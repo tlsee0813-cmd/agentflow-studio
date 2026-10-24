@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>소프트웨어 지도 비교</title>
+<style>
+:root{
+  --paper:#f5f4f0; --field:#ecebe5; --surface:#fff; --ink:#191b1f; --ink2:#41464e; --ink3:#61666e;
+  --rule:#d7d4cc; --rule2:#aeaaa1; --line:#8c887f; --line-lo:#cbc8c0;
+  --accent:#2343c2; --accent-soft:#e8ecfa; --accent-ink:#1a338f; --warm:#7b4c0c;
+  --f:"Segoe UI","Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--paper);color:var(--ink);font:15px/1.45 var(--f);display:grid;grid-template-rows:46px 44px minmax(0,1fr);overflow:hidden;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:left}
+button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* 상단 */
+.top{display:flex;align-items:center;gap:14px;padding:0 18px;border-bottom:1px solid var(--rule)}
+.proj{display:flex;align-items:baseline;gap:9px;min-width:0;flex:1}
+.proj b{font-size:15.5px;font-weight:650;white-space:nowrap}
+.proj span{font-size:13px;color:var(--ink3);white-space:nowrap}
+.alts{display:flex;border:1px solid var(--rule2);border-radius:5px;overflow:hidden;flex:none}
+.alts button{font-size:13.5px;padding:4px 13px;color:var(--ink2);border-left:1px solid var(--rule)}
+.alts button:first-child{border-left:0}
+.alts button[aria-pressed=true]{background:var(--ink);color:#fff}
+.top-r{display:flex;align-items:center;gap:10px;flex:1;justify-content:flex-end}
+.board{font-size:12px;color:var(--ink3);border:1px solid var(--rule2);border-radius:3px;padding:1px 6px;letter-spacing:.02em}
+.info-btn{font-size:13px;color:var(--ink2);padding:4px 8px;border-radius:4px}
+.info-btn:hover,.info-btn[aria-expanded=true]{background:var(--field)}
+
+/* 도구 줄 */
+.bar{display:flex;align-items:center;gap:14px;padding:0 18px;border-bottom:1px solid var(--rule);min-width:0}
+.path{display:flex;align-items:center;gap:7px;font-size:14px;white-space:nowrap;min-width:0}
+.path button{color:var(--accent-ink);padding:2px 0}
+.path button:hover{text-decoration:underline}
+.path .sep{color:var(--ink3)}
+.path .here{font-weight:600}
+.back{font-size:13.5px;padding:4px 10px;border:1px solid var(--rule2);border-radius:4px;color:var(--ink2);white-space:nowrap}
+.back:hover{border-color:var(--ink2)}
+.bar-r{margin-left:auto;display:flex;align-items:center;gap:14px}
+.kbd{font-size:12px;color:var(--ink3);white-space:nowrap}
+.qs{display:flex;gap:2px;border:1px solid var(--rule2);border-radius:5px;padding:2px}
+.qs button{font-size:13.5px;padding:3px 10px;border-radius:3px;color:var(--ink2);white-space:nowrap}
+.qs button[aria-pressed=true]{background:var(--ink);color:#fff}
+.keyplan{display:grid;grid-template-columns:repeat(3,24px);grid-template-rows:repeat(2,13px);gap:3px}
+.keyplan button{border:1px solid var(--rule2);border-radius:1px}
+.keyplan button.here{background:var(--accent);border-color:var(--accent)}
+.keyplan button.sel{border-color:var(--accent);background:var(--accent-soft)}
+.keyplan button:hover{border-color:var(--ink)}
+
+/* 공통 본문 */
+main{display:flex;min-height:0;min-width:0}
+.cv{position:relative;flex:1;min-width:0;overflow:hidden}
+svg.ln{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+svg.ln path{fill:none;stroke-width:1.3}
+svg.ln text{font:12.5px var(--f);fill:var(--ink2);paint-order:stroke;stroke:var(--paper);stroke-width:4px;stroke-linejoin:round}
+svg.ln text.hi{fill:var(--accent-ink)}
+svg.ln .pill{fill:var(--paper);stroke:var(--rule2);stroke-width:1}
+svg.ln .pilltx{font-size:12px;fill:var(--ink2);stroke:none}
+.fading svg.ln{opacity:0}
+
+.panel{width:344px;flex:none;border-left:1px solid var(--rule);background:var(--surface);overflow:auto;padding:18px 20px 20px}
+.pk{font-size:12.5px;color:var(--ink3)}
+.panel h2{font-size:20px;font-weight:650;margin:2px 0 8px;letter-spacing:-.01em}
+.pd{margin:0 0 14px;color:var(--ink2)}
+.panel dl{margin:0 0 14px;display:grid;grid-template-columns:52px 1fr;gap:7px 10px;font-size:14px}
+.panel dt{color:var(--ink3)}
+.panel dd{margin:0}
+.panel .note{display:block;font-size:12.5px;color:var(--ink3)}
+.ph{font-size:13px;color:var(--ink3);margin:0 0 6px;font-weight:500}
+.rl{list-style:none;margin:0 0 16px;padding:0;border-top:1px solid var(--rule)}
+.rl button{display:block;width:100%;padding:6px 0;border-bottom:1px solid var(--rule);font-size:14px}
+.rl button:hover{background:var(--paper)}
+.rl small{display:block;font-size:12.5px;color:var(--ink3)}
+.pa{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font-size:14px;padding:6px 12px;border-radius:4px;border:1px solid var(--rule2)}
+.btn.pri{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn:hover{border-color:var(--ink)}
+.rule-t{color:var(--warm)}
+
+/* A 공간 구성 */
+.a-root{position:absolute;inset:0;padding:12px 22px 18px;display:grid;grid-template-rows:auto minmax(0,1fr);gap:10px}
+.a-role{display:flex;align-items:center;gap:14px}
+.role-btn{display:flex;align-items:baseline;gap:9px;padding:5px 10px;border:1px solid var(--rule2);border-radius:14px;background:var(--surface)}
+.role-btn b{font-weight:600}
+.role-btn span{font-size:12.5px;color:var(--ink3)}
+.role-btn.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.a-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto auto;align-content:center;gap:58px 46px;min-height:0}
+.reg{position:relative;background:var(--field);border-top:2px solid var(--ink);padding:9px 14px 12px;min-height:168px;cursor:pointer;display:flex;flex-direction:column}
+.reg.shared{border-top:4px double var(--ink)}
+.reg.thin{border-top-color:var(--rule2)}
+.reg.on{background:var(--accent-soft);border-top-color:var(--accent)}
+.reg.lo{background:#f0efea}
+.reg header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.reg h3{margin:0;font-size:16.5px;font-weight:650}
+.tag{font-size:12.5px;color:var(--ink2)}
+.meta{font-size:13px;color:var(--ink3);margin-top:1px}
+.rows{margin-top:8px;display:flex;flex-direction:column}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:6px 8px;border-top:1px solid var(--rule);font-size:15px}
+.row:hover{background:rgba(255,255,255,.6)}
+.row .st{font-size:13px;color:var(--ink3);white-space:nowrap}
+.row .x{font-size:12px;color:var(--warm);margin-left:6px}
+.row.on{background:var(--surface);box-shadow:inset 3px 0 0 var(--accent)}
+.row.hit{box-shadow:inset 3px 0 0 var(--ink2)}
+.row.on .nm{color:var(--accent-ink);font-weight:600}
+.empty{margin:12px 0 0;font-size:14px;color:var(--ink3)}
+
+.a-in{position:absolute;inset:0;display:grid;padding:10px 18px 14px;align-content:center}
+.a-frame{grid-area:2/2;position:relative;border:1.5px solid var(--ink2);background:var(--field);padding:14px 18px 24px;display:flex;flex-direction:column;min-height:0}
+.a-frame.shared{border-top:5px double var(--ink2)}
+.a-frame>header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.a-frame h3{margin:0;font-size:18px;font-weight:650}
+.kids{display:grid;gap:22px 30px;padding:58px 6px 0}
+.kid{background:var(--surface);border:1px solid var(--rule2);padding:12px 14px 13px;display:flex;flex-direction:column;gap:3px;min-height:104px;border-radius:2px}
+.kid:hover{border-color:var(--ink2)}
+.kid .kn{font-size:16.5px;font-weight:600}
+.kid .ks{font-size:13.5px;color:var(--ink3)}
+.kid .kx{font-size:13px;color:var(--warm)}
+.kid.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.kid.on .kn{color:var(--accent-ink)}
+.kid.hit{border-color:var(--ink2)}
+.vars{display:flex;gap:6px;margin-top:6px}
+.vars i{font-style:normal;font-size:13px;border:1px solid var(--rule2);padding:1px 7px;border-radius:2px}
+.views{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:13px;color:var(--ink2)}
+.views .vd{border:1px solid var(--ink2);padding:1px 7px}
+.views .vw{display:flex;flex-direction:column;gap:2px}
+.views .vw i{font-style:normal;border:1px solid var(--rule2);padding:0 6px}
+.edge{display:flex;gap:12px;align-items:center;min-width:0}
+.edge.t,.edge.b{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;padding:0 0}
+.edge.l,.edge.r{flex-direction:column;justify-content:flex-start;padding-top:30px;gap:10px}
+.edge.t>*,.edge.b>*{align-self:center}
+.slotL{justify-self:start}.slotC{justify-self:center}.slotR{justify-self:end}
+.stub{display:flex;flex-direction:column;padding:6px 11px;border:1px solid var(--rule2);background:var(--paper);border-radius:2px;max-width:230px}
+.stub:hover{border-color:var(--ink)}
+.stub b{font-size:14.5px;font-weight:600}
+.stub b::before{content:"↗ ";color:var(--ink3);font-weight:400}
+.stub small{font-size:12.5px;color:var(--ink3)}
+.stub.role{border-radius:14px;background:var(--surface)}
+.stub.role b::before{content:""}
+.stub.on{border-color:var(--accent)}
+
+/* B 관계 아틀라스 */
+.b-wrap{display:flex;flex:1;min-width:0}
+.b-index{width:236px;flex:none;border-right:1px solid var(--rule);padding:10px 10px 10px 16px;display:flex;flex-direction:column;overflow:hidden}
+.ih{font-size:12.5px;color:var(--ink3);margin-bottom:6px}
+.tree,.tree ul{list-style:none;margin:0;padding:0}
+.tree ul{padding-left:14px}
+.tree button,.tree span.f{display:block;width:100%;padding:1px 6px;font-size:13.5px;color:var(--ink3);border-left:2px solid transparent;line-height:1.34}
+.tree button.vis{color:var(--ink)}
+.tree button.vis::after{content:" ·";color:var(--ink3)}
+.tree .f{border-left-color:var(--accent);color:var(--accent-ink);font-weight:650}
+.tree button:hover{background:var(--field)}
+.tree .tl>button,.tree .tl>span{font-weight:600;margin-top:3px}
+.tree .rolel{font-size:13px;color:var(--ink3);padding:6px 6px 0}
+.loss{margin-top:auto;font-size:12.5px;line-height:1.4;color:var(--ink2);border-top:1px solid var(--rule);padding-top:6px}
+.loss b{font-weight:600}
+.b-stage{position:relative;flex:1;min-width:0;overflow:hidden;display:grid;grid-template-rows:auto minmax(0,auto) auto;align-content:center;padding:12px 22px 14px;gap:22px}
+.b-up{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink3);justify-content:center}
+.b-up button{font-size:14px;color:var(--accent-ink);border-bottom:1px solid currentColor}
+.b-mid{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,360px) minmax(0,1fr);gap:0 70px;min-height:0;align-items:center}
+.b-col{display:flex;flex-direction:column;gap:10px;justify-content:center;min-width:0}
+.b-col h4,.b-down h4{margin:0 0 2px;font-size:12.5px;font-weight:500;color:var(--ink3)}
+.b-col.out h4{text-align:left}
+.chip{display:block;width:100%;background:var(--surface);border:1px solid var(--rule2);border-radius:3px;padding:7px 11px 8px}
+.chip:hover{border-color:var(--ink2)}
+.chip .cn{font-size:15px;font-weight:600;display:flex;gap:8px;align-items:baseline}
+.chip .ck{font-size:12px;color:var(--ink3);font-weight:400}
+.chip ul{list-style:none;margin:3px 0 0;padding:0}
+.chip li{font-size:13.5px;color:var(--ink2);padding:1px 0}
+.chip li em{font-style:normal;color:var(--ink3);font-size:12.5px;margin-left:4px}
+.chip.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.chip.role{border-radius:14px;background:var(--paper)}
+.chip .go{margin-top:6px;font-size:13.5px;color:var(--accent-ink);font-weight:600}
+.focus{background:var(--surface);border:1px solid var(--ink2);border-top:3px solid var(--accent);padding:14px 18px 16px;align-self:center;max-height:100%;overflow:hidden}
+.focus .pk{margin-bottom:1px}
+.focus h2{font-size:21px;margin:0 0 6px;font-weight:650}
+.focus p{margin:0 0 10px;color:var(--ink2);font-size:14.5px}
+.focus dl{display:grid;grid-template-columns:44px 1fr;gap:4px 10px;margin:0;font-size:13.5px}
+.focus dt{color:var(--ink3)}.focus dd{margin:0}
+.none{font-size:13.5px;color:var(--ink3);padding:4px 0}
+.b-down{border-top:1px solid var(--rule);padding-top:8px}
+.b-kids{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.b-kids .chip{width:auto;min-width:128px;max-width:220px;padding:6px 11px}
+.b-kids .chip .cs{display:block;font-size:12.5px;color:var(--ink3)}
+.b-kids .chip.hit{border-color:var(--ink);box-shadow:inset 0 -2px 0 var(--ink2)}
+
+/* C 질문 단면 */
+.c-wrap{position:absolute;inset:0;padding:12px 18px 12px;overflow:hidden}
+.c-grid{display:grid;height:100%;align-content:start;column-gap:0}
+.cc{padding:8px 10px;border-left:1px solid var(--rule);min-width:0}
+.cc.rh{border-left:0;padding-left:0}
+.cc.b1{border-top:1px solid var(--ink2)}
+.cc.b2{border-top:1px solid var(--rule)}
+.cc.sel{background:var(--accent-soft)}
+.cc.out{background:repeating-linear-gradient(90deg,transparent 0 6px,rgba(0,0,0,.018) 6px 7px)}
+.rh b{display:block;font-size:14px;font-weight:650}
+.rh small{display:block;font-size:12.5px;color:var(--ink3);line-height:1.35}
+.chd{display:block;width:100%;padding:4px 0 2px}
+.chd b{display:block;font-size:15.5px;font-weight:650;line-height:1.3}
+.chd small{display:block;font-size:12.5px;color:var(--ink3)}
+.chd:hover b{text-decoration:underline}
+.cc.sel .chd b{color:var(--accent-ink)}
+.cc.colh{border-top:2px solid var(--ink)}
+.cc.rolh{border-top:1px solid var(--rule2)}
+.cc.rolh .chd b{font-weight:500;color:var(--ink2)}
+.no.wide{width:auto;padding:0 6px;border-radius:10px}
+.cc.colh.sh{border-top:4px double var(--ink)}
+.cc.colh.sel{border-top-color:var(--accent)}
+.clist{list-style:none;margin:0;padding:0;font-size:14.5px}
+.clist li{padding:2px 0}
+.clist .vr{font-size:13px;color:var(--ink3)}
+.outl button{display:block;width:100%;padding:3px 7px;margin-bottom:4px;border:1px solid var(--rule2);background:var(--paper);border-radius:2px}
+.outl button:hover{border-color:var(--ink)}
+.outl b{font-size:14px;font-weight:600}
+.outl b::before{content:"↗ ";color:var(--ink3);font-weight:400}
+.outl small{display:block;font-size:12.5px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.does{font-size:14px;color:var(--ink2)}
+.does.nil{color:var(--ink3)}
+.step{display:flex;gap:8px;align-items:flex-start;font-size:14px;line-height:1.38}
+.no{flex:none;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--ink);font-size:12px;font-weight:650;display:inline-flex;align-items:center;justify-content:center;background:var(--surface)}
+.step .ev{color:var(--ink3);font-size:12.5px;display:block}
+.actor{display:flex;align-items:center;gap:6px;font-size:13.5px;color:var(--ink2)}
+.actor i{width:8px;height:8px;border-radius:50%;background:var(--ink2);flex:none}
+.impl{font-size:13.5px;color:var(--ink2)}
+.impl div{padding:1px 0}
+.impl .w{color:var(--ink3);font-size:12.5px}
+.impl .o{color:var(--warm);font-size:12.5px}
+.cfoot{grid-column:1/-1;font-size:13px;color:var(--ink3);padding:8px 0 0;border-top:1px solid var(--rule)}
+
+/* 정보 메뉴 */
+.info{position:fixed;top:44px;right:14px;width:470px;max-height:calc(100vh - 64px);overflow:auto;background:var(--surface);border:1px solid var(--rule2);border-radius:6px;box-shadow:0 10px 30px rgba(0,0,0,.12);padding:16px 18px;z-index:10;font-size:14px}
+.info h3{font-size:13px;color:var(--ink3);font-weight:500;margin:12px 0 4px}
+.info h3:first-child{margin-top:0}
+.info p{margin:0 0 6px;color:var(--ink2)}
+.info ul{margin:0;padding-left:18px;color:var(--ink2)}
+.info li{margin:3px 0}
+.info a{color:var(--accent-ink);word-break:break-all;font-size:13px}
+.info .lg{display:grid;grid-template-columns:76px 1fr;gap:5px 10px;align-items:center;color:var(--ink2)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="proj"><b>문서 편집기</b><span>설계용 합성 사례</span></div>
+  <nav class="alts" aria-label="대안">
+    <button data-act="alt" data-arg="A">A 공간 구성</button><button data-act="alt" data-arg="B">B 관계 아틀라스</button><button data-act="alt" data-arg="C">C 질문 단면</button>
+  </nav>
+  <div class="top-r"><span class="board">디자인 보드</span><button class="info-btn" data-act="info" aria-expanded="false" aria-controls="info">출처·가정</button></div>
+</header>
+<div class="bar" id="bar"></div>
+<main id="main"></main>
+<div class="info" id="info" hidden>
+  <h3>이 사례</h3>
+  <p>VS Code 공개 자료에서 의미 차이를 뽑아 만든 설계용 합성 사례입니다. VS Code 제품 구조를 재현한 것이 아닙니다. 세 대안은 같은 데이터를 씁니다.</p>
+  <h3>사례를 만들 때 참고한 출처 (이 보드에서 다시 확인하지 않음)</h3>
+  <ul>
+    <li>텍스트 편집과 시각 편집이 같은 문서를 다루는 방식, 한 문서를 여러 편집창에서 여는 경우<br><a href="https://code.visualstudio.com/api/extension-guides/custom-editors">code.visualstudio.com/api/extension-guides/custom-editors</a></li>
+    <li>확장이 명령을 등록해 제공<br><a href="https://code.visualstudio.com/api/extension-guides/command">code.visualstudio.com/api/extension-guides/command</a></li>
+    <li>확장이 로컬·웹·원격 실행 환경 중 정해진 곳에서 실행<br><a href="https://code.visualstudio.com/api/advanced-topics/extension-host">code.visualstudio.com/api/advanced-topics/extension-host</a></li>
+    <li>여러 문서에 걸친 변경을 묶어 되돌리는 요소 (고정 커밋)<br><a href="https://github.com/microsoft/vscode/blob/784ce2212c21959ae8078d2fab304ecbf1f305a8/src/vs/platform/undoRedo/common/undoRedo.ts">microsoft/vscode@784ce22 · src/vs/platform/undoRedo/common/undoRedo.ts</a></li>
+  </ul>
+  <h3>합성 가정</h3>
+  <ul>
+    <li>부분별 상태, 담당 세션 3개, 미정 질문</li>
+    <li>문서 상태 관리 안의 세 부분(문서 버전·변경 반영·표현 연결)</li>
+    <li>규칙: 오래된 문서 버전에 늦게 도착한 응답은 적용하지 않음</li>
+    <li>C의 질문과 행동 단계. 행동은 사건이며 구성 부분이 아님</li>
+  </ul>
+  <h3>표기</h3>
+  <div class="lg">
+    <svg width="48" height="10" aria-hidden="true"><path d="M2 5H46" stroke="#8c887f" stroke-width="1.4"/></svg><span>기록에서 확인한 관계</span>
+    <svg width="48" height="10" aria-hidden="true"><path d="M2 5H46" stroke="#8c887f" stroke-width="1.4" stroke-dasharray="5 4"/></svg><span>설계 가정인 관계. 관계 종류(사용·제공·만듦·실행 위치)는 선택하면 글자로 보임</span>
+    <span>구현 보고</span><span>외부 AI가 구현했다고 남긴 기록. 동작을 확인한 것은 아님</span>
+    <span>검사 기록</span><span>검사 통과 기록이 있음. 검사 범위 밖은 모름</span>
+  </div>
+</div>
+<script>
+"use strict";
+/* ---------- 같은 데이터 ---------- */
+const N={
+ root:{name:'문서 편집기',desc:'글쓴이가 문서를 열어 텍스트나 시각 편집기로 고치고, 확장이 명령을 더하는 데스크톱 편집기.'},
+ doc:{name:'문서 다루기',parent:'root',desc:'문서를 열고 저장하며, 아직 저장하지 않은 변경을 알려 준다.'},
+ 'doc.open':{name:'문서 열기',parent:'doc',st:'reported',desc:'파일을 읽어 문서 상태 관리에 문서 하나로 등록한다.'},
+ 'doc.save':{name:'저장',parent:'doc',st:'reported',who:'s1',desc:'현재 문서 버전을 파일에 쓴다.'},
+ 'doc.dirty':{name:'미저장 변경',parent:'doc',st:'design',who:'s1',desc:'마지막 저장 이후 문서 버전이 달라졌는지 표시한다.'},
+ edit:{name:'편집하기',parent:'root',desc:'텍스트 편집과 시각 편집은 별개 기능이지만 같은 문서 상태를 고친다. 명령도 여기서 실행된다.'},
+ 'edit.text':{name:'텍스트 편집',parent:'edit',st:'checked',desc:'글자 단위로 문서를 고친다.'},
+ 'edit.visual':{name:'시각 편집',parent:'edit',st:'design',who:'s3',desc:'표·그림 같은 시각 편집기로 같은 문서를 고친다. 텍스트 편집과는 별개 기능이다.'},
+ 'edit.cmd':{name:'명령 실행',parent:'edit',st:'reported',desc:'이름 붙은 명령을 실행해 문서를 바꾼다. 명령은 확장이 더할 수 있다.'},
+ undo:{name:'변경 되돌리기',parent:'root',desc:'변경을 단위로 기록하고, 여러 문서에 걸친 변경을 한 묶음으로 되돌린다.'},
+ 'undo.unit':{name:'변경 단위',parent:'undo',st:'reported',who:'s2',desc:'되돌릴 수 있는 한 번의 변경 기록.'},
+ 'undo.multi':{name:'여러 문서 묶음',parent:'undo',st:'design',who:'s2',desc:'여러 문서의 변경 단위를 하나로 묶어 한 번에 되돌린다.',open:'묶음 안의 문서 하나가 이미 닫혔다면?'},
+ 'undo.cursor':{name:'커서 복원',parent:'undo',st:'idea',desc:'되돌린 뒤 커서를 변경 전 위치로 돌려놓는다.'},
+ ext:{name:'확장하기',parent:'root',desc:'확장이 명령을 등록해 기능을 더한다. 확장은 정해진 실행 환경에서 동작한다.'},
+ 'ext.reg':{name:'명령 등록',parent:'ext',st:'design',desc:'확장이 이름 붙은 명령을 편집기에 제공한다.'},
+ 'ext.host':{name:'실행 환경',parent:'ext',st:'design',vars:['로컬','웹','원격'],desc:'확장이 동작하는 곳. 확장마다 로컬·웹·원격 중에서 정해지며, 모든 확장이 세 곳에서 동시에 도는 것은 아니다.',open:'원격 실행을 첫 범위에 넣을까?'},
+ state:{name:'문서 상태 관리',parent:'root',shared:true,desc:'열린 문서의 내용과 버전을 한곳에서 관리한다. 편집·저장·되돌리기가 모두 이곳을 거친다.'},
+ 'state.version':{name:'문서 버전',parent:'state',st:'reported',desc:'문서가 바뀔 때마다 올라가는 버전.'},
+ 'state.apply':{name:'변경 반영',parent:'state',st:'design',rule:'r1',desc:'들어온 변경을 현재 문서 버전에 반영한다.'},
+ 'state.views':{name:'표현 연결',parent:'state',st:'design',desc:'한 문서를 두 편집창에서 볼 때 대상은 하나이고 표현이 둘이다. 창마다 문서를 복제하지 않는다.'},
+ collab:{name:'함께 편집하기',parent:'root',st:'idea',desc:'여러 사람이 같은 문서를 동시에 고치는 구상. 아직 부분으로 나뉘지 않았다.'}
+};
+const TOP=['doc','edit','undo','ext','state','collab'];
+const GRID={doc:[0,0],edit:[1,0],undo:[2,0],ext:[0,1],state:[1,1],collab:[2,1]};
+const SES={s1:'Codex 세션 · 저장 흐름',s2:'Claude 세션 · 되돌리기 묶음',s3:'Claude 세션 · 시각 편집 설계'};
+const WR={name:'글쓴이',desc:'편집기를 쓰는 사람. 구성 부분이 아니라 바깥 역할이며, 개발을 맡은 AI 세션과도 다르다.',
+ uses:['doc.open','doc.save','edit.text','edit.visual','edit.cmd','undo.unit'],
+ does:{doc:'문서를 열고 저장',edit:'글을 고치고 명령 실행',undo:'되돌리기 · 다시 실행',ext:'명령으로만 만남',state:'직접 만나지 않음',collab:'함께 고치기 (구상)'}};
+const RULES={r1:{at:'state.apply',text:'오래된 문서 버전을 기준으로 늦게 도착한 응답은 적용하지 않는다.'}};
+const R=[
+ ['doc.open','state.version','사용',1],['doc.save','state.version','사용',1],['doc.dirty','state.version','사용',0],
+ ['edit.text','state.apply','사용',1],['edit.visual','state.apply','사용',0],['edit.text','state.views','사용',1],['edit.visual','state.views','사용',0],
+ ['edit.cmd','undo.unit','만듦',1],['ext.reg','edit.cmd','제공',1],['ext.host','ext.reg','실행 위치',1],
+ ['undo.unit','state.apply','사용',1],['undo.multi','state.version','사용',0],['undo.cursor','edit.text','사용',0],['collab','state','사용',0]
+].map(([f,t,k,s])=>({f,t,k,sure:!!s}));
+const Q={
+ q0:{label:'구성 전체'},
+ q1:{label:'저장하면?',steps:[
+  {at:'doc.save',w:1,tx:'저장한다'},
+  {at:'state.version',tx:'저장 시점의 버전 v14를 기록'},
+  {at:'doc.dirty',tx:'미저장 표시를 지운다'},
+  {at:'state.views',tx:'두 편집창이 같은 v14를 보인다',ev:'대상 하나 · 표현 둘'}]},
+ q2:{label:'여러 문서를 되돌리면?',steps:[
+  {at:'edit.cmd',w:1,tx:'‘모든 파일에서 바꾸기’ 실행 (문서 3개)'},
+  {at:'undo.unit',tx:'문서마다 변경 단위 하나씩, 3개'},
+  {at:'undo.multi',tx:'세 변경을 한 묶음으로 기록'},
+  {at:'undo.multi',w:1,tx:'되돌리기',ev:'실행 사건 · 구성 부분 아님'},
+  {at:'state.apply',tx:'문서 3개를 이전 버전으로 반영'},
+  {at:'undo.cursor',tx:'커서를 변경 전 위치로',ev:'아직 구상'}]},
+ q3:{label:'확장 응답이 늦으면?',steps:[
+  {at:'ext.reg',tx:'확장이 ‘서식 정리’ 명령을 제공'},
+  {at:'ext.host',tx:'이 확장은 원격에서 실행 (가정)'},
+  {at:'edit.cmd',w:1,tx:'명령 실행 · 요청 기준 v12'},
+  {at:'edit.text',w:1,tx:'응답 전에 계속 입력 → v13'},
+  {at:'state.apply',tx:'v12 기준 응답 도착 → 적용 안 함',ev:'규칙 · 설계용 가정'}]}
+};
+const ST={idea:'구상',design:'설계',reported:'구현 보고',checked:'검사 기록 있음'};
+const STX={idea:'구상만 있음',design:'설계 논의만 있고 구현 기록은 없음',reported:'외부 AI가 구현했다고 남긴 기록. 동작을 확인한 것은 아님',checked:'검사 통과 기록이 있음. 검사 범위 밖은 모름'};
+
+/* ---------- 도우미 ---------- */
+const $=s=>document.querySelector(s);
+const kids=id=>Object.keys(N).filter(k=>N[k].parent===id);
+const under=(id,a)=>{for(let x=id;x;x=N[x].parent)if(x===a)return true;return false};
+const topOf=id=>{let x=id;while(N[x].parent&&N[x].parent!=='root')x=N[x].parent;return x};
+const nm=id=>id==='writer'?'글쓴이':N[id].name;
+function summary(id){const k=kids(id);if(!k.length)return ST[N[id].st]||'';const c={};k.forEach(x=>c[N[x].st]=(c[N[x].st]||0)+1);
+ return k.length+'개 부분 · '+['checked','reported','design','idea'].filter(s=>c[s]).map(s=>(s==='checked'?'검사 기록':ST[s])+' '+c[s]).join(' · ')}
+const users=id=>[...new Set(R.filter(r=>under(r.t,id)&&!under(r.f,id)).map(r=>topOf(r.f)))];
+const crossing=id=>R.filter(r=>under(r.f,id)!==under(r.t,id));
+const sessionsOf=id=>[...new Set([id,...kids(id)].map(x=>N[x].who).filter(Boolean))].map(s=>SES[s]);
+const rulesOf=id=>Object.values(RULES).filter(r=>under(r.at,id));
+const opensOf=id=>[id,...kids(id)].filter(x=>N[x].open);
+const kindLabel=id=>id==='root'?'프로젝트':N[id].shared?'공유 대상 · '+users(id).length+'개 구성이 사용':N[id].parent==='root'?'구성':'부분 · '+N[N[id].parent].name;
+
+/* ---------- 상태 ---------- */
+const S={alt:'A',A:{v:'root',sel:null,h:[]},B:{v:'root',sel:null,h:[]},C:{v:'root',q:'q0',sel:null,h:[]},flip:null};
+try{const a=location.hash.slice(1);if(/^[ABC]$/.test(a))S.alt=a}catch(e){}
+const cur=()=>S[S.alt];
+function push(v,sel,flip){const s=cur();s.h.push({v:s.v,sel:s.sel});s.v=v;s.sel=sel||null;S.flip=flip||null;render()}
+function back(){const s=cur();if(!s.h.length)return;const p=s.h.pop();S.flip=s.v;s.v=p.v;s.sel=p.sel;render()}
+function home(){if(cur().v!=='root')push('root',null)}
+function setSel(id){cur().sel=id;render()}
+
+/* A: 공간 이동 */
+function goA(id){const s=S.A;if(id==='writer'){s.v==='root'?setSel(id):push('root','writer');return}
+ const t=topOf(id);if(s.v==='root'){setSel(id);return}
+ if(under(id,s.v)){setSel(id);return}
+ if(kids(t).length)push(t,id===t?null:id,t);else push('root',id)}
+function goC(id){const s=S.C;const cols=colsC().map(c=>c.id);const hit=cols.find(c=>c!=='__out'&&under(id,c));
+ if(hit){setSel(hit);return}const t=topOf(id);if(kids(t).length)push(t,id===t?null:id);else{s.q='q0';push('root',t)}}
+
+/* ---------- 선 ---------- */
+let edgesFn=null;
+function rr(el,c){const r=el.getBoundingClientRect();return{l:r.left-c.left,r:r.right-c.left,t:r.top-c.top,b:r.bottom-c.top,cx:(r.left+r.right)/2-c.left,cy:(r.top+r.bottom)/2-c.top}}
+function bz(p0,p1,p2,p3,t){const u=1-t;return{x:u*u*u*p0.x+3*u*u*t*p1.x+3*u*t*t*p2.x+t*t*t*p3.x,y:u*u*u*p0.y+3*u*u*t*p1.y+3*u*t*t*p2.y+t*t*t*p3.y}}
+function route(a,b,o){let p1,p2,c1,c2;const g=6;
+ if(o.stair){const y=b.t-7,r=6;if(Math.abs(a.cx-b.cx)<2)return{d:`M${a.cx},${a.b} L${b.cx},${b.t}`,m:{x:a.cx,y:(a.b+b.t)/2}};const sx=b.cx>a.cx?1:-1;
+  return{d:`M${a.cx},${a.b} L${a.cx},${y-r} Q${a.cx},${y} ${a.cx+sx*r},${y} L${b.cx-sx*r},${y} Q${b.cx},${y} ${b.cx},${y+r} L${b.cx},${b.t}`,m:{x:(a.cx+b.cx)/2,y}}}
+ if(o.elbow){const k=o.kidA?a:b,st=o.kidA?b:a;const left=st.r<=k.l;const P={x:k.cx,y:k.t},Q={x:left?st.r:st.l,y:st.cy},r=10,sx=left?-1:1;
+  const pts=`${P.x},${P.y} L${P.x},${Q.y+r} Q${P.x},${Q.y} ${P.x+sx*r},${Q.y} L${Q.x},${Q.y}`;
+  const rev=`${Q.x},${Q.y} L${P.x+sx*r},${Q.y} Q${P.x},${Q.y} ${P.x},${Q.y+r} L${P.x},${P.y}`;
+  return{d:'M'+(o.kidA?pts:rev),m:{x:(P.x+Q.x)/2,y:Q.y}}}
+ if(o.vert){if(o.pa){p1=o.pa;p2=o.pb}else{const dn=b.cy>a.cy;p1={x:a.cx,y:dn?a.b:a.t};p2={x:b.cx,y:dn?b.t:b.b}}const d=Math.max(14,Math.abs(p2.y-p1.y)/2)*Math.sign(p2.y-p1.y||1);c1={x:p1.x,y:p1.y+d};c2={x:p2.x,y:p2.y-d};return{d:`M${p1.x},${p1.y} C${c1.x},${c1.y} ${c2.x},${c2.y} ${p2.x},${p2.y}`,m:{x:p2.x+16,y:p2.y-(p2.y>p1.y?6:-22)}}}
+ else if(o.pa&&o.pb){p1=o.pa;p2=o.pb;const d=Math.max(28,Math.abs(p2.x-p1.x)/2)*Math.sign(p2.x-p1.x||1);c1={x:p1.x+d,y:p1.y};c2={x:p2.x-d,y:p2.y}}
+ else if(o.side&&!(b.l>=a.r-g||b.r<=a.l+g)){p1={x:a.r,y:a.cy};p2={x:b.r,y:b.cy};const x=Math.max(a.r,b.r)+o.side;c1={x,y:p1.y};c2={x,y:p2.y}}
+ else if(b.l>=a.r-g){p1={x:a.r,y:a.cy};p2={x:b.l,y:b.cy};const d=Math.max(26,(p2.x-p1.x)/2);c1={x:p1.x+d,y:p1.y};c2={x:p2.x-d,y:p2.y}}
+ else if(b.r<=a.l+g){p1={x:a.l,y:a.cy};p2={x:b.r,y:b.cy};const d=Math.max(26,(p1.x-p2.x)/2);c1={x:p1.x-d,y:p1.y};c2={x:p2.x+d,y:p2.y}}
+ else{const x=(Math.max(a.l,b.l)+Math.min(a.r,b.r))/2+(o.dx||0);const dn=b.t>=a.cy;p1={x,y:dn?a.b:a.t};p2={x,y:dn?b.t:b.b};const d=Math.max(16,Math.abs(p2.y-p1.y)/2)*(dn?1:-1);c1={x,y:p1.y+d};c2={x,y:p2.y-d}}
+ return{q:bz(p1,c1,c2,p2,.3),d:`M${p1.x.toFixed(1)},${p1.y.toFixed(1)} C${c1.x.toFixed(1)},${c1.y.toFixed(1)} ${c2.x.toFixed(1)},${c2.y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`,m:bz(p1,c1,c2,p2,.5)}}
+function drawLines(){const cv=$('#cv');if(!cv||!edgesFn)return;const svg=cv.querySelector('svg.ln');if(!svg)return;
+ const c=cv.getBoundingClientRect();const E=edgesFn(cv);let out=`<defs>${['n','hi','lo'].map(t=>`<marker id="m-${t}" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.8 L7,4 L0,7.2z" fill="${t==='hi'?'var(--accent)':t==='lo'?'var(--line-lo)':'var(--line)'}"/></marker>`).join('')}</defs>`;
+ const lbl=[];E.sort((x,y)=>(x.tone==='hi')-(y.tone==='hi')).forEach(e=>{if(!e.a&&!e.pa)return;
+  const a=e.a?rr(e.a,c):null,b=e.b?rr(e.b,c):null;const p=route(a,b,e);
+  const col=e.tone==='hi'?'var(--accent)':e.tone==='lo'?'var(--line-lo)':'var(--line)';
+  out+=`<path d="${p.d}" stroke="${col}" ${e.dash?'stroke-dasharray="5 4"':''} stroke-width="${e.tone==='hi'?1.8:1.3}" ${e.arrow===false?'':`marker-end="url(#m-${e.tone||'n'})"`}/>`;
+  if(e.label)lbl.push({...p.m,t:e.label,hi:e.tone==='hi'});if(e.pill)lbl.push({...(p.q||p.m),pill:e.pill});});
+ lbl.forEach(l=>{if(l.pill){const w=8+l.pill.length*7.2;out+=`<rect class="pill" x="${l.x-w/2}" y="${l.y-9}" width="${w}" height="18" rx="9"/><text class="pilltx" x="${l.x}" y="${l.y+4}" text-anchor="middle">${l.pill}</text>`}
+  else out+=`<text class="${l.hi?'hi':''}" x="${l.x}" y="${l.y-5}" text-anchor="middle">${l.t}</text>`});
+ svg.innerHTML=out}
+const q=(cv,s)=>cv.querySelector(s);
+const qid=(cv,id)=>cv.querySelector(`[data-id="${CSS.escape(id)}"]`);
+
+/* ---------- 패널 (A·C 공용) ---------- */
+function relItems(id){if(id==='writer')return WR.uses.map(u=>`<li><button data-act="go" data-arg="${u}">${nm(u)}<small>${N[topOf(u)].name} · 직접 사용</small></button></li>`).join('');
+ const rs=(N[id].parent==='root'&&kids(id).length)||id==='state'?crossing(id):R.filter(r=>r.f===id||r.t===id);
+ return rs.map(r=>{const outg=under(r.f,id);const o=outg?r.t:r.f;const inner=outg?r.f:r.t;
+  const lead=inner!==id?nm(inner)+(outg?' → ':' ← '):(outg?'→ ':'← ');
+  return`<li><button data-act="go" data-arg="${o}">${lead}${nm(o)}<small>${o===topOf(o)?'':N[topOf(o)].name+' · '}${r.k} · ${r.sure?'기록에서 확인':'설계 가정'}</small></button></li>`}).join('')}
+function panel(id,alt){
+ if(id==='writer')return`<aside class="panel"><div class="pk">사용자 역할 · 구성 아님</div><h2>글쓴이</h2><p class="pd">${WR.desc}</p><p class="ph">직접 사용하는 곳 ${WR.uses.length}</p><ul class="rl">${relItems('writer')}</ul><div class="pa"><button class="btn" data-act="clear">선택 해제</button></div></aside>`;
+ const n=N[id],k=kids(id),ru=rulesOf(id),op=opensOf(id),se=sessionsOf(id),rel=relItems(id),wu=WR.uses.filter(u=>under(u,id));
+ let act='';
+ if(alt==='A'&&k.length&&S.A.v==='root')act=`<button class="btn pri" data-act="enter" data-arg="${id}">안으로</button>`;
+ if(alt==='C'&&k.length&&S.C.v!==id)act=`<button class="btn pri" data-act="cut" data-arg="${id}">이 부분으로 자르기</button>`;
+ return`<aside class="panel"><div class="pk">${kindLabel(id)}</div><h2>${n.name}</h2><p class="pd">${n.desc}</p><dl>
+ ${k.length?`<dt>상태</dt><dd>${summary(id)}<span class="note">구현 보고는 완료가 아니라 외부 AI가 남긴 기록</span></dd>`:n.st?`<dt>상태</dt><dd>${ST[n.st]}<span class="note">${STX[n.st]}</span></dd>`:''}
+ ${n.vars?`<dt>환경</dt><dd>${n.vars.join(' · ')}<span class="note">확장마다 정해짐, 동시에 셋이 아님</span></dd>`:''}
+ ${op.length?`<dt>미정</dt><dd>${op.map(x=>(x!==id?nm(x)+': ':'')+N[x].open).join('<br>')}</dd>`:''}
+ ${ru.length?`<dt class="rule-t">규칙</dt><dd>${ru.map(r=>r.text).join('<br>')}<span class="note">설계용 가정</span></dd>`:''}
+ ${se.length?`<dt>담당</dt><dd>${se.join('<br>')}</dd>`:''}
+ ${wu.length?`<dt>역할</dt><dd>글쓴이가 직접 사용 ${wu.length===1&&wu[0]===id?'':'('+wu.map(nm).join(', ')+')'}</dd>`:''}
+ </dl>${rel?`<p class="ph">경계를 넘는 관계</p><ul class="rl">${rel}</ul>`:''}<div class="pa">${act}<button class="btn" data-act="clear">선택 해제</button></div></aside>`}
+
+/* ---------- 도구 줄 ---------- */
+function bar(v,extra){const s=cur();const chain=[];if(v!=='root'){for(let x=v;x&&x!=='root';x=N[x].parent)chain.unshift(x)}
+ const pv=s.h.length?s.h[s.h.length-1].v:null;
+ $('#bar').innerHTML=`<div class="path">${v==='root'?'<span class="here">전체</span>':`<button data-act="home">전체</button>`}${chain.map((x,i)=>`<span class="sep">›</span>${i===chain.length-1?`<span class="here">${nm(x)}</span>`:`<button data-act="nav" data-arg="${x}">${nm(x)}</button>`}`).join('')}</div>
+ ${pv!==null?`<button class="back" data-act="back">← 이전 · ${pv==='root'?'전체':nm(pv)}</button>`:''}
+ <div class="bar-r">${extra||''}<span class="kbd">Esc 한 단계 뒤로</span></div>`}
+
+/* ---------- A 공간 구성 ---------- */
+function relSetA(sel){if(!sel)return[];if(sel==='writer')return[];return R.filter(r=>under(r.f,sel)||under(r.t,sel))}
+function renderA(){const s=S.A;const kp=`<div class="keyplan" title="전체 배치">${TOP.map(id=>{const[c,r]=GRID[id];return`<button style="grid-column:${c+1};grid-row:${r+1}" class="${s.v===id?'here':s.sel&&s.sel!=='writer'&&topOf(s.sel)===id?'sel':''}" data-act="kp" data-arg="${id}" title="${N[id].name}" aria-label="${N[id].name}"></button>`}).join('')}</div>`;
+ bar(s.v,kp);
+ $('#main').innerHTML=`<div class="cv" id="cv">${s.v==='root'?aRoot():aIn(s.v)}<svg class="ln"></svg></div>${s.sel?panel(s.sel,'A'):''}`;
+ edgesFn=s.v==='root'?edgesARoot:edgesAIn}
+function aRoot(){const s=S.A,sel=s.sel;const rs=relSetA(sel);const hit=new Set(sel==='writer'?WR.uses:[]);rs.forEach(r=>{hit.add(r.f);hit.add(r.t)});
+ const selTop=sel&&sel!=='writer'?topOf(sel):null;
+ return`<div class="a-root" data-act="clear"><div class="a-role"><button class="role-btn ${sel==='writer'?'on':''}" data-id="writer" data-act="sel" data-arg="writer"><b>글쓴이</b><span>사용자 역할 · 구성 아님</span></button></div>
+ <div class="a-grid">${TOP.map(id=>{const[c,r]=GRID[id];const n=N[id],k=kids(id);
+  const cls=['reg',n.shared?'shared':'',k.length?'':'thin',sel===id?'on':'',sel&&selTop!==id&&![...hit].some(h=>topOf(h)===id)?'lo':''].join(' ');
+  return`<section class="${cls}" style="grid-column:${c+1};grid-row:${r+1}" data-id="${id}" data-flip="${id}" data-act="sel" data-arg="${id}" data-dbl="${k.length?id:''}">
+  <header><h3>${n.name}</h3>${n.shared?`<span class="tag">공유 대상 · ${users(id).length}개 구성이 사용</span>`:''}</header><div class="meta">${k.length?summary(id).replace(/^\d+개 부분 · /,''):'구상만 · 아직 나뉘지 않음'}</div>
+  ${k.length?`<div class="rows">${k.map(x=>{const m=N[x];return`<button class="row ${sel===x?'on':''} ${sel!==x&&hit.has(x)&&sel!==id?'hit':''}" data-id="${x}" data-act="sel" data-arg="${x}"><span class="nm">${m.name}${m.open?'<span class="x">미정</span>':''}${m.rule?'<span class="x">규칙</span>':''}</span><span class="st">${ST[m.st]}</span></button>`}).join('')}</div>`:''}</section>`}).join('')}</div></div>`}
+function edgesARoot(cv){const s=S.A,sel=s.sel;const E=[];const c=cv.getBoundingClientRect();
+ const rb=rr(qid(cv,'writer'),c);const tone=sel==='writer'?'hi':sel?'lo':'n';
+ const tt=['doc','edit','undo'].map(t=>rr(qid(cv,t),c));const xs=tt.map(t=>t.l+34);
+ E.push({pa:{x:rb.r,y:rb.cy},pb:{x:xs[xs.length-1],y:rb.cy},tone,arrow:false});
+ xs.forEach((x,i)=>E.push({pa:{x,y:x<rb.r?rb.b:rb.cy},pb:{x,y:tt[i].t},tone,vert:true,label:sel==='writer'&&i===1?'직접 사용':null}));
+ if(!sel||sel==='writer'){const pairs={};R.forEach(r=>{const a=topOf(r.f),b=topOf(r.t);if(a===b)return;const k=[a,b].sort().join('|');(pairs[k]=pairs[k]||{a,b,n:0,sure:0}).n++;if(r.sure)pairs[k].sure++});
+  Object.values(pairs).forEach(p=>E.push({a:qid(cv,p.a),b:qid(cv,p.b),dash:!p.sure,arrow:false,tone:sel?'lo':'n',pill:p.n>1&&!sel?'관계 '+p.n:null}));return E}
+ const rs=relSetA(sel);
+ const pairs={};R.forEach(r=>{const a=topOf(r.f),b=topOf(r.t);if(a===b)return;if(rs.includes(r))return;const k=[a,b].sort().join('|');pairs[k]={a,b}});
+ Object.values(pairs).forEach(p=>E.push({a:qid(cv,p.a),b:qid(cv,p.b),tone:'lo',arrow:false}));
+ rs.forEach(r=>{const a=qid(cv,r.f),b=qid(cv,r.t);const rows=a&&b&&a.classList.contains('row')&&b.classList.contains('row');
+  E.push({a,b,tone:'hi',dash:!r.sure,label:r.k,side:rows?58:0})});return E}
+function placeOut(X){const outs={};const add=(t,x)=>{(outs[t]=outs[t]||new Set()).add(x)};
+ R.forEach(r=>{const fi=under(r.f,X),ti=under(r.t,X);if(fi&&!ti)add(topOf(r.t),r.t);if(ti&&!fi)add(topOf(r.f),r.f)});
+ const[px,py]=GRID[X];const slot={t:{},b:{},l:[],r:[]};
+ Object.keys(outs).forEach(t=>{const[gx,gy]=GRID[t];const dx=Math.sign(gx-px),dy=Math.sign(gy-py);
+  if(dy<0)slot.t[dx<0?'L':dx>0?'R':'C']=t;else if(dy>0)slot.b[dx<0?'L':dx>0?'R':'C']=t;else(dx<0?slot.l:slot.r).push(t)});
+ return{outs,slot}}
+function aIn(X){const s=S.A,sel=s.sel;const{outs,slot}=placeOut(X);const n=N[X],k=kids(X);
+ const wr=WR.uses.some(u=>under(u,X));if(wr){const f=['C','L','R'].find(p=>!slot.t[p]);slot.t[f]='writer'}
+ const rs=sel&&sel!=='writer'?R.filter(r=>r.f===sel||r.t===sel):[];const hit=new Set();rs.forEach(r=>{hit.add(r.f);hit.add(r.t)});
+ const stub=(t,sl)=>{if(t==='writer')return`<button class="stub role ${sel==='writer'?'on':''}" data-id="writer" data-slot="${sl}" data-act="sel" data-arg="writer"><b>글쓴이</b><small>사용자 역할 · 바깥</small></button>`;
+  const es=[...outs[t]];return`<button class="stub ${[...hit].some(h=>topOf(h)===t)?'on':''}" data-id="out:${t}" data-slot="${sl}" data-flip="${t}" data-act="go" data-arg="${es[0]}"><b>${N[t].name}</b><small>${es.map(e=>e===t?(N[t].shared?'공유 대상':kids(t).length?'구성 전체':'구상만'):nm(e)).join(' · ')}</small></button>`};
+ const edge=(o,cls)=>`<div class="edge ${cls}" style="grid-area:${cls==='t'?'1/2':cls==='b'?'3/2':cls==='l'?'2/1':'2/3'}">${cls==='t'||cls==='b'?['L','C','R'].map(p=>o[p]?`<div class="slot${p}">${stub(o[p],cls)}</div>`:'<div></div>').join(''):o.map(t=>stub(t,cls)).join('')}</div>`;
+ const hasT=Object.keys(slot.t).length,hasB=Object.keys(slot.b).length;
+ const cols=`${slot.l.length?'200px':'10px'} minmax(0,1fr) ${slot.r.length?'200px':'10px'}`,rows=`${hasT?'auto':'0'} auto ${hasB?'auto':'0'}`;
+ return`<div class="a-in" style="grid-template-columns:${cols};grid-template-rows:${rows};gap:26px 34px" data-act="clear">
+ ${hasT?edge(slot.t,'t'):''}${hasB?edge(slot.b,'b'):''}${slot.l.length?edge(slot.l,'l'):''}${slot.r.length?edge(slot.r,'r'):''}
+ <div class="a-frame ${n.shared?'shared':''}" data-flip="${X}" data-id="${X}"><header><h3>${n.name}</h3><span class="tag">${kindLabel(X)}</span><span class="meta">${summary(X)}</span></header>
+ <div class="kids" style="grid-template-columns:repeat(${Math.min(k.length,3)},minmax(0,1fr))">${k.map(x=>{const m=N[x];
+  return`<button class="kid ${sel===x?'on':''} ${sel&&sel!==x&&hit.has(x)?'hit':''}" data-id="${x}" data-act="sel" data-arg="${x}"><span class="kn">${m.name}</span><span class="ks">${ST[m.st]}</span>
+  ${m.vars?`<span class="vars">${m.vars.map(v=>`<i>${v}</i>`).join('')}</span><span class="ks">확장마다 하나 이상, 동시에 셋이 아님</span>`:''}
+  ${x==='state.views'?`<span class="views"><span class="vd">문서 1</span>⇉<span class="vw"><i>편집창 1</i><i>편집창 2</i></span></span>`:''}
+  ${m.open?`<span class="kx">미정 1</span>`:''}${m.rule?`<span class="kx">규칙 1 · 늦은 응답</span>`:''}</button>`}).join('')}</div></div></div>`}
+function edgesAIn(cv){const s=S.A,X=s.v,sel=s.sel;const E=[];
+ const end=id=>under(id,X)?qid(cv,id):qid(cv,'out:'+topOf(id));const v=el=>el&&/[tb]/.test(el.dataset.slot||'');
+ R.forEach(r=>{const fi=under(r.f,X),ti=under(r.t,X);if(!fi&&!ti)return;const a=end(r.f),b=end(r.t);
+  const on=sel&&(r.f===sel||r.t===sel);
+  const lr=el=>el&&/[lr]/.test(el.dataset.slot||'');E.push({a,b,dash:!r.sure,tone:on?'hi':sel?'lo':'n',label:on?r.k:null,vert:v(a)||v(b),elbow:(lr(a)||lr(b))&&!(lr(a)&&lr(b)),kidA:fi})});
+ const w=qid(cv,'writer');if(w)WR.uses.filter(u=>under(u,X)).forEach((u,i)=>E.push({a:w,b:qid(cv,u),vert:v(w),tone:sel==='writer'?'hi':sel?'lo':'n',label:sel==='writer'&&!i?'직접 사용':null}));
+ return E}
+
+/* ---------- B 관계 아틀라스 ---------- */
+function gkey(x,F){const anc=[];for(let y=F;y;y=N[y].parent)anc.push(y);let c=x;while(N[c].parent&&!anc.includes(N[c].parent))c=N[c].parent;return c}
+function nbB(F){const inc={},out={};R.forEach(r=>{const fi=under(r.f,F),ti=under(r.t,F);
+ if(ti&&!fi)(inc[gkey(r.f,F)]=inc[gkey(r.f,F)]||[]).push(r);if(fi&&!ti)(out[gkey(r.t,F)]=out[gkey(r.t,F)]||[]).push(r)});return{inc,out}}
+function renderB(){const s=S.B,F=s.v,sel=s.sel;bar(F);
+ const{inc,out}=nbB(F);const k=F==='root'?TOP:kids(F);const wu=WR.uses.filter(u=>under(u,F));
+ const vis=new Set([F]);for(let y=N[F].parent;y;y=N[y].parent)vis.add(y);k.forEach(x=>vis.add(x));
+ let vr=0;[inc,out].forEach(g=>Object.entries(g).forEach(([key,rs])=>{vis.add(key);rs.forEach(r=>{vis.add(r.f);vis.add(r.t);vr++})}));
+ const total=Object.keys(N).length-1;const shown=[...vis].filter(x=>x!=='root').length;
+ const selRels=sel?(inc[sel]||out[sel]||[]):[];const hitK=new Set();selRels.forEach(r=>k.forEach(x=>{if(under(r.f,x)||under(r.t,x))hitK.add(x)}));
+ if(sel==='writer')wu.forEach(u=>k.forEach(x=>{if(under(u,x))hitK.add(x)}));
+ const chip=(key,rs,dir)=>`<div class="chip ${sel===key?'on':''}" data-id="g:${key}" data-flip="${key}" data-act="selB" data-arg="${key}" data-dbl="${key}" role="button" tabindex="0">
+  <div class="cn">${nm(key)}<span class="ck">${key===topOf(key)&&N[key].shared?'공유 대상':key!==topOf(key)?N[topOf(key)].name:''}</span></div>
+  <ul>${rs.map((r,i)=>`<li data-ri="${key}:${i}">${dir==='in'?`${nm(r.f)} → ${nm(r.t)}`:`${nm(r.f)} → ${nm(r.t)}`}<em>· ${r.k}${r.sure?'':' · 가정'}</em></li>`).join('')}</ul>
+  ${sel===key?`<button class="go" data-act="focus" data-arg="${key}">이것을 가운데로 →</button>`:''}</div>`;
+ const roleChip=wu.length||F==='root'?`<div class="chip role ${sel==='writer'?'on':''}" data-id="g:writer" data-act="selB" data-arg="writer" role="button" tabindex="0"><div class="cn">글쓴이<span class="ck">사용자 역할</span></div><ul>${(F==='root'?['doc','edit','undo']:wu).map((u,i)=>`<li data-ri="writer:${i}">${F==='root'?nm(u)+'를 직접 사용':nm(u)+' 직접 사용'}</li>`).join('')}</ul></div>`:'';
+ const n=N[F];const op=opensOf(F),ru=rulesOf(F),se=sessionsOf(F);
+ const ti=x=>F===x?`<span class="f">${nm(x)}</span>`:`<button class="${vis.has(x)?'vis':''}" data-act="focus" data-arg="${x}">${nm(x)}</button>`;
+ const tree=`<ul class="tree"><li>${ti('root')}<ul>${TOP.map(t=>`<li class="tl">${ti(t)}${kids(t).length?`<ul>${kids(t).map(x=>`<li>${ti(x)}</li>`).join('')}</ul>`:''}</li>`).join('')}</ul></li></ul><div class="rolel">역할: 글쓴이 (구성 아님)</div>`;
+ $('#main').innerHTML=`<div class="b-wrap"><aside class="b-index"><div class="ih">전체 색인 · 점(·)은 지금 보임</div>${tree}
+ <div class="loss">보이는 구성 <b>${shown}/${total}</b> · 관계 <b>${vr}/${R.length}</b><br>${F==='root'?'구성 사이 관계는 하나를 가운데에 둘 때만 보임':'나머지와 전체 배치는 이 보기에 없음'}</div></aside>
+ <div class="b-stage" id="cv" data-act="clear">
+ <div class="b-up">${F==='root'?'가장 바깥 · 프로젝트':`속한 곳 ${[...vis].filter(x=>x!==F&&under(F,x)).reverse().map(x=>`<button data-act="focus" data-arg="${x}">${nm(x)}</button>`).join(' › ')}`}</div>
+ <div class="b-mid"><div class="b-col in"><h4>이것을 쓰는 곳 · 들어오는 관계</h4>${roleChip}${Object.entries(inc).map(([g,rs])=>chip(g,rs,'in')).join('')||(roleChip?'':'<div class="none">들어오는 관계 없음</div>')}</div>
+ <div class="focus" data-flip="${F}" data-id="focus"><div class="pk">${kindLabel(F)}</div><h2>${n.name}</h2><p>${n.desc}</p><dl>
+  ${F==='root'?`<dt>구성</dt><dd>${TOP.length}개 · 공유 대상 1</dd>`:kids(F).length?`<dt>상태</dt><dd>${summary(F)}</dd>`:`<dt>상태</dt><dd>${ST[n.st]} <span style="color:var(--ink3);font-size:12.5px">— ${STX[n.st]}</span></dd>`}
+  ${n.vars?`<dt>환경</dt><dd>${n.vars.join(' · ')} (확장마다 정해짐)</dd>`:''}
+  ${op.length?`<dt>미정</dt><dd>${op.map(x=>N[x].open).join('<br>')}</dd>`:''}
+  ${ru.length&&F!=='root'?`<dt class="rule-t">규칙</dt><dd>${ru.map(r=>r.text).join('<br>')} <span style="color:var(--ink3);font-size:12.5px">(가정)</span></dd>`:''}
+  ${se.length?`<dt>담당</dt><dd>${se.join('<br>')}</dd>`:''}</dl></div>
+ <div class="b-col out"><h4>이것이 쓰는 것 · 나가는 관계</h4>${Object.entries(out).map(([g,rs])=>chip(g,rs,'out')).join('')||'<div class="none">나가는 관계 없음</div>'}</div></div>
+ <div class="b-down"><h4>${k.length?'안에 있는 것 '+k.length:'안에 있는 것'}</h4><div class="b-kids">${k.length?k.map(x=>`<div class="chip ${sel===x?'on':''} ${hitK.has(x)?'hit':''}" data-id="k:${x}" data-act="selB" data-arg="${x}" data-dbl="${x}" data-flip="${x}" role="button" tabindex="0"><div class="cn">${N[x].name}</div><span class="cs">${kids(x).length?summary(x):N[x].st?ST[N[x].st]:''}${N[x].shared?' · 공유 대상':''}</span>${sel===x?`<button class="go" data-act="focus" data-arg="${x}">가운데로 →</button>`:''}</div>`).join(''):`<div class="none">${F==='collab'?'아직 나뉘지 않은 구상':'더 나뉘지 않음'}</div>`}</div></div>
+ <svg class="ln"></svg></div></div>`;
+ edgesFn=edgesB}
+function edgesB(cv){const s=S.B,sel=s.sel;const E=[];const fc=qid(cv,'focus');if(!fc)return E;const c=cv.getBoundingClientRect();const f=rr(fc,c);
+ const lis=[...cv.querySelectorAll('.b-col.in li[data-ri]')],los=[...cv.querySelectorAll('.b-col.out li[data-ri]')];
+ const{inc,out}=nbB(s.v);
+ const spread=(n,i)=>f.t+20+(f.b-f.t-40)*(n<2?.5:i/(n-1));
+ lis.forEach((li,i)=>{const[g,j]=li.dataset.ri.split(':');const r=g==='writer'?null:inc[g][+j];const chipEl=li.closest('.chip');const cr=rr(chipEl,c),lr=rr(li,c);
+  E.push({pa:{x:cr.r,y:lr.cy},pb:{x:f.l,y:spread(lis.length,i)},dash:r?!r.sure:false,tone:sel===g?'hi':sel?'lo':'n'})});
+ los.forEach((li,i)=>{const[g,j]=li.dataset.ri.split(':');const r=out[g][+j];const cr=rr(li.closest('.chip'),c),lr=rr(li,c);
+  E.push({pa:{x:f.r,y:spread(los.length,i)},pb:{x:cr.l,y:lr.cy},dash:!r.sure,tone:sel===g?'hi':sel?'lo':'n'})});
+ return E}
+
+/* ---------- C 질문 단면 ---------- */
+function colsC(){const{v,q}=S.C;
+ if(v==='root'){let ids=TOP.slice();if(q!=='q0'){const inv=new Set(Q[q].steps.map(s=>topOf(s.at)));ids=ids.filter(i=>inv.has(i))}return ids.map(id=>({id}))}
+ const cols=kids(v).map(id=>({id}));const outs={};const add=(t,x)=>{(outs[t]=outs[t]||new Set()).add(x)};
+ R.forEach(r=>{const fi=under(r.f,v),ti=under(r.t,v);if(fi&&!ti)add(topOf(r.t),r.t);if(ti&&!fi)add(topOf(r.f),r.f)});
+ if(q!=='q0')Q[q].steps.forEach(s=>{if(!under(s.at,v))add(topOf(s.at),s.at)});
+ if(Object.keys(outs).length)cols.push({id:'__out',outs});return cols}
+function renderC(){const s=S.C,v=s.v,qq=s.q,sel=s.sel;
+ bar(v,`<div class="qs" role="group" aria-label="질문">${Object.entries(Q).map(([k,o])=>`<button data-act="q" data-arg="${k}" aria-pressed="${qq===k}">${o.label}</button>`).join('')}</div>`);
+ const cols=colsC();const n=cols.length;const steps=qq==='q0'?[]:Q[qq].steps;
+ const colOf=at=>{const c=cols.find(c=>c.id!=='__out'&&under(at,c.id));return c?c.id:'__out'};
+ const tmpl=`86px 112px ${cols.map(c=>c.id==='__out'?'minmax(0,.95fr)':'minmax(0,1fr)').join(' ')}`;
+ let h='';let row=1;
+ const cell=(ci,cls,inner,extra='')=>{const col=ci+3;const c=cols[ci];const sc=c&&sel===c.id?' sel':'';const oc=c&&c.id==='__out'?' out':'';return`<div class="cc ${cls}${sc}${oc}" style="grid-row:${row};grid-column:${col}" ${extra}>${inner}</div>`};
+ // 머리
+ h+=`<div class="cc rh" style="grid-row:${row};grid-column:1"></div><div class="cc rolh" style="grid-row:${row};grid-column:2"><div class="chd"><b>글쓴이</b><small>역할 · 구성 아님</small></div></div>`;
+ cols.forEach((c,i)=>{if(c.id==='__out'){h+=cell(i,'colh',`<div class="chd"><b>경계 바깥</b><small>${N[v].name} 밖에서 닿는 곳</small></div>`);return}
+  const m=N[c.id];h+=cell(i,'colh'+(m.shared?' sh':''),`<button class="chd" data-act="selC" data-arg="${c.id}" data-id="${c.id}" data-dbl="${kids(c.id).length?c.id:''}"><b>${m.name}</b><small>${m.shared?'공유 대상':m.parent==='root'?(kids(c.id).length?kids(c.id).length+'개 부분':'구상'):'부분'}</small></button>`)});
+ row++;
+ // 구성
+ h+=`<div class="cc rh b1" style="grid-row:${row};grid-column:1"><b>구성</b><small>이루는 부분</small></div><div class="cc b1" style="grid-row:${row};grid-column:2"><span class="does nil">—</span></div>`;
+ cols.forEach((c,i)=>{if(c.id==='__out'){h+=cell(i,'b1 outl',Object.entries(c.outs).map(([t,set])=>`<button data-act="cut" data-arg="${t}" data-id="out:${t}"><b>${N[t].name}</b><small>${[...set].map(x=>x===t?(N[t].shared?'공유 대상':kids(t).length?'구성 전체':'구상만'):nm(x)).join(' · ')}</small></button>`).join(''));return}
+  const k=kids(c.id),m=N[c.id];h+=cell(i,'b1',k.length?`<ul class="clist">${k.map(x=>`<li>${N[x].name}</li>`).join('')}</ul>`:m.vars?`<ul class="clist"><li class="vr">환경: ${m.vars.join(' · ')}</li><li class="vr">확장마다 정해짐</li></ul>`:c.id==='state.views'?`<ul class="clist"><li class="vr">문서 1 ⇉ 편집창 2</li><li class="vr">대상 하나 · 표현 둘</li></ul>`:`<span class="does nil">${m.parent==='root'?'아직 나뉘지 않음':'더 나뉘지 않음'}</span>`)});
+ row++;
+ // 행동
+ const bandRows=qq==='q0'?1:steps.length;
+ h+=`<div class="cc rh b1" style="grid-row:${row}/span ${bandRows};grid-column:1"><b>행동</b><small>${qq==='q0'?'글쓴이가 하는 일<br>순서 없음':'순서 ↓<br>사건 · 구성 아님'}</small></div>`;
+ if(qq==='q0'){h+=`<div class="cc b1" style="grid-row:${row};grid-column:2"><span class="actor"><i></i>글쓴이</span></div>`;
+  cols.forEach((c,i)=>{if(c.id==='__out'){h+=cell(i,'b1','');return}const t=WR.does[c.id];const direct=WR.uses.filter(u=>under(u,c.id));
+   h+=cell(i,'b1',t?`<span class="does ${/만나지|명령으로만/.test(t)?'nil':''}">${t}</span>`:`<span class="does ${direct.length?'':'nil'}">${direct.length?'직접 사용':'직접 쓰지 않음'}</span>`)});row++}
+ else{CROWS=[];steps.forEach((st,si)=>{const cid=colOf(st.at);const last=CROWS[CROWS.length-1];
+  if(cid==='__out'&&last&&last.col==='__out')last.idx.push(si);else CROWS.push({col:cid,idx:[si]})});
+  CROWS.forEach((g,gi)=>{const ci=cols.findIndex(c=>c.id===g.col);const b=gi===0?'b1':'b2';g.w=g.idx.some(i=>steps[i].w);const st=steps[g.idx[0]];
+  h+=`<div class="cc ${b}" style="grid-row:${row};grid-column:2">${g.w?`<span class="actor" data-id="a${gi}"><i></i>글쓴이</span>`:''}</div>`;
+  const many=g.idx.length>1;const label=many?`${g.idx[0]+1}–${g.idx[g.idx.length-1]+1}`:g.idx[0]+1;let inner;
+  if(g.col==='__out')inner=many?`<span class="ev">경계 바깥에서 ${g.idx.length}단계</span>${[...new Set(g.idx.map(i=>N[topOf(steps[i].at)].name))].join(' → ')}`:`<span class="ev">${N[topOf(st.at)].name} · ${nm(st.at)}</span>${st.tx}`;
+  else inner=`${st.at!==g.col?`<span class="ev">${nm(st.at)}</span>`:''}${st.tx}${st.ev?`<span class="ev">${st.ev}</span>`:''}`;
+  cols.forEach((c,i)=>{h+=cell(i,b,i===ci?`<div class="step"><span class="no ${many?'wide':''}" data-id="s${gi}">${label}</span><span>${inner}</span></div>`:'')});row++})}
+ // 구현
+ h+=`<div class="cc rh b1" style="grid-row:${row};grid-column:1"><b>구현 기록</b><small>외부 AI 기록</small></div><div class="cc b1" style="grid-row:${row};grid-column:2"></div>`;
+ cols.forEach((c,i)=>{if(c.id==='__out'){h+=cell(i,'b1','<div class="impl"><div class="w">각 구성에서 봄</div></div>');return}
+  const k=kids(c.id),m=N[c.id],se=sessionsOf(c.id),op=opensOf(c.id);
+  h+=cell(i,'b1',`<div class="impl">${k.length?['checked','reported','design','idea'].map(x=>{const l=k.filter(y=>N[y].st===x);return l.length?`<div>${ST[x]} ${l.length}</div>`:''}).join(''):`<div>${ST[m.st]||''}</div>`}${se.map(x=>`<div class="w">${x}</div>`).join('')}${op.length?`<div class="o">미정 ${op.length}</div>`:''}</div>`)});
+ row++;
+ if(v==='root'&&qq!=='q0'){const no=TOP.filter(t=>!cols.some(c=>c.id===t));if(no.length)h+=`<div class="cfoot" style="grid-row:${row}">이 질문에 관여하지 않아 단면에서 뺀 구성: ${no.map(nm).join(' · ')}</div>`}
+ $('#main').innerHTML=`<div class="cv" id="cv"><div class="c-wrap" data-act="clear"><div class="c-grid" style="grid-template-columns:${tmpl}">${h}</div></div><svg class="ln"></svg></div>${sel?panel(sel,'C'):''}`;
+ edgesFn=edgesC}
+let CROWS=[];
+function edgesC(cv){const s=S.C;if(s.q==='q0')return[];const E=[];
+ CROWS.forEach((g,i)=>{const no=qid(cv,'s'+i);if(g.w){const a=qid(cv,'a'+i);if(a&&no)E.push({a,b:no,tone:'n'})}
+  if(i>0){const p=qid(cv,'s'+(i-1));if(p&&no)E.push({a:p,b:no,tone:'hi',stair:true})}});return E}
+
+/* ---------- 렌더·전환 ---------- */
+function snap(){const m={};document.querySelectorAll('#main [data-flip]').forEach(e=>m[e.dataset.flip]=e.getBoundingClientRect());return m}
+let lineTimer=0;
+function render(){document.querySelectorAll('.alts button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.arg===S.alt));
+ const before=snap();const key=S.flip;S.flip=null;
+ ({A:renderA,B:renderB,C:renderC})[S.alt]();
+ let anim=false;
+ if(key&&before[key]&&!matchMedia('(prefers-reduced-motion: reduce)').matches){const el=document.querySelector(`#main [data-flip="${CSS.escape(key)}"]`);
+  if(el){const a=before[key],b=el.getBoundingClientRect();if(b.width&&b.height){anim=true;
+   el.animate([{transformOrigin:'0 0',transform:`translate(${a.left-b.left}px,${a.top-b.top}px) scale(${a.width/b.width},${a.height/b.height})`,opacity:.6},{transformOrigin:'0 0',transform:'none',opacity:1}],{duration:240,easing:'cubic-bezier(.2,.7,.2,1)'})}}}
+ const cv=$('#cv');clearTimeout(lineTimer);
+ if(anim&&cv){cv.classList.add('fading');lineTimer=setTimeout(()=>{drawLines();cv.classList.remove('fading')},250)}else requestAnimationFrame(drawLines);
+ try{history.replaceState(null,'','#'+S.alt)}catch(e){}}
+
+function act(a,arg){const s=cur();
+ switch(a){
+ case'alt':S.alt=arg;render();break;
+ case'info':toggleInfo();break;
+ case'clear':if(s.sel){s.sel=null;render()}break;
+ case'sel':setSel(arg);break;
+ case'enter':if(kids(arg).length)push(arg,null,arg);break;
+ case'kp':if(arg===s.v)push('root',arg);else if(kids(arg).length)push(arg,null,s.v==='root'?arg:null);else push('root',arg);break;
+ case'go':S.alt==='A'?goA(arg):goC(arg);break;
+ case'back':back();break;
+ case'home':home();break;
+ case'nav':push(arg,null);break;
+ case'selB':setSel(arg);break;
+ case'focus':if(arg==='writer')break;if(arg!==s.v)push(arg,null,arg);break;
+ case'selC':setSel(arg);break;
+ case'cut':if(kids(arg).length){if(arg!==s.v)push(arg,null)}else{push('root',arg)}break;
+ case'q':S.C.q=arg;render();break;}}
+let lastClick={k:null,t:0};
+document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(!t)return;
+ const k=S.alt+t.dataset.act+t.dataset.arg,now=Date.now(),dbl=t.dataset.dbl&&lastClick.k===k&&now-lastClick.t<420;lastClick={k,t:now};
+ if(dbl){lastClick.k=null;const id=t.dataset.dbl;if(S.alt==='A')act('enter',id);else if(S.alt==='B')act('focus',id);else act('cut',id);return}
+ act(t.dataset.act,t.dataset.arg)});
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape'){if(!$('#info').hidden){toggleInfo(false);return}const s=cur();if(s.sel){s.sel=null;render()}else back();e.preventDefault();return}
+ if((e.key==='Enter'||e.key===' ')&&e.target.matches('[role=button][data-act]')){e.preventDefault();act(e.target.dataset.act,e.target.dataset.arg)}});
+document.addEventListener('mousedown',e=>{if(!$('#info').hidden&&!e.target.closest('#info')&&!e.target.closest('.info-btn'))toggleInfo(false)});
+function toggleInfo(f){const el=$('#info');const open=f===undefined?el.hidden:f;el.hidden=!open;document.querySelector('.info-btn').setAttribute('aria-expanded',open)}
+new ResizeObserver(()=>requestAnimationFrame(drawLines)).observe(document.body);
+render();
+</script>
+</body>
+</html>
