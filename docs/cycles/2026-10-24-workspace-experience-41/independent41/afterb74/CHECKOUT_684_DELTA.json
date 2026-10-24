@@ -1,0 +1,67 @@
+{
+  "executedCommit": "b74b2597a8d8ab8ab8feeda27a74867520ce130b",
+  "checkoutCommit": "6840496f2d4a41d7e396f0febea3cc4cb1f90702",
+  "checkoutAppTree": "5f42a2c6f5cbdb295cbb7ad7a71a1e36275b66f9",
+  "changedPaths": [
+    "app/continuity/tests/branch-records31_browser.py"
+  ],
+  "identicalGitObjects": {
+    "app/continuity/src": {
+      "executed": "6982855e6365574efb658802d6fb2c455538a29d",
+      "checkout": "6982855e6365574efb658802d6fb2c455538a29d"
+    },
+    "app/continuity/public": {
+      "executed": "7351e49ecab854b98215138bd8cffd838c45216e",
+      "checkout": "7351e49ecab854b98215138bd8cffd838c45216e"
+    },
+    "app/src": {
+      "executed": "421fc0585936bee368d7bb810cf4585c5ac1c013",
+      "checkout": "421fc0585936bee368d7bb810cf4585c5ac1c013"
+    },
+    "app/public": {
+      "executed": "ebcaf1194b17f21b39265214a6829d735384d71f",
+      "checkout": "ebcaf1194b17f21b39265214a6829d735384d71f"
+    },
+    "app/continuity/scripts/build.mjs": {
+      "executed": "a3ebcc94b7ec2655e56b9a75ac5077d560d02733",
+      "checkout": "a3ebcc94b7ec2655e56b9a75ac5077d560d02733"
+    },
+    "app/continuity/server": {
+      "executed": "9f7fdccb6ea4e761f07123fa3d7cf9b993dbde20",
+      "checkout": "9f7fdccb6ea4e761f07123fa3d7cf9b993dbde20"
+    }
+  },
+  "normalRuntimeFilesSha256": {
+    "app\\continuity\\dist\\public\\index.html": "1b3514d251bbd8efce9ecfccedbf365c8c5047802b3365f8dbe4ceff06e9d24c",
+    "app\\continuity\\dist\\public\\styles.css": "3d61f326fdc394b92a2575bf7fbf4df035996835503b709b97bfa55a6bf5dac4",
+    "app\\continuity\\dist\\public\\client\\app.js": "7af4bb3c25aa084b4aff821cc419decedc0ec73bc3ae52e710f5537fceaa76a4",
+    "app\\continuity\\dist\\public\\client\\presentation.js": "b0a1b18e2ef737228a1bb0cd53d81ffc6dd7b60f4af60933ff6562c39616fe55",
+    "app\\continuity\\dist\\public\\client\\runtime-static.js": "d368c64b881ed766a2eba49d96ae40d92912008a8d6b37bb0660380e0492a092",
+    "app\\continuity\\dist\\public\\client\\runtime.js": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+    "app\\continuity\\dist\\public\\client\\source-review.js": "f365ce38fbdf20bf9df61de7cb8ecd07beeb96cb6ff006d8a536f3005c9b3629",
+    "app\\continuity\\dist\\public\\client\\static-target-preview.js": "0d847d744ce6dd680cf0d601faf77789973907e89c288cbbe85f8061056ddac9",
+    "app\\continuity\\dist\\public\\client\\static-target.js": "bded42aab4b5f5cee8df6fdd6b3c6f1cc9c200aa8071a146e1e6317a0a093657",
+    "app\\continuity\\dist\\public\\shared\\attention.js": "55182121cccdf9d54bd8bcb8626d559a199192501386a718a9adb3696198950c",
+    "app\\continuity\\dist\\public\\shared\\domain.js": "f8559b0a01a633385bea417ae76f797f9051b109e300a43b6becc3c9cd1bdcbd",
+    "app\\continuity\\dist\\public\\shared\\guidance.js": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+    "app\\continuity\\dist\\public\\shared\\hierarchy.js": "5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624",
+    "app\\continuity\\dist\\public\\shared\\mock.js": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+    "app\\continuity\\dist\\public\\shared\\outcome.js": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+    "app\\continuity\\dist\\public\\shared\\plan-facts.js": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+    "app\\continuity\\dist\\public\\shared\\source-proposals-example.js": "2b20b2c291e58f53deaf60516cc24a401b25b648c795162bef854dfd658f8d4b",
+    "app\\continuity\\dist\\public\\shared\\source-proposals.js": "57ebe66b903fe2f17458b39d02c88487a60704b6b59aebfd7a944a56dd34c71d",
+    "app\\continuity\\dist\\public\\shared\\storage.js": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+    "app\\continuity\\dist\\public\\shared\\types.js": "d1dd2c914e0332a57bb6875e4cbd660d95ec529e2038e04a2e69c585c4deaf53",
+    "app\\continuity\\dist\\public\\shared\\validation.js": "5c1c5f2ed79435a3250fe31fa3d8c43442f080d757368b157da97b22572960b4"
+  },
+  "normalRuntimeBytesUnchanged": true,
+  "untrackedPathsPreserved": true,
+  "trackedChanges": "",
+  "rebuilt": false,
+  "browserReexecutedAt684": false,
+  "serverRetained": {
+    "url": "http://127.0.0.1:50886",
+    "pid": 34680
+  },
+  "meaning": "b74 browser execution; 684 is test-only delta with identical source/public/build/server and unchanged already-running runtime; not a new 684 browser run."
+}

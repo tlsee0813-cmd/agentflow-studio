@@ -1,0 +1,938 @@
+{
+  "commit": "b74b2597a8d8ab8ab8feeda27a74867520ce130b",
+  "appTree": "80097aaf62afc1115c808fbe19f0d228173998fd",
+  "trackedChanges": "",
+  "scopeStatus": "Previously observed failures resolved within executed independent representative scope. Overall acceptance and CI are separate.",
+  "server": {
+    "pid": 34680,
+    "url": "http://127.0.0.1:50886",
+    "running": true,
+    "startedUtc": "2026-10-24T02:50:43Z",
+    "keepAliveForRoot": true
+  },
+  "buildCommand": [
+    "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+    "continuity/scripts/build.mjs"
+  ],
+  "buildCwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product-handoff-20261024\\app",
+  "serverCommand": "node.exe continuity/server/index.mjs --mock",
+  "environment": {
+    "node": "24.22.1",
+    "python": "3.12.14",
+    "typescript": "5.8.3",
+    "playwright": "1.57.0",
+    "chrome": "155.0.8059.85",
+    "transport": "real installed Chrome -> local HTTP -> explicit server MOCK",
+    "paidCalls": 0,
+    "dependencyInstalls": 0,
+    "pageZoomCondition": "1024x576 CSS viewport + DPR1.25 emulation; not browser UI page zoom"
+  },
+  "sameFixtureBytes": {
+    "independent-project.json": {
+      "same": true,
+      "sha256": "258ceb68b1d8b4226d3a504669effea6baae1dc442c96da94291b66d7a4fd1cb"
+    },
+    "independent-project-max60.json": {
+      "same": true,
+      "sha256": "a246a68b4465939b0aa724972aff626c1379fc50fe71af197e49ac7c7470fe3d"
+    },
+    "independent-project-ids.json": {
+      "same": true,
+      "sha256": "69e918d957bd43ac69264f2966476a9505718e1d52be2ffb831eb2f333543059"
+    }
+  },
+  "firstScreenAndMainJourney": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "map": {
+        "x": 264,
+        "y": 204,
+        "width": 660,
+        "height": 500,
+        "top": 204,
+        "right": 924,
+        "bottom": 704,
+        "left": 264
+      },
+      "editor": {
+        "x": 290,
+        "y": 365.8125,
+        "width": 922,
+        "height": 300,
+        "top": 365.8125,
+        "right": 1212,
+        "bottom": 665.8125,
+        "left": 290
+      },
+      "copy": {
+        "x": 290,
+        "y": 210.140625,
+        "width": 98.328125,
+        "height": 37,
+        "top": 210.140625,
+        "right": 388.328125,
+        "bottom": 247.140625,
+        "left": 290
+      },
+      "focusAndSelectionPreserved": true,
+      "editorScrollPreserved": true,
+      "textSame": true,
+      "exampleStorageZero": true,
+      "closedStorageZero": true,
+      "startOwnEmpty": {
+        "draft": "",
+        "brief": "",
+        "exampleBannerHidden": true,
+        "localStorageKeys": []
+      }
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "map": {
+        "x": 264,
+        "y": 204,
+        "width": 820,
+        "height": 680,
+        "top": 204,
+        "right": 1084,
+        "bottom": 884,
+        "left": 264
+      },
+      "editor": {
+        "x": 370,
+        "y": 365.8125,
+        "width": 922,
+        "height": 300,
+        "top": 365.8125,
+        "right": 1292,
+        "bottom": 665.8125,
+        "left": 370
+      },
+      "copy": {
+        "x": 370,
+        "y": 210.140625,
+        "width": 98.328125,
+        "height": 37,
+        "top": 210.140625,
+        "right": 468.328125,
+        "bottom": 247.140625,
+        "left": 370
+      },
+      "focusAndSelectionPreserved": true,
+      "editorScrollPreserved": true,
+      "textSame": true,
+      "exampleStorageZero": true,
+      "closedStorageZero": true,
+      "startOwnEmpty": {
+        "draft": "",
+        "brief": "",
+        "exampleBannerHidden": true,
+        "localStorageKeys": []
+      }
+    },
+    {
+      "viewport": {
+        "w": 1024,
+        "h": 576,
+        "dpr": 1.25
+      },
+      "editor": {
+        "x": 239,
+        "y": 383.8125,
+        "width": 738,
+        "height": 176,
+        "top": 383.8125,
+        "right": 977,
+        "bottom": 559.8125,
+        "left": 239
+      },
+      "copy": {
+        "x": 239,
+        "y": 228.140625,
+        "width": 98.328125,
+        "height": 37,
+        "top": 228.140625,
+        "right": 337.328125,
+        "bottom": 265.140625,
+        "left": 239
+      }
+    }
+  ],
+  "zeroDepartureThreeReturns": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "initial": {
+        "scrollY": 0,
+        "mapRect": {
+          "x": 264,
+          "y": 204,
+          "width": 660,
+          "height": 500,
+          "top": 204,
+          "right": 924,
+          "bottom": 704,
+          "left": 264
+        },
+        "projectHead": {
+          "x": 264,
+          "y": 54,
+          "width": 974,
+          "height": 40
+        },
+        "projectName": {
+          "x": 263,
+          "y": 60.25,
+          "width": 361.03125,
+          "height": 27.5
+        }
+      },
+      "returnGeometryIdentical": [
+        true,
+        true,
+        true
+      ],
+      "allOriginButtonsVisible": true,
+      "allUsedOrigin": true,
+      "allCameraSame": true,
+      "allSelectionSame": true,
+      "allPanelsOpen": true,
+      "allCaret4to8": true,
+      "exampleStorageZero": true
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "initial": {
+        "scrollY": 0,
+        "mapRect": {
+          "x": 264,
+          "y": 204,
+          "width": 820,
+          "height": 680,
+          "top": 204,
+          "right": 1084,
+          "bottom": 884,
+          "left": 264
+        },
+        "projectHead": {
+          "x": 264,
+          "y": 54,
+          "width": 1134,
+          "height": 40
+        },
+        "projectName": {
+          "x": 263,
+          "y": 60.25,
+          "width": 521.03125,
+          "height": 27.5
+        }
+      },
+      "returnGeometryIdentical": [
+        true,
+        true,
+        true
+      ],
+      "allOriginButtonsVisible": true,
+      "allUsedOrigin": true,
+      "allCameraSame": true,
+      "allSelectionSame": true,
+      "allPanelsOpen": true,
+      "allCaret4to8": true,
+      "exampleStorageZero": true
+    },
+    {
+      "viewport": [
+        1024,
+        576
+      ],
+      "initial": {
+        "scrollY": 0,
+        "mapRect": {
+          "x": 220,
+          "y": 209,
+          "width": 513.6875,
+          "height": 351,
+          "top": 209,
+          "right": 733.6875,
+          "bottom": 560,
+          "left": 220
+        },
+        "projectHead": {
+          "x": 220,
+          "y": 54,
+          "width": 776,
+          "height": 45
+        },
+        "projectName": {
+          "x": 219,
+          "y": 62.75,
+          "width": 189.109375,
+          "height": 27.5
+        }
+      },
+      "returnGeometryIdentical": [
+        true,
+        true,
+        true
+      ],
+      "allOriginButtonsVisible": true,
+      "allUsedOrigin": true,
+      "allCameraSame": true,
+      "allSelectionSame": true,
+      "allPanelsOpen": true,
+      "allCaret4to8": true,
+      "exampleStorageZero": true
+    }
+  ],
+  "nonzeroDepartureThreeReturns": [
+    {
+      "condition": "explicitCenterThenNativeClick",
+      "viewport": [
+        1280,
+        720,
+        1
+      ],
+      "departureScrollY": [
+        317,
+        317,
+        317
+      ],
+      "returnScrollY": [
+        317,
+        317,
+        317
+      ],
+      "returnMapHeight": [
+        500,
+        500,
+        500
+      ],
+      "allGeometryExact": true,
+      "allCameraSame": true,
+      "allSelectionSame": true,
+      "allPanelsOpen": true
+    },
+    {
+      "condition": "explicitCenterThenNativeClick",
+      "viewport": [
+        1440,
+        900,
+        1
+      ],
+      "departureScrollY": [
+        319,
+        319,
+        319
+      ],
+      "returnScrollY": [
+        319,
+        319,
+        319
+      ],
+      "returnMapHeight": [
+        680,
+        680,
+        680
+      ],
+      "allGeometryExact": true,
+      "allCameraSame": true,
+      "allSelectionSame": true,
+      "allPanelsOpen": true
+    },
+    {
+      "condition": "explicitCenterThenNativeClick",
+      "viewport": [
+        1024,
+        576,
+        1.25
+      ],
+      "departureScrollY": [
+        245,
+        245,
+        245
+      ],
+      "returnScrollY": [
+        245,
+        245,
+        245
+      ],
+      "returnMapHeight": [
+        351,
+        351,
+        351
+      ],
+      "allGeometryExact": true,
+      "allCameraSame": true,
+      "allSelectionSame": true,
+      "allPanelsOpen": true
+    },
+    {
+      "condition": "mapWheelThenNativeClick",
+      "viewport": [
+        1280,
+        720,
+        1
+      ],
+      "departureScrollY": [
+        120,
+        240,
+        319
+      ],
+      "returnScrollY": [
+        120,
+        240,
+        319
+      ],
+      "returnMapHeight": [
+        500,
+        500,
+        500
+      ],
+      "allGeometryExact": true,
+      "allCameraSame": true,
+      "allSelectionSame": true,
+      "allPanelsOpen": true
+    },
+    {
+      "condition": "mapWheelThenNativeClick",
+      "viewport": [
+        1440,
+        900,
+        1
+      ],
+      "departureScrollY": [
+        120,
+        240,
+        319
+      ],
+      "returnScrollY": [
+        120,
+        240,
+        319
+      ],
+      "returnMapHeight": [
+        680,
+        680,
+        680
+      ],
+      "allGeometryExact": true,
+      "allCameraSame": true,
+      "allSelectionSame": true,
+      "allPanelsOpen": true
+    },
+    {
+      "condition": "mapWheelThenNativeClick",
+      "viewport": [
+        1024,
+        576,
+        1.25
+      ],
+      "departureScrollY": [
+        120,
+        240,
+        327
+      ],
+      "returnScrollY": [
+        120,
+        240,
+        327
+      ],
+      "returnMapHeight": [
+        351,
+        351,
+        351
+      ],
+      "allGeometryExact": true,
+      "allCameraSame": true,
+      "allSelectionSame": true,
+      "allPanelsOpen": true
+    }
+  ],
+  "longNames": [
+    {
+      "viewport": [
+        1280,
+        720,
+        1
+      ],
+      "observations": {
+        "noSpaceA": {
+          "effectiveNamePx": 14.999999418999998,
+          "distinguishingTail": "예약변경",
+          "tailWhole": true,
+          "tailHit": true,
+          "panelFullNameLength": 60,
+          "panelTailWhole": true,
+          "panelTailHit": true,
+          "selectScrollHeight": 110,
+          "selectClientHeight": 110
+        },
+        "noSpaceB": {
+          "effectiveNamePx": 14.999999418999998,
+          "distinguishingTail": "예약취소",
+          "tailWhole": true,
+          "tailHit": true,
+          "panelFullNameLength": 60,
+          "panelTailWhole": true,
+          "panelTailHit": true,
+          "selectScrollHeight": 133,
+          "selectClientHeight": 133
+        },
+        "spacedB": {
+          "effectiveNamePx": 14.999999418999998,
+          "distinguishingTail": "예약취소",
+          "tailWhole": true,
+          "tailHit": true,
+          "panelFullNameLength": 60,
+          "panelTailWhole": true,
+          "panelTailHit": true,
+          "selectScrollHeight": 133,
+          "selectClientHeight": 133
+        }
+      }
+    },
+    {
+      "viewport": [
+        1440,
+        900,
+        1
+      ],
+      "observations": {
+        "noSpaceA": {
+          "effectiveNamePx": 14.9999895873,
+          "distinguishingTail": "예약변경",
+          "tailWhole": true,
+          "tailHit": true,
+          "panelFullNameLength": 60,
+          "panelTailWhole": true,
+          "panelTailHit": true,
+          "selectScrollHeight": 116,
+          "selectClientHeight": 116
+        },
+        "noSpaceB": {
+          "effectiveNamePx": 14.9999895873,
+          "distinguishingTail": "예약취소",
+          "tailWhole": true,
+          "tailHit": true,
+          "panelFullNameLength": 60,
+          "panelTailWhole": true,
+          "panelTailHit": true,
+          "selectScrollHeight": 136,
+          "selectClientHeight": 136
+        },
+        "spacedB": {
+          "effectiveNamePx": 14.9999895873,
+          "distinguishingTail": "예약취소",
+          "tailWhole": true,
+          "tailHit": true,
+          "panelFullNameLength": 60,
+          "panelTailWhole": true,
+          "panelTailHit": true,
+          "selectScrollHeight": 136,
+          "selectClientHeight": 136
+        }
+      }
+    },
+    {
+      "viewport": [
+        1024,
+        576,
+        1.25
+      ],
+      "observations": {
+        "noSpaceA": {
+          "effectiveNamePx": 14.526312,
+          "distinguishingTail": "예약변경",
+          "tailWhole": true,
+          "tailHit": true,
+          "panelFullNameLength": 60,
+          "panelTailWhole": true,
+          "panelTailHit": true,
+          "selectScrollHeight": 105,
+          "selectClientHeight": 105
+        },
+        "noSpaceB": {
+          "effectiveNamePx": 14.526312,
+          "distinguishingTail": "예약취소",
+          "tailWhole": true,
+          "tailHit": true,
+          "panelFullNameLength": 60,
+          "panelTailWhole": true,
+          "panelTailHit": true,
+          "selectScrollHeight": 133,
+          "selectClientHeight": 133
+        },
+        "spacedB": {
+          "effectiveNamePx": 14.526312,
+          "distinguishingTail": "예약취소",
+          "tailWhole": true,
+          "tailHit": true,
+          "panelFullNameLength": 60,
+          "panelTailWhole": true,
+          "panelTailHit": true,
+          "selectScrollHeight": 133,
+          "selectClientHeight": 133
+        }
+      }
+    }
+  ],
+  "preservation": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "initialBytesSha256": "acc4407c85b5ee89544a42e2b21f8c2a5265f5409a69ea3abeae654d3cd22c9b",
+      "editedBytesSha256": "9e59d17ec5105f6709fefac10650800c0df967de1f71bf8dd9e5f772bfd469d5",
+      "finalBytesSha256": "9e59d17ec5105f6709fefac10650800c0df967de1f71bf8dd9e5f772bfd469d5",
+      "contracts": {
+        "readOnlyBytesSame": true,
+        "continueBytesSame": true,
+        "exactReportReturnMemo": true,
+        "reportReadBytesSame": true,
+        "openUnsentBytesSame": true,
+        "editedNavigationBytesSame": true,
+        "exampleProtectsRealBytes": true,
+        "exampleProtectsRealMapMemo": true
+      },
+      "draftSameAfterNavigation": true,
+      "beforeEditor": {
+        "id": "work-next",
+        "start": 4,
+        "end": 8
+      },
+      "afterEditor": {
+        "id": "work-next",
+        "start": 4,
+        "end": 8
+      }
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "initialBytesSha256": "f2c88f3466df7d5a5a78bdecbfb3bbf27c00f0099ee21f1882c44422857e34e9",
+      "editedBytesSha256": "48caf64fc1624333f396fe8786e7eec72ffa80a511f8b44e5da41411d5e4aa6b",
+      "finalBytesSha256": "48caf64fc1624333f396fe8786e7eec72ffa80a511f8b44e5da41411d5e4aa6b",
+      "contracts": {
+        "readOnlyBytesSame": true,
+        "continueBytesSame": true,
+        "exactReportReturnMemo": true,
+        "reportReadBytesSame": true,
+        "openUnsentBytesSame": true,
+        "editedNavigationBytesSame": true,
+        "exampleProtectsRealBytes": true,
+        "exampleProtectsRealMapMemo": true
+      },
+      "draftSameAfterNavigation": true,
+      "beforeEditor": {
+        "id": "work-next",
+        "start": 4,
+        "end": 8
+      },
+      "afterEditor": {
+        "id": "work-next",
+        "start": 4,
+        "end": 8
+      }
+    }
+  ],
+  "freshEntry": [
+    {
+      "viewport": [
+        1280,
+        720,
+        1
+      ],
+      "exampleCloseThenNew": {
+        "active": "brief-input",
+        "scrollY": 0,
+        "viewport": {
+          "w": 1280,
+          "h": 720,
+          "dpr": 1
+        },
+        "briefValue": "",
+        "draftValue": "",
+        "brief": {
+          "x": 271,
+          "y": 392.171875,
+          "w": 640,
+          "h": 73.78125,
+          "bottom": 465.953125,
+          "whole": true
+        },
+        "divideAction": {
+          "y": 473.953125,
+          "bottom": 518.953125,
+          "whole": true
+        },
+        "localKeys": [],
+        "exampleBannerHidden": true
+      },
+      "exampleStartOwn": {
+        "active": "brief-input",
+        "scrollY": 0,
+        "viewport": {
+          "w": 1280,
+          "h": 720,
+          "dpr": 1
+        },
+        "briefValue": "",
+        "draftValue": "",
+        "brief": {
+          "x": 271,
+          "y": 392.171875,
+          "w": 640,
+          "h": 73.78125,
+          "bottom": 465.953125,
+          "whole": true
+        },
+        "divideAction": {
+          "y": 473.953125,
+          "bottom": 518.953125,
+          "whole": true
+        },
+        "localKeys": [],
+        "exampleBannerHidden": true
+      }
+    },
+    {
+      "viewport": [
+        1440,
+        900,
+        1
+      ],
+      "exampleCloseThenNew": {
+        "active": "brief-input",
+        "scrollY": 0,
+        "viewport": {
+          "w": 1440,
+          "h": 900,
+          "dpr": 1
+        },
+        "briefValue": "",
+        "draftValue": "",
+        "brief": {
+          "x": 351,
+          "y": 392.171875,
+          "w": 640,
+          "h": 73.78125,
+          "bottom": 465.953125,
+          "whole": true
+        },
+        "divideAction": {
+          "y": 473.953125,
+          "bottom": 518.953125,
+          "whole": true
+        },
+        "localKeys": [],
+        "exampleBannerHidden": true
+      },
+      "exampleStartOwn": {
+        "active": "brief-input",
+        "scrollY": 0,
+        "viewport": {
+          "w": 1440,
+          "h": 900,
+          "dpr": 1
+        },
+        "briefValue": "",
+        "draftValue": "",
+        "brief": {
+          "x": 351,
+          "y": 392.171875,
+          "w": 640,
+          "h": 73.78125,
+          "bottom": 465.953125,
+          "whole": true
+        },
+        "divideAction": {
+          "y": 473.953125,
+          "bottom": 518.953125,
+          "whole": true
+        },
+        "localKeys": [],
+        "exampleBannerHidden": true
+      }
+    },
+    {
+      "viewport": [
+        1024,
+        576,
+        1.25
+      ],
+      "exampleCloseThenNew": {
+        "active": "brief-input",
+        "scrollY": 0,
+        "viewport": {
+          "w": 1024,
+          "h": 576,
+          "dpr": 1.25
+        },
+        "briefValue": "",
+        "draftValue": "",
+        "brief": {
+          "x": 220,
+          "y": 386.171875,
+          "w": 640,
+          "h": 73.78125,
+          "bottom": 459.953125,
+          "whole": true
+        },
+        "divideAction": {
+          "y": 467.953125,
+          "bottom": 512.953125,
+          "whole": true
+        },
+        "localKeys": [],
+        "exampleBannerHidden": true
+      },
+      "exampleStartOwn": {
+        "active": "brief-input",
+        "scrollY": 0,
+        "viewport": {
+          "w": 1024,
+          "h": 576,
+          "dpr": 1.25
+        },
+        "briefValue": "",
+        "draftValue": "",
+        "brief": {
+          "x": 220,
+          "y": 386.171875,
+          "w": 640,
+          "h": 73.78125,
+          "bottom": 459.953125,
+          "whole": true
+        },
+        "divideAction": {
+          "y": 467.953125,
+          "bottom": 512.953125,
+          "whole": true
+        },
+        "localKeys": [],
+        "exampleBannerHidden": true
+      }
+    }
+  ],
+  "receiptIndependentUIJourney": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "condition": "receivedNoticeAfterContinueOtherTask",
+      "currentTaskChanged": true,
+      "composeOpen": true,
+      "fileOpen": true,
+      "receiptButtonVisible": true,
+      "selectionVisible": false,
+      "sourceRecordsPreserved": true,
+      "taskRecordsPreserved": true,
+      "receiptReadDoesNotMutate": true
+    },
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "condition": "selectedFileAfterContinueOtherTask",
+      "currentTaskChanged": true,
+      "composeOpen": true,
+      "fileOpen": true,
+      "receiptButtonVisible": false,
+      "selectionVisible": true,
+      "sourceRecordsPreserved": true,
+      "taskRecordsPreserved": true,
+      "receiptReadDoesNotMutate": true
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "condition": "receivedNoticeAfterContinueOtherTask",
+      "currentTaskChanged": true,
+      "composeOpen": true,
+      "fileOpen": true,
+      "receiptButtonVisible": true,
+      "selectionVisible": false,
+      "sourceRecordsPreserved": true,
+      "taskRecordsPreserved": true,
+      "receiptReadDoesNotMutate": true
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "condition": "selectedFileAfterContinueOtherTask",
+      "currentTaskChanged": true,
+      "composeOpen": true,
+      "fileOpen": true,
+      "receiptButtonVisible": false,
+      "selectionVisible": true,
+      "sourceRecordsPreserved": true,
+      "taskRecordsPreserved": true,
+      "receiptReadDoesNotMutate": true
+    }
+  ],
+  "pageErrors": {
+    "example": [],
+    "preservation": [],
+    "longNames": [],
+    "receipt": []
+  },
+  "externalRequests": {
+    "example": [],
+    "preservation": [],
+    "receipt": []
+  },
+  "runtimeHashes": {
+    "client/app.js": "7af4bb3c25aa084b4aff821cc419decedc0ec73bc3ae52e710f5537fceaa76a4",
+    "styles.css": "3d61f326fdc394b92a2575bf7fbf4df035996835503b709b97bfa55a6bf5dac4"
+  },
+  "screenshots": [
+    "after-1280-map-selected.png",
+    "after-1280-work.png",
+    "nospace60-125equiv-selected.png"
+  ],
+  "notExecuted": [
+    "Full author regression suites including PC12 and received20",
+    "CI verification",
+    "Actual browser UI page zoom",
+    "Real external AI execution",
+    "Human comprehension study",
+    "Static-preview build (owned by parent)"
+  ],
+  "commands": [
+    "startb74.py",
+    "runb74.py examples",
+    "runb74.py preserve",
+    "runb74.py 125example",
+    "repeat_scrollb74.py",
+    "nospaceb74.py",
+    "departureb74.py",
+    "node receiptb74_fixture.mjs",
+    "receiptb74.py"
+  ],
+  "historicalFailures": {
+    "e3": "Editor below first screen, focus return and small long names",
+    "7cb": "No-space 60-char names and repeated origin disappearance",
+    "42ff_c7a7": "Page scroll and map height drift after origin return; c7 natural wheel120 returned at scroll240 and h704 from scroll120 and h500"
+  },
+  "behaviorDecision": "For nonzero scroll departure, retain document-coordinate map height rather than expanding it to viewport bottom on return; parent-approved change from earlier behavior."
+}

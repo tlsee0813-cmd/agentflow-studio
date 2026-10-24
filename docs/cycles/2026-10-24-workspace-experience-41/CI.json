@@ -1,0 +1,22 @@
+{
+  "headRevision": "6840496f2d4a41d7e396f0febea3cc4cb1f90702",
+  "runId": 40056301818,
+  "verifiedBy": "Code Review pull_requests_checks",
+  "checkedAt": "2026-10-24T03:16:39.929Z",
+  "jobs": [
+    {
+      "id": 120760189297,
+      "head_sha": "6840496f2d4a41d7e396f0febea3cc4cb1f90702",
+      "name": "verify (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 120760189411,
+      "head_sha": "6840496f2d4a41d7e396f0febea3cc4cb1f90702",
+      "name": "verify (windows-2022)",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ]
+}
