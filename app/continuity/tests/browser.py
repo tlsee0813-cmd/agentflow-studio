@@ -46,6 +46,11 @@ def reveal_management(page,selector):
         menu=page.locator('#project-management');expect(menu).to_be_visible()
         if not menu.evaluate('(e)=>e.open'):page.locator('#project-management-toggle').click()
     expect(control).to_be_visible()
+def open_context(page):
+    """WORK41: the work's goal, request, conditions and received reports are one disclosure under the work card. Tests that
+    read or correct them open it first, as a user would; nothing else about those controls changed."""
+    d=page.locator('#outcome-context')
+    if d.count() and d.is_visible() and not d.evaluate('(e)=>e.open'):page.locator('#outcome-context > summary').click()
 def open_records(page):
     """WORKSPACE19 keeps the exact record buttons, now in the existing bounded side reader."""
     if not page.locator('#area-panel[data-panel-mode="records"]').count():page.locator('#check-summary').click()

@@ -138,7 +138,7 @@ class EntryReview(unittest.TestCase):
         self.send('공방 위치만 안내해 주세요.')
         self.send('합성 실수: 다른 프로젝트의 결과를 잘못 가져왔습니다. 실제 구현 없음.', 'report')
         before = self.state()
-        self.page.locator('#outcome-results > summary').click()
+        base.open_context(self.page);self.page.locator('#outcome-results > summary').click()
         guidance = self.page.locator('#outcome-results .report-correction-help')
         expect(guidance).to_contain_text('한 건만 삭제')
         expect(guidance).to_contain_text('새 요청')
@@ -211,9 +211,9 @@ class EntryReview(unittest.TestCase):
         original = '공방 수업 소개 문구를 검토해 주세요.'
         correction = '수업 소개가 아니라 위치 안내 문구만 검토해 주세요.'
         self.send(original)
-        self.page.locator('#outcome-correction > summary').click()
-        self.page.locator('#outcome-correction-text').fill(correction)
-        self.page.locator('#correct-outcome').click()
+        base.open_context(self.page);self.page.locator('#outcome-correction > summary').click()
+        base.open_context(self.page);self.page.locator('#outcome-correction-text').fill(correction)
+        base.open_context(self.page);self.page.locator('#correct-outcome').click()
         review = self.page.locator('#handoff-review')
         expect(review).to_contain_text('이번 요청 · 현재 기준 값 앞부분')
         expect(review).to_contain_text(correction)

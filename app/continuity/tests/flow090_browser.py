@@ -268,11 +268,11 @@ class SpatialWorkspace(unittest.TestCase):
         self.assertLess(self.page.locator('#space-map').bounding_box()['y'],380,'the map starts in the first screen')
         self.page.locator('#brief-edit > summary').click();expect(self.page.locator('#brief-edit-text')).to_have_value('예약 서비스')
         self.request_in('예약',request,export=False)
-        self.assertLess(self.page.locator('#next-actions').bounding_box()['y'],330,'the next action starts in the first screen')
+        self.assertLess(self.page.locator('#next-actions').bounding_box()['y'],712-60,'the next action starts in the first screen') # WORK41: the copy row sits on the work card, still in the first screen
         expect(self.page.locator('#intent-home h3')).to_have_text('이 작업의 목표 · MOCK 정리');expect(self.page.locator('#intent-goal')).to_have_text(request)
         # The same sentence is not shown twice; the original stays one click away.
         raw=self.page.locator('#outcome-request-raw');expect(raw).to_have_count(1);expect(self.page.locator('#outcome-purpose')).to_be_hidden()
-        expect(self.page.locator('#outcome-purpose')).to_have_text(request);raw.locator('summary').click();expect(self.page.locator('#outcome-purpose')).to_be_visible()
+        base.open_context(self.page);expect(self.page.locator('#outcome-purpose')).to_have_text(request);raw.locator('summary').click();expect(self.page.locator('#outcome-purpose')).to_be_visible()
         # One entry to the work text and one new-request button (plus the composer itself); both still work.
         work=self.page.locator('#work-view')
         expect(work.locator('button',has_text=re.compile('작업문.*보기'))).to_have_count(1);expect(work.locator('button',has_text='새 요청')).to_have_count(0)
@@ -280,9 +280,9 @@ class SpatialWorkspace(unittest.TestCase):
         self.page.locator('#next-preview').click();expect(self.page.locator('#handoff-text')).to_be_visible()
         self.page.locator('#change-direction').click();expect(self.page.locator('#draft')).to_be_focused()
         # A corrected goal differs from the original, which is then shown open again.
-        self.page.locator('#intent-details > summary').click();self.page.locator('#intent-edit-goal').fill('날짜 고르기 화면만 먼저');self.page.locator('#intent-correct').click()
+        base.open_context(self.page);self.page.locator('#intent-details > summary').click();self.page.locator('#intent-edit-goal').fill('날짜 고르기 화면만 먼저');self.page.locator('#intent-correct').click()
         expect(self.page.locator('#intent-home h3')).to_have_text('이 작업의 목표 · 직접 정정')
-        expect(self.page.locator('#outcome-request-raw')).to_have_count(0);expect(self.page.locator('#outcome-purpose')).to_be_visible()
+        base.open_context(self.page);expect(self.page.locator('#outcome-request-raw')).to_have_count(0);expect(self.page.locator('#outcome-purpose')).to_be_visible()
 
     def test_12_a_received_report_is_kept_on_its_task_and_the_next_text_is_a_follow_up_draft(self):
         (booking,)=self.start(['예약']);task=self.request_in('예약','예약 화면에서 날짜와 시간을 고르게 해줘')

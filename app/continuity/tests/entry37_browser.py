@@ -78,8 +78,9 @@ class Entry37(unittest.TestCase):
         expect(p.locator('#nav-space')).to_be_visible();expect(p.locator('#space-brief')).to_have_text(BRIEF)
         expect(p.locator('#example-banner')).to_contain_text('저장되지 않고')
         for name in ['예약하기','알림','시간 고르기','예약 확인']:expect(p.locator(f'.node-enter[aria-label="{name} 영역 열기"]')).to_be_visible()
-        expect(p.locator('.node-enter[aria-label="시간 고르기 영역 열기"] .area-card-path')).to_have_text('소속 · 예약하기')
-        expect(p.locator('.node-enter[aria-label="예약하기 영역 열기"] .area-card-path')).to_have_text('독립 영역')
+        # WORK41: the card body selects; '열기' (same label) is its own button, so the path is read from the same card.
+        expect(p.locator('.area-node:has(.node-enter[aria-label="시간 고르기 영역 열기"]) .area-card-path')).to_have_text('소속 · 예약하기')
+        expect(p.locator('.area-node:has(.node-enter[aria-label="예약하기 영역 열기"]) .area-card-path')).to_have_text('독립 영역')
         self.no_test_ids('space');self.fits();self.shot('2-space');camera=self.plane()
 
         p.locator('.node-enter[aria-label="시간 고르기 영역 열기"]').click()
@@ -111,7 +112,7 @@ class Entry37(unittest.TestCase):
         p.locator('.node-enter[aria-label="알림 영역 열기"]').click();expect(p.locator('#area-tasks')).to_be_visible()
         p.locator('#example-start').click();expect(p.locator('#example-banner')).to_be_hidden()
         expect(p.locator('#empty')).to_be_visible();expect(p.locator('#brief-form')).to_be_visible()
-        expect(p.locator('#brief-input')).to_have_value('');expect(p.locator('#draft')).to_have_value('');expect(p.locator('#draft')).to_be_focused()
+        expect(p.locator('#brief-input')).to_have_value('');expect(p.locator('#draft')).to_have_value('');expect(p.locator('#brief-input')).to_be_focused() # WORK41: starts at the purpose
         self.assertEqual(self.keys(),[]);p.evaluate('window.scrollTo(0,0)');self.shot('8-start-own')
         p.locator('#brief-input').fill('동네 빵집 픽업 주문을 받는 사이트');p.locator('#brief-start').click()
         expect(p.locator('#space-view')).to_be_visible();base.saved(p)

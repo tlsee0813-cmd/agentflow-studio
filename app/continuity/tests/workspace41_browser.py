@@ -11,7 +11,7 @@ WORKSPACE='agentflow.idea015.workspace';MAP_KEY='agentflow.workspace.map'
 subprocess.run(['node',str(base.ROOT/'tests/workspace41-fixtures.mjs'),str(base.OUT)],check=True)
 IDS=json.loads((base.OUT/'workspace41-ids.json').read_text(encoding='utf-8'))
 FX=json.loads((base.OUT/'workspace41.json').read_text(encoding='utf-8'))['entries'][0]['project']
-PREFIX='예약 화면에서 손님이 이미 잡은 예약을 바꾸거나 없애는 흐름의'
+PREFIX='예약 화면에서 손님이 휴대폰으로 이미 잡아 둔 예약을 직접 바꾸거나 없애는 흐름의 마지막 단계인'
 CHANGE,CANCEL=f'{PREFIX} 예약 변경',f'{PREFIX} 예약 취소'
 MANUAL='[합성41] 변경 가능 시간만 보여 주고, 취소 흐름은 건드리지 않는다.'
 DRAFT='[합성41 미전송] 알림 문자에 변경된 시간을 함께 적어 주세요.'
@@ -23,7 +23,7 @@ READ=r'''()=>{const m=document.getElementById('space-map'),mr=m.getBoundingClien
   const px=e=>e&&getComputedStyle(e).display!=='none'?parseFloat(getComputedStyle(e).fontSize)*s:null;
   const inside=(e,b)=>{if(!e||getComputedStyle(e).display==='none')return true;const r=R(e);return r.left>=b.left-.5&&r.right<=b.right+.5&&r.top>=b.top-.5&&r.bottom<=b.bottom+.5};
   return {id:n.dataset.areaId,name:name.textContent,box:c.toJSON(),namePx:px(name),notePx:px(note),reasonPx:px(sig),
-   nameWhole:inside(name,p)&&name.scrollHeight<=name.clientHeight+1,textsInCard:[name,note,n.querySelector('.area-card-path'),sig,n.querySelector('.node-enter')].every(e=>inside(e,c)),
+   full:name.dataset.full??name.textContent,nameWhole:inside(name,p)&&name.scrollHeight<=name.clientHeight+1,textsInCard:[name,note,n.querySelector('.area-card-path'),sig,n.querySelector('.node-enter')].every(e=>inside(e,c)),
    nameBox:R(name).toJSON(),selected:n.classList.contains('selected'),visible:c.left>=mr.left-.5&&c.right<=mr.right+.5&&c.top>=mr.top-.5&&c.bottom<=mr.bottom+.5}});
  const lines=[...document.querySelectorAll('.relation-line')].map(l=>{const ctm=l.getScreenCTM(),pt=(x,y)=>({x:ctm.a*x+ctm.e,y:ctm.d*y+ctm.f});return [pt(+l.getAttribute('x1'),+l.getAttribute('y1')),pt(+l.getAttribute('x2'),+l.getAttribute('y2'))]});
  return {map:{top:mr.top,h:mr.height,w:mr.width,left:mr.left,right:mr.right,bottom:mr.bottom},scale:s,transform:plane.style.transform,cards,lines,read:!document.getElementById('map-read').hidden}}'''
@@ -49,16 +49,18 @@ class Work41(unittest.TestCase):
     def raw(self):return self.page.evaluate('(k)=>localStorage.getItem(k)',WORKSPACE)
     def read(self,label):r=self.page.evaluate(READ);self.record(label,r);return r
     def fits(self):self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),self.WIDTH,'no horizontal overflow')
-    def readable(self,r,where):
+    def readable(self,r,where,name_px=14,small_px=12):
         for c in r['cards']:
             if not c['visible']:continue
-            self.assertGreaterEqual(c['namePx'],14-0.05,f'{where}: name on screen >= 14px · {c["name"][:20]}')
-            if c['notePx'] is not None:self.assertGreaterEqual(c['notePx'],12-0.05,f'{where}: idea on screen >= 12px · {c["name"][:20]}')
-            if c['reasonPx'] is not None:self.assertGreaterEqual(c['reasonPx'],12-0.05,f'{where}: reading reason >= 12px')
+            self.assertGreaterEqual(c['namePx'],name_px-0.05,f'{where}: name on screen >= {name_px}px · {c["name"][:20]}')
+            if c['notePx'] is not None:self.assertGreaterEqual(c['notePx'],small_px-0.05,f'{where}: idea on screen >= {small_px}px · {c["name"][:20]}')
+            if c['reasonPx'] is not None:self.assertGreaterEqual(c['reasonPx'],small_px-0.05,f'{where}: reading reason >= {small_px}px')
     def no_collisions(self,r,where):
         for c in r['cards']:
             self.assertTrue(c['textsInCard'],f'{where}: texts stay inside their card · {c["name"][:20]}')
-            self.assertTrue(c['nameWhole'],f'{where}: the whole name is shown · {c["name"][:20]}')
+            self.assertTrue(c['nameWhole'],f'{where}: the shown name is not clipped · {c["name"][:20]}')
+            end=' '.join(c['full'].split()[-2:])
+            self.assertTrue(c['name']==c['full'] or (c['name'].endswith(end) and ' … ' in c['name']),f'{where}: whole name, or its start and distinguishing end · {c["name"]}')
             for o in r['cards']:
                 if o is c:continue
                 b,n=o['box'],c['nameBox'];self.assertFalse(n['left']<b['right'] and b['left']<n['right'] and n['top']<b['bottom'] and b['top']<n['bottom'],f'{where}: name not over another card')
@@ -66,7 +68,7 @@ class Work41(unittest.TestCase):
                 for pt in line:
                     n=c['nameBox'];self.assertFalse(n['left']<=pt['x']<=n['right'] and n['top']<=pt['y']<=n['bottom'],f'{where}: a line end is not under a name')
     def select(self,name):
-        card=self.page.locator('.area-node').filter(has=self.page.locator('.area-card-name',has_text=name)).first
+        card=self.page.locator(f'.area-node:has(.node-select[aria-label^="{name} 선택"])').first
         card.locator('.node-select').click();expect(self.page.locator('#area-panel-title')).to_have_text(name);return card
 
     def test_01_example_map_select_continue_and_back(self):
@@ -109,6 +111,11 @@ class Work41(unittest.TestCase):
         self.assertEqual(p.evaluate('scrollY'),y,'the same reading place')
         self.assertEqual(self.keys(),[],'nothing from the example is written')
         p.locator('#example-close').click();expect(p.locator('#projects-view')).to_be_visible();self.assertEqual(self.keys(),[])
+        # A new project of one's own starts at its top with the optional purpose focused; the direct first request is below it.
+        p.locator('#new-project').click();expect(p.locator('#brief-input')).to_be_focused();self.assertEqual(p.evaluate('scrollY'),0)
+        expect(p.locator('#project-name')).to_be_in_viewport();expect(p.locator('#draft')).to_be_attached();self.shot('9-new-project')
+        p.locator('#nav-projects').click();p.locator('#example-list .example-open').click();p.locator('#example-start').click()
+        expect(p.locator('#brief-input')).to_be_focused();self.assertEqual(p.evaluate('scrollY'),0);self.assertEqual(self.keys(),[])
 
     def test_02_real_project_long_names_report_and_other_part_draft(self):
         p=self.page;raw=json.dumps({'version':'agentflow.workspace.1','migratedFromLegacy':True,'entries':[]})
@@ -117,8 +124,10 @@ class Work41(unittest.TestCase):
         expect(p.locator('#projects-view')).to_be_visible();p.locator('#project-list .project-open').first.click();expect(p.locator('#space-map')).to_be_visible()
         r=self.read('long names first view');self.shot('6-long-names');self.fits()
         self.readable(r,'long names');self.no_collisions(r,'long names')
-        names=[c['name'] for c in r['cards']];self.assertIn(CHANGE,names);self.assertIn(CANCEL,names)
-        self.select(CHANGE);r2=self.read('long name selected');self.no_collisions(r2,'long name selected')
+        names=[c['full'] for c in r['cards']];self.assertIn(CHANGE,names);self.assertIn(CANCEL,names)
+        shown={c['full']:c['name'] for c in r['cards']};self.assertNotEqual(shown[CHANGE],shown[CANCEL],'the two long names read differently on the map')
+        self.select(CHANGE);r2=self.read('long name selected');self.no_collisions(r2,'long name selected');self.readable(r2,'long name selected')
+        title=p.locator('#area-panel-title');self.assertTrue(title.evaluate('(e)=>e.scrollHeight<=e.clientHeight+1&&e.getClientRects().length>0'),'the panel title shows the whole name')
         self.assertTrue(next(c for c in r2['cards'] if c['selected'])['visible'])
         expect(p.locator('#panel-continue-gist')).to_contain_text(MANUAL[:20]);expect(p.locator('#panel-continue-target')).to_contain_text('작업 01의 작업문은 그대로')
         self.assertEqual(self.raw(),raw,'selecting and reading change no saved bytes')

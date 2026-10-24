@@ -107,7 +107,8 @@ class UI001(unittest.TestCase):
         self.send('예약 완료 문구만 바꿔줘.');self.basis('예약 성립 방식과 대기 순서는 그대로 유지한다.')
         self.page.locator('#edit-work').evaluate('(e)=>e.open=true')
         self.page.locator('#work-next').fill('예약 완료 화면의 문구만 수정한다. 기존 예약 처리에는 손대지 않는다.')
-        expect(self.page.locator('#instruction-preview')).to_have_text('예약 완료 화면의 문구만 수정한다. 기존 예약 처리에는 손대지 않는다.')
+        # WORK41: the work text is read and edited in one field (the separate read-only preview of it was removed).
+        expect(self.page.locator('#work-next')).to_have_value('예약 완료 화면의 문구만 수정한다. 기존 예약 처리에는 손대지 않는다.')
         expect(self.page.locator('#instruction-author')).to_have_text('사용자 직접 수정')
         expect(self.page.locator('#work-authorship')).to_contain_text('직접 수정 포함')
         self.page.locator('#edit-D2').evaluate('(e)=>e.open=true');self.page.locator('#text-D2').fill('아직 반영하지 않은 기준 초안')
@@ -131,7 +132,7 @@ class UI001(unittest.TestCase):
         self.assertEqual(self.state(),original)
         before=self.calls() if base.DOM else 0
         self.remount(json.dumps(original,ensure_ascii=False));expect(self.page.locator('#draft')).to_be_visible()
-        expect(self.page.locator('#compose-draft-status')).to_have_text('작성 중인 입력 있음')
+        expect(self.page.locator('#compose-draft-status')).to_contain_text('작성 중인 요청 있음') # WORK41: names its kind and target
         self.assertEqual(self.calls(),before);self.assertEqual(self.state()['sources'],original['sources'])
 
     def test_ui05_storage_error_labels_survive_import_and_input_stays_recoverable(self):
@@ -216,7 +217,7 @@ class UI001(unittest.TestCase):
         self.assertEqual(self.calls(),before)
         self.download_work('ui001-rev1-suggestions-original.md')
         expect(self.page.locator('#stage-label')).to_have_text('작업문 내보냄')
-        self.page.locator('#edit-work > summary').click()
+        if not self.page.locator('#edit-work').evaluate('(e)=>e.open'):self.page.locator('#edit-work > summary').click() # WORK41: starts open
         for key,value in [('text','전달 전에 바뀐 문구와 범위를 확인하세요.'),('why','누락된 조건을 전달 전에 발견할 수 있습니다.')]:
             self.page.locator('#suggestion-0-'+key).fill(value)
             expect(self.page.locator('#stage-label')).to_have_text('내보낸 뒤 수정됨')

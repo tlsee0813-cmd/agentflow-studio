@@ -8,7 +8,8 @@ import { createProject, rename, setBrief, addArea, addChildArea, addRelation, ed
 import { parseProject, validateRequest, validateAdvice } from '../dist/public/shared/validation.js';
 import { mockAdvice } from '../dist/public/shared/mock.js';
 const out=process.argv[2];if(!out)throw new Error('out dir required');mkdirSync(out,{recursive:true});
-export const PREFIX='예약 화면에서 손님이 이미 잡은 예약을 바꾸거나 없애는 흐름의';
+// 60 characters, the area-name limit: the names differ only in their last word.
+export const PREFIX='예약 화면에서 손님이 휴대폰으로 이미 잡아 둔 예약을 직접 바꾸거나 없애는 흐름의 마지막 단계인';
 export const CHANGE=`${PREFIX} 예약 변경`,CANCEL=`${PREFIX} 예약 취소`;
 export const MANUAL='[합성41] 변경 가능 시간만 보여 주고, 취소 흐름은 건드리지 않는다.';
 export const DRAFT='[합성41 미전송] 알림 문자에 변경된 시간을 함께 적어 주세요.';
@@ -20,6 +21,7 @@ p=addArea(p,'예약','손님이 시술과 날짜·시간을 고르고 예약을 
 p=addArea(p,'알림','예약 확정·변경·취소를 문자로 알린다.');const notify=p.space.areas.at(-1).id;
 p=addChildArea(p,book,CHANGE,'이미 잡은 예약의 날짜·시간을 바꾼다.');const change=p.space.areas.at(-1).id;
 p=addChildArea(p,book,CANCEL,'이미 잡은 예약을 취소하고 자리를 비운다.');const cancel=p.space.areas.at(-1).id;
+p=addArea(p,'결제','예약금과 현장 결제를 나눠 받는다.');p=addArea(p,'후기','시술 뒤 손님이 짧은 후기를 남긴다.');
 p=addRelation(p,book,notify,'flow','예약이 바뀌면 알림을 보낸다.');
 p=submit(editDraft(p,'예약 변경 화면에서 바꿀 수 있는 시간만 고를 수 있게 해 주세요.'),undefined,change);
 const started=begin(p,p.currentTaskId),request=validateRequest(started.request);

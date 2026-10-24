@@ -2791,7 +2791,7 @@ body:not([data-route="projects"]) .sidebar-bottom{display:none}
   body[data-layer="space"] .map-toolbar .toolbar-disclosure{padding:4px 12px}
   body[data-layer="space"] .map-toolbar>button{min-height:32px;padding:4px 12px}
 }
-/* WORK41: a card's body selects the part (side panel); '열기' at its top-right goes one structure level in. Focus and selection
+/* WORK41: a card's body selects the part (side panel); '열기' at the end of its bottom row goes one structure level in. Focus and selection
    look different: selection is the accent border and tint, keyboard focus a dashed ring, so Tab never looks like a pick. */
 .area-node .node-select{display:flex;flex-direction:column;align-items:stretch;gap:1px;flex:1;min-height:0;overflow:hidden;text-align:left;
   background:none;border:0;border-radius:8px;padding:0;margin:0;color:inherit;font:inherit;cursor:pointer;min-width:0}
@@ -2800,8 +2800,8 @@ body:not([data-route="projects"]) .sidebar-bottom{display:none}
 .area-node:has(.node-select:focus-visible){outline:2px dashed #4a4766;outline-offset:3px}
 .area-node.selected .area-card-name{color:var(--accent-dark)}
 .area-node .node-select .area-card-note{overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
-.area-node .node-enter{position:absolute;right:8px;top:8px;display:inline-flex;align-items:center;flex:none;min-height:0;width:auto;
-  padding:3px 9px;margin:0;gap:0;border:1px solid var(--line);border-radius:8px;background:var(--paper);font-size:12px;line-height:1.4;color:var(--accent-dark);overflow:visible}
+.area-node .node-enter{position:static;margin-left:auto;display:inline-flex;align-items:center;flex:none;min-height:0;width:auto;
+  padding:2px 9px;gap:0;border:1px solid var(--line);border-radius:8px;background:var(--paper);font-size:12px;line-height:1.4;color:var(--accent-dark);overflow:visible}
 .area-node .node-enter:hover,.area-node .node-enter:focus-visible{border-color:var(--accent);background:var(--tint)}
 /* The selected part's panel: four labelled parts, quiet rules between them instead of stacked cards. */
 .area-panel .panel-section{padding:8px 0 10px;border-top:1px solid var(--line)}
@@ -2842,17 +2842,20 @@ body:not([data-route="projects"]) .sidebar-bottom{display:none}
 .outcome-home .outcome-heading h2{font-size:16px;margin:0}
 .outcome-home{padding:16px 22px;border-top-width:1px}
 .outcome-context>summary{font-size:13px;color:var(--accent-dark);cursor:pointer;padding:6px 0}
-/* WORK41 (Q13 B): text inside a card follows --read (1 at 100% and above, up to 1.45 when zoomed out); the card box, its
+/* WORK41 (Q13 B): text inside a card follows --read (1 at 100% and above, up to 1.6 when zoomed out); the card box, its
    position and the lines between cards do not. The name is never clamped; a long idea gives way first. */
 .area-node .area-card-name{font-size:calc(15px * var(--read,1));line-height:calc(18px * var(--read,1));-webkit-line-clamp:unset;display:block;overflow:visible;
-  padding-right:calc(44px * var(--read,1));overflow-wrap:anywhere;word-break:keep-all}
-.area-node .area-card-path{font-size:calc(11px * var(--read,1));line-height:calc(14px * var(--read,1));max-height:calc(14px * var(--read,1));padding-right:calc(44px * var(--read,1))}
+  padding-right:0;overflow-wrap:anywhere;word-break:keep-all}
+.area-node .area-card-path{font-size:calc(11px * var(--read,1));line-height:calc(14px * var(--read,1));max-height:calc(14px * var(--read,1));padding-right:0}
 .area-node .node-select .area-card-note{font-size:calc(12.5px * var(--read,1));line-height:calc(16px * var(--read,1));-webkit-line-clamp:3;flex-shrink:0}
-.area-node[data-note="short"] .node-select .area-card-note{-webkit-line-clamp:1}
+.area-node[data-note="2"] .node-select .area-card-note{-webkit-line-clamp:2}
+.area-node[data-note="1"] .node-select .area-card-note{-webkit-line-clamp:1}
 .area-node[data-note="hidden"] .node-select .area-card-note{display:none}
-.area-node .branch-signals{font-size:calc(11.5px * var(--read,1));line-height:calc(15px * var(--read,1))}
-.area-node .area-node-foot .tag,.area-node .area-node-foot .branch-toggle{font-size:calc(11px * var(--read,1))}
-.area-node .node-enter{font-size:calc(12px * var(--read,1))}
+.area-node .branch-signals{font-size:calc(12px * var(--read,1));line-height:calc(15px * var(--read,1))}
+/* The bottom row's controls grow less (they are labels, not the part's reading) so the row stays one line. */
+.area-node .area-node-foot{flex-wrap:nowrap}
+.area-node .area-node-foot .tag,.area-node .area-node-foot .branch-toggle{font-size:calc(11px * min(var(--read,1),1.25));white-space:nowrap}
+.area-node .node-enter{font-size:calc(12px * min(var(--read,1),1.25))}
 .map-read{font-size:11px;color:var(--accent-dark);background:var(--tint);border-radius:6px;padding:2px 6px;white-space:nowrap}
 .map-read[hidden]{display:none}
 .area-panel .panel-actions button{white-space:nowrap;flex:1 1 auto}
@@ -2863,3 +2866,47 @@ body[data-starting="true"] .compose-apart{display:none}
   body[data-compact="true"] .topbar{height:44px}
   body[data-compact="true"] #breadcrumb-project,body[data-compact="true"] #breadcrumb-sep{display:none}
 }
+.area-node .area-node-foot{width:calc(100% + 22px)}
+/* The work's title row: what state it is in, in one short block; the card below is where the work happens. */
+@media(min-width:761px){
+  body[data-compact="true"] #work-view .context-bar{padding:0 0 10px;margin-bottom:12px}
+  body[data-compact="true"] #work-view .context-top h1{font-size:18px;margin:0 0 2px}
+  body[data-compact="true"] #work-view .context-top p{font-size:12px;margin:0}
+  body[data-compact="true"] .work-place{margin-bottom:6px}
+  .work-place .origin-return{padding:5px 12px;font-size:12.5px;min-height:0}
+  .work-focus .work-reference-editor>summary{padding:4px 0}
+  .work-focus .work-source{padding:8px 12px}
+  .work-focus .work-source .task-source{margin-top:4px;padding:2px 0}
+}
+/* WORK41 fix: the selected part's own title is never clamped (a long name keeps its distinguishing end). */
+#area-panel-title{display:block;-webkit-line-clamp:unset;overflow:visible}
+/* WORK41 fix: continuing = a short header (state, place and the way back to the map), then the report in one line, the action
+   row and the editor; the part's idea and description follow the editor as reference context. */
+.work-source{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px}
+.work-source-line{flex:1 1 300px;min-width:0;margin:0;display:flex;gap:8px;align-items:baseline;white-space:nowrap;overflow:hidden}
+.work-source-meta{flex:none;font-size:12px;color:#7a6fae;font-weight:600}
+.work-source-lead{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13.5px;line-height:1.6;color:var(--ink)}
+.work-source .task-source{flex:none;margin:0;padding:0}
+.work-source .task-source>summary{font-size:12px;color:var(--accent-dark);white-space:nowrap}
+.work-source .task-source[open]{flex:1 1 100%;margin-top:8px}
+@media(min-width:761px){
+  #work-view:has(#work-place:not([hidden])) #context-sub{display:none}
+  body[data-compact="true"] #work-view .context-bar{display:flex;align-items:center;gap:10px;border-bottom:0;padding:0;margin:0 0 8px}
+  body[data-compact="true"] #work-view .context-top{flex:1;min-width:0}
+  body[data-compact="true"] #work-view .context-top h1{font-size:15.5px;line-height:1.4}
+  body[data-compact="true"] .feedback-stack .alert{font-size:12px;line-height:1.5;padding:6px 12px;margin-bottom:6px}
+  .work-place{flex-wrap:nowrap;min-width:0}
+  .work-place>*{flex:none}
+  .work-place>strong{flex:0 0 auto;max-width:40%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .work-place .origin-return{white-space:nowrap;flex:0 1 auto;min-width:8em;max-width:40%;overflow:hidden;text-overflow:ellipsis}
+  .work-focus{padding:12px 18px}
+  .work-focus .work-heading{margin-bottom:6px}
+  .work-focus .work-source{margin-bottom:8px}
+  .work-focus .next-actions{margin-bottom:4px}
+  .work-focus .work-actions button{padding:7px 14px;min-height:0}
+  .work-focus .edit-area>summary{margin:0}
+  .work-focus .work-edit-fields>label:first-child{margin-top:2px}
+  .work-focus #work-next{min-height:min(240px,calc(100vh - 470px))}
+}
+.work-place #place-area{max-width:26%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:0 1 auto;min-width:4em}
+.work-jumps-label{max-width:24em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

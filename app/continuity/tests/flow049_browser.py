@@ -100,10 +100,10 @@ class OutcomeHome(unittest.TestCase):
             self.page.locator('#outcome-home').scroll_into_view_if_needed()
             self.page.screenshot(path=str(base.OUT/f'fix051-direction-{width}.png'),full_page=True)
             self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),width)
-        self.page.locator('#outcome-correction > summary').click()
+        base.open_context(self.page);self.page.locator('#outcome-correction > summary').click()
         correction='예약 링크로 취소하되 만료 기간은 유지한다.'
-        self.page.locator('#outcome-correction-text').fill(correction)
-        self.page.locator('#correct-outcome').click()
+        base.open_context(self.page);self.page.locator('#outcome-correction-text').fill(correction)
+        base.open_context(self.page);self.page.locator('#correct-outcome').click()
         expect(self.page.locator('#outcome-direction')).to_contain_text(correction)
         backup=self.download('#backup','fix051-direction-backup.json')
         self.page.reload();expect(self.page.locator('#outcome-direction')).to_contain_text(correction)
@@ -121,7 +121,7 @@ class OutcomeHome(unittest.TestCase):
         for width in [1440,390]:
             self.page.set_viewport_size({'width':width,'height':900})
             expect(self.page.locator('#outcome-purpose')).to_have_text('나'*11000)
-            self.assertLess(self.page.locator('#outcome-purpose').bounding_box()['height'],120)
+            base.open_context(self.page);self.assertLess(self.page.locator('#outcome-purpose').bounding_box()['height'],120)
             self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),width)
             self.page.locator('#outcome-home').scroll_into_view_if_needed()
             self.page.screenshot(path=str(base.OUT/f'fix051-long-{width}.png'))
@@ -145,7 +145,7 @@ class OutcomeHome(unittest.TestCase):
         for width in [1440,390]:
             self.page.set_viewport_size({'width':width,'height':900})
             self.page.locator('#outcome-home').scroll_into_view_if_needed()
-            self.assertLess(self.page.locator('#outcome-direction p').bounding_box()['height'],120)
+            base.open_context(self.page);self.assertLess(self.page.locator('#outcome-direction p').bounding_box()['height'],120)
             self.page.screenshot(path=str(base.OUT/f'fix051-return-{width}.png'),full_page=True)
             self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),width)
         (base.OUT/'fix051-http-requests.json').write_bytes(json.dumps(calls,ensure_ascii=False,indent=2).encode('utf-8'))
@@ -172,7 +172,7 @@ class OutcomeHome(unittest.TestCase):
         expect(self.page.locator('#outcome-purpose')).to_have_text(a_text);expect(self.page.locator('#outcome-latest-request')).to_contain_text(b_text)
         self.page.locator('#retry-work').click();expect(self.page.locator('#working')).to_have_text('')
         self.assertEqual(calls[-1]['ticket']['taskId'],R);expect(self.page.locator('#intent-goal')).to_have_text(a_text)
-        self.assertNotIn(report,self.page.locator('#intent-goal').inner_text())
+        base.open_context(self.page);self.assertNotIn(report,self.page.locator('#intent-goal').inner_text())
         self.page.locator('#resume-latest').click();self.assertEqual(self.state()['currentTaskId'],B)
         expect(self.page.locator('#outcome-purpose')).to_have_text(b_text);expect(self.page.locator('#outcome-latest-request')).to_have_count(0)
 

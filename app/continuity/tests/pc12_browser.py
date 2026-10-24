@@ -250,7 +250,8 @@ class Pc12(unittest.TestCase):
         booking,notify=self.start([('예약','짧은 구상'),('알림','')]);A=self.request_in(booking,'A: 예약 접수 화면')
         long={'understanding':'짧은 이해 앞부분 '+'가'*230+' ZZ-REQ-U 필수: 연락처는 반드시 받는다',
               'scope':'범위 앞부분 '+'나'*230+' ZZ-REQ-S 유지: 결제 단계는 바꾸지 않는다'}
-        d=self.page.locator('#edit-work');d.locator('summary').first.click()
+        d=self.page.locator('#edit-work')
+        if not d.evaluate('(e)=>e.open'):d.locator('summary').first.click() # WORK41: the editor starts open
         for k,v in long.items():self.page.locator(f'#work-{k}').fill(v)
         base.saved(self.page);self.log('fixture via UI: A manual understanding/scope over 200 chars, marker after 200')
         R=self.paste_report('R 보고: 접수 화면을 만들었다고 주장');self.unsent_draft(notify,'보내지 않은 알림 초안')
