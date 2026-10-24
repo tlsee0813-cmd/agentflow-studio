@@ -2763,3 +2763,103 @@ html.source-review-open{overflow:hidden}
   .sr-side{border-right:0;border-bottom:1px solid var(--line)}
   .sr-head{padding:10px 16px}.sr-feedback{padding:0 16px}
 }
+
+/* WORK41: the project shell is one quiet line (name · place · save state, an example's short unsaved strip with its two
+   actions) so the map is the first thing on a PC screen. Management stays behind its menu; the purpose shares the path row. */
+.project-head .example-banner{display:flex;flex-wrap:nowrap;align-items:center;gap:6px 10px;margin:0;padding:4px 6px 4px 12px;min-width:0;
+  border:1px solid #cfc6f4;border-radius:10px;background:var(--tint);font-size:12.5px;line-height:1.4;flex:0 1 auto}
+.project-head .example-banner[hidden]{display:none}
+.project-head .example-banner strong{flex:none;color:var(--accent-dark);font-size:12px}
+.project-head .example-banner span{flex:0 1 auto;min-width:0;font-size:12.5px;color:var(--ink)}
+.project-head .example-banner button{flex:none;padding:5px 11px;font-size:12px;min-height:30px;white-space:nowrap}
+body[data-route="example"] #project-management{display:none}
+body[data-route="example"] .pencil{display:none}
+@media(max-width:900px){.project-head .example-banner{flex-wrap:wrap}.project-head{flex-wrap:wrap}}
+/* The sidebar keeps navigation; the slogan block was a second, long voice next to the work. */
+body:not([data-route="projects"]) .sidebar-bottom{display:none}
+@media(min-width:761px){
+  body[data-compact="true"] .project-head{margin-bottom:8px;gap:10px;min-height:38px}
+  body[data-compact="true"] .project-heading{flex:1 1 200px}
+  body[data-compact="true"] .project-name{font-size:17px;line-height:1.5}
+  body[data-compact="true"] .shell{padding-top:10px}
+  body[data-layer="space"] .project-head{margin-bottom:6px}
+  .overview-top{display:flex;align-items:center;gap:6px 12px;min-width:0;margin-bottom:6px;flex-wrap:wrap}
+  .overview-top>.space-crumb{margin:0;flex:none}
+  .overview-top>.space-head.overview-head{flex:1 1 360px;min-width:0;margin:0;padding:3px 10px}
+  body[data-layer="space"] .map-toolbar{margin:0 0 6px}
+  body[data-layer="space"] .map-toolbar h2{line-height:32px;font-size:15px}
+  body[data-layer="space"] .map-toolbar .toolbar-disclosure{padding:4px 12px}
+  body[data-layer="space"] .map-toolbar>button{min-height:32px;padding:4px 12px}
+}
+/* WORK41: a card's body selects the part (side panel); '열기' at its top-right goes one structure level in. Focus and selection
+   look different: selection is the accent border and tint, keyboard focus a dashed ring, so Tab never looks like a pick. */
+.area-node .node-select{display:flex;flex-direction:column;align-items:stretch;gap:1px;flex:1;min-height:0;overflow:hidden;text-align:left;
+  background:none;border:0;border-radius:8px;padding:0;margin:0;color:inherit;font:inherit;cursor:pointer;min-width:0}
+.area-node .node-select:hover .area-card-name{color:var(--accent-dark)}
+.area-node .node-select:focus-visible{outline:none}
+.area-node:has(.node-select:focus-visible){outline:2px dashed #4a4766;outline-offset:3px}
+.area-node.selected .area-card-name{color:var(--accent-dark)}
+.area-node .node-select .area-card-note{overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
+.area-node .node-enter{position:absolute;right:8px;top:8px;display:inline-flex;align-items:center;flex:none;min-height:0;width:auto;
+  padding:3px 9px;margin:0;gap:0;border:1px solid var(--line);border-radius:8px;background:var(--paper);font-size:12px;line-height:1.4;color:var(--accent-dark);overflow:visible}
+.area-node .node-enter:hover,.area-node .node-enter:focus-visible{border-color:var(--accent);background:var(--tint)}
+/* The selected part's panel: four labelled parts, quiet rules between them instead of stacked cards. */
+.area-panel .panel-section{padding:8px 0 10px;border-top:1px solid var(--line)}
+.area-panel .panel-section:first-child{border-top:0;padding-top:2px}
+.panel-section-title{margin:0 0 4px;font-size:11px;font-weight:650;letter-spacing:.04em;color:var(--muted)}
+.panel-section>.area-idea{margin:0}
+.panel-neighbours{list-style:none;margin:0;padding:0;display:grid;gap:3px}
+.panel-neighbours li{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 6px;min-width:0;font-size:12.5px}
+.panel-neighbours .hint{margin:0;font-size:11.5px}
+.panel-neighbour{padding:1px 6px;font-size:12.5px;min-height:0;text-align:left;white-space:normal;overflow-wrap:anywhere}
+.panel-continue-what{margin:0 0 4px;font-size:13px;overflow-wrap:anywhere}
+.panel-continue .tag{margin-bottom:4px}
+#panel-continue{margin-top:6px}
+
+/* WORK41: continuing a work = its place and title, then one card: the record it follows up (opening lines), the copy/save row
+   and the editor whose first field is the work text. The context below is one disclosure. */
+#work-view:has(#work-place:not([hidden])) #task-number{display:none}
+.work-focus{padding:18px 22px}
+.work-focus .work-heading{align-items:flex-start;margin-bottom:10px}
+.work-title{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;min-width:0}
+.work-title h2{font-size:17px;margin:0}
+.work-jumps{display:flex;flex-wrap:wrap;align-items:center;gap:2px 4px;font-size:12px}
+.work-jumps-label{color:var(--muted);margin-right:4px}
+.work-jumps button{font-size:12px;padding:2px 8px;min-height:0}
+.work-source{margin:0 0 12px;padding:10px 14px;border-left:3px solid #cfc6f4;background:#fbfaff;border-radius:0 10px 10px 0}
+.work-source>.source-meta{margin:0 0 4px}
+.work-source-lead{font-size:14px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink)}
+.work-source .task-source{margin:8px 0 0;padding:6px 10px;background:transparent;border:0}
+.work-source-end{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:10px;padding-top:8px;border-top:1px dashed var(--line)}
+.work-source-end .hint{margin:0}
+.work-focus .next-actions{margin:0 0 10px;gap:8px}
+.work-actions .tag{margin-left:auto}
+.work-focus .handoff-ready{padding:8px 12px}
+.work-focus .work-reference-editor{margin-top:4px}
+.work-focus .work-reference-editor>summary{font-size:13px;color:var(--muted)}
+.work-focus #work-next{font-size:14.5px;line-height:1.6;min-height:132px}
+.work-more{display:grid;gap:4px;margin-top:10px}
+.outcome-home .outcome-heading h2{font-size:16px;margin:0}
+.outcome-home{padding:16px 22px;border-top-width:1px}
+.outcome-context>summary{font-size:13px;color:var(--accent-dark);cursor:pointer;padding:6px 0}
+/* WORK41 (Q13 B): text inside a card follows --read (1 at 100% and above, up to 1.45 when zoomed out); the card box, its
+   position and the lines between cards do not. The name is never clamped; a long idea gives way first. */
+.area-node .area-card-name{font-size:calc(15px * var(--read,1));line-height:calc(18px * var(--read,1));-webkit-line-clamp:unset;display:block;overflow:visible;
+  padding-right:calc(44px * var(--read,1));overflow-wrap:anywhere;word-break:keep-all}
+.area-node .area-card-path{font-size:calc(11px * var(--read,1));line-height:calc(14px * var(--read,1));max-height:calc(14px * var(--read,1));padding-right:calc(44px * var(--read,1))}
+.area-node .node-select .area-card-note{font-size:calc(12.5px * var(--read,1));line-height:calc(16px * var(--read,1));-webkit-line-clamp:3;flex-shrink:0}
+.area-node[data-note="short"] .node-select .area-card-note{-webkit-line-clamp:1}
+.area-node[data-note="hidden"] .node-select .area-card-note{display:none}
+.area-node .branch-signals{font-size:calc(11.5px * var(--read,1));line-height:calc(15px * var(--read,1))}
+.area-node .area-node-foot .tag,.area-node .area-node-foot .branch-toggle{font-size:calc(11px * var(--read,1))}
+.area-node .node-enter{font-size:calc(12px * var(--read,1))}
+.map-read{font-size:11px;color:var(--accent-dark);background:var(--tint);border-radius:6px;padding:2px 6px;white-space:nowrap}
+.map-read[hidden]{display:none}
+.area-panel .panel-actions button{white-space:nowrap;flex:1 1 auto}
+.compose-apart{font-size:11px;color:var(--muted);margin-left:8px}
+body[data-starting="true"] .compose-apart{display:none}
+/* In a project the top bar is one short line on every PC layer; the project's name is in the head row below it. */
+@media(min-width:761px){
+  body[data-compact="true"] .topbar{height:44px}
+  body[data-compact="true"] #breadcrumb-project,body[data-compact="true"] #breadcrumb-sep{display:none}
+}
