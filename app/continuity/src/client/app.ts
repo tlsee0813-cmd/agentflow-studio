@@ -646,10 +646,10 @@ function composer(o: Opened, part: PartView): HTMLElement {
     code.addEventListener('input', keep); code.addEventListener('change', keep);
     box.append(h('div', { class: 'access' }, h('label', { for: 'access-code' }, '접속 코드'), code));
   }
+  if (!busy && !failed) quickButtons.append(h('button', { type: 'button', class: 'link-button fold', onclick: () => { composerOpen = false; if (!input.value.trim()) setDraft(o, part.id, ''); renderPanel(false); } }, '접기'));
   box.append(quickButtons,
     h('div', { class: 'ask-row' }, input, h('button', { type: 'button', class: 'primary send', disabled: busy, 'aria-label': '보내기', onclick: submitQuestion }, '보내기')),
-    h('p', { class: 'fine' }, `${status.model ?? 'DeepSeek'}가 이 부분과 안의 부분 기록만 읽고 정리해요 · 개발을 실행하지 않아요`,
-      !busy && !failed ? h('button', { type: 'button', class: 'link-button fold', onclick: () => { composerOpen = false; if (!input.value.trim()) setDraft(o, part.id, ''); renderPanel(false); } }, '접기') : null));
+    h('p', { class: 'fine' }, `${status.model ?? 'DeepSeek'}가 이 부분과 안의 부분 기록만 읽고 정리해요 · 개발을 실행하지 않아요`));
   return box;
 }
 let accessCodeMemory = '';
