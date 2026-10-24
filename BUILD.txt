@@ -1,4 +1,4 @@
-AgentFlow Studio 44
-source=c0a805cae72458e9ac22ff53ebc463b6dce6cd99
-CI=https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40079755042
+AgentFlow Studio45
+source=aae976d0357d18479a38acb75269b7a7f886fdd8
+ci=https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40087902257
 AI=https://agentflow-studio.tlsee0813.workers.dev

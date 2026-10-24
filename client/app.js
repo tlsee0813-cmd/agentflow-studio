@@ -2,8 +2,8 @@ import { FILE_LIMIT } from '../shared/types.js';
 import { WorkspaceStore, storageErrorCode } from '../shared/storage.js';
 import { parseProject } from '../shared/validation.js';
 import { editArea, addArea, addChildArea, createProject, rename } from '../shared/domain.js';
-import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, RECORD_LABEL } from '../shared/studio.js';
-import { EXAMPLES, buildExample } from '../shared/studio-examples.js';
+import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL } from '../shared/studio.js';
+import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
 import { layoutScope, edgePath, ROOT } from './map-layout.js';
 import { aiStatus, askStudio, AskError, ERROR_TEXT } from './studio-api.js';
 import { runtimeStorage } from './runtime.js';
@@ -64,6 +64,24 @@ let selected = null;
 let camera = { x: 0, y: 0, k: 1 };
 let ask = null;
 let editing = false;
+/** The question box opens on demand; it stays open while there is a draft, a request in flight or an error. */
+let composerOpen = false;
+let recentAll = false;
+/** Short note of what went to the AI when not everything fit (newest records first). null when everything went. */
+function coverageText(c) {
+    if (!c)
+        return null;
+    const out = [];
+    if (c.records.sent < c.records.total)
+        out.push(`기록 ${c.records.total}개 중 최신 ${c.records.sent}개`);
+    if (c.records.cut)
+        out.push(`${c.records.cut}개는 앞부분만`);
+    if (c.links.sent < c.links.total)
+        out.push(`연결 ${c.links.total}개 중 ${c.links.sent}개`);
+    if (c.children.sent < c.children.total)
+        out.push(`안의 부분 ${c.children.total}개 중 ${c.children.sent}개`);
+    return out.length ? `${out.join(' · ')}만 보냄` : null;
+}
 let recentOpen = window.innerWidth >= 1000;
 /** While a part is open the list folds to give the map room; the person's own choice comes back on close. */
 let recentPeek = false;
@@ -208,7 +226,19 @@ const cameras = new Map();
 const expandState = new Map();
 const camKey = (o, s) => `${o.project.id}|${s ?? ''}`;
 /** Direct children of the scope open as frames; deeper parts stay folded until opened. */
-const isExpanded = (o) => (id, depth) => expandState.get(`${o.project.id}|${id}`) ?? depth === 0;
+/** Unfolded only for the part being looked at (not the person's own fold choice). */
+const tempExpand = new Set();
+const isExpanded = (o) => (id, depth) => tempExpand.has(`${o.project.id}|${id}`) || (expandState.get(`${o.project.id}|${id}`) ?? depth === 0);
+/** Marks every part between the scope and this part (exclusive) as unfolded in the given set or map. */
+function expandPath(o, id, into) {
+    for (let p = partOf(o, partOf(o, id)?.parentId ?? null), g = 0; p && p.id !== scope && g < 64; p = partOf(o, p.parentId), g++) {
+        const k = `${o.project.id}|${p.id}`;
+        if (into instanceof Set)
+            into.add(k);
+        else
+            into.set(k, true);
+    }
+}
 const partOf = (o, id) => (id ? o.view.parts.find(p => p.id === id) ?? null : null);
 function insideScope(o, id) {
     if (!scope)
@@ -224,7 +254,9 @@ function route() {
     const d = (x) => (x ? decodeURIComponent(x) : null);
     return m ? { key: d(m[1]), scope: d(m[2]), part: d(m[3]) } : { key: null, scope: null, part: null };
 }
-const hashFor = (key, part, s) => key ? `#/p/${encodeURIComponent(key)}${s ? `/in/${encodeURIComponent(s)}` : ''}${part ? `/${encodeURIComponent(part)}` : ''}` : '#/';
+/** Addresses use an example's stable part keys, so a copied or reloaded link opens the same part of a freshly built example. */
+const addr = (key, id) => encodeURIComponent((opened?.key === key ? opened.alias?.toKey.get(id) : undefined) ?? id);
+const hashFor = (key, part, s) => key ? `#/p/${encodeURIComponent(key)}${s ? `/in/${addr(key, s)}` : ''}${part ? `/${addr(key, part)}` : ''}` : '#/';
 /** sc undefined = stay in the current scope of the same project. */
 const go = (key, part = null, sc) => {
     const hash = hashFor(key, part, sc !== undefined ? sc : key === opened?.key ? scope : null);
@@ -259,7 +291,12 @@ function projectFor(key) {
     }
     if (!project)
         return null;
-    return { key, kind, project, ref, view: studioView(project) };
+    let alias = null;
+    if (kind === 'example') {
+        const toId = exampleKeys(key.slice(3), project);
+        alias = { toId, toKey: new Map([...toId].map(([k, id]) => [id, k])) };
+    }
+    return { key, kind, project, ref, view: studioView(project), alias };
 }
 /* ---------- rendering ---------- */
 async function render() {
@@ -279,7 +316,8 @@ async function render() {
         return;
     }
     const fresh = opened?.key !== next.key;
-    const nextScope = r.scope && next.view.parts.some(p => p.id === r.scope && p.childIds.length) ? r.scope : null;
+    const idOf = (x) => (x ? next.alias?.toId.get(x) ?? x : null), routeScope = idOf(r.scope), routePart = idOf(r.part);
+    const nextScope = routeScope && next.view.parts.some(p => p.id === routeScope && p.childIds.length) ? routeScope : null;
     if (fresh || nextScope !== scope) {
         if (opened)
             cameras.set(camKey(opened, scope), { ...camera });
@@ -291,23 +329,29 @@ async function render() {
             ask = null;
             editing = false;
             partForm = null;
+            composerOpen = false;
         }
+        tempExpand.clear();
         renderSpace('restore');
     }
     const o = opened;
-    const part = r.part && o.view.parts.some(p => p.id === r.part) ? r.part : null;
+    const part = routePart && o.view.parts.some(p => p.id === routePart) ? routePart : null;
+    // Opening a folded part for reference unfolds its way down only while it is open; the person's own folds come back after.
+    const before = [...tempExpand].join('|');
+    tempExpand.clear();
+    relayout(o);
     if (part && part !== scope && !lay.boxes.has(part)) {
-        if (insideScope(o, part)) {
-            // Unfold the way down to it inside this scope rather than leaving the scope.
-            for (let p = partOf(o, partOf(o, part).parentId), g = 0; p && p.id !== scope && g < 64; p = partOf(o, p.parentId), g++)
-                expandState.set(`${o.project.id}|${p.id}`, true);
-            renderSpace('keep');
-        }
+        if (insideScope(o, part))
+            expandPath(o, part, tempExpand);
         else {
             location.replace(hashFor(o.key, part, partOf(o, part).parentId));
             return;
         }
     }
+    if ([...tempExpand].join('|') !== before)
+        renderSpace('keep');
+    else
+        relayout(o);
     select(part);
 }
 function setBar(o) {
@@ -387,10 +431,10 @@ function renderSpace(cameraMode = 'fit') {
     for (const e of lay.edges) {
         const g = svg('g', { class: `edge k-${e.kind}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
         g.append(svg('path', { 'marker-end': 'url(#arrow)' }));
+        // No text on the map: long notes crossed the nodes. The note is in the panel's 연결 list (and the line's title).
         if (e.notes.length) {
-            const t = svg('text', { 'text-anchor': 'middle' });
-            const n = e.notes[0];
-            t.textContent = `${n.length > 28 ? `${n.slice(0, 28)}…` : n}${e.notes.length > 1 ? ` 외 ${e.notes.length - 1}` : ''}`;
+            const t = svg('title', {});
+            t.textContent = e.notes.join('\n');
             g.append(t);
         }
         edges.append(g);
@@ -398,7 +442,7 @@ function renderSpace(cameraMode = 'fit') {
     world.append(edges);
     const enterButton = (p) => h('button', { type: 'button', class: 'enter', title: `‘${p.name}’ 안으로 들어가기`, 'aria-label': `${p.name} 안으로 들어가기`, onclick: () => go(o.key, null, p.id) }, `${p.childIds.length}`, h('span', { 'aria-hidden': 'true' }, '›'));
     const toggleButton = (p, open) => h('button', { type: 'button', class: 'toggle', title: open ? '접기' : '여기서 펼치기', 'aria-label': `${p.name} ${open ? '접기' : '펼치기'}`, 'aria-expanded': String(open),
-        onclick: () => { expandState.set(`${o.project.id}|${p.id}`, !open); renderSpace('keep'); if (selected)
+        onclick: () => { const k = `${o.project.id}|${p.id}`; expandState.set(k, !open); tempExpand.delete(k); renderSpace('keep'); if (selected)
             select(selected); } }, chevron(open));
     const keySelect = (id) => (e) => { const k = e.key; if ((k === 'Enter' || k === ' ') && e.target === e.currentTarget) {
         e.preventDefault();
@@ -414,13 +458,13 @@ function renderSpace(cameraMode = 'fit') {
         const p = partOf(o, b.id);
         if (b.kind === 'frame') {
             const latest = subtreeRecords(view, p.id)[0]?.at ?? null;
-            world.append(h('div', { class: `frame depth-${Math.min(b.depth, 2)}`, 'data-part': p.id, 'data-box': p.id }, h('div', { class: `frame-head s-${p.status}`, 'data-part': p.id, 'data-drag': p.id, role: 'button', tabindex: '0', title: p.name, onkeydown: keySelect(p.id) }, toggleButton(p, true), h('span', { class: 'frame-name' }, p.name), h('span', { class: 'frame-meta' }, recentAt(latest) ? h('i', { class: 'new-dot', title: '최근 기록' }) : null, latest ? ago(latest) : STATUS_LABEL[p.status]), enterButton(p))));
+            world.append(h('div', { class: `frame depth-${Math.min(b.depth, 2)}`, 'data-part': p.id, 'data-box': p.id }, h('div', { class: `frame-head s-${p.status}`, 'data-part': p.id, 'data-drag': p.id, role: 'button', tabindex: '0', title: p.name, onkeydown: keySelect(p.id) }, toggleButton(p, true), h('span', { class: 'frame-name' }, p.name), h('span', { class: 'frame-meta' }, recentAt(latest) ? h('i', { class: 'new-dot', title: '최근 기록' }) : null, latest ? ago(latest) : STATUS_SHORT[p.status]), enterButton(p))));
         }
         else {
             // A folded part reads its inside: latest record anywhere under it.
             const last = b.kids ? subtreeRecords(view, p.id)[0]?.at ?? null : p.lastAt;
             world.append(h('div', { class: `node s-${p.status}${recentAt(last) ? ' fresh' : ''}${b.kids ? ' has-kids' : ''}`, 'data-part': p.id, 'data-box': p.id, 'data-drag': p.id, role: 'button', tabindex: '0',
-                title: `${p.name}${p.note ? ` — ${p.note}` : ''}`, onkeydown: keySelect(p.id) }, b.kids ? toggleButton(p, false) : null, h('span', { class: 'node-text' }, h('span', { class: 'node-name' }, p.name), h('span', { class: 'node-meta' }, h('i', { class: 'dot', 'aria-hidden': 'true' }), STATUS_LABEL[p.status], last ? ` · ${ago(last)}` : '')), b.kids ? enterButton(p) : null));
+                title: `${p.name}${p.note ? ` — ${p.note}` : ''}`, onkeydown: keySelect(p.id) }, b.kids ? toggleButton(p, false) : null, h('span', { class: 'node-text' }, h('span', { class: 'node-name' }, p.name), h('span', { class: 'node-meta' }, h('i', { class: 'dot', 'aria-hidden': 'true' }), STATUS_SHORT[p.status], last ? ` · ${ago(last)}` : '')), b.kids ? enterButton(p) : null));
         }
     }
     positionWorld();
@@ -466,19 +510,14 @@ function positionWorld() {
         const a = lay.boxes.get(g.dataset.from), b = lay.boxes.get(g.dataset.to);
         if (!a || !b)
             return;
-        const { d, mx, my } = edgePath(a, b);
-        g.querySelector('path').setAttribute('d', d);
-        const t = g.querySelector('text');
-        if (t) {
-            t.setAttribute('x', String(mx));
-            t.setAttribute('y', String(my - 6));
-        }
+        g.querySelector('path').setAttribute('d', edgePath(a, b).d);
     });
 }
 function renderRecent() {
-    const o = opened, sp = partOf(o, scope), all = sp ? subtreeRecords(o.view, sp.id) : o.view.records, items = all.slice(0, 7);
-    $('recent-title').textContent = sp ? `최근 변화 · ${sp.name}` : '최근 변화';
-    $('recent-count').textContent = String(all.length);
+    const o = opened, sp = partOf(o, scope), all = sp ? subtreeRecords(o.view, sp.id) : o.view.records, LATEST = 7;
+    const items = recentAll ? all : all.slice(0, LATEST), partial = items.length < all.length;
+    $('recent-title').textContent = sp ? `최근 기록 · ${sp.name}` : '최근 기록';
+    $('recent-count').textContent = partial ? `최신 ${items.length} / ${all.length}` : String(all.length);
     $('recent').classList.toggle('collapsed', !recentShown());
     $('recent-toggle').setAttribute('aria-expanded', String(recentShown()));
     $('recent-list').replaceChildren(...items.map(r => {
@@ -487,7 +526,7 @@ function renderRecent() {
                 pendingRecord = r.id;
                 go(o.key, part.id);
             } } }, h('span', { class: 'ri-top' }, h('i', { class: `k-${r.kind}`, 'aria-hidden': 'true' }), h('strong', {}, part?.name ?? '부분 미지정'), h('span', { class: 'ri-kind' }, RECORD_LABEL[r.kind]), h('span', { class: 'ri-time' }, ago(r.at))), h('span', { class: 'ri-text' }, firstLine(r.text, 70))));
-    }));
+    }), ...(all.length > LATEST ? [h('li', { class: 'recent-more' }, h('button', { type: 'button', class: 'link-button', onclick: () => { recentAll = !recentAll; renderRecent(); } }, recentAll ? `최신 ${LATEST}개만 보기` : `전체 ${all.length}개 보기`))] : []));
 }
 /* ---------- camera ---------- */
 const ZOOM_MIN = 0.4, ZOOM_MAX = 1.6;
@@ -547,6 +586,7 @@ function select(partId) {
     const changed = selected !== partId;
     if (changed) {
         editing = false;
+        composerOpen = false;
         if (ask && !ask.controller)
             ask = null;
     }
@@ -610,7 +650,7 @@ function renderPanel(scrollTop) {
     const o = opened, part = o.view.parts.find(p => p.id === selected), panel = $('panel');
     const prevBody = panel.querySelector('.panel-body'), keep = scrollTop ? 0 : prevBody?.scrollTop ?? 0;
     const path = partPath(o.view, part.id).slice(0, -1), records = subtreeRecords(o.view, part.id);
-    const head = h('header', { class: 'panel-head' }, h('div', { class: 'panel-path' }, ...path.flatMap((x, i) => [h('a', { href: `#/p/${encodeURIComponent(o.key)}/${encodeURIComponent(x.id)}` }, x.name), h('span', { 'aria-hidden': 'true' }, '›')]), path.length ? null : h('span', {}, o.project.name)), h('h2', { id: 'panel-title', tabindex: '-1' }, part.name), h('div', { class: 'panel-chips' }, h('span', { class: `chip s-${part.status}` }, h('i', { class: 'dot' }), STATUS_LABEL[part.status]), records.length ? h('span', { class: 'chip plain' }, `기록 ${records.length}${records[0] ? ` · ${ago(records[0].at)}` : ''}`) : null, o.kind !== 'legacy' ? h('button', { type: 'button', class: 'chip-button', onclick: () => { editing = !editing; renderPanel(false); } }, editing ? '고치기 닫기' : '이름·설명 고치기') : null, o.kind === 'saved' ? h('button', { type: 'button', class: 'chip-button tight', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null, part.childIds.length && part.id !== scope ? h('button', { type: 'button', class: 'chip-button tight go-in', onclick: () => go(o.key, null, part.id) }, `안으로 들어가기 · ${part.childIds.length}`, h('span', { 'aria-hidden': 'true' }, ' ›')) : null), h('button', { type: 'button', class: 'close', 'aria-label': '닫고 지도로', title: '닫기 (Esc)', onclick: () => go(o.key) }, '×'));
+    const head = h('header', { class: 'panel-head' }, h('div', { class: 'panel-path' }, ...path.flatMap((x, i) => [h('a', { href: hashFor(o.key, x.id, scope) }, x.name), h('span', { 'aria-hidden': 'true' }, '›')]), path.length ? null : h('span', {}, o.project.name)), h('h2', { id: 'panel-title', tabindex: '-1' }, part.name), h('div', { class: 'panel-chips' }, h('span', { class: `chip s-${part.status}` }, h('i', { class: 'dot' }), STATUS_LABEL[part.status]), records.length ? h('span', { class: 'chip plain' }, `기록 ${records.length}${records[0] ? ` · ${ago(records[0].at)}` : ''}`) : null, o.kind !== 'legacy' ? h('button', { type: 'button', class: 'chip-button', onclick: () => { editing = !editing; renderPanel(false); } }, editing ? '고치기 닫기' : '이름·설명 고치기') : null, o.kind === 'saved' ? h('button', { type: 'button', class: 'chip-button tight', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null, part.childIds.length && part.id !== scope ? h('button', { type: 'button', class: 'chip-button tight go-in', onclick: () => go(o.key, null, part.id) }, `안으로 들어가기 · ${part.childIds.length}`, h('span', { 'aria-hidden': 'true' }, ' ›')) : null), h('button', { type: 'button', class: 'close', 'aria-label': '닫고 지도로', title: '닫기 (Esc)', onclick: () => go(o.key) }, '×'));
     const body = h('div', { class: 'panel-body' });
     if (editing)
         body.append(editForm(o, part));
@@ -622,7 +662,7 @@ function renderPanel(scrollTop) {
             now.append(h('div', { class: 'proposal' }, h('strong', {}, '제안 · 아직 반영 안 됨'), h('span', {}, part.proposal)));
     }
     else if (records.length) {
-        put(now, h('p', { class: 'summary muted' }, part.childIds.length ? '이 부분 자체에 대한 정리는 아직 없어요. 안의 부분과 기록을 보세요.' : '요청은 전달됐고 아직 돌아온 작업 보고가 없어요.'), part.note ? h('p', { class: 'note' }, h('span', {}, '계획'), part.note) : null);
+        put(now, h('p', { class: 'summary muted' }, part.childIds.length ? '이 부분 자체에 대한 정리는 아직 없어요. 안의 부분과 기록을 보세요.' : '요청 기록은 있고, 아직 받은 작업 보고는 없어요.'), part.note ? h('p', { class: 'note' }, h('span', {}, '계획'), part.note) : null);
     }
     else {
         put(now, h('p', { class: 'summary muted' }, '아직 이 부분에 연결된 기록이 없어요.'), part.note ? h('p', { class: 'note' }, h('span', {}, '계획'), part.note) : null);
@@ -635,13 +675,13 @@ function renderPanel(scrollTop) {
     if (part.childIds.length)
         body.append(h('section', { class: 'sec' }, h('h3', {}, '안의 부분'), h('div', { class: 'kids' }, ...part.childIds.map(id => {
             const c = o.view.parts.find(x => x.id === id);
-            return h('a', { class: `kid s-${c.status}`, href: `#/p/${encodeURIComponent(o.key)}/${encodeURIComponent(id)}` }, h('i', { class: 'dot' }), h('span', {}, c.name), h('small', {}, c.lastAt ? ago(c.lastAt) : STATUS_LABEL[c.status]));
+            return h('a', { class: `kid s-${c.status}`, href: hashFor(o.key, id, scope) }, h('i', { class: 'dot' }), h('span', {}, c.name), h('small', {}, c.lastAt ? ago(c.lastAt) : STATUS_SHORT[c.status]));
         }))));
     const links = o.view.relations.filter(r => r.from === part.id || r.to === part.id);
     if (links.length)
         body.append(h('section', { class: 'sec' }, h('h3', {}, '연결'), h('ul', { class: 'links' }, ...links.map(r => {
             const out = r.from === part.id, other = o.view.parts.find(x => x.id === (out ? r.to : r.from));
-            return h('li', {}, h('a', { href: `#/p/${encodeURIComponent(o.key)}/${encodeURIComponent(other.id)}` }, h('span', { class: 'dir' }, out ? '→' : '←'), h('strong', {}, other.name)), r.note ? h('span', { class: 'link-note' }, r.note) : null);
+            return h('li', {}, h('a', { href: hashFor(o.key, other.id, scope) }, h('span', { class: 'dir' }, out ? '→' : '←'), h('strong', {}, other.name)), r.note ? h('span', { class: 'link-note' }, r.note) : null);
         }))));
     if (records.length) {
         const showAll = records.length <= 5, list = h('ol', { class: 'records' }, ...records.slice(0, showAll ? records.length : 4).map(r => recordItem(o, r, r.partId !== part.id)));
@@ -657,7 +697,7 @@ function renderPanel(scrollTop) {
             sec.append(answerCard(o, a));
         if (ask && ask.partId === part.id)
             sec.append(ask.controller
-                ? h('div', { class: 'pending' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), h('span', {}, `${status.model ?? 'DeepSeek'}가 기록을 읽고 정리하고 있어요…`), h('button', { type: 'button', class: 'link-button', onclick: () => ask?.controller?.abort() }, '취소'))
+                ? h('div', { class: 'pending' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), h('span', {}, `${status.model ?? 'DeepSeek'}가 기록을 읽고 정리하고 있어요…`, coverageText(ask.coverage) ? h('small', { class: 'scope-note' }, coverageText(ask.coverage)) : null), h('button', { type: 'button', class: 'link-button', onclick: () => ask?.controller?.abort() }, '취소'))
                 : h('div', { class: 'failed', role: 'alert' }, h('span', {}, ask.error ?? '응답을 받지 못했어요.'), h('button', { type: 'button', class: 'secondary small', onclick: () => send(ask.intent, ask.question) }, '다시 시도'), h('button', { type: 'button', class: 'link-button', onclick: () => { ask = null; renderPanel(false); } }, '닫기')));
         body.append(sec);
     }
@@ -715,6 +755,7 @@ function renderPartForm() {
                 msg.textContent = failed;
                 return;
             }
+            expandPath(o, id, expandState); // made here on purpose: keep its parent open
             partForm = null;
             renderPartForm();
             renderSpace('keep');
@@ -763,7 +804,7 @@ function answerCard(o, a) {
     const cited = a.reply.refs.map(ref => a.refs[ref]).filter((x) => !!x);
     const records = cited.map(id => o.view.records.find(r => r.id === id)).filter((r) => !!r);
     const partsCited = new Set(records.map(r => r.partId).filter((x) => !!x));
-    return h('article', { class: 'answer' }, h('p', { class: 'ans-ask' }, h('span', {}, label), h('small', {}, `${ago(a.at)} · ${a.model}`)), lead, records.length ? h('div', { class: 'ans-refs' }, h('span', {}, '근거'), ...records.map(r => {
+    return h('article', { class: 'answer' }, h('p', { class: 'ans-ask' }, h('span', {}, label), h('small', {}, `${ago(a.at)} · ${a.model}`)), coverageText(a.coverage) ? h('p', { class: 'ans-scope' }, coverageText(a.coverage)) : null, lead, records.length ? h('div', { class: 'ans-refs' }, h('span', {}, '근거'), ...records.map(r => {
         const pn = r.partId ? o.view.parts.find(x => x.id === r.partId)?.name : null;
         return h('button', { type: 'button', class: 'ref', title: firstLine(r.text, 120), onclick: () => openRecord(r.id) }, `${RECORD_LABEL[r.kind]}${pn ? ` · ${pn}` : ''} · ${ago(r.at)}`);
     }), partsCited.size ? h('button', { type: 'button', class: 'link-button', onclick: () => highlightParts(partsCited) }, '지도에서 보기') : null) : null, rest.length ? h('details', { class: 'ans-more' }, h('summary', {}, a.intent === 'question' ? '정리 상세' : '나머지 정리'), ...rest.map(([t, items]) => block(t, items))) : null);
@@ -776,9 +817,19 @@ function composer(o, part) {
             : 'AI 서버에 연결되지 않은 페이지예요. 지도와 기록은 그대로 볼 수 있고, 정리 요청은 서버가 연결된 주소에서 쓸 수 있어요.'));
         return box;
     }
-    const busy = !!ask?.controller;
+    const busy = !!ask?.controller, failed = !!ask && ask.partId === part.id && !ask.controller, draft = getDraft(o, part.id);
+    const needsCode = () => status.access === 'code' && !sessionCode(); // read at click time: the code may just have been typed
+    const openBox = () => { composerOpen = true; renderPanel(false); document.getElementById(needsCode() ? 'access-code' : 'ask-input')?.focus(); };
+    const quick = (intent) => () => (needsCode() ? openBox() : send(intent, null));
+    const quickButtons = h('div', { class: 'quick' }, h('button', { type: 'button', class: 'secondary small', disabled: busy, onclick: quick('summary') }, '지금 상황 정리'), h('button', { type: 'button', class: 'secondary small', disabled: busy, onclick: quick('next') }, '다음에 판단할 것'));
+    // Reading first: a small entry. The full box opens on demand and stays while there is a draft, a request or an error.
+    if (!composerOpen && !busy && !failed && !draft.trim()) {
+        box.classList.add('compact');
+        box.append(h('div', { class: 'ask-entry' }, h('button', { type: 'button', class: 'ask-open', 'aria-label': `‘${part.name}’에 대해 질문하기`, onclick: openBox }, `‘${part.name}’에 묻기…`), quickButtons));
+        return box;
+    }
     const input = h('textarea', { id: 'ask-input', rows: '2', maxlength: '1000', placeholder: `‘${part.name}’에 대해 물어보세요`, disabled: busy });
-    input.value = getDraft(o, part.id);
+    input.value = draft;
     input.addEventListener('input', () => setDraft(o, part.id, input.value));
     input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
         e.preventDefault();
@@ -789,13 +840,19 @@ function composer(o, part) {
     } };
     if (status.access === 'code') {
         const code = h('input', { id: 'access-code', type: 'password', placeholder: '접속 코드', autocomplete: 'off', value: sessionCode() });
-        code.addEventListener('change', () => { try {
+        // input (not only change): typing, paste and autofill are all kept.
+        const keep = () => { try {
             sessionStorage.setItem('agentflow.studio.access', code.value);
         }
-        catch { /* memory only */ } accessCodeMemory = code.value; });
+        catch { /* memory only */ } accessCodeMemory = code.value; };
+        code.addEventListener('input', keep);
+        code.addEventListener('change', keep);
         box.append(h('div', { class: 'access' }, h('label', { for: 'access-code' }, '접속 코드'), code));
     }
-    box.append(h('div', { class: 'quick' }, h('button', { type: 'button', class: 'secondary small', disabled: busy, onclick: () => send('summary', null) }, '지금 상황 정리'), h('button', { type: 'button', class: 'secondary small', disabled: busy, onclick: () => send('next', null) }, '다음에 판단할 것')), h('div', { class: 'ask-row' }, input, h('button', { type: 'button', class: 'primary send', disabled: busy, 'aria-label': '보내기', onclick: submitQuestion }, '보내기')), h('p', { class: 'fine' }, `${status.model ?? 'DeepSeek'}가 이 부분과 안의 부분 기록만 읽고 정리해요 · 개발을 실행하지 않아요`));
+    if (!busy && !failed)
+        quickButtons.append(h('button', { type: 'button', class: 'link-button fold', onclick: () => { composerOpen = false; if (!input.value.trim())
+                setDraft(o, part.id, ''); renderPanel(false); } }, '접기'));
+    box.append(quickButtons, h('div', { class: 'ask-row' }, input, h('button', { type: 'button', class: 'primary send', disabled: busy, 'aria-label': '보내기', onclick: submitQuestion }, '보내기')), h('p', { class: 'fine' }, `${status.model ?? 'DeepSeek'}가 이 부분과 안의 부분 기록만 읽고 정리해요 · 개발을 실행하지 않아요`));
     return box;
 }
 let accessCodeMemory = '';
@@ -809,21 +866,23 @@ async function send(intent, question) {
     const o = opened, partId = selected;
     if (!o || !partId || ask?.controller)
         return;
-    const { ask: payload, refs } = buildAsk(o.project, o.view, partId, intent, question);
+    const { ask: payload, refs, coverage } = buildAsk(o.project, o.view, partId, intent, question);
     const controller = new AbortController();
-    ask = { partId, intent, question, controller, error: null };
+    ask = { partId, intent, question, controller, error: null, coverage };
+    if (intent === 'question')
+        composerOpen = true; // asked from the box: keep it open for a follow-up
     renderPanel(false);
     scrollThread();
     try {
         const res = await askStudio(payload, controller.signal, sessionCode());
-        addAnswer(o, partId, { at: new Date().toISOString(), intent, question, model: res.model, reply: res.reply, refs: Object.fromEntries(refs) });
+        addAnswer(o, partId, { at: new Date().toISOString(), intent, question, model: res.model, reply: res.reply, refs: Object.fromEntries(refs), coverage });
         ask = null;
         if (intent === 'question')
             setDraft(o, partId, '');
     }
     catch (e) {
         const code = e instanceof AskError ? e.code : 'REQUEST_FAILED';
-        ask = code === 'CANCELLED' ? null : { partId, intent, question, controller: null, error: ERROR_TEXT[code] ?? `응답을 받지 못했어요 (${code}).` };
+        ask = code === 'CANCELLED' ? null : { partId, intent, question, controller: null, error: ERROR_TEXT[code] ?? `응답을 받지 못했어요 (${code}).`, coverage };
     }
     if (opened === o && selected === partId) {
         renderPanel(false);
