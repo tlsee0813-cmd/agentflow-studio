@@ -57,6 +57,8 @@ class Viewport30(unittest.TestCase):
         self.assertFalse(self.map_before['listOpen'],'six-part closed-list condition; no later default-open repair')
         self.page.locator('#nav-work').click()
         if not self.page.locator('#edit-work').evaluate('e=>e.open'):self.page.locator('#edit-work > summary').click()
+        # WORK41: the goal/request/conditions/reports that made the work page deep are one disclosure now; the user opens it.
+        base.open_context(self.page)
         self.before=self.state()
         self.record('preparation','existing camera/fold and unchanged saved input',{'map':self.map_before,'project':self.before})
     def tearDown(self):

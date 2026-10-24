@@ -1139,7 +1139,8 @@ function renderWork(t:Task|null) {
   const preview=details('실제로 전달할 전체 문맥 보기','handoff-preview');const txt=node('textarea');txt.id='handoff-text';txt.readOnly=true;txt.rows=14;txt.className='export-preview';
   try{txt.value=handoffText(project,t.id);}catch{txt.value='문맥 크기 또는 데이터 오류로 자동 인계를 만들지 못했습니다. 복구 파일로 원문을 보존하세요.';}
   preview.append(node('p','관련 입력 + 직전 작업 + 모든 보존 기준. AI가 관련으로 고르지 않은 기준도 뒤에 남습니다.','hint'),txt);
-  more.append(backgroundPreview(t),preview,fileOptions);card.append(more);area.append(card);
+  // The optional file-return choice stays a folded line in the action row, as on the first prepared screen before (BLANK21).
+  actions.append(fileOptions);more.append(backgroundPreview(t),preview);card.append(more);area.append(card);
 }
 /** FLOW091-C: which plan copy goes out with this task. Fixed at the request; later plan edits are not applied to it. */
 /** PC12: the task reading screen shows the same copy under its own id (id); only the work card keeps its open state across views. */

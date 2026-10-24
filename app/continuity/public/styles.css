@@ -2906,7 +2906,8 @@ body[data-starting="true"] .compose-apart{display:none}
   .work-focus .work-actions button{padding:7px 14px;min-height:0}
   .work-focus .edit-area>summary{margin:0}
   .work-focus .work-edit-fields>label:first-child{margin-top:2px}
-  .work-focus #work-next{min-height:min(240px,calc(100vh - 470px))}
+  .work-focus #work-next{height:clamp(160px,calc(100vh - 400px),300px);min-height:160px}
+  .work-focus .next-actions>.file-return-options{margin:0;padding:2px 0 0;border-top:0}
 }
 .work-place #place-area{max-width:26%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:0 1 auto;min-width:4em}
 .work-jumps-label{max-width:24em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
