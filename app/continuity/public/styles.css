@@ -567,10 +567,13 @@ body[data-layer="space"] .space-start,body[data-layer="space"] .received-areas,b
 .area-panel .panel-section:first-child {border-top:0}
 .panel-section-title {margin:0 0 6px;font-size:12px;line-height:18px;font-weight:600;color:var(--text-3);letter-spacing:0}
 .panel-continue {display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.panel-continue-head {display:flex;flex-wrap:wrap;align-items:center;gap:4px var(--s2)}
 .panel-continue-what {margin:0;font-size:15px;line-height:22px;font-weight:600;color:var(--text);overflow-wrap:anywhere}
 .panel-continue-gist {margin:0;font-size:14px;line-height:22px;color:var(--text-2)}
 .panel-continue .hint {margin:0;font-size:13px;line-height:20px}
-#panel-continue-target {font-size:13px;line-height:20px;color:var(--text-3)}
+#panel-continue-target {margin:2px 0 0}
+#panel-continue-target>summary {padding:2px 0;font-size:13px;line-height:20px;font-weight:500;color:var(--text-2)}
+#panel-continue-target>p {margin:4px 0 0 18px;font-size:13px;line-height:20px}
 .panel-section>.area-idea {margin:0}
 .panel-neighbours {list-style:none;margin:0;padding:0;display:grid;gap:2px}
 .panel-neighbours li {display:flex;flex-wrap:wrap;align-items:baseline;gap:0 6px;min-width:0;font-size:13px;line-height:20px}
@@ -781,11 +784,13 @@ body[data-compact="true"] #work-view .context-top h1 {font-size:14px;line-height
 /* One tool row: copy, save, re-organise, read the whole text, and the folded file-result option; the author label at its end. */
 .next-actions {display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2) var(--s3);margin:0 0 var(--s3)}
 .next-actions>.actions {display:flex;flex-wrap:wrap;gap:var(--s2);align-items:center}
-.work-actions {flex:1 1 auto;min-width:0}
-.work-actions .tag {margin-left:auto}
-.work-focus .next-actions>.file-return-options {order:2;flex:none;margin:0;padding:0;border:0}
-.work-focus .next-actions>.file-return-options>summary {padding:5px 0;color:var(--text-3)}
-.work-focus .next-actions>.file-return-options[open] {flex-basis:100%;padding:var(--s3);border:1px solid var(--border);border-radius:var(--r-control);background:var(--surface-subtle)}
+.work-actions {flex:none}
+/* Secondary tools: one quiet group after a divider (re-organise, read the whole text, the optional file result). */
+.work-tools {display:flex;flex-wrap:wrap;align-items:center;gap:2px var(--s1);flex:1 1 auto;min-width:0;padding-left:var(--s3);border-left:1px solid var(--border)}
+.work-tools>button {min-height:var(--h-md);padding:5px 8px;color:var(--text-3)}
+.work-tools>.file-return-options {flex:none;margin:0;padding:0 0 0 4px;border:0}
+.work-tools>.file-return-options>summary {padding:5px 4px;color:var(--text-3)}
+.work-tools>.file-return-options[open] {flex-basis:100%;margin-top:var(--s2);padding:var(--s3);border:1px solid var(--border);border-radius:var(--r-control);background:var(--surface-subtle)}
 .next-actions .handoff-ready {order:3;flex-basis:100%;margin:0}
 .handoff-ready {display:flex;justify-content:space-between;align-items:center;gap:var(--s4);padding:var(--s3) 14px;margin:0 0 var(--s4);border:1px solid var(--primary-tint-2);border-radius:var(--r-control);background:var(--primary-tint)}
 .handoff-ready strong {display:block;font-size:14px;line-height:22px;color:var(--text)}
@@ -799,6 +804,9 @@ body[data-compact="true"] #work-view .context-top h1 {font-size:14px;line-height
 .work-edit-fields,.work-reference {min-width:0;max-width:100%}
 .work-edit-fields>label {margin:var(--s4) 0 6px;font-size:14px;line-height:22px;font-weight:600;color:var(--text)}
 .work-edit-fields>label:first-child {margin-top:var(--s1)}
+/* The work text's label carries who wrote the text (provenance next to what it describes). */
+.work-field-head {display:flex;align-items:center;justify-content:space-between;gap:var(--s2);margin:var(--s1) 0 6px}
+.work-field-head>label {margin:0;font-size:14px;line-height:22px;font-weight:600;color:var(--text)}
 .work-edit-fields>textarea {font-size:14px;line-height:22px;padding:8px 12px}
 .work-focus #work-next {font-size:15px;line-height:24px;padding:12px 14px;field-sizing:content;min-height:clamp(160px,calc(100vh - 416px),208px);max-height:min(62vh,560px);resize:vertical}
 .work-edit-fields>.hint {margin:var(--s4) 0 0;font-size:12px;line-height:18px}
@@ -815,6 +823,8 @@ body[data-compact="true"] #work-view .context-top h1 {font-size:14px;line-height
   .work-edit-layout:has(>.work-reference[open]) {display:grid;grid-template-columns:minmax(360px,1fr) minmax(260px,.72fr);align-items:start}
   .work-edit-layout:has(>.work-reference[open])>.work-edit-fields {grid-column:1;grid-row:1}
   .work-edit-layout:has(>.work-reference[open])>.work-reference {grid-column:2;grid-row:1;position:sticky;top:12px}
+  /* Reading the reference beside the editor: the work text keeps the reader's height, so both are read and written together. */
+  .work-focus .work-edit-layout:has(>.work-reference[open]) #work-next {min-height:clamp(240px,calc(100vh - 400px),320px)}
 }
 .suggestion {padding:var(--s3) 0;border-bottom:1px solid var(--divider)}
 .suggestion label {font-size:13px}
@@ -1030,6 +1040,11 @@ html.source-review-open {overflow:hidden}
   .topbar {flex-wrap:wrap}
   .project-head {flex-wrap:wrap;flex-basis:100%;order:3}
   .project-tools {flex:1 1 auto;flex-wrap:wrap;margin-left:0}
+  /* Narrow screens: the example group may wrap inside the header width; its help opens from the group's left edge. */
+  .project-name {max-width:100%}
+  .example-banner {flex:0 1 auto;flex-wrap:wrap;max-width:100%;position:relative}
+  .example-help {position:static}
+  .example-help>p {width:min(280px,calc(100vw - 32px))}
 }
 @media(max-width:800px){
   .app-shell {display:block}

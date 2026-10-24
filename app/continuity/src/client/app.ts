@@ -1123,11 +1123,14 @@ function renderWork(t:Task|null) {
   const actions=node('div','','next-actions');actions.id='next-actions';
   const row=node('div','','actions work-actions');
   const retry=btn('이 입력 다시 정리',()=>{void generate(t.id);},'quiet','retry-work');retry.dataset.aiAction='true';
-  row.append(btn('작업문 복사',()=>{void exportWork(t.id,'clipboard');},'primary','copy-work'),btn('Markdown 저장',()=>{void exportWork(t.id,'download');},'secondary','download-work'),retry,
-    btn('전달할 작업문 전체 보기',()=>{const d=$<HTMLDetailsElement>('handoff-preview');d.open=true;d.scrollIntoView({block:'nearest'});$('handoff-text').focus({preventScroll:true});},'quiet','next-preview'));
+  // VISUAL42: copy/save are the principal group; re-organising, reading the whole text and the file-result option are a
+  // separate quiet group; who wrote the text sits beside the text's own label below.
+  row.append(btn('작업문 복사',()=>{void exportWork(t.id,'clipboard');},'primary','copy-work'),btn('Markdown 저장',()=>{void exportWork(t.id,'download');},'secondary','download-work'));
   if(questionApplicability(project,t)==='active')row.prepend(btn('질문에 답하기',()=>{$('question-box').scrollIntoView({block:'center'});$('answer-draft')?.focus({preventScroll:true});},'primary','next-answer'));
-  const author=tag(workAuthor(t,v.next));author.id='instruction-author';row.append(author);
-  actions.append(row);
+  const tools=node('div','','work-tools');tools.setAttribute('role','group');tools.setAttribute('aria-label','작업문 보조 행동');
+  tools.append(retry,btn('전달할 작업문 전체 보기',()=>{const d=$<HTMLDetailsElement>('handoff-preview');d.open=true;d.scrollIntoView({block:'nearest'});$('handoff-text').focus({preventScroll:true});},'quiet','next-preview'));
+  const author=tag(workAuthor(t,v.next));author.id='instruction-author';
+  actions.append(row,tools);
   const next=node('div','','handoff-ready');next.id='handoff-ready';
   const exported=t.handoffs.at(-1),nextText=node('div');nextText.append(node('strong','작업 결과를 받으셨나요?'),node('p',exported?`${dateLabel(exported.at)} · ${exported.method==='clipboard'?'복사':'파일 저장'} 기록이 있어요. 개발 도구에 전달됐는지, 실행됐는지는 이 앱이 알 수 없어요.`:'작업문을 전달한 도구에서 받은 내용을 그대로 가져오세요.'));
   next.append(nextText,btn('결과 붙여넣기',()=>openComposer('report'),'primary','bring-report'));actions.append(next);
@@ -1136,11 +1139,12 @@ function renderWork(t:Task|null) {
   const layout=node('div','','work-edit-layout'),fields=node('div','','work-edit-fields');fields.id='work-edit-fields';fields.dataset.taskId=t.id;
   layout.append(fields,workReferenceReader(t));edit.append(layout);
   for(const [key,label] of [['next','실행 도구에 전달할 작업문'],['scope','이번 범위와 유지할 것'],['checks','확인할 동작 / 완료 조건'],['understanding','짧은 이해']] as const) {
-    const l=node('label',label);l.htmlFor=`work-${key}`;const field=node('textarea');field.id=`work-${key}`;field.rows=key==='next'?9:2;field.maxLength=6000;field.value=v[key];
+    const l=node('label',label);l.htmlFor=`work-${key}`;const field=node('textarea');
+    const head=key==='next'?node('div','','work-field-head'):null;if(head)head.append(l,author);field.id=`work-${key}`;field.rows=key==='next'?9:2;field.maxLength=6000;field.value=v[key];
     if(key==='next')field.placeholder='원문과 현재 기준은 전체 인계 문맥에 들어가요. 실행 도구가 할 일을 여기에 직접 적을 수 있어요.';
     field.addEventListener('input',()=>guard(()=>{commit(editTask(project,t.id,key,field.value),false);const marker=$(`manual-${key}`);marker.textContent='직접 수정 · AI가 덮어쓰지 않음';refreshPreview();}));
     const old=t.manual[key]===null&&w.aiStale?t.advice?.[key]??'':'';
-    const marker=node('p',t.manual[key]!==null?'직접 수정 · AI가 덮어쓰지 않음':old?'이전 AI 문구는 작업문에서 제외됨 · 직접 쓰면 그대로 들어갑니다':'제안 · 실제 실행 결과 아님','manual-note');marker.id=`manual-${key}`;fields.append(l,field,marker);
+    const marker=node('p',t.manual[key]!==null?'직접 수정 · AI가 덮어쓰지 않음':old?'이전 AI 문구는 작업문에서 제외됨 · 직접 쓰면 그대로 들어갑니다':'제안 · 실제 실행 결과 아님','manual-note');marker.id=`manual-${key}`;fields.append(head??l,field,marker);
     if(old){const d=details('제외된 이전 AI 문구 보기 (현재 작업문 아님)',`stale-${key}`);d.append(node('div',old,'source-raw'),btn('이 문구로 시작해 직접 고치기',()=>commit(editTask(project,t.id,key,old)),'quiet',`stale-use-${key}`));fields.append(d);}
   }
   const suggestions=taskSuggestions(t);
@@ -1161,7 +1165,7 @@ function renderWork(t:Task|null) {
   try{txt.value=handoffText(project,t.id);}catch{txt.value='문맥 크기 또는 데이터 오류로 자동 인계를 만들지 못했습니다. 복구 파일로 원문을 보존하세요.';}
   preview.append(node('p','관련 입력 + 직전 작업 + 모든 보존 기준. AI가 관련으로 고르지 않은 기준도 뒤에 남습니다.','hint'),txt);
   // The optional file-return choice stays a folded line in the action row, as on the first prepared screen before (BLANK21).
-  actions.append(fileOptions);more.append(backgroundPreview(t),preview);card.append(more);area.append(card);
+  tools.append(fileOptions);more.append(backgroundPreview(t),preview);card.append(more);area.append(card);
 }
 /** FLOW091-C: which plan copy goes out with this task. Fixed at the request; later plan edits are not applied to it. */
 /** PC12: the task reading screen shows the same copy under its own id (id); only the work card keeps its open state across views. */
@@ -2113,8 +2117,13 @@ function areaPanel(a:Area):HTMLElement {
     const gist=node('p',next?shortText(next,90):'작업문은 아직 비어 있어요. 이어가서 직접 쓸 수 있어요.',next?'panel-continue-gist':'hint');gist.id='panel-continue-gist';
     // Same rule as continueTarget: a current report of this request stays the edited record; the request's own text stays.
     const edited=`작업 ${pad(project.tasks.indexOf(curTask)+1)}`,own=`작업 ${pad(project.tasks.indexOf(cur)+1)}`;
-    const why=node('p',curTask.id===cur.id?`고치는 대상 · ${edited}의 작업문`:`고치는 대상 · ${edited} (${own}에 받은 보고의 후속 확인 작업문) · ${own}의 작업문은 그대로`,'hint');why.id='panel-continue-target';why.title=target.text;
-    work.append(what,appTag(),gist,why);body.append(work);
+    // VISUAL42: the edited record in one short visible line (which text changes, which stays); the exact sentence and the
+    // continue rule open from the same line (keyboard reachable), so the ownership is never only in a tooltip.
+    const why=node('details','','panel-continue-target');why.id='panel-continue-target';why.title=target.text;
+    why.append(node('summary',curTask.id===cur.id?`${edited} 편집`:`${edited} 편집 · ${own} 원문 유지`),
+      node('p',curTask.id===cur.id?`고치는 대상 · ${edited}의 작업문`:`고치는 대상 · ${edited} (${own}에 받은 보고의 후속 확인 작업문) · ${own}의 작업문은 그대로`,'hint'),node('p',target.text,'hint'));
+    const head=node('div','','panel-continue-head');head.append(what,appTag());
+    work.append(head,gist,why);body.append(work);
     go.prepend(btn('이어가기',()=>{if(workMemo?.task===project.currentTaskId)resumeWork(true,true);else continueTask(cur.id);},'primary','panel-continue'));
   }
   const meaning=node('section','','panel-section');meaning.id='panel-meaning';meaning.append(node('h3','이 부분','panel-section-title'),areaIdea(a,'panel-idea',100),...[understandingPanel(a,'panel-understanding',true)].filter(x=>!!x));
