@@ -70,7 +70,8 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
   const timer = setTimeout(() => { timedOut = true; controller.abort(); }, config.timeoutMs);
   const abort = () => controller.abort(); signal?.addEventListener('abort', abort, { once: true });
   try {
-    const response = await fetchImpl(ENDPOINT, { method: 'POST', redirect: 'error', signal: controller.signal,
+    // Workers supports manual/follow, not redirect:error. Reject 3xx below without forwarding the key.
+    const response = await fetchImpl(ENDPOINT, { method: 'POST', redirect: 'manual', signal: controller.signal,
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.apiKey}` },
       body: JSON.stringify({ model: config.model, stream: false, thinking: { type: 'disabled' }, max_tokens: config.maxTokens,
         response_format: { type: 'json_object' },

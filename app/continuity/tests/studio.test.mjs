@@ -117,6 +117,7 @@ test('STUDIO-S1 without a key: status off, ask fails with AI_NOT_CONFIGURED and 
 test('STUDIO-S2 key stays server-side: sent only as the provider Authorization header, never in a response', async () => {
   const key = 'test-key-not-real-0123456789'; let seen = null;
   const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: key }, fetchImpl: async (url, init) => {
+    assert.equal(init.redirect, 'manual', 'Workers-compatible; never follow a redirect carrying the provider key');
     seen = { url, auth: init.headers.Authorization, body: JSON.parse(init.body) };
     return providerReply(okContent)();
   } });
@@ -133,7 +134,7 @@ test('STUDIO-S2 key stays server-side: sent only as the provider Authorization h
 });
 
 test('STUDIO-S3 provider failures are short codes, never substitute answers', async () => {
-  const cases = [[401, 'AI_AUTH_FAILED'], [402, 'AI_BALANCE_REQUIRED'], [429, 'AI_RATE_LIMIT'], [400, 'AI_CONFIG_REJECTED'], [500, 'AI_UNAVAILABLE']];
+  const cases = [[302, 'AI_UNAVAILABLE'], [307, 'AI_UNAVAILABLE'], [401, 'AI_AUTH_FAILED'], [402, 'AI_BALANCE_REQUIRED'], [429, 'AI_RATE_LIMIT'], [400, 'AI_CONFIG_REJECTED'], [500, 'AI_UNAVAILABLE']];
   for (const [status, code] of cases) {
     const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: 'k' }, fetchImpl: async () => new Response('{"error":"raw upstream"}', { status }) });
     const r = await handle(post(ask())), body = await r.json();
