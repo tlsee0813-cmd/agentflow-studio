@@ -1,0 +1,25 @@
+{
+  "scope": "Owned visual42 temporary evidence, generated builds, transfer ZIPs and release helpers",
+  "fileCount": 299,
+  "bytes": 23700547,
+  "paths": [
+    "visual42-independent-evidence",
+    "product-handoff-20261024/app/continuity/dist",
+    "product-handoff-20261024/app/continuity/static-preview-dist",
+    "agentflow-ops-assembly/.ops/visual42-baseline-preview.zip",
+    "agentflow-ops-assembly/.ops/visual42-BUILD.txt",
+    "agentflow-ops-assembly/.ops/visual42-candidate1-preview.zip",
+    "agentflow-ops-assembly/.ops/visual42-candidate2-preview.zip",
+    "agentflow-ops-assembly/.ops/visual42-final2ae-preview.zip",
+    "agentflow-ops-assembly/.ops/visual42-final6cf-preview.zip",
+    "agentflow-ops-assembly/.ops/visual42-final7a-preview.zip",
+    "agentflow-ops-assembly/.ops/visual42-finalcaf-preview.zip",
+    "agentflow-ops-assembly/.ops/visual42-http.py",
+    "agentflow-ops-assembly/.ops/visual42-release.py",
+    "agentflow-ops-assembly/.ops/visual42-status-docs.py"
+  ],
+  "server24656": "Already absent at cleanup check",
+  "preserved": "Pre-existing dirty work, JSONL, shared runtimes, keys, prior38 remnants, small worker receipts",
+  "mergedRemoteBranchRemoved": "product/visual-design-42",
+  "githubEvidenceBeforeCleanup": "b4de2f4"
+}

@@ -47,3 +47,5 @@ Q04/Q13의 PC 흐름은41에 이어42의 시각 체계·반복 pan·소속 가�
 총괄만 agentflow-coordinator/Ops를 쓴다. Pro 비교, Claude 좁은 구현, 준비된 Cloud 또는 작성자와 분리한 로컬 실행, DeepSeek 출처 있는 좁은 분류, Sol6.1 High 보조를 사용한다. Cloud는 해시 고정 공개 runtime ZIP을 정상 첨부해 독립 실행했다. Git 직접 조회/소스 재빌드는 프록시 오류로 하지 못했고, 웹 UI 이미지 출력 실패와 별도 Windows 원본 직접 검토를 구분한다. GitHub 연결은 정상이며409 HEAD 변경 응답을 인증 실패로 오해하지 않는다. 환경 재설치·계정 전환은 하지 않았다.
 
 공개 Pages 허용·DeepSeek 키 공개 금지·로컬/저장소 정돈이 사용자 결정이다. runtime은 gh-pages, 결정/최소 증거는 각 cycle 한곳에 둔다. 큰 원로그/중복 ZIP은 공유하지 않는다. 38에서 자동 승인 검토가 차단한 강제 일괄 삭제는 재시도하지 않았고 약144MiB의 과거 잔여물은 보존했다.40의 전용 임시8,394,735bytes와 병합 브랜치는 정리 완료.41의 정리는 [RELEASE](2026-10-24-workspace-experience-41/RELEASE.md)에 기록한다. 기존 dirty checkout·원본 JSONL·키/워커 환경은 보존한다. 사람 사용 기록 제출을 관문으로 만들지 않는다.
+
+42의 임시299파일·23,700,547bytes와 병합 브랜치도 [정리 완료](2026-10-24-visual-design-42/CLEANUP.json). 공개 탭은 최종 자산으로 갱신했다.
