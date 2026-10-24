@@ -1,6 +1,7 @@
-AgentFlow Studio visual design 42
-source caf6126a4a2e592dc4f17626f0440d13a1d4c188
-appTree 9ba47af6a58cf97d717e743a862553ea2cf1053d
-runtimeTree 9043b5c8e5645e062bef547b60b53b9305d3ec89
-CI run 40066138381; Ubuntu 120789685141; Windows 120789685300
-Explicit browser MOCK preview; no provider or API key.
+AgentFlow Studio demo 43
+source 00ca5753e46d34c42a535f7acbcea9b0a88d16b2
+appTree c342d89bdc8a4edecd51d4e1c8d7d3124a57dca7
+runtimeTree e244dca61c3ac17126d8341c1ecc5dc0e191e6f6
+CI run 40076048672; Ubuntu 120819712336; Windows 120819712517
+Static experience; AI runs only in the local application. No provider key.
+Existing preview storage namespace retained.
