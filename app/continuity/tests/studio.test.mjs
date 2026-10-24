@@ -6,7 +6,7 @@ import { EXAMPLES, buildExample } from '../dist/public/shared/studio-examples.js
 import { studioView, subtreeRecords, buildAsk, validateAsk, validateReply } from '../dist/public/shared/studio.js';
 import { parseProject, parseResultFile } from '../dist/public/shared/validation.js';
 import { editArea } from '../dist/public/shared/domain.js';
-import { layoutMap, NODE_W, NODE_H } from '../dist/public/client/map-layout.js';
+import { layoutScope, NODE_W, NODE_H, ROOT, ghostId } from '../dist/public/client/map-layout.js';
 import { createStudioHandler, readStudioConfig } from '../server/studio.mjs';
 
 const salon = () => buildExample(EXAMPLES.find(e => e.id === 'salon'));
@@ -41,15 +41,41 @@ test('STUDIO-D2 map parts follow stored containment; records attach to the part 
   assert.ok(v.records.filter(r => r.kind === 'report').every(r => !r.text.startsWith('[Studio')));
 });
 
+const top = (id, depth) => depth === 0;
 test('STUDIO-D3 layout keeps node size fixed and grows frames with children', () => {
-  const p = salon(), v = studioView(p), l = layoutMap(v);
-  for (const part of v.parts) { const b = l.boxes.get(part.id); if (!part.childIds.length) { assert.equal(b.w, NODE_W); assert.equal(b.h, NODE_H); } }
+  const p = salon(), v = studioView(p), l = layoutScope(v, null, top, {});
+  for (const b of l.boxes.values()) if (b.kind === 'node') { assert.equal(b.w, NODE_W); assert.equal(b.h, NODE_H); }
   const book = partNamed(v, '예약하기'), before = l.boxes.get(book.id).h;
+  assert.equal(l.boxes.get(book.id).kind, 'frame');
   // A fourth child: frame grows, node size stays.
   const more = { ...EXAMPLES[0], parts: [...EXAMPLES[0].parts, { key: 'extra', name: '대기 예약', note: '', parent: 'book' }] };
-  const v2 = studioView(buildExample(more)), l2 = layoutMap(v2);
+  const v2 = studioView(buildExample(more)), l2 = layoutScope(v2, null, top, {});
   assert.ok(l2.boxes.get(partNamed(v2, '예약하기').id).h > before);
   assert.equal(l2.boxes.get(partNamed(v2, '대기 예약').id).w, NODE_W);
+});
+
+test('STUDIO-D5 stored places win, children stay inside their frame, one sibling arrangement serves both views', () => {
+  const v = studioView(salon()), book = partNamed(v, '예약하기'), slots = partNamed(v, '시간 고르기'), notify = partNamed(v, '문자 알림');
+  const pos = { [ROOT]: { [notify.id]: { x: 900, y: 500 } }, [book.id]: { [slots.id]: { x: -120, y: 260 } } };
+  const l = layoutScope(v, null, top, pos), f = l.boxes.get(book.id), c = l.boxes.get(slots.id);
+  assert.deepEqual([l.boxes.get(notify.id).x, l.boxes.get(notify.id).y], [900, 500]);
+  assert.ok(c.x >= f.x && c.y >= f.y && c.x + c.w <= f.x + f.w && c.y + c.h <= f.y + f.h, 'a moved child stays inside its parent frame');
+  assert.deepEqual(c.rel, { x: -120, y: 260 });
+  // Inside 예약하기 the same stored sibling place is used for the same part.
+  const inside = layoutScope(v, book.id, top, pos);
+  assert.deepEqual(inside.boxes.get(slots.id).rel, { x: -120, y: 260 });
+  assert.ok(!inside.boxes.has(book.id) && !inside.boxes.has(notify.id), 'a scope shows only its inside');
+});
+
+test('STUDIO-D6 folding keeps relations on the visible part; partners outside a scope appear as ghosts', () => {
+  const v = studioView(salon()), book = partNamed(v, '예약하기'), confirm = partNamed(v, '예약 확인'), list = partNamed(v, '예약 목록'), admin = partNamed(v, '관리자 화면');
+  const folded = layoutScope(v, null, () => false, {});
+  assert.equal(folded.boxes.get(book.id).kind, 'node');
+  assert.ok(!folded.boxes.has(confirm.id));
+  assert.ok(folded.edges.some(e => e.from === book.id && e.to === admin.id), 'confirm→list is carried by the folded parents');
+  const inside = layoutScope(v, book.id, top, {});
+  assert.ok(inside.edges.some(e => e.from === confirm.id && e.to === ghostId(list.id)));
+  assert.equal(inside.boxes.get(ghostId(list.id)).kind, 'ghost');
 });
 
 test('STUDIO-D4 renaming a part keeps the stored format valid', () => {

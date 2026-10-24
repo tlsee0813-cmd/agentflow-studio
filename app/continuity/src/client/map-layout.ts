@@ -1,70 +1,109 @@
-/* Automatic map layout from the project's real containment and relations. Fixed node size: adding children grows the
- * frame and the canvas, never shrinks text. Roots are placed in columns by relation order (cycles broken by input order). */
-import type { StudioView } from '../shared/studio.js';
+/* Map layout for one scope (the whole project, or the inside of one part), from the project's real containment and relations.
+ * - Items are the scope's direct children. An expanded item is a frame around its own children; a collapsed one is a node.
+ * - Positions are per container ('root' or a parent id): the arrangement of siblings is the same whether the parent is the
+ *   scope itself or an expanded frame, so a place set in one view holds in the other. Missing positions use the automatic
+ *   arrangement; nothing here overwrites a stored position.
+ * - Node size is fixed: more children grow frames and the canvas, never shrink text. */
+import type { StudioView, RelationView } from '../shared/studio.js';
 
-export const NODE_W = 188, NODE_H = 56, PAD = 14, HEAD = 36, GAP = 14, COL_GAP = 100, ROW_GAP = 36;
-export interface Box { id: string; x: number; y: number; w: number; h: number; group: boolean }
-export interface MapLayout { boxes: Map<string, Box>; width: number; height: number }
+/** Frames are a little wider than a node so the head keeps its name beside the fold and go-inside controls. */
+export const FRAME_MIN_W = 252;
+export const NODE_W = 188, NODE_H = 56, PAD = 14, HEAD = 36, GAP = 14, COL_GAP = 100, ROW_GAP = 36, GHOST_W = 168, GHOST_H = 34;
+export interface Point { x: number; y: number }
+export type Positions = Record<string, Record<string, Point>>;
+export const ROOT = 'root';
+export interface Box { id: string; x: number; y: number; w: number; h: number; kind: 'node' | 'frame' | 'ghost'; depth: number; container: string; kids: number;
+  /** The container-relative place used for this box (stored, or automatic): what a drag starts from and stores. */
+  rel: Point }
+export interface Edge { key: string; from: string; to: string; kind: RelationView['kind']; notes: string[]; ids: string[] }
+export interface ScopeLayout { boxes: Map<string, Box>; edges: Edge[]; bounds: { x: number; y: number; w: number; h: number } }
 
-interface Size { w: number; h: number }
+interface Measure { w: number; h: number; ox: number; oy: number }
+export const ghostId = (id: string) => `ghost:${id}`;
 
-export function layoutMap(v: StudioView): MapLayout {
+export function layoutScope(v: StudioView, scope: string | null, expanded: (id: string, depth: number) => boolean, pos: Positions): ScopeLayout {
   const byId = new Map(v.parts.map(p => [p.id, p]));
-  const sizes = new Map<string, Size>();
-  const cols = (n: number) => n <= 4 ? 1 : n <= 8 ? 2 : 3;
-  const chunk = (ids: string[]) => { const c = cols(ids.length), per = Math.ceil(ids.length / c), out: string[][] = [];
-    for (let i = 0; i < ids.length; i += per) out.push(ids.slice(i, i + per)); return out; };
-  const size = (id: string, depth = 0): Size => {
-    const cached = sizes.get(id); if (cached) return cached;
-    const kids = byId.get(id)?.childIds ?? [];
-    let s: Size;
-    if (!kids.length || depth > 30) s = { w: NODE_W, h: NODE_H };
-    else {
-      const columns = chunk(kids).map(c => c.map(k => size(k, depth + 1)));
-      const w = columns.reduce((a, c) => a + Math.max(...c.map(x => x.w)), 0) + GAP * (columns.length - 1);
-      const h = Math.max(...columns.map(c => c.reduce((a, x) => a + x.h, 0) + GAP * (c.length - 1)));
-      s = { w: Math.max(w + PAD * 2, NODE_W + PAD * 2), h: h + HEAD + PAD };
+  const kidsOf = (id: string | null) => (id ? byId.get(id)?.childIds ?? [] : v.roots);
+  const open = (id: string, depth: number) => depth < 12 && kidsOf(id).length > 0 && expanded(id, depth);
+  const memo = new Map<string, Measure>();
+  // Automatic arrangement of siblings: longest-path columns over relations lifted to the siblings; long columns wrap.
+  const autoArrange = (container: string | null, sizes: Map<string, Measure>): Map<string, Point> => {
+    const ids = kidsOf(container), set = new Set(ids);
+    const lift = (id: string) => { let cur = byId.get(id), guard = 0; while (cur && !set.has(cur.id) && guard++ < 64) cur = cur.parentId ? byId.get(cur.parentId) : undefined; return cur && set.has(cur.id) ? cur.id : null; };
+    const out = new Map<string, Set<string>>(ids.map(i => [i, new Set<string>()]));
+    const reaches = (a: string, b: string) => { const seen = new Set<string>(), st = [a]; while (st.length) { const x = st.pop()!; if (x === b) return true; if (seen.has(x)) continue; seen.add(x); st.push(...out.get(x)!); } return false; };
+    for (const r of v.relations) { const a = lift(r.from), b = lift(r.to); if (a && b && a !== b && !reaches(b, a)) out.get(a)!.add(b); }
+    const layer = new Map<string, number>();
+    const depthOf = (id: string, guard = 0): number => {
+      if (layer.has(id)) return layer.get(id)!;
+      let d = 0; for (const [from, tos] of out) if (tos.has(id) && guard < 64) d = Math.max(d, depthOf(from, guard + 1) + 1);
+      layer.set(id, d); return d;
+    };
+    ids.forEach(i => depthOf(i));
+    const columns: string[][] = [];
+    for (const i of ids) (columns[layer.get(i)!] ??= []).push(i);
+    const cols = columns.filter(Boolean).flatMap(c => { if (c.length <= 4) return [c]; const per = Math.ceil(c.length / Math.ceil(c.length / 4)), o: string[][] = []; for (let i = 0; i < c.length; i += per) o.push(c.slice(i, i + per)); return o; });
+    const gapX = container === scope ? COL_GAP : GAP, gapY = container === scope ? ROW_GAP : GAP;
+    const heights = cols.map(c => c.reduce((a, i) => a + sizes.get(i)!.h, 0) + gapY * (c.length - 1)), tallest = Math.max(0, ...heights);
+    const at = new Map<string, Point>(); let x = 0;
+    cols.forEach((c, ci) => {
+      const w = Math.max(...c.map(i => sizes.get(i)!.w));
+      let y = container === scope ? (tallest - heights[ci]!) / 2 : 0;
+      for (const i of c) { const s = sizes.get(i)!; at.set(i, { x: x - s.ox, y: y - s.oy }); y += s.h + gapY; }
+      x += w + gapX;
+    });
+    return at;
+  };
+  const anchors = (container: string | null, depth: number) => {
+    const ids = kidsOf(container), sizes = new Map(ids.map(i => [i, measure(i, depth)]));
+    const auto = autoArrange(container, sizes), stored = pos[container ?? ROOT] ?? {};
+    return { sizes, at: new Map(ids.map(i => [i, stored[i] ? { ...stored[i]! } : auto.get(i)!])) };
+  };
+  function measure(id: string, depth: number): Measure {
+    const cached = memo.get(id); if (cached) return cached;
+    let m: Measure = { w: NODE_W, h: NODE_H, ox: 0, oy: 0 };
+    if (open(id, depth)) {
+      const { sizes, at } = anchors(id, depth + 1);
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      for (const [k, p] of at) { const s = sizes.get(k)!; minX = Math.min(minX, p.x + s.ox); minY = Math.min(minY, p.y + s.oy); maxX = Math.max(maxX, p.x + s.ox + s.w); maxY = Math.max(maxY, p.y + s.oy + s.h); }
+      m = { ox: minX, oy: minY, w: Math.max(maxX - minX + PAD * 2, FRAME_MIN_W), h: maxY - minY + HEAD + PAD };
     }
-    sizes.set(id, s); return s;
-  };
-  // Root order: longest-path layers over relations lifted to their roots.
-  const rootOf = (id: string) => { let cur = byId.get(id), guard = 0; while (cur?.parentId && guard++ < 64) cur = byId.get(cur.parentId); return cur?.id ?? id; };
-  const roots = v.roots, out = new Map<string, Set<string>>(roots.map(r => [r, new Set<string>()]));
-  const reaches = (a: string, b: string): boolean => { const seen = new Set<string>(), st = [a];
-    while (st.length) { const x = st.pop()!; if (x === b) return true; if (seen.has(x)) continue; seen.add(x); st.push(...(out.get(x) ?? [])); } return false; };
-  for (const r of v.relations) { const a = rootOf(r.from), b = rootOf(r.to); if (a !== b && out.has(a) && out.has(b) && !reaches(b, a)) out.get(a)!.add(b); }
-  const layer = new Map<string, number>();
-  const depthOf = (id: string, guard = 0): number => {
-    if (layer.has(id)) return layer.get(id)!;
-    let d = 0; for (const [from, tos] of out) if (tos.has(id) && guard < 64) d = Math.max(d, depthOf(from, guard + 1) + 1);
-    layer.set(id, d); return d;
-  };
-  roots.forEach(r => depthOf(r));
-  const columns: string[][] = [];
-  for (const r of roots) (columns[layer.get(r)!] ??= []).push(r);
-  const used = columns.filter(Boolean);
-  const heights = used.map(c => c.reduce((a, id) => a + size(id).h, 0) + ROW_GAP * (c.length - 1));
-  const tallest = Math.max(0, ...heights);
+    memo.set(id, m); return m;
+  }
   const boxes = new Map<string, Box>();
-  const place = (id: string, x: number, y: number, depth = 0) => {
-    const s = size(id), kids = byId.get(id)?.childIds ?? [];
-    boxes.set(id, { id, x, y, w: s.w, h: s.h, group: kids.length > 0 && depth <= 30 });
-    if (!kids.length || depth > 30) return;
-    let cx = x + PAD;
-    for (const c of chunk(kids)) {
-      let cy = y + HEAD; const w = Math.max(...c.map(k => size(k).w));
-      for (const k of c) { place(k, cx, cy, depth + 1); cy += size(k).h + GAP; }
-      cx += w + GAP;
-    }
+  const place = (id: string, anchor: Point, rel: Point, depth: number, container: string) => {
+    const m = measure(id, depth), kids = kidsOf(id).length, isOpen = open(id, depth);
+    boxes.set(id, { id, x: anchor.x + m.ox, y: anchor.y + m.oy, w: m.w, h: m.h, kind: isOpen ? 'frame' : 'node', depth, container, kids, rel });
+    if (!isOpen) return;
+    const { at } = anchors(id, depth + 1);
+    for (const [k, p] of at) place(k, { x: anchor.x + PAD + p.x, y: anchor.y + HEAD + p.y }, p, depth + 1, id);
   };
-  let x = 0;
-  used.forEach((c, i) => {
-    const w = Math.max(...c.map(id => size(id).w));
-    let y = (tallest - heights[i]!) / 2;
-    for (const id of c) { const s = size(id); place(id, x + (w - s.w) / 2, y); y += s.h + ROW_GAP; }
-    x += w + COL_GAP;
-  });
-  return { boxes, width: Math.max(0, x - COL_GAP), height: tallest };
+  const top = anchors(scope, 0);
+  for (const [k, p] of top.at) place(k, p, p, 0, scope ?? ROOT);
+
+  // Visible representative of any part: itself or its nearest visible ancestor; null when outside this scope.
+  const rep = (id: string): string | null => { let cur = byId.get(id), guard = 0; while (cur && guard++ < 64) { if (boxes.has(cur.id)) return cur.id; cur = cur.parentId ? byId.get(cur.parentId) : undefined; } return null; };
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const b of boxes.values()) { minX = Math.min(minX, b.x); minY = Math.min(minY, b.y); maxX = Math.max(maxX, b.x + b.w); maxY = Math.max(maxY, b.y + b.h); }
+  if (!boxes.size) { minX = minY = 0; maxX = maxY = 0; }
+  // Relations: drawn between representatives; a partner outside the scope is a small ghost at the side (incoming left, outgoing right).
+  const edges = new Map<string, Edge>(), ghostsIn: string[] = [], ghostsOut: string[] = [];
+  for (const r of v.relations) {
+    let a = rep(r.from), b = rep(r.to);
+    if (!a && !b) continue;
+    if (!a) { a = ghostId(r.from); if (!ghostsIn.includes(r.from)) ghostsIn.push(r.from); }
+    if (!b) { b = ghostId(r.to); if (!ghostsOut.includes(r.to)) ghostsOut.push(r.to); }
+    if (a === b) continue;
+    const key = `${a}|${b}|${r.kind}`, e = edges.get(key) ?? { key, from: a, to: b, kind: r.kind, notes: [], ids: [] };
+    if (r.note) e.notes.push(r.note); e.ids.push(r.id); edges.set(key, e);
+  }
+  const ghostColumn = (ids: string[], x: number) => ids.forEach((id, i) => boxes.set(ghostId(id), { id: ghostId(id), x, y: minY + i * (GHOST_H + 12), w: GHOST_W, h: GHOST_H, kind: 'ghost', depth: 0, container: '', kids: 0, rel: { x: 0, y: 0 } }));
+  ghostColumn(ghostsIn.filter(id => !ghostsOut.includes(id)), minX - GHOST_W - 90);
+  ghostColumn(ghostsOut, maxX + 90);
+  let bx = Infinity, by = Infinity, bx2 = -Infinity, by2 = -Infinity;
+  for (const b of boxes.values()) { bx = Math.min(bx, b.x); by = Math.min(by, b.y); bx2 = Math.max(bx2, b.x + b.w); by2 = Math.max(by2, b.y + b.h); }
+  if (!boxes.size) { bx = by = bx2 = by2 = 0; }
+  return { boxes, edges: [...edges.values()], bounds: { x: bx, y: by, w: bx2 - bx, h: by2 - by } };
 }
 
 /** Edge path between two boxes: horizontal bezier between facing sides, vertical when they share a column. */

@@ -85,13 +85,74 @@ def main_flow(browser, base):
     page.close()
 
 
+def drag(page, locator, dx, dy):
+    box = locator.bounding_box()
+    x, y = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
+    page.mouse.move(x, y); page.mouse.down(); page.mouse.move(x + dx, y + dy, steps=8); page.mouse.up()
+    page.wait_for_timeout(150)
+
+
+def map_flow(browser, base):
+    """Drag, wheel zoom, going inside and back with the view kept; example places are not saved."""
+    page = browser.new_page(viewport={"width": 1280, "height": 720})
+    page.goto(base + "/")
+    page.locator(".project-card").first.click()
+    customer, notify = page.locator(".node", has_text="손님 정보"), page.locator(".node", has_text="문자 알림")
+    gap = notify.bounding_box()["y"] - customer.bounding_box()["y"]
+    drag(page, customer, 0, 160)
+    expect(page.locator("#panel")).to_be_hidden()  # a drag is not a click
+    moved = notify.bounding_box()["y"] - customer.bounding_box()["y"]
+    assert abs((gap - moved) - 160) < 4, (gap, moved)
+    # A group moves with its children.
+    kid = page.locator(".node", has_text="예약 목록")
+    before = kid.bounding_box()["x"]
+    drag(page, page.locator(".frame-head", has_text="관리자 화면").locator(".frame-name"), -80, 0)
+    assert abs(kid.bounding_box()["x"] - (before - 80)) < 4
+    # Plain wheel zooms at the cursor.
+    vp = page.locator("#viewport").bounding_box()
+    page.mouse.move(vp["x"] + vp["width"] - 120, vp["y"] + vp["height"] - 120)
+    page.mouse.wheel(0, -240)
+    expect(page.locator("#zoom-level")).not_to_have_text("100%")
+    zoom = page.locator("#zoom-level").inner_text()
+    # Inside and back: scope bar and path say where; the parent view comes back as it was.
+    page.locator(".frame-head", has_text="예약하기").locator(".enter").click()
+    expect(page.locator("#scope-bar")).to_contain_text("예약하기 안")
+    expect(page.locator("#crumbs")).to_contain_text("예약하기")
+    expect(page.locator(".node")).to_have_count(3)
+    expect(page.locator(".ghost").first).to_be_visible()
+    page.locator(".node", has_text="시간 고르기").click()
+    expect(page.locator("#panel-title")).to_have_text("시간 고르기")
+    page.keyboard.press("Escape")
+    expect(page.locator("#panel")).to_be_hidden()
+    page.keyboard.press("Escape")  # nothing selected: Esc goes up one level
+    expect(page.locator("#scope-bar")).to_be_hidden()
+    expect(page.locator("#zoom-level")).to_have_text(zoom)
+    # Double-click also goes inside; the panel offers it too.
+    page.locator(".frame-head", has_text="관리자 화면").locator(".frame-name").dblclick()
+    expect(page.locator("#scope-bar")).to_contain_text("관리자 화면 안")
+    page.locator("#scope-bar .scope-up").click()
+    expect(page.locator("#scope-bar")).to_be_hidden()
+    page.locator(".frame-head", has_text="관리자 화면").locator(".frame-name").click()
+    expect(page.locator(".panel .go-in")).to_be_visible()
+    # Fold in place keeps the scope.
+    page.keyboard.press("Escape")
+    page.locator(".frame-head", has_text="예약하기").locator(".toggle").click()
+    expect(page.locator(".node", has_text="예약하기")).to_be_visible()
+    expect(page.locator(".node", has_text="시간 고르기")).to_have_count(0)
+    # Example places live in memory only: a reload brings the automatic arrangement back.
+    page.reload()
+    customer, notify = page.locator(".node", has_text="손님 정보"), page.locator(".node", has_text="문자 알림")
+    assert abs((notify.bounding_box()["y"] - customer.bounding_box()["y"]) - gap) < 4
+    page.close()
+
+
 def new_project_flow(browser, base):
     context = browser.new_context(viewport={"width": 1280, "height": 720})
     page = context.new_page()
     page.goto(base + "/")
     page.locator("#new-name").fill("테스트 프로젝트")
     page.get_by_role("button", name="내 프로젝트 시작").click()
-    expect(page.locator("#crumb-project")).to_have_text("테스트 프로젝트")
+    expect(page.locator("#crumbs")).to_contain_text("테스트 프로젝트")
     expect(page.locator("#part-form")).to_contain_text("첫 부분 만들기")
     page.locator("#part-name").fill("로그인")
     page.get_by_role("button", name="만들기").click()
@@ -107,6 +168,45 @@ def new_project_flow(browser, base):
     page.reload()
     expect(page.locator("#panel-title")).to_have_text("비밀번호 찾기")
     expect(page.locator("#ask-input")).to_have_value("어디까지 됐어?")
+    # Third level, then down and back up through it.
+    page.get_by_role("button", name="안에 부분 추가").click()
+    page.locator("#part-name").fill("메일 발송")
+    page.get_by_role("button", name="만들기").click()
+    expect(page.locator("#panel-title")).to_have_text("메일 발송")
+    page.keyboard.press("Escape")
+    page.locator(".frame-head", has_text="로그인").locator(".enter").click()
+    expect(page.locator("#scope-bar")).to_contain_text("로그인")
+    page.locator(".frame-head", has_text="비밀번호 찾기").locator(".enter").click()
+    expect(page.locator("#crumbs")).to_contain_text("테스트 프로젝트/로그인/비밀번호 찾기")
+    expect(page.locator("#scope-bar .scope-up")).to_contain_text("로그인")
+    expect(page.locator(".node")).to_have_count(1)
+    page.locator("#scope-bar .scope-up").click()
+    expect(page.locator("#scope-bar")).to_contain_text("로그인 안")
+    page.locator("#crumbs a", has_text="테스트 프로젝트").click()
+    expect(page.locator("#scope-bar")).to_be_hidden()
+    # A second top part; its dragged place in a saved project survives a reload.
+    page.locator("#add-part").click()
+    page.locator("#part-name").fill("결제")
+    page.get_by_role("button", name="만들기").click()
+    expect(page.locator("#panel-title")).to_have_text("결제")
+    page.keyboard.press("Escape")
+    expect(page.locator("#panel")).to_be_hidden()
+    pay, login = page.locator(".node", has_text="결제"), page.locator(".frame", has_text="로그인").first
+    gap = pay.bounding_box()["y"] - login.bounding_box()["y"]
+    drag(page, pay, 0, 200)
+    moved = pay.bounding_box()["y"] - login.bounding_box()["y"]
+    assert abs(moved - gap - 200) < 4, (gap, moved)
+    page.reload()
+    pay, login = page.locator(".node", has_text="결제"), page.locator(".frame", has_text="로그인").first
+    expect(pay).to_be_visible()
+    assert abs((pay.bounding_box()["y"] - login.bounding_box()["y"]) - moved) < 4
+    # The automatic arrangement only on request, with one undo.
+    page.locator("#arrange").click()
+    page.wait_for_timeout(350)
+    assert abs((pay.bounding_box()["y"] - login.bounding_box()["y"]) - moved) > 50
+    page.locator("#toast").get_by_role("button", name="되돌리기").click()
+    page.wait_for_timeout(200)
+    assert abs((pay.bounding_box()["y"] - login.bounding_box()["y"]) - moved) < 4
     page.locator(".brand").click()
     expect(page.locator("#saved-list .project-card")).to_have_count(1)
     expect(page.locator(".project-card", has_text="예제")).to_have_count(2)  # examples are never saved as mine
@@ -157,7 +257,8 @@ def main():
             exe = os.environ.get("STUDIO_CHROMIUM")
             browser = p.chromium.launch(**({"executable_path": exe} if exe else {}))
             proc, base = start("ok"); procs.append(proc); main_flow(browser, base); print("ok  entry -> map -> part -> ask -> evidence -> map")
-            new_project_flow(browser, base); print("ok  new project -> first part -> inner part -> draft kept on reload")
+            map_flow(browser, base); print("ok  drag (node, group), wheel zoom, inside/back with view kept, fold, example places not saved")
+            new_project_flow(browser, base); print("ok  new project -> three levels -> path and back -> saved place and draft kept on reload")
             proc, base = start("fail"); procs.append(proc); failure_flow(browser, base); print("ok  provider failure -> short error -> retry")
             proc, base = start("nokey"); procs.append(proc); off_flow(browser, base + "/", "AI 키 없음"); print("ok  server without key -> honest off state")
             if (ROOT / "static-dist/index.html").exists():
