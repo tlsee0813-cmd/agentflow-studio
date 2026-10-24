@@ -1677,7 +1677,9 @@ function drawContainment(layer:HTMLElement,plane:HTMLElement) {
 function sizeWorkspace() {
   const layout=document.querySelector<HTMLElement>('.map-layout');if(!layout)return;
   const map=document.getElementById('space-map');
-  if(innerWidth>760){const top=layout.getBoundingClientRect().top;layout.style.height=`${Math.max(240,innerHeight-Math.max(0,top)-16)}px`;if(map){map.style.height='100%';map.style.minHeight='0';}}
+  // WORK41: measured from the layout's place in the document, not in the window, so the page scroll (a wheel, a restored
+  // return) never changes the map height; content above it (a notice, the purpose row) and the window size still do.
+  if(innerWidth>760){const top=layout.getBoundingClientRect().top+window.scrollY;layout.style.height=`${Math.max(240,innerHeight-Math.max(0,top)-16)}px`;if(map){map.style.height='100%';map.style.minHeight='0';}}
   else {layout.style.removeProperty('height');map?.style.removeProperty('height');map?.style.removeProperty('min-height');}
 }
 window.addEventListener('resize',()=>{capturePanelReading();syncProjectHeader();sizeWorkspace();restorePanelReading();});

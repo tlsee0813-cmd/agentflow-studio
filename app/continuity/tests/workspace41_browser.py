@@ -193,6 +193,25 @@ class Work41(unittest.TestCase):
             self.assertEqual(back,start,f'round trip {i+1}: same page scroll, map box and project name position')
         self.assertEqual(self.keys(),[],'nothing from the example is written')
 
+    def test_05_scrolled_map_departure_returns_to_the_same_page(self):
+        # A map page scrolled with the wheel before leaving: the return must bring back that page scroll and map box, not a
+        # height re-measured at the restored scroll. Native wheel and clicks; three round trips.
+        p=self.page;p.locator('#example-list .example-open').click();expect(p.locator('#space-map')).to_be_visible()
+        self.select('시간 고르기');cam=p.locator('#space-plane').evaluate('(e)=>e.style.transform')
+        head=p.locator('#space-brief').bounding_box();p.mouse.move(head['x']+20,head['y']+head['height']/2);p.mouse.wheel(0,120);p.wait_for_timeout(200)
+        place=lambda:p.evaluate('()=>{const m=document.getElementById("space-map").getBoundingClientRect();return {y:Math.round(scrollY),mapTop:Math.round(m.top),mapH:Math.round(m.height)}}')
+        start=place();self.record('scrolled departure start',start);self.assertGreater(start['y'],0,'the map page was really scrolled')
+        for i in range(3):
+            b=p.locator('#panel-continue').bounding_box();p.mouse.click(b['x']+b['width']/2,b['y']+b['height']/2)
+            expect(p.locator('#work-return-origin')).to_be_visible()
+            p.locator('#work-next').click();p.keyboard.type(f' 휠{i+1}')
+            b=p.locator('#work-return-origin').bounding_box();p.mouse.click(b['x']+b['width']/2,b['y']+b['height']/2)
+            expect(p.locator('#area-panel-title')).to_have_text('시간 고르기')
+            back=place();self.record(f'scrolled departure back {i+1}',back)
+            self.assertEqual(p.locator('#space-plane').evaluate('(e)=>e.style.transform'),cam,f'round trip {i+1}: same map view')
+            self.assertEqual(back,start,f'round trip {i+1}: same page scroll and map box as the scrolled departure')
+        self.assertEqual(self.keys(),[],'nothing from the example is written')
+
 class Work41Wide(Work41):WIDTH,HEIGHT=1440,900
 class Work41Zoom125(Work41):WIDTH,HEIGHT,ZOOM=1024,576,1.25
 
