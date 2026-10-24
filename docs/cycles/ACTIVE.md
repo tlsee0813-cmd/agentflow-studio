@@ -1,5 +1,7 @@
 # AgentFlow 현재 상태
 
+**설계46 진행:** 제품45를 유지하며 [소프트웨어 지도 설계](../SOFTWARE_MAP_DESIGN_KO.md) 한 문서를 지속 수정한다. 사용자 승인으로 Pro8개 주제 조사와 Opus 의미/탐색/시각 관점 비교를 시작했다. 실제 OSS 구성·현대 구조 표현·타 분야 UX·원연구를 교차 확인한다. 제품 구현은 착수하지 않는다.
+
 **현재 수용45 · 기본 결함 수정:** [Studio](https://agentflow-studio.tlsee0813.workers.dev/#/p/ex-salon/in/book/slots) · [PR28](https://github.com/tlsee0813-cmd/agentflow-studio/pull/28). 예제 부분 주소를 spec key로 안정화했고, 한글 AI 요청은 최종 JSON의 UTF-8 바이트 예산으로 구성하며 포함/제외/발췌 범위를 표시한다. ‘진행 중’을 ‘요청만 있음’으로 교정하고 AI에도 같은 관측 의미를 명시했다. 지도 관계 설명 겹침 제거, 최근 기록의 최신/전체 범위, 잠깐 보고 열기 후 접힘 복원, 작은 기본 질문 입구와 초안 보존을 수정했다.
 
 최종 source `aae976d0357d18479a38acb75269b7a7f886fdd8`, app tree `d4189c7ea6a920ed5d88e98e1ede4e059850d147`; merge `c798474ba24877d0fce165bc2efb4a1195ba251a`와 동일하다. [CI40087902257](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40087902257)의 Ubuntu `120854578536`·Windows `120854578630` 모두 성공. 기존 Workers와 Pages `407d35e6bc4f57405d6b2cb74e2f3abe85f6e44a`를 갱신했으며 공개 BUILD.txt의 source 일치를 확인했다. 실제 비밀값 일치0을 검사한25자산/11서버모듈만 배포했다.
