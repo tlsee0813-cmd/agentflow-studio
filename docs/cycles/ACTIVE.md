@@ -1,5 +1,7 @@
 # AgentFlow 현재 상태
 
+**진행45 / 사용자 범위 정정:** 기본 배경이 만들어진 단계다. 지금은 입력·출력 기능을 늘리지 않고, 링크 안정성·한글 요청 바이트 한도·사실에 맞는 상태·관계 라벨·최근 기록 명칭·잠깐 기록을 본 뒤 접힘 복원·작은 질문 입구를 먼저 고친다. 그 뒤 실제 공개 소프트웨어를 사례로 구성 단위·관계·층위·복잡성 표현을 사용자와 설계한다. 예제 몇 개의 성공을 다양한 게임·웹·일반 프로그램에 대한 설계 완료로 확대하지 않는다. 기록 붙여넣기·hook·인계문·저장소 분리·새 노드 종류·판단거리 배지 구현은 이번 범위가 아니다.
+
 **현재 수용44 · 2026-10-24:** [Studio 실제 AI 사용](https://agentflow-studio.tlsee0813.workers.dev) · [정적 Pages 체험](https://tlsee0813-cmd.github.io/agentflow-studio/). 사용자가43에서 지적한 노드/그룹 이동, 커서 기준 일반 휠 줌, 안으로 들어가기·상위 복귀·제자리 접기, 범위별 시점과 저장 프로젝트 배치 보존을 복원했다. [PR26](https://github.com/tlsee0813-cmd/agentflow-studio/pull/26)과 Workers 호환 수정 [PR27](https://github.com/tlsee0813-cmd/agentflow-studio/pull/27)을 병합했다. 총괄이1280 브라우저에서 조작·초안·3단계 층위·새로고침 배치·예제 초기화를 확인했다. 이는 브라우저 자동화 직접 사용이며 사람의 물리 마우스/트랙패드 검사는 아니다. 배치는 브라우저에 보존되지만 프로젝트 백업에는 아직 포함되지 않는다.
 
 최종 배포 source `660fad24d3ad91951316e7abc1ca2bffe8c3d899`, app tree `5f95762473609b69294e517849a83db32ab901b1`; merge `51bcede262c0dde592c07859daaf6d8ab85fd01d`와 동일하다. [CI40080458577](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40080458577)의 Windows `120832733745`·Ubuntu `120832733888` 모두 성공. 배포 BUILD.txt의 SHA와 일치하며 상태 API200, 잘못된 접속 코드401을 확인했다. 최종 Cloudflare 화면에서 실제 DeepSeek 질문 응답을 받았다: 휴무일 안내·필터는 보고된 구현으로, 설정 저장 위치·연결은 미확인으로 구분했고 근거 기록 두 개를 연결했다. 공급자 키는 Worker Secret이며 공개25자산/11서버모듈에 실제 비밀값 일치0을 배포 직전에 검사했다. Pages는 UI가 같은 `c0a805c`의 정적 빌드 `5345ca53cff559913ef2470fef8679fb3f7b0178`이며 공개 BUILD도 확인했다.
