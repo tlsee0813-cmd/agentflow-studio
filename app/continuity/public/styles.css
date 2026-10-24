@@ -186,7 +186,7 @@ body[data-route="projects"] .sidebar-current,body[data-route="projects"] .nav-ca
 /* The header: one 56px row. Where am I (my projects › this project, with the example's unsaved note), then the save state,
    the project menu and the mode. The project head lives in this row, so the map and the editor start at a predictable line. */
 .topbar {
-  min-height:56px;display:flex;align-items:center;gap:var(--s3);padding:10px var(--s5);
+  min-height:56px;display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2) var(--s3);padding:10px var(--s5);
   background:var(--surface);border-bottom:1px solid var(--border);
 }
 body[data-route="projects"] .topbar {display:none}
@@ -197,12 +197,14 @@ body[data-route="projects"] .topbar {display:none}
 .breadcrumb strong {color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px}
 /* Inside a project the name is the header's editable field; the plain copy of it stays for screen readers and tests. */
 body:not([data-route="projects"]) #breadcrumb-project {position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
-.project-head {display:flex;align-items:center;gap:var(--s3);flex:1 1 auto;min-width:0;margin:0}
-.project-heading {display:flex;align-items:center;min-width:0;flex:0 1 auto}
+/* The header wraps instead of overlapping: the name keeps its full width, the example group stays together, and on a narrow
+   PC the example group or the mode moves to the next line (the same width gives the same layout on entry and return). */
+.project-head {display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2) var(--s3);flex:1 1 0;min-width:0;margin:0}
+.project-heading {display:flex;align-items:center;flex:none;max-width:100%}
 .project-heading .eyebrow,.project-heading .subtitle {display:none}
 .project-title {display:flex;align-items:center;gap:var(--s1);min-width:0;position:relative}
 .project-name {
-  min-width:6em;max-width:min(420px,32vw);width:auto;field-sizing:content;
+  min-width:6em;max-width:min(420px,32vw);width:12em;
   font-size:16px;line-height:24px;font-weight:600;color:var(--text);letter-spacing:-.012em;
   border:1px solid transparent;border-radius:6px;background:transparent;padding:2px 6px;margin-left:-6px;text-overflow:ellipsis;
 }
@@ -211,11 +213,18 @@ body:not([data-route="projects"]) #breadcrumb-project {position:absolute;width:1
 .pencil {display:none}
 body[data-starting="true"] .project-name {color:var(--text-2)}
 /* The unsaved example: a small labelled note with its two actions, never a banner that leads the screen. */
-.example-banner {display:flex;align-items:center;gap:var(--s2);min-width:0;flex:0 1 auto;margin:0;padding:0;border:0;background:none}
-.example-banner strong {flex:none;display:inline-flex;align-items:center;height:22px;padding:0 7px;border-radius:var(--r-small);background:var(--warning-bg);border:1px solid var(--warning-border);color:var(--warning-text);font-size:12px;font-weight:600}
-.example-banner span {flex:0 1 auto;min-width:0;font-size:13px;line-height:18px;color:var(--text-3)}
+.example-banner {display:flex;align-items:center;gap:6px;flex:none;margin:0;padding:0;border:0;background:none}
+.example-banner strong {flex:none;display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:var(--r-small);background:var(--warning-bg);border:1px solid var(--warning-border);color:var(--warning-text);font-size:12px;font-weight:600;white-space:nowrap}
 .example-banner button {flex:none;min-height:var(--h-sm);padding:3px 10px;font-size:13px;white-space:nowrap}
-.project-tools {display:flex;align-items:center;gap:var(--s2);margin-left:auto;flex:none;min-width:0}
+/* The full unsaved/list-separation sentence: a help disclosure next to the badge (keyboard reachable, read by screen readers). */
+.example-help {position:relative;flex:none;margin-right:var(--s1)}
+.example-help>summary {display:grid;place-items:center;width:24px;height:24px;padding:0;margin:0;border-radius:50%;
+  background:no-repeat center/16px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%235f6779' stroke-width='1.4' stroke-linecap='round'%3E%3Ccircle cx='8' cy='8' r='6.2'/%3E%3Cpath d='M8 7.3v3.6'/%3E%3Ccircle cx='8' cy='5' r='.4' fill='%235f6779'/%3E%3C/svg%3E")}
+.example-help>summary:before {content:none}
+.example-help>summary:hover,.example-help[open]>summary {background-color:var(--surface-hover)}
+.example-help>p {position:absolute;left:0;top:calc(100% + 6px);z-index:30;width:280px;margin:0;padding:10px var(--s3);font-size:13px;line-height:20px;color:var(--text-2);
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r-control);box-shadow:var(--shadow-menu)}
+.project-tools {display:flex;align-items:center;gap:var(--s2);margin-left:auto;flex:none}
 .saved {display:inline-flex;align-items:center;gap:6px;font-size:12px;line-height:18px;color:var(--text-3);white-space:nowrap}
 .saved:before {content:'';width:6px;height:6px;border-radius:50%;background:#12b76a}
 .saved.failed {color:var(--danger-text)}
@@ -242,7 +251,7 @@ body[data-route="example"] #saved,body[data-route="example"] #project-management
   body[data-map-header="true"] #project-management>.row button {width:100%;min-height:var(--h-md);text-align:left;white-space:normal;border-color:transparent;background:transparent}
   body[data-map-header="true"] #project-management>.row button:hover:not(:disabled) {background:var(--surface-hover)}
 }
-.topbar-actions {display:flex;align-items:center;gap:var(--s2);flex:none}
+.topbar-actions {display:flex;align-items:center;gap:var(--s2);flex:none;margin-left:auto}
 .connection-details {position:relative;flex:none;font-size:12px}
 .connection-details>summary {
   list-style:none;display:flex;align-items:center;gap:6px;min-height:var(--h-sm);padding:0 10px;margin:0;
@@ -1017,14 +1026,10 @@ html.source-review-open {overflow:hidden}
   .context-panel {width:100%}
   .project-name {max-width:min(320px,28vw)}
 }
-@media(max-width:1100px) and (min-width:761px){
-  .example-banner span {display:none}
-}
 @media(max-width:900px){
   .topbar {flex-wrap:wrap}
   .project-head {flex-wrap:wrap;flex-basis:100%;order:3}
   .project-tools {flex:1 1 auto;flex-wrap:wrap;margin-left:0}
-  .example-banner {flex-wrap:wrap}
 }
 @media(max-width:800px){
   .app-shell {display:block}

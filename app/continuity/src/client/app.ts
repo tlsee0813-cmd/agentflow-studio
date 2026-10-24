@@ -333,10 +333,20 @@ function displayView() {
   // WORK41: the edit-place memo serves one return; once the work view is shown again it is spent (never replayed later).
   if(inProject&&view==='work')workMemo=null;
   $('context-panel').hidden=!contextOpen;$('workspace').classList.toggle('details-open',contextOpen);
-  $('nav-context').setAttribute('aria-expanded',String(contextOpen));
+  $('nav-context').setAttribute('aria-expanded',String(contextOpen));fitNameField();
   for(const [id,active] of [['nav-work',inProject&&view==='work'&&!contextOpen],['nav-context',inProject&&view==='work'&&contextOpen],['nav-history',inProject&&view==='history']] as const){
     $(id).classList.toggle('active',active);if(active)$(id).setAttribute('aria-current','page');else $(id).removeAttribute('aria-current');
   }
+}
+/** VISUAL42: the header's name field is as wide as its text (measured with its own computed font, plus a small margin for
+ * caret and rounding), up to the CSS max-width; a longer name scrolls inside the field. View only, nothing is stored. */
+let nameMeasure:CanvasRenderingContext2D|null=null;
+function fitNameField() {
+  const field=$<HTMLInputElement>('project-name'),cs=getComputedStyle(field);
+  nameMeasure??=document.createElement('canvas').getContext('2d');if(!nameMeasure)return;
+  nameMeasure.font=`${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+  const edges=['paddingLeft','paddingRight','borderLeftWidth','borderRightWidth'].reduce((n,k)=>n+(parseFloat(cs[k as 'paddingLeft'])||0),0);
+  field.style.width=`${Math.ceil(nameMeasure.measureText(field.value||field.placeholder).width+edges+6)}px`;
 }
 /** VISUAL42: on PC every project layer shares the one header row, so project management is its menu there; narrow screens keep the inline buttons. */
 function syncProjectHeader() {
@@ -2795,8 +2805,9 @@ function submitInput(withAI:boolean) {
 $('compose').addEventListener('submit',e=>{e.preventDefault();submitInput(true);});
 $('save-input').addEventListener('click',()=>submitInput(false));
 $('draft').addEventListener('input',()=>guard(()=>commit(editDraft(project,$<HTMLTextAreaElement>('draft').value),false)));
-$('project-name').addEventListener('input',()=>{const value=$<HTMLInputElement>('project-name').value;if(value.trim())guard(()=>commit(rename(project,value),false));});
-$('project-name').addEventListener('blur',()=>{$<HTMLInputElement>('project-name').value=project.name;});
+$('project-name').addEventListener('input',()=>{fitNameField();const value=$<HTMLInputElement>('project-name').value;if(value.trim())guard(()=>commit(rename(project,value),false));});
+$('project-name').addEventListener('blur',()=>{$<HTMLInputElement>('project-name').value=project.name;fitNameField();});
+void document.fonts?.ready.then(fitNameField);
 $('request-tab').addEventListener('click',()=>{if(project.draftKind!=='request')changeKind('request');});
 $('report-tab').addEventListener('click',()=>{if(project.draftKind!=='report')changeKind('report');});
 $('source-kind').addEventListener('change',()=>{const kind=$<HTMLSelectElement>('source-kind').value as Project['draftKind'];if(project.draftKind!==kind)changeKind(kind);});
