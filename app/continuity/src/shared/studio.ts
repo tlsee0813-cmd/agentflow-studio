@@ -5,7 +5,10 @@ import { areaOf, isReturnTask, areaDescription } from './domain.js';
 import { parseResultFile } from './validation.js';
 
 export type PartStatus = 'plan' | 'active' | 'reported' | 'check';
-export const STATUS_LABEL: Record<PartStatus, string> = { plan: '구상', active: '진행 중', reported: '보고 받음', check: '확인 필요' };
+/** Observations only: 'active' means a request is recorded and no report came back, not that work is running. */
+export const STATUS_LABEL: Record<PartStatus, string> = { plan: '구상', active: '요청 있음 · 보고 없음', reported: '보고 받음', check: '확인 필요' };
+/** Same meaning, short enough for a map node. */
+export const STATUS_SHORT: Record<PartStatus, string> = { plan: '구상', active: '요청만 있음', reported: '보고 받음', check: '확인 필요' };
 export type RecordKind = 'request' | 'report' | 'evidence' | 'answer' | 'decision';
 export const RECORD_LABEL: Record<RecordKind, string> = { request: '요청', report: '작업 보고', evidence: '확인 자료', answer: '답변', decision: '결정' };
 
@@ -97,26 +100,60 @@ export interface StudioAsk {
     links: { other: string; direction: 'to' | 'from'; kind: RelationKind; note: string }[] };
   current: { summary: string | null; changes: string[] };
   records: AskRecord[];
+  coverage?: AskCoverage;
 }
 export interface StudioReply { headline: string; situation: string[]; changes: string[]; next: string[]; answer: string | null; refs: string[] }
 
-export function buildAsk(p: Project, v: StudioView, partId: string, intent: AskIntent, question: string | null): { ask: StudioAsk; refs: Map<string, string> } {
+/** What part of the material went out: newest records first, within ASK_BYTES of UTF-8 JSON. Optional on input, so a
+ * request from an older open tab (no coverage) is still accepted. */
+export interface AskCoverage { records: { total: number; sent: number; cut: number }; links: { total: number; sent: number }; children: { total: number; sent: number } }
+const encoder = new TextEncoder();
+export const askBytes = (v: unknown) => encoder.encode(JSON.stringify(v)).length;
+/** Cut to at most n UTF-16 units without leaving half of a surrogate pair. */
+export function clip(text: string, n: number): string {
+  if (text.length <= n) return text;
+  const code = text.charCodeAt(n - 1);
+  return text.slice(0, code >= 0xd800 && code <= 0xdbff ? n - 1 : n);
+}
+/** Room kept for the coverage counts, which are filled in last. */
+const COVERAGE_ROOM = 256, META_BYTES = 32768, MIN_EXCERPT_BYTES = 600;
+
+export function buildAsk(p: Project, v: StudioView, partId: string, intent: AskIntent, question: string | null): { ask: StudioAsk; refs: Map<string, string>; coverage: AskCoverage } {
   const part = v.parts.find(x => x.id === partId); if (!part) throw new Error('PART_MISSING');
-  const name = (id: string) => v.parts.find(x => x.id === id)?.name ?? '';
-  const refs = new Map<string, string>();
-  const records = subtreeRecords(v, partId).slice(0, ASK_RECORDS).map((r, i) => {
-    const ref = `R${i + 1}`; refs.set(ref, r.id);
-    return { ref, kind: r.kind, at: r.at, part: name(r.partId!), text: r.text.slice(0, RECORD_CHARS), cut: r.text.length > RECORD_CHARS };
-  });
-  return { refs, ask: {
+  const name = (id: string) => clip(v.parts.find(x => x.id === id)?.name ?? '', 60);
+  const allLinks = v.relations.filter(r => r.from === partId || r.to === partId).map(r => ({ other: name(r.from === partId ? r.to : r.from), direction: r.from === partId ? 'to' as const : 'from' as const, kind: r.kind, note: clip(r.note, 300) }));
+  const allChildren = part.childIds.map(id => ({ name: name(id), status: v.parts.find(x => x.id === id)!.status }));
+  const ask: StudioAsk = {
     version: STUDIO_SCHEMA, intent, question: intent === 'question' ? question : null,
-    project: { name: p.name, purpose: p.space.brief?.text.slice(0, 2000) ?? null },
-    part: { name: part.name, note: part.note.slice(0, 2000), path: partPath(v, partId).map(x => x.name),
-      children: part.childIds.map(id => ({ name: name(id), status: v.parts.find(x => x.id === id)!.status })),
-      links: v.relations.filter(r => r.from === partId || r.to === partId).map(r => ({ other: name(r.from === partId ? r.to : r.from), direction: r.from === partId ? 'to' as const : 'from' as const, kind: r.kind, note: r.note.slice(0, 300) })) },
-    current: { summary: part.summary?.slice(0, 2000) ?? null, changes: part.changes.slice(0, 6) },
-    records
-  } };
+    project: { name: clip(p.name, 120), purpose: p.space.brief ? clip(p.space.brief.text, 2000) : null },
+    part: { name: clip(part.name, 60), note: clip(part.note, 2000), path: partPath(v, partId).map(x => clip(x.name, 60)).slice(-64),
+      children: allChildren.slice(0, 200), links: allLinks.slice(0, 200) },
+    current: { summary: part.summary ? clip(part.summary, 2000) : null, changes: part.changes.slice(0, 6).map(c => clip(c, 300)) },
+    records: []
+  };
+  // Structure first, but bounded: relations and children shrink from the end, keeping at least one of each.
+  while (askBytes(ask) > META_BYTES && ask.part.links.length > 1) ask.part.links.pop();
+  while (askBytes(ask) > META_BYTES && ask.part.children.length > 1) ask.part.children.pop();
+  const budget = ASK_BYTES - COVERAGE_ROOM, refs = new Map<string, string>(), all = subtreeRecords(v, partId);
+  let cut = 0;
+  // Newest first. A record that does not fit whole goes as a marked excerpt if a useful part fits; the rest are left out.
+  for (const r of all) {
+    if (ask.records.length >= ASK_RECORDS) break;
+    const ref = `R${ask.records.length + 1}`, rec: AskRecord = { ref, kind: r.kind, at: r.at, part: name(r.partId!), text: clip(r.text, RECORD_CHARS), cut: r.text.length > RECORD_CHARS };
+    ask.records.push(rec);
+    if (askBytes(ask) <= budget) { refs.set(ref, r.id); if (rec.cut) cut++; continue; }
+    rec.text = ''; const room = budget - askBytes(ask);
+    if (room < MIN_EXCERPT_BYTES) { ask.records.pop(); break; }
+    let lo = 0, hi = Math.min(r.text.length, RECORD_CHARS);
+    while (lo < hi) { const mid = Math.ceil((lo + hi) / 2); rec.text = clip(r.text, mid); if (askBytes(ask) <= budget) lo = mid; else hi = mid - 1; }
+    rec.text = clip(r.text, lo); rec.cut = true;
+    if (!rec.text.trim()) { ask.records.pop(); break; }
+    refs.set(ref, r.id); cut++; break;
+  }
+  const coverage: AskCoverage = { records: { total: all.length, sent: ask.records.length, cut },
+    links: { total: allLinks.length, sent: ask.part.links.length }, children: { total: allChildren.length, sent: ask.part.children.length } };
+  ask.coverage = coverage;
+  return { refs, ask, coverage };
 }
 
 export class StudioError extends Error { constructor(code: string) { super(code); this.name = 'StudioError'; } }
@@ -135,7 +172,8 @@ function arr(v: unknown, max: number, code?: string): unknown[] { if (!Array.isA
 const STATUSES = ['plan', 'active', 'reported', 'check'], KINDS = ['request', 'report', 'evidence', 'answer', 'decision'], RELS = ['flow', 'needs', 'shares', 'related'];
 
 export function validateAsk(v: unknown): StudioAsk {
-  const o = keys(v, ['version', 'intent', 'question', 'project', 'part', 'current', 'records']);
+  const base = ['version', 'intent', 'question', 'project', 'part', 'current', 'records'];
+  const o = keys(v, isObj(v) && 'coverage' in v ? [...base, 'coverage'] : base);
   if (o.version !== STUDIO_SCHEMA) fail('UNSUPPORTED_VERSION');
   if (!['summary', 'next', 'question'].includes(o.intent as string)) fail();
   if (o.intent === 'question') str(o.question, 1000); else if (o.question !== null) fail();
@@ -151,6 +189,14 @@ export function validateAsk(v: unknown): StudioAsk {
     if (typeof x.ref !== 'string' || !/^R\d{1,2}$/.test(x.ref) || seen.has(x.ref)) fail(); seen.add(x.ref as string);
     if (!KINDS.includes(x.kind as string) || typeof x.cut !== 'boolean') fail();
     str(x.at, 30); str(x.part, 60); str(x.text, RECORD_CHARS);
+  }
+  if ('coverage' in o) {
+    const c = keys(o.coverage, ['records', 'links', 'children']), n = (x: unknown) => Number.isSafeInteger(x) && (x as number) >= 0;
+    const rc = keys(c.records, ['total', 'sent', 'cut']), lc = keys(c.links, ['total', 'sent']), cc = keys(c.children, ['total', 'sent']);
+    const records = o.records as { cut: boolean }[];
+    if (![rc.total, rc.sent, rc.cut, lc.total, lc.sent, cc.total, cc.sent].every(n) || rc.sent !== records.length || rc.cut !== records.filter(r => r.cut).length
+      || (rc.total as number) < (rc.sent as number) || lc.sent !== (pa.links as unknown[]).length || (lc.total as number) < (lc.sent as number)
+      || cc.sent !== (pa.children as unknown[]).length || (cc.total as number) < (cc.sent as number)) fail();
   }
   return structuredClone(o) as unknown as StudioAsk;
 }

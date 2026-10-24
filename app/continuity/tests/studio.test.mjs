@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { EXAMPLES, buildExample } from '../dist/public/shared/studio-examples.js';
-import { studioView, subtreeRecords, buildAsk, validateAsk, validateReply } from '../dist/public/shared/studio.js';
+import { studioView, subtreeRecords, buildAsk, validateAsk, validateReply, askBytes, ASK_BYTES, ASK_RECORDS, RECORD_CHARS } from '../dist/public/shared/studio.js';
 import { parseProject, parseResultFile } from '../dist/public/shared/validation.js';
 import { editArea } from '../dist/public/shared/domain.js';
 import { layoutScope, NODE_W, NODE_H, ROOT, ghostId } from '../dist/public/client/map-layout.js';
@@ -173,4 +173,52 @@ test('STUDIO-S5 handler and adapter modules import nothing from node:', async ()
   const r = await worker.fetch(new Request('https://studio.example/api/studio/status'), {});
   assert.deepEqual(await r.json(), { ai: 'off', model: null, access: 'open' });
   assert.equal((await worker.fetch(new Request('https://studio.example/other'), {})).status, 404);
+});
+
+// Long Korean records (3 bytes per character), an emoji at a cut point and many long relation notes, all through the normal domain path.
+function heavyProject() {
+  const long = (seed, n) => `${seed} `.padEnd(n, '가나다라마바사아자차카타파하');
+  const emoji = (n) => '기록😀'.repeat(Math.ceil(n / 4)).slice(0, n);
+  const others = Array.from({ length: 30 }, (_, i) => ({ key: `o${i}`, name: `연결 부분 ${i + 1}`, note: '' }));
+  const kinds = ['flow', 'needs', 'shares', 'related'];
+  return buildExample({ id: 'heavy', name: '긴 기록 프로젝트', brief: long('목적', 1900),
+    parts: [{ key: 'main', name: '결제 흐름', note: long('계획', 1900) }, ...others],
+    relations: others.flatMap((o, i) => kinds.slice(0, i % 2 ? 4 : 3).map(k => ['main', o.key, k, long(`관계 ${i}`, 200)])),
+    records: Array.from({ length: 7 }, (_, i) => ({ part: 'main', minutesAgo: 1000 - i * 100, request: long(`요청 ${i + 1}`, 3000),
+      reply: { minutesAgo: 990 - i * 100, report: i === 6 ? emoji(3000) : long(`보고 ${i + 1}`, 3000), origin: 'Claude Code 세션 기록에서 정리', summary: long('설명', 1900), changes: [long('변화', 290)] } })) });
+}
+
+test('STUDIO-C2 long Korean material fits ASK_BYTES as UTF-8: newest first, excerpt marked, the rest counted, refs only to sent records', async () => {
+  const p = heavyProject(), v = studioView(p), part = v.parts.find(x => x.name === '결제 흐름');
+  const all = subtreeRecords(v, part.id);
+  assert.equal(all.length, 14);
+  // The earlier construction (first 14 records cut at 2,400 characters, every relation) was over the limit.
+  const old = { ...buildAsk(p, v, part.id, 'summary', null).ask, coverage: undefined };
+  delete old.coverage;
+  old.records = all.slice(0, ASK_RECORDS).map((r, i) => ({ ref: `R${i + 1}`, kind: r.kind, at: r.at, part: '결제 흐름', text: r.text.slice(0, RECORD_CHARS), cut: r.text.length > RECORD_CHARS }));
+  old.part.links = v.relations.filter(r => r.from === part.id).slice(0, 200).map(r => ({ other: 'x', direction: 'to', kind: r.kind, note: r.note }));
+  assert.ok(askBytes(old) > ASK_BYTES, `old size ${askBytes(old)}`);
+
+  const { ask, refs, coverage } = buildAsk(p, v, part.id, 'question', '이모지😀 포함 질문: 결제는 어디까지 됐어?');
+  assert.ok(askBytes(ask) <= ASK_BYTES, `new size ${askBytes(ask)}`);
+  assert.deepEqual(validateAsk(JSON.parse(JSON.stringify(ask))), JSON.parse(JSON.stringify(ask)));
+  assert.equal(coverage.records.total, 14);
+  assert.ok(coverage.records.sent > 0 && coverage.records.sent < 14, 'some records are left out and counted');
+  assert.equal(coverage.records.sent, ask.records.length);
+  assert.ok(coverage.links.sent >= 1 && coverage.links.sent < coverage.links.total, 'large relation metadata keeps at least one representative');
+  assert.deepEqual(ask.records.map(r => refs.get(r.ref)), all.slice(0, ask.records.length).map(r => r.id), 'newest first, refs map to the records actually sent');
+  for (const r of ask.records) assert.ok(!/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/.test(r.text) && !/(^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]/.test(r.text), 'no half emoji');
+  assert.ok(ask.records.every(r => r.cut === (r.text.length < (all.find(x => x.id === refs.get(r.ref)).text.length))));
+
+  // The real handler accepts it and reaches the (stub) provider; a reply may only cite sent records.
+  let called = 0;
+  const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: 'k' }, fetchImpl: async (...a) => { called++; return providerReply({ ...okContent, answer: '답', refs: ['R1'] })(...a); } });
+  const r = await handle(post(ask));
+  assert.equal(r.status, 200); assert.equal(called, 1);
+  assert.throws(() => validateReply({ ...okContent, answer: '답', refs: [`R${ask.records.length + 1}`] }, ask));
+  // A request from an older open tab (no coverage) is still valid.
+  const legacy = JSON.parse(JSON.stringify(ask)); delete legacy.coverage;
+  assert.equal((await handle(post(legacy))).status, 200);
+  // A coverage that does not match the records is refused.
+  assert.throws(() => validateAsk({ ...JSON.parse(JSON.stringify(ask)), coverage: { ...coverage, records: { ...coverage.records, sent: 99 } } }));
 });

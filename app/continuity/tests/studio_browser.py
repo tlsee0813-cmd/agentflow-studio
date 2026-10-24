@@ -43,12 +43,15 @@ def main_flow(browser, base):
     expect(page.locator(".panel .summary")).to_contain_text("휴무일")
     expect(page.locator("#recent")).to_have_class(re.compile("collapsed"))  # folds while a part is open
     no_page_scroll(page)
+    # Reading first: the question entry is one small row until it is opened.
+    assert page.locator(".composer").bounding_box()["height"] < 64, page.locator(".composer").bounding_box()
     page.get_by_role("button", name="지금 상황 정리").first.click()
     expect(page.locator(".answer")).to_have_count(1)
     expect(page.locator(".answer .ans-head")).to_contain_text("[스텁 응답] 시간 고르기")
     page.locator(".answer .ref").first.click()
     expect(page.locator(".record details[open]")).to_have_count(1)
     # A draft survives switching parts (example: memory only).
+    page.locator(".ask-open").click()
     page.locator("#ask-input").fill("휴무일은 어디서 정해?")
     page.locator(".kid, .panel-path a").first.click()
     expect(page.locator("#panel-title")).to_have_text("예약하기")
@@ -153,6 +156,73 @@ def map_flow(browser, base):
     page.close()
 
 
+def basics_flow(browser, base):
+    """Studio 45 fixes: stable example links, observation labels, no note text on the map, recent records range,
+    temporary unfold for a record, and the access code kept from an input event."""
+    page = browser.new_page(viewport={"width": 1280, "height": 720})
+    page.goto(base + "/")
+    page.locator(".project-card").first.click()
+    # Labels say what was observed, not that work is running; relation notes are not drawn over the map.
+    expect(page.locator(".node", has_text="문자 알림")).to_contain_text("요청만 있음")
+    expect(page.locator("#space")).not_to_contain_text("진행 중")
+    expect(page.locator("#world .edge text")).to_have_count(0)
+    # Recent records: newest 7 of all, with the way to all of them.
+    expect(page.locator("#recent-title")).to_have_text("최근 기록")
+    expect(page.locator("#recent-count")).to_have_text("최신 7 / 14")
+    page.get_by_role("button", name="전체 14개 보기").click()
+    expect(page.locator(".recent-item")).to_have_count(14)
+    page.get_by_role("button", name="최신 7개만 보기").click()
+    expect(page.locator(".recent-item")).to_have_count(7)
+    # A fold the person made comes back after a record was opened for reference.
+    page.locator(".frame-head", has_text="예약하기").locator(".toggle").click()
+    expect(page.locator(".node", has_text="시간 고르기")).to_have_count(0)
+    page.locator(".recent-item", has_text="시간 고르기").first.click()
+    expect(page.locator("#panel-title")).to_have_text("시간 고르기")
+    expect(page.locator(".node", has_text="시간 고르기")).to_be_visible()
+    expect(page.locator(".record details[open]")).to_have_count(1)
+    page.keyboard.press("Escape")
+    expect(page.locator("#panel")).to_be_hidden()
+    expect(page.locator(".node", has_text="시간 고르기")).to_have_count(0)
+    expect(page.locator(".node", has_text="예약하기")).to_be_visible()
+    page.locator(".node", has_text="예약하기").locator(".toggle").click()
+    # Panel: observation wording, the relation note in 연결, the line highlighted on the map.
+    page.locator(".node", has_text="문자 알림").click()
+    expect(page.locator(".panel-chips")).to_contain_text("요청 있음 · 보고 없음")
+    expect(page.locator(".panel .summary")).to_contain_text("요청 기록은 있고")
+    expect(page.locator(".panel .links")).to_contain_text("예약이 확정되면 문자를 보낸다")
+    expect(page.locator("#world .edge.on")).to_have_count(1)
+    # An example link (scope + part) opens the same part after a reload and in a new browser, although ids are rebuilt.
+    page.keyboard.press("Escape")
+    page.locator(".frame-head", has_text="예약하기").locator(".enter").click()
+    page.locator(".node", has_text="시간 고르기").click()
+    expect(page.locator("#panel-title")).to_have_text("시간 고르기")
+    assert re.search(r"#/p/ex-salon/in/book/slots$", page.url), page.url
+    link = page.url
+    page.reload()
+    expect(page.locator("#panel-title")).to_have_text("시간 고르기")
+    expect(page.locator("#scope-bar")).to_contain_text("예약하기 안")
+    other = browser.new_context(viewport={"width": 1440, "height": 900})
+    fresh = other.new_page()
+    fresh.goto(link)
+    expect(fresh.locator("#panel-title")).to_have_text("시간 고르기")
+    expect(fresh.locator("#scope-bar")).to_contain_text("예약하기 안")
+    other.close()
+    page.close()
+
+
+def code_flow(browser, base):
+    page = browser.new_page(viewport={"width": 1280, "height": 720})
+    page.goto(base + "/")
+    page.locator(".project-card").first.click()
+    page.locator(".node", has_text="시간 고르기").click()
+    page.get_by_role("button", name="지금 상황 정리").click()  # no code yet: opens the box at the code field
+    expect(page.locator("#access-code")).to_be_focused()
+    page.locator("#access-code").fill("smoke-code")  # input events only (as with paste or autofill), no change event
+    page.get_by_role("button", name="지금 상황 정리").click()
+    expect(page.locator(".answer")).to_have_count(1)
+    page.close()
+
+
 def new_project_flow(browser, base):
     context = browser.new_context(viewport={"width": 1280, "height": 720})
     page = context.new_page()
@@ -171,6 +241,7 @@ def new_project_flow(browser, base):
     expect(page.locator(".frame")).to_have_count(1)
     expect(page.locator("#panel-title")).to_have_text("비밀번호 찾기")
     # A saved project's draft survives a reload.
+    page.locator(".ask-open").click()
     page.locator("#ask-input").fill("어디까지 됐어?")
     page.reload()
     expect(page.locator("#panel-title")).to_have_text("비밀번호 찾기")
@@ -264,8 +335,10 @@ def main():
             exe = os.environ.get("STUDIO_CHROMIUM")
             browser = p.chromium.launch(**({"executable_path": exe} if exe else {}))
             proc, base = start("ok"); procs.append(proc); main_flow(browser, base); print("ok  entry -> map -> part -> ask -> evidence -> map")
+            basics_flow(browser, base); print("ok  stable example link (reload, new browser), labels, no map note text, recent range, fold restored")
             map_flow(browser, base); print("ok  drag (node, group), wheel zoom, inside/back with view kept, fold, example places not saved")
             new_project_flow(browser, base); print("ok  new project -> three levels -> path and back -> saved place and draft kept on reload")
+            proc, base = start("code"); procs.append(proc); code_flow(browser, base); print("ok  access code kept from an input event")
             proc, base = start("fail"); procs.append(proc); failure_flow(browser, base); print("ok  provider failure -> short error -> retry")
             proc, base = start("nokey"); procs.append(proc); off_flow(browser, base + "/", "AI 키 없음"); print("ok  server without key -> honest off state")
             if (ROOT / "static-dist/index.html").exists():

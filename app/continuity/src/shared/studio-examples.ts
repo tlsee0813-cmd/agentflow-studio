@@ -119,3 +119,12 @@ export const EXAMPLES: ExampleSpec[] = [{
     { part: 'report', minutesAgo: 90, request: '이번 달 분류별 합계를 막대 그래프로 보여줘.' }
   ]
 }];
+
+/** Stable address keys of an example's parts: the spec keys, independent of shown names and of the random ids a fresh
+ * build gets. buildExample creates the areas in spec order and nothing else adds any, so the n-th area is the n-th spec part. */
+export function exampleKeys(exampleId: string, p: Project): Map<string, string> {
+  const spec = EXAMPLES.find(e => e.id === exampleId), keys = new Map<string, string>();
+  if (!spec) return keys;
+  spec.parts.forEach((part, i) => { const area = p.space.areas[i]; if (area) keys.set(part.key, area.id); });
+  return keys;
+}
