@@ -53,7 +53,31 @@ Windows에서 빌드가 이미 있다면 PowerShell로 `./continuity/scripts/sta
 - 한도(선택): `STUDIO_TIMEOUT_MS`, `STUDIO_MAX_TOKENS`, `STUDIO_REQUESTS_PER_MINUTE`, `STUDIO_MAX_CONCURRENT`, `STUDIO_CALL_CAP`.
 - 로컬 Node: `server/app.mjs`가 기존 localhost Host 검사를 먼저 하고 그다음 `/api/studio/*`를 handler에 넘깁니다.
   기존 `/api/continuity`·`/api/guidance` 경계는 바뀌지 않았습니다.
-- handler는 `node:` 없이 import됩니다(`server/worker.mjs`는 Worker 형식의 얇은 예시). 이번 범위의 실행은 로컬 서버입니다.
+- handler는 `node:` 없이 import됩니다. `server/worker.mjs`가 Cloudflare에서 같은 API와 정적 화면을 연결합니다.
+
+## Cloudflare Workers
+
+`app/`에서 `node continuity/scripts/deploy-cloudflare.mjs --dry-run`으로 빌드·업로드 대상만 확인합니다.
+기존 Node와 TypeScript를 재사용하며 Wrangler나 별도 서버 환경을 설치하지 않습니다.
+실제 배포는 깨끗하게 커밋된 HEAD에서만 실행하고, 그 SHA의 CI 성공을 먼저 확인합니다.
+
+```sh
+node --env-file=/private/cloudflare.env --env-file=/private/studio.env continuity/scripts/deploy-cloudflare.mjs
+```
+
+- `cloudflare.env`: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`. Workers 편집 권한을 사용할 계정 하나에 한정합니다.
+- `studio.env`: `DEEPSEEK_API_KEY`, `STUDIO_ACCESS_CODE`, 선택 `DEEPSEEK_MODEL`.
+  AI 이용 코드는 사용자만 보관합니다. 공개 AI 배포에서는 빈 코드를 허용하지 않습니다.
+- 기본 Worker 이름은 `agentflow-studio`이며 `CLOUDFLARE_WORKER_NAME`으로 바꿀 수 있습니다.
+  계정의 `workers.dev` 하위 도메인이 먼저 설정되어 있어야 합니다.
+- 화면은 정적 자산, `/api/studio/*`는 같은 주소의 Worker로 배포합니다. 키와 이용 코드는 `secret_text` 바인딩에만 넣습니다.
+  공개 자산과 서버 코드에 실제 비밀 값이 포함되면 업로드 전에 중단합니다.
+- `BUILD.txt`와 Worker 배포 메시지에 원본 SHA를 남깁니다. 배포 뒤 상태 API, AI 이용 코드 경계, 실제 응답을 확인합니다.
+  요청 한도는 인스턴스 메모리 기준이며 계정 전체의 영구 사용량 한도는 아닙니다.
+- 프로젝트는 브라우저 주소별 저장입니다. Pages/로컬/Workers 간에는 자동 이전되지 않습니다. 기존 주소의 저장 내용은 유지됩니다.
+
+배포 절차는 Cloudflare의 [Direct Uploads](https://developers.cloudflare.com/workers/static-assets/direct-upload/)와
+[module/secret metadata](https://developers.cloudflare.com/workers/configuration/multipart-upload-metadata/)를 사용합니다.
 
 ## 정적 빌드 (공개 Pages 체험)
 

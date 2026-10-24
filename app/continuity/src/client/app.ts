@@ -7,7 +7,7 @@ import { parseProject } from '../shared/validation.js';
 import { editArea, addArea, addChildArea, createProject, rename } from '../shared/domain.js';
 import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, RECORD_LABEL, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample } from '../shared/studio-examples.js';
-import { layoutMap, edgePath, type MapLayout } from './map-layout.js';
+import { layoutScope, edgePath, ROOT, type ScopeLayout, type Positions, type Point } from './map-layout.js';
 import { aiStatus, askStudio, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
 import { runtimeStorage } from './runtime.js';
 
@@ -28,6 +28,7 @@ function h<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Record<string, 
 const SVG = 'http://www.w3.org/2000/svg';
 const put = (el: HTMLElement, ...children: Child[]) => { for (const c of children) if (c) el.append(c); };
 const svg = (tag: string, attrs: Record<string, string>) => { const el = document.createElementNS(SVG, tag); for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v); return el; };
+const chevron = (open: boolean) => { const el = svg('svg', { viewBox: '0 0 16 16', 'aria-hidden': 'true', class: open ? 'open' : '' }); el.append(svg('path', { d: 'M6 4l4 4-4 4' })); return el; };
 
 function ago(at: string | null): string {
   if (!at) return '';
@@ -43,7 +44,7 @@ const firstLine = (text: string, n = 90) => { const line = text.split('\n').find
 const recentAt = (at: string | null) => !!at && Date.now() - Date.parse(at) < 24 * 3600000;
 
 /* ---------- state ---------- */
-interface Opened { key: string; kind: 'example' | 'saved' | 'legacy'; project: Project; ref: EntryRef | null; view: StudioView; layout: MapLayout }
+interface Opened { key: string; kind: 'example' | 'saved' | 'legacy'; project: Project; ref: EntryRef | null; view: StudioView }
 interface Answer { at: string; intent: AskIntent; question: string | null; model: string; reply: StudioReply; refs: Record<string, string> }
 interface Ask { partId: string; intent: AskIntent; question: string | null; controller: AbortController | null; error: string | null }
 
@@ -105,13 +106,66 @@ function setDraft(o: Opened, partId: string, value: string) {
   } catch { /* the in-memory draft still holds */ }
 }
 
-/* ---------- routing: #/  ·  #/p/<key>  ·  #/p/<key>/<partId> ---------- */
-function route(): { key: string | null; part: string | null } {
-  const m = /^#\/p\/([^/]+)(?:\/([^/]+))?$/.exec(location.hash);
-  return m ? { key: decodeURIComponent(m[1]!), part: m[2] ? decodeURIComponent(m[2]) : null } : { key: null, part: null };
+/* Map positions the person set by dragging: own key per project (saved projects only; examples stay in memory).
+ * Kept apart from the stored layout.1 data, which the domain fills on every new area and so cannot tell a placed part
+ * from an untouched one. Same browser only; a backup file does not carry them. */
+const POSITIONS_KEY = 'agentflow.studio.positions.1';
+const memoryPositions = new Map<string, Positions>();
+function cleanPositions(v: unknown): Positions {
+  const out: Positions = {};
+  if (!v || typeof v !== 'object') return out;
+  for (const [c, m] of Object.entries(v as Record<string, unknown>)) {
+    if (!m || typeof m !== 'object') continue;
+    for (const [id, p] of Object.entries(m as Record<string, unknown>)) {
+      const x = (p as Point)?.x, y = (p as Point)?.y;
+      if (Number.isFinite(x) && Number.isFinite(y) && Math.abs(x) < 1e6 && Math.abs(y) < 1e6) (out[c] ??= {})[id] = { x, y };
+    }
+  }
+  return out;
 }
-const go = (key: string | null, part: string | null = null) => {
-  const hash = key ? `#/p/${encodeURIComponent(key)}${part ? `/${encodeURIComponent(part)}` : ''}` : '#/';
+function positionsOf(o: Opened): Positions {
+  let p = memoryPositions.get(o.project.id);
+  if (!p) {
+    p = {};
+    if (o.kind === 'saved') { try { p = cleanPositions((JSON.parse(kv.getItem(POSITIONS_KEY) ?? '{}') as Record<string, unknown>)[o.project.id]); } catch { p = {}; } }
+    memoryPositions.set(o.project.id, p);
+  }
+  return p;
+}
+function savePositions(o: Opened) {
+  if (o.kind !== 'saved') return;
+  try {
+    const all = JSON.parse(kv.getItem(POSITIONS_KEY) ?? '{}') as Record<string, Positions>;
+    all[o.project.id] = positionsOf(o); kv.setItem(POSITIONS_KEY, JSON.stringify(all));
+  } catch { /* the in-memory positions still hold for this tab */ }
+}
+
+/* Scope = the part whose inside is shown (null = whole project). Each scope keeps its own camera for the way back. */
+let scope: string | null = null;
+let lay: ScopeLayout = { boxes: new Map(), edges: [], bounds: { x: 0, y: 0, w: 0, h: 0 } };
+const cameras = new Map<string, { x: number; y: number; k: number }>();
+const expandState = new Map<string, boolean>();
+const camKey = (o: Opened, s: string | null) => `${o.project.id}|${s ?? ''}`;
+/** Direct children of the scope open as frames; deeper parts stay folded until opened. */
+const isExpanded = (o: Opened) => (id: string, depth: number) => expandState.get(`${o.project.id}|${id}`) ?? depth === 0;
+const partOf = (o: Opened, id: string | null) => (id ? o.view.parts.find(p => p.id === id) ?? null : null);
+function insideScope(o: Opened, id: string): boolean {
+  if (!scope) return true;
+  for (let p = partOf(o, id), g = 0; p && g < 64; p = partOf(o, p.parentId), g++) if (p.parentId === scope) return true;
+  return false;
+}
+
+/* ---------- routing: #/  ·  #/p/<key>[/in/<scope>][/<part>] ---------- */
+function route(): { key: string | null; scope: string | null; part: string | null } {
+  const m = /^#\/p\/([^/]+)(?:\/in\/([^/]+))?(?:\/([^/]+))?$/.exec(location.hash);
+  const d = (x: string | undefined) => (x ? decodeURIComponent(x) : null);
+  return m ? { key: d(m[1])!, scope: d(m[2]), part: d(m[3]) } : { key: null, scope: null, part: null };
+}
+const hashFor = (key: string | null, part: string | null, s: string | null) =>
+  key ? `#/p/${encodeURIComponent(key)}${s ? `/in/${encodeURIComponent(s)}` : ''}${part ? `/${encodeURIComponent(part)}` : ''}` : '#/';
+/** sc undefined = stay in the current scope of the same project. */
+const go = (key: string | null, part: string | null = null, sc?: string | null) => {
+  const hash = hashFor(key, part, sc !== undefined ? sc : key === opened?.key ? scope : null);
   if (location.hash !== hash) location.hash = hash; else void render();
 };
 
@@ -129,29 +183,46 @@ function projectFor(key: string): Opened | null {
     project = e.project; ref = { entryId: e.entryId, lifecycle: e.lifecycle, seq: e.seq };
   }
   if (!project) return null;
-  const view = studioView(project);
-  return { key, kind, project, ref, view, layout: layoutMap(view) };
+  return { key, kind, project, ref, view: studioView(project) };
 }
 
 /* ---------- rendering ---------- */
 async function render() {
   const r = route();
-  if (!r.key) { opened = null; selected = null; renderHome(); return; }
+  if (!r.key) { if (opened) cameras.set(camKey(opened, scope), { ...camera }); opened = null; selected = null; scope = null; renderHome(); return; }
   const next = projectFor(r.key);
   if (!next) { go(null); return; }
   const fresh = opened?.key !== next.key;
-  opened = next;
-  if (fresh) { selected = null; ask = null; editing = false; partForm = null; renderSpace(); }
-  select(r.part && next.view.parts.some(p => p.id === r.part) ? r.part : null);
+  const nextScope = r.scope && next.view.parts.some(p => p.id === r.scope && p.childIds.length) ? r.scope : null;
+  if (fresh || nextScope !== scope) {
+    if (opened) cameras.set(camKey(opened, scope), { ...camera });
+    opened = next; scope = nextScope; lastClick.id = '';
+    if (fresh) { selected = null; ask = null; editing = false; partForm = null; }
+    renderSpace('restore');
+  }
+  const o = opened!;
+  const part = r.part && o.view.parts.some(p => p.id === r.part) ? r.part : null;
+  if (part && part !== scope && !lay.boxes.has(part)) {
+    if (insideScope(o, part)) {
+      // Unfold the way down to it inside this scope rather than leaving the scope.
+      for (let p = partOf(o, partOf(o, part)!.parentId), g = 0; p && p.id !== scope && g < 64; p = partOf(o, p.parentId), g++) expandState.set(`${o.project.id}|${p.id}`, true);
+      renderSpace('keep');
+    } else { location.replace(hashFor(o.key, part, partOf(o, part)!.parentId)); return; }
+  }
+  select(part);
 }
 
 function setBar(o: Opened | null) {
-  $('crumb-sep').hidden = $('crumb-project').hidden = !o;
-  $('crumb-project').textContent = o?.project.name ?? '';
-  const tag = $('crumb-tag');
-  tag.hidden = !o || o.kind === 'saved';
-  tag.textContent = o?.kind === 'example' ? '예제 기록' : o?.kind === 'legacy' ? '이전 저장 · 읽기 전용' : '';
-  tag.title = o?.kind === 'example' ? 'Codex·Claude에서 전달받았다고 가정하고 쓴 예제 기록이에요. 저장되지 않아요.' : '';
+  const crumbs: Node[] = [h('a', { href: '#/' }, '프로젝트')];
+  if (o) {
+    const path = scope ? partPath(o.view, scope) : [];
+    crumbs.push(h('span', { class: 'sep', 'aria-hidden': 'true' }, '/'),
+      path.length ? h('a', { href: hashFor(o.key, null, null), title: '전체 지도' }, o.project.name) : h('strong', {}, o.project.name));
+    path.forEach((p, i) => crumbs.push(h('span', { class: 'sep', 'aria-hidden': 'true' }, '/'),
+      i === path.length - 1 ? h('strong', { 'aria-current': 'location' }, p.name) : h('a', { href: hashFor(o.key, null, p.id) }, p.name)));
+    if (o.kind !== 'saved') crumbs.push(h('span', { class: 'tag', title: o.kind === 'example' ? 'Codex·Claude에서 전달받았다고 가정하고 쓴 예제 기록이에요. 저장되지 않아요.' : '' }, o.kind === 'example' ? '예제 기록' : '이전 저장 · 읽기 전용'));
+  }
+  $('crumbs').replaceChildren(...crumbs);
   document.title = o ? `${o.project.name} · AgentFlow Studio` : 'AgentFlow Studio';
 }
 
@@ -185,57 +256,102 @@ function renderHome() {
   if (problem) { msg.textContent = problem; msg.hidden = false; } else if (!msg.dataset.keep) msg.hidden = true;
 }
 
-function renderSpace() {
+const relayout = (o: Opened) => { lay = layoutScope(o.view, scope, isExpanded(o), positionsOf(o)); };
+
+/** camera: 'fit' (new view), 'restore' (a scope's own last camera, else fit), 'keep' (same view, structure changed). */
+function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit') {
   const o = opened!; setBar(o);
   $('home').hidden = true; $('space').hidden = false;
-  const world = $('world'), { layout, view } = o;
+  relayout(o);
+  const world = $('world'), view = o.view;
   world.replaceChildren();
-  world.style.width = `${layout.width}px`; world.style.height = `${layout.height}px`;
-  const edges = svg('svg', { class: 'edges', width: String(layout.width + 2), height: String(layout.height + 2), 'aria-hidden': 'true' });
+  const edges = svg('svg', { class: 'edges', width: '1', height: '1', 'aria-hidden': 'true' });
   const defs = svg('defs', {});
   for (const id of ['arrow', 'arrow-on']) {
     const m = svg('marker', { id, viewBox: '0 0 10 10', refX: '9', refY: '5', markerWidth: '7', markerHeight: '7', orient: 'auto-start-reverse' });
     m.append(svg('path', { d: 'M0,1 L9,5 L0,9 z' })); defs.append(m);
   }
   edges.append(defs);
-  // Frames first (behind), deepest last so nested frames sit above their parents.
-  const parts = [...view.parts].sort((a, b) => a.depth - b.depth);
-  for (const p of parts) {
-    const b = layout.boxes.get(p.id); if (!b?.group) continue;
-    const inside = subtreeRecords(view, p.id), latest = inside[0]?.at ?? null;
-    world.append(h('div', { class: `frame depth-${Math.min(p.depth, 2)}`, 'data-part': p.id, style: `left:${b.x}px;top:${b.y}px;width:${b.w}px;height:${b.h}px` },
-      h('button', { type: 'button', class: `frame-head s-${p.status}`, 'data-part': p.id, title: p.name, onclick: () => go(o.key, p.id) },
-        h('span', { class: 'frame-name' }, p.name),
-        h('span', { class: 'frame-meta' }, recentAt(latest) ? h('i', { class: 'new-dot', title: '최근 기록' }) : null, latest ? ago(latest) : STATUS_LABEL[p.status]))));
-  }
-  for (const r of view.relations) {
-    const a = layout.boxes.get(r.from), b = layout.boxes.get(r.to); if (!a || !b) continue;
-    const { d, mx, my } = edgePath(a, b), g = svg('g', { class: `edge k-${r.kind}`, 'data-from': r.from, 'data-to': r.to });
-    g.append(svg('path', { d, 'marker-end': 'url(#arrow)' }));
-    if (r.note) { const t = svg('text', { x: String(mx), y: String(my - 6), 'text-anchor': 'middle' }); t.textContent = r.note.length > 28 ? `${r.note.slice(0, 28)}…` : r.note; g.append(t); }
+  for (const e of lay.edges) {
+    const g = svg('g', { class: `edge k-${e.kind}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
+    g.append(svg('path', { 'marker-end': 'url(#arrow)' }));
+    if (e.notes.length) { const t = svg('text', { 'text-anchor': 'middle' }); const n = e.notes[0]!; t.textContent = `${n.length > 28 ? `${n.slice(0, 28)}…` : n}${e.notes.length > 1 ? ` 외 ${e.notes.length - 1}` : ''}`; g.append(t); }
     edges.append(g);
   }
-  world.prepend(edges);
-  for (const p of view.parts) {
-    const b = layout.boxes.get(p.id); if (!b || b.group) continue;
-    world.append(h('button', { type: 'button', class: `node s-${p.status}${recentAt(p.lastAt) ? ' recent' : ''}`, 'data-part': p.id, title: `${p.name}${p.note ? ` — ${p.note}` : ''}`,
-      style: `left:${b.x}px;top:${b.y}px;width:${b.w}px;height:${b.h}px`, onclick: () => go(o.key, p.id) },
-      h('span', { class: 'node-name' }, p.name),
-      h('span', { class: 'node-meta' }, h('i', { class: 'dot', 'aria-hidden': 'true' }), STATUS_LABEL[p.status], p.lastAt ? ` · ${ago(p.lastAt)}` : '')));
+  world.append(edges);
+  const enterButton = (p: PartView) => h('button', { type: 'button', class: 'enter', title: `‘${p.name}’ 안으로 들어가기`, 'aria-label': `${p.name} 안으로 들어가기`, onclick: () => go(o.key, null, p.id) }, `${p.childIds.length}`, h('span', { 'aria-hidden': 'true' }, '›'));
+  const toggleButton = (p: PartView, open: boolean) => h('button', { type: 'button', class: 'toggle', title: open ? '접기' : '여기서 펼치기', 'aria-label': `${p.name} ${open ? '접기' : '펼치기'}`, 'aria-expanded': String(open),
+    onclick: () => { expandState.set(`${o.project.id}|${p.id}`, !open); renderSpace('keep'); if (selected) select(selected); } }, chevron(open));
+  const keySelect = (id: string) => (e: Event) => { const k = (e as KeyboardEvent).key; if ((k === 'Enter' || k === ' ') && e.target === e.currentTarget) { e.preventDefault(); go(o.key, id); } };
+  const boxes = [...lay.boxes.values()].sort((a, b) => (a.kind === 'frame' ? 0 : 1) - (b.kind === 'frame' ? 0 : 1) || a.depth - b.depth);
+  for (const b of boxes) {
+    if (b.kind === 'ghost') {
+      const id = b.id.slice(6), p = partOf(o, id)!, path = partPath(view, id).map(x => x.name);
+      world.append(h('button', { type: 'button', class: 'ghost', 'data-box': b.id, title: `바깥 부분 · ${path.join(' › ')}`, onclick: () => go(o.key, id, p.parentId) }, h('span', { class: 'ghost-tag' }, '바깥'), h('span', { class: 'ghost-name' }, p.name)));
+      continue;
+    }
+    const p = partOf(o, b.id)!;
+    if (b.kind === 'frame') {
+      const latest = subtreeRecords(view, p.id)[0]?.at ?? null;
+      world.append(h('div', { class: `frame depth-${Math.min(b.depth, 2)}`, 'data-part': p.id, 'data-box': p.id },
+        h('div', { class: `frame-head s-${p.status}`, 'data-part': p.id, 'data-drag': p.id, role: 'button', tabindex: '0', title: p.name, onkeydown: keySelect(p.id) },
+          toggleButton(p, true), h('span', { class: 'frame-name' }, p.name),
+          h('span', { class: 'frame-meta' }, recentAt(latest) ? h('i', { class: 'new-dot', title: '최근 기록' }) : null, latest ? ago(latest) : STATUS_LABEL[p.status]),
+          enterButton(p))));
+    } else {
+      // A folded part reads its inside: latest record anywhere under it.
+      const last = b.kids ? subtreeRecords(view, p.id)[0]?.at ?? null : p.lastAt;
+      world.append(h('div', { class: `node s-${p.status}${recentAt(last) ? ' fresh' : ''}${b.kids ? ' has-kids' : ''}`, 'data-part': p.id, 'data-box': p.id, 'data-drag': p.id, role: 'button', tabindex: '0',
+        title: `${p.name}${p.note ? ` — ${p.note}` : ''}`, onkeydown: keySelect(p.id) },
+        b.kids ? toggleButton(p, false) : null,
+        h('span', { class: 'node-text' }, h('span', { class: 'node-name' }, p.name),
+          h('span', { class: 'node-meta' }, h('i', { class: 'dot', 'aria-hidden': 'true' }), STATUS_LABEL[p.status], last ? ` · ${ago(last)}` : '')),
+        b.kids ? enterButton(p) : null));
+    }
+  }
+  positionWorld();
+  // Scope bar: where am I and how to go back up.
+  const sp = partOf(o, scope), bar = $('scope-bar');
+  bar.hidden = !sp; $('space').classList.toggle('in-scope', !!sp);
+  if (sp) {
+    const up = sp.parentId ? partOf(o, sp.parentId) : null;
+    bar.replaceChildren(h('button', { type: 'button', class: 'scope-up', onclick: () => go(o.key, null, sp.parentId), title: `${up?.name ?? '전체 지도'}로 돌아가기` }, h('span', { 'aria-hidden': 'true' }, '‹'), up ? up.name : '전체'),
+      h('span', { class: 'scope-label' }, h('strong', {}, sp.name), ` 안 · 부분 ${sp.childIds.length}`),
+      h('button', { type: 'button', class: 'link-button', onclick: () => go(o.key, sp.id) }, '정보'));
   }
   const empty = $('space-empty');
   empty.hidden = view.parts.length > 0 || o.kind === 'saved';
   empty.textContent = view.records.length ? `아직 부분으로 나뉘지 않은 프로젝트예요. 기록 ${view.records.length}개는 왼쪽 ‘최근 변화’에서 볼 수 있어요.` : '아직 부분도 기록도 없는 프로젝트예요.';
   $('add-part').hidden = o.kind !== 'saved';
+  $('arrange').hidden = !view.parts.length;
   partForm = !view.parts.length && o.kind === 'saved' ? { parentId: null } : partForm && view.parts.length ? partForm : null;
   renderPartForm();
   renderRecent();
-  fitView(false);
+  const saved = cameraMode === 'restore' ? cameras.get(camKey(o, scope)) : undefined;
+  if (cameraMode === 'keep') applyCamera();
+  else if (saved) { camera = { ...saved }; applyCamera(); }
+  else fitView(false);
+}
+
+/** Geometry only (also during a drag): boxes and edge paths from the current layout. */
+function positionWorld() {
+  const world = $('world');
+  world.querySelectorAll<HTMLElement>('[data-box]').forEach(el => {
+    const b = lay.boxes.get(el.dataset.box!); if (!b) return;
+    el.style.left = `${b.x}px`; el.style.top = `${b.y}px`; el.style.width = `${b.w}px`; el.style.height = `${b.h}px`;
+  });
+  world.querySelectorAll<SVGGElement>('.edge').forEach(g => {
+    const a = lay.boxes.get(g.dataset.from!), b = lay.boxes.get(g.dataset.to!); if (!a || !b) return;
+    const { d, mx, my } = edgePath(a, b);
+    g.querySelector('path')!.setAttribute('d', d);
+    const t = g.querySelector('text'); if (t) { t.setAttribute('x', String(mx)); t.setAttribute('y', String(my - 6)); }
+  });
 }
 
 function renderRecent() {
-  const o = opened!, items = o.view.records.slice(0, 7);
-  $('recent-count').textContent = String(o.view.records.length);
+  const o = opened!, sp = partOf(o, scope), all = sp ? subtreeRecords(o.view, sp.id) : o.view.records, items = all.slice(0, 7);
+  $('recent-title').textContent = sp ? `최근 변화 · ${sp.name}` : '최근 변화';
+  $('recent-count').textContent = String(all.length);
   $('recent').classList.toggle('collapsed', !recentShown());
   $('recent-toggle').setAttribute('aria-expanded', String(recentShown()));
   $('recent-list').replaceChildren(...items.map(r => {
@@ -247,6 +363,7 @@ function renderRecent() {
 }
 
 /* ---------- camera ---------- */
+const ZOOM_MIN = 0.4, ZOOM_MAX = 1.6;
 const PANEL_W = () => (selected && !$('panel').hidden ? Math.min(460, window.innerWidth - 24) + 24 : 0);
 const leftInset = () => (recentShown() && window.innerWidth >= 900 ? 312 : 16);
 function applyCamera(animate = false) {
@@ -257,25 +374,25 @@ function applyCamera(animate = false) {
   vp.style.backgroundSize = `${20 * camera.k}px ${20 * camera.k}px`;
   $('zoom-level').textContent = `${Math.round(camera.k * 100)}%`;
 }
-/** Whole map in the free area. Opening never shrinks below 85%; only the explicit 전체 보기 button may go further. */
+/** Whole view in the free area. Opening never shrinks below 85%; only the explicit 전체 보기 button may go further. */
 function fitView(explicit: boolean, animate = false) {
   const o = opened; if (!o) return;
-  const vp = $('viewport').getBoundingClientRect(), left = leftInset(), right = PANEL_W() + 16, top = 24, bottom = 72;
-  const w = Math.max(200, vp.width - left - right), hgt = Math.max(160, vp.height - top - bottom);
-  const fit = Math.min(1, w / Math.max(1, o.layout.width + 40), hgt / Math.max(1, o.layout.height + 40));
-  const k = explicit ? Math.max(0.4, fit) : Math.max(0.85, fit);
-  const mw = o.layout.width * k, mh = o.layout.height * k;
-  camera = { k, x: left + (mw <= w ? (w - mw) / 2 : 12), y: top + (mh <= hgt ? (hgt - mh) / 2 : 12) };
+  const vp = $('viewport').getBoundingClientRect(), left = leftInset(), right = PANEL_W() + 16, top = scope ? 64 : 24, bottom = 72;
+  const w = Math.max(200, vp.width - left - right), hgt = Math.max(160, vp.height - top - bottom), B = lay.bounds;
+  const fit = Math.min(1, w / Math.max(1, B.w + 40), hgt / Math.max(1, B.h + 40));
+  const k = explicit ? Math.max(ZOOM_MIN, fit) : Math.max(0.85, fit);
+  const mw = B.w * k, mh = B.h * k;
+  camera = { k, x: left + (mw <= w ? (w - mw) / 2 : 12) - B.x * k, y: top + (mh <= hgt ? (hgt - mh) / 2 : 12) - B.y * k };
   applyCamera(animate);
 }
 function zoomAt(k: number, cx: number, cy: number, animate = false) {
-  const nk = Math.min(1.6, Math.max(0.4, k));
+  const nk = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, k));
   camera = { k: nk, x: cx - (cx - camera.x) * (nk / camera.k), y: cy - (cy - camera.y) * (nk / camera.k) };
   applyCamera(animate);
 }
 /** Keep the selected part visible beside the panel. */
 function reveal(partId: string) {
-  const o = opened, b = o?.layout.boxes.get(partId); if (!o || !b) return;
+  const b = lay.boxes.get(partId); if (!b) return;
   const vp = $('viewport').getBoundingClientRect(), left = leftInset(), right = vp.width - PANEL_W() - 16;
   const sx = camera.x + b.x * camera.k, sy = camera.y + b.y * camera.k, sw = Math.min(b.w, 420) * camera.k, sh = Math.min(b.h, 360) * camera.k;
   // Smallest move that brings it into view, so the surrounding structure stays where it was.
@@ -290,13 +407,12 @@ function reveal(partId: string) {
 /* ---------- selection & panel ---------- */
 let pendingRecord: string | null = null;
 function select(partId: string | null) {
-  const o = opened!; const changed = selected !== partId;
+  const changed = selected !== partId;
   if (changed) { editing = false; if (ask && !ask.controller) ask = null; }
   if (!!selected !== !!partId) recentPeek = false;
   selected = partId;
   if (opened) renderRecent();
-  document.querySelectorAll<HTMLElement>('[data-part]').forEach(el => el.classList.toggle('selected', el.dataset.part === partId && !el.classList.contains('frame')));
-  document.querySelectorAll<HTMLElement>('.frame').forEach(el => el.classList.toggle('selected', el.dataset.part === partId));
+  document.querySelectorAll<HTMLElement>('.node[data-part],.frame').forEach(el => el.classList.toggle('selected', el.dataset.part === partId));
   document.querySelectorAll<SVGGElement>('.edge').forEach(el => {
     const on = !!partId && (el.dataset.from === partId || el.dataset.to === partId);
     el.classList.toggle('on', on); el.querySelector('path')!.setAttribute('marker-end', on ? 'url(#arrow-on)' : 'url(#arrow)');
@@ -341,7 +457,8 @@ function renderPanel(scrollTop: boolean) {
     h('div', { class: 'panel-chips' }, h('span', { class: `chip s-${part.status}` }, h('i', { class: 'dot' }), STATUS_LABEL[part.status]),
       records.length ? h('span', { class: 'chip plain' }, `기록 ${records.length}${records[0] ? ` · ${ago(records[0].at)}` : ''}`) : null,
       o.kind !== 'legacy' ? h('button', { type: 'button', class: 'chip-button', onclick: () => { editing = !editing; renderPanel(false); } }, editing ? '고치기 닫기' : '이름·설명 고치기') : null,
-      o.kind === 'saved' ? h('button', { type: 'button', class: 'chip-button tight', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null),
+      o.kind === 'saved' ? h('button', { type: 'button', class: 'chip-button tight', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null,
+      part.childIds.length && part.id !== scope ? h('button', { type: 'button', class: 'chip-button tight go-in', onclick: () => go(o.key, null, part.id) }, `안으로 들어가기 · ${part.childIds.length}`, h('span', { 'aria-hidden': 'true' }, ' ›')) : null),
     h('button', { type: 'button', class: 'close', 'aria-label': '닫고 지도로', title: '닫기 (Esc)', onclick: () => go(o.key) }, '×'));
   const body = h('div', { class: 'panel-body' });
   if (editing) body.append(editForm(o, part));
@@ -393,7 +510,7 @@ async function commit(o: Opened, next: Project): Promise<string | null> {
     catch (err) { return storageErrorCode(err) === 'STORAGE_CONFLICT' ? '다른 탭에서 이 프로젝트가 바뀌어 저장하지 않았어요. 새로고침한 뒤 다시 해 주세요.' : '저장하지 못했어요. 바뀐 내용은 적용하지 않았어요.'; }
   } else if (o.kind === 'example') examples.set(o.key, next);
   else return '이 프로젝트는 읽기 전용이에요.';
-  o.project = next; o.view = studioView(next); o.layout = layoutMap(o.view);
+  o.project = next; o.view = studioView(next);
   return null;
 }
 
@@ -415,7 +532,7 @@ function renderPartForm() {
     catch { msg.textContent = '이름은 1~60자로 적어 주세요.'; return; }
     const id = next.space.areas.at(-1)!.id, failed = await commit(o, next);
     if (failed) { msg.textContent = failed; return; }
-    partForm = null; renderPartForm(); renderSpace(); go(o.key, id);
+    partForm = null; renderPartForm(); renderSpace('keep'); go(o.key, id);
   } },
     h('h3', {}, parent ? `‘${parent.name}’ 안에 부분 추가` : first ? '첫 부분 만들기' : '부분 추가'),
     first ? h('p', { class: 'hint' }, '프로젝트를 이루는 큰 부분 하나를 적어 주세요. 개발 기록은 이 부분들에 연결돼요.') : null,
@@ -434,7 +551,7 @@ function editForm(o: Opened, part: PartView): HTMLElement {
     try { next = editArea(o.project, part.id, name.value, note.value); } catch { msg.textContent = '이름은 1~60자, 설명은 2,000자까지 쓸 수 있어요.'; return; }
     const failed = await commit(o, next); if (failed) { msg.textContent = failed; return; }
     editing = false;
-    const keepCam = { ...camera }; renderSpace(); camera = keepCam; applyCamera(); select(part.id);
+    renderSpace('keep'); select(part.id);
   } },
     h('label', { for: 'edit-name' }, '이름'), name, h('label', { for: 'edit-note' }, '설명 ', h('small', {}, '계획에 적힌 내 말')), note, msg,
     h('div', { class: 'row' }, h('button', { type: 'submit', class: 'primary small' }, '저장'), h('button', { type: 'button', class: 'link-button', onclick: () => { editing = false; renderPanel(false); } }, '취소')));
@@ -527,40 +644,94 @@ function renderStatus() {
   pill.title = status.ai === 'deepseek' ? '서버가 DeepSeek에 정리를 요청해요. 키는 서버에만 있어요.' : status.ai === 'off' ? '서버는 연결됐지만 AI 키가 설정되지 않았어요.' : '이 페이지에는 AI 서버가 연결되어 있지 않아요.';
 }
 
-/* ---------- canvas interaction ---------- */
+/* ---------- canvas interaction ----------
+ * Empty space: drag pans. A node or frame head: click selects, drag moves (frames carry their children; a child moves
+ * inside its parent frame, which grows around it), double-click goes inside. Wheel zooms at the cursor (also Ctrl/⌘). */
+let toastTimer = 0;
+/** Double-click = two clicks on the same part, same view, same spot. */
+let lastClick = { id: '', at: 0, x: 0, y: 0, scope: null as string | null };
+function toast(text: string, action?: { label: string; run: () => void }) {
+  const t = $('toast'); clearTimeout(toastTimer); t.replaceChildren();
+  put(t, h('span', {}, text), action ? h('button', { type: 'button', class: 'link-button', onclick: () => { action.run(); t.hidden = true; } }, action.label) : null);
+  t.hidden = false; toastTimer = window.setTimeout(() => { t.hidden = true; }, 8000);
+}
+/** Explicit only: resets the places in this view (the scope and its open frames); one undo. */
+function arrange() {
+  const o = opened; if (!o) return;
+  const pos = positionsOf(o), containers = [scope ?? ROOT, ...[...lay.boxes.values()].filter(b => b.kind === 'frame').map(b => b.id)];
+  const before = structuredClone(pos), had = containers.some(c => pos[c] && Object.keys(pos[c]!).length);
+  if (!had) { toast('이미 자동 배치 상태예요.'); return; }
+  for (const c of containers) delete pos[c];
+  savePositions(o); renderSpace('keep'); fitView(false, true); if (selected) select(selected);
+  toast('이 화면을 자동 정렬했어요.', { label: '되돌리기', run: () => {
+    for (const k of Object.keys(pos)) delete pos[k]; Object.assign(pos, before);
+    savePositions(o); if (opened === o) { renderSpace('keep'); if (selected) select(selected); }
+  } });
+}
+
 function bindCanvas() {
   const vp = $('viewport');
-  let drag: { id: number; x: number; y: number; cx: number; cy: number; moved: boolean } | null = null;
+  type Drag = { pointer: number; x: number; y: number; moved: boolean; mode: 'pan'; cx: number; cy: number }
+    | { pointer: number; x: number; y: number; moved: boolean; mode: 'part'; id: string; container: string; start: Point };
+  let drag: Drag | null = null;
   vp.addEventListener('pointerdown', e => {
-    if ((e.target as HTMLElement).closest('button,a')) return;
-    drag = { id: e.pointerId, x: e.clientX, y: e.clientY, cx: camera.x, cy: camera.y, moved: false };
-    vp.setPointerCapture(e.pointerId); vp.classList.add('grabbing');
+    if (e.button !== 0) return;
+    const target = e.target as HTMLElement;
+    if (target.closest('button,a,input,textarea')) return;
+    const handle = target.closest<HTMLElement>('[data-drag]'), o = opened;
+    if (handle && o) {
+      const id = handle.dataset.drag!, b = lay.boxes.get(id); if (!b) return;
+      drag = { pointer: e.pointerId, x: e.clientX, y: e.clientY, moved: false, mode: 'part', id, container: b.container, start: { ...b.rel } };
+    } else drag = { pointer: e.pointerId, x: e.clientX, y: e.clientY, moved: false, mode: 'pan', cx: camera.x, cy: camera.y };
+    vp.setPointerCapture(e.pointerId);
   });
   vp.addEventListener('pointermove', e => {
-    if (!drag || drag.id !== e.pointerId) return;
-    const dx = e.clientX - drag.x, dy = e.clientY - drag.y; if (Math.abs(dx) + Math.abs(dy) > 3) drag.moved = true;
-    camera = { ...camera, x: drag.cx + dx, y: drag.cy + dy }; applyCamera();
+    if (!drag || drag.pointer !== e.pointerId) return;
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.moved && Math.abs(dx) + Math.abs(dy) < 4) return;
+    if (!drag.moved) { drag.moved = true; vp.classList.add(drag.mode === 'pan' ? 'grabbing' : 'moving'); if (drag.mode === 'part') document.querySelector(`[data-box="${CSS.escape(drag.id)}"]`)?.classList.add('dragging'); }
+    if (drag.mode === 'pan') { camera = { ...camera, x: drag.cx + dx, y: drag.cy + dy }; applyCamera(); return; }
+    const o = opened!; const pos = positionsOf(o);
+    (pos[drag.container] ??= {})[drag.id] = { x: Math.round(drag.start.x + dx / camera.k), y: Math.round(drag.start.y + dy / camera.k) };
+    relayout(o); positionWorld();
   });
   const end = (e: PointerEvent) => {
-    if (!drag || drag.id !== e.pointerId) return;
-    const clicked = !drag.moved; drag = null; vp.classList.remove('grabbing');
-    if (clicked && selected && opened) go(opened.key);
+    if (!drag || drag.pointer !== e.pointerId) return;
+    const d = drag; drag = null; vp.classList.remove('grabbing', 'moving');
+    document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
+    const o = opened; if (!o || e.type === 'pointercancel') return;
+    if (d.mode === 'part' && d.moved) { savePositions(o); return; }
+    if (d.mode === 'part') {
+      const now = Date.now(), part = partOf(o, d.id);
+      const twice = lastClick.id === d.id && lastClick.scope === scope && now - lastClick.at < 380 && Math.abs(lastClick.x - e.clientX) + Math.abs(lastClick.y - e.clientY) < 8;
+      lastClick = { id: d.id, at: now, x: e.clientX, y: e.clientY, scope };
+      if (twice && part?.childIds.length) { lastClick.id = ''; go(o.key, null, d.id); return; }
+      go(o.key, d.id); return;
+    }
+    if (!d.moved && selected) go(o.key);
   };
   vp.addEventListener('pointerup', end); vp.addEventListener('pointercancel', end);
   vp.addEventListener('wheel', e => {
     e.preventDefault();
-    const r = vp.getBoundingClientRect();
-    if (e.ctrlKey || e.metaKey) zoomAt(camera.k * Math.exp(-e.deltaY * 0.0025), e.clientX - r.left, e.clientY - r.top);
-    else { camera = { ...camera, x: camera.x - e.deltaX, y: camera.y - e.deltaY }; applyCamera(); }
+    const r = vp.getBoundingClientRect(), unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1;
+    const delta = (Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX) * unit;
+    // Pinch (ctrlKey) sends small deltas; a mouse notch is about 100.
+    zoomAt(camera.k * Math.exp(-delta * (e.ctrlKey ? 0.01 : 0.0015)), e.clientX - r.left, e.clientY - r.top);
   }, { passive: false });
   const center = () => { const r = vp.getBoundingClientRect(); return [(r.width - PANEL_W()) / 2, r.height / 2] as const; };
   $('zoom-in').addEventListener('click', () => { const [x, y] = center(); zoomAt(camera.k + 0.15, x, y, true); });
   $('zoom-out').addEventListener('click', () => { const [x, y] = center(); zoomAt(camera.k - 0.15, x, y, true); });
   $('zoom-fit').addEventListener('click', () => fitView(true, true));
+  $('arrange').addEventListener('click', arrange);
+  const help = $('help'), helpButton = $('help-toggle');
+  helpButton.addEventListener('click', () => { help.hidden = !help.hidden; helpButton.setAttribute('aria-expanded', String(!help.hidden)); });
   $('recent-toggle').addEventListener('click', () => { if (selected) recentPeek = !recentPeek; else recentOpen = !recentOpen; if (opened) renderRecent(); });
   document.addEventListener('keydown', e => {
+    if ((e.target as HTMLElement).closest('textarea,input')) return;
+    if (e.key === 'Escape' && !help.hidden) { help.hidden = true; return; }
     if (e.key === 'Escape' && partForm && opened?.view.parts.length) { partForm = null; renderPartForm(); return; }
-    if (e.key === 'Escape' && opened && selected && !(e.target as HTMLElement).closest('textarea,input')) { const key = opened.key, part = selected; go(key); requestAnimationFrame(() => document.querySelector<HTMLElement>(`.node[data-part="${part}"],.frame-head[data-part="${part}"]`)?.focus()); }
+    if (e.key === 'Escape' && opened && selected) { const key = opened.key, part = selected; go(key); requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-drag="${CSS.escape(part)}"]`)?.focus()); return; }
+    if (e.key === 'Escape' && opened && scope) { const o = opened, from = scope; go(o.key, null, partOf(o, from)?.parentId ?? null); requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-drag="${CSS.escape(from)}"]`)?.focus()); }
   });
   let resize = 0;
   window.addEventListener('resize', () => { cancelAnimationFrame(resize); resize = requestAnimationFrame(() => { if (opened && !selected) fitView(false); }); });
@@ -598,7 +769,7 @@ async function main() {
   store = new WorkspaceStore(kv, (navigator as Navigator & { locks?: { request(name: string, cb: () => unknown): Promise<unknown> } }).locks ?? null);
   try { await store.init(); } catch { store.read(); }
   bindCanvas(); bindImport(); bindNewProject();
-  $('add-part').addEventListener('click', () => openPartForm(null));
+  $('add-part').addEventListener('click', () => openPartForm(scope));
   statusReady = aiStatus().then(s => { status = s; renderStatus(); if (opened && selected) renderPanel(false); });
   window.addEventListener('hashchange', () => void render());
   await render();
