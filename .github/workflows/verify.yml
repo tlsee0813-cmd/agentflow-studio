@@ -67,6 +67,9 @@ jobs:
         run: |
           node continuity/scripts/build.mjs 2>&1 | tee test-results/continuity-build.log
           node --test continuity/tests/*.test.mjs 2>&1 | tee test-results/continuity-node-tests.tap
+      - name: Prepare Cloudflare modules and assets without credentials or deployment
+        shell: bash
+        run: node continuity/scripts/deploy-cloudflare.mjs --dry-run
       - name: Build static site (no AI server bundled, no credentials)
         shell: bash
         run: |
