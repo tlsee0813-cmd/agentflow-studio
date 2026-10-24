@@ -59,6 +59,12 @@ export function studioView(p: Project): StudioView {
       status, lastAt: own[0]?.at ?? null, recordIds: own.map(r => r.id),
       summary: cur?.summary ?? null, changes: cur?.changes ?? [], origin: cur?.origin ?? null, proposal: cur?.proposal ?? null };
   });
+  // A part with no request of its own reads its inside: the most pressing status among its descendants (check > active > reported).
+  const rank: PartStatus[] = ['plan', 'reported', 'active', 'check'], byId = new Map(parts.map(x => [x.id, x]));
+  const inner = (x: PartView, guard = 0): PartStatus => x.status !== 'plan' || guard > 64 ? x.status
+    : x.childIds.map(id => inner(byId.get(id)!, guard + 1)).reduce<PartStatus>((a, b) => rank.indexOf(b) > rank.indexOf(a) ? b : a, 'plan');
+  const aggregated = parts.map(x => inner(x));
+  parts.forEach((x, i) => { x.status = aggregated[i]!; });
   return {
     parts, roots: parts.filter(x => x.parentId === null).map(x => x.id),
     relations: p.space.relations.filter(r => ids.has(r.from) && ids.has(r.to)).map(r => ({ id: r.id, from: r.from, to: r.to, kind: r.kind, note: r.note })),
@@ -154,7 +160,7 @@ export function validateReply(v: unknown, ask: StudioAsk): StudioReply {
   const o = keys(v, ['headline', 'situation', 'changes', 'next', 'answer', 'refs'], code);
   const headline = str(o.headline, 160, false, code).trim();
   const list = (x: unknown, max: number, min = 0) => { const a = arr(x, max, code).map(s => str(s, 400, false, code).trim()); if (a.length < min) fail(code); return a; };
-  const situation = list(o.situation, 4, 1), changes = list(o.changes, 4), next = list(o.next, 3);
+  const situation = list(o.situation, 4, ask.intent === 'summary' ? 1 : 0), changes = list(o.changes, 4), next = list(o.next, 3);
   const answer = o.answer === null ? null : str(o.answer, 1600, false, code).trim();
   if (ask.intent === 'question' && answer === null) fail(code);
   const known = new Set(ask.records.map(r => r.ref)), refs = arr(o.refs, ASK_RECORDS, code).map(r => str(r, 4, false, code));

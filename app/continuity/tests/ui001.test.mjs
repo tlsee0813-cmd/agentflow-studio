@@ -60,7 +60,7 @@ test('UI001-P7 changed HTML/CSS and the new presentation module are served by th
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   try {
     const port=server.address().port;
-    for(const [path,marker,mime] of [['/','id="compose-panel"','text/html'],['/styles.css','.workspace','text/css'],['/client/app.js','./presentation.js','text/javascript'],['/client/presentation.js','stageOf','text/javascript']]){
+    for(const [path,marker,mime] of [['/','id="viewport"','text/html'],['/styles.css','.viewport','text/css'],['/client/app.js','./map-layout.js','text/javascript'],['/client/presentation.js','stageOf','text/javascript']]){
       const result=await new Promise((resolve,reject)=>{get({hostname:'127.0.0.1',port,path},res=>{const chunks=[];res.on('data',c=>chunks.push(c));res.on('end',()=>resolve({status:res.statusCode,headers:res.headers,text:Buffer.concat(chunks).toString()}));}).on('error',reject);});
       assert.equal(result.status,200,path);assert.ok(result.headers['content-type'].startsWith(mime),path);assert.ok(result.text.includes(marker),path);
       assert.match(result.headers['content-security-policy'],/script-src 'self'/);

@@ -4,13 +4,14 @@ import { RUNTIME } from './runtime.js';
 export interface AiStatus { ai: 'deepseek' | 'off' | 'none'; model: string | null; access: 'open' | 'code' }
 export class AskError extends Error { constructor(readonly code: string) { super(code); } }
 
+// same-origin: an owner-private host's own cookies go with same-origin calls; a cross-origin API still gets none.
 const url = (path: string) => `${RUNTIME.apiBase ?? ''}${path}`;
 
 /** none = this build has no server to ask; off = a server answered but has no AI key. */
 export async function aiStatus(): Promise<AiStatus> {
   if (RUNTIME.apiBase === null) return { ai: 'none', model: null, access: 'open' };
   try {
-    const res = await fetch(url('/api/studio/status'), { credentials: 'omit' });
+    const res = await fetch(url('/api/studio/status'), { credentials: 'same-origin' });
     const v = await res.json();
     if (!res.ok || !['deepseek', 'off'].includes(v?.ai)) return { ai: 'none', model: null, access: 'open' };
     return { ai: v.ai, model: typeof v.model === 'string' ? v.model : null, access: v.access === 'code' ? 'code' : 'open' };
@@ -22,7 +23,7 @@ export async function askStudio(ask: StudioAsk, signal: AbortSignal, accessCode:
   const headers: Record<string, string> = { 'Content-Type': 'application/json', 'X-AgentFlow-Request': '1' };
   if (accessCode) headers['X-Studio-Access'] = accessCode;
   let res: Response;
-  try { res = await fetch(url('/api/studio/ask'), { method: 'POST', headers, body: JSON.stringify(ask), signal, credentials: 'omit' }); }
+  try { res = await fetch(url('/api/studio/ask'), { method: 'POST', headers, body: JSON.stringify(ask), signal, credentials: 'same-origin' }); }
   catch (e) { throw new AskError(signal.aborted ? 'CANCELLED' : 'NETWORK'); }
   let data: { error?: { code?: unknown }; model?: unknown; reply?: StudioReply } | null = null;
   try { data = await res.json(); } catch { /* handled below */ }

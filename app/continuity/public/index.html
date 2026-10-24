@@ -18,6 +18,7 @@
       <div class="home-inner">
         <h1 class="home-title">프로젝트</h1>
         <p class="home-lede">Codex·Claude에서 개발한 기록을 프로젝트의 부분에 연결해, 구조와 최근 변화를 한눈에 봅니다.</p>
+        <form id="new-form" class="new-form"><label for="new-name" class="sr-only">새 프로젝트 이름</label><input id="new-name" maxlength="120" placeholder="새 프로젝트 이름" autocomplete="off"><button type="submit" class="primary">내 프로젝트 시작</button></form>
         <div id="home-message" class="message" role="status" hidden></div>
         <ul id="project-list" class="project-list"></ul>
         <h2 id="saved-title" class="home-sub" hidden>이 브라우저에 저장된 프로젝트</h2>
@@ -39,9 +40,11 @@
         <span id="zoom-level" class="zoom-level">100%</span>
         <button type="button" id="zoom-in" aria-label="확대" title="확대">+</button>
         <button type="button" id="zoom-fit" aria-label="전체 보기" title="전체 보기"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"/></svg></button>
+        <button type="button" id="add-part" class="add-part" hidden>+ 부분</button>
         <span class="legend" aria-label="상태"><i class="s-reported"></i>보고 받음<i class="s-active"></i>진행 중<i class="s-plan"></i>구상</span>
       </div>
       <p id="space-empty" class="space-empty" hidden></p>
+      <div id="part-form" class="part-form" hidden></div>
       <aside id="panel" class="panel" aria-labelledby="panel-title" hidden></aside>
     </main>
   </div>

@@ -25,7 +25,7 @@ test('I15-H01 real local HTTP -> mock -> typed envelope, safe config and static 
   await withServer(cfg(),async port=>{
     const req=input(),r=await local(port,{request:req});assert.equal(r.status,200);assert.equal(r.data.mode,'mock');assert.deepEqual(r.data.ticket,req.ticket);assert.equal(r.data.advice.question,null);
     const c=await local(port,{method:'GET',path:'/api/config'});assert.equal(c.data.scope,'local-development-only');assert.equal(c.data.paidEnabled,false);assert.ok(!c.raw.includes('apiKey'));
-    const page=await local(port,{method:'GET',path:'/'});assert.equal(page.status,200);assert.match(page.raw,/이어갈 기준/);assert.match(page.headers['content-security-policy'],/connect-src 'self'/);
+    const page=await local(port,{method:'GET',path:'/'});assert.equal(page.status,200);assert.match(page.raw,/id="viewport"/);assert.match(page.headers['content-security-policy'],/connect-src 'self'/);
     assert.equal((await local(port,{method:'GET',path:'/client/app.js'})).status,200);
   },{fetchImpl:()=>assert.fail('no external fetch')});
 });
