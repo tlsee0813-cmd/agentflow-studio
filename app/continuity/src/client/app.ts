@@ -482,8 +482,9 @@ function continueTask(id:string) {
   markOrigin();
   const current=project.currentTaskId?taskOf(project):null,same=current&&(current.id===id||isReturnTask(project,current)&&current.parentTaskId===id);
   if(!same)commit(focusTask(project,id));view='work';render();
-  // WORK41: continuing shows the work; the separate new-request box stays folded unless it holds an unsent input.
-  if(!project.draft.trim())$<HTMLDetailsElement>('compose-panel').open=false;
+  // WORK41: continuing shows the work; the separate new-request box stays folded unless it holds an unsent input, a selected
+  // result file or the receipt of a just-imported result (those are read there).
+  if(!project.draft.trim()&&!resultSelection&&!receivedReceiptTarget())$<HTMLDetailsElement>('compose-panel').open=false;
   // PC12: say which record is now edited when it is not the request that was read.
   const read=project.tasks.find(x=>x.id===id),no=(x:Task)=>`작업 ${pad(project.tasks.findIndex(t=>t.id===x.id)+1)}`;
   if(read&&current&&same&&current.id!==id){project={...project,notice:`${no(read)} 요청에서 이어가기 · 이 요청에 받은 현재 보고 ${no(current)}에서 계속해요. 고치는 작업문은 ${no(current)}의 후속 확인 작업문이고, ${no(read)}의 작업문은 그대로예요.`};workNotice=project.notice;renderStatus();}
