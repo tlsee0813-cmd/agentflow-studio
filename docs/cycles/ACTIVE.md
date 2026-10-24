@@ -1,8 +1,10 @@
 # AgentFlow 현재 상태
 
-2026-10-24 KST. **사용자가42의 시각·사용 경험을 반려했다. Studio43을 구현 중이며 아직 수용하지 않았다.** [기존 공개 체험본](https://tlsee0813-cmd.github.io/agentflow-studio/) · [42 당시 판단 기록](2026-10-24-visual-design-42/DECISION.md) · [제품 기준](../PROJECT_STATUS.md) · [질문별 근거](../QUESTIONS.md).
+2026-10-24 KST. **사용자가42를 반려한 뒤 Studio43의 지도·부분·실제 AI 데모를 다시 구성하고 총괄 직접 사용·양OS CI를 확인했다.** [공개 정적 체험](https://tlsee0813-cmd.github.io/agentflow-studio/) · [PR25](https://github.com/tlsee0813-cmd/agentflow-studio/pull/25) · [로컬 실행](../../app/continuity/README.md) · [질문별 근거](../QUESTIONS.md).
 
-43은 프로젝트 입구→고정 지도→선택한 부분의 기록·실제 AI 정리로 화면을 다시 구성한다. Claude 단일 세션 `session_019mbJshQGDVwW5sqoPHeX7y`, [PR25](https://github.com/tlsee0813-cmd/agentflow-studio/pull/25), 브랜치 `product/studio-demo-43`. 총괄은 `374f72e`를1280 화면에서 직접 사용했다. 실제 DeepSeek 답변이 기록의 임시 고정·설정 미연결을 짚었으며, 짧은 답과 접힌 상세·선택 때 변화 목록 접힘·지도 복귀 초안·새 프로젝트와 첫 부분·새로고침 초안 보존을 확인했다. 작성자의 스텁 실행과 총괄의 실제 API 실행은 구별한다. 최종 통합 SHA의 양OS CI 전에는 병합·Pages 갱신하지 않는다.
+43은 프로젝트 입구→고정 지도→선택한 부분의 기록·실제 AI 정리로 화면을 다시 구성했다. Claude 단일 세션 `session_019mbJshQGDVwW5sqoPHeX7y`의 결과를 회수·통합했다. 총괄은 `374f72e`를1280 화면에서 직접 사용했다. 실제 DeepSeek 답변이 기록의 임시 고정·설정 미연결을 짚었으며, 짧은 답과 접힌 상세·선택 때 변화 목록 접힘·지도 복귀 초안·새 프로젝트와 첫 부분·새로고침 초안 보존을 확인했다. 이후 UI·handler는 그대로이고 실행기와 정적 저장 접두사를 보정했다.
+
+최종 source `00ca5753e46d34c42a535f7acbcea9b0a88d16b2`, app tree `c342d89bdc8a4edecd51d4e1c8d7d3124a57dca7`. [CI40076048672](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40076048672)에서 Ubuntu `120819712336`·Windows `120819712517` 모두 성공했다. PR25 merge `af4675b881f85e3e9ad6457478f97ab001f9fa3c`의 app tree도 일치한다. Pages 배포 커밋은 `27505ed018676f87c725eae742c488c471a121e5`이며 기존 preview 저장 공간을 유지한다. 변경 소스·정적 출력50파일에 실제 키 일치0을 확인했다. 작성자 스텁 실행·총괄 실제 API 및 화면 사용·CI를 구별하며 새 독립 감사는 시행하지 않았다.
 
 사용자 최신 결정: AI는 사용자 PC의 로컬 프로그램에서 실행한다. 별도 Sites 배포는 중단하고 공개 Pages는 정적 체험을 유지한다. 로컬 프로그램이 Git 밖의 비공개 env 파일에서 키를 읽으며 공개 소스에는 키를 포함하지 않는다. 새 독립 감사·픽셀 검사·증거 묶음을 추가하지 않으며 총괄 직접 사용과 최종 SHA CI로 판단한다. 사용자가 직접 화면을 보고 반려했으므로 “사람이 한 번도 보지 않았다”는 주장은 사실이 아니다.
 
@@ -45,6 +47,8 @@
 | 독립 Sol High42 | /root/visual42_structure,/root/visual42_verify | 완료·정적/Windows 실행 분리·최종 최소 증거 |
 
 ## 다음 범위와 운영
+
+43의 수용 범위는 로컬 실제 AI를 포함한 세 화면 데모다. 자동 로그 수집·연결·일반 정리 담당은 아직 없다. 예제는 명시된 합성 자료이며 실제 JSONL의 소속·인계가 확인된 것으로 취급하지 않는다. Q02/Q06의39 관측은 반복하지 않고 실제 연결 근거가 없는 상태를 유지한다.1280에서 부분 패널이 열리면 먼 노드는 드래그로 보며 전체 지도를 자동 축소하지 않는다. 아래41/42의 수용 표현은 당시 좁은 검증 이력이다.
 
 Q04/Q13의 PC 흐름은41에 이어42의 시각 체계·반복 pan·소속 가독성까지 좁게 수용했다. Q02/Q06은39에서 선택한40의 좁은 검토 흐름을 유지한다. 실제 연결·자동 동일성·일반 추출기는 남아 있으며 질문 전체를 일괄 개발하지 않는다. 완료한 연구를 처음부터 반복하지 않는다.
 

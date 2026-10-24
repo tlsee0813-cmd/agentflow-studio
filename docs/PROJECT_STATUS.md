@@ -1,5 +1,11 @@
 # AgentFlow Studio 제품 기준과 공개 버전
 
+2026-10-24 KST. **현재는 Studio43의 로컬 실제 AI 데모다.** 사용자가42의 시각·사용 경험을 반려해 프로젝트 입구, 창에 고정된 지도, 선택한 부분의 기록·짧은 AI 답변으로 기본 화면을 다시 구성했다. [PR25](https://github.com/tlsee0813-cmd/agentflow-studio/pull/25) · [로컬 실행](../app/continuity/README.md) · [현재 상태와 실행 근거](cycles/ACTIVE.md).
+
+source `00ca5753e46d34c42a535f7acbcea9b0a88d16b2`, app tree `c342d89bdc8a4edecd51d4e1c8d7d3124a57dca7`, merge `af4675b881f85e3e9ad6457478f97ab001f9fa3c`. 최종 source의 [Ubuntu·Windows CI](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40076048672) 모두 성공했다. 실제 AI는 사용자 PC의 비공개 env 키로 실행하며 별도 Sites 배포는 중단했다. Pages `27505ed018676f87c725eae742c488c471a121e5`는 같은 화면의 정적 체험으로, AI 미연결을 표시하고 이전 preview 저장 공간을 보존한다. 자동 로그 수집·프로젝트 연결은 아직 미구현이다. 예제와 실제 수신 성공을 혼동하지 않는다.
+
+아래는 과거 버전의 당시 수용 기록이며,42에 대한 사용자의 반려를 대체하지 않는다.
+
 2026-10-24 KST. **시각 재설계42를 수용하고 기존 공개 Pages에 게시했다.** [PC 체험본](https://tlsee0813-cmd.github.io/agentflow-studio/) · [판단·독립검증·CI·한계](cycles/2026-10-24-visual-design-42/DECISION.md). source `caf6126a4a2e592dc4f17626f0440d13a1d4c188`, app tree `9ba47af6a58cf97d717e743a862553ea2cf1053d`, 배포 `78356d033e455f2a255a5d03c9790495eb9c7d66`다. 홈·공간 지도·작업 편집의 글자·간격·표면·아이콘과 행동 위계를 통일했다. 실제 표시·반복 pan·초안/커서·1280 지도 복귀·예제 비저장을 검증했다.41의 기능 흐름은 유지하지만 당시 시각 수용 판단은 사용자 반려에 따라 수정했다. Q02/Q06의39/40 범위는 그대로다.
 
 이전41 기능 흐름과 당시 검증은 [41 판단](cycles/2026-10-24-workspace-experience-41/DECISION.md)에 보존한다. 아래는 포함된 이전40·38과 과거 단계의 기록이다.
