@@ -1,0 +1,143 @@
+{
+  "source": "44cfc9ade567b3b7cfe66af57d9762d5bf1ead39",
+  "deploymentCommit": "d2ecd38141384ce54b69563f2512a15beb4a53f8",
+  "checkedAt": "2026-10-24T01:09:35.848Z",
+  "buildText": "AgentFlow Studio PC preview40\nsource 44cfc9ade567b3b7cfe66af57d9762d5bf1ead39\napp-tree c6172dd71c592ae331931b5d9e5ca5b60b0e77d0\nruntime-tree 81ba7c3787c4f3655aaf55a4d1e027ac46098838\nCI https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40047073004 (both OS success)\nBrowser MOCK; no API calls or credentials; preview storage prefix.\n",
+  "httpRuntimeFiles": 19,
+  "allMatch": true,
+  "files": [
+    {
+      "path": "client/app.js",
+      "status": 200,
+      "bytes": 314011,
+      "sha256": "fbf7a00d592281f764ced990e0b5656c076c089ae0802824e6f18c05275eb1c6",
+      "matches": true
+    },
+    {
+      "path": "client/presentation.js",
+      "status": 200,
+      "bytes": 7833,
+      "sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "matches": true
+    },
+    {
+      "path": "client/runtime.js",
+      "status": 200,
+      "bytes": 1836,
+      "sha256": "d368c64b881ed766a2eba49d96ae40d92912008a8d6b37bb0660380e0492a092",
+      "matches": true
+    },
+    {
+      "path": "client/source-review.js",
+      "status": 200,
+      "bytes": 25772,
+      "sha256": "f365ce38fbdf20bf9df61de7cb8ecd07beeb96cb6ff006d8a536f3005c9b3629",
+      "matches": true
+    },
+    {
+      "path": "client/static-target.js",
+      "status": 200,
+      "bytes": 751,
+      "sha256": "0d847d744ce6dd680cf0d601faf77789973907e89c288cbbe85f8061056ddac9",
+      "matches": true
+    },
+    {
+      "path": "index.html",
+      "status": 200,
+      "bytes": 19631,
+      "sha256": "6fd5917e436dc195a290ce0a775ee16386a9f6161148b56e11bb348ffa3f1f69",
+      "matches": true
+    },
+    {
+      "path": "shared/attention.js",
+      "status": 200,
+      "bytes": 6116,
+      "sha256": "55182121cccdf9d54bd8bcb8626d559a199192501386a718a9adb3696198950c",
+      "matches": true
+    },
+    {
+      "path": "shared/domain.js",
+      "status": 200,
+      "bytes": 77648,
+      "sha256": "f8559b0a01a633385bea417ae76f797f9051b109e300a43b6becc3c9cd1bdcbd",
+      "matches": true
+    },
+    {
+      "path": "shared/guidance.js",
+      "status": 200,
+      "bytes": 6701,
+      "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "matches": true
+    },
+    {
+      "path": "shared/hierarchy.js",
+      "status": 200,
+      "bytes": 2489,
+      "sha256": "5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624",
+      "matches": true
+    },
+    {
+      "path": "shared/mock.js",
+      "status": 200,
+      "bytes": 18360,
+      "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "matches": true
+    },
+    {
+      "path": "shared/outcome.js",
+      "status": 200,
+      "bytes": 4887,
+      "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "matches": true
+    },
+    {
+      "path": "shared/plan-facts.js",
+      "status": 200,
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "matches": true
+    },
+    {
+      "path": "shared/source-proposals-example.js",
+      "status": 200,
+      "bytes": 10745,
+      "sha256": "2b20b2c291e58f53deaf60516cc24a401b25b648c795162bef854dfd658f8d4b",
+      "matches": true
+    },
+    {
+      "path": "shared/source-proposals.js",
+      "status": 200,
+      "bytes": 16007,
+      "sha256": "57ebe66b903fe2f17458b39d02c88487a60704b6b59aebfd7a944a56dd34c71d",
+      "matches": true
+    },
+    {
+      "path": "shared/storage.js",
+      "status": 200,
+      "bytes": 12708,
+      "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "matches": true
+    },
+    {
+      "path": "shared/types.js",
+      "status": 200,
+      "bytes": 2672,
+      "sha256": "d1dd2c914e0332a57bb6875e4cbd660d95ec529e2038e04a2e69c585c4deaf53",
+      "matches": true
+    },
+    {
+      "path": "shared/validation.js",
+      "status": 200,
+      "bytes": 50121,
+      "sha256": "5c1c5f2ed79435a3250fe31fa3d8c43442f080d757368b157da97b22572960b4",
+      "matches": true
+    },
+    {
+      "path": "styles.css",
+      "status": 200,
+      "bytes": 84101,
+      "sha256": "a6b66d46c5c234408ef6d0c93fbb8567aa90da8874aee2ab695262e15df6d234",
+      "matches": true
+    }
+  ]
+}

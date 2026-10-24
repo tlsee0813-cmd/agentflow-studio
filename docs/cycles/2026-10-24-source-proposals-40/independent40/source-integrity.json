@@ -1,0 +1,58 @@
+{
+  "sourceSha": "44cfc9ade567b3b7cfe66af57d9762d5bf1ead39",
+  "appTree": "c6172dd71c592ae331931b5d9e5ca5b60b0e77d0",
+  "initialBase": "43af7412e44c49f0460323153224cdd641a89879",
+  "headAtFinalization": "44cfc9ade567b3b7cfe66af57d9762d5bf1ead39",
+  "trackedDiff": "",
+  "status": "?? app/continuity/static-preview-dist/\n?? docs/cycles/2026-10-24-source-proposals-40/DECISION.md\n?? docs/cycles/2026-10-24-source-proposals-40/REVIEW_DECISION.md\n?? docs/cycles/2026-10-24-source-proposals-40/SOURCE_PARITY.json\n?? docs/cycles/2026-10-24-source-proposals-40/WORK_ORDER.md",
+  "changedPaths": [
+    ".github/workflows/verify.yml",
+    "app/continuity/public/index.html",
+    "app/continuity/public/styles.css",
+    "app/continuity/scripts/build-static.mjs",
+    "app/continuity/src/client/app.ts",
+    "app/continuity/src/client/source-review.ts",
+    "app/continuity/src/shared/source-proposals-example.ts",
+    "app/continuity/src/shared/source-proposals.ts",
+    "app/continuity/tests/source-proposals40.test.mjs",
+    "app/continuity/tests/source-proposals40_browser.py",
+    "app/continuity/tests/static_browser.py",
+    "docs/cycles/2026-10-24-source-proposals-40/AUTHOR.md"
+  ],
+  "boundaryFiles": {
+    "app/continuity/src/shared/types.ts": {
+      "baselineGitBlob": "8ca513f5be7749d4962eaf80582f6c8273f0aad9",
+      "candidateGitBlob": "8ca513f5be7749d4962eaf80582f6c8273f0aad9"
+    },
+    "app/continuity/src/shared/domain.ts": {
+      "baselineGitBlob": "71b7f4d027ac5f5c5615e4dcff4502496ab47b8e",
+      "candidateGitBlob": "71b7f4d027ac5f5c5615e4dcff4502496ab47b8e"
+    },
+    "app/continuity/src/shared/storage.ts": {
+      "baselineGitBlob": "f4b2607e70ad762e924539a34dd36f684003bca8",
+      "candidateGitBlob": "f4b2607e70ad762e924539a34dd36f684003bca8"
+    },
+    "app/continuity/src/shared/validation.ts": {
+      "baselineGitBlob": "1d784d254588c268fca4a4780b095ec78be7f3fc",
+      "candidateGitBlob": "1d784d254588c268fca4a4780b095ec78be7f3fc"
+    }
+  },
+  "changedSourceSha256": {
+    ".github/workflows/verify.yml": "262400e1ec9a899e089978cb10be51137bb3cc7bc47f61215ba294574fa2b432",
+    "app/continuity/public/index.html": "f06f52e46b56cc375f551023ed582dfdc31d70d563a492dc574f5abf80080ca4",
+    "app/continuity/public/styles.css": "a6b66d46c5c234408ef6d0c93fbb8567aa90da8874aee2ab695262e15df6d234",
+    "app/continuity/scripts/build-static.mjs": "cddc035e4c1583cc89bb255516151507a50838c7bbf422d7d5dd2aed2c9d50b7",
+    "app/continuity/src/client/app.ts": "b51656e874dd81ca372ec9cb8d1efc335423289746d239a03e6152998f908fb2",
+    "app/continuity/src/client/source-review.ts": "ad2e6d065b54a00e09b605e8fe7d68e6b40528c6861e0fefc9f0d39a8cd6c45d",
+    "app/continuity/src/shared/source-proposals-example.ts": "b484f39e3e798f4fae920691a5d61d61d540a056ee8cbe30e98a53be3ae0bd5b",
+    "app/continuity/src/shared/source-proposals.ts": "5b40e0b95e32a45e12b2179fc0b2f20994cf6a0ac4fee732f0d4ac1ece71e788",
+    "app/continuity/tests/source-proposals40.test.mjs": "0cb24349d87bc86ddcd927f3bf73553999209883c4cc09c4b7fc3c366f29043f",
+    "app/continuity/tests/source-proposals40_browser.py": "a4f0c52dfeed4782c7431302153799b067bda7c2864b848404e0799734a41f10",
+    "app/continuity/tests/static_browser.py": "8243a93381c3fa3ce0dffec35f5ef2d2cb43eb4f85f4ee98b03fdf3c6012e90b",
+    "docs/cycles/2026-10-24-source-proposals-40/AUTHOR.md": "8f85422f14f6cb1dccca7c2c9d1815f2316974aced425ece48237d406c745f94"
+  },
+  "initialToFinalDiffNames": [
+    "app/continuity/src/client/source-review.ts",
+    "docs/cycles/2026-10-24-source-proposals-40/AUTHOR.md"
+  ]
+}

@@ -1,0 +1,26 @@
+home15 fixtures written
+test_five_counterexamples_both_pcs (__main__.Independent.test_five_counterexamples_both_pcs) ... ERROR
+test_five_counterexamples_both_pcs (__main__.Independent.test_five_counterexamples_both_pcs) ... ERROR
+
+======================================================================
+ERROR: test_five_counterexamples_both_pcs (__main__.Independent.test_five_counterexamples_both_pcs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\이준혁\Documents\Codex\2026-10-15\github-plugin-github-openai-curated-remote-4\work\product40-independent-evidence-20261024\probe.py", line 29, in test_five_counterexamples_both_pcs
+    p=self.page
+      ^^^^^^^^^
+AttributeError: 'Independent' object has no attribute 'page'
+
+======================================================================
+ERROR: test_five_counterexamples_both_pcs (__main__.Independent.test_five_counterexamples_both_pcs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\이준혁\Documents\Codex\2026-10-15\github-plugin-github-openai-curated-remote-4\work\product-handoff-20261024\app\continuity\tests\browser.py", line 87, in tearDown
+    self.assertEqual(self.external,[]);self.assertEqual(self.errors,[]);self.ctx.close()
+                     ^^^^^^^^^^^^^
+AttributeError: 'Independent' object has no attribute 'external'
+
+----------------------------------------------------------------------
+Ran 1 test in 2.263s
+
+FAILED (errors=2)

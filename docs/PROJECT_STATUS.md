@@ -1,5 +1,9 @@
 # AgentFlow Studio 제품 기준과 공개 버전
 
+2026-10-24 KST. **출처 제안 검토40을 수용하고 기존 공개 GitHub Pages에 게시했다.** [PC 체험본](https://tlsee0813-cmd.github.io/agentflow-studio/) · [40 판단·독립검증](cycles/2026-10-24-source-proposals-40/DECISION.md) · [정확 양OS CI](cycles/2026-10-24-source-proposals-40/CI.md). 수용 source는 `44cfc9ade567b3b7cfe66af57d9762d5bf1ead39`, app tree는 `c6172dd71c592ae331931b5d9e5ca5b60b0e77d0`, 배포는 `d2ecd38141384ce54b69563f2512a15beb4a53f8`다. 홈에서 작은 기록 검토 진입을 열어 명시 예제/JSON의 제안·원문을 왕복하고 제외/되돌림·근거 분리 후 원래 홈으로 돌아온다. 탭 메모리만 사용하며 새로고침하면 검토는 사라진다. 기존 project/초안/저장·수신 계약은 그대로이고 실제AI 추출·자동 연결은 아니다.
+
+아래는 이전38과 과거 단계의 수용 기록이다.
+
 2026-10-24 KST. **36/37 결합38을 수용하고 기존 공개 GitHub Pages에 게시했다.** [PC 체험본](https://tlsee0813-cmd.github.io/agentflow-studio/) · [수용·독립검증·한계](cycles/2026-10-24-entry-integration-38/DECISION.md) · [최종 CI](cycles/2026-10-24-entry-integration-38/CI.md). 정확 제품 source는 `c7329aa8b941791633d5f22da4ca105188aab0be`, app tree는 `af4556e7463fa76ce36938220c52447bd539cd3f`, 공개배포는 `4ebf8fa39df1353f9853aa3819c6917a609aa74b`다. 후속 문서는 이 제품코드와 구별한다.
 
 프로젝트 홈→비저장 예제 지도→부분/작업→이어가기→지도 복귀→예제 닫기→빈 내 프로젝트 시작을 연결했다.1280 복귀 안내의 지도 높이 축소를 수정하고 실제 표시·초안·예제 비저장을 독립 확인했다. 기본78% 작은 글씨는 남은 한계다. 브라우저 MOCK·실제 AI 없음·브라우저 저장이며, 이전 공개 데모와 다른 preview 접두사로 기록을 분리한다. 기존 데이터 이동은 명시 백업/가져오기다. DeepSeek 키/실제 JSONL/서버는 공개체험본에 포함되지 않는다.
@@ -20,7 +24,7 @@
 
 **이전19에서는 지도 공간을 유지하는 우측 기록 읽기·전체 목적 창·정확한 출발 복귀를 반영했다.** [PR10](https://github.com/tlsee0813-cmd/agentflow-studio/pull/10) · [19 결과와 잔여 위험](cycles/2026-10-22-workspace-records-19/RESULT.md).
 
-**이전18에서는 같은 지도 안의 실제 포함·부분별 접기, 하위 질문/설명과 실제 관계 끝점 탐색, 정확한 자식 요청·인계와 출발 복귀를 반영했다.** [PR #9](https://github.com/tlsee0813-cmd/agentflow-studio/pull/9) · [포함18 결과·수용 범위](cycles/2026-10-22-mixed-depth-18/RESULT.md). 기존 프로젝트 카드 홈·보고 읽기·같은 영역 설명 갱신을 이어 확장했다. [PR #8](https://github.com/tlsee0813-cmd/agentflow-studio/pull/8) · [갱신17 결과·수용 범위](cycles/2026-10-22-area-update-17/RESULT.md). [PR #7](https://github.com/tlsee0813-cmd/agentflow-studio/pull/7) · [연결16 결과·수용 경계](cycles/2026-10-16-report-area-16/RESULT.md). [PR #6](https://github.com/tlsee0813-cmd/agentflow-studio/pull/6) · [홈15 결과](cycles/2026-10-16-project-home-15/RESULT.md). [PR #4](https://github.com/tlsee0813-cmd/agentflow-studio/pull/4) · [제품13 결과·검증·남은 조건](cycles/2026-10-16-pc-map-space-13/RESULT.md). 당시 공개 MOCK은 USE106이었으며 현재 공개판은 상단38 기준이다.
+**이전18에서는 같은 지도 안의 실제 포함·부분별 접기, 하위 질문/설명과 실제 관계 끝점 탐색, 정확한 자식 요청·인계와 출발 복귀를 반영했다.** [PR #9](https://github.com/tlsee0813-cmd/agentflow-studio/pull/9) · [포함18 결과·수용 범위](cycles/2026-10-22-mixed-depth-18/RESULT.md). 기존 프로젝트 카드 홈·보고 읽기·같은 영역 설명 갱신을 이어 확장했다. [PR #8](https://github.com/tlsee0813-cmd/agentflow-studio/pull/8) · [갱신17 결과·수용 범위](cycles/2026-10-22-area-update-17/RESULT.md). [PR #7](https://github.com/tlsee0813-cmd/agentflow-studio/pull/7) · [연결16 결과·수용 경계](cycles/2026-10-16-report-area-16/RESULT.md). [PR #6](https://github.com/tlsee0813-cmd/agentflow-studio/pull/6) · [홈15 결과](cycles/2026-10-16-project-home-15/RESULT.md). [PR #4](https://github.com/tlsee0813-cmd/agentflow-studio/pull/4) · [제품13 결과·검증·남은 조건](cycles/2026-10-16-pc-map-space-13/RESULT.md). 당시 공개 MOCK은 USE106이었으며 현재 공개판은 상단40 기준이다.
 
 ## 제품 목적과 현재 범위
 
@@ -32,9 +36,11 @@
 
 | 구분 | 정확한 기준 | 상태 |
 |---|---|---|
-| 제품 기준 checkpoint | [c7329aa](https://github.com/tlsee0813-cmd/agentflow-studio/commit/c7329aa8b941791633d5f22da4ca105188aab0be) | 36/37 결합38 수용. 후속 문서 커밋의 app tree 동일 |
+| 제품 기준 checkpoint | [44cfc9a](https://github.com/tlsee0813-cmd/agentflow-studio/commit/44cfc9ade567b3b7cfe66af57d9762d5bf1ead39) | 40 수용, 아래38 포함. 후속 증거 문서는 app tree 동일 |
+| 이전38 제품 | [c7329aa](https://github.com/tlsee0813-cmd/agentflow-studio/commit/c7329aa8b941791633d5f22da4ca105188aab0be) | 36/37 결합38 수용. 후속 문서 커밋의 app tree 동일 |
 | 과거 비공개 체험본35 | Sites 소스99d4502·제품81f8a32 | 기존 private35 그대로. 현재 공개체험본으로 대체 안내 |
-| 현재 공개 PC MOCK38 | [gh-pages4ebf8fa](https://github.com/tlsee0813-cmd/agentflow-studio/commit/4ebf8fa39df1353f9853aa3819c6917a609aa74b) | 검증 preview runtime17개. [BUILD.txt](https://tlsee0813-cmd.github.io/agentflow-studio/BUILD.txt). 이전 공개 rollback63f5540 |
+| 현재 공개 PC MOCK40 | [gh-pages d2ecd38](https://github.com/tlsee0813-cmd/agentflow-studio/commit/d2ecd38141384ce54b69563f2512a15beb4a53f8) | preview runtime20개·HTTP19개 일치, [배포](cycles/2026-10-24-source-proposals-40/DEPLOYMENT.json) |
+| 이전 공개 PC MOCK38 | [gh-pages4ebf8fa](https://github.com/tlsee0813-cmd/agentflow-studio/commit/4ebf8fa39df1353f9853aa3819c6917a609aa74b) | 검증 preview runtime17개. [BUILD.txt](https://tlsee0813-cmd.github.io/agentflow-studio/BUILD.txt). 이전 공개 rollback63f5540 |
 | 이전 공개 기준 | 소스 [`2931b509`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/2931b50938af037a43e20ed7aba69b96ab79843d) · 배포 [`d7b0bf85`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/d7b0bf8541ba0b5ecca914f8d6f412f44af24127) | 비교·되돌리기 기준이며 현재 공개 버전 아님 |
 | GUIDE107 병렬 후보 | [`3fd4b305`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/3fd4b3055328862c8b8471b356ee5f3772a8deee), 부모 `2931b509` | 소스 검토·CI 통과, 실제 AI 의미 품질 **HOLD**. USE106·공개 소스에 미통합 |
 | main / dev | [main `896dcf38`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/896dcf3848fec70357d0f9bd4fd6c09cab70db37) / dev 없음 | main은 초기 커밋이며 최신 제품 아님 |
@@ -47,7 +53,7 @@ USE106과 GUIDE107은 같은 이전 공개 소스에서 갈라진 병렬 작업�
 
 실제 편집 작업의 소유 부분을 따른다. 현재 인계에 쓰이지 않는 이전 기준을 알리되 읽던 본문은 유지하며, 직접 재열기로만 새 적용 설명을 선택한다. 첫 입력·재열기·새 보고 수신·인계·복귀를 독립 양PC에서 확인하고 정확 최종 양OS CI와 원자료 검토를 구분해 수용했다. [결과와 공유 근거](cycles/2026-10-23-work-reference-29/RESULT.md).
 
-합성 입력이며 사람 연구·실제 AI 의미 품질 검증은 아니다. 기존 인계·원보고·원기준을 보존했으나 전체 실행의 기준은 후속 요청으로2→4가 됐다. 관계는0개이고 JSON 원문 textarea 내부 스크롤·760px 분기점 자체는 미검증이다. 이는29 당시의 공개판 유지 기록이다. 현재 공개판은 상단38 기준이다.
+합성 입력이며 사람 연구·실제 AI 의미 품질 검증은 아니다. 기존 인계·원보고·원기준을 보존했으나 전체 실행의 기준은 후속 요청으로2→4가 됐다. 관계는0개이고 JSON 원문 textarea 내부 스크롤·760px 분기점 자체는 미검증이다. 이는29 당시의 공개판 유지 기록이다. 현재 공개판은 상단40 기준이다.
 
 ## 현재 설명 다시 기록27의 수용 경계
 

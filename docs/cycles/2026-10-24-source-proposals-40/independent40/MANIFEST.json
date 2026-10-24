@@ -1,0 +1,76 @@
+{
+  "sourceSha": "44cfc9ade567b3b7cfe66af57d9762d5bf1ead39",
+  "appTree": "c6172dd71c592ae331931b5d9e5ca5b60b0e77d0",
+  "purpose": "Coordinator consolidated command logs into one keyed JSON; private fixtures and third old image excluded",
+  "files": {
+    "build-manifest.json": {
+      "sha256": "3c91684a6718d809bcd1e137e51f4673bae514c220407a95e7b8e48773d795ba",
+      "bytes": 11709
+    },
+    "copy-verified.json": {
+      "sha256": "e3b804b536a504497f9d3e3f87c4543b8e75b89fe1687ce1eeec24365ce25364",
+      "bytes": 504
+    },
+    "environment.json": {
+      "sha256": "4ade4344617ba05e520d899b1340e580bab7ed73a0fc606e8e3ac943162e4e29",
+      "bytes": 637
+    },
+    "execution.json": {
+      "sha256": "fb22fbbb20f261becca5413102d792f2928a93a8ba2bdafefcbd4bbb46983a7c",
+      "bytes": 11192
+    },
+    "geometry.json": {
+      "sha256": "d669f10c187b34a439a814971c02206bf40046ada15d07d33d327903f4490141",
+      "bytes": 815
+    },
+    "independent-1280-source-end.png": {
+      "sha256": "10025ecf545f78cc2352ac9ffcdc3958266ffae0701101de7dd7296dfc2a76fc",
+      "bytes": 102312
+    },
+    "independent-1440-proposal.png": {
+      "sha256": "ce5071aa4b8454c09bc76f373ad2c4e1648b776575e68291369ddb7889c6fd44",
+      "bytes": 165064
+    },
+    "probe-harness-initial-error.log": {
+      "sha256": "953e77c4ef05dd2b832cb605189ea27706903004fd13e513f72d8dd6b6ad0a8f",
+      "bytes": 1566
+    },
+    "probe.py": {
+      "sha256": "f4774bebcd7da0b0384d106f865168f9a089d43513a70cd2d835bcf5efb1f5cc",
+      "bytes": 10736
+    },
+    "REPORT.md": {
+      "sha256": "e590d4017a62f54d2857ec5d48ce433ea3091ffa8764743bd28c73ae5350b1e1",
+      "bytes": 6852
+    },
+    "run-author.py": {
+      "sha256": "8aeb58fa528150ccfde2b72312cdec3c7f8557439cac67aa3ad9c6680e9c5859",
+      "bytes": 372
+    },
+    "runner.py": {
+      "sha256": "d778e3dd673f2476fc78831eb4e33d1adcef2b1f62c4c68fbc0b8513037d65d5",
+      "bytes": 3149
+    },
+    "RUN_LOGS.json": {
+      "sha256": "8b4efac81e53913faaa48aa26f98c79302f037b2115ffafb5d2ee55bf687f587",
+      "bytes": 58044
+    },
+    "server-cleanup.json": {
+      "sha256": "69d18d42271badf4b08ce713bb80a45de7fee74534a01bd83994e41765ea335a",
+      "bytes": 89
+    },
+    "source-integrity-initial.json": {
+      "sha256": "2590b324338fcd742d7780bffb4770da04540093bf91a6c6d01ac9b324a2902f",
+      "bytes": 3284
+    },
+    "source-integrity.json": {
+      "sha256": "9079b4703454efaf4d2581b5c544345eb70079fbdac5f8777e2582997b591ac8",
+      "bytes": 3554
+    },
+    "test-counts.json": {
+      "sha256": "728df4c12163790e5ae2b78e9cbe40c53011496db1ea4881977a3ad0496edb27",
+      "bytes": 465
+    }
+  },
+  "hashRepresentation": "Git staged blob bytes after repository line-ending normalization; runtime/observed-source hashes in reports retain their original stated representation."
+}

@@ -1,0 +1,34 @@
+{
+  "source40": {
+    "testCount": 6,
+    "ok": true
+  },
+  "entry37": {
+    "testCount": 10,
+    "ok": true
+  },
+  "map36": {
+    "testCount": 12,
+    "ok": true
+  },
+  "home15": {
+    "testCount": 21,
+    "ok": true
+  },
+  "static": {
+    "testCount": 4,
+    "ok": true
+  },
+  "independent-probe": {
+    "testCount": 1,
+    "ok": true
+  },
+  "final-source40": {
+    "testCount": 6,
+    "ok": true
+  },
+  "final-static": {
+    "testCount": 4,
+    "ok": true
+  }
+}

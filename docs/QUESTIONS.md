@@ -1,15 +1,15 @@
 # 연구 질문과 축적된 근거
 
-2026-10-24 결합38 수용·정리v0 관측39 반영. 질문의 정의·식별자는 [제품 방향 6절](PRODUCT_DIRECTION_AND_RESEARCH_PLAN_KO.md#6-연구-질문-목록)이 단일 원본이다. 이 표는 **질문별 근거 색인이지 승인된 개발 목록이 아니다.** 한 사이클에서 질문1~2개만 선택한다. 제품 수용/연구 탐색/반환 후보를 구별하며 현재 배정은 [ACTIVE](cycles/ACTIVE.md)에만 둔다. 새 결과가 질문의 답을 바꿀 때 이 행을 누적 갱신하고 과거 반례를 지우지 않는다.
+2026-10-24 결합38·출처 제안 검토40 수용·정리v0 관측39 반영. 질문의 정의·식별자는 [제품 방향 6절](PRODUCT_DIRECTION_AND_RESEARCH_PLAN_KO.md#6-연구-질문-목록)이 단일 원본이다. 이 표는 **질문별 근거 색인이지 승인된 개발 목록이 아니다.** 한 사이클에서 질문1~2개만 선택한다. 제품 수용/연구 탐색/반환 후보를 구별하며 현재 배정은 [ACTIVE](cycles/ACTIVE.md)에만 둔다. 새 결과가 질문의 답을 바꿀 때 이 행을 누적 갱신하고 과거 반례를 지우지 않는다.
 
 | 질문 | 현재까지 근거 / 단계 | 남은 판단 |
 |---|---|---|
 | Q01 구성 단위와 역할 | [13](cycles/2026-10-16-pc-map-space-13/RESULT.md), [18](cycles/2026-10-22-mixed-depth-18/RESULT.md) 제품 공간·포함 수용 | 외부 기록의 기능/세션/작업을 자동으로 같은 노드로 만들지 않는 대응 |
-| Q02 정체성·별칭·이름의 근거 | [14](cycles/2026-10-16-session-input-14/RESULT.md) 수동 탐색 + [39 실제8사건·정제3후보](cycles/2026-10-24-organizer-observation-39/RESULT.md). 기능/담당/세션 혼합·출처누락 보정 | 다음 범위는 연결 대기 제안의 이름 후보·동일성 불명 보존. 자동 병합·개명/별칭/분할 판정은 근거 없음 |
+| Q02 정체성·별칭·이름의 근거 | [14](cycles/2026-10-16-session-input-14/RESULT.md) 수동 탐색 + [39 실제8사건·정제3후보](cycles/2026-10-24-organizer-observation-39/RESULT.md). 기능/담당/세션 혼합·출처누락 보정. [40](cycles/2026-10-24-source-proposals-40/DECISION.md)에서 연결 대기·동일성 불명 표시 수용 | 자동 병합·개명/별칭/분할 판정은 근거 없음 |
 | Q03 포함·관계·혼합 깊이 | [18](cycles/2026-10-22-mixed-depth-18/RESULT.md) 포함/부분 접기, [31](cycles/2026-10-23-branch-records-31/RESULT.md) 하위 기록 수용 | 큰 실제 구조의 가독성·접힘 집계와 관계 실제 끝점 |
 | Q04 탐색·층·관점 | [19](cycles/2026-10-22-workspace-records-19/RESULT.md), [30](cycles/2026-10-23-viewport-return-30/RESULT.md), [38 홈/예제/작업/복귀](cycles/2026-10-24-entry-integration-38/DECISION.md) 수용 | 1280 안내로 지도 높이가 줄던 반례 수정. 일반 기본fit 가독성·구조 상세 층 판단은 남음 |
 | Q05 원본·현재 상태·재구성 | [17](cycles/2026-10-22-area-update-17/RESULT.md), [20](cycles/2026-10-22-received-result-20/RESULT.md) 원보고/설명/정정 분리 | 일반 원본의 누락 범위·재해석·버전 재구성. 수신 보존≠무손실 수집 |
-| Q06 첫 연결과 과거 기록 | [14](cycles/2026-10-16-session-input-14/RESULT.md) 수동 탐색 + [39](cycles/2026-10-24-organizer-observation-39/RESULT.md) 실제JSONL 한 표본 분류·독립 보정. project 연결 없어 수신 NOT_RUN | 다음 제품 범위: 선택 구간·출처·빠진 연결을 보존한 최대3개 연결 대기 제안. 일반 수집/자동배치/기존return 수신 확대 아님 |
+| Q06 첫 연결과 과거 기록 | [14](cycles/2026-10-16-session-input-14/RESULT.md) 수동 탐색 + [39](cycles/2026-10-24-organizer-observation-39/RESULT.md) 실제JSONL 한 표본 분류·독립 보정. [40](cycles/2026-10-24-source-proposals-40/DECISION.md)에서 선택 구간·출처·빠진 연결을 보존한 최대3개 연결 대기 제안 검토 수용 | 실제project/export 연결 근거 없음·수신 NOT_RUN. 일반 수집/자동배치/기존return 수신 확대 아님 |
 | Q07 주장·결정·관측·비어 있음 | [17](cycles/2026-10-22-area-update-17/RESULT.md), [27](cycles/2026-10-23-description-refresh-27/RESULT.md) 설명 보류·현재 맥락 대조 수용 | 외부 의미 분류 정확성. 완료 발언/검사 통과/미관측 분리 |
 | Q08 변경·중복·순서·동시 작업 | [17](cycles/2026-10-22-area-update-17/RESULT.md) anchor/중복/이전 기준 판정 수용 | 일반 이벤트 재수신·지연·여러 세션 겹침. return 계약만으로 해결되지 않음 |
 | Q09 사용자 수정과 역방향 전달 | [23](cycles/2026-10-23-correction-context-23/RESULT.md), [27](cycles/2026-10-23-description-refresh-27/RESULT.md), [29](cycles/2026-10-23-work-reference-29/RESULT.md) 수용 | 전달/읽힘/반영됨 구별, 외부 기록이 정정을 덮지 않는 일반화 |
@@ -23,4 +23,4 @@
 | Q17 동일 입력 비교와 품질 기준 | [11](cycles/2026-10-16-two-change-record-11/RESULT.md), [14](cycles/2026-10-16-session-input-14/RESULT.md) 같은 렌더러·입력 교체; 독립 반례 축적 | 검사 중심 표본 편향 줄이기. Dify 실제 조작 비교와 AI 사전 평가 구별 |
 | Q18 정리 시점과 호출 방식 | 정의 유지, 자동 정리 호출·스케줄러 미통합 | v0의 정보 범위 이후 턴/유휴/의미 변화 기준 비교. 지금 스케줄러부터 만들지 않음 |
 
-36·37은 [결합38](cycles/2026-10-24-entry-integration-38/DECISION.md)로 수용했고, 다음 Q02/Q06 범위는 [관측39](cycles/2026-10-24-organizer-observation-39/RESULT.md)에서 선택했다. 원래 인계 조건은 [인계 4~6절](COORDINATOR_HANDOFF_2026-10-24_KO.md)에 보존한다. Q02·06·12·18의 공백은 유지하되 관련 수동 탐색과 수신 부품까지 “아무것도 없음”으로 지우지 않는다.
+36·37은 [결합38](cycles/2026-10-24-entry-integration-38/DECISION.md)로 수용했고, 다음 Q02/Q06 범위는 [관측39](cycles/2026-10-24-organizer-observation-39/RESULT.md)에서 선택하고 [40](cycles/2026-10-24-source-proposals-40/DECISION.md)의 좁은 검토 흐름으로 수용했다. 원래 인계 조건은 [인계 4~6절](COORDINATOR_HANDOFF_2026-10-24_KO.md)에 보존한다. Q02·06·12·18의 공백은 유지하되 관련 수동 탐색과 수신 부품까지 “아무것도 없음”으로 지우지 않는다.

@@ -1,0 +1,268 @@
+[
+  {
+    "name": "root-type",
+    "command": [
+      "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product17-author\\app\\node_modules\\typescript\\bin\\tsc",
+      "--noEmit"
+    ],
+    "exit": 0,
+    "seconds": 2.234,
+    "sourceSha": "248320d65ef7008b4d5e5e35f5ef03f4f56bf667"
+  },
+  {
+    "name": "root-boundary",
+    "command": [
+      "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "scripts/check.mjs"
+    ],
+    "exit": 0,
+    "seconds": 5.156,
+    "sourceSha": "248320d65ef7008b4d5e5e35f5ef03f4f56bf667"
+  },
+  {
+    "name": "root-build",
+    "command": [
+      "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "scripts/build.mjs"
+    ],
+    "exit": 0,
+    "seconds": 1.578,
+    "sourceSha": "248320d65ef7008b4d5e5e35f5ef03f4f56bf667"
+  },
+  {
+    "name": "continuity-check",
+    "command": [
+      "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "continuity/scripts/check.mjs"
+    ],
+    "exit": 0,
+    "seconds": 5.547,
+    "sourceSha": "248320d65ef7008b4d5e5e35f5ef03f4f56bf667"
+  },
+  {
+    "name": "continuity-build",
+    "command": [
+      "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "continuity/scripts/build.mjs"
+    ],
+    "exit": 0,
+    "seconds": 2.75,
+    "sourceSha": "248320d65ef7008b4d5e5e35f5ef03f4f56bf667"
+  },
+  {
+    "name": "continuity-unit",
+    "command": [
+      "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "--test",
+      "continuity\\tests\\ai055.test.mjs",
+      "continuity\\tests\\connect039.test.mjs",
+      "continuity\\tests\\description-refresh27.test.mjs",
+      "continuity\\tests\\description23.test.mjs",
+      "continuity\\tests\\domain.test.mjs",
+      "continuity\\tests\\fix058.test.mjs",
+      "continuity\\tests\\fix066.test.mjs",
+      "continuity\\tests\\fix088.test.mjs",
+      "continuity\\tests\\flow049.test.mjs",
+      "continuity\\tests\\flow083.test.mjs",
+      "continuity\\tests\\flow090.test.mjs",
+      "continuity\\tests\\flow091c.test.mjs",
+      "continuity\\tests\\flow094.test.mjs",
+      "continuity\\tests\\flow095.test.mjs",
+      "continuity\\tests\\fresh033.test.mjs",
+      "continuity\\tests\\guide097.test.mjs",
+      "continuity\\tests\\hierarchy18.test.mjs",
+      "continuity\\tests\\http.test.mjs",
+      "continuity\\tests\\idea017.test.mjs",
+      "continuity\\tests\\idea022.test.mjs",
+      "continuity\\tests\\map-priority36.test.mjs",
+      "continuity\\tests\\select035.test.mjs",
+      "continuity\\tests\\source-proposals40.test.mjs",
+      "continuity\\tests\\spatial102.test.mjs",
+      "continuity\\tests\\ui001.test.mjs",
+      "continuity\\tests\\understanding17.test.mjs"
+    ],
+    "exit": 0,
+    "seconds": 13.813,
+    "sourceSha": "248320d65ef7008b4d5e5e35f5ef03f4f56bf667"
+  },
+  {
+    "name": "static-build",
+    "command": [
+      "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "continuity/scripts/build-static.mjs"
+    ],
+    "exit": 0,
+    "seconds": 3.25,
+    "sourceSha": "248320d65ef7008b4d5e5e35f5ef03f4f56bf667"
+  },
+  {
+    "name": "preview-build",
+    "command": [
+      "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "continuity/scripts/build-static.mjs",
+      "--preview"
+    ],
+    "exit": 0,
+    "seconds": 2.719,
+    "sourceSha": "248320d65ef7008b4d5e5e35f5ef03f4f56bf667"
+  },
+  {
+    "name": "source40",
+    "command": [
+      "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+      "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product40-independent-evidence-20261024\\run-author.py",
+      "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product-handoff-20261024\\app\\continuity\\tests\\source-proposals40_browser.py"
+    ],
+    "exit": 0,
+    "seconds": 21.406,
+    "sourceSha": "248320d65ef7008b4d5e5e35f5ef03f4f56bf667"
+  },
+  {
+    "name": "independent-probe",
+    "command": [
+      "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+      "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product40-independent-evidence-20261024\\probe.py"
+    ],
+    "exit": 1,
+    "seconds": 3.422,
+    "sourceSha": "248320d65ef7008b4d5e5e35f5ef03f4f56bf667"
+  },
+  {
+    "name": "entry37",
+    "command": [
+      "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+      "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product40-independent-evidence-20261024\\run-author.py",
+      "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product-handoff-20261024\\app\\continuity\\tests\\entry37_browser.py"
+    ],
+    "exit": 0,
+    "seconds": 52.0,
+    "sourceSha": "248320d65ef7008b4d5e5e35f5ef03f4f56bf667"
+  },
+  {
+    "name": "independent-probe",
+    "command": [
+      "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+      "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product40-independent-evidence-20261024\\probe.py"
+    ],
+    "exit": 0,
+    "seconds": 7.891,
+    "sourceSha": "248320d65ef7008b4d5e5e35f5ef03f4f56bf667"
+  },
+  {
+    "name": "map36",
+    "command": [
+      "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+      "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product40-independent-evidence-20261024\\run-author.py",
+      "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product-handoff-20261024\\app\\continuity\\tests\\map-priority36_browser.py"
+    ],
+    "exit": 0,
+    "seconds": 33.39,
+    "sourceSha": "248320d65ef7008b4d5e5e35f5ef03f4f56bf667"
+  },
+  {
+    "name": "home15",
+    "command": [
+      "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+      "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product40-independent-evidence-20261024\\run-author.py",
+      "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product-handoff-20261024\\app\\continuity\\tests\\home15_browser.py"
+    ],
+    "exit": 0,
+    "seconds": 41.5,
+    "sourceSha": "248320d65ef7008b4d5e5e35f5ef03f4f56bf667"
+  },
+  {
+    "name": "static",
+    "command": [
+      "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+      "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product40-independent-evidence-20261024\\run-author.py",
+      "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product-handoff-20261024\\app\\continuity\\tests\\static_browser.py"
+    ],
+    "exit": 0,
+    "seconds": 19.922,
+    "sourceSha": "248320d65ef7008b4d5e5e35f5ef03f4f56bf667"
+  },
+  {
+    "name": "final-continuity-check",
+    "command": [
+      "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "continuity/scripts/check.mjs"
+    ],
+    "exit": 0,
+    "seconds": 4.812,
+    "sourceSha": "44cfc9ade567b3b7cfe66af57d9762d5bf1ead39"
+  },
+  {
+    "name": "final-continuity-build",
+    "command": [
+      "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "continuity/scripts/build.mjs"
+    ],
+    "exit": 0,
+    "seconds": 2.469,
+    "sourceSha": "44cfc9ade567b3b7cfe66af57d9762d5bf1ead39"
+  },
+  {
+    "name": "final-static-build",
+    "command": [
+      "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "continuity/scripts/build-static.mjs"
+    ],
+    "exit": 0,
+    "seconds": 2.782,
+    "sourceSha": "44cfc9ade567b3b7cfe66af57d9762d5bf1ead39"
+  },
+  {
+    "name": "final-preview-build",
+    "command": [
+      "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "continuity/scripts/build-static.mjs",
+      "--preview"
+    ],
+    "exit": 0,
+    "seconds": 2.765,
+    "sourceSha": "44cfc9ade567b3b7cfe66af57d9762d5bf1ead39"
+  },
+  {
+    "name": "final-source40",
+    "command": [
+      "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+      "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product40-independent-evidence-20261024\\run-author.py",
+      "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product-handoff-20261024\\app\\continuity\\tests\\source-proposals40_browser.py"
+    ],
+    "exit": 0,
+    "seconds": 15.546,
+    "sourceSha": "44cfc9ade567b3b7cfe66af57d9762d5bf1ead39"
+  },
+  {
+    "name": "independent-probe",
+    "command": [
+      "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+      "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product40-independent-evidence-20261024\\probe.py"
+    ],
+    "exit": 0,
+    "seconds": 7.078,
+    "sourceSha": "44cfc9ade567b3b7cfe66af57d9762d5bf1ead39"
+  },
+  {
+    "name": "final-static",
+    "command": [
+      "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+      "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product40-independent-evidence-20261024\\run-author.py",
+      "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product-handoff-20261024\\app\\continuity\\tests\\static_browser.py"
+    ],
+    "exit": 0,
+    "seconds": 22.953,
+    "sourceSha": "44cfc9ade567b3b7cfe66af57d9762d5bf1ead39"
+  },
+  {
+    "name": "independent-probe",
+    "command": [
+      "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+      "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product40-independent-evidence-20261024\\probe.py"
+    ],
+    "exit": 0,
+    "seconds": 5.969,
+    "sourceSha": "44cfc9ade567b3b7cfe66af57d9762d5bf1ead39"
+  }
+]

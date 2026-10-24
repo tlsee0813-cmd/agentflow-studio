@@ -1,0 +1,11 @@
+{
+  "source": "44cfc9ade567b3b7cfe66af57d9762d5bf1ead39",
+  "excerpts": 8,
+  "proposals": 3,
+  "comparisons": 72,
+  "mismatches": [],
+  "rawHashMatches": true,
+  "totalLinesMatch": true,
+  "additionalPresentationFields": "Per-proposal missing arrays summarize existing fidelity, identity, roleChange and review.md omissions; coordinator manually checked all three. New role/truncated/note fields label existing evidence, not new execution facts.",
+  "initialComparison": "Comparing all new keys to the old format reported three absent missing keys; narrowed exact parity to all original fields and separately reviewed added presentation fields."
+}
