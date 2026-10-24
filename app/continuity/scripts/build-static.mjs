@@ -10,7 +10,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const cwd = fileURLToPath(new URL('..', import.meta.url));
-if (process.argv.length > 2) throw new Error('Usage: [STUDIO_API_BASE=same-origin|https://origin] node continuity/scripts/build-static.mjs');
+const args = process.argv.slice(2);
+if (args.length > 1 || args.some(arg => arg !== '--preview')) throw new Error('Usage: [STUDIO_API_BASE=same-origin|https://origin] node continuity/scripts/build-static.mjs [--preview]');
+const preview = args.includes('--preview');
 const raw = (process.env.STUDIO_API_BASE ?? '').trim();
 let endpoint = null, connect = "'none'";
 if (raw === 'same-origin') { endpoint = ''; connect = "'self'"; }
@@ -31,6 +33,8 @@ try {
   await cp(join(stage, 'client'), new URL('client/', output), { recursive: true });
   await copyFile(join(stage, 'client/runtime-static.js'), new URL('client/runtime.js', output));
   await rm(new URL('client/runtime-static.js', output));
+  // The existing public Pages deployment uses this namespace. Keep its saved projects readable on upgrade.
+  if (preview) await writeFile(new URL('client/static-target.js', output), "export const STATIC_TARGET = { prefix: 'agentflow.studio.preview:' };\n");
   await writeFile(new URL('client/studio-endpoint.js', output), `export const STUDIO_ENDPOINT = ${JSON.stringify(endpoint)};\n`);
   let html = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
   html = html.replace('<meta charset="utf-8">', `<meta charset="utf-8">\n  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src ${connect}; object-src 'none'; base-uri 'none'; form-action 'none'">\n  <meta name="referrer" content="no-referrer">`);
@@ -41,7 +45,7 @@ try {
   const files = async (dir, base = '') => (await Promise.all((await readdir(dir, { withFileTypes: true })).map(f => f.isDirectory() ? files(join(dir, f.name), `${base}${f.name}/`) : [`${base}${f.name}`]))).flat();
   const root = fileURLToPath(output);
   for (const f of await files(root)) if (/DEEPSEEK_API_KEY|api\.deepseek\.com|sk-[A-Za-z0-9]{16,}/.test(await readFile(join(root, f), 'utf8'))) throw new Error(`Credential/provider reference in static output: ${f}`);
-  console.log(`Static build: continuity/static-dist · AI server: ${endpoint === null ? 'none' : endpoint === '' ? 'same origin' : endpoint}`);
+  console.log(`Static build: continuity/static-dist · storage: ${preview ? 'existing preview' : 'browser demo'} · AI server: ${endpoint === null ? 'none' : endpoint === '' ? 'same origin' : endpoint}`);
   console.log(compilerSource);
   for (const f of (await files(root)).sort()) console.log(`sha256 ${createHash('sha256').update(await readFile(join(root, f))).digest('hex')}  ${f}`);
 } finally { await rm(stage, { recursive: true, force: true }); }

@@ -71,7 +71,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          node continuity/scripts/build-static.mjs 2>&1 | tee test-results/static-build.log
+          node continuity/scripts/build-static.mjs --preview 2>&1 | tee test-results/static-build.log
       - name: Install pinned browser verification tools
         run: |
           python -m pip install -r tests/browser-requirements.txt

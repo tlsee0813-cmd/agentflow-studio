@@ -59,6 +59,7 @@ Windows에서 빌드가 이미 있다면 PowerShell로 `./continuity/scripts/sta
 
 ```sh
 node continuity/scripts/build-static.mjs    # 새 화면의 정적 체험: 지도·기록은 그대로, 정리 요청은 'AI 서버 미연결'
+node continuity/scripts/build-static.mjs --preview  # 기존 공개 Pages 갱신: 이전 미리보기 저장 공간 유지
 ```
 
 빌드 결과는 `continuity/static-dist`이고 CSP는 `connect-src 'none'`입니다. 선택적으로 `STUDIO_API_BASE=same-origin`이나
