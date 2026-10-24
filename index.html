@@ -12,7 +12,7 @@
   <div class="app">
     <header class="bar">
       <a class="brand" href="#/" aria-label="AgentFlow Studio 프로젝트 목록"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="7" height="5" rx="1.6"/><rect x="14.5" y="4" width="7" height="5" rx="1.6"/><rect x="8.5" y="15" width="7" height="5" rx="1.6"/><path d="M6 9v2.5h12V9M12 11.5V15"/></svg><span>AgentFlow Studio</span></a>
-      <nav class="crumbs" aria-label="위치"><a id="crumb-home" href="#/">프로젝트</a><span id="crumb-sep" class="sep" aria-hidden="true" hidden>/</span><strong id="crumb-project" hidden></strong><span id="crumb-tag" class="tag" hidden></span></nav>
+      <nav id="crumbs" class="crumbs" aria-label="위치"><a href="#/">프로젝트</a></nav>
       <span class="grow"></span>
       <span id="ai-pill" class="ai-pill" data-state="checking"><i aria-hidden="true"></i><span id="ai-text">AI 확인 중</span></span>
     </header>
@@ -42,9 +42,14 @@
         <span id="zoom-level" class="zoom-level">100%</span>
         <button type="button" id="zoom-in" aria-label="확대" title="확대">+</button>
         <button type="button" id="zoom-fit" aria-label="전체 보기" title="전체 보기"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"/></svg></button>
+        <button type="button" id="arrange" title="자동 정렬 · 이 화면에서 옮긴 위치를 되돌림 (되돌리기 가능)" aria-label="자동 정렬"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="2.5" width="5" height="4" rx="1"/><rect x="9" y="2.5" width="5" height="4" rx="1"/><rect x="2" y="9.5" width="5" height="4" rx="1"/><rect x="9" y="9.5" width="5" height="4" rx="1"/></svg></button>
+        <button type="button" id="help-toggle" aria-expanded="false" aria-controls="help" title="조작법" aria-label="조작법">?</button>
         <button type="button" id="add-part" class="add-part" hidden>+ 부분</button>
         <span class="legend" aria-label="상태"><i class="s-reported"></i>보고 받음<i class="s-active"></i>진행 중<i class="s-plan"></i>구상</span>
       </div>
+      <div id="help" class="help" hidden><strong>지도 조작</strong><ul><li><b>휠</b> 커서 위치로 확대·축소 (40–160%)</li><li><b>빈 곳 드래그</b> 지도 이동</li><li><b>부분 끌기</b> 위치 옮기기 · 그룹은 안의 부분과 함께</li><li><b>클릭</b> 정보 열기</li><li><b>더블클릭</b> 또는 <b>숫자 ›</b> 안으로 들어가기</li><li><b>›</b> 그 자리에서 펼치기·접기</li><li><b>Esc</b> 정보 닫기 · 한 단계 위로</li></ul></div>
+      <div id="scope-bar" class="scope-bar" hidden></div>
+      <div id="toast" class="toast" role="status" hidden></div>
       <p id="space-empty" class="space-empty" hidden></p>
       <div id="part-form" class="part-form" hidden></div>
       <aside id="panel" class="panel" aria-labelledby="panel-title" hidden></aside>

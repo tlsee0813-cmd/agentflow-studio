@@ -1,7 +1,4 @@
-AgentFlow Studio demo 43
-source 00ca5753e46d34c42a535f7acbcea9b0a88d16b2
-appTree c342d89bdc8a4edecd51d4e1c8d7d3124a57dca7
-runtimeTree e244dca61c3ac17126d8341c1ecc5dc0e191e6f6
-CI run 40076048672; Ubuntu 120819712336; Windows 120819712517
-Static experience; AI runs only in the local application. No provider key.
-Existing preview storage namespace retained.
+AgentFlow Studio 44
+source=c0a805cae72458e9ac22ff53ebc463b6dce6cd99
+CI=https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40079755042
+AI=https://agentflow-studio.tlsee0813.workers.dev
