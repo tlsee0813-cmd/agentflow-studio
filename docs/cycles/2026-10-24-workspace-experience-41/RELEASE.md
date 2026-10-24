@@ -14,4 +14,8 @@
 
 작성자/독립 실행/정적 검토/총괄 화면/CI를 별도 문서로 남겼다. 독립 보관 묶음은 개선 전2PNG·개선 후3PNG·최종 보고2개·측정/동일성 JSON2개·원본 합성 fixture3개, 총12파일695,124bytes다. 공개 확인 PNG는 별도 한 장이다. 중간 후보의 실패는 EVALUATION.md에 요약했다. 작성자 중복3PNG는 고정 구현 커밋의 history에서 회수 가능하며 AUTHOR.md에 링크를 남겼다.
 
-GitHub의 최소 증거 회수 확인 뒤 이번41 전용 임시 생성물·중간 반복 원자료를 정리한다. 정리 완료 수치와 보존 경계는 아래에 확정 기록한다. 기존 dirty checkout·원본 실제 JSONL·키·공용 런타임·과거38의 삭제 차단 잔여물은 정리 대상이 아니다.
+GitHub checkpoint의 DECISION과 독립 RESULT를 다시 회수한 뒤 이번41 전용 임시 생성물·중간 반복 원자료를 정리했다. [정리 기록](CLEANUP.json):185파일7,188,900bytes 제거, 로컬 MOCK 서버 PID34680 종료. 중간 반복 원자료·전용 probe 임시 폴더·static-preview-dist·배포 보조2개가 대상이다. 대표 증거와 합성 fixture는 이 cycle에 유지한다. 작성자 중복3PNG는 앞선 증거 커밋에서 별도로 제거했다.
+
+병합한 product/workspace-experience-41 브랜치는 정확6840496과 checkpoint 포함 관계를 확인한 뒤 삭제했다. 기존 dirty checkout·원본 실제 JSONL·키·공용 런타임·과거38의 삭제 차단 잔여물은 그대로다. 독립 보고/RESULT의 서버 running 표시는 측정 당시 사실이며 현재는 종료했다. Pro 접수/반환의 작은 비공개 기록은 중복 제출 방지용으로 유지한다.
+
+추가 공개 문서·증거28파일906,599bytes도 커밋 전에 실제 키와 대조해 일치0건이었다. 후속 증거/정리 커밋의 app tree는 수용 소스와 동일하다.

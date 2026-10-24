@@ -1,0 +1,10 @@
+{
+  "removedFiles": 185,
+  "removedBytes": 7188900.0,
+  "serverPid": 34680,
+  "serverStopped": true,
+  "keptIndependentFiles": 12,
+  "keptIndependentBytes": 695124,
+  "previousWorkPreserved": true,
+  "scope": "Only cycle41 untracked intermediate files, its independent temporary directory, static preview output and two release helpers"
+}
