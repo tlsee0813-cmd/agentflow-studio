@@ -80,8 +80,12 @@ export function stageOf(p, t) {
     const w = currentWork(p, t);
     if (w.aiStale)
         return { kind: 'stale', title: '현재 기준으로 이어가세요.', label: w.changed === 'unknown' ? '기준 시점 확인 불가' : '기준 변경됨', next: '이전 AI 문구는 제외했습니다. 직접 다듬거나 이 입력만 다시 정리할 수 있어요.', step: 2 };
-    if (!t.advice && !Object.values(t.manual).some(v => v?.trim()))
+    if (!t.advice && !Object.values(t.manual).some(v => v?.trim())) {
+        // WORK41: a returned report with an empty follow-up says so, instead of the plain 'request kept' wording.
+        if (['report', 'evidence'].includes(sourceOf(p, t)?.kind ?? ''))
+            return { kind: 'saved', title: '받은 보고를 확인할 작업문이 아직 비어 있어요.', label: '원문 보관됨', next: '보고는 앱이 검증하지 않았어요. 확인할 일을 아래에 직접 쓰거나 이 입력을 다시 정리하세요.', step: 1 };
         return { kind: 'saved', title: '요청 원문은 남아 있어요.', label: '원문 보관됨', next: '다시 정리하거나, 아래에서 작업문을 직접 작성하세요.', step: 1 };
+    }
     if (t.handoffs.length && !exportNeedsRefresh(p, t))
         return { kind: 'exported', title: '돌아온 결과에서 이어가세요.', label: '작업문 내보냄', next: '사용 중인 도구에 작업문을 전달한 뒤, 받은 결과를 여기에 붙여넣으세요.', step: 3 };
     const returned = ['report', 'evidence'].includes(sourceOf(p, t)?.kind ?? '');

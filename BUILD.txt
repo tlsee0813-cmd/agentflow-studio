@@ -1,6 +1,6 @@
-AgentFlow Studio PC preview40
-source 44cfc9ade567b3b7cfe66af57d9762d5bf1ead39
-app-tree c6172dd71c592ae331931b5d9e5ca5b60b0e77d0
-runtime-tree 81ba7c3787c4f3655aaf55a4d1e027ac46098838
-CI https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40047073004 (both OS success)
+AgentFlow Studio PC preview41
+source 6840496f2d4a41d7e396f0febea3cc4cb1f90702
+app-tree 5f42a2c6f5cbdb295cbb7ad7a71a1e36275b66f9
+runtime-tree d31f701199beb83609ef42ca11d329ff1f8170ae
+CI https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40056301818 (both OS success)
 Browser MOCK; no API calls or credentials; preview storage prefix.
