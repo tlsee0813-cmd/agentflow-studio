@@ -25,7 +25,7 @@ try {
   await rm(output,{recursive:true,force:true});await mkdir(output,{recursive:true});
   await cp(join(stage,'shared'),new URL('shared/',output),{recursive:true});
   await mkdir(new URL('client/',output));
-  for(const file of ['app.js','presentation.js'])await copyFile(join(stage,'client',file),new URL(`client/${file}`,output));
+  for(const file of ['app.js','presentation.js','source-review.js'])await copyFile(join(stage,'client',file),new URL(`client/${file}`,output));
   await copyFile(join(stage,'client/runtime-static.js'),new URL('client/runtime.js',output));
   await copyFile(join(stage,'client',target.module),new URL('client/static-target.js',output));
   let html=await readFile(new URL('../public/index.html',import.meta.url),'utf8');

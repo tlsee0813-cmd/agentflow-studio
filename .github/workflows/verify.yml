@@ -196,6 +196,13 @@ jobs:
         run: |
           set -o pipefail
           python continuity/tests/entry37_browser.py 2>&1 | tee test-results/entry37-browser.log
+      - name: SOURCE40 sourced proposal review from the home, explicit example, file import refusals and project byte preservation on two PCs (native HTTP, tab memory, MOCK; wiring, not usability)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/source40
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/source-proposals40_browser.py 2>&1 | tee test-results/source40-browser.log
       - name: REPORT16 current area idea, explicit report reading, draft protection and origin return (native HTTP, labelled fixtures, mock AI)
         env:
           IDEA015_EVIDENCE_DIR: test-results/report16

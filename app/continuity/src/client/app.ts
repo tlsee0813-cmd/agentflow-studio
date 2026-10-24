@@ -12,6 +12,7 @@ import { loadConfig, requestAdvice, requestGuidance, runtimeStorage, runtimeFail
 import { outcomeOf } from '../shared/outcome.js';
 import { checkItems, pointedReturn, readingReasons, returnPath, rootRequest, subtreeSignals, type CheckItem, type ReadingReason } from '../shared/attention.js';
 import { childrenOf, areaPath, descendantAreas, visibleAreas, visibleRepresentative, bundleRelations } from '../shared/hierarchy.js';
+import { initSourceReview } from './source-review.js';
 const $=<T extends HTMLElement>(id:string)=>document.getElementById(id) as T;
 function node<K extends keyof HTMLElementTagNameMap>(tag:K,content='',cls=''):HTMLElementTagNameMap[K] {
   const e=document.createElement(tag);e.textContent=content;if(cls)e.className=cls;return e;
@@ -2682,6 +2683,8 @@ $('list-import').addEventListener('click',()=>$<HTMLInputElement>('import-file')
 $('open-example').addEventListener('click',()=>void openExample());
 $('example-start').addEventListener('click',()=>closeExample(true));
 $('example-close').addEventListener('click',()=>closeExample(false));
+// SOURCE40: the home's separate proposal review (tab memory only; never the project, its draft or the map memo).
+initSourceReview();
 /** Explicit navigation starts a new excursion. Part/endpoint locators and same-part actions keep their first caller. */
 function endRecordsExcursion(){
   branchRecordCaller=null;

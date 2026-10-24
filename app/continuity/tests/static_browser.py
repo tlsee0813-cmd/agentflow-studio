@@ -27,6 +27,8 @@ SESSION_KEYS = {OPEN_KEY, 'agentflow.workspace.place', 'agentflow.workspace.map'
 EXPECTED_FILES = {'.nojekyll', 'index.html', 'styles.css', 'client/app.js',
                   # PREVIEW35: the build-selected target (storage prefix and short label) is one small module.
                   'client/presentation.js', 'client/runtime.js', 'client/static-target.js',
+                  # SOURCE40 adds the home's proposal review (client UI, a pure shared helper and the 8-excerpt example; no network/storage).
+                  'client/source-review.js', 'shared/source-proposals.js', 'shared/source-proposals-example.js',
                   *('shared/' + n + '.js' for n in
                     # GUIDE097 adds shared/guidance.js (area guidance, browser MOCK only); the network/key checks below cover it.
                     # SPATIAL102 adds shared/attention.js ('확인할 일', a pure read of the project; no network or storage).
@@ -303,6 +305,25 @@ class StaticWeb(unittest.TestCase):
     def envelope(self, page, prefix):
         base.saved(page)
         return json.loads(page.evaluate('(k)=>localStorage.getItem(k)', prefix + base.WORKSPACE))
+
+    def test_source_review_example_under_the_static_csp_writes_nothing(self):
+        """SOURCE40: the published preview opens the explicit review example (excerpt hashes recomputed with WebCrypto under the
+        static CSP) and closes back to the home with every key of the origin unchanged."""
+        self.check_published(self.preview_site)
+        ctx = self.browser.new_context(viewport={'width': 1280, 'height': 720}); errors = []
+        try:
+            page = ctx.new_page(); page.on('pageerror', lambda e: errors.append(str(e))); page.set_default_timeout(6000)
+            page.goto(self.url.replace('/agentflow-studio/', PREVIEW_PATH)); expect(page.locator('#projects-view')).to_be_visible()
+            stores = '()=>[Object.keys(localStorage).sort().map(k=>[k,localStorage.getItem(k)]),Object.keys(sessionStorage).sort().map(k=>[k,sessionStorage.getItem(k)])]'
+            before = page.evaluate(stores)
+            page.locator('#proposal-review-open').click(); expect(page.locator('#source-review')).to_be_visible()
+            page.locator('#sr-example').click(); expect(page.locator('#sr-notice')).to_contain_text('해시를 다시 계산해')
+            expect(page.locator('#sr-side .sr-item')).to_have_count(3); page.locator('#sr-read-E01').click()
+            expect(page.locator('#sr-quote')).to_contain_text('dify')
+            page.keyboard.press('Escape'); expect(page.locator('#proposal-review-open')).to_be_focused()
+            self.assertEqual(page.evaluate(stores), before); self.assertEqual(errors, [])
+        finally:
+            ctx.close()
 
     def test_preview_same_origin_storage_isolation(self):
         """PREVIEW35: demo and preview on one origin never read, write or swap each other's keys."""
