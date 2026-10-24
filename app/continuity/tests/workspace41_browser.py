@@ -156,11 +156,16 @@ class Work41(unittest.TestCase):
         # The same panel continues and returns again and again: every continue from the map offers the way back to it, and the
         # edit place survives each round trip.
         p.locator('#place-space').click();self.select(CHANGE);cam=p.locator('#space-plane').evaluate('(e)=>e.style.transform')
+        place=lambda:p.evaluate('()=>{const m=document.getElementById("space-map").getBoundingClientRect(),n=document.getElementById("project-name").getBoundingClientRect();return {y:scrollY,mapTop:Math.round(m.top),mapH:Math.round(m.height),name:Math.round(n.top)}}')
+        start=place();self.record('round trip start',start);self.assertGreaterEqual(start['name'],0,'the project name is on screen')
         for i in range(3):
             p.locator('#panel-continue').click();expect(p.locator('#work-return-origin')).to_be_visible()
             expect(field).to_be_focused();self.assertEqual(field.evaluate('(e)=>[e.selectionStart,e.selectionEnd]'),[6,9],f'round trip {i+1}: caret kept')
+            p.mouse.move(self.WIDTH//2,self.HEIGHT//2);p.mouse.wheel(0,240);p.wait_for_timeout(150) # the work page was scrolled while editing
             p.locator('#work-return-origin').click();expect(p.locator('#area-panel-title')).to_have_text(CHANGE)
             self.assertEqual(p.locator('#space-plane').evaluate('(e)=>e.style.transform'),cam,f'round trip {i+1}: same map view')
+            back=place();self.record(f'round trip {i+1} back',back)
+            self.assertEqual(back,start,f'round trip {i+1}: same page scroll, map box and project name position')
         self.assertEqual(self.raw(),raw,'the round trip changed no saved bytes')
 
     def test_03_legal_long_names_without_spaces(self):
@@ -172,6 +177,21 @@ class Work41(unittest.TestCase):
         title=self.page.locator('#area-panel-title');expect(title).to_have_text(a)
         self.assertTrue(title.evaluate('(e)=>e.scrollHeight<=e.clientHeight+1'),'the panel title shows the whole name')
         self.assertEqual(self.raw(),raw,'reading changes no saved bytes')
+
+    def test_04_example_continue_edit_and_back_keeps_the_page(self):
+        # Root's path: the example map, a part's panel, its continue, an edit, the work's own way back; three times.
+        p=self.page;p.locator('#example-list .example-open').click();expect(p.locator('#space-map')).to_be_visible()
+        self.select('시간 고르기');cam=p.locator('#space-plane').evaluate('(e)=>e.style.transform')
+        place=lambda:p.evaluate('()=>{const m=document.getElementById("space-map").getBoundingClientRect(),n=document.getElementById("project-name").getBoundingClientRect();return {y:scrollY,mapTop:Math.round(m.top),mapH:Math.round(m.height),name:Math.round(n.top)}}')
+        start=place();self.record('example round trip start',start);self.assertGreaterEqual(start['name'],0,'the project name is on screen')
+        for i in range(3):
+            p.locator('#panel-continue').click();expect(p.locator('#work-return-origin')).to_be_visible()
+            field=p.locator('#work-next');field.click();p.keyboard.type(f' 고침{i+1}')
+            p.locator('#work-return-origin').click();expect(p.locator('#area-panel-title')).to_have_text('시간 고르기')
+            back=place();self.record(f'example round trip {i+1} back',back)
+            self.assertEqual(p.locator('#space-plane').evaluate('(e)=>e.style.transform'),cam,f'round trip {i+1}: same map view')
+            self.assertEqual(back,start,f'round trip {i+1}: same page scroll, map box and project name position')
+        self.assertEqual(self.keys(),[],'nothing from the example is written')
 
 class Work41Wide(Work41):WIDTH,HEIGHT=1440,900
 class Work41Zoom125(Work41):WIDTH,HEIGHT,ZOOM=1024,576,1.25

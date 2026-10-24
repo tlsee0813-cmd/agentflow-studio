@@ -450,10 +450,13 @@ function restoreOrigin(o:Origin|null) {
   view=areaGone?'space':o.view;viewArea=view==='area'?o.area:null;viewTask=null;viewReturn=null;
   if(o.map)mapView={...o.map};mapSelected=selGone?null:o.selected;sheetOpen=o.sheet&&!!mapSelected;
   collapsed=new Set(o.collapsed);panelReadings=structuredClone(panels);panelMode=o.panel;recordsReturnNotice='';
-  render(false,false); // Reading waits until the original disclosures and final workspace height are restored.
+  // Reading waits until the original disclosures and final workspace height are restored.
   // fix1: disclosures that still exist get the open state they had; ones that are gone are skipped. Then the scroll.
-  if(!areaGone)for(const [id,open] of Object.entries(o.open)){const d=document.getElementById(id);if(d instanceof HTMLDetailsElement&&$('space-view').contains(d))d.open=open;}
-  window.scrollTo({top:areaGone?0:o.y});
+  // WORK41: both happen before the PC map is sized, so its height is measured at the departure scroll (not the work view's).
+  render(false,false,()=>{
+    if(!areaGone)for(const [id,open] of Object.entries(o.open)){const d=document.getElementById(id);if(d instanceof HTMLDetailsElement&&$('space-view').contains(d))d.open=open;}
+    window.scrollTo({top:areaGone?0:o.y});
+  });
   // fix2: same content above the control = the scroll above is already the reading place. If the control moved on the page,
   // scroll so it is where it was in the viewport (the browser may clamp at the page end). Without the control: the plain scroll.
   const a=!areaGone?o.anchor:null,el=a?document.getElementById(a.id):null;
