@@ -97,7 +97,10 @@ svg.ln.under{z-index:-1}
 .rt svg.i{width:17px;height:17px;color:var(--core-ic)}
 .hub .rt svg.i,.hub .nd svg.i{color:var(--hub)}
 .rs{font-size:12.5px;color:var(--hub-ink);line-height:1.35}
-.rg>.rs{position:relative;z-index:3;display:block;margin:-8px 0 8px}
+.rg>.rs{position:relative;z-index:3;display:table;margin:-8px 0 8px -4px;padding:0 4px;border-radius:4px}
+.rg .rt,.rg>.rs,.rg .in,.rg .purpose,.frame .rt,.frame .rs,.frame .ttl,.sub .rt,.sub .in{background:var(--tf,var(--core))}
+.rg.hub,.frame.hub{--tf:var(--hub-bg)} .rg.idea,.frame.idea{--tf:#f8f8f6} .sub{--tf:#f9f9fa} .hub .sub{--tf:#f6fbf9}
+.rg .purpose{display:table;padding:0 4px;margin-left:-4px;border-radius:4px}
 .in{margin-left:auto;flex:none;display:inline-flex;align-items:center;gap:2px;font-size:12.5px;color:var(--ink2);padding:3px 4px 3px 8px;border-radius:6px}
 .in svg.i{width:13px;height:13px}
 .in:hover{background:rgba(255,255,255,.75);color:var(--ink)}
@@ -408,8 +411,8 @@ Object.assign(DS.game,{
    {id:'feel',l:'실패의 무게',h:'플레이어가 겪는 차이',A:{t:'한 판의 긴장이 크다. 길을 처음부터 다시 찾는다.'},B:{t:'다음 탐험이 빨라진다. 같은 길 찾기가 줄어든다.'},C:{t:'아직 말한 적 없음. 조합으로 새로 생긴 질문.',k:'unk'},sA:Q.a1018,sB:Q.b1019},
    {id:'restart',l:'다시 출발',common:{t:'마을 광장에서, 마지막 저장 슬롯으로.'},sAll:Q.rs1016},
    {id:'scope',l:'적용 범위',h:'어느 게임 모드에',A:{t:'기록 없음.',k:'unk'},
-    B:st=>st.corr.applied?{t:'체험판에만.',k:'fixed',note:'본편은 아직 정하지 않음'}:{t:'모든 게임 모드.',k:'interp'},
-    C:st=>st.corr.applied?{t:'체험판에만.',k:'fixed',from:'B',note:'본편은 아직 정하지 않음'}:{t:'모든 게임 모드.',k:'interp',from:'B'},
+    B:st=>{const a=st.corr.applied;return a?{t:scopeLabel(a.scope)+'.',k:'fixed',quote:a.text}:{t:'모든 게임 모드.',k:'interp'}},
+    C:st=>{const a=st.corr.applied;return a?{t:scopeLabel(a.scope)+'.',k:'fixed',from:'B',quote:a.text}:{t:'모든 게임 모드.',k:'interp',from:'B'}},
     sB:Q.trial,sC:Q.trial}
   ]},
  corr:{row:'scope',quote:Q.trial,
@@ -417,10 +420,11 @@ Object.assign(DS.game,{
   pre:'실패해도 발견한 지도는 ',mark:'모든 게임 모드',post:'에서 유지한다.',
   scopes:[{k:'all',t:'모든 게임 모드',s:'실패해도 발견한 지도는 모든 게임 모드에서 유지한다.'},{k:'trial',t:'체험판에만',s:'체험판에서는 실패해도 발견한 지도를 유지한다. 본편은 아직 정하지 않았다.'}]},
  draft:{title:'지도를 남겨도 발견 보상을 반복해서 받지 않는 방법',targets:['mapRec','firstFind'],
-  keep:['실패하면 가방은 비우고 마을 창고는 남긴다.','본편의 지도 처리는 이 작업에서 정하지 않는다.'],
-  body:'알고 싶은 것\n- ‘처음 발견’을 탐험마다 셀 때와 저장 전체에서 한 번만 셀 때, 체험판 진행이 어떻게 달라지는지\n- 기름 보상을 줄이지 않고 반복 지급만 막는 방법\n\n하지 않을 것\n- 본편 저장 방식 바꾸기'}
+  keep:['실패하면 가방은 비우고 마을 창고는 남긴다.'],
+  body:'알고 싶은 것\n- ‘처음 발견’을 탐험마다 셀 때와 저장 전체에서 한 번만 셀 때, 진행이 어떻게 달라지는지\n- 기름 보상을 줄이지 않고 반복 지급만 막는 방법\n\n적용 범위는 위 기준 줄을 따릅니다.'}
 });
-DS.game.items.mapRec.sf=st=>st.corr.applied?'실패 뒤 발견한 지도를 남기는 구상. 정리된 뜻: 체험판에서 유지, 본편은 아직 정하지 않음.':'실패 뒤 발견한 지도를 남기는 구상. 정리된 뜻: 모든 게임 모드에서 유지.';
+DS.game.items.mapRec.sf=st=>{const a=st.corr.applied;return a?`실패 뒤 발견한 지도를 남기는 구상. 바로잡은 뜻(${scopeLabel(a.scope)}): ${a.text}`:'실패 뒤 발견한 지도를 남기는 구상. 정리된 뜻: 모든 게임 모드에서 유지.'};
+function scopeLabel(k){const x=DS.game.corr.scopes.find(s=>s.k===k);return x?x.t:k}
 
 DS.booking=build({key:'booking',name:'예약 서비스',desc:'예약금 · 카드 보증 · 단골 예외 — 관계가 정해지지 않은 구상',
  root:{cols:[360,360,360],cells:[{c:1,r:1,ids:['book']},{c:2,r:1,ids:['sched']},{c:3,r:1,ids:['notify']},{c:1,r:2,ids:['pay']},{c:2,r:2,ids:['guest']},{c:3,r:2,ids:['@phr']}]},
@@ -481,7 +485,7 @@ Object.assign(DS.sparse,{rels:[],read:{},cmp:null});
 /* ===== 상태 ===== */
 function fresh(){return{scope:'root',sel:null,fid:null,cams:{},off:{},stack:[],visit:null,all:false,
  cmp:{pair:'ab',row:null,open:null,combo:false,scroll:0},
- corr:{text:null,scope:'all',applied:false,appliedText:null,ctx:false,imp:false,dirty:false},
+ corr:{text:null,scope:'all',applied:null,ctx:false,imp:false,dirty:false},
  draft:{exists:false,title:null,body:null,copied:false}}}
 const S={ds:'game',per:{game:fresh(),booking:fresh(),sparse:fresh()},menu:null,q:'',qi:0};
 const D=()=>DS[S.ds], ST=()=>S.per[S.ds];
@@ -660,7 +664,7 @@ function cellHTML(c,colName){if(!c)return `<div class="cv2 unk" data-col="${esc(
  let inner='';if(c.from)inner+=`<span class="lbl from">${esc(c.from)}에서</span>`;if(c.k==='as')inner+=`<span class="lbl as">비교용 가정</span>`;
  if(c.k==='judge')return `<div class="cv2" data-col="${esc(colName)}"><div class="judge"><span class="jl">정해야 함</span>${esc(c.t)}</div></div>`;
  if(c.k==='interp')return `<div class="cv2" data-col="${esc(colName)}">${inner}${esc(c.t)} <span class="lbl interp">정리된 뜻</span><br><button class="fixb" data-act="corr" data-fid="fix-${colName}">${ic('edit')}뜻 바로잡기</button></div>`;
- if(c.k==='fixed')return `<div class="cv2" data-col="${esc(colName)}">${inner}${esc(c.t)}<span class="note">${esc(c.note)} · 10/25 바로잡음</span></div>`;
+ if(c.k==='fixed')return `<div class="cv2" data-col="${esc(colName)}">${inner}${esc(c.t)} <span class="lbl interp">선택한 범위</span><span class="note">바로잡은 문장: “${esc(c.quote)}” · 10/25</span><button class="fixb" data-act="corr" data-fid="fix-${colName}">${ic('edit')}다시 바로잡기</button></div>`;
  return `<div class="cv2${c.k==='unk'?' unk':''}" data-col="${esc(colName)}">${inner}${esc(c.t)}</div>`}
 function srcHTML(s,label){return s?`<div data-col="${esc(label)}"><blockquote>“${esc(s.q)}”</blockquote><div class="who">${esc(s.who)}</div></div>`:`<div data-col="${esc(label)}"><p class="nosrc">이 칸과 연결된 원문이 없습니다.</p></div>`}
 function cmpHTML(){const d=D(),C=d.cmp,st=ST(),c=st.cmp;const pair=c.combo?c.pair:'ab';const X=pair==='ab'?'B':'C';
@@ -686,15 +690,19 @@ function botCmp(){const d=D(),C=d.cmp,st=ST(),c=st.cmp;const r=C.rows.find(x=>x.
  return `<div class="acts" style="flex:1 1 auto">${L.join('')}</div><div class="acts">${R.join('')}</div>`}
 
 /* --- 뜻 바로잡기 --- */
-function corrInit(){const st=ST(),k=D().corr;if(st.corr.text==null){st.corr.scope=st.corr.applied?'trial':'all';st.corr.text=k.scopes.find(s=>s.k===st.corr.scope).s}}
-function corrChanged(){const st=ST(),k=D().corr;if(!k)return false;const base=st.corr.applied?st.corr.appliedText:k.scopes[0].s;return st.corr.text!=null&&st.corr.text.trim()!==base}
-function corrHTML(){const d=D(),k=d.corr,st=ST(),c=st.corr;corrInit();const ch=corrChanged();
- const curTxt=c.applied?`<p class="cur done">${esc(c.appliedText)}</p>`:`<p class="cur">${esc(k.pre)}<mark>${esc(k.mark)}</mark>${esc(k.post)}</p>`;
+function corrBase(){const st=ST(),k=D().corr;return st.corr.applied||{text:k.scopes[0].s,scope:'all'}}
+function corrInit(){const st=ST();if(st.corr.text==null){const b=corrBase();st.corr.scope=b.scope;st.corr.text=b.text}}
+function corrChanged(){const st=ST(),k=D().corr;if(!k||st.corr.text==null)return false;const b=corrBase(),t=st.corr.text.trim();return !!t&&(t!==b.text||st.corr.scope!==b.scope)}
+function impHTML(){const st=ST(),c=st.corr,b=corrBase(),ch=corrChanged();
+ const sc=scopeLabel(c.scope),scCh=c.scope!==b.scope;
  const imp=[
-  {t:'지도 기록 설명',d:`<del>${esc(k.scopes[0].s)}</del> → <ins>${esc(c.text||'')}</ins>`},
-  {t:'비교 › 적용 범위 행',d:'B와 조합 초안의 칸이 새 범위로 바뀜. A는 그대로.'}];
- if(st.draft.exists)imp.push({t:'작업 초안 (보내지 않음)',d:'기준 줄만 새 범위로 표시. 직접 쓴 내용은 그대로.'});
+  {t:'지도 기록 설명',d:`<del>${esc(b.text)}</del> → <ins>${esc((c.text||'').trim())}</ins>`},
+  {t:'비교 › 적용 범위 행',d:`B와 조합 초안의 칸: ${scCh?`<del>${esc(scopeLabel(b.scope))}</del> → <ins>${esc(sc)}</ins>`:`${esc(sc)} (범위 그대로)`}, 아래에 바로잡은 문장 표시. A는 그대로.`}];
+ if(st.draft.exists)imp.push({t:'작업 초안 (보내지 않음)',d:'기준 줄만 바로잡은 범위·문장으로 표시. 직접 쓴 내용은 그대로.'});
  imp.push({t:'이미 보낸 작업 · 지도 기록 저장 형식 정리 (10/21)',d:'보낸 내용 그대로 둠. 정정을 추가로 전할지는 직접 정합니다.',keep:1},{t:'원문 발언 (10/19)',d:'고치지 않음.',keep:1});
+ return `<h3>달라지는 곳</h3>${ch?`<p>지도 기록 설명과 비교의 적용 범위 행이 바뀝니다. 원문과 이미 보낸 작업 1개는 그대로 둡니다. <button class="lnk" data-act="imp" aria-expanded="${c.imp}">${c.imp?'접기':'자세히'}</button></p>${c.imp?`<ul class="imp">${imp.map(x=>`<li class="${x.keep?'keep':''}"><b>${esc(x.t)}</b><span>${x.d}</span></li>`).join('')}</ul>`:''}`:`<p class="nosrc">${c.applied?'바로잡은 판본에서 더 바뀐 것이 없습니다.':'아직 바뀌는 것이 없습니다. 범위나 문장을 고치면 영향이 여기 나옵니다.'}</p>`}`}
+function corrHTML(){const d=D(),k=d.corr,st=ST(),c=st.corr;corrInit();const ch=corrChanged();
+ const b=corrBase();const curTxt=c.applied?`<p class="cur done">${esc(c.applied.text)}</p><p class="hintl">선택한 범위: ${esc(scopeLabel(c.applied.scope))}</p>`:`<p class="cur">${esc(k.pre)}<mark>${esc(k.mark)}</mark>${esc(k.post)}</p>`;
  return `<div class="scene" data-v="corr"><div class="rd"><div class="kick">${ic('edit')}뜻 바로잡기 · ${esc(d.cmp.title)} › 적용 범위 행</div><h1 tabindex="-1" id="sh">“지도를 남긴다”가 어디까지인지 바로잡기</h1>
  <section><h3>원문</h3><blockquote>“${esc(k.quote.q)}”</blockquote><div class="who">${esc(k.quote.who)}</div>
  <p style="margin:8px 0 0"><button class="lnk" data-act="ctx" aria-expanded="${c.ctx}">${c.ctx?'앞뒤 문맥 접기':'앞뒤 문맥 보기'}</button></p>
@@ -702,13 +710,13 @@ function corrHTML(){const d=D(),k=d.corr,st=ST(),c=st.corr;corrInit();const ch=c
  <section><h3>${c.applied?'지금 정리된 뜻 · 바로잡은 판본':'지금 정리된 뜻'}</h3>${curTxt}</section>
  <section><h3>바로잡을 문장</h3><div class="chips" role="radiogroup" aria-label="적용 범위">${k.scopes.map(s=>`<button class="chip" role="radio" aria-checked="${c.scope===s.k}" data-act="cscope" data-arg="${s.k}">${esc(s.t)}</button>`).join('')}</div>
  <textarea id="corrText" data-model="corr" aria-label="바로잡을 문장" rows="3">${esc(c.text)}</textarea>
- <p class="hintl">범위를 좁혀도 반대쪽 뜻을 새로 만들지 않습니다. ‘본편은 초기화’가 아니라 ‘본편은 아직 정하지 않음’입니다.</p></section>
- <section><h3>달라지는 곳</h3>${ch?`<p>지도 기록 설명과 비교의 적용 범위 행이 바뀝니다. 원문과 이미 보낸 작업 1개는 그대로 둡니다. <button class="lnk" data-act="imp" aria-expanded="${c.imp}">${c.imp?'접기':'자세히'}</button></p>${c.imp?`<ul class="imp">${imp.map(x=>`<li class="${x.keep?'keep':''}"><b>${esc(x.t)}</b><span>${x.d}</span></li>`).join('')}</ul>`:''}`:`<p class="nosrc">${c.applied?'바로잡은 판본에서 더 바뀐 것이 없습니다.':'아직 바뀌는 것이 없습니다. 범위나 문장을 고치면 영향이 여기 나옵니다.'}</p>`}</section>
+ <p class="hintl">선택한 범위와 쓴 문장을 그대로 반영합니다. 문장에서 범위를 추측하거나, 범위를 좁혔다고 반대쪽 뜻을 새로 만들지 않습니다.</p></section>
+ <section id="impSec">${impHTML()}</section>
  </div></div>`}
 
 /* --- 작업 초안 --- */
 function draftInit(){const st=ST(),k=D().draft;if(st.draft.title==null){st.draft.title=k.title;st.draft.body=k.body}st.draft.exists=true}
-function draftBasis(){const st=ST();return '조합 초안 (원래 A + B의 지도 유지) · '+(st.corr.applied?'적용 범위: 체험판에만 (10/25 바로잡음)':'적용 범위: ‘모든 게임 모드’로 정리된 뜻 — 아직 바로잡지 않음')}
+function draftBasis(){const st=ST();return '조합 초안 (원래 A + B의 지도 유지) · '+(st.corr.applied?`적용 범위: ${scopeLabel(st.corr.applied.scope)} · 바로잡은 문장 “${st.corr.applied.text}” (10/25)`:'적용 범위: ‘모든 게임 모드’로 정리된 뜻 — 아직 바로잡지 않음')}
 function draftHTML(){const d=D(),k=d.draft,st=ST(),df=st.draft;draftInit();
  return `<div class="scene" data-v="draft"><div class="rd"><div class="kick">${ic('edit')}작업 초안 · 조합 초안에서 · 아직 보내지 않음</div>
  <h1 tabindex="-1" id="sh" style="position:absolute;left:-9999px">작업 초안</h1>
@@ -778,7 +786,7 @@ function act(a,arg,el){const st=ST(),d=D();
   case 'ctx':st.corr.ctx=!st.corr.ctx;keepFocus(()=>{renderMain()},'[data-act="ctx"]');return;
   case 'imp':st.corr.imp=!st.corr.imp;keepFocus(()=>{renderMain()},'[data-act="imp"]');return;
   case 'cscope':{const s=d.corr.scopes.find(x=>x.k===arg);st.corr.scope=arg;if(!st.corr.dirty)st.corr.text=s.s;keepFocus(()=>{renderMain();renderBot()},`[data-arg="${arg}"]`);return}
-  case 'applycorr':{if(!corrChanged())return;st.corr.applied=true;st.corr.appliedText=st.corr.text.trim();st.corr.dirty=false;st.corr.imp=false;st.cmp.row=d.corr.row;st.cmp.open=null;
+  case 'applycorr':{if(!corrChanged())return;st.corr.applied={text:st.corr.text.trim(),scope:st.corr.scope};st.corr.text=st.corr.applied.text;st.corr.dirty=false;st.corr.imp=false;st.cmp.row=d.corr.row;st.cmp.open=null;
    const i=st.stack.findIndex(e=>e.v==='corr');popTo(i>=0?i:st.stack.length-1);return}
   case 'draft':{const i=st.stack.findIndex(e=>e.v==='draft');if(i>=0){popTo(i+1);return}push('draft');return}
   case 'copy':{const t=draftText();const done=()=>{st.draft.copied=true;const n=$('#copyNote');if(n)n.textContent='복사함 — 아직 아무에게도 보내지 않았습니다.'};
@@ -818,7 +826,7 @@ document.addEventListener('dblclick',e=>{const t=e.target.closest('#world [data-
 document.addEventListener('focusin',e=>{const n=e.target.closest('#world [data-nav]');if(n){ST().fid=navKey(n);[...$('#world').querySelectorAll('[data-nav]')].forEach(x=>x.tabIndex=x===n?0:-1)}
  const cv=$('#cv');if(cv&&(cv.scrollLeft||cv.scrollTop)){cv.scrollLeft=0;cv.scrollTop=0}});
 document.addEventListener('input',e=>{const m=e.target.dataset.model,st=ST();
- if(m==='corr'){st.corr.text=e.target.value;st.corr.dirty=true;const b=$('[data-act="applycorr"]');if(b)b.disabled=!corrChanged()}
+ if(m==='corr'){st.corr.text=e.target.value;st.corr.dirty=true;const b=$('[data-act="applycorr"]');if(b)b.disabled=!corrChanged();const im=$('#impSec');if(im)im.innerHTML=impHTML()}
  if(m==='dtitle')st.draft.title=e.target.value;
  if(m==='dbody')st.draft.body=e.target.value;
  if(e.target.id==='fq'){S.q=e.target.value;S.qi=0;$('#fl').innerHTML=findItems(findList())}});
