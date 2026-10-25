@@ -845,7 +845,7 @@ document.addEventListener('keydown',e=>{
   e.preventDefault();back();return}
  if(inField)return;
  if(e.key==='/'&&view()==='map'){e.preventDefault();act('menu','find');return}
- const row=e.target.closest('[data-row]');if(row&&(e.key==='Enter'||e.key===' ')){e.preventDefault();toggleRow(row.dataset.row);return}
+ const row=e.target.matches('[data-row]')?e.target:null;if(row&&(e.key==='Enter'||e.key===' ')){e.preventDefault();toggleRow(row.dataset.row);return}
  if(row&&(e.key==='ArrowDown'||e.key==='ArrowUp')){const rs=[...document.querySelectorAll('[data-row]')];const i=rs.indexOf(row)+(e.key==='ArrowDown'?1:-1);if(rs[i]){e.preventDefault();rs[i].focus()}return}
  const n=e.target.closest('#world [data-nav]');
  if(n&&e.key.startsWith('Arrow')){e.preventDefault();const t=nearest(n,e.key);if(t){t.focus({preventScroll:true});if(!inCanvas(t))reveal(t)}return}
