@@ -970,7 +970,8 @@ function markSelection(partId: string | null) {
   const related = new Set<string>(), base = document.querySelector('#world .edges:not(.edges-top)'), top = document.querySelector('#world .edges-top');
   document.querySelectorAll<SVGGElement>('.edge').forEach(el => {
     const on = !!partId && (el.dataset.from === partId || el.dataset.to === partId);
-    const layer = on ? top : base; if (layer && el.parentNode !== layer) layer.append(el);
+    // A line the change plan reads as context of its change (.ctx) stays above the groups as well.
+    const layer = on || el.classList.contains('ctx') ? top : base; if (layer && el.parentNode !== layer) layer.append(el);
     el.classList.toggle('on', on);
     const line = el.querySelector('.edge-line')!; line.setAttribute('marker-end', on ? 'url(#arrow-on)' : 'url(#arrow)');
     line.setAttribute('marker-start', on ? 'url(#dot-on)' : 'url(#dot)');

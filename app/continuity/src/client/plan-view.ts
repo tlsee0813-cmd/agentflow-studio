@@ -197,12 +197,42 @@ export function createPlanView(host: PlanHost) {
   }
   const kindWord = (c: RowChange) => (!c.pres ? '변경' : c.pres.origin === 'suggestion' ? '제안' : '');
   const manyLine = (list: RowChange[]) => list.map(c => c.item.title).join(', ');
-  /** Every text a part's row can show in this plan (for its room on the map), whichever change is being read. */
+  /** The impact candidates the map names for what is being read: near the focused change, or all when reading the impacts. */
+  function shownImpacts(p: ChangePlan) {
+    const focusItem = s?.focus?.kind === 'item' ? itemOf(s.focus.id) : null;
+    return focusItem ? nearImpacts(focusItem) : s?.focus?.kind === 'impacts' ? p.analysis.impacts : [];
+  }
+  /** What the comparison scene shows on parts' rows (every target's change line, whichever change is being read, and the
+   * candidates named for the current reading): the same set the overlay draws, so no row keeps an empty line. The map holds
+   * these sizes in both the current view and the preview while the plan is open. */
   function rowLines(p: ChangePlan): Map<string, string[]> {
     const out = new Map<string, string[]>();
     for (const [id, list] of rowChanges(p)) out.set(id, [...list.map(c => `${kindWord(c)} ${c.text}${list.length > 1 ? ` 외 ${list.length - 1}건` : ''}`), ...(list.length > 1 ? [`변경 ${list.length}건 ${manyLine(list)}`] : [])]);
-    for (const x of p.analysis.impacts) if (!out.has(x.partId)) out.set(x.partId, ['영향 후보']);
+    for (const x of shownImpacts(p)) if (!out.has(x.partId)) out.set(x.partId, ['영향 후보']);
     return out;
+  }
+  /* Existing relations read as context of the change being read: lines already on the map between its actual targets and the
+     candidates named here, and from those candidates to other parts the analysis names as candidates (a shared node's other
+     users). They move above the group surfaces and keep their own kind and hover meaning; nothing is drawn or inferred, and
+     no line is restyled as required or verified. */
+  function contextEdges(p: ChangePlan, rep: (id: string) => string | null, targets: string[], shown: { partId: string }[]) {
+    document.querySelectorAll<SVGGElement>('#world .edge.ctx').forEach(e => e.classList.remove('ctx'));
+    document.querySelectorAll('#world .plan-ctx').forEach(e => e.classList.remove('plan-ctx'));
+    const anchors = new Set([...targets, ...shown.map(x => x.partId)].map(rep).filter((x): x is string => !!x));
+    const named = new Set(shown.map(x => rep(x.partId)).filter((x): x is string => !!x));
+    const others = new Set(p.analysis.impacts.map(x => rep(x.partId)).filter((x): x is string => !!x));
+    const top = document.querySelector('#world .edges-top');
+    document.querySelectorAll<SVGGElement>('#world .edge').forEach(e => {
+      const a = e.dataset.from!, b = e.dataset.to!;
+      const ctx = a !== b && ((anchors.has(a) && anchors.has(b) && (named.has(a) || named.has(b))) || (named.has(a) && others.has(b)) || (named.has(b) && others.has(a)));
+      if (!ctx) return;
+      e.classList.add('ctx'); if (top && e.parentNode !== top) top.append(e);
+      // Both ends stay readable (not dimmed with the rest); an end gets no label it does not already have.
+      for (const id of [a, b]) document.querySelector(`#world [data-box="${CSS.escape(id)}"]`)?.classList.add('plan-ctx');
+    });
+    // Lines no longer in context go back under the groups unless the selection holds them.
+    const base = document.querySelector('#world .edges:not(.edges-top)');
+    document.querySelectorAll<SVGGElement>('#world .edges-top .edge:not(.ctx):not(.on)').forEach(e => base?.append(e));
   }
   function overlay() {
     document.querySelectorAll<HTMLElement>('.plan-direct,.plan-impact,.plan-focus,.plan-reading').forEach(el => { el.classList.remove('plan-direct', 'plan-impact', 'plan-focus', 'plan-reading'); el.removeAttribute('data-plan-title'); });
@@ -211,7 +241,7 @@ export function createPlanView(host: PlanHost) {
     $('space').classList.toggle('planning', !!s);
     $('space').classList.toggle('preview', !!s && s.mode === 'preview' && !!plan());
     $('space').classList.toggle('focusing', !!s && s.mode === 'preview' && !!s.focus);
-    const p = plan(); if (!s || s.mode !== 'preview' || !p) { host.callouts([]); return; }
+    const p = plan(); if (!s || !p) { document.querySelectorAll('#world .edge.ctx').forEach(e => e.classList.remove('ctx')); document.querySelectorAll('#world .plan-ctx').forEach(e => e.classList.remove('plan-ctx')); host.callouts([]); return; }
     const o = host.current()!, boxes = host.boxes(), rep = (id: string) => visibleRep(id, boxes);
     // Drawn part → its own changes (the part itself is the target) and the inner targets it stands for.
     const own = rowChanges(p), marks = new Map<string, { items: PlanItem[]; inner: string[] }>();
@@ -224,7 +254,10 @@ export function createPlanView(host: PlanHost) {
     const focusItem = s.focus?.kind === 'item' ? itemOf(s.focus.id) : null;
     const focused = new Set((focusItem ? itemTargets(focusItem) : []).map(rep).filter((x): x is string => !!x));
     const reading = focusItem ? rep(activeTarget(focusItem) ?? '') : null;
-    const impacts = (focusItem ? nearImpacts(focusItem) : s.focus?.kind === 'impacts' ? p.analysis.impacts : []).filter(x => !marks.has(rep(x.partId) ?? ''));
+    const impacts = shownImpacts(p).filter(x => !marks.has(rep(x.partId) ?? ''));
+    // Existing relations read the same in the current view and the preview; only the change marks below are the preview's.
+    contextEdges(p, rep, focusItem ? itemTargets(focusItem) : [], impacts);
+    if (s.mode !== 'preview') { host.callouts([]); return; }
     const el = (id: string) => document.querySelector<HTMLElement>(`.node[data-box="${CSS.escape(id)}"], .frame[data-box="${CSS.escape(id)}"]`);
     const kind = (word: string) => (word ? h('span', { class: 'pn-k' }, word) : null), gap = (word: string) => (word ? ' ' : null);
     for (const [id, m] of marks) {
@@ -282,7 +315,7 @@ export function createPlanView(host: PlanHost) {
         h('div', { class: 'co-fallback' },
           h('div', { class: 'co-row want' }, h('span', { class: 'co-label' }, '바꿀 내용'), h('p', {}, item.title)),
           role ? h('div', { class: 'co-role' }, h('span', { class: 'co-label' }, role.label), h('p', {}, role.text, h('small', {}, role.from))) : null,
-          h('p', { class: 'co-gap' }, '현재와 비교할 내용은 아직 정리되지 않았어요.')));
+          h('p', { class: 'co-gap' }, '현재와의 비교는 아직 정리 전이에요.')));
     }
     let from: Node | string = '지도 설명';
     if (pres.current.source === 'evidence') {
@@ -456,8 +489,10 @@ export function createPlanView(host: PlanHost) {
   function render() {
     if (!s) return;
     const o = host.current(); if (!o) return;
-    const item = s.mode === 'preview' && s.focus?.kind === 'item' ? itemOf(s.focus.id) : null, p = plan();
-    host.rows(s.mode === 'preview' && p ? rowLines(p) : null);
+    // The comparison scene (the target's path and the rows' sizes) is the same in the current view and the preview: switching
+    // the mode shows or hides the change marks only. Closing the plan gives the map back its own folds and sizes.
+    const item = s.focus?.kind === 'item' ? itemOf(s.focus.id) : null, p = plan();
+    host.rows(p ? rowLines(p) : null);
     host.targetContext(item ? activeTarget(item) : null, moveTarget);
     renderMode(); renderStrip(o);
     if (panelOpen()) renderPanel(o); else { $('plan-panel').hidden = true; $('plan-panel').replaceChildren(); }
@@ -587,7 +622,7 @@ export function createPlanView(host: PlanHost) {
     // Without same-side data for this target: what the change wants, then the part's role apart from it; no before/after.
     const fallback = () => h('div', { class: 'cmp-only cmp-fallback' },
       ...[...at].map(nameLine), h('h3', { class: 'cmp-label' }, '바꿀 내용 ', h('small', {}, '변경 전체의 설명 · 적용 안 됨')), h('p', { class: 'cmp-text' }, item.description),
-      ...(active ? roleBlock(o, active) : []), h('p', { class: 'cmp-gap' }, '현재와 비교할 내용은 아직 정리되지 않았어요.'));
+      ...(active ? roleBlock(o, active) : []), h('p', { class: 'cmp-gap' }, '현재와의 비교는 아직 정리 전이에요.'));
     const own = p.analysis.impacts.filter(x => at.has(x.partId)), near = nearImpacts(item);
     const box = h('input', { type: 'checkbox', id: `cmp-hand-${item.id}` }) as HTMLInputElement;
     box.checked = p.selected.includes(item.id); box.addEventListener('change', () => toggleItem(item.id, box.checked));
@@ -632,7 +667,7 @@ export function createPlanView(host: PlanHost) {
     const box = $('plan-mode'), p = plan();
     box.hidden = !s || !p;
     if (!s || !p) return;
-    const b = (mode: 'current' | 'preview', label: string) => h('button', { type: 'button', 'aria-pressed': String(s!.mode === mode), onclick: () => { const changed = s!.mode !== mode; s!.mode = mode; moveTarget = changed && mode === 'preview'; render(); } }, label);
+    const b = (mode: 'current' | 'preview', label: string) => h('button', { type: 'button', 'aria-pressed': String(s!.mode === mode), onclick: () => { s!.mode = mode; moveTarget = false; render(); } }, label);
     box.replaceChildren(b('current', '현재'), b('preview', '변경 미리보기'));
   }
 

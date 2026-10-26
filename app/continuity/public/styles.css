@@ -459,7 +459,11 @@ button:disabled { opacity: .5; cursor: default; }
 .plan-direct .plan-note { color: #8a4806; }
 .node.plan-impact, .frame.plan-impact { outline: 1.5px dashed var(--change-line); outline-offset: 3px; }
 .plan-impact .plan-note { color: var(--text-2); }
-.space.preview.focusing .node:not(.plan-direct):not(.plan-impact):not(.selected) { opacity: .55; }
+.space.preview.focusing .node:not(.plan-direct):not(.plan-impact):not(.plan-ctx):not(.selected) { opacity: .55; }
+/* Existing relations read as context of the change being read: above the groups, in the map's own line colour (not the change
+   colour: nothing here is new, required or verified), the same in the current view and the preview. Kind dashes and the
+   hover meaning stay. */
+.space.planning .edge.ctx .edge-line { stroke: var(--text-3); stroke-width: 1.9; stroke-opacity: 1; opacity: 1; }
 
 /* the plan's strip: what is being tried, its changes, the conditions without a part, and the way to the whole plan */
 .plan-strip { position: absolute; top: 12px; left: 16px; right: calc(16px + var(--plan-w)); display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; padding: 8px 8px 8px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-sm); z-index: 3; }

@@ -45,6 +45,10 @@ def sheet(page, name):
     expect(page.locator("#lens")).to_be_hidden()
 
 
+BOXES = "() => [...document.querySelectorAll('#world [data-box]')].map(e => e.dataset.box + ':' + e.style.cssText).sort().join('|')"
+CAMERA = "e => e.style.transform"
+
+
 def clear_of(page, a, b):
     ra, rb = page.locator(a).bounding_box(), page.locator(b).bounding_box()
     assert ra["x"] + ra["width"] <= rb["x"] + 1 or rb["x"] + rb["width"] <= ra["x"] + 1 or ra["y"] + ra["height"] <= rb["y"] + 1 or rb["y"] + rb["height"] <= ra["y"] + 1, (a, ra, b, rb)
@@ -394,7 +398,7 @@ def workspace_flow(browser, base, cases):
     expect(page.locator(".callout .co-row.want p")).to_have_text("성공 유지·실패 모음")
     expect(page.locator(".callout .co-row.now")).to_have_count(0)
     expect(page.locator(".callout .co-role")).to_contain_text("변환 형식과 저장한 산출물을 다룬다.")
-    expect(page.locator(".callout .co-gap")).to_have_text("현재와 비교할 내용은 아직 정리되지 않았어요.")
+    expect(page.locator(".callout .co-gap")).to_have_text("현재와의 비교는 아직 정리 전이에요.")
     page.locator(".ps-target").nth(1).click()
     expect(page.locator(".ps-target").nth(1)).to_have_attribute("aria-selected", "true")
     expect(page.locator(".callout .co-head strong")).to_have_text(target_names[1])
@@ -456,15 +460,18 @@ def workspace_flow(browser, base, cases):
     expect(page.locator("#lens .cmp-fallback .cmp-name")).to_have_text(target_names[0])
     expect(page.locator("#lens .cmp-want")).to_have_count(0)
     expect(page.locator("#lens .cmp-fallback")).to_contain_text("이 부분의 역할")
-    expect(page.locator("#lens .cmp-fallback .cmp-gap")).to_have_text("현재와 비교할 내용은 아직 정리되지 않았어요.")
+    expect(page.locator("#lens .cmp-fallback .cmp-gap")).to_have_text("현재와의 비교는 아직 정리 전이에요.")
     expect(page.locator("#world .plan-reading")).to_be_in_viewport()
     page.wait_for_timeout(400)  # compare stable rectangles after the minimum-pan animation
     clear_of(page, "#world .plan-reading", "#lens")
     page.keyboard.press("Escape")
     expect(page.locator("#lens")).to_be_hidden()
+    scene, camera = page.evaluate(BOXES), page.locator("#world").evaluate(CAMERA)
     page.locator("#plan-mode").get_by_role("button", name="현재").click()
     expect(page.locator("#world .plan-direct")).to_have_count(0)
     expect(page.locator("#zoom-level")).to_have_text(zoom)
+    # The mode shows or hides the change marks only: the same boxes and camera in both (the plan's comparison scene).
+    assert page.evaluate(BOXES) == scene and page.locator("#world").evaluate(CAMERA) == camera
     page.locator("#plan-mode").get_by_role("button", name="변경 미리보기").click()
     expect(page.locator(".ps-target").nth(0)).to_have_attribute("aria-selected", "true")
     expect(page.locator(".callout .co-head strong")).to_have_text(target_names[0])
@@ -556,9 +563,14 @@ def preview_context_flow(browser, base):
     expect(page.locator(".callout-leader")).to_have_count(1)
     assert page.locator(".callout-leader path").get_attribute("marker-end") is None
     expect(page.locator("#zoom-level")).to_have_text(zoom)
+    scene, camera = page.evaluate(BOXES), page.locator("#world").evaluate(CAMERA)
     page.locator("#plan-mode").get_by_role("button", name="현재", exact=True).click()
-    expect(page.locator("#world .frame")).to_have_count(0)
+    # The current view of an open plan keeps the comparison's target path; the folds come back only on closing.
+    expect(page.locator("#world .frame")).to_have_count(1)
+    expect(page.locator("#world .plan-direct")).to_have_count(0)
+    assert page.evaluate(BOXES) == scene and page.locator("#world").evaluate(CAMERA) == camera
     page.locator("#plan-mode").get_by_role("button", name="변경 미리보기").click()
+    assert page.evaluate(BOXES) == scene and page.locator("#world").evaluate(CAMERA) == camera
     expect(page.locator("#world .plan-reading .node-name")).to_have_text("문서 읽기")
     # A direct user fold wins until another explicit focus, even across evidence renders and viewport changes.
     page.get_by_role("button", name="읽어들이기 접기", exact=True).click()
@@ -592,6 +604,42 @@ def preview_context_flow(browser, base):
     expect(page.get_by_role("button", name="내용·모양 보존 접기", exact=True)).to_be_visible()
     expect(page.get_by_role("button", name="내보내기와 결과 펼치기", exact=True)).to_be_visible()
     expect(page.locator("#zoom-level")).to_have_text(zoom)
+    context.close()
+
+
+def relation_context_flow(browser, base, cases):
+    """Node-RED real-model plan: existing relations between the actual target and its candidate read above the groups in both
+    modes; the candidate's other existing users keep their lines without a label or a reserved line; one scene for both modes."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    page.goto(base + "/")
+    page.locator("#import-file").set_input_files(str(cases / "oss-node-red.json"))
+    before = page.evaluate(BOXES)
+    page.locator("#plan-entry").click()
+    page.locator("#plan-import-file").set_input_files(str(ROOT.parents[1] / "docs/cycles/2026-10-26-visual-experience-59/node-red-real-plan.json"))
+    expect(page.locator("#world .plan-reading .node-name")).to_have_text("10-mqtt.js")
+    ctx = page.locator("#world .edges-top .edge.ctx")
+    expect(ctx).to_have_count(3)
+    keys = ctx.evaluate_all("es => es.map(e => e.dataset.key)")
+    assert any("10-mqtt" in k and "05-tls" in k for k in keys), keys
+    assert all("05-tls" in k for k in keys), keys  # lines of the named candidate only; no line is drawn or inferred
+    expect(page.locator("#world .node", has_text="05-tls.js").locator(".plan-note")).to_have_text("영향 후보")
+    for name in ["21-httprequest.js", "22-websocket.js"]:
+        row = page.locator("#world .node", has_text=name)
+        expect(row.locator(".plan-note")).to_have_text("")
+        assert row.evaluate("e => e.offsetHeight") == 38, name  # no empty line kept for a label it does not show
+    scene, camera = page.evaluate(BOXES), page.locator("#world").evaluate(CAMERA)
+    page.locator("#plan-mode").get_by_role("button", name="현재", exact=True).click()
+    # Existing relations, not change lines: they read in the current view too; only the change marks go.
+    expect(ctx).to_have_count(3)
+    expect(page.locator("#world .plan-impact")).to_have_count(0)
+    assert page.evaluate(BOXES) == scene and page.locator("#world").evaluate(CAMERA) == camera
+    page.locator("#plan-mode").get_by_role("button", name="변경 미리보기").click()
+    expect(ctx).to_have_count(3)
+    assert page.evaluate(BOXES) == scene and page.locator("#world").evaluate(CAMERA) == camera
+    page.locator(".ps-close").click()
+    expect(page.locator("#world .edge.ctx")).to_have_count(0)
+    assert page.evaluate(BOXES) == before
     context.close()
 
 
@@ -646,6 +694,7 @@ def main():
             new_project_flow(browser, base); print("ok  new project -> three levels -> path and back -> saved place and draft kept on reload")
             workspace_flow(browser, base, oss_fixtures()); print("ok  plan strip and docked comparison, open/close without zoom, long same-prefix names, way back apart from way up")
             preview_context_flow(browser, base); print("ok  preview exposes only its target path; current, sources and user folds preserve ownership")
+            relation_context_flow(browser, base, oss_fixtures()); print("ok  existing relations of target and candidate read above groups; current and preview share one scene")
             proc, base = start("code"); procs.append(proc); code_flow(browser, base); print("ok  access code kept from an input event")
             proc, base = start("fail"); procs.append(proc); failure_flow(browser, base); print("ok  provider failure -> short error -> retry")
             proc, base = start("nokey"); procs.append(proc); off_flow(browser, base + "/", "AI 키 없음"); print("ok  server without key -> honest off state")
