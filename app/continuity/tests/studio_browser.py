@@ -374,19 +374,52 @@ def workspace_flow(browser, base, cases):
     expect(page.locator(".frame")).to_have_count(3)
     expect(page.locator("#world .plan-direct")).not_to_have_count(0)
     expect(page.locator(".plan-badge")).to_have_count(0)
-    # A change with two parts: a note beside each (now → wanted), none over a part.
+    # A change with two targets keeps both names and marks, but reads one actual current/wanted pair at a time.
     page.locator(".ps-item").nth(2).click()
     expect(page.locator(".ps-item").nth(2)).to_have_attribute("aria-pressed", "true")
-    expect(page.locator(".callout")).to_have_count(2)
+    expect(page.locator(".callout")).to_have_count(1)
+    expect(page.locator(".ps-target")).to_have_count(2)
+    expect(page.locator(".ps-target-label")).to_have_text("바뀌는 부분 2")
+    target_names = page.locator(".ps-target").all_text_contents()
+    expect(page.locator(".ps-target").nth(0)).to_have_attribute("aria-selected", "true")
+    expect(page.locator(".callout .co-head strong")).to_have_text(target_names[0])
+    expect(page.locator(".callout .co-row.want p")).to_have_text("성공한 산출물 유지")
+    first_now = page.locator(".callout .co-row.now p").inner_text()
+    page.locator(".ps-target").nth(1).click()
+    expect(page.locator(".ps-target").nth(1)).to_have_attribute("aria-selected", "true")
+    expect(page.locator(".callout .co-head strong")).to_have_text(target_names[1])
+    expect(page.locator(".callout .co-row.now p")).to_contain_text("화면은 마지막 결과만 표시한다.")
+    assert page.locator(".callout .co-row.now p").inner_text() != first_now
+    expect(page.locator(".callout .co-row.want p")).to_have_text("실패한 파일과 이유 모아 보기")
     expect(page.locator(".callout .co-row.now").first).to_be_visible()
     expect(page.locator(".callout .co-row.want").first).to_be_visible()
     page.wait_for_timeout(300)
-    for i in range(page.locator(".callout").count()):
+    if "docked" in page.locator(".callout").get_attribute("class"):
+        vp, card = page.locator("#viewport").bounding_box(), page.locator(".callout").bounding_box()
+        assert vp["y"] + vp["height"] <= card["y"]  # the actual map ends before the reading row
+        assert page.locator(".callout").evaluate("e => e.scrollHeight <= e.clientHeight")
+    else:
         for j in range(page.locator(".node").count()):
-            clear_of(page, f".callout >> nth={i}", f".node >> nth={j}")
-    # The long reading on request: the parts as they are now → what the change wants, said once.
+            clear_of(page, ".callout", f".node >> nth={j}")
+    # Sources replace this one reading; coming back keeps the actual target and its matching before/after text.
+    page.locator(".callout .co-src").click()
+    expect(page.locator("#lens .cmp-evidence")).to_be_visible()
+    expect(page.locator(".callout")).to_have_count(0)
+    page.locator("#cmp-back").click()
+    expect(page.locator(".ps-target").nth(1)).to_have_attribute("aria-selected", "true")
+    expect(page.locator(".callout .co-head strong")).to_have_text(target_names[1])
+    expect(page.locator(".callout .co-row.want p")).to_have_text("실패한 파일과 이유 모아 보기")
+    # Keyboard navigation names the targets too, and supports a return to the same selected target.
+    page.locator(".ps-target").nth(1).focus()
+    page.keyboard.press("ArrowLeft")
+    expect(page.locator(".callout .co-head strong")).to_have_text(target_names[0])
+    expect(page.locator(".ps-target").nth(0)).to_be_focused()
+    page.keyboard.press("ArrowRight")
+    expect(page.locator(".callout .co-head strong")).to_have_text(target_names[1])
+    # The long reading on request still pairs only the target currently being read with its own wanted text.
     page.locator(".ps-link", has_text="설명").click()
-    expect(page.locator("#lens .cmp-now .cmp-part")).to_have_count(2)
+    expect(page.locator("#lens .cmp-now .cmp-part")).to_have_count(1)
+    expect(page.locator("#lens .cmp-now .cmp-text")).to_have_text("화면은 마지막 결과만 표시한다.")
     expect(page.locator("#lens .cmp-want .cmp-text")).to_have_count(1)
     expect(page.locator("#lens .cmp-hand input")).to_be_checked()
     page.wait_for_timeout(400)
@@ -398,6 +431,8 @@ def workspace_flow(browser, base, cases):
     expect(page.locator("#world .plan-direct")).to_have_count(0)
     expect(page.locator("#zoom-level")).to_have_text(zoom)
     page.locator("#plan-mode").get_by_role("button", name="변경 미리보기").click()
+    expect(page.locator(".ps-target").nth(1)).to_have_attribute("aria-selected", "true")
+    expect(page.locator(".callout .co-head strong")).to_have_text(target_names[1])
     # The whole plan opens on request. A narrow window: the panel and the request sheet take the whole width; back to 1280.
     page.locator(".ps-more").click()
     expect(page.locator("#plan-panel")).to_be_visible()

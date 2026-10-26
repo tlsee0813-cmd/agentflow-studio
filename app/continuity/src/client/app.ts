@@ -577,7 +577,7 @@ function applyCamera(animate = false) {
   const world = $('world'), vp = $('viewport');
   world.classList.toggle('animate', animate);
   world.style.transform = `translate(${camera.x}px, ${camera.y}px) scale(${camera.k})`;
-  vp.style.backgroundPosition = `${camera.x}px ${camera.y}px`;
+  vp.style.backgroundPosition = `${camera.x}px ${camera.y - vp.offsetTop}px`;
   vp.style.backgroundSize = `${28 * camera.k}px ${28 * camera.k}px`;
   $('zoom-level').textContent = `${Math.round(camera.k * 100)}%`;
   // Density follows the zoom: below 80% notes and state lines step back, below 60% names grow to stay readable. The selected
@@ -592,8 +592,8 @@ function applyCamera(animate = false) {
 /** Whole view in the free area. Opening never shrinks below 85%; only the explicit 전체 보기 button may go further. */
 function fitView(explicit: boolean, animate = false) {
   const o = opened; if (!o) return;
-  const vp = $('viewport').getBoundingClientRect(), left = leftInset() + 8, right = PANEL_W() + 24, top = 28, bottom = BOTTOM + 8;
-  const w = Math.max(200, vp.width - left - right), hgt = Math.max(160, vp.height - top - bottom), B = lay.bounds;
+  const vp = $('viewport').getBoundingClientRect(), left = leftInset() + 8, right = PANEL_W() + 24, top = topInset() + 12, bottom = mapBottomInset() + 8;
+  const w = Math.max(200, vp.width - left - right), hgt = Math.max(160, mapBottom() - top - bottom), B = lay.bounds;
   const fit = Math.min(1, w / Math.max(1, B.w + 40), hgt / Math.max(1, B.h + 40));
   const k = explicit ? Math.max(ZOOM_MIN, fit) : Math.max(0.85, fit);
   const mw = B.w * k, mh = B.h * k;
@@ -608,7 +608,7 @@ function zoomAt(k: number, cx: number, cy: number, animate = false) {
 /** Smallest pan that brings a world rectangle into the free map area (left of the inspector, above the tools); never a zoom.
  * Larger than the area: its top-left corner comes in. */
 function revealRect(B: { x: number; y: number; w: number; h: number }, keepRight = 0, keepBottom = 0) {
-  const vp = $('viewport').getBoundingClientRect(), left = leftInset() + 16, right = vp.width - PANEL_W() - 24 - keepRight, top = topInset() + 4, bottom = vp.height - BOTTOM - 12 - keepBottom;
+  const vp = $('viewport').getBoundingClientRect(), left = leftInset() + 16, right = vp.width - PANEL_W() - 24 - keepRight, top = topInset() + 4, bottom = mapBottom() - mapBottomInset() - 12 - keepBottom;
   const sx = camera.x + B.x * camera.k, sy = camera.y + B.y * camera.k, sw = B.w * camera.k, sh = B.h * camera.k;
   let dx = 0, dy = 0;
   if (sx + sw > right) dx = right - (sx + sw);
@@ -627,7 +627,7 @@ function reveal(partId: string) {
     const all = [own, ...ends], x = Math.min(...all.map(r => r.x)), y = Math.min(...all.map(r => r.y));
     const B = { x, y, w: Math.max(...all.map(r => r.x + r.w)) - x, h: Math.max(...all.map(r => r.y + r.h)) - y };
     const vp = $('viewport').getBoundingClientRect();
-    if (B.w * camera.k <= vp.width - PANEL_W() - 56 && B.h * camera.k <= vp.height - BOTTOM - 40) { revealRect(B); return; }
+    if (B.w * camera.k <= vp.width - PANEL_W() - 56 && B.h * camera.k <= lensArea().h - 24) { revealRect(B); return; }
   }
   revealRect(own);
 }
@@ -646,7 +646,7 @@ function select(partId: string | null) {
   markSelection(partId);
   $('space').classList.toggle('dim', !!partId);
   const panel = $('panel');
-  if (planView.isOpen()) { panel.hidden = true; panel.replaceChildren(); clearHighlight(); if (partId && changed) reveal(partId); planView.selectionChanged(); return; }
+  if (planView.isOpen()) { panel.hidden = true; panel.replaceChildren(); clearHighlight(); planView.selectionChanged(changed); return; }
   if (!partId) { panel.hidden = true; panel.replaceChildren(); hideLens(); clearHighlight(); return; }
   showReading(changed, changed);
   if (pendingRecord) { const id = pendingRecord; pendingRecord = null; openRecord(id); }
@@ -683,8 +683,9 @@ let readingFor: string[] = [];
 const toScreen = (b: { x: number; y: number; w: number; h: number }): Rect => ({ x: camera.x + b.x * camera.k, y: camera.y + b.y * camera.k, w: b.w * camera.k, h: b.h * camera.k });
 const union = <T extends Rect>(rs: T[]): Rect => { const x = Math.min(...rs.map(r => r.x)), y = Math.min(...rs.map(r => r.y)); return { x, y, w: Math.max(...rs.map(r => r.x + r.w)) - x, h: Math.max(...rs.map(r => r.y + r.h)) - y }; };
 /** The change plan's strip takes the top of the map while it is open. */
-const topInset = () => { const strip = $('plan-strip'); return strip.hidden ? 16 : strip.offsetTop + strip.offsetHeight + 10; };
-function lensArea(): Rect { const vp = $('viewport').getBoundingClientRect(), top = topInset(); return { x: 16, y: top, w: vp.width - 32 - PANEL_W(), h: vp.height - top - BOTTOM }; }
+const stripInset = () => { const strip = $('plan-strip'); return strip.hidden ? 16 : strip.offsetTop + strip.offsetHeight + 10; };
+const topInset = () => stripInset() + (!$('plan-strip').hidden && !$('scope-sticky').hidden ? $('scope-sticky').offsetHeight + 8 : 0);
+function lensArea(): Rect { const vp = $('viewport').getBoundingClientRect(), top = topInset(); return { x: 16, y: top, w: vp.width - 32 - PANEL_W(), h: mapBottom() - top - mapBottomInset() }; }
 function hideLens() { const l = $('lens'); l.hidden = true; l.replaceChildren(); l.classList.remove('docked', 'compare'); lensPlace = null; readingFor = []; }
 /** part: what the surface is about; beside: that and the group it sits in; protect: those, the other ends of their lines and
  * the scope's title; keep: the same in map coordinates (what a docked surface keeps clear of with one pan). */
@@ -760,59 +761,63 @@ function positionLens(animate = false) {
   l.classList.toggle('animate', animate);
   l.style.left = `${Math.round(at.x)}px`; l.style.top = `${Math.round(at.y)}px`; l.style.maxHeight = `${Math.round(hgt)}px`;
 }
-/** Notes stay beside their targets only in genuinely free space. A crowded map reads them in a bounded row inside the
- * plan strip instead. Once a note joins that row it stays there until the focus changes, so a manual pan never makes the
- * strip grow and shrink. Neither placing notes nor following the camera moves the camera. */
-let calloutNotes: HTMLElement[] = [], calloutFocus = '', calloutFrame = 0;
+/** A change reads one real target at a time. A clear nearby place wins; otherwise a two-column comparison reserves
+ * actual space below the map. Both sides remain visible, and manual camera moves never trigger a new reveal. */
+let calloutNotes: HTMLElement[] = [], calloutFrame = 0, calloutDockHeight = 0, calloutMovePending = false;
+const mapBottomInset = () => calloutDockHeight ? 12 : BOTTOM;
+const mapBottom = () => $('viewport').offsetTop + $('viewport').clientHeight;
+function syncMapArea() {
+  const vp = $('viewport'), world = $('world'), top = $('plan-strip').hidden ? 0 : topInset();
+  vp.style.top = top + 'px'; vp.style.bottom = calloutDockHeight ? (calloutDockHeight + BOTTOM + 12) + 'px' : '0px';
+  // Camera coordinates stay relative to space, including when the viewport gains an actual reading row above or below it.
+  world.style.top = -top + 'px'; vp.style.backgroundPosition = camera.x + 'px ' + (camera.y - top) + 'px';
+}
 function positionCallouts() {
-  const notes = calloutNotes; if (!notes.length) return;
-  const strip = $('plan-strip'), lens = $('lens'), sp = $('space').getBoundingClientRect();
-  const overflow = () => {
-    let row = document.getElementById('callout-overflow');
-    if (!row) {
-      row = h('section', { id: 'callout-overflow', class: 'callout-overflow', 'aria-label': '부분별 변경 설명' },
-        h('p', { class: 'co-overflow-label' }, '부분별 변경 설명'), h('div', { class: 'co-overflow-notes', tabindex: '0', 'aria-label': '부분별 변경 설명 · 가로로 스크롤' }));
-      strip.append(row);
-    }
-    return row.lastElementChild as HTMLElement;
-  };
-  // Adding a reading row reduces the map's free area. Recheck earlier floating notes against the final strip height.
-  for (let pass = 0; pass <= notes.length; pass++) {
-    positionLens(); updateSticky();
-    const area = lensArea(), taken: Rect[] = [];
-    if (!lens.hidden) { const r = lens.getBoundingClientRect(); taken.push({ x: r.left - sp.left, y: r.top - sp.top, w: r.width, h: r.height }); }
+  syncMapArea(); updateSticky(); syncMapArea();
+  const el = calloutNotes[0]; if (!el) return;
+  const b = lay.boxes.get(el.dataset.box ?? ''); el.hidden = !b; if (!b) return;
+  const sp = $('space').getBoundingClientRect(), lens = $('lens'), area = lensArea();
+  if (el.dataset.side !== 'dock') {
     const blockers = [...lay.boxes.values()].map(toScreen).filter(r => r.x < area.x + area.w && r.y < area.y + area.h && r.x + r.w > area.x && r.y + r.h > area.y);
     if (titleH) blockers.push(toScreen(titleRect()));
-    const sticky = $('scope-sticky');
-    if (!sticky.hidden) { const r = sticky.getBoundingClientRect(); blockers.push({ x: r.left - sp.left, y: r.top - sp.top, w: r.width, h: r.height }); }
-    let changed = false;
-    for (const el of notes) {
-      const b = lay.boxes.get(el.dataset.box ?? ''); el.hidden = !b; if (!b) continue;
-      if (el.dataset.side === 'strip') { if (!strip.contains(el)) overflow().append(el); continue; }
-      const gb = lay.boxes.get(b.container);
-      const at = placeCallout(toScreen(b), gb?.kind === 'frame' ? toScreen(gb) : null, { w: el.offsetWidth, h: el.offsetHeight }, area, [...blockers, ...taken]);
-      if (!at) { el.dataset.side = 'strip'; el.style.left = ''; el.style.top = ''; el.tabIndex = 0; overflow().append(el); changed = true; continue; }
-      el.style.left = `${at.x}px`; el.style.top = `${at.y}px`; taken.push(at);
-    }
-    if (!changed) break;
+    for (const other of [lens, $('scope-sticky')]) if (!other.hidden) { const r = other.getBoundingClientRect(); blockers.push({ x: r.left - sp.left, y: r.top - sp.top, w: r.width, h: r.height }); }
+    const gb = lay.boxes.get(b.container);
+    const at = placeCallout(toScreen(b), gb?.kind === 'frame' ? toScreen(gb) : null, { w: el.offsetWidth, h: el.offsetHeight }, area, blockers);
+    if (at) { el.style.left = at.x + 'px'; el.style.top = at.y + 'px'; return; }
+    el.dataset.side = 'dock'; el.classList.add('docked');
   }
+  // Content determines the height: no card scrollbar, clamp, or hidden second half of the comparison.
+  el.style.width = Math.min(760, area.w) + 'px';
+  calloutDockHeight = el.offsetHeight;
+  syncMapArea(); updateSticky(); syncMapArea();
+  el.style.left = Math.max(area.x, area.x + (area.w - el.offsetWidth) / 2) + 'px';
+  el.style.top = (sp.height - BOTTOM - calloutDockHeight) + 'px';
 }
-/** New focus or explicit resize only: bring the named targets into the map space left below the reading row. */
-function revealCalloutTargets() {
-  if (!document.getElementById('callout-overflow')) return;
-  const boxes = calloutNotes.map(el => lay.boxes.get(el.dataset.box ?? '')).filter((b): b is Box => !!b);
-  if (!boxes.length) return;
-  const all = union(boxes), area = lensArea(), lens = $('lens');
-  const keepBottom = !lens.hidden && lensPlace?.side === 'dock' ? lens.offsetHeight + 12 : 0;
-  if (all.w * camera.k <= area.w - 24 && all.h * camera.k <= area.h - keepBottom - 24) revealRect(all, 0, keepBottom);
+/** New target or explicit resize only. Prefer the target, its line ends and the title together when they fit; a large
+ * frame still reveals its own heading and first rows instead of refusing to move because the whole group is too tall. */
+function revealCalloutTarget() {
+  const el = calloutNotes[0], b = el ? lay.boxes.get(el.dataset.box ?? '') : null; if (!b) return;
+  const own = { x: b.x, y: b.y, w: Math.min(b.w, 420), h: Math.min(b.h, 220) }, area = lensArea();
+  const ends = lay.edges.filter(e => e.from === b.id || e.to === b.id).map(e => lay.boxes.get(e.from === b.id ? e.to : e.from)).filter((q): q is Box => !!q);
+  const candidates = [[own, ...ends, ...(titleH ? [titleRect()] : [])], [own, ...ends], [own, ...(titleH ? [titleRect()] : [])], [own]];
+  let fit = candidates.map(rs => union(rs)).find(r => r.w * camera.k <= area.w - 32 && r.h * camera.k <= area.h - 24) ?? own;
+  // Avoid leaving an unrelated group name cut in half along the new viewport edge when a small downward pan can show it
+  // without sacrificing the chosen target. Large groups themselves need not fit at once; target navigation keeps them named.
+  const heads = [...lay.boxes.values()].filter(q => q.kind === 'frame').map(q => ({ x: q.x, y: q.y, w: q.w, h: q.head }))
+    .filter(q => { const r = toScreen(q); return r.y < area.y && r.y + r.h > area.y && r.x < area.x + area.w && r.x + r.w > area.x; });
+  if (heads.length) {
+    const y = Math.min(fit.y, ...heads.map(q => q.y)), h = fit.y + fit.h - y;
+    if (h * camera.k <= area.h - 24) fit = { ...fit, y, h };
+  }
+  revealRect(fit);
 }
 /** The scope's title belongs to the map; when a pan takes it out of view its name stays at the top left of the map. */
 function updateSticky() {
   const st = $('scope-sticky'), o = opened;
   if (!o || !titleH) { st.hidden = true; return; }
-  const vp = $('viewport').getBoundingClientRect(), t = toScreen(titleRect()), top = topInset();
+  const vp = $('viewport').getBoundingClientRect(), t = toScreen(titleRect()), top = stripInset();
   st.style.top = `${top - 6}px`;
-  st.hidden = t.y >= top - 8 && t.y + 24 * camera.k <= vp.height - BOTTOM && t.x + 120 >= 0 && t.x <= vp.width - PANEL_W() - 120;
+  st.hidden = t.y >= top - 8 && t.y + 24 * camera.k <= mapBottom() - mapBottomInset() && t.x + 120 >= 0 && t.x <= vp.width - PANEL_W() - 120;
   // One title at a time: the map's own title steps back while its name is pinned.
   document.querySelector('.map-title')?.classList.toggle('pinned', !st.hidden);
 }
@@ -1157,16 +1162,15 @@ const planView = createPlanView({
     revealRect(B);
   },
   restore: r => { const o = opened; if (!o) return; returnCamera = r.camera; go(o.key, r.selected, r.scope); },
-  callouts: notes => {
-    const key = (el: HTMLElement) => `${el.dataset.box}:${el.textContent}`;
-    const focus = notes.map(key).join('|'), changed = focus !== calloutFocus;
-    const inStrip = new Set(calloutNotes.filter(el => el.dataset.side === 'strip').map(key));
-    if (!changed) for (const el of notes) if (inStrip.has(key(el))) { el.dataset.side = 'strip'; el.tabIndex = 0; }
-    calloutFocus = focus; calloutNotes = notes;
-    document.getElementById('callout-overflow')?.remove();
+  callouts: (notes, move = false) => {
+    const previous = calloutNotes[0], next = notes[0];
+    const same = previous && next && previous.dataset.box === next.dataset.box && previous.textContent === next.textContent;
+    if (same && previous.dataset.side === 'dock') { next.dataset.side = 'dock'; next.classList.add('docked'); }
+    calloutNotes = notes; calloutDockHeight = 0;
     $('callouts').replaceChildren(...notes); positionCallouts();
+    calloutMovePending ||= move;
     cancelAnimationFrame(calloutFrame);
-    calloutFrame = requestAnimationFrame(() => { positionCallouts(); if (changed) revealCalloutTargets(); });
+    calloutFrame = requestAnimationFrame(() => { positionCallouts(); const reveal = calloutMovePending; calloutMovePending = false; if (reveal) revealCalloutTarget(); });
   },
   surface: (content, parts, place) => {
     const l = $('lens');
@@ -1290,9 +1294,9 @@ function bindCanvas() {
     const r = vp.getBoundingClientRect(), unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1;
     const delta = (Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX) * unit;
     // Pinch (ctrlKey) sends small deltas; a mouse notch is about 100.
-    mapMoved = true; zoomAt(camera.k * Math.exp(-delta * (e.ctrlKey ? 0.01 : 0.0015)), e.clientX - r.left, e.clientY - r.top);
+    mapMoved = true; zoomAt(camera.k * Math.exp(-delta * (e.ctrlKey ? 0.01 : 0.0015)), e.clientX - r.left, e.clientY - r.top + vp.offsetTop);
   }, { passive: false });
-  const center = () => { const r = vp.getBoundingClientRect(); return [(r.width - PANEL_W()) / 2, r.height / 2] as const; };
+  const center = () => { const r = vp.getBoundingClientRect(); return [(r.width - PANEL_W()) / 2, vp.offsetTop + r.height / 2] as const; };
   $('zoom-in').addEventListener('click', () => { mapMoved = true; const [x, y] = center(); zoomAt(camera.k + 0.15, x, y, true); });
   $('zoom-out').addEventListener('click', () => { mapMoved = true; const [x, y] = center(); zoomAt(camera.k - 0.15, x, y, true); });
   $('zoom-fit').addEventListener('click', () => { mapMoved = true; fitView(true, true); });
@@ -1320,7 +1324,7 @@ function bindCanvas() {
     if (e.key === 'Escape' && opened && scope) { const o = opened, from = scope; go(o.key, null, partOf(o, from)?.parentId ?? null); requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-drag="${CSS.escape(from)}"]`)?.focus()); }
   });
   let resize = 0;
-  window.addEventListener('resize', () => { cancelAnimationFrame(resize); resize = requestAnimationFrame(() => { if (opened && !selected && !planView.isOpen()) fitView(false); else if (!$('lens').hidden) placeLensOnce($('lens').classList.contains('compare'), false); positionCallouts(); revealCalloutTargets(); }); });
+  window.addEventListener('resize', () => { cancelAnimationFrame(resize); resize = requestAnimationFrame(() => { if (opened && !selected && !planView.isOpen()) fitView(false); else if (!$('lens').hidden) placeLensOnce($('lens').classList.contains('compare'), false); positionCallouts(); revealCalloutTarget(); }); });
 }
 
 /** Hover: a line shows what it means (ends, kind, recorded note) without selecting; a part lights its own lines. */
