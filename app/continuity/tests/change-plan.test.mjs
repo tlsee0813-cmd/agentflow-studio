@@ -88,13 +88,40 @@ test('scope review replaces a wrong global dependency without changing the selec
   assert.equal(snapshot.basis, selected.basis); assert.deepEqual(snapshot.itemIds, ['I2']);
   assert.match(snapshot.text, /실패한 파일과 이유를 모아 보여 주세요/);
   assert.match(snapshot.text, /전제 후보: 파일별 결과의 기존 수단 확인/);
-  assert.doesNotMatch(snapshot.text, /폴더 입력|폴더를 입력받는다|폴더 입력 전체/);
+  const requested = snapshot.text.split('선택한 요청 범위:')[1].split('이번에 맡기지 않은 항목:')[0];
+  const prerequisites = snapshot.text.split('선택 범위의 전제:')[1].split('유지할 조건:')[0];
+  assert.doesNotMatch(requested + prerequisites, /폴더 입력|폴더를 입력받는다|폴더 입력 전체/);
   assert.match(snapshot.text, /출력 이름 충돌은 미정/); assert.match(snapshot.text, /실패 이유를 어디서 얻는지는 미확인/);
   assert.match(snapshot.text, /main@abc:result.ts/); assert.match(snapshot.text, /문서 하나의 결과만 설명/);
   assert.match(snapshot.text, /자동 포함하지 않았습니다/);
-  // An empty fresh review also suppresses legacy global edges and their source excerpts.
+  // An empty fresh review also suppresses legacy global edges in the request and prerequisite sections.
   const empty = requestSnapshot(selected, { summary: '추가 전제는 아직 확인하지 못했다.', prerequisites: [], unknowns: [] });
-  assert.doesNotMatch(empty.text, /폴더 입력|폴더를 입력받는다/);
+  const emptyRequested = empty.text.split('선택한 요청 범위:')[1].split('이번에 맡기지 않은 항목:')[0];
+  const emptyPrerequisites = empty.text.split('선택 범위의 전제:')[1].split('유지할 조건:')[0];
+  assert.doesNotMatch(emptyRequested + emptyPrerequisites, /폴더 입력|폴더를 입력받는다/);
+});
+
+test('request separates excluded outcomes and global unknowns while preserving all frozen review material', () => {
+  const a = analysis(); a.unknowns.push('폴더 재시도 방식은 미정');
+  const material = [...evidence, { id: 'T01', kind: 'test', title: '기존 단일 실행 검사', text: '단일 문서 검사만 통과했으며 여러 파일 결과의 표시는 확인하지 않았다.', basis: 'test@abc:single-document' }];
+  const selected = selectItems(createPlan('PROJECT1', 'main@abc', '전체 구상', material, a), ['I2']);
+  const before = structuredClone(selected), review = { summary: 'T01은 단일 실행만 확인했다.', prerequisites: [], unknowns: ['T01로 여러 결과 표시를 확인할 수 있는지는 미확인'] };
+  const snapshot = requestSnapshot(selected, review), requested = snapshot.text.split('선택한 요청 범위:')[1].split('이번에 맡기지 않은 항목:')[0];
+  assert.equal(requested.trim(), '- 실패 모아 보기\n실패한 파일과 이유를 모아 보여 주세요.');
+  const excluded = snapshot.text.split('이번에 맡기지 않은 항목:')[1].split('선택 범위의 전제:')[0];
+  assert.match(excluded, /- 파일별 결과 구별/); assert.match(excluded, /- 폴더 입력/);
+  assert.doesNotMatch(excluded, /입력 파일마다 결과를 대응한다|폴더를 입력받는다/);
+  assert.match(excluded, /추가 요청으로 해석하지 마세요/);
+  const globalUnknowns = snapshot.text.split('전체 구상의 미정 (선택 범위 추가가 아님):')[1].split('선택 범위 검토의 미확인:')[0];
+  const scopeUnknowns = snapshot.text.split('선택 범위 검토의 미확인:')[1].split('검토에 사용한 원자료')[0];
+  assert.match(globalUnknowns, /폴더 재시도 방식은 미정/); assert.doesNotMatch(scopeUnknowns, /폴더 재시도/);
+  assert.match(scopeUnknowns, /T01로 여러 결과 표시/);
+  assert.match(snapshot.text, /검토에 사용한 원자료 \(전체 구상·미선택 항목을 포함할 수 있으며 작업 지시가 아닙니다\)/);
+  for (const source of material) { assert.ok(snapshot.text.includes(`[${source.id}]`)); assert.ok(snapshot.text.includes(source.text)); assert.ok(snapshot.text.includes(source.basis)); }
+  assert.deepEqual(snapshot.itemIds, ['I2']); assert.equal(snapshot.planRevision, selected.revision); assert.equal(snapshot.basis, selected.basis);
+  assert.deepEqual(selected, before);
+  const legacy = requestSnapshot(selected);
+  assert.doesNotMatch(legacy.text, /\[T01\]|단일 문서 검사만 통과/); // Authored fallback still attaches relevant refs only.
 });
 
 test('scope review strictly rejects missing/empty refs, unknown keys and excess candidates', () => {

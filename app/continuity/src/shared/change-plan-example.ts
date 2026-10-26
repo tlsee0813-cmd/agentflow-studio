@@ -61,7 +61,7 @@ export function converterExampleAnalysis(partIds: Record<string, string>, condit
       ...(condition === 'B' ? [{ id: 'outcomes', title: '파일별 결과 구별', description: '제공된 코드는 경로 한 개 또는 예외만 전달합니다. 실패한 파일과 이유를 모으려면 입력과 성공·실패 결과를 대응시킬 수 있어야 합니다. 이 전제를 요청에 포함할지 또는 기존 수단을 더 확인할지 구별합니다.', partIds: ids('transform', 'results'), refs: ['P03', 'R03'], dependsOn: [] }] : []),
       { id: 'failures', title: '성공 유지·실패 모음', description: condition === 'A'
         ? '기존 입력별 성공 경로·실패 이유와 결과 누적을 재사용해 실패 모음을 구성할 수 있는 후보입니다. 현재 화면은 마지막 결과만 보여 주므로 결과 읽기 변화가 필요합니다. 폴더 실행이나 성공 보존 전체가 검증된 것은 아닙니다.'
-        : '실패한 입력과 이유를 모아 읽고 성공 산출물을 유지하려는 변경입니다. 제공된 범위에는 파일별 결과 누적이 없어 그 전제를 먼저 다룹니다. 새 처리기 전체나 폴더 입력을 몰래 선택하지 않습니다.', partIds: ids('output', 'files', 'results'), refs: ['R02', 'R03', 'P03', 'T01'], dependsOn: prerequisite },
+        : '실패한 입력과 이유를 모아 읽고 성공 산출물을 유지하려는 변경입니다. 제공된 범위에는 파일별 결과 누적이 없어 최소 전제의 확인이 필요합니다. 전제는 별도로 선택하지 않으면 이번 요청에 포함되지 않습니다.', partIds: ids('output', 'files', 'results'), refs: ['R02', 'R03', 'P03', 'T01'], dependsOn: prerequisite },
     ],
     impacts: [
       { partId: partIds.document ?? partIds.input ?? '', reason: '문서 하나에서 폴더 안 파일로 입력 범위가 달라집니다. 파일 대상 규칙은 아직 미정입니다.', refs: ['R02', 'R03'] },
