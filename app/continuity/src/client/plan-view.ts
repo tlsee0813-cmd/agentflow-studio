@@ -150,7 +150,7 @@ export function createPlanView(host: PlanHost) {
     if (host.selected()) host.selectPart(null);
     moveTarget = true; render();
     const at = visibleRep(id, host.boxes());
-    if (!at) host.showPart(id); else if (s.explain) host.reveal(at);
+    if (!at) host.showPart(id);
     requestAnimationFrame(() => {
       const tab = document.querySelector<HTMLElement>(`.ps-target[data-target="${CSS.escape(id)}"]`);
       tab?.scrollIntoView({ block: 'nearest', inline: 'nearest' }); if (keyboard) tab?.focus({ preventScroll: true });
@@ -493,8 +493,9 @@ export function createPlanView(host: PlanHost) {
     } else {
       const id = st.focus.id; content = partCompare(o, p, id); parts = [rep(id) ?? id];
     }
-    // A new change or part: a new place. Its sources in and out: the same place sized again, the camera untouched.
-    host.surface(content, parts, key !== lastFocusKey || shown !== lastShown ? 'refit' : false); lastFocusKey = key; lastShown = shown;
+    // An explicit target change in an open comparison reveals that target above the reading surface. First opening and
+    // the same target's sources in and out only size the surface; they keep the person's camera, including a manual pan.
+    host.surface(content, parts, lastFocusKey && key !== lastFocusKey ? true : key !== lastFocusKey || shown !== lastShown ? 'refit' : false); lastFocusKey = key; lastShown = shown;
   }
   /** What a part is now, and where that description comes from; nothing when there is nothing. */
   function now(o: PlanOpened, id: string): Node[] {

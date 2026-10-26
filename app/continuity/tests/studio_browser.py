@@ -441,14 +441,21 @@ def workspace_flow(browser, base, cases):
     page.wait_for_timeout(400)
     for i in range(page.locator(".plan-focus").count()):  # the parts being compared stay clear of the comparison
         clear_of(page, f".plan-focus >> nth={i}", "#lens")
+    # Selecting a different named target while the comparison is open reveals its real map box above that reading surface.
+    page.locator(".ps-target").nth(0).click()
+    expect(page.locator("#lens .cmp-now .cmp-name")).to_have_text(target_names[0])
+    expect(page.locator("#lens .cmp-want .cmp-text")).to_have_text("성공한 산출물 유지")
+    expect(page.locator("#world .plan-reading")).to_be_in_viewport()
+    page.wait_for_timeout(400)  # compare stable rectangles after the minimum-pan animation
+    clear_of(page, "#world .plan-reading", "#lens")
     page.keyboard.press("Escape")
     expect(page.locator("#lens")).to_be_hidden()
     page.locator("#plan-mode").get_by_role("button", name="현재").click()
     expect(page.locator("#world .plan-direct")).to_have_count(0)
     expect(page.locator("#zoom-level")).to_have_text(zoom)
     page.locator("#plan-mode").get_by_role("button", name="변경 미리보기").click()
-    expect(page.locator(".ps-target").nth(1)).to_have_attribute("aria-selected", "true")
-    expect(page.locator(".callout .co-head strong")).to_have_text(target_names[1])
+    expect(page.locator(".ps-target").nth(0)).to_have_attribute("aria-selected", "true")
+    expect(page.locator(".callout .co-head strong")).to_have_text(target_names[0])
     # The whole plan opens on request. A narrow window: the panel and the request sheet take the whole width; back to 1280.
     page.locator(".ps-more").click()
     expect(page.locator("#plan-panel")).to_be_visible()
