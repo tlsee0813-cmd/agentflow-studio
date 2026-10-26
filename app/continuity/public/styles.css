@@ -9,7 +9,7 @@
   --change: #a55a0b; --change-soft: #fdf4e8; --change-line: #edc48d;
   --ok: #3f9a6c; --busy: #c98a1b; --plan: #a7adb7; --warn: #c4443b;
   --frame-0: #eceef2; --frame-1: #e4e7ec; --frame-2: #dde1e7;
-  --edge: #aeb5c0;
+  --edge: #bcc2cb;
   --radius: 10px; --shadow-sm: 0 1px 2px rgba(16,24,40,.06); --shadow: 0 1px 2px rgba(16,24,40,.05), 0 1px 1px rgba(16,24,40,.03);
   --shadow-lg: 0 14px 34px -12px rgba(16,24,40,.22), 0 2px 6px rgba(16,24,40,.06);
   --font: system-ui, -apple-system, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
@@ -120,14 +120,14 @@ button:disabled { opacity: .5; cursor: default; }
 .world { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
 .world.animate { transition: transform .22s ease; }
 .edges { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
-.edge-line { fill: none; stroke: var(--edge); stroke-width: 1.4; stroke-linecap: round; transition: stroke .12s, opacity .12s; }
+.edge-line { fill: none; stroke: var(--edge); stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; transition: stroke .12s, opacity .12s; }
 .edge-hit { fill: none; stroke: transparent; stroke-width: 14; pointer-events: stroke; cursor: help; }
 .edge.k-needs .edge-line { stroke-dasharray: 6 4; }
 .edge.k-shares .edge-line, .edge.k-related .edge-line { stroke-dasharray: 1.5 4.5; stroke-width: 1.7; }
 .edge.near .edge-line { stroke: var(--text-3); stroke-width: 1.9; }
 .edge.on .edge-line { stroke: var(--accent); stroke-width: 2; }
-#arrow path { fill: var(--edge); } #arrow-on path { fill: var(--accent); } #arrow-near path { fill: var(--text-3); }
-.space.dim .edge:not(.on):not(.near) .edge-line { opacity: .4; }
+#arrow path { fill: var(--edge); } #arrow-on path, #dot-on circle { fill: var(--accent); } #arrow-near path { fill: var(--text-3); }
+.space.dim .edge:not(.on):not(.near) .edge-line { opacity: .3; }
 
 /* containment surfaces: tinted, no shadow; parts are the white cards on them */
 .frame { position: absolute; border-radius: 12px; background: var(--frame-0); border: 1px solid transparent; }

@@ -340,6 +340,9 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit') {
     const m = svg('marker', { id, viewBox: '0 0 10 10', refX: '9', refY: '5', markerWidth: '6', markerHeight: '6', orient: 'auto-start-reverse' });
     m.append(svg('path', { d: 'M0,1.5 L9,5 L0,8.5 z' })); defs.append(m);
   }
+  // A selected line also marks where it starts, so both of its ends read on the map.
+  const dot = svg('marker', { id: 'dot-on', viewBox: '0 0 10 10', refX: '5', refY: '5', markerWidth: '6', markerHeight: '6' });
+  dot.append(svg('circle', { cx: '5', cy: '5', r: '3.6' })); defs.append(dot);
   edges.append(defs);
   for (const e of lay.edges) {
     const g = svg('g', { class: `edge k-${e.kind}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
@@ -519,7 +522,9 @@ function markSelection(partId: string | null) {
   document.querySelectorAll<SVGGElement>('.edge').forEach(el => {
     const on = !!partId && (el.dataset.from === partId || el.dataset.to === partId);
     const layer = on ? top : base; if (layer && el.parentNode !== layer) layer.append(el);
-    el.classList.toggle('on', on); el.querySelector('.edge-line')!.setAttribute('marker-end', on ? 'url(#arrow-on)' : 'url(#arrow)');
+    el.classList.toggle('on', on);
+    const line = el.querySelector('.edge-line')!; line.setAttribute('marker-end', on ? 'url(#arrow-on)' : 'url(#arrow)');
+    if (on) line.setAttribute('marker-start', 'url(#dot-on)'); else line.removeAttribute('marker-start');
     if (on) related.add(el.dataset.from === partId ? el.dataset.to! : el.dataset.from!);
   });
   document.querySelectorAll<HTMLElement>('.node[data-part],.frame,.ghost').forEach(el => {

@@ -75,3 +75,60 @@ test('UI58-L6 a line between two parts of one column goes round a part between t
   assert.match(edgePath(a, c, [a, b, c]).d, new RegExp(`^M${NODE_W},`), 'leaves from the side');
   assert.match(edgePath(a, b, [a, b, c]).d, new RegExp(`^M${NODE_W / 2},${NODE_H}`), 'neighbours keep the short vertical line');
 });
+
+/** Points along an edge path made of M, C, L and Q commands (what edgePath writes). */
+function sample(d) {
+  const t = d.match(/[MCLQ]|-?\d+(?:\.\d+)?(?:e-?\d+)?/g), pts = []; let i = 0, cur = null;
+  const num = () => Number(t[i++]);
+  while (i < t.length) {
+    const c = t[i++];
+    if (c === 'M') { cur = { x: num(), y: num() }; continue; }
+    const P = c === 'C' ? [cur, { x: num(), y: num() }, { x: num(), y: num() }, { x: num(), y: num() }] : c === 'Q' ? [cur, { x: num(), y: num() }, { x: num(), y: num() }] : [cur, { x: num(), y: num() }];
+    for (let s = 1; s <= 20; s++) {
+      const u = s / 20, v = 1 - u;
+      pts.push(P.length === 4 ? { x: v ** 3 * P[0].x + 3 * v * v * u * P[1].x + 3 * v * u * u * P[2].x + u ** 3 * P[3].x, y: v ** 3 * P[0].y + 3 * v * v * u * P[1].y + 3 * v * u * u * P[2].y + u ** 3 * P[3].y }
+        : P.length === 3 ? { x: v * v * P[0].x + 2 * v * u * P[1].x + u * u * P[2].x, y: v * v * P[0].y + 2 * v * u * P[1].y + u * u * P[2].y }
+        : { x: v * P[0].x + u * P[1].x, y: v * P[0].y + u * P[1].y });
+    }
+    cur = P.at(-1);
+  }
+  return pts;
+}
+function crossings(l) {
+  const boxes = [...l.boxes.values()], byId = new Map(boxes.map(b => [b.id, b]));
+  const within = (o, f) => { for (let c = o.container, g = 0; c && g < 64; c = byId.get(c)?.container ?? '', g++) if (c === f.id) return true; return false; };
+  const bad = [];
+  for (const e of l.edges) {
+    const a = byId.get(e.from), b = byId.get(e.to);
+    const blocks = boxes.filter(o => o !== a && o !== b && !(o.kind === 'frame' && (within(a, o) || within(b, o))) && !(a.kind === 'frame' && within(o, a)) && !(b.kind === 'frame' && within(o, b)));
+    for (const q of sample(edgePath(a, b, boxes).d)) {
+      const o = blocks.find(o => q.x > o.x + 2 && q.x < o.x + o.w - 2 && q.y > o.y + 2 && q.y < o.y + o.h - 2);
+      if (o) { bad.push(`${e.from} → ${e.to} under ${o.id}`); break; }
+    }
+  }
+  return bad;
+}
+
+test('UI58-L7 no relation line passes under an unrelated part or group (Joplin, Node-RED core, converter, salon)', async () => {
+  const { buildConverterProject } = await import('../dist/public/client/plan-source.js');
+  const { EXAMPLES } = await import('../dist/public/shared/studio-examples.js');
+  const open0 = (_id, depth) => depth === 0;
+  const nr = viewOf('oss-node-red'), core = nr.parts.find(p => p.name === 'core');
+  for (const [name, l] of [
+    ['joplin', layoutScope(viewOf('oss-joplin'), null, open0, {})],
+    ['node-red', layoutScope(nr, null, open0, {})],
+    ['node-red core', layoutScope(nr, core.id, open0, {})],
+    ['converter', layoutScope(studioView(buildConverterProject()), null, open0, {})],
+    ['salon', layoutScope(studioView(buildExample(EXAMPLES.find(e => e.id === 'salon'))), null, open0, {})]
+  ]) assert.deepEqual(crossings(l), [], name);
+});
+
+test('UI58-L8 a group end meets the group at its head row, not beside an inner part', () => {
+  const v = viewOf('oss-joplin'), l = layoutScope(v, null, (_id, depth) => depth === 0, {});
+  const groupEdges = l.edges.filter(e => l.boxes.get(e.from).kind === 'frame' || l.boxes.get(e.to).kind === 'frame');
+  assert.ok(groupEdges.length > 0);
+  for (const e of groupEdges) {
+    const a = l.boxes.get(e.from), b = l.boxes.get(e.to), pts = sample(edgePath(a, b, l.boxes.values()).d), first = pts[0], last = pts.at(-1);
+    for (const [box, p] of [[a, first], [b, last]]) if (box.kind === 'frame') assert.ok(p.y >= box.y && p.y <= box.y + box.head, `${box.id} port at y ${p.y}`);
+  }
+});
