@@ -378,8 +378,9 @@ def workspace_flow(browser, base, cases):
     expect(page.locator("#lens .cmp-now .cmp-part")).to_have_count(2)
     expect(page.locator("#lens .cmp-want .cmp-text")).to_have_count(1)
     expect(page.locator("#lens .cmp-hand input")).to_be_checked()
-    for i in range(page.locator(".frame").count()):  # the groups stay above the docked comparison
-        clear_of(page, f".frame >> nth={i}", "#lens")
+    page.wait_for_timeout(400)
+    for i in range(page.locator(".plan-focus").count()):  # the parts being compared stay clear of the comparison
+        clear_of(page, f".plan-focus >> nth={i}", "#lens")
     page.locator("#plan-mode").get_by_role("button", name="현재").click()
     expect(page.locator("#world .plan-direct")).to_have_count(0)
     expect(page.locator("#zoom-level")).to_have_text(zoom)
