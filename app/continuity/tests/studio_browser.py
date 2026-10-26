@@ -26,6 +26,18 @@ def no_page_scroll(page):
     assert sizes[0] <= sizes[2] and sizes[1] <= sizes[3], f"document scrolls: {sizes}"
 
 
+def in_scope(page, name):
+    """The context row names the scope as the current step of the composition path and offers the way up."""
+    expect(page.locator("#crumbs [aria-current]")).to_have_text(name)
+    expect(page.locator("#scope-bar .scope-up")).to_be_visible()
+
+
+def add_inside(page):
+    """Structure edits sit in the inspector's quiet menu."""
+    page.locator(".panel .more summary").click()
+    page.get_by_role("menuitem", name="안에 부분 추가").click()
+
+
 def main_flow(browser, base):
     page = browser.new_page(viewport={"width": 1280, "height": 720})
     errors = []
@@ -37,6 +49,9 @@ def main_flow(browser, base):
     expect(page.locator(".node")).to_have_count(7)
     expect(page.locator(".frame")).to_have_count(2)
     no_page_scroll(page)
+    # Recent records open only when asked for, as a popover over the map tools (no reserved map room).
+    expect(page.locator("#recent")).to_have_class(re.compile("collapsed"))
+    page.locator("#recent-toggle").click()
     expect(page.locator("#recent")).not_to_have_class(re.compile("collapsed"))
     page.locator(".node", has_text="시간 고르기").click()
     expect(page.locator("#panel-title")).to_have_text("시간 고르기")
@@ -73,7 +88,7 @@ def main_flow(browser, base):
     expect(page.locator("#ask-input")).to_have_value("")
     page.keyboard.press("Escape")
     expect(page.locator("#panel")).to_be_hidden()
-    expect(page.locator("#recent")).not_to_have_class(re.compile("collapsed"))  # earlier state back
+    expect(page.locator("#recent")).to_have_class(re.compile("collapsed"))  # working on the map closed the popover
     # Group head opens the parent part, whose records include its children. 전체 보기 first: panning may have put it under the overlay.
     page.locator("#zoom-fit").click()
     page.wait_for_timeout(300)
@@ -121,8 +136,7 @@ def map_flow(browser, base):
     place = book_head.bounding_box()
     # Inside and back: scope bar and path say where; the parent view comes back as it was.
     page.locator(".frame-head", has_text="예약하기").locator(".enter").click()
-    expect(page.locator("#scope-bar")).to_contain_text("예약하기 안")
-    expect(page.locator("#crumbs")).to_contain_text("예약하기")
+    in_scope(page, "예약하기")
     expect(page.locator(".node")).to_have_count(3)
     expect(page.locator(".ghost").first).to_be_visible()
     page.locator(".node", has_text="시간 고르기").click()
@@ -139,7 +153,7 @@ def map_flow(browser, base):
     page.wait_for_timeout(350)
     # Double-click also goes inside; the panel offers it too.
     page.locator(".frame-head", has_text="관리자 화면").locator(".frame-name").dblclick()
-    expect(page.locator("#scope-bar")).to_contain_text("관리자 화면 안")
+    in_scope(page, "관리자 화면")
     page.locator("#scope-bar .scope-up").click()
     expect(page.locator("#scope-bar")).to_be_hidden()
     page.locator(".frame-head", has_text="관리자 화면").locator(".frame-name").click()
@@ -167,6 +181,7 @@ def basics_flow(browser, base):
     expect(page.locator("#space")).not_to_contain_text("진행 중")
     expect(page.locator("#world .edge text")).to_have_count(0)
     # Recent records: newest 7 of all, with the way to all of them.
+    page.locator("#recent-toggle").click()
     expect(page.locator("#recent-title")).to_have_text("최근 기록")
     expect(page.locator("#recent-count")).to_have_text("최신 7 / 14")
     page.get_by_role("button", name="전체 14개 보기").click()
@@ -176,6 +191,7 @@ def basics_flow(browser, base):
     # A fold the person made comes back after a record was opened for reference.
     page.locator(".frame-head", has_text="예약하기").locator(".toggle").click()
     expect(page.locator(".node", has_text="시간 고르기")).to_have_count(0)
+    page.locator("#recent-toggle").click()  # folding on the map closed the popover; open it again
     page.locator(".recent-item", has_text="시간 고르기").first.click()
     expect(page.locator("#panel-title")).to_have_text("시간 고르기")
     expect(page.locator(".node", has_text="시간 고르기")).to_be_visible()
@@ -200,12 +216,12 @@ def basics_flow(browser, base):
     link = page.url
     page.reload()
     expect(page.locator("#panel-title")).to_have_text("시간 고르기")
-    expect(page.locator("#scope-bar")).to_contain_text("예약하기 안")
+    in_scope(page, "예약하기")
     other = browser.new_context(viewport={"width": 1440, "height": 900})
     fresh = other.new_page()
     fresh.goto(link)
     expect(fresh.locator("#panel-title")).to_have_text("시간 고르기")
-    expect(fresh.locator("#scope-bar")).to_contain_text("예약하기 안")
+    in_scope(fresh, "예약하기")
     other.close()
     page.close()
 
@@ -235,7 +251,7 @@ def new_project_flow(browser, base):
     page.get_by_role("button", name="만들기").click()
     expect(page.locator(".node")).to_have_count(1)
     expect(page.locator("#panel-title")).to_have_text("로그인")
-    page.get_by_role("button", name="안에 부분 추가").click()
+    add_inside(page)
     page.locator("#part-name").fill("비밀번호 찾기")
     page.get_by_role("button", name="만들기").click()
     expect(page.locator(".frame")).to_have_count(1)
@@ -247,19 +263,20 @@ def new_project_flow(browser, base):
     expect(page.locator("#panel-title")).to_have_text("비밀번호 찾기")
     expect(page.locator("#ask-input")).to_have_value("어디까지 됐어?")
     # Third level, then down and back up through it.
-    page.get_by_role("button", name="안에 부분 추가").click()
+    add_inside(page)
     page.locator("#part-name").fill("메일 발송")
     page.get_by_role("button", name="만들기").click()
     expect(page.locator("#panel-title")).to_have_text("메일 발송")
     page.keyboard.press("Escape")
     page.locator(".frame-head", has_text="로그인").locator(".enter").click()
-    expect(page.locator("#scope-bar")).to_contain_text("로그인")
+    in_scope(page, "로그인")
     page.locator(".frame-head", has_text="비밀번호 찾기").locator(".enter").click()
-    expect(page.locator("#crumbs")).to_contain_text("테스트 프로젝트/로그인/비밀번호 찾기")
+    expect(page.locator("#crumbs")).to_contain_text("테스트 프로젝트›로그인›비밀번호 찾기")
     expect(page.locator("#scope-bar .scope-up")).to_contain_text("로그인")
+    expect(page.locator("#scene-back")).to_be_hidden()  # the previous scene is the parent: the way up is enough
     expect(page.locator(".node")).to_have_count(1)
     page.locator("#scope-bar .scope-up").click()
-    expect(page.locator("#scope-bar")).to_contain_text("로그인 안")
+    in_scope(page, "로그인")
     page.locator("#crumbs a", has_text="테스트 프로젝트").click()
     expect(page.locator("#scope-bar")).to_be_hidden()
     # A second top part; its dragged place in a saved project survives a reload.
@@ -287,7 +304,10 @@ def new_project_flow(browser, base):
     assert abs((pay.bounding_box()["y"] - login.bounding_box()["y"]) - moved) < 4
     page.locator(".brand").click()
     expect(page.locator("#saved-list .project-card")).to_have_count(1)
-    expect(page.locator(".project-card", has_text="예제")).to_have_count(3)  # examples are never saved as mine
+    expect(page.locator("#project-list .project-card.is-example")).to_have_count(3)  # examples are never saved as mine
+    expect(page.locator("#saved-list .is-example")).to_have_count(0)
+    # My projects lead; the examples step back once there is one.
+    assert page.locator("#saved-list").bounding_box()["y"] < page.locator("#project-list").bounding_box()["y"]
     context.close()
 
 

@@ -8,7 +8,9 @@ import type { StudioView, RelationView } from '../shared/studio.js';
 
 /** Frames are a little wider than a node so the head keeps its name beside the fold and go-inside controls. */
 export const FRAME_MIN_W = 252;
-export const NODE_W = 188, NODE_H = 56, PAD = 14, HEAD = 36, GAP = 14, COL_GAP = 100, ROW_GAP = 36, GHOST_W = 168, GHOST_H = 34;
+export const NODE_W = 200, NODE_H = 60, PAD = 14, HEAD = 38, GAP = 12, COL_GAP = 96, ROW_GAP = 22, GHOST_W = 168, GHOST_H = 34;
+/** Between wrapped columns of one layer (no relation runs between them, so they sit closer than relation layers). */
+export const WRAP_GAP = 36;
 export interface Point { x: number; y: number }
 export type Positions = Record<string, Record<string, Point>>;
 export const ROOT = 'root';
@@ -42,15 +44,20 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
     ids.forEach(i => depthOf(i));
     const columns: string[][] = [];
     for (const i of ids) (columns[layer.get(i)!] ??= []).push(i);
-    const cols = columns.filter(Boolean).flatMap(c => { if (c.length <= 4) return [c]; const per = Math.ceil(c.length / Math.ceil(c.length / 4)), o: string[][] = []; for (let i = 0; i < c.length; i += per) o.push(c.slice(i, i + per)); return o; });
-    const gapX = container === scope ? COL_GAP : GAP, gapY = container === scope ? ROW_GAP : GAP;
+    // Long columns wrap; a long list of siblings takes a squarer block (up to 8 rows) instead of a wide strip.
+    const maxPer = Math.max(4, Math.min(8, Math.ceil(Math.sqrt(ids.length * 1.3))));
+    const layerOf: number[] = [];
+    const cols = columns.filter(Boolean).flatMap((c, li) => { const o: string[][] = []; if (c.length <= maxPer) o.push(c); else { const per = Math.ceil(c.length / Math.ceil(c.length / maxPer)); for (let i = 0; i < c.length; i += per) o.push(c.slice(i, i + per)); } o.forEach(() => layerOf.push(li)); return o; });
+    const gapY = container === scope ? ROW_GAP : GAP;
+    const gapAfter = (ci: number) => (container !== scope ? GAP : layerOf[ci + 1] === layerOf[ci] ? WRAP_GAP : COL_GAP);
     const heights = cols.map(c => c.reduce((a, i) => a + sizes.get(i)!.h, 0) + gapY * (c.length - 1)), tallest = Math.max(0, ...heights);
     const at = new Map<string, Point>(); let x = 0;
     cols.forEach((c, ci) => {
       const w = Math.max(...c.map(i => sizes.get(i)!.w));
-      let y = container === scope ? (tallest - heights[ci]!) / 2 : 0;
+      const wrapped = layerOf.filter(l => l === layerOf[ci]).length > 1;
+      let y = container === scope && !wrapped ? (tallest - heights[ci]!) / 2 : 0;
       for (const i of c) { const s = sizes.get(i)!; at.set(i, { x: x - s.ox, y: y - s.oy }); y += s.h + gapY; }
-      x += w + gapX;
+      x += w + gapAfter(ci);
     });
     return at;
   };
