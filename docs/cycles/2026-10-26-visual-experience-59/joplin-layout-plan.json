@@ -1,0 +1,115 @@
+{
+  "format": "agentflow.change-plan-file.1",
+  "note": "변경안 파일입니다. 프로젝트 백업이 아니며 프로젝트 기록은 들어 있지 않습니다.",
+  "project": {
+    "id": "P_visual58_oss-joplin",
+    "name": "Joplin 데스크톱·공유 라이브러리"
+  },
+  "exportedAt": "2026-10-26T13:31:02.248Z",
+  "bundle": {
+    "draft": "데스크톱에서 노트를 편집하면서 같은 창에서 미리보기를 확인하고 싶다. 편집 내용과 표시 결과의 차이를 찾기 쉽게 해줘.",
+    "extra": [],
+    "plan": {
+      "version": "change-plan.1",
+      "id": "CP_49d4c34e-f378-44c5-b45e-612724b5fb31",
+      "projectId": "P_visual58_oss-joplin",
+      "revision": 1,
+      "basis": "UI59 합성 표시 검토",
+      "intent": "데스크톱에서 노트를 편집하면서 같은 창에서 미리보기를 확인하고 싶다. 편집 내용과 표시 결과의 차이를 찾기 쉽게 해줘.",
+      "evidence": [
+        {
+          "id": "INTENT",
+          "kind": "user",
+          "title": "배치 검토용 합성 요구",
+          "text": "데스크톱에서 노트를 편집하면서 같은 창에서 미리보기를 확인하고 싶다. 편집 내용과 표시 결과의 차이를 찾기 쉽게 해줘.",
+          "basis": "UI59 조밀한 지도 표현 검사. 실제 제품 요구나 구현 사실 아님."
+        }
+      ],
+      "analysis": {
+        "summary": "합성 변경 구상의 표시 배치만 검토한다.",
+        "items": [
+          {
+            "id": "preview",
+            "title": "같은 창에서 편집·미리보기 비교",
+            "description": "데스크톱에서 노트를 편집하면서 같은 창에서 미리보기를 확인하고 싶다. 편집 내용과 표시 결과의 차이를 찾기 쉽게 해줘.",
+            "partIds": [
+              "A_oss-joplin_desktop",
+              "A_oss-joplin_editor",
+              "A_oss-joplin_renderer"
+            ],
+            "refs": [
+              "INTENT"
+            ],
+            "dependsOn": [],
+            "presentation": [
+              {
+                "partId": "A_oss-joplin_desktop",
+                "current": {
+                  "text": "Electron·React 데스크톱 앱. 이름은 package.json, 기술 설명은 architecture.md에서 확인.",
+                  "source": "part-note",
+                  "refs": []
+                },
+                "wanted": {
+                  "text": "편집과 미리보기를 같은 창에서 비교하기",
+                  "refs": [
+                    "INTENT"
+                  ]
+                },
+                "origin": "intent"
+              },
+              {
+                "partId": "A_oss-joplin_editor",
+                "current": {
+                  "text": "desktop·mobile manifest에 있는 공유 편집기 패키지.",
+                  "source": "part-note",
+                  "refs": []
+                },
+                "wanted": {
+                  "text": "작성 중인 내용을 미리보기와 대응시키기",
+                  "refs": [
+                    "INTENT"
+                  ]
+                },
+                "origin": "intent"
+              },
+              {
+                "partId": "A_oss-joplin_renderer",
+                "current": {
+                  "text": "desktop·mobile·CLI manifest에 있는 공유 렌더러 패키지.",
+                  "source": "part-note",
+                  "refs": []
+                },
+                "wanted": {
+                  "text": "편집한 내용의 표시 결과를 함께 확인하기",
+                  "refs": [
+                    "INTENT"
+                  ]
+                },
+                "origin": "intent"
+              }
+            ]
+          }
+        ],
+        "impacts": [],
+        "preserve": [
+          "원래 구조를 변경하지 않음"
+        ],
+        "unknowns": [
+          "실제 Joplin 변경 영향 분석이 아닌 배치 검토 자료"
+        ]
+      },
+      "selected": [
+        "preview"
+      ],
+      "createdAt": "2026-10-26T13:31:02.246Z"
+    },
+    "by": {
+      "kind": "example"
+    },
+    "snapshots": [],
+    "labels": {},
+    "origins": {},
+    "observations": [],
+    "attached": {}
+  }
+}

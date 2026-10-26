@@ -1,0 +1,126 @@
+{
+  "format": "agentflow.change-plan-file.1",
+  "note": "변경안 파일입니다. 프로젝트 백업이 아니며 프로젝트 기록은 들어 있지 않습니다.",
+  "project": {
+    "id": "P_visual58_oss-node-red",
+    "name": "Node-RED 이벤트·네트워크·데이터 처리"
+  },
+  "exportedAt": "2026-10-26T13:25:25.114Z",
+  "bundle": {
+    "draft": "MQTT에서는 TLS 설정을 반드시 고르게 바꾸고 싶어. HTTP 요청과 WebSocket의 TLS 선택 방식은 그대로 유지해줘.",
+    "extra": [],
+    "plan": {
+      "version": "change-plan.1",
+      "id": "CP_8982db00-4c4a-4c15-b4e7-f58d60ef2fbf",
+      "projectId": "P_visual58_oss-node-red",
+      "revision": 1,
+      "basis": "Node-RED 고정 소스 선택 발췌 · UI 검토 합성 요구",
+      "intent": "MQTT에서는 TLS 설정을 반드시 고르게 바꾸고 싶어. HTTP 요청과 WebSocket의 TLS 선택 방식은 그대로 유지해줘.",
+      "evidence": [
+        {
+          "id": "INTENT",
+          "kind": "user",
+          "title": "표현 검토용 합성 변경 요구",
+          "text": "MQTT에서는 TLS 설정을 반드시 고르게 바꾸고 싶어. HTTP 요청과 WebSocket의 TLS 선택 방식은 그대로 유지해줘.",
+          "basis": "실제 사용자 개발요구가 아닌 UI59 검토용 합성 요구"
+        },
+        {
+          "id": "SOURCE",
+          "kind": "code",
+          "title": "고정 소스에서 추출한 기존 관계",
+          "text": "[[\"runtime\",\"registry\",\"needs\",\"runtime package.json의 dependencies에 @node-red/registry가 명시돼 있다.\"],[\"runtime\",\"util\",\"needs\",\"runtime package.json의 dependencies에 @node-red/util이 명시돼 있다.\"],[\"node-red\",\"runtime\",\"needs\",\"node-red package.json의 dependencies에 @node-red/runtime이 명시돼 있다.\"],[\"node-red\",\"nodes\",\"needs\",\"node-red package.json의 dependencies에 @node-red/nodes이 명시돼 있다.\"],[\"node-red\",\"util\",\"needs\",\"node-red package.json의 dependencies에 @node-red/util이 명시돼 있다.\"],[\"10-mqtt\",\"05-tls\",\"related\",\"MQTT의 TLS 구성 노드를 선택했을 때 조회하여 TLS options를 추가한다. 선택적 구성 관계이며 필수 실행 의존성을 뜻하지 않는다.\"],[\"21-httprequest\",\"05-tls\",\"related\",\"HTTP request가 구성된 TLS 노드를 조회하고, 존재할 때 HTTPS options를 추가한다. 선택적 구성 관계이며 필수 실행 의존성을 뜻하지 않는다.\"],[\"22-websocket\",\"05-tls\",\"related\",\"WebSocket client의 TLS 노드가 있을 때 options를 추가한다. 선택적 구성 관계이며 필수 실행 의존성을 뜻하지 않는다.\"]]",
+          "basis": "https://github.com/node-red/node-red/commit/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f · 원본 전체 코드가 아닌 출처 대조를 거친 선택 관계 발췌"
+        }
+      ],
+      "analysis": {
+        "summary": "제공된 자료에는 MQTT·HTTP 요청·WebSocket이 모두 05-tls 구성 노드를 선택적으로 조회하는 관계가 발췌되어 있어, MQTT의 TLS 구성에 기존 05-tls 재사용을 검토할 수 있다. 다만 MQTT에서 TLS 선택을 어떻게 필수로 강제할지는 자료에 없어, 그 방식과 기존 노드 처리에 대한 검토가 필요하다.",
+        "items": [
+          {
+            "id": "mqtt_tls_required",
+            "title": "MQTT TLS 설정 선택을 필수로 요구",
+            "description": "MQTT 노드에서 TLS 구성을 선택하지 않으면 진행할 수 없도록 요구하고, TLS 구성은 기존 05-tls 노드 연결 방식을 재사용한다. HTTP 요청과 WebSocket의 선택적 TLS 관계는 건드리지 않는다.",
+            "partIds": [
+              "A_oss-node-red_10-mqtt"
+            ],
+            "refs": [
+              "INTENT",
+              "SOURCE"
+            ],
+            "dependsOn": [],
+            "presentation": [
+              {
+                "partId": "A_oss-node-red_10-mqtt",
+                "current": {
+                  "text": "선택적 구성 관계이며 필수 실행 의존성을 뜻하지 않는다.",
+                  "source": "evidence",
+                  "refs": [
+                    "SOURCE"
+                  ]
+                },
+                "wanted": {
+                  "text": "MQTT에서는 TLS 설정을 반드시 선택하도록 요구한다.",
+                  "refs": [
+                    "INTENT"
+                  ]
+                },
+                "origin": "intent"
+              }
+            ]
+          }
+        ],
+        "impacts": [
+          {
+            "partId": "A_oss-node-red_05-tls",
+            "reason": "MQTT가 재사용할 TLS 구성 노드이므로, 필수화가 이 노드의 공유 방식이나 다른 프로토콜 사용을 막지 않는지 함께 살펴볼 필요가 있다.",
+            "refs": [
+              "SOURCE"
+            ]
+          },
+          {
+            "partId": "A_oss-node-red_21-httprequest",
+            "reason": "HTTP 요청의 TLS 노드 조회는 선택적 관계로 발췌되어 있어, MQTT 필수화가 이 선택성을 바꾸지 않는지 확인할 대상이다.",
+            "refs": [
+              "SOURCE"
+            ]
+          },
+          {
+            "partId": "A_oss-node-red_22-websocket",
+            "reason": "WebSocket 클라이언트의 TLS 노드 추가도 선택적 관계로 발췌되어 있어, MQTT 필수화와 분리해 유지되는지 확인할 대상이다.",
+            "refs": [
+              "SOURCE"
+            ]
+          }
+        ],
+        "preserve": [
+          "HTTP 요청에서 TLS 구성 노드를 선택하는 기존 방식을 그대로 유지한다.",
+          "WebSocket에서 TLS 노드를 선택하는 기존 방식을 그대로 유지한다.",
+          "TLS 구성 자체는 기존 05-tls 노드와의 연결 방식을 재사용한다."
+        ],
+        "unknowns": [
+          "MQTT에서 TLS 선택을 UI 입력 단계, 설정 검증, 실행 시점 중 어디에서 필수로 강제할지는 제공된 자료로 확인되지 않는다.",
+          "TLS 설정이 없는 기존 MQTT 노드를 어떻게 처리할지는 제시되지 않았다.",
+          "05-tls 노드 자체의 수정 필요 여부는 제공된 발췌만으로 확인되지 않는다.",
+          "필수화 이후의 동작을 검증한 검사 결과는 제공된 자료에 없다."
+        ]
+      },
+      "selected": [
+        "mqtt_tls_required"
+      ],
+      "createdAt": "2026-10-26T13:25:25.112Z"
+    },
+    "by": {
+      "kind": "ai",
+      "model": "deepseek-flash",
+      "at": "2026-10-26T13:25:25.114Z",
+      "records": {
+        "total": 2,
+        "sent": 2
+      }
+    },
+    "snapshots": [],
+    "labels": {},
+    "origins": {},
+    "observations": [],
+    "attached": {}
+  }
+}
