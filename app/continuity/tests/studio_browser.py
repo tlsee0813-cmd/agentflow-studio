@@ -394,6 +394,7 @@ def workspace_flow(browser, base, cases):
     expect(page.locator(".callout .co-row.want p")).to_have_text("성공 유지·실패 모음")
     expect(page.locator(".callout .co-row.now")).to_have_count(0)
     expect(page.locator(".callout .co-role")).to_contain_text("변환 형식과 저장한 산출물을 다룬다.")
+    expect(page.locator(".callout .co-gap")).to_have_text("현재와 비교할 내용은 아직 정리되지 않았어요.")
     page.locator(".ps-target").nth(1).click()
     expect(page.locator(".ps-target").nth(1)).to_have_attribute("aria-selected", "true")
     expect(page.locator(".callout .co-head strong")).to_have_text(target_names[1])
@@ -455,6 +456,7 @@ def workspace_flow(browser, base, cases):
     expect(page.locator("#lens .cmp-fallback .cmp-name")).to_have_text(target_names[0])
     expect(page.locator("#lens .cmp-want")).to_have_count(0)
     expect(page.locator("#lens .cmp-fallback")).to_contain_text("이 부분의 역할")
+    expect(page.locator("#lens .cmp-fallback .cmp-gap")).to_have_text("현재와 비교할 내용은 아직 정리되지 않았어요.")
     expect(page.locator("#world .plan-reading")).to_be_in_viewport()
     page.wait_for_timeout(400)  # compare stable rectangles after the minimum-pan animation
     clear_of(page, "#world .plan-reading", "#lens")

@@ -282,7 +282,7 @@ export function createPlanView(host: PlanHost) {
         h('div', { class: 'co-fallback' },
           h('div', { class: 'co-row want' }, h('span', { class: 'co-label' }, '바꿀 내용'), h('p', {}, item.title)),
           role ? h('div', { class: 'co-role' }, h('span', { class: 'co-label' }, role.label), h('p', {}, role.text, h('small', {}, role.from))) : null,
-          h('p', { class: 'co-gap' }, '이 부분의 현재 동작과 견줄 자료는 없어요.')));
+          h('p', { class: 'co-gap' }, '현재와 비교할 내용은 아직 정리되지 않았어요.')));
     }
     let from: Node | string = '지도 설명';
     if (pres.current.source === 'evidence') {
@@ -587,7 +587,7 @@ export function createPlanView(host: PlanHost) {
     // Without same-side data for this target: what the change wants, then the part's role apart from it; no before/after.
     const fallback = () => h('div', { class: 'cmp-only cmp-fallback' },
       ...[...at].map(nameLine), h('h3', { class: 'cmp-label' }, '바꿀 내용 ', h('small', {}, '변경 전체의 설명 · 적용 안 됨')), h('p', { class: 'cmp-text' }, item.description),
-      ...(active ? roleBlock(o, active) : []), h('p', { class: 'cmp-gap' }, '이 부분의 현재 동작과 견줄 자료는 없어요.'));
+      ...(active ? roleBlock(o, active) : []), h('p', { class: 'cmp-gap' }, '현재와 비교할 내용은 아직 정리되지 않았어요.'));
     const own = p.analysis.impacts.filter(x => at.has(x.partId)), near = nearImpacts(item);
     const box = h('input', { type: 'checkbox', id: `cmp-hand-${item.id}` }) as HTMLInputElement;
     box.checked = p.selected.includes(item.id); box.addEventListener('change', () => toggleItem(item.id, box.checked));

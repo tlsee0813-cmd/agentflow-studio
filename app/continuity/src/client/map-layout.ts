@@ -169,6 +169,9 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
   const lines = (text: string, kind: Parameters<TextMeasure>[1], room: number, max = 2) => (!text ? 0 : Math.min(max, Math.ceil((measureText(text, kind) * 1.15 + 6) / Math.max(40, room))));
   // Planned lines are short phrases measured in their own font: a smaller share is left for word ends than for notes.
   const plannedLines = (id: string, room: number) => Math.max(0, ...(planned?.get(id) ?? []).map(t => Math.min(2, Math.ceil((measureText(t, 'plan') * 1.06 + 4) / Math.max(40, room)))));
+  // A folded part standing for a planned part inside it reads one line naming that inner part.
+  const plannedInside = (id: string) => !!planned && [...planned.keys()].some(k => { for (let p = byId.get(k)?.parentId, g = 0; p && g < 64; p = byId.get(p)?.parentId, g++) if (p === id) return true; return false; });
+  const nodeLines = (id: string, room: number) => plannedLines(id, room) || (plannedInside(id) ? 1 : 0);
   /** Region head: the name (one or two lines; a longer name widens the region rather than being cut) and the first sentence of
    * the note under it. Head row: toggle 28, go-inside ~44, paddings ~12, and the latest-record time ~52 when there is one. */
   const regionHead = (id: string, w: number): { w: number; head: number } => {
@@ -204,18 +207,19 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
       const { w, head } = (depth === 0 ? regionHead : groupHead)(id, Math.max(maxX - minX + PAD * 2, FRAME_MIN_W));
       m = { ox: minX, oy: minY, w, h: maxY - minY + head + PAD, head };
     } else if (listOf(container)) {
-      const w = nodeWidth(p.name, kids, measureText), nl = lines(p.name, 'node', w - chrome), pl = plannedLines(id, w - chrome);
-      m = { w, h: Math.max(14 + (nl + extra) * 17, pl > 1 ? 12 + nl * 17 + 2 + pl * PLAN_LINE : 0), ox: 0, oy: 0, head: 0, face: 'item' };
+      // Planned lines keep the item's own padding (7 above and below), for one line as for two.
+      const w = nodeWidth(p.name, kids, measureText), nl = lines(p.name, 'node', w - chrome), pl = nodeLines(id, w - chrome);
+      m = { w, h: Math.max(14 + (nl + extra) * 17, pl ? 14 + nl * 17 + 2 + pl * PLAN_LINE : 0), ox: 0, oy: 0, head: 0, face: 'item' };
     } else if (depth === 0) {
       const note = mapLead(v, id), need = measureText(p.name, 'head') * 1.1 + 6;
       let w = note ? UNIT_W : NODE_W;
       if (need > (w - chrome) * 2) w = Math.min(NODE_MAX_W + 40, Math.ceil(need / 2) + chrome);
-      const nl = need > w - chrome ? 2 : 1, ll = lines(note, 'note', w - chrome), pl = plannedLines(id, w - chrome);
+      const nl = need > w - chrome ? 2 : 1, ll = lines(note, 'note', w - chrome), pl = nodeLines(id, w - chrome);
       m = { w, h: Math.max(NODE_H, 24 + nl * 20 + (ll ? 2 + ll * 17 : 0) + extra * 19, pl ? 24 + nl * 20 + 3 + pl * PLAN_LINE : 0), ox: 0, oy: 0, head: 0, face: 'unit' };
     } else {
-      // One planned line takes the place of the state line (or the row's own margin); a second one adds a line to this row only.
-      const w = nodeWidth(p.name, kids, measureText), nl = lines(p.name, 'node', w - chrome), pl = plannedLines(id, w - chrome);
-      m = { w, h: Math.max(20 + (nl + extra) * 18, pl > 1 ? 16 + nl * 18 + 2 + pl * PLAN_LINE : 0), ox: 0, oy: 0, head: 0, face: 'row' };
+      // Planned lines keep the row's own padding (10 above and below): this row only, for one line as for two.
+      const w = nodeWidth(p.name, kids, measureText), nl = lines(p.name, 'node', w - chrome), pl = nodeLines(id, w - chrome);
+      m = { w, h: Math.max(20 + (nl + extra) * 18, pl ? 20 + nl * 18 + 2 + pl * PLAN_LINE : 0), ox: 0, oy: 0, head: 0, face: 'row' };
     }
     memo.set(id, m); return m;
   }

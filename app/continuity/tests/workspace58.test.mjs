@@ -166,3 +166,17 @@ test('UI61 a planned change line takes room only on its own part and never narro
     assert.deepEqual([planned.boxes.get(id).w, planned.boxes.get(id).h], [b.w, b.h], `${id} keeps its size`);
   }
 });
+
+test('UI61 one short planned line keeps the own padding of a list item or row; a folded part keeps room for its inner line', () => {
+  const v = viewOf('oss-restic'), open = (_id, depth) => depth === 0, A = k => v.parts.find(p => p.name === `restic ${k.replace('-', ' ')}`).id;
+  const base = layoutScope(v, null, open, {}), planned = layoutScope(v, null, open, {}, undefined, new Map([[A('backup'), ['백업 대상 먼저 보기']], [A('key-add'), ['추가할 키의 용도 먼저 적기']]]));
+  const item = planned.boxes.get(A('backup')), folded = planned.boxes.get(A('key'));
+  assert.equal(item.face, 'item'); assert.equal(base.boxes.get(A('backup')).h, 31, 'a plan-status item without a state line is 31 tall');
+  assert.equal(item.h, 14 + 17 + 2 + 15, 'name 17 + gap 2 + one planned line 15, with the 7px padding above and below');
+  assert.equal(folded.h, 14 + 17 + 2 + 15, 'the folded parent of a planned part reserves its one inner line');
+  for (const [id, b] of base.boxes) if (![A('backup'), A('key')].includes(id) && planned.boxes.get(id).face === 'item') assert.equal(planned.boxes.get(id).h, b.h, `${id} keeps its height`);
+  const c = studioView(buildExample(data.cases.find(x => x.spec.id === 'oss-node-red').spec)), mqtt = c.parts.find(p => p.name === '10-mqtt.js');
+  const expand = id => { const out = new Set(); for (let p = c.parts.find(x => x.id === id)?.parentId; p; p = c.parts.find(x => x.id === p)?.parentId) out.add(p); return out; };
+  const path = expand(mqtt.id), rows = layoutScope(c, null, x => path.has(x), {}, undefined, new Map([[mqtt.id, ['TLS 필수']]]));
+  assert.equal(rows.boxes.get(mqtt.id).face, 'row'); assert.equal(rows.boxes.get(mqtt.id).h, 20 + 18 + 2 + 15, 'a row keeps its 10px padding for one line');
+});
