@@ -21,7 +21,8 @@ export interface PlanBundle {
   /** Item titles as they were when each snapshot was made (snapshot id → item id → title). */
   labels: Record<string, Record<string, string>>;
   /** Which analysis each snapshot was made from. Authored example results match only snapshots of the authored analysis. */
-  origins: Record<string, 'example' | 'ai'>;
+  /** 'reviewed': made from an AI analysis after one review of the chosen scope; 'ai': an earlier AI request without it. */
+  origins: Record<string, 'example' | 'ai' | 'reviewed'>;
   observations: ResultObservation[];
   /** observation id → the snapshot it was read against */
   attached: Record<string, string>;
@@ -60,7 +61,7 @@ export function parseBundle(v: unknown, projectId: string): PlanBundle {
   if (new Set(snapshots.map(s => s.id)).size !== snapshots.length) fail();
   if (!isObj(v.labels)) fail();
   for (const [sid, m] of Object.entries(v.labels)) { if (!snapshots.some(s => s.id === sid) || !isObj(m) || !Object.values(m).every(t => typeof t === 'string' && t.length <= 200)) fail(); }
-  if (!isObj(v.origins) || Object.keys(v.origins).length !== snapshots.length || !snapshots.every(s => ['example', 'ai'].includes((v.origins as Record<string, unknown>)[s.id] as string))) fail();
+  if (!isObj(v.origins) || Object.keys(v.origins).length !== snapshots.length || !snapshots.every(s => ['example', 'ai', 'reviewed'].includes((v.origins as Record<string, unknown>)[s.id] as string))) fail();
   if (!Array.isArray(v.observations) || v.observations.length > 256 || !isObj(v.attached)) fail();
   const observations = v.observations as ResultObservation[], attached = v.attached as Record<string, string>;
   if (Object.keys(attached).length !== observations.length) fail();

@@ -5,13 +5,13 @@
 import type { Project } from '../shared/types.js';
 import type { StorageLike } from '../shared/storage.js';
 import type { StudioView } from '../shared/studio.js';
-import { createPlan, selectItems, requestSnapshot, compareResults, type ChangePlan, type Evidence, type PlanItem, type ResultObservation, type RequestSnapshot } from '../shared/change-plan.js';
+import { createPlan, selectItems, requestSnapshot, compareResults, parseScopeReview, type ChangePlan, type Evidence, type PlanItem, type ResultObservation, type RequestSnapshot } from '../shared/change-plan.js';
 import { CONVERTER_INTENT, converterEvidence, converterExampleAnalysis, converterObservations } from '../shared/change-plan-example.js';
 import type { Box } from './map-layout.js';
 import { AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
 import { h, put, $, ago, fullTime } from './plan-dom.js';
-import { CONVERTER_KEY, CONDITION_LABEL, EVIDENCE_LABEL, exampleInput, projectInput, mapReply, secretLike, type Condition, type PlanInput } from './plan-source.js';
-import { requestPlan } from './plan-request.js';
+import { CONVERTER_KEY, CONDITION_LABEL, EVIDENCE_LABEL, exampleInput, projectInput, mapReply, secretLike, scopeInput, type Condition, type PlanInput } from './plan-source.js';
+import { requestPlan, requestScope } from './plan-request.js';
 import { emptyBundle, loadBundle, saveBundle, setAside, planFile, readPlanFile, type PlanBundle } from './plan-store.js';
 
 export interface PlanOpened { key: string; kind: 'example' | 'saved' | 'legacy'; project: Project; view: StudioView; alias: { toId: Map<string, string> } | null }
@@ -42,6 +42,8 @@ interface Session {
   bundle: PlanBundle; unreadable: boolean; storeMsg: string | null;
   focus: Focus; mode: 'current' | 'preview'; editing: boolean;
   pending: { controller: AbortController; input: PlanInput } | null; error: string | null;
+  /** The one scope review of a request being made from an AI analysis, and why the last one did not produce a document. */
+  scoping: { controller: AbortController; count: number } | null; scopeError: string | null;
   sheet: string | null; sources: boolean; adding: boolean; resultFor: string | null; addForm: boolean; copyMsg: string | null; fileMsg: string | null;
   ret: PlanReturn;
 }
@@ -84,7 +86,7 @@ export function createPlanView(host: PlanHost) {
     if (s && s.key === o.key) return;
     const condition: Condition = 'A', { bundle, unreadable } = bundleFor(o, condition);
     s = { key: o.key, projectId: o.project.id, example: o.kind === 'example', condition, bundle, unreadable, storeMsg: null,
-      focus: null, mode: bundle.plan ? 'preview' : 'current', editing: !bundle.plan, pending: null, error: null,
+      focus: null, mode: bundle.plan ? 'preview' : 'current', editing: !bundle.plan, pending: null, error: null, scoping: null, scopeError: null,
       sheet: null, sources: false, adding: false, resultFor: bundle.snapshots.at(-1)?.id ?? null, addForm: false, copyMsg: null, fileMsg: null, ret: host.capture() };
     if (unreadable) s.storeMsg = null;
     host.chrome(); render(); host.frame();
@@ -93,7 +95,7 @@ export function createPlanView(host: PlanHost) {
   /** Closing keeps the draft and the plan; the map goes back to the latest current view with the earlier selection and camera. */
   function close(restore = true) {
     if (!s) return;
-    s.pending?.controller.abort();
+    s.pending?.controller.abort(); s.scoping?.controller.abort();
     const ret = s.ret; s = null;
     $('plan-panel').hidden = true; $('plan-panel').replaceChildren(); $('plan-mode').hidden = true; $('plan-sheet').hidden = true;
     $('space').style.setProperty('--plan-w', '0px');
@@ -211,14 +213,48 @@ export function createPlanView(host: PlanHost) {
   function toggleItem(id: string, on: boolean) {
     const p = plan(); if (!s || !p) return;
     const next = on ? [...p.selected, id] : p.selected.filter(x => x !== id);
-    s.bundle = { ...s.bundle, plan: selectItems(p, next) }; persist(); render();
+    s.bundle = { ...s.bundle, plan: selectItems(p, next) }; s.scopeError = null; persist(); render();
   }
+  /** Authored example: its fixed, checked dependencies and the static document. AI analysis: the chosen scope is reviewed
+   * once, here and only here; its global dependsOn is not treated as settled. */
   function makeRequest() {
-    const p = plan(); if (!s || !p || !p.selected.length) return;
-    const snap = requestSnapshot(p);
+    const p = plan(); if (!s || !p || !p.selected.length || s.scoping) return;
+    s.scopeError = null;
+    if (s.bundle.by?.kind === 'example') { keepSnapshot(p, requestSnapshot(p)); return; }
+    void reviewScope(p);
+  }
+  async function reviewScope(p: ChangePlan) {
+    const st = s!, o = host.current()!, notMade = '전제 검토를 마치지 못해 새 요청문은 만들지 않았어요. 초안과 이전 요청문은 그대로예요.';
+    const say = (text: string) => { st.scopeError = text; render(); };
+    if (host.status().ai !== 'deepseek') return say(`${host.status().ai === 'off' ? ERROR_TEXT.AI_NOT_CONFIGURED : ERROR_TEXT.NO_SERVER} ${notMade}`);
+    if (needsCode()) { st.editing = false; say(`접속 코드를 입력한 뒤 다시 만들어 주세요. ${notMade}`); document.getElementById('plan-access')?.focus(); return; }
+    const inp = scopeInput(o, p);
+    if (inp.problem === 'TOO_LARGE') return say(`검토할 자료가 요청 한도보다 커요. ${notMade}`);
+    if (inp.problem) return say(`‘${inp.problem.secret}’에 키나 토큰처럼 보이는 문자열이 있어 보내지 않았어요. ${notMade}`);
+    const start = { key: st.key, projectId: p.projectId, id: p.id, revision: p.revision, basis: p.basis };
+    const controller = new AbortController();
+    st.scoping = { controller, count: p.selected.length }; render();
+    try {
+      const res = await requestScope(inp.ask, controller.signal, host.accessCode());
+      let review;
+      try { review = parseScopeReview(res.reply, p.evidence.map(e => e.id)); } catch { throw new AskError('INVALID_RESPONSE'); }
+      // Apply only to the plan and view it was asked for: same open plan, same project, plan id, revision and basis.
+      const now = s === st ? plan() : null;
+      if (!now || host.current()?.key !== start.key || now.projectId !== start.projectId || now.id !== start.id || now.revision !== start.revision || now.basis !== start.basis || stale()) {
+        st.scopeError = '검토하는 동안 변경안이나 고른 항목이 바뀌어 이 검토는 쓰지 않았어요. 요청문을 다시 만들어 주세요.';
+      } else { st.scoping = null; keepSnapshot(now, requestSnapshot(now, review), 'reviewed'); return; }
+    } catch (e) {
+      const code = e instanceof AskError ? e.code : 'REQUEST_FAILED';
+      st.scopeError = code === 'CANCELLED' ? `취소했어요. ${notMade}` : `${ERROR_TEXT[code] ?? `검토 응답을 받지 못했어요 (${code}).`} ${notMade}`;
+    }
+    st.scoping = null;
+    if (s === st) render();
+  }
+  function keepSnapshot(p: ChangePlan, snap: RequestSnapshot, origin: 'example' | 'reviewed' = 'example') {
+    if (!s) return;
     s.bundle = { ...s.bundle, snapshots: [...s.bundle.snapshots, snap].slice(-60),
       labels: { ...s.bundle.labels, [snap.id]: Object.fromEntries(p.analysis.items.map(i => [i.id, i.title])) },
-      origins: { ...s.bundle.origins, [snap.id]: s.bundle.by?.kind === 'example' ? 'example' : 'ai' } };
+      origins: { ...s.bundle.origins, [snap.id]: origin } };
     // Keep the bundle within its limit: an observation goes with the snapshot it was read against.
     const kept = new Set(s.bundle.snapshots.map(x => x.id));
     for (const k of Object.keys(s.bundle.labels)) if (!kept.has(k)) delete s.bundle.labels[k];
@@ -444,7 +480,8 @@ export function createPlanView(host: PlanHost) {
       h('p', { class: 'pp-summary' }, p.analysis.summary));
     const list = h('ul', { class: 'pp-items' });
     for (const item of p.analysis.items) {
-      const on = p.selected.includes(item.id), focused = st.focus?.kind === 'item' && st.focus.id === item.id, missing = on ? missingDeps(item) : [];
+      const authored = st.bundle.by?.kind === 'example';
+      const on = p.selected.includes(item.id), focused = st.focus?.kind === 'item' && st.focus.id === item.id, missing = on && authored ? missingDeps(item) : [];
       const parts = item.partIds.map(partName).filter(Boolean) as string[];
       const box = h('input', { type: 'checkbox', id: `pi-${item.id}`, 'aria-label': `‘${item.title}’ 이번에 맡기기` }) as HTMLInputElement;
       box.checked = on; box.addEventListener('change', () => toggleItem(item.id, box.checked));
@@ -476,7 +513,9 @@ export function createPlanView(host: PlanHost) {
       h('p', {}, item.description),
       item.partIds.length ? h('p', { class: 'pp-line' }, h('span', {}, '바꿀 곳'), h('span', {}, ...item.partIds.flatMap((id, n) => [n ? ', ' : '', h('button', { type: 'button', class: 'link-button', onclick: () => locate(id) }, partName(id) ?? '지금 지도에 없는 부분')]))) : h('p', { class: 'pp-line' }, h('span', {}, '바꿀 곳'), '지금 지도에 없는 새 부분'),
       impacts.length ? h('div', { class: 'pp-line' }, h('span', {}, '함께 볼 곳'), h('ul', {}, ...impacts.map(x => h('li', {}, h('button', { type: 'button', class: 'link-button', onclick: () => locate(x.partId) }, partName(x.partId) ?? '부분'), ` — ${x.reason}`)))) : null,
-      item.dependsOn.length ? h('p', { class: 'pp-line' }, h('span', {}, '전제'), item.dependsOn.map(d => itemOf(d)?.title ?? d).join(', ')) : null,
+      item.dependsOn.length ? (s!.bundle.by?.kind === 'example'
+        ? h('p', { class: 'pp-line' }, h('span', {}, '전제'), item.dependsOn.map(d => itemOf(d)?.title ?? d).join(', '))
+        : h('p', { class: 'pp-line' }, h('span', {}, '전제'), '요청문을 만들 때 고른 범위로 살펴봐요.')) : null,
       refs.length ? h('details', { class: 'pp-why' }, h('summary', {}, `근거 ${refs.length}개`), sourceList(refs)) : null
     );
   }
@@ -487,9 +526,14 @@ export function createPlanView(host: PlanHost) {
     const names = p.analysis.items.filter(i => p.selected.includes(i.id)).map(i => i.title);
     const sec = h('section', { class: 'pp-request', 'aria-label': '이번에 맡길 것' },
       h('p', { class: 'pp-chosen' }, h('strong', {}, `맡길 항목 ${n}/${p.analysis.items.length}`), h('span', { title: names.join('\n') }, names.length ? names.join(' · ') : '목록에서 이번에 맡길 항목에 체크하세요')),
-      h('div', { class: 'pp-row' }, h('button', { type: 'button', class: 'primary small', disabled: !n || stale(), onclick: makeRequest, title: stale() ? '고친 문장을 먼저 살펴본 뒤 만들 수 있어요' : '만들고 복사해도 보내거나 실행하지 않아요' }, '요청문 만들기'),
-        last ? h('button', { type: 'button', class: 'link-button', onclick: () => { st.sheet = last.id; st.copyMsg = null; render(); } }, `마지막 요청문 · ${ago(last.createdAt)}`) : null),
-      changed ? h('p', { class: 'fine' }, '마지막 요청문 뒤로 변경안이 바뀌었어요. 새로 만들어도 이전 것은 남아요.') : null);
+      st.scoping
+        ? h('div', { class: 'pending', role: 'status' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), h('span', {}, `고른 항목 ${st.scoping.count}개의 전제를 살펴보는 중…`),
+            h('button', { type: 'button', class: 'link-button', onclick: () => st.scoping?.controller.abort() }, '취소'))
+        : h('div', { class: 'pp-row' }, h('button', { type: 'button', class: 'primary small', disabled: !n || stale(), onclick: makeRequest, title: stale() ? '고친 문장을 먼저 살펴본 뒤 만들 수 있어요' : '만들고 복사해도 보내거나 실행하지 않아요' }, '요청문 만들기'),
+          last ? h('button', { type: 'button', class: 'link-button', onclick: () => { st.sheet = last.id; st.copyMsg = null; render(); } }, `마지막 요청문 · ${ago(last.createdAt)}`) : null),
+      st.scopeError ? h('p', { class: 'pp-error', role: 'alert' }, st.scopeError) : null,
+      !st.scoping && !st.scopeError && st.bundle.by?.kind === 'ai' ? h('p', { class: 'fine' }, '만들 때 고른 항목의 전제를 AI가 한 번 살펴봐요.') : null,
+      changed && !st.scoping ? h('p', { class: 'fine' }, '마지막 요청문 뒤로 변경안이 바뀌었어요. 새로 만들어도 이전 것은 남아요.') : null);
     return sec;
   }
 
@@ -521,9 +565,9 @@ export function createPlanView(host: PlanHost) {
     const loaded = mine.some(x => /^(R07|P02|R08)-/.test(x.id));
     const actions = h('div', { class: 'pp-row' });
     if (st.example && origin === 'example' && !loaded) actions.append(h('button', { type: 'button', class: 'secondary small', onclick: () => loadExampleResults(snap) }, '돌아온 기록 살펴보기'));
-    if (!st.example || origin === 'ai') actions.append(h('button', { type: 'button', class: 'link-button', 'aria-expanded': String(st.addForm), onclick: () => { st.addForm = !st.addForm; render(); } }, st.addForm ? '붙이기 닫기' : '돌아온 기록 붙이기'));
+    if (!st.example || origin !== 'example') actions.append(h('button', { type: 'button', class: 'link-button', 'aria-expanded': String(st.addForm), onclick: () => { st.addForm = !st.addForm; render(); } }, st.addForm ? '붙이기 닫기' : '돌아온 기록 붙이기'));
     if (actions.childElementCount) sec.append(actions);
-    if (st.example && origin === 'ai') sec.append(h('p', { class: 'fine' }, '예제의 돌아온 기록은 작성된 예제 항목과만 대응해요. AI 분석 항목에는 받은 글을 직접 붙여 주세요.'));
+    if (st.example && origin !== 'example') sec.append(h('p', { class: 'fine' }, '예제의 돌아온 기록은 작성된 예제 항목과만 대응해요. AI 분석 항목에는 받은 글을 직접 붙여 주세요.'));
     if (st.addForm) sec.append(addForm(snap, labels));
     return sec;
   }
@@ -574,7 +618,7 @@ export function createPlanView(host: PlanHost) {
     const total = Object.keys(labels).length || snap.itemIds.length;
     sheet.replaceChildren(
       h('header', {}, h('div', {}, h('h2', { id: 'sheet-title' }, '요청문'), h('p', {}, `맡길 항목 ${snap.itemIds.length}/${total} · ${snap.itemIds.map(id => labels[id] ?? id).join(' · ')}`),
-        h('p', { class: 'fine' }, `${fullTime(snap.createdAt)}에 만듦${old ? ' · 지금 변경안과 다른 판' : ''}`)),
+        h('p', { class: 'fine' }, `${fullTime(snap.createdAt)}에 만듦 · ${{ example: '작성된 예제 분석의 고정 전제', reviewed: 'AI가 고른 범위의 전제를 살펴봄', ai: '전제 검토 없이 만든 이전 요청문' }[s.bundle.origins[snap.id] ?? 'ai']}${old ? ' · 지금 변경안과 다른 판' : ''}`)),
         h('button', { type: 'button', class: 'close', 'aria-label': '요청문 닫기', title: '닫기 (Esc)', onclick: closeSheet }, '×')),
       h('pre', { tabindex: '0' }, snap.text),
       h('footer', {}, h('button', { type: 'button', id: 'plan-copy', class: 'primary small', onclick: () => void copy(snap.text) }, '복사'),
