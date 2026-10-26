@@ -15,14 +15,14 @@ test('source-bound presentation checks exact excerpts and intent attribution aga
   const invalid = [
     r => { r.items[0].presentation[0].current.text = '현재는 폴더를 받는다.'; },
     r => { r.items[0].presentation[0].current.text = '본문·표·문단 모양을 보존하며 변환한다.'; }, // another part's note
-    r => { r.items[2].presentation[1].current.text = '파일별 결과를 모두 보여 준다.'; },
-    r => { r.items[2].presentation[1].current.refs = ['T01']; }, // quote exists, but not in this cited source
-    r => { r.items[2].presentation[1].wanted.refs = ['P03']; }, // intent cannot cite only code
-    r => { r.items[2].presentation[1].wanted.refs = ['T01']; },
+    r => { r.items[2].presentation[0].current.text = '파일별 결과를 모두 보여 준다.'; },
+    r => { r.items[2].presentation[0].current.refs = ['T01']; }, // quote exists, but not in this cited source
+    r => { r.items[2].presentation[0].wanted.refs = ['P03']; }, // intent cannot cite only code
+    r => { r.items[2].presentation[0].wanted.refs = ['T01']; },
   ];
   for (const mutate of invalid) { const r = answer('A'); mutate(r); assert.throws(() => validatePlanReply(r, input)); }
-  const suggestion = answer('A'); suggestion.items[2].presentation[1].origin = 'suggestion'; suggestion.items[2].presentation[1].wanted.refs = ['P03'];
-  assert.equal(validatePlanReply(suggestion, input).items[2].presentation[1].origin, 'suggestion');
+  const suggestion = answer('A'); suggestion.items[2].presentation[0].origin = 'suggestion'; suggestion.items[2].presentation[0].wanted.refs = ['P03'];
+  assert.equal(validatePlanReply(suggestion, input).items[2].presentation[0].origin, 'suggestion');
   const punctuation = answer('A'); punctuation.items[0].presentation[0].current.text += '…';
   assert.throws(() => validatePlanReply(punctuation, input), 'only whitespace differences are allowed');
   const legacy = answer('A'); legacy.items.forEach(i => { delete i.presentation; });
@@ -49,10 +49,12 @@ test('authored A/B presentation keeps actual target identity, synthetic source s
         }
       }
     }
-    const continuation = reply.items.find(i => i.id === 'continue').presentation[0];
-    assert.deepEqual(continuation.current, { text: '입력 문서 하나', source: 'evidence', refs: ['P01'] });
-    assert.doesNotMatch(continuation.current.text, /본문|표|보존/); // Preserve content is not replaced by failure independence.
-    assert.match(continuation.wanted.text, /실패해도.*나머지 파일.*계속/);
+    // No same-side current text exists for failure continuation or for keeping outputs: those targets stay honest fallbacks
+    // (no pair of a single input or a part's role with the wanted behaviour). Reading and result pairs remain.
+    assert.ok(!Object.hasOwn(reply.items.find(i => i.id === 'continue'), 'presentation'));
+    const failures = reply.items.find(i => i.id === 'failures').presentation;
+    assert.deepEqual(failures.map(p => p.partId), ['results']);
+    assert.equal(reply.items.find(i => i.id === 'folder').presentation[0].partId, 'document');
     if (condition === 'B') assert.equal(reply.items.find(i => i.id === 'outcomes').presentation[0].origin, 'suggestion');
   }
 });
@@ -60,11 +62,12 @@ test('authored A/B presentation keeps actual target identity, synthetic source s
 test('mapping reply aliases maps presentation targets too, keeps source aliases and rejects wrong-item targets', () => {
   const reply = answer('A'), input = { parts: new Map(parts.map((p, i) => [p.id, `REAL_${i}`])), evidence: converterEvidence('A') };
   const mapped = mapReply(reply, input);
-  for (const [index, item] of reply.items.entries()) for (const [j, p] of item.presentation.entries()) {
+  for (const [index, item] of reply.items.entries()) for (const [j, p] of (item.presentation ?? []).entries()) {
     assert.equal(mapped.items[index].presentation[j].partId, input.parts.get(p.partId));
     assert.deepEqual(mapped.items[index].presentation[j].current.refs, p.current.refs);
     assert.deepEqual(mapped.items[index].presentation[j].wanted.refs, p.wanted.refs);
   }
+  assert.ok(!Object.hasOwn(mapped.items[1], 'presentation'), 'an item without presentation stays without it');
   const bad = answer('A'); bad.items[0].presentation[0].partId = 'results';
   assert.throws(() => mapReply(bad, input));
   const legacy = answer('A'); legacy.items.forEach(i => { delete i.presentation; });

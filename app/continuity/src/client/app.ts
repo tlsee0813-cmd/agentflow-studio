@@ -430,7 +430,7 @@ const measureName: TextMeasure = (() => {
     const key = `${kind}|${text}`, hit = cache.get(key); if (hit !== undefined) return hit;
     if (!ctx) { ctx = document.createElement('canvas').getContext('2d'); family = getComputedStyle(document.body).fontFamily; }
     if (!ctx) return text.length * 9;
-    ctx.font = kind === 'node' ? `600 13.5px ${family}` : kind === 'head' ? `650 15px ${family}` : kind === 'sub' ? `650 13px ${family}` : `400 12.5px ${family}`;
+    ctx.font = kind === 'node' ? `600 13.5px ${family}` : kind === 'head' ? `650 15px ${family}` : kind === 'sub' ? `650 13px ${family}` : kind === 'plan' ? `600 12px ${family}` : `400 12.5px ${family}`;
     const w = ctx.measureText(text).width; cache.set(key, w); return w;
   };
 })();
@@ -444,7 +444,10 @@ function withTitle() {
   const t = titleRect(), B = core, x = Math.min(B.x, t.x), y = Math.min(B.y, t.y);
   lay.bounds = { x, y, w: Math.max(B.x + B.w, t.x + t.w) - x, h: Math.max(B.y + B.h, t.y + t.h) - y };
 }
-const relayout = (o: Opened) => { lay = layoutScope(o.view, scope, isExpanded(o), positionsOf(o), measureName); core = { ...lay.bounds }; withTitle(); };
+/** While a change preview reads on the map: the change lines each part's own row shows (plan-view decides; the layout only
+ * makes room for them on those parts). null in the current view, so the current map keeps its own sizes. */
+let planRows: Map<string, string[]> | null = null, planRowsKey = '';
+const relayout = (o: Opened) => { lay = layoutScope(o.view, scope, isExpanded(o), positionsOf(o), measureName, planRows ?? undefined); core = { ...lay.bounds }; withTitle(); };
 
 const REL_LABEL: Record<string, string> = { flow: '넘겨줌', needs: '필요로 함', shares: '함께 씀', related: '관련' };
 /** A part's line on the map: the state only when it says something. 'plan' (no request yet) stays quiet here; the inspector
@@ -501,8 +504,9 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
       world.append(h('div', { class: `frame ${region ? 'region' : 'group'} depth-${Math.min(b.depth, 2)}${b.depth % 2 ? ' tint' : ''}${b.list ? ' list' : ''}`, 'data-part': p.id, 'data-box': p.id },
         h('div', { class: `frame-head s-${p.status}${b.head > HEAD ? ' tall' : ''}`, style: `height:${b.head}px`, 'data-part': p.id, 'data-drag': p.id, role: 'button', tabindex: '0', title: of ? `${of} › ${p.name}` : p.name, onkeydown: keySelect(p.id) },
           toggleButton(p, true),
-          h('span', { class: 'frame-title' }, h('span', { class: 'frame-name' }, p.name)),
-          h('span', { class: 'plan-note' }), h('span', { class: 'frame-meta' }, latest ? h('span', { class: recentAt(latest) ? 'fresh' : '' }, ago(latest)) : null),
+          // A change line reads under the name (in the preview only), never beside it: the name keeps the whole head width.
+          h('span', { class: 'frame-title' }, h('span', { class: 'frame-name' }, p.name), h('span', { class: 'plan-note' })),
+          h('span', { class: 'frame-meta' }, latest ? h('span', { class: recentAt(latest) ? 'fresh' : '' }, ago(latest)) : null),
           enterButton(p), note ? h('span', { class: 'frame-note' }, note) : null)));
     } else {
       // A folded part reads its inside: latest record anywhere under it.
@@ -757,6 +761,9 @@ function placeLensOnce(dock = false, pan = true) {
       const keepH = g.keep.h * camera.k, room = Math.floor(area.h - keepH - 24);
       if (room < h && room >= Math.min(natural, 160)) h = room;
     }
+    // The camera stays the person's (no pan): the surface gives up height (its body scrolls) rather than cover the part it
+    // reads, when that still leaves it a readable height.
+    if (g && !pan) { const free = Math.floor(bottom - (g.part.y + g.part.h) - 12); if (free >= 160 && free < h && g.part.y + g.part.h > bottom - h) h = free; }
     lensPlace = { side: 'dock', x: x ?? area.x, y: bottom - h, h, dy: 0, w: ww };
     if (g && pan && !clearAt(lensPlace.x, h, ww)) {
       const fits = g.keep.h * camera.k <= area.h - h - 12 && g.keep.w * camera.k <= area.w - 24;
@@ -830,9 +837,27 @@ function positionCalloutLeader(note: HTMLElement | null) {
     z = { x: right ? card.x : card.x + card.w, y: clamp(a.y, card.y + 10, card.y + card.h - 10) };
   }
   if (a.x < vp.left - sp.left || a.x > vp.right - sp.left || a.y < vp.top - sp.top || a.y > vp.bottom - sp.top) { line?.remove(); return; }
+  // The leader never runs through another part's name or row (nor a group's heading): straight when that is clear, else one
+  // bend through the gap beside the target (a group's padding or the space between columns); with no clear way, no leader.
+  const blocks = [...lay.boxes.values()].filter(q => q.id !== b.id && (q.kind !== 'frame' || q.head)).map(q => toScreen(q.kind === 'frame' ? { ...q, h: q.head } : q));
+  const clear = (pts: Point[]) => pts.every((p, i) => {
+    if (!i) return true;
+    const q = pts[i - 1]!, n = Math.max(1, Math.ceil(Math.hypot(p.x - q.x, p.y - q.y) / 3));
+    for (let k = 0; k <= n; k++) { const x = q.x + (p.x - q.x) * k / n, y = q.y + (p.y - q.y) * k / n; if (blocks.some(o => x > o.x - 2 && x < o.x + o.w + 2 && y > o.y - 2 && y < o.y + o.h + 2)) return false; }
+    return true;
+  });
+  const below = card.y >= target.y + target.h, above = target.y >= card.y + card.h, toLeft = card.x + card.w / 2 < target.x + target.w / 2;
+  const bends = (left: boolean): Point[] => {
+    const g = left ? target.x - 7 : target.x + target.w + 7, start = { x: left ? target.x : target.x + target.w, y: target.y + Math.min(target.h / 2, 14) };
+    if ((below || above) && g > card.x + 10 && g < card.x + card.w - 10) return [start, { x: g, y: start.y }, { x: g, y: below ? card.y : card.y + card.h }];
+    const y = clamp(start.y, card.y + 10, card.y + card.h - 10), side = card.x >= g ? card.x : card.x + card.w;
+    return [start, { x: g, y: start.y }, { x: g, y }, { x: side, y }];
+  };
+  const path = [[a, z], bends(toLeft), bends(!toLeft)].find(clear);
+  if (!path) { line?.remove(); return; }
   if (!line) { line = svg('svg', { class: 'callout-leader', 'aria-hidden': 'true' }) as SVGSVGElement; line.append(svg('path', {})); holder.prepend(line); }
   line.setAttribute('width', String(sp.width)); line.setAttribute('height', String(sp.height));
-  line.querySelector('path')!.setAttribute('d', `M${a.x},${a.y} L${z.x},${z.y}`);
+  line.querySelector('path')!.setAttribute('d', path.map((p, i) => `${i ? 'L' : 'M'}${p.x},${p.y}`).join(' '));
 }
 /** New target or explicit resize only. Prefer the target, its line ends and the title together when they fit; a large
  * frame still reveals its own heading and first rows instead of refusing to move because the whole group is too tall. */
@@ -948,7 +973,8 @@ function markSelection(partId: string | null) {
   const related = new Set<string>(), base = document.querySelector('#world .edges:not(.edges-top)'), top = document.querySelector('#world .edges-top');
   document.querySelectorAll<SVGGElement>('.edge').forEach(el => {
     const on = !!partId && (el.dataset.from === partId || el.dataset.to === partId);
-    const layer = on ? top : base; if (layer && el.parentNode !== layer) layer.append(el);
+    // A line the change plan reads as context of its change (.ctx) stays above the groups as well.
+    const layer = on || el.classList.contains('ctx') ? top : base; if (layer && el.parentNode !== layer) layer.append(el);
     el.classList.toggle('on', on);
     const line = el.querySelector('.edge-line')!; line.setAttribute('marker-end', on ? 'url(#arrow-on)' : 'url(#arrow)');
     line.setAttribute('marker-start', on ? 'url(#dot-on)' : 'url(#dot)');
@@ -1189,6 +1215,12 @@ const planView = createPlanView({
   selected: () => selected,
   boxes: () => lay.boxes,
   targetContext: previewContext,
+  rows: next => {
+    const key = next ? JSON.stringify([...next].sort(([a], [b]) => (a < b ? -1 : 1))) : '';
+    if (key === planRowsKey) return;
+    planRows = next; planRowsKey = key;
+    if (opened) { renderSpace('keep', false); markSelection(selected); }
+  },
   selectPart: id => { if (opened) go(opened.key, id); },
   showPart: id => { const o = opened; if (o) go(o.key, id, partOf(o, id)?.parentId ?? null); },
   reveal,

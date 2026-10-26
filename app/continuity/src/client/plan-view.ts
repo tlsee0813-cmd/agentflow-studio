@@ -26,6 +26,9 @@ export interface PlanHost {
   /** Temporarily expose only this target's ancestors in the current scope. Explicit focus may reopen its path; a normal
    * render keeps a manual fold. null releases the preview's layer without changing user folds or record peeks. */
   targetContext(id: string | null, explicit: boolean): void;
+  /** The change lines each actual part's own row may show in the preview (null: none). The map makes room for them on those
+   * parts only; nothing else changes size. */
+  rows(lines: Map<string, string[]> | null): void;
   /** Select a part of the current project (null clears), staying in the current scope. */
   selectPart(id: string | null): void;
   /** Open a part's scope when it is not visible here (keeps the plan open). */
@@ -115,7 +118,7 @@ export function createPlanView(host: PlanHost) {
   function close(restore = true) {
     if (!s) return;
     s.pending?.controller.abort(); s.scoping?.controller.abort();
-    const ret = s.ret; s = null; host.targetContext(null, false);
+    const ret = s.ret; s = null; host.rows(null); host.targetContext(null, false);
     $('plan-panel').hidden = true; $('plan-panel').replaceChildren(); $('plan-mode').hidden = true; $('plan-sheet').hidden = true;
     $('plan-strip').hidden = true; $('plan-strip').replaceChildren(); host.surface(null, [], false); lastFocusKey = '';
     $('space').style.setProperty('--plan-w', '0px');
@@ -138,8 +141,9 @@ export function createPlanView(host: PlanHost) {
   function itemTargets(item: PlanItem): string[] {
     const parts = host.current()?.view.parts ?? [], ids = new Set(item.partIds);
     for (const id of [...ids]) for (let p = parts.find(x => x.id === id)?.parentId, g = 0; p && g < 64; p = parts.find(x => x.id === p)?.parentId, g++) ids.delete(p);
-    // Presentation is optional per part: an excerpt enriches its target without dropping other explicit targets.
-    return [...new Set([...(item.presentation ?? []).map(x => x.partId), ...ids])];
+    // Presentation is optional per part: an excerpt enriches its target without dropping other explicit targets or
+    // reordering them (the change's own order, as on the map).
+    return [...new Set([...ids, ...(item.presentation ?? []).map(x => x.partId)])];
   }
   function activeTarget(item: PlanItem): string | null {
     const ids = itemTargets(item), previous = s!.targets[item.id];
@@ -176,84 +180,152 @@ export function createPlanView(host: PlanHost) {
   const snapshotOf = (id: string | null) => s?.bundle.snapshots.find(x => x.id === id) ?? null;
 
   /* ---------- map overlay: same boxes, one mark per part ----------
-   A part a change targets reads '구상' (with the change's name, or how many changes touch it); the parts of the change being
-   compared stand out. A part only named as an impact candidate reads '영향 후보' with a dashed outline. A part that is both is
-   marked once as a target; its candidate reason belongs to the comparison. A target folded inside a part marks that part with
-   the inner name: the inside is changed, not the whole parent. */
+   A part a change targets reads what is to change under its own name: the change's wanted text for exactly this part when the
+   plan has one (presentation), else the change's name ('변경'). Several changes on one part: the one being read with '외 n건',
+   otherwise their count and names; none is picked as the part's text. A part only named as an impact candidate reads '영향
+   후보' with a dashed outline. A target folded inside a part marks that part with the inner name only: the inside changes,
+   and its wanted text is not the parent's. */
+  interface RowChange { item: PlanItem; text: string; pres: PlanPresentation | null }
+  /** Per actual target part, every change that names it, with its own text: from the plan alone, independent of the layout. */
+  function rowChanges(p: ChangePlan): Map<string, RowChange[]> {
+    const out = new Map<string, RowChange[]>();
+    for (const item of p.analysis.items) for (const id of itemTargets(item)) {
+      const pres = item.presentation?.find(x => x.partId === id) ?? null;
+      out.set(id, [...(out.get(id) ?? []), { item, text: pres ? pres.wanted.text : item.title, pres }]);
+    }
+    return out;
+  }
+  const kindWord = (c: RowChange) => (!c.pres ? '변경' : c.pres.origin === 'suggestion' ? '제안' : '');
+  const manyLine = (list: RowChange[]) => list.map(c => c.item.title).join(', ');
+  /** The impact candidates the map names for what is being read: near the focused change, or all when reading the impacts. */
+  function shownImpacts(p: ChangePlan) {
+    const focusItem = s?.focus?.kind === 'item' ? itemOf(s.focus.id) : null;
+    return focusItem ? nearImpacts(focusItem) : s?.focus?.kind === 'impacts' ? p.analysis.impacts : [];
+  }
+  /** What the comparison scene shows on parts' rows (every target's change line, whichever change is being read, and the
+   * candidates named for the current reading): the same set the overlay draws, so no row keeps an empty line. The map holds
+   * these sizes in both the current view and the preview while the plan is open. */
+  function rowLines(p: ChangePlan): Map<string, string[]> {
+    const out = new Map<string, string[]>();
+    for (const [id, list] of rowChanges(p)) out.set(id, [...list.map(c => `${kindWord(c)} ${c.text}${list.length > 1 ? ` 외 ${list.length - 1}건` : ''}`), ...(list.length > 1 ? [`변경 ${list.length}건 ${manyLine(list)}`] : [])]);
+    for (const x of shownImpacts(p)) if (!out.has(x.partId)) out.set(x.partId, ['영향 후보']);
+    return out;
+  }
+  /* Existing relations read as context of the change being read: lines already on the map between its actual targets and the
+     candidates named here, and from those candidates to other parts the analysis names as candidates (a shared node's other
+     users). They move above the group surfaces and keep their own kind and hover meaning; nothing is drawn or inferred, and
+     no line is restyled as required or verified. */
+  function contextEdges(p: ChangePlan, rep: (id: string) => string | null, targets: string[], shown: { partId: string }[]) {
+    document.querySelectorAll<SVGGElement>('#world .edge.ctx').forEach(e => e.classList.remove('ctx'));
+    document.querySelectorAll('#world .plan-ctx').forEach(e => e.classList.remove('plan-ctx'));
+    const anchors = new Set([...targets, ...shown.map(x => x.partId)].map(rep).filter((x): x is string => !!x));
+    const named = new Set(shown.map(x => rep(x.partId)).filter((x): x is string => !!x));
+    const others = new Set(p.analysis.impacts.map(x => rep(x.partId)).filter((x): x is string => !!x));
+    const top = document.querySelector('#world .edges-top');
+    document.querySelectorAll<SVGGElement>('#world .edge').forEach(e => {
+      const a = e.dataset.from!, b = e.dataset.to!;
+      const ctx = a !== b && ((anchors.has(a) && anchors.has(b) && (named.has(a) || named.has(b))) || (named.has(a) && others.has(b)) || (named.has(b) && others.has(a)));
+      if (!ctx) return;
+      e.classList.add('ctx'); if (top && e.parentNode !== top) top.append(e);
+      // Both ends stay readable (not dimmed with the rest); an end gets no label it does not already have.
+      for (const id of [a, b]) document.querySelector(`#world [data-box="${CSS.escape(id)}"]`)?.classList.add('plan-ctx');
+    });
+    // Lines no longer in context go back under the groups unless the selection holds them.
+    const base = document.querySelector('#world .edges:not(.edges-top)');
+    document.querySelectorAll<SVGGElement>('#world .edges-top .edge:not(.ctx):not(.on)').forEach(e => base?.append(e));
+  }
   function overlay() {
     document.querySelectorAll<HTMLElement>('.plan-direct,.plan-impact,.plan-focus,.plan-reading').forEach(el => { el.classList.remove('plan-direct', 'plan-impact', 'plan-focus', 'plan-reading'); el.removeAttribute('data-plan-title'); });
-    document.querySelectorAll<HTMLElement>('.plan-note').forEach(el => { el.textContent = ''; el.removeAttribute('title'); });
+    document.querySelectorAll<HTMLElement>('.plan-note').forEach(el => { el.replaceChildren(); el.removeAttribute('title'); el.className = 'plan-note'; });
     document.querySelectorAll('.plan-badge').forEach(el => el.remove());
     $('space').classList.toggle('planning', !!s);
     $('space').classList.toggle('preview', !!s && s.mode === 'preview' && !!plan());
     $('space').classList.toggle('focusing', !!s && s.mode === 'preview' && !!s.focus);
-    const p = plan(); if (!s || s.mode !== 'preview' || !p) { host.callouts([]); return; }
+    const p = plan(); if (!s || !p) { document.querySelectorAll('#world .edge.ctx').forEach(e => e.classList.remove('ctx')); document.querySelectorAll('#world .plan-ctx').forEach(e => e.classList.remove('plan-ctx')); host.callouts([]); return; }
     const o = host.current()!, boxes = host.boxes(), rep = (id: string) => visibleRep(id, boxes);
-    const parentOf = (id: string) => o.view.parts.find(x => x.id === id)?.parentId ?? null;
-    const targets = new Map<string, { items: PlanItem[]; inner: Set<string> }>();
-    for (const item of p.analysis.items) {
-      const at = new Set(item.partIds.filter(id => rep(id)));
-      // Innermost only: never a parent and its child for the same change.
-      for (const id of [...at]) for (let up = parentOf(id), g = 0; up && g < 64; up = parentOf(up), g++) at.delete(up);
-      for (const id of at) {
-        const r = rep(id)!, t = targets.get(r) ?? { items: [], inner: new Set<string>() };
-        if (!t.items.includes(item)) t.items.push(item); if (r !== id) t.inner.add(id); targets.set(r, t);
-      }
+    // Drawn part → its own changes (the part itself is the target) and the inner targets it stands for.
+    const own = rowChanges(p), marks = new Map<string, { items: PlanItem[]; inner: string[] }>();
+    for (const [id, list] of own) {
+      const r = rep(id); if (!r) continue;
+      const m = marks.get(r) ?? { items: [], inner: [] };
+      for (const c of list) if (!m.items.includes(c.item)) m.items.push(c.item);
+      if (r !== id) m.inner.push(id); marks.set(r, m);
     }
     const focusItem = s.focus?.kind === 'item' ? itemOf(s.focus.id) : null;
-    const focused = new Set((focusItem?.partIds ?? []).map(rep).filter((x): x is string => !!x));
+    const focused = new Set((focusItem ? itemTargets(focusItem) : []).map(rep).filter((x): x is string => !!x));
     const reading = focusItem ? rep(activeTarget(focusItem) ?? '') : null;
-    const impacts = (focusItem ? nearImpacts(focusItem) : s.focus?.kind === 'impacts' ? p.analysis.impacts : []).filter(x => !targets.has(rep(x.partId) ?? ''));
+    const impacts = shownImpacts(p).filter(x => !marks.has(rep(x.partId) ?? ''));
+    // Existing relations read the same in the current view and the preview; only the change marks below are the preview's.
+    contextEdges(p, rep, focusItem ? itemTargets(focusItem) : [], impacts);
+    if (s.mode !== 'preview') { host.callouts([]); return; }
     const el = (id: string) => document.querySelector<HTMLElement>(`.node[data-box="${CSS.escape(id)}"], .frame[data-box="${CSS.escape(id)}"]`);
-    for (const [id, t] of targets) {
+    const kind = (word: string) => (word ? h('span', { class: 'pn-k' }, word) : null), gap = (word: string) => (word ? ' ' : null);
+    for (const [id, m] of marks) {
       const e = el(id); if (!e) continue;
       e.classList.add('plan-direct'); if (focused.has(id)) e.classList.add('plan-focus');
       if (reading === id) e.classList.add('plan-reading');
-      const inner = [...t.inner].map(partName).filter(Boolean);
-      // The change being read speaks in its note beside the part; here only the word. Other changes keep their name.
-      const text = `${inner.length ? `안쪽 ‘${inner.join('’, ‘')}’ · ` : ''}구상${focused.has(id) ? '' : ` · ${t.items.length > 1 ? `${t.items.length}건` : t.items[0]!.title}`}`;
-      e.dataset.planTitle = t.items.map(i => i.title).join('\n');
-      const note = e.querySelector<HTMLElement>('.plan-note'); if (note) { note.textContent = text; note.title = `바꾸려는 내용(아직 적용 안 됨): ${t.items.map(i => i.title).join(', ')}`; }
+      e.dataset.planTitle = m.items.map(i => i.title).join('\n');
+      const note = e.querySelector<HTMLElement>('.plan-note'); if (!note) continue;
+      const list = own.get(id) ?? [];
+      if (list.length) {
+        const mine = list.length > 1 && focusItem ? list.find(c => c.item === focusItem) ?? null : list.length === 1 ? list[0]! : null;
+        if (mine) put(note, kind(kindWord(mine)), gap(kindWord(mine)), mine.text, list.length > 1 ? h('span', { class: 'pn-more' }, ` 외 ${list.length - 1}건`) : null);
+        else put(note, kind(`변경 ${list.length}건`), ' ', manyLine(list));
+        note.title = list.map(c => `${c.item.title}${c.pres ? ` · ${c.pres.origin === 'suggestion' ? '분석 제안' : '바꿀 모습'}: ${c.text}` : ' (이 부분의 바꿀 모습 자료 없음)'}`).join('\n') + '\n아직 적용 안 됨';
+        if (m.inner.length) note.title += `\n안쪽에도 변경: ${m.inner.map(partName).join(', ')}`;
+      } else {
+        note.classList.add('inner');
+        put(note, kind('안쪽'), ' ', `‘${m.inner.map(partName).join('’, ‘')}’ 변경`);
+        note.title = `안쪽 부분을 바꾸려는 변경(아직 적용 안 됨): ${m.items.map(i => i.title).join(', ')}\n이 부분 전체를 바꾸는 것은 아니에요.`;
+      }
     }
     for (const x of impacts) {
       const r = rep(x.partId), e = r ? el(r) : null; if (!e || e.classList.contains('plan-impact')) continue;
       e.classList.add('plan-impact');
-      const note = e.querySelector<HTMLElement>('.plan-note'); if (note) { note.textContent = `${r !== x.partId ? `안쪽 ‘${partName(x.partId)}’ · ` : ''}영향 후보`; note.title = `영향 후보: ${x.reason}`; }
+      const note = e.querySelector<HTMLElement>('.plan-note'); if (note) { note.classList.add('inner'); note.textContent = `${r !== x.partId ? `안쪽 ‘${partName(x.partId)}’ · ` : ''}영향 후보`; note.title = `영향 후보: ${x.reason}`; }
     }
     host.callouts(callouts(o, p), moveTarget); moveTarget = false;
   }
 
   /* ---------- notes beside the parts: what a part is now → the difference wanted ----------
-     Outside the structure: no node, no port, no relation, no place in the layout. With presentation data, its short quotes
-     and where they come from (the map's description, or a cited source: '자료에서', not the product as it is); without, the
-     honest fallback (the part's own description → the change's name). One target reads at a time; all targets of the change
-     remain marked on the map and named in the target navigation. */
+     Outside the structure: no node, no port, no relation, no place in the layout. With presentation data, its short quotes on
+     the same side and where they come from (the map's description, or a cited source: '자료에서', not the product as it is).
+     Without, no pair: the change's name for this part, and the part's own description apart as its role in the map, never as
+     what it does now. One target reads at a time; all targets of the change remain marked on the map and named in the target
+     navigation. */
   function callouts(o: PlanOpened, p: ChangePlan): HTMLElement[] {
     const st = s!, f = st.focus;
     if (st.explain || st.evidenceFor || panelOpen() || st.sheet || f?.kind !== 'item') return [];
     const item = itemOf(f.id), id = item ? activeTarget(item) : null, at = id ? visibleRep(id, host.boxes()) : null;
     return item && id && at ? [calloutNote(o, p, item, id, item.presentation?.find(x => x.partId === id) ?? null, at)] : [];
   }
+  /** The part's own description as its role on the map (first sentence), with where it comes from; never a current state. */
+  function partRole(o: PlanOpened, id: string): { text: string; from: string; label: string } | null {
+    const part = o.view.parts.find(x => x.id === id), firstSentence = (t: string) => { const m = /^(.+?[.!?。])(?=\s|$)/.exec(t.replace(/\s+/g, ' ').trim()); return m ? m[1]! : t.trim(); };
+    return part?.note ? { text: firstSentence(part.note), from: '지도 설명', label: '이 부분의 역할' } : part?.summary ? { text: firstSentence(part.summary), from: '받은 정리', label: '이 부분의 맥락' } : null;
+  }
   function calloutNote(o: PlanOpened, p: ChangePlan, item: PlanItem, partId: string, pres: PlanPresentation | null, at: string): HTMLElement {
-    const st = s!, part = o.view.parts.find(x => x.id === partId), name = part?.name ?? '부분';
-    const firstSentence = (t: string) => { const m = /^(.+?[.!?。])(?=\s|$)/.exec(t.replace(/\s+/g, ' ').trim()); return m ? m[1]! : t.trim(); };
-    let now: string, from: Node | string;
-    if (pres) {
-      now = pres.current.text;
-      if (pres.current.source === 'evidence') {
-        const ev = p.evidence.filter(e => pres.current.refs.includes(e.id));
-        from = h('button', { type: 'button', class: 'co-src', title: ev.map(e => `${e.id} · ${e.title} · ${e.basis}`).join('\n'), onclick: () => { st.evidenceFor = item.id; render(); } }, `자료에서 · ${pres.current.refs.join(', ')}`);
-      } else from = '지도 설명';
-    } else if (part?.summary) { now = firstSentence(part.summary); from = '받은 정리'; }
-    else if (part?.note) { now = firstSentence(part.note); from = '지도 설명'; }
-    else { now = '지금 설명 없음'; from = ''; }
+    const st = s!, name = o.view.parts.find(x => x.id === partId)?.name ?? '부분';
     const kind = pres?.origin ?? null;
-    return h('div', { class: `callout ${kind ?? 'plain'}`, 'data-box': at, 'data-target': partId, role: 'note', 'aria-label': `${name} · 변경 구상` },
-      h('p', { class: 'co-head' }, h('span', { class: 'co-kind' }, kind === 'intent' ? '원하는 차이' : kind === 'suggestion' ? '분석 제안' : '변경 항목'), h('strong', {}, name),
-        at !== partId ? h('small', {}, `‘${partName(at)}’ 안쪽`) : null),
+    const head = h('p', { class: 'co-head' }, h('span', { class: 'co-kind' }, kind === 'intent' ? '원하는 차이' : kind === 'suggestion' ? '분석 제안' : '변경 항목'), h('strong', {}, name),
+      at !== partId ? h('small', {}, `‘${partName(at)}’ 안쪽`) : null);
+    if (!pres) {
+      const role = partRole(o, partId);
+      return h('div', { class: 'callout plain', 'data-box': at, 'data-target': partId, role: 'note', 'aria-label': `${name} · 변경 항목` }, head,
+        h('div', { class: 'co-fallback' },
+          h('div', { class: 'co-row want' }, h('span', { class: 'co-label' }, '바꿀 내용'), h('p', {}, item.title)),
+          role ? h('div', { class: 'co-role' }, h('span', { class: 'co-label' }, role.label), h('p', {}, role.text, h('small', {}, role.from))) : null,
+          h('p', { class: 'co-gap' }, '현재와의 비교는 아직 정리 전이에요.')));
+    }
+    let from: Node | string = '지도 설명';
+    if (pres.current.source === 'evidence') {
+      const ev = p.evidence.filter(e => pres.current.refs.includes(e.id));
+      from = h('button', { type: 'button', class: 'co-src', title: ev.map(e => `${e.id} · ${e.title} · ${e.basis}`).join('\n'), onclick: () => { st.evidenceFor = item.id; render(); } }, `자료에서 · ${pres.current.refs.join(', ')}`);
+    }
+    return h('div', { class: `callout ${kind}`, 'data-box': at, 'data-target': partId, role: 'note', 'aria-label': `${name} · 변경 구상` }, head,
       h('div', { class: 'co-pair' },
-        h('div', { class: 'co-row now' }, h('span', { class: 'co-label' }, pres?.current.source === 'evidence' ? '자료상' : '현재 설명'), h('p', {}, now, from ? h('small', {}, from) : null)),
-        h('div', { class: 'co-row want' }, h('span', { class: 'co-label' }, kind === 'suggestion' ? '제안' : '바꿀 모습'), h('p', {}, pres ? pres.wanted.text : item.title))));
+        h('div', { class: 'co-row now' }, h('span', { class: 'co-label' }, pres.current.source === 'evidence' ? '자료상' : '현재 설명'), h('p', {}, pres.current.text, h('small', {}, from))),
+        h('div', { class: 'co-row want' }, h('span', { class: 'co-label' }, kind === 'suggestion' ? '제안' : '바꿀 모습'), h('p', {}, pres.wanted.text))));
   }
   /** The part itself when it is drawn in this view, else its nearest drawn ancestor; null outside the view. */
   function visibleRep(id: string, boxes: Map<string, Box>): string | null {
@@ -417,7 +489,10 @@ export function createPlanView(host: PlanHost) {
   function render() {
     if (!s) return;
     const o = host.current(); if (!o) return;
-    const item = s.mode === 'preview' && s.focus?.kind === 'item' ? itemOf(s.focus.id) : null;
+    // The comparison scene (the target's path and the rows' sizes) is the same in the current view and the preview: switching
+    // the mode shows or hides the change marks only. Closing the plan gives the map back its own folds and sizes.
+    const item = s.focus?.kind === 'item' ? itemOf(s.focus.id) : null, p = plan();
+    host.rows(p ? rowLines(p) : null);
     host.targetContext(item ? activeTarget(item) : null, moveTarget);
     renderMode(); renderStrip(o);
     if (panelOpen()) renderPanel(o); else { $('plan-panel').hidden = true; $('plan-panel').replaceChildren(); }
@@ -467,7 +542,7 @@ export function createPlanView(host: PlanHost) {
     box.checked = p.selected.includes(item.id); box.addEventListener('change', () => toggleItem(item.id, box.checked));
     return h('div', { class: 'ps-focus', role: 'group', 'aria-label': `‘${item.title}’` },
       h('label', { class: 'cmp-hand', for: `ps-hand-${item.id}` }, box, h('span', {}, '맡기기')),
-      h('button', { type: 'button', class: 'ps-link', 'aria-pressed': String(st.explain), onclick: () => { st.explain = !st.explain; st.evidenceFor = null; render(); } }, '설명'),
+      h('button', { type: 'button', class: 'ps-link', 'aria-pressed': String(st.explain), onclick: () => { st.explain = !st.explain; st.evidenceFor = null; explainOpened = st.explain; render(); } }, '설명'),
       refs ? h('button', { type: 'button', class: 'ps-link', 'aria-pressed': String(st.evidenceFor === item.id), onclick: () => { st.evidenceFor = st.evidenceFor === item.id ? null : item.id; render(); } }, `근거 ${refs}`) : null);
   }
   /** Conditions with no part of their own (to keep, not yet decided): read here, never pinned to a part on the map. */
@@ -485,9 +560,12 @@ export function createPlanView(host: PlanHost) {
      The words carry the roles: 지금 (the part's current description and where it comes from), 구상 (what the change wants;
      not applied, not a result), 살펴볼 것 (an impact candidate's reason, on the part it names). */
   let lastFocusKey = '', lastShown = '';
+  /** The person asked for the long reading just now: it takes a new place, and that place may pan once (the smallest pan) so
+   * the target it explains stays readable above it. Coming back from sources, a mode switch or a resize keeps the camera. */
+  let explainOpened = false;
   function renderCompare(o: PlanOpened) {
     const st = s!, p = plan();
-    if (!p || st.mode !== 'preview' || !st.focus || st.focus.kind === 'impacts' || panelOpen() || st.sheet || (!st.explain && !st.evidenceFor)) { host.surface(null, [], false); lastFocusKey = ''; return; }
+    if (!p || st.mode !== 'preview' || !st.focus || st.focus.kind === 'impacts' || panelOpen() || st.sheet || (!st.explain && !st.evidenceFor)) { host.surface(null, [], false); lastFocusKey = ''; explainOpened = false; return; }
     const boxes = host.boxes(), rep = (id: string) => visibleRep(id, boxes), active = st.focus.kind === 'item' ? activeTarget(itemOf(st.focus.id)!) : st.focus.id;
     const key = `${JSON.stringify(st.focus)}|${active ?? ''}`;
     let content: Node[], parts: string[];
@@ -500,15 +578,18 @@ export function createPlanView(host: PlanHost) {
     }
     // An explicit target change in an open comparison reveals that target above the reading surface. First opening and
     // the same target's sources in and out only size the surface; they keep the person's camera, including a manual pan.
-    host.surface(content, parts, lastFocusKey && key !== lastFocusKey ? true : key !== lastFocusKey || shown !== lastShown ? 'refit' : false); lastFocusKey = key; lastShown = shown;
+    const opened = explainOpened && st.explain && !st.evidenceFor; explainOpened = false;
+    host.surface(content, parts, opened || (lastFocusKey && key !== lastFocusKey) ? true : key !== lastFocusKey || shown !== lastShown ? 'refit' : false); lastFocusKey = key; lastShown = shown;
   }
-  /** What a part is now, and where that description comes from; nothing when there is nothing. */
-  function now(o: PlanOpened, id: string): Node[] {
+  /** A part's own descriptions as its context (its role in the map, a received summary), each with where it comes from. They
+   * are not set against a change as its 'before': that needs presentation data on the same side. */
+  function roleBlock(o: PlanOpened, id: string): Node[] {
     const part = o.view.parts.find(x => x.id === id);
     if (!part) return [h('p', { class: 'cmp-none' }, '지금 지도에 없는 부분이에요.')];
-    if (part.summary) return [h('p', { class: 'cmp-text' }, part.summary), h('p', { class: 'cmp-src' }, `받은 정리 · ${part.origin ?? '전달받은 정리'}`)];
-    if (part.note) return [h('p', { class: 'cmp-text' }, part.note), h('p', { class: 'cmp-src' }, '적어 둔 계획 설명 · 받은 정리 없음')];
-    return [h('p', { class: 'cmp-none' }, '지금 설명 없음')];
+    const out: Node[] = [];
+    if (part.note) out.push(h('h3', { class: 'cmp-label' }, '이 부분의 역할'), h('p', { class: 'cmp-text cmp-role' }, part.note), h('p', { class: 'cmp-src' }, '지도 설명'));
+    if (part.summary) out.push(h('h3', { class: 'cmp-label' }, '받은 정리'), h('p', { class: 'cmp-text cmp-role' }, part.summary), h('p', { class: 'cmp-src' }, part.origin ?? '전달받은 정리'));
+    return out;
   }
   const row = (label: string, cls: string, ...children: (Node | null)[]) => h('div', { class: `cmp-row ${cls}` }, h('span', { class: 'cmp-label' }, label), h('div', { class: 'cmp-val' }, ...children.filter((c): c is Node => !!c)));
   function compareHead(kicker: string, title: string, tools: Node[]) {
@@ -536,11 +617,16 @@ export function createPlanView(host: PlanHost) {
       items.length > 1 ? h('button', { type: 'button', class: 'cmp-step', 'aria-label': '다음 변경', onclick: () => step(1) }, '›') : null,
       h('button', { type: 'button', class: 'close', 'aria-label': '설명 닫기', title: '닫기 (Esc)', onclick: () => { st.explain = false; render(); } }, '×')].filter((x): x is HTMLElement => !!x);
     const active = activeTarget(item), pres = item.presentation?.find(x => x.partId === active), at = new Set(active ? [active] : []);
-    const targets = [...at].map(id => {
+    const nameLine = (id: string) => {
       const r = visibleRep(id, boxes), where = r && r !== id ? `‘${partName(r)}’ 안쪽` : !r ? '이 범위 밖' : null;
-      const current = pres ? [h('p', { class: 'cmp-text' }, pres.current.text), h('p', { class: 'cmp-src' }, pres.current.source === 'evidence' ? `자료에서 · ${pres.current.refs.join(', ')}` : '지도 설명')] : now(o, id);
-      return h('div', { class: 'cmp-part' }, h('p', { class: 'cmp-name' }, h('button', { type: 'button', class: 'link-button', onclick: () => locate(id) }, partName(id) ?? '지금 지도에 없는 부분'), where ? h('small', {}, where) : null), ...current);
-    });
+      return h('p', { class: 'cmp-name' }, h('button', { type: 'button', class: 'link-button', onclick: () => locate(id) }, partName(id) ?? '지금 지도에 없는 부분'), where ? h('small', {}, where) : null);
+    };
+    const targets = pres ? [...at].map(id => h('div', { class: 'cmp-part' }, nameLine(id),
+      h('p', { class: 'cmp-text' }, pres.current.text), h('p', { class: 'cmp-src' }, pres.current.source === 'evidence' ? `자료에서 · ${pres.current.refs.join(', ')}` : '지도 설명'))) : [];
+    // Without same-side data for this target: what the change wants, then the part's role apart from it; no before/after.
+    const fallback = () => h('div', { class: 'cmp-only cmp-fallback' },
+      ...[...at].map(nameLine), h('h3', { class: 'cmp-label' }, '바꿀 내용 ', h('small', {}, '변경 전체의 설명 · 적용 안 됨')), h('p', { class: 'cmp-text' }, item.description),
+      ...(active ? roleBlock(o, active) : []), h('p', { class: 'cmp-gap' }, '현재와의 비교는 아직 정리 전이에요.'));
     const own = p.analysis.impacts.filter(x => at.has(x.partId)), near = nearImpacts(item);
     const box = h('input', { type: 'checkbox', id: `cmp-hand-${item.id}` }) as HTMLInputElement;
     box.checked = p.selected.includes(item.id); box.addEventListener('change', () => toggleItem(item.id, box.checked));
@@ -548,7 +634,7 @@ export function createPlanView(host: PlanHost) {
     return [
       compareHead(`변경 구상 · ${basis}`, item.title, tools),
       h('div', { class: 'lens-body cmp-body' },
-        h('div', { class: 'cmp-main' }, pair(targets.length ? targets : [h('p', { class: 'cmp-none' }, '지금 지도에 대응하는 부분이 없어요.')], [h('p', { class: 'cmp-text' }, pres?.wanted.text ?? item.description)], pres?.current.source === 'evidence' ? '자료상' : '현재 설명'),
+        h('div', { class: 'cmp-main' }, pres ? pair(targets, [h('p', { class: 'cmp-text' }, pres.wanted.text)], pres.current.source === 'evidence' ? '자료상' : '현재 설명') : fallback(),
           impactList(o, [...own, ...near])),
         item.dependsOn.length && by?.kind === 'example' ? h('p', { class: 'cmp-dep' }, h('span', {}, '전제'), item.dependsOn.map(d => itemOf(d)?.title ?? d).join(', ')) : null),
       h('footer', { class: 'lens-foot' },
@@ -572,10 +658,12 @@ export function createPlanView(host: PlanHost) {
     return [
       compareHead('변경 구상 · 이 부분', partName(id) ?? '부분', [h('button', { type: 'button', class: 'close', 'aria-label': '선택 해제', title: '닫기 (Esc)', onclick: () => host.selectPart(null) }, '×')]),
       h('div', { class: 'lens-body cmp-body' },
-        h('div', { class: 'cmp-main' }, touching.length ? pair(now(o, id), touching.map(i => h('div', { class: 'cmp-item' },
-          h('p', { class: 'cmp-name' }, h('button', { type: 'button', class: 'link-button', onclick: () => focusItem({ kind: 'item', id: i.id }) }, i.title), i.partIds.includes(id) ? null : h('small', {}, '이 부분 안쪽')),
-          h('p', { class: 'cmp-text clamp3' }, i.description))))
-          : h('div', { class: 'cmp-only' }, h('h3', { class: 'cmp-label' }, '지금'), ...now(o, id), impacts.length ? null : h('p', { class: 'cmp-none' }, '이 변경안이 바꾸거나 영향 후보로 본 부분은 아니에요.')),
+        h('div', { class: 'cmp-main' }, h('div', { class: 'cmp-only' },
+          touching.length ? h('h3', { class: 'cmp-label' }, '이 부분에 걸친 변경 ', h('small', {}, '적용 안 됨')) : null,
+          ...touching.map(i => h('div', { class: 'cmp-item' },
+            h('p', { class: 'cmp-name' }, h('button', { type: 'button', class: 'link-button', onclick: () => focusItem({ kind: 'item', id: i.id }) }, i.title), i.partIds.includes(id) ? null : h('small', {}, '이 부분 안쪽')),
+            h('p', { class: 'cmp-text clamp3' }, i.description))),
+          ...roleBlock(o, id), touching.length || impacts.length ? null : h('p', { class: 'cmp-none' }, '이 변경안이 바꾸거나 영향 후보로 본 부분은 아니에요.')),
         impactList(o, impacts, false)))];
   }
   function closePlan() { close(); }
@@ -583,7 +671,7 @@ export function createPlanView(host: PlanHost) {
     const box = $('plan-mode'), p = plan();
     box.hidden = !s || !p;
     if (!s || !p) return;
-    const b = (mode: 'current' | 'preview', label: string) => h('button', { type: 'button', 'aria-pressed': String(s!.mode === mode), onclick: () => { const changed = s!.mode !== mode; s!.mode = mode; moveTarget = changed && mode === 'preview'; render(); } }, label);
+    const b = (mode: 'current' | 'preview', label: string) => h('button', { type: 'button', 'aria-pressed': String(s!.mode === mode), onclick: () => { s!.mode = mode; moveTarget = false; render(); } }, label);
     box.replaceChildren(b('current', '현재'), b('preview', '변경 미리보기'));
   }
 

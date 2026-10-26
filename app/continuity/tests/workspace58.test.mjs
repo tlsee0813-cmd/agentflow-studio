@@ -150,3 +150,33 @@ test('UI58-L9 only long part names widen their card, by measured width, with roo
   const v = viewOf('oss-restic'), long = layoutScope(v, null, () => true, {}, wide);
   for (const b of long.boxes.values()) if (b.kind === 'node') assert.ok(b.w >= NODE_W);
 });
+
+test('UI61 a planned change line takes room only on its own part and never narrows a name; no plan keeps every box', () => {
+  const v = viewOf('oss-joplin'), open = (_id, depth) => depth === 0;
+  const desktop = v.parts.find(p => p.name === '@joplin/app-desktop'), row = v.parts.find(p => p.parentId === desktop.id && !p.childIds.length);
+  const base = layoutScope(v, null, open, {}), same = layoutScope(v, null, open, {}, undefined, new Map());
+  for (const [id, b] of base.boxes) assert.deepEqual(same.boxes.get(id), b, 'an empty plan changes nothing');
+  const long = '편집과 미리보기를 같은 창에서 비교하고 작성 중인 내용과 표시 결과를 함께 확인하기';
+  const planned = layoutScope(v, null, open, {}, undefined, new Map([[desktop.id, [long]], [row.id, [long]]]));
+  const b0 = base.boxes.get(desktop.id), b1 = planned.boxes.get(desktop.id), r0 = base.boxes.get(row.id), r1 = planned.boxes.get(row.id);
+  assert.ok(b1.head > b0.head && b1.w === b0.w, 'the region head grows under its name; its width (the name room) is kept');
+  assert.ok(r1.h > r0.h && r1.w === r0.w, 'two planned lines add a line to that row only');
+  for (const [id, b] of base.boxes) {
+    if (id === desktop.id || id === row.id || b.container === desktop.id) continue;
+    assert.deepEqual([planned.boxes.get(id).w, planned.boxes.get(id).h], [b.w, b.h], `${id} keeps its size`);
+  }
+});
+
+test('UI61 one short planned line keeps the own padding of a list item or row; a folded part keeps room for its inner line', () => {
+  const v = viewOf('oss-restic'), open = (_id, depth) => depth === 0, A = k => v.parts.find(p => p.name === `restic ${k.replace('-', ' ')}`).id;
+  const base = layoutScope(v, null, open, {}), planned = layoutScope(v, null, open, {}, undefined, new Map([[A('backup'), ['백업 대상 먼저 보기']], [A('key-add'), ['추가할 키의 용도 먼저 적기']]]));
+  const item = planned.boxes.get(A('backup')), folded = planned.boxes.get(A('key'));
+  assert.equal(item.face, 'item'); assert.equal(base.boxes.get(A('backup')).h, 31, 'a plan-status item without a state line is 31 tall');
+  assert.equal(item.h, 14 + 17 + 2 + 15, 'name 17 + gap 2 + one planned line 15, with the 7px padding above and below');
+  assert.equal(folded.h, 14 + 17 + 2 + 15, 'the folded parent of a planned part reserves its one inner line');
+  for (const [id, b] of base.boxes) if (![A('backup'), A('key')].includes(id) && planned.boxes.get(id).face === 'item') assert.equal(planned.boxes.get(id).h, b.h, `${id} keeps its height`);
+  const c = studioView(buildExample(data.cases.find(x => x.spec.id === 'oss-node-red').spec)), mqtt = c.parts.find(p => p.name === '10-mqtt.js');
+  const expand = id => { const out = new Set(); for (let p = c.parts.find(x => x.id === id)?.parentId; p; p = c.parts.find(x => x.id === p)?.parentId) out.add(p); return out; };
+  const path = expand(mqtt.id), rows = layoutScope(c, null, x => path.has(x), {}, undefined, new Map([[mqtt.id, ['TLS 필수']]]));
+  assert.equal(rows.boxes.get(mqtt.id).face, 'row'); assert.equal(rows.boxes.get(mqtt.id).h, 20 + 18 + 2 + 15, 'a row keeps its 10px padding for one line');
+});
