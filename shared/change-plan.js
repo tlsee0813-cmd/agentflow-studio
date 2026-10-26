@@ -2,9 +2,9 @@ const MAX_ITEMS = 32, MAX_EVIDENCE = 48, MAX_IMPACTS = 64, MAX_TEXT = 12000;
 const copy = (value) => structuredClone(value);
 function check(condition) { if (!condition)
     throw new Error('INVALID_CHANGE_PLAN'); }
-function object(value, keys) {
+function object(value, keys, optional = []) {
     check(value !== null && typeof value === 'object' && !Array.isArray(value));
-    check(Object.keys(value).length === keys.length && keys.every(k => Object.hasOwn(value, k)));
+    check(keys.every(k => Object.hasOwn(value, k)) && Object.keys(value).every(k => keys.includes(k) || optional.includes(k)));
 }
 function text(value, max = MAX_TEXT) {
     check(typeof value === 'string' && value.length <= max && !!value.trim() && !/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(value));
@@ -35,6 +35,26 @@ function evidenceList(value) {
     }
     check(new Set(value.map(v => v.id)).size === value.length);
 }
+function presentations(value, partIds, itemRefs) {
+    list(value, 8);
+    const seen = new Set(), parts = new Set(partIds), refs = new Set(itemRefs);
+    for (const entry of value) {
+        object(entry, ['partId', 'current', 'wanted', 'origin']);
+        id(entry.partId);
+        check(parts.has(entry.partId) && !seen.has(entry.partId));
+        seen.add(entry.partId);
+        object(entry.current, ['text', 'source', 'refs']);
+        text(entry.current.text, 140);
+        check(entry.current.source === 'part-note' || entry.current.source === 'evidence');
+        ids(entry.current.refs, MAX_EVIDENCE, refs, entry.current.source === 'evidence');
+        if (entry.current.source === 'part-note')
+            check(entry.current.refs.length === 0);
+        object(entry.wanted, ['text', 'refs']);
+        text(entry.wanted.text, 140);
+        ids(entry.wanted.refs, MAX_EVIDENCE, refs, true);
+        check(entry.origin === 'intent' || entry.origin === 'suggestion');
+    }
+}
 /** A fresh review of the selected outcome, without treating global dependency guesses as facts. */
 export function parseScopeReview(value, evidenceIds) {
     ids(evidenceIds, MAX_EVIDENCE);
@@ -62,7 +82,7 @@ export function parsePlanAnalysis(value, partIds, evidenceIds) {
     list(value.items, MAX_ITEMS);
     check(value.items.length > 0);
     for (const item of value.items) {
-        object(item, ['id', 'title', 'description', 'partIds', 'refs', 'dependsOn']);
+        object(item, ['id', 'title', 'description', 'partIds', 'refs', 'dependsOn'], ['presentation']);
         id(item.id);
         text(item.title, 200);
         text(item.description, 4000);
@@ -70,6 +90,8 @@ export function parsePlanAnalysis(value, partIds, evidenceIds) {
         ids(item.partIds, 32, parts);
         ids(item.refs, MAX_EVIDENCE, refs, true);
         ids(item.dependsOn, MAX_ITEMS);
+        if (Object.hasOwn(item, 'presentation'))
+            presentations(item.presentation, item.partIds, item.refs);
     }
     const items = value.items, byId = new Map(items.map(x => [x.id, x]));
     check(byId.size === items.length);
@@ -107,7 +129,7 @@ function analysisParts(analysis) {
     list(analysis.impacts, MAX_IMPACTS);
     const parts = [];
     for (const item of analysis.items) {
-        object(item, ['id', 'title', 'description', 'partIds', 'refs', 'dependsOn']);
+        object(item, ['id', 'title', 'description', 'partIds', 'refs', 'dependsOn'], ['presentation']);
         ids(item.partIds, 32);
         parts.push(...item.partIds);
     }
@@ -129,6 +151,17 @@ function validatedPlan(value) {
     date(value.createdAt);
     evidenceList(value.evidence);
     const analysis = parsePlanAnalysis(value.analysis, analysisParts(value.analysis), value.evidence.map(x => x.id));
+    const sources = new Map(value.evidence.map(e => [e.id, e]));
+    const normal = (text) => text.replace(/\s+/g, ' ').trim();
+    for (const item of analysis.items)
+        for (const view of item.presentation ?? []) {
+            if (view.origin === 'intent')
+                check(view.wanted.refs.some(ref => sources.get(ref).kind === 'user'));
+            if (view.current.source === 'evidence')
+                check(view.current.refs.some(ref => normal(sources.get(ref).text).includes(normal(view.current.text))));
+            // A saved plan holds evidence but no part-note snapshot: only validatePlanReply with the original ask can check that
+            // quote. Neither an exact excerpt nor valid refs establishes factual accuracy or current product behaviour.
+        }
     ids(value.selected, MAX_ITEMS, new Set(analysis.items.map(x => x.id)));
     return copy({ ...value, analysis });
 }

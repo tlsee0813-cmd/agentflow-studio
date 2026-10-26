@@ -10,6 +10,7 @@ const memoryKey = (o, c) => (o.key === CONVERTER_KEY ? `${o.key}#${c}` : o.proje
 const short = (text, n) => { const t = text.replace(/\s+/g, ' ').trim(); return t.length > n ? `${t.slice(0, n)}…` : t; };
 export function createPlanView(host) {
     let s = null;
+    let moveTarget = false;
     /* ---------- bundles ---------- */
     function keysOf(o) { return Object.fromEntries(o.alias?.toId ?? []); }
     function exampleBundle(o, c) {
@@ -56,13 +57,13 @@ export function createPlanView(host) {
             return;
         const condition = 'A', { bundle, unreadable } = bundleFor(o, condition);
         s = { key: o.key, projectId: o.project.id, example: o.kind === 'example', condition, bundle, unreadable, storeMsg: null,
-            focus: null, mode: bundle.plan ? 'preview' : 'current', editing: !bundle.plan, pending: null, error: null, scoping: null, scopeError: null,
+            focus: firstFocus(bundle.plan), targets: {}, mode: bundle.plan ? 'preview' : 'current', editing: !bundle.plan, detail: false, strip: null, evidenceFor: null, explain: false, pending: null, error: null, scoping: null, scopeError: null,
             sheet: null, sources: false, adding: false, resultFor: bundle.snapshots.at(-1)?.id ?? null, addForm: false, copyMsg: null, fileMsg: null, ret: host.capture() };
         if (unreadable)
             s.storeMsg = null;
+        moveTarget = true;
         host.chrome();
         render();
-        host.frame(changedParts());
         requestAnimationFrame(() => (document.getElementById('plan-intent') ?? document.getElementById('plan-title'))?.focus());
     }
     /** Closing keeps the draft and the plan; the map goes back to the latest current view with the earlier selection and camera. */
@@ -77,6 +78,10 @@ export function createPlanView(host) {
         $('plan-panel').replaceChildren();
         $('plan-mode').hidden = true;
         $('plan-sheet').hidden = true;
+        $('plan-strip').hidden = true;
+        $('plan-strip').replaceChildren();
+        host.surface(null, [], false);
+        lastFocusKey = '';
         $('space').style.setProperty('--plan-w', '0px');
         host.chrome();
         overlay();
@@ -89,10 +94,51 @@ export function createPlanView(host) {
     function projectChanged() { if (s && host.current()?.key !== s.key)
         close(false); }
     /* ---------- derived ---------- */
+    /** The comparison opens on one change: the first one handed over, else the first. */
+    function firstFocus(p) {
+        const first = p?.analysis.items.find(i => p.selected.includes(i.id)) ?? p?.analysis.items[0];
+        return first ? { kind: 'item', id: first.id } : null;
+    }
     const plan = () => s?.bundle.plan ?? null;
     const items = () => plan()?.analysis.items ?? [];
     const itemOf = (id) => items().find(i => i.id === id) ?? null;
     const partName = (id) => host.current()?.view.parts.find(p => p.id === id)?.name ?? null;
+    function itemTargets(item) {
+        const parts = host.current()?.view.parts ?? [], ids = new Set(item.partIds);
+        for (const id of [...ids])
+            for (let p = parts.find(x => x.id === id)?.parentId, g = 0; p && g < 64; p = parts.find(x => x.id === p)?.parentId, g++)
+                ids.delete(p);
+        // Presentation is optional per part: an excerpt enriches its target without dropping other explicit targets.
+        return [...new Set([...(item.presentation ?? []).map(x => x.partId), ...ids])];
+    }
+    function activeTarget(item) {
+        const ids = itemTargets(item), previous = s.targets[item.id];
+        const id = previous && ids.includes(previous) ? previous : ids[0] ?? null;
+        if (id)
+            s.targets[item.id] = id;
+        return id;
+    }
+    function chooseTarget(item, id, keyboard = false) {
+        if (!s)
+            return;
+        s.targets[item.id] = id;
+        s.focus = { kind: 'item', id: item.id };
+        s.mode = 'preview';
+        s.evidenceFor = null;
+        if (host.selected())
+            host.selectPart(null);
+        moveTarget = true;
+        render();
+        const at = visibleRep(id, host.boxes());
+        if (!at)
+            host.showPart(id);
+        requestAnimationFrame(() => {
+            const tab = document.querySelector(`.ps-target[data-target="${CSS.escape(id)}"]`);
+            tab?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+            if (keyboard)
+                tab?.focus({ preventScroll: true });
+        });
+    }
     const stale = () => { const p = plan(); return !!p && !!s && s.bundle.draft.trim() !== p.intent; };
     function input() {
         const o = host.current();
@@ -109,81 +155,118 @@ export function createPlanView(host) {
     const missingDeps = (item) => item.dependsOn.filter(d => !plan().selected.includes(d));
     const latestSnapshot = () => s?.bundle.snapshots.at(-1) ?? null;
     const snapshotOf = (id) => s?.bundle.snapshots.find(x => x.id === id) ?? null;
-    /* ---------- map overlay: same boxes, extra classes and a short note in place of the status line ---------- */
+    /* ---------- map overlay: same boxes, one mark per part ----------
+     A part a change targets reads '구상' (with the change's name, or how many changes touch it); the parts of the change being
+     compared stand out. A part only named as an impact candidate reads '영향 후보' with a dashed outline. A part that is both is
+     marked once as a target; its candidate reason belongs to the comparison. A target folded inside a part marks that part with
+     the inner name: the inside is changed, not the whole parent. */
     function overlay() {
-        document.querySelectorAll('.plan-direct,.plan-impact').forEach(el => { el.classList.remove('plan-direct', 'plan-impact'); el.removeAttribute('data-plan-title'); });
+        document.querySelectorAll('.plan-direct,.plan-impact,.plan-focus,.plan-reading').forEach(el => { el.classList.remove('plan-direct', 'plan-impact', 'plan-focus', 'plan-reading'); el.removeAttribute('data-plan-title'); });
         document.querySelectorAll('.plan-note').forEach(el => { el.textContent = ''; el.removeAttribute('title'); });
         document.querySelectorAll('.plan-badge').forEach(el => el.remove());
         $('space').classList.toggle('planning', !!s);
         $('space').classList.toggle('preview', !!s && s.mode === 'preview' && !!plan());
         $('space').classList.toggle('focusing', !!s && s.mode === 'preview' && !!s.focus);
         const p = plan();
-        if (!s || s.mode !== 'preview' || !p)
+        if (!s || s.mode !== 'preview' || !p) {
+            host.callouts([]);
             return;
-        const o = host.current(), boxes = host.boxes();
-        const rep = (id) => visibleRep(id, boxes);
-        const marks = new Map();
-        const mark = (partId, role, note, full) => {
-            const r = rep(partId);
-            if (!r)
-                return;
-            const inner = r !== partId ? `안쪽 ‘${partName(partId)}’ · ` : '';
-            const prev = marks.get(r);
-            if (prev && (prev.role === 'plan-direct' || role === 'plan-impact'))
-                return;
-            marks.set(r, { role, note: inner + note, full });
-        };
-        const f = s.focus;
-        if (f?.kind === 'item') {
-            const item = itemOf(f.id);
-            if (item) {
-                // A checked item is already named by its badge right below; an unchecked one is named here and marked as not handed over.
-                const named = p.selected.includes(item.id) ? '바꿀 곳' : `바꿀 곳 · ${item.title} · 이번엔 안 맡김`;
-                for (const id of item.partIds)
-                    mark(id, 'plan-direct', named, `${item.title}\n${item.description}`);
-                for (const x of nearImpacts(item))
-                    mark(x.partId, 'plan-impact', `영향 후보 · ${x.reason}`, `영향 후보: ${x.reason}`);
-            }
         }
-        else if (f?.kind === 'impacts') {
-            for (const x of p.analysis.impacts)
-                mark(x.partId, 'plan-impact', `영향 후보 · ${x.reason}`, `영향 후보: ${x.reason}`);
-        }
-        // Outline only the innermost visible part: a frame whose own child carries the same mark stays plain.
+        const o = host.current(), boxes = host.boxes(), rep = (id) => visibleRep(id, boxes);
         const parentOf = (id) => o.view.parts.find(x => x.id === id)?.parentId ?? null;
-        for (const [id, m] of [...marks])
-            for (let up = parentOf(id), g = 0; up && g < 64; up = parentOf(up), g++)
-                if (marks.get(up)?.role === m.role)
-                    marks.delete(up);
-        for (const [id, m] of marks) {
-            const el = document.querySelector(`.node[data-box="${CSS.escape(id)}"], .frame[data-box="${CSS.escape(id)}"]`);
-            if (!el)
-                continue;
-            el.classList.add(m.role);
-            el.dataset.planTitle = m.full;
-            const note = el.querySelector('.plan-note');
-            if (note) {
-                note.textContent = m.note;
-                note.title = m.full;
-            }
-        }
-        // What this request changes, readable on the map itself: a small title on each direct target of a checked item.
-        // Innermost visible part only (never a parent and its child for the same item); never on parts that do not exist.
-        const titles = new Map();
-        for (const item of p.analysis.items.filter(i => p.selected.includes(i.id))) {
-            const at = new Set(item.partIds.map(rep).filter((x) => !!x));
+        const targets = new Map();
+        for (const item of p.analysis.items) {
+            const at = new Set(item.partIds.filter(id => rep(id)));
+            // Innermost only: never a parent and its child for the same change.
             for (const id of [...at])
                 for (let up = parentOf(id), g = 0; up && g < 64; up = parentOf(up), g++)
                     at.delete(up);
-            for (const id of at)
-                (titles.get(id) ?? titles.set(id, []).get(id)).push(item.title);
+            for (const id of at) {
+                const r = rep(id), t = targets.get(r) ?? { items: [], inner: new Set() };
+                if (!t.items.includes(item))
+                    t.items.push(item);
+                if (r !== id)
+                    t.inner.add(id);
+                targets.set(r, t);
+            }
         }
-        for (const [id, list] of titles) {
-            const el = document.querySelector(`.node[data-box="${CSS.escape(id)}"], .frame[data-box="${CSS.escape(id)}"]`);
-            if (!el)
+        const focusItem = s.focus?.kind === 'item' ? itemOf(s.focus.id) : null;
+        const focused = new Set((focusItem?.partIds ?? []).map(rep).filter((x) => !!x));
+        const reading = focusItem ? rep(activeTarget(focusItem) ?? '') : null;
+        const impacts = (focusItem ? nearImpacts(focusItem) : s.focus?.kind === 'impacts' ? p.analysis.impacts : []).filter(x => !targets.has(rep(x.partId) ?? ''));
+        const el = (id) => document.querySelector(`.node[data-box="${CSS.escape(id)}"], .frame[data-box="${CSS.escape(id)}"]`);
+        for (const [id, t] of targets) {
+            const e = el(id);
+            if (!e)
                 continue;
-            el.append(h('span', { class: 'plan-badge', title: `이번에 맡길 변경: ${list.join(', ')}` }, list.length > 1 ? `변경 · ${list[0]} 외 ${list.length - 1}` : `변경 · ${list[0]}`));
+            e.classList.add('plan-direct');
+            if (focused.has(id))
+                e.classList.add('plan-focus');
+            if (reading === id)
+                e.classList.add('plan-reading');
+            const inner = [...t.inner].map(partName).filter(Boolean);
+            // The change being read speaks in its note beside the part; here only the word. Other changes keep their name.
+            const text = `${inner.length ? `안쪽 ‘${inner.join('’, ‘')}’ · ` : ''}구상${focused.has(id) ? '' : ` · ${t.items.length > 1 ? `${t.items.length}건` : t.items[0].title}`}`;
+            e.dataset.planTitle = t.items.map(i => i.title).join('\n');
+            const note = e.querySelector('.plan-note');
+            if (note) {
+                note.textContent = text;
+                note.title = `바꾸려는 내용(아직 적용 안 됨): ${t.items.map(i => i.title).join(', ')}`;
+            }
         }
+        for (const x of impacts) {
+            const r = rep(x.partId), e = r ? el(r) : null;
+            if (!e || e.classList.contains('plan-impact'))
+                continue;
+            e.classList.add('plan-impact');
+            const note = e.querySelector('.plan-note');
+            if (note) {
+                note.textContent = `${r !== x.partId ? `안쪽 ‘${partName(x.partId)}’ · ` : ''}영향 후보`;
+                note.title = `영향 후보: ${x.reason}`;
+            }
+        }
+        host.callouts(callouts(o, p), moveTarget);
+        moveTarget = false;
+    }
+    /* ---------- notes beside the parts: what a part is now → the difference wanted ----------
+       Outside the structure: no node, no port, no relation, no place in the layout. With presentation data, its short quotes
+       and where they come from (the map's description, or a cited source: '자료에서', not the product as it is); without, the
+       honest fallback (the part's own description → the change's name). One target reads at a time; all targets of the change
+       remain marked on the map and named in the target navigation. */
+    function callouts(o, p) {
+        const st = s, f = st.focus;
+        if (st.explain || st.evidenceFor || panelOpen() || st.sheet || f?.kind !== 'item')
+            return [];
+        const item = itemOf(f.id), id = item ? activeTarget(item) : null, at = id ? visibleRep(id, host.boxes()) : null;
+        return item && id && at ? [calloutNote(o, p, item, id, item.presentation?.find(x => x.partId === id) ?? null, at)] : [];
+    }
+    function calloutNote(o, p, item, partId, pres, at) {
+        const st = s, part = o.view.parts.find(x => x.id === partId), name = part?.name ?? '부분';
+        const firstSentence = (t) => { const m = /^(.+?[.!?。])(?=\s|$)/.exec(t.replace(/\s+/g, ' ').trim()); return m ? m[1] : t.trim(); };
+        let now, from;
+        if (pres) {
+            now = pres.current.text;
+            if (pres.current.source === 'evidence') {
+                const ev = p.evidence.filter(e => pres.current.refs.includes(e.id));
+                from = h('button', { type: 'button', class: 'co-src', title: ev.map(e => `${e.id} · ${e.title} · ${e.basis}`).join('\n'), onclick: () => { st.evidenceFor = item.id; render(); } }, `자료에서 · ${pres.current.refs.join(', ')}`);
+            }
+            else
+                from = '지도 설명';
+        }
+        else if (part?.summary) {
+            now = firstSentence(part.summary);
+            from = '받은 정리';
+        }
+        else if (part?.note) {
+            now = firstSentence(part.note);
+            from = '지도 설명';
+        }
+        else {
+            now = '지금 설명 없음';
+            from = '';
+        }
+        const kind = pres?.origin ?? null;
+        return h('div', { class: `callout ${kind ?? 'plain'}`, 'data-box': at, role: 'note', 'aria-label': `${name} · 변경 구상` }, h('p', { class: 'co-head' }, h('span', { class: 'co-kind' }, kind === 'intent' ? '원하는 차이' : kind === 'suggestion' ? '분석 제안' : '변경 항목'), h('strong', {}, name), at !== partId ? h('small', {}, `‘${partName(at)}’ 안쪽`) : null), h('div', { class: 'co-pair' }, h('div', { class: 'co-row now' }, h('span', { class: 'co-label' }, pres?.current.source === 'evidence' ? '자료상' : '현재 설명'), h('p', {}, now, from ? h('small', {}, from) : null)), h('div', { class: 'co-row want' }, h('span', { class: 'co-label' }, kind === 'suggestion' ? '제안' : '바꿀 모습'), h('p', {}, pres ? pres.wanted.text : item.title))));
     }
     /** The part itself when it is drawn in this view, else its nearest drawn ancestor; null outside the view. */
     function visibleRep(id, boxes) {
@@ -207,19 +290,14 @@ export function createPlanView(host) {
         if (!s)
             return;
         const same = JSON.stringify(s.focus) === JSON.stringify(next);
+        if (next?.kind === 'item' && host.selected())
+            host.selectPart(null);
         s.focus = same ? null : next;
+        s.evidenceFor = null;
         if (s.focus && plan())
             s.mode = 'preview';
+        moveTarget = !!s.focus;
         render();
-        // Bring the first changed part into view with the smallest move; never a refit.
-        if (s.focus?.kind === 'item') {
-            const item = itemOf(s.focus.id), boxes = host.boxes(), o = host.current();
-            const first = item?.partIds.map(id => { for (let cur = id, g = 0; cur && g < 64; cur = o.view.parts.find(x => x.id === cur)?.parentId ?? null, g++)
-                if (boxes.has(cur))
-                    return cur; return null; }).find(Boolean);
-            if (first)
-                host.reveal(first);
-        }
     }
     /* ---------- actions ---------- */
     const needsCode = () => host.status().access === 'code' && !host.accessCode();
@@ -269,8 +347,11 @@ export function createPlanView(host) {
             const next = createPlan(o.project.id, inp.basis, inp.ask.intent, inp.evidence, analysis);
             session.bundle = { ...session.bundle, plan: next, by: { kind: 'ai', model: res.model, at: new Date().toISOString(), records: inp.records } };
             session.mode = 'preview';
-            session.focus = null;
+            session.focus = firstFocus(next);
+            session.targets = {};
             session.editing = false;
+            session.detail = false;
+            moveTarget = true;
             if (s === session)
                 persist();
         }
@@ -448,10 +529,12 @@ export function createPlanView(host) {
             if ((s.bundle.plan || s.bundle.snapshots.length) && !confirm('지금 변경안을 가져온 파일의 내용으로 바꿀까요? 지금 안을 남기려면 먼저 파일로 내보내 두세요.'))
                 return;
             s.bundle = read;
-            s.focus = null;
+            s.focus = firstFocus(read.plan);
+            s.targets = {};
             s.mode = read.plan ? 'preview' : 'current';
             s.editing = !read.plan;
             s.resultFor = read.snapshots.at(-1)?.id ?? null;
+            moveTarget = true;
             persist();
             s.fileMsg = s.storeMsg ? null : '변경안 파일을 가져왔어요.';
             render();
@@ -478,9 +561,11 @@ export function createPlanView(host) {
         MEMORY.set(memoryKey(o, s.condition), s.bundle);
         s.condition = c;
         s.bundle = bundleFor(o, c).bundle;
-        s.focus = null;
+        s.focus = firstFocus(s.bundle.plan);
+        s.targets = {};
         s.error = null;
         s.mode = s.bundle.plan ? 'preview' : 'current';
+        moveTarget = true;
         s.resultFor = s.bundle.snapshots.at(-1)?.id ?? null;
         s.editing = !s.bundle.plan;
         render();
@@ -493,19 +578,179 @@ export function createPlanView(host) {
         if (!o)
             return;
         renderMode();
-        renderPanel(o);
+        renderStrip(o);
+        if (panelOpen())
+            renderPanel(o);
+        else {
+            $('plan-panel').hidden = true;
+            $('plan-panel').replaceChildren();
+        }
         $('space').style.setProperty('--plan-w', `${width()}px`);
         renderSheet();
         overlay();
+        renderCompare(o);
     }
-    const width = () => (s ? inspectorWidth() : 0);
+    /** The right panel opens for writing (no plan yet, editing, a stale sentence, work in progress) or when asked for the whole
+     * plan; otherwise the plan reads on the map: its strip and one comparison. */
+    const panelOpen = () => !!s && (!plan() || s.editing || stale() || !!s.pending || !!s.scoping || s.detail);
+    const width = () => (s && panelOpen() ? inspectorWidth() : 0);
+    /* ---------- the plan's strip: what is being tried, the changes, and the way to the whole plan ---------- */
+    function renderStrip(o) {
+        const strip = $('plan-strip'), st = s, p = plan();
+        strip.hidden = false;
+        const close = h('button', { type: 'button', class: 'close ps-close', 'aria-label': '변경 구상 닫기', title: '변경 구상 닫기 (Esc) · 초안은 남아요', onclick: () => closePlan() }, '×');
+        if (!p) {
+            strip.replaceChildren();
+            put(strip, h('div', { class: 'ps-head' }, h('span', { class: 'ps-kicker' }, '변경 구상'), st.example ? h('span', { class: 'tag' }, '예제') : null, h('span', { class: 'ps-intent' }, '오른쪽에 바꾸고 싶은 모습을 적어 주세요')), close);
+            return;
+        }
+        const by = st.bundle.by, basis = by?.kind === 'example' ? '작성된 예제 분석' : by?.kind === 'ai' ? `AI 분석 · ${ago(by.at)}` : '분석';
+        const focusId = st.focus?.kind === 'item' ? st.focus.id : null;
+        const conds = p.analysis.preserve.length + p.analysis.unknowns.length;
+        strip.replaceChildren();
+        put(strip, h('div', { class: 'ps-head' }, h('span', { class: 'ps-kicker', title: by?.kind === 'ai' ? `${by.model} · ${fullTime(by.at)}` : '' }, '변경 구상', h('small', {}, basis)), h('button', { type: 'button', class: 'ps-intent', title: `${p.intent}\n\n문장 고치기·근거·요청문은 ‘자세히’`, onclick: () => { st.detail = true; render(); } }, p.intent)), h('div', { class: 'ps-items', role: 'group', 'aria-label': '바꾸려는 것' }, ...p.analysis.items.map(i => h('button', { type: 'button', class: 'ps-item', 'aria-pressed': String(focusId === i.id), title: p.selected.includes(i.id) ? '이번 요청에 맡기는 변경' : '이번 요청에서 빠진 변경', onclick: () => focusItem({ kind: 'item', id: i.id }) }, h('span', { class: `ps-hand${p.selected.includes(i.id) ? ' on' : ''}`, 'aria-hidden': 'true' }), i.title))), focusId ? focusControls(p, itemOf(focusId)) : null, conds ? conditions(p) : null, h('button', { type: 'button', class: 'ps-more', 'aria-pressed': String(st.detail), onclick: () => { st.detail = !st.detail; render(); } }, st.detail ? '지도 비교로' : '자세히'), close, focusId && itemOf(focusId) ? targetNav(itemOf(focusId)) : null);
+    }
+    function targetNav(item) {
+        const ids = itemTargets(item), active = activeTarget(item);
+        if (ids.length < 2)
+            return null;
+        const tabs = h('div', { class: 'ps-target-tabs', role: 'tablist', 'aria-label': `‘${item.title}’에서 바뀌는 부분` }, ...ids.map(id => h('button', { type: 'button', class: 'ps-target', role: 'tab', 'data-target': id, 'aria-selected': String(id === active), tabindex: id === active ? '0' : '-1',
+            title: `${partName(id) ?? '부분'}${visibleRep(id, host.boxes()) !== id ? ' · 안쪽의 실제 부분' : ''}`, onclick: () => chooseTarget(item, id) }, partName(id) ?? '부분')));
+        tabs.addEventListener('keydown', e => {
+            const at = ids.indexOf(active ?? '');
+            const next = e.key === 'ArrowRight' ? (at + 1) % ids.length : e.key === 'ArrowLeft' ? (at + ids.length - 1) % ids.length : e.key === 'Home' ? 0 : e.key === 'End' ? ids.length - 1 : -1;
+            if (next < 0)
+                return;
+            e.preventDefault();
+            chooseTarget(item, ids[next], true);
+        });
+        return h('nav', { class: 'ps-targets', 'aria-label': '읽을 변경 대상' }, h('span', { class: 'ps-target-label' }, `바뀌는 부분 ${ids.length}`), tabs);
+    }
+    /** The change being read: hand it over or not, read its explanation, open its sources. */
+    function focusControls(p, item) {
+        const st = s, refs = p.evidence.filter(e => item.refs.includes(e.id)).length, box = h('input', { type: 'checkbox', id: `ps-hand-${item.id}` });
+        box.checked = p.selected.includes(item.id);
+        box.addEventListener('change', () => toggleItem(item.id, box.checked));
+        return h('div', { class: 'ps-focus', role: 'group', 'aria-label': `‘${item.title}’` }, h('label', { class: 'cmp-hand', for: `ps-hand-${item.id}` }, box, h('span', {}, '맡기기')), h('button', { type: 'button', class: 'ps-link', 'aria-pressed': String(st.explain), onclick: () => { st.explain = !st.explain; st.evidenceFor = null; render(); } }, '설명'), refs ? h('button', { type: 'button', class: 'ps-link', 'aria-pressed': String(st.evidenceFor === item.id), onclick: () => { st.evidenceFor = st.evidenceFor === item.id ? null : item.id; render(); } }, `근거 ${refs}`) : null);
+    }
+    /** Conditions with no part of their own (to keep, not yet decided): read here, never pinned to a part on the map. */
+    function conditions(p) {
+        const st = s, open = st.strip === 'conditions';
+        const pop = open ? h('div', { class: 'ps-pop', role: 'dialog', 'aria-label': '대상을 정하지 않은 조건' }, p.analysis.preserve.length ? h('section', {}, h('h3', {}, '지킬 것'), h('ul', {}, ...p.analysis.preserve.map(x => h('li', {}, x)))) : null, p.analysis.unknowns.length ? h('section', {}, h('h3', {}, '아직 정하지 않은 것'), h('ul', {}, ...p.analysis.unknowns.map(x => h('li', {}, x)))) : null, h('p', { class: 'fine' }, '특정 부분에 걸린 조건이 아니라 이 변경안 전체의 조건이에요.')) : null;
+        return h('div', { class: 'ps-conds' }, h('button', { type: 'button', class: 'ps-cond-btn', 'aria-expanded': String(open), onclick: () => { st.strip = open ? null : 'conditions'; render(); } }, `지킬 것 ${p.analysis.preserve.length} · 정할 것 ${p.analysis.unknowns.length}`), pop);
+    }
+    /* ---------- one comparison on the map: what a change wants next to what each of its parts is now ----------
+       The words carry the roles: 지금 (the part's current description and where it comes from), 구상 (what the change wants;
+       not applied, not a result), 살펴볼 것 (an impact candidate's reason, on the part it names). */
+    let lastFocusKey = '', lastShown = '';
+    function renderCompare(o) {
+        const st = s, p = plan();
+        if (!p || st.mode !== 'preview' || !st.focus || st.focus.kind === 'impacts' || panelOpen() || st.sheet || (!st.explain && !st.evidenceFor)) {
+            host.surface(null, [], false);
+            lastFocusKey = '';
+            return;
+        }
+        const boxes = host.boxes(), rep = (id) => visibleRep(id, boxes), active = st.focus.kind === 'item' ? activeTarget(itemOf(st.focus.id)) : st.focus.id;
+        const key = `${JSON.stringify(st.focus)}|${active ?? ''}`;
+        let content, parts;
+        const shown = `${key}|${st.evidenceFor ?? ''}`;
+        if (st.focus.kind === 'item') {
+            const item = itemOf(st.focus.id);
+            if (!item) {
+                host.surface(null, [], false);
+                return;
+            }
+            content = st.evidenceFor === item.id ? itemEvidence(p, item) : itemCompare(o, p, item);
+            parts = active && rep(active) ? [rep(active)] : [];
+        }
+        else {
+            const id = st.focus.id;
+            content = partCompare(o, p, id);
+            parts = [rep(id) ?? id];
+        }
+        // An explicit target change in an open comparison reveals that target above the reading surface. First opening and
+        // the same target's sources in and out only size the surface; they keep the person's camera, including a manual pan.
+        host.surface(content, parts, lastFocusKey && key !== lastFocusKey ? true : key !== lastFocusKey || shown !== lastShown ? 'refit' : false);
+        lastFocusKey = key;
+        lastShown = shown;
+    }
+    /** What a part is now, and where that description comes from; nothing when there is nothing. */
+    function now(o, id) {
+        const part = o.view.parts.find(x => x.id === id);
+        if (!part)
+            return [h('p', { class: 'cmp-none' }, '지금 지도에 없는 부분이에요.')];
+        if (part.summary)
+            return [h('p', { class: 'cmp-text' }, part.summary), h('p', { class: 'cmp-src' }, `받은 정리 · ${part.origin ?? '전달받은 정리'}`)];
+        if (part.note)
+            return [h('p', { class: 'cmp-text' }, part.note), h('p', { class: 'cmp-src' }, '적어 둔 계획 설명 · 받은 정리 없음')];
+        return [h('p', { class: 'cmp-none' }, '지금 설명 없음')];
+    }
+    const row = (label, cls, ...children) => h('div', { class: `cmp-row ${cls}` }, h('span', { class: 'cmp-label' }, label), h('div', { class: 'cmp-val' }, ...children.filter((c) => !!c)));
+    function compareHead(kicker, title, tools) {
+        return h('header', { class: 'lens-head cmp-head' }, h('div', { class: 'lens-path' }, h('span', {}, kicker)), h('h2', { id: 'lens-title' }, title), h('div', { class: 'head-tools' }, ...tools));
+    }
+    /* A change reads as pairs: on the left each part it targets as it is now (with where that comes from), on the right what the
+       change wants, once for all of them, after an arrow. Impact candidates follow below, their reasons only, apart from the pair. */
+    function pair(left, right, currentLabel = '현재 설명') {
+        return h('div', { class: 'cmp-pair' }, h('div', { class: 'cmp-now' }, h('h3', { class: 'cmp-label' }, currentLabel), ...left), h('div', { class: 'cmp-arrow', 'aria-hidden': 'true' }, '→'), h('div', { class: 'cmp-want' }, h('h3', { class: 'cmp-label' }, '구상 ', h('small', {}, '바라는 모습 · 적용 안 됨')), ...right));
+    }
+    function impactList(o, list, named = true) {
+        return list.length ? h('section', { class: 'cmp-impacts' }, h('h3', { class: 'cmp-label' }, '살펴볼 것 ', h('small', {}, '영향 후보 · 분석이 든 이유')), h('ul', {}, ...list.map(x => h('li', {}, named ? h('button', { type: 'button', class: 'link-button', onclick: () => locate(x.partId) }, partName(x.partId) ?? '부분') : null, h('span', {}, x.reason))))) : null;
+    }
+    function itemCompare(o, p, item) {
+        const st = s, items = p.analysis.items, n = items.indexOf(item), boxes = host.boxes();
+        const by = st.bundle.by, basis = by?.kind === 'example' ? '작성된 예제 분석' : by?.kind === 'ai' ? 'AI 분석' : '분석';
+        const step = (d) => focusItem({ kind: 'item', id: items[(n + d + items.length) % items.length].id });
+        const tools = [
+            items.length > 1 ? h('button', { type: 'button', class: 'cmp-step', 'aria-label': '앞 변경', onclick: () => step(-1) }, '‹') : null,
+            items.length > 1 ? h('span', { class: 'cmp-count' }, `${n + 1}/${items.length}`) : null,
+            items.length > 1 ? h('button', { type: 'button', class: 'cmp-step', 'aria-label': '다음 변경', onclick: () => step(1) }, '›') : null,
+            h('button', { type: 'button', class: 'close', 'aria-label': '설명 닫기', title: '닫기 (Esc)', onclick: () => { st.explain = false; render(); } }, '×')
+        ].filter((x) => !!x);
+        const active = activeTarget(item), pres = item.presentation?.find(x => x.partId === active), at = new Set(active ? [active] : []);
+        const targets = [...at].map(id => {
+            const r = visibleRep(id, boxes), where = r && r !== id ? `‘${partName(r)}’ 안쪽` : !r ? '이 범위 밖' : null;
+            const current = pres ? [h('p', { class: 'cmp-text' }, pres.current.text), h('p', { class: 'cmp-src' }, pres.current.source === 'evidence' ? `자료에서 · ${pres.current.refs.join(', ')}` : '지도 설명')] : now(o, id);
+            return h('div', { class: 'cmp-part' }, h('p', { class: 'cmp-name' }, h('button', { type: 'button', class: 'link-button', onclick: () => locate(id) }, partName(id) ?? '지금 지도에 없는 부분'), where ? h('small', {}, where) : null), ...current);
+        });
+        const own = p.analysis.impacts.filter(x => at.has(x.partId)), near = nearImpacts(item);
+        const box = h('input', { type: 'checkbox', id: `cmp-hand-${item.id}` });
+        box.checked = p.selected.includes(item.id);
+        box.addEventListener('change', () => toggleItem(item.id, box.checked));
+        const refs = p.evidence.filter(e => item.refs.includes(e.id)).length;
+        return [
+            compareHead(`변경 구상 · ${basis}`, item.title, tools),
+            h('div', { class: 'lens-body cmp-body' }, h('div', { class: 'cmp-main' }, pair(targets.length ? targets : [h('p', { class: 'cmp-none' }, '지금 지도에 대응하는 부분이 없어요.')], [h('p', { class: 'cmp-text' }, pres?.wanted.text ?? item.description)], pres?.current.source === 'evidence' ? '자료상' : '현재 설명'), impactList(o, [...own, ...near])), item.dependsOn.length && by?.kind === 'example' ? h('p', { class: 'cmp-dep' }, h('span', {}, '전제'), item.dependsOn.map(d => itemOf(d)?.title ?? d).join(', ')) : null),
+            h('footer', { class: 'lens-foot' }, h('label', { class: 'cmp-hand', for: `cmp-hand-${item.id}` }, box, h('span', {}, '이번 요청에 맡기기')), refs ? h('button', { type: 'button', class: 'lens-more', onclick: () => { st.evidenceFor = item.id; render(); requestAnimationFrame(() => document.getElementById('cmp-back')?.focus()); } }, `근거 ${refs}`, h('span', { 'aria-hidden': 'true' }, ' ›')) : null)
+        ];
+    }
+    /** The sources this change cites, read in the comparison's place: each original text with where it comes from. */
+    function itemEvidence(p, item) {
+        const st = s, by = st.bundle.by, refs = p.evidence.filter(e => item.refs.includes(e.id));
+        const back = () => { st.evidenceFor = null; render(); requestAnimationFrame(() => document.querySelector('#lens .cmp-hand input, #lens .lens-more, .ps-focus button')?.focus()); };
+        return [
+            compareHead(`근거 ${refs.length} · ${by?.kind === 'example' ? '예제 원자료' : '이 변경안이 읽은 자료'}`, item.title, [h('button', { type: 'button', class: 'close', 'aria-label': '비교로 돌아가기', title: '비교로 (Esc)', onclick: back }, '×')]),
+            h('div', { class: 'lens-body cmp-body cmp-evidence' }, sourceList(refs, true)),
+            h('footer', { class: 'lens-foot' }, h('button', { type: 'button', id: 'cmp-back', class: 'lens-more', onclick: back }, h('span', { 'aria-hidden': 'true' }, '‹ '), st.explain ? '비교로 돌아가기' : '지도로 돌아가기'))
+        ];
+    }
+    function partCompare(o, p, id) {
+        const boxes = host.boxes(), r = visibleRep(id, boxes) ?? id;
+        const touching = p.analysis.items.filter(i => i.partIds.some(x => x === id || visibleRep(x, boxes) === r));
+        const impacts = p.analysis.impacts.filter(x => x.partId === id);
+        return [
+            compareHead('변경 구상 · 이 부분', partName(id) ?? '부분', [h('button', { type: 'button', class: 'close', 'aria-label': '선택 해제', title: '닫기 (Esc)', onclick: () => host.selectPart(null) }, '×')]),
+            h('div', { class: 'lens-body cmp-body' }, h('div', { class: 'cmp-main' }, touching.length ? pair(now(o, id), touching.map(i => h('div', { class: 'cmp-item' }, h('p', { class: 'cmp-name' }, h('button', { type: 'button', class: 'link-button', onclick: () => focusItem({ kind: 'item', id: i.id }) }, i.title), i.partIds.includes(id) ? null : h('small', {}, '이 부분 안쪽')), h('p', { class: 'cmp-text clamp3' }, i.description))))
+                : h('div', { class: 'cmp-only' }, h('h3', { class: 'cmp-label' }, '지금'), ...now(o, id), impacts.length ? null : h('p', { class: 'cmp-none' }, '이 변경안이 바꾸거나 영향 후보로 본 부분은 아니에요.')), impactList(o, impacts, false)))
+        ];
+    }
+    function closePlan() { close(); }
     function renderMode() {
         const box = $('plan-mode'), p = plan();
         box.hidden = !s || !p;
         if (!s || !p)
             return;
-        const b = (mode, label) => h('button', { type: 'button', 'aria-pressed': String(s.mode === mode), onclick: () => { s.mode = mode; if (mode === 'current')
-                s.focus = null; render(); } }, label);
+        const b = (mode, label) => h('button', { type: 'button', 'aria-pressed': String(s.mode === mode), onclick: () => { s.mode = mode; render(); } }, label);
         box.replaceChildren(b('current', '현재'), b('preview', '변경 미리보기'));
     }
     /** Same inspector grammar as a part: kicker → title (what is wanted) → one basis line → the change list first. Writing and
@@ -513,7 +758,9 @@ export function createPlanView(host) {
     function renderPanel(o) {
         const panel = $('plan-panel'), prev = panel.querySelector('.pp-body'), keep = prev?.scrollTop ?? 0, p = plan(), st = s;
         panel.hidden = false;
-        const head = h('header', { class: 'panel-head pp-head' }, h('div', { class: 'panel-path' }, h('span', {}, '변경 구상'), st.example ? h('span', { class: 'tag' }, '예제') : null), p ? h('h2', { id: 'plan-title', class: 'pp-want', tabindex: '-1', title: p.intent }, p.intent) : h('h2', { id: 'plan-title', tabindex: '-1' }, '새 변경안'), p ? h('p', { class: 'pp-basis', title: p.basis }, `기준 · ${short(p.basis, 64)}`) : h('p', { class: 'pp-basis' }, '적은 문장으로 같은 지도에서 달라질 곳을 살펴봐요.'), newerNote(o, p), h('div', { class: 'head-tools' }, h('button', { type: 'button', class: 'close', 'aria-label': '변경 구상 닫고 현재 지도로', title: '닫기 (Esc) · 초안은 남아요', onclick: () => close() }, '×')));
+        const head = h('header', { class: 'panel-head pp-head' }, h('div', { class: 'panel-path' }, h('span', {}, '변경 구상'), st.example ? h('span', { class: 'tag' }, '예제') : null), p ? h('h2', { id: 'plan-title', class: 'pp-want', tabindex: '-1', title: p.intent }, p.intent) : h('h2', { id: 'plan-title', tabindex: '-1' }, '새 변경안'), p ? h('p', { class: 'pp-basis', title: p.basis }, `기준 · ${short(p.basis, 64)}`) : h('p', { class: 'pp-basis' }, '적은 문장으로 같은 지도에서 달라질 곳을 살펴봐요.'), newerNote(o, p), h('div', { class: 'head-tools' }, p && !st.editing && !stale()
+            ? h('button', { type: 'button', class: 'close', 'aria-label': '자세히 닫고 지도 비교로', title: '지도 비교로 (Esc)', onclick: () => { st.detail = false; render(); } }, '×')
+            : h('button', { type: 'button', class: 'close', 'aria-label': '변경 구상 닫고 현재 지도로', title: '닫기 (Esc) · 초안은 남아요', onclick: () => close() }, '×')));
         const body = h('div', { class: 'pp-body panel-body' });
         put(body, partContext(o), p && !st.editing && !stale() ? planSection(o, p) : null, intentSection(o), p && (st.editing || stale()) ? planSection(o, p) : null, st.bundle.snapshots.length ? resultSection() : null);
         // What goes into this request stays in view under the scrolling body, next to the button that makes it.
@@ -620,8 +867,8 @@ export function createPlanView(host) {
         const st = s, b = (c, label) => h('button', { type: 'button', 'aria-pressed': String(st.condition === c), title: CONDITION_LABEL[c], disabled: !!st.pending, onclick: () => setCondition(c) }, label);
         return h('div', { class: 'pp-cond', role: 'group', 'aria-label': '예제 자료 바꾸기' }, h('span', {}, '자료 바꾸기 · 코드에 파일별 결과가'), b('A', '있음'), b('B', '없음'));
     }
-    function sourceList(evidence) {
-        return h('ol', { class: 'pp-sources' }, ...evidence.map(e => h('li', {}, h('details', {}, h('summary', {}, h('span', { class: `pp-kind k-${e.kind}` }, EVIDENCE_LABEL[e.kind]), h('span', {}, e.title)), h('p', {}, e.text), h('p', { class: 'pp-ref' }, `${e.id} · ${e.basis}`)))));
+    function sourceList(evidence, open = false) {
+        return h('ol', { class: 'pp-sources' }, ...evidence.map(e => h('li', {}, h('details', { open }, h('summary', {}, h('span', { class: `pp-kind k-${e.kind}` }, EVIDENCE_LABEL[e.kind]), h('span', {}, e.title)), h('p', {}, e.text), h('p', { class: 'pp-ref' }, `${e.id} · ${e.basis}`)))));
     }
     /** The person's own material for a project with few records: kept in the plan's sidecar, sent with the next analysis. */
     function addSource(o) {
@@ -831,6 +1078,30 @@ export function createPlanView(host) {
             render();
             return true;
         }
+        if (s.strip) {
+            s.strip = null;
+            render();
+            return true;
+        }
+        if (s.evidenceFor) {
+            s.evidenceFor = null;
+            render();
+            return true;
+        }
+        if (s.explain) {
+            s.explain = false;
+            render();
+            return true;
+        }
+        if (s.detail && plan() && !s.editing) {
+            s.detail = false;
+            render();
+            return true;
+        }
+        if (s.focus?.kind === 'part' && host.selected()) {
+            host.selectPart(null);
+            return true;
+        }
         if (s.focus) {
             s.focus = null;
             render();
@@ -845,10 +1116,37 @@ export function createPlanView(host) {
     }
     return {
         isOpen: () => !!s,
+        /** The right panel's width while the whole plan is open there; 0 while the plan reads on the map. */
         open, close, projectChanged, overlay, escape,
         /** The selection changed on the map while planning: the panel reads it in place of the part panel. */
-        selectionChanged: () => { if (s)
-            render(); },
+        selectionChanged: (changed = false) => {
+            if (!s)
+                return;
+            const id = host.selected();
+            if (id && plan()) {
+                const boxes = host.boxes(), matches = (item) => itemTargets(item).filter(t => t === id || visibleRep(t, boxes) === id);
+                const current = s.focus?.kind === 'item' ? itemOf(s.focus.id) : null;
+                const item = current && matches(current).length ? current : items().find(i => matches(i).length);
+                if (item) {
+                    const possible = matches(item), remembered = activeTarget(item);
+                    s.targets[item.id] = possible.includes(remembered ?? '') ? remembered : possible[0];
+                    s.focus = { kind: 'item', id: item.id };
+                }
+                else
+                    s.focus = { kind: 'part', id };
+                s.mode = 'preview';
+                s.strip = null;
+                if (changed) {
+                    s.evidenceFor = null;
+                    moveTarget = true;
+                }
+            }
+            else if (!id && s.focus?.kind === 'part')
+                s.focus = firstFocus(plan());
+            render();
+            if (changed && id && s.focus?.kind === 'part')
+                host.reveal(id);
+        },
         statusChanged: () => { if (s)
             render(); },
         toggle: () => (s ? close() : open()),

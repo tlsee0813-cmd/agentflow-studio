@@ -96,7 +96,8 @@ function finish(input) {
 export function mapReply(reply, input) {
     const sent = parsePlanAnalysis(reply, [...input.parts.keys()], input.evidence.map(e => e.id));
     const real = (a) => input.parts.get(a);
-    const mapped = { ...sent, items: sent.items.map(i => ({ ...i, partIds: i.partIds.map(real) })), impacts: sent.impacts.map(x => ({ ...x, partId: real(x.partId) })) };
+    const mapped = { ...sent, items: sent.items.map(i => ({ ...i, partIds: i.partIds.map(real),
+            ...(i.presentation ? { presentation: i.presentation.map(p => ({ ...p, partId: real(p.partId) })) } : {}) })), impacts: sent.impacts.map(x => ({ ...x, partId: real(x.partId) })) };
     return parsePlanAnalysis(mapped, [...input.parts.values()], input.evidence.map(e => e.id));
 }
 /** The request-scope review: the plan's own evidence and only the chosen items (their parts under the same aliases as an
