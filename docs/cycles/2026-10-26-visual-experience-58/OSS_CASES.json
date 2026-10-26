@@ -1,0 +1,1959 @@
+{
+  "schemaVersion": "agentflow.oss-review-cases.1",
+  "preparedAt": "2026-10-26",
+  "purpose": "UI58 source-grounded real-OSS inspection inputs; not official architecture diagrams or OSS execution test results.",
+  "mapping": {
+    "target": "app/continuity/src/shared/studio-examples.ts buildExample(spec)",
+    "extract": "Each cases[i].spec is directly compatible with ExampleSpec. Ignore sources/provenance/checks when passing spec.",
+    "identity": "key is fixture identity; name is display text. Keep parent-before-child order. records stays empty.",
+    "relationSemantics": "needs is directed consumer→provider only where source explicitly declares use; related is optional configuration. Placement and selected subset are reviewer choices.",
+    "scope": "Read-only repository research; no builds, dependency installs, reports, agents, or input/output AI connectors."
+  },
+  "cases": [
+    {
+      "id": "oss-joplin",
+      "category": "Joplin 데스크톱·공유 라이브러리",
+      "repository": "laurent22/joplin",
+      "commit": "0c9e457db81108660b96effbc767aea599d6ca90",
+      "commitUrl": "https://github.com/laurent22/joplin/commit/0c9e457db81108660b96effbc767aea599d6ca90",
+      "sourceReadMethod": "Read-only GitHub connector; immutable raw files and directory listings; no clone/install or OSS application execution.",
+      "spec": {
+        "id": "oss-joplin",
+        "name": "Joplin 데스크톱·공유 라이브러리",
+        "brief": "실제 Joplin 소스·아키텍처를 읽어 만든 탐색용 부분 지도. 전체 저장소나 공식 제품 분해도를 재현하지 않으며 작업·검증 보고는 넣지 않는다.",
+        "parts": [
+          {
+            "key": "desktop",
+            "name": "@joplin/app-desktop",
+            "note": "Electron·React 데스크톱 앱. 이름은 package.json, 기술 설명은 architecture.md에서 확인."
+          },
+          {
+            "key": "note-editor",
+            "name": "NoteEditor",
+            "note": "데스크톱 gui/NoteEditor 디렉터리.",
+            "parent": "desktop"
+          },
+          {
+            "key": "note-body",
+            "name": "NoteBody",
+            "note": "NoteEditor/NoteBody 디렉터리.",
+            "parent": "note-editor"
+          },
+          {
+            "key": "body-codemirror",
+            "name": "CodeMirror",
+            "note": "NoteBody 아래 실제 편집기 디렉터리.",
+            "parent": "note-body"
+          },
+          {
+            "key": "body-plaineditor",
+            "name": "PlainEditor",
+            "note": "NoteBody 아래 실제 편집기 디렉터리.",
+            "parent": "note-body"
+          },
+          {
+            "key": "body-tinymce",
+            "name": "TinyMCE",
+            "note": "NoteBody 아래 실제 편집기 디렉터리.",
+            "parent": "note-body"
+          },
+          {
+            "key": "body-whiteboardeditor",
+            "name": "WhiteboardEditor",
+            "note": "NoteBody 아래 실제 편집기 디렉터리.",
+            "parent": "note-body"
+          },
+          {
+            "key": "note-title",
+            "name": "NoteTitle",
+            "note": "NoteEditor 아래 제목 편집 부분 디렉터리.",
+            "parent": "note-editor"
+          },
+          {
+            "key": "desktop-notelist",
+            "name": "NoteList",
+            "note": "데스크톱 gui 아래 실제 디렉터리.",
+            "parent": "desktop"
+          },
+          {
+            "key": "desktop-sidebar",
+            "name": "Sidebar",
+            "note": "데스크톱 gui 아래 실제 디렉터리.",
+            "parent": "desktop"
+          },
+          {
+            "key": "desktop-notetoolbar",
+            "name": "NoteToolbar",
+            "note": "데스크톱 gui 아래 실제 디렉터리.",
+            "parent": "desktop"
+          },
+          {
+            "key": "mobile",
+            "name": "@joplin/app-mobile",
+            "note": "React Native 앱. 공유 라이브러리·편집기·렌더러 의존성이 명세에 있다."
+          },
+          {
+            "key": "cli",
+            "name": "joplin (app-cli)",
+            "note": "터미널 앱. manifest의 패키지 이름은 joplin이다."
+          },
+          {
+            "key": "lib",
+            "name": "@joplin/lib",
+            "note": "사용자 앱이 함께 쓰는 백엔드 라이브러리."
+          },
+          {
+            "key": "services",
+            "name": "Services",
+            "note": "문서가 설명하는 고수준 기능 묶음. 전체 디렉터리 트리를 그대로 옮긴 것은 아니다.",
+            "parent": "lib"
+          },
+          {
+            "key": "search",
+            "name": "Search engine",
+            "note": "packages/lib/services/search",
+            "parent": "services"
+          },
+          {
+            "key": "plugins",
+            "name": "Plugin system",
+            "note": "packages/lib/services/plugins",
+            "parent": "services"
+          },
+          {
+            "key": "sync",
+            "name": "Synchronizer",
+            "note": "packages/lib/Synchronizer.ts",
+            "parent": "services"
+          },
+          {
+            "key": "models",
+            "name": "Models",
+            "note": "문서가 설명하는 서비스와 DB 사이의 모델 계층.",
+            "parent": "lib"
+          },
+          {
+            "key": "sqlite",
+            "name": "Local SQLite database",
+            "note": "각 앱의 로컬 notes·settings·cache 저장소. 공유 라이브러리 관련 개념을 모아 둔 위치이며 디렉터리 포함관계 주장은 아니다.",
+            "parent": "lib"
+          },
+          {
+            "key": "settings",
+            "name": "settings.json",
+            "note": "사용자 앱 구성 파일. 라이브러리 관련 설정으로 묶은 위치는 검토자가 선택.",
+            "parent": "lib"
+          },
+          {
+            "key": "editor",
+            "name": "@joplin/editor",
+            "note": "desktop·mobile manifest에 있는 공유 편집기 패키지."
+          },
+          {
+            "key": "renderer",
+            "name": "@joplin/renderer",
+            "note": "desktop·mobile·CLI manifest에 있는 공유 렌더러 패키지."
+          },
+          {
+            "key": "server",
+            "name": "Joplin Server",
+            "note": "기기 간 동기화·노트북 공유·노트 게시 서버."
+          },
+          {
+            "key": "server-api",
+            "name": "Node.js REST API",
+            "note": "클라이언트가 Joplin 객체를 업로드·다운로드하는 API.",
+            "parent": "server"
+          },
+          {
+            "key": "postgres",
+            "name": "PostgreSQL",
+            "note": "문서의 전형적 설치에서 item 메타데이터와 계정 등을 저장.",
+            "parent": "server"
+          },
+          {
+            "key": "s3",
+            "name": "AWS S3",
+            "note": "문서의 전형적 설치에서 본문·첨부 등 item 콘텐츠 저장.",
+            "parent": "server"
+          },
+          {
+            "key": "nginx",
+            "name": "Nginx",
+            "note": "전형적 설치의 reverse proxy·TLS termination. 필수 구성은 아니다.",
+            "parent": "server"
+          },
+          {
+            "key": "env",
+            "name": ".env",
+            "note": "서버 환경변수 구성 파일.",
+            "parent": "server"
+          },
+          {
+            "key": "clipper",
+            "name": "Web Clipper",
+            "note": "Firefox·Chrome 브라우저 확장. 페이지·부분·스크린샷을 Joplin에 저장."
+          }
+        ],
+        "relations": [
+          [
+            "desktop",
+            "lib",
+            "needs",
+            "해당 앱의 package.json에 @joplin/lib 의존성이 명시돼 있다."
+          ],
+          [
+            "desktop",
+            "editor",
+            "needs",
+            "해당 앱의 package.json에 @joplin/editor 의존성이 명시돼 있다."
+          ],
+          [
+            "desktop",
+            "renderer",
+            "needs",
+            "해당 앱의 package.json에 @joplin/renderer 의존성이 명시돼 있다."
+          ],
+          [
+            "mobile",
+            "lib",
+            "needs",
+            "해당 앱의 package.json에 @joplin/lib 의존성이 명시돼 있다."
+          ],
+          [
+            "mobile",
+            "editor",
+            "needs",
+            "해당 앱의 package.json에 @joplin/editor 의존성이 명시돼 있다."
+          ],
+          [
+            "mobile",
+            "renderer",
+            "needs",
+            "해당 앱의 package.json에 @joplin/renderer 의존성이 명시돼 있다."
+          ],
+          [
+            "cli",
+            "lib",
+            "needs",
+            "해당 앱의 package.json에 @joplin/lib 의존성이 명시돼 있다."
+          ],
+          [
+            "cli",
+            "renderer",
+            "needs",
+            "해당 앱의 package.json에 @joplin/renderer 의존성이 명시돼 있다."
+          ]
+        ],
+        "records": []
+      },
+      "sources": [
+        {
+          "id": "architecture",
+          "url": "https://github.com/laurent22/joplin/blob/0c9e457db81108660b96effbc767aea599d6ca90/readme/dev/spec/architecture.md",
+          "path": "readme/dev/spec/architecture.md"
+        },
+        {
+          "id": "desktop-manifest",
+          "url": "https://github.com/laurent22/joplin/blob/0c9e457db81108660b96effbc767aea599d6ca90/packages/app-desktop/package.json",
+          "path": "packages/app-desktop/package.json"
+        },
+        {
+          "id": "mobile-manifest",
+          "url": "https://github.com/laurent22/joplin/blob/0c9e457db81108660b96effbc767aea599d6ca90/packages/app-mobile/package.json",
+          "path": "packages/app-mobile/package.json"
+        },
+        {
+          "id": "cli-manifest",
+          "url": "https://github.com/laurent22/joplin/blob/0c9e457db81108660b96effbc767aea599d6ca90/packages/app-cli/package.json",
+          "path": "packages/app-cli/package.json"
+        },
+        {
+          "id": "packages",
+          "url": "https://github.com/laurent22/joplin/tree/0c9e457db81108660b96effbc767aea599d6ca90/packages",
+          "path": "packages"
+        },
+        {
+          "id": "desktop-gui",
+          "url": "https://github.com/laurent22/joplin/tree/0c9e457db81108660b96effbc767aea599d6ca90/packages/app-desktop/gui",
+          "path": "packages/app-desktop/gui"
+        },
+        {
+          "id": "note-editor",
+          "url": "https://github.com/laurent22/joplin/tree/0c9e457db81108660b96effbc767aea599d6ca90/packages/app-desktop/gui/NoteEditor",
+          "path": "packages/app-desktop/gui/NoteEditor"
+        },
+        {
+          "id": "note-body",
+          "url": "https://github.com/laurent22/joplin/tree/0c9e457db81108660b96effbc767aea599d6ca90/packages/app-desktop/gui/NoteEditor/NoteBody",
+          "path": "packages/app-desktop/gui/NoteEditor/NoteBody"
+        },
+        {
+          "id": "lib-directory",
+          "url": "https://github.com/laurent22/joplin/tree/0c9e457db81108660b96effbc767aea599d6ca90/packages/lib",
+          "path": "packages/lib"
+        }
+      ],
+      "provenance": {
+        "parts": {
+          "desktop": {
+            "refs": [
+              "architecture",
+              "desktop-manifest"
+            ],
+            "classification": "official-name"
+          },
+          "note-editor": {
+            "refs": [
+              "desktop-gui"
+            ],
+            "classification": "official-name"
+          },
+          "note-body": {
+            "refs": [
+              "note-editor"
+            ],
+            "classification": "official-name"
+          },
+          "body-codemirror": {
+            "refs": [
+              "note-body"
+            ],
+            "classification": "official-name"
+          },
+          "body-plaineditor": {
+            "refs": [
+              "note-body"
+            ],
+            "classification": "official-name"
+          },
+          "body-tinymce": {
+            "refs": [
+              "note-body"
+            ],
+            "classification": "official-name"
+          },
+          "body-whiteboardeditor": {
+            "refs": [
+              "note-body"
+            ],
+            "classification": "official-name"
+          },
+          "note-title": {
+            "refs": [
+              "note-editor"
+            ],
+            "classification": "official-name"
+          },
+          "desktop-notelist": {
+            "refs": [
+              "desktop-gui"
+            ],
+            "classification": "official-name"
+          },
+          "desktop-sidebar": {
+            "refs": [
+              "desktop-gui"
+            ],
+            "classification": "official-name"
+          },
+          "desktop-notetoolbar": {
+            "refs": [
+              "desktop-gui"
+            ],
+            "classification": "official-name"
+          },
+          "mobile": {
+            "refs": [
+              "architecture",
+              "mobile-manifest"
+            ],
+            "classification": "official-name"
+          },
+          "cli": {
+            "refs": [
+              "architecture",
+              "cli-manifest"
+            ],
+            "classification": "official-name"
+          },
+          "lib": {
+            "refs": [
+              "architecture",
+              "desktop-manifest",
+              "mobile-manifest",
+              "cli-manifest"
+            ],
+            "classification": "official-name"
+          },
+          "services": {
+            "refs": [
+              "architecture"
+            ],
+            "classification": "reviewer-grouping-from-official-architecture"
+          },
+          "search": {
+            "refs": [
+              "architecture"
+            ],
+            "classification": "official-name"
+          },
+          "plugins": {
+            "refs": [
+              "architecture"
+            ],
+            "classification": "official-name"
+          },
+          "sync": {
+            "refs": [
+              "architecture"
+            ],
+            "classification": "official-name"
+          },
+          "models": {
+            "refs": [
+              "architecture"
+            ],
+            "classification": "official-name"
+          },
+          "sqlite": {
+            "refs": [
+              "architecture"
+            ],
+            "classification": "reviewer-grouping-from-official-architecture"
+          },
+          "settings": {
+            "refs": [
+              "architecture"
+            ],
+            "classification": "reviewer-grouping-from-official-architecture"
+          },
+          "editor": {
+            "refs": [
+              "packages",
+              "desktop-manifest",
+              "mobile-manifest"
+            ],
+            "classification": "official-name"
+          },
+          "renderer": {
+            "refs": [
+              "packages",
+              "desktop-manifest",
+              "mobile-manifest",
+              "cli-manifest"
+            ],
+            "classification": "official-name"
+          },
+          "server": {
+            "refs": [
+              "architecture"
+            ],
+            "classification": "official-name"
+          },
+          "server-api": {
+            "refs": [
+              "architecture"
+            ],
+            "classification": "reviewer-grouping-from-official-architecture"
+          },
+          "postgres": {
+            "refs": [
+              "architecture"
+            ],
+            "classification": "reviewer-grouping-from-official-architecture"
+          },
+          "s3": {
+            "refs": [
+              "architecture"
+            ],
+            "classification": "reviewer-grouping-from-official-architecture"
+          },
+          "nginx": {
+            "refs": [
+              "architecture"
+            ],
+            "classification": "reviewer-grouping-from-official-architecture"
+          },
+          "env": {
+            "refs": [
+              "architecture"
+            ],
+            "classification": "reviewer-grouping-from-official-architecture"
+          },
+          "clipper": {
+            "refs": [
+              "architecture"
+            ],
+            "classification": "official-name"
+          }
+        },
+        "relations": [
+          {
+            "index": 0,
+            "refs": [
+              "desktop-manifest"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 1,
+            "refs": [
+              "desktop-manifest"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 2,
+            "refs": [
+              "desktop-manifest"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 3,
+            "refs": [
+              "mobile-manifest"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 4,
+            "refs": [
+              "mobile-manifest"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 5,
+            "refs": [
+              "mobile-manifest"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 6,
+            "refs": [
+              "cli-manifest"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 7,
+            "refs": [
+              "cli-manifest"
+            ],
+            "classification": "explicit-source-fact"
+          }
+        ]
+      },
+      "checks": {
+        "partCount": 30,
+        "maxDepth": 4,
+        "relationCount": 8,
+        "recordsCount": 0,
+        "structuralValidation": "keys unique; parent before child; relation endpoints exist; part provenance refs resolve. Browser/UI behavior not executed by this dataset extraction."
+      },
+      "coverage": [
+        "Desktop hierarchy depth 4; siblings NoteBody/NoteTitle plus four editor branches.",
+        "Shared lib/editor/renderer are single identity nodes consumed by multiple apps.",
+        "Sparse roots editor/renderer/clipper with no child; server conceptual deployment subtree.",
+        "Relations crossing focused subtrees; fold NoteEditor then inspect hidden descendant relations (if any)."
+      ]
+    },
+    {
+      "id": "oss-restic",
+      "category": "restic 명령·반복 하위 명령",
+      "repository": "restic/restic",
+      "commit": "dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4",
+      "commitUrl": "https://github.com/restic/restic/commit/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4",
+      "sourceReadMethod": "Read-only GitHub connector; immutable raw files and directory listings; no clone/install or OSS application execution.",
+      "spec": {
+        "id": "oss-restic",
+        "name": "restic 명령·반복 하위 명령",
+        "brief": "실제 Go/Cobra 명령 등록과 Use 문자열에서 뽑은 CLI 탐색 지도. 명령끼리의 실행 순서나 의존성은 만들어 넣지 않는다.",
+        "parts": [
+          {
+            "key": "restic",
+            "name": "restic",
+            "note": "newRootCommand에서 등록하는 CLI 명령 트리의 일부."
+          },
+          {
+            "key": "backup",
+            "name": "restic backup",
+            "note": "\"backup [flags] [FILE/DIR] ...\"",
+            "parent": "restic"
+          },
+          {
+            "key": "restore",
+            "name": "restic restore",
+            "note": "\"restore [flags] snapshotID\"",
+            "parent": "restic"
+          },
+          {
+            "key": "snapshots",
+            "name": "restic snapshots",
+            "note": "\"snapshots [flags] [snapshotID ...]\"",
+            "parent": "restic"
+          },
+          {
+            "key": "check",
+            "name": "restic check",
+            "note": "\"check [flags]\"",
+            "parent": "restic"
+          },
+          {
+            "key": "copy",
+            "name": "restic copy",
+            "note": "\"copy [flags] [snapshotID ...]\"",
+            "parent": "restic"
+          },
+          {
+            "key": "diff",
+            "name": "restic diff",
+            "note": "\"diff [flags] snapshotID snapshotID\"",
+            "parent": "restic"
+          },
+          {
+            "key": "dump",
+            "name": "restic dump",
+            "note": "\"dump [flags] snapshotID file\"",
+            "parent": "restic"
+          },
+          {
+            "key": "find",
+            "name": "restic find",
+            "note": "\"find [flags] PATTERN...\"",
+            "parent": "restic"
+          },
+          {
+            "key": "forget",
+            "name": "restic forget",
+            "note": "\"forget [flags] [snapshot ID] [...]\"",
+            "parent": "restic"
+          },
+          {
+            "key": "init",
+            "name": "restic init",
+            "note": "\"init\"",
+            "parent": "restic"
+          },
+          {
+            "key": "list",
+            "name": "restic list",
+            "note": "\"list [flags] [\" + listAllowedArgsUseString + \"|packs snapshotID]\"",
+            "parent": "restic"
+          },
+          {
+            "key": "ls",
+            "name": "restic ls",
+            "note": "\"ls [flags] snapshotID [dir...]\"",
+            "parent": "restic"
+          },
+          {
+            "key": "prune",
+            "name": "restic prune",
+            "note": "\"prune [flags]\"",
+            "parent": "restic"
+          },
+          {
+            "key": "recover",
+            "name": "restic recover",
+            "note": "\"recover [flags]\"",
+            "parent": "restic"
+          },
+          {
+            "key": "rewrite",
+            "name": "restic rewrite",
+            "note": "\"rewrite [flags] [snapshotID ...]\"",
+            "parent": "restic"
+          },
+          {
+            "key": "stats",
+            "name": "restic stats",
+            "note": "\"stats [flags] [snapshot ID] [...]\"",
+            "parent": "restic"
+          },
+          {
+            "key": "tag",
+            "name": "restic tag",
+            "note": "\"tag [flags] [snapshotID ...]\"",
+            "parent": "restic"
+          },
+          {
+            "key": "unlock",
+            "name": "restic unlock",
+            "note": "\"unlock\"",
+            "parent": "restic"
+          },
+          {
+            "key": "key",
+            "name": "restic key",
+            "note": "액세스 키·비밀번호 관리. add/list/passwd/remove를 공식 등록.",
+            "parent": "restic"
+          },
+          {
+            "key": "key-add",
+            "name": "restic key add",
+            "note": "공식 key 하위 명령. 다른 위치의 list와 이름 끝부분이 같아도 독립된 부분이다.",
+            "parent": "key"
+          },
+          {
+            "key": "key-list",
+            "name": "restic key list",
+            "note": "공식 key 하위 명령. 다른 위치의 list와 이름 끝부분이 같아도 독립된 부분이다.",
+            "parent": "key"
+          },
+          {
+            "key": "key-passwd",
+            "name": "restic key passwd",
+            "note": "공식 key 하위 명령. 다른 위치의 list와 이름 끝부분이 같아도 독립된 부분이다.",
+            "parent": "key"
+          },
+          {
+            "key": "key-remove",
+            "name": "restic key remove",
+            "note": "공식 key 하위 명령. 다른 위치의 list와 이름 끝부분이 같아도 독립된 부분이다.",
+            "parent": "key"
+          },
+          {
+            "key": "repair",
+            "name": "restic repair",
+            "note": "손상 저장소 복구. index/packs/snapshots를 공식 등록.",
+            "parent": "restic"
+          },
+          {
+            "key": "repair-index",
+            "name": "restic repair index",
+            "note": "공식 repair 하위 명령. snapshots 최상위 명령과 별도 정체성.",
+            "parent": "repair"
+          },
+          {
+            "key": "repair-packs",
+            "name": "restic repair packs",
+            "note": "공식 repair 하위 명령. snapshots 최상위 명령과 별도 정체성.",
+            "parent": "repair"
+          },
+          {
+            "key": "repair-snapshots",
+            "name": "restic repair snapshots",
+            "note": "공식 repair 하위 명령. snapshots 최상위 명령과 별도 정체성.",
+            "parent": "repair"
+          },
+          {
+            "key": "global-options",
+            "name": "global.Options",
+            "note": "여러 명령 생성 함수에 전달되는 공통 옵션 객체. root와 별도로 표시한 위치는 탐색용 검토자 선택."
+          }
+        ],
+        "relations": [
+          [
+            "backup",
+            "global-options",
+            "needs",
+            "newBackupCommand가 *global.Options를 받아 runBackup에 전달한다."
+          ],
+          [
+            "restore",
+            "global-options",
+            "needs",
+            "newRestoreCommand가 *global.Options를 받아 runRestore에 전달한다."
+          ],
+          [
+            "key",
+            "global-options",
+            "needs",
+            "newKeyCommand는 같은 globalOptions를 하위 명령 생성 함수에 넘긴다."
+          ],
+          [
+            "repair",
+            "global-options",
+            "needs",
+            "newRepairCommand는 같은 globalOptions를 하위 명령 생성 함수에 넘긴다."
+          ]
+        ],
+        "records": []
+      },
+      "sources": [
+        {
+          "id": "main",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/main.go",
+          "path": "cmd/restic/main.go"
+        },
+        {
+          "id": "command-dir",
+          "url": "https://github.com/restic/restic/tree/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic",
+          "path": "cmd/restic"
+        },
+        {
+          "id": "key-register",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_key.go",
+          "path": "cmd/restic/cmd_key.go"
+        },
+        {
+          "id": "repair-register",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_repair.go",
+          "path": "cmd/restic/cmd_repair.go"
+        },
+        {
+          "id": "cmd-backup",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_backup.go#L40",
+          "path": "cmd/restic/cmd_backup.go"
+        },
+        {
+          "id": "cmd-restore",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_restore.go#L27",
+          "path": "cmd/restic/cmd_restore.go"
+        },
+        {
+          "id": "cmd-snapshots",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_snapshots.go#L26",
+          "path": "cmd/restic/cmd_snapshots.go"
+        },
+        {
+          "id": "cmd-check",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_check.go#L30",
+          "path": "cmd/restic/cmd_check.go"
+        },
+        {
+          "id": "cmd-copy",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_copy.go#L26",
+          "path": "cmd/restic/cmd_copy.go"
+        },
+        {
+          "id": "cmd-diff",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_diff.go#L24",
+          "path": "cmd/restic/cmd_diff.go"
+        },
+        {
+          "id": "cmd-dump",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_dump.go#L26",
+          "path": "cmd/restic/cmd_dump.go"
+        },
+        {
+          "id": "cmd-find",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_find.go#L33",
+          "path": "cmd/restic/cmd_find.go"
+        },
+        {
+          "id": "cmd-forget",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_forget.go#L26",
+          "path": "cmd/restic/cmd_forget.go"
+        },
+        {
+          "id": "cmd-init",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_init.go#L24",
+          "path": "cmd/restic/cmd_init.go"
+        },
+        {
+          "id": "cmd-list",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_list.go#L24",
+          "path": "cmd/restic/cmd_list.go"
+        },
+        {
+          "id": "cmd-ls",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_ls.go#L32",
+          "path": "cmd/restic/cmd_ls.go"
+        },
+        {
+          "id": "cmd-prune",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_prune.go#L27",
+          "path": "cmd/restic/cmd_prune.go"
+        },
+        {
+          "id": "cmd-recover",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_recover.go#L20",
+          "path": "cmd/restic/cmd_recover.go"
+        },
+        {
+          "id": "cmd-rewrite",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_rewrite.go#L26",
+          "path": "cmd/restic/cmd_rewrite.go"
+        },
+        {
+          "id": "cmd-stats",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_stats.go#L30",
+          "path": "cmd/restic/cmd_stats.go"
+        },
+        {
+          "id": "cmd-tag",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_tag.go#L23",
+          "path": "cmd/restic/cmd_tag.go"
+        },
+        {
+          "id": "cmd-unlock",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_unlock.go#L18",
+          "path": "cmd/restic/cmd_unlock.go"
+        },
+        {
+          "id": "key-add",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_key_add.go",
+          "path": "cmd/restic/cmd_key_add.go"
+        },
+        {
+          "id": "key-list",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_key_list.go",
+          "path": "cmd/restic/cmd_key_list.go"
+        },
+        {
+          "id": "key-passwd",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_key_passwd.go",
+          "path": "cmd/restic/cmd_key_passwd.go"
+        },
+        {
+          "id": "key-remove",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_key_remove.go",
+          "path": "cmd/restic/cmd_key_remove.go"
+        },
+        {
+          "id": "repair-index",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_repair_index.go",
+          "path": "cmd/restic/cmd_repair_index.go"
+        },
+        {
+          "id": "repair-packs",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_repair_packs.go",
+          "path": "cmd/restic/cmd_repair_packs.go"
+        },
+        {
+          "id": "repair-snapshots",
+          "url": "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_repair_snapshots.go",
+          "path": "cmd/restic/cmd_repair_snapshots.go"
+        }
+      ],
+      "provenance": {
+        "parts": {
+          "restic": {
+            "refs": [
+              "main"
+            ],
+            "classification": "official-name"
+          },
+          "backup": {
+            "refs": [
+              "cmd-backup",
+              "main"
+            ],
+            "classification": "official-name"
+          },
+          "restore": {
+            "refs": [
+              "cmd-restore",
+              "main"
+            ],
+            "classification": "official-name"
+          },
+          "snapshots": {
+            "refs": [
+              "cmd-snapshots",
+              "main"
+            ],
+            "classification": "official-name"
+          },
+          "check": {
+            "refs": [
+              "cmd-check",
+              "main"
+            ],
+            "classification": "official-name"
+          },
+          "copy": {
+            "refs": [
+              "cmd-copy",
+              "main"
+            ],
+            "classification": "official-name"
+          },
+          "diff": {
+            "refs": [
+              "cmd-diff",
+              "main"
+            ],
+            "classification": "official-name"
+          },
+          "dump": {
+            "refs": [
+              "cmd-dump",
+              "main"
+            ],
+            "classification": "official-name"
+          },
+          "find": {
+            "refs": [
+              "cmd-find",
+              "main"
+            ],
+            "classification": "official-name"
+          },
+          "forget": {
+            "refs": [
+              "cmd-forget",
+              "main"
+            ],
+            "classification": "official-name"
+          },
+          "init": {
+            "refs": [
+              "cmd-init",
+              "main"
+            ],
+            "classification": "official-name"
+          },
+          "list": {
+            "refs": [
+              "cmd-list",
+              "main"
+            ],
+            "classification": "official-name"
+          },
+          "ls": {
+            "refs": [
+              "cmd-ls",
+              "main"
+            ],
+            "classification": "official-name"
+          },
+          "prune": {
+            "refs": [
+              "cmd-prune",
+              "main"
+            ],
+            "classification": "official-name"
+          },
+          "recover": {
+            "refs": [
+              "cmd-recover",
+              "main"
+            ],
+            "classification": "official-name"
+          },
+          "rewrite": {
+            "refs": [
+              "cmd-rewrite",
+              "main"
+            ],
+            "classification": "official-name"
+          },
+          "stats": {
+            "refs": [
+              "cmd-stats",
+              "main"
+            ],
+            "classification": "official-name"
+          },
+          "tag": {
+            "refs": [
+              "cmd-tag",
+              "main"
+            ],
+            "classification": "official-name"
+          },
+          "unlock": {
+            "refs": [
+              "cmd-unlock",
+              "main"
+            ],
+            "classification": "official-name"
+          },
+          "key": {
+            "refs": [
+              "key-register",
+              "main"
+            ],
+            "classification": "official-name"
+          },
+          "key-add": {
+            "refs": [
+              "key-add",
+              "key-register"
+            ],
+            "classification": "official-name"
+          },
+          "key-list": {
+            "refs": [
+              "key-list",
+              "key-register"
+            ],
+            "classification": "official-name"
+          },
+          "key-passwd": {
+            "refs": [
+              "key-passwd",
+              "key-register"
+            ],
+            "classification": "official-name"
+          },
+          "key-remove": {
+            "refs": [
+              "key-remove",
+              "key-register"
+            ],
+            "classification": "official-name"
+          },
+          "repair": {
+            "refs": [
+              "repair-register",
+              "main"
+            ],
+            "classification": "official-name"
+          },
+          "repair-index": {
+            "refs": [
+              "repair-index",
+              "repair-register"
+            ],
+            "classification": "official-name"
+          },
+          "repair-packs": {
+            "refs": [
+              "repair-packs",
+              "repair-register"
+            ],
+            "classification": "official-name"
+          },
+          "repair-snapshots": {
+            "refs": [
+              "repair-snapshots",
+              "repair-register"
+            ],
+            "classification": "official-name"
+          },
+          "global-options": {
+            "refs": [
+              "main"
+            ],
+            "classification": "reviewer-grouping-of-explicit-shared-parameter"
+          }
+        },
+        "relations": [
+          {
+            "index": 0,
+            "refs": [
+              "cmd-backup"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 1,
+            "refs": [
+              "cmd-restore"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 2,
+            "refs": [
+              "key-register"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 3,
+            "refs": [
+              "repair-register"
+            ],
+            "classification": "explicit-source-fact"
+          }
+        ]
+      },
+      "checks": {
+        "partCount": 29,
+        "maxDepth": 3,
+        "relationCount": 4,
+        "recordsCount": 0,
+        "structuralValidation": "keys unique; parent before child; relation endpoints exist; part provenance refs resolve. Browser/UI behavior not executed by this dataset extraction."
+      },
+      "coverage": [
+        "Many same-prefix restic labels; key list vs root list; repair snapshots vs root snapshots.",
+        "True Cobra depth 3, 20 root-command children and 4/3 nested siblings.",
+        "Shared options node crosses command subtree boundaries.",
+        "No manufactured backup→forget→prune workflow relation."
+      ]
+    },
+    {
+      "id": "oss-node-red",
+      "category": "Node-RED 이벤트·네트워크·데이터 처리",
+      "repository": "node-red/node-red",
+      "commit": "df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f",
+      "commitUrl": "https://github.com/node-red/node-red/commit/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f",
+      "sourceReadMethod": "Read-only GitHub connector; immutable raw files and directory listings; no clone/install or OSS application execution.",
+      "spec": {
+        "id": "oss-node-red",
+        "name": "Node-RED 이벤트·네트워크·데이터 처리",
+        "brief": "실제 Node-RED core 디렉터리와 패키지 의존성, 선택적 TLS 조회를 읽어 만든 자동화·데이터 처리 지도. 가상의 장치·flow 실행은 포함하지 않는다.",
+        "parts": [
+          {
+            "key": "nodes",
+            "name": "@node-red/nodes",
+            "note": "내장 노드 패키지."
+          },
+          {
+            "key": "core",
+            "name": "core",
+            "note": "실제 내장 노드 소스 디렉터리.",
+            "parent": "nodes"
+          },
+          {
+            "key": "common",
+            "name": "common",
+            "note": "실제 core 하위 디렉터리 이름. 화면의 배치는 검토자 선택.",
+            "parent": "core"
+          },
+          {
+            "key": "20-inject",
+            "name": "20-inject.js",
+            "note": "실제 파일 단위. 하나의 파일이 여러 등록 노드 타입을 포함할 수 있으므로 노드 1개와 동일시하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "21-debug",
+            "name": "21-debug.js",
+            "note": "실제 파일 단위. 하나의 파일이 여러 등록 노드 타입을 포함할 수 있으므로 노드 1개와 동일시하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "25-catch",
+            "name": "25-catch.js",
+            "note": "실제 파일 단위. 하나의 파일이 여러 등록 노드 타입을 포함할 수 있으므로 노드 1개와 동일시하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "network",
+            "name": "network",
+            "note": "실제 core 하위 디렉터리 이름. 화면의 배치는 검토자 선택.",
+            "parent": "core"
+          },
+          {
+            "key": "05-tls",
+            "name": "05-tls.js",
+            "note": "실제 파일 단위. 하나의 파일이 여러 등록 노드 타입을 포함할 수 있으므로 노드 1개와 동일시하지 않는다.",
+            "parent": "network"
+          },
+          {
+            "key": "10-mqtt",
+            "name": "10-mqtt.js",
+            "note": "실제 파일 단위. 하나의 파일이 여러 등록 노드 타입을 포함할 수 있으므로 노드 1개와 동일시하지 않는다.",
+            "parent": "network"
+          },
+          {
+            "key": "21-httprequest",
+            "name": "21-httprequest.js",
+            "note": "실제 파일 단위. 하나의 파일이 여러 등록 노드 타입을 포함할 수 있으므로 노드 1개와 동일시하지 않는다.",
+            "parent": "network"
+          },
+          {
+            "key": "22-websocket",
+            "name": "22-websocket.js",
+            "note": "실제 파일 단위. 하나의 파일이 여러 등록 노드 타입을 포함할 수 있으므로 노드 1개와 동일시하지 않는다.",
+            "parent": "network"
+          },
+          {
+            "key": "31-tcpin",
+            "name": "31-tcpin.js",
+            "note": "실제 파일 단위. 하나의 파일이 여러 등록 노드 타입을 포함할 수 있으므로 노드 1개와 동일시하지 않는다.",
+            "parent": "network"
+          },
+          {
+            "key": "32-udp",
+            "name": "32-udp.js",
+            "note": "실제 파일 단위. 하나의 파일이 여러 등록 노드 타입을 포함할 수 있으므로 노드 1개와 동일시하지 않는다.",
+            "parent": "network"
+          },
+          {
+            "key": "function",
+            "name": "function",
+            "note": "실제 core 하위 디렉터리 이름. 화면의 배치는 검토자 선택.",
+            "parent": "core"
+          },
+          {
+            "key": "10-function",
+            "name": "10-function.js",
+            "note": "실제 파일 단위. 하나의 파일이 여러 등록 노드 타입을 포함할 수 있으므로 노드 1개와 동일시하지 않는다.",
+            "parent": "function"
+          },
+          {
+            "key": "10-switch",
+            "name": "10-switch.js",
+            "note": "실제 파일 단위. 하나의 파일이 여러 등록 노드 타입을 포함할 수 있으므로 노드 1개와 동일시하지 않는다.",
+            "parent": "function"
+          },
+          {
+            "key": "15-change",
+            "name": "15-change.js",
+            "note": "실제 파일 단위. 하나의 파일이 여러 등록 노드 타입을 포함할 수 있으므로 노드 1개와 동일시하지 않는다.",
+            "parent": "function"
+          },
+          {
+            "key": "80-template",
+            "name": "80-template.js",
+            "note": "실제 파일 단위. 하나의 파일이 여러 등록 노드 타입을 포함할 수 있으므로 노드 1개와 동일시하지 않는다.",
+            "parent": "function"
+          },
+          {
+            "key": "parsers",
+            "name": "parsers",
+            "note": "실제 core 하위 디렉터리 이름. 화면의 배치는 검토자 선택.",
+            "parent": "core"
+          },
+          {
+            "key": "70-CSV",
+            "name": "70-CSV.js",
+            "note": "실제 파일 단위. 하나의 파일이 여러 등록 노드 타입을 포함할 수 있으므로 노드 1개와 동일시하지 않는다.",
+            "parent": "parsers"
+          },
+          {
+            "key": "70-JSON",
+            "name": "70-JSON.js",
+            "note": "실제 파일 단위. 하나의 파일이 여러 등록 노드 타입을 포함할 수 있으므로 노드 1개와 동일시하지 않는다.",
+            "parent": "parsers"
+          },
+          {
+            "key": "70-XML",
+            "name": "70-XML.js",
+            "note": "실제 파일 단위. 하나의 파일이 여러 등록 노드 타입을 포함할 수 있으므로 노드 1개와 동일시하지 않는다.",
+            "parent": "parsers"
+          },
+          {
+            "key": "sequence",
+            "name": "sequence",
+            "note": "실제 core 하위 디렉터리 이름. 화면의 배치는 검토자 선택.",
+            "parent": "core"
+          },
+          {
+            "key": "17-split",
+            "name": "17-split.js",
+            "note": "실제 파일 단위. 하나의 파일이 여러 등록 노드 타입을 포함할 수 있으므로 노드 1개와 동일시하지 않는다.",
+            "parent": "sequence"
+          },
+          {
+            "key": "18-sort",
+            "name": "18-sort.js",
+            "note": "실제 파일 단위. 하나의 파일이 여러 등록 노드 타입을 포함할 수 있으므로 노드 1개와 동일시하지 않는다.",
+            "parent": "sequence"
+          },
+          {
+            "key": "storage",
+            "name": "storage",
+            "note": "실제 core 하위 디렉터리 이름. 화면의 배치는 검토자 선택.",
+            "parent": "core"
+          },
+          {
+            "key": "10-file",
+            "name": "10-file.js",
+            "note": "실제 파일 단위. 하나의 파일이 여러 등록 노드 타입을 포함할 수 있으므로 노드 1개와 동일시하지 않는다.",
+            "parent": "storage"
+          },
+          {
+            "key": "23-watch",
+            "name": "23-watch.js",
+            "note": "실제 파일 단위. 하나의 파일이 여러 등록 노드 타입을 포함할 수 있으므로 노드 1개와 동일시하지 않는다.",
+            "parent": "storage"
+          },
+          {
+            "key": "runtime",
+            "name": "@node-red/runtime",
+            "note": "공식 package.json에서 확인한 패키지. core 트리와 별도 루트로 놓은 위치는 검토자 선택."
+          },
+          {
+            "key": "util",
+            "name": "@node-red/util",
+            "note": "공식 package.json에서 확인한 패키지. core 트리와 별도 루트로 놓은 위치는 검토자 선택."
+          },
+          {
+            "key": "registry",
+            "name": "@node-red/registry",
+            "note": "공식 package.json에서 확인한 패키지. core 트리와 별도 루트로 놓은 위치는 검토자 선택."
+          },
+          {
+            "key": "node-red",
+            "name": "node-red",
+            "note": "공식 package.json에서 확인한 패키지. core 트리와 별도 루트로 놓은 위치는 검토자 선택."
+          }
+        ],
+        "relations": [
+          [
+            "runtime",
+            "registry",
+            "needs",
+            "runtime package.json의 dependencies에 @node-red/registry가 명시돼 있다."
+          ],
+          [
+            "runtime",
+            "util",
+            "needs",
+            "runtime package.json의 dependencies에 @node-red/util이 명시돼 있다."
+          ],
+          [
+            "node-red",
+            "runtime",
+            "needs",
+            "node-red package.json의 dependencies에 @node-red/runtime이 명시돼 있다."
+          ],
+          [
+            "node-red",
+            "nodes",
+            "needs",
+            "node-red package.json의 dependencies에 @node-red/nodes이 명시돼 있다."
+          ],
+          [
+            "node-red",
+            "util",
+            "needs",
+            "node-red package.json의 dependencies에 @node-red/util이 명시돼 있다."
+          ],
+          [
+            "10-mqtt",
+            "05-tls",
+            "related",
+            "MQTT의 TLS 구성 노드를 선택했을 때 조회하여 TLS options를 추가한다. 선택적 구성 관계이며 필수 실행 의존성을 뜻하지 않는다."
+          ],
+          [
+            "21-httprequest",
+            "05-tls",
+            "related",
+            "HTTP request가 구성된 TLS 노드를 조회하고, 존재할 때 HTTPS options를 추가한다. 선택적 구성 관계이며 필수 실행 의존성을 뜻하지 않는다."
+          ],
+          [
+            "22-websocket",
+            "05-tls",
+            "related",
+            "WebSocket client의 TLS 노드가 있을 때 options를 추가한다. 선택적 구성 관계이며 필수 실행 의존성을 뜻하지 않는다."
+          ]
+        ],
+        "records": []
+      },
+      "sources": [
+        {
+          "id": "nodes-manifest",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/package.json",
+          "path": "packages/node_modules/@node-red/nodes/package.json"
+        },
+        {
+          "id": "core",
+          "url": "https://github.com/node-red/node-red/tree/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core",
+          "path": "packages/node_modules/@node-red/nodes/core"
+        },
+        {
+          "id": "runtime-manifest",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/runtime/package.json",
+          "path": "packages/node_modules/@node-red/runtime/package.json"
+        },
+        {
+          "id": "root-manifest",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/node-red/package.json",
+          "path": "packages/node_modules/node-red/package.json"
+        },
+        {
+          "id": "dir-common",
+          "url": "https://github.com/node-red/node-red/tree/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/common",
+          "path": "packages/node_modules/@node-red/nodes/core/common"
+        },
+        {
+          "id": "file-20-inject",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/common/20-inject.js",
+          "path": "packages/node_modules/@node-red/nodes/core/common/20-inject.js"
+        },
+        {
+          "id": "file-21-debug",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/common/21-debug.js",
+          "path": "packages/node_modules/@node-red/nodes/core/common/21-debug.js"
+        },
+        {
+          "id": "file-25-catch",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/common/25-catch.js",
+          "path": "packages/node_modules/@node-red/nodes/core/common/25-catch.js"
+        },
+        {
+          "id": "dir-network",
+          "url": "https://github.com/node-red/node-red/tree/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/network",
+          "path": "packages/node_modules/@node-red/nodes/core/network"
+        },
+        {
+          "id": "file-05-tls",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/network/05-tls.js",
+          "path": "packages/node_modules/@node-red/nodes/core/network/05-tls.js"
+        },
+        {
+          "id": "file-10-mqtt",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/network/10-mqtt.js",
+          "path": "packages/node_modules/@node-red/nodes/core/network/10-mqtt.js"
+        },
+        {
+          "id": "file-21-httprequest",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/network/21-httprequest.js",
+          "path": "packages/node_modules/@node-red/nodes/core/network/21-httprequest.js"
+        },
+        {
+          "id": "file-22-websocket",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/network/22-websocket.js",
+          "path": "packages/node_modules/@node-red/nodes/core/network/22-websocket.js"
+        },
+        {
+          "id": "file-31-tcpin",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/network/31-tcpin.js",
+          "path": "packages/node_modules/@node-red/nodes/core/network/31-tcpin.js"
+        },
+        {
+          "id": "file-32-udp",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/network/32-udp.js",
+          "path": "packages/node_modules/@node-red/nodes/core/network/32-udp.js"
+        },
+        {
+          "id": "dir-function",
+          "url": "https://github.com/node-red/node-red/tree/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/function",
+          "path": "packages/node_modules/@node-red/nodes/core/function"
+        },
+        {
+          "id": "file-10-function",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/function/10-function.js",
+          "path": "packages/node_modules/@node-red/nodes/core/function/10-function.js"
+        },
+        {
+          "id": "file-10-switch",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/function/10-switch.js",
+          "path": "packages/node_modules/@node-red/nodes/core/function/10-switch.js"
+        },
+        {
+          "id": "file-15-change",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/function/15-change.js",
+          "path": "packages/node_modules/@node-red/nodes/core/function/15-change.js"
+        },
+        {
+          "id": "file-80-template",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/function/80-template.js",
+          "path": "packages/node_modules/@node-red/nodes/core/function/80-template.js"
+        },
+        {
+          "id": "dir-parsers",
+          "url": "https://github.com/node-red/node-red/tree/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/parsers",
+          "path": "packages/node_modules/@node-red/nodes/core/parsers"
+        },
+        {
+          "id": "file-70-CSV",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/parsers/70-CSV.js",
+          "path": "packages/node_modules/@node-red/nodes/core/parsers/70-CSV.js"
+        },
+        {
+          "id": "file-70-JSON",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/parsers/70-JSON.js",
+          "path": "packages/node_modules/@node-red/nodes/core/parsers/70-JSON.js"
+        },
+        {
+          "id": "file-70-XML",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/parsers/70-XML.js",
+          "path": "packages/node_modules/@node-red/nodes/core/parsers/70-XML.js"
+        },
+        {
+          "id": "dir-sequence",
+          "url": "https://github.com/node-red/node-red/tree/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/sequence",
+          "path": "packages/node_modules/@node-red/nodes/core/sequence"
+        },
+        {
+          "id": "file-17-split",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/sequence/17-split.js",
+          "path": "packages/node_modules/@node-red/nodes/core/sequence/17-split.js"
+        },
+        {
+          "id": "file-18-sort",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/sequence/18-sort.js",
+          "path": "packages/node_modules/@node-red/nodes/core/sequence/18-sort.js"
+        },
+        {
+          "id": "dir-storage",
+          "url": "https://github.com/node-red/node-red/tree/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/storage",
+          "path": "packages/node_modules/@node-red/nodes/core/storage"
+        },
+        {
+          "id": "file-10-file",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/storage/10-file.js",
+          "path": "packages/node_modules/@node-red/nodes/core/storage/10-file.js"
+        },
+        {
+          "id": "file-23-watch",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/storage/23-watch.js",
+          "path": "packages/node_modules/@node-red/nodes/core/storage/23-watch.js"
+        },
+        {
+          "id": "tls-10-mqtt",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/network/10-mqtt.js#L720",
+          "path": "packages/node_modules/@node-red/nodes/core/network/10-mqtt.js"
+        },
+        {
+          "id": "tls-21-httprequest",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/network/21-httprequest.js#L95",
+          "path": "packages/node_modules/@node-red/nodes/core/network/21-httprequest.js"
+        },
+        {
+          "id": "tls-22-websocket",
+          "url": "https://github.com/node-red/node-red/blob/df0a87cce1a243e21a2e0eb0fdbdbb8c4732392f/packages/node_modules/@node-red/nodes/core/network/22-websocket.js#L126",
+          "path": "packages/node_modules/@node-red/nodes/core/network/22-websocket.js"
+        }
+      ],
+      "provenance": {
+        "parts": {
+          "nodes": {
+            "refs": [
+              "nodes-manifest"
+            ],
+            "classification": "official-name"
+          },
+          "core": {
+            "refs": [
+              "core"
+            ],
+            "classification": "official-name"
+          },
+          "common": {
+            "refs": [
+              "core"
+            ],
+            "classification": "official-name"
+          },
+          "20-inject": {
+            "refs": [
+              "dir-common",
+              "file-20-inject"
+            ],
+            "classification": "official-name"
+          },
+          "21-debug": {
+            "refs": [
+              "dir-common",
+              "file-21-debug"
+            ],
+            "classification": "official-name"
+          },
+          "25-catch": {
+            "refs": [
+              "dir-common",
+              "file-25-catch"
+            ],
+            "classification": "official-name"
+          },
+          "network": {
+            "refs": [
+              "core"
+            ],
+            "classification": "official-name"
+          },
+          "05-tls": {
+            "refs": [
+              "dir-network",
+              "file-05-tls"
+            ],
+            "classification": "official-name"
+          },
+          "10-mqtt": {
+            "refs": [
+              "dir-network",
+              "file-10-mqtt"
+            ],
+            "classification": "official-name"
+          },
+          "21-httprequest": {
+            "refs": [
+              "dir-network",
+              "file-21-httprequest"
+            ],
+            "classification": "official-name"
+          },
+          "22-websocket": {
+            "refs": [
+              "dir-network",
+              "file-22-websocket"
+            ],
+            "classification": "official-name"
+          },
+          "31-tcpin": {
+            "refs": [
+              "dir-network",
+              "file-31-tcpin"
+            ],
+            "classification": "official-name"
+          },
+          "32-udp": {
+            "refs": [
+              "dir-network",
+              "file-32-udp"
+            ],
+            "classification": "official-name"
+          },
+          "function": {
+            "refs": [
+              "core"
+            ],
+            "classification": "official-name"
+          },
+          "10-function": {
+            "refs": [
+              "dir-function",
+              "file-10-function"
+            ],
+            "classification": "official-name"
+          },
+          "10-switch": {
+            "refs": [
+              "dir-function",
+              "file-10-switch"
+            ],
+            "classification": "official-name"
+          },
+          "15-change": {
+            "refs": [
+              "dir-function",
+              "file-15-change"
+            ],
+            "classification": "official-name"
+          },
+          "80-template": {
+            "refs": [
+              "dir-function",
+              "file-80-template"
+            ],
+            "classification": "official-name"
+          },
+          "parsers": {
+            "refs": [
+              "core"
+            ],
+            "classification": "official-name"
+          },
+          "70-CSV": {
+            "refs": [
+              "dir-parsers",
+              "file-70-CSV"
+            ],
+            "classification": "official-name"
+          },
+          "70-JSON": {
+            "refs": [
+              "dir-parsers",
+              "file-70-JSON"
+            ],
+            "classification": "official-name"
+          },
+          "70-XML": {
+            "refs": [
+              "dir-parsers",
+              "file-70-XML"
+            ],
+            "classification": "official-name"
+          },
+          "sequence": {
+            "refs": [
+              "core"
+            ],
+            "classification": "official-name"
+          },
+          "17-split": {
+            "refs": [
+              "dir-sequence",
+              "file-17-split"
+            ],
+            "classification": "official-name"
+          },
+          "18-sort": {
+            "refs": [
+              "dir-sequence",
+              "file-18-sort"
+            ],
+            "classification": "official-name"
+          },
+          "storage": {
+            "refs": [
+              "core"
+            ],
+            "classification": "official-name"
+          },
+          "10-file": {
+            "refs": [
+              "dir-storage",
+              "file-10-file"
+            ],
+            "classification": "official-name"
+          },
+          "23-watch": {
+            "refs": [
+              "dir-storage",
+              "file-23-watch"
+            ],
+            "classification": "official-name"
+          },
+          "runtime": {
+            "refs": [
+              "runtime-manifest"
+            ],
+            "classification": "reviewer-grouping-of-official-packages"
+          },
+          "util": {
+            "refs": [
+              "runtime-manifest"
+            ],
+            "classification": "reviewer-grouping-of-official-packages"
+          },
+          "registry": {
+            "refs": [
+              "runtime-manifest"
+            ],
+            "classification": "reviewer-grouping-of-official-packages"
+          },
+          "node-red": {
+            "refs": [
+              "root-manifest"
+            ],
+            "classification": "reviewer-grouping-of-official-packages"
+          }
+        },
+        "relations": [
+          {
+            "index": 0,
+            "refs": [
+              "runtime-manifest"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 1,
+            "refs": [
+              "runtime-manifest"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 2,
+            "refs": [
+              "root-manifest"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 3,
+            "refs": [
+              "root-manifest"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 4,
+            "refs": [
+              "root-manifest"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 5,
+            "refs": [
+              "tls-10-mqtt"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 6,
+            "refs": [
+              "tls-21-httprequest"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 7,
+            "refs": [
+              "tls-22-websocket"
+            ],
+            "classification": "explicit-source-fact"
+          }
+        ]
+      },
+      "checks": {
+        "partCount": 32,
+        "maxDepth": 4,
+        "relationCount": 8,
+        "recordsCount": 0,
+        "structuralValidation": "keys unique; parent before child; relation endpoints exist; part provenance refs resolve. Browser/UI behavior not executed by this dataset extraction."
+      },
+      "coverage": [
+        "Data/automation rather than web-page or game: MQTT/TCP/UDP, parsers, file/watch, sequence.",
+        "Four-level actual package/core/category/file hierarchy; file units deliberately retained.",
+        "Three optional TLS relations with shared endpoint; package dependencies connect other roots.",
+        "No fabricated sensor→MQTT→JSON→file execution flow."
+      ]
+    }
+  ],
+  "derivedStress": [
+    {
+      "id": "sparse-joplin",
+      "classification": "reviewer-selected-source-subset",
+      "base": "oss-joplin",
+      "keepKeys": [
+        "desktop",
+        "mobile",
+        "cli",
+        "lib"
+      ],
+      "retainRelationsWithBothEndpoints": true,
+      "records": [],
+      "purpose": "Four roots, no child hierarchy; compare overview whitespace and controls."
+    },
+    {
+      "id": "long-prefix-restic",
+      "classification": "synthetic-derived-display-stress",
+      "base": "oss-restic",
+      "renameRule": {
+        "keys": [
+          "repair-index",
+          "repair-packs",
+          "repair-snapshots"
+        ],
+        "template": "restic repository review / {originalName}"
+      },
+      "purpose": "Only names change for truncation/wrapping. Prefix is test text, not an official restic command or hierarchy."
+    },
+    {
+      "id": "repeated-subparts",
+      "classification": "synthetic-derived-hierarchy-stress",
+      "base": "oss-node-red",
+      "appendParts": [
+        {
+          "key": "stress-network-settings",
+          "name": "설정",
+          "note": "합성 스트레스 하위 부분; 실제 OSS 구성요소라는 주장이 아니다.",
+          "parent": "network"
+        },
+        {
+          "key": "stress-parser-settings",
+          "name": "설정",
+          "note": "합성 스트레스 하위 부분; 같은 표시 이름·다른 부모·다른 key.",
+          "parent": "parsers"
+        },
+        {
+          "key": "stress-storage-settings",
+          "name": "설정",
+          "note": "합성 스트레스 하위 부분; 같은 표시 이름·다른 부모·다른 key.",
+          "parent": "storage"
+        }
+      ],
+      "purpose": "Select each identically named child; breadcrumb and back must preserve identity. No invented relations or records."
+    }
+  ],
+  "reviewMatrix": {
+    "viewports": [
+      {
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "width": 1440,
+        "height": 900
+      }
+    ],
+    "forEveryCase": [
+      "Open overview; count visible roots/parts; inspect density/overflow at each viewport.",
+      "Select a root and a deep child; selection must not silently become inside-navigation.",
+      "Enter inside view; verify immediate children and full breadcrumb context.",
+      "Fold/unfold branch; verify siblings and saved identities remain unchanged.",
+      "Back from child to parent then overview; verify selected identity/context.",
+      "Open relation endpoints inside/outside focus; check labels, direction, optionality and hidden descendants.",
+      "Compare dense and sparse cases: readable names, hit targets, bounded panels, no excessive repeated context."
+    ],
+    "evidenceRequired": "Record case id, viewport, action, observed result and screenshot path. This file lists intended checks; it does not claim they ran."
+  }
+}
