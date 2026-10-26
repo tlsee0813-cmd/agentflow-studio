@@ -133,10 +133,10 @@ export function createPlanView(host: PlanHost) {
   const itemOf = (id: string) => items().find(i => i.id === id) ?? null;
   const partName = (id: string) => host.current()?.view.parts.find(p => p.id === id)?.name ?? null;
   function itemTargets(item: PlanItem): string[] {
-    if (item.presentation?.length) return [...new Set(item.presentation.map(x => x.partId))];
     const parts = host.current()?.view.parts ?? [], ids = new Set(item.partIds);
     for (const id of [...ids]) for (let p = parts.find(x => x.id === id)?.parentId, g = 0; p && g < 64; p = parts.find(x => x.id === p)?.parentId, g++) ids.delete(p);
-    return [...ids];
+    // Presentation is optional per part: an excerpt enriches its target without dropping other explicit targets.
+    return [...new Set([...(item.presentation ?? []).map(x => x.partId), ...ids])];
   }
   function activeTarget(item: PlanItem): string | null {
     const ids = itemTargets(item), previous = s!.targets[item.id];
