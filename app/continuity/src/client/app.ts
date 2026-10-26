@@ -7,7 +7,7 @@ import { parseProject } from '../shared/validation.js';
 import { editArea, addArea, addChildArea, createProject, rename } from '../shared/domain.js';
 import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
-import { layoutScope, edgePath, ROOT, HEAD, type ScopeLayout, type Positions, type Point } from './map-layout.js';
+import { layoutScope, edgePath, ROOT, HEAD, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
 import { aiStatus, askStudio, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
 import { runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth } from './plan-dom.js';
@@ -317,7 +317,18 @@ function renderHome() {
   if (problem) { msg.textContent = problem; msg.hidden = false; } else if (!msg.dataset.keep) msg.hidden = true;
 }
 
-const relayout = (o: Opened) => { lay = layoutScope(o.view, scope, isExpanded(o), positionsOf(o)); };
+/** Names measured in the page's own font (whatever the system falls back to), so card widths match what is drawn. */
+const measureName: TextMeasure = (() => {
+  const cache = new Map<string, number>(); let ctx: CanvasRenderingContext2D | null = null, family = '';
+  return (text, kind) => {
+    const key = `${kind}|${text}`, hit = cache.get(key); if (hit !== undefined) return hit;
+    if (!ctx) { ctx = document.createElement('canvas').getContext('2d'); family = getComputedStyle(document.body).fontFamily; }
+    if (!ctx) return text.length * 9;
+    ctx.font = kind === 'node' ? `600 13.5px ${family}` : `650 13px ${family}`;
+    const w = ctx.measureText(text).width; cache.set(key, w); return w;
+  };
+})();
+const relayout = (o: Opened) => { lay = layoutScope(o.view, scope, isExpanded(o), positionsOf(o), measureName); };
 
 const REL_LABEL: Record<string, string> = { flow: '넘겨줌', needs: '필요로 함', shares: '함께 씀', related: '관련' };
 /** A part's line on the map: the state only when it says something. 'plan' (no request yet) stays quiet here; the inspector

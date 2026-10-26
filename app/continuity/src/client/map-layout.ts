@@ -35,7 +35,22 @@ export function textWidth(text: string): number {
   return w;
 }
 
-export function layoutScope(v: StudioView, scope: string | null, expanded: (id: string, depth: number) => boolean, pos: Positions): ScopeLayout {
+/** Rendered width of a name: 'node' (13.5px semibold part name) or 'head' (13px group name). The browser passes a canvas
+ * measurement in the page's own font; without one, the estimate below. */
+export type TextMeasure = (text: string, kind: 'node' | 'head') => number;
+const estimate: TextMeasure = (text, kind) => textWidth(text) * (kind === 'node' ? 13.5 / 13 : 1);
+/** Long part names widen their card (never the short ones) so the name fits two lines: room beside the name is the card
+ * minus its paddings, and with an inside also the fold toggle and the go-inside count. */
+export const NODE_MAX_W = 320;
+const nodeChrome = (kids: boolean) => (kids ? 5 + 22 + 4 + 4 + 40 + 8 + 2 : 13 + 8 + 2);
+export function nodeWidth(name: string, kids: boolean, measure: TextMeasure = estimate): number {
+  // Lines break at word ends, not mid-word: leave a share of each line unused.
+  const need = measure(name, 'node') * 1.12 + 8;
+  if (need <= (NODE_W - nodeChrome(kids)) * 2) return NODE_W;
+  return Math.min(NODE_MAX_W, Math.ceil(need / 2) + nodeChrome(kids));
+}
+
+export function layoutScope(v: StudioView, scope: string | null, expanded: (id: string, depth: number) => boolean, pos: Positions, measureText: TextMeasure = estimate): ScopeLayout {
   const byId = new Map(v.parts.map(p => [p.id, p]));
   const kidsOf = (id: string | null) => (id ? byId.get(id)?.childIds ?? [] : v.roots);
   const open = (id: string, depth: number) => depth < 12 && kidsOf(id).length > 0 && expanded(id, depth);
@@ -90,13 +105,13 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
   const headRoom = (id: string, w: number) => w - 88 - (hasRecords(id) ? 52 : 0);
   /** A name longer than two lines of a narrow group widens the group (up to 360px) rather than cutting the name. */
   const headFit = (id: string, w: number): { w: number; head: number } => {
-    const need = textWidth(byId.get(id)?.name ?? '');
+    const need = measureText(byId.get(id)?.name ?? '', 'head') * 1.08;
     if (need > headRoom(id, w) * 2) w = Math.max(w, Math.min(360, Math.ceil(need / 2) + w - headRoom(id, w) + 12));
     return { w, head: need > headRoom(id, w) ? HEAD_2 : HEAD };
   };
   function measure(id: string, depth: number): Measure {
     const cached = memo.get(id); if (cached) return cached;
-    let m: Measure = { w: NODE_W, h: NODE_H, ox: 0, oy: 0, head: 0 };
+    let m: Measure = { w: nodeWidth(byId.get(id)?.name ?? '', kidsOf(id).length > 0, measureText), h: NODE_H, ox: 0, oy: 0, head: 0 };
     if (open(id, depth)) {
       const { sizes, at } = anchors(id, depth + 1);
       let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;

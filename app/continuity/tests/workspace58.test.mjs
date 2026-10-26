@@ -132,3 +132,19 @@ test('UI58-L8 a group end meets the group at its head row, not beside an inner p
     for (const [box, p] of [[a, first], [b, last]]) if (box.kind === 'frame') assert.ok(p.y >= box.y && p.y <= box.y + box.head, `${box.id} port at y ${p.y}`);
   }
 });
+
+test('UI58-L9 only long part names widen their card, by measured width, with room for the go-inside count; capped', async () => {
+  const { nodeWidth, NODE_MAX_W } = await import('../dist/public/client/map-layout.js');
+  const wide = text => text.length * 8.6; // a wide fallback font (DejaVu Sans semibold at 13.5px is about this)
+  assert.equal(nodeWidth('restic backup', false, wide), NODE_W);
+  for (const name of ['restic repository review / restic repair index', 'restic repository review / restic repair snapshots']) {
+    const w = nodeWidth(name, false, wide);
+    assert.ok(w > NODE_W && w <= NODE_MAX_W, `${name}: ${w}`);
+    assert.ok(wide(name) * 1.12 + 8 <= (w - 23) * 2, 'two lines are enough, with room for word breaks');
+  }
+  const name = 'restic repository review / restic repair index';
+  assert.ok(nodeWidth(name, true, wide) > nodeWidth(name, false, wide), 'the fold toggle and go-inside count take room too');
+  assert.equal(nodeWidth('x'.repeat(60), true, wide), NODE_MAX_W);
+  const v = viewOf('oss-restic'), long = layoutScope(v, null, () => true, {}, wide);
+  for (const b of long.boxes.values()) if (b.kind === 'node') assert.ok(b.w >= NODE_W);
+});

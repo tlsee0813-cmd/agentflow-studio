@@ -385,6 +385,15 @@ def workspace_flow(browser, base, cases):
         cut = names.nth(i).evaluate("e => e.scrollHeight > e.clientHeight + 1")
         assert not cut, names.nth(i).inner_text()
     assert len({names.nth(i).inner_text() for i in range(3)}) == 3
+    # The same in a wide fallback font (as on a Linux runner without the system UI font): long cards widen, nothing is cut.
+    wide = context.new_page()
+    wide.route("**/styles.css", lambda route: route.fulfill(response=(r := route.fetch()), body=r.text() + '\nbody, button, input { font-family: "DejaVu Sans" !important; }'))
+    wide.goto(page.url)
+    expect(wide.locator(".node .node-name")).to_have_count(3)
+    for i in range(3):
+        name = wide.locator(".node .node-name").nth(i)
+        assert not name.evaluate("e => e.scrollHeight > e.clientHeight + 1"), name.inner_text()
+    wide.close()
     # Arrived from the whole map, not from the parent: a way back to that scene, apart from the way up.
     expect(page.locator("#scene-back")).to_be_visible()
     expect(page.locator("#scope-bar .scope-up")).to_contain_text("restic")
