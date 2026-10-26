@@ -16,7 +16,8 @@ test('UI58-L1 twenty restic commands wrap into a block that fits a 1280 map at 1
   const l = layoutScope(v, root.id, () => false, {});
   const nodes = [...l.boxes.values()].filter(b => b.kind === 'node');
   assert.ok(nodes.length >= 20);
-  for (const b of nodes) { assert.equal(b.w, NODE_W); assert.equal(b.h, NODE_H); }
+  // A catalogue of commands with few links between them reads as a list: short rows, never narrower than a part.
+  for (const b of nodes) { assert.equal(b.face, 'item'); assert.ok(b.w >= NODE_W && b.h >= 31 && b.h <= 48, `${b.id} ${b.w}×${b.h}`); }
   for (let i = 0; i < nodes.length; i++) for (let j = i + 1; j < nodes.length; j++) assert.ok(!overlaps(nodes[i], nodes[j]), 'no overlap');
   const rows = new Set(nodes.map(b => b.y)).size, cols = new Set(nodes.map(b => b.x)).size;
   assert.ok(rows <= 8 && cols <= 5, `${cols} columns × ${rows} rows`);
@@ -61,10 +62,11 @@ test('UI58-L5 a long group name gets a second head line and room for it; stored 
   const f = v.parts.find(p => p.name === long);
   const l = layoutScope(v, null, (_id, depth) => depth === 0, {});
   const box = l.boxes.get(f.id);
-  assert.equal(box.kind, 'frame'); assert.equal(box.head, HEAD_2); assert.ok(box.w <= 360);
-  assert.ok(textWidth(long) <= (box.w - 88) * 2, 'two lines are enough');
+  // A region head: the name on up to two lines (15px) and the first sentence of its note; the region widens rather than cut.
+  assert.equal(box.kind, 'frame'); assert.ok(box.head >= HEAD_2, `head ${box.head}`); assert.ok(box.w <= 380);
+  assert.ok(textWidth(long) * 15 / 13 <= (box.w - 84) * 2, 'two lines are enough');
   const kid = [...l.boxes.values()].find(b => b.container === f.id);
-  assert.equal(kid.y - box.y, HEAD_2, 'children start under the taller head');
+  assert.equal(kid.y - box.y, box.head, 'children start under the taller head');
   const stored = { root: { [f.id]: { x: 900, y: 40 } } };
   assert.equal(layoutScope(v, null, (_id, depth) => depth === 0, stored).boxes.get(f.id).x, 900);
 });

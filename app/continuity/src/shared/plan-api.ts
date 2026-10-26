@@ -50,5 +50,16 @@ export function validatePlanReply(value: unknown, ask: PlanAsk): PlanAnalysis {
   // AI overview suggestions do not establish a global mandatory-dependency graph.
   // Actual selected scope is evaluated separately; authored examples may still use explicit dependencies.
   check(reply.items.every(item => item.dependsOn.length === 0));
+  const parts = new Map(ask.parts.map(p => [p.id, p])), evidence = new Map(ask.evidence.map(e => [e.id, e]));
+  const normal = (text: string) => text.replace(/\s+/g, ' ').trim();
+  for (const item of reply.items) for (const view of item.presentation ?? []) {
+    // Only whitespace-normalized exact excerpts are checked here. A substring and valid refs do not prove
+    // factual accuracy, completeness, attribution, or that a desired result has been implemented.
+    const quote = normal(view.current.text);
+    check(view.current.source === 'part-note'
+      ? normal(parts.get(view.partId)!.note).includes(quote)
+      : view.current.refs.some(ref => normal(evidence.get(ref)!.text).includes(quote)));
+    if (view.origin === 'intent') check(view.wanted.refs.some(ref => evidence.get(ref)!.kind === 'user'));
+  }
   return reply;
 }

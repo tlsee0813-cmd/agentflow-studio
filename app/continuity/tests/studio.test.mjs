@@ -42,16 +42,18 @@ test('STUDIO-D2 map parts follow stored containment; records attach to the part 
 });
 
 const top = (id, depth) => depth === 0;
-test('STUDIO-D3 layout keeps node size fixed and grows frames with children', () => {
+test('STUDIO-D3 parts never shrink below their reading size; frames grow with children, siblings keep theirs', () => {
   const p = salon(), v = studioView(p), l = layoutScope(v, null, top, {});
-  for (const b of l.boxes.values()) if (b.kind === 'node') { assert.equal(b.w, NODE_W); assert.equal(b.h, NODE_H); }
-  const book = partNamed(v, '예약하기'), before = l.boxes.get(book.id).h;
+  // Units (direct children of the scope) are cards with room for name, note and state; rows inside a group are compact.
+  for (const b of l.boxes.values()) if (b.kind === 'node') { assert.ok(b.w >= NODE_W); assert.ok(b.h >= (b.face === 'unit' ? NODE_H : 38), `${b.id} ${b.face} ${b.h}`); }
+  const book = partNamed(v, '예약하기'), before = l.boxes.get(book.id).h, slots = partNamed(v, '시간 고르기'), slotH = l.boxes.get(slots.id).h;
   assert.equal(l.boxes.get(book.id).kind, 'frame');
-  // A fourth child: frame grows, node size stays.
+  // A fourth child: frame grows, the other rows keep their size.
   const more = { ...EXAMPLES[0], parts: [...EXAMPLES[0].parts, { key: 'extra', name: '대기 예약', note: '', parent: 'book' }] };
   const v2 = studioView(buildExample(more)), l2 = layoutScope(v2, null, top, {});
   assert.ok(l2.boxes.get(partNamed(v2, '예약하기').id).h > before);
-  assert.equal(l2.boxes.get(partNamed(v2, '대기 예약').id).w, NODE_W);
+  assert.ok(l2.boxes.get(partNamed(v2, '대기 예약').id).w >= NODE_W);
+  assert.equal(l2.boxes.get(partNamed(v2, '시간 고르기').id).h, slotH);
 });
 
 test('STUDIO-D5 stored places win, children stay inside their frame, one sibling arrangement serves both views', () => {

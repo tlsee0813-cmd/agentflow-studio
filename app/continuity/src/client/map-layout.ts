@@ -3,27 +3,38 @@
  * - Positions are per container ('root' or a parent id): the arrangement of siblings is the same whether the parent is the
  *   scope itself or an expanded frame, so a place set in one view holds in the other. Missing positions use the automatic
  *   arrangement; nothing here overwrites a stored position.
- * - Node size is fixed: more children grow frames and the canvas, never shrink text. */
+ * - Reading levels: a direct child of the scope is a region (a frame with its name and the first sentence of its note) or a
+ *   unit (a card with the same two lines); inside a region parts are compact rows, and a long run of siblings with few links
+ *   among them reads as a list. Heights follow the lines a part really needs (two-line names, a state line); text never shrinks. */
 import type { StudioView, RelationView } from '../shared/studio.js';
 
 /** Frames are a little wider than a node so the head keeps its name beside the fold and go-inside controls. */
 export const FRAME_MIN_W = 228;
-export const NODE_W = 200, NODE_H = 60, PAD = 14, HEAD = 38, GAP = 12, COL_GAP = 76, ROW_GAP = 22, GHOST_W = 168, GHOST_H = 34;
-/** A frame head whose name needs two lines (estimated from the name and the frame width; names never shrink). */
-export const HEAD_2 = 56;
+/** NODE_W: a row's width (long names widen it). NODE_H: the least height of a unit card. */
+export const NODE_W = 200, NODE_H = 52, UNIT_W = 240, PAD = 14, GAP = 8, COL_GAP = 76, ROW_GAP = 22, GHOST_W = 168, GHOST_H = 34;
+/** Head of a group inside a region: one line, or two when the name needs them (names never shrink). */
+export const HEAD = 34, HEAD_2 = 52;
 /** Between wrapped columns of one layer (no relation runs between them, so they sit closer than relation layers). */
 export const WRAP_GAP = 36;
 /** Between relation layers inside a group: room for converging lines to stay apart. */
 export const FLOW_GAP = 44;
+/** A list: columns of short rows. */
+export const LIST_GAP = 18, LIST_ROW_GAP = 2;
 export interface Point { x: number; y: number }
 export type Positions = Record<string, Record<string, Point>>;
 export const ROOT = 'root';
+export type Face = 'unit' | 'row' | 'item';
 export interface Box { id: string; x: number; y: number; w: number; h: number; kind: 'node' | 'frame' | 'ghost'; depth: number; container: string; kids: number;
-  /** Frames: height of the head row (HEAD, or HEAD_2 when the name takes two lines). */
+  /** Frames: height of the head row. */
   head: number;
   /** The container-relative place used for this box (stored, or automatic): what a drag starts from and stores. */
-  rel: Point }
-export interface Edge { key: string; from: string; to: string; kind: RelationView['kind']; notes: string[]; ids: string[] }
+  rel: Point;
+  /** Nodes: unit (a direct child of the scope), row (inside a group) or item (in a list). Frames: depth 0 is a region. */
+  face?: Face;
+  /** Frames whose children read as a list. */
+  list?: boolean }
+/** agg: at least one end is drawn by a folded ancestor (a summary of inner relations, not a relation of that ancestor). */
+export interface Edge { key: string; from: string; to: string; kind: RelationView['kind']; notes: string[]; ids: string[]; agg: boolean }
 export interface ScopeLayout { boxes: Map<string, Box>; edges: Edge[]; bounds: { x: number; y: number; w: number; h: number } }
 
 interface Measure { w: number; h: number; ox: number; oy: number; head: number }
@@ -31,14 +42,28 @@ export const ghostId = (id: string) => `ghost:${id}`;
 
 /** Rough rendered width of a frame name (13px, semibold): wide for CJK, narrower for Latin. Only decides one or two head lines. */
 export function textWidth(text: string): number {
-  let w = 0; for (const ch of text) w += /[\u1100-\u11ff\u2e80-\ua4cf\uac00-\ud7af\uf900-\ufaff\uff00-\uffef]/.test(ch) ? 13.4 : /[A-Z@]/.test(ch) ? 8.8 : /[ .,:;'|il!]/.test(ch) ? 4.2 : 7.6;
+  let w = 0; for (const ch of text) w += /[ᄀ-ᇿ⺀-꓏가-힯豈-﫿＀-￯]/.test(ch) ? 13.4 : /[A-Z@]/.test(ch) ? 8.8 : /[ .,:;'|il!]/.test(ch) ? 4.2 : 7.6;
   return w;
 }
 
-/** Rendered width of a name: 'node' (13.5px semibold part name) or 'head' (13px group name). The browser passes a canvas
- * measurement in the page's own font; without one, the estimate below. */
-export type TextMeasure = (text: string, kind: 'node' | 'head') => number;
-const estimate: TextMeasure = (text, kind) => textWidth(text) * (kind === 'node' ? 13.5 / 13 : 1);
+/** Rendered width of text: 'node' (13.5px semibold row name), 'head' (15px region or unit name), 'sub' (13px group name) or
+ * 'note' (12.5px description). The browser passes a canvas measurement in the page's own font; without one, the estimate. */
+export type TextMeasure = (text: string, kind: 'node' | 'head' | 'sub' | 'note') => number;
+const SCALE = { node: 13.5 / 13, head: 15 / 13, sub: 1, note: 12.5 / 13 * 0.92 } as const;
+const estimate: TextMeasure = (text, kind) => textWidth(text) * SCALE[kind];
+/** The first sentence of a note: what a region or unit says about itself on the map. The rest belongs to the selection. */
+export function lead(note: string): string {
+  const t = note.replace(/\s+/g, ' ').trim(), m = /^(.+?[.!?。])(?=\s|$)/.exec(t);
+  return m ? m[1]! : t;
+}
+/** The note's first sentence as the map shows it: empty when a sibling says the very same sentence (a shared label such as
+ * "a real source file" read once per sibling is noise); the full note stays with the selection. */
+export function mapLead(v: StudioView, id: string): string {
+  const p = v.parts.find(x => x.id === id); if (!p) return '';
+  const own = lead(p.note); if (!own) return '';
+  const sibs = p.parentId ? v.parts.find(x => x.id === p.parentId)?.childIds ?? [] : v.roots;
+  return sibs.some(s => s !== id && lead(v.parts.find(x => x.id === s)?.note ?? '') === own) ? '' : own;
+}
 /** Long part names widen their card (never the short ones) so the name fits two lines: room beside the name is the card
  * minus its paddings, and with an inside also the fold toggle and the go-inside count. */
 export const NODE_MAX_W = 320;
@@ -50,15 +75,50 @@ export function nodeWidth(name: string, kids: boolean, measure: TextMeasure = es
   return Math.min(NODE_MAX_W, Math.ceil(need / 2) + nodeChrome(kids));
 }
 
+/** Siblings (direct children of a container) that a relation between their subtrees links to another sibling. */
+function linkedSiblings(v: StudioView, ids: string[]): Set<string> {
+  const byId = new Map(v.parts.map(p => [p.id, p])), set = new Set(ids), out = new Set<string>();
+  const lift = (id: string) => { let cur = byId.get(id), g = 0; while (cur && !set.has(cur.id) && g++ < 64) cur = cur.parentId ? byId.get(cur.parentId) : undefined; return cur && set.has(cur.id) ? cur.id : null; };
+  for (const r of v.relations) { const a = lift(r.from), b = lift(r.to); if (a && b && a !== b) { out.add(a); out.add(b); } }
+  return out;
+}
+/** A long run of siblings, mostly without an inside and rarely linked to each other, reads as a list (rows in columns):
+ * a command catalogue, a folder of files. Decided from the structure alone. */
+export function isListGroup(v: StudioView, container: string | null): boolean {
+  const byId = new Map(v.parts.map(p => [p.id, p])), ids = container ? byId.get(container)?.childIds ?? [] : v.roots;
+  if (ids.length < 8) return false;
+  const leaves = ids.filter(id => !(byId.get(id)?.childIds.length)).length;
+  return leaves >= ids.length * 0.7 && linkedSiblings(v, ids).size <= Math.floor(ids.length / 5);
+}
+
 export function layoutScope(v: StudioView, scope: string | null, expanded: (id: string, depth: number) => boolean, pos: Positions, measureText: TextMeasure = estimate): ScopeLayout {
   const byId = new Map(v.parts.map(p => [p.id, p]));
   const kidsOf = (id: string | null) => (id ? byId.get(id)?.childIds ?? [] : v.roots);
   const open = (id: string, depth: number) => depth < 12 && kidsOf(id).length > 0 && expanded(id, depth);
-  const memo = new Map<string, Measure>();
+  const memo = new Map<string, Measure & { face?: Face }>();
+  const listMemo = new Map<string, boolean>();
+  const listOf = (container: string | null) => { const k = container ?? ROOT; if (!listMemo.has(k)) listMemo.set(k, isListGroup(v, container)); return listMemo.get(k)!; };
+  const names = new Map<string, number>(); for (const p of v.parts) names.set(p.name, (names.get(p.name) ?? 0) + 1);
   // Automatic arrangement of siblings: longest-path columns over relations lifted to the siblings; long columns wrap.
   const autoArrange = (container: string | null, sizes: Map<string, Measure>): Map<string, Point> => {
     const ids = kidsOf(container), set = new Set(ids);
     const lift = (id: string) => { let cur = byId.get(id), guard = 0; while (cur && !set.has(cur.id) && guard++ < 64) cur = cur.parentId ? byId.get(cur.parentId) : undefined; return cur && set.has(cur.id) ? cur.id : null; };
+    if (listOf(container)) {
+      // A list keeps its own order in columns. Rows linked outward sit in the last column and rows linked from outside in the
+      // first, so their lines leave the list at its edge instead of running under other rows.
+      const outward = new Set<string>(), inward = new Set<string>();
+      for (const r of v.relations) { const a = lift(r.from), b = lift(r.to); if (a && !b) outward.add(a); if (b && !a) inward.add(b); }
+      const order = [...ids.filter(i => inward.has(i) && !outward.has(i)), ...ids.filter(i => !inward.has(i) && !outward.has(i)), ...ids.filter(i => outward.has(i))];
+      const cols = Math.min(4, Math.max(1, Math.ceil(order.length / 8))), per = Math.ceil(order.length / cols);
+      const at = new Map<string, Point>(); let x = 0;
+      for (let c = 0; c < cols; c++) {
+        const col = order.slice(c * per, (c + 1) * per); if (!col.length) break;
+        let y = 0; const w = Math.max(...col.map(i => sizes.get(i)!.w));
+        for (const i of col) { const sz = sizes.get(i)!; at.set(i, { x: x - sz.ox, y: y - sz.oy }); y += sz.h + LIST_ROW_GAP; }
+        x += w + LIST_GAP;
+      }
+      return at;
+    }
     const out = new Map<string, Set<string>>(ids.map(i => [i, new Set<string>()]));
     const reaches = (a: string, b: string) => { const seen = new Set<string>(), st = [a]; while (st.length) { const x = st.pop()!; if (x === b) return true; if (seen.has(x)) continue; seen.add(x); st.push(...out.get(x)!); } return false; };
     for (const r of v.relations) { const a = lift(r.from), b = lift(r.to); if (a && b && a !== b && !reaches(b, a)) out.get(a)!.add(b); }
@@ -96,41 +156,76 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
     return at;
   };
   const anchors = (container: string | null, depth: number) => {
-    const ids = kidsOf(container), sizes = new Map(ids.map(i => [i, measure(i, depth)]));
+    const ids = kidsOf(container), sizes = new Map(ids.map(i => [i, measure(i, depth, container)]));
     const auto = autoArrange(container, sizes), stored = pos[container ?? ROOT] ?? {};
     return { sizes, at: new Map(ids.map(i => [i, stored[i] ? { ...stored[i]! } : auto.get(i)!])) };
   };
-  // Head row: toggle 22 + paddings and gaps ~26 + go-inside ~40, and the latest-record time ~52 when there is one.
   const hasRecords = (id: string, guard = 0): boolean => { const p = byId.get(id); return !!p && guard < 64 && (!!p.lastAt || p.childIds.some(c => hasRecords(c, guard + 1))); };
-  const headRoom = (id: string, w: number) => w - 88 - (hasRecords(id) ? 52 : 0);
-  /** A name longer than two lines of a narrow group widens the group (up to 360px) rather than cutting the name. */
-  const headFit = (id: string, w: number): { w: number; head: number } => {
-    const need = measureText(byId.get(id)?.name ?? '', 'head') * 1.08;
-    if (need > headRoom(id, w) * 2) w = Math.max(w, Math.min(360, Math.ceil(need / 2) + w - headRoom(id, w) + 12));
-    return { w, head: need > headRoom(id, w) ? HEAD_2 : HEAD };
+  // Korean text breaks between words (keep-all): leave a share of each line unused.
+  const lines = (text: string, kind: Parameters<TextMeasure>[1], room: number, max = 2) => (!text ? 0 : Math.min(max, Math.ceil((measureText(text, kind) * 1.15 + 6) / Math.max(40, room))));
+  /** Region head: the name (one or two lines; a longer name widens the region rather than being cut) and the first sentence of
+   * the note under it. Head row: toggle 28, go-inside ~44, paddings ~12, and the latest-record time ~52 when there is one. */
+  const regionHead = (id: string, w: number): { w: number; head: number } => {
+    const p = byId.get(id)!, room = (x: number) => x - 84 - (hasRecords(id) ? 52 : 0), chrome = w - room(w);
+    // A region keeps its name on one line when it can (up to 320px), and on two lines otherwise (up to 380px).
+    const need = measureText(p.name, 'head') * 1.08 + 4;
+    if (need > room(w)) w = Math.max(w, Math.min(320, Math.ceil(need) + chrome));
+    if (need > room(w) * 2) w = Math.max(w, Math.min(380, Math.ceil(need / 2) + chrome + 12));
+    // The note runs under the whole head row; a region widens (up to 340px) rather than cut its sentence after two lines.
+    const note = mapLead(v, id), noteNeed = note ? measureText(note, 'note') * 1.15 + 6 : 0;
+    if (noteNeed > (w - 44) * 2) w = Math.max(w, Math.min(340, Math.ceil(noteNeed / 2) + 44));
+    const nl = need > room(w) ? 2 : 1, ll = lines(note, 'note', w - 44);
+    return { w, head: 12 + nl * 22 + (ll ? 3 + ll * 17 : 0) + 14 };
   };
-  function measure(id: string, depth: number): Measure {
+  /** Group head inside a region: its name only; a long name takes a second line or widens the group (up to 360px). */
+  const groupHead = (id: string, w: number): { w: number; head: number } => {
+    const need = measureText(byId.get(id)?.name ?? '', 'sub') * 1.08, room = (x: number) => x - 88 - (hasRecords(id) ? 52 : 0);
+    if (need > room(w) * 2) w = Math.max(w, Math.min(360, Math.ceil(need / 2) + w - room(w) + 12));
+    return { w, head: need > room(w) ? HEAD_2 : HEAD };
+  };
+  function measure(id: string, depth: number, container: string | null): Measure & { face?: Face } {
     const cached = memo.get(id); if (cached) return cached;
-    let m: Measure = { w: nodeWidth(byId.get(id)?.name ?? '', kidsOf(id).length > 0, measureText), h: NODE_H, ox: 0, oy: 0, head: 0 };
+    const p = byId.get(id)!, kids = kidsOf(id).length > 0, chrome = nodeChrome(kids);
+    // The extra line under a name: the state when there is one, else the parent beside a name that repeats in the project.
+    const extra = p.status !== 'plan' || (names.get(p.name) ?? 0) > 1 ? 1 : 0;
+    let m: Measure & { face?: Face };
     if (open(id, depth)) {
       const { sizes, at } = anchors(id, depth + 1);
       let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-      for (const [k, p] of at) { const s = sizes.get(k)!; minX = Math.min(minX, p.x + s.ox); minY = Math.min(minY, p.y + s.oy); maxX = Math.max(maxX, p.x + s.ox + s.w); maxY = Math.max(maxY, p.y + s.oy + s.h); }
-      const { w, head } = headFit(id, Math.max(maxX - minX + PAD * 2, FRAME_MIN_W));
+      for (const [k, q] of at) { const s = sizes.get(k)!; minX = Math.min(minX, q.x + s.ox); minY = Math.min(minY, q.y + s.oy); maxX = Math.max(maxX, q.x + s.ox + s.w); maxY = Math.max(maxY, q.y + s.oy + s.h); }
+      const { w, head } = (depth === 0 ? regionHead : groupHead)(id, Math.max(maxX - minX + PAD * 2, FRAME_MIN_W));
       m = { ox: minX, oy: minY, w, h: maxY - minY + head + PAD, head };
+    } else if (listOf(container)) {
+      const w = nodeWidth(p.name, kids, measureText), nl = lines(p.name, 'node', w - chrome);
+      m = { w, h: 14 + (nl + extra) * 17, ox: 0, oy: 0, head: 0, face: 'item' };
+    } else if (depth === 0) {
+      const note = mapLead(v, id), need = measureText(p.name, 'head') * 1.1 + 6;
+      let w = note ? UNIT_W : NODE_W;
+      if (need > (w - chrome) * 2) w = Math.min(NODE_MAX_W + 40, Math.ceil(need / 2) + chrome);
+      const nl = need > w - chrome ? 2 : 1, ll = lines(note, 'note', w - chrome);
+      m = { w, h: Math.max(NODE_H, 24 + nl * 20 + (ll ? 2 + ll * 17 : 0) + extra * 19), ox: 0, oy: 0, head: 0, face: 'unit' };
+    } else {
+      const w = nodeWidth(p.name, kids, measureText), nl = lines(p.name, 'node', w - chrome);
+      m = { w, h: 20 + (nl + extra) * 18, ox: 0, oy: 0, head: 0, face: 'row' };
     }
     memo.set(id, m); return m;
   }
   const boxes = new Map<string, Box>();
-  const place = (id: string, anchor: Point, rel: Point, depth: number, container: string) => {
-    const m = measure(id, depth), kids = kidsOf(id).length, isOpen = open(id, depth);
-    boxes.set(id, { id, x: anchor.x + m.ox, y: anchor.y + m.oy, w: m.w, h: m.h, kind: isOpen ? 'frame' : 'node', depth, container, kids, rel, head: m.head });
+  const place = (id: string, anchor: Point, rel: Point, depth: number, container: string | null) => {
+    const m = measure(id, depth, container), kids = kidsOf(id).length, isOpen = open(id, depth);
+    boxes.set(id, { id, x: anchor.x + m.ox, y: anchor.y + m.oy, w: m.w, h: m.h, kind: isOpen ? 'frame' : 'node', depth, container: container ?? ROOT, kids, rel, head: m.head,
+      ...(isOpen ? { list: listOf(id) } : { face: m.face ?? 'row' }) });
     if (!isOpen) return;
     const { at } = anchors(id, depth + 1);
-    for (const [k, p] of at) place(k, { x: anchor.x + PAD + p.x, y: anchor.y + m.head + p.y }, p, depth + 1, id);
+    // One column of rows fills the group's width, so a region widened for its name or note keeps an even edge.
+    const single = !listOf(id) && new Set([...at.values()].map(q => q.x)).size === 1;
+    for (const [k, p] of at) {
+      place(k, { x: anchor.x + PAD + p.x, y: anchor.y + m.head + p.y }, p, depth + 1, id);
+      const kb = boxes.get(k)!; if (single && kb.kind === 'node') kb.w = Math.max(kb.w, m.w - PAD * 2);
+    }
   };
   const top = anchors(scope, 0);
-  for (const [k, p] of top.at) place(k, p, p, 0, scope ?? ROOT);
+  for (const [k, p] of top.at) place(k, p, p, 0, scope);
 
   // Visible representative of any part: itself or its nearest visible ancestor; null when outside this scope.
   const rep = (id: string): string | null => { let cur = byId.get(id), guard = 0; while (cur && guard++ < 64) { if (boxes.has(cur.id)) return cur.id; cur = cur.parentId ? byId.get(cur.parentId) : undefined; } return null; };
@@ -145,8 +240,10 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
     if (!a) { a = ghostId(r.from); if (!ghostsIn.includes(r.from)) ghostsIn.push(r.from); }
     if (!b) { b = ghostId(r.to); if (!ghostsOut.includes(r.to)) ghostsOut.push(r.to); }
     if (a === b) continue;
-    const key = `${a}|${b}|${r.kind}`, e = edges.get(key) ?? { key, from: a, to: b, kind: r.kind, notes: [], ids: [] };
-    if (r.note) e.notes.push(r.note); e.ids.push(r.id); edges.set(key, e);
+    const key = `${a}|${b}|${r.kind}`, e = edges.get(key) ?? { key, from: a, to: b, kind: r.kind, notes: [], ids: [], agg: false };
+    if (r.note) e.notes.push(r.note); e.ids.push(r.id);
+    if ((a !== r.from && a !== ghostId(r.from)) || (b !== r.to && b !== ghostId(r.to))) e.agg = true;
+    edges.set(key, e);
   }
   const ghostColumn = (ids: string[], x: number) => ids.forEach((id, i) => boxes.set(ghostId(id), { id: ghostId(id), x, y: minY + i * (GHOST_H + 12), w: GHOST_W, h: GHOST_H, kind: 'ghost', depth: 0, container: '', kids: 0, rel: { x: 0, y: 0 }, head: 0 }));
   ghostColumn(ghostsIn.filter(id => !ghostsOut.includes(id)), minX - GHOST_W - 90);

@@ -24,25 +24,27 @@
     <main id="home" class="home" hidden>
       <div class="home-inner">
         <header class="home-head">
-          <h1 class="home-title">프로젝트</h1>
-          <p class="home-lede">개발 기록을 프로젝트의 부분에 이어 구조와 최근 변화를 읽습니다.</p>
-        </header>
-        <div id="home-message" class="message" role="status" hidden></div>
-        <section class="home-mine" aria-labelledby="saved-title">
-          <div class="home-row">
-            <h2 id="saved-title" class="home-sub">내 프로젝트</h2>
-            <form id="new-form" class="new-form"><label for="new-name" class="sr-only">새 프로젝트 이름</label><input id="new-name" maxlength="120" placeholder="새 프로젝트 이름" autocomplete="off"><button type="submit" class="primary">내 프로젝트 시작</button></form>
+          <div>
+            <h1 class="home-title">내 프로그램</h1>
+            <p class="home-lede">만들고 있는 프로그램의 부분과 묶음을 그대로 열어, 이해하고 바꿀 모습을 시험해요.</p>
           </div>
-          <ul id="saved-list" class="project-list mine"></ul>
-          <p id="saved-empty" class="home-empty" hidden>아직 이 브라우저에 만든 프로젝트가 없어요. 이름을 적어 시작하거나 아래 예제로 둘러보세요.</p>
+          <div class="home-actions">
+            <button type="button" id="new-open" class="secondary small" aria-expanded="false" aria-controls="new-form">새 프로젝트</button>
+            <button type="button" id="import" class="link-button">백업 파일 가져오기</button><input id="import-file" type="file" accept="application/json,.json" hidden>
+          </div>
+        </header>
+        <form id="new-form" class="new-form" hidden><label for="new-name" class="sr-only">새 프로젝트 이름</label><input id="new-name" maxlength="120" placeholder="새 프로젝트 이름" autocomplete="off"><button type="submit" class="primary small">만들기</button><button type="button" id="new-cancel" class="link-button">취소</button></form>
+        <div id="home-message" class="message" role="status" hidden></div>
+        <section class="home-mine" aria-label="내 프로젝트">
+          <ul id="saved-list" class="program-list mine"></ul>
+          <p id="saved-empty" class="home-empty" hidden>아직 이 브라우저에 만든 프로젝트가 없어요. 아래 예제의 실제 구성으로 둘러보거나, 변경 구상을 시험해 보세요.</p>
         </section>
         <section class="home-examples" aria-labelledby="examples-title">
           <h2 id="examples-title" class="home-sub">예제로 둘러보기</h2>
-          <ul id="project-list" class="project-list examples"></ul>
+          <ul id="project-list" class="program-list examples"></ul>
         </section>
         <footer class="home-foot">
           <p>예제는 전달받았다고 가정하고 쓴 합성 기록이며 저장되지 않아요. 실제 기록 연결기는 아직 없어요.</p>
-          <button type="button" id="import" class="link-button">백업 파일 가져오기</button><input id="import-file" type="file" accept="application/json,.json" hidden>
         </footer>
       </div>
     </main>
@@ -65,7 +67,7 @@
       </div>
       <div id="help" class="help" hidden>
         <strong>지도 조작</strong>
-        <ul><li><b>클릭</b> 선택해 오른쪽에서 읽기</li><li><b>더블클릭</b> 또는 <b>숫자 ›</b> 안으로 들어가기</li><li><b>‹</b> 그 자리에서 펼치기·접기</li><li><b>휠</b> 커서 위치로 확대·축소 · <b>빈 곳 드래그</b> 이동</li><li><b>부분 끌기</b> 이 보기에서 위치 옮기기</li><li><b>Esc</b> 선택 해제 · 한 단계 위로</li></ul>
+        <ul><li><b>클릭</b> 선택해 그 옆에서 읽기 · 근거는 ‘근거·기록’</li><li><b>더블클릭</b> 또는 <b>숫자 ›</b> 안으로 들어가기</li><li><b>‹</b> 그 자리에서 펼치기·접기</li><li><b>휠</b> 커서 위치로 확대·축소 · <b>빈 곳 드래그</b> 이동</li><li><b>부분 끌기</b> 이 보기에서 위치 옮기기</li><li><b>Esc</b> 선택 해제 · 한 단계 위로</li></ul>
         <strong>선</strong>
         <ul class="line-legend"><li><svg viewBox="0 0 28 8" aria-hidden="true"><path d="M1 4h26"/></svg>흐름 · 넘겨줌</li><li><svg viewBox="0 0 28 8" aria-hidden="true"><path class="d-needs" d="M1 4h26"/></svg>필요로 함</li><li><svg viewBox="0 0 28 8" aria-hidden="true"><path class="d-shares" d="M1 4h26"/></svg>함께 씀 · 관련</li></ul>
         <p>선 위에 마우스를 올리면 관계 설명이 보여요.</p>
@@ -74,6 +76,10 @@
       <div id="toast" class="toast" role="status" hidden></div>
       <p id="space-empty" class="space-empty" hidden></p>
       <div id="part-form" class="part-form" hidden></div>
+      <div id="callouts" class="callouts"></div>
+      <div id="scope-sticky" class="scope-sticky" aria-hidden="true" hidden></div>
+      <div id="plan-strip" class="plan-strip" role="region" aria-label="변경 구상" hidden></div>
+      <aside id="lens" class="lens" aria-labelledby="lens-title" hidden></aside>
       <aside id="panel" class="panel inspector" aria-labelledby="panel-title" hidden></aside>
       <aside id="plan-panel" class="plan-panel inspector" aria-labelledby="plan-title" hidden></aside>
       <div id="plan-sheet" class="plan-sheet" role="dialog" aria-labelledby="sheet-title" hidden></div>

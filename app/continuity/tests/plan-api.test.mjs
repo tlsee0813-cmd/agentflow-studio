@@ -3,9 +3,73 @@ import assert from 'node:assert/strict';
 import { validatePlanAsk, validatePlanReply } from '../dist/public/shared/plan-api.js';
 import { CONVERTER_PARTS, converterEvidence, CONVERTER_INTENT, converterExampleAnalysis } from '../dist/public/shared/change-plan-example.js';
 import { createStudioHandler } from '../server/studio.mjs';
+import { mapReply } from '../dist/public/client/plan-source.js';
 const parts = CONVERTER_PARTS.map(p => ({id:p.key, name:p.name, note:p.note, parentId:p.parent ?? null}));
 const ask = condition => ({schemaVersion:'studio.plan.1',intent:CONVERTER_INTENT,parts:structuredClone(parts),evidence:converterEvidence(condition)});
 const answer = condition => converterExampleAnalysis(Object.fromEntries(parts.map(p=>[p.id,p.id])),condition);
+
+test('source-bound presentation checks exact excerpts and intent attribution against the request, without normalizing output', () => {
+  const input = ask('A'), reply = answer('A');
+  reply.items[0].presentation[0].current.text = '현재 합성 자료에서는\n  한 번에 문서 하나를 받는다.';
+  const before = structuredClone(reply); assert.deepEqual(validatePlanReply(reply, input), before);
+  const invalid = [
+    r => { r.items[0].presentation[0].current.text = '현재는 폴더를 받는다.'; },
+    r => { r.items[0].presentation[0].current.text = '본문·표·문단 모양을 보존하며 변환한다.'; }, // another part's note
+    r => { r.items[2].presentation[1].current.text = '파일별 결과를 모두 보여 준다.'; },
+    r => { r.items[2].presentation[1].current.refs = ['T01']; }, // quote exists, but not in this cited source
+    r => { r.items[2].presentation[1].wanted.refs = ['P03']; }, // intent cannot cite only code
+    r => { r.items[2].presentation[1].wanted.refs = ['T01']; },
+  ];
+  for (const mutate of invalid) { const r = answer('A'); mutate(r); assert.throws(() => validatePlanReply(r, input)); }
+  const suggestion = answer('A'); suggestion.items[2].presentation[1].origin = 'suggestion'; suggestion.items[2].presentation[1].wanted.refs = ['P03'];
+  assert.equal(validatePlanReply(suggestion, input).items[2].presentation[1].origin, 'suggestion');
+  const punctuation = answer('A'); punctuation.items[0].presentation[0].current.text += '…';
+  assert.throws(() => validatePlanReply(punctuation, input), 'only whitespace differences are allowed');
+  const legacy = answer('A'); legacy.items.forEach(i => { delete i.presentation; });
+  assert.deepEqual(validatePlanReply(legacy, input), legacy);
+});
+
+test('authored A/B presentation keeps actual target identity, synthetic source scope and condition-specific current evidence', () => {
+  for (const condition of ['A', 'B']) {
+    const reply = answer(condition), input = ask(condition);
+    // Examples may have explicit dependencies; the AI reply contract still forbids them.
+    const aiShape = structuredClone(reply); aiShape.items.forEach(i => { i.dependsOn = []; });
+    assert.deepEqual(validatePlanReply(aiShape, input), aiShape);
+    for (const item of reply.items) {
+      const shown = item.presentation ?? [];
+      assert.equal(new Set(shown.map(p => p.partId)).size, shown.length);
+      for (const p of shown) {
+        assert.ok(item.partIds.includes(p.partId));
+        assert.ok(p.current.text.length <= 48 && p.wanted.text.length <= 48);
+        assert.ok(!shown.some(other => other.partId === parts.find(part => part.id === p.partId)?.parentId), 'do not duplicate a target into its parent');
+        if (p.current.source === 'evidence') {
+          const basis = input.evidence.find(e => e.id === p.current.refs[0]).basis;
+          assert.match(basis, /합성.*main@S0/);
+          if (p.current.refs.includes('P03')) assert.match(basis, new RegExp(`조건 ${condition}`));
+        }
+      }
+    }
+    const continuation = reply.items.find(i => i.id === 'continue').presentation[0];
+    assert.deepEqual(continuation.current, { text: '입력 문서 하나', source: 'evidence', refs: ['P01'] });
+    assert.doesNotMatch(continuation.current.text, /본문|표|보존/); // Preserve content is not replaced by failure independence.
+    assert.match(continuation.wanted.text, /실패해도.*나머지 파일.*계속/);
+    if (condition === 'B') assert.equal(reply.items.find(i => i.id === 'outcomes').presentation[0].origin, 'suggestion');
+  }
+});
+
+test('mapping reply aliases maps presentation targets too, keeps source aliases and rejects wrong-item targets', () => {
+  const reply = answer('A'), input = { parts: new Map(parts.map((p, i) => [p.id, `REAL_${i}`])), evidence: converterEvidence('A') };
+  const mapped = mapReply(reply, input);
+  for (const [index, item] of reply.items.entries()) for (const [j, p] of item.presentation.entries()) {
+    assert.equal(mapped.items[index].presentation[j].partId, input.parts.get(p.partId));
+    assert.deepEqual(mapped.items[index].presentation[j].current.refs, p.current.refs);
+    assert.deepEqual(mapped.items[index].presentation[j].wanted.refs, p.wanted.refs);
+  }
+  const bad = answer('A'); bad.items[0].presentation[0].partId = 'results';
+  assert.throws(() => mapReply(bad, input));
+  const legacy = answer('A'); legacy.items.forEach(i => { delete i.presentation; });
+  assert.ok(mapReply(legacy, input).items.every(i => !Object.hasOwn(i, 'presentation')));
+});
 test('plan input is bounded by serialized UTF-8 bytes and rejects invented topology',()=>{
   assert.deepEqual(validatePlanAsk(ask('A')),ask('A'));
   const large=ask('A'); large.evidence=Array.from({length:10},(_,i)=>({id:'R'+i,kind:'report',title:'r',text:'한'.repeat(3000),basis:'S0'}));

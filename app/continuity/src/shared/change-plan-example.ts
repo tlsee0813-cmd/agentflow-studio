@@ -5,7 +5,7 @@
  * The actual JSONL excerpts from observation 39 are a separate corpus.
  */
 import type { RelationKind } from './types.js';
-import type { Evidence, PlanAnalysis, ResultObservation } from './change-plan.js';
+import type { Evidence, PlanAnalysis, PlanPresentation, ResultObservation } from './change-plan.js';
 
 export const CONVERTER_PARTS: { key: string; name: string; note: string; parent?: string }[] = [
   { key: 'input', name: '읽어들이기', note: '문서를 받아 변환할 내용을 읽는다.' },
@@ -50,18 +50,32 @@ export function converterEvidence(condition: 'A' | 'B'): Evidence[] {
  * dependency without silently selecting or adding it to the user's request. */
 export function converterExampleAnalysis(partIds: Record<string, string>, condition: 'A' | 'B'): PlanAnalysis {
   const ids = (...keys: string[]) => keys.map(key => partIds[key]).filter((id): id is string => typeof id === 'string' && !!id);
+  // Authored presentation of this synthetic corpus only, never an inferred operation or current-product claim.
+  // part-note excerpts are the actual authored map descriptions; evidence excerpts retain A/B's P03 basis via refs.
+  const present = (key: string, current: PlanPresentation['current'], wanted: PlanPresentation['wanted'], origin: PlanPresentation['origin'] = 'intent'): PlanPresentation[] =>
+    partIds[key] ? [{ partId: partIds[key]!, current, wanted, origin }] : [];
+  const note = (key: string): PlanPresentation['current'] => ({ text: CONVERTER_PARTS.find(p => p.key === key)!.note, source: 'part-note', refs: [] });
+  const code = (text: string): PlanPresentation['current'] => ({ text, source: 'evidence', refs: ['P03'] });
   const prerequisite = condition === 'B' ? ['outcomes'] : [];
   return {
     summary: condition === 'A'
       ? '파일별 결과는 이미 남고 있지만, 화면에는 마지막 결과만 보여요. 기존 결과를 활용해 실패 모음을 만들고, 폴더 입력과 계속 처리는 따로 살펴볼 수 있어요.'
       : '현재는 결과 하나만 전달해요. 실패한 파일과 이유를 모으려면 입력마다 결과를 구별하는 부분이 먼저 필요해요.',
     items: [
-      { id: 'folder', title: '폴더 입력', description: '현재 단일 문서 입력을 폴더 안 파일을 받는 범위로 확장합니다. 하위 폴더 포함은 아직 정하지 않았습니다.', partIds: ids('input', 'document'), refs: ['R02', 'R03', 'P01'], dependsOn: [] },
-      { id: 'continue', title: '실패해도 나머지 계속', description: '한 문서의 실패가 다른 문서 처리를 중단하지 않는 결과를 원합니다. 병렬 처리나 재시도를 필수 방식으로 정하지 않습니다.', partIds: ids('transform', 'content'), refs: ['R03', 'R04', 'P03'], dependsOn: [] },
-      ...(condition === 'B' ? [{ id: 'outcomes', title: '파일별 결과 구별', description: '제공된 코드는 경로 한 개 또는 예외만 전달합니다. 실패한 파일과 이유를 모으려면 입력과 성공·실패 결과를 대응시킬 수 있어야 합니다. 이 전제를 요청에 포함할지 또는 기존 수단을 더 확인할지 구별합니다.', partIds: ids('transform', 'results'), refs: ['P03', 'R03'], dependsOn: [] }] : []),
+      { id: 'folder', title: '폴더 입력', description: '현재 단일 문서 입력을 폴더 안 파일을 받는 범위로 확장합니다. 하위 폴더 포함은 아직 정하지 않았습니다.', partIds: ids('input', 'document'), refs: ['R02', 'R03', 'P01'], dependsOn: [],
+        presentation: present('document', note('document'), { text: '폴더 안 파일을 입력받기', refs: ['R03'] }) },
+      { id: 'continue', title: '실패해도 나머지 계속', description: '한 문서의 실패가 다른 문서 처리를 중단하지 않는 결과를 원합니다. 병렬 처리나 재시도를 필수 방식으로 정하지 않습니다.', partIds: ids('transform', 'content'), refs: ['R03', 'R04', 'P03', 'P01'], dependsOn: [],
+        presentation: present('content', { text: '입력 문서 하나', source: 'evidence', refs: ['P01'] }, { text: '실패해도 나머지 파일 계속 변환', refs: ['R03', 'R04'] }) },
+      ...(condition === 'B' ? [{ id: 'outcomes', title: '파일별 결과 구별', description: '제공된 코드는 경로 한 개 또는 예외만 전달합니다. 실패한 파일과 이유를 모으려면 입력과 성공·실패 결과를 대응시킬 수 있어야 합니다. 이 전제를 요청에 포함할지 또는 기존 수단을 더 확인할지 구별합니다.', partIds: ids('transform', 'results'), refs: ['P03', 'R03'], dependsOn: [],
+        presentation: present('results', code('제공된 호출자는 성공 경로 또는 오류 메시지 하나를 화면에 표시한다.'), { text: '입력별 성공·실패 결과 구별', refs: ['P03', 'R03'] }, 'suggestion') }] : []),
       { id: 'failures', title: '성공 유지·실패 모음', description: condition === 'A'
         ? '기존 입력별 성공 경로·실패 이유와 결과 누적을 재사용해 실패 모음을 구성할 수 있는 후보입니다. 현재 화면은 마지막 결과만 보여 주므로 결과 읽기 변화가 필요합니다. 폴더 실행이나 성공 보존 전체가 검증된 것은 아닙니다.'
-        : '실패한 입력과 이유를 모아 읽고 성공 산출물을 유지하려는 변경입니다. 제공된 범위에는 파일별 결과 누적이 없어 최소 전제의 확인이 필요합니다. 전제는 별도로 선택하지 않으면 이번 요청에 포함되지 않습니다.', partIds: ids('output', 'files', 'results'), refs: ['R02', 'R03', 'P03', 'T01'], dependsOn: prerequisite },
+        : '실패한 입력과 이유를 모아 읽고 성공 산출물을 유지하려는 변경입니다. 제공된 범위에는 파일별 결과 누적이 없어 최소 전제의 확인이 필요합니다. 전제는 별도로 선택하지 않으면 이번 요청에 포함되지 않습니다.', partIds: ids('output', 'files', 'results'), refs: ['R02', 'R03', 'P03', 'T01'], dependsOn: prerequisite,
+        presentation: [
+          ...present('files', note('files'), { text: '성공한 산출물 유지', refs: ['R03'] }),
+          ...present('results', condition === 'A' ? code('화면은 마지막 결과만 표시한다.') : code('제공된 호출자는 성공 경로 또는 오류 메시지 하나를 화면에 표시한다.'),
+            { text: '실패한 파일과 이유 모아 보기', refs: ['R03'] }),
+        ] },
     ],
     impacts: [
       { partId: partIds.document ?? partIds.input ?? '', reason: '문서 하나에서 폴더 안 파일로 입력 범위가 달라집니다. 파일 대상 규칙은 아직 미정입니다.', refs: ['R02', 'R03'] },

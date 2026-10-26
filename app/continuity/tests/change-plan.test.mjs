@@ -16,6 +16,82 @@ const analysis = () => ({ summary: '파일별 결과를 구별하고 실패를 �
 ], impacts: [{ partId: 'P1', reason: '파일별 대응 여부를 살핀다.', refs: ['E2'] }], preserve: ['성공 결과 유지'], unknowns: ['출력 이름 충돌은 미정'] });
 const plan = () => createPlan('PROJECT1', 'main@abc', '폴더 변환과 실패 보고', evidence, analysis());
 
+const presented = () => {
+  const a = analysis();
+  a.items[0].presentation = [{ partId: 'P1', current: { text: '현재는 문서 하나의 결과만 설명한다.', source: 'evidence', refs: ['E2'] },
+    wanted: { text: '입력마다 결과를 구별하는 수단을 살핀다.', refs: ['E2'] }, origin: 'suggestion' }];
+  return a;
+};
+
+test('optional presentation round-trips without adding it to legacy plans or changing snapshot requests', () => {
+  const legacy = plan(); assert.deepEqual(parsePersistedPlan(legacy), legacy);
+  assert.ok(!Object.hasOwn(parsePersistedPlan(legacy).analysis.items[0], 'presentation'));
+  const next = createPlan('PROJECT1', 'main@abc', legacy.intent, evidence, presented());
+  const saved = parsePersistedPlan(next); assert.deepEqual(saved, next);
+  assert.deepEqual(selectItems(saved, ['I1']).analysis.items[0].presentation, next.analysis.items[0].presentation);
+  const without = structuredClone(saved); delete without.analysis.items[0].presentation;
+  assert.equal(requestSnapshot(saved).text, requestSnapshot(without).text);
+  saved.analysis.items[0].presentation[0].wanted.text = 'outside mutation';
+  assert.notEqual(next.analysis.items[0].presentation[0].wanted.text, 'outside mutation');
+});
+
+test('presentation rejects unrelated IDs/refs, duplicate targets, excess size and unknown nested keys without repair', () => {
+  const invalid = [
+    a => { a.items[0].presentation = undefined; },
+    a => { a.items[0].presentation[0].partId = 'P2'; }, // valid map part, wrong item
+    a => { a.items[0].presentation[0].partId = 'invented'; },
+    a => { a.items[0].presentation.push(structuredClone(a.items[0].presentation[0])); },
+    a => { a.items[0].presentation = Array(9).fill(a.items[0].presentation[0]); },
+    a => { a.items[0].presentation[0].wanted.refs = ['E1']; }, // real evidence, outside item.refs
+    a => { a.items[0].presentation[0].current.refs = ['invented']; },
+    a => { a.items[0].presentation[0].current.refs = []; },
+    a => { a.items[0].presentation[0].wanted.refs = []; },
+    a => { a.items[0].presentation[0].wanted.refs = ['E2', 'E2']; },
+    a => { a.items[0].presentation[0].current.text = 'x'.repeat(141); },
+    a => { a.items[0].presentation[0].wanted.text = 'x'.repeat(141); },
+    a => { a.items[0].presentation[0].wanted.text = '  '; },
+    a => { a.items[0].presentation[0].current.source = 'summary'; },
+    a => { a.items[0].presentation[0].current.source = 'part-note'; }, // part-note refs must be empty
+    a => { a.items[0].presentation[0].origin = 'verified'; },
+    a => { a.items[0].presentation[0].operation = 'delete'; },
+    a => { a.items[0].presentation[0].current.basis = 'extra'; },
+    a => { a.items[0].presentation[0].wanted.confirmed = true; },
+  ];
+  for (const mutate of invalid) {
+    const a = presented(); mutate(a);
+    assert.throws(() => parsePlanAnalysis(a, ['P1', 'P2'], evidence.map(e => e.id)));
+    const saved = plan(); saved.analysis = a; assert.equal(parsePersistedPlan(saved), null);
+  }
+  const a = presented(); a.items[0].presentation[0].current = { text: '계획 원문', source: 'part-note', refs: [] };
+  a.items[0].presentation[0].wanted.text = '한'.repeat(140);
+  assert.deepEqual(parsePlanAnalysis(a, ['P1', 'P2'], evidence.map(e => e.id)), a);
+});
+
+test('saved plans and createPlan validate evidence excerpts and intent user refs, while part-note snapshots are unavailable', () => {
+  for (const mutate of [a => { a.items[0].presentation[0].origin = 'intent'; },
+    a => { a.items[0].presentation[0].current.text = '인용 근거에 없는 현재 설명'; }]) {
+    const a = presented(); mutate(a);
+    assert.throws(() => createPlan('PROJECT1', 'main@abc', '구상', evidence, a));
+    const saved = plan(); saved.analysis = a; assert.equal(parsePersistedPlan(saved), null);
+  }
+  const a = presented(); a.items[0].refs.push('E1');
+  a.items[0].presentation[0].origin = 'intent'; a.items[0].presentation[0].wanted.refs = ['E1'];
+  a.items[0].presentation[0].current.text = '현재는\n 문서 하나의 결과만 설명한다.';
+  assert.ok(createPlan('PROJECT1', 'main@abc', '구상', evidence, a));
+  a.items[0].presentation[0].current = { text: '저장된 plan에는 없는 대상 설명 스냅샷', source: 'part-note', refs: [] };
+  assert.ok(parsePersistedPlan(createPlan('PROJECT1', 'main@abc', '구상', evidence, a)));
+});
+
+test('presentation permits eight distinct item targets and rejects a ninth independently of duplicate-ID rules', () => {
+  const a = presented(), targetIds = Array.from({ length: 9 }, (_, i) => `TARGET_${i}`);
+  a.items[0].partIds = targetIds;
+  const view = a.items[0].presentation[0];
+  a.items[0].presentation = targetIds.slice(0, 8).map(partId => ({ ...structuredClone(view), partId }));
+  assert.equal(parsePlanAnalysis(a, [...targetIds, 'P1', 'P2'], evidence.map(e => e.id)).items[0].presentation.length, 8);
+  a.items[0].presentation.push({ ...structuredClone(view), partId: targetIds[8] });
+  assert.throws(() => parsePlanAnalysis(a, [...targetIds, 'P1', 'P2'], evidence.map(e => e.id)));
+});
+
 test('partial selection discloses missing prerequisites without silently requesting them or unrelated scope', () => {
   const full = plan(), partial = selectItems(full, ['I2']);
   assert.deepEqual(full.selected, ['I1', 'I2', 'I3']);
