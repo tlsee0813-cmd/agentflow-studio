@@ -23,6 +23,9 @@ export interface PlanHost {
   accessCode(): string; keepAccessCode(value: string): void;
   selected(): string | null;
   boxes(): Map<string, Box>;
+  /** Temporarily expose only this target's ancestors in the current scope. Explicit focus may reopen its path; a normal
+   * render keeps a manual fold. null releases the preview's layer without changing user folds or record peeks. */
+  targetContext(id: string | null, explicit: boolean): void;
   /** Select a part of the current project (null clears), staying in the current scope. */
   selectPart(id: string | null): void;
   /** Open a part's scope when it is not visible here (keeps the plan open). */
@@ -112,7 +115,7 @@ export function createPlanView(host: PlanHost) {
   function close(restore = true) {
     if (!s) return;
     s.pending?.controller.abort(); s.scoping?.controller.abort();
-    const ret = s.ret; s = null;
+    const ret = s.ret; s = null; host.targetContext(null, false);
     $('plan-panel').hidden = true; $('plan-panel').replaceChildren(); $('plan-mode').hidden = true; $('plan-sheet').hidden = true;
     $('plan-strip').hidden = true; $('plan-strip').replaceChildren(); host.surface(null, [], false); lastFocusKey = '';
     $('space').style.setProperty('--plan-w', '0px');
@@ -245,7 +248,7 @@ export function createPlanView(host: PlanHost) {
     else if (part?.note) { now = firstSentence(part.note); from = '지도 설명'; }
     else { now = '지금 설명 없음'; from = ''; }
     const kind = pres?.origin ?? null;
-    return h('div', { class: `callout ${kind ?? 'plain'}`, 'data-box': at, role: 'note', 'aria-label': `${name} · 변경 구상` },
+    return h('div', { class: `callout ${kind ?? 'plain'}`, 'data-box': at, 'data-target': partId, role: 'note', 'aria-label': `${name} · 변경 구상` },
       h('p', { class: 'co-head' }, h('span', { class: 'co-kind' }, kind === 'intent' ? '원하는 차이' : kind === 'suggestion' ? '분석 제안' : '변경 항목'), h('strong', {}, name),
         at !== partId ? h('small', {}, `‘${partName(at)}’ 안쪽`) : null),
       h('div', { class: 'co-pair' },
@@ -414,6 +417,8 @@ export function createPlanView(host: PlanHost) {
   function render() {
     if (!s) return;
     const o = host.current(); if (!o) return;
+    const item = s.mode === 'preview' && s.focus?.kind === 'item' ? itemOf(s.focus.id) : null;
+    host.targetContext(item ? activeTarget(item) : null, moveTarget);
     renderMode(); renderStrip(o);
     if (panelOpen()) renderPanel(o); else { $('plan-panel').hidden = true; $('plan-panel').replaceChildren(); }
     $('space').style.setProperty('--plan-w', `${width()}px`);
@@ -578,7 +583,7 @@ export function createPlanView(host: PlanHost) {
     const box = $('plan-mode'), p = plan();
     box.hidden = !s || !p;
     if (!s || !p) return;
-    const b = (mode: 'current' | 'preview', label: string) => h('button', { type: 'button', 'aria-pressed': String(s!.mode === mode), onclick: () => { s!.mode = mode; render(); } }, label);
+    const b = (mode: 'current' | 'preview', label: string) => h('button', { type: 'button', 'aria-pressed': String(s!.mode === mode), onclick: () => { const changed = s!.mode !== mode; s!.mode = mode; moveTarget = changed && mode === 'preview'; render(); } }, label);
     box.replaceChildren(b('current', '현재'), b('preview', '변경 미리보기'));
   }
 

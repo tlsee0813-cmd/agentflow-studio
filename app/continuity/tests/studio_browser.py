@@ -525,6 +525,61 @@ def workspace_flow(browser, base, cases):
     context.close()
 
 
+def preview_context_flow(browser, base):
+    """Only an explicit preview focus exposes a target's ancestors; sources and user folds keep their own ownership."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    page.goto(base + "/#/p/ex-converter")
+    parents = ["읽어들이기", "내용·모양 보존", "내보내기와 결과"]
+    for name in parents:
+        page.get_by_role("button", name=name + " 접기", exact=True).click()
+    expect(page.locator("#world .frame")).to_have_count(0)
+    zoom = page.locator("#zoom-level").inner_text()
+    page.locator("#plan-entry").click()
+    expect(page.locator("#world .frame")).to_have_count(1)  # only the input path, not the other two groups
+    expect(page.locator("#world .plan-reading .node-name")).to_have_text("문서 읽기")
+    target = page.locator("#world .plan-reading").get_attribute("data-box")
+    expect(page.locator(".callout")).to_have_attribute("data-target", target)
+    expect(page.locator(".callout")).to_have_attribute("data-box", target)
+    expect(page.locator(".callout-leader")).to_have_count(1)
+    assert page.locator(".callout-leader path").get_attribute("marker-end") is None
+    expect(page.locator("#zoom-level")).to_have_text(zoom)
+    page.locator("#plan-mode").get_by_role("button", name="현재", exact=True).click()
+    expect(page.locator("#world .frame")).to_have_count(0)
+    page.locator("#plan-mode").get_by_role("button", name="변경 미리보기").click()
+    expect(page.locator("#world .plan-reading .node-name")).to_have_text("문서 읽기")
+    # A direct user fold wins until another explicit focus, even across evidence renders and viewport changes.
+    page.get_by_role("button", name="읽어들이기 접기", exact=True).click()
+    expect(page.locator("#world .node-name", has_text="문서 읽기")).to_have_count(0)
+    camera = page.locator("#world").evaluate("e => e.style.transform")
+    page.locator(".ps-focus .ps-link", has_text="근거").click()
+    expect(page.locator("#lens .cmp-evidence")).to_be_visible()
+    page.locator("#cmp-back").click()
+    expect(page.locator("#world .node-name", has_text="문서 읽기")).to_have_count(0)
+    assert page.locator("#world").evaluate("e => e.style.transform") == camera
+    page.set_viewport_size({"width": 1270, "height": 720})
+    expect(page.locator("#world .node-name", has_text="문서 읽기")).to_have_count(0)
+    page.set_viewport_size({"width": 1280, "height": 720})
+    # Another item releases the input path and exposes only the output target. Target navigation retains its real names.
+    page.locator(".ps-item").nth(2).click()
+    expect(page.locator("#world .frame")).to_have_count(1)
+    expect(page.locator("#world .plan-reading .node-name")).to_have_text("변환한 파일")
+    page.locator(".ps-target").nth(1).click()
+    expect(page.locator("#world .plan-reading .node-name")).to_have_text("결과 설명")
+    expect(page.locator(".callout")).to_have_count(1)
+    page.locator(".ps-item").nth(0).click()
+    expect(page.locator("#world .plan-reading .node-name")).to_have_text("문서 읽기")
+    expect(page.locator("#world .frame")).to_have_count(1)
+    # User changes made during preview survive release; there is no whole-fold snapshot restore on close.
+    page.get_by_role("button", name="내용·모양 보존 펼치기", exact=True).click()
+    page.locator(".ps-close").click()
+    expect(page.get_by_role("button", name="읽어들이기 펼치기", exact=True)).to_be_visible()
+    expect(page.get_by_role("button", name="내용·모양 보존 접기", exact=True)).to_be_visible()
+    expect(page.get_by_role("button", name="내보내기와 결과 펼치기", exact=True)).to_be_visible()
+    expect(page.locator("#zoom-level")).to_have_text(zoom)
+    context.close()
+
+
 def failure_flow(browser, base):
     page = browser.new_page(viewport={"width": 1280, "height": 720})
     page.goto(base + "/")
@@ -575,6 +630,7 @@ def main():
             map_flow(browser, base); print("ok  drag (node, group), wheel zoom, inside/back with view kept, fold, example places not saved")
             new_project_flow(browser, base); print("ok  new project -> three levels -> path and back -> saved place and draft kept on reload")
             workspace_flow(browser, base, oss_fixtures()); print("ok  plan strip and docked comparison, open/close without zoom, long same-prefix names, way back apart from way up")
+            preview_context_flow(browser, base); print("ok  preview exposes only its target path; current, sources and user folds preserve ownership")
             proc, base = start("code"); procs.append(proc); code_flow(browser, base); print("ok  access code kept from an input event")
             proc, base = start("fail"); procs.append(proc); failure_flow(browser, base); print("ok  provider failure -> short error -> retry")
             proc, base = start("nokey"); procs.append(proc); off_flow(browser, base + "/", "AI 키 없음"); print("ok  server without key -> honest off state")
