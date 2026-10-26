@@ -614,6 +614,10 @@ def relation_context_flow(browser, base, cases):
     page = context.new_page()
     page.goto(base + "/")
     page.locator("#import-file").set_input_files(str(cases / "oss-node-red.json"))
+    # The baseline is the imported project's own map: its name in the path and its parts drawn, not the page before import.
+    expect(page.locator("#crumbs")).to_contain_text("Node-RED 이벤트·네트워크·데이터 처리")
+    expect(page.locator("#world .frame-head", has_text="@node-red/nodes")).to_be_visible()
+    expect(page.locator("#world .node", has_text="network")).to_be_visible()
     before = page.evaluate(BOXES)
     page.locator("#plan-entry").click()
     page.locator("#plan-import-file").set_input_files(str(ROOT.parents[1] / "docs/cycles/2026-10-26-visual-experience-59/node-red-real-plan.json"))
