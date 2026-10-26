@@ -1,9 +1,34 @@
 /** Frames are a little wider than a node so the head keeps its name beside the fold and go-inside controls. */
-export const FRAME_MIN_W = 252;
-export const NODE_W = 188, NODE_H = 56, PAD = 14, HEAD = 36, GAP = 14, COL_GAP = 100, ROW_GAP = 36, GHOST_W = 168, GHOST_H = 34;
+export const FRAME_MIN_W = 228;
+export const NODE_W = 200, NODE_H = 60, PAD = 14, HEAD = 38, GAP = 12, COL_GAP = 76, ROW_GAP = 22, GHOST_W = 168, GHOST_H = 34;
+/** A frame head whose name needs two lines (estimated from the name and the frame width; names never shrink). */
+export const HEAD_2 = 56;
+/** Between wrapped columns of one layer (no relation runs between them, so they sit closer than relation layers). */
+export const WRAP_GAP = 36;
+/** Between relation layers inside a group: room for converging lines to stay apart. */
+export const FLOW_GAP = 44;
 export const ROOT = 'root';
 export const ghostId = (id) => `ghost:${id}`;
-export function layoutScope(v, scope, expanded, pos) {
+/** Rough rendered width of a frame name (13px, semibold): wide for CJK, narrower for Latin. Only decides one or two head lines. */
+export function textWidth(text) {
+    let w = 0;
+    for (const ch of text)
+        w += /[\u1100-\u11ff\u2e80-\ua4cf\uac00-\ud7af\uf900-\ufaff\uff00-\uffef]/.test(ch) ? 13.4 : /[A-Z@]/.test(ch) ? 8.8 : /[ .,:;'|il!]/.test(ch) ? 4.2 : 7.6;
+    return w;
+}
+const estimate = (text, kind) => textWidth(text) * (kind === 'node' ? 13.5 / 13 : 1);
+/** Long part names widen their card (never the short ones) so the name fits two lines: room beside the name is the card
+ * minus its paddings, and with an inside also the fold toggle and the go-inside count. */
+export const NODE_MAX_W = 320;
+const nodeChrome = (kids) => (kids ? 5 + 22 + 4 + 4 + 40 + 8 + 2 : 13 + 8 + 2);
+export function nodeWidth(name, kids, measure = estimate) {
+    // Lines break at word ends, not mid-word: leave a share of each line unused.
+    const need = measure(name, 'node') * 1.12 + 8;
+    if (need <= (NODE_W - nodeChrome(kids)) * 2)
+        return NODE_W;
+    return Math.min(NODE_MAX_W, Math.ceil(need / 2) + nodeChrome(kids));
+}
+export function layoutScope(v, scope, expanded, pos, measureText = estimate) {
     const byId = new Map(v.parts.map(p => [p.id, p]));
     const kidsOf = (id) => (id ? byId.get(id)?.childIds ?? [] : v.roots);
     const open = (id, depth) => depth < 12 && kidsOf(id).length > 0 && expanded(id, depth);
@@ -40,25 +65,45 @@ export function layoutScope(v, scope, expanded, pos) {
             return d;
         };
         ids.forEach(i => depthOf(i));
-        const columns = [];
+        // Parts linked to a sibling come first, by relation layer; siblings with no link here follow as their own block, so a line
+        // never has to pass an unrelated part between its ends. Inside a group a plain chain (one part per layer) runs top to bottom.
+        const linked = new Set();
+        for (const [x, tos] of out)
+            if (tos.size) {
+                linked.add(x);
+                tos.forEach(t => linked.add(t));
+            }
+        const layers = [];
         for (const i of ids)
-            (columns[layer.get(i)] ??= []).push(i);
-        const cols = columns.filter(Boolean).flatMap(c => { if (c.length <= 4)
-            return [c]; const per = Math.ceil(c.length / Math.ceil(c.length / 4)), o = []; for (let i = 0; i < c.length; i += per)
-            o.push(c.slice(i, i + per)); return o; });
-        const gapX = container === scope ? COL_GAP : GAP, gapY = container === scope ? ROW_GAP : GAP;
-        const heights = cols.map(c => c.reduce((a, i) => a + sizes.get(i).h, 0) + gapY * (c.length - 1)), tallest = Math.max(0, ...heights);
+            if (linked.has(i))
+                (layers[layer.get(i)] ??= []).push(i);
+        const flow = layers.filter(Boolean), lone = ids.filter(i => !linked.has(i)), inFrame = container !== scope;
+        const maxPer = Math.max(4, Math.min(8, Math.ceil(Math.sqrt(ids.length * 1.3))));
+        const wrap = (c) => { if (c.length <= maxPer)
+            return [c]; const per = Math.ceil(c.length / Math.ceil(c.length / maxPer)), o = []; for (let i = 0; i < c.length; i += per)
+            o.push(c.slice(i, i + per)); return o; };
+        // Each column: its parts, the gap after it, and whether it is centred against the tallest relation column.
+        const cols = [];
+        if (inFrame && flow.length && flow.every(l => l.length === 1))
+            cols.push(...wrap(flow.map(l => l[0])).map(c => ({ ids: c, gap: GAP, centre: false })));
+        else
+            flow.forEach(l => { const w = wrap(l); w.forEach((c, i) => cols.push({ ids: c, gap: i < w.length - 1 ? (inFrame ? GAP : WRAP_GAP) : inFrame ? FLOW_GAP : COL_GAP, centre: w.length === 1 })); });
+        if (cols.length && lone.length)
+            cols.at(-1).gap = inFrame ? (cols.at(-1).gap === GAP ? GAP : FLOW_GAP) : WRAP_GAP;
+        cols.push(...wrap(lone).map(c => ({ ids: c, gap: inFrame ? GAP : WRAP_GAP, centre: false })));
+        const gapY = inFrame ? GAP : ROW_GAP;
+        const heights = cols.map(c => c.ids.reduce((acc, i) => acc + sizes.get(i).h, 0) + gapY * (c.ids.length - 1)), tallest = Math.max(0, ...heights);
         const at = new Map();
         let x = 0;
         cols.forEach((c, ci) => {
-            const w = Math.max(...c.map(i => sizes.get(i).w));
-            let y = container === scope ? (tallest - heights[ci]) / 2 : 0;
-            for (const i of c) {
-                const s = sizes.get(i);
-                at.set(i, { x: x - s.ox, y: y - s.oy });
-                y += s.h + gapY;
+            const w = Math.max(...c.ids.map(i => sizes.get(i).w));
+            let y = c.centre ? (tallest - heights[ci]) / 2 : 0;
+            for (const i of c.ids) {
+                const sz = sizes.get(i);
+                at.set(i, { x: x - sz.ox, y: y - sz.oy });
+                y += sz.h + gapY;
             }
-            x += w + gapX;
+            x += w + c.gap;
         });
         return at;
     };
@@ -67,11 +112,21 @@ export function layoutScope(v, scope, expanded, pos) {
         const auto = autoArrange(container, sizes), stored = pos[container ?? ROOT] ?? {};
         return { sizes, at: new Map(ids.map(i => [i, stored[i] ? { ...stored[i] } : auto.get(i)])) };
     };
+    // Head row: toggle 22 + paddings and gaps ~26 + go-inside ~40, and the latest-record time ~52 when there is one.
+    const hasRecords = (id, guard = 0) => { const p = byId.get(id); return !!p && guard < 64 && (!!p.lastAt || p.childIds.some(c => hasRecords(c, guard + 1))); };
+    const headRoom = (id, w) => w - 88 - (hasRecords(id) ? 52 : 0);
+    /** A name longer than two lines of a narrow group widens the group (up to 360px) rather than cutting the name. */
+    const headFit = (id, w) => {
+        const need = measureText(byId.get(id)?.name ?? '', 'head') * 1.08;
+        if (need > headRoom(id, w) * 2)
+            w = Math.max(w, Math.min(360, Math.ceil(need / 2) + w - headRoom(id, w) + 12));
+        return { w, head: need > headRoom(id, w) ? HEAD_2 : HEAD };
+    };
     function measure(id, depth) {
         const cached = memo.get(id);
         if (cached)
             return cached;
-        let m = { w: NODE_W, h: NODE_H, ox: 0, oy: 0 };
+        let m = { w: nodeWidth(byId.get(id)?.name ?? '', kidsOf(id).length > 0, measureText), h: NODE_H, ox: 0, oy: 0, head: 0 };
         if (open(id, depth)) {
             const { sizes, at } = anchors(id, depth + 1);
             let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -82,7 +137,8 @@ export function layoutScope(v, scope, expanded, pos) {
                 maxX = Math.max(maxX, p.x + s.ox + s.w);
                 maxY = Math.max(maxY, p.y + s.oy + s.h);
             }
-            m = { ox: minX, oy: minY, w: Math.max(maxX - minX + PAD * 2, FRAME_MIN_W), h: maxY - minY + HEAD + PAD };
+            const { w, head } = headFit(id, Math.max(maxX - minX + PAD * 2, FRAME_MIN_W));
+            m = { ox: minX, oy: minY, w, h: maxY - minY + head + PAD, head };
         }
         memo.set(id, m);
         return m;
@@ -90,12 +146,12 @@ export function layoutScope(v, scope, expanded, pos) {
     const boxes = new Map();
     const place = (id, anchor, rel, depth, container) => {
         const m = measure(id, depth), kids = kidsOf(id).length, isOpen = open(id, depth);
-        boxes.set(id, { id, x: anchor.x + m.ox, y: anchor.y + m.oy, w: m.w, h: m.h, kind: isOpen ? 'frame' : 'node', depth, container, kids, rel });
+        boxes.set(id, { id, x: anchor.x + m.ox, y: anchor.y + m.oy, w: m.w, h: m.h, kind: isOpen ? 'frame' : 'node', depth, container, kids, rel, head: m.head });
         if (!isOpen)
             return;
         const { at } = anchors(id, depth + 1);
         for (const [k, p] of at)
-            place(k, { x: anchor.x + PAD + p.x, y: anchor.y + HEAD + p.y }, p, depth + 1, id);
+            place(k, { x: anchor.x + PAD + p.x, y: anchor.y + m.head + p.y }, p, depth + 1, id);
     };
     const top = anchors(scope, 0);
     for (const [k, p] of top.at)
@@ -141,7 +197,7 @@ export function layoutScope(v, scope, expanded, pos) {
         e.ids.push(r.id);
         edges.set(key, e);
     }
-    const ghostColumn = (ids, x) => ids.forEach((id, i) => boxes.set(ghostId(id), { id: ghostId(id), x, y: minY + i * (GHOST_H + 12), w: GHOST_W, h: GHOST_H, kind: 'ghost', depth: 0, container: '', kids: 0, rel: { x: 0, y: 0 } }));
+    const ghostColumn = (ids, x) => ids.forEach((id, i) => boxes.set(ghostId(id), { id: ghostId(id), x, y: minY + i * (GHOST_H + 12), w: GHOST_W, h: GHOST_H, kind: 'ghost', depth: 0, container: '', kids: 0, rel: { x: 0, y: 0 }, head: 0 }));
     ghostColumn(ghostsIn.filter(id => !ghostsOut.includes(id)), minX - GHOST_W - 90);
     ghostColumn(ghostsOut, maxX + 90);
     let bx = Infinity, by = Infinity, bx2 = -Infinity, by2 = -Infinity;
@@ -156,16 +212,67 @@ export function layoutScope(v, scope, expanded, pos) {
     }
     return { boxes, edges: [...edges.values()], bounds: { x: bx, y: by, w: bx2 - bx, h: by2 - by } };
 }
-/** Edge path between two boxes: horizontal bezier between facing sides, vertical when they share a column. */
-export function edgePath(a, b) {
-    const acx = a.x + a.w / 2, bcx = b.x + b.w / 2, acy = a.y + a.h / 2, bcy = b.y + b.h / 2;
+/** Rounded orthogonal path through points (corners of radius up to r). */
+function rounded(pts, r = 8) {
+    const p = pts.filter((q, i) => i === 0 || Math.abs(q.x - pts[i - 1].x) + Math.abs(q.y - pts[i - 1].y) > 0.5);
+    let d = `M${p[0].x},${p[0].y}`;
+    for (let i = 1; i < p.length - 1; i++) {
+        const A = p[i - 1], B = p[i], C = p[i + 1];
+        const r1 = Math.min(r, Math.hypot(B.x - A.x, B.y - A.y) / 2, Math.hypot(C.x - B.x, C.y - B.y) / 2);
+        const u = (P, Q) => { const l = Math.hypot(Q.x - P.x, Q.y - P.y) || 1; return { x: (Q.x - P.x) / l, y: (Q.y - P.y) / l }; };
+        const ua = u(B, A), uc = u(B, C);
+        d += ` L${B.x + ua.x * r1},${B.y + ua.y * r1} Q${B.x},${B.y} ${B.x + uc.x * r1},${B.y + uc.y * r1}`;
+    }
+    const last = p[p.length - 1];
+    return `${d} L${last.x},${last.y}`;
+}
+/** Edge path between two boxes. A group end meets the group at its head row (the group's port), never beside an inner part.
+ * The usual soft curve is kept when it crosses nothing; when it would pass under an unrelated part or group, the line takes an
+ * outside corridor through the gaps (out from the side, along a free row gap, into the other side). */
+export function edgePath(a, b, others = []) {
+    const all = [...others], byId = new Map(all.map(o => [o.id, o]));
+    const within = (o, f) => { for (let c = o.container, g = 0; c && g < 64; c = byId.get(c)?.container ?? '', g++)
+        if (c === f.id)
+            return true; return false; };
+    // What a line must not cross: other parts and groups, except the groups around either end and the inside of a group end.
+    const blocks = all.filter(o => o !== a && o !== b && !(o.kind === 'frame' && (within(a, o) || within(b, o))) && !(a.kind === 'frame' && within(o, a)) && !(b.kind === 'frame' && within(o, b)));
+    const inside = (x, y) => blocks.some(o => x > o.x + 1 && x < o.x + o.w - 1 && y > o.y + 1 && y < o.y + o.h - 1);
+    const segFree = (x1, y1, x2, y2) => !blocks.some(o => Math.max(x1, x2) > o.x + 1 && Math.min(x1, x2) < o.x + o.w - 1 && Math.max(y1, y2) > o.y + 1 && Math.min(y1, y2) < o.y + o.h - 1);
+    const portY = (x) => (x.kind === 'frame' ? x.y + x.head / 2 : x.y + x.h / 2);
+    const acx = a.x + a.w / 2, bcx = b.x + b.w / 2, acy = portY(a), bcy = portY(b);
     const overlapX = a.x < b.x + b.w && b.x < a.x + a.w;
     if (overlapX) {
-        const down = bcy > acy, y1 = down ? a.y + a.h : a.y, y2 = down ? b.y : b.y + b.h;
+        const down = b.y + b.h / 2 > a.y + a.h / 2, y1 = down ? a.y + a.h : a.y, y2 = down ? b.y : b.y + b.h;
         const x1 = Math.max(a.x, b.x) + (Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) / 2, k = Math.max(24, Math.abs(y2 - y1) / 2) * (down ? 1 : -1);
-        return { d: `M${x1},${y1} C${x1},${y1 + k} ${x1},${y2 - k} ${x1},${y2}`, mx: x1, my: (y1 + y2) / 2 };
+        if (segFree(x1, y1, x1, y2))
+            return { d: `M${x1},${y1} C${x1},${y1 + k} ${x1},${y2 - k} ${x1},${y2}`, mx: x1, my: (y1 + y2) / 2 };
+        // A part between them in the same column would read as an end: go round the right side instead.
+        const ax = a.x + a.w, bx = b.x + b.w, xs = Math.max(ax, bx) + 14;
+        return { d: rounded([{ x: ax, y: acy }, { x: xs, y: acy }, { x: xs, y: bcy }, { x: bx, y: bcy }]), mx: xs, my: (acy + bcy) / 2 };
     }
-    const right = bcx > acx, x1 = right ? a.x + a.w : a.x, x2 = right ? b.x : b.x + b.w;
-    const k = Math.max(40, Math.abs(x2 - x1) / 2) * (right ? 1 : -1);
-    return { d: `M${x1},${acy} C${x1 + k},${acy} ${x2 - k},${bcy} ${x2},${bcy}`, mx: (x1 + x2) / 2, my: (acy + bcy) / 2 };
+    const right = bcx > acx, dir = right ? 1 : -1, x1 = right ? a.x + a.w : a.x, x2 = right ? b.x : b.x + b.w;
+    const k = Math.max(40, Math.abs(x2 - x1) / 2) * dir;
+    const curve = { d: `M${x1},${acy} C${x1 + k},${acy} ${x2 - k},${bcy} ${x2},${bcy}`, mx: (x1 + x2) / 2, my: (acy + bcy) / 2 };
+    const at = (t) => { const u = 1 - t; return { x: u * u * u * x1 + 3 * u * u * t * (x1 + k) + 3 * u * t * t * (x2 - k) + t * t * t * x2, y: u * u * u * acy + 3 * u * u * t * acy + 3 * u * t * t * bcy + t * t * t * bcy }; };
+    let crosses = false;
+    for (let i = 1; i < 24 && !crosses; i++) {
+        const q = at(i / 24);
+        crosses = inside(q.x, q.y);
+    }
+    if (!crosses)
+        return curve;
+    // Half of the free gap beside an end (at most 14px): where the line turns.
+    const room = (x, y, d) => Math.min(28, ...blocks.filter(o => y >= o.y && y <= o.y + o.h && (d > 0 ? o.x >= x : o.x + o.w <= x)).map(o => (d > 0 ? o.x - x : x - (o.x + o.w)))) / 2;
+    const xa = x1 + dir * room(x1, acy, dir), xb = x2 - dir * room(x2, bcy, -dir);
+    if ((xb - xa) * dir <= 0)
+        return curve;
+    const lo = Math.min(xa, xb), hi = Math.max(xa, xb);
+    const ys = [acy, bcy, ...blocks.filter(o => o.x < hi && lo < o.x + o.w).flatMap(o => [o.y - 6, o.y + o.h + 6])]
+        .sort((p, q) => Math.abs(p - acy) + Math.abs(p - bcy) - (Math.abs(q - acy) + Math.abs(q - bcy)));
+    for (const yc of ys) {
+        if (!segFree(xa, acy, xa, yc) || !segFree(xa, yc, xb, yc) || !segFree(xb, yc, xb, bcy))
+            continue;
+        return { d: rounded([{ x: x1, y: acy }, { x: xa, y: acy }, { x: xa, y: yc }, { x: xb, y: yc }, { x: xb, y: bcy }, { x: x2, y: bcy }]), mx: (xa + xb) / 2, my: yc };
+    }
+    return curve;
 }
