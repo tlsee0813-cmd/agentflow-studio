@@ -4,7 +4,7 @@ entry -> map (no document scroll) -> part -> ask (summary, question) -> answer w
 provider failure shows a short error and a retry (never a substitute answer); a server without a key and the static
 build both show the honest not-connected state. Not a visual or usability audit.
 """
-import functools, http.server, os, pathlib, re, subprocess, sys, threading
+import functools, http.server, os, pathlib, re, subprocess, sys, tempfile, threading
 from playwright.sync_api import sync_playwright, expect
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -26,6 +26,18 @@ def no_page_scroll(page):
     assert sizes[0] <= sizes[2] and sizes[1] <= sizes[3], f"document scrolls: {sizes}"
 
 
+def in_scope(page, name):
+    """The context row names the scope as the current step of the composition path and offers the way up."""
+    expect(page.locator("#crumbs [aria-current]")).to_have_text(name)
+    expect(page.locator("#scope-bar .scope-up")).to_be_visible()
+
+
+def add_inside(page):
+    """Structure edits sit in the inspector's quiet menu."""
+    page.locator(".panel .more summary").click()
+    page.get_by_role("menuitem", name="안에 부분 추가").click()
+
+
 def main_flow(browser, base):
     page = browser.new_page(viewport={"width": 1280, "height": 720})
     errors = []
@@ -37,6 +49,9 @@ def main_flow(browser, base):
     expect(page.locator(".node")).to_have_count(7)
     expect(page.locator(".frame")).to_have_count(2)
     no_page_scroll(page)
+    # Recent records open only when asked for, as a popover over the map tools (no reserved map room).
+    expect(page.locator("#recent")).to_have_class(re.compile("collapsed"))
+    page.locator("#recent-toggle").click()
     expect(page.locator("#recent")).not_to_have_class(re.compile("collapsed"))
     page.locator(".node", has_text="시간 고르기").click()
     expect(page.locator("#panel-title")).to_have_text("시간 고르기")
@@ -73,7 +88,7 @@ def main_flow(browser, base):
     expect(page.locator("#ask-input")).to_have_value("")
     page.keyboard.press("Escape")
     expect(page.locator("#panel")).to_be_hidden()
-    expect(page.locator("#recent")).not_to_have_class(re.compile("collapsed"))  # earlier state back
+    expect(page.locator("#recent")).to_have_class(re.compile("collapsed"))  # working on the map closed the popover
     # Group head opens the parent part, whose records include its children. 전체 보기 first: panning may have put it under the overlay.
     page.locator("#zoom-fit").click()
     page.wait_for_timeout(300)
@@ -121,8 +136,7 @@ def map_flow(browser, base):
     place = book_head.bounding_box()
     # Inside and back: scope bar and path say where; the parent view comes back as it was.
     page.locator(".frame-head", has_text="예약하기").locator(".enter").click()
-    expect(page.locator("#scope-bar")).to_contain_text("예약하기 안")
-    expect(page.locator("#crumbs")).to_contain_text("예약하기")
+    in_scope(page, "예약하기")
     expect(page.locator(".node")).to_have_count(3)
     expect(page.locator(".ghost").first).to_be_visible()
     page.locator(".node", has_text="시간 고르기").click()
@@ -139,7 +153,7 @@ def map_flow(browser, base):
     page.wait_for_timeout(350)
     # Double-click also goes inside; the panel offers it too.
     page.locator(".frame-head", has_text="관리자 화면").locator(".frame-name").dblclick()
-    expect(page.locator("#scope-bar")).to_contain_text("관리자 화면 안")
+    in_scope(page, "관리자 화면")
     page.locator("#scope-bar .scope-up").click()
     expect(page.locator("#scope-bar")).to_be_hidden()
     page.locator(".frame-head", has_text="관리자 화면").locator(".frame-name").click()
@@ -167,6 +181,7 @@ def basics_flow(browser, base):
     expect(page.locator("#space")).not_to_contain_text("진행 중")
     expect(page.locator("#world .edge text")).to_have_count(0)
     # Recent records: newest 7 of all, with the way to all of them.
+    page.locator("#recent-toggle").click()
     expect(page.locator("#recent-title")).to_have_text("최근 기록")
     expect(page.locator("#recent-count")).to_have_text("최신 7 / 14")
     page.get_by_role("button", name="전체 14개 보기").click()
@@ -176,6 +191,7 @@ def basics_flow(browser, base):
     # A fold the person made comes back after a record was opened for reference.
     page.locator(".frame-head", has_text="예약하기").locator(".toggle").click()
     expect(page.locator(".node", has_text="시간 고르기")).to_have_count(0)
+    page.locator("#recent-toggle").click()  # folding on the map closed the popover; open it again
     page.locator(".recent-item", has_text="시간 고르기").first.click()
     expect(page.locator("#panel-title")).to_have_text("시간 고르기")
     expect(page.locator(".node", has_text="시간 고르기")).to_be_visible()
@@ -200,12 +216,12 @@ def basics_flow(browser, base):
     link = page.url
     page.reload()
     expect(page.locator("#panel-title")).to_have_text("시간 고르기")
-    expect(page.locator("#scope-bar")).to_contain_text("예약하기 안")
+    in_scope(page, "예약하기")
     other = browser.new_context(viewport={"width": 1440, "height": 900})
     fresh = other.new_page()
     fresh.goto(link)
     expect(fresh.locator("#panel-title")).to_have_text("시간 고르기")
-    expect(fresh.locator("#scope-bar")).to_contain_text("예약하기 안")
+    in_scope(fresh, "예약하기")
     other.close()
     page.close()
 
@@ -235,7 +251,7 @@ def new_project_flow(browser, base):
     page.get_by_role("button", name="만들기").click()
     expect(page.locator(".node")).to_have_count(1)
     expect(page.locator("#panel-title")).to_have_text("로그인")
-    page.get_by_role("button", name="안에 부분 추가").click()
+    add_inside(page)
     page.locator("#part-name").fill("비밀번호 찾기")
     page.get_by_role("button", name="만들기").click()
     expect(page.locator(".frame")).to_have_count(1)
@@ -247,19 +263,20 @@ def new_project_flow(browser, base):
     expect(page.locator("#panel-title")).to_have_text("비밀번호 찾기")
     expect(page.locator("#ask-input")).to_have_value("어디까지 됐어?")
     # Third level, then down and back up through it.
-    page.get_by_role("button", name="안에 부분 추가").click()
+    add_inside(page)
     page.locator("#part-name").fill("메일 발송")
     page.get_by_role("button", name="만들기").click()
     expect(page.locator("#panel-title")).to_have_text("메일 발송")
     page.keyboard.press("Escape")
     page.locator(".frame-head", has_text="로그인").locator(".enter").click()
-    expect(page.locator("#scope-bar")).to_contain_text("로그인")
+    in_scope(page, "로그인")
     page.locator(".frame-head", has_text="비밀번호 찾기").locator(".enter").click()
-    expect(page.locator("#crumbs")).to_contain_text("테스트 프로젝트/로그인/비밀번호 찾기")
+    expect(page.locator("#crumbs")).to_contain_text("테스트 프로젝트›로그인›비밀번호 찾기")
     expect(page.locator("#scope-bar .scope-up")).to_contain_text("로그인")
+    expect(page.locator("#scene-back")).to_be_hidden()  # the previous scene is the parent: the way up is enough
     expect(page.locator(".node")).to_have_count(1)
     page.locator("#scope-bar .scope-up").click()
-    expect(page.locator("#scope-bar")).to_contain_text("로그인 안")
+    in_scope(page, "로그인")
     page.locator("#crumbs a", has_text="테스트 프로젝트").click()
     expect(page.locator("#scope-bar")).to_be_hidden()
     # A second top part; its dragged place in a saved project survives a reload.
@@ -287,7 +304,113 @@ def new_project_flow(browser, base):
     assert abs((pay.bounding_box()["y"] - login.bounding_box()["y"]) - moved) < 4
     page.locator(".brand").click()
     expect(page.locator("#saved-list .project-card")).to_have_count(1)
-    expect(page.locator(".project-card", has_text="예제")).to_have_count(3)  # examples are never saved as mine
+    expect(page.locator("#project-list .project-card.is-example")).to_have_count(3)  # examples are never saved as mine
+    expect(page.locator("#saved-list .is-example")).to_have_count(0)
+    # My projects lead; the examples step back once there is one.
+    assert page.locator("#saved-list").bounding_box()["y"] < page.locator("#project-list").bounding_box()["y"]
+    context.close()
+
+
+def oss_fixtures():
+    """Backup files of the pinned OSS cases (docs/cycles/2026-10-26-visual-experience-58), made by the shared generator."""
+    out = pathlib.Path(tempfile.mkdtemp(prefix="visual58-")) / "cases"
+    subprocess.run(["node", str(ROOT / "tests/visual58-fixtures.mjs"), "--out", str(out)], cwd=APP, check=True, stdout=subprocess.DEVNULL)
+    return out
+
+
+def workspace_flow(browser, base, cases):
+    """UI58 workspace: one inspector width, no zoom on opening or closing the plan, the plan's way back, long same-prefix
+    names told apart on the map, the previous scene apart from the way up, and no recent entry without records."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    page.goto(base + "/#/p/ex-converter")
+    page.locator(".node", has_text="문서 읽기").click()
+    part_w = page.locator("#panel").bounding_box()["width"]
+    zoom, before = page.locator("#zoom-level").inner_text(), page.locator("#world").evaluate("e => e.style.transform")
+    page.locator("#plan-entry").click()
+    expect(page.locator("#plan-panel")).to_be_visible()
+    assert abs(page.locator("#plan-panel").bounding_box()["width"] - part_w) < 1, "part and plan share one inspector width"
+    expect(page.locator("#zoom-level")).to_have_text(zoom)  # opening never re-zooms
+    # Reading an item (map marks) and handing it over (checkbox) are separate controls.
+    # At 1280 and 100%, the three groups and every change tab read beside the inspector, and no tab sits on a group head.
+    page.wait_for_timeout(400)  # the dock slides in and the smallest pan eases
+    panel_x = page.locator("#plan-panel").bounding_box()["x"]
+    for box in [page.locator(sel).nth(i).bounding_box() for sel in (".frame", ".plan-badge") for i in range(page.locator(sel).count())]:
+        assert box["x"] >= 0 and box["x"] + box["width"] <= panel_x, (box, panel_x)
+    expect(page.locator(".frame")).to_have_count(3)
+    expect(page.locator(".plan-badge")).not_to_have_count(0)
+    assert page.evaluate("""() => { const hit = (a, b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+      const heads = [...document.querySelectorAll('.frame-head')].map(e => e.getBoundingClientRect());
+      return [...document.querySelectorAll('.plan-badge')].every(b => heads.every(h => !hit(b.getBoundingClientRect(), h))); }""")
+    page.locator(".pp-item-title").first.click()
+    expect(page.locator(".pp-item.focused")).to_have_count(1)
+    expect(page.locator(".pp-item").first.locator("input[type=checkbox]")).to_be_checked()
+    expect(page.locator("#world .plan-direct")).not_to_have_count(0)
+    page.locator("#plan-mode").get_by_role("button", name="현재").click()
+    expect(page.locator("#world .plan-badge")).to_have_count(0)
+    expect(page.locator("#zoom-level")).to_have_text(zoom)
+    # A narrow window: the inspector and the request sheet take the whole width and stay readable; back to 1280 after.
+    page.set_viewport_size({"width": 700, "height": 700})
+    page.wait_for_timeout(200)
+    assert page.evaluate("getComputedStyle(document.getElementById('space')).getPropertyValue('--plan-w')").strip() == "700px"
+    assert page.locator("#plan-panel").bounding_box()["width"] == 700
+    page.get_by_role("button", name="요청문 만들기").click()
+    assert page.locator("#plan-sheet").bounding_box()["width"] >= 600
+    page.keyboard.press("Escape")
+    expect(page.locator("#plan-sheet")).to_be_hidden()
+    page.set_viewport_size({"width": 1280, "height": 720})
+    page.wait_for_timeout(200)
+    page.locator("#plan-panel .close").click()
+    expect(page.locator("#panel-title")).to_have_text("문서 읽기")  # selection and camera come back
+    page.wait_for_timeout(300)
+    assert page.locator("#world").evaluate("e => e.style.transform") == before
+    # No records: no recent entry and no reserved room.
+    expect(page.locator("#recent-toggle")).to_be_hidden()
+    # The ⋯ menu closes first on Esc, focus back on its button; the part stays selected.
+    page.locator(".panel .more summary").click()
+    expect(page.locator(".more-menu")).to_be_visible()
+    page.keyboard.press("Escape")
+    expect(page.locator(".more-menu")).to_be_hidden()
+    expect(page.locator("#panel-title")).to_have_text("문서 읽기")
+    expect(page.locator(".panel .more summary")).to_be_focused()
+    # Long names sharing a 41-character prefix stay apart by their endings (two lines, nothing cut).
+    page.goto(base + "/")
+    page.locator("#import-file").set_input_files(str(cases / "long-prefix-restic.json"))
+    expect(page.locator("#crumbs")).to_contain_text("long-prefix-restic")
+    page.locator(".node", has_text="restic repair").locator(".enter").click()
+    in_scope(page, "restic repair")
+    names = page.locator(".node .node-name")
+    expect(names).to_have_count(3)
+    for i in range(3):
+        cut = names.nth(i).evaluate("e => e.scrollHeight > e.clientHeight + 1")
+        assert not cut, names.nth(i).inner_text()
+    assert len({names.nth(i).inner_text() for i in range(3)}) == 3
+    # The same in a wide fallback font (as on a Linux runner without the system UI font): long cards widen, nothing is cut.
+    wide = context.new_page()
+    wide.route("**/styles.css", lambda route: route.fulfill(response=(r := route.fetch()), body=r.text() + '\nbody, button, input { font-family: "DejaVu Sans" !important; }'))
+    wide.goto(page.url)
+    expect(wide.locator(".node .node-name")).to_have_count(3)
+    for i in range(3):
+        name = wide.locator(".node .node-name").nth(i)
+        assert not name.evaluate("e => e.scrollHeight > e.clientHeight + 1"), name.inner_text()
+    wide.close()
+    # Arrived from the whole map, not from the parent: a way back to that scene, apart from the way up.
+    expect(page.locator("#scene-back")).to_be_visible()
+    expect(page.locator("#scope-bar .scope-up")).to_contain_text("restic")
+    page.locator("#scene-back").click()
+    expect(page.locator("#scope-bar")).to_be_hidden()
+    expect(page.locator("#scene-back")).to_be_hidden()
+    # A long group name reads in full on two head lines; the group makes room for it.
+    page.goto(base + "/")
+    page.locator("#import-file").set_input_files(str(cases / "oss-node-red.json"))
+    page.locator(".frame-head", has_text="@node-red/nodes").locator(".frame-name").click()
+    page.locator(".panel .more summary").click()
+    page.get_by_role("menuitem", name="이름·설명 고치기").click()
+    page.locator("#edit-name").fill("@node-red/nodes 기본 제공 노드 묶음 · 네트워크·데이터·파일 처리")
+    page.get_by_role("button", name="저장").click()
+    head = page.locator(".frame-head.tall .frame-name")
+    expect(head).to_have_text("@node-red/nodes 기본 제공 노드 묶음 · 네트워크·데이터·파일 처리")
+    assert not head.evaluate("e => e.scrollHeight > e.clientHeight + 1")
     context.close()
 
 
@@ -338,6 +461,7 @@ def main():
             basics_flow(browser, base); print("ok  stable example link (reload, new browser), labels, no map note text, recent range, fold restored")
             map_flow(browser, base); print("ok  drag (node, group), wheel zoom, inside/back with view kept, fold, example places not saved")
             new_project_flow(browser, base); print("ok  new project -> three levels -> path and back -> saved place and draft kept on reload")
+            workspace_flow(browser, base, oss_fixtures()); print("ok  one inspector width, plan open/close without zoom, long same-prefix names, way back apart from way up")
             proc, base = start("code"); procs.append(proc); code_flow(browser, base); print("ok  access code kept from an input event")
             proc, base = start("fail"); procs.append(proc); failure_flow(browser, base); print("ok  provider failure -> short error -> retry")
             proc, base = start("nokey"); procs.append(proc); off_flow(browser, base + "/", "AI 키 없음"); print("ok  server without key -> honest off state")

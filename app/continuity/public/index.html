@@ -9,51 +9,73 @@
 <body>
   <div class="app">
     <header class="bar">
-      <a class="brand" href="#/" aria-label="AgentFlow Studio 프로젝트 목록"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="7" height="5" rx="1.6"/><rect x="14.5" y="4" width="7" height="5" rx="1.6"/><rect x="8.5" y="15" width="7" height="5" rx="1.6"/><path d="M6 9v2.5h12V9M12 11.5V15"/></svg><span>AgentFlow Studio</span></a>
-      <nav id="crumbs" class="crumbs" aria-label="위치"><a href="#/">프로젝트</a></nav>
-      <button type="button" id="plan-entry" class="plan-entry" aria-pressed="false" hidden>변경 구상</button>
-      <span class="grow"></span>
+      <a class="brand" href="#/" aria-label="AgentFlow Studio 프로젝트 목록"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="7.5" height="6" rx="1.8"/><rect x="13.5" y="4.5" width="7.5" height="6" rx="1.8"/><rect x="8.25" y="14" width="7.5" height="6" rx="1.8"/></svg><span>AgentFlow Studio</span></a>
+      <div class="context">
+        <nav id="crumbs" class="crumbs" aria-label="구성 경로"><a href="#/">프로젝트</a></nav>
+        <div id="scope-bar" class="scope-bar" hidden></div>
+        <button type="button" id="scene-back" class="scene-back" hidden></button>
+      </div>
+      <div id="modebar" class="modebar" hidden>
+        <button type="button" id="plan-entry" class="plan-entry" aria-pressed="false">변경 구상</button>
+        <div id="plan-mode" class="plan-mode" role="group" aria-label="지도에 보이는 내용" hidden></div>
+      </div>
       <span id="ai-pill" class="ai-pill" data-state="checking"><i aria-hidden="true"></i><span id="ai-text">AI 확인 중</span></span>
     </header>
     <main id="home" class="home" hidden>
       <div class="home-inner">
-        <h1 class="home-title">프로젝트</h1>
-        <p class="home-lede">Codex·Claude에서 개발한 기록을 프로젝트의 부분에 연결해, 구조와 최근 변화를 한눈에 봅니다.</p>
-        <form id="new-form" class="new-form"><label for="new-name" class="sr-only">새 프로젝트 이름</label><input id="new-name" maxlength="120" placeholder="새 프로젝트 이름" autocomplete="off"><button type="submit" class="primary">내 프로젝트 시작</button></form>
+        <header class="home-head">
+          <h1 class="home-title">프로젝트</h1>
+          <p class="home-lede">개발 기록을 프로젝트의 부분에 이어 구조와 최근 변화를 읽습니다.</p>
+        </header>
         <div id="home-message" class="message" role="status" hidden></div>
-        <ul id="project-list" class="project-list"></ul>
-        <h2 id="saved-title" class="home-sub" hidden>이 브라우저에 저장된 프로젝트</h2>
-        <ul id="saved-list" class="project-list"></ul>
-        <div class="home-foot">
-          <p>예제 기록은 Codex·Claude에서 전달받았다고 가정하고 쓴 기록이에요. 문서 변환기는 변경 구상을 시험하는 공개 합성 예제예요. 실제 기록 연결기는 아직 없어요.</p>
+        <section class="home-mine" aria-labelledby="saved-title">
+          <div class="home-row">
+            <h2 id="saved-title" class="home-sub">내 프로젝트</h2>
+            <form id="new-form" class="new-form"><label for="new-name" class="sr-only">새 프로젝트 이름</label><input id="new-name" maxlength="120" placeholder="새 프로젝트 이름" autocomplete="off"><button type="submit" class="primary">내 프로젝트 시작</button></form>
+          </div>
+          <ul id="saved-list" class="project-list mine"></ul>
+          <p id="saved-empty" class="home-empty" hidden>아직 이 브라우저에 만든 프로젝트가 없어요. 이름을 적어 시작하거나 아래 예제로 둘러보세요.</p>
+        </section>
+        <section class="home-examples" aria-labelledby="examples-title">
+          <h2 id="examples-title" class="home-sub">예제로 둘러보기</h2>
+          <ul id="project-list" class="project-list examples"></ul>
+        </section>
+        <footer class="home-foot">
+          <p>예제는 전달받았다고 가정하고 쓴 합성 기록이며 저장되지 않아요. 실제 기록 연결기는 아직 없어요.</p>
           <button type="button" id="import" class="link-button">백업 파일 가져오기</button><input id="import-file" type="file" accept="application/json,.json" hidden>
-        </div>
+        </footer>
       </div>
     </main>
     <main id="space" class="space" hidden>
       <div id="viewport" class="viewport" tabindex="-1" aria-label="프로젝트 지도"><div id="world" class="world"></div></div>
-      <section id="recent" class="recent" aria-labelledby="recent-title">
-        <button type="button" id="recent-toggle" class="recent-head" aria-expanded="true"><span id="recent-title">최근 변화</span><span id="recent-count" class="count"></span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg></button>
+      <section id="recent" class="recent collapsed" aria-labelledby="recent-title">
+        <header class="recent-head"><span id="recent-title">최근 기록</span><span id="recent-count" class="count"></span></header>
         <ol id="recent-list" class="recent-list"></ol>
       </section>
       <div class="controls" role="toolbar" aria-label="지도 보기">
+        <button type="button" id="recent-toggle" class="recent-toggle" aria-expanded="false" aria-controls="recent"><span>최근 기록</span><span id="recent-badge" class="count"></span></button>
+        <span class="tool-sep" aria-hidden="true"></span>
         <button type="button" id="zoom-out" aria-label="축소" title="축소">−</button>
         <span id="zoom-level" class="zoom-level">100%</span>
         <button type="button" id="zoom-in" aria-label="확대" title="확대">+</button>
         <button type="button" id="zoom-fit" aria-label="전체 보기" title="전체 보기"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"/></svg></button>
         <button type="button" id="arrange" title="자동 정렬 · 이 화면에서 옮긴 위치를 되돌림 (되돌리기 가능)" aria-label="자동 정렬"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="2.5" width="5" height="4" rx="1"/><rect x="9" y="2.5" width="5" height="4" rx="1"/><rect x="2" y="9.5" width="5" height="4" rx="1"/><rect x="9" y="9.5" width="5" height="4" rx="1"/></svg></button>
-        <button type="button" id="help-toggle" aria-expanded="false" aria-controls="help" title="조작법" aria-label="조작법">?</button>
+        <button type="button" id="help-toggle" aria-expanded="false" aria-controls="help" title="조작법과 선의 뜻" aria-label="조작법과 선의 뜻">?</button>
         <button type="button" id="add-part" class="add-part" hidden>+ 부분</button>
-        <span class="legend" aria-label="상태"><i class="s-reported"></i>보고 받음<i class="s-active"></i>요청만 있음<i class="s-plan"></i>구상</span>
       </div>
-      <div id="help" class="help" hidden><strong>지도 조작</strong><ul><li><b>휠</b> 커서 위치로 확대·축소 (40–160%)</li><li><b>빈 곳 드래그</b> 지도 이동</li><li><b>부분 끌기</b> 위치 옮기기 · 그룹은 안의 부분과 함께</li><li><b>클릭</b> 정보 열기</li><li><b>더블클릭</b> 또는 <b>숫자 ›</b> 안으로 들어가기</li><li><b>›</b> 그 자리에서 펼치기·접기</li><li><b>Esc</b> 정보 닫기 · 한 단계 위로</li></ul></div>
-      <div id="scope-bar" class="scope-bar" hidden></div>
+      <div id="help" class="help" hidden>
+        <strong>지도 조작</strong>
+        <ul><li><b>클릭</b> 선택해 오른쪽에서 읽기</li><li><b>더블클릭</b> 또는 <b>숫자 ›</b> 안으로 들어가기</li><li><b>‹</b> 그 자리에서 펼치기·접기</li><li><b>휠</b> 커서 위치로 확대·축소 · <b>빈 곳 드래그</b> 이동</li><li><b>부분 끌기</b> 이 보기에서 위치 옮기기</li><li><b>Esc</b> 선택 해제 · 한 단계 위로</li></ul>
+        <strong>선</strong>
+        <ul class="line-legend"><li><svg viewBox="0 0 28 8" aria-hidden="true"><path d="M1 4h26"/></svg>흐름 · 넘겨줌</li><li><svg viewBox="0 0 28 8" aria-hidden="true"><path class="d-needs" d="M1 4h26"/></svg>필요로 함</li><li><svg viewBox="0 0 28 8" aria-hidden="true"><path class="d-shares" d="M1 4h26"/></svg>함께 씀 · 관련</li></ul>
+        <p>선 위에 마우스를 올리면 관계 설명이 보여요.</p>
+      </div>
+      <div id="edge-tip" class="edge-tip" role="tooltip" hidden></div>
       <div id="toast" class="toast" role="status" hidden></div>
       <p id="space-empty" class="space-empty" hidden></p>
       <div id="part-form" class="part-form" hidden></div>
-      <aside id="panel" class="panel" aria-labelledby="panel-title" hidden></aside>
-      <div id="plan-mode" class="plan-mode" role="group" aria-label="지도 보기" hidden></div>
-      <aside id="plan-panel" class="plan-panel" aria-labelledby="plan-title" hidden></aside>
+      <aside id="panel" class="panel inspector" aria-labelledby="panel-title" hidden></aside>
+      <aside id="plan-panel" class="plan-panel inspector" aria-labelledby="plan-title" hidden></aside>
       <div id="plan-sheet" class="plan-sheet" role="dialog" aria-labelledby="sheet-title" hidden></div>
       <input id="plan-import-file" type="file" accept="application/json,.json" hidden>
     </main>

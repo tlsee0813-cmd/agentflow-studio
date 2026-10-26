@@ -27,3 +27,5 @@ export function ago(at: string | null): string {
   const d = Math.round(hr / 24); if (d === 1) return '어제'; if (d < 7) return `${d}일 전`;
   return new Intl.DateTimeFormat('ko-KR', { month: 'long', day: 'numeric' }).format(new Date(t));
 }
+/** One inspector width for a selected part and the change plan (matches .inspector in styles.css). Narrow: the whole width. */
+export const inspectorWidth = () => (window.innerWidth < 720 ? window.innerWidth : Math.round(Math.min(408, Math.max(360, window.innerWidth * 0.3))));

@@ -9,7 +9,7 @@ import { createPlan, selectItems, requestSnapshot, compareResults, parseScopeRev
 import { CONVERTER_INTENT, converterEvidence, converterExampleAnalysis, converterObservations } from '../shared/change-plan-example.js';
 import type { Box } from './map-layout.js';
 import { AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
-import { h, put, $, ago, fullTime } from './plan-dom.js';
+import { h, put, $, ago, fullTime, inspectorWidth } from './plan-dom.js';
 import { CONVERTER_KEY, CONDITION_LABEL, EVIDENCE_LABEL, exampleInput, projectInput, mapReply, secretLike, scopeInput, type Condition, type PlanInput } from './plan-source.js';
 import { requestPlan, requestScope } from './plan-request.js';
 import { emptyBundle, loadBundle, saveBundle, setAside, planFile, readPlanFile, type PlanBundle } from './plan-store.js';
@@ -348,7 +348,7 @@ export function createPlanView(host: PlanHost) {
     $('space').style.setProperty('--plan-w', `${width()}px`);
     renderSheet(); overlay();
   }
-  const width = () => (s ? $('plan-panel').getBoundingClientRect().width + 24 : 0);
+  const width = () => (s ? inspectorWidth() : 0);
   function renderMode() {
     const box = $('plan-mode'), p = plan();
     box.hidden = !s || !p;
@@ -357,18 +357,19 @@ export function createPlanView(host: PlanHost) {
     box.replaceChildren(b('current', '현재'), b('preview', '변경 미리보기'));
   }
 
+  /** Same inspector grammar as a part: kicker → title (what is wanted) → one basis line → the change list first. Writing and
+   * source tools come after the list; with no plan yet, writing is the only content. */
   function renderPanel(o: PlanOpened) {
     const panel = $('plan-panel'), prev = panel.querySelector('.pp-body'), keep = prev?.scrollTop ?? 0, p = plan(), st = s!;
     panel.hidden = false;
-    const title = p ? p.intent : '';
-    const head = h('header', { class: 'pp-head' },
-      h('div', { class: 'pp-title-row' }, h('h2', { id: 'plan-title', tabindex: '-1' }, '변경 구상'), st.example ? h('span', { class: 'tag' }, '예제') : null),
-      p ? h('blockquote', { class: 'pp-want', title: p.intent }, title) : h('p', { class: 'pp-want empty' }, '바꾸고 싶은 모습을 적으면 같은 지도에서 달라질 곳을 보여 줘요.'),
-      p ? h('p', { class: 'pp-basis', title: p.basis }, `기준 · ${short(p.basis, 70)}`) : null,
+    const head = h('header', { class: 'panel-head pp-head' },
+      h('div', { class: 'panel-path' }, h('span', {}, '변경 구상'), st.example ? h('span', { class: 'tag' }, '예제') : null),
+      p ? h('h2', { id: 'plan-title', class: 'pp-want', tabindex: '-1', title: p.intent }, p.intent) : h('h2', { id: 'plan-title', tabindex: '-1' }, '새 변경안'),
+      p ? h('p', { class: 'pp-basis', title: p.basis }, `기준 · ${short(p.basis, 64)}`) : h('p', { class: 'pp-basis' }, '적은 문장으로 같은 지도에서 달라질 곳을 살펴봐요.'),
       newerNote(o, p),
-      h('button', { type: 'button', class: 'close', 'aria-label': '변경 구상 닫고 현재 지도로', title: '닫기 (Esc) · 초안은 남아요', onclick: () => close() }, '×'));
-    const body = h('div', { class: 'pp-body' });
-    put(body, partContext(o), intentSection(o), p ? planSection(o, p) : null, st.bundle.snapshots.length ? resultSection() : null);
+      h('div', { class: 'head-tools' }, h('button', { type: 'button', class: 'close', 'aria-label': '변경 구상 닫고 현재 지도로', title: '닫기 (Esc) · 초안은 남아요', onclick: () => close() }, '×')));
+    const body = h('div', { class: 'pp-body panel-body' });
+    put(body, partContext(o), p && !st.editing && !stale() ? planSection(o, p) : null, intentSection(o), p && (st.editing || stale()) ? planSection(o, p) : null, st.bundle.snapshots.length ? resultSection() : null);
     // What goes into this request stays in view under the scrolling body, next to the button that makes it.
     panel.replaceChildren(head, body, ...(p ? [requestSection(p)] : []), footer(o));
     body.scrollTop = keep;
@@ -395,7 +396,7 @@ export function createPlanView(host: PlanHost) {
     const status = host.status(), canAsk = status.ai === 'deepseek';
     if (p && !st.editing && !stale()) {
       sec.classList.add('compact');
-      put(sec, h('div', { class: 'pp-row pp-acts' },
+      put(sec, h('h3', {}, '문장과 자료'), h('div', { class: 'pp-row pp-acts' },
         h('button', { type: 'button', class: 'link-button', onclick: () => { st.editing = true; render(); requestAnimationFrame(() => document.getElementById('plan-intent')?.focus()); } }, '문장 고치기'),
         sourcesToggle(o),
         st.pending ? null : h('button', { type: 'button', class: 'link-button', disabled: !canAsk, title: canAsk ? reachText() : 'AI 서버가 연결된 주소에서 쓸 수 있어요', onclick: () => void analyze() }, 'AI로 다시 살펴보기')),
@@ -498,19 +499,20 @@ export function createPlanView(host: PlanHost) {
     const origin = by?.kind === 'example' ? h('span', { class: 'tag', title: '사람이 작성한 합성 예시 분석이에요. AI에 보낸 적이 없어요.' }, '작성된 예제 분석')
       : by?.kind === 'ai' ? h('span', { class: 'tag ai', title: `${fullTime(by.at)}${by.records.total ? ` · 기록 ${by.records.total}개 중 ${by.records.sent}개를 읽음` : ''}` }, `AI 분석 · ${by.model} · ${ago(by.at)}`) : null;
     const sec = h('section', { class: `pp-sec pp-plan${stale() ? ' is-stale' : ''}` },
-      h('div', { class: 'pp-sec-head' }, h('h3', {}, '변경안'), origin),
-      h('p', { class: 'pp-summary' }, p.analysis.summary));
+      h('div', { class: 'pp-sec-head' }, h('h3', {}, `바뀌는 것 ${p.analysis.items.length}`), origin));
     const list = h('ul', { class: 'pp-items' });
     for (const item of p.analysis.items) {
       const authored = st.bundle.by?.kind === 'example';
       const on = p.selected.includes(item.id), focused = st.focus?.kind === 'item' && st.focus.id === item.id, missing = on && authored ? missingDeps(item) : [];
       const parts = item.partIds.map(partName).filter(Boolean) as string[];
-      const box = h('input', { type: 'checkbox', id: `pi-${item.id}`, 'aria-label': `‘${item.title}’ 이번에 맡기기` }) as HTMLInputElement;
+      const box = h('input', { type: 'checkbox', id: `pi-${item.id}`, 'aria-label': `‘${item.title}’ 이번 요청에 맡기기` }) as HTMLInputElement;
       box.checked = on; box.addEventListener('change', () => toggleItem(item.id, box.checked));
+      // Reading an item (its places on the map and its detail) is the row; handing it over is the separate toggle on the right.
       const li = h('li', { class: `pp-item${focused ? ' focused' : ''}${on ? ' on' : ''}` },
-        h('div', { class: 'pp-item-row' }, box,
-          h('button', { type: 'button', class: 'pp-item-title', 'aria-expanded': String(focused), onclick: () => focusItem({ kind: 'item', id: item.id }) },
-            h('span', {}, item.title), h('small', {}, parts.length ? parts.join(' · ') : '새 부분'))));
+        h('div', { class: 'pp-item-row' },
+          h('button', { type: 'button', class: 'pp-item-title', 'aria-expanded': String(focused), title: focused ? '지도 표시 해제' : '지도에서 이 변경 보기', onclick: () => focusItem({ kind: 'item', id: item.id }) },
+            h('span', {}, item.title), h('small', {}, parts.length ? parts.join(' · ') : '지금 지도에 없는 새 부분')),
+          h('label', { class: 'pp-hand', for: `pi-${item.id}`, title: on ? '이번 요청문에 들어가요' : '이번 요청문에서 빠져요' }, box, h('span', {}, '맡기기'))));
       if (missing.length) li.append(h('p', { class: 'pp-warn' }, `‘${missing.map(d => itemOf(d)?.title ?? d).join('’, ‘')}’이 이 항목의 전제예요. `,
         h('button', { type: 'button', class: 'link-button', onclick: () => { s!.bundle = { ...s!.bundle, plan: selectItems(plan()!, [...plan()!.selected, ...missing]) }; persist(); render(); } }, '함께 맡기기'),
         h('span', {}, ' · 빼 두면 요청문에 미선택 전제로 적혀요.')));
@@ -522,8 +524,10 @@ export function createPlanView(host: PlanHost) {
     const folds = h('div', { class: 'pp-folds' },
       nImp ? h('button', { type: 'button', class: `pp-fold-btn${st.focus?.kind === 'impacts' ? ' on' : ''}`, 'aria-pressed': String(st.focus?.kind === 'impacts'), onclick: () => focusItem({ kind: 'impacts' }) }, `영향 후보 ${nImp}곳`) : null,
       p.analysis.preserve.length ? fold(`유지할 조건 ${p.analysis.preserve.length}`, p.analysis.preserve) : null,
-      p.analysis.unknowns.length ? fold(`아직 정하지 않은 것 ${p.analysis.unknowns.length}`, p.analysis.unknowns) : null);
+      p.analysis.unknowns.length ? fold(`정하지 않은 것 ${p.analysis.unknowns.length}`, p.analysis.unknowns) : null);
     sec.append(folds);
+    // The analysis in a few words, after the list it explains.
+    if (p.analysis.summary) sec.append(h('p', { class: 'pp-summary' }, p.analysis.summary));
     if (st.focus?.kind === 'impacts') sec.append(h('ul', { class: 'pp-impacts' }, ...p.analysis.impacts.map(x => h('li', {}, h('button', { type: 'button', class: 'link-button', onclick: () => locate(x.partId) }, partName(x.partId) ?? '지금 지도에 없는 부분'), h('span', {}, x.reason)))));
     return sec;
   }
@@ -635,6 +639,7 @@ export function createPlanView(host: PlanHost) {
     const sheet = $('plan-sheet'), snap = s ? snapshotOf(s.sheet) : null;
     sheet.hidden = !snap;
     if (!s || !snap) { sheet.replaceChildren(); return; }
+    fitSheet();
     const labels = s.bundle.labels[snap.id] ?? {}, p = plan();
     const old = !p || snap.planId !== p.id || snap.planRevision !== p.revision;
     const total = Object.keys(labels).length || snap.itemIds.length;
@@ -647,6 +652,10 @@ export function createPlanView(host: PlanHost) {
         h('span', { class: 'fine', role: 'status' }, s.copyMsg ?? '복사는 이 글을 옮기는 일이에요. 접수·실행·완료를 기록하지 않아요.'),
         h('button', { type: 'button', class: 'link-button', onclick: closeSheet }, '닫기')));
   }
+  /** The sheet reads beside the inspector while the strip left of it is wide enough; otherwise it covers the window. */
+  function fitSheet() { $('plan-sheet').classList.toggle('wide', $('space').getBoundingClientRect().width - width() - 48 < 420); }
+  // A resized window changes the inspector width: keep the map's reference width and the sheet in step.
+  window.addEventListener('resize', () => { if (!s) return; $('space').style.setProperty('--plan-w', `${width()}px`); fitSheet(); });
   function closeSheet() { if (!s) return; s.sheet = null; s.copyMsg = null; render(); document.querySelector<HTMLElement>('.pp-request .link-button, .pp-request .primary')?.focus(); }
 
   /** Escape: the innermost open thing first; the plan itself last. Returns true when handled. */
