@@ -74,6 +74,7 @@ export function createPlanView(host) {
         s.scoping?.controller.abort();
         const ret = s.ret;
         s = null;
+        host.targetContext(null, false);
         $('plan-panel').hidden = true;
         $('plan-panel').replaceChildren();
         $('plan-mode').hidden = true;
@@ -266,7 +267,7 @@ export function createPlanView(host) {
             from = '';
         }
         const kind = pres?.origin ?? null;
-        return h('div', { class: `callout ${kind ?? 'plain'}`, 'data-box': at, role: 'note', 'aria-label': `${name} · 변경 구상` }, h('p', { class: 'co-head' }, h('span', { class: 'co-kind' }, kind === 'intent' ? '원하는 차이' : kind === 'suggestion' ? '분석 제안' : '변경 항목'), h('strong', {}, name), at !== partId ? h('small', {}, `‘${partName(at)}’ 안쪽`) : null), h('div', { class: 'co-pair' }, h('div', { class: 'co-row now' }, h('span', { class: 'co-label' }, pres?.current.source === 'evidence' ? '자료상' : '현재 설명'), h('p', {}, now, from ? h('small', {}, from) : null)), h('div', { class: 'co-row want' }, h('span', { class: 'co-label' }, kind === 'suggestion' ? '제안' : '바꿀 모습'), h('p', {}, pres ? pres.wanted.text : item.title))));
+        return h('div', { class: `callout ${kind ?? 'plain'}`, 'data-box': at, 'data-target': partId, role: 'note', 'aria-label': `${name} · 변경 구상` }, h('p', { class: 'co-head' }, h('span', { class: 'co-kind' }, kind === 'intent' ? '원하는 차이' : kind === 'suggestion' ? '분석 제안' : '변경 항목'), h('strong', {}, name), at !== partId ? h('small', {}, `‘${partName(at)}’ 안쪽`) : null), h('div', { class: 'co-pair' }, h('div', { class: 'co-row now' }, h('span', { class: 'co-label' }, pres?.current.source === 'evidence' ? '자료상' : '현재 설명'), h('p', {}, now, from ? h('small', {}, from) : null)), h('div', { class: 'co-row want' }, h('span', { class: 'co-label' }, kind === 'suggestion' ? '제안' : '바꿀 모습'), h('p', {}, pres ? pres.wanted.text : item.title))));
     }
     /** The part itself when it is drawn in this view, else its nearest drawn ancestor; null outside the view. */
     function visibleRep(id, boxes) {
@@ -577,6 +578,8 @@ export function createPlanView(host) {
         const o = host.current();
         if (!o)
             return;
+        const item = s.mode === 'preview' && s.focus?.kind === 'item' ? itemOf(s.focus.id) : null;
+        host.targetContext(item ? activeTarget(item) : null, moveTarget);
         renderMode();
         renderStrip(o);
         if (panelOpen())
@@ -750,7 +753,7 @@ export function createPlanView(host) {
         box.hidden = !s || !p;
         if (!s || !p)
             return;
-        const b = (mode, label) => h('button', { type: 'button', 'aria-pressed': String(s.mode === mode), onclick: () => { s.mode = mode; render(); } }, label);
+        const b = (mode, label) => h('button', { type: 'button', 'aria-pressed': String(s.mode === mode), onclick: () => { const changed = s.mode !== mode; s.mode = mode; moveTarget = changed && mode === 'preview'; render(); } }, label);
         box.replaceChildren(b('current', '현재'), b('preview', '변경 미리보기'));
     }
     /** Same inspector grammar as a part: kicker → title (what is wanted) → one basis line → the change list first. Writing and

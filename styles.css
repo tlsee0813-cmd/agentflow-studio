@@ -659,6 +659,8 @@ button:disabled { opacity: .5; cursor: default; }
 /* notes of a change beside its parts: outside the structure (no port, no relation, not a part). Solid: what the person
    wants; dashed: what the analysis suggests; plain: no presentation data (the part's own description → the change's name). */
 .callouts { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.callout-leader { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+.callout-leader path { fill: none; stroke: var(--change); stroke-width: 1.5; stroke-dasharray: 2 4; stroke-linecap: round; opacity: .65; }
 .callout { position: absolute; width: 236px; padding: 8px 10px 9px 11px; pointer-events: auto; background: #fffaf2; border: 1px solid var(--change-line); border-left: 3px solid var(--change); border-radius: 4px 10px 10px 4px; box-shadow: 0 8px 20px -14px rgba(120,60,0,.4); font-size: 12.5px; line-height: 1.45; }
 .callout.suggestion { border-style: dashed; border-left-style: dashed; background: var(--surface); }
 .callout.plain { border-left-color: var(--change-line); }

@@ -188,6 +188,9 @@ const camKey = (o, s) => `${o.project.id}|${s ?? ''}`;
 /** Direct children of the scope open as frames; deeper parts stay folded until opened. */
 /** Unfolded only for the part being looked at (not the person's own fold choice). */
 const tempExpand = new Set();
+/** The preview owns only the ancestors needed to see its current actual target. User folds and record peeks stay separate. */
+const previewExpand = new Set();
+let previewTarget = null, previewScope = '';
 const isExpanded = (o) => {
     const memo = new Map();
     const fn = (id, depth) => {
@@ -195,7 +198,7 @@ const isExpanded = (o) => {
         if (memo.has(k))
             return memo.get(k);
         let v;
-        if (tempExpand.has(k))
+        if (tempExpand.has(k) || previewExpand.has(k))
             v = true;
         else if (expandState.has(k))
             v = expandState.get(k);
@@ -236,6 +239,27 @@ function insideScope(o, id) {
         if (p.parentId === scope)
             return true;
     return false;
+}
+/** Explicit preview focus changes replace this path. Ordinary renders (sources, resize, manual pan, or a user fold) do not
+ * rebuild it, so folding an ancestor while reading never immediately opens that ancestor again. */
+function previewContext(id, explicit) {
+    const o = opened, key = o ? camKey(o, scope) : '';
+    if (id === previewTarget && key === previewScope && !explicit)
+        return;
+    previewTarget = id;
+    previewScope = key;
+    const next = new Set();
+    if (o && id && id !== scope && partOf(o, id) && insideScope(o, id))
+        expandPath(o, id, next);
+    if (next.size === previewExpand.size && [...next].every(k => previewExpand.has(k)))
+        return;
+    previewExpand.clear();
+    for (const k of next)
+        previewExpand.add(k);
+    if (o) {
+        renderSpace('keep', false);
+        markSelection(selected);
+    }
 }
 /* ---------- routing: #/  ·  #/p/<key>[/in/<scope>][/<part>] ---------- */
 function route() {
@@ -343,6 +367,9 @@ async function render() {
             composerOpen = false;
         }
         tempExpand.clear();
+        previewExpand.clear();
+        previewTarget = null;
+        previewScope = '';
         renderSpace('restore');
     }
     const travelling = !!travel && travel.to === scope;
@@ -621,7 +648,7 @@ function metaLine(p, last) {
     return `${STATUS_SHORT[p.status]}${last ? ` · ${ago(last)}` : ''}`;
 }
 /** camera: 'fit' (new view), 'restore' (a scope's own last camera, else fit), 'keep' (same view, structure changed). */
-function renderSpace(cameraMode = 'fit') {
+function renderSpace(cameraMode = 'fit', planOverlay = true) {
     const o = opened;
     setBar(o);
     $('home').hidden = true;
@@ -654,7 +681,7 @@ function renderSpace(cameraMode = 'fit') {
     world.append(edges);
     const enterButton = (p) => h('button', { type: 'button', class: 'enter', title: `‘${p.name}’ 안으로 들어가기 · 부분 ${p.childIds.length}`, 'aria-label': `${p.name} 안으로 들어가기`, onclick: () => go(o.key, null, p.id) }, `${p.childIds.length}`, h('span', { 'aria-hidden': 'true' }, '›'));
     const toggleButton = (p, open) => h('button', { type: 'button', class: 'toggle', title: open ? '접기' : '여기서 펼치기', 'aria-label': `${p.name} ${open ? '접기' : '펼치기'}`, 'aria-expanded': String(open),
-        onclick: () => { const k = `${o.project.id}|${p.id}`; expandState.set(k, !open); tempExpand.delete(k); renderSpace('keep'); if (selected)
+        onclick: () => { const k = `${o.project.id}|${p.id}`; expandState.set(k, !open); tempExpand.delete(k); previewExpand.delete(k); renderSpace('keep'); if (selected)
             select(selected); } }, chevron(open));
     const keySelect = (id) => (e) => { const k = e.key; if ((k === 'Enter' || k === ' ') && e.target === e.currentTarget) {
         e.preventDefault();
@@ -723,7 +750,8 @@ function renderSpace(cameraMode = 'fit') {
     }
     else
         fitView(false);
-    planView.overlay();
+    if (planOverlay)
+        planView.overlay();
 }
 /** Geometry only (also during a drag): boxes and edge paths from the current layout. */
 function positionWorld() {
@@ -1070,12 +1098,16 @@ function positionCallouts() {
     updateSticky();
     syncMapArea();
     const el = calloutNotes[0];
-    if (!el)
+    if (!el) {
+        positionCalloutLeader(null);
         return;
+    }
     const b = lay.boxes.get(el.dataset.box ?? '');
     el.hidden = !b;
-    if (!b)
+    if (!b) {
+        positionCalloutLeader(null);
         return;
+    }
     const sp = $('space').getBoundingClientRect(), lens = $('lens'), area = lensArea();
     if (el.dataset.side !== 'dock') {
         const blockers = [...lay.boxes.values()].map(toScreen).filter(r => r.x < area.x + area.w && r.y < area.y + area.h && r.x + r.w > area.x && r.y + r.h > area.y);
@@ -1091,6 +1123,7 @@ function positionCallouts() {
         if (at) {
             el.style.left = at.x + 'px';
             el.style.top = at.y + 'px';
+            positionCalloutLeader(el);
             return;
         }
         el.dataset.side = 'dock';
@@ -1104,6 +1137,46 @@ function positionCallouts() {
     syncMapArea();
     el.style.left = Math.max(area.x, area.x + (area.w - el.offsetWidth) / 2) + 'px';
     el.style.top = (sp.height - BOTTOM - calloutDockHeight) + 'px';
+    positionCalloutLeader(el);
+}
+/** An annotation leader, not a map relation: no arrow, port, or inferred endpoint. It attaches only to the actual target's
+ * highlighted box (a frame's heading), never to an ancestor standing in for a target the person has folded away. */
+function positionCalloutLeader(note) {
+    const holder = $('callouts'), b = note ? lay.boxes.get(note.dataset.target ?? '') : null;
+    let line = holder.querySelector('.callout-leader');
+    if (!note || !b) {
+        line?.remove();
+        return;
+    }
+    const target = toScreen(b.kind === 'frame' ? { ...b, h: b.head } : b), sp = $('space').getBoundingClientRect(), vp = $('viewport').getBoundingClientRect();
+    const r = note.getBoundingClientRect(), card = { x: r.left - sp.left, y: r.top - sp.top, w: r.width, h: r.height };
+    const clamp = (v, low, high) => Math.max(low, Math.min(v, high));
+    let a, z;
+    if (card.y >= target.y + target.h) {
+        a = { x: target.x + target.w / 2, y: target.y + target.h };
+        z = { x: clamp(a.x, card.x + 14, card.x + card.w - 14), y: card.y };
+    }
+    else if (target.y >= card.y + card.h) {
+        a = { x: target.x + target.w / 2, y: target.y };
+        z = { x: clamp(a.x, card.x + 14, card.x + card.w - 14), y: card.y + card.h };
+    }
+    else {
+        const right = card.x >= target.x + target.w;
+        a = { x: right ? target.x + target.w : target.x, y: target.y + target.h / 2 };
+        z = { x: right ? card.x : card.x + card.w, y: clamp(a.y, card.y + 10, card.y + card.h - 10) };
+    }
+    if (a.x < vp.left - sp.left || a.x > vp.right - sp.left || a.y < vp.top - sp.top || a.y > vp.bottom - sp.top) {
+        line?.remove();
+        return;
+    }
+    if (!line) {
+        line = svg('svg', { class: 'callout-leader', 'aria-hidden': 'true' });
+        line.append(svg('path', {}));
+        holder.prepend(line);
+    }
+    line.setAttribute('width', String(sp.width));
+    line.setAttribute('height', String(sp.height));
+    line.querySelector('path').setAttribute('d', `M${a.x},${a.y} L${z.x},${z.y}`);
 }
 /** New target or explicit resize only. Prefer the target, its line ends and the title together when they fit; a large
  * frame still reveals its own heading and first rows instead of refusing to move because the whole group is too tall. */
@@ -1495,6 +1568,7 @@ const planView = createPlanView({
     accessCode: () => sessionCode(), keepAccessCode,
     selected: () => selected,
     boxes: () => lay.boxes,
+    targetContext: previewContext,
     selectPart: id => { if (opened)
         go(opened.key, id); },
     showPart: id => { const o = opened; if (o)
