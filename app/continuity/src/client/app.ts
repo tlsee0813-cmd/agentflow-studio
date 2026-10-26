@@ -662,12 +662,20 @@ const planView = createPlanView({
   reveal,
   capture: () => ({ selected, scope, camera: { ...camera } }),
   notice: (text, action) => toast(text, action),
-  frame: () => {
-    const vp = $('viewport').getBoundingClientRect(), left = leftInset(), right = vp.width - PANEL_W() - 16, B = lay.bounds;
-    // Zoom out only as far as 70% and only if the view does not fit beside the panel; the camera comes back on close.
-    const w = right - left, k = Math.min(camera.k, Math.max(0.7, (w - 24) / Math.max(1, B.w)));
-    const x = B.w * k <= w ? left + (w - B.w * k) / 2 - B.x * k : left + 12 - B.x * k;
-    const top = scope ? 64 : 24, hgt = vp.height - top - 72, y = B.h * k <= hgt ? top + (hgt - B.h * k) / 2 - B.y * k : top + 12 - B.y * k;
+  frame: parts => {
+    // Readable first: about 100% (never smaller than the person's own zoom above that). The whole view is centred when it
+    // fits; otherwise the changed parts are, and the rest is a pan or 전체 보기 away. The camera comes back on close.
+    const vp = $('viewport').getBoundingClientRect(), left = leftInset(), right = vp.width - PANEL_W() - 16, top = scope ? 64 : 24, bottom = vp.height - 72;
+    const w = right - left, hgt = bottom - top, all = lay.bounds, base = Math.min(ZOOM_MAX, Math.max(1, camera.k));
+    // A view only a little too wide may come down to 90% to fit whole; anything wider stays readable and is panned.
+    const fitK = Math.min((w - 16) / Math.max(1, all.w), (hgt - 32) / Math.max(1, all.h)), k = fitK < base && fitK >= 0.9 ? fitK : base;
+    const boxes = parts.map(id => lay.boxes.get(id)).filter((b): b is NonNullable<typeof b> => !!b);
+    const B = all.w * k <= w && all.h * k <= hgt || !boxes.length ? all : (() => {
+      const x = Math.min(...boxes.map(b => b.x)), y = Math.min(...boxes.map(b => b.y));
+      return { x, y, w: Math.max(...boxes.map(b => b.x + b.w)) - x, h: Math.max(...boxes.map(b => b.y + b.h)) - y };
+    })();
+    const x = B.w * k <= w ? left + (w - B.w * k) / 2 - B.x * k : left + 24 - B.x * k;
+    const y = B.h * k <= hgt ? top + (hgt - B.h * k) / 2 - B.y * k : top + 24 - B.y * k;
     camera = { k, x, y }; applyCamera(true);
   },
   restore: r => { const o = opened; if (!o) return; returnCamera = r.camera; go(o.key, r.selected, r.scope); },
