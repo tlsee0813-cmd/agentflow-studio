@@ -32,8 +32,8 @@ export interface PlanHost {
   /** The plan panel opened, closed or changed width: map insets and chrome follow. */
   chrome(): void;
   notice(text: string, action?: { label: string; run: () => void }): void;
-  /** Once, when the plan opens: pan (never zoom) so the current view sits in the space beside the panel. */
-  frame(): void;
+  /** Once, when the plan opens: a readable size (about 100%) around these parts beside the panel; the rest by pan or 전체 보기. */
+  frame(parts: string[]): void;
 }
 
 type Focus = { kind: 'item'; id: string } | { kind: 'impacts' } | null;
@@ -89,7 +89,7 @@ export function createPlanView(host: PlanHost) {
       focus: null, mode: bundle.plan ? 'preview' : 'current', editing: !bundle.plan, pending: null, error: null, scoping: null, scopeError: null,
       sheet: null, sources: false, adding: false, resultFor: bundle.snapshots.at(-1)?.id ?? null, addForm: false, copyMsg: null, fileMsg: null, ret: host.capture() };
     if (unreadable) s.storeMsg = null;
-    host.chrome(); render(); host.frame();
+    host.chrome(); render(); host.frame(changedParts());
     requestAnimationFrame(() => (document.getElementById('plan-intent') ?? document.getElementById('plan-title'))?.focus());
   }
   /** Closing keeps the draft and the plan; the map goes back to the latest current view with the earlier selection and camera. */
@@ -128,35 +128,34 @@ export function createPlanView(host: PlanHost) {
 
   /* ---------- map overlay: same boxes, extra classes and a short note in place of the status line ---------- */
   function overlay() {
-    document.querySelectorAll<HTMLElement>('.plan-direct,.plan-impact,.plan-mark').forEach(el => { el.classList.remove('plan-direct', 'plan-impact', 'plan-mark'); el.removeAttribute('data-plan-title'); });
+    document.querySelectorAll<HTMLElement>('.plan-direct,.plan-impact').forEach(el => { el.classList.remove('plan-direct', 'plan-impact'); el.removeAttribute('data-plan-title'); });
     document.querySelectorAll<HTMLElement>('.plan-note').forEach(el => { el.textContent = ''; el.removeAttribute('title'); });
+    document.querySelectorAll('.plan-badge').forEach(el => el.remove());
     $('space').classList.toggle('planning', !!s);
     $('space').classList.toggle('preview', !!s && s.mode === 'preview' && !!plan());
     $('space').classList.toggle('focusing', !!s && s.mode === 'preview' && !!s.focus);
     const p = plan(); if (!s || s.mode !== 'preview' || !p) return;
     const o = host.current()!, boxes = host.boxes();
-    const rep = (id: string): string | null => { for (let cur: string | null = id, g = 0; cur && g < 64; cur = o.view.parts.find(x => x.id === cur)?.parentId ?? null, g++) { const b = boxes.get(cur); if (b && b.kind !== 'ghost') return cur; } return null; };
-    const marks = new Map<string, { role: 'plan-direct' | 'plan-impact' | 'plan-mark'; note: string; full: string }>();
-    const mark = (partId: string, role: 'plan-direct' | 'plan-impact' | 'plan-mark', note: string, full: string) => {
+    const rep = (id: string) => visibleRep(id, boxes);
+    const marks = new Map<string, { role: 'plan-direct' | 'plan-impact'; note: string; full: string }>();
+    const mark = (partId: string, role: 'plan-direct' | 'plan-impact', note: string, full: string) => {
       const r = rep(partId); if (!r) return;
       const inner = r !== partId ? `안쪽 ‘${partName(partId)}’ · ` : '';
       const prev = marks.get(r);
-      if (prev && (prev.role === 'plan-direct' || role === 'plan-mark' || (prev.role === 'plan-impact' && role === 'plan-impact'))) return;
+      if (prev && (prev.role === 'plan-direct' || role === 'plan-impact')) return;
       marks.set(r, { role, note: inner + note, full });
     };
     const f = s.focus;
     if (f?.kind === 'item') {
       const item = itemOf(f.id);
       if (item) {
-        for (const id of item.partIds) mark(id, 'plan-direct', `바꿀 곳 · ${item.title}`, `${item.title}\n${item.description}`);
+        // A checked item is already named by its badge right below; an unchecked one is named here and marked as not handed over.
+        const named = p.selected.includes(item.id) ? '바꿀 곳' : `바꿀 곳 · ${item.title} · 이번엔 안 맡김`;
+        for (const id of item.partIds) mark(id, 'plan-direct', named, `${item.title}\n${item.description}`);
         for (const x of nearImpacts(item)) mark(x.partId, 'plan-impact', `영향 후보 · ${x.reason}`, `영향 후보: ${x.reason}`);
       }
     } else if (f?.kind === 'impacts') {
       for (const x of p.analysis.impacts) mark(x.partId, 'plan-impact', `영향 후보 · ${x.reason}`, `영향 후보: ${x.reason}`);
-    } else {
-      const count = new Map<string, string[]>();
-      for (const i of p.analysis.items) if (p.selected.includes(i.id)) for (const id of i.partIds) (count.get(id) ?? count.set(id, []).get(id)!).push(i.title);
-      for (const [id, titles] of count) mark(id, 'plan-mark', '', `이번에 맡길 변경: ${titles.join(', ')}`);
     }
     // Outline only the innermost visible part: a frame whose own child carries the same mark stays plain.
     const parentOf = (id: string) => o.view.parts.find(x => x.id === id)?.parentId ?? null;
@@ -164,9 +163,32 @@ export function createPlanView(host: PlanHost) {
     for (const [id, m] of marks) {
       const el = document.querySelector<HTMLElement>(`.node[data-box="${CSS.escape(id)}"], .frame[data-box="${CSS.escape(id)}"]`); if (!el) continue;
       el.classList.add(m.role); el.dataset.planTitle = m.full;
-      if (m.role === 'plan-mark') continue;
       const note = el.querySelector<HTMLElement>('.plan-note'); if (note) { note.textContent = m.note; note.title = m.full; }
     }
+    // What this request changes, readable on the map itself: a small title on each direct target of a checked item.
+    // Innermost visible part only (never a parent and its child for the same item); never on parts that do not exist.
+    const titles = new Map<string, string[]>();
+    for (const item of p.analysis.items.filter(i => p.selected.includes(i.id))) {
+      const at = new Set(item.partIds.map(rep).filter((x): x is string => !!x));
+      for (const id of [...at]) for (let up = parentOf(id), g = 0; up && g < 64; up = parentOf(up), g++) at.delete(up);
+      for (const id of at) (titles.get(id) ?? titles.set(id, []).get(id)!).push(item.title);
+    }
+    for (const [id, list] of titles) {
+      const el = document.querySelector<HTMLElement>(`.node[data-box="${CSS.escape(id)}"], .frame[data-box="${CSS.escape(id)}"]`); if (!el) continue;
+      el.append(h('span', { class: 'plan-badge', title: `이번에 맡길 변경: ${list.join(', ')}` }, list.length > 1 ? `변경 · ${list[0]} 외 ${list.length - 1}` : `변경 · ${list[0]}`));
+    }
+  }
+  /** The part itself when it is drawn in this view, else its nearest drawn ancestor; null outside the view. */
+  function visibleRep(id: string, boxes: Map<string, Box>): string | null {
+    const o = host.current()!;
+    for (let cur: string | null = id, g = 0; cur && g < 64; cur = o.view.parts.find(x => x.id === cur)?.parentId ?? null, g++) { const b = boxes.get(cur); if (b && b.kind !== 'ghost') return cur; }
+    return null;
+  }
+  /** Where the request's changes sit on the map: what opening frames at a readable size. */
+  function changedParts(): string[] {
+    const p = plan(); if (!p) return [];
+    const chosen = p.analysis.items.filter(i => p.selected.includes(i.id)), from = chosen.length ? chosen : p.analysis.items, boxes = host.boxes();
+    return [...new Set(from.flatMap(i => i.partIds).map(id => visibleRep(id, boxes)).filter((x): x is string => !!x))];
   }
   function focusItem(next: Focus) {
     if (!s) return;
@@ -338,10 +360,10 @@ export function createPlanView(host: PlanHost) {
   function renderPanel(o: PlanOpened) {
     const panel = $('plan-panel'), prev = panel.querySelector('.pp-body'), keep = prev?.scrollTop ?? 0, p = plan(), st = s!;
     panel.hidden = false;
-    const title = p ? p.intent : '새 변경안';
+    const title = p ? p.intent : '';
     const head = h('header', { class: 'pp-head' },
-      h('div', { class: 'pp-kicker' }, h('strong', {}, '변경 구상'), st.example ? h('span', { class: 'tag' }, '예제') : null),
-      h('h2', { id: 'plan-title', tabindex: '-1', title: p?.intent ?? '' }, title),
+      h('div', { class: 'pp-title-row' }, h('h2', { id: 'plan-title', tabindex: '-1' }, '변경 구상'), st.example ? h('span', { class: 'tag' }, '예제') : null),
+      p ? h('blockquote', { class: 'pp-want', title: p.intent }, title) : h('p', { class: 'pp-want empty' }, '바꾸고 싶은 모습을 적으면 같은 지도에서 달라질 곳을 보여 줘요.'),
       p ? h('p', { class: 'pp-basis', title: p.basis }, `기준 · ${short(p.basis, 70)}`) : null,
       newerNote(o, p),
       h('button', { type: 'button', class: 'close', 'aria-label': '변경 구상 닫고 현재 지도로', title: '닫기 (Esc) · 초안은 남아요', onclick: () => close() }, '×'));
