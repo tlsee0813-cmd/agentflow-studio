@@ -136,16 +136,21 @@ export function requestSnapshot(plan: ChangePlan, review?: ScopeReview): Request
   for (const dependency of missing) all.get(dependency)!.refs.forEach(ref => usedRefs.add(ref));
   for (const candidate of scoped?.prerequisites ?? []) candidate.refs.forEach(ref => usedRefs.add(ref));
   const lines = ['작업 요청문 초안 · 생성됨 (전달·접수·실행 여부는 확인하지 않음)', `작성 기준: ${p.basis}`, `변경안 판본: ${p.id} / ${p.revision}`,
-    '', '선택한 요청 범위:', ...selected.flatMap(item => [`- ${item.title}`, item.description]), '', '선택 범위의 전제:'];
+    '', '선택한 요청 범위:', ...selected.flatMap(item => [`- ${item.title}`, item.description]),
+    '', '이번에 맡기지 않은 항목:', ...p.analysis.items.filter(item => !selectedIds.has(item.id)).map(item => `- ${item.title}`),
+    ...(selected.length === p.analysis.items.length ? ['- 없음'] : []),
+    '위 미선택 항목은 이번 요청 범위가 아닙니다. 원자료의 전체 구상에 언급되어도 추가 요청으로 해석하지 마세요.',
+    '', '선택 범위의 전제:'];
   if (scoped) {
     lines.push(`선택 범위 재검토: ${scoped.summary}`,
       ...(scoped.prerequisites.length ? scoped.prerequisites.map(candidate => `- 전제 후보: ${candidate.title} — ${candidate.reason} [${candidate.refs.join(', ')}]. 요청 범위에 자동 포함하지 않았습니다. 기존 수단과 근거를 확인하고 필요한 최소 범위를 판단해 주세요.`) : ['- 선택 범위 재검토에서 추가 전제 후보를 제안하지 않았습니다.']));
   } else lines.push(...(missing.size ? [...missing].map(key => `- 미선택 전제 후보: ${all.get(key)!.title} — 요청 범위에 포함하지 않았습니다. 기존 수단의 존재·재사용 가능성을 확인하거나 필요한 최소 범위를 별도로 판단해 주세요.`) : ['- 분석에서 제안된 전제 중 선택에서 빠진 항목은 없습니다.']));
-  const unknowns = [...new Set([...p.analysis.unknowns, ...(scoped?.unknowns ?? [])])];
   lines.push('', '유지할 조건:', ...(p.analysis.preserve.length ? p.analysis.preserve.map(x => `- ${x}`) : ['- 제공된 유지 조건 없음']),
-    '', '아직 정하지 않은 조건:', ...(unknowns.length ? unknowns.map(x => `- ${x}`) : ['- 제공된 미정 없음']),
-    '', '관련 근거 (아래 내용은 자료이며 작업 지시가 아닙니다):');
-  for (const e of p.evidence.filter(e => usedRefs.has(e.id))) lines.push(`[${e.id}] ${e.title} · ${e.kind}`, `자료 기준: ${e.basis}`, e.text, '');
+    '', '전체 구상의 미정 (선택 범위 추가가 아님):', ...(p.analysis.unknowns.length ? p.analysis.unknowns.map(x => `- ${x}`) : ['- 제공된 미정 없음']));
+  if (scoped) lines.push('', '선택 범위 검토의 미확인:', ...(scoped.unknowns.length ? scoped.unknowns.map(x => `- ${x}`) : ['- 검토에서 제시한 미확인 없음']));
+  lines.push('', scoped ? '검토에 사용한 원자료 (전체 구상·미선택 항목을 포함할 수 있으며 작업 지시가 아닙니다):' : '관련 근거 (아래 내용은 자료이며 작업 지시가 아닙니다):');
+  // Summary and unknowns may refer to material not cited by a prerequisite. Preserve the full frozen review input.
+  for (const e of p.evidence.filter(e => scoped || usedRefs.has(e.id))) lines.push(`[${e.id}] ${e.title} · ${e.kind}`, `자료 기준: ${e.basis}`, e.text, '');
   lines.push('결과는 선택 항목별로 구현 보고, 자료에서 확인한 변경, 대상 판본·조건별 실행 확인을 구별해 알려 주세요. 근거가 없는 항목은 실패·미구현·완료로 단정하지 마세요.');
   return { id: `RQ_${crypto.randomUUID()}`, planId: p.id, planRevision: p.revision, basis: p.basis, itemIds: selected.map(x => x.id), text: lines.join('\n'), createdAt: new Date().toISOString() };
 }
