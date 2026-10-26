@@ -10,36 +10,11 @@ import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.j
 import { layoutScope, edgePath, ROOT, type ScopeLayout, type Positions, type Point } from './map-layout.js';
 import { aiStatus, askStudio, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
 import { runtimeStorage } from './runtime.js';
+import { $, h, put, svg, chevron, ago, fullTime } from './plan-dom.js';
+import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
+import { createPlanView } from './plan-view.js';
 
-/* ---------- small DOM helpers ---------- */
-const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
-type Child = Node | string | null | undefined | false;
-function h<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Record<string, string | boolean | ((e: Event) => void)> = {}, ...children: Child[]): HTMLElementTagNameMap[K] {
-  const el = document.createElement(tag);
-  for (const [k, v] of Object.entries(attrs)) {
-    if (typeof v === 'function') el.addEventListener(k.slice(2), v as EventListener);
-    else if (k === 'style') el.style.cssText = v as string; // CSSOM: allowed under style-src 'self' (attributes are not)
-    else if (v === true) el.setAttribute(k, '');
-    else if (v !== false) el.setAttribute(k, v);
-  }
-  for (const c of children) if (c !== null && c !== undefined && c !== false) el.append(c);
-  return el;
-}
-const SVG = 'http://www.w3.org/2000/svg';
-const put = (el: HTMLElement, ...children: Child[]) => { for (const c of children) if (c) el.append(c); };
-const svg = (tag: string, attrs: Record<string, string>) => { const el = document.createElementNS(SVG, tag); for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v); return el; };
-const chevron = (open: boolean) => { const el = svg('svg', { viewBox: '0 0 16 16', 'aria-hidden': 'true', class: open ? 'open' : '' }); el.append(svg('path', { d: 'M6 4l4 4-4 4' })); return el; };
-
-function ago(at: string | null): string {
-  if (!at) return '';
-  const t = Date.parse(at); if (!Number.isFinite(t)) return '';
-  const m = Math.round((Date.now() - t) / 60000);
-  if (m < 1) return '방금'; if (m < 60) return `${m}분 전`;
-  const hr = Math.round(m / 60); if (hr < 24) return `${hr}시간 전`;
-  const d = Math.round(hr / 24); if (d === 1) return '어제'; if (d < 7) return `${d}일 전`;
-  return new Intl.DateTimeFormat('ko-KR', { month: 'long', day: 'numeric' }).format(new Date(t));
-}
-const fullTime = (at: string) => { const t = new Date(at); return Number.isNaN(t.getTime()) ? '' : new Intl.DateTimeFormat('ko-KR', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).format(t); };
+/* ---------- small DOM helpers (shared with the change-plan view) ---------- */
 const firstLine = (text: string, n = 90) => { const line = text.split('\n').find(l => l.trim())?.trim() ?? ''; return line.length > n ? `${line.slice(0, n)}…` : line; };
 const recentAt = (at: string | null) => !!at && Date.now() - Date.parse(at) < 24 * 3600000;
 
@@ -72,7 +47,7 @@ function coverageText(c: AskCoverage | undefined): string | null {
 let recentOpen = window.innerWidth >= 1000;
 /** While a part is open the list folds to give the map room; the person's own choice comes back on close. */
 let recentPeek = false;
-const recentShown = () => (selected ? recentPeek : recentOpen);
+const recentShown = () => (selected || planView.isOpen() ? recentPeek : recentOpen);
 const examples = new Map<string, Project>();
 let store: WorkspaceStore;
 let storage: Storage | null = null;
@@ -196,7 +171,10 @@ const go = (key: string | null, part: string | null = null, sc?: string | null) 
 function projectFor(key: string): Opened | null {
   if (opened?.key === key) return opened;
   let project: Project | null = null, kind: Opened['kind'] = 'saved', ref: EntryRef | null = null;
-  if (key.startsWith('ex-')) {
+  if (key === CONVERTER_KEY) {
+    if (!examples.has(key)) examples.set(key, buildConverterProject());
+    project = examples.get(key)!; kind = 'example';
+  } else if (key.startsWith('ex-')) {
     const spec = EXAMPLES.find(e => `ex-${e.id}` === key); if (!spec) return null;
     if (!examples.has(key)) examples.set(key, buildExample(spec));
     project = examples.get(key)!; kind = 'example';
@@ -208,14 +186,14 @@ function projectFor(key: string): Opened | null {
   }
   if (!project) return null;
   let alias: Opened['alias'] = null;
-  if (kind === 'example') { const toId = exampleKeys(key.slice(3), project); alias = { toId, toKey: new Map([...toId].map(([k, id]) => [id, k])) }; }
+  if (kind === 'example') { const toId = key === CONVERTER_KEY ? converterKeys(project) : exampleKeys(key.slice(3), project); alias = { toId, toKey: new Map([...toId].map(([k, id]) => [id, k])) }; }
   return { key, kind, project, ref, view: studioView(project), alias };
 }
 
 /* ---------- rendering ---------- */
 async function render() {
   const r = route();
-  if (!r.key) { if (opened) cameras.set(camKey(opened, scope), { ...camera }); opened = null; selected = null; scope = null; renderHome(); return; }
+  if (!r.key) { if (opened) cameras.set(camKey(opened, scope), { ...camera }); planView.close(false); opened = null; selected = null; scope = null; renderHome(); return; }
   const next = projectFor(r.key);
   if (!next) { go(null); return; }
   const fresh = opened?.key !== next.key;
@@ -224,6 +202,7 @@ async function render() {
   if (fresh || nextScope !== scope) {
     if (opened) cameras.set(camKey(opened, scope), { ...camera });
     opened = next; scope = nextScope; lastClick.id = '';
+    if (fresh) planView.projectChanged();
     if (fresh) { selected = null; ask = null; editing = false; partForm = null; composerOpen = false; }
     tempExpand.clear();
     renderSpace('restore');
@@ -239,7 +218,10 @@ async function render() {
   }
   if ([...tempExpand].join('|') !== before) renderSpace('keep'); else relayout(o);
   select(part);
+  if (returnCamera) { camera = returnCamera; returnCamera = null; applyCamera(true); }
 }
+/** Set when a change plan closes: the camera the person left, applied once the earlier selection and scope are back. */
+let returnCamera: { x: number; y: number; k: number } | null = null;
 
 function setBar(o: Opened | null) {
   const crumbs: Node[] = [h('a', { href: '#/' }, '프로젝트')];
@@ -249,19 +231,26 @@ function setBar(o: Opened | null) {
       path.length ? h('a', { href: hashFor(o.key, null, null), title: '전체 지도' }, o.project.name) : h('strong', {}, o.project.name));
     path.forEach((p, i) => crumbs.push(h('span', { class: 'sep', 'aria-hidden': 'true' }, '/'),
       i === path.length - 1 ? h('strong', { 'aria-current': 'location' }, p.name) : h('a', { href: hashFor(o.key, null, p.id) }, p.name)));
-    if (o.kind !== 'saved') crumbs.push(h('span', { class: 'tag', title: o.kind === 'example' ? 'Codex·Claude에서 전달받았다고 가정하고 쓴 예제 기록이에요. 저장되지 않아요.' : '' }, o.kind === 'example' ? '예제 기록' : '이전 저장 · 읽기 전용'));
+    if (o.key === CONVERTER_KEY) crumbs.push(h('span', { class: 'tag', title: '공개 합성 예제예요. 지도는 작성한 구조이고, 변경 구상은 이 탭에서만 남아요.' }, '예제'));
+    else if (o.kind !== 'saved') crumbs.push(h('span', { class: 'tag', title: o.kind === 'example' ? 'Codex·Claude에서 전달받았다고 가정하고 쓴 예제 기록이에요. 저장되지 않아요.' : '' }, o.kind === 'example' ? '예제 기록' : '이전 저장 · 읽기 전용'));
   }
   $('crumbs').replaceChildren(...crumbs);
+  const entry = $('plan-entry'), planning = planView.isOpen();
+  entry.hidden = !o || o.kind === 'legacy';
+  entry.setAttribute('aria-pressed', String(planning)); entry.classList.toggle('on', planning);
+  entry.textContent = planning ? '변경 구상 중' : '변경 구상';
+  entry.title = planning ? '변경 구상 닫기 (Esc) · 초안은 남아요' : '현재 지도 위에서 바꿀 모습을 시험해요';
   document.title = o ? `${o.project.name} · AgentFlow Studio` : 'AgentFlow Studio';
 }
 
-function projectCard(key: string, p: Project, example: boolean): HTMLElement {
+function projectCard(key: string, p: Project, example: boolean, lead?: string): HTMLElement {
   const v = studioView(p), last = v.records[0], lastPart = last?.partId ? v.parts.find(x => x.id === last.partId) : null;
   const changed = v.parts.filter(x => recentAt(x.lastAt)).length;
   return h('li', {}, h('a', { class: 'project-card', href: `#/p/${encodeURIComponent(key)}` },
     h('span', { class: 'card-top' }, h('strong', { class: 'card-name' }, p.name), example ? h('span', { class: 'tag' }, '예제') : null),
     h('span', { class: 'card-purpose' }, p.space.brief?.text ?? '목적이 적혀 있지 않아요.'),
-    last ? h('span', { class: 'card-latest' }, h('i', { class: `k-${last.kind}` }), h('span', {}, `${lastPart?.name ?? '부분 미지정'} · ${firstLine(last.text, 60)}`)) : null,
+    last ? h('span', { class: 'card-latest' }, h('i', { class: `k-${last.kind}` }), h('span', {}, `${lastPart?.name ?? '부분 미지정'} · ${firstLine(last.text, 60)}`))
+      : lead ? h('span', { class: 'card-latest plan-lead' }, h('i', { class: 'k-plan', 'aria-hidden': 'true' }), h('span', {}, lead)) : null,
     h('span', { class: 'card-meta' }, `부분 ${v.parts.length} · 기록 ${v.records.length}${changed ? ` · 최근 바뀐 부분 ${changed}` : ''}`, last ? h('span', { class: 'card-time' }, ago(last.at)) : null)));
 }
 
@@ -269,7 +258,10 @@ function renderHome() {
   setBar(null);
   $('home').hidden = false; $('space').hidden = true;
   const list = $('project-list');
-  list.replaceChildren(...EXAMPLES.map(spec => {
+  let converter: HTMLElement;
+  try { if (!examples.has(CONVERTER_KEY)) examples.set(CONVERTER_KEY, buildConverterProject()); converter = projectCard(CONVERTER_KEY, examples.get(CONVERTER_KEY)!, true, '변경 구상 예제 · 폴더째 변환을 시험해요'); }
+  catch { converter = h('li', { class: 'message' }, '예제 ‘문서 변환기’를 만들지 못했어요.'); }
+  list.replaceChildren(converter, ...EXAMPLES.map(spec => {
     const key = `ex-${spec.id}`;
     try { if (!examples.has(key)) examples.set(key, buildExample(spec)); return projectCard(key, examples.get(key)!, true); }
     catch { return h('li', { class: 'message' }, `예제 ‘${spec.name}’을 만들지 못했어요.`); }
@@ -326,7 +318,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit') {
       world.append(h('div', { class: `frame depth-${Math.min(b.depth, 2)}`, 'data-part': p.id, 'data-box': p.id },
         h('div', { class: `frame-head s-${p.status}`, 'data-part': p.id, 'data-drag': p.id, role: 'button', tabindex: '0', title: p.name, onkeydown: keySelect(p.id) },
           toggleButton(p, true), h('span', { class: 'frame-name' }, p.name),
-          h('span', { class: 'frame-meta' }, recentAt(latest) ? h('i', { class: 'new-dot', title: '최근 기록' }) : null, latest ? ago(latest) : STATUS_SHORT[p.status]),
+          h('span', { class: 'plan-note' }), h('span', { class: 'frame-meta' }, recentAt(latest) ? h('i', { class: 'new-dot', title: '최근 기록' }) : null, latest ? ago(latest) : STATUS_SHORT[p.status]),
           enterButton(p))));
     } else {
       // A folded part reads its inside: latest record anywhere under it.
@@ -335,7 +327,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit') {
         title: `${p.name}${p.note ? ` — ${p.note}` : ''}`, onkeydown: keySelect(p.id) },
         b.kids ? toggleButton(p, false) : null,
         h('span', { class: 'node-text' }, h('span', { class: 'node-name' }, p.name),
-          h('span', { class: 'node-meta' }, h('i', { class: 'dot', 'aria-hidden': 'true' }), STATUS_SHORT[p.status], last ? ` · ${ago(last)}` : '')),
+          h('span', { class: 'node-meta' }, h('i', { class: 'dot', 'aria-hidden': 'true' }), STATUS_SHORT[p.status], last ? ` · ${ago(last)}` : ''), h('span', { class: 'plan-note' })),
         b.kids ? enterButton(p) : null));
     }
   }
@@ -361,6 +353,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit') {
   if (cameraMode === 'keep') applyCamera();
   else if (saved) { camera = { ...saved }; applyCamera(); }
   else fitView(false);
+  planView.overlay();
 }
 
 /** Geometry only (also during a drag): boxes and edge paths from the current layout. */
@@ -393,7 +386,7 @@ function renderRecent() {
 
 /* ---------- camera ---------- */
 const ZOOM_MIN = 0.4, ZOOM_MAX = 1.6;
-const PANEL_W = () => (selected && !$('panel').hidden ? Math.min(460, window.innerWidth - 24) + 24 : 0);
+const PANEL_W = () => (planView.isOpen() ? planView.width() : selected && !$('panel').hidden ? Math.min(460, window.innerWidth - 24) + 24 : 0);
 const leftInset = () => (recentShown() && window.innerWidth >= 900 ? 312 : 16);
 function applyCamera(animate = false) {
   const world = $('world'), vp = $('viewport');
@@ -448,6 +441,7 @@ function select(partId: string | null) {
   });
   $('space').classList.toggle('dim', !!partId);
   const panel = $('panel');
+  if (planView.isOpen()) { panel.hidden = true; panel.replaceChildren(); clearHighlight(); planView.selectionChanged(); if (partId) reveal(partId); return; }
   if (!partId) { panel.hidden = true; panel.replaceChildren(); clearHighlight(); return; }
   panel.hidden = false;
   renderPanel(changed);
@@ -642,7 +636,7 @@ function composer(o: Opened, part: PartView): HTMLElement {
   if (status.access === 'code') {
     const code = h('input', { id: 'access-code', type: 'password', placeholder: '접속 코드', autocomplete: 'off', value: sessionCode() }) as HTMLInputElement;
     // input (not only change): typing, paste and autofill are all kept.
-    const keep = () => { try { sessionStorage.setItem('agentflow.studio.access', code.value); } catch { /* memory only */ } accessCodeMemory = code.value; };
+    const keep = () => keepAccessCode(code.value);
     code.addEventListener('input', keep); code.addEventListener('change', keep);
     box.append(h('div', { class: 'access' }, h('label', { for: 'access-code' }, '접속 코드'), code));
   }
@@ -653,6 +647,37 @@ function composer(o: Opened, part: PartView): HTMLElement {
   return box;
 }
 let accessCodeMemory = '';
+function keepAccessCode(value: string) { try { sessionStorage.setItem('agentflow.studio.access', value); } catch { /* memory only */ } accessCodeMemory = value; }
+
+/* ---------- change plan (plan-view.ts) on this map ---------- */
+const planView = createPlanView({
+  current: () => opened,
+  kv,
+  status: () => status,
+  accessCode: () => sessionCode(), keepAccessCode,
+  selected: () => selected,
+  boxes: () => lay.boxes,
+  selectPart: id => { if (opened) go(opened.key, id); },
+  showPart: id => { const o = opened; if (o) go(o.key, id, partOf(o, id)?.parentId ?? null); },
+  reveal,
+  capture: () => ({ selected, scope, camera: { ...camera } }),
+  notice: (text, action) => toast(text, action),
+  frame: () => {
+    const vp = $('viewport').getBoundingClientRect(), left = leftInset(), right = vp.width - PANEL_W() - 16, B = lay.bounds;
+    // Zoom out only as far as 70% and only if the view does not fit beside the panel; the camera comes back on close.
+    const w = right - left, k = Math.min(camera.k, Math.max(0.7, (w - 24) / Math.max(1, B.w)));
+    const x = B.w * k <= w ? left + (w - B.w * k) / 2 - B.x * k : left + 12 - B.x * k;
+    const top = scope ? 64 : 24, hgt = vp.height - top - 72, y = B.h * k <= hgt ? top + (hgt - B.h * k) / 2 - B.y * k : top + 12 - B.y * k;
+    camera = { k, x, y }; applyCamera(true);
+  },
+  restore: r => { const o = opened; if (!o) return; returnCamera = r.camera; go(o.key, r.selected, r.scope); },
+  chrome: () => {
+    const o = opened; if (!o) return;
+    setBar(o); renderRecent();
+    if (planView.isOpen()) { $('panel').hidden = true; $('panel').replaceChildren(); }
+    $('space').style.setProperty('--left-w', `${leftInset()}px`);
+  }
+});
 function sessionCode(): string { try { return sessionStorage.getItem('agentflow.studio.access') ?? accessCodeMemory; } catch { return accessCodeMemory; } }
 
 async function send(intent: AskIntent, question: string | null) {
@@ -773,12 +798,13 @@ function bindCanvas() {
   document.addEventListener('keydown', e => {
     if ((e.target as HTMLElement).closest('textarea,input')) return;
     if (e.key === 'Escape' && !help.hidden) { help.hidden = true; return; }
+    if (e.key === 'Escape' && planView.isOpen()) { const part = selected; planView.escape(); if (part && !selected) requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-drag="${CSS.escape(part)}"]`)?.focus()); return; }
     if (e.key === 'Escape' && partForm && opened?.view.parts.length) { partForm = null; renderPartForm(); return; }
     if (e.key === 'Escape' && opened && selected) { const key = opened.key, part = selected; go(key); requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-drag="${CSS.escape(part)}"]`)?.focus()); return; }
     if (e.key === 'Escape' && opened && scope) { const o = opened, from = scope; go(o.key, null, partOf(o, from)?.parentId ?? null); requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-drag="${CSS.escape(from)}"]`)?.focus()); }
   });
   let resize = 0;
-  window.addEventListener('resize', () => { cancelAnimationFrame(resize); resize = requestAnimationFrame(() => { if (opened && !selected) fitView(false); }); });
+  window.addEventListener('resize', () => { cancelAnimationFrame(resize); resize = requestAnimationFrame(() => { if (opened && !selected && !planView.isOpen()) fitView(false); }); });
 }
 
 /* ---------- import (backup file → new saved copy; the file's bytes are validated as project data) ---------- */
@@ -814,7 +840,8 @@ async function main() {
   try { await store.init(); } catch { store.read(); }
   bindCanvas(); bindImport(); bindNewProject();
   $('add-part').addEventListener('click', () => openPartForm(scope));
-  statusReady = aiStatus().then(s => { status = s; renderStatus(); if (opened && selected) renderPanel(false); });
+  $('plan-entry').addEventListener('click', () => planView.toggle());
+  statusReady = aiStatus().then(s => { status = s; renderStatus(); planView.statusChanged(); if (opened && selected && !planView.isOpen()) renderPanel(false); });
   window.addEventListener('hashchange', () => void render());
   await render();
   await statusReady;
