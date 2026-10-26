@@ -42,9 +42,17 @@ test('authored A/B presentation keeps actual target identity, synthetic source s
         assert.ok(item.partIds.includes(p.partId));
         assert.ok(p.current.text.length <= 48 && p.wanted.text.length <= 48);
         assert.ok(!shown.some(other => other.partId === parts.find(part => part.id === p.partId)?.parentId), 'do not duplicate a target into its parent');
-        if (p.current.source === 'evidence') assert.match(input.evidence.find(e => e.id === p.current.refs[0]).basis, new RegExp(`합성.*조건 ${condition}`));
+        if (p.current.source === 'evidence') {
+          const basis = input.evidence.find(e => e.id === p.current.refs[0]).basis;
+          assert.match(basis, /합성.*main@S0/);
+          if (p.current.refs.includes('P03')) assert.match(basis, new RegExp(`조건 ${condition}`));
+        }
       }
     }
+    const continuation = reply.items.find(i => i.id === 'continue').presentation[0];
+    assert.deepEqual(continuation.current, { text: '입력 문서 하나', source: 'evidence', refs: ['P01'] });
+    assert.doesNotMatch(continuation.current.text, /본문|표|보존/); // Preserve content is not replaced by failure independence.
+    assert.match(continuation.wanted.text, /실패해도.*나머지 파일.*계속/);
     if (condition === 'B') assert.equal(reply.items.find(i => i.id === 'outcomes').presentation[0].origin, 'suggestion');
   }
 });
