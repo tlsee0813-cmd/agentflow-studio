@@ -1,3 +1,3 @@
 AgentFlow Studio auxiliary static build
-source=93cb8d355c9204a469fa9b38127ff68f0e3d5d1a
+source=8a8cf48548a5ddcbe0a682ac8bd12ec8b3063529
 primary=https://agentflow-studio.tlsee0813.workers.dev/
