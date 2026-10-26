@@ -13,6 +13,7 @@
     <header class="bar">
       <a class="brand" href="#/" aria-label="AgentFlow Studio 프로젝트 목록"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="7" height="5" rx="1.6"/><rect x="14.5" y="4" width="7" height="5" rx="1.6"/><rect x="8.5" y="15" width="7" height="5" rx="1.6"/><path d="M6 9v2.5h12V9M12 11.5V15"/></svg><span>AgentFlow Studio</span></a>
       <nav id="crumbs" class="crumbs" aria-label="위치"><a href="#/">프로젝트</a></nav>
+      <button type="button" id="plan-entry" class="plan-entry" aria-pressed="false" hidden>변경 구상</button>
       <span class="grow"></span>
       <span id="ai-pill" class="ai-pill" data-state="checking"><i aria-hidden="true"></i><span id="ai-text">AI 확인 중</span></span>
     </header>
@@ -26,7 +27,7 @@
         <h2 id="saved-title" class="home-sub" hidden>이 브라우저에 저장된 프로젝트</h2>
         <ul id="saved-list" class="project-list"></ul>
         <div class="home-foot">
-          <p>예제는 Codex·Claude에서 전달받았다고 가정하고 쓴 기록이에요. 실제 기록 연결기는 아직 설치되어 있지 않아요.</p>
+          <p>예제 기록은 Codex·Claude에서 전달받았다고 가정하고 쓴 기록이에요. 문서 변환기는 변경 구상을 시험하는 공개 합성 예제예요. 실제 기록 연결기는 아직 없어요.</p>
           <button type="button" id="import" class="link-button">백업 파일 가져오기</button><input id="import-file" type="file" accept="application/json,.json" hidden>
         </div>
       </div>
@@ -53,6 +54,10 @@
       <p id="space-empty" class="space-empty" hidden></p>
       <div id="part-form" class="part-form" hidden></div>
       <aside id="panel" class="panel" aria-labelledby="panel-title" hidden></aside>
+      <div id="plan-mode" class="plan-mode" role="group" aria-label="지도 보기" hidden></div>
+      <aside id="plan-panel" class="plan-panel" aria-labelledby="plan-title" hidden></aside>
+      <div id="plan-sheet" class="plan-sheet" role="dialog" aria-labelledby="sheet-title" hidden></div>
+      <input id="plan-import-file" type="file" accept="application/json,.json" hidden>
     </main>
   </div>
 </body>
