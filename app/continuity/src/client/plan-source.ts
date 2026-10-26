@@ -7,7 +7,7 @@ import { parseProject } from '../shared/validation.js';
 import { partPath, RECORD_LABEL, clip, type StudioView, type RecordKind } from '../shared/studio.js';
 import { CONVERTER_PARTS, CONVERTER_RELATIONS, CONVERTER_INTENT, converterEvidence } from '../shared/change-plan-example.js';
 import { parsePlanAnalysis, type ChangePlan, type Evidence, type PlanAnalysis } from '../shared/change-plan.js';
-import type { ScopeAsk } from './plan-request.js';
+import { SCOPE_BYTES, type ScopeAsk } from '../shared/scope-api.js';
 import { PLAN_BYTES, type PlanAsk } from '../shared/plan-api.js';
 import { fullTime } from './plan-dom.js';
 
@@ -121,13 +121,13 @@ export function scopeInput(o: { key: string; project: Project; view: StudioView;
   if (o.key === CONVERTER_KEY && o.alias) for (const [k, id] of o.alias.toId) toAlias.set(id, k);
   else o.view.parts.forEach((p, i) => toAlias.set(p.id, `P${String(i + 1).padStart(2, '0')}`));
   const chosen = plan.analysis.items.filter(i => plan.selected.includes(i.id));
-  const ask = { schemaVersion: 'studio.scope.1', intent: plan.intent,
+  const ask: ScopeAsk = { schemaVersion: 'studio.scope.1', intent: plan.intent,
     parts: o.view.parts.map(p => ({ id: toAlias.get(p.id)!, name: clip(p.name, 200), note: clip(p.note, 3000), parentId: p.parentId ? toAlias.get(p.parentId)! : null })),
     evidence: plan.evidence,
     // A part removed from the map since the analysis has no alias now; the item keeps its words and sources.
     selected: chosen.map(i => ({ id: i.id, title: i.title, description: i.description, partIds: i.partIds.map(id => toAlias.get(id)).filter((x): x is string => !!x), refs: i.refs })),
-    excluded: plan.analysis.items.filter(i => !plan.selected.includes(i.id)).map(i => i.title) } as unknown as ScopeAsk;
-  if (bytes(ask) > PLAN_BYTES) return { ask, problem: 'TOO_LARGE' };
+    excluded: [...new Set(plan.analysis.items.filter(i => !plan.selected.includes(i.id)).map(i => i.title))] };
+  if (bytes(ask) > SCOPE_BYTES) return { ask, problem: 'TOO_LARGE' };
   if (secretLike(plan.intent) || chosen.some(i => secretLike(i.title) || secretLike(i.description))) return { ask, problem: { secret: '변경안 항목' } };
   const leak = plan.evidence.find(e => secretLike(e.text) || secretLike(e.title));
   return { ask, problem: leak ? { secret: leak.title } : null };

@@ -2,11 +2,10 @@
  * X-AgentFlow-Request header, the person's access code when the server asks for one, and an AbortController the panel can
  * cancel. No key in the browser. */
 import type { PlanAsk } from '../shared/plan-api.js';
-import type { validateScopeAsk } from '../shared/scope-api.js';
+import type { ScopeAsk } from '../shared/scope-api.js';
 import { RUNTIME } from './runtime.js';
 import { AskError } from './studio-api.js';
 
-export type ScopeAsk = ReturnType<typeof validateScopeAsk>;
 const url = (path: string) => `${RUNTIME.apiBase ?? ''}${path}`;
 
 async function post(path: string, body: unknown, signal: AbortSignal, accessCode: string): Promise<{ model: string; reply: unknown }> {
