@@ -118,6 +118,14 @@ function validatedPlan(value: unknown): ChangePlan {
   check(Number.isSafeInteger(value.revision) && (value.revision as number) >= 1);
   text(value.basis, 2000); text(value.intent); date(value.createdAt); evidenceList(value.evidence);
   const analysis = parsePlanAnalysis(value.analysis, analysisParts(value.analysis), value.evidence.map(x => x.id));
+  const sources = new Map(value.evidence.map(e => [e.id, e]));
+  const normal = (text: string) => text.replace(/\s+/g, ' ').trim();
+  for (const item of analysis.items) for (const view of item.presentation ?? []) {
+    if (view.origin === 'intent') check(view.wanted.refs.some(ref => sources.get(ref)!.kind === 'user'));
+    if (view.current.source === 'evidence') check(view.current.refs.some(ref => normal(sources.get(ref)!.text).includes(normal(view.current.text))));
+    // A saved plan holds evidence but no part-note snapshot: only validatePlanReply with the original ask can check that
+    // quote. Neither an exact excerpt nor valid refs establishes factual accuracy or current product behaviour.
+  }
   ids(value.selected, MAX_ITEMS, new Set(analysis.items.map(x => x.id)));
   return copy({ ...value, analysis } as unknown as ChangePlan);
 }
