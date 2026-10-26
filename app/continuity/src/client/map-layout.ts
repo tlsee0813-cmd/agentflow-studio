@@ -56,6 +56,14 @@ export function lead(note: string): string {
   const t = note.replace(/\s+/g, ' ').trim(), m = /^(.+?[.!?。])(?=\s|$)/.exec(t);
   return m ? m[1]! : t;
 }
+/** The note's first sentence as the map shows it: empty when a sibling says the very same sentence (a shared label such as
+ * "a real source file" read once per sibling is noise); the full note stays with the selection. */
+export function mapLead(v: StudioView, id: string): string {
+  const p = v.parts.find(x => x.id === id); if (!p) return '';
+  const own = lead(p.note); if (!own) return '';
+  const sibs = p.parentId ? v.parts.find(x => x.id === p.parentId)?.childIds ?? [] : v.roots;
+  return sibs.some(s => s !== id && lead(v.parts.find(x => x.id === s)?.note ?? '') === own) ? '' : own;
+}
 /** Long part names widen their card (never the short ones) so the name fits two lines: room beside the name is the card
  * minus its paddings, and with an inside also the fold toggle and the go-inside count. */
 export const NODE_MAX_W = 320;
@@ -164,7 +172,7 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
     if (need > room(w)) w = Math.max(w, Math.min(320, Math.ceil(need) + chrome));
     if (need > room(w) * 2) w = Math.max(w, Math.min(380, Math.ceil(need / 2) + chrome + 12));
     // The note runs under the whole head row; a region widens (up to 340px) rather than cut its sentence after two lines.
-    const note = lead(p.note), noteNeed = note ? measureText(note, 'note') * 1.15 + 6 : 0;
+    const note = mapLead(v, id), noteNeed = note ? measureText(note, 'note') * 1.15 + 6 : 0;
     if (noteNeed > (w - 44) * 2) w = Math.max(w, Math.min(340, Math.ceil(noteNeed / 2) + 44));
     const nl = need > room(w) ? 2 : 1, ll = lines(note, 'note', w - 44);
     return { w, head: 12 + nl * 22 + (ll ? 3 + ll * 17 : 0) + 14 };
@@ -191,7 +199,7 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
       const w = nodeWidth(p.name, kids, measureText), nl = lines(p.name, 'node', w - chrome);
       m = { w, h: 14 + (nl + extra) * 17, ox: 0, oy: 0, head: 0, face: 'item' };
     } else if (depth === 0) {
-      const note = lead(p.note), need = measureText(p.name, 'head') * 1.1 + 6;
+      const note = mapLead(v, id), need = measureText(p.name, 'head') * 1.1 + 6;
       let w = note ? UNIT_W : NODE_W;
       if (need > (w - chrome) * 2) w = Math.min(NODE_MAX_W + 40, Math.ceil(need / 2) + chrome);
       const nl = need > w - chrome ? 2 : 1, ll = lines(note, 'note', w - chrome);

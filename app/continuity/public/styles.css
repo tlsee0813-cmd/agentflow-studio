@@ -136,7 +136,8 @@ button:disabled { opacity: .5; cursor: default; }
 #arrow path { fill: var(--edge); } #arrow-on path, #dot-on circle { fill: var(--accent); } #arrow-near path { fill: var(--text-3); }
 .space.dim .edge:not(.on):not(.near) .edge-line { opacity: .28; }
 
-.map-title { position: absolute; pointer-events: none; }
+.map-title { position: absolute; pointer-events: none; transition: opacity .12s; }
+.map-title.pinned { opacity: 0; }
 .map-name { margin: 0; word-break: keep-all; font-size: 22px; line-height: 1.25; font-weight: 700; letter-spacing: -.02em; color: var(--text); overflow-wrap: anywhere; }
 .map-purpose { margin: 6px 0 0; word-break: keep-all; font-size: 14px; line-height: 1.6; color: var(--text-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
@@ -414,26 +415,76 @@ button:disabled { opacity: .5; cursor: default; }
 .form-msg { margin: 0; font-size: 12px; color: var(--text-3); min-height: 0; }
 
 /* ---------- change preview on the same map ----------
-   What the person changes: the change colour and a small tab on the part's top edge; impact candidates: a dashed outline and
-   their reason in place of the status line; parts outside the change stay readable, only quieter. */
-.plan-note { display: none; font-size: 11.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+   One mark per part, read by its words: '구상 · …' on a part a change targets (a bar on its left edge; stronger on the change
+   being compared), '영향 후보' with a dashed outline on a part only named as a candidate. Parts outside stay readable. */
+.plan-note { display: none; font-size: 11.5px; font-weight: 600; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .space.preview :is(.plan-direct, .plan-impact) .plan-note { display: block; }
 .space.preview .node:is(.plan-direct, .plan-impact) :is(.node-meta, .node-note),
-.space.preview .frame:is(.plan-direct, .plan-impact) > .frame-head .frame-note,
-.space.preview .frame:is(.plan-direct, .plan-impact) > .frame-head .frame-meta { display: none; }
-.space.preview .frame:is(.plan-direct, .plan-impact) > .frame-head .plan-note { margin-left: auto; flex: 1 1 auto; text-align: right; }
-.space.preview .frame:is(.plan-direct, .plan-impact) > .frame-head .frame-name { flex: none; max-width: 58%; }
-.node.plan-direct { border-color: var(--change); box-shadow: 0 0 0 3px rgba(165,90,11,.13), var(--shadow); }
-.frame.plan-direct { border-color: var(--change); }
+.space.preview .frame:is(.plan-direct, .plan-impact) > .frame-head :is(.frame-meta, .frame-note) { display: none; }
+.space.preview .frame:is(.plan-direct, .plan-impact) > .frame-head .plan-note { align-self: center; text-align: right; }
+.node.plan-direct, .frame.plan-direct { border-color: var(--change-line); box-shadow: inset 3px 0 0 var(--change); }
+.node.plan-focus, .frame.plan-focus { border-color: var(--change); box-shadow: inset 3px 0 0 var(--change), 0 0 0 3px rgba(165,90,11,.12); background: var(--surface); }
 .plan-direct .plan-note { color: var(--change); }
 .node.plan-impact, .frame.plan-impact { outline: 1.5px dashed var(--change-line); outline-offset: 3px; }
-.plan-impact .plan-note { color: var(--change); font-weight: 550; }
-.plan-badge { position: absolute; bottom: -9px; left: 10px; z-index: 2; max-width: calc(100% - 20px); height: 17px; padding: 0 7px; border-radius: 5px; background: var(--change); color: #fff; font-size: 10.5px; font-weight: 650; line-height: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
-/* on a group: its bottom edge, clear of the head row and its controls */
-.frame > .plan-badge { left: 14px; }
-.space.preview .node:not(.plan-direct):not(.plan-impact):not(.selected) { box-shadow: none; }
-.space.preview.focusing .node:not(.plan-direct):not(.plan-impact):not(.selected) { opacity: .7; }
-.space.preview.focusing .frame:not(.plan-direct):not(.plan-impact) > .frame-head { opacity: .75; }
+.plan-impact .plan-note { color: var(--text-2); }
+.space.preview.focusing .node:not(.plan-direct):not(.plan-impact):not(.selected) { opacity: .55; }
+
+/* the plan's strip: what is being tried, its changes, the conditions without a part, and the way to the whole plan */
+.plan-strip { position: absolute; top: 12px; left: 16px; right: calc(16px + var(--plan-w)); display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; padding: 8px 8px 8px 14px; background: var(--surface); border: 1px solid var(--change-line); border-radius: 12px; box-shadow: var(--shadow-sm); z-index: 3; }
+.ps-head { flex: 1 1 240px; min-width: 0; display: flex; align-items: baseline; gap: 10px; }
+.ps-kicker { flex: none; font-size: 12px; font-weight: 700; color: var(--change); white-space: nowrap; }
+.ps-kicker small { margin-left: 6px; font-size: 11.5px; font-weight: 500; color: var(--text-3); }
+.ps-intent { min-width: 0; padding: 0; border: 0; background: none; text-align: left; font-size: 13.5px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ps-intent:hover { color: var(--accent); }
+.ps-items { display: flex; flex-wrap: wrap; gap: 6px; }
+.ps-item { display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 11px 0 10px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--surface); font-size: 12.5px; font-weight: 600; color: var(--text-2); white-space: nowrap; }
+.ps-item:hover { border-color: var(--change-line); color: var(--text); }
+.ps-item[aria-pressed="true"] { border-color: var(--change); background: var(--change-soft); color: #6d3a06; }
+.ps-hand { width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid var(--text-4); }
+.ps-hand.on { background: var(--accent); border-color: var(--accent); }
+.ps-conds { position: relative; }
+.ps-cond-btn { height: 30px; padding: 0 8px; border: 0; border-radius: 8px; background: none; font-size: 12.5px; font-weight: 600; color: var(--text-2); white-space: nowrap; }
+.ps-cond-btn:hover, .ps-cond-btn[aria-expanded="true"] { background: var(--tint); color: var(--text); }
+.ps-pop { position: absolute; top: 38px; right: 0; width: 340px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-lg); z-index: 5; }
+.ps-pop h3 { margin: 0 0 4px; font-size: 12px; font-weight: 650; color: var(--text-3); }
+.ps-pop section + section { margin-top: 10px; }
+.ps-pop ul { margin: 0; padding-left: 16px; font-size: 13px; line-height: 1.55; } .ps-pop .fine { margin-top: 10px; }
+.ps-more { height: 30px; padding: 0 11px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--surface); font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.ps-more[aria-pressed="true"] { background: var(--tint); }
+.ps-close { flex: none; }
+
+/* the comparison: 지금 / 구상 / 살펴볼 것 in one column of labels, so the roles read by word and by alignment */
+.lens.compare { width: min(380px, calc(100% - 32px)); border-color: var(--change-line); }
+.cmp-head .lens-path span { color: var(--change); font-weight: 600; }
+.cmp-head { padding-right: 132px; }
+.cmp-step { width: 26px; height: 26px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--text-2); font-size: 15px; line-height: 1; }
+.cmp-step:hover { border-color: var(--line-strong); color: var(--text); }
+.cmp-count { align-self: center; padding: 0 4px; font-size: 12px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+.cmp-body { display: flex; flex-direction: column; }
+.cmp-row { display: grid; grid-template-columns: 54px minmax(0, 1fr); column-gap: 10px; padding: 7px 0; }
+.cmp-label { font-size: 11.5px; font-weight: 700; line-height: 21px; letter-spacing: .01em; color: var(--text-3); }
+.cmp-row.want .cmp-label { color: var(--change); }
+.cmp-row.impact .cmp-label { color: var(--text-2); }
+.cmp-row.want .cmp-val { padding-left: 10px; border-left: 2px solid var(--change); }
+.cmp-row.impact .cmp-val { padding-left: 10px; border-left: 2px dashed var(--change-line); }
+.cmp-row.now .cmp-val { padding-left: 10px; border-left: 2px solid var(--line); }
+.cmp-text { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--text); word-break: keep-all; overflow-wrap: anywhere; }
+.cmp-title { margin: 0 0 2px; } .cmp-title .link-button { font-size: 13.5px; }
+.cmp-src { margin: 2px 0 0; font-size: 11.5px; color: var(--text-4); }
+.cmp-none { margin: 0; font-size: 13px; color: var(--text-4); }
+.clamp3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.cmp-target, .cmp-near { margin-top: 6px; padding-top: 10px; border-top: 1px solid var(--hair); }
+.cmp-target h3, .cmp-near h3 { margin: 0 0 2px; font-size: 13.5px; font-weight: 650; display: flex; align-items: baseline; gap: 8px; }
+.cmp-target h3 .link-button { font-size: 13.5px; color: var(--text); } .cmp-target h3 .link-button:hover { color: var(--accent); }
+.cmp-target h3 small, .cmp-near h3 small { font-size: 11.5px; font-weight: 500; color: var(--text-4); }
+.cmp-near p { margin: 6px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--text-2); display: flex; flex-direction: column; }
+.cmp-near .link-button { align-self: flex-start; font-size: 12.5px; }
+.cmp-hand { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; color: var(--text-2); cursor: pointer; }
+.cmp-hand input { width: 15px; height: 15px; margin: 0; accent-color: var(--accent); }
+.lens.compare .lens-foot { justify-content: space-between; }
+.lens.compare.docked .cmp-body { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(250px, 1fr); }
+.lens.compare.docked .cmp-body > .cmp-row.want { align-self: start; }
+.lens.compare.docked .cmp-body > :is(.cmp-target, .cmp-near) { margin-top: 0; padding-top: 0; border-top: 0; padding-left: 20px; border-left: 1px solid var(--hair); }
 
 /* plan inspector: the change list leads; writing and sources follow */
 .pp-head { padding-right: 52px; }
@@ -561,3 +612,13 @@ button:disabled { opacity: .5; cursor: default; }
   .home-foot { flex-direction: column; align-items: flex-start; }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* A reading surface with no clear place beside its part docks along the bottom of the map: one row of columns. */
+.lens.docked { border-radius: 14px; }
+.lens.docked .lens-head { padding-bottom: 6px; }
+.lens.docked .lens-body { display: grid; grid-template-columns: minmax(260px, 1.25fr) repeat(auto-fit, minmax(220px, 1fr)); column-gap: 22px; align-items: start; }
+.lens.docked .lens-body > :is(.lens-ports, .lens-inside) { margin-top: 0; padding-top: 0; border-top: 0; padding-left: 20px; border-left: 1px solid var(--hair); }
+/* The scope's name when its title on the map is out of view. */
+.scope-sticky { position: absolute; left: 16px; max-width: min(560px, calc(100% - 32px)); display: flex; align-items: baseline; gap: 10px; padding: 6px 12px; background: rgba(245,246,248,.94); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow-sm); pointer-events: none; z-index: 2; min-width: 0; }
+.scope-sticky strong { flex: none; font-size: 14px; font-weight: 700; letter-spacing: -.01em; }
+.scope-sticky span { min-width: 0; font-size: 12.5px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

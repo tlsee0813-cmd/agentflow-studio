@@ -7,8 +7,8 @@ import { parseProject } from '../shared/validation.js';
 import { editArea, addArea, addChildArea, createProject, rename } from '../shared/domain.js';
 import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
-import { layoutScope, edgePath, lead, isListGroup, ROOT, HEAD, type Box, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
-import { placeLens, follow, fixedPlace, type Rect, type LensPlace } from './lens.js';
+import { layoutScope, edgePath, lead, mapLead, isListGroup, ROOT, HEAD, type Box, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
+import { placeLens, follow, dockPlace, type Rect, type LensPlace } from './lens.js';
 import { aiStatus, askStudio, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
 import { runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth } from './plan-dom.js';
@@ -412,7 +412,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit') {
     }
     const p = partOf(o, b.id)!, of = owner(p);
     if (b.kind === 'frame') {
-      const latest = subtreeRecords(view, p.id)[0]?.at ?? null, region = b.depth === 0, note = region ? lead(p.note) : '';
+      const latest = subtreeRecords(view, p.id)[0]?.at ?? null, region = b.depth === 0, note = region ? mapLead(view, p.id) : '';
       world.append(h('div', { class: `frame ${region ? 'region' : 'group'} depth-${Math.min(b.depth, 2)}${b.depth % 2 ? ' tint' : ''}${b.list ? ' list' : ''}`, 'data-part': p.id, 'data-box': p.id },
         h('div', { class: `frame-head s-${p.status}${b.head > HEAD ? ' tall' : ''}`, style: `height:${b.head}px`, 'data-part': p.id, 'data-drag': p.id, role: 'button', tabindex: '0', title: of ? `${of} › ${p.name}` : p.name, onkeydown: keySelect(p.id) },
           toggleButton(p, true),
@@ -422,7 +422,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit') {
     } else {
       // A folded part reads its inside: latest record anywhere under it.
       const last = b.kids ? subtreeRecords(view, p.id)[0]?.at ?? null : p.lastAt, meta = metaLine(p, last), face = b.face ?? 'row';
-      const note = face === 'unit' ? lead(p.note) : '', box = lay.boxes.get(b.container), onTint = box?.kind === 'frame' && box.depth % 2 === 1;
+      const note = face === 'unit' ? mapLead(view, p.id) : '', box = lay.boxes.get(b.container), onTint = box?.kind === 'frame' && box.depth % 2 === 1;
       world.append(h('div', { class: `node ${face}${onTint ? ' on-tint' : ''} s-${p.status}${recentAt(last) ? ' fresh' : ''}${b.kids ? ' has-kids' : ''}${meta || of ? '' : ' bare'}`, 'data-part': p.id, 'data-box': p.id, 'data-drag': p.id, role: 'button', tabindex: '0',
         title: `${of ? `${of} › ` : ''}${p.name}`, onkeydown: keySelect(p.id) },
         b.kids ? toggleButton(p, false) : null,
@@ -439,6 +439,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit') {
   world.append(title);
   title.style.width = `${titleRect().w}px`;
   titleH = view.parts.length ? title.offsetHeight : 0; title.hidden = !titleH;
+  $('scope-sticky').replaceChildren(h('strong', {}, sp ? sp.name : o.project.name), purpose ? h('span', {}, purpose) : '');
   lay.bounds = { ...core }; withTitle();
   // Selected lines move to a layer above the group surfaces (below the parts), so a line that crosses a group is not read as
   // ending at it.
@@ -499,7 +500,7 @@ function renderRecent() {
 /* ---------- camera ---------- */
 const ZOOM_MIN = 0.4, ZOOM_MAX = 1.6;
 /** The right dock is taken only by the change plan or an open reading sheet; the lens floats over the map and takes no room. */
-const PANEL_W = () => (planView.isOpen() || (selected && sheetOpen) ? inspW() : 0);
+const PANEL_W = () => (planView.isOpen() ? planView.width() : selected && sheetOpen ? inspW() : 0);
 const leftInset = () => 16;
 /** Map tools sit at the bottom left; the map keeps clear of them only below this line. */
 const BOTTOM = 64;
@@ -511,6 +512,7 @@ function applyCamera(animate = false) {
   vp.style.backgroundSize = `${28 * camera.k}px ${28 * camera.k}px`;
   $('zoom-level').textContent = `${Math.round(camera.k * 100)}%`;
   positionLens(animate);
+  updateSticky();
 }
 /** Whole view in the free area. Opening never shrinks below 85%; only the explicit 전체 보기 button may go further. */
 function fitView(explicit: boolean, animate = false) {
@@ -530,8 +532,8 @@ function zoomAt(k: number, cx: number, cy: number, animate = false) {
 }
 /** Smallest pan that brings a world rectangle into the free map area (left of the inspector, above the tools); never a zoom.
  * Larger than the area: its top-left corner comes in. */
-function revealRect(B: { x: number; y: number; w: number; h: number }, keepRight = 0) {
-  const vp = $('viewport').getBoundingClientRect(), left = leftInset() + 16, right = vp.width - PANEL_W() - 24 - keepRight, top = 20, bottom = vp.height - BOTTOM - 12;
+function revealRect(B: { x: number; y: number; w: number; h: number }, keepRight = 0, keepBottom = 0) {
+  const vp = $('viewport').getBoundingClientRect(), left = leftInset() + 16, right = vp.width - PANEL_W() - 24 - keepRight, top = topInset() + 4, bottom = vp.height - BOTTOM - 12 - keepBottom;
   const sx = camera.x + B.x * camera.k, sy = camera.y + B.y * camera.k, sw = B.w * camera.k, sh = B.h * camera.k;
   let dx = 0, dy = 0;
   if (sx + sw > right) dx = right - (sx + sw);
@@ -569,7 +571,7 @@ function select(partId: string | null) {
   markSelection(partId);
   $('space').classList.toggle('dim', !!partId);
   const panel = $('panel');
-  if (planView.isOpen()) { panel.hidden = true; panel.replaceChildren(); hideLens(); clearHighlight(); planView.selectionChanged(); if (partId) reveal(partId); return; }
+  if (planView.isOpen()) { panel.hidden = true; panel.replaceChildren(); clearHighlight(); if (partId && changed) reveal(partId); planView.selectionChanged(); return; }
   if (!partId) { panel.hidden = true; panel.replaceChildren(); hideLens(); clearHighlight(); return; }
   showReading(changed, changed);
   if (pendingRecord) { const id = pendingRecord; pendingRecord = null; openRecord(id); }
@@ -582,61 +584,84 @@ function showReading(scrollTop: boolean, move: boolean) {
   if (move) reveal(selected!);
   renderLens(); placeLensOnce();
 }
-function openSheet(then?: () => void) { if (!selected) return; sheetOpen = true; showReading(true, true); then?.(); }
+/** The camera before the sheet opened: closing the sheet comes back to it unless the person moved the map meanwhile. */
+let sheetReturn: { x: number; y: number; k: number } | null = null, mapMoved = false;
+function openSheet(then?: () => void) { if (!selected) return; sheetReturn = { ...camera }; mapMoved = false; sheetOpen = true; showReading(true, true); then?.(); }
 function closeSheet() {
   if (!selected || !sheetOpen) return;
-  sheetOpen = false; editing = false; showReading(false, false);
+  sheetOpen = false; editing = false;
+  if (sheetReturn && !mapMoved) { camera = sheetReturn; applyCamera(true); }
+  sheetReturn = null;
+  showReading(false, false);
   requestAnimationFrame(() => $('lens').querySelector<HTMLElement>('.lens-more')?.focus());
 }
 /** Re-render whichever surface is open (after an answer, a status change or an edit). */
 function refreshReading() { if (!opened || !selected || planView.isOpen()) return; if (sheetOpen) renderPanel(false); else { renderLens(); positionLens(); } }
 
-/* ---------- the lens ---------- */
+/* ---------- reading surfaces ----------
+ * The lens (a selection) and the change comparison (plan-view) share one element and one way of finding a place: beside the
+ * part's own group, never over the part, its group, the other ends of its lines or the scope's title; else docked along the
+ * bottom of the map. Chosen once per selection; afterwards it only follows its part. */
 let lensPlace: LensPlace | null = null;
+/** Parts the open surface is about when it is not the selection (the parts of a change the comparison reads). */
+let readingFor: string[] = [];
 const toScreen = (b: { x: number; y: number; w: number; h: number }): Rect => ({ x: camera.x + b.x * camera.k, y: camera.y + b.y * camera.k, w: b.w * camera.k, h: b.h * camera.k });
-function lensArea(): Rect { const vp = $('viewport').getBoundingClientRect(); return { x: 16, y: 16, w: vp.width - 32 - PANEL_W(), h: vp.height - 16 - BOTTOM }; }
-function hideLens() { const l = $('lens'); l.hidden = true; l.replaceChildren(); lensPlace = null; }
-/** The part on screen, and what the lens must not cover: the part, the other ends of its lines, and the head it sits under. */
-function lensGeometry(): { anchor: Rect | null; protect: Rect[] } {
-  const b = selected ? lay.boxes.get(selected) : undefined; if (!b) return { anchor: null, protect: [] };
-  const anchor = toScreen(b), protect = [anchor];
-  for (const e of lay.edges) if (e.from === b.id || e.to === b.id) { const other = lay.boxes.get(e.from === b.id ? e.to : e.from); if (other) protect.push(toScreen(other)); }
-  const parent = lay.boxes.get(b.container);
-  if (parent?.kind === 'frame') protect.push(toScreen({ x: parent.x, y: parent.y, w: parent.w, h: parent.head }));
-  else if (titleH) protect.push(toScreen(titleRect()));
-  return { anchor, protect };
+const union = <T extends Rect>(rs: T[]): Rect => { const x = Math.min(...rs.map(r => r.x)), y = Math.min(...rs.map(r => r.y)); return { x, y, w: Math.max(...rs.map(r => r.x + r.w)) - x, h: Math.max(...rs.map(r => r.y + r.h)) - y }; };
+/** The change plan's strip takes the top of the map while it is open. */
+const topInset = () => { const strip = $('plan-strip'); return strip.hidden ? 16 : strip.offsetTop + strip.offsetHeight + 10; };
+function lensArea(): Rect { const vp = $('viewport').getBoundingClientRect(), top = topInset(); return { x: 16, y: top, w: vp.width - 32 - PANEL_W(), h: vp.height - top - BOTTOM }; }
+function hideLens() { const l = $('lens'); l.hidden = true; l.replaceChildren(); l.classList.remove('docked', 'compare'); lensPlace = null; readingFor = []; }
+/** part: what the surface is about; beside: that and the group it sits in; protect: those, the other ends of their lines and
+ * the scope's title; keep: the same in map coordinates (what a docked surface keeps clear of with one pan). */
+function lensGeometry(): { part: Rect; beside: Rect; protect: Rect[]; keep: Rect; own: Rect } | null {
+  const ids = (readingFor.length ? readingFor : selected ? [selected] : []).filter(id => lay.boxes.get(id)?.kind !== 'ghost' && lay.boxes.has(id));
+  if (!ids.length) return null;
+  const parts = ids.map(id => lay.boxes.get(id)!), set = new Set(ids);
+  const groups = parts.map(b => lay.boxes.get(b.container)).filter((g): g is Box => g?.kind === 'frame');
+  const ends = lay.edges.filter(e => set.has(e.from) !== set.has(e.to)).map(e => lay.boxes.get(set.has(e.from) ? e.to : e.from)).filter((x): x is Box => !!x);
+  const near = union([...parts, ...groups]), own = union(parts.map(b => ({ x: b.x, y: b.y, w: Math.min(b.w, 420), h: Math.min(b.h, 300) })));
+  const protect = [toScreen(near), ...ends.map(toScreen), ...(titleH ? [toScreen(titleRect())] : [])];
+  return { part: toScreen(union(parts)), beside: toScreen(near), protect, keep: union([near, ...ends]), own };
 }
-/** Once per selection (or after the map's structure changed): the first clear place from a fixed list, else the fixed reading
- * place; when that place would cover the part or the ends of its lines, one smallest pan moves them out from under it. No
- * zoom, and no second round. */
-function placeLensOnce() {
+/** Once per selection (or after the map's structure changed). Docked: one smallest pan keeps the part, its group and its line
+ * ends above the dock (or the part alone when they cannot fit). No zoom, and no second round. */
+function placeLensOnce(dock = false) {
   const l = $('lens'); if (l.hidden) return;
-  l.style.maxHeight = ''; l.style.height = '';
-  const area = lensArea(), size = { w: l.offsetWidth, h: Math.min(l.offsetHeight, area.h) }, { anchor, protect } = lensGeometry();
-  if (!anchor) { lensPlace = { side: 'fixed', ...fixedPlace(size.w, area), h: size.h, dy: 0 }; positionLens(); return; }
-  lensPlace = placeLens(anchor, protect, size, area);
-  if (lensPlace.side === 'fixed') {
-    const slot = { x: lensPlace.x - 16, y: lensPlace.y, w: size.w + 16, h: lensPlace.h };
-    const hit = (r: Rect) => r.x < slot.x + slot.w && slot.x < r.x + r.w && r.y < slot.y + slot.h && slot.y < r.y + r.h;
-    if (protect.some(hit)) {
-      const b = lay.boxes.get(selected!)!, ends = lay.edges.filter(e => e.from === b.id || e.to === b.id).map(e => lay.boxes.get(e.from === b.id ? e.to : e.from)).filter((x): x is Box => !!x);
-      const all = [{ x: b.x, y: b.y, w: Math.min(b.w, 420), h: Math.min(b.h, 300) }, ...ends], x = Math.min(...all.map(r => r.x)), y = Math.min(...all.map(r => r.y));
-      const U = { x, y, w: Math.max(...all.map(r => r.x + r.w)) - x, h: Math.max(...all.map(r => r.y + r.h)) - y };
-      revealRect(U.w * camera.k <= area.w - size.w - 40 ? U : all[0]!, size.w + 16); // applyCamera places the lens
-      return;
+  l.classList.remove('docked'); l.style.maxHeight = ''; l.style.width = '';
+  const area = lensArea(), g = lensGeometry(), size = { w: l.offsetWidth, h: Math.min(l.offsetHeight, area.h) };
+  lensPlace = g && !dock ? placeLens(g.part, g.beside, g.protect, size, area) : { side: 'dock', x: 0, y: 0, h: 0, dy: 0 };
+  if (lensPlace.side === 'dock') {
+    l.classList.add('docked'); l.style.width = `${area.w}px`;
+    const h = Math.min(l.offsetHeight, Math.round(area.h * (dock ? 0.5 : 0.42))), at = dockPlace(h, area);
+    lensPlace = { side: 'dock', ...at, h, dy: 0 };
+    if (g) {
+      const free = area.h - h - 12, keepH = g.keep.h * camera.k, under = (r: Rect) => r.y + r.h > at.y - 8;
+      const fits = keepH <= free && g.keep.w * camera.k <= area.w - 24;
+      if ((fits ? toScreen(g.keep) : toScreen(g.own)).y + (fits ? keepH : g.own.h * camera.k) > at.y - 8 || under(g.part)) { revealRect(fits ? g.keep : g.own, 0, h + 12); return; } // applyCamera places it
     }
   }
   positionLens();
 }
-/** Camera moved or the part was dragged: the lens follows its part in the arrangement chosen for this selection. */
+/** Camera moved or the part was dragged: the surface follows its part in the arrangement chosen for this selection. */
 function positionLens(animate = false) {
   const l = $('lens'); if (l.hidden || !lensPlace) return;
-  const area = lensArea(), w = l.offsetWidth, { anchor } = lensGeometry();
-  let at = anchor ? follow(lensPlace, anchor, w, area) : fixedPlace(w, area);
-  const hgt = Math.min(lensPlace.h, area.h);
+  const area = lensArea(), docked = lensPlace.side === 'dock', g = lensGeometry(), hgt = Math.min(lensPlace.h, area.h);
+  if (docked) l.style.width = `${area.w}px`;
+  const w = l.offsetWidth;
+  let at = docked || !g ? dockPlace(hgt, area) : follow(lensPlace, g.part, g.beside, w, hgt, area);
   at = { x: Math.min(Math.max(at.x, area.x), area.x + area.w - w), y: Math.min(Math.max(at.y, area.y), area.y + area.h - hgt) };
-  l.classList.toggle('animate', animate); l.classList.toggle('fixed', lensPlace.side === 'fixed');
+  l.classList.toggle('animate', animate);
   l.style.left = `${Math.round(at.x)}px`; l.style.top = `${Math.round(at.y)}px`; l.style.maxHeight = `${Math.round(hgt)}px`;
+}
+/** The scope's title belongs to the map; when a pan takes it out of view its name stays at the top left of the map. */
+function updateSticky() {
+  const st = $('scope-sticky'), o = opened;
+  if (!o || !titleH) { st.hidden = true; return; }
+  const vp = $('viewport').getBoundingClientRect(), t = toScreen(titleRect()), top = topInset();
+  st.style.top = `${top - 6}px`;
+  st.hidden = t.y >= top - 8 && t.y + 24 * camera.k <= vp.height - BOTTOM && t.x + 120 >= 0 && t.x <= vp.width - PANEL_W() - 120;
+  // One title at a time: the map's own title steps back while its name is pinned.
+  document.querySelector('.map-title')?.classList.toggle('pinned', !st.hidden);
 }
 /** The state of a part as the source of what is said about it: a received summary, a written plan, or nothing yet. */
 function stateText(part: PartView, records: RecordView[]): string {
@@ -647,13 +672,25 @@ function drawnRep(o: Opened, id: string): string | null {
   for (let c = partOf(o, id), g = 0; c && g < 64; c = partOf(o, c.parentId), g++) { const b = lay.boxes.get(c.id); if (b && b.kind !== 'ghost') return c.id; }
   return null;
 }
+/** A part's relations by their real ends. A part drawn folded stands for its inside: a relation of an inner part counts,
+ * with that inner part as its near end. The lens and the reading sheet list the same relations. */
+interface End { r: StudioView['relations'][number]; near: string; far: string; out: boolean }
+function relationEnds(o: Opened, partId: string): End[] {
+  const drawn = lay.boxes.has(partId), out: End[] = [];
+  for (const r of o.view.relations) {
+    const a = drawn ? drawnRep(o, r.from) : r.from, c = drawn ? drawnRep(o, r.to) : r.to;
+    if (a === partId && c !== partId) out.push({ r, near: r.from, far: r.to, out: true });
+    else if (c === partId && a !== partId) out.push({ r, near: r.to, far: r.from, out: false });
+  }
+  return out;
+}
 /** The lens: what the selection is (its description beyond what the map already shows, with where that description comes
  * from), what it is linked to and why (each line's real ends, by direction), its inside, and the way to sources and edits. */
 function renderLens() {
   const o = opened!, part = partOf(o, selected)!, l = $('lens'), b = lay.boxes.get(part.id);
   const records = subtreeRecords(o.view, part.id), path = partPath(o.view, part.id).slice(0, -1);
   const norm = part.note.replace(/\s+/g, ' ').trim();
-  const shown = b && ((b.kind === 'frame' && b.depth === 0) || (b.kind === 'node' && b.face === 'unit')) ? lead(part.note) : '';
+  const shown = b && ((b.kind === 'frame' && b.depth === 0) || (b.kind === 'node' && b.face === 'unit')) ? mapLead(o.view, part.id) : '';
   const rest = shown && norm.startsWith(shown) ? norm.slice(shown.length).trim() : norm;
   const dot = h('i', { class: `dot s-${part.status}`, 'aria-hidden': 'true' });
   const src = (text: string) => h('p', { class: `lens-src s-${part.status}` }, dot, h('span', {}, text));
@@ -671,13 +708,8 @@ function renderLens() {
   } else put(desc, src(part.status === 'plan' ? (records.length ? `설명 없음 · 요청 기록 없음 · ${recs}` : '아직 설명도 기록도 없어요') : `${STATUS_LABEL[part.status]} · ${recs} · 받은 정리 없음`));
   if (part.changes.length) desc.append(h('ul', { class: 'lens-changes' }, ...part.changes.slice(0, 2).map(c => h('li', {}, c))));
   // Lines: real ends. A line drawn from a folded part summarises its inside; each row names the inner end and goes to the far one.
-  const ins: { r: (typeof o.view.relations)[number]; near: string; far: string }[] = [], outs: typeof ins = [];
-  for (const r of o.view.relations) {
-    const a = b ? drawnRep(o, r.from) : r.from, c = b ? drawnRep(o, r.to) : r.to;
-    if (a === part.id && c !== part.id) outs.push({ r, near: r.from, far: r.to });
-    else if (c === part.id && a !== part.id) ins.push({ r, near: r.to, far: r.from });
-  }
-  const port = (x: (typeof ins)[number], out: boolean) => {
+  const ends = relationEnds(o, part.id), ins = ends.filter(x => !x.out), outs = ends.filter(x => x.out);
+  const port = (x: End, out: boolean) => {
     const far = partOf(o, x.far)!, near = x.near !== part.id ? partOf(o, x.near)?.name : null, farRep = drawnRep(o, x.far);
     const where = farRep === x.far ? null : farRep ? `${partOf(o, farRep)!.name} 안` : partPath(o.view, x.far).slice(0, -1).map(q => q.name).join(' › ') || o.project.name;
     return h('li', {}, h('button', { type: 'button', class: 'port', title: `${out ? '이 부분에서' : '이 부분으로'} · ${far.name}로 가기`, onclick: () => go(o.key, x.far) },
@@ -697,6 +729,7 @@ function renderLens() {
     o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', onclick: () => { editing = true; openSheet(() => document.getElementById('edit-name')?.focus()); } }, '이름·설명 고치기') : null,
     o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null
   ].filter((x): x is HTMLButtonElement => !!x);
+  l.classList.remove('compare'); readingFor = [];
   l.replaceChildren(); put(l,
     h('header', { class: 'lens-head' },
       path.length ? h('div', { class: 'lens-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope) }, x.name)])) : null,
@@ -786,19 +819,19 @@ function renderPanel(scrollTop: boolean) {
   body.append(now);
   if (part.changes.length) body.append(h('section', { class: 'sec' }, h('h3', {}, '최근 변화'), h('ul', { class: 'changes' }, ...part.changes.map(c => h('li', {}, c)))));
   // 관련 부분: its inside, then the recorded links with their meaning.
-  const links = o.view.relations.filter(r => r.from === part.id || r.to === part.id);
+  const links = relationEnds(o, part.id);
   if (part.childIds.length || links.length) {
     const rel = h('section', { class: 'sec sec-related' }, h('h3', {}, '관련 부분'));
     if (part.childIds.length) rel.append(h('p', { class: 'sub' }, `안쪽 ${part.childIds.length}`), h('div', { class: 'kids' }, ...part.childIds.map(id => {
       const c = o.view.parts.find(x => x.id === id)!, m = metaLine(c, c.childIds.length ? subtreeRecords(o.view, c.id)[0]?.at ?? null : c.lastAt);
       return h('a', { class: `kid s-${c.status}`, href: hashFor(o.key, id, scope) }, h('span', {}, c.name), c.childIds.length ? h('small', {}, `안쪽 ${c.childIds.length}`) : null, m ? h('small', {}, m) : null);
     })));
-    if (links.length) rel.append(h('p', { class: 'sub' }, `연결 ${links.length}`), h('ul', { class: 'links' }, ...links.map(r => {
-      const out = r.from === part.id, other = o.view.parts.find(x => x.id === (out ? r.to : r.from))!;
-      const where = insideScope(o, other.id) ? null : partPath(o.view, other.id).slice(0, -1).map(x => x.name).join(' › ') || o.project.name;
+    if (links.length) rel.append(h('p', { class: 'sub' }, `연결 ${links.length}`), h('ul', { class: 'links' }, ...links.map(({ r, out, near, far }) => {
+      const other = o.view.parts.find(x => x.id === far)!, inner = near !== part.id ? partOf(o, near)?.name : null;
+      const where = [inner ? `안쪽 ‘${inner}’에서` : '', insideScope(o, other.id) ? '' : `${partPath(o.view, other.id).slice(0, -1).map(x => x.name).join(' › ') || o.project.name} 안`].filter(Boolean).join(' · ');
       return h('li', {}, h('a', { href: hashFor(o.key, other.id, scope) },
         h('span', { class: 'dir', title: out ? '이 부분에서 나감' : '이 부분으로 들어옴' }, out ? '→' : '←'), h('strong', {}, other.name), h('span', { class: 'rel-kind' }, REL_LABEL[r.kind] ?? r.kind)),
-        where ? h('span', { class: 'link-where' }, `${where} 안`) : null,
+        where ? h('span', { class: 'link-where' }, where) : null,
         r.note ? h('span', { class: 'link-note' }, r.note) : null);
     })));
     body.append(rel);
@@ -971,10 +1004,17 @@ const planView = createPlanView({
     revealRect(B);
   },
   restore: r => { const o = opened; if (!o) return; returnCamera = r.camera; go(o.key, r.selected, r.scope); },
+  surface: (content, parts, place) => {
+    const l = $('lens');
+    if (!content) { if (l.classList.contains('compare')) hideLens(); return; }
+    l.replaceChildren(...content); l.hidden = false; l.classList.add('compare'); readingFor = parts;
+    // The comparison always reads in the same place: docked under the map, the plan's strip above it.
+    if (place || !lensPlace) placeLensOnce(true); else positionLens();
+  },
   chrome: () => {
     const o = opened; if (!o) return;
     setBar(o); renderRecent();
-    if (planView.isOpen()) { $('panel').hidden = true; $('panel').replaceChildren(); hideLens(); }
+    if (planView.isOpen()) { $('panel').hidden = true; $('panel').replaceChildren(); if (!$('lens').classList.contains('compare')) hideLens(); }
   }
 });
 function sessionCode(): string { try { return sessionStorage.getItem('agentflow.studio.access') ?? accessCodeMemory; } catch { return accessCodeMemory; } }
@@ -1060,7 +1100,7 @@ function bindCanvas() {
     const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
     if (!drag.moved && Math.abs(dx) + Math.abs(dy) < 4) return;
     if (!drag.moved) { drag.moved = true; vp.classList.add(drag.mode === 'pan' ? 'grabbing' : 'moving'); if (drag.mode === 'part') document.querySelector(`[data-box="${CSS.escape(drag.id)}"]`)?.classList.add('dragging'); }
-    if (drag.mode === 'pan') { camera = { ...camera, x: drag.cx + dx, y: drag.cy + dy }; applyCamera(); return; }
+    if (drag.mode === 'pan') { mapMoved = true; camera = { ...camera, x: drag.cx + dx, y: drag.cy + dy }; applyCamera(); return; }
     const o = opened!; const pos = positionsOf(o);
     (pos[drag.container] ??= {})[drag.id] = { x: Math.round(drag.start.x + dx / camera.k), y: Math.round(drag.start.y + dy / camera.k) };
     relayout(o); positionWorld(); positionLens();
@@ -1086,12 +1126,12 @@ function bindCanvas() {
     const r = vp.getBoundingClientRect(), unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1;
     const delta = (Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX) * unit;
     // Pinch (ctrlKey) sends small deltas; a mouse notch is about 100.
-    zoomAt(camera.k * Math.exp(-delta * (e.ctrlKey ? 0.01 : 0.0015)), e.clientX - r.left, e.clientY - r.top);
+    mapMoved = true; zoomAt(camera.k * Math.exp(-delta * (e.ctrlKey ? 0.01 : 0.0015)), e.clientX - r.left, e.clientY - r.top);
   }, { passive: false });
   const center = () => { const r = vp.getBoundingClientRect(); return [(r.width - PANEL_W()) / 2, r.height / 2] as const; };
-  $('zoom-in').addEventListener('click', () => { const [x, y] = center(); zoomAt(camera.k + 0.15, x, y, true); });
-  $('zoom-out').addEventListener('click', () => { const [x, y] = center(); zoomAt(camera.k - 0.15, x, y, true); });
-  $('zoom-fit').addEventListener('click', () => fitView(true, true));
+  $('zoom-in').addEventListener('click', () => { mapMoved = true; const [x, y] = center(); zoomAt(camera.k + 0.15, x, y, true); });
+  $('zoom-out').addEventListener('click', () => { mapMoved = true; const [x, y] = center(); zoomAt(camera.k - 0.15, x, y, true); });
+  $('zoom-fit').addEventListener('click', () => { mapMoved = true; fitView(true, true); });
   $('arrange').addEventListener('click', arrange);
   const help = $('help'), helpButton = $('help-toggle');
   helpButton.addEventListener('click', () => { help.hidden = !help.hidden; helpButton.setAttribute('aria-expanded', String(!help.hidden)); });
