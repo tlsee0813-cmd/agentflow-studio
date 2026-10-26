@@ -761,6 +761,9 @@ function placeLensOnce(dock = false, pan = true) {
       const keepH = g.keep.h * camera.k, room = Math.floor(area.h - keepH - 24);
       if (room < h && room >= Math.min(natural, 160)) h = room;
     }
+    // The camera stays the person's (no pan): the surface gives up height (its body scrolls) rather than cover the part it
+    // reads, when that still leaves it a readable height.
+    if (g && !pan) { const free = Math.floor(bottom - (g.part.y + g.part.h) - 12); if (free >= 160 && free < h && g.part.y + g.part.h > bottom - h) h = free; }
     lensPlace = { side: 'dock', x: x ?? area.x, y: bottom - h, h, dy: 0, w: ww };
     if (g && pan && !clearAt(lensPlace.x, h, ww)) {
       const fits = g.keep.h * camera.k <= area.h - h - 12 && g.keep.w * camera.k <= area.w - 24;

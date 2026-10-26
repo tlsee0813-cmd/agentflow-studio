@@ -475,6 +475,24 @@ def workspace_flow(browser, base, cases):
     page.locator("#plan-mode").get_by_role("button", name="변경 미리보기").click()
     expect(page.locator(".ps-target").nth(0)).to_have_attribute("aria-selected", "true")
     expect(page.locator(".callout .co-head strong")).to_have_text(target_names[0])
+    # Opening the long reading of a change whose target sits low (1280×720): one smallest pan keeps that target readable above
+    # it; its sources and the way back keep that camera and still leave the target uncovered.
+    page.locator(".ps-item", has_text="실패해도 나머지 계속").click()
+    target = page.locator("#world .plan-reading").get_attribute("data-box")
+    page.locator(".ps-link", has_text="설명").click()
+    expect(page.locator("#lens .cmp-fallback")).to_be_visible()
+    page.wait_for_timeout(400)  # compare stable rectangles after the minimum-pan animation
+    clear_of(page, f'#world [data-box="{target}"]', "#lens")
+    explained = page.locator("#world").evaluate(CAMERA)
+    page.locator("#lens .lens-more", has_text="근거").click()
+    expect(page.locator("#lens .cmp-evidence")).to_be_visible()
+    clear_of(page, f'#world [data-box="{target}"]', "#lens")
+    page.locator("#cmp-back").click()
+    expect(page.locator("#lens .cmp-fallback")).to_be_visible()
+    clear_of(page, f'#world [data-box="{target}"]', "#lens")
+    assert page.locator("#world").evaluate(CAMERA) == explained
+    page.keyboard.press("Escape")
+    expect(page.locator("#lens")).to_be_hidden()
     # The whole plan opens on request. A narrow window: the panel and the request sheet take the whole width; back to 1280.
     page.locator(".ps-more").click()
     expect(page.locator("#plan-panel")).to_be_visible()

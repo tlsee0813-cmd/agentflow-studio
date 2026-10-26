@@ -542,7 +542,7 @@ export function createPlanView(host: PlanHost) {
     box.checked = p.selected.includes(item.id); box.addEventListener('change', () => toggleItem(item.id, box.checked));
     return h('div', { class: 'ps-focus', role: 'group', 'aria-label': `‘${item.title}’` },
       h('label', { class: 'cmp-hand', for: `ps-hand-${item.id}` }, box, h('span', {}, '맡기기')),
-      h('button', { type: 'button', class: 'ps-link', 'aria-pressed': String(st.explain), onclick: () => { st.explain = !st.explain; st.evidenceFor = null; render(); } }, '설명'),
+      h('button', { type: 'button', class: 'ps-link', 'aria-pressed': String(st.explain), onclick: () => { st.explain = !st.explain; st.evidenceFor = null; explainOpened = st.explain; render(); } }, '설명'),
       refs ? h('button', { type: 'button', class: 'ps-link', 'aria-pressed': String(st.evidenceFor === item.id), onclick: () => { st.evidenceFor = st.evidenceFor === item.id ? null : item.id; render(); } }, `근거 ${refs}`) : null);
   }
   /** Conditions with no part of their own (to keep, not yet decided): read here, never pinned to a part on the map. */
@@ -560,9 +560,12 @@ export function createPlanView(host: PlanHost) {
      The words carry the roles: 지금 (the part's current description and where it comes from), 구상 (what the change wants;
      not applied, not a result), 살펴볼 것 (an impact candidate's reason, on the part it names). */
   let lastFocusKey = '', lastShown = '';
+  /** The person asked for the long reading just now: it takes a new place, and that place may pan once (the smallest pan) so
+   * the target it explains stays readable above it. Coming back from sources, a mode switch or a resize keeps the camera. */
+  let explainOpened = false;
   function renderCompare(o: PlanOpened) {
     const st = s!, p = plan();
-    if (!p || st.mode !== 'preview' || !st.focus || st.focus.kind === 'impacts' || panelOpen() || st.sheet || (!st.explain && !st.evidenceFor)) { host.surface(null, [], false); lastFocusKey = ''; return; }
+    if (!p || st.mode !== 'preview' || !st.focus || st.focus.kind === 'impacts' || panelOpen() || st.sheet || (!st.explain && !st.evidenceFor)) { host.surface(null, [], false); lastFocusKey = ''; explainOpened = false; return; }
     const boxes = host.boxes(), rep = (id: string) => visibleRep(id, boxes), active = st.focus.kind === 'item' ? activeTarget(itemOf(st.focus.id)!) : st.focus.id;
     const key = `${JSON.stringify(st.focus)}|${active ?? ''}`;
     let content: Node[], parts: string[];
@@ -575,7 +578,8 @@ export function createPlanView(host: PlanHost) {
     }
     // An explicit target change in an open comparison reveals that target above the reading surface. First opening and
     // the same target's sources in and out only size the surface; they keep the person's camera, including a manual pan.
-    host.surface(content, parts, lastFocusKey && key !== lastFocusKey ? true : key !== lastFocusKey || shown !== lastShown ? 'refit' : false); lastFocusKey = key; lastShown = shown;
+    const opened = explainOpened && st.explain && !st.evidenceFor; explainOpened = false;
+    host.surface(content, parts, opened || (lastFocusKey && key !== lastFocusKey) ? true : key !== lastFocusKey || shown !== lastShown ? 'refit' : false); lastFocusKey = key; lastShown = shown;
   }
   /** A part's own descriptions as its context (its role in the map, a received summary), each with where it comes from. They
    * are not set against a change as its 'before': that needs presentation data on the same side. */
