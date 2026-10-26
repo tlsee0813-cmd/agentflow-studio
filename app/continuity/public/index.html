@@ -24,25 +24,27 @@
     <main id="home" class="home" hidden>
       <div class="home-inner">
         <header class="home-head">
-          <h1 class="home-title">프로젝트</h1>
-          <p class="home-lede">개발 기록을 프로젝트의 부분에 이어 구조와 최근 변화를 읽습니다.</p>
-        </header>
-        <div id="home-message" class="message" role="status" hidden></div>
-        <section class="home-mine" aria-labelledby="saved-title">
-          <div class="home-row">
-            <h2 id="saved-title" class="home-sub">내 프로젝트</h2>
-            <form id="new-form" class="new-form"><label for="new-name" class="sr-only">새 프로젝트 이름</label><input id="new-name" maxlength="120" placeholder="새 프로젝트 이름" autocomplete="off"><button type="submit" class="primary">내 프로젝트 시작</button></form>
+          <div>
+            <h1 class="home-title">내 프로그램</h1>
+            <p class="home-lede">만들고 있는 프로그램의 부분과 묶음을 그대로 열어, 이해하고 바꿀 모습을 시험해요.</p>
           </div>
-          <ul id="saved-list" class="project-list mine"></ul>
-          <p id="saved-empty" class="home-empty" hidden>아직 이 브라우저에 만든 프로젝트가 없어요. 이름을 적어 시작하거나 아래 예제로 둘러보세요.</p>
+          <div class="home-actions">
+            <button type="button" id="new-open" class="secondary small" aria-expanded="false" aria-controls="new-form">새 프로젝트</button>
+            <button type="button" id="import" class="link-button">백업 파일 가져오기</button><input id="import-file" type="file" accept="application/json,.json" hidden>
+          </div>
+        </header>
+        <form id="new-form" class="new-form" hidden><label for="new-name" class="sr-only">새 프로젝트 이름</label><input id="new-name" maxlength="120" placeholder="새 프로젝트 이름" autocomplete="off"><button type="submit" class="primary small">만들기</button><button type="button" id="new-cancel" class="link-button">취소</button></form>
+        <div id="home-message" class="message" role="status" hidden></div>
+        <section class="home-mine" aria-label="내 프로젝트">
+          <ul id="saved-list" class="program-list mine"></ul>
+          <p id="saved-empty" class="home-empty" hidden>아직 이 브라우저에 만든 프로젝트가 없어요. 아래 예제의 실제 구성으로 둘러보거나, 변경 구상을 시험해 보세요.</p>
         </section>
         <section class="home-examples" aria-labelledby="examples-title">
           <h2 id="examples-title" class="home-sub">예제로 둘러보기</h2>
-          <ul id="project-list" class="project-list examples"></ul>
+          <ul id="project-list" class="program-list examples"></ul>
         </section>
         <footer class="home-foot">
           <p>예제는 전달받았다고 가정하고 쓴 합성 기록이며 저장되지 않아요. 실제 기록 연결기는 아직 없어요.</p>
-          <button type="button" id="import" class="link-button">백업 파일 가져오기</button><input id="import-file" type="file" accept="application/json,.json" hidden>
         </footer>
       </div>
     </main>

@@ -27,10 +27,13 @@ export function follow(place: LensPlace, part: Rect, beside: Rect, w: number, h:
  * part sits in, so its own group stays readable. protect: the part, its group, the other ends of its lines and the scope's
  * title. Places are tried in order: right, then left of the group (at the part's height, under a protected head above it, or
  * at the top), then below or above the group. The whole height wins first; else the tallest clear place beside it, down to
- * MIN_H (its body scrolls). Otherwise the dock.
+ * MIN_H (its body scrolls). others: every other part on screen; a place that would hide one of them is not clear.
+ * Otherwise the dock.
  */
-export function placeLens(part: Rect, beside: Rect, protect: Rect[], size: { w: number; h: number }, area: Rect): LensPlace {
-  const bottom = area.y + area.h, clear = (r: Rect) => protect.every(q => overlap(r, q) < 1);
+export function placeLens(part: Rect, beside: Rect, protect: Rect[], size: { w: number; h: number }, area: Rect, others: Rect[] = []): LensPlace {
+  // Clear: covers nothing protected, and hides no other part on the map whole (most of it under the surface).
+  const hides = (r: Rect) => others.some(q => q.w * q.h > 0 && overlap(r, q) > q.w * q.h * 0.6);
+  const bottom = area.y + area.h, clear = (r: Rect) => protect.every(q => overlap(r, q) < 1) && !hides(r);
   const inArea = (r: Rect) => r.x >= area.x - 0.5 && r.y >= area.y - 0.5 && r.x + r.w <= area.x + area.w + 0.5 && r.y + r.h <= bottom + 0.5;
   const above = protect.filter(q => q.y + q.h <= part.y + 1 && q.x < part.x + part.w && part.x < q.x + q.w).map(q => q.y + q.h + 8);
   const tops = [...new Set([part.y - 6, ...above, area.y].map(y => Math.max(area.y, Math.round(y))))];

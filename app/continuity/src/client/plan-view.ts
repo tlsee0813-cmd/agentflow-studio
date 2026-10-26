@@ -416,6 +416,18 @@ export function createPlanView(host: PlanHost) {
   function compareHead(kicker: string, title: string, tools: Node[]) {
     return h('header', { class: 'lens-head cmp-head' }, h('div', { class: 'lens-path' }, h('span', {}, kicker)), h('h2', { id: 'lens-title' }, title), h('div', { class: 'head-tools' }, ...tools));
   }
+  /* A change reads as pairs: on the left each part it targets as it is now (with where that comes from), on the right what the
+     change wants, once for all of them, after an arrow. Impact candidates follow below, their reasons only, apart from the pair. */
+  function pair(left: Node[], right: Node[]) {
+    return h('div', { class: 'cmp-pair' },
+      h('div', { class: 'cmp-now' }, h('h3', { class: 'cmp-label' }, '지금'), ...left),
+      h('div', { class: 'cmp-arrow', 'aria-hidden': 'true' }, '→'),
+      h('div', { class: 'cmp-want' }, h('h3', { class: 'cmp-label' }, '구상 ', h('small', {}, '바라는 모습 · 적용 안 됨')), ...right));
+  }
+  function impactList(o: PlanOpened, list: { partId: string; reason: string }[], named = true) {
+    return list.length ? h('section', { class: 'cmp-impacts' }, h('h3', { class: 'cmp-label' }, '살펴볼 것 ', h('small', {}, '영향 후보 · 분석이 든 이유')),
+      h('ul', {}, ...list.map(x => h('li', {}, named ? h('button', { type: 'button', class: 'link-button', onclick: () => locate(x.partId) }, partName(x.partId) ?? '부분') : null, h('span', {}, x.reason))))) : null;
+  }
   function itemCompare(o: PlanOpened, p: ChangePlan, item: PlanItem): Node[] {
     const st = s!, items = p.analysis.items, n = items.indexOf(item), boxes = host.boxes();
     const by = st.bundle.by, basis = by?.kind === 'example' ? '작성된 예제 분석' : by?.kind === 'ai' ? 'AI 분석' : '분석';
@@ -430,25 +442,19 @@ export function createPlanView(host: PlanHost) {
     const at = new Set(item.partIds);
     for (const id of [...at]) for (let up = parentOf(id), g = 0; up && g < 64; up = parentOf(up), g++) at.delete(up);
     const targets = [...at].map(id => {
-      const r = visibleRep(id, boxes), own = p.analysis.impacts.filter(x => x.partId === id);
-      const where = r && r !== id ? `‘${partName(r)}’ 안쪽` : !r ? '이 범위 밖' : null;
-      return h('section', { class: 'cmp-target' },
-        h('h3', {}, h('button', { type: 'button', class: 'link-button', onclick: () => locate(id) }, partName(id) ?? '지금 지도에 없는 부분'), where ? h('small', {}, where) : null),
-        row('지금', 'now', ...now(o, id)),
-        ...own.map(x => row('살펴볼 것', 'impact', h('p', { class: 'cmp-text' }, x.reason), h('p', { class: 'cmp-src' }, `영향 후보 · ${basis}`))));
+      const r = visibleRep(id, boxes), where = r && r !== id ? `‘${partName(r)}’ 안쪽` : !r ? '이 범위 밖' : null;
+      return h('div', { class: 'cmp-part' }, h('p', { class: 'cmp-name' }, h('button', { type: 'button', class: 'link-button', onclick: () => locate(id) }, partName(id) ?? '지금 지도에 없는 부분'), where ? h('small', {}, where) : null), ...now(o, id));
     });
-    const near = nearImpacts(item);
+    const own = p.analysis.impacts.filter(x => at.has(x.partId)), near = nearImpacts(item);
     const box = h('input', { type: 'checkbox', id: `cmp-hand-${item.id}` }) as HTMLInputElement;
     box.checked = p.selected.includes(item.id); box.addEventListener('change', () => toggleItem(item.id, box.checked));
     const refs = p.evidence.filter(e => item.refs.includes(e.id)).length;
     return [
-      compareHead(`변경 구상 · ${basis} · 아직 적용 안 됨`, item.title, tools),
+      compareHead(`변경 구상 · ${basis}`, item.title, tools),
       h('div', { class: 'lens-body cmp-body' },
-        row('구상', 'want', h('p', { class: 'cmp-text' }, item.description)),
-        ...(targets.length ? targets : [h('p', { class: 'cmp-none' }, '지금 지도에 대응하는 부분이 없는 변경이에요.')]),
-        near.length ? h('section', { class: 'cmp-near' }, h('h3', {}, '함께 살펴볼 곳 ', h('small', {}, '영향 후보')),
-          ...near.map(x => h('p', {}, h('button', { type: 'button', class: 'link-button', onclick: () => locate(x.partId) }, partName(x.partId) ?? '부분'), h('span', {}, x.reason)))) : null,
-        item.dependsOn.length && by?.kind === 'example' ? row('전제', 'dep', h('p', { class: 'cmp-text' }, item.dependsOn.map(d => itemOf(d)?.title ?? d).join(', '))) : null),
+        h('div', { class: 'cmp-main' }, pair(targets.length ? targets : [h('p', { class: 'cmp-none' }, '지금 지도에 대응하는 부분이 없어요.')], [h('p', { class: 'cmp-text' }, item.description)]),
+          impactList(o, [...own, ...near])),
+        item.dependsOn.length && by?.kind === 'example' ? h('p', { class: 'cmp-dep' }, h('span', {}, '전제'), item.dependsOn.map(d => itemOf(d)?.title ?? d).join(', ')) : null),
       h('footer', { class: 'lens-foot' },
         h('label', { class: 'cmp-hand', for: `cmp-hand-${item.id}` }, box, h('span', {}, '이번 요청에 맡기기')),
         h('button', { type: 'button', class: 'lens-more', onclick: () => { st.detail = true; render(); } }, refs ? `근거 ${refs} · 자세히` : '자세히', h('span', { 'aria-hidden': 'true' }, ' ›')))];
@@ -458,13 +464,13 @@ export function createPlanView(host: PlanHost) {
     const touching = p.analysis.items.filter(i => i.partIds.some(x => x === id || visibleRep(x, boxes) === r));
     const impacts = p.analysis.impacts.filter(x => x.partId === id);
     return [
-      compareHead('변경 구상 · 이 부분 · 아직 적용 안 됨', partName(id) ?? '부분', [h('button', { type: 'button', class: 'close', 'aria-label': '선택 해제', title: '닫기 (Esc)', onclick: () => host.selectPart(null) }, '×')]),
+      compareHead('변경 구상 · 이 부분', partName(id) ?? '부분', [h('button', { type: 'button', class: 'close', 'aria-label': '선택 해제', title: '닫기 (Esc)', onclick: () => host.selectPart(null) }, '×')]),
       h('div', { class: 'lens-body cmp-body' },
-        row('지금', 'now', ...now(o, id)),
-        ...touching.map(i => row('구상', 'want', h('p', { class: 'cmp-title' }, h('button', { type: 'button', class: 'link-button', onclick: () => focusItem({ kind: 'item', id: i.id }) }, i.title)),
-          h('p', { class: 'cmp-text clamp3' }, i.description), i.partIds.includes(id) ? null : h('p', { class: 'cmp-src' }, '이 부분 안쪽을 바꾸려는 변경'))),
-        ...impacts.map(x => row('살펴볼 것', 'impact', h('p', { class: 'cmp-text' }, x.reason), h('p', { class: 'cmp-src' }, '영향 후보'))),
-        !touching.length && !impacts.length ? h('p', { class: 'cmp-none' }, '이 변경안이 바꾸거나 영향 후보로 본 부분은 아니에요.') : null)];
+        h('div', { class: 'cmp-main' }, touching.length ? pair(now(o, id), touching.map(i => h('div', { class: 'cmp-item' },
+          h('p', { class: 'cmp-name' }, h('button', { type: 'button', class: 'link-button', onclick: () => focusItem({ kind: 'item', id: i.id }) }, i.title), i.partIds.includes(id) ? null : h('small', {}, '이 부분 안쪽')),
+          h('p', { class: 'cmp-text clamp3' }, i.description))))
+          : h('div', { class: 'cmp-only' }, h('h3', { class: 'cmp-label' }, '지금'), ...now(o, id), impacts.length ? null : h('p', { class: 'cmp-none' }, '이 변경안이 바꾸거나 영향 후보로 본 부분은 아니에요.')),
+        impactList(o, impacts, false)))];
   }
   function closePlan() { close(); }
   function renderMode() {
