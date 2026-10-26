@@ -656,7 +656,7 @@ function showReading(scrollTop: boolean, move: boolean) {
   if (sheetOpen) { hideLens(); panel.hidden = false; renderPanel(scrollTop); if (move) reveal(selected!); return; }
   panel.hidden = true; panel.replaceChildren();
   if (move) reveal(selected!);
-  renderLens(); placeLensOnce();
+  renderLens(); placeLensOnce(false, move);
 }
 /** The camera before the sheet opened: closing the sheet comes back to it unless the person moved the map meanwhile. */
 let sheetReturn: { x: number; y: number; k: number } | null = null, mapMoved = false;
@@ -702,8 +702,9 @@ function lensGeometry(): { part: Rect; beside: Rect; protect: Rect[]; keep: Rect
   return { part: toScreen(union(parts)), beside: toScreen(near), protect, keep: union([near, ...ends]), own, others };
 }
 /** Once per selection (or after the map's structure changed). Docked: one smallest pan keeps the part, its group and its line
- * ends above the dock (or the part alone when they cannot fit). No zoom, and no second round. */
-function placeLensOnce(dock = false) {
+ * ends above the dock (or the part alone when they cannot fit). No zoom, and no second round. pan false: the camera is the
+ * person's (coming back from the sheet, where they may have moved the map); the surface takes its place without moving it. */
+function placeLensOnce(dock = false, pan = true) {
   const l = $('lens'); if (l.hidden) return;
   l.classList.remove('docked'); l.style.maxHeight = ''; l.style.width = '';
   const area = lensArea(), g = lensGeometry(), size = { w: l.offsetWidth, h: Math.min(l.offsetHeight, area.h) };
@@ -712,7 +713,7 @@ function placeLensOnce(dock = false) {
     l.classList.add('docked'); l.style.width = `${area.w}px`;
     const h = Math.min(l.offsetHeight, Math.round(area.h * (dock ? 0.6 : 0.42))), at = dockPlace(h, area);
     lensPlace = { side: 'dock', ...at, h, dy: 0 };
-    if (g) {
+    if (g && pan) {
       const free = area.h - h - 12, keepH = g.keep.h * camera.k, under = (r: Rect) => r.y + r.h > at.y - 8;
       const fits = keepH <= free && g.keep.w * camera.k <= area.w - 24;
       if ((fits ? toScreen(g.keep) : toScreen(g.own)).y + (fits ? keepH : g.own.h * camera.k) > at.y - 8 || under(g.part)) { revealRect(fits ? g.keep : g.own, 0, h + 12); return; } // applyCamera places it
