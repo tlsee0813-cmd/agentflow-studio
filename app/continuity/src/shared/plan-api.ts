@@ -46,5 +46,9 @@ export function validatePlanAsk(value: unknown): PlanAsk {
   return structuredClone(value as unknown as PlanAsk);
 }
 export function validatePlanReply(value: unknown, ask: PlanAsk): PlanAnalysis {
-  return parsePlanAnalysis(value, ask.parts.map(p => p.id), ask.evidence.map(e => e.id));
+  const reply = parsePlanAnalysis(value, ask.parts.map(p => p.id), ask.evidence.map(e => e.id));
+  // AI overview suggestions do not establish a global mandatory-dependency graph.
+  // Actual selected scope is evaluated separately; authored examples may still use explicit dependencies.
+  check(reply.items.every(item => item.dependsOn.length === 0));
+  return reply;
 }

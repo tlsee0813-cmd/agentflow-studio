@@ -6,7 +6,8 @@ import { ApiError } from '../../server/errors.mjs';
 import { createLimiter } from '../../server/limiter.mjs';
 import { validateAsk, validateReply, ASK_BYTES } from '../dist/public/shared/studio.js';
 import { validatePlanAsk, validatePlanReply } from '../dist/public/shared/plan-api.js';
-import { PLAN_PROMPT } from './plan-prompt.mjs';
+import { validateScopeAsk, validateScopeReply } from '../dist/public/shared/scope-api.js';
+import { PLAN_PROMPT, SCOPE_PROMPT } from './plan-prompt.mjs';
 
 const ENDPOINT = 'https://api.deepseek.com/chat/completions';
 const REPLY_BYTES = 131072;
@@ -41,7 +42,8 @@ export function readStudioConfig(env = {}) {
   return {
     // AI_MODE=mock (the local --mock run) keeps every studio call off: mock never means a substitute answer.
     apiKey: env.AI_MODE === 'mock' ? '' : String(env.DEEPSEEK_API_KEY ?? ''),
-    model, origins, accessCode: String(env.STUDIO_ACCESS_CODE ?? ''),
+    model, planModel: env.DEEPSEEK_PLAN_MODEL && /^[a-zA-Z0-9._-]{1,80}$/.test(env.DEEPSEEK_PLAN_MODEL) ? env.DEEPSEEK_PLAN_MODEL : model,
+    origins, accessCode: String(env.STUDIO_ACCESS_CODE ?? ''),
     timeoutMs: int('STUDIO_TIMEOUT_MS', 30000, 1000, 60000), maxTokens: int('STUDIO_MAX_TOKENS', 1200, 256, 4096),
     rate: int('STUDIO_REQUESTS_PER_MINUTE', 10, 1, 120), cap: int('STUDIO_CALL_CAP', 300, 1, 100000), concurrency: int('STUDIO_MAX_CONCURRENT', 3, 1, 16)
   };
@@ -70,7 +72,9 @@ async function readLimited(body, max, signal) {
 
 export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetch, signal } = {}) {
   const planning = ask.schemaVersion === 'studio.plan.1';
+  const scope = ask.schemaVersion === 'studio.scope.1';
   if (!config.apiKey) throw new ApiError('AI_NOT_CONFIGURED', 503);
+  if (signal?.aborted) throw new ApiError('CANCELLED', 499);
   const controller = new AbortController(); let timedOut = false;
   const timer = setTimeout(() => { timedOut = true; controller.abort(); }, config.timeoutMs);
   const abort = () => controller.abort(); signal?.addEventListener('abort', abort, { once: true });
@@ -78,9 +82,9 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
     // Workers supports manual/follow, not redirect:error. Reject 3xx below without forwarding the key.
     const response = await fetchImpl(ENDPOINT, { method: 'POST', redirect: 'manual', signal: controller.signal,
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.apiKey}` },
-      body: JSON.stringify({ model: config.model, stream: false, thinking: { type: 'disabled' }, max_tokens: planning ? Math.max(3000, config.maxTokens) : config.maxTokens,
+      body: JSON.stringify({ model: config.model, stream: false, thinking: { type: 'disabled' }, max_tokens: planning ? 3000 : scope ? 1800 : config.maxTokens,
         response_format: { type: 'json_object' },
-        messages: [{ role: 'system', content: planning ? PLAN_PROMPT : STUDIO_PROMPT }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }] }) });
+        messages: [{ role: 'system', content: scope ? SCOPE_PROMPT : planning ? PLAN_PROMPT : STUDIO_PROMPT }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }] }) });
     if (!response.ok) {
       await response.body?.cancel().catch(() => {});
       if ([401, 403].includes(response.status)) throw new ApiError('AI_AUTH_FAILED', 502);
@@ -95,7 +99,7 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
       const choice = JSON.parse(raw ?? '')?.choices?.[0];
       if (choice?.finish_reason !== 'stop' || typeof choice?.message?.content !== 'string') throw new Error();
       if (choice.message.content.includes(config.apiKey)) throw new Error();
-      reply = planning ? validatePlanReply(JSON.parse(choice.message.content), ask) : validateReply(JSON.parse(choice.message.content), ask);
+      reply = scope ? validateScopeReply(JSON.parse(choice.message.content), ask) : planning ? validatePlanReply(JSON.parse(choice.message.content), ask) : validateReply(JSON.parse(choice.message.content), ask);
     } catch (e) { if (controller.signal.aborted) throw e; throw new ApiError('INVALID_RESPONSE', 502); }
     return reply;
   } catch (e) {
@@ -135,7 +139,7 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
       if (url.pathname === '/api/studio/status' && request.method === 'GET') {
         return reply(200, { ai: config.apiKey ? 'deepseek' : 'off', model: config.apiKey ? config.model : null, access: config.accessCode ? 'code' : 'open' }, cors);
       }
-      if (!['/api/studio/ask', '/api/studio/plan'].includes(url.pathname)) throw new ApiError('NOT_FOUND', 404);
+      if (!['/api/studio/ask', '/api/studio/plan', '/api/studio/scope'].includes(url.pathname)) throw new ApiError('NOT_FOUND', 404);
       if (request.method !== 'POST') throw new ApiError('METHOD_NOT_ALLOWED', 405);
       if (request.headers.get('x-agentflow-request') !== '1') throw new ApiError('FORBIDDEN_ORIGIN', 403);
       if (request.headers.get('content-type')?.split(';')[0].trim() !== 'application/json') throw new ApiError('INVALID_CONTENT_TYPE', 415);
@@ -145,13 +149,14 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
       try {
         const raw = await readLimited(request.body, ASK_BYTES);
         if (raw === null) throw new ApiError('INPUT_TOO_LARGE', 413);
-        ask = (url.pathname === '/api/studio/plan' ? validatePlanAsk : validateAsk)(JSON.parse(raw));
+        ask = (url.pathname === '/api/studio/scope' ? validateScopeAsk : url.pathname === '/api/studio/plan' ? validatePlanAsk : validateAsk)(JSON.parse(raw));
       } catch (e) { throw e instanceof ApiError ? e : new ApiError(e?.message === 'INPUT_TOO_LARGE' ? 'INPUT_TOO_LARGE' : e?.message === 'UNSUPPORTED_VERSION' ? 'UNSUPPORTED_VERSION' : 'INVALID_INPUT', e?.message === 'INPUT_TOO_LARGE' ? 413 : 400); }
       if (!config.apiKey) throw new ApiError('AI_NOT_CONFIGURED', 503);
       const release = limiter.acquire(crypto.randomUUID());
       try {
-        const answer = await callStudioModel(ask, config, { fetchImpl, signal: request.signal });
-        return reply(200, { model: config.model, reply: answer }, cors);
+        const requestConfig = url.pathname !== '/api/studio/ask' ? { ...config, model: config.planModel ?? config.model } : config;
+        const answer = await callStudioModel(ask, requestConfig, { fetchImpl, signal: request.signal });
+        return reply(200, { model: requestConfig.model, reply: answer }, cors);
       } finally { release(); }
     } catch (e) {
       const error = e instanceof ApiError ? e : new ApiError('INTERNAL_ERROR', 500);

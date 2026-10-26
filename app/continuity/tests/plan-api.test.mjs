@@ -13,7 +13,8 @@ test('plan input is bounded by serialized UTF-8 bytes and rejects invented topol
   const cycle=ask('A'); cycle.parts[0].parentId='document'; assert.throws(()=>validatePlanAsk(cycle));
 });
 test('plan replies must cite actual sources and actual map parts',()=>{
-  assert.deepEqual(validatePlanReply(answer('B'),ask('B')),answer('B'));
+  assert.deepEqual(validatePlanReply(answer('A'),ask('A')),answer('A'));
+  assert.throws(()=>validatePlanReply(answer('B'),ask('B')), 'AI overview cannot establish mandatory dependencies');
   const wrong=answer('A'); wrong.impacts[0].refs=['INVENTED'];
   assert.throws(()=>validatePlanReply(wrong,ask('A')));
 });
