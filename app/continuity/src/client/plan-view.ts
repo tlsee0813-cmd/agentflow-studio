@@ -34,9 +34,9 @@ export interface PlanHost {
   notice(text: string, action?: { label: string; run: () => void }): void;
   /** Once, when the plan opens: a readable size (about 100%) around these parts beside the panel; the rest by pan or 전체 보기. */
   frame(parts: string[]): void;
-  /** The map's reading surface, about these parts: a new place when place is true, else the same place with new content.
-   * null hides it. */
-  surface(content: Node[] | null, parts: string[], place: boolean): void;
+  /** The map's reading surface, about these parts: a new place when place is true; 'refit' sizes it again for new content
+   * in the same place without moving the camera; false keeps the place. null hides it. */
+  surface(content: Node[] | null, parts: string[], place: boolean | 'refit'): void;
 }
 
 type Focus = { kind: 'item'; id: string } | { kind: 'impacts' } | { kind: 'part'; id: string } | null;
@@ -47,6 +47,8 @@ interface Session {
   /** The whole plan (writing, sources, every item, the request and results) in the right panel. The map, the plan's strip and
    * one comparison are the default reading. */
   detail: boolean; strip: 'conditions' | null;
+  /** The comparison shows the sources of this change in its place (the way back keeps the change, drafts and camera). */
+  evidenceFor: string | null;
   pending: { controller: AbortController; input: PlanInput } | null; error: string | null;
   /** The one scope review of a request being made from an AI analysis, and why the last one did not produce a document. */
   scoping: { controller: AbortController; count: number } | null; scopeError: string | null;
@@ -92,7 +94,7 @@ export function createPlanView(host: PlanHost) {
     if (s && s.key === o.key) return;
     const condition: Condition = 'A', { bundle, unreadable } = bundleFor(o, condition);
     s = { key: o.key, projectId: o.project.id, example: o.kind === 'example', condition, bundle, unreadable, storeMsg: null,
-      focus: firstFocus(bundle.plan), mode: bundle.plan ? 'preview' : 'current', editing: !bundle.plan, detail: false, strip: null, pending: null, error: null, scoping: null, scopeError: null,
+      focus: firstFocus(bundle.plan), mode: bundle.plan ? 'preview' : 'current', editing: !bundle.plan, detail: false, strip: null, evidenceFor: null, pending: null, error: null, scoping: null, scopeError: null,
       sheet: null, sources: false, adding: false, resultFor: bundle.snapshots.at(-1)?.id ?? null, addForm: false, copyMsg: null, fileMsg: null, ret: host.capture() };
     if (unreadable) s.storeMsg = null;
     host.chrome(); host.frame(changedParts()); render();
@@ -197,7 +199,7 @@ export function createPlanView(host: PlanHost) {
     if (!s) return;
     const same = JSON.stringify(s.focus) === JSON.stringify(next);
     if (next?.kind === 'item' && host.selected()) host.selectPart(null);
-    s.focus = same ? null : next;
+    s.focus = same ? null : next; s.evidenceFor = null;
     if (s.focus && plan()) s.mode = 'preview';
     render();
     // Bring the first changed part into view with the smallest move; never a refit.
@@ -390,19 +392,21 @@ export function createPlanView(host: PlanHost) {
   /* ---------- one comparison on the map: what a change wants next to what each of its parts is now ----------
      The words carry the roles: 지금 (the part's current description and where it comes from), 구상 (what the change wants;
      not applied, not a result), 살펴볼 것 (an impact candidate's reason, on the part it names). */
-  let lastFocusKey = '';
+  let lastFocusKey = '', lastShown = '';
   function renderCompare(o: PlanOpened) {
     const st = s!, p = plan();
     if (!p || st.mode !== 'preview' || !st.focus || st.focus.kind === 'impacts' || panelOpen() || st.sheet) { host.surface(null, [], false); lastFocusKey = ''; return; }
     const boxes = host.boxes(), rep = (id: string) => visibleRep(id, boxes), key = JSON.stringify(st.focus);
     let content: Node[], parts: string[];
+    const shown = `${key}|${st.evidenceFor ?? ''}`;
     if (st.focus.kind === 'item') {
       const item = itemOf(st.focus.id); if (!item) { host.surface(null, [], false); return; }
-      content = itemCompare(o, p, item); parts = [...new Set(item.partIds.map(rep).filter((x): x is string => !!x))];
+      content = st.evidenceFor === item.id ? itemEvidence(p, item) : itemCompare(o, p, item); parts = [...new Set(item.partIds.map(rep).filter((x): x is string => !!x))];
     } else {
       const id = st.focus.id; content = partCompare(o, p, id); parts = [rep(id) ?? id];
     }
-    host.surface(content, parts, key !== lastFocusKey); lastFocusKey = key;
+    // A new change or part: a new place. Its sources in and out: the same place sized again, the camera untouched.
+    host.surface(content, parts, key !== lastFocusKey ? true : shown !== lastShown ? 'refit' : false); lastFocusKey = key; lastShown = shown;
   }
   /** What a part is now, and where that description comes from; nothing when there is nothing. */
   function now(o: PlanOpened, id: string): Node[] {
@@ -457,7 +461,17 @@ export function createPlanView(host: PlanHost) {
         item.dependsOn.length && by?.kind === 'example' ? h('p', { class: 'cmp-dep' }, h('span', {}, '전제'), item.dependsOn.map(d => itemOf(d)?.title ?? d).join(', ')) : null),
       h('footer', { class: 'lens-foot' },
         h('label', { class: 'cmp-hand', for: `cmp-hand-${item.id}` }, box, h('span', {}, '이번 요청에 맡기기')),
-        h('button', { type: 'button', class: 'lens-more', onclick: () => { st.detail = true; render(); } }, refs ? `근거 ${refs} · 자세히` : '자세히', h('span', { 'aria-hidden': 'true' }, ' ›')))];
+        refs ? h('button', { type: 'button', class: 'lens-more', onclick: () => { st.evidenceFor = item.id; render(); requestAnimationFrame(() => document.getElementById('cmp-back')?.focus()); } }, `근거 ${refs}`, h('span', { 'aria-hidden': 'true' }, ' ›')) : null)];
+  }
+  /** The sources this change cites, read in the comparison's place: each original text with where it comes from. */
+  function itemEvidence(p: ChangePlan, item: PlanItem): Node[] {
+    const st = s!, by = st.bundle.by, refs = p.evidence.filter(e => item.refs.includes(e.id));
+    const back = () => { st.evidenceFor = null; render(); requestAnimationFrame(() => document.querySelector<HTMLElement>('#lens .cmp-hand input, #lens .lens-more')?.focus()); };
+    return [
+      compareHead(`근거 ${refs.length} · ${by?.kind === 'example' ? '예제 원자료' : '이 변경안이 읽은 자료'}`, item.title,
+        [h('button', { type: 'button', class: 'close', 'aria-label': '비교로 돌아가기', title: '비교로 (Esc)', onclick: back }, '×')]),
+      h('div', { class: 'lens-body cmp-body cmp-evidence' }, sourceList(refs, true)),
+      h('footer', { class: 'lens-foot' }, h('button', { type: 'button', id: 'cmp-back', class: 'lens-more', onclick: back }, h('span', { 'aria-hidden': 'true' }, '‹ '), '비교로 돌아가기'))];
   }
   function partCompare(o: PlanOpened, p: ChangePlan, id: string): Node[] {
     const boxes = host.boxes(), r = visibleRep(id, boxes) ?? id;
@@ -587,8 +601,8 @@ export function createPlanView(host: PlanHost) {
     const st = s!, b = (c: Condition, label: string) => h('button', { type: 'button', 'aria-pressed': String(st.condition === c), title: CONDITION_LABEL[c], disabled: !!st.pending, onclick: () => setCondition(c) }, label);
     return h('div', { class: 'pp-cond', role: 'group', 'aria-label': '예제 자료 바꾸기' }, h('span', {}, '자료 바꾸기 · 코드에 파일별 결과가'), b('A', '있음'), b('B', '없음'));
   }
-  function sourceList(evidence: { id: string; kind: keyof typeof EVIDENCE_LABEL; title: string; text: string; basis: string }[]) {
-    return h('ol', { class: 'pp-sources' }, ...evidence.map(e => h('li', {}, h('details', {},
+  function sourceList(evidence: { id: string; kind: keyof typeof EVIDENCE_LABEL; title: string; text: string; basis: string }[], open = false) {
+    return h('ol', { class: 'pp-sources' }, ...evidence.map(e => h('li', {}, h('details', { open },
       h('summary', {}, h('span', { class: `pp-kind k-${e.kind}` }, EVIDENCE_LABEL[e.kind]), h('span', {}, e.title)),
       h('p', {}, e.text), h('p', { class: 'pp-ref' }, `${e.id} · ${e.basis}`)))));
   }
@@ -790,6 +804,7 @@ export function createPlanView(host: PlanHost) {
     if (s.sheet) { closeSheet(); return true; }
     if (s.addForm) { s.addForm = false; render(); return true; }
     if (s.strip) { s.strip = null; render(); return true; }
+    if (s.evidenceFor) { s.evidenceFor = null; render(); return true; }
     if (s.detail && plan() && !s.editing) { s.detail = false; render(); return true; }
     if (s.focus?.kind === 'part' && host.selected()) { host.selectPart(null); return true; }
     if (s.focus) { s.focus = null; render(); return true; }

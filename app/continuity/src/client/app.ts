@@ -711,7 +711,7 @@ function placeLensOnce(dock = false, pan = true) {
   lensPlace = g && !dock ? placeLens(g.part, g.beside, g.protect, size, area, g.others) : { side: 'dock', x: 0, y: 0, h: 0, dy: 0 };
   if (lensPlace.side === 'dock') {
     l.classList.add('docked'); l.style.width = `${area.w}px`;
-    const h = Math.min(l.offsetHeight, Math.round(area.h * (dock ? 0.6 : 0.42))), at = dockPlace(h, area);
+    const h = Math.min(l.offsetHeight, Math.round(area.h * (dock ? 0.7 : 0.42))), at = dockPlace(h, area);
     lensPlace = { side: 'dock', ...at, h, dy: 0 };
     if (g && pan) {
       const free = area.h - h - 12, keepH = g.keep.h * camera.k, under = (r: Rect) => r.y + r.h > at.y - 8;
@@ -1088,7 +1088,7 @@ const planView = createPlanView({
     if (!content) { if (l.classList.contains('compare')) hideLens(); return; }
     l.replaceChildren(...content); l.hidden = false; l.classList.add('compare'); readingFor = parts;
     // The comparison always reads in the same place: docked under the map, the plan's strip above it.
-    if (place || !lensPlace) placeLensOnce(true); else positionLens();
+    if (place === true || !lensPlace) placeLensOnce(true); else if (place === 'refit') placeLensOnce(true, false); else positionLens();
   },
   chrome: () => {
     const o = opened; if (!o) return;
