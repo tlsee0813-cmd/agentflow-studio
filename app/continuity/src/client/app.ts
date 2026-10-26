@@ -261,8 +261,7 @@ function setBar(o: Opened | null) {
   bar.hidden = !sp;
   if (o && sp) {
     const up = sp.parentId ? partOf(o, sp.parentId) : null, upName = up?.name ?? o.project.name;
-    bar.replaceChildren(h('span', { class: 'scope-label' }, `안쪽 ${sp.childIds.length}`),
-      h('button', { type: 'button', class: 'scope-up', onclick: () => go(o.key, null, sp.parentId), title: `구성 위로 · ${upName}`, 'aria-label': `${upName}(으)로 올라가기` },
+    bar.replaceChildren(h('button', { type: 'button', class: 'scope-up', onclick: () => go(o.key, null, sp.parentId), title: `구성 위로 · ${upName}`, 'aria-label': `${upName}(으)로 올라가기` },
         h('span', { 'aria-hidden': 'true' }, '↑'), h('span', { class: 'scope-up-name' }, upName)));
   } else bar.replaceChildren();
   // Back: only when the previous scene is not simply the parent.
@@ -270,7 +269,7 @@ function setBar(o: Opened | null) {
   const showBack = !!o && !!prev && prev.scope !== (sp?.parentId ?? null) && !planView.isOpen();
   back.hidden = !showBack;
   if (o && prev && showBack) {
-    const name = prev.scope ? partOf(o, prev.scope)?.name ?? o.project.name : `${o.project.name} 전체`;
+    const name = prev.scope ? partOf(o, prev.scope)?.name ?? o.project.name : '전체 지도';
     back.replaceChildren(h('span', { 'aria-hidden': 'true' }, '←'), h('span', {}, name));
     back.title = `직전 장면으로 · ${name}${prev.selected ? ` · ${partOf(o, prev.selected)?.name ?? ''} 선택` : ''}`;
   }

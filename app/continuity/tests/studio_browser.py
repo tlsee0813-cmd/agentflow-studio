@@ -4,7 +4,7 @@ entry -> map (no document scroll) -> part -> ask (summary, question) -> answer w
 provider failure shows a short error and a retry (never a substitute answer); a server without a key and the static
 build both show the honest not-connected state. Not a visual or usability audit.
 """
-import functools, http.server, os, pathlib, re, subprocess, sys, threading
+import functools, http.server, os, pathlib, re, subprocess, sys, tempfile, threading
 from playwright.sync_api import sync_playwright, expect
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -311,6 +311,61 @@ def new_project_flow(browser, base):
     context.close()
 
 
+def oss_fixtures():
+    """Backup files of the pinned OSS cases (docs/cycles/2026-10-26-visual-experience-58), made by the shared generator."""
+    out = pathlib.Path(tempfile.mkdtemp(prefix="visual58-")) / "cases"
+    subprocess.run(["node", str(ROOT / "tests/visual58-fixtures.mjs"), "--out", str(out)], cwd=APP, check=True, stdout=subprocess.DEVNULL)
+    return out
+
+
+def workspace_flow(browser, base, cases):
+    """UI58 workspace: one inspector width, no zoom on opening or closing the plan, the plan's way back, long same-prefix
+    names told apart on the map, the previous scene apart from the way up, and no recent entry without records."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    page.goto(base + "/#/p/ex-converter")
+    page.locator(".node", has_text="문서 읽기").click()
+    part_w = page.locator("#panel").bounding_box()["width"]
+    zoom, before = page.locator("#zoom-level").inner_text(), page.locator("#world").evaluate("e => e.style.transform")
+    page.locator("#plan-entry").click()
+    expect(page.locator("#plan-panel")).to_be_visible()
+    assert abs(page.locator("#plan-panel").bounding_box()["width"] - part_w) < 1, "part and plan share one inspector width"
+    expect(page.locator("#zoom-level")).to_have_text(zoom)  # opening never re-zooms
+    # Reading an item (map marks) and handing it over (checkbox) are separate controls.
+    page.locator(".pp-item-title").first.click()
+    expect(page.locator(".pp-item.focused")).to_have_count(1)
+    expect(page.locator(".pp-item").first.locator("input[type=checkbox]")).to_be_checked()
+    expect(page.locator("#world .plan-direct")).not_to_have_count(0)
+    page.locator("#plan-mode").get_by_role("button", name="현재").click()
+    expect(page.locator("#world .plan-badge")).to_have_count(0)
+    expect(page.locator("#zoom-level")).to_have_text(zoom)
+    page.locator("#plan-panel .close").click()
+    expect(page.locator("#panel-title")).to_have_text("문서 읽기")  # selection and camera come back
+    page.wait_for_timeout(300)
+    assert page.locator("#world").evaluate("e => e.style.transform") == before
+    # No records: no recent entry and no reserved room.
+    expect(page.locator("#recent-toggle")).to_be_hidden()
+    # Long names sharing a 41-character prefix stay apart by their endings (two lines, nothing cut).
+    page.goto(base + "/")
+    page.locator("#import-file").set_input_files(str(cases / "long-prefix-restic.json"))
+    expect(page.locator("#crumbs")).to_contain_text("long-prefix-restic")
+    page.locator(".node", has_text="restic repair").locator(".enter").click()
+    in_scope(page, "restic repair")
+    names = page.locator(".node .node-name")
+    expect(names).to_have_count(3)
+    for i in range(3):
+        cut = names.nth(i).evaluate("e => e.scrollHeight > e.clientHeight + 1")
+        assert not cut, names.nth(i).inner_text()
+    assert len({names.nth(i).inner_text() for i in range(3)}) == 3
+    # Arrived from the whole map, not from the parent: a way back to that scene, apart from the way up.
+    expect(page.locator("#scene-back")).to_be_visible()
+    expect(page.locator("#scope-bar .scope-up")).to_contain_text("restic")
+    page.locator("#scene-back").click()
+    expect(page.locator("#scope-bar")).to_be_hidden()
+    expect(page.locator("#scene-back")).to_be_hidden()
+    context.close()
+
+
 def failure_flow(browser, base):
     page = browser.new_page(viewport={"width": 1280, "height": 720})
     page.goto(base + "/")
@@ -358,6 +413,7 @@ def main():
             basics_flow(browser, base); print("ok  stable example link (reload, new browser), labels, no map note text, recent range, fold restored")
             map_flow(browser, base); print("ok  drag (node, group), wheel zoom, inside/back with view kept, fold, example places not saved")
             new_project_flow(browser, base); print("ok  new project -> three levels -> path and back -> saved place and draft kept on reload")
+            workspace_flow(browser, base, oss_fixtures()); print("ok  one inspector width, plan open/close without zoom, long same-prefix names, way back apart from way up")
             proc, base = start("code"); procs.append(proc); code_flow(browser, base); print("ok  access code kept from an input event")
             proc, base = start("fail"); procs.append(proc); failure_flow(browser, base); print("ok  provider failure -> short error -> retry")
             proc, base = start("nokey"); procs.append(proc); off_flow(browser, base + "/", "AI 키 없음"); print("ok  server without key -> honest off state")
