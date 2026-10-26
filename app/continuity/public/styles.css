@@ -136,7 +136,10 @@ button:disabled { opacity: .5; cursor: default; }
 .frame.related { border-color: var(--accent-line); }
 .frame.cited { border-color: var(--accent); }
 .frame-head { position: absolute; left: 0; right: 0; top: 0; height: 38px; display: flex; align-items: center; gap: 4px; padding: 0 8px 0 6px; border-radius: 12px 12px 0 0; cursor: pointer; }
-.frame-name { font-weight: 650; font-size: 13px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.frame-name { flex: 1 1 auto; font-weight: 650; font-size: 13px; line-height: 1.3; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+/* A long group name takes a second line; the layout gives the head the height for it (HEAD_2). */
+.frame-head.tall { height: 56px; align-items: center; }
+.frame-head.tall .frame-name { white-space: normal; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .frame-head:hover .frame-name, .frame.selected > .frame-head .frame-name { color: var(--text); }
 .frame-meta { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; color: var(--text-4); font-size: 11.5px; white-space: nowrap; }
 .frame-meta .fresh { color: var(--text-2); }
@@ -352,8 +355,9 @@ button:disabled { opacity: .5; cursor: default; }
 .plan-direct .plan-note { color: var(--change); }
 .node.plan-impact, .frame.plan-impact { outline: 1.5px dashed var(--change-line); outline-offset: 3px; }
 .plan-impact .plan-note { color: var(--change); font-weight: 550; }
-.plan-badge { position: absolute; top: -9px; left: 10px; z-index: 2; max-width: calc(100% - 20px); height: 17px; padding: 0 7px; border-radius: 5px; background: var(--change); color: #fff; font-size: 10.5px; font-weight: 650; line-height: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
-.frame > .plan-badge { left: auto; right: 14px; }
+.plan-badge { position: absolute; bottom: -9px; left: 10px; z-index: 2; max-width: calc(100% - 20px); height: 17px; padding: 0 7px; border-radius: 5px; background: var(--change); color: #fff; font-size: 10.5px; font-weight: 650; line-height: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+/* on a group: its bottom edge, clear of the head row and its controls */
+.frame > .plan-badge { left: 14px; }
 .space.preview .node:not(.plan-direct):not(.plan-impact):not(.selected) { box-shadow: none; }
 .space.preview.focusing .node:not(.plan-direct):not(.plan-impact):not(.selected) { opacity: .7; }
 .space.preview.focusing .frame:not(.plan-direct):not(.plan-impact) > .frame-head { opacity: .75; }
@@ -467,6 +471,13 @@ button:disabled { opacity: .5; cursor: default; }
 .plan-sheet footer .fine { flex: 1; }
 
 @media (max-width: 1100px) { .brand span { display: none; } }
+/* Below 720px the inspector takes the whole width (inspectorWidth() in plan-dom.ts reads the same breakpoint), and the request
+   sheet covers the window instead of the leftover strip. */
+@media (max-width: 719.98px) {
+  :root { --insp-w: 100vw; }
+  .inspector { border-left: 0; }
+}
+.plan-sheet.wide { left: 50%; width: min(680px, calc(100% - 24px)); }
 @media (max-width: 720px) {
   .crumbs a:not(:last-of-type) { display: none; }
   .ai-pill { display: none; }

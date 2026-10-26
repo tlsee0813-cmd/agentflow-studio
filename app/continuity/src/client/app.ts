@@ -7,7 +7,7 @@ import { parseProject } from '../shared/validation.js';
 import { editArea, addArea, addChildArea, createProject, rename } from '../shared/domain.js';
 import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
-import { layoutScope, edgePath, ROOT, type ScopeLayout, type Positions, type Point } from './map-layout.js';
+import { layoutScope, edgePath, ROOT, HEAD, type ScopeLayout, type Positions, type Point } from './map-layout.js';
 import { aiStatus, askStudio, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
 import { runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth } from './plan-dom.js';
@@ -367,7 +367,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit') {
     if (b.kind === 'frame') {
       const latest = subtreeRecords(view, p.id)[0]?.at ?? null;
       world.append(h('div', { class: `frame depth-${Math.min(b.depth, 2)}`, 'data-part': p.id, 'data-box': p.id },
-        h('div', { class: `frame-head s-${p.status}`, 'data-part': p.id, 'data-drag': p.id, role: 'button', tabindex: '0', title: of ? `${of} › ${p.name}` : p.name, onkeydown: keySelect(p.id) },
+        h('div', { class: `frame-head s-${p.status}${b.head > HEAD ? ' tall' : ''}`, 'data-part': p.id, 'data-drag': p.id, role: 'button', tabindex: '0', title: of ? `${of} › ${p.name}` : p.name, onkeydown: keySelect(p.id) },
           toggleButton(p, true), h('span', { class: 'frame-name' }, p.name),
           h('span', { class: 'plan-note' }), h('span', { class: 'frame-meta' }, latest ? h('span', { class: recentAt(latest) ? 'fresh' : '' }, ago(latest)) : null),
           enterButton(p))));
@@ -383,6 +383,10 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit') {
         b.kids ? enterButton(p) : null));
     }
   }
+  // Selected lines move to a layer above the group surfaces (below the parts), so a line that crosses a group is not read as
+  // ending at it.
+  const top = svg('svg', { class: 'edges edges-top', width: '1', height: '1', 'aria-hidden': 'true' });
+  world.insertBefore(top, world.querySelector('.node, .ghost'));
   positionWorld();
   $('space').classList.toggle('in-scope', !!scope);
   const empty = $('space-empty');
@@ -409,7 +413,7 @@ function positionWorld() {
   });
   world.querySelectorAll<SVGGElement>('.edge').forEach(g => {
     const a = lay.boxes.get(g.dataset.from!), b = lay.boxes.get(g.dataset.to!); if (!a || !b) return;
-    const d = edgePath(a, b).d; g.querySelectorAll('path').forEach(x => x.setAttribute('d', d));
+    const d = edgePath(a, b, lay.boxes.values()).d; g.querySelectorAll('path').forEach(x => x.setAttribute('d', d));
   });
 }
 
@@ -475,10 +479,19 @@ function revealRect(B: { x: number; y: number; w: number; h: number }) {
   if (sy + dy < top) dy = top - sy;
   if (dx || dy) { camera = { ...camera, x: camera.x + dx, y: camera.y + dy }; applyCamera(true); }
 }
-/** Keep the selected part visible beside the inspector (a large frame: its head and first rows). */
+/** Keep the selected part visible beside the inspector (a large frame: its head and first rows). When the part and the other
+ * ends of its lines fit together at this zoom, they come into view together. */
 function reveal(partId: string) {
   const b = lay.boxes.get(partId); if (!b) return;
-  revealRect({ x: b.x, y: b.y, w: Math.min(b.w, 420), h: Math.min(b.h, 300) });
+  const ends = lay.edges.filter(e => e.from === partId || e.to === partId).map(e => lay.boxes.get(e.from === partId ? e.to : e.from)).filter((x): x is NonNullable<typeof x> => !!x);
+  const own = { x: b.x, y: b.y, w: Math.min(b.w, 420), h: Math.min(b.h, 300) };
+  if (ends.length) {
+    const all = [own, ...ends], x = Math.min(...all.map(r => r.x)), y = Math.min(...all.map(r => r.y));
+    const B = { x, y, w: Math.max(...all.map(r => r.x + r.w)) - x, h: Math.max(...all.map(r => r.y + r.h)) - y };
+    const vp = $('viewport').getBoundingClientRect();
+    if (B.w * camera.k <= vp.width - PANEL_W() - 56 && B.h * camera.k <= vp.height - BOTTOM - 40) { revealRect(B); return; }
+  }
+  revealRect(own);
 }
 
 /* ---------- selection & panel ---------- */
@@ -502,9 +515,10 @@ function select(partId: string | null) {
 
 /** Selection on the map: the part, its lines and the parts at their other ends (drawn representative or side ghost). */
 function markSelection(partId: string | null) {
-  const related = new Set<string>();
+  const related = new Set<string>(), base = document.querySelector('#world .edges:not(.edges-top)'), top = document.querySelector('#world .edges-top');
   document.querySelectorAll<SVGGElement>('.edge').forEach(el => {
     const on = !!partId && (el.dataset.from === partId || el.dataset.to === partId);
+    const layer = on ? top : base; if (layer && el.parentNode !== layer) layer.append(el);
     el.classList.toggle('on', on); el.querySelector('.edge-line')!.setAttribute('marker-end', on ? 'url(#arrow-on)' : 'url(#arrow)');
     if (on) related.add(el.dataset.from === partId ? el.dataset.to! : el.dataset.from!);
   });
@@ -551,7 +565,7 @@ function renderPanel(scrollTop: boolean) {
     h('div', { class: 'panel-chips' }, h('span', { class: `state s-${part.status}` }, h('i', { class: 'dot', 'aria-hidden': 'true' }), state),
       records.length ? h('span', { class: 'chip plain' }, `기록 ${records.length}${records[0] ? ` · ${ago(records[0].at)}` : ''}`) : null),
     h('div', { class: 'head-tools' },
-      menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu' }, ...menuItems)) : null,
+      menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e: Event) => { ((e.currentTarget as HTMLElement).parentElement as HTMLDetailsElement).open = false; } }, ...menuItems)) : null,
       h('button', { type: 'button', class: 'close', 'aria-label': '닫고 지도로', title: '닫기 (Esc)', onclick: () => go(o.key) }, '×')));
   const body = h('div', { class: 'panel-body' });
   if (editing) body.append(editForm(o, part));
@@ -884,8 +898,15 @@ function bindCanvas() {
   $('recent-toggle').addEventListener('click', () => { if (selected || planView.isOpen()) recentPeek = !recentPeek; else recentOpen = !recentOpen; if (opened) renderRecent(); });
   $('scene-back').addEventListener('click', sceneBack);
   bindEdgeHints();
+  document.addEventListener('pointerdown', e => {
+    const menu = document.querySelector<HTMLDetailsElement>('details.more[open]');
+    if (menu && !menu.contains(e.target as Node)) menu.open = false;
+  });
   document.addEventListener('keydown', e => {
     if ((e.target as HTMLElement).closest('textarea,input')) return;
+    // Innermost first: an open ⋯ menu closes before anything else, and focus goes back to its button.
+    const menu = document.querySelector<HTMLDetailsElement>('details.more[open]');
+    if (e.key === 'Escape' && menu) { menu.open = false; menu.querySelector<HTMLElement>('summary')?.focus(); return; }
     if (e.key === 'Escape' && !help.hidden) { help.hidden = true; helpButton.setAttribute('aria-expanded', 'false'); return; }
     if (e.key === 'Escape' && opened && recentShown() && !$('recent').classList.contains('collapsed')) { if (selected || planView.isOpen()) recentPeek = false; else recentOpen = false; renderRecent(); return; }
     if (e.key === 'Escape' && planView.isOpen()) { const part = selected; planView.escape(); if (part && !selected) requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-drag="${CSS.escape(part)}"]`)?.focus()); return; }

@@ -639,6 +639,7 @@ export function createPlanView(host: PlanHost) {
     const sheet = $('plan-sheet'), snap = s ? snapshotOf(s.sheet) : null;
     sheet.hidden = !snap;
     if (!s || !snap) { sheet.replaceChildren(); return; }
+    fitSheet();
     const labels = s.bundle.labels[snap.id] ?? {}, p = plan();
     const old = !p || snap.planId !== p.id || snap.planRevision !== p.revision;
     const total = Object.keys(labels).length || snap.itemIds.length;
@@ -651,6 +652,10 @@ export function createPlanView(host: PlanHost) {
         h('span', { class: 'fine', role: 'status' }, s.copyMsg ?? '복사는 이 글을 옮기는 일이에요. 접수·실행·완료를 기록하지 않아요.'),
         h('button', { type: 'button', class: 'link-button', onclick: closeSheet }, '닫기')));
   }
+  /** The sheet reads beside the inspector while the strip left of it is wide enough; otherwise it covers the window. */
+  function fitSheet() { $('plan-sheet').classList.toggle('wide', $('space').getBoundingClientRect().width - width() - 48 < 420); }
+  // A resized window changes the inspector width: keep the map's reference width and the sheet in step.
+  window.addEventListener('resize', () => { if (!s) return; $('space').style.setProperty('--plan-w', `${width()}px`); fitSheet(); });
   function closeSheet() { if (!s) return; s.sheet = null; s.copyMsg = null; render(); document.querySelector<HTMLElement>('.pp-request .link-button, .pp-request .primary')?.focus(); }
 
   /** Escape: the innermost open thing first; the plan itself last. Returns true when handled. */

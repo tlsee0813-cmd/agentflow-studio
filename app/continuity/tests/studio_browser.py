@@ -332,6 +332,16 @@ def workspace_flow(browser, base, cases):
     assert abs(page.locator("#plan-panel").bounding_box()["width"] - part_w) < 1, "part and plan share one inspector width"
     expect(page.locator("#zoom-level")).to_have_text(zoom)  # opening never re-zooms
     # Reading an item (map marks) and handing it over (checkbox) are separate controls.
+    # At 1280 and 100%, the three groups and every change tab read beside the inspector, and no tab sits on a group head.
+    page.wait_for_timeout(400)  # the dock slides in and the smallest pan eases
+    panel_x = page.locator("#plan-panel").bounding_box()["x"]
+    for box in [page.locator(sel).nth(i).bounding_box() for sel in (".frame", ".plan-badge") for i in range(page.locator(sel).count())]:
+        assert box["x"] >= 0 and box["x"] + box["width"] <= panel_x, (box, panel_x)
+    expect(page.locator(".frame")).to_have_count(3)
+    expect(page.locator(".plan-badge")).not_to_have_count(0)
+    assert page.evaluate("""() => { const hit = (a, b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+      const heads = [...document.querySelectorAll('.frame-head')].map(e => e.getBoundingClientRect());
+      return [...document.querySelectorAll('.plan-badge')].every(b => heads.every(h => !hit(b.getBoundingClientRect(), h))); }""")
     page.locator(".pp-item-title").first.click()
     expect(page.locator(".pp-item.focused")).to_have_count(1)
     expect(page.locator(".pp-item").first.locator("input[type=checkbox]")).to_be_checked()
@@ -339,12 +349,30 @@ def workspace_flow(browser, base, cases):
     page.locator("#plan-mode").get_by_role("button", name="현재").click()
     expect(page.locator("#world .plan-badge")).to_have_count(0)
     expect(page.locator("#zoom-level")).to_have_text(zoom)
+    # A narrow window: the inspector and the request sheet take the whole width and stay readable; back to 1280 after.
+    page.set_viewport_size({"width": 700, "height": 700})
+    page.wait_for_timeout(200)
+    assert page.evaluate("getComputedStyle(document.getElementById('space')).getPropertyValue('--plan-w')").strip() == "700px"
+    assert page.locator("#plan-panel").bounding_box()["width"] == 700
+    page.get_by_role("button", name="요청문 만들기").click()
+    assert page.locator("#plan-sheet").bounding_box()["width"] >= 600
+    page.keyboard.press("Escape")
+    expect(page.locator("#plan-sheet")).to_be_hidden()
+    page.set_viewport_size({"width": 1280, "height": 720})
+    page.wait_for_timeout(200)
     page.locator("#plan-panel .close").click()
     expect(page.locator("#panel-title")).to_have_text("문서 읽기")  # selection and camera come back
     page.wait_for_timeout(300)
     assert page.locator("#world").evaluate("e => e.style.transform") == before
     # No records: no recent entry and no reserved room.
     expect(page.locator("#recent-toggle")).to_be_hidden()
+    # The ⋯ menu closes first on Esc, focus back on its button; the part stays selected.
+    page.locator(".panel .more summary").click()
+    expect(page.locator(".more-menu")).to_be_visible()
+    page.keyboard.press("Escape")
+    expect(page.locator(".more-menu")).to_be_hidden()
+    expect(page.locator("#panel-title")).to_have_text("문서 읽기")
+    expect(page.locator(".panel .more summary")).to_be_focused()
     # Long names sharing a 41-character prefix stay apart by their endings (two lines, nothing cut).
     page.goto(base + "/")
     page.locator("#import-file").set_input_files(str(cases / "long-prefix-restic.json"))
@@ -363,6 +391,17 @@ def workspace_flow(browser, base, cases):
     page.locator("#scene-back").click()
     expect(page.locator("#scope-bar")).to_be_hidden()
     expect(page.locator("#scene-back")).to_be_hidden()
+    # A long group name reads in full on two head lines; the group makes room for it.
+    page.goto(base + "/")
+    page.locator("#import-file").set_input_files(str(cases / "oss-node-red.json"))
+    page.locator(".frame-head", has_text="@node-red/nodes").locator(".frame-name").click()
+    page.locator(".panel .more summary").click()
+    page.get_by_role("menuitem", name="이름·설명 고치기").click()
+    page.locator("#edit-name").fill("@node-red/nodes 기본 제공 노드 묶음 · 네트워크·데이터·파일 처리")
+    page.get_by_role("button", name="저장").click()
+    head = page.locator(".frame-head.tall .frame-name")
+    expect(head).to_have_text("@node-red/nodes 기본 제공 노드 묶음 · 네트워크·데이터·파일 처리")
+    assert not head.evaluate("e => e.scrollHeight > e.clientHeight + 1")
     context.close()
 
 
