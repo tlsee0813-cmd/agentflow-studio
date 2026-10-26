@@ -374,6 +374,13 @@ def workspace_flow(browser, base, cases):
     expect(page.locator(".frame")).to_have_count(3)
     expect(page.locator("#world .plan-direct")).not_to_have_count(0)
     expect(page.locator(".plan-badge")).to_have_count(0)
+    # Each target's own row reads what is to change under its whole name: the target's wanted text when the plan has one,
+    # else the change's name marked as such (no '구상' placeholder, no part description set against it).
+    expect(page.locator("#world .node", has_text="문서 읽기").locator(".plan-note")).to_have_text("폴더 안 파일을 입력받기")
+    expect(page.locator("#world .node", has_text="본문과 표").locator(".plan-note")).to_have_text("변경 실패해도 나머지 계속")
+    expect(page.locator("#world .node", has_text="결과 설명").locator(".plan-note")).to_have_text("실패한 파일과 이유 모아 보기")
+    for name in page.locator("#world .plan-direct :is(.node-name, .frame-name)").all():
+        assert not name.evaluate("e => e.scrollHeight > e.clientHeight + 1 || e.scrollWidth > e.clientWidth + 1"), name.inner_text()
     # A change with two targets keeps both names and marks, but reads one actual current/wanted pair at a time.
     page.locator(".ps-item").nth(2).click()
     expect(page.locator(".ps-item").nth(2)).to_have_attribute("aria-pressed", "true")
@@ -383,13 +390,15 @@ def workspace_flow(browser, base, cases):
     target_names = page.locator(".ps-target").all_text_contents()
     expect(page.locator(".ps-target").nth(0)).to_have_attribute("aria-selected", "true")
     expect(page.locator(".callout .co-head strong")).to_have_text(target_names[0])
-    expect(page.locator(".callout .co-row.want p")).to_have_text("성공한 산출물 유지")
-    first_now = page.locator(".callout .co-row.now p").inner_text()
+    # No same-side data for this target: the change, the part's role apart from it, no before/after pair.
+    expect(page.locator(".callout .co-row.want p")).to_have_text("성공 유지·실패 모음")
+    expect(page.locator(".callout .co-row.now")).to_have_count(0)
+    expect(page.locator(".callout .co-role")).to_contain_text("변환 형식과 저장한 산출물을 다룬다.")
     page.locator(".ps-target").nth(1).click()
     expect(page.locator(".ps-target").nth(1)).to_have_attribute("aria-selected", "true")
     expect(page.locator(".callout .co-head strong")).to_have_text(target_names[1])
     expect(page.locator(".callout .co-row.now p")).to_contain_text("화면은 마지막 결과만 표시한다.")
-    assert page.locator(".callout .co-row.now p").inner_text() != first_now
+    expect(page.locator(".callout .co-role")).to_have_count(0)
     expect(page.locator(".callout .co-row.want p")).to_have_text("실패한 파일과 이유 모아 보기")
     expect(page.locator(".callout .co-row.now").first).to_be_visible()
     expect(page.locator(".callout .co-row.want").first).to_be_visible()
@@ -443,8 +452,9 @@ def workspace_flow(browser, base, cases):
         clear_of(page, f".plan-focus >> nth={i}", "#lens")
     # Selecting a different named target while the comparison is open reveals its real map box above that reading surface.
     page.locator(".ps-target").nth(0).click()
-    expect(page.locator("#lens .cmp-now .cmp-name")).to_have_text(target_names[0])
-    expect(page.locator("#lens .cmp-want .cmp-text")).to_have_text("성공한 산출물 유지")
+    expect(page.locator("#lens .cmp-fallback .cmp-name")).to_have_text(target_names[0])
+    expect(page.locator("#lens .cmp-want")).to_have_count(0)
+    expect(page.locator("#lens .cmp-fallback")).to_contain_text("이 부분의 역할")
     expect(page.locator("#world .plan-reading")).to_be_in_viewport()
     page.wait_for_timeout(400)  # compare stable rectangles after the minimum-pan animation
     clear_of(page, "#world .plan-reading", "#lens")
@@ -551,6 +561,9 @@ def preview_context_flow(browser, base):
     # A direct user fold wins until another explicit focus, even across evidence renders and viewport changes.
     page.get_by_role("button", name="읽어들이기 접기", exact=True).click()
     expect(page.locator("#world .node-name", has_text="문서 읽기")).to_have_count(0)
+    # The folded parent names its inner target; the inner wanted text is not shown as a change of the whole parent.
+    expect(page.locator("#world .node", has_text="읽어들이기").locator(".plan-note")).to_have_text("안쪽 ‘문서 읽기’ 변경")
+    expect(page.locator("#world .plan-note", has_text="폴더 안 파일을 입력받기")).to_have_count(0)
     camera = page.locator("#world").evaluate("e => e.style.transform")
     page.locator(".ps-focus .ps-link", has_text="근거").click()
     expect(page.locator("#lens .cmp-evidence")).to_be_visible()

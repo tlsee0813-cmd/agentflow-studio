@@ -150,3 +150,19 @@ test('UI58-L9 only long part names widen their card, by measured width, with roo
   const v = viewOf('oss-restic'), long = layoutScope(v, null, () => true, {}, wide);
   for (const b of long.boxes.values()) if (b.kind === 'node') assert.ok(b.w >= NODE_W);
 });
+
+test('UI61 a planned change line takes room only on its own part and never narrows a name; no plan keeps every box', () => {
+  const v = viewOf('oss-joplin'), open = (_id, depth) => depth === 0;
+  const desktop = v.parts.find(p => p.name === '@joplin/app-desktop'), row = v.parts.find(p => p.parentId === desktop.id && !p.childIds.length);
+  const base = layoutScope(v, null, open, {}), same = layoutScope(v, null, open, {}, undefined, new Map());
+  for (const [id, b] of base.boxes) assert.deepEqual(same.boxes.get(id), b, 'an empty plan changes nothing');
+  const long = '편집과 미리보기를 같은 창에서 비교하고 작성 중인 내용과 표시 결과를 함께 확인하기';
+  const planned = layoutScope(v, null, open, {}, undefined, new Map([[desktop.id, [long]], [row.id, [long]]]));
+  const b0 = base.boxes.get(desktop.id), b1 = planned.boxes.get(desktop.id), r0 = base.boxes.get(row.id), r1 = planned.boxes.get(row.id);
+  assert.ok(b1.head > b0.head && b1.w === b0.w, 'the region head grows under its name; its width (the name room) is kept');
+  assert.ok(r1.h > r0.h && r1.w === r0.w, 'two planned lines add a line to that row only');
+  for (const [id, b] of base.boxes) {
+    if (id === desktop.id || id === row.id || b.container === desktop.id) continue;
+    assert.deepEqual([planned.boxes.get(id).w, planned.boxes.get(id).h], [b.w, b.h], `${id} keeps its size`);
+  }
+});

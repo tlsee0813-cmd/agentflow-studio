@@ -14,6 +14,8 @@ export const FRAME_MIN_W = 228;
 export const NODE_W = 200, NODE_H = 52, UNIT_W = 240, PAD = 14, GAP = 8, COL_GAP = 76, ROW_GAP = 22, GHOST_W = 168, GHOST_H = 34;
 /** Head of a group inside a region: one line, or two when the name needs them (names never shrink). */
 export const HEAD = 34, HEAD_2 = 52;
+/** A planned change line under a part's name in the preview (12px). */
+export const PLAN_LINE = 15;
 /** Between wrapped columns of one layer (no relation runs between them, so they sit closer than relation layers). */
 export const WRAP_GAP = 36;
 /** Between relation layers inside a group: room for converging lines to stay apart. */
@@ -48,8 +50,8 @@ export function textWidth(text: string): number {
 
 /** Rendered width of text: 'node' (13.5px semibold row name), 'head' (15px region or unit name), 'sub' (13px group name) or
  * 'note' (12.5px description). The browser passes a canvas measurement in the page's own font; without one, the estimate. */
-export type TextMeasure = (text: string, kind: 'node' | 'head' | 'sub' | 'note') => number;
-const SCALE = { node: 13.5 / 13, head: 15 / 13, sub: 1, note: 12.5 / 13 * 0.92 } as const;
+export type TextMeasure = (text: string, kind: 'node' | 'head' | 'sub' | 'note' | 'plan') => number;
+const SCALE = { node: 13.5 / 13, head: 15 / 13, sub: 1, note: 12.5 / 13 * 0.92, plan: 12 / 13 * 0.95 } as const;
 const estimate: TextMeasure = (text, kind) => textWidth(text) * SCALE[kind];
 /** The first sentence of a note: what a region or unit says about itself on the map. The rest belongs to the selection. */
 export function lead(note: string): string {
@@ -91,7 +93,9 @@ export function isListGroup(v: StudioView, container: string | null): boolean {
   return leaves >= ids.length * 0.7 && linkedSiblings(v, ids).size <= Math.floor(ids.length / 5);
 }
 
-export function layoutScope(v: StudioView, scope: string | null, expanded: (id: string, depth: number) => boolean, pos: Positions, measureText: TextMeasure = estimate): ScopeLayout {
+/** planned: only while a change preview reads on the map, the lines a part's own row will show under its name (each text it can
+ * show; the longest, up to two lines, decides). Only these parts take that room; every other box keeps its current size. */
+export function layoutScope(v: StudioView, scope: string | null, expanded: (id: string, depth: number) => boolean, pos: Positions, measureText: TextMeasure = estimate, planned?: ReadonlyMap<string, readonly string[]>): ScopeLayout {
   const byId = new Map(v.parts.map(p => [p.id, p]));
   const kidsOf = (id: string | null) => (id ? byId.get(id)?.childIds ?? [] : v.roots);
   const open = (id: string, depth: number) => depth < 12 && kidsOf(id).length > 0 && expanded(id, depth);
@@ -163,6 +167,8 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
   const hasRecords = (id: string, guard = 0): boolean => { const p = byId.get(id); return !!p && guard < 64 && (!!p.lastAt || p.childIds.some(c => hasRecords(c, guard + 1))); };
   // Korean text breaks between words (keep-all): leave a share of each line unused.
   const lines = (text: string, kind: Parameters<TextMeasure>[1], room: number, max = 2) => (!text ? 0 : Math.min(max, Math.ceil((measureText(text, kind) * 1.15 + 6) / Math.max(40, room))));
+  // Planned lines are short phrases measured in their own font: a smaller share is left for word ends than for notes.
+  const plannedLines = (id: string, room: number) => Math.max(0, ...(planned?.get(id) ?? []).map(t => Math.min(2, Math.ceil((measureText(t, 'plan') * 1.06 + 4) / Math.max(40, room)))));
   /** Region head: the name (one or two lines; a longer name widens the region rather than being cut) and the first sentence of
    * the note under it. Head row: toggle 28, go-inside ~44, paddings ~12, and the latest-record time ~52 when there is one. */
   const regionHead = (id: string, w: number): { w: number; head: number } => {
@@ -174,14 +180,16 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
     // The note runs under the whole head row; a region widens (up to 340px) rather than cut its sentence after two lines.
     const note = mapLead(v, id), noteNeed = note ? measureText(note, 'note') * 1.15 + 6 : 0;
     if (noteNeed > (w - 44) * 2) w = Math.max(w, Math.min(340, Math.ceil(noteNeed / 2) + 44));
-    const nl = need > room(w) ? 2 : 1, ll = lines(note, 'note', w - 44);
-    return { w, head: 12 + nl * 22 + (ll ? 3 + ll * 17 : 0) + 14 };
+    const nl = need > room(w) ? 2 : 1, ll = lines(note, 'note', w - 44), pl = plannedLines(id, room(w));
+    // In a preview the planned lines sit under the name in place of the note (hidden there); the head never shrinks.
+    return { w, head: 12 + nl * 22 + Math.max(ll ? 3 + ll * 17 : 0, pl ? 3 + pl * PLAN_LINE : 0) + 14 };
   };
   /** Group head inside a region: its name only; a long name takes a second line or widens the group (up to 360px). */
   const groupHead = (id: string, w: number): { w: number; head: number } => {
     const need = measureText(byId.get(id)?.name ?? '', 'sub') * 1.08, room = (x: number) => x - 88 - (hasRecords(id) ? 52 : 0);
     if (need > room(w) * 2) w = Math.max(w, Math.min(360, Math.ceil(need / 2) + w - room(w) + 12));
-    return { w, head: need > room(w) ? HEAD_2 : HEAD };
+    const pl = plannedLines(id, room(w));
+    return { w, head: (need > room(w) ? HEAD_2 : HEAD) + (pl ? 3 + pl * PLAN_LINE : 0) };
   };
   function measure(id: string, depth: number, container: string | null): Measure & { face?: Face } {
     const cached = memo.get(id); if (cached) return cached;
@@ -196,17 +204,18 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
       const { w, head } = (depth === 0 ? regionHead : groupHead)(id, Math.max(maxX - minX + PAD * 2, FRAME_MIN_W));
       m = { ox: minX, oy: minY, w, h: maxY - minY + head + PAD, head };
     } else if (listOf(container)) {
-      const w = nodeWidth(p.name, kids, measureText), nl = lines(p.name, 'node', w - chrome);
-      m = { w, h: 14 + (nl + extra) * 17, ox: 0, oy: 0, head: 0, face: 'item' };
+      const w = nodeWidth(p.name, kids, measureText), nl = lines(p.name, 'node', w - chrome), pl = plannedLines(id, w - chrome);
+      m = { w, h: Math.max(14 + (nl + extra) * 17, pl > 1 ? 12 + nl * 17 + 2 + pl * PLAN_LINE : 0), ox: 0, oy: 0, head: 0, face: 'item' };
     } else if (depth === 0) {
       const note = mapLead(v, id), need = measureText(p.name, 'head') * 1.1 + 6;
       let w = note ? UNIT_W : NODE_W;
       if (need > (w - chrome) * 2) w = Math.min(NODE_MAX_W + 40, Math.ceil(need / 2) + chrome);
-      const nl = need > w - chrome ? 2 : 1, ll = lines(note, 'note', w - chrome);
-      m = { w, h: Math.max(NODE_H, 24 + nl * 20 + (ll ? 2 + ll * 17 : 0) + extra * 19), ox: 0, oy: 0, head: 0, face: 'unit' };
+      const nl = need > w - chrome ? 2 : 1, ll = lines(note, 'note', w - chrome), pl = plannedLines(id, w - chrome);
+      m = { w, h: Math.max(NODE_H, 24 + nl * 20 + (ll ? 2 + ll * 17 : 0) + extra * 19, pl ? 24 + nl * 20 + 3 + pl * PLAN_LINE : 0), ox: 0, oy: 0, head: 0, face: 'unit' };
     } else {
-      const w = nodeWidth(p.name, kids, measureText), nl = lines(p.name, 'node', w - chrome);
-      m = { w, h: 20 + (nl + extra) * 18, ox: 0, oy: 0, head: 0, face: 'row' };
+      // One planned line takes the place of the state line (or the row's own margin); a second one adds a line to this row only.
+      const w = nodeWidth(p.name, kids, measureText), nl = lines(p.name, 'node', w - chrome), pl = plannedLines(id, w - chrome);
+      m = { w, h: Math.max(20 + (nl + extra) * 18, pl > 1 ? 16 + nl * 18 + 2 + pl * PLAN_LINE : 0), ox: 0, oy: 0, head: 0, face: 'row' };
     }
     memo.set(id, m); return m;
   }
