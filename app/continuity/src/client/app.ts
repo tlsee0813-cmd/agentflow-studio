@@ -711,7 +711,7 @@ function placeLensOnce(dock = false, pan = true) {
   lensPlace = g && !dock ? placeLens(g.part, g.beside, g.protect, size, area, g.others) : { side: 'dock', x: 0, y: 0, h: 0, dy: 0 };
   if (lensPlace.side === 'dock') {
     l.classList.add('docked'); l.style.width = `${area.w}px`;
-    const h = Math.min(l.offsetHeight, Math.round(area.h * (dock ? 0.7 : 0.42))), at = dockPlace(h, area);
+    const h = Math.min(l.offsetHeight, Math.round(area.h * (dock ? 0.6 : 0.42))), at = dockPlace(h, area);
     lensPlace = { side: 'dock', ...at, h, dy: 0 };
     if (g && pan) {
       const free = area.h - h - 12, keepH = g.keep.h * camera.k, under = (r: Rect) => r.y + r.h > at.y - 8;
