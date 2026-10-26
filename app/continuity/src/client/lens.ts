@@ -4,10 +4,11 @@
  * with its part in the arrangement chosen; nothing here moves the camera. */
 export interface Rect { x: number; y: number; w: number; h: number }
 export type LensSide = 'right' | 'left' | 'below' | 'above' | 'dock';
-/** dy: the top relative to the part's top when placed beside (right and left); h: the height it was given. */
-export interface LensPlace { side: LensSide; x: number; y: number; h: number; dy: number }
+/** dy: the top relative to the part's top when placed beside (right and left); h: the height it was given; w: a docked
+ * surface's width (it reads near its part, as wide as its content needs). */
+export interface LensPlace { side: LensSide; x: number; y: number; h: number; dy: number; w?: number }
 
-const overlap = (a: Rect, b: Rect) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
+export const overlap = (a: Rect, b: Rect) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
 const GAP = 14;
 /** The least height a surface may be given beside its part before its body scrolls instead of the place being refused. */
 const MIN_H = 240;

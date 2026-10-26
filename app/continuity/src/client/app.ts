@@ -8,7 +8,7 @@ import { editArea, addArea, addChildArea, createProject, rename } from '../share
 import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
 import { layoutScope, edgePath, lead, mapLead, isListGroup, ROOT, HEAD, type Box, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
-import { placeLens, follow, dockPlace, type Rect, type LensPlace } from './lens.js';
+import { placeLens, follow, overlap, type Rect, type LensPlace } from './lens.js';
 import { aiStatus, askStudio, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
 import { runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth } from './plan-dom.js';
@@ -452,13 +452,13 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit') {
     m.append(svg('path', { d: 'M0,1.5 L9,5 L0,8.5 z' })); defs.append(m);
   }
   // A selected line also marks where it starts, so both of its ends read on the map.
-  const dot = svg('marker', { id: 'dot-on', viewBox: '0 0 10 10', refX: '5', refY: '5', markerWidth: '6', markerHeight: '6' });
-  dot.append(svg('circle', { cx: '5', cy: '5', r: '3.6' })); defs.append(dot);
+  // Every line marks the part it leaves from with a small dot, so the starting row reads without a label.
+  for (const id of ['dot', 'dot-on']) { const d = svg('marker', { id, viewBox: '0 0 10 10', refX: '5', refY: '5', markerWidth: '6', markerHeight: '6' }); d.append(svg('circle', { cx: '5', cy: '5', r: id === 'dot' ? '2.6' : '3.6' })); defs.append(d); }
   edges.append(defs);
   for (const e of lay.edges) {
     const g = svg('g', { class: `edge k-${e.kind}${e.agg ? ' agg' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
     // No text on the map: the meaning shows on hover (tip) and in the selected part's 관련 부분.
-    g.append(svg('path', { class: 'edge-line', 'marker-end': 'url(#arrow)' }), svg('path', { class: 'edge-hit' }));
+    g.append(svg('path', { class: 'edge-line', 'marker-end': 'url(#arrow)', 'marker-start': 'url(#dot)' }), svg('path', { class: 'edge-hit' }));
     edges.append(g);
   }
   world.append(edges);
@@ -586,6 +586,7 @@ function applyCamera(animate = false) {
   sp.classList.toggle('z-mid', camera.k < 0.8); sp.classList.toggle('z-low', camera.k < 0.6);
   sp.style.setProperty('--grow', String(Math.min(1.6, Math.max(1, 0.85 / camera.k))));
   positionLens(animate);
+  positionCallouts();
   updateSticky();
 }
 /** Whole view in the free area. Opening never shrinks below 85%; only the explicit 전체 보기 button may go further. */
@@ -710,27 +711,80 @@ function placeLensOnce(dock = false, pan = true) {
   const area = lensArea(), g = lensGeometry(), size = { w: l.offsetWidth, h: Math.min(l.offsetHeight, area.h) };
   lensPlace = g && !dock ? placeLens(g.part, g.beside, g.protect, size, area, g.others) : { side: 'dock', x: 0, y: 0, h: 0, dy: 0 };
   if (lensPlace.side === 'dock') {
-    l.classList.add('docked'); l.style.width = `${area.w}px`;
-    const h = Math.min(l.offsetHeight, Math.round(area.h * (dock ? 0.6 : 0.42))), at = dockPlace(h, area);
-    lensPlace = { side: 'dock', ...at, h, dy: 0 };
-    if (g && pan) {
-      const free = area.h - h - 12, keepH = g.keep.h * camera.k, under = (r: Rect) => r.y + r.h > at.y - 8;
-      const fits = keepH <= free && g.keep.w * camera.k <= area.w - 24;
-      if ((fits ? toScreen(g.keep) : toScreen(g.own)).y + (fits ? keepH : g.own.h * camera.k) > at.y - 8 || under(g.part)) { revealRect(fits ? g.keep : g.own, 0, h + 12); return; } // applyCamera places it
+    // Docked: as wide as its content needs (a sentence does not take the whole window), at the bottom of the map near the
+    // part, where it covers nothing it must not. Else it gives up height (its body scrolls) so the part, its group and its
+    // line ends fit above it, and one smallest pan brings them there. The space it takes is the reading place's, not the map's.
+    l.classList.add('docked');
+    const compare = l.classList.contains('compare'), sections = l.querySelectorAll('.lens-body > *').length;
+    const w = Math.round(Math.min(area.w, compare ? 1100 : Math.max(420, Math.min(720, sections * 290))));
+    l.style.width = `${w}px`;
+    const natural = l.offsetHeight, bottom = area.y + area.h;
+    let h = Math.min(natural, Math.round(area.h * (dock ? 0.6 : 0.42)));
+    const clearAt = (x: number, hh: number, ww = w) => !g || g.protect.every(q => overlap({ x, y: bottom - hh, w: ww, h: hh }, q) < 1);
+    // Among clear places: the one hiding the least of the other parts, nearest the part's group first.
+    const hidden = (x: number, ww: number) => !g ? 0 : g.others.reduce((sum, q) => sum + overlap({ x, y: bottom - h, w: ww, h }, q), 0);
+    const cands: { x: number; w: number }[] = [];
+    const add = (x: number, ww: number) => { ww = Math.min(ww, area.w); cands.push({ x: Math.min(Math.max(x, area.x), area.x + area.w - ww), w: ww }); };
+    if (g) for (const x of [g.beside.x, g.beside.x + g.beside.w - w, g.beside.x + (g.beside.w - w) / 2, area.x, area.x + area.w - w]) add(x, w);
+    else add(area.x, w);
+    if (g) {
+      // Free stretches of the bottom band between protected parts: a narrower surface may fit beside them.
+      const band = g.protect.filter(q => q.y + q.h > bottom - h && q.y < bottom).map(q => [q.x - 12, q.x + q.w + 12] as const).sort((a, b) => a[0] - b[0]);
+      let from = area.x;
+      for (const [a, b2] of [...band, [area.x + area.w, area.x + area.w] as const]) { if (a - from >= (compare ? 760 : 380)) { add(from, Math.min(w, a - from)); add(a - Math.min(w, a - from), Math.min(w, a - from)); } from = Math.max(from, b2); }
+    }
+    const best = cands.filter(c => clearAt(c.x, h, c.w)).sort((p, q) => hidden(p.x, p.w) - hidden(q.x, q.w))[0];
+    let x = best?.x, ww = best?.w ?? w;
+    if (!best && g) {
+      x = cands[0]!.x;
+      const keepH = g.keep.h * camera.k, room = Math.floor(area.h - keepH - 24);
+      if (room < h && room >= Math.min(natural, 160)) h = room;
+    }
+    lensPlace = { side: 'dock', x: x ?? area.x, y: bottom - h, h, dy: 0, w: ww };
+    if (g && pan && !clearAt(lensPlace.x, h, ww)) {
+      const fits = g.keep.h * camera.k <= area.h - h - 12 && g.keep.w * camera.k <= area.w - 24;
+      revealRect(fits ? g.keep : g.own, 0, h + 12); return; // applyCamera places it
     }
   }
   positionLens();
 }
-/** Camera moved or the part was dragged: the surface follows its part in the arrangement chosen for this selection. */
+/** Camera moved or the part was dragged: the surface follows its part in the arrangement chosen for this selection; a docked
+ * surface stays where it was put at the bottom of the map. */
 function positionLens(animate = false) {
   const l = $('lens'); if (l.hidden || !lensPlace) return;
   const area = lensArea(), docked = lensPlace.side === 'dock', g = lensGeometry(), hgt = Math.min(lensPlace.h, area.h);
-  if (docked) l.style.width = `${area.w}px`;
+  if (docked) l.style.width = `${Math.min(lensPlace.w ?? area.w, area.w)}px`;
   const w = l.offsetWidth;
-  let at = docked || !g ? dockPlace(hgt, area) : follow(lensPlace, g.part, g.beside, w, hgt, area);
+  let at = docked || !g ? { x: lensPlace.x, y: area.y + area.h - hgt } : follow(lensPlace, g.part, g.beside, w, hgt, area);
   at = { x: Math.min(Math.max(at.x, area.x), area.x + area.w - w), y: Math.min(Math.max(at.y, area.y), area.y + area.h - hgt) };
   l.classList.toggle('animate', animate);
   l.style.left = `${Math.round(at.x)}px`; l.style.top = `${Math.round(at.y)}px`; l.style.maxHeight = `${Math.round(hgt)}px`;
+}
+/** Notes of a change beside their parts (screen space: they keep their size at any zoom). Each takes the first clear place
+ * among: right, left, below, above the part; then the same beside its group. Clear: inside the map area, over no other part,
+ * no group head, no other note and not the reading surface. Nothing clear: below the group (it may cover). */
+function positionCallouts() {
+  const notes = [...$('callouts').children] as HTMLElement[]; if (!notes.length) return;
+  const area = lensArea(), bottom = area.y + area.h, right = area.x + area.w, taken: Rect[] = [];
+  const lens = $('lens'), sp = $('space').getBoundingClientRect();
+  if (!lens.hidden) { const r = lens.getBoundingClientRect(); taken.push({ x: r.left - sp.left, y: r.top - sp.top, w: r.width, h: r.height }); }
+  const blockers = [...lay.boxes.values()].map(b => ({ id: b.id, r: b.kind === 'frame' ? toScreen({ x: b.x, y: b.y, w: b.w, h: b.head }) : toScreen(b) }));
+  // The lowest part first: notes of parts stacked in one group keep their order (the lower one below, the upper one above).
+  const order = notes.map(el => ({ el, b: lay.boxes.get(el.dataset.box ?? '') })).sort((p, q) => (q.b?.y ?? 0) - (p.b?.y ?? 0));
+  for (const { el, b } of order) {
+    el.hidden = !b; if (!b) continue;
+    const T = toScreen(b), gb = lay.boxes.get(b.container), G = gb?.kind === 'frame' ? toScreen(gb) : null, w = el.offsetWidth, h = el.offsetHeight;
+    const around = (R: Rect, side: string) => [
+      { x: R.x + R.w + 10, y: T.y - 4, side: `${side}right` }, { x: R.x - 10 - w, y: T.y - 4, side: `${side}left` },
+      { x: R.x, y: R.y + R.h + 8, side: `${side}below` }, { x: R.x, y: R.y - 8 - h, side: `${side}above` }];
+    const cands = [...around(T, ''), ...(G ? around(G, 'group-') : [])];
+    const clear = (r: Rect) => r.x >= area.x && r.y >= area.y && r.x + r.w <= right && r.y + r.h <= bottom
+      && blockers.every(q => q.id === b.id || overlap(r, q.r) < 1) && taken.every(q => overlap(r, q) < 1);
+    const at = cands.find(c => clear({ x: c.x, y: c.y, w, h })) ?? { ...(G ? cands[6]! : cands[2]!), side: 'loose' };
+    const x = Math.min(Math.max(at.x, area.x), right - w), y = Math.min(Math.max(at.y, area.y), bottom - h);
+    el.style.left = `${Math.round(x)}px`; el.style.top = `${Math.round(y)}px`; el.dataset.side = at.side;
+    taken.push({ x, y, w, h });
+  }
 }
 /** The scope's title belongs to the map; when a pan takes it out of view its name stays at the top left of the map. */
 function updateSticky() {
@@ -831,7 +885,7 @@ function markSelection(partId: string | null) {
     const layer = on ? top : base; if (layer && el.parentNode !== layer) layer.append(el);
     el.classList.toggle('on', on);
     const line = el.querySelector('.edge-line')!; line.setAttribute('marker-end', on ? 'url(#arrow-on)' : 'url(#arrow)');
-    if (on) line.setAttribute('marker-start', 'url(#dot-on)'); else line.removeAttribute('marker-start');
+    line.setAttribute('marker-start', on ? 'url(#dot-on)' : 'url(#dot)');
     if (on) related.add(el.dataset.from === partId ? el.dataset.to! : el.dataset.from!);
   });
   document.querySelectorAll<HTMLElement>('.node[data-part],.frame,.ghost').forEach(el => {
@@ -1083,6 +1137,7 @@ const planView = createPlanView({
     revealRect(B);
   },
   restore: r => { const o = opened; if (!o) return; returnCamera = r.camera; go(o.key, r.selected, r.scope); },
+  callouts: notes => { $('callouts').replaceChildren(...notes); positionCallouts(); },
   surface: (content, parts, place) => {
     const l = $('lens');
     if (!content) { if (l.classList.contains('compare')) hideLens(); return; }
@@ -1182,7 +1237,7 @@ function bindCanvas() {
     if (drag.mode === 'pan') { mapMoved = true; camera = { ...camera, x: drag.cx + dx, y: drag.cy + dy }; applyCamera(); return; }
     const o = opened!; const pos = positionsOf(o);
     (pos[drag.container] ??= {})[drag.id] = { x: Math.round(drag.start.x + dx / camera.k), y: Math.round(drag.start.y + dy / camera.k) };
-    relayout(o); positionWorld(); positionLens();
+    relayout(o); positionWorld(); positionLens(); positionCallouts();
   });
   const end = (e: PointerEvent) => {
     if (!drag || drag.pointer !== e.pointerId) return;
@@ -1235,7 +1290,7 @@ function bindCanvas() {
     if (e.key === 'Escape' && opened && scope) { const o = opened, from = scope; go(o.key, null, partOf(o, from)?.parentId ?? null); requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-drag="${CSS.escape(from)}"]`)?.focus()); }
   });
   let resize = 0;
-  window.addEventListener('resize', () => { cancelAnimationFrame(resize); resize = requestAnimationFrame(() => { if (opened && !selected && !planView.isOpen()) fitView(false); else if (selected && !sheetOpen) placeLensOnce(); }); });
+  window.addEventListener('resize', () => { cancelAnimationFrame(resize); resize = requestAnimationFrame(() => { if (opened && !selected && !planView.isOpen()) fitView(false); else if (selected && !sheetOpen) placeLensOnce(); positionCallouts(); }); });
 }
 
 /** Hover: a line shows what it means (ends, kind, recorded note) without selecting; a part lights its own lines. */

@@ -156,7 +156,7 @@ button:disabled { opacity: .5; cursor: default; }
 .edge.near .edge-line { stroke: var(--text-3); stroke-width: 1.9; stroke-opacity: 1; }
 .edge.on .edge-line { stroke: var(--accent); stroke-width: 2; stroke-opacity: 1; }
 .edge.agg.on .edge-line { stroke-width: 3; stroke-opacity: .6; }
-#arrow path { fill: var(--edge); } #arrow-on path, #dot-on circle { fill: var(--accent); } #arrow-near path { fill: var(--text-3); }
+#arrow path, #dot circle { fill: var(--edge); } #arrow-on path, #dot-on circle { fill: var(--accent); } #arrow-near path { fill: var(--text-3); }
 .space.dim .edge:not(.on):not(.near) .edge-line { opacity: .28; }
 
 .map-title { position: absolute; pointer-events: none; transition: opacity .12s; }
@@ -446,15 +446,16 @@ button:disabled { opacity: .5; cursor: default; }
 .space.preview .node:is(.plan-direct, .plan-impact) :is(.node-meta, .node-note),
 .space.preview .frame:is(.plan-direct, .plan-impact) > .frame-head :is(.frame-meta, .frame-note) { display: none; }
 .space.preview .frame:is(.plan-direct, .plan-impact) > .frame-head .plan-note { align-self: center; text-align: right; }
-.node.plan-direct, .frame.plan-direct { border-color: var(--change-line); box-shadow: inset 3px 0 0 var(--change); }
-.node.plan-focus, .frame.plan-focus { border-color: var(--change); box-shadow: inset 3px 0 0 var(--change), 0 0 0 3px rgba(165,90,11,.12); background: var(--surface); }
+.node.plan-direct, .frame.plan-direct { border-color: transparent; }
+/* one strong mark: the parts of the change being read */
+.node.plan-focus, .frame.plan-focus { border-color: var(--change); box-shadow: inset 3px 0 0 var(--change); background: var(--surface); }
 .plan-direct .plan-note { color: var(--change); }
 .node.plan-impact, .frame.plan-impact { outline: 1.5px dashed var(--change-line); outline-offset: 3px; }
 .plan-impact .plan-note { color: var(--text-2); }
 .space.preview.focusing .node:not(.plan-direct):not(.plan-impact):not(.selected) { opacity: .55; }
 
 /* the plan's strip: what is being tried, its changes, the conditions without a part, and the way to the whole plan */
-.plan-strip { position: absolute; top: 12px; left: 16px; right: calc(16px + var(--plan-w)); display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; padding: 8px 8px 8px 14px; background: var(--surface); border: 1px solid var(--change-line); border-radius: 12px; box-shadow: var(--shadow-sm); z-index: 3; }
+.plan-strip { position: absolute; top: 12px; left: 16px; right: calc(16px + var(--plan-w)); display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; padding: 8px 8px 8px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-sm); z-index: 3; }
 .ps-head { flex: 1 1 240px; min-width: 0; display: flex; align-items: baseline; gap: 10px; }
 .ps-kicker { flex: none; font-size: 12px; font-weight: 700; color: var(--change); white-space: nowrap; }
 .ps-kicker small { margin-left: 6px; font-size: 11.5px; font-weight: 500; color: var(--text-3); }
@@ -478,7 +479,7 @@ button:disabled { opacity: .5; cursor: default; }
 .ps-close { flex: none; }
 
 /* the comparison: the parts as they are now → what the change wants (once), then impact candidates with their reasons */
-.lens.compare { width: min(380px, calc(100% - 32px)); border-color: var(--change-line); }
+.lens.compare { width: min(380px, calc(100% - 32px)); }
 .cmp-head .lens-path span { color: var(--change); font-weight: 600; }
 .cmp-head { padding-right: 132px; }
 .cmp-step { width: 26px; height: 26px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--text-2); font-size: 15px; line-height: 1; }
@@ -649,3 +650,28 @@ button:disabled { opacity: .5; cursor: default; }
 .scope-sticky { position: absolute; left: 16px; max-width: min(560px, calc(100% - 32px)); display: flex; align-items: baseline; gap: 10px; padding: 6px 12px; background: rgba(245,246,248,.94); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow-sm); pointer-events: none; z-index: 2; min-width: 0; }
 .scope-sticky strong { flex: none; font-size: 14px; font-weight: 700; letter-spacing: -.01em; }
 .scope-sticky span { min-width: 0; font-size: 12.5px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* the focused change's controls in the strip */
+.ps-focus { display: flex; align-items: center; gap: 4px 12px; padding-left: 12px; border-left: 1px solid var(--line); }
+.ps-link { height: 28px; padding: 0 8px; border: 0; border-radius: 7px; background: none; font-size: 12.5px; font-weight: 600; color: var(--accent); white-space: nowrap; }
+.ps-link:hover, .ps-link[aria-pressed="true"] { background: var(--accent-soft); }
+
+/* notes of a change beside its parts: outside the structure (no port, no relation, not a part). Solid: what the person
+   wants; dashed: what the analysis suggests; plain: no presentation data (the part's own description → the change's name). */
+.callouts { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.callout { position: absolute; width: 236px; padding: 8px 10px 9px 11px; pointer-events: auto; background: #fffaf2; border: 1px solid var(--change-line); border-left: 3px solid var(--change); border-radius: 4px 10px 10px 4px; box-shadow: 0 8px 20px -14px rgba(120,60,0,.4); font-size: 12.5px; line-height: 1.45; }
+.callout.suggestion { border-style: dashed; border-left-style: dashed; background: var(--surface); }
+.callout.plain { border-left-color: var(--change-line); }
+.co-head { margin: 0 0 5px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 7px; }
+.co-kind { font-size: 11px; font-weight: 700; color: var(--change); }
+.co-head strong { font-size: 12.5px; font-weight: 650; color: var(--text); }
+.co-head small { font-size: 11px; color: var(--text-4); }
+.co-row { display: grid; grid-template-columns: 30px minmax(0, 1fr); column-gap: 6px; }
+.co-row + .co-row { margin-top: 4px; padding-top: 4px; border-top: 1px dashed var(--change-line); }
+.co-label { font-size: 11px; font-weight: 700; line-height: 18px; color: var(--text-3); }
+.co-row.want .co-label { color: var(--change); }
+.co-row p { margin: 0; color: var(--text); word-break: keep-all; overflow-wrap: anywhere; }
+.co-row.now p { color: var(--text-2); }
+.co-row small { display: block; font-size: 11px; color: var(--text-4); }
+.co-src { padding: 0; border: 0; background: none; font-size: 11px; color: var(--accent); text-decoration: underline dotted; }
+.space:not(.preview) .callouts { display: none; }

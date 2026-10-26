@@ -363,24 +363,37 @@ def workspace_flow(browser, base, cases):
     page.locator(".node", has_text="문서 읽기").click()
     zoom, before = page.locator("#zoom-level").inner_text(), page.locator("#world").evaluate("e => e.style.transform")
     page.locator("#plan-entry").click()
-    # The plan reads on the map: its strip on top, one comparison docked below, no right panel by default.
+    # The plan reads on the map: its strip on top and short notes beside the parts of the change being read; no right panel
+    # and no long comparison by default.
     expect(page.locator("#plan-strip")).to_be_visible()
     expect(page.locator("#plan-panel")).to_be_hidden()
-    expect(page.locator("#lens.compare")).to_be_visible()
+    expect(page.locator("#lens")).to_be_hidden()
+    expect(page.locator(".callout").first).to_be_visible()
     expect(page.locator("#zoom-level")).to_have_text(zoom)  # opening never re-zooms
     page.wait_for_timeout(400)
     expect(page.locator(".frame")).to_have_count(3)
     expect(page.locator("#world .plan-direct")).not_to_have_count(0)
     expect(page.locator(".plan-badge")).to_have_count(0)
-    # A change reads as now → wanted, by words; the wanted text is said once.
+    # A change with two parts: a note beside each (now → wanted), none over a part.
     page.locator(".ps-item").nth(2).click()
     expect(page.locator(".ps-item").nth(2)).to_have_attribute("aria-pressed", "true")
+    expect(page.locator(".callout")).to_have_count(2)
+    expect(page.locator(".callout .co-row.now").first).to_be_visible()
+    expect(page.locator(".callout .co-row.want").first).to_be_visible()
+    page.wait_for_timeout(300)
+    for i in range(page.locator(".callout").count()):
+        for j in range(page.locator(".node").count()):
+            clear_of(page, f".callout >> nth={i}", f".node >> nth={j}")
+    # The long reading on request: the parts as they are now → what the change wants, said once.
+    page.locator(".ps-link", has_text="설명").click()
     expect(page.locator("#lens .cmp-now .cmp-part")).to_have_count(2)
     expect(page.locator("#lens .cmp-want .cmp-text")).to_have_count(1)
     expect(page.locator("#lens .cmp-hand input")).to_be_checked()
     page.wait_for_timeout(400)
     for i in range(page.locator(".plan-focus").count()):  # the parts being compared stay clear of the comparison
         clear_of(page, f".plan-focus >> nth={i}", "#lens")
+    page.keyboard.press("Escape")
+    expect(page.locator("#lens")).to_be_hidden()
     page.locator("#plan-mode").get_by_role("button", name="현재").click()
     expect(page.locator("#world .plan-direct")).to_have_count(0)
     expect(page.locator("#zoom-level")).to_have_text(zoom)
