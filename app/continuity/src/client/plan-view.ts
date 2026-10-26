@@ -227,8 +227,8 @@ export function createPlanView(host: PlanHost) {
     return h('div', { class: `callout ${kind ?? 'plain'}`, 'data-box': at, role: 'note', 'aria-label': `${name} · 변경 구상` },
       h('p', { class: 'co-head' }, h('span', { class: 'co-kind' }, kind === 'intent' ? '원하는 차이' : kind === 'suggestion' ? '분석 제안' : '변경 항목'), h('strong', {}, name),
         at !== partId ? h('small', {}, `‘${partName(at)}’ 안쪽`) : null),
-      h('div', { class: 'co-row now' }, h('span', { class: 'co-label' }, '지금'), h('p', {}, now, from ? h('small', {}, from) : null)),
-      h('div', { class: 'co-row want' }, h('span', { class: 'co-label' }, kind === 'suggestion' ? '제안' : kind ? '원함' : '바꿀 것'), h('p', {}, pres ? pres.wanted.text : item.title)));
+      h('div', { class: 'co-row now' }, h('span', { class: 'co-label' }, pres?.current.source === 'evidence' ? '자료상' : '현재 설명'), h('p', {}, now, from ? h('small', {}, from) : null)),
+      h('div', { class: 'co-row want' }, h('span', { class: 'co-label' }, kind === 'suggestion' ? '제안' : '바꿀 모습'), h('p', {}, pres ? pres.wanted.text : item.title)));
   }
   /** The part itself when it is drawn in this view, else its nearest drawn ancestor; null outside the view. */
   function visibleRep(id: string, boxes: Map<string, Box>): string | null {

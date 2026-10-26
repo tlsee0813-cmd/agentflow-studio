@@ -8,7 +8,7 @@ import { editArea, addArea, addChildArea, createProject, rename } from '../share
 import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
 import { layoutScope, edgePath, lead, mapLead, isListGroup, ROOT, HEAD, type Box, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
-import { placeLens, follow, overlap, type Rect, type LensPlace } from './lens.js';
+import { placeLens, placeCallout, follow, overlap, type Rect, type LensPlace } from './lens.js';
 import { aiStatus, askStudio, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
 import { runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth } from './plan-dom.js';
@@ -760,31 +760,51 @@ function positionLens(animate = false) {
   l.classList.toggle('animate', animate);
   l.style.left = `${Math.round(at.x)}px`; l.style.top = `${Math.round(at.y)}px`; l.style.maxHeight = `${Math.round(hgt)}px`;
 }
-/** Notes of a change beside their parts (screen space: they keep their size at any zoom). Each takes the first clear place
- * among: right, left, below, above the part; then the same beside its group. Clear: inside the map area, over no other part,
- * no group head, no other note and not the reading surface. Nothing clear: below the group (it may cover). */
+/** Notes stay beside their targets only in genuinely free space. A crowded map reads them in a bounded row inside the
+ * plan strip instead. Once a note joins that row it stays there until the focus changes, so a manual pan never makes the
+ * strip grow and shrink. Neither placing notes nor following the camera moves the camera. */
+let calloutNotes: HTMLElement[] = [], calloutFocus = '', calloutFrame = 0;
 function positionCallouts() {
-  const notes = [...$('callouts').children] as HTMLElement[]; if (!notes.length) return;
-  const area = lensArea(), bottom = area.y + area.h, right = area.x + area.w, taken: Rect[] = [];
-  const lens = $('lens'), sp = $('space').getBoundingClientRect();
-  if (!lens.hidden) { const r = lens.getBoundingClientRect(); taken.push({ x: r.left - sp.left, y: r.top - sp.top, w: r.width, h: r.height }); }
-  const blockers = [...lay.boxes.values()].map(b => ({ id: b.id, r: b.kind === 'frame' ? toScreen({ x: b.x, y: b.y, w: b.w, h: b.head }) : toScreen(b) }));
-  // The lowest part first: notes of parts stacked in one group keep their order (the lower one below, the upper one above).
-  const order = notes.map(el => ({ el, b: lay.boxes.get(el.dataset.box ?? '') })).sort((p, q) => (q.b?.y ?? 0) - (p.b?.y ?? 0));
-  for (const { el, b } of order) {
-    el.hidden = !b; if (!b) continue;
-    const T = toScreen(b), gb = lay.boxes.get(b.container), G = gb?.kind === 'frame' ? toScreen(gb) : null, w = el.offsetWidth, h = el.offsetHeight;
-    const around = (R: Rect, side: string) => [
-      { x: R.x + R.w + 10, y: T.y - 4, side: `${side}right` }, { x: R.x - 10 - w, y: T.y - 4, side: `${side}left` },
-      { x: R.x, y: R.y + R.h + 8, side: `${side}below` }, { x: R.x, y: R.y - 8 - h, side: `${side}above` }];
-    const cands = [...around(T, ''), ...(G ? around(G, 'group-') : [])];
-    const clear = (r: Rect) => r.x >= area.x && r.y >= area.y && r.x + r.w <= right && r.y + r.h <= bottom
-      && blockers.every(q => q.id === b.id || overlap(r, q.r) < 1) && taken.every(q => overlap(r, q) < 1);
-    const at = cands.find(c => clear({ x: c.x, y: c.y, w, h })) ?? { ...(G ? cands[6]! : cands[2]!), side: 'loose' };
-    const x = Math.min(Math.max(at.x, area.x), right - w), y = Math.min(Math.max(at.y, area.y), bottom - h);
-    el.style.left = `${Math.round(x)}px`; el.style.top = `${Math.round(y)}px`; el.dataset.side = at.side;
-    taken.push({ x, y, w, h });
+  const notes = calloutNotes; if (!notes.length) return;
+  const strip = $('plan-strip'), lens = $('lens'), sp = $('space').getBoundingClientRect();
+  const overflow = () => {
+    let row = document.getElementById('callout-overflow');
+    if (!row) {
+      row = h('section', { id: 'callout-overflow', class: 'callout-overflow', 'aria-label': '부분별 변경 설명' },
+        h('p', { class: 'co-overflow-label' }, '부분별 변경 설명'), h('div', { class: 'co-overflow-notes', tabindex: '0', 'aria-label': '부분별 변경 설명 · 가로로 스크롤' }));
+      strip.append(row);
+    }
+    return row.lastElementChild as HTMLElement;
+  };
+  // Adding a reading row reduces the map's free area. Recheck earlier floating notes against the final strip height.
+  for (let pass = 0; pass <= notes.length; pass++) {
+    positionLens(); updateSticky();
+    const area = lensArea(), taken: Rect[] = [];
+    if (!lens.hidden) { const r = lens.getBoundingClientRect(); taken.push({ x: r.left - sp.left, y: r.top - sp.top, w: r.width, h: r.height }); }
+    const blockers = [...lay.boxes.values()].map(toScreen).filter(r => r.x < area.x + area.w && r.y < area.y + area.h && r.x + r.w > area.x && r.y + r.h > area.y);
+    if (titleH) blockers.push(toScreen(titleRect()));
+    const sticky = $('scope-sticky');
+    if (!sticky.hidden) { const r = sticky.getBoundingClientRect(); blockers.push({ x: r.left - sp.left, y: r.top - sp.top, w: r.width, h: r.height }); }
+    let changed = false;
+    for (const el of notes) {
+      const b = lay.boxes.get(el.dataset.box ?? ''); el.hidden = !b; if (!b) continue;
+      if (el.dataset.side === 'strip') { if (!strip.contains(el)) overflow().append(el); continue; }
+      const gb = lay.boxes.get(b.container);
+      const at = placeCallout(toScreen(b), gb?.kind === 'frame' ? toScreen(gb) : null, { w: el.offsetWidth, h: el.offsetHeight }, area, [...blockers, ...taken]);
+      if (!at) { el.dataset.side = 'strip'; el.style.left = ''; el.style.top = ''; el.tabIndex = 0; overflow().append(el); changed = true; continue; }
+      el.style.left = `${at.x}px`; el.style.top = `${at.y}px`; taken.push(at);
+    }
+    if (!changed) break;
   }
+}
+/** New focus or explicit resize only: bring the named targets into the map space left below the reading row. */
+function revealCalloutTargets() {
+  if (!document.getElementById('callout-overflow')) return;
+  const boxes = calloutNotes.map(el => lay.boxes.get(el.dataset.box ?? '')).filter((b): b is Box => !!b);
+  if (!boxes.length) return;
+  const all = union(boxes), area = lensArea(), lens = $('lens');
+  const keepBottom = !lens.hidden && lensPlace?.side === 'dock' ? lens.offsetHeight + 12 : 0;
+  if (all.w * camera.k <= area.w - 24 && all.h * camera.k <= area.h - keepBottom - 24) revealRect(all, 0, keepBottom);
 }
 /** The scope's title belongs to the map; when a pan takes it out of view its name stays at the top left of the map. */
 function updateSticky() {
@@ -1137,7 +1157,17 @@ const planView = createPlanView({
     revealRect(B);
   },
   restore: r => { const o = opened; if (!o) return; returnCamera = r.camera; go(o.key, r.selected, r.scope); },
-  callouts: notes => { $('callouts').replaceChildren(...notes); positionCallouts(); },
+  callouts: notes => {
+    const key = (el: HTMLElement) => `${el.dataset.box}:${el.textContent}`;
+    const focus = notes.map(key).join('|'), changed = focus !== calloutFocus;
+    const inStrip = new Set(calloutNotes.filter(el => el.dataset.side === 'strip').map(key));
+    if (!changed) for (const el of notes) if (inStrip.has(key(el))) { el.dataset.side = 'strip'; el.tabIndex = 0; }
+    calloutFocus = focus; calloutNotes = notes;
+    document.getElementById('callout-overflow')?.remove();
+    $('callouts').replaceChildren(...notes); positionCallouts();
+    cancelAnimationFrame(calloutFrame);
+    calloutFrame = requestAnimationFrame(() => { positionCallouts(); if (changed) revealCalloutTargets(); });
+  },
   surface: (content, parts, place) => {
     const l = $('lens');
     if (!content) { if (l.classList.contains('compare')) hideLens(); return; }
@@ -1290,7 +1320,7 @@ function bindCanvas() {
     if (e.key === 'Escape' && opened && scope) { const o = opened, from = scope; go(o.key, null, partOf(o, from)?.parentId ?? null); requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-drag="${CSS.escape(from)}"]`)?.focus()); }
   });
   let resize = 0;
-  window.addEventListener('resize', () => { cancelAnimationFrame(resize); resize = requestAnimationFrame(() => { if (opened && !selected && !planView.isOpen()) fitView(false); else if (selected && !sheetOpen) placeLensOnce(); positionCallouts(); }); });
+  window.addEventListener('resize', () => { cancelAnimationFrame(resize); resize = requestAnimationFrame(() => { if (opened && !selected && !planView.isOpen()) fitView(false); else if (!$('lens').hidden) placeLensOnce($('lens').classList.contains('compare'), false); positionCallouts(); revealCalloutTargets(); }); });
 }
 
 /** Hover: a line shows what it means (ends, kind, recorded note) without selecting; a part lights its own lines. */

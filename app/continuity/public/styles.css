@@ -666,7 +666,7 @@ button:disabled { opacity: .5; cursor: default; }
 .co-kind { font-size: 11px; font-weight: 700; color: var(--change); }
 .co-head strong { font-size: 12.5px; font-weight: 650; color: var(--text); }
 .co-head small { font-size: 11px; color: var(--text-4); }
-.co-row { display: grid; grid-template-columns: 30px minmax(0, 1fr); column-gap: 6px; }
+.co-row { display: grid; grid-template-columns: 46px minmax(0, 1fr); column-gap: 6px; }
 .co-row + .co-row { margin-top: 4px; padding-top: 4px; border-top: 1px dashed var(--change-line); }
 .co-label { font-size: 11px; font-weight: 700; line-height: 18px; color: var(--text-3); }
 .co-row.want .co-label { color: var(--change); }
@@ -675,3 +675,9 @@ button:disabled { opacity: .5; cursor: default; }
 .co-row small { display: block; font-size: 11px; color: var(--text-4); }
 .co-src { padding: 0; border: 0; background: none; font-size: 11px; color: var(--accent); text-decoration: underline dotted; }
 .space:not(.preview) .callouts { display: none; }
+
+/* Crowded maps read the same notes in the strip's own flow, with bounded height and every target named. */
+.callout-overflow { flex: 1 1 100%; min-width: 0; padding-top: 7px; border-top: 1px solid var(--hair); }
+.co-overflow-label { margin: 0 0 5px; font-size: 11.5px; font-weight: 600; color: var(--text-3); }
+.co-overflow-notes { display: flex; align-items: stretch; gap: 8px; overflow-x: auto; padding-bottom: 4px; overscroll-behavior: contain; }
+.co-overflow-notes .callout { position: relative; flex: 0 0 270px; width: 270px; max-height: min(144px, 19vh); overflow-y: auto; box-shadow: none; }

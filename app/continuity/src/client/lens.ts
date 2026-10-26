@@ -9,6 +9,28 @@ export type LensSide = 'right' | 'left' | 'below' | 'above' | 'dock';
 export interface LensPlace { side: LensSide; x: number; y: number; h: number; dy: number; w?: number }
 
 export const overlap = (a: Rect, b: Rect) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
+
+/** A note may only occupy clear map space. Clamp candidates before checking them: clamping a rejected place afterwards
+ * can put it over a title or another note. No place is also an answer; the caller then reads the note outside the map. */
+export function placeCallout(target: Rect, group: Rect | null, size: { w: number; h: number }, area: Rect, blockers: Rect[]): Rect | null {
+  const { w, h } = size, gap = 10, right = area.x + area.w - w, bottom = area.y + area.h - h;
+  if (right < area.x || bottom < area.y || overlap(target, area) < 1) return null;
+  const at = (x: number, y: number): Rect => ({ x: Math.max(area.x, Math.min(x, right)), y: Math.max(area.y, Math.min(y, bottom)), w, h });
+  const distance = (r: Rect) => Math.max(target.x - r.x - w, r.x - target.x - target.w, 0) ** 2 + Math.max(target.y - r.y - h, r.y - target.y - target.h, 0) ** 2;
+  const clear = (r: Rect) => distance(r) <= 160 ** 2 && blockers.every(b => overlap(r, { x: b.x - 5, y: b.y - 5, w: b.w + 10, h: b.h + 10 }) < 1);
+  const around = (r: Rect) => [at(r.x + r.w + gap, target.y - 4), at(r.x - w - gap, target.y - 4), at(r.x, r.y + r.h + gap), at(r.x, r.y - h - gap)];
+  for (const r of [...around(target), ...(group ? around(group) : [])]) if (clear(r)) return r;
+  // Obstacle edges supply the remaining free lanes, nearest the target first. This also finds gaps above a long title or
+  // between unrelated groups without pretending that a note is a part of the map's layout.
+  // Bound the search even on dense maps. All obstacles still participate in collision checks. A remote gap does not count
+  // as beside the target; that note belongs in the named reading row instead.
+  const nearest = (values: number[], center: number) => [...new Set(values)].sort((a, b) => Math.abs(a - center) - Math.abs(b - center)).slice(0, 24);
+  const xs = nearest([area.x, right, ...blockers.flatMap(b => [Math.max(area.x, Math.min(b.x - w - gap, right)), Math.max(area.x, Math.min(b.x + b.w + gap, right))])], target.x + (target.w - w) / 2);
+  const ys = nearest([area.y, bottom, ...blockers.flatMap(b => [Math.max(area.y, Math.min(b.y - h - gap, bottom)), Math.max(area.y, Math.min(b.y + b.h + gap, bottom))])], target.y + (target.h - h) / 2);
+  const candidates = xs.flatMap(x => ys.map(y => at(x, y)));
+  candidates.sort((a, b) => distance(a) - distance(b));
+  return candidates.find(clear) ?? null;
+}
 const GAP = 14;
 /** The least height a surface may be given beside its part before its body scrolls instead of the place being refused. */
 const MIN_H = 240;
