@@ -1177,7 +1177,8 @@ const planView = createPlanView({
     if (!content) { if (l.classList.contains('compare')) hideLens(); return; }
     l.replaceChildren(...content); l.hidden = false; l.classList.add('compare'); readingFor = parts;
     // The comparison always reads in the same place: docked under the map, the plan's strip above it.
-    if (place === true || !lensPlace) placeLensOnce(true); else if (place === 'refit') placeLensOnce(true, false); else positionLens();
+    // 'refit' also applies to the first opening: having no earlier lens place must not turn a reading action into a pan.
+    if (place === 'refit') placeLensOnce(true, false); else if (place === true || !lensPlace) placeLensOnce(true); else positionLens();
   },
   chrome: () => {
     const o = opened; if (!o) return;

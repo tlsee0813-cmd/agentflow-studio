@@ -402,13 +402,29 @@ def workspace_flow(browser, base, cases):
         for j in range(page.locator(".node").count()):
             clear_of(page, ".callout", f".node >> nth={j}")
     # Sources replace this one reading; coming back keeps the actual target and its matching before/after text.
+    target_camera = page.locator("#world").evaluate("e => e.style.transform")
     page.locator(".callout .co-src").click()
     expect(page.locator("#lens .cmp-evidence")).to_be_visible()
     expect(page.locator(".callout")).to_have_count(0)
+    assert page.locator("#world").evaluate("e => e.style.transform") == target_camera
     page.locator("#cmp-back").click()
     expect(page.locator(".ps-target").nth(1)).to_have_attribute("aria-selected", "true")
     expect(page.locator(".callout .co-head strong")).to_have_text(target_names[1])
     expect(page.locator(".callout .co-row.want p")).to_have_text("실패한 파일과 이유 모아 보기")
+    assert page.locator("#world").evaluate("e => e.style.transform") == target_camera
+    # A pan made while reading sources remains the person's camera on return; no saved-camera restore may discard it.
+    page.locator(".callout .co-src").click()
+    expect(page.locator("#lens .cmp-evidence")).to_be_visible()
+    vp = page.locator("#viewport").bounding_box()
+    page.mouse.move(vp["x"] + 6, vp["y"] + 24)
+    page.mouse.down()
+    page.mouse.move(vp["x"] + 24, vp["y"] + 42, steps=4)
+    page.mouse.up()
+    panned_camera = page.locator("#world").evaluate("e => e.style.transform")
+    assert panned_camera != target_camera
+    page.locator("#cmp-back").click()
+    expect(page.locator(".callout .co-head strong")).to_have_text(target_names[1])
+    assert page.locator("#world").evaluate("e => e.style.transform") == panned_camera
     # Keyboard navigation names the targets too, and supports a return to the same selected target.
     page.locator(".ps-target").nth(1).focus()
     page.keyboard.press("ArrowLeft")
