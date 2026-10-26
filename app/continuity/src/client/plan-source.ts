@@ -110,7 +110,8 @@ function finish(input: PlanInput): PlanInput {
 export function mapReply(reply: unknown, input: PlanInput): PlanAnalysis {
   const sent = parsePlanAnalysis(reply, [...input.parts.keys()], input.evidence.map(e => e.id));
   const real = (a: string) => input.parts.get(a)!;
-  const mapped: PlanAnalysis = { ...sent, items: sent.items.map(i => ({ ...i, partIds: i.partIds.map(real) })), impacts: sent.impacts.map(x => ({ ...x, partId: real(x.partId) })) };
+  const mapped: PlanAnalysis = { ...sent, items: sent.items.map(i => ({ ...i, partIds: i.partIds.map(real),
+    ...(i.presentation ? { presentation: i.presentation.map(p => ({ ...p, partId: real(p.partId) })) } : {}) })), impacts: sent.impacts.map(x => ({ ...x, partId: real(x.partId) })) };
   return parsePlanAnalysis(mapped, [...input.parts.values()], input.evidence.map(e => e.id));
 }
 
