@@ -1,0 +1,265 @@
+{
+  "source": "93cbff963c064a24de1438e2dba5cd07efde0840",
+  "notice": "Public synthetic inputs processed by real DeepSeek API; no general accuracy or actual project ingestion claim",
+  "deployedScope": {
+    "source": "93cbff963c064a24de1438e2dba5cd07efde0840",
+    "host": "https://agentflow-studio.tlsee0813.workers.dev",
+    "inputKind": "public synthetic evidence",
+    "selected": "failures only",
+    "results": [
+      {
+        "condition": "A",
+        "status": 200,
+        "at": "2026-10-26T09:23:46.677Z",
+        "data": {
+          "model": "deepseek-flash",
+          "reply": {
+            "summary": "선택한 실패 목록 보기는 convertOne이 오류 시 inputId와 reason을 반환하고 호출자가 각 결과를 sessionResults에 누적하는 기존 동작을 재사용할 수 있다. 다만 입력 파일의 표시 이름과 inputId의 대응, 누적 결과에서 실패 항목만 화면에 모아 보여주는 표시 계층은 제공된 자료에서 확인되지 않는다.",
+            "prerequisites": [],
+            "unknowns": [
+              "inputId가 사용자에게 보여줄 입력 파일 이름과 어떻게 대응되는지, 파일명이 결과 데이터에 포함되는지가 자료에 없다.",
+              "sessionResults에 누적된 결과 중 실패 항목만 조회해 화면에 제공하는 방식은 제공된 발췌에서 확인되지 않는다."
+            ]
+          }
+        }
+      },
+      {
+        "condition": "B",
+        "status": 200,
+        "at": "2026-10-26T09:24:00.027Z",
+        "data": {
+          "model": "deepseek-flash",
+          "reply": {
+            "summary": "단일 문서 변환, 내용·모양 보존, PDF/docx 저장 흐름은 재사용할 수 있다. 다만 현재 호출자는 성공 경로나 오류 메시지 하나만 표시하고, 입력 식별자가 붙은 실패 결과 누적은 제공된 자료에 없어 실패 파일명과 이유를 모아 보여줄 자료 기반이 부족하다.",
+            "prerequisites": [
+              {
+                "title": "입력 파일명과 실패 이유가 연결된 실패 기록의 보관·누적 수단",
+                "reason": "convertOne은 실패 시 예외를 던지고 제공된 호출자는 오류 메시지 하나만 화면에 표시하며, 제공된 발췌에는 입력 식별자가 붙은 결과 누적이 없다. 따라서 여러 실패의 파일명과 이유를 모아 읽으려면 그 기록을 남기는 최소 수단이 필요하다.",
+                "refs": [
+                  "P03",
+                  "R02",
+                  "R05"
+                ]
+              }
+            ],
+            "unknowns": [
+              "제공된 convertOne 예외 메시지가 입력 파일명과 사람이 읽을 수 있는 실패 이유를 실제로 포함하는지 확인되지 않음.",
+              "폴더 입력과 실패 후 계속 처리가 이번 선택에서 제외된 상태에서 여러 실패를 '모아' 보는 입력·실행 범위가 무엇인지 원자료만으로 확정되지 않음.",
+              "현재 결과 화면이 마지막 문서 결과만 설명한다는 사실과 실패 목록 표시의 관계, 기존 결과 화면 재사용 가능 여부는 미확인."
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "localFinalPlanB": {
+    "condition": "B",
+    "status": 200,
+    "at": "2026-10-26T09:10:24.144Z",
+    "data": {
+      "model": "deepseek-flash",
+      "reply": {
+        "summary": "현재 자료에는 단일 문서를 읽어 PDF/docx로 저장하고 마지막 문서 결과나 오류 하나만 표시하는 흐름이 있으며, 기존 단일 변환과 본문·표·문단 모양 보존 요구는 재사용할 수 있다. 폴더 입력에서 파일별 실패를 격리해 성공 산출물을 남기고, 입력별 성공·실패와 실패 이유를 모아 보여 주는 변화가 필요하다.",
+        "items": [
+          {
+            "id": "change_1",
+            "title": "폴더 입력을 파일별 변환 대상으로 받기",
+            "description": "현재 자료는 한 번에 문서 하나만 받고 폴더 실행이 없다. 기존 단일 문서 변환 경로를 재사용해 폴더 안의 각 문서를 변환 대상으로 삼는 입력·읽기 변화가 필요하다.",
+            "partIds": [
+              "input",
+              "document"
+            ],
+            "refs": [
+              "R03",
+              "R02",
+              "P03"
+            ],
+            "dependsOn": []
+          },
+          {
+            "id": "change_2",
+            "title": "파일 하나의 실패가 나머지 변환을 중단하지 않게 하기",
+            "description": "제공된 호출자는 성공 경로 또는 오류 메시지 하나만 표시하고, 입력 식별자가 붙은 결과 누적이나 폴더 실행은 발췌에 없다. 파일별 실패를 격리하고 성공 산출물을 유지하는 처리가 필요하다.",
+            "partIds": [],
+            "refs": [
+              "R03",
+              "R02",
+              "P03"
+            ],
+            "dependsOn": []
+          },
+          {
+            "id": "change_3",
+            "title": "성공·실패 결과를 입력별로 모아 보여 주기",
+            "description": "현재 결과 화면은 마지막 문서만 설명한다. 변환한 각 입력에 대해 성공 산출물과 실패 파일 이름·이유를 함께 볼 수 있도록 결과 설명을 바꾼다.",
+            "partIds": [
+              "results"
+            ],
+            "refs": [
+              "R03",
+              "R05",
+              "R02"
+            ],
+            "dependsOn": []
+          },
+          {
+            "id": "change_4",
+            "title": "성공한 산출물을 결과 목록에서 다시 열기",
+            "description": "저장된 산출물을 입력과 연결해 목록에서 다시 열 수 있게 한다. 기존 PDF/docx 저장 결과를 재사용한다.",
+            "partIds": [
+              "files",
+              "results"
+            ],
+            "refs": [
+              "R05",
+              "R02",
+              "T01"
+            ],
+            "dependsOn": []
+          }
+        ],
+        "impacts": [
+          {
+            "partId": "layout",
+            "reason": "폴더 단위 결과를 성공으로 모아도 각 파일의 문단 모양 보존 정확도는 제공된 자료로 검증되지 않아, 결과 신뢰도 확인이 필요하다.",
+            "refs": [
+              "R04",
+              "P01",
+              "T01"
+            ]
+          },
+          {
+            "partId": "output",
+            "reason": "여러 파일을 한 번에 저장하면 출력 이름 충돌 가능성이 생기지만 제공된 검사 원자료에 충돌 검사가 포함되지 않는다.",
+            "refs": [
+              "T01",
+              "R03"
+            ]
+          }
+        ],
+        "preserve": [
+          "기존 본문·표·문단 모양 보존 요구",
+          "기존 단일 문서 변환과 PDF/docx 저장 경로 재사용",
+          "병렬 처리는 도입하지 않음(사용자가 요청하지 않음)"
+        ],
+        "unknowns": [
+          "폴더 변환 시 하위 폴더를 포함할지 여부",
+          "실패한 파일을 재시도할지 여부",
+          "폴더 실행·성공과 실패 혼합·실패 후 계속·출력 이름 충돌에 대한 검증이 제공된 자료로 확인되지 않음",
+          "문단 모양 보존의 실제 정확도는 제공된 자료로 확인되지 않음",
+          "성공 결과를 결과 목록에서 다시 여는 구체적 방식"
+        ]
+      }
+    }
+  },
+  "measurementCrossCase": {
+    "input": {
+      "schemaVersion": "studio.plan.1",
+      "intent": "장치에서 이미 보정한 측정값은 PC에서 다시 보정하지 않고, 화면에 보정 여부를 알아볼 수 있게 해줘. 원시값도 계속 보관해.",
+      "parts": [
+        {
+          "id": "device",
+          "name": "측정 장치",
+          "note": "센서 값을 읽고 보정값을 전송한다.",
+          "parentId": null
+        },
+        {
+          "id": "ingest",
+          "name": "PC 가져오기",
+          "note": "장치 패킷을 받아 수치로 변환한다.",
+          "parentId": null
+        },
+        {
+          "id": "screen",
+          "name": "측정 화면",
+          "note": "측정 수치를 보여준다.",
+          "parentId": null
+        }
+      ],
+      "evidence": [
+        {
+          "id": "U1",
+          "kind": "user",
+          "title": "유지할 원시 기록",
+          "text": "변환된 값과 별도로 받은 원시 패킷을 계속 보관해 주세요.",
+          "basis": "공개 합성 요구 / S0"
+        },
+        {
+          "id": "C1",
+          "kind": "code",
+          "title": "장치 출력 발췌",
+          "text": "device 0.8: emit({raw, value:calibrate(raw), calibrated:true}); 원시값과 보정값, 보정 표시를 함께 전송한다.",
+          "basis": "공개 합성 코드 설명 / device@0.8"
+        },
+        {
+          "id": "C2",
+          "kind": "code",
+          "title": "PC 입력 발췌",
+          "text": "pc 0.9: archive(packet); value=calibrate(packet.value); renderNumber(value); calibrated 필드를 읽지 않고 모든 packet.value에 보정을 적용한다.",
+          "basis": "공개 합성 코드 설명 / pc@0.9"
+        },
+        {
+          "id": "R1",
+          "kind": "report",
+          "title": "PC 담당 보고",
+          "text": "수신한 측정값이 숫자로 표시되도록 만들었습니다. 보정 여부 표시는 아직 없습니다.",
+          "basis": "공개 합성 담당 보고 / pc@0.9 / 실행 아님"
+        },
+        {
+          "id": "T1",
+          "kind": "test",
+          "title": "수신 스모크 검사",
+          "text": "packet 수신 후 숫자 DOM 존재 PASS. 수치 정확도, 보정 횟수, 실장치 연결은 검사하지 않았다.",
+          "basis": "공개 합성 검사 기록 / pc@0.9"
+        }
+      ]
+    },
+    "status": 200,
+    "data": {
+      "model": "deepseek-flash",
+      "reply": {
+        "summary": "장치 출력에는 원시값·보정값·보정 표시가 이미 있고 PC는 받은 패킷을 그대로 보관하지만, PC가 보정 표시를 읽지 않고 값을 다시 보정하며 화면에는 보정 여부가 드러나지 않는다. 기존 원시 보관과 숫자 표시는 재사용하고, PC의 보정 판단과 화면의 보정 여부 표시를 바꿔야 한다.",
+        "items": [
+          {
+            "id": "change_ingest_calibration",
+            "title": "이미 보정된 측정값을 PC에서 다시 보정하지 않음",
+            "description": "장치가 보낸 보정 표시를 읽어, 장치에서 보정된 값은 그대로 사용하고 보정하지 않은 값에만 기존 보정을 적용한다. 받은 패킷 전체를 보관하는 기존 동작은 그대로 재사용한다.",
+            "partIds": [
+              "ingest"
+            ],
+            "refs": [
+              "C2",
+              "C1",
+              "U1"
+            ],
+            "dependsOn": []
+          },
+          {
+            "id": "change_screen_calibrated",
+            "title": "측정 화면에서 보정 여부를 확인할 수 있음",
+            "description": "장치 패킷의 보정 표시를 근거로 측정 화면의 수치가 장치 보정값인지 아닌지 알아볼 수 있게 표시한다. 기존 숫자 표시는 유지한다.",
+            "partIds": [
+              "screen"
+            ],
+            "refs": [
+              "R1",
+              "C1"
+            ],
+            "dependsOn": []
+          }
+        ],
+        "impacts": [],
+        "preserve": [
+          "변환된 값과 별도로 받은 원시 패킷을 계속 보관한다.",
+          "측정 수치를 화면에 숫자로 표시하는 기존 동작을 유지한다.",
+          "장치가 원시값과 보정값, 보정 표시를 함께 전송하는 출력을 유지한다."
+        ],
+        "unknowns": [
+          "화면에서 보정 여부를 어떤 형태(문구, 아이콘, 별도 필드 등)로 표시할지 정해지지 않았다.",
+          "보정 표시가 없는 패킷이나 구버전 패킷을 어떻게 표시·처리할지 정해지지 않았다.",
+          "실장치 연결, 수치 정확도, 보정 횟수는 검사 기록에서 검사되지 않았다."
+        ]
+      }
+    }
+  }
+}
