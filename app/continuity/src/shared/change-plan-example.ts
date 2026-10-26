@@ -52,7 +52,9 @@ export function converterExampleAnalysis(partIds: Record<string, string>, condit
   const ids = (...keys: string[]) => keys.map(key => partIds[key]).filter((id): id is string => typeof id === 'string' && !!id);
   const prerequisite = condition === 'B' ? ['outcomes'] : [];
   return {
-    summary: '작성된 합성 예시: 단일 문서 흐름을 기준으로 폴더 입력, 실패 후 계속, 성공 유지·실패 모음을 비교합니다. 실제 AI 분석이나 구현 결과가 아닙니다.',
+    summary: condition === 'A'
+      ? '파일별 결과는 이미 남고 있지만, 화면에는 마지막 결과만 보여요. 기존 결과를 활용해 실패 모음을 만들고, 폴더 입력과 계속 처리는 따로 살펴볼 수 있어요.'
+      : '현재는 결과 하나만 전달해요. 실패한 파일과 이유를 모으려면 입력마다 결과를 구별하는 부분이 먼저 필요해요.',
     items: [
       { id: 'folder', title: '폴더 입력', description: '현재 단일 문서 입력을 폴더 안 파일을 받는 범위로 확장합니다. 하위 폴더 포함은 아직 정하지 않았습니다.', partIds: ids('input', 'document'), refs: ['R02', 'R03', 'P01'], dependsOn: [] },
       { id: 'continue', title: '실패해도 나머지 계속', description: '한 문서의 실패가 다른 문서 처리를 중단하지 않는 결과를 원합니다. 병렬 처리나 재시도를 필수 방식으로 정하지 않습니다.', partIds: ids('transform', 'content'), refs: ['R03', 'R04', 'P03'], dependsOn: [] },

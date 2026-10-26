@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createPlan, selectItems, revisePlan, requestSnapshot, parsePlanAnalysis, parsePersistedPlan, compareResults } from '../dist/public/shared/change-plan.js';
+import { parseScopeReview } from '../dist/public/shared/change-plan.js';
+import { validateScopeAsk, validateScopeReply, SCOPE_BYTES } from '../dist/public/shared/scope-api.js';
 
 const evidence = [
   { id: 'E1', kind: 'user', title: '사용자 요구', text: '성공은 유지하고 실패 파일을 모아 보고 싶다.', basis: '기록 1' },
@@ -19,7 +21,7 @@ test('partial selection discloses missing prerequisites without silently request
   assert.deepEqual(full.selected, ['I1', 'I2', 'I3']);
   const snapshot = requestSnapshot(partial);
   assert.deepEqual(snapshot.itemIds, ['I2']);
-  assert.match(snapshot.text, /미선택 전제: 파일별 결과 구별/);
+  assert.match(snapshot.text, /미선택 전제 후보: 파일별 결과 구별/);
   assert.match(snapshot.text, /요청 범위에 포함하지 않았습니다/);
   assert.doesNotMatch(snapshot.text, /입력 파일마다 결과를 대응한다|폴더를 입력받는다|폴더 입력 전체/);
   assert.match(snapshot.text, /성공 결과 유지/); assert.match(snapshot.text, /출력 이름 충돌은 미정/);
@@ -73,4 +75,54 @@ test('partial observations preserve report/code/test and branch distinctions; si
   assert.deepEqual(Object.keys(results[0]), ['itemId', 'reported', 'code', 'tests']);
   input[0].text = 'mutated'; assert.notEqual(results[0].reported[0].text, 'mutated');
   assert.throws(() => compareResults(snapshot, [observation('same', 'report', 'a'), observation('same', 'code', 'b')]));
+});
+
+test('scope review replaces a wrong global dependency without changing the selected request or snapshot basis', () => {
+  const a = analysis(); a.items[1].dependsOn = ['I3']; // Global analysis incorrectly made folder input a prerequisite.
+  const selected = selectItems(createPlan('PROJECT1', 'main@abc', '실패 결과', evidence, a), ['I2']);
+  const review = { summary: '단일 파일에서도 실패 결과를 구별할 수 있다.', prerequisites: [
+    { title: '파일별 결과의 기존 수단 확인', reason: '현재 자료는 문서 하나의 결과만 설명하므로 입력별 구별 여부는 더 확인해야 한다.', refs: ['E2'] }
+  ], unknowns: ['실패 이유를 어디서 얻는지는 미확인'] };
+  const before = structuredClone(selected), snapshot = requestSnapshot(selected, review);
+  assert.deepEqual(selected, before); assert.equal(snapshot.planId, selected.id); assert.equal(snapshot.planRevision, selected.revision);
+  assert.equal(snapshot.basis, selected.basis); assert.deepEqual(snapshot.itemIds, ['I2']);
+  assert.match(snapshot.text, /실패한 파일과 이유를 모아 보여 주세요/);
+  assert.match(snapshot.text, /전제 후보: 파일별 결과의 기존 수단 확인/);
+  assert.doesNotMatch(snapshot.text, /폴더 입력|폴더를 입력받는다|폴더 입력 전체/);
+  assert.match(snapshot.text, /출력 이름 충돌은 미정/); assert.match(snapshot.text, /실패 이유를 어디서 얻는지는 미확인/);
+  assert.match(snapshot.text, /main@abc:result.ts/); assert.match(snapshot.text, /문서 하나의 결과만 설명/);
+  assert.match(snapshot.text, /자동 포함하지 않았습니다/);
+  // An empty fresh review also suppresses legacy global edges and their source excerpts.
+  const empty = requestSnapshot(selected, { summary: '추가 전제는 아직 확인하지 못했다.', prerequisites: [], unknowns: [] });
+  assert.doesNotMatch(empty.text, /폴더 입력|폴더를 입력받는다/);
+});
+
+test('scope review strictly rejects missing/empty refs, unknown keys and excess candidates', () => {
+  const review = { summary: '범위 재검토', prerequisites: [{ title: '전제', reason: '근거 설명', refs: ['E1'] }], unknowns: [] };
+  assert.deepEqual(parseScopeReview(review, ['E1']), review);
+  for (const mutate of [r => { r.prerequisites[0].refs = ['unknown']; }, r => { r.prerequisites[0].refs = []; },
+    r => { r.prerequisites[0].required = true; }, r => { r.extra = true; },
+    r => { r.prerequisites = Array.from({ length: 13 }, () => structuredClone(r.prerequisites[0])); },
+    r => { r.unknowns = Array(13).fill('미정'); }]) {
+    const r = structuredClone(review); mutate(r); assert.throws(() => parseScopeReview(r, ['E1']));
+    assert.throws(() => requestSnapshot(plan(), r));
+  }
+});
+
+test('scope ask bounds UTF-8 including selected text and rejects invented parts/refs and duplicate selection', () => {
+  const ask = () => ({ schemaVersion: 'studio.scope.1', intent: '실패 모아 보기', parts: [
+    { id: 'P1', name: '입력', note: '', parentId: null }, { id: 'P2', name: '결과', note: '', parentId: null }
+  ], evidence, selected: [{ id: 'I2', title: '실패 모아 보기', description: '실패와 이유를 보여 주세요.', partIds: ['P2'], refs: ['E1'] }], excluded: ['폴더 입력'] });
+  assert.deepEqual(validateScopeAsk(ask()), ask());
+  const reply = { summary: '검토 결과', prerequisites: [], unknowns: [] };
+  assert.deepEqual(validateScopeReply(reply, ask()), reply);
+  assert.throws(() => validateScopeReply({ ...reply, prerequisites: [{ title: '전제', reason: '이유', refs: ['unknown'] }] }, ask()));
+  for (const mutate of [r => { r.selected[0].partIds = ['missing']; }, r => { r.selected[0].refs = ['missing']; },
+    r => { r.selected[0].refs = []; }, r => { r.selected.push(structuredClone(r.selected[0])); },
+    r => { r.selected = []; }, r => { r.selected[0].dependsOn = []; }, r => { r.extra = true; }]) {
+    const r = ask(); mutate(r); assert.throws(() => validateScopeAsk(r));
+  }
+  const large = ask(); large.evidence = Array.from({ length: 4 }, (_, i) => ({ ...evidence[0], id: `E${i + 1}`, text: '한'.repeat(6000) }));
+  assert.ok(new TextEncoder().encode(JSON.stringify(large)).length > SCOPE_BYTES);
+  assert.throws(() => validateScopeAsk(large), /INPUT_TOO_LARGE/);
 });
