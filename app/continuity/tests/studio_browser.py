@@ -31,9 +31,9 @@ def main_flow(browser, base):
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))
     page.goto(base + "/")
-    expect(page.locator(".project-card")).to_have_count(2)
+    expect(page.locator(".project-card")).to_have_count(3)
     expect(page.locator("#ai-text")).to_contain_text("AI 정리")
-    page.locator(".project-card").first.click()
+    page.locator('.project-card[href="#/p/ex-salon"]').click()
     expect(page.locator(".node")).to_have_count(7)
     expect(page.locator(".frame")).to_have_count(2)
     no_page_scroll(page)
@@ -83,7 +83,7 @@ def main_flow(browser, base):
     page.go_back()
     expect(page.locator("#panel")).to_be_hidden()
     page.locator(".brand").click()
-    expect(page.locator(".project-card")).to_have_count(2)
+    expect(page.locator(".project-card")).to_have_count(3)
     assert not errors, errors
     page.close()
 
@@ -99,7 +99,7 @@ def map_flow(browser, base):
     """Drag, wheel zoom, going inside and back with the view kept; example places are not saved."""
     page = browser.new_page(viewport={"width": 1280, "height": 720})
     page.goto(base + "/")
-    page.locator(".project-card").first.click()
+    page.locator('.project-card[href="#/p/ex-salon"]').click()
     customer, notify = page.locator(".node", has_text="손님 정보"), page.locator(".node", has_text="문자 알림")
     gap = notify.bounding_box()["y"] - customer.bounding_box()["y"]
     drag(page, customer, 0, 160)
@@ -161,7 +161,7 @@ def basics_flow(browser, base):
     temporary unfold for a record, and the access code kept from an input event."""
     page = browser.new_page(viewport={"width": 1280, "height": 720})
     page.goto(base + "/")
-    page.locator(".project-card").first.click()
+    page.locator('.project-card[href="#/p/ex-salon"]').click()
     # Labels say what was observed, not that work is running; relation notes are not drawn over the map.
     expect(page.locator(".node", has_text="문자 알림")).to_contain_text("요청만 있음")
     expect(page.locator("#space")).not_to_contain_text("진행 중")
@@ -213,7 +213,7 @@ def basics_flow(browser, base):
 def code_flow(browser, base):
     page = browser.new_page(viewport={"width": 1280, "height": 720})
     page.goto(base + "/")
-    page.locator(".project-card").first.click()
+    page.locator('.project-card[href="#/p/ex-salon"]').click()
     page.locator(".node", has_text="시간 고르기").click()
     page.get_by_role("button", name="지금 상황 정리").click()  # no code yet: opens the box at the code field
     expect(page.locator("#access-code")).to_be_focused()
@@ -287,14 +287,14 @@ def new_project_flow(browser, base):
     assert abs((pay.bounding_box()["y"] - login.bounding_box()["y"]) - moved) < 4
     page.locator(".brand").click()
     expect(page.locator("#saved-list .project-card")).to_have_count(1)
-    expect(page.locator(".project-card", has_text="예제")).to_have_count(2)  # examples are never saved as mine
+    expect(page.locator(".project-card", has_text="예제")).to_have_count(3)  # examples are never saved as mine
     context.close()
 
 
 def failure_flow(browser, base):
     page = browser.new_page(viewport={"width": 1280, "height": 720})
     page.goto(base + "/")
-    page.locator(".project-card").first.click()
+    page.locator('.project-card[href="#/p/ex-salon"]').click()
     page.locator(".node", has_text="문자 알림").click()
     page.get_by_role("button", name="다음에 판단할 것").click()
     expect(page.locator(".failed")).to_contain_text("AI 서비스가 응답하지 않아요")
@@ -309,7 +309,7 @@ def off_flow(browser, base, expected_pill):
     page = browser.new_page(viewport={"width": 1280, "height": 720})
     page.goto(base)
     expect(page.locator("#ai-text")).to_have_text(expected_pill)
-    page.locator(".project-card").first.click()
+    page.locator('.project-card[href="#/p/ex-salon"]').click()
     page.locator(".node", has_text="시간 고르기").click()
     expect(page.locator(".composer .ai-off")).to_be_visible()
     expect(page.locator("#ask-input")).to_have_count(0)

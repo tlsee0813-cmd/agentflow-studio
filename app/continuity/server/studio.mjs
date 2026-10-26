@@ -44,7 +44,7 @@ export function readStudioConfig(env = {}) {
     apiKey: env.AI_MODE === 'mock' ? '' : String(env.DEEPSEEK_API_KEY ?? ''),
     model, planModel: env.DEEPSEEK_PLAN_MODEL && /^[a-zA-Z0-9._-]{1,80}$/.test(env.DEEPSEEK_PLAN_MODEL) ? env.DEEPSEEK_PLAN_MODEL : model,
     origins, accessCode: String(env.STUDIO_ACCESS_CODE ?? ''),
-    timeoutMs: int('STUDIO_TIMEOUT_MS', 30000, 1000, 60000), maxTokens: int('STUDIO_MAX_TOKENS', 1200, 256, 4096),
+    timeoutMs: int('STUDIO_TIMEOUT_MS', 30000, 1000, 60000), planTimeoutMs: int('STUDIO_PLAN_TIMEOUT_MS', 60000, 1000, 60000), maxTokens: int('STUDIO_MAX_TOKENS', 1200, 256, 4096),
     rate: int('STUDIO_REQUESTS_PER_MINUTE', 10, 1, 120), cap: int('STUDIO_CALL_CAP', 300, 1, 100000), concurrency: int('STUDIO_MAX_CONCURRENT', 3, 1, 16)
   };
 }
@@ -76,13 +76,13 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
   if (!config.apiKey) throw new ApiError('AI_NOT_CONFIGURED', 503);
   if (signal?.aborted) throw new ApiError('CANCELLED', 499);
   const controller = new AbortController(); let timedOut = false;
-  const timer = setTimeout(() => { timedOut = true; controller.abort(); }, config.timeoutMs);
+  const timer = setTimeout(() => { timedOut = true; controller.abort(); }, planning ? (config.planTimeoutMs ?? config.timeoutMs) : config.timeoutMs);
   const abort = () => controller.abort(); signal?.addEventListener('abort', abort, { once: true });
   try {
     // Workers supports manual/follow, not redirect:error. Reject 3xx below without forwarding the key.
     const response = await fetchImpl(ENDPOINT, { method: 'POST', redirect: 'manual', signal: controller.signal,
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.apiKey}` },
-      body: JSON.stringify({ model: config.model, stream: false, thinking: { type: 'disabled' }, max_tokens: planning ? 3000 : scope ? 1800 : config.maxTokens,
+      body: JSON.stringify({ model: config.model, stream: false, thinking: { type: scope || planning ? 'enabled' : 'disabled' }, ...(scope || planning ? { reasoning_effort: 'low' } : {}), max_tokens: planning ? 8192 : scope ? 4096 : config.maxTokens,
         response_format: { type: 'json_object' },
         messages: [{ role: 'system', content: scope ? SCOPE_PROMPT : planning ? PLAN_PROMPT : STUDIO_PROMPT }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }] }) });
     if (!response.ok) {
