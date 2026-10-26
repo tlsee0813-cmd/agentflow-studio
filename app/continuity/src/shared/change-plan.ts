@@ -1,6 +1,13 @@
 /** A hypothetical change is separate from project requirements and from execution evidence. */
 export interface Evidence { id: string; kind: 'user' | 'report' | 'code' | 'test'; title: string; text: string; basis: string }
-export interface PlanItem { id: string; title: string; description: string; partIds: string[]; refs: string[]; dependsOn: string[] }
+/** A source-bound reading aid, not graph operations or proof of current product behaviour. */
+export interface PlanPresentation {
+  partId: string;
+  current: { text: string; source: 'part-note' | 'evidence'; refs: string[] };
+  wanted: { text: string; refs: string[] };
+  origin: 'intent' | 'suggestion';
+}
+export interface PlanItem { id: string; title: string; description: string; partIds: string[]; refs: string[]; dependsOn: string[]; presentation?: PlanPresentation[] }
 export interface Impact { partId: string; reason: string; refs: string[] }
 export interface PlanAnalysis { summary: string; items: PlanItem[]; impacts: Impact[]; preserve: string[]; unknowns: string[] }
 export interface ChangePlan { version: 'change-plan.1'; id: string; projectId: string; revision: number; basis: string; intent: string; evidence: Evidence[]; analysis: PlanAnalysis; selected: string[]; createdAt: string }
@@ -11,9 +18,9 @@ export interface ScopeReview { summary: string; prerequisites: { title: string; 
 const MAX_ITEMS = 32, MAX_EVIDENCE = 48, MAX_IMPACTS = 64, MAX_TEXT = 12000;
 const copy = <T>(value: T): T => structuredClone(value);
 function check(condition: unknown): asserts condition { if (!condition) throw new Error('INVALID_CHANGE_PLAN'); }
-function object(value: unknown, keys: string[]): asserts value is Record<string, unknown> {
+function object(value: unknown, keys: string[], optional: string[] = []): asserts value is Record<string, unknown> {
   check(value !== null && typeof value === 'object' && !Array.isArray(value));
-  check(Object.keys(value).length === keys.length && keys.every(k => Object.hasOwn(value, k)));
+  check(keys.every(k => Object.hasOwn(value, k)) && Object.keys(value).every(k => keys.includes(k) || optional.includes(k)));
 }
 function text(value: unknown, max = MAX_TEXT): asserts value is string {
   check(typeof value === 'string' && value.length <= max && !!value.trim() && !/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(value));
@@ -36,6 +43,22 @@ function evidenceList(value: unknown): asserts value is Evidence[] {
   check(new Set(value.map(v => (v as Evidence).id)).size === value.length);
 }
 
+function presentations(value: unknown, partIds: string[], itemRefs: string[]): asserts value is PlanPresentation[] {
+  list(value, 8);
+  const seen = new Set<string>(), parts = new Set(partIds), refs = new Set(itemRefs);
+  for (const entry of value) {
+    object(entry, ['partId', 'current', 'wanted', 'origin']); id(entry.partId);
+    check(parts.has(entry.partId) && !seen.has(entry.partId)); seen.add(entry.partId);
+    object(entry.current, ['text', 'source', 'refs']); text(entry.current.text, 140);
+    check(entry.current.source === 'part-note' || entry.current.source === 'evidence');
+    ids(entry.current.refs, MAX_EVIDENCE, refs, entry.current.source === 'evidence');
+    if (entry.current.source === 'part-note') check(entry.current.refs.length === 0);
+    object(entry.wanted, ['text', 'refs']); text(entry.wanted.text, 140);
+    ids(entry.wanted.refs, MAX_EVIDENCE, refs, true);
+    check(entry.origin === 'intent' || entry.origin === 'suggestion');
+  }
+}
+
 /** A fresh review of the selected outcome, without treating global dependency guesses as facts. */
 export function parseScopeReview(value: unknown, evidenceIds: string[]): ScopeReview {
   ids(evidenceIds, MAX_EVIDENCE);
@@ -56,10 +79,11 @@ export function parsePlanAnalysis(value: unknown, partIds: string[], evidenceIds
   object(value, ['summary', 'items', 'impacts', 'preserve', 'unknowns']); text(value.summary, 2000);
   list(value.items, MAX_ITEMS); check(value.items.length > 0);
   for (const item of value.items) {
-    object(item, ['id', 'title', 'description', 'partIds', 'refs', 'dependsOn']);
+    object(item, ['id', 'title', 'description', 'partIds', 'refs', 'dependsOn'], ['presentation']);
     id(item.id); text(item.title, 200); text(item.description, 4000);
     // Empty partIds supports a genuinely new part whose implementation identity is not known yet.
     ids(item.partIds, 32, parts); ids(item.refs, MAX_EVIDENCE, refs, true); ids(item.dependsOn, MAX_ITEMS);
+    if (Object.hasOwn(item, 'presentation')) presentations(item.presentation, item.partIds, item.refs);
   }
   const items = value.items as unknown as PlanItem[], byId = new Map(items.map(x => [x.id, x]));
   check(byId.size === items.length);
@@ -84,7 +108,7 @@ function analysisParts(analysis: unknown): string[] {
   // Only recover the persisted allow-list, never assume these still exist in the current project.
   object(analysis, ['summary', 'items', 'impacts', 'preserve', 'unknowns']); list(analysis.items, MAX_ITEMS); list(analysis.impacts, MAX_IMPACTS);
   const parts: string[] = [];
-  for (const item of analysis.items) { object(item, ['id', 'title', 'description', 'partIds', 'refs', 'dependsOn']); ids(item.partIds, 32); parts.push(...item.partIds); }
+  for (const item of analysis.items) { object(item, ['id', 'title', 'description', 'partIds', 'refs', 'dependsOn'], ['presentation']); ids(item.partIds, 32); parts.push(...item.partIds); }
   for (const impact of analysis.impacts) { object(impact, ['partId', 'reason', 'refs']); id(impact.partId); parts.push(impact.partId); }
   return [...new Set(parts)];
 }
