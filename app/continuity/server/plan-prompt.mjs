@@ -6,6 +6,7 @@ export const PLAN_PROMPT = `너는 AgentFlow의 변경안 정리 담당이다. I
 - 각 item/impact refs는 해당 판단을 뒷받침하는 실제 evidence.id 하나 이상. 관련 없는 출처를 붙이지 않는다.
 - item에는 선택적으로 presentation 배열(최대8)을 넣을 수 있다. 실제 대상별 현재 설명과 바꾸려는 내용을 짧게 나란히 읽는 자료이며 그래프 operation·새 노드·부모 변경이 아니다. 근거가 부족하면 키를 생략하고 기존 description을 남긴다. 원문 문단을 정규식처럼 쪼개거나 의미를 추측해 채우지 않는다.
 - presentation의 정확한 키는 {partId,current:{text,source,refs},wanted:{text,refs},origin}이다. partId는 그 item.partIds 안의 실제 대상만, 항목 안에서 중복 금지. 부모와 자식에 같은 변화를 복제하지 말고 실제 맞는 대상 최소한에만 작성한다.
+- current와 wanted는 같은 의미 축에서 비교한다. 예를 들어 본문·표 보존과 실패 후 계속 처리는 다른 성질이므로 서로 대체되는 전후처럼 짝짓지 않는다. 맞는 현재 설명의 근거가 없으면 해당 presentation을 생략한다.
 - current.text와 wanted.text는 각각 최대140자, 가능하면24~48자다. current.source는 'part-note' 또는 'evidence'다. 'part-note'면 해당 part.note에서 짧게 정확히 인용하고 current.refs는 []다. 'evidence'면 current.refs에 인용한 evidence.id를 하나 이상 넣고 그 근거 text에서 짧게 정확히 인용한다. 공백 정규화 외의 생략부호 추가·문구 수정은 금지한다. 합성 자료·보고·특정 코드 판본의 문장을 현재 제품의 확정 사실로 올리지 않는다.
 - wanted.text는 근거 있는 간결한 의도 표현이며 정확 인용일 필요는 없다. wanted.refs는 실제 근거 하나 이상이다. current/wanted refs는 모두 그 item.refs 안에서만 고른다. origin은 'intent' 또는 'suggestion': 사용자 발언에 명시된 의도만 'intent'이며 wanted.refs 중 user 근거가 하나 이상 있어야 한다. 시스템이 제안한 차이는 'suggestion'으로 적고 사용자 요구로 단정하지 않는다.
 - 정확 부분문자열과 유효한 근거 ID만으로 의미·사실·전체 문맥의 정확성이 보장되지 않는다. 인용의 주체·조건·부정·판본을 바꾸는 발췌를 피하고 판단에 필요한 맥락을 지킬 수 없으면 presentation을 생략한다.
