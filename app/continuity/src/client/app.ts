@@ -624,6 +624,10 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   world.querySelectorAll('.edge.inner').forEach(g => top.append(g));
   positionWorld();
   $('space').classList.toggle('in-scope', !!scope);
+  // Many lines on one view: those that go round other parts share the same gaps and would read as extra outlines of the
+  // groups they pass; they step back until selected, hovered or read as a change's context (kind, direction and hover meaning
+  // unchanged).
+  $('space').classList.toggle('dense-lines', lay.edges.length >= 12);
   const empty = $('space-empty');
   empty.hidden = view.parts.length > 0 || o.kind === 'saved';
   empty.textContent = view.records.length ? `아직 부분으로 나뉘지 않은 프로젝트예요. 기록 ${view.records.length}개는 ‘최근 기록’에서 볼 수 있어요.` : '아직 부분도 기록도 없는 프로젝트예요.';
@@ -650,7 +654,8 @@ function positionWorld() {
   if (title) { const t = titleRect(); title.style.left = `${t.x}px`; title.style.top = `${t.y}px`; title.style.width = `${t.w}px`; }
   world.querySelectorAll<SVGGElement>('.edge').forEach(g => {
     const a = lay.boxes.get(g.dataset.from!), b = lay.boxes.get(g.dataset.to!); if (!a || !b) return;
-    const d = edgePath(a, b, lay.boxes.values()).d; g.querySelectorAll('path').forEach(x => x.setAttribute('d', d));
+    const r = edgePath(a, b, lay.boxes.values()); g.querySelectorAll('path').forEach(x => x.setAttribute('d', r.d));
+    g.classList.toggle('detour', !!r.detour);
   });
   placeEdgeLabels();
 }
@@ -1263,6 +1268,16 @@ const planView = createPlanView({
     if (place === true) revealParts(parts);
   },
   area: () => syncMapArea(),
+  frame: (all, fallback) => {
+    // Once, when a whole plan comes to read: its changed parts together when they fit beside the pane at this zoom (no zoom,
+    // no centring); else the target being read, as for any new target.
+    const boxes = all.map(id => lay.boxes.get(id)).filter((b): b is Box => !!b && b.kind !== 'ghost'), area = mapArea();
+    // With the map's title when that fits too, as any later target is shown (so reading the next change does not move again).
+    for (const rs of boxes.length ? [[...boxes, ...(titleH ? [titleRect()] : [])], boxes] : []) {
+      const U = union(rs); if (U.w * camera.k <= area.w - 32 && U.h * camera.k <= area.h - 24) { revealRect(U); return; }
+    }
+    revealParts(fallback);
+  },
   chrome: () => {
     const o = opened; if (!o) return;
     setBar(o); renderRecent();

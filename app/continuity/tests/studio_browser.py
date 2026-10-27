@@ -725,6 +725,14 @@ def overview_flow(browser, base, cases):
     expect(page.locator("#world .node.has-kids", has_text="공통과 기타")).to_be_visible()
     page.wait_for_timeout(500)
     assert page.locator("#world").evaluate(CAMERA) == overview
+    # Collector: many lines; those going round other parts step back (still drawn, same kind) until the selection's.
+    page.goto(base + "/")
+    page.locator("#import-file").set_input_files(str(cases / "oss-collector.json"))
+    expect(page.locator("#space")).to_have_class(re.compile("dense-lines"))
+    assert page.locator("#world .edge.detour").count() > 0
+    page.locator("#world .node", has_text="logs/1").click()
+    expect(page.locator("#world .edge.on")).to_have_count(2)
+    page.keyboard.press("Escape")
     # scikit-learn: its four groups read whole in the first view (no group past the window's edge).
     page.goto(base + "/")
     page.locator("#import-file").set_input_files(str(cases / "oss-scikit-learn.json"))
@@ -759,6 +767,20 @@ def overview_flow(browser, base, cases):
     page.goto(base + "/#/p/ex-converter")
     page.locator("#world .node", has_text="문서 읽기").click()
     page.locator("#plan-entry").click()
+    # Opening frames the plan's changed parts together once; reading the next change or the current view does not move it,
+    # and the current view keeps a neutral mark on the target the pane reads (no change words).
+    page.wait_for_timeout(400)
+    opened_at = page.locator("#world").evaluate(CAMERA)
+    for i in range(page.locator("#world .plan-direct").count()):
+        in_map(page, f"#world .plan-direct >> nth={i}")
+    page.locator(".ps-item").nth(1).click()
+    page.locator(".ps-item").nth(2).click()
+    page.locator("#plan-mode").get_by_role("button", name="현재", exact=True).click()
+    page.wait_for_timeout(300)
+    assert page.locator("#world").evaluate(CAMERA) == opened_at
+    expect(page.locator("#world .plan-reading-now")).to_have_count(1)
+    expect(page.locator("#world .plan-direct")).to_have_count(0)
+    expect(page.locator("#world .plan-note:visible")).to_have_count(0)
     page.locator(".ps-close").click()
     expect(page.locator("#toast")).to_be_visible()
     page.goto(base + "/#/p/ex-salon")

@@ -44,6 +44,9 @@ export interface PlanHost {
   /** The reading pane, about these parts: true brings them beside the pane by the smallest pan (a new target); 'refit' shows
    * new content without moving the camera; false re-renders the same reading in place. null closes it. */
   surface(content: Node[] | null, parts: string[], place: boolean | 'refit'): void;
+  /** When a whole plan comes to read (opened, analysed, imported, another example condition): the parts it changes, together,
+   * by the smallest pan when they fit at the current zoom; else the target being read (fallback) as for a new target. */
+  frame(all: string[], fallback: string[]): void;
 }
 
 type Focus = { kind: 'item'; id: string } | { kind: 'impacts' } | { kind: 'part'; id: string } | null;
@@ -75,6 +78,8 @@ const short = (text: string, n: number) => { const t = text.replace(/\s+/g, ' ')
 export function createPlanView(host: PlanHost) {
   let s: Session | null = null;
   let moveTarget = false;
+  /** The whole plan just came to read: frame all its changed parts once (then the camera is the person's). */
+  let frameWhole = false;
 
   /* ---------- bundles ---------- */
   function keysOf(o: PlanOpened): Record<string, string> { return Object.fromEntries(o.alias?.toId ?? []); }
@@ -110,7 +115,7 @@ export function createPlanView(host: PlanHost) {
       focus: firstFocus(bundle.plan), targets: {}, mode: bundle.plan ? 'preview' : 'current', editing: !bundle.plan, detail: false, strip: null, evidenceFor: null, explain: false, pending: null, error: null, scoping: null, scopeError: null,
       sheet: null, sources: false, adding: false, resultFor: bundle.snapshots.at(-1)?.id ?? null, addForm: false, copyMsg: null, fileMsg: null, ret: host.capture() };
     if (unreadable) s.storeMsg = null;
-    moveTarget = true; host.chrome(); render();
+    moveTarget = true; frameWhole = true; host.chrome(); render();
     requestAnimationFrame(() => (document.getElementById('plan-intent') ?? document.getElementById('plan-title'))?.focus());
   }
   /** Closing keeps the draft and the plan; the map goes back to the latest current view with the earlier selection and camera. */
@@ -233,7 +238,7 @@ export function createPlanView(host: PlanHost) {
     document.querySelectorAll<SVGGElement>('#world .edges-top .edge:not(.ctx):not(.on):not(.inner)').forEach(e => base?.append(e));
   }
   function overlay() {
-    document.querySelectorAll<HTMLElement>('.plan-direct,.plan-impact,.plan-focus,.plan-reading').forEach(el => { el.classList.remove('plan-direct', 'plan-impact', 'plan-focus', 'plan-reading'); el.removeAttribute('data-plan-title'); });
+    document.querySelectorAll<HTMLElement>('.plan-direct,.plan-impact,.plan-focus,.plan-reading,.plan-reading-now').forEach(el => { el.classList.remove('plan-direct', 'plan-impact', 'plan-focus', 'plan-reading', 'plan-reading-now'); el.removeAttribute('data-plan-title'); });
     document.querySelectorAll<HTMLElement>('.plan-note').forEach(el => { el.replaceChildren(); el.removeAttribute('title'); el.className = 'plan-note'; });
     document.querySelectorAll('.plan-badge').forEach(el => el.remove());
     $('space').classList.toggle('planning', !!s);
@@ -255,8 +260,10 @@ export function createPlanView(host: PlanHost) {
     const impacts = shownImpacts(p).filter(x => !marks.has(rep(x.partId) ?? ''));
     // Existing relations read the same in the current view and the preview; only the change marks below are the preview's.
     contextEdges(p, rep, focusItem ? itemTargets(focusItem) : [], impacts);
-    if (s.mode !== 'preview') return;
     const el = (id: string) => document.querySelector<HTMLElement>(`.node[data-box="${CSS.escape(id)}"], .frame[data-box="${CSS.escape(id)}"]`);
+    // The current view keeps only where the pane is reading (a neutral mark, no change words): the comparison and the map stay
+    // matched while the change itself is hidden.
+    if (s.mode !== 'preview') { if (reading) el(reading)?.classList.add('plan-reading-now'); return; }
     const kind = (word: string) => (word ? h('span', { class: 'pn-k' }, word) : null), gap = (word: string) => (word ? ' ' : null);
     for (const [id, m] of marks) {
       const e = el(id); if (!e) continue;
@@ -359,7 +366,7 @@ export function createPlanView(host: PlanHost) {
       try { analysis = mapReply(res.reply, inp); } catch { throw new AskError('INVALID_RESPONSE'); }
       const next = createPlan(o.project.id, inp.basis, inp.ask.intent, inp.evidence, analysis);
       session.bundle = { ...session.bundle, plan: next, by: { kind: 'ai', model: res.model, at: new Date().toISOString(), records: inp.records } };
-      session.mode = 'preview'; session.focus = firstFocus(next); session.targets = {}; session.editing = false; session.detail = false; moveTarget = true;
+      session.mode = 'preview'; session.focus = firstFocus(next); session.targets = {}; session.editing = false; session.detail = false; moveTarget = true; frameWhole = true;
       if (s === session) persist();
     } catch (e) {
       const code = e instanceof AskError ? e.code : 'REQUEST_FAILED';
@@ -458,7 +465,7 @@ export function createPlanView(host: PlanHost) {
       const read = readPlanFile(await f.text(), o.project.id);
       if (typeof read === 'string') { s.fileMsg = read; render(); return; }
       if ((s.bundle.plan || s.bundle.snapshots.length) && !confirm('지금 변경안을 가져온 파일의 내용으로 바꿀까요? 지금 안을 남기려면 먼저 파일로 내보내 두세요.')) return;
-      s.bundle = read; s.focus = firstFocus(read.plan); s.targets = {}; s.mode = read.plan ? 'preview' : 'current'; s.editing = !read.plan; s.resultFor = read.snapshots.at(-1)?.id ?? null; moveTarget = true;
+      s.bundle = read; s.focus = firstFocus(read.plan); s.targets = {}; s.mode = read.plan ? 'preview' : 'current'; s.editing = !read.plan; s.resultFor = read.snapshots.at(-1)?.id ?? null; moveTarget = true; frameWhole = true;
       persist(); s.fileMsg = s.storeMsg ? null : '변경안 파일을 가져왔어요.'; render();
     });
   }
@@ -471,7 +478,7 @@ export function createPlanView(host: PlanHost) {
   function setCondition(c: Condition) {
     const o = host.current(); if (!s || !o || s.condition === c) return;
     MEMORY.set(memoryKey(o, s.condition), s.bundle);
-    s.condition = c; s.bundle = bundleFor(o, c).bundle; s.focus = firstFocus(s.bundle.plan); s.targets = {}; s.error = null; s.mode = s.bundle.plan ? 'preview' : 'current'; moveTarget = true;
+    s.condition = c; s.bundle = bundleFor(o, c).bundle; s.focus = firstFocus(s.bundle.plan); s.targets = {}; s.error = null; s.mode = s.bundle.plan ? 'preview' : 'current'; moveTarget = true; frameWhole = true;
     s.resultFor = s.bundle.snapshots.at(-1)?.id ?? null; s.editing = !s.bundle.plan;
     render();
   }
@@ -554,7 +561,7 @@ export function createPlanView(host: PlanHost) {
   let lastFocusKey = '', lastShown = '';
   function renderCompare(o: PlanOpened) {
     const st = s!, p = plan();
-    if (!p || !st.focus || st.focus.kind === 'impacts' || panelOpen() || st.sheet) { host.surface(null, [], false); lastFocusKey = ''; lastShown = ''; moveTarget = false; return; }
+    if (!p || !st.focus || st.focus.kind === 'impacts' || panelOpen() || st.sheet) { host.surface(null, [], false); lastFocusKey = ''; lastShown = ''; moveTarget = false; frameWhole = false; return; }
     const boxes = host.boxes(), rep = (id: string) => visibleRep(id, boxes), active = st.focus.kind === 'item' ? activeTarget(itemOf(st.focus.id)!) : st.focus.id;
     const key = `${JSON.stringify(st.focus)}|${active ?? ''}`;
     let content: Node[], parts: string[];
@@ -568,8 +575,10 @@ export function createPlanView(host: PlanHost) {
     // An explicit new target (opening the plan, another change, another named target) is brought beside the pane by the
     // smallest pan. The long reading, its sources and the way back only change the pane; they keep the person's camera.
     const place = moveTarget || (lastFocusKey && key !== lastFocusKey) ? true : shown !== lastShown ? 'refit' : false;
-    moveTarget = false;
-    host.surface(content, parts, place); lastFocusKey = key; lastShown = shown;
+    const whole = frameWhole && place === true;
+    moveTarget = false; frameWhole = false;
+    host.surface(content, parts, whole ? 'refit' : place); lastFocusKey = key; lastShown = shown;
+    if (whole) host.frame([...new Set([...changedParts(), ...parts])], parts);
   }
   /** The short reading of one change: its targets by name, the pair for the target being read, and what to do with it. */
   function itemBrief(o: PlanOpened, p: ChangePlan, item: PlanItem): Node[] {

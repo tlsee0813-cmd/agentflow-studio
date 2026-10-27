@@ -746,3 +746,9 @@ button:disabled { opacity: .5; cursor: default; }
 
 /* A folded group without a sentence on the map: its name and count sit on the card's middle line. */
 .node.unit.has-kids:not(:has(.node-note)) { align-items: center; padding-top: 0; padding-bottom: 0; }
+
+/* The current view of an open plan: where the pane is reading stays marked, neutrally (no change colour, no change words). */
+.node.plan-reading-now, .frame.plan-reading-now { border-color: var(--text-3); box-shadow: inset 3px 0 0 var(--text-3); }
+
+/* A dense view: lines that go round other parts step back until they are the selection's, hovered or a change's context. */
+.space.dense-lines .edge.detour:not(.on):not(.near):not(.ctx) .edge-line { stroke-opacity: .32; }

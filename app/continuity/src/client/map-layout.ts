@@ -327,7 +327,7 @@ function rounded(pts: Point[], r = 8): string {
 /** Edge path between two boxes. A group end meets the group at its head row (the group's port), never beside an inner part.
  * The usual soft curve is kept when it crosses nothing; when it would pass under an unrelated part or group, the line takes an
  * outside corridor through the gaps (out from the side, along a free row gap, into the other side). */
-export function edgePath(a: Box, b: Box, others: Iterable<Box> = []): { d: string; mx: number; my: number } {
+export function edgePath(a: Box, b: Box, others: Iterable<Box> = []): { d: string; mx: number; my: number; detour?: boolean } {
   const all = [...others], byId = new Map(all.map(o => [o.id, o]));
   const within = (o: Box, f: Box) => { for (let c = o.container, g = 0; c && g < 64; c = byId.get(c)?.container ?? '', g++) if (c === f.id) return true; return false; };
   // What a line must not cross: other parts and groups, except the groups around either end and the inside of a group end.
@@ -343,7 +343,7 @@ export function edgePath(a: Box, b: Box, others: Iterable<Box> = []): { d: strin
     if (segFree(x1, y1, x1, y2)) return { d: `M${x1},${y1} C${x1},${y1 + k} ${x1},${y2 - k} ${x1},${y2}`, mx: x1, my: (y1 + y2) / 2 };
     // A part between them in the same column would read as an end: go round the right side instead.
     const ax = a.x + a.w, bx = b.x + b.w, xs = Math.max(ax, bx) + 14;
-    return { d: rounded([{ x: ax, y: acy }, { x: xs, y: acy }, { x: xs, y: bcy }, { x: bx, y: bcy }]), mx: xs, my: (acy + bcy) / 2 };
+    return { d: rounded([{ x: ax, y: acy }, { x: xs, y: acy }, { x: xs, y: bcy }, { x: bx, y: bcy }]), mx: xs, my: (acy + bcy) / 2, detour: true };
   }
   const right = bcx > acx, dir = right ? 1 : -1, x1 = right ? a.x + a.w : a.x, x2 = right ? b.x : b.x + b.w;
   const k = Math.max(40, Math.abs(x2 - x1) / 2) * dir;
@@ -360,7 +360,7 @@ export function edgePath(a: Box, b: Box, others: Iterable<Box> = []): { d: strin
     .sort((p, q) => Math.abs(p - acy) + Math.abs(p - bcy) - (Math.abs(q - acy) + Math.abs(q - bcy)));
   for (const yc of ys) {
     if (!segFree(xa, acy, xa, yc) || !segFree(xa, yc, xb, yc) || !segFree(xb, yc, xb, bcy)) continue;
-    return { d: rounded([{ x: x1, y: acy }, { x: xa, y: acy }, { x: xa, y: yc }, { x: xb, y: yc }, { x: xb, y: bcy }, { x: x2, y: bcy }]), mx: (xa + xb) / 2, my: yc };
+    return { d: rounded([{ x: x1, y: acy }, { x: xa, y: acy }, { x: xa, y: yc }, { x: xb, y: yc }, { x: xb, y: bcy }, { x: x2, y: bcy }]), mx: (xa + xb) / 2, my: yc, detour: true };
   }
   return curve;
 }
