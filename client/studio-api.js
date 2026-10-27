@@ -1,3 +1,4 @@
+import { validateDigestReply } from '../shared/digest-api.js';
 import { RUNTIME } from './runtime.js';
 export class AskError extends Error {
     code;
@@ -17,7 +18,8 @@ export async function aiStatus() {
         const v = await res.json();
         if (!res.ok || !['deepseek', 'off'].includes(v?.ai))
             return { ai: 'none', model: null, access: 'open' };
-        return { ai: v.ai, model: typeof v.model === 'string' ? v.model : null, access: v.access === 'code' ? 'code' : 'open' };
+        const d = v.digest, digest = d && typeof d.model === 'string' && typeof d.prompt === 'string' && /^[\w.-]{1,80}$/.test(d.model) && /^d1-[0-9a-f]{12}$/.test(d.prompt) ? { model: d.model, prompt: d.prompt } : null;
+        return { ai: v.ai, model: typeof v.model === 'string' ? v.model : null, access: v.access === 'code' ? 'code' : 'open', digest };
     }
     catch {
         return { ai: 'none', model: null, access: 'open' };
@@ -46,6 +48,36 @@ export async function askStudio(ask, signal, accessCode) {
     if (!data?.reply || typeof data.model !== 'string')
         throw new AskError('INVALID_RESPONSE');
     return { model: data.model, reply: data.reply };
+}
+/** A return reading. The reply is checked again here against the request that was sent. */
+export async function askDigest(ask, signal, accessCode) {
+    if (RUNTIME.apiBase === null)
+        throw new AskError('NO_SERVER');
+    const headers = { 'Content-Type': 'application/json', 'X-AgentFlow-Request': '1' };
+    if (accessCode)
+        headers['X-Studio-Access'] = accessCode;
+    let res;
+    try {
+        res = await fetch(url('/api/studio/digest'), { method: 'POST', headers, body: JSON.stringify(ask), signal, credentials: 'same-origin' });
+    }
+    catch {
+        throw new AskError(signal.aborted ? 'CANCELLED' : 'NETWORK');
+    }
+    let data = null;
+    try {
+        data = await res.json();
+    }
+    catch { /* handled below */ }
+    if (!res.ok)
+        throw new AskError(typeof data?.error?.code === 'string' ? data.error.code : 'REQUEST_FAILED');
+    if (typeof data?.model !== 'string')
+        throw new AskError('INVALID_RESPONSE');
+    try {
+        return { model: data.model, reply: validateDigestReply(data.reply, ask) };
+    }
+    catch {
+        throw new AskError('INVALID_RESPONSE');
+    }
 }
 export const ERROR_TEXT = {
     AI_NOT_CONFIGURED: '서버에 AI 키가 설정되지 않았어요.',

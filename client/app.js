@@ -10,6 +10,8 @@ import { runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth } from './plan-dom.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
 import { createPlanView } from './plan-view.js';
+import { createReturnView } from './return-view.js';
+import { UI62_KEY, buildUi62Project, ui62Keys } from '../shared/return-material.js';
 /* ---------- small DOM helpers (shared with the change-plan view) ---------- */
 const firstLine = (text, n = 90) => { const line = text.split('\n').find(l => l.trim())?.trim() ?? ''; return line.length > n ? `${line.slice(0, n)}…` : line; };
 const recentAt = (at) => !!at && Date.now() - Date.parse(at) < 24 * 3600000;
@@ -352,6 +354,12 @@ function projectFor(key) {
         project = examples.get(key);
         kind = 'example';
     }
+    else if (key === UI62_KEY) {
+        if (!examples.has(key))
+            examples.set(key, buildUi62Project());
+        project = examples.get(key);
+        kind = 'example';
+    }
     else if (key.startsWith('ex-')) {
         const spec = EXAMPLES.find(e => `ex-${e.id}` === key);
         if (!spec)
@@ -376,7 +384,7 @@ function projectFor(key) {
         return null;
     let alias = null;
     if (kind === 'example') {
-        const toId = key === CONVERTER_KEY ? converterKeys(project) : exampleKeys(key.slice(3), project);
+        const toId = key === CONVERTER_KEY ? converterKeys(project) : key === UI62_KEY ? ui62Keys(project) : exampleKeys(key.slice(3), project);
         alias = { toId, toKey: new Map([...toId].map(([k, id]) => [id, k])) };
     }
     return { key, kind, project, ref, view: studioView(project), alias };
@@ -425,8 +433,12 @@ async function render() {
         opened = next;
         scope = nextScope;
         lastClick.id = '';
-        if (fresh)
+        if (fresh) {
             planView.projectChanged();
+            returnView.projectChanged();
+            readMarks = [];
+            readingCamera = null;
+        }
         // A new project starts with the map alone: the previous project's reading pane must not narrow its first view.
         if (fresh) {
             selected = null;
@@ -484,6 +496,9 @@ async function render() {
         if (!planView.isOpen() && o.kind !== 'legacy')
             planView.toggle();
     }
+    // The development-material example opens on its reading (the material or a reading already made; never a call by itself).
+    if (fresh && o.key === UI62_KEY && !part && !planView.isOpen() && !returnView.isOpen())
+        returnView.open();
 }
 function travelFrom(next) {
     const r = route(), to = (r.scope ? next.alias?.toId.get(r.scope) ?? r.scope : null);
@@ -555,7 +570,9 @@ function setBar(o) {
         path.forEach((p, i) => crumbs.push(sep(), i === path.length - 1
             ? h('button', { type: 'button', class: 'crumb-current', 'aria-current': 'location', title: `‘${p.name}’ 설명 보기`, onclick: () => go(o.key, p.id) }, p.name)
             : h('a', { href: hashFor(o.key, null, p.id) }, p.name)));
-        if (o.key === CONVERTER_KEY)
+        if (o.key === UI62_KEY)
+            crumbs.push(h('span', { class: 'tag', title: '공개 commit과 결과 문서에서 사후 편집한 실제 개발 자료예요. 지도는 자료집의 편집 분류이고, 이 탭에서만 남아요.' }, '예제 · 공개 자료'));
+        else if (o.key === CONVERTER_KEY)
             crumbs.push(h('span', { class: 'tag', title: '공개 합성 예제예요. 지도는 작성한 구조이고, 변경 구상은 이 탭에서만 남아요.' }, '예제'));
         else if (o.kind !== 'saved')
             crumbs.push(h('span', { class: 'tag', title: o.kind === 'example' ? 'Codex·Claude에서 전달받았다고 가정하고 쓴 예제 기록이에요. 저장되지 않아요.' : '' }, o.kind === 'example' ? '예제' : '읽기 전용'));
@@ -584,6 +601,10 @@ function setBar(o) {
     entry.setAttribute('aria-pressed', String(planning));
     entry.classList.toggle('on', planning);
     entry.textContent = '변경 구상';
+    const ret = $('return-entry'), reading = returnView.isOpen() && !planView.isOpen();
+    ret.setAttribute('aria-pressed', String(reading));
+    ret.classList.toggle('on', reading);
+    ret.title = reading ? '돌아와 읽기 닫기 (Esc)' : '무엇이 달라졌는지 자료로 읽어요';
     entry.title = planning ? '변경 구상 닫기 (Esc) · 초안은 남아요' : '현재 지도 위에서 바꿀 모습을 시험해요';
     document.title = o ? `${o.project.name} · AgentFlow Studio` : 'AgentFlow Studio';
 }
@@ -632,8 +653,9 @@ function programCard(key, p, example, keyOf) {
         const kids = r.childIds.map(id => v.parts.find(x => x.id === id)?.name).filter(Boolean);
         return h('li', {}, h('a', { href: `${base}/${encodeURIComponent(keyOf(r.id))}`, title: `‘${r.name}’ 선택해서 열기` }, h('strong', {}, ...slashBreaks(r.name)), kids.length ? h('span', {}, kids.slice(0, 3).join(' · '), kids.length > 3 ? h('small', {}, ` +${kids.length - 3}`) : null) : (mapLead(v, r.id) ? h('span', { class: 'quiet' }, mapLead(v, r.id)) : null)));
     }), roots.length > MAX ? h('li', { class: 'more' }, h('a', { href: base }, `+${roots.length - MAX}개 묶음`)) : null) : h('p', { class: 'program-empty' }, '아직 부분이 없어요 · 열어서 첫 부분을 적어요');
+    const tryReturn = key === UI62_KEY ? h('a', { class: 'program-try', href: base }, h('strong', {}, '돌아와 읽기'), h('span', {}, '공개 개발 자료 10개 · 3단계로 늘려 읽기 · 사후 편집')) : null;
     const tryPlan = key === CONVERTER_KEY ? h('a', { class: 'program-try', href: base, onclick: () => { openPlanOnArrive = true; } }, h('strong', {}, '변경 구상 시험해 보기'), h('span', {}, '폴더째 변환 · 지금과 구상을 같은 자리에서 비교')) : null;
-    return h('li', {}, h('article', { class: `program${example ? ' is-example' : ''}` }, h('a', { class: 'program-head', href: base }, h('strong', { class: 'program-name' }, p.name), h('span', { class: 'program-brief' }, p.space.brief?.text ?? '목적이 아직 적혀 있지 않아요.'), h('span', { class: 'program-meta' }, meta)), h('div', { class: 'program-body' }, section, cont, tryPlan)));
+    return h('li', {}, h('article', { class: `program${example ? ' is-example' : ''}` }, h('a', { class: 'program-head', href: base }, h('strong', { class: 'program-name' }, p.name), h('span', { class: 'program-brief' }, p.space.brief?.text ?? '목적이 아직 적혀 있지 않아요.'), h('span', { class: 'program-meta' }, meta)), h('div', { class: 'program-body' }, section, cont, tryPlan, tryReturn)));
 }
 /** My programs lead; the examples show their real composition on a first visit and step back once there is work of one's own. */
 function renderHome() {
@@ -652,6 +674,16 @@ function renderHome() {
     catch {
         converter = h('li', { class: 'message' }, '예제 ‘문서 변환기’를 만들지 못했어요.');
     }
+    let material;
+    try {
+        if (!examples.has(UI62_KEY))
+            examples.set(UI62_KEY, buildUi62Project());
+        const m = examples.get(UI62_KEY);
+        material = programCard(UI62_KEY, m, true, invert(ui62Keys(m)));
+    }
+    catch {
+        material = h('li', { class: 'message' }, '예제 ‘AgentFlow UI62 개발 자료’를 만들지 못했어요.');
+    }
     $('project-list').replaceChildren(converter, ...EXAMPLES.map(spec => {
         const key = `ex-${spec.id}`;
         try {
@@ -663,7 +695,7 @@ function renderHome() {
         catch {
             return h('li', { class: 'message' }, `예제 ‘${spec.name}’을 만들지 못했어요.`);
         }
-    }));
+    }), material);
     const saved = store.entries().filter(e => e.state === 'active');
     const cards = [];
     for (const e of saved) {
@@ -893,6 +925,7 @@ function renderSpace(cameraMode = 'fit', planOverlay = true) {
         fitView(false);
     if (planOverlay)
         planView.overlay();
+    applyReadMarks();
 }
 /** Geometry only (also during a drag): boxes and edge paths from the current layout. */
 function positionWorld() {
@@ -1120,12 +1153,30 @@ function select(partId) {
     if (!partId) {
         panel.hidden = true;
         panel.replaceChildren();
+        clearHighlight();
+        if (returnView.isOpen()) {
+            // Back from a part read beside the return reading: the same reading, and the camera it had unless the map was moved.
+            if (readingCamera && !mapMoved) {
+                camera = readingCamera;
+                applyCamera(true);
+            }
+            readingCamera = null;
+            returnView.render();
+            return;
+        }
         if (scopeReading)
             renderScopeLens();
         else
             hideLens();
-        clearHighlight();
         return;
+    }
+    if (returnView.isOpen()) {
+        if (changed && !readingCamera) {
+            readingCamera = { ...camera };
+            mapMoved = false;
+        }
+        readMarks = [];
+        applyReadMarks();
     }
     showReading(changed, changed);
     if (pendingRecord) {
@@ -1668,6 +1719,7 @@ const planView = createPlanView({
             revealParts(parts);
     },
     area: () => syncMapArea(),
+    readReturn: () => { planView.close(); openReturn(); },
     frame: (all, fallback) => {
         // Once, when a whole plan comes to read: its changed parts together when they fit beside the pane at this zoom (no zoom,
         // no centring); else the target being read, as for any new target.
@@ -1697,6 +1749,63 @@ const planView = createPlanView({
         }
         syncMapArea();
     }
+});
+/* ---------- coming back: the return reading in the pane ---------- */
+/** Parts the return reading is about now: marked on the map (drawn representatives), never selected or restyled by status. */
+let readMarks = [];
+/** The camera when a part was opened from (or beside) the return reading; coming back restores it unless the map was moved. */
+let readingCamera = null;
+function applyReadMarks() {
+    const o = opened, ids = new Set(o ? readMarks.map(id => drawnRep(o, id)).filter((x) => !!x) : []);
+    document.querySelectorAll('.node[data-part],.frame[data-part]').forEach(el => el.classList.toggle('read-mark', ids.has(el.dataset.part)));
+}
+function openReturn() {
+    const o = opened;
+    if (!o || o.kind === 'legacy')
+        return;
+    if (planView.isOpen())
+        planView.close(false);
+    scopeReading = false;
+    if (selected) {
+        go(o.key);
+    }
+    returnView.open();
+}
+const returnView = createReturnView({
+    current: () => opened,
+    kv,
+    status: () => status,
+    accessCode: () => sessionCode(), keepAccessCode,
+    bundle: () => planView.bundleOf(),
+    show: content => {
+        const l = $('lens');
+        if (!content) {
+            if (l.classList.contains('return-read'))
+                hideLens();
+            return;
+        }
+        if (selected || planView.isOpen())
+            return;
+        const same = l.classList.contains('return-read') && !l.hidden, keep = same ? l.querySelector('.lens-body')?.scrollTop ?? 0 : 0;
+        l.replaceChildren(...content);
+        l.classList.remove('compare', 'scope-read');
+        l.classList.add('return-read');
+        l.hidden = false;
+        readingFor = [];
+        syncMapArea();
+        const body = l.querySelector('.lens-body');
+        if (body && same)
+            body.scrollTop = keep;
+    },
+    mark: ids => { readMarks = [...ids]; applyReadMarks(); },
+    reveal: ids => { const o = opened; if (!o)
+        return; revealParts([...new Set(ids.map(id => drawnRep(o, id)).filter((x) => !!x))]); },
+    selectPart: id => { const o = opened; if (!o)
+        return; readingCamera = { ...camera }; mapMoved = false; go(o.key, id); },
+    trial: (text, sources) => { planView.propose(text, sources); },
+    compare: ids => { planView.focusParts(ids); },
+    chrome: () => { const o = opened; if (o)
+        setBar(o); }
 });
 function sessionCode() { try {
     return sessionStorage.getItem('agentflow.studio.access') ?? accessCodeMemory;
@@ -2042,6 +2151,10 @@ function bindCanvas() {
             closeScopeReading();
             return;
         }
+        if (e.key === 'Escape' && opened && returnView.isOpen() && !selected) {
+            returnView.escape();
+            return;
+        }
         if (e.key === 'Escape' && opened && scope) {
             const o = opened, from = scope;
             go(o.key, null, partOf(o, from)?.parentId ?? null);
@@ -2184,7 +2297,12 @@ async function main() {
     bindNewProject();
     $('add-part').addEventListener('click', () => openPartForm(scope));
     $('plan-entry').addEventListener('click', () => planView.toggle());
-    statusReady = aiStatus().then(s => { status = s; renderStatus(); planView.statusChanged(); refreshReading(); });
+    $('return-entry').addEventListener('click', () => { if (returnView.isOpen() && !planView.isOpen())
+        returnView.close();
+    else
+        openReturn(); });
+    statusReady = aiStatus().then(s => { status = s; renderStatus(); planView.statusChanged(); refreshReading(); if (!selected && !planView.isOpen())
+        returnView.render(); });
     window.addEventListener('hashchange', () => void render());
     await render();
     await statusReady;
