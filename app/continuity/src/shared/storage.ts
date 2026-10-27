@@ -1,5 +1,5 @@
 import { type Project, type ManualPositions, type ViewState, FILE_LIMIT } from './types.js';
-import { ensure, parseProject, isLegacy, isPrevious, assertPositions } from './validation.js';
+import { ensure, parseProject, isLegacy, isPrevious, assertPositions, cleanPositions } from './validation.js';
 import { restore } from './domain.js';
 export const STORAGE_KEY='agentflow.idea015.project.v1';
 /** Untouched legacy values taken before a project.3 write replaces them. */
@@ -18,16 +18,39 @@ export function serializeBackup(project:Project,positions:ManualPositions|null):
   ensure(new TextEncoder().encode(raw).length<=FILE_LIMIT,'FILE_TOO_LARGE');
   return raw;
 }
-/** Folds and per-scope cameras, per project, apart from the project data (same browser only). One key for all projects; the
- * newest VIEW_PROJECTS are kept. Unreadable or malformed values read as nothing stored; a failed write is only a lost convenience. */
+/** Manual places per workspace entry. An imported copy keeps its project's id, so the id cannot tell the copy from the
+ * original: places are kept by entry. positions.1 held them by project id; it is only read, never written again. An entry
+ * with no record of its own reads what its project had there, which is what every entry of that project showed before.
+ * A new entry (an import) writes its own record at once, so it never takes over places another entry set. */
+export const POSITIONS_KEY='agentflow.studio.positions.2';
+export const LEGACY_POSITIONS_KEY='agentflow.studio.positions.1';
+function placesAll(storage:StorageLike,key:string):Record<string,unknown> {
+  try {const v=JSON.parse(storage.getItem(key)??'{}');return v&&typeof v==='object'&&!Array.isArray(v)?Object.assign(Object.create(null) as Record<string,unknown>,v):Object.create(null);}
+  catch {return Object.create(null);}
+}
+export function readEntryPositions(storage:StorageLike,entryId:string,projectId:string):ManualPositions {
+  const own=placesAll(storage,POSITIONS_KEY);
+  if(Object.hasOwn(own,entryId))return cleanPositions(own[entryId]);
+  const old=placesAll(storage,LEGACY_POSITIONS_KEY);
+  return cleanPositions(Object.hasOwn(old,projectId)?old[projectId]:null);
+}
+/** Writes one entry's places (an empty record too: it keeps the entry off positions.1). False when the browser refused. */
+export function writeEntryPositions(storage:StorageLike,entryId:string,positions:ManualPositions):boolean {
+  try {const all=placesAll(storage,POSITIONS_KEY);all[entryId]=cleanPositions(positions);storage.setItem(POSITIONS_KEY,JSON.stringify(all));return true;}
+  catch {return false;}
+}
+/** Folds and per-scope cameras, per opened map (a saved project by its workspace entry, an example by its key), apart from
+ * the project data (same browser only). One key for all maps; the newest VIEW_PROJECTS are kept. Unreadable or malformed values read as nothing stored; a failed write is only a lost convenience. */
 export const VIEW_KEY='agentflow.studio.view.1';
 const VIEW_PROJECTS=60;
 export function cleanViewState(v:unknown):ViewState {
   const out:ViewState={folds:{},cameras:{}};
   if(!v||typeof v!=='object'||Array.isArray(v))return out;
   const {folds,cameras}=v as Record<string,unknown>;
-  if(folds&&typeof folds==='object'&&!Array.isArray(folds))for(const [k,b] of Object.entries(folds))if(typeof b==='boolean'&&k)out.folds[k]=b;
+  // A key an ordinary object inherits ('__proto__'…) is no part's key: skipped, so it cannot replace a dictionary's prototype.
+  if(folds&&typeof folds==='object'&&!Array.isArray(folds))for(const [k,b] of Object.entries(folds))if(typeof b==='boolean'&&k&&!(k in Object.prototype))out.folds[k]=b;
   if(cameras&&typeof cameras==='object'&&!Array.isArray(cameras))for(const [k,c] of Object.entries(cameras)){
+    if(k in Object.prototype)continue;
     const {x,y,scale}=(c??{}) as {x?:unknown;y?:unknown;scale?:unknown};
     if(typeof x==='number'&&typeof y==='number'&&typeof scale==='number'&&Number.isFinite(x)&&Number.isFinite(y)&&Math.abs(x)<1e7&&Math.abs(y)<1e7&&scale>=0.1&&scale<=4)out.cameras[k]={x,y,scale};
   }

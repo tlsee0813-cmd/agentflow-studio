@@ -275,7 +275,8 @@ export function createPlanView(host: PlanHost) {
     const named = new Set(shown.map(x => rep(x.partId)).filter((x): x is string => !!x));
     const others = new Set(p.analysis.impacts.map(x => rep(x.partId)).filter((x): x is string => !!x));
     const top = document.querySelector('#world .edges-top');
-    document.querySelectorAll<SVGGElement>('#world .edge').forEach(e => {
+    // Each stored relation's own line; a summary line of the overview (.sum, not drawn while the plan reads) is never context.
+    document.querySelectorAll<SVGGElement>('#world .edge:not(.sum)').forEach(e => {
       const a = e.dataset.from!, b = e.dataset.to!;
       const ctx = a !== b && ((anchors.has(a) && anchors.has(b) && (named.has(a) || named.has(b))) || (named.has(a) && others.has(b)) || (named.has(b) && others.has(a)));
       if (!ctx) return;

@@ -1055,12 +1055,25 @@ def relation_visit_flow(browser, base, cases):
     page.locator("#edit-name").fill(long)
     page.get_by_role("button", name="저장").click()
     page.locator("#panel .close").click()
+    page.wait_for_timeout(400)
+    came_from = page.locator("#world").evaluate(CAMERA)
     page.locator("#lens .port", has_text="수신 · traces").click()
     expect(back).to_have_accessible_name(long + "으로 돌아가기")
+    # A long name (UI67, intended): the way back wraps instead of cutting the name. The whole name reads in the pane as one
+    # sentence with its arrow, the scene it came from is its own line under it, and the title and body still follow close below.
     box, pane = back.bounding_box(), page.locator("#lens").bounding_box()
-    assert box["height"] <= 26 and box["x"] + box["width"] <= pane["x"] + pane["width"] - 16, (box, pane)
+    assert pane["x"] <= box["x"] and box["x"] + box["width"] <= pane["x"] + pane["width"] - 16, (box, pane)
+    expect(back.locator("strong")).to_have_text(long)
+    expect(back.locator(".vl-where")).to_have_text("전체 지도")
+    name, where = back.locator("strong").bounding_box(), back.locator(".vl-where").bounding_box()
+    assert where["y"] >= name["y"] + name["height"] - 1, (name, where)
+    assert back.locator(".vl-where").evaluate("e => e.scrollWidth <= e.clientWidth")
+    title = page.locator("#lens-title").bounding_box()
+    assert box["y"] + box["height"] <= title["y"] and title["y"] - pane["y"] <= 140, (box, title, pane)
     back.click()
     expect(page.locator("#lens-title")).to_have_text(long)
+    page.wait_for_timeout(500)
+    assert page.locator("#world").evaluate(CAMERA) == came_from
     # Out of the scope from a part: the scene changes; the context row's back and the pane's line (where the reader looks) are
     # the same way back, and it brings the part, its camera and the reading back; the folds the visit opened close again.
     page.locator(".frame-head", has_text="정적 실행본 대응").locator(".enter").click()

@@ -463,7 +463,9 @@ export function edgePath(a: Box, b: Box, others: Iterable<Box> = []): { d: strin
   // Half of the free gap beside an end (at most 14px): where the line turns.
   const room = (x: number, y: number, d: number) => Math.min(28, ...blocks.filter(o => y >= o.y && y <= o.y + o.h && (d > 0 ? o.x >= x : o.x + o.w <= x)).map(o => (d > 0 ? o.x - x : x - (o.x + o.w)))) / 2;
   const xa = x1 + dir * room(x1, acy, dir), xb = x2 - dir * room(x2, bcy, -dir);
-  if ((xb - xa) * dir <= 0) return curve;
+  // Past the one-corridor routes, the line goes through the gaps with more turns, or into a part from above or below.
+  const around = () => { const r = gapRoute(a, b, dir, blocks, segFree); return r ? { d: rounded(r.pts), mx: r.mid.x, my: r.mid.y, detour: true, clear: true } : curve; };
+  if ((xb - xa) * dir <= 0) return around();
   const lo = Math.min(xa, xb), hi = Math.max(xa, xb);
   const ys = [acy, bcy, ...blocks.filter(o => o.x < hi && lo < o.x + o.w).flatMap(o => [o.y - 6, o.y + o.h + 6])]
     .sort((p, q) => Math.abs(p - acy) + Math.abs(p - bcy) - (Math.abs(q - acy) + Math.abs(q - bcy)));
@@ -471,7 +473,70 @@ export function edgePath(a: Box, b: Box, others: Iterable<Box> = []): { d: strin
     if (!segFree(xa, acy, xa, yc) || !segFree(xa, yc, xb, yc) || !segFree(xb, yc, xb, bcy)) continue;
     return { d: rounded([{ x: x1, y: acy }, { x: xa, y: acy }, { x: xa, y: yc }, { x: xb, y: yc }, { x: xb, y: bcy }, { x: x2, y: bcy }]), mx: (xa + xb) / 2, my: yc, detour: true, clear: true };
   }
-  return curve;
+  return around();
+}
+
+/** The last route before a curve that would cross: an orthogonal path through the gaps near both ends (fewest turns, then
+ * shortest), kept LANE_CLEAR from every obstacle. It leaves a by the side facing b (or, failing that, its top or bottom) and
+ * meets b on the side facing a, or on its top or bottom when that side is shut in; a group end only at its head row, as
+ * everywhere. Only boxes near the two ends are searched; null when no such path is found, and the crossing curve stays. */
+function gapRoute(a: Box, b: Box, dir: number, blocks: { x: number; y: number; w: number; h: number }[], segFree: (x1: number, y1: number, x2: number, y2: number) => boolean): { pts: Point[]; mid: Point } | null {
+  const LEAD = 12, SIDE = 0, END = 34;
+  type Port = { at: Point; lead: Point; cost: number };
+  const ports = (x: Box, face: number): Port[] => {
+    const cy = x.kind === 'frame' ? x.y + x.head / 2 : x.y + x.h / 2, cx = x.x + x.w / 2, sx = face > 0 ? x.x + x.w : x.x;
+    const out: Port[] = [{ at: { x: sx, y: cy }, lead: { x: sx + face * LEAD, y: cy }, cost: SIDE }];
+    if (x.kind !== 'frame') out.push({ at: { x: cx, y: x.y + x.h }, lead: { x: cx, y: x.y + x.h + LEAD }, cost: END }, { at: { x: cx, y: x.y }, lead: { x: cx, y: x.y - LEAD }, cost: END });
+    return out.filter(p => segFree(p.at.x + (p.lead.x - p.at.x) / LEAD, p.at.y + (p.lead.y - p.at.y) / LEAD, p.lead.x, p.lead.y));
+  };
+  const from = ports(a, dir), to = ports(b, -dir);
+  if (!from.length || !to.length) return null;
+  const x0 = Math.min(a.x, b.x) - 160, x1 = Math.max(a.x + a.w, b.x + b.w) + 160, y0 = Math.min(a.y, b.y) - 160, y1 = Math.max(a.y + a.h, b.y + b.h) + 160;
+  const near = blocks.filter(o => o.x < x1 && x0 < o.x + o.w && o.y < y1 && y0 < o.y + o.h);
+  // Lanes: just outside each nearby box, the middle of every gap between box edges, the ports' own lines and the search edge.
+  const lanes = (edges: number[], extra: number[]) => {
+    const e = [...new Set(edges)].sort((p, q) => p - q), out = new Set(extra), half = (v: number) => Math.round(v * 2) / 2;
+    for (let i = 0; i < e.length; i++) { out.add(e[i]! - 8); out.add(e[i]! + 8); if (i) out.add((e[i - 1]! + e[i]!) / 2); }
+    return [...new Set([...out].map(half))].sort((p, q) => p - q);
+  };
+  const xs = lanes(near.flatMap(o => [o.x, o.x + o.w]), [x0, x1, ...from.map(p => p.lead.x), ...to.map(p => p.lead.x)]);
+  const ys = lanes(near.flatMap(o => [o.y, o.y + o.h]), [y0, y1, ...from.map(p => p.lead.y), ...to.map(p => p.lead.y)]);
+  const X = xs.length, Y = ys.length, N = X * Y, ix = new Map(xs.map((v, i) => [v, i])), iy = new Map(ys.map((v, i) => [v, i]));
+  const key = (p: Point) => { const i = ix.get(Math.round(p.x * 2) / 2), j = iy.get(Math.round(p.y * 2) / 2); return i === undefined || j === undefined ? -1 : j * X + i; };
+  // Free steps between neighbouring lane crossings (right: 0, down: 1), each tested once.
+  const step = new Uint8Array(N * 2);
+  for (let j = 0; j < Y; j++) for (let i = 0; i < X; i++) {
+    if (i + 1 < X && segFree(xs[i]!, ys[j]!, xs[i + 1]!, ys[j]!)) step[(j * X + i) * 2] = 1;
+    if (j + 1 < Y && segFree(xs[i]!, ys[j]!, xs[i]!, ys[j + 1]!)) step[(j * X + i) * 2 + 1] = 1;
+  }
+  // Dijkstra over (crossing, heading); a turn costs as much as a long run, so the fewest-turn path wins and then the shortest.
+  const TURN = 400, dist = new Float64Array(N * 4).fill(Infinity), prev = new Int32Array(N * 4).fill(-1), heap: [number, number][] = [];
+  const push = (d: number, s: number) => { heap.push([d, s]); for (let c = heap.length - 1; c > 0;) { const q = (c - 1) >> 1; if (heap[q]![0] <= heap[c]![0]) break; [heap[q], heap[c]] = [heap[c]!, heap[q]!]; c = q; } };
+  const pop = () => { const top = heap[0]!, last = heap.pop()!; if (heap.length) { heap[0] = last; for (let c = 0; ;) { const l = 2 * c + 1, r = l + 1; let m = c; if (l < heap.length && heap[l]![0] < heap[m]![0]) m = l; if (r < heap.length && heap[r]![0] < heap[m]![0]) m = r; if (m === c) break; [heap[m], heap[c]] = [heap[c]!, heap[m]!]; c = m; } } return top; };
+  const heading = (p: Port) => (p.lead.x > p.at.x ? 0 : p.lead.x < p.at.x ? 2 : p.lead.y > p.at.y ? 1 : 3); // 0 right, 1 down, 2 left, 3 up
+  for (const p of from) { const k = key(p.lead); if (k >= 0) { const s = k * 4 + heading(p); if (p.cost < dist[s]!) { dist[s] = p.cost; push(p.cost, s); } } }
+  const goal = new Map<number, Port>(); for (const p of to) { const k = key(p.lead); if (k >= 0) goal.set(k, p); }
+  let best = Infinity, bestState = -1, bestPort: Port | null = null;
+  while (heap.length) {
+    const [d, s] = pop(); if (d > dist[s]! || d >= best) continue;
+    const k = s >> 2, hd = s & 3, i = k % X, j = (k - i) / X, g = goal.get(k);
+    if (g) { const into = (g.at.x > g.lead.x ? 0 : g.at.x < g.lead.x ? 2 : g.at.y > g.lead.y ? 1 : 3), c = d + g.cost + (into === hd ? 0 : TURN); if (c < best) { best = c; bestState = s; bestPort = g; } }
+    const moves: [number, number, boolean][] = [[0, k + 1, i + 1 < X && !!step[k * 2]], [1, k + X, j + 1 < Y && !!step[k * 2 + 1]], [2, k - 1, i > 0 && !!step[(k - 1) * 2]], [3, k - X, j > 0 && !!step[(k - X) * 2 + 1]]];
+    for (const [h, n, ok] of moves) {
+      if (!ok || (h + 2) % 4 === hd) continue;
+      const len = Math.abs(xs[n % X]! - xs[i]!) + Math.abs(ys[(n - (n % X)) / X]! - ys[j]!), nd = d + len + (h === hd ? 0 : TURN), ns = n * 4 + h;
+      if (nd < dist[ns]!) { dist[ns] = nd; prev[ns] = s; push(nd, ns); }
+    }
+  }
+  if (bestState < 0 || !bestPort) return null;
+  const mids: Point[] = [];
+  for (let s = bestState; s >= 0; s = prev[s]!) { const k = s >> 2, i = k % X; mids.push({ x: xs[i]!, y: ys[(k - i) / X]! }); }
+  mids.reverse();
+  const start = from.find(p => key(p.lead) === key(mids[0]!))!;
+  // Only the corners: points on a straight run between two others are dropped.
+  const raw = [start.at, ...mids, bestPort.at], pts = raw.filter((q, n) => n === 0 || n === raw.length - 1 || !((raw[n - 1]!.x === q.x && q.x === raw[n + 1]!.x) || (raw[n - 1]!.y === q.y && q.y === raw[n + 1]!.y)));
+  const m = Math.floor((pts.length - 1) / 2), mid = { x: (pts[m]!.x + pts[m + 1]!.x) / 2, y: (pts[m]!.y + pts[m + 1]!.y) / 2 };
+  return { pts, mid };
 }
 
 /** The overview of a busy map at rest: each relation drawn once between the outermost drawn boxes that hold its ends below the
@@ -490,6 +555,12 @@ export function summaryEdges(boxes: Map<string, Box>, edges: Edge[]): Edge[] {
     out.set(key, s);
   }
   return [...out.values()];
+}
+
+/** The summary beside a selection: the same lines over the relations that are not drawn one by one (own: the selection's), each
+ * holding only those. Every relation reads once, on its own line or in one summary; a line left with none is not returned. */
+export function restSummary(boxes: Map<string, Box>, edges: Edge[], own: (e: Edge) => boolean): Edge[] {
+  return summaryEdges(boxes, edges.filter(e => !own(e)));
 }
 
 /** A verb's place on the map and how far it sits from the end it is read at. */

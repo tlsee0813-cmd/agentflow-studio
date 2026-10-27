@@ -510,18 +510,36 @@ export function parseProject(raw: string): Project {
   assertProject(project); return convertIntentEdits(project); // Freshly parsed, not shared: no defensive copy needed.
 }
 
+/** A key of a places dictionary: a part id or the map's root, in the id alphabet, and never a name an ordinary object
+ * inherits ('__proto__', 'toString', 'constructor'…): writing one of those through a plain object reaches Object.prototype. */
+export function placeKey(k: string): boolean { return k.length <= 200 && /^[A-Za-z0-9_-]+$/.test(k) && !(k in Object.prototype); }
+const placePoint = (p: unknown): p is Point => {
+  if (!p || typeof p !== 'object' || Array.isArray(p)) return false;
+  const keys = Object.keys(p), x = (p as Point).x, y = (p as Point).y;
+  return keys.length === 2 && Object.hasOwn(p, 'x') && Object.hasOwn(p, 'y') && Number.isFinite(x) && Number.isFinite(y) && Math.abs(x) < 1e6 && Math.abs(y) < 1e6;
+};
 /** Manual places as a backup carries them: containers of parts, each part at a finite point. Nothing else is accepted. */
 export function assertPositions(v: unknown): asserts v is ManualPositions {
   ensure(!!v && typeof v === 'object' && !Array.isArray(v));
   const containers = Object.entries(v as Record<string, unknown>); ensure(containers.length <= ITEM_LIMIT);
   for (const [c, m] of containers) {
-    ensure(c.length > 0 && c.length <= 200 && !!m && typeof m === 'object' && !Array.isArray(m));
+    ensure(placeKey(c) && !!m && typeof m === 'object' && !Array.isArray(m));
+    for (const [id, p] of Object.entries(m as Record<string, unknown>)) ensure(placeKey(id) && placePoint(p));
+  }
+}
+/** Places read from browser storage or an accepted backup, as dictionaries with no prototype: only well-formed keys and
+ * points are kept, and a malformed value reads as no places. */
+export function cleanPositions(v: unknown): ManualPositions {
+  const out = Object.create(null) as ManualPositions;
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return out;
+  for (const [c, m] of Object.entries(v as Record<string, unknown>)) {
+    if (!placeKey(c) || !m || typeof m !== 'object' || Array.isArray(m)) continue;
     for (const [id, p] of Object.entries(m as Record<string, unknown>)) {
-      ensure(id.length > 0 && id.length <= 200 && !!p && typeof p === 'object' && !Array.isArray(p));
-      const keys = Object.keys(p as object), x = (p as Point).x, y = (p as Point).y;
-      ensure(keys.length === 2 && keys.includes('x') && keys.includes('y') && Number.isFinite(x) && Number.isFinite(y) && Math.abs(x) < 1e6 && Math.abs(y) < 1e6);
+      if (!placeKey(id) || !placePoint(p)) continue;
+      (out[c] ??= Object.create(null) as Record<string, Point>)[id] = { x: p.x, y: p.y };
     }
   }
+  return out;
 }
 /** A backup file in either shape: a plain project (as before), or the same project with its manual places as an extra top-level
  * 'positions'. The project part passes the same parseProject as every other persisted byte; the places are checked apart. */

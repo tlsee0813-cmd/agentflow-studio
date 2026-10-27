@@ -2,12 +2,12 @@
  * rewrites records; the only project write is the user's own part name/note through the domain's editArea. */
 import type { Project } from '../shared/types.js';
 import { FILE_LIMIT } from '../shared/types.js';
-import { WorkspaceStore, type EntryRef, storageErrorCode, readViewState, writeViewState } from '../shared/storage.js';
-import { parseBackup } from '../shared/validation.js';
+import { WorkspaceStore, type EntryRef, storageErrorCode, readViewState, writeViewState, readEntryPositions, writeEntryPositions } from '../shared/storage.js';
+import { parseBackup, cleanPositions } from '../shared/validation.js';
 import { editArea, addArea, addChildArea, createProject, rename } from '../shared/domain.js';
 import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
-import { layoutScope, edgePath, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, resolveLabels, ROOT, HEAD, type Box, type Edge, type LabelSpot, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
+import { layoutScope, edgePath, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, ROOT, HEAD, type Box, type Edge, type LabelSpot, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
 import { aiStatus, askStudio, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
 import { runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
@@ -101,54 +101,33 @@ function setDraft(o: Opened, partId: string, value: string) {
   } catch { /* the in-memory draft still holds */ }
 }
 
-/* Map positions the person set by dragging: own key per project (saved projects only; examples stay in memory).
- * Kept apart from the stored layout.1 data, which the domain fills on every new area and so cannot tell a placed part
- * from an untouched one. A backup file carries them beside the project (serializeBackup); importing one keeps them. */
-const POSITIONS_KEY = 'agentflow.studio.positions.1';
+/* Map positions the person set by dragging: own record per opened map (a saved project by its workspace entry, so an imported
+ * copy and its original keep their own places; examples stay in memory). Kept apart from the stored layout.1 data, which the
+ * domain fills on every new area and so cannot tell a placed part from an untouched one. A backup file carries them beside the
+ * project (serializeBackup); importing one gives the new copy those places. */
 const memoryPositions = new Map<string, Positions>();
-function cleanPositions(v: unknown): Positions {
-  const out: Positions = {};
-  if (!v || typeof v !== 'object') return out;
-  for (const [c, m] of Object.entries(v as Record<string, unknown>)) {
-    if (!m || typeof m !== 'object') continue;
-    for (const [id, p] of Object.entries(m as Record<string, unknown>)) {
-      const x = (p as Point)?.x, y = (p as Point)?.y;
-      if (Number.isFinite(x) && Number.isFinite(y) && Math.abs(x) < 1e6 && Math.abs(y) < 1e6) (out[c] ??= {})[id] = { x, y };
-    }
-  }
-  return out;
-}
 function positionsOf(o: Opened): Positions {
-  let p = memoryPositions.get(o.project.id);
-  if (!p) {
-    p = {};
-    if (o.kind === 'saved') { try { p = cleanPositions((JSON.parse(kv.getItem(POSITIONS_KEY) ?? '{}') as Record<string, unknown>)[o.project.id]); } catch { p = {}; } }
-    memoryPositions.set(o.project.id, p);
-  }
+  let p = memoryPositions.get(o.key);
+  if (!p) { p = o.kind === 'saved' ? readEntryPositions(kv, o.key, o.project.id) : cleanPositions(null); memoryPositions.set(o.key, p); }
   return p;
 }
-function savePositions(o: Opened) {
-  if (o.kind !== 'saved') return;
-  try {
-    const all = JSON.parse(kv.getItem(POSITIONS_KEY) ?? '{}') as Record<string, Positions>;
-    all[o.project.id] = positionsOf(o); kv.setItem(POSITIONS_KEY, JSON.stringify(all));
-  } catch { /* the in-memory positions still hold for this tab */ }
-}
+function savePositions(o: Opened) { if (o.kind === 'saved') writeEntryPositions(kv, o.key, positionsOf(o)); } // a refused write: the in-memory places still hold for this tab
 
 /* Scope = the part whose inside is shown (null = whole project). Each scope keeps its own camera for the way back. */
 let scope: string | null = null;
 let lay: ScopeLayout = { boxes: new Map(), edges: [], heads: [], bounds: { x: 0, y: 0, w: 0, h: 0 } };
 const cameras = new Map<string, { x: number; y: number; k: number }>();
 const expandState = new Map<string, boolean>();
-const camKey = (o: Opened, s: string | null) => `${o.project.id}|${s ?? ''}`;
-/* Folds and per-scope cameras outlive a reload: own key per project (an example by its address key and stable part keys, so a
- * freshly built example reads the same), written shortly after a change and when the page goes away. Never the project data. */
-const viewKeyOf = (o: Opened) => (o.kind === 'example' ? o.key : o.project.id);
+const camKey = (o: Opened, s: string | null) => `${o.key}|${s ?? ''}`;
+/* Folds and per-scope cameras outlive a reload: own record per opened map (a saved project by its workspace entry, like its
+ * places; an example by its address key and stable part keys, so a freshly built example reads the same), written shortly
+ * after a change and when the page goes away. Never the project data. */
+const viewKeyOf = (o: Opened) => o.key;
 const stableId = (o: Opened, id: string) => o.alias?.toKey.get(id) ?? id;
 const liveId = (o: Opened, key: string) => o.alias?.toId.get(key) ?? key;
 function loadView(o: Opened) {
   const v = readViewState(kv, viewKeyOf(o));
-  for (const [k, open] of Object.entries(v.folds)) { const id = liveId(o, k); if (partOf(o, id)) expandState.set(`${o.project.id}|${id}`, open); }
+  for (const [k, open] of Object.entries(v.folds)) { const id = liveId(o, k); if (partOf(o, id)) expandState.set(`${o.key}|${id}`, open); }
   for (const [k, c] of Object.entries(v.cameras)) {
     const id = k ? liveId(o, k) : null; if (id && !partOf(o, id)?.childIds.length) continue;
     if (!cameras.has(camKey(o, id))) cameras.set(camKey(o, id), { x: c.x, y: c.y, k: Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, c.scale)) });
@@ -159,7 +138,7 @@ function saveViewSoon() { const o = opened; if (!o) return; if (viewFor && viewF
 function flushView() {
   clearTimeout(viewTimer); const o = viewFor; viewFor = null; if (!o) return;
   if (opened === o) cameras.set(camKey(o, scope), { ...camera });
-  const prefix = `${o.project.id}|`, folds: Record<string, boolean> = {}, cams: Record<string, { x: number; y: number; scale: number }> = {};
+  const prefix = `${o.key}|`, folds: Record<string, boolean> = {}, cams: Record<string, { x: number; y: number; scale: number }> = {};
   for (const [k, v] of expandState) if (k.startsWith(prefix)) folds[stableId(o, k.slice(prefix.length))] = v;
   for (const [k, c] of cameras) if (k.startsWith(prefix)) { const sc = k.slice(prefix.length); cams[sc ? stableId(o, sc) : ''] = { x: c.x, y: c.y, scale: c.k }; }
   writeViewState(kv, viewKeyOf(o), { folds, cameras: cams });
@@ -173,7 +152,7 @@ let previewTarget: string | null = null, previewScope = '';
 const isExpanded = (o: Opened) => {
   const memo = new Map<string, boolean>();
   const fn = (id: string, depth: number): boolean => {
-    const k = `${o.project.id}|${id}`; if (memo.has(k)) return memo.get(k)!;
+    const k = `${o.key}|${id}`; if (memo.has(k)) return memo.get(k)!;
     let v: boolean;
     if (tempExpand.has(k) || previewExpand.has(k)) v = true;
     else if (expandState.has(k)) v = expandState.get(k)!;
@@ -201,9 +180,9 @@ const SHOW_BUDGET = 28;
  * decide the first view again. */
 const foldMemo = new Map<string, Set<string>>();
 function budgetFolded(o: Opened): Set<string> {
-  const k = `${o.project.id}|${scope ?? ''}`, hit = foldMemo.get(k); if (hit) return hit;
+  const k = `${o.key}|${scope ?? ''}`, hit = foldMemo.get(k); if (hit) return hit;
   const ids = scope ? partOf(o, scope)?.childIds ?? [] : o.view.roots, size = (id: string) => partOf(o, id)?.childIds.length ?? 0;
-  const own = (id: string) => expandState.has(`${o.project.id}|${id}`); // the person's own fold or unfold is never decided again
+  const own = (id: string) => expandState.has(`${o.key}|${id}`); // the person's own fold or unfold is never decided again
   const out = budgetFold(ids.map(id => ({ id, size: size(id) })), own, SHOW_BUDGET);
   // Then the room it takes: the first view, its title included, must read at the opening scale (85%) in this window. Past
   // it, the open group taking the most room folds next, until it does or nothing is left to fold. Stored places count as
@@ -212,7 +191,7 @@ function budgetFolded(o: Opened): Set<string> {
     const memo = new Map<string, boolean>();
     const open = (id: string, depth: number): boolean => {
       const hit = memo.get(id); if (hit !== undefined) return hit;
-      const k = `${o.project.id}|${id}`, p = partOf(o, id); let v: boolean;
+      const k = `${o.key}|${id}`, p = partOf(o, id); let v: boolean;
       if (expandState.has(k)) v = expandState.get(k)!;
       else if (!p || !p.childIds.length) v = false;
       else if (depth === 0) v = !isListGroup(o.view, scope) && !fold.has(id);
@@ -234,7 +213,7 @@ function budgetFolded(o: Opened): Set<string> {
 /** Marks every part between the scope and this part (exclusive) as unfolded in the given set or map. */
 function expandPath(o: Opened, id: string, into: Set<string> | Map<string, boolean>) {
   for (let p = partOf(o, partOf(o, id)?.parentId ?? null), g = 0; p && p.id !== scope && g < 64; p = partOf(o, p.parentId), g++) {
-    const k = `${o.project.id}|${p.id}`; if (into instanceof Set) into.add(k); else into.set(k, true);
+    const k = `${o.key}|${p.id}`; if (into instanceof Set) into.add(k); else into.set(k, true);
   }
 }
 const partOf = (o: Opened, id: string | null) => (id ? o.view.parts.find(p => p.id === id) ?? null : null);
@@ -681,7 +660,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   const frames = (id: string) => { const out = new Set<string>(); for (let c = lay.boxes.get(id)?.container, g = 0; c && g < 64; c = lay.boxes.get(c)?.container, g++) if (lay.boxes.get(c)?.kind === 'frame') out.add(c); return out; };
   // A busy map at rest reads as its summary (summaryEdges: one line per pair of groups and kind, with its count); a selection,
   // the change plan or a map of a few lines draws each line. Both sets are drawn; .rest-sum on the space shows one of them.
-  sums = lay.edges.length > 6 ? summaryEdges(lay.boxes, lay.edges) : [];
+  restSums = sums = lay.edges.length > 6 ? summaryEdges(lay.boxes, lay.edges) : [];
   for (const e of [...lay.edges, ...sums]) {
     const fa = frames(e.from), inner = [...frames(e.to)].some(f => fa.has(f)), sum = e.key.startsWith('sum:');
     const g = svg('g', { class: `edge${sum ? ' sum' : ''} k-${e.kind}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
@@ -701,7 +680,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   };
   const enterButton = (p: PartView) => h('button', { type: 'button', class: 'enter', title: `‘${p.name}’ 안으로 들어가기 · 부분 ${p.childIds.length}`, 'aria-label': `${p.name} 안으로 들어가기`, onclick: () => go(o.key, null, p.id) }, `${p.childIds.length}`, h('span', { 'aria-hidden': 'true' }, '›'));
   const toggleButton = (p: PartView, open: boolean) => h('button', { type: 'button', class: 'toggle', title: open ? '접기' : '여기서 펼치기', 'aria-label': `${p.name} ${open ? '접기' : '펼치기'}`, 'aria-expanded': String(open),
-    onclick: () => { const k = `${o.project.id}|${p.id}`; expandState.set(k, !open); tempExpand.delete(k); previewExpand.delete(k); renderSpace('keep'); if (selected) select(selected); } }, chevron(open));
+    onclick: () => { const k = `${o.key}|${p.id}`; expandState.set(k, !open); tempExpand.delete(k); previewExpand.delete(k); renderSpace('keep'); if (selected) select(selected); } }, chevron(open));
   const keySelect = (id: string) => (e: Event) => { const k = (e as KeyboardEvent).key; if ((k === 'Enter' || k === ' ') && e.target === e.currentTarget) { e.preventDefault(); go(o.key, id); } };
   const boxes = [...lay.boxes.values()].sort((a, b) => (a.kind === 'frame' ? 0 : 1) - (b.kind === 'frame' ? 0 : 1) || a.depth - b.depth);
   // Same names under different parents read with their parent beside them (only where a name repeats in this view).
@@ -813,14 +792,17 @@ function positionWorld() {
   });
   placeEdgeLabels();
 }
-/** Map lines at rest on a busy map: the summary lines (see renderSpace). */
-let sums: Edge[] = [];
+/** Map lines at rest on a busy map: the summary lines (see renderSpace). With a selection, sums holds what each of them still
+ * holds beside the selection's own lines (restSummary, set by markSelection); the drawn lines are restSums'. */
+let restSums: Edge[] = [], sums: Edge[] = [];
 const edgeOf = (key: string | undefined) => (key?.startsWith('sum:') ? sums : lay.edges).find(x => x.key === key);
+/** A summary line that, beside the selection, holds fewer relations than at rest. */
+const restOf = (e: Edge) => e.key.startsWith('sum:') && sums !== restSums && (restSums.find(x => x.key === e.key)?.ids.length ?? 0) > e.ids.length;
 function syncLineMode() {
-  const sp = $('space'), rest = !selected && !planView.isOpen() && sums.length > 0;
+  const sp = $('space'), rest = !selected && !planView.isOpen() && restSums.length > 0;
   sp.classList.toggle('rest-sum', rest);
   // A selection on a busy map: its own lines one by one, the rest as the dimmed summary (see .sel-sum).
-  sp.classList.toggle('sel-sum', !!selected && !planView.isOpen() && sums.length > 0);
+  sp.classList.toggle('sel-sum', !!selected && !planView.isOpen() && restSums.length > 0);
   // Many lines on one view: those that go round other parts step back (see .dense-lines); a summary line never does.
   sp.classList.toggle('dense-lines', lay.edges.length >= 12);
 }
@@ -862,8 +844,7 @@ function placeEdgeLabels() {
   if (titleH) blocks.push(titleRect());
   const clear = (r: Rect) => !blocks.some(b => r.x < b.x + b.w + 3 && b.x < r.x + r.w + 3 && r.y < b.y + b.h + 3 && b.y < r.y + r.h + 3);
   if ($('space').classList.contains('rest-sum')) { placeCounts(box, clear, blocks); return; }
-  if (!lines.length) return;
-  if (!selected) { placeRestLabels(box, lines, clear); return; }
+  if (!selected) { if (lines.length) placeRestLabels(box, lines, clear); return; }
   for (const g of lines) {
     const e = lay.edges.find(x => x.key === g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'); if (!e || !path) continue;
     const on = g.classList.contains('on'), fan = on && (fans.get(selKey(e)) ?? 0) > 1;
@@ -881,15 +862,22 @@ function placeEdgeLabels() {
     label.style.left = `${spot.x}px`; label.style.top = `${spot.y}px`; blocks.push(spot);
     if (on) seenSel.add(selKey(e));
   }
+  // The dimmed summary beside the selection keeps its counts (what each line still holds), after the selection's verbs.
+  if ($('space').classList.contains('sel-sum')) placeCounts(box, clear, blocks, true);
 }
-/** How many relations a summary line holds, on the line where it reads clear of parts (a line of one relation has none). */
-function placeCounts(box: HTMLElement, clear: (r: Rect) => boolean, blocks: Rect[]) {
-  for (const g of $('world').querySelectorAll<SVGGElement>('.edge.sum')) {
+/** How many relations a summary line holds, on the line where it reads clear of parts (a line of one relation has none).
+ * Beside a selection (dimmed, .beside) a count that finds no clear place is left off rather than set over a part or a verb. */
+function placeCounts(box: HTMLElement, clear: (r: Rect) => boolean, blocks: Rect[], beside = false) {
+  // Beside a selection a count also keeps off the selection's own lines, where it would read as theirs.
+  const onPts = beside ? [...$('world').querySelectorAll<SVGPathElement>('.edge.on .edge-line')].flatMap(p => { const n = p.getTotalLength(); return Array.from({ length: Math.ceil(n / 6) + 1 }, (_, i) => p.getPointAtLength(Math.min(n, i * 6))); }) : [];
+  const off = (r: Rect) => clear(r) && !onPts.some(q => q.x > r.x - 4 && q.x < r.x + r.w + 4 && q.y > r.y - 4 && q.y < r.y + r.h + 4);
+  for (const g of $('world').querySelectorAll<SVGGElement>('.edge.sum:not(.hit)')) {
     const e = edgeOf(g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'); if (!e || !path || e.ids.length < 2) continue;
-    const chip = h('span', { class: `edge-count k-${e.kind}` }, String(e.ids.length)); box.append(chip);
+    const chip = h('span', { class: `edge-count k-${e.kind}${beside ? ' beside' : ''}` }, String(e.ids.length)); box.append(chip);
     const w = chip.offsetWidth, hh = chip.offsetHeight, len = path.getTotalLength();
     const at = (t: number) => { const q = path.getPointAtLength(len * t); return { x: q.x - w / 2, y: q.y - hh / 2, w, h: hh }; };
-    const spot = [0.5, 0.42, 0.58, 0.34, 0.66, 0.26, 0.74].map(at).find(clear) ?? at(0.5);
+    const spot = [0.5, 0.42, 0.58, 0.34, 0.66, 0.26, 0.74].map(at).find(off) ?? (beside ? null : at(0.5));
+    if (!spot) { chip.remove(); continue; }
     chip.style.left = `${spot.x}px`; chip.style.top = `${spot.y}px`; blocks.push(spot);
   }
 }
@@ -1295,9 +1283,10 @@ function markSelection(partId: string | null) {
     line.setAttribute('marker-start', on ? 'url(#dot-on)' : 'url(#dot)');
     if (on) related.add(el.dataset.from === partId ? el.dataset.to! : el.dataset.from!);
   });
-  // A summary line that holds one of the selection's relations gives way to those lines (.hit, hidden by .sel-sum).
-  const mine = new Set(lay.edges.filter(e => partId && (e.from === partId || e.to === partId)).flatMap(e => e.ids));
-  document.querySelectorAll<SVGGElement>('.edge.sum').forEach(el => el.classList.toggle('hit', !!edgeOf(el.dataset.key)?.ids.some(r => mine.has(r))));
+  // The summary beside a selection holds every other relation: a line that held some of the selection's relations keeps the
+  // rest (its count drops by those, which are drawn one by one), and gives way (.hit, hidden by .sel-sum) only when none is left.
+  sums = partId ? restSummary(lay.boxes, lay.edges, e => e.from === partId || e.to === partId) : restSums;
+  document.querySelectorAll<SVGGElement>('.edge.sum').forEach(el => { const e = edgeOf(el.dataset.key); el.classList.toggle('hit', !e); el.classList.toggle('agg', !!e?.agg); });
   syncLineMode();
   placeEdgeLabels();
   document.querySelectorAll<HTMLElement>('.node[data-part],.frame,.ghost').forEach(el => {
@@ -1827,7 +1816,7 @@ function bindEdgeHints() {
     if (g && t.classList.contains('edge-hit')) {
       const edge = edgeOf(g.dataset.key); if (!edge) return;
       g.classList.add('near');
-      tip.replaceChildren(h('strong', {}, `${nameOf(edge.from)} ${edge.kind === 'related' ? '—' : '→'} ${nameOf(edge.to)}`), h('span', { class: 'tip-kind' }, `${REL_LABEL[edge.kind] ?? edge.kind}${edge.agg ? ` · 안쪽 관계 ${edge.ids.length}개의 요약 · 선택하면 실제 끝점` : edge.ids.length > 1 ? ` · 관계 ${edge.ids.length}개를 한 선으로 묶음` : ''}`),
+      tip.replaceChildren(h('strong', {}, `${nameOf(edge.from)} ${edge.kind === 'related' ? '—' : '→'} ${nameOf(edge.to)}`), h('span', { class: 'tip-kind' }, `${REL_LABEL[edge.kind] ?? edge.kind}${restOf(edge) ? ` · 선택한 부분의 관계를 뺀 나머지 ${edge.ids.length}개` : edge.agg ? ` · 안쪽 관계 ${edge.ids.length}개의 요약 · 선택하면 실제 끝점` : edge.ids.length > 1 ? ` · 관계 ${edge.ids.length}개를 한 선으로 묶음` : ''}`),
         ...edge.notes.slice(0, 3).map(n => h('span', {}, n)));
       tip.hidden = false; place(e as PointerEvent); return;
     }
@@ -1876,8 +1865,9 @@ function bindImport() {
     if (!store.writable) { say('이 브라우저에서는 저장할 수 없어 가져오지 못했어요.'); return; }
     try {
       const ref = await store.create(project, 'import');
-      // The places the backup carries come back with it (a file without them keeps whatever this browser had).
-      if (places) { memoryPositions.set(project.id, cleanPositions(places)); savePositions({ key: ref.entryId, kind: 'saved', project, ref, view: studioView(project), alias: null }); }
+      // The new copy has places of its own: the ones the backup carries, or none (automatic layout) for a file without them.
+      // Never the places another entry of the same project id set; that entry's places stay as they were.
+      const own = cleanPositions(places); memoryPositions.set(ref.entryId, own); writeEntryPositions(kv, ref.entryId, own);
       say(`새 사본으로 가져왔어요 · ${project.name}`); go(ref.entryId);
     }
     catch { say('가져오지 못했어요. 저장된 프로젝트는 그대로예요.'); }

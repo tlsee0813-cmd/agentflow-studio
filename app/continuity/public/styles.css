@@ -1072,11 +1072,12 @@ button:disabled { opacity: .5; cursor: default; }
 .node.unit .frame-links { margin-top: 1px; }
 /* A busy map at rest reads its summary lines; a selection, the change plan or a map of a few lines draws each line. */
 .space.rest-sum .edge:not(.sum), .space:not(.rest-sum) .edge.sum { display: none; }
-/* With a selection on a busy map: its own lines are drawn one by one; everything else stays the dimmed summary (a summary
-   that holds one of the selection's relations gives way to those lines). */
+/* With a selection on a busy map: its own lines are drawn one by one; everything else stays the dimmed summary, each line
+   holding only the relations not drawn on their own (a summary left with none gives way, .hit). */
 .space.sel-sum .edge:not(.sum):not(.on):not(.near):not(.ctx) { display: none; }
 .space.sel-sum .edge.sum:not(.hit) { display: block; }
 .edge-count { position: absolute; min-width: 24px; height: 20px; padding: 0 7px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); box-shadow: 0 1px 2px rgba(16,24,40,.05); color: var(--text-2); font-size: 11.5px; line-height: 18px; font-weight: 650; text-align: center; font-variant-numeric: tabular-nums; }
+.edge-count.beside { color: var(--text-3); border-color: var(--hair-2); box-shadow: none; }
 /* Names wrap to three lines before they are cut (the layout gives them the room). */
 .node-name { -webkit-line-clamp: 3; }
 /* Below 70%: no notes or state lines; each name on one line across its card, a little larger (--grow ≤ 1.25). */
@@ -1097,13 +1098,15 @@ button:disabled { opacity: .5; cursor: default; }
 .fr-near { min-width: 0; font-size: 13px; font-weight: 550; color: var(--text-2); overflow-wrap: anywhere; }
 .fr-port .port-where, .fr-port .port-note { margin-left: 0; }
 .fr-within { margin: 8px 0 0; font-size: 12px; color: var(--text-3); }
-/* The way back from a followed relation: first line of the pane, where the reader is looking. */
-.visit-line { flex: none; align-self: flex-start; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 4px; max-width: calc(100% - 32px); min-width: 0; margin: 12px 16px -6px; padding: 2px 8px 2px 6px; border: 1px solid transparent; border-radius: 6px; background: var(--accent-soft); color: var(--accent); font-size: 12px; line-height: 1.5; text-align: left; }
-.visit-line strong { min-width: 0; font-weight: 650; overflow-wrap: anywhere; }
-.visit-line .vl-arrow, .visit-line .vl-came { flex: none; font-weight: 500; }
-.visit-line .vl-came { margin-left: -4px; }
-/* The scene it came from on its own line under the name (never a cut name beside a cut scene). */
-.visit-line .vl-where { flex-basis: 100%; min-width: 0; font-weight: 500; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The way back from a followed relation: first line of the pane, where the reader is looking. The part's name reads as one
+   sentence with its arrow and '에서 따라옴', wrapping at word breaks like the title (never an arrow or a particle left alone on a
+   line); the scene it came from is its own line under it. */
+.visit-line { flex: none; align-self: flex-start; display: block; max-width: calc(100% - 32px); min-width: 0; margin: 12px 16px -6px; padding: 2px 8px 2px 6px; border: 1px solid transparent; border-radius: 6px; background: var(--accent-soft); color: var(--accent); font-size: 12px; line-height: 1.5; text-align: left; }
+.visit-line strong { font-weight: 650; word-break: keep-all; overflow-wrap: anywhere; }
+.visit-line .vl-arrow, .visit-line .vl-came { font-weight: 500; }
+.visit-line .vl-arrow { margin-right: 4px; }
+.visit-line .vl-came { white-space: nowrap; }
+.visit-line .vl-where { display: block; min-width: 0; font-weight: 500; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .visit-line:hover { border-color: var(--accent-line); color: var(--accent-strong); }
 /* Folding the pane: a third head tool, and the rail it folds to (the map's area takes the rest; --insp-w is unchanged). */
 .lens-head:has(.rail-toggle) { padding-right: 104px; }
