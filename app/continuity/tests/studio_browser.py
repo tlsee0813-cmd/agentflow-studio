@@ -969,6 +969,21 @@ def relation_visit_flow(browser, base, cases):
     page.go_back()
     expect(page.locator("#lens-title")).to_have_text("수신 · traces")
     expect(back).to_have_count(0)
+    # A long name: one small line in the pane, cut only on screen; its accessible name keeps the whole name.
+    long = "traces/1 · 수신기와 내보내기만 있는 두 번째 추적 파이프라인 정의, 처리기 없음"
+    assert len(long) <= 60
+    page.locator("#world .node", has_text="traces/1").click()
+    page.locator("#lens .more summary").click()
+    page.get_by_role("menuitem", name="이름·설명 고치기").click()
+    page.locator("#edit-name").fill(long)
+    page.get_by_role("button", name="저장").click()
+    page.locator("#panel .close").click()
+    page.locator("#lens .port", has_text="수신 · traces").click()
+    expect(back).to_have_accessible_name(long + "으로 돌아가기")
+    box, pane = back.bounding_box(), page.locator("#lens").bounding_box()
+    assert box["height"] <= 26 and box["x"] + box["width"] <= pane["x"] + pane["width"] - 16, (box, pane)
+    back.click()
+    expect(page.locator("#lens-title")).to_have_text(long)
     # Out of the scope from a part: the scene changes, so the context row's back is the way back (one, not two), and it
     # brings the part, its camera and the reading back; the folds the visit opened close again.
     page.locator(".frame-head", has_text="정적 실행본 대응").locator(".enter").click()
