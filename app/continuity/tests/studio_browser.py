@@ -93,7 +93,7 @@ def main_flow(browser, base):
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))
     page.goto(base + "/")
-    expect(page.locator("#project-list .program")).to_have_count(3)
+    expect(page.locator("#project-list .program")).to_have_count(4)
     expect(page.locator("#ai-text")).to_contain_text("AI 정리")
     page.locator('.program-head[href="#/p/ex-salon"]').click()
     expect(page.locator(".node")).to_have_count(7)
@@ -157,7 +157,7 @@ def main_flow(browser, base):
     page.go_back()
     expect(page.locator("#lens")).to_be_hidden()
     page.locator(".brand").click()
-    expect(page.locator("#project-list .program")).to_have_count(3)
+    expect(page.locator("#project-list .program")).to_have_count(4)
     assert not errors, errors
     page.close()
 
@@ -375,7 +375,7 @@ def new_project_flow(browser, base):
     assert abs((pay.bounding_box()["y"] - login.bounding_box()["y"]) - moved) < 4
     page.locator(".brand").click()
     expect(page.locator("#saved-list .program")).to_have_count(1)
-    expect(page.locator("#project-list .program.is-example")).to_have_count(3)  # examples are never saved as mine
+    expect(page.locator("#project-list .program.is-example")).to_have_count(4)  # examples are never saved as mine
     # The program reads by its real top parts, and offers to continue where this browser last was.
     expect(page.locator("#saved-list .program-section li")).to_have_count(2)
     expect(page.locator("#saved-list .program-continue")).to_have_count(0)  # left at the whole map with nothing selected
