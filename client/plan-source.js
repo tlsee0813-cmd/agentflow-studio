@@ -41,9 +41,10 @@ export function intentEvidence(intent, example) {
     return { id: 'INTENT', kind: 'user', title: '지금 쓴 변경 구상', text: clip(clean(intent.trim()), TEXT_MAX),
         basis: example ? '변경 구상 초안 · 지금 입력한 문장이 이번 분석의 기준 · R03·R04는 예제에 앞서 기록된 구상' : '변경 구상 초안 · 지금 입력한 문장이 이번 분석의 기준' };
 }
-export function exampleInput(o, condition, intent, keys) {
+/** The person's added material (taken from the return reading) is read with the example's own, as in a saved project. */
+export function exampleInput(o, condition, intent, keys, extra = []) {
     const changed = intent.trim() !== CONVERTER_INTENT;
-    const evidence = [...converterEvidence(condition), ...(changed ? [intentEvidence(intent, true)] : [])];
+    const evidence = [...converterEvidence(condition), ...(changed ? [intentEvidence(intent, true)] : []), ...extra];
     const parts = new Map([...keys].map(([k, id]) => [k, id]));
     const toKey = new Map([...keys].map(([k, id]) => [id, k]));
     const ask = { schemaVersion: 'studio.plan.1', intent: intent.trim(),

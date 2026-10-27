@@ -15,6 +15,8 @@ export const CONVERTER_RELATIONS = [
     ['layout', 'files', 'needs', '내보낼 때도 문단 모양을 보존하는 요구가 있다.'],
     ['files', 'results', 'related', '저장 위치 또는 실패 이유를 결과로 설명한다.'],
 ];
+/** The authored short heading of the example's own sentence (CONVERTER_INTENT); any other sentence gets no authored heading. */
+export const CONVERTER_HEADING = '폴더 단위 변환';
 export const CONVERTER_INTENT = '폴더째 변환하고, 한 파일이 실패해도 나머지는 계속하며, 성공 결과는 유지하고 실패한 파일과 이유를 모아 보고 싶어. 기존 내용과 모양 보존은 유지해줘. 하위 폴더 포함과 재시도는 아직 정하지 않았고 병렬 처리는 요청하지 않았어.';
 /** Input material only. A and B differ in the supplied implementation excerpt;
  * neither contains the authored expected analysis or preselected plan items. */
@@ -51,8 +53,9 @@ export function converterExampleAnalysis(partIds, condition) {
             { id: 'folder', title: '폴더 입력', description: '현재 단일 문서 입력을 폴더 안 파일을 받는 범위로 확장합니다. 하위 폴더 포함은 아직 정하지 않았습니다.', partIds: ids('input', 'document'), refs: ['R02', 'R03', 'P01'], dependsOn: [],
                 presentation: present('document', note('document'), { text: '폴더 안 파일을 입력받기', refs: ['R03'] }) },
             // No presentation: the sources say nothing about what happens after a failure now, so there is no current text on the
-            // same side as 'continue after a failure' (a single input or the part's role would be another side).
-            { id: 'continue', title: '실패해도 나머지 계속', description: '한 문서의 실패가 다른 문서 처리를 중단하지 않는 결과를 원합니다. 병렬 처리나 재시도를 필수 방식으로 정하지 않습니다.', partIds: ids('transform', 'content'), refs: ['R03', 'R04', 'P03', 'P01'], dependsOn: [] },
+            // same side as 'continue after a failure' (a single input or the part's role would be another side). The target is the
+            // conversion stage as a whole, not one of its inner parts: why it is read is the impact on it below.
+            { id: 'continue', title: '실패해도 나머지 계속', description: '한 문서의 실패가 다른 문서 처리를 중단하지 않는 결과를 원합니다. 병렬 처리나 재시도를 필수 방식으로 정하지 않습니다.', partIds: ids('transform'), refs: ['R03', 'R04', 'P03', 'P01'], dependsOn: [] },
             ...(condition === 'B' ? [{ id: 'outcomes', title: '파일별 결과 구별', description: '제공된 코드는 경로 한 개 또는 예외만 전달합니다. 실패한 파일과 이유를 모으려면 입력과 성공·실패 결과를 대응시킬 수 있어야 합니다. 이 전제를 요청에 포함할지 또는 기존 수단을 더 확인할지 구별합니다.', partIds: ids('transform', 'results'), refs: ['P03', 'R03'], dependsOn: [],
                     presentation: present('results', code('제공된 호출자는 성공 경로 또는 오류 메시지 하나를 화면에 표시한다.'), { text: '입력별 성공·실패 결과 구별', refs: ['P03', 'R03'] }, 'suggestion') }] : []),
             { id: 'failures', title: '성공 유지·실패 모음', description: condition === 'A'
@@ -64,6 +67,11 @@ export function converterExampleAnalysis(partIds, condition) {
                 ] },
         ],
         impacts: [
+            // Why the conversion stage is read for 'continue': what the supplied code is known to return per input, and what no
+            // source says (where a failure stops the rest, whether outputs already made remain). No loop or place is settled.
+            { partId: partIds.transform ?? '', reason: condition === 'A'
+                    ? '문서는 이 단계에서 변환된 뒤 변환한 파일로 넘어가요. 변환 결과는 입력마다 성공 경로나 실패 이유로 이미 돌아와요. 한 파일이 실패한 뒤 나머지를 계속 변환하는지, 이미 만든 산출물이 남는지는 확인되지 않았어요. 어디서 반복할지도 정하지 않았어요.'
+                    : '문서는 이 단계에서 변환된 뒤 변환한 파일로 넘어가요. 변환은 성공하면 출력 경로를 돌려주고 실패하면 예외를 내요. 한 파일이 실패한 뒤 나머지를 계속 변환하는지, 이미 만든 산출물이 남는지는 확인되지 않았어요. 어디서 반복할지도 정하지 않았어요.', refs: ['P03', 'P01', 'R03', 'T01'] },
             { partId: partIds.document ?? partIds.input ?? '', reason: '문서 하나에서 폴더 안 파일로 입력 범위가 달라집니다. 파일 대상 규칙은 아직 미정입니다.', refs: ['R02', 'R03'] },
             { partId: partIds.results ?? partIds.output ?? '', reason: condition === 'A'
                     ? '파일별 결과 누적은 제공된 코드에 이미 있지만 화면은 마지막 결과만 보여 줍니다. 결과 읽기의 재사용 범위를 확인합니다.'
