@@ -1,6 +1,8 @@
 # 연구 질문과 축적된 근거
 
-65 변경 구상: [차이·이유·작성 맥락의 넓은 비교](cycles/2026-10-26-visual-experience-59/RESULT.md)에서 Q04/Q13/Q14의 읽기와 요청 포함, 근거와 현재 모습, 초안·커서·지도 복귀를 연결했다. 변환기·Node-RED·Joplin·restic 교차 화면, 두 실제 AI 요구, 독립 Cloud·양OS CI를 구별한다. 자료 부족 시 함수 호출을 사용자 출력으로 잘못 비교한 실제 응답을 반려·보정했고, 부족한 자료의 요약 단정은 남는 한계다. Q02/Q06 자동 동일성·지속 갱신이나 임의 프로젝트 정확성의 통과가 아니다.
+66 복잡한 구성 읽기: [같은 이름·바깥 소속·관계 의미](cycles/2026-10-26-visual-experience-59/RESULT.md)에서 Q03/Q04/Q13의 구성 경계·공유 정의·선택과 방문을 VS Code·scikit-learn·Zephyr·Collector의 출처 기반 부분지도로 대조했다. 최초 배치와 수동 위치를 구별하고, 반복 동사 절제와 개별 관계 보존을 함께 적용했다. 긴 조상 제목 겹침과 Collector 끝점 가림은 반려 후 최종 PC 화면으로 수리 확인했다. Q02/Q06 자동 동일성·자동 갱신 품질이나 전체 OSS 분석의 통과로 확대하지 않는다.
+
+65 변경 구상: [차이·이유·작성 맥락의 넓은 비교](https://github.com/tlsee0813-cmd/agentflow-studio/blob/e3cc3a6a30f9536db9935854698438466844d176/docs/cycles/2026-10-26-visual-experience-59/RESULT.md)에서 Q04/Q13/Q14의 읽기와 요청 포함, 근거와 현재 모습, 초안·커서·지도 복귀를 연결했다. 변환기·Node-RED·Joplin·restic 교차 화면, 두 실제 AI 요구, 독립 Cloud·양OS CI를 구별한다. 자료 부족 시 함수 호출을 사용자 출력으로 잘못 비교한 실제 응답을 반려·보정했고, 부족한 자료의 요약 단정은 남는 한계다. Q02/Q06 자동 동일성·지속 갱신이나 임의 프로젝트 정확성의 통과가 아니다.
 
 64 관계 읽기: [같은 읽기면의 출발 맥락·복귀](https://github.com/tlsee0813-cmd/agentflow-studio/blob/04b38bc7599978646bea708ff73b192fb37adc6b/docs/cycles/2026-10-26-visual-experience-59/RESULT.md)에서 Q04/Q13의 구성과 방문 구별, 요약/상세·스크롤·키보드 복귀를 Collector/Joplin과 Zephyr·VS Code 교차 자료로 확인했다. 일반 선택의 기존 브라우저 이력과 새 관계 방문 입구를 구별하며, 선택 경로의 임시 펼침을 사용자 접힘 유실로 판정하지 않는다. 최종 양OS CI·독립 화면·공개 조작은 각각 기록했다. Q02/Q06 자동 동일성/갱신·입출력·실제 AI 일반 품질의 검증은 아니다.
 
