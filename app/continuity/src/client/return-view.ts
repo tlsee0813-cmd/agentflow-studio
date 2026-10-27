@@ -66,10 +66,10 @@ export function createReturnView(host: ReturnHost) {
     const hash = await askHash(input.ask);
     if (mine !== seq || !s) return;
     const st = host.status(), store = storeFor();
+    if (s.hash !== hash) s.focus = null;
     s.input = input; s.hash = hash;
     s.reading = st.digest ? store.find(o.project.id, hash, input.ask, st.digest.model, st.digest.prompt) : null;
     s.previous = o.key === UI62_KEY ? null : store.previous(o.project.id, hash);
-    if (s.reading && !s.focus) s.focus = s.reading.reply.changes.length ? { list: 'changes', n: 0 } : null;
     render();
   }
   async function analyze() {
@@ -83,7 +83,7 @@ export function createReturnView(host: ReturnHost) {
     try {
       const res = await askDigest(input.ask, controller.signal, host.accessCode());
       const reading = makeReading(input, hash, res.model, prompt, res.reply), msg = storeFor().keep(o.project.id, reading);
-      if (s && s.key === key && s.hash === hash) { s.reading = reading; s.storeMsg = msg; s.focus = reading.reply.changes.length ? { list: 'changes', n: 0 } : null; s.view = { kind: 'reading' }; }
+      if (s && s.key === key && s.hash === hash) { s.reading = reading; s.storeMsg = msg; s.focus = null; s.view = { kind: 'reading' }; }
     } catch (e) {
       const code = e instanceof AskError ? e.code : 'NETWORK';
       if (s && s.key === key && code !== 'CANCELLED') s.error = ERROR_TEXT[code] ?? '정리하지 못했어요. 원자료는 그대로 읽을 수 있어요.';
@@ -126,8 +126,8 @@ export function createReturnView(host: ReturnHost) {
   function focusParts(): string[] {
     const r = shown(); if (!s || !r) return [];
     const st = statements(r);
-    // Without a sentence in focus (no change to read), the part to read now is what the map shows.
-    if (!s.focus) return st.read ? [st.read.partId] : [];
+    // Before a sentence is chosen, mark the suggested reading, or the first actual decision's known parts.
+    if (!s.focus) return st.read ? [st.read.partId] : st.open[0]?.partIds ?? [];
     return (s.focus.list === 'changes' ? st.changes : st.open)[s.focus.n]?.partIds ?? [];
   }
   function chipFor(id: string, r: Reading | null, from: 'now' | 'previous') {
@@ -200,15 +200,15 @@ export function createReturnView(host: ReturnHost) {
     if (prev) out.push(h('p', { class: 'rr-older', role: 'status' }, `앞서 보낸 자료 ${prev.coverage.sent}개로 만든 정리예요. 지금 원자료는 ${total}개이고, 새로 정리하면 ${sent}개를 보내요.`));
     if (use) {
       const m = statements(use);
-      if (m.changes.length) out.push(h('section', { class: 'rr-sec' }, h('h3', {}, '달라진 점'),
-        ...m.changes.map((x, n) => statement('changes', n, x, use, from, planMeet(x.partIds)))));
-      else out.push(h('section', { class: 'rr-sec' }, h('h3', {}, '달라진 점'),
-        h('p', { class: 'rr-none' }, outcome ? '이 자료에서 프로그램의 달라진 점을 말하지 않았어요.' : '돌아온 결과 자료가 아직 없어요. 반영 실패나 변화 없음이라는 뜻은 아니에요.')));
       if (m.read) out.push(h('section', { class: 'rr-sec rr-read' }, h('h3', {}, '지금 읽을 부분'),
         h('div', { class: 'rr-readrow' }, h('button', { type: 'button', class: 'rr-go', onclick: () => host.selectPart(m.read!.partId) }, partName(m.read.partId), h('span', { 'aria-hidden': 'true' }, ' ›')),
           h('p', {}, m.read.why), h('div', { class: 'rr-chips' }, ...m.read.refs.map(id => chipFor(id, use, from))), planMeet([m.read.partId]))));
       if (m.open.length) out.push(h('section', { class: 'rr-sec' }, h('h3', {}, '정할 것'),
         ...m.open.map((x, n) => statement('open', n, x, use, from, h('div', { class: 'rr-acts' }, trialButton(x, use, from, '이걸로 시험'))))));
+      if (m.changes.length) out.push(h('section', { class: 'rr-sec' }, h('h3', {}, '달라진 점'),
+        ...m.changes.map((x, n) => statement('changes', n, x, use, from, planMeet(x.partIds)))));
+      else out.push(h('section', { class: 'rr-sec' }, h('h3', {}, '달라진 점'),
+        h('p', { class: 'rr-none' }, outcome ? '이 자료에서 프로그램의 달라진 점을 말하지 않았어요.' : '돌아온 결과 자료가 아직 없어요. 반영 실패나 변화 없음이라는 뜻은 아니에요.')));
       if (use.reply.notCovered.length) out.push(h('section', { class: 'rr-sec rr-gaps' }, h('h3', {}, '이 자료로는 말할 수 없는 것'),
         h('ul', {}, ...use.reply.notCovered.map(t => h('li', {}, t)))));
       const f = st.focus && st.focus.list === 'changes' ? m.changes[st.focus.n] : null;
@@ -275,7 +275,7 @@ export function createReturnView(host: ReturnHost) {
 
   function render() {
     const o = host.current(); if (!s || !o || o.key !== s.key) return;
-    const back = (label: string) => h('button', { type: 'button', class: 'rr-back', onclick: () => { s!.view = { kind: 'reading' }; render(); requestAnimationFrame(() => { const b = document.querySelector('#lens .lens-body'); if (b) b.scrollTop = s?.scroll ?? 0; }); } },
+    const back = (label: string) => h('button', { type: 'button', class: 'rr-back', onclick: backToReading },
       h('span', { 'aria-hidden': 'true' }, '←'), label);
     const body = h('div', { class: 'lens-body rr-body' });
     if (s.view.kind === 'source') put(body, back('정리로'), ...sourceBody(s.view.source, s.view.from));
@@ -295,6 +295,11 @@ export function createReturnView(host: ReturnHost) {
     s.view = { kind: 'source', source: structuredClone(source), from }; render();
     requestAnimationFrame(() => document.querySelector<HTMLElement>('#lens .rr-back')?.focus());
   }
+  function backToReading() {
+    if (!s) return;
+    s.view = { kind: 'reading' }; render();
+    const body = document.querySelector('#lens .lens-body'); if (body) body.scrollTop = s.scroll;
+  }
 
   return {
     isOpen: () => !!s,
@@ -302,7 +307,7 @@ export function createReturnView(host: ReturnHost) {
     /** Re-render (the pane came back after a part's reading, or the AI status arrived). */
     render: () => { if (s) { render(); void refresh(); } },
     /** Esc: from a source back to the reading, else close. */
-    escape: () => { if (!s) return; if (s.view.kind !== 'reading') { s.view = { kind: 'reading' }; render(); } else close(); },
+    escape: () => { if (!s) return; if (s.view.kind !== 'reading') backToReading(); else close(); },
     projectChanged: () => { if (s && host.current()?.key !== s.key) { s.pending?.abort(); s = null; host.mark([]); } }
   };
 }

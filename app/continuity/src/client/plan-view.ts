@@ -787,7 +787,10 @@ export function createPlanView(host: PlanHost) {
       extra.push({ ...e, id: `U${String(n).padStart(2, '0')}` });
     }
     st.bundle = { ...st.bundle, draft, extra }; PROPOSALS.delete(st.key); st.editing = true; st.error = null; persist(); render();
-    requestAnimationFrame(() => { const a = document.getElementById('plan-intent') as HTMLTextAreaElement | null; if (a) { a.focus(); a.setSelectionRange(a.value.length, a.value.length); } });
+    // The new textarea is already in the DOM. Finish its caret placement in this click, before the person can select/type.
+    // A deferred selection can collapse a subsequent select-all between selection and insertion, appending to the proposal.
+    const a = document.getElementById('plan-intent') as HTMLTextAreaElement | null;
+    if (a) { a.focus(); a.setSelectionRange(a.value.length, a.value.length); }
   }
   /** compact: the plan is shown and the ask is the small link above; only progress, errors and a needed code appear here. */
   function askLine(canAsk: boolean, p: ChangePlan | null, compact = false): (Node | null)[] {

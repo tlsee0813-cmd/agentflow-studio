@@ -467,11 +467,11 @@ function renderHome() {
   let material: HTMLElement;
   try { if (!examples.has(UI62_KEY)) examples.set(UI62_KEY, buildUi62Project()); const m = examples.get(UI62_KEY)!; material = programCard(UI62_KEY, m, true, invert(ui62Keys(m))); }
   catch { material = h('li', { class: 'message' }, '예제 ‘AgentFlow UI62 개발 자료’를 만들지 못했어요.'); }
-  $('project-list').replaceChildren(material, converter, ...EXAMPLES.map(spec => {
+  $('project-list').replaceChildren(converter, ...EXAMPLES.map(spec => {
     const key = `ex-${spec.id}`;
     try { if (!examples.has(key)) examples.set(key, buildExample(spec)); const ex = examples.get(key)!; return programCard(key, ex, true, invert(exampleKeys(spec.id, ex))); }
     catch { return h('li', { class: 'message' }, `예제 ‘${spec.name}’을 만들지 못했어요.`); }
-  }));
+  }), material);
   const saved = store.entries().filter(e => e.state === 'active');
   const cards: HTMLElement[] = [];
   for (const e of saved) { try { cards.push(programCard(e.entryId, e.project, false, id => id)); } catch { cards.push(h('li', { class: 'message' }, `‘${e.project.name}’을 읽지 못했어요.`)); } }

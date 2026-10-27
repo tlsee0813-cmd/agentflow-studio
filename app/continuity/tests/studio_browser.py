@@ -851,6 +851,7 @@ def return_flow(browser, base, cases):
     Stubbed provider: layout and boundaries only, not reading quality."""
     material = json.loads((ROOT.parents[1] / "docs/cycles/2026-10-27-return-experience-63/MATERIAL.json").read_text(encoding="utf-8"))
     excerpt = {r["id"]: r["text"]["publicExcerpt"] for r in material["records"]}
+    stage_sizes = {s["id"]: len(s["sourceIds"]) for s in material["checkpoints"]}
     context = browser.new_context(viewport={"width": 1280, "height": 720})
     page = context.new_page()
     calls = []
@@ -858,13 +859,34 @@ def return_flow(browser, base, cases):
     page.goto(base + "/")
     page.locator('.program-try[href="#/p/ex-ui62"]').click()
     expect(page.locator("#lens .rr-head")).to_be_visible()
-    expect(page.locator("#lens .rr-src")).to_have_count(4)  # stage 1: the material itself, before any reading
+    expect(page.locator("#lens .rr-src")).to_have_count(min(5, stage_sizes["reading_1"]))  # material preview, before any reading
     pane_beside_map(page); no_page_scroll(page)
     assert calls == [], "opening never calls"
     page.get_by_role("button", name="AI로 정리하기").click()
     expect(page.locator("#lens .rr-st").first).to_be_visible()
     assert len(calls) == 1
+    expect(page.locator("#lens .rr-sec > h3")).to_have_text(["지금 읽을 부분", "달라진 점"])
+    expect(page.locator('#lens .rr-st.on')).to_have_count(0)
+    changes = page.locator('#lens .rr-st-select[data-list="changes"]')
+    expect(changes.first).to_have_attribute("aria-expanded", "false")
     first = page.locator("#lens .rr-st").first
+    expect(first.locator(".rr-expand")).to_have_text("펼쳐 읽기")
+    expect(first.locator(".rr-part")).to_have_count(0)
+    expect(first.locator(".rr-ref").first).to_be_visible()  # collapsed sentences still lead straight to their sources
+    read_part = page.locator("#lens .rr-go").inner_text().replace("›", "").strip()
+    expect(page.locator("#world .read-mark")).to_have_count(1)
+    expect(page.locator("#world .read-mark")).to_contain_text(read_part)
+    initial_camera = page.locator("#world").evaluate(CAMERA)
+    first.locator(".rr-ref").first.click()
+    collapsed_sid = page.locator("#lens .rr-source-kind span").last.inner_text()
+    expect(page.locator("#lens .rr-quote")).to_have_text(excerpt[collapsed_sid])
+    page.keyboard.press("Escape")
+    expect(changes.first).to_have_attribute("aria-expanded", "false")
+    expect(page.locator('#lens .rr-st.on')).to_have_count(0)  # source buttons never select the surrounding change
+    assert page.locator("#world").evaluate(CAMERA) == initial_camera
+    # Only an explicit choice expands a change; the initial mark comes from read.partId, not an automatic first change.
+    changes.first.click()
+    expect(changes.first).to_have_attribute("aria-expanded", "true")
     expect(first).to_have_class(re.compile(r"\bon\b"))
     part = first.locator(".rr-part").first.inner_text().strip()
     expect(page.locator("#world .read-mark")).to_have_count(1)
@@ -874,12 +896,16 @@ def return_flow(browser, base, cases):
     camera = page.locator("#world").evaluate(CAMERA)
     ref = first.locator(".rr-ref").first
     version = ref.locator("code").inner_text()
+    ref.scroll_into_view_if_needed()
+    reading_scroll = page.locator("#lens .lens-body").evaluate("e => e.scrollTop")
     ref.click()
     sid = page.locator("#lens .rr-source-kind span").last.inner_text()
     expect(page.locator("#lens .rr-quote")).to_have_text(excerpt[sid])
     expect(page.locator("#lens .rr-meta")).to_contain_text(version)
     page.keyboard.press("Escape")
     expect(page.locator("#lens .rr-st")).not_to_have_count(0)
+    expect(changes.first).to_have_attribute("aria-expanded", "true")
+    expect(page.locator("#lens .lens-body")).to_have_js_property("scrollTop", reading_scroll)
     assert page.locator("#world").evaluate(CAMERA) == camera
     # A part read from the reading, and back (Esc) to the reading with the same camera.
     page.locator("#lens .rr-go").click()
@@ -890,11 +916,15 @@ def return_flow(browser, base, cases):
     assert page.locator("#world").evaluate(CAMERA) == camera
     # Another stage is other material (a call when asked); back to stage 1 reads the kept reading without a call.
     page.get_by_role("button", name="3단계").click()
-    expect(page.locator("#lens .rr-src")).to_have_count(5)
+    expect(page.locator("#lens .rr-src")).to_have_count(min(5, stage_sizes["reading_3"]))  # first-page material preview
     page.get_by_role("button", name="AI로 정리하기").click()
     expect(page.locator("#lens .rr-st").first).to_be_visible()
+    expect(page.locator("#lens .rr-sec > h3")).to_have_text(["지금 읽을 부분", "정할 것", "달라진 점"])
+    expect(page.locator('#lens .rr-st-select[data-list="changes"][aria-expanded="true"]')).to_have_count(0)
+    expect(page.get_by_role("button", name="이걸로 시험")).to_be_visible()  # actual open item stays full and actionable
     page.get_by_role("button", name="1단계").click()
     expect(page.locator("#lens .rr-st").first).to_be_visible()
+    expect(page.locator('#lens .rr-st.on')).to_have_count(0)
     page.get_by_role("button", name="3단계").click()
     expect(page.locator("#lens .rr-st").first).to_be_visible()
     assert len(calls) == 2, calls
@@ -903,9 +933,12 @@ def return_flow(browser, base, cases):
     page.get_by_role("button", name="이걸로 시험").click()
     expect(page.locator(".pp-proposal")).to_be_visible()
     offered = page.locator(".pp-proposal blockquote").inner_text()
+    expect(page.locator("#plan-intent")).to_have_value("")  # offering alone never changes the draft
     page.get_by_role("button", name="초안으로 쓰기").click()
     expect(page.locator("#plan-intent")).to_have_value(offered)
+    # Replace immediately, without waiting for an animation frame. A deferred caret change must not append to the offer.
     page.locator("#plan-intent").fill("내 초안 한 줄")
+    expect(page.locator("#plan-intent")).to_have_value("내 초안 한 줄")
     page.locator("#return-entry").click()
     expect(page.locator("#lens .rr-st").first).to_be_visible()
     page.get_by_role("button", name="이걸로 시험").click()
@@ -922,7 +955,7 @@ def return_flow(browser, base, cases):
     context = browser.new_context(viewport={"width": 1440, "height": 900})
     page = context.new_page()
     page.goto(base + "/#/p/ex-ui62")
-    expect(page.locator("#lens .rr-src")).to_have_count(4)
+    expect(page.locator("#lens .rr-src")).to_have_count(min(5, stage_sizes["reading_1"]))
     page.get_by_role("button", name="AI로 정리하기").click()
     expect(page.locator("#lens .rr-st").first).to_be_visible()
     pane_beside_map(page); no_page_scroll(page); in_map(page, "#world .read-mark")
@@ -937,11 +970,25 @@ def return_flow(browser, base, cases):
     page.locator("#import-file").set_input_files(str(cases / "oss-node-red.json"))
     expect(page.locator("#crumbs")).to_contain_text("Node-RED")
     page.locator("#plan-entry").click()
-    page.locator("#plan-import-file").set_input_files(str(ROOT.parents[1] / "docs/cycles/2026-10-26-visual-experience-59/node-red-real-plan.json"))
+    plan_path = ROOT.parents[1] / "docs/cycles/2026-10-26-visual-experience-59/node-red-real-plan.json"
+    plan_bundle = json.loads(plan_path.read_text(encoding="utf-8"))["bundle"]
+    plan = plan_bundle["plan"]
+    # No observations or project records in this fixture: evidence sources plus the plan-wide preserve/unknowns context.
+    assert not plan_bundle["observations"] and not plan_bundle["extra"]
+    plan_evidence = [e for e in plan["evidence"] if not re.fullmatch(r"E\d+|U\d+|BRIEF", e["id"])]
+    context_source = bool(plan["analysis"]["preserve"] or plan["analysis"]["unknowns"])
+    page.locator("#plan-import-file").set_input_files(str(plan_path))
     expect(page.locator("#world .plan-reading .node-name")).to_have_text("10-mqtt.js")
     page.locator("#return-entry").click()
     expect(page.locator("#plan-strip")).to_be_hidden()
-    expect(page.locator("#lens .rr-src")).to_have_count(2)
+    expect(page.locator("#lens .rr-src")).to_have_count(len(plan_evidence) + int(context_source))
+    for i, evidence in enumerate(plan_evidence):
+        expect(page.locator("#lens .rr-src strong").nth(i)).to_contain_text(evidence["title"])
+    if context_source:
+        page.locator("#lens .rr-src", has_text="변경안의 유지 범위와 미정").click()
+        for line in plan["analysis"]["preserve"] + plan["analysis"]["unknowns"]:
+            expect(page.locator("#lens .rr-quote")).to_contain_text(line)
+        page.keyboard.press("Escape")
     page.get_by_role("button", name="AI로 정리하기").click()
     expect(page.locator("#lens .rr-none")).to_contain_text("돌아온 결과 자료가 아직 없어요")
     expect(page.locator("#lens .rr-gaps")).to_be_visible()
@@ -960,12 +1007,14 @@ def return_flow(browser, base, cases):
 
 def return_failure_flow(browser, base):
     """A failed return reading: a short error and the material itself, never a substitute reading; asking again works."""
+    material = json.loads((ROOT.parents[1] / "docs/cycles/2026-10-27-return-experience-63/MATERIAL.json").read_text(encoding="utf-8"))
+    stage = next(s for s in material["checkpoints"] if s["id"] == "reading_1")
     page = browser.new_page(viewport={"width": 1280, "height": 720})
     page.goto(base + "/#/p/ex-ui62")
     page.get_by_role("button", name="AI로 정리하기").click()
     expect(page.locator("#lens .pp-error")).to_contain_text("AI 서비스가 응답하지 않아요")
     expect(page.locator("#lens .rr-st")).to_have_count(0)
-    expect(page.locator("#lens .rr-src")).to_have_count(4)
+    expect(page.locator("#lens .rr-src")).to_have_count(min(5, len(stage["sourceIds"])))
     page.get_by_role("button", name="AI로 정리하기").click()
     expect(page.locator("#lens .rr-st").first).to_be_visible()
     expect(page.locator("#lens .pp-error")).to_have_count(0)
