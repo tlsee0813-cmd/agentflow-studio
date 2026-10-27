@@ -666,7 +666,7 @@ export function createPlanView(host: PlanHost) {
   /** The sources this change cites, read in the comparison's place: each original text with where it comes from. */
   function itemEvidence(p: ChangePlan, item: PlanItem): Node[] {
     const st = s!, by = st.bundle.by, refs = p.evidence.filter(e => item.refs.includes(e.id));
-    const back = () => { st.evidenceFor = null; render(); requestAnimationFrame(() => document.querySelector<HTMLElement>('#lens .cmp-hand input, #lens .lens-more, .ps-focus button')?.focus()); };
+    const back = () => { st.evidenceFor = null; render(); document.querySelector<HTMLElement>('#lens .cmp-hand input, #lens .lens-more, .ps-focus button')?.focus(); };
     return [
       compareHead(`근거 ${refs.length} · ${by?.kind === 'example' ? '예제 원자료' : '이 변경안이 읽은 자료'}`, item.title,
         [h('button', { type: 'button', class: 'close', 'aria-label': '비교로 돌아가기', title: '비교로 (Esc)', onclick: back }, '×')]),
