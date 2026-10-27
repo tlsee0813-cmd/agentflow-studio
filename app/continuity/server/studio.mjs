@@ -93,7 +93,7 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
     // Workers supports manual/follow, not redirect:error. Reject 3xx below without forwarding the key.
     const response = await fetchImpl(ENDPOINT, { method: 'POST', redirect: 'manual', signal: controller.signal,
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.apiKey}` },
-      body: JSON.stringify({ model: config.model, stream: false, thinking: { type: scope || planning || digest ? 'enabled' : 'disabled' }, ...(scope || planning || digest ? { reasoning_effort: 'low' } : {}), max_tokens: planning ? 8192 : scope || digest ? 4096 : config.maxTokens,
+      body: JSON.stringify({ model: config.model, stream: false, thinking: { type: scope || planning || digest ? 'enabled' : 'disabled' }, ...(scope || planning || digest ? { reasoning_effort: 'low' } : {}), max_tokens: planning || digest ? 8192 : scope ? 4096 : config.maxTokens,
         response_format: { type: 'json_object' },
         messages: [{ role: 'system', content: digest ? DIGEST_PROMPT : scope ? SCOPE_PROMPT : planning ? PLAN_PROMPT : STUDIO_PROMPT }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }] }) });
     if (!response.ok) {

@@ -47,6 +47,8 @@ export interface PlanHost {
   /** When a whole plan comes to read (opened, analysed, imported, another example condition): the parts it changes, together,
    * by the smallest pan when they fit at the current zoom; else the target being read (fallback) as for a new target. */
   frame(all: string[], fallback: string[]): void;
+  /** Read what came back for this project in the return reading (the plan closes; its draft stays). */
+  readReturn(): void;
 }
 
 type Focus = { kind: 'item'; id: string } | { kind: 'impacts' } | { kind: 'part'; id: string } | null;
@@ -72,6 +74,9 @@ interface Session {
 }
 
 const MEMORY = new Map<string, PlanBundle>();
+/** A sentence handed over from the return reading, per project, in this tab only. It enters the draft only when the person
+ * says so (write it as the draft when there is none, else add it at the end); dismissing or closing leaves the draft as is. */
+const PROPOSALS = new Map<string, { text: string; sources: Evidence[] }>();
 const memoryKey = (o: PlanOpened, c: Condition) => (o.key === CONVERTER_KEY ? `${o.key}#${c}` : o.project.id);
 const short = (text: string, n: number) => { const t = text.replace(/\s+/g, ' ').trim(); return t.length > n ? `${t.slice(0, n)}…` : t; };
 
@@ -731,6 +736,7 @@ export function createPlanView(host: PlanHost) {
   function intentSection(o: PlanOpened) {
     const st = s!, p = plan(), sec = h('section', { class: 'pp-sec pp-intent' });
     const status = host.status(), canAsk = status.ai === 'deepseek';
+    put(sec, proposalCard());
     if (p && !st.editing && !stale()) {
       sec.classList.add('compact');
       put(sec, h('h3', {}, '문장과 자료'), h('div', { class: 'pp-row pp-acts' },
@@ -755,6 +761,33 @@ export function createPlanView(host: PlanHost) {
     if (st.sources) put(sec, sourceList((input() ?? { evidence: [] }).evidence.filter(e => !st.bundle.extra.some(x => x.id === e.id))), addSource(o));
     put(sec, ...askLine(canAsk, p));
     return sec;
+  }
+  function proposalCard(): Node | null {
+    const st = s!, pr = PROPOSALS.get(st.key); if (!pr) return null;
+    const empty = !st.bundle.draft.trim(), fresh = pr.sources.filter(e => !st.bundle.extra.some(x => x.title === e.title && x.basis === e.basis));
+    const adding = Math.min(20 - st.bundle.extra.length, fresh.length);
+    return h('div', { class: 'pp-proposal', role: 'group', 'aria-label': '돌아와 읽기에서 가져온 문장' },
+      h('p', { class: 'pp-proposal-head' }, '돌아와 읽기에서 가져온 문장 · 아직 초안에 넣지 않았어요'),
+      h('blockquote', {}, pr.text),
+      h('div', { class: 'pp-row' },
+        h('button', { type: 'button', class: 'secondary small', disabled: !!st.pending, onclick: acceptProposal }, empty ? '초안으로 쓰기' : '초안 끝에 덧붙이기'),
+        h('button', { type: 'button', class: 'link-button', onclick: () => { PROPOSALS.delete(st.key); render(); } }, '넣지 않기')),
+      h('p', { class: 'fine' }, [empty ? '' : '지금 초안은 그대로 두고 끝에 이 문장을 더해요.', adding > 0 ? `결과 근거 ${adding}개도 이 구상의 자료로 붙어요.` : '',
+        '사용자 기록·방향·변경안 자료는 원래 읽기에 남아요.'].filter(Boolean).join(' ')));
+  }
+  function acceptProposal() {
+    const st = s!, pr = PROPOSALS.get(st.key); if (!pr || st.pending) return;
+    const draft = st.bundle.draft.trim() ? `${st.bundle.draft.replace(/\s+$/, '')}\n${pr.text}` : pr.text;
+    if (draft.length > 6000) { st.error = '초안이 6000자를 넘게 되어 덧붙이지 않았어요. 지금 초안은 그대로예요.'; render(); return; }
+    const extra = [...st.bundle.extra];
+    for (const e of pr.sources) {
+      if (extra.length >= 20) break;
+      if (extra.some(x => x.title === e.title && x.basis === e.basis)) continue;
+      let n = 1; while (extra.some(x => x.id === `U${String(n).padStart(2, '0')}`)) n++;
+      extra.push({ ...e, id: `U${String(n).padStart(2, '0')}` });
+    }
+    st.bundle = { ...st.bundle, draft, extra }; PROPOSALS.delete(st.key); st.editing = true; st.error = null; persist(); render();
+    requestAnimationFrame(() => { const a = document.getElementById('plan-intent') as HTMLTextAreaElement | null; if (a) { a.focus(); a.setSelectionRange(a.value.length, a.value.length); } });
   }
   /** compact: the plan is shown and the ask is the small link above; only progress, errors and a needed code appear here. */
   function askLine(canAsk: boolean, p: ChangePlan | null, compact = false): (Node | null)[] {
@@ -784,14 +817,14 @@ export function createPlanView(host: PlanHost) {
     const inp = input(); if (!inp) return '';
     if (inp.problem === 'TOO_LARGE') return '자료가 요청 한도보다 커요';
     if (inp.problem) return `‘${inp.problem.secret}’에 키처럼 보이는 글이 있어요`;
-    if (s!.example) return `예제 원자료 ${inp.evidence.filter(e => e.id !== 'INTENT').length}개${inp.evidence.some(e => e.id === 'INTENT') ? ' + 고친 문장' : ''} · 작성된 분석은 보내지 않아요`;
+    if (s!.example && s!.key === CONVERTER_KEY) return `예제 원자료 ${inp.evidence.filter(e => e.id !== 'INTENT').length}개${inp.evidence.some(e => e.id === 'INTENT') ? ' + 고친 문장' : ''} · 작성된 분석은 보내지 않아요`;
     const added = s!.bundle.extra.length ? ` + 붙인 자료 ${s!.bundle.extra.length}개` : '';
     return inp.records.total ? `이 문장${added} + 기록 ${inp.records.sent === inp.records.total ? `${inp.records.total}개` : `${inp.records.total}개 중 최신 ${inp.records.sent}개`}` : `${added ? `이 문장${added}` : '이 문장과 지도'} · 아직 기록 없음`;
   }
   function syncFoot() { const r = document.getElementById('plan-reach'); if (r) r.textContent = reachText(); const btn = r?.previousElementSibling as HTMLButtonElement | null; if (btn) btn.disabled = host.status().ai !== 'deepseek' || !s!.bundle.draft.trim(); }
   function sourcesToggle(_o: PlanOpened) {
     const st = s!, n = (plan() && !stale() && !st.editing ? plan()!.evidence : input()?.evidence ?? []).length;
-    return h('button', { type: 'button', class: 'link-button quiet', 'aria-expanded': String(st.sources), onclick: () => { st.sources = !st.sources; render(); } }, `${st.example ? '예제 원자료' : '읽는 자료'} ${n}개`);
+    return h('button', { type: 'button', class: 'link-button quiet', 'aria-expanded': String(st.sources), onclick: () => { st.sources = !st.sources; render(); } }, `${st.example && st.key === CONVERTER_KEY ? '예제 원자료' : '읽는 자료'} ${n}개`);
   }
   function conditionSwitch(o: PlanOpened) {
     if (o.key !== CONVERTER_KEY) return null;
@@ -906,6 +939,7 @@ export function createPlanView(host: PlanHost) {
     const mine = st.bundle.observations.filter(x => st.bundle.attached[x.id] === snap.id);
     const rows = compareResults(snap, mine);
     const sec = h('section', { class: 'pp-sec pp-results' }, h('div', { class: 'pp-sec-head' }, h('h3', {}, '돌아온 기록'),
+      h('button', { type: 'button', class: 'link-button', title: '돌아온 기록과 프로젝트 기록을 함께 읽어요. 변경 구상은 닫혀도 초안은 남아요.', onclick: () => host.readReturn() }, '돌아와 읽기'),
       snaps.length > 1 ? (() => {
         const sel = h('select', { 'aria-label': '대조할 요청문' }) as HTMLSelectElement;
         snaps.slice().reverse().forEach((x, i) => sel.append(h('option', { value: x.id, selected: x.id === snap.id }, `${i === 0 ? '마지막 ' : ''}요청문 · ${fullTime(x.createdAt)} · ${x.itemIds.length}개`)));
@@ -1035,6 +1069,28 @@ export function createPlanView(host: PlanHost) {
       if (changed && id && s.focus?.kind === 'part') host.reveal(id);
     },
     statusChanged: () => { if (s) render(); },
+    /** The project's change plan as kept, without opening it (null: none, or unreadable). */
+    bundleOf: (): PlanBundle | null => {
+      const o = host.current(); if (!o || o.kind === 'legacy') return null;
+      if (s && s.key === o.key) return s.bundle;
+      const loaded = bundleFor(o, 'A'); return loaded.unreadable ? null : loaded.bundle;
+    },
+    /** A sentence (and its sources) from the return reading, offered beside the draft; nothing enters it until accepted. */
+    propose: (text: string, sources: Evidence[]) => {
+      const o = host.current(); if (!o || o.kind === 'legacy') return;
+      PROPOSALS.set(o.key, { text, sources });
+      if (!s) open(); if (!s) return;
+      if (plan() && !s.editing) s.detail = true;
+      render();
+      requestAnimationFrame(() => document.querySelector<HTMLElement>('.pp-proposal button')?.focus());
+    },
+    /** Open on the change whose targets include one of these parts, in preview on the same map. */
+    focusParts: (ids: string[]) => {
+      if (!s) open(); if (!s) return;
+      const item = items().find(i => itemTargets(i).some(t => ids.includes(t)));
+      if (item) { s.focus = { kind: 'item', id: item.id }; s.targets[item.id] = itemTargets(item).find(t => ids.includes(t))!; s.mode = 'preview'; s.detail = false; s.evidenceFor = null; moveTarget = true; }
+      render();
+    },
     toggle: () => (s ? close() : open()),
     width,
     sheetOpen: () => !!s?.sheet,

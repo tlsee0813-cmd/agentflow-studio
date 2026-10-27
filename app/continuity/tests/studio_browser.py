@@ -4,7 +4,7 @@ entry -> map (no document scroll) -> part -> ask (summary, question) -> answer w
 provider failure shows a short error and a retry (never a substitute answer); a server without a key and the static
 build both show the honest not-connected state. Not a visual or usability audit.
 """
-import functools, http.server, os, pathlib, re, subprocess, sys, tempfile, threading
+import functools, http.server, json, os, pathlib, re, subprocess, sys, tempfile, threading
 from playwright.sync_api import sync_playwright, expect
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -843,6 +843,135 @@ def overview_flow(browser, base, cases):
     context.close()
 
 
+def return_flow(browser, base, cases):
+    """EXPERIENCE63: the return reading beside the same map. The UI62 material opens without a call; one explicit call per
+    material (stage), never again for the same material; each sentence leads to its exact quote and version and back with the
+    camera kept; a part read from it comes back to it; a sentence offered to the change plan never overwrites a draft.
+    A saved project with a real AI plan and no returned result reads 'no result yet'; its reading is kept across a reload.
+    Stubbed provider: layout and boundaries only, not reading quality."""
+    material = json.loads((ROOT.parents[1] / "docs/cycles/2026-10-27-return-experience-63/MATERIAL.json").read_text(encoding="utf-8"))
+    excerpt = {r["id"]: r["text"]["publicExcerpt"] for r in material["records"]}
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    calls = []
+    page.on("request", lambda r: calls.append(r.url) if r.url.endswith("/api/studio/digest") else None)
+    page.goto(base + "/")
+    page.locator('.program-try[href="#/p/ex-ui62"]').click()
+    expect(page.locator("#lens .rr-head")).to_be_visible()
+    expect(page.locator("#lens .rr-src")).to_have_count(4)  # stage 1: the material itself, before any reading
+    pane_beside_map(page); no_page_scroll(page)
+    assert calls == [], "opening never calls"
+    page.get_by_role("button", name="AI로 정리하기").click()
+    expect(page.locator("#lens .rr-st").first).to_be_visible()
+    assert len(calls) == 1
+    first = page.locator("#lens .rr-st").first
+    expect(first).to_have_class(re.compile(r"\bon\b"))
+    part = first.locator(".rr-part").first.inner_text().strip()
+    expect(page.locator("#world .read-mark")).to_have_count(1)
+    expect(page.locator("#world .read-mark")).to_contain_text(part)
+    in_map(page, "#world .read-mark")
+    # The quote, exactly as published, with its version; back to the same reading with the camera untouched.
+    camera = page.locator("#world").evaluate(CAMERA)
+    ref = first.locator(".rr-ref").first
+    version = ref.locator("code").inner_text()
+    ref.click()
+    sid = page.locator("#lens .rr-source-kind span").last.inner_text()
+    expect(page.locator("#lens .rr-quote")).to_have_text(excerpt[sid])
+    expect(page.locator("#lens .rr-meta")).to_contain_text(version)
+    page.keyboard.press("Escape")
+    expect(page.locator("#lens .rr-st")).not_to_have_count(0)
+    assert page.locator("#world").evaluate(CAMERA) == camera
+    # A part read from the reading, and back (Esc) to the reading with the same camera.
+    page.locator("#lens .rr-go").click()
+    expect(page.locator("#lens .rr-head")).to_have_count(0)
+    page.keyboard.press("Escape")
+    expect(page.locator("#lens .rr-head")).to_be_visible()
+    page.wait_for_timeout(400)
+    assert page.locator("#world").evaluate(CAMERA) == camera
+    # Another stage is other material (a call when asked); back to stage 1 reads the kept reading without a call.
+    page.get_by_role("button", name="3단계").click()
+    expect(page.locator("#lens .rr-src")).to_have_count(5)
+    page.get_by_role("button", name="AI로 정리하기").click()
+    expect(page.locator("#lens .rr-st").first).to_be_visible()
+    page.get_by_role("button", name="1단계").click()
+    expect(page.locator("#lens .rr-st").first).to_be_visible()
+    page.get_by_role("button", name="3단계").click()
+    expect(page.locator("#lens .rr-st").first).to_be_visible()
+    assert len(calls) == 2, calls
+    no_page_scroll(page)
+    # A sentence offered to the change plan: no draft yet, so it may become the draft; only when said so.
+    page.get_by_role("button", name="이걸로 시험").click()
+    expect(page.locator(".pp-proposal")).to_be_visible()
+    offered = page.locator(".pp-proposal blockquote").inner_text()
+    page.get_by_role("button", name="초안으로 쓰기").click()
+    expect(page.locator("#plan-intent")).to_have_value(offered)
+    page.locator("#plan-intent").fill("내 초안 한 줄")
+    page.locator("#return-entry").click()
+    expect(page.locator("#lens .rr-st").first).to_be_visible()
+    page.get_by_role("button", name="이걸로 시험").click()
+    page.get_by_role("button", name="넣지 않기").click()
+    expect(page.locator("#plan-intent")).to_have_value("내 초안 한 줄")
+    page.locator("#return-entry").click()
+    page.get_by_role("button", name="이걸로 시험").click()
+    page.get_by_role("button", name="초안 끝에 덧붙이기").click()
+    expect(page.locator("#plan-intent")).to_have_value("내 초안 한 줄\n" + offered)
+    assert page.evaluate("localStorage.getItem('agentflow.studio.digest.1')") is None, "examples are never stored"
+    context.close()
+
+    # 1440: the same first reading reads beside the map without page scroll.
+    context = browser.new_context(viewport={"width": 1440, "height": 900})
+    page = context.new_page()
+    page.goto(base + "/#/p/ex-ui62")
+    expect(page.locator("#lens .rr-src")).to_have_count(4)
+    page.get_by_role("button", name="AI로 정리하기").click()
+    expect(page.locator("#lens .rr-st").first).to_be_visible()
+    pane_beside_map(page); no_page_scroll(page); in_map(page, "#world .read-mark")
+    context.close()
+
+    # Node-RED: a real AI change plan, no returned result. Plan material only; no change is claimed; kept across a reload.
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    calls.clear()
+    page.on("request", lambda r: calls.append(r.url) if r.url.endswith("/api/studio/digest") else None)
+    page.goto(base + "/")
+    page.locator("#import-file").set_input_files(str(cases / "oss-node-red.json"))
+    expect(page.locator("#crumbs")).to_contain_text("Node-RED")
+    page.locator("#plan-entry").click()
+    page.locator("#plan-import-file").set_input_files(str(ROOT.parents[1] / "docs/cycles/2026-10-26-visual-experience-59/node-red-real-plan.json"))
+    expect(page.locator("#world .plan-reading .node-name")).to_have_text("10-mqtt.js")
+    page.locator("#return-entry").click()
+    expect(page.locator("#plan-strip")).to_be_hidden()
+    expect(page.locator("#lens .rr-src")).to_have_count(2)
+    page.get_by_role("button", name="AI로 정리하기").click()
+    expect(page.locator("#lens .rr-none")).to_contain_text("돌아온 결과 자료가 아직 없어요")
+    expect(page.locator("#lens .rr-gaps")).to_be_visible()
+    expect(page.locator("#lens .rr-meet")).to_contain_text("변경 구상")
+    page.locator("#lens .rr-meet .link-button").click()
+    expect(page.locator("#plan-strip")).to_be_visible()
+    expect(page.locator("#world .plan-reading .node-name")).to_have_text("10-mqtt.js")
+    url = page.url
+    page.reload()
+    page.locator("#return-entry").click()
+    expect(page.locator("#lens .rr-none")).to_be_visible()
+    assert len(calls) == 1, calls  # read from this browser's kept reading, not sent again
+    assert page.url == url
+    context.close()
+
+
+def return_failure_flow(browser, base):
+    """A failed return reading: a short error and the material itself, never a substitute reading; asking again works."""
+    page = browser.new_page(viewport={"width": 1280, "height": 720})
+    page.goto(base + "/#/p/ex-ui62")
+    page.get_by_role("button", name="AI로 정리하기").click()
+    expect(page.locator("#lens .pp-error")).to_contain_text("AI 서비스가 응답하지 않아요")
+    expect(page.locator("#lens .rr-st")).to_have_count(0)
+    expect(page.locator("#lens .rr-src")).to_have_count(4)
+    page.get_by_role("button", name="AI로 정리하기").click()
+    expect(page.locator("#lens .rr-st").first).to_be_visible()
+    expect(page.locator("#lens .pp-error")).to_have_count(0)
+    page.close()
+
+
 def failure_flow(browser, base):
     page = browser.new_page(viewport={"width": 1280, "height": 720})
     page.goto(base + "/")
@@ -896,8 +1025,10 @@ def main():
             preview_context_flow(browser, base); print("ok  preview exposes only its target path; current, sources and user folds preserve ownership")
             relation_context_flow(browser, base, oss_fixtures()); print("ok  existing relations of target and candidate read above groups; current and preview share one scene")
             overview_flow(browser, base, oss_fixtures()); print("ok  large list as an overview of real groups, find with way back, scope relations, pane beside the map, verbs")
+            return_flow(browser, base, oss_fixtures()); print("ok  return reading: no call on open, one per material, exact quote and back, draft never overwritten, Node-RED plan without result")
             proc, base = start("code"); procs.append(proc); code_flow(browser, base); print("ok  access code kept from an input event")
             proc, base = start("fail"); procs.append(proc); failure_flow(browser, base); print("ok  provider failure -> short error -> retry")
+            proc, base = start("fail"); procs.append(proc); return_failure_flow(browser, base); print("ok  return reading failure -> short error and the material -> asking again")
             proc, base = start("nokey"); procs.append(proc); off_flow(browser, base + "/", "AI 키 없음"); print("ok  server without key -> honest off state")
             if (ROOT / "static-dist/index.html").exists():
                 server = serve_static()
