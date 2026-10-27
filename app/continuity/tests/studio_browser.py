@@ -508,6 +508,29 @@ def workspace_flow(browser, base, cases):
     box = work.bounding_box(); assert box["x"] == 0 and box["width"] == 1280, box
     assert page.locator("#world").evaluate(CAMERA) == on_map and page.locator("#viewport").bounding_box()["width"] == area_w
     expect(page.locator(".pw-pick[aria-current='true']")).to_contain_text("실패해도 나머지 계속")
+    expect(page.locator(".pw-pick[aria-current='true']")).to_be_focused()
+    # What the workspace covers is inert (out of the tab order and the accessibility tree) but stays in place: real Tab and
+    # Shift+Tab from the current row reach the workspace and the top bar only, never the pane's old include box under it.
+    lens_box = page.locator("#lens").bounding_box()
+    for sel in ("#lens", "#plan-strip", "#viewport", ".controls"):
+        assert page.locator(sel).evaluate("e => e.inert"), sel
+    assert page.locator("#lens").bounding_box() == lens_box
+    def route(key, n):
+        out = []
+        for _ in range(n):
+            page.keyboard.press(key)
+            out.append(page.evaluate("""() => { const a = document.activeElement;
+              return { covered: !!a.closest('[inert]'), where: a.closest('#plan-panel') ? 'work' : a.closest('.bar') ? 'top' : a.closest('#space') ? 'space' : 'page',
+                       id: a.id, text: (a.textContent || a.getAttribute('aria-label') || '').trim().slice(0, 24) }; }"""))
+        return out
+    back_route = route("Shift+Tab", 14)
+    assert not any(x["covered"] or x["where"] == "space" for x in back_route), back_route
+    assert any(x["where"] == "top" for x in back_route), back_route
+    page.locator(".pw-pick[aria-current='true']").focus()
+    fwd_route = route("Tab", 30)
+    assert not any(x["covered"] or x["where"] == "space" for x in fwd_route), fwd_route
+    assert not any(x["id"].startswith("ps-hand-") for x in back_route + fwd_route)
+    page.locator(".pw-pick[aria-current='true']").focus()
     expect(page.locator(".pw-found")).to_contain_text("파일별 결과는 이미 남고 있지만, 화면에는 마지막 결과만 보여요.")
     expect(page.locator(".pw-title")).to_have_text("폴더 단위 변환")  # a short heading, not every change again
     page.locator(".pw-said-btn").click()  # the whole sentence on request
@@ -543,6 +566,8 @@ def workspace_flow(browser, base, cases):
     page.wait_for_timeout(400)
     in_map(page, "#world .plan-reading")
     expect(page.locator("#lens .ps-wide")).to_have_text("‹ 넓은 비교로")
+    assert not page.locator("#lens").evaluate("e => e.inert") and not page.locator("#viewport").evaluate("e => e.inert")
+    expect(page.locator("#lens .ps-wide")).to_be_focused()  # keyboard focus follows to the way back
     page.locator("#lens .ps-wide").click()
     expect(page.locator(".pw-pick[aria-current='true']")).to_contain_text("성공 유지·실패 모음")
     assert page.locator(".pw-detail").evaluate("e => e.scrollTop") == held
@@ -552,6 +577,7 @@ def workspace_flow(browser, base, cases):
     expect(work).to_be_hidden()
     page.wait_for_timeout(300)
     assert page.locator("#world").evaluate(CAMERA) == mapped
+    assert page.evaluate("[...document.getElementById('space').children].every(e => !e.inert)")
     page.keyboard.press("Escape")
     expect(page.locator("#lens")).to_be_hidden()
     # A narrow window: the workspace and the request sheet take the whole width; back to 1280.

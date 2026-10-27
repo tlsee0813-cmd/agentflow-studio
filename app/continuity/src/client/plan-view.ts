@@ -137,7 +137,7 @@ export function createPlanView(host: PlanHost) {
     s.pending?.controller.abort(); s.scoping?.controller.abort();
     const ret = s.ret; s = null; host.rows(null); host.targetContext(null, false);
     $('plan-panel').hidden = true; $('plan-panel').replaceChildren(); $('plan-mode').hidden = true; $('plan-sheet').hidden = true;
-    $('plan-strip').hidden = true; $('plan-strip').replaceChildren(); host.surface(null, [], false); lastFocusKey = ''; lastShown = '';
+    $('plan-strip').hidden = true; $('plan-strip').replaceChildren(); host.surface(null, [], false); lastFocusKey = ''; lastShown = ''; cover(false);
     host.chrome(); overlay();
     if (restore) { host.restore(ret); host.notice('변경 구상을 닫았어요. 초안과 변경안은 그대로 남아 있어요.', { label: '다시 열기', run: open }); }
   }
@@ -544,9 +544,15 @@ export function createPlanView(host: PlanHost) {
     host.targetContext(item ? activeTarget(item) : null, moveTarget);
     renderMode(); renderStrip(o);
     if (panelOpen()) renderPanel(o); else if (workOpen()) renderWork(o); else { const pp = $('plan-panel'); pp.hidden = true; pp.classList.remove('work'); pp.replaceChildren(); }
+    cover(workOpen());
     renderSheet(); overlay(); renderCompare(o);
     host.area();
   }
+  /** What the workspace covers (the map, its controls, the strip, the pane and the part panel) is inert while it is open: out of
+   * the tab order and the accessibility tree, but kept in place with its size, camera and scroll. The workspace itself, the
+   * request sheet over it, the toast and the top bar stay as they are. */
+  const UNCOVERED = new Set(['plan-panel', 'plan-sheet', 'toast', 'plan-import-file']);
+  function cover(on: boolean) { for (const el of Array.from($('space').children) as HTMLElement[]) el.inert = on && !UNCOVERED.has(el.id); }
   /** The slim panel beside the map: writing the first sentence, before there is a plan. */
   const panelOpen = () => !!s && !plan();
   /** The wide workspace over the map: the whole plan read and edited (asked for, writing, a sentence or material ahead of the
