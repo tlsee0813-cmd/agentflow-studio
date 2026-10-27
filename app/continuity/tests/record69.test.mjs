@@ -260,8 +260,13 @@ test('R69 HTTP: digest.2 on the same endpoint with its own prompt; digest.1 unto
   assert.ok(!/mqtt|broker|node-red|21-mqtt/i.test(DIGEST2_PROMPT), 'no sample answer in the prompt');
   // Metadata in a record is material (merged, checked out and deployed kept apart); nothing sent is called missing; a gap
   // already read in recordReadings is not listed again.
-  assert.ok(DIGEST2_PROMPT.includes('보낸 원문에 이미 있는 정보를 자료에 없다고 쓰지 않는다') && DIGEST2_PROMPT.includes('병합됐다는 기록, 지금 받은 코드(checkout)에 들어 있는지, 배포됐는지는 서로 다른 사실'));
+  assert.ok(DIGEST2_PROMPT.includes('보낸 원문에 이미 있는 정보를 자료에 없다고 쓰지 않는다') && DIGEST2_PROMPT.includes('보고된 병합·검사와, 지금 받은 코드(checkout)에 들어 있는지·배포됐는지는 다른 범위다'));
   assert.ok(DIGEST2_PROMPT.includes('recordReadings에서 이미 읽은 확인 범위·실행하지 않은 확인·한계는 notCovered에 다시 쓰지 않는다'));
+  // Reported changes, checks and merges read alike as what the record reports; not checking them oneself is no absence, and a
+  // checkout or deployment gap is listed only when the material says why it matters now. digest.1 is untouched.
+  assert.ok(DIGEST2_PROMPT.includes('네가 직접 확인하지 않았다는 이유만으로 그것을 자료에 없는 정보나 미상으로 바꾸지 않는다'));
+  assert.ok(DIGEST2_PROMPT.includes('그 부재를 notCovered에 쓰거나 일반적인 단서를 덧붙이지 않는다') && !DIGEST_PROMPT.includes('checkout'));
+  assert.ok(!/[0-9a-f]{7,40}/.test(DIGEST2_PROMPT.replace(DIGEST_PROMPT, '')), 'no particular commit in the record rules');
   const note = structuredClone(reply); note.recordReadings[0].kind = 'note';
   assert.equal(validateDigestReply(note, inp.ask).recordReadings[0].kind, 'note');
   assert.notEqual(await digestPromptId(1), await digestPromptId(2));
