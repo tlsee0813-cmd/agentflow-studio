@@ -975,3 +975,5 @@ button:disabled { opacity: .5; cursor: default; }
 .space.z-mid .node .node-name { font-size: calc(13.5px * var(--grow)); }
 .space.z-mid .node.item .node-name, .space.z-mid .frame.group > .frame-head .frame-name { font-size: calc(13px * var(--grow)); }
 .space.z-mid .node.unit .node-name, .space.z-mid .region > .frame-head .frame-name { font-size: calc(15px * var(--grow)); }
+.space.rest-sum.dense-lines .edge.sum.detour:not(.on):not(.near):not(.ctx) .edge-line { stroke-opacity: 1; }
+.space.rest-sum.dense-lines .edge.sum.agg.detour:not(.on):not(.near):not(.ctx) .edge-line { stroke-opacity: .42; }

@@ -811,8 +811,8 @@ const edgeOf = (key: string | undefined) => (key?.startsWith('sum:') ? sums : la
 function syncLineMode() {
   const sp = $('space'), rest = !selected && !planView.isOpen() && sums.length > 0;
   sp.classList.toggle('rest-sum', rest);
-  // Many lines on one view: those that go round other parts step back (see .dense-lines), counted as drawn.
-  sp.classList.toggle('dense-lines', (rest ? sums.length : lay.edges.length) >= 12);
+  // Many lines on one view: those that go round other parts step back (see .dense-lines); a summary line never does.
+  sp.classList.toggle('dense-lines', lay.edges.length >= 12);
 }
 /** Selected lines, a change's context lines, lines inside one group and lines that cross nothing else read above the groups. */
 function layerEdge(el: Element) {

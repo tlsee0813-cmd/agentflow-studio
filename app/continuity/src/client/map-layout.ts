@@ -103,7 +103,9 @@ const nodeChrome = (kids: boolean, extra = 0) => (kids ? 5 + 22 + 4 + 4 + 40 + 8
 /** extra: room a part with an inside gives its boundary count beside the name (linkChipW). */
 export function nodeWidth(name: string, kids: boolean, measure: TextMeasure = estimate, extra = 0): number {
   // Lines break at word ends, not mid-word: leave a share of each line unused.
-  const need = measure(name, 'node') * 1.12 + 8;
+  const need = measure(name, 'node') * 1.12 + 8, one = measure(name, 'node') + 2;
+  // A name that reads on one line beside the toggle and the way in keeps its one line beside the count too: the card widens.
+  if (extra && one <= NODE_W - nodeChrome(kids)) return Math.min(NODE_MAX_W, Math.max(NODE_W, Math.ceil(one) + nodeChrome(kids, extra)));
   if (need <= (NODE_W - nodeChrome(kids, extra)) * 2) return NODE_W;
   return Math.min(NODE_MAX_W, Math.ceil(need / 2) + nodeChrome(kids, extra));
 }
