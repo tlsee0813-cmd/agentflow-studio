@@ -38,9 +38,20 @@ export function ui62Reading(project: Project, stageId: string): ReadingSource[] 
     partIds: s.partKeys.map(k => keys.get(k)!).filter(Boolean) }));
 }
 
+/** A part's name as read beside the map; where another part has the same name, with its parents (up to two) in front until
+ * it differs: 'PC 앱 · 보정' and '장치 펌웨어 · 보정'. */
+export function partLabel(view: StudioView, id: string): string {
+  const of = (x: string | null) => (x ? view.parts.find(p => p.id === x) ?? null : null), part = of(id);
+  if (!part) return '부분';
+  const same = view.parts.filter(p => p.id !== id && p.name === part.name); if (!same.length) return part.name;
+  const pathOf = (p: { name: string; parentId: string | null }, n: number) => { const q = [p.name]; for (let u = of(p.parentId), k = 0; u && k < n; u = of(u.parentId), k++) q.unshift(u.name); return q.join(' · '); };
+  let label = part.name;
+  for (let n = 1; n <= 2; n++) { label = pathOf(part, n); if (!same.some(o => pathOf(o, n) === label)) break; }
+  return label;
+}
 /** A pasted record as material: the text as pasted, never located (its context part is a note only). */
-function pastedSource(r: Project['pasted'][number], alias: string, name: (id: string | null) => string | null): ReadingSource {
-  const at = name(r.context);
+function pastedSource(r: Project['pasted'][number], alias: string, view: StudioView): ReadingSource {
+  const at = r.context && view.parts.some(p => p.id === r.context) ? partLabel(view, r.context) : null;
   return { id: alias, kind: 'record', title: clip(recordTitle(clean(r.text)) || '붙여넣은 기록', 200), text: clean(r.text),
     note: ['사용자가 붙여넣은 원문 그대로', at ? `붙일 때 보던 부분: ${at} (읽기 맥락일 뿐 본문 전체가 이 부분에 관한 근거는 아님)` : ''].filter(Boolean).join(' · '),
     basis: `붙여넣은 시각 ${fullTime(r.at)} (원문 작성·판본 시각 아님)`, partIds: [], url: null, recordId: r.id };
@@ -49,7 +60,7 @@ function pastedSource(r: Project['pasted'][number], alias: string, name: (id: st
  * material the person attached to its change plan, its own records (newest first) and any older pasted records. */
 export function savedReading(view: StudioView, bundle: PlanBundle | null, pasted: Project['pasted'] = []): ReadingSource[] {
   const out: ReadingSource[] = [], name = (id: string | null) => (id ? view.parts.find(p => p.id === id)?.name ?? null : null);
-  const newest = [...pasted].reverse().map((r, i) => pastedSource(r, `N${String(i + 1).padStart(2, '0')}`, name));
+  const newest = [...pasted].reverse().map((r, i) => pastedSource(r, `N${String(i + 1).padStart(2, '0')}`, view));
   out.push(...newest.slice(0, LEAD_RECORDS));
   const plan = bundle?.plan ?? null, items = plan?.analysis.items ?? [];
   const citedBy = (ref: string) => [...new Set(items.filter(i => i.refs.includes(ref)).flatMap(i => i.partIds))].filter(id => view.parts.some(p => p.id === id));

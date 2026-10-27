@@ -12,7 +12,7 @@ import { serializeProject, serializeBackup, WorkspaceStore, importCopy } from '.
 import { buildExample } from '../dist/public/shared/studio-examples.js';
 import { studioView } from '../dist/public/shared/studio.js';
 import { validateDigestAsk, validateDigestReply, quoteAt, DIGEST_BYTES, RECORD_SENT_MAX } from '../dist/public/shared/digest-api.js';
-import { savedReading, readingInput } from '../dist/public/client/digest-source.js';
+import { savedReading, readingInput, partLabel } from '../dist/public/client/digest-source.js';
 import { digestStore, askHash, makeReading, DIGEST_KEY } from '../dist/public/client/digest-store.js';
 import { secretLike } from '../dist/public/client/plan-source.js';
 import { createStudioHandler, digestPromptId } from '../server/studio.mjs';
@@ -161,7 +161,17 @@ test('R69 sample B (synthetic) and D: same-named parts, no parts; the looked-at 
   const [pcCal, devCal] = p.space.areas.slice(2).map(a => a.id);
   p = D.pasteRecord(p, SYNTH, pcCal).project;
   const inp = input(p), rec = recordOf(inp);
-  assert.deepEqual(rec.partIds, []); assert.match(rec.note, /붙일 때 보던 부분: 보정 \(읽기 맥락일 뿐/);
+  assert.deepEqual(rec.partIds, []); assert.match(rec.note, /붙일 때 보던 부분: PC 앱 · 보정 \(읽기 맥락일 뿐/);
+  // Same-named parts read with their parent wherever they are named beside the map (chips, candidates, context); others plain.
+  const view = studioView(p);
+  assert.deepEqual([pcCal, devCal, pc].map(id => partLabel(view, id)), ['PC 앱 · 보정', '장치 펌웨어 · 보정', 'PC 앱']);
+  let deep = D.addArea(D.addArea(D.createProject(), 'A'), 'B');
+  const [ra, rb] = deep.space.areas.map(x => x.id);
+  deep = D.addChildArea(D.addChildArea(deep, ra, '설정'), rb, '설정');
+  const [sa, sb] = deep.space.areas.slice(2).map(x => x.id);
+  deep = D.addChildArea(D.addChildArea(deep, sa, '보정'), sb, '보정');
+  const dv = studioView(deep), [ca, cb] = deep.space.areas.slice(4).map(x => x.id);
+  assert.deepEqual([partLabel(dv, ca), partLabel(dv, cb)], ['A · 설정 · 보정', 'B · 설정 · 보정'], 'up to two parents until they differ');
   assert.equal(inp.ask.parts.filter(x => x.name === '보정').length, 2, 'both same-named parts go with their parents');
   // The contract checks only that a candidate is a known part with a quote in the text: it cannot tell PC from device. That is
   // the model's (and the person's) reading; the screen shows such links as candidates only. A real model is checked apart.

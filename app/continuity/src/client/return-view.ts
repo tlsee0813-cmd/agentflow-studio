@@ -12,7 +12,7 @@ import { UI62_KEY, UI62_STAGES } from '../shared/return-material.js';
 import type { Evidence } from '../shared/change-plan.js';
 import type { StorageLike } from '../shared/storage.js';
 import { clip } from '../shared/studio.js';
-import { ui62Reading, savedReading, readingInput, recordTitle, type ReadingInput, type ReadingSource } from './digest-source.js';
+import { ui62Reading, savedReading, readingInput, recordTitle, partLabel, type ReadingInput, type ReadingSource } from './digest-source.js';
 import { digestStore, askHash, makeReading, type Reading } from './digest-store.js';
 import { askDigest, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
 import type { PlanOpened } from './plan-view.js';
@@ -86,7 +86,7 @@ export function createReturnView(host: ReturnHost) {
       host.kv.setItem(PASTE_DRAFT_KEY, JSON.stringify(all));
     } catch { /* this tab keeps it */ }
   }
-  const partName = (id: string) => host.current()?.view.parts.find(p => p.id === id)?.name ?? '부분';
+  const partName = (id: string) => { const v = host.current()?.view; return v ? partLabel(v, id) : '부분'; };
 
   /* ---------- material and the reading of it ---------- */
   function sources(): ReadingSource[] {
@@ -236,7 +236,7 @@ export function createReturnView(host: ReturnHost) {
     const titles = [...new Set(all.map(({ x }) => x.source?.recordId))];
     const head = !only && titles.length === 1 && all[0]!.x.source
       ? h('button', { type: 'button', class: 'rr-rec-src', title: '붙여넣은 원문 보기', onclick: () => openSource(all[0]!.x.source!, from, null) }, all[0]!.x.source.title) : null;
-    return h('section', { class: 'rr-sec rr-records' }, h('h3', {}, only ? '이 기록에서 읽은 것' : '붙여넣은 기록에서', head),
+    return h('section', { class: 'rr-sec rr-records' }, h('h3', {}, only ? '이 기록에서 읽은 것' : '붙여넣은 기록에서'), head,
       ...all.map(({ x, n }) => recordItem(x, n, from)));
   }
   function chipFor(id: string, r: Reading | null, from: 'now' | 'previous') {
@@ -412,7 +412,8 @@ export function createReturnView(host: ReturnHost) {
       h('p', { class: 'rr-source-kind' }, h('span', { class: 'rr-kind k-record' }, DIGEST_KIND_LABEL.record), kept ? h('span', {}, `붙여넣음 ${fullTime(kept.at)}`) : null),
       h('h3', { title: '원문의 첫 줄이에요' }, src.title),
       ctx ? h('p', { class: 'rr-context' }, h('span', {}, '붙일 때 보던 부분'), partChip(ctx)) : null,
-      read ?? h('p', { class: 'rr-lead' }, s?.pending ? '읽는 중이에요…' : '아직 이 기록을 읽지 않았어요.'),
+      // Arrived by a quote: the original, with the quote marked, is what this view is for (the readings are one step back).
+      quote ? null : read ?? h('p', { class: 'rr-lead' }, s?.pending ? '읽는 중이에요…' : '아직 이 기록을 읽지 않았어요.'),
       h('blockquote', { class: 'rr-quote rr-raw' }, ...quoted(kept?.text ?? src.text, quote)),
       sentTo !== undefined && sentTo < (kept?.text ?? src.text).length ? h('p', { class: 'fine' }, `읽을 때 앞 ${sentTo.toLocaleString()}자만 보내요 · 전체 ${(kept?.text ?? src.text).length.toLocaleString()}자`) : null)];
   }
@@ -443,8 +444,9 @@ export function createReturnView(host: ReturnHost) {
 
   function render() {
     const o = host.current(); if (!s || !o || o.key !== s.key) return;
-    const back = (label: string) => h('button', { type: 'button', class: 'rr-back', onclick: backToReading },
-      h('span', { 'aria-hidden': 'true' }, '←'), label);
+    // The way back stays at the top of the pane while a long original scrolls under it.
+    const back = (label: string) => h('div', { class: 'rr-backbar' }, h('button', { type: 'button', class: 'rr-back', onclick: backToReading },
+      h('span', { 'aria-hidden': 'true' }, '←'), label));
     const body = h('div', { class: 'lens-body rr-body' });
     if (s.view.kind === 'paste') {
       // Re-rendering keeps the caret where the person was typing.
