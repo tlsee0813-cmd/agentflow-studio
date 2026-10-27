@@ -182,7 +182,7 @@ function savePositions(o) {
 }
 /* Scope = the part whose inside is shown (null = whole project). Each scope keeps its own camera for the way back. */
 let scope = null;
-let lay = { boxes: new Map(), edges: [], bounds: { x: 0, y: 0, w: 0, h: 0 } };
+let lay = { boxes: new Map(), edges: [], heads: [], bounds: { x: 0, y: 0, w: 0, h: 0 } };
 const cameras = new Map();
 const expandState = new Map();
 const camKey = (o, s) => `${o.project.id}|${s ?? ''}`;
@@ -930,6 +930,9 @@ function relLabel(kind, out, subject = '부분') {
         return out ? `${it}${subject === '부분' ? '이' : '가'} 필요로 함` : `${it}${subject === '부분' ? '을' : '를'} 필요로 함`;
     if (kind === 'flow')
         return out ? `${it}${subject === '부분' ? '이' : '가'} 넘겨줌` : `${it}에 넘겨줌`;
+    // A plain relation has no direction to read: one neutral verb, whichever end was recorded first.
+    if (kind === 'related')
+        return verb;
     return out ? `${verb} →` : `← ${verb}`;
 }
 /** Relations of one part (or one scope), grouped by verb and direction: what it uses before what uses it. */
@@ -937,13 +940,16 @@ function relationGroups(ends, subject = '부분') {
     const order = ['flow', 'needs', 'shares', 'related'], groups = new Map();
     const sorted = [...ends].sort((a, b) => Number(b.out) - Number(a.out) || order.indexOf(a.r.kind) - order.indexOf(b.r.kind));
     for (const x of sorted) {
-        const k = `${x.out}|${x.r.kind}`;
+        const k = `${x.r.kind === 'related' ? '' : x.out}|${x.r.kind}`;
         const g = groups.get(k) ?? { label: relLabel(x.r.kind, x.out, subject), list: [] };
         g.list.push(x);
         groups.set(k, g);
     }
     return [...groups.values()];
 }
+/** The direction mark of a relation row: from or to this end; none for a plain relation, which only says the two are related. */
+const dirMark = (kind, out) => (kind === 'related' ? '–' : out ? '→' : '←');
+const dirTitle = (kind, out) => (kind === 'related' ? '방향 없는 관련' : out ? '이 부분에서 나감' : '이 부분으로 들어옴');
 /** A part's line on the map: the state only when it says something. 'plan' (no request yet) stays quiet here; the inspector
  * still tells "no records" apart from "a planned note only". */
 function metaLine(p, last) {
@@ -985,7 +991,8 @@ function renderSpace(cameraMode = 'fit', planOverlay = true) {
         const fa = frames(e.from), inner = [...frames(e.to)].some(f => fa.has(f));
         const g = svg('g', { class: `edge k-${e.kind}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
         // No text on the map: the meaning shows on hover (tip) and in the selected part's 관련 부분.
-        g.append(svg('path', { class: 'edge-line', 'marker-end': 'url(#arrow)', 'marker-start': 'url(#dot)' }), svg('path', { class: 'edge-hit' }));
+        // A plain relation ends in the same dot at both ends: it is drawn, not directed.
+        g.append(svg('path', { class: 'edge-line', 'marker-end': e.kind === 'related' ? 'url(#dot)' : 'url(#arrow)', 'marker-start': 'url(#dot)' }), svg('path', { class: 'edge-hit' }));
         edges.append(g);
     }
     world.append(edges);
@@ -1011,7 +1018,8 @@ function renderSpace(cameraMode = 'fit', planOverlay = true) {
     for (const b of boxes) {
         if (b.kind === 'ghost') {
             const id = b.id.slice(6), p = partOf(o, id), path = partPath(view, id).map(x => x.name);
-            world.append(h('button', { type: 'button', class: 'ghost', 'data-box': b.id, 'data-part-ref': id, title: `이 범위 밖 · ${path.join(' › ')}`, onclick: () => go(o.key, id, p.parentId) }, h('span', { class: 'ghost-tag' }, '밖'), h('span', { class: 'ghost-name' }, p.name)));
+            // Its whole name (the layout sized the card for it); where it belongs reads once over its run (.ghost-head).
+            world.append(h('button', { type: 'button', class: 'ghost', 'data-box': b.id, 'data-part-ref': id, title: `이 범위 밖 · ${path.join(' › ')}`, onclick: () => go(o.key, id, p.parentId) }, h('span', { class: 'ghost-name' }, p.name)));
             continue;
         }
         const p = partOf(o, b.id), of = owner(p);
@@ -1079,6 +1087,25 @@ function renderSpace(cameraMode = 'fit', planOverlay = true) {
 /** Geometry only (also during a drag): boxes and edge paths from the current layout. */
 function positionWorld() {
     const world = $('world');
+    // Heads of the outside partners' runs follow their layout (it can change while a part is dragged).
+    const heads = new Map(lay.heads.map(x => [x.key, x]));
+    world.querySelectorAll('.ghost-head').forEach(el => {
+        const g = heads.get(el.dataset.head);
+        el.hidden = !g;
+        if (!g)
+            return;
+        el.style.left = `${g.x}px`;
+        el.style.top = `${g.y}px`;
+        el.style.width = `${g.w}px`;
+    });
+    for (const g of lay.heads)
+        if (!world.querySelector(`.ghost-head[data-head="${CSS.escape(g.key)}"]`)) {
+            const el = h('div', { class: 'ghost-head', 'data-head': g.key }, g.text);
+            el.style.left = `${g.x}px`;
+            el.style.top = `${g.y}px`;
+            el.style.width = `${g.w}px`;
+            world.append(el);
+        }
     world.querySelectorAll('[data-box]').forEach(el => {
         const b = lay.boxes.get(el.dataset.box);
         if (!b)
@@ -1121,6 +1148,15 @@ function placeEdgeLabels() {
     const few = !selected && !planView.isOpen() && lay.edges.length <= 6;
     // At rest, lines of one kind meeting the same part share one verb (the first of them carries it).
     const seenEnd = new Set();
+    // The selection's lines of one kind and one direction that leave it on one side share one verb, set where they leave it;
+    // every line stays its own (its tip and the pane keep each relation and its reason). The verb of such a fan carries no number:
+    // a number on a verb reads as the relations one line holds, and the pane already counts the fan.
+    const sel = selected ? lay.boxes.get(selected) : undefined;
+    const side = (e) => { const far = lay.boxes.get(e.from === selected ? e.to : e.from); return !sel || !far ? '' : far.x + far.w / 2 < sel.x + sel.w / 2 ? 'l' : 'r'; };
+    const selKey = (e) => `${e.kind}|${e.kind === 'related' ? '' : e.from === selected}|${side(e)}`;
+    const fans = new Map(), seenSel = new Set();
+    world.querySelectorAll('.edge.on').forEach(g => { const e = lay.edges.find(x => x.key === g.dataset.key); if (e)
+        fans.set(selKey(e), (fans.get(selKey(e)) ?? 0) + 1); });
     const lines = [...world.querySelectorAll('.edge')].filter(g => {
         if (g.classList.contains('on'))
             return true;
@@ -1142,11 +1178,15 @@ function placeEdgeLabels() {
         const e = lay.edges.find(x => x.key === g.dataset.key), path = g.querySelector('.edge-line');
         if (!e || !path)
             continue;
-        const label = h('span', { class: `edge-label k-${e.kind}${g.classList.contains('on') ? ' on' : ''}` }, `${REL_LABEL[e.kind] ?? e.kind}${e.ids.length > 1 ? ` ${e.ids.length}` : ''}`);
+        const on = g.classList.contains('on'), fan = on && (fans.get(selKey(e)) ?? 0) > 1;
+        if (on && seenSel.has(selKey(e)))
+            continue;
+        const label = h('span', { class: `edge-label k-${e.kind}${on ? ' on' : ''}` }, `${REL_LABEL[e.kind] ?? e.kind}${!fan && e.ids.length > 1 ? ` ${e.ids.length}` : ''}`);
         box.append(label);
         const w = label.offsetWidth, hh = label.offsetHeight, len = path.getTotalLength();
         let spot = null;
-        for (const t of [0.5, 0.4, 0.6, 0.3, 0.7, 0.22, 0.78]) {
+        const near = e.to === selected ? [0.86, 0.8, 0.74, 0.68, 0.6, 0.5] : [0.14, 0.2, 0.26, 0.32, 0.4, 0.5];
+        for (const t of fan ? near : [0.5, 0.4, 0.6, 0.3, 0.7, 0.22, 0.78]) {
             const q = path.getPointAtLength(len * t), r = { x: q.x - w / 2, y: q.y - hh / 2, w, h: hh };
             if (clear(r)) {
                 spot = r;
@@ -1160,6 +1200,8 @@ function placeEdgeLabels() {
         label.style.left = `${spot.x}px`;
         label.style.top = `${spot.y}px`;
         blocks.push(spot);
+        if (on)
+            seenSel.add(selKey(e));
     }
 }
 function renderRecent() {
@@ -1483,7 +1525,7 @@ function renderScopeLens() {
     l.classList.remove('compare');
     l.classList.add('scope-read');
     readingFor = [];
-    l.replaceChildren(h('header', { class: 'lens-head' }, h('div', { class: 'lens-path' }, h('span', {}, sp ? '이 범위' : '프로젝트'), ...path.flatMap(x => [h('span', { 'aria-hidden': 'true' }, '›'), h('a', { href: hashFor(o.key, null, x.id) }, x.name)])), h('h2', { id: 'lens-title' }, sp ? sp.name : o.project.name), h('div', { class: 'head-tools' }, h('button', { type: 'button', class: 'close', 'aria-label': '범위 설명 닫기', title: '닫기 (Esc)', onclick: closeScopeReading }, '×'))), h('div', { class: 'lens-body' }, h('div', { class: 'lens-desc' }, text ? h('p', { class: 'lens-text' }, text) : null, h('p', { class: 'lens-src' }, h('span', {}, sp ? '적어 둔 설명 · 원문 그대로' : '프로젝트 설명 · 원문 그대로'))), ...outside.map(g => h('section', { class: 'lens-ports' }, h('h3', {}, g.label, h('small', {}, String(g.list.length))), h('ul', {}, ...g.list.map(x => h('li', {}, h('button', { type: 'button', class: 'port', 'data-far': x.far, onclick: (e) => { follow(x.far, x.r, e); go(o.key, x.far, null); } }, h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, x.out ? '→' : '←'), h('strong', {}, partOf(o, x.far)?.name ?? '부분')), x.r.note ? h('span', { class: 'port-note' }, x.r.note) : null)))))), kids.length ? h('section', { class: 'lens-ports' }, h('h3', {}, sp ? '안의 부분' : '최상위 구성', h('small', {}, String(kids.length))), h('ul', {}, ...kids.map(k => h('li', {}, h('button', { type: 'button', class: 'port', onclick: () => go(o.key, k.id) }, h('span', { class: 'port-top' }, h('strong', {}, k.name), k.childIds.length ? h('span', { class: 'port-count' }, `안쪽 ${k.childIds.length}`) : null), mapLead(o.view, k.id) ? h('span', { class: 'port-note' }, mapLead(o.view, k.id)) : null))))) : null));
+    l.replaceChildren(h('header', { class: 'lens-head' }, h('div', { class: 'lens-path' }, h('span', {}, sp ? '이 범위' : '프로젝트'), ...path.flatMap(x => [h('span', { 'aria-hidden': 'true' }, '›'), h('a', { href: hashFor(o.key, null, x.id) }, x.name)])), h('h2', { id: 'lens-title' }, sp ? sp.name : o.project.name), h('div', { class: 'head-tools' }, h('button', { type: 'button', class: 'close', 'aria-label': '범위 설명 닫기', title: '닫기 (Esc)', onclick: closeScopeReading }, '×'))), h('div', { class: 'lens-body' }, h('div', { class: 'lens-desc' }, text ? h('p', { class: 'lens-text' }, text) : null, h('p', { class: 'lens-src' }, h('span', {}, sp ? '적어 둔 설명 · 원문 그대로' : '프로젝트 설명 · 원문 그대로'))), ...outside.map(g => h('section', { class: 'lens-ports' }, h('h3', {}, g.label, h('small', {}, String(g.list.length))), h('ul', {}, ...g.list.map(x => h('li', {}, h('button', { type: 'button', class: 'port', 'data-far': x.far, onclick: (e) => { follow(x.far, x.r, e); go(o.key, x.far, null); } }, h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, dirMark(x.r.kind, x.out)), h('strong', {}, partOf(o, x.far)?.name ?? '부분')), x.r.note ? h('span', { class: 'port-note' }, x.r.note) : null)))))), kids.length ? h('section', { class: 'lens-ports' }, h('h3', {}, sp ? '안의 부분' : '최상위 구성', h('small', {}, String(kids.length))), h('ul', {}, ...kids.map(k => h('li', {}, h('button', { type: 'button', class: 'port', onclick: () => go(o.key, k.id) }, h('span', { class: 'port-top' }, h('strong', {}, k.name), k.childIds.length ? h('span', { class: 'port-count' }, `안쪽 ${k.childIds.length}`) : null), mapLead(o.view, k.id) ? h('span', { class: 'port-note' }, mapLead(o.view, k.id)) : null))))) : null));
     l.hidden = false;
     syncMapArea();
 }
@@ -1521,7 +1563,7 @@ function renderLens() {
         const far = partOf(o, x.far), near = x.near !== part.id ? partOf(o, x.near)?.name : null, farRep = drawnRep(o, x.far);
         const where = farRep === x.far ? null : farRep ? `${partOf(o, farRep).name} 안` : partPath(o.view, x.far).slice(0, -1).map(q => q.name).join(' › ') || o.project.name;
         const came = x.far === cameFrom;
-        return h('li', {}, h('button', { type: 'button', class: `port${came ? ' came' : ''}`, 'data-far': x.far, title: `${far.name}${toParticle(far.name)} 가기${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e) => { follow(x.far, x.r, e); go(o.key, x.far); } }, h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, x.out ? '→' : '←'), h('strong', {}, far.name), came ? h('span', { class: 'port-came' }, '출발') : null), near || where ? h('span', { class: 'port-where' }, [near ? `안쪽 ‘${near}’에서` : '', where ? `${where}` : ''].filter(Boolean).join(' · ')) : null, x.r.note ? h('span', { class: 'port-note' }, x.r.note) : null));
+        return h('li', {}, h('button', { type: 'button', class: `port${came ? ' came' : ''}`, 'data-far': x.far, title: `${far.name}${toParticle(far.name)} 가기${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e) => { follow(x.far, x.r, e); go(o.key, x.far); } }, h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, dirMark(x.r.kind, x.out)), h('strong', {}, far.name), came ? h('span', { class: 'port-came' }, '출발') : null), near || where ? h('span', { class: 'port-where' }, [near ? `안쪽 ‘${near}’에서` : '', where ? `${where}` : ''].filter(Boolean).join(' · ')) : null, x.r.note ? h('span', { class: 'port-note' }, x.r.note) : null));
     };
     const ports = relationGroups(ends).map(g => h('section', { class: 'lens-ports' }, h('h3', {}, g.label, h('small', {}, String(g.list.length))), h('ul', {}, ...g.list.slice(0, 8).map(port)), g.list.length > 8 ? h('button', { type: 'button', class: 'link-button', onclick: () => openSheet() }, `${g.list.length - 8}개 더 · 자세히`) : null));
     // Inside: on the map already when the part is an open frame; else its names, and the explicit way in.
@@ -1548,8 +1590,8 @@ function markSelection(partId) {
         if (layer && el.parentNode !== layer)
             layer.append(el);
         el.classList.toggle('on', on);
-        const line = el.querySelector('.edge-line');
-        line.setAttribute('marker-end', on ? 'url(#arrow-on)' : 'url(#arrow)');
+        const line = el.querySelector('.edge-line'), plain = el.classList.contains('k-related');
+        line.setAttribute('marker-end', plain ? (on ? 'url(#dot-on)' : 'url(#dot)') : on ? 'url(#arrow-on)' : 'url(#arrow)');
         line.setAttribute('marker-start', on ? 'url(#dot-on)' : 'url(#dot)');
         if (on)
             related.add(el.dataset.from === partId ? el.dataset.to : el.dataset.from);
@@ -1636,7 +1678,7 @@ function renderPanel(scrollTop) {
             rel.append(h('p', { class: 'sub' }, `연결 ${links.length}`), h('ul', { class: 'links' }, ...links.map(({ r, out, near, far }) => {
                 const other = o.view.parts.find(x => x.id === far), inner = near !== part.id ? partOf(o, near)?.name : null;
                 const where = [inner ? `안쪽 ‘${inner}’에서` : '', insideScope(o, other.id) ? '' : `${partPath(o.view, other.id).slice(0, -1).map(x => x.name).join(' › ') || o.project.name} 안`].filter(Boolean).join(' · ');
-                return h('li', {}, h('a', { href: hashFor(o.key, other.id, scope), 'data-far': other.id, onclick: (e) => follow(other.id, r, e) }, h('span', { class: 'dir', title: out ? '이 부분에서 나감' : '이 부분으로 들어옴' }, out ? '→' : '←'), h('strong', {}, other.name), h('span', { class: 'rel-kind' }, REL_LABEL[r.kind] ?? r.kind)), where ? h('span', { class: 'link-where' }, where) : null, r.note ? h('span', { class: 'link-note' }, r.note) : null);
+                return h('li', {}, h('a', { href: hashFor(o.key, other.id, scope), 'data-far': other.id, onclick: (e) => follow(other.id, r, e) }, h('span', { class: 'dir', title: dirTitle(r.kind, out) }, dirMark(r.kind, out)), h('strong', {}, other.name), h('span', { class: 'rel-kind' }, REL_LABEL[r.kind] ?? r.kind)), where ? h('span', { class: 'link-where' }, where) : null, r.note ? h('span', { class: 'link-note' }, r.note) : null);
             })));
         body.append(rel);
     }
@@ -2331,7 +2373,7 @@ function bindEdgeHints() {
             if (!edge)
                 return;
             g.classList.add('near');
-            tip.replaceChildren(h('strong', {}, `${nameOf(edge.from)} → ${nameOf(edge.to)}`), h('span', { class: 'tip-kind' }, `${REL_LABEL[edge.kind] ?? edge.kind}${edge.agg ? ` · 안쪽 관계 ${edge.ids.length}개의 요약 · 선택하면 실제 끝점` : edge.ids.length > 1 ? ` · 관계 ${edge.ids.length}개를 한 선으로 묶음` : ''}`), ...edge.notes.slice(0, 3).map(n => h('span', {}, n)));
+            tip.replaceChildren(h('strong', {}, `${nameOf(edge.from)} ${edge.kind === 'related' ? '—' : '→'} ${nameOf(edge.to)}`), h('span', { class: 'tip-kind' }, `${REL_LABEL[edge.kind] ?? edge.kind}${edge.agg ? ` · 안쪽 관계 ${edge.ids.length}개의 요약 · 선택하면 실제 끝점` : edge.ids.length > 1 ? ` · 관계 ${edge.ids.length}개를 한 선으로 묶음` : ''}`), ...edge.notes.slice(0, 3).map(n => h('span', {}, n)));
             tip.hidden = false;
             place(e);
             return;
