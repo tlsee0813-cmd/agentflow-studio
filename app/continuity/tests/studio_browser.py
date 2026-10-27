@@ -1388,7 +1388,11 @@ def stale_request_flow(browser, base):
         page.locator("#src-title").fill("저장 함수 발췌")
         page.locator("#src-text").fill("save.ts: 같은 이름이 있으면 덮어쓴다.")
         page.locator("#src-basis").fill("main save.ts")
+        fields = page.evaluate("() => ['src-title', 'src-text', 'src-basis'].map(id => document.getElementById(id)?.value ?? null)")
         page.locator(".pp-add").get_by_role("button", name="추가").click()
+        # The material must be added as typed; on failure say what the fields held and what the form answered.
+        if page.locator(".pp-add").count():
+            raise AssertionError(f"material not added: fields={fields} message={page.locator('.pp-add .form-msg').inner_text()!r}")
     page.get_by_role("button", name=re.compile("읽는 자료")).click()
     add_material()
     plan_reply(held[0], "덮어쓰기 막기")
@@ -1417,6 +1421,34 @@ def stale_request_flow(browser, base):
     page.locator("#plan-entry").click()
     page.locator(".ps-more").click()
     expect(make).to_be_enabled()
+    # A late frame must not move focus into a field being typed in (Windows CI: the form was focused one frame after it
+    # rendered; on a slow runner that landed in the text field mid-entry, the text went into the title and the material
+    # was refused). Frames are held here and run at the worst moment: after focus has moved on to the text field.
+    slow = browser.new_context(viewport={"width": 1280, "height": 720})
+    slow.add_init_script("{ window.__frames = []; window.requestAnimationFrame = cb => window.__frames.push(cb); }")
+    page = slow.new_page()
+    page.goto(base + "/")
+    page.locator("#new-open").click()
+    page.locator("#new-name").fill("느린 화면")
+    page.locator("#new-form").get_by_role("button", name="만들기").click()
+    page.locator("#part-name").fill("변환")
+    page.get_by_role("button", name="만들기").click()
+    page.keyboard.press("Escape")
+    page.locator("#plan-entry").click()
+    page.get_by_role("button", name=re.compile("읽는 자료")).click()
+    page.evaluate("() => window.__frames.splice(0).forEach(cb => cb(performance.now()))")
+    page.get_by_role("button", name="+ 자료 추가").click()
+    expect(page.locator("#src-title")).to_be_focused()  # focused by the click itself, not a frame later
+    page.keyboard.type("저장 함수 발췌")
+    page.locator("#src-text").focus()
+    page.evaluate("() => window.__frames.splice(0).forEach(cb => cb(performance.now()))")
+    page.keyboard.type("save.ts: 같은 이름이 있으면 덮어쓴다.")
+    page.locator("#src-basis").fill("main save.ts")
+    fields = page.evaluate("() => ['src-title', 'src-text', 'src-basis'].map(id => document.getElementById(id)?.value ?? null)")
+    assert fields == ["저장 함수 발췌", "save.ts: 같은 이름이 있으면 덮어쓴다.", "main save.ts"], fields
+    page.locator(".pp-add").get_by_role("button", name="추가").click()
+    expect(page.locator(".pp-extra")).to_contain_text("저장 함수 발췌")
+    slow.close()
     # The converter example: material taken from the return reading and added to the draft is read by the next analysis and
     # kept in its plan, so the plan made from it is current (the request comes on).
     page = context.new_page()
@@ -1555,6 +1587,82 @@ def actual_reply_flow(browser, base):
     context.close()
 
 
+def stale_work_flow(browser, base):
+    """EXP65: writing in the wide comparison makes its ways to the map follow at once: no part reading of the earlier plan
+    (a forced click changes nothing, the editor and caret stay), and an honest way out to the current map with the draft
+    kept; reopening finds the same draft; the analysed sentence written back gives the ways back."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    page.goto(base + "/#/p/ex-converter")
+    before = page.locator("#world").evaluate(CAMERA)
+    page.locator("#plan-entry").click()
+    page.locator(".ps-more").click()
+    work, maps, back = page.locator("#plan-panel.work"), page.locator("#plan-panel .pw-map"), page.locator("#pw-back")
+    expect(back).to_have_text("지도로 돌아가기")
+    expect(maps.first).to_be_enabled()
+    # Cloud's sequence on '성공 유지·실패 모음': the whole sentence plus a line, the caret moved once, the second part's way to
+    # the map: the way is off at once and the caret stays where it was put.
+    page.locator(".pw-pick", has_text="성공 유지·실패 모음").click()
+    page.locator("#plan-panel").get_by_role("button", name="문장 고치기").click()
+    area = page.locator("#plan-intent")
+    original = area.input_value()
+    area.fill(original + "\n사용자 검토 초안")
+    page.keyboard.press("ArrowLeft")
+    at = area.evaluate("a => [a.selectionStart, a.selectionEnd]")
+    second = page.locator(".pw-part").nth(1).locator(".pw-map")
+    expect(second).to_be_disabled()
+    second.evaluate("b => { b.disabled = false; b.click(); }")
+    expect(work).to_be_visible()
+    assert area.evaluate("a => [a.selectionStart, a.selectionEnd]") == at, at
+    expect(back).to_have_text("현재 지도로 (초안 유지)")
+    area.fill(original)
+    expect(area).to_be_focused()
+    area.evaluate("a => { a.dataset.same = '1'; a.setSelectionRange(a.value.length, a.value.length); }")
+    page.keyboard.type(" 이름 충돌도 막아줘.")
+    draft = area.input_value()
+    # At once, without a re-render: the ways to the map are off with their reason, the way out says what it does.
+    for i in range(maps.count()):
+        expect(maps.nth(i)).to_be_disabled()
+    expect(back).to_have_text("현재 지도로 (초안 유지)")
+    expect(page.locator(".pw-stale")).to_be_visible()
+    expect(page.locator("#plan-stale")).to_be_visible()
+    # A forced click on an outdated '지도에서 보기' changes nothing: same workspace, same editor element, draft, caret, focus.
+    maps.first.evaluate("b => { b.disabled = false; b.click(); }")
+    expect(work).to_be_visible()
+    expect(maps.first).to_be_disabled()
+    assert area.evaluate("a => a.dataset.same === '1' && document.activeElement === a && a.selectionStart === a.value.length"), "editor kept"
+    expect(area).to_have_value(draft)
+    # Reading a source re-renders the workspace: the editor keeps its caret.
+    area.evaluate("a => a.setSelectionRange(3, 3)")
+    page.locator("#plan-panel .co-ref").first.click()
+    expect(page.locator(".pw-rail-head h3")).to_contain_text("근거")
+    assert page.locator("#plan-intent").evaluate("a => a.selectionStart === 3 && a.selectionEnd === 3")
+    page.locator("#pw-rail-back").click()
+    # The honest way out: the current map, the plan closed with the draft kept and said so.
+    back.click()
+    expect(page.locator("#plan-panel")).to_be_hidden()
+    expect(page.locator("#plan-strip")).to_be_hidden()
+    expect(page.locator("#toast")).to_contain_text("초안과 변경안은 그대로 남아 있어요")
+    page.wait_for_timeout(300)
+    assert page.locator("#world").evaluate(CAMERA) == before
+    assert page.evaluate("[...document.getElementById('space').children].every(e => !e.inert)")
+    # Reopening finds the same draft, still ahead of the plan; the earlier plan's request stays off.
+    page.locator("#plan-entry").click()
+    expect(work).to_be_visible()
+    expect(page.locator("#plan-intent")).to_have_value(draft)
+    expect(page.locator("#plan-make")).to_be_disabled()
+    expect(maps.first).to_be_disabled()
+    # The analysed sentence written back: the ways to the map come back at once, and a part reads on the map.
+    page.locator("#plan-intent").fill(original)
+    expect(maps.first).to_be_enabled()
+    expect(back).to_have_text("지도로 돌아가기")
+    maps.first.click()
+    expect(work).to_be_hidden()
+    expect(page.locator("#lens .callout")).to_be_visible()
+    expect(page.locator("#lens .ps-wide")).to_have_text("‹ 넓은 비교로")
+    context.close()
+
+
 def return_failure_flow(browser, base):
     """A failed return reading: a short error and the material itself, never a substitute reading; asking again works."""
     material = json.loads((ROOT.parents[1] / "docs/cycles/2026-10-27-return-experience-63/MATERIAL.json").read_text(encoding="utf-8"))
@@ -1628,6 +1736,7 @@ def main():
             return_flow(browser, base, oss_fixtures()); print("ok  return reading: no call on open, one per material, exact quote and back, draft never overwritten, Node-RED plan without result")
             stale_request_flow(browser, base); print("ok  request only from the analysis of what is written now: typed, forced, A-B-A, cancelled and outdated replies, material")
             actual_reply_flow(browser, base); print("ok  wide comparison of an actual reply without presentation; scope reviews outliving a material change; four changes")
+            stale_work_flow(browser, base); print("ok  writing in the wide comparison: map ways off at once (forced click a no-op, caret kept), honest way out, draft on reopen")
             proc, base = start("code"); procs.append(proc); code_flow(browser, base); print("ok  access code kept from an input event")
             proc, base = start("fail"); procs.append(proc); failure_flow(browser, base); print("ok  provider failure -> short error -> retry")
             proc, base = start("fail"); procs.append(proc); return_failure_flow(browser, base); print("ok  return reading failure -> short error and the material -> asking again")

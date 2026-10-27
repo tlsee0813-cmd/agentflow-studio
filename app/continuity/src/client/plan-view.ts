@@ -129,7 +129,8 @@ export function createPlanView(host: PlanHost) {
       sheet: null, sources: false, adding: false, resultFor: bundle.snapshots.at(-1)?.id ?? null, addForm: false, copyMsg: null, fileMsg: null, ret: host.capture() };
     if (unreadable) s.storeMsg = null;
     moveTarget = true; frameWhole = true; host.chrome(); render();
-    requestAnimationFrame(() => (document.getElementById('plan-intent') ?? document.getElementById('plan-title'))?.focus());
+    // Focus right after the render that made the field (never a frame later, when it can land in a field being typed in).
+    (document.getElementById('plan-intent') ?? document.getElementById('plan-title'))?.focus();
   }
   /** Closing keeps the draft and the plan; the map goes back to the latest current view with the earlier selection and camera. */
   function close(restore = true) {
@@ -478,7 +479,7 @@ export function createPlanView(host: PlanHost) {
     for (const k of Object.keys(s.bundle.attached)) if (!kept.has(s.bundle.attached[k]!)) delete s.bundle.attached[k];
     s.sheet = snap.id; s.resultFor = snap.id; s.copyMsg = null;
     persist(); render();
-    requestAnimationFrame(() => document.getElementById('plan-copy')?.focus());
+    document.getElementById('plan-copy')?.focus();
   }
   function attach(snapshot: RequestSnapshot, obs: ResultObservation[]) {
     if (!s) return;
@@ -755,7 +756,7 @@ export function createPlanView(host: PlanHost) {
     const item = itemOf((st.focus as { id: string }).id)!;
     panel.hidden = false; panel.classList.add('work'); panel.dataset.rail = st.rail;
     const by = st.bundle.by, origin = by?.kind === 'example' ? '작성된 예제 분석' : by?.kind === 'ai' ? `AI 분석 · ${by.model} · ${ago(by.at)}` : '분석';
-    const writing = st.editing || stale() || !!st.pending, leave = !stale() && !st.pending && !st.scoping;
+    const writing = st.editing || stale() || !!st.pending;
     // A short heading: authored for the example's own sentence, otherwise what the plan holds (no invented summary).
     const heading = by?.kind === 'example' && st.key === CONVERTER_KEY && p.intent === CONVERTER_INTENT ? CONVERTER_HEADING : `변경안 · ${p.analysis.items.length}가지 변화`;
     const lead = firstSentence(p.analysis.summary), more = p.analysis.summary.trim().slice(lead.length).trim();
@@ -768,13 +769,12 @@ export function createPlanView(host: PlanHost) {
       newerNote(o, p),
       h('div', { class: 'pw-head-tools' },
         writing ? null : h('button', { type: 'button', class: 'secondary small', onclick: () => edit() }, '문장 고치기'),
-        leave ? h('button', { type: 'button', class: 'secondary small pw-back', title: '지도로 (Esc) · 카메라와 읽던 변경은 그대로예요', onclick: leaveWork }, '지도로 돌아가기')
-          : h('button', { type: 'button', class: 'close', 'aria-label': '변경 구상 닫고 현재 지도로', title: '닫기 · 초안은 남아요', onclick: () => close() }, '×')));
+        backButton(h('button', { type: 'button', id: 'pw-back', class: 'secondary small pw-back', onclick: () => (canLeave() ? leaveWork() : close()) }) as HTMLButtonElement)));
     // The analysis's first finding leads; the rest of its summary and what it is (not a run) open quietly.
     const found = h('section', { class: 'pw-found', 'aria-label': '분석이 찾은 것' }, h('p', { class: 'pw-lead' }, h('span', { class: 'pw-found-k' }, '분석이 찾은 것'), lead),
       h('details', { class: 'pw-found-more' }, h('summary', {}, more ? '분석 전체' : '이 정리는'), more ? h('p', {}, more) : null, h('p', { class: 'pw-note' }, '변경안을 읽은 정리예요. 실행해서 확인한 결과는 아니에요.')));
-    const open = (ref: string) => { st.rail = 'source'; st.railSource = ref; render(); requestAnimationFrame(() => document.getElementById('pw-rail-back')?.focus()); };
-    const pick = (id: string) => { st.focus = { kind: 'item', id }; st.evidenceFor = null; render(); requestAnimationFrame(() => document.querySelector<HTMLElement>('.pw-pick[aria-current="true"]')?.focus()); };
+    const open = (ref: string) => { st.rail = 'source'; st.railSource = ref; render(); document.getElementById('pw-rail-back')?.focus(); };
+    const pick = (id: string) => { st.focus = { kind: 'item', id }; st.evidenceFor = null; render(); document.querySelector<HTMLElement>('.pw-pick[aria-current="true"]')?.focus(); };
     const list = h('nav', { class: 'pw-list', 'aria-label': '바뀌는 것' },
       h('div', { class: 'pw-list-head' }, h('span', {}, `바뀌는 것 ${p.analysis.items.length}`), h('span', { 'aria-hidden': 'true' }, '이번 요청에 포함')),
       h('ul', {}, ...p.analysis.items.map(i => {
@@ -789,9 +789,9 @@ export function createPlanView(host: PlanHost) {
     const boxes = host.boxes(), targets = itemTargets(item), near = nearImpacts(item).filter(x => !targets.includes(x.partId));
     const bareOne = !item.presentation?.length && targets.length === 1;
     const path = (id: string) => { const names: string[] = []; for (let q = o.view.parts.find(x => x.id === id)?.parentId, g = 0; q && g < 64; q = o.view.parts.find(x => x.id === q)?.parentId, g++) names.unshift(partName(q) ?? ''); return names.join(' › '); };
-    const toMap = (id: string, impact = false) => leave ? h('button', { type: 'button', class: 'link-button pw-map', onclick: () => showOnMap(item, id, impact) }, '지도에서 보기') : null;
+    const toMap = (id: string, impact = false) => mapButton(h('button', { type: 'button', class: 'link-button pw-map', onclick: () => showOnMap(item, id, impact) }, '지도에서 보기') as HTMLButtonElement);
     const detail = h('article', { class: `pw-detail${stale() ? ' is-stale' : ''}`, 'aria-labelledby': 'pw-item-title' },
-      stale() ? h('p', { class: 'pw-stale' }, '아래는 앞 문장과 자료로 만든 변경안이에요. 고친 내용은 아직 살펴보지 않았어요.') : null,
+      h('p', { class: 'pw-stale', hidden: !stale() }, '아래는 앞 문장과 자료로 만든 변경안이에요. 고친 내용은 아직 살펴보지 않았어요.'),
       h('h3', { id: 'pw-item-title', class: 'pw-item-title' }, item.title),
       // The change's description once: beside '지금' as the wanted result when the change has no pair of its own and one
       // target; otherwise a lead above the parts.
@@ -805,7 +805,10 @@ export function createPlanView(host: PlanHost) {
         h('ul', {}, ...near.map(x => h('li', {}, h('p', { class: 'pw-near-name' }, h('strong', {}, partName(x.partId) ?? '지금 지도에 없는 부분'), toMap(x.partId, true)), h('p', {}, x.reason), refLine(p, x.refs, open))))) : null);
     const main = h('div', { class: 'pw-main' }, head, writing ? intentSection(o) : null, found, h('div', { class: 'pw-body' }, list, detail));
     const rail = h('aside', { class: 'pw-rail', 'aria-label': '이번 요청' }, h('div', { class: 'pw-rail-body' }, ...railView(o, p, writing).filter((x): x is Node => !!x)), footer(o));
+    const typed = panel.querySelector<HTMLTextAreaElement>('#plan-intent'), caret = typed && was ? [typed.selectionStart, typed.selectionEnd, document.activeElement === typed] as const : null;
     panel.replaceChildren(main, rail);
+    const area = panel.querySelector<HTMLTextAreaElement>('#plan-intent');
+    if (area && caret) { area.setSelectionRange(caret[0], caret[1]); if (caret[2]) area.focus({ preventScroll: true }); }
     // The same change keeps where the person was in it; another change starts at its top; back from the map: as left.
     panel.querySelector('.pw-list')!.scrollTop = back?.list ?? prevList;
     panel.querySelector('.pw-detail')!.scrollTop = back ? back.detail : item.id === lastWorkItem ? prevDetail : 0;
@@ -822,7 +825,7 @@ export function createPlanView(host: PlanHost) {
   }
   /** The right column: by default what this request takes and the way to make it; a source, results or every source in its place. */
   function railView(o: PlanOpened, p: ChangePlan, writing: boolean): (Node | null)[] {
-    const st = s!, back = () => { st.rail = 'request'; st.railSource = null; render(); requestAnimationFrame(() => document.getElementById('plan-make')?.focus()); };
+    const st = s!, back = () => { st.rail = 'request'; st.railSource = null; render(); document.getElementById('plan-make')?.focus(); };
     const top = (title: string) => h('header', { class: 'pw-rail-head' }, h('button', { type: 'button', class: 'link-button', id: 'pw-rail-back', onclick: back }, '‹ 이번 요청으로'), h('h3', {}, title));
     if (st.rail === 'source') {
       const e = p.evidence.find(x => x.id === st.railSource);
@@ -873,31 +876,47 @@ export function createPlanView(host: PlanHost) {
   function edit() {
     if (!s) return;
     s.editing = true; s.rail = 'request'; render();
-    requestAnimationFrame(() => document.getElementById('plan-intent')?.focus());
+    document.getElementById('plan-intent')?.focus();
   }
   function openWork(itemId?: string) {
     if (!s || !plan()) return;
     if (itemId && itemOf(itemId)) s.focus = { kind: 'item', id: itemId };
     s.detail = true; s.fromWork = false; s.evidenceFor = null; s.strip = null; render();
-    requestAnimationFrame(() => document.querySelector<HTMLElement>('.pw-pick[aria-current="true"]')?.focus({ preventScroll: true }));
+    document.querySelector<HTMLElement>('.pw-pick[aria-current="true"]')?.focus({ preventScroll: true });
+  }
+  /** The change map can be read again only when the plan answers what is written and nothing is in flight. */
+  const canLeave = () => !!s && !stale() && !s.pending && !s.scoping;
+  /** The header's way out: back to the change map as it was; while the sentence or material is ahead of the plan (or work is
+   * in flight) the change map would show an earlier plan, so it closes the plan to the current map instead, the draft kept. */
+  function backButton(b: HTMLButtonElement): HTMLButtonElement {
+    const ok = canLeave();
+    b.textContent = ok ? '지도로 돌아가기' : '현재 지도로 (초안 유지)';
+    b.title = ok ? '지도로 (Esc) · 카메라와 읽던 변경은 그대로예요' : '변경 구상을 닫고 현재 지도로 가요. 고친 문장과 이전 변경안·요청문은 그대로 남아요. (Esc)';
+    return b;
+  }
+  /** A part on the map reads this plan there: off while the plan is behind what is written (the stale notice says why). */
+  function mapButton(b: HTMLButtonElement): HTMLButtonElement {
+    const ok = canLeave(); b.disabled = !ok;
+    b.title = ok ? '지도에서 이 부분과 이유를 읽어요' : '고친 문장이나 자료를 먼저 살펴본 뒤 지도에서 볼 수 있어요';
+    return b;
   }
   /** Back to the change map as it was left: same camera, mode, folds and pane; nothing is re-framed. */
   function leaveWork() {
     if (!s || stale() || s.pending || s.scoping) return;
     s.detail = false; s.editing = false; s.rail = 'request'; s.railSource = null; s.fromWork = false;
     render();
-    requestAnimationFrame(() => document.querySelector<HTMLElement>('#lens .ps-wide, #plan-strip .ps-more')?.focus());
+    document.querySelector<HTMLElement>('#lens .ps-wide, #plan-strip .ps-more')?.focus();
   }
   /** From the wide comparison to one part on the map: the part brought beside the pane, the pane reading this change there
    * (or, for a part to look at with it, that part's reasons), and the way back to the same row and scroll. */
   function showOnMap(item: PlanItem, id: string, impact: boolean) {
-    if (!s) return;
+    if (!s || !canLeave()) { syncStale(); return; }
     const panel = $('plan-panel');
     s.workAt = { list: panel.querySelector('.pw-list')?.scrollTop ?? 0, detail: panel.querySelector('.pw-detail')?.scrollTop ?? 0 };
     s.detail = false; s.editing = false; s.rail = 'request'; s.railSource = null; s.fromWork = true;
     if (impact) { s.focus = { kind: 'item', id: item.id }; render(); locate(id); }
     else chooseTarget(item, id);
-    requestAnimationFrame(() => document.querySelector<HTMLElement>('#lens .ps-wide')?.focus({ preventScroll: true }));
+    document.querySelector<HTMLElement>('#lens .ps-wide')?.focus({ preventScroll: true });
   }
   /** The plan's basis is fixed; newer records are announced, never merged into it. */
   function newerNote(o: PlanOpened, p: ChangePlan | null) {
@@ -1000,6 +1019,11 @@ export function createPlanView(host: PlanHost) {
     const make = document.getElementById('plan-make') as HTMLButtonElement | null;
     if (make) { make.disabled = !canRequest(); make.title = requestTitle(); }
     const note = document.getElementById('plan-make-note'); if (note) { note.textContent = why ? requestTitle() : ''; note.hidden = !why; }
+    // The workspace's ways to the map follow too: no part reading of an earlier plan, and an honest way out.
+    document.querySelectorAll<HTMLButtonElement>('#plan-panel .pw-map').forEach(mapButton);
+    const back = document.getElementById('pw-back') as HTMLButtonElement | null; if (back) backButton(back);
+    const detail = document.querySelector('#plan-panel .pw-detail'); detail?.classList.toggle('is-stale', !!why);
+    const banner = detail?.querySelector<HTMLElement>('.pw-stale'); if (banner) banner.hidden = !why;
   }
   function sourcesToggle(_o: PlanOpened) {
     const st = s!, p = plan(), n = (p && !stale() && !st.editing ? p.evidence : input()?.evidence ?? []).length, open = p ? st.rail === 'sources' : st.sources;
@@ -1022,7 +1046,7 @@ export function createPlanView(host: PlanHost) {
     const st = s!, extra = st.bundle.extra;
     const list = extra.length ? h('ul', { class: 'pp-extra' }, ...extra.map(e => h('li', {}, h('span', { class: `pp-kind k-${e.kind}` }, EVIDENCE_LABEL[e.kind]), h('span', {}, e.title),
       h('button', { type: 'button', class: 'link-button', 'aria-label': `‘${e.title}’ 자료 빼기`, onclick: () => { st.bundle = { ...st.bundle, extra: st.bundle.extra.filter(x => x.id !== e.id) }; persist(); render(); } }, '빼기')))) : null;
-    if (!st.adding) return h('div', { class: 'pp-addsrc' }, list, extra.length < 20 ? h('button', { type: 'button', class: 'link-button', onclick: () => { st.adding = true; render(); requestAnimationFrame(() => document.getElementById('src-title')?.focus()); } }, '+ 자료 추가') : null);
+    if (!st.adding) return h('div', { class: 'pp-addsrc' }, list, extra.length < 20 ? h('button', { type: 'button', class: 'link-button', onclick: () => { st.adding = true; render(); document.getElementById('src-title')?.focus(); } }, '+ 자료 추가') : null);
     const kind = h('select', { id: 'src-kind', 'aria-label': '자료 종류' }) as HTMLSelectElement;
     for (const [v, l] of [['report', '받은 작업 보고'], ['code', '프로젝트 자료·코드'], ['test', '검사 기록']] as const) kind.append(h('option', { value: v }, l));
     const title = h('input', { id: 'src-title', maxlength: '120', placeholder: '제목 · 예: 변환 함수 발췌', autocomplete: 'off' }) as HTMLInputElement;
@@ -1197,7 +1221,7 @@ export function createPlanView(host: PlanHost) {
       if (!s) open(); if (!s) return;
       if (plan()) { s.detail = true; s.editing = true; }
       render();
-      requestAnimationFrame(() => document.querySelector<HTMLElement>('.pp-proposal button')?.focus());
+      document.querySelector<HTMLElement>('.pp-proposal button')?.focus();
     },
     /** Open on the change whose targets include one of these parts, in preview on the same map. */
     focusParts: (ids: string[]) => {
