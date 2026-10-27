@@ -43,7 +43,7 @@ export interface ScopeLayout { boxes: Map<string, Box>; edges: Edge[]; heads: Gh
 
 interface Measure { w: number; h: number; ox: number; oy: number; head: number }
 export const ghostId = (id: string) => `ghost:${id}`;
-const GHOST_GAP = 8, RUN_GAP = 14, GHOST_MAX_W = 300;
+const GHOST_GAP = 8, RUN_GAP = 14, GHOST_MIN_W = 112, GHOST_MAX_W = 300;
 /** Where a partner outside the scope belongs, as the map says it under its name: its own ancestors that are not the scope's
  * (outermost first), else the parent it shares with the scope, else the top of the project (''). Read from the structure only. */
 export function ghostContext(v: StudioView, scope: string | null, id: string): string {
@@ -54,14 +54,19 @@ export function ghostContext(v: StudioView, scope: string | null, id: string): s
   const own = up.filter(x => !mine.has(x));
   return (own.length ? own : up.slice(-1)).map(x => byId.get(x)!.name).join(' › ');
 }
-/** An outside partner's card: its whole name, widening up to 300px and then wrapping (an identifier may break anywhere), so it
- * is never cut. 12.5px name lines of 17px; padding 6+7 and borders 2. Where it belongs reads once over its run (GhostHead). */
+/** Lines a text takes in a box of this room: one when it fits whole, else as many as it needs, with the share left for word ends
+ * that the other wrapped texts of the map keep. Never capped: the box is as tall as what the browser draws. */
+const wrapLines = (need: number, room: number) => (need <= room ? 1 : Math.ceil((need * 1.12 + 6) / Math.max(40, room)));
+/** An outside partner's card: its whole name, as wide as the name (at least GHOST_MIN_W, so a short name keeps a target) up to
+ * 300px, then wrapping (an identifier may break anywhere), so it is never cut. 12.5px name lines of 17px; padding 6+7, borders 2.
+ * Where it belongs reads once over its run (GhostHead). */
 export function ghostSize(name: string, measure: TextMeasure = estimate): { w: number; h: number } {
-  const need = measure(name, 'item') * 1.02 + 2, chrome = 22, w = Math.min(GHOST_MAX_W, Math.max(GHOST_W, Math.ceil(need) + chrome));
-  return { w, h: Math.max(GHOST_H, 15 + Math.min(3, Math.ceil(need / (w - chrome))) * 17) };
+  const need = measure(name, 'item') * 1.02 + 2, chrome = 22, w = Math.min(GHOST_MAX_W, Math.max(GHOST_MIN_W, Math.ceil(need) + chrome));
+  return { w, h: Math.max(GHOST_H, 15 + wrapLines(need, w - chrome) * 17) };
 }
-/** The head over a run of outside partners: 11px lines of 15px and 4px under it; as wide as its column, wrapping if it must. */
-const headSize = (text: string, w: number, measure: TextMeasure) => 4 + Math.min(2, Math.ceil((measure(text, 'note') * 0.9 + 2) / w)) * 15;
+/** The head over a run of outside partners: 12px lines of 16px and 4px under it; as wide as its column, wrapping as it needs. */
+const headNeed = (text: string, measure: TextMeasure) => measure(text, 'note') * 0.96 + 2;
+const headSize = (text: string, w: number, measure: TextMeasure) => 4 + wrapLines(headNeed(text, measure), w) * 16;
 
 /** Rough rendered width of a frame name (13px, semibold): wide for CJK, narrower for Latin. Only decides one or two head lines. */
 export function textWidth(text: string): number {
@@ -343,7 +348,7 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
     const where = new Map(list.map(id => [id, `밖 · ${ghostContext(v, scope, id) || '최상위'}`])), runs = [...new Set(where.values())];
     const ids = runs.flatMap(t => list.filter(id => where.get(id) === t));
     const near = [...new Set([...edges.values()].filter(e => ids.some(g => (out ? e.to : e.from) === ghostId(g))).map(e => (out ? e.from : e.to)))].map(id => boxes.get(id)).filter((b): b is Box => !!b);
-    const colW = Math.max(...ids.map(id => size.get(id)!.w), ...runs.map(t => Math.min(GHOST_MAX_W, Math.ceil(measureText(t, 'note') * 0.9) + 4)));
+    const colW = Math.max(...ids.map(id => size.get(id)!.w), ...runs.map(t => Math.min(GHOST_MAX_W, Math.ceil(headNeed(t, measureText)))));
     const headH = new Map(runs.map(t => [t, headSize(t, colW, measureText)]));
     const colH = ids.reduce((a, id) => a + size.get(id)!.h + GHOST_GAP, 0) - GHOST_GAP + runs.reduce((a, t) => a + headH.get(t)!, 0) + RUN_GAP * (runs.length - 1);
     const cy = near.length ? (Math.min(...near.map(b => b.y)) + Math.max(...near.map(b => b.y + Math.min(b.h, 120)))) / 2 : minY + colH / 2;

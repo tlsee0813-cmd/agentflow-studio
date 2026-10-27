@@ -976,8 +976,8 @@ def relation_visit_flow(browser, base, cases):
     expect(back).to_have_accessible_name("수신 · traces로 돌아가기")
     back.click()
     # The same part left in its summary and met again in its sheet: two steps back read the summary it left, at its scroll
-    # (a shorter window, so the summary scrolls).
-    page.set_viewport_size({"width": 1280, "height": 600})
+    # (a shorter window, so the summary scrolls; a plain relation's ends read as one group, so the summary is short).
+    page.set_viewport_size({"width": 1280, "height": 500})
     page.locator("#world .node", has_text="수신 · traces").click()
     lens_body = page.locator("#lens .lens-body")
     lens_body.evaluate("e => { e.scrollTop = e.scrollHeight }")
