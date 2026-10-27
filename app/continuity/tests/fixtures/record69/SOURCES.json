@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "agentflow.record69-samples.1",
+  "samples": [
+    { "file": "node-red-pr6019.txt", "kind": "public-author-report",
+      "url": "https://github.com/node-red/node-red/pull/6019",
+      "head": "056fffd8b4dbfefea7100b76b33724f1823c5426", "merge": "039fd638e5dd9c8f430fb89731baa4aa97e46f07",
+      "note": "The PR author's own description, unedited (no part ids added). It is the author's report, not an execution by AgentFlow; Node-RED was not run here.",
+      "map": "docs/cycles/2026-10-26-visual-experience-58/OSS_CASES.json#oss-node-red" },
+    { "file": "synthetic-calibration.txt", "kind": "synthetic",
+      "note": "Written for this test: PC and device calibration under one name in one record. Not a real report." }
+  ]
+}

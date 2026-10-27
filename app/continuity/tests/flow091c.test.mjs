@@ -82,7 +82,7 @@ test('F091C-c A export -> B -> late A report (paste and exact file returnId): A\
   assert.equal(section(D.handoffText(opened)).includes('이 보고가 돌아간 작업의 요청을 쓸 때'),true);
   const next=put(opened,'C: 새 요청','request',undefined,booking);assert.equal(D.taskOf(next).background.area.note,'바뀐 구상');
   // An older export without a stored copy stays null; the current plan is never used to fill it.
-  const old=JSON.parse(serializeProject(p));old.schemaVersion='idea015.project.4';delete old.space.understanding;delete old.space.containment;for(const t of old.tasks){delete t.background;for(const h of t.handoffs){delete h.background;delete h.anchor;}}
+  const old=JSON.parse(serializeProject(p));old.schemaVersion='idea015.project.4';delete old.pasted;delete old.space.understanding;delete old.space.containment;for(const t of old.tasks){delete t.background;for(const h of t.handoffs){delete h.background;delete h.anchor;}}
   const migrated=parseProject(JSON.stringify(old));assert.equal(migrated.schemaVersion,SCHEMA);
   const legacyFile=D.importResultFile(migrated,JSON.stringify(fileFor(migrated,A,H))).tasks.at(-1);assert.equal(legacyFile.background,null);
   assert.equal(put(migrated,'A 보고 붙여넣기','report',A).tasks.at(-1).background,null);
@@ -107,7 +107,7 @@ test('F091C-d ideas and undecided points in the background never become bases, s
 test('F091C-e old formats, reload, backup, empty values, maximum Unicode and byte limits: null, exact, refused (never cut)',()=>{
   // Older formats: every task and export null (no backfill even when the plan exists).
   let {p,booking}=planned();p=exported(respond(put(p,'예약','request',undefined,booking)));
-  const v4=JSON.parse(serializeProject(p));v4.schemaVersion='idea015.project.4';delete v4.space.understanding;delete v4.space.containment;for(const t of v4.tasks){delete t.background;for(const h of t.handoffs){delete h.background;delete h.anchor;}}
+  const v4=JSON.parse(serializeProject(p));v4.schemaVersion='idea015.project.4';delete v4.pasted;delete v4.space.understanding;delete v4.space.containment;for(const t of v4.tasks){delete t.background;for(const h of t.handoffs){delete h.background;delete h.anchor;}}
   const m=parseProject(JSON.stringify(v4));assert.ok(m.tasks.every(t=>t.background===null&&t.handoffs.every(h=>h.background===null)));
   assert.equal(D.begin(m,m.tasks[0].id).request.background,null);
   const keyed=structuredClone(v4);keyed.tasks[0].background=null;assert.throws(()=>parseProject(JSON.stringify(keyed)),'a project.4 file never had the key');

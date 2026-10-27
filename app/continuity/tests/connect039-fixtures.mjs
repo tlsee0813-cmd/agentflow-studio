@@ -20,12 +20,12 @@ export function fixture() {
 }
 export function v2(p) {
   // project.2 predates the FLOW090 plan space and task areas.
-  const old=structuredClone(p);old.schemaVersion='idea015.project.2';delete old.space;for(const t of old.tasks){delete t.areaId;delete t.background;for(const h of t.handoffs)delete h.background;}
+  const old=structuredClone(p);old.schemaVersion='idea015.project.2';delete old.pasted;delete old.space;for(const t of old.tasks){delete t.areaId;delete t.background;for(const h of t.handoffs)delete h.background;}
   for(const t of old.tasks){delete t.resultFile;for(const h of t.handoffs){delete h.returnId;delete h.anchor;}}
   return old;
 }
 export function v1(p) {
-  const old=v2(p);old.schemaVersion='idea015.project.1';for(const b of old.bases)b.locked=false;
+  const old=v2(p);old.schemaVersion='idea015.project.1';delete old.pasted;for(const b of old.bases)b.locked=false;
   for(const t of old.tasks){delete t.adviceRevision;t.handoffs=t.handoffs.map(h=>({at:h.at,method:h.method,revision:h.revision,text:'합성 이전 작업문 원문'}));}
   return old;
 }

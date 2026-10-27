@@ -1,0 +1,32 @@
+- [x] Bugfix (non-breaking change which fixes an issue)
+- [ ] New feature (non-breaking change which adds functionality)
+
+## Proposed changes
+
+Fixes #5095
+
+The broker node only applied `msg.broker.url` from a connect action when it differed from the current `brokerurl`. The first action worked, but repeating it (with `force`, or after a disconnect) rebuilt the url from the configured `broker`/`port`. With the config from the issue, the node then sat in "connecting" on `mqtt://-:1883`.
+
+Now a `url` in the action is always used, as the help text describes. An action that only sets `broker`/`port` still replaces an earlier url, same as before.
+
+The new test in `21-mqtt_spec.js` needs no broker. It applies the same `url` twice, then a `broker`/`port` override, and checks `brokerurl` after each step.
+
+`npx mocha --exit test/nodes/core/network/21-mqtt_spec.js` on Node 22.23.2 (the 28 pending tests need a real broker):
+
+- main 7f8d1ac with the new test: 3 passing, 28 pending, 1 failing: `expected MQTTBrokerNode {...} to have property brokerurl of 'mqtts://broker.example.com' (got 'mqtt://localhost:1883')`
+- with the fix: 4 passing, 28 pending (same on Node 24.11.1)
+
+`npm run lint` passes, though it only covers the editor-client sources.
+
+I also replayed the issue's steps against a minimal local broker stub. Before the fix, a second "connect with force", or a disconnect followed by the same connect, left the node connecting to `mqtt://-:1883`. With the fix, both reconnect to the action's url.
+
+## Checklist
+
+- [x] I have read the [contribution guidelines](https://github.com/node-red/node-red/blob/main/CONTRIBUTING.md)
+- [ ] For non-bugfix PRs, I have discussed this change on the forum/slack team.
+- [ ] I have run `npm run test` to verify the unit tests pass
+- [x] I have added suitable unit tests to cover the new/changed functionality
+
+I ran the MQTT spec rather than the full `npm run test`, which builds the editor first.
+
+AI disclosure: AI coding tools (Claude Code) helped write this change and the test. I reviewed the change and ran the tests above before submitting.

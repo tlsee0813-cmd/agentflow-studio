@@ -3,7 +3,7 @@ import { validateDigestReply, type DigestAsk, type DigestReply } from '../shared
 import { RUNTIME } from './runtime.js';
 
 /** digest: the model and prompt id a return reading would be made with (null when the server does not say). */
-export interface AiStatus { ai: 'deepseek' | 'off' | 'none'; model: string | null; access: 'open' | 'code'; digest?: { model: string; prompt: string } | null }
+export interface AiStatus { ai: 'deepseek' | 'off' | 'none'; model: string | null; access: 'open' | 'code'; digest?: { model: string; prompt: string; record: string | null } | null }
 export class AskError extends Error { constructor(readonly code: string) { super(code); } }
 
 // same-origin: an owner-private host's own cookies go with same-origin calls; a cross-origin API still gets none.
@@ -16,7 +16,8 @@ export async function aiStatus(): Promise<AiStatus> {
     const res = await fetch(url('/api/studio/status'), { credentials: 'same-origin' });
     const v = await res.json();
     if (!res.ok || !['deepseek', 'off'].includes(v?.ai)) return { ai: 'none', model: null, access: 'open' };
-    const d = v.digest, digest = d && typeof d.model === 'string' && typeof d.prompt === 'string' && /^[\w.-]{1,80}$/.test(d.model) && /^d1-[0-9a-f]{12}$/.test(d.prompt) ? { model: d.model, prompt: d.prompt } : null;
+    const d = v.digest, digest = d && typeof d.model === 'string' && typeof d.prompt === 'string' && /^[\w.-]{1,80}$/.test(d.model) && /^d1-[0-9a-f]{12}$/.test(d.prompt)
+      ? { model: d.model, prompt: d.prompt, record: typeof d.record === 'string' && /^d2-[0-9a-f]{12}$/.test(d.record) ? d.record : null } : null;
     return { ai: v.ai, model: typeof v.model === 'string' ? v.model : null, access: v.access === 'code' ? 'code' : 'open', digest };
   } catch { return { ai: 'none', model: null, access: 'open' }; }
 }

@@ -1,4 +1,6 @@
-export const SCHEMA = 'idea015.project.7' as const;
+export const SCHEMA = 'idea015.project.8' as const;
+/** project.7 had no pasted records: it reads as none (pasted=[]); nothing else changes. */
+export const V7_SCHEMA = 'idea015.project.7' as const;
 export const V6_SCHEMA = 'idea015.project.6' as const;
 /** project.5 had no area understanding and no export anchors: every area reads none, every export anchor=null (no backfill). */
 export const V5_SCHEMA = 'idea015.project.5' as const;
@@ -155,7 +157,16 @@ export interface Project {
   sources: Source[]; bases: Basis[]; tasks: Task[]; currentTaskId: string | null;
   draft: string; answerDraft: string; basisDraft: string; basisEdits: Record<string,string>; draftKind: 'request' | 'report' | 'evidence' | 'test_answer';
   pending: Ticket | null; notice: string | null; space: Space;
+  /** Records the person pasted as they were (project.8). Not a source, task or return: nothing here is a request, a report of
+   * a task or a decision, and a reading of one never writes back into the project. */
+  pasted: PastedRecord[];
 }
+/** One pasted record: the text exactly as pasted, a stable id, when it was added here (not when it was written or which
+ * version it is about) and, optionally, the part being looked at when it was pasted. That part is the reading's context only,
+ * never a claim that the whole text is about it. */
+export interface PastedRecord { id: string; text: string; at: string; context: string | null }
+export const PASTED_TEXT_LIMIT = 60000;
+export const PASTED_LIMIT = 500;
 export interface ContextBasis {
   id: string; text: string; status: Basis['status']; sourceId: string; revision: number;
   previousVersions: number; partial: boolean;

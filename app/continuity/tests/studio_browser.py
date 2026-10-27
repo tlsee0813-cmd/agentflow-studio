@@ -1306,6 +1306,246 @@ def return_flow(browser, base, cases):
     context.close()
 
 
+def record_fixtures():
+    """EXPERIENCE69: a saved-project backup with two parts both named '보정' (PC app, device firmware), made by the shared generator."""
+    out = pathlib.Path(tempfile.mkdtemp(prefix="record69-")) / "cases"
+    subprocess.run(["node", str(ROOT / "tests/record69-fixtures.mjs"), "--out", str(out)], cwd=APP, check=True, stdout=subprocess.DEVNULL)
+    return out / "record69-same-name.json"
+
+
+ENTRY = "key => JSON.parse(localStorage.getItem('agentflow.idea015.workspace')).entries.find(e => e.entryId === key).project"
+
+
+def record_flow(browser, base, backup):
+    """EXPERIENCE69: one record pasted as it came, from a selected part, read on request, beside the same map. The draft survives
+    leaving the box and a reload; the saved text is exact and the canonical structure (parts, notes, relations, containment,
+    records, tasks) is untouched by saving, reading or a repeat; the looked-at part is context only (never a location in the
+    request); same-named candidates read apart and mark the right part; a quote opens the original with the way back pinned;
+    closing comes back to the selection and camera it began from; a key-like text is neither saved nor kept as a draft; the
+    reading is kept across a reload without a call; a backup carries the record and its copy shows none of the original's
+    readings. Stubbed provider (synthetic sample): contract, storage and round trips, not reading quality."""
+    text = (ROOT / "tests/fixtures/record69/synthetic-calibration.txt").read_text(encoding="utf-8")
+    first_line = text.split("\n")[0].strip()
+    device_line = next(l.strip() for l in text.split("\n") if l.strip().startswith("2)"))[:160].strip()
+    context = browser.new_context(viewport={"width": 1280, "height": 720}, accept_downloads=True)
+    page = context.new_page()
+    errors, calls = [], []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.on("request", lambda r: calls.append(r.post_data_json) if r.url.endswith("/api/studio/digest") else None)
+    page.goto(base + "/")
+    page.locator("#import-file").set_input_files(str(backup))
+    page.wait_for_url(re.compile(r"#/p/E_"))
+    entry = re.search(r"#/p/(E_[^/]+)", page.url).group(1)
+    before = page.evaluate(ENTRY, entry)
+    canonical = lambda p: json.dumps([p["space"], p["sources"], p["tasks"], p["bases"]], sort_keys=True, ensure_ascii=False)
+    pc, dev = '#world .node[data-part="A_r69_pccal"]', '#world .node[data-part="A_r69_devcal"]'
+
+    # The same box from a selected part; the part is named as context, apart from its same-named twin.
+    page.locator(pc).click()
+    expect(page.locator("#lens-title")).to_have_text("보정")
+    page.locator("#lens .more summary").click()
+    page.get_by_role("menuitem", name="기록 붙여넣기").click()
+    expect(page.locator("#paste-text")).to_be_visible()
+    expect(page.locator("#lens .rr-context .rr-part")).to_have_text("PC 앱 · 보정")
+    pane_beside_map(page); no_page_scroll(page)
+    head = text[:60]
+    page.locator("#paste-text").fill(head)
+    page.locator("#lens .rr-back").click()
+    expect(page.locator("#paste-text")).to_have_count(0)
+    page.locator("#lens .rr-paste-open").click()
+    assert page.locator("#paste-text").input_value() == head, "the draft survives leaving the box"
+    page.reload()
+    page.locator(pc).click()
+    expect(page.locator("#lens-title")).to_have_text("보정")
+    page.wait_for_timeout(400)
+    url0, cam0 = page.url, page.locator("#world").evaluate(CAMERA)
+    page.locator("#lens .more summary").click()
+    page.get_by_role("menuitem", name="기록 붙여넣기").click()
+    assert page.locator("#paste-text").input_value() == head, "the draft survives a reload"
+    page.locator("#paste-text").fill(text)
+    page.get_by_role("button", name="기록 저장").click()
+
+    # Saved exactly, as one record with its context; nothing canonical changed and nothing was sent.
+    expect(page.locator("#lens .rr-raw")).to_be_visible()
+    assert page.locator("#lens .rr-raw").evaluate("e => e.textContent") == text
+    saved = page.evaluate(ENTRY, entry)
+    assert [(r["text"], r["context"]) for r in saved["pasted"]] == [(text, "A_r69_pccal")]
+    assert canonical(saved) == canonical(before) and saved["revision"] == before["revision"] + 1
+    assert calls == [], "saving never calls"
+
+    # Read on request: one call, digest.2, the record whole and unlocated, its context only in the note.
+    page.get_by_role("button", name="기록 읽기").click()
+    expect(page.locator("#lens .rr-records")).to_be_visible()
+    assert len(calls) == 1
+    ask = calls[0]
+    assert ask["schemaVersion"] == "studio.digest.2"
+    record = ask["sources"][0]
+    assert record["kind"] == "record" and record["partIds"] == [] and record["text"] == text and "PC 앱 · 보정" in record["note"]
+    # The reading: its own heading, the record's first line under it, no 'no result material' line for a read record.
+    expect(page.locator("#lens .rr-sec > h3")).to_have_text(["붙여넣은 기록에서"])
+    expect(page.locator("#lens .rr-rec-src")).to_have_text(first_line)
+    expect(page.locator("#lens .rr-none")).to_have_count(0)
+    expect(page.locator("#lens .rr-part.cand")).to_have_text(["PC 앱 · 보정", "장치 펌웨어 · 보정"])
+    expect(page.get_by_role("button", name="장치 펌웨어 · 보정", exact=True)).to_have_count(1)
+    expect(page.locator("#lens .rr-why")).to_have_count(0)  # reasons stay folded until a candidate is chosen
+    page.locator("#lens .rr-part.cand", has_text="장치 펌웨어 · 보정").click()
+    expect(page.locator("#lens .rr-why")).to_have_count(1)
+    expect(page.locator("#lens .rr-rec").nth(2).locator(".rr-why")).to_have_text("장치 펌웨어 · 보정 · [스텁] 원문 줄에 이 부분과 부모 이름이 있음")
+    expect(page.locator("#lens .rr-part.cand.on")).to_have_attribute("aria-pressed", "true")
+    expect(page.locator("#world .read-mark")).to_have_count(1)
+    expect(page.locator("#world .read-mark")).to_have_attribute("data-part", "A_r69_devcal")
+    page.wait_for_timeout(400)  # after the smallest pan that brings it beside the pane
+    in_map(page, dev)
+
+    # The record itself: its readings, then the text exactly as pasted.
+    page.locator("#lens .rr-rec-src").click()
+    expect(page.locator("#lens .rr-records > h3")).to_have_text("이 기록에서 읽은 것")
+    assert page.locator("#lens .rr-raw").evaluate("e => e.textContent") == text
+    page.locator("#lens .rr-back").click()
+
+    # A quote opens the original with the quote marked (not the readings again); the way back stays in view while it scrolls.
+    page.locator("#lens .rr-rec").nth(2).locator(".rr-cite").click()
+    expect(page.locator("#lens .rr-mark")).to_have_text(device_line)
+    expect(page.locator("#lens .rr-records")).to_have_count(0)
+    page.locator("#lens .lens-body").evaluate("e => { e.scrollTop = e.scrollHeight; }")
+    expect(page.locator("#lens .rr-back")).to_be_in_viewport()
+    page.locator("#lens .rr-back").click()
+    expect(page.locator("#lens .rr-sec > h3")).to_have_text(["붙여넣은 기록에서"])
+    # Back from the quote: the chosen candidate, its reason and its mark are still there.
+    expect(page.locator("#lens .rr-rec").nth(2).locator(".rr-why")).to_contain_text("장치 펌웨어 · 보정")
+    expect(page.locator("#world .read-mark")).to_have_attribute("data-part", "A_r69_devcal")
+    # By keyboard: the other candidate takes its place (one reason at a time), focus stays on it.
+    page.locator("#lens .rr-part.cand", has_text="PC 앱 · 보정").focus()
+    page.keyboard.press("Enter")
+    expect(page.locator("#lens .rr-why")).to_have_count(1)
+    expect(page.locator("#lens .rr-rec").nth(1).locator(".rr-why")).to_contain_text("PC 앱 · 보정")
+    expect(page.locator("#lens .rr-part.cand", has_text="PC 앱 · 보정")).to_be_focused()
+    expect(page.locator("#world .read-mark")).to_have_attribute("data-part", "A_r69_pccal")
+
+    # Closing comes back to the scene the paste began from: same part selected, same camera; reading wrote nothing.
+    page.locator("#lens .rr-head .close").click()
+    expect(page).to_have_url(url0)
+    expect(page.locator("#lens-title")).to_have_text("보정")
+    page.wait_for_timeout(400)
+    assert page.locator("#world").evaluate(CAMERA) == cam0
+    assert canonical(page.evaluate(ENTRY, entry)) == canonical(before)
+
+    # The same text again is the same record: told so, nothing added, no call.
+    page.locator("#lens .more summary").click()
+    page.get_by_role("menuitem", name="기록 붙여넣기").click()
+    page.locator("#paste-text").fill(text)
+    page.get_by_role("button", name="기록 저장").click()
+    expect(page.locator("#lens .rr-foot p[role=status]")).to_contain_text("새로 저장하지 않았어요")
+    again = page.evaluate(ENTRY, entry)
+    assert len(again["pasted"]) == 1 and again["revision"] == saved["revision"] and len(calls) == 1
+
+    # A key-like text is refused, the box stays editable, and it is not kept as a draft in this browser.
+    page.locator("#lens .rr-paste-open").click()
+    fake = "보고 끝\nAPI_KEY=sk-" + "Z" * 26
+    page.locator("#paste-text").fill(fake)
+    page.get_by_role("button", name="기록 저장").click()
+    expect(page.locator("#lens .rr-paste-box [role=alert]")).to_contain_text("저장하지 않았어요")
+    assert "sk-Z" not in (page.evaluate("() => localStorage.getItem('agentflow.studio.paste-draft.1')") or "")
+    assert len(page.evaluate(ENTRY, entry)["pasted"]) == 1
+    page.locator("#paste-text").fill("")
+
+    # Reload: the record and its reading are found again, without a call.
+    page.reload()
+    page.locator("#return-entry").click()
+    expect(page.locator("#lens .rr-records")).to_be_visible()
+    expect(page.locator("#lens .rr-part.cand")).to_have_count(2)
+    assert len(calls) == 1
+
+    # Backup: the existing format with the record exact; its copy is a new entry that shows none of the original's readings.
+    page.goto(base + "/")
+    # The home card counts the pasted record apart from work records; it never reads as having none.
+    expect(page.locator("#saved-list .program-meta")).to_contain_text("붙인 기록 1")
+    expect(page.locator("#saved-list .program-meta")).not_to_contain_text("기록 없음")
+    with page.expect_download() as download:
+        page.locator("#saved-list .program-backup").first.click()
+    path = download.value.path()
+    data = json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
+    assert data["id"] == "P_record69_same_name" and [(r["text"], r["context"]) for r in data["pasted"]] == [(text, "A_r69_pccal")]
+    assert not any(k in data for k in ("readings", "digest")), "readings are not part of a backup"
+    page.locator("#import-file").set_input_files(path)
+    page.wait_for_url(lambda u: "#/p/E_" in u and entry not in u)
+    copy = re.search(r"#/p/(E_[^/]+)", page.url).group(1)
+    assert page.evaluate(ENTRY, copy)["pasted"] == saved["pasted"]
+    page.locator("#return-entry").click()
+    expect(page.locator("#lens .rr-head")).to_be_visible()
+    expect(page.locator("#lens .rr-lead")).to_have_text("아직 이 자료를 정리하지 않았어요.")
+    expect(page.locator("#lens .rr-records")).to_have_count(0)
+    expect(page.locator("#lens .rr-src").first).to_contain_text(first_line)
+    assert len(calls) == 1 and errors == [], errors
+    context.close()
+
+
+DRAWN = "() => [...document.querySelectorAll('#world [data-box]')].map(e => e.dataset.box).sort().join('|')"
+
+
+def record_fold_flow(browser, base, cases):
+    """EXPERIENCE69: a chosen candidate inside a folded group is shown on the same map. Node-RED's 10-mqtt.js sits in
+    network, folded by default: nothing unfolds when the reading comes, choosing the candidate unfolds only its path and
+    marks the part itself (not the folded group), the choice holds through a quote and back, another candidate or letting it
+    go folds that path again, and closing comes back to the scene with the folds and camera it had. Stubbed provider."""
+    text = (ROOT / "tests/fixtures/record69/node-red-pr6019.txt").read_text(encoding="utf-8")
+    page = browser.new_page(viewport={"width": 1280, "height": 720})
+    errors = []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.goto(base + "/")
+    page.locator("#import-file").set_input_files(str(cases / "oss-node-red.json"))
+    page.wait_for_url(re.compile(r"#/p/E_"))
+    mqtt, change, network = (f'#world .node[data-part="A_oss-node-red_{k}"]' for k in ("10-mqtt", "15-change", "network"))
+    page.locator(network).click()
+    expect(page.locator("#lens-title")).to_have_text("network")
+    page.wait_for_timeout(400)
+    url0, cam0, drawn0 = page.url, page.locator("#world").evaluate(CAMERA), page.evaluate(DRAWN)
+    expect(page.locator(mqtt)).to_have_count(0)  # inside the folded group
+    page.locator("#lens .more summary").click()
+    page.get_by_role("menuitem", name="기록 붙여넣기").click()
+    page.locator("#paste-text").fill(text)
+    page.get_by_role("button", name="기록 저장").click()
+    page.get_by_role("button", name="기록 읽기").click()
+    expect(page.locator("#lens .rr-records")).to_be_visible()
+    # The reading alone unfolds nothing.
+    expect(page.locator(mqtt)).to_have_count(0)
+    assert page.evaluate(DRAWN) == drawn0
+    # Choosing the candidate: its path opens, the part itself is drawn, marked and brought beside the pane; its reason reads.
+    page.locator("#lens .rr-part.cand", has_text="10-mqtt.js").click()
+    expect(page.locator(mqtt)).to_be_visible()
+    expect(page.locator("#world .read-mark")).to_have_count(1)
+    expect(page.locator(mqtt)).to_have_class(re.compile(r"\bread-mark\b"))
+    expect(page.locator("#lens .rr-rec").nth(1).locator(".rr-why")).to_contain_text("10-mqtt.js")
+    page.wait_for_timeout(400)
+    in_map(page, mqtt)
+    # A quote and back: the same part stays open and marked, with its reason.
+    page.locator("#lens .rr-rec").nth(1).locator(".rr-cite").click()
+    expect(page.locator("#lens .rr-mark")).to_be_visible()
+    expect(page.locator(mqtt)).to_have_class(re.compile(r"\bread-mark\b"))
+    page.locator("#lens .rr-back").click()
+    expect(page.locator(mqtt)).to_have_class(re.compile(r"\bread-mark\b"))
+    expect(page.locator("#lens .rr-rec").nth(1).locator(".rr-why")).to_contain_text("10-mqtt.js")
+    # Another candidate: the first path folds again, the other opens; letting it go folds everything back as it was.
+    page.locator("#lens .rr-part.cand", has_text="15-change.js").click()
+    expect(page.locator(change)).to_have_class(re.compile(r"\bread-mark\b"))
+    expect(page.locator(mqtt)).to_have_count(0)
+    page.locator("#lens .rr-part.cand", has_text="15-change.js").click()
+    expect(page.locator(change)).to_have_count(0)
+    assert page.evaluate(DRAWN) == drawn0
+    # Closing with a candidate open: back to the part, the folds and the camera the paste began from.
+    page.locator("#lens .rr-part.cand", has_text="10-mqtt.js").click()
+    expect(page.locator(mqtt)).to_be_visible()
+    page.locator("#lens .rr-head .close").click()
+    expect(page).to_have_url(url0)
+    expect(page.locator("#lens-title")).to_have_text("network")
+    expect(page.locator(mqtt)).to_have_count(0)
+    page.wait_for_timeout(400)
+    assert page.evaluate(DRAWN) == drawn0
+    assert page.locator("#world").evaluate(CAMERA) == cam0
+    assert errors == [], errors
+    page.close()
+
+
 def plan_reply(route, title):
     """A valid analysis of exactly what the page sent (test-only, routed in the browser): one change on the first part, cited
     to the sentence itself. Never a model's reading."""
@@ -1749,6 +1989,8 @@ def main():
             overview_flow(browser, base, oss_fixtures()); print("ok  large list as an overview of real groups, find with way back, scope relations, pane beside the map, verbs")
             relation_visit_flow(browser, base, oss_fixtures()); print("ok  relation visit: named way back to its part, selection, camera, sheet and scroll; browser Back the same; no stale way back")
             return_flow(browser, base, oss_fixtures()); print("ok  return reading: no call on open, one per material, exact quote and back, draft never overwritten, Node-RED plan without result")
+            record_flow(browser, base, record_fixtures()); print("ok  pasted record: draft kept, exact text, structure untouched, read on request, same-named candidates apart, quote and back, scene restored, repeat/key refused, backup copy without readings")
+            record_fold_flow(browser, base, oss_fixtures()); print("ok  pasted record on Node-RED: a chosen candidate in a folded group opens only its path, holds through a quote, folds back on another choice and on close")
             stale_request_flow(browser, base); print("ok  request only from the analysis of what is written now: typed, forced, A-B-A, cancelled and outdated replies, material")
             actual_reply_flow(browser, base); print("ok  wide comparison of an actual reply without presentation; scope reviews outliving a material change; four changes")
             stale_work_flow(browser, base); print("ok  writing in the wide comparison: map ways off at once (forced click a no-op, caret kept), honest way out, draft on reopen")
