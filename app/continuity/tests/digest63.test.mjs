@@ -126,8 +126,8 @@ test('global reports and unattached extras can describe changes without fabricat
   validateDigestReply(reply, input.ask); assert.deepEqual(mapDigest(reply, input).changes[0].partIds, []);
   const reading = makeReading(input, await askHash(input.ask), 'm', 'd1-example', reply);
   assert.equal(reading.cited.U01.text, full); assert.match(reading.cited.U01.note, /AI에는/);
-  const kv = memoryKv(), store = digestStore(kv); store.keep(project.id, reading);
-  assert.equal(digestStore(kv).previous(project.id, 'other').cited.U01.text, full, 'a reload does not silently substitute a 2000-character excerpt for the source');
+  const kv = memoryKv(), store = digestStore(kv); store.keep(project.id, project.id, reading);
+  assert.equal(digestStore(kv).previous(project.id, project.id, 'other').cited.U01.text, full, 'a reload does not silently substitute a 2000-character excerpt for the source');
   const global = savedReading({ ...view, records: [{ id: 'raw', kind: 'report', at: '2026-10-27T00:00:00Z', partId: null, taskId: 'task', text: full, origin: null }] }, null);
   assert.deepEqual(global[0].partIds, []); assert.equal(global[0].text, full);
   const many = { ...view, records: Array.from({ length: 120 }, (_, i) => ({ id: `raw-${i}`, kind: 'report', at: '2026-10-27T00:00:00Z', partId: null, taskId: 'task', text: `보고 ${i}`, origin: null })) };
@@ -146,7 +146,7 @@ test('HTTP: digest keeps the studio boundary (origin, access code, byte cap, key
   const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: key, DEEPSEEK_MODEL: 'm-ask', DEEPSEEK_PLAN_MODEL: 'm-plan', STUDIO_ACCESS_CODE: 'c0de' },
     fetchImpl: async (url, init) => { seen = JSON.parse(init.body); return provider(okReply)(); } });
   const status = await (await handle(new Request(STATUS))).json();
-  assert.deepEqual(status.digest, { model: 'm-plan', prompt: await digestPromptId() }); assert.match(status.digest.prompt, /^d1-[0-9a-f]{12}$/);
+  assert.deepEqual(status.digest, { model: 'm-plan', prompt: await digestPromptId(), record: await digestPromptId(2) }); assert.match(status.digest.record, /^d2-[0-9a-f]{12}$/); assert.match(status.digest.prompt, /^d1-[0-9a-f]{12}$/);
   assert.equal((await handle(post(input.ask))).status, 401);
   assert.equal((await handle(post(input.ask, { 'x-studio-access': 'c0de', origin: 'https://evil.example' }))).status, 403);
   assert.equal((await handle(post(input.ask, { 'x-studio-access': 'c0de', 'x-agentflow-request': '0' }))).status, 403);
@@ -170,25 +170,25 @@ function memoryKv() { const m = new Map(); return { m, getItem: k => m.get(k) ??
 test('cache: found only for the same material, model and prompt; examples never stored', async () => {
   const kv = memoryKv(), store = digestStore(kv), { project, input } = ui62('reading_3');
   const hash = await askHash(input.ask), reading = makeReading(input, hash, 'm', 'd1-000000000000', okReply);
-  assert.equal(store.keep(project.id, reading), null);
-  assert.equal(store.find(project.id, hash, input.ask, 'm', 'd1-000000000000').hash, hash);
-  assert.equal(digestStore(kv).find(project.id, hash, input.ask, 'm', 'd1-000000000000')?.hash, hash, 'kept across a reload');
-  assert.equal(store.find(project.id, hash, input.ask, 'm2', 'd1-000000000000'), null, 'another model');
-  assert.equal(store.find(project.id, hash, input.ask, 'm', 'd1-111111111111'), null, 'another prompt');
+  assert.equal(store.keep(project.id, project.id, reading), null);
+  assert.equal(store.find(project.id, project.id, hash, input.ask, 'm', 'd1-000000000000').hash, hash);
+  assert.equal(digestStore(kv).find(project.id, project.id, hash, input.ask, 'm', 'd1-000000000000')?.hash, hash, 'kept across a reload');
+  assert.equal(store.find(project.id, project.id, hash, input.ask, 'm2', 'd1-000000000000'), null, 'another model');
+  assert.equal(store.find(project.id, project.id, hash, input.ask, 'm', 'd1-111111111111'), null, 'another prompt');
   const edited = structuredClone(input.ask); edited.sources[9].text += ' ';
   const other = await askHash(edited); assert.notEqual(other, hash, 'one changed character is other material');
-  assert.equal(store.find(project.id, other, edited, 'm', 'd1-000000000000'), null);
+  assert.equal(store.find(project.id, project.id, other, edited, 'm', 'd1-000000000000'), null);
   const based = structuredClone(input.ask); based.sources[9].basis = based.sources[9].basis.replace(/· [0-9a-f]{7} ·/, '· 0000000 ·');
   assert.notEqual(await askHash(based), hash, 'another basis is other material');
-  assert.equal(store.previous(project.id, other).hash, hash, 'the earlier reading stays readable for the grown material');
+  assert.equal(store.previous(project.id, project.id, other).hash, hash, 'the earlier reading stays readable for the grown material');
   assert.ok(reading.cited.S05 && reading.cited.S09 && !reading.cited.S01, 'only cited sources are kept with a reading');
   const stage1 = ui62('reading_1'); assert.notEqual(await askHash(stage1.input.ask), hash);
   // A stored reading that no longer fits its request is not used.
   const stale = JSON.parse(kv.m.get(DIGEST_KEY)); stale.projects[project.id][0].reply.changes[0].refs = ['S42']; kv.m.set(DIGEST_KEY, JSON.stringify(stale));
-  assert.equal(digestStore(kv).find(project.id, hash, input.ask, 'm', 'd1-000000000000'), null);
-  assert.equal(digestStore(kv).previous(project.id, other), null, 'invalid frozen citations are also refused for an earlier reading');
-  const example = digestStore(null); example.keep(project.id, reading);
-  assert.equal(example.find(project.id, hash, input.ask, 'm', 'd1-000000000000').hash, hash); assert.equal(kv.m.size, 1);
+  assert.equal(digestStore(kv).find(project.id, project.id, hash, input.ask, 'm', 'd1-000000000000'), null);
+  assert.equal(digestStore(kv).previous(project.id, project.id, other), null, 'invalid frozen citations are also refused for an earlier reading');
+  const example = digestStore(null); example.keep(project.id, project.id, reading);
+  assert.equal(example.find(project.id, project.id, hash, input.ask, 'm', 'd1-000000000000').hash, hash); assert.equal(kv.m.size, 1);
 });
 
 test('cache: malformed earlier readings are skipped before source rendering or mapping', async () => {
@@ -200,6 +200,6 @@ test('cache: malformed earlier readings are skipped before source rendering or m
   for (const mutate of bad) {
     const kv = memoryKv(), broken = structuredClone(reading); mutate(broken);
     kv.setItem(DIGEST_KEY, JSON.stringify({ version: 'studio.digest-cache.1', projects: { [project.id]: [broken, reading] } }));
-    assert.deepEqual(digestStore(kv).previous(project.id, 'different'), reading, 'skip malformed entry and preserve the next readable one');
+    assert.deepEqual(digestStore(kv).previous(project.id, project.id, 'different'), reading, 'skip malformed entry and preserve the next readable one');
   }
 });

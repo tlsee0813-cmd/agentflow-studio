@@ -9,7 +9,7 @@ import { validatePlanAsk, validatePlanReply } from '../dist/public/shared/plan-a
 import { validateScopeAsk, validateScopeReply } from '../dist/public/shared/scope-api.js';
 import { validateDigestAsk, validateDigestReply } from '../dist/public/shared/digest-api.js';
 import { PLAN_PROMPT, SCOPE_PROMPT } from './plan-prompt.mjs';
-import { DIGEST_PROMPT } from './digest-prompt.mjs';
+import { DIGEST_PROMPT, DIGEST2_PROMPT } from './digest-prompt.mjs';
 
 const ENDPOINT = 'https://api.deepseek.com/chat/completions';
 const REPLY_BYTES = 131072;
@@ -32,12 +32,13 @@ JSON 객체 하나만 반환한다. 키는 정확히 다음 6개다:
 {"headline":"한 줄 요약(80자 이내)","situation":["지금 상황, 각 한두 문장"],"changes":["최근 변화"],"next":["사용자가 다음에 판단할 것"],"answer":"질문에 대한 답 또는 null","refs":["R1"]}
 intent가 question이 아니면 answer는 null이어도 된다. 모든 문자열은 비어 있지 않아야 한다.`;
 
-let promptId = null;
-/** Short id of the digest prompt text (SHA-256, first 12 hex digits); Web Crypto, so it runs in Node and in a Worker. */
-export async function digestPromptId() {
-  promptId ??= crypto.subtle.digest('SHA-256', new TextEncoder().encode(DIGEST_PROMPT))
-    .then(b => `d1-${[...new Uint8Array(b)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`);
-  return promptId;
+const promptIds = new Map();
+/** Short id of a digest prompt text (SHA-256, first 12 hex digits); Web Crypto, so it runs in Node and in a Worker.
+ * d1- for studio.digest.1, d2- for studio.digest.2 (material with pasted records). */
+export async function digestPromptId(version = 1) {
+  if (!promptIds.has(version)) promptIds.set(version, crypto.subtle.digest('SHA-256', new TextEncoder().encode(version === 2 ? DIGEST2_PROMPT : DIGEST_PROMPT))
+    .then(b => `d${version}-${[...new Uint8Array(b)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`));
+  return promptIds.get(version);
 }
 
 export function readStudioConfig(env = {}) {
@@ -83,7 +84,7 @@ async function readLimited(body, max, signal) {
 export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetch, signal } = {}) {
   const planning = ask.schemaVersion === 'studio.plan.1';
   const scope = ask.schemaVersion === 'studio.scope.1';
-  const digest = ask.schemaVersion === 'studio.digest.1';
+  const digest2 = ask.schemaVersion === 'studio.digest.2', digest = ask.schemaVersion === 'studio.digest.1' || digest2;
   if (!config.apiKey) throw new ApiError('AI_NOT_CONFIGURED', 503);
   if (signal?.aborted) throw new ApiError('CANCELLED', 499);
   const controller = new AbortController(); let timedOut = false;
@@ -95,7 +96,7 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.apiKey}` },
       body: JSON.stringify({ model: config.model, stream: false, thinking: { type: scope || planning || digest ? 'enabled' : 'disabled' }, ...(scope || planning || digest ? { reasoning_effort: 'low' } : {}), max_tokens: planning || digest ? 8192 : scope ? 4096 : config.maxTokens,
         response_format: { type: 'json_object' },
-        messages: [{ role: 'system', content: digest ? DIGEST_PROMPT : scope ? SCOPE_PROMPT : planning ? PLAN_PROMPT : STUDIO_PROMPT }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }] }) });
+        messages: [{ role: 'system', content: digest2 ? DIGEST2_PROMPT : digest ? DIGEST_PROMPT : scope ? SCOPE_PROMPT : planning ? PLAN_PROMPT : STUDIO_PROMPT }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }] }) });
     if (!response.ok) {
       await response.body?.cancel().catch(() => {});
       if ([401, 403].includes(response.status)) throw new ApiError('AI_AUTH_FAILED', 502);
@@ -150,7 +151,7 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
       if (url.pathname === '/api/studio/status' && request.method === 'GET') {
         // digest: the model and prompt a reading would be made with, so a browser can tell its stored readings apart.
         return reply(200, { ai: config.apiKey ? 'deepseek' : 'off', model: config.apiKey ? config.model : null, access: config.accessCode ? 'code' : 'open',
-          ...(config.apiKey ? { digest: { model: config.planModel ?? config.model, prompt: await digestPromptId() } } : {}) }, cors);
+          ...(config.apiKey ? { digest: { model: config.planModel ?? config.model, prompt: await digestPromptId(1), record: await digestPromptId(2) } } : {}) }, cors);
       }
       if (!['/api/studio/ask', '/api/studio/plan', '/api/studio/scope', '/api/studio/digest'].includes(url.pathname)) throw new ApiError('NOT_FOUND', 404);
       if (request.method !== 'POST') throw new ApiError('METHOD_NOT_ALLOWED', 405);

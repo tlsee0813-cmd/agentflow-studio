@@ -2,9 +2,13 @@
  * request (SHA-256 of its JSON: part names and notes, source texts, notes, bases and plan context), the model and the prompt
  * id the server reports; any change to one of them is a different reading. Each entry also keeps the sources it cites, so an
  * earlier reading stays readable after the material grew. Saved projects: one own key in this browser, apart from the project
- * and its plans. Examples: this tab only. Nothing here calls the AI. */
+ * and its plans. Examples: this tab only. Nothing here calls the AI.
+ * Readings are kept by workspace entry: an imported copy keeps its project id, so the id cannot tell a copy from its original.
+ * An entry with no list of its own reads what was kept under its project id before (never written again); an imported copy
+ * reads only its own (its host passes no project id), so it never shows the original's readings or their quoted sources. A backup file never
+ * carries readings: they can be made again from the records it does carry. */
 import type { StorageLike } from '../shared/storage.js';
-import { DIGEST_SCHEMA, DIGEST_KINDS, validateDigestReply, type DigestAsk, type DigestKind, type DigestReply } from '../shared/digest-api.js';
+import { DIGEST_SCHEMA, DIGEST2_SCHEMA, DIGEST_KINDS, validateDigestReply, type DigestAsk, type DigestKind, type DigestReply } from '../shared/digest-api.js';
 import type { ReadingInput, ReadingSource } from './digest-source.js';
 
 export const DIGEST_KEY = 'agentflow.studio.digest.1';
@@ -24,7 +28,7 @@ export async function askHash(ask: DigestAsk): Promise<string> {
   return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
 }
 export function makeReading(input: ReadingInput, hash: string, model: string, prompt: string, reply: DigestReply): Reading {
-  const refs = new Set([...reply.changes, ...reply.open].flatMap(s => s.refs).concat(reply.read?.refs ?? []));
+  const refs = new Set([...reply.changes, ...reply.open].flatMap(s => s.refs).concat(reply.read?.refs ?? [], (reply.recordReadings ?? []).map(x => x.ref)));
   const cited: Record<string, ReadingSource> = {};
   for (const r of refs) { const s = input.sources.get(r); if (s) cited[r] = { ...s, partIds: [...s.partIds] }; }
   return { sourceVersion: 'complete.1', hash, model, prompt, at: new Date().toISOString(), coverage: { ...input.coverage }, reply: structuredClone(reply), parts: Object.fromEntries(input.parts), cited };
@@ -47,22 +51,28 @@ function readable(v: unknown): Reading | null {
       || !text(s.title, 200) || !text(s.text, 1_000_000) || !text(s.note, 4000, true) || !text(s.basis, 600)
       || !Array.isArray(s.partIds) || s.partIds.length > 32 || s.partIds.some(p => typeof p !== 'string' || !alias.has(p)) || new Set(s.partIds).size !== s.partIds.length
       || !(s.url === null || (typeof s.url === 'string' && /^https?:\/\//.test(s.url)))) return null;
+    // A pasted record: never located, and how much of it was sent (its quotes are checked against that excerpt only).
+    if (s.kind === 'record' && (s.partIds.length || typeof s.recordId !== 'string' || !Number.isSafeInteger(s.sent) || (s.sent as number) < 1 || (s.sent as number) > (s.text as string).length)) return null;
   }
   const reading = v as unknown as Reading;
   // Previous readings have no current request. Recheck their reply using only the frozen citations and aliases they hold.
-  const ask: DigestAsk = { schemaVersion: DIGEST_SCHEMA, project: { name: '보관 정리', purpose: null }, plan: null,
+  const two = isObj(v.reply) && Object.hasOwn(v.reply, 'recordReadings');
+  const ask: DigestAsk = { schemaVersion: two ? DIGEST2_SCHEMA : DIGEST_SCHEMA, project: { name: '보관 정리', purpose: null }, plan: null,
     parts: partEntries.map(([id]) => ({ id, name: id, note: '', parentId: null })),
-    sources: Object.values(reading.cited).map(s => ({ ...s, partIds: s.partIds.map(id => alias.get(id)).filter((id): id is string => !!id) })) };
+    sources: Object.values(reading.cited).map(s => ({ id: s.id, kind: s.kind, title: s.title, text: s.kind === 'record' ? s.text.slice(0, s.sent) : s.text, note: s.note, basis: s.basis,
+      partIds: s.partIds.map(id => alias.get(id)).filter((id): id is string => !!id) })) };
   try { validateDigestReply(reading.reply, ask); return reading; } catch { return null; }
 }
 
+/** key: the workspace entry (or an example's key); legacy: the project id readings were kept under before entries had their own,
+ * or null when there is none to read (an imported copy shares its original's project id). */
 export interface DigestStore {
   /** The reading of exactly this request with this model and prompt, re-checked against the request; else null. */
-  find(projectId: string, hash: string, ask: DigestAsk, model: string, prompt: string): Reading | null;
+  find(key: string, legacy: string | null, hash: string, ask: DigestAsk, model: string, prompt: string): Reading | null;
   /** Newest reading of the project made from other material (or another model/prompt). */
-  previous(projectId: string, hash: string): Reading | null;
+  previous(key: string, legacy: string | null, hash: string): Reading | null;
   /** null when kept; otherwise the text to show (the reading still shows for this tab). */
-  keep(projectId: string, reading: Reading): string | null;
+  keep(key: string, legacy: string | null, reading: Reading): string | null;
 }
 
 export function digestStore(kv: StorageLike | null): DigestStore {
@@ -72,30 +82,30 @@ export function digestStore(kv: StorageLike | null): DigestStore {
     try { const raw = kv.getItem(DIGEST_KEY); if (raw === null) return {}; const v = JSON.parse(raw); return isObj(v) && v.version === 'studio.digest-cache.1' && isObj(v.projects) ? v.projects as Record<string, unknown[]> : null; }
     catch { return null; }
   };
-  const list = (projectId: string): Reading[] => {
-    const mem = memory.get(projectId); if (mem) return mem;
-    const all = load(), raw = all && Array.isArray(all[projectId]) ? all[projectId]! : [];
-    return raw.map(readable).filter((x): x is Reading => !!x);
+  const list = (key: string, legacy: string | null): Reading[] => {
+    const mem = memory.get(key); if (mem) return mem;
+    const all = load(), own = all && Object.hasOwn(all, key) ? all[key] : legacy !== null && all && Object.hasOwn(all, legacy) ? all[legacy] : null;
+    return (Array.isArray(own) ? own : []).map(readable).filter((x): x is Reading => !!x);
   };
   return {
-    find(projectId, hash, ask, model, prompt) {
-      const hit = list(projectId).find(x => x.hash === hash && x.model === model && x.prompt === prompt);
+    find(key, legacy, hash, ask, model, prompt) {
+      const hit = list(key, legacy).find(x => x.hash === hash && x.model === model && x.prompt === prompt);
       if (!hit) return null;
       try { validateDigestReply(hit.reply, ask); return hit; } catch { return null; }
     },
-    previous(projectId, hash) { return list(projectId).find(x => x.hash !== hash) ?? null; },
-    keep(projectId, reading) {
-      const next = [reading, ...list(projectId).filter(x => !(x.hash === reading.hash && x.model === reading.model && x.prompt === reading.prompt))].slice(0, PER_PROJECT);
-      memory.set(projectId, next);
+    previous(key, legacy, hash) { return list(key, legacy).find(x => x.hash !== hash) ?? null; },
+    keep(key, legacy, reading) {
+      const next = [reading, ...list(key, legacy).filter(x => !(x.hash === reading.hash && x.model === reading.model && x.prompt === reading.prompt))].slice(0, PER_PROJECT);
+      memory.set(key, next);
       if (!kv) return null;
       const all = load();
       if (!all) return '이 브라우저의 정리 보관 자리를 읽지 못해 새로 저장하지 않았어요. 이 탭에서만 보여요.';
-      all[projectId] = next;
-      const keys = Object.keys(all); for (const k of keys.slice(0, Math.max(0, keys.length - PROJECTS))) if (k !== projectId) delete all[k];
+      all[key] = next;
+      const keys = Object.keys(all); for (const k of keys.slice(0, Math.max(0, keys.length - PROJECTS))) if (k !== key) delete all[k];
       try {
         const text = JSON.stringify({ version: 'studio.digest-cache.1', projects: all });
         kv.setItem(DIGEST_KEY, text); if (kv.getItem(DIGEST_KEY) !== text) throw new Error('LOST_WRITE');
-        memory.delete(projectId); return null;
+        memory.delete(key); return null;
       } catch { return '이 브라우저에 정리를 저장하지 못했어요. 이 탭에서만 보여요.'; }
     }
   };

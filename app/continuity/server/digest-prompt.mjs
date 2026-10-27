@@ -37,3 +37,29 @@ notCovered (최대 3개, 없으면 빈 배열): 이 자료로는 말할 수 없�
 JSON 객체 하나만 반환한다. 키는 정확히 다음 4개다:
 {"changes":[{"text":"달라진 점","partIds":["P01"],"refs":["S01"]}],"read":{"partId":"P01","why":"이유","refs":["S01"]},"open":[],"notCovered":[]}
 read가 없으면 null이다.`;
+
+// studio.digest.2: the same reading when the material holds records the person pasted as they came (kind 'record'). Only the
+// parts below differ from DIGEST_PROMPT; it has its own prompt id, so readings of digest.1 material stay as they were.
+const RECORD_RULES = `
+record 자료 (kind가 record): 사용자가 작업 AI나 협업 도구에서 받은 글을 그대로 붙여넣은 원문이다. 원문 전체가 결과나 사용자 결정이라는 뜻이 아니다. 그 안에는 보고된 변경, 확인한 범위와 확인하지 않은 범위, 남은 선택, 예전 판본 이야기가 섞여 있을 수 있고, 원문의 주장은 원문 작성자의 주장이다. note의 '붙일 때 보던 부분'은 사용자가 그때 보던 위치일 뿐 원문 전체가 그 부분에 관한 근거가 아니다. basis의 붙여넣은 시각은 원문이 쓰인 시각이나 판본이 아니다. note에 발췌가 표시되면 보내지 않은 뒷부분은 읽었다고 가정하지 않는다.
+
+recordReadings (최대 3개, 가장 앞의 record부터, 쓸 것이 없으면 빈 배열):
+- record 원문에서 사용자가 지금 알아야 할 구체적인 내용을 짧은 한국어 문장으로 읽는다. kind는 change(원문이 보고한 프로그램의 변화), check(원문이 밝힌 확인 범위·실행하지 않은 확인·한계), open(원문이 사용자에게 남긴 판단) 중 하나다. 원문에 변화가 있으면 change를 먼저 쓴다. 남은 판단은 원문이 실제로 사용자에게 남긴 선택만 쓴다.
+- text는 내용이 먼저 온다. "원문에 따르면", "작성자 보고에 따르면", "이 기록은", "붙여넣은 글은" 같은 출처·면책 표현으로 문장을 시작하지 않는다. 출처는 화면이 인용 옆에 따로 보여 준다. 원문의 수치와 범위(통과·보류 개수, 실행하지 않은 검사, 일부만 덮는 검사, 실행한 환경)는 그대로 보존하고 넓히거나 줄이지 않는다. 원문 작성자가 한 확인을 네가 하거나 본 것처럼 쓰지 않는다.
+- ref는 그 record의 id다. quote는 text를 직접 뒷받침하는 원문의 한 구절을 글자 그대로(기호·대소문자 포함) 옮긴 것이며 10~200자다. 원문 전체나 떨어진 두 구절을 이어 붙이지 않고, 보낸 원문에 없는 글을 쓰지 않는다.
+- related는 이 문장과 관련된 지도 부분 후보 0~2개다. 각 후보는 parts의 id(partId), 그 부분과 이어지는 원문 구절(quote, 글자 그대로), 연결 이유(why, 60자 이내)다. 원문에 그 부분을 가리키는 구체적인 이름·파일·동작이 있을 때만 쓴다. 비슷한 단어나 같은 이름만으로 연결하지 않는다. 같은 이름의 부분이 여럿이고 원문으로 어느 것인지 가를 수 없으면 후보로 쓰지 않는다. 붙일 때 보던 부분이라는 이유만으로 연결하지 않는다. 마땅한 부분이 없으면 빈 배열로 두고 문장은 그대로 쓴다. 지도에 없는 부분을 만들지 않는다.
+- 원문이 어느 판본·커밋·시점에 관한 것인지 적혀 있으면 그 판본을 문장에 쓸 수 있고 quote로 뒷받침한다. 적혀 있지 않으면 판본을 추정하지 않는다. 원문이 parts의 note에 적힌 지금 설명·요구와 다른 예전 판본이나 이미 바뀐 내용을 말하면 원문을 지금 상태로 단정하지 않고 그 차이를 짧게 밝힌다.
+- record만으로는 changes를 쓰지 않는다. changes는 위 규칙대로 결과 자료가 인용될 때만 쓴다. record 원문의 변화·확인 범위·남은 판단은 recordReadings에 쓰고 changes·open·notCovered에 같은 말을 반복하지 않는다.
+- recordReadings가 원문의 변화와 확인 범위를 읽었으면 record 때문에 '결과 자료가 없음'을 notCovered에 쓰지 않는다.
+`;
+function derive(text, swaps) {
+  let out = text;
+  for (const [from, to] of swaps) { if (!out.includes(from)) throw new Error(`digest.2 prompt: missing ${from.slice(0, 40)}`); out = out.replace(from, () => to); }
+  return out;
+}
+export const DIGEST2_PROMPT = derive(DIGEST_PROMPT, [
+  ['\n\nchanges (최대 3개, 중요한 것부터):', `\n${RECORD_RULES}\nchanges (최대 3개, 중요한 것부터):`],
+  ['changes가 비어 있으면 notCovered에 그 이유를 한 문장 이상 쓴다.', 'changes와 recordReadings가 모두 비어 있으면 notCovered에 그 이유를 한 문장 이상 쓴다.'],
+  ['JSON 객체 하나만 반환한다. 키는 정확히 다음 4개다:\n{"changes":[{"text":"달라진 점","partIds":["P01"],"refs":["S01"]}],"read":{"partId":"P01","why":"이유","refs":["S01"]},"open":[],"notCovered":[]}',
+    'JSON 객체 하나만 반환한다. 키는 정확히 다음 5개다:\n{"changes":[],"read":null,"open":[],"notCovered":[],"recordReadings":[{"kind":"change","text":"읽은 내용","ref":"N01","quote":"원문 구절 그대로","related":[{"partId":"P01","quote":"원문 구절 그대로","why":"연결 이유"}]}]}']
+]);

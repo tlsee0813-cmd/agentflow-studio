@@ -1,4 +1,4 @@
-import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type PreviousIntent, type CurrentIntent, type Intent, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues, type RelationKind, type Point, type Area, type Background, type ExportRecord, type PlanStamp, type ExportAnchor, type UnderstandingEntry, type UnderstandingInput, type HeldReason, type ResultFile } from './types.js';
+import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type PreviousIntent, type CurrentIntent, type Intent, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues, type RelationKind, type Point, type Area, type Background, type ExportRecord, type PlanStamp, type ExportAnchor, type UnderstandingEntry, type UnderstandingInput, type HeldReason, type ResultFile, type PastedRecord, PASTED_TEXT_LIMIT } from './types.js';
 import { ensure, text, validateEnvelope, digest, sha256, parseResultFile, resultSourceText, parseProject, POSITION_LIMIT, SUMMARY_LIMIT } from './validation.js';
 import { planFacts, planFactsText } from './plan-facts.js';
 import { areaPath, childrenOf } from './hierarchy.js';
@@ -11,7 +11,7 @@ const copy = <T>(value: T): T => structuredClone(value);
 const WORK_KEYS = ['understanding','scope','next','checks'] as const;
 const CONDITION_KEYS = ['scope','checks'] as const;
 export function createProject(): Project {
-  return {schemaVersion:SCHEMA,id:uid('P'),revision:1,name:'나의 프로젝트',sources:[],bases:[],tasks:[],currentTaskId:null,draft:'',answerDraft:'',basisDraft:'',basisEdits:{},draftKind:'request',pending:null,notice:null,space:{brief:null,areas:[],relations:[],draftTarget:null,layout:{version:'layout.1',positions:{}},understanding:{},containment:{version:'containment.1',parents:{},revisions:{}}}};
+  return {schemaVersion:SCHEMA,id:uid('P'),revision:1,name:'나의 프로젝트',sources:[],bases:[],tasks:[],currentTaskId:null,draft:'',answerDraft:'',basisDraft:'',basisEdits:{},draftKind:'request',pending:null,notice:null,space:{brief:null,areas:[],relations:[],draftTarget:null,layout:{version:'layout.1',positions:{}},understanding:{},containment:{version:'containment.1',parents:{},revisions:{}}},pasted:[]};
 }
 export function taskOf(p: Project, id = p.currentTaskId): Task { const t=p.tasks.find(t=>t.id === id); ensure(t,'TASK_MISSING'); return t; }
 function change(p: Project): Project { return {...copy(p),revision:p.revision+1,notice:null}; }
@@ -563,6 +563,14 @@ export function markHandoff(p:Project,id:string,text:string,method:'clipboard'|'
     // AREA17: what the return file's description may build on, captured now (not the request-time background copy).
     anchor});
   return n;
+}
+/** project.8: keeps a pasted record exactly as given (no trimming or merging) with the time it was added here and, optionally, the
+ * part being looked at. The very same text already kept is that record again: nothing is added and the revision stays. */
+export function pasteRecord(p: Project, value: string, context: string|null): {project:Project;record:PastedRecord;duplicate:boolean} {
+  const same=p.pasted.find(r=>r.text===value); if(same) return {project:p,record:same,duplicate:true};
+  text(value,PASTED_TEXT_LIMIT); ensure(context===null||p.space.areas.some(a=>a.id===context));
+  const n=change(p), record:PastedRecord={id:uid('N'),text:value,at:now(),context};
+  n.pasted.push(record); return {project:n,record:copy(record),duplicate:false};
 }
 export function restore(p: Project): Project {
   return {...copy(p),pending:null,notice:p.pending ? '중단된 요청의 입력을 복구했습니다. 자동으로 다시 전송하지 않습니다.' : null};
