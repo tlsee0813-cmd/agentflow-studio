@@ -94,8 +94,10 @@ export function isListGroup(v: StudioView, container: string | null): boolean {
 }
 
 /** planned: only while a change preview reads on the map, the lines a part's own row will show under its name (each text it can
- * show; the longest, up to two lines, decides). Only these parts take that room; every other box keeps its current size. */
-export function layoutScope(v: StudioView, scope: string | null, expanded: (id: string, depth: number) => boolean, pos: Positions, measureText: TextMeasure = estimate, planned?: ReadonlyMap<string, readonly string[]>): ScopeLayout {
+ * show; the longest, up to two lines, decides). Only these parts take that room; every other box keeps its current size.
+ * aspect: width/height of the window's map (not of what a reading pane leaves of it): the scope's own unlinked parts are set in
+ * as many columns as make their block closest to that shape, instead of one tall column. */
+export function layoutScope(v: StudioView, scope: string | null, expanded: (id: string, depth: number) => boolean, pos: Positions, measureText: TextMeasure = estimate, planned?: ReadonlyMap<string, readonly string[]>, aspect = 1.6): ScopeLayout {
   const byId = new Map(v.parts.map(p => [p.id, p]));
   const kidsOf = (id: string | null) => (id ? byId.get(id)?.childIds ?? [] : v.roots);
   const open = (id: string, depth: number) => depth < 12 && kidsOf(id).length > 0 && expanded(id, depth);
@@ -147,9 +149,36 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
     if (inFrame && flow.length && flow.every(l => l.length === 1)) cols.push(...wrap(flow.map(l => l[0]!)).map(c => ({ ids: c, gap: GAP, centre: false })));
     else flow.forEach(l => { const w = wrap(l); w.forEach((c, i) => cols.push({ ids: c, gap: i < w.length - 1 ? (inFrame ? GAP : WRAP_GAP) : inFrame ? FLOW_GAP : COL_GAP, centre: w.length === 1 })); });
     if (cols.length && lone.length) cols.at(-1)!.gap = inFrame ? (cols.at(-1)!.gap === GAP ? GAP : FLOW_GAP) : WRAP_GAP;
-    cols.push(...wrap(lone).map(c => ({ ids: c, gap: inFrame ? GAP : WRAP_GAP, centre: false })));
+    // The scope's own unlinked parts: no order between them to keep, so they go where the whole block needs the least zoom in a
+    // window of this shape: as columns beside the linked block, or in rows under it (never inside a relation layer, which would
+    // read as a step). Parts inside a group keep their one readable column.
+    const colW = (c: string[]) => Math.max(...c.map(i => sizes.get(i)!.w)), colH = (c: string[]) => c.reduce((a, i) => a + sizes.get(i)!.h, 0) + ROW_GAP * (c.length - 1);
+    const flowCols = cols.length, flowW = cols.reduce((a, x) => a + colW(x.ids) + x.gap, 0), flowH = Math.max(0, ...cols.map(x => colH(x.ids)));
+    const need = (W: number, H: number) => Math.max(W, H * aspect);
+    let side = wrap(lone), below: string[][] | null = null;
+    if (!inFrame && lone.length) {
+      let score = Infinity;
+      for (let per = 1; per <= lone.length; per++) {
+        const cs: string[][] = []; for (let i = 0; i < lone.length; i += per) cs.push(lone.slice(i, i + per));
+        const sc = need(flowW + cs.reduce((a, x) => a + colW(x), 0) + WRAP_GAP * (cs.length - 1), Math.max(flowH, ...cs.map(colH)));
+        if (sc < score - 1e-6) { score = sc; side = cs; }
+      }
+      if (flowCols) {
+        const room = Math.max(flowW - WRAP_GAP, ...lone.map(i => sizes.get(i)!.w)), rows: string[][] = [];
+        let cur: string[] = [], w = 0;
+        for (const i of lone) { const iw = sizes.get(i)!.w; if (cur.length && w + WRAP_GAP + iw > room) { rows.push(cur); cur = []; w = 0; } w += (cur.length ? WRAP_GAP : 0) + iw; cur.push(i); }
+        if (cur.length) rows.push(cur);
+        const rowH = (r: string[]) => Math.max(...r.map(i => sizes.get(i)!.h));
+        const sc = need(Math.max(flowW - WRAP_GAP, room), flowH + ROW_GAP * 2 + rows.reduce((a, r) => a + rowH(r), 0) + ROW_GAP * (rows.length - 1));
+        if (sc < score - 1e-6) below = rows;
+      }
+    }
+    if (below) cols.at(-1)!.gap = inFrame ? FLOW_GAP : COL_GAP;
+    else cols.push(...side.map(c => ({ ids: c, gap: inFrame ? GAP : WRAP_GAP, centre: false })));
     const gapY = inFrame ? GAP : ROW_GAP;
-    const heights = cols.map(c => c.ids.reduce((acc, i) => acc + sizes.get(i)!.h, 0) + gapY * (c.ids.length - 1)), tallest = Math.max(0, ...heights);
+    // Relation layers centre against the tallest relation layer only: a tall block of unlinked parts beside them does not
+    // push them down.
+    const heights = cols.map(c => c.ids.reduce((acc, i) => acc + sizes.get(i)!.h, 0) + gapY * (c.ids.length - 1)), tallest = Math.max(0, ...heights.slice(0, flowCols));
     const at = new Map<string, Point>(); let x = 0;
     cols.forEach((c, ci) => {
       const w = Math.max(...c.ids.map(i => sizes.get(i)!.w));
@@ -157,6 +186,13 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
       for (const i of c.ids) { const sz = sizes.get(i)!; at.set(i, { x: x - sz.ox, y: y - sz.oy }); y += sz.h + gapY; }
       x += w + c.gap;
     });
+    if (below) {
+      let y = tallest + ROW_GAP * 2;
+      for (const r of below) {
+        let rx = 0; for (const i of r) { const sz = sizes.get(i)!; at.set(i, { x: rx - sz.ox, y: y - sz.oy }); rx += sz.w + WRAP_GAP; }
+        y += Math.max(...r.map(i => sizes.get(i)!.h)) + ROW_GAP;
+      }
+    }
     return at;
   };
   const anchors = (container: string | null, depth: number) => {

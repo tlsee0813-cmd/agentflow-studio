@@ -49,6 +49,19 @@ BOXES = "() => [...document.querySelectorAll('#world [data-box]')].map(e => e.da
 CAMERA = "e => e.style.transform"
 
 
+def in_map(page, sel):
+    """Wholly inside the map's own viewport: not under the reading pane, the plan's strip or past an edge."""
+    vp, r = page.locator("#viewport").bounding_box(), page.locator(sel).bounding_box()
+    assert vp["x"] - 1 <= r["x"] and r["x"] + r["width"] <= vp["x"] + vp["width"] + 1 and vp["y"] - 1 <= r["y"] and r["y"] + r["height"] <= vp["y"] + vp["height"] + 1, (sel, r, vp)
+
+
+def pane_beside_map(page):
+    """The reading pane is a column of its own: the map's viewport ends where it begins."""
+    page.wait_for_timeout(250)  # after its short slide in
+    vp, pane = page.locator("#viewport").bounding_box(), page.locator("#lens").bounding_box()
+    assert abs(vp["x"] + vp["width"] - pane["x"]) <= 1 and pane["x"] + pane["width"] >= page.viewport_size["width"] - 1, (vp, pane)
+
+
 def clear_of(page, a, b):
     ra, rb = page.locator(a).bounding_box(), page.locator(b).bounding_box()
     assert ra["x"] + ra["width"] <= rb["x"] + 1 or rb["x"] + rb["width"] <= ra["x"] + 1 or ra["y"] + ra["height"] <= rb["y"] + 1 or rb["y"] + rb["height"] <= ra["y"] + 1, (a, ra, b, rb)
@@ -367,12 +380,12 @@ def workspace_flow(browser, base, cases):
     page.locator(".node", has_text="문서 읽기").click()
     zoom, before = page.locator("#zoom-level").inner_text(), page.locator("#world").evaluate("e => e.style.transform")
     page.locator("#plan-entry").click()
-    # The plan reads on the map: its strip on top and short notes beside the parts of the change being read; no right panel
-    # and no long comparison by default.
+    # The plan reads on the map and in the pane: its strip on top, the change's marks on the parts, and the short reading of
+    # the change in the pane beside the map; no whole-plan panel and no long comparison by default.
     expect(page.locator("#plan-strip")).to_be_visible()
     expect(page.locator("#plan-panel")).to_be_hidden()
-    expect(page.locator("#lens")).to_be_hidden()
-    expect(page.locator(".callout").first).to_be_visible()
+    expect(page.locator("#lens .callout")).to_be_visible()
+    pane_beside_map(page)
     expect(page.locator("#zoom-level")).to_have_text(zoom)  # opening never re-zooms
     page.wait_for_timeout(400)
     expect(page.locator(".frame")).to_have_count(3)
@@ -408,13 +421,8 @@ def workspace_flow(browser, base, cases):
     expect(page.locator(".callout .co-row.now").first).to_be_visible()
     expect(page.locator(".callout .co-row.want").first).to_be_visible()
     page.wait_for_timeout(300)
-    if "docked" in page.locator(".callout").get_attribute("class"):
-        vp, card = page.locator("#viewport").bounding_box(), page.locator(".callout").bounding_box()
-        assert vp["y"] + vp["height"] <= card["y"]  # the actual map ends before the reading row
-        assert page.locator(".callout").evaluate("e => e.scrollHeight <= e.clientHeight")
-    else:
-        for j in range(page.locator(".node").count()):
-            clear_of(page, ".callout", f".node >> nth={j}")
+    in_map(page, "#world .plan-reading")  # the target being read is brought beside the pane, not under it
+    pane_beside_map(page)
     # Sources replace this one reading; coming back keeps the actual target and its matching before/after text.
     target_camera = page.locator("#world").evaluate("e => e.style.transform")
     page.locator(".callout .co-src").click()
@@ -453,8 +461,7 @@ def workspace_flow(browser, base, cases):
     expect(page.locator("#lens .cmp-want .cmp-text")).to_have_count(1)
     expect(page.locator("#lens .cmp-hand input")).to_be_checked()
     page.wait_for_timeout(400)
-    for i in range(page.locator(".plan-focus").count()):  # the parts being compared stay clear of the comparison
-        clear_of(page, f".plan-focus >> nth={i}", "#lens")
+    in_map(page, "#world .plan-reading")  # the part being compared stays in the map beside the comparison
     # Selecting a different named target while the comparison is open reveals its real map box above that reading surface.
     page.locator(".ps-target").nth(0).click()
     expect(page.locator("#lens .cmp-fallback .cmp-name")).to_have_text(target_names[0])
@@ -463,9 +470,9 @@ def workspace_flow(browser, base, cases):
     expect(page.locator("#lens .cmp-fallback .cmp-gap")).to_have_text("현재와의 비교는 아직 정리 전이에요.")
     expect(page.locator("#world .plan-reading")).to_be_in_viewport()
     page.wait_for_timeout(400)  # compare stable rectangles after the minimum-pan animation
-    clear_of(page, "#world .plan-reading", "#lens")
-    page.keyboard.press("Escape")
-    expect(page.locator("#lens")).to_be_hidden()
+    in_map(page, "#world .plan-reading")
+    page.keyboard.press("Escape")  # the long reading gives way to the short one, in the same pane
+    expect(page.locator("#lens .callout")).to_be_visible()
     scene, camera = page.evaluate(BOXES), page.locator("#world").evaluate(CAMERA)
     page.locator("#plan-mode").get_by_role("button", name="현재").click()
     expect(page.locator("#world .plan-direct")).to_have_count(0)
@@ -482,16 +489,18 @@ def workspace_flow(browser, base, cases):
     page.locator(".ps-link", has_text="설명").click()
     expect(page.locator("#lens .cmp-fallback")).to_be_visible()
     page.wait_for_timeout(400)  # compare stable rectangles after the minimum-pan animation
-    clear_of(page, f'#world [data-box="{target}"]', "#lens")
+    in_map(page, f'#world [data-box="{target}"]')
     explained = page.locator("#world").evaluate(CAMERA)
     page.locator("#lens .lens-more", has_text="근거").click()
     expect(page.locator("#lens .cmp-evidence")).to_be_visible()
-    clear_of(page, f'#world [data-box="{target}"]', "#lens")
+    in_map(page, f'#world [data-box="{target}"]')
     page.locator("#cmp-back").click()
     expect(page.locator("#lens .cmp-fallback")).to_be_visible()
-    clear_of(page, f'#world [data-box="{target}"]', "#lens")
+    in_map(page, f'#world [data-box="{target}"]')
     assert page.locator("#world").evaluate(CAMERA) == explained
     page.keyboard.press("Escape")
+    expect(page.locator("#lens .callout")).to_be_visible()
+    page.keyboard.press("Escape")  # no change being read: the pane closes and the map takes the window
     expect(page.locator("#lens")).to_be_hidden()
     # The whole plan opens on request. A narrow window: the panel and the request sheet take the whole width; back to 1280.
     page.locator(".ps-more").click()
@@ -576,10 +585,9 @@ def preview_context_flow(browser, base):
     expect(page.locator("#world .frame")).to_have_count(1)  # only the input path, not the other two groups
     expect(page.locator("#world .plan-reading .node-name")).to_have_text("문서 읽기")
     target = page.locator("#world .plan-reading").get_attribute("data-box")
-    expect(page.locator(".callout")).to_have_attribute("data-target", target)
-    expect(page.locator(".callout")).to_have_attribute("data-box", target)
-    expect(page.locator(".callout-leader")).to_have_count(1)
-    assert page.locator(".callout-leader path").get_attribute("marker-end") is None
+    expect(page.locator("#lens .callout")).to_have_attribute("data-target", target)
+    expect(page.locator("#lens .callout")).to_have_attribute("data-box", target)
+    expect(page.locator(".callout-leader")).to_have_count(0)  # read in the pane: no leader drawn over the map
     expect(page.locator("#zoom-level")).to_have_text(zoom)
     scene, camera = page.evaluate(BOXES), page.locator("#world").evaluate(CAMERA)
     page.locator("#plan-mode").get_by_role("button", name="현재", exact=True).click()
@@ -665,6 +673,65 @@ def relation_context_flow(browser, base, cases):
     context.close()
 
 
+def overview_flow(browser, base, cases):
+    """UI62: a large source list opens as an overview of its real groups (names, counts, outside lines), every part stays
+    reachable by name with a way back; a scope's own relations read as the scope's; the selection reads in the pane beside the
+    map with its relations by verb; unlinked parts of a scope sit in balanced columns."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    page.goto(base + "/")
+    page.locator("#import-file").set_input_files(str(cases / "oss-vscode.json"))
+    expect(page.locator("#crumbs")).to_contain_text("VS Code")
+    for name in ["문서와 편집기", "확장 실행과 연결", "공통과 기타", "대화와 AI", "공개 API 계약"]:
+        expect(page.locator("#world [data-part]", has_text=name).first).to_be_in_viewport()
+    common = page.locator("#world .node.has-kids", has_text="공통과 기타")
+    expect(common.locator(".enter")).to_contain_text("43")  # folded at first, with its count and its way in
+    expect(page.locator("#world .node.item")).to_have_count(0)  # no catalogue spread over the overview
+    assert page.locator("#world [data-part]").count() < 40
+    # Any part by name: the same part, inside its own group when that group is folded here; the way back to the overview.
+    overview = page.locator("#world").evaluate(CAMERA)
+    page.locator("#find-toggle").click()
+    page.locator("#find-input").fill("Telemetry")
+    page.locator(".find-item", has_text="Telemetry").first.click()
+    expect(page.locator("#lens-title")).to_have_text("Telemetry")
+    in_scope(page, "공통과 기타")
+    expect(page.locator("#world .node.item")).to_have_count(43)  # the whole list at full size, all of it reachable
+    expect(page.locator("#world .node.selected")).to_have_text(re.compile("Telemetry"))
+    page.locator("#scope-bar .scope-up").click()  # the overview came before it: up is the way back, to the same view
+    expect(page.locator("#scope-bar")).to_be_hidden()
+    expect(page.locator("#world .node.has-kids", has_text="공통과 기타")).to_be_visible()
+    page.wait_for_timeout(500)
+    assert page.locator("#world").evaluate(CAMERA) == overview
+    # Joplin: the desktop app's own relations read under its title inside it (no line drawn from one of its children).
+    page.goto(base + "/")
+    page.locator("#import-file").set_input_files(str(cases / "oss-joplin.json"))
+    page.locator("#world .node", has_text="@joplin/renderer").click()
+    pane_beside_map(page)
+    expect(page.locator("#lens .lens-ports h3").first).to_contain_text("이 부분을 필요로 함")
+    expect(page.locator("#world .edge-label.on")).not_to_have_count(0)
+    page.keyboard.press("Escape")
+    page.locator(".frame-head", has_text="@joplin/app-desktop").locator(".enter").click()
+    in_scope(page, "@joplin/app-desktop")
+    rels = page.locator(".map-title .scope-rel")
+    expect(rels).to_have_count(1)
+    expect(rels).to_contain_text("이 범위가 필요로 함")
+    for name in ["@joplin/lib", "@joplin/editor", "@joplin/renderer"]:
+        expect(rels.locator(".sr-part", has_text=name)).to_have_count(1)
+    expect(page.locator("#world .ghost")).to_have_count(0)
+    xs = page.evaluate("[...document.querySelectorAll('#world > .node, #world > .frame')].filter(e => !e.closest('.frame') || true).map(e => e.style.left)")
+    assert len(set(xs)) >= 2, xs  # four unlinked parts are not one tall column
+    # The scope reads whole in the pane on request; its relations there too.
+    page.locator(".map-title .map-more").click()
+    expect(page.locator("#lens.scope-read")).to_be_visible()
+    expect(page.locator("#lens .lens-text")).to_contain_text("architecture.md")
+    page.keyboard.press("Escape")
+    expect(page.locator("#lens")).to_be_hidden()
+    rels.locator(".sr-part", has_text="@joplin/lib").click()
+    expect(page.locator("#scope-bar")).to_be_hidden()
+    expect(page.locator("#lens-title")).to_have_text("@joplin/lib")
+    context.close()
+
+
 def failure_flow(browser, base):
     page = browser.new_page(viewport={"width": 1280, "height": 720})
     page.goto(base + "/")
@@ -714,9 +781,10 @@ def main():
             basics_flow(browser, base); print("ok  stable example link (reload, new browser), labels, no map note text, recent range, fold restored")
             map_flow(browser, base); print("ok  drag (node, group), wheel zoom, inside/back with view kept, fold, example places not saved")
             new_project_flow(browser, base); print("ok  new project -> three levels -> path and back -> saved place and draft kept on reload")
-            workspace_flow(browser, base, oss_fixtures()); print("ok  plan strip and docked comparison, open/close without zoom, long same-prefix names, way back apart from way up")
+            workspace_flow(browser, base, oss_fixtures()); print("ok  plan strip and comparison in the pane, open/close without zoom, long same-prefix names, way back apart from way up")
             preview_context_flow(browser, base); print("ok  preview exposes only its target path; current, sources and user folds preserve ownership")
             relation_context_flow(browser, base, oss_fixtures()); print("ok  existing relations of target and candidate read above groups; current and preview share one scene")
+            overview_flow(browser, base, oss_fixtures()); print("ok  large list as an overview of real groups, find with way back, scope relations, pane beside the map, verbs")
             proc, base = start("code"); procs.append(proc); code_flow(browser, base); print("ok  access code kept from an input event")
             proc, base = start("fail"); procs.append(proc); failure_flow(browser, base); print("ok  provider failure -> short error -> retry")
             proc, base = start("nokey"); procs.append(proc); off_flow(browser, base + "/", "AI 키 없음"); print("ok  server without key -> honest off state")

@@ -14,7 +14,7 @@
   --radius: 10px; --shadow-sm: 0 1px 2px rgba(16,24,40,.06); --shadow: 0 1px 2px rgba(16,24,40,.05), 0 1px 1px rgba(16,24,40,.03);
   --shadow-lg: 0 14px 34px -12px rgba(16,24,40,.22), 0 2px 6px rgba(16,24,40,.06);
   --font: system-ui, -apple-system, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
-  --insp-w: clamp(360px, 30vw, 408px);
+  --insp-w: clamp(336px, 27vw, 392px);
   color-scheme: light;
 }
 * { box-sizing: border-box; }
@@ -97,7 +97,7 @@ button:disabled { opacity: .5; cursor: default; }
 .program-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
 .program { display: grid; grid-template-columns: minmax(220px, 300px) minmax(0, 1fr); gap: 12px 28px; padding: 18px 20px; background: var(--surface); border: 1px solid var(--region-line); border-radius: 16px; box-shadow: var(--shadow-region); }
 .program-head { display: flex; flex-direction: column; gap: 6px; min-width: 0; text-decoration: none; }
-.program-name { font-size: 17px; font-weight: 700; letter-spacing: -.01em; overflow-wrap: anywhere; }
+.program-name { font-size: 17px; font-weight: 700; letter-spacing: -.01em; word-break: keep-all; overflow-wrap: anywhere; }
 .program-head:hover .program-name { color: var(--accent); }
 .program-brief { font-size: 13.5px; line-height: 1.55; color: var(--text-2); word-break: keep-all; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .program-meta { margin-top: auto; padding-top: 4px; font-size: 12px; color: var(--text-4); }
@@ -105,8 +105,8 @@ button:disabled { opacity: .5; cursor: default; }
 .program-section { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
 .program-section a { display: flex; flex-direction: column; gap: 3px; height: 100%; padding: 10px 12px; background: var(--tint); border: 1px solid transparent; border-radius: 10px; text-decoration: none; }
 .program-section a:hover { background: var(--surface); border-color: var(--line-strong); }
-.program-section strong { font-size: 13px; font-weight: 650; overflow-wrap: anywhere; }
-.program-section span { font-size: 12px; line-height: 1.45; color: var(--text-3); overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.program-section strong { font-size: 13px; font-weight: 650; word-break: keep-all; overflow-wrap: break-word; hyphens: manual; }
+.program-section span { font-size: 12px; line-height: 1.45; color: var(--text-3); word-break: keep-all; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .program-section small { color: var(--text-4); }
 .program-section .quiet { color: var(--text-4); }
 .program-section .more a { justify-content: center; align-items: center; font-size: 12.5px; font-weight: 600; color: var(--text-3); }
@@ -160,20 +160,33 @@ button:disabled { opacity: .5; cursor: default; }
 .space.dim .edge:not(.on):not(.near) .edge-line { opacity: .28; }
 
 .map-title { position: absolute; pointer-events: none; transition: opacity .12s; }
+.map-title button { pointer-events: auto; }
+.map-more { margin-left: 8px; padding: 0; border: 0; background: none; color: var(--accent); font-size: 13px; font-weight: 600; white-space: nowrap; }
+.map-more:hover { text-decoration: underline; }
+/* The scope's own relations to the outside: the scope's, never lines from one of its children. */
+.scope-rels { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+.scope-rel { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; font-size: 12.5px; }
+.sr-verb { margin-right: 4px; color: var(--text-3); font-weight: 600; white-space: nowrap; }
+.sr-part { height: 26px; padding: 0 9px; border: 1px dashed var(--line-strong); border-radius: 7px; background: var(--surface); font-size: 12.5px; font-weight: 600; color: var(--text-2); white-space: nowrap; }
+.sr-part:hover { border-color: var(--accent); color: var(--accent); }
+/* verbs on the selection's lines (and on the few lines of a small map) */
+.edge-labels { position: absolute; left: 0; top: 0; pointer-events: none; }
+.edge-label { position: absolute; height: 18px; padding: 0 6px; border-radius: 9px; background: var(--bg); font-size: 11.5px; line-height: 18px; font-weight: 600; color: var(--text-3); white-space: nowrap; }
+.edge-label.on { background: var(--accent-soft); color: var(--accent); }
 .map-title.pinned { opacity: 0; }
 .map-name { margin: 0; word-break: keep-all; font-size: 22px; line-height: 1.25; font-weight: 700; letter-spacing: -.02em; color: var(--text); overflow-wrap: anywhere; }
-.map-purpose { margin: 6px 0 0; word-break: keep-all; font-size: 14px; line-height: 1.6; color: var(--text-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.map-purpose { margin: 6px 0 0; word-break: keep-all; font-size: 14px; line-height: 1.6; color: var(--text-2); }
 
 .frame { position: absolute; border-radius: 12px; border: 1px solid transparent; }
 .frame.region { background: var(--surface); border-color: var(--region-line); border-radius: 16px; box-shadow: var(--shadow-region); }
-.frame.group { background: var(--surface); border-color: var(--hair-2); }
+.frame.group { background: transparent; border-color: var(--hair-2); }
 .frame.group.tint { background: var(--tint); border-color: transparent; }
 .frame.selected { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(43,89,195,.12); }
 .frame.related { border-color: var(--accent-line); }
 .frame.cited { border-color: var(--accent); }
 .frame-head { position: absolute; left: 0; right: 0; top: 0; display: flex; align-items: center; gap: 4px; padding: 0 8px 0 6px; border-radius: 12px 12px 0 0; cursor: pointer; }
 .frame-title { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-.frame-name { font-weight: 650; font-size: 13px; line-height: 1.3; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.frame-name { font-weight: 650; font-size: 13px; line-height: 1.3; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .frame-head.tall .frame-name { white-space: normal; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .region > .frame-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto auto; grid-template-rows: auto auto; align-items: start; column-gap: 4px; row-gap: 3px; padding: 12px 10px 0 6px; border-radius: 16px 16px 0 0; }
 .region > .frame-head .frame-note { grid-column: 2 / -1; grid-row: 2; }
@@ -185,10 +198,11 @@ button:disabled { opacity: .5; cursor: default; }
 .region > .frame-head .frame-meta { margin-top: 3px; }
 .frame-meta .fresh { color: var(--text-2); }
 
-.node { position: absolute; display: flex; align-items: center; gap: 4px; padding: 0 8px 0 12px; cursor: pointer; background: var(--tint); border: 1px solid transparent; border-radius: 9px; text-align: left; transition: border-color .12s, box-shadow .12s, opacity .12s, background .12s; }
-.node:hover { background: var(--surface); border-color: var(--line-strong); }
-/* rows on a tinted group are white */
-.node.on-tint { background: var(--surface); border-color: var(--hair-2); }
+.node { position: absolute; display: flex; align-items: center; gap: 4px; padding: 0 8px 0 12px; cursor: pointer; background: var(--surface); border: 1px solid var(--hair-2); border-radius: 9px; text-align: left; transition: border-color .12s, box-shadow .12s, opacity .12s, background .12s; }
+.node:hover { border-color: var(--line-strong); }
+/* A folded part with an inside reads as a small stack: its parts are there, behind its count. */
+.node.has-kids:not(.item) { box-shadow: 0 3px 0 -1px var(--surface), 0 3px 0 0 var(--hair-2); }
+.node.unit.has-kids { box-shadow: 0 4px 0 -1px var(--surface), 0 4px 0 0 var(--region-line), var(--shadow-region); }
 .node.unit { align-items: flex-start; padding: 12px 10px 12px 14px; background: var(--surface); border-color: var(--region-line); border-radius: 14px; box-shadow: var(--shadow-region); }
 .node.unit.has-kids { padding-left: 6px; }
 .node.item { background: transparent; border-radius: 7px; padding: 0 8px 0 10px; }
@@ -228,16 +242,16 @@ button:disabled { opacity: .5; cursor: default; }
 .ghost-tag { flex: none; font-size: 11px; color: var(--text-4); }
 .ghost-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
 
-/* ---------- the lens: the selection read beside its part (one reading surface; the sheet replaces it) ---------- */
-.lens { position: absolute; left: 0; top: 0; width: min(340px, calc(100% - 32px)); display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow-lg); overflow: hidden; z-index: 3; animation: pop-in .14s ease; }
-.lens.animate { transition: left .22s ease, top .22s ease; }
-.lens-head { position: relative; padding: 13px 72px 8px 16px; }
+/* ---------- the reading pane: the selection, a comparison, the scope itself (the sheet and the whole plan take its place) ----------
+   A column of text on the right, the same width as the sheet; the map's viewport ends where it begins. */
+.lens { position: absolute; top: 0; right: 0; bottom: 0; width: var(--insp-w); display: flex; flex-direction: column; background: var(--surface); border-left: 1px solid var(--line); box-shadow: -14px 0 28px -24px rgba(16,24,40,.24); overflow: hidden; z-index: 3; animation: dock-in .16s ease; }
+.lens-head { position: relative; padding: 16px 72px 10px 20px; border-bottom: 1px solid var(--hair); }
 .lens-path { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; font-size: 12px; color: var(--text-3); margin-bottom: 2px; }
 .lens-path a { text-decoration: none; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .lens-path a:hover { color: var(--accent); }
 .lens-path > span[aria-hidden] { color: var(--text-4); }
-.lens-head h2 { margin: 0; font-size: 17px; line-height: 1.3; font-weight: 700; letter-spacing: -.012em; overflow-wrap: anywhere; }
-.lens .head-tools { top: 9px; right: 8px; }
-.lens-body { flex: 1; min-height: 0; overflow-y: auto; padding: 0 16px 12px; overscroll-behavior: contain; }
+.lens-head h2 { margin: 2px 0 0; font-size: 18px; line-height: 1.3; font-weight: 700; letter-spacing: -.012em; word-break: keep-all; overflow-wrap: anywhere; }
+.lens .head-tools { top: 12px; right: 10px; }
+.lens-body { flex: 1; min-height: 0; overflow-y: auto; padding: 14px 20px 18px; overscroll-behavior: contain; }
 .cmp-evidence .pp-sources { margin-top: 2px; }
 .lens-desc { display: flex; flex-direction: column; gap: 6px; }
 .lens-text { word-break: keep-all; margin: 0; font-size: 14px; line-height: 1.6; color: var(--text); }
@@ -248,8 +262,8 @@ button:disabled { opacity: .5; cursor: default; }
 .lens-plan { margin: 0; font-size: 12.5px; color: var(--text-2); display: flex; gap: 6px; }
 .lens-plan span { flex: none; font-size: 11px; font-weight: 650; color: var(--text-3); background: #f1f2f5; border-radius: 5px; padding: 0 6px; height: 19px; line-height: 19px; }
 .lens-changes { margin: 2px 0 0; padding-left: 16px; font-size: 13px; color: var(--text); } .lens-changes li + li { margin-top: 2px; }
-.lens-ports { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--hair); }
-.lens-ports h3 { margin: 0 0 4px; font-size: 12px; font-weight: 650; color: var(--text-3); }
+.lens-ports { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--hair); }
+.lens-ports h3 { margin: 0 0 4px; font-size: 12.5px; font-weight: 650; color: var(--text-2); }
 .lens-ports h3 small { margin-left: 5px; font-weight: 500; color: var(--text-4); }
 .lens-ports ul { list-style: none; margin: 0 -8px; padding: 0; }
 .port { width: 100%; display: flex; flex-direction: column; gap: 1px; padding: 6px 8px; border: 0; border-radius: 8px; background: none; text-align: left; }
@@ -257,7 +271,7 @@ button:disabled { opacity: .5; cursor: default; }
 .port-top { display: flex; align-items: baseline; gap: 7px; min-width: 0; }
 .port-dir { flex: none; color: var(--text-4); font-size: 12.5px; }
 .port-top strong { min-width: 0; font-size: 13.5px; font-weight: 650; overflow-wrap: anywhere; }
-.port-kind { flex: none; margin-left: auto; font-size: 11.5px; color: var(--text-3); white-space: nowrap; }
+.port-kind, .port-count { flex: none; margin-left: auto; font-size: 11.5px; color: var(--text-3); white-space: nowrap; }
 .port-where { margin-left: 19px; font-size: 12px; color: var(--text-4); }
 .port-note { word-break: keep-all; margin-left: 19px; font-size: 12.5px; line-height: 1.5; color: var(--text-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .lens-ports .link-button { margin: 4px 0 0; font-size: 12px; }
@@ -266,7 +280,7 @@ button:disabled { opacity: .5; cursor: default; }
 .lens-inside p span { font-weight: 650; color: var(--text-3); margin-right: 6px; }
 .go-in { align-self: flex-start; height: 30px; padding: 0 12px; border: 1px solid var(--accent-line); border-radius: 8px; background: var(--accent-soft); color: var(--accent); font-size: 12.5px; font-weight: 650; }
 .go-in:hover { background: #e3eafb; }
-.lens-foot { display: flex; align-items: center; gap: 14px; padding: 9px 16px 11px; border-top: 1px solid var(--hair); }
+.lens-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 10px 20px 12px; border-top: 1px solid var(--hair); }
 .lens-more { height: 30px; padding: 0 11px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--surface); font-size: 12.5px; font-weight: 600; color: var(--text); }
 .lens-more:hover { background: var(--surface-2); }
 .lens-foot .link-button { font-size: 12.5px; }
@@ -490,7 +504,6 @@ button:disabled { opacity: .5; cursor: default; }
 .ps-close { flex: none; }
 
 /* the comparison: the parts as they are now → what the change wants (once), then impact candidates with their reasons */
-.lens.compare { width: min(380px, calc(100% - 32px)); }
 .cmp-head .lens-path span { color: var(--change); font-weight: 600; }
 .cmp-head { padding-right: 132px; }
 .cmp-step { width: 26px; height: 26px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--text-2); font-size: 15px; line-height: 1; }
@@ -514,16 +527,12 @@ button:disabled { opacity: .5; cursor: default; }
 .clamp3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .cmp-impacts { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--change-line); }
 .cmp-impacts ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-/* Docked (the plan's usual place): the pair, then the candidates beside it, so the comparison reads in one sweep. */
-.lens.compare.docked .cmp-main { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(220px, 1fr); column-gap: 24px; align-items: start; }
-.lens.compare.docked .cmp-impacts { margin-top: 0; padding: 0 0 0 20px; border-top: 0; border-left: 1px dashed var(--change-line); }
 .cmp-impacts li { display: flex; flex-direction: column; gap: 1px; font-size: 12.5px; line-height: 1.5; color: var(--text-2); word-break: keep-all; }
 .cmp-impacts .link-button { align-self: flex-start; font-size: 12.5px; color: var(--text); }
 .cmp-dep { margin: 10px 0 0; font-size: 12.5px; color: var(--text-2); } .cmp-dep span { margin-right: 8px; font-weight: 700; font-size: 11.5px; color: var(--text-3); }
 .cmp-hand { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; color: var(--text-2); cursor: pointer; }
 .cmp-hand input { width: 15px; height: 15px; margin: 0; accent-color: var(--accent); }
 .lens.compare .lens-foot { justify-content: space-between; }
-.lens.compare.docked .lens-body { display: block; }
 
 /* plan inspector: the change list leads; writing and sources follow */
 .pp-head { padding-right: 52px; }
@@ -652,11 +661,6 @@ button:disabled { opacity: .5; cursor: default; }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 
-/* A reading surface with no clear place beside its part docks along the bottom of the map: one row of columns. */
-.lens.docked { border-radius: 14px; }
-.lens.docked .lens-head { padding-bottom: 6px; }
-.lens.docked .lens-body { display: grid; grid-template-columns: minmax(260px, 1.25fr) repeat(auto-fit, minmax(220px, 1fr)); column-gap: 22px; align-items: start; }
-.lens.docked .lens-body > :is(.lens-ports, .lens-inside) { margin-top: 0; padding-top: 0; border-top: 0; padding-left: 20px; border-left: 1px solid var(--hair); }
 /* The scope's name when its title on the map is out of view. */
 .scope-sticky { position: absolute; left: 16px; max-width: min(560px, calc(100% - 32px)); display: flex; align-items: baseline; gap: 10px; padding: 6px 12px; background: rgba(245,246,248,.94); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow-sm); pointer-events: none; z-index: 2; min-width: 0; }
 .scope-sticky strong { flex: none; font-size: 14px; font-weight: 700; letter-spacing: -.01em; }
@@ -667,12 +671,10 @@ button:disabled { opacity: .5; cursor: default; }
 .ps-link { height: 28px; padding: 0 8px; border: 0; border-radius: 7px; background: none; font-size: 12.5px; font-weight: 600; color: var(--accent); white-space: nowrap; }
 .ps-link:hover, .ps-link[aria-pressed="true"] { background: var(--accent-soft); }
 
-/* notes of a change beside its parts: outside the structure (no port, no relation, not a part). Solid: what the person
-   wants; dashed: what the analysis suggests; plain: no presentation data (the part's own description → the change's name). */
-.callouts { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
-.callout-leader { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
-.callout-leader path { fill: none; stroke: var(--change); stroke-width: 1.5; stroke-dasharray: 2 4; stroke-linecap: round; opacity: .65; }
-.callout { position: absolute; width: 236px; padding: 8px 10px 9px 11px; pointer-events: auto; background: #fffaf2; border: 1px solid var(--change-line); border-left: 3px solid var(--change); border-radius: 4px 10px 10px 4px; box-shadow: 0 8px 20px -14px rgba(120,60,0,.4); font-size: 12.5px; line-height: 1.45; }
+/* The short reading of a change in the pane: the target being read, as it is now → the difference wanted. Solid: what the
+   person wants; dashed: what the analysis suggests; plain: no presentation data (the change's name, the part's role apart). */
+.callouts { display: none; }
+.callout { padding: 10px 12px 12px 13px; background: #fffaf2; border: 1px solid var(--change-line); border-left: 3px solid var(--change); border-radius: 4px 10px 10px 4px; font-size: 13.5px; line-height: 1.55; }
 .callout.suggestion { border-style: dashed; border-left-style: dashed; background: var(--surface); }
 .callout.plain { border-left-color: var(--change-line); }
 .co-head { margin: 0 0 5px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 7px; }
@@ -687,7 +689,6 @@ button:disabled { opacity: .5; cursor: default; }
 .co-row.now p { color: var(--text-2); }
 .co-row small { display: block; font-size: 11px; color: var(--text-4); }
 .co-src { padding: 0; border: 0; background: none; font-size: 11px; color: var(--accent); text-decoration: underline dotted; }
-.space:not(.preview) .callouts { display: none; }
 /* No same-side data for this target: the change, then the part's role apart from it (no before/after), and one short line. */
 .co-role { margin-top: 5px; padding-top: 5px; border-top: 1px solid var(--hair); }
 .co-role p { margin: 0; color: var(--text-3); font-size: 12px; word-break: keep-all; overflow-wrap: anywhere; }
@@ -707,10 +708,36 @@ button:disabled { opacity: .5; cursor: default; }
 .ps-target[aria-selected="true"] { border-color: var(--change); background: var(--change-soft); color: #6d3a06; font-weight: 650; }
 .node.plan-focus, .frame.plan-focus { border-color: var(--change-line); box-shadow: inset 1px 0 0 var(--change-line); }
 .node.plan-reading, .frame.plan-reading { border-color: var(--change); box-shadow: inset 3px 0 0 var(--change); }
-/* The fallback owns a row below the actual viewport; its two complete descriptions never scroll inside a card. */
-.callout.docked { padding: 10px 14px 12px; border-radius: 12px; }
-.callout.docked .co-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
-.callout.docked .co-row + .co-row { margin: 0; padding: 0 0 0 18px; border-top: 0; border-left: 1px solid var(--change-line); }
-.callout.docked .co-fallback { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 20px; }
-.callout.docked .co-role { margin: 0; padding: 0 0 0 18px; border-top: 0; border-left: 1px solid var(--hair); }
-.callout.docked .co-gap { grid-column: 1 / -1; }
+
+/* In the pane: the targets of the change by name (one read at a time), and what to do with the change at its foot. */
+.lens .ps-targets { padding: 0 0 12px; border-top: 0; flex-wrap: wrap; gap: 6px 10px; }
+.lens .ps-target-tabs { flex-wrap: wrap; overflow: visible; padding: 0; }
+.lens .ps-target { max-width: 100%; }
+.lens-foot .ps-focus { padding-left: 0; border-left: 0; flex-wrap: wrap; }
+.co-head strong { font-size: 13.5px; }
+.co-label { font-size: 11.5px; }
+.co-row small, .co-role small { font-size: 11.5px; }
+.cmp-body > .cmp-src { margin-top: 8px; }
+
+/* finding a part by name: a popover above the map tools, like the recent records */
+.controls .find-toggle { padding: 0 9px; font-size: 12.5px; font-weight: 600; }
+.controls .find-toggle.on { background: var(--accent-soft); color: var(--accent); }
+.find { position: absolute; left: 16px; bottom: 60px; width: 340px; max-height: calc(100% - 84px); display: flex; flex-direction: column; gap: 6px; padding: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-lg); z-index: 3; animation: pop-in .14s ease; }
+.find input { height: 34px; padding: 0 11px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--surface); }
+.find input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(43,89,195,.12); }
+.find-count { margin: 0 2px; font-size: 12px; color: var(--text-3); }
+.find-list { list-style: none; margin: 0 -4px; padding: 0; overflow: auto; overscroll-behavior: contain; }
+.find-item { width: 100%; display: flex; flex-direction: column; gap: 1px; padding: 7px 8px; border: 0; border-radius: 8px; background: none; text-align: left; }
+.find-item:hover, .find-item:focus-visible { background: var(--surface-2); }
+.find-item strong { font-size: 13.5px; font-weight: 600; overflow-wrap: anywhere; }
+.find-item span { font-size: 12px; color: var(--text-3); overflow-wrap: anywhere; }
+
+/* The plan's strip in two calm rows: what is being tried (and the way to the whole plan, and out); then its changes and the
+   conditions that belong to the whole plan. The change being read is read in the pane. */
+.plan-strip { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "head more close" "items items items"; align-items: center; gap: 8px 10px; }
+.plan-strip > .ps-head { grid-area: head; }
+.plan-strip > .ps-more { grid-area: more; }
+.plan-strip > .ps-close { grid-area: close; }
+.plan-strip > .ps-row { grid-area: items; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; min-width: 0; }
+.ps-row > .ps-conds { margin-left: auto; }
+.plan-strip:not(:has(.ps-row)) { grid-template-areas: "head close close"; }
