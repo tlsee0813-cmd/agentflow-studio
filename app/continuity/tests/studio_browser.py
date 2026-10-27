@@ -922,6 +922,20 @@ def return_flow(browser, base, cases):
     expect(page.locator("#lens .rr-sec > h3")).to_have_text(["지금 읽을 부분", "정할 것", "달라진 점"])
     expect(page.locator('#lens .rr-st-select[data-list="changes"][aria-expanded="true"]')).to_have_count(0)
     expect(page.get_by_role("button", name="이걸로 시험")).to_be_visible()  # actual open item stays full and actionable
+    # Different excerpts from one review document are named before opening, even when kind and revision are identical.
+    for record in (r for r in material["records"] if r["type"].startswith("retrospective_")):
+        chip = page.locator("#lens .rr-ref").filter(has=page.locator(".rr-ref-title", has_text=re.compile("^" + re.escape(record["title"]) + "$"))).first
+        expect(chip).to_be_visible()
+        expect(chip).to_have_attribute("aria-label", re.compile(re.escape(record["title"])))
+        expect(chip.locator(".rr-ref-kind")).to_have_text("검토·검사 기록")
+        expect(chip.locator("code")).to_have_text(record["sourceSHA"][:7])
+        bounds = chip.evaluate("""e => {
+          const box = e.getBoundingClientRect(), kind = e.querySelector('.rr-ref-kind').getBoundingClientRect(),
+            title = e.querySelector('.rr-ref-title').getBoundingClientRect(), version = e.querySelector('code').getBoundingClientRect();
+          return { oneLine: box.height <= 24, titleWidth: title.width,
+            fixedVisible: kind.left >= box.left && version.right <= box.right && kind.right <= title.left && title.right <= version.left };
+        }""")
+        assert bounds["oneLine"] and bounds["fixedVisible"] and bounds["titleWidth"] >= 50, bounds
     page.get_by_role("button", name="1단계").click()
     expect(page.locator("#lens .rr-st").first).to_be_visible()
     expect(page.locator('#lens .rr-st.on')).to_have_count(0)

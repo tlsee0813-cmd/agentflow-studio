@@ -786,6 +786,8 @@ button:disabled { opacity: .5; cursor: default; }
 .rr-part:hover { background: var(--accent-soft); }
 .rr-ref { border: 1px solid var(--line); background: var(--surface); color: var(--text-2); font-weight: 550; }
 .rr-ref:hover { border-color: var(--text-4); color: var(--text); }
+.rr-ref-kind, .rr-ref code { flex: none; }
+.rr-ref-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; font-weight: 400; }
 .rr-ref code { font-size: 11px; color: var(--text-3); }
 .rr-meet { margin: 7px 0 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; font-size: 12px; color: var(--text-3); }
 .rr-meet .link-button { font-size: 12px; }

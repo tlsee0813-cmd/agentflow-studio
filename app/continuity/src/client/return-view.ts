@@ -133,8 +133,9 @@ export function createReturnView(host: ReturnHost) {
   function chipFor(id: string, r: Reading | null, from: 'now' | 'previous') {
     const src = sourceOf(r, id); if (!src) return null;
     const v = versionOf(src.basis);
-    return h('button', { type: 'button', class: `rr-ref k-${src.kind}`, title: `${src.title} · ${src.basis}`, onclick: (e: Event) => { e.stopPropagation(); openSource(src, from); } },
-      h('span', {}, DIGEST_KIND_LABEL[src.kind]), v ? h('code', {}, v) : null);
+    const label = `${src.title} · ${DIGEST_KIND_LABEL[src.kind]} · ${src.basis}`;
+    return h('button', { type: 'button', class: `rr-ref k-${src.kind}`, title: label, 'aria-label': label, onclick: (e: Event) => { e.stopPropagation(); openSource(src, from); } },
+      h('span', { class: 'rr-ref-kind' }, DIGEST_KIND_LABEL[src.kind]), h('span', { class: 'rr-ref-title' }, src.title), v ? h('code', {}, v) : null);
   }
   function partChip(id: string) {
     return h('button', { type: 'button', class: 'rr-part', title: `지도에서 ‘${partName(id)}’ 보기`, onclick: (e: Event) => { e.stopPropagation(); host.mark([id]); host.reveal([id]); } },
