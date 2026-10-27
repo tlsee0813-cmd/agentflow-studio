@@ -493,8 +493,8 @@ export function summaryEdges(boxes: Map<string, Box>, edges: Edge[]): Edge[] {
 export interface LabelSpot { key: string; x: number; y: number; w: number; h: number; dist: number }
 /** Verbs that would touch (one box grown by pad): the one nearer its own end keeps its place, the other takes its next free
  * place (spots may hold several per key, nearest first wins) or, with none left, is left off the map. */
-export function resolveLabels(spots: LabelSpot[], pad = 6): { kept: LabelSpot[]; dropped: string[] } {
-  const kept: LabelSpot[] = [], done = new Set<string>();
+export function resolveLabels<T extends LabelSpot>(spots: T[], pad = 6): { kept: T[]; dropped: string[] } {
+  const kept: T[] = [], done = new Set<string>();
   for (const s of [...spots].sort((p, q) => p.dist - q.dist)) {
     if (done.has(s.key) || kept.some(k => s.x - pad < k.x + k.w && k.x < s.x + s.w + pad && s.y - pad < k.y + k.h && k.y < s.y + s.h + pad)) continue;
     kept.push(s); done.add(s.key);
