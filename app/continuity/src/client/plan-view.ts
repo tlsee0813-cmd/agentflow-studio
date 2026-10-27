@@ -200,7 +200,7 @@ export function createPlanView(host: PlanHost) {
   }
   function input(): PlanInput | null {
     const o = host.current(); if (!o || !s || !s.bundle.draft.trim()) return null;
-    return o.key === CONVERTER_KEY ? exampleInput(o, s.condition, s.bundle.draft, o.alias!.toId) : projectInput(o, s.bundle.draft, s.bundle.extra);
+    return o.key === CONVERTER_KEY ? exampleInput(o, s.condition, s.bundle.draft, o.alias!.toId, s.bundle.extra) : projectInput(o, s.bundle.draft, s.bundle.extra);
   }
   /** Parts linked to an item's parts: same part, a recorded relation, or a parent/child. Used to show an item's impacts. */
   function nearImpacts(item: PlanItem) {
@@ -783,7 +783,7 @@ export function createPlanView(host: PlanHost) {
         sourcesToggle(o),
         st.pending ? null : h('button', { type: 'button', class: 'link-button', disabled: !canAsk, title: canAsk ? reachText() : 'AI 서버가 연결된 주소에서 쓸 수 있어요', onclick: () => void analyze() }, 'AI로 다시 살펴보기')),
         conditionSwitch(o));
-      if (st.sources) put(sec, sourceList(p.evidence.filter(e => !st.bundle.extra.some(x => x.id === e.id))), addSource(o));
+      if (st.sources) put(sec, sourceList(p.evidence.filter(e => o.kind !== 'saved' || !st.bundle.extra.some(x => x.id === e.id))), addSource(o));
       put(sec, ...askLine(canAsk, p, true));
       return sec;
     }
@@ -797,7 +797,8 @@ export function createPlanView(host: PlanHost) {
     sec.append(h('label', { for: 'plan-intent', class: 'pp-label' }, '바꾸고 싶은 모습'), area, staleLine,
       h('div', { class: 'pp-row' }, sourcesToggle(o), p ? h('button', { type: 'button', class: 'link-button', onclick: () => { st.editing = false; render(); } }, '접기') : null));
     put(sec, conditionSwitch(o));
-    if (st.sources) put(sec, sourceList((input() ?? { evidence: [] }).evidence.filter(e => !st.bundle.extra.some(x => x.id === e.id))), addSource(o));
+    // Added material is listed apart (with a way to remove it) only in a saved project; an example lists it with its sources.
+    if (st.sources) put(sec, sourceList((input() ?? { evidence: [] }).evidence.filter(e => o.kind !== 'saved' || !st.bundle.extra.some(x => x.id === e.id))), addSource(o));
     put(sec, ...askLine(canAsk, p));
     return sec;
   }
@@ -860,8 +861,8 @@ export function createPlanView(host: PlanHost) {
     const inp = input(); if (!inp) return '';
     if (inp.problem === 'TOO_LARGE') return '자료가 요청 한도보다 커요';
     if (inp.problem) return `‘${inp.problem.secret}’에 키처럼 보이는 글이 있어요`;
-    if (s!.example && s!.key === CONVERTER_KEY) return `예제 원자료 ${inp.evidence.filter(e => e.id !== 'INTENT').length}개${inp.evidence.some(e => e.id === 'INTENT') ? ' + 고친 문장' : ''} · 작성된 분석은 보내지 않아요`;
     const added = s!.bundle.extra.length ? ` + 붙인 자료 ${s!.bundle.extra.length}개` : '';
+    if (s!.example && s!.key === CONVERTER_KEY) return `예제 원자료 ${inp.evidence.filter(e => e.id !== 'INTENT' && !s!.bundle.extra.some(x => x.id === e.id)).length}개${inp.evidence.some(e => e.id === 'INTENT') ? ' + 고친 문장' : ''}${added} · 작성된 분석은 보내지 않아요`;
     return inp.records.total ? `이 문장${added} + 기록 ${inp.records.sent === inp.records.total ? `${inp.records.total}개` : `${inp.records.total}개 중 최신 ${inp.records.sent}개`}` : `${added ? `이 문장${added}` : '이 문장과 지도'} · 아직 기록 없음`;
   }
   function askState(btn: HTMLButtonElement) {

@@ -62,9 +62,10 @@ export function intentEvidence(intent: string, example: boolean): Evidence {
     basis: example ? '변경 구상 초안 · 지금 입력한 문장이 이번 분석의 기준 · R03·R04는 예제에 앞서 기록된 구상' : '변경 구상 초안 · 지금 입력한 문장이 이번 분석의 기준' };
 }
 
-export function exampleInput(o: { project: Project; view: StudioView }, condition: Condition, intent: string, keys: Map<string, string>): PlanInput {
+/** The person's added material (taken from the return reading) is read with the example's own, as in a saved project. */
+export function exampleInput(o: { project: Project; view: StudioView }, condition: Condition, intent: string, keys: Map<string, string>, extra: Evidence[] = []): PlanInput {
   const changed = intent.trim() !== CONVERTER_INTENT;
-  const evidence = [...converterEvidence(condition), ...(changed ? [intentEvidence(intent, true)] : [])];
+  const evidence = [...converterEvidence(condition), ...(changed ? [intentEvidence(intent, true)] : []), ...extra];
   const parts = new Map([...keys].map(([k, id]) => [k, id]));
   const toKey = new Map([...keys].map(([k, id]) => [id, k]));
   const ask: PlanAsk = { schemaVersion: 'studio.plan.1', intent: intent.trim(),

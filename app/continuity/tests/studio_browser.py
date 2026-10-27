@@ -1358,6 +1358,37 @@ def stale_request_flow(browser, base):
     page.locator("#plan-entry").click()
     page.locator(".ps-more").click()
     expect(make).to_be_enabled()
+    # The converter example: material taken from the return reading and added to the draft is read by the next analysis and
+    # kept in its plan, so the plan made from it is current (the request comes on).
+    page = context.new_page()
+    page.goto(base + "/#/p/ex-converter")
+    page.locator("#plan-entry").click()
+    page.locator(".ps-more").click()
+    make = page.get_by_role("button", name="요청문 만들기", exact=True)
+    make.click()
+    page.keyboard.press("Escape")
+    page.get_by_role("button", name="돌아온 기록 살펴보기").click()
+    def digest(route):
+        ask = route.request.post_data_json
+        src = next(x for x in ask["sources"] if x["kind"] in ("authored", "report", "code", "test", "review", "result") and x["partIds"])
+        reply = {"changes": [], "read": None, "open": [{"text": "[테스트 응답] 이름이 같은 결과 파일을 덮어쓰지 않게 하고 싶어.", "partIds": src["partIds"][:1], "refs": [src["id"]]}],
+                 "notCovered": ["[테스트 응답] 돌아온 자료로 말할 수 없는 것 자리입니다."]}
+        route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "reply": reply}))
+    page.route("**/api/studio/digest", digest)
+    page.locator("#plan-panel").get_by_role("button", name="돌아와 읽기").click()
+    page.get_by_role("button", name=re.compile("AI로 정리")).first.click()
+    page.get_by_role("button", name="이걸로 시험").click()
+    page.get_by_role("button", name="초안 끝에 덧붙이기").click()
+    expect(make).to_be_disabled()
+    expect(page.locator("#plan-reach")).to_contain_text("+ 붙인 자료 1개")
+    sent = []
+    page.route("**/api/studio/plan", lambda route: (sent.append(route.request.post_data_json), plan_reply(route, "같은 이름 덮어쓰기 막기")))
+    page.locator("#plan-ask").click()
+    expect(page.locator(".ps-intent")).to_contain_text("덮어쓰지 않게")
+    assert any(e["id"] == "U01" for e in sent[0]["evidence"]), [e["id"] for e in sent[0]["evidence"]]
+    page.locator(".ps-more").click()
+    expect(make).to_be_enabled()
+    expect(page.locator("#plan-make-note")).to_be_hidden()
     context.close()
 
 
