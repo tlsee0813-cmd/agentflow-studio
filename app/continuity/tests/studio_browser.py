@@ -1042,6 +1042,7 @@ def relation_visit_flow(browser, base, cases):
     page.locator("#scene-back").click()
     in_scope(page, "@joplin/app-desktop")
     expect(page.locator("#lens.scope-read")).to_be_visible()
+    expect(page.locator("#lens .port", has_text="@joplin/lib")).to_be_focused()  # the restored reading, not the map title's
     expect(page.locator("#scene-back")).to_be_hidden()
     page.wait_for_timeout(500)
     assert page.locator("#world").evaluate(CAMERA) == inside

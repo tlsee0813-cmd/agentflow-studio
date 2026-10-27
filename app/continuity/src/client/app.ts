@@ -440,7 +440,9 @@ function restoreSurface(v: Visit) {
   if (body) body.scrollTop = f.scroll;
   // Keyboard: back on the relation it was followed by (without moving the restored reading). Now, while this arrival is the
   // page: never later, when the person may already be typing or reading somewhere else.
-  document.querySelector<HTMLElement>(['#lens', '#panel', '#world .map-title'].map(x => `${x} [data-far="${CSS.escape(v.to)}"]`).join(','))?.focus({ preventScroll: true });
+  // The surface just restored first (the map title also names a scope's relations); the map title only when nothing reads.
+  const far = `[data-far="${CSS.escape(v.to)}"]`, own = f.surface === 'sheet' ? '#panel' : f.surface === 'none' ? null : '#lens';
+  ((own && document.querySelector<HTMLElement>(`${own} ${far}`)) || document.querySelector<HTMLElement>(`#world .map-title ${far}`))?.focus({ preventScroll: true });
 }
 const REL_WHY = (v: Visit) => `‘${REL_LABEL[v.kind] ?? v.kind}’ 관계를 따라 왔어요${v.note ? ` · ${v.note}` : ''}`;
 /** '로' or '으로' after a name; '(으)로' where its reading is not known from its last letter. */
