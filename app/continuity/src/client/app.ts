@@ -276,7 +276,11 @@ function projectFor(key: string): Opened | null {
 }
 
 /* ---------- rendering ---------- */
+/** The address the last render read: a step between two history entries of the same address (A, then B, then A again) changes
+ * no hash, so only popstate tells of it. */
+let renderedHash = '';
 async function render() {
+  renderedHash = location.hash;
   const r = route();
   if (!r.key) { if (opened) cameras.set(camKey(opened, scope), { ...camera }); planView.close(false); if (toastKey) dropToast(); forgetVisits(); opened = null; selected = null; scope = null; renderHome(); return; }
   const next = projectFor(r.key);
@@ -285,11 +289,13 @@ async function render() {
   if (fresh && toastKey && toastKey !== next.key) dropToast();
   // Which visit this arrival is: back to where a relation was followed from (this tab's own history entry, or the named way
   // back), forward again over it, or neither. Never told by the address alone: the same part can be two different visits.
-  const mark = visitMark(), top = visits.at(-1), leaving = !fresh && opened ? herePlace() : null;
-  const back = !fresh && top && !pendingVisit && (visitBack === top.id || mark.from === top.id) ? top : null;
-  const forward = !fresh && !back && !pendingVisit && leaving && ahead.length && mark.to === ahead.at(-1)!.id ? ahead.at(-1)! : null;
+  // Back or forward by any number of steps (the browser's menu, history.go(-2)): the entry names its own visit, and every
+  // visit after it goes (or comes back) with it.
+  const mark = visitMark(), leaving = !fresh && opened ? herePlace() : null;
+  const backAt = !fresh && !pendingVisit ? visits.findIndex(v => v.id === (visitBack ?? mark.from)) : -1, back = backAt >= 0 ? visits[backAt]! : null;
+  const forwardAt = !fresh && !back && !pendingVisit && leaving && mark.to ? ahead.findIndex(v => v.id === mark.to) : -1;
   visitBack = null;
-  if (back) { visits.pop(); ahead.push(back); returnCamera = back.from.camera; }
+  if (back) { ahead.push(...visits.splice(backAt).reverse()); returnCamera = back.from.camera; }
   if (fresh) forgetVisits();
   // A way back is not a move in or out of the composition: it lands where it left, with no travel.
   const travel = !fresh && !back && opened ? travelFrom(next) : null;
@@ -326,7 +332,7 @@ async function render() {
   if ([...tempExpand].join('|') !== before) renderSpace('keep'); else relayout(o);
   // Visits: kept only while the selection is the part a relation led to; any other way of moving on lets them go.
   if (pendingVisit) { if (pendingVisit.to === part && pendingVisit.from.key === o.key) { visits.push(pendingVisit); ahead = []; markEntry({ to: pendingVisit.id }); } pendingVisit = null; }
-  else if (forward && forward.to === part && leaving) { ahead.pop(); visits.push({ ...forward, from: leaving }); }
+  else if (forwardAt >= 0 && ahead[forwardAt]!.to === part && leaving) { const again = ahead.splice(forwardAt).reverse(); again[0] = { ...again[0]!, from: leaving }; visits.push(...again); }
   else if (!back && ahead.length && (part !== leaving?.selected || scope !== leaving?.scope)) ahead = [];
   if (visits.length && visits.at(-1)!.to !== part) forgetVisits();
   if (visits.length > 12) visits = visits.slice(-12);
@@ -430,8 +436,9 @@ function restoreSurface(v: Visit) {
   sheetReturn = f.surface === 'sheet' ? f.sheetReturn : null;
   const body = f.surface === 'sheet' ? $('panel').querySelector('.panel-body') : f.surface === 'none' ? null : $('lens').querySelector('.lens-body');
   if (body) body.scrollTop = f.scroll;
-  // Keyboard: back on the relation it was followed by (without moving the restored reading).
-  requestAnimationFrame(() => document.querySelector<HTMLElement>(`#lens [data-far="${CSS.escape(v.to)}"], #panel [data-far="${CSS.escape(v.to)}"]`)?.focus({ preventScroll: true }));
+  // Keyboard: back on the relation it was followed by (without moving the restored reading). Now, while this arrival is the
+  // page: never later, when the person may already be typing or reading somewhere else.
+  document.querySelector<HTMLElement>(['#lens', '#panel', '#world .map-title'].map(x => `${x} [data-far="${CSS.escape(v.to)}"]`).join(','))?.focus({ preventScroll: true });
 }
 const REL_WHY = (v: Visit) => `‘${REL_LABEL[v.kind] ?? v.kind}’ 관계를 따라 왔어요${v.note ? ` · ${v.note}` : ''}`;
 /** '로' or '으로' after a name; '(으)로' where its reading is not known from its last letter. */
@@ -448,7 +455,7 @@ function toParticle(name: string): string {
 function visitEntry(o: Opened): HTMLElement | null {
   const v = visits.at(-1); if (!v || v.to !== selected || v.from.key !== o.key || v.from.scope !== scope || !v.from.selected) return null;
   const name = partOf(o, v.from.selected)?.name; if (!name) return null;
-  return h('button', { type: 'button', class: 'visit-back', title: `${name}${toParticle(name)} 돌아가기 · ${REL_WHY(v)}`, onclick: returnFromVisit },
+  return h('button', { type: 'button', class: 'visit-back', 'aria-label': `${name}${toParticle(name)} 돌아가기`, title: `${name}${toParticle(name)} 돌아가기 · ${REL_WHY(v)}`, onclick: returnFromVisit },
     h('span', { 'aria-hidden': 'true' }, '←'), h('strong', {}, name), h('span', {}, `${toParticle(name)} 돌아가기`));
 }
 
@@ -716,7 +723,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   const title = h('header', { class: 'map-title' }, h('h1', { class: 'map-name' }, sp ? sp.name : o.project.name),
     first ? h('p', { class: 'map-purpose' }, h('span', {}, first), more ? h('button', { type: 'button', class: 'map-more', title: '설명 전체와 출처', onclick: () => openScopeReading() }, '자세히') : null) : null,
     outside.length ? h('div', { class: 'scope-rels', role: 'list', 'aria-label': '이 범위의 바깥 관계' }, ...relationGroups(outside, '범위').map(g => h('p', { class: 'scope-rel', role: 'listitem' },
-      h('span', { class: 'sr-verb' }, g.label), ...g.list.map(x => h('button', { type: 'button', class: 'sr-part', title: `${partPath(o.view, x.far).map(q => q.name).join(' › ')}${x.r.note ? `\n${x.r.note}` : ''}`, onclick: () => go(o.key, x.far, null) }, partOf(o, x.far)?.name ?? '부분'))))) : null);
+      h('span', { class: 'sr-verb' }, g.label), ...g.list.map(x => h('button', { type: 'button', class: 'sr-part', title: `${partPath(o.view, x.far).map(q => q.name).join(' › ')}${x.r.note ? `\n${x.r.note}` : ''}`, 'data-far': x.far, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far, null); } }, partOf(o, x.far)?.name ?? '부분'))))) : null);
   world.append(title);
   title.style.width = `${titleRect().w}px`;
   titleH = view.parts.length ? title.offsetHeight : 0; title.hidden = !titleH;
@@ -1702,6 +1709,7 @@ async function main() {
   $('return-entry').addEventListener('click', () => { if (returnView.isOpen() && !planView.isOpen()) returnView.close(); else openReturn(); });
   statusReady = aiStatus().then(s => { status = s; renderStatus(); planView.statusChanged(); refreshReading(); if (!selected && !planView.isOpen()) returnView.render(); });
   window.addEventListener('hashchange', () => void render());
+  window.addEventListener('popstate', () => { if (location.hash === renderedHash) void render(); });
   await render();
   await statusReady;
 }
