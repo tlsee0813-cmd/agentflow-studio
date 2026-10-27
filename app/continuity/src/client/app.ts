@@ -837,7 +837,8 @@ const ZOOM_MIN = 0.4, ZOOM_MAX = 1.6;
 /** The reading pane is a column of its own on the right: the map's viewport ends where the pane begins (syncMapArea), so nothing
  * the person reads is ever drawn under it and the geometry below needs no inset for it.
  * Width of the reading pane while anything reads there (a part, its sheet, a comparison or the whole plan); 0 otherwise. */
-const paneWidth = () => (['lens', 'panel', 'plan-panel'].some(id => !$(id).hidden) ? inspW() : 0);
+// The change plan's wide workspace covers the map without taking width from it: the map under it keeps its area and camera.
+const paneWidth = () => (['lens', 'panel'].some(id => !$(id).hidden) || (!$('plan-panel').hidden && !$('plan-panel').classList.contains('work')) ? inspW() : 0);
 const leftInset = () => 16;
 /** Map tools sit at the bottom left; the map keeps clear of them only below this line. */
 const BOTTOM = 64;
@@ -1359,7 +1360,7 @@ function composer(o: Opened, part: PartView): HTMLElement {
   return box;
 }
 let accessCodeMemory = '';
-function keepAccessCode(value: string) { try { sessionStorage.setItem('agentflow.studio.access', value); } catch { /* memory only */ } accessCodeMemory = value; }
+function keepAccessCode(value: string) { try { sessionStorage.setItem('agentflow.studio.access', value); } catch { /* memory only */ } accessCodeMemory = value; renderStatus(); }
 
 /* ---------- change plan (plan-view.ts) on this map ---------- */
 const planView = createPlanView({
@@ -1482,9 +1483,11 @@ function scrollThread() {
 /* ---------- AI status pill ---------- */
 function renderStatus() {
   const pill = $('ai-pill'), text = $('ai-text');
-  pill.dataset.state = status.ai;
-  text.textContent = status.ai === 'deepseek' ? 'AI 정리 가능' : status.ai === 'off' ? 'AI 키 없음' : 'AI 서버 미연결';
-  pill.title = status.ai === 'deepseek' ? `서버가 ${status.model ?? 'DeepSeek'}에 정리를 요청해요. 키는 서버에만 있어요.` : status.ai === 'off' ? '서버는 연결됐지만 AI 키가 설정되지 않았어요.' : '이 페이지에는 AI 서버가 연결되어 있지 않아요.';
+  // A server that asks for an access code is not ready to ask until the person has given one in this tab.
+  const needsCode = status.ai === 'deepseek' && status.access === 'code' && !sessionCode();
+  pill.dataset.state = needsCode ? 'code' : status.ai;
+  text.textContent = status.ai === 'deepseek' ? (needsCode ? 'AI · 접속 코드 필요' : 'AI 정리 가능') : status.ai === 'off' ? 'AI 키 없음' : 'AI 서버 미연결';
+  pill.title = status.ai === 'deepseek' ? `서버가 ${status.model ?? 'DeepSeek'}에 정리를 요청해요. 키는 서버에만 있어요.${needsCode ? ' 이 서버는 접속 코드를 받아요. 정리를 요청할 때 입력해 주세요.' : ''}` : status.ai === 'off' ? '서버는 연결됐지만 AI 키가 설정되지 않았어요.' : '이 페이지에는 AI 서버가 연결되어 있지 않아요.';
 }
 
 /* ---------- canvas interaction ----------

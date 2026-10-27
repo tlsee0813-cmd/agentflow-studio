@@ -296,12 +296,14 @@ def basics_flow(browser, base):
 def code_flow(browser, base):
     page = browser.new_page(viewport={"width": 1280, "height": 720})
     page.goto(base + "/")
+    expect(page.locator("#ai-text")).to_have_text("AI · 접속 코드 필요")  # not ready to ask until a code is given
     page.locator('.program-head[href="#/p/ex-salon"]').click()
     page.locator(".node", has_text="시간 고르기").click()
     sheet(page, "시간 고르기")
     page.get_by_role("button", name="지금 상황 정리").click()  # no code yet: opens the box at the code field
     expect(page.locator("#access-code")).to_be_focused()
     page.locator("#access-code").fill("smoke-code")  # input events only (as with paste or autofill), no change event
+    expect(page.locator("#ai-text")).to_have_text("AI 정리 가능")
     page.get_by_role("button", name="지금 상황 정리").click()
     expect(page.locator(".answer")).to_have_count(1)
     page.close()
@@ -413,50 +415,57 @@ def workspace_flow(browser, base, cases):
     expect(page.locator("#world .plan-direct")).not_to_have_count(0)
     expect(page.locator(".plan-badge")).to_have_count(0)
     # Each target's own row reads what is to change under its whole name: the target's wanted text when the plan has one,
-    # else the change's name marked as such (no '구상' placeholder, no part description set against it).
+    # else the change's name marked as such. '실패해도 나머지 계속' marks the conversion stage itself, not one inner part.
     expect(page.locator("#world .node", has_text="문서 읽기").locator(".plan-note")).to_have_text("폴더 안 파일을 입력받기")
-    expect(page.locator("#world .node", has_text="본문과 표").locator(".plan-note")).to_have_text("변경 실패해도 나머지 계속")
+    expect(page.locator("#world .frame", has_text="내용·모양 보존").locator(".frame-title .plan-note")).to_have_text("변경 실패해도 나머지 계속")
+    expect(page.locator("#world .node", has_text="본문과 표").locator(".plan-note")).to_have_text("")
     expect(page.locator("#world .node", has_text="결과 설명").locator(".plan-note")).to_have_text("실패한 파일과 이유 모아 보기")
     for name in page.locator("#world .plan-direct :is(.node-name, .frame-name)").all():
         assert not name.evaluate("e => e.scrollHeight > e.clientHeight + 1 || e.scrollWidth > e.clientWidth + 1"), name.inner_text()
-    # A change with two targets keeps both names and marks, but reads one actual current/wanted pair at a time.
+    # The strip reads the analysis's finding on the map; the change chips are a reading choice, apart from what the request
+    # takes (no checkbox-like mark on them).
+    expect(page.locator(".ps-find")).to_contain_text("파일별 결과는 이미 남고 있지만, 화면에는 마지막 결과만 보여요.")
+    expect(page.locator(".ps-inc")).to_have_text("요청에 포함 3/3")
+    expect(page.locator(".ps-item .ps-hand")).to_have_count(0)
+    # A change with two targets keeps both names and marks, but reads one target at a time.
     page.locator(".ps-item").nth(2).click()
-    expect(page.locator(".ps-item").nth(2)).to_have_attribute("aria-pressed", "true")
+    expect(page.locator(".ps-item").nth(2)).to_have_attribute("aria-current", "true")
     expect(page.locator(".callout")).to_have_count(1)
     expect(page.locator(".ps-target")).to_have_count(2)
     expect(page.locator(".ps-target-label")).to_have_text("바뀌는 부분 2")
     target_names = page.locator(".ps-target").all_text_contents()
     expect(page.locator(".ps-target").nth(0)).to_have_attribute("aria-selected", "true")
     expect(page.locator(".callout .co-head strong")).to_have_text(target_names[0])
-    # No same-side data for this target: the change, the part's role apart from it, no before/after pair.
-    expect(page.locator(".callout .co-row.want p")).to_have_text("성공 유지·실패 모음")
-    expect(page.locator(".callout .co-row.now")).to_have_count(0)
-    expect(page.locator(".callout .co-role")).to_contain_text("변환 형식과 저장한 산출물을 다룬다.")
-    expect(page.locator(".callout .co-gap")).to_have_text("현재와의 비교는 아직 정리 전이에요.")
+    # No quote for this target: '지금' says the material does not tell (never a gap to fill, never an invented current), no
+    # wanted text of its own, and why the change reads this part in the analysis's words.
+    expect(page.locator(".callout .co-row.now.unknown p").first).to_have_text("이 변경안의 자료로는 지금 어떻게 하는지 알 수 없어요.")
+    expect(page.locator(".callout .co-row.want")).to_have_count(0)
+    expect(page.locator(".callout .co-row.why")).to_contain_text("같은 이름 충돌")
+    expect(page.locator("#lens")).not_to_contain_text("비교는 아직 정리 전")
     page.locator(".ps-target").nth(1).click()
     expect(page.locator(".ps-target").nth(1)).to_have_attribute("aria-selected", "true")
     expect(page.locator(".callout .co-head strong")).to_have_text(target_names[1])
-    expect(page.locator(".callout .co-row.now p")).to_contain_text("화면은 마지막 결과만 표시한다.")
-    expect(page.locator(".callout .co-role")).to_have_count(0)
-    expect(page.locator(".callout .co-row.want p")).to_have_text("실패한 파일과 이유 모아 보기")
-    expect(page.locator(".callout .co-row.now").first).to_be_visible()
-    expect(page.locator(".callout .co-row.want").first).to_be_visible()
+    expect(page.locator(".callout .co-row.now p").first).to_have_text("화면은 마지막 결과만 표시한다.")
+    expect(page.locator(".callout .co-row.now")).to_contain_text("자료에서 P03")
+    expect(page.locator(".callout .co-row.want p").first).to_have_text("실패한 파일과 이유 모아 보기")
+    expect(page.locator(".callout .co-row.why")).to_contain_text("화면은 마지막 결과만 보여 줍니다")
     page.wait_for_timeout(300)
     in_map(page, "#world .plan-reading")  # the target being read is brought beside the pane, not under it
     pane_beside_map(page)
     # Sources replace this one reading; coming back keeps the actual target and its matching before/after text.
     target_camera = page.locator("#world").evaluate("e => e.style.transform")
-    page.locator(".callout .co-src").click()
+    page.locator(".callout .co-row.now .co-ref").click()
     expect(page.locator("#lens .cmp-evidence")).to_be_visible()
+    expect(page.locator("#lens .cmp-evidence details").first).to_contain_text("P03")
     expect(page.locator(".callout")).to_have_count(0)
     assert page.locator("#world").evaluate("e => e.style.transform") == target_camera
     page.locator("#cmp-back").click()
     expect(page.locator(".ps-target").nth(1)).to_have_attribute("aria-selected", "true")
     expect(page.locator(".callout .co-head strong")).to_have_text(target_names[1])
-    expect(page.locator(".callout .co-row.want p")).to_have_text("실패한 파일과 이유 모아 보기")
+    expect(page.locator(".callout .co-row.want p").first).to_have_text("실패한 파일과 이유 모아 보기")
     assert page.locator("#world").evaluate("e => e.style.transform") == target_camera
     # A pan made while reading sources remains the person's camera on return; no saved-camera restore may discard it.
-    page.locator(".callout .co-src").click()
+    page.locator(".callout .co-row.now .co-ref").click()
     expect(page.locator("#lens .cmp-evidence")).to_be_visible()
     vp = page.locator("#viewport").bounding_box()
     page.mouse.move(vp["x"] + 6, vp["y"] + 24)
@@ -475,25 +484,6 @@ def workspace_flow(browser, base, cases):
     expect(page.locator(".ps-target").nth(0)).to_be_focused()
     page.keyboard.press("ArrowRight")
     expect(page.locator(".callout .co-head strong")).to_have_text(target_names[1])
-    # The long reading on request still pairs only the target currently being read with its own wanted text.
-    page.locator(".ps-link", has_text="설명").click()
-    expect(page.locator("#lens .cmp-now .cmp-part")).to_have_count(1)
-    expect(page.locator("#lens .cmp-now .cmp-text")).to_have_text("화면은 마지막 결과만 표시한다.")
-    expect(page.locator("#lens .cmp-want .cmp-text")).to_have_count(1)
-    expect(page.locator("#lens .cmp-hand input")).to_be_checked()
-    page.wait_for_timeout(400)
-    in_map(page, "#world .plan-reading")  # the part being compared stays in the map beside the comparison
-    # Selecting a different named target while the comparison is open reveals its real map box above that reading surface.
-    page.locator(".ps-target").nth(0).click()
-    expect(page.locator("#lens .cmp-fallback .cmp-name")).to_have_text(target_names[0])
-    expect(page.locator("#lens .cmp-want")).to_have_count(0)
-    expect(page.locator("#lens .cmp-fallback")).to_contain_text("이 부분의 역할")
-    expect(page.locator("#lens .cmp-fallback .cmp-gap")).to_have_text("현재와의 비교는 아직 정리 전이에요.")
-    expect(page.locator("#world .plan-reading")).to_be_in_viewport()
-    page.wait_for_timeout(400)  # compare stable rectangles after the minimum-pan animation
-    in_map(page, "#world .plan-reading")
-    page.keyboard.press("Escape")  # the long reading gives way to the short one, in the same pane
-    expect(page.locator("#lens .callout")).to_be_visible()
     scene, camera = page.evaluate(BOXES), page.locator("#world").evaluate(CAMERA)
     page.locator("#plan-mode").get_by_role("button", name="현재").click()
     expect(page.locator("#world .plan-direct")).to_have_count(0)
@@ -501,43 +491,109 @@ def workspace_flow(browser, base, cases):
     # The mode shows or hides the change marks only: the same boxes and camera in both (the plan's comparison scene).
     assert page.evaluate(BOXES) == scene and page.locator("#world").evaluate(CAMERA) == camera
     page.locator("#plan-mode").get_by_role("button", name="변경 미리보기").click()
-    expect(page.locator(".ps-target").nth(0)).to_have_attribute("aria-selected", "true")
-    expect(page.locator(".callout .co-head strong")).to_have_text(target_names[0])
-    # Opening the long reading of a change whose target sits low (1280×720): one smallest pan keeps that target readable above
-    # it; its sources and the way back keep that camera and still leave the target uncovered.
+    expect(page.locator(".ps-target").nth(1)).to_have_attribute("aria-selected", "true")
+    # 'Continue after a failure' on the conversion stage: why it is read there, with what is known and what is not.
     page.locator(".ps-item", has_text="실패해도 나머지 계속").click()
-    target = page.locator("#world .plan-reading").get_attribute("data-box")
-    page.locator(".ps-link", has_text="설명").click()
-    expect(page.locator("#lens .cmp-fallback")).to_be_visible()
-    page.wait_for_timeout(400)  # compare stable rectangles after the minimum-pan animation
-    in_map(page, f'#world [data-box="{target}"]')
-    explained = page.locator("#world").evaluate(CAMERA)
-    page.locator("#lens .lens-more", has_text="근거").click()
-    expect(page.locator("#lens .cmp-evidence")).to_be_visible()
-    in_map(page, f'#world [data-box="{target}"]')
-    page.locator("#cmp-back").click()
-    expect(page.locator("#lens .cmp-fallback")).to_be_visible()
-    in_map(page, f'#world [data-box="{target}"]')
-    assert page.locator("#world").evaluate(CAMERA) == explained
+    expect(page.locator(".callout .co-head strong")).to_have_text("내용·모양 보존")
+    expect(page.locator(".callout .co-row.now.unknown")).to_be_visible()
+    expect(page.locator(".callout .co-row.outcome")).to_contain_text("한 문서의 실패가 다른 문서 처리를 중단하지 않는 결과를 원합니다.")
+    expect(page.locator(".callout .co-row.why")).to_contain_text("변환 결과는 입력마다 성공 경로나 실패 이유로 이미 돌아와요")
+    expect(page.locator(".callout .co-row.why")).to_contain_text("이미 만든 산출물이 남는지는 확인되지 않았어요")
+    page.wait_for_timeout(400)
+    # The wide comparison covers the map without moving it: same camera and map area underneath, the pane kept as it was.
+    on_map, area_w = page.locator("#world").evaluate(CAMERA), page.locator("#viewport").bounding_box()["width"]
+    page.locator("#lens .ps-wide").click()
+    work = page.locator("#plan-panel.work")
+    expect(work).to_be_visible()
+    box = work.bounding_box(); assert box["x"] == 0 and box["width"] == 1280, box
+    assert page.locator("#world").evaluate(CAMERA) == on_map and page.locator("#viewport").bounding_box()["width"] == area_w
+    expect(page.locator(".pw-pick[aria-current='true']")).to_contain_text("실패해도 나머지 계속")
+    expect(page.locator(".pw-pick[aria-current='true']")).to_be_focused()
+    # What the workspace covers is inert (out of the tab order and the accessibility tree) but stays in place: real Tab and
+    # Shift+Tab from the current row reach the workspace and the top bar only, never the pane's old include box under it.
+    lens_box = page.locator("#lens").bounding_box()
+    for sel in ("#lens", "#plan-strip", "#viewport", ".controls"):
+        assert page.locator(sel).evaluate("e => e.inert"), sel
+    assert page.locator("#lens").bounding_box() == lens_box
+    def route(key, n):
+        out = []
+        for _ in range(n):
+            page.keyboard.press(key)
+            out.append(page.evaluate("""() => { const a = document.activeElement;
+              return { covered: !!a.closest('[inert]'), where: a.closest('#plan-panel') ? 'work' : a.closest('.bar') ? 'top' : a.closest('#space') ? 'space' : 'page',
+                       id: a.id, text: (a.textContent || a.getAttribute('aria-label') || '').trim().slice(0, 24) }; }"""))
+        return out
+    back_route = route("Shift+Tab", 14)
+    assert not any(x["covered"] or x["where"] == "space" for x in back_route), back_route
+    assert any(x["where"] == "top" for x in back_route), back_route
+    page.locator(".pw-pick[aria-current='true']").focus()
+    fwd_route = route("Tab", 30)
+    assert not any(x["covered"] or x["where"] == "space" for x in fwd_route), fwd_route
+    assert not any(x["id"].startswith("ps-hand-") for x in back_route + fwd_route)
+    page.locator(".pw-pick[aria-current='true']").focus()
+    expect(page.locator(".pw-found")).to_contain_text("파일별 결과는 이미 남고 있지만, 화면에는 마지막 결과만 보여요.")
+    expect(page.locator(".pw-title")).to_have_text("폴더 단위 변환")  # a short heading, not every change again
+    page.locator(".pw-said-btn").click()  # the whole sentence on request
+    expect(page.locator("#pw-said")).to_contain_text("병렬 처리는 요청하지 않았어.")
+    page.locator(".pw-said-btn").click()
+    # One target and no pair of its own: the wanted result reads beside '지금', and why the stage is read is in the first view.
+    expect(page.locator(".pw-what")).to_have_count(0)
+    assert page.locator(".pw-part .co-row.why").evaluate("e => e.getBoundingClientRect().bottom") <= 720
+    expect(work).not_to_contain_text("비교는 아직 정리 전")
+    no_page_scroll(page)
+    assert page.locator(".pw-list").evaluate("e => e.scrollWidth <= e.clientWidth") and page.locator(".pw-detail").evaluate("e => e.scrollWidth <= e.clientWidth")
+    # Reading another change is not including it, and including is not reading: one explicit box per change.
+    page.locator(".pw-item", has_text="폴더 입력").locator("input[type=checkbox]").uncheck()
+    expect(page.locator(".pw-pick[aria-current='true']")).to_contain_text("실패해도 나머지 계속")
+    expect(page.locator(".pw-count")).to_have_text("2/3 포함")
+    page.locator(".pw-pick", has_text="성공 유지·실패 모음").click()
+    expect(page.locator(".pw-item", has_text="폴더 입력").locator("input[type=checkbox]")).not_to_be_checked()
+    expect(page.locator(".pw-item", has_text="성공 유지·실패 모음").locator("input[type=checkbox]")).to_be_checked()
+    expect(page.locator(".pw-part")).to_have_count(2)
+    # A source opens in the right column; the comparison beside it stays (same change, same scroll).
+    page.locator(".pw-detail").evaluate("e => e.scrollTop = 140")
+    held = page.locator(".pw-detail").evaluate("e => e.scrollTop")
+    page.locator(".pw-part").nth(1).locator(".co-row.now .co-ref").evaluate("e => e.click()")  # no scroll into view first
+    expect(page.locator(".pw-rail-head h3")).to_have_text("근거 P03")
+    expect(page.locator("#pw-item-title")).to_have_text("성공 유지·실패 모음")
+    assert page.locator(".pw-detail").evaluate("e => e.scrollTop") == held
     page.keyboard.press("Escape")
-    expect(page.locator("#lens .callout")).to_be_visible()
-    page.keyboard.press("Escape")  # no change being read: the pane closes and the map takes the window
+    expect(page.locator("#plan-make")).to_be_visible()
+    # From the wide comparison to the part on the map, and back to the same change and scroll.
+    page.locator(".pw-part").nth(1).locator(".pw-map").click()
+    expect(work).to_be_hidden()
+    expect(page.locator(".callout .co-head strong")).to_have_text(target_names[1])
+    page.wait_for_timeout(400)
+    in_map(page, "#world .plan-reading")
+    expect(page.locator("#lens .ps-wide")).to_have_text("‹ 넓은 비교로")
+    assert not page.locator("#lens").evaluate("e => e.inert") and not page.locator("#viewport").evaluate("e => e.inert")
+    expect(page.locator("#lens .ps-wide")).to_be_focused()  # keyboard focus follows to the way back
+    page.locator("#lens .ps-wide").click()
+    expect(page.locator(".pw-pick[aria-current='true']")).to_contain_text("성공 유지·실패 모음")
+    assert page.locator(".pw-detail").evaluate("e => e.scrollTop") == held
+    # Back to the map as it was left: no re-frame.
+    mapped = page.locator("#world").evaluate(CAMERA)
+    page.get_by_role("button", name="지도로 돌아가기").click()
+    expect(work).to_be_hidden()
+    page.wait_for_timeout(300)
+    assert page.locator("#world").evaluate(CAMERA) == mapped
+    assert page.evaluate("[...document.getElementById('space').children].every(e => !e.inert)")
+    page.keyboard.press("Escape")
     expect(page.locator("#lens")).to_be_hidden()
-    # The whole plan opens on request. A narrow window: the panel and the request sheet take the whole width; back to 1280.
+    # A narrow window: the workspace and the request sheet take the whole width; back to 1280.
     page.locator(".ps-more").click()
-    expect(page.locator("#plan-panel")).to_be_visible()
     page.set_viewport_size({"width": 700, "height": 700})
     page.wait_for_timeout(200)
-    assert page.evaluate("getComputedStyle(document.getElementById('space')).getPropertyValue('--plan-w')").strip() == "700px"
-    assert page.locator("#plan-panel").bounding_box()["width"] == 700
+    assert work.bounding_box()["width"] == 700
+    assert page.evaluate("document.documentElement.scrollWidth") <= 700
     page.get_by_role("button", name="요청문 만들기").click()
     assert page.locator("#plan-sheet").bounding_box()["width"] >= 600
     page.keyboard.press("Escape")
     expect(page.locator("#plan-sheet")).to_be_hidden()
     page.set_viewport_size({"width": 1280, "height": 720})
     page.wait_for_timeout(200)
-    page.locator("#plan-panel .close").click()  # back to the map comparison
-    expect(page.locator("#plan-panel")).to_be_hidden()
+    page.keyboard.press("Escape")  # the workspace gives the map back
+    expect(work).to_be_hidden()
     page.locator(".ps-close").click()
     expect(page.locator("#lens-title")).to_have_text("문서 읽기")  # selection and camera come back
     page.wait_for_timeout(300)
@@ -1235,6 +1291,378 @@ def return_flow(browser, base, cases):
     context.close()
 
 
+def plan_reply(route, title):
+    """A valid analysis of exactly what the page sent (test-only, routed in the browser): one change on the first part, cited
+    to the sentence itself. Never a model's reading."""
+    ask = route.request.post_data_json
+    first = ask["parts"][0]["id"]
+    reply = {"summary": "[테스트 응답] 보낸 문장만 근거로 한 분석 자리입니다.", "items": [{"id": "ask", "title": title,
+        "description": "[테스트 응답] 지금 문장에서 온 변경 자리입니다.", "partIds": [first], "refs": ["INTENT"], "dependsOn": []}],
+        "impacts": [], "preserve": [], "unknowns": []}
+    route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "reply": reply}))
+
+
+def stale_request_flow(browser, base):
+    """EXP65 P1: a request document is made only from the analysis of what is written now. Typing a new sentence turns the
+    request off at once (the caret stays where it was), a forced call makes nothing, writing the analysed sentence back turns
+    it on again; a cancelled or outdated analysis never becomes the plan; added material counts like the sentence."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    page.goto(base + "/#/p/ex-converter")
+    page.locator("#plan-entry").click()
+    page.locator(".ps-more").click()
+    page.locator("#plan-panel").get_by_role("button", name="문장 고치기").click()
+    area, make = page.locator("#plan-intent"), page.get_by_role("button", name="요청문 만들기", exact=True)
+    original = area.input_value()
+    expect(make).to_be_enabled()
+    new = "폴더 변환은 추가하지 말고, 파일 이름 충돌 때 덮어쓰지만 막아줘."
+    area.evaluate("a => { a.dataset.same = '1'; }")
+    area.fill(new)  # one input event, no other step
+    expect(make).to_be_disabled()
+    expect(page.locator("#plan-make-note")).to_have_text("고친 문장을 먼저 살펴본 뒤 만들 수 있어요")
+    expect(page.locator("#plan-ask")).to_have_text("고친 문장으로 살펴보기")
+    expect(page.locator("#plan-stale")).to_be_visible()
+    # Typing keeps the same field and caret (no re-render while writing).
+    area.evaluate("a => a.setSelectionRange(5, 5)")
+    page.keyboard.type("꼭 ")
+    expect(area).to_have_value(new[:5] + "꼭 " + new[5:])
+    assert area.evaluate("a => a.dataset.same === '1' && a.selectionStart === 7 && document.activeElement === a")
+    area.fill(new)
+    # The handler itself refuses: a button forced on makes no document, and the request goes back off.
+    make.evaluate("b => { b.disabled = false; b.click(); }")
+    expect(page.locator("#plan-sheet")).to_be_hidden()
+    expect(page.get_by_role("button", name=re.compile("마지막 요청문"))).to_have_count(0)
+    expect(make).to_be_disabled()
+    # Writing the analysed sentence back: the prepared example request is made as before.
+    area.fill(original)
+    expect(make).to_be_enabled()
+    expect(page.locator("#plan-make-note")).to_be_hidden()
+    make.click()
+    expect(page.locator("#plan-sheet pre")).to_contain_text("- 폴더 입력")
+    page.keyboard.press("Escape")
+    # A cancelled analysis of the new sentence ends without a plan, even when its reply comes after the cancel.
+    held = []
+    page.route("**/api/studio/plan", lambda route: held.append(route))
+    area.fill(new)
+    page.locator("#plan-ask").click()
+    expect(page.locator("#plan-panel .pending")).to_be_visible()
+    expect(make).to_be_disabled()
+    page.locator("#plan-panel .pending").get_by_role("button", name="취소").click()
+    expect(page.locator("#plan-panel .pending")).to_have_count(0)
+    try: plan_reply(held[0], "늦게 온 응답")
+    except Exception: pass
+    page.wait_for_timeout(200)
+    expect(page.locator(".ps-intent")).to_have_text(original)
+    expect(page.locator("#plan-panel .pp-error")).to_have_count(0)
+    expect(make).to_be_disabled()
+    # Analysed now: the request comes from that analysis, never from the earlier plan.
+    page.unroute("**/api/studio/plan")
+    page.route("**/api/studio/plan", lambda route: plan_reply(route, "이름 충돌 때 덮어쓰기 막기"))
+    page.route("**/api/studio/scope", lambda route: route.fulfill(status=200, content_type="application/json", body=json.dumps(
+        {"model": "stub-model", "reply": {"summary": "[테스트 응답] 범위 검토 자리입니다.", "prerequisites": [], "unknowns": []}})))
+    page.locator("#plan-ask").click()
+    expect(page.locator(".ps-intent")).to_have_text(new)
+    page.locator(".ps-more").click()
+    expect(make).to_be_enabled()
+    make.click()
+    expect(page.locator("#plan-sheet pre")).to_contain_text("- 이름 충돌 때 덮어쓰기 막기")
+    expect(page.locator("#plan-sheet pre")).not_to_contain_text("- 폴더 입력")
+    page.keyboard.press("Escape")
+    page.unroute("**/api/studio/plan")
+    # A saved project: material added while its analysis is in flight makes that reply outdated; the plan is not made.
+    page.goto(base + "/")
+    page.locator("#new-open").click()
+    page.locator("#new-name").fill("자료 프로젝트")
+    page.locator("#new-form").get_by_role("button", name="만들기").click()
+    page.locator("#part-name").fill("변환")
+    page.get_by_role("button", name="만들기").click()
+    page.keyboard.press("Escape")
+    page.locator("#plan-entry").click()
+    page.locator("#plan-intent").fill("이름 충돌 때 덮어쓰지 않게 해줘.")
+    held.clear()
+    page.route("**/api/studio/plan", lambda route: held.append(route))
+    page.locator("#plan-ask").click()
+    expect(page.locator("#plan-panel .pending")).to_be_visible()
+    def add_material():
+        page.get_by_role("button", name="+ 자료 추가").click()
+        page.locator("#src-title").fill("저장 함수 발췌")
+        page.locator("#src-text").fill("save.ts: 같은 이름이 있으면 덮어쓴다.")
+        page.locator("#src-basis").fill("main save.ts")
+        fields = page.evaluate("() => ['src-title', 'src-text', 'src-basis'].map(id => document.getElementById(id)?.value ?? null)")
+        page.locator(".pp-add").get_by_role("button", name="추가").click()
+        # The material must be added as typed; on failure say what the fields held and what the form answered.
+        if page.locator(".pp-add").count():
+            raise AssertionError(f"material not added: fields={fields} message={page.locator('.pp-add .form-msg').inner_text()!r}")
+    page.get_by_role("button", name=re.compile("읽는 자료")).click()
+    add_material()
+    plan_reply(held[0], "덮어쓰기 막기")
+    expect(page.locator("#plan-panel .pp-error")).to_contain_text("살펴보는 동안 문장이나 자료가 바뀌어 이 결과는 쓰지 않았어요")
+    expect(page.locator(".ps-intent")).to_have_text("오른쪽에 바꾸고 싶은 모습을 적어 주세요")
+    # Analysed with the material: removing it puts the request off, adding the same material back puts it on again.
+    page.unroute("**/api/studio/plan")
+    page.route("**/api/studio/plan", lambda route: plan_reply(route, "덮어쓰기 막기"))
+    page.locator("#plan-ask").click()
+    expect(page.locator(".ps-intent")).to_have_text("이름 충돌 때 덮어쓰지 않게 해줘.")
+    page.locator(".ps-more").click()
+    expect(make).to_be_enabled()
+    sources = page.get_by_role("button", name=re.compile("읽는 자료"))
+    if sources.get_attribute("aria-expanded") != "true": sources.click()
+    page.get_by_role("button", name="‘저장 함수 발췌’ 자료 빼기").click()
+    page.locator("#pw-rail-back").click()  # the material list opens in the right column in place of the request
+    expect(make).to_be_disabled()
+    expect(page.locator("#plan-make-note")).to_have_text("바뀐 자료로 먼저 살펴본 뒤 만들 수 있어요")
+    expect(page.locator("#plan-ask")).to_have_text("바뀐 자료로 살펴보기")
+    page.get_by_role("button", name=re.compile("읽는 자료")).click()
+    add_material()
+    page.locator("#pw-rail-back").click()
+    expect(make).to_be_enabled()
+    # Kept as analysed after a reload: the saved plan still answers what is written.
+    page.reload()
+    page.locator("#plan-entry").click()
+    page.locator(".ps-more").click()
+    expect(make).to_be_enabled()
+    # A late frame must not move focus into a field being typed in (Windows CI: the form was focused one frame after it
+    # rendered; on a slow runner that landed in the text field mid-entry, the text went into the title and the material
+    # was refused). Frames are held here and run at the worst moment: after focus has moved on to the text field.
+    slow = browser.new_context(viewport={"width": 1280, "height": 720})
+    slow.add_init_script("{ window.__frames = []; window.requestAnimationFrame = cb => window.__frames.push(cb); }")
+    page = slow.new_page()
+    page.goto(base + "/")
+    page.locator("#new-open").click()
+    page.locator("#new-name").fill("느린 화면")
+    page.locator("#new-form").get_by_role("button", name="만들기").click()
+    page.locator("#part-name").fill("변환")
+    page.get_by_role("button", name="만들기").click()
+    page.keyboard.press("Escape")
+    page.locator("#plan-entry").click()
+    page.get_by_role("button", name=re.compile("읽는 자료")).click()
+    page.evaluate("() => window.__frames.splice(0).forEach(cb => cb(performance.now()))")
+    page.get_by_role("button", name="+ 자료 추가").click()
+    expect(page.locator("#src-title")).to_be_focused()  # focused by the click itself, not a frame later
+    page.keyboard.type("저장 함수 발췌")
+    page.locator("#src-text").focus()
+    page.evaluate("() => window.__frames.splice(0).forEach(cb => cb(performance.now()))")
+    page.keyboard.type("save.ts: 같은 이름이 있으면 덮어쓴다.")
+    page.locator("#src-basis").fill("main save.ts")
+    fields = page.evaluate("() => ['src-title', 'src-text', 'src-basis'].map(id => document.getElementById(id)?.value ?? null)")
+    assert fields == ["저장 함수 발췌", "save.ts: 같은 이름이 있으면 덮어쓴다.", "main save.ts"], fields
+    page.locator(".pp-add").get_by_role("button", name="추가").click()
+    expect(page.locator(".pp-extra")).to_contain_text("저장 함수 발췌")
+    slow.close()
+    # The converter example: material taken from the return reading and added to the draft is read by the next analysis and
+    # kept in its plan, so the plan made from it is current (the request comes on).
+    page = context.new_page()
+    page.goto(base + "/#/p/ex-converter")
+    page.locator("#plan-entry").click()
+    page.locator(".ps-more").click()
+    make = page.get_by_role("button", name="요청문 만들기", exact=True)
+    make.click()
+    page.keyboard.press("Escape")
+    page.get_by_role("button", name=re.compile("^돌아온 기록 · 요청문")).click()  # returned results open in the right column
+    page.get_by_role("button", name="돌아온 기록 살펴보기").click()
+    def digest(route):
+        ask = route.request.post_data_json
+        src = next(x for x in ask["sources"] if x["kind"] in ("authored", "report", "code", "test", "review", "result") and x["partIds"])
+        reply = {"changes": [], "read": None, "open": [{"text": "[테스트 응답] 이름이 같은 결과 파일을 덮어쓰지 않게 하고 싶어.", "partIds": src["partIds"][:1], "refs": [src["id"]]}],
+                 "notCovered": ["[테스트 응답] 돌아온 자료로 말할 수 없는 것 자리입니다."]}
+        route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "reply": reply}))
+    page.route("**/api/studio/digest", digest)
+    page.locator("#plan-panel").get_by_role("button", name="돌아와 읽기").click()
+    page.get_by_role("button", name=re.compile("AI로 정리")).first.click()
+    page.get_by_role("button", name="이걸로 시험").click()
+    page.get_by_role("button", name="초안 끝에 덧붙이기").click()
+    expect(make).to_be_disabled()
+    expect(page.locator("#plan-reach")).to_contain_text("+ 붙인 자료 1개")
+    sent = []
+    page.route("**/api/studio/plan", lambda route: (sent.append(route.request.post_data_json), plan_reply(route, "같은 이름 덮어쓰기 막기")))
+    page.locator("#plan-ask").click()
+    expect(page.locator(".ps-intent")).to_contain_text("덮어쓰지 않게")
+    assert any(e["id"] == "U01" for e in sent[0]["evidence"]), [e["id"] for e in sent[0]["evidence"]]
+    page.locator(".ps-more").click()
+    expect(make).to_be_enabled()
+    expect(page.locator("#plan-make-note")).to_be_hidden()
+    context.close()
+
+
+# An actual analysis reply (source: the EXP65 lead's own call on commit 5cbd1db, ex-converter, real DeepSeek, HTTP 200) for
+# "폴더 변환은 추가하지 말고, 파일 이름 충돌 때 덮어쓰지만 막아줘.". Fields as reported; its summary text was not recorded
+# with it, so the summary below is a marked placeholder, and preserve/unknowns were not reported (empty here). No presentation:
+# a normal case for an actual reply, which the reading must make readable without inventing the current overwrite behaviour.
+ACTUAL_COLLISION = {
+    "summary": "[테스트 자리: 실제 응답의 요약 원문은 함께 전달되지 않았음. 내용은 기존 ok/error 누적 결과의 재사용 설명]",
+    "items": [{"id": "change_1", "title": "이름 충돌 시 덮어쓰기 차단",
+               "description": "현재 단일 문서 변환과 저장 흐름을 재사용하되, 저장 대상과 같은 이름의 기존 파일이 있으면 덮어쓰지 않고 저장을 막는다. 폴더 단위 변환은 새로 추가하지 않는다.",
+               "partIds": ["files"], "refs": ["INTENT", "P03"], "dependsOn": []}],
+    "impacts": [{"partId": "results", "reason": "충돌로 저장을 막았을 때 현재 화면은 마지막 결과만 설명하므로, 차단 사실과 이유를 결과 설명에서 어떻게 보여줄지 함께 확인해야 한다.",
+                 "refs": ["INTENT", "P03", "R05"]}],
+    "preserve": [], "unknowns": []}
+
+
+def actual_reply_flow(browser, base):
+    """EXP65 wide comparison on an actual reply without presentation, scope reviews that outlive a material change, and
+    four changes without horizontal scroll."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    page.goto(base + "/#/p/ex-converter")
+    page.locator("#plan-entry").click()
+    page.locator(".ps-edit").click()
+    page.locator("#plan-intent").fill("폴더 변환은 추가하지 말고, 파일 이름 충돌 때 덮어쓰지만 막아줘.")
+    page.route("**/api/studio/plan", lambda route: route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "reply": ACTUAL_COLLISION})))
+    page.locator("#plan-ask").click()
+    expect(page.locator(".ps-item")).to_have_count(1)
+    # On the map: the change's own words, the target with no claimed current behaviour, and the part's role as the reason.
+    expect(page.locator(".callout .co-head strong")).to_have_text("변환한 파일")
+    expect(page.locator(".callout .co-row.outcome")).to_contain_text("덮어쓰지 않고 저장을 막는다")
+    expect(page.locator("#lens .cmp-desc")).to_have_count(0)  # the description once, as the wanted result
+    expect(page.locator(".callout .co-row.now.unknown p").first).to_have_text("이 변경안의 자료로는 지금 어떻게 하는지 알 수 없어요.")
+    expect(page.locator(".callout .co-row.why")).to_contain_text("변환 형식과 저장한 산출물을 다룬다.")
+    expect(page.locator("#lens")).not_to_contain_text("비교는 아직 정리 전")
+    # Wide: the whole description and its sources, the target, and the part to look at with it with the analysis's reason.
+    page.locator("#lens .ps-wide").click()
+    expect(page.locator(".pw-title")).to_have_text("변경안 · 1가지 변화")
+    expect(page.locator(".pw-part .co-row.outcome p").first).to_have_text(ACTUAL_COLLISION["items"][0]["description"])
+    expect(page.locator(".pw-part .co-row.outcome .co-ref")).to_have_count(2)
+    expect(page.locator(".pw-part")).to_have_count(1)
+    expect(page.locator(".pw-near li")).to_have_count(1)
+    expect(page.locator(".pw-near li")).to_contain_text("결과 설명")
+    expect(page.locator(".pw-near li")).to_contain_text("차단 사실과 이유를 결과 설명에서 어떻게 보여줄지")
+    expect(page.locator(".pw-near .co-ref")).to_have_count(3)
+    # Its part to look at, read on the map: the part and its reason, and the way back.
+    page.locator(".pw-near .pw-map").click()
+    expect(page.locator("#lens-title")).to_have_text("결과 설명")
+    expect(page.locator("#lens")).to_contain_text("차단 사실과 이유")
+    page.locator("#lens .ps-wide").click()
+    expect(page.locator("#plan-panel.work")).to_be_visible()
+    expect(page.locator(".pw-pick[aria-current='true']")).to_contain_text("이름 충돌 시 덮어쓰기 차단")
+    # A scope review still in flight when the example material is switched: its reply makes no document in either.
+    held = []
+    page.route("**/api/studio/scope", lambda route: held.append(route))
+    page.locator("#plan-make").click()
+    expect(page.locator(".pw-req .pending")).to_be_visible()
+    page.locator(".pp-cond").get_by_role("button", name="없음").click()
+    expect(page.locator(".pw-item")).to_have_count(4)  # condition B's authored analysis: four changes
+    try: held[0].fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "reply": {"summary": "[테스트 응답] 늦은 검토", "prerequisites": [], "unknowns": []}}))
+    except Exception: pass
+    page.wait_for_timeout(300)
+    expect(page.locator("#plan-sheet")).to_be_hidden()
+    expect(page.get_by_role("button", name=re.compile("마지막 요청문"))).to_have_count(0)
+    # Four changes and long names: no horizontal scroll anywhere in the workspace.
+    for sel in (".pw-list", ".pw-detail", ".pw-rail-body"):
+        assert page.locator(sel).evaluate("e => e.scrollWidth <= e.clientWidth + 1"), sel
+    no_page_scroll(page)
+    page.locator(".pp-cond").get_by_role("button", name="있음").click()
+    expect(page.locator(".pw-item")).to_have_count(1)
+    expect(page.get_by_role("button", name=re.compile("마지막 요청문"))).to_have_count(0)
+    expect(page.locator(".pw-req .pp-error")).to_have_count(0)
+    page.unroute("**/api/studio/scope")
+    # A saved project: material added while its scope review is in flight makes that review unused; no document is made.
+    page.goto(base + "/")
+    page.locator("#new-open").click()
+    page.locator("#new-name").fill("검토 프로젝트")
+    page.locator("#new-form").get_by_role("button", name="만들기").click()
+    page.locator("#part-name").fill("변환")
+    page.get_by_role("button", name="만들기").click()
+    page.keyboard.press("Escape")
+    page.locator("#plan-entry").click()
+    page.locator("#plan-intent").fill("이름 충돌 때 덮어쓰지 않게 해줘.")
+    page.unroute("**/api/studio/plan")
+    page.route("**/api/studio/plan", lambda route: plan_reply(route, "덮어쓰기 막기"))
+    page.locator("#plan-ask").click()
+    page.locator(".ps-more").click()
+    held.clear()
+    page.route("**/api/studio/scope", lambda route: held.append(route))
+    page.locator("#plan-make").click()
+    expect(page.locator(".pw-req .pending")).to_be_visible()
+    page.get_by_role("button", name=re.compile("읽는 자료")).click()
+    page.get_by_role("button", name="+ 자료 추가").click()
+    page.locator("#src-title").fill("저장 함수 발췌")
+    page.locator("#src-text").fill("save.ts: 같은 이름이 있으면 덮어쓴다.")
+    page.locator("#src-basis").fill("main save.ts")
+    page.locator(".pp-add").get_by_role("button", name="추가").click()
+    held[0].fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "reply": {"summary": "[테스트 응답] 늦은 검토", "prerequisites": [], "unknowns": []}}))
+    page.locator("#pw-rail-back").click()
+    expect(page.locator(".pw-req .pp-error")).to_contain_text("검토하는 동안 변경안이나 고른 항목이 바뀌어 이 검토는 쓰지 않았어요")
+    expect(page.get_by_role("button", name=re.compile("마지막 요청문"))).to_have_count(0)
+    expect(page.locator("#plan-make")).to_be_disabled()
+    context.close()
+
+
+def stale_work_flow(browser, base):
+    """EXP65: writing in the wide comparison makes its ways to the map follow at once: no part reading of the earlier plan
+    (a forced click changes nothing, the editor and caret stay), and an honest way out to the current map with the draft
+    kept; reopening finds the same draft; the analysed sentence written back gives the ways back."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    page.goto(base + "/#/p/ex-converter")
+    before = page.locator("#world").evaluate(CAMERA)
+    page.locator("#plan-entry").click()
+    page.locator(".ps-more").click()
+    work, maps, back = page.locator("#plan-panel.work"), page.locator("#plan-panel .pw-map"), page.locator("#pw-back")
+    expect(back).to_have_text("지도로 돌아가기")
+    expect(maps.first).to_be_enabled()
+    # Cloud's sequence on '성공 유지·실패 모음': the whole sentence plus a line, the caret moved once, the second part's way to
+    # the map: the way is off at once and the caret stays where it was put.
+    page.locator(".pw-pick", has_text="성공 유지·실패 모음").click()
+    page.locator("#plan-panel").get_by_role("button", name="문장 고치기").click()
+    area = page.locator("#plan-intent")
+    original = area.input_value()
+    area.fill(original + "\n사용자 검토 초안")
+    page.keyboard.press("ArrowLeft")
+    at = area.evaluate("a => [a.selectionStart, a.selectionEnd]")
+    second = page.locator(".pw-part").nth(1).locator(".pw-map")
+    expect(second).to_be_disabled()
+    second.evaluate("b => { b.disabled = false; b.click(); }")
+    expect(work).to_be_visible()
+    assert area.evaluate("a => [a.selectionStart, a.selectionEnd]") == at, at
+    expect(back).to_have_text("현재 지도로 (초안 유지)")
+    area.fill(original)
+    expect(area).to_be_focused()
+    area.evaluate("a => { a.dataset.same = '1'; a.setSelectionRange(a.value.length, a.value.length); }")
+    page.keyboard.type(" 이름 충돌도 막아줘.")
+    draft = area.input_value()
+    # At once, without a re-render: the ways to the map are off with their reason, the way out says what it does.
+    for i in range(maps.count()):
+        expect(maps.nth(i)).to_be_disabled()
+    expect(back).to_have_text("현재 지도로 (초안 유지)")
+    expect(page.locator(".pw-stale")).to_be_visible()
+    expect(page.locator("#plan-stale")).to_be_visible()
+    # A forced click on an outdated '지도에서 보기' changes nothing: same workspace, same editor element, draft, caret, focus.
+    maps.first.evaluate("b => { b.disabled = false; b.click(); }")
+    expect(work).to_be_visible()
+    expect(maps.first).to_be_disabled()
+    assert area.evaluate("a => a.dataset.same === '1' && document.activeElement === a && a.selectionStart === a.value.length"), "editor kept"
+    expect(area).to_have_value(draft)
+    # Reading a source re-renders the workspace: the editor keeps its caret.
+    area.evaluate("a => a.setSelectionRange(3, 3)")
+    page.locator("#plan-panel .co-ref").first.click()
+    expect(page.locator(".pw-rail-head h3")).to_contain_text("근거")
+    assert page.locator("#plan-intent").evaluate("a => a.selectionStart === 3 && a.selectionEnd === 3")
+    page.locator("#pw-rail-back").click()
+    # The honest way out: the current map, the plan closed with the draft kept and said so.
+    back.click()
+    expect(page.locator("#plan-panel")).to_be_hidden()
+    expect(page.locator("#plan-strip")).to_be_hidden()
+    expect(page.locator("#toast")).to_contain_text("초안과 변경안은 그대로 남아 있어요")
+    page.wait_for_timeout(300)
+    assert page.locator("#world").evaluate(CAMERA) == before
+    assert page.evaluate("[...document.getElementById('space').children].every(e => !e.inert)")
+    # Reopening finds the same draft, still ahead of the plan; the earlier plan's request stays off.
+    page.locator("#plan-entry").click()
+    expect(work).to_be_visible()
+    expect(page.locator("#plan-intent")).to_have_value(draft)
+    expect(page.locator("#plan-make")).to_be_disabled()
+    expect(maps.first).to_be_disabled()
+    # The analysed sentence written back: the ways to the map come back at once, and a part reads on the map.
+    page.locator("#plan-intent").fill(original)
+    expect(maps.first).to_be_enabled()
+    expect(back).to_have_text("지도로 돌아가기")
+    maps.first.click()
+    expect(work).to_be_hidden()
+    expect(page.locator("#lens .callout")).to_be_visible()
+    expect(page.locator("#lens .ps-wide")).to_have_text("‹ 넓은 비교로")
+    context.close()
+
+
 def return_failure_flow(browser, base):
     """A failed return reading: a short error and the material itself, never a substitute reading; asking again works."""
     material = json.loads((ROOT.parents[1] / "docs/cycles/2026-10-27-return-experience-63/MATERIAL.json").read_text(encoding="utf-8"))
@@ -1306,6 +1734,9 @@ def main():
             overview_flow(browser, base, oss_fixtures()); print("ok  large list as an overview of real groups, find with way back, scope relations, pane beside the map, verbs")
             relation_visit_flow(browser, base, oss_fixtures()); print("ok  relation visit: named way back to its part, selection, camera, sheet and scroll; browser Back the same; no stale way back")
             return_flow(browser, base, oss_fixtures()); print("ok  return reading: no call on open, one per material, exact quote and back, draft never overwritten, Node-RED plan without result")
+            stale_request_flow(browser, base); print("ok  request only from the analysis of what is written now: typed, forced, A-B-A, cancelled and outdated replies, material")
+            actual_reply_flow(browser, base); print("ok  wide comparison of an actual reply without presentation; scope reviews outliving a material change; four changes")
+            stale_work_flow(browser, base); print("ok  writing in the wide comparison: map ways off at once (forced click a no-op, caret kept), honest way out, draft on reopen")
             proc, base = start("code"); procs.append(proc); code_flow(browser, base); print("ok  access code kept from an input event")
             proc, base = start("fail"); procs.append(proc); failure_flow(browser, base); print("ok  provider failure -> short error -> retry")
             proc, base = start("fail"); procs.append(proc); return_failure_flow(browser, base); print("ok  return reading failure -> short error and the material -> asking again")
