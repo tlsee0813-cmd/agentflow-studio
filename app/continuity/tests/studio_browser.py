@@ -1480,6 +1480,72 @@ def record_flow(browser, base, backup):
     context.close()
 
 
+DRAWN = "() => [...document.querySelectorAll('#world [data-box]')].map(e => e.dataset.box).sort().join('|')"
+
+
+def record_fold_flow(browser, base, cases):
+    """EXPERIENCE69: a chosen candidate inside a folded group is shown on the same map. Node-RED's 10-mqtt.js sits in
+    network, folded by default: nothing unfolds when the reading comes, choosing the candidate unfolds only its path and
+    marks the part itself (not the folded group), the choice holds through a quote and back, another candidate or letting it
+    go folds that path again, and closing comes back to the scene with the folds and camera it had. Stubbed provider."""
+    text = (ROOT / "tests/fixtures/record69/node-red-pr6019.txt").read_text(encoding="utf-8")
+    page = browser.new_page(viewport={"width": 1280, "height": 720})
+    errors = []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.goto(base + "/")
+    page.locator("#import-file").set_input_files(str(cases / "oss-node-red.json"))
+    page.wait_for_url(re.compile(r"#/p/E_"))
+    mqtt, change, network = (f'#world .node[data-part="A_oss-node-red_{k}"]' for k in ("10-mqtt", "15-change", "network"))
+    page.locator(network).click()
+    expect(page.locator("#lens-title")).to_have_text("network")
+    page.wait_for_timeout(400)
+    url0, cam0, drawn0 = page.url, page.locator("#world").evaluate(CAMERA), page.evaluate(DRAWN)
+    expect(page.locator(mqtt)).to_have_count(0)  # inside the folded group
+    page.locator("#lens .more summary").click()
+    page.get_by_role("menuitem", name="기록 붙여넣기").click()
+    page.locator("#paste-text").fill(text)
+    page.get_by_role("button", name="기록 저장").click()
+    page.get_by_role("button", name="기록 읽기").click()
+    expect(page.locator("#lens .rr-records")).to_be_visible()
+    # The reading alone unfolds nothing.
+    expect(page.locator(mqtt)).to_have_count(0)
+    assert page.evaluate(DRAWN) == drawn0
+    # Choosing the candidate: its path opens, the part itself is drawn, marked and brought beside the pane; its reason reads.
+    page.locator("#lens .rr-part.cand", has_text="10-mqtt.js").click()
+    expect(page.locator(mqtt)).to_be_visible()
+    expect(page.locator("#world .read-mark")).to_have_count(1)
+    expect(page.locator(mqtt)).to_have_class(re.compile(r"\bread-mark\b"))
+    expect(page.locator("#lens .rr-rec").nth(1).locator(".rr-why")).to_contain_text("10-mqtt.js")
+    page.wait_for_timeout(400)
+    in_map(page, mqtt)
+    # A quote and back: the same part stays open and marked, with its reason.
+    page.locator("#lens .rr-rec").nth(1).locator(".rr-cite").click()
+    expect(page.locator("#lens .rr-mark")).to_be_visible()
+    expect(page.locator(mqtt)).to_have_class(re.compile(r"\bread-mark\b"))
+    page.locator("#lens .rr-back").click()
+    expect(page.locator(mqtt)).to_have_class(re.compile(r"\bread-mark\b"))
+    expect(page.locator("#lens .rr-rec").nth(1).locator(".rr-why")).to_contain_text("10-mqtt.js")
+    # Another candidate: the first path folds again, the other opens; letting it go folds everything back as it was.
+    page.locator("#lens .rr-part.cand", has_text="15-change.js").click()
+    expect(page.locator(change)).to_have_class(re.compile(r"\bread-mark\b"))
+    expect(page.locator(mqtt)).to_have_count(0)
+    page.locator("#lens .rr-part.cand", has_text="15-change.js").click()
+    expect(page.locator(change)).to_have_count(0)
+    assert page.evaluate(DRAWN) == drawn0
+    # Closing with a candidate open: back to the part, the folds and the camera the paste began from.
+    page.locator("#lens .rr-part.cand", has_text="10-mqtt.js").click()
+    expect(page.locator(mqtt)).to_be_visible()
+    page.locator("#lens .rr-head .close").click()
+    expect(page).to_have_url(url0)
+    expect(page.locator("#lens-title")).to_have_text("network")
+    expect(page.locator(mqtt)).to_have_count(0)
+    page.wait_for_timeout(400)
+    assert page.evaluate(DRAWN) == drawn0
+    assert page.locator("#world").evaluate(CAMERA) == cam0
+    assert errors == [], errors
+    page.close()
+
+
 def plan_reply(route, title):
     """A valid analysis of exactly what the page sent (test-only, routed in the browser): one change on the first part, cited
     to the sentence itself. Never a model's reading."""
@@ -1924,6 +1990,7 @@ def main():
             relation_visit_flow(browser, base, oss_fixtures()); print("ok  relation visit: named way back to its part, selection, camera, sheet and scroll; browser Back the same; no stale way back")
             return_flow(browser, base, oss_fixtures()); print("ok  return reading: no call on open, one per material, exact quote and back, draft never overwritten, Node-RED plan without result")
             record_flow(browser, base, record_fixtures()); print("ok  pasted record: draft kept, exact text, structure untouched, read on request, same-named candidates apart, quote and back, scene restored, repeat/key refused, backup copy without readings")
+            record_fold_flow(browser, base, oss_fixtures()); print("ok  pasted record on Node-RED: a chosen candidate in a folded group opens only its path, holds through a quote, folds back on another choice and on close")
             stale_request_flow(browser, base); print("ok  request only from the analysis of what is written now: typed, forced, A-B-A, cancelled and outdated replies, material")
             actual_reply_flow(browser, base); print("ok  wide comparison of an actual reply without presentation; scope reviews outliving a material change; four changes")
             stale_work_flow(browser, base); print("ok  writing in the wide comparison: map ways off at once (forced click a no-op, caret kept), honest way out, draft on reopen")

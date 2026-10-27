@@ -29,6 +29,8 @@ export interface ReturnHost {
   bundle(): PlanBundle | null;
   /** Put the reading in the pane (null takes it away). The host leaves a selected part's reading in place. */
   show(content: Node[] | null): void;
+  /** The one part a chosen candidate names, unfolded for the reading (only its path, until another choice; null folds it back). */
+  open(part: string | null): void;
   /** The parts the reading is about now ([] clears). A mark only: no status, no selection, no camera. */
   mark(parts: string[]): void;
   /** Bring these parts beside the pane by the smallest pan (an explicit request). */
@@ -141,7 +143,7 @@ export function createReturnView(host: ReturnHost) {
   function close() {
     if (!s) return;
     const back = s.back;
-    s.pending?.abort(); s = null; host.mark([]); host.show(null); host.chrome();
+    s.pending?.abort(); s = null; host.open(null); host.mark([]); host.show(null); host.chrome();
     if (back) host.restoreScene(back);
   }
   /** The paste box, in this pane. context: the part being looked at (null from the reading itself); scene: where to come back to,
@@ -477,6 +479,7 @@ export function createReturnView(host: ReturnHost) {
     } else put(body, ...readingBody(o));
     host.show([header(o), body, footer(o)]);
     const v = s.view;
+    host.open(s.focus?.list === 'records' && s.focus.part ? s.focus.part : null);
     host.mark(v.kind === 'source' ? (v.source.kind === 'record' ? focusParts() : v.source.partIds) : focusParts());
     if (v.kind === 'source' && v.quote) requestAnimationFrame(() => document.querySelector('#lens .rr-mark')?.scrollIntoView({ block: 'center' }));
   }

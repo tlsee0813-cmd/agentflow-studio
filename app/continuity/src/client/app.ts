@@ -325,7 +325,7 @@ async function render() {
   const part = routePart && o.view.parts.some(p => p.id === routePart) ? routePart : null;
   // Opening a folded part for reference unfolds its way down only while it is open; the person's own folds come back after.
   const before = [...tempExpand].join('|');
-  tempExpand.clear(); relayout(o);
+  tempExpand.clear(); readOpen = null; relayout(o);
   if (part && part !== scope && !lay.boxes.has(part)) {
     if (insideScope(o, part)) expandPath(o, part, tempExpand);
     else { location.replace(hashFor(o.key, part, partOf(o, part)!.parentId)); return; }
@@ -1595,6 +1595,20 @@ function applyReadMarks() {
   const o = opened, ids = new Set(o ? readMarks.map(id => drawnRep(o, id)).filter((x): x is string => !!x) : []);
   document.querySelectorAll<HTMLElement>('.node[data-part],.frame[data-part]').forEach(el => el.classList.toggle('read-mark', ids.has(el.dataset.part!)));
 }
+/** The related part a return reading's chosen candidate names, opened to be seen: only the path down to it unfolds, as a
+ * reference (tempExpand, as for a part opened by its address); the person's own folds, places and camera are left as they are,
+ * and choosing another candidate, letting it go or closing the reading folds that path again. Nothing unfolds before a choice.
+ * A part outside the scope is reached the way any explicit move is: up to the scope that holds it (the scene back stays). */
+let readOpen: string | null = null;
+function openForReading(id: string | null) {
+  const o = opened; if (!o || selected || id === readOpen) return;
+  readOpen = id;
+  if (id && partOf(o, id) && !insideScope(o, id) && id !== scope) { go(o.key, null, partOf(o, id)!.parentId); return; }
+  const before = [...tempExpand].join('|');
+  tempExpand.clear();
+  if (id && id !== scope && partOf(o, id)) expandPath(o, id, tempExpand);
+  if ([...tempExpand].join('|') !== before) { renderSpace('keep'); markSelection(selected); }
+}
 function openReturn() {
   const o = opened; if (!o || o.kind === 'legacy') return;
   if (planView.isOpen()) planView.close(false);
@@ -1626,6 +1640,7 @@ const returnView = createReturnView({
     const body = l.querySelector('.lens-body'); if (body && same) body.scrollTop = keep;
   },
   mark: ids => { readMarks = [...ids]; applyReadMarks(); },
+  open: openForReading,
   reveal: ids => { const o = opened; if (!o) return; revealParts([...new Set(ids.map(id => drawnRep(o, id)).filter((x): x is string => !!x))]); },
   selectPart: id => { const o = opened; if (!o) return; readingCamera = { ...camera }; mapMoved = false; go(o.key, id); },
   trial: (text, sources) => { planView.propose(text, sources); },
