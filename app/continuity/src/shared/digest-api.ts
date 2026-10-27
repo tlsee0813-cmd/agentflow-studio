@@ -31,10 +31,11 @@ export interface DigestAsk {
   plan: { intent: string; items: { title: string; partIds: string[] }[] } | null;
 }
 export interface DigestStatement { text: string; partIds: string[]; refs: string[] }
-/** One reading of a pasted record: what it says changed, what it says was and was not checked, or what it leaves to decide.
+/** One reading of a pasted record: what it says changed, what it says was and was not checked, what it leaves to decide, or
+ * (note) what it explains as it stands — a description, background or context that the record does not say this work changed.
  * quote is text of the record as it was sent; related parts are candidates the model connected, each with its own quote. */
-export type RecordReadingKind = 'change' | 'check' | 'open';
-export const RECORD_READING_KINDS: readonly RecordReadingKind[] = ['change', 'check', 'open'];
+export type RecordReadingKind = 'change' | 'check' | 'open' | 'note';
+export const RECORD_READING_KINDS: readonly RecordReadingKind[] = ['change', 'check', 'open', 'note'];
 export interface RecordCandidate { partId: string; quote: string; why: string }
 export interface RecordReading { kind: RecordReadingKind; text: string; ref: string; quote: string; related: RecordCandidate[] }
 export interface DigestReply {

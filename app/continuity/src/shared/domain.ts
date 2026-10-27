@@ -4,6 +4,7 @@ import { planFacts, planFactsText } from './plan-facts.js';
 import { areaPath, childrenOf } from './hierarchy.js';
 import type {ContextPlanStamp,ContextAreaDescription} from './types.js';
 import { outcomeOf, contextLinks } from './outcome.js';
+import { secretLike } from './secret.js';
 export { planFacts, planFactsText } from './plan-facts.js';
 const uid = (prefix: string) => `${prefix}_${crypto.randomUUID()}`;
 const now = () => new Date().toISOString();
@@ -566,9 +567,11 @@ export function markHandoff(p:Project,id:string,text:string,method:'clipboard'|'
 }
 /** project.8: keeps a pasted record exactly as given (no trimming or merging) with the time it was added here and, optionally, the
  * part being looked at. The very same text already kept is that record again: nothing is added and the revision stays. */
+/** A backup's pasted records that look like they hold a key: such a file is not taken in (nothing is stored). */
+export function secretPasted(p: Project): PastedRecord[] { return p.pasted.filter(r=>secretLike(r.text)); }
 export function pasteRecord(p: Project, value: string, context: string|null): {project:Project;record:PastedRecord;duplicate:boolean} {
   const same=p.pasted.find(r=>r.text===value); if(same) return {project:p,record:same,duplicate:true};
-  text(value,PASTED_TEXT_LIMIT); ensure(context===null||p.space.areas.some(a=>a.id===context));
+  text(value,PASTED_TEXT_LIMIT); ensure(!secretLike(value),'SECRET_LIKE'); ensure(context===null||p.space.areas.some(a=>a.id===context));
   const n=change(p), record:PastedRecord={id:uid('N'),text:value,at:now(),context};
   n.pasted.push(record); return {project:n,record:copy(record),duplicate:false};
 }

@@ -4,7 +4,7 @@ import type { Project } from '../shared/types.js';
 import { FILE_LIMIT } from '../shared/types.js';
 import { WorkspaceStore, type EntryRef, storageErrorCode, readViewState, readEntryView, writeViewState, readEntryPositions, writeEntryPositions, importCopy, serializeBackup } from '../shared/storage.js';
 import { parseBackup, cleanPositions } from '../shared/validation.js';
-import { editArea, addArea, addChildArea, createProject, rename, pasteRecord } from '../shared/domain.js';
+import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, secretPasted } from '../shared/domain.js';
 import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
 import { layoutScope, edgePath, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, ROOT, HEAD, type Box, type Edge, type LabelSpot, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
@@ -1897,6 +1897,8 @@ function bindImport() {
     if (f.size > FILE_LIMIT) { say('파일이 너무 커요.'); return; }
     let project: Project, places: Positions | null;
     try { ({ project, positions: places } = parseBackup(await f.text())); } catch { say('AgentFlow 프로젝트 백업 파일이 아니거나 읽을 수 없어요. 아무것도 바꾸지 않았어요.'); return; }
+    // A pasted record holding something like a key never comes in by a backup either (the paste box refuses it the same way).
+    if (secretPasted(project).length) { say(`백업의 붙여넣은 기록 ${secretPasted(project).length}개에 키나 토큰처럼 보이는 글이 있어 가져오지 않았어요. 저장된 프로젝트는 그대로예요.`); return; }
     if (!store.writable) { say('이 브라우저에서는 저장할 수 없어 가져오지 못했어요.'); return; }
     try {
       // The new copy has places of its own (the file's, or none: automatic layout) and an empty view, kept before it is added;

@@ -61,7 +61,8 @@ interface State {
 /** Paste drafts, per workspace entry (an imported copy has its own), in this browser apart from the project. A draft that looks
  * like it holds a key stays in this tab only. */
 const PASTE_DRAFT_KEY = 'agentflow.studio.paste-draft.1';
-const READING_KIND: Record<RecordReading['kind'], string> = { change: '변화', check: '확인 범위', open: '남은 판단' };
+/** A note (what the record explains as it stands) carries no tag: it is neither a change nor a check. */
+const READING_KIND: Record<RecordReading['kind'], string | null> = { change: '변화', check: '확인 범위', open: '남은 판단', note: null };
 const STAGE_MEMORY = new Map<string, string>();
 const short = (text: string, n: number) => { const t = text.replace(/\s+/g, ' ').trim(); return t.length > n ? `${t.slice(0, n)}…` : t; };
 /** A version named in a source's basis (a commit), else nothing. */
@@ -157,17 +158,22 @@ export function createReturnView(host: ReturnHost) {
     const key = s.key, text = draftOf(key);
     if (!text.trim()) { s.pasteMsg = '붙여 넣을 글이 아직 없어요.'; render(); return; }
     if (secretLike(text)) { s.pasteMsg = '키나 토큰처럼 보이는 글이 있어 저장하지 않았어요. 그 부분을 지우고 다시 저장하세요.'; render(); return; }
-    s.saving = true; render();
-    const done = await host.paste(text, s.pasteContext);
-    if (!s || s.key !== key) return;
-    s.saving = false;
-    if (typeof done === 'string') { s.pasteMsg = done; render(); return; }
-    keepDraft(key, ''); s.pasteContext = null; s.pasteMsg = null;
+    // The box stays editable while saving: only the text that was saved leaves the draft. Whatever was written meanwhile stays,
+    // and the box stays open with it. A pane closed or reopened meanwhile is another state: it is only told by the draft.
+    const st = s; st.saving = true; render();
+    const done = await host.paste(text, st.pasteContext);
+    st.saving = false;
+    const kept = typeof done !== 'string', untouched = draftOf(key) === text;
+    if (kept && untouched) keepDraft(key, '');
+    if (s !== st) return;
+    if (!kept) { st.pasteMsg = done; render(); return; }
     const r = host.current()?.project.pasted.find(x => x.id === done.id);
-    s.storeMsg = done.duplicate ? `같은 글을 ${r ? fullTime(r.at) : '앞서'}에 붙여 넣었어요. 새로 저장하지 않았어요.` : '기록을 저장했어요. ‘기록 읽기’로 읽어요.';
+    const said = done.duplicate ? `같은 글을 ${r ? fullTime(r.at) : '앞서'}에 붙여 넣었어요. 새로 저장하지 않았어요.` : '기록을 저장했어요. ‘기록 읽기’로 읽어요.';
+    if (!untouched) { st.pasteMsg = `${said} 저장하는 동안 쓴 글은 초안으로 남겨 두었어요.`; render(); void refresh(); return; }
+    st.pasteContext = null; st.pasteMsg = null; st.storeMsg = said;
     await refresh();
-    const src = s && s.key === key ? sources().find(x => x.recordId === done.id) : null;
-    if (s && src) { s.view = { kind: 'source', source: structuredClone(src), from: 'material', quote: null }; render(); }
+    const src = s === st ? sources().find(x => x.recordId === done.id) : null;
+    if (s === st && src) { st.view = { kind: 'source', source: structuredClone(src), from: 'material', quote: null }; render(); }
   }
   function setStage(id: string) {
     if (!s || s.stage === id || s.pending) return;
@@ -220,7 +226,7 @@ export function createReturnView(host: ReturnHost) {
     };
     return h('article', { class: `rr-st rr-rec${active ? ' on' : ''}`, 'aria-current': active ? 'true' : 'false', onclick: () => choose() },
       h('button', { type: 'button', class: 'rr-st-select', 'data-list': 'records', 'data-index': String(n), onclick: (e: Event) => { e.stopPropagation(); choose((e as MouseEvent).detail === 0); } },
-        h('span', { class: `rr-rec-kind k-${x.kind}` }, READING_KIND[x.kind]), h('span', { class: 'rr-text' }, x.text)),
+        READING_KIND[x.kind] ? h('span', { class: `rr-rec-kind k-${x.kind}` }, READING_KIND[x.kind]) : null, h('span', { class: 'rr-text' }, x.text)),
       h('div', { class: 'rr-chips' }, quoteChip(x.source, x.quote, from),
         x.related.length ? h('span', { class: 'rr-cand-label' }, '관련 후보') : null, ...x.related.map(c => candidateChip(c, x.source, from))));
   }
