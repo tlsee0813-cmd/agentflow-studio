@@ -36,16 +36,19 @@ function digestStub(input) {
   return new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(content) } }] }), { status: 200 });
 }
 // digest.2: up to three readings of the newest record, each quoting one of its own lines as sent; a part is a candidate only
-// when its file stem (10-mqtt.js -> mqtt) appears in that line. Mechanical and labelled: layout and round trips only.
+// when the line names it with its parent, or its file stem (10-mqtt.js -> mqtt) appears in that line. Mechanical and labelled: layout and round trips only.
 function recordStub(input) {
   const rec = input.sources.find(s => s.kind === 'record'); if (!rec) return [];
   const lines = rec.text.split('\n').map(l => l.trim()).filter(l => l.length >= 12).map(l => l.slice(0, 160).trim());
   const stem = name => name.replace(/\.[a-z]+$/i, '').replace(/^[\d-]+/, '').toLowerCase();
   const kinds = ['change', 'check', 'open'];
   return lines.filter((l, i) => i === 0 || /pass|pending|lint|test|정해|확인|바꿨/i.test(l)).slice(0, 3).map((line, i) => {
-    const part = input.parts.find(p => stem(p.name).length >= 3 && line.toLowerCase().includes(stem(p.name)));
+    // A part named in the line together with its parent (same-named parts told apart), else a file stem in the line.
+    const parent = p => input.parts.find(q => q.id === p.parentId);
+    const part = input.parts.find(p => p.parentId && line.includes(p.name) && line.includes(parent(p)?.name ?? '\u0000'))
+      ?? input.parts.find(p => stem(p.name).length >= 3 && line.toLowerCase().includes(stem(p.name)));
     return { kind: kinds[i], text: `[스텁 응답] 붙여넣은 기록의 ${i + 1}번째 읽기 자리입니다. 실제 모델의 읽기가 아닙니다.`, ref: rec.id, quote: line,
-      related: part ? [{ partId: part.id, quote: line, why: '[스텁] 파일 이름이 원문에 있음' }] : [] };
+      related: part ? [{ partId: part.id, quote: line, why: part.parentId && line.includes(part.name) ? '[스텁] 원문 줄에 이 부분과 부모 이름이 있음' : '[스텁] 파일 이름이 원문에 있음' }] : [] };
   });
 }
 const env = mode === 'nokey' ? {} : { DEEPSEEK_API_KEY: 'stub-key', DEEPSEEK_MODEL: 'stub-model', ...(mode === 'code' ? { STUDIO_ACCESS_CODE: 'smoke-code' } : {}) };

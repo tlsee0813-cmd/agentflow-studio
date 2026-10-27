@@ -258,6 +258,10 @@ test('R69 HTTP: digest.2 on the same endpoint with its own prompt; digest.1 unto
   // is written into the instructions, and none has to be given.
   assert.ok(DIGEST2_PROMPT.includes('name·note·부모(parentId) 맥락과 대조한 추정') && DIGEST2_PROMPT.includes('후보를 채워야 하는 것은 아니며'));
   assert.ok(!/mqtt|broker|node-red|21-mqtt/i.test(DIGEST2_PROMPT), 'no sample answer in the prompt');
+  // Metadata in a record is material (merged, checked out and deployed kept apart); nothing sent is called missing; a gap
+  // already read in recordReadings is not listed again.
+  assert.ok(DIGEST2_PROMPT.includes('보낸 원문에 이미 있는 정보를 자료에 없다고 쓰지 않는다') && DIGEST2_PROMPT.includes('병합됐다는 기록, 지금 받은 코드(checkout)에 들어 있는지, 배포됐는지는 서로 다른 사실'));
+  assert.ok(DIGEST2_PROMPT.includes('recordReadings에서 이미 읽은 확인 범위·실행하지 않은 확인·한계는 notCovered에 다시 쓰지 않는다'));
   const note = structuredClone(reply); note.recordReadings[0].kind = 'note';
   assert.equal(validateDigestReply(note, inp.ask).recordReadings[0].kind, 'note');
   assert.notEqual(await digestPromptId(1), await digestPromptId(2));

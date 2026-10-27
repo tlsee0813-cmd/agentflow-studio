@@ -52,7 +52,8 @@ export interface Scene { selected: string | null; scope: string | null; camera: 
 
 type View = { kind: 'reading' } | { kind: 'source'; source: ReadingSource; from: 'now' | 'previous' | 'material'; quote: string | null } | { kind: 'material' } | { kind: 'paste' };
 interface State {
-  key: string; stage: string; view: View; focus: { list: 'changes' | 'open' | 'records'; n: number } | null;
+  /** The sentence chosen; for a record reading, also the related candidate chosen in it (its reason reads under it). */
+  key: string; stage: string; view: View; focus: { list: 'changes' | 'open' | 'records'; n: number; part?: string } | null;
   input: ReadingInput | null; hash: string | null; reading: Reading | null; previous: Reading | null;
   pending: AbortController | null; error: string | null; storeMsg: string | null; scroll: number;
   /** The paste being written: the part looked at when it began (context only), and the scene to come back to on close. */
@@ -198,7 +199,7 @@ export function createReturnView(host: ReturnHost) {
     const r = shown(); if (!s || !r) return [];
     const st = statements(r);
     // Before a sentence is chosen, mark the suggested reading, or the first actual decision's known parts.
-    if (s.focus?.list === 'records') return recordReadings(r)[s.focus.n]?.related.map(c => c.partId) ?? [];
+    if (s.focus?.list === 'records') { const rel = recordReadings(r)[s.focus.n]?.related ?? []; return s.focus.part && rel.some(c => c.partId === s!.focus!.part) ? [s.focus.part] : rel.map(c => c.partId); }
     if (!s.focus) return st.read ? [st.read.partId] : st.open[0]?.partIds ?? [];
     return (s.focus.list === 'changes' ? st.changes : st.open)[s.focus.n]?.partIds ?? [];
   }
@@ -213,13 +214,21 @@ export function createReturnView(host: ReturnHost) {
     return h('button', { type: 'button', class: 'rr-ref rr-cite', title: `원문에서 보기 · ${src.title}`, onclick: (e: Event) => { e.stopPropagation(); openSource(src, from, quote); } },
       h('span', { class: 'rr-ref-title' }, `“${short(quote, 46)}”`));
   }
-  function candidateChip(c: { partId: string; why: string; quote: string }, src: ReadingSource | null, from: 'now' | 'previous') {
-    return h('button', { type: 'button', class: 'rr-part cand', title: `관련 후보 · ${c.why} · “${short(c.quote, 60)}”`,
-      onclick: (e: Event) => { e.stopPropagation(); host.mark([c.partId]); host.reveal([c.partId]); if (src && (e as MouseEvent).altKey) openSource(src, from, c.quote); } },
-      h('i', { 'aria-hidden': 'true' }), partName(c.partId));
+  /** Choosing a candidate (click or keyboard) chooses its sentence too: the map marks that part alone and its reason reads under
+   * the sentence. Choosing it again lets it go. The choice stays while a quote is read and comes back with the reading. */
+  function candidateChip(c: { partId: string; why: string; quote: string }, n: number) {
+    const on = s!.focus?.list === 'records' && s!.focus.n === n && s!.focus.part === c.partId;
+    return h('button', { type: 'button', class: `rr-part cand${on ? ' on' : ''}`, 'aria-pressed': String(on), 'data-index': String(n), 'data-part': c.partId,
+      title: `관련 후보 · ${c.why}`, onclick: (e: Event) => {
+        e.stopPropagation();
+        s!.focus = on ? { list: 'records', n } : { list: 'records', n, part: c.partId }; render();
+        if (!on) host.reveal([c.partId]);
+        if ((e as MouseEvent).detail === 0) requestAnimationFrame(() => document.querySelector<HTMLButtonElement>(`#lens .rr-part.cand[data-index="${n}"][data-part="${CSS.escape(c.partId)}"]`)?.focus({ preventScroll: true }));
+      } }, h('i', { 'aria-hidden': 'true' }), partName(c.partId));
   }
   function recordItem(x: ReturnType<typeof recordReadings>[number], n: number, from: 'now' | 'previous') {
     const active = s!.focus?.list === 'records' && s!.focus.n === n;
+    const why = active ? x.related.find(c => c.partId === s!.focus!.part) ?? null : null;
     const choose = (keyboard = false) => {
       s!.focus = { list: 'records', n }; render(); if (x.related.length) host.reveal(x.related.map(c => c.partId));
       if (keyboard) requestAnimationFrame(() => document.querySelector<HTMLButtonElement>(`.rr-st-select[data-list="records"][data-index="${n}"]`)?.focus({ preventScroll: true }));
@@ -228,7 +237,8 @@ export function createReturnView(host: ReturnHost) {
       h('button', { type: 'button', class: 'rr-st-select', 'data-list': 'records', 'data-index': String(n), onclick: (e: Event) => { e.stopPropagation(); choose((e as MouseEvent).detail === 0); } },
         READING_KIND[x.kind] ? h('span', { class: `rr-rec-kind k-${x.kind}` }, READING_KIND[x.kind]) : null, h('span', { class: 'rr-text' }, x.text)),
       h('div', { class: 'rr-chips' }, quoteChip(x.source, x.quote, from),
-        x.related.length ? h('span', { class: 'rr-cand-label' }, '관련 후보') : null, ...x.related.map(c => candidateChip(c, x.source, from))));
+        x.related.length ? h('span', { class: 'rr-cand-label' }, '관련 후보') : null, ...x.related.map(c => candidateChip(c, n))),
+      why ? h('p', { class: 'rr-why', role: 'status' }, h('strong', {}, partName(why.partId)), ` · ${why.why}`) : null);
   }
   function recordSection(r: Reading, from: 'now' | 'previous', only: string | null): Node | null {
     const all = recordReadings(r).map((x, n) => ({ x, n })).filter(({ x }) => !only || x.source?.recordId === only);

@@ -936,6 +936,9 @@ button:disabled { opacity: .5; cursor: default; }
 .rr-cite .rr-ref-title { font-style: normal; color: var(--text-2); }
 .rr-cand-label { align-self: center; font-size: 11px; color: var(--text-3); }
 .rr-part.cand { border-style: dashed; font-weight: 550; }
+.rr-part.cand.on { border-style: solid; background: var(--accent-soft); }
+.rr-why { margin: 6px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--text-2); word-break: keep-all; overflow-wrap: anywhere; }
+.rr-why strong { font-weight: 650; color: var(--accent); }
 .rr-part.cand i { background: transparent; border: 1.5px solid var(--accent); width: 5px; height: 5px; }
 .rr-mark { background: #fff1c2; color: inherit; border-radius: 3px; padding: 0 1px; box-shadow: 0 0 0 1px #f0d37a; }
 .rr-raw { max-height: none; font-size: 13px; }

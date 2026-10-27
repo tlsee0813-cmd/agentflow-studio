@@ -535,10 +535,11 @@ let openPlanOnArrive = false;
 /** A package-like name ('@node-red/runtime') may break after its slashes rather than inside a word. */
 const slashBreaks = (name: string): (string | HTMLElement)[] => name.split('/').flatMap((x, i, all) => (i < all.length - 1 ? [`${x}/`, document.createElement('wbr')] : [x]));
 function programCard(key: string, p: Project, example: boolean, keyOf: (id: string) => string): HTMLElement {
-  const v = studioView(p), last = v.records[0];
+  const v = studioView(p), pasted = p.pasted.at(-1)?.at ?? null, lastAt = [v.records[0]?.at ?? null, pasted].filter((x): x is string => !!x).sort().at(-1) ?? null;
   const changed = v.parts.filter(x => recentAt(x.lastAt)).length;
-  // One span per item: the stylesheet draws the separators between them.
-  const meta = [`부분 ${v.parts.length}`, v.records.length ? `기록 ${v.records.length}` : '기록 없음', last ? ago(last.at) : '', changed ? `최근 바뀐 부분 ${changed}` : ''].filter(Boolean).map(t => h('span', {}, t));
+  // One span per item: the stylesheet draws the separators between them. Pasted records count apart from work records.
+  const meta = [`부분 ${v.parts.length}`, v.records.length ? `기록 ${v.records.length}` : '', p.pasted.length ? `붙인 기록 ${p.pasted.length}` : '',
+    v.records.length || p.pasted.length ? '' : '기록 없음', lastAt ? ago(lastAt) : '', changed ? `최근 바뀐 부분 ${changed}` : ''].filter(Boolean).map(t => h('span', {}, t));
   const base = `#/p/${encodeURIComponent(key)}`, name = (id: string | null) => (id ? v.parts.find(x => x.id === id)?.name ?? null : null);
   // Continue: only a remembered place whose parts still exist.
   const at = example ? null : lastPlaces()[p.id];
