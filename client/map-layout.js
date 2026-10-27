@@ -12,6 +12,8 @@ export const WRAP_GAP = 36;
 export const FLOW_GAP = 44;
 /** A list: columns of short rows. */
 export const LIST_GAP = 18, LIST_ROW_GAP = 2;
+/** Between an open group and a sibling: a lane wide enough for a line to pass between them. */
+export const FRAME_GUTTER = 40;
 export const ROOT = 'root';
 export const ghostId = (id) => `ghost:${id}`;
 const GHOST_GAP = 8, RUN_GAP = 14, GHOST_MIN_W = 112, GHOST_MAX_W = 300;
@@ -71,13 +73,44 @@ export function mapLead(v, id) {
 export const NODE_MAX_W = 320;
 /** A list item's horizontal padding and border without an inside (styles.css .node.item). */
 const ITEM_SIDES = 10 + 8 + 2;
-const nodeChrome = (kids) => (kids ? 5 + 22 + 4 + 4 + 40 + 8 + 2 : 13 + 8 + 2);
-export function nodeWidth(name, kids, measure = estimate) {
+const nodeChrome = (kids, extra = 0) => (kids ? 5 + 22 + 4 + 4 + 40 + 8 + 2 + extra : 13 + 8 + 2);
+/** extra: room a part with an inside gives its boundary count beside the name (linkChipW). */
+export function nodeWidth(name, kids, measure = estimate, extra = 0) {
     // Lines break at word ends, not mid-word: leave a share of each line unused.
-    const need = measure(name, 'node') * 1.12 + 8;
-    if (need <= (NODE_W - nodeChrome(kids)) * 2)
+    const need = measure(name, 'node') * 1.12 + 8, one = measure(name, 'node') + 2;
+    // A name that reads on one line beside the toggle and the way in keeps its one line beside the count too: the card widens.
+    if (extra && one <= NODE_W - nodeChrome(kids))
+        return Math.min(NODE_MAX_W, Math.max(NODE_W, Math.ceil(one) + nodeChrome(kids, extra)));
+    if (need <= (NODE_W - nodeChrome(kids, extra)) * 2)
         return NODE_W;
-    return Math.min(NODE_MAX_W, Math.ceil(need / 2) + nodeChrome(kids));
+    return Math.min(NODE_MAX_W, Math.ceil(need / 2) + nodeChrome(kids, extra));
+}
+export function boundaryCounts(v) {
+    const byId = new Map(v.parts.map(p => [p.id, p])), m = new Map();
+    const up = (id) => { const out = []; for (let c = byId.get(id), g = 0; c && g < 64; c = c.parentId ? byId.get(c.parentId) : undefined, g++)
+        out.push(c.id); return out; };
+    for (const r of v.relations) {
+        const a = up(r.from), b = up(r.to), sa = new Set(a), sb = new Set(b);
+        const bump = (id, side) => { const c = m.get(id) ?? { all: 0, in: 0, out: 0, plain: 0 }; c.all++; if (r.kind === 'related')
+            c.plain++;
+        else
+            c[side]++; m.set(id, c); };
+        for (const id of a)
+            if (!sb.has(id))
+                bump(id, 'out');
+        for (const id of b)
+            if (!sa.has(id))
+                bump(id, 'in');
+    }
+    return m;
+}
+/** The boundary count beside a head's name ('↔ 12', 11px with its border and padding) and the gap before it; 0 when none. */
+export const linkChipW = (n) => (n > 0 ? 4 + 30 + 6 * String(n).length : 0);
+/** A first view over its count budget folds every group with an inside alike (the person's own fold or unfold excepted), so
+ * no group reads as singled out by its size; each folded head still says how many relations cross it. */
+export function budgetFold(groups, own, budget) {
+    const shown = groups.reduce((n, g) => n + 1 + g.size, 0);
+    return new Set(shown <= budget ? [] : groups.filter(g => g.size > 0 && !own(g.id)).map(g => g.id));
 }
 /** Siblings (direct children of a container) that a relation between their subtrees links to another sibling. */
 function linkedSiblings(v, ids) {
@@ -117,6 +150,8 @@ export function layoutScope(v, scope, expanded, pos, measureText = estimate, pla
     const names = new Map();
     for (const p of v.parts)
         names.set(p.name, (names.get(p.name) ?? 0) + 1);
+    // A part with an inside keeps room beside its name for its boundary count.
+    const cross = boundaryCounts(v), chip = (id) => (kidsOf(id).length ? linkChipW(cross.get(id)?.all ?? 0) : 0);
     // Automatic arrangement of siblings: longest-path columns over relations lifted to the siblings; long columns wrap.
     const autoArrange = (container, sizes) => {
         const ids = kidsOf(container), set = new Set(ids);
@@ -230,20 +265,11 @@ export function layoutScope(v, scope, expanded, pos, measureText = estimate, pla
                 }
             }
             if (flowCols) {
-                const room = Math.max(flowW - WRAP_GAP, ...lone.map(i => sizes.get(i).w)), rows = [];
-                let cur = [], w = 0;
-                for (const i of lone) {
-                    const iw = sizes.get(i).w;
-                    if (cur.length && w + WRAP_GAP + iw > room) {
-                        rows.push(cur);
-                        cur = [];
-                        w = 0;
-                    }
-                    w += (cur.length ? WRAP_GAP : 0) + iw;
-                    cur.push(i);
-                }
-                if (cur.length)
-                    rows.push(cur);
+                // Rows under the linked block are a grid: one cell width (the widest unlinked part), so the rows' left edges line up.
+                const cell = Math.max(...lone.map(i => sizes.get(i).w)), room = Math.max(flowW - WRAP_GAP, cell), rows = [];
+                const per = Math.max(1, Math.floor((room + WRAP_GAP) / (cell + WRAP_GAP)));
+                for (let i = 0; i < lone.length; i += per)
+                    rows.push(lone.slice(i, i + per));
                 const rowH = (r) => Math.max(...r.map(i => sizes.get(i).h));
                 const sc = need(Math.max(flowW - WRAP_GAP, room), flowH + ROW_GAP * 2 + rows.reduce((a, r) => a + rowH(r), 0) + ROW_GAP * (rows.length - 1));
                 if (sc < score - 1e-6)
@@ -255,29 +281,31 @@ export function layoutScope(v, scope, expanded, pos, measureText = estimate, pla
         else
             cols.push(...side.map(c => ({ ids: c, gap: inFrame ? GAP : WRAP_GAP, centre: false })));
         const gapY = inFrame ? GAP : ROW_GAP;
+        // An open group beside or under another sibling keeps a lane (FRAME_GUTTER) so lines can pass between them instead of under one.
+        const isFrame = (i) => sizes.get(i).head > 0, pairGap = (p, q) => (isFrame(p) || isFrame(q) ? Math.max(gapY, FRAME_GUTTER) : gapY);
+        cols.forEach((c, ci) => { const n = cols[ci + 1]; if (n && (c.ids.some(isFrame) || n.ids.some(isFrame)))
+            c.gap = Math.max(c.gap, FRAME_GUTTER); });
         // Relation layers centre against the tallest relation layer only: a tall block of unlinked parts beside them does not
         // push them down.
-        const heights = cols.map(c => c.ids.reduce((acc, i) => acc + sizes.get(i).h, 0) + gapY * (c.ids.length - 1)), tallest = Math.max(0, ...heights.slice(0, flowCols));
+        const heights = cols.map(c => c.ids.reduce((acc, i, k) => acc + sizes.get(i).h + (k ? pairGap(c.ids[k - 1], i) : 0), 0)), tallest = Math.max(0, ...heights.slice(0, flowCols));
         const at = new Map();
         let x = 0;
         cols.forEach((c, ci) => {
             const w = Math.max(...c.ids.map(i => sizes.get(i).w));
             let y = c.centre ? (tallest - heights[ci]) / 2 : 0;
-            for (const i of c.ids) {
-                const sz = sizes.get(i);
-                at.set(i, { x: x - sz.ox, y: y - sz.oy });
-                y += sz.h + gapY;
-            }
+            c.ids.forEach((i, k) => { const sz = sizes.get(i); if (k)
+                y += pairGap(c.ids[k - 1], i); at.set(i, { x: x - sz.ox, y: y - sz.oy }); y += sz.h; });
             x += w + c.gap;
         });
         if (below) {
             let y = tallest + ROW_GAP * 2;
             for (const r of below) {
+                const cell = Math.max(...lone.map(i => sizes.get(i).w));
                 let rx = 0;
                 for (const i of r) {
                     const sz = sizes.get(i);
                     at.set(i, { x: rx - sz.ox, y: y - sz.oy });
-                    rx += sz.w + WRAP_GAP;
+                    rx += cell + WRAP_GAP;
                 }
                 y += Math.max(...r.map(i => sizes.get(i).h)) + ROW_GAP;
             }
@@ -311,7 +339,7 @@ export function layoutScope(v, scope, expanded, pos, measureText = estimate, pla
     /** Region head: the name (one or two lines; a longer name widens the region rather than being cut) and the first sentence of
      * the note under it. Head row: toggle 28, go-inside ~44, paddings ~12, and the latest-record time ~52 when there is one. */
     const regionHead = (id, w) => {
-        const p = byId.get(id), room = (x) => x - 84 - (hasRecords(id) ? 52 : 0), chrome = w - room(w);
+        const p = byId.get(id), room = (x) => x - 84 - (hasRecords(id) ? 52 : 0) - chip(id), chrome = w - room(w);
         // A region keeps its name on one line when it can (up to 320px), and on two lines otherwise (up to 380px).
         const need = measureText(p.name, 'head') * 1.08 + 4;
         if (need > room(w))
@@ -328,7 +356,7 @@ export function layoutScope(v, scope, expanded, pos, measureText = estimate, pla
     };
     /** Group head inside a region: its name only; a long name takes a second line or widens the group (up to 360px). */
     const groupHead = (id, w) => {
-        const need = measureText(byId.get(id)?.name ?? '', 'sub') * 1.08, room = (x) => x - 88 - (hasRecords(id) ? 52 : 0);
+        const need = measureText(byId.get(id)?.name ?? '', 'sub') * 1.08, room = (x) => x - 88 - (hasRecords(id) ? 52 : 0) - chip(id);
         if (need > room(w) * 2)
             w = Math.max(w, Math.min(360, Math.ceil(need / 2) + w - room(w) + 12));
         const pl = plannedLines(id, room(w));
@@ -338,7 +366,7 @@ export function layoutScope(v, scope, expanded, pos, measureText = estimate, pla
         const cached = memo.get(id);
         if (cached)
             return cached;
-        const p = byId.get(id), kids = kidsOf(id).length > 0, chrome = nodeChrome(kids);
+        const p = byId.get(id), kids = kidsOf(id).length > 0, extraW = chip(id), chrome = nodeChrome(kids, extraW);
         // The extra line under a name: the state when there is one, else the parent beside a name that repeats in the project.
         const extra = p.status !== 'plan' || (names.get(p.name) ?? 0) > 1 ? 1 : 0;
         let m;
@@ -359,21 +387,24 @@ export function layoutScope(v, scope, expanded, pos, measureText = estimate, pla
             // Planned lines keep the item's own padding (7 above and below), for one line as for two.
             // A list item's own sides (styles.css .node.item: 10 + 8 padding, 1 + 1 border) are narrower than a row's: its name's
             // room is measured with them, so a name that fits on one line is not given a second, empty one.
-            const w = nodeWidth(p.name, kids, measureText), room = w - (kids ? chrome : ITEM_SIDES), nl = lines(p.name, 'item', room), pl = nodeLines(id, room);
+            const w = nodeWidth(p.name, kids, measureText, extraW), room = w - (kids ? chrome : ITEM_SIDES), nl = lines(p.name, 'item', room, 3), pl = nodeLines(id, room);
             m = { w, h: Math.max(14 + (nl + extra) * 17, pl ? 14 + nl * 17 + 2 + pl * PLAN_LINE : 0), ox: 0, oy: 0, head: 0, face: 'item' };
         }
         else if (depth === 0) {
             // A folded group reads by its name and count; its note is the selection's. A part without an inside keeps its sentence.
             const note = kids ? '' : mapLead(v, id), need = measureText(p.name, 'head') * 1.1 + 6;
             let w = note ? UNIT_W : NODE_W;
+            // A folded group's name keeps one line when a card up to NODE_MAX_W holds it beside its count and the way in.
+            if (kids && need > w - chrome && need <= NODE_MAX_W - chrome)
+                w = Math.ceil(need) + chrome;
             if (need > (w - chrome) * 2)
                 w = Math.min(NODE_MAX_W + 40, Math.ceil(need / 2) + chrome);
-            const nl = need > w - chrome ? 2 : 1, ll = lines(note, 'note', w - chrome), pl = nodeLines(id, w - chrome);
+            const nl = need > w - chrome ? (need > (w - chrome) * 2 ? 3 : 2) : 1, ll = lines(note, 'note', w - chrome), pl = nodeLines(id, w - chrome);
             m = { w, h: Math.max(NODE_H, 24 + nl * 20 + (ll ? 2 + ll * 17 : 0) + extra * 19, pl ? 24 + nl * 20 + 3 + pl * PLAN_LINE : 0), ox: 0, oy: 0, head: 0, face: 'unit' };
         }
         else {
             // Planned lines keep the row's own padding (10 above and below): this row only, for one line as for two.
-            const w = nodeWidth(p.name, kids, measureText), nl = lines(p.name, 'node', w - chrome), pl = nodeLines(id, w - chrome);
+            const w = nodeWidth(p.name, kids, measureText, extraW), nl = lines(p.name, 'node', w - chrome, 3), pl = nodeLines(id, w - chrome);
             m = { w, h: Math.max(20 + (nl + extra) * 18, pl ? 20 + nl * 18 + 2 + pl * PLAN_LINE : 0), ox: 0, oy: 0, head: 0, face: 'row' };
         }
         memo.set(id, m);
@@ -505,31 +536,38 @@ function rounded(pts, r = 8) {
 }
 /** Edge path between two boxes. A group end meets the group at its head row (the group's port), never beside an inner part.
  * The usual soft curve is kept when it crosses nothing; when it would pass under an unrelated part or group, the line takes an
- * outside corridor through the gaps (out from the side, along a free row gap, into the other side). */
+ * outside corridor through the gaps (out from the side, along a free row gap, into the other side).
+ * Frames are obstacles like parts, except the frames around either end (the line has to reach inside them, but not across their
+ * heads) and the inside of a frame end. A corridor keeps LANE_CLEAR from every obstacle, so the hairline between two stacked
+ * rows is not a lane. clear: the path crosses no obstacle (a fallback curve that has to cross one is not clear). */
+export const LANE_CLEAR = 3;
 export function edgePath(a, b, others = []) {
     const all = [...others], byId = new Map(all.map(o => [o.id, o]));
     const within = (o, f) => { for (let c = o.container, g = 0; c && g < 64; c = byId.get(c)?.container ?? '', g++)
         if (c === f.id)
             return true; return false; };
-    // What a line must not cross: other parts and groups, except the groups around either end and the inside of a group end.
     const blocks = all.filter(o => o !== a && o !== b && !(o.kind === 'frame' && (within(a, o) || within(b, o))) && !(a.kind === 'frame' && within(o, a)) && !(b.kind === 'frame' && within(o, b)));
+    for (const o of all)
+        if (o.kind === 'frame' && o !== a && o !== b && o.head > 0 && (within(a, o) || within(b, o)))
+            blocks.push({ x: o.x, y: o.y, w: o.w, h: o.head });
     const inside = (x, y) => blocks.some(o => x > o.x + 1 && x < o.x + o.w - 1 && y > o.y + 1 && y < o.y + o.h - 1);
-    const segFree = (x1, y1, x2, y2) => !blocks.some(o => Math.max(x1, x2) > o.x + 1 && Math.min(x1, x2) < o.x + o.w - 1 && Math.max(y1, y2) > o.y + 1 && Math.min(y1, y2) < o.y + o.h - 1);
+    const segFree = (x1, y1, x2, y2, m = LANE_CLEAR) => !blocks.some(o => Math.max(x1, x2) > o.x - m && Math.min(x1, x2) < o.x + o.w + m && Math.max(y1, y2) > o.y - m && Math.min(y1, y2) < o.y + o.h + m);
+    const free = (pts) => pts.every((p, i) => !i || segFree(pts[i - 1].x, pts[i - 1].y, p.x, p.y, -1));
     const portY = (x) => (x.kind === 'frame' ? x.y + x.head / 2 : x.y + x.h / 2);
     const acx = a.x + a.w / 2, bcx = b.x + b.w / 2, acy = portY(a), bcy = portY(b);
     const overlapX = a.x < b.x + b.w && b.x < a.x + a.w;
     if (overlapX) {
         const down = b.y + b.h / 2 > a.y + a.h / 2, y1 = down ? a.y + a.h : a.y, y2 = down ? b.y : b.y + b.h;
         const x1 = Math.max(a.x, b.x) + (Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) / 2, k = Math.max(24, Math.abs(y2 - y1) / 2) * (down ? 1 : -1);
-        if (segFree(x1, y1, x1, y2))
-            return { d: `M${x1},${y1} C${x1},${y1 + k} ${x1},${y2 - k} ${x1},${y2}`, mx: x1, my: (y1 + y2) / 2 };
+        if (segFree(x1, y1, x1, y2, -1))
+            return { d: `M${x1},${y1} C${x1},${y1 + k} ${x1},${y2 - k} ${x1},${y2}`, mx: x1, my: (y1 + y2) / 2, clear: true };
         // A part between them in the same column would read as an end: go round the right side instead.
-        const ax = a.x + a.w, bx = b.x + b.w, xs = Math.max(ax, bx) + 14;
-        return { d: rounded([{ x: ax, y: acy }, { x: xs, y: acy }, { x: xs, y: bcy }, { x: bx, y: bcy }]), mx: xs, my: (acy + bcy) / 2, detour: true };
+        const ax = a.x + a.w, bx = b.x + b.w, xs = Math.max(ax, bx) + 14, pts = [{ x: ax, y: acy }, { x: xs, y: acy }, { x: xs, y: bcy }, { x: bx, y: bcy }];
+        return { d: rounded(pts), mx: xs, my: (acy + bcy) / 2, detour: true, clear: free(pts) };
     }
     const right = bcx > acx, dir = right ? 1 : -1, x1 = right ? a.x + a.w : a.x, x2 = right ? b.x : b.x + b.w;
     const k = Math.max(40, Math.abs(x2 - x1) / 2) * dir;
-    const curve = { d: `M${x1},${acy} C${x1 + k},${acy} ${x2 - k},${bcy} ${x2},${bcy}`, mx: (x1 + x2) / 2, my: (acy + bcy) / 2 };
+    const curve = { d: `M${x1},${acy} C${x1 + k},${acy} ${x2 - k},${bcy} ${x2},${bcy}`, mx: (x1 + x2) / 2, my: (acy + bcy) / 2, clear: false };
     const at = (t) => { const u = 1 - t; return { x: u * u * u * x1 + 3 * u * u * t * (x1 + k) + 3 * u * t * t * (x2 - k) + t * t * t * x2, y: u * u * u * acy + 3 * u * u * t * acy + 3 * u * t * t * bcy + t * t * t * bcy }; };
     let crosses = false;
     for (let i = 1; i < 24 && !crosses; i++) {
@@ -537,19 +575,181 @@ export function edgePath(a, b, others = []) {
         crosses = inside(q.x, q.y);
     }
     if (!crosses)
-        return curve;
+        return { ...curve, clear: true };
     // Half of the free gap beside an end (at most 14px): where the line turns.
     const room = (x, y, d) => Math.min(28, ...blocks.filter(o => y >= o.y && y <= o.y + o.h && (d > 0 ? o.x >= x : o.x + o.w <= x)).map(o => (d > 0 ? o.x - x : x - (o.x + o.w)))) / 2;
     const xa = x1 + dir * room(x1, acy, dir), xb = x2 - dir * room(x2, bcy, -dir);
+    // Past the one-corridor routes, the line goes through the gaps with more turns, or into a part from above or below.
+    const around = () => { const r = gapRoute(a, b, dir, blocks, segFree); return r ? { d: rounded(r.pts), mx: r.mid.x, my: r.mid.y, detour: true, clear: true } : curve; };
     if ((xb - xa) * dir <= 0)
-        return curve;
+        return around();
     const lo = Math.min(xa, xb), hi = Math.max(xa, xb);
     const ys = [acy, bcy, ...blocks.filter(o => o.x < hi && lo < o.x + o.w).flatMap(o => [o.y - 6, o.y + o.h + 6])]
         .sort((p, q) => Math.abs(p - acy) + Math.abs(p - bcy) - (Math.abs(q - acy) + Math.abs(q - bcy)));
     for (const yc of ys) {
         if (!segFree(xa, acy, xa, yc) || !segFree(xa, yc, xb, yc) || !segFree(xb, yc, xb, bcy))
             continue;
-        return { d: rounded([{ x: x1, y: acy }, { x: xa, y: acy }, { x: xa, y: yc }, { x: xb, y: yc }, { x: xb, y: bcy }, { x: x2, y: bcy }]), mx: (xa + xb) / 2, my: yc, detour: true };
+        return { d: rounded([{ x: x1, y: acy }, { x: xa, y: acy }, { x: xa, y: yc }, { x: xb, y: yc }, { x: xb, y: bcy }, { x: x2, y: bcy }]), mx: (xa + xb) / 2, my: yc, detour: true, clear: true };
     }
-    return curve;
+    return around();
+}
+/** The last route before a curve that would cross: an orthogonal path through the gaps near both ends (fewest turns, then
+ * shortest), kept LANE_CLEAR from every obstacle. It leaves a by the side facing b (or, failing that, its top or bottom) and
+ * meets b on the side facing a, or on its top or bottom when that side is shut in; a group end only at its head row, as
+ * everywhere. Only boxes near the two ends are searched; null when no such path is found, and the crossing curve stays. */
+function gapRoute(a, b, dir, blocks, segFree) {
+    const LEAD = 12, SIDE = 0, END = 34;
+    const ports = (x, face) => {
+        const cy = x.kind === 'frame' ? x.y + x.head / 2 : x.y + x.h / 2, cx = x.x + x.w / 2, sx = face > 0 ? x.x + x.w : x.x;
+        const out = [{ at: { x: sx, y: cy }, lead: { x: sx + face * LEAD, y: cy }, cost: SIDE }];
+        if (x.kind !== 'frame')
+            out.push({ at: { x: cx, y: x.y + x.h }, lead: { x: cx, y: x.y + x.h + LEAD }, cost: END }, { at: { x: cx, y: x.y }, lead: { x: cx, y: x.y - LEAD }, cost: END });
+        return out.filter(p => segFree(p.at.x + (p.lead.x - p.at.x) / LEAD, p.at.y + (p.lead.y - p.at.y) / LEAD, p.lead.x, p.lead.y));
+    };
+    const from = ports(a, dir), to = ports(b, -dir);
+    if (!from.length || !to.length)
+        return null;
+    const x0 = Math.min(a.x, b.x) - 160, x1 = Math.max(a.x + a.w, b.x + b.w) + 160, y0 = Math.min(a.y, b.y) - 160, y1 = Math.max(a.y + a.h, b.y + b.h) + 160;
+    const near = blocks.filter(o => o.x < x1 && x0 < o.x + o.w && o.y < y1 && y0 < o.y + o.h);
+    // Lanes: just outside each nearby box, the middle of every gap between box edges, the ports' own lines and the search edge.
+    const lanes = (edges, extra) => {
+        const e = [...new Set(edges)].sort((p, q) => p - q), out = new Set(extra), half = (v) => Math.round(v * 2) / 2;
+        for (let i = 0; i < e.length; i++) {
+            out.add(e[i] - 8);
+            out.add(e[i] + 8);
+            if (i)
+                out.add((e[i - 1] + e[i]) / 2);
+        }
+        return [...new Set([...out].map(half))].sort((p, q) => p - q);
+    };
+    const xs = lanes(near.flatMap(o => [o.x, o.x + o.w]), [x0, x1, ...from.map(p => p.lead.x), ...to.map(p => p.lead.x)]);
+    const ys = lanes(near.flatMap(o => [o.y, o.y + o.h]), [y0, y1, ...from.map(p => p.lead.y), ...to.map(p => p.lead.y)]);
+    const X = xs.length, Y = ys.length, N = X * Y, ix = new Map(xs.map((v, i) => [v, i])), iy = new Map(ys.map((v, i) => [v, i]));
+    const key = (p) => { const i = ix.get(Math.round(p.x * 2) / 2), j = iy.get(Math.round(p.y * 2) / 2); return i === undefined || j === undefined ? -1 : j * X + i; };
+    // Free steps between neighbouring lane crossings (right: 0, down: 1), each tested once.
+    const step = new Uint8Array(N * 2);
+    for (let j = 0; j < Y; j++)
+        for (let i = 0; i < X; i++) {
+            if (i + 1 < X && segFree(xs[i], ys[j], xs[i + 1], ys[j]))
+                step[(j * X + i) * 2] = 1;
+            if (j + 1 < Y && segFree(xs[i], ys[j], xs[i], ys[j + 1]))
+                step[(j * X + i) * 2 + 1] = 1;
+        }
+    // Dijkstra over (crossing, heading); a turn costs as much as a long run, so the fewest-turn path wins and then the shortest.
+    const TURN = 400, dist = new Float64Array(N * 4).fill(Infinity), prev = new Int32Array(N * 4).fill(-1), heap = [];
+    const push = (d, s) => { heap.push([d, s]); for (let c = heap.length - 1; c > 0;) {
+        const q = (c - 1) >> 1;
+        if (heap[q][0] <= heap[c][0])
+            break;
+        [heap[q], heap[c]] = [heap[c], heap[q]];
+        c = q;
+    } };
+    const pop = () => { const top = heap[0], last = heap.pop(); if (heap.length) {
+        heap[0] = last;
+        for (let c = 0;;) {
+            const l = 2 * c + 1, r = l + 1;
+            let m = c;
+            if (l < heap.length && heap[l][0] < heap[m][0])
+                m = l;
+            if (r < heap.length && heap[r][0] < heap[m][0])
+                m = r;
+            if (m === c)
+                break;
+            [heap[m], heap[c]] = [heap[c], heap[m]];
+            c = m;
+        }
+    } return top; };
+    const heading = (p) => (p.lead.x > p.at.x ? 0 : p.lead.x < p.at.x ? 2 : p.lead.y > p.at.y ? 1 : 3); // 0 right, 1 down, 2 left, 3 up
+    for (const p of from) {
+        const k = key(p.lead);
+        if (k >= 0) {
+            const s = k * 4 + heading(p);
+            if (p.cost < dist[s]) {
+                dist[s] = p.cost;
+                push(p.cost, s);
+            }
+        }
+    }
+    const goal = new Map();
+    for (const p of to) {
+        const k = key(p.lead);
+        if (k >= 0)
+            goal.set(k, p);
+    }
+    let best = Infinity, bestState = -1, bestPort = null;
+    while (heap.length) {
+        const [d, s] = pop();
+        if (d > dist[s] || d >= best)
+            continue;
+        const k = s >> 2, hd = s & 3, i = k % X, j = (k - i) / X, g = goal.get(k);
+        if (g) {
+            const into = (g.at.x > g.lead.x ? 0 : g.at.x < g.lead.x ? 2 : g.at.y > g.lead.y ? 1 : 3), c = d + g.cost + (into === hd ? 0 : TURN);
+            if (c < best) {
+                best = c;
+                bestState = s;
+                bestPort = g;
+            }
+        }
+        const moves = [[0, k + 1, i + 1 < X && !!step[k * 2]], [1, k + X, j + 1 < Y && !!step[k * 2 + 1]], [2, k - 1, i > 0 && !!step[(k - 1) * 2]], [3, k - X, j > 0 && !!step[(k - X) * 2 + 1]]];
+        for (const [h, n, ok] of moves) {
+            if (!ok || (h + 2) % 4 === hd)
+                continue;
+            const len = Math.abs(xs[n % X] - xs[i]) + Math.abs(ys[(n - (n % X)) / X] - ys[j]), nd = d + len + (h === hd ? 0 : TURN), ns = n * 4 + h;
+            if (nd < dist[ns]) {
+                dist[ns] = nd;
+                prev[ns] = s;
+                push(nd, ns);
+            }
+        }
+    }
+    if (bestState < 0 || !bestPort)
+        return null;
+    const mids = [];
+    for (let s = bestState; s >= 0; s = prev[s]) {
+        const k = s >> 2, i = k % X;
+        mids.push({ x: xs[i], y: ys[(k - i) / X] });
+    }
+    mids.reverse();
+    const start = from.find(p => key(p.lead) === key(mids[0]));
+    // Only the corners: points on a straight run between two others are dropped.
+    const raw = [start.at, ...mids, bestPort.at], pts = raw.filter((q, n) => n === 0 || n === raw.length - 1 || !((raw[n - 1].x === q.x && q.x === raw[n + 1].x) || (raw[n - 1].y === q.y && q.y === raw[n + 1].y)));
+    const m = Math.floor((pts.length - 1) / 2), mid = { x: (pts[m].x + pts[m + 1].x) / 2, y: (pts[m].y + pts[m + 1].y) / 2 };
+    return { pts, mid };
+}
+/** The overview of a busy map at rest: each relation drawn once between the outermost drawn boxes that hold its ends below the
+ * group they share (two groups side by side, a group and an outside partner), merged by kind. Ids and notes are the relations'
+ * own; a line that stands for relations of inner parts is agg, as a folded group's line is. */
+export function summaryEdges(boxes, edges) {
+    const chain = (id) => { const out = [id]; for (let c = boxes.get(id)?.container, g = 0; c && boxes.has(c) && g < 64; c = boxes.get(c).container, g++)
+        out.push(c); return out; };
+    const out = new Map();
+    for (const e of edges) {
+        const ca = chain(e.from), cb = chain(e.to), sb = new Set(cb), common = ca.find(x => sb.has(x));
+        // One end holds the other (a group and a part inside it): drawn as it is.
+        const a = common === e.from || common === e.to ? e.from : common ? ca[ca.indexOf(common) - 1] : ca.at(-1);
+        const b = common === e.from || common === e.to ? e.to : common ? cb[cb.indexOf(common) - 1] : cb.at(-1);
+        const key = `sum:${a}|${b}|${e.kind}`, s = out.get(key) ?? { key, from: a, to: b, kind: e.kind, notes: [], ids: [], agg: false };
+        s.notes.push(...e.notes);
+        s.ids.push(...e.ids);
+        s.agg ||= e.agg || a !== e.from || b !== e.to;
+        out.set(key, s);
+    }
+    return [...out.values()];
+}
+/** The summary beside a selection: the same lines over the relations that are not drawn one by one (own: the selection's), each
+ * holding only those. Every relation reads once, on its own line or in one summary; a line left with none is not returned. */
+export function restSummary(boxes, edges, own) {
+    return summaryEdges(boxes, edges.filter(e => !own(e)));
+}
+/** Verbs that would touch (one box grown by pad): the one nearer its own end keeps its place, the other takes its next free
+ * place (spots may hold several per key, nearest first wins) or, with none left, is left off the map. */
+export function resolveLabels(spots, pad = 6) {
+    const kept = [], done = new Set();
+    for (const s of [...spots].sort((p, q) => p.dist - q.dist)) {
+        if (done.has(s.key) || kept.some(k => s.x - pad < k.x + k.w && k.x < s.x + s.w + pad && s.y - pad < k.y + k.h && k.y < s.y + s.h + pad))
+            continue;
+        kept.push(s);
+        done.add(s.key);
+    }
+    return { kept, dropped: [...new Set(spots.map(s => s.key))].filter(k => !done.has(k)) };
 }

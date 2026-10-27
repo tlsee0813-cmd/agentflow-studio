@@ -10,7 +10,7 @@ import { ui62Reading, savedReading, readingInput } from './digest-source.js';
 import { digestStore, askHash, makeReading } from './digest-store.js';
 import { askDigest, AskError, ERROR_TEXT } from './studio-api.js';
 import { secretLike } from './plan-source.js';
-import { h, put, fullTime } from './plan-dom.js';
+import { h, put, fullTime, codeGate, codeNote } from './plan-dom.js';
 const STAGE_MEMORY = new Map();
 const short = (text, n) => { const t = text.replace(/\s+/g, ' ').trim(); return t.length > n ? `${t.slice(0, n)}…` : t; };
 /** A version named in a source's basis (a commit), else nothing. */
@@ -260,7 +260,8 @@ export function createReturnView(host) {
             out.append(h('div', { class: 'access' }, h('label', { for: 'return-access' }, '접속 코드'), code));
         }
         const sent = state.input?.coverage.sent ?? 0, total = state.input?.coverage.total ?? 0;
-        out.append(h('div', { class: 'pp-row' }, h('button', { type: 'button', class: 'primary small', disabled: !can, onclick: () => void analyze() }, state.previous ? '지금 자료로 정리하기' : 'AI로 정리하기'), h('span', { class: 'fine' }, can ? `자료 ${sent < total ? `${total}개 중 ${sent}개` : `${sent}개`}를 보내요` : status.ai === 'off' ? '서버에 AI 키가 없어요 · 원자료로 읽어요' : status.ai === 'none' ? '이 주소에는 AI 서버가 없어요 · 원자료로 읽어요' : ''), state.view.kind === 'reading' ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { state.view = { kind: 'material' }; render(); } }, '원자료') : null));
+        const gated = status.access === 'code' && can, go = codeGate(h('button', { type: 'button', class: 'primary small', onclick: () => void analyze() }, state.previous ? '지금 자료로 정리하기' : 'AI로 정리하기'), gated, !!host.accessCode(), !can);
+        out.append(h('div', { class: 'pp-row' }, go, codeNote(gated, !!host.accessCode()), h('span', { class: 'fine' }, can ? `자료 ${sent < total ? `${total}개 중 ${sent}개` : `${sent}개`}를 보내요` : status.ai === 'off' ? '서버에 AI 키가 없어요 · 원자료로 읽어요' : status.ai === 'none' ? '이 주소에는 AI 서버가 없어요 · 원자료로 읽어요' : ''), state.view.kind === 'reading' ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { state.view = { kind: 'material' }; render(); } }, '원자료') : null));
         return out;
     }
     function sourceBody(src, from) {

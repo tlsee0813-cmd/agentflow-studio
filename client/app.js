@@ -1,17 +1,18 @@
 import { FILE_LIMIT } from '../shared/types.js';
-import { WorkspaceStore, storageErrorCode } from '../shared/storage.js';
-import { parseProject } from '../shared/validation.js';
+import { WorkspaceStore, storageErrorCode, readViewState, readEntryView, writeViewState, readEntryPositions, writeEntryPositions, importCopy } from '../shared/storage.js';
+import { parseBackup, cleanPositions } from '../shared/validation.js';
 import { editArea, addArea, addChildArea, createProject, rename } from '../shared/domain.js';
 import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
-import { layoutScope, edgePath, lead, mapLead, isListGroup, ROOT, HEAD } from './map-layout.js';
+import { layoutScope, edgePath, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, ROOT, HEAD } from './map-layout.js';
 import { aiStatus, askStudio, AskError, ERROR_TEXT } from './studio-api.js';
 import { runtimeStorage } from './runtime.js';
-import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth } from './plan-dom.js';
+import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
 import { createPlanView } from './plan-view.js';
 import { createReturnView } from './return-view.js';
 import { UI62_KEY, buildUi62Project, ui62Keys } from '../shared/return-material.js';
+import { REL_LABEL, relationGroups, dirMark, dirTitle, insideEnds } from '../shared/relation-groups.js';
 /* ---------- small DOM helpers (shared with the change-plan view) ---------- */
 const firstLine = (text, n = 90) => { const line = text.split('\n').find(l => l.trim())?.trim() ?? ''; return line.length > n ? `${line.slice(0, n)}…` : line; };
 const recentAt = (at) => !!at && Date.now() - Date.parse(at) < 24 * 3600000;
@@ -134,58 +135,71 @@ function setDraft(o, partId, value) {
     }
     catch { /* the in-memory draft still holds */ }
 }
-/* Map positions the person set by dragging: own key per project (saved projects only; examples stay in memory).
- * Kept apart from the stored layout.1 data, which the domain fills on every new area and so cannot tell a placed part
- * from an untouched one. Same browser only; a backup file does not carry them. */
-const POSITIONS_KEY = 'agentflow.studio.positions.1';
+/* Map positions the person set by dragging: own record per opened map (a saved project by its workspace entry, so an imported
+ * copy and its original keep their own places; examples stay in memory). Kept apart from the stored layout.1 data, which the
+ * domain fills on every new area and so cannot tell a placed part from an untouched one. A backup file carries them beside the
+ * project (serializeBackup); importing one gives the new copy those places. */
 const memoryPositions = new Map();
-function cleanPositions(v) {
-    const out = {};
-    if (!v || typeof v !== 'object')
-        return out;
-    for (const [c, m] of Object.entries(v)) {
-        if (!m || typeof m !== 'object')
-            continue;
-        for (const [id, p] of Object.entries(m)) {
-            const x = p?.x, y = p?.y;
-            if (Number.isFinite(x) && Number.isFinite(y) && Math.abs(x) < 1e6 && Math.abs(y) < 1e6)
-                (out[c] ??= {})[id] = { x, y };
-        }
-    }
-    return out;
-}
 function positionsOf(o) {
-    let p = memoryPositions.get(o.project.id);
+    let p = memoryPositions.get(o.key);
     if (!p) {
-        p = {};
-        if (o.kind === 'saved') {
-            try {
-                p = cleanPositions(JSON.parse(kv.getItem(POSITIONS_KEY) ?? '{}')[o.project.id]);
-            }
-            catch {
-                p = {};
-            }
-        }
-        memoryPositions.set(o.project.id, p);
+        p = o.kind === 'saved' ? readEntryPositions(kv, o.key, o.project.id) : cleanPositions(null);
+        memoryPositions.set(o.key, p);
     }
     return p;
 }
-function savePositions(o) {
-    if (o.kind !== 'saved')
-        return;
-    try {
-        const all = JSON.parse(kv.getItem(POSITIONS_KEY) ?? '{}');
-        all[o.project.id] = positionsOf(o);
-        kv.setItem(POSITIONS_KEY, JSON.stringify(all));
-    }
-    catch { /* the in-memory positions still hold for this tab */ }
-}
+function savePositions(o) { if (o.kind === 'saved')
+    writeEntryPositions(kv, o.key, positionsOf(o)); } // a refused write: the in-memory places still hold for this tab
 /* Scope = the part whose inside is shown (null = whole project). Each scope keeps its own camera for the way back. */
 let scope = null;
 let lay = { boxes: new Map(), edges: [], heads: [], bounds: { x: 0, y: 0, w: 0, h: 0 } };
 const cameras = new Map();
 const expandState = new Map();
-const camKey = (o, s) => `${o.project.id}|${s ?? ''}`;
+const camKey = (o, s) => `${o.key}|${s ?? ''}`;
+/* Folds and per-scope cameras outlive a reload: own record per opened map (a saved project by its workspace entry, like its
+ * places; an example by its address key and stable part keys, so a freshly built example reads the same), written shortly
+ * after a change and when the page goes away. Never the project data. */
+const viewKeyOf = (o) => o.key;
+const stableId = (o, id) => o.alias?.toKey.get(id) ?? id;
+const liveId = (o, key) => o.alias?.toId.get(key) ?? key;
+function loadView(o) {
+    const v = o.kind === 'example' ? readViewState(kv, viewKeyOf(o)) : readEntryView(kv, viewKeyOf(o), o.project.id);
+    for (const [k, open] of Object.entries(v.folds)) {
+        const id = liveId(o, k);
+        if (partOf(o, id))
+            expandState.set(`${o.key}|${id}`, open);
+    }
+    for (const [k, c] of Object.entries(v.cameras)) {
+        const id = k ? liveId(o, k) : null;
+        if (id && !partOf(o, id)?.childIds.length)
+            continue;
+        if (!cameras.has(camKey(o, id)))
+            cameras.set(camKey(o, id), { x: c.x, y: c.y, k: Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, c.scale)) });
+    }
+}
+let viewTimer = 0, viewFor = null;
+function saveViewSoon() { const o = opened; if (!o)
+    return; if (viewFor && viewFor !== o)
+    flushView(); viewFor = o; clearTimeout(viewTimer); viewTimer = window.setTimeout(flushView, 400); }
+function flushView() {
+    clearTimeout(viewTimer);
+    const o = viewFor;
+    viewFor = null;
+    if (!o)
+        return;
+    if (opened === o)
+        cameras.set(camKey(o, scope), { ...camera });
+    const prefix = `${o.key}|`, folds = {}, cams = {};
+    for (const [k, v] of expandState)
+        if (k.startsWith(prefix))
+            folds[stableId(o, k.slice(prefix.length))] = v;
+    for (const [k, c] of cameras)
+        if (k.startsWith(prefix)) {
+            const sc = k.slice(prefix.length);
+            cams[sc ? stableId(o, sc) : ''] = { x: c.x, y: c.y, scale: c.k };
+        }
+    writeViewState(kv, viewKeyOf(o), { folds, cameras: cams });
+}
 /** Direct children of the scope open as frames; deeper parts stay folded until opened. */
 /** Unfolded only for the part being looked at (not the person's own fold choice). */
 const tempExpand = new Set();
@@ -195,7 +209,7 @@ let previewTarget = null, previewScope = '';
 const isExpanded = (o) => {
     const memo = new Map();
     const fn = (id, depth) => {
-        const k = `${o.project.id}|${id}`;
+        const k = `${o.key}|${id}`;
         if (memo.has(k))
             return memo.get(k);
         let v;
@@ -222,9 +236,9 @@ function defaultOpen(o, id, depth, isOpen) {
     const parent = partOf(o, p.parentId);
     return !!parent && depth <= 3 && parent.childIds.length === 1 && isOpen(parent.id, depth - 1);
 }
-/** How many parts a first view of a scope shows unfolded, and how much room it may take. Past the count, the scope's
- * catalogue-like groups (a list by isListGroup: many leaves, few links among them) start folded, largest first, then the
- * other largest groups; past the room, the open group taking the most room. The overview keeps every group's name, count and
+/** How many parts a first view of a scope shows unfolded, and how much room it may take. Past the count, every group with an
+ * inside starts folded alike (budgetFold: folding the largest first left the smallest open alone, which read as emphasis);
+ * past the room, the open group taking the most room. The overview keeps every group's name, count, boundary count and
  * outside lines, and each opens at full size inside or in place. Decided once per scope, for its first view: the person's own
  * folds and places always win (expandState, positions), and a visited view keeps its camera. */
 const SHOW_BUDGET = 28;
@@ -232,21 +246,12 @@ const SHOW_BUDGET = 28;
  * decide the first view again. */
 const foldMemo = new Map();
 function budgetFolded(o) {
-    const k = `${o.project.id}|${scope ?? ''}`, hit = foldMemo.get(k);
+    const k = `${o.key}|${scope ?? ''}`, hit = foldMemo.get(k);
     if (hit)
         return hit;
-    const ids = scope ? partOf(o, scope)?.childIds ?? [] : o.view.roots, out = new Set(), size = (id) => partOf(o, id)?.childIds.length ?? 0;
-    let shown = ids.reduce((n, id) => n + 1 + size(id), 0);
-    const bySize = (list) => list.filter(id => size(id) > 0).sort((a, b) => size(b) - size(a));
-    const own = (id) => expandState.has(`${o.project.id}|${id}`); // the person's own fold or unfold is never decided again
-    for (const id of [...bySize(ids.filter(id => isListGroup(o.view, id))), ...bySize(ids.filter(id => !isListGroup(o.view, id)))]) {
-        if (shown <= SHOW_BUDGET)
-            break;
-        if (own(id))
-            continue;
-        out.add(id);
-        shown -= size(id);
-    }
+    const ids = scope ? partOf(o, scope)?.childIds ?? [] : o.view.roots, size = (id) => partOf(o, id)?.childIds.length ?? 0;
+    const own = (id) => expandState.has(`${o.key}|${id}`); // the person's own fold or unfold is never decided again
+    const out = budgetFold(ids.map(id => ({ id, size: size(id) })), own, SHOW_BUDGET);
     // Then the room it takes: the first view, its title included, must read at the opening scale (85%) in this window. Past
     // it, the open group taking the most room folds next, until it does or nothing is left to fold. Stored places count as
     // they are; a group opened or entered later may be larger than the window and is read by panning.
@@ -256,7 +261,7 @@ function budgetFolded(o) {
             const hit = memo.get(id);
             if (hit !== undefined)
                 return hit;
-            const k = `${o.project.id}|${id}`, p = partOf(o, id);
+            const k = `${o.key}|${id}`, p = partOf(o, id);
             let v;
             if (expandState.has(k))
                 v = expandState.get(k);
@@ -290,7 +295,7 @@ function budgetFolded(o) {
 /** Marks every part between the scope and this part (exclusive) as unfolded in the given set or map. */
 function expandPath(o, id, into) {
     for (let p = partOf(o, partOf(o, id)?.parentId ?? null), g = 0; p && p.id !== scope && g < 64; p = partOf(o, p.parentId), g++) {
-        const k = `${o.project.id}|${p.id}`;
+        const k = `${o.key}|${p.id}`;
         if (into instanceof Set)
             into.add(k);
         else
@@ -399,6 +404,7 @@ async function render() {
     if (!r.key) {
         if (opened)
             cameras.set(camKey(opened, scope), { ...camera });
+        flushView();
         planView.close(false);
         if (toastKey)
             dropToast();
@@ -438,8 +444,10 @@ async function render() {
     if (fresh || nextScope !== scope) {
         if (opened)
             cameras.set(camKey(opened, scope), { ...camera });
-        if (fresh)
+        if (fresh) {
+            flushView();
             scenes = [];
+        }
         else if (backing || (back && scenes.at(-1)?.scope === back.from.scope))
             scenes.pop();
         else
@@ -458,6 +466,7 @@ async function render() {
             returnView.projectChanged();
             readMarks = [];
             readingCamera = null;
+            loadView(next);
         }
         // A new project starts with the map alone: the previous project's reading pane must not narrow its first view.
         if (fresh) {
@@ -693,16 +702,20 @@ function toParticle(name) {
         return '으로';
     return /[aeiouylrsxzfhvw]/i.test(c) ? '로' : '(으)로';
 }
-/** The way back inside the reading pane, above the part's composition path: the name of the part it was followed from. Only
- * within one scene; a visit that changed the scene goes back by the context row's existing back (one way back, never two). */
+/** The way back where the reader is looking: one line at the top of the reading pane, after any followed relation (in the
+ * same scope or across scopes): the part it was followed from (or the scope, when followed from the scope's own relations) and
+ * the scene it sits in. It returns exactly as the context row's back does (scope, selection, camera, surface, scroll); that
+ * header back stays for a scene change. */
 function visitEntry(o) {
     const v = visits.at(-1);
-    if (!v || v.to !== selected || v.from.key !== o.key || v.from.scope !== scope || !v.from.selected)
+    if (!v || v.to !== selected || v.from.key !== o.key)
         return null;
-    const name = partOf(o, v.from.selected)?.name;
+    const sceneName = (s) => (s ? partOf(o, s)?.name ?? null : '전체 지도');
+    const name = v.from.selected ? partOf(o, v.from.selected)?.name : v.from.scope ? partOf(o, v.from.scope)?.name : o.project.name;
     if (!name)
         return null;
-    return h('button', { type: 'button', class: 'visit-back', 'aria-label': `${name}${toParticle(name)} 돌아가기`, title: `${name}${toParticle(name)} 돌아가기 · ${REL_WHY(v)}`, onclick: returnFromVisit }, h('span', { 'aria-hidden': 'true' }, '←'), h('strong', {}, name), h('span', {}, `${toParticle(name)} 돌아가기`));
+    const where = v.from.selected ? sceneName(v.from.scope) : null;
+    return h('button', { type: 'button', class: 'visit-line', 'aria-label': `${name}${toParticle(name)} 돌아가기`, title: `${name}${toParticle(name)} 돌아가기 · ${REL_WHY(v)}`, onclick: returnFromVisit }, h('span', { class: 'vl-arrow', 'aria-hidden': 'true' }, '←'), h('strong', {}, name), h('span', { class: 'vl-came' }, '에서 따라옴'), where ? h('span', { class: 'vl-where' }, where) : null);
 }
 /** One context row: the composition path (where this view sits), the scope's way up, the way back to the previous scene, and
  * whether the map reads the current state or a change preview. */
@@ -790,7 +803,8 @@ const slashBreaks = (name) => name.split('/').flatMap((x, i, all) => (i < all.le
 function programCard(key, p, example, keyOf) {
     const v = studioView(p), last = v.records[0];
     const changed = v.parts.filter(x => recentAt(x.lastAt)).length;
-    const meta = [`부분 ${v.parts.length}`, v.records.length ? `기록 ${v.records.length}${last ? ` · ${ago(last.at)}` : ''}` : '기록 없음', changed ? `최근 바뀐 부분 ${changed}` : ''].filter(Boolean).join(' · ');
+    // One span per item: the stylesheet draws the separators between them.
+    const meta = [`부분 ${v.parts.length}`, v.records.length ? `기록 ${v.records.length}` : '기록 없음', last ? ago(last.at) : '', changed ? `최근 바뀐 부분 ${changed}` : ''].filter(Boolean).map(t => h('span', {}, t));
     const base = `#/p/${encodeURIComponent(key)}`, name = (id) => (id ? v.parts.find(x => x.id === id)?.name ?? null : null);
     // Continue: only a remembered place whose parts still exist.
     const at = example ? null : lastPlaces()[p.id];
@@ -804,7 +818,7 @@ function programCard(key, p, example, keyOf) {
     }), roots.length > MAX ? h('li', { class: 'more' }, h('a', { href: base }, `+${roots.length - MAX}개 묶음`)) : null) : h('p', { class: 'program-empty' }, '아직 부분이 없어요 · 열어서 첫 부분을 적어요');
     const tryReturn = key === UI62_KEY ? h('a', { class: 'program-try', href: base }, h('strong', {}, '돌아와 읽기'), h('span', {}, '공개 개발 자료 10개 · 3단계로 늘려 읽기 · 사후 편집')) : null;
     const tryPlan = key === CONVERTER_KEY ? h('a', { class: 'program-try', href: base, onclick: () => { openPlanOnArrive = true; } }, h('strong', {}, '변경 구상 시험해 보기'), h('span', {}, '폴더째 변환 · 지금과 구상을 같은 자리에서 비교')) : null;
-    return h('li', {}, h('article', { class: `program${example ? ' is-example' : ''}` }, h('a', { class: 'program-head', href: base }, h('strong', { class: 'program-name' }, p.name), h('span', { class: 'program-brief' }, p.space.brief?.text ?? '목적이 아직 적혀 있지 않아요.'), h('span', { class: 'program-meta' }, meta)), h('div', { class: 'program-body' }, section, cont, tryPlan, tryReturn)));
+    return h('li', {}, h('article', { class: `program${example ? ' is-example' : ''}` }, h('a', { class: 'program-head', href: base }, h('strong', { class: 'program-name' }, p.name), h('span', { class: 'program-brief' }, p.space.brief?.text ?? '목적이 아직 적혀 있지 않아요.'), h('span', { class: 'program-meta' }, ...meta)), h('div', { class: 'program-body' }, section, cont, tryPlan, tryReturn)));
 }
 /** My programs lead; the examples show their real composition on a first visit and step back once there is work of one's own. */
 function renderHome() {
@@ -921,35 +935,6 @@ function aliasOf(v, id) {
     const mine = clause(p.note);
     return mine && !sibs.some(x => clause(v.parts.find(y => y.id === x)?.note ?? '') === mine) ? mine : null;
 }
-const REL_LABEL = { flow: '넘겨줌', needs: '필요로 함', shares: '함께 씀', related: '관련' };
-/** A relation read from one end: the verb with that end as its subject ("이 부분이 필요로 함") or its object ("이 부분을 필요로
- * 함"). The kinds and their directions are the project's own; nothing here makes a relation more or less certain. */
-function relLabel(kind, out, subject = '부분') {
-    const it = `이 ${subject}`, verb = REL_LABEL[kind] ?? kind;
-    if (kind === 'needs')
-        return out ? `${it}${subject === '부분' ? '이' : '가'} 필요로 함` : `${it}${subject === '부분' ? '을' : '를'} 필요로 함`;
-    if (kind === 'flow')
-        return out ? `${it}${subject === '부분' ? '이' : '가'} 넘겨줌` : `${it}에 넘겨줌`;
-    // A plain relation has no direction to read: one neutral verb, whichever end was recorded first.
-    if (kind === 'related')
-        return verb;
-    return out ? `${verb} →` : `← ${verb}`;
-}
-/** Relations of one part (or one scope), grouped by verb and direction: what it uses before what uses it. */
-function relationGroups(ends, subject = '부분') {
-    const order = ['flow', 'needs', 'shares', 'related'], groups = new Map();
-    const sorted = [...ends].sort((a, b) => Number(b.out) - Number(a.out) || order.indexOf(a.r.kind) - order.indexOf(b.r.kind));
-    for (const x of sorted) {
-        const k = `${x.r.kind === 'related' ? '' : x.out}|${x.r.kind}`;
-        const g = groups.get(k) ?? { label: relLabel(x.r.kind, x.out, subject), list: [] };
-        g.list.push(x);
-        groups.set(k, g);
-    }
-    return [...groups.values()];
-}
-/** The direction mark of a relation row: from or to this end; none for a plain relation, which only says the two are related. */
-const dirMark = (kind, out) => (kind === 'related' ? '–' : out ? '→' : '←');
-const dirTitle = (kind, out) => (kind === 'related' ? '방향 없는 관련' : out ? '이 부분에서 나감' : '이 부분으로 들어옴');
 /** A part's line on the map: the state only when it says something. 'plan' (no request yet) stays quiet here; the inspector
  * still tells "no records" apart from "a planned note only". */
 function metaLine(p, last) {
@@ -987,18 +972,31 @@ function renderSpace(cameraMode = 'fit', planOverlay = true) {
     const frames = (id) => { const out = new Set(); for (let c = lay.boxes.get(id)?.container, g = 0; c && g < 64; c = lay.boxes.get(c)?.container, g++)
         if (lay.boxes.get(c)?.kind === 'frame')
             out.add(c); return out; };
-    for (const e of lay.edges) {
-        const fa = frames(e.from), inner = [...frames(e.to)].some(f => fa.has(f));
-        const g = svg('g', { class: `edge k-${e.kind}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
+    // A busy map at rest reads as its summary (summaryEdges: one line per pair of groups and kind, with its count); a selection,
+    // the change plan or a map of a few lines draws each line. Both sets are drawn; .rest-sum on the space shows one of them.
+    restSums = sums = lay.edges.length > 6 ? summaryEdges(lay.boxes, lay.edges) : [];
+    for (const e of [...lay.edges, ...sums]) {
+        const fa = frames(e.from), inner = [...frames(e.to)].some(f => fa.has(f)), sum = e.key.startsWith('sum:');
+        const g = svg('g', { class: `edge${sum ? ' sum' : ''} k-${e.kind}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
         // No text on the map: the meaning shows on hover (tip) and in the selected part's 관련 부분.
         // A plain relation ends in the same dot at both ends: it is drawn, not directed.
         g.append(svg('path', { class: 'edge-line', 'marker-end': e.kind === 'related' ? 'url(#dot)' : 'url(#arrow)', 'marker-start': 'url(#dot)' }), svg('path', { class: 'edge-hit' }));
         edges.append(g);
     }
     world.append(edges);
+    // Each group's head says how many relations cross its boundary (stored relations, any depth inside): where it connects, before
+    // anything is selected. Part of the head, so clicking it selects the group and the head's own button role reads it.
+    const crossing = boundaryCounts(view);
+    const linksChip = (id) => {
+        const c = crossing.get(id);
+        if (!c?.all)
+            return null;
+        const how = [c.in ? `들어옴 ${c.in}` : '', c.out ? `나감 ${c.out}` : '', c.plain ? `방향 없음 ${c.plain}` : ''].filter(Boolean).join(' · ');
+        return h('span', { class: 'frame-links', title: `바깥과 이어진 관계 ${c.all}개${how ? ` · ${how}` : ''}` }, h('span', { 'aria-hidden': 'true' }, `↔ ${c.all}`), h('span', { class: 'sr-only' }, `바깥 관계 ${c.all}`));
+    };
     const enterButton = (p) => h('button', { type: 'button', class: 'enter', title: `‘${p.name}’ 안으로 들어가기 · 부분 ${p.childIds.length}`, 'aria-label': `${p.name} 안으로 들어가기`, onclick: () => go(o.key, null, p.id) }, `${p.childIds.length}`, h('span', { 'aria-hidden': 'true' }, '›'));
     const toggleButton = (p, open) => h('button', { type: 'button', class: 'toggle', title: open ? '접기' : '여기서 펼치기', 'aria-label': `${p.name} ${open ? '접기' : '펼치기'}`, 'aria-expanded': String(open),
-        onclick: () => { const k = `${o.project.id}|${p.id}`; expandState.set(k, !open); tempExpand.delete(k); previewExpand.delete(k); renderSpace('keep'); if (selected)
+        onclick: () => { const k = `${o.key}|${p.id}`; expandState.set(k, !open); tempExpand.delete(k); previewExpand.delete(k); renderSpace('keep'); if (selected)
             select(selected); } }, chevron(open));
     const keySelect = (id) => (e) => { const k = e.key; if ((k === 'Enter' || k === ' ') && e.target === e.currentTarget) {
         e.preventDefault();
@@ -1027,7 +1025,7 @@ function renderSpace(cameraMode = 'fit', planOverlay = true) {
             const latest = subtreeRecords(view, p.id)[0]?.at ?? null, region = b.depth === 0, note = region ? mapLead(view, p.id) : '';
             world.append(h('div', { class: `frame ${region ? 'region' : 'group'} depth-${Math.min(b.depth, 2)}${b.depth % 2 ? ' tint' : ''}${b.list ? ' list' : ''}`, 'data-part': p.id, 'data-box': p.id }, h('div', { class: `frame-head s-${p.status}${b.head > HEAD ? ' tall' : ''}`, style: `height:${b.head}px`, 'data-part': p.id, 'data-drag': p.id, role: 'button', tabindex: '0', title: of ? `${of} › ${p.name}` : p.name, onkeydown: keySelect(p.id) }, toggleButton(p, true), 
             // A change line reads under the name (in the preview only), never beside it: the name keeps the whole head width.
-            h('span', { class: 'frame-title' }, h('span', { class: 'frame-name' }, p.name), h('span', { class: 'plan-note' })), h('span', { class: 'frame-meta' }, latest ? h('span', { class: recentAt(latest) ? 'fresh' : '' }, ago(latest)) : null), enterButton(p), note ? h('span', { class: 'frame-note' }, note) : null)));
+            h('span', { class: 'frame-title' }, h('span', { class: 'frame-name' }, p.name), h('span', { class: 'plan-note' })), h('span', { class: 'frame-meta' }, latest ? h('span', { class: recentAt(latest) ? 'fresh' : '' }, ago(latest)) : null), linksChip(p.id), enterButton(p), note ? h('span', { class: 'frame-note' }, note) : null)));
         }
         else {
             // A folded part reads its inside: latest record anywhere under it.
@@ -1036,7 +1034,7 @@ function renderSpace(cameraMode = 'fit', planOverlay = true) {
             // its own first sentence.
             const note = face === 'unit' && !b.kids ? mapLead(view, p.id) : '', box = lay.boxes.get(b.container), onTint = box?.kind === 'frame' && box.depth % 2 === 1, alias = aliasOf(view, p.id);
             world.append(h('div', { class: `node ${face}${onTint ? ' on-tint' : ''} s-${p.status}${recentAt(last) ? ' fresh' : ''}${b.kids ? ' has-kids' : ''}${meta || of ? '' : ' bare'}`, 'data-part': p.id, 'data-box': p.id, 'data-drag': p.id, role: 'button', tabindex: '0',
-                title: `${of ? `${of} › ` : ''}${p.name}${alias ? ` · ${alias}` : ''}`, onkeydown: keySelect(p.id) }, b.kids ? toggleButton(p, false) : null, h('span', { class: 'node-text' }, h('span', { class: 'node-name' }, p.name), note ? h('span', { class: 'node-note' }, note) : null, meta ? h('span', { class: 'node-meta' }, h('i', { class: 'dot', 'aria-hidden': 'true' }), meta) : alias ? h('span', { class: 'node-meta owner alias' }, alias) : of ? h('span', { class: 'node-meta owner' }, `${of} 안`) : null, h('span', { class: 'plan-note' })), b.kids ? enterButton(p) : null));
+                title: `${of ? `${of} › ` : ''}${p.name}${alias ? ` · ${alias}` : ''}`, onkeydown: keySelect(p.id) }, b.kids ? toggleButton(p, false) : null, h('span', { class: 'node-text' }, h('span', { class: 'node-name' }, p.name), note ? h('span', { class: 'node-note' }, note) : null, meta ? h('span', { class: 'node-meta' }, h('i', { class: 'dot', 'aria-hidden': 'true' }), meta) : alias ? h('span', { class: 'node-meta owner alias' }, alias) : of ? h('span', { class: 'node-meta owner' }, `${of} 안`) : null, h('span', { class: 'plan-note' })), b.kids ? linksChip(p.id) : null, b.kids ? enterButton(p) : null));
         }
     }
     // The title of this map: what the scope is for, in its own first sentence. The rest of that text (where it comes from, what
@@ -1044,7 +1042,7 @@ function renderSpace(cameraMode = 'fit', planOverlay = true) {
     // relations to the outside read under the title as the scope's, never drawn as lines from one of its children.
     const sp = partOf(o, scope), purpose = (sp ? sp.note : o.project.space.brief?.text ?? '').trim(), first = lead(purpose);
     const outside = scopeEnds(o), more = purpose.replace(/\s+/g, ' ').length > first.length + 1;
-    const title = h('header', { class: 'map-title' }, h('h1', { class: 'map-name' }, sp ? sp.name : o.project.name), first ? h('p', { class: 'map-purpose' }, h('span', {}, first), more ? h('button', { type: 'button', class: 'map-more', title: '설명 전체와 출처', onclick: () => openScopeReading() }, '자세히') : null) : null, outside.length ? h('div', { class: 'scope-rels', role: 'list', 'aria-label': '이 범위의 바깥 관계' }, ...relationGroups(outside, '범위').map(g => h('p', { class: 'scope-rel', role: 'listitem' }, h('span', { class: 'sr-verb' }, g.label), ...g.list.map(x => h('button', { type: 'button', class: 'sr-part', title: `${partPath(o.view, x.far).map(q => q.name).join(' › ')}${x.r.note ? `\n${x.r.note}` : ''}`, 'data-far': x.far, onclick: (e) => { follow(x.far, x.r, e); go(o.key, x.far, null); } }, partOf(o, x.far)?.name ?? '부분'))))) : null);
+    const title = h('header', { class: 'map-title' }, h('h1', { class: 'map-name' }, sp ? sp.name : o.project.name), first ? h('p', { class: 'map-purpose' }, h('span', {}, first), more ? h('button', { type: 'button', class: 'map-more', title: '설명 전체와 출처', onclick: () => openScopeReading() }, '범위 설명') : null) : null, outside.length ? h('div', { class: 'scope-rels', role: 'list', 'aria-label': '이 범위의 바깥 관계' }, ...relationGroups(outside, '범위').map(g => h('p', { class: 'scope-rel', role: 'listitem' }, h('span', { class: 'sr-verb' }, g.label), ...g.list.map(x => h('button', { type: 'button', class: 'sr-part', title: `${partPath(o.view, x.far).map(q => q.name).join(' › ')}${x.r.note ? `\n${x.r.note}` : ''}`, 'data-far': x.far, onclick: (e) => { follow(x.far, x.r, e); go(o.key, x.far, null); } }, partOf(o, x.far)?.name ?? '부분'))))) : null);
     world.append(title);
     title.style.width = `${titleRect().w}px`;
     titleH = view.parts.length ? title.offsetHeight : 0;
@@ -1062,7 +1060,7 @@ function renderSpace(cameraMode = 'fit', planOverlay = true) {
     // Many lines on one view: those that go round other parts share the same gaps and would read as extra outlines of the
     // groups they pass; they step back until selected, hovered or read as a change's context (kind, direction and hover meaning
     // unchanged).
-    $('space').classList.toggle('dense-lines', lay.edges.length >= 12);
+    syncLineMode();
     const empty = $('space-empty');
     empty.hidden = view.parts.length > 0 || o.kind === 'saved';
     empty.textContent = view.records.length ? `아직 부분으로 나뉘지 않은 프로젝트예요. 기록 ${view.records.length}개는 ‘최근 기록’에서 볼 수 있어요.` : '아직 부분도 기록도 없는 프로젝트예요.';
@@ -1129,8 +1127,33 @@ function positionWorld() {
         const r = edgePath(a, b, lay.boxes.values());
         g.querySelectorAll('path').forEach(x => x.setAttribute('d', r.d));
         g.classList.toggle('detour', !!r.detour);
+        // A line that crosses nothing it does not belong to reads above the group surfaces, so its run inside the groups of its own
+        // ends is seen up to its part; one that has to cross another box stays under them.
+        g.classList.toggle('clear', r.clear);
+        layerEdge(g);
     });
     placeEdgeLabels();
+}
+/** Map lines at rest on a busy map: the summary lines (see renderSpace). With a selection, sums holds what each of them still
+ * holds beside the selection's own lines (restSummary, set by markSelection); the drawn lines are restSums'. */
+let restSums = [], sums = [];
+const edgeOf = (key) => (key?.startsWith('sum:') ? sums : lay.edges).find(x => x.key === key);
+/** A summary line that, beside the selection, holds fewer relations than at rest. */
+const restOf = (e) => e.key.startsWith('sum:') && sums !== restSums && (restSums.find(x => x.key === e.key)?.ids.length ?? 0) > e.ids.length;
+function syncLineMode() {
+    const sp = $('space'), rest = !selected && !planView.isOpen() && restSums.length > 0;
+    sp.classList.toggle('rest-sum', rest);
+    // A selection on a busy map: its own lines one by one, the rest as the dimmed summary (see .sel-sum).
+    sp.classList.toggle('sel-sum', !!selected && !planView.isOpen() && restSums.length > 0);
+    // Many lines on one view: those that go round other parts step back (see .dense-lines); a summary line never does.
+    sp.classList.toggle('dense-lines', lay.edges.length >= 12);
+}
+/** Selected lines, a change's context lines, lines inside one group and lines that cross nothing else read above the groups. */
+function layerEdge(el) {
+    const top = document.querySelector('#world .edges-top'), base = document.querySelector('#world .edges:not(.edges-top)');
+    const layer = ['on', 'ctx', 'inner', 'clear'].some(c => el.classList.contains(c)) ? top : base;
+    if (layer && el.parentNode !== layer)
+        layer.append(el);
 }
 /** Verbs on the map: on the lines of the selection, and on every line of a map that has only a few. Each sits at a free spot
  * along its own line; a verb that would cover a part, a group's head, the title or another verb is left off the map (the pane
@@ -1145,6 +1168,9 @@ function placeEdgeLabels() {
         world.append(box);
     }
     box.replaceChildren();
+    syncLineMode();
+    world.querySelectorAll('.edge.label-hidden').forEach(g => g.classList.remove('label-hidden'));
+    world.dataset.labelsHidden = '0';
     const few = !selected && !planView.isOpen() && lay.edges.length <= 6;
     // At rest, lines of one kind meeting the same part share one verb (the first of them carries it).
     const seenEnd = new Set();
@@ -1168,12 +1194,19 @@ function placeEdgeLabels() {
         seenEnd.add(k);
         return true;
     });
-    if (!lines.length)
-        return;
     const blocks = [...lay.boxes.values()].map(b => (b.kind === 'frame' ? { x: b.x, y: b.y, w: b.w, h: b.head } : b));
     if (titleH)
         blocks.push(titleRect());
     const clear = (r) => !blocks.some(b => r.x < b.x + b.w + 3 && b.x < r.x + r.w + 3 && r.y < b.y + b.h + 3 && b.y < r.y + r.h + 3);
+    if ($('space').classList.contains('rest-sum')) {
+        placeCounts(box, clear, blocks);
+        return;
+    }
+    if (!selected) {
+        if (lines.length)
+            placeRestLabels(box, lines, clear);
+        return;
+    }
     for (const g of lines) {
         const e = lay.edges.find(x => x.key === g.dataset.key), path = g.querySelector('.edge-line');
         if (!e || !path)
@@ -1203,6 +1236,89 @@ function placeEdgeLabels() {
         if (on)
             seenSel.add(selKey(e));
     }
+    // The dimmed summary beside the selection keeps its counts (what each line still holds), after the selection's verbs.
+    if ($('space').classList.contains('sel-sum'))
+        placeCounts(box, clear, blocks, true);
+}
+/** How many relations a summary line holds, on the line where it reads clear of parts (a line of one relation has none).
+ * Beside a selection (dimmed, .beside) a count that finds no clear place is left off rather than set over a part or a verb. */
+function placeCounts(box, clear, blocks, beside = false) {
+    // Beside a selection a count also keeps off the selection's own lines, where it would read as theirs.
+    const onPts = beside ? [...$('world').querySelectorAll('.edge.on .edge-line')].flatMap(p => { const n = p.getTotalLength(); return Array.from({ length: Math.ceil(n / 6) + 1 }, (_, i) => p.getPointAtLength(Math.min(n, i * 6))); }) : [];
+    const off = (r) => clear(r) && !onPts.some(q => q.x > r.x - 4 && q.x < r.x + r.w + 4 && q.y > r.y - 4 && q.y < r.y + r.h + 4);
+    for (const g of $('world').querySelectorAll('.edge.sum:not(.hit)')) {
+        const e = edgeOf(g.dataset.key), path = g.querySelector('.edge-line');
+        if (!e || !path || e.ids.length < 2)
+            continue;
+        const chip = h('span', { class: `edge-count k-${e.kind}${beside ? ' beside' : ''}` }, String(e.ids.length));
+        box.append(chip);
+        const w = chip.offsetWidth, hh = chip.offsetHeight, len = path.getTotalLength();
+        const at = (t) => { const q = path.getPointAtLength(len * t); return { x: q.x - w / 2, y: q.y - hh / 2, w, h: hh }; };
+        const spot = [0.5, 0.42, 0.58, 0.34, 0.66, 0.26, 0.74].map(at).find(off) ?? (beside ? null : at(0.5));
+        if (!spot) {
+            chip.remove();
+            continue;
+        }
+        chip.style.left = `${spot.x}px`;
+        chip.style.top = `${spot.y}px`;
+        blocks.push(spot);
+    }
+}
+/** Verbs at rest on a map of a few lines: each beside the box its line points to (about four fifths along the line, moved off
+ * that box), never at the middle where lines cross. Two that would touch keep the one nearer its end; the other relation's line
+ * says so (.label-hidden, still hovered for its meaning) and is counted in the map's data-labels-hidden. */
+function placeRestLabels(box, lines, clear) {
+    const spots = [], hidden = [];
+    for (const g of lines) {
+        const e = edgeOf(g.dataset.key), path = g.querySelector('.edge-line'), end = e && lay.boxes.get(e.to);
+        if (!e || !path || !end)
+            continue;
+        const label = h('span', { class: `edge-label k-${e.kind}` }, `${REL_LABEL[e.kind] ?? e.kind}${e.ids.length > 1 ? ` ${e.ids.length}` : ''}`);
+        box.append(label);
+        const w = label.offsetWidth, hh = label.offsetHeight, len = path.getTotalLength(), tip = path.getPointAtLength(len);
+        const mine = [];
+        for (const t of [0.82, 0.78, 0.85, 0.74, 0.88, 0.7]) {
+            const q = path.getPointAtLength(len * t), q2 = path.getPointAtLength(Math.min(len, len * t + 1)), q1 = path.getPointAtLength(Math.max(0, len * t - 1));
+            // On the line, then beside it (lines meeting one end stack their verbs there).
+            const tx = q2.x - q1.x, ty = q2.y - q1.y, tl = Math.hypot(tx, ty) || 1, nx = -ty / tl, ny = tx / tl;
+            for (const [cx, cy] of [0, 1, -1, 2, -2].map(s => [q.x + nx * s * (hh / 2 + 4), q.y + ny * s * (hh / 2 + 4)])) {
+                const r = { x: cx - w / 2, y: cy - hh / 2, w, h: hh };
+                // Off the box it points to, on the side the line comes from.
+                if (r.x < end.x + end.w + 4 && end.x - 4 < r.x + r.w && r.y < end.y + end.h + 4 && end.y - 4 < r.y + r.h) {
+                    if (q.x < end.x)
+                        r.x = end.x - 4 - w;
+                    else if (q.x > end.x + end.w)
+                        r.x = end.x + end.w + 4;
+                    else if (q.y < end.y)
+                        r.y = end.y - 4 - hh;
+                    else
+                        r.y = end.y + end.h + 4;
+                }
+                if (clear(r))
+                    mine.push(r);
+            }
+        }
+        if (!mine.length) {
+            label.remove();
+            hidden.push(g);
+            continue;
+        }
+        // Nearest to its end first; a later place only when a nearer verb takes this one's.
+        for (const r of mine)
+            spots.push({ key: e.key, ...r, dist: Math.hypot(r.x + w / 2 - tip.x, r.y + hh / 2 - tip.y), el: label });
+    }
+    const { kept, dropped } = resolveLabels(spots, 6);
+    for (const s of kept) {
+        s.el.style.left = `${s.x}px`;
+        s.el.style.top = `${s.y}px`;
+    }
+    for (const s of spots)
+        if (dropped.includes(s.key))
+            s.el.remove();
+    for (const g of lines)
+        if (dropped.includes(g.dataset.key) || hidden.includes(g))
+            g.classList.add('label-hidden');
+    $('world').dataset.labelsHidden = String(dropped.length + hidden.length);
 }
 function renderRecent() {
     const o = opened, sp = partOf(o, scope), all = sp ? subtreeRecords(o.view, sp.id) : o.view.records, LATEST = 7;
@@ -1225,12 +1341,12 @@ function renderRecent() {
     }), ...(all.length > LATEST ? [h('li', { class: 'recent-more' }, h('button', { type: 'button', class: 'link-button', onclick: () => { recentAll = !recentAll; renderRecent(); } }, recentAll ? `최신 ${LATEST}개만 보기` : `전체 ${all.length}개 보기`))] : []));
 }
 /* ---------- camera ---------- */
-const ZOOM_MIN = 0.4, ZOOM_MAX = 1.6;
+const ZOOM_MIN = 0.4, ZOOM_MAX = 1.6, OPEN_MIN = 0.6;
 /** The reading pane is a column of its own on the right: the map's viewport ends where the pane begins (syncMapArea), so nothing
  * the person reads is ever drawn under it and the geometry below needs no inset for it.
  * Width of the reading pane while anything reads there (a part, its sheet, a comparison or the whole plan); 0 otherwise. */
 // The change plan's wide workspace covers the map without taking width from it: the map under it keeps its area and camera.
-const paneWidth = () => (['lens', 'panel'].some(id => !$(id).hidden) || (!$('plan-panel').hidden && !$('plan-panel').classList.contains('work')) ? inspW() : 0);
+const paneWidth = () => (!$('lens').hidden && $('panel').hidden && $('lens').classList.contains('railed') ? RAIL_W : ['lens', 'panel'].some(id => !$(id).hidden) || (!$('plan-panel').hidden && !$('plan-panel').classList.contains('work')) ? inspW() : 0);
 const leftInset = () => 16;
 /** Map tools sit at the bottom left; the map keeps clear of them only below this line. */
 const BOTTOM = 64;
@@ -1241,15 +1357,18 @@ function applyCamera(animate = false) {
     vp.style.backgroundPosition = `${camera.x}px ${camera.y - vp.offsetTop}px`;
     vp.style.backgroundSize = `${28 * camera.k}px ${28 * camera.k}px`;
     $('zoom-level').textContent = `${Math.round(camera.k * 100)}%`;
-    // Density follows the zoom: below 80% notes and state lines step back, below 60% names grow to stay readable. The selected
-    // part, its partners and what is being dragged keep their full detail; nothing is removed from the page or its layout.
+    // Density follows the zoom: below 70% notes and state lines go and names read on one line across the card, a little larger
+    // (never past 1.25×, so a name is cut only when it truly does not fit); below 60% that is all a box shows. Nothing is
+    // removed from the page or its layout.
     const sp = $('space');
-    sp.classList.toggle('z-mid', camera.k < 0.8);
-    sp.classList.toggle('z-low', camera.k < 0.6);
-    sp.style.setProperty('--grow', String(Math.min(1.6, Math.max(1, 0.85 / camera.k))));
+    sp.classList.toggle('z-mid', camera.k < 0.705);
+    sp.classList.toggle('z-low', camera.k < 0.6); // z-mid: 70% as shown and below
+    sp.style.setProperty('--grow', String(Math.min(1.25, Math.max(1, 0.85 / camera.k))));
     updateSticky();
+    saveViewSoon();
 }
-/** Whole view in the free area. Opening never shrinks below 85%; only the explicit 전체 보기 button may go further. A map smaller
+/** Whole view in the free area. Opening shrinks to 60% at most, so a large map opens whole (names stay readable on one line
+ * there, see applyCamera); only the explicit 전체 보기 button may go further. A map smaller
  * than the window sits near the top (a page is read from its top) and, while the pane is closed, leaves the pane's room free on
  * the right when there is enough of it, so opening a reading later rarely has to move the map. */
 function fitView(explicit, animate = false) {
@@ -1260,7 +1379,7 @@ function fitView(explicit, animate = false) {
     const vp = $('viewport').getBoundingClientRect(), left = leftInset() + 8, right = 24, top = topInset() + 12, bottom = mapBottomInset() + 8;
     const w = Math.max(200, vp.width - left - right), hgt = Math.max(160, mapBottom() - top - bottom), B = lay.bounds;
     const fit = Math.min(1, w / Math.max(1, B.w + 40), hgt / Math.max(1, B.h + 40));
-    const k = explicit ? Math.max(ZOOM_MIN, fit) : Math.max(0.85, fit);
+    const k = explicit ? Math.max(ZOOM_MIN, fit) : Math.max(OPEN_MIN, fit);
     const mw = B.w * k, mh = B.h * k, free = w - mw, room = paneWidth() ? 0 : inspW();
     const xoff = free <= 0 ? 12 : free >= room + 96 ? Math.max(40, (free - room) / 2) : free / 2;
     const yoff = mh <= hgt ? Math.min((hgt - mh) / 2, 48) : 12;
@@ -1431,7 +1550,7 @@ const union = (rs) => { const x = Math.min(...rs.map(r => r.x)), y = Math.min(..
 const stripInset = () => { const strip = $('plan-strip'); return strip.hidden ? 16 : strip.offsetTop + strip.offsetHeight + 10; };
 const topInset = () => stripInset() + (!$('plan-strip').hidden && !$('scope-sticky').hidden ? $('scope-sticky').offsetHeight + 8 : 0);
 function mapArea() { const vp = $('viewport').getBoundingClientRect(), top = topInset(); return { x: 16, y: top, w: vp.width - 32, h: mapBottom() - top - mapBottomInset() }; }
-function hideLens() { const l = $('lens'); l.hidden = true; l.replaceChildren(); l.classList.remove('compare', 'scope-read'); readingFor = []; syncMapArea(); }
+function hideLens() { const l = $('lens'); l.hidden = true; l.replaceChildren(); l.classList.remove('compare', 'scope-read', 'railed'); readingFor = []; syncMapArea(); }
 const mapBottomInset = () => BOTTOM;
 const mapBottom = () => $('viewport').offsetTop + $('viewport').clientHeight;
 /** The map's viewport: below the plan's strip when it is open, left of the pane when it is open. Camera coordinates stay
@@ -1505,7 +1624,7 @@ function scopeEnds(o) {
             return true; return false; };
     return o.view.relations.flatMap((r) => r.from === scope && !inside(r.to) ? [{ r, near: r.from, far: r.to, out: true }] : r.to === scope && !inside(r.from) ? [{ r, near: r.to, far: r.from, out: false }] : []);
 }
-/** Reading the scope itself in the pane (the map's 자세히): its whole description as written, where it sits, its relations
+/** Reading the scope itself in the pane (the map title's 범위 설명): its whole description as written, where it sits, its relations
  * to the outside and its parts with their sizes. Selecting a part replaces it. */
 let scopeReading = false;
 function openScopeReading() { const o = opened; if (!o)
@@ -1522,7 +1641,7 @@ function renderScopeLens() {
     const kids = (sp ? sp.childIds : o.view.roots).map(id => partOf(o, id)).filter(Boolean);
     const outside = relationGroups(scopeEnds(o), '범위');
     const path = sp ? partPath(o.view, sp.id).slice(0, -1) : [];
-    l.classList.remove('compare');
+    l.classList.remove('compare', 'railed');
     l.classList.add('scope-read');
     readingFor = [];
     l.replaceChildren(h('header', { class: 'lens-head' }, h('div', { class: 'lens-path' }, h('span', {}, sp ? '이 범위' : '프로젝트'), ...path.flatMap(x => [h('span', { 'aria-hidden': 'true' }, '›'), h('a', { href: hashFor(o.key, null, x.id) }, x.name)])), h('h2', { id: 'lens-title' }, sp ? sp.name : o.project.name), h('div', { class: 'head-tools' }, h('button', { type: 'button', class: 'close', 'aria-label': '범위 설명 닫기', title: '닫기 (Esc)', onclick: closeScopeReading }, '×'))), h('div', { class: 'lens-body' }, h('div', { class: 'lens-desc' }, text ? h('p', { class: 'lens-text' }, text) : null, h('p', { class: 'lens-src' }, h('span', {}, sp ? '적어 둔 설명 · 원문 그대로' : '프로젝트 설명 · 원문 그대로'))), ...outside.map(g => h('section', { class: 'lens-ports' }, h('h3', {}, g.label, h('small', {}, String(g.list.length))), h('ul', {}, ...g.list.map(x => h('li', {}, h('button', { type: 'button', class: 'port', 'data-far': x.far, onclick: (e) => { follow(x.far, x.r, e); go(o.key, x.far, null); } }, h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, dirMark(x.r.kind, x.out)), h('strong', {}, partOf(o, x.far)?.name ?? '부분')), x.r.note ? h('span', { class: 'port-note' }, x.r.note) : null)))))), kids.length ? h('section', { class: 'lens-ports' }, h('h3', {}, sp ? '안의 부분' : '최상위 구성', h('small', {}, String(kids.length))), h('ul', {}, ...kids.map(k => h('li', {}, h('button', { type: 'button', class: 'port', onclick: () => go(o.key, k.id) }, h('span', { class: 'port-top' }, h('strong', {}, k.name), k.childIds.length ? h('span', { class: 'port-count' }, `안쪽 ${k.childIds.length}`) : null), mapLead(o.view, k.id) ? h('span', { class: 'port-note' }, mapLead(o.view, k.id)) : null))))) : null));
@@ -1531,11 +1650,36 @@ function renderScopeLens() {
 }
 function closeScopeReading() { scopeReading = false; if ($('lens').classList.contains('scope-read'))
     hideLens(); }
+/* The lens folds to a narrow rail on request, for this tab (memory only): the map's area takes the window back (paneWidth), the
+ * rail keeps the selection's name and the way to open the reading again. Selection, Esc and the sheet work as before. */
+let lensRail = false;
+const RAIL_W = 44;
+const railIcon = (open) => { const el = svg('svg', { viewBox: '0 0 16 16', 'aria-hidden': 'true' }); el.append(svg('path', { d: open ? 'M3.5 4l4 4-4 4M8.5 4l4 4-4 4' : 'M12.5 4l-4 4 4 4M7.5 4l-4 4 4 4' })); return el; };
+function setRail(on) {
+    lensRail = on;
+    if (!opened || !selected || sheetOpen || planView.isOpen())
+        return;
+    renderLens();
+    syncMapArea();
+    if (!on)
+        reveal(selected);
+    $('lens').querySelector('.rail-toggle')?.focus();
+}
 /** The lens: what the selection is (its whole description as written, with where that description comes from; the map shows
  * only its first sentence), what it is linked to, by verb (each line's real ends), its inside, and the way to sources and
  * edits. */
 function renderLens() {
     const o = opened, part = partOf(o, selected), l = $('lens'), b = lay.boxes.get(part.id);
+    if (lensRail) {
+        // Folded to a rail: the selection's name, read top to bottom, and the way to open the reading again.
+        l.classList.remove('compare', 'scope-read', 'return-read');
+        l.classList.add('railed');
+        readingFor = [];
+        l.replaceChildren(h('button', { type: 'button', class: 'rail-toggle', 'aria-label': '읽기면 펼치기', 'aria-expanded': 'false', title: `읽기면 펼치기 · ${part.name}`, onclick: () => setRail(false) }, railIcon(false)), h('span', { class: 'rail-name', id: 'lens-title', title: part.name, onclick: () => setRail(false) }, part.name));
+        l.hidden = false;
+        return;
+    }
+    l.classList.remove('railed');
     const records = subtreeRecords(o.view, part.id), path = partPath(o.view, part.id).slice(0, -1);
     const rest = part.note.replace(/\s+/g, ' ').trim();
     const dot = h('i', { class: `dot s-${part.status}`, 'aria-hidden': 'true' });
@@ -1548,7 +1692,7 @@ function renderLens() {
     }
     else if (rest) {
         // The description is the person's written plan, not a received summary. A state line only when there is something to say
-        // (records, a reported state); "no records yet" and where the text comes from read in the sheet (자세히).
+        // (records, a reported state); "no records yet" and where the text comes from read in the sheet (전체 읽기).
         const state = part.status === 'plan' ? (records.length ? `받은 정리 없음 · 요청 기록 없음 · ${recs}` : '') : `${STATUS_LABEL[part.status]} · ${recs}`;
         put(desc, rest ? h('p', { class: 'lens-text' }, rest) : null, state ? src(`적어 둔 계획 설명 · ${state}`) : null);
     }
@@ -1565,7 +1709,23 @@ function renderLens() {
         const came = x.far === cameFrom;
         return h('li', {}, h('button', { type: 'button', class: `port${came ? ' came' : ''}`, 'data-far': x.far, title: `${far.name}${toParticle(far.name)} 가기${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e) => { follow(x.far, x.r, e); go(o.key, x.far); } }, h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, dirMark(x.r.kind, x.out)), h('strong', {}, far.name), came ? h('span', { class: 'port-came' }, '출발') : null), near || where ? h('span', { class: 'port-where' }, [near ? `안쪽 ‘${near}’에서` : '', where ? `${where}` : ''].filter(Boolean).join(' · ')) : null, x.r.note ? h('span', { class: 'port-note' }, x.r.note) : null));
     };
-    const ports = relationGroups(ends).map(g => h('section', { class: 'lens-ports' }, h('h3', {}, g.label, h('small', {}, String(g.list.length))), h('ul', {}, ...g.list.slice(0, 8).map(port)), g.list.length > 8 ? h('button', { type: 'button', class: 'link-button', onclick: () => openSheet() }, `${g.list.length - 8}개 더 · 자세히`) : null));
+    const ports = relationGroups(ends).map(g => h('section', { class: 'lens-ports' }, h('h3', {}, g.label, h('small', {}, String(g.list.length))), h('ul', {}, ...g.list.slice(0, 8).map(port)), g.list.length > 8 ? h('button', { type: 'button', class: 'link-button', onclick: () => openSheet() }, `${g.list.length - 8}개 더 · 전체 읽기`) : null));
+    // A group drawn open: the lines that touch its frame belong to its inner parts. They read here from those parts, by verb and
+    // direction, each row naming the inner part, the outside part and where that one belongs; following one records a visit.
+    // Relations between two of its inner parts are drawn inside it and only counted.
+    const inner = b?.kind === 'frame' ? insideEnds(o.view, part.id) : null;
+    const innerRow = (x) => {
+        const near = partOf(o, x.near), far = partOf(o, x.far);
+        if (!near || !far)
+            return null;
+        const where = partPath(o.view, x.far).slice(0, -1).map(q => q.name).join(' › ') || o.project.name, came = x.far === cameFrom;
+        return h('li', {}, h('button', { type: 'button', class: `port fr-port${came ? ' came' : ''}`, 'data-far': x.far, title: `${far.name}${toParticle(far.name)} 가기 · ${REL_LABEL[x.r.kind] ?? x.r.kind}${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e) => { follow(x.far, x.r, e); go(o.key, x.far); } }, h('span', { class: 'port-top' }, h('span', { class: 'fr-near' }, near.name), h('span', { class: 'port-dir', 'aria-hidden': 'true' }, dirMark(x.r.kind, x.out)), h('strong', {}, far.name), came ? h('span', { class: 'port-came' }, '출발') : null), h('span', { class: 'port-where' }, `${where} 안`), x.r.note ? h('span', { class: 'port-note' }, x.r.note) : null));
+    };
+    const innerSection = inner && (inner.outside.length || inner.within) ? h('section', { class: 'lens-ports frame-rels', 'aria-label': '안쪽 부분의 바깥 연결' }, inner.outside.length ? h('h3', {}, '안쪽 부분의 바깥 연결', h('small', {}, String(inner.outside.length))) : null, ...relationGroups(inner.outside, '안쪽').flatMap(g => {
+        const list = h('ul', {}, ...g.list.slice(0, 8).map(innerRow));
+        return [h('h4', { class: 'fr-verb' }, g.label, h('small', {}, String(g.list.length))), list,
+            g.list.length > 8 ? h('button', { type: 'button', class: 'link-button', onclick: (e) => { list.replaceChildren(...g.list.map(innerRow).filter((x) => !!x)); e.currentTarget.remove(); } }, `${g.list.length - 8}개 더 보기`) : null];
+    }), inner.within ? h('p', { class: 'fr-within' }, `안에서 서로 ${inner.within}`) : null) : null;
     // Inside: on the map already when the part is an open frame; else its names, and the explicit way in.
     const kids = part.childIds.map(id => partOf(o, id).name);
     const inside = kids.length && part.id !== scope ? h('div', { class: 'lens-inside' }, b?.kind === 'frame' ? null : h('p', {}, h('span', {}, `안쪽 ${kids.length}`), kids.join(' · ')), h('button', { type: 'button', class: 'go-in', onclick: () => go(o.key, null, part.id) }, `안으로 들어가기 · ${kids.length}`, h('span', { 'aria-hidden': 'true' }, ' ›'))) : null;
@@ -1577,25 +1737,30 @@ function renderLens() {
     l.classList.remove('compare', 'scope-read');
     readingFor = [];
     l.replaceChildren();
-    put(l, h('header', { class: 'lens-head' }, entry, path.length ? h('div', { class: 'lens-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope) }, x.name)])) : null, h('h2', { id: 'lens-title' }, part.name), aliasOf(o.view, part.id) ? h('p', { class: 'lens-alias' }, aliasOf(o.view, part.id)) : null, h('div', { class: 'head-tools' }, menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e) => { e.currentTarget.parentElement.open = false; } }, ...menuItems)) : null, h('button', { type: 'button', class: 'close', 'aria-label': '선택 해제', title: '닫기 (Esc)', onclick: () => go(o.key) }, '×'))), h('div', { class: 'lens-body' }, desc, ...ports, inside), h('footer', { class: 'lens-foot' }, h('button', { type: 'button', class: 'lens-more', onclick: () => openSheet() }, records.length ? `근거·기록 ${records.length}` : '자세히', thread ? ` · 정리 ${thread}` : '', h('span', { 'aria-hidden': 'true' }, ' ›')), status.ai === 'deepseek' ? h('button', { type: 'button', class: 'link-button', onclick: () => { composerOpen = true; openSheet(() => document.getElementById(status.access === 'code' && !sessionCode() ? 'access-code' : 'ask-input')?.focus()); } }, '질문하기') : null));
+    put(l, entry, h('header', { class: 'lens-head' }, path.length ? h('div', { class: 'lens-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope) }, x.name)])) : null, h('h2', { id: 'lens-title' }, part.name), aliasOf(o.view, part.id) ? h('p', { class: 'lens-alias' }, aliasOf(o.view, part.id)) : null, h('div', { class: 'head-tools' }, menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e) => { e.currentTarget.parentElement.open = false; } }, ...menuItems)) : null, h('button', { type: 'button', class: 'rail-toggle', 'aria-label': '읽기면 접기', 'aria-expanded': 'true', title: '읽기면 접기 · 지도를 넓게 봐요', onclick: () => setRail(true) }, railIcon(true)), h('button', { type: 'button', class: 'close', 'aria-label': '선택 해제', title: '닫기 (Esc)', onclick: () => go(o.key) }, '×'))), h('div', { class: 'lens-body' }, desc, ...ports, innerSection, inside), h('footer', { class: 'lens-foot' }, h('button', { type: 'button', class: 'lens-more', onclick: () => openSheet() }, records.length ? `근거·기록 ${records.length}` : '전체 읽기', thread ? ` · 정리 ${thread}` : '', h('span', { 'aria-hidden': 'true' }, ' ›')), status.ai === 'deepseek' ? h('button', { type: 'button', class: 'link-button', onclick: () => { composerOpen = true; openSheet(() => document.getElementById(status.access === 'code' && !sessionCode() ? 'access-code' : 'ask-input')?.focus()); } }, '질문하기') : null));
     l.hidden = false;
 }
 /** Selection on the map: the part, its lines and the parts at their other ends (drawn representative or side ghost). */
 function markSelection(partId) {
-    const related = new Set(), base = document.querySelector('#world .edges:not(.edges-top)'), top = document.querySelector('#world .edges-top');
+    const related = new Set();
     document.querySelectorAll('.edge').forEach(el => {
+        if (el.classList.contains('sum'))
+            return; // summary lines read only at rest, never as a selection's own lines
         const on = !!partId && (el.dataset.from === partId || el.dataset.to === partId);
         // A line the change plan reads as context of its change (.ctx) stays above the groups as well.
-        const layer = on || el.classList.contains('ctx') || el.classList.contains('inner') ? top : base;
-        if (layer && el.parentNode !== layer)
-            layer.append(el);
         el.classList.toggle('on', on);
+        layerEdge(el);
         const line = el.querySelector('.edge-line'), plain = el.classList.contains('k-related');
         line.setAttribute('marker-end', plain ? (on ? 'url(#dot-on)' : 'url(#dot)') : on ? 'url(#arrow-on)' : 'url(#arrow)');
         line.setAttribute('marker-start', on ? 'url(#dot-on)' : 'url(#dot)');
         if (on)
             related.add(el.dataset.from === partId ? el.dataset.to : el.dataset.from);
     });
+    // The summary beside a selection holds every other relation: a line that held some of the selection's relations keeps the
+    // rest (its count drops by those, which are drawn one by one), and gives way (.hit, hidden by .sel-sum) only when none is left.
+    sums = partId ? restSummary(lay.boxes, lay.edges, e => e.from === partId || e.to === partId) : restSums;
+    document.querySelectorAll('.edge.sum').forEach(el => { const e = edgeOf(el.dataset.key); el.classList.toggle('hit', !e); el.classList.toggle('agg', !!e?.agg); });
+    syncLineMode();
     placeEdgeLabels();
     document.querySelectorAll('.node[data-part],.frame,.ghost').forEach(el => {
         el.classList.toggle('selected', !!partId && el.dataset.part === partId);
@@ -1641,7 +1806,7 @@ function renderPanel(scrollTop) {
         o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', onclick: () => { editing = !editing; renderPanel(false); } }, editing ? '고치기 닫기' : '이름·설명 고치기') : null,
         o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null
     ].filter((x) => !!x);
-    const head = h('header', { class: 'panel-head' }, visitEntry(o), h('div', { class: 'panel-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope) }, x.name)]), path.length ? null : h('span', {}, o.project.name)), h('h2', { id: 'panel-title', tabindex: '-1' }, part.name), h('div', { class: 'panel-chips' }, h('span', { class: `state s-${part.status}` }, h('i', { class: 'dot', 'aria-hidden': 'true' }), state), records.length ? h('span', { class: 'chip plain' }, `기록 ${records.length}${records[0] ? ` · ${ago(records[0].at)}` : ''}`) : null), h('div', { class: 'head-tools' }, menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e) => { e.currentTarget.parentElement.open = false; } }, ...menuItems)) : null, h('button', { type: 'button', class: 'close', 'aria-label': '요약으로 돌아가기', title: '요약으로 (Esc)', onclick: closeSheet }, '×')));
+    const head = h('header', { class: 'panel-head' }, h('div', { class: 'panel-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope) }, x.name)]), path.length ? null : h('span', {}, o.project.name)), h('h2', { id: 'panel-title', tabindex: '-1' }, part.name), h('div', { class: 'panel-chips' }, h('span', { class: `state s-${part.status}` }, h('i', { class: 'dot', 'aria-hidden': 'true' }), state), records.length ? h('span', { class: 'chip plain' }, `기록 ${records.length}${records[0] ? ` · ${ago(records[0].at)}` : ''}`) : null), h('div', { class: 'head-tools' }, menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e) => { e.currentTarget.parentElement.open = false; } }, ...menuItems)) : null, h('button', { type: 'button', class: 'close', 'aria-label': '요약으로 돌아가기', title: '요약으로 (Esc)', onclick: closeSheet }, '×')));
     const body = h('div', { class: 'panel-body' });
     if (editing)
         body.append(editForm(o, part));
@@ -1703,7 +1868,7 @@ function renderPanel(scrollTop) {
                 : h('div', { class: 'failed', role: 'alert' }, h('span', {}, ask.error ?? '응답을 받지 못했어요.'), h('button', { type: 'button', class: 'secondary small', onclick: () => send(ask.intent, ask.question) }, '다시 시도'), h('button', { type: 'button', class: 'link-button', onclick: () => { ask = null; renderPanel(false); } }, '닫기')));
         body.append(sec);
     }
-    panel.replaceChildren(head, body, composer(o, part));
+    panel.replaceChildren(...[visitEntry(o), head, body, composer(o, part)].filter((x) => !!x));
     if (scrollTop)
         body.scrollTop = 0;
     else
@@ -1837,7 +2002,10 @@ function composer(o, part) {
         e.preventDefault();
         submitQuestion();
     } });
-    const submitQuestion = () => { const q = input.value.trim(); if (q) {
+    const submitQuestion = () => { if (needsCode()) {
+        document.getElementById('access-code')?.focus();
+        return;
+    } const q = input.value.trim(); if (q) {
         send('question', q);
     } };
     if (status.access === 'code') {
@@ -1851,14 +2019,17 @@ function composer(o, part) {
     if (!busy && !failed)
         quickButtons.append(h('button', { type: 'button', class: 'link-button fold', onclick: () => { composerOpen = false; if (!input.value.trim())
                 setDraft(o, part.id, ''); renderPanel(false); } }, '접기'));
-    box.append(quickButtons, h('div', { class: 'ask-row' }, input, h('button', { type: 'button', class: 'primary send', disabled: busy, 'aria-label': '보내기', onclick: submitQuestion }, '보내기')), h('p', { class: 'fine' }, `${status.model ?? 'DeepSeek'}가 이 부분과 안의 부분 기록만 읽고 정리해요 · 개발을 실행하지 않아요`));
+    // With the code field in view, every way to send waits for a code (and says so beside the send button).
+    const gated = status.access === 'code', hasCode = !!sessionCode();
+    quickButtons.querySelectorAll('button.secondary').forEach(b => codeGate(b, gated, hasCode, busy));
+    put(box, quickButtons, h('div', { class: 'ask-row' }, input, codeGate(h('button', { type: 'button', class: 'primary send', 'aria-label': '보내기', onclick: submitQuestion }, '보내기'), gated, hasCode, busy)), codeNote(gated, hasCode), h('p', { class: 'fine' }, `${status.model ?? 'DeepSeek'}가 이 부분과 안의 부분 기록만 읽고 정리해요 · 개발을 실행하지 않아요`));
     return box;
 }
 let accessCodeMemory = '';
 function keepAccessCode(value) { try {
     sessionStorage.setItem('agentflow.studio.access', value);
 }
-catch { /* memory only */ } accessCodeMemory = value; renderStatus(); }
+catch { /* memory only */ } accessCodeMemory = value; renderStatus(); syncCodeGates(!!value); }
 /* ---------- change plan (plan-view.ts) on this map ---------- */
 const planView = createPlanView({
     current: () => opened,
@@ -1899,7 +2070,7 @@ const planView = createPlanView({
         const keep = place === false ? l.querySelector('.lens-body')?.scrollTop ?? 0 : 0;
         l.replaceChildren(...content);
         l.hidden = false;
-        l.classList.remove('scope-read');
+        l.classList.remove('scope-read', 'railed');
         l.classList.add('compare');
         readingFor = parts;
         syncMapArea();
@@ -1941,6 +2112,7 @@ const planView = createPlanView({
                 hideLens();
         }
         syncMapArea();
+        placeEdgeLabels(); // the change plan draws each line: the rest summary and its counts give way
     }
 });
 /* ---------- coming back: the return reading in the pane ---------- */
@@ -1981,7 +2153,7 @@ const returnView = createReturnView({
             return;
         const same = l.classList.contains('return-read') && !l.hidden, keep = same ? l.querySelector('.lens-body')?.scrollTop ?? 0 : 0;
         l.replaceChildren(...content);
-        l.classList.remove('compare', 'scope-read');
+        l.classList.remove('compare', 'scope-read', 'railed');
         l.classList.add('return-read');
         l.hidden = false;
         readingFor = [];
@@ -2369,19 +2541,20 @@ function bindEdgeHints() {
     world.addEventListener('pointerover', e => {
         const t = e.target, g = t.closest('.edge');
         if (g && t.classList.contains('edge-hit')) {
-            const edge = lay.edges.find(x => x.key === g.dataset.key);
+            const edge = edgeOf(g.dataset.key);
             if (!edge)
                 return;
             g.classList.add('near');
-            tip.replaceChildren(h('strong', {}, `${nameOf(edge.from)} ${edge.kind === 'related' ? '—' : '→'} ${nameOf(edge.to)}`), h('span', { class: 'tip-kind' }, `${REL_LABEL[edge.kind] ?? edge.kind}${edge.agg ? ` · 안쪽 관계 ${edge.ids.length}개의 요약 · 선택하면 실제 끝점` : edge.ids.length > 1 ? ` · 관계 ${edge.ids.length}개를 한 선으로 묶음` : ''}`), ...edge.notes.slice(0, 3).map(n => h('span', {}, n)));
+            tip.replaceChildren(h('strong', {}, `${nameOf(edge.from)} ${edge.kind === 'related' ? '—' : '→'} ${nameOf(edge.to)}`), h('span', { class: 'tip-kind' }, `${REL_LABEL[edge.kind] ?? edge.kind}${restOf(edge) ? ` · 선택한 부분의 관계를 뺀 나머지 ${edge.ids.length}개` : edge.agg ? ` · 안쪽 관계 ${edge.ids.length}개의 요약 · 선택하면 실제 끝점` : edge.ids.length > 1 ? ` · 관계 ${edge.ids.length}개를 한 선으로 묶음` : ''}`), ...edge.notes.slice(0, 3).map(n => h('span', {}, n)));
             tip.hidden = false;
             place(e);
             return;
         }
         const part = t.closest('.node[data-box], .frame-head[data-part], .ghost[data-box]');
         if (part) {
-            const id = part.dataset.box ?? part.dataset.part;
-            world.querySelectorAll('.edge').forEach(x => x.classList.toggle('near', x.dataset.from === id || x.dataset.to === id));
+            // A summary line also lights for a part inside one of its ends whose own relations it holds.
+            const id = part.dataset.box ?? part.dataset.part, mine = new Set(lay.edges.filter(x => x.from === id || x.to === id).flatMap(x => x.ids));
+            world.querySelectorAll('.edge').forEach(x => x.classList.toggle('near', x.dataset.from === id || x.dataset.to === id || (x.classList.contains('sum') && !!edgeOf(x.dataset.key)?.ids.some(r => mine.has(r)))));
         }
     });
     world.addEventListener('pointermove', e => { if (!tip.hidden)
@@ -2456,9 +2629,9 @@ function bindImport() {
             say('파일이 너무 커요.');
             return;
         }
-        let project;
+        let project, places;
         try {
-            project = parseProject(await f.text());
+            ({ project, positions: places } = parseBackup(await f.text()));
         }
         catch {
             say('AgentFlow 프로젝트 백업 파일이 아니거나 읽을 수 없어요. 아무것도 바꾸지 않았어요.');
@@ -2469,7 +2642,10 @@ function bindImport() {
             return;
         }
         try {
-            const ref = await store.create(project, 'import');
+            // The new copy has places of its own (the file's, or none: automatic layout) and an empty view, kept before it is added;
+            // never another entry's of the same project id. A refused write adds nothing and says so.
+            const { ref, positions: own } = await importCopy(store, kv, project, places);
+            memoryPositions.set(ref.entryId, own);
             say(`새 사본으로 가져왔어요 · ${project.name}`);
             go(ref.entryId);
         }
@@ -2499,6 +2675,9 @@ async function main() {
     statusReady = aiStatus().then(s => { status = s; renderStatus(); planView.statusChanged(); refreshReading(); if (!selected && !planView.isOpen())
         returnView.render(); });
     window.addEventListener('hashchange', () => void render());
+    window.addEventListener('pagehide', flushView);
+    document.addEventListener('visibilitychange', () => { if (document.hidden)
+        flushView(); });
     window.addEventListener('popstate', () => { if (location.hash === renderedHash)
         void render(); });
     await render();

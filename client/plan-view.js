@@ -1,7 +1,8 @@
 import { createPlan, selectItems, requestSnapshot, compareResults, parseScopeReview } from '../shared/change-plan.js';
 import { CONVERTER_HEADING, CONVERTER_INTENT, converterEvidence, converterExampleAnalysis, converterObservations } from '../shared/change-plan-example.js';
+import { mapLead } from './map-layout.js';
 import { AskError, ERROR_TEXT } from './studio-api.js';
-import { h, put, $, ago, fullTime, inspectorWidth } from './plan-dom.js';
+import { h, put, $, ago, fullTime, inspectorWidth, codeGate, codeNote } from './plan-dom.js';
 import { CONVERTER_KEY, CONDITION_LABEL, EVIDENCE_LABEL, exampleInput, projectInput, mapReply, secretLike, scopeInput } from './plan-source.js';
 import { requestPlan, requestScope } from './plan-request.js';
 import { emptyBundle, loadBundle, saveBundle, setAside, planFile, readPlanFile } from './plan-store.js';
@@ -12,6 +13,8 @@ const PROPOSALS = new Map();
 const memoryKey = (o, c) => (o.key === CONVERTER_KEY ? `${o.key}#${c}` : o.project.id);
 const short = (text, n) => { const t = text.replace(/\s+/g, ' ').trim(); return t.length > n ? `${t.slice(0, n)}…` : t; };
 /** The first sentence (or line) of a text, whole: a title or a one-line finding, the rest read where there is room. */
+/** Characters in a region's sizing hint: wider than any region head's room at 12px, so the layout reserves two lines. */
+const REGION_HINT = 120;
 const firstSentence = (text) => { const t = text.trim(), m = /^(.+?)(?:[.!?。](?=\s|$)|\n)/s.exec(t); return m ? t.slice(0, m[0].length).trim() : t; };
 export function createPlanView(host) {
     let s = null;
@@ -225,8 +228,20 @@ export function createPlanView(host) {
         for (const x of shownImpacts(p))
             if (!out.has(x.partId))
                 out.set(x.partId, ['영향 후보']);
+        // An open region keeps what it is now (its note, one line, dimmed) and reads the change under it: two lines in its head.
+        // The layout gives a head the larger of its note's room and its planned lines' room, so the region asks for two planned
+        // lines (a sizing request only: the hint is never drawn, and what the head shows is the note and the change line).
+        const o = host.current(), boxes = host.boxes();
+        if (o)
+            for (const [id, lines] of out) {
+                const b = boxes.get(id), now = b?.kind === 'frame' && b.depth === 0 ? mapLead(o.view, id) : '';
+                if (now)
+                    out.set(id, [...lines, regionHint(`${now} ${lines[0] ?? ''}`)]);
+            }
         return out;
     }
+    /** A text long enough to take two planned lines in any region head (regions are at most 380px wide). */
+    const regionHint = (t) => (t.length >= REGION_HINT ? t : t.padEnd(REGION_HINT, ` ${t}`));
     /* Existing relations read as context of the change being read: lines already on the map between its actual targets and the
        candidates named here, and from those candidates to other parts the analysis names as candidates (a shared node's other
        users). They move above the group surfaces and keep their own kind and hover meaning; nothing is drawn or inferred, and
@@ -238,7 +253,8 @@ export function createPlanView(host) {
         const named = new Set(shown.map(x => rep(x.partId)).filter((x) => !!x));
         const others = new Set(p.analysis.impacts.map(x => rep(x.partId)).filter((x) => !!x));
         const top = document.querySelector('#world .edges-top');
-        document.querySelectorAll('#world .edge').forEach(e => {
+        // Each stored relation's own line; a summary line of the overview (.sum, not drawn while the plan reads) is never context.
+        document.querySelectorAll('#world .edge:not(.sum)').forEach(e => {
             const a = e.dataset.from, b = e.dataset.to;
             const ctx = a !== b && ((anchors.has(a) && anchors.has(b) && (named.has(a) || named.has(b))) || (named.has(a) && others.has(b)) || (named.has(b) && others.has(a)));
             if (!ctx)
@@ -713,6 +729,9 @@ export function createPlanView(host) {
         const item = s.focus?.kind === 'item' ? itemOf(s.focus.id) : null, p = plan();
         host.rows(p ? rowLines(p) : null);
         host.targetContext(item ? activeTarget(item) : null, moveTarget);
+        // The target's context may have opened or folded a region: its head asks again for the room it now draws (no-op if same).
+        if (p)
+            host.rows(rowLines(p));
         renderMode();
         renderStrip(o);
         if (panelOpen())
@@ -1206,7 +1225,7 @@ export function createPlanView(host) {
         const reach = h('p', { class: 'fine', id: 'plan-reach' }, reachText());
         const ask = h('button', { type: 'button', id: 'plan-ask', onclick: () => void analyze() });
         askState(ask);
-        out.push(h('div', { class: 'pp-row pp-ask' }, ask, reach));
+        out.push(h('div', { class: 'pp-row pp-ask' }, ask, codeNote(canAsk && host.status().access === 'code', !!host.accessCode()), reach));
         if (!canAsk)
             out.push(h('p', { class: 'fine' }, host.status().ai === 'off' ? '서버에 AI 키가 없어 살펴볼 수 없어요. 초안은 남아요.' : 'AI 서버가 연결된 주소에서 살펴볼 수 있어요. 초안은 남아요.'));
         return out;
@@ -1229,7 +1248,8 @@ export function createPlanView(host) {
         const p = plan(), why = staleness();
         btn.textContent = p ? (why === 'sentence' ? '고친 문장으로 살펴보기' : why === 'material' ? '바뀐 자료로 살펴보기' : 'AI로 다시 살펴보기') : 'AI로 살펴보기';
         btn.className = p && !why ? 'secondary small' : 'primary small';
-        btn.disabled = host.status().ai !== 'deepseek' || !s.bundle.draft.trim();
+        const st = host.status();
+        codeGate(btn, st.ai === 'deepseek' && st.access === 'code', !!host.accessCode(), st.ai !== 'deepseek' || !s.bundle.draft.trim());
     }
     /** The draft changed without a render: the stale line, the ask, what it would read and the request follow in place. */
     function syncStale() {

@@ -920,6 +920,54 @@ export function parseProject(raw) {
     assertProject(project);
     return convertIntentEdits(project); // Freshly parsed, not shared: no defensive copy needed.
 }
+/** A key of a places dictionary: a part id or the map's root, in the id alphabet, and never a name an ordinary object
+ * inherits ('__proto__', 'toString', 'constructor'…): writing one of those through a plain object reaches Object.prototype. */
+export function placeKey(k) { return k.length <= 200 && /^[A-Za-z0-9_-]+$/.test(k) && !(k in Object.prototype); }
+const placePoint = (p) => {
+    if (!p || typeof p !== 'object' || Array.isArray(p))
+        return false;
+    const keys = Object.keys(p), x = p.x, y = p.y;
+    return keys.length === 2 && Object.hasOwn(p, 'x') && Object.hasOwn(p, 'y') && Number.isFinite(x) && Number.isFinite(y) && Math.abs(x) < 1e6 && Math.abs(y) < 1e6;
+};
+/** Manual places as a backup carries them: containers of parts, each part at a finite point. Nothing else is accepted. */
+export function assertPositions(v) {
+    ensure(!!v && typeof v === 'object' && !Array.isArray(v));
+    const containers = Object.entries(v);
+    ensure(containers.length <= ITEM_LIMIT);
+    for (const [c, m] of containers) {
+        ensure(placeKey(c) && !!m && typeof m === 'object' && !Array.isArray(m));
+        for (const [id, p] of Object.entries(m))
+            ensure(placeKey(id) && placePoint(p));
+    }
+}
+/** Places read from browser storage or an accepted backup, as dictionaries with no prototype: only well-formed keys and
+ * points are kept, and a malformed value reads as no places. */
+export function cleanPositions(v) {
+    const out = Object.create(null);
+    if (!v || typeof v !== 'object' || Array.isArray(v))
+        return out;
+    for (const [c, m] of Object.entries(v)) {
+        if (!placeKey(c) || !m || typeof m !== 'object' || Array.isArray(m))
+            continue;
+        for (const [id, p] of Object.entries(m)) {
+            if (!placeKey(id) || !placePoint(p))
+                continue;
+            (out[c] ??= Object.create(null))[id] = { x: p.x, y: p.y };
+        }
+    }
+    return out;
+}
+/** A backup file in either shape: a plain project (as before), or the same project with its manual places as an extra top-level
+ * 'positions'. The project part passes the same parseProject as every other persisted byte; the places are checked apart. */
+export function parseBackup(raw) {
+    ensure(new TextEncoder().encode(raw).length <= FILE_LIMIT, 'FILE_TOO_LARGE');
+    const v = JSON.parse(raw);
+    if (!v || typeof v !== 'object' || Array.isArray(v) || !Object.hasOwn(v, 'positions'))
+        return { project: parseProject(raw), positions: null };
+    const { positions, ...rest } = v;
+    assertPositions(positions);
+    return { project: parseProject(JSON.stringify(rest)), positions };
+}
 /* ---------- GUIDE097 ---------- */
 function guideTicket(v) { obj(v, ['projectId', 'revision', 'requestId', 'areaId']); id(v.projectId); integer(v.revision); id(v.requestId); id(v.areaId); }
 const GUIDE_WORK = 5;

@@ -49,3 +49,24 @@ export function ago(at) {
 }
 /** One inspector width for a selected part and the change plan (matches .inspector in styles.css). Narrow: the whole width. */
 export const inspectorWidth = () => (window.innerWidth < 720 ? window.innerWidth : Math.min(392, Math.max(336, window.innerWidth * 0.27)));
+/** An AI action on a server that asks for an access code reads as unavailable while no code is given, with the reason beside it;
+ * typing a code turns it on in place (syncCodeGates; no re-render, so the caret stays in the field). The action's own other
+ * reason to be off (busy, nothing to send) is kept apart in data-off. The request path is unchanged. */
+export const CODE_FIRST = '접속 코드를 먼저 적어 주세요';
+export function codeGate(btn, needed, hasCode, otherwiseOff) {
+    if (needed) {
+        btn.dataset.codeGate = '';
+        btn.dataset.off = otherwiseOff ? '1' : '';
+    }
+    else {
+        delete btn.dataset.codeGate;
+        delete btn.dataset.off;
+    }
+    btn.disabled = otherwiseOff || (needed && !hasCode);
+    return btn;
+}
+export const codeNote = (needed, hasCode) => (needed ? h('span', { class: 'code-first', 'data-code-note': '', role: 'status', hidden: hasCode }, CODE_FIRST) : null);
+export function syncCodeGates(hasCode) {
+    document.querySelectorAll('button[data-code-gate]').forEach(b => { b.disabled = b.dataset.off === '1' || !hasCode; });
+    document.querySelectorAll('[data-code-note]').forEach(n => { n.hidden = hasCode; });
+}
