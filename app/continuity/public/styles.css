@@ -238,11 +238,13 @@ button:disabled { opacity: .5; cursor: default; }
 .node.item .enter { height: 20px; }
 .viewport.moving, .viewport.moving * { cursor: grabbing !important; }
 .dragging { box-shadow: var(--shadow-lg) !important; z-index: 1; }
-.ghost { position: absolute; display: flex; align-items: center; gap: 7px; padding: 0 10px; border: 1px dashed var(--line-strong); border-radius: 8px; background: rgba(255,255,255,.6); font-size: 12.5px; color: var(--text-2); text-align: left; }
+/* An outside partner: its whole name; the layout sizes the card for it (map-layout ghostSize). */
+.ghost { position: absolute; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: 6px 10px 7px; border: 1px dashed var(--line-strong); border-radius: 8px; background: rgba(255,255,255,.6); font-size: 12.5px; color: var(--text-2); text-align: left; }
 .ghost:hover { border-color: var(--text-4); color: var(--text); }
 .ghost.related { border-color: var(--accent); color: var(--accent); }
-.ghost-tag { flex: none; font-size: 11px; color: var(--text-4); }
-.ghost-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+.ghost-name { max-width: 100%; font-weight: 600; line-height: 17px; overflow-wrap: anywhere; }
+/* Where a run of outside partners belongs, once over the run (map-layout GhostHead). */
+.ghost-head { position: absolute; font-size: 11px; line-height: 15px; color: var(--text-4); overflow-wrap: anywhere; pointer-events: none; }
 
 /* ---------- the reading pane: the selection, a comparison, the scope itself (the sheet and the whole plan take its place) ----------
    A column of text on the right, the same width as the sheet; the map's viewport ends where it begins. */

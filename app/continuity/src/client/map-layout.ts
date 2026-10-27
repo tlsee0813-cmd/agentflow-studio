@@ -37,10 +37,31 @@ export interface Box { id: string; x: number; y: number; w: number; h: number; k
   list?: boolean }
 /** agg: at least one end is drawn by a folded ancestor (a summary of inner relations, not a relation of that ancestor). */
 export interface Edge { key: string; from: string; to: string; kind: RelationView['kind']; notes: string[]; ids: string[]; agg: boolean }
-export interface ScopeLayout { boxes: Map<string, Box>; edges: Edge[]; bounds: { x: number; y: number; w: number; h: number } }
+/** heads: over each run of outside partners that belong to the same place, that place once ('밖 · 확장 실행과 연결'). */
+export interface GhostHead { key: string; x: number; y: number; w: number; h: number; text: string }
+export interface ScopeLayout { boxes: Map<string, Box>; edges: Edge[]; heads: GhostHead[]; bounds: { x: number; y: number; w: number; h: number } }
 
 interface Measure { w: number; h: number; ox: number; oy: number; head: number }
 export const ghostId = (id: string) => `ghost:${id}`;
+const GHOST_GAP = 8, RUN_GAP = 14, GHOST_MAX_W = 300;
+/** Where a partner outside the scope belongs, as the map says it under its name: its own ancestors that are not the scope's
+ * (outermost first), else the parent it shares with the scope, else the top of the project (''). Read from the structure only. */
+export function ghostContext(v: StudioView, scope: string | null, id: string): string {
+  const byId = new Map(v.parts.map(p => [p.id, p])), mine = new Set<string>();
+  for (let c = scope ? byId.get(scope) : undefined, g = 0; c && g < 64; c = c.parentId ? byId.get(c.parentId) : undefined, g++) mine.add(c.id);
+  const up: string[] = [];
+  for (let c = byId.get(byId.get(id)?.parentId ?? ''), g = 0; c && g < 64; c = c.parentId ? byId.get(c.parentId) : undefined, g++) up.unshift(c.id);
+  const own = up.filter(x => !mine.has(x));
+  return (own.length ? own : up.slice(-1)).map(x => byId.get(x)!.name).join(' › ');
+}
+/** An outside partner's card: its whole name, widening up to 300px and then wrapping (an identifier may break anywhere), so it
+ * is never cut. 12.5px name lines of 17px; padding 6+7 and borders 2. Where it belongs reads once over its run (GhostHead). */
+export function ghostSize(name: string, measure: TextMeasure = estimate): { w: number; h: number } {
+  const need = measure(name, 'item') * 1.02 + 2, chrome = 22, w = Math.min(GHOST_MAX_W, Math.max(GHOST_W, Math.ceil(need) + chrome));
+  return { w, h: Math.max(GHOST_H, 15 + Math.min(3, Math.ceil(need / (w - chrome))) * 17) };
+}
+/** The head over a run of outside partners: 11px lines of 15px and 4px under it; as wide as its column, wrapping if it must. */
+const headSize = (text: string, w: number, measure: TextMeasure) => 4 + Math.min(2, Math.ceil((measure(text, 'note') * 0.9 + 2) / w)) * 15;
 
 /** Rough rendered width of a frame name (13px, semibold): wide for CJK, narrower for Latin. Only decides one or two head lines. */
 export function textWidth(text: string): number {
@@ -143,7 +164,12 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
     for (const [x, tos] of out) if (tos.size) { linked.add(x); tos.forEach(t => linked.add(t)); }
     const layers: string[][] = [];
     for (const i of ids) if (linked.has(i)) (layers[layer.get(i)!] ??= []).push(i);
-    const flow = layers.filter(Boolean), lone = ids.filter(i => !linked.has(i)), inFrame = container !== scope;
+    // A part the scope's outside refers to and nothing inside links (a shared definition) opens the scope's order, as rows linked
+    // from outside open a list: its outside partners then sit beside it. The order is the scope's own; nothing here depends on
+    // what is selected, and a stored position still wins.
+    const fromOut = container !== null && container === scope ? ids.filter(i => !linked.has(i) && v.relations.some(r => lift(r.to) === i && !lift(r.from))) : [];
+    if (fromOut.length) layers.unshift(fromOut);
+    const flow = layers.filter(Boolean), lone = ids.filter(i => !linked.has(i) && !fromOut.includes(i)), inFrame = container !== scope;
     const maxPer = Math.max(4, Math.min(8, Math.ceil(Math.sqrt(ids.length * 1.3))));
     const wrap = (c: string[]) => { if (c.length <= maxPer) return [c]; const per = Math.ceil(c.length / Math.ceil(c.length / maxPer)), o: string[][] = []; for (let i = 0; i < c.length; i += per) o.push(c.slice(i, i + per)); return o; };
     // Each column: its parts, the gap after it, and whether it is centred against the tallest relation column.
@@ -306,13 +332,43 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
     if ((a !== r.from && a !== ghostId(r.from)) || (b !== r.to && b !== ghostId(r.to))) e.agg = true;
     edges.set(key, e);
   }
-  const ghostColumn = (ids: string[], x: number) => ids.forEach((id, i) => boxes.set(ghostId(id), { id: ghostId(id), x, y: minY + i * (GHOST_H + 12), w: GHOST_W, h: GHOST_H, kind: 'ghost', depth: 0, container: '', kids: 0, rel: { x: 0, y: 0 }, head: 0 }));
-  ghostColumn(ghostsIn.filter(id => !ghostsOut.includes(id)), minX - GHOST_W - 90);
-  ghostColumn(ghostsOut, maxX + 90);
+  // A partner outside the scope reads by its own name under where it belongs, and sits next to the parts it actually meets, on
+  // the free side nearest to them (outgoing to the right first, incoming to the left first). Placing it never moves a part;
+  // without a free lane beside them it keeps the scope's edge as before.
+  const size = new Map(ghostsIn.concat(ghostsOut).map(id => [id, ghostSize(byId.get(id)?.name ?? '', measureText)]));
+  const heads: GhostHead[] = [];
+  const placeEnds = (list: string[], out: boolean, fallbackX: number) => {
+    if (!list.length) return;
+    // Partners that belong to the same place run together under one head, in the order the place first appears.
+    const where = new Map(list.map(id => [id, `밖 · ${ghostContext(v, scope, id) || '최상위'}`])), runs = [...new Set(where.values())];
+    const ids = runs.flatMap(t => list.filter(id => where.get(id) === t));
+    const near = [...new Set([...edges.values()].filter(e => ids.some(g => (out ? e.to : e.from) === ghostId(g))).map(e => (out ? e.from : e.to)))].map(id => boxes.get(id)).filter((b): b is Box => !!b);
+    const colW = Math.max(...ids.map(id => size.get(id)!.w), ...runs.map(t => Math.min(GHOST_MAX_W, Math.ceil(measureText(t, 'note') * 0.9) + 4)));
+    const headH = new Map(runs.map(t => [t, headSize(t, colW, measureText)]));
+    const colH = ids.reduce((a, id) => a + size.get(id)!.h + GHOST_GAP, 0) - GHOST_GAP + runs.reduce((a, t) => a + headH.get(t)!, 0) + RUN_GAP * (runs.length - 1);
+    const cy = near.length ? (Math.min(...near.map(b => b.y)) + Math.max(...near.map(b => b.y + Math.min(b.h, 120)))) / 2 : minY + colH / 2;
+    const y = Math.max(minY, cy - colH / 2), all = [...boxes.values()];
+    const free = (x: number) => all.every(b => b.x > x + colW + 24 || b.x + b.w < x - 24 || b.y > y + colH + 12 || b.y + b.h < y - 12);
+    const right = near.length ? Math.max(...near.map(b => b.x + b.w)) + 90 : NaN, left = near.length ? Math.min(...near.map(b => b.x)) - 90 - colW : NaN;
+    const found = (out ? [right, left] : [left, right]).find(x => Number.isFinite(x) && free(x));
+    const x = found ?? fallbackX - (out ? 0 : colW), leftOf = near.length > 0 && x < near[0]!.x;
+    let at = found === undefined ? minY : y;
+    for (const t of runs) {
+      heads.push({ key: `${out ? 'out' : 'in'}|${t}`, x, y: at, w: colW, h: headH.get(t)!, text: t }); at += headH.get(t)!;
+      for (const id of ids.filter(i => where.get(i) === t)) {
+        const { w, h } = size.get(id)!; // a column left of its parts keeps its lines' ends even
+        boxes.set(ghostId(id), { id: ghostId(id), x: leftOf ? x + colW - w : x, y: at, w, h, kind: 'ghost', depth: 0, container: '', kids: 0, rel: { x: 0, y: 0 }, head: 0 });
+        at += h + GHOST_GAP;
+      }
+      at += RUN_GAP - GHOST_GAP;
+    }
+  };
+  placeEnds(ghostsIn.filter(id => !ghostsOut.includes(id)), false, minX - 90);
+  placeEnds(ghostsOut, true, maxX + 90);
   let bx = Infinity, by = Infinity, bx2 = -Infinity, by2 = -Infinity;
-  for (const b of boxes.values()) { bx = Math.min(bx, b.x); by = Math.min(by, b.y); bx2 = Math.max(bx2, b.x + b.w); by2 = Math.max(by2, b.y + b.h); }
+  for (const b of [...boxes.values(), ...heads]) { bx = Math.min(bx, b.x); by = Math.min(by, b.y); bx2 = Math.max(bx2, b.x + b.w); by2 = Math.max(by2, b.y + b.h); }
   if (!boxes.size) { bx = by = bx2 = by2 = 0; }
-  return { boxes, edges: [...edges.values()], bounds: { x: bx, y: by, w: bx2 - bx, h: by2 - by } };
+  return { boxes, edges: [...edges.values()], heads, bounds: { x: bx, y: by, w: bx2 - bx, h: by2 - by } };
 }
 
 /** Rounded orthogonal path through points (corners of radius up to r). */
