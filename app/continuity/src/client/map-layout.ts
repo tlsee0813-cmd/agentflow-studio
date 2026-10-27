@@ -247,7 +247,8 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
       const w = nodeWidth(p.name, kids, measureText), nl = lines(p.name, 'node', w - chrome), pl = nodeLines(id, w - chrome);
       m = { w, h: Math.max(14 + (nl + extra) * 17, pl ? 14 + nl * 17 + 2 + pl * PLAN_LINE : 0), ox: 0, oy: 0, head: 0, face: 'item' };
     } else if (depth === 0) {
-      const note = mapLead(v, id), need = measureText(p.name, 'head') * 1.1 + 6;
+      // A folded group reads by its name and count; its note is the selection's. A part without an inside keeps its sentence.
+      const note = kids ? '' : mapLead(v, id), need = measureText(p.name, 'head') * 1.1 + 6;
       let w = note ? UNIT_W : NODE_W;
       if (need > (w - chrome) * 2) w = Math.min(NODE_MAX_W + 40, Math.ceil(need / 2) + chrome);
       const nl = need > w - chrome ? 2 : 1, ll = lines(note, 'note', w - chrome), pl = nodeLines(id, w - chrome);

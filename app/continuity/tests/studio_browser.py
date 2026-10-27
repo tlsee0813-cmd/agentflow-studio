@@ -688,6 +688,25 @@ def overview_flow(browser, base, cases):
     expect(common.locator(".enter")).to_contain_text("43")  # folded at first, with its count and its way in
     expect(page.locator("#world .node.item")).to_have_count(0)  # no catalogue spread over the overview
     assert page.locator("#world [data-part]").count() < 40
+    # The first view is decided by its room too: every group's name and count reads in the map at the opening scale.
+    tops = page.evaluate("[...document.querySelectorAll('#world > .node.unit, #world > .frame.region')].map(e => e.dataset.box)")
+    assert len(tops) == 9, tops
+    for box in tops:
+        in_map(page, f'#world [data-box="{box}"]')
+    # A folded group reads by its name and count; its note is the selection's.
+    expect(page.locator("#world .node.unit.has-kids .node-note")).to_have_count(0)
+    page.locator("#world .node.unit.has-kids", has_text="대화와 AI").click()
+    expect(page.locator("#lens .lens-text")).to_contain_text("검토자 분류")
+    expect(page.locator("#lens .lens-src")).to_have_count(0)  # no repeated "no records" line in the default reading
+    page.keyboard.press("Escape")
+    # Two real parts named Types under one parent: told apart by their own first clause, never merged.
+    page.locator("#find-toggle").click()
+    page.locator("#find-input").fill("Types")
+    found = page.locator(".find-item", has_text=re.compile(r"^Types"))
+    expect(found).to_have_count(2)
+    texts = found.all_inner_texts()
+    assert texts[0] != texts[1] and any("extHostTypes.ts" in t for t in texts), texts
+    page.keyboard.press("Escape")
     # Any part by name: the same part, inside its own group when that group is folded here; the way back to the overview.
     overview = page.locator("#world").evaluate(CAMERA)
     page.locator("#find-toggle").click()
@@ -702,6 +721,29 @@ def overview_flow(browser, base, cases):
     expect(page.locator("#world .node.has-kids", has_text="공통과 기타")).to_be_visible()
     page.wait_for_timeout(500)
     assert page.locator("#world").evaluate(CAMERA) == overview
+    # scikit-learn: its four groups read whole in the first view (no group past the window's edge).
+    page.goto(base + "/")
+    page.locator("#import-file").set_input_files(str(cases / "oss-scikit-learn.json"))
+    expect(page.locator("#crumbs")).to_contain_text("scikit-learn")
+    for box in page.evaluate("[...document.querySelectorAll('#world > .node.unit, #world > .frame.region')].map(e => e.dataset.box)"):
+        in_map(page, f'#world [data-box="{box}"]')
+    # A plan with no analysis yet, opened the first time: the panel takes its column at once and the map ends where it begins.
+    page.goto(base + "/")
+    page.locator("#import-file").set_input_files(str(cases / "oss-micro-javascript.json"))
+    page.locator("#plan-entry").click()
+    expect(page.locator("#plan-panel")).to_be_visible()
+    page.wait_for_timeout(250)
+    vp, panel, strip = (page.locator(x).bounding_box() for x in ("#viewport", "#plan-panel", "#plan-strip"))
+    assert abs(vp["x"] + vp["width"] - panel["x"]) <= 1 and strip["x"] + strip["width"] <= panel["x"], (vp, panel, strip)
+    page.locator("#plan-intent").fill("폴더 단위로 바꾸고 싶어")
+    page.locator("#plan-entry").click()  # close: the draft stays, the map takes the window back
+    expect(page.locator("#plan-panel")).to_be_hidden()
+    assert abs(page.locator("#viewport").bounding_box()["width"] - 1280) <= 1
+    page.locator("#plan-entry").click()
+    expect(page.locator("#plan-intent")).to_have_value("폴더 단위로 바꾸고 싶어")
+    page.wait_for_timeout(250)
+    assert abs(page.locator("#viewport").bounding_box()["width"] - page.locator("#plan-panel").bounding_box()["x"]) <= 1
+    page.locator("#plan-entry").click()
     # Joplin: the desktop app's own relations read under its title inside it (no line drawn from one of its children).
     page.goto(base + "/")
     page.locator("#import-file").set_input_files(str(cases / "oss-joplin.json"))

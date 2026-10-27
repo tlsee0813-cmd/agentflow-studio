@@ -37,6 +37,9 @@ export interface PlanHost {
   capture(): PlanReturn; restore(r: PlanReturn): void;
   /** The plan panel opened, closed or changed width: map insets and chrome follow. */
   chrome(): void;
+  /** After every render of the plan: the map's area follows what now reads beside it (the strip on top, the panel or the
+   * comparison on the right), also when nothing else on the map changed (the first opening of a plan with no analysis). */
+  area(): void;
   notice(text: string, action?: { label: string; run: () => void }): void;
   /** The reading pane, about these parts: true brings them beside the pane by the smallest pan (a new target); 'refit' shows
    * new content without moving the camera; false re-renders the same reading in place. null closes it. */
@@ -485,6 +488,7 @@ export function createPlanView(host: PlanHost) {
     renderMode(); renderStrip(o);
     if (panelOpen()) renderPanel(o); else { $('plan-panel').hidden = true; $('plan-panel').replaceChildren(); }
     renderSheet(); overlay(); renderCompare(o);
+    host.area();
   }
   /** The right panel opens for writing (no plan yet, editing, a stale sentence, work in progress) or when asked for the whole
    * plan; otherwise the plan reads on the map: its strip and one comparison. */

@@ -215,13 +215,15 @@ button:disabled { opacity: .5; cursor: default; }
 .node.has-kids { padding-left: 5px; }
 .node.unit .node-text { gap: 3px; }
 /* Names wrap to two lines: long names that share a prefix stay apart by their endings. */
-.node-name { font-weight: 600; font-size: 13.5px; line-height: 18px; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.node-name { font-weight: 600; font-size: 13.5px; line-height: 18px; word-break: keep-all; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .node.unit .node-name { font-size: 15px; line-height: 20px; font-weight: 650; letter-spacing: -.01em; }
 .node.item .node-name { font-size: 13px; line-height: 17px; font-weight: 550; color: var(--text); }
 .node-note { word-break: keep-all; font-size: 12.5px; line-height: 17px; color: var(--text-3); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 .node-meta { display: flex; align-items: center; gap: 6px; color: var(--text-3); font-size: 12px; line-height: 17px; white-space: nowrap; overflow: hidden; }
 .node.unit .node-meta { margin-top: 2px; }
 .node-meta.owner { color: var(--text-4); }
+.node-meta.alias { color: var(--text-3); text-overflow: ellipsis; }
+.lens-alias { margin: 2px 0 0; font-size: 12.5px; color: var(--text-3); overflow-wrap: anywhere; }
 .node.fresh .node-meta { color: var(--text-2); }
 /* Parts outside the selection step back but keep readable names. */
 .space.dim .node:not(.selected):not(.related):not(.cited) { opacity: .62; }
@@ -741,3 +743,6 @@ button:disabled { opacity: .5; cursor: default; }
 .plan-strip > .ps-row { grid-area: items; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; min-width: 0; }
 .ps-row > .ps-conds { margin-left: auto; }
 .plan-strip:not(:has(.ps-row)) { grid-template-areas: "head close close"; }
+
+/* A folded group without a sentence on the map: its name and count sit on the card's middle line. */
+.node.unit.has-kids:not(:has(.node-note)) { align-items: center; padding-top: 0; padding-bottom: 0; }

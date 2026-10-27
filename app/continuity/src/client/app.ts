@@ -165,10 +165,11 @@ function defaultOpen(o: Opened, id: string, depth: number, isOpen: (id: string, 
   const parent = partOf(o, p.parentId);
   return !!parent && depth <= 3 && parent.childIds.length === 1 && isOpen(parent.id, depth - 1);
 }
-/** How many parts a first view of a scope shows unfolded. Past it, the scope's catalogue-like groups (a list by isListGroup:
- * many leaves, few links among them) start folded, largest first, and only if that is not enough the other largest groups,
- * until the rest fits: the overview keeps every group's name, count and outside lines, and each opens at full size inside or
- * in place. Only the first view: the person's own folds and places always win (expandState, positions). */
+/** How many parts a first view of a scope shows unfolded, and how much room it may take. Past the count, the scope's
+ * catalogue-like groups (a list by isListGroup: many leaves, few links among them) start folded, largest first, then the
+ * other largest groups; past the room, the open group taking the most room. The overview keeps every group's name, count and
+ * outside lines, and each opens at full size inside or in place. Decided once per scope, for its first view: the person's own
+ * folds and places always win (expandState, positions), and a visited view keeps its camera. */
 const SHOW_BUDGET = 28;
 const foldMemo = new WeakMap<StudioView, Map<string, Set<string>>>();
 function budgetFolded(o: Opened): Set<string> {
@@ -177,7 +178,32 @@ function budgetFolded(o: Opened): Set<string> {
   const ids = scope ? partOf(o, scope)?.childIds ?? [] : o.view.roots, out = new Set<string>(), size = (id: string) => partOf(o, id)?.childIds.length ?? 0;
   let shown = ids.reduce((n, id) => n + 1 + size(id), 0);
   const bySize = (list: string[]) => list.filter(id => size(id) > 0).sort((a, b) => size(b) - size(a));
-  for (const id of [...bySize(ids.filter(id => isListGroup(o.view, id))), ...bySize(ids.filter(id => !isListGroup(o.view, id)))]) { if (shown <= SHOW_BUDGET) break; out.add(id); shown -= size(id); }
+  const own = (id: string) => expandState.has(`${o.project.id}|${id}`); // the person's own fold or unfold is never decided again
+  for (const id of [...bySize(ids.filter(id => isListGroup(o.view, id))), ...bySize(ids.filter(id => !isListGroup(o.view, id)))]) { if (shown <= SHOW_BUDGET) break; if (own(id)) continue; out.add(id); shown -= size(id); }
+  // Then the room it takes: the first view, its title included, must read at the opening scale (85%) in this window. Past
+  // it, the open group taking the most room folds next, until it does or nothing is left to fold. Stored places count as
+  // they are; a group opened or entered later may be larger than the window and is read by panning.
+  const fits = (fold: Set<string>) => {
+    const memo = new Map<string, boolean>();
+    const open = (id: string, depth: number): boolean => {
+      const hit = memo.get(id); if (hit !== undefined) return hit;
+      const k = `${o.project.id}|${id}`, p = partOf(o, id); let v: boolean;
+      if (expandState.has(k)) v = expandState.get(k)!;
+      else if (!p || !p.childIds.length) v = false;
+      else if (depth === 0) v = !isListGroup(o.view, scope) && !fold.has(id);
+      else { const parent = partOf(o, p.parentId); v = !!parent && depth <= 3 && parent.childIds.length === 1 && open(parent.id, depth - 1); }
+      memo.set(id, v); return v;
+    };
+    const L = layoutScope(o.view, scope, open, positionsOf(o), measureName, undefined, mapAspect()), titleRoom = 100 + (scope ? 34 * relationGroups(scopeEnds(o)).length : 0);
+    return { L, ok: (L.bounds.w + 40) * 0.85 <= window.innerWidth - 48 && (L.bounds.h + titleRoom + 40) * 0.85 <= window.innerHeight - 152 };
+  };
+  for (let g = 0; g < ids.length; g++) {
+    const { L, ok } = fits(out); if (ok) break;
+    const area = (id: string) => { const b = L.boxes.get(id); return b ? b.w * b.h : 0; };
+    const next = ids.filter(id => size(id) > 0 && !out.has(id) && !own(id) && L.boxes.get(id)?.kind === 'frame').sort((a, b) => area(b) - area(a))[0];
+    if (!next) break;
+    out.add(next);
+  }
   per.set(k, out); return out;
 }
 /** Marks every part between the scope and this part (exclusive) as unfolded in the given set or map. */
@@ -464,10 +490,22 @@ function withTitle() {
 /** While a change preview reads on the map: the change lines each part's own row shows (plan-view decides; the layout only
  * makes room for them on those parts). null in the current view, so the current map keeps its own sizes. */
 let planRows: Map<string, string[]> | null = null, planRowsKey = '';
-/** The window's map shape (header excluded, never the reading pane): what an unlinked block of parts is balanced against. */
-const mapAspect = () => Math.max(1, Math.min(2.4, window.innerWidth / Math.max(320, window.innerHeight - 52)));
+/** The shape of the room a first view has for its parts (the window's map without the header, the title above the parts and
+ * the margins; never the reading pane): what an unlinked block of parts is balanced against. */
+const mapAspect = () => Math.max(1, Math.min(3, (window.innerWidth - 48) / Math.max(240, window.innerHeight - 252)));
 const relayout = (o: Opened) => { lay = layoutScope(o.view, scope, isExpanded(o), positionsOf(o), measureName, planRows ?? undefined, mapAspect()); core = { ...lay.bounds }; withTitle(); };
 
+/** Two real parts with one name under one parent ('Types' and 'Types'): told apart by the first clause of their own note, as
+ * written ('원명 extHostTypes.ts'), only where the name is really ambiguous. Never merged, renamed or guessed: null when the name
+ * is not shared, or when their own words do not tell them apart. */
+function aliasOf(v: StudioView, id: string): string | null {
+  const p = v.parts.find(x => x.id === id); if (!p) return null;
+  const sibs = (p.parentId ? v.parts.find(x => x.id === p.parentId)?.childIds ?? [] : v.roots).filter(x => x !== id && v.parts.find(y => y.id === x)?.name === p.name);
+  if (!sibs.length) return null;
+  const clause = (t: string) => { const n = t.replace(/\s+/g, ' ').trim(), m = /^(.+?)(?:[:;：]|[.。](?=\s|$))/.exec(n); return (m ? m[1]! : n).trim().slice(0, 60); };
+  const mine = clause(p.note);
+  return mine && !sibs.some(x => clause(v.parts.find(y => y.id === x)?.note ?? '') === mine) ? mine : null;
+}
 const REL_LABEL: Record<string, string> = { flow: '넘겨줌', needs: '필요로 함', shares: '함께 씀', related: '관련' };
 /** A relation read from one end: the verb with that end as its subject ("이 부분이 필요로 함") or its object ("이 부분을 필요로
  * 함"). The kinds and their directions are the project's own; nothing here makes a relation more or less certain. */
@@ -549,13 +587,15 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
     } else {
       // A folded part reads its inside: latest record anywhere under it.
       const last = b.kids ? subtreeRecords(view, p.id)[0]?.at ?? null : p.lastAt, meta = metaLine(p, last), face = b.face ?? 'row';
-      const note = face === 'unit' ? mapLead(view, p.id) : '', box = lay.boxes.get(b.container), onTint = box?.kind === 'frame' && box.depth % 2 === 1;
+      // A folded group reads by its name and its count (the way in); its note reads in the pane. A part without an inside keeps
+      // its own first sentence.
+      const note = face === 'unit' && !b.kids ? mapLead(view, p.id) : '', box = lay.boxes.get(b.container), onTint = box?.kind === 'frame' && box.depth % 2 === 1, alias = aliasOf(view, p.id);
       world.append(h('div', { class: `node ${face}${onTint ? ' on-tint' : ''} s-${p.status}${recentAt(last) ? ' fresh' : ''}${b.kids ? ' has-kids' : ''}${meta || of ? '' : ' bare'}`, 'data-part': p.id, 'data-box': p.id, 'data-drag': p.id, role: 'button', tabindex: '0',
-        title: `${of ? `${of} › ` : ''}${p.name}`, onkeydown: keySelect(p.id) },
+        title: `${of ? `${of} › ` : ''}${p.name}${alias ? ` · ${alias}` : ''}`, onkeydown: keySelect(p.id) },
         b.kids ? toggleButton(p, false) : null,
         h('span', { class: 'node-text' }, h('span', { class: 'node-name' }, p.name),
           note ? h('span', { class: 'node-note' }, note) : null,
-          meta ? h('span', { class: 'node-meta' }, h('i', { class: 'dot', 'aria-hidden': 'true' }), meta) : of ? h('span', { class: 'node-meta owner' }, `${of} 안`) : null,
+          meta ? h('span', { class: 'node-meta' }, h('i', { class: 'dot', 'aria-hidden': 'true' }), meta) : alias ? h('span', { class: 'node-meta owner alias' }, alias) : of ? h('span', { class: 'node-meta owner' }, `${of} 안`) : null,
           h('span', { class: 'plan-note' })),
         b.kids ? enterButton(p) : null));
     }
@@ -902,9 +942,10 @@ function renderLens() {
       part.proposal ? h('p', { class: 'lens-proposal' }, h('strong', {}, '제안 · 아직 반영 안 됨 '), part.proposal) : null,
       rest ? h('p', { class: 'lens-plan' }, h('span', {}, '계획'), rest) : null);
   } else if (rest) {
-    // The description is the person's written plan, not a received summary; the state says what records exist.
-    const state = part.status === 'plan' ? (records.length ? `받은 정리 없음 · 요청 기록 없음 · ${recs}` : '받은 정리·기록 없음') : `${STATUS_LABEL[part.status]} · ${recs}`;
-    put(desc, rest ? h('p', { class: 'lens-text' }, rest) : null, src(`적어 둔 계획 설명 · ${state}`));
+    // The description is the person's written plan, not a received summary. A state line only when there is something to say
+    // (records, a reported state); "no records yet" and where the text comes from read in the sheet (자세히).
+    const state = part.status === 'plan' ? (records.length ? `받은 정리 없음 · 요청 기록 없음 · ${recs}` : '') : `${STATUS_LABEL[part.status]} · ${recs}`;
+    put(desc, rest ? h('p', { class: 'lens-text' }, rest) : null, state ? src(`적어 둔 계획 설명 · ${state}`) : null);
   } else put(desc, src(part.status === 'plan' ? (records.length ? `설명 없음 · 요청 기록 없음 · ${recs}` : '아직 설명도 기록도 없어요') : `${STATUS_LABEL[part.status]} · ${recs} · 받은 정리 없음`));
   if (part.changes.length) desc.append(h('ul', { class: 'lens-changes' }, ...part.changes.slice(0, 2).map(c => h('li', {}, c))));
   // Lines: real ends, read by what they mean. One group per verb and direction ("이 부분이 필요로 함"), each row the real other
@@ -935,6 +976,7 @@ function renderLens() {
     h('header', { class: 'lens-head' },
       path.length ? h('div', { class: 'lens-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope) }, x.name)])) : null,
       h('h2', { id: 'lens-title' }, part.name),
+      aliasOf(o.view, part.id) ? h('p', { class: 'lens-alias' }, aliasOf(o.view, part.id)) : null,
       h('div', { class: 'head-tools' },
         menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e: Event) => { ((e.currentTarget as HTMLElement).parentElement as HTMLDetailsElement).open = false; } }, ...menuItems)) : null,
         h('button', { type: 'button', class: 'close', 'aria-label': '선택 해제', title: '닫기 (Esc)', onclick: () => go(o.key) }, '×'))),
@@ -1217,6 +1259,7 @@ const planView = createPlanView({
     // switch keep the person's camera, including a manual pan.
     if (place === true) revealParts(parts);
   },
+  area: () => syncMapArea(),
   chrome: () => {
     const o = opened; if (!o) return;
     setBar(o); renderRecent();
@@ -1312,7 +1355,7 @@ function bindFind() {
     const all = [...byName, ...byNote];
     count.textContent = all.length ? (all.length > LIMIT ? `${all.length}개 중 ${LIMIT}개 · 더 좁혀 적어 주세요` : `${all.length}개`) : '찾은 부분이 없어요';
     list.replaceChildren(...all.slice(0, LIMIT).map(p => h('li', {}, h('button', { type: 'button', class: 'find-item', onclick: () => open(p.id) },
-      h('strong', {}, p.name), h('span', {}, [...partPath(o.view, p.id).slice(0, -1).map(x => x.name)].join(' › ') || o.project.name, byName.includes(p) ? '' : ' · 설명에서')))));
+      h('strong', {}, p.name), h('span', {}, [[...partPath(o.view, p.id).slice(0, -1).map(x => x.name)].join(' › ') || o.project.name, aliasOf(o.view, p.id)].filter(Boolean).join(' · '), byName.includes(p) ? '' : ' · 설명에서')))));
   }
   input.addEventListener('input', run);
   input.addEventListener('keydown', e => {
