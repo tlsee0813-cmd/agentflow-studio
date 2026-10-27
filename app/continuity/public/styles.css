@@ -334,11 +334,6 @@ button:disabled { opacity: .5; cursor: default; }
 .port-where { margin-left: 20px; font-size: 12px; line-height: 16px; color: var(--text-4); }
 .port-note { display: block; word-break: keep-all; overflow-wrap: anywhere; margin-left: 20px; font-size: 12.5px; line-height: 1.5; color: var(--text-2); }
 /* Where a relation was followed from (visit context, not composition): the scene-back's colour, above the quiet path. */
-.visit-back { display: flex; align-items: baseline; gap: 5px; width: fit-content; max-width: 100%; min-width: 0; margin: -6px 0 6px -6px; padding: 2px 8px 2px 6px; border: 1px solid transparent; border-radius: 6px; background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 600; line-height: 1.5; text-align: left; }
-.visit-back > span:first-child { flex: none; }
-.visit-back strong { min-width: 0; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.visit-back > span:last-child { flex: none; margin-left: -5px; font-weight: 500; }
-.visit-back:hover { border-color: var(--accent-line); color: var(--accent-strong); }
 .port-came { flex: none; margin-left: auto; font-size: 11px; font-weight: 600; color: var(--accent); }
 .lens-ports .link-button { margin: var(--s-1) 0 0; font-size: 12px; }
 .lens-inside { margin-top: var(--s-4); padding-top: var(--s-4); border-top: 1px solid var(--hair); display: flex; flex-direction: column; gap: var(--s-2); }
@@ -1057,11 +1052,6 @@ button:disabled { opacity: .5; cursor: default; }
    Defaults in the shared tokens for small marks other parts of the map add (a frame head's link count, a folded band's count,
    the line at the top of the pane that says where a reading came from, the pane folded to a rail). Their own blocks place
    them; these only keep them in the same type, colour and radius as the rest. */
-.frame-links { display: inline-flex; align-items: center; gap: 3px; height: 20px; padding: 0 6px; border-radius: var(--r-sm); background: var(--chip); color: var(--text-3); font-size: 11.5px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.edge-count { display: inline-flex; align-items: center; height: 18px; padding: 0 6px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--text-2); font-size: 11px; font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.visit-line { font-size: 12px; line-height: 16px; color: var(--text-3); }
-.visit-line :is(a, button) { color: var(--accent); font-weight: 600; }
-.lens-rail { background: var(--surface); border-left: 1px solid var(--line); color: var(--text-2); }
 /* Narrow windows: the bar keeps one line (the brand's name already gives way at 1100px). */
 @media (max-width: 900px) {
   .plan-entry { padding: 0 var(--s-2); font-size: 12.5px; }
@@ -1076,12 +1066,17 @@ button:disabled { opacity: .5; cursor: default; }
 
 /* ---------- 67 · map overview: boundary counts, aggregated lines, label anchoring, low zoom ---------- */
 /* How many relations cross a group's boundary, beside its way in (part of the head: clicking it selects the group). */
-.frame-links { flex: none; display: inline-flex; align-items: center; height: 20px; padding: 0 5px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--text-2); font-size: 10.5px; font-weight: 600; line-height: 1; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.frame-links { flex: none; display: inline-flex; align-items: center; gap: 3px; height: 22px; padding: 0 6px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); color: var(--text-2); font-size: 11.5px; font-weight: 650; line-height: 1; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.node.item .frame-links { height: 20px; }
 .region > .frame-head .frame-links { margin-top: 0; }
 .node.unit .frame-links { margin-top: 1px; }
 /* A busy map at rest reads its summary lines; a selection, the change plan or a map of a few lines draws each line. */
 .space.rest-sum .edge:not(.sum), .space:not(.rest-sum) .edge.sum { display: none; }
-.edge-count { position: absolute; min-width: 20px; height: 18px; padding: 0 5px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--text-2); font-size: 10.5px; line-height: 16px; font-weight: 650; text-align: center; font-variant-numeric: tabular-nums; }
+/* With a selection on a busy map: its own lines are drawn one by one; everything else stays the dimmed summary (a summary
+   that holds one of the selection's relations gives way to those lines). */
+.space.sel-sum .edge:not(.sum):not(.on):not(.near):not(.ctx) { display: none; }
+.space.sel-sum .edge.sum:not(.hit) { display: block; }
+.edge-count { position: absolute; min-width: 24px; height: 20px; padding: 0 7px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); box-shadow: 0 1px 2px rgba(16,24,40,.05); color: var(--text-2); font-size: 11.5px; line-height: 18px; font-weight: 650; text-align: center; font-variant-numeric: tabular-nums; }
 /* Names wrap to three lines before they are cut (the layout gives them the room). */
 .node-name { -webkit-line-clamp: 3; }
 /* Below 70%: no notes or state lines; each name on one line across its card, a little larger (--grow ≤ 1.25). */
@@ -1103,11 +1098,12 @@ button:disabled { opacity: .5; cursor: default; }
 .fr-port .port-where, .fr-port .port-note { margin-left: 0; }
 .fr-within { margin: 8px 0 0; font-size: 12px; color: var(--text-3); }
 /* The way back from a followed relation: first line of the pane, where the reader is looking. */
-.visit-line { flex: none; align-self: flex-start; display: flex; align-items: baseline; gap: 4px; max-width: calc(100% - 32px); min-width: 0; margin: 12px 16px -6px; padding: 2px 8px 2px 6px; border: 1px solid transparent; border-radius: 6px; background: var(--accent-soft); color: var(--accent); font-size: 12px; line-height: 1.5; text-align: left; }
-.visit-line strong { min-width: 0; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.visit-line { flex: none; align-self: flex-start; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 4px; max-width: calc(100% - 32px); min-width: 0; margin: 12px 16px -6px; padding: 2px 8px 2px 6px; border: 1px solid transparent; border-radius: 6px; background: var(--accent-soft); color: var(--accent); font-size: 12px; line-height: 1.5; text-align: left; }
+.visit-line strong { min-width: 0; font-weight: 650; overflow-wrap: anywhere; }
 .visit-line .vl-arrow, .visit-line .vl-came { flex: none; font-weight: 500; }
 .visit-line .vl-came { margin-left: -4px; }
-.visit-line .vl-where { min-width: 0; font-weight: 500; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The scene it came from on its own line under the name (never a cut name beside a cut scene). */
+.visit-line .vl-where { flex-basis: 100%; min-width: 0; font-weight: 500; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .visit-line:hover { border-color: var(--accent-line); color: var(--accent-strong); }
 /* Folding the pane: a third head tool, and the rail it folds to (the map's area takes the rest; --insp-w is unchanged). */
 .lens-head:has(.rail-toggle) { padding-right: 104px; }

@@ -486,7 +486,7 @@ function visitEntry(o: Opened): HTMLElement | null {
   const name = v.from.selected ? partOf(o, v.from.selected)?.name : v.from.scope ? partOf(o, v.from.scope)?.name : o.project.name; if (!name) return null;
   const where = v.from.selected ? sceneName(v.from.scope) : null;
   return h('button', { type: 'button', class: 'visit-line', 'aria-label': `${name}${toParticle(name)} 돌아가기`, title: `${name}${toParticle(name)} 돌아가기 · ${REL_WHY(v)}`, onclick: returnFromVisit },
-    h('span', { class: 'vl-arrow', 'aria-hidden': 'true' }, '←'), h('strong', {}, name), h('span', { class: 'vl-came' }, '에서 따라옴'), where ? h('span', { class: 'vl-where' }, `· ${where}`) : null);
+    h('span', { class: 'vl-arrow', 'aria-hidden': 'true' }, '←'), h('strong', {}, name), h('span', { class: 'vl-came' }, '에서 따라옴'), where ? h('span', { class: 'vl-where' }, where) : null);
 }
 
 /** One context row: the composition path (where this view sits), the scope's way up, the way back to the previous scene, and
@@ -558,7 +558,8 @@ const slashBreaks = (name: string): (string | HTMLElement)[] => name.split('/').
 function programCard(key: string, p: Project, example: boolean, keyOf: (id: string) => string): HTMLElement {
   const v = studioView(p), last = v.records[0];
   const changed = v.parts.filter(x => recentAt(x.lastAt)).length;
-  const meta = [`부분 ${v.parts.length}`, v.records.length ? `기록 ${v.records.length}${last ? ` · ${ago(last.at)}` : ''}` : '기록 없음', changed ? `최근 바뀐 부분 ${changed}` : ''].filter(Boolean).join(' · ');
+  // One span per item: the stylesheet draws the separators between them.
+  const meta = [`부분 ${v.parts.length}`, v.records.length ? `기록 ${v.records.length}` : '기록 없음', last ? ago(last.at) : '', changed ? `최근 바뀐 부분 ${changed}` : ''].filter(Boolean).map(t => h('span', {}, t));
   const base = `#/p/${encodeURIComponent(key)}`, name = (id: string | null) => (id ? v.parts.find(x => x.id === id)?.name ?? null : null);
   // Continue: only a remembered place whose parts still exist.
   const at = example ? null : lastPlaces()[p.id];
@@ -579,7 +580,7 @@ function programCard(key: string, p: Project, example: boolean, keyOf: (id: stri
   const tryPlan = key === CONVERTER_KEY ? h('a', { class: 'program-try', href: base, onclick: () => { openPlanOnArrive = true; } }, h('strong', {}, '변경 구상 시험해 보기'), h('span', {}, '폴더째 변환 · 지금과 구상을 같은 자리에서 비교')) : null;
   return h('li', {}, h('article', { class: `program${example ? ' is-example' : ''}` },
     h('a', { class: 'program-head', href: base },
-      h('strong', { class: 'program-name' }, p.name), h('span', { class: 'program-brief' }, p.space.brief?.text ?? '목적이 아직 적혀 있지 않아요.'), h('span', { class: 'program-meta' }, meta)),
+      h('strong', { class: 'program-name' }, p.name), h('span', { class: 'program-brief' }, p.space.brief?.text ?? '목적이 아직 적혀 있지 않아요.'), h('span', { class: 'program-meta' }, ...meta)),
     h('div', { class: 'program-body' }, section, cont, tryPlan, tryReturn)));
 }
 
@@ -818,6 +819,8 @@ const edgeOf = (key: string | undefined) => (key?.startsWith('sum:') ? sums : la
 function syncLineMode() {
   const sp = $('space'), rest = !selected && !planView.isOpen() && sums.length > 0;
   sp.classList.toggle('rest-sum', rest);
+  // A selection on a busy map: its own lines one by one, the rest as the dimmed summary (see .sel-sum).
+  sp.classList.toggle('sel-sum', !!selected && !planView.isOpen() && sums.length > 0);
   // Many lines on one view: those that go round other parts step back (see .dense-lines); a summary line never does.
   sp.classList.toggle('dense-lines', lay.edges.length >= 12);
 }
@@ -1292,6 +1295,10 @@ function markSelection(partId: string | null) {
     line.setAttribute('marker-start', on ? 'url(#dot-on)' : 'url(#dot)');
     if (on) related.add(el.dataset.from === partId ? el.dataset.to! : el.dataset.from!);
   });
+  // A summary line that holds one of the selection's relations gives way to those lines (.hit, hidden by .sel-sum).
+  const mine = new Set(lay.edges.filter(e => partId && (e.from === partId || e.to === partId)).flatMap(e => e.ids));
+  document.querySelectorAll<SVGGElement>('.edge.sum').forEach(el => el.classList.toggle('hit', !!edgeOf(el.dataset.key)?.ids.some(r => mine.has(r))));
+  syncLineMode();
   placeEdgeLabels();
   document.querySelectorAll<HTMLElement>('.node[data-part],.frame,.ghost').forEach(el => {
     el.classList.toggle('selected', !!partId && el.dataset.part === partId);

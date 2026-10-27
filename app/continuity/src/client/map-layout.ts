@@ -226,10 +226,10 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
         if (sc < score - 1e-6) { score = sc; side = cs; }
       }
       if (flowCols) {
-        const room = Math.max(flowW - WRAP_GAP, ...lone.map(i => sizes.get(i)!.w)), rows: string[][] = [];
-        let cur: string[] = [], w = 0;
-        for (const i of lone) { const iw = sizes.get(i)!.w; if (cur.length && w + WRAP_GAP + iw > room) { rows.push(cur); cur = []; w = 0; } w += (cur.length ? WRAP_GAP : 0) + iw; cur.push(i); }
-        if (cur.length) rows.push(cur);
+        // Rows under the linked block are a grid: one cell width (the widest unlinked part), so the rows' left edges line up.
+        const cell = Math.max(...lone.map(i => sizes.get(i)!.w)), room = Math.max(flowW - WRAP_GAP, cell), rows: string[][] = [];
+        const per = Math.max(1, Math.floor((room + WRAP_GAP) / (cell + WRAP_GAP)));
+        for (let i = 0; i < lone.length; i += per) rows.push(lone.slice(i, i + per));
         const rowH = (r: string[]) => Math.max(...r.map(i => sizes.get(i)!.h));
         const sc = need(Math.max(flowW - WRAP_GAP, room), flowH + ROW_GAP * 2 + rows.reduce((a, r) => a + rowH(r), 0) + ROW_GAP * (rows.length - 1));
         if (sc < score - 1e-6) below = rows;
@@ -254,7 +254,8 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
     if (below) {
       let y = tallest + ROW_GAP * 2;
       for (const r of below) {
-        let rx = 0; for (const i of r) { const sz = sizes.get(i)!; at.set(i, { x: rx - sz.ox, y: y - sz.oy }); rx += sz.w + WRAP_GAP; }
+        const cell = Math.max(...lone.map(i => sizes.get(i)!.w));
+        let rx = 0; for (const i of r) { const sz = sizes.get(i)!; at.set(i, { x: rx - sz.ox, y: y - sz.oy }); rx += cell + WRAP_GAP; }
         y += Math.max(...r.map(i => sizes.get(i)!.h)) + ROW_GAP;
       }
     }
