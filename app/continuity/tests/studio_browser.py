@@ -62,6 +62,27 @@ def pane_beside_map(page):
     assert abs(vp["x"] + vp["width"] - pane["x"]) <= 1 and pane["x"] + pane["width"] >= page.viewport_size["width"] - 1, (vp, pane)
 
 
+# Each list item or row is as tall as the lines it really draws: its name's rendered lines plus its own second lines (a state,
+# an owner, an ambiguous name's clause), with the layout's paddings (items 14 + 17 per line, rows 20 + 18 per line). A name that
+# draws one line must not keep an empty second one; a name the font really wraps is entitled to two. Nothing is cut.
+ROWS_DRAWN = """() => [...document.querySelectorAll('#world .node.item, #world .node.row')].map(e => {
+  const n = e.querySelector('.node-name'), r = document.createRange(); r.selectNodeContents(n);
+  const lines = new Set([...r.getClientRects()].map(q => Math.round(q.top))).size, more = e.querySelectorAll('.node-meta').length;
+  const want = e.classList.contains('item') ? 14 + (lines + more) * 17 : 20 + (lines + more) * 18;
+  return { name: n.innerText, h: e.offsetHeight, lines, want, cut: n.scrollHeight > n.clientHeight + 1 || n.scrollWidth > n.clientWidth + 1 };
+}).filter(x => x.cut || Math.abs(x.h - x.want) > 1)"""
+
+
+def rows_as_drawn(page):
+    bad = page.evaluate(ROWS_DRAWN)
+    assert not bad, bad
+
+
+def wide_font(page):
+    """The page in a wide fallback font (as on a Linux runner without the system UI font)."""
+    page.route("**/styles.css", lambda route: route.fulfill(response=(r := route.fetch()), body=r.text() + '\nbody, button, input { font-family: "DejaVu Sans" !important; }'))
+
+
 def clear_of(page, a, b):
     ra, rb = page.locator(a).bounding_box(), page.locator(b).bounding_box()
     assert ra["x"] + ra["width"] <= rb["x"] + 1 or rb["x"] + rb["width"] <= ra["x"] + 1 or ra["y"] + ra["height"] <= rb["y"] + 1 or rb["y"] + rb["height"] <= ra["y"] + 1, (a, ra, b, rb)
@@ -715,10 +736,15 @@ def overview_flow(browser, base, cases):
     expect(page.locator("#lens-title")).to_have_text("Telemetry")
     in_scope(page, "공통과 기타")
     expect(page.locator("#world .node.item")).to_have_count(43)  # the whole list at full size, all of it reachable
-    # A one-word name that fits takes one line: the list's rows share one height (only an ambiguous name adds its own line).
-    heights = page.evaluate("[...new Set([...document.querySelectorAll('#world .node.item:not(:has(.alias))')].map(e => e.offsetHeight))]")
-    assert len(heights) == 1, heights
-    assert not page.evaluate("[...document.querySelectorAll('#world .node .node-name')].some(n => n.scrollHeight > n.clientHeight + 1)")
+    # Every row is as tall as what it draws (a one-line name keeps no empty second line); the ambiguous Types rows keep theirs.
+    rows_as_drawn(page)
+    expect(page.locator("#world .node.item:has(.alias)")).to_have_count(2)
+    wide = context.new_page()
+    wide_font(wide)
+    wide.goto(page.url)
+    expect(wide.locator("#world .node.item")).to_have_count(43)
+    rows_as_drawn(wide)  # the same in a wide font, where some names may truly need two lines
+    wide.close()
     expect(page.locator("#world .node.selected")).to_have_text(re.compile("Telemetry"))
     page.locator("#scope-bar .scope-up").click()  # the overview came before it: up is the way back, to the same view
     expect(page.locator("#scope-bar")).to_be_hidden()
