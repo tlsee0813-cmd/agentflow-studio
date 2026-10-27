@@ -276,20 +276,35 @@ function projectFor(key: string): Opened | null {
 }
 
 /* ---------- rendering ---------- */
+/** The address the last render read: a step between two history entries of the same address (A, then B, then A again) changes
+ * no hash, so only popstate tells of it. */
+let renderedHash = '';
 async function render() {
+  renderedHash = location.hash;
   const r = route();
-  if (!r.key) { if (opened) cameras.set(camKey(opened, scope), { ...camera }); planView.close(false); if (toastKey) dropToast(); opened = null; selected = null; scope = null; renderHome(); return; }
+  if (!r.key) { if (opened) cameras.set(camKey(opened, scope), { ...camera }); planView.close(false); if (toastKey) dropToast(); forgetVisits(); opened = null; selected = null; scope = null; renderHome(); return; }
   const next = projectFor(r.key);
   if (!next) { go(null); return; }
   const fresh = opened?.key !== next.key;
   if (fresh && toastKey && toastKey !== next.key) dropToast();
-  const travel = !fresh && opened ? travelFrom(next) : null;
+  // Which visit this arrival is: back to where a relation was followed from (this tab's own history entry, or the named way
+  // back), forward again over it, or neither. Never told by the address alone: the same part can be two different visits.
+  // Back or forward by any number of steps (the browser's menu, history.go(-2)): the entry names its own visit, and every
+  // visit after it goes (or comes back) with it.
+  const mark = visitMark(), leaving = !fresh && opened ? herePlace() : null;
+  const backAt = !fresh && !pendingVisit ? visits.findIndex(v => v.id === (visitBack ?? mark.from)) : -1, back = backAt >= 0 ? visits[backAt]! : null;
+  const forwardAt = !fresh && !back && !pendingVisit && leaving && mark.to ? ahead.findIndex(v => v.id === mark.to) : -1;
+  visitBack = null;
+  if (back) { ahead.push(...visits.splice(backAt).reverse()); returnCamera = back.from.camera; }
+  if (fresh) forgetVisits();
+  // A way back is not a move in or out of the composition: it lands where it left, with no travel.
+  const travel = !fresh && !back && opened ? travelFrom(next) : null;
   const idOf = (x: string | null) => (x ? next.alias?.toId.get(x) ?? x : null), routeScope = idOf(r.scope), routePart = idOf(r.part);
   const nextScope = routeScope && next.view.parts.some(p => p.id === routeScope && p.childIds.length) ? routeScope : null;
   if (fresh || nextScope !== scope) {
     if (opened) cameras.set(camKey(opened, scope), { ...camera });
     if (fresh) scenes = [];
-    else if (backing) scenes.pop();
+    else if (backing || (back && scenes.at(-1)?.scope === back.from.scope)) scenes.pop();
     else scenes.push({ scope, selected });
     backing = false;
     // A scene equal to where we now are is not a way back (e.g. went inside, then up again).
@@ -315,8 +330,16 @@ async function render() {
     else { location.replace(hashFor(o.key, part, partOf(o, part)!.parentId)); return; }
   }
   if ([...tempExpand].join('|') !== before) renderSpace('keep'); else relayout(o);
+  // Visits: kept only while the selection is the part a relation led to; any other way of moving on lets them go.
+  if (pendingVisit) { if (pendingVisit.to === part && pendingVisit.from.key === o.key) { visits.push(pendingVisit); ahead = []; markEntry({ to: pendingVisit.id }); } pendingVisit = null; }
+  else if (forwardAt >= 0 && ahead[forwardAt]!.to === part && leaving) { const again = ahead.splice(forwardAt).reverse(); again[0] = { ...again[0]!, from: leaving }; visits.push(...again); }
+  else if (!back && ahead.length && (part !== leaving?.selected || scope !== leaving?.scope)) ahead = [];
+  if (visits.length && visits.at(-1)!.to !== part) forgetVisits();
+  if (visits.length > 12) visits = visits.slice(-12);
   select(part);
+  setBar(o);
   if (returnCamera) { camera = returnCamera; returnCamera = null; applyCamera(true); }
+  if (back) restoreSurface(back);
   if (travelling) playTravel(travel!);
   rememberPlace();
   if (openPlanOnArrive) { openPlanOnArrive = false; if (!planView.isOpen() && o.kind !== 'legacy') planView.toggle(); }
@@ -362,7 +385,82 @@ let scenes: { scope: string | null; selected: string | null }[] = [];
 let backing = false;
 function sceneBack() {
   const o = opened, prev = scenes.at(-1); if (!o || !prev) return;
+  if (visitScene(o)) { returnFromVisit(); return; }
   backing = true; go(o.key, prev.selected && o.view.parts.some(p => p.id === prev.selected) ? prev.selected : null, prev.scope);
+}
+
+/* ---------- following a relation: a named way back to where it was followed from ----------
+ * Only an explicit relation (a port in the lens, a link in the reading sheet, a scope's own outside relation) records where it
+ * was followed from: the scope, the selection, the camera, which surface was reading (lens, sheet, scope) and how far it was
+ * scrolled. Selecting on the map, finding, going in or up record nothing. Folds, places and drafts are never taken back: what
+ * the person folded or moved meanwhile stays; only the path unfolded to show the visited part closes again (it follows the
+ * route). Each visit marks this tab's own history entries, so the browser's Back and the named way back are one and the same,
+ * and the same part reached twice is two visits. Memory only: a reload or another project starts with none. */
+type Place = { key: string; scope: string | null; selected: string | null; camera: { x: number; y: number; k: number }; surface: 'lens' | 'sheet' | 'scope' | 'none'; sheetReturn: { x: number; y: number; k: number } | null; scroll: number };
+type Visit = { id: string; from: Place; to: string; kind: string; note: string };
+const visitTab = Math.random().toString(36).slice(2, 8);
+let visits: Visit[] = [], ahead: Visit[] = [], pendingVisit: Visit | null = null, visitBack: string | null = null, visitSeq = 0;
+function forgetVisits() { visits = []; ahead = []; pendingVisit = null; }
+function herePlace(): Place | null {
+  const o = opened; if (!o) return null;
+  const surface = selected ? (sheetOpen ? 'sheet' : 'lens') : scopeReading ? 'scope' : 'none';
+  const body = surface === 'sheet' ? $('panel').querySelector('.panel-body') : surface === 'none' ? null : $('lens').querySelector('.lens-body');
+  return { key: o.key, scope, selected, camera: { ...camera }, surface, sheetReturn, scroll: body?.scrollTop ?? 0 };
+}
+function visitMark(): { from: string | undefined; to: string | undefined } { const s = history.state as { afVisitFrom?: unknown; afVisitTo?: unknown } | null; return { from: typeof s?.afVisitFrom === 'string' ? s.afVisitFrom : undefined, to: typeof s?.afVisitTo === 'string' ? s.afVisitTo : undefined }; }
+function markEntry(m: { from?: string; to?: string }) {
+  try { const s = history.state && typeof history.state === 'object' ? history.state : {}; history.replaceState({ ...s, ...(m.from ? { afVisitFrom: m.from } : {}), ...(m.to ? { afVisitTo: m.to } : {}) }, ''); } catch { /* the named way back still works in memory */ }
+}
+/** Called by a relation's own control just before it navigates (a modified click opening a new tab records nothing). */
+function follow(far: string, r: { kind: string; note?: string | null | undefined }, e?: Event) {
+  const from = herePlace(); const m = e as MouseEvent | undefined; if (!from || (m && (m.ctrlKey || m.metaKey || m.shiftKey || m.altKey || m.button))) return;
+  const id = `${visitTab}.${++visitSeq}`;
+  markEntry({ from: id });
+  pendingVisit = { id, from, to: far, kind: r.kind, note: (r.note ?? '').trim() };
+}
+/** The visit the selection came by, when its way back is the same scene that the context row's back already names. */
+function visitScene(o: Opened): Visit | null {
+  const v = visits.at(-1), prev = scenes.at(-1);
+  return v && prev && v.from.key === o.key && v.to === selected && v.from.scope !== scope && v.from.scope === prev.scope && v.from.selected === prev.selected ? v : null;
+}
+function returnFromVisit() {
+  const o = opened, v = visits.at(-1); if (!o || !v) return;
+  // The entry the relation made is this one: step back in the browser's own history, so Back and Forward keep agreeing.
+  if (visitMark().to === v.id) { history.back(); return; }
+  visitBack = v.id; go(o.key, v.from.selected, v.from.scope);
+}
+function restoreSurface(v: Visit) {
+  const f = v.from;
+  if (f.surface === 'sheet' && selected === f.selected) { sheetOpen = true; showReading(false, false); }
+  // The same part read in another surface since (A0 summary -> B -> A1 sheet, then two steps back): the summary it left.
+  else if (f.surface === 'lens' && selected === f.selected && sheetOpen) { sheetOpen = false; editing = false; showReading(false, false); }
+  else if (f.surface === 'scope' && !selected) { scopeReading = true; renderScopeLens(); }
+  sheetReturn = f.surface === 'sheet' ? f.sheetReturn : null;
+  const body = f.surface === 'sheet' ? $('panel').querySelector('.panel-body') : f.surface === 'none' ? null : $('lens').querySelector('.lens-body');
+  if (body) body.scrollTop = f.scroll;
+  // Keyboard: back on the relation it was followed by (without moving the restored reading). Now, while this arrival is the
+  // page: never later, when the person may already be typing or reading somewhere else.
+  // The surface just restored first (the map title also names a scope's relations); the map title only when nothing reads.
+  const far = `[data-far="${CSS.escape(v.to)}"]`, own = f.surface === 'sheet' ? '#panel' : f.surface === 'none' ? null : '#lens';
+  ((own && document.querySelector<HTMLElement>(`${own} ${far}`)) || document.querySelector<HTMLElement>(`#world .map-title ${far}`))?.focus({ preventScroll: true });
+}
+const REL_WHY = (v: Visit) => `‘${REL_LABEL[v.kind] ?? v.kind}’ 관계를 따라 왔어요${v.note ? ` · ${v.note}` : ''}`;
+/** '로' or '으로' after a name; '(으)로' where its reading is not known from its last letter. */
+function toParticle(name: string): string {
+  const c = name.trim().replace(/[^0-9A-Za-z\uac00-\ud7a3]+$/, '').slice(-1), code = c.charCodeAt(0);
+  if (code >= 0xac00 && code <= 0xd7a3) { const jong = (code - 0xac00) % 28; return jong === 0 || jong === 8 ? '로' : '으로'; }
+  if (/[0-9]/.test(c)) return '036'.includes(c) ? '으로' : '로';
+  // Latin: a vowel, l/r and the endings read with a vowel ('-s' 스, '-x' 스) take 로; m, n, ng take 으로; a stop is unsure.
+  if (/ng$/i.test(name.trim()) || /[mn]/i.test(c)) return '으로';
+  return /[aeiouylrsxzfhvw]/i.test(c) ? '로' : '(으)로';
+}
+/** The way back inside the reading pane, above the part's composition path: the name of the part it was followed from. Only
+ * within one scene; a visit that changed the scene goes back by the context row's existing back (one way back, never two). */
+function visitEntry(o: Opened): HTMLElement | null {
+  const v = visits.at(-1); if (!v || v.to !== selected || v.from.key !== o.key || v.from.scope !== scope || !v.from.selected) return null;
+  const name = partOf(o, v.from.selected)?.name; if (!name) return null;
+  return h('button', { type: 'button', class: 'visit-back', 'aria-label': `${name}${toParticle(name)} 돌아가기`, title: `${name}${toParticle(name)} 돌아가기 · ${REL_WHY(v)}`, onclick: returnFromVisit },
+    h('span', { 'aria-hidden': 'true' }, '←'), h('strong', {}, name), h('span', {}, `${toParticle(name)} 돌아가기`));
 }
 
 /** One context row: the composition path (where this view sits), the scope's way up, the way back to the previous scene, and
@@ -397,6 +495,9 @@ function setBar(o: Opened | null) {
     const name = prev.scope ? partOf(o, prev.scope)?.name ?? o.project.name : '전체 지도';
     back.replaceChildren(h('span', { 'aria-hidden': 'true' }, '←'), h('span', {}, name));
     back.title = `직전 장면으로 · ${name}${prev.selected ? ` · ${partOf(o, prev.selected)?.name ?? ''} 선택` : ''}`;
+    // Came here by a relation from that scene: the same one way back, now naming why (and restoring the reading it left).
+    const v = visitScene(o);
+    if (v) back.title = `${back.title} · ${REL_WHY(v)}`;
   }
   const entry = $('plan-entry'), planning = planView.isOpen();
   $('modebar').hidden = !o || o.kind === 'legacy';
@@ -626,7 +727,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   const title = h('header', { class: 'map-title' }, h('h1', { class: 'map-name' }, sp ? sp.name : o.project.name),
     first ? h('p', { class: 'map-purpose' }, h('span', {}, first), more ? h('button', { type: 'button', class: 'map-more', title: '설명 전체와 출처', onclick: () => openScopeReading() }, '자세히') : null) : null,
     outside.length ? h('div', { class: 'scope-rels', role: 'list', 'aria-label': '이 범위의 바깥 관계' }, ...relationGroups(outside, '범위').map(g => h('p', { class: 'scope-rel', role: 'listitem' },
-      h('span', { class: 'sr-verb' }, g.label), ...g.list.map(x => h('button', { type: 'button', class: 'sr-part', title: `${partPath(o.view, x.far).map(q => q.name).join(' › ')}${x.r.note ? `\n${x.r.note}` : ''}`, onclick: () => go(o.key, x.far, null) }, partOf(o, x.far)?.name ?? '부분'))))) : null);
+      h('span', { class: 'sr-verb' }, g.label), ...g.list.map(x => h('button', { type: 'button', class: 'sr-part', title: `${partPath(o.view, x.far).map(q => q.name).join(' › ')}${x.r.note ? `\n${x.r.note}` : ''}`, 'data-far': x.far, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far, null); } }, partOf(o, x.far)?.name ?? '부분'))))) : null);
   world.append(title);
   title.style.width = `${titleRect().w}px`;
   titleH = view.parts.length ? title.offsetHeight : 0; title.hidden = !titleH;
@@ -947,7 +1048,7 @@ function renderScopeLens() {
     h('div', { class: 'lens-body' },
       h('div', { class: 'lens-desc' }, text ? h('p', { class: 'lens-text' }, text) : null, h('p', { class: 'lens-src' }, h('span', {}, sp ? '적어 둔 설명 · 원문 그대로' : '프로젝트 설명 · 원문 그대로'))),
       ...outside.map(g => h('section', { class: 'lens-ports' }, h('h3', {}, g.label, h('small', {}, String(g.list.length))),
-        h('ul', {}, ...g.list.map(x => h('li', {}, h('button', { type: 'button', class: 'port', onclick: () => go(o.key, x.far, null) },
+        h('ul', {}, ...g.list.map(x => h('li', {}, h('button', { type: 'button', class: 'port', 'data-far': x.far, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far, null); } },
           h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, x.out ? '→' : '←'), h('strong', {}, partOf(o, x.far)?.name ?? '부분')),
           x.r.note ? h('span', { class: 'port-note' }, x.r.note) : null)))))),
       kids.length ? h('section', { class: 'lens-ports' }, h('h3', {}, sp ? '안의 부분' : '최상위 구성', h('small', {}, String(kids.length))),
@@ -983,12 +1084,13 @@ function renderLens() {
   if (part.changes.length) desc.append(h('ul', { class: 'lens-changes' }, ...part.changes.slice(0, 2).map(c => h('li', {}, c))));
   // Lines: real ends, read by what they mean. One group per verb and direction ("이 부분이 필요로 함"), each row the real other
   // end; a line drawn from a folded part summarises its inside, so its row also names the inner end.
-  const ends = relationEnds(o, part.id);
+  const ends = relationEnds(o, part.id), entry = visitEntry(o), cameFrom = entry ? visits.at(-1)!.from.selected : null;
   const port = (x: End) => {
     const far = partOf(o, x.far)!, near = x.near !== part.id ? partOf(o, x.near)?.name : null, farRep = drawnRep(o, x.far);
     const where = farRep === x.far ? null : farRep ? `${partOf(o, farRep)!.name} 안` : partPath(o.view, x.far).slice(0, -1).map(q => q.name).join(' › ') || o.project.name;
-    return h('li', {}, h('button', { type: 'button', class: 'port', title: `${far.name}로 가기`, onclick: () => go(o.key, x.far) },
-      h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, x.out ? '→' : '←'), h('strong', {}, far.name)),
+    const came = x.far === cameFrom;
+    return h('li', {}, h('button', { type: 'button', class: `port${came ? ' came' : ''}`, 'data-far': x.far, title: `${far.name}${toParticle(far.name)} 가기${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far); } },
+      h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, x.out ? '→' : '←'), h('strong', {}, far.name), came ? h('span', { class: 'port-came' }, '출발') : null),
       near || where ? h('span', { class: 'port-where' }, [near ? `안쪽 ‘${near}’에서` : '', where ? `${where}` : ''].filter(Boolean).join(' · ')) : null,
       x.r.note ? h('span', { class: 'port-note' }, x.r.note) : null));
   };
@@ -1006,7 +1108,7 @@ function renderLens() {
   ].filter((x): x is HTMLButtonElement => !!x);
   l.classList.remove('compare', 'scope-read'); readingFor = [];
   l.replaceChildren(); put(l,
-    h('header', { class: 'lens-head' },
+    h('header', { class: 'lens-head' }, entry,
       path.length ? h('div', { class: 'lens-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope) }, x.name)])) : null,
       h('h2', { id: 'lens-title' }, part.name),
       aliasOf(o.view, part.id) ? h('p', { class: 'lens-alias' }, aliasOf(o.view, part.id)) : null,
@@ -1070,7 +1172,7 @@ function renderPanel(scrollTop: boolean) {
     o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', onclick: () => { editing = !editing; renderPanel(false); } }, editing ? '고치기 닫기' : '이름·설명 고치기') : null,
     o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null
   ].filter((x): x is HTMLButtonElement => !!x);
-  const head = h('header', { class: 'panel-head' },
+  const head = h('header', { class: 'panel-head' }, visitEntry(o),
     h('div', { class: 'panel-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope) }, x.name)]), path.length ? null : h('span', {}, o.project.name)),
     h('h2', { id: 'panel-title', tabindex: '-1' }, part.name),
     h('div', { class: 'panel-chips' }, h('span', { class: `state s-${part.status}` }, h('i', { class: 'dot', 'aria-hidden': 'true' }), state),
@@ -1107,7 +1209,7 @@ function renderPanel(scrollTop: boolean) {
     if (links.length) rel.append(h('p', { class: 'sub' }, `연결 ${links.length}`), h('ul', { class: 'links' }, ...links.map(({ r, out, near, far }) => {
       const other = o.view.parts.find(x => x.id === far)!, inner = near !== part.id ? partOf(o, near)?.name : null;
       const where = [inner ? `안쪽 ‘${inner}’에서` : '', insideScope(o, other.id) ? '' : `${partPath(o.view, other.id).slice(0, -1).map(x => x.name).join(' › ') || o.project.name} 안`].filter(Boolean).join(' · ');
-      return h('li', {}, h('a', { href: hashFor(o.key, other.id, scope) },
+      return h('li', {}, h('a', { href: hashFor(o.key, other.id, scope), 'data-far': other.id, onclick: (e: Event) => follow(other.id, r, e) },
         h('span', { class: 'dir', title: out ? '이 부분에서 나감' : '이 부분으로 들어옴' }, out ? '→' : '←'), h('strong', {}, other.name), h('span', { class: 'rel-kind' }, REL_LABEL[r.kind] ?? r.kind)),
         where ? h('span', { class: 'link-where' }, where) : null,
         r.note ? h('span', { class: 'link-note' }, r.note) : null);
@@ -1611,6 +1713,7 @@ async function main() {
   $('return-entry').addEventListener('click', () => { if (returnView.isOpen() && !planView.isOpen()) returnView.close(); else openReturn(); });
   statusReady = aiStatus().then(s => { status = s; renderStatus(); planView.statusChanged(); refreshReading(); if (!selected && !planView.isOpen()) returnView.render(); });
   window.addEventListener('hashchange', () => void render());
+  window.addEventListener('popstate', () => { if (location.hash === renderedHash) void render(); });
   await render();
   await statusReady;
 }

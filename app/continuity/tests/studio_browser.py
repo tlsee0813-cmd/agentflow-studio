@@ -843,6 +843,222 @@ def overview_flow(browser, base, cases):
     context.close()
 
 
+def relation_visit_flow(browser, base, cases):
+    """Following a relation keeps where it was followed from, apart from the composition path: the reading pane names that
+    part and goes back to its selection, camera, surface and scroll; the browser's Back is the same step. Only explicit
+    relations record a visit; a visit that changed scene goes back by the context row's existing back, never by two."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    errors = []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    back = page.locator("#lens .visit-back")
+    page.goto(base + "/")
+    page.locator("#import-file").set_input_files(str(cases / "oss-collector.json"))
+    page.get_by_role("button", name="구성 ID 정의 접기", exact=True).click()
+    page.locator("#world .node", has_text="traces/1").click()
+    page.wait_for_timeout(400)
+    origin = page.locator("#world").evaluate(CAMERA)
+    expect(back).to_have_count(0)  # a selection on the map is not a visit
+    # A -> B in the same scene: the pane names where it came from; the composition path still reads where B really sits.
+    page.locator("#lens .port", has_text="수신 · traces").click()
+    expect(page.locator("#lens-title")).to_have_text("수신 · traces")
+    expect(back).to_have_accessible_name("traces/1로 돌아가기")
+    expect(page.locator("#lens .lens-path")).to_have_text("정적 실행본 대응")
+    expect(page.locator("#lens .port.came")).to_have_text(re.compile("traces/1"))
+    expect(page.locator("#scene-back")).to_be_hidden()
+    in_map(page, "#world .node.selected")
+    # B -> C inside a group the person folded: it opens only for the visit. A fold made meanwhile stays the person's.
+    page.locator("#lens .port", has_text="수신 설정 ID").click()
+    expect(page.locator("#lens-title")).to_have_text("수신 설정 ID")
+    expect(back).to_have_accessible_name("수신 · traces로 돌아가기")
+    expect(page.locator("#world .node", has_text="처리 설정 ID")).to_be_visible()
+    fold = page.get_by_role("button", name="파이프라인 정의 접기", exact=True)
+    vp = page.locator("#viewport").bounding_box()
+    page.mouse.move(vp["x"] + 180, vp["y"] + vp["height"] - 100)  # pan by the empty map below the groups, as a person would
+    page.mouse.down(); page.mouse.move(vp["x"] + 640, vp["y"] + vp["height"] - 100, steps=8); page.mouse.up()
+    in_map(page, '#world .frame-head:has-text("파이프라인 정의")')
+    fold.click()
+    back.click()
+    expect(page.locator("#lens-title")).to_have_text("수신 · traces")
+    expect(back).to_have_accessible_name("traces/1로 돌아가기")
+    expect(page.locator("#world .node", has_text="처리 설정 ID")).to_have_count(0)
+    expect(page.get_by_role("button", name="파이프라인 정의 펼치기", exact=True)).to_be_visible()
+    expect(page.locator("#lens .port", has_text="수신 설정 ID")).to_be_focused()
+    page.get_by_role("button", name="파이프라인 정의 펼치기", exact=True).click()
+    # The browser's Back is the same step: the first part, its camera, no way back left.
+    page.go_back()
+    expect(page.locator("#lens-title")).to_have_text("traces/1")
+    expect(back).to_have_count(0)
+    page.wait_for_timeout(400)
+    assert page.locator("#world").evaluate(CAMERA) == origin
+    page.go_forward()
+    expect(page.locator("#lens-title")).to_have_text("수신 · traces")
+    expect(back).to_have_accessible_name("traces/1로 돌아가기")
+    # Two steps at once (the browser's history menu): from C straight to A, and forward again to C with both ways back.
+    page.go_forward()
+    expect(page.locator("#lens-title")).to_have_text("수신 설정 ID")
+    page.evaluate("history.go(-2)")
+    expect(page.locator("#lens-title")).to_have_text("traces/1")
+    expect(back).to_have_count(0)
+    page.wait_for_timeout(400)
+    assert page.locator("#world").evaluate(CAMERA) == origin
+    page.evaluate("history.go(2)")
+    expect(page.locator("#lens-title")).to_have_text("수신 설정 ID")
+    expect(back).to_have_accessible_name("수신 · traces로 돌아가기")
+    back.click()
+    expect(page.locator("#lens-title")).to_have_text("수신 · traces")
+    expect(back).to_have_accessible_name("traces/1로 돌아가기")
+    # A0 -> B -> A1: the same part again is a visit of its own, with its own way back; two steps back to A0 leave none.
+    page.locator("#lens .port", has_text="traces/1").click()
+    expect(page.locator("#lens-title")).to_have_text("traces/1")
+    expect(back).to_have_accessible_name("수신 · traces로 돌아가기")
+    page.evaluate("history.go(-2)")  # the same address as A1: the step is told by its entry, not its hash
+    expect(back).to_have_count(0)
+    expect(page.locator("#lens-title")).to_have_text("traces/1")
+    expect(page.locator("#lens .port.came")).to_have_count(0)
+    page.evaluate("history.go(2)")
+    expect(back).to_have_accessible_name("수신 · traces로 돌아가기")
+    back.click()
+    # The same part left in its summary and met again in its sheet: two steps back read the summary it left, at its scroll
+    # (a shorter window, so the summary scrolls).
+    page.set_viewport_size({"width": 1280, "height": 600})
+    page.locator("#world .node", has_text="수신 · traces").click()
+    lens_body = page.locator("#lens .lens-body")
+    lens_body.evaluate("e => { e.scrollTop = e.scrollHeight }")
+    left = lens_body.evaluate("e => e.scrollTop")
+    assert left > 20, left
+    page.locator("#lens .port").filter(has=page.get_by_text("traces", exact=True)).click()
+    page.locator("#lens .port", has_text="수신 · traces").click()
+    page.locator("#lens .lens-more").click()
+    expect(page.locator("#panel-title")).to_have_text("수신 · traces")
+    page.evaluate("history.go(-2)")
+    expect(page.locator("#panel")).to_be_hidden()
+    expect(page.locator("#lens-title")).to_have_text("수신 · traces")
+    expect(back).to_have_accessible_name("traces/1로 돌아가기")  # A0's own way back (it was reached from traces/1) stays
+    assert abs(lens_body.evaluate("e => e.scrollTop") - left) <= 1
+    page.set_viewport_size({"width": 1280, "height": 720})
+    page.locator("#world .node", has_text="traces/1").click()
+    page.locator("#lens .port", has_text="수신 · traces").click()
+    expect(page.locator("#lens-title")).to_have_text("수신 · traces")
+    back.click()
+    expect(page.locator("#lens-title")).to_have_text("traces/1")
+    expect(back).to_have_count(0)
+    # Selecting on the map lets the visits go; it records none of its own.
+    page.locator("#lens .port", has_text="수신 · traces").click()
+    page.locator("#world .node", has_text="metrics/1").click()
+    expect(back).to_have_count(0)
+    page.locator("#world .node", has_text="수신 · traces").click()
+    expect(back).to_have_count(0)
+    # From the reading sheet: the sheet, its scroll and the question draft come back; the draft is the latest, never a copy.
+    page.locator("#world .node", has_text="traces").first.click()
+    expect(page.locator("#lens-title")).to_have_text("traces")
+    page.locator("#lens .lens-more").click()
+    page.locator(".ask-open").click()
+    page.locator("#ask-input").fill("receiver 식별은 어디서 와?")
+    body = page.locator("#panel .panel-body")
+    body.evaluate("e => { e.scrollTop = e.scrollHeight }")
+    scrolled = body.evaluate("e => e.scrollTop")
+    assert scrolled > 40, scrolled
+    page.locator("#panel .links a", has_text="처리 · traces").click()
+    expect(page.locator("#lens-title")).to_have_text("처리 · traces")
+    expect(back).to_have_accessible_name("traces로 돌아가기")
+    back.click()
+    expect(page.locator("#panel-title")).to_have_text("traces")
+    expect(page.locator("#lens")).to_be_hidden()
+    expect(page.locator("#ask-input")).to_have_value("receiver 식별은 어디서 와?")
+    assert abs(body.evaluate("e => e.scrollTop") - scrolled) <= 1, (body.evaluate("e => e.scrollTop"), scrolled)
+    expect(page.locator(".answer")).to_have_count(0)  # nothing was sent by coming back
+    page.locator("#panel .links a", has_text="처리 · traces").click()
+    page.locator("#lens .visit-back").wait_for()
+    page.go_back()
+    expect(page.locator("#panel-title")).to_have_text("traces")
+    expect(page.locator("#ask-input")).to_have_value("receiver 식별은 어디서 와?")
+    # A reload or another project keeps no stale way back.
+    page.locator("#panel .links a", has_text="처리 · traces").click()
+    expect(back).to_have_count(1)
+    page.reload()
+    expect(page.locator("#lens-title")).to_have_text("처리 · traces")
+    expect(back).to_have_count(0)
+    page.go_back()
+    expect(page.locator("#panel-title, #lens-title").first).to_have_text("traces")
+    expect(back).to_have_count(0)
+    page.locator("#world .node", has_text="traces/1").click()
+    page.locator("#lens .port", has_text="수신 · traces").click()
+    expect(back).to_have_count(1)
+    page.goto(base + "/#/p/ex-salon")
+    page.go_back()
+    expect(page.locator("#lens-title")).to_have_text("수신 · traces")
+    expect(back).to_have_count(0)
+    # A long name: one small line in the pane, cut only on screen; its accessible name keeps the whole name.
+    long = "traces/1 · 수신기와 내보내기만 있는 두 번째 추적 파이프라인 정의, 처리기 없음"
+    assert len(long) <= 60
+    page.locator("#world .node", has_text="traces/1").click()
+    page.locator("#lens .more summary").click()
+    page.get_by_role("menuitem", name="이름·설명 고치기").click()
+    page.locator("#edit-name").fill(long)
+    page.get_by_role("button", name="저장").click()
+    page.locator("#panel .close").click()
+    page.locator("#lens .port", has_text="수신 · traces").click()
+    expect(back).to_have_accessible_name(long + "으로 돌아가기")
+    box, pane = back.bounding_box(), page.locator("#lens").bounding_box()
+    assert box["height"] <= 26 and box["x"] + box["width"] <= pane["x"] + pane["width"] - 16, (box, pane)
+    back.click()
+    expect(page.locator("#lens-title")).to_have_text(long)
+    # Out of the scope from a part: the scene changes, so the context row's back is the way back (one, not two), and it
+    # brings the part, its camera and the reading back; the folds the visit opened close again.
+    page.locator(".frame-head", has_text="정적 실행본 대응").locator(".enter").click()
+    in_scope(page, "정적 실행본 대응")
+    page.locator("#world .node", has_text="수신 · traces").click()
+    page.wait_for_timeout(400)
+    inside = page.locator("#world").evaluate(CAMERA)
+    page.locator("#lens .port", has_text="수신 설정 ID").click()
+    expect(page.locator("#lens-title")).to_have_text("수신 설정 ID")
+    in_scope(page, "구성 ID 정의")
+    expect(back).to_have_count(0)
+    expect(page.locator("#scene-back")).to_have_text(re.compile("정적 실행본 대응"))
+    page.locator("#scene-back").click()
+    in_scope(page, "정적 실행본 대응")
+    expect(page.locator("#lens-title")).to_have_text("수신 · traces")
+    expect(page.locator("#scene-back")).to_be_hidden()
+    page.wait_for_timeout(500)
+    assert page.locator("#world").evaluate(CAMERA) == inside
+    # Out of the scope: inside the desktop app, its own relation to @joplin/lib leaves the scene. The context row's back is the
+    # one way back (as before), now with why, and it brings the scope's reading and camera back.
+    page.goto(base + "/")
+    page.locator("#import-file").set_input_files(str(cases / "oss-joplin.json"))
+    page.locator(".frame-head", has_text="@joplin/app-desktop").locator(".enter").click()
+    in_scope(page, "@joplin/app-desktop")
+    page.wait_for_timeout(500)
+    inside = page.locator("#world").evaluate(CAMERA)
+    page.locator(".map-title .map-more").click()
+    expect(page.locator("#lens.scope-read")).to_be_visible()
+    page.locator("#lens .port", has_text="@joplin/lib").click()
+    expect(page.locator("#lens-title")).to_have_text("@joplin/lib")
+    expect(page.locator("#scope-bar")).to_be_hidden()
+    expect(back).to_have_count(0)
+    expect(page.locator("#scene-back")).to_be_visible()
+    expect(page.locator("#scene-back")).to_have_text(re.compile("@joplin/app-desktop"))
+    assert "관계를 따라 왔어요" in page.locator("#scene-back").get_attribute("title")
+    page.locator("#scene-back").click()
+    in_scope(page, "@joplin/app-desktop")
+    expect(page.locator("#lens.scope-read")).to_be_visible()
+    expect(page.locator("#lens .port", has_text="@joplin/lib")).to_be_focused()  # the restored reading, not the map title's
+    expect(page.locator("#scene-back")).to_be_hidden()
+    page.wait_for_timeout(500)
+    assert page.locator("#world").evaluate(CAMERA) == inside
+    # The map title's relation too; the browser's Back takes the same way.
+    page.keyboard.press("Escape")
+    page.locator(".map-title .sr-part", has_text="@joplin/lib").click()
+    expect(page.locator("#lens-title")).to_have_text("@joplin/lib")
+    expect(page.locator("#scene-back")).to_be_visible()
+    page.go_back()
+    in_scope(page, "@joplin/app-desktop")
+    expect(page.locator("#scene-back")).to_be_hidden()
+    no_page_scroll(page)
+    assert not errors, errors
+    context.close()
+
+
 def return_flow(browser, base, cases):
     """EXPERIENCE63: the return reading beside the same map. The UI62 material opens without a call; one explicit call per
     material (stage), never again for the same material; each sentence leads to its exact quote and version and back with the
@@ -1088,6 +1304,7 @@ def main():
             preview_context_flow(browser, base); print("ok  preview exposes only its target path; current, sources and user folds preserve ownership")
             relation_context_flow(browser, base, oss_fixtures()); print("ok  existing relations of target and candidate read above groups; current and preview share one scene")
             overview_flow(browser, base, oss_fixtures()); print("ok  large list as an overview of real groups, find with way back, scope relations, pane beside the map, verbs")
+            relation_visit_flow(browser, base, oss_fixtures()); print("ok  relation visit: named way back to its part, selection, camera, sheet and scroll; browser Back the same; no stale way back")
             return_flow(browser, base, oss_fixtures()); print("ok  return reading: no call on open, one per material, exact quote and back, draft never overwritten, Node-RED plan without result")
             proc, base = start("code"); procs.append(proc); code_flow(browser, base); print("ok  access code kept from an input event")
             proc, base = start("fail"); procs.append(proc); failure_flow(browser, base); print("ok  provider failure -> short error -> retry")
