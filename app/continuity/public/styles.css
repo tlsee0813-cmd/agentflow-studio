@@ -147,6 +147,8 @@ button:disabled { opacity: .5; cursor: default; }
 .home.has-mine .examples .program { padding: var(--s-4) var(--s-5); background: rgba(255,255,255,.7); box-shadow: none; }
 .home.has-mine .examples .program-section, .home.has-mine .examples .program-meta { display: none; }
 .home.has-mine .examples .program-body:not(:has(> a)) { display: none; }
+.home.has-mine .examples > li { align-items: flex-start; }
+.home.has-mine .examples .program-body { padding-top: var(--s-3); }
 .home.has-mine .examples .program-brief { -webkit-line-clamp: 1; font-size: 12.5px; }
 .home-foot { margin-top: var(--s-6); padding-top: var(--s-4); border-top: 1px solid var(--line); color: var(--text-3); font-size: 12.5px; line-height: 1.6; word-break: keep-all; }
 .home-foot p { margin: 0; max-width: 760px; }
@@ -565,7 +567,7 @@ button:disabled { opacity: .5; cursor: default; }
 .space.preview .frame:is(.plan-direct, .plan-impact) > .frame-head { align-items: start; }
 .space.preview .frame.group:is(.plan-direct, .plan-impact) > .frame-head { padding-top: 8px; }
 .space.preview .frame.group:is(.plan-direct, .plan-impact) > .frame-head :is(.toggle, .enter) { margin-top: -2px; }
-.node.plan-direct, .frame.plan-direct { border-color: transparent; }
+.node.plan-direct, .frame.plan-direct { border-color: var(--hair-2); }
 /* one strong mark: the parts of the change being read */
 .node.plan-focus, .frame.plan-focus { border-color: var(--change); box-shadow: inset 3px 0 0 var(--change); background: var(--surface); }
 .plan-direct .plan-note { color: #8a4806; }
