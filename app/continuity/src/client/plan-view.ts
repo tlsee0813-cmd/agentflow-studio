@@ -6,7 +6,7 @@ import type { Project } from '../shared/types.js';
 import type { StorageLike } from '../shared/storage.js';
 import type { StudioView } from '../shared/studio.js';
 import { createPlan, selectItems, requestSnapshot, compareResults, parseScopeReview, type ChangePlan, type Evidence, type PlanItem, type PlanPresentation, type ResultObservation, type RequestSnapshot } from '../shared/change-plan.js';
-import { CONVERTER_INTENT, converterEvidence, converterExampleAnalysis, converterObservations } from '../shared/change-plan-example.js';
+import { CONVERTER_HEADING, CONVERTER_INTENT, converterEvidence, converterExampleAnalysis, converterObservations } from '../shared/change-plan-example.js';
 import type { Box } from './map-layout.js';
 import { AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
 import { h, put, $, ago, fullTime, inspectorWidth } from './plan-dom.js';
@@ -339,15 +339,18 @@ export function createPlanView(host: PlanHost) {
     const part = o.view.parts.find(x => x.id === id);
     return part?.note ? { text: firstSentence(part.note), from: '지도 설명', label: '이 부분의 역할' } : part?.summary ? { text: firstSentence(part.summary), from: '받은 정리', label: '이 부분의 맥락' } : null;
   }
-  function partReading(o: PlanOpened, p: ChangePlan, item: PlanItem, partId: string, at: string, openRef: (id: string) => void, extra: Node | null = null): HTMLElement {
+  /** outcome: the change's own description as the wanted result beside '지금' when the plan has no presentation for the change
+   * (read once there instead of above). */
+  function partReading(o: PlanOpened, p: ChangePlan, item: PlanItem, partId: string, at: string, openRef: (id: string) => void, extra: Node | null = null, outcome = false): HTMLElement {
     const name = partName(partId) ?? '부분', pres = item.presentation?.find(x => x.partId === partId) ?? null;
     // The role is the fallback reason only where '지금' does not already quote the same map description.
     const reasons = p.analysis.impacts.filter(x => x.partId === partId), role = reasons.length || pres ? null : partRole(o, partId);
     const row = (cls: string, label: string, ...body: (Node | null)[]) => h('div', { class: `co-row ${cls}` }, h('h4', { class: 'co-label' }, label), h('div', { class: 'co-val' }, ...body));
     const now = pres
       ? row('now', '지금', h('p', {}, pres.current.text), pres.current.source === 'evidence' ? refLine(p, pres.current.refs, openRef, '자료에서') : h('p', { class: 'co-from' }, '지도 설명'))
-      : row('now unknown', '지금', h('p', {}, '자료로는 알 수 없어요.'), h('p', { class: 'co-from' }, '이 변경안의 자료는 이 부분이 지금 어떻게 하는지 말하지 않아요.'));
-    const want = pres ? row('want', pres.origin === 'suggestion' ? '분석 제안' : '바라는 모습', h('p', {}, pres.wanted.text), refLine(p, pres.wanted.refs, openRef)) : null;
+      : row('now unknown', '지금', h('p', {}, '이 변경안의 자료로는 지금 어떻게 하는지 알 수 없어요.'));
+    const want = pres ? row('want', pres.origin === 'suggestion' ? '분석 제안' : '바라는 모습', h('p', {}, pres.wanted.text), refLine(p, pres.wanted.refs, openRef))
+      : outcome ? row('want outcome', '바라는 결과', h('p', {}, item.description), refLine(p, item.refs, openRef, '변경 설명 · 근거')) : null;
     const why = reasons.length ? row('why', '왜 이 부분을 보나', ...reasons.flatMap(x => [h('p', {}, x.reason), refLine(p, x.refs, openRef)]))
       : role ? row('why role', role.label, h('p', {}, role.text), h('p', { class: 'co-from' }, role.from)) : null;
     return h('div', { class: `callout${pres ? ` ${pres.origin}` : ' plain'}`, 'data-box': at, 'data-target': partId, role: 'group', 'aria-label': `${name} · ${item.title}` },
@@ -648,11 +651,12 @@ export function createPlanView(host: PlanHost) {
       h('button', { type: 'button', class: 'close', 'aria-label': '이 변경 읽기 닫기', title: '닫기 (Esc)', onclick: () => { st.focus = null; render(); } }, '×')].filter((x): x is HTMLElement => !!x);
     const id = activeTarget(item), at = id ? visibleRep(id, boxes) : null;
     const open = (ref: string) => { st.evidenceFor = item.id; st.evidenceRef = ref; render(); };
-    const note = id ? partReading(o, p, item, id, at ?? id, open) : h('p', { class: 'cmp-none' }, '지금 지도에 없는 새 부분을 더하는 변경이에요.');
+    // A change without presentation reads its own description as the wanted result beside '지금'; with one, a short lead above.
+    const bare = !item.presentation?.length;
+    const note = id ? partReading(o, p, item, id, at ?? id, open, null, bare) : h('p', { class: 'cmp-none' }, '지금 지도에 없는 새 부분을 더하는 변경이에요.');
     return [
       compareHead(`변경 구상 · ${basis}`, item.title, tools),
-      // What the change wants, in its own words, before the part being read (a long one opens whole in the wide comparison).
-      h('div', { class: 'lens-body cmp-body' }, h('p', { class: 'cmp-desc clamp3', title: item.description }, item.description), targetNav(item), note,
+      h('div', { class: 'lens-body cmp-body' }, bare && id ? null : h('p', { class: 'cmp-desc clamp3', title: item.description }, item.description), targetNav(item), note,
         at && at !== id ? h('p', { class: 'cmp-src' }, `지도에서는 ‘${partName(at)}’ 안에 접혀 있어요.`) : null),
       h('footer', { class: 'lens-foot' }, focusControls(p, item))];
   }
@@ -698,7 +702,9 @@ export function createPlanView(host: PlanHost) {
             h('p', { class: 'cmp-name' }, h('button', { type: 'button', class: 'link-button', onclick: () => focusItem({ kind: 'item', id: i.id }) }, i.title), i.partIds.includes(id) ? null : h('small', {}, '이 부분 안쪽')),
             h('p', { class: 'cmp-text clamp3' }, i.description))),
           ...roleBlock(o, id), touching.length || impacts.length ? null : h('p', { class: 'cmp-none' }, '이 변경안이 바꾸거나 영향 후보로 본 부분은 아니에요.')),
-        impactList(o, impacts, false)))];
+        impactList(o, impacts, false))),
+      // Opened from the wide comparison (a part to look at with a change): the way back to that change and its scroll.
+      s!.fromWork ? h('footer', { class: 'lens-foot' }, h('button', { type: 'button', class: 'ps-link ps-wide back', onclick: () => openWork(lastWorkItem || undefined) }, '‹ 넓은 비교로')) : null].filter((x): x is HTMLElement => !!x);
   }
   function closePlan() { close(); }
   function renderMode() {
@@ -732,6 +738,8 @@ export function createPlanView(host: PlanHost) {
      the parts to look at with it, each with '지도에서 보기'. The right column holds what this step needs: what the request
      takes and the way to make it. A source, the returned results or every source open there in its place. */
   let lastWorkItem = '';
+  /** The person's whole sentence opened under the short heading (kept while the plan is open). */
+  let sentenceOpen = false;
   function renderWork(o: PlanOpened) {
     const panel = $('plan-panel'), p = plan()!, st = s!, was = panel.classList.contains('work') && !panel.hidden;
     const back = st.workAt, prevDetail = was ? panel.querySelector('.pw-detail')?.scrollTop ?? 0 : 0, prevList = was ? panel.querySelector('.pw-list')?.scrollTop ?? 0 : 0;
@@ -742,18 +750,23 @@ export function createPlanView(host: PlanHost) {
     panel.hidden = false; panel.classList.add('work'); panel.dataset.rail = st.rail;
     const by = st.bundle.by, origin = by?.kind === 'example' ? '작성된 예제 분석' : by?.kind === 'ai' ? `AI 분석 · ${by.model} · ${ago(by.at)}` : '분석';
     const writing = st.editing || stale() || !!st.pending, leave = !stale() && !st.pending && !st.scoping;
-    const title = firstSentence(p.intent), whole = title.length < p.intent.trim().length;
+    // A short heading: authored for the example's own sentence, otherwise what the plan holds (no invented summary).
+    const heading = by?.kind === 'example' && st.key === CONVERTER_KEY && p.intent === CONVERTER_INTENT ? CONVERTER_HEADING : `변경안 · ${p.analysis.items.length}가지 변화`;
+    const lead = firstSentence(p.analysis.summary), more = p.analysis.summary.trim().slice(lead.length).trim();
     const head = h('header', { class: 'pw-head' },
       h('p', { class: 'pw-kick' }, h('span', {}, '변경 구상'), st.example ? h('span', { class: 'tag' }, '예제') : null, h('span', { class: 'pw-origin', title: by?.kind === 'ai' ? `${fullTime(by.at)} · ${p.basis}` : p.basis }, origin)),
-      // A short title: the sentence's first sentence (the whole one is in the editor and on hover).
-      h('h2', { id: 'plan-title', class: 'pw-title', tabindex: '-1', title: p.intent }, title, whole && !writing ? h('span', { class: 'pw-more' }, ' …') : null),
+      h('div', { class: 'pw-title-row' }, h('h2', { id: 'plan-title', class: 'pw-title', tabindex: '-1' }, heading),
+        writing ? null : h('button', { type: 'button', class: 'link-button quiet pw-said-btn', 'aria-expanded': String(sentenceOpen), 'aria-controls': 'pw-said', onclick: () => { sentenceOpen = !sentenceOpen; render(); } }, sentenceOpen ? '적은 문장 접기' : '적은 문장 펼쳐 읽기')),
+      // The person's whole sentence, on request (it is also what the editor holds).
+      !writing && sentenceOpen ? h('p', { id: 'pw-said', class: 'pw-said' }, p.intent) : null,
       newerNote(o, p),
       h('div', { class: 'pw-head-tools' },
         writing ? null : h('button', { type: 'button', class: 'secondary small', onclick: () => edit() }, '문장 고치기'),
         leave ? h('button', { type: 'button', class: 'secondary small pw-back', title: '지도로 (Esc) · 카메라와 읽던 변경은 그대로예요', onclick: leaveWork }, '지도로 돌아가기')
           : h('button', { type: 'button', class: 'close', 'aria-label': '변경 구상 닫고 현재 지도로', title: '닫기 · 초안은 남아요', onclick: () => close() }, '×')));
-    const found = h('section', { class: 'pw-found', 'aria-labelledby': 'pw-found-h' }, h('h3', { id: 'pw-found-h' }, '분석이 찾은 것'), h('p', {}, p.analysis.summary),
-      h('p', { class: 'pw-note' }, `${by?.kind === 'example' ? '작성된 예제 분석' : 'AI 분석'}의 정리예요. 실행해서 확인한 결과는 아니에요.`));
+    // The analysis's first finding leads; the rest of its summary and what it is (not a run) open quietly.
+    const found = h('section', { class: 'pw-found', 'aria-label': '분석이 찾은 것' }, h('p', { class: 'pw-lead' }, h('span', { class: 'pw-found-k' }, '분석이 찾은 것'), lead),
+      h('details', { class: 'pw-found-more' }, h('summary', {}, more ? '분석 전체' : '이 정리는'), more ? h('p', {}, more) : null, h('p', { class: 'pw-note' }, '변경안을 읽은 정리예요. 실행해서 확인한 결과는 아니에요.')));
     const open = (ref: string) => { st.rail = 'source'; st.railSource = ref; render(); requestAnimationFrame(() => document.getElementById('pw-rail-back')?.focus()); };
     const pick = (id: string) => { st.focus = { kind: 'item', id }; st.evidenceFor = null; render(); requestAnimationFrame(() => document.querySelector<HTMLElement>('.pw-pick[aria-current="true"]')?.focus()); };
     const list = h('nav', { class: 'pw-list', 'aria-label': '바뀌는 것' },
@@ -768,16 +781,19 @@ export function createPlanView(host: PlanHost) {
       })),
       planConditions(p));
     const boxes = host.boxes(), targets = itemTargets(item), near = nearImpacts(item).filter(x => !targets.includes(x.partId));
+    const bareOne = !item.presentation?.length && targets.length === 1;
     const path = (id: string) => { const names: string[] = []; for (let q = o.view.parts.find(x => x.id === id)?.parentId, g = 0; q && g < 64; q = o.view.parts.find(x => x.id === q)?.parentId, g++) names.unshift(partName(q) ?? ''); return names.join(' › '); };
     const toMap = (id: string, impact = false) => leave ? h('button', { type: 'button', class: 'link-button pw-map', onclick: () => showOnMap(item, id, impact) }, '지도에서 보기') : null;
     const detail = h('article', { class: `pw-detail${stale() ? ' is-stale' : ''}`, 'aria-labelledby': 'pw-item-title' },
       stale() ? h('p', { class: 'pw-stale' }, '아래는 앞 문장과 자료로 만든 변경안이에요. 고친 내용은 아직 살펴보지 않았어요.') : null,
       h('h3', { id: 'pw-item-title', class: 'pw-item-title' }, item.title),
-      h('section', { class: 'pw-what' }, h('h4', {}, '무엇이 달라지나'), h('p', {}, item.description), refLine(p, item.refs, open)),
+      // The change's description once: beside '지금' as the wanted result when the change has no pair of its own and one
+      // target; otherwise a lead above the parts.
+      bareOne ? null : h('section', { class: 'pw-what' }, h('p', {}, item.description), refLine(p, item.refs, open)),
       item.dependsOn.length && by?.kind === 'example' ? h('p', { class: 'pw-dep' }, h('span', {}, '전제'), item.dependsOn.map(d => itemOf(d)?.title ?? d).join(', ')) : null,
-      targets.length ? h('section', { class: 'pw-parts' }, h('h4', {}, `바뀌는 부분 ${targets.length}`), ...targets.map(id => {
+      targets.length ? h('section', { class: 'pw-parts' }, targets.length > 1 ? h('h4', {}, `바뀌는 부분 ${targets.length}`) : null, ...targets.map(id => {
         const where = path(id);
-        return h('div', { class: 'pw-part' }, partReading(o, p, item, id, visibleRep(id, boxes) ?? id, open, h('span', { class: 'pw-part-tools' }, where ? h('span', { class: 'pw-path' }, `${where} 안`) : null, toMap(id))));
+        return h('div', { class: 'pw-part' }, partReading(o, p, item, id, visibleRep(id, boxes) ?? id, open, h('span', { class: 'pw-part-tools' }, where ? h('span', { class: 'pw-path' }, `${where} 안`) : null, toMap(id)), bareOne));
       })) : h('p', { class: 'pw-none' }, '지금 지도에 없는 새 부분을 더하는 변경이에요. 바뀔 자리는 정해지지 않았어요.'),
       near.length ? h('section', { class: 'pw-near' }, h('h4', {}, '함께 볼 부분 ', h('small', {}, '영향 후보 · 분석이 든 이유')),
         h('ul', {}, ...near.map(x => h('li', {}, h('p', { class: 'pw-near-name' }, h('strong', {}, partName(x.partId) ?? '지금 지도에 없는 부분'), toMap(x.partId, true)), h('p', {}, x.reason), refLine(p, x.refs, open))))) : null);
