@@ -2,7 +2,7 @@
  * rewrites records; the only project write is the user's own part name/note through the domain's editArea. */
 import type { Project } from '../shared/types.js';
 import { FILE_LIMIT } from '../shared/types.js';
-import { WorkspaceStore, type EntryRef, storageErrorCode, readViewState, writeViewState, readEntryPositions, writeEntryPositions } from '../shared/storage.js';
+import { WorkspaceStore, type EntryRef, storageErrorCode, readViewState, readEntryView, writeViewState, readEntryPositions, writeEntryPositions, importCopy } from '../shared/storage.js';
 import { parseBackup, cleanPositions } from '../shared/validation.js';
 import { editArea, addArea, addChildArea, createProject, rename } from '../shared/domain.js';
 import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
@@ -126,7 +126,7 @@ const viewKeyOf = (o: Opened) => o.key;
 const stableId = (o: Opened, id: string) => o.alias?.toKey.get(id) ?? id;
 const liveId = (o: Opened, key: string) => o.alias?.toId.get(key) ?? key;
 function loadView(o: Opened) {
-  const v = readViewState(kv, viewKeyOf(o));
+  const v = o.kind === 'example' ? readViewState(kv, viewKeyOf(o)) : readEntryView(kv, viewKeyOf(o), o.project.id);
   for (const [k, open] of Object.entries(v.folds)) { const id = liveId(o, k); if (partOf(o, id)) expandState.set(`${o.key}|${id}`, open); }
   for (const [k, c] of Object.entries(v.cameras)) {
     const id = k ? liveId(o, k) : null; if (id && !partOf(o, id)?.childIds.length) continue;
@@ -1864,10 +1864,10 @@ function bindImport() {
     try { ({ project, positions: places } = parseBackup(await f.text())); } catch { say('AgentFlow 프로젝트 백업 파일이 아니거나 읽을 수 없어요. 아무것도 바꾸지 않았어요.'); return; }
     if (!store.writable) { say('이 브라우저에서는 저장할 수 없어 가져오지 못했어요.'); return; }
     try {
-      const ref = await store.create(project, 'import');
-      // The new copy has places of its own: the ones the backup carries, or none (automatic layout) for a file without them.
-      // Never the places another entry of the same project id set; that entry's places stay as they were.
-      const own = cleanPositions(places); memoryPositions.set(ref.entryId, own); writeEntryPositions(kv, ref.entryId, own);
+      // The new copy has places of its own (the file's, or none: automatic layout) and an empty view, kept before it is added;
+      // never another entry's of the same project id. A refused write adds nothing and says so.
+      const { ref, positions: own } = await importCopy(store, kv, project, places);
+      memoryPositions.set(ref.entryId, own);
       say(`새 사본으로 가져왔어요 · ${project.name}`); go(ref.entryId);
     }
     catch { say('가져오지 못했어요. 저장된 프로젝트는 그대로예요.'); }

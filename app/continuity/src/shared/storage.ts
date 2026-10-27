@@ -34,10 +34,14 @@ export function readEntryPositions(storage:StorageLike,entryId:string,projectId:
   const old=placesAll(storage,LEGACY_POSITIONS_KEY);
   return cleanPositions(Object.hasOwn(old,projectId)?old[projectId]:null);
 }
-/** Writes one entry's places (an empty record too: it keeps the entry off positions.1). False when the browser refused. */
-export function writeEntryPositions(storage:StorageLike,entryId:string,positions:ManualPositions):boolean {
-  try {const all=placesAll(storage,POSITIONS_KEY);all[entryId]=cleanPositions(positions);storage.setItem(POSITIONS_KEY,JSON.stringify(all));return true;}
-  catch {return false;}
+/** Writes one entry's places (an empty record too: it keeps the entry off positions.1); null removes the record. False when
+ * the browser refused. */
+export function writeEntryPositions(storage:StorageLike,entryId:string,positions:ManualPositions|null):boolean {
+  try {
+    const all=placesAll(storage,POSITIONS_KEY);
+    if(positions)all[entryId]=cleanPositions(positions);else delete all[entryId];
+    storage.setItem(POSITIONS_KEY,JSON.stringify(all));return true;
+  } catch {return false;}
 }
 /** Folds and per-scope cameras, per opened map (a saved project by its workspace entry, an example by its key), apart from
  * the project data (same browser only). One key for all maps; the newest VIEW_PROJECTS are kept. Unreadable or malformed values read as nothing stored; a failed write is only a lost convenience. */
@@ -60,6 +64,14 @@ function viewAll(storage:StorageLike):Record<string,unknown> {
   try {const v=JSON.parse(storage.getItem(VIEW_KEY)??'{}');return v&&typeof v==='object'&&!Array.isArray(v)?v as Record<string,unknown>:{};} catch {return {};}
 }
 export function readViewState(storage:StorageLike,projectKey:string):ViewState {return cleanViewState(viewAll(storage)[projectKey]);}
+/** A saved entry's view. Before entries had their own, view.1 kept it by project id: an entry with no record of its own reads
+ * that one (what it showed then), and keeps its own from its next write. An import writes an empty record first (importCopy),
+ * so it never reads another entry's. The project-id record is never written again; the newest-first trim removes it before
+ * any entry's own record, which is always written later. */
+export function readEntryView(storage:StorageLike,entryKey:string,projectId:string):ViewState {
+  const all=viewAll(storage);
+  return cleanViewState(Object.hasOwn(all,entryKey)?all[entryKey]:Object.hasOwn(all,projectId)?all[projectId]:undefined);
+}
 /** Writes one project's view; this project becomes the newest. Returns false when the browser refused the write. */
 export function writeViewState(storage:StorageLike,projectKey:string,state:ViewState):boolean {
   try {
@@ -197,12 +209,15 @@ export class WorkspaceStore {
     if(failure&&this.legacy)this.legacy.error=failure; // stays readable, explained, and never written
   }
   entries():WorkspaceEntry[] {return this.envelope?.entries??[];}
+  /** An id for an entry about to be created, so what is kept beside it can be written first (importCopy). */
+  newEntryId():string {return this.newId();}
   /** Adds a project (new or an imported copy, payload unchanged). Completes only once the envelope is written. */
-  async create(project:Project,origin:'new'|'import'):Promise<EntryRef> {
-    const raw=serializeProject(project);parseProject(raw);
+  async create(project:Project,origin:'new'|'import',entryId:string=this.newId()):Promise<EntryRef> {
+    const raw=serializeProject(project);parseProject(raw);ensure(ENTRY_ID.test(entryId),'STORAGE_CONFLICT');
     return await this.locked(env=>{
       const base:Envelope=env??{version:'agentflow.workspace.1',migratedFromLegacy:false,entries:[]};
-      const entry:WorkspaceEntry={entryId:this.newId(),state:'active',lifecycle:1,seq:1,createdAt:this.now(),trashedAt:null,origin,project:JSON.parse(raw) as Project};
+      if(base.entries.some(e=>e.entryId===entryId))throw new Error('STORAGE_CONFLICT');
+      const entry:WorkspaceEntry={entryId,state:'active',lifecycle:1,seq:1,createdAt:this.now(),trashedAt:null,origin,project:JSON.parse(raw) as Project};
       return {next:{...base,entries:[...base.entries,entry]},result:{entryId:entry.entryId,lifecycle:1,seq:1}};
     });
   }
@@ -229,4 +244,15 @@ export class WorkspaceStore {
   /** Trash/restore change the wrapper only (Project.revision untouched) and invalidate older tabs' saves. */
   trash(entryId:string){return this.setState(entryId,'trashed');}
   restoreEntry(entryId:string){return this.setState(entryId,'active');}
+}
+/** A backup comes in as a new entry with places and a view of its own: the places the file carries (none, for a file without
+ * them) and an empty view are written first, under the id the entry will take, and the entry is added only once both are
+ * kept. A refused write adds nothing (an entry without its own record would read another entry's places or view after a
+ * reload); a failed add takes the places written for it back. Existing entries and their places are never touched. */
+export async function importCopy(store:WorkspaceStore,storage:StorageLike,project:Project,places:ManualPositions|null):Promise<{ref:EntryRef;positions:ManualPositions}> {
+  const entryId=store.newEntryId(),positions=cleanPositions(places);
+  if(!writeEntryPositions(storage,entryId,positions))throw new Error('WRITE_FAILED');
+  if(!writeViewState(storage,entryId,{folds:{},cameras:{}})){writeEntryPositions(storage,entryId,null);throw new Error('WRITE_FAILED');}
+  try {return {ref:await store.create(project,'import',entryId),positions};}
+  catch(e) {writeEntryPositions(storage,entryId,null);throw e;}
 }

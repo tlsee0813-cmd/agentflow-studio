@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { buildExample, EXAMPLES } from '../dist/public/shared/studio-examples.js';
 import { studioView } from '../dist/public/shared/studio.js';
-import { serializeBackup, serializeProject, readEntryPositions, writeEntryPositions, POSITIONS_KEY, LEGACY_POSITIONS_KEY, WorkspaceStore, readViewState, writeViewState, cleanViewState } from '../dist/public/shared/storage.js';
+import { serializeBackup, serializeProject, readEntryPositions, writeEntryPositions, POSITIONS_KEY, LEGACY_POSITIONS_KEY, WorkspaceStore, readViewState, writeViewState, cleanViewState, readEntryView, importCopy, VIEW_KEY, WORKSPACE_KEY } from '../dist/public/shared/storage.js';
 import { parseBackup, cleanPositions, placeKey } from '../dist/public/shared/validation.js';
 import { layoutScope, edgePath, summaryEdges, restSummary } from '../dist/public/client/map-layout.js';
 
@@ -57,6 +57,56 @@ test('FIX68-1 an imported copy and its original keep their own places; the old p
   // Unreadable stores read as no places; a refused write is reported, not thrown.
   kv.setItem(POSITIONS_KEY, '{oops'); assert.deepEqual(plain(readEntryPositions(kv, 'E_x', 'P_none')), {});
   assert.equal(writeEntryPositions({ getItem: () => null, setItem: () => { throw new Error('QuotaExceededError'); } }, 'E_1', moved), false);
+});
+
+test('FIX68-1 an import is added only once its own places and empty view are kept; a refused write adds nothing and changes nothing', async () => {
+  const p = salon(), [a] = p.space.areas, older = { root: { [a.id]: { x: -50, y: -60 } } };
+  // A browser store that refuses writes to one key on demand.
+  const failing = () => { const kv = memory(), deny = new Set(); return { kv, deny, getItem: kv.getItem, setItem: (k, v) => { if (deny.has(k)) throw new Error('QuotaExceededError'); kv.setItem(k, v); } }; };
+  const s = failing(); let n = 0;
+  const store = new WorkspaceStore(s, { request: async (_n, cb) => cb() }, () => `E_entry-${String(++n).padStart(4, '0')}`);
+  await store.init();
+  const orig = await store.create(p, 'new'), mine = { root: { [a.id]: { x: 300, y: 40 } } };
+  writeEntryPositions(s, orig.entryId, mine); writeViewState(s, orig.entryId, { folds: { [a.id]: false }, cameras: {} });
+  const snapshot = () => [...s.kv.m].map(([k, v]) => `${k}=${v}`).sort().join('\n');
+  for (const denied of [POSITIONS_KEY, VIEW_KEY, WORKSPACE_KEY]) {
+    const before = snapshot(), count = store.entries().length;
+    s.deny.add(denied);
+    await assert.rejects(importCopy(store, s, parseBackup(serializeBackup(p, older)).project, older), undefined, denied);
+    s.deny.delete(denied);
+    store.read();
+    // Nothing added and every stored byte as it was (a view record written before a refused add may stay; it names no entry).
+    assert.equal(store.entries().length, count, denied);
+    const after = snapshot().split('\n').filter(l => !(denied === WORKSPACE_KEY && l.startsWith(`${VIEW_KEY}=`))).join('\n');
+    assert.equal(after, before.split('\n').filter(l => !(denied === WORKSPACE_KEY && l.startsWith(`${VIEW_KEY}=`))).join('\n'), denied);
+    assert.deepEqual(plain(readEntryPositions(s, orig.entryId, p.id)), mine);
+  }
+  // Allowed: the copy is added with the file's places and an empty view; the original keeps its own.
+  const { ref, positions } = await importCopy(store, s, p, older);
+  assert.deepEqual(plain(positions), older);
+  assert.deepEqual(plain(readEntryPositions(s, ref.entryId, p.id)), older);
+  assert.deepEqual(readEntryView(s, ref.entryId, p.id), { folds: {}, cameras: {} });
+  assert.deepEqual(plain(readEntryPositions(s, orig.entryId, p.id)), mine);
+  // An entry id is taken once.
+  await assert.rejects(store.create(p, 'import', ref.entryId));
+});
+
+test('FIX68-1 views kept by project id (view.1 before entries) carry over to the entries that had them; an import starts empty', async () => {
+  const kv = memory(), p = salon(), [a] = p.space.areas;
+  const before = { folds: { [a.id]: false }, cameras: { '': { x: 12, y: -30, scale: 0.85 } } };
+  kv.setItem(VIEW_KEY, JSON.stringify({ [p.id]: before, 'ex-salon': { folds: {}, cameras: {} } }));
+  let n = 0; const store = new WorkspaceStore(kv, { request: async (_n, cb) => cb() }, () => `E_entry-${String(++n).padStart(4, '0')}`);
+  await store.init();
+  const orig = await store.create(p, 'new');
+  assert.deepEqual(readEntryView(kv, orig.entryId, p.id), before, 'the existing entry opens with the view it had');
+  const { ref } = await importCopy(store, kv, p, null);
+  assert.deepEqual(readEntryView(kv, ref.entryId, p.id), { folds: {}, cameras: {} }, 'the import does not take it');
+  // The entry keeps its own from its next write; the project-id record is only read.
+  const later = { folds: {}, cameras: { '': { x: 1, y: 2, scale: 1 } } };
+  writeViewState(kv, orig.entryId, later);
+  assert.deepEqual(readEntryView(kv, orig.entryId, p.id), later);
+  assert.deepEqual(readViewState(kv, p.id), before);
+  assert.deepEqual(readEntryView(kv, ref.entryId, p.id), { folds: {}, cameras: {} });
 });
 
 test('FIX68-2 places keys that name an inherited property are refused; nothing reaches Object.prototype, valid places and older backups still read', () => {
