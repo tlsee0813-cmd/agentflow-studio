@@ -1,77 +1,58 @@
-# UI·UX62 · 구조를 읽고 같은 자리에서 비교하는 PC 작업 화면
+# UI·UX64 · 관계를 따라 읽고 원래 자리로 돌아오기
 
-## 현재 수용본 · 2026-10-27
+## 수용 결과 · 2026-10-27
 
-지도, 선택, 설명, 변경 비교를 **지도 + 오른쪽 한 읽기면**으로 정리했다. 큰 자료는 묶음·개수로 시작하고 실제 항목은 내부 목록에서 읽는다. 작은 자료를 큰 카드로 부풀리지 않는다. 입력 수집·출력 기능과 서버/모델 계약은 바꾸지 않았다.
+같은 읽기면에서 다른 부분의 관계를 따라가도 **어디서 왔는지 이름으로 남고, 읽던 곳으로 돌아온다.** 실제 소속 경로와 방문 경로를 구별한다. 범위 밖으로 이동하면 기존 상단 복귀 입구 하나를 사용한다.
 
-- runtime source: `bcf88bbdcaa683b5d2e781a0ab97135ea6f00fb8`
-- [PR34](https://github.com/tlsee0813-cmd/agentflow-studio/pull/34), merge `e25727e0f07f5341b64ddffcab08f3a5418231c5`
-- source/merge app tree: `1ec4ff1c9e8deab3d989b8f9fdd1e717bf5e7d64`
-- [최종 CI40442668481](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40442668481): Ubuntu121986436149 · Windows121986436581 모두 성공.
-- [주 체험본](https://agentflow-studio.tlsee0813.workers.dev/#/p/ex-converter) / [보조 Pages](https://tlsee0813-cmd.github.io/agentflow-studio/): 양쪽 공개 BUILD.txt가 위 source와 일치한다. Pages 게시 커밋은 `13a57b580c2c7301ba64212b8a1eb77baaa6c274`이며 기존 design 경로를 보존했다.
+- source: `f5036013f4d18f24c02eadb354c45816f2de9110`
+- [PR36](https://github.com/tlsee0813-cmd/agentflow-studio/pull/36), merge `94b5662f0166f51077ada920b2fb7fed85d2b287`; app tree `d2013befcda4c2d06f7a062391108861225b21ce` 일치.
+- [최종 CI40466829984](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40466829984): Ubuntu122064403291 · Windows122064403536 성공. checkout은 PR head SHA를 명시하며 Node22.16.0을 사용한다.
+- [주 체험본](https://agentflow-studio.tlsee0813.workers.dev/) / [보조 Pages](https://tlsee0813-cmd.github.io/agentflow-studio/): 공개 BUILD source 일치. Pages 게시 `7feb310bb1c675419211a021a99ed4a25231355f`.
+- 기반인 [62의 8종 OSS 화면·변경 비교 수용 결과](https://github.com/tlsee0813-cmd/agentflow-studio/blob/b6a9987f21c9628d550c10894eabda871de2c38a/docs/cycles/2026-10-26-visual-experience-59/RESULT.md)와 [63 돌아와 읽기](../2026-10-27-return-experience-63/RESULT.md)를 유지한다. 이번에는 입력 수집·출력 확장·서버·모델 계약을 바꾸지 않았다.
 
-## 화면에서 달라지는 경험
+## 사용자가 덜 해야 하는 일
 
-1. **어디를 읽는지 유지한다.** 선택·설명·근거·변경 비교가 같은 오른쪽 면을 쓴다. 지도는 그 옆까지이며 선택 대상을 최소 이동으로 드러낸다. 근거를 읽고 돌아오면 카메라와 초안이 남는다.
-2. **크기에 맞는 첫 윤곽을 준다.** 136부분의 VS Code 표본은 실제 9묶음과 개수로 시작하고 공통 항목43개는 목록으로 열린다. 사용자가 펼친 구성은 다시 자동으로 접지 않는다. 성긴5부분은 있는 만큼만 그린다.
-3. **선택 전에도 이름을 구별한다.** 같은 부모의 Types 파일/디렉터리는 원명 `extHostTypes.ts` / `extHostTypes`를 찾기·지도 행·읽기면에 덧붙인다. 별개 대상을 합치지 않는다.
-4. **같은 자리에서 변화를 이해한다.** 작은 변경안은 첫 열기에서 대상과 제목이 들어갈 때 한 번만 최소 이동한다. 항목·현재/미리보기 왕복은 같은 배치이며 현재에도 활성 대상의 중립 표시가 남는다. 큰 안은 억지 축소하지 않는다.
-5. **관계와 층위를 섞지 않는다.** 안쪽 범위의 바깥 참조를 별도 입구로 보인다. 선택한 실제 관계만 강하게 드러내고 복잡한 개요의 우회선은 물러난다. 관계 종류·방향·대상은 바꾸지 않았다.
-6. **읽기 마감을 맞춘다.** 한 줄 파일 이름의 불필요한 행 높이, 관계 원문 두 줄 잘림, 다른 프로젝트에 남는 다시 열기 안내, 이전 패널 때문에 다음 지도까지 축소되던 문제를 고쳤다.
+Collector의 `traces/1 → 수신 · traces → 수신 설정 ID`를 읽은 뒤, 역관계 목록을 다시 찾아갈 필요가 없다. 오른쪽 면의 작은 복귀 행이 출발 부분을 이름으로 가리킨다. 관계 목록의 ‘출발’은 그 관계를 따라왔다는 뜻이며, 부분의 소속이나 개발 순서를 바꾸지 않는다.
 
-Pro는 KNIME 경계 입구·Understand 선택 주변·OSGiViz 숨긴 관계·NDepend 밀집 관계 표현을 비교했다. 총괄은 안정된 읽기면·묶음/목록·선택 관계를 결합했고 전면 행렬, 모든 선의 상시 설명, 기존 점선을 불확실성으로 재해석하는 안은 채택하지 않았다. 독립 Claude의 추가 의견도 그대로 복사하지 않았다. Collector는 선택/기본 경로 계산이 원래 같았으므로 새 경로 엔진 대신 우회선 강약을 보정했다.
+Joplin 내부에서 바깥 공유 라이브러리를 보고 돌아오면 원래 내부 범위와 설명이 복원된다. 요약에서 출발했으면 요약, 상세에서 출발했으면 상세와 읽던 스크롤로 돌아온다. 사용자가 그동안 직접 바꾼 접힘·배치와 질문·변경 구상 초안은 과거 상태로 되감지 않는다.
 
-## 실제 OSS 자료 검토 범위
+같은 부분을 다시 방문하는 순환, 여러 단계를 건너뛰는 브라우저 Back/Forward도 주소만으로 구별하지 않고 방문 항목을 구별한다. 복귀 직후 입력을 시작했을 때 늦은 focus가 입력을 빼앗지 않도록 동기로 처리하고, 복원된 읽기면의 관계 버튼을 먼저 찾는다.
 
-[정확 SHA·원출처·선택 범위](../2026-10-26-visual-experience-58/OSS_CASES.md)와 [고정 자료](../2026-10-26-visual-experience-58/OSS_CASES.json)를 사용한다. 이는 수작업으로 만든 출처 있는 부분지도이며 전체 저장소 자동 분석이나 OSS 실행 검증이 아니다. 표의 숫자는 부분/깊이/관계 수다.
+## 선택한 표현
 
-| 사례 | 규모 | Cloud에서 실제 조작한 범위 | 하지 않은 것 |
-|---|---|---|---|
-| Joplin | 30 / 4 / 8 | desktop 내부·바깥 lib/editor/renderer·직전 장면 복귀 | 전체 최심부 |
-| restic | 29 / 3 / 4 | 명령 목록·backup→Options·하위 탐색 | 모든 명령 개별 동작 |
-| Node-RED | 32 / 4 / 8 | nodes/network·실제 응답 변경안·현재/미리보기 | 모든 노드 |
-| Zephyr | 14 / 2 / 10 | 센서·I2C/GPIO·관련 관계 | 하드웨어 실행 |
-| scikit-learn | 21 / 3 / 14 | 전처리·참조와 처리 순서 구별 | 학습·예측 실행 |
-| VS Code | 136 / 2 / 7 | 9묶음·common43·동명 Types 두 원명 | 136항목 개별 검토 |
-| Collector | 26 / 2 / 32 | traces/traces1 공유 receiver/exporter·processor 차이 | 실제 Collector 실행 |
-| micro-javascript | 5 / 3 / 1 | 성긴 첫 구조·module/JSContext·접기 | 실제 라이브러리 실행 |
+[VS Code의 의미 이동 이력](https://code.visualstudio.com/updates/v1_65#_new-editor-history-navigation), [Obsidian의 문맥 미리보기](https://obsidian.md/help/plugins/page-preview), [Ilograph의 관점 간 선택 유지](https://www.ilograph.com/docs/getting-started/browsing-diagrams/)를 Pro가 조사하고 총괄이 공식 출처를 대조했다. 이들의 서로 다른 기능을 같은 방문 기능이라고 뭉뚱그리지 않았다. AgentFlow에는 실제 소속과 방문을 분리하고 같은 읽기면에서 복귀하는 방법을 선택했다.
 
-8종 모두 1280×720·1440×900에서 개요 PNG 열람, 선택·가능한 내부 진입·접기·복귀·휠 줌/이동을 실행했다. 별도 파생3종은 긴 접미사, 반복 이름의 부모 구별, 성긴 자료 크기만 대조했다. converter 합성3변경, Node-RED 실제 이전 모델 응답, Joplin 합성 배치안도 구별했다.
+상시 두 줄의 이력 바·세 개의 이동 버튼·새 미리보기 모드는 채택하지 않았다. 같은 범위에서는 한 줄, 범위가 달라지면 기존 상단 입구를 재사용해 지도 면적을 추가로 줄이지 않는다.
 
-## 작성자 주장·독립 실행·총괄 판단
+## 근거와 검증 범위
 
-| 근거 | 결과와 한계 |
+| 구분 | 실제 확인과 한계 |
 |---|---|
-| 작성자 Claude | 335 continuity 검사·12브라우저 흐름과 영향 화면을 보고했다. 전체 제품 완성이나 실제 AI 품질의 증거로 확대하지 않는다. |
-| Cloud request1 / 8c0e8cc | 8종·파생3·변경안 왕복 상태는 통과. 동명 Types 선택 전 구별과 VS Code/sklearn 초기 경계 잘림으로 시각 수용 보류. 두 건은 fa75727에서 수정했다. |
-| 새 독립 Claude / fa75727 | 1280의5장면과1440핵심 장면을 직접 열어 읽기 순서·강약·크기 대응·복귀를 수용했다. 첫 비교의 타 대상 가림, 현재 대상 표시, 조밀 개요선과 작은 마감을 후속 개선으로 제안했고 최종 후보에 반영했다. |
-| Cloud request2 / 753639a | 두 PC 크기에서 경계·동명 구별·작은 초안·비교 대상 전체/중립 표시·관계 원문·프로젝트 전환·Node-RED 회귀를 수용. |
-| Cloud request3 / bcf88bb | 최종 후보의 기본 Noto Sans에서 1280·1440 실제 화면으로 VS Code 한 줄 행·Types 별칭, Joplin 짧은 행, 변환기 비교/닫기 복귀를 수용했다. 별도 DejaVu 강제 글꼴은 CSP로 적용되지 않아 미실행이며 작성자/CI의 넓은 글꼴 검사와 구별한다. |
-| 총괄 Windows | 최초 미분석 변경안의 영역 충돌·Types 구별 문제, Collector 선/토스트 반례를 직접 재현했다. 최종 후보에서 변환기 1280 전체 비교 대상·현재 중립 표시·같은 지도 좌표, Collector98% 진입·관계 전문·토스트 제거를 확인했다. 배포 후 Workers1280에서 변환기 전체 비교 대상과 현재 전환, VS Code9묶음100% 개요·공통43개 내부 목록·Types 두 원명을 직접 확인했다. 아래 두 PNG는 그 공개 화면이다. |
-| 최종 CI | 정확 source의 Windows/Ubuntu type/build/domain/HTTP/보안 경계/실제 브라우저 검사. paid provider 응답은 스텁이며 실제 AI 호출과 구별한다. |
+| 작성자 Opus5.5 High | 초기 구현과 관계 방문 흐름을 반환. 중간본의 기존 브라우저 흐름 및 정적 흐름 통과 보고. 마지막 요약/상세 복원과 focus 변경은 관련 흐름만 다시 실행했다. Node 검사 1개는 작성자 Node22.22와 고정22.16 요구 차이로 기준본에서도 실패했으며, 환경 재설치 대신 최종 CI에서 확인했다. |
+| Sol6.1 High 코드 검토 | 다단계·동일주소 방문, 지연 focus, 동일 대상의 요약→상세 후 복귀 반례를 발견했다. 마지막 surface 수정 해소는 읽기 검토이며 실제 실행과 구별한다. |
+| 총괄 Windows 실제 조작 | Collector 단계별 앱/브라우저 복귀, Joplin 내부·바깥 관계·범위 설명 복귀를 사용했다. 1280×720 및 실제1440×900 캡처를 열람했다. scope 설명 복귀 초점이 지도 제목으로 가던 차이를 직접 발견했고 최종본에서 읽기면 복원을 확인했다. |
+| Cloud 독립 실행 | f809의 relation_visit_flow·workspace_flow·return_flow·main_flow 각1회 성공. Collector·Joplin·Zephyr·VS Code 교차 조작과 1280×720·1440×900 PNG 열람 후 수용. f503의 최종 focus 차이와 relation_visit_flow를 별도1회 확인하고 직후 입력 보존까지 수용했다. 서버·브라우저 종료 보고. 실제 AI 호출·전체 OSS 실행은 하지 않았다. |
+| 최종 CI | 정확 source에서 양OS type/build/domain/HTTP/보안 경계/브라우저 검사 성공. AI 공급자는 스텁이며 실제 AI 의미 품질 검증이 아니다. |
+| 배포 후 확인 | Workers·Pages 공개 BUILD source 일치와 Workers AI 상태를 확인했다. 공개 Workers에서 Collector 단계별 관계·복귀, Joplin 관계 순환·복귀를 실제 조작하고 1280·1440 원본 화면을 저장했다. 이번에는 실제 AI를 다시 호출하지 않았다. |
 
-최종 request3 ZIP은242406bytes, SHA256 `a656cd329402dd24f42fc838a856ce33795bde7a700dcdbbcc78d160fa836d00`이다. request2 ZIP은242207bytes, SHA256 `86bc6fd16ceffc80b740eaf66d429ce91d65766ca5681b961131bb0ff4550a2c`. GitHub에는 ZIP/전체 로그를 올리지 않는다. 독립 실행자의 PNG 열람과 총괄의 원본 회수는 구별하며, 아래 이미지는 총괄의 최종 공개 화면이다. DeepSeek 추출 작업은 오류·빈 반환으로 채택 결과가 없었고 출처 담당과 총괄의 원문 대조로 진행했다.
+Cloud 첫 검토는 `f809e01` ZIP593003B·SHA256 `3b147955181370a257a497f67de4a316946d66e014b8eb250da87c787ebc65db`, 최종 focus 변경 검토는 `f503601` ZIP593190B·SHA256 `47c7b80b66b37cbc9c6a9cdd9a455925715b62082fc0998a1519965c02cab5f4`다. 111개 파일의 manifest를 확인한 제공 빌드 실행이며 원격 Git 재빌드는 아니다. ZIP과 전체 로그를 GitHub에 추가하지 않았다.
 
-직전753639a의 CI는 Windows 성공·Ubuntu 행 높이 검사 실패였다. 실제 한 줄 이름에 과한 내부 여백과 줄바꿈 여유를 적용하던 원인을 수정했다. 최종 bcf88bb에서는 실제 글자 폭·줄 수·잘림을 확인하는 검사로 보강했고 양OS CI가 성공했다. 실패한 후보를 배포하지 않았다.
+초기 Cloud 지시의 ‘일반 선택은 history를 늘리지 않는다’는 문구는 부정확했다. 실제 일반 선택의 native history.length 3→4 관측은 보존했다. 제품 기준은 **일반 선택에 관계 출발 입구를 만들지 않는 것**이며, 기존 부분 주소와 브라우저 Back을 위해 native 이력은 유지한다. 통과를 위해 이를 숨기거나 제품 이력을 제거하지 않았다.
 
-## 남는 대가
+## 자료·남는 대가
 
-- 큰 변경안 전체가 현재 배율에 들어가지 않으면 활성 대상만 드러내고 다른 항목으로 옮길 때 최소 이동한다.
-- 조밀한 개요의 선 다발은 옅게 남는다. 모든 관계를 개요에서 읽히게 만든 것은 아니며 선택한 관계와 원문으로 내려간다.
-- 현재/미리보기의 대응 위치를 보존하므로 현재 모드에 비교용 행 높이가 일부 남는다.
-- 첫 자동 접힘은 탭에서 프로젝트·범위별로 기억한다. 창 크기가 바뀔 때마다 사용자의 구성을 다시 정하지 않는다.
-- 실제 AI 일반 이해 품질, 자동 수집/기억 갱신, OSS 자체 실행, 설계 전체 구현 완료, 실제 구매 의사는 이번 수용의 범위가 아니다.
+[고정 OSS 원자료](../2026-10-26-visual-experience-58/OSS_CASES.json)와 기존 생성기를 재사용했다. 이번 핵심은 Collector·Joplin이며 Cloud가 Zephyr 관계 왕복과 VS Code 긴 목록 선택를 교차 확인했다. 출처 있는 수작업 부분지도이며 전체 OSS 실행이나 자동 추출 검증이 아니다. 앞선8종 전수 연구를 반복하지 않았다.
 
-## 최소 재현 자료와 화면
+- 복귀 행은 명시적으로 관계를 따라간 방문에 붙는다. 일반 선택·지도 선 클릭 전체를 새 방문 기능으로 바꾸지 않았다.
+- 방문 이력은 현재 탭의 짧은 읽기 맥락이다. 새로고침·프로젝트 전환 뒤에는 남지 않는다.
+- 긴 출발 이름은 한 줄로 줄이되 전체 접근성 이름·설명을 남긴다. 영문 끝소리가 불명확한 이름에는 ‘(으)로’를 사용한다.
+- 조밀한 개요의 선 다발, 큰 자료의 일부 화면 밖 배치, 긴 상세의 스크롤은 남는다. 모든 관계를 첫 화면에서 읽히게 했다는 뜻은 아니다.
+- 실제 AI 일반 이해·자동 기억 갱신·설계 전체 완성·구매 의사는 이번 수용 범위가 아니다.
 
-```sh
-node app/continuity/scripts/build.mjs
-node app/continuity/tests/visual58-fixtures.mjs --out <새 임시 폴더의 절대 경로>
-```
+## 대표 공개 화면
 
-홈의 백업 가져오기로 표본을 연다. Node-RED는 [기존 실제 모델 응답](node-red-real-plan.json), Joplin은 [배치 검토용 합성안](joplin-layout-plan.json)을 변경 구상에서 가져온다. 원본 요구·실제 응답·수작업 배치 자료를 혼동하지 않는다.
+![Collector 관계를 따라 읽기 · 1280×720](collector-return-1280.png)
 
-- [변환기 변경 비교 1280](converter-1280.png)
-- [VS Code 136부분 첫 개요 1280](vscode-1280.png)
+![Joplin 공유 라이브러리를 읽는 화면 · 1440×900](joplin-return-1440.png)
 
-이전59–61 판단은 [PR31](https://github.com/tlsee0813-cmd/agentflow-studio/pull/31), [PR32](https://github.com/tlsee0813-cmd/agentflow-studio/pull/32), [PR33](https://github.com/tlsee0813-cmd/agentflow-studio/pull/33) 및 이 문서 Git 이력에 남긴다. 매번 증거 폴더를 늘리지 않고 현재 결과와 대표 이미지 두 장을 갱신했다.
+이전59–62 판단과 원래 대표 화면은 위 고정 커밋 및 Git 이력에 보존한다. 현재 결과 문서를 갱신하며 별도 감사 폴더와 전체 로그 묶음을 늘리지 않았다.
