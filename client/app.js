@@ -4,8 +4,7 @@ import { parseProject } from '../shared/validation.js';
 import { editArea, addArea, addChildArea, createProject, rename } from '../shared/domain.js';
 import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
-import { layoutScope, edgePath, mapLead, isListGroup, ROOT, HEAD } from './map-layout.js';
-import { placeLens, placeCallout, follow, overlap } from './lens.js';
+import { layoutScope, edgePath, lead, mapLead, isListGroup, ROOT, HEAD } from './map-layout.js';
 import { aiStatus, askStudio, AskError, ERROR_TEXT } from './studio-api.js';
 import { runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth } from './plan-dom.js';
@@ -217,9 +216,74 @@ function defaultOpen(o, id, depth, isOpen) {
     if (!p || !p.childIds.length)
         return false;
     if (depth === 0)
-        return !isListGroup(o.view, scope);
+        return !isListGroup(o.view, scope) && !budgetFolded(o).has(id);
     const parent = partOf(o, p.parentId);
     return !!parent && depth <= 3 && parent.childIds.length === 1 && isOpen(parent.id, depth - 1);
+}
+/** How many parts a first view of a scope shows unfolded, and how much room it may take. Past the count, the scope's
+ * catalogue-like groups (a list by isListGroup: many leaves, few links among them) start folded, largest first, then the
+ * other largest groups; past the room, the open group taking the most room. The overview keeps every group's name, count and
+ * outside lines, and each opens at full size inside or in place. Decided once per scope, for its first view: the person's own
+ * folds and places always win (expandState, positions), and a visited view keeps its camera. */
+const SHOW_BUDGET = 28;
+/** Per project and scope, for the life of the tab: an edit (a new view of the same project) or a later window size does not
+ * decide the first view again. */
+const foldMemo = new Map();
+function budgetFolded(o) {
+    const k = `${o.project.id}|${scope ?? ''}`, hit = foldMemo.get(k);
+    if (hit)
+        return hit;
+    const ids = scope ? partOf(o, scope)?.childIds ?? [] : o.view.roots, out = new Set(), size = (id) => partOf(o, id)?.childIds.length ?? 0;
+    let shown = ids.reduce((n, id) => n + 1 + size(id), 0);
+    const bySize = (list) => list.filter(id => size(id) > 0).sort((a, b) => size(b) - size(a));
+    const own = (id) => expandState.has(`${o.project.id}|${id}`); // the person's own fold or unfold is never decided again
+    for (const id of [...bySize(ids.filter(id => isListGroup(o.view, id))), ...bySize(ids.filter(id => !isListGroup(o.view, id)))]) {
+        if (shown <= SHOW_BUDGET)
+            break;
+        if (own(id))
+            continue;
+        out.add(id);
+        shown -= size(id);
+    }
+    // Then the room it takes: the first view, its title included, must read at the opening scale (85%) in this window. Past
+    // it, the open group taking the most room folds next, until it does or nothing is left to fold. Stored places count as
+    // they are; a group opened or entered later may be larger than the window and is read by panning.
+    const fits = (fold) => {
+        const memo = new Map();
+        const open = (id, depth) => {
+            const hit = memo.get(id);
+            if (hit !== undefined)
+                return hit;
+            const k = `${o.project.id}|${id}`, p = partOf(o, id);
+            let v;
+            if (expandState.has(k))
+                v = expandState.get(k);
+            else if (!p || !p.childIds.length)
+                v = false;
+            else if (depth === 0)
+                v = !isListGroup(o.view, scope) && !fold.has(id);
+            else {
+                const parent = partOf(o, p.parentId);
+                v = !!parent && depth <= 3 && parent.childIds.length === 1 && open(parent.id, depth - 1);
+            }
+            memo.set(id, v);
+            return v;
+        };
+        const L = layoutScope(o.view, scope, open, positionsOf(o), measureName, undefined, mapAspect()), titleRoom = 100 + (scope ? 34 * relationGroups(scopeEnds(o)).length : 0);
+        return { L, ok: (L.bounds.w + 40) * 0.85 <= window.innerWidth - 48 && (L.bounds.h + titleRoom + 40) * 0.85 <= window.innerHeight - 152 };
+    };
+    for (let g = 0; g < ids.length; g++) {
+        const { L, ok } = fits(out);
+        if (ok)
+            break;
+        const area = (id) => { const b = L.boxes.get(id); return b ? b.w * b.h : 0; };
+        const next = ids.filter(id => size(id) > 0 && !out.has(id) && !own(id) && L.boxes.get(id)?.kind === 'frame').sort((a, b) => area(b) - area(a))[0];
+        if (!next)
+            break;
+        out.add(next);
+    }
+    foldMemo.set(k, out);
+    return out;
 }
 /** Marks every part between the scope and this part (exclusive) as unfolded in the given set or map. */
 function expandPath(o, id, into) {
@@ -324,6 +388,8 @@ async function render() {
         if (opened)
             cameras.set(camKey(opened, scope), { ...camera });
         planView.close(false);
+        if (toastKey)
+            dropToast();
         opened = null;
         selected = null;
         scope = null;
@@ -336,6 +402,8 @@ async function render() {
         return;
     }
     const fresh = opened?.key !== next.key;
+    if (fresh && toastKey && toastKey !== next.key)
+        dropToast();
     const travel = !fresh && opened ? travelFrom(next) : null;
     const idOf = (x) => (x ? next.alias?.toId.get(x) ?? x : null), routeScope = idOf(r.scope), routePart = idOf(r.part);
     const nextScope = routeScope && next.view.parts.some(p => p.id === routeScope && p.childIds.length) ? routeScope : null;
@@ -359,17 +427,28 @@ async function render() {
         lastClick.id = '';
         if (fresh)
             planView.projectChanged();
+        // A new project starts with the map alone: the previous project's reading pane must not narrow its first view.
         if (fresh) {
             selected = null;
             ask = null;
             editing = false;
             partForm = null;
             composerOpen = false;
+            sheetOpen = false;
+            scopeReading = false;
+            $('panel').hidden = true;
+            $('panel').replaceChildren();
+            hideLens();
         }
         tempExpand.clear();
         previewExpand.clear();
         previewTarget = null;
         previewScope = '';
+        if (scopeReading) {
+            scopeReading = false;
+            if ($('lens').classList.contains('scope-read'))
+                hideLens();
+        }
         renderSpace('restore');
     }
     const travelling = !!travel && travel.to === scope;
@@ -536,6 +615,8 @@ function rememberPlace() {
     catch { /* a convenience only */ }
 }
 let openPlanOnArrive = false;
+/** A package-like name ('@node-red/runtime') may break after its slashes rather than inside a word. */
+const slashBreaks = (name) => name.split('/').flatMap((x, i, all) => (i < all.length - 1 ? [`${x}/`, document.createElement('wbr')] : [x]));
 function programCard(key, p, example, keyOf) {
     const v = studioView(p), last = v.records[0];
     const changed = v.parts.filter(x => recentAt(x.lastAt)).length;
@@ -549,7 +630,7 @@ function programCard(key, p, example, keyOf) {
     const roots = v.roots.map(id => v.parts.find(x => x.id === id)).filter(Boolean), MAX = 4;
     const section = roots.length ? h('ol', { class: 'program-section', 'aria-label': '최상위 구성' }, ...roots.slice(0, MAX).map(r => {
         const kids = r.childIds.map(id => v.parts.find(x => x.id === id)?.name).filter(Boolean);
-        return h('li', {}, h('a', { href: `${base}/${encodeURIComponent(keyOf(r.id))}`, title: `‘${r.name}’ 선택해서 열기` }, h('strong', {}, r.name), kids.length ? h('span', {}, kids.slice(0, 3).join(' · '), kids.length > 3 ? h('small', {}, ` +${kids.length - 3}`) : null) : (mapLead(v, r.id) ? h('span', { class: 'quiet' }, mapLead(v, r.id)) : null)));
+        return h('li', {}, h('a', { href: `${base}/${encodeURIComponent(keyOf(r.id))}`, title: `‘${r.name}’ 선택해서 열기` }, h('strong', {}, ...slashBreaks(r.name)), kids.length ? h('span', {}, kids.slice(0, 3).join(' · '), kids.length > 3 ? h('small', {}, ` +${kids.length - 3}`) : null) : (mapLead(v, r.id) ? h('span', { class: 'quiet' }, mapLead(v, r.id)) : null)));
     }), roots.length > MAX ? h('li', { class: 'more' }, h('a', { href: base }, `+${roots.length - MAX}개 묶음`)) : null) : h('p', { class: 'program-empty' }, '아직 부분이 없어요 · 열어서 첫 부분을 적어요');
     const tryPlan = key === CONVERTER_KEY ? h('a', { class: 'program-try', href: base, onclick: () => { openPlanOnArrive = true; } }, h('strong', {}, '변경 구상 시험해 보기'), h('span', {}, '폴더째 변환 · 지금과 구상을 같은 자리에서 비교')) : null;
     return h('li', {}, h('article', { class: `program${example ? ' is-example' : ''}` }, h('a', { class: 'program-head', href: base }, h('strong', { class: 'program-name' }, p.name), h('span', { class: 'program-brief' }, p.space.brief?.text ?? '목적이 아직 적혀 있지 않아요.'), h('span', { class: 'program-meta' }, meta)), h('div', { class: 'program-body' }, section, cont, tryPlan)));
@@ -621,7 +702,7 @@ const measureName = (() => {
         }
         if (!ctx)
             return text.length * 9;
-        ctx.font = kind === 'node' ? `600 13.5px ${family}` : kind === 'head' ? `650 15px ${family}` : kind === 'sub' ? `650 13px ${family}` : kind === 'plan' ? `600 12px ${family}` : `400 12.5px ${family}`;
+        ctx.font = kind === 'node' ? `600 13.5px ${family}` : kind === 'item' ? `550 13px ${family}` : kind === 'head' ? `650 15px ${family}` : kind === 'sub' ? `650 13px ${family}` : kind === 'plan' ? `600 12px ${family}` : `400 12.5px ${family}`;
         const w = ctx.measureText(text).width;
         cache.set(key, w);
         return w;
@@ -641,8 +722,47 @@ function withTitle() {
 /** While a change preview reads on the map: the change lines each part's own row shows (plan-view decides; the layout only
  * makes room for them on those parts). null in the current view, so the current map keeps its own sizes. */
 let planRows = null, planRowsKey = '';
-const relayout = (o) => { lay = layoutScope(o.view, scope, isExpanded(o), positionsOf(o), measureName, planRows ?? undefined); core = { ...lay.bounds }; withTitle(); };
+/** The shape of the room a first view has for its parts (the window's map without the header, the title above the parts and
+ * the margins; never the reading pane): what an unlinked block of parts is balanced against. */
+const mapAspect = () => Math.max(1, Math.min(3, (window.innerWidth - 48) / Math.max(240, window.innerHeight - 252)));
+const relayout = (o) => { lay = layoutScope(o.view, scope, isExpanded(o), positionsOf(o), measureName, planRows ?? undefined, mapAspect()); core = { ...lay.bounds }; withTitle(); };
+/** Two real parts with one name under one parent ('Types' and 'Types'): told apart by the first clause of their own note, as
+ * written ('원명 extHostTypes.ts'), only where the name is really ambiguous. Never merged, renamed or guessed: null when the name
+ * is not shared, or when their own words do not tell them apart. */
+function aliasOf(v, id) {
+    const p = v.parts.find(x => x.id === id);
+    if (!p)
+        return null;
+    const sibs = (p.parentId ? v.parts.find(x => x.id === p.parentId)?.childIds ?? [] : v.roots).filter(x => x !== id && v.parts.find(y => y.id === x)?.name === p.name);
+    if (!sibs.length)
+        return null;
+    const clause = (t) => { const n = t.replace(/\s+/g, ' ').trim(), m = /^(.+?)(?:[:;：]|[.。](?=\s|$))/.exec(n); return (m ? m[1] : n).trim().slice(0, 60); };
+    const mine = clause(p.note);
+    return mine && !sibs.some(x => clause(v.parts.find(y => y.id === x)?.note ?? '') === mine) ? mine : null;
+}
 const REL_LABEL = { flow: '넘겨줌', needs: '필요로 함', shares: '함께 씀', related: '관련' };
+/** A relation read from one end: the verb with that end as its subject ("이 부분이 필요로 함") or its object ("이 부분을 필요로
+ * 함"). The kinds and their directions are the project's own; nothing here makes a relation more or less certain. */
+function relLabel(kind, out, subject = '부분') {
+    const it = `이 ${subject}`, verb = REL_LABEL[kind] ?? kind;
+    if (kind === 'needs')
+        return out ? `${it}${subject === '부분' ? '이' : '가'} 필요로 함` : `${it}${subject === '부분' ? '을' : '를'} 필요로 함`;
+    if (kind === 'flow')
+        return out ? `${it}${subject === '부분' ? '이' : '가'} 넘겨줌` : `${it}에 넘겨줌`;
+    return out ? `${verb} →` : `← ${verb}`;
+}
+/** Relations of one part (or one scope), grouped by verb and direction: what it uses before what uses it. */
+function relationGroups(ends, subject = '부분') {
+    const order = ['flow', 'needs', 'shares', 'related'], groups = new Map();
+    const sorted = [...ends].sort((a, b) => Number(b.out) - Number(a.out) || order.indexOf(a.r.kind) - order.indexOf(b.r.kind));
+    for (const x of sorted) {
+        const k = `${x.out}|${x.r.kind}`;
+        const g = groups.get(k) ?? { label: relLabel(x.r.kind, x.out, subject), list: [] };
+        g.list.push(x);
+        groups.set(k, g);
+    }
+    return [...groups.values()];
+}
 /** A part's line on the map: the state only when it says something. 'plan' (no request yet) stays quiet here; the inspector
  * still tells "no records" apart from "a planned note only". */
 function metaLine(p, last) {
@@ -675,8 +795,14 @@ function renderSpace(cameraMode = 'fit', planOverlay = true) {
         defs.append(d);
     }
     edges.append(defs);
+    // A line between two parts of the same group belongs to that group: it reads above the group's surface (a line between
+    // groups stays under them, so it never seems to end at a group it only passes).
+    const frames = (id) => { const out = new Set(); for (let c = lay.boxes.get(id)?.container, g = 0; c && g < 64; c = lay.boxes.get(c)?.container, g++)
+        if (lay.boxes.get(c)?.kind === 'frame')
+            out.add(c); return out; };
     for (const e of lay.edges) {
-        const g = svg('g', { class: `edge k-${e.kind}${e.agg ? ' agg' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
+        const fa = frames(e.from), inner = [...frames(e.to)].some(f => fa.has(f));
+        const g = svg('g', { class: `edge k-${e.kind}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
         // No text on the map: the meaning shows on hover (tip) and in the selected part's 관련 부분.
         g.append(svg('path', { class: 'edge-line', 'marker-end': 'url(#arrow)', 'marker-start': 'url(#dot)' }), svg('path', { class: 'edge-hit' }));
         edges.append(g);
@@ -717,27 +843,37 @@ function renderSpace(cameraMode = 'fit', planOverlay = true) {
         else {
             // A folded part reads its inside: latest record anywhere under it.
             const last = b.kids ? subtreeRecords(view, p.id)[0]?.at ?? null : p.lastAt, meta = metaLine(p, last), face = b.face ?? 'row';
-            const note = face === 'unit' ? mapLead(view, p.id) : '', box = lay.boxes.get(b.container), onTint = box?.kind === 'frame' && box.depth % 2 === 1;
+            // A folded group reads by its name and its count (the way in); its note reads in the pane. A part without an inside keeps
+            // its own first sentence.
+            const note = face === 'unit' && !b.kids ? mapLead(view, p.id) : '', box = lay.boxes.get(b.container), onTint = box?.kind === 'frame' && box.depth % 2 === 1, alias = aliasOf(view, p.id);
             world.append(h('div', { class: `node ${face}${onTint ? ' on-tint' : ''} s-${p.status}${recentAt(last) ? ' fresh' : ''}${b.kids ? ' has-kids' : ''}${meta || of ? '' : ' bare'}`, 'data-part': p.id, 'data-box': p.id, 'data-drag': p.id, role: 'button', tabindex: '0',
-                title: `${of ? `${of} › ` : ''}${p.name}`, onkeydown: keySelect(p.id) }, b.kids ? toggleButton(p, false) : null, h('span', { class: 'node-text' }, h('span', { class: 'node-name' }, p.name), note ? h('span', { class: 'node-note' }, note) : null, meta ? h('span', { class: 'node-meta' }, h('i', { class: 'dot', 'aria-hidden': 'true' }), meta) : of ? h('span', { class: 'node-meta owner' }, `${of} 안`) : null, h('span', { class: 'plan-note' })), b.kids ? enterButton(p) : null));
+                title: `${of ? `${of} › ` : ''}${p.name}${alias ? ` · ${alias}` : ''}`, onkeydown: keySelect(p.id) }, b.kids ? toggleButton(p, false) : null, h('span', { class: 'node-text' }, h('span', { class: 'node-name' }, p.name), note ? h('span', { class: 'node-note' }, note) : null, meta ? h('span', { class: 'node-meta' }, h('i', { class: 'dot', 'aria-hidden': 'true' }), meta) : alias ? h('span', { class: 'node-meta owner alias' }, alias) : of ? h('span', { class: 'node-meta owner' }, `${of} 안`) : null, h('span', { class: 'plan-note' })), b.kids ? enterButton(p) : null));
         }
     }
-    // The title of this map: what the scope is for. Its own sentence is not repeated by any region or the lens.
-    const sp = partOf(o, scope), purpose = (sp ? sp.note : o.project.space.brief?.text ?? '').trim();
-    const title = h('header', { class: 'map-title' }, h('h1', { class: 'map-name' }, sp ? sp.name : o.project.name), purpose ? h('p', { class: 'map-purpose', title: purpose }, purpose) : null);
+    // The title of this map: what the scope is for, in its own first sentence. The rest of that text (where it comes from, what
+    // was checked) reads in full in the pane on request; nothing of it is cut or reworded. Inside a part, the scope's own
+    // relations to the outside read under the title as the scope's, never drawn as lines from one of its children.
+    const sp = partOf(o, scope), purpose = (sp ? sp.note : o.project.space.brief?.text ?? '').trim(), first = lead(purpose);
+    const outside = scopeEnds(o), more = purpose.replace(/\s+/g, ' ').length > first.length + 1;
+    const title = h('header', { class: 'map-title' }, h('h1', { class: 'map-name' }, sp ? sp.name : o.project.name), first ? h('p', { class: 'map-purpose' }, h('span', {}, first), more ? h('button', { type: 'button', class: 'map-more', title: '설명 전체와 출처', onclick: () => openScopeReading() }, '자세히') : null) : null, outside.length ? h('div', { class: 'scope-rels', role: 'list', 'aria-label': '이 범위의 바깥 관계' }, ...relationGroups(outside, '범위').map(g => h('p', { class: 'scope-rel', role: 'listitem' }, h('span', { class: 'sr-verb' }, g.label), ...g.list.map(x => h('button', { type: 'button', class: 'sr-part', title: `${partPath(o.view, x.far).map(q => q.name).join(' › ')}${x.r.note ? `\n${x.r.note}` : ''}`, onclick: () => go(o.key, x.far, null) }, partOf(o, x.far)?.name ?? '부분'))))) : null);
     world.append(title);
     title.style.width = `${titleRect().w}px`;
     titleH = view.parts.length ? title.offsetHeight : 0;
     title.hidden = !titleH;
-    $('scope-sticky').replaceChildren(h('strong', {}, sp ? sp.name : o.project.name), purpose ? h('span', {}, purpose) : '');
+    $('scope-sticky').replaceChildren(h('strong', {}, sp ? sp.name : o.project.name), first ? h('span', {}, first) : '');
     lay.bounds = { ...core };
     withTitle();
     // Selected lines move to a layer above the group surfaces (below the parts), so a line that crosses a group is not read as
     // ending at it.
     const top = svg('svg', { class: 'edges edges-top', width: '1', height: '1', 'aria-hidden': 'true' });
     world.insertBefore(top, world.querySelector('.node, .ghost'));
+    world.querySelectorAll('.edge.inner').forEach(g => top.append(g));
     positionWorld();
     $('space').classList.toggle('in-scope', !!scope);
+    // Many lines on one view: those that go round other parts share the same gaps and would read as extra outlines of the
+    // groups they pass; they step back until selected, hovered or read as a change's context (kind, direction and hover meaning
+    // unchanged).
+    $('space').classList.toggle('dense-lines', lay.edges.length >= 12);
     const empty = $('space-empty');
     empty.hidden = view.parts.length > 0 || o.kind === 'saved';
     empty.textContent = view.records.length ? `아직 부분으로 나뉘지 않은 프로젝트예요. 기록 ${view.records.length}개는 ‘최근 기록’에서 볼 수 있어요.` : '아직 부분도 기록도 없는 프로젝트예요.';
@@ -781,9 +917,68 @@ function positionWorld() {
         const a = lay.boxes.get(g.dataset.from), b = lay.boxes.get(g.dataset.to);
         if (!a || !b)
             return;
-        const d = edgePath(a, b, lay.boxes.values()).d;
-        g.querySelectorAll('path').forEach(x => x.setAttribute('d', d));
+        const r = edgePath(a, b, lay.boxes.values());
+        g.querySelectorAll('path').forEach(x => x.setAttribute('d', r.d));
+        g.classList.toggle('detour', !!r.detour);
     });
+    placeEdgeLabels();
+}
+/** Verbs on the map: on the lines of the selection, and on every line of a map that has only a few. Each sits at a free spot
+ * along its own line; a verb that would cover a part, a group's head, the title or another verb is left off the map (the pane
+ * lists every relation by its verb). Nothing is drawn for a relation the project does not hold. */
+function placeEdgeLabels() {
+    const world = $('world'), o = opened;
+    if (!o)
+        return;
+    let box = world.querySelector('.edge-labels');
+    if (!box) {
+        box = h('div', { class: 'edge-labels', 'aria-hidden': 'true' });
+        world.append(box);
+    }
+    box.replaceChildren();
+    const few = !selected && !planView.isOpen() && lay.edges.length <= 6;
+    // At rest, lines of one kind meeting the same part share one verb (the first of them carries it).
+    const seenEnd = new Set();
+    const lines = [...world.querySelectorAll('.edge')].filter(g => {
+        if (g.classList.contains('on'))
+            return true;
+        if (!few)
+            return false;
+        const e = lay.edges.find(x => x.key === g.dataset.key), k = e ? `${e.to}|${e.kind}` : '';
+        if (!e || seenEnd.has(k))
+            return false;
+        seenEnd.add(k);
+        return true;
+    });
+    if (!lines.length)
+        return;
+    const blocks = [...lay.boxes.values()].map(b => (b.kind === 'frame' ? { x: b.x, y: b.y, w: b.w, h: b.head } : b));
+    if (titleH)
+        blocks.push(titleRect());
+    const clear = (r) => !blocks.some(b => r.x < b.x + b.w + 3 && b.x < r.x + r.w + 3 && r.y < b.y + b.h + 3 && b.y < r.y + r.h + 3);
+    for (const g of lines) {
+        const e = lay.edges.find(x => x.key === g.dataset.key), path = g.querySelector('.edge-line');
+        if (!e || !path)
+            continue;
+        const label = h('span', { class: `edge-label k-${e.kind}${g.classList.contains('on') ? ' on' : ''}` }, `${REL_LABEL[e.kind] ?? e.kind}${e.ids.length > 1 ? ` ${e.ids.length}` : ''}`);
+        box.append(label);
+        const w = label.offsetWidth, hh = label.offsetHeight, len = path.getTotalLength();
+        let spot = null;
+        for (const t of [0.5, 0.4, 0.6, 0.3, 0.7, 0.22, 0.78]) {
+            const q = path.getPointAtLength(len * t), r = { x: q.x - w / 2, y: q.y - hh / 2, w, h: hh };
+            if (clear(r)) {
+                spot = r;
+                break;
+            }
+        }
+        if (!spot) {
+            label.remove();
+            continue;
+        }
+        label.style.left = `${spot.x}px`;
+        label.style.top = `${spot.y}px`;
+        blocks.push(spot);
+    }
 }
 function renderRecent() {
     const o = opened, sp = partOf(o, scope), all = sp ? subtreeRecords(o.view, sp.id) : o.view.records, LATEST = 7;
@@ -791,7 +986,6 @@ function renderRecent() {
     // No records here: no entry and no reserved room.
     const none = !all.length, shown = recentShown() && !none;
     $('recent-toggle').hidden = none;
-    $('recent-toggle').nextElementSibling.toggleAttribute('hidden', none);
     $('recent-badge').textContent = String(all.length);
     $('recent-title').textContent = sp ? `최근 기록 · ${sp.name}` : '최근 기록';
     $('recent-count').textContent = partial ? `최신 ${items.length} / ${all.length}` : String(all.length);
@@ -808,8 +1002,10 @@ function renderRecent() {
 }
 /* ---------- camera ---------- */
 const ZOOM_MIN = 0.4, ZOOM_MAX = 1.6;
-/** The right dock is taken only by the change plan or an open reading sheet; the lens floats over the map and takes no room. */
-const PANEL_W = () => (planView.isOpen() ? planView.width() : selected && sheetOpen ? inspW() : 0);
+/** The reading pane is a column of its own on the right: the map's viewport ends where the pane begins (syncMapArea), so nothing
+ * the person reads is ever drawn under it and the geometry below needs no inset for it.
+ * Width of the reading pane while anything reads there (a part, its sheet, a comparison or the whole plan); 0 otherwise. */
+const paneWidth = () => (['lens', 'panel', 'plan-panel'].some(id => !$(id).hidden) ? inspW() : 0);
 const leftInset = () => 16;
 /** Map tools sit at the bottom left; the map keeps clear of them only below this line. */
 const BOTTOM = 64;
@@ -826,21 +1022,24 @@ function applyCamera(animate = false) {
     sp.classList.toggle('z-mid', camera.k < 0.8);
     sp.classList.toggle('z-low', camera.k < 0.6);
     sp.style.setProperty('--grow', String(Math.min(1.6, Math.max(1, 0.85 / camera.k))));
-    positionLens(animate);
-    positionCallouts();
     updateSticky();
 }
-/** Whole view in the free area. Opening never shrinks below 85%; only the explicit 전체 보기 button may go further. */
+/** Whole view in the free area. Opening never shrinks below 85%; only the explicit 전체 보기 button may go further. A map smaller
+ * than the window sits near the top (a page is read from its top) and, while the pane is closed, leaves the pane's room free on
+ * the right when there is enough of it, so opening a reading later rarely has to move the map. */
 function fitView(explicit, animate = false) {
     const o = opened;
     if (!o)
         return;
-    const vp = $('viewport').getBoundingClientRect(), left = leftInset() + 8, right = PANEL_W() + 24, top = topInset() + 12, bottom = mapBottomInset() + 8;
+    syncMapArea();
+    const vp = $('viewport').getBoundingClientRect(), left = leftInset() + 8, right = 24, top = topInset() + 12, bottom = mapBottomInset() + 8;
     const w = Math.max(200, vp.width - left - right), hgt = Math.max(160, mapBottom() - top - bottom), B = lay.bounds;
     const fit = Math.min(1, w / Math.max(1, B.w + 40), hgt / Math.max(1, B.h + 40));
     const k = explicit ? Math.max(ZOOM_MIN, fit) : Math.max(0.85, fit);
-    const mw = B.w * k, mh = B.h * k;
-    camera = { k, x: left + (mw <= w ? (w - mw) / 2 : 12) - B.x * k, y: top + (mh <= hgt ? (hgt - mh) / 2 : 12) - B.y * k };
+    const mw = B.w * k, mh = B.h * k, free = w - mw, room = paneWidth() ? 0 : inspW();
+    const xoff = free <= 0 ? 12 : free >= room + 96 ? Math.max(40, (free - room) / 2) : free / 2;
+    const yoff = mh <= hgt ? Math.min((hgt - mh) / 2, 48) : 12;
+    camera = { k, x: left + xoff - B.x * k, y: top + yoff - B.y * k };
     applyCamera(animate);
 }
 function zoomAt(k, cx, cy, animate = false) {
@@ -848,10 +1047,10 @@ function zoomAt(k, cx, cy, animate = false) {
     camera = { k: nk, x: cx - (cx - camera.x) * (nk / camera.k), y: cy - (cy - camera.y) * (nk / camera.k) };
     applyCamera(animate);
 }
-/** Smallest pan that brings a world rectangle into the free map area (left of the inspector, above the tools); never a zoom.
- * Larger than the area: its top-left corner comes in. */
+/** Smallest pan that brings a world rectangle into the free map area (left of the reading pane, above the tools); never a
+ * zoom. Larger than the area: its top-left corner comes in. */
 function revealRect(B, keepRight = 0, keepBottom = 0) {
-    const vp = $('viewport').getBoundingClientRect(), left = leftInset() + 16, right = vp.width - PANEL_W() - 24 - keepRight, top = topInset() + 4, bottom = mapBottom() - mapBottomInset() - 12 - keepBottom;
+    const vp = $('viewport').getBoundingClientRect(), left = leftInset() + 16, right = vp.width - 24 - keepRight, top = topInset() + 4, bottom = mapBottom() - mapBottomInset() - 12 - keepBottom;
     const sx = camera.x + B.x * camera.k, sy = camera.y + B.y * camera.k, sw = B.w * camera.k, sh = B.h * camera.k;
     let dx = 0, dy = 0;
     if (sx + sw > right)
@@ -867,8 +1066,8 @@ function revealRect(B, keepRight = 0, keepBottom = 0) {
         applyCamera(true);
     }
 }
-/** Keep the selected part visible beside the inspector (a large frame: its head and first rows). When the part and the other
- * ends of its lines fit together at this zoom, they come into view together. */
+/** Keep the selected part visible beside the pane (a large frame: its head and first rows). When the part and the other ends
+ * of its lines fit together at this zoom, they come into view together. */
 function reveal(partId) {
     const b = lay.boxes.get(partId);
     if (!b)
@@ -878,8 +1077,8 @@ function reveal(partId) {
     if (ends.length) {
         const all = [own, ...ends], x = Math.min(...all.map(r => r.x)), y = Math.min(...all.map(r => r.y));
         const B = { x, y, w: Math.max(...all.map(r => r.x + r.w)) - x, h: Math.max(...all.map(r => r.y + r.h)) - y };
-        const vp = $('viewport').getBoundingClientRect();
-        if (B.w * camera.k <= vp.width - PANEL_W() - 56 && B.h * camera.k <= lensArea().h - 24) {
+        const area = mapArea();
+        if (B.w * camera.k <= area.w - 24 && B.h * camera.k <= area.h - 24) {
             revealRect(B);
             return;
         }
@@ -888,8 +1087,9 @@ function reveal(partId) {
 }
 /* ---------- selection & panel ---------- */
 let pendingRecord = null;
-/** One reading surface per selection: the lens beside the part, or the reading sheet (sources, records, questions, edits) in its
- * place. The sheet replaces the lens; closing it brings the same lens back with the same selection, camera and drafts. */
+/** One reading surface per selection, always in the pane: the lens (what the part is and how it is linked), or the reading sheet
+ * (sources, records, questions, edits) in its place. Closing the sheet brings the same lens back with the same selection,
+ * camera and drafts. */
 let sheetOpen = false;
 function select(partId) {
     const changed = selected !== partId;
@@ -899,10 +1099,11 @@ function select(partId) {
         if (ask && !ask.controller)
             ask = null;
         sheetOpen = !!pendingRecord;
-        lensPlace = null;
     }
     if (!!selected !== !!partId)
         recentPeek = false;
+    if (partId)
+        scopeReading = false;
     selected = partId;
     if (opened)
         renderRecent();
@@ -919,7 +1120,10 @@ function select(partId) {
     if (!partId) {
         panel.hidden = true;
         panel.replaceChildren();
-        hideLens();
+        if (scopeReading)
+            renderScopeLens();
+        else
+            hideLens();
         clearHighlight();
         return;
     }
@@ -937,16 +1141,17 @@ function showReading(scrollTop, move) {
         hideLens();
         panel.hidden = false;
         renderPanel(scrollTop);
+        syncMapArea();
         if (move)
             reveal(selected);
         return;
     }
     panel.hidden = true;
     panel.replaceChildren();
+    renderLens();
+    syncMapArea();
     if (move)
         reveal(selected);
-    renderLens();
-    placeLensOnce(false, move);
 }
 /** The camera before the sheet opened: closing the sheet comes back to it unless the person moved the map meanwhile. */
 let sheetReturn = null, mapMoved = false;
@@ -969,15 +1174,12 @@ function closeSheet() {
 function refreshReading() { if (!opened || !selected || planView.isOpen())
     return; if (sheetOpen)
     renderPanel(false);
-else {
-    renderLens();
-    positionLens();
-} }
-/* ---------- reading surfaces ----------
- * The lens (a selection) and the change comparison (plan-view) share one element and one way of finding a place: beside the
- * part's own group, never over the part, its group, the other ends of its lines or the scope's title; else docked along the
- * bottom of the map. Chosen once per selection; afterwards it only follows its part. */
-let lensPlace = null;
+else
+    renderLens(); }
+/* ---------- the reading pane and the map area ----------
+ * Selection, comparison, explanation and sources read in one place: the pane on the right, as wide as a column of text and no
+ * wider. The map keeps the rest of the window. Opening the pane never re-fits or zooms the map; the part being read is brought
+ * beside it by the smallest pan, and only when it would be hidden. */
 /** Parts the open surface is about when it is not the selection (the parts of a change the comparison reads). */
 let readingFor = [];
 const toScreen = (b) => ({ x: camera.x + b.x * camera.k, y: camera.y + b.y * camera.k, w: b.w * camera.k, h: b.h * camera.k });
@@ -985,257 +1187,33 @@ const union = (rs) => { const x = Math.min(...rs.map(r => r.x)), y = Math.min(..
 /** The change plan's strip takes the top of the map while it is open. */
 const stripInset = () => { const strip = $('plan-strip'); return strip.hidden ? 16 : strip.offsetTop + strip.offsetHeight + 10; };
 const topInset = () => stripInset() + (!$('plan-strip').hidden && !$('scope-sticky').hidden ? $('scope-sticky').offsetHeight + 8 : 0);
-function lensArea() { const vp = $('viewport').getBoundingClientRect(), top = topInset(); return { x: 16, y: top, w: vp.width - 32 - PANEL_W(), h: mapBottom() - top - mapBottomInset() }; }
-function hideLens() { const l = $('lens'); l.hidden = true; l.replaceChildren(); l.classList.remove('docked', 'compare'); lensPlace = null; readingFor = []; }
-/** part: what the surface is about; beside: that and the group it sits in; protect: those, the other ends of their lines and
- * the scope's title; keep: the same in map coordinates (what a docked surface keeps clear of with one pan). */
-function lensGeometry() {
-    const ids = (readingFor.length ? readingFor : selected ? [selected] : []).filter(id => lay.boxes.get(id)?.kind !== 'ghost' && lay.boxes.has(id));
-    if (!ids.length)
-        return null;
-    const parts = ids.map(id => lay.boxes.get(id)), set = new Set(ids);
-    const groups = parts.map(b => lay.boxes.get(b.container)).filter((g) => g?.kind === 'frame');
-    const ends = lay.edges.filter(e => set.has(e.from) !== set.has(e.to)).map(e => lay.boxes.get(set.has(e.from) ? e.to : e.from)).filter((x) => !!x);
-    const near = union([...parts, ...groups]), own = union(parts.map(b => ({ x: b.x, y: b.y, w: Math.min(b.w, 420), h: Math.min(b.h, 300) })));
-    const protect = [toScreen(near), ...ends.map(toScreen), ...(titleH ? [toScreen(titleRect())] : [])];
-    // Every other part drawn on screen (not the surface's own parts or the groups around them).
-    const around = new Set();
-    for (const b of parts)
-        for (let c = b; c; c = lay.boxes.get(c.container))
-            around.add(c.id);
-    const vp = $('viewport').getBoundingClientRect();
-    const others = [...lay.boxes.values()].filter(b => !around.has(b.id) && b.kind !== 'ghost').map(toScreen).filter(r => r.x < vp.width && r.y < vp.height && r.x + r.w > 0 && r.y + r.h > 0);
-    return { part: toScreen(union(parts)), beside: toScreen(near), protect, keep: union([near, ...ends]), own, others };
-}
-/** Once per selection (or after the map's structure changed). Docked: one smallest pan keeps the part, its group and its line
- * ends above the dock (or the part alone when they cannot fit). No zoom, and no second round. pan false: the camera is the
- * person's (coming back from the sheet, where they may have moved the map); the surface takes its place without moving it. */
-function placeLensOnce(dock = false, pan = true) {
-    const l = $('lens');
-    if (l.hidden)
-        return;
-    l.classList.remove('docked');
-    l.style.maxHeight = '';
-    l.style.width = '';
-    const area = lensArea(), g = lensGeometry(), size = { w: l.offsetWidth, h: Math.min(l.offsetHeight, area.h) };
-    lensPlace = g && !dock ? placeLens(g.part, g.beside, g.protect, size, area, g.others) : { side: 'dock', x: 0, y: 0, h: 0, dy: 0 };
-    if (lensPlace.side === 'dock') {
-        // Docked: as wide as its content needs (a sentence does not take the whole window), at the bottom of the map near the
-        // part, where it covers nothing it must not. Else it gives up height (its body scrolls) so the part, its group and its
-        // line ends fit above it, and one smallest pan brings them there. The space it takes is the reading place's, not the map's.
-        l.classList.add('docked');
-        const compare = l.classList.contains('compare'), sections = l.querySelectorAll('.lens-body > *').length;
-        const w = Math.round(Math.min(area.w, compare ? 1100 : Math.max(420, Math.min(720, sections * 290))));
-        l.style.width = `${w}px`;
-        const natural = l.offsetHeight, bottom = area.y + area.h;
-        let h = Math.min(natural, Math.round(area.h * (dock ? 0.6 : 0.42)));
-        const clearAt = (x, hh, ww = w) => !g || g.protect.every(q => overlap({ x, y: bottom - hh, w: ww, h: hh }, q) < 1);
-        // Among clear places: the one hiding the least of the other parts, nearest the part's group first.
-        const hidden = (x, ww) => !g ? 0 : g.others.reduce((sum, q) => sum + overlap({ x, y: bottom - h, w: ww, h }, q), 0);
-        const cands = [];
-        const add = (x, ww) => { ww = Math.min(ww, area.w); cands.push({ x: Math.min(Math.max(x, area.x), area.x + area.w - ww), w: ww }); };
-        if (g)
-            for (const x of [g.beside.x, g.beside.x + g.beside.w - w, g.beside.x + (g.beside.w - w) / 2, area.x, area.x + area.w - w])
-                add(x, w);
-        else
-            add(area.x, w);
-        if (g) {
-            // Free stretches of the bottom band between protected parts: a narrower surface may fit beside them.
-            const band = g.protect.filter(q => q.y + q.h > bottom - h && q.y < bottom).map(q => [q.x - 12, q.x + q.w + 12]).sort((a, b) => a[0] - b[0]);
-            let from = area.x;
-            for (const [a, b2] of [...band, [area.x + area.w, area.x + area.w]]) {
-                if (a - from >= (compare ? 760 : 380)) {
-                    add(from, Math.min(w, a - from));
-                    add(a - Math.min(w, a - from), Math.min(w, a - from));
-                }
-                from = Math.max(from, b2);
-            }
-        }
-        const best = cands.filter(c => clearAt(c.x, h, c.w)).sort((p, q) => hidden(p.x, p.w) - hidden(q.x, q.w))[0];
-        let x = best?.x, ww = best?.w ?? w;
-        if (!best && g) {
-            x = cands[0].x;
-            const keepH = g.keep.h * camera.k, room = Math.floor(area.h - keepH - 24);
-            if (room < h && room >= Math.min(natural, 160))
-                h = room;
-        }
-        // The camera stays the person's (no pan): the surface gives up height (its body scrolls) rather than cover the part it
-        // reads, when that still leaves it a readable height.
-        if (g && !pan) {
-            const free = Math.floor(bottom - (g.part.y + g.part.h) - 12);
-            if (free >= 160 && free < h && g.part.y + g.part.h > bottom - h)
-                h = free;
-        }
-        lensPlace = { side: 'dock', x: x ?? area.x, y: bottom - h, h, dy: 0, w: ww };
-        if (g && pan && !clearAt(lensPlace.x, h, ww)) {
-            const fits = g.keep.h * camera.k <= area.h - h - 12 && g.keep.w * camera.k <= area.w - 24;
-            revealRect(fits ? g.keep : g.own, 0, h + 12);
-            return; // applyCamera places it
-        }
-    }
-    positionLens();
-}
-/** Camera moved or the part was dragged: the surface follows its part in the arrangement chosen for this selection; a docked
- * surface stays where it was put at the bottom of the map. */
-function positionLens(animate = false) {
-    const l = $('lens');
-    if (l.hidden || !lensPlace)
-        return;
-    const area = lensArea(), docked = lensPlace.side === 'dock', g = lensGeometry(), hgt = Math.min(lensPlace.h, area.h);
-    if (docked)
-        l.style.width = `${Math.min(lensPlace.w ?? area.w, area.w)}px`;
-    const w = l.offsetWidth;
-    let at = docked || !g ? { x: lensPlace.x, y: area.y + area.h - hgt } : follow(lensPlace, g.part, g.beside, w, hgt, area);
-    at = { x: Math.min(Math.max(at.x, area.x), area.x + area.w - w), y: Math.min(Math.max(at.y, area.y), area.y + area.h - hgt) };
-    l.classList.toggle('animate', animate);
-    l.style.left = `${Math.round(at.x)}px`;
-    l.style.top = `${Math.round(at.y)}px`;
-    l.style.maxHeight = `${Math.round(hgt)}px`;
-}
-/** A change reads one real target at a time. A clear nearby place wins; otherwise a two-column comparison reserves
- * actual space below the map. Both sides remain visible, and manual camera moves never trigger a new reveal. */
-let calloutNotes = [], calloutFrame = 0, calloutDockHeight = 0, calloutMovePending = false;
-const mapBottomInset = () => calloutDockHeight ? 12 : BOTTOM;
+function mapArea() { const vp = $('viewport').getBoundingClientRect(), top = topInset(); return { x: 16, y: top, w: vp.width - 32, h: mapBottom() - top - mapBottomInset() }; }
+function hideLens() { const l = $('lens'); l.hidden = true; l.replaceChildren(); l.classList.remove('compare', 'scope-read'); readingFor = []; syncMapArea(); }
+const mapBottomInset = () => BOTTOM;
 const mapBottom = () => $('viewport').offsetTop + $('viewport').clientHeight;
+/** The map's viewport: below the plan's strip when it is open, left of the pane when it is open. Camera coordinates stay
+ * relative to the space, so neither moves anything already drawn. */
 function syncMapArea() {
-    const vp = $('viewport'), world = $('world'), top = $('plan-strip').hidden ? 0 : topInset();
+    const vp = $('viewport'), world = $('world'), pane = paneWidth();
+    $('space').style.setProperty('--plan-w', `${pane}px`);
+    vp.style.right = pane + 'px';
+    const top = $('plan-strip').hidden ? 0 : topInset();
     vp.style.top = top + 'px';
-    vp.style.bottom = calloutDockHeight ? (calloutDockHeight + BOTTOM + 12) + 'px' : '0px';
-    // Camera coordinates stay relative to space, including when the viewport gains an actual reading row above or below it.
+    vp.style.bottom = '0px';
     world.style.top = -top + 'px';
     vp.style.backgroundPosition = camera.x + 'px ' + (camera.y - top) + 'px';
-}
-function positionCallouts() {
-    syncMapArea();
     updateSticky();
-    syncMapArea();
-    const el = calloutNotes[0];
-    if (!el) {
-        positionCalloutLeader(null);
-        return;
-    }
-    const b = lay.boxes.get(el.dataset.box ?? '');
-    el.hidden = !b;
-    if (!b) {
-        positionCalloutLeader(null);
-        return;
-    }
-    const sp = $('space').getBoundingClientRect(), lens = $('lens'), area = lensArea();
-    if (el.dataset.side !== 'dock') {
-        const blockers = [...lay.boxes.values()].map(toScreen).filter(r => r.x < area.x + area.w && r.y < area.y + area.h && r.x + r.w > area.x && r.y + r.h > area.y);
-        if (titleH)
-            blockers.push(toScreen(titleRect()));
-        for (const other of [lens, $('scope-sticky')])
-            if (!other.hidden) {
-                const r = other.getBoundingClientRect();
-                blockers.push({ x: r.left - sp.left, y: r.top - sp.top, w: r.width, h: r.height });
-            }
-        const gb = lay.boxes.get(b.container);
-        const at = placeCallout(toScreen(b), gb?.kind === 'frame' ? toScreen(gb) : null, { w: el.offsetWidth, h: el.offsetHeight }, area, blockers);
-        if (at) {
-            el.style.left = at.x + 'px';
-            el.style.top = at.y + 'px';
-            positionCalloutLeader(el);
-            return;
-        }
-        el.dataset.side = 'dock';
-        el.classList.add('docked');
-    }
-    // Content determines the height: no card scrollbar, clamp, or hidden second half of the comparison.
-    el.style.width = Math.min(760, area.w) + 'px';
-    calloutDockHeight = el.offsetHeight;
-    syncMapArea();
-    updateSticky();
-    syncMapArea();
-    el.style.left = Math.max(area.x, area.x + (area.w - el.offsetWidth) / 2) + 'px';
-    el.style.top = (sp.height - BOTTOM - calloutDockHeight) + 'px';
-    positionCalloutLeader(el);
 }
-/** An annotation leader, not a map relation: no arrow, port, or inferred endpoint. It attaches only to the actual target's
- * highlighted box (a frame's heading), never to an ancestor standing in for a target the person has folded away. */
-function positionCalloutLeader(note) {
-    const holder = $('callouts'), b = note ? lay.boxes.get(note.dataset.target ?? '') : null;
-    let line = holder.querySelector('.callout-leader');
-    if (!note || !b) {
-        line?.remove();
+/** A new target to read (or an explicit resize): the target, its line ends and the title together when they fit beside the
+ * pane; a large frame still reveals its own heading and first rows. Never a zoom. */
+function revealParts(ids) {
+    const boxes = ids.map(id => lay.boxes.get(id)).filter((b) => !!b && b.kind !== 'ghost');
+    if (!boxes.length)
         return;
-    }
-    const target = toScreen(b.kind === 'frame' ? { ...b, h: b.head } : b), sp = $('space').getBoundingClientRect(), vp = $('viewport').getBoundingClientRect();
-    const r = note.getBoundingClientRect(), card = { x: r.left - sp.left, y: r.top - sp.top, w: r.width, h: r.height };
-    const clamp = (v, low, high) => Math.max(low, Math.min(v, high));
-    let a, z;
-    if (card.y >= target.y + target.h) {
-        a = { x: target.x + target.w / 2, y: target.y + target.h };
-        z = { x: clamp(a.x, card.x + 14, card.x + card.w - 14), y: card.y };
-    }
-    else if (target.y >= card.y + card.h) {
-        a = { x: target.x + target.w / 2, y: target.y };
-        z = { x: clamp(a.x, card.x + 14, card.x + card.w - 14), y: card.y + card.h };
-    }
-    else {
-        const right = card.x >= target.x + target.w;
-        a = { x: right ? target.x + target.w : target.x, y: target.y + target.h / 2 };
-        z = { x: right ? card.x : card.x + card.w, y: clamp(a.y, card.y + 10, card.y + card.h - 10) };
-    }
-    if (a.x < vp.left - sp.left || a.x > vp.right - sp.left || a.y < vp.top - sp.top || a.y > vp.bottom - sp.top) {
-        line?.remove();
-        return;
-    }
-    // The leader never runs through another part's name or row (nor a group's heading): straight when that is clear, else one
-    // bend through the gap beside the target (a group's padding or the space between columns); with no clear way, no leader.
-    const blocks = [...lay.boxes.values()].filter(q => q.id !== b.id && (q.kind !== 'frame' || q.head)).map(q => toScreen(q.kind === 'frame' ? { ...q, h: q.head } : q));
-    const clear = (pts) => pts.every((p, i) => {
-        if (!i)
-            return true;
-        const q = pts[i - 1], n = Math.max(1, Math.ceil(Math.hypot(p.x - q.x, p.y - q.y) / 3));
-        for (let k = 0; k <= n; k++) {
-            const x = q.x + (p.x - q.x) * k / n, y = q.y + (p.y - q.y) * k / n;
-            if (blocks.some(o => x > o.x - 2 && x < o.x + o.w + 2 && y > o.y - 2 && y < o.y + o.h + 2))
-                return false;
-        }
-        return true;
-    });
-    const below = card.y >= target.y + target.h, above = target.y >= card.y + card.h, toLeft = card.x + card.w / 2 < target.x + target.w / 2;
-    const bends = (left) => {
-        const g = left ? target.x - 7 : target.x + target.w + 7, start = { x: left ? target.x : target.x + target.w, y: target.y + Math.min(target.h / 2, 14) };
-        if ((below || above) && g > card.x + 10 && g < card.x + card.w - 10)
-            return [start, { x: g, y: start.y }, { x: g, y: below ? card.y : card.y + card.h }];
-        const y = clamp(start.y, card.y + 10, card.y + card.h - 10), side = card.x >= g ? card.x : card.x + card.w;
-        return [start, { x: g, y: start.y }, { x: g, y }, { x: side, y }];
-    };
-    const path = [[a, z], bends(toLeft), bends(!toLeft)].find(clear);
-    if (!path) {
-        line?.remove();
-        return;
-    }
-    if (!line) {
-        line = svg('svg', { class: 'callout-leader', 'aria-hidden': 'true' });
-        line.append(svg('path', {}));
-        holder.prepend(line);
-    }
-    line.setAttribute('width', String(sp.width));
-    line.setAttribute('height', String(sp.height));
-    line.querySelector('path').setAttribute('d', path.map((p, i) => `${i ? 'L' : 'M'}${p.x},${p.y}`).join(' '));
-}
-/** New target or explicit resize only. Prefer the target, its line ends and the title together when they fit; a large
- * frame still reveals its own heading and first rows instead of refusing to move because the whole group is too tall. */
-function revealCalloutTarget() {
-    const el = calloutNotes[0], b = el ? lay.boxes.get(el.dataset.box ?? '') : null;
-    if (!b)
-        return;
-    const own = { x: b.x, y: b.y, w: Math.min(b.w, 420), h: Math.min(b.h, 220) }, area = lensArea();
-    const ends = lay.edges.filter(e => e.from === b.id || e.to === b.id).map(e => lay.boxes.get(e.from === b.id ? e.to : e.from)).filter((q) => !!q);
+    const own = union(boxes.map(b => ({ x: b.x, y: b.y, w: Math.min(b.w, 420), h: Math.min(b.h, 220) }))), area = mapArea(), set = new Set(boxes.map(b => b.id));
+    const ends = lay.edges.filter(e => set.has(e.from) !== set.has(e.to)).map(e => lay.boxes.get(set.has(e.from) ? e.to : e.from)).filter((q) => !!q);
     const candidates = [[own, ...ends, ...(titleH ? [titleRect()] : [])], [own, ...ends], [own, ...(titleH ? [titleRect()] : [])], [own]];
-    let fit = candidates.map(rs => union(rs)).find(r => r.w * camera.k <= area.w - 32 && r.h * camera.k <= area.h - 24) ?? own;
-    // Avoid leaving an unrelated group name cut in half along the new viewport edge when a small downward pan can show it
-    // without sacrificing the chosen target. Large groups themselves need not fit at once; target navigation keeps them named.
-    const heads = [...lay.boxes.values()].filter(q => q.kind === 'frame').map(q => ({ x: q.x, y: q.y, w: q.w, h: q.head }))
-        .filter(q => { const r = toScreen(q); return r.y < area.y && r.y + r.h > area.y && r.x < area.x + area.w && r.x + r.w > area.x; });
-    if (heads.length) {
-        const y = Math.min(fit.y, ...heads.map(q => q.y)), h = fit.y + fit.h - y;
-        if (h * camera.k <= area.h - 24)
-            fit = { ...fit, y, h };
-    }
+    const fit = candidates.map(rs => union(rs)).find(r => r.w * camera.k <= area.w - 32 && r.h * camera.k <= area.h - 24) ?? own;
     revealRect(fit);
 }
 /** The scope's title belongs to the map; when a pan takes it out of view its name stays at the top left of the map. */
@@ -1247,7 +1225,7 @@ function updateSticky() {
     }
     const vp = $('viewport').getBoundingClientRect(), t = toScreen(titleRect()), top = stripInset();
     st.style.top = `${top - 6}px`;
-    st.hidden = t.y >= top - 8 && t.y + 24 * camera.k <= mapBottom() - mapBottomInset() && t.x + 120 >= 0 && t.x <= vp.width - PANEL_W() - 120;
+    st.hidden = t.y >= top - 8 && t.y + 24 * camera.k <= mapBottom() - mapBottomInset() && t.x + 120 >= 0 && t.x <= vp.width - 120;
     // One title at a time: the map's own title steps back while its name is pinned.
     document.querySelector('.map-title')?.classList.toggle('pinned', !st.hidden);
 }
@@ -1275,14 +1253,48 @@ function relationEnds(o, partId) {
     }
     return out;
 }
-/** The lens: what the selection is (its description beyond what the map already shows, with where that description comes
- * from), what it is linked to and why (each line's real ends, by direction), its inside, and the way to sources and edits. */
+/** The scope's own relations to parts outside it (its inside's relations are drawn on the map, or as side entries). */
+function scopeEnds(o) {
+    if (!scope)
+        return [];
+    const inside = (id) => { for (let p = partOf(o, id), g = 0; p && g < 64; p = partOf(o, p.parentId), g++)
+        if (p.id === scope)
+            return true; return false; };
+    return o.view.relations.flatMap((r) => r.from === scope && !inside(r.to) ? [{ r, near: r.from, far: r.to, out: true }] : r.to === scope && !inside(r.from) ? [{ r, near: r.to, far: r.from, out: false }] : []);
+}
+/** Reading the scope itself in the pane (the map's 자세히): its whole description as written, where it sits, its relations
+ * to the outside and its parts with their sizes. Selecting a part replaces it. */
+let scopeReading = false;
+function openScopeReading() { const o = opened; if (!o)
+    return; if (selected) {
+    scopeReading = true;
+    go(o.key);
+    return;
+} scopeReading = true; renderScopeLens(); }
+function renderScopeLens() {
+    const o = opened;
+    if (!o)
+        return;
+    const l = $('lens'), sp = partOf(o, scope), text = (sp ? sp.note : o.project.space.brief?.text ?? '').trim();
+    const kids = (sp ? sp.childIds : o.view.roots).map(id => partOf(o, id)).filter(Boolean);
+    const outside = relationGroups(scopeEnds(o), '범위');
+    const path = sp ? partPath(o.view, sp.id).slice(0, -1) : [];
+    l.classList.remove('compare');
+    l.classList.add('scope-read');
+    readingFor = [];
+    l.replaceChildren(h('header', { class: 'lens-head' }, h('div', { class: 'lens-path' }, h('span', {}, sp ? '이 범위' : '프로젝트'), ...path.flatMap(x => [h('span', { 'aria-hidden': 'true' }, '›'), h('a', { href: hashFor(o.key, null, x.id) }, x.name)])), h('h2', { id: 'lens-title' }, sp ? sp.name : o.project.name), h('div', { class: 'head-tools' }, h('button', { type: 'button', class: 'close', 'aria-label': '범위 설명 닫기', title: '닫기 (Esc)', onclick: closeScopeReading }, '×'))), h('div', { class: 'lens-body' }, h('div', { class: 'lens-desc' }, text ? h('p', { class: 'lens-text' }, text) : null, h('p', { class: 'lens-src' }, h('span', {}, sp ? '적어 둔 설명 · 원문 그대로' : '프로젝트 설명 · 원문 그대로'))), ...outside.map(g => h('section', { class: 'lens-ports' }, h('h3', {}, g.label, h('small', {}, String(g.list.length))), h('ul', {}, ...g.list.map(x => h('li', {}, h('button', { type: 'button', class: 'port', onclick: () => go(o.key, x.far, null) }, h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, x.out ? '→' : '←'), h('strong', {}, partOf(o, x.far)?.name ?? '부분')), x.r.note ? h('span', { class: 'port-note' }, x.r.note) : null)))))), kids.length ? h('section', { class: 'lens-ports' }, h('h3', {}, sp ? '안의 부분' : '최상위 구성', h('small', {}, String(kids.length))), h('ul', {}, ...kids.map(k => h('li', {}, h('button', { type: 'button', class: 'port', onclick: () => go(o.key, k.id) }, h('span', { class: 'port-top' }, h('strong', {}, k.name), k.childIds.length ? h('span', { class: 'port-count' }, `안쪽 ${k.childIds.length}`) : null), mapLead(o.view, k.id) ? h('span', { class: 'port-note' }, mapLead(o.view, k.id)) : null))))) : null));
+    l.hidden = false;
+    syncMapArea();
+}
+function closeScopeReading() { scopeReading = false; if ($('lens').classList.contains('scope-read'))
+    hideLens(); }
+/** The lens: what the selection is (its whole description as written, with where that description comes from; the map shows
+ * only its first sentence), what it is linked to, by verb (each line's real ends), its inside, and the way to sources and
+ * edits. */
 function renderLens() {
     const o = opened, part = partOf(o, selected), l = $('lens'), b = lay.boxes.get(part.id);
     const records = subtreeRecords(o.view, part.id), path = partPath(o.view, part.id).slice(0, -1);
-    const norm = part.note.replace(/\s+/g, ' ').trim();
-    const shown = b && ((b.kind === 'frame' && b.depth === 0) || (b.kind === 'node' && b.face === 'unit')) ? mapLead(o.view, part.id) : '';
-    const rest = shown && norm.startsWith(shown) ? norm.slice(shown.length).trim() : norm;
+    const rest = part.note.replace(/\s+/g, ' ').trim();
     const dot = h('i', { class: `dot s-${part.status}`, 'aria-hidden': 'true' });
     const src = (text) => h('p', { class: `lens-src s-${part.status}` }, dot, h('span', {}, text));
     const recs = records.length ? `기록 ${records.length} · ${ago(records[0].at)}` : '기록 없음';
@@ -1291,23 +1303,25 @@ function renderLens() {
         const report = records.find(r => r.kind === 'report');
         put(desc, h('p', { class: 'lens-text' }, part.summary), src(`${STATUS_LABEL[part.status]} · ${part.origin ?? '전달받은 정리'}${report ? ` · ${ago(report.at)}` : ''}`), part.proposal ? h('p', { class: 'lens-proposal' }, h('strong', {}, '제안 · 아직 반영 안 됨 '), part.proposal) : null, rest ? h('p', { class: 'lens-plan' }, h('span', {}, '계획'), rest) : null);
     }
-    else if (norm) {
-        // The description is the person's written plan, not a received summary; the state says what records exist.
-        const state = part.status === 'plan' ? (records.length ? `받은 정리 없음 · 요청 기록 없음 · ${recs}` : '받은 정리·기록 없음') : `${STATUS_LABEL[part.status]} · ${recs}`;
-        put(desc, rest ? h('p', { class: 'lens-text' }, rest) : null, src(`적어 둔 계획 설명 · ${state}`));
+    else if (rest) {
+        // The description is the person's written plan, not a received summary. A state line only when there is something to say
+        // (records, a reported state); "no records yet" and where the text comes from read in the sheet (자세히).
+        const state = part.status === 'plan' ? (records.length ? `받은 정리 없음 · 요청 기록 없음 · ${recs}` : '') : `${STATUS_LABEL[part.status]} · ${recs}`;
+        put(desc, rest ? h('p', { class: 'lens-text' }, rest) : null, state ? src(`적어 둔 계획 설명 · ${state}`) : null);
     }
     else
         put(desc, src(part.status === 'plan' ? (records.length ? `설명 없음 · 요청 기록 없음 · ${recs}` : '아직 설명도 기록도 없어요') : `${STATUS_LABEL[part.status]} · ${recs} · 받은 정리 없음`));
     if (part.changes.length)
         desc.append(h('ul', { class: 'lens-changes' }, ...part.changes.slice(0, 2).map(c => h('li', {}, c))));
-    // Lines: real ends. A line drawn from a folded part summarises its inside; each row names the inner end and goes to the far one.
-    const ends = relationEnds(o, part.id), ins = ends.filter(x => !x.out), outs = ends.filter(x => x.out);
-    const port = (x, out) => {
+    // Lines: real ends, read by what they mean. One group per verb and direction ("이 부분이 필요로 함"), each row the real other
+    // end; a line drawn from a folded part summarises its inside, so its row also names the inner end.
+    const ends = relationEnds(o, part.id);
+    const port = (x) => {
         const far = partOf(o, x.far), near = x.near !== part.id ? partOf(o, x.near)?.name : null, farRep = drawnRep(o, x.far);
         const where = farRep === x.far ? null : farRep ? `${partOf(o, farRep).name} 안` : partPath(o.view, x.far).slice(0, -1).map(q => q.name).join(' › ') || o.project.name;
-        return h('li', {}, h('button', { type: 'button', class: 'port', title: `${out ? '이 부분에서' : '이 부분으로'} · ${far.name}로 가기`, onclick: () => go(o.key, x.far) }, h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, out ? '→' : '←'), h('strong', {}, far.name), h('span', { class: 'port-kind' }, REL_LABEL[x.r.kind] ?? x.r.kind)), near || where ? h('span', { class: 'port-where' }, [near ? `안쪽 ‘${near}’에서` : '', where ? `${where}` : ''].filter(Boolean).join(' · ')) : null, x.r.note ? h('span', { class: 'port-note' }, x.r.note) : null));
+        return h('li', {}, h('button', { type: 'button', class: 'port', title: `${far.name}로 가기`, onclick: () => go(o.key, x.far) }, h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, x.out ? '→' : '←'), h('strong', {}, far.name)), near || where ? h('span', { class: 'port-where' }, [near ? `안쪽 ‘${near}’에서` : '', where ? `${where}` : ''].filter(Boolean).join(' · ')) : null, x.r.note ? h('span', { class: 'port-note' }, x.r.note) : null));
     };
-    const MAX = 4, group = (list, out, label) => list.length ? h('section', { class: 'lens-ports' }, h('h3', {}, label, h('small', {}, String(list.length))), h('ul', {}, ...list.slice(0, MAX).map(x => port(x, out))), list.length > MAX ? h('button', { type: 'button', class: 'link-button', onclick: () => openSheet() }, `${list.length - MAX}개 더 · 자세히`) : null) : null;
+    const ports = relationGroups(ends).map(g => h('section', { class: 'lens-ports' }, h('h3', {}, g.label, h('small', {}, String(g.list.length))), h('ul', {}, ...g.list.slice(0, 8).map(port)), g.list.length > 8 ? h('button', { type: 'button', class: 'link-button', onclick: () => openSheet() }, `${g.list.length - 8}개 더 · 자세히`) : null));
     // Inside: on the map already when the part is an open frame; else its names, and the explicit way in.
     const kids = part.childIds.map(id => partOf(o, id).name);
     const inside = kids.length && part.id !== scope ? h('div', { class: 'lens-inside' }, b?.kind === 'frame' ? null : h('p', {}, h('span', {}, `안쪽 ${kids.length}`), kids.join(' · ')), h('button', { type: 'button', class: 'go-in', onclick: () => go(o.key, null, part.id) }, `안으로 들어가기 · ${kids.length}`, h('span', { 'aria-hidden': 'true' }, ' ›'))) : null;
@@ -1316,10 +1330,10 @@ function renderLens() {
         o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', onclick: () => { editing = true; openSheet(() => document.getElementById('edit-name')?.focus()); } }, '이름·설명 고치기') : null,
         o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null
     ].filter((x) => !!x);
-    l.classList.remove('compare');
+    l.classList.remove('compare', 'scope-read');
     readingFor = [];
     l.replaceChildren();
-    put(l, h('header', { class: 'lens-head' }, path.length ? h('div', { class: 'lens-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope) }, x.name)])) : null, h('h2', { id: 'lens-title' }, part.name), h('div', { class: 'head-tools' }, menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e) => { e.currentTarget.parentElement.open = false; } }, ...menuItems)) : null, h('button', { type: 'button', class: 'close', 'aria-label': '선택 해제', title: '닫기 (Esc)', onclick: () => go(o.key) }, '×'))), h('div', { class: 'lens-body' }, desc, group(ins, false, '들어오는 관계'), group(outs, true, '나가는 관계'), inside), h('footer', { class: 'lens-foot' }, h('button', { type: 'button', class: 'lens-more', onclick: () => openSheet() }, records.length ? `근거·기록 ${records.length}` : '자세히', thread ? ` · 정리 ${thread}` : '', h('span', { 'aria-hidden': 'true' }, ' ›')), status.ai === 'deepseek' ? h('button', { type: 'button', class: 'link-button', onclick: () => { composerOpen = true; openSheet(() => document.getElementById(status.access === 'code' && !sessionCode() ? 'access-code' : 'ask-input')?.focus()); } }, '질문하기') : null));
+    put(l, h('header', { class: 'lens-head' }, path.length ? h('div', { class: 'lens-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope) }, x.name)])) : null, h('h2', { id: 'lens-title' }, part.name), aliasOf(o.view, part.id) ? h('p', { class: 'lens-alias' }, aliasOf(o.view, part.id)) : null, h('div', { class: 'head-tools' }, menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e) => { e.currentTarget.parentElement.open = false; } }, ...menuItems)) : null, h('button', { type: 'button', class: 'close', 'aria-label': '선택 해제', title: '닫기 (Esc)', onclick: () => go(o.key) }, '×'))), h('div', { class: 'lens-body' }, desc, ...ports, inside), h('footer', { class: 'lens-foot' }, h('button', { type: 'button', class: 'lens-more', onclick: () => openSheet() }, records.length ? `근거·기록 ${records.length}` : '자세히', thread ? ` · 정리 ${thread}` : '', h('span', { 'aria-hidden': 'true' }, ' ›')), status.ai === 'deepseek' ? h('button', { type: 'button', class: 'link-button', onclick: () => { composerOpen = true; openSheet(() => document.getElementById(status.access === 'code' && !sessionCode() ? 'access-code' : 'ask-input')?.focus()); } }, '질문하기') : null));
     l.hidden = false;
 }
 /** Selection on the map: the part, its lines and the parts at their other ends (drawn representative or side ghost). */
@@ -1328,7 +1342,7 @@ function markSelection(partId) {
     document.querySelectorAll('.edge').forEach(el => {
         const on = !!partId && (el.dataset.from === partId || el.dataset.to === partId);
         // A line the change plan reads as context of its change (.ctx) stays above the groups as well.
-        const layer = on || el.classList.contains('ctx') ? top : base;
+        const layer = on || el.classList.contains('ctx') || el.classList.contains('inner') ? top : base;
         if (layer && el.parentNode !== layer)
             layer.append(el);
         el.classList.toggle('on', on);
@@ -1338,6 +1352,7 @@ function markSelection(partId) {
         if (on)
             related.add(el.dataset.from === partId ? el.dataset.to : el.dataset.from);
     });
+    placeEdgeLabels();
     document.querySelectorAll('.node[data-part],.frame,.ghost').forEach(el => {
         el.classList.toggle('selected', !!partId && el.dataset.part === partId);
         el.classList.toggle('related', related.has(el.dataset.box));
@@ -1627,35 +1642,8 @@ const planView = createPlanView({
     reveal,
     capture: () => ({ selected, scope, camera: { ...camera } }),
     notice: (text, action) => toast(text, action),
-    frame: parts => {
-        // No zoom on opening: the person's camera stays; only the changed parts are brought beside the inspector by the smallest
-        // pan (their first part when they do not fit together).
-        const boxes = parts.map(id => lay.boxes.get(id)).filter((b) => !!b);
-        if (!boxes.length)
-            return;
-        const x = Math.min(...boxes.map(b => b.x)), y = Math.min(...boxes.map(b => b.y));
-        const B = { x, y, w: Math.max(...boxes.map(b => b.x + b.w)) - x, h: Math.max(...boxes.map(b => b.y + b.h)) - y };
-        // Too large to fit: revealRect keeps its top-left in view, so the most of it shows that a pan can show.
-        revealRect(B);
-    },
     restore: r => { const o = opened; if (!o)
         return; returnCamera = r.camera; go(o.key, r.selected, r.scope); },
-    callouts: (notes, move = false) => {
-        const previous = calloutNotes[0], next = notes[0];
-        const same = previous && next && previous.dataset.box === next.dataset.box && previous.textContent === next.textContent;
-        if (same && previous.dataset.side === 'dock') {
-            next.dataset.side = 'dock';
-            next.classList.add('docked');
-        }
-        calloutNotes = notes;
-        calloutDockHeight = 0;
-        $('callouts').replaceChildren(...notes);
-        positionCallouts();
-        calloutMovePending ||= move;
-        cancelAnimationFrame(calloutFrame);
-        calloutFrame = requestAnimationFrame(() => { positionCallouts(); const reveal = calloutMovePending; calloutMovePending = false; if (reveal)
-            revealCalloutTarget(); });
-    },
     surface: (content, parts, place) => {
         const l = $('lens');
         if (!content) {
@@ -1663,18 +1651,36 @@ const planView = createPlanView({
                 hideLens();
             return;
         }
+        // The same reading keeps where the person was in it (a re-render of the same change); a new reading starts at its top.
+        const keep = place === false ? l.querySelector('.lens-body')?.scrollTop ?? 0 : 0;
         l.replaceChildren(...content);
         l.hidden = false;
+        l.classList.remove('scope-read');
         l.classList.add('compare');
         readingFor = parts;
-        // The comparison always reads in the same place: docked under the map, the plan's strip above it.
-        // 'refit' also applies to the first opening: having no earlier lens place must not turn a reading action into a pan.
-        if (place === 'refit')
-            placeLensOnce(true, false);
-        else if (place === true || !lensPlace)
-            placeLensOnce(true);
-        else
-            positionLens();
+        syncMapArea();
+        const body = l.querySelector('.lens-body');
+        if (body)
+            body.scrollTop = keep;
+        // Only an explicit new target moves the map (the smallest pan beside the pane); sources, the long reading and a mode
+        // switch keep the person's camera, including a manual pan.
+        if (place === true)
+            revealParts(parts);
+    },
+    area: () => syncMapArea(),
+    frame: (all, fallback) => {
+        // Once, when a whole plan comes to read: its changed parts together when they fit beside the pane at this zoom (no zoom,
+        // no centring); else the target being read, as for any new target.
+        const boxes = all.map(id => lay.boxes.get(id)).filter((b) => !!b && b.kind !== 'ghost'), area = mapArea();
+        // With the map's title when that fits too, as any later target is shown (so reading the next change does not move again).
+        for (const rs of boxes.length ? [[...boxes, ...(titleH ? [titleRect()] : [])], boxes] : []) {
+            const U = union(rs);
+            if (U.w * camera.k <= area.w - 32 && U.h * camera.k <= area.h - 24) {
+                revealRect(U);
+                return;
+            }
+        }
+        revealParts(fallback);
     },
     chrome: () => {
         const o = opened;
@@ -1683,11 +1689,13 @@ const planView = createPlanView({
         setBar(o);
         renderRecent();
         if (planView.isOpen()) {
+            scopeReading = false;
             $('panel').hidden = true;
             $('panel').replaceChildren();
             if (!$('lens').classList.contains('compare'))
                 hideLens();
         }
+        syncMapArea();
     }
 });
 function sessionCode() { try {
@@ -1747,14 +1755,19 @@ function renderStatus() {
 let toastTimer = 0;
 /** Double-click = two clicks on the same part, same view, same spot. */
 let lastClick = { id: '', at: 0, x: 0, y: 0, scope: null };
+/** A toast speaks for the project it was made in: its action runs only there, and leaving that project takes it away. */
+let toastKey = null;
 function toast(text, action) {
-    const t = $('toast');
+    const t = $('toast'), key = opened?.key ?? null;
     clearTimeout(toastTimer);
     t.replaceChildren();
-    put(t, h('span', {}, text), action ? h('button', { type: 'button', class: 'link-button', onclick: () => { action.run(); t.hidden = true; } }, action.label) : null);
+    toastKey = key;
+    put(t, h('span', {}, text), action ? h('button', { type: 'button', class: 'link-button', onclick: () => { t.hidden = true; if (opened?.key === key)
+            action.run(); } }, action.label) : null);
     t.hidden = false;
     toastTimer = window.setTimeout(() => { t.hidden = true; }, 8000);
 }
+function dropToast() { clearTimeout(toastTimer); $('toast').hidden = true; toastKey = null; }
 /** Explicit only: resets the places in this view (the scope and its open frames); one undo. */
 function arrange() {
     const o = opened;
@@ -1784,6 +1797,93 @@ function arrange() {
                     select(selected);
             }
         } });
+}
+/* ---------- finding a part by name ----------
+ * Every part stays reachable however the map is folded: names (and the descriptions that keep original names) are searched in
+ * the project's own data, and a result opens the same part where it sits, inside its group when that group is folded here.
+ * The previous scene keeps its way back. A navigation aid only: nothing is ranked, grouped or added. */
+let findOpen = false;
+function bindFind() {
+    const tools = document.querySelector('.controls'), button = h('button', { type: 'button', id: 'find-toggle', class: 'find-toggle', 'aria-expanded': 'false', 'aria-controls': 'find', title: '부분 찾기 (/)' }, '찾기');
+    tools.insertBefore(button, $('zoom-out').previousElementSibling);
+    const input = h('input', { id: 'find-input', type: 'search', placeholder: '부분 이름이나 설명의 낱말', autocomplete: 'off', 'aria-label': '부분 찾기' });
+    const count = h('p', { class: 'find-count', role: 'status' }), list = h('ol', { class: 'find-list' });
+    const box = h('section', { id: 'find', class: 'find', 'aria-label': '부분 찾기', hidden: true }, input, count, list);
+    $('space').append(box);
+    const LIMIT = 60;
+    const show = (on) => { findOpen = on; box.hidden = !on; button.setAttribute('aria-expanded', String(on)); button.classList.toggle('on', on); if (on) {
+        input.select();
+        input.focus();
+        run();
+    } };
+    const open = (id) => {
+        const o = opened, p = o ? partOf(o, id) : null;
+        if (!o || !p)
+            return;
+        // Here when it is drawn in this view; else inside its own group (a list reads there at full size); a top part on the map.
+        const sc = lay.boxes.has(id) && lay.boxes.get(id).kind !== 'ghost' ? scope : p.parentId;
+        show(false);
+        go(o.key, id, sc);
+    };
+    function run() {
+        const o = opened;
+        if (!o)
+            return;
+        const q = input.value.trim().toLowerCase();
+        if (!q) {
+            count.textContent = `부분 ${o.view.parts.length}개 · 이름을 적어 주세요`;
+            list.replaceChildren();
+            return;
+        }
+        const byName = o.view.parts.filter(p => p.name.toLowerCase().includes(q)), byNote = o.view.parts.filter(p => !byName.includes(p) && p.note.toLowerCase().includes(q));
+        const all = [...byName, ...byNote];
+        count.textContent = all.length ? (all.length > LIMIT ? `${all.length}개 중 ${LIMIT}개 · 더 좁혀 적어 주세요` : `${all.length}개`) : '찾은 부분이 없어요';
+        list.replaceChildren(...all.slice(0, LIMIT).map(p => h('li', {}, h('button', { type: 'button', class: 'find-item', onclick: () => open(p.id) }, h('strong', {}, p.name), h('span', {}, [[...partPath(o.view, p.id).slice(0, -1).map(x => x.name)].join(' › ') || o.project.name, aliasOf(o.view, p.id)].filter(Boolean).join(' · '), byName.includes(p) ? '' : ' · 설명에서')))));
+    }
+    input.addEventListener('input', run);
+    input.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            e.stopPropagation();
+            show(false);
+            button.focus();
+        }
+        if (e.key === 'Enter') {
+            const first = list.querySelector('.find-item');
+            if (first) {
+                e.preventDefault();
+                first.click();
+            }
+        }
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            list.querySelector('.find-item')?.focus();
+        }
+    });
+    list.addEventListener('keydown', e => {
+        const items = [...list.querySelectorAll('.find-item')], at = items.indexOf(document.activeElement);
+        if (e.key === 'ArrowDown' && at >= 0) {
+            e.preventDefault();
+            items[Math.min(items.length - 1, at + 1)]?.focus();
+        }
+        if (e.key === 'ArrowUp' && at >= 0) {
+            e.preventDefault();
+            (at === 0 ? input : items[at - 1]).focus();
+        }
+        if (e.key === 'Escape') {
+            e.stopPropagation();
+            show(false);
+            button.focus();
+        }
+    });
+    button.addEventListener('click', () => show(!findOpen));
+    document.addEventListener('keydown', e => { if (e.key === '/' && opened && !$('space').hidden && !e.target.closest('textarea,input,select')) {
+        e.preventDefault();
+        show(true);
+    } });
+    $('viewport').addEventListener('pointerdown', () => { if (findOpen)
+        show(false); });
+    window.addEventListener('hashchange', () => { if (findOpen && !location.hash.startsWith('#/p/'))
+        show(false); });
 }
 function bindCanvas() {
     const vp = $('viewport');
@@ -1834,8 +1934,6 @@ function bindCanvas() {
         (pos[drag.container] ??= {})[drag.id] = { x: Math.round(drag.start.x + dx / camera.k), y: Math.round(drag.start.y + dy / camera.k) };
         relayout(o);
         positionWorld();
-        positionLens();
-        positionCallouts();
     });
     const end = (e) => {
         if (!drag || drag.pointer !== e.pointerId)
@@ -1876,7 +1974,7 @@ function bindCanvas() {
         mapMoved = true;
         zoomAt(camera.k * Math.exp(-delta * (e.ctrlKey ? 0.01 : 0.0015)), e.clientX - r.left, e.clientY - r.top + vp.offsetTop);
     }, { passive: false });
-    const center = () => { const r = vp.getBoundingClientRect(); return [(r.width - PANEL_W()) / 2, vp.offsetTop + r.height / 2]; };
+    const center = () => { const r = vp.getBoundingClientRect(); return [r.width / 2, vp.offsetTop + r.height / 2]; };
     $('zoom-in').addEventListener('click', () => { mapMoved = true; const [x, y] = center(); zoomAt(camera.k + 0.15, x, y, true); });
     $('zoom-out').addEventListener('click', () => { mapMoved = true; const [x, y] = center(); zoomAt(camera.k - 0.15, x, y, true); });
     $('zoom-fit').addEventListener('click', () => { mapMoved = true; fitView(true, true); });
@@ -1896,8 +1994,8 @@ function bindCanvas() {
             menu.open = false;
     });
     document.addEventListener('keydown', e => {
-        if (e.target.closest('textarea,input'))
-            return;
+        if (e.target.closest('textarea,select,input:not([type=checkbox]):not([type=radio])'))
+            return; // Esc still works from a checkbox
         // Innermost first: an open ⋯ menu closes before anything else, and focus goes back to its button.
         const menu = document.querySelector('details.more[open]');
         if (e.key === 'Escape' && menu) {
@@ -1940,6 +2038,10 @@ function bindCanvas() {
             requestAnimationFrame(() => document.querySelector(`[data-drag="${CSS.escape(part)}"]`)?.focus());
             return;
         }
+        if (e.key === 'Escape' && opened && scopeReading && !selected) {
+            closeScopeReading();
+            return;
+        }
         if (e.key === 'Escape' && opened && scope) {
             const o = opened, from = scope;
             go(o.key, null, partOf(o, from)?.parentId ?? null);
@@ -1947,10 +2049,8 @@ function bindCanvas() {
         }
     });
     let resize = 0;
-    window.addEventListener('resize', () => { cancelAnimationFrame(resize); resize = requestAnimationFrame(() => { if (opened && !selected && !planView.isOpen())
-        fitView(false);
-    else if (!$('lens').hidden)
-        placeLensOnce($('lens').classList.contains('compare'), false); positionCallouts(); revealCalloutTarget(); }); });
+    window.addEventListener('resize', () => { cancelAnimationFrame(resize); resize = requestAnimationFrame(() => { syncMapArea(); if (opened && !selected && !planView.isOpen() && $('lens').hidden)
+        fitView(false); }); });
 }
 /** Hover: a line shows what it means (ends, kind, recorded note) without selecting; a part lights its own lines. */
 function bindEdgeHints() {
@@ -2062,7 +2162,7 @@ function bindImport() {
         }
         try {
             const ref = await store.create(project, 'import');
-            say(`‘${project.name}’을 새 사본으로 가져왔어요.`);
+            say(`새 사본으로 가져왔어요 · ${project.name}`);
             go(ref.entryId);
         }
         catch {
@@ -2079,6 +2179,7 @@ async function main() {
         store.read();
     }
     bindCanvas();
+    bindFind();
     bindImport();
     bindNewProject();
     $('add-part').addEventListener('click', () => openPartForm(scope));

@@ -21,7 +21,7 @@ export function textWidth(text) {
         w += /[ᄀ-ᇿ⺀-꓏가-힯豈-﫿＀-￯]/.test(ch) ? 13.4 : /[A-Z@]/.test(ch) ? 8.8 : /[ .,:;'|il!]/.test(ch) ? 4.2 : 7.6;
     return w;
 }
-const SCALE = { node: 13.5 / 13, head: 15 / 13, sub: 1, note: 12.5 / 13 * 0.92, plan: 12 / 13 * 0.95 };
+const SCALE = { node: 13.5 / 13, item: 0.98, head: 15 / 13, sub: 1, note: 12.5 / 13 * 0.92, plan: 12 / 13 * 0.95 };
 const estimate = (text, kind) => textWidth(text) * SCALE[kind];
 /** The first sentence of a note: what a region or unit says about itself on the map. The rest belongs to the selection. */
 export function lead(note) {
@@ -43,6 +43,8 @@ export function mapLead(v, id) {
 /** Long part names widen their card (never the short ones) so the name fits two lines: room beside the name is the card
  * minus its paddings, and with an inside also the fold toggle and the go-inside count. */
 export const NODE_MAX_W = 320;
+/** A list item's horizontal padding and border without an inside (styles.css .node.item). */
+const ITEM_SIDES = 10 + 8 + 2;
 const nodeChrome = (kids) => (kids ? 5 + 22 + 4 + 4 + 40 + 8 + 2 : 13 + 8 + 2);
 export function nodeWidth(name, kids, measure = estimate) {
     // Lines break at word ends, not mid-word: leave a share of each line unused.
@@ -75,8 +77,10 @@ export function isListGroup(v, container) {
     return leaves >= ids.length * 0.7 && linkedSiblings(v, ids).size <= Math.floor(ids.length / 5);
 }
 /** planned: only while a change preview reads on the map, the lines a part's own row will show under its name (each text it can
- * show; the longest, up to two lines, decides). Only these parts take that room; every other box keeps its current size. */
-export function layoutScope(v, scope, expanded, pos, measureText = estimate, planned) {
+ * show; the longest, up to two lines, decides). Only these parts take that room; every other box keeps its current size.
+ * aspect: width/height of the window's map (not of what a reading pane leaves of it): the scope's own unlinked parts are set in
+ * as many columns as make their block closest to that shape, instead of one tall column. */
+export function layoutScope(v, scope, expanded, pos, measureText = estimate, planned, aspect = 1.6) {
     const byId = new Map(v.parts.map(p => [p.id, p]));
     const kidsOf = (id) => (id ? byId.get(id)?.childIds ?? [] : v.roots);
     const open = (id, depth) => depth < 12 && kidsOf(id).length > 0 && expanded(id, depth);
@@ -174,9 +178,54 @@ export function layoutScope(v, scope, expanded, pos, measureText = estimate, pla
             flow.forEach(l => { const w = wrap(l); w.forEach((c, i) => cols.push({ ids: c, gap: i < w.length - 1 ? (inFrame ? GAP : WRAP_GAP) : inFrame ? FLOW_GAP : COL_GAP, centre: w.length === 1 })); });
         if (cols.length && lone.length)
             cols.at(-1).gap = inFrame ? (cols.at(-1).gap === GAP ? GAP : FLOW_GAP) : WRAP_GAP;
-        cols.push(...wrap(lone).map(c => ({ ids: c, gap: inFrame ? GAP : WRAP_GAP, centre: false })));
+        // The scope's own unlinked parts: no order between them to keep, so they go where the whole block needs the least zoom in a
+        // window of this shape: as columns beside the linked block, or in rows under it (never inside a relation layer, which would
+        // read as a step). Parts inside a group keep their one readable column.
+        const colW = (c) => Math.max(...c.map(i => sizes.get(i).w)), colH = (c) => c.reduce((a, i) => a + sizes.get(i).h, 0) + ROW_GAP * (c.length - 1);
+        const flowCols = cols.length, flowW = cols.reduce((a, x) => a + colW(x.ids) + x.gap, 0), flowH = Math.max(0, ...cols.map(x => colH(x.ids)));
+        const need = (W, H) => Math.max(W, H * aspect);
+        let side = wrap(lone), below = null;
+        if (!inFrame && lone.length) {
+            let score = Infinity;
+            for (let per = 1; per <= lone.length; per++) {
+                const cs = [];
+                for (let i = 0; i < lone.length; i += per)
+                    cs.push(lone.slice(i, i + per));
+                const sc = need(flowW + cs.reduce((a, x) => a + colW(x), 0) + WRAP_GAP * (cs.length - 1), Math.max(flowH, ...cs.map(colH)));
+                if (sc < score - 1e-6) {
+                    score = sc;
+                    side = cs;
+                }
+            }
+            if (flowCols) {
+                const room = Math.max(flowW - WRAP_GAP, ...lone.map(i => sizes.get(i).w)), rows = [];
+                let cur = [], w = 0;
+                for (const i of lone) {
+                    const iw = sizes.get(i).w;
+                    if (cur.length && w + WRAP_GAP + iw > room) {
+                        rows.push(cur);
+                        cur = [];
+                        w = 0;
+                    }
+                    w += (cur.length ? WRAP_GAP : 0) + iw;
+                    cur.push(i);
+                }
+                if (cur.length)
+                    rows.push(cur);
+                const rowH = (r) => Math.max(...r.map(i => sizes.get(i).h));
+                const sc = need(Math.max(flowW - WRAP_GAP, room), flowH + ROW_GAP * 2 + rows.reduce((a, r) => a + rowH(r), 0) + ROW_GAP * (rows.length - 1));
+                if (sc < score - 1e-6)
+                    below = rows;
+            }
+        }
+        if (below)
+            cols.at(-1).gap = inFrame ? FLOW_GAP : COL_GAP;
+        else
+            cols.push(...side.map(c => ({ ids: c, gap: inFrame ? GAP : WRAP_GAP, centre: false })));
         const gapY = inFrame ? GAP : ROW_GAP;
-        const heights = cols.map(c => c.ids.reduce((acc, i) => acc + sizes.get(i).h, 0) + gapY * (c.ids.length - 1)), tallest = Math.max(0, ...heights);
+        // Relation layers centre against the tallest relation layer only: a tall block of unlinked parts beside them does not
+        // push them down.
+        const heights = cols.map(c => c.ids.reduce((acc, i) => acc + sizes.get(i).h, 0) + gapY * (c.ids.length - 1)), tallest = Math.max(0, ...heights.slice(0, flowCols));
         const at = new Map();
         let x = 0;
         cols.forEach((c, ci) => {
@@ -189,6 +238,18 @@ export function layoutScope(v, scope, expanded, pos, measureText = estimate, pla
             }
             x += w + c.gap;
         });
+        if (below) {
+            let y = tallest + ROW_GAP * 2;
+            for (const r of below) {
+                let rx = 0;
+                for (const i of r) {
+                    const sz = sizes.get(i);
+                    at.set(i, { x: rx - sz.ox, y: y - sz.oy });
+                    rx += sz.w + WRAP_GAP;
+                }
+                y += Math.max(...r.map(i => sizes.get(i).h)) + ROW_GAP;
+            }
+        }
         return at;
     };
     const anchors = (container, depth) => {
@@ -198,7 +259,16 @@ export function layoutScope(v, scope, expanded, pos, measureText = estimate, pla
     };
     const hasRecords = (id, guard = 0) => { const p = byId.get(id); return !!p && guard < 64 && (!!p.lastAt || p.childIds.some(c => hasRecords(c, guard + 1))); };
     // Korean text breaks between words (keep-all): leave a share of each line unused.
-    const lines = (text, kind, room, max = 2) => (!text ? 0 : Math.min(max, Math.ceil((measureText(text, kind) * 1.15 + 6) / Math.max(40, room))));
+    // A text that fits whole on one line, as measured in its own font, takes one line (the browser lays it out with the same
+    // measure; they agree to within hundredths of a pixel). Only a text that must wrap keeps the share left for word ends.
+    const lines = (text, kind, room, max = 2) => {
+        if (!text)
+            return 0;
+        const w = measureText(text, kind);
+        if (w + 0.25 <= room)
+            return 1;
+        return Math.min(max, Math.max(2, Math.ceil((w * 1.15 + 6) / Math.max(40, room))));
+    };
     // Planned lines are short phrases measured in their own font: a smaller share is left for word ends than for notes.
     const plannedLines = (id, room) => Math.max(0, ...(planned?.get(id) ?? []).map(t => Math.min(2, Math.ceil((measureText(t, 'plan') * 1.06 + 4) / Math.max(40, room)))));
     // A folded part standing for a planned part inside it reads one line naming that inner part.
@@ -255,11 +325,14 @@ export function layoutScope(v, scope, expanded, pos, measureText = estimate, pla
         }
         else if (listOf(container)) {
             // Planned lines keep the item's own padding (7 above and below), for one line as for two.
-            const w = nodeWidth(p.name, kids, measureText), nl = lines(p.name, 'node', w - chrome), pl = nodeLines(id, w - chrome);
+            // A list item's own sides (styles.css .node.item: 10 + 8 padding, 1 + 1 border) are narrower than a row's: its name's
+            // room is measured with them, so a name that fits on one line is not given a second, empty one.
+            const w = nodeWidth(p.name, kids, measureText), room = w - (kids ? chrome : ITEM_SIDES), nl = lines(p.name, 'item', room), pl = nodeLines(id, room);
             m = { w, h: Math.max(14 + (nl + extra) * 17, pl ? 14 + nl * 17 + 2 + pl * PLAN_LINE : 0), ox: 0, oy: 0, head: 0, face: 'item' };
         }
         else if (depth === 0) {
-            const note = mapLead(v, id), need = measureText(p.name, 'head') * 1.1 + 6;
+            // A folded group reads by its name and count; its note is the selection's. A part without an inside keeps its sentence.
+            const note = kids ? '' : mapLead(v, id), need = measureText(p.name, 'head') * 1.1 + 6;
             let w = note ? UNIT_W : NODE_W;
             if (need > (w - chrome) * 2)
                 w = Math.min(NODE_MAX_W + 40, Math.ceil(need / 2) + chrome);
@@ -388,7 +461,7 @@ export function edgePath(a, b, others = []) {
             return { d: `M${x1},${y1} C${x1},${y1 + k} ${x1},${y2 - k} ${x1},${y2}`, mx: x1, my: (y1 + y2) / 2 };
         // A part between them in the same column would read as an end: go round the right side instead.
         const ax = a.x + a.w, bx = b.x + b.w, xs = Math.max(ax, bx) + 14;
-        return { d: rounded([{ x: ax, y: acy }, { x: xs, y: acy }, { x: xs, y: bcy }, { x: bx, y: bcy }]), mx: xs, my: (acy + bcy) / 2 };
+        return { d: rounded([{ x: ax, y: acy }, { x: xs, y: acy }, { x: xs, y: bcy }, { x: bx, y: bcy }]), mx: xs, my: (acy + bcy) / 2, detour: true };
     }
     const right = bcx > acx, dir = right ? 1 : -1, x1 = right ? a.x + a.w : a.x, x2 = right ? b.x : b.x + b.w;
     const k = Math.max(40, Math.abs(x2 - x1) / 2) * dir;
@@ -412,7 +485,7 @@ export function edgePath(a, b, others = []) {
     for (const yc of ys) {
         if (!segFree(xa, acy, xa, yc) || !segFree(xa, yc, xb, yc) || !segFree(xb, yc, xb, bcy))
             continue;
-        return { d: rounded([{ x: x1, y: acy }, { x: xa, y: acy }, { x: xa, y: yc }, { x: xb, y: yc }, { x: xb, y: bcy }, { x: x2, y: bcy }]), mx: (xa + xb) / 2, my: yc };
+        return { d: rounded([{ x: x1, y: acy }, { x: xa, y: acy }, { x: xa, y: yc }, { x: xb, y: yc }, { x: xb, y: bcy }, { x: x2, y: bcy }]), mx: (xa + xb) / 2, my: yc, detour: true };
     }
     return curve;
 }
