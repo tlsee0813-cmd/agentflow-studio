@@ -14,7 +14,7 @@ import { askDigest, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js'
 import type { PlanOpened } from './plan-view.js';
 import type { PlanBundle } from './plan-store.js';
 import { secretLike } from './plan-source.js';
-import { h, put, fullTime } from './plan-dom.js';
+import { h, put, fullTime, codeGate, codeNote } from './plan-dom.js';
 
 export interface ReturnHost {
   current(): PlanOpened | null;
@@ -255,7 +255,8 @@ export function createReturnView(host: ReturnHost) {
       out.append(h('div', { class: 'access' }, h('label', { for: 'return-access' }, '접속 코드'), code));
     }
     const sent = state.input?.coverage.sent ?? 0, total = state.input?.coverage.total ?? 0;
-    out.append(h('div', { class: 'pp-row' }, h('button', { type: 'button', class: 'primary small', disabled: !can, onclick: () => void analyze() }, state.previous ? '지금 자료로 정리하기' : 'AI로 정리하기'),
+    const gated = status.access === 'code' && can, go = codeGate(h('button', { type: 'button', class: 'primary small', onclick: () => void analyze() }, state.previous ? '지금 자료로 정리하기' : 'AI로 정리하기'), gated, !!host.accessCode(), !can);
+    out.append(h('div', { class: 'pp-row' }, go, codeNote(gated, !!host.accessCode()),
       h('span', { class: 'fine' }, can ? `자료 ${sent < total ? `${total}개 중 ${sent}개` : `${sent}개`}를 보내요` : status.ai === 'off' ? '서버에 AI 키가 없어요 · 원자료로 읽어요' : status.ai === 'none' ? '이 주소에는 AI 서버가 없어요 · 원자료로 읽어요' : ''),
       state.view.kind === 'reading' ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { state.view = { kind: 'material' }; render(); } }, '원자료') : null));
     return out;
