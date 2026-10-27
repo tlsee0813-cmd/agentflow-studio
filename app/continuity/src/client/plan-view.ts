@@ -61,11 +61,15 @@ interface Session {
   /** The whole plan (writing, sources, every item, the request and results) in the right panel. The map, the plan's strip and
    * one comparison are the default reading. */
   detail: boolean; strip: 'conditions' | null;
-  /** The comparison shows the sources of this change in its place (the way back keeps the change, drafts and camera). */
-  evidenceFor: string | null;
-  /** The comparison's long reading (description, every target, candidates) is open on request; by default a change reads
-   * in small notes beside its parts. */
-  explain: boolean;
+  /** The pane shows the sources of this change in its place (the way back keeps the change, drafts and camera), opened at
+   * evidenceRef when one source was asked for. */
+  evidenceFor: string | null; evidenceRef: string | null;
+  /** The wide workspace's right column: what this request takes (default), one source, the returned results, or every source
+   * the analysis reads. A source opens there in its place; the comparison beside it stays as it was. */
+  rail: 'request' | 'source' | 'results' | 'sources'; railSource: string | null;
+  /** The person went from the wide comparison to a part on the map: the pane offers the way back, to the same change and the
+   * same scroll (workAt). */
+  fromWork: boolean; workAt: { list: number; detail: number } | null;
   /** The analysis in flight: its reply becomes the plan only while it is still the one in flight and the sentence and material
    * are still those it read (inputKey). */
   pending: { controller: AbortController; input: PlanInput } | null; error: string | null;
@@ -81,6 +85,8 @@ const MEMORY = new Map<string, PlanBundle>();
 const PROPOSALS = new Map<string, { text: string; sources: Evidence[] }>();
 const memoryKey = (o: PlanOpened, c: Condition) => (o.key === CONVERTER_KEY ? `${o.key}#${c}` : o.project.id);
 const short = (text: string, n: number) => { const t = text.replace(/\s+/g, ' ').trim(); return t.length > n ? `${t.slice(0, n)}…` : t; };
+/** The first sentence (or line) of a text, whole: a title or a one-line finding, the rest read where there is room. */
+const firstSentence = (text: string) => { const t = text.trim(), m = /^(.+?)(?:[.!?。](?=\s|$)|\n)/s.exec(t); return m ? t.slice(0, m[0].length).trim() : t; };
 
 export function createPlanView(host: PlanHost) {
   let s: Session | null = null;
@@ -119,7 +125,7 @@ export function createPlanView(host: PlanHost) {
     if (s && s.key === o.key) return;
     const condition: Condition = 'A', { bundle, unreadable } = bundleFor(o, condition);
     s = { key: o.key, projectId: o.project.id, example: o.kind === 'example', condition, bundle, unreadable, storeMsg: null,
-      focus: firstFocus(bundle.plan), targets: {}, mode: bundle.plan ? 'preview' : 'current', editing: !bundle.plan, detail: false, strip: null, evidenceFor: null, explain: false, pending: null, error: null, scoping: null, scopeError: null,
+      focus: firstFocus(bundle.plan), targets: {}, mode: bundle.plan ? 'preview' : 'current', editing: !bundle.plan, detail: false, strip: null, evidenceFor: null, evidenceRef: null, rail: 'request', railSource: null, fromWork: false, workAt: null, pending: null, error: null, scoping: null, scopeError: null,
       sheet: null, sources: false, adding: false, resultFor: bundle.snapshots.at(-1)?.id ?? null, addForm: false, copyMsg: null, fileMsg: null, ret: host.capture() };
     if (unreadable) s.storeMsg = null;
     moveTarget = true; frameWhole = true; host.chrome(); render();
@@ -322,39 +328,36 @@ export function createPlanView(host: PlanHost) {
     }
   }
 
-  /* ---------- notes beside the parts: what a part is now → the difference wanted ----------
-     Outside the structure: no node, no port, no relation, no place in the layout. With presentation data, its short quotes on
-     the same side and where they come from (the map's description, or a cited source: '자료에서', not the product as it is).
-     Without, no pair: the change's name for this part, and the part's own description apart as its role in the map, never as
-     what it does now. One target reads at a time; all targets of the change remain marked on the map and named in the target
-     navigation. */
+  /* ---------- one target of a change: what it is now, what is wanted there, why the change reads it ----------
+     The same grammar in the pane beside the map and in the wide comparison, for the authored example and for any analysis.
+     '지금' is the plan's quote for this part (the map's description or a cited excerpt, with where it comes from); without one
+     it says the material does not tell, never an empty slot and never an invented current behaviour. '바라는 모습' only where
+     the plan states it for this part ('분석 제안' when the analysis proposes it). '왜 이 부분을 보나' is the analysis's own
+     reason about this part, else the part's role on the map, labelled as such. Sources open where the reading is. */
   /** The part's own description as its role on the map (first sentence), with where it comes from; never a current state. */
   function partRole(o: PlanOpened, id: string): { text: string; from: string; label: string } | null {
-    const part = o.view.parts.find(x => x.id === id), firstSentence = (t: string) => { const m = /^(.+?[.!?。])(?=\s|$)/.exec(t.replace(/\s+/g, ' ').trim()); return m ? m[1]! : t.trim(); };
+    const part = o.view.parts.find(x => x.id === id);
     return part?.note ? { text: firstSentence(part.note), from: '지도 설명', label: '이 부분의 역할' } : part?.summary ? { text: firstSentence(part.summary), from: '받은 정리', label: '이 부분의 맥락' } : null;
   }
-  function calloutNote(o: PlanOpened, p: ChangePlan, item: PlanItem, partId: string, pres: PlanPresentation | null, at: string): HTMLElement {
-    const st = s!, name = o.view.parts.find(x => x.id === partId)?.name ?? '부분';
-    const kind = pres?.origin ?? null;
-    const head = h('p', { class: 'co-head' }, h('span', { class: 'co-kind' }, kind === 'intent' ? '원하는 차이' : kind === 'suggestion' ? '분석 제안' : '변경 항목'), h('strong', {}, name),
-      at !== partId ? h('small', {}, `‘${partName(at)}’ 안쪽`) : null);
-    if (!pres) {
-      const role = partRole(o, partId);
-      return h('div', { class: 'callout plain', 'data-box': at, 'data-target': partId, role: 'note', 'aria-label': `${name} · 변경 항목` }, head,
-        h('div', { class: 'co-fallback' },
-          h('div', { class: 'co-row want' }, h('span', { class: 'co-label' }, '바꿀 내용'), h('p', {}, item.title)),
-          role ? h('div', { class: 'co-role' }, h('span', { class: 'co-label' }, role.label), h('p', {}, role.text, h('small', {}, role.from))) : null,
-          h('p', { class: 'co-gap' }, '현재와의 비교는 아직 정리 전이에요.')));
-    }
-    let from: Node | string = '지도 설명';
-    if (pres.current.source === 'evidence') {
-      const ev = p.evidence.filter(e => pres.current.refs.includes(e.id));
-      from = h('button', { type: 'button', class: 'co-src', title: ev.map(e => `${e.id} · ${e.title} · ${e.basis}`).join('\n'), onclick: () => { st.evidenceFor = item.id; render(); } }, `자료에서 · ${pres.current.refs.join(', ')}`);
-    }
-    return h('div', { class: `callout ${kind}`, 'data-box': at, 'data-target': partId, role: 'note', 'aria-label': `${name} · 변경 구상` }, head,
-      h('div', { class: 'co-pair' },
-        h('div', { class: 'co-row now' }, h('span', { class: 'co-label' }, pres.current.source === 'evidence' ? '자료상' : '현재 설명'), h('p', {}, pres.current.text, h('small', {}, from))),
-        h('div', { class: 'co-row want' }, h('span', { class: 'co-label' }, kind === 'suggestion' ? '제안' : '바꿀 모습'), h('p', {}, pres.wanted.text))));
+  function partReading(o: PlanOpened, p: ChangePlan, item: PlanItem, partId: string, at: string, openRef: (id: string) => void, extra: Node | null = null): HTMLElement {
+    const name = partName(partId) ?? '부분', pres = item.presentation?.find(x => x.partId === partId) ?? null;
+    // The role is the fallback reason only where '지금' does not already quote the same map description.
+    const reasons = p.analysis.impacts.filter(x => x.partId === partId), role = reasons.length || pres ? null : partRole(o, partId);
+    const row = (cls: string, label: string, ...body: (Node | null)[]) => h('div', { class: `co-row ${cls}` }, h('h4', { class: 'co-label' }, label), h('div', { class: 'co-val' }, ...body));
+    const now = pres
+      ? row('now', '지금', h('p', {}, pres.current.text), pres.current.source === 'evidence' ? refLine(p, pres.current.refs, openRef, '자료에서') : h('p', { class: 'co-from' }, '지도 설명'))
+      : row('now unknown', '지금', h('p', {}, '자료로는 알 수 없어요.'), h('p', { class: 'co-from' }, '이 변경안의 자료는 이 부분이 지금 어떻게 하는지 말하지 않아요.'));
+    const want = pres ? row('want', pres.origin === 'suggestion' ? '분석 제안' : '바라는 모습', h('p', {}, pres.wanted.text), refLine(p, pres.wanted.refs, openRef)) : null;
+    const why = reasons.length ? row('why', '왜 이 부분을 보나', ...reasons.flatMap(x => [h('p', {}, x.reason), refLine(p, x.refs, openRef)]))
+      : role ? row('why role', role.label, h('p', {}, role.text), h('p', { class: 'co-from' }, role.from)) : null;
+    return h('div', { class: `callout${pres ? ` ${pres.origin}` : ' plain'}`, 'data-box': at, 'data-target': partId, role: 'group', 'aria-label': `${name} · ${item.title}` },
+      h('div', { class: 'co-head' }, h('strong', {}, name), at !== partId ? h('small', {}, `‘${partName(at)}’ 안쪽`) : null, extra),
+      h('div', { class: `co-pair${want ? ' two' : ''}` }, now, want), why);
+  }
+  /** Cited sources as small buttons that open them where the reading is (the pane, or the workspace's right column). */
+  function refLine(p: ChangePlan, refs: string[], openRef: (id: string) => void, lead = '근거'): HTMLElement | null {
+    const list = refs.map(id => p.evidence.find(e => e.id === id)).filter((e): e is Evidence => !!e); if (!list.length) return null;
+    return h('p', { class: 'co-from' }, `${lead} `, ...list.flatMap((e, n) => [n ? ' · ' : '', h('button', { type: 'button', class: 'co-ref', title: `${e.title} · ${e.basis}`, onclick: () => openRef(e.id) }, `${e.id} ${EVIDENCE_LABEL[e.kind]}`)]));
   }
   /** The part itself when it is drawn in this view, else its nearest drawn ancestor; null outside the view. */
   function visibleRep(id: string, boxes: Map<string, Box>): string | null {
@@ -537,16 +540,21 @@ export function createPlanView(host: PlanHost) {
     host.rows(p ? rowLines(p) : null);
     host.targetContext(item ? activeTarget(item) : null, moveTarget);
     renderMode(); renderStrip(o);
-    if (panelOpen()) renderPanel(o); else { $('plan-panel').hidden = true; $('plan-panel').replaceChildren(); }
+    if (panelOpen()) renderPanel(o); else if (workOpen()) renderWork(o); else { const pp = $('plan-panel'); pp.hidden = true; pp.classList.remove('work'); pp.replaceChildren(); }
     renderSheet(); overlay(); renderCompare(o);
     host.area();
   }
-  /** The right panel opens for writing (no plan yet, editing, a stale sentence, work in progress) or when asked for the whole
-   * plan; otherwise the plan reads on the map: its strip and one comparison. */
-  const panelOpen = () => !!s && (!plan() || s.editing || stale() || !!s.pending || !!s.scoping || s.detail);
+  /** The slim panel beside the map: writing the first sentence, before there is a plan. */
+  const panelOpen = () => !!s && !plan();
+  /** The wide workspace over the map: the whole plan read and edited (asked for, writing, a sentence or material ahead of the
+   * plan, work in flight). Otherwise the plan reads on the map: its strip and one change in the pane. */
+  const workOpen = () => !!s && !!plan() && (s.detail || s.editing || stale() || !!s.pending || !!s.scoping);
+  /** The width the map gives up beside it: the slim panel only. The workspace covers the map without moving it. */
   const width = () => (s && panelOpen() ? inspectorWidth() : 0);
 
-  /* ---------- the plan's strip: what is being tried, the changes, and the way to the whole plan ---------- */
+  /* ---------- the plan's strip: what is being tried, what the analysis found, the changes, the way to the wide workspace ----------
+     The changes are a reading choice (aria-current), not what the request takes: that count reads apart, and is chosen with
+     explicit boxes in the pane and the workspace. */
   function renderStrip(o: PlanOpened) {
     const strip = $('plan-strip'), st = s!, p = plan();
     strip.hidden = false;
@@ -557,12 +565,14 @@ export function createPlanView(host: PlanHost) {
     const conds = p.analysis.preserve.length + p.analysis.unknowns.length;
     strip.replaceChildren(); put(strip,
       h('div', { class: 'ps-head' }, h('span', { class: 'ps-kicker', title: by?.kind === 'ai' ? `${by.model} · ${fullTime(by.at)}` : '' }, '변경 구상', h('small', {}, basis)),
-        h('button', { type: 'button', class: 'ps-intent', title: `${p.intent}\n\n문장 고치기·근거·요청문은 ‘자세히’`, onclick: () => { st.detail = true; render(); } }, p.intent)),
+        h('button', { type: 'button', class: 'ps-intent', title: `${p.intent}\n\n넓게 비교에서 문장·근거·요청을 다뤄요`, onclick: () => openWork() }, p.intent)),
+      h('p', { class: 'ps-find', title: p.analysis.summary }, h('span', { class: 'ps-find-k' }, '분석이 찾은 것'), firstSentence(p.analysis.summary)),
       h('div', { class: 'ps-row' },
-        h('div', { class: 'ps-items', role: 'group', 'aria-label': '바꾸려는 것' }, ...p.analysis.items.map(i => h('button', { type: 'button', class: 'ps-item', 'aria-pressed': String(focusId === i.id), title: p.selected.includes(i.id) ? '이번 요청에 맡기는 변경' : '이번 요청에서 빠진 변경', onclick: () => focusItem({ kind: 'item', id: i.id }) },
-          h('span', { class: `ps-hand${p.selected.includes(i.id) ? ' on' : ''}`, 'aria-hidden': 'true' }), i.title))),
+        h('div', { class: 'ps-items', role: 'group', 'aria-label': '읽을 변경' }, ...p.analysis.items.map(i => h('button', { type: 'button', class: 'ps-item', 'aria-current': focusId === i.id ? 'true' : 'false', title: i.title, onclick: () => focusItem({ kind: 'item', id: i.id }) }, i.title))),
+        h('span', { class: 'ps-inc', title: '이번 요청에 포함한 변경 수' }, `요청에 포함 ${p.selected.length}/${p.analysis.items.length}`),
         conds ? conditions(p) : null),
-      h('button', { type: 'button', class: 'ps-more', 'aria-pressed': String(st.detail), onclick: () => { st.detail = !st.detail; render(); } }, st.detail ? '지도 비교로' : '자세히'),
+      h('div', { class: 'ps-acts' }, h('button', { type: 'button', class: 'link-button ps-edit', onclick: () => edit() }, '문장 고치기'),
+        h('button', { type: 'button', class: 'ps-more', onclick: () => openWork(focusId ?? undefined) }, '넓게 비교')),
       close);
   }
   function targetNav(item: PlanItem): HTMLElement | null {
@@ -577,14 +587,14 @@ export function createPlanView(host: PlanHost) {
     });
     return h('nav', { class: 'ps-targets', 'aria-label': '읽을 변경 대상' }, h('span', { class: 'ps-target-label' }, `바뀌는 부분 ${ids.length}`), tabs);
   }
-  /** The change being read: hand it over or not, read its explanation, open its sources. */
+  /** The change being read: include it in this request (an explicit box), read it wide, open its sources. */
   function focusControls(p: ChangePlan, item: PlanItem) {
     const st = s!, refs = p.evidence.filter(e => item.refs.includes(e.id)).length, box = h('input', { type: 'checkbox', id: `ps-hand-${item.id}` }) as HTMLInputElement;
     box.checked = p.selected.includes(item.id); box.addEventListener('change', () => toggleItem(item.id, box.checked));
     return h('div', { class: 'ps-focus', role: 'group', 'aria-label': `‘${item.title}’` },
-      h('label', { class: 'cmp-hand', for: `ps-hand-${item.id}` }, box, h('span', {}, '맡기기')),
-      h('button', { type: 'button', class: 'ps-link', 'aria-pressed': String(st.explain), onclick: () => { st.explain = !st.explain; st.evidenceFor = null; render(); } }, st.explain ? '짧게 보기' : '설명'),
-      refs ? h('button', { type: 'button', class: 'ps-link', 'aria-pressed': String(st.evidenceFor === item.id), onclick: () => { st.evidenceFor = st.evidenceFor === item.id ? null : item.id; render(); } }, `근거 ${refs}`) : null);
+      h('label', { class: 'cmp-hand', for: `ps-hand-${item.id}` }, box, h('span', {}, '이번 요청에 포함')),
+      h('button', { type: 'button', class: `ps-link ps-wide${st.fromWork ? ' back' : ''}`, onclick: () => openWork(item.id) }, st.fromWork ? '‹ 넓은 비교로' : '넓게 비교'),
+      refs ? h('button', { type: 'button', class: 'ps-link', 'aria-pressed': String(st.evidenceFor === item.id), onclick: () => { st.evidenceFor = st.evidenceFor === item.id ? null : item.id; st.evidenceRef = null; render(); } }, `근거 ${refs}`) : null);
   }
   /** Conditions with no part of their own (to keep, not yet decided): read here, never pinned to a part on the map. */
   function conditions(p: ChangePlan) {
@@ -605,14 +615,16 @@ export function createPlanView(host: PlanHost) {
   let lastFocusKey = '', lastShown = '';
   function renderCompare(o: PlanOpened) {
     const st = s!, p = plan();
+    // Under the workspace the pane stays exactly as it was (content, scroll, the map beside it): coming back finds it in place.
+    if (workOpen()) return;
     if (!p || !st.focus || st.focus.kind === 'impacts' || panelOpen() || st.sheet) { host.surface(null, [], false); lastFocusKey = ''; lastShown = ''; moveTarget = false; frameWhole = false; return; }
     const boxes = host.boxes(), rep = (id: string) => visibleRep(id, boxes), active = st.focus.kind === 'item' ? activeTarget(itemOf(st.focus.id)!) : st.focus.id;
     const key = `${JSON.stringify(st.focus)}|${active ?? ''}`;
     let content: Node[], parts: string[];
-    const shown = `${key}|${st.evidenceFor ?? ''}|${st.explain}`;
+    const shown = `${key}|${st.evidenceFor ?? ''}|${st.evidenceRef ?? ''}`;
     if (st.focus.kind === 'item') {
       const item = itemOf(st.focus.id); if (!item) { host.surface(null, [], false); return; }
-      content = st.evidenceFor === item.id ? itemEvidence(p, item) : st.explain ? itemCompare(o, p, item) : itemBrief(o, p, item); parts = active && rep(active) ? [rep(active)!] : [];
+      content = st.evidenceFor === item.id ? itemEvidence(p, item) : itemBrief(o, p, item); parts = active && rep(active) ? [rep(active)!] : [];
     } else {
       const id = st.focus.id; content = partCompare(o, p, id); parts = [rep(id) ?? id];
     }
@@ -635,10 +647,12 @@ export function createPlanView(host: PlanHost) {
       items.length > 1 ? h('button', { type: 'button', class: 'cmp-step', 'aria-label': '다음 변경', onclick: () => step(1) }, '›') : null,
       h('button', { type: 'button', class: 'close', 'aria-label': '이 변경 읽기 닫기', title: '닫기 (Esc)', onclick: () => { st.focus = null; render(); } }, '×')].filter((x): x is HTMLElement => !!x);
     const id = activeTarget(item), at = id ? visibleRep(id, boxes) : null;
-    const note = id ? calloutNote(o, p, item, id, item.presentation?.find(x => x.partId === id) ?? null, at ?? id) : h('p', { class: 'cmp-none' }, '지금 지도에 없는 새 부분을 더하는 변경이에요.');
+    const open = (ref: string) => { st.evidenceFor = item.id; st.evidenceRef = ref; render(); };
+    const note = id ? partReading(o, p, item, id, at ?? id, open) : h('p', { class: 'cmp-none' }, '지금 지도에 없는 새 부분을 더하는 변경이에요.');
     return [
       compareHead(`변경 구상 · ${basis}`, item.title, tools),
-      h('div', { class: 'lens-body cmp-body' }, targetNav(item), note,
+      // What the change wants, in its own words, before the part being read (a long one opens whole in the wide comparison).
+      h('div', { class: 'lens-body cmp-body' }, h('p', { class: 'cmp-desc clamp3', title: item.description }, item.description), targetNav(item), note,
         at && at !== id ? h('p', { class: 'cmp-src' }, `지도에서는 ‘${partName(at)}’ 안에 접혀 있어요.`) : null),
       h('footer', { class: 'lens-foot' }, focusControls(p, item))];
   }
@@ -656,61 +670,20 @@ export function createPlanView(host: PlanHost) {
   function compareHead(kicker: string, title: string, tools: Node[]) {
     return h('header', { class: 'lens-head cmp-head' }, h('div', { class: 'lens-path' }, h('span', {}, kicker)), h('h2', { id: 'lens-title' }, title), h('div', { class: 'head-tools' }, ...tools));
   }
-  /* A change reads as pairs: on the left each part it targets as it is now (with where that comes from), on the right what the
-     change wants, once for all of them, after an arrow. Impact candidates follow below, their reasons only, apart from the pair. */
-  function pair(left: Node[], right: Node[], currentLabel = '현재 설명') {
-    return h('div', { class: 'cmp-pair' },
-      h('div', { class: 'cmp-now' }, h('h3', { class: 'cmp-label' }, currentLabel), ...left),
-      h('div', { class: 'cmp-arrow', 'aria-hidden': 'true' }, '→'),
-      h('div', { class: 'cmp-want' }, h('h3', { class: 'cmp-label' }, '구상 ', h('small', {}, '바라는 모습 · 적용 안 됨')), ...right));
-  }
   function impactList(o: PlanOpened, list: { partId: string; reason: string }[], named = true) {
     return list.length ? h('section', { class: 'cmp-impacts' }, h('h3', { class: 'cmp-label' }, '살펴볼 것 ', h('small', {}, '영향 후보 · 분석이 든 이유')),
       h('ul', {}, ...list.map(x => h('li', {}, named ? h('button', { type: 'button', class: 'link-button', onclick: () => locate(x.partId) }, partName(x.partId) ?? '부분') : null, h('span', {}, x.reason))))) : null;
   }
-  function itemCompare(o: PlanOpened, p: ChangePlan, item: PlanItem): Node[] {
-    const st = s!, items = p.analysis.items, n = items.indexOf(item), boxes = host.boxes();
-    const by = st.bundle.by, basis = by?.kind === 'example' ? '작성된 예제 분석' : by?.kind === 'ai' ? 'AI 분석' : '분석';
-    const step = (d: number) => focusItem({ kind: 'item', id: items[(n + d + items.length) % items.length]!.id });
-    const tools = [
-      items.length > 1 ? h('button', { type: 'button', class: 'cmp-step', 'aria-label': '앞 변경', onclick: () => step(-1) }, '‹') : null,
-      items.length > 1 ? h('span', { class: 'cmp-count' }, `${n + 1}/${items.length}`) : null,
-      items.length > 1 ? h('button', { type: 'button', class: 'cmp-step', 'aria-label': '다음 변경', onclick: () => step(1) }, '›') : null,
-      h('button', { type: 'button', class: 'close', 'aria-label': '설명 닫기', title: '닫기 (Esc)', onclick: () => { st.explain = false; render(); } }, '×')].filter((x): x is HTMLElement => !!x);
-    const active = activeTarget(item), pres = item.presentation?.find(x => x.partId === active), at = new Set(active ? [active] : []);
-    const nameLine = (id: string) => {
-      const r = visibleRep(id, boxes), where = r && r !== id ? `‘${partName(r)}’ 안쪽` : !r ? '이 범위 밖' : null;
-      return h('p', { class: 'cmp-name' }, h('button', { type: 'button', class: 'link-button', onclick: () => locate(id) }, partName(id) ?? '지금 지도에 없는 부분'), where ? h('small', {}, where) : null);
-    };
-    const targets = pres ? [...at].map(id => h('div', { class: 'cmp-part' }, nameLine(id),
-      h('p', { class: 'cmp-text' }, pres.current.text), h('p', { class: 'cmp-src' }, pres.current.source === 'evidence' ? `자료에서 · ${pres.current.refs.join(', ')}` : '지도 설명'))) : [];
-    // Without same-side data for this target: what the change wants, then the part's role apart from it; no before/after.
-    const fallback = () => h('div', { class: 'cmp-only cmp-fallback' },
-      ...[...at].map(nameLine), h('h3', { class: 'cmp-label' }, '바꿀 내용 ', h('small', {}, '변경 전체의 설명 · 적용 안 됨')), h('p', { class: 'cmp-text' }, item.description),
-      ...(active ? roleBlock(o, active) : []), h('p', { class: 'cmp-gap' }, '현재와의 비교는 아직 정리 전이에요.'));
-    const own = p.analysis.impacts.filter(x => at.has(x.partId)), near = nearImpacts(item);
-    const box = h('input', { type: 'checkbox', id: `cmp-hand-${item.id}` }) as HTMLInputElement;
-    box.checked = p.selected.includes(item.id); box.addEventListener('change', () => toggleItem(item.id, box.checked));
-    const refs = p.evidence.filter(e => item.refs.includes(e.id)).length;
-    return [
-      compareHead(`변경 구상 · ${basis}`, item.title, tools),
-      h('div', { class: 'lens-body cmp-body' }, targetNav(item),
-        h('div', { class: 'cmp-main' }, pres ? pair(targets, [h('p', { class: 'cmp-text' }, pres.wanted.text)], pres.current.source === 'evidence' ? '자료상' : '현재 설명') : fallback(),
-          impactList(o, [...own, ...near])),
-        item.dependsOn.length && by?.kind === 'example' ? h('p', { class: 'cmp-dep' }, h('span', {}, '전제'), item.dependsOn.map(d => itemOf(d)?.title ?? d).join(', ')) : null),
-      h('footer', { class: 'lens-foot' },
-        h('label', { class: 'cmp-hand', for: `cmp-hand-${item.id}` }, box, h('span', {}, '이번 요청에 맡기기')),
-        refs ? h('button', { type: 'button', class: 'lens-more', onclick: () => { st.evidenceFor = item.id; render(); requestAnimationFrame(() => document.getElementById('cmp-back')?.focus()); } }, `근거 ${refs}`, h('span', { 'aria-hidden': 'true' }, ' ›')) : null)];
-  }
   /** The sources this change cites, read in the comparison's place: each original text with where it comes from. */
   function itemEvidence(p: ChangePlan, item: PlanItem): Node[] {
-    const st = s!, by = st.bundle.by, refs = p.evidence.filter(e => item.refs.includes(e.id));
-    const back = () => { st.evidenceFor = null; render(); document.querySelector<HTMLElement>('#lens .cmp-hand input, #lens .lens-more, .ps-focus button')?.focus(); };
+    const st = s!, by = st.bundle.by, asked = p.evidence.find(e => e.id === st.evidenceRef) ?? null;
+    const refs = [...(asked ? [asked] : []), ...p.evidence.filter(e => item.refs.includes(e.id) && e !== asked)];
+    const back = () => { st.evidenceFor = null; st.evidenceRef = null; render(); document.querySelector<HTMLElement>('#lens .cmp-hand input, #lens .lens-more, .ps-focus button')?.focus(); };
     return [
       compareHead(`근거 ${refs.length} · ${by?.kind === 'example' ? '예제 원자료' : '이 변경안이 읽은 자료'}`, item.title,
         [h('button', { type: 'button', class: 'close', 'aria-label': '비교로 돌아가기', title: '비교로 (Esc)', onclick: back }, '×')]),
       h('div', { class: 'lens-body cmp-body cmp-evidence' }, sourceList(refs, true)),
-      h('footer', { class: 'lens-foot' }, h('button', { type: 'button', id: 'cmp-back', class: 'lens-more', onclick: back }, h('span', { 'aria-hidden': 'true' }, '‹ '), st.explain ? '비교로 돌아가기' : '지도로 돌아가기'))];
+      h('footer', { class: 'lens-foot' }, h('button', { type: 'button', id: 'cmp-back', class: 'lens-more', onclick: back }, h('span', { 'aria-hidden': 'true' }, '‹ '), '변경 읽기로 돌아가기'))];
   }
   function partCompare(o: PlanOpened, p: ChangePlan, id: string): Node[] {
     const boxes = host.boxes(), r = visibleRep(id, boxes) ?? id;
@@ -736,24 +709,173 @@ export function createPlanView(host: PlanHost) {
     box.replaceChildren(b('current', '현재'), b('preview', '변경 미리보기'));
   }
 
-  /** Same inspector grammar as a part: kicker → title (what is wanted) → one basis line → the change list first. Writing and
-   * source tools come after the list; with no plan yet, writing is the only content. */
+  /** The slim panel, before there is a plan: the sentence to try, what it would read, and the ask. */
   function renderPanel(o: PlanOpened) {
-    const panel = $('plan-panel'), prev = panel.querySelector('.pp-body'), keep = prev?.scrollTop ?? 0, p = plan(), st = s!;
-    panel.hidden = false;
+    const panel = $('plan-panel'), prev = panel.classList.contains('work') ? null : panel.querySelector('.pp-body'), keep = prev?.scrollTop ?? 0, st = s!;
+    panel.hidden = false; panel.classList.remove('work');
     const head = h('header', { class: 'panel-head pp-head' },
       h('div', { class: 'panel-path' }, h('span', {}, '변경 구상'), st.example ? h('span', { class: 'tag' }, '예제') : null),
-      p ? h('h2', { id: 'plan-title', class: 'pp-want', tabindex: '-1', title: p.intent }, p.intent) : h('h2', { id: 'plan-title', tabindex: '-1' }, '새 변경안'),
-      p ? h('p', { class: 'pp-basis', title: p.basis }, `기준 · ${short(p.basis, 64)}`) : h('p', { class: 'pp-basis' }, '적은 문장으로 같은 지도에서 달라질 곳을 살펴봐요.'),
-      newerNote(o, p),
-      h('div', { class: 'head-tools' }, p && !st.editing && !stale()
-        ? h('button', { type: 'button', class: 'close', 'aria-label': '자세히 닫고 지도 비교로', title: '지도 비교로 (Esc)', onclick: () => { st.detail = false; render(); } }, '×')
-        : h('button', { type: 'button', class: 'close', 'aria-label': '변경 구상 닫고 현재 지도로', title: '닫기 (Esc) · 초안은 남아요', onclick: () => close() }, '×')));
+      h('h2', { id: 'plan-title', tabindex: '-1' }, '새 변경안'),
+      h('p', { class: 'pp-basis' }, '적은 문장으로 같은 지도에서 달라질 곳을 살펴봐요.'),
+      h('div', { class: 'head-tools' }, h('button', { type: 'button', class: 'close', 'aria-label': '변경 구상 닫고 현재 지도로', title: '닫기 (Esc) · 초안은 남아요', onclick: () => close() }, '×')));
     const body = h('div', { class: 'pp-body panel-body' });
-    put(body, partContext(o), p && !st.editing && !stale() ? planSection(o, p) : null, intentSection(o), p && (st.editing || stale()) ? planSection(o, p) : null, st.bundle.snapshots.length ? resultSection() : null);
-    // What goes into this request stays in view under the scrolling body, next to the button that makes it.
-    panel.replaceChildren(head, body, ...(p ? [requestSection(p)] : []), footer(o));
+    put(body, intentSection(o), st.bundle.snapshots.length ? resultSection() : null);
+    panel.replaceChildren(head, body, footer(o));
     body.scrollTop = keep;
+  }
+
+  /* ---------- the wide workspace: the whole plan read and edited over the map ----------
+     Entered from the change map ('넓게 비교', '문장 고치기', a change's '넓게 비교' in the pane). It covers the map without
+     moving it: the camera, the preview, folds and the pane under it stay as they were, so '지도로 돌아가기' finds them again.
+     Reading order: what is being tried → what the analysis found → the changes (one read at a time; each with its own
+     '이번 요청에 포함' box) → for the one read: what differs, then each part it changes (now, wanted there, why it is read) and
+     the parts to look at with it, each with '지도에서 보기'. The right column holds what this step needs: what the request
+     takes and the way to make it. A source, the returned results or every source open there in its place. */
+  let lastWorkItem = '';
+  function renderWork(o: PlanOpened) {
+    const panel = $('plan-panel'), p = plan()!, st = s!, was = panel.classList.contains('work') && !panel.hidden;
+    const back = st.workAt, prevDetail = was ? panel.querySelector('.pw-detail')?.scrollTop ?? 0 : 0, prevList = was ? panel.querySelector('.pw-list')?.scrollTop ?? 0 : 0;
+    const prevRail = was ? panel.querySelector('.pw-rail-body')?.scrollTop ?? 0 : 0, prevView = panel.dataset.rail ?? '';
+    st.workAt = null;
+    if (st.focus?.kind !== 'item' || !itemOf(st.focus.id)) st.focus = firstFocus(p);
+    const item = itemOf((st.focus as { id: string }).id)!;
+    panel.hidden = false; panel.classList.add('work'); panel.dataset.rail = st.rail;
+    const by = st.bundle.by, origin = by?.kind === 'example' ? '작성된 예제 분석' : by?.kind === 'ai' ? `AI 분석 · ${by.model} · ${ago(by.at)}` : '분석';
+    const writing = st.editing || stale() || !!st.pending, leave = !stale() && !st.pending && !st.scoping;
+    const title = firstSentence(p.intent), whole = title.length < p.intent.trim().length;
+    const head = h('header', { class: 'pw-head' },
+      h('p', { class: 'pw-kick' }, h('span', {}, '변경 구상'), st.example ? h('span', { class: 'tag' }, '예제') : null, h('span', { class: 'pw-origin', title: by?.kind === 'ai' ? `${fullTime(by.at)} · ${p.basis}` : p.basis }, origin)),
+      // A short title: the sentence's first sentence (the whole one is in the editor and on hover).
+      h('h2', { id: 'plan-title', class: 'pw-title', tabindex: '-1', title: p.intent }, title, whole && !writing ? h('span', { class: 'pw-more' }, ' …') : null),
+      newerNote(o, p),
+      h('div', { class: 'pw-head-tools' },
+        writing ? null : h('button', { type: 'button', class: 'secondary small', onclick: () => edit() }, '문장 고치기'),
+        leave ? h('button', { type: 'button', class: 'secondary small pw-back', title: '지도로 (Esc) · 카메라와 읽던 변경은 그대로예요', onclick: leaveWork }, '지도로 돌아가기')
+          : h('button', { type: 'button', class: 'close', 'aria-label': '변경 구상 닫고 현재 지도로', title: '닫기 · 초안은 남아요', onclick: () => close() }, '×')));
+    const found = h('section', { class: 'pw-found', 'aria-labelledby': 'pw-found-h' }, h('h3', { id: 'pw-found-h' }, '분석이 찾은 것'), h('p', {}, p.analysis.summary),
+      h('p', { class: 'pw-note' }, `${by?.kind === 'example' ? '작성된 예제 분석' : 'AI 분석'}의 정리예요. 실행해서 확인한 결과는 아니에요.`));
+    const open = (ref: string) => { st.rail = 'source'; st.railSource = ref; render(); requestAnimationFrame(() => document.getElementById('pw-rail-back')?.focus()); };
+    const pick = (id: string) => { st.focus = { kind: 'item', id }; st.evidenceFor = null; render(); requestAnimationFrame(() => document.querySelector<HTMLElement>('.pw-pick[aria-current="true"]')?.focus()); };
+    const list = h('nav', { class: 'pw-list', 'aria-label': '바뀌는 것' },
+      h('div', { class: 'pw-list-head' }, h('span', {}, `바뀌는 것 ${p.analysis.items.length}`), h('span', { 'aria-hidden': 'true' }, '이번 요청에 포함')),
+      h('ul', {}, ...p.analysis.items.map(i => {
+        const on = i.id === item.id, box = h('input', { type: 'checkbox', id: `pw-inc-${i.id}`, 'aria-label': `‘${i.title}’ 이번 요청에 포함` }) as HTMLInputElement;
+        box.checked = p.selected.includes(i.id); box.addEventListener('change', () => toggleItem(i.id, box.checked));
+        const names = itemTargets(i).map(partName).filter(Boolean).join(' · ');
+        return h('li', { class: `pw-item${on ? ' on' : ''}` },
+          h('button', { type: 'button', class: 'pw-pick', 'aria-current': on ? 'true' : 'false', onclick: () => pick(i.id) },
+            h('span', { class: 'pw-pick-title' }, i.title), h('span', { class: 'pw-pick-parts' }, names || '지금 지도에 없는 새 부분')), box);
+      })),
+      planConditions(p));
+    const boxes = host.boxes(), targets = itemTargets(item), near = nearImpacts(item).filter(x => !targets.includes(x.partId));
+    const path = (id: string) => { const names: string[] = []; for (let q = o.view.parts.find(x => x.id === id)?.parentId, g = 0; q && g < 64; q = o.view.parts.find(x => x.id === q)?.parentId, g++) names.unshift(partName(q) ?? ''); return names.join(' › '); };
+    const toMap = (id: string, impact = false) => leave ? h('button', { type: 'button', class: 'link-button pw-map', onclick: () => showOnMap(item, id, impact) }, '지도에서 보기') : null;
+    const detail = h('article', { class: `pw-detail${stale() ? ' is-stale' : ''}`, 'aria-labelledby': 'pw-item-title' },
+      stale() ? h('p', { class: 'pw-stale' }, '아래는 앞 문장과 자료로 만든 변경안이에요. 고친 내용은 아직 살펴보지 않았어요.') : null,
+      h('h3', { id: 'pw-item-title', class: 'pw-item-title' }, item.title),
+      h('section', { class: 'pw-what' }, h('h4', {}, '무엇이 달라지나'), h('p', {}, item.description), refLine(p, item.refs, open)),
+      item.dependsOn.length && by?.kind === 'example' ? h('p', { class: 'pw-dep' }, h('span', {}, '전제'), item.dependsOn.map(d => itemOf(d)?.title ?? d).join(', ')) : null,
+      targets.length ? h('section', { class: 'pw-parts' }, h('h4', {}, `바뀌는 부분 ${targets.length}`), ...targets.map(id => {
+        const where = path(id);
+        return h('div', { class: 'pw-part' }, partReading(o, p, item, id, visibleRep(id, boxes) ?? id, open, h('span', { class: 'pw-part-tools' }, where ? h('span', { class: 'pw-path' }, `${where} 안`) : null, toMap(id))));
+      })) : h('p', { class: 'pw-none' }, '지금 지도에 없는 새 부분을 더하는 변경이에요. 바뀔 자리는 정해지지 않았어요.'),
+      near.length ? h('section', { class: 'pw-near' }, h('h4', {}, '함께 볼 부분 ', h('small', {}, '영향 후보 · 분석이 든 이유')),
+        h('ul', {}, ...near.map(x => h('li', {}, h('p', { class: 'pw-near-name' }, h('strong', {}, partName(x.partId) ?? '지금 지도에 없는 부분'), toMap(x.partId, true)), h('p', {}, x.reason), refLine(p, x.refs, open))))) : null);
+    const main = h('div', { class: 'pw-main' }, head, writing ? intentSection(o) : null, found, h('div', { class: 'pw-body' }, list, detail));
+    const rail = h('aside', { class: 'pw-rail', 'aria-label': '이번 요청' }, h('div', { class: 'pw-rail-body' }, ...railView(o, p, writing).filter((x): x is Node => !!x)), footer(o));
+    panel.replaceChildren(main, rail);
+    // The same change keeps where the person was in it; another change starts at its top; back from the map: as left.
+    panel.querySelector('.pw-list')!.scrollTop = back?.list ?? prevList;
+    panel.querySelector('.pw-detail')!.scrollTop = back ? back.detail : item.id === lastWorkItem ? prevDetail : 0;
+    if (prevView === st.rail) panel.querySelector('.pw-rail-body')!.scrollTop = prevRail;
+    lastWorkItem = item.id;
+  }
+  /** Conditions of the whole plan (to keep, not decided yet): once, under the list, folded; never pinned to a change. */
+  function planConditions(p: ChangePlan): HTMLElement | null {
+    const a = p.analysis.preserve.length, b = p.analysis.unknowns.length; if (!a && !b) return null;
+    return h('details', { class: 'pw-conds' }, h('summary', {}, `지킬 것 ${a} · 정하지 않은 것 ${b}`),
+      a ? h('section', {}, h('h4', {}, '지킬 것'), h('ul', {}, ...p.analysis.preserve.map(x => h('li', {}, x)))) : null,
+      b ? h('section', {}, h('h4', {}, '아직 정하지 않은 것'), h('ul', {}, ...p.analysis.unknowns.map(x => h('li', {}, x)))) : null,
+      h('p', { class: 'fine' }, '특정 변경에 걸린 조건이 아니라 이 변경안 전체의 조건이에요.'));
+  }
+  /** The right column: by default what this request takes and the way to make it; a source, results or every source in its place. */
+  function railView(o: PlanOpened, p: ChangePlan, writing: boolean): (Node | null)[] {
+    const st = s!, back = () => { st.rail = 'request'; st.railSource = null; render(); requestAnimationFrame(() => document.getElementById('plan-make')?.focus()); };
+    const top = (title: string) => h('header', { class: 'pw-rail-head' }, h('button', { type: 'button', class: 'link-button', id: 'pw-rail-back', onclick: back }, '‹ 이번 요청으로'), h('h3', {}, title));
+    if (st.rail === 'source') {
+      const e = p.evidence.find(x => x.id === st.railSource);
+      if (e) return [top(`근거 ${e.id}`), sourceList([e], true), h('p', { class: 'fine' }, '자료 원문이에요. 지시나 실행 결과로 읽지 않아요.')];
+    }
+    if (st.rail === 'results' && st.bundle.snapshots.length) return [top('돌아온 기록'), resultSection()];
+    if (st.rail === 'sources') {
+      const ev = (writing ? input()?.evidence : null) ?? p.evidence;
+      return [top(`${st.example && st.key === CONVERTER_KEY ? '예제 원자료' : '읽는 자료'} ${ev.length}`), sourceList(ev.filter(e => o.kind !== 'saved' || !st.bundle.extra.some(x => x.id === e.id))), addSource(o)];
+    }
+    return requestRail(o, p, writing);
+  }
+  function requestRail(o: PlanOpened, p: ChangePlan, writing: boolean): (Node | null)[] {
+    const st = s!, last = latestSnapshot(), chosen = p.analysis.items.filter(i => p.selected.includes(i.id)), why = staleness();
+    const changed = last && (last.planId !== p.id || last.planRevision !== p.revision), authored = st.bundle.by?.kind === 'example';
+    const warns = authored ? chosen.map(i => ({ i, missing: missingDeps(i) })).filter(x => x.missing.length).map(({ i, missing }) =>
+      h('p', { class: 'pp-warn' }, `‘${missing.map(d => itemOf(d)?.title ?? d).join('’, ‘')}’이 ‘${i.title}’의 전제예요. `,
+        h('button', { type: 'button', class: 'link-button', onclick: () => { s!.bundle = { ...s!.bundle, plan: selectItems(plan()!, [...plan()!.selected, ...missing]) }; persist(); render(); } }, '함께 포함'),
+        h('span', {}, ' · 빼 두면 요청문에 포함하지 않은 전제로 적혀요.'))) : [];
+    const tools = h('div', { class: 'pw-tools' },
+      writing ? null : sourcesToggle(o),
+      st.bundle.snapshots.length ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { st.rail = 'results'; render(); } }, `돌아온 기록 · 요청문 ${st.bundle.snapshots.length}개`) : null,
+      st.bundle.snapshots.length ? h('button', { type: 'button', class: 'link-button quiet', title: '돌아온 기록과 프로젝트 기록을 함께 읽어요. 변경 구상은 닫혀도 초안은 남아요.', onclick: () => host.readReturn() }, '돌아와 읽기') : null);
+    return [
+      h('section', { class: 'pw-req', 'aria-labelledby': 'pw-req-h' },
+        h('h3', { id: 'pw-req-h' }, '이번 요청', h('span', { class: 'pw-count' }, `${chosen.length}/${p.analysis.items.length} 포함`)),
+        chosen.length ? h('ul', { class: 'pw-req-list' }, ...chosen.map(i => h('li', {}, i.title))) : h('p', { class: 'pw-muted' }, '포함한 변경이 없어요. 왼쪽 목록에서 ‘이번 요청에 포함’을 고르세요.'),
+        ...warns,
+        st.scoping
+          ? h('div', { class: 'pending', role: 'status' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), h('span', {}, `고른 변경 ${st.scoping.count}개의 전제를 살펴보는 중…`),
+              h('button', { type: 'button', class: 'link-button', onclick: () => st.scoping?.controller.abort() }, '취소'))
+          : h('div', { class: 'pp-row' }, h('button', { type: 'button', id: 'plan-make', class: 'primary small', disabled: !canRequest(), onclick: makeRequest, title: requestTitle() }, '요청문 만들기'),
+              last ? h('button', { type: 'button', class: 'link-button', onclick: () => { st.sheet = last.id; st.copyMsg = null; render(); } }, `마지막 요청문 · ${ago(last.createdAt)}`) : null),
+        // Why the button is off while the sentence or material is ahead of the plan (kept in step as the person types).
+        h('p', { class: 'fine pp-make-note', id: 'plan-make-note', role: 'status', hidden: !why }, why ? requestTitle() : ''),
+        st.scopeError ? h('p', { class: 'pp-error', role: 'alert' }, st.scopeError) : null,
+        !st.scoping && !st.scopeError && !why ? h('p', { class: 'fine' }, authored ? '만들고 복사해도 보내거나 실행하지 않아요.' : '만들 때 고른 변경의 전제를 AI가 한 번 살펴봐요. 보내거나 실행하지 않아요.') : null,
+        changed && !st.scoping ? h('p', { class: 'fine' }, '마지막 요청문 뒤로 변경안이 바뀌었어요. 새로 만들어도 이전 것은 남아요.') : null),
+      !authored && needsCode() ? accessField() : null,
+      tools, writing ? null : conditionSwitch(o)];
+  }
+  function accessField(): HTMLElement {
+    const code = h('input', { id: 'plan-access', type: 'password', placeholder: '접속 코드', autocomplete: 'off', value: host.accessCode() }) as HTMLInputElement;
+    const keep = () => host.keepAccessCode(code.value);
+    code.addEventListener('input', keep); code.addEventListener('change', keep);
+    return h('div', { class: 'access' }, h('label', { for: 'plan-access' }, '접속 코드'), code);
+  }
+  function edit() {
+    if (!s) return;
+    s.editing = true; s.rail = 'request'; render();
+    requestAnimationFrame(() => document.getElementById('plan-intent')?.focus());
+  }
+  function openWork(itemId?: string) {
+    if (!s || !plan()) return;
+    if (itemId && itemOf(itemId)) s.focus = { kind: 'item', id: itemId };
+    s.detail = true; s.fromWork = false; s.evidenceFor = null; s.strip = null; render();
+    requestAnimationFrame(() => document.querySelector<HTMLElement>('.pw-pick[aria-current="true"]')?.focus({ preventScroll: true }));
+  }
+  /** Back to the change map as it was left: same camera, mode, folds and pane; nothing is re-framed. */
+  function leaveWork() {
+    if (!s || stale() || s.pending || s.scoping) return;
+    s.detail = false; s.editing = false; s.rail = 'request'; s.railSource = null; s.fromWork = false;
+    render();
+    requestAnimationFrame(() => document.querySelector<HTMLElement>('#lens .ps-wide, #plan-strip .ps-more')?.focus());
+  }
+  /** From the wide comparison to one part on the map: the part brought beside the pane, the pane reading this change there
+   * (or, for a part to look at with it, that part's reasons), and the way back to the same row and scroll. */
+  function showOnMap(item: PlanItem, id: string, impact: boolean) {
+    if (!s) return;
+    const panel = $('plan-panel');
+    s.workAt = { list: panel.querySelector('.pw-list')?.scrollTop ?? 0, detail: panel.querySelector('.pw-detail')?.scrollTop ?? 0 };
+    s.detail = false; s.editing = false; s.rail = 'request'; s.railSource = null; s.fromWork = true;
+    if (impact) { s.focus = { kind: 'item', id: item.id }; render(); locate(id); }
+    else chooseTarget(item, id);
+    requestAnimationFrame(() => document.querySelector<HTMLElement>('#lens .ps-wide')?.focus({ preventScroll: true }));
   }
   /** The plan's basis is fixed; newer records are announced, never merged into it. */
   function newerNote(o: PlanOpened, p: ChangePlan | null) {
@@ -761,32 +883,11 @@ export function createPlanView(host: PlanHost) {
     const newer = o.view.records.filter(r => r.at > p.createdAt).length;
     return newer ? h('p', { class: 'pp-newer' }, `만든 뒤 새 기록 ${newer}개 · 이 안의 기준은 그대로예요`) : null;
   }
-  function partContext(o: PlanOpened) {
-    const id = host.selected(), p = plan(); if (!id || !p) return null;
-    const part = o.view.parts.find(x => x.id === id); if (!part) return null;
-    const touching = p.analysis.items.filter(i => i.partIds.includes(id)), impacts = p.analysis.impacts.filter(x => x.partId === id);
-    return h('section', { class: 'pp-sec pp-part' },
-      h('p', { class: 'pp-part-name' }, h('span', {}, '선택한 부분'), h('strong', {}, part.name), h('button', { type: 'button', class: 'link-button', onclick: () => host.selectPart(null) }, '해제')),
-      touching.length ? h('p', {}, '바꾸는 항목 · ', ...touching.flatMap((i, n) => [n ? ', ' : '', h('button', { type: 'button', class: 'link-button', onclick: () => focusItem({ kind: 'item', id: i.id }) }, i.title)])) : null,
-      impacts.map(x => h('p', { class: 'pp-muted clamp2', title: x.reason }, `영향 후보 · ${x.reason}`))[0] ?? null,
-      !touching.length && !impacts.length ? h('p', { class: 'pp-muted' }, '이 변경안에서 직접 바꾸거나 영향 후보로 본 부분은 아니에요.') : null);
-  }
-
   function intentSection(o: PlanOpened) {
     const st = s!, p = plan(), sec = h('section', { class: 'pp-sec pp-intent' });
     const status = host.status(), canAsk = status.ai === 'deepseek';
     put(sec, proposalCard());
-    if (p && !st.editing && !stale()) {
-      sec.classList.add('compact');
-      put(sec, h('h3', {}, '문장과 자료'), h('div', { class: 'pp-row pp-acts' },
-        h('button', { type: 'button', class: 'link-button', onclick: () => { st.editing = true; render(); requestAnimationFrame(() => document.getElementById('plan-intent')?.focus()); } }, '문장 고치기'),
-        sourcesToggle(o),
-        st.pending ? null : h('button', { type: 'button', class: 'link-button', disabled: !canAsk, title: canAsk ? reachText() : 'AI 서버가 연결된 주소에서 쓸 수 있어요', onclick: () => void analyze() }, 'AI로 다시 살펴보기')),
-        conditionSwitch(o));
-      if (st.sources) put(sec, sourceList(p.evidence.filter(e => o.kind !== 'saved' || !st.bundle.extra.some(x => x.id === e.id))), addSource(o));
-      put(sec, ...askLine(canAsk, p, true));
-      return sec;
-    }
+    if (p) sec.classList.add('pw-edit');
     const area = h('textarea', { id: 'plan-intent', rows: '3', maxlength: '6000', placeholder: '어떻게 바뀌면 좋을지 두세 줄로 적어 주세요. 예: 폴더째 변환하고, 실패한 파일은 모아서 보고 싶어.', 'aria-label': '바꾸고 싶은 모습', disabled: !!st.pending }) as HTMLTextAreaElement;
     area.value = st.bundle.draft;
     const staleLine = h('p', { class: 'pp-stale', id: 'plan-stale', role: 'status' });
@@ -795,10 +896,11 @@ export function createPlanView(host: PlanHost) {
     area.addEventListener('input', () => { st.bundle = { ...st.bundle, draft: area.value }; persist(); syncStale(); });
     area.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); area.blur(); } if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void analyze(); } });
     sec.append(h('label', { for: 'plan-intent', class: 'pp-label' }, '바꾸고 싶은 모습'), area, staleLine,
-      h('div', { class: 'pp-row' }, sourcesToggle(o), p ? h('button', { type: 'button', class: 'link-button', onclick: () => { st.editing = false; render(); } }, '접기') : null));
+      h('div', { class: 'pp-row' }, sourcesToggle(o), p && !stale() && !st.pending ? h('button', { type: 'button', class: 'link-button', onclick: () => { st.editing = false; render(); } }, '접기') : null));
     put(sec, conditionSwitch(o));
     // Added material is listed apart (with a way to remove it) only in a saved project; an example lists it with its sources.
-    if (st.sources) put(sec, sourceList((input() ?? { evidence: [] }).evidence.filter(e => o.kind !== 'saved' || !st.bundle.extra.some(x => x.id === e.id))), addSource(o));
+    // In the workspace the list opens in the right column instead.
+    if (st.sources && !p) put(sec, sourceList((input() ?? { evidence: [] }).evidence.filter(e => o.kind !== 'saved' || !st.bundle.extra.some(x => x.id === e.id))), addSource(o));
     put(sec, ...askLine(canAsk, p));
     return sec;
   }
@@ -832,8 +934,8 @@ export function createPlanView(host: PlanHost) {
     const a = document.getElementById('plan-intent') as HTMLTextAreaElement | null;
     if (a) { a.focus(); a.setSelectionRange(a.value.length, a.value.length); }
   }
-  /** compact: the plan is shown and the ask is the small link above; only progress, errors and a needed code appear here. */
-  function askLine(canAsk: boolean, p: ChangePlan | null, compact = false): (Node | null)[] {
+  /** Progress, an error, the access code only when it is needed, and the ask with what it would read. */
+  function askLine(canAsk: boolean, p: ChangePlan | null): (Node | null)[] {
     const st = s!, out: (Node | null)[] = [];
     if (st.pending) {
       out.push(h('div', { class: 'pending' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }),
@@ -842,13 +944,7 @@ export function createPlanView(host: PlanHost) {
       return out;
     }
     if (st.error) out.push(h('p', { class: 'pp-error', role: 'alert' }, st.error));
-    if (host.status().access === 'code' && canAsk && (!compact || !host.accessCode() || st.error)) {
-      const code = h('input', { id: 'plan-access', type: 'password', placeholder: '접속 코드', autocomplete: 'off', value: host.accessCode() }) as HTMLInputElement;
-      const keep = () => host.keepAccessCode(code.value);
-      code.addEventListener('input', keep); code.addEventListener('change', keep);
-      out.push(h('div', { class: 'access' }, h('label', { for: 'plan-access' }, '접속 코드'), code));
-    }
-    if (compact) return out;
+    if (host.status().access === 'code' && canAsk && (!host.accessCode() || st.error)) out.push(accessField());
     const reach = h('p', { class: 'fine', id: 'plan-reach' }, reachText());
     const ask = h('button', { type: 'button', id: 'plan-ask', onclick: () => void analyze() }) as HTMLButtonElement;
     askState(ask);
@@ -884,8 +980,8 @@ export function createPlanView(host: PlanHost) {
     const note = document.getElementById('plan-make-note'); if (note) { note.textContent = why ? requestTitle() : ''; note.hidden = !why; }
   }
   function sourcesToggle(_o: PlanOpened) {
-    const st = s!, n = (plan() && !stale() && !st.editing ? plan()!.evidence : input()?.evidence ?? []).length;
-    return h('button', { type: 'button', class: 'link-button quiet', 'aria-expanded': String(st.sources), onclick: () => { st.sources = !st.sources; render(); } }, `${st.example && st.key === CONVERTER_KEY ? '예제 원자료' : '읽는 자료'} ${n}개`);
+    const st = s!, p = plan(), n = (p && !stale() && !st.editing ? p.evidence : input()?.evidence ?? []).length, open = p ? st.rail === 'sources' : st.sources;
+    return h('button', { type: 'button', class: 'link-button quiet', 'aria-expanded': String(open), onclick: () => { if (p) st.rail = open ? 'request' : 'sources'; else st.sources = !st.sources; render(); } }, `${st.example && st.key === CONVERTER_KEY ? '예제 원자료' : '읽는 자료'} ${n}개`);
   }
   function conditionSwitch(o: PlanOpened) {
     if (o.key !== CONVERTER_KEY) return null;
@@ -925,77 +1021,7 @@ export function createPlanView(host: PlanHost) {
         h('span', { class: 'fine' }, '붙인 자료는 다음 분석에 쓰여요. 실행해 확인한 결과로 보지 않아요.')));
   }
 
-  function planSection(o: PlanOpened, p: ChangePlan) {
-    const st = s!, by = st.bundle.by;
-    const origin = by?.kind === 'example' ? h('span', { class: 'tag', title: '사람이 작성한 합성 예시 분석이에요. AI에 보낸 적이 없어요.' }, '작성된 예제 분석')
-      : by?.kind === 'ai' ? h('span', { class: 'tag ai', title: `${fullTime(by.at)}${by.records.total ? ` · 기록 ${by.records.total}개 중 ${by.records.sent}개를 읽음` : ''}` }, `AI 분석 · ${by.model} · ${ago(by.at)}`) : null;
-    const sec = h('section', { class: `pp-sec pp-plan${stale() ? ' is-stale' : ''}` },
-      h('div', { class: 'pp-sec-head' }, h('h3', {}, `바뀌는 것 ${p.analysis.items.length}`), origin));
-    const list = h('ul', { class: 'pp-items' });
-    for (const item of p.analysis.items) {
-      const authored = st.bundle.by?.kind === 'example';
-      const on = p.selected.includes(item.id), focused = st.focus?.kind === 'item' && st.focus.id === item.id, missing = on && authored ? missingDeps(item) : [];
-      const parts = item.partIds.map(partName).filter(Boolean) as string[];
-      const box = h('input', { type: 'checkbox', id: `pi-${item.id}`, 'aria-label': `‘${item.title}’ 이번 요청에 맡기기` }) as HTMLInputElement;
-      box.checked = on; box.addEventListener('change', () => toggleItem(item.id, box.checked));
-      // Reading an item (its places on the map and its detail) is the row; handing it over is the separate toggle on the right.
-      const li = h('li', { class: `pp-item${focused ? ' focused' : ''}${on ? ' on' : ''}` },
-        h('div', { class: 'pp-item-row' },
-          h('button', { type: 'button', class: 'pp-item-title', 'aria-expanded': String(focused), title: focused ? '지도 표시 해제' : '지도에서 이 변경 보기', onclick: () => focusItem({ kind: 'item', id: item.id }) },
-            h('span', {}, item.title), h('small', {}, parts.length ? parts.join(' · ') : '지금 지도에 없는 새 부분')),
-          h('label', { class: 'pp-hand', for: `pi-${item.id}`, title: on ? '이번 요청문에 들어가요' : '이번 요청문에서 빠져요' }, box, h('span', {}, '맡기기'))));
-      if (missing.length) li.append(h('p', { class: 'pp-warn' }, `‘${missing.map(d => itemOf(d)?.title ?? d).join('’, ‘')}’이 이 항목의 전제예요. `,
-        h('button', { type: 'button', class: 'link-button', onclick: () => { s!.bundle = { ...s!.bundle, plan: selectItems(plan()!, [...plan()!.selected, ...missing]) }; persist(); render(); } }, '함께 맡기기'),
-        h('span', {}, ' · 빼 두면 요청문에 미선택 전제로 적혀요.')));
-      if (focused) li.append(itemDetail(o, item));
-      list.append(li);
-    }
-    sec.append(list);
-    const nImp = p.analysis.impacts.length;
-    const folds = h('div', { class: 'pp-folds' },
-      nImp ? h('button', { type: 'button', class: `pp-fold-btn${st.focus?.kind === 'impacts' ? ' on' : ''}`, 'aria-pressed': String(st.focus?.kind === 'impacts'), onclick: () => focusItem({ kind: 'impacts' }) }, `영향 후보 ${nImp}곳`) : null,
-      p.analysis.preserve.length ? fold(`유지할 조건 ${p.analysis.preserve.length}`, p.analysis.preserve) : null,
-      p.analysis.unknowns.length ? fold(`정하지 않은 것 ${p.analysis.unknowns.length}`, p.analysis.unknowns) : null);
-    sec.append(folds);
-    // The analysis in a few words, after the list it explains.
-    if (p.analysis.summary) sec.append(h('p', { class: 'pp-summary' }, p.analysis.summary));
-    if (st.focus?.kind === 'impacts') sec.append(h('ul', { class: 'pp-impacts' }, ...p.analysis.impacts.map(x => h('li', {}, h('button', { type: 'button', class: 'link-button', onclick: () => locate(x.partId) }, partName(x.partId) ?? '지금 지도에 없는 부분'), h('span', {}, x.reason)))));
-    return sec;
-  }
-  const fold = (label: string, lines: string[]) => h('details', { class: 'pp-fold' }, h('summary', {}, label), h('ul', {}, ...lines.map(l => h('li', {}, l))));
   function locate(partId: string) { if (host.boxes().has(partId)) { host.reveal(partId); host.selectPart(partId); } else host.showPart(partId); }
-  function itemDetail(o: PlanOpened, item: PlanItem) {
-    const p = plan()!, impacts = nearImpacts(item), refs = p.evidence.filter(e => item.refs.includes(e.id));
-    return h('div', { class: 'pp-detail' },
-      h('p', {}, item.description),
-      item.partIds.length ? h('p', { class: 'pp-line' }, h('span', {}, '바꿀 곳'), h('span', {}, ...item.partIds.flatMap((id, n) => [n ? ', ' : '', h('button', { type: 'button', class: 'link-button', onclick: () => locate(id) }, partName(id) ?? '지금 지도에 없는 부분')]))) : h('p', { class: 'pp-line' }, h('span', {}, '바꿀 곳'), '지금 지도에 없는 새 부분'),
-      impacts.length ? h('div', { class: 'pp-line' }, h('span', {}, '함께 볼 곳'), h('ul', {}, ...impacts.map(x => h('li', {}, h('button', { type: 'button', class: 'link-button', onclick: () => locate(x.partId) }, partName(x.partId) ?? '부분'), ` — ${x.reason}`)))) : null,
-      item.dependsOn.length ? (s!.bundle.by?.kind === 'example'
-        ? h('p', { class: 'pp-line' }, h('span', {}, '전제'), item.dependsOn.map(d => itemOf(d)?.title ?? d).join(', '))
-        : h('p', { class: 'pp-line' }, h('span', {}, '전제'), '요청문을 만들 때 고른 범위로 살펴봐요.')) : null,
-      refs.length ? h('details', { class: 'pp-why' }, h('summary', {}, `근거 ${refs.length}개`), sourceList(refs)) : null
-    );
-  }
-
-  function requestSection(p: ChangePlan) {
-    const st = s!, last = latestSnapshot(), n = p.selected.length;
-    const changed = last && (last.planId !== p.id || last.planRevision !== p.revision);
-    const names = p.analysis.items.filter(i => p.selected.includes(i.id)).map(i => i.title);
-    const sec = h('section', { class: 'pp-request', 'aria-label': '이번에 맡길 것' },
-      h('p', { class: 'pp-chosen' }, h('strong', {}, `맡길 항목 ${n}/${p.analysis.items.length}`), h('span', { title: names.join('\n') }, names.length ? names.join(' · ') : '목록에서 이번에 맡길 항목에 체크하세요')),
-      st.scoping
-        ? h('div', { class: 'pending', role: 'status' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), h('span', {}, `고른 항목 ${st.scoping.count}개의 전제를 살펴보는 중…`),
-            h('button', { type: 'button', class: 'link-button', onclick: () => st.scoping?.controller.abort() }, '취소'))
-        : h('div', { class: 'pp-row' }, h('button', { type: 'button', id: 'plan-make', class: 'primary small', disabled: !canRequest(), onclick: makeRequest, title: requestTitle() }, '요청문 만들기'),
-          last ? h('button', { type: 'button', class: 'link-button', onclick: () => { st.sheet = last.id; st.copyMsg = null; render(); } }, `마지막 요청문 · ${ago(last.createdAt)}`) : null),
-      // Why the button is off while the sentence or material is ahead of the plan (kept in step as the person types).
-      h('p', { class: 'fine pp-make-note', id: 'plan-make-note', role: 'status', hidden: !stale() }, stale() ? requestTitle() : ''),
-      st.scopeError ? h('p', { class: 'pp-error', role: 'alert' }, st.scopeError) : null,
-      !st.scoping && !st.scopeError && st.bundle.by?.kind === 'ai' ? h('p', { class: 'fine' }, '만들 때 고른 항목의 전제를 AI가 한 번 살펴봐요.') : null,
-      changed && !st.scoping ? h('p', { class: 'fine' }, '마지막 요청문 뒤로 변경안이 바뀌었어요. 새로 만들어도 이전 것은 남아요.') : null);
-    return sec;
-  }
-
   function resultSection() {
     const st = s!, snaps = st.bundle.snapshots, snap = snapshotOf(st.resultFor) ?? snaps.at(-1)!;
     const labels = st.bundle.labels[snap.id] ?? {}, origin = st.bundle.origins[snap.id];
@@ -1090,7 +1116,7 @@ export function createPlanView(host: PlanHost) {
   function fitSheet() { $('plan-sheet').classList.toggle('wide', $('space').getBoundingClientRect().width - width() - 48 < 420); }
   // A resized window changes the inspector width: keep the map's reference width and the sheet in step.
   window.addEventListener('resize', () => { if (!s) return; fitSheet(); });
-  function closeSheet() { if (!s) return; s.sheet = null; s.copyMsg = null; render(); document.querySelector<HTMLElement>('.pp-request .link-button, .pp-request .primary')?.focus(); }
+  function closeSheet() { if (!s) return; s.sheet = null; s.copyMsg = null; render(); document.querySelector<HTMLElement>('#plan-make, .pw-req .link-button')?.focus(); }
 
   /** Escape: the innermost open thing first; the plan itself last. Returns true when handled. */
   function escape(): boolean {
@@ -1098,9 +1124,13 @@ export function createPlanView(host: PlanHost) {
     if (s.sheet) { closeSheet(); return true; }
     if (s.addForm) { s.addForm = false; render(); return true; }
     if (s.strip) { s.strip = null; render(); return true; }
-    if (s.evidenceFor) { s.evidenceFor = null; render(); return true; }
-    if (s.explain) { s.explain = false; render(); return true; }
-    if (s.detail && plan() && !s.editing) { s.detail = false; render(); return true; }
+    if (workOpen()) {
+      if (s.rail !== 'request') { s.rail = 'request'; s.railSource = null; render(); return true; }
+      if (s.editing && !stale() && !s.pending) { s.editing = false; render(); return true; }
+      if (!stale() && !s.pending && !s.scoping) { leaveWork(); return true; }
+      close(); return true;
+    }
+    if (s.evidenceFor) { s.evidenceFor = null; s.evidenceRef = null; render(); return true; }
     if (s.focus?.kind === 'part' && host.selected()) { host.selectPart(null); return true; }
     if (s.focus) { s.focus = null; render(); return true; }
     if (host.selected()) { host.selectPart(null); return true; }
@@ -1143,7 +1173,7 @@ export function createPlanView(host: PlanHost) {
       const o = host.current(); if (!o || o.kind === 'legacy') return;
       PROPOSALS.set(o.key, { text, sources });
       if (!s) open(); if (!s) return;
-      if (plan() && !s.editing) s.detail = true;
+      if (plan()) { s.detail = true; s.editing = true; }
       render();
       requestAnimationFrame(() => document.querySelector<HTMLElement>('.pp-proposal button')?.focus());
     },
