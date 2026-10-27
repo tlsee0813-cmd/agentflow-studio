@@ -1,12 +1,12 @@
 {
   "schemaVersion": "agentflow.oss-review-cases.1",
-  "preparedAt": "2026-10-26",
-  "purpose": "UI58 source-grounded real-OSS inspection inputs; not official architecture diagrams or OSS execution test results.",
+  "preparedAt": "2026-10-27",
+  "purpose": "UI58/UI62 fixed-commit source-grounded inspection inputs: eight actual repositories and three explicitly derived stress cases; not official architecture or OSS execution results.",
   "mapping": {
     "target": "app/continuity/src/shared/studio-examples.ts buildExample(spec)",
     "extract": "Each cases[i].spec is directly compatible with ExampleSpec. Ignore sources/provenance/checks when passing spec.",
     "identity": "key is fixture identity; name is display text. Keep parent-before-child order. records stays empty.",
-    "relationSemantics": "needs is directed consumer→provider only where source explicitly declares use; related is optional configuration. Placement and selected subset are reviewer choices.",
+    "relationSemantics": "Existing needs/related/flow kinds only. Physical wiring and definition/static-instance correspondence use related with explicit notes; source imports use needs. Placement and selected subset are reviewer choices. No dedicated physical/runtime relation kind is invented.",
     "scope": "Read-only repository research; no builds, dependency installs, reports, agents, or input/output AI connectors."
   },
   "cases": [
@@ -1876,6 +1876,4418 @@
         "Three optional TLS relations with shared endpoint; package dependencies connect other roots.",
         "No fabricated sensor→MQTT→JSON→file execution flow."
       ]
+    },
+    {
+      "id": "oss-zephyr",
+      "category": "Zephyr 장치·연결",
+      "repository": "zephyrproject-rtos/zephyr",
+      "commit": "3568e1b6d5cdd51a6b964a2a1d6d29200fea2056",
+      "commitUrl": "https://github.com/zephyrproject-rtos/zephyr/commit/3568e1b6d5cdd51a6b964a2a1d6d29200fea2056",
+      "sourceReadMethod": "Read-only official GitHub fixed-commit files/listings; no clone/install/build or execution of the OSS.",
+      "spec": {
+        "id": "oss-zephyr",
+        "name": "Zephyr 장치·연결",
+        "brief": "reel_board 고정 소스의 센서·표시·버스 부분 지도. 기능 묶음은 검토자 해석이며 실제 장치 실행 기록은 없다.",
+        "parts": [
+          {
+            "key": "sense",
+            "name": "환경 측정",
+            "note": "측정 책임으로 센서를 모은 검토자 묶음이며 물리적 소유를 뜻하지 않는다."
+          },
+          {
+            "key": "apds",
+            "name": "빛·동작 센서",
+            "note": "원명 APDS9960(보드 문서에는 ADPS9960 표기): 근접·주변광·RGB·동작을 감지하는 한 센서다.",
+            "parent": "sense"
+          },
+          {
+            "key": "hdc",
+            "name": "온습도 센서",
+            "note": "원명 HDC1010: 습도와 온도를 측정하며 두 역할을 가진 하나의 부품이다.",
+            "parent": "sense"
+          },
+          {
+            "key": "mma",
+            "name": "가속도 센서",
+            "note": "원명 MMA8652FC: 디지털 가속도 센서이며 dtsi의 mma8652fc@1d에는 int1·int2 GPIO가 선언된다.",
+            "parent": "sense"
+          },
+          {
+            "key": "interface",
+            "name": "표시와 조작",
+            "note": "표시·입력 책임으로 모은 검토자 묶음이며 실제 하드웨어 상자를 새로 만든 것은 아니다."
+          },
+          {
+            "key": "epd",
+            "name": "전자잉크 표시",
+            "note": "원명 EPD: v2 overlay의 ssd16xx 표시기이며 SPI와 GPIO를 함께 사용한다.",
+            "parent": "interface"
+          },
+          {
+            "key": "rgb",
+            "name": "RGB LED",
+            "note": "원명 RGB-LED: nRF52840이 GPIO 핀으로 제어하는 표시 부품이다.",
+            "parent": "interface"
+          },
+          {
+            "key": "button",
+            "name": "사용자 버튼",
+            "note": "원명 user button (S5): 문서의 P0.07에 연결된 사용자 입력 버튼이다.",
+            "parent": "interface"
+          },
+          {
+            "key": "links",
+            "name": "구동 연결",
+            "note": "보드 문서의 연결 수단을 모은 검토자 묶음이며 처리 순서를 뜻하지 않는다."
+          },
+          {
+            "key": "i2c",
+            "name": "I2C",
+            "note": "모든 센서가 함께 연결되는 버스이며 센서의 소유 상위가 아니다.",
+            "parent": "links"
+          },
+          {
+            "key": "spi",
+            "name": "SPI",
+            "note": "전자잉크 표시기의 제어 버스이며 v2 overlay는 spi1을 사용한다.",
+            "parent": "links"
+          },
+          {
+            "key": "gpio",
+            "name": "GPIO",
+            "note": "센서 인터럽트·LED·표시 제어·버튼에 참여하는 핀 연결이다.",
+            "parent": "links"
+          },
+          {
+            "key": "uart",
+            "name": "UART",
+            "note": "원명 UART0: USB를 통한 콘솔 송수신 연결이다.",
+            "parent": "links"
+          },
+          {
+            "key": "soc",
+            "name": "nRF52840",
+            "note": "원명 Nordic nRF52840: Cortex-M4F와 무선 송수신기를 가진 보드의 SoC다."
+          }
+        ],
+        "relations": [
+          [
+            "apds",
+            "i2c",
+            "related",
+            "보드 문서에서 이 센서는 I2C 버스에 연결된다; 물리 연결의 일반 관련 표기다."
+          ],
+          [
+            "hdc",
+            "i2c",
+            "related",
+            "보드 문서에서 이 센서는 I2C 버스에 연결된다; 물리 연결의 일반 관련 표기다."
+          ],
+          [
+            "mma",
+            "i2c",
+            "related",
+            "보드 문서에서 이 센서는 I2C 버스에 연결된다; 물리 연결의 일반 관련 표기다."
+          ],
+          [
+            "apds",
+            "gpio",
+            "related",
+            "dtsi의 센서 노드는 GPIO 인터럽트/준비 핀을 선언한다; 물리 연결의 일반 관련 표기다."
+          ],
+          [
+            "hdc",
+            "gpio",
+            "related",
+            "dtsi의 센서 노드는 GPIO 인터럽트/준비 핀을 선언한다; 물리 연결의 일반 관련 표기다."
+          ],
+          [
+            "mma",
+            "gpio",
+            "related",
+            "dtsi의 mma8652fc@1d는 int1·int2 GPIO 두 개를 선언한다; 개요의 한 핀 설명과 구별한다."
+          ],
+          [
+            "epd",
+            "spi",
+            "related",
+            "표시기는 SPI로 제어된다. 일반 관련선이며 전용 물리선 의미는 지원하지 않는다."
+          ],
+          [
+            "epd",
+            "gpio",
+            "related",
+            "표시기는 reset·dc·busy GPIO도 사용한다. 일반 관련선이며 전용 물리선 의미는 지원하지 않는다."
+          ],
+          [
+            "rgb",
+            "gpio",
+            "related",
+            "RGB LED는 GPIO 핀으로 제어된다. 일반 관련선이며 전용 물리선 의미는 지원하지 않는다."
+          ],
+          [
+            "button",
+            "gpio",
+            "related",
+            "사용자 버튼 S5는 P0.07에 연결된다. 일반 관련선이며 전용 물리선 의미는 지원하지 않는다."
+          ]
+        ],
+        "records": []
+      },
+      "sources": [
+        {
+          "id": "board-doc",
+          "path": "boards/phytec/reel_board/doc/index.rst",
+          "url": "https://github.com/zephyrproject-rtos/zephyr/blob/3568e1b6d5cdd51a6b964a2a1d6d29200fea2056/boards/phytec/reel_board/doc/index.rst"
+        },
+        {
+          "id": "v2-overlay",
+          "path": "boards/phytec/reel_board/reel_board_nrf52840_2.overlay",
+          "url": "https://github.com/zephyrproject-rtos/zephyr/blob/3568e1b6d5cdd51a6b964a2a1d6d29200fea2056/boards/phytec/reel_board/reel_board_nrf52840_2.overlay"
+        },
+        {
+          "id": "board-dtsi",
+          "path": "boards/phytec/reel_board/dts/reel_board.dtsi",
+          "url": "https://github.com/zephyrproject-rtos/zephyr/blob/3568e1b6d5cdd51a6b964a2a1d6d29200fea2056/boards/phytec/reel_board/dts/reel_board.dtsi"
+        }
+      ],
+      "provenance": {
+        "parts": {
+          "sense": {
+            "refs": [
+              "board-doc"
+            ],
+            "classification": "reviewer-grouping"
+          },
+          "apds": {
+            "refs": [
+              "board-doc",
+              "board-dtsi"
+            ],
+            "classification": "official-component-with-translated-label",
+            "originalName": "APDS9960 / ADPS9960"
+          },
+          "hdc": {
+            "refs": [
+              "board-doc",
+              "board-dtsi"
+            ],
+            "classification": "official-component-with-translated-label",
+            "originalName": "HDC1010"
+          },
+          "mma": {
+            "refs": [
+              "board-doc",
+              "board-dtsi"
+            ],
+            "classification": "official-component-with-translated-label",
+            "originalName": "MMA8652FC"
+          },
+          "interface": {
+            "refs": [
+              "board-doc"
+            ],
+            "classification": "reviewer-grouping"
+          },
+          "epd": {
+            "refs": [
+              "board-doc",
+              "v2-overlay"
+            ],
+            "classification": "official-component-with-translated-label",
+            "originalName": "EPD / ssd16xx"
+          },
+          "rgb": {
+            "refs": [
+              "board-doc",
+              "board-dtsi"
+            ],
+            "classification": "official-component",
+            "originalName": "RGB-LED"
+          },
+          "button": {
+            "refs": [
+              "board-doc",
+              "board-dtsi"
+            ],
+            "classification": "official-component-with-translated-label",
+            "originalName": "user button (S5)"
+          },
+          "links": {
+            "refs": [
+              "board-doc"
+            ],
+            "classification": "reviewer-grouping"
+          },
+          "i2c": {
+            "refs": [
+              "board-doc",
+              "board-dtsi"
+            ],
+            "classification": "source-grounded-name-and-role"
+          },
+          "spi": {
+            "refs": [
+              "board-doc",
+              "v2-overlay"
+            ],
+            "classification": "source-grounded-name-and-role"
+          },
+          "gpio": {
+            "refs": [
+              "board-doc",
+              "v2-overlay",
+              "board-dtsi"
+            ],
+            "classification": "source-grounded-name-and-role"
+          },
+          "uart": {
+            "refs": [
+              "board-doc",
+              "v2-overlay",
+              "board-dtsi"
+            ],
+            "classification": "source-grounded-name-and-role"
+          },
+          "soc": {
+            "refs": [
+              "board-doc"
+            ],
+            "classification": "official-component",
+            "originalName": "nRF52840"
+          }
+        },
+        "relations": [
+          {
+            "index": 0,
+            "refs": [
+              "board-doc",
+              "board-dtsi"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 1,
+            "refs": [
+              "board-doc",
+              "board-dtsi"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 2,
+            "refs": [
+              "board-doc",
+              "board-dtsi"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 3,
+            "refs": [
+              "board-doc",
+              "board-dtsi"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 4,
+            "refs": [
+              "board-doc",
+              "board-dtsi"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 5,
+            "refs": [
+              "board-doc",
+              "board-dtsi"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 6,
+            "refs": [
+              "board-doc",
+              "v2-overlay"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 7,
+            "refs": [
+              "board-doc",
+              "v2-overlay"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 8,
+            "refs": [
+              "board-doc"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 9,
+            "refs": [
+              "board-doc"
+            ],
+            "classification": "explicit-source-fact"
+          }
+        ]
+      },
+      "limitations": [
+        "물리 연결·기능 참여·실제 포함을 구별하는 전용 relation kind는 없다. related와 note로만 연결 근거를 보이며 하드웨어 배선도라고 주장하지 않는다.",
+        "센서별 측정값·실행 상태·드라이버 전체는 포함하지 않는다. 문서의 ADPS9960 표기와 소스 계열 APDS9960 이름 차이를 note에 보존한다.",
+        "공식 개요는 센서마다 GPIO 한 핀이라고 요약하지만 고정 dtsi의 MMA8652FC에는 int1·int2 두 GPIO가 선언된다. 핀 수는 dtsi 근거로 구별하고 원문 차이를 숨기지 않는다."
+      ],
+      "checks": {
+        "partCount": 14,
+        "maxDepth": 2,
+        "relationCount": 10,
+        "recordsCount": 0,
+        "structuralValidation": "keys unique; parent before child; relation endpoints exist; part/relationship provenance refs resolve. Browser/UI behavior and OSS execution not performed by dataset extraction."
+      }
+    },
+    {
+      "id": "oss-scikit-learn",
+      "category": "scikit-learn 혼합 특성",
+      "repository": "scikit-learn/scikit-learn",
+      "commit": "25dee604bae18205b01548348388baf7a1cdfe0e",
+      "commitUrl": "https://github.com/scikit-learn/scikit-learn/commit/25dee604bae18205b01548348388baf7a1cdfe0e",
+      "sourceReadMethod": "Read-only official GitHub fixed-commit files/listings; no clone/install/build or execution of the OSS.",
+      "spec": {
+        "id": "oss-scikit-learn",
+        "name": "scikit-learn 혼합 특성",
+        "brief": "공식 혼합 특성 예제의 이름 기준·자료형 기준 전처리 정의와 탐색 구성을 구별하는 부분 지도. 데이터 다운로드나 학습은 실행하지 않았다.",
+        "parts": [
+          {
+            "key": "input",
+            "name": "입력과 분할",
+            "note": "입력 준비 책임으로 모은 검토자 묶음이다."
+          },
+          {
+            "key": "titanic",
+            "name": "Titanic 데이터",
+            "note": "원명 fetch_openml(\"titanic\", version=1): 예제에서 읽는 자료 선언이며 다운로드를 실행하지 않았다.",
+            "parent": "input"
+          },
+          {
+            "key": "split",
+            "name": "훈련·평가 분할",
+            "note": "원명 train_test_split: 예제에서 20%를 평가 자료로 나누는 호출이다.",
+            "parent": "input"
+          },
+          {
+            "key": "transforms",
+            "name": "공용 전처리 정의",
+            "note": "두 ColumnTransformer 구성이 참조하는 변환기 정의를 모은 검토자 묶음이며 학습 뒤 인스턴스 공유를 주장하지 않는다."
+          },
+          {
+            "key": "num",
+            "name": "수치 Pipeline",
+            "note": "원명 numeric_transformer: 대치와 스케일 조정의 두 단계를 정의한 Pipeline 객체다.",
+            "parent": "transforms"
+          },
+          {
+            "key": "imputer",
+            "name": "결측값 대치",
+            "note": "원명 SimpleImputer(strategy=\"median\"): 첫 수치 단계의 추정기 정의다.",
+            "parent": "num"
+          },
+          {
+            "key": "scaler",
+            "name": "수치 크기 조정",
+            "note": "원명 StandardScaler: 대치 다음에 배치된 두 번째 수치 단계다.",
+            "parent": "num"
+          },
+          {
+            "key": "cat",
+            "name": "범주 Pipeline",
+            "note": "원명 categorical_transformer: 인코딩과 특성 선택을 정의한 별개의 Pipeline 객체다.",
+            "parent": "transforms"
+          },
+          {
+            "key": "encoder",
+            "name": "범주 인코딩",
+            "note": "원명 OneHotEncoder(handle_unknown=\"ignore\"): 범주 전처리의 첫 단계다.",
+            "parent": "cat"
+          },
+          {
+            "key": "selector",
+            "name": "범주 특성 선택",
+            "note": "원명 SelectPercentile(chi2, percentile=50): chi2 점수로 범주 특성을 선택하는 단계다.",
+            "parent": "cat"
+          },
+          {
+            "key": "chi2",
+            "name": "chi2 점수 함수",
+            "note": "원명 chi2: SelectPercentile의 인자로 전달되는 점수 함수이며 영구 자식 소유 관계는 아니다.",
+            "parent": "transforms"
+          },
+          {
+            "key": "by-name",
+            "name": "이름으로 열 선택",
+            "note": "예제 첫 구성의 age·fare와 embarked·sex·pclass 열 선택을 모은 검토자 묶음이다."
+          },
+          {
+            "key": "pre-name",
+            "name": "전처리 조합",
+            "note": "원명 첫 preprocessor: 열 이름으로 num·cat 변환기를 지정하는 ColumnTransformer 정의다.",
+            "parent": "by-name"
+          },
+          {
+            "key": "clf-name",
+            "name": "예측 Pipeline",
+            "note": "원명 첫 clf: 첫 preprocessor와 LogisticRegression을 잇는 Pipeline 정의이며 뒤의 clf 재정의와 구별한다.",
+            "parent": "by-name"
+          },
+          {
+            "key": "lr-name",
+            "name": "로지스틱 분류",
+            "note": "원명 첫 LogisticRegression(): 이름 기준 clf 안에 생성되는 classifier 단계다.",
+            "parent": "clf-name"
+          },
+          {
+            "key": "by-type",
+            "name": "자료형으로 열 선택",
+            "note": "예제 후반의 category 자료형 분기와 검색 구성을 모은 검토자 묶음이다."
+          },
+          {
+            "key": "pre-type",
+            "name": "전처리 조합",
+            "note": "원명 두 번째 preprocessor: make_column_selector의 자료형 조건으로 선택하는 별개의 ColumnTransformer 정의다.",
+            "parent": "by-type"
+          },
+          {
+            "key": "clf-type",
+            "name": "예측 Pipeline",
+            "note": "원명 두 번째 clf: 자료형 기준 preprocessor를 사용하는 별개의 Pipeline 정의다.",
+            "parent": "by-type"
+          },
+          {
+            "key": "lr-type",
+            "name": "로지스틱 분류",
+            "note": "원명 두 번째 LogisticRegression(): 자료형 기준 clf의 classifier 단계다.",
+            "parent": "clf-type"
+          },
+          {
+            "key": "search",
+            "name": "파라미터 탐색",
+            "note": "원명 search_cv / RandomizedSearchCV: 두 번째 clf와 param_grid를 받는 n_iter=10 검색 정의이며 실행 결과가 아니다.",
+            "parent": "by-type"
+          },
+          {
+            "key": "grid",
+            "name": "탐색 후보",
+            "note": "원명 param_grid: 대치 전략·특성 백분위·분류 C 후보를 정의한 사전이다.",
+            "parent": "by-type"
+          }
+        ],
+        "relations": [
+          [
+            "titanic",
+            "split",
+            "flow",
+            "예제의 X·y가 train_test_split의 입력으로 전달된다."
+          ],
+          [
+            "imputer",
+            "scaler",
+            "flow",
+            "numeric_transformer.steps에서 imputer 다음 scaler 순서다."
+          ],
+          [
+            "encoder",
+            "selector",
+            "flow",
+            "categorical_transformer.steps에서 encoder 다음 selector 순서다."
+          ],
+          [
+            "selector",
+            "chi2",
+            "needs",
+            "SelectPercentile 생성자가 chi2 점수 함수를 인자로 받는다."
+          ],
+          [
+            "pre-name",
+            "num",
+            "needs",
+            "ColumnTransformer 정의가 numeric_transformer 객체를 참조한다; 학습된 상태의 실제 공유를 뜻하지 않는다."
+          ],
+          [
+            "pre-name",
+            "cat",
+            "needs",
+            "ColumnTransformer 정의가 categorical_transformer 객체를 참조한다; 학습된 상태의 실제 공유를 뜻하지 않는다."
+          ],
+          [
+            "pre-type",
+            "num",
+            "needs",
+            "ColumnTransformer 정의가 numeric_transformer 객체를 참조한다; 학습된 상태의 실제 공유를 뜻하지 않는다."
+          ],
+          [
+            "pre-type",
+            "cat",
+            "needs",
+            "ColumnTransformer 정의가 categorical_transformer 객체를 참조한다; 학습된 상태의 실제 공유를 뜻하지 않는다."
+          ],
+          [
+            "clf-name",
+            "pre-name",
+            "needs",
+            "해당 clf.steps가 이 preprocessor 정의를 참조한다."
+          ],
+          [
+            "pre-name",
+            "lr-name",
+            "flow",
+            "해당 clf.steps의 순서는 preprocessor 다음 classifier다."
+          ],
+          [
+            "clf-type",
+            "pre-type",
+            "needs",
+            "해당 clf.steps가 이 preprocessor 정의를 참조한다."
+          ],
+          [
+            "pre-type",
+            "lr-type",
+            "flow",
+            "해당 clf.steps의 순서는 preprocessor 다음 classifier다."
+          ],
+          [
+            "search",
+            "clf-type",
+            "needs",
+            "search_cv 생성자는 자료형 기준으로 재정의한 두 번째 clf를 받는다."
+          ],
+          [
+            "search",
+            "grid",
+            "needs",
+            "search_cv 생성자는 param_grid 후보 사전을 받는다."
+          ]
+        ],
+        "records": []
+      },
+      "sources": [
+        {
+          "id": "mixed-types",
+          "path": "examples/compose/plot_column_transformer_mixed_types.py",
+          "url": "https://github.com/scikit-learn/scikit-learn/blob/25dee604bae18205b01548348388baf7a1cdfe0e/examples/compose/plot_column_transformer_mixed_types.py"
+        }
+      ],
+      "provenance": {
+        "parts": {
+          "input": {
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "reviewer-grouping"
+          },
+          "titanic": {
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "source-grounded-definition",
+            "originalName": "fetch_openml"
+          },
+          "split": {
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "source-grounded-definition",
+            "originalName": "train_test_split"
+          },
+          "transforms": {
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "reviewer-grouping"
+          },
+          "num": {
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "source-grounded-definition",
+            "originalName": "numeric_transformer / Pipeline"
+          },
+          "imputer": {
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "source-grounded-definition",
+            "originalName": "SimpleImputer"
+          },
+          "scaler": {
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "source-grounded-definition",
+            "originalName": "StandardScaler"
+          },
+          "cat": {
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "source-grounded-definition",
+            "originalName": "categorical_transformer / Pipeline"
+          },
+          "encoder": {
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "source-grounded-definition",
+            "originalName": "OneHotEncoder"
+          },
+          "selector": {
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "source-grounded-definition",
+            "originalName": "SelectPercentile"
+          },
+          "chi2": {
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "source-grounded-definition",
+            "originalName": "chi2"
+          },
+          "by-name": {
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "reviewer-grouping"
+          },
+          "pre-name": {
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "source-grounded-definition",
+            "originalName": "preprocessor / ColumnTransformer (column names)"
+          },
+          "clf-name": {
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "source-grounded-definition",
+            "originalName": "clf / Pipeline (column names)"
+          },
+          "lr-name": {
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "source-grounded-definition",
+            "originalName": "LogisticRegression (column names)"
+          },
+          "by-type": {
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "reviewer-grouping"
+          },
+          "pre-type": {
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "source-grounded-definition",
+            "originalName": "preprocessor / ColumnTransformer (dtypes)"
+          },
+          "clf-type": {
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "source-grounded-definition",
+            "originalName": "clf / Pipeline (dtypes)"
+          },
+          "lr-type": {
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "source-grounded-definition",
+            "originalName": "LogisticRegression (dtypes)"
+          },
+          "search": {
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "source-grounded-definition",
+            "originalName": "search_cv / RandomizedSearchCV"
+          },
+          "grid": {
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "source-grounded-definition",
+            "originalName": "param_grid"
+          }
+        },
+        "relations": [
+          {
+            "index": 0,
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 1,
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 2,
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 3,
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 4,
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 5,
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 6,
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 7,
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 8,
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 9,
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 10,
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 11,
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 12,
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 13,
+            "refs": [
+              "mixed-types"
+            ],
+            "classification": "explicit-source-fact"
+          }
+        ]
+      },
+      "limitations": [
+        "객체 정의와 코드의 참조만 표현한다. clone·fit 뒤 런타임 추정기의 정체성이나 학습 성공을 주장하지 않는다.",
+        "첫 clf/preprocessor와 후반 재정의한 clf/preprocessor는 안정 key로 구별한다. 관계의 종류·구성 판본은 note에만 표현하며 파이프라인 순서를 부모·자식으로 대체하지 않는다."
+      ],
+      "checks": {
+        "partCount": 21,
+        "maxDepth": 3,
+        "relationCount": 14,
+        "recordsCount": 0,
+        "structuralValidation": "keys unique; parent before child; relation endpoints exist; part/relationship provenance refs resolve. Browser/UI behavior and OSS execution not performed by dataset extraction."
+      }
+    },
+    {
+      "id": "oss-vscode",
+      "category": "VS Code 확장 소스",
+      "repository": "microsoft/vscode",
+      "commit": "784ce2212c21959ae8078d2fab304ecbf1f305a8",
+      "commitUrl": "https://github.com/microsoft/vscode/commit/784ce2212c21959ae8078d2fab304ecbf1f305a8",
+      "sourceReadMethod": "Read-only official GitHub fixed-commit files/listings; no clone/install/build or execution of the OSS.",
+      "spec": {
+        "id": "oss-vscode",
+        "name": "VS Code 확장 소스",
+        "brief": "확장 API 주변의 실제 소스 파일120개와 디렉터리2개, 공개 계약 일부를 함께 읽는 부분 지도. 파일의 기능 분류는 검토자 가설이며 파일 존재를 구현 기능의 증거로 바꾸지 않는다.",
+        "parts": [
+          {
+            "key": "documents",
+            "name": "문서와 편집기",
+            "note": "문서·편집기 관련 이름의 파일을 모은 검토자 분류다. 불변의 공식 아키텍처 경계라는 주장은 아니다."
+          },
+          {
+            "key": "file-exthostbulkedits-ts",
+            "name": "BulkEdits",
+            "note": "원명 extHostBulkEdits.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘문서와 편집기’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "documents"
+          },
+          {
+            "key": "file-exthostcustomeditors-ts",
+            "name": "CustomEditors",
+            "note": "원명 extHostCustomEditors.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘문서와 편집기’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "documents"
+          },
+          {
+            "key": "file-exthostdocumentcontentproviders-ts",
+            "name": "DocumentContentProviders",
+            "note": "원명 extHostDocumentContentProviders.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘문서와 편집기’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "documents"
+          },
+          {
+            "key": "file-exthostdocumentdata-ts",
+            "name": "DocumentData",
+            "note": "원명 extHostDocumentData.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘문서와 편집기’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "documents"
+          },
+          {
+            "key": "file-exthostdocumentsaveparticipant-ts",
+            "name": "DocumentSaveParticipant",
+            "note": "원명 extHostDocumentSaveParticipant.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘문서와 편집기’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "documents"
+          },
+          {
+            "key": "file-exthostdocuments-ts",
+            "name": "Documents",
+            "note": "원명 extHostDocuments.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘문서와 편집기’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "documents"
+          },
+          {
+            "key": "file-exthostdocumentsandeditors-ts",
+            "name": "DocumentsAndEditors",
+            "note": "원명 extHostDocumentsAndEditors.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘문서와 편집기’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "documents"
+          },
+          {
+            "key": "file-exthosteditortabs-ts",
+            "name": "EditorTabs",
+            "note": "원명 extHostEditorTabs.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘문서와 편집기’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "documents"
+          },
+          {
+            "key": "file-exthostinteractive-ts",
+            "name": "Interactive",
+            "note": "원명 extHostInteractive.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘문서와 편집기’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "documents"
+          },
+          {
+            "key": "file-exthosttexteditor-ts",
+            "name": "TextEditor",
+            "note": "원명 extHostTextEditor.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘문서와 편집기’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "documents"
+          },
+          {
+            "key": "file-exthosttexteditors-ts",
+            "name": "TextEditors",
+            "note": "원명 extHostTextEditors.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘문서와 편집기’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "documents"
+          },
+          {
+            "key": "runtime",
+            "name": "확장 실행과 연결",
+            "note": "확장 실행·통신 관련 이름의 파일을 모은 검토자 분류다. 불변의 공식 아키텍처 경계라는 주장은 아니다."
+          },
+          {
+            "key": "file-configurationextensionpoint-ts",
+            "name": "ConfigExtensionPoint",
+            "note": "원명 configurationExtensionPoint.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘확장 실행과 연결’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "runtime"
+          },
+          {
+            "key": "file-exthost-protocol-ts",
+            "name": ".protocol",
+            "note": "원명 extHost.protocol.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘확장 실행과 연결’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "runtime"
+          },
+          {
+            "key": "file-exthostbrowsertunnelproxy-ts",
+            "name": "BrowserTunnelProxy",
+            "note": "원명 extHostBrowserTunnelProxy.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘확장 실행과 연결’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "runtime"
+          },
+          {
+            "key": "file-exthostextensionactivator-ts",
+            "name": "ExtensionActivator",
+            "note": "원명 extHostExtensionActivator.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘확장 실행과 연결’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "runtime"
+          },
+          {
+            "key": "file-exthostextensionservice-ts",
+            "name": "ExtensionService",
+            "note": "원명 extHostExtensionService.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘확장 실행과 연결’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "runtime"
+          },
+          {
+            "key": "file-exthostgitextensionservice-ts",
+            "name": "GitExtensionService",
+            "note": "원명 extHostGitExtensionService.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘확장 실행과 연결’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "runtime"
+          },
+          {
+            "key": "file-exthostinitdataservice-ts",
+            "name": "InitDataService",
+            "note": "원명 extHostInitDataService.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘확장 실행과 연결’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "runtime"
+          },
+          {
+            "key": "file-exthostmanagedsockets-ts",
+            "name": "ManagedSockets",
+            "note": "원명 extHostManagedSockets.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘확장 실행과 연결’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "runtime"
+          },
+          {
+            "key": "file-exthostrequireinterceptor-ts",
+            "name": "RequireInterceptor",
+            "note": "원명 extHostRequireInterceptor.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘확장 실행과 연결’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "runtime"
+          },
+          {
+            "key": "file-exthostrpcservice-ts",
+            "name": "RpcService",
+            "note": "원명 extHostRpcService.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘확장 실행과 연결’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "runtime"
+          },
+          {
+            "key": "file-exthosttunnelservice-ts",
+            "name": "TunnelService",
+            "note": "원명 extHostTunnelService.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘확장 실행과 연결’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "runtime"
+          },
+          {
+            "key": "file-exthosturitransformerservice-ts",
+            "name": "UriTransformerService",
+            "note": "원명 extHostUriTransformerService.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘확장 실행과 연결’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "runtime"
+          },
+          {
+            "key": "file-jsonvalidationextensionpoint-ts",
+            "name": "jsonValidationExtensionPoint",
+            "note": "원명 jsonValidationExtensionPoint.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘확장 실행과 연결’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "runtime"
+          },
+          {
+            "key": "tasks",
+            "name": "작업과 터미널",
+            "note": "Task·터미널 관련 이름의 파일을 모은 검토자 분류다. 불변의 공식 아키텍처 경계라는 주장은 아니다."
+          },
+          {
+            "key": "file-exthostdebugservice-ts",
+            "name": "DebugService",
+            "note": "원명 extHostDebugService.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘작업과 터미널’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "tasks"
+          },
+          {
+            "key": "file-exthosttask-ts",
+            "name": "Task",
+            "note": "원명 extHostTask.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘작업과 터미널’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "tasks"
+          },
+          {
+            "key": "file-exthostterminalservice-ts",
+            "name": "TerminalService",
+            "note": "원명 extHostTerminalService.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘작업과 터미널’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "tasks"
+          },
+          {
+            "key": "file-exthostterminalshellintegration-ts",
+            "name": "TerminalShellIntegration",
+            "note": "원명 extHostTerminalShellIntegration.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘작업과 터미널’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "tasks"
+          },
+          {
+            "key": "language",
+            "name": "언어와 검색",
+            "note": "언어·검색·진단 관련 이름의 파일을 모은 검토자 분류다. 불변의 공식 아키텍처 경계라는 주장은 아니다."
+          },
+          {
+            "key": "file-exthostdiagnostics-ts",
+            "name": "Diagnostics",
+            "note": "원명 extHostDiagnostics.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘언어와 검색’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "language"
+          },
+          {
+            "key": "file-exthostlanguagefeatures-ts",
+            "name": "LanguageFeatures",
+            "note": "원명 extHostLanguageFeatures.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘언어와 검색’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "language"
+          },
+          {
+            "key": "file-exthostlanguages-ts",
+            "name": "Languages",
+            "note": "원명 extHostLanguages.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘언어와 검색’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "language"
+          },
+          {
+            "key": "file-exthostquickdiff-ts",
+            "name": "QuickDiff",
+            "note": "원명 extHostQuickDiff.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘언어와 검색’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "language"
+          },
+          {
+            "key": "file-exthostscm-ts",
+            "name": "SCM",
+            "note": "원명 extHostSCM.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘언어와 검색’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "language"
+          },
+          {
+            "key": "file-exthostsearch-ts",
+            "name": "Search",
+            "note": "원명 extHostSearch.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘언어와 검색’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "language"
+          },
+          {
+            "key": "file-exthosttestitem-ts",
+            "name": "TestItem",
+            "note": "원명 extHostTestItem.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘언어와 검색’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "language"
+          },
+          {
+            "key": "file-exthosttesting-ts",
+            "name": "Testing",
+            "note": "원명 extHostTesting.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘언어와 검색’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "language"
+          },
+          {
+            "key": "file-exthosttestingprivateapi-ts",
+            "name": "TestingPrivateApi",
+            "note": "원명 extHostTestingPrivateApi.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘언어와 검색’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "language"
+          },
+          {
+            "key": "notebooks",
+            "name": "노트북",
+            "note": "Notebook 관련 이름의 파일을 모은 검토자 분류다. 불변의 공식 아키텍처 경계라는 주장은 아니다."
+          },
+          {
+            "key": "file-exthostnotebook-ts",
+            "name": "Notebook",
+            "note": "원명 extHostNotebook.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘노트북’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "notebooks"
+          },
+          {
+            "key": "file-exthostnotebookdocument-ts",
+            "name": "NotebookDocument",
+            "note": "원명 extHostNotebookDocument.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘노트북’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "notebooks"
+          },
+          {
+            "key": "file-exthostnotebookdocumentsaveparticipant-ts",
+            "name": "NotebookDocumentSaveParticipant",
+            "note": "원명 extHostNotebookDocumentSaveParticipant.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘노트북’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "notebooks"
+          },
+          {
+            "key": "file-exthostnotebookdocuments-ts",
+            "name": "NotebookDocuments",
+            "note": "원명 extHostNotebookDocuments.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘노트북’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "notebooks"
+          },
+          {
+            "key": "file-exthostnotebookeditor-ts",
+            "name": "NotebookEditor",
+            "note": "원명 extHostNotebookEditor.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘노트북’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "notebooks"
+          },
+          {
+            "key": "file-exthostnotebookeditors-ts",
+            "name": "NotebookEditors",
+            "note": "원명 extHostNotebookEditors.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘노트북’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "notebooks"
+          },
+          {
+            "key": "file-exthostnotebookkernels-ts",
+            "name": "NotebookKernels",
+            "note": "원명 extHostNotebookKernels.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘노트북’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "notebooks"
+          },
+          {
+            "key": "file-exthostnotebookrenderers-ts",
+            "name": "NotebookRenderers",
+            "note": "원명 extHostNotebookRenderers.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘노트북’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "notebooks"
+          },
+          {
+            "key": "ai",
+            "name": "대화와 AI",
+            "note": "Chat·AI·MCP 관련 이름의 파일을 모은 검토자 분류다. 불변의 공식 아키텍처 경계라는 주장은 아니다."
+          },
+          {
+            "key": "file-exthostairelatedinformation-ts",
+            "name": "AiRelatedInformation",
+            "note": "원명 extHostAiRelatedInformation.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘대화와 AI’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "ai"
+          },
+          {
+            "key": "file-exthostaisettingssearch-ts",
+            "name": "AiSettingsSearch",
+            "note": "원명 extHostAiSettingsSearch.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘대화와 AI’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "ai"
+          },
+          {
+            "key": "file-exthostchatagents2-ts",
+            "name": "ChatAgents2",
+            "note": "원명 extHostChatAgents2.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘대화와 AI’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "ai"
+          },
+          {
+            "key": "file-exthostchatartifactintegrations-ts",
+            "name": "ChatArtifactIntegrations",
+            "note": "원명 extHostChatArtifactIntegrations.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘대화와 AI’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "ai"
+          },
+          {
+            "key": "file-exthostchatcontext-ts",
+            "name": "ChatContext",
+            "note": "원명 extHostChatContext.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘대화와 AI’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "ai"
+          },
+          {
+            "key": "file-exthostchatdebug-ts",
+            "name": "ChatDebug",
+            "note": "원명 extHostChatDebug.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘대화와 AI’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "ai"
+          },
+          {
+            "key": "file-exthostchatinputnotification-ts",
+            "name": "ChatInputNotification",
+            "note": "원명 extHostChatInputNotification.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘대화와 AI’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "ai"
+          },
+          {
+            "key": "file-exthostchatoutputrenderer-ts",
+            "name": "ChatOutputRenderer",
+            "note": "원명 extHostChatOutputRenderer.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘대화와 AI’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "ai"
+          },
+          {
+            "key": "file-exthostchatquota-ts",
+            "name": "ChatQuota",
+            "note": "원명 extHostChatQuota.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘대화와 AI’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "ai"
+          },
+          {
+            "key": "file-exthostchatsessions-ts",
+            "name": "ChatSessions",
+            "note": "원명 extHostChatSessions.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘대화와 AI’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "ai"
+          },
+          {
+            "key": "file-exthostchatstatus-ts",
+            "name": "ChatStatus",
+            "note": "원명 extHostChatStatus.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘대화와 AI’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "ai"
+          },
+          {
+            "key": "file-exthostcodemapper-ts",
+            "name": "CodeMapper",
+            "note": "원명 extHostCodeMapper.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘대화와 AI’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "ai"
+          },
+          {
+            "key": "file-exthostembedding-ts",
+            "name": "Embedding",
+            "note": "원명 extHostEmbedding.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘대화와 AI’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "ai"
+          },
+          {
+            "key": "file-exthostembeddingvector-ts",
+            "name": "EmbeddingVector",
+            "note": "원명 extHostEmbeddingVector.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘대화와 AI’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "ai"
+          },
+          {
+            "key": "file-exthostlanguagemodeltools-ts",
+            "name": "LanguageModelTools",
+            "note": "원명 extHostLanguageModelTools.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘대화와 AI’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "ai"
+          },
+          {
+            "key": "file-exthostlanguagemodels-ts",
+            "name": "LanguageModels",
+            "note": "원명 extHostLanguageModels.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘대화와 AI’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "ai"
+          },
+          {
+            "key": "file-exthostmcp-ts",
+            "name": "Mcp",
+            "note": "원명 extHostMcp.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘대화와 AI’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "ai"
+          },
+          {
+            "key": "file-exthostspeech-ts",
+            "name": "Speech",
+            "note": "원명 extHostSpeech.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘대화와 AI’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "ai"
+          },
+          {
+            "key": "interface",
+            "name": "화면과 상호작용",
+            "note": "창·웹뷰·알림 관련 이름의 파일을 모은 검토자 분류다. 불변의 공식 아키텍처 경계라는 주장은 아니다."
+          },
+          {
+            "key": "file-exthostbrowsers-ts",
+            "name": "Browsers",
+            "note": "원명 extHostBrowsers.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘화면과 상호작용’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "interface"
+          },
+          {
+            "key": "file-exthostdecorations-ts",
+            "name": "Decorations",
+            "note": "원명 extHostDecorations.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘화면과 상호작용’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "interface"
+          },
+          {
+            "key": "file-exthostdialogs-ts",
+            "name": "Dialogs",
+            "note": "원명 extHostDialogs.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘화면과 상호작용’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "interface"
+          },
+          {
+            "key": "file-exthostmessageservice-ts",
+            "name": "MessageService",
+            "note": "원명 extHostMessageService.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘화면과 상호작용’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "interface"
+          },
+          {
+            "key": "file-exthostoutput-ts",
+            "name": "Output",
+            "note": "원명 extHostOutput.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘화면과 상호작용’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "interface"
+          },
+          {
+            "key": "file-exthostprogress-ts",
+            "name": "Progress",
+            "note": "원명 extHostProgress.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘화면과 상호작용’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "interface"
+          },
+          {
+            "key": "file-exthostquickopen-ts",
+            "name": "QuickOpen",
+            "note": "원명 extHostQuickOpen.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘화면과 상호작용’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "interface"
+          },
+          {
+            "key": "file-exthoststatusbar-ts",
+            "name": "StatusBar",
+            "note": "원명 extHostStatusBar.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘화면과 상호작용’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "interface"
+          },
+          {
+            "key": "file-exthosttheming-ts",
+            "name": "Theming",
+            "note": "원명 extHostTheming.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘화면과 상호작용’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "interface"
+          },
+          {
+            "key": "file-exthosttimeline-ts",
+            "name": "Timeline",
+            "note": "원명 extHostTimeline.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘화면과 상호작용’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "interface"
+          },
+          {
+            "key": "file-exthosttreeviews-ts",
+            "name": "TreeViews",
+            "note": "원명 extHostTreeViews.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘화면과 상호작용’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "interface"
+          },
+          {
+            "key": "file-exthostwebview-ts",
+            "name": "Webview",
+            "note": "원명 extHostWebview.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘화면과 상호작용’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "interface"
+          },
+          {
+            "key": "file-exthostwebviewmessaging-ts",
+            "name": "WebviewMessaging",
+            "note": "원명 extHostWebviewMessaging.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘화면과 상호작용’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "interface"
+          },
+          {
+            "key": "file-exthostwebviewpanels-ts",
+            "name": "WebviewPanels",
+            "note": "원명 extHostWebviewPanels.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘화면과 상호작용’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "interface"
+          },
+          {
+            "key": "file-exthostwebviewview-ts",
+            "name": "WebviewView",
+            "note": "원명 extHostWebviewView.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘화면과 상호작용’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "interface"
+          },
+          {
+            "key": "file-exthostwindow-ts",
+            "name": "Window",
+            "note": "원명 extHostWindow.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘화면과 상호작용’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "interface"
+          },
+          {
+            "key": "common",
+            "name": "공통과 기타",
+            "note": "나머지 실제 파일과 미확장 디렉터리를 모은 검토자 분류다. 불변의 공식 아키텍처 경계라는 주장은 아니다."
+          },
+          {
+            "key": "file-cache-ts",
+            "name": "cache",
+            "note": "원명 cache.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthost-api-impl-ts",
+            "name": ".api.impl",
+            "note": "원명 extHost.api.impl.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthost-common-services-ts",
+            "name": ".common.services",
+            "note": "원명 extHost.common.services.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostagenteditorcomments-ts",
+            "name": "AgentEditorComments",
+            "note": "원명 extHostAgentEditorComments.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostapicommands-ts",
+            "name": "ApiCommands",
+            "note": "원명 extHostApiCommands.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostapideprecationservice-ts",
+            "name": "ApiDeprecationService",
+            "note": "원명 extHostApiDeprecationService.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostauthentication-ts",
+            "name": "Authentication",
+            "note": "원명 extHostAuthentication.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostclipboard-ts",
+            "name": "Clipboard",
+            "note": "원명 extHostClipboard.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostcodeinsets-ts",
+            "name": "CodeInsets",
+            "note": "원명 extHostCodeInsets.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostcommands-ts",
+            "name": "Commands",
+            "note": "원명 extHostCommands.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostcomments-ts",
+            "name": "Comments",
+            "note": "원명 extHostComments.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostconfiguration-ts",
+            "name": "Configuration",
+            "note": "원명 extHostConfiguration.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostconsoleforwarder-ts",
+            "name": "ConsoleForwarder",
+            "note": "원명 extHostConsoleForwarder.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostdatachannels-ts",
+            "name": "DataChannels",
+            "note": "원명 extHostDataChannels.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostfilesystem-ts",
+            "name": "FileSystem",
+            "note": "원명 extHostFileSystem.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostfilesystemconsumer-ts",
+            "name": "FileSystemConsumer",
+            "note": "원명 extHostFileSystemConsumer.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostfilesystemeventservice-ts",
+            "name": "FileSystemEventService",
+            "note": "원명 extHostFileSystemEventService.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostfilesysteminfo-ts",
+            "name": "FileSystemInfo",
+            "note": "원명 extHostFileSystemInfo.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostgithub-ts",
+            "name": "GitHub",
+            "note": "원명 extHostGitHub.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostlabelservice-ts",
+            "name": "LabelService",
+            "note": "원명 extHostLabelService.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostlocalizationservice-ts",
+            "name": "LocalizationService",
+            "note": "원명 extHostLocalizationService.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostlogservice-ts",
+            "name": "LogService",
+            "note": "원명 extHostLogService.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostloggerservice-ts",
+            "name": "LoggerService",
+            "note": "원명 extHostLoggerService.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostmemento-ts",
+            "name": "Memento",
+            "note": "원명 extHostMemento.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostmeteredconnection-ts",
+            "name": "MeteredConnection",
+            "note": "원명 extHostMeteredConnection.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostpower-ts",
+            "name": "Power",
+            "note": "원명 extHostPower.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostprofilecontenthandler-ts",
+            "name": "ProfileContentHandler",
+            "note": "원명 extHostProfileContentHandler.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostsecretstate-ts",
+            "name": "SecretState",
+            "note": "원명 extHostSecretState.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostsecrets-ts",
+            "name": "Secrets",
+            "note": "원명 extHostSecrets.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostshare-ts",
+            "name": "Share",
+            "note": "원명 extHostShare.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthoststorage-ts",
+            "name": "Storage",
+            "note": "원명 extHostStorage.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthoststoragepaths-ts",
+            "name": "StoragePaths",
+            "note": "원명 extHostStoragePaths.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthosttelemetry-ts",
+            "name": "Telemetry",
+            "note": "원명 extHostTelemetry.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthosttypeconverters-ts",
+            "name": "TypeConverters",
+            "note": "원명 extHostTypeConverters.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthosttypes-ts",
+            "name": "Types",
+            "note": "원명 extHostTypes.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthosttypes",
+            "name": "Types",
+            "note": "원명 extHostTypes: 내용을 펼치지 않은 실제 디렉터리이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthosturiopener-ts",
+            "name": "UriOpener",
+            "note": "원명 extHostUriOpener.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthosturls-ts",
+            "name": "Urls",
+            "note": "원명 extHostUrls.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostvariableresolverservice-ts",
+            "name": "VariableResolverService",
+            "note": "원명 extHostVariableResolverService.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostworkspace-ts",
+            "name": "Workspace",
+            "note": "원명 extHostWorkspace.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-exthostxaaauthprovider-ts",
+            "name": "XaaAuthProvider",
+            "note": "원명 extHostXaaAuthProvider.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-extensionhostmain-ts",
+            "name": "extensionHostMain",
+            "note": "원명 extensionHostMain.ts: 목록에서 존재를 확인한 실제 소스 파일이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "file-shared",
+            "name": "shared",
+            "note": "원명 shared: 내용을 펼치지 않은 실제 디렉터리이며 ‘공통과 기타’ 배치는 검토자 분류다; 파일명으로 구현 기능을 확정하지 않는다.",
+            "parent": "common"
+          },
+          {
+            "key": "contracts",
+            "name": "공개 API 계약",
+            "note": "공개 vscode.d.ts의 타입 계약 일부를 모은 검토자 묶음이며 실행본이나 소스 폴더가 아니다."
+          },
+          {
+            "key": "textdoc",
+            "name": "문서",
+            "note": "원명 TextDocument: 열린 문서의 내용·URI 등을 나타내는 공개 인터페이스다.",
+            "parent": "contracts"
+          },
+          {
+            "key": "textedit",
+            "name": "편집기",
+            "note": "원명 TextEditor: document 필드로 TextDocument를 참조하는 편집기 인터페이스다.",
+            "parent": "contracts"
+          },
+          {
+            "key": "task",
+            "name": "작업 정의",
+            "note": "원명 Task: 실행할 작업을 기술하는 클래스이며 한 번의 실행과 구별한다.",
+            "parent": "contracts"
+          },
+          {
+            "key": "execution",
+            "name": "작업 실행",
+            "note": "원명 TaskExecution: task 필드로 원래 Task를 참조하는 한 번의 실행 인터페이스다.",
+            "parent": "contracts"
+          },
+          {
+            "key": "debugsession",
+            "name": "디버그 세션",
+            "note": "원명 DebugSession: 디버그 세션의 ID·이름·구성 등을 가진 공개 인터페이스다.",
+            "parent": "contracts"
+          }
+        ],
+        "relations": [
+          [
+            "file-exthostdocumentsandeditors-ts",
+            "file-exthost-protocol-ts",
+            "needs",
+            "extHostDocumentsAndEditors.ts의 import가 extHost.protocol.ts을 참조한다; 파일 참조이며 런타임 배치 주장은 아니다."
+          ],
+          [
+            "file-exthostdocumentsandeditors-ts",
+            "file-exthostdocumentdata-ts",
+            "needs",
+            "extHostDocumentsAndEditors.ts의 import가 extHostDocumentData.ts을 참조한다; 파일 참조이며 런타임 배치 주장은 아니다."
+          ],
+          [
+            "file-exthostdocumentsandeditors-ts",
+            "file-exthostrpcservice-ts",
+            "needs",
+            "extHostDocumentsAndEditors.ts의 import가 extHostRpcService.ts을 참조한다; 파일 참조이며 런타임 배치 주장은 아니다."
+          ],
+          [
+            "file-exthostdocumentsandeditors-ts",
+            "file-exthosttexteditor-ts",
+            "needs",
+            "extHostDocumentsAndEditors.ts의 import가 extHostTextEditor.ts을 참조한다; 파일 참조이며 런타임 배치 주장은 아니다."
+          ],
+          [
+            "file-exthostdocumentsandeditors-ts",
+            "file-exthosttypeconverters-ts",
+            "needs",
+            "extHostDocumentsAndEditors.ts의 import가 extHostTypeConverters.ts을 참조한다; 파일 참조이며 런타임 배치 주장은 아니다."
+          ],
+          [
+            "textedit",
+            "textdoc",
+            "needs",
+            "TextEditor.document는 readonly TextDocument 계약을 참조한다."
+          ],
+          [
+            "execution",
+            "task",
+            "needs",
+            "TaskExecution.task는 실행을 시작한 Task 계약을 참조한다."
+          ]
+        ],
+        "records": []
+      },
+      "sources": [
+        {
+          "id": "api-common",
+          "path": "src/vs/workbench/api/common",
+          "url": "https://github.com/microsoft/vscode/tree/784ce2212c21959ae8078d2fab304ecbf1f305a8/src/vs/workbench/api/common"
+        },
+        {
+          "id": "public-api",
+          "path": "src/vscode-dts/vscode.d.ts",
+          "url": "https://github.com/microsoft/vscode/blob/784ce2212c21959ae8078d2fab304ecbf1f305a8/src/vscode-dts/vscode.d.ts"
+        },
+        {
+          "id": "doc-edit-impl",
+          "path": "src/vs/workbench/api/common/extHostDocumentsAndEditors.ts",
+          "url": "https://github.com/microsoft/vscode/blob/784ce2212c21959ae8078d2fab304ecbf1f305a8/src/vs/workbench/api/common/extHostDocumentsAndEditors.ts"
+        }
+      ],
+      "provenance": {
+        "parts": {
+          "documents": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "reviewer-grouping-from-source-names"
+          },
+          "file-exthostbulkedits-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostBulkEdits.ts"
+          },
+          "file-exthostcustomeditors-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostCustomEditors.ts"
+          },
+          "file-exthostdocumentcontentproviders-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostDocumentContentProviders.ts"
+          },
+          "file-exthostdocumentdata-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostDocumentData.ts"
+          },
+          "file-exthostdocumentsaveparticipant-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostDocumentSaveParticipant.ts"
+          },
+          "file-exthostdocuments-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostDocuments.ts"
+          },
+          "file-exthostdocumentsandeditors-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostDocumentsAndEditors.ts"
+          },
+          "file-exthosteditortabs-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostEditorTabs.ts"
+          },
+          "file-exthostinteractive-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostInteractive.ts"
+          },
+          "file-exthosttexteditor-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostTextEditor.ts"
+          },
+          "file-exthosttexteditors-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostTextEditors.ts"
+          },
+          "runtime": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "reviewer-grouping-from-source-names"
+          },
+          "file-configurationextensionpoint-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "configurationExtensionPoint.ts"
+          },
+          "file-exthost-protocol-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHost.protocol.ts"
+          },
+          "file-exthostbrowsertunnelproxy-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostBrowserTunnelProxy.ts"
+          },
+          "file-exthostextensionactivator-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostExtensionActivator.ts"
+          },
+          "file-exthostextensionservice-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostExtensionService.ts"
+          },
+          "file-exthostgitextensionservice-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostGitExtensionService.ts"
+          },
+          "file-exthostinitdataservice-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostInitDataService.ts"
+          },
+          "file-exthostmanagedsockets-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostManagedSockets.ts"
+          },
+          "file-exthostrequireinterceptor-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostRequireInterceptor.ts"
+          },
+          "file-exthostrpcservice-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostRpcService.ts"
+          },
+          "file-exthosttunnelservice-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostTunnelService.ts"
+          },
+          "file-exthosturitransformerservice-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostUriTransformerService.ts"
+          },
+          "file-jsonvalidationextensionpoint-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "jsonValidationExtensionPoint.ts"
+          },
+          "tasks": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "reviewer-grouping-from-source-names"
+          },
+          "file-exthostdebugservice-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostDebugService.ts"
+          },
+          "file-exthosttask-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostTask.ts"
+          },
+          "file-exthostterminalservice-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostTerminalService.ts"
+          },
+          "file-exthostterminalshellintegration-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostTerminalShellIntegration.ts"
+          },
+          "language": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "reviewer-grouping-from-source-names"
+          },
+          "file-exthostdiagnostics-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostDiagnostics.ts"
+          },
+          "file-exthostlanguagefeatures-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostLanguageFeatures.ts"
+          },
+          "file-exthostlanguages-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostLanguages.ts"
+          },
+          "file-exthostquickdiff-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostQuickDiff.ts"
+          },
+          "file-exthostscm-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostSCM.ts"
+          },
+          "file-exthostsearch-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostSearch.ts"
+          },
+          "file-exthosttestitem-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostTestItem.ts"
+          },
+          "file-exthosttesting-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostTesting.ts"
+          },
+          "file-exthosttestingprivateapi-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostTestingPrivateApi.ts"
+          },
+          "notebooks": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "reviewer-grouping-from-source-names"
+          },
+          "file-exthostnotebook-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostNotebook.ts"
+          },
+          "file-exthostnotebookdocument-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostNotebookDocument.ts"
+          },
+          "file-exthostnotebookdocumentsaveparticipant-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostNotebookDocumentSaveParticipant.ts"
+          },
+          "file-exthostnotebookdocuments-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostNotebookDocuments.ts"
+          },
+          "file-exthostnotebookeditor-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostNotebookEditor.ts"
+          },
+          "file-exthostnotebookeditors-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostNotebookEditors.ts"
+          },
+          "file-exthostnotebookkernels-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostNotebookKernels.ts"
+          },
+          "file-exthostnotebookrenderers-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostNotebookRenderers.ts"
+          },
+          "ai": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "reviewer-grouping-from-source-names"
+          },
+          "file-exthostairelatedinformation-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostAiRelatedInformation.ts"
+          },
+          "file-exthostaisettingssearch-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostAiSettingsSearch.ts"
+          },
+          "file-exthostchatagents2-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostChatAgents2.ts"
+          },
+          "file-exthostchatartifactintegrations-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostChatArtifactIntegrations.ts"
+          },
+          "file-exthostchatcontext-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostChatContext.ts"
+          },
+          "file-exthostchatdebug-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostChatDebug.ts"
+          },
+          "file-exthostchatinputnotification-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostChatInputNotification.ts"
+          },
+          "file-exthostchatoutputrenderer-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostChatOutputRenderer.ts"
+          },
+          "file-exthostchatquota-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostChatQuota.ts"
+          },
+          "file-exthostchatsessions-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostChatSessions.ts"
+          },
+          "file-exthostchatstatus-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostChatStatus.ts"
+          },
+          "file-exthostcodemapper-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostCodeMapper.ts"
+          },
+          "file-exthostembedding-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostEmbedding.ts"
+          },
+          "file-exthostembeddingvector-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostEmbeddingVector.ts"
+          },
+          "file-exthostlanguagemodeltools-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostLanguageModelTools.ts"
+          },
+          "file-exthostlanguagemodels-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostLanguageModels.ts"
+          },
+          "file-exthostmcp-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostMcp.ts"
+          },
+          "file-exthostspeech-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostSpeech.ts"
+          },
+          "interface": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "reviewer-grouping-from-source-names"
+          },
+          "file-exthostbrowsers-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostBrowsers.ts"
+          },
+          "file-exthostdecorations-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostDecorations.ts"
+          },
+          "file-exthostdialogs-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostDialogs.ts"
+          },
+          "file-exthostmessageservice-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostMessageService.ts"
+          },
+          "file-exthostoutput-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostOutput.ts"
+          },
+          "file-exthostprogress-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostProgress.ts"
+          },
+          "file-exthostquickopen-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostQuickOpen.ts"
+          },
+          "file-exthoststatusbar-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostStatusBar.ts"
+          },
+          "file-exthosttheming-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostTheming.ts"
+          },
+          "file-exthosttimeline-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostTimeline.ts"
+          },
+          "file-exthosttreeviews-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostTreeViews.ts"
+          },
+          "file-exthostwebview-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostWebview.ts"
+          },
+          "file-exthostwebviewmessaging-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostWebviewMessaging.ts"
+          },
+          "file-exthostwebviewpanels-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostWebviewPanels.ts"
+          },
+          "file-exthostwebviewview-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostWebviewView.ts"
+          },
+          "file-exthostwindow-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostWindow.ts"
+          },
+          "common": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "reviewer-grouping-from-source-names"
+          },
+          "file-cache-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "cache.ts"
+          },
+          "file-exthost-api-impl-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHost.api.impl.ts"
+          },
+          "file-exthost-common-services-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHost.common.services.ts"
+          },
+          "file-exthostagenteditorcomments-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostAgentEditorComments.ts"
+          },
+          "file-exthostapicommands-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostApiCommands.ts"
+          },
+          "file-exthostapideprecationservice-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostApiDeprecationService.ts"
+          },
+          "file-exthostauthentication-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostAuthentication.ts"
+          },
+          "file-exthostclipboard-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostClipboard.ts"
+          },
+          "file-exthostcodeinsets-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostCodeInsets.ts"
+          },
+          "file-exthostcommands-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostCommands.ts"
+          },
+          "file-exthostcomments-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostComments.ts"
+          },
+          "file-exthostconfiguration-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostConfiguration.ts"
+          },
+          "file-exthostconsoleforwarder-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostConsoleForwarder.ts"
+          },
+          "file-exthostdatachannels-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostDataChannels.ts"
+          },
+          "file-exthostfilesystem-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostFileSystem.ts"
+          },
+          "file-exthostfilesystemconsumer-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostFileSystemConsumer.ts"
+          },
+          "file-exthostfilesystemeventservice-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostFileSystemEventService.ts"
+          },
+          "file-exthostfilesysteminfo-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostFileSystemInfo.ts"
+          },
+          "file-exthostgithub-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostGitHub.ts"
+          },
+          "file-exthostlabelservice-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostLabelService.ts"
+          },
+          "file-exthostlocalizationservice-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostLocalizationService.ts"
+          },
+          "file-exthostlogservice-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostLogService.ts"
+          },
+          "file-exthostloggerservice-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostLoggerService.ts"
+          },
+          "file-exthostmemento-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostMemento.ts"
+          },
+          "file-exthostmeteredconnection-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostMeteredConnection.ts"
+          },
+          "file-exthostpower-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostPower.ts"
+          },
+          "file-exthostprofilecontenthandler-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostProfileContentHandler.ts"
+          },
+          "file-exthostsecretstate-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostSecretState.ts"
+          },
+          "file-exthostsecrets-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostSecrets.ts"
+          },
+          "file-exthostshare-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostShare.ts"
+          },
+          "file-exthoststorage-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostStorage.ts"
+          },
+          "file-exthoststoragepaths-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostStoragePaths.ts"
+          },
+          "file-exthosttelemetry-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostTelemetry.ts"
+          },
+          "file-exthosttypeconverters-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostTypeConverters.ts"
+          },
+          "file-exthosttypes-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostTypes.ts"
+          },
+          "file-exthosttypes": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-directory-reviewer-placement",
+            "originalName": "extHostTypes"
+          },
+          "file-exthosturiopener-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostUriOpener.ts"
+          },
+          "file-exthosturls-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostUrls.ts"
+          },
+          "file-exthostvariableresolverservice-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostVariableResolverService.ts"
+          },
+          "file-exthostworkspace-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostWorkspace.ts"
+          },
+          "file-exthostxaaauthprovider-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extHostXaaAuthProvider.ts"
+          },
+          "file-extensionhostmain-ts": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-file-existence-reviewer-placement",
+            "originalName": "extensionHostMain.ts"
+          },
+          "file-shared": {
+            "refs": [
+              "api-common"
+            ],
+            "classification": "official-directory-reviewer-placement",
+            "originalName": "shared"
+          },
+          "contracts": {
+            "refs": [
+              "public-api"
+            ],
+            "classification": "reviewer-grouping"
+          },
+          "textdoc": {
+            "refs": [
+              "public-api"
+            ],
+            "classification": "official-api-contract-with-translated-label",
+            "originalName": "TextDocument"
+          },
+          "textedit": {
+            "refs": [
+              "public-api"
+            ],
+            "classification": "official-api-contract-with-translated-label",
+            "originalName": "TextEditor"
+          },
+          "task": {
+            "refs": [
+              "public-api"
+            ],
+            "classification": "official-api-contract-with-translated-label",
+            "originalName": "Task"
+          },
+          "execution": {
+            "refs": [
+              "public-api"
+            ],
+            "classification": "official-api-contract-with-translated-label",
+            "originalName": "TaskExecution"
+          },
+          "debugsession": {
+            "refs": [
+              "public-api"
+            ],
+            "classification": "official-api-contract-with-translated-label",
+            "originalName": "DebugSession"
+          }
+        },
+        "relations": [
+          {
+            "index": 0,
+            "refs": [
+              "doc-edit-impl"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 1,
+            "refs": [
+              "doc-edit-impl"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 2,
+            "refs": [
+              "doc-edit-impl"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 3,
+            "refs": [
+              "doc-edit-impl"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 4,
+            "refs": [
+              "doc-edit-impl"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 5,
+            "refs": [
+              "public-api"
+            ],
+            "classification": "explicit-source-fact"
+          },
+          {
+            "index": 6,
+            "refs": [
+              "public-api"
+            ],
+            "classification": "explicit-source-fact"
+          }
+        ]
+      },
+      "limitations": [
+        "120개 파일과 2개 디렉터리 항목을 빠짐없이 보존했다. 각 파일은 소스 상세 항목이며 독립 제품 기능·실행 인스턴스·완성도를 뜻하지 않는다.",
+        "8개 책임 묶음과 짧은 표시 이름은 검토자가 파일명에 따라 정했다. 원명은 note·provenance.originalName·sourceInventory에 보존한다.",
+        "공개 API 계약과 구현 파일은 서로 다른 대상이다. 전체 확장 호스트 아키텍처·정식 배포판 대응·모든 파일의 의존 관계는 분석하지 않았다."
+      ],
+      "checks": {
+        "partCount": 136,
+        "maxDepth": 2,
+        "relationCount": 7,
+        "recordsCount": 0,
+        "structuralValidation": "keys unique; parent before child; relation endpoints exist; part/relationship provenance refs resolve. Browser/UI behavior and OSS execution not performed by dataset extraction."
+      },
+      "sourceInventory": {
+        "path": "src/vs/workbench/api/common",
+        "fileCount": 120,
+        "directoryCount": 2,
+        "entries": [
+          {
+            "name": "cache.ts",
+            "path": "src/vs/workbench/api/common/cache.ts",
+            "type": "file"
+          },
+          {
+            "name": "configurationExtensionPoint.ts",
+            "path": "src/vs/workbench/api/common/configurationExtensionPoint.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHost.api.impl.ts",
+            "path": "src/vs/workbench/api/common/extHost.api.impl.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHost.common.services.ts",
+            "path": "src/vs/workbench/api/common/extHost.common.services.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHost.protocol.ts",
+            "path": "src/vs/workbench/api/common/extHost.protocol.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostAgentEditorComments.ts",
+            "path": "src/vs/workbench/api/common/extHostAgentEditorComments.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostAiRelatedInformation.ts",
+            "path": "src/vs/workbench/api/common/extHostAiRelatedInformation.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostAiSettingsSearch.ts",
+            "path": "src/vs/workbench/api/common/extHostAiSettingsSearch.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostApiCommands.ts",
+            "path": "src/vs/workbench/api/common/extHostApiCommands.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostApiDeprecationService.ts",
+            "path": "src/vs/workbench/api/common/extHostApiDeprecationService.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostAuthentication.ts",
+            "path": "src/vs/workbench/api/common/extHostAuthentication.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostBrowserTunnelProxy.ts",
+            "path": "src/vs/workbench/api/common/extHostBrowserTunnelProxy.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostBrowsers.ts",
+            "path": "src/vs/workbench/api/common/extHostBrowsers.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostBulkEdits.ts",
+            "path": "src/vs/workbench/api/common/extHostBulkEdits.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostChatAgents2.ts",
+            "path": "src/vs/workbench/api/common/extHostChatAgents2.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostChatArtifactIntegrations.ts",
+            "path": "src/vs/workbench/api/common/extHostChatArtifactIntegrations.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostChatContext.ts",
+            "path": "src/vs/workbench/api/common/extHostChatContext.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostChatDebug.ts",
+            "path": "src/vs/workbench/api/common/extHostChatDebug.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostChatInputNotification.ts",
+            "path": "src/vs/workbench/api/common/extHostChatInputNotification.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostChatOutputRenderer.ts",
+            "path": "src/vs/workbench/api/common/extHostChatOutputRenderer.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostChatQuota.ts",
+            "path": "src/vs/workbench/api/common/extHostChatQuota.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostChatSessions.ts",
+            "path": "src/vs/workbench/api/common/extHostChatSessions.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostChatStatus.ts",
+            "path": "src/vs/workbench/api/common/extHostChatStatus.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostClipboard.ts",
+            "path": "src/vs/workbench/api/common/extHostClipboard.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostCodeInsets.ts",
+            "path": "src/vs/workbench/api/common/extHostCodeInsets.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostCodeMapper.ts",
+            "path": "src/vs/workbench/api/common/extHostCodeMapper.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostCommands.ts",
+            "path": "src/vs/workbench/api/common/extHostCommands.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostComments.ts",
+            "path": "src/vs/workbench/api/common/extHostComments.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostConfiguration.ts",
+            "path": "src/vs/workbench/api/common/extHostConfiguration.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostConsoleForwarder.ts",
+            "path": "src/vs/workbench/api/common/extHostConsoleForwarder.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostCustomEditors.ts",
+            "path": "src/vs/workbench/api/common/extHostCustomEditors.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostDataChannels.ts",
+            "path": "src/vs/workbench/api/common/extHostDataChannels.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostDebugService.ts",
+            "path": "src/vs/workbench/api/common/extHostDebugService.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostDecorations.ts",
+            "path": "src/vs/workbench/api/common/extHostDecorations.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostDiagnostics.ts",
+            "path": "src/vs/workbench/api/common/extHostDiagnostics.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostDialogs.ts",
+            "path": "src/vs/workbench/api/common/extHostDialogs.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostDocumentContentProviders.ts",
+            "path": "src/vs/workbench/api/common/extHostDocumentContentProviders.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostDocumentData.ts",
+            "path": "src/vs/workbench/api/common/extHostDocumentData.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostDocumentSaveParticipant.ts",
+            "path": "src/vs/workbench/api/common/extHostDocumentSaveParticipant.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostDocuments.ts",
+            "path": "src/vs/workbench/api/common/extHostDocuments.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostDocumentsAndEditors.ts",
+            "path": "src/vs/workbench/api/common/extHostDocumentsAndEditors.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostEditorTabs.ts",
+            "path": "src/vs/workbench/api/common/extHostEditorTabs.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostEmbedding.ts",
+            "path": "src/vs/workbench/api/common/extHostEmbedding.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostEmbeddingVector.ts",
+            "path": "src/vs/workbench/api/common/extHostEmbeddingVector.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostExtensionActivator.ts",
+            "path": "src/vs/workbench/api/common/extHostExtensionActivator.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostExtensionService.ts",
+            "path": "src/vs/workbench/api/common/extHostExtensionService.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostFileSystem.ts",
+            "path": "src/vs/workbench/api/common/extHostFileSystem.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostFileSystemConsumer.ts",
+            "path": "src/vs/workbench/api/common/extHostFileSystemConsumer.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostFileSystemEventService.ts",
+            "path": "src/vs/workbench/api/common/extHostFileSystemEventService.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostFileSystemInfo.ts",
+            "path": "src/vs/workbench/api/common/extHostFileSystemInfo.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostGitExtensionService.ts",
+            "path": "src/vs/workbench/api/common/extHostGitExtensionService.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostGitHub.ts",
+            "path": "src/vs/workbench/api/common/extHostGitHub.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostInitDataService.ts",
+            "path": "src/vs/workbench/api/common/extHostInitDataService.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostInteractive.ts",
+            "path": "src/vs/workbench/api/common/extHostInteractive.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostLabelService.ts",
+            "path": "src/vs/workbench/api/common/extHostLabelService.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostLanguageFeatures.ts",
+            "path": "src/vs/workbench/api/common/extHostLanguageFeatures.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostLanguageModelTools.ts",
+            "path": "src/vs/workbench/api/common/extHostLanguageModelTools.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostLanguageModels.ts",
+            "path": "src/vs/workbench/api/common/extHostLanguageModels.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostLanguages.ts",
+            "path": "src/vs/workbench/api/common/extHostLanguages.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostLocalizationService.ts",
+            "path": "src/vs/workbench/api/common/extHostLocalizationService.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostLogService.ts",
+            "path": "src/vs/workbench/api/common/extHostLogService.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostLoggerService.ts",
+            "path": "src/vs/workbench/api/common/extHostLoggerService.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostManagedSockets.ts",
+            "path": "src/vs/workbench/api/common/extHostManagedSockets.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostMcp.ts",
+            "path": "src/vs/workbench/api/common/extHostMcp.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostMemento.ts",
+            "path": "src/vs/workbench/api/common/extHostMemento.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostMessageService.ts",
+            "path": "src/vs/workbench/api/common/extHostMessageService.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostMeteredConnection.ts",
+            "path": "src/vs/workbench/api/common/extHostMeteredConnection.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostNotebook.ts",
+            "path": "src/vs/workbench/api/common/extHostNotebook.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostNotebookDocument.ts",
+            "path": "src/vs/workbench/api/common/extHostNotebookDocument.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostNotebookDocumentSaveParticipant.ts",
+            "path": "src/vs/workbench/api/common/extHostNotebookDocumentSaveParticipant.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostNotebookDocuments.ts",
+            "path": "src/vs/workbench/api/common/extHostNotebookDocuments.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostNotebookEditor.ts",
+            "path": "src/vs/workbench/api/common/extHostNotebookEditor.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostNotebookEditors.ts",
+            "path": "src/vs/workbench/api/common/extHostNotebookEditors.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostNotebookKernels.ts",
+            "path": "src/vs/workbench/api/common/extHostNotebookKernels.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostNotebookRenderers.ts",
+            "path": "src/vs/workbench/api/common/extHostNotebookRenderers.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostOutput.ts",
+            "path": "src/vs/workbench/api/common/extHostOutput.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostPower.ts",
+            "path": "src/vs/workbench/api/common/extHostPower.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostProfileContentHandler.ts",
+            "path": "src/vs/workbench/api/common/extHostProfileContentHandler.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostProgress.ts",
+            "path": "src/vs/workbench/api/common/extHostProgress.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostQuickDiff.ts",
+            "path": "src/vs/workbench/api/common/extHostQuickDiff.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostQuickOpen.ts",
+            "path": "src/vs/workbench/api/common/extHostQuickOpen.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostRequireInterceptor.ts",
+            "path": "src/vs/workbench/api/common/extHostRequireInterceptor.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostRpcService.ts",
+            "path": "src/vs/workbench/api/common/extHostRpcService.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostSCM.ts",
+            "path": "src/vs/workbench/api/common/extHostSCM.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostSearch.ts",
+            "path": "src/vs/workbench/api/common/extHostSearch.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostSecretState.ts",
+            "path": "src/vs/workbench/api/common/extHostSecretState.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostSecrets.ts",
+            "path": "src/vs/workbench/api/common/extHostSecrets.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostShare.ts",
+            "path": "src/vs/workbench/api/common/extHostShare.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostSpeech.ts",
+            "path": "src/vs/workbench/api/common/extHostSpeech.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostStatusBar.ts",
+            "path": "src/vs/workbench/api/common/extHostStatusBar.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostStorage.ts",
+            "path": "src/vs/workbench/api/common/extHostStorage.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostStoragePaths.ts",
+            "path": "src/vs/workbench/api/common/extHostStoragePaths.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostTask.ts",
+            "path": "src/vs/workbench/api/common/extHostTask.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostTelemetry.ts",
+            "path": "src/vs/workbench/api/common/extHostTelemetry.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostTerminalService.ts",
+            "path": "src/vs/workbench/api/common/extHostTerminalService.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostTerminalShellIntegration.ts",
+            "path": "src/vs/workbench/api/common/extHostTerminalShellIntegration.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostTestItem.ts",
+            "path": "src/vs/workbench/api/common/extHostTestItem.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostTesting.ts",
+            "path": "src/vs/workbench/api/common/extHostTesting.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostTestingPrivateApi.ts",
+            "path": "src/vs/workbench/api/common/extHostTestingPrivateApi.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostTextEditor.ts",
+            "path": "src/vs/workbench/api/common/extHostTextEditor.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostTextEditors.ts",
+            "path": "src/vs/workbench/api/common/extHostTextEditors.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostTheming.ts",
+            "path": "src/vs/workbench/api/common/extHostTheming.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostTimeline.ts",
+            "path": "src/vs/workbench/api/common/extHostTimeline.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostTreeViews.ts",
+            "path": "src/vs/workbench/api/common/extHostTreeViews.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostTunnelService.ts",
+            "path": "src/vs/workbench/api/common/extHostTunnelService.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostTypeConverters.ts",
+            "path": "src/vs/workbench/api/common/extHostTypeConverters.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostTypes.ts",
+            "path": "src/vs/workbench/api/common/extHostTypes.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostTypes",
+            "path": "src/vs/workbench/api/common/extHostTypes",
+            "type": "dir"
+          },
+          {
+            "name": "extHostUriOpener.ts",
+            "path": "src/vs/workbench/api/common/extHostUriOpener.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostUriTransformerService.ts",
+            "path": "src/vs/workbench/api/common/extHostUriTransformerService.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostUrls.ts",
+            "path": "src/vs/workbench/api/common/extHostUrls.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostVariableResolverService.ts",
+            "path": "src/vs/workbench/api/common/extHostVariableResolverService.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostWebview.ts",
+            "path": "src/vs/workbench/api/common/extHostWebview.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostWebviewMessaging.ts",
+            "path": "src/vs/workbench/api/common/extHostWebviewMessaging.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostWebviewPanels.ts",
+            "path": "src/vs/workbench/api/common/extHostWebviewPanels.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostWebviewView.ts",
+            "path": "src/vs/workbench/api/common/extHostWebviewView.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostWindow.ts",
+            "path": "src/vs/workbench/api/common/extHostWindow.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostWorkspace.ts",
+            "path": "src/vs/workbench/api/common/extHostWorkspace.ts",
+            "type": "file"
+          },
+          {
+            "name": "extHostXaaAuthProvider.ts",
+            "path": "src/vs/workbench/api/common/extHostXaaAuthProvider.ts",
+            "type": "file"
+          },
+          {
+            "name": "extensionHostMain.ts",
+            "path": "src/vs/workbench/api/common/extensionHostMain.ts",
+            "type": "file"
+          },
+          {
+            "name": "jsonValidationExtensionPoint.ts",
+            "path": "src/vs/workbench/api/common/jsonValidationExtensionPoint.ts",
+            "type": "file"
+          },
+          {
+            "name": "shared",
+            "path": "src/vs/workbench/api/common/shared",
+            "type": "dir"
+          }
+        ]
+      }
+    },
+    {
+      "id": "oss-collector",
+      "category": "Collector 정의와 실행 식별",
+      "repository": "open-telemetry/opentelemetry-collector",
+      "commit": "3b5555471b93052c4fbe4ef412d974a999d1b27f",
+      "commitUrl": "https://github.com/open-telemetry/opentelemetry-collector/commit/3b5555471b93052c4fbe4ef412d974a999d1b27f",
+      "sourceReadMethod": "Read-only official GitHub fixed-commit files/listings; no clone/install/build or execution of the OSS.",
+      "spec": {
+        "id": "oss-collector",
+        "name": "Collector 정의와 실행 식별",
+        "brief": "공식 graph_test의 multi_pipeline_receivers_and_exporters 구성을 소스의 실행 식별 규칙과 대조한 부분 지도. 아래 실행본은 정적 소스 대응이며 Collector를 실행해 관측한 결과가 아니다.",
+        "parts": [
+          {
+            "key": "definitions",
+            "name": "구성 ID 정의",
+            "note": "선택한 공식 테스트의 component.ID 참조를 모은 검토자 묶음이며 실제 설정 파일을 실행한 것은 아니다."
+          },
+          {
+            "key": "recv-def",
+            "name": "수신 설정 ID",
+            "note": "원명 examplereceiver: graph_test의 선택한 구성에서 참조하는 component.ID이며 실행 인스턴스와 구별한다.",
+            "parent": "definitions"
+          },
+          {
+            "key": "proc-def",
+            "name": "처리 설정 ID",
+            "note": "원명 exampleprocessor/mutate: graph_test의 선택한 구성에서 참조하는 component.ID이며 실행 인스턴스와 구별한다.",
+            "parent": "definitions"
+          },
+          {
+            "key": "exp-def",
+            "name": "전달 설정 ID",
+            "note": "원명 exampleexporter: graph_test의 선택한 구성에서 참조하는 component.ID이며 실행 인스턴스와 구별한다.",
+            "parent": "definitions"
+          },
+          {
+            "key": "pipelines",
+            "name": "파이프라인 정의",
+            "note": "공식 테스트에 선언된 네 신호별 두 파이프라인을 모은 검토자 묶음이다."
+          },
+          {
+            "key": "pipe-traces",
+            "name": "traces",
+            "note": "원명 traces: 선택한 공식 테스트의 파이프라인 정의이며 receiver·exampleprocessor/mutate·exporter를 참조한다; 실행 기록이 아니다.",
+            "parent": "pipelines"
+          },
+          {
+            "key": "pipe-traces-1",
+            "name": "traces/1",
+            "note": "원명 traces/1: 선택한 공식 테스트의 파이프라인 정의이며 processor 없이 receiver·exporter만 참조한다; 실행 기록이 아니다.",
+            "parent": "pipelines"
+          },
+          {
+            "key": "pipe-metrics",
+            "name": "metrics",
+            "note": "원명 metrics: 선택한 공식 테스트의 파이프라인 정의이며 receiver·exampleprocessor/mutate·exporter를 참조한다; 실행 기록이 아니다.",
+            "parent": "pipelines"
+          },
+          {
+            "key": "pipe-metrics-1",
+            "name": "metrics/1",
+            "note": "원명 metrics/1: 선택한 공식 테스트의 파이프라인 정의이며 processor 없이 receiver·exporter만 참조한다; 실행 기록이 아니다.",
+            "parent": "pipelines"
+          },
+          {
+            "key": "pipe-logs",
+            "name": "logs",
+            "note": "원명 logs: 선택한 공식 테스트의 파이프라인 정의이며 receiver·exampleprocessor/mutate·exporter를 참조한다; 실행 기록이 아니다.",
+            "parent": "pipelines"
+          },
+          {
+            "key": "pipe-logs-1",
+            "name": "logs/1",
+            "note": "원명 logs/1: 선택한 공식 테스트의 파이프라인 정의이며 processor 없이 receiver·exporter만 참조한다; 실행 기록이 아니다.",
+            "parent": "pipelines"
+          },
+          {
+            "key": "pipe-profiles",
+            "name": "profiles",
+            "note": "원명 profiles: 선택한 공식 테스트의 파이프라인 정의이며 receiver·exampleprocessor/mutate·exporter를 참조한다; 실행 기록이 아니다.",
+            "parent": "pipelines"
+          },
+          {
+            "key": "pipe-profiles-1",
+            "name": "profiles/1",
+            "note": "원명 profiles/1: 선택한 공식 테스트의 파이프라인 정의이며 processor 없이 receiver·exporter만 참조한다; 실행 기록이 아니다.",
+            "parent": "pipelines"
+          },
+          {
+            "key": "identities",
+            "name": "정적 실행본 대응",
+            "note": "아래 항목은 테스트 정의와 생성 코드에서 도출한 식별 대응이며 실행 관측이나 가동 상태가 아니다."
+          },
+          {
+            "key": "recv-traces",
+            "name": "수신 · traces",
+            "note": "원명 examplereceiver: signal + component ID 규칙에 따른 traces의 정적 실행본 식별이며 이 표본의 실제 실행 관측은 아니다.",
+            "parent": "identities"
+          },
+          {
+            "key": "proc-traces",
+            "name": "처리 · traces",
+            "note": "원명 exampleprocessor/mutate: pipeline ID + component ID 규칙에 따른 traces의 정적 실행본 식별이며 이 표본의 실제 실행 관측은 아니다.",
+            "parent": "identities"
+          },
+          {
+            "key": "exp-traces",
+            "name": "전달 · traces",
+            "note": "원명 exampleexporter: signal + component ID 규칙에 따른 traces의 정적 실행본 식별이며 이 표본의 실제 실행 관측은 아니다.",
+            "parent": "identities"
+          },
+          {
+            "key": "recv-metrics",
+            "name": "수신 · metrics",
+            "note": "원명 examplereceiver: signal + component ID 규칙에 따른 metrics의 정적 실행본 식별이며 이 표본의 실제 실행 관측은 아니다.",
+            "parent": "identities"
+          },
+          {
+            "key": "proc-metrics",
+            "name": "처리 · metrics",
+            "note": "원명 exampleprocessor/mutate: pipeline ID + component ID 규칙에 따른 metrics의 정적 실행본 식별이며 이 표본의 실제 실행 관측은 아니다.",
+            "parent": "identities"
+          },
+          {
+            "key": "exp-metrics",
+            "name": "전달 · metrics",
+            "note": "원명 exampleexporter: signal + component ID 규칙에 따른 metrics의 정적 실행본 식별이며 이 표본의 실제 실행 관측은 아니다.",
+            "parent": "identities"
+          },
+          {
+            "key": "recv-logs",
+            "name": "수신 · logs",
+            "note": "원명 examplereceiver: signal + component ID 규칙에 따른 logs의 정적 실행본 식별이며 이 표본의 실제 실행 관측은 아니다.",
+            "parent": "identities"
+          },
+          {
+            "key": "proc-logs",
+            "name": "처리 · logs",
+            "note": "원명 exampleprocessor/mutate: pipeline ID + component ID 규칙에 따른 logs의 정적 실행본 식별이며 이 표본의 실제 실행 관측은 아니다.",
+            "parent": "identities"
+          },
+          {
+            "key": "exp-logs",
+            "name": "전달 · logs",
+            "note": "원명 exampleexporter: signal + component ID 규칙에 따른 logs의 정적 실행본 식별이며 이 표본의 실제 실행 관측은 아니다.",
+            "parent": "identities"
+          },
+          {
+            "key": "recv-profiles",
+            "name": "수신 · profiles",
+            "note": "원명 examplereceiver: signal + component ID 규칙에 따른 profiles의 정적 실행본 식별이며 이 표본의 실제 실행 관측은 아니다.",
+            "parent": "identities"
+          },
+          {
+            "key": "proc-profiles",
+            "name": "처리 · profiles",
+            "note": "원명 exampleprocessor/mutate: pipeline ID + component ID 규칙에 따른 profiles의 정적 실행본 식별이며 이 표본의 실제 실행 관측은 아니다.",
+            "parent": "identities"
+          },
+          {
+            "key": "exp-profiles",
+            "name": "전달 · profiles",
+            "note": "원명 exampleexporter: signal + component ID 규칙에 따른 profiles의 정적 실행본 식별이며 이 표본의 실제 실행 관측은 아니다.",
+            "parent": "identities"
+          }
+        ],
+        "relations": [
+          [
+            "recv-traces",
+            "recv-def",
+            "related",
+            "정적 식별과 구성 ID의 대응이다; signal + component ID를 구별하며 실행 결과를 뜻하지 않는다."
+          ],
+          [
+            "proc-traces",
+            "proc-def",
+            "related",
+            "정적 식별과 구성 ID의 대응이다; pipeline ID + component ID를 구별하며 실행 결과를 뜻하지 않는다."
+          ],
+          [
+            "exp-traces",
+            "exp-def",
+            "related",
+            "정적 식별과 구성 ID의 대응이다; signal + component ID를 구별하며 실행 결과를 뜻하지 않는다."
+          ],
+          [
+            "pipe-traces",
+            "recv-traces",
+            "related",
+            "traces 정의에 대응하는 정적 receiver 식별이다; 배포/가동/실행 성공의 관측이 아니다."
+          ],
+          [
+            "pipe-traces",
+            "proc-traces",
+            "related",
+            "traces 정의에 대응하는 정적 processor 식별이다; 배포/가동/실행 성공의 관측이 아니다."
+          ],
+          [
+            "pipe-traces",
+            "exp-traces",
+            "related",
+            "traces 정의에 대응하는 정적 exporter 식별이다; 배포/가동/실행 성공의 관측이 아니다."
+          ],
+          [
+            "pipe-traces-1",
+            "recv-traces",
+            "related",
+            "traces/1 정의에 대응하는 정적 receiver 식별이다; 배포/가동/실행 성공의 관측이 아니다."
+          ],
+          [
+            "pipe-traces-1",
+            "exp-traces",
+            "related",
+            "traces/1 정의에 대응하는 정적 exporter 식별이다; 배포/가동/실행 성공의 관측이 아니다."
+          ],
+          [
+            "recv-metrics",
+            "recv-def",
+            "related",
+            "정적 식별과 구성 ID의 대응이다; signal + component ID를 구별하며 실행 결과를 뜻하지 않는다."
+          ],
+          [
+            "proc-metrics",
+            "proc-def",
+            "related",
+            "정적 식별과 구성 ID의 대응이다; pipeline ID + component ID를 구별하며 실행 결과를 뜻하지 않는다."
+          ],
+          [
+            "exp-metrics",
+            "exp-def",
+            "related",
+            "정적 식별과 구성 ID의 대응이다; signal + component ID를 구별하며 실행 결과를 뜻하지 않는다."
+          ],
+          [
+            "pipe-metrics",
+            "recv-metrics",
+            "related",
+            "metrics 정의에 대응하는 정적 receiver 식별이다; 배포/가동/실행 성공의 관측이 아니다."
+          ],
+          [
+            "pipe-metrics",
+            "proc-metrics",
+            "related",
+            "metrics 정의에 대응하는 정적 processor 식별이다; 배포/가동/실행 성공의 관측이 아니다."
+          ],
+          [
+            "pipe-metrics",
+            "exp-metrics",
+            "related",
+            "metrics 정의에 대응하는 정적 exporter 식별이다; 배포/가동/실행 성공의 관측이 아니다."
+          ],
+          [
+            "pipe-metrics-1",
+            "recv-metrics",
+            "related",
+            "metrics/1 정의에 대응하는 정적 receiver 식별이다; 배포/가동/실행 성공의 관측이 아니다."
+          ],
+          [
+            "pipe-metrics-1",
+            "exp-metrics",
+            "related",
+            "metrics/1 정의에 대응하는 정적 exporter 식별이다; 배포/가동/실행 성공의 관측이 아니다."
+          ],
+          [
+            "recv-logs",
+            "recv-def",
+            "related",
+            "정적 식별과 구성 ID의 대응이다; signal + component ID를 구별하며 실행 결과를 뜻하지 않는다."
+          ],
+          [
+            "proc-logs",
+            "proc-def",
+            "related",
+            "정적 식별과 구성 ID의 대응이다; pipeline ID + component ID를 구별하며 실행 결과를 뜻하지 않는다."
+          ],
+          [
+            "exp-logs",
+            "exp-def",
+            "related",
+            "정적 식별과 구성 ID의 대응이다; signal + component ID를 구별하며 실행 결과를 뜻하지 않는다."
+          ],
+          [
+            "pipe-logs",
+            "recv-logs",
+            "related",
+            "logs 정의에 대응하는 정적 receiver 식별이다; 배포/가동/실행 성공의 관측이 아니다."
+          ],
+          [
+            "pipe-logs",
+            "proc-logs",
+            "related",
+            "logs 정의에 대응하는 정적 processor 식별이다; 배포/가동/실행 성공의 관측이 아니다."
+          ],
+          [
+            "pipe-logs",
+            "exp-logs",
+            "related",
+            "logs 정의에 대응하는 정적 exporter 식별이다; 배포/가동/실행 성공의 관측이 아니다."
+          ],
+          [
+            "pipe-logs-1",
+            "recv-logs",
+            "related",
+            "logs/1 정의에 대응하는 정적 receiver 식별이다; 배포/가동/실행 성공의 관측이 아니다."
+          ],
+          [
+            "pipe-logs-1",
+            "exp-logs",
+            "related",
+            "logs/1 정의에 대응하는 정적 exporter 식별이다; 배포/가동/실행 성공의 관측이 아니다."
+          ],
+          [
+            "recv-profiles",
+            "recv-def",
+            "related",
+            "정적 식별과 구성 ID의 대응이다; signal + component ID를 구별하며 실행 결과를 뜻하지 않는다."
+          ],
+          [
+            "proc-profiles",
+            "proc-def",
+            "related",
+            "정적 식별과 구성 ID의 대응이다; pipeline ID + component ID를 구별하며 실행 결과를 뜻하지 않는다."
+          ],
+          [
+            "exp-profiles",
+            "exp-def",
+            "related",
+            "정적 식별과 구성 ID의 대응이다; signal + component ID를 구별하며 실행 결과를 뜻하지 않는다."
+          ],
+          [
+            "pipe-profiles",
+            "recv-profiles",
+            "related",
+            "profiles 정의에 대응하는 정적 receiver 식별이다; 배포/가동/실행 성공의 관측이 아니다."
+          ],
+          [
+            "pipe-profiles",
+            "proc-profiles",
+            "related",
+            "profiles 정의에 대응하는 정적 processor 식별이다; 배포/가동/실행 성공의 관측이 아니다."
+          ],
+          [
+            "pipe-profiles",
+            "exp-profiles",
+            "related",
+            "profiles 정의에 대응하는 정적 exporter 식별이다; 배포/가동/실행 성공의 관측이 아니다."
+          ],
+          [
+            "pipe-profiles-1",
+            "recv-profiles",
+            "related",
+            "profiles/1 정의에 대응하는 정적 receiver 식별이다; 배포/가동/실행 성공의 관측이 아니다."
+          ],
+          [
+            "pipe-profiles-1",
+            "exp-profiles",
+            "related",
+            "profiles/1 정의에 대응하는 정적 exporter 식별이다; 배포/가동/실행 성공의 관측이 아니다."
+          ]
+        ],
+        "records": []
+      },
+      "sources": [
+        {
+          "id": "test-config",
+          "path": "service/internal/graph/graph_test.go",
+          "url": "https://github.com/open-telemetry/opentelemetry-collector/blob/3b5555471b93052c4fbe4ef412d974a999d1b27f/service/internal/graph/graph_test.go#L204-L243"
+        },
+        {
+          "id": "graph-builder",
+          "path": "service/internal/graph/graph.go",
+          "url": "https://github.com/open-telemetry/opentelemetry-collector/blob/3b5555471b93052c4fbe4ef412d974a999d1b27f/service/internal/graph/graph.go#L212-L247"
+        },
+        {
+          "id": "receiver-rule",
+          "path": "service/internal/graph/receiver.go",
+          "url": "https://github.com/open-telemetry/opentelemetry-collector/blob/3b5555471b93052c4fbe4ef412d974a999d1b27f/service/internal/graph/receiver.go"
+        },
+        {
+          "id": "processor-rule",
+          "path": "service/internal/graph/processor.go",
+          "url": "https://github.com/open-telemetry/opentelemetry-collector/blob/3b5555471b93052c4fbe4ef412d974a999d1b27f/service/internal/graph/processor.go"
+        },
+        {
+          "id": "exporter-rule",
+          "path": "service/internal/graph/exporter.go",
+          "url": "https://github.com/open-telemetry/opentelemetry-collector/blob/3b5555471b93052c4fbe4ef412d974a999d1b27f/service/internal/graph/exporter.go"
+        }
+      ],
+      "provenance": {
+        "parts": {
+          "definitions": {
+            "refs": [
+              "test-config"
+            ],
+            "classification": "reviewer-grouping"
+          },
+          "recv-def": {
+            "refs": [
+              "test-config"
+            ],
+            "classification": "official-test-configuration-reference",
+            "originalName": "examplereceiver"
+          },
+          "proc-def": {
+            "refs": [
+              "test-config"
+            ],
+            "classification": "official-test-configuration-reference",
+            "originalName": "exampleprocessor/mutate"
+          },
+          "exp-def": {
+            "refs": [
+              "test-config"
+            ],
+            "classification": "official-test-configuration-reference",
+            "originalName": "exampleexporter"
+          },
+          "pipelines": {
+            "refs": [
+              "test-config"
+            ],
+            "classification": "reviewer-grouping"
+          },
+          "pipe-traces": {
+            "refs": [
+              "test-config"
+            ],
+            "classification": "official-test-pipeline-definition",
+            "originalName": "traces"
+          },
+          "pipe-traces-1": {
+            "refs": [
+              "test-config"
+            ],
+            "classification": "official-test-pipeline-definition",
+            "originalName": "traces/1"
+          },
+          "pipe-metrics": {
+            "refs": [
+              "test-config"
+            ],
+            "classification": "official-test-pipeline-definition",
+            "originalName": "metrics"
+          },
+          "pipe-metrics-1": {
+            "refs": [
+              "test-config"
+            ],
+            "classification": "official-test-pipeline-definition",
+            "originalName": "metrics/1"
+          },
+          "pipe-logs": {
+            "refs": [
+              "test-config"
+            ],
+            "classification": "official-test-pipeline-definition",
+            "originalName": "logs"
+          },
+          "pipe-logs-1": {
+            "refs": [
+              "test-config"
+            ],
+            "classification": "official-test-pipeline-definition",
+            "originalName": "logs/1"
+          },
+          "pipe-profiles": {
+            "refs": [
+              "test-config"
+            ],
+            "classification": "official-test-pipeline-definition",
+            "originalName": "profiles"
+          },
+          "pipe-profiles-1": {
+            "refs": [
+              "test-config"
+            ],
+            "classification": "official-test-pipeline-definition",
+            "originalName": "profiles/1"
+          },
+          "identities": {
+            "refs": [
+              "test-config",
+              "graph-builder"
+            ],
+            "classification": "reviewer-grouping-of-source-derived-identities"
+          },
+          "recv-traces": {
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "receiver-rule"
+            ],
+            "classification": "source-derived-static-instance-identity",
+            "originalName": "examplereceiver"
+          },
+          "proc-traces": {
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "processor-rule"
+            ],
+            "classification": "source-derived-static-instance-identity",
+            "originalName": "exampleprocessor/mutate"
+          },
+          "exp-traces": {
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "exporter-rule"
+            ],
+            "classification": "source-derived-static-instance-identity",
+            "originalName": "exampleexporter"
+          },
+          "recv-metrics": {
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "receiver-rule"
+            ],
+            "classification": "source-derived-static-instance-identity",
+            "originalName": "examplereceiver"
+          },
+          "proc-metrics": {
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "processor-rule"
+            ],
+            "classification": "source-derived-static-instance-identity",
+            "originalName": "exampleprocessor/mutate"
+          },
+          "exp-metrics": {
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "exporter-rule"
+            ],
+            "classification": "source-derived-static-instance-identity",
+            "originalName": "exampleexporter"
+          },
+          "recv-logs": {
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "receiver-rule"
+            ],
+            "classification": "source-derived-static-instance-identity",
+            "originalName": "examplereceiver"
+          },
+          "proc-logs": {
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "processor-rule"
+            ],
+            "classification": "source-derived-static-instance-identity",
+            "originalName": "exampleprocessor/mutate"
+          },
+          "exp-logs": {
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "exporter-rule"
+            ],
+            "classification": "source-derived-static-instance-identity",
+            "originalName": "exampleexporter"
+          },
+          "recv-profiles": {
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "receiver-rule"
+            ],
+            "classification": "source-derived-static-instance-identity",
+            "originalName": "examplereceiver"
+          },
+          "proc-profiles": {
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "processor-rule"
+            ],
+            "classification": "source-derived-static-instance-identity",
+            "originalName": "exampleprocessor/mutate"
+          },
+          "exp-profiles": {
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "exporter-rule"
+            ],
+            "classification": "source-derived-static-instance-identity",
+            "originalName": "exampleexporter"
+          }
+        },
+        "relations": [
+          {
+            "index": 0,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "receiver-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 1,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "processor-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 2,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "exporter-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 3,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "receiver-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 4,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "processor-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 5,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "exporter-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 6,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "receiver-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 7,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "exporter-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 8,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "receiver-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 9,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "processor-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 10,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "exporter-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 11,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "receiver-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 12,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "processor-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 13,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "exporter-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 14,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "receiver-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 15,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "exporter-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 16,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "receiver-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 17,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "processor-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 18,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "exporter-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 19,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "receiver-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 20,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "processor-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 21,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "exporter-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 22,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "receiver-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 23,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "exporter-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 24,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "receiver-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 25,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "processor-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 26,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "exporter-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 27,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "receiver-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 28,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "processor-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 29,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "exporter-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 30,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "receiver-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          },
+          {
+            "index": 31,
+            "refs": [
+              "test-config",
+              "graph-builder",
+              "exporter-rule"
+            ],
+            "classification": "source-derived-identity-correspondence"
+          }
+        ]
+      },
+      "limitations": [
+        "실행본 항목은 소스 규칙으로 계산한 정적 식별 대응이다. 공식 테스트나 Collector 서비스 자체를 실행하지 않았으며 성공·상태·건강 보고는 없다.",
+        "같은 신호의 두 pipeline은 receiver/exporter 식별을 함께 참조하지만 processor는 pipeline ID마다 별개다. 서로 다른 신호의 동명 receiver/exporter를 하나로 합치지 않는다.",
+        "현재 모델에는 설정·실행본·정체성 대응의 전용 타입이 없다. 일반 related와 한국어 note로 구별하며 shares·flow로 위장하지 않는다. 물리 배포·시간에 따른 실행은 표현하지 않는다."
+      ],
+      "checks": {
+        "partCount": 26,
+        "maxDepth": 2,
+        "relationCount": 32,
+        "recordsCount": 0,
+        "structuralValidation": "keys unique; parent before child; relation endpoints exist; part/relationship provenance refs resolve. Browser/UI behavior and OSS execution not performed by dataset extraction."
+      }
+    },
+    {
+      "id": "oss-micro-javascript",
+      "category": "micro-javascript 초기 라이브러리",
+      "repository": "simonw/micro-javascript",
+      "commit": "86236b28d2ad0a5b9896c2432d109aed3d0933ee",
+      "commitUrl": "https://github.com/simonw/micro-javascript/commit/86236b28d2ad0a5b9896c2432d109aed3d0933ee",
+      "sourceReadMethod": "Read-only official GitHub fixed-commit files/listings; no clone/install/build or execution of the OSS.",
+      "spec": {
+        "id": "oss-micro-javascript",
+        "name": "micro-javascript 초기 라이브러리",
+        "brief": "초기 0.1a0 패키지의 설치 이름·import 이름·실행 문맥과 두 제한만 읽는 성긴 부분 지도. 비어 있는 기능 골격을 만들어 다른 사례와 크기를 맞추지 않는다.",
+        "parts": [
+          {
+            "key": "package",
+            "name": "설치 패키지",
+            "note": "원명 micro-javascript: pyproject.toml의 0.1a0 배포 이름이며 README의 pip install 이름이다."
+          },
+          {
+            "key": "module",
+            "name": "import 모듈",
+            "note": "원명 microjs: README의 from microjs import JSContext와 __init__.py가 보여 주는 Python 모듈 이름이다."
+          },
+          {
+            "key": "context",
+            "name": "실행 문맥",
+            "note": "원명 JSContext: 모듈이 내보내며 memory_limit·time_limit를 받는 클래스 정의다; 실제 실행된 문맥은 아니다.",
+            "parent": "module"
+          },
+          {
+            "key": "memory",
+            "name": "메모리 제한",
+            "note": "원명 memory_limit: JSContext 생성자에 전달하는 대략적인 최대 메모리 바이트 수 설정이다.",
+            "parent": "context"
+          },
+          {
+            "key": "time",
+            "name": "시간 제한",
+            "note": "원명 time_limit: JSContext 생성자에 전달하는 최대 실행 시간(초) 설정이다.",
+            "parent": "context"
+          }
+        ],
+        "relations": [
+          [
+            "package",
+            "module",
+            "related",
+            "README의 설치 예는 micro-javascript, 사용 예의 import는 microjs다; 동시에 유효한 서로 다른 역할의 이름이다."
+          ]
+        ],
+        "records": []
+      },
+      "sources": [
+        {
+          "id": "readme",
+          "path": "README.md",
+          "url": "https://github.com/simonw/micro-javascript/blob/86236b28d2ad0a5b9896c2432d109aed3d0933ee/README.md"
+        },
+        {
+          "id": "package",
+          "path": "pyproject.toml",
+          "url": "https://github.com/simonw/micro-javascript/blob/86236b28d2ad0a5b9896c2432d109aed3d0933ee/pyproject.toml"
+        },
+        {
+          "id": "module-init",
+          "path": "src/microjs/__init__.py",
+          "url": "https://github.com/simonw/micro-javascript/blob/86236b28d2ad0a5b9896c2432d109aed3d0933ee/src/microjs/__init__.py"
+        },
+        {
+          "id": "context",
+          "path": "src/microjs/context.py",
+          "url": "https://github.com/simonw/micro-javascript/blob/86236b28d2ad0a5b9896c2432d109aed3d0933ee/src/microjs/context.py"
+        }
+      ],
+      "provenance": {
+        "parts": {
+          "package": {
+            "refs": [
+              "readme",
+              "package"
+            ],
+            "classification": "official-distribution-name",
+            "originalName": "micro-javascript"
+          },
+          "module": {
+            "refs": [
+              "readme",
+              "module-init"
+            ],
+            "classification": "official-import-name",
+            "originalName": "microjs"
+          },
+          "context": {
+            "refs": [
+              "module-init",
+              "context"
+            ],
+            "classification": "official-api-definition",
+            "originalName": "JSContext"
+          },
+          "memory": {
+            "refs": [
+              "context"
+            ],
+            "classification": "official-constructor-parameter",
+            "originalName": "memory_limit"
+          },
+          "time": {
+            "refs": [
+              "context"
+            ],
+            "classification": "official-constructor-parameter",
+            "originalName": "time_limit"
+          }
+        },
+        "relations": [
+          {
+            "index": 0,
+            "refs": [
+              "readme",
+              "package",
+              "module-init"
+            ],
+            "classification": "explicit-source-fact"
+          }
+        ]
+      },
+      "limitations": [
+        "일부 공개 API만 고른 성긴 표본이다. 작은 저장소 전체의 기능 수·완성도·런타임 메모리 제한 효과를 뜻하지 않는다.",
+        "설치 이름과 import 이름은 역할이 다른 사실이며 전역 개명으로 합치지 않는다. 생성자 파라미터를 하위 영역으로 읽는 배치는 검토자가 선택했다."
+      ],
+      "checks": {
+        "partCount": 5,
+        "maxDepth": 3,
+        "relationCount": 1,
+        "recordsCount": 0,
+        "structuralValidation": "keys unique; parent before child; relation endpoints exist; part/relationship provenance refs resolve. Browser/UI behavior and OSS execution not performed by dataset extraction."
+      }
     }
   ],
   "derivedStress": [
@@ -1952,7 +6364,10 @@
       "Fold/unfold branch; verify siblings and saved identities remain unchanged.",
       "Back from child to parent then overview; verify selected identity/context.",
       "Open relation endpoints inside/outside focus; check labels, direction, optionality and hidden descendants.",
-      "Compare dense and sparse cases: readable names, hit targets, bounded panels, no excessive repeated context."
+      "Compare dense and sparse cases: readable names, hit targets, bounded panels, no excessive repeated context.",
+      "Separate official source facts, reviewer grouping, source files, API contracts, configuration definitions and source-derived static instance identities; records remain empty.",
+      "Inspect VS Code source detail with all 120 actual files and two directories retained; do not equate source-file count with feature count.",
+      "Compare the 5-part early library, 14-part board, 21-part scientific example, 26-part Collector identity map and 136-part editor source without padding counts."
     ],
     "evidenceRequired": "Record case id, viewport, action, observed result and screenshot path. This file lists intended checks; it does not claim they ran."
   }

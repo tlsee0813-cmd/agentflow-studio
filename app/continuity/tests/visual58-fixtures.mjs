@@ -53,6 +53,14 @@ function validateAttribution(c) {
   for (const part of c.spec.parts) checkRefs(c.provenance.parts[part.key]);
   assert.equal(c.provenance.relations.length, c.spec.relations.length);
   c.provenance.relations.forEach((p, index) => { assert.equal(p.index, index); checkRefs(p); });
+  if (c.sourceInventory) {
+    const entries = c.sourceInventory.entries;
+    assert.equal(entries.filter(e => e.type === 'file').length, c.sourceInventory.fileCount);
+    assert.equal(entries.filter(e => e.type === 'dir').length, c.sourceInventory.directoryCount);
+    const mapped = c.spec.parts.filter(p => c.provenance.parts[p.key].classification.startsWith('official-file-existence') || c.provenance.parts[p.key].classification.startsWith('official-directory-'));
+    assert.equal(mapped.length, entries.length, 'retain every actual source listing entry exactly once');
+    assert.deepEqual(mapped.map(p => c.provenance.parts[p.key].originalName).sort(), entries.map(e => e.name).sort());
+  }
 }
 
 function projectFor(spec) {
@@ -103,7 +111,8 @@ for (const c of data.cases) {
   const counts = validateSpec(c.spec);
   assert.deepEqual([counts.parts, counts.maxDepth, counts.relations], [c.checks.partCount, c.checks.maxDepth, c.checks.relationCount]);
   assert.ok(!baseCases.has(c.id)); baseCases.set(c.id, c);
-  prepare(c.spec, { classification: 'source-grounded-review-map', repository: c.repository, commit: c.commit, commitUrl: c.commitUrl, sources: c.sources, provenance: c.provenance });
+  prepare(c.spec, { classification: 'source-grounded-review-map', repository: c.repository, commit: c.commit, commitUrl: c.commitUrl, sources: c.sources, provenance: c.provenance,
+    ...(c.limitations ? { limitations: c.limitations } : {}), ...(c.sourceInventory ? { sourceInventory: c.sourceInventory } : {}) });
 }
 for (const derived of data.derivedStress) {
   const base = baseCases.get(derived.base); assert.ok(base, 'unknown derived base');
