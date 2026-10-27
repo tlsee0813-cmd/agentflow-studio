@@ -56,7 +56,7 @@ export function validateDigestAsk(value: unknown): DigestAsk {
   if (digestBytes(value) > DIGEST_BYTES) throw new Error('INPUT_TOO_LARGE');
   obj(value.project, ['name', 'purpose']); str(value.project.name, 120);
   if (value.project.purpose !== null) str(value.project.purpose, 2000);
-  check(Array.isArray(value.parts) && value.parts.length >= 1 && value.parts.length <= 200);
+  check(Array.isArray(value.parts) && value.parts.length <= 200);
   const parts = new Set<string>();
   for (const p of value.parts as unknown[]) {
     obj(p, ['id', 'name', 'note', 'parentId']); check(typeof p.id === 'string' && PART_ID.test(p.id) && !parts.has(p.id));
@@ -80,7 +80,7 @@ export function validateDigestAsk(value: unknown): DigestAsk {
 }
 
 /** Exact keys, bounded text, refs only to sent sources, and parts only among the parts the cited sources are about.
- * Without any outcome material the reply may not claim a change. Anything else refuses the whole reply. */
+ * Each change must cite outcome material; a source without a known location can support an unlocated statement. */
 export function validateDigestReply(value: unknown, ask: DigestAsk): DigestReply {
   const code = 'INVALID_RESPONSE';
   obj(value, ['changes', 'read', 'open', 'notCovered'], code);
@@ -93,8 +93,8 @@ export function validateDigestReply(value: unknown, ask: DigestAsk): DigestReply
     return { text: v.text.trim(), partIds: [...v.partIds], refs: [...v.refs] };
   };
   check(Array.isArray(value.changes) && value.changes.length <= 3, code);
-  const changes = (value.changes as unknown[]).map(x => statement(x, 1));
-  if (!ask.sources.some(s => OUTCOME_KINDS.includes(s.kind))) check(changes.length === 0, code);
+  const changes = (value.changes as unknown[]).map(x => statement(x, 0));
+  for (const change of changes) check(change.refs.some(r => OUTCOME_KINDS.includes(sources.get(r)!.kind)), code);
   let read: DigestReply['read'] = null;
   if (value.read !== null) {
     obj(value.read, ['partId', 'why', 'refs'], code); str(value.read.why, 240, false, code);

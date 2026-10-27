@@ -4,16 +4,18 @@
  * earlier reading stays readable after the material grew. Saved projects: one own key in this browser, apart from the project
  * and its plans. Examples: this tab only. Nothing here calls the AI. */
 import type { StorageLike } from '../shared/storage.js';
-import { validateDigestReply, type DigestAsk, type DigestReply } from '../shared/digest-api.js';
+import { DIGEST_SCHEMA, DIGEST_KINDS, validateDigestReply, type DigestAsk, type DigestKind, type DigestReply } from '../shared/digest-api.js';
 import type { ReadingInput, ReadingSource } from './digest-source.js';
 
 export const DIGEST_KEY = 'agentflow.studio.digest.1';
-const PER_PROJECT = 4, PROJECTS = 30, CITED_CHARS = 2000;
+const PER_PROJECT = 4, PROJECTS = 30;
 export interface Reading {
+  /** Earlier cache entries silently cut source text; they cannot establish that the source is complete. */
+  sourceVersion: 'complete.1';
   hash: string; model: string; prompt: string; at: string; coverage: { total: number; sent: number };
   /** Reply as made, in the request's aliases. */
   reply: DigestReply;
-  /** alias → real part id, and alias → cited source as it read then (text cut to CITED_CHARS) */
+  /** alias → real part id, and alias → complete cited source as held when sent (with any AI excerpt notice). */
   parts: Record<string, string>; cited: Record<string, ReadingSource>;
 }
 
@@ -24,16 +26,34 @@ export async function askHash(ask: DigestAsk): Promise<string> {
 export function makeReading(input: ReadingInput, hash: string, model: string, prompt: string, reply: DigestReply): Reading {
   const refs = new Set([...reply.changes, ...reply.open].flatMap(s => s.refs).concat(reply.read?.refs ?? []));
   const cited: Record<string, ReadingSource> = {};
-  for (const r of refs) { const s = input.sources.get(r); if (s) cited[r] = { ...s, partIds: [...s.partIds], text: s.text.slice(0, CITED_CHARS) }; }
-  return { hash, model, prompt, at: new Date().toISOString(), coverage: { ...input.coverage }, reply: structuredClone(reply), parts: Object.fromEntries(input.parts), cited };
+  for (const r of refs) { const s = input.sources.get(r); if (s) cited[r] = { ...s, partIds: [...s.partIds] }; }
+  return { sourceVersion: 'complete.1', hash, model, prompt, at: new Date().toISOString(), coverage: { ...input.coverage }, reply: structuredClone(reply), parts: Object.fromEntries(input.parts), cited };
 }
 
 const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
 /** A stored entry is used only when it still has the stored shape; anything else is skipped, never repaired. */
 function readable(v: unknown): Reading | null {
-  if (!isObj(v) || typeof v.hash !== 'string' || !/^[0-9a-f]{64}$/.test(v.hash) || typeof v.model !== 'string' || typeof v.prompt !== 'string'
+  if (!isObj(v) || v.sourceVersion !== 'complete.1' || typeof v.hash !== 'string' || !/^[0-9a-f]{64}$/.test(v.hash) || typeof v.model !== 'string' || !v.model.trim() || v.model.length > 200 || typeof v.prompt !== 'string' || !v.prompt.trim() || v.prompt.length > 200
     || typeof v.at !== 'string' || !Number.isFinite(Date.parse(v.at)) || !isObj(v.coverage) || !isObj(v.reply) || !isObj(v.parts) || !isObj(v.cited)) return null;
-  return v as unknown as Reading;
+  const count = (x: unknown): x is number => Number.isSafeInteger(x) && (x as number) >= 0;
+  if (!count(v.coverage.total) || !count(v.coverage.sent) || v.coverage.sent > v.coverage.total || v.coverage.sent > 48) return null;
+  const partEntries = Object.entries(v.parts), citedEntries = Object.entries(v.cited);
+  if (partEntries.length > 200 || citedEntries.length > v.coverage.sent || partEntries.some(([a, id]) => !/^P\d{2,3}$/.test(a) || typeof id !== 'string' || !id.trim())
+    || new Set(partEntries.map(([, id]) => id)).size !== partEntries.length) return null;
+  const alias = new Map(partEntries.map(([a, id]) => [id, a]));
+  const text = (x: unknown, max: number, empty = false): x is string => typeof x === 'string' && x.length <= max && (empty || !!x.trim()) && !/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(x);
+  for (const [id, s] of citedEntries) {
+    if (!/^[A-Z]{1,2}\d{2,3}$/.test(id) || !isObj(s) || s.id !== id || !DIGEST_KINDS.includes(s.kind as DigestKind)
+      || !text(s.title, 200) || !text(s.text, 1_000_000) || !text(s.note, 4000, true) || !text(s.basis, 600)
+      || !Array.isArray(s.partIds) || s.partIds.length > 32 || s.partIds.some(p => typeof p !== 'string' || !alias.has(p)) || new Set(s.partIds).size !== s.partIds.length
+      || !(s.url === null || (typeof s.url === 'string' && /^https?:\/\//.test(s.url)))) return null;
+  }
+  const reading = v as unknown as Reading;
+  // Previous readings have no current request. Recheck their reply using only the frozen citations and aliases they hold.
+  const ask: DigestAsk = { schemaVersion: DIGEST_SCHEMA, project: { name: '보관 정리', purpose: null }, plan: null,
+    parts: partEntries.map(([id]) => ({ id, name: id, note: '', parentId: null })),
+    sources: Object.values(reading.cited).map(s => ({ ...s, partIds: s.partIds.map(id => alias.get(id)).filter((id): id is string => !!id) })) };
+  try { validateDigestReply(reading.reply, ask); return reading; } catch { return null; }
 }
 
 export interface DigestStore {
