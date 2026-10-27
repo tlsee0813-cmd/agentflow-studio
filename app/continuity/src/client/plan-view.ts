@@ -7,7 +7,7 @@ import type { StorageLike } from '../shared/storage.js';
 import type { StudioView } from '../shared/studio.js';
 import { createPlan, selectItems, requestSnapshot, compareResults, parseScopeReview, type ChangePlan, type Evidence, type PlanItem, type PlanPresentation, type ResultObservation, type RequestSnapshot } from '../shared/change-plan.js';
 import { CONVERTER_HEADING, CONVERTER_INTENT, converterEvidence, converterExampleAnalysis, converterObservations } from '../shared/change-plan-example.js';
-import type { Box } from './map-layout.js';
+import { mapLead, type Box } from './map-layout.js';
 import { AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
 import { h, put, $, ago, fullTime, inspectorWidth, codeGate, codeNote } from './plan-dom.js';
 import { CONVERTER_KEY, CONDITION_LABEL, EVIDENCE_LABEL, exampleInput, projectInput, mapReply, secretLike, scopeInput, type Condition, type PlanInput } from './plan-source.js';
@@ -86,6 +86,8 @@ const PROPOSALS = new Map<string, { text: string; sources: Evidence[] }>();
 const memoryKey = (o: PlanOpened, c: Condition) => (o.key === CONVERTER_KEY ? `${o.key}#${c}` : o.project.id);
 const short = (text: string, n: number) => { const t = text.replace(/\s+/g, ' ').trim(); return t.length > n ? `${t.slice(0, n)}…` : t; };
 /** The first sentence (or line) of a text, whole: a title or a one-line finding, the rest read where there is room. */
+/** Characters in a region's sizing hint: wider than any region head's room at 12px, so the layout reserves two lines. */
+const REGION_HINT = 120;
 const firstSentence = (text: string) => { const t = text.trim(), m = /^(.+?)(?:[.!?。](?=\s|$)|\n)/s.exec(t); return m ? t.slice(0, m[0].length).trim() : t; };
 
 export function createPlanView(host: PlanHost) {
@@ -250,8 +252,18 @@ export function createPlanView(host: PlanHost) {
     const out = new Map<string, string[]>();
     for (const [id, list] of rowChanges(p)) out.set(id, [...list.map(c => `${kindWord(c)} ${c.text}${list.length > 1 ? ` 외 ${list.length - 1}건` : ''}`), ...(list.length > 1 ? [`변경 ${list.length}건 ${manyLine(list)}`] : [])]);
     for (const x of shownImpacts(p)) if (!out.has(x.partId)) out.set(x.partId, ['영향 후보']);
+    // An open region keeps what it is now (its note, one line, dimmed) and reads the change under it: two lines in its head.
+    // The layout gives a head the larger of its note's room and its planned lines' room, so the region asks for two planned
+    // lines (a sizing request only: the hint is never drawn, and what the head shows is the note and the change line).
+    const o = host.current(), boxes = host.boxes();
+    if (o) for (const [id, lines] of out) {
+      const b = boxes.get(id), now = b?.kind === 'frame' && b.depth === 0 ? mapLead(o.view, id) : '';
+      if (now) out.set(id, [...lines, regionHint(`${now} ${lines[0] ?? ''}`)]);
+    }
     return out;
   }
+  /** A text long enough to take two planned lines in any region head (regions are at most 380px wide). */
+  const regionHint = (t: string) => (t.length >= REGION_HINT ? t : t.padEnd(REGION_HINT, ` ${t}`));
   /* Existing relations read as context of the change being read: lines already on the map between its actual targets and the
      candidates named here, and from those candidates to other parts the analysis names as candidates (a shared node's other
      users). They move above the group surfaces and keep their own kind and hover meaning; nothing is drawn or inferred, and
@@ -543,6 +555,8 @@ export function createPlanView(host: PlanHost) {
     const item = s.focus?.kind === 'item' ? itemOf(s.focus.id) : null, p = plan();
     host.rows(p ? rowLines(p) : null);
     host.targetContext(item ? activeTarget(item) : null, moveTarget);
+    // The target's context may have opened or folded a region: its head asks again for the room it now draws (no-op if same).
+    if (p) host.rows(rowLines(p));
     renderMode(); renderStrip(o);
     if (panelOpen()) renderPanel(o); else if (workOpen()) renderWork(o); else { const pp = $('plan-panel'); pp.hidden = true; pp.classList.remove('work'); pp.replaceChildren(); }
     cover(workOpen());
