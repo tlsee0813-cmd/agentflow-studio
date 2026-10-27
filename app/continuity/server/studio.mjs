@@ -7,7 +7,9 @@ import { createLimiter } from '../../server/limiter.mjs';
 import { validateAsk, validateReply, ASK_BYTES } from '../dist/public/shared/studio.js';
 import { validatePlanAsk, validatePlanReply } from '../dist/public/shared/plan-api.js';
 import { validateScopeAsk, validateScopeReply } from '../dist/public/shared/scope-api.js';
+import { validateDigestAsk, validateDigestReply } from '../dist/public/shared/digest-api.js';
 import { PLAN_PROMPT, SCOPE_PROMPT } from './plan-prompt.mjs';
+import { DIGEST_PROMPT } from './digest-prompt.mjs';
 
 const ENDPOINT = 'https://api.deepseek.com/chat/completions';
 const REPLY_BYTES = 131072;
@@ -29,6 +31,14 @@ export const STUDIO_PROMPT = `너는 AgentFlow Studio의 정리 담당이다. �
 JSON 객체 하나만 반환한다. 키는 정확히 다음 6개다:
 {"headline":"한 줄 요약(80자 이내)","situation":["지금 상황, 각 한두 문장"],"changes":["최근 변화"],"next":["사용자가 다음에 판단할 것"],"answer":"질문에 대한 답 또는 null","refs":["R1"]}
 intent가 question이 아니면 answer는 null이어도 된다. 모든 문자열은 비어 있지 않아야 한다.`;
+
+let promptId = null;
+/** Short id of the digest prompt text (SHA-256, first 12 hex digits); Web Crypto, so it runs in Node and in a Worker. */
+export async function digestPromptId() {
+  promptId ??= crypto.subtle.digest('SHA-256', new TextEncoder().encode(DIGEST_PROMPT))
+    .then(b => `d1-${[...new Uint8Array(b)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`);
+  return promptId;
+}
 
 export function readStudioConfig(env = {}) {
   const int = (key, fallback, min, max) => {
@@ -73,18 +83,19 @@ async function readLimited(body, max, signal) {
 export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetch, signal } = {}) {
   const planning = ask.schemaVersion === 'studio.plan.1';
   const scope = ask.schemaVersion === 'studio.scope.1';
+  const digest = ask.schemaVersion === 'studio.digest.1';
   if (!config.apiKey) throw new ApiError('AI_NOT_CONFIGURED', 503);
   if (signal?.aborted) throw new ApiError('CANCELLED', 499);
   const controller = new AbortController(); let timedOut = false;
-  const timer = setTimeout(() => { timedOut = true; controller.abort(); }, planning ? (config.planTimeoutMs ?? config.timeoutMs) : config.timeoutMs);
+  const timer = setTimeout(() => { timedOut = true; controller.abort(); }, planning || digest ? (config.planTimeoutMs ?? config.timeoutMs) : config.timeoutMs);
   const abort = () => controller.abort(); signal?.addEventListener('abort', abort, { once: true });
   try {
     // Workers supports manual/follow, not redirect:error. Reject 3xx below without forwarding the key.
     const response = await fetchImpl(ENDPOINT, { method: 'POST', redirect: 'manual', signal: controller.signal,
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.apiKey}` },
-      body: JSON.stringify({ model: config.model, stream: false, thinking: { type: scope || planning ? 'enabled' : 'disabled' }, ...(scope || planning ? { reasoning_effort: 'low' } : {}), max_tokens: planning ? 8192 : scope ? 4096 : config.maxTokens,
+      body: JSON.stringify({ model: config.model, stream: false, thinking: { type: scope || planning || digest ? 'enabled' : 'disabled' }, ...(scope || planning || digest ? { reasoning_effort: 'low' } : {}), max_tokens: planning ? 8192 : scope || digest ? 4096 : config.maxTokens,
         response_format: { type: 'json_object' },
-        messages: [{ role: 'system', content: scope ? SCOPE_PROMPT : planning ? PLAN_PROMPT : STUDIO_PROMPT }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }] }) });
+        messages: [{ role: 'system', content: digest ? DIGEST_PROMPT : scope ? SCOPE_PROMPT : planning ? PLAN_PROMPT : STUDIO_PROMPT }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }] }) });
     if (!response.ok) {
       await response.body?.cancel().catch(() => {});
       if ([401, 403].includes(response.status)) throw new ApiError('AI_AUTH_FAILED', 502);
@@ -99,7 +110,7 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
       const choice = JSON.parse(raw ?? '')?.choices?.[0];
       if (choice?.finish_reason !== 'stop' || typeof choice?.message?.content !== 'string') throw new Error();
       if (choice.message.content.includes(config.apiKey)) throw new Error();
-      reply = scope ? validateScopeReply(JSON.parse(choice.message.content), ask) : planning ? validatePlanReply(JSON.parse(choice.message.content), ask) : validateReply(JSON.parse(choice.message.content), ask);
+      reply = digest ? validateDigestReply(JSON.parse(choice.message.content), ask) : scope ? validateScopeReply(JSON.parse(choice.message.content), ask) : planning ? validatePlanReply(JSON.parse(choice.message.content), ask) : validateReply(JSON.parse(choice.message.content), ask);
     } catch (e) { if (controller.signal.aborted) throw e; throw new ApiError('INVALID_RESPONSE', 502); }
     return reply;
   } catch (e) {
@@ -137,9 +148,11 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
           'Access-Control-Allow-Headers': 'Content-Type, X-AgentFlow-Request, X-Studio-Access', 'Access-Control-Max-Age': '600' } });
       }
       if (url.pathname === '/api/studio/status' && request.method === 'GET') {
-        return reply(200, { ai: config.apiKey ? 'deepseek' : 'off', model: config.apiKey ? config.model : null, access: config.accessCode ? 'code' : 'open' }, cors);
+        // digest: the model and prompt a reading would be made with, so a browser can tell its stored readings apart.
+        return reply(200, { ai: config.apiKey ? 'deepseek' : 'off', model: config.apiKey ? config.model : null, access: config.accessCode ? 'code' : 'open',
+          ...(config.apiKey ? { digest: { model: config.planModel ?? config.model, prompt: await digestPromptId() } } : {}) }, cors);
       }
-      if (!['/api/studio/ask', '/api/studio/plan', '/api/studio/scope'].includes(url.pathname)) throw new ApiError('NOT_FOUND', 404);
+      if (!['/api/studio/ask', '/api/studio/plan', '/api/studio/scope', '/api/studio/digest'].includes(url.pathname)) throw new ApiError('NOT_FOUND', 404);
       if (request.method !== 'POST') throw new ApiError('METHOD_NOT_ALLOWED', 405);
       if (request.headers.get('x-agentflow-request') !== '1') throw new ApiError('FORBIDDEN_ORIGIN', 403);
       if (request.headers.get('content-type')?.split(';')[0].trim() !== 'application/json') throw new ApiError('INVALID_CONTENT_TYPE', 415);
@@ -149,7 +162,7 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
       try {
         const raw = await readLimited(request.body, ASK_BYTES);
         if (raw === null) throw new ApiError('INPUT_TOO_LARGE', 413);
-        ask = (url.pathname === '/api/studio/scope' ? validateScopeAsk : url.pathname === '/api/studio/plan' ? validatePlanAsk : validateAsk)(JSON.parse(raw));
+        ask = (url.pathname === '/api/studio/digest' ? validateDigestAsk : url.pathname === '/api/studio/scope' ? validateScopeAsk : url.pathname === '/api/studio/plan' ? validatePlanAsk : validateAsk)(JSON.parse(raw));
       } catch (e) { throw e instanceof ApiError ? e : new ApiError(e?.message === 'INPUT_TOO_LARGE' ? 'INPUT_TOO_LARGE' : e?.message === 'UNSUPPORTED_VERSION' ? 'UNSUPPORTED_VERSION' : 'INVALID_INPUT', e?.message === 'INPUT_TOO_LARGE' ? 413 : 400); }
       if (!config.apiKey) throw new ApiError('AI_NOT_CONFIGURED', 503);
       const release = limiter.acquire(crypto.randomUUID());
