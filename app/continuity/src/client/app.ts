@@ -2,19 +2,20 @@
  * rewrites records; the only project write is the user's own part name/note through the domain's editArea. */
 import type { Project } from '../shared/types.js';
 import { FILE_LIMIT } from '../shared/types.js';
-import { WorkspaceStore, type EntryRef, storageErrorCode } from '../shared/storage.js';
-import { parseProject } from '../shared/validation.js';
+import { WorkspaceStore, type EntryRef, storageErrorCode, readViewState, writeViewState } from '../shared/storage.js';
+import { parseBackup } from '../shared/validation.js';
 import { editArea, addArea, addChildArea, createProject, rename } from '../shared/domain.js';
 import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
 import { layoutScope, edgePath, lead, mapLead, isListGroup, ROOT, HEAD, type Box, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
 import { aiStatus, askStudio, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
 import { runtimeStorage } from './runtime.js';
-import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth } from './plan-dom.js';
+import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
 import { createPlanView } from './plan-view.js';
 import { createReturnView } from './return-view.js';
 import { UI62_KEY, buildUi62Project, ui62Keys } from '../shared/return-material.js';
+import { REL_LABEL, relationGroups, dirMark, dirTitle, insideEnds } from '../shared/relation-groups.js';
 
 /* ---------- small DOM helpers (shared with the change-plan view) ---------- */
 const firstLine = (text: string, n = 90) => { const line = text.split('\n').find(l => l.trim())?.trim() ?? ''; return line.length > n ? `${line.slice(0, n)}…` : line; };
@@ -102,7 +103,7 @@ function setDraft(o: Opened, partId: string, value: string) {
 
 /* Map positions the person set by dragging: own key per project (saved projects only; examples stay in memory).
  * Kept apart from the stored layout.1 data, which the domain fills on every new area and so cannot tell a placed part
- * from an untouched one. Same browser only; a backup file does not carry them. */
+ * from an untouched one. A backup file carries them beside the project (serializeBackup); importing one keeps them. */
 const POSITIONS_KEY = 'agentflow.studio.positions.1';
 const memoryPositions = new Map<string, Positions>();
 function cleanPositions(v: unknown): Positions {
@@ -140,6 +141,29 @@ let lay: ScopeLayout = { boxes: new Map(), edges: [], heads: [], bounds: { x: 0,
 const cameras = new Map<string, { x: number; y: number; k: number }>();
 const expandState = new Map<string, boolean>();
 const camKey = (o: Opened, s: string | null) => `${o.project.id}|${s ?? ''}`;
+/* Folds and per-scope cameras outlive a reload: own key per project (an example by its address key and stable part keys, so a
+ * freshly built example reads the same), written shortly after a change and when the page goes away. Never the project data. */
+const viewKeyOf = (o: Opened) => (o.kind === 'example' ? o.key : o.project.id);
+const stableId = (o: Opened, id: string) => o.alias?.toKey.get(id) ?? id;
+const liveId = (o: Opened, key: string) => o.alias?.toId.get(key) ?? key;
+function loadView(o: Opened) {
+  const v = readViewState(kv, viewKeyOf(o));
+  for (const [k, open] of Object.entries(v.folds)) { const id = liveId(o, k); if (partOf(o, id)) expandState.set(`${o.project.id}|${id}`, open); }
+  for (const [k, c] of Object.entries(v.cameras)) {
+    const id = k ? liveId(o, k) : null; if (id && !partOf(o, id)?.childIds.length) continue;
+    if (!cameras.has(camKey(o, id))) cameras.set(camKey(o, id), { x: c.x, y: c.y, k: Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, c.scale)) });
+  }
+}
+let viewTimer = 0, viewFor: Opened | null = null;
+function saveViewSoon() { const o = opened; if (!o) return; if (viewFor && viewFor !== o) flushView(); viewFor = o; clearTimeout(viewTimer); viewTimer = window.setTimeout(flushView, 400); }
+function flushView() {
+  clearTimeout(viewTimer); const o = viewFor; viewFor = null; if (!o) return;
+  if (opened === o) cameras.set(camKey(o, scope), { ...camera });
+  const prefix = `${o.project.id}|`, folds: Record<string, boolean> = {}, cams: Record<string, { x: number; y: number; scale: number }> = {};
+  for (const [k, v] of expandState) if (k.startsWith(prefix)) folds[stableId(o, k.slice(prefix.length))] = v;
+  for (const [k, c] of cameras) if (k.startsWith(prefix)) { const sc = k.slice(prefix.length); cams[sc ? stableId(o, sc) : ''] = { x: c.x, y: c.y, scale: c.k }; }
+  writeViewState(kv, viewKeyOf(o), { folds, cameras: cams });
+}
 /** Direct children of the scope open as frames; deeper parts stay folded until opened. */
 /** Unfolded only for the part being looked at (not the person's own fold choice). */
 const tempExpand = new Set<string>();
@@ -282,7 +306,7 @@ let renderedHash = '';
 async function render() {
   renderedHash = location.hash;
   const r = route();
-  if (!r.key) { if (opened) cameras.set(camKey(opened, scope), { ...camera }); planView.close(false); if (toastKey) dropToast(); forgetVisits(); opened = null; selected = null; scope = null; renderHome(); return; }
+  if (!r.key) { if (opened) cameras.set(camKey(opened, scope), { ...camera }); flushView(); planView.close(false); if (toastKey) dropToast(); forgetVisits(); opened = null; selected = null; scope = null; renderHome(); return; }
   const next = projectFor(r.key);
   if (!next) { go(null); return; }
   const fresh = opened?.key !== next.key;
@@ -303,7 +327,7 @@ async function render() {
   const nextScope = routeScope && next.view.parts.some(p => p.id === routeScope && p.childIds.length) ? routeScope : null;
   if (fresh || nextScope !== scope) {
     if (opened) cameras.set(camKey(opened, scope), { ...camera });
-    if (fresh) scenes = [];
+    if (fresh) { flushView(); scenes = []; }
     else if (backing || (back && scenes.at(-1)?.scope === back.from.scope)) scenes.pop();
     else scenes.push({ scope, selected });
     backing = false;
@@ -311,7 +335,7 @@ async function render() {
     while (scenes.length && scenes.at(-1)!.scope === nextScope) scenes.pop();
     if (scenes.length > 12) scenes = scenes.slice(-12);
     opened = next; scope = nextScope; lastClick.id = '';
-    if (fresh) { planView.projectChanged(); returnView.projectChanged(); readMarks = []; readingCamera = null; }
+    if (fresh) { planView.projectChanged(); returnView.projectChanged(); readMarks = []; readingCamera = null; loadView(next); }
     // A new project starts with the map alone: the previous project's reading pane must not narrow its first view.
     if (fresh) { selected = null; ask = null; editing = false; partForm = null; composerOpen = false; sheetOpen = false; scopeReading = false; $('panel').hidden = true; $('panel').replaceChildren(); hideLens(); }
     tempExpand.clear();
@@ -454,13 +478,17 @@ function toParticle(name: string): string {
   if (/ng$/i.test(name.trim()) || /[mn]/i.test(c)) return '으로';
   return /[aeiouylrsxzfhvw]/i.test(c) ? '로' : '(으)로';
 }
-/** The way back inside the reading pane, above the part's composition path: the name of the part it was followed from. Only
- * within one scene; a visit that changed the scene goes back by the context row's existing back (one way back, never two). */
+/** The way back where the reader is looking: one line at the top of the reading pane, after any followed relation (in the
+ * same scope or across scopes): the part it was followed from (or the scope, when followed from the scope's own relations) and
+ * the scene it sits in. It returns exactly as the context row's back does (scope, selection, camera, surface, scroll); that
+ * header back stays for a scene change. */
 function visitEntry(o: Opened): HTMLElement | null {
-  const v = visits.at(-1); if (!v || v.to !== selected || v.from.key !== o.key || v.from.scope !== scope || !v.from.selected) return null;
-  const name = partOf(o, v.from.selected)?.name; if (!name) return null;
-  return h('button', { type: 'button', class: 'visit-back', 'aria-label': `${name}${toParticle(name)} 돌아가기`, title: `${name}${toParticle(name)} 돌아가기 · ${REL_WHY(v)}`, onclick: returnFromVisit },
-    h('span', { 'aria-hidden': 'true' }, '←'), h('strong', {}, name), h('span', {}, `${toParticle(name)} 돌아가기`));
+  const v = visits.at(-1); if (!v || v.to !== selected || v.from.key !== o.key) return null;
+  const sceneName = (s: string | null) => (s ? partOf(o, s)?.name ?? null : '전체 지도');
+  const name = v.from.selected ? partOf(o, v.from.selected)?.name : v.from.scope ? partOf(o, v.from.scope)?.name : o.project.name; if (!name) return null;
+  const where = v.from.selected ? sceneName(v.from.scope) : null;
+  return h('button', { type: 'button', class: 'visit-line', 'aria-label': `${name}${toParticle(name)} 돌아가기`, title: `${name}${toParticle(name)} 돌아가기 · ${REL_WHY(v)}`, onclick: returnFromVisit },
+    h('span', { class: 'vl-arrow', 'aria-hidden': 'true' }, '←'), h('strong', {}, name), h('span', { class: 'vl-came' }, '에서 따라옴'), where ? h('span', { class: 'vl-where' }, `· ${where}`) : null);
 }
 
 /** One context row: the composition path (where this view sits), the scope's way up, the way back to the previous scene, and
@@ -625,27 +653,6 @@ function aliasOf(v: StudioView, id: string): string | null {
   const mine = clause(p.note);
   return mine && !sibs.some(x => clause(v.parts.find(y => y.id === x)?.note ?? '') === mine) ? mine : null;
 }
-const REL_LABEL: Record<string, string> = { flow: '넘겨줌', needs: '필요로 함', shares: '함께 씀', related: '관련' };
-/** A relation read from one end: the verb with that end as its subject ("이 부분이 필요로 함") or its object ("이 부분을 필요로
- * 함"). The kinds and their directions are the project's own; nothing here makes a relation more or less certain. */
-function relLabel(kind: string, out: boolean, subject: '부분' | '범위' = '부분'): string {
-  const it = `이 ${subject}`, verb = REL_LABEL[kind] ?? kind;
-  if (kind === 'needs') return out ? `${it}${subject === '부분' ? '이' : '가'} 필요로 함` : `${it}${subject === '부분' ? '을' : '를'} 필요로 함`;
-  if (kind === 'flow') return out ? `${it}${subject === '부분' ? '이' : '가'} 넘겨줌` : `${it}에 넘겨줌`;
-  // A plain relation has no direction to read: one neutral verb, whichever end was recorded first.
-  if (kind === 'related') return verb;
-  return out ? `${verb} →` : `← ${verb}`;
-}
-/** Relations of one part (or one scope), grouped by verb and direction: what it uses before what uses it. */
-function relationGroups<T extends { r: { kind: string }; out: boolean }>(ends: T[], subject: '부분' | '범위' = '부분'): { label: string; list: T[] }[] {
-  const order = ['flow', 'needs', 'shares', 'related'], groups = new Map<string, { label: string; list: T[] }>();
-  const sorted = [...ends].sort((a, b) => Number(b.out) - Number(a.out) || order.indexOf(a.r.kind) - order.indexOf(b.r.kind));
-  for (const x of sorted) { const k = `${x.r.kind === 'related' ? '' : x.out}|${x.r.kind}`; const g = groups.get(k) ?? { label: relLabel(x.r.kind, x.out, subject), list: [] }; g.list.push(x); groups.set(k, g); }
-  return [...groups.values()];
-}
-/** The direction mark of a relation row: from or to this end; none for a plain relation, which only says the two are related. */
-const dirMark = (kind: string, out: boolean) => (kind === 'related' ? '–' : out ? '→' : '←');
-const dirTitle = (kind: string, out: boolean) => (kind === 'related' ? '방향 없는 관련' : out ? '이 부분에서 나감' : '이 부분으로 들어옴');
 /** A part's line on the map: the state only when it says something. 'plan' (no request yet) stays quiet here; the inspector
  * still tells "no records" apart from "a planned note only". */
 function metaLine(p: PartView, last: string | null): string | null {
@@ -733,7 +740,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   const sp = partOf(o, scope), purpose = (sp ? sp.note : o.project.space.brief?.text ?? '').trim(), first = lead(purpose);
   const outside = scopeEnds(o), more = purpose.replace(/\s+/g, ' ').length > first.length + 1;
   const title = h('header', { class: 'map-title' }, h('h1', { class: 'map-name' }, sp ? sp.name : o.project.name),
-    first ? h('p', { class: 'map-purpose' }, h('span', {}, first), more ? h('button', { type: 'button', class: 'map-more', title: '설명 전체와 출처', onclick: () => openScopeReading() }, '자세히') : null) : null,
+    first ? h('p', { class: 'map-purpose' }, h('span', {}, first), more ? h('button', { type: 'button', class: 'map-more', title: '설명 전체와 출처', onclick: () => openScopeReading() }, '범위 설명') : null) : null,
     outside.length ? h('div', { class: 'scope-rels', role: 'list', 'aria-label': '이 범위의 바깥 관계' }, ...relationGroups(outside, '범위').map(g => h('p', { class: 'scope-rel', role: 'listitem' },
       h('span', { class: 'sr-verb' }, g.label), ...g.list.map(x => h('button', { type: 'button', class: 'sr-part', title: `${partPath(o.view, x.far).map(q => q.name).join(' › ')}${x.r.note ? `\n${x.r.note}` : ''}`, 'data-far': x.far, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far, null); } }, partOf(o, x.far)?.name ?? '부분'))))) : null);
   world.append(title);
@@ -867,7 +874,7 @@ const ZOOM_MIN = 0.4, ZOOM_MAX = 1.6;
  * the person reads is ever drawn under it and the geometry below needs no inset for it.
  * Width of the reading pane while anything reads there (a part, its sheet, a comparison or the whole plan); 0 otherwise. */
 // The change plan's wide workspace covers the map without taking width from it: the map under it keeps its area and camera.
-const paneWidth = () => (['lens', 'panel'].some(id => !$(id).hidden) || (!$('plan-panel').hidden && !$('plan-panel').classList.contains('work')) ? inspW() : 0);
+const paneWidth = () => (!$('lens').hidden && $('panel').hidden && $('lens').classList.contains('railed') ? RAIL_W : ['lens', 'panel'].some(id => !$(id).hidden) || (!$('plan-panel').hidden && !$('plan-panel').classList.contains('work')) ? inspW() : 0);
 const leftInset = () => 16;
 /** Map tools sit at the bottom left; the map keeps clear of them only below this line. */
 const BOTTOM = 64;
@@ -884,6 +891,7 @@ function applyCamera(animate = false) {
   sp.classList.toggle('z-mid', camera.k < 0.8); sp.classList.toggle('z-low', camera.k < 0.6);
   sp.style.setProperty('--grow', String(Math.min(1.6, Math.max(1, 0.85 / camera.k))));
   updateSticky();
+  saveViewSoon();
 }
 /** Whole view in the free area. Opening never shrinks below 85%; only the explicit 전체 보기 button may go further. A map smaller
  * than the window sits near the top (a page is read from its top) and, while the pane is closed, leaves the pane's room free on
@@ -998,7 +1006,7 @@ const union = <T extends Rect>(rs: T[]): Rect => { const x = Math.min(...rs.map(
 const stripInset = () => { const strip = $('plan-strip'); return strip.hidden ? 16 : strip.offsetTop + strip.offsetHeight + 10; };
 const topInset = () => stripInset() + (!$('plan-strip').hidden && !$('scope-sticky').hidden ? $('scope-sticky').offsetHeight + 8 : 0);
 function mapArea(): Rect { const vp = $('viewport').getBoundingClientRect(), top = topInset(); return { x: 16, y: top, w: vp.width - 32, h: mapBottom() - top - mapBottomInset() }; }
-function hideLens() { const l = $('lens'); l.hidden = true; l.replaceChildren(); l.classList.remove('compare', 'scope-read'); readingFor = []; syncMapArea(); }
+function hideLens() { const l = $('lens'); l.hidden = true; l.replaceChildren(); l.classList.remove('compare', 'scope-read', 'railed'); readingFor = []; syncMapArea(); }
 const mapBottomInset = () => BOTTOM;
 const mapBottom = () => $('viewport').offsetTop + $('viewport').clientHeight;
 /** The map's viewport: below the plan's strip when it is open, left of the pane when it is open. Camera coordinates stay
@@ -1059,7 +1067,7 @@ function scopeEnds(o: Opened): End[] {
   const inside = (id: string) => { for (let p = partOf(o, id), g = 0; p && g < 64; p = partOf(o, p.parentId), g++) if (p.id === scope) return true; return false; };
   return o.view.relations.flatMap((r): End[] => r.from === scope && !inside(r.to) ? [{ r, near: r.from, far: r.to, out: true }] : r.to === scope && !inside(r.from) ? [{ r, near: r.to, far: r.from, out: false }] : []);
 }
-/** Reading the scope itself in the pane (the map's 자세히): its whole description as written, where it sits, its relations
+/** Reading the scope itself in the pane (the map title's 범위 설명): its whole description as written, where it sits, its relations
  * to the outside and its parts with their sizes. Selecting a part replaces it. */
 let scopeReading = false;
 function openScopeReading() { const o = opened; if (!o) return; if (selected) { scopeReading = true; go(o.key); return; } scopeReading = true; renderScopeLens(); }
@@ -1069,7 +1077,7 @@ function renderScopeLens() {
   const kids = (sp ? sp.childIds : o.view.roots).map(id => partOf(o, id)!).filter(Boolean);
   const outside = relationGroups(scopeEnds(o), '범위');
   const path = sp ? partPath(o.view, sp.id).slice(0, -1) : [];
-  l.classList.remove('compare'); l.classList.add('scope-read'); readingFor = [];
+  l.classList.remove('compare', 'railed'); l.classList.add('scope-read'); readingFor = [];
   l.replaceChildren(
     h('header', { class: 'lens-head' },
       h('div', { class: 'lens-path' }, h('span', {}, sp ? '이 범위' : '프로젝트'), ...path.flatMap(x => [h('span', { 'aria-hidden': 'true' }, '›'), h('a', { href: hashFor(o.key, null, x.id) }, x.name)])),
@@ -1089,11 +1097,30 @@ function renderScopeLens() {
 }
 function closeScopeReading() { scopeReading = false; if ($('lens').classList.contains('scope-read')) hideLens(); }
 
+/* The lens folds to a narrow rail on request, for this tab (memory only): the map's area takes the window back (paneWidth), the
+ * rail keeps the selection's name and the way to open the reading again. Selection, Esc and the sheet work as before. */
+let lensRail = false;
+const RAIL_W = 44;
+const railIcon = (open: boolean) => { const el = svg('svg', { viewBox: '0 0 16 16', 'aria-hidden': 'true' }); el.append(svg('path', { d: open ? 'M3.5 4l4 4-4 4M8.5 4l4 4-4 4' : 'M12.5 4l-4 4 4 4M7.5 4l-4 4 4 4' })); return el; };
+function setRail(on: boolean) {
+  lensRail = on; if (!opened || !selected || sheetOpen || planView.isOpen()) return;
+  renderLens(); syncMapArea();
+  if (!on) reveal(selected);
+  $('lens').querySelector<HTMLElement>('.rail-toggle')?.focus();
+}
 /** The lens: what the selection is (its whole description as written, with where that description comes from; the map shows
  * only its first sentence), what it is linked to, by verb (each line's real ends), its inside, and the way to sources and
  * edits. */
 function renderLens() {
   const o = opened!, part = partOf(o, selected)!, l = $('lens'), b = lay.boxes.get(part.id);
+  if (lensRail) {
+    // Folded to a rail: the selection's name, read top to bottom, and the way to open the reading again.
+    l.classList.remove('compare', 'scope-read', 'return-read'); l.classList.add('railed'); readingFor = [];
+    l.replaceChildren(h('button', { type: 'button', class: 'rail-toggle', 'aria-label': '읽기면 펼치기', 'aria-expanded': 'false', title: `읽기면 펼치기 · ${part.name}`, onclick: () => setRail(false) }, railIcon(false)),
+      h('span', { class: 'rail-name', id: 'lens-title', title: part.name, onclick: () => setRail(false) }, part.name));
+    l.hidden = false; return;
+  }
+  l.classList.remove('railed');
   const records = subtreeRecords(o.view, part.id), path = partPath(o.view, part.id).slice(0, -1);
   const rest = part.note.replace(/\s+/g, ' ').trim();
   const dot = h('i', { class: `dot s-${part.status}`, 'aria-hidden': 'true' });
@@ -1107,7 +1134,7 @@ function renderLens() {
       rest ? h('p', { class: 'lens-plan' }, h('span', {}, '계획'), rest) : null);
   } else if (rest) {
     // The description is the person's written plan, not a received summary. A state line only when there is something to say
-    // (records, a reported state); "no records yet" and where the text comes from read in the sheet (자세히).
+    // (records, a reported state); "no records yet" and where the text comes from read in the sheet (전체 읽기).
     const state = part.status === 'plan' ? (records.length ? `받은 정리 없음 · 요청 기록 없음 · ${recs}` : '') : `${STATUS_LABEL[part.status]} · ${recs}`;
     put(desc, rest ? h('p', { class: 'lens-text' }, rest) : null, state ? src(`적어 둔 계획 설명 · ${state}`) : null);
   } else put(desc, src(part.status === 'plan' ? (records.length ? `설명 없음 · 요청 기록 없음 · ${recs}` : '아직 설명도 기록도 없어요') : `${STATUS_LABEL[part.status]} · ${recs} · 받은 정리 없음`));
@@ -1125,7 +1152,27 @@ function renderLens() {
       x.r.note ? h('span', { class: 'port-note' }, x.r.note) : null));
   };
   const ports = relationGroups(ends).map(g => h('section', { class: 'lens-ports' }, h('h3', {}, g.label, h('small', {}, String(g.list.length))),
-    h('ul', {}, ...g.list.slice(0, 8).map(port)), g.list.length > 8 ? h('button', { type: 'button', class: 'link-button', onclick: () => openSheet() }, `${g.list.length - 8}개 더 · 자세히`) : null));
+    h('ul', {}, ...g.list.slice(0, 8).map(port)), g.list.length > 8 ? h('button', { type: 'button', class: 'link-button', onclick: () => openSheet() }, `${g.list.length - 8}개 더 · 전체 읽기`) : null));
+  // A group drawn open: the lines that touch its frame belong to its inner parts. They read here from those parts, by verb and
+  // direction, each row naming the inner part, the outside part and where that one belongs; following one records a visit.
+  // Relations between two of its inner parts are drawn inside it and only counted.
+  const inner = b?.kind === 'frame' ? insideEnds(o.view, part.id) : null;
+  const innerRow = (x: End) => {
+    const near = partOf(o, x.near), far = partOf(o, x.far); if (!near || !far) return null;
+    const where = partPath(o.view, x.far).slice(0, -1).map(q => q.name).join(' › ') || o.project.name, came = x.far === cameFrom;
+    return h('li', {}, h('button', { type: 'button', class: `port fr-port${came ? ' came' : ''}`, 'data-far': x.far, title: `${far.name}${toParticle(far.name)} 가기 · ${REL_LABEL[x.r.kind] ?? x.r.kind}${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far); } },
+      h('span', { class: 'port-top' }, h('span', { class: 'fr-near' }, near.name), h('span', { class: 'port-dir', 'aria-hidden': 'true' }, dirMark(x.r.kind, x.out)), h('strong', {}, far.name), came ? h('span', { class: 'port-came' }, '출발') : null),
+      h('span', { class: 'port-where' }, `${where} 안`),
+      x.r.note ? h('span', { class: 'port-note' }, x.r.note) : null));
+  };
+  const innerSection = inner && (inner.outside.length || inner.within) ? h('section', { class: 'lens-ports frame-rels', 'aria-label': '안쪽 부분의 바깥 연결' },
+    inner.outside.length ? h('h3', {}, '안쪽 부분의 바깥 연결', h('small', {}, String(inner.outside.length))) : null,
+    ...relationGroups(inner.outside, '안쪽').flatMap(g => {
+      const list = h('ul', {}, ...g.list.slice(0, 8).map(innerRow));
+      return [h('h4', { class: 'fr-verb' }, g.label, h('small', {}, String(g.list.length))), list,
+        g.list.length > 8 ? h('button', { type: 'button', class: 'link-button', onclick: (e: Event) => { list.replaceChildren(...g.list.map(innerRow).filter((x): x is HTMLLIElement => !!x)); (e.currentTarget as HTMLElement).remove(); } }, `${g.list.length - 8}개 더 보기`) : null];
+    }),
+    inner.within ? h('p', { class: 'fr-within' }, `안에서 서로 ${inner.within}`) : null) : null;
   // Inside: on the map already when the part is an open frame; else its names, and the explicit way in.
   const kids = part.childIds.map(id => partOf(o, id)!.name);
   const inside = kids.length && part.id !== scope ? h('div', { class: 'lens-inside' },
@@ -1137,17 +1184,18 @@ function renderLens() {
     o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null
   ].filter((x): x is HTMLButtonElement => !!x);
   l.classList.remove('compare', 'scope-read'); readingFor = [];
-  l.replaceChildren(); put(l,
-    h('header', { class: 'lens-head' }, entry,
+  l.replaceChildren(); put(l, entry,
+    h('header', { class: 'lens-head' },
       path.length ? h('div', { class: 'lens-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope) }, x.name)])) : null,
       h('h2', { id: 'lens-title' }, part.name),
       aliasOf(o.view, part.id) ? h('p', { class: 'lens-alias' }, aliasOf(o.view, part.id)) : null,
       h('div', { class: 'head-tools' },
         menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e: Event) => { ((e.currentTarget as HTMLElement).parentElement as HTMLDetailsElement).open = false; } }, ...menuItems)) : null,
+        h('button', { type: 'button', class: 'rail-toggle', 'aria-label': '읽기면 접기', 'aria-expanded': 'true', title: '읽기면 접기 · 지도를 넓게 봐요', onclick: () => setRail(true) }, railIcon(true)),
         h('button', { type: 'button', class: 'close', 'aria-label': '선택 해제', title: '닫기 (Esc)', onclick: () => go(o.key) }, '×'))),
-    h('div', { class: 'lens-body' }, desc, ...ports, inside),
+    h('div', { class: 'lens-body' }, desc, ...ports, innerSection, inside),
     h('footer', { class: 'lens-foot' },
-      h('button', { type: 'button', class: 'lens-more', onclick: () => openSheet() }, records.length ? `근거·기록 ${records.length}` : '자세히', thread ? ` · 정리 ${thread}` : '', h('span', { 'aria-hidden': 'true' }, ' ›')),
+      h('button', { type: 'button', class: 'lens-more', onclick: () => openSheet() }, records.length ? `근거·기록 ${records.length}` : '전체 읽기', thread ? ` · 정리 ${thread}` : '', h('span', { 'aria-hidden': 'true' }, ' ›')),
       status.ai === 'deepseek' ? h('button', { type: 'button', class: 'link-button', onclick: () => { composerOpen = true; openSheet(() => document.getElementById(status.access === 'code' && !sessionCode() ? 'access-code' : 'ask-input')?.focus()); } }, '질문하기') : null));
   l.hidden = false;
 }
@@ -1203,7 +1251,7 @@ function renderPanel(scrollTop: boolean) {
     o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', onclick: () => { editing = !editing; renderPanel(false); } }, editing ? '고치기 닫기' : '이름·설명 고치기') : null,
     o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null
   ].filter((x): x is HTMLButtonElement => !!x);
-  const head = h('header', { class: 'panel-head' }, visitEntry(o),
+  const head = h('header', { class: 'panel-head' },
     h('div', { class: 'panel-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope) }, x.name)]), path.length ? null : h('span', {}, o.project.name)),
     h('h2', { id: 'panel-title', tabindex: '-1' }, part.name),
     h('div', { class: 'panel-chips' }, h('span', { class: `state s-${part.status}` }, h('i', { class: 'dot', 'aria-hidden': 'true' }), state),
@@ -1265,7 +1313,7 @@ function renderPanel(scrollTop: boolean) {
       : h('div', { class: 'failed', role: 'alert' }, h('span', {}, ask.error ?? '응답을 받지 못했어요.'), h('button', { type: 'button', class: 'secondary small', onclick: () => send(ask!.intent, ask!.question) }, '다시 시도'), h('button', { type: 'button', class: 'link-button', onclick: () => { ask = null; renderPanel(false); } }, '닫기')));
     body.append(sec);
   }
-  panel.replaceChildren(head, body, composer(o, part));
+  panel.replaceChildren(...[visitEntry(o), head, body, composer(o, part)].filter((x): x is HTMLElement => !!x));
   if (scrollTop) body.scrollTop = 0; else body.scrollTop = keep;
 }
 
@@ -1375,7 +1423,7 @@ function composer(o: Opened, part: PartView): HTMLElement {
   input.value = draft;
   input.addEventListener('input', () => setDraft(o, part.id, input.value));
   input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); submitQuestion(); } });
-  const submitQuestion = () => { const q = input.value.trim(); if (q) { send('question', q); } };
+  const submitQuestion = () => { if (needsCode()) { document.getElementById('access-code')?.focus(); return; } const q = input.value.trim(); if (q) { send('question', q); } };
   if (status.access === 'code') {
     const code = h('input', { id: 'access-code', type: 'password', placeholder: '접속 코드', autocomplete: 'off', value: sessionCode() }) as HTMLInputElement;
     // input (not only change): typing, paste and autofill are all kept.
@@ -1384,13 +1432,17 @@ function composer(o: Opened, part: PartView): HTMLElement {
     box.append(h('div', { class: 'access' }, h('label', { for: 'access-code' }, '접속 코드'), code));
   }
   if (!busy && !failed) quickButtons.append(h('button', { type: 'button', class: 'link-button fold', onclick: () => { composerOpen = false; if (!input.value.trim()) setDraft(o, part.id, ''); renderPanel(false); } }, '접기'));
-  box.append(quickButtons,
-    h('div', { class: 'ask-row' }, input, h('button', { type: 'button', class: 'primary send', disabled: busy, 'aria-label': '보내기', onclick: submitQuestion }, '보내기')),
+  // With the code field in view, every way to send waits for a code (and says so beside the send button).
+  const gated = status.access === 'code', hasCode = !!sessionCode();
+  quickButtons.querySelectorAll<HTMLButtonElement>('button.secondary').forEach(b => codeGate(b, gated, hasCode, busy));
+  put(box, quickButtons,
+    h('div', { class: 'ask-row' }, input, codeGate(h('button', { type: 'button', class: 'primary send', 'aria-label': '보내기', onclick: submitQuestion }, '보내기'), gated, hasCode, busy)),
+    codeNote(gated, hasCode),
     h('p', { class: 'fine' }, `${status.model ?? 'DeepSeek'}가 이 부분과 안의 부분 기록만 읽고 정리해요 · 개발을 실행하지 않아요`));
   return box;
 }
 let accessCodeMemory = '';
-function keepAccessCode(value: string) { try { sessionStorage.setItem('agentflow.studio.access', value); } catch { /* memory only */ } accessCodeMemory = value; renderStatus(); }
+function keepAccessCode(value: string) { try { sessionStorage.setItem('agentflow.studio.access', value); } catch { /* memory only */ } accessCodeMemory = value; renderStatus(); syncCodeGates(!!value); }
 
 /* ---------- change plan (plan-view.ts) on this map ---------- */
 const planView = createPlanView({
@@ -1418,7 +1470,7 @@ const planView = createPlanView({
     if (!content) { if (l.classList.contains('compare')) hideLens(); return; }
     // The same reading keeps where the person was in it (a re-render of the same change); a new reading starts at its top.
     const keep = place === false ? l.querySelector('.lens-body')?.scrollTop ?? 0 : 0;
-    l.replaceChildren(...content); l.hidden = false; l.classList.remove('scope-read'); l.classList.add('compare'); readingFor = parts;
+    l.replaceChildren(...content); l.hidden = false; l.classList.remove('scope-read', 'railed'); l.classList.add('compare'); readingFor = parts;
     syncMapArea();
     const body = l.querySelector('.lens-body'); if (body) body.scrollTop = keep;
     // Only an explicit new target moves the map (the smallest pan beside the pane); sources, the long reading and a mode
@@ -1471,7 +1523,7 @@ const returnView = createReturnView({
     if (!content) { if (l.classList.contains('return-read')) hideLens(); return; }
     if (selected || planView.isOpen()) return;
     const same = l.classList.contains('return-read') && !l.hidden, keep = same ? l.querySelector('.lens-body')?.scrollTop ?? 0 : 0;
-    l.replaceChildren(...content); l.classList.remove('compare', 'scope-read'); l.classList.add('return-read'); l.hidden = false; readingFor = [];
+    l.replaceChildren(...content); l.classList.remove('compare', 'scope-read', 'railed'); l.classList.add('return-read'); l.hidden = false; readingFor = [];
     syncMapArea();
     const body = l.querySelector('.lens-body'); if (body && same) body.scrollTop = keep;
   },
@@ -1729,10 +1781,15 @@ function bindImport() {
   file.addEventListener('change', async () => {
     const f = file.files?.[0]; file.value = ''; if (!f) return;
     if (f.size > FILE_LIMIT) { say('파일이 너무 커요.'); return; }
-    let project: Project;
-    try { project = parseProject(await f.text()); } catch { say('AgentFlow 프로젝트 백업 파일이 아니거나 읽을 수 없어요. 아무것도 바꾸지 않았어요.'); return; }
+    let project: Project, places: Positions | null;
+    try { ({ project, positions: places } = parseBackup(await f.text())); } catch { say('AgentFlow 프로젝트 백업 파일이 아니거나 읽을 수 없어요. 아무것도 바꾸지 않았어요.'); return; }
     if (!store.writable) { say('이 브라우저에서는 저장할 수 없어 가져오지 못했어요.'); return; }
-    try { const ref = await store.create(project, 'import'); say(`새 사본으로 가져왔어요 · ${project.name}`); go(ref.entryId); }
+    try {
+      const ref = await store.create(project, 'import');
+      // The places the backup carries come back with it (a file without them keeps whatever this browser had).
+      if (places) { memoryPositions.set(project.id, cleanPositions(places)); savePositions({ key: ref.entryId, kind: 'saved', project, ref, view: studioView(project), alias: null }); }
+      say(`새 사본으로 가져왔어요 · ${project.name}`); go(ref.entryId);
+    }
     catch { say('가져오지 못했어요. 저장된 프로젝트는 그대로예요.'); }
   });
 }
@@ -1746,6 +1803,8 @@ async function main() {
   $('return-entry').addEventListener('click', () => { if (returnView.isOpen() && !planView.isOpen()) returnView.close(); else openReturn(); });
   statusReady = aiStatus().then(s => { status = s; renderStatus(); planView.statusChanged(); refreshReading(); if (!selected && !planView.isOpen()) returnView.render(); });
   window.addEventListener('hashchange', () => void render());
+  window.addEventListener('pagehide', flushView);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) flushView(); });
   window.addEventListener('popstate', () => { if (location.hash === renderedHash) void render(); });
   await render();
   await statusReady;
