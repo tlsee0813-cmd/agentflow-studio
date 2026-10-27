@@ -715,6 +715,10 @@ def overview_flow(browser, base, cases):
     expect(page.locator("#lens-title")).to_have_text("Telemetry")
     in_scope(page, "공통과 기타")
     expect(page.locator("#world .node.item")).to_have_count(43)  # the whole list at full size, all of it reachable
+    # A one-word name that fits takes one line: the list's rows share one height (only an ambiguous name adds its own line).
+    heights = page.evaluate("[...new Set([...document.querySelectorAll('#world .node.item:not(:has(.alias))')].map(e => e.offsetHeight))]")
+    assert len(heights) == 1, heights
+    assert not page.evaluate("[...document.querySelectorAll('#world .node .node-name')].some(n => n.scrollHeight > n.clientHeight + 1)")
     expect(page.locator("#world .node.selected")).to_have_text(re.compile("Telemetry"))
     page.locator("#scope-bar .scope-up").click()  # the overview came before it: up is the way back, to the same view
     expect(page.locator("#scope-bar")).to_be_hidden()
@@ -730,6 +734,12 @@ def overview_flow(browser, base, cases):
     # A plan with no analysis yet, opened the first time: the panel takes its column at once and the map ends where it begins.
     page.goto(base + "/")
     page.locator("#import-file").set_input_files(str(cases / "oss-micro-javascript.json"))
+    # The pane has the room: a relation's recorded note reads whole there (the map's cards stay short).
+    page.locator("#world .node", has_text="설치 패키지").click()
+    notes = page.locator("#lens .port-note")
+    expect(notes).not_to_have_count(0)
+    assert notes.evaluate_all("ns => ns.every(n => n.scrollHeight <= n.clientHeight + 1)")
+    page.keyboard.press("Escape")
     page.locator("#plan-entry").click()
     expect(page.locator("#plan-panel")).to_be_visible()
     page.wait_for_timeout(250)
@@ -744,6 +754,17 @@ def overview_flow(browser, base, cases):
     page.wait_for_timeout(250)
     assert abs(page.locator("#viewport").bounding_box()["width"] - page.locator("#plan-panel").bounding_box()["x"]) <= 1
     page.locator("#plan-entry").click()
+    # A toast belongs to its project: leaving it takes the toast and its action away, and a new project's first view is the
+    # map alone (no reading pane left from the project before).
+    page.goto(base + "/#/p/ex-converter")
+    page.locator("#world .node", has_text="문서 읽기").click()
+    page.locator("#plan-entry").click()
+    page.locator(".ps-close").click()
+    expect(page.locator("#toast")).to_be_visible()
+    page.goto(base + "/#/p/ex-salon")
+    expect(page.locator("#toast")).to_be_hidden()
+    expect(page.locator("#lens")).to_be_hidden()
+    assert abs(page.locator("#viewport").bounding_box()["width"] - 1280) <= 1
     # Joplin: the desktop app's own relations read under its title inside it (no line drawn from one of its children).
     page.goto(base + "/")
     page.locator("#import-file").set_input_files(str(cases / "oss-joplin.json"))

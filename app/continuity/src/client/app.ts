@@ -171,10 +171,11 @@ function defaultOpen(o: Opened, id: string, depth: number, isOpen: (id: string, 
  * outside lines, and each opens at full size inside or in place. Decided once per scope, for its first view: the person's own
  * folds and places always win (expandState, positions), and a visited view keeps its camera. */
 const SHOW_BUDGET = 28;
-const foldMemo = new WeakMap<StudioView, Map<string, Set<string>>>();
+/** Per project and scope, for the life of the tab: an edit (a new view of the same project) or a later window size does not
+ * decide the first view again. */
+const foldMemo = new Map<string, Set<string>>();
 function budgetFolded(o: Opened): Set<string> {
-  let per = foldMemo.get(o.view); if (!per) foldMemo.set(o.view, per = new Map());
-  const k = scope ?? '', hit = per.get(k); if (hit) return hit;
+  const k = `${o.project.id}|${scope ?? ''}`, hit = foldMemo.get(k); if (hit) return hit;
   const ids = scope ? partOf(o, scope)?.childIds ?? [] : o.view.roots, out = new Set<string>(), size = (id: string) => partOf(o, id)?.childIds.length ?? 0;
   let shown = ids.reduce((n, id) => n + 1 + size(id), 0);
   const bySize = (list: string[]) => list.filter(id => size(id) > 0).sort((a, b) => size(b) - size(a));
@@ -204,7 +205,7 @@ function budgetFolded(o: Opened): Set<string> {
     if (!next) break;
     out.add(next);
   }
-  per.set(k, out); return out;
+  foldMemo.set(k, out); return out;
 }
 /** Marks every part between the scope and this part (exclusive) as unfolded in the given set or map. */
 function expandPath(o: Opened, id: string, into: Set<string> | Map<string, boolean>) {
@@ -272,10 +273,11 @@ function projectFor(key: string): Opened | null {
 /* ---------- rendering ---------- */
 async function render() {
   const r = route();
-  if (!r.key) { if (opened) cameras.set(camKey(opened, scope), { ...camera }); planView.close(false); opened = null; selected = null; scope = null; renderHome(); return; }
+  if (!r.key) { if (opened) cameras.set(camKey(opened, scope), { ...camera }); planView.close(false); if (toastKey) dropToast(); opened = null; selected = null; scope = null; renderHome(); return; }
   const next = projectFor(r.key);
   if (!next) { go(null); return; }
   const fresh = opened?.key !== next.key;
+  if (fresh && toastKey && toastKey !== next.key) dropToast();
   const travel = !fresh && opened ? travelFrom(next) : null;
   const idOf = (x: string | null) => (x ? next.alias?.toId.get(x) ?? x : null), routeScope = idOf(r.scope), routePart = idOf(r.part);
   const nextScope = routeScope && next.view.parts.some(p => p.id === routeScope && p.childIds.length) ? routeScope : null;
@@ -290,7 +292,8 @@ async function render() {
     if (scenes.length > 12) scenes = scenes.slice(-12);
     opened = next; scope = nextScope; lastClick.id = '';
     if (fresh) planView.projectChanged();
-    if (fresh) { selected = null; ask = null; editing = false; partForm = null; composerOpen = false; }
+    // A new project starts with the map alone: the previous project's reading pane must not narrow its first view.
+    if (fresh) { selected = null; ask = null; editing = false; partForm = null; composerOpen = false; sheetOpen = false; scopeReading = false; $('panel').hidden = true; $('panel').replaceChildren(); hideLens(); }
     tempExpand.clear();
     previewExpand.clear(); previewTarget = null; previewScope = '';
     if (scopeReading) { scopeReading = false; if ($('lens').classList.contains('scope-read')) hideLens(); }
@@ -473,7 +476,7 @@ const measureName: TextMeasure = (() => {
     const key = `${kind}|${text}`, hit = cache.get(key); if (hit !== undefined) return hit;
     if (!ctx) { ctx = document.createElement('canvas').getContext('2d'); family = getComputedStyle(document.body).fontFamily; }
     if (!ctx) return text.length * 9;
-    ctx.font = kind === 'node' ? `600 13.5px ${family}` : kind === 'head' ? `650 15px ${family}` : kind === 'sub' ? `650 13px ${family}` : kind === 'plan' ? `600 12px ${family}` : `400 12.5px ${family}`;
+    ctx.font = kind === 'node' ? `600 13.5px ${family}` : kind === 'item' ? `550 13px ${family}` : kind === 'head' ? `650 15px ${family}` : kind === 'sub' ? `650 13px ${family}` : kind === 'plan' ? `600 12px ${family}` : `400 12.5px ${family}`;
     const w = ctx.measureText(text).width; cache.set(key, w); return w;
   };
 })();
@@ -1308,11 +1311,14 @@ function renderStatus() {
 let toastTimer = 0;
 /** Double-click = two clicks on the same part, same view, same spot. */
 let lastClick = { id: '', at: 0, x: 0, y: 0, scope: null as string | null };
+/** A toast speaks for the project it was made in: its action runs only there, and leaving that project takes it away. */
+let toastKey: string | null = null;
 function toast(text: string, action?: { label: string; run: () => void }) {
-  const t = $('toast'); clearTimeout(toastTimer); t.replaceChildren();
-  put(t, h('span', {}, text), action ? h('button', { type: 'button', class: 'link-button', onclick: () => { action.run(); t.hidden = true; } }, action.label) : null);
+  const t = $('toast'), key = opened?.key ?? null; clearTimeout(toastTimer); t.replaceChildren(); toastKey = key;
+  put(t, h('span', {}, text), action ? h('button', { type: 'button', class: 'link-button', onclick: () => { t.hidden = true; if (opened?.key === key) action.run(); } }, action.label) : null);
   t.hidden = false; toastTimer = window.setTimeout(() => { t.hidden = true; }, 8000);
 }
+function dropToast() { clearTimeout(toastTimer); $('toast').hidden = true; toastKey = null; }
 /** Explicit only: resets the places in this view (the scope and its open frames); one undo. */
 function arrange() {
   const o = opened; if (!o) return;
@@ -1510,7 +1516,7 @@ function bindImport() {
     let project: Project;
     try { project = parseProject(await f.text()); } catch { say('AgentFlow 프로젝트 백업 파일이 아니거나 읽을 수 없어요. 아무것도 바꾸지 않았어요.'); return; }
     if (!store.writable) { say('이 브라우저에서는 저장할 수 없어 가져오지 못했어요.'); return; }
-    try { const ref = await store.create(project, 'import'); say(`‘${project.name}’을 새 사본으로 가져왔어요.`); go(ref.entryId); }
+    try { const ref = await store.create(project, 'import'); say(`새 사본으로 가져왔어요 · ${project.name}`); go(ref.entryId); }
     catch { say('가져오지 못했어요. 저장된 프로젝트는 그대로예요.'); }
   });
 }

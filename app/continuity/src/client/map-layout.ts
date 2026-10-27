@@ -50,8 +50,8 @@ export function textWidth(text: string): number {
 
 /** Rendered width of text: 'node' (13.5px semibold row name), 'head' (15px region or unit name), 'sub' (13px group name) or
  * 'note' (12.5px description). The browser passes a canvas measurement in the page's own font; without one, the estimate. */
-export type TextMeasure = (text: string, kind: 'node' | 'head' | 'sub' | 'note' | 'plan') => number;
-const SCALE = { node: 13.5 / 13, head: 15 / 13, sub: 1, note: 12.5 / 13 * 0.92, plan: 12 / 13 * 0.95 } as const;
+export type TextMeasure = (text: string, kind: 'node' | 'item' | 'head' | 'sub' | 'note' | 'plan') => number;
+const SCALE = { node: 13.5 / 13, item: 0.98, head: 15 / 13, sub: 1, note: 12.5 / 13 * 0.92, plan: 12 / 13 * 0.95 } as const;
 const estimate: TextMeasure = (text, kind) => textWidth(text) * SCALE[kind];
 /** The first sentence of a note: what a region or unit says about itself on the map. The rest belongs to the selection. */
 export function lead(note: string): string {
@@ -202,7 +202,13 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
   };
   const hasRecords = (id: string, guard = 0): boolean => { const p = byId.get(id); return !!p && guard < 64 && (!!p.lastAt || p.childIds.some(c => hasRecords(c, guard + 1))); };
   // Korean text breaks between words (keep-all): leave a share of each line unused.
-  const lines = (text: string, kind: Parameters<TextMeasure>[1], room: number, max = 2) => (!text ? 0 : Math.min(max, Math.ceil((measureText(text, kind) * 1.15 + 6) / Math.max(40, room))));
+  // A single word (a file or package name) has no word end to break at: it takes one line whenever it fits as measured.
+  const lines = (text: string, kind: Parameters<TextMeasure>[1], room: number, max = 2) => {
+    if (!text) return 0;
+    const w = measureText(text, kind);
+    if (!/\s/.test(text.trim()) && w + 2 <= room) return 1;
+    return Math.min(max, Math.ceil((w * 1.15 + 6) / Math.max(40, room)));
+  };
   // Planned lines are short phrases measured in their own font: a smaller share is left for word ends than for notes.
   const plannedLines = (id: string, room: number) => Math.max(0, ...(planned?.get(id) ?? []).map(t => Math.min(2, Math.ceil((measureText(t, 'plan') * 1.06 + 4) / Math.max(40, room)))));
   // A folded part standing for a planned part inside it reads one line naming that inner part.
@@ -244,7 +250,7 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
       m = { ox: minX, oy: minY, w, h: maxY - minY + head + PAD, head };
     } else if (listOf(container)) {
       // Planned lines keep the item's own padding (7 above and below), for one line as for two.
-      const w = nodeWidth(p.name, kids, measureText), nl = lines(p.name, 'node', w - chrome), pl = nodeLines(id, w - chrome);
+      const w = nodeWidth(p.name, kids, measureText), nl = lines(p.name, 'item', w - chrome), pl = nodeLines(id, w - chrome);
       m = { w, h: Math.max(14 + (nl + extra) * 17, pl ? 14 + nl * 17 + 2 + pl * PLAN_LINE : 0), ox: 0, oy: 0, head: 0, face: 'item' };
     } else if (depth === 0) {
       // A folded group reads by its name and count; its note is the selection's. A part without an inside keeps its sentence.
