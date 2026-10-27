@@ -51,8 +51,10 @@ test('UI58-L4 parts inside a group run top to bottom; the converter plan map fit
     const kids = [...l.boxes.values()].filter(b => b.container === f.id);
     assert.equal(new Set(kids.map(b => b.x)).size, 1, 'one column inside the group');
   }
-  // 1280 window − 384 inspector − 16 + 24 side margins.
-  assert.ok(l.bounds.w <= 1280 - 384 - 40, `bounds ${l.bounds.w}`);
+  // 1280 window − 384 inspector − 16 + 24 side margins; each region's head also holds its boundary count (POLISH67: the
+  // estimate font is wider than the page's, where the three regions still fit).
+  const { linkChipW } = await import('../dist/public/client/map-layout.js');
+  assert.ok(l.bounds.w <= 1280 - 384 - 40 + 3 * linkChipW(9), `bounds ${l.bounds.w}`);
 });
 
 test('UI58-L5 a long group name gets a second head line and room for it; stored places are kept', () => {

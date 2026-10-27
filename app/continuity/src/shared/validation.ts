@@ -1,5 +1,5 @@
 import { API_SCHEMA, SCHEMA, V5_SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Intent, type Background, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket, type Question, GUIDE_SCHEMA, type GuideRequest, type GuideReply, type GuideEnvelope, type GuideTicket, type UnderstandingInput } from './types.js';
-import {V6_SCHEMA,type Area,type PlanStamp} from './types.js';
+import {V6_SCHEMA,type Area,type PlanStamp,type Point,type ManualPositions,type Backup} from './types.js';
 export class ContextError extends Error { constructor(code: string) { super(code); this.name = 'ContextError'; } }
 export function ensure(condition: unknown, code = 'INVALID_DATA'): asserts condition { if (!condition) throw new ContextError(code); }
 function obj(v: unknown, keys: string[]): asserts v is Record<string, unknown> {
@@ -508,6 +508,48 @@ export function parseProject(raw: string): Project {
   const schema=(v as {schemaVersion?:unknown})?.schemaVersion;
   const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : schema===V3_SCHEMA ? migrateV3(v) : schema===V4_SCHEMA ? migrateV4(v) : schema===V5_SCHEMA ? migrateV5(v) : schema===V6_SCHEMA ? migrateV6(v) : v;
   assertProject(project); return convertIntentEdits(project); // Freshly parsed, not shared: no defensive copy needed.
+}
+
+/** A key of a places dictionary: a part id or the map's root, in the id alphabet, and never a name an ordinary object
+ * inherits ('__proto__', 'toString', 'constructor'…): writing one of those through a plain object reaches Object.prototype. */
+export function placeKey(k: string): boolean { return k.length <= 200 && /^[A-Za-z0-9_-]+$/.test(k) && !(k in Object.prototype); }
+const placePoint = (p: unknown): p is Point => {
+  if (!p || typeof p !== 'object' || Array.isArray(p)) return false;
+  const keys = Object.keys(p), x = (p as Point).x, y = (p as Point).y;
+  return keys.length === 2 && Object.hasOwn(p, 'x') && Object.hasOwn(p, 'y') && Number.isFinite(x) && Number.isFinite(y) && Math.abs(x) < 1e6 && Math.abs(y) < 1e6;
+};
+/** Manual places as a backup carries them: containers of parts, each part at a finite point. Nothing else is accepted. */
+export function assertPositions(v: unknown): asserts v is ManualPositions {
+  ensure(!!v && typeof v === 'object' && !Array.isArray(v));
+  const containers = Object.entries(v as Record<string, unknown>); ensure(containers.length <= ITEM_LIMIT);
+  for (const [c, m] of containers) {
+    ensure(placeKey(c) && !!m && typeof m === 'object' && !Array.isArray(m));
+    for (const [id, p] of Object.entries(m as Record<string, unknown>)) ensure(placeKey(id) && placePoint(p));
+  }
+}
+/** Places read from browser storage or an accepted backup, as dictionaries with no prototype: only well-formed keys and
+ * points are kept, and a malformed value reads as no places. */
+export function cleanPositions(v: unknown): ManualPositions {
+  const out = Object.create(null) as ManualPositions;
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return out;
+  for (const [c, m] of Object.entries(v as Record<string, unknown>)) {
+    if (!placeKey(c) || !m || typeof m !== 'object' || Array.isArray(m)) continue;
+    for (const [id, p] of Object.entries(m as Record<string, unknown>)) {
+      if (!placeKey(id) || !placePoint(p)) continue;
+      (out[c] ??= Object.create(null) as Record<string, Point>)[id] = { x: p.x, y: p.y };
+    }
+  }
+  return out;
+}
+/** A backup file in either shape: a plain project (as before), or the same project with its manual places as an extra top-level
+ * 'positions'. The project part passes the same parseProject as every other persisted byte; the places are checked apart. */
+export function parseBackup(raw: string): Backup {
+  ensure(new TextEncoder().encode(raw).length <= FILE_LIMIT, 'FILE_TOO_LARGE');
+  const v: unknown = JSON.parse(raw);
+  if (!v || typeof v !== 'object' || Array.isArray(v) || !Object.hasOwn(v, 'positions')) return { project: parseProject(raw), positions: null };
+  const { positions, ...rest } = v as Record<string, unknown>;
+  assertPositions(positions);
+  return { project: parseProject(JSON.stringify(rest)), positions };
 }
 
 /* ---------- GUIDE097 ---------- */
