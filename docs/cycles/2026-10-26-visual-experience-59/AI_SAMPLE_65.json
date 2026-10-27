@@ -1,0 +1,181 @@
+{
+  "source": "f7f14997926974bf9ae8da47e4889c2383fed4d1",
+  "displaySource": "3764788fc07dd99a2861f8136717e74ea6e91dd0",
+  "nature": "총괄이 실제 UI로 DeepSeek에 요청한 응답. 이후 UI 변경에도 서버·프롬프트·입력 구성은 동일. Cloud는 이 응답을 동결 재생했으며 새 AI 호출이 아니다.",
+  "cases": [
+    {
+      "case": "converter-negative-intent",
+      "intent": "폴더 변환은 추가하지 말고, 파일 이름 충돌 때 덮어쓰지만 막아줘.",
+      "material": "합성 변환기 예제의 원자료 A. 과거 R03과 지금 INTENT를 구별.",
+      "plan": {
+        "endpoint": "/api/studio/plan",
+        "http": 200,
+        "elapsedMs": 18831,
+        "requestSha256": "49448878dca5a2edec379f8382af71c1882cb88439ecbbdaf1207e8c5b862ac4",
+        "reply": {
+          "summary": "현재는 단일 문서를 읽어 PDF/docx로 저장하는 흐름을 재사용할 수 있고, 제공된 자료에는 파일 이름 충돌 처리나 폴더 변환 실행이 확인되지 않는다. 이번에는 폴더 변환을 추가하지 않고, 저장 전에 같은 이름의 기존 파일 덮어쓰기를 막는 변화가 필요하다.",
+          "items": [
+            {
+              "id": "change_1",
+              "title": "파일 이름 충돌 시 덮어쓰기 차단",
+              "description": "현재 단일 문서 변환과 PDF/docx 저장 흐름은 재사용한다. 저장 전에 같은 이름의 기존 파일이 있으면 덮어쓰지 않도록 막고, 충돌 시 안내 방식은 제공된 자료로 확인되지 않음.",
+              "partIds": [
+                "files"
+              ],
+              "refs": [
+                "INTENT",
+                "R02",
+                "P03"
+              ],
+              "dependsOn": []
+            }
+          ],
+          "impacts": [
+            {
+              "partId": "results",
+              "reason": "충돌로 저장을 막으면 마지막 문서의 결과만 설명하는 현재 화면에서 실패 사유를 어떻게 보여줄지 함께 확인해야 함.",
+              "refs": [
+                "P03",
+                "R02",
+                "INTENT"
+              ]
+            }
+          ],
+          "preserve": [
+            "단일 문서 변환과 PDF/docx 저장",
+            "본문·표·문단 모양 보존",
+            "폴더 변환은 추가하지 않음"
+          ],
+          "unknowns": [
+            "파일 이름 충돌 시 덮어쓰기를 막는 구체 방식(중단·이름 변경·확인 요청 등)은 정해지지 않음",
+            "충돌로 저장하지 못한 경우 사용자에게 어떤 문구·화면으로 알릴지 제공된 자료로 확인되지 않음",
+            "충돌 차단 동작을 검증한 검사는 제공된 검사 원자료에 포함되지 않음"
+          ]
+        }
+      },
+      "scope": {
+        "endpoint": "/api/studio/scope",
+        "http": 200,
+        "elapsedMs": 17045,
+        "requestSha256": "bde46b7dd84f62768e3aed544adcade680fdf7a1fcaa20fc08fea6a7e21e1aa1",
+        "reply": {
+          "summary": "단일 문서 변환과 PDF/docx 저장, outputPath 반환은 재사용할 수 있고 호출자는 결과를 sessionResults에 누적하지만 화면은 마지막 결과만 표시한다. 선택한 파일명 충돌 차단에 필요한 기존 파일 존재 확인이나 충돌 안내 방식은 제공된 자료에서 확인되지 않는다.",
+          "prerequisites": [],
+          "unknowns": [
+            "충돌 시 사용자에게 안내하는 방식(메시지, 결과 상태, 중단 여부 등)이 자료에서 확인되지 않음.",
+            "충돌 판정 대상이 입력 파일명인지 저장 산출물 파일명인지, 어떤 저장 위치와 비교하는지 불명확함.",
+            "현재 변환·저장 흐름이 같은 이름 파일을 실제로 덮어쓰는지 또는 이미 충돌 검사가 있는지에 대한 검증 자료가 없음."
+          ]
+        }
+      },
+      "observed": "문장 수정 즉시 생성 비활성. 새 분석 뒤 요청문 선택 범위는 덮어쓰기 방지 1개, 유지 조건은 폴더 변환 추가 금지. 예전 R03은 원자료 블록에만 남음."
+    },
+    {
+      "case": "restic-source-enrichment",
+      "intent": "읽지 못한 파일이 있는 백업이 끝나면, 만들어진 스냅샷과 빠진 파일이 있다는 사실을 마지막 요약에서 함께 읽고 싶어. 기존 종료 코드와 스냅샷은 유지하고, 자동 재시도나 삭제는 추가하지 마.",
+      "repository": "restic/restic",
+      "revision": "dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4",
+      "sources": [
+        "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/cmd/restic/cmd_backup.go",
+        "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/internal/ui/backup/progress.go",
+        "https://github.com/restic/restic/blob/dd09b6bd01af220b1d5d95c0d4d7d472e05e05c4/internal/ui/backup/text.go"
+      ],
+      "initialCounterexample": {
+        "source": "5cbd1db3fb75a61b56d4f2b13fe63a8dc011c1bd",
+        "rejected": "Finish 호출문을 현재 사용자 출력과 짝지음. 정확 부분 인용 검증만으로 의미 비교의 정확성은 보장되지 않았음."
+      },
+      "partialMaterialRetry": {
+        "http": 200,
+        "observed": "수정 프롬프트는 호출문을 current로 쓰지 않고 현재 표시 미확인으로 남김.",
+        "limitation": "요약 말미는 여전히 변경 필요를 단정해 일반 정확성 수용으로 보지 않음."
+      },
+      "enrichedPlan": {
+        "endpoint": "/api/studio/plan",
+        "http": 200,
+        "elapsedMs": 34111,
+        "requestSha256": "f181c81eb0d6edede3a08b1008874f72a1d5929a1a8dec82e148b0870d2ad137",
+        "reply": {
+          "summary": "backup은 이미 arch.Snapshot 결과의 id·summary를 받아 Finish로 최종 요약을 출력하고, 읽지 못한 소스가 있으면 ErrInvalidSourceData를 반환하는 흐름이 있다. 이 흐름을 재사용해 기존 종료 코드와 스냅샷은 유지하면서, 텍스트 최종 요약에서 읽지 못한 파일이 있었다는 사실도 함께 읽을 수 있게 하는 변화가 필요하다.",
+          "items": [
+            {
+              "id": "backup_summary_missing_files",
+              "title": "백업 최종 요약에 읽지 못한 파일 안내 추가",
+              "description": "기존 스냅샷 결과와 최종 텍스트 요약 출력 흐름을 재사용해, 스냅샷 저장 안내와 함께 읽지 못한 파일이 있었다는 사실을 마지막 요약에서 보여준다. 제공된 텍스트 요약 발췌에는 그런 안내가 확인되지 않으며, 종료 코드와 스냅샷 생성·ID 표시는 바꾸지 않는다.",
+              "partIds": [
+                "P02"
+              ],
+              "refs": [
+                "INTENT",
+                "U01",
+                "U02"
+              ],
+              "dependsOn": [],
+              "presentation": [
+                {
+                  "partId": "P02",
+                  "current": {
+                    "text": "snapshot %s saved",
+                    "source": "evidence",
+                    "refs": [
+                      "U02"
+                    ]
+                  },
+                  "wanted": {
+                    "text": "스냅샷 저장 안내와 읽지 못한 파일이 있었다는 사실을 같은 최종 요약에서 보여준다",
+                    "refs": [
+                      "INTENT",
+                      "U01",
+                      "U02"
+                    ]
+                  },
+                  "origin": "intent"
+                }
+              ]
+            }
+          ],
+          "impacts": [],
+          "preserve": [
+            "기존 backup 종료 코드 체계를 유지한다.",
+            "읽지 못한 파일이 있어도 만들어진 스냅샷과 스냅샷 ID 안내를 유지한다.",
+            "자동 재시도와 자동 삭제는 추가하지 않는다."
+          ],
+          "unknowns": [
+            "최종 요약에서 읽지 못한 파일을 개수·목록·문구 중 어떤 형태로 표시할지 미정이다.",
+            "최종 요약 출력에 읽지 못한 파일 여부를 어떤 입력으로 전달할지 제공된 자료로 확인되지 않음.",
+            "JSON 출력 경로에도 같은 안내가 필요한지, 현재 JSON에서 어떻게 보이는지 제공된 자료로 확인되지 않음."
+          ]
+        }
+      },
+      "scope": {
+        "endpoint": "/api/studio/scope",
+        "http": 200,
+        "elapsedMs": 13852,
+        "requestSha256": "843ab951affa487d1bd1bf8fc978e132cadbb384a35ba1e3fdb89aee2136de0f",
+        "reply": {
+          "summary": "기존 백업 흐름은 arch.Snapshot의 id·summary를 최종 Finish로 넘기고, 텍스트 요약은 파일/디렉터리 통계와 스냅샷 저장 안내를 이미 출력한다. 다만 읽지 못한 파일이 있었다는 사실을 최종 요약 시점에 전달해 표시하는 연결은 제공된 발췌에서 확인되지 않는다.",
+          "prerequisites": [
+            {
+              "title": "읽지 못한 파일이 있었다는 상태를 최종 요약 출력 경로에서 사용할 수 있게 하는 것",
+              "reason": "U01은 success 여부를 Finish 호출 이후 ErrInvalidSourceData 반환에 사용하지만, U02의 Finish와 텍스트 요약은 id·summary·dryRun만 받고 읽기 실패 상태를 출력하지 않는다. 따라서 기존 스냅샷 ID와 요약을 재사용하더라도, 읽지 못한 파일이 있었다는 사실이 최종 텍스트 요약에 도달한다고 자료에서 확인되지 않는다.",
+              "refs": [
+                "U01",
+                "U02"
+              ]
+            }
+          ],
+          "unknowns": [
+            "archiver.Summary에 읽지 못한 파일의 수·목록 또는 읽기 실패 상태가 이미 포함되어 있는지 발췌만으로는 확인할 수 없다.",
+            "U01의 success가 정확히 '읽지 못한 파일 존재'만을 뜻하는지, 다른 불완전 처리 사유도 포함하는지 확인되지 않는다.",
+            "텍스트 요약 외의 출력 경로(JSON 등)에서 같은 안내가 필요한지 또는 이미 처리되는지는 제공된 자료에서 확인되지 않는다."
+          ]
+        }
+      },
+      "observed": "실제 텍스트 출력 코드를 보강하자 스냅샷 ID 표시는 유지하고 누락 안내 한 항목으로 좁힘. 실제 OSS 실행은 하지 않았고 JSON 출력은 미검증."
+    }
+  ],
+  "limits": [
+    "두 요구의 좁은 실제 표본이며 임의 프로젝트의 자동 이해 정확성을 보장하지 않는다.",
+    "자료에 없다는 것과 기능이 없다는 것을 구별한다.",
+    "연결기·대화 자동 수신·자동 갱신은 이번 검증 범위가 아니다."
+  ]
+}
