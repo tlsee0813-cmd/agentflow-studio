@@ -1235,6 +1235,132 @@ def return_flow(browser, base, cases):
     context.close()
 
 
+def plan_reply(route, title):
+    """A valid analysis of exactly what the page sent (test-only, routed in the browser): one change on the first part, cited
+    to the sentence itself. Never a model's reading."""
+    ask = route.request.post_data_json
+    first = ask["parts"][0]["id"]
+    reply = {"summary": "[테스트 응답] 보낸 문장만 근거로 한 분석 자리입니다.", "items": [{"id": "ask", "title": title,
+        "description": "[테스트 응답] 지금 문장에서 온 변경 자리입니다.", "partIds": [first], "refs": ["INTENT"], "dependsOn": []}],
+        "impacts": [], "preserve": [], "unknowns": []}
+    route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "reply": reply}))
+
+
+def stale_request_flow(browser, base):
+    """EXP65 P1: a request document is made only from the analysis of what is written now. Typing a new sentence turns the
+    request off at once (the caret stays where it was), a forced call makes nothing, writing the analysed sentence back turns
+    it on again; a cancelled or outdated analysis never becomes the plan; added material counts like the sentence."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    page.goto(base + "/#/p/ex-converter")
+    page.locator("#plan-entry").click()
+    page.locator(".ps-more").click()
+    page.get_by_role("button", name="문장 고치기").click()
+    area, make = page.locator("#plan-intent"), page.get_by_role("button", name="요청문 만들기", exact=True)
+    original = area.input_value()
+    expect(make).to_be_enabled()
+    new = "폴더 변환은 추가하지 말고, 파일 이름 충돌 때 덮어쓰지만 막아줘."
+    area.evaluate("a => { a.dataset.same = '1'; }")
+    area.fill(new)  # one input event, no other step
+    expect(make).to_be_disabled()
+    expect(page.locator("#plan-make-note")).to_have_text("고친 문장을 먼저 살펴본 뒤 만들 수 있어요")
+    expect(page.locator("#plan-ask")).to_have_text("고친 문장으로 살펴보기")
+    expect(page.locator("#plan-stale")).to_be_visible()
+    # Typing keeps the same field and caret (no re-render while writing).
+    area.evaluate("a => a.setSelectionRange(5, 5)")
+    page.keyboard.type("꼭 ")
+    expect(area).to_have_value(new[:5] + "꼭 " + new[5:])
+    assert area.evaluate("a => a.dataset.same === '1' && a.selectionStart === 7 && document.activeElement === a")
+    area.fill(new)
+    # The handler itself refuses: a button forced on makes no document, and the request goes back off.
+    make.evaluate("b => { b.disabled = false; b.click(); }")
+    expect(page.locator("#plan-sheet")).to_be_hidden()
+    expect(page.get_by_role("button", name=re.compile("마지막 요청문"))).to_have_count(0)
+    expect(make).to_be_disabled()
+    # Writing the analysed sentence back: the prepared example request is made as before.
+    area.fill(original)
+    expect(make).to_be_enabled()
+    expect(page.locator("#plan-make-note")).to_be_hidden()
+    make.click()
+    expect(page.locator("#plan-sheet pre")).to_contain_text("- 폴더 입력")
+    page.keyboard.press("Escape")
+    # A cancelled analysis of the new sentence ends without a plan, even when its reply comes after the cancel.
+    held = []
+    page.route("**/api/studio/plan", lambda route: held.append(route))
+    area.fill(new)
+    page.locator("#plan-ask").click()
+    expect(page.locator("#plan-panel .pending")).to_be_visible()
+    expect(make).to_be_disabled()
+    page.locator("#plan-panel .pending").get_by_role("button", name="취소").click()
+    expect(page.locator("#plan-panel .pending")).to_have_count(0)
+    try: plan_reply(held[0], "늦게 온 응답")
+    except Exception: pass
+    page.wait_for_timeout(200)
+    expect(page.locator(".ps-intent")).to_have_text(original)
+    expect(page.locator("#plan-panel .pp-error")).to_have_count(0)
+    expect(make).to_be_disabled()
+    # Analysed now: the request comes from that analysis, never from the earlier plan.
+    page.unroute("**/api/studio/plan")
+    page.route("**/api/studio/plan", lambda route: plan_reply(route, "이름 충돌 때 덮어쓰기 막기"))
+    page.route("**/api/studio/scope", lambda route: route.fulfill(status=200, content_type="application/json", body=json.dumps(
+        {"model": "stub-model", "reply": {"summary": "[테스트 응답] 범위 검토 자리입니다.", "prerequisites": [], "unknowns": []}})))
+    page.locator("#plan-ask").click()
+    expect(page.locator(".ps-intent")).to_have_text(new)
+    page.locator(".ps-more").click()
+    expect(make).to_be_enabled()
+    make.click()
+    expect(page.locator("#plan-sheet pre")).to_contain_text("- 이름 충돌 때 덮어쓰기 막기")
+    expect(page.locator("#plan-sheet pre")).not_to_contain_text("- 폴더 입력")
+    page.keyboard.press("Escape")
+    page.unroute("**/api/studio/plan")
+    # A saved project: material added while its analysis is in flight makes that reply outdated; the plan is not made.
+    page.goto(base + "/")
+    page.locator("#new-open").click()
+    page.locator("#new-name").fill("자료 프로젝트")
+    page.locator("#new-form").get_by_role("button", name="만들기").click()
+    page.locator("#part-name").fill("변환")
+    page.get_by_role("button", name="만들기").click()
+    page.keyboard.press("Escape")
+    page.locator("#plan-entry").click()
+    page.locator("#plan-intent").fill("이름 충돌 때 덮어쓰지 않게 해줘.")
+    held.clear()
+    page.route("**/api/studio/plan", lambda route: held.append(route))
+    page.locator("#plan-ask").click()
+    expect(page.locator("#plan-panel .pending")).to_be_visible()
+    def add_material():
+        page.get_by_role("button", name="+ 자료 추가").click()
+        page.locator("#src-title").fill("저장 함수 발췌")
+        page.locator("#src-text").fill("save.ts: 같은 이름이 있으면 덮어쓴다.")
+        page.locator("#src-basis").fill("main save.ts")
+        page.locator(".pp-add").get_by_role("button", name="추가").click()
+    page.get_by_role("button", name=re.compile("읽는 자료")).click()
+    add_material()
+    plan_reply(held[0], "덮어쓰기 막기")
+    expect(page.locator("#plan-panel .pp-error")).to_contain_text("살펴보는 동안 문장이나 자료가 바뀌어 이 결과는 쓰지 않았어요")
+    expect(page.locator(".ps-intent")).to_have_text("오른쪽에 바꾸고 싶은 모습을 적어 주세요")
+    # Analysed with the material: removing it puts the request off, adding the same material back puts it on again.
+    page.unroute("**/api/studio/plan")
+    page.route("**/api/studio/plan", lambda route: plan_reply(route, "덮어쓰기 막기"))
+    page.locator("#plan-ask").click()
+    expect(page.locator(".ps-intent")).to_have_text("이름 충돌 때 덮어쓰지 않게 해줘.")
+    page.locator(".ps-more").click()
+    expect(make).to_be_enabled()
+    sources = page.get_by_role("button", name=re.compile("읽는 자료"))
+    if sources.get_attribute("aria-expanded") != "true": sources.click()
+    page.get_by_role("button", name="‘저장 함수 발췌’ 자료 빼기").click()
+    expect(make).to_be_disabled()
+    expect(page.locator("#plan-make-note")).to_have_text("바뀐 자료로 먼저 살펴본 뒤 만들 수 있어요")
+    expect(page.locator("#plan-ask")).to_have_text("바뀐 자료로 살펴보기")
+    add_material()
+    expect(make).to_be_enabled()
+    # Kept as analysed after a reload: the saved plan still answers what is written.
+    page.reload()
+    page.locator("#plan-entry").click()
+    page.locator(".ps-more").click()
+    expect(make).to_be_enabled()
+    context.close()
+
+
 def return_failure_flow(browser, base):
     """A failed return reading: a short error and the material itself, never a substitute reading; asking again works."""
     material = json.loads((ROOT.parents[1] / "docs/cycles/2026-10-27-return-experience-63/MATERIAL.json").read_text(encoding="utf-8"))
@@ -1306,6 +1432,7 @@ def main():
             overview_flow(browser, base, oss_fixtures()); print("ok  large list as an overview of real groups, find with way back, scope relations, pane beside the map, verbs")
             relation_visit_flow(browser, base, oss_fixtures()); print("ok  relation visit: named way back to its part, selection, camera, sheet and scroll; browser Back the same; no stale way back")
             return_flow(browser, base, oss_fixtures()); print("ok  return reading: no call on open, one per material, exact quote and back, draft never overwritten, Node-RED plan without result")
+            stale_request_flow(browser, base); print("ok  request only from the analysis of what is written now: typed, forced, A-B-A, cancelled and outdated replies, material")
             proc, base = start("code"); procs.append(proc); code_flow(browser, base); print("ok  access code kept from an input event")
             proc, base = start("fail"); procs.append(proc); failure_flow(browser, base); print("ok  provider failure -> short error -> retry")
             proc, base = start("fail"); procs.append(proc); return_failure_flow(browser, base); print("ok  return reading failure -> short error and the material -> asking again")

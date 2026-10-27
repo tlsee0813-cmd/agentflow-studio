@@ -66,6 +66,8 @@ interface Session {
   /** The comparison's long reading (description, every target, candidates) is open on request; by default a change reads
    * in small notes beside its parts. */
   explain: boolean;
+  /** The analysis in flight: its reply becomes the plan only while it is still the one in flight and the sentence and material
+   * are still those it read (inputKey). */
   pending: { controller: AbortController; input: PlanInput } | null; error: string | null;
   /** The one scope review of a request being made from an AI analysis, and why the last one did not produce a document. */
   scoping: { controller: AbortController; count: number } | null; scopeError: string | null;
@@ -171,7 +173,31 @@ export function createPlanView(host: PlanHost) {
       tab?.scrollIntoView({ block: 'nearest', inline: 'nearest' }); if (keyboard) tab?.focus({ preventScroll: true });
     });
   }
-  const stale = () => { const p = plan(); return !!p && !!s && s.bundle.draft.trim() !== p.intent; };
+  /* What an analysis reads from the person: the sentence and the material they added. The plan keeps both as it read them (its
+     intent, and the added material among its sources by their U ids). Records and the time in the basis are not part of it:
+     newer records are announced beside the plan, never merged into it. */
+  const material = (list: Evidence[]) => JSON.stringify(list.filter(e => /^U\d{2}$/.test(e.id)).map(e => [e.id, e.kind, e.title, e.text, e.basis]));
+  /** Why the plan no longer answers what is written now (null: it does). Writing the earlier sentence back makes it current again. */
+  function staleness(): 'sentence' | 'material' | null {
+    const p = plan(); if (!p || !s) return null;
+    return s.bundle.draft.trim() !== p.intent ? 'sentence' : material(s.bundle.extra) !== material(p.evidence) ? 'material' : null;
+  }
+  const stale = () => !!staleness();
+  const STALE_LINE = { sentence: '고친 문장은 아직 살펴보지 않았어요. 아래 변경안은 앞 문장 기준이에요.', material: '바뀐 자료는 아직 살펴보지 않았어요. 아래 변경안은 앞 자료 기준이에요.' };
+  const inputKey = (st: Session) => JSON.stringify([st.key, st.condition, st.bundle.draft.trim(), material(st.bundle.extra)]);
+  /** A request document comes only from the analysis of what is written now, with nothing being analysed or reviewed. */
+  const canRequest = () => { const p = plan(); return !!s && !!p && p.selected.length > 0 && !stale() && !s.pending && !s.scoping; };
+  const requestTitle = () => {
+    const why = staleness();
+    return why === 'sentence' ? '고친 문장을 먼저 살펴본 뒤 만들 수 있어요' : why === 'material' ? '바뀐 자료로 먼저 살펴본 뒤 만들 수 있어요'
+      : s?.pending ? '살펴보기가 끝난 뒤 만들 수 있어요' : '만들고 복사해도 보내거나 실행하지 않아요';
+  };
+  /** Work in flight belongs to the bundle it started from: replacing the bundle (another example material, an imported file)
+   * cancels it, so its reply can never land on the new one. */
+  function cancelWork() {
+    if (!s) return;
+    s.pending?.controller.abort(); s.pending = null; s.scoping?.controller.abort(); s.scoping = null;
+  }
   function input(): PlanInput | null {
     const o = host.current(); if (!o || !s || !s.bundle.draft.trim()) return null;
     return o.key === CONVERTER_KEY ? exampleInput(o, s.condition, s.bundle.draft, o.alias!.toId) : projectInput(o, s.bundle.draft, s.bundle.extra);
@@ -363,20 +389,28 @@ export function createPlanView(host: PlanHost) {
     if (inp.problem) { s.error = `‘${inp.problem.secret}’에 키나 토큰처럼 보이는 문자열이 있어 보내지 않았어요. 그 부분을 지운 뒤 다시 살펴보세요.`; render(); return; }
     if (host.status().ai !== 'deepseek') { s.error = host.status().ai === 'off' ? ERROR_TEXT.AI_NOT_CONFIGURED! : ERROR_TEXT.NO_SERVER!; render(); return; }
     if (needsCode()) { s.error = '접속 코드를 입력해 주세요.'; render(); document.getElementById('plan-access')?.focus(); return; }
-    const controller = new AbortController(), session = s;
+    const controller = new AbortController(), session = s, key = inputKey(s);
     s.pending = { controller, input: inp }; render();
+    // Only the analysis still in flight for this open plan may speak: a cancelled, superseded or closed one ends silently.
+    const mine = () => s === session && session.pending?.controller === controller && !controller.signal.aborted;
     try {
       const res = await requestPlan(inp.ask, controller.signal, host.accessCode());
+      if (!mine()) throw new AskError('CANCELLED');
       let analysis;
       try { analysis = mapReply(res.reply, inp); } catch { throw new AskError('INVALID_RESPONSE'); }
-      const next = createPlan(o.project.id, inp.basis, inp.ask.intent, inp.evidence, analysis);
-      session.bundle = { ...session.bundle, plan: next, by: { kind: 'ai', model: res.model, at: new Date().toISOString(), records: inp.records } };
-      session.mode = 'preview'; session.focus = firstFocus(next); session.targets = {}; session.editing = false; session.detail = false; moveTarget = true; frameWhole = true;
-      if (s === session) persist();
+      // The reply answers the sentence and material it was asked from, in the project it was asked in; not what is there now.
+      if (host.current()?.key !== session.key || inputKey(session) !== key) session.error = '살펴보는 동안 문장이나 자료가 바뀌어 이 결과는 쓰지 않았어요. 지금 문장과 자료로 다시 살펴보세요.';
+      else {
+        const next = createPlan(o.project.id, inp.basis, inp.ask.intent, inp.evidence, analysis);
+        session.bundle = { ...session.bundle, plan: next, by: { kind: 'ai', model: res.model, at: new Date().toISOString(), records: inp.records } };
+        session.mode = 'preview'; session.focus = firstFocus(next); session.targets = {}; session.editing = false; session.detail = false; moveTarget = true; frameWhole = true;
+        persist();
+      }
     } catch (e) {
       const code = e instanceof AskError ? e.code : 'REQUEST_FAILED';
-      if (code !== 'CANCELLED') session.error = ERROR_TEXT[code] ?? `분석을 받지 못했어요 (${code}). 문장과 초안은 그대로예요.`;
+      if (code !== 'CANCELLED' && mine()) session.error = ERROR_TEXT[code] ?? `분석을 받지 못했어요 (${code}). 문장과 초안은 그대로예요.`;
     }
+    if (session.pending?.controller !== controller) return;
     session.pending = null;
     if (s === session) render();
   }
@@ -388,7 +422,7 @@ export function createPlanView(host: PlanHost) {
   /** Authored example: its fixed, checked dependencies and the static document. AI analysis: the chosen scope is reviewed
    * once, here and only here; its global dependsOn is not treated as settled. */
   function makeRequest() {
-    const p = plan(); if (!s || !p || !p.selected.length || s.scoping) return;
+    const p = plan(); if (!s || !p || !canRequest()) { syncStale(); return; }
     s.scopeError = null;
     if (s.bundle.by?.kind === 'example') { keepSnapshot(p, requestSnapshot(p)); return; }
     void reviewScope(p);
@@ -404,16 +438,21 @@ export function createPlanView(host: PlanHost) {
     const start = { key: st.key, projectId: p.projectId, id: p.id, revision: p.revision, basis: p.basis };
     const controller = new AbortController();
     st.scoping = { controller, count: p.selected.length }; render();
+    const mine = () => st.scoping?.controller === controller;
     try {
       const res = await requestScope(inp.ask, controller.signal, host.accessCode());
+      if (controller.signal.aborted) throw new AskError('CANCELLED');
       let review;
       try { review = parseScopeReview(res.reply, p.evidence.map(e => e.id)); } catch { throw new AskError('INVALID_RESPONSE'); }
-      // Apply only to the plan and view it was asked for: same open plan, same project, plan id, revision and basis.
+      // Apply only to the plan and view it was asked for: same open plan, same project, plan id, revision and basis, and still
+      // the analysis of what is written now.
+      if (!mine()) return;
       const now = s === st ? plan() : null;
-      if (!now || host.current()?.key !== start.key || now.projectId !== start.projectId || now.id !== start.id || now.revision !== start.revision || now.basis !== start.basis || stale()) {
+      if (!now || host.current()?.key !== start.key || now.projectId !== start.projectId || now.id !== start.id || now.revision !== start.revision || now.basis !== start.basis || stale() || st.pending) {
         st.scopeError = '검토하는 동안 변경안이나 고른 항목이 바뀌어 이 검토는 쓰지 않았어요. 요청문을 다시 만들어 주세요.';
       } else { st.scoping = null; keepSnapshot(now, requestSnapshot(now, review), 'reviewed'); return; }
     } catch (e) {
+      if (!mine()) return;
       const code = e instanceof AskError ? e.code : 'REQUEST_FAILED';
       st.scopeError = code === 'CANCELLED' ? `취소했어요. ${notMade}` : `${ERROR_TEXT[code] ?? `검토 응답을 받지 못했어요 (${code}).`} ${notMade}`;
     }
@@ -421,7 +460,7 @@ export function createPlanView(host: PlanHost) {
     if (s === st) render();
   }
   function keepSnapshot(p: ChangePlan, snap: RequestSnapshot, origin: 'example' | 'reviewed' = 'example') {
-    if (!s) return;
+    if (!s || stale() || s.pending) return;
     s.bundle = { ...s.bundle, snapshots: [...s.bundle.snapshots, snap].slice(-60),
       labels: { ...s.bundle.labels, [snap.id]: Object.fromEntries(p.analysis.items.map(i => [i.id, i.title])) },
       origins: { ...s.bundle.origins, [snap.id]: origin } };
@@ -470,7 +509,7 @@ export function createPlanView(host: PlanHost) {
       const read = readPlanFile(await f.text(), o.project.id);
       if (typeof read === 'string') { s.fileMsg = read; render(); return; }
       if ((s.bundle.plan || s.bundle.snapshots.length) && !confirm('지금 변경안을 가져온 파일의 내용으로 바꿀까요? 지금 안을 남기려면 먼저 파일로 내보내 두세요.')) return;
-      s.bundle = read; s.focus = firstFocus(read.plan); s.targets = {}; s.mode = read.plan ? 'preview' : 'current'; s.editing = !read.plan; s.resultFor = read.snapshots.at(-1)?.id ?? null; moveTarget = true; frameWhole = true;
+      cancelWork(); s.bundle = read; s.focus = firstFocus(read.plan); s.targets = {}; s.mode = read.plan ? 'preview' : 'current'; s.editing = !read.plan; s.resultFor = read.snapshots.at(-1)?.id ?? null; moveTarget = true; frameWhole = true;
       persist(); s.fileMsg = s.storeMsg ? null : '변경안 파일을 가져왔어요.'; render();
     });
   }
@@ -482,7 +521,7 @@ export function createPlanView(host: PlanHost) {
   }
   function setCondition(c: Condition) {
     const o = host.current(); if (!s || !o || s.condition === c) return;
-    MEMORY.set(memoryKey(o, s.condition), s.bundle);
+    cancelWork(); MEMORY.set(memoryKey(o, s.condition), s.bundle);
     s.condition = c; s.bundle = bundleFor(o, c).bundle; s.focus = firstFocus(s.bundle.plan); s.targets = {}; s.error = null; s.mode = s.bundle.plan ? 'preview' : 'current'; moveTarget = true; frameWhole = true;
     s.resultFor = s.bundle.snapshots.at(-1)?.id ?? null; s.editing = !s.bundle.plan;
     render();
@@ -750,11 +789,11 @@ export function createPlanView(host: PlanHost) {
     }
     const area = h('textarea', { id: 'plan-intent', rows: '3', maxlength: '6000', placeholder: '어떻게 바뀌면 좋을지 두세 줄로 적어 주세요. 예: 폴더째 변환하고, 실패한 파일은 모아서 보고 싶어.', 'aria-label': '바꾸고 싶은 모습', disabled: !!st.pending }) as HTMLTextAreaElement;
     area.value = st.bundle.draft;
-    const staleLine = h('p', { class: 'pp-stale', role: 'status' });
-    const setStale = () => { staleLine.textContent = stale() ? '고친 문장은 아직 살펴보지 않았어요. 아래 변경안은 앞 문장 기준이에요.' : ''; staleLine.hidden = !stale(); };
-    area.addEventListener('input', () => { st.bundle = { ...st.bundle, draft: area.value }; persist(); setStale(); syncFoot(); });
+    const staleLine = h('p', { class: 'pp-stale', id: 'plan-stale', role: 'status' });
+    const why = staleness(); staleLine.textContent = why ? STALE_LINE[why] : ''; staleLine.hidden = !why;
+    // Typing changes the draft in place (no re-render, the caret stays): everything that depends on it follows at once.
+    area.addEventListener('input', () => { st.bundle = { ...st.bundle, draft: area.value }; persist(); syncStale(); });
     area.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); area.blur(); } if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void analyze(); } });
-    setStale();
     sec.append(h('label', { for: 'plan-intent', class: 'pp-label' }, '바꾸고 싶은 모습'), area, staleLine,
       h('div', { class: 'pp-row' }, sourcesToggle(o), p ? h('button', { type: 'button', class: 'link-button', onclick: () => { st.editing = false; render(); } }, '접기') : null));
     put(sec, conditionSwitch(o));
@@ -809,9 +848,10 @@ export function createPlanView(host: PlanHost) {
       out.push(h('div', { class: 'access' }, h('label', { for: 'plan-access' }, '접속 코드'), code));
     }
     if (compact) return out;
-    const label = p ? (stale() ? '고친 문장으로 살펴보기' : 'AI로 다시 살펴보기') : 'AI로 살펴보기';
     const reach = h('p', { class: 'fine', id: 'plan-reach' }, reachText());
-    out.push(h('div', { class: 'pp-row pp-ask' }, h('button', { type: 'button', class: p && !stale() ? 'secondary small' : 'primary small', disabled: !canAsk || !st.bundle.draft.trim(), onclick: () => void analyze() }, label), reach));
+    const ask = h('button', { type: 'button', id: 'plan-ask', onclick: () => void analyze() }) as HTMLButtonElement;
+    askState(ask);
+    out.push(h('div', { class: 'pp-row pp-ask' }, ask, reach));
     if (!canAsk) out.push(h('p', { class: 'fine' }, host.status().ai === 'off' ? '서버에 AI 키가 없어 살펴볼 수 없어요. 초안은 남아요.' : 'AI 서버가 연결된 주소에서 살펴볼 수 있어요. 초안은 남아요.'));
     return out;
   }
@@ -824,7 +864,24 @@ export function createPlanView(host: PlanHost) {
     const added = s!.bundle.extra.length ? ` + 붙인 자료 ${s!.bundle.extra.length}개` : '';
     return inp.records.total ? `이 문장${added} + 기록 ${inp.records.sent === inp.records.total ? `${inp.records.total}개` : `${inp.records.total}개 중 최신 ${inp.records.sent}개`}` : `${added ? `이 문장${added}` : '이 문장과 지도'} · 아직 기록 없음`;
   }
-  function syncFoot() { const r = document.getElementById('plan-reach'); if (r) r.textContent = reachText(); const btn = r?.previousElementSibling as HTMLButtonElement | null; if (btn) btn.disabled = host.status().ai !== 'deepseek' || !s!.bundle.draft.trim(); }
+  function askState(btn: HTMLButtonElement) {
+    const p = plan(), why = staleness();
+    btn.textContent = p ? (why === 'sentence' ? '고친 문장으로 살펴보기' : why === 'material' ? '바뀐 자료로 살펴보기' : 'AI로 다시 살펴보기') : 'AI로 살펴보기';
+    btn.className = p && !why ? 'secondary small' : 'primary small';
+    btn.disabled = host.status().ai !== 'deepseek' || !s!.bundle.draft.trim();
+  }
+  /** The draft changed without a render: the stale line, the ask, what it would read and the request follow in place. */
+  function syncStale() {
+    if (!s) return;
+    const why = staleness(), line = document.getElementById('plan-stale');
+    if (line) { line.textContent = why ? STALE_LINE[why] : ''; line.hidden = !why; }
+    const ask = document.getElementById('plan-ask') as HTMLButtonElement | null; if (ask) askState(ask);
+    const reach = document.getElementById('plan-reach'); if (reach) reach.textContent = reachText();
+    document.querySelector('#plan-panel .pp-plan')?.classList.toggle('is-stale', !!why);
+    const make = document.getElementById('plan-make') as HTMLButtonElement | null;
+    if (make) { make.disabled = !canRequest(); make.title = requestTitle(); }
+    const note = document.getElementById('plan-make-note'); if (note) { note.textContent = why ? requestTitle() : ''; note.hidden = !why; }
+  }
   function sourcesToggle(_o: PlanOpened) {
     const st = s!, n = (plan() && !stale() && !st.editing ? plan()!.evidence : input()?.evidence ?? []).length;
     return h('button', { type: 'button', class: 'link-button quiet', 'aria-expanded': String(st.sources), onclick: () => { st.sources = !st.sources; render(); } }, `${st.example && st.key === CONVERTER_KEY ? '예제 원자료' : '읽는 자료'} ${n}개`);
@@ -928,8 +985,10 @@ export function createPlanView(host: PlanHost) {
       st.scoping
         ? h('div', { class: 'pending', role: 'status' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), h('span', {}, `고른 항목 ${st.scoping.count}개의 전제를 살펴보는 중…`),
             h('button', { type: 'button', class: 'link-button', onclick: () => st.scoping?.controller.abort() }, '취소'))
-        : h('div', { class: 'pp-row' }, h('button', { type: 'button', class: 'primary small', disabled: !n || stale(), onclick: makeRequest, title: stale() ? '고친 문장을 먼저 살펴본 뒤 만들 수 있어요' : '만들고 복사해도 보내거나 실행하지 않아요' }, '요청문 만들기'),
+        : h('div', { class: 'pp-row' }, h('button', { type: 'button', id: 'plan-make', class: 'primary small', disabled: !canRequest(), onclick: makeRequest, title: requestTitle() }, '요청문 만들기'),
           last ? h('button', { type: 'button', class: 'link-button', onclick: () => { st.sheet = last.id; st.copyMsg = null; render(); } }, `마지막 요청문 · ${ago(last.createdAt)}`) : null),
+      // Why the button is off while the sentence or material is ahead of the plan (kept in step as the person types).
+      h('p', { class: 'fine pp-make-note', id: 'plan-make-note', role: 'status', hidden: !stale() }, stale() ? requestTitle() : ''),
       st.scopeError ? h('p', { class: 'pp-error', role: 'alert' }, st.scopeError) : null,
       !st.scoping && !st.scopeError && st.bundle.by?.kind === 'ai' ? h('p', { class: 'fine' }, '만들 때 고른 항목의 전제를 AI가 한 번 살펴봐요.') : null,
       changed && !st.scoping ? h('p', { class: 'fine' }, '마지막 요청문 뒤로 변경안이 바뀌었어요. 새로 만들어도 이전 것은 남아요.') : null);
