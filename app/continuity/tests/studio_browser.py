@@ -919,6 +919,26 @@ def relation_visit_flow(browser, base, cases):
     page.evaluate("history.go(2)")
     expect(back).to_have_accessible_name("수신 · traces로 돌아가기")
     back.click()
+    # The same part left in its summary and met again in its sheet: two steps back read the summary it left, at its scroll
+    # (a shorter window, so the summary scrolls).
+    page.set_viewport_size({"width": 1280, "height": 600})
+    page.locator("#world .node", has_text="수신 · traces").click()
+    lens_body = page.locator("#lens .lens-body")
+    lens_body.evaluate("e => { e.scrollTop = e.scrollHeight }")
+    left = lens_body.evaluate("e => e.scrollTop")
+    assert left > 20, left
+    page.locator("#lens .port").filter(has=page.get_by_text("traces", exact=True)).click()
+    page.locator("#lens .port", has_text="수신 · traces").click()
+    page.locator("#lens .lens-more").click()
+    expect(page.locator("#panel-title")).to_have_text("수신 · traces")
+    page.evaluate("history.go(-2)")
+    expect(page.locator("#panel")).to_be_hidden()
+    expect(page.locator("#lens-title")).to_have_text("수신 · traces")
+    expect(back).to_have_accessible_name("traces/1로 돌아가기")  # A0's own way back (it was reached from traces/1) stays
+    assert abs(lens_body.evaluate("e => e.scrollTop") - left) <= 1
+    page.set_viewport_size({"width": 1280, "height": 720})
+    page.locator("#world .node", has_text="traces/1").click()
+    page.locator("#lens .port", has_text="수신 · traces").click()
     expect(page.locator("#lens-title")).to_have_text("수신 · traces")
     back.click()
     expect(page.locator("#lens-title")).to_have_text("traces/1")

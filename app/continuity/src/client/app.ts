@@ -432,6 +432,8 @@ function returnFromVisit() {
 function restoreSurface(v: Visit) {
   const f = v.from;
   if (f.surface === 'sheet' && selected === f.selected) { sheetOpen = true; showReading(false, false); }
+  // The same part read in another surface since (A0 summary -> B -> A1 sheet, then two steps back): the summary it left.
+  else if (f.surface === 'lens' && selected === f.selected && sheetOpen) { sheetOpen = false; editing = false; showReading(false, false); }
   else if (f.surface === 'scope' && !selected) { scopeReading = true; renderScopeLens(); }
   sheetReturn = f.surface === 'sheet' ? f.sheetReturn : null;
   const body = f.surface === 'sheet' ? $('panel').querySelector('.panel-body') : f.surface === 'none' ? null : $('lens').querySelector('.lens-body');
