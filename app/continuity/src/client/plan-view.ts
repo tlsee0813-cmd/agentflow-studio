@@ -9,7 +9,7 @@ import { createPlan, selectItems, requestSnapshot, compareResults, parseScopeRev
 import { CONVERTER_HEADING, CONVERTER_INTENT, converterEvidence, converterExampleAnalysis, converterObservations } from '../shared/change-plan-example.js';
 import type { Box } from './map-layout.js';
 import { AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
-import { h, put, $, ago, fullTime, inspectorWidth } from './plan-dom.js';
+import { h, put, $, ago, fullTime, inspectorWidth, codeGate, codeNote } from './plan-dom.js';
 import { CONVERTER_KEY, CONDITION_LABEL, EVIDENCE_LABEL, exampleInput, projectInput, mapReply, secretLike, scopeInput, type Condition, type PlanInput } from './plan-source.js';
 import { requestPlan, requestScope } from './plan-request.js';
 import { emptyBundle, loadBundle, saveBundle, setAside, planFile, readPlanFile, type PlanBundle } from './plan-store.js';
@@ -989,7 +989,7 @@ export function createPlanView(host: PlanHost) {
     const reach = h('p', { class: 'fine', id: 'plan-reach' }, reachText());
     const ask = h('button', { type: 'button', id: 'plan-ask', onclick: () => void analyze() }) as HTMLButtonElement;
     askState(ask);
-    out.push(h('div', { class: 'pp-row pp-ask' }, ask, reach));
+    out.push(h('div', { class: 'pp-row pp-ask' }, ask, codeNote(canAsk && host.status().access === 'code', !!host.accessCode()), reach));
     if (!canAsk) out.push(h('p', { class: 'fine' }, host.status().ai === 'off' ? '서버에 AI 키가 없어 살펴볼 수 없어요. 초안은 남아요.' : 'AI 서버가 연결된 주소에서 살펴볼 수 있어요. 초안은 남아요.'));
     return out;
   }
@@ -1006,7 +1006,8 @@ export function createPlanView(host: PlanHost) {
     const p = plan(), why = staleness();
     btn.textContent = p ? (why === 'sentence' ? '고친 문장으로 살펴보기' : why === 'material' ? '바뀐 자료로 살펴보기' : 'AI로 다시 살펴보기') : 'AI로 살펴보기';
     btn.className = p && !why ? 'secondary small' : 'primary small';
-    btn.disabled = host.status().ai !== 'deepseek' || !s!.bundle.draft.trim();
+    const st = host.status();
+    codeGate(btn, st.ai === 'deepseek' && st.access === 'code', !!host.accessCode(), st.ai !== 'deepseek' || !s!.bundle.draft.trim());
   }
   /** The draft changed without a render: the stale line, the ask, what it would read and the request follow in place. */
   function syncStale() {

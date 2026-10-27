@@ -902,12 +902,13 @@ def overview_flow(browser, base, cases):
 def relation_visit_flow(browser, base, cases):
     """Following a relation keeps where it was followed from, apart from the composition path: the reading pane names that
     part and goes back to its selection, camera, surface and scroll; the browser's Back is the same step. Only explicit
-    relations record a visit; a visit that changed scene goes back by the context row's existing back, never by two."""
+    relations record a visit; a visit that changed scene goes back by the context row's existing back too, and the pane's line
+    takes the same way."""
     context = browser.new_context(viewport={"width": 1280, "height": 720})
     page = context.new_page()
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))
-    back = page.locator("#lens .visit-back")
+    back = page.locator("#lens .visit-line")
     page.goto(base + "/")
     page.locator("#import-file").set_input_files(str(cases / "oss-collector.json"))
     page.get_by_role("button", name="구성 ID 정의 접기", exact=True).click()
@@ -1025,7 +1026,7 @@ def relation_visit_flow(browser, base, cases):
     assert abs(body.evaluate("e => e.scrollTop") - scrolled) <= 1, (body.evaluate("e => e.scrollTop"), scrolled)
     expect(page.locator(".answer")).to_have_count(0)  # nothing was sent by coming back
     page.locator("#panel .links a", has_text="처리 · traces").click()
-    page.locator("#lens .visit-back").wait_for()
+    page.locator("#lens .visit-line").wait_for()
     page.go_back()
     expect(page.locator("#panel-title")).to_have_text("traces")
     expect(page.locator("#ask-input")).to_have_value("receiver 식별은 어디서 와?")
@@ -1060,8 +1061,8 @@ def relation_visit_flow(browser, base, cases):
     assert box["height"] <= 26 and box["x"] + box["width"] <= pane["x"] + pane["width"] - 16, (box, pane)
     back.click()
     expect(page.locator("#lens-title")).to_have_text(long)
-    # Out of the scope from a part: the scene changes, so the context row's back is the way back (one, not two), and it
-    # brings the part, its camera and the reading back; the folds the visit opened close again.
+    # Out of the scope from a part: the scene changes; the context row's back and the pane's line (where the reader looks) are
+    # the same way back, and it brings the part, its camera and the reading back; the folds the visit opened close again.
     page.locator(".frame-head", has_text="정적 실행본 대응").locator(".enter").click()
     in_scope(page, "정적 실행본 대응")
     page.locator("#world .node", has_text="수신 · traces").click()
@@ -1070,7 +1071,8 @@ def relation_visit_flow(browser, base, cases):
     page.locator("#lens .port", has_text="수신 설정 ID").click()
     expect(page.locator("#lens-title")).to_have_text("수신 설정 ID")
     in_scope(page, "구성 ID 정의")
-    expect(back).to_have_count(0)
+    expect(back).to_have_accessible_name("수신 · traces로 돌아가기")
+    expect(back).to_contain_text("정적 실행본 대응")
     expect(page.locator("#scene-back")).to_have_text(re.compile("정적 실행본 대응"))
     page.locator("#scene-back").click()
     in_scope(page, "정적 실행본 대응")
@@ -1091,7 +1093,7 @@ def relation_visit_flow(browser, base, cases):
     page.locator("#lens .port", has_text="@joplin/lib").click()
     expect(page.locator("#lens-title")).to_have_text("@joplin/lib")
     expect(page.locator("#scope-bar")).to_be_hidden()
-    expect(back).to_have_count(0)
+    expect(back).to_have_accessible_name("@joplin/app-desktop(으)로 돌아가기")  # followed from the scope's own reading
     expect(page.locator("#scene-back")).to_be_visible()
     expect(page.locator("#scene-back")).to_have_text(re.compile("@joplin/app-desktop"))
     assert "관계를 따라 왔어요" in page.locator("#scene-back").get_attribute("title")

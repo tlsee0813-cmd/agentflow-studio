@@ -138,6 +138,14 @@ export interface DraftTarget { area: string | null }
 export interface Point { x: number; y: number }
 export interface Layout { version: 'layout.1'; positions: Record<string, Point> }
 /** Single parent hypothesis. Absent parent key = root; revision tracks explicit name/note/parent changes, not views. */
+/** Places the person set by dragging, per container (a part id, or the layout's root key) and part id, relative to the
+ * container. Kept apart from the project (browser storage), and carried by a backup file as its optional top-level 'positions'. */
+export type ManualPositions = Record<string, Record<string, Point>>;
+/** A backup file: the project's own bytes, plus the manual places when there are any. Without them it is a plain project. */
+export interface Backup { project: Project; positions: ManualPositions | null }
+/** How a project was last looked at in this browser (folds and per-scope cameras), apart from the project data. Keys are part
+ * ids (for an example: its stable part keys); a camera's scope '' is the whole map. */
+export interface ViewState { folds: Record<string, boolean>; cameras: Record<string, { x: number; y: number; scale: number }> }
 export interface Containment { version:'containment.1'; parents:Record<string,string>; revisions:Record<string,number> }
 /** understanding (AREA17): derived descriptions per area ID, kept apart from Area.note (the user's words). */
 export interface Space { brief: Brief | null; areas: Area[]; relations: Relation[]; draftTarget: DraftTarget | null; layout: Layout; understanding: Record<string, AreaUnderstanding>; containment:Containment }
