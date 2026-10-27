@@ -2,15 +2,24 @@
  * read in the right pane beside the same map. The reading is made by the model from prepared material (studio.digest.1) only
  * when the person asks; the same material is never sent again (the cache), and without a reading the material itself is
  * what one reads. Each sentence names its sources (one click to the exact quote and its version) and at most two parts,
- * which the map marks without changing their status or description. Nothing here writes a project, a plan or a record. */
-import { DIGEST_KIND_LABEL, OUTCOME_KINDS } from '../shared/digest-api.js';
+ * which the map marks without changing their status or description. Nothing here writes a plan or a record.
+ * A saved project also takes a record pasted as it came (one textarea; no title, kind, version or part to give first). It is
+ * kept in the project as pasted (host.paste) and read only when the person asks, with the rest of the material (studio.digest.2):
+ * up to three readings of it, each on an exact quote of what was sent, its related parts shown as candidates. A part looked at
+ * when pasting is the reading's context, never where the record belongs; closing comes back to the scene the paste began from. */
+import { DIGEST_KIND_LABEL, OUTCOME_KINDS, quoteAt } from '../shared/digest-api.js';
 import { UI62_KEY, UI62_STAGES } from '../shared/return-material.js';
 import { clip } from '../shared/studio.js';
-import { ui62Reading, savedReading, readingInput } from './digest-source.js';
+import { ui62Reading, savedReading, readingInput, partLabel } from './digest-source.js';
 import { digestStore, askHash, makeReading } from './digest-store.js';
 import { askDigest, AskError, ERROR_TEXT } from './studio-api.js';
 import { secretLike } from './plan-source.js';
 import { h, put, fullTime, codeGate, codeNote } from './plan-dom.js';
+/** Paste drafts, per workspace entry (an imported copy has its own), in this browser apart from the project. A draft that looks
+ * like it holds a key stays in this tab only. */
+const PASTE_DRAFT_KEY = 'agentflow.studio.paste-draft.1';
+/** A note (what the record explains as it stands) carries no tag: it is neither a change nor a check. */
+const READING_KIND = { change: '변화', check: '확인 범위', open: '남은 판단', note: null };
 const STAGE_MEMORY = new Map();
 const short = (text, n) => { const t = text.replace(/\s+/g, ' ').trim(); return t.length > n ? `${t.slice(0, n)}…` : t; };
 /** A version named in a source's basis (a commit), else nothing. */
@@ -19,11 +28,39 @@ export function createReturnView(host) {
     const saved = digestStore(host.kv), memory = digestStore(null);
     let s = null, seq = 0;
     const storeFor = () => (host.current()?.kind === 'saved' ? saved : memory);
-    const partName = (id) => host.current()?.view.parts.find(p => p.id === id)?.name ?? '부분';
+    const memoryDrafts = new Map();
+    function draftOf(key) {
+        if (memoryDrafts.has(key))
+            return memoryDrafts.get(key);
+        try {
+            const v = JSON.parse(host.kv.getItem(PASTE_DRAFT_KEY) ?? '{}')[key];
+            return typeof v === 'string' ? v : '';
+        }
+        catch {
+            return '';
+        }
+    }
+    function keepDraft(key, text) {
+        memoryDrafts.set(key, text);
+        try {
+            const all = JSON.parse(host.kv.getItem(PASTE_DRAFT_KEY) ?? '{}');
+            if (text.trim() && !secretLike(text))
+                all[key] = text;
+            else
+                delete all[key];
+            const keys = Object.keys(all);
+            for (const k of keys.slice(0, Math.max(0, keys.length - 30)))
+                if (k !== key)
+                    delete all[k];
+            host.kv.setItem(PASTE_DRAFT_KEY, JSON.stringify(all));
+        }
+        catch { /* this tab keeps it */ }
+    }
+    const partName = (id) => { const v = host.current()?.view; return v ? partLabel(v, id) : '부분'; };
     /* ---------- material and the reading of it ---------- */
     function sources() {
         const o = host.current();
-        return o.key === UI62_KEY ? ui62Reading(o.project, s.stage) : savedReading(o.view, host.bundle());
+        return o.key === UI62_KEY ? ui62Reading(o.project, s.stage) : savedReading(o.view, host.bundle(), o.project.pasted);
     }
     /** Recompute the request for the material as it is now and look up a reading of exactly it (no call). */
     async function refresh() {
@@ -39,8 +76,9 @@ export function createReturnView(host) {
             s.focus = null;
         s.input = input;
         s.hash = hash;
-        s.reading = st.digest ? store.find(o.project.id, hash, input.ask, st.digest.model, st.digest.prompt) : null;
-        s.previous = o.key === UI62_KEY ? null : store.previous(o.project.id, hash);
+        const prompt = input.ask.schemaVersion === 'studio.digest.2' ? st.digest?.record : st.digest?.prompt;
+        s.reading = st.digest && prompt ? store.find(o.key, host.legacyKey(), hash, input.ask, st.digest.model, prompt) : null;
+        s.previous = o.key === UI62_KEY ? null : store.previous(o.key, host.legacyKey(), hash);
         render();
     }
     async function analyze() {
@@ -48,7 +86,8 @@ export function createReturnView(host) {
         if (!s || !o || !s.input || !s.hash || s.pending)
             return;
         const st = host.status();
-        if (st.ai !== 'deepseek' || !st.digest)
+        const prompt = s.input.ask.schemaVersion === 'studio.digest.2' ? st.digest?.record : st.digest?.prompt;
+        if (st.ai !== 'deepseek' || !st.digest || !prompt)
             return;
         const secret = s.input.ask.sources.find(x => secretLike(`${x.title}\n${x.text}\n${x.basis}`));
         if (secret) {
@@ -56,13 +95,14 @@ export function createReturnView(host) {
             render();
             return;
         }
-        const input = s.input, hash = s.hash, key = s.key, controller = new AbortController(), prompt = st.digest.prompt;
+        // The entry this reading is for, and where it is kept, are fixed now: a reply that comes back after a switch stays with it.
+        const input = s.input, hash = s.hash, key = s.key, controller = new AbortController(), store = storeFor(), legacy = host.legacyKey();
         s.pending = controller;
         s.error = null;
         render();
         try {
             const res = await askDigest(input.ask, controller.signal, host.accessCode());
-            const reading = makeReading(input, hash, res.model, prompt, res.reply), msg = storeFor().keep(o.project.id, reading);
+            const reading = makeReading(input, hash, res.model, prompt, res.reply), msg = store.keep(key, legacy, reading);
             if (s && s.key === key && s.hash === hash) {
                 s.reading = reading;
                 s.storeMsg = msg;
@@ -88,7 +128,7 @@ export function createReturnView(host) {
             return;
         if (!s || s.key !== o.key) {
             s = { key: o.key, stage: STAGE_MEMORY.get(o.key) ?? UI62_STAGES[0].id, view: { kind: 'reading' }, focus: null, input: null, hash: null, reading: null, previous: null,
-                pending: null, error: null, storeMsg: null, scroll: 0 };
+                pending: null, error: null, storeMsg: null, scroll: 0, pasteContext: null, back: null, pasteMsg: null, saving: false };
         }
         host.chrome();
         render();
@@ -97,11 +137,84 @@ export function createReturnView(host) {
     function close() {
         if (!s)
             return;
+        const back = s.back;
         s.pending?.abort();
         s = null;
+        host.open(null);
         host.mark([]);
         host.show(null);
         host.chrome();
+        if (back)
+            host.restoreScene(back);
+    }
+    /** The paste box, in this pane. context: the part being looked at (null from the reading itself); scene: where to come back to,
+     * captured by the host before opening the pane cleared the selection. */
+    function openPaste(context, scene) {
+        const o = host.current();
+        if (!o || o.kind !== 'saved')
+            return;
+        open();
+        if (!s)
+            return;
+        if (s.view.kind === 'reading')
+            s.scroll = document.querySelector('#lens .lens-body')?.scrollTop ?? 0;
+        s.pasteContext = context;
+        if (scene)
+            s.back = scene;
+        s.view = { kind: 'paste' };
+        s.pasteMsg = null;
+        render();
+        requestAnimationFrame(() => document.querySelector('#paste-text')?.focus({ preventScroll: true }));
+    }
+    async function savePaste() {
+        const o = host.current();
+        if (!s || !o || s.saving)
+            return;
+        const key = s.key, text = draftOf(key);
+        if (!text.trim()) {
+            s.pasteMsg = '붙여 넣을 글이 아직 없어요.';
+            render();
+            return;
+        }
+        if (secretLike(text)) {
+            s.pasteMsg = '키나 토큰처럼 보이는 글이 있어 저장하지 않았어요. 그 부분을 지우고 다시 저장하세요.';
+            render();
+            return;
+        }
+        // The box stays editable while saving: only the text that was saved leaves the draft. Whatever was written meanwhile stays,
+        // and the box stays open with it. A pane closed or reopened meanwhile is another state: it is only told by the draft.
+        const st = s;
+        st.saving = true;
+        render();
+        const done = await host.paste(text, st.pasteContext);
+        st.saving = false;
+        const kept = typeof done !== 'string', untouched = draftOf(key) === text;
+        if (kept && untouched)
+            keepDraft(key, '');
+        if (s !== st)
+            return;
+        if (!kept) {
+            st.pasteMsg = done;
+            render();
+            return;
+        }
+        const r = host.current()?.project.pasted.find(x => x.id === done.id);
+        const said = done.duplicate ? `같은 글을 ${r ? fullTime(r.at) : '앞서'}에 붙여 넣었어요. 새로 저장하지 않았어요.` : '기록을 저장했어요. ‘기록 읽기’로 읽어요.';
+        if (!untouched) {
+            st.pasteMsg = `${said} 저장하는 동안 쓴 글은 초안으로 남겨 두었어요.`;
+            render();
+            void refresh();
+            return;
+        }
+        st.pasteContext = null;
+        st.pasteMsg = null;
+        st.storeMsg = said;
+        await refresh();
+        const src = s === st ? sources().find(x => x.recordId === done.id) : null;
+        if (s === st && src) {
+            st.view = { kind: 'source', source: structuredClone(src), from: 'material', quote: null };
+            render();
+        }
     }
     function setStage(id) {
         if (!s || s.stage === id || s.pending)
@@ -135,9 +248,61 @@ export function createReturnView(host) {
             return [];
         const st = statements(r);
         // Before a sentence is chosen, mark the suggested reading, or the first actual decision's known parts.
+        if (s.focus?.list === 'records') {
+            const rel = recordReadings(r)[s.focus.n]?.related ?? [];
+            return s.focus.part && rel.some(c => c.partId === s.focus.part) ? [s.focus.part] : rel.map(c => c.partId);
+        }
         if (!s.focus)
             return st.read ? [st.read.partId] : st.open[0]?.partIds ?? [];
         return (s.focus.list === 'changes' ? st.changes : st.open)[s.focus.n]?.partIds ?? [];
+    }
+    /** A reading's readings of pasted records, with candidates only for parts still on the map (in real ids). */
+    function recordReadings(r) {
+        const live = (id) => !!id && !!host.current()?.view.parts.some(p => p.id === id);
+        return (r.reply.recordReadings ?? []).map(x => ({ ...x, source: r.cited[x.ref] ?? null,
+            related: x.related.map(c => ({ ...c, partId: r.parts[c.partId] ?? '' })).filter(c => live(c.partId)) }));
+    }
+    function quoteChip(src, quote, from) {
+        if (!src)
+            return null;
+        return h('button', { type: 'button', class: 'rr-ref rr-cite', title: `원문에서 보기 · ${src.title}`, onclick: (e) => { e.stopPropagation(); openSource(src, from, quote); } }, h('span', { class: 'rr-ref-title' }, `“${short(quote, 46)}”`));
+    }
+    /** Choosing a candidate (click or keyboard) chooses its sentence too: the map marks that part alone and its reason reads under
+     * the sentence. Choosing it again lets it go. The choice stays while a quote is read and comes back with the reading. */
+    function candidateChip(c, n) {
+        const on = s.focus?.list === 'records' && s.focus.n === n && s.focus.part === c.partId;
+        return h('button', { type: 'button', class: `rr-part cand${on ? ' on' : ''}`, 'aria-pressed': String(on), 'data-index': String(n), 'data-part': c.partId,
+            title: `관련 후보 · ${c.why}`, onclick: (e) => {
+                e.stopPropagation();
+                s.focus = on ? { list: 'records', n } : { list: 'records', n, part: c.partId };
+                render();
+                if (!on)
+                    host.reveal([c.partId]);
+                if (e.detail === 0)
+                    requestAnimationFrame(() => document.querySelector(`#lens .rr-part.cand[data-index="${n}"][data-part="${CSS.escape(c.partId)}"]`)?.focus({ preventScroll: true }));
+            } }, h('i', { 'aria-hidden': 'true' }), partName(c.partId));
+    }
+    function recordItem(x, n, from) {
+        const active = s.focus?.list === 'records' && s.focus.n === n;
+        const why = active ? x.related.find(c => c.partId === s.focus.part) ?? null : null;
+        const choose = (keyboard = false) => {
+            s.focus = { list: 'records', n };
+            render();
+            if (x.related.length)
+                host.reveal(x.related.map(c => c.partId));
+            if (keyboard)
+                requestAnimationFrame(() => document.querySelector(`.rr-st-select[data-list="records"][data-index="${n}"]`)?.focus({ preventScroll: true }));
+        };
+        return h('article', { class: `rr-st rr-rec${active ? ' on' : ''}`, 'aria-current': active ? 'true' : 'false', onclick: () => choose() }, h('button', { type: 'button', class: 'rr-st-select', 'data-list': 'records', 'data-index': String(n), onclick: (e) => { e.stopPropagation(); choose(e.detail === 0); } }, READING_KIND[x.kind] ? h('span', { class: `rr-rec-kind k-${x.kind}` }, READING_KIND[x.kind]) : null, h('span', { class: 'rr-text' }, x.text)), h('div', { class: 'rr-chips' }, quoteChip(x.source, x.quote, from), x.related.length ? h('span', { class: 'rr-cand-label' }, '관련 후보') : null, ...x.related.map(c => candidateChip(c, n))), why ? h('p', { class: 'rr-why', role: 'status' }, h('strong', {}, partName(why.partId)), ` · ${why.why}`) : null);
+    }
+    function recordSection(r, from, only) {
+        const all = recordReadings(r).map((x, n) => ({ x, n })).filter(({ x }) => !only || x.source?.recordId === only);
+        if (!all.length)
+            return null;
+        const titles = [...new Set(all.map(({ x }) => x.source?.recordId))];
+        const head = !only && titles.length === 1 && all[0].x.source
+            ? h('button', { type: 'button', class: 'rr-rec-src', title: '붙여넣은 원문 보기', onclick: () => openSource(all[0].x.source, from, null) }, all[0].x.source.title) : null;
+        return h('section', { class: 'rr-sec rr-records' }, h('h3', {}, only ? '이 기록에서 읽은 것' : '붙여넣은 기록에서'), head, ...all.map(({ x, n }) => recordItem(x, n, from)));
     }
     function chipFor(id, r, from) {
         const src = sourceOf(r, id);
@@ -190,7 +355,7 @@ export function createReturnView(host) {
     }
     function header(o) {
         const ex = o.key === UI62_KEY;
-        return h('header', { class: 'lens-head rr-head' }, h('h2', { id: 'lens-title' }, '돌아와 읽기', ex ? h('span', { class: 'tag', title: '공개 commit과 결과 문서에서 사후 편집한 자료예요. 당시 실시간으로 받은 기록이 아니에요.' }, '공개 자료 · 사후 편집') : null), ex ? stageSwitch() : null, h('div', { class: 'head-tools' }, h('button', { type: 'button', class: 'close', 'aria-label': '돌아와 읽기 닫기', title: '닫기 (Esc)', onclick: close }, '×')));
+        return h('header', { class: 'lens-head rr-head' }, h('h2', { id: 'lens-title' }, '돌아와 읽기', ex ? h('span', { class: 'tag', title: '공개 commit과 결과 문서에서 사후 편집한 자료예요. 당시 실시간으로 받은 기록이 아니에요.' }, '공개 자료 · 사후 편집') : null), ex ? stageSwitch() : null, h('div', { class: 'head-tools' }, o.kind === 'saved' && s.view.kind !== 'paste' ? h('button', { type: 'button', class: 'rr-paste-open', title: '작업 AI가 돌려준 글을 그대로 붙여 넣어요', onclick: () => openPaste(null, null) }, '기록 붙여넣기') : null, h('button', { type: 'button', class: 'close', 'aria-label': '돌아와 읽기 닫기', title: '닫기 (Esc)', onclick: close }, '×')));
     }
     function stageSwitch() {
         const st = s, cur = UI62_STAGES.find(x => x.id === st.stage);
@@ -201,7 +366,7 @@ export function createReturnView(host) {
         const st = s, r = st.reading, prev = !r ? st.previous : null, use = r ?? prev, from = r ? 'now' : 'previous';
         const out = [];
         const total = st.input?.coverage.total ?? 0, sent = st.input?.coverage.sent ?? 0;
-        const outcome = !!st.input?.ask.sources.some(x => OUTCOME_KINDS.includes(x.kind));
+        const outcome = !!st.input?.ask.sources.some(x => OUTCOME_KINDS.includes(x.kind) || x.kind === 'record');
         if (!st.input) {
             out.push(h('p', { class: 'fine' }, '자료를 읽는 중…'));
             return out;
@@ -210,13 +375,17 @@ export function createReturnView(host) {
             out.push(h('p', { class: 'rr-older', role: 'status' }, `앞서 보낸 자료 ${prev.coverage.sent}개로 만든 정리예요. 지금 원자료는 ${total}개이고, 새로 정리하면 ${sent}개를 보내요.`));
         if (use) {
             const m = statements(use);
+            const records = recordSection(use, from, null);
+            if (records)
+                out.push(records);
             if (m.read)
                 out.push(h('section', { class: 'rr-sec rr-read' }, h('h3', {}, '지금 읽을 부분'), h('div', { class: 'rr-readrow' }, h('button', { type: 'button', class: 'rr-go', onclick: () => host.selectPart(m.read.partId) }, partName(m.read.partId), h('span', { 'aria-hidden': 'true' }, ' ›')), h('p', {}, m.read.why), h('div', { class: 'rr-chips' }, ...m.read.refs.map(id => chipFor(id, use, from))), planMeet([m.read.partId]))));
             if (m.open.length)
                 out.push(h('section', { class: 'rr-sec' }, h('h3', {}, '정할 것'), ...m.open.map((x, n) => statement('open', n, x, use, from, h('div', { class: 'rr-acts' }, trialButton(x, use, from, '이걸로 시험'))))));
             if (m.changes.length)
                 out.push(h('section', { class: 'rr-sec' }, h('h3', {}, '달라진 점'), ...m.changes.map((x, n) => statement('changes', n, x, use, from, planMeet(x.partIds)))));
-            else
+            // A pasted record read in its own readings is not 'no result material'.
+            else if (!records)
                 out.push(h('section', { class: 'rr-sec' }, h('h3', {}, '달라진 점'), h('p', { class: 'rr-none' }, outcome ? '이 자료에서 프로그램의 달라진 점을 말하지 않았어요.' : '돌아온 결과 자료가 아직 없어요. 반영 실패나 변화 없음이라는 뜻은 아니에요.')));
             if (use.reply.notCovered.length)
                 out.push(h('section', { class: 'rr-sec rr-gaps' }, h('h3', {}, '이 자료로는 말할 수 없는 것'), h('ul', {}, ...use.reply.notCovered.map(t => h('li', {}, t)))));
@@ -260,22 +429,85 @@ export function createReturnView(host) {
             out.append(h('div', { class: 'access' }, h('label', { for: 'return-access' }, '접속 코드'), code));
         }
         const sent = state.input?.coverage.sent ?? 0, total = state.input?.coverage.total ?? 0;
-        const gated = status.access === 'code' && can, go = codeGate(h('button', { type: 'button', class: 'primary small', onclick: () => void analyze() }, state.previous ? '지금 자료로 정리하기' : 'AI로 정리하기'), gated, !!host.accessCode(), !can);
-        out.append(h('div', { class: 'pp-row' }, go, codeNote(gated, !!host.accessCode()), h('span', { class: 'fine' }, can ? `자료 ${sent < total ? `${total}개 중 ${sent}개` : `${sent}개`}를 보내요` : status.ai === 'off' ? '서버에 AI 키가 없어요 · 원자료로 읽어요' : status.ai === 'none' ? '이 주소에는 AI 서버가 없어요 · 원자료로 읽어요' : ''), state.view.kind === 'reading' ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { state.view = { kind: 'material' }; render(); } }, '원자료') : null));
+        // A pasted record is read with the rest of the material, newest records first; say when one goes only in part or not at all.
+        const recs = [...(state.input?.sources.values() ?? [])].filter(x => x.kind === 'record'), kept = host.current()?.project.pasted.length ?? 0;
+        const cut = recs.filter(x => (x.sent ?? 0) < x.text.length).length, left = Math.max(0, kept - recs.length);
+        const range = [cut ? `기록 ${cut}개는 앞부분만` : '', left ? `붙여넣은 기록 ${left}개는 이번에 안 보냄` : ''].filter(Boolean).join(' · ');
+        const label = recs.length ? '기록 읽기' : state.previous ? '지금 자료로 정리하기' : 'AI로 정리하기';
+        const gated = status.access === 'code' && can, go = codeGate(h('button', { type: 'button', class: 'primary small', onclick: () => void analyze() }, label), gated, !!host.accessCode(), !can);
+        out.append(h('div', { class: 'pp-row' }, go, codeNote(gated, !!host.accessCode()), h('span', { class: 'fine' }, can ? `자료 ${sent < total ? `${total}개 중 ${sent}개` : `${sent}개`}를 보내요${range ? ` · ${range}` : ''}` : status.ai === 'off' ? '서버에 AI 키가 없어요 · 원자료로 읽어요' : status.ai === 'none' ? '이 주소에는 AI 서버가 없어요 · 원자료로 읽어요' : ''), state.view.kind === 'reading' ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { state.view = { kind: 'material' }; render(); } }, '원자료') : null));
         return out;
     }
-    function sourceBody(src, from) {
+    /** The text with one quote marked (white space read loosely, as the reply check does); the first mark scrolls into view. */
+    function quoted(text, quote) {
+        const at = quote ? quoteAt(text, quote) : null;
+        if (!at)
+            return [text];
+        return [text.slice(0, at.at), h('mark', { class: 'rr-mark' }, text.slice(at.at, at.at + at.length)), text.slice(at.at + at.length)];
+    }
+    function sourceBody(src, from, quote) {
         const v = versionOf(src.basis);
-        return [h('article', { class: 'rr-source' }, h('p', { class: 'rr-source-kind' }, h('span', { class: `rr-kind k-${src.kind}` }, DIGEST_KIND_LABEL[src.kind]), v ? h('code', {}, v) : null, h('span', {}, src.id)), h('h3', {}, src.title), h('blockquote', { class: `rr-quote${src.kind === 'code' ? ' code' : ''}` }, src.text), from !== 'material' ? h('p', { class: 'fine' }, '이 정리를 만들 때 함께 보관한 자료예요.') : null, h('dl', { class: 'rr-meta' }, h('dt', {}, '판본·출처'), h('dd', {}, src.basis, src.url ? h('a', { href: src.url, target: '_blank', rel: 'noopener noreferrer' }, ' 공개 원문 ↗') : null), src.note ? h('dt', {}, '편집 설명') : null, src.note ? h('dd', {}, src.note) : null, src.partIds.length ? h('dt', {}, '다루는 부분') : null, src.partIds.length ? h('dd', { class: 'rr-chips' }, ...src.partIds.map(partChip)) : null))];
+        if (src.kind === 'record')
+            return recordBody(src, quote);
+        return [h('article', { class: 'rr-source' }, h('p', { class: 'rr-source-kind' }, h('span', { class: `rr-kind k-${src.kind}` }, DIGEST_KIND_LABEL[src.kind]), v ? h('code', {}, v) : null, h('span', {}, src.id)), h('h3', {}, src.title), h('blockquote', { class: `rr-quote${src.kind === 'code' ? ' code' : ''}` }, ...quoted(src.text, quote)), from !== 'material' ? h('p', { class: 'fine' }, '이 정리를 만들 때 함께 보관한 자료예요.') : null, h('dl', { class: 'rr-meta' }, h('dt', {}, '판본·출처'), h('dd', {}, src.basis, src.url ? h('a', { href: src.url, target: '_blank', rel: 'noopener noreferrer' }, ' 공개 원문 ↗') : null), src.note ? h('dt', {}, '편집 설명') : null, src.note ? h('dd', {}, src.note) : null, src.partIds.length ? h('dt', {}, '다루는 부분') : null, src.partIds.length ? h('dd', { class: 'rr-chips' }, ...src.partIds.map(partChip)) : null))];
+    }
+    /** A pasted record: what was read from it (when a reading covers it), then the text as pasted with the quote marked. The
+     * time is when it was added here; the part is where the person was looking, shown as such. */
+    function recordBody(src, quote) {
+        const kept = host.current()?.project.pasted.find(x => x.id === src.recordId) ?? null;
+        const use = shown(), from = s?.reading ? 'now' : 'previous';
+        const read = use && src.recordId ? recordSection(use, from, src.recordId) : null;
+        const sentTo = s?.input?.sources.get(src.id)?.sent;
+        const ctx = kept?.context && host.current()?.view.parts.some(p => p.id === kept.context) ? kept.context : null;
+        return [h('article', { class: 'rr-source rr-record' }, h('p', { class: 'rr-source-kind' }, h('span', { class: 'rr-kind k-record' }, DIGEST_KIND_LABEL.record), kept ? h('span', {}, `붙여넣음 ${fullTime(kept.at)}`) : null), h('h3', { title: '원문의 첫 줄이에요' }, src.title), ctx ? h('p', { class: 'rr-context' }, h('span', {}, '붙일 때 보던 부분'), partChip(ctx)) : null, 
+            // Arrived by a quote: the original, with the quote marked, is what this view is for (the readings are one step back).
+            quote ? null : read ?? h('p', { class: 'rr-lead' }, s?.pending ? '읽는 중이에요…' : '아직 이 기록을 읽지 않았어요.'), h('blockquote', { class: 'rr-quote rr-raw' }, ...quoted(kept?.text ?? src.text, quote)), sentTo !== undefined && sentTo < (kept?.text ?? src.text).length ? h('p', { class: 'fine' }, `읽을 때 앞 ${sentTo.toLocaleString()}자만 보내요 · 전체 ${(kept?.text ?? src.text).length.toLocaleString()}자`) : null)];
+    }
+    function pasteBody(o) {
+        const st = s, text = draftOf(st.key), ctx = st.pasteContext && o.view.parts.some(p => p.id === st.pasteContext) ? st.pasteContext : null;
+        const area = h('textarea', { id: 'paste-text', class: 'rr-paste', rows: '14', spellcheck: 'false', 'aria-label': '붙여 넣을 기록 원문',
+            placeholder: '작업 AI가 돌려준 보고나 대화를 그대로 붙여 넣어요.' });
+        area.value = text;
+        const count = h('span', { class: 'fine rr-count' }, text ? `${text.length.toLocaleString()}자` : '');
+        const warn = h('p', { class: 'pp-error', role: 'status', hidden: !secretLike(text) }, '키나 토큰처럼 보이는 글이 있어요. 이 탭에만 두고 저장·전송하지 않아요.');
+        area.addEventListener('keydown', e => { if (e.key === 'Escape') {
+            e.stopPropagation();
+            backToReading();
+        } });
+        area.addEventListener('input', () => {
+            keepDraft(st.key, area.value);
+            count.textContent = area.value ? `${area.value.length.toLocaleString()}자` : '';
+            warn.hidden = !secretLike(area.value);
+        });
+        return [h('section', { class: 'rr-sec rr-paste-box' }, h('h3', {}, '기록 붙여넣기'), h('p', { class: 'fine' }, '나누거나 종류·부분을 고르지 않아도 돼요. 저장한 뒤 ‘기록 읽기’를 누르면 읽어요.'), ctx ? h('p', { class: 'rr-context' }, h('span', {}, '보던 부분'), partChip(ctx), h('button', { type: 'button', class: 'link-button quiet', title: '읽기 맥락에서 빼요', onclick: () => { st.pasteContext = null; render(); } }, '빼기')) : null, area, warn, count, st.pasteMsg ? h('p', { class: 'pp-error', role: 'alert' }, st.pasteMsg) : null)];
+    }
+    function pasteFooter() {
+        const st = s;
+        return h('footer', { class: 'lens-foot rr-foot' }, h('div', { class: 'pp-row' }, h('button', { type: 'button', class: 'primary small', disabled: st.saving, onclick: () => void savePaste() }, st.saving ? '저장 중…' : '기록 저장'), h('span', { class: 'fine' }, '저장해도 AI에 보내지 않아요'), h('button', { type: 'button', class: 'link-button quiet', onclick: backToReading }, '닫기')));
     }
     function render() {
         const o = host.current();
         if (!s || !o || o.key !== s.key)
             return;
-        const back = (label) => h('button', { type: 'button', class: 'rr-back', onclick: backToReading }, h('span', { 'aria-hidden': 'true' }, '←'), label);
+        // The way back stays at the top of the pane while a long original scrolls under it.
+        const back = (label) => h('div', { class: 'rr-backbar' }, h('button', { type: 'button', class: 'rr-back', onclick: backToReading }, h('span', { 'aria-hidden': 'true' }, '←'), label));
         const body = h('div', { class: 'lens-body rr-body' });
+        if (s.view.kind === 'paste') {
+            // Re-rendering keeps the caret where the person was typing.
+            const area = document.querySelector('#paste-text'), caret = area ? [area.selectionStart, area.selectionEnd, document.activeElement === area] : null;
+            put(body, back('정리로'), ...pasteBody(o));
+            host.show([header(o), body, pasteFooter()]);
+            host.mark(s.pasteContext ? [s.pasteContext] : []);
+            const next = document.querySelector('#paste-text');
+            if (next && caret) {
+                next.setSelectionRange(caret[0], caret[1]);
+                if (caret[2])
+                    next.focus({ preventScroll: true });
+            }
+            return;
+        }
         if (s.view.kind === 'source')
-            put(body, back('정리로'), ...sourceBody(s.view.source, s.view.from));
+            put(body, back('정리로'), ...sourceBody(s.view.source, s.view.from, s.view.quote));
         else if (s.view.kind === 'material') {
             const all = sources();
             put(body, back('정리로'), h('section', { class: 'rr-sec rr-material' }, h('h3', {}, '원자료', h('small', {}, `${all.length}`)), h('ol', {}, ...all.map(x => h('li', {}, h('button', { type: 'button', class: 'rr-src', onclick: () => openSource(x, 'material') }, h('span', { class: `rr-kind k-${x.kind}` }, DIGEST_KIND_LABEL[x.kind]), h('strong', {}, x.title), h('small', {}, [versionOf(x.basis), x.partIds.map(partName).join(' · ')].filter(Boolean).join(' · '))))))));
@@ -283,16 +515,20 @@ export function createReturnView(host) {
         else
             put(body, ...readingBody(o));
         host.show([header(o), body, footer(o)]);
-        host.mark(s.view.kind === 'source' ? s.view.source.partIds : focusParts());
+        const v = s.view;
+        host.open(s.focus?.list === 'records' && s.focus.part ? s.focus.part : null);
+        host.mark(v.kind === 'source' ? (v.source.kind === 'record' ? focusParts() : v.source.partIds) : focusParts());
+        if (v.kind === 'source' && v.quote)
+            requestAnimationFrame(() => document.querySelector('#lens .rr-mark')?.scrollIntoView({ block: 'center' }));
     }
-    function openSource(source, from) {
+    function openSource(source, from, quote = null) {
         if (!s)
             return;
         if (s.view.kind === 'reading')
             s.scroll = document.querySelector('#lens .lens-body')?.scrollTop ?? 0;
-        s.view = { kind: 'source', source: structuredClone(source), from };
+        s.view = { kind: 'source', source: structuredClone(source), from, quote };
         render();
-        requestAnimationFrame(() => document.querySelector('#lens .rr-back')?.focus());
+        requestAnimationFrame(() => document.querySelector('#lens .rr-back')?.focus({ preventScroll: true }));
     }
     function backToReading() {
         if (!s)
@@ -305,7 +541,7 @@ export function createReturnView(host) {
     }
     return {
         isOpen: () => !!s,
-        open, close, toggle: () => (s ? close() : open()),
+        open, close, toggle: () => (s ? close() : open()), openPaste,
         /** Re-render (the pane came back after a part's reading, or the AI status arrived). */
         render: () => { if (s) {
             render();

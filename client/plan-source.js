@@ -6,6 +6,7 @@ import { parsePlanAnalysis } from '../shared/change-plan.js';
 import { SCOPE_BYTES } from '../shared/scope-api.js';
 import { PLAN_BYTES } from '../shared/plan-api.js';
 import { fullTime } from './plan-dom.js';
+import { secretLike } from '../shared/secret.js';
 export const CONVERTER_KEY = 'ex-converter';
 export const CONDITION_LABEL = { A: '파일별 결과가 있는 코드', B: '파일별 결과가 없는 코드' };
 /** The converter map: areas, children and relations only (no records, returns or anchors). */
@@ -32,9 +33,8 @@ export const EVIDENCE_LABEL = { user: '사용자 발언', report: '담당 보고
 const TEXT_MAX = 12000;
 /** The plan contract refuses control characters; records may carry them from pasted terminal output. */
 const clean = (text) => text.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, ' ');
-/** Looks like a credential: never sent, the person is told which text holds it. */
-const SECRET = /\bsk-[A-Za-z0-9_-]{16,}|\bgh[pousr]_[A-Za-z0-9]{20,}|\bgithub_pat_[A-Za-z0-9_]{20,}|\bAKIA[0-9A-Z]{16}\b|\bxox[abpr]-[A-Za-z0-9-]{10,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|\bAIza[0-9A-Za-z_-]{30,}/;
-export const secretLike = (text) => SECRET.test(text);
+/** Looks like a credential: never sent, the person is told which text holds it (one rule, shared with the domain). */
+export { secretLike } from '../shared/secret.js';
 const bytes = (v) => new TextEncoder().encode(JSON.stringify(v)).length;
 /** The draft sentence as its own source, so the model can ground items in what was written now rather than an older plan. */
 export function intentEvidence(intent, example) {

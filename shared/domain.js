@@ -1,8 +1,9 @@
-import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL } from './types.js';
+import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, PASTED_TEXT_LIMIT } from './types.js';
 import { ensure, text, validateEnvelope, digest, sha256, parseResultFile, resultSourceText, parseProject, POSITION_LIMIT, SUMMARY_LIMIT } from './validation.js';
 import { planFacts, planFactsText } from './plan-facts.js';
 import { areaPath, childrenOf } from './hierarchy.js';
 import { outcomeOf, contextLinks } from './outcome.js';
+import { secretLike } from './secret.js';
 export { planFacts, planFactsText } from './plan-facts.js';
 const uid = (prefix) => `${prefix}_${crypto.randomUUID()}`;
 const now = () => new Date().toISOString();
@@ -10,7 +11,7 @@ const copy = (value) => structuredClone(value);
 const WORK_KEYS = ['understanding', 'scope', 'next', 'checks'];
 const CONDITION_KEYS = ['scope', 'checks'];
 export function createProject() {
-    return { schemaVersion: SCHEMA, id: uid('P'), revision: 1, name: '나의 프로젝트', sources: [], bases: [], tasks: [], currentTaskId: null, draft: '', answerDraft: '', basisDraft: '', basisEdits: {}, draftKind: 'request', pending: null, notice: null, space: { brief: null, areas: [], relations: [], draftTarget: null, layout: { version: 'layout.1', positions: {} }, understanding: {}, containment: { version: 'containment.1', parents: {}, revisions: {} } } };
+    return { schemaVersion: SCHEMA, id: uid('P'), revision: 1, name: '나의 프로젝트', sources: [], bases: [], tasks: [], currentTaskId: null, draft: '', answerDraft: '', basisDraft: '', basisEdits: {}, draftKind: 'request', pending: null, notice: null, space: { brief: null, areas: [], relations: [], draftTarget: null, layout: { version: 'layout.1', positions: {} }, understanding: {}, containment: { version: 'containment.1', parents: {}, revisions: {} } }, pasted: [] };
 }
 export function taskOf(p, id = p.currentTaskId) { const t = p.tasks.find(t => t.id === id); ensure(t, 'TASK_MISSING'); return t; }
 function change(p) { return { ...copy(p), revision: p.revision + 1, notice: null }; }
@@ -688,6 +689,21 @@ export function markHandoff(p, id, text, method, exportRevision = p.revision, re
         // AREA17: what the return file's description may build on, captured now (not the request-time background copy).
         anchor });
     return n;
+}
+/** project.8: keeps a pasted record exactly as given (no trimming or merging) with the time it was added here and, optionally, the
+ * part being looked at. The very same text already kept is that record again: nothing is added and the revision stays. */
+/** A backup's pasted records that look like they hold a key: such a file is not taken in (nothing is stored). */
+export function secretPasted(p) { return p.pasted.filter(r => secretLike(r.text)); }
+export function pasteRecord(p, value, context) {
+    const same = p.pasted.find(r => r.text === value);
+    if (same)
+        return { project: p, record: same, duplicate: true };
+    text(value, PASTED_TEXT_LIMIT);
+    ensure(!secretLike(value), 'SECRET_LIKE');
+    ensure(context === null || p.space.areas.some(a => a.id === context));
+    const n = change(p), record = { id: uid('N'), text: value, at: now(), context };
+    n.pasted.push(record);
+    return { project: n, record: copy(record), duplicate: false };
 }
 export function restore(p) {
     return { ...copy(p), pending: null, notice: p.pending ? '중단된 요청의 입력을 복구했습니다. 자동으로 다시 전송하지 않습니다.' : null };

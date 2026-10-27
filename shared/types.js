@@ -1,4 +1,6 @@
-export const SCHEMA = 'idea015.project.7';
+export const SCHEMA = 'idea015.project.8';
+/** project.7 had no pasted records: it reads as none (pasted=[]); nothing else changes. */
+export const V7_SCHEMA = 'idea015.project.7';
 export const V6_SCHEMA = 'idea015.project.6';
 /** project.5 had no area understanding and no export anchors: every area reads none, every export anchor=null (no backfill). */
 export const V5_SCHEMA = 'idea015.project.5';
@@ -25,6 +27,8 @@ export const ITEM_LIMIT = 100_000;
 export const REQUEST_BYTES = 131072;
 // Only when full context exceeds REQUEST_BYTES: older, never-edited requests may use marked excerpts.
 export const EXCERPT_CHARS = 200;
+export const PASTED_TEXT_LIMIT = 60000;
+export const PASTED_LIMIT = 500;
 export const SOURCE_LABEL = {
     request: '사용자 요청 원문', report: '가져온 구현 보고 · 앱 미검증',
     evidence: '사용자가 가져온 관찰·검사 자료 · 앱 미검증', test_answer: '합성 시험답변 · 실제 요구 아님',

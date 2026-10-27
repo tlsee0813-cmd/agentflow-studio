@@ -1,20 +1,53 @@
 import { RECORD_LABEL, clip } from '../shared/studio.js';
-import { DIGEST_SCHEMA, DIGEST_BYTES, digestBytes } from '../shared/digest-api.js';
+import { DIGEST_SCHEMA, DIGEST2_SCHEMA, DIGEST_BYTES, RECORD_SENT_MAX, digestBytes } from '../shared/digest-api.js';
 import { ui62Sources, ui62Keys } from '../shared/return-material.js';
 import { EVIDENCE_LABEL } from './plan-source.js';
 import { fullTime } from './plan-dom.js';
 const TEXT_MAX = 6000, NOTE_MAX = 2000;
 const clean = (text) => text.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, ' ');
-const excerptNote = (text, note) => [text.length > TEXT_MAX ? `AI에는 원자료 ${text.length}자 중 앞 ${clip(text, TEXT_MAX).length}자만 보냄. 인용자료 보관본은 전체 내용.` : '', note].filter(Boolean).join(' · ');
+const excerptNote = (text, sent, note) => [sent < text.length ? `AI에는 원자료 ${text.length}자 중 앞 ${sent}자만 보냄. 인용자료 보관본은 전체 내용.` : '', note].filter(Boolean).join(' · ');
+/** A pasted record's preview line: its first non-empty line, as written. A preview, not a title the record claims. */
+export const recordTitle = (text, n = 80) => { const line = text.split('\n').find(l => l.trim())?.trim() ?? ''; return line.length > n ? `${line.slice(0, n)}…` : line; };
+/** How many of the newest pasted records lead the material, ahead of whatever else the project holds. */
+const LEAD_RECORDS = 3;
 const RECORD_KIND = { request: 'user', answer: 'user', decision: 'user', report: 'report', evidence: 'test' };
 export function ui62Reading(project, stageId) {
     const keys = ui62Keys(project);
     return ui62Sources(stageId).map(s => ({ id: s.id, kind: s.kind, title: s.title, text: s.text, note: s.note, basis: s.basis, url: s.url,
         partIds: s.partKeys.map(k => keys.get(k)).filter(Boolean) }));
 }
-/** A saved project: its own records (newest first), then what the person attached to its change plan. */
-export function savedReading(view, bundle) {
+/** A part's name as read beside the map; where another part has the same name, with its parents (up to two) in front until
+ * it differs: 'PC 앱 · 보정' and '장치 펌웨어 · 보정'. */
+export function partLabel(view, id) {
+    const of = (x) => (x ? view.parts.find(p => p.id === x) ?? null : null), part = of(id);
+    if (!part)
+        return '부분';
+    const same = view.parts.filter(p => p.id !== id && p.name === part.name);
+    if (!same.length)
+        return part.name;
+    const pathOf = (p, n) => { const q = [p.name]; for (let u = of(p.parentId), k = 0; u && k < n; u = of(u.parentId), k++)
+        q.unshift(u.name); return q.join(' · '); };
+    let label = part.name;
+    for (let n = 1; n <= 2; n++) {
+        label = pathOf(part, n);
+        if (!same.some(o => pathOf(o, n) === label))
+            break;
+    }
+    return label;
+}
+/** A pasted record as material: the text as pasted, never located (its context part is a note only). */
+function pastedSource(r, alias, view) {
+    const at = r.context && view.parts.some(p => p.id === r.context) ? partLabel(view, r.context) : null;
+    return { id: alias, kind: 'record', title: clip(recordTitle(clean(r.text)) || '붙여넣은 기록', 200), text: clean(r.text),
+        note: ['사용자가 붙여넣은 원문 그대로', at ? `붙일 때 보던 부분: ${at} (읽기 맥락일 뿐 본문 전체가 이 부분에 관한 근거는 아님)` : ''].filter(Boolean).join(' · '),
+        basis: `붙여넣은 시각 ${fullTime(r.at)} (원문 작성·판본 시각 아님)`, partIds: [], url: null, recordId: r.id };
+}
+/** A saved project: the newest pasted records first (so a large project's other material never pushes a new one out), then the
+ * material the person attached to its change plan, its own records (newest first) and any older pasted records. */
+export function savedReading(view, bundle, pasted = []) {
     const out = [], name = (id) => (id ? view.parts.find(p => p.id === id)?.name ?? null : null);
+    const newest = [...pasted].reverse().map((r, i) => pastedSource(r, `N${String(i + 1).padStart(2, '0')}`, view));
+    out.push(...newest.slice(0, LEAD_RECORDS));
     const plan = bundle?.plan ?? null, items = plan?.analysis.items ?? [];
     const citedBy = (ref) => [...new Set(items.filter(i => i.refs.includes(ref)).flatMap(i => i.partIds))].filter(id => view.parts.some(p => p.id === id));
     for (const [i, o] of [...(bundle?.observations ?? [])].reverse().entries()) {
@@ -50,6 +83,7 @@ export function savedReading(view, bundle) {
             text: clean(r.text), note: '', basis: `프로젝트 기록 · ${fullTime(r.at)}`,
             partIds: r.partId && part ? [r.partId] : [], url: null });
     }
+    out.push(...newest.slice(LEAD_RECORDS));
     return out;
 }
 /** The request: every part (aliased), then sources in the given order up to the source/byte caps. Coverage counts all material. */
@@ -59,22 +93,33 @@ export function readingInput(o, all, bundle) {
     const ap = (ids) => ids.map(id => alias.get(id)).filter((x) => !!x);
     const plan = bundle?.plan ?? null;
     const ask = {
-        schemaVersion: DIGEST_SCHEMA,
+        // Material with a pasted record is read under digest.2; anything else exactly as before.
+        schemaVersion: all.slice(0, 48).some(s => s.kind === 'record') ? DIGEST2_SCHEMA : DIGEST_SCHEMA,
         project: { name: clip(o.project.name, 120), purpose: o.project.space.brief ? clip(clean(o.project.space.brief.text), 2000) : null },
         parts: o.view.parts.slice(0, 200).map(p => ({ id: alias.get(p.id), name: clip(p.name, 120), note: clip(clean(p.note), 2000), parentId: p.parentId ? alias.get(p.parentId) ?? null : null })),
         sources: [],
         plan: plan ? { intent: clip(clean(plan.intent), 6000), items: plan.analysis.items.slice(0, 32).map(i => ({ title: clip(i.title, 200), partIds: ap(i.partIds).slice(0, 32) })) } : null
     };
     const sources = new Map();
+    const room = DIGEST_BYTES - 256;
     for (const s of all.slice(0, 48)) {
-        const note = excerptNote(s.text, s.note);
-        const sent = { id: s.id, kind: s.kind, title: s.title, text: clip(s.text, TEXT_MAX), note: clip(note, NOTE_MAX), basis: s.basis, partIds: ap(s.partIds).slice(0, 32) };
+        const record = s.kind === 'record';
+        let text = clip(s.text, record ? RECORD_SENT_MAX : TEXT_MAX);
+        const sent = { id: s.id, kind: s.kind, title: s.title, text, note: clip(excerptNote(s.text, text.length, s.note), NOTE_MAX), basis: s.basis, partIds: ask.schemaVersion === DIGEST2_SCHEMA && record ? [] : ap(s.partIds).slice(0, 32) };
         ask.sources.push(sent);
-        if (digestBytes(ask) > DIGEST_BYTES - 256) {
+        // A pasted record takes the room that is left rather than being dropped, down to a readable excerpt.
+        for (let g = 0; record && digestBytes(ask) > room && text.length > 1500 && g < 40; g++) {
+            text = clip(text, Math.floor(text.length * 0.9));
+            sent.text = text;
+            sent.note = clip(excerptNote(s.text, text.length, s.note), NOTE_MAX);
+        }
+        if (digestBytes(ask) > room) {
             ask.sources.pop();
+            if (record)
+                continue;
             break;
         }
-        sources.set(s.id, { ...s, partIds: sent.partIds.map(id => parts.get(id)), note });
+        sources.set(s.id, { ...s, partIds: sent.partIds.map(id => parts.get(id)), note: excerptNote(s.text, text.length, s.note), ...(record ? { sent: text.length } : {}) });
     }
     return { ask, sources, parts, coverage: { total: all.length, sent: ask.sources.length } };
 }

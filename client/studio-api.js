@@ -18,7 +18,8 @@ export async function aiStatus() {
         const v = await res.json();
         if (!res.ok || !['deepseek', 'off'].includes(v?.ai))
             return { ai: 'none', model: null, access: 'open' };
-        const d = v.digest, digest = d && typeof d.model === 'string' && typeof d.prompt === 'string' && /^[\w.-]{1,80}$/.test(d.model) && /^d1-[0-9a-f]{12}$/.test(d.prompt) ? { model: d.model, prompt: d.prompt } : null;
+        const d = v.digest, digest = d && typeof d.model === 'string' && typeof d.prompt === 'string' && /^[\w.-]{1,80}$/.test(d.model) && /^d1-[0-9a-f]{12}$/.test(d.prompt)
+            ? { model: d.model, prompt: d.prompt, record: typeof d.record === 'string' && /^d2-[0-9a-f]{12}$/.test(d.record) ? d.record : null } : null;
         return { ai: v.ai, model: typeof v.model === 'string' ? v.model : null, access: v.access === 'code' ? 'code' : 'open', digest };
     }
     catch {

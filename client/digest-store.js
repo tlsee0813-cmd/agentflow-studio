@@ -1,4 +1,4 @@
-import { DIGEST_SCHEMA, DIGEST_KINDS, validateDigestReply } from '../shared/digest-api.js';
+import { DIGEST_SCHEMA, DIGEST2_SCHEMA, DIGEST_KINDS, validateDigestReply } from '../shared/digest-api.js';
 export const DIGEST_KEY = 'agentflow.studio.digest.1';
 const PER_PROJECT = 4, PROJECTS = 30;
 export async function askHash(ask) {
@@ -6,7 +6,7 @@ export async function askHash(ask) {
     return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
 }
 export function makeReading(input, hash, model, prompt, reply) {
-    const refs = new Set([...reply.changes, ...reply.open].flatMap(s => s.refs).concat(reply.read?.refs ?? []));
+    const refs = new Set([...reply.changes, ...reply.open].flatMap(s => s.refs).concat(reply.read?.refs ?? [], (reply.recordReadings ?? []).map(x => x.ref)));
     const cited = {};
     for (const r of refs) {
         const s = input.sources.get(r);
@@ -36,12 +36,17 @@ function readable(v) {
             || !Array.isArray(s.partIds) || s.partIds.length > 32 || s.partIds.some(p => typeof p !== 'string' || !alias.has(p)) || new Set(s.partIds).size !== s.partIds.length
             || !(s.url === null || (typeof s.url === 'string' && /^https?:\/\//.test(s.url))))
             return null;
+        // A pasted record: never located, and how much of it was sent (its quotes are checked against that excerpt only).
+        if (s.kind === 'record' && (s.partIds.length || typeof s.recordId !== 'string' || !Number.isSafeInteger(s.sent) || s.sent < 1 || s.sent > s.text.length))
+            return null;
     }
     const reading = v;
     // Previous readings have no current request. Recheck their reply using only the frozen citations and aliases they hold.
-    const ask = { schemaVersion: DIGEST_SCHEMA, project: { name: '보관 정리', purpose: null }, plan: null,
+    const two = isObj(v.reply) && Object.hasOwn(v.reply, 'recordReadings');
+    const ask = { schemaVersion: two ? DIGEST2_SCHEMA : DIGEST_SCHEMA, project: { name: '보관 정리', purpose: null }, plan: null,
         parts: partEntries.map(([id]) => ({ id, name: id, note: '', parentId: null })),
-        sources: Object.values(reading.cited).map(s => ({ ...s, partIds: s.partIds.map(id => alias.get(id)).filter((id) => !!id) })) };
+        sources: Object.values(reading.cited).map(s => ({ id: s.id, kind: s.kind, title: s.title, text: s.kind === 'record' ? s.text.slice(0, s.sent) : s.text, note: s.note, basis: s.basis,
+            partIds: s.partIds.map(id => alias.get(id)).filter((id) => !!id) })) };
     try {
         validateDigestReply(reading.reply, ask);
         return reading;
@@ -66,16 +71,16 @@ export function digestStore(kv) {
             return null;
         }
     };
-    const list = (projectId) => {
-        const mem = memory.get(projectId);
+    const list = (key, legacy) => {
+        const mem = memory.get(key);
         if (mem)
             return mem;
-        const all = load(), raw = all && Array.isArray(all[projectId]) ? all[projectId] : [];
-        return raw.map(readable).filter((x) => !!x);
+        const all = load(), own = all && Object.hasOwn(all, key) ? all[key] : legacy !== null && all && Object.hasOwn(all, legacy) ? all[legacy] : null;
+        return (Array.isArray(own) ? own : []).map(readable).filter((x) => !!x);
     };
     return {
-        find(projectId, hash, ask, model, prompt) {
-            const hit = list(projectId).find(x => x.hash === hash && x.model === model && x.prompt === prompt);
+        find(key, legacy, hash, ask, model, prompt) {
+            const hit = list(key, legacy).find(x => x.hash === hash && x.model === model && x.prompt === prompt);
             if (!hit)
                 return null;
             try {
@@ -86,26 +91,26 @@ export function digestStore(kv) {
                 return null;
             }
         },
-        previous(projectId, hash) { return list(projectId).find(x => x.hash !== hash) ?? null; },
-        keep(projectId, reading) {
-            const next = [reading, ...list(projectId).filter(x => !(x.hash === reading.hash && x.model === reading.model && x.prompt === reading.prompt))].slice(0, PER_PROJECT);
-            memory.set(projectId, next);
+        previous(key, legacy, hash) { return list(key, legacy).find(x => x.hash !== hash) ?? null; },
+        keep(key, legacy, reading) {
+            const next = [reading, ...list(key, legacy).filter(x => !(x.hash === reading.hash && x.model === reading.model && x.prompt === reading.prompt))].slice(0, PER_PROJECT);
+            memory.set(key, next);
             if (!kv)
                 return null;
             const all = load();
             if (!all)
                 return '이 브라우저의 정리 보관 자리를 읽지 못해 새로 저장하지 않았어요. 이 탭에서만 보여요.';
-            all[projectId] = next;
+            all[key] = next;
             const keys = Object.keys(all);
             for (const k of keys.slice(0, Math.max(0, keys.length - PROJECTS)))
-                if (k !== projectId)
+                if (k !== key)
                     delete all[k];
             try {
                 const text = JSON.stringify({ version: 'studio.digest-cache.1', projects: all });
                 kv.setItem(DIGEST_KEY, text);
                 if (kv.getItem(DIGEST_KEY) !== text)
                     throw new Error('LOST_WRITE');
-                memory.delete(projectId);
+                memory.delete(key);
                 return null;
             }
             catch {

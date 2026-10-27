@@ -3,12 +3,19 @@
  * bound to the sources it rests on and to at most two parts those sources are about. Nothing here writes a project, a plan,
  * a record or a return; a reply is a reading aid and never becomes a part's status or description. */
 export const DIGEST_SCHEMA = 'studio.digest.1';
+/** studio.digest.2: digest.1 plus material the person pasted as it came (kind 'record') and, in the reply, recordReadings: a few
+ * readings of that material, each resting on an exact quote of what was sent, with related parts only as candidates. A record
+ * is never outcome material and never located (partIds []), so the checks of changes, read and open stay exactly as in digest.1. */
+export const DIGEST2_SCHEMA = 'studio.digest.2';
+/** A pasted record may go longer than other material; the whole request still has to fit DIGEST_BYTES. */
+export const RECORD_SENT_MAX = 12000;
 export const DIGEST_BYTES = 65536;
-export const DIGEST_KINDS = ['user', 'direction', 'plan', 'authored', 'report', 'code', 'test', 'review', 'result'];
+export const DIGEST_KINDS = ['user', 'direction', 'plan', 'authored', 'report', 'code', 'test', 'review', 'result', 'record'];
 export const OUTCOME_KINDS = ['authored', 'report', 'code', 'test', 'review', 'result'];
 export const DIGEST_KIND_LABEL = {
-    user: '사용자 기록', direction: '방향 기록', plan: '변경안 자료', authored: '작성자 설명', report: '작업 보고', code: '코드', test: '검사 기록', review: '검토·검사 기록', result: '돌아온 기록'
+    user: '사용자 기록', direction: '방향 기록', plan: '변경안 자료', authored: '작성자 설명', report: '작업 보고', code: '코드', test: '검사 기록', review: '검토·검사 기록', result: '돌아온 기록', record: '붙여넣은 기록'
 };
+export const RECORD_READING_KINDS = ['change', 'check', 'open', 'note'];
 const PART_ID = /^P\d{2,3}$/, SOURCE_ID = /^[A-Z]{1,2}\d{2,3}$/;
 const CONTROL = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
 function check(ok, code = 'INVALID_INPUT') { if (!ok)
@@ -27,11 +34,24 @@ function idList(v, max, pattern, allowed, min, code) {
     check(new Set(v).size === v.length, code);
 }
 export const digestBytes = (v) => new TextEncoder().encode(JSON.stringify(v)).length;
+/** Where a quote sits in a text: exactly, or with runs of white space read as one (a model may rewrap a line); null if nowhere. */
+export function quoteAt(text, quote) {
+    const q = quote.trim();
+    if (!q)
+        return null;
+    const at = text.indexOf(q);
+    if (at >= 0)
+        return { at, length: q.length };
+    const pattern = q.split(/\s+/).map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('\\s+');
+    const m = new RegExp(pattern).exec(text);
+    return m ? { at: m.index, length: m[0].length } : null;
+}
 /** The whole request within DIGEST_BYTES of UTF-8 JSON; nothing is clipped here. */
 export function validateDigestAsk(value) {
     obj(value, ['schemaVersion', 'project', 'parts', 'sources', 'plan']);
-    if (value.schemaVersion !== DIGEST_SCHEMA)
+    if (value.schemaVersion !== DIGEST_SCHEMA && value.schemaVersion !== DIGEST2_SCHEMA)
         throw new Error('UNSUPPORTED_VERSION');
+    const two = value.schemaVersion === DIGEST2_SCHEMA;
     if (digestBytes(value) > DIGEST_BYTES)
         throw new Error('INPUT_TOO_LARGE');
     obj(value.project, ['name', 'purpose']);
@@ -55,12 +75,14 @@ export function validateDigestAsk(value) {
         obj(s, ['id', 'kind', 'title', 'text', 'note', 'basis', 'partIds']);
         check(typeof s.id === 'string' && SOURCE_ID.test(s.id) && !sources.has(s.id));
         sources.add(s.id);
-        check(DIGEST_KINDS.includes(s.kind));
+        // A record comes only in digest.2, and is never located: the part the person was looking at goes in its note as context.
+        const record = s.kind === 'record';
+        check(DIGEST_KINDS.includes(s.kind) && (two || !record));
         str(s.title, 200);
-        str(s.text, 6000);
+        str(s.text, record ? RECORD_SENT_MAX : 6000);
         str(s.note, 2000, true);
         str(s.basis, 600);
-        idList(s.partIds, 32, PART_ID, parts, 0);
+        idList(s.partIds, record ? 0 : 32, PART_ID, parts, 0);
     }
     if (value.plan !== null) {
         obj(value.plan, ['intent', 'items']);
@@ -77,8 +99,8 @@ export function validateDigestAsk(value) {
 /** Exact keys, bounded text, refs only to sent sources, and parts only among the parts the cited sources are about.
  * Each change must cite outcome material; a source without a known location can support an unlocated statement. */
 export function validateDigestReply(value, ask) {
-    const code = 'INVALID_RESPONSE';
-    obj(value, ['changes', 'read', 'open', 'notCovered'], code);
+    const code = 'INVALID_RESPONSE', two = ask.schemaVersion === DIGEST2_SCHEMA;
+    obj(value, ['changes', 'read', 'open', 'notCovered', ...(two ? ['recordReadings'] : [])], code);
     const sources = new Map(ask.sources.map(s => [s.id, s])), sourceIds = new Set(sources.keys()), partIds = new Set(ask.parts.map(p => p.id));
     const grounded = (refs) => new Set(refs.flatMap(r => sources.get(r).partIds));
     const statement = (v, minParts) => {
@@ -106,6 +128,35 @@ export function validateDigestReply(value, ask) {
     const open = value.open.map(x => statement(x, 0));
     check(Array.isArray(value.notCovered) && value.notCovered.length <= 3, code);
     const notCovered = value.notCovered.map(x => { str(x, 240, false, code); return x.trim(); });
-    check(changes.length + notCovered.length > 0, code);
-    return { changes, read, open, notCovered };
+    if (!two) {
+        check(changes.length + notCovered.length > 0, code);
+        return { changes, read, open, notCovered };
+    }
+    // Each reading quotes a record as sent (never the whole of it, never text beyond the excerpt); its parts are candidates among
+    // the known parts, each with its own quote and a short reason. Containment is all this checks: not that the reading is right.
+    const quote = (v, text) => {
+        str(v, 300, false, code);
+        const q = v.trim();
+        check(q.length >= 6 && q.length < text.trim().length && !!quoteAt(text, q), code);
+        return q;
+    };
+    check(Array.isArray(value.recordReadings) && value.recordReadings.length <= 3, code);
+    const recordReadings = value.recordReadings.map((v) => {
+        obj(v, ['kind', 'text', 'ref', 'quote', 'related'], code);
+        check(RECORD_READING_KINDS.includes(v.kind), code);
+        str(v.text, 240, false, code);
+        const src = typeof v.ref === 'string' ? sources.get(v.ref) : undefined;
+        check(!!src && src.kind === 'record', code);
+        check(Array.isArray(v.related) && v.related.length <= 2, code);
+        const related = v.related.map((c) => {
+            obj(c, ['partId', 'quote', 'why'], code);
+            check(typeof c.partId === 'string' && partIds.has(c.partId), code);
+            str(c.why, 120, false, code);
+            return { partId: c.partId, quote: quote(c.quote, src.text), why: c.why.trim() };
+        });
+        check(new Set(related.map(c => c.partId)).size === related.length, code);
+        return { kind: v.kind, text: v.text.trim(), ref: v.ref, quote: quote(v.quote, src.text), related };
+    });
+    check(changes.length + notCovered.length + recordReadings.length > 0, code);
+    return { changes, read, open, notCovered, recordReadings };
 }

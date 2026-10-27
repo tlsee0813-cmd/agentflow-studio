@@ -1,7 +1,7 @@
 import { FILE_LIMIT } from '../shared/types.js';
-import { WorkspaceStore, storageErrorCode, readViewState, readEntryView, writeViewState, readEntryPositions, writeEntryPositions, importCopy } from '../shared/storage.js';
+import { WorkspaceStore, storageErrorCode, readViewState, readEntryView, writeViewState, readEntryPositions, writeEntryPositions, importCopy, serializeBackup } from '../shared/storage.js';
 import { parseBackup, cleanPositions } from '../shared/validation.js';
-import { editArea, addArea, addChildArea, createProject, rename } from '../shared/domain.js';
+import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, secretPasted } from '../shared/domain.js';
 import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
 import { layoutScope, edgePath, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, ROOT, HEAD } from './map-layout.js';
@@ -498,6 +498,7 @@ async function render() {
     // Opening a folded part for reference unfolds its way down only while it is open; the person's own folds come back after.
     const before = [...tempExpand].join('|');
     tempExpand.clear();
+    readOpen = null;
     relayout(o);
     if (part && part !== scope && !lay.boxes.has(part)) {
         if (insideScope(o, part))
@@ -801,10 +802,11 @@ let openPlanOnArrive = false;
 /** A package-like name ('@node-red/runtime') may break after its slashes rather than inside a word. */
 const slashBreaks = (name) => name.split('/').flatMap((x, i, all) => (i < all.length - 1 ? [`${x}/`, document.createElement('wbr')] : [x]));
 function programCard(key, p, example, keyOf) {
-    const v = studioView(p), last = v.records[0];
+    const v = studioView(p), pasted = p.pasted.at(-1)?.at ?? null, lastAt = [v.records[0]?.at ?? null, pasted].filter((x) => !!x).sort().at(-1) ?? null;
     const changed = v.parts.filter(x => recentAt(x.lastAt)).length;
-    // One span per item: the stylesheet draws the separators between them.
-    const meta = [`부분 ${v.parts.length}`, v.records.length ? `기록 ${v.records.length}` : '기록 없음', last ? ago(last.at) : '', changed ? `최근 바뀐 부분 ${changed}` : ''].filter(Boolean).map(t => h('span', {}, t));
+    // One span per item: the stylesheet draws the separators between them. Pasted records count apart from work records.
+    const meta = [`부분 ${v.parts.length}`, v.records.length ? `기록 ${v.records.length}` : '', p.pasted.length ? `붙인 기록 ${p.pasted.length}` : '',
+        v.records.length || p.pasted.length ? '' : '기록 없음', lastAt ? ago(lastAt) : '', changed ? `최근 바뀐 부분 ${changed}` : ''].filter(Boolean).map(t => h('span', {}, t));
     const base = `#/p/${encodeURIComponent(key)}`, name = (id) => (id ? v.parts.find(x => x.id === id)?.name ?? null : null);
     // Continue: only a remembered place whose parts still exist.
     const at = example ? null : lastPlaces()[p.id];
@@ -818,7 +820,29 @@ function programCard(key, p, example, keyOf) {
     }), roots.length > MAX ? h('li', { class: 'more' }, h('a', { href: base }, `+${roots.length - MAX}개 묶음`)) : null) : h('p', { class: 'program-empty' }, '아직 부분이 없어요 · 열어서 첫 부분을 적어요');
     const tryReturn = key === UI62_KEY ? h('a', { class: 'program-try', href: base }, h('strong', {}, '돌아와 읽기'), h('span', {}, '공개 개발 자료 10개 · 3단계로 늘려 읽기 · 사후 편집')) : null;
     const tryPlan = key === CONVERTER_KEY ? h('a', { class: 'program-try', href: base, onclick: () => { openPlanOnArrive = true; } }, h('strong', {}, '변경 구상 시험해 보기'), h('span', {}, '폴더째 변환 · 지금과 구상을 같은 자리에서 비교')) : null;
-    return h('li', {}, h('article', { class: `program${example ? ' is-example' : ''}` }, h('a', { class: 'program-head', href: base }, h('strong', { class: 'program-name' }, p.name), h('span', { class: 'program-brief' }, p.space.brief?.text ?? '목적이 아직 적혀 있지 않아요.'), h('span', { class: 'program-meta' }, ...meta)), h('div', { class: 'program-body' }, section, cont, tryPlan, tryReturn)));
+    return h('li', {}, h('article', { class: `program${example ? ' is-example' : ''}` }, h('a', { class: 'program-head', href: base }, h('strong', { class: 'program-name' }, p.name), h('span', { class: 'program-brief' }, p.space.brief?.text ?? '목적이 아직 적혀 있지 않아요.'), h('span', { class: 'program-meta' }, ...meta)), h('div', { class: 'program-body' }, section, cont, tryPlan, tryReturn, !example && key !== 'legacy' ? h('button', { type: 'button', class: 'link-button quiet program-backup', title: '붙여넣은 원문 기록과 옮긴 위치를 함께 담은 백업 파일을 내려받아요', onclick: () => saveBackup(key, p) }, '백업 저장') : null)));
+}
+/** A backup file of a saved entry: the project as kept (pasted records included) and this entry's own manual places, in the
+ * existing backup format; ‘백업 파일 가져오기’ reads it back as a new copy. Readings and drafts are not part of it. */
+function saveBackup(entryId, p) {
+    const msg = $('home-message');
+    let raw;
+    try {
+        raw = serializeBackup(p, memoryPositions.get(entryId) ?? readEntryPositions(kv, entryId, p.id));
+    }
+    catch {
+        msg.textContent = '백업 파일을 만들지 못했어요.';
+        msg.hidden = false;
+        msg.dataset.keep = '1';
+        return;
+    }
+    const a = document.createElement('a'), url = URL.createObjectURL(new Blob([raw], { type: 'application/json' }));
+    a.href = url;
+    a.download = `${p.name.replace(/[\\/:*?"<>|]+/g, '_').slice(0, 60) || 'project'}-백업.json`;
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 /** My programs lead; the examples show their real composition on a first visit and step back once there is work of one's own. */
 function renderHome() {
@@ -1732,7 +1756,8 @@ function renderLens() {
     const thread = answersOf(o, part.id).length;
     const menuItems = [
         o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', onclick: () => { editing = true; openSheet(() => document.getElementById('edit-name')?.focus()); } }, '이름·설명 고치기') : null,
-        o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null
+        o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null,
+        o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '이 부분을 보던 맥락으로 원문을 붙여 넣어요', onclick: () => openPaste(part.id) }, '기록 붙여넣기') : null
     ].filter((x) => !!x);
     l.classList.remove('compare', 'scope-read');
     readingFor = [];
@@ -1804,7 +1829,8 @@ function renderPanel(scrollTop) {
     const state = part.status === 'plan' ? (records.length ? '요청 기록 없음' : part.note ? '계획 설명만 있음 · 기록 없음' : '기록 없음') : STATUS_LABEL[part.status];
     const menuItems = [
         o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', onclick: () => { editing = !editing; renderPanel(false); } }, editing ? '고치기 닫기' : '이름·설명 고치기') : null,
-        o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null
+        o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null,
+        o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '이 부분을 보던 맥락으로 원문을 붙여 넣어요', onclick: () => openPaste(part.id) }, '기록 붙여넣기') : null
     ].filter((x) => !!x);
     const head = h('header', { class: 'panel-head' }, h('div', { class: 'panel-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope) }, x.name)]), path.length ? null : h('span', {}, o.project.name)), h('h2', { id: 'panel-title', tabindex: '-1' }, part.name), h('div', { class: 'panel-chips' }, h('span', { class: `state s-${part.status}` }, h('i', { class: 'dot', 'aria-hidden': 'true' }), state), records.length ? h('span', { class: 'chip plain' }, `기록 ${records.length}${records[0] ? ` · ${ago(records[0].at)}` : ''}`) : null), h('div', { class: 'head-tools' }, menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e) => { e.currentTarget.parentElement.open = false; } }, ...menuItems)) : null, h('button', { type: 'button', class: 'close', 'aria-label': '요약으로 돌아가기', title: '요약으로 (Esc)', onclick: closeSheet }, '×')));
     const body = h('div', { class: 'panel-body' });
@@ -2124,6 +2150,29 @@ function applyReadMarks() {
     const o = opened, ids = new Set(o ? readMarks.map(id => drawnRep(o, id)).filter((x) => !!x) : []);
     document.querySelectorAll('.node[data-part],.frame[data-part]').forEach(el => el.classList.toggle('read-mark', ids.has(el.dataset.part)));
 }
+/** The related part a return reading's chosen candidate names, opened to be seen: only the path down to it unfolds, as a
+ * reference (tempExpand, as for a part opened by its address); the person's own folds, places and camera are left as they are,
+ * and choosing another candidate, letting it go or closing the reading folds that path again. Nothing unfolds before a choice.
+ * A part outside the scope is reached the way any explicit move is: up to the scope that holds it (the scene back stays). */
+let readOpen = null;
+function openForReading(id) {
+    const o = opened;
+    if (!o || selected || id === readOpen)
+        return;
+    readOpen = id;
+    if (id && partOf(o, id) && !insideScope(o, id) && id !== scope) {
+        go(o.key, null, partOf(o, id).parentId);
+        return;
+    }
+    const before = [...tempExpand].join('|');
+    tempExpand.clear();
+    if (id && id !== scope && partOf(o, id))
+        expandPath(o, id, tempExpand);
+    if ([...tempExpand].join('|') !== before) {
+        renderSpace('keep');
+        markSelection(selected);
+    }
+}
 function openReturn() {
     const o = opened;
     if (!o || o.kind === 'legacy')
@@ -2135,6 +2184,16 @@ function openReturn() {
         go(o.key);
     }
     returnView.open();
+}
+/** The same paste box from a selected part: the part is the reading's context, and closing the pane comes back to this scene
+ * (selection, scope, camera; folds were never touched). Captured here, before opening the pane clears the selection. */
+function openPaste(partId) {
+    const o = opened;
+    if (!o || o.kind !== 'saved')
+        return;
+    const scene = selected ? { selected, scope, camera: { ...camera } } : null;
+    openReturn();
+    returnView.openPaste(partId, scene);
 }
 const returnView = createReturnView({
     current: () => opened,
@@ -2163,6 +2222,7 @@ const returnView = createReturnView({
             body.scrollTop = keep;
     },
     mark: ids => { readMarks = [...ids]; applyReadMarks(); },
+    open: openForReading,
     reveal: ids => { const o = opened; if (!o)
         return; revealParts([...new Set(ids.map(id => drawnRep(o, id)).filter((x) => !!x))]); },
     selectPart: id => { const o = opened; if (!o)
@@ -2170,7 +2230,31 @@ const returnView = createReturnView({
     trial: (text, sources) => { planView.propose(text, sources); },
     compare: ids => { planView.focusParts(ids); },
     chrome: () => { const o = opened; if (o)
-        setBar(o); }
+        setBar(o); },
+    paste: async (text, context) => {
+        const o = opened;
+        if (!o || o.kind !== 'saved')
+            return '이 프로젝트에는 기록을 저장할 수 없어요.';
+        let r;
+        try {
+            r = pasteRecord(o.project, text, context && partOf(o, context) ? context : null);
+        }
+        catch {
+            return '이 글은 저장할 수 없어요(너무 길거나 쓸 수 없는 문자).';
+        }
+        if (r.duplicate)
+            return { id: r.record.id, duplicate: true };
+        const failed = await commit(o, r.project);
+        return failed ?? { id: r.record.id, duplicate: false };
+    },
+    legacyKey: () => {
+        const o = opened;
+        if (!o || o.kind !== 'saved')
+            return null;
+        return store.entries().find(e => e.entryId === o.key)?.origin === 'import' ? null : o.project.id;
+    },
+    restoreScene: scene => { const o = opened; if (!o)
+        return; returnCamera = scene.camera; go(o.key, scene.selected && partOf(o, scene.selected) ? scene.selected : null, scene.scope && partOf(o, scene.scope) ? scene.scope : null); }
 });
 function sessionCode() { try {
     return sessionStorage.getItem('agentflow.studio.access') ?? accessCodeMemory;
@@ -2635,6 +2719,11 @@ function bindImport() {
         }
         catch {
             say('AgentFlow 프로젝트 백업 파일이 아니거나 읽을 수 없어요. 아무것도 바꾸지 않았어요.');
+            return;
+        }
+        // A pasted record holding something like a key never comes in by a backup either (the paste box refuses it the same way).
+        if (secretPasted(project).length) {
+            say(`백업의 붙여넣은 기록 ${secretPasted(project).length}개에 키나 토큰처럼 보이는 글이 있어 가져오지 않았어요. 저장된 프로젝트는 그대로예요.`);
             return;
         }
         if (!store.writable) {

@@ -1,5 +1,5 @@
 import { API_SCHEMA, SCHEMA, V5_SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, GUIDE_SCHEMA } from './types.js';
-import { V6_SCHEMA } from './types.js';
+import { V6_SCHEMA, V7_SCHEMA, PASTED_TEXT_LIMIT, PASTED_LIMIT } from './types.js';
 export class ContextError extends Error {
     constructor(code) { super(code); this.name = 'ContextError'; }
 }
@@ -363,7 +363,7 @@ export function validateRequest(v) {
 }
 /** Same checks as validateProject without the defensive copy; used on freshly parsed JSON. */
 function assertProject(v) {
-    obj(v, ['schemaVersion', 'id', 'revision', 'name', 'sources', 'bases', 'tasks', 'currentTaskId', 'draft', 'answerDraft', 'basisDraft', 'basisEdits', 'draftKind', 'pending', 'notice', 'space']);
+    obj(v, ['schemaVersion', 'id', 'revision', 'name', 'sources', 'bases', 'tasks', 'currentTaskId', 'draft', 'answerDraft', 'basisDraft', 'basisEdits', 'draftKind', 'pending', 'notice', 'space', 'pasted']);
     ensure(v.schemaVersion === SCHEMA, 'UNSUPPORTED_SCHEMA');
     id(v.id);
     integer(v.revision);
@@ -394,6 +394,7 @@ function assertProject(v) {
     const bids = [...basisIds], basisMap = new Map(v.bases.map(b => [b.id, b]));
     const tasks = new Set(), returns = new Map();
     const areaIds = space(v.space);
+    pasted(v.pasted, areaIds);
     for (const t of v.tasks) {
         const optional = ['intentEdit', 'areaId'].filter(k => t && typeof t === 'object' && Object.hasOwn(t, k));
         obj(t, ['id', 'sourceIds', 'parentTaskId', 'advice', 'adviceRevision', 'mode', 'manual', 'suggestions', 'handoffs', 'resultFile', 'background', ...optional]);
@@ -576,6 +577,22 @@ function space(v) {
     }
     areaUnderstanding(v.understanding, ids);
     return ids;
+}
+/** Pasted records: text as pasted (any whitespace kept; control characters other than tab/newline refused, as everywhere),
+ * unique ids and texts, and a context that names an existing part or nothing. */
+function pasted(v, areaIds) {
+    list(v, PASTED_LIMIT);
+    const texts = new Set();
+    for (const r of v) {
+        obj(r, ['id', 'text', 'at', 'context']);
+        id(r.id);
+        text(r.text, PASTED_TEXT_LIMIT);
+        date(r.at);
+        ensure(r.context === null || (typeof r.context === 'string' && areaIds.has(r.context)));
+        ensure(!texts.has(r.text));
+        texts.add(r.text);
+    }
+    unique(v);
 }
 export const POSITION_LIMIT = 200000;
 function planStamp(v) {
@@ -891,7 +908,13 @@ function migrateV6(v) {
         }
     }
     const revisions = Object.fromEntries(space.areas.map(a => { id(a.id); return [a.id, 0]; }));
-    return { ...p, schemaVersion: SCHEMA, space: { ...space, containment: { version: 'containment.1', parents: {}, revisions } } };
+    return migrateV7({ ...p, schemaVersion: V7_SCHEMA, space: { ...space, containment: { version: 'containment.1', parents: {}, revisions } } });
+}
+/** project.7 had no pasted records: it reads as none. Its own keys and bytes are kept as they were. */
+function migrateV7(v) {
+    const p = v;
+    ensure(!!p && typeof p === 'object' && !Array.isArray(p) && p.schemaVersion === V7_SCHEMA && !Object.hasOwn(p, 'pasted'));
+    return { ...p, schemaVersion: SCHEMA, pasted: [] };
 }
 /** The single acceptance test for persisted bytes: autosave, recovery-file download and import all use it. */
 /** intent-edit.1 (unreleased AI055 candidate) kept the correction in manual.*, where any later work edit
@@ -916,7 +939,7 @@ export function parseProject(raw) {
     ensure(new TextEncoder().encode(raw).length <= FILE_LIMIT, 'FILE_TOO_LARGE');
     const v = JSON.parse(raw);
     const schema = v?.schemaVersion;
-    const project = schema === LEGACY_SCHEMA ? migrateLegacy(v) : schema === PREVIOUS_SCHEMA ? migrateV2(v) : schema === V3_SCHEMA ? migrateV3(v) : schema === V4_SCHEMA ? migrateV4(v) : schema === V5_SCHEMA ? migrateV5(v) : schema === V6_SCHEMA ? migrateV6(v) : v;
+    const project = schema === LEGACY_SCHEMA ? migrateLegacy(v) : schema === PREVIOUS_SCHEMA ? migrateV2(v) : schema === V3_SCHEMA ? migrateV3(v) : schema === V4_SCHEMA ? migrateV4(v) : schema === V5_SCHEMA ? migrateV5(v) : schema === V6_SCHEMA ? migrateV6(v) : schema === V7_SCHEMA ? migrateV7(v) : v;
     assertProject(project);
     return convertIntentEdits(project); // Freshly parsed, not shared: no defensive copy needed.
 }
