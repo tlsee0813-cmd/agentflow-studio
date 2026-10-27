@@ -7,7 +7,7 @@ import { parseProject } from '../shared/validation.js';
 import { editArea, addArea, addChildArea, createProject, rename } from '../shared/domain.js';
 import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
-import { layoutScope, edgePath, lead, mapLead, isListGroup, ROOT, HEAD, type Box, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
+import { layoutScope, edgePath, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, resolveLabels, ROOT, HEAD, type Box, type Edge, type LabelSpot, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
 import { aiStatus, askStudio, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
 import { runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth } from './plan-dom.js';
@@ -167,9 +167,9 @@ function defaultOpen(o: Opened, id: string, depth: number, isOpen: (id: string, 
   const parent = partOf(o, p.parentId);
   return !!parent && depth <= 3 && parent.childIds.length === 1 && isOpen(parent.id, depth - 1);
 }
-/** How many parts a first view of a scope shows unfolded, and how much room it may take. Past the count, the scope's
- * catalogue-like groups (a list by isListGroup: many leaves, few links among them) start folded, largest first, then the
- * other largest groups; past the room, the open group taking the most room. The overview keeps every group's name, count and
+/** How many parts a first view of a scope shows unfolded, and how much room it may take. Past the count, every group with an
+ * inside starts folded alike (budgetFold: folding the largest first left the smallest open alone, which read as emphasis);
+ * past the room, the open group taking the most room. The overview keeps every group's name, count, boundary count and
  * outside lines, and each opens at full size inside or in place. Decided once per scope, for its first view: the person's own
  * folds and places always win (expandState, positions), and a visited view keeps its camera. */
 const SHOW_BUDGET = 28;
@@ -178,11 +178,9 @@ const SHOW_BUDGET = 28;
 const foldMemo = new Map<string, Set<string>>();
 function budgetFolded(o: Opened): Set<string> {
   const k = `${o.project.id}|${scope ?? ''}`, hit = foldMemo.get(k); if (hit) return hit;
-  const ids = scope ? partOf(o, scope)?.childIds ?? [] : o.view.roots, out = new Set<string>(), size = (id: string) => partOf(o, id)?.childIds.length ?? 0;
-  let shown = ids.reduce((n, id) => n + 1 + size(id), 0);
-  const bySize = (list: string[]) => list.filter(id => size(id) > 0).sort((a, b) => size(b) - size(a));
+  const ids = scope ? partOf(o, scope)?.childIds ?? [] : o.view.roots, size = (id: string) => partOf(o, id)?.childIds.length ?? 0;
   const own = (id: string) => expandState.has(`${o.project.id}|${id}`); // the person's own fold or unfold is never decided again
-  for (const id of [...bySize(ids.filter(id => isListGroup(o.view, id))), ...bySize(ids.filter(id => !isListGroup(o.view, id)))]) { if (shown <= SHOW_BUDGET) break; if (own(id)) continue; out.add(id); shown -= size(id); }
+  const out = budgetFold(ids.map(id => ({ id, size: size(id) })), own, SHOW_BUDGET);
   // Then the room it takes: the first view, its title included, must read at the opening scale (85%) in this window. Past
   // it, the open group taking the most room folds next, until it does or nothing is left to fold. Stored places count as
   // they are; a group opened or entered later may be larger than the window and is read by panning.
@@ -673,15 +671,26 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   // A line between two parts of the same group belongs to that group: it reads above the group's surface (a line between
   // groups stays under them, so it never seems to end at a group it only passes).
   const frames = (id: string) => { const out = new Set<string>(); for (let c = lay.boxes.get(id)?.container, g = 0; c && g < 64; c = lay.boxes.get(c)?.container, g++) if (lay.boxes.get(c)?.kind === 'frame') out.add(c); return out; };
-  for (const e of lay.edges) {
-    const fa = frames(e.from), inner = [...frames(e.to)].some(f => fa.has(f));
-    const g = svg('g', { class: `edge k-${e.kind}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
+  // A busy map at rest reads as its summary (summaryEdges: one line per pair of groups and kind, with its count); a selection,
+  // the change plan or a map of a few lines draws each line. Both sets are drawn; .rest-sum on the space shows one of them.
+  sums = lay.edges.length > 6 ? summaryEdges(lay.boxes, lay.edges) : [];
+  for (const e of [...lay.edges, ...sums]) {
+    const fa = frames(e.from), inner = [...frames(e.to)].some(f => fa.has(f)), sum = e.key.startsWith('sum:');
+    const g = svg('g', { class: `edge${sum ? ' sum' : ''} k-${e.kind}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
     // No text on the map: the meaning shows on hover (tip) and in the selected part's 관련 부분.
     // A plain relation ends in the same dot at both ends: it is drawn, not directed.
     g.append(svg('path', { class: 'edge-line', 'marker-end': e.kind === 'related' ? 'url(#dot)' : 'url(#arrow)', 'marker-start': 'url(#dot)' }), svg('path', { class: 'edge-hit' }));
     edges.append(g);
   }
   world.append(edges);
+  // Each group's head says how many relations cross its boundary (stored relations, any depth inside): where it connects, before
+  // anything is selected. Part of the head, so clicking it selects the group and the head's own button role reads it.
+  const crossing = boundaryCounts(view);
+  const linksChip = (id: string) => {
+    const c = crossing.get(id); if (!c?.all) return null;
+    const how = [c.in ? `들어옴 ${c.in}` : '', c.out ? `나감 ${c.out}` : '', c.plain ? `방향 없음 ${c.plain}` : ''].filter(Boolean).join(' · ');
+    return h('span', { class: 'frame-links', title: `바깥과 이어진 관계 ${c.all}개${how ? ` · ${how}` : ''}` }, h('span', { 'aria-hidden': 'true' }, `↔ ${c.all}`), h('span', { class: 'sr-only' }, `바깥 관계 ${c.all}`));
+  };
   const enterButton = (p: PartView) => h('button', { type: 'button', class: 'enter', title: `‘${p.name}’ 안으로 들어가기 · 부분 ${p.childIds.length}`, 'aria-label': `${p.name} 안으로 들어가기`, onclick: () => go(o.key, null, p.id) }, `${p.childIds.length}`, h('span', { 'aria-hidden': 'true' }, '›'));
   const toggleButton = (p: PartView, open: boolean) => h('button', { type: 'button', class: 'toggle', title: open ? '접기' : '여기서 펼치기', 'aria-label': `${p.name} ${open ? '접기' : '펼치기'}`, 'aria-expanded': String(open),
     onclick: () => { const k = `${o.project.id}|${p.id}`; expandState.set(k, !open); tempExpand.delete(k); previewExpand.delete(k); renderSpace('keep'); if (selected) select(selected); } }, chevron(open));
@@ -710,7 +719,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
           // A change line reads under the name (in the preview only), never beside it: the name keeps the whole head width.
           h('span', { class: 'frame-title' }, h('span', { class: 'frame-name' }, p.name), h('span', { class: 'plan-note' })),
           h('span', { class: 'frame-meta' }, latest ? h('span', { class: recentAt(latest) ? 'fresh' : '' }, ago(latest)) : null),
-          enterButton(p), note ? h('span', { class: 'frame-note' }, note) : null)));
+          linksChip(p.id), enterButton(p), note ? h('span', { class: 'frame-note' }, note) : null)));
     } else {
       // A folded part reads its inside: latest record anywhere under it.
       const last = b.kids ? subtreeRecords(view, p.id)[0]?.at ?? null : p.lastAt, meta = metaLine(p, last), face = b.face ?? 'row';
@@ -724,7 +733,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
           note ? h('span', { class: 'node-note' }, note) : null,
           meta ? h('span', { class: 'node-meta' }, h('i', { class: 'dot', 'aria-hidden': 'true' }), meta) : alias ? h('span', { class: 'node-meta owner alias' }, alias) : of ? h('span', { class: 'node-meta owner' }, `${of} 안`) : null,
           h('span', { class: 'plan-note' })),
-        b.kids ? enterButton(p) : null));
+        b.kids ? linksChip(p.id) : null, b.kids ? enterButton(p) : null));
     }
   }
   // The title of this map: what the scope is for, in its own first sentence. The rest of that text (where it comes from, what
@@ -751,7 +760,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   // Many lines on one view: those that go round other parts share the same gaps and would read as extra outlines of the
   // groups they pass; they step back until selected, hovered or read as a change's context (kind, direction and hover meaning
   // unchanged).
-  $('space').classList.toggle('dense-lines', lay.edges.length >= 12);
+  syncLineMode();
   const empty = $('space-empty');
   empty.hidden = view.parts.length > 0 || o.kind === 'saved';
   empty.textContent = view.records.length ? `아직 부분으로 나뉘지 않은 프로젝트예요. 기록 ${view.records.length}개는 ‘최근 기록’에서 볼 수 있어요.` : '아직 부분도 기록도 없는 프로젝트예요.';
@@ -790,8 +799,26 @@ function positionWorld() {
     const a = lay.boxes.get(g.dataset.from!), b = lay.boxes.get(g.dataset.to!); if (!a || !b) return;
     const r = edgePath(a, b, lay.boxes.values()); g.querySelectorAll('path').forEach(x => x.setAttribute('d', r.d));
     g.classList.toggle('detour', !!r.detour);
+    // A line that crosses nothing it does not belong to reads above the group surfaces, so its run inside the groups of its own
+    // ends is seen up to its part; one that has to cross another box stays under them.
+    g.classList.toggle('clear', r.clear); layerEdge(g);
   });
   placeEdgeLabels();
+}
+/** Map lines at rest on a busy map: the summary lines (see renderSpace). */
+let sums: Edge[] = [];
+const edgeOf = (key: string | undefined) => (key?.startsWith('sum:') ? sums : lay.edges).find(x => x.key === key);
+function syncLineMode() {
+  const sp = $('space'), rest = !selected && !planView.isOpen() && sums.length > 0;
+  sp.classList.toggle('rest-sum', rest);
+  // Many lines on one view: those that go round other parts step back (see .dense-lines), counted as drawn.
+  sp.classList.toggle('dense-lines', (rest ? sums.length : lay.edges.length) >= 12);
+}
+/** Selected lines, a change's context lines, lines inside one group and lines that cross nothing else read above the groups. */
+function layerEdge(el: Element) {
+  const top = document.querySelector('#world .edges-top'), base = document.querySelector('#world .edges:not(.edges-top)');
+  const layer = ['on', 'ctx', 'inner', 'clear'].some(c => el.classList.contains(c)) ? top : base;
+  if (layer && el.parentNode !== layer) layer.append(el);
 }
 /** Verbs on the map: on the lines of the selection, and on every line of a map that has only a few. Each sits at a free spot
  * along its own line; a verb that would cover a part, a group's head, the title or another verb is left off the map (the pane
@@ -801,6 +828,9 @@ function placeEdgeLabels() {
   let box = world.querySelector<HTMLElement>('.edge-labels');
   if (!box) { box = h('div', { class: 'edge-labels', 'aria-hidden': 'true' }); world.append(box); }
   box.replaceChildren();
+  syncLineMode();
+  world.querySelectorAll('.edge.label-hidden').forEach(g => g.classList.remove('label-hidden'));
+  world.dataset.labelsHidden = '0';
   const few = !selected && !planView.isOpen() && lay.edges.length <= 6;
   // At rest, lines of one kind meeting the same part share one verb (the first of them carries it).
   const seenEnd = new Set<string>();
@@ -818,10 +848,12 @@ function placeEdgeLabels() {
     const e = lay.edges.find(x => x.key === g.dataset.key), k = e ? `${e.to}|${e.kind}` : ''; if (!e || seenEnd.has(k)) return false;
     seenEnd.add(k); return true;
   });
-  if (!lines.length) return;
   const blocks: Rect[] = [...lay.boxes.values()].map(b => (b.kind === 'frame' ? { x: b.x, y: b.y, w: b.w, h: b.head } : b));
   if (titleH) blocks.push(titleRect());
   const clear = (r: Rect) => !blocks.some(b => r.x < b.x + b.w + 3 && b.x < r.x + r.w + 3 && r.y < b.y + b.h + 3 && b.y < r.y + r.h + 3);
+  if ($('space').classList.contains('rest-sum')) { placeCounts(box, clear, blocks); return; }
+  if (!lines.length) return;
+  if (!selected) { placeRestLabels(box, lines, clear); return; }
   for (const g of lines) {
     const e = lay.edges.find(x => x.key === g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'); if (!e || !path) continue;
     const on = g.classList.contains('on'), fan = on && (fans.get(selKey(e)) ?? 0) > 1;
@@ -839,6 +871,51 @@ function placeEdgeLabels() {
     label.style.left = `${spot.x}px`; label.style.top = `${spot.y}px`; blocks.push(spot);
     if (on) seenSel.add(selKey(e));
   }
+}
+/** How many relations a summary line holds, on the line where it reads clear of parts (a line of one relation has none). */
+function placeCounts(box: HTMLElement, clear: (r: Rect) => boolean, blocks: Rect[]) {
+  for (const g of $('world').querySelectorAll<SVGGElement>('.edge.sum')) {
+    const e = edgeOf(g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'); if (!e || !path || e.ids.length < 2) continue;
+    const chip = h('span', { class: `edge-count k-${e.kind}` }, String(e.ids.length)); box.append(chip);
+    const w = chip.offsetWidth, hh = chip.offsetHeight, len = path.getTotalLength();
+    const at = (t: number) => { const q = path.getPointAtLength(len * t); return { x: q.x - w / 2, y: q.y - hh / 2, w, h: hh }; };
+    const spot = [0.5, 0.42, 0.58, 0.34, 0.66, 0.26, 0.74].map(at).find(clear) ?? at(0.5);
+    chip.style.left = `${spot.x}px`; chip.style.top = `${spot.y}px`; blocks.push(spot);
+  }
+}
+/** Verbs at rest on a map of a few lines: each beside the box its line points to (about four fifths along the line, moved off
+ * that box), never at the middle where lines cross. Two that would touch keep the one nearer its end; the other relation's line
+ * says so (.label-hidden, still hovered for its meaning) and is counted in the map's data-labels-hidden. */
+function placeRestLabels(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect) => boolean) {
+  const spots: (LabelSpot & { el: HTMLElement })[] = [], hidden: SVGGElement[] = [];
+  for (const g of lines) {
+    const e = edgeOf(g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'), end = e && lay.boxes.get(e.to); if (!e || !path || !end) continue;
+    const label = h('span', { class: `edge-label k-${e.kind}` }, `${REL_LABEL[e.kind] ?? e.kind}${e.ids.length > 1 ? ` ${e.ids.length}` : ''}`);
+    box.append(label);
+    const w = label.offsetWidth, hh = label.offsetHeight, len = path.getTotalLength(), tip = path.getPointAtLength(len);
+    const mine: Rect[] = [];
+    for (const t of [0.82, 0.78, 0.85, 0.74, 0.88, 0.7]) {
+      const q = path.getPointAtLength(len * t), q2 = path.getPointAtLength(Math.min(len, len * t + 1)), q1 = path.getPointAtLength(Math.max(0, len * t - 1));
+      // On the line, then beside it (lines meeting one end stack their verbs there).
+      const tx = q2.x - q1.x, ty = q2.y - q1.y, tl = Math.hypot(tx, ty) || 1, nx = -ty / tl, ny = tx / tl;
+      for (const [cx, cy] of [0, 1, -1, 2, -2].map(s => [q.x + nx * s * (hh / 2 + 4), q.y + ny * s * (hh / 2 + 4)] as const)) {
+        const r = { x: cx - w / 2, y: cy - hh / 2, w, h: hh };
+        // Off the box it points to, on the side the line comes from.
+        if (r.x < end.x + end.w + 4 && end.x - 4 < r.x + r.w && r.y < end.y + end.h + 4 && end.y - 4 < r.y + r.h) {
+          if (q.x < end.x) r.x = end.x - 4 - w; else if (q.x > end.x + end.w) r.x = end.x + end.w + 4; else if (q.y < end.y) r.y = end.y - 4 - hh; else r.y = end.y + end.h + 4;
+        }
+        if (clear(r)) mine.push(r);
+      }
+    }
+    if (!mine.length) { label.remove(); hidden.push(g); continue; }
+    // Nearest to its end first; a later place only when a nearer verb takes this one's.
+    for (const r of mine) spots.push({ key: e.key, ...r, dist: Math.hypot(r.x + w / 2 - tip.x, r.y + hh / 2 - tip.y), el: label });
+  }
+  const { kept, dropped } = resolveLabels(spots, 6);
+  for (const s of kept) { s.el.style.left = `${s.x}px`; s.el.style.top = `${s.y}px`; }
+  for (const s of spots) if (dropped.includes(s.key)) s.el.remove();
+  for (const g of lines) if (dropped.includes(g.dataset.key!) || hidden.includes(g)) g.classList.add('label-hidden');
+  $('world').dataset.labelsHidden = String(dropped.length + hidden.length);
 }
 
 function renderRecent() {
@@ -862,7 +939,7 @@ function renderRecent() {
 }
 
 /* ---------- camera ---------- */
-const ZOOM_MIN = 0.4, ZOOM_MAX = 1.6;
+const ZOOM_MIN = 0.4, ZOOM_MAX = 1.6, OPEN_MIN = 0.6;
 /** The reading pane is a column of its own on the right: the map's viewport ends where the pane begins (syncMapArea), so nothing
  * the person reads is ever drawn under it and the geometry below needs no inset for it.
  * Width of the reading pane while anything reads there (a part, its sheet, a comparison or the whole plan); 0 otherwise. */
@@ -878,14 +955,16 @@ function applyCamera(animate = false) {
   vp.style.backgroundPosition = `${camera.x}px ${camera.y - vp.offsetTop}px`;
   vp.style.backgroundSize = `${28 * camera.k}px ${28 * camera.k}px`;
   $('zoom-level').textContent = `${Math.round(camera.k * 100)}%`;
-  // Density follows the zoom: below 80% notes and state lines step back, below 60% names grow to stay readable. The selected
-  // part, its partners and what is being dragged keep their full detail; nothing is removed from the page or its layout.
+  // Density follows the zoom: below 70% notes and state lines go and names read on one line across the card, a little larger
+  // (never past 1.25×, so a name is cut only when it truly does not fit); below 60% that is all a box shows. Nothing is
+  // removed from the page or its layout.
   const sp = $('space');
-  sp.classList.toggle('z-mid', camera.k < 0.8); sp.classList.toggle('z-low', camera.k < 0.6);
-  sp.style.setProperty('--grow', String(Math.min(1.6, Math.max(1, 0.85 / camera.k))));
+  sp.classList.toggle('z-mid', camera.k < 0.705); sp.classList.toggle('z-low', camera.k < 0.6); // z-mid: 70% as shown and below
+  sp.style.setProperty('--grow', String(Math.min(1.25, Math.max(1, 0.85 / camera.k))));
   updateSticky();
 }
-/** Whole view in the free area. Opening never shrinks below 85%; only the explicit 전체 보기 button may go further. A map smaller
+/** Whole view in the free area. Opening shrinks to 60% at most, so a large map opens whole (names stay readable on one line
+ * there, see applyCamera); only the explicit 전체 보기 button may go further. A map smaller
  * than the window sits near the top (a page is read from its top) and, while the pane is closed, leaves the pane's room free on
  * the right when there is enough of it, so opening a reading later rarely has to move the map. */
 function fitView(explicit: boolean, animate = false) {
@@ -894,7 +973,7 @@ function fitView(explicit: boolean, animate = false) {
   const vp = $('viewport').getBoundingClientRect(), left = leftInset() + 8, right = 24, top = topInset() + 12, bottom = mapBottomInset() + 8;
   const w = Math.max(200, vp.width - left - right), hgt = Math.max(160, mapBottom() - top - bottom), B = lay.bounds;
   const fit = Math.min(1, w / Math.max(1, B.w + 40), hgt / Math.max(1, B.h + 40));
-  const k = explicit ? Math.max(ZOOM_MIN, fit) : Math.max(0.85, fit);
+  const k = explicit ? Math.max(ZOOM_MIN, fit) : Math.max(OPEN_MIN, fit);
   const mw = B.w * k, mh = B.h * k, free = w - mw, room = paneWidth() ? 0 : inspW();
   const xoff = free <= 0 ? 12 : free >= room + 96 ? Math.max(40, (free - room) / 2) : free / 2;
   const yoff = mh <= hgt ? Math.min((hgt - mh) / 2, 48) : 12;
@@ -1154,12 +1233,12 @@ function renderLens() {
 
 /** Selection on the map: the part, its lines and the parts at their other ends (drawn representative or side ghost). */
 function markSelection(partId: string | null) {
-  const related = new Set<string>(), base = document.querySelector('#world .edges:not(.edges-top)'), top = document.querySelector('#world .edges-top');
+  const related = new Set<string>();
   document.querySelectorAll<SVGGElement>('.edge').forEach(el => {
+    if (el.classList.contains('sum')) return; // summary lines read only at rest, never as a selection's own lines
     const on = !!partId && (el.dataset.from === partId || el.dataset.to === partId);
     // A line the change plan reads as context of its change (.ctx) stays above the groups as well.
-    const layer = on || el.classList.contains('ctx') || el.classList.contains('inner') ? top : base; if (layer && el.parentNode !== layer) layer.append(el);
-    el.classList.toggle('on', on);
+    el.classList.toggle('on', on); layerEdge(el);
     const line = el.querySelector('.edge-line')!, plain = el.classList.contains('k-related');
     line.setAttribute('marker-end', plain ? (on ? 'url(#dot-on)' : 'url(#dot)') : on ? 'url(#arrow-on)' : 'url(#arrow)');
     line.setAttribute('marker-start', on ? 'url(#dot-on)' : 'url(#dot)');
@@ -1441,7 +1520,7 @@ const planView = createPlanView({
     const o = opened; if (!o) return;
     setBar(o); renderRecent();
     if (planView.isOpen()) { scopeReading = false; $('panel').hidden = true; $('panel').replaceChildren(); if (!$('lens').classList.contains('compare')) hideLens(); }
-    syncMapArea();
+    syncMapArea(); placeEdgeLabels(); // the change plan draws each line: the rest summary and its counts give way
   }
 });
 /* ---------- coming back: the return reading in the pane ---------- */
@@ -1687,14 +1766,18 @@ function bindEdgeHints() {
   world.addEventListener('pointerover', e => {
     const t = e.target as Element, g = t.closest<SVGGElement>('.edge');
     if (g && t.classList.contains('edge-hit')) {
-      const edge = lay.edges.find(x => x.key === g.dataset.key); if (!edge) return;
+      const edge = edgeOf(g.dataset.key); if (!edge) return;
       g.classList.add('near');
       tip.replaceChildren(h('strong', {}, `${nameOf(edge.from)} ${edge.kind === 'related' ? '—' : '→'} ${nameOf(edge.to)}`), h('span', { class: 'tip-kind' }, `${REL_LABEL[edge.kind] ?? edge.kind}${edge.agg ? ` · 안쪽 관계 ${edge.ids.length}개의 요약 · 선택하면 실제 끝점` : edge.ids.length > 1 ? ` · 관계 ${edge.ids.length}개를 한 선으로 묶음` : ''}`),
         ...edge.notes.slice(0, 3).map(n => h('span', {}, n)));
       tip.hidden = false; place(e as PointerEvent); return;
     }
     const part = t.closest<HTMLElement>('.node[data-box], .frame-head[data-part], .ghost[data-box]');
-    if (part) { const id = part.dataset.box ?? part.dataset.part!; world.querySelectorAll<SVGGElement>('.edge').forEach(x => x.classList.toggle('near', x.dataset.from === id || x.dataset.to === id)); }
+    if (part) {
+      // A summary line also lights for a part inside one of its ends whose own relations it holds.
+      const id = part.dataset.box ?? part.dataset.part!, mine = new Set(lay.edges.filter(x => x.from === id || x.to === id).flatMap(x => x.ids));
+      world.querySelectorAll<SVGGElement>('.edge').forEach(x => x.classList.toggle('near', x.dataset.from === id || x.dataset.to === id || (x.classList.contains('sum') && !!edgeOf(x.dataset.key)?.ids.some(r => mine.has(r)))));
+    }
   });
   world.addEventListener('pointermove', e => { if (!tip.hidden) place(e); });
   world.addEventListener('pointerout', e => {

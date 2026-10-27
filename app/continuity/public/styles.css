@@ -957,3 +957,21 @@ button:disabled { opacity: .5; cursor: default; }
   .pw-part .co-pair.two > .co-row.want, .pw-part .co-pair.two > .co-row.outcome { padding-left: 0; border-left: 0; }
   .pw-rail { border-left: 0; border-top: 1px solid var(--line); }
 }
+
+/* ---------- 67 · map overview: boundary counts, aggregated lines, label anchoring, low zoom ---------- */
+/* How many relations cross a group's boundary, beside its way in (part of the head: clicking it selects the group). */
+.frame-links { flex: none; display: inline-flex; align-items: center; height: 20px; padding: 0 5px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--text-2); font-size: 10.5px; font-weight: 600; line-height: 1; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.region > .frame-head .frame-links { margin-top: 0; }
+.node.unit .frame-links { margin-top: 1px; }
+/* A busy map at rest reads its summary lines; a selection, the change plan or a map of a few lines draws each line. */
+.space.rest-sum .edge:not(.sum), .space:not(.rest-sum) .edge.sum { display: none; }
+.edge-count { position: absolute; min-width: 20px; height: 18px; padding: 0 5px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--text-2); font-size: 10.5px; line-height: 16px; font-weight: 650; text-align: center; font-variant-numeric: tabular-nums; }
+/* Names wrap to three lines before they are cut (the layout gives them the room). */
+.node-name { -webkit-line-clamp: 3; }
+/* Below 70%: no notes or state lines; each name on one line across its card, a little larger (--grow ≤ 1.25). */
+.space.z-mid .node :is(.node-note, .node-meta), .space.z-mid .frame-head .frame-note { display: none; }
+.space.z-mid .node .node-text { justify-content: center; align-self: stretch; }
+.space.z-mid :is(.node .node-name, .frame-head .frame-name) { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+.space.z-mid .node .node-name { font-size: calc(13.5px * var(--grow)); }
+.space.z-mid .node.item .node-name, .space.z-mid .frame.group > .frame-head .frame-name { font-size: calc(13px * var(--grow)); }
+.space.z-mid .node.unit .node-name, .space.z-mid .region > .frame-head .frame-name { font-size: calc(15px * var(--grow)); }
