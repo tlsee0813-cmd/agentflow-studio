@@ -1865,6 +1865,8 @@ function claimList(claims: CurrentClaim[], max: number): HTMLElement {
 function showQuote(record: string, quote: string) {
   const o = opened; if (!o || o.kind !== 'saved') return;
   const scene = readingScene();
+  // Nothing selected: the quote comes from the pane's own reading (the map's root), kept before reopening it re-renders it.
+  if (!scene && returnView.isOpen()) returnView.keepReading();
   openReturn(); returnView.openQuote(record, quote, scene);
 }
 /** In the sheet: the part as read from records (the description and the person's correction of it, the current claims), then the
