@@ -2744,6 +2744,32 @@ def authoring84_flow(browser, base):
     expect(area).to_have_value(draft)
     assert area.evaluate(caret) == [12, 40, "backward", 90], area.evaluate(caret)
     expect(line).to_contain_text("작성 맥락")
+    # A (this screen) is analysed; the context is removed while the reply is held; the reply comes late and reads as made from A
+    # (stale, nothing made from it). Taking this screen again is A: the plan is current again, and the editor the person was
+    # writing in stays open with its caret, selection and a live control focused. Stubbed reply, not a model.
+    line.get_by_role("button", name="없애기").click()
+    line.get_by_role("button", name="현재 화면 맥락으로 지정").click()
+    held = []
+    page.route("**/api/studio/plan", lambda route: held.append(route))
+    page.locator("#plan-ask").click()
+    expect(page.locator("#plan-panel .pending")).to_be_visible()
+    line.get_by_role("button", name="없애기").click()
+    body = json.loads(held[0].request.post_data)
+    assert body["authoring"]["state"] == "recorded", body["authoring"]
+    held[0].fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "reply": {"summary": "[스텁] 실패 후 다음 단계.",
+        "items": [{"id": "c1", "title": "[스텁] 실패 후 계속", "description": "한 단계 실패에도 다음 단계로.", "partIds": [body["parts"][0]["id"]], "refs": ["INTENT"], "dependsOn": []}],
+        "impacts": [], "preserve": [], "unknowns": []}}))
+    expect(page.locator("#plan-stale")).to_contain_text("작성 맥락")
+    expect(page.locator("#plan-make")).to_be_disabled()
+    area.evaluate("a => { a.focus(); a.setSelectionRange(7, 20, 'backward'); }")
+    line.get_by_role("button", name="현재 화면 맥락으로 지정").click()
+    expect(page.locator("#plan-stale")).to_be_hidden()
+    expect(page.locator("#plan-make")).to_be_enabled()
+    expect(area).to_be_visible()
+    expect(area).to_have_value(draft)
+    assert area.evaluate(caret) == [7, 20, "backward", 90], area.evaluate(caret)
+    assert page.evaluate(active) == ["BUTTON", "없애기", False], page.evaluate(active)
+    page.unroute("**/api/studio/plan")
     context.close()
 
 

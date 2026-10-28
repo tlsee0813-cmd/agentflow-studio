@@ -1001,6 +1001,9 @@ export function createPlanView(host: PlanHost) {
     // control of the new line that can act (the same-screen replace is off), else to the draft.
     const was = document.getElementById('plan-intent') as HTMLTextAreaElement | null;
     const caret = was ? { start: was.selectionStart, end: was.selectionEnd, dir: was.selectionDirection, top: was.scrollTop } : null;
+    // The editor the person was writing in stays open, also when this change makes the plan current again (it was open because
+    // the plan was behind the draft): the plan is current, the draft is still being written.
+    if (was && plan()) s.editing = true;
     s.bundle = { ...s.bundle, authoring: { ...authoringOf(s.bundle), draft: a } }; persist(); render();
     const area = document.getElementById('plan-intent') as HTMLTextAreaElement | null;
     if (area && caret) { area.setSelectionRange(caret.start, caret.end, caret.dir); area.scrollTop = caret.top; }
