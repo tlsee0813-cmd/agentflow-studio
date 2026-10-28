@@ -117,7 +117,57 @@ test('71 long report: requests share the byte budget; unseen tail cannot support
   const inp = input(p, [snap.scope]); assert.equal(inp.ask.schemaVersion, 'studio.map.2'); assert.equal(inp.coverage.partial, 1); assert.ok(new TextEncoder().encode(JSON.stringify(inp.ask)).length <= M.MAP_BYTES);
   assert.throws(() => M.validateMapReply(reply([match(snap, { quote: '꼬리에서만 검사 성공을 말합니다', about: null })]), inp.ask), /INVALID_RESPONSE/);
   const many = Array.from({ length: 9 }, (_, i) => ({ ...snap.scope, id: `RQ_${i}` }));
-  const crowded = input(p, many); assert.equal(crowded.requestCoverage.sent, 0); assert.equal(crowded.ask.requests, undefined);
+  const crowded = input(p, many); assert.equal(crowded.problem, 'REQUEST_CONTEXT_TOO_LARGE'); assert.equal(crowded.requestCoverage.sent, 0); assert.equal(crowded.ask.requests, undefined);
+  assert.throws(() => M.applyReading(p, crowded, { summary: '', parts: [], relations: [], candidates: [], gaps: [] }, meta()), /REQUEST_CONTEXT_TOO_LARGE/);
+  assert.equal(p.readings.length, 0); assert.equal(M.unreadRecords(p, studioView(p)).length, 1);
+  const selected = M.buildMapAsk(p, studioView(p), many, many[3].id); assert.equal(selected.problem, null); assert.equal(selected.ask.requests[0].id, many[3].id);
+});
+
+test('71 compact six-item/two-RQ contexts do not duplicate sources; full origins remain exactly frozen in the single reading', () => {
+  const { p, area, plan } = setup(), record = p.pasted[0];
+  const origins = { INTENT: Array.from({ length: 16 }, () => ({ record: record.id, reading: null, quote: record.text })) };
+  const analysis = { ...plan.analysis, items: Array.from({ length: 6 }, (_, n) => ({ ...plan.analysis.items[n % 3], id: `I${n + 1}`, title: `요구 ${n + 1}`, description: `이 항목 ${n + 1}의 결과를 요청함`, partIds: [area] })) };
+  const six = C.createPlan(p.id, plan.basis, plan.intent, plan.evidence, analysis, origins), first = C.requestSnapshot(six), second = C.requestSnapshot(six);
+  const full = [first.scope, second.scope], before = JSON.stringify(full), inp = input(p, full);
+  assert.ok(Buffer.byteLength(before) > 18000); assert.equal(inp.problem, null); assert.equal(inp.ask.requests.length, 2);
+  assert.ok(Buffer.byteLength(JSON.stringify(inp.ask.requests)) < Buffer.byteLength(before) / 3);
+  assert.ok(inp.ask.requests.every(q => q.items.every(i => !Object.hasOwn(i, 'sources'))));
+  M.validateMapAsk(inp.ask);
+  const done = apply(p, inp, reply([]));
+  assert.equal(JSON.stringify(done.reading.requests), before); assert.equal(JSON.stringify(full), before);
+  assert.ok(done.reading.requests.every(q => q.items.every(i => i.sources[0].origins.length === 16)));
+});
+
+test('71 explicit recompare recovers map-only material, keeps a correction on its original RQ, and leaves a conflicting new proposal undecided', () => {
+  let { p, snap, plan } = setup();
+  // A prior version consumed this report as a map-only read: the explicit RQ comparison still recovers it.
+  const mapOnly = M.buildMapAsk(p, studioView(p));
+  p = M.applyReading(p, mapOnly, M.validateMapReply({ summary: '', parts: [], relations: [], candidates: [], gaps: [] }, mapOnly.ask), meta()).project;
+  assert.equal(M.buildMapAsk(p, studioView(p), [snap.scope]).problem, 'NOTHING_NEW');
+  const next = C.requestSnapshot(plan), both = [snap.scope, next.scope];
+  let inp = M.buildMapAsk(p, studioView(p), both, snap.id);
+  assert.equal(inp.problem, null); p = apply(p, inp, reply([match(snap)])).project;
+  let old = R.requestMatches(p)[0]; p = R.correctRequestMatch(p, old.reading, old.index, { requestId: snap.id, itemId: 'I1' });
+  inp = M.buildMapAsk(p, studioView(p), both, next.id); assert.equal(inp.problem, null);
+  p = apply(p, inp, reply([match(next)])).project;
+  const results = R.requestMatches(p), kept = results.find(x => x.reading === old.reading), fresh = results.find(x => x.reading !== old.reading);
+  assert.equal(kept.corrected, true); assert.equal(kept.target.requestId, snap.id);
+  assert.equal(fresh.target, null); assert.equal(fresh.corrected, false); assert.equal(fresh.prior.target.requestId, snap.id);
+  assert.ok(fresh.requests.every(q => q.id === next.id)); parseProject(JSON.stringify(p));
+  assert.equal(M.buildMapAsk(p, studioView(p), both, next.id).problem, 'NOTHING_NEW');
+  // Choosing a comparison is not proof that a report explicitly naming RQ1 fulfils RQ2.
+  const named = D.pasteRecord(p, `요청문 참조: ${snap.id}\nfeature/folder@abc1234: 폴더 안 파일을 받는 입력을 바꿨습니다.`, null).project;
+  const narrowed = M.buildMapAsk(named, studioView(named), both, next.id);
+  assert.throws(() => M.validateMapReply(reply([match(next)]), narrowed.ask), /INVALID_RESPONSE/);
+  assert.deepEqual(M.validateMapReply(reply([match(next, { targets: [], why: '원문이 다른 요청문을 명시함' })]), narrowed.ask).matches[0].targets, []);
+});
+
+test('71 copied request carries its own real RQ and plan revision while legacy text stays untouched', () => {
+  const { p, snap, plan, bundle } = setup();
+  assert.ok(snap.text.includes(`요청문 참조: ${snap.id}`)); assert.ok(snap.text.includes(`변경안 판본: ${plan.id} / ${plan.revision}`));
+  assert.ok(snap.text.includes(`결과에 이 요청문 참조 ${snap.id}를 함께 남겨 주세요`));
+  const legacy = structuredClone(bundle); delete legacy.snapshots[0].scope; legacy.snapshots[0].text = '이전 복사 요청문 원문';
+  assert.equal(parseBundle(legacy, p.id).snapshots[0].text, '이전 복사 요청문 원문');
 });
 
 test('71 map.2 HTTP uses one combined prompt and rejects invented matching; runner failed commit applies neither map nor correspondence', async () => {

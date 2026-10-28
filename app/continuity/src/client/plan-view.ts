@@ -52,6 +52,7 @@ export interface PlanHost {
   /** Read what came back for this project in the return reading (the plan closes; its draft stays). */
   readReturn(): void;
   pasteReturn(): void;
+  readRequest(id: string): void;
   commitProject(project: Project): Promise<string | null>;
 }
 
@@ -1136,10 +1137,12 @@ export function createPlanView(host: PlanHost) {
     const loaded = mine.some(x => /^(R07|P02|R08)-/.test(x.id));
     const actions = h('div', { class: 'pp-row' });
     if (st.example && origin === 'example' && !loaded) actions.append(h('button', { type: 'button', class: 'secondary small', onclick: () => loadExampleResults(snap) }, '돌아온 기록 살펴보기'));
-    if (!st.example) actions.append(h('button', { type: 'button', class: 'link-button', onclick: () => host.pasteReturn() }, '보고 원문 붙여넣기'));
-    if (st.example && origin !== 'example') actions.append(h('button', { type: 'button', class: 'link-button', 'aria-expanded': String(st.addForm), onclick: () => { st.addForm = !st.addForm; render(); } }, st.addForm ? '붙이기 닫기' : '돌아온 기록 붙이기'));
+    if (!st.example && snap.scope) actions.append(h('button', { type: 'button', class: 'link-button', onclick: () => host.pasteReturn() }, '보고 원문 붙여넣기'),
+      h('button', { type: 'button', class: 'link-button', title: '고른 이 요청문으로 아직 대조하지 않은 보고를 읽어요', onclick: () => host.readRequest(snap.id) }, '이 요청과 보고 읽기'));
+    if ((!st.example && !snap.scope) || (st.example && origin !== 'example')) actions.append(h('button', { type: 'button', class: 'link-button', 'aria-expanded': String(st.addForm), onclick: () => { st.addForm = !st.addForm; render(); } }, st.addForm ? '붙이기 닫기' : '돌아온 기록 직접 붙이기'));
     if (actions.childElementCount) sec.append(actions);
     if (st.example && origin !== 'example') sec.append(h('p', { class: 'fine' }, '예제의 돌아온 기록은 작성된 예제 항목과만 대응해요. AI 분석 항목에는 받은 글을 직접 붙여 주세요.'));
+    if (!st.example && !snap.scope) sec.append(h('p', { class: 'fine' }, '이전 형식 요청문이라 보고가 자동 대응되지 않아요. 요청문은 그대로 두고 항목에 직접 기록할 수 있어요.'));
     if (st.addForm) sec.append(addForm(snap, labels));
     return sec;
   }
@@ -1227,6 +1230,7 @@ export function createPlanView(host: PlanHost) {
     isOpen: () => !!s,
     /** The right panel's width while the whole plan is open there; 0 while the plan reads on the map. */
     open, close, projectChanged, overlay, escape,
+    openResults: () => { if (!s) open(); if (!s) return; s.detail = true; s.rail = 'results'; render(); },
     /** The selection changed on the map while planning: the panel reads it in place of the part panel. */
     selectionChanged: (changed = false) => {
       if (!s) return;

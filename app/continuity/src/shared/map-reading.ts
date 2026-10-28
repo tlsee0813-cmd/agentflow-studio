@@ -9,7 +9,7 @@ import { addArea, addChildArea, addRelation, addReading } from './domain.js';
 import { parseProject } from './validation.js';
 import { quoteAt } from './digest-api.js';
 import { secretLike } from './secret.js';
-import { validateFrozenRequest, validateRequestMatch, type FrozenRequest, type RequestMatch, type StoredRequestMatch } from './request-return.js';
+import { validateFrozenRequest, validateRequestContext, requestContext, validateRequestMatch, type RequestContext, type FrozenRequest, type RequestMatch, type StoredRequestMatch } from './request-return.js';
 
 export const MAP_SCHEMA = 'studio.map.1' as const;
 export const MAP2_SCHEMA = 'studio.map.2' as const;
@@ -34,7 +34,7 @@ export interface MapAsk {
   parts: MapAskPart[];
   relations: { from: string; to: string; kind: RelationKind; note: string }[];
   records: MapAskRecord[];
-  requests?: FrozenRequest[];
+  requests?: (RequestContext | FrozenRequest)[];
 }
 export interface MapReplyQuote { record: string; quote: string }
 export interface MapReplyClaim { kind: ClaimKind; text: string; record: string; quote: string; about: string | null; replaces: string | null }
@@ -125,7 +125,7 @@ export function validateMapAsk(value: unknown): MapAsk {
     obj(r, ['id', 'kind', 'text', 'note', 'basis']); check(typeof r.id === 'string' && RECORD.test(r.id) && !records.has(r.id)); records.add(r.id);
     check(['pasted', 'request', 'report', 'evidence', 'answer', 'decision'].includes(r.kind as string)); str(r.text, MAP_RECORD_CHARS); str(r.note, 600, true); str(r.basis, 300);
   }
-  if (two) { arr(value.requests, 8); const ids = new Set<string>(); for (const r of value.requests) { const req = validateFrozenRequest(r); check(!ids.has(req.id)); ids.add(req.id); } }
+  if (two) { arr(value.requests, 8); const ids = new Set<string>(); for (const r of value.requests) { const req = r && typeof r === 'object' && (r as { version?: unknown }).version === 'request-scope.1' ? validateFrozenRequest(r) : validateRequestContext(r); check(!ids.has(req.id)); ids.add(req.id); } }
   return structuredClone(value as unknown as MapAsk);
 }
 
@@ -211,6 +211,8 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
       // Request correspondence quotes the literal sent passage; it does not repair or join excerpts.
       const rec = records.get(m.record), at = rec ? quoteAt(rec.text, m.quote) : null;
       check(rec && at && at.length >= 6 && at.length <= 300, code);
+      const explicit = new Set(rec!.text.match(/\bRQ_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi) ?? []);
+      check(!explicit.size || m.targets.every(t => explicit.has(t.requestId)), code);
       check(!['code', 'test'].includes(m.kind) || rec!.kind === 'evidence', code);
       const about = m.about === null ? null : resolveQuote(rec!.text, m.about);
       check(m.about === null || about !== null, code);
@@ -296,8 +298,10 @@ export interface MapInput {
   coverage: { fresh: number; sent: number; partial: number };
   /** The last reading when this request was made: an answer is applied only on top of it. */
   after: string | null;
-  problem: 'NOTHING_NEW' | 'TOO_LARGE' | { secret: string } | null;
+  problem: 'NOTHING_NEW' | 'TOO_LARGE' | 'REQUEST_CONTEXT_TOO_LARGE' | { secret: string } | null;
   requestCoverage?: { total: number; sent: number };
+  /** Full scopes, captured before the call; the wire sends only requestContext(scope). */
+  fullRequests?: FrozenRequest[];
 }
 /** Records of a project with text no map reading has read yet, newest first: pasted records as pasted, and the project's own
  * records. A record sent only in part comes back with its unread tail (from the end of what was read). */
@@ -308,7 +312,7 @@ export function unreadRecords(p: Project, view: StudioView): MapRecordSource[] {
   const own: MapRecordSource[] = view.records.map(r => ({ id: r.id, kind: r.kind, text: r.text, at: r.at, label: '프로젝트 기록', from: readTo.get(r.id) ?? 0 }));
   return [...pasted, ...own].filter(r => r.from < r.text.length).sort((a, b) => b.at.localeCompare(a.at));
 }
-export function buildMapAsk(p: Project, view: StudioView, requests: FrozenRequest[] = []): MapInput {
+export function buildMapAsk(p: Project, view: StudioView, requests: FrozenRequest[] = [], selectedRequestId?: string): MapInput {
   const parts = new Map<string, string>(), alias = new Map<string, string>(), claims = new Map<string, { reading: string; index: number }>();
   view.parts.slice(0, 200).forEach((x, i) => { const a = `P${String(i + 1).padStart(2, '0')}`; parts.set(a, x.id); alias.set(x.id, a); });
   let c = 0;
@@ -325,18 +329,33 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
     relations: view.relations.filter(r => alias.has(r.from) && alias.has(r.to)).slice(0, 400).map(r => ({ from: alias.get(r.from)!, to: alias.get(r.to)!, kind: r.kind, note: cut(r.note, 200) })),
     records: []
   };
-  const unread = unreadRecords(p, view), records = new Map<string, { id: string; from: number; to: number; total: number; text: string }>();
+  let unread = unreadRecords(p, view);
+  if (selectedRequestId) {
+    if (!requests.some(r => r.id === selectedRequestId)) throw new Error('INVALID_REQUEST_SCOPE');
+    // Explicit recovery may compare a report previously read without this RQ. Coverage is per RQ, from its contiguous
+    // compared prefix, so an earlier map-only read or a sent tail does not hide an uncompared head forever.
+    const compared = p.readings.filter(isMapReading).filter(r => r.requests?.some(q => q.id === selectedRequestId)).flatMap(r => r.records);
+    const prefix = (id: string) => { let end = 0; for (const r of compared.filter(r => r.id === id).sort((a, b) => a.from - b.from)) if (r.from <= end) end = Math.max(end, r.to); return end; };
+    unread = [...p.pasted.map(r => ({ id: r.id, kind: 'pasted' as const, text: r.text, at: r.at, label: '붙여넣은 기록', from: prefix(r.id) })),
+      ...view.records.map(r => ({ id: r.id, kind: r.kind, text: r.text, at: r.at, label: '프로젝트 기록', from: prefix(r.id) }))].filter(r => r.from < r.text.length).sort((a, b) => b.at.localeCompare(a.at));
+  }
+  const records = new Map<string, { id: string; from: number; to: number; total: number; text: string }>();
   const input: MapInput = { ask, parts, records, claims, coverage: { fresh: unread.length, sent: 0, partial: 0 }, after: p.readings.filter(isMapReading).at(-1)?.id ?? null, problem: null };
-  // All comparable frozen requests or none: omitting an older, indistinguishable request must never pick the latest one.
+  if (!unread.length) return { ...input, problem: 'NOTHING_NEW' };
+  // All comparable contexts or a request the person explicitly chose. Full origins are never sent repeatedly per item.
   if (requests.length) {
     for (const r of requests) { validateFrozenRequest(r); if (r.projectId !== p.id) throw new Error('INVALID_REQUEST_SCOPE'); }
-    if (requests.length <= 8 && bytes(requests) <= 18000) { ask.schemaVersion = MAP2_SCHEMA; ask.requests = structuredClone(requests); }
-    input.requestCoverage = { total: requests.length, sent: ask.requests?.length ?? 0 };
+    const chosen = selectedRequestId ? requests.filter(r => r.id === selectedRequestId) : requests, contexts = chosen.map(requestContext);
+    input.requestCoverage = { total: requests.length, sent: 0 };
+    if (chosen.length > 8 || bytes(contexts) > 28000) return { ...input, problem: 'REQUEST_CONTEXT_TOO_LARGE' };
+    ask.schemaVersion = MAP2_SCHEMA; ask.requests = contexts; input.fullRequests = structuredClone(chosen);
+    input.requestCoverage.sent = chosen.length;
   }
-  if (!unread.length) return { ...input, problem: 'NOTHING_NEW' };
   // Structure first, bounded: the earlier understanding of each part shrinks before any record is left out.
-  if (bytes(ask) > META_BYTES) for (const x of ask.parts) { x.current = x.current.slice(0, 2); x.role = cut(x.role, 120); if (bytes(ask) <= META_BYTES) break; }
-  if (bytes(ask) > META_BYTES) return { ...input, problem: 'TOO_LARGE' };
+  const mapBytes = () => bytes({ ...ask, ...(ask.requests ? { requests: [] } : {}) });
+  if (mapBytes() > META_BYTES) for (const x of ask.parts) { x.current = x.current.slice(0, 2); x.role = cut(x.role, 120); if (mapBytes() <= META_BYTES) break; }
+  if (mapBytes() > META_BYTES) return { ...input, problem: 'TOO_LARGE' };
+  if (bytes(ask) > MAP_BYTES - MIN_RECORD_CHARS * 3) return { ...input, problem: 'REQUEST_CONTEXT_TOO_LARGE' };
   let n = { N: 0, R: 0 };
   for (const r of unread) {
     if (ask.records.length >= MAP_RECORDS) break;
@@ -365,6 +384,9 @@ export interface Applied { project: Project; reading: MapReading; created: strin
  * are kept, or nothing is (the result is re-read by parseProject). Refused when another reading was applied meanwhile or a part
  * the reply names has gone; edits the person made meanwhile (names, notes, places, plans, records) are kept as they are. */
 export function applyReading(project: Project, input: MapInput, reply: MapReply, meta: { id: string; at: string; model: string; prompt: string; hash: string }): Applied {
+  if (input.problem) throw new Error(input.problem === 'REQUEST_CONTEXT_TOO_LARGE' ? 'REQUEST_CONTEXT_TOO_LARGE' : 'INVALID_INPUT');
+  const frozen = input.ask.schemaVersion === MAP2_SCHEMA ? input.fullRequests ?? input.ask.requests!.map(validateFrozenRequest) : [];
+  if (frozen.some(r => r.projectId !== project.id) || JSON.stringify(frozen.map(requestContext)) !== JSON.stringify((input.ask.requests ?? []).map(r => r.version === 'request-scope.1' ? requestContext(r) : r))) throw new Error('INVALID_REQUEST_SCOPE');
   const done = project.readings.filter(isMapReading);
   if ((done.at(-1)?.id ?? null) !== input.after) throw new Error('MAP_CHANGED');
   if (done.some(r => r.hash === meta.hash)) throw new Error('ALREADY_APPLIED');
@@ -428,7 +450,7 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   const reading: MapReading = { version: input.ask.schemaVersion === MAP2_SCHEMA ? 'map-reading.2' : 'map-reading.1', id: meta.id, at: meta.at, model: meta.model, prompt: meta.prompt, hash: meta.hash,
     records: [...input.records.values()].map(r => ({ id: r.id, from: r.from, to: r.to, total: r.total })),
     summary: reply.summary, parts, relations, candidates: candidates.slice(0, 16), gaps: reply.gaps, skipped: skipped.slice(0, 64),
-    ...(input.ask.schemaVersion === MAP2_SCHEMA ? { requests: structuredClone(input.ask.requests!), matches } : {}) };
+    ...(input.ask.schemaVersion === MAP2_SCHEMA ? { requests: structuredClone(frozen), matches } : {}) };
   p = addReading(p, reading);
   const next = parseProject(JSON.stringify(p));
   const corresponding = matches.filter(m => m.targets.length === 1).flatMap(m => {

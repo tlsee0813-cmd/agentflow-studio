@@ -30,7 +30,8 @@ test('optional presentation round-trips without adding it to legacy plans or cha
   const saved = parsePersistedPlan(next); assert.deepEqual(saved, next);
   assert.deepEqual(selectItems(saved, ['I1']).analysis.items[0].presentation, next.analysis.items[0].presentation);
   const without = structuredClone(saved); delete without.analysis.items[0].presentation;
-  assert.equal(requestSnapshot(saved).text, requestSnapshot(without).text);
+  const withoutRef = s => s.replace(/RQ_[A-Za-z0-9_-]+/g, 'RQ_generated');
+  assert.equal(withoutRef(requestSnapshot(saved).text), withoutRef(requestSnapshot(without).text));
   saved.analysis.items[0].presentation[0].wanted.text = 'outside mutation';
   assert.notEqual(next.analysis.items[0].presentation[0].wanted.text, 'outside mutation');
 });

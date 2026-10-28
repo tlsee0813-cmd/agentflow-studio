@@ -7,7 +7,7 @@
  * kept in the project as pasted (host.paste) and read only when the person asks, with the rest of the material (studio.digest.2):
  * up to three readings of it, each on an exact quote of what was sent, its related parts shown as candidates. A part looked at
  * when pasting is the reading's context, never where the record belongs; closing comes back to the scene the paste began from. */
-import { DIGEST_KIND_LABEL, OUTCOME_KINDS, quoteAt, type DigestStatement, type RecordReading } from '../shared/digest-api.js';
+import { DIGEST_KIND_LABEL, OUTCOME_KINDS, type DigestStatement, type RecordReading } from '../shared/digest-api.js';
 import { UI62_KEY, UI62_STAGES } from '../shared/return-material.js';
 import type { Evidence } from '../shared/change-plan.js';
 import type { StorageLike } from '../shared/storage.js';
@@ -18,7 +18,7 @@ import { askDigest, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js'
 import type { PlanOpened } from './plan-view.js';
 import type { PlanBundle } from './plan-store.js';
 import { secretLike } from './plan-source.js';
-import { h, put, fullTime, codeGate, codeNote } from './plan-dom.js';
+import { h, put, fullTime, codeGate, codeNote, quotedText as quoted } from './plan-dom.js';
 
 export interface ReturnHost {
   current(): PlanOpened | null;
@@ -405,12 +405,6 @@ export function createReturnView(host: ReturnHost) {
     return out;
   }
 
-  /** The text with one quote marked (white space read loosely, as the reply check does); the first mark scrolls into view. */
-  function quoted(text: string, quote: string | null): (Node | string)[] {
-    const at = quote ? quoteAt(text, quote) : null;
-    if (!at) return [text];
-    return [text.slice(0, at.at), h('mark', { class: 'rr-mark' }, text.slice(at.at, at.at + at.length)), text.slice(at.at + at.length)];
-  }
   function sourceBody(src: ReadingSource, from: 'now' | 'previous' | 'material', quote: string | null): Node[] {
     const v = versionOf(src.basis);
     if (src.kind === 'record') return recordBody(src, quote);

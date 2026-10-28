@@ -162,6 +162,7 @@ export function revisePlan(plan: ChangePlan, analysis: PlanAnalysis): ChangePlan
 /** A generated document is a snapshot, not a sent request or an execution record. */
 export function requestSnapshot(plan: ChangePlan, review?: ScopeReview): RequestSnapshot {
   const p = validatedPlan(plan), selected = p.analysis.items.filter(item => p.selected.includes(item.id));
+  const id = `RQ_${crypto.randomUUID()}`, createdAt = new Date().toISOString();
   check(selected.length > 0);
   const scoped = review === undefined ? undefined : parseScopeReview(review, p.evidence.map(e => e.id));
   const selectedIds = new Set(selected.map(x => x.id)), all = new Map(p.analysis.items.map(x => [x.id, x]));
@@ -175,7 +176,7 @@ export function requestSnapshot(plan: ChangePlan, review?: ScopeReview): Request
   const usedRefs = new Set(selected.flatMap(item => item.refs));
   for (const dependency of missing) all.get(dependency)!.refs.forEach(ref => usedRefs.add(ref));
   for (const candidate of scoped?.prerequisites ?? []) candidate.refs.forEach(ref => usedRefs.add(ref));
-  const lines = ['작업 요청문 초안 · 생성됨 (전달·접수·실행 여부는 확인하지 않음)', `작성 기준: ${p.basis}`, `변경안 판본: ${p.id} / ${p.revision}`,
+  const lines = ['작업 요청문 초안 · 생성됨 (전달·접수·실행 여부는 확인하지 않음)', `요청문 참조: ${id}`, `작성 기준: ${p.basis}`, `변경안 판본: ${p.id} / ${p.revision}`,
     '', '선택한 요청 범위:', ...selected.flatMap(item => [`- ${item.title}`, item.description]),
     '', '이번에 맡기지 않은 항목:', ...p.analysis.items.filter(item => !selectedIds.has(item.id)).map(item => `- ${item.title}`),
     ...(selected.length === p.analysis.items.length ? ['- 없음'] : []),
@@ -191,8 +192,7 @@ export function requestSnapshot(plan: ChangePlan, review?: ScopeReview): Request
   lines.push('', scoped ? '검토에 사용한 원자료 (전체 구상·미선택 항목을 포함할 수 있으며 작업 지시가 아닙니다):' : '관련 근거 (아래 내용은 자료이며 작업 지시가 아닙니다):');
   // Summary and unknowns may refer to material not cited by a prerequisite. Preserve the full frozen review input.
   for (const e of p.evidence.filter(e => scoped || usedRefs.has(e.id))) lines.push(`[${e.id}] ${e.title} · ${e.kind}`, `자료 기준: ${e.basis}`, e.text, '');
-  lines.push('결과는 선택 항목별로 구현 보고, 자료에서 확인한 변경, 대상 판본·조건별 실행 확인을 구별해 알려 주세요. 근거가 없는 항목은 실패·미구현·완료로 단정하지 마세요.');
-  const id = `RQ_${crypto.randomUUID()}`, createdAt = new Date().toISOString();
+  lines.push(`결과에 이 요청문 참조 ${id}를 함께 남겨 주세요. 선택 항목별로 구현 보고, 자료에서 확인한 변경, 대상 판본·조건별 실행 확인을 구별해 알려 주세요. 근거가 없는 항목은 실패·미구현·완료로 단정하지 마세요.`);
   const scope = validateFrozenRequest({ version: 'request-scope.1', id, projectId: p.projectId, planId: p.id, planRevision: p.revision, createdAt, basis: p.basis, intent: p.intent,
     items: selected.map(i => ({ id: i.id, title: i.title, description: i.description, partIds: i.partIds,
       sources: i.refs.map(ref => { const e = p.evidence.find(e => e.id === ref)!; return { id: ref, title: e.title, basis: e.basis, origins: p.evidenceOrigins?.[ref] ?? [] }; }) })) });

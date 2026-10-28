@@ -9,7 +9,7 @@ import { CLAIM_LABEL, STATE_LABEL, type Applied, type CurrentClaim } from '../sh
 import type { ClaimKind } from '../shared/types.js';
 import { createMapRun, sendLine } from './map-run.js';
 import { requestResults, frozenRequests, displayAbout } from './request-results.js';
-import { correctRequestMatch } from '../shared/request-return.js';
+import { correctRequestMatch, requestComparison } from '../shared/request-return.js';
 import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
 import { layoutScope, edgePath, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, ROOT, HEAD, type Box, type Edge, type LabelSpot, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
@@ -1582,6 +1582,7 @@ const planView = createPlanView({
   area: () => syncMapArea(),
   readReturn: () => { planView.close(); openReturn(); },
   pasteReturn: () => { planView.close(); openPaste(selected); },
+  readRequest: id => { planView.close(); void mapRun.run(id); },
   commitProject: next => { const o = opened; return o ? commit(o, next) : Promise.resolve('프로젝트가 열려 있지 않아요.'); },
   frame: (all, fallback) => {
     // Once, when a whole plan comes to read: its changed parts together when they fit beside the pane at this zoom (no zoom,
@@ -1718,9 +1719,12 @@ function understoodLine(o: Opened): HTMLElement | null {
   if (!last && !fresh && !st.pending && !st.error) return null;
   const line = h('p', { class: 'map-understood' });
   if (last?.summary) line.append(h('span', { class: 'mu-text' }, last.summary));
+  const comparison = last ? requestComparison(o.project, last) : null;
+  if (comparison) line.append(h('button', { type: 'button', class: 'map-more mu-comparison', onclick: () => openReturn() }, comparison));
   if (st.pending) line.append(h('span', { class: 'mu-pending' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), '기록을 읽고 지도를 갱신하는 중…'), h('button', { type: 'button', class: 'map-more', onclick: () => mapRun.cancel() }, '취소'));
   else if (fresh && mapRun.can() && !inp!.problem) line.append(h('button', { type: 'button', class: 'map-more mu-run', title: sendLine(inp!), onclick: () => void mapRun.run() }, `새 기록 ${fresh}개 읽고 지도 갱신`));
   else if (fresh) line.append(h('span', { class: 'mu-fresh' }, `아직 지도에 읽지 않은 기록 ${fresh}개`));
+  if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE') line.append(h('button', { type: 'button', class: 'map-more', title: sendLine(inp), onclick: () => { if (returnView.isOpen()) returnView.close(); planView.openResults(); } }, '요청문을 골라 대조'));
   if (last) line.append(h('button', { type: 'button', class: 'map-more', title: '이번 정리의 근거와 확인할 것', onclick: () => openReturn() }, '근거'));
   if (st.error) line.append(h('span', { class: 'mu-error', role: 'alert' }, st.error));
   return line;
@@ -1767,6 +1771,7 @@ function mapBlock(): HTMLElement | null {
     can && !inp!.problem ? h('button', { type: 'button', class: 'primary small', onclick: () => void mapRun.run() }, o.view.parts.length ? '기록 읽고 지도 갱신' : '기록으로 지도 정리') : null,
     h('span', { class: 'fine' }, can && !inp!.problem ? `읽지 않은 기록 ${fresh}개 · ${sendLine(inp!)}` : !can ? `읽지 않은 기록 ${fresh}개 · AI 서버가 연결된 주소에서 정리할 수 있어요` : '보낼 수 없는 기록이 있어요(너무 크거나 키처럼 보이는 글).')));
   if (st.error) sec.append(h('p', { class: 'pp-error', role: 'alert' }, st.error));
+  if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE') sec.append(h('p', { class: 'fine' }, sendLine(inp)), h('button', { type: 'button', class: 'link-button', onclick: () => { returnView.close(); planView.openResults(); } }, '요청문을 골라 대조'));
   if (last) {
     const name = (id: string) => partOf(o, id)?.name ?? null;
     if (last.summary) sec.append(h('p', { class: 'rm-summary' }, last.summary));

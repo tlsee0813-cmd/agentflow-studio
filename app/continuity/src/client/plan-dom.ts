@@ -1,5 +1,6 @@
 /* Small DOM helpers shared by the map client and the change-plan view. Attributes only through setAttribute and CSSOM, so the
  * page keeps working under style-src 'self'. */
+import { quoteAt } from '../shared/digest-api.js';
 export const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 export type Child = Node | string | null | undefined | false;
 export function h<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Record<string, string | boolean | ((e: Event) => void)> = {}, ...children: Child[]): HTMLElementTagNameMap[K] {
@@ -14,6 +15,11 @@ export function h<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Record<s
   return el;
 }
 const SVG = 'http://www.w3.org/2000/svg';
+/** Shared original-text rendering, optionally at an exact stored interval (repeated quotes keep their own origin). */
+export function quotedText(text: string, quote: string | null, interval?: { at: number; length: number }): (Node | string)[] {
+  const at = interval && text.slice(interval.at, interval.at + interval.length) === quote ? interval : quote ? quoteAt(text, quote) : null;
+  return at ? [text.slice(0, at.at), h('mark', { class: 'rr-mark' }, text.slice(at.at, at.at + at.length)), text.slice(at.at + at.length)] : [text];
+}
 export const put = (el: HTMLElement, ...children: Child[]) => { for (const c of children) if (c) el.append(c); };
 export const svg = (tag: string, attrs: Record<string, string>) => { const el = document.createElementNS(SVG, tag); for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v); return el; };
 export const chevron = (open: boolean) => { const el = svg('svg', { viewBox: '0 0 16 16', 'aria-hidden': 'true', class: open ? 'open' : '' }); el.append(svg('path', { d: 'M6 4l4 4-4 4' })); return el; };

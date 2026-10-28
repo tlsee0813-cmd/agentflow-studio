@@ -37,14 +37,14 @@ export function createMapRun(host: MapRunHost) {
   const states = new Map<string, MapRunState>();
   const of = (key: string) => { let s = states.get(key); if (!s) { s = { pending: null, error: null }; states.set(key, s); } return s; };
   /** What a reading would send now (nothing is sent). */
-  function input(): MapInput | null { const o = host.current(); return o && o.kind === 'saved' ? buildMapAsk(o.project, o.view, host.requests?.() ?? []) : null; }
+  function input(requestId?: string): MapInput | null { const o = host.current(); return o && o.kind === 'saved' ? buildMapAsk(o.project, o.view, host.requests?.() ?? [], requestId) : null; }
   function can(): boolean { const st = host.status(); return st.ai === 'deepseek' && !!st.map; }
-  async function run() {
+  async function run(requestId?: string) {
     const o = host.current(); if (!o || o.kind !== 'saved') return;
     const key = o.key, state = of(key); if (state.pending) return;
-    const st = host.status(), inp = buildMapAsk(o.project, o.view, host.requests?.() ?? []);
+    const st = host.status(), inp = buildMapAsk(o.project, o.view, host.requests?.() ?? [], requestId);
     if (!st.map || st.ai !== 'deepseek') return;
-    if (inp.problem) { state.error = inp.problem === 'NOTHING_NEW' ? '새로 읽을 기록이 없어요.' : inp.problem === 'TOO_LARGE' ? '지도가 커서 한 번에 보낼 수 없어요.' : '키나 토큰처럼 보이는 글이 있는 기록이 있어 보내지 않았어요.'; host.changed(); return; }
+    if (inp.problem) { state.error = inp.problem === 'NOTHING_NEW' ? '이 범위에서 새로 읽을 기록이 없어요.' : inp.problem === 'REQUEST_CONTEXT_TOO_LARGE' ? '요청 문맥을 한 번에 대조하기 어려워 보고를 읽지 않았어요. 비교할 요청문을 골라 주세요.' : inp.problem === 'TOO_LARGE' ? '지도가 커서 한 번에 보낼 수 없어요.' : '키나 토큰처럼 보이는 글이 있는 기록이 있어 보내지 않았어요.'; host.changed(); return; }
     const hash = await askHash(inp.ask);
     if (o.project.readings.some(r => isMapReading(r) && r.hash === hash)) { state.error = MAP_ERROR.ALREADY_APPLIED!; host.changed(); return; }
     const controller = new AbortController(); state.pending = controller; state.error = null; host.changed();
@@ -76,5 +76,6 @@ export type MapRun = ReturnType<typeof createMapRun>;
 /** What a request would send, said before it is sent. */
 export function sendLine(inp: MapInput): string {
   const c = inp.coverage, left = c.fresh - c.sent;
-  return [`기록 ${c.sent}개를 AI에 보내요`, c.partial ? `${c.partial}개는 일부 구간만` : '', left > 0 ? `${left}개는 다음에` : '', inp.requestCoverage ? inp.requestCoverage.sent ? `고정 요청 ${inp.requestCoverage.sent}개와 대조` : '요청문이 많거나 커서 이번에는 지도만 정리' : ''].filter(Boolean).join(' · ');
+  if (inp.problem === 'REQUEST_CONTEXT_TOO_LARGE') return '요청 문맥이 커서 아직 보고를 읽지 않았어요. 비교할 요청문을 골라 주세요.';
+  return [`기록 ${c.sent}개를 AI에 보내요`, c.partial ? `${c.partial}개는 일부 구간만` : '', left > 0 ? `${left}개는 다음에` : '', inp.requestCoverage?.sent ? `고정 요청 ${inp.requestCoverage.sent}개와 대조` : ''].filter(Boolean).join(' · ');
 }
