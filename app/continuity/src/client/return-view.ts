@@ -19,6 +19,7 @@ import type { PlanOpened } from './plan-view.js';
 import type { PlanBundle } from './plan-store.js';
 import { secretLike } from './plan-source.js';
 import { h, put, fullTime, codeGate, codeNote, quotedText as quoted } from './plan-dom.js';
+import type { RequestReading } from './request-results.js';
 
 export interface ReturnHost {
   current(): PlanOpened | null;
@@ -57,8 +58,15 @@ export interface ReturnHost {
   /** Records wait to be read into the map: that is the pane's one main action, and this reading's summary steps back. */
   mapPrimary(): boolean;
 }
-/** Where the person was when a paste began from a part: the part, the scope and the camera. */
-export interface Scene { selected: string | null; scope: string | null; camera: { x: number; y: number; k: number } }
+/** Memory of the caller's reading surface. No source text or rendered nodes are held: the host renders current data first. */
+export interface ReadingContext {
+  surface: 'lens' | 'sheet' | 'scope' | 'none';
+  sheetReturn: { x: number; y: number; k: number } | null;
+  scroll: number;
+  requests: RequestReading | null;
+}
+/** Where a quote or paste began: this entry, selection, scope, camera and optional reading position. */
+export interface Scene { key?: string; selected: string | null; scope: string | null; camera: { x: number; y: number; k: number }; reading?: ReadingContext }
 
 type View = { kind: 'reading' } | { kind: 'source'; source: ReadingSource; from: 'now' | 'previous' | 'material'; quote: string | null } | { kind: 'material' } | { kind: 'paste' };
 interface State {
