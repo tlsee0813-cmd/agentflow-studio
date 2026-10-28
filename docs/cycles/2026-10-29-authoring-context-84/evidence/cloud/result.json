@@ -1,0 +1,355 @@
+{
+  "request": "AF-CLOUD-20261029-84 + DELTA5 + DELTA6",
+  "verdict": "ACCEPT within independently executed authoring-context and two narrow deltas; no remaining P1/P2 found",
+  "findings": [],
+  "sources": [
+    {
+      "source": "048dfec634c869bd44c4295eece9c3c43ef130dd",
+      "zipBytes": 1156436,
+      "zipSHA256": "f1c49e25760e567aebdb53ebbea9354062dd519eb0d7caff103e9ed6151ba152",
+      "manifestPayloadVerified": 207,
+      "fixturesVerified": 4,
+      "verdict": "Original contracts passed in exercised scope; original two P2 failures preserved, not retroactively marked pass",
+      "passed": [
+        "authoring84 + origins84 Node test files once, exit 0",
+        "authoring84_flow once, exit 0; 1280x800 DPR1.25",
+        "Manual 1280x720 and 1440x900 DPR1: first edit versus open, same sentence distinct API/PIPE stable context and request aliases, all 6 parts retained",
+        "Long real micro reading origins >300 characters retained in synthetic analysis, save/reload, exported file import and generated request",
+        "Legacy nine-key draft stays unrecorded on edit; explicit set/remove preserves selection and enabled focus; removed stays removed through edit/reload",
+        "Delayed old A after B or removal stays explicitly stale and disables request/map actions; navigation alone not stale; no-context analysis allowed",
+        "Explicit B in full intent allowed by public synthetic reply while independent authoring context is A; no auto-added preserve item",
+        "Long synthetic selection/scope labels and action buttons fit both viewports; rename/missing/same-name/owner/version by targeted units"
+      ]
+    },
+    {
+      "source": "6404afe8299efe856b734afab77943a28c8c26f6",
+      "zipBytes": 1156272,
+      "zipSHA256": "1cb06964b8411dce940fcd1ad02f69f854111b57d4e0bd9e6acfa27ae7b2d241",
+      "manifestPayloadVerified": 207,
+      "fixturesVerified": 4,
+      "verdict": "DELTA5 close/open caret change PASS at both requested DPR1 viewports; context-restored editor P2 not repaired in this source and not re-executed on640",
+      "caret": {
+        "draftLength": 61,
+        "beforeAfter": [
+          1,
+          1
+        ],
+        "backwardSelection": [
+          12,
+          40,
+          "backward"
+        ],
+        "textareaScrollBeforeAfter": [
+          369,
+          369
+        ],
+        "draftContextCameraUnchanged": true
+      }
+    },
+    {
+      "source": "90ac73624689e8f3639dacf93b5e7cb3640def64",
+      "zipBytes": 1156922,
+      "zipSHA256": "32ffa741b57a210571bb542d4b008dba721ad50d934f2f2fa6a446c8064b168c",
+      "manifestPayloadVerified": 207,
+      "fixturesVerified": 4,
+      "verdict": "DELTA6 A-to-B-to-A editor/focus repair PASS at1280x720 and1440x900 DPR1; removed-to-A small cross-check PASS1280",
+      "passed": [
+        "stale-only editor stays open when explicit context A makes the plan current",
+        "7..20 backward selection and body retained; focus remains enabled remove button; stale clears and request enabled",
+        "1/2 plan selection, complete plan, analyzed-context snapshot, frozen request snapshot and origin citations equal before/after",
+        "Remaining isolation: identical-text different projects retain distinct caret1/caret5; authored converter B caret9 does not overwrite default-A caret2",
+        "Actual same-tab text replacement retains new caret24 rather than forcing old caret1"
+      ],
+      "newRealModelCalls": 0,
+      "newPlanOrScopeHTTPCalls": 0
+    }
+  ],
+  "originalFailures": [
+    {
+      "id": "P2-close-open-caret",
+      "source": "048",
+      "observed": "20-character micro draft caret1 became20 after close/open; body/context retained",
+      "beforeJSON": "/workspace/work/af84-observation/04-api1280-caret-before-close.json",
+      "afterJSON": "/workspace/work/af84-observation/05-api1280-reopen-caret.json",
+      "resolvedBy": "640 direct two-viewport close/open checks"
+    },
+    {
+      "id": "P2-context-A-restored-editor-closed",
+      "source": "048",
+      "observed": "After delayed A analysis while draft context B, explicitly returning context to A removed textarea/workspace; focus BODY.87-character body and context retained.",
+      "beforeJSON": "/workspace/work/af84-observation/14-api1280-late-A-after-B.json",
+      "afterJSON": "/workspace/work/af84-observation/15-api1280-context-restored-A-editor-hidden.json",
+      "resolvedBy": "90 direct B-to-A two viewports; removed-to-A1280"
+    }
+  ],
+  "comparisonBasis": {
+    "048OriginalContextCase": "87-character intent with delayed public synthetic response, B PIPE to A API; original before/after observations and originals preserved",
+    "90ContextCase": "Normal UI import of the original048 exported analyzed-A bundle and frozen request (20-character intent). Unselected source item to exercise1/2; draft context B; close/navigate A/open stale-forced editor; explicit A. No new response or delayed-response repeat. The stale-resolution transition is compared; literal87-character delayed sequence is not re-executed.",
+    "inputs": "Frozen actual74 micro source/reading fixture + public synthetic browser-intercepted plan/scope replies; no new model effect",
+    "legacyAndLongContext": "Review copy of real export with legacy9-key bundle; supplied boundary83 W16 synthetic fixture. No product source modifications."
+  },
+  "commands": [
+    {
+      "command": "node --test app/continuity/tests/authoring84.test.mjs app/continuity/tests/origins84.test.mjs",
+      "cwd": "/workspace/work/af84-6_kckomw",
+      "exit": 0,
+      "runs": 1
+    },
+    {
+      "command": "python3 /workspace/work/af84-flow-run.py",
+      "flow": "authoring84_flow",
+      "source": "048",
+      "exit": 0,
+      "runs": 1
+    },
+    {
+      "command": "python3 /workspace/work/af84-session.py (temporary review wrapper, supplied studio_browser.start(\"ok\"), native Playwright inputs and same-stage observations)",
+      "sources": [
+        "048",
+        "640",
+        "90"
+      ],
+      "exit": 0,
+      "note": "Interactive targeted steps only, no whole suite.90 transition step file preserved in af84-d6-observation/90-transition-steps.py."
+    }
+  ],
+  "executionBoundaries": {
+    "platform": "Linux; existing Chromium /usr/bin/chromium and Python Playwright, Node24.19.0",
+    "providedBuild": "Windows pinned TypeScript5.8.3 precompiled build supplied; not independently rebuilt or Git-attested",
+    "manualViewports": [
+      {
+        "width": 1280,
+        "height": 720,
+        "dpr": 1
+      },
+      {
+        "width": 1440,
+        "height": 900,
+        "dpr": 1
+      }
+    ],
+    "realAIAPI": 0,
+    "remoteGit": false,
+    "rebuild": false,
+    "installation": false,
+    "wholeSuite": false,
+    "windowsCI": false,
+    "OSSExecution": false,
+    "productSourceChanges": false,
+    "rootActualModel5": "Not executed by Cloud; not counted as our evidence"
+  },
+  "limitations": [
+    "No general model correctness, first-map quality or whole-product completion claim.",
+    "Cross-tab sync was not assessed: a second-tab write did not replace the first tab cached body, so that attempt did not reach the replacement premise and is excluded from CARETS pass/fail. Normal same-tab replacement was then checked separately.",
+    "Authored converter opens existing default condition A. A/B cursor isolation was checked; arbitrary condition-switch own-caret restoration not claimed.",
+    "Small context line is readable in both viewed Linux configurations; other fonts/platforms not assessed."
+  ],
+  "visualJudgment": "Paired stable screenshots directly opened: editing field/context controls remain visible without overlaps at both PC sizes. Context hint separates reference from requested scope. Existing compact secondary typography remains; no new blocking visual issue found in this authoring delta.",
+  "snapshotLedger": [
+    {
+      "source": "048",
+      "sequence": 5,
+      "atUTC": "2026-10-28T20:19:53.719385+00:00",
+      "viewport": {
+        "width": 1280,
+        "height": 720,
+        "dpr": 1
+      },
+      "png": "/workspace/work/af84-observation/05-api1280-reopen-caret.png",
+      "bytes": 97353,
+      "sha256": "246088b3c74804576d6d47ad2a00d86046a4df9f6584e8b3357c8e427c95d5c2",
+      "pairedJSON": "/workspace/work/af84-observation/05-api1280-reopen-caret.json",
+      "pairedJSONsha256": "bf60800c1a6d84b610126281fcbd7ce4c5d12d08d363e14f83af586e23b985b0",
+      "openedWithViewImage": true
+    },
+    {
+      "source": "048",
+      "sequence": 14,
+      "atUTC": "2026-10-28T20:23:59.313353+00:00",
+      "viewport": {
+        "width": 1280,
+        "height": 720,
+        "dpr": 1
+      },
+      "png": "/workspace/work/af84-observation/14-api1280-late-A-after-B.png",
+      "bytes": 143258,
+      "sha256": "50a4355978e64565b91a84b3a9e9c145ebf611f9f735b157309732111250ea3a",
+      "pairedJSON": "/workspace/work/af84-observation/14-api1280-late-A-after-B.json",
+      "pairedJSONsha256": "22ca6d7a0312a4d383313b6a06fe270f7446a3fe3b7526cffad203fa191280d4",
+      "openedWithViewImage": true
+    },
+    {
+      "source": "048",
+      "sequence": 15,
+      "atUTC": "2026-10-28T20:26:07.477878+00:00",
+      "viewport": {
+        "width": 1280,
+        "height": 720,
+        "dpr": 1
+      },
+      "png": "/workspace/work/af84-observation/15-api1280-context-restored-A-editor-hidden.png",
+      "bytes": 107947,
+      "sha256": "a90214b50e762aa0f39cba340452ec9ab7ab851b8f424935da7b47f0f77b9e72",
+      "pairedJSON": "/workspace/work/af84-observation/15-api1280-context-restored-A-editor-hidden.json",
+      "pairedJSONsha256": "6fc73c5cce2f6cfcf59b340146e785156091d53738e5e07ef2ad09154b83f265",
+      "openedWithViewImage": true
+    },
+    {
+      "source": "048",
+      "sequence": 18,
+      "atUTC": "2026-10-28T20:26:08.865588+00:00",
+      "viewport": {
+        "width": 1280,
+        "height": 720,
+        "dpr": 1
+      },
+      "png": "/workspace/work/af84-observation/18-api1280-late-A-after-removal.png",
+      "bytes": 139999,
+      "sha256": "3097f623de59c963a151c9e6cadf7e8df328dc2b112617e1d7919e6139b08731",
+      "pairedJSON": "/workspace/work/af84-observation/18-api1280-late-A-after-removal.json",
+      "pairedJSONsha256": "a4172f619eb3910273b25031f6a384b39263f2fc93ddbc14cfe2160e171557a2",
+      "openedWithViewImage": false
+    },
+    {
+      "source": "048",
+      "sequence": 31,
+      "atUTC": "2026-10-28T20:27:49.075875+00:00",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "dpr": 1
+      },
+      "png": "/workspace/work/af84-observation/31-pipe1440-first-edit.png",
+      "bytes": 94145,
+      "sha256": "0e888786e92fd39ff4ec051dd428005c8a86e96fa8894391b50c0e75f1d57ba8",
+      "pairedJSON": "/workspace/work/af84-observation/31-pipe1440-first-edit.json",
+      "pairedJSONsha256": "774fcb9681339e9ad0504e0105b5d4449be6de24a13682ebf8fd07f73164d974",
+      "openedWithViewImage": true
+    },
+    {
+      "source": "048",
+      "sequence": 42,
+      "atUTC": "2026-10-28T20:32:02.465928+00:00",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "dpr": 1
+      },
+      "png": "/workspace/work/af84-observation/42-legacy1440-selection-and-remove.png",
+      "bytes": 133642,
+      "sha256": "e65040b7bcf4c345eace2c4ccb19d51d7fca93ec5a3a5c351c0415fb6b75615e",
+      "pairedJSON": "/workspace/work/af84-observation/42-legacy1440-selection-and-remove.json",
+      "pairedJSONsha256": "c5b86ecb5bbd00d5c6abac461022e106321dab29c13ae3233e20fb2aac9efbc3",
+      "openedWithViewImage": true
+    },
+    {
+      "source": "048",
+      "sequence": 43,
+      "atUTC": "2026-10-28T20:33:21.057044+00:00",
+      "viewport": {
+        "width": 1280,
+        "height": 720,
+        "dpr": 1
+      },
+      "png": "/workspace/work/af84-observation/43-long1280-first-edit.png",
+      "bytes": 85404,
+      "sha256": "1998325c5f33584f09be1ed387f619c7de5c66785820e6de2ebb7cdee72f5c7d",
+      "pairedJSON": "/workspace/work/af84-observation/43-long1280-first-edit.json",
+      "pairedJSONsha256": "59ca370d4c3645f6c5b8cefd9a5f35ccc49cb71b3e4d181e2605ba032fc841bc",
+      "openedWithViewImage": true
+    },
+    {
+      "source": "640",
+      "sequence": 4,
+      "atUTC": "2026-10-28T20:34:34.591836+00:00",
+      "viewport": {
+        "width": 1280,
+        "height": 720,
+        "dpr": 1
+      },
+      "png": "/workspace/work/af84-d5-observation/04-640-1280-backward-scroll-after.png",
+      "bytes": 102384,
+      "sha256": "5711c42af6078d1099172ed6b24416ede549e39a4d688c1a03ee15ad6f78e3a0",
+      "pairedJSON": "/workspace/work/af84-d5-observation/04-640-1280-backward-scroll-after.json",
+      "pairedJSONsha256": "8155148c29851dc79a5f30a7c7dd7b59868f908adc86b8dfb44313d2adbc684b",
+      "openedWithViewImage": true
+    },
+    {
+      "source": "640",
+      "sequence": 6,
+      "atUTC": "2026-10-28T20:34:38.807054+00:00",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "dpr": 1
+      },
+      "png": "/workspace/work/af84-d5-observation/06-640-1440-caret1-after.png",
+      "bytes": 106348,
+      "sha256": "06e5cb4c0f6669ae185baac319bb669e6c395a808a55a775625145de0e23c3c4",
+      "pairedJSON": "/workspace/work/af84-d5-observation/06-640-1440-caret1-after.json",
+      "pairedJSONsha256": "2b57d12358e22b8f13d72e98e628014c31a17ff2095fc0045e8db1ad34f93a4e",
+      "openedWithViewImage": true
+    },
+    {
+      "source": "90",
+      "sequence": 3,
+      "atUTC": "2026-10-28T20:37:33.573516+00:00",
+      "viewport": {
+        "width": 1280,
+        "height": 720,
+        "dpr": 1
+      },
+      "png": "/workspace/work/af84-d6-observation/03-90-1280-B-to-A-after.png",
+      "bytes": 124421,
+      "sha256": "6635e70f62f29e6786390eaa666410193ec5a903287250d82836bff69bf5589d",
+      "pairedJSON": "/workspace/work/af84-d6-observation/03-90-1280-B-to-A-after.json",
+      "pairedJSONsha256": "5c1d3ffd23f5ac9766fbffe7cbd1bf2f2f3da7a00983aad4ab2a90b49703ad7f",
+      "openedWithViewImage": true
+    },
+    {
+      "source": "90",
+      "sequence": 5,
+      "atUTC": "2026-10-28T20:37:35.151074+00:00",
+      "viewport": {
+        "width": 1280,
+        "height": 720,
+        "dpr": 1
+      },
+      "png": "/workspace/work/af84-d6-observation/05-90-1280-removed-to-A-after.png",
+      "bytes": 124421,
+      "sha256": "6635e70f62f29e6786390eaa666410193ec5a903287250d82836bff69bf5589d",
+      "pairedJSON": "/workspace/work/af84-d6-observation/05-90-1280-removed-to-A-after.json",
+      "pairedJSONsha256": "e2050277844dbee9ec962390495fb603b453f6fb298963450eb9de47bb0a7260",
+      "openedWithViewImage": false
+    },
+    {
+      "source": "90",
+      "sequence": 8,
+      "atUTC": "2026-10-28T20:37:42.257834+00:00",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "dpr": 1
+      },
+      "png": "/workspace/work/af84-d6-observation/08-90-1440-B-to-A-after.png",
+      "bytes": 128467,
+      "sha256": "739793ffcc9ce114520113e9868d972ec898fbbbe8d8654e25de5b77453e553b",
+      "pairedJSON": "/workspace/work/af84-d6-observation/08-90-1440-B-to-A-after.json",
+      "pairedJSONsha256": "48ffafbeff5d770a6ef3da70be7f2431531f50978fa9bd2e80152afa9d3c4bda",
+      "openedWithViewImage": true
+    }
+  ],
+  "captureCount": 12,
+  "originalsPreserved": true,
+  "evidenceZipPolicy": "Only result + original048 paired evidence and final90 two-PC before/after JSON. Two original PNGs (old1280 and final1280) keep transfer small; final1440 PNG remains at original ledger path and was directly viewed.",
+  "cleanup": {
+    "allOwnBrowsersClosed": true,
+    "allOwnServersStopped": true,
+    "serversExit": {
+      "048": -15,
+      "640": -15,
+      "90": -15
+    },
+    "note": "SIGTERM -15 was intentional server cleanup; review wrapper exit0."
+  }
+}

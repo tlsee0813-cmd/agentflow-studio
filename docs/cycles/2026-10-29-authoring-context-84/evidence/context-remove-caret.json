@@ -1,0 +1,13 @@
+{
+  "source": "8e4b03c",
+  "before": {
+    "caret": 1,
+    "focus": "plan-intent"
+  },
+  "after": {
+    "caret": 90,
+    "context": "작성 맥락\n없음 · 없앤 뒤로 다시 잡지 않아요\n현재 화면 맥락으로 지정",
+    "focus": "",
+    "tag": "BUTTON"
+  }
+}

@@ -1,0 +1,283 @@
+{
+  "task": "AF84-five-response-independent-semantic-review",
+  "source": "6404afe8299efe856b734afab77943a28c8c26f6",
+  "conclusion": "고정된 합성 authoring-context 기능 진단에서 독립 의미 판정 5/5 통과. 대상 없는 입력은 미정/조건부 후보를 유지했고, A/B 지시어 해석과 명시 B·전체 의도의 우선권이 응답 본문에 보존됐다. 첫 지도 품질 또는 실제 OSS 실행 수용으로 확대하지 않는다.",
+  "finalGate": {
+    "semanticDiagnostic": "pass",
+    "casesPassed": 5,
+    "casesReviewed": 5,
+    "fullProductAcceptance": "판정 범위 밖",
+    "generalModelEffect": "미증명",
+    "firstMapMeaningQuality": "미해결 범위를 이 결과로 바꾸지 않음",
+    "realOSSOrFileExecution": "실행하지 않음"
+  },
+  "method": {
+    "readOrder": "진단안→frozen/ask/reply 독립 판정→이후 root verdict 대조",
+    "blindLimit": "root 메시지에 잠정 5pass와 기대 패턴이 포함돼 있었으므로 완전한 blind 평가라고 주장하지 않는다. root verdict 파일의 상세 이유는 독립 판정을 먼저 기록한 뒤 읽었다.",
+    "scored": "지시어의 해석, 직접 변경 의미, 반대 흐름/실제 처리 보존, 자료 미기재와 부재 구별, 추가 요구 여부",
+    "notScored": "형식 valid·partIds 일치·항목 수만으로 합격하지 않았다. 인식한 대상과 직접 변경 ID는 구별했다.",
+    "providerRaw": "읽기 대상으로 출력하거나 추론문을 의미 근거로 사용하지 않았다. ask와 outcome.reply만 대조했다.",
+    "execution": "새 모델/API/브라우저/검사 재실행/수선/apply/제품 수정 0. JSON 읽기와 입력/응답 해시 계산만 수행했다.",
+    "contractEvidence": "각 보존 artifact의 outcome.ok=true를 기존 adapter 검증 통과 기록으로 참고했다. 이번 평가에서 validator를 다시 실행하지 않았다."
+  },
+  "frozenInputs": {
+    "diagnosticPlan": {
+      "name": "experience84-model-diagnostic-plan.json",
+      "sha256": "3942498b6a6bcf3fd8889d8714472e1add67e26d5e3d2e01c84c10006decc6e1"
+    },
+    "frozen": {
+      "name": "experience84-model-frozen.json",
+      "sha256": "2bc0ef442d92f8a6c37cfecfd40d606acce340a973a41a9d9babeef62caa4856"
+    },
+    "nativeCriteriaReferencedSha256": "b91bcf413f49bc1f7b7d5193333a4a48716a4e01f9682ef05ecd8ac9183b7bae",
+    "appTree": "aaa02b5922f227037101ca82440f83ce4f493a33",
+    "promptSha256": "c7c0228a981491f2e6a8703cea5466c2b524f78dcaa14e829510ea800d179e87",
+    "settings": {
+      "model": "deepseek-flash",
+      "thinking": "enabled",
+      "reasoning_effort": "low",
+      "max_tokens": 8192,
+      "timeoutMs": 60000
+    },
+    "firstThreeComparison": "none/A/B의 의도·자료·parts·모델 설정은 같고 authoring 필드가 다르다. 각1회 응답의 질적 차이만 관측하며 반복성·통계적 인과효과는 입증하지 않는다.",
+    "artifactsMatchFrozen": true,
+    "recordedCalls": 5,
+    "retry": 0,
+    "applied": false
+  },
+  "cases": [
+    {
+      "id": "none",
+      "pass": true,
+      "referent": {
+        "status": "미정 유지",
+        "evidence": [
+          {
+            "path": "$.outcome.reply.summary",
+            "text": "대상 흐름이 정해지지 않아 ... 각각의 안내 구분 후보"
+          },
+          {
+            "path": "$.outcome.reply.items[0].description",
+            "text": "'이 부분'이 P01인지는 확인이 필요하다."
+          },
+          {
+            "path": "$.outcome.reply.items[1].description",
+            "text": "'이 부분'이 P02인지는 확인이 필요하다."
+          }
+        ]
+      },
+      "reason": "불러오기/내보내기를 조건부 후보로 두고 각각 '이 부분'인지 확인 필요를 명시. 두 흐름 동시 확정으로 읽지 않았다.",
+      "directChange": "P01/P02는 각각 조건부 후보의 직접 변경 ID다. 두 흐름이 모두 확정 요구라는 의미로 채점하지 않았다. presentation.origin도 suggestion이다.",
+      "preservation": "각 후보 설명이 반대 흐름의 안내와 실제 읽기/저장을 유지한다. preserve에 실제 처리와 가져온 항목 표시/선택 항목 저장도 유지한다.",
+      "uncertainty": "대상 자체, 원인 목록·재시도 조건·표시 방식·현재 세부 안내·실제 오류 종류/코드 미제공을 구별한다.",
+      "extraRequirement": "새 파일 처리·자동 재시도·추가 오류 분류 구현을 확정 요구하지 않았다.",
+      "limit": "두 후보의 상호 배타 선택이 UI에서 보장됨을 증명하지 않는다. 원문 지시어가 확정됐다고도 세지 않는다.",
+      "input": {
+        "id": "none",
+        "file": "experience84-model-none.json",
+        "artifactSha256": "ce8e18abfe307563ed39e59fc1223dec2793fe41d9c44825342d0c2de43552cd",
+        "askSha256": "c8560351dd3c00407af5af949bc2d332900c17e97471c199feda946361f8390f",
+        "declaredAskSha256": "c8560351dd3c00407af5af949bc2d332900c17e97471c199feda946361f8390f",
+        "frozenAskSha256": "c8560351dd3c00407af5af949bc2d332900c17e97471c199feda946361f8390f",
+        "askExactlyFrozen": true,
+        "replySha256": "4979ec041b41401361dd9709a320290c9d2251ec57243c4ba76287a770d327ec",
+        "source": "6404afe8299efe856b734afab77943a28c8c26f6",
+        "settingsExactlyFrozen": true,
+        "ok": true,
+        "ms": 22813,
+        "retries": 0,
+        "applied": false
+      },
+      "rootVerdictComparedAfterIndependent": true,
+      "rootAgreement": true
+    },
+    {
+      "id": "A",
+      "pass": true,
+      "referent": {
+        "status": "불러오기",
+        "evidence": [
+          {
+            "path": "$.outcome.reply.items[0].title",
+            "text": "불러오기 실패 원인 구분 안내"
+          },
+          {
+            "path": "$.outcome.reply.items[1].title",
+            "text": "불러오기 재시도 조건 안내"
+          }
+        ]
+      },
+      "reason": "본문·제안·보존이 불러오기 안내를 변경하고 내보내기 및 실제 처리 유지. 원인·재시도조건을 지어내지 않음.",
+      "directChange": "두 항목은 불러오기 안내의 원인/조건 표현을 나누는 변화다. 단순 P01 일치가 아니라 description과 wanted의 실제 내용으로 판정했다.",
+      "preservation": "preserve에 P02 오류 안내, 실제 파일 불러오기·내보내기 처리, 기존 안내 표시 흐름이 명시된다.",
+      "uncertainty": "실제 원인 정보 획득 가능성, 오류 종류, 재시도 가능한 조건과 코드/검증을 미확인으로 둔다.",
+      "extraRequirement": "구체 오류 종류나 안전한 재시도를 발명하지 않는다. 원인 확인은 요구를 실현할 미확인 사항이며 새 파일 처리 방식 요구로 확대하지 않는다.",
+      "input": {
+        "id": "A",
+        "file": "experience84-model-A.json",
+        "artifactSha256": "af009bbd697cec4d38cec41af942e2421d738484ea2b3cc05a306514c35e04f7",
+        "askSha256": "6d60259508a3e9aa5ef93a3182cfe0253cab171fd936b8f175adc8d1caf28533",
+        "declaredAskSha256": "6d60259508a3e9aa5ef93a3182cfe0253cab171fd936b8f175adc8d1caf28533",
+        "frozenAskSha256": "6d60259508a3e9aa5ef93a3182cfe0253cab171fd936b8f175adc8d1caf28533",
+        "askExactlyFrozen": true,
+        "replySha256": "ad052b68fb25e431fa45ff4d490a8fe4a65288c2666db269384d6d665a6966a0",
+        "source": "6404afe8299efe856b734afab77943a28c8c26f6",
+        "settingsExactlyFrozen": true,
+        "ok": true,
+        "ms": 18339,
+        "retries": 0,
+        "applied": false
+      },
+      "rootVerdictComparedAfterIndependent": true,
+      "rootAgreement": true
+    },
+    {
+      "id": "B",
+      "pass": true,
+      "referent": {
+        "status": "내보내기",
+        "evidence": [
+          {
+            "path": "$.outcome.reply.items[0].title",
+            "text": "내보내기 실패 안내에서 원인·재시도 조건 구분"
+          },
+          {
+            "path": "$.outcome.reply.items[0].description",
+            "text": "실제 파일 저장 처리와 불러오기 안내는 유지한다."
+          }
+        ]
+      },
+      "reason": "본문·제안·보존이 내보내기 안내를 변경하고 불러오기 안내와 저장처리 유지. 현재 세부 미확인 유지.",
+      "directChange": "내보내기 실패 안내의 표현 변화다. 불러오기 변경은 추가하지 않는다.",
+      "preservation": "preserve와 description이 실제 저장 및 반대 흐름 안내를 유지한다.",
+      "uncertainty": "제공된 자료에서 현재 원인/조건 구분이 확인되지 않음을 명시한다. 오류 종류·메시지는 검토할 기준 예시이며 기존 taxonomy로 확정하지 않는다.",
+      "extraRequirement": "실제 저장 실패 원인과 재시도 가능 조건을 모른다고 하며 재시도 동작·보장·저장 알고리즘 변경을 추가하지 않는다.",
+      "input": {
+        "id": "B",
+        "file": "experience84-model-B.json",
+        "artifactSha256": "00f234e4fff591cce50a6bffcbeb9938a63742156f88834c77900c630a31b7c9",
+        "askSha256": "0d416dc86d8ddf399e415af5d8975a5215631b0df91cc020b44f9583eaf67959",
+        "declaredAskSha256": "0d416dc86d8ddf399e415af5d8975a5215631b0df91cc020b44f9583eaf67959",
+        "frozenAskSha256": "0d416dc86d8ddf399e415af5d8975a5215631b0df91cc020b44f9583eaf67959",
+        "askExactlyFrozen": true,
+        "replySha256": "301627a7305648545e8540f9aba9f86d06f3ecb726ec8e56db848207f0be0fa1",
+        "source": "6404afe8299efe856b734afab77943a28c8c26f6",
+        "settingsExactlyFrozen": true,
+        "ok": true,
+        "ms": 12883,
+        "retries": 0,
+        "applied": false
+      },
+      "rootVerdictComparedAfterIndependent": true,
+      "rootAgreement": true
+    },
+    {
+      "id": "explicit_B_context_A",
+      "pass": true,
+      "referent": {
+        "status": "명시한 내보내기가 선택 맥락 불러오기보다 우선",
+        "evidence": [
+          {
+            "path": "$.ask.authoring.selection.partId",
+            "text": "P01"
+          },
+          {
+            "path": "$.outcome.reply.items[0].title",
+            "text": "내보내기 오류 안내에서 원인과 재시도 조건 구분"
+          },
+          {
+            "path": "$.outcome.reply.items[0].description",
+            "text": "기존의 파일 저장 흐름과 불러오기 쪽 안내·처리는 재사용한다."
+          }
+        ]
+      },
+      "reason": "선택 P01에도 실제 계획은 내보내기 안내. 파일 저장흐름과 불러오기 쪽 안내·처리 재사용. 구체원인·조건·추가표시는 미확인.",
+      "directChange": "명시 B의 안내만 변경하며 context A를 추가 변경으로 승격하지 않는다. P02 ID만을 근거로 판정하지 않았다.",
+      "preservation": "preserve 배열은 불러오기를 명시하고 description은 내보내기의 실제 저장 흐름 재사용도 명시한다. 의미가 배열 한 곳에만 있어야 한다고 요구하지 않았다.",
+      "uncertainty": "원인 종류·다시 시도할 조건·현재 추가 표시·실제 오류 처리 코드/검사가 미확인으로 남는다.",
+      "extraRequirement": "context를 evidence/사용자 추가 요구로 인용하지 않고 다른 흐름 수리나 실제 처리 변경을 더하지 않는다.",
+      "input": {
+        "id": "explicit_B_context_A",
+        "file": "experience84-model-explicit_B_context_A.json",
+        "artifactSha256": "4c6dd59becedb7f8fe180dcfd0e08acd3242cb88cacabe26050c9236b7474150",
+        "askSha256": "b972a119112d0e53ad44dae4c5e1f04df8e25ef9eddb45bf7d18b65b24437579",
+        "declaredAskSha256": "b972a119112d0e53ad44dae4c5e1f04df8e25ef9eddb45bf7d18b65b24437579",
+        "frozenAskSha256": "b972a119112d0e53ad44dae4c5e1f04df8e25ef9eddb45bf7d18b65b24437579",
+        "askExactlyFrozen": true,
+        "replySha256": "73c4ad3210e883a3cc68d927c6e4b3637d9284a909a39289f06a687ef1dabee4",
+        "source": "6404afe8299efe856b734afab77943a28c8c26f6",
+        "settingsExactlyFrozen": true,
+        "ok": true,
+        "ms": 14835,
+        "retries": 0,
+        "applied": false
+      },
+      "rootVerdictComparedAfterIndependent": true,
+      "rootAgreement": true
+    },
+    {
+      "id": "whole_context_A",
+      "pass": true,
+      "referent": {
+        "status": "명시한 두 흐름 모두 유지",
+        "evidence": [
+          {
+            "path": "$.outcome.reply.items[0].description",
+            "text": "파일을 읽고 항목을 보여주는 실제 처리는 재사용"
+          },
+          {
+            "path": "$.outcome.reply.items[1].description",
+            "text": "선택한 항목을 파일로 저장하는 실제 처리는 재사용"
+          }
+        ]
+      },
+      "reason": "P01 선택에 한정하지 않고 두 흐름의 안내변화 및 각 실제처리 보존. 오류기준·표시형식 미확인.",
+      "directChange": "불러오기와 내보내기 각각의 오류 안내를 구별한다. 항목 수가 2여서 합격한 것이 아니라 명시된 두 변화의 의미가 모두 남아 있어 합격이다.",
+      "preservation": "각 실제 파일 읽기/항목 표시와 선택 항목 저장을 description 및 preserve에서 유지한다.",
+      "uncertainty": "오류 원인 분류 기준, 조건 문구/형식, 두 안내의 표현 통일 여부와 현재 더 세부적인 안내 유무가 미확인이다. 실제 코드를 실행·검증했다는 주장은 없다.",
+      "extraRequirement": "선택 A로 전체 의도를 축소하지 않고 실제 파일 처리 변경이나 자동 재시도를 더하지 않는다.",
+      "input": {
+        "id": "whole_context_A",
+        "file": "experience84-model-whole_context_A.json",
+        "artifactSha256": "719f1595254f39fa3dec6f8d56947ef8682256fbd4b9f7d7ba665a907a1c089b",
+        "askSha256": "5253a5cb1f1e1efe2de6b861750ba5fb4657f8e0ba737b1737606d8cceec1125",
+        "declaredAskSha256": "5253a5cb1f1e1efe2de6b861750ba5fb4657f8e0ba737b1737606d8cceec1125",
+        "frozenAskSha256": "5253a5cb1f1e1efe2de6b861750ba5fb4657f8e0ba737b1737606d8cceec1125",
+        "askExactlyFrozen": true,
+        "replySha256": "0b29f40895ac470c680c7d5243bf58e555ec91d92310fd3df793fdfd3497a331",
+        "source": "6404afe8299efe856b734afab77943a28c8c26f6",
+        "settingsExactlyFrozen": true,
+        "ok": true,
+        "ms": 5635,
+        "retries": 0,
+        "applied": false
+      },
+      "rootVerdictComparedAfterIndependent": true,
+      "rootAgreement": true
+    }
+  ],
+  "phrasingCaution": {
+    "finding": "일부 '한 줄로만/한 줄 안내만'은 문장 단독으로는 추가표시 부재처럼 읽힐 여지가 있으나 전체 응답이 현 구분/추가표시의 미확인을 명시해 이 진단의 부재단정 실패로 판단하지 않음.",
+    "locations": [
+      "none.summary의 '한 줄 안내만 제공되는 것으로 설명'",
+      "explicit_B_context_A.items[0].description의 '한 줄로만 표시되는 안내'",
+      "whole_context_A.summary의 '한 줄 안내만 표시하는 흐름'"
+    ],
+    "reasonNotFailure": "같은 응답의 summary/unknowns가 현재 구분 또는 추가 표시 여부를 제공 자료로 확인할 수 없다고 명시한다. 문장 단독의 과장 가능성을 일반적 코드 부재·기능 부재 확정으로 판정하지 않았다.",
+    "revision": "원본 reply는 수정하지 않았다."
+  },
+  "rootComparison": {
+    "readLast": true,
+    "allFiveRootPass": true,
+    "independentAgreement": true,
+    "changedIndependentVerdictsAfterComparison": false
+  },
+  "limitations": [
+    "한 합성 제품·유사한 두 흐름·각1회의 제한된 진단이다. 실제74 micro/Joplin 자료에 대한 모델 결과가 아니다.",
+    "none의 두 조건부 후보를 사용자가 실제로 안전하게 고르는 UI는 이 진단에서 검증하지 않았다.",
+    "실제 오류 taxonomy·재시도 안전성·파일 처리 코드는 제공되지 않았다. 응답의 안내 구상은 이를 검증한 결과가 아니다.",
+    "다섯 호출 전체의 운영 가드나 PC 수용 검토를 반복하지 않았다.",
+    "정답 일반화, 전체 프로젝트 전달 성공률, 77/79/81/82 실패 해결 또는 공개73 변경 근거로 세지 않는다."
+  ],
+  "preservation": "진단안·frozen·5개 원본 response 및 root verdict 파일은 수정하지 않았다. 결과 파일 하나만 새로 작성."
+}

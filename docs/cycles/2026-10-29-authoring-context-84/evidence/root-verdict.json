@@ -1,0 +1,25 @@
+{
+  "source": "90ac73624689e8f3639dacf93b5e7cb3640def64",
+  "appTree": "9a708ed559b8a8c81f649d812075e1b50a398211",
+  "decision": "accepted bounded authoring-context84; public73 unchanged; not overall completion",
+  "cloudResultSha256": "4c5ceddbc1459bef1dc856f1f2027e09401553b04dd6588bd71c31b724b9850b",
+  "cloudZipSha256": "b3018768d07fe2d6563a187dc961fc92fcbb8329022c1ba99541c77fd0a9a94f",
+  "exactSourceCI": {
+    "run": 40764156377,
+    "windows-2022": "success",
+    "ubuntu-24.04": "success"
+  },
+  "modelDiagnostic": {
+    "source": "6404afe8299efe856b734afab77943a28c8c26f6",
+    "calls": 5,
+    "rootSemanticPassed": 5,
+    "nativeSemanticPassed": 5,
+    "retries": 0,
+    "applied": false,
+    "reusedAt90": "server/shared/plan-source/prompt diff empty; only UI+browser regression changes"
+  },
+  "rootVisualRecovery": "Original048 and final90 PNGs opened and matched SHA/pairedJSON; final1440 paired JSON recovered, PNG SHA and independent viewed status retained in Cloud ledger",
+  "originalFailuresPreserved": true,
+  "overallGoal": "active",
+  "next": "85 real-material authoring connection, one new fixed response; not executed"
+}

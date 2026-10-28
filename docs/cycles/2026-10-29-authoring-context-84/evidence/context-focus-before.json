@@ -1,0 +1,26 @@
+{
+  "source": "8e4b03c6ee2f6dc9595b180cc380d64e518d0568",
+  "action": "Legacy draft edit stayed unrecorded; then caret set to1 via CtrlHome+Right and explicit current-context button clicked.",
+  "observed": {
+    "buttons": [
+      {
+        "disabled": true,
+        "text": "현재 화면으로 바꾸기"
+      },
+      {
+        "disabled": false,
+        "text": "없애기"
+      }
+    ],
+    "caret": 90,
+    "context": "작성 맥락\n선택 평가 실행 파이프라인 · 보던 범위 평가 실행 파이프라인\n현재 화면으로 바꾸기\n없애기",
+    "draft": "평가 실행 파이프라인을 읽을 때 메모리 제한과 시간 제한의 차이를 별도로 설명하고 싶다. 기존 eval 실행 순서와 전역 객체 공유 동작은 유지한다. 검토 초안.",
+    "focusId": "",
+    "focusTag": "BODY",
+    "viewport": {
+      "dpr": 1.25,
+      "h": 720,
+      "w": 1280
+    }
+  }
+}

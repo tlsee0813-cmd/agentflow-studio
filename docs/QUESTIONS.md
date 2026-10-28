@@ -1,5 +1,9 @@
 # 연구 질문과 축적된 근거
 
+84: [작성 맥락 범위 수용](cycles/2026-10-29-authoring-context-84/RESULT.md). Q04/Q13/Q14의 초안 맥락을 가시적으로 고정·제거하고 명시 의도/전체 parts/안정 ID를 유지한다. 실제 자료 저장·PC와 합성 실제모델5건, 독립 의미/두PC·정확90 CI를 구별했다. 긴 인용/legacy 승격/소유 검증/커서/이전기준 해소 편집면 수리를 포함하며 실패 원본을 보존한다. 작은5건은 일반 의미 정확도나 Q02/Q06 첫지도 해결이 아니다. 다음85는 기존micro 혼합 기록을 함께 읽은 실제plan2 결과와 PC 비교·근거 왕복의 연결만 준비한다.
+
+84: Q04/Q13/Q14의 새 [작성 맥락 계약](https://github.com/tlsee0813-cmd/agentflow-studio/blob/58539a406a29ac437353db17f5a15b8959c24f7e/docs/cycles/2026-10-29-authoring-context-84/DESIGN.md)을 구현한다. 복귀용 selected/scope 보존과 모델에 전달하는 초안의 지시어 맥락은 별개다. 안정 ID·명시 변경/제거·구형 초안 무소급·이전 분석 기준을 보이게 하되 전체 parts와 본문의 명시 의도를 유지한다. 입력 정보의 공백을 확인한 것이며 실제 AI 오답 또는 개선 효과의 관측은 아니다. 첫 지도 Q02/Q06 미해결 및 기존 실패 기록을 유지한다.
+
 83: [경계 읽기 수용과 독립 보고 정정](https://github.com/tlsee0813-cmd/agentflow-studio/blob/ef7f257618c32bbe0333ec32b9ec3bc79cd3ca03/docs/cycles/2026-10-29-boundary-reading-83/RESULT.md). Q04/Q13의 실제 저장 micro 범위 진입에서 자기 범위를 바깥으로 표시하던 의미와 문맥명/카드 겹침을 수리했다. 큰 VSCode·깊은 Joplin 관찰은 기존 수용과 구별하며, 합성 긴 경로는 자동 OSS 이해 증거가 아니다. root/Cloud·최종 양OS CI 범위 수용, Cloud 오지적은 원본 증거로 철회했다. Q02/Q06 첫 지도 미해결·공개73 유지. 다음은 새 자기범위 선택과 기존 변경 구상의 대상/초안 연결을 좁게 대조한다.
 
 82: [대상·조건 우선 첫 지도 미채택](https://github.com/tlsee0813-cmd/agentflow-studio/blob/28fda951e95bb2bd8739d4949443522c0dde857a/docs/cycles/2026-10-29-subject-first-82/RESULT.md). Q02/Q06/Q07 실제지시1회는INVALID_RESPONSE이며 운영지시제품화·종류오판·미정중복도남았다. 일부정밀조건회복은전체성공이아니다. 재시도/수선/적용0,공개73유지. 다음Q04/Q13의큰개요·깊은구성·긴설명은수용80의실제저장OSS자료에서직접확인하며,그화면개선을첫지도품질해결로확대하지않는다.

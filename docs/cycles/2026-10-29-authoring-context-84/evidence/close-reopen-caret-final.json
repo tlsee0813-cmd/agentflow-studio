@@ -1,0 +1,13 @@
+{
+  "source": "6404afe8299efe856b734afab77943a28c8c26f6",
+  "before": {
+    "caret": 1,
+    "context": "작성 맥락\n선택 TinyMCE · 보던 범위 NoteEditor\n현재 화면으로 바꾸기\n없애기",
+    "text": "이 부분의 입력 방식과 CodeMirror의 입력 방식을 비교해서 설명하고 싶다. 실제 편집 기능은 유지한다."
+  },
+  "after": {
+    "caret": 1,
+    "context": "작성 맥락\n선택 TinyMCE · 보던 범위 NoteEditor\n현재 화면으로 바꾸기\n없애기",
+    "text": "이 부분의 입력 방식과 CodeMirror의 입력 방식을 비교해서 설명하고 싶다. 실제 편집 기능은 유지한다."
+  }
+}

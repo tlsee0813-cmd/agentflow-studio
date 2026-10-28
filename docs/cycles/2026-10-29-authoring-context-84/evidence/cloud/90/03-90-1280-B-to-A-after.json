@@ -1,0 +1,117 @@
+{
+  "sequence": 3,
+  "label": "90-1280-B-to-A-after",
+  "atUTC": "2026-10-28T20:37:33.573516+00:00",
+  "viewport": {
+    "width": 1280,
+    "height": 720,
+    "dpr": 1
+  },
+  "url": "http://127.0.0.1:36403/#/p/E_2c813d9d-5ab8-44d1-9bc2-5b29abeaaa7d/in/A_e0b75f15-9f2e-4af6-9d95-a6562db23680/A_e0b75f15-9f2e-4af6-9d95-a6562db23680",
+  "camera": "translate(365.703px, 172px) scale(1)",
+  "contextLine": "작성 맥락\n선택 JSContext.eval 평가 API · 보던 범위 JSContext.eval 평가 API\n현재 화면으로 바꾸기\n없애기",
+  "contextHint": "변경할 범위는 쓴 문장을 따라요.",
+  "caret": {
+    "start": 7,
+    "end": 20,
+    "direction": "backward",
+    "scroll": 0,
+    "value": "이 부분의 동작을 명확하게 정리해줘."
+  },
+  "focus": {
+    "tag": "BUTTON",
+    "text": "없애기",
+    "disabled": false
+  },
+  "bundle": {
+    "draft": "이 부분의 동작을 명확하게 정리해줘.",
+    "authoring": {
+      "version": "authoring-context.1",
+      "draft": {
+        "state": "set",
+        "context": {
+          "projectId": "P_6a74a281-f0dd-4dd8-8e00-d5b013112326",
+          "selection": {
+            "id": "A_e0b75f15-9f2e-4af6-9d95-a6562db23680",
+            "name": "JSContext.eval 평가 API"
+          },
+          "scope": {
+            "id": "A_e0b75f15-9f2e-4af6-9d95-a6562db23680",
+            "name": "JSContext.eval 평가 API"
+          },
+          "at": "2026-10-28T20:37:33.330Z",
+          "how": "explicit"
+        }
+      },
+      "analyzed": {
+        "authoring": {
+          "state": "set",
+          "context": {
+            "projectId": "P_6a74a281-f0dd-4dd8-8e00-d5b013112326",
+            "selection": {
+              "id": "A_e0b75f15-9f2e-4af6-9d95-a6562db23680",
+              "name": "JSContext.eval 평가 API"
+            },
+            "scope": {
+              "id": "A_e0b75f15-9f2e-4af6-9d95-a6562db23680",
+              "name": "JSContext.eval 평가 API"
+            },
+            "at": "2026-10-28T20:19:52.845Z",
+            "how": "first-edit"
+          }
+        },
+        "missing": []
+      }
+    },
+    "plan": {
+      "id": "CP_ae034518-ef52-4a6b-8e02-d7028135a972",
+      "revision": 2,
+      "intent": "이 부분의 동작을 명확하게 정리해줘.",
+      "analysis": {
+        "summary": "[공개 합성 스텁] stub-plan-1 · 모델 판단이 아닌 UI/저장 검토입니다.",
+        "items": [
+          {
+            "id": "change",
+            "title": "[스텁] 본문 명시 대상 검토",
+            "description": "[스텁] 선택 범위를 자동 추가하지 않는 검토 항목입니다.",
+            "partIds": [
+              "A_49bad1f8-971b-4bff-8030-a62d8a470c16"
+            ],
+            "refs": [
+              "INTENT"
+            ],
+            "dependsOn": []
+          },
+          {
+            "id": "source",
+            "title": "[스텁] 저장된 근거 왕복",
+            "description": "[스텁] 실제 micro의 저장된 긴 인용을 보존하는 계약 검사입니다.",
+            "partIds": [
+              "A_49bad1f8-971b-4bff-8030-a62d8a470c16"
+            ],
+            "refs": [
+              "M01",
+              "M02"
+            ],
+            "dependsOn": []
+          }
+        ],
+        "impacts": [],
+        "preserve": [],
+        "unknowns": []
+      },
+      "selected": [
+        "change"
+      ]
+    },
+    "snapshotIds": [
+      "RQ_909c0959-451c-4dd8-bdb1-c017eb2fa003"
+    ]
+  },
+  "makeDisabled": false,
+  "stale": null,
+  "png": {
+    "path": "/workspace/work/af84-d6-observation/03-90-1280-B-to-A-after.png",
+    "sha256": "6635e70f62f29e6786390eaa666410193ec5a903287250d82836bff69bf5589d"
+  }
+}

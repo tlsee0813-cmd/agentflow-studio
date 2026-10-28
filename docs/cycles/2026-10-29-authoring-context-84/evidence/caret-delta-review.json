@@ -1,0 +1,45 @@
+{
+  "task": "AF84-caret-delta-independent-review",
+  "base": "048dfec634c869bd44c4295eece9c3c43ef130dd",
+  "reviewedCommit": "6404afe8299efe856b734afab77943a28c8c26f6",
+  "conclusion": "닫기/다시 열기의 커서 delta에서 새로운 실질 P1/P2를 발견하지 못했다. 기존 세 경계 검토는 반복하지 않았다. 실제 PC 해소 판정은 총괄 관측을 기다린다.",
+  "findings": [],
+  "evidence": [
+    {
+      "file": "app/continuity/src/client/plan-view.ts",
+      "line": 95,
+      "detail": "CARETS는 같은 탭의 메모리 Map이다. 본문·선택 시작/끝·방향·textarea scrollTop만 보관하며 storage/wire/authoring 값은 바꾸지 않는다."
+    },
+    {
+      "file": "app/continuity/src/client/plan-view.ts",
+      "line": 154,
+      "detail": "닫을 때 현재 host project 대신 닫히는 session의 projectId/condition으로 키를 만든다. projectChanged로 닫히는 경우 새 프로젝트에 커서를 저장하는 혼동을 피한다. 키 형식은 MEMORY와 일치한다."
+    },
+    {
+      "file": "app/continuity/src/client/plan-view.ts",
+      "line": 155,
+      "detail": "DOM을 제거하기 전에 textarea가 있으면 실제 본문과 selectionStart/selectionEnd/selectionDirection/scrollTop을 캡처한다."
+    },
+    {
+      "file": "app/continuity/src/client/plan-view.ts",
+      "line": 147,
+      "detail": "다시 열린 textarea의 본문과 저장 본문이 같은 경우에만 동기적으로 범위·방향·스크롤을 복원한다. focus 이후 실행하므로 focus 동작에 의해 복원 위치가 덮이지 않는다."
+    },
+    {
+      "file": "app/continuity/tests/studio_browser.py",
+      "line": 2726,
+      "detail": "기존 authoring flow에 5번 위치의 커서 및 backward 선택/scroll90을 닫기·다시 열기 후 비교하는 검사가 추가됐다. 이 검토에서는 해당 브라우저 검사를 실행하지 않았다."
+    }
+  ],
+  "scopeLimits": [
+    "source diff와 호출 주변 open/close/projectChanged 경로만 읽었다. 추가 Node·브라우저·API·모델 호출 없음.",
+    "총괄의 고정5.8.3 check/build 완료 통지는 참고했으며 직접 반복하지 않았다.",
+    "CARETS 복원 판정은 프로젝트/예제 condition 키와 본문 동일성이다. 같은 문자열을 가진 교체 초안의 별도 identity까지 구별하는 기능으로 확대 해석하지 않는다.",
+    "이 delta는 textarea가 있는 작성 화면을 닫고 다시 열 때의 보존이다. 다른 편집 화면·예제 condition 전환의 기존 동작 전체를 새로 검증했다고 주장하지 않는다.",
+    "본문·작성 맥락·이전 최종 수리 파일은 수정하지 않았다."
+  ],
+  "previousReviewPreserved": ".ops/results/experience84-final-code-review.json",
+  "writes": [
+    ".ops/results/experience84-caret-delta-review.json"
+  ]
+}

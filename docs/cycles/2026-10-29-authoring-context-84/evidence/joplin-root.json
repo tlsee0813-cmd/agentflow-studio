@@ -1,0 +1,25 @@
+{
+  "source": "048dfec634c869bd44c4295eece9c3c43ef130dd",
+  "provenance": "source-grounded hand-authored Joplin partial map; synthetic change-plan draft; no model call",
+  "beforeInput": {
+    "context": "작성 맥락\n쓰기 시작하면 고정\n선택 TinyMCE · 보던 범위 NoteEditor\n없이 쓰기",
+    "draft": "",
+    "url": "http://127.0.0.1:4393/#/p/E_a4b50743-ae74-4a9c-83e3-dc9952c4fcac/in/A_oss-joplin_note-editor/A_oss-joplin_body-tinymce"
+  },
+  "firstEdit": {
+    "caret": 61,
+    "context": "작성 맥락\n선택 TinyMCE · 보던 범위 NoteEditor\n현재 화면으로 바꾸기\n없애기",
+    "draft": "이 부분의 입력 방식과 CodeMirror의 입력 방식을 비교해서 설명하고 싶다. 실제 편집 기능은 유지한다.",
+    "url": "http://127.0.0.1:4393/#/p/E_a4b50743-ae74-4a9c-83e3-dc9952c4fcac/in/A_oss-joplin_note-editor/A_oss-joplin_body-tinymce"
+  },
+  "navigate": {
+    "context": "작성 맥락\n선택 TinyMCE · 보던 범위 NoteEditor\n현재 화면으로 바꾸기\n없애기",
+    "url": "http://127.0.0.1:4393/#/p/E_a4b50743-ae74-4a9c-83e3-dc9952c4fcac/in/A_oss-joplin_note-editor/A_oss-joplin_body-codemirror"
+  },
+  "reopen": {
+    "caret": 61,
+    "context": "작성 맥락\n선택 TinyMCE · 보던 범위 NoteEditor\n현재 화면으로 바꾸기\n없애기",
+    "draft": "이 부분의 입력 방식과 CodeMirror의 입력 방식을 비교해서 설명하고 싶다. 실제 편집 기능은 유지한다.",
+    "url": "http://127.0.0.1:4393/#/p/E_a4b50743-ae74-4a9c-83e3-dc9952c4fcac/in/A_oss-joplin_note-editor/A_oss-joplin_body-plaineditor"
+  }
+}
