@@ -1812,7 +1812,8 @@ def reading72_flow(browser, base):
     page.locator("#import-file").set_input_files(str(sample))
     page.wait_for_url(re.compile(r"#/p/E_"))
     entry = re.search(r"#/p/(E_[^/]+)", page.url).group(1)
-    page.locator(f'#world .node[data-part="{area}"]').click()
+    # This saved part has a child: its selectable map surface is the group head, not a leaf node.
+    page.locator(f'#world .frame-head[data-part="{area}"]').locator(".frame-name").click()
     expect(page.locator("#lens-title")).to_have_text("폴더 일괄 처리")
     page.locator("#lens .request-item > summary").first.click()
 
