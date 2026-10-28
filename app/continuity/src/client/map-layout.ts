@@ -45,6 +45,8 @@ export interface ScopeLayout { boxes: Map<string, Box>; edges: Edge[]; heads: Gh
 
 interface Measure { w: number; h: number; ox: number; oy: number; head: number }
 export const ghostId = (id: string) => `ghost:${id}`;
+/** The head over the scope's own boundary end (see placeEnds). */
+export const SELF_HEAD = '이 범위';
 const GHOST_GAP = 8, RUN_GAP = 14, GHOST_MIN_W = 112, GHOST_MAX_W = 300;
 /** Where a partner outside the scope belongs, as the map says it under its name: its own ancestors that are not the scope's
  * (outermost first), else the parent it shares with the scope, else the top of the project (''). Read from the structure only. */
@@ -66,8 +68,12 @@ export function ghostSize(name: string, measure: TextMeasure = estimate): { w: n
   const need = measure(name, 'item') * 1.02 + 2, chrome = 22, w = Math.min(GHOST_MAX_W, Math.max(GHOST_MIN_W, Math.ceil(need) + chrome));
   return { w, h: Math.max(GHOST_H, 15 + wrapLines(need, w - chrome) * 17) };
 }
-/** The head over a run of outside partners: 12px lines of 16px and 4px under it; as wide as its column, wrapping as it needs. */
-const headNeed = (text: string, measure: TextMeasure) => measure(text, 'note') * 0.96 + 2;
+/** The head over a run of outside partners as styles.css draws it (.ghost-head: 600 11px, 16px lines, letter-spacing .04em = 0.44px
+ * after every character), with 4px under it; as wide as its column, wrapping as it needs. Measured in that font and tracking,
+ * never through another text's proxy: a proxy that happens to match one system font wraps in another (two lines drawn where one
+ * was kept). */
+export const HEAD_TRACK = 0.44;
+export const headNeed = (text: string, measure: TextMeasure) => measure(text, 'where') + HEAD_TRACK * [...text].length + 2;
 const headSize = (text: string, w: number, measure: TextMeasure) => 4 + wrapLines(headNeed(text, measure), w) * 16;
 
 /** Rough rendered width of a frame name (13px, semibold): wide for CJK, narrower for Latin. Only decides one or two head lines. */
@@ -76,10 +82,11 @@ export function textWidth(text: string): number {
   return w;
 }
 
-/** Rendered width of text: 'node' (13.5px semibold row name), 'head' (15px region or unit name), 'sub' (13px group name) or
- * 'note' (12.5px description). The browser passes a canvas measurement in the page's own font; without one, the estimate. */
-export type TextMeasure = (text: string, kind: 'node' | 'item' | 'head' | 'sub' | 'note' | 'plan') => number;
-const SCALE = { node: 13.5 / 13, item: 0.98, head: 15 / 13, sub: 1, note: 12.5 / 13 * 0.92, plan: 12 / 13 * 0.95 } as const;
+/** Rendered width of text: 'node' (13.5px semibold row name), 'head' (15px region or unit name), 'sub' (13px group name),
+ * 'note' (12.5px description) or 'where' (600 11px, where outside partners belong; tracking is added by headNeed). The browser
+ * passes a canvas measurement in the page's own font; without one, the estimate. */
+export type TextMeasure = (text: string, kind: 'node' | 'item' | 'head' | 'sub' | 'note' | 'plan' | 'where') => number;
+const SCALE = { node: 13.5 / 13, item: 0.98, head: 15 / 13, sub: 1, note: 12.5 / 13 * 0.92, plan: 12 / 13 * 0.95, where: 11 / 13 } as const;
 const estimate: TextMeasure = (text, kind) => textWidth(text) * SCALE[kind];
 /** The first sentence of a note: what a region or unit says about itself on the map. The rest belongs to the selection. */
 export function lead(note: string): string {
@@ -390,7 +397,9 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
   const placeEnds = (list: string[], out: boolean, fallbackX: number) => {
     if (!list.length) return;
     // Partners that belong to the same place run together under one head, in the order the place first appears.
-    const where = new Map(list.map(id => [id, `밖 · ${ghostContext(v, scope, id) || '최상위'}`])), runs = [...new Set(where.values())];
+    // The scope itself (the end of a relation between it and one of its own parts) is this scope's boundary, not a part outside
+    // it: it reads as '이 범위', in a run of its own. Decided by id: another part with the same name stays outside.
+    const where = new Map(list.map(id => [id, id === scope ? SELF_HEAD : `밖 · ${ghostContext(v, scope, id) || '최상위'}`])), runs = [...new Set(where.values())];
     const ids = runs.flatMap(t => list.filter(id => where.get(id) === t));
     const near = [...new Set([...edges.values()].filter(e => ids.some(g => (out ? e.to : e.from) === ghostId(g))).map(e => (out ? e.from : e.to)))].map(id => boxes.get(id)).filter((b): b is Box => !!b);
     const colW = Math.max(...ids.map(id => size.get(id)!.w), ...runs.map(t => Math.min(GHOST_MAX_W, Math.ceil(headNeed(t, measureText)))));

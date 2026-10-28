@@ -639,7 +639,7 @@ const measureName: TextMeasure = (() => {
     const key = `${kind}|${text}`, hit = cache.get(key); if (hit !== undefined) return hit;
     if (!ctx) { ctx = document.createElement('canvas').getContext('2d'); family = getComputedStyle(document.body).fontFamily; }
     if (!ctx) return text.length * 9;
-    ctx.font = kind === 'node' ? `600 13.5px ${family}` : kind === 'item' ? `550 13px ${family}` : kind === 'head' ? `650 15px ${family}` : kind === 'sub' ? `650 13px ${family}` : kind === 'plan' ? `600 12px ${family}` : `400 12.5px ${family}`;
+    ctx.font = kind === 'node' ? `600 13.5px ${family}` : kind === 'item' ? `550 13px ${family}` : kind === 'head' ? `650 15px ${family}` : kind === 'sub' ? `650 13px ${family}` : kind === 'plan' ? `600 12px ${family}` : kind === 'where' ? `600 11px ${family}` : `400 12.5px ${family}`;
     const w = ctx.measureText(text).width; cache.set(key, w); return w;
   };
 })();
@@ -735,6 +735,13 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
     if (b.kind === 'ghost') {
       const id = b.id.slice(6), p = partOf(o, id)!, path = partPath(view, id).map(x => x.name);
       // Its whole name (the layout sized the card for it); where it belongs reads once over its run (.ghost-head).
+      // The scope itself, as the end of its relations with its own parts, is this scope's boundary: it opens the scope's own
+      // description here, never a move out of the scope. Any other id (the same name included) is a part outside.
+      if (id === scope) {
+        world.append(h('button', { type: 'button', class: 'ghost self', 'data-box': b.id, 'data-part-ref': id, title: `이 범위 · ${path.join(' › ')} · 범위 설명 보기`, 'aria-label': `이 범위 ${p.name} 설명 보기`, onclick: () => openScopeReading() },
+          h('span', { class: 'ghost-name' }, p.name)));
+        continue;
+      }
       world.append(h('button', { type: 'button', class: 'ghost', 'data-box': b.id, 'data-part-ref': id, title: `이 범위 밖 · ${path.join(' › ')}`, onclick: () => go(o.key, id, p.parentId) },
         h('span', { class: 'ghost-name' }, p.name)));
       continue;
@@ -883,7 +890,8 @@ function placeEdgeLabels() {
     const e = lay.edges.find(x => x.key === g.dataset.key), k = e ? `${e.to}|${e.kind}` : ''; if (!e || seenEnd.has(k)) return false;
     seenEnd.add(k); return true;
   });
-  const blocks: Rect[] = [...lay.boxes.values()].map(b => (b.kind === 'frame' ? { x: b.x, y: b.y, w: b.w, h: b.head } : b));
+  // Where outside partners belong (their heads) is text on the map as well: a verb never covers it.
+  const blocks: Rect[] = [...lay.boxes.values()].map(b => (b.kind === 'frame' ? { x: b.x, y: b.y, w: b.w, h: b.head } : b)).concat(lay.heads);
   if (titleH) blocks.push(titleRect());
   const clear = (r: Rect) => !blocks.some(b => r.x < b.x + b.w + 3 && b.x < r.x + r.w + 3 && r.y < b.y + b.h + 3 && b.y < r.y + r.h + 3);
   if ($('space').classList.contains('rest-sum')) { placeCounts(box, clear, blocks); return; }
@@ -1283,7 +1291,8 @@ function renderLens() {
   const ends = relationEnds(o, part.id), entry = visitEntry(o), cameFrom = entry ? visits.at(-1)!.from.selected : null;
   const port = (x: End) => {
     const far = partOf(o, x.far)!, near = x.near !== part.id ? partOf(o, x.near)?.name : null, farRep = drawnRep(o, x.far);
-    const where = farRep === x.far ? null : farRep ? `${partOf(o, farRep)!.name} 안` : partPath(o.view, x.far).slice(0, -1).map(q => q.name).join(' › ') || o.project.name;
+    // The scope itself is this scope's boundary, not a place outside it.
+    const where = farRep === x.far ? null : x.far === scope ? '이 범위' : farRep ? `${partOf(o, farRep)!.name} 안` : partPath(o.view, x.far).slice(0, -1).map(q => q.name).join(' › ') || o.project.name;
     const came = x.far === cameFrom;
     return h('li', {}, h('button', { type: 'button', class: `port${came ? ' came' : ''}`, 'data-far': x.far, 'data-rel': x.r.id, title: `${far.name}${toParticle(far.name)} 가기${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far); }, ...lightOn([x.r.id], x.far) },
       h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, dirMark(x.r.kind, x.out)), h('strong', {}, far.name), came ? h('span', { class: 'port-came' }, '출발') : null),
