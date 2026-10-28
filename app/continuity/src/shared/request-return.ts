@@ -92,7 +92,9 @@ export function requestMatches(p: Project): EffectiveMatch[] {
   }
   // A replay of the same passage and scope is one correspondence, with the correction kept above.
   const seen = new Set<string>();
-  return out.reverse().filter(x => { const key = `${x.match.record}/${x.match.from}/${x.match.to}/${targetKey(x.match.targets)}`; if (seen.has(key)) return false; seen.add(key); return true; });
+  const recent = out.reverse().filter(x => { const key = `${x.match.record}/${x.match.from}/${x.match.to}/${targetKey(x.match.targets)}`; if (seen.has(key)) return false; seen.add(key); return true; });
+  const order = new Map(p.readings.map((r, i) => [r.id, i]));
+  return recent.sort((a, b) => (order.get(b.reading)! - order.get(a.reading)!) || a.index - b.index);
 }
 /** A brief comparison of one stored read, counting item occurrences within their exact RQ, never product completion. */
 export function requestComparison(p: Project, reading: MapReading): string | null {

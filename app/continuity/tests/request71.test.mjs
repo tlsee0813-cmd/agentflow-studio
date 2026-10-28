@@ -18,6 +18,7 @@ import { MAP2_PROMPT } from '../server/map-prompt.mjs';
 let counter = 0;
 const meta = () => ({ id: `R_t${++counter}`, at: new Date().toISOString(), model: 'stub', prompt: 'm2-000000000000', hash: String(counter).padStart(64, '0') });
 const reply = matches => ({ summary: '폴더 입력의 부분 보고를 요청과 대조했어요.', parts: [], relations: [], candidates: [], gaps: [], matches });
+const snapshotAt = (plan, at) => { const q = C.requestSnapshot(plan); q.createdAt = at; q.scope.createdAt = at; return q; };
 function setup(report = 'feature/folder@abc1234: 폴더 안 파일을 받는 입력을 바꿨습니다. 단일 문서 검사 3개 통과. 실패 후 계속은 아직 확인하지 않았습니다.') {
   let p = D.addArea(D.createProject(), '문서 변환', '단일 문서를 변환한다.');
   const area = p.space.areas[0].id, evidence = [{ id: 'INTENT', kind: 'user', title: '원함', text: '폴더 입력, 실패 후 계속, 성공 유지와 실패 모음을 원합니다.', basis: '사용자 초안' }];
@@ -64,7 +65,7 @@ test('71 source-bound contracts reject fabricated ids, omitted quotes, borrowed 
 });
 
 test('71 two indistinguishable RQs stay ambiguous even if a model selects only the latest; explicit RQ and human correction can distinguish them', () => {
-  const { p, snap, plan } = setup(), newer = C.requestSnapshot(plan), inp = input(p, [snap.scope, newer.scope]);
+  const { p, snap, plan } = setup(), newer = snapshotAt(plan, snap.createdAt), inp = input(p, [snap.scope, newer.scope]);
   const validated = M.validateMapReply(reply([match(newer)]), inp.ask);
   assert.equal(validated.matches[0].targets.length, 2);
   let done = M.applyReading(p, inp, validated, meta()).project;
@@ -145,7 +146,7 @@ test('71 explicit recompare recovers map-only material, keeps a correction on it
   const mapOnly = M.buildMapAsk(p, studioView(p));
   p = M.applyReading(p, mapOnly, M.validateMapReply({ summary: '', parts: [], relations: [], candidates: [], gaps: [] }, mapOnly.ask), meta()).project;
   assert.equal(M.buildMapAsk(p, studioView(p), [snap.scope]).problem, 'NOTHING_NEW');
-  const next = C.requestSnapshot(plan), both = [snap.scope, next.scope];
+  const next = snapshotAt(plan, snap.createdAt), both = [snap.scope, next.scope];
   let inp = M.buildMapAsk(p, studioView(p), both, snap.id);
   assert.equal(inp.problem, null); p = apply(p, inp, reply([match(snap)])).project;
   let old = R.requestMatches(p)[0]; p = R.correctRequestMatch(p, old.reading, old.index, { requestId: snap.id, itemId: 'I1' });
@@ -169,6 +170,89 @@ test('71 copied request carries its own real RQ and plan revision while legacy t
   assert.ok(snap.text.includes(`결과에 이 요청문 참조 ${snap.id}를 함께 남겨 주세요`));
   const legacy = structuredClone(bundle); delete legacy.snapshots[0].scope; legacy.snapshots[0].text = '이전 복사 요청문 원문';
   assert.equal(parseBundle(legacy, p.id).snapshots[0].text, '이전 복사 요청문 원문');
+});
+
+test('71 pre-request material is labelled as earlier context and cannot be promoted to a later RQ return, even through recovery or a legacy wire ask', () => {
+  const { p, snap, plan } = setup();
+  const later = snapshotAt(plan, new Date(Date.parse(p.pasted[0].at) + 1000).toISOString());
+  const inp = M.buildMapAsk(p, studioView(p), [later.scope], later.id);
+  assert.equal(inp.problem, null); assert.equal(inp.ask.records[0].addedAt, p.pasted[0].at);
+  assert.match(inp.ask.records[0].note, /요청문 생성 전에 붙인 이전 자료/);
+  assert.throws(() => M.validateMapReply(reply([match(later)]), inp.ask), /INVALID_RESPONSE/);
+  const legacyWire = structuredClone(inp.ask); delete legacyWire.records[0].addedAt;
+  const superficiallyValid = M.validateMapReply(reply([match(later)]), legacyWire);
+  assert.throws(() => M.applyReading(p, { ...inp, ask: legacyWire }, superficiallyValid, meta()), /INVALID_RESPONSE/);
+  // The text is still legitimate evidence of the existing map, just not evidence of a return to this later request.
+  const existing = { ref: 'P01', name: null, parent: null, role: '기존 입력 처리', roleAbout: null, roleReplaces: null, basis: [{ record: 'N01', quote: '폴더 안 파일을 받는 입력을 바꿨습니다' }], claims: [] };
+  const done = apply(p, inp, { ...reply([match(later, { targets: [], why: '요청 생성 전에 보관한 자료' })]), parts: [existing] });
+  assert.equal(M.partUnderstanding(done.project, p.space.areas[0].id).role, '기존 입력 처리');
+  assert.equal(R.requestMatches(done.project)[0].target, null); assert.equal(done.project.pasted[0].text, p.pasted[0].text);
+  // A report explicitly naming the original RQ cannot be forced onto a selected later RQ that omits that reference.
+  const named = D.pasteRecord(p, `요청문 참조: ${snap.id}\nfeature/folder@abc1234: 폴더 안 파일을 받는 입력을 바꿨습니다.`, null).project;
+  const selected = M.buildMapAsk(named, studioView(named), [later.scope], later.id);
+  assert.throws(() => M.validateMapReply(reply([match(later)]), selected.ask), /INVALID_RESPONSE/);
+});
+
+test('71 comparison replay adds only matches for already-read intervals; fresh map evidence in a new record still applies', () => {
+  let { p, snap, area } = setup(); p = D.addArea(p, '결과');
+  const inputQuote = '폴더 안 파일을 받는 입력을 바꿨습니다', checkQuote = '단일 문서 검사 3개 통과';
+  const part = (role, claims = []) => ({ ref: 'P01', name: null, parent: null, role, roleAbout: null, roleReplaces: null, basis: role ? [{ record: 'N01', quote: inputQuote }] : [], claims });
+  const claim = text => ({ kind: 'reported', text, record: 'N01', quote: inputQuote, about: null, replaces: null });
+  const mapOnly = M.buildMapAsk(p, studioView(p));
+  p = M.applyReading(p, mapOnly, M.validateMapReply({ summary: '', parts: [part('기존 입력 역할', [claim('처음 받은 입력 보고')])], relations: [], candidates: [], gaps: [] }, mapOnly.ask), meta()).project;
+  const before = JSON.stringify(p.space), beforeRole = M.partUnderstanding(p, area), inp = M.buildMapAsk(p, studioView(p), [snap.scope], snap.id);
+  const oldReply = { ...reply([match(snap)]), parts: [part('재해석한 오래된 역할', [claim('재해석한 이전 입력 보고')]),
+    { ref: 'new:replay', name: '재독으로 만든 별도 부분', parent: null, role: null, roleAbout: null, roleReplaces: null, basis: [{ record: 'N01', quote: inputQuote }], claims: [] }],
+    relations: [{ from: 'P01', to: 'P02', kind: 'needs', note: '같은 구절의 재해석', record: 'N01', quote: checkQuote }] };
+  const done = apply(p, inp, oldReply); p = done.project;
+  assert.equal(JSON.stringify(p.space), before); assert.deepEqual(done.reading.parts, []); assert.deepEqual(done.reading.relations, []); assert.deepEqual(done.created, []);
+  assert.deepEqual(M.partUnderstanding(p, area), beforeRole); assert.equal(R.requestMatches(p).length, 1);
+  assert.match(done.reading.summary, /이미 지도에 읽은 원문/);
+  p = D.pasteRecord(p, '새 보고: 입력 규칙을 새 원문에서 덧붙였습니다.', null).project;
+  const fresh = M.buildMapAsk(p, studioView(p), [snap.scope], snap.id);
+  const newClaim = { kind: 'reported', text: '새 입력 규칙의 추가 보고', record: 'N01', quote: '입력 규칙을 새 원문에서 덧붙였습니다', about: null, replaces: null };
+  p = apply(p, fresh, { ...reply([]), parts: [{ ...part(null), claims: [newClaim] }] }).project;
+  assert.ok(M.partUnderstanding(p, area).claims.some(c => c.text === newClaim.text));
+});
+
+test('71 request-only replay of a long record does not consume the canonical effects of its unread tail', () => {
+  let { p, snap } = setup('앞부분 입력 설명입니다.\n' + 'x'.repeat(13000) + '\n꼬리에서는 출력 규칙을 추가했습니다.');
+  let inp = M.buildMapAsk(p, studioView(p));
+  p = M.applyReading(p, inp, M.validateMapReply({ summary: '', parts: [], relations: [], candidates: [], gaps: [] }, inp.ask), meta()).project;
+  inp = M.buildMapAsk(p, studioView(p), [snap.scope], snap.id);
+  const replay = apply(p, inp, reply([])); p = replay.project; assert.deepEqual(replay.reading.parts, []);
+  inp = M.buildMapAsk(p, studioView(p), [snap.scope], snap.id);
+  assert.ok(inp.ask.records[0].text.includes('꼬리에서는 출력 규칙을 추가했습니다'));
+  const role = { ref: 'P01', name: null, parent: null, role: '출력 규칙도 다룸', roleAbout: null, roleReplaces: null, basis: [{ record: 'N01', quote: '꼬리에서는 출력 규칙을 추가했습니다' }], claims: [] };
+  const done = apply(p, inp, { ...reply([]), parts: [role] }); assert.equal(done.reading.parts[0].role, role.role);
+});
+
+test('71 an explicit map-only action unblocks an unrelated note past the RQ limit and still permits later selected comparison', async () => {
+  const { p, snap } = setup(), many = Array.from({ length: 9 }, (_, i) => ({ ...snap.scope, id: `RQ_limit_${i}` }));
+  const savedFetch = globalThis.fetch; let project = p, calls = [], committed = 0;
+  globalThis.fetch = async (_url, options) => { const ask = JSON.parse(options.body); calls.push(ask); return new Response(JSON.stringify({ model: 'stub', reply: { summary: '설계 메모를 지도에서 읽음', parts: [], relations: [], candidates: [], gaps: [], ...(ask.schemaVersion === 'studio.map.2' ? { matches: [] } : {}) } })); };
+  try {
+    const run = createMapRun({ current: () => ({ key: 'map-only-entry', kind: 'saved', project, view: studioView(project) }), requests: () => many,
+      status: () => ({ ai: 'deepseek', access: 'open', map: { model: 'stub', prompt: awaitlessPrompt } }), accessCode: () => '',
+      commit: async next => { project = next; committed++; return null; }, done: () => {}, changed: () => {} });
+    await run.run(); assert.equal(calls.length, 0); assert.equal(committed, 0); assert.match(run.state().error, /읽지 않았어요/);
+    await run.runMapOnly(); assert.equal(calls.length, 1); assert.equal(calls[0].schemaVersion, 'studio.map.1'); assert.equal(committed, 1);
+    assert.equal(project.pasted[0].text, p.pasted[0].text); assert.equal(M.unreadRecords(project, studioView(project)).length, 0);
+    await run.run(many[3].id); assert.equal(calls.length, 2); assert.equal(calls[1].schemaVersion, 'studio.map.2'); assert.deepEqual(calls[1].requests.map(q => q.id), [many[3].id]);
+    assert.equal(project.readings.at(-1).requests[0].id, many[3].id);
+  } finally { globalThis.fetch = savedFetch; }
+});
+
+test('71 return passages keep model order inside each reading and newer reading groups stay first', () => {
+  let { p, snap } = setup('feature/folder@abc1234: 폴더 안 파일을 받는 입력을 바꿨습니다. main에는 병합하지 않았습니다. 단일 문서 검사 3개 통과.');
+  const inp = input(p, [snap.scope]);
+  const first = apply(p, inp, reply([match(snap), match(snap, { text: 'main에는 병합하지 않았다고 보고함', quote: 'main에는 병합하지 않았습니다' }),
+    match(snap, { text: '단일 문서 검사 보고', kind: 'checked', quote: '단일 문서 검사 3개 통과' })])); p = first.project;
+  assert.deepEqual(R.requestMatches(p).map(x => x.index), [0, 1, 2]);
+  p = D.pasteRecord(p, 'feature/folder@abc1234 추가 보고: 폴더 안 파일을 받는 입력을 바꿨습니다.', null).project;
+  const later = apply(p, input(p, [snap.scope]), reply([match(snap, { text: '더 나중의 입력 보고' })]));
+  const order = R.requestMatches(later.project); assert.equal(order[0].reading, later.reading.id);
+  assert.deepEqual(order.filter(x => x.reading === first.reading.id).map(x => x.index), [0, 1, 2]);
 });
 
 test('71 map.2 HTTP uses one combined prompt and rejects invented matching; runner failed commit applies neither map nor correspondence', async () => {

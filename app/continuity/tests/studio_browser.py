@@ -1501,6 +1501,8 @@ def record_fold_flow(browser, base, cases):
     page = browser.new_page(viewport={"width": 1280, "height": 720})
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))
+    digest_responses = []
+    page.on("response", lambda r: digest_responses.append(r) if r.url.endswith("/api/studio/digest") else None)
     page.goto(base + "/")
     page.locator("#import-file").set_input_files(str(cases / "oss-node-red.json"))
     page.wait_for_url(re.compile(r"#/p/E_"))
@@ -1515,7 +1517,11 @@ def record_fold_flow(browser, base, cases):
     page.locator("#paste-text").fill(text)
     page.get_by_role("button", name="기록 저장").click()
     page.get_by_role("button", name="붙인 기록 요약").click()
-    expect(page.locator("#lens .rr-records")).to_be_visible()
+    try:
+        expect(page.locator("#lens .rr-records")).to_be_visible()
+    except AssertionError as failure:
+        http = [{"status": r.status, "body": r.text()[:600]} for r in digest_responses]
+        raise AssertionError(f"record_fold summary missing: http={http}, pageerrors={errors}, lens={page.locator('#lens').inner_text()[:1800]!r}") from failure
     # The reading alone unfolds nothing.
     expect(page.locator(mqtt)).to_have_count(0)
     assert page.evaluate(DRAWN) == drawn0

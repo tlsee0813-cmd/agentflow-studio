@@ -39,10 +39,10 @@ export function createMapRun(host: MapRunHost) {
   /** What a reading would send now (nothing is sent). */
   function input(requestId?: string): MapInput | null { const o = host.current(); return o && o.kind === 'saved' ? buildMapAsk(o.project, o.view, host.requests?.() ?? [], requestId) : null; }
   function can(): boolean { const st = host.status(); return st.ai === 'deepseek' && !!st.map; }
-  async function run(requestId?: string) {
+  async function run(requestId?: string, mapOnly = false) {
     const o = host.current(); if (!o || o.kind !== 'saved') return;
     const key = o.key, state = of(key); if (state.pending) return;
-    const st = host.status(), inp = buildMapAsk(o.project, o.view, host.requests?.() ?? [], requestId);
+    const st = host.status(), inp = buildMapAsk(o.project, o.view, mapOnly ? [] : host.requests?.() ?? [], requestId);
     if (!st.map || st.ai !== 'deepseek') return;
     if (inp.problem) { state.error = inp.problem === 'NOTHING_NEW' ? '이 범위에서 새로 읽을 기록이 없어요.' : inp.problem === 'REQUEST_CONTEXT_TOO_LARGE' ? '요청 문맥을 한 번에 대조하기 어려워 보고를 읽지 않았어요. 비교할 요청문을 골라 주세요.' : inp.problem === 'TOO_LARGE' ? '지도가 커서 한 번에 보낼 수 없어요.' : '키나 토큰처럼 보이는 글이 있는 기록이 있어 보내지 않았어요.'; host.changed(); return; }
     const hash = await askHash(inp.ask);
@@ -65,7 +65,7 @@ export function createMapRun(host: MapRunHost) {
     } finally { state.pending = null; host.changed(); }
   }
   return {
-    input, can, run,
+    input, can, run, runMapOnly: () => run(undefined, true),
     state: (): MapRunState => { const o = host.current(); return o ? of(o.key) : { pending: null, error: null }; },
     cancel: () => { const o = host.current(); if (o) of(o.key).pending?.abort(); },
     clearError: () => { const o = host.current(); if (o) of(o.key).error = null; },

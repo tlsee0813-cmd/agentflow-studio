@@ -27,7 +27,7 @@ const STATE_ORDER: ClaimKind[] = ['reported', 'checked', 'want', 'idea', 'descri
 const RELS: RelationKind[] = ['flow', 'needs', 'shares', 'related'];
 
 export interface MapAskPart { id: string; name: string; note: string; parentId: string | null; readAs: string | null; role: string; roleBy: 'reading' | 'person' | null; roleAbout: string | null; current: { key: string; kind: ClaimKind; text: string; about: string | null }[] }
-export interface MapAskRecord { id: string; kind: 'pasted' | RecordView['kind']; text: string; note: string; basis: string }
+export interface MapAskRecord { id: string; kind: 'pasted' | RecordView['kind']; text: string; note: string; basis: string; addedAt?: string }
 export interface MapAsk {
   schemaVersion: typeof MAP_SCHEMA | typeof MAP2_SCHEMA;
   project: { name: string; purpose: string | null };
@@ -122,8 +122,10 @@ export function validateMapAsk(value: unknown): MapAsk {
   arr(value.records, MAP_RECORDS); check(value.records.length > 0);
   const records = new Set<string>();
   for (const r of value.records) {
-    obj(r, ['id', 'kind', 'text', 'note', 'basis']); check(typeof r.id === 'string' && RECORD.test(r.id) && !records.has(r.id)); records.add(r.id);
+    const hasTime = !!r && typeof r === 'object' && Object.hasOwn(r, 'addedAt');
+    obj(r, ['id', 'kind', 'text', 'note', 'basis', ...(hasTime ? ['addedAt'] : [])]); check(typeof r.id === 'string' && RECORD.test(r.id) && !records.has(r.id)); records.add(r.id);
     check(['pasted', 'request', 'report', 'evidence', 'answer', 'decision'].includes(r.kind as string)); str(r.text, MAP_RECORD_CHARS); str(r.note, 600, true); str(r.basis, 300);
+    if (hasTime) { str(r.addedAt, 30); check(Number.isFinite(Date.parse(r.addedAt)) && new Date(r.addedAt).toISOString() === r.addedAt); }
   }
   if (two) { arr(value.requests, 8); const ids = new Set<string>(); for (const r of value.requests) { const req = r && typeof r === 'object' && (r as { version?: unknown }).version === 'request-scope.1' ? validateFrozenRequest(r) : validateRequestContext(r); check(!ids.has(req.id)); ids.add(req.id); } }
   return structuredClone(value as unknown as MapAsk);
@@ -220,10 +222,12 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
       // Identical frozen demands cannot be separated by arrival order. Retain all competing RQ targets, unless the report
       // explicitly names the request id (or the plan id AND revision) itself.
       const targets = [...m.targets];
+      const eligible = (request: { createdAt: string }) => !rec!.addedAt || Date.parse(rec!.addedAt) >= Date.parse(request.createdAt);
+      check(targets.every(t => eligible(ask.requests!.find(r => r.id === t.requestId)!)), code);
       for (const t of m.targets) {
         const req = ask.requests!.find(r => r.id === t.requestId)!, item = req.items.find(i => i.id === t.itemId)!;
         if (rec!.text.includes(req.id) || new RegExp(`${req.planId}\\s*/\\s*${req.planRevision}(?!\\d)`).test(rec!.text)) continue;
-        for (const other of ask.requests!) for (const i of other.items) if (other.id !== req.id && norm(i.title) === norm(item.title) && norm(i.description) === norm(item.description) && !targets.some(x => x.requestId === other.id && x.itemId === i.id)) targets.push({ requestId: other.id, itemId: i.id });
+        for (const other of ask.requests!) for (const i of other.items) if (eligible(other) && other.id !== req.id && norm(i.title) === norm(item.title) && norm(i.description) === norm(item.description) && !targets.some(x => x.requestId === other.id && x.itemId === i.id)) targets.push({ requestId: other.id, itemId: i.id });
       }
       check(targets.length <= 8, code);
       return { ...m, quote: rec!.text.slice(at!.at, at!.at + at!.length), about, targets };
@@ -363,8 +367,10 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
     // Only the unread part goes: what is quoted is checked against exactly this excerpt.
     const rest = r.text.slice(r.from);
     let text = cut(clean(rest), MAP_RECORD_CHARS);
-    const rec: MapAskRecord = { id, kind: r.kind, text, note: '', basis: `${r.label} · ${r.at} (가져온 시각이며 원문 작성·판본 시각이 아님)` };
-    const note = () => (r.from > 0 || text.length < rest.length ? `원문 ${r.text.length}자 중 ${r.from + 1}~${r.from + text.length}자 구간만 보냄${r.from > 0 ? ' (앞 구간은 앞선 정리에서 읽음)' : ''}` : '');
+    const rec: MapAskRecord = { id, kind: r.kind, text, note: '', basis: `${r.label} · ${r.at} (가져온 시각이며 원문 작성·판본 시각이 아님)`, ...(ask.requests ? { addedAt: r.at } : {}) };
+    const earlier = ask.requests?.filter(q => Date.parse(r.at) < Date.parse(q.createdAt)).map(q => q.id) ?? [];
+    const note = () => [r.from > 0 || text.length < rest.length ? `원문 ${r.text.length}자 중 ${r.from + 1}~${r.from + text.length}자 구간만 보냄${r.from > 0 ? ' (앞 구간은 앞선 정리에서 읽음)' : ''}` : '',
+      earlier.length ? `다음 요청문 생성 전에 붙인 이전 자료이며 후속 반환 근거가 아님: ${earlier.join(', ')}` : ''].filter(Boolean).join(' · ');
     rec.note = note(); ask.records.push(rec);
     // A record takes the room that is left, down to a readable excerpt; one that cannot is left for the next reading.
     for (let g = 0; bytes(ask) > MAP_BYTES - 256 && text.length > MIN_RECORD_CHARS && g < 40; g++) { text = cut(text, Math.floor(text.length * 0.9)); rec.text = text; rec.note = note(); }
@@ -391,6 +397,30 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   if ((done.at(-1)?.id ?? null) !== input.after) throw new Error('MAP_CHANGED');
   if (done.some(r => r.hash === meta.hash)) throw new Error('ALREADY_APPLIED');
   if (project.readings.length >= READINGS_LIMIT) throw new Error('READINGS_FULL');
+  const addedAt = new Map([...project.pasted.map(r => [r.id, r.at] as const), ...project.sources.map(r => [r.id, r.at] as const)]);
+  for (const m of reply.matches ?? []) for (const t of m.targets) {
+    const record = input.records.get(m.record), request = frozen.find(r => r.id === t.requestId);
+    if (!record || !request || !addedAt.has(record.id) || Date.parse(addedAt.get(record.id)!) < Date.parse(request.createdAt)) throw new Error('INVALID_RESPONSE');
+  }
+  // A comparison may re-read an old interval. Only quotes containing previously unread bytes can change the map again.
+  // Request matches still use the full reply below and are saved with their frozen context in the same write.
+  const covered = done.flatMap(r => r.records);
+  const freshQuote = (q: MapReplyQuote) => {
+    const source = input.records.get(q.record), at = source ? quoteAt(source.text, q.quote) : null;
+    if (!source || !at) return false;
+    let end = source.from + at.at; const limit = end + at.length;
+    for (const r of covered.filter(r => r.id === source.id && r.to > end && r.from < limit).sort((a, b) => a.from - b.from)) {
+      if (r.from > end) return true; end = Math.max(end, r.to); if (end >= limit) return false;
+    }
+    return end < limit;
+  };
+  const mapParts = reply.parts.flatMap(x => {
+    const basis = x.basis.filter(freshQuote), claims = x.claims.filter(freshQuote), role = basis.length ? x.role : null;
+    if (x.name !== null ? !basis.length : !role && !claims.length) return [];
+    return [{ ...x, basis, claims, role, roleAbout: role ? x.roleAbout : null, roleReplaces: role && x.roleReplaces && freshQuote(x.roleReplaces) ? x.roleReplaces : null }];
+  });
+  const mapRelations = reply.relations.filter(freshQuote);
+  const comparisonOnly = frozen.length > 0 && [...input.records].every(([record, source]) => !freshQuote({ record, quote: source.text }));
   const active = (id: string) => project.space.areas.some(a => a.id === id && !a.archived);
   for (const id of input.parts.values()) if (!active(id)) throw new Error('MAP_CHANGED');
   const real = (q: MapReplyQuote): ReadingQuote => ({ record: input.records.get(q.record)!.id, quote: q.quote });
@@ -400,7 +430,7 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   const parentOf = (id: string) => p.space.containment.parents[id] ?? null;
   const madeBefore = done.flatMap(r => r.parts.filter(x => x.created).map(x => ({ areaId: x.areaId, ...x.created! })));
   // New parts, parents first (the reply's own order otherwise).
-  const queue = reply.parts.filter(x => x.name !== null), dropped = new Set<string>();
+  const queue = mapParts.filter(x => x.name !== null), dropped = new Set(reply.parts.filter(x => x.name !== null && !mapParts.some(p => p.ref === x.ref)).map(x => x.ref));
   for (let guard = 0; queue.length && guard < 64; guard++) {
     for (let i = 0; i < queue.length; i++) {
       const x = queue[i]!; if (x.parent && !ids.has(x.parent) && !dropped.has(x.parent)) continue;
@@ -428,12 +458,12 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   const unsure = reply.candidates.filter(c => c.quote && c.parts.length).map(c => ({ parts: new Set(c.parts.map(a => ids.get(a))), record: input.records.get(c.record!)!.id, quote: c.quote! }));
   const overlaps = (a: string, b: string) => a.includes(b) || b.includes(a);
   const settled = (areaId: string, c: ReadingClaim) => !unsure.some(u => u.parts.has(areaId) && u.record === c.record && overlaps(u.quote, c.quote));
-  for (const x of reply.parts) if (x.name === null) parts.push({ areaId: ids.get(x.ref)!, created: null, role: x.role, roleAbout: x.roleAbout, roleReplaces: x.roleReplaces ? real(x.roleReplaces) : null, basis: x.basis.map(real), claims: x.claims.map(claimOf) });
+  for (const x of mapParts) if (x.name === null) parts.push({ areaId: ids.get(x.ref)!, created: null, role: x.role, roleAbout: x.roleAbout, roleReplaces: x.roleReplaces ? real(x.roleReplaces) : null, basis: x.basis.map(real), claims: x.claims.map(claimOf) });
   for (const part of parts) part.claims = part.claims.filter(c => settled(part.areaId, c));
   for (let i = parts.length - 1; i >= 0; i--) if (!parts[i]!.created && !parts[i]!.role && !parts[i]!.claims.length) parts.splice(i, 1);
   const relations: ReadingRelation[] = [];
   const madeRelations = done.flatMap(r => r.relations);
-  for (const r of reply.relations) {
+  for (const r of mapRelations) {
     const from = ids.get(r.from), to = ids.get(r.to), name = `${r.from}→${r.to}`;
     if (!from || !to) { skipped.push({ what: 'relation', name, reason: 'parent-skipped' }); continue; }
     if (p.space.relations.some(x => x.from === from && x.to === to && x.kind === r.kind)) { skipped.push({ what: 'relation', name, reason: 'exists' }); continue; }
@@ -449,7 +479,7 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   });
   const reading: MapReading = { version: input.ask.schemaVersion === MAP2_SCHEMA ? 'map-reading.2' : 'map-reading.1', id: meta.id, at: meta.at, model: meta.model, prompt: meta.prompt, hash: meta.hash,
     records: [...input.records.values()].map(r => ({ id: r.id, from: r.from, to: r.to, total: r.total })),
-    summary: reply.summary, parts, relations, candidates: candidates.slice(0, 16), gaps: reply.gaps, skipped: skipped.slice(0, 64),
+    summary: comparisonOnly ? '이미 지도에 읽은 원문을 고른 요청과 다시 대조했어요.' : reply.summary, parts, relations, candidates: candidates.slice(0, 16), gaps: reply.gaps, skipped: skipped.slice(0, 64),
     ...(input.ask.schemaVersion === MAP2_SCHEMA ? { requests: structuredClone(frozen), matches } : {}) };
   p = addReading(p, reading);
   const next = parseProject(JSON.stringify(p));

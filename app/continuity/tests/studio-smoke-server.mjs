@@ -68,7 +68,9 @@ function mapStub(input) {
   if (input.schemaVersion === 'studio.map.2') content.matches = [];
   return new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(content) } }] }), { status: 200 });
 }
-const env = mode === 'nokey' ? {} : { DEEPSEEK_API_KEY: 'stub-key', DEEPSEEK_MODEL: 'stub-model', ...(mode === 'code' ? { STUDIO_ACCESS_CODE: 'smoke-code' } : {}) };
+// The browser suite shares this stub process across many flows and can make >10 calls in a minute on a fast CI runner.
+// Only this simulated-provider fixture gets a higher rate; the real server's default remains 10/minute.
+const env = mode === 'nokey' ? {} : { DEEPSEEK_API_KEY: 'stub-key', DEEPSEEK_MODEL: 'stub-model', STUDIO_REQUESTS_PER_MINUTE: '120', ...(mode === 'code' ? { STUDIO_ACCESS_CODE: 'smoke-code' } : {}) };
 const studio = createStudioHandler({ env, fetchImpl: stub });
 const config = readConfig({ AI_MODE: 'mock', PORT: process.env.PORT ?? '0' });
 createContinuityApp({ config, studio }).listen(config.port, '127.0.0.1', function () { console.log(`READY http://127.0.0.1:${this.address().port}`); });
