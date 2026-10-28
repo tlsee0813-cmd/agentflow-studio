@@ -1,8 +1,8 @@
 /* Studio: read-only projection of a saved project (project.7) into map parts and recent records, plus the small
  * studio.1 contract the server forwards to DeepSeek. Nothing here writes to a project. */
-import type { Project, Task, Source, RelationKind } from './types.js';
+import type { Project, Source, RelationKind } from './types.js';
 import { areaOf, isReturnTask, areaDescription } from './domain.js';
-import { parseResultFile } from './validation.js';
+import { parseResultFile, sourceText } from './validation.js';
 import { partUnderstanding, type PartUnderstanding } from './map-reading.js';
 
 export type PartStatus = 'plan' | 'active' | 'reported' | 'check';
@@ -34,13 +34,6 @@ const KIND: Record<Source['kind'], RecordKind | null> = {
   request: 'request', report: 'report', evidence: 'evidence', answer: 'answer', manual_decision: 'decision', test_answer: null
 };
 
-function recordText(t: Task, s: Source): string {
-  if (t.resultFile && (s.kind === 'report' || s.kind === 'evidence')) {
-    const f = parseResultFile(t.resultFile.rawText);
-    return (s.kind === 'report' ? f.report : f.evidence) ?? s.text;
-  }
-  return s.text;
-}
 
 export function studioView(p: Project): StudioView {
   const active = p.space.areas.filter(a => !a.archived), ids = new Set(active.map(a => a.id));
@@ -50,7 +43,7 @@ export function studioView(p: Project): StudioView {
   for (const s of p.sources) {
     const kind = KIND[s.kind], t = tasks.get(s.taskId); if (!kind || !t) continue;
     const area = areaOf(p, t), u = t.resultFile ? parseResultFile(t.resultFile.rawText).understanding : null;
-    records.push({ id: s.id, kind, at: s.at, partId: area && ids.has(area) ? area : null, taskId: t.id, text: recordText(t, s), origin: kind === 'report' ? u?.origin ?? null : null });
+    records.push({ id: s.id, kind, at: s.at, partId: area && ids.has(area) ? area : null, taskId: t.id, text: sourceText([t], s), origin: kind === 'report' ? u?.origin ?? null : null });
   }
   records.sort((a, b) => b.at.localeCompare(a.at));
   const parts: PartView[] = active.map(a => {

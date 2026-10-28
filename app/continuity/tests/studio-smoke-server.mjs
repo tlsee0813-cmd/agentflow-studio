@@ -69,7 +69,7 @@ function mapStub(input) {
   if (input.schemaVersion !== 'studio.map.1') content.matches = [];
   return new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(content) } }] }), { status: 200 });
 }
-// studio.map.4: the same mechanical reading, citing the span.1 piece each labelled line begins (never a copied quote).
+// studio.map.4: the same mechanical reading, citing the span.2 piece each labelled line begins (never a copied quote).
 function map4Stub(input) {
   const rec = input.records[0], pieces = rec.spans.filter(x => /^(요구|작업 보고|구상):/.test(x.t.trim()));
   const kind = t => t.startsWith('요구') ? 'want' : t.startsWith('구상') ? 'idea' : 'reported';

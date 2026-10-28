@@ -46,7 +46,7 @@ export async function digestPromptId(version = 1) {
 
 let mapId = null;
 /** Short id of the map reading prompt a current client reads with (m4- and the first 12 hex digits of its SHA-256): a client sends
- * studio.map.4 (evidence by span.1 piece) only to a server whose status names an m4- prompt. A studio.map.1–3 request from an
+ * studio.map.4 (evidence by span.2 piece) only to a server whose status names an m4- prompt. A studio.map.1–3 request from an
  * older tab is still answered with its own prompt; status names only the current one. */
 export async function mapPromptId() {
   if (!mapId) mapId = crypto.subtle.digest('SHA-256', new TextEncoder().encode(MAP4_PROMPT)).then(b => `m4-${[...new Uint8Array(b)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`);

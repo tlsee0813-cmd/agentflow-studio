@@ -422,7 +422,7 @@ export function createReturnView(host: ReturnHost) {
     return [h('article', { class: 'rr-source' },
       h('p', { class: 'rr-source-kind' }, h('span', { class: `rr-kind k-${src.kind}` }, DIGEST_KIND_LABEL[src.kind]), v ? h('code', {}, v) : null, h('span', {}, src.id)),
       h('h3', {}, src.title),
-      h('blockquote', { class: `rr-quote${src.kind === 'code' ? ' code' : ''}` }, ...quoted(src.text, quote)),
+      h('blockquote', { class: `rr-quote${src.kind === 'code' ? ' code' : ''}` }, ...quoted(src.text, quote, quote && at !== undefined ? { at, length: quote.length } : undefined)),
       from !== 'material' ? h('p', { class: 'fine' }, '이 정리를 만들 때 함께 보관한 자료예요.') : null,
       h('dl', { class: 'rr-meta' },
         h('dt', {}, '판본·출처'), h('dd', {}, src.basis, src.url ? h('a', { href: src.url, target: '_blank', rel: 'noopener noreferrer' }, ' 공개 원문 ↗') : null),

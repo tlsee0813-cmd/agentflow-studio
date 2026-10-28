@@ -16,6 +16,13 @@ function integer(v: unknown) { ensure(Number.isSafeInteger(v) && (v as number) >
 function id(v: unknown) { text(v, 100); ensure(/^[A-Za-z0-9_-]+$/.test(v as string)); }
 function date(v: unknown) { text(v, 30); ensure(Number.isFinite(Date.parse(v as string)) && new Date(v as string).toISOString() === v); }
 function unique(items: {id: string}[]) { ensure(new Set(items.map(x => x.id)).size === items.length); }
+/** The text a source stands for as a record (what a map reading is sent, quotes, stores and marks): a returned report or evidence
+ * as received in its return file, without the app's own label prefix; any other source as it is. One choice for every reader. */
+export function sourceText(tasks: readonly Task[], s: Source): string {
+  const t = tasks.find(x => x.id === s.taskId);
+  if (t?.resultFile && (s.kind === 'report' || s.kind === 'evidence')) { const f = parseResultFile(t.resultFile.rawText); return (s.kind === 'report' ? f.report : f.evidence) ?? s.text; }
+  return s.text;
+}
 /** A file is untrusted data, not an authenticated execution receipt. Never repair/truncate it. */
 export function parseResultFile(raw: string): ResultFile {
   ensure(typeof raw==='string' && new TextEncoder().encode(raw).length<=RESULT_BYTES,'RESULT_TOO_LARGE');
@@ -230,7 +237,6 @@ function assertProject(v: unknown): asserts v is Project {
   const tasks=new Set<string>(),returns=new Map<string,{taskId:string;record:ExportRecord}>();
   const areaIds=space(v.space);
   pasted(v.pasted,areaIds);
-  readings(v.readings,areaIds,new Map([...(v.pasted as {id:string;text:string}[]).map(r=>[r.id,r.text] as const),...[...sources.values()].map(r=>[r.id,r.text] as const)]),v.id as string,new Set([...sources.values()].filter(s=>s.kind==='evidence').map(s=>s.id)));
   for (const t of v.tasks) {
     const optional=['intentEdit','areaId'].filter(k=>t&&typeof t==='object'&&Object.hasOwn(t,k));
     obj(t,['id','sourceIds','parentTaskId','advice','adviceRevision','mode','manual','suggestions','handoffs','resultFile','background',...optional]); id(t.id);
@@ -286,6 +292,8 @@ function assertProject(v: unknown): asserts v is Project {
     ensure(!tasks.has(t.id as string)); tasks.add(t.id as string);
   }
   for(const s of sources.values()) ensure(tasks.has(s.taskId));
+  // Readings quote each record as it was read: a returned report or evidence as received (sourceText), once its task is checked.
+  readings(v.readings,areaIds,new Map([...(v.pasted as {id:string;text:string}[]).map(r=>[r.id,r.text] as const),...[...sources.values()].map(r=>[r.id,sourceText(v.tasks as Task[],r)] as const)]),v.id as string,new Set([...sources.values()].filter(s=>s.kind==='evidence').map(s=>s.id)));
   understandingRefs(v.space as Record<string,unknown>,v.tasks as Task[],sources);
   // Imported reports or synthetic answers cannot masquerade as an authoritative decision.
   for(const b of v.bases as Basis[]) {

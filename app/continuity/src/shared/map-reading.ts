@@ -7,7 +7,7 @@ import { CLAIM_KINDS, READINGS_LIMIT, isMapReading, type ClaimKind, type MapRead
 import { indexSpans, encodeSpans, decodeSpans, resolveRef, resolveRange, textDigest, ANCHOR_QUOTE_MAX, SPANS_PER_RECORD, type Span, type SpanWire } from './evidence-span.js';
 import type { StudioView, RecordView } from './studio.js';
 import { addArea, addChildArea, addRelation, addReading } from './domain.js';
-import { parseProject } from './validation.js';
+import { parseProject, sourceText } from './validation.js';
 import { quoteAt } from './digest-api.js';
 import { secretLike } from './secret.js';
 import { validateFrozenRequest, validateRequestContext, requestContext, validateRequestMatch, requestMatches, hasTarget, sameTarget, canReplace, MATCH_STANCES, type RequestContext, type FrozenRequest, type RequestMatch, type RequestMatch3, type StoredRequestMatch, type MatchKind, type MatchStance, type RequestTarget } from './request-return.js';
@@ -16,7 +16,7 @@ export const MAP_SCHEMA = 'studio.map.1' as const;
 export const MAP2_SCHEMA = 'studio.map.2' as const;
 /** studio.map.2 with a stance on each match and the explicit withdrawal of an earlier one (priors). map.2 stays readable. */
 export const MAP3_SCHEMA = 'studio.map.3' as const;
-/** studio.map.4: the same reading with its evidence named, never copied. Each record goes once as span.1 pieces (lead + spans,
+/** studio.map.4: the same reading with its evidence named, never copied. Each record goes once as span.2 pieces (lead + spans,
  * which join back to the excerpt exactly); the reply cites a piece ('N01.07') or two adjacent ones ('N01.07-08') and says which
  * ranges it read as material inside the record (an example, a sample under test), which nothing of the map may rest on alone.
  * Every quote then keeps where it stands ([from, to) of the record) through the reply, the one write, storage and the mark. */
@@ -41,7 +41,7 @@ const STATE_ORDER: ClaimKind[] = ['reported', 'checked', 'want', 'idea', 'descri
 const RELS: RelationKind[] = ['flow', 'needs', 'shares', 'related'];
 
 export interface MapAskPart { id: string; name: string; note: string; parentId: string | null; readAs: string | null; role: string; roleBy: 'reading' | 'person' | null; roleAbout: string | null; current: { key: string; kind: ClaimKind; text: string; about: string | null }[] }
-/** text: studio.map.1–3. lead + spans: studio.map.4 (the same excerpt as span.1 pieces; never both). */
+/** text: studio.map.1–3. lead + spans: studio.map.4 (the same excerpt as span.2 pieces; never both). */
 export interface MapAskRecord { id: string; kind: 'pasted' | RecordView['kind']; text?: string; lead?: string; spans?: SpanWire[]; note: string; basis: string; addedAt?: string }
 /** studio.map.3: an earlier current match the records may explicitly take back, by alias (M01…), with what it said and the one
  * frozen item it answers. Material, never a new record. */
@@ -72,7 +72,7 @@ export interface MapReply {
   matches?: MapReplyMatch[];
   material?: MapReplyMaterial[];
 }
-/** The excerpt each record of a request stands for: its text, and its span.1 pieces when it was sent as pieces. */
+/** The excerpt each record of a request stands for: its text, and its span.2 pieces when it was sent as pieces. */
 const askTexts = new WeakMap<MapAsk, Map<string, { text: string; spans: Span[] | null }>>();
 export function askRecords(ask: MapAsk): Map<string, { text: string; spans: Span[] | null }> {
   const hit = askTexts.get(ask); if (hit) return hit;
@@ -164,7 +164,7 @@ export function validateMapAsk(value: unknown): MapAsk {
     check(['pasted', 'request', 'report', 'evidence', 'answer', 'decision'].includes(r.kind as string)); str(r.note, 600, true); str(r.basis, 300);
     if (!four) str(r.text, MAP_RECORD_CHARS);
     else {
-      // The pieces are exactly what span.1 makes of the text they join into: no other boundary, alias or mark.
+      // The pieces are exactly what span.2 makes of the text they join into: no other boundary, alias or mark.
       str(r.lead, MAP_RECORD_CHARS, true); check(!(r.lead as string).trim()); arr(r.spans, SPANS_PER_RECORD); check(r.spans.length > 0);
       for (const x of r.spans) {
         check(!!x && typeof x === 'object' && !Array.isArray(x)); const keys = Object.keys(x as object);
@@ -409,7 +409,8 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
 /* ---------- evidence a later record took back ---------- */
 interface RecordSpan { record: string; from: number; to: number }
 const spanCache = new WeakMap<Project, Map<string, RecordSpan[]>>();
-const recordText = (p: Project, id: string) => p.pasted.find(r => r.id === id)?.text ?? p.sources.find(r => r.id === id)?.text ?? null;
+/** A record as it is read, quoted and marked (a returned report as received: sourceText), or null when there is none. */
+const recordText = (p: Project, id: string) => { const pasted = p.pasted.find(r => r.id === id); if (pasted) return pasted.text; const s = p.sources.find(r => r.id === id); return s ? sourceText(p.tasks, s) : null; };
 /** Where a quote stands in its record: where it was read (map-reading.4 keeps it), else only when it stands there once (otherwise
  * which passage is meant is not certain, and none is made up). */
 function spanOnce(p: Project, q: ReadingQuote): RecordSpan | null {
@@ -482,7 +483,7 @@ export function unreadRecords(p: Project, view: StudioView): MapRecordSource[] {
   const own: MapRecordSource[] = view.records.map(r => ({ id: r.id, kind: r.kind, text: r.text, at: r.at, label: '프로젝트 기록', from: readTo.get(r.id) ?? 0 }));
   return [...pasted, ...own].filter(r => r.from < r.text.length).sort((a, b) => b.at.localeCompare(a.at));
 }
-/** anchored: the server reads studio.map.4 (its status names an m4- prompt); records then go as span.1 pieces, each excerpt ending
+/** anchored: the server reads studio.map.4 (its status names an m4- prompt); records then go as span.2 pieces, each excerpt ending
  * where a piece ends (a cut excerpt never leaves its last sentence half sent), with requests and priors always present. */
 export function buildMapAsk(p: Project, view: StudioView, requests: FrozenRequest[] = [], selectedRequestId?: string, anchored = false): MapInput {
   const parts = new Map<string, string>(), alias = new Map<string, string>(), claims = new Map<string, { reading: string; index: number }>();
@@ -713,6 +714,10 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
     summary: comparisonOnly ? '이미 지도에 읽은 원문을 고른 요청과 다시 대조했어요.' : reply.summary, parts, relations, candidates: candidates.slice(0, 16), gaps: reply.gaps, skipped: skipped.slice(0, 64),
     ...(withRequests ? { requests: structuredClone(frozen), matches } : {}),
     ...(four ? { material: material.map(m => { const source = input.records.get(m.record)!; return { record: source.id, from: source.from + m.from, to: source.from + m.to, what: m.what }; }) } : {}) };
+  // Anchored: a reply that gets nothing out of the records (no part, claim, line, candidate or match) and says why with gaps
+  // (material it found lacking) is not kept: the records stay unread for the person to ask again (NOTHING_READ). A reply with
+  // nothing to change and no such reason (the records add nothing to the map as it is) is a reading, kept as before.
+  if (four && !parts.length && !relations.length && !candidates.length && !matches.length && reply.gaps.length) throw new Error('NOTHING_READ');
   p = addReading(p, reading);
   const next = parseProject(JSON.stringify(p));
   const corresponding = matches.filter(m => m.targets.length === 1).flatMap(m => {

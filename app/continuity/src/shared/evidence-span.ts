@@ -1,11 +1,13 @@
-/* span.1: exact passages of a sent excerpt, cut deterministically so a reply can name evidence instead of copying it. The excerpt
+/* span.2: exact passages of a sent excerpt, cut deterministically so a reply can name evidence instead of copying it. The excerpt
  * goes once, as consecutive labelled pieces whose texts join back to it character for character (CRLF, emoji, Markdown and white
  * space as they are); each piece's evidence span is [from, to) in UTF-16 code units of that excerpt, its own white space left out,
- * never inside a surrogate pair. Sentences, list items, headings, table rows and code lines are cut where they end; a sentence
+ * never inside a surrogate pair. Sentences, list items, headings and table rows are cut where they end; the lines of a code
+ * block (fenced, or indented four spaces or a tab) go together up to SPAN_MAX, a blank line ending an indented one (span.2;
+ * span.1 cut indented code line by line); a sentence
  * longer than SPAN_MAX goes on in the next piece (more). What is marked (heading, list, code, table, quotation) is where a piece
  * stands, not what it means: a quotation is a blockquote line or a passage inside “…”/「…」/『…』 that holds more than one sentence.
  * A reference names one piece ('N01.07') or two adjacent pieces of one paragraph ('N01.07-08'), within the excerpt it was sent in. */
-export const SPAN_INDEX = 'span.1' as const;
+export const SPAN_INDEX = 'span.2' as const;
 /** A piece's evidence is at most this long; two adjacent pieces of one paragraph are at most 2·SPAN_MAX plus the space between. */
 export const SPAN_MAX = 240;
 /** At most this many pieces in one excerpt: a longer one is sent up to a piece boundary and read on from there next time. */
@@ -72,6 +74,9 @@ export function indexSpans(t: string): Span[] {
   for (let at = 0; at <= t.length;) {
     const nl = t.indexOf('\n', at), end = nl < 0 ? t.length : nl, line = t.slice(at, end);
     const fence = /^\s{0,3}(```|~~~)/.test(line);
+    // Indented code (four spaces or a tab, not a list item): its lines go together as code, as a fenced block's do.
+    const indented = !fenced && !fence && !!line.trim() && /^( {4,}|\t)/.test(line) && !/^\s*(?:[-*+•]|\d{1,3}[.)])\s/.test(line);
+    if (fence && !fenced) flushCode();
     if (fenced || fence) {
       if (!line.trim()) { flushCode(); }
       // Code lines go together up to SPAN_MAX; a fence line opens or closes the block.
@@ -80,9 +85,12 @@ export function indexSpans(t: string): Span[] {
       if (fence) fenced = !fenced;
       if (!fenced) flushCode();
       blank = false;
-    } else if (!line.trim()) { if (!blank) para++; blank = true; }
-    else {
+    } else if (!line.trim()) { flushCode(); if (!blank) para++; blank = true; }
+    else if (indented) {
       blank = false;
+      if (code && end - code[0] <= SPAN_MAX) code[1] = end; else { flushCode(); code = [at, end]; }
+    } else {
+      flushCode(); blank = false;
       const kind: SpanKind = /^\s{0,3}#{1,6}\s/.test(line) ? 'h' : /^\s*>/.test(line) ? 'p' : /^\s*\|/.test(line) ? 't' : /^\s*(?:[-*+•]|\d{1,3}[.)])\s/.test(line) ? 'l' : 'p';
       const quoted = /^\s*>/.test(line);
       if (kind === 'h' || kind === 't') push(at, end, kind, quoted);
@@ -117,7 +125,7 @@ export function encodeSpans(record: string, t: string, spans: Span[] = indexSpan
     return w;
   }) };
 }
-/** The excerpt and its pieces from what was sent, only when the pieces are exactly what span.1 makes of the joined text (aliases,
+/** The excerpt and its pieces from what was sent, only when the pieces are exactly what span.2 makes of the joined text (aliases,
  * boundaries and marks); anything else is not this index. */
 export function decodeSpans(record: string, wire: RecordSpans): { text: string; spans: Span[] } | null {
   const text = wire.lead + wire.spans.map(s => s.t).join(''), spans = indexSpans(text), again = encodeSpans(record, text, spans);

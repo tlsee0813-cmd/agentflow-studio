@@ -1667,7 +1667,7 @@ def map70_flow(browser, base):
 
 
 def text_digest(t):
-    """span.1 textDigest (evidence-span.ts): two FNV-1a lanes over UTF-16 code units, as the server names the body it read."""
+    """span.2 textDigest (evidence-span.ts): two FNV-1a lanes over UTF-16 code units, as the server names the body it read."""
     units = [int.from_bytes(t.encode("utf-16-le")[i:i + 2], "little") for i in range(0, len(t.encode("utf-16-le")), 2)]
     m = 0xffffffff
     a, b = 0x811c9dc5, (0x01000193 ^ len(units)) & m
@@ -1729,13 +1729,13 @@ def request71_flow(browser, base):
     def returned(route):
         ask = route.request.post_data_json
         maps.append(ask)
-        # studio.map.4 (the stub server's status names an m4 prompt): the reply names span.1 pieces, and says which body it read.
+        # studio.map.4 (the stub server's status names an m4 prompt): the reply names span.2 pieces, and says which body it read.
         assert ask["schemaVersion"] == "studio.map.4" and ask["requests"][0]["id"] == rq and ask["priors"] == []
         rec = next(r for r in ask["records"] if "feature/folder" in "".join(x["t"] for x in r["spans"]))
         at = lambda words: next(x["s"] for x in rec["spans"] if x["t"].strip().startswith(words))
         match = {"at": at("작업 보고: feature/folder"), "text": "[스텁] 폴더 입력 변경 보고", "kind": "reported", "about": "feature/folder@abc1234", "targets": [{"requestId": rq, "itemId": "I1"}], "why": "[스텁] 입력 요구에 대응하는 구절", "stance": "made", "replaces": None}
         check = {**match, "kind": "checked", "stance": "unclear", "at": at("기존 단일 문서 검사"), "text": "[스텁] 단일 문서 검사만 통과했다고 보고함"}
-        route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "evidence": {"index": "span.1", "ask": text_digest(route.request.post_data)},
+        route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "evidence": {"index": "span.2", "ask": text_digest(route.request.post_data)},
             "reply": {"summary": "[스텁] 폴더 입력만 부분 보고됨", "parts": [], "relations": [], "candidates": [], "gaps": [], "matches": [match, check], "material": []}}))
     page.route("**/api/studio/map", returned)
     page.locator("#lens .rr-map").get_by_role("button", name="기록 읽고 지도 갱신").click()

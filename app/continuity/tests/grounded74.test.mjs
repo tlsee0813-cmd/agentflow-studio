@@ -1,4 +1,4 @@
-// AF-EXPERIENCE74: evidence named by exact passage (span.1 pieces, studio.map.4, map-reading.4, project.12). The replies below are
+// AF-EXPERIENCE74: evidence named by exact passage (span.2 pieces, studio.map.4, map-reading.4, project.12). The replies below are
 // written for the test (a stub, not a model): they check the contract (wire, both validations, the one write, storage, backup and
 // the marked place) and what it refuses, never a model's reading quality. Samples: the experience73 actual-order backup (the real
 // AgentFlow73 instruction with its quoted correction as test material), the record69 Node-RED PR6019 author's text, the request72
@@ -18,6 +18,7 @@ import { askMap, aiStatus } from '../dist/public/client/studio-api.js';
 import { createMapRun } from '../dist/public/client/map-run.js';
 import { createStudioHandler, mapPromptId } from '../server/studio.mjs';
 import { MAP3_PROMPT, MAP4_PROMPT } from '../server/map-prompt.mjs';
+import { sample } from './understanding17-fixtures.mjs';
 
 const ORDER_RAW = readFileSync(new URL('./fixtures/record74/actual-order-backup.json', import.meta.url), 'utf8');
 const ORDER = JSON.parse(ORDER_RAW).pasted[0].text;
@@ -50,7 +51,7 @@ function plan(p, area, titles = ['폴더 안 마크다운 문서 일괄 변환',
 
 /* ---------- A: the codec ---------- */
 const MIXED = '😀 v1은 폴더 입력을 지원하지 않습니다.\r\nv2의 feature/folder 브랜치에서만 폴더 입력을 지원합니다. main에는 아직 병합하지 않았습니다.\r\n## 제목\r\n- 항목 **하나**. 둘째 문장!\r\n\r\n```js\r\nconst a = `x`; // 😀\r\n```\r\n> 인용 줄. 다음.\r\n| a | b |\r\n끝👍. 마지막';
-test('74-A span.1 cuts the excerpt exactly: pieces join back to it (CRLF, emoji, Markdown), never split a surrogate, and read the same every time', () => {
+test('74-A span.2 cuts the excerpt exactly: pieces join back to it (CRLF, emoji, Markdown), never split a surrogate, and read the same every time', () => {
   const spans = S.indexSpans(MIXED), w = S.encodeSpans('N01', MIXED);
   assert.equal(w.lead + w.spans.map(x => x.t).join(''), MIXED);
   assert.deepEqual(S.indexSpans(MIXED), spans); assert.deepEqual(S.decodeSpans('N01', JSON.parse(JSON.stringify(w))).spans, spans);
@@ -67,7 +68,7 @@ test('74-A span.1 cuts the excerpt exactly: pieces join back to it (CRLF, emoji,
   assert.ok(ls.every(s => !/[\ud800-\udbff]$/.test(long.slice(s.from, s.to)) && !/^[\udc00-\udfff]/.test(long.slice(s.from, s.to))));
 });
 
-test('74-A2 a span table that is not exactly what span.1 makes is no table; a reference names one piece or two adjacent ones of a paragraph', () => {
+test('74-A2 a span table that is not exactly what span.2 makes is no table; a reference names one piece or two adjacent ones of a paragraph', () => {
   const w = S.encodeSpans('N01', MIXED);
   const moved = structuredClone(w); moved.spans[1].t = moved.spans[1].t.slice(0, -3); moved.spans[2].t = w.spans[1].t.slice(-3) + moved.spans[2].t;
   const renamed = structuredClone(w); renamed.spans[3].s = 'N01.09';
@@ -156,12 +157,12 @@ test('74-C2 the same reply through the real handler and the browser decoder: the
     const res = await askMap(inp.ask, new AbortController().signal, '');
     assert.equal(sent.messages[0].content, MAP4_PROMPT); assert.equal(sent.messages[1].content.split('\n').slice(1).join('\n'), JSON.stringify(inp.ask));
     assert.equal(raw.reply.parts[0].basis[0], written.parts[0].basis[0], 'the server answers with the references');
-    assert.deepEqual(raw.evidence, { index: 'span.1', ask: S.textDigest(JSON.stringify(inp.ask)) });
+    assert.deepEqual(raw.evidence, { index: 'span.2', ask: S.textDigest(JSON.stringify(inp.ask)) });
     assert.equal(res.reply.parts[0].basis[0].quote, ORDER.slice(res.reply.parts[0].basis[0].from, res.reply.parts[0].basis[0].to));
     const applied = M.applyReading(p, inp, res.reply, meta());
     assert.deepEqual(applied.created.length, 2);
     // A response that names another request body, or none, is not decoded at all.
-    globalThis.fetch = async () => new Response(JSON.stringify({ ...raw, evidence: { index: 'span.1', ask: 'f1-0000000000000000' } }));
+    globalThis.fetch = async () => new Response(JSON.stringify({ ...raw, evidence: { index: 'span.2', ask: 'f1-0000000000000000' } }));
     await assert.rejects(askMap(inp.ask, new AbortController().signal, ''), e => e.code === 'INVALID_RESPONSE');
     globalThis.fetch = async () => new Response(JSON.stringify({ model: raw.model, reply: raw.reply }));
     await assert.rejects(askMap(inp.ask, new AbortController().signal, ''), e => e.code === 'INVALID_RESPONSE');
@@ -368,4 +369,57 @@ test('74-J Node-RED PR6019 first map and a later record on the anchored wire; re
   assert.equal(one.history[0].match.quote.startsWith('feature/folder 브랜치에서'), true);
   assert.deepEqual(round(s), s); assert.deepEqual(parseBackup(serializeBackup(s, null)).project, s);
   assert.equal(JSON.parse(serializeProject(s)).schemaVersion, 'idea015.project.12');
+});
+
+/* ---------- K: counterexamples of the 48cb real replies and the returned-report record ---------- */
+test('74-K1 a returned report (return.2 import) is read, applied, stored and checked as the text it was sent as, never the prefixed source', () => {
+  const s = sample(); let p = D.importResultFile(s.p, JSON.stringify(s.file));
+  const src = p.sources.find(x => x.kind === 'report'), view = studioView(p).records.find(r => r.id === src.id);
+  assert.equal(view.text, s.file.report); assert.notEqual(src.text, s.file.report, 'the stored source carries the app\'s own label');
+  const inp = ask4(p), alias = [...inp.records].find(([, r]) => r.id === src.id)[0];
+  const at = inp.ask.records.find(r => r.id === alias).spans[0].s;
+  const { project, reading } = apply4(p, inp, reply4({ parts: [part('P01', { claims: [claim('reported', '반환 보고의 첫 구절', at)] })] }));
+  const c = reading.parts[0].claims[0];
+  assert.equal(s.file.report.slice(c.from, c.to), c.quote); assert.equal(reading.records.find(r => r.id === src.id).total, s.file.report.length);
+  assert.deepEqual(round(project), project); assert.equal(R.recordTexts(project).get(src.id), s.file.report);
+});
+
+test('74-K2 indented code goes as one piece per block (a call and the line using its result stay together); a range never joins across a blank line', () => {
+  const code = 'Excerpt: eval path\n\n    def eval(self, code):\n        # Parse the code\n        parser = Parser(code)\n        ast = parser.parse()\n\n        result = vm.run(compiled)\n\n        return self._to_python(result)\n';
+  const spans = S.indexSpans(code), texts = spans.map(x => code.slice(x.from, x.to));
+  assert.ok(texts.includes('def eval(self, code):\n        # Parse the code\n        parser = Parser(code)\n        ast = parser.parse()'));
+  assert.ok(spans.filter(x => x.kind === 'c').length === 3);
+  const i = texts.indexOf('result = vm.run(compiled)') + 1;
+  assert.equal(S.resolveRef(`N01.${String(i).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`, 'N01', code, spans), null, 'a blank line between: another paragraph');
+  // A list item indented four spaces is still a list item, not code.
+  assert.equal(S.indexSpans('- a\n    - nested item. second.')[1].kind, 'l');
+});
+
+test('74-K3 an anchored reply that gets nothing and gives gaps as the reason is not kept (records stay unread); a reply with nothing to change is', async () => {
+  const dts = 'Source: boards/x/x.dtsi\n\narduino_i2c: &i2c0 {\n\tcompatible = "nordic,nrf-twim";\n\tstatus = "okay";\n};\n';
+  const p = D.pasteRecord(D.rename(D.createProject(), 'x-board'), dts, null).project, inp = ask4(p), empty = reply4({ gaps: ['작업 보고를 붙여 주세요.'] });
+  refused(() => apply4(p, inp, empty), 'NOTHING_READ');
+  assert.equal(M.unreadRecords(p, studioView(p)).length, 1);
+  const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: 'test-74-not-real' }, fetchImpl: async () => new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(empty) } }] })) });
+  const oldFetch = globalThis.fetch, prompt = await mapPromptId(); let saved = 0;
+  try {
+    globalThis.fetch = async (url, o) => handle(new Request(`https://studio.example${url}`, o));
+    const run = createMapRun({ current: () => ({ key: 'z', kind: 'saved', project: p, view: studioView(p) }), status: () => ({ ai: 'deepseek', model: 'm', access: 'open', map: { model: 'm', prompt } }), accessCode: () => '', commit: async () => { saved++; return null; }, done: () => {}, changed: () => {} });
+    await run.run(); assert.equal(saved, 0); assert.equal(run.state().error, '이번 응답에서 정리할 내용을 얻지 못했어요. 원문은 보존됐어요. 작업 보고를 붙여 주세요.');
+  } finally { globalThis.fetch = oldFetch; }
+  // Nothing to change and no reason given (the records add nothing to the map as it is) is a reading, kept as before.
+  assert.equal(apply4(p, inp, reply4({})).reading.parts.length, 0);
+  // What a source defines is a reading (describes), not a report: kept, and the record counts as read.
+  const read = apply4(p, inp, reply4({ parts: [part('new:i2c', { name: 'I2C 버스', role: 'I2C 컨트롤러 설정을 정의한다.', basis: ['N01.03-04'], claims: [claim('describes', 'nrf-twim 호환 I2C로 정의됨', 'N01.04')] })] })).project;
+  assert.equal(M.unreadRecords(read, studioView(read)).length, 0);
+});
+
+test('74-K4 the anchored prompt states every hard limit the validator holds, reads sources as describes, and keeps material out of gaps', () => {
+  assert.match(MAP4_PROMPT, /부분마다 basis 4개\(새 부분은 1~4개\)·claims 4개, relations 12개, candidates 6개\(각 parts 2개\), gaps 2개, material 6개, matches 24개/);
+  assert.match(MAP4_PROMPT, /parts 24개\(그중 새 부분 12개\)/);
+  assert.match(MAP4_PROMPT, /소스 코드·설정·장치 정의\(DTS·스키마 등\)·설명 문서뿐이어도/); assert.match(MAP4_PROMPT, /실행·검사·구현 진전\(reported·checked\)이 아니다/);
+  assert.match(MAP4_PROMPT, /summary·gaps·candidates에서도 그것을 이 프로젝트의 누락/); assert.match(MAP4_PROMPT, /빈 줄\(줄바꿈 두 번\)로 끝나면/);
+  // The validator holds those limits: a fifth basis is refused, not cut.
+  const p = D.pasteRecord(D.createProject(), MIXED, null).project, inp = ask4(p);
+  refused(() => M.validateMapReply(reply4({ parts: [part('new:a', { name: 'a', basis: ['N01.01', 'N01.02', 'N01.03', 'N01.04', 'N01.05'] })] }), inp.ask));
 });

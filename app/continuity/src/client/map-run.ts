@@ -30,13 +30,14 @@ const MAP_ERROR: Record<string, string> = {
   MAP_CHANGED: '정리하는 동안 지도가 바뀌어(다른 정리가 반영되었거나 부분이 보관됨) 이번 결과는 반영하지 않았어요. 다시 정리해 주세요.',
   ALREADY_APPLIED: '같은 기록은 이미 지도에 정리했어요.',
   READINGS_FULL: '이 프로젝트에 더 정리할 수 없어요(정리 기록 한도).',
-  INVALID_RESPONSE: 'AI 응답이 근거 규칙(원문 인용·알려진 부분)에 맞지 않아 반영하지 않았어요.'
+  INVALID_RESPONSE: 'AI 응답이 근거 규칙(원문 인용·알려진 부분)에 맞지 않아 반영하지 않았어요.',
+  NOTHING_READ: '이번 응답에서 정리할 내용을 얻지 못했어요. 원문은 보존됐어요.'
 };
 
 export function createMapRun(host: MapRunHost) {
   const states = new Map<string, MapRunState>();
   const of = (key: string) => { let s = states.get(key); if (!s) { s = { pending: null, error: null }; states.set(key, s); } return s; };
-  /** The server reads evidence by span.1 piece (studio.map.4): its status names an m4- map prompt. Otherwise the earlier wire. */
+  /** The server reads evidence by span.2 piece (studio.map.4): its status names an m4- map prompt. Otherwise the earlier wire. */
   const anchored = () => /^m4-/.test(host.status().map?.prompt ?? '');
   /** What a reading would send now (nothing is sent). */
   function input(requestId?: string): MapInput | null { const o = host.current(); return o && o.kind === 'saved' ? buildMapAsk(o.project, o.view, host.requests?.() ?? [], requestId, anchored()) : null; }
@@ -56,7 +57,10 @@ export function createMapRun(host: MapRunHost) {
       if (!now || now.key !== key) { state.error = '다른 프로젝트로 옮겨 이번 결과는 반영하지 않았어요. 돌아와서 다시 정리해 주세요.'; return; }
       let applied: Applied;
       try { applied = applyReading(now.project, inp, res.reply, { id: `R_${crypto.randomUUID()}`, at: new Date().toISOString(), model: res.model, prompt: st.map.prompt, hash }); }
-      catch (e) { state.error = MAP_ERROR[(e as Error).message] ?? '이 결과를 지도에 반영하지 못했어요. 지도와 기록은 그대로예요.'; return; }
+      catch (e) {
+        const code = (e as Error).message;
+        state.error = code === 'NOTHING_READ' ? [MAP_ERROR.NOTHING_READ!, ...res.reply.gaps].join(' ') : MAP_ERROR[code] ?? '이 결과를 지도에 반영하지 못했어요. 지도와 기록은 그대로예요.'; return;
+      }
       const failed = await host.commit(applied.project);
       if (failed) { state.error = failed; return; }
       // Saved to the entry it was asked for; shown only if that entry is still the one open (another one is left as it is).

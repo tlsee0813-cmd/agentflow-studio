@@ -1,6 +1,7 @@
 /* Frozen requests and quote-backed correspondence. The generated request lives in the plan sidecar; a reading keeps its own
  * copy and matches in the Project's single commit. No auto observation is written back into the sidecar. */
 import type { Project, MapReading, ReadingEntry } from './types.js';
+import { sourceText } from './validation.js';
 
 export interface EvidenceOrigin { record: string | null; reading: string | null; quote: string | null }
 export interface FrozenItem { id: string; title: string; description: string; partIds: string[]; sources: { id: string; title: string; basis: string; origins: EvidenceOrigin[] }[] }
@@ -198,7 +199,8 @@ export function matchLedger(readings: readonly ReadingEntry[], texts: ReadonlyMa
   }
   return { all: out, invalid };
 }
-export const recordTexts = (p: Project): Map<string, string> => new Map([...p.pasted.map(r => [r.id, r.text] as const), ...p.sources.map(r => [r.id, r.text] as const)]);
+/** Each record as it was read (a returned report as received: sourceText). */
+export const recordTexts = (p: Project): Map<string, string> => new Map([...p.pasted.map(r => [r.id, r.text] as const), ...p.sources.map(r => [r.id, sourceText(p.tasks, r)] as const)]);
 export function requestMatches(p: Project): EffectiveMatch[] {
   const out = matchLedger(p.readings, recordTexts(p)).all;
   // A replay of the same passage and scope is one correspondence, with the correction kept above.
