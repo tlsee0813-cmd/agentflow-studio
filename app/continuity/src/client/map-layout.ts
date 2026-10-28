@@ -74,7 +74,25 @@ export function ghostSize(name: string, measure: TextMeasure = estimate): { w: n
  * was kept). */
 export const HEAD_TRACK = 0.44;
 export const headNeed = (text: string, measure: TextMeasure) => measure(text, 'where') + HEAD_TRACK * [...text].length + 2;
-const headSize = (text: string, w: number, measure: TextMeasure) => 4 + wrapLines(headNeed(text, measure), w) * 16;
+const CJK = 'ᄀ-ᇿ㄰-㆏가-힯一-鿿';
+const UNITS = new RegExp(`\\s+|[${CJK}]|[^\\s${CJK}]+`, 'g');
+/** Lines a caption takes in a column of this width, broken as the browser breaks it (.ghost-head: normal word-break, overflow-wrap
+ * anywhere): after spaces and between Hangul or CJK characters, a run longer than a whole line anywhere; greedy, line by line.
+ * A total width over the column misses the room left at the end of each line (two long words that do not share a line), so the
+ * lines are counted where they really break. A line is full a pixel early, so a measuring tie keeps a line more, never one less. */
+export function captionLines(text: string, room: number, measure: TextMeasure = estimate): number {
+  const width = (t: string) => (t ? measure(t, 'where') + HEAD_TRACK * [...t].length : 0), fits = (t: string) => width(t.trimEnd()) <= room - 1;
+  let lines = 1, line = '';
+  for (const unit of text.match(UNITS) ?? []) {
+    if (fits(line + unit) || /^\s+$/.test(unit)) { line += unit; continue; } // spaces hang at a line's end
+    if (line.trim()) { lines++; line = ''; }
+    let rest = unit;
+    while (!fits(rest) && rest.length > 1) { let n = 1; while (n < rest.length - 1 && fits(rest.slice(0, n + 1))) n++; lines++; rest = rest.slice(n); }
+    line = rest;
+  }
+  return lines;
+}
+const headSize = (text: string, w: number, measure: TextMeasure) => 4 + captionLines(text, w, measure) * 16;
 
 /** Rough rendered width of a frame name (13px, semibold): wide for CJK, narrower for Latin. Only decides one or two head lines. */
 export function textWidth(text: string): number {

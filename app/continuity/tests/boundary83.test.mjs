@@ -43,3 +43,28 @@ test("U83-2 the scope itself reads as this scope's boundary; a part outside, eve
   assert.match(runOf(ghostId(ERR)), /^밖 · /);
   assert.equal(T.edges.length, L.edges.length, 'renaming changes no line');
 });
+
+// AF-UI83-DELTA2: a long caption reserves the lines it really breaks into. long-context.json (root's synthetic stress copy of the
+// context75 backup, not an OSS structure or a model answer): five ancestors of sixteen W each over an outside target. With a caption
+// font of 10px per character (+0.44px tracking), in its 300px column:
+//   '밖 · W×16'          20 characters = 208.8px  fits;  '… › W×16' would be 396.7px  → the next ancestor takes a new line
+//   '› W×16'             18 characters = 187.9px  fits;  '… › W×16' would be 375.8px  → again a new line
+// so five lines, one ancestor each. The total width (96 characters, 1002px) over 300px suggests four: the room left at each line's
+// end, where the next word does not fit, is what a total misses.
+import { captionLines } from '../dist/public/client/map-layout.js';
+const LONG = parseBackup(readFileSync(new URL('./fixtures/boundary83/long-context.json', import.meta.url), 'utf8')).project;
+const TARGET = 'A_4e6562bf-b303-4bb2-9991-868d36fa6111';
+const ten = (t, kind) => (kind === 'where' ? [...t].length * 10 : textWidth(t));
+
+test('U83-3 a long boundary caption keeps the lines it breaks into at word ends, and the target card starts under them', () => {
+  const L = layoutScope(studioView(LONG), API, () => true, {}, ten), W16 = 'W'.repeat(16);
+  const head = L.heads.find(h => h.text.includes(W16));
+  assert.equal(head.text, `밖 · ${Array(5).fill(W16).join(' › ')}`, 'the whole caption, nothing cut');
+  assert.equal(head.w, 300);
+  assert.equal(head.h, 4 + 5 * 16, 'five lines, one ancestor each');
+  const target = L.boxes.get(ghostId(TARGET));
+  assert.ok(target.y >= head.y + head.h, `target at ${target.y} under the caption ending at ${head.y + head.h}`);
+  // Where words do share a line, they still do; a run longer than a whole line breaks inside it (overflow-wrap: anywhere).
+  assert.equal(captionLines('밖 · ab › cd', 300, ten), 1);
+  assert.equal(captionLines('W'.repeat(40), 300, ten), 2, '40 characters, 417.6px: one run over two lines');
+});
