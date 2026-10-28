@@ -5,6 +5,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { parseBackup } from '../dist/public/shared/validation.js';
+import * as D from '../dist/public/shared/domain.js';
 import { studioView } from '../dist/public/shared/studio.js';
 import { layoutScope, edgePath, nodeWidth, linkChipW, textWidth, HEAD, PAD } from '../dist/public/client/map-layout.js';
 
@@ -39,4 +40,38 @@ test('E75-3 a folded part whose name takes two lines keeps its longest word whol
   const w = nodeWidth('JSContext.eval 평가 API', true, m, chip), room = w - (5 + 22 + 4 + 4 + 40 + 8 + 2 + chip);
   assert.ok(room >= m('JSContext.eval', 'node'), `room ${room} for 'JSContext.eval'`);
   assert.equal(nodeWidth('Hardware', false, m), 200, 'a short name keeps the usual width');
+});
+
+// The review's counter-example: a group whose inner parts sit in two columns (A→B, A→C, A→D, so A is centred on C's row), and the
+// group's own relation to C; then the same with a descendant two levels inside C (C → C1 → C2) as the group's other end. A route
+// down the group's left margin would run through A in both. Kinds are flow.
+function nested(deep) {
+  let p = D.addArea(D.createProject(), 'outer');
+  const pid = n => p.space.areas.find(a => a.name === n).id, names = deep ? ['A', 'B', 'C', 'D', 'E'] : ['A', 'B', 'C', 'D'];
+  for (const n of names) p = D.addChildArea(p, pid('outer'), n);
+  if (deep) { p = D.addChildArea(p, pid('C'), 'C1'); p = D.addChildArea(p, pid('C1'), 'C2'); }
+  for (const n of names.slice(1)) p = D.addRelation(p, pid('A'), pid(n), 'flow');
+  p = D.addRelation(p, pid('outer'), pid(deep ? 'C2' : 'C'), 'flow');
+  return { view: studioView(p), pid, target: deep ? 'C2' : 'C', holders: deep ? ['C', 'C1'] : [] };
+}
+/** The path's corners (a rounded corner's control point is the corner itself) as straight runs. */
+const runs = d => { const q = corners(d); return q.slice(1).map((b, i) => [q[i], b]); };
+const crosses = ([p, q], r) => Math.max(p.x, q.x) > r.x + 0.5 && Math.min(p.x, q.x) < r.x + r.w - 0.5 && Math.max(p.y, q.y) > r.y + 0.5 && Math.min(p.y, q.y) < r.y + r.h - 0.5;
+
+test('E75-4 a group\'s line to a part in a later column or deep inside a sibling goes round the parts between, never over a head', () => {
+  for (const deep of [false, true]) {
+    const { view, pid, target, holders } = nested(deep), L = layoutScope(view, null, () => true, {}), all = [...L.boxes.values()];
+    const outer = L.boxes.get(pid('outer')), inner = L.boxes.get(pid(target)), A = L.boxes.get(pid('A')), hold = holders.map(n => L.boxes.get(pid(n)));
+    const iy = inner.y + inner.h / 2, lane = [{ x: outer.x + PAD / 2, y: outer.y + outer.head }, { x: outer.x + PAD / 2, y: iy }, { x: inner.x, y: iy }];
+    assert.ok(runs(`M${lane.map(q => `${q.x},${q.y}`).join(' L')}`).some(s => crosses(s, A)), `${target}: the margin route would cross A (the counter-example holds)`);
+    const r = edgePath(outer, inner, all), seg = runs(r.d), pts = corners(r.d), end = pts.at(-1);
+    assert.equal(r.clear, true, `${target}: a free way exists`);
+    assert.ok(Math.abs(pts[0].y - (outer.y + outer.head)) < 0.5 && pts[0].x > outer.x && pts[0].x < outer.x + outer.w, `${target}: leaves from under the group's head`);
+    assert.ok([end.x - inner.x, end.x - inner.x - inner.w, end.y - inner.y, end.y - inner.y - inner.h].some(v => Math.abs(v) < 0.5), `${target}: ends on its own end's edge: ${r.d}`);
+    for (const b of all.filter(b => b !== outer && b !== inner && !hold.includes(b)))
+      assert.ok(!seg.some(s => crosses(s, b)), `${target}: crosses ${view.parts.find(x => x.id === b.id)?.name}: ${r.d}`);
+    for (const f of [outer, ...hold]) assert.ok(!seg.some(s => crosses(s, { x: f.x, y: f.y, w: f.w, h: f.head })), `${target}: crosses a head: ${r.d}`);
+    const back = corners(edgePath(inner, outer, all).d);
+    assert.deepEqual([back[0], back.at(-1)], [end, pts[0]], `${target}: the other direction is the same route, from the inner end`);
+  }
 });

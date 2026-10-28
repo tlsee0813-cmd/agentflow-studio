@@ -457,11 +457,28 @@ export function edgePath(a: Box, b: Box, others: Iterable<Box> = []): { d: strin
   // One end holds the other (a group and a part or group inside it): the line leaves the group under its head and runs down the
   // group's own margin to the side of the inner end (its head row when it is a group), so it never crosses a head or the parts
   // between them. Reversed when the inner end is where the line starts.
+  // What lies between them inside the group is in the way: every box inside it but the inner end and the groups that hold the
+  // inner end, whose heads are in the way all the same. When that margin route would cross one, the line takes the gaps inside
+  // the group instead (from under its head, into a side of the inner end, or a part's top or bottom).
   const outer = a.kind === 'frame' && within(b, a) ? a : b.kind === 'frame' && within(a, b) ? b : null;
   if (outer) {
     const inner = outer === a ? b : a, lx = outer.x + PAD / 2, top = outer.y + outer.head, iy = Math.max(top + 10, portY(inner));
-    const pts = [{ x: lx, y: top }, { x: lx, y: iy }, { x: inner.x, y: iy }];
-    return { d: rounded(outer === a ? pts : pts.reverse(), 6), mx: lx, my: (top + iy) / 2, detour: true, clear: true };
+    const holds = (o: Box) => o.kind === 'frame' && within(inner, o), inGroup = all.filter(o => o !== outer && o !== inner && within(o, outer));
+    const stop: Rect[] = [...inGroup.filter(o => !holds(o)), ...inGroup.filter(o => holds(o) && o.head > 0).map(o => ({ x: o.x, y: o.y, w: o.w, h: o.head }))];
+    const open = (x1: number, y1: number, x2: number, y2: number, m = LANE_CLEAR) => !stop.some(o => Math.max(x1, x2) > o.x - m && Math.min(x1, x2) < o.x + o.w + m && Math.max(y1, y2) > o.y - m && Math.min(y1, y2) < o.y + o.h + m);
+    const draw = (pts: Point[], mid: Point) => ({ d: rounded(outer === a ? pts : [...pts].reverse(), 6), mx: mid.x, my: mid.y, detour: true, clear: true });
+    const lane = [{ x: lx, y: top }, { x: lx, y: iy }, { x: inner.x, y: iy }];
+    if (lane.every((p, i) => !i || open(lane[i - 1]!.x, lane[i - 1]!.y, p.x, p.y, -1))) return draw(lane, { x: lx, y: (top + iy) / 2 });
+    const LEAD = 12, starts = new Set([lx, outer.x + outer.w - PAD / 2, inner.x + inner.w / 2, inner.x - PAD / 2, inner.x + inner.w + PAD / 2]);
+    const from: Port[] = [...starts].filter(x => x > outer.x && x < outer.x + outer.w).map(x => ({ at: { x, y: top }, lead: { x, y: top + LEAD }, cost: 0 }));
+    const icx = inner.x + inner.w / 2, to: Port[] = [{ at: { x: inner.x, y: iy }, lead: { x: inner.x - LEAD, y: iy }, cost: 0 }, { at: { x: inner.x + inner.w, y: iy }, lead: { x: inner.x + inner.w + LEAD, y: iy }, cost: 0 },
+      ...(inner.kind === 'frame' ? [] : [{ at: { x: icx, y: inner.y }, lead: { x: icx, y: inner.y - LEAD }, cost: 0 }, { at: { x: icx, y: inner.y + inner.h }, lead: { x: icx, y: inner.y + inner.h + LEAD }, cost: 0 }])];
+    const seg = (x1: number, y1: number, x2: number, y2: number) => open(x1, y1, x2, y2);
+    const r = searchRoute(from.filter(p => seg(p.at.x, p.at.y + 1, p.lead.x, p.lead.y)), to.filter(p => seg(p.at.x + Math.sign(p.lead.x - p.at.x), p.at.y + Math.sign(p.lead.y - p.at.y), p.lead.x, p.lead.y)),
+      stop, seg, { x0: outer.x + 2, x1: outer.x + outer.w - 2, y0: top, y1: outer.y + outer.h - 2 });
+    if (r) return draw(r.pts, r.mid);
+    // No free way inside the group: the margin route, said to cross (never claimed clear).
+    return { ...draw(lane, { x: lx, y: (top + iy) / 2 }), clear: false };
   }
   const acx = a.x + a.w / 2, bcx = b.x + b.w / 2, acy = portY(a), bcy = portY(b);
   const overlapX = a.x < b.x + b.w && b.x < a.x + a.w;
@@ -501,7 +518,6 @@ export function edgePath(a: Box, b: Box, others: Iterable<Box> = []): { d: strin
  * everywhere. Only boxes near the two ends are searched; null when no such path is found, and the crossing curve stays. */
 function gapRoute(a: Box, b: Box, dir: number, blocks: { x: number; y: number; w: number; h: number }[], segFree: (x1: number, y1: number, x2: number, y2: number) => boolean): { pts: Point[]; mid: Point } | null {
   const LEAD = 12, SIDE = 0, END = 34;
-  type Port = { at: Point; lead: Point; cost: number };
   const ports = (x: Box, face: number): Port[] => {
     const cy = x.kind === 'frame' ? x.y + x.head / 2 : x.y + x.h / 2, cx = x.x + x.w / 2, sx = face > 0 ? x.x + x.w : x.x;
     const out: Port[] = [{ at: { x: sx, y: cy }, lead: { x: sx + face * LEAD, y: cy }, cost: SIDE }];
@@ -511,15 +527,23 @@ function gapRoute(a: Box, b: Box, dir: number, blocks: { x: number; y: number; w
   const from = ports(a, dir), to = ports(b, -dir);
   if (!from.length || !to.length) return null;
   const x0 = Math.min(a.x, b.x) - 160, x1 = Math.max(a.x + a.w, b.x + b.w) + 160, y0 = Math.min(a.y, b.y) - 160, y1 = Math.max(a.y + a.h, b.y + b.h) + 160;
+  return searchRoute(from, to, blocks, segFree, { x0, x1, y0, y1 });
+}
+type Port = { at: Point; lead: Point; cost: number };
+/** The search behind gapRoute: an orthogonal path from one of the from ports to one of the to ports through the lanes between
+ * the blocks inside the bounds (fewest turns, then shortest), every step tested with segFree. null when none is found. */
+function searchRoute(from: Port[], to: Port[], blocks: { x: number; y: number; w: number; h: number }[], segFree: (x1: number, y1: number, x2: number, y2: number) => boolean, bounds: { x0: number; x1: number; y0: number; y1: number }): { pts: Point[]; mid: Point } | null {
+  const { x0, x1, y0, y1 } = bounds;
   const near = blocks.filter(o => o.x < x1 && x0 < o.x + o.w && o.y < y1 && y0 < o.y + o.h);
-  // Lanes: just outside each nearby box, the middle of every gap between box edges, the ports' own lines and the search edge.
-  const lanes = (edges: number[], extra: number[]) => {
+  // Lanes: just outside each nearby box, the middle of every gap between box edges, the ports' own lines and the search edge;
+  // never past the search edge.
+  const lanes = (edges: number[], extra: number[], lo: number, hi: number) => {
     const e = [...new Set(edges)].sort((p, q) => p - q), out = new Set(extra), half = (v: number) => Math.round(v * 2) / 2;
     for (let i = 0; i < e.length; i++) { out.add(e[i]! - 8); out.add(e[i]! + 8); if (i) out.add((e[i - 1]! + e[i]!) / 2); }
-    return [...new Set([...out].map(half))].sort((p, q) => p - q);
+    return [...new Set([...out].map(half))].filter(v => v >= lo && v <= hi).sort((p, q) => p - q);
   };
-  const xs = lanes(near.flatMap(o => [o.x, o.x + o.w]), [x0, x1, ...from.map(p => p.lead.x), ...to.map(p => p.lead.x)]);
-  const ys = lanes(near.flatMap(o => [o.y, o.y + o.h]), [y0, y1, ...from.map(p => p.lead.y), ...to.map(p => p.lead.y)]);
+  const xs = lanes(near.flatMap(o => [o.x, o.x + o.w]), [x0, x1, ...from.map(p => p.lead.x), ...to.map(p => p.lead.x)], x0, x1);
+  const ys = lanes(near.flatMap(o => [o.y, o.y + o.h]), [y0, y1, ...from.map(p => p.lead.y), ...to.map(p => p.lead.y)], y0, y1);
   const X = xs.length, Y = ys.length, N = X * Y, ix = new Map(xs.map((v, i) => [v, i])), iy = new Map(ys.map((v, i) => [v, i]));
   const key = (p: Point) => { const i = ix.get(Math.round(p.x * 2) / 2), j = iy.get(Math.round(p.y * 2) / 2); return i === undefined || j === undefined ? -1 : j * X + i; };
   // Free steps between neighbouring lane crossings (right: 0, down: 1), each tested once.

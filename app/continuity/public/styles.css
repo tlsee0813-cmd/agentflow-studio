@@ -1236,8 +1236,9 @@ button:disabled { opacity: .5; cursor: default; }
 .port.lit { background: var(--accent-soft); }
 .port.lit strong { color: var(--accent-strong); }
 /* The note is what the relation is: it reads as body text under the other end's name, three lines at most until asked. */
-.lens-ports .port-note { font-size: 13px; color: var(--text); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.lens-ports .port-note.whole { display: block; -webkit-line-clamp: unset; overflow: visible; }
+/* Only a selection's relation notes, which carry their own whole-note control (clampNotes); a scope's notes read whole. */
+.lens-ports .port-note[data-rel-note] { font-size: 13px; color: var(--text); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.lens-ports .port-note[data-rel-note].whole { display: block; -webkit-line-clamp: unset; overflow: visible; }
 .lens-ports li { position: relative; }
 .lens-ports .note-more { margin: -2px 0 4px 28px; font-size: 12px; }
 .lens-ports .fr-port + .note-more { margin-left: 8px; }

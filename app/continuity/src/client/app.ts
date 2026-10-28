@@ -1307,7 +1307,7 @@ function renderLens() {
     ...relationGroups(inner.outside, '안쪽').flatMap(g => {
       const list = h('ul', {}, ...g.list.slice(0, 8).map(innerRow));
       return [h('h4', { class: 'fr-verb' }, g.label, h('small', {}, String(g.list.length))), list,
-        g.list.length > 8 ? h('button', { type: 'button', class: 'link-button', onclick: (e: Event) => { list.replaceChildren(...g.list.map(innerRow).filter((x): x is HTMLLIElement => !!x)); (e.currentTarget as HTMLElement).remove(); } }, `${g.list.length - 8}개 더 보기`) : null];
+        g.list.length > 8 ? h('button', { type: 'button', class: 'link-button', onclick: (e: Event) => { list.replaceChildren(...g.list.map(innerRow).filter((x): x is HTMLLIElement => !!x)); (e.currentTarget as HTMLElement).remove(); clampNotes(list, o, part.id); } }, `${g.list.length - 8}개 더 보기`) : null];
     }),
     inner.within ? h('p', { class: 'fr-within' }, `안에서 서로 ${inner.within}`) : null) : null;
   // Inside: on the map already when the part is an open frame; else its names, and the explicit way in.
@@ -1937,11 +1937,12 @@ function lensClaims(o: Opened, part: string, claims: CurrentClaim[]): HTMLElemen
   sync();
   return h('section', { class: 'lens-claims', 'aria-label': `현재 주장 ${items.length}개` }, h('h3', {}, '현재 주장', h('small', {}, String(items.length))), list, toggle);
 }
-/** A relation note longer than its three lines reads whole on request, in place (the row itself goes to the other end). */
+/** A relation note longer than its three lines reads whole on request, in place (the row itself goes to the other end). Safe to
+ * run again over the same pane (rows shown later, e.g. after '더 보기'): a row that has its control keeps it. */
 function clampNotes(root: HTMLElement, o: Opened, part: string) {
   root.querySelectorAll<HTMLElement>('.port-note[data-rel-note]').forEach(note => {
     const key = `${o.key}|${part}|note|${note.dataset.relNote}`, li = note.closest('li');
-    if (!li || note.scrollHeight <= note.clientHeight + 1) return;
+    if (!li || li.querySelector(':scope > .note-more') || note.classList.contains('whole') || note.scrollHeight <= note.clientHeight + 1) return;
     const sync = () => { const open = lensOpen.has(key); note.classList.toggle('whole', open); more.textContent = open ? '접기' : '전체'; more.setAttribute('aria-expanded', String(open)); };
     const more = h('button', { type: 'button', class: 'link-button note-more', 'aria-label': '관계 설명 전체', onclick: () => { if (lensOpen.has(key)) lensOpen.delete(key); else lensOpen.add(key); sync(); } });
     li.append(more); sync();
