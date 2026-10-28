@@ -8,7 +8,7 @@ import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, se
 import { CLAIM_LABEL, STATE_LABEL, type Applied, type CurrentClaim } from '../shared/map-reading.js';
 import type { ClaimKind } from '../shared/types.js';
 import { createMapRun, sendLine } from './map-run.js';
-import { requestResults, frozenRequests, displayAbout } from './request-results.js';
+import { requestResults, frozenRequests, displayAbout, captureRequestReading, restoreRequestReading } from './request-results.js';
 import { correctRequestMatch, requestComparison } from '../shared/request-return.js';
 import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
@@ -18,7 +18,7 @@ import { runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
 import { createPlanView } from './plan-view.js';
-import { createReturnView, type Scene } from './return-view.js';
+import { createReturnView, type Scene, type ReadingContext } from './return-view.js';
 import { UI62_KEY, buildUi62Project, ui62Keys } from '../shared/return-material.js';
 import { REL_LABEL, relationGroups, dirMark, dirTitle, insideEnds } from '../shared/relation-groups.js';
 
@@ -288,7 +288,7 @@ let renderedHash = '';
 async function render() {
   renderedHash = location.hash;
   const r = route();
-  if (!r.key) { if (opened) cameras.set(camKey(opened, scope), { ...camera }); flushView(); planView.close(false); if (toastKey) dropToast(); forgetVisits(); opened = null; selected = null; scope = null; renderHome(); return; }
+  if (!r.key) { quoteBack = null; if (opened) cameras.set(camKey(opened, scope), { ...camera }); flushView(); planView.close(false); if (toastKey) dropToast(); forgetVisits(); opened = null; selected = null; scope = null; renderHome(); return; }
   const next = projectFor(r.key);
   if (!next) { go(null); return; }
   const fresh = opened?.key !== next.key;
@@ -346,6 +346,7 @@ async function render() {
   setBar(o);
   if (returnCamera) { camera = returnCamera; returnCamera = null; applyCamera(true); }
   if (back) restoreSurface(back);
+  if (quoteBack) { const from = quoteBack; quoteBack = null; restoreReading(from); }
   if (travelling) playTravel(travel!);
   rememberPlace();
   if (openPlanOnArrive) { openPlanOnArrive = false; if (!planView.isOpen() && o.kind !== 'legacy') planView.toggle(); }
@@ -402,7 +403,8 @@ function sceneBack() {
  * the person folded or moved meanwhile stays; only the path unfolded to show the visited part closes again (it follows the
  * route). Each visit marks this tab's own history entries, so the browser's Back and the named way back are one and the same,
  * and the same part reached twice is two visits. Memory only: a reload or another project starts with none. */
-type Place = { key: string; scope: string | null; selected: string | null; camera: { x: number; y: number; k: number }; surface: 'lens' | 'sheet' | 'scope' | 'none'; sheetReturn: { x: number; y: number; k: number } | null; scroll: number };
+type Place = ReadingContext & { key: string; scope: string | null; selected: string | null; camera: { x: number; y: number; k: number } };
+let quoteBack: Place | null = null;
 type Visit = { id: string; from: Place; to: string; kind: string; note: string };
 const visitTab = Math.random().toString(36).slice(2, 8);
 let visits: Visit[] = [], ahead: Visit[] = [], pendingVisit: Visit | null = null, visitBack: string | null = null, visitSeq = 0;
@@ -411,7 +413,11 @@ function herePlace(): Place | null {
   const o = opened; if (!o) return null;
   const surface = selected ? (sheetOpen ? 'sheet' : 'lens') : scopeReading ? 'scope' : 'none';
   const body = surface === 'sheet' ? $('panel').querySelector('.panel-body') : surface === 'none' ? null : $('lens').querySelector('.lens-body');
-  return { key: o.key, scope, selected, camera: { ...camera }, surface, sheetReturn, scroll: body?.scrollTop ?? 0 };
+  return { key: o.key, scope, selected, camera: { ...camera }, surface, sheetReturn, scroll: body?.scrollTop ?? 0, requests: body ? captureRequestReading(body) : null };
+}
+function readingScene(): Scene | null {
+  const p = selected ? herePlace() : null;
+  return p ? { key: p.key, selected: p.selected, scope: p.scope, camera: p.camera, reading: p } : null;
 }
 function visitMark(): { from: string | undefined; to: string | undefined } { const s = history.state as { afVisitFrom?: unknown; afVisitTo?: unknown } | null; return { from: typeof s?.afVisitFrom === 'string' ? s.afVisitFrom : undefined, to: typeof s?.afVisitTo === 'string' ? s.afVisitTo : undefined }; }
 function markEntry(m: { from?: string; to?: string }) {
@@ -435,15 +441,20 @@ function returnFromVisit() {
   if (visitMark().to === v.id) { history.back(); return; }
   visitBack = v.id; go(o.key, v.from.selected, v.from.scope);
 }
-function restoreSurface(v: Visit) {
-  const f = v.from;
+function restoreReading(f: Place): boolean {
+  if (f.key !== opened?.key || f.selected !== selected || f.scope !== scope) return false;
   if (f.surface === 'sheet' && selected === f.selected) { sheetOpen = true; showReading(false, false); }
   // The same part read in another surface since (A0 summary -> B -> A1 sheet, then two steps back): the summary it left.
   else if (f.surface === 'lens' && selected === f.selected && sheetOpen) { sheetOpen = false; editing = false; showReading(false, false); }
   else if (f.surface === 'scope' && !selected) { scopeReading = true; renderScopeLens(); }
   sheetReturn = f.surface === 'sheet' ? f.sheetReturn : null;
   const body = f.surface === 'sheet' ? $('panel').querySelector('.panel-body') : f.surface === 'none' ? null : $('lens').querySelector('.lens-body');
-  if (body) body.scrollTop = f.scroll;
+  if (body && (!f.requests || restoreRequestReading(body, f.requests))) body.scrollTop = f.scroll;
+  return true;
+}
+function restoreSurface(v: Visit) {
+  const f = v.from;
+  if (!restoreReading(f)) return;
   // Keyboard: back on the relation it was followed by (without moving the restored reading). Now, while this arrival is the
   // page: never later, when the person may already be typing or reading somewhere else.
   // The surface just restored first (the map title also names a scope's relations); the map title only when nothing reads.
@@ -531,7 +542,7 @@ function lastPlaces(): Record<string, LastPlace> { try { const v = JSON.parse(kv
 function rememberPlace() {
   const o = opened; if (!o || o.kind !== 'saved') return;
   try {
-    const all = lastPlaces(); all[o.project.id] = { scope, part: selected, at: new Date().toISOString() };
+    const all = lastPlaces(); all[o.key] = { scope, part: selected, at: new Date().toISOString() };
     const keys = Object.keys(all); for (const k of keys.slice(0, Math.max(0, keys.length - 100))) delete all[k];
     kv.setItem(LAST_KEY, JSON.stringify(all));
   } catch { /* a convenience only */ }
@@ -547,7 +558,9 @@ function programCard(key: string, p: Project, example: boolean, keyOf: (id: stri
     v.records.length || p.pasted.length ? '' : '기록 없음', lastAt ? ago(lastAt) : '', changed ? `최근 바뀐 부분 ${changed}` : ''].filter(Boolean).map(t => h('span', {}, t));
   const base = `#/p/${encodeURIComponent(key)}`, name = (id: string | null) => (id ? v.parts.find(x => x.id === id)?.name ?? null : null);
   // Continue: only a remembered place whose parts still exist.
-  const at = example ? null : lastPlaces()[p.id];
+  // Old project-id memory cannot identify an imported copy. Its first own visit starts an entry-id memory instead.
+  const places = lastPlaces(), imported = store.entries().find(e => e.entryId === key)?.origin === 'import';
+  const at = example ? null : places[key] ?? (imported ? null : places[p.id]);
   const cont = at && (at.scope || at.part) && (!at.scope || name(at.scope)) && (!at.part || name(at.part))
     ? h('a', { class: 'program-continue', href: `${base}${at.scope ? `/in/${encodeURIComponent(at.scope)}` : ''}${at.part ? `/${encodeURIComponent(at.part)}` : ''}` },
       h('span', {}, '이어서'), h('strong', {}, name(at.part) ?? name(at.scope)!), h('small', {}, at.part ? (at.scope ? `선택 · ${name(at.scope)} 안` : '선택') : '안쪽 보기'), h('span', { 'aria-hidden': 'true' }, '→')) : null;
@@ -1635,7 +1648,7 @@ function openReturn() {
  * (selection, scope, camera; folds were never touched). Captured here, before opening the pane clears the selection. */
 function openPaste(partId: string | null) {
   const o = opened; if (!o || o.kind !== 'saved') return;
-  const scene: Scene | null = selected ? { selected, scope, camera: { ...camera } } : null;
+  const scene = readingScene();
   openReturn();
   returnView.openPaste(partId, scene);
 }
@@ -1675,7 +1688,12 @@ const returnView = createReturnView({
     const o = opened; if (!o || o.kind !== 'saved') return null;
     return store.entries().find(e => e.entryId === o.key)?.origin === 'import' ? null : o.project.id;
   },
-  restoreScene: scene => { const o = opened; if (!o) return; returnCamera = scene.camera; go(o.key, scene.selected && partOf(o, scene.selected) ? scene.selected : null, scene.scope && partOf(o, scene.scope) ? scene.scope : null); },
+  restoreScene: scene => {
+    const o = opened; if (!o || (scene.key && scene.key !== o.key)) return;
+    returnCamera = scene.camera;
+    quoteBack = scene.reading ? { ...scene.reading, key: o.key, selected: scene.selected, scope: scene.scope, camera: scene.camera } : null;
+    go(o.key, scene.selected && partOf(o, scene.selected) ? scene.selected : null, scene.scope && partOf(o, scene.scope) ? scene.scope : null);
+  },
   mapBlock: () => mapBlock(),
   mapMarks: () => { const o = opened; return o && justRead?.key === o.key ? justRead.parts : []; },
   readIntoMap: id => !!opened?.project.readings.some(r => (r.version === 'map-reading.1' || r.version === 'map-reading.2') && r.records.some(x => x.id === id)),
@@ -1817,7 +1835,7 @@ function claimList(claims: CurrentClaim[], max: number): HTMLElement {
 /** A quote from the selection: the record in the pane, marked; closing the pane comes back to this part. */
 function showQuote(record: string, quote: string) {
   const o = opened; if (!o || o.kind !== 'saved') return;
-  const scene: Scene | null = selected ? { selected, scope, camera: { ...camera } } : null;
+  const scene = readingScene();
   openReturn(); returnView.openQuote(record, quote, scene);
 }
 /** In the sheet: the part as read from records (the description and the person's correction of it, the current claims), then the

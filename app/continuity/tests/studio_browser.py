@@ -1745,7 +1745,8 @@ def request71_flow(browser, base):
     page.wait_for_timeout(300)
     assert page.locator("#world").evaluate(CAMERA) == camera0
     # The correction is optional and local to this correspondence; it never changes the request or the map's role.
-    page.locator("#lens .request-item > summary").first.click()
+    expect(page.locator("#lens .request-item").first).to_have_attribute("open", "")
+    expect(page.locator("#lens .request-passage", has_text="폴더 입력 변경 보고").get_by_role("button", name="근거", exact=True)).to_be_focused()
     page.locator("#lens .request-fix > summary").first.click()
     page.locator("#lens .request-fix select").first.select_option("")
     page.locator("#lens .request-fix").first.get_by_role("button", name="저장").click()
@@ -1791,6 +1792,135 @@ def request71_flow(browser, base):
     kept = page.evaluate("() => JSON.parse(localStorage.getItem('agentflow.studio.plans.1'))")["projects"][project["id"]]
     assert "scope" not in kept["snapshots"][0] and kept["snapshots"][0]["text"] == old["text"]
     assert kept["observations"][-1]["text"] == "[스텁] 이전 요청의 직접 기록" and kept["attached"][kept["observations"][-1]["id"]] == old["id"]
+    context.close()
+
+
+def reading72_flow(browser, base):
+    """Read the saved actual 71 response, not another AI call: expanded request -> second quote -> named part return.
+    Disclosure, pane scroll and focus survive repeated trips in the lens and the sheet; another part starts its own reading.
+    A separate component replay checks fresh contents and exact frozen request/revision identity (never old DOM replay)."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    errors, calls = [], []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.on("request", lambda r: calls.append(r.url) if r.method == "POST" and "/api/studio/" in r.url else None)
+    page.goto(base + "/")
+    sample = ROOT.parents[1] / "docs/cycles/2026-10-26-visual-experience-59/request71-sample.json"
+    data = json.loads(sample.read_text(encoding="utf-8"))
+    area = next(a["id"] for a in data["space"]["areas"] if a["name"] == "폴더 일괄 처리")
+    other = next(a["id"] for a in data["space"]["areas"] if a["name"] == "터미널 명령 실행")
+    page.locator("#import-file").set_input_files(str(sample))
+    page.wait_for_url(re.compile(r"#/p/E_"))
+    entry = re.search(r"#/p/(E_[^/]+)", page.url).group(1)
+    # This saved part has a child: its selectable map surface is the group head, not a leaf node.
+    page.locator(f'#world .frame-head[data-part="{area}"]').locator(".frame-name").click()
+    expect(page.locator("#lens-title")).to_have_text("폴더 일괄 처리")
+    page.locator("#lens .request-item > summary").first.click()
+
+    def roundtrip(pane):
+        item = page.locator(pane + " .request-item").first
+        cite = item.locator(".request-passage .cl-cite").nth(1)
+        cite.scroll_into_view_if_needed()
+        cite.focus()
+        scroll = page.locator(pane + (" .panel-body" if pane == "#panel" else " .lens-body")).evaluate("e => e.scrollTop")
+        assert scroll > 0, "the test must return to a scrolled reading, not its start"
+        url0, camera0 = page.url, page.locator("#world").evaluate(CAMERA)
+        quote = cite.get_attribute("title")
+        cite.click()
+        expect(page.locator("#lens .rr-mark")).to_have_text(quote)
+        expect(page.locator("#lens .rr-back")).to_contain_text("폴더 일괄 처리")
+        page.locator("#lens .rr-back").click()
+        expect(page).to_have_url(url0)
+        expect(item).to_have_attribute("open", "")
+        expect(cite).to_be_focused()
+        body = page.locator(pane + (" .panel-body" if pane == "#panel" else " .lens-body"))
+        assert abs(body.evaluate("e => e.scrollTop") - scroll) <= 1
+        page.wait_for_timeout(250)
+        assert page.locator("#world").evaluate(CAMERA) == camera0
+
+    roundtrip("#lens")
+    roundtrip("#lens")
+    # Reusing the same item ids in another part does not unfold them there.
+    page.goto(base + f"/#/p/{entry}/{other}")
+    expect(page.locator("#lens-title")).to_have_text("터미널 명령 실행")
+    expect(page.locator("#lens .request-item")).to_have_count(1)
+    expect(page.locator("#lens .request-item[open]")).to_have_count(0)
+    page.goto(base + f"/#/p/{entry}/{area}")
+    sheet(page, "폴더 일괄 처리")
+    page.locator("#panel .request-item > summary").first.click()
+    roundtrip("#panel")
+    no_page_scroll(page)
+    assert not calls and not errors, (calls, errors)
+
+    # The memory contains only identity/disclosure/focus. Rebuild with fresh contents, then replace the request identity.
+    result = page.evaluate("""async p => {
+      const UI = await import('/client/request-results.js');
+      const q = p.readings.find(r => r.version === 'map-reading.2').requests[0];
+      const box = document.createElement('div'); document.body.append(box);
+      const render = () => box.replaceChildren(UI.requestResults(p, [], {partId:q.items[0].partIds[0],compact:true,quote:()=>{},correct:async()=>null}));
+      render(); const item = box.querySelector('.request-item'); item.open=true;
+      item.querySelectorAll('.cl-cite')[1].focus(); const saved=UI.captureRequestReading(box);
+      q.items[0].description='[검사] 지금 원자료의 요청 설명';
+      render(); const fresh=UI.restoreRequestReading(box,saved);
+      const current=box.querySelector('.request-want').textContent;
+      const focused=box.contains(document.activeElement) && document.activeElement.dataset.requestFocus===saved.focus;
+      // Same RQ/item id, a new frozen plan revision: none of the old disclosure/focus belongs to it.
+      q.planRevision+=1; render(); const revision=UI.restoreRequestReading(box,saved);
+      const revisionClosed=!box.querySelector('.request-item').open;
+      q.planRevision-=1; q.id+='-different-request'; render(); const request=UI.restoreRequestReading(box,saved);
+      const requestClosed=!box.querySelector('.request-item').open; box.remove();
+      return {fresh,current,focused,revision,revisionClosed,request,requestClosed};
+    }""", data)
+    assert result == {"fresh": True, "current": "원함[검사] 지금 원자료의 요청 설명", "focused": True, "revision": False, "revisionClosed": True, "request": False, "requestClosed": True}, result
+    context.close()
+
+
+def continue72_flow(browser, base):
+    """The home link resumes both scope and selection of this workspace entry. An imported copy with the same project id
+    starts from its own visit; old ambiguous project-key memory is not silently assigned to either imported copy."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    page.goto(base + "/")
+    fixture = page.evaluate("""async () => {
+      const D=await import('/shared/domain.js'), S=await import('/shared/storage.js');
+      let p=D.addArea(D.rename(D.createProject(),'이어가기 검사'),'그룹'); const group=p.space.areas[0].id;
+      p=D.addChildArea(p,group,'첫 부분'); const first=p.space.areas.at(-1).id;
+      p=D.addChildArea(p,group,'둘째 부분'); const second=p.space.areas.at(-1).id;
+      return {id:p.id,group,first,second,backup:S.serializeBackup(p,null)};
+    }""")
+    backup = {"name": "continue72.json", "mimeType": "application/json", "buffer": fixture["backup"].encode("utf-8")}
+    page.locator("#import-file").set_input_files(backup)
+    page.wait_for_url(re.compile(r"#/p/E_"))
+    first_entry = re.search(r"#/p/(E_[^/]+)", page.url).group(1)
+    first_url = base + f'/#/p/{first_entry}/in/{fixture["group"]}/{fixture["first"]}'
+    page.goto(first_url)
+    expect(page.locator("#lens-title")).to_have_text("첫 부분")
+    in_scope(page, "그룹")
+    page.locator(".brand").click()
+    card = page.locator("#saved-list .program", has=page.locator(f'.program-head[href="#/p/{first_entry}"]'))
+    expect(card.locator(".program-continue")).to_have_attribute("href", first_url.split(base + "/")[1])
+    card.locator(".program-continue").click()
+    expect(page.locator("#lens-title")).to_have_text("첫 부분")
+    in_scope(page, "그룹")
+    page.locator(".brand").click()
+    # An old shared memory names a plausible place, but cannot identify which imported entry it came from.
+    page.evaluate("f => {const k='agentflow.studio.last.1',v=JSON.parse(localStorage.getItem(k));v[f.id]={scope:f.group,part:f.first,at:new Date().toISOString()};localStorage.setItem(k,JSON.stringify(v));}", fixture)
+    page.locator("#import-file").set_input_files(backup)
+    page.wait_for_url(re.compile(r"#/p/E_"))
+    second_entry = re.search(r"#/p/(E_[^/]+)", page.url).group(1)
+    assert second_entry != first_entry
+    page.locator(".brand").click()
+    copy = page.locator("#saved-list .program", has=page.locator(f'.program-head[href="#/p/{second_entry}"]'))
+    expect(copy.locator(".program-continue")).to_have_count(0)
+    page.goto(base + f'/#/p/{second_entry}/in/{fixture["group"]}/{fixture["second"]}')
+    expect(page.locator("#lens-title")).to_have_text("둘째 부분")
+    page.locator(".brand").click()
+    expect(card.locator(".program-continue strong")).to_have_text("첫 부분")
+    expect(copy.locator(".program-continue strong")).to_have_text("둘째 부분")
+    stored = page.evaluate("() => JSON.parse(localStorage.getItem('agentflow.studio.last.1'))")
+    assert stored[first_entry]["part"] == fixture["first"] and stored[second_entry]["part"] == fixture["second"]
+    assert stored[fixture["id"]]["part"] == fixture["first"], "visiting a copy must not overwrite ambiguous old memory"
+    assert page.evaluate(ENTRY, first_entry) == page.evaluate(ENTRY, second_entry), "continue never edits either project"
     context.close()
 
 
@@ -2288,6 +2418,8 @@ def main():
             map70_flow(browser, base); print("ok  first map from a pasted record (save sends nothing), quote and back, rename/place/draft kept, later record on the same part, plan reads record and reading")
             request71_flow(browser, base); print("ok  own map -> frozen three-item request -> plain partial report -> one combined read -> unanswered items, feature scope, exact quote/back, durable exclusion; stubbed replies")
             request71_projection_flow(browser, base); print("ok  request projection: unrelated excerpts do not spread into parts; older report precedes newer unanswered RQ; exact quoted interval marked/scrolled; written fixture")
+            reading72_flow(browser, base); print("ok  saved actual request: second quote/back keeps disclosure, scroll, focus and surface; current contents, exact RQ/revision and other-part isolation")
+            continue72_flow(browser, base); print("ok  home continue: scope and selection per workspace entry; imported copies and ambiguous old project memory kept apart")
             record_fold_flow(browser, base, oss_fixtures()); print("ok  pasted record on Node-RED: a chosen candidate in a folded group opens only its path, holds through a quote, folds back on another choice and on close")
             stale_request_flow(browser, base); print("ok  request only from the analysis of what is written now: typed, forced, A-B-A, cancelled and outdated replies, material")
             actual_reply_flow(browser, base); print("ok  wide comparison of an actual reply without presentation; scope reviews outliving a material change; four changes")
