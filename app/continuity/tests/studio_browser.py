@@ -1989,6 +1989,47 @@ def history73_flow(browser, base):
     context.close()
 
 
+def revised73_flow(browser, base):
+    """The saved public 72 sequential backup: the folder-input -> converter relation rests only on the withdrawn 71 report. Selected
+    from either end, its line carries one visible '근거 정정' mark clear of parts, heads and other verbs; an ordinary relation's
+    line never does. 1280 and 1440, no AI call."""
+    sample = ROOT.parents[1] / "docs/cycles/2026-10-26-visual-experience-59/request72-sequential-sample.json"
+    data = json.loads(sample.read_text(encoding="utf-8"))
+    area = {a["name"]: a["id"] for a in data["space"]["areas"]}
+    overlaps = """() => { const m = document.querySelector('#world .edge-label.revised'); if (!m) return ['missing'];
+      const r = m.getBoundingClientRect(), hit = e => { const q = e.getBoundingClientRect(); return r.left < q.right && q.left < r.right && r.top < q.bottom && q.top < r.bottom; };
+      return [...document.querySelectorAll('#world .node, #world .frame-head, #world .edge-label')].filter(e => e !== m && hit(e)).map(e => e.className); }"""
+    for width in (1280, 1440):
+        context = browser.new_context(viewport={"width": width, "height": 720})
+        page = context.new_page()
+        errors, calls = [], []
+        page.on("pageerror", lambda e: errors.append(str(e)))
+        page.on("request", lambda r: calls.append(r.url) if r.method == "POST" and "/api/studio/" in r.url else None)
+        page.goto(base + "/")
+        page.locator("#import-file").set_input_files(str(sample))
+        page.wait_for_url(re.compile(r"#/p/E_"))
+        entry = re.search(r"#/p/(E_[^/]+)", page.url).group(1)
+        for name in ("폴더 입력", "변환기"):
+            page.goto(base + f"/#/p/{entry}/{area[name]}")
+            expect(page.locator("#lens-title")).to_have_text(name)
+            expect(page.locator("#world .edge.revised.on")).to_have_count(1)
+            mark = page.locator("#world .edge-label.revised")
+            expect(mark).to_have_count(1)
+            expect(mark).to_be_visible()
+            expect(mark).to_contain_text("근거 정정")
+            assert page.evaluate(overlaps) == [], (width, name, page.evaluate(overlaps))
+            expect(page.locator("#world .edge-label:not(.revised)", has_text="근거 정정")).to_have_count(0)
+        # A part whose relations rest on current reports: no mark anywhere on the map.
+        page.goto(base + f"/#/p/{entry}/{area['입력 경로 읽기']}")
+        expect(page.locator("#lens-title")).to_have_text("입력 경로 읽기")
+        expect(page.locator("#world .edge.on")).not_to_have_count(0)
+        expect(page.locator("#world .edge.revised.on")).to_have_count(0)
+        expect(page.locator("#world .edge-label", has_text="근거 정정")).to_have_count(0)
+        no_page_scroll(page)
+        assert not calls and not errors, (width, calls, errors)
+        context.close()
+
+
 def request71_projection_flow(browser, base):
     """Written, validated fixture in the actual request-results DOM: unrelated excerpts stay folded outside parts, a real
     older-RQ report precedes a newer unanswered RQ, and the shared original component marks/scrolls its exact interval."""
@@ -2486,6 +2527,7 @@ def main():
             reading72_flow(browser, base); print("ok  saved actual request: second quote/back keeps disclosure, scroll, focus and surface; current contents, exact RQ/revision and other-part isolation")
             continue72_flow(browser, base); print("ok  home continue: scope and selection per workspace entry; imported copies and ambiguous old project memory kept apart")
             history73_flow(browser, base); print("ok  withdrawn report history: old quote and named way back keep the item, its history fold, quote focus, scroll and camera; current quote path; other part untouched")
+            revised73_flow(browser, base); print("ok  corrected-basis relation: selected from either end its line keeps one clear '근거 정정' mark at 1280/1440; ordinary lines never carry it")
             record_fold_flow(browser, base, oss_fixtures()); print("ok  pasted record on Node-RED: a chosen candidate in a folded group opens only its path, holds through a quote, folds back on another choice and on close")
             stale_request_flow(browser, base); print("ok  request only from the analysis of what is written now: typed, forced, A-B-A, cancelled and outdated replies, material")
             actual_reply_flow(browser, base); print("ok  wide comparison of an actual reply without presentation; scope reviews outliving a material change; four changes")

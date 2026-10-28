@@ -861,10 +861,13 @@ function placeEdgeLabels() {
   // a number on a verb reads as the relations one line holds, and the pane already counts the fan.
   const sel = selected ? lay.boxes.get(selected) : undefined;
   const side = (e: { from: string; to: string }) => { const far = lay.boxes.get(e.from === selected ? e.to : e.from); return !sel || !far ? '' : far.x + far.w / 2 < sel.x + sel.w / 2 ? 'l' : 'r'; };
-  const selKey = (e: { kind: string; from: string; to: string }) => `${e.kind}|${e.kind === 'related' ? '' : e.from === selected}|${side(e)}`;
+  // A line resting only on a withdrawn report never shares its verb with ordinary lines (nor they its mark).
+  const selKey = (e: Edge) => `${e.kind}|${e.kind === 'related' ? '' : e.from === selected}|${side(e)}|${edgeRevised(e) ? 'r' : ''}`;
   const fans = new Map<string, number>(), seenSel = new Set<string>();
   world.querySelectorAll<SVGGElement>('.edge.on').forEach(g => { const e = lay.edges.find(x => x.key === g.dataset.key); if (e) fans.set(selKey(e), (fans.get(selKey(e)) ?? 0) + 1); });
-  const lines = [...world.querySelectorAll<SVGGElement>('.edge')].filter(g => {
+  // The selection's corrected lines are placed first, so other verbs never take the room their mark needs.
+  const firstRevised = (g: SVGGElement) => g.classList.contains('on') && g.classList.contains('revised') ? 0 : 1;
+  const lines = [...world.querySelectorAll<SVGGElement>('.edge')].sort((a, b) => firstRevised(a) - firstRevised(b)).filter(g => {
     if (g.classList.contains('on')) return true;
     if (!few) return false;
     const e = lay.edges.find(x => x.key === g.dataset.key), k = e ? `${e.to}|${e.kind}` : ''; if (!e || seenEnd.has(k)) return false;
@@ -887,6 +890,22 @@ function placeEdgeLabels() {
     for (const t of fan ? near : [0.5, 0.4, 0.6, 0.3, 0.7, 0.22, 0.78]) {
       const q = path.getPointAtLength(len * t), r = { x: q.x - w / 2, y: q.y - hh / 2, w, h: hh };
       if (clear(r)) { spot = r; break; }
+    }
+    // A selected corrected line keeps its meaning on the map: more room along its line (beside it too), then only the short
+    // mark, along the line, then beside the selected card or the other end. Never over a part, a head, the title or a verb.
+    if (!spot && on && edgeRevised(e)) {
+      const along = (wd: number, ht: number) => Array.from({ length: 17 }, (_, i) => 0.1 + i * 0.05).flatMap(t => {
+        const q = path.getPointAtLength(len * t); return [[0, 0], [0, -(ht + 4)], [0, ht + 4], [-(wd / 2 + 6), 0], [wd / 2 + 6, 0]].map(([dx, dy]) => ({ x: q.x - wd / 2 + dx!, y: q.y - ht / 2 + dy!, w: wd, h: ht }));
+      });
+      const beside = (wd: number, ht: number) => [lay.boxes.get(selected!), lay.boxes.get(e.from === selected ? e.to : e.from)].flatMap(b => !b ? [] : [
+        { x: b.x, y: b.y - ht - 6 }, { x: b.x + b.w - wd, y: b.y - ht - 6 }, { x: b.x, y: b.y + b.h + 6 }, { x: b.x + b.w - wd, y: b.y + b.h + 6 },
+        { x: b.x - wd - 6, y: b.y + b.h / 2 - ht / 2 }, { x: b.x + b.w + 6, y: b.y + b.h / 2 - ht / 2 }].map(r => ({ ...r, w: wd, h: ht })));
+      spot = along(w, hh).find(clear) ?? null;
+      if (!spot) {
+        label.textContent = REVISED_SHORT; label.classList.add('short');
+        const sw = label.offsetWidth, sh = label.offsetHeight;
+        spot = along(sw, sh).find(clear) ?? beside(sw, sh).find(clear) ?? null;
+      }
     }
     if (!spot) { label.remove(); continue; }
     label.style.left = `${spot.x}px`; label.style.top = `${spot.y}px`; blocks.push(spot);
@@ -1886,7 +1905,7 @@ function understoodSection(o: Opened, part: PartView): HTMLElement | null {
 function revisedLine(o: Opened, relationId: string): boolean { return revisedRelations(o.project).has(relationId); }
 /** A drawn line all of whose relations rest on withdrawn reports: its own dash and a short title, selected or not. */
 function edgeRevised(e: Edge): boolean { return !!opened && !e.agg && e.ids.length > 0 && e.ids.every(id => revisedLine(opened!, id)); }
-const REVISED_EDGE = ' · 근거 정정';
+const REVISED_EDGE = ' · 근거 정정', REVISED_SHORT = '근거 정정';
 
 function sessionCode(): string { try { return sessionStorage.getItem('agentflow.studio.access') ?? accessCodeMemory; } catch { return accessCodeMemory; } }
 
