@@ -6,7 +6,7 @@
 84의 실제 자료 PC는 스텁 분석, 실제모델5건은 두 부분의 합성 설명이었다. 둘의 독립 통과가 복잡한 실제 자료와 새 맥락을 함께 읽는 품질을 증명하지 않는다.65의 일반 OSS 분석이나70/71의 전체 요청·반환 순환을 반복하지 않는다. 새 기능·schema·입출력·환경 설치 범위는 없다.
 
 ## 출력 전에 고정한 한 장면
-기존 [micro 저장자료](../../../../app/continuity/tests/fixtures/context75/micro-javascript-backup.json), SHA256 aaffb3764afc68f054d05ff54f4e2b5bf72b5b0abfc259d0bfc1deda666f8065를 그대로 쓴다. 공개 고정 README/context.py 발췌 두 개와 이미 저장된 AI 읽기이며 OSS 자체를 실행한 자료가 아니다. 새 초안은 이 진단을 위해 총괄이 작성한 가상 요구다.
+기존 [micro 저장자료](../../../app/continuity/tests/fixtures/context75/micro-javascript-backup.json), SHA256 aaffb3764afc68f054d05ff54f4e2b5bf72b5b0abfc259d0bfc1deda666f8065를 그대로 쓴다. 공개 고정 README/context.py 발췌 두 개와 이미 저장된 AI 읽기이며 OSS 자체를 실행한 자료가 아니다. 새 초안은 이 진단을 위해 총괄이 작성한 가상 요구다.
 
 선택·보던 범위는 평가 실행 파이프라인 A_49bad1f8-971b-4bff-8030-a62d8a470c16이다. 프로젝트 소유 ID는 P_6a74a281-f0dd-4dd8-8e00-d5b013112326이며 화면 주소의 E_는 별도 라이브러리 entry다. 이를 소유 ID로 오인하거나 이름으로 다시 연결하지 않는다.
 
@@ -27,4 +27,3 @@
 
 ## 현재 상태
 설계와 기준만 준비했다. 새 제공자 호출/화면 실행은0이며 실제 ask/source 동결이 다음이다. 작은 연결이 통과하더라도 일반 정확도·첫 지도 품질·전체 제품 완성으로 판단하지 않는다.
-
