@@ -21,7 +21,9 @@ const meta = () => ({ id: `R_u76_${++n}`, at: new Date().toISOString(), model: '
 const ask = (p, schema = M.MAP6_SCHEMA) => M.buildMapAsk(p, studioView(p), [], undefined, schema);
 const reply = o => ({ summary: '', parts: [], relations: [], candidates: [], gaps: [], matches: [], material: [], ...o });
 const part = (ref, o = {}) => ({ ref, name: null, parent: null, role: null, roleAbout: null, roleReplaces: null, basis: [], claims: [], ...o });
-const claim = (kind, text, at, o = {}) => ({ kind, text, at, about: null, replaces: null, key: null, ...o });
+// map.6: every claim has a key unique in its reply; these start at s50 so a test's own s1… never meet them by chance.
+let keys = 49;
+const claim = (kind, text, at, o = {}) => ({ kind, text, at, about: null, replaces: null, key: `s${++keys}`, ...o });
 const cand = (target, parts, o = {}) => ({ text: '미정 사항', target, parts, at: null, statement: null, ...o });
 const said = (key, text, at, o = {}) => ({ key, kind: 'describes', text, at, about: null, ...o });
 const apply = (p, inp, r) => M.applyReading(p, inp, M.validateMapReply(r, inp.ask), meta());
@@ -176,7 +178,8 @@ test('76-W1 m6 is advertised and sent; m5 and older stay served; a contradiction
   }
   assert.equal(sent[0].messages[0].content, MAP6_FIRST_PROMPT); assert.equal(map6Prompt({ ...inp.ask, parts: [{}] }), MAP6_PROMPT);
   for (const t of [MAP6_PROMPT, MAP6_FIRST_PROMPT]) {
-    for (const rule of ['target 하나로 밝힌다', '원문이 이미 답한 것을 다시 묻지 않는다', '요구·계획을 현재 구현으로 확정하거나', '근거 위치(at)가 겹친다는 것은 같은 진술이라는 뜻이 아니다', '응답 전체가 거절된다', '"key":null']) assert.ok(t.includes(rule), rule);
+    for (const rule of ['target 하나로 밝힌다', '원문이 이미 답한 것을 다시 묻지 않는다', '요구·계획을 현재 구현으로 확정하거나', '근거 위치(at)가 겹친다는 것은 같은 진술이라는 뜻이 아니다', '응답 전체가 거절된다', '"key":"s1"', 'null 불가']) assert.ok(t.includes(rule), rule);
+    assert.ok(!t.includes('"key":null'), 'no example claim without a key');
     assert.ok(!t.includes('지도 근거가 되지 않는다'), 'material overlap is refused, not dropped');
   }
   assert.ok(MAP5_PROMPT.includes('지도 근거가 되지 않는다') && !MAP5_PROMPT.includes('target 하나로'), 'the map.5 prompt is as it was'); assert.ok(!MAP5_FIRST_PROMPT.includes('target 하나로'));
@@ -196,3 +199,46 @@ test('76-W1 m6 is advertised and sent; m5 and older stay served; a contradiction
   const legacy = JSON.stringify({ ...v12, schemaVersion: 'idea015.project.12' });
   assert.deepEqual(parseProject(legacy).readings, v12.readings); assert.equal(lastReading(v12).version, 'map-reading.4'); assert.ok(!('target' in lastReading(v12).candidates[0]));
 });
+
+/* ---------- DELTA1: keys required, an existing part's link asked about, and how a candidate reads ---------- */
+test('76-K1 every map.6 claim names a unique key: a claim with none is refused at its path', () => {
+  const p = D.pasteRecord(D.createProject(), '첫째 사실입니다. 둘째 사실입니다.', null).project, inp = ask(p), one = piece(inp, '첫째');
+  for (const key of [null, undefined, '', 'S1', 's1x']) {
+    const c = claim('describes', '첫째', one, { key }); if (key === undefined) delete c.key;
+    const r = reply({ parts: [part('new:a', { name: 'A', basis: [one], claims: [c] })] });
+    if (key === undefined) assert.throws(() => M.validateMapReply(r, inp.ask), /INVALID_RESPONSE/);
+    else refused(() => M.validateMapReply(r, inp.ask), 'reference', /^parts\[0\]\.claims\[0\]\.key$/);
+  }
+});
+
+test('76-K2 asking whether an existing part belongs under its current parent is allowed and moves nothing; a new part settled under an open parent is still refused', () => {
+  let p = D.addArea(D.createProject(), '평가 API', ''); const api = p.space.areas[0].id; p = D.addChildArea(p, api, '파서', ''); const parser = p.space.areas[1].id;
+  p = D.pasteRecord(p, '파서는 문자열을 AST로 바꾼다.', null).project;
+  const inp = ask(p), aliasOf = id => [...inp.parts].find(([, x]) => x === id)[0], at = piece(inp, '파서는');
+  assert.equal(inp.ask.parts.find(x => x.id === aliasOf(parser)).parentId, aliasOf(api));
+  const { project, reading } = apply(p, inp, reply({ parts: [part(aliasOf(parser), { claims: [claim('describes', '문자열을 AST로 바꾼다', at)] })],
+    candidates: [cand('parent', [aliasOf(parser), aliasOf(api)], { text: '파서가 평가 API 안의 단계인지 이 기록만으로는 정할 수 없어요', at })] }));
+  assert.equal(project.space.containment.parents[parser], api, 'the earlier structure stays'); assert.deepEqual(reading.candidates[0].areaIds, [parser, api]);
+  assert.deepEqual(claimsOf(project, parser), ['describes:문자열을 AST로 바꾼다']);
+});
+
+test('76-V1 a stored candidate reads with its open label, the undecided statement (kind, words, version) and each passage once, even without its own at', () => {
+  const { p, inp, a, b } = calibration(), intro = piece(inp, '보정 작업 정리입니다.'), pcLine = piece(inp, "1) PC 앱의 '보정' 화면");
+  // The independently reproduced case: the candidate's own at is null, the statement has its place.
+  const r = reply({ candidates: [
+    cand('attribution', [a, b], { text: '이 보고의 귀속은 미정입니다.', at: null, statement: said('s1', '보정 작업을 정리했다', intro, { kind: 'reported', about: 'v2' }) }),
+    cand('holds', [a], { text: '소수점 입력이 PC 앱에 해당하는지', at: pcLine, statement: said('s2', '소수점 둘째 자리까지 받는다', pcLine) }),
+    cand('holds', [b], { text: '장치 쪽에도 해당하는지', at: intro, statement: said('s3', '정리 대상이다', pcLine, { kind: 'want' }) }),
+    cand('identity', [a, b], { text: '두 보정이 같은 대상인지', at: intro })] });
+  const { project, reading } = apply(p, inp, r), [open, same, apart, identity] = reading.candidates.map(M.candidateReading);
+  assert.deepEqual([open.label, open.statement], ['귀속 미정', { kind: '작업 보고', text: '보정 작업을 정리했다', about: 'v2' }]);
+  assert.deepEqual(open.quotes.map(x => [x.which, x.quote.quote]), [['statement', '보정 작업 정리입니다.']], 'at null: the statement\'s passage is still there');
+  assert.equal(same.label, '성립 미정'); assert.deepEqual(same.quotes.map(x => x.which), ['at'], 'the same place twice is one passage');
+  assert.deepEqual(apart.quotes.map(x => x.which), ['at', 'statement']); assert.equal(apart.statement.kind, '원함');
+  assert.deepEqual([identity.label, identity.statement, identity.quotes.length], ['같은 대상인지 미정', null, 1]);
+  for (const v of [open, same, apart]) for (const x of v.quotes) assert.equal(R_text(project, x.quote).slice(x.quote.from, x.quote.to), x.quote.quote);
+  // An earlier reading's candidate reads as before: no label, no statement, its own passage.
+  const old = M.candidateReading({ text: '어느 보정인지', areaIds: [], quote: { record: 'N_x', quote: '보정 작업 정리입니다.' } });
+  assert.deepEqual([old.label, old.statement, old.quotes.length], [null, null, 1]);
+});
+const R_text = (p, q) => p.pasted.find(r => r.id === q.record).text;

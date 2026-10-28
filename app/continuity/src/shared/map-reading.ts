@@ -72,7 +72,7 @@ export interface MapAsk {
 /** from/to (studio.map.4): where the quote stands in the excerpt that was sent (UTF-16 code units of it). */
 export interface MapReplyQuote { record: string; quote: string; from?: number; to?: number }
 export interface MapReplyClaim { kind: ClaimKind; text: string; record: string; quote: string; from?: number; to?: number; about: string | null; replaces: string | null;
-  /** map.6: the reply-local key of this statement ('s1'…), or null. */
+  /** map.6: the reply-local key of this statement ('s1'…), required and unique in the reply. */
   key?: string | null }
 /** map.6: the undecided statement a candidate keeps (attribution, holds), exact where it stands in the excerpt. */
 export interface MapReplyStatement { key: string; kind: ClaimKind; text: string; about: string | null; record: string; quote: string; from: number; to: number }
@@ -269,7 +269,9 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
       const q = evidence(c, `parts[${pi}].claims[${j}].at`);
       if (c.about !== null) str(c.about, 80, false, code);
       check(c.replaces === null || (typeof c.replaces === 'string' && own.has(c.replaces)), code);
-      if (six) check(c.key === null || (typeof c.key === 'string' && KEY.test(c.key)), code);
+      // map.6: every claim names its statement with a key unique in the reply (a statement settled under one key and left open
+      // under another is not caught by this; it only makes the settled/open clash of one key checkable).
+      if (six && !(typeof c.key === 'string' && KEY.test(c.key))) throw new MapReplyError(`parts[${pi}].claims[${j}].key`, 'reference', String(c.key));
       return { kind: c.kind as ClaimKind, text: c.text.trim(), ...q, about: c.about === null ? null : (c.about as string).trim(), replaces: c.replaces as string | null, ...(six ? { key: c.key as string | null } : {}) };
     });
     // A description, new or changed, rests on its own quote: an existing part's role never comes in without one.
@@ -420,6 +422,17 @@ function contradictions(parts: MapReplyPart[], relations: MapReply['relations'],
     ...matches.map((m, i) => [`matches[${i}].at`, m] as [string, MapReplyMatch]),
     ...candidates.flatMap((c, i) => c.statement ? [[`candidates[${i}].statement.at`, c.statement] as [string, MapReplyStatement]] : [])];
   for (const [path, q] of evidence) if (inside(q)) throw new MapReplyError(path, 'material-evidence', q.record);
+}
+
+/** How a stored candidate reads (map-reading.5): what it leaves undecided, the undecided statement itself (its kind, words and
+ * version, never as a settled claim of a part), and the passages to open: the candidate's own and the statement's, once each
+ * (one passage when both are the same place). A candidate of an earlier reading has no label or statement: it reads as before. */
+export const CANDIDATE_LABEL: Record<CandidateTarget, string> = { attribution: '귀속 미정', holds: '성립 미정', identity: '같은 대상인지 미정', parent: '포함 미정' };
+export function candidateReading(c: ReadingCandidate): { label: string | null; statement: { kind: string; text: string; about: string | null } | null; quotes: { which: 'at' | 'statement'; quote: ReadingQuote }[] } {
+  const same = (a: ReadingQuote, b: ReadingQuote) => a.record === b.record && (a.from !== undefined && b.from !== undefined ? a.from === b.from && a.to === b.to : a.quote === b.quote);
+  const quotes: { which: 'at' | 'statement'; quote: ReadingQuote }[] = c.quote ? [{ which: 'at', quote: c.quote }] : [];
+  if (c.statement && !(c.quote && same(c.quote, c.statement.quote))) quotes.push({ which: 'statement', quote: c.statement.quote });
+  return { label: c.target ? CANDIDATE_LABEL[c.target] : null, statement: c.statement ? { kind: CLAIM_LABEL[c.statement.kind], text: c.statement.text, about: c.statement.about } : null, quotes };
 }
 
 /* ---------- what earlier readings understood, per part ---------- */

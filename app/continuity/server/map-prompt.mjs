@@ -228,12 +228,12 @@ const MAP6_CANDIDATES = `candidates (최대 6개): 기록만으로 가를 수 �
 - 미정은 그 대상 하나만 보류한다. 같은 문단·같은 구간에 있는 다른 독립 사실(같은 설정의 다른 값, 판본별 대응, 같은 기록의 다른 부분에 대한 사실)은 그대로 해당 부분의 claims에 쓴다. 근거 위치(at)가 겹친다는 것은 같은 진술이라는 뜻이 아니다.
 - 같은 진술을 claims(확정)와 후보(미정)에 함께 쓰거나, 같은 대상을 두 번 후보로 쓰거나, 후보가 미정이라 한 부모에 그 부분을 넣으면 응답 전체가 거절된다. 후보는 이미 있는 사실을 철회하지 않는다.
 - 원문이 이미 답한 것을 다시 묻지 않는다. 요구·계획을 현재 구현으로 확정하거나 그것을 묻는 후보를 만들지 않는다. 정리 작업을 사용자에게 떠넘기는 일반 확인 요청, 분류 선호, 이 프로젝트와 무관한 조건, 일반 면책은 쓰지 않는다. at은 후보 질문의 근거 구간 또는 null.
-- claims의 key: 진술을 구별해 가리킬 필요가 있으면 "s1"·"s2"처럼 응답 안에서 고유한 키, 아니면 null. 후보의 statement.key도 같은 키 공간이다.`;
-const map6 = prompt => prompt
+- claims의 key: 모든 claim에 "s1"·"s2"처럼 응답 안에서 고유한 key를 쓴다(null 불가). 후보의 statement.key도 같은 키 공간이며 어떤 claim의 key와도 겹치지 않는다.`;
+const map6 = (prompt, k = 0) => prompt
   .replace(/candidates \(최대 6개\): [^\n]+/, MAP6_CANDIDATES)
   .replace('근거가 material 범위와 조금이라도 겹치면 지도 근거가 되지 않는다.', '부분·주장·관계·대응·후보 진술의 근거가 material 범위와 조금이라도 겹치면 응답 전체가 거절된다.')
-  .replace(/("about":(?:null|"[^"]*"),"replaces":null)\}/g, '$1,"key":null}')
-  .replace('"candidates":[{"text":"...","parts":["P01"],"at":null}]', '"candidates":[{"text":"...","target":"attribution","parts":["P01","P02"],"at":null,"statement":{"key":"s1","kind":"reported","text":"...","at":"N01.14","about":null}}]');
+  .replace(/("about":(?:null|"[^"]*"),"replaces":null)\}/g, (_, head) => `${head},"key":"s${++k}"}`)
+  .replace('"candidates":[{"text":"...","parts":["P01"],"at":null}]', '"candidates":[{"text":"...","target":"attribution","parts":["P01","P02"],"at":null,"statement":{"key":"s9","kind":"reported","text":"...","at":"N01.14","about":null}}]');
 export const MAP6_PROMPT = map6(MAP5_PROMPT);
 export const MAP6_FIRST_PROMPT = map6(MAP5_FIRST_PROMPT);
 export const MAP6_RECIPE = 'map6-recipe.1: first = parts.length === 0 && requests.length === 0 && priors.length === 0; evidence = same-record contiguous range <= 600 UTF-16; span.2; candidates state their target (attribution|identity|parent|holds) and statement keys';

@@ -1809,6 +1809,58 @@ def request71_flow(browser, base):
     context.close()
 
 
+def uncertainty76_flow(browser, base):
+    """AF76: a first map whose candidate leaves a report's part open (target attribution, its own at null, the statement with its
+    place). The map row reads the open label and the statement's kind and words beside it (never as a settled claim of a part),
+    gives the statement's exact passage, and the way back comes to that same passage button. Written reply (labelled '[스텁]')."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    errors = []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.goto(base + "/")
+    page.locator("#new-open").click()
+    page.locator("#new-name").fill("귀속 미정 프로젝트")
+    page.locator("#new-form").get_by_role("button", name="만들기").click()
+    text = "보정 작업 정리입니다.\nPC 앱의 보정 화면은 소수점 둘째 자리까지 받습니다."
+    page.locator("#space-empty").get_by_role("button", name="기록 붙여넣기").click()
+    page.locator("#paste-text").fill(text)
+    page.locator("#lens").get_by_role("button", name="기록 저장").click()
+    def returned(route):
+        ask = route.request.post_data_json
+        assert ask["schemaVersion"] == "studio.map.6", ask["schemaVersion"]
+        spans = ask["records"][0]["spans"]
+        at = lambda words: next(x["s"] for x in spans if x["t"].strip().startswith(words))
+        reply = {"summary": "[스텁] PC 앱 보정 화면의 입력 범위를 읽은 자리예요.", "relations": [], "gaps": [], "matches": [], "material": [],
+            "parts": [{"ref": "new:pc", "name": "PC 보정 화면", "parent": None, "role": "[스텁] 보정 값을 입력받는다.", "roleAbout": None, "roleReplaces": None, "basis": [at("PC 앱")],
+                "claims": [{"kind": "describes", "text": "[스텁] 소수점 둘째 자리까지 받는다", "at": at("PC 앱"), "about": None, "replaces": None, "key": "s1"}]}],
+            "candidates": [{"text": "이 보고의 귀속은 미정입니다.", "target": "attribution", "parts": ["new:pc"], "at": None,
+                "statement": {"key": "s2", "kind": "reported", "text": "보정 작업을 정리했다", "at": at("보정 작업"), "about": None}}]}
+        route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "evidence": {"index": "span.2", "ask": text_digest(route.request.post_data)}, "reply": reply}))
+    page.route("**/api/studio/map", returned)
+    page.locator("#space-empty").get_by_role("button", name="기록으로 지도 정리").click()
+    expect(page.locator("#world .node")).to_have_count(1)
+    page.locator("#world .map-understood").get_by_role("button", name="근거").click()
+    item = page.locator("#lens .rm-cands li").first
+    expect(item).to_contain_text("귀속 미정 · 이 보고의 귀속은 미정입니다.")
+    expect(item).to_contain_text("귀속 미정 진술 · 작업 보고 · 보정 작업을 정리했다")
+    cites = item.locator(".rr-cite")
+    expect(cites).to_have_count(1)  # its own at is null: the statement's passage, once
+    cites.first.click()
+    expect(page.locator("#lens .rr-mark")).to_have_text("보정 작업 정리입니다.")
+    page.locator("#lens .rr-back").click()
+    back = page.locator("#lens .rm-cands li").first.locator(".rr-cite").first
+    expect(back).to_be_focused()
+    assert '"statement"' in back.get_attribute("data-request-focus")
+    # The settled claim of the part stays a claim of that part; the open statement is not among them.
+    page.locator("#lens .rr-head .close").click()
+    page.locator("#world .node", has_text="PC 보정 화면").click()
+    expect(page.locator("#lens .claims .claim")).to_have_count(1)
+    expect(page.locator("#lens .claims")).not_to_contain_text("보정 작업을 정리했다")
+    page.unroute("**/api/studio/map")
+    assert not errors, errors
+    context.close()
+
+
 def reading72_flow(browser, base):
     """Read the saved actual 71 response, not another AI call: expanded request -> second quote -> named part return.
     Disclosure, pane scroll and focus survive repeated trips in the lens and the sheet; another part starts its own reading.
@@ -2578,6 +2630,7 @@ def main():
             map70_flow(browser, base); print("ok  first map from a pasted record (save sends nothing), quote and back, rename/place/draft kept, later record on the same part, plan reads record and reading")
             request71_flow(browser, base); print("ok  own map -> frozen three-item request -> plain partial report -> one combined read -> unanswered items, feature scope, exact quote/back, durable exclusion; stubbed replies")
             request71_projection_flow(browser, base); print("ok  request projection: unrelated excerpts do not spread into parts; older report precedes newer unanswered RQ; exact quoted interval marked/scrolled; written fixture")
+            uncertainty76_flow(browser, base); print("ok  AF76 candidate: open attribution label, the statement's kind and words, its exact passage and the way back to the same button; the part's claims apart; stubbed reply")
             reading72_flow(browser, base); print("ok  saved actual request: second quote/back keeps disclosure, scroll, focus and surface; current contents, exact RQ/revision and other-part isolation")
             continue72_flow(browser, base); print("ok  home continue: scope and selection per workspace entry; imported copies and ambiguous old project memory kept apart")
             history73_flow(browser, base); print("ok  withdrawn report history: old quote and way back keep the item, its history fold, quote focus, scroll and camera, from a part and from the map root; current quote path; other part untouched")

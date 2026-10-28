@@ -73,7 +73,8 @@ function mapStub(input) {
 function map4Stub(input) {
   const rec = input.records[0], pieces = rec.spans.filter(x => /^(요구|작업 보고|구상):/.test(x.t.trim()));
   const kind = t => t.startsWith('요구') ? 'want' : t.startsWith('구상') ? 'idea' : 'reported';
-  const claim = x => ({ kind: kind(x.t.trim()), text: `[스텁] ${x.t.trim().slice(0, 40)}`, at: x.s, about: null, replaces: null, ...(input.schemaVersion === 'studio.map.6' ? { key: null } : {}) });
+  let keys = 0; // map.6: every claim names its statement with a key unique in the reply.
+  const claim = x => ({ kind: kind(x.t.trim()), text: `[스텁] ${x.t.trim().slice(0, 40)}`, at: x.s, about: null, replaces: null, ...(input.schemaVersion === 'studio.map.6' ? { key: `s${++keys}` } : {}) });
   let content;
   if (!pieces.length) content = { summary: '', parts: [], relations: [], candidates: [], gaps: ['[스텁] 프로그램을 말하는 기록을 붙여 주세요.'] };
   else if (!input.parts.length) content = { summary: '[스텁] 기록의 요구·보고·구상 줄을 부분으로 놓은 자리예요.', relations: [], candidates: [], gaps: [],

@@ -5,8 +5,8 @@ import { FILE_LIMIT } from '../shared/types.js';
 import { WorkspaceStore, type EntryRef, storageErrorCode, readViewState, readEntryView, writeViewState, readEntryPositions, writeEntryPositions, importCopy, serializeBackup } from '../shared/storage.js';
 import { parseBackup, cleanPositions } from '../shared/validation.js';
 import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, secretPasted, correctReadingRole } from '../shared/domain.js';
-import { CLAIM_LABEL, stateLabel, revisedRelations, type Applied, type CurrentClaim } from '../shared/map-reading.js';
-import type { ClaimKind } from '../shared/types.js';
+import { CLAIM_LABEL, stateLabel, revisedRelations, candidateReading, type Applied, type CurrentClaim } from '../shared/map-reading.js';
+import type { ClaimKind, ReadingQuote } from '../shared/types.js';
 import { createMapRun, sendLine } from './map-run.js';
 import { requestResults, frozenRequests, displayAbout, captureRequestReading, restoreRequestReading } from './request-results.js';
 import { correctRequestMatch, unlinkReplacement, requestComparison } from '../shared/request-return.js';
@@ -1873,10 +1873,18 @@ function mapBlock(): HTMLElement | null {
     const chip = (id: string) => h('button', { type: 'button', class: 'rr-part', title: `‘${name(id)}’ 선택`, onclick: () => go(o.key, id) }, h('i', { 'aria-hidden': 'true' }), name(id)!);
     if (made.length) sec.append(h('div', { class: 'rr-chips' }, h('span', { class: 'rr-cand-label' }, '새 부분'), ...made.slice(0, 12).map(chip)));
     if (said.length) sec.append(h('div', { class: 'rr-chips' }, h('span', { class: 'rr-cand-label' }, '이해가 갱신된 부분'), ...said.slice(0, 12).map(chip)));
-    const cands = last.candidates.filter(c => c.areaIds.every(id => name(id)));
+    const cands = last.candidates.map((c, i) => [c, i] as const).filter(([c]) => c.areaIds.every(id => name(id)));
+    // A candidate reads with what it leaves undecided and, for a statement whose part or truth is open, that statement itself
+    // (kind, words, version) beside the open label, never as a settled claim; each of its passages opens exactly, and the way
+    // back comes to this same passage button (kept by its identity, with the pane's scroll and request folds).
+    const cite = (q: ReadingQuote, which: 'at' | 'statement', i: number) => h('button', { type: 'button', class: 'rr-ref rr-cite', 'data-request-focus': JSON.stringify(['candidate', last.id, i, which]),
+      title: which === 'statement' ? '미정 진술의 원문에서 보기' : '원문에서 보기', onclick: () => { if (returnView.isOpen()) returnView.keepReading(); returnView.openQuote(q.record, q.quote, null, q.from); } },
+      `“${q.quote.slice(0, 40)}${q.quote.length > 40 ? '…' : ''}”`);
     if (cands.length) sec.append(h('div', { class: 'rm-cands' }, h('h4', {}, '확인할 것', h('small', {}, String(cands.length))),
-      h('ul', {}, ...cands.map(c => h('li', {}, h('span', {}, c.text),
-        h('span', { class: 'rr-chips' }, ...c.areaIds.map(chip), c.quote ? h('button', { type: 'button', class: 'rr-ref rr-cite', title: '원문에서 보기', onclick: () => returnView.openQuote(c.quote!.record, c.quote!.quote, null, c.quote!.from) }, `“${c.quote.quote.slice(0, 40)}${c.quote.quote.length > 40 ? '…' : ''}”`) : null))))));
+      h('ul', {}, ...cands.map(([c, i]) => { const v = candidateReading(c);
+        return h('li', {}, h('span', {}, v.label ? `${v.label} · ` : '', c.text),
+          v.statement ? h('p', { class: 'fine' }, `${v.label ?? '미정'} 진술 · ${v.statement.kind} · ${v.statement.text}${v.statement.about ? ` · ${displayAbout(v.statement.about)}` : ''}`) : null,
+          h('span', { class: 'rr-chips' }, ...c.areaIds.map(chip), ...v.quotes.map(x => cite(x.quote, x.which, i)))); }))));
     if (last.gaps.length) sec.append(h('ul', { class: 'rm-gaps' }, ...last.gaps.map(g => h('li', {}, g))));
     const cut = last.records.filter(r => r.to < r.total || r.from > 0).length;
     sec.append(h('p', { class: 'rr-prov' }, h('span', { class: 'tag ai' }, `AI 정리 · ${last.model}`), h('span', {}, `기록 ${last.records.length}개${cut ? ` (${cut}개는 일부 구간만)` : ''} · 인용 원문에 근거 · 앱이 확인한 사실 아님`)));
