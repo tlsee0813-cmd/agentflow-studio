@@ -1,0 +1,144 @@
+{
+  "request": "AF85 DELTA1",
+  "source": "ffe60935a6f7f5760fb9a1a72ca66e8ab8693fa3",
+  "appTree": "b4984d261a4a7ccc1ace712a4d9d783c8a9103db",
+  "providedBuild": true,
+  "input": {
+    "bytes": 1252313,
+    "sha256": "45db71b84f543b5467c6cfb58f58ac78eb01ba80a395145a7904c1aa5358d6a7",
+    "entries": 246,
+    "payloadHashesVerified": 245
+  },
+  "snapshots": [
+    {
+      "json": "/workspace/work/af85-d1-observation/01-return-wording-1280.json",
+      "jsonSHA256": "1f6b3b1a84d23d88fed3de42993354f66d43302470613ac1d79abbf100772646",
+      "png": {
+        "path": "/workspace/work/af85-d1-observation/01-return-wording-1280.png",
+        "sha256": "4d7fd1099f7b27cbfb08afd8e43331fca61a9f7af9392c52f0886825bda68d41"
+      },
+      "viewport": {
+        "width": 1280,
+        "height": 720,
+        "dpr": 1
+      },
+      "sequence": 1,
+      "bundleExactEqualToOld": true,
+      "frozenSHA256": "db4b928eac8f831c919ca31892087c6786cbae9895b12e171ae5c1e1671e38c1",
+      "requestTextSHA256": "8cef3b1151e1f7cc3c16799f7ccf3b549c4c5e6f3d0190b84e7c6b972d79e0a2",
+      "camera": "translate(378.203px, 172px) scale(1)",
+      "oldCamera": "translate(378.203px, 172px) scale(1)"
+    },
+    {
+      "json": "/workspace/work/af85-d1-observation/02-return-wording-1440.json",
+      "jsonSHA256": "1b55c28148107d76d7b403fc1ff58229e063d77d2a0b738c1dc35d556a635fcc",
+      "png": {
+        "path": "/workspace/work/af85-d1-observation/02-return-wording-1440.png",
+        "sha256": "91704b06f369b37dffc72478858d8639cc5c022328701dd0ac35f3b81b5758b0"
+      },
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "dpr": 1
+      },
+      "sequence": 2,
+      "bundleExactEqualToOld": true,
+      "frozenSHA256": "fd3e193c6e938d2ed80ed07064fe22055783c96c417ff414ded137ebae0f1fe7",
+      "requestTextSHA256": "5d1e6cde365671498d575d5c82b6282528a5eda9238dc11d379acd40546bfc9a",
+      "camera": "translate(436.602px, 172px) scale(1)",
+      "oldCamera": "translate(436.602px, 172px) scale(1)"
+    }
+  ],
+  "errors": [],
+  "prohibitedAnalysisRequests": [],
+  "commands": {
+    "server": "node review-server.mjs",
+    "review": "python3 /workspace/work/af85-d1-review.py",
+    "reviewExit": 0,
+    "serverIntentionalStopExit": -15
+  },
+  "cleanup": {
+    "browserClosed": true,
+    "serverStopped": true,
+    "serverExit": -15
+  },
+  "executionExit": 0,
+  "verdict": "PASS — AF85 DELTA1 wording-only scope",
+  "findings": [],
+  "resolvedFinding": {
+    "id": "AF85-P2-RETURN-STATUS-CONFLICT",
+    "oldFindingPreserved": true,
+    "newRegressionWasNotEstablished": true,
+    "resolution": "Upper absence now explicitly means no linked project original passage; separately attached synthetic report remains readable below. No received-report absence claim.",
+    "visibleNewText": [
+      "연결된 원문 구절 없음",
+      "이 요청 항목에 연결된 프로젝트 원문 구절이 아직 없어요."
+    ],
+    "lowerVisible": "보고 1 · 코드 자료 0 · 검사 0 / expanded synthetic report and basis",
+    "completionPromotion": false
+  },
+  "inputValidation": {
+    "safePaths": true,
+    "crcPassed": true,
+    "BUILDAndManifestSourceAgree": true,
+    "payloadHashesVerified": 245,
+    "designatedFixtureSHA256": "aaffb3764afc68f054d05ff54f4e2b5bf72b5b0abfc259d0bfc1deda666f8065"
+  },
+  "codeComparison": {
+    "baseline": "bf30033cca0f16b87b90aac31d8bdccd8bb03d49",
+    "runtimeChangesOnly": [
+      "app/continuity/src/client/request-results.ts",
+      "app/continuity/dist/public/client/request-results.js"
+    ],
+    "sourceDelta": "Exactly two no-match string replacements; lead/history/correction/ownership/withdrawal branches unchanged.",
+    "browserHarnessDelta": "Three old wording expectation replacements only; not executed.",
+    "otherChanges": "BUILD/FIXTURES/MANIFEST/REVIEW_ORDER and DESIGN/PREFLIGHT metadata/docs differ. All other supplied product/source/server/runtime files byte-identical."
+  },
+  "directVisualReview": {
+    "openedPNGCount": 3,
+    "newPNGCount": 2,
+    "oldPNGCount": 1,
+    "viewports": [
+      [
+        1280,
+        720,
+        1
+      ],
+      [
+        1440,
+        900,
+        1
+      ]
+    ],
+    "stableFrameWaitMs": 350,
+    "fontReady": true,
+    "assessment": "PASS for changed absence wording. 320px rail at1280: new sentence wraps to2 lines/41.59375px; 360px rail at1440:1 line/20.796875px. All text client/scroll sizes agree; no clipping or overlaps; report text and basis visible.",
+    "residualAestheticLimit": "At1280 the lower old report title remains ellipsized; its full identical item title is readable above. Existing unchanged layout, no new P1/P2 assigned.",
+    "sameSceneComparison": "Archived1440 PNG and final1440 PNG directly opened at same viewport, report disclosure, railScroll0, matching camera/frozen request. Old1280 same-stage JSON available; old1280 PNG was empty-analysis scene, not equivalent return scene and not treated as paired visual proof."
+  },
+  "environmentAttempt": {
+    "initial": "Restricted executor denied localhost listen with EPERM; wrapper exit1 and isolated Node diagnostic exit1, before browser launch.",
+    "authorizedContinuation": "Same wrapper via supported exec with_additional_permissions network enabled; localhost only. No proxy/policy/configuration modifications.",
+    "actualUIRunCount": 1
+  },
+  "notExecuted": [
+    "New model/stub analysis:0",
+    "Actual external API calls:0",
+    "Remote Git lookup/build/TypeScript build:0",
+    "CI/Windows execution:0",
+    "zero85 Node/full browser suites, nullfocus/empty full preservation and withdrawal suites not repeated",
+    "Actual OSS execution:0"
+  ],
+  "acceptanceBoundary": "Only wording P2 delta accepted. Prior bf contract/data passes and original finding remain preserved. Overall product/first-map quality unresolved; public73 boundary retained.",
+  "oldEvidence": {
+    "path": "/workspace/work/af85-minimal-evidence.zip",
+    "bytes": 434243,
+    "sha256": "bd417794de5488cd5ff92ab672935f7bd4cf2383dc2db8e159430134cbee568a",
+    "unchanged": true,
+    "sameScene1440PNG": {
+      "path": "/workspace/work/af85-observation/21-old-return-actually-expanded-1440.png",
+      "sha256": "9798284b12ad3ee1bf075b6c89a004f0ba122d19a69acb69b662ecf0d3c7598b"
+    }
+  },
+  "imageAndObservationStageMatched": true
+}

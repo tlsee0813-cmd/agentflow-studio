@@ -1,0 +1,394 @@
+{
+  "request": "AF85 ZERO-CHANGE",
+  "source": "bf30033cca0f16b87b90aac31d8bdccd8bb03d49",
+  "appTree": "42803f840f53dce12a047a4cd27912ebf945267f",
+  "input": {
+    "source": "bf30033cca0f16b87b90aac31d8bdccd8bb03d49",
+    "appTree": "42803f840f53dce12a047a4cd27912ebf945267f",
+    "zipBytes": 1252452,
+    "zipSHA256": "38b139d6f85abd179eb310161af97657e9110b4abaef59263edf57cc281ec44d",
+    "entries": 246,
+    "payloadVerified": 245,
+    "fixtureVerified": 1,
+    "safePaths": true,
+    "zipHashReference": "matched to user supplemental submission:1252452 bytes/38b139d6f85abd179eb310161af97657e9110b4abaef59263edf57cc281ec44d",
+    "providedBuildTreeSha256": "2ba98da992291a2bbc47117abc550b3f5a0fbe4932751466b240a77d4a12ed00",
+    "root": "/workspace/work/af85-72zvazzm"
+  },
+  "verdict": "HOLD reading acceptance for one P2; zero-change data/contract/preservation checks PASS in executed scope",
+  "findings": [
+    {
+      "id": "AF85-P2-RETURN-STATUS-CONFLICT",
+      "priority": "P2",
+      "newRegression": "not established; no previous whole-suite or baseline UI repeated",
+      "reproduction": [
+        "Normal UI import designated actual74 micro project; select/enter evaluation pipeline and write fixed hypothetical intent.",
+        "Public synthetic positive plan + scope reply; UI creates one frozen request.",
+        "Normal plan-file import of a review copy containing one clearly synthetic ResultObservation report for c1, attached to that exact request (same observation shape as supplied zero85_flow; no real work/AI report).",
+        "Re-analyse with reviewer-written five-key items=[] and impacts=[] reply. Open old return and natively expand its report disclosure."
+      ],
+      "observed": "For the same frozen request/c1, upper projection says 아직 받은 내용 없음 / 이 요청에 대응하는 내용은 아직 받지 못했어요, while lower expanded row says 보고 1 and displays the report text and basis.",
+      "impact": "A reader can mistake a retained report for a missing/unreceived result. Data retention alone does not resolve the conflicting visible statements.",
+      "evidence": {
+        "viewport1440": "/workspace/work/af85-observation/21-old-return-actually-expanded-1440.json",
+        "pairedPNG": "/workspace/work/af85-observation/21-old-return-actually-expanded-1440.png",
+        "pngSHA256": "9798284b12ad3ee1bf075b6c89a004f0ba122d19a69acb69b662ecf0d3c7598b",
+        "viewport1280": "/workspace/work/af85-observation/15-old-return-actually-expanded-1280.json",
+        "minimumVisibleExcerpt": "원한 것과 돌아온 범위\n\n요청 1 · 10월 29일 06:32 · 판 3\n\n[합성 검토] 제한 종류별 안내\n· 아직 받은 내용 없음\n\n원함[합성 검토] 기존 두 예외를 구별해 호출자에게 알리는 제안\n\n이 요청에 대응하는 내용은 아직 받지 못했어요.\n\n[합성 검토] 제한 종류별 안내\n보고 1 · 코드 자료 0 · 검사 0\n담당 보고\n\n[AF85 검토용 합성 보고] 제한 종류별 안내를 작성했다고 가정합니다. 실제 코드 변경이나 실행 결과가 아닙니다.\n\n공개 합성 검토 자료 · feature/reviewer-only\n\n",
+        "frozenRequestItemIds": [
+          "c1"
+        ],
+        "attached": {
+          "O_AF85_review_1440": "RQ_8097cf48-0e18-43ce-a699-98e01e3020d0"
+        }
+      },
+      "causeFromReadOnlySource": {
+        "plan-view.ts:1236": "The projection reads current.project request matches and frozen scope.",
+        "plan-view.ts:1242-1253": "Legacy bundle observations render separately below it.",
+        "request-results.ts:119-122": "No project match is worded as no received content without distinguishing direct attached observations."
+      },
+      "suggestion": "Distinguish lack of map/source correspondence from a directly attached report, or reconcile the two presentations while preserving report provenance and unverified status. Do not promote a report to verified completion."
+    }
+  ],
+  "passed": [
+    "ZIP/source BUILD and MANIFEST consistent; all245 payload hashes, designated fixture hash and safe paths verified. Source is supplied marker, not independent Git verification.",
+    "zero85.test.mjs once exit0. Directly observed runner summary is one test file pass; root41 and author claims not counted.",
+    "Unmodified zero85_flow once per width1280/1440 at its supplied height800,DPR1,exit0; no full suite.",
+    "Independent normal UI imports at1280x720 and1440x900,DPR1. New plan.3 ask contains original intent, all6 parts,9 evidence and pipeline authoring selection/scope; project P_ owner distinguished from E_ entry.",
+    "Neutral no-change heading/summary/preserve/unknowns read directly; no fake item/list or0/0 chooser. Make disabled for empty; positive plan with selection0 reads separately as0/1 and a selection instruction.",
+    "N01 actually opened in expanded source disclosure; visible raw text exactly equals sent1369-character context.py excerpt. MemoryLimitError/TimeLimitError and parse/compile/body present. Back retains source-button focus, detail scroll0, draft, pinned authoring, pipeline scope/selection and camera.",
+    "Edited draft leaves prior analysis INTENT/source unchanged and stale warning visible; restored original intent resolves it. No per-summary-sentence validation claim.",
+    "Empty close/reopen, reload, actual download and normal file import preserve complete plan/unknowns/material and authoring; no page errors/null-focus crash.",
+    "Empty reanalysis preserves prior frozen snapshots, labels, origins, observations and attachments exactly by before/after hash; old request document actually opened and marked different version. Reports actually disclosed, not hidden textContent only.",
+    "No area/relation/containment changes in either manual project. No new map/OSS execution."
+  ],
+  "unitAndCodeBoundary": {
+    "plan1and2PromptBytes": "Targeted test asserts fixed old SHA256 values; same old prompts retained. No model meaning claim.",
+    "onlyPlan3AllowsEmpty": "unit/source confirms plan1/2 empty rejection, plan3 empty acceptance, empty+impact rejection and strict five keys/ref/id validation.",
+    "storageCompatibility": "Targeted units accept old positive file/envelope, reject empty under old version and retain owner/version checks. Older-client UI not executed; old-reader rejection remains unsupported backward compatibility."
+  },
+  "actualManualCalls": {
+    "plan": 6,
+    "scope": 2,
+    "modeOrder": [
+      "empty",
+      "empty",
+      "positive",
+      "empty",
+      "positive",
+      "empty"
+    ],
+    "externalActualAI": 0,
+    "note": "Browser-intercepted reviewer stubs on local test server, not recorded model replay or fresh model responses."
+  },
+  "frozenComparisons": [
+    {
+      "label": "frozen-return-preservation-1280",
+      "beforeSHA256": "db4b928eac8f831c919ca31892087c6786cbae9895b12e171ae5c1e1671e38c1",
+      "afterSHA256": "db4b928eac8f831c919ca31892087c6786cbae9895b12e171ae5c1e1671e38c1",
+      "equal": true,
+      "requestTextSHA256": "8cef3b1151e1f7cc3c16799f7ccf3b549c4c5e6f3d0190b84e7c6b972d79e0a2",
+      "snapshotId": "RQ_16933d7f-b8c9-4dd4-bda1-4257429ad31f",
+      "reviewFixture": "/workspace/work/af85-observation/review-synthetic-return-1280.json",
+      "fixtureType": "reviewer-authored synthetic report inserted through normal plan-file import, not actual AI or work output",
+      "latestPlanId": "CP_36003f1c-e43f-4926-b34a-12a243af8088",
+      "oldRequestPlanId": "CP_5d3305f3-562e-4387-b40b-e3cfee7bf2ce"
+    },
+    {
+      "label": "frozen-return-preservation-1440",
+      "beforeSHA256": "fd3e193c6e938d2ed80ed07064fe22055783c96c417ff414ded137ebae0f1fe7",
+      "afterSHA256": "fd3e193c6e938d2ed80ed07064fe22055783c96c417ff414ded137ebae0f1fe7",
+      "equal": true,
+      "requestTextSHA256": "5d1e6cde365671498d575d5c82b6282528a5eda9238dc11d379acd40546bfc9a",
+      "snapshotId": "RQ_8097cf48-0e18-43ce-a699-98e01e3020d0",
+      "reviewFixture": "/workspace/work/af85-observation/review-synthetic-return-1440.json",
+      "fixtureType": "reviewer-authored synthetic report inserted through normal plan-file import, not actual AI or work output",
+      "latestPlanId": "CP_e56476f1-7b28-454c-82c1-c87b2dae2ee3",
+      "oldRequestPlanId": "CP_5ba56e54-04cf-4d53-a295-a3d2a7dafa21"
+    }
+  ],
+  "sourceRoundTrips": [
+    {
+      "label": "raw-source-trip-1280",
+      "sourceSHA256": "cd143d46caf9c613b3a177b9a9964139419bd70780132968785540ed8fb9abdc",
+      "length": 1369,
+      "beforeEqualsAfter": true,
+      "before": {
+        "camera": "translate(378.203px, 172px) scale(1)",
+        "url": "http://127.0.0.1:36655/#/p/E_dbd10f57-da8b-4ad3-b243-6a3484c6d577/in/A_49bad1f8-971b-4bff-8030-a62d8a470c16/A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+        "scroll": 0,
+        "draft": "이 부분에서 메모리 제한과 시간 제한으로 끝난 이유를 호출자가 구별해 설명할 수 있게 하고 싶다. 기존 eval 실행 순서와 전역 객체 공유 동작은 유지한다.",
+        "authoring": {
+          "version": "authoring-context.1",
+          "draft": {
+            "state": "set",
+            "context": {
+              "projectId": "P_6a74a281-f0dd-4dd8-8e00-d5b013112326",
+              "selection": {
+                "id": "A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+                "name": "평가 실행 파이프라인"
+              },
+              "scope": {
+                "id": "A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+                "name": "평가 실행 파이프라인"
+              },
+              "at": "2026-10-28T21:29:28.821Z",
+              "how": "first-edit"
+            }
+          },
+          "analyzed": {
+            "authoring": {
+              "state": "set",
+              "context": {
+                "projectId": "P_6a74a281-f0dd-4dd8-8e00-d5b013112326",
+                "selection": {
+                  "id": "A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+                  "name": "평가 실행 파이프라인"
+                },
+                "scope": {
+                  "id": "A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+                  "name": "평가 실행 파이프라인"
+                },
+                "at": "2026-10-28T21:29:28.821Z",
+                "how": "first-edit"
+              }
+            },
+            "missing": []
+          }
+        },
+        "ref": "N01"
+      },
+      "after": {
+        "camera": "translate(378.203px, 172px) scale(1)",
+        "url": "http://127.0.0.1:36655/#/p/E_dbd10f57-da8b-4ad3-b243-6a3484c6d577/in/A_49bad1f8-971b-4bff-8030-a62d8a470c16/A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+        "scroll": 0,
+        "draft": "이 부분에서 메모리 제한과 시간 제한으로 끝난 이유를 호출자가 구별해 설명할 수 있게 하고 싶다. 기존 eval 실행 순서와 전역 객체 공유 동작은 유지한다.",
+        "authoring": {
+          "version": "authoring-context.1",
+          "draft": {
+            "state": "set",
+            "context": {
+              "projectId": "P_6a74a281-f0dd-4dd8-8e00-d5b013112326",
+              "selection": {
+                "id": "A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+                "name": "평가 실행 파이프라인"
+              },
+              "scope": {
+                "id": "A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+                "name": "평가 실행 파이프라인"
+              },
+              "at": "2026-10-28T21:29:28.821Z",
+              "how": "first-edit"
+            }
+          },
+          "analyzed": {
+            "authoring": {
+              "state": "set",
+              "context": {
+                "projectId": "P_6a74a281-f0dd-4dd8-8e00-d5b013112326",
+                "selection": {
+                  "id": "A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+                  "name": "평가 실행 파이프라인"
+                },
+                "scope": {
+                  "id": "A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+                  "name": "평가 실행 파이프라인"
+                },
+                "at": "2026-10-28T21:29:28.821Z",
+                "how": "first-edit"
+              }
+            },
+            "missing": []
+          }
+        },
+        "ref": "N01"
+      }
+    },
+    {
+      "label": "raw-source-trip-1440",
+      "sourceSHA256": "cd143d46caf9c613b3a177b9a9964139419bd70780132968785540ed8fb9abdc",
+      "length": 1369,
+      "beforeEqualsAfter": true,
+      "before": {
+        "camera": "translate(436.602px, 172px) scale(1)",
+        "url": "http://127.0.0.1:36655/#/p/E_cd725a6e-e79a-404f-8f31-b7952f244564/in/A_49bad1f8-971b-4bff-8030-a62d8a470c16/A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+        "scroll": 0,
+        "draft": "이 부분에서 메모리 제한과 시간 제한으로 끝난 이유를 호출자가 구별해 설명할 수 있게 하고 싶다. 기존 eval 실행 순서와 전역 객체 공유 동작은 유지한다.",
+        "authoring": {
+          "version": "authoring-context.1",
+          "draft": {
+            "state": "set",
+            "context": {
+              "projectId": "P_6a74a281-f0dd-4dd8-8e00-d5b013112326",
+              "selection": {
+                "id": "A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+                "name": "평가 실행 파이프라인"
+              },
+              "scope": {
+                "id": "A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+                "name": "평가 실행 파이프라인"
+              },
+              "at": "2026-10-28T21:30:39.821Z",
+              "how": "first-edit"
+            }
+          },
+          "analyzed": {
+            "authoring": {
+              "state": "set",
+              "context": {
+                "projectId": "P_6a74a281-f0dd-4dd8-8e00-d5b013112326",
+                "selection": {
+                  "id": "A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+                  "name": "평가 실행 파이프라인"
+                },
+                "scope": {
+                  "id": "A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+                  "name": "평가 실행 파이프라인"
+                },
+                "at": "2026-10-28T21:30:39.821Z",
+                "how": "first-edit"
+              }
+            },
+            "missing": []
+          }
+        },
+        "ref": "N01"
+      },
+      "after": {
+        "camera": "translate(436.602px, 172px) scale(1)",
+        "url": "http://127.0.0.1:36655/#/p/E_cd725a6e-e79a-404f-8f31-b7952f244564/in/A_49bad1f8-971b-4bff-8030-a62d8a470c16/A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+        "scroll": 0,
+        "draft": "이 부분에서 메모리 제한과 시간 제한으로 끝난 이유를 호출자가 구별해 설명할 수 있게 하고 싶다. 기존 eval 실행 순서와 전역 객체 공유 동작은 유지한다.",
+        "authoring": {
+          "version": "authoring-context.1",
+          "draft": {
+            "state": "set",
+            "context": {
+              "projectId": "P_6a74a281-f0dd-4dd8-8e00-d5b013112326",
+              "selection": {
+                "id": "A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+                "name": "평가 실행 파이프라인"
+              },
+              "scope": {
+                "id": "A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+                "name": "평가 실행 파이프라인"
+              },
+              "at": "2026-10-28T21:30:39.821Z",
+              "how": "first-edit"
+            }
+          },
+          "analyzed": {
+            "authoring": {
+              "state": "set",
+              "context": {
+                "projectId": "P_6a74a281-f0dd-4dd8-8e00-d5b013112326",
+                "selection": {
+                  "id": "A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+                  "name": "평가 실행 파이프라인"
+                },
+                "scope": {
+                  "id": "A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+                  "name": "평가 실행 파이프라인"
+                },
+                "at": "2026-10-28T21:30:39.821Z",
+                "how": "first-edit"
+              }
+            },
+            "missing": []
+          }
+        },
+        "ref": "N01"
+      }
+    }
+  ],
+  "commands": [
+    {
+      "command": "node --test app/continuity/tests/zero85.test.mjs",
+      "cwd": "/workspace/work/af85-72zvazzm",
+      "runs": 1,
+      "exit": 0
+    },
+    {
+      "command": "python3 /workspace/work/af85-flow-run.py",
+      "flow": "unmodified zero85_flow",
+      "runsPerWidth": 1,
+      "widths": [
+        1280,
+        1440
+      ],
+      "height": 800,
+      "exit": 0
+    },
+    {
+      "command": "python3 /workspace/work/af85-session.py; temporary af85-empty-steps.py and af85-past-steps.py",
+      "mode": "interactive targeted manual UI checks, existing Chromium",
+      "exit": 0,
+      "manualViewports": [
+        [
+          1280,
+          720,
+          1
+        ],
+        [
+          1440,
+          900,
+          1
+        ]
+      ]
+    }
+  ],
+  "visualJudgment": "No-change title and caution distinguish proposed0 from goal complete; summary, preserve and unknowns read in clear sections. At1280 the last material rows/footnote require pane scrolling, no document scroll. Secondary metadata/source paths are dense and repeated but no title/card/line overlap observed. The conflicting old-return statuses remain the P2 above.",
+  "captureCount": 2,
+  "snapshots": [
+    {
+      "source": "bf30033cca0f16b87b90aac31d8bdccd8bb03d49",
+      "sequence": 1,
+      "atUTC": "2026-10-28T21:30:32.651283+00:00",
+      "viewport": {
+        "width": 1280,
+        "height": 720,
+        "dpr": 1
+      },
+      "png": "/workspace/work/af85-observation/01-empty-1280.png",
+      "pngBytes": 166314,
+      "sha256": "2db222fe7b7343426a773bca938ccce6ef4da7b112d862038ee754295bc3ac9a",
+      "pairedJSON": "/workspace/work/af85-observation/01-empty-1280.json",
+      "pairedJSONsha256": "e014810fdc9047e965a7c1d8d3342f04cde60ef8fc2847c4f071f6b9f93b4f50",
+      "directlyOpenedWithViewImage": true
+    },
+    {
+      "source": "bf30033cca0f16b87b90aac31d8bdccd8bb03d49",
+      "sequence": 21,
+      "atUTC": "2026-10-28T21:32:08.349481+00:00",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "dpr": 1
+      },
+      "png": "/workspace/work/af85-observation/21-old-return-actually-expanded-1440.png",
+      "pngBytes": 228422,
+      "sha256": "9798284b12ad3ee1bf075b6c89a004f0ba122d19a69acb69b662ecf0d3c7598b",
+      "pairedJSON": "/workspace/work/af85-observation/21-old-return-actually-expanded-1440.json",
+      "pairedJSONsha256": "d31f1b2c93302f3d651de77bd767d97f7bbcd7a33e61095c2c5230ef74c85cab",
+      "directlyOpenedWithViewImage": true
+    }
+  ],
+  "snapshotsNotOverwritten": true,
+  "allOriginalObservationJSONs": "/workspace/work/af85-observation",
+  "rawObservationLog": "/workspace/work/af85-observation/observations.json",
+  "methodBoundaries": [
+    "Provided Windows pinned TypeScript5.8.3 build run on existing Linux Python/Chromium; no remote Git verification or rebuild.",
+    "Designated actual74 saved reading is frozen public source material, not OSS execution; hypothetical intent and synthetic replies/reports are reviewer authored.",
+    "Whole suite, real AI/API, new first map, installs, account/proxy changes, WindowsCI and cross-tab synchronization not executed.",
+    "The supplied flow seeds local test storage; manual review starts via normal home import and pins on first edit. Synthetic return review copy was imported normally.",
+    "Initial PTY command decode and wrapper read-expression quoting errors were corrected before the first analysis; no product/test source edits or completed-flow repeats."
+  ],
+  "pageErrors": [],
+  "cleanup": {
+    "browserClosed": true,
+    "serverStopped": true,
+    "serverExit": -15
+  },
+  "flowCleanup": true,
+  "original84Preserved": true
+}

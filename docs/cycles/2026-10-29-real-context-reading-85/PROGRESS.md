@@ -1,5 +1,7 @@
 # 85 진행 근거 — 최종 수용 전
 
+> 아래는995e03d 시점의 이력이다. 현재 판정과 실제1회·최종CI·PC 결과는 [최종 결과](RESULT.md)를 따른다.
+
 후보 runtime **bf30033cca0f16b87b90aac31d8bdccd8bb03d49**, app tree **42803f840f53dce12a047a4cd27912ebf945267f**, [PR54 draft](https://github.com/tlsee0813-cmd/agentflow-studio/pull/54). 공개73의 앱 코드는 바꾸지 않았다. UI75 최종693d0c7과84 최종90ac736 수리는 계승한다.
 
 ## 확인한 것

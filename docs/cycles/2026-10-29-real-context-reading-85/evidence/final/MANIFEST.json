@@ -1,0 +1,66 @@
+{
+  "basis": "Exact staged Git blob bytes; does not hash this manifest",
+  "runtime": "ffe60935a6f7f5760fb9a1a72ca66e8ab8693fa3",
+  "files": [
+    {
+      "file": "actual-model.json",
+      "bytes": 19346,
+      "sha256": "21c03c6260a16bd5a65aaea65dea2d152ed17d431d0c7f288f2a9823b1c141c4"
+    },
+    {
+      "file": "ci.json",
+      "bytes": 1097,
+      "sha256": "4c6ed2a6744c7e66aa3c189e9526d201c21d24e90ca6b5d6d216f8745984d2d4"
+    },
+    {
+      "file": "cloud-delta.json",
+      "bytes": 6300,
+      "sha256": "536f823371f06ded797c4c56db731dfa45d8e25319136d3c54b96ae112e3854d"
+    },
+    {
+      "file": "cloud-original.json",
+      "bytes": 19838,
+      "sha256": "c6e457da898cff2b0d37a3007d925f9aab60e21454252c0e78073e2bb8938df3"
+    },
+    {
+      "file": "independent-semantic.json",
+      "bytes": 11816,
+      "sha256": "0bbf50f0e385b228b852a5a62fc252efd510fa96d1fdff2fee9a6588a251c10d"
+    },
+    {
+      "file": "real-overview-1280.jpg",
+      "bytes": 123049,
+      "sha256": "23064cde4805b9ac212eeb77c5722711c8e171062f92491d8346b0894ffeb282"
+    },
+    {
+      "file": "real-source-1280.jpg",
+      "bytes": 140810,
+      "sha256": "28aeb18ce139ca1bae5fb664d734f6ca9d50cae479fecd331e194f2e46d182c8"
+    },
+    {
+      "file": "return-after.png",
+      "bytes": 229104,
+      "sha256": "91704b06f369b37dffc72478858d8639cc5c022328701dd0ac35f3b81b5758b0"
+    },
+    {
+      "file": "return-before.png",
+      "bytes": 228422,
+      "sha256": "9798284b12ad3ee1bf075b6c89a004f0ba122d19a69acb69b662ecf0d3c7598b"
+    },
+    {
+      "file": "root-real-pc.json",
+      "bytes": 12899,
+      "sha256": "7c10a2b0b93f583722743193c8fc5bb6eb1bba7a19f29eb7c76ffdcbd3abd9f0"
+    },
+    {
+      "file": "root-semantic.json",
+      "bytes": 2731,
+      "sha256": "20c06dfaac022ac0f54606ba0e1f485e11de185f8647c2e391c2b7fa32a1f2be"
+    },
+    {
+      "file": "wording-review.json",
+      "bytes": 2653,
+      "sha256": "055a62dfc1534a4f21c00b2c0c64cdbe4bca1e83389ef5f36594dd8bd0f17001"
+    }
+  ]
+}

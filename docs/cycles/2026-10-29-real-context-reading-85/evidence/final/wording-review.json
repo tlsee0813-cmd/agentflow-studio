@@ -1,0 +1,42 @@
+{
+  "task": "AF85-return-label-final-delta-review",
+  "base": "995e03d218636c5c5b1928695a0d7d4b801bc171",
+  "source": "ffe60935a6f7f5760fb9a1a72ca66e8ab8693fa3",
+  "appTree": "b4984d261a4a7ccc1ace712a4d9d783c8a9103db",
+  "conclusion": "2파일5줄의 최소 문구 delta에 새 실질 P1/P2를 발견하지 못했다. 원문 구절의 현재 연결 부재로 의미를 좁혀 별도 보고의 수신 부재처럼 읽히던 공백을 수리한다.",
+  "findings": [],
+  "reviewed": [
+    {
+      "file": "app/continuity/src/client/request-results.ts",
+      "line": 119,
+      "detail": "lead도 history도 없는 분기의 summary만 '연결된 원문 구절 없음'으로 바뀐다. 데이터 전체에 관련 내용이 없거나 보고를 받지 못했다고 단정하지 않는다."
+    },
+    {
+      "file": "app/continuity/src/client/request-results.ts",
+      "line": 122,
+      "detail": "current도 history도 없는 설명만 '이 요청 항목에 연결된 프로젝트 원문 구절이 아직 없어요.'로 바뀐다. 프로젝트 원문과 항목 연결이라는 범위가 명시된다."
+    },
+    {
+      "file": "app/continuity/tests/studio_browser.py",
+      "lines": [
+        1749,
+        1750,
+        2238
+      ],
+      "detail": "기존3곳의 예상 문구만 갱신한다. 항목 개수·대상/판본·인용 등 나머지 검사는 delta에서 제거하지 않았다."
+    }
+  ],
+  "preservation": {
+    "history": "history.length 분기의 기존 ITEM_STATE_LABEL, '앞 보고는 이후 원문이 철회' 안내와 철회·정정 details는 변경하지 않았다.",
+    "identity": "request/item key, disclosure/focus, lead/current/history 계산과 원문 접근 이벤트를 변경하지 않았다.",
+    "observations": "plan-view의 별도 observations·보고 count·본문 경로는 건드리지 않는다. 이를 원문 match나 완료 상태로 합치지 않는다.",
+    "storedData": "요청/반환 저장 로직과 schema 변경이 없다."
+  },
+  "evidenceLimits": [
+    "HEAD와 clean status 및 exact diff만 확인했다. 제품·runner 수정, Node/Python 검사, UI/API 실행은0이다.",
+    "총괄의 pinned5.8.3 check/build exit0와 Cloud 원본 관측은 전달받은 근거다. 이 검토에서 다시 실행하거나 PNG를 직접 열람한 것으로 세지 않는다.",
+    "기존 v2는995 source에 고정돼 있으므로 현 ffe source에서 sourceguard 차단이 유지돼야 한다. 이 검토는 v2를 수정·실행하지 않았다."
+  ],
+  "previousReview": ".ops/results/experience85-return-label-review.json",
+  "onlyWrite": ".ops/results/experience85-return-label-final-review.json"
+}

@@ -1,0 +1,236 @@
+{
+  "task": "AF85-actual-connection-independent-semantic",
+  "source": "ffe60935a6f7f5760fb9a1a72ca66e8ab8693fa3",
+  "appTree": "b4984d261a4a7ccc1ace712a4d9d783c8a9103db",
+  "pass": true,
+  "conclusion": "고정 실제 자료와 가상 변경 초안의 이번 1회 응답은 의미 기준 통과다. 이미 구별된 두 예외의 문서 계약을 인정하고, 호출자에게 충분한 설명 정보가 실제로 전달되는지는 미확인으로 남겨 중립적인 제안 없음으로 읽었다. 목표 달성·변경 불필요 검증으로 판정하지 않았다.",
+  "inputs": {
+    "artifacts": [
+      {
+        "file": "experience85-connection-plan.json",
+        "sha256": "a38a792dcca3482c54d172ccd87dafb0364985acd7e26ce853307817b52df218"
+      },
+      {
+        "file": "experience85-connection-amendment.json",
+        "sha256": "41d32e03cfd0bbc6cecc849fb7d5008bb4d4ef2330509f72c808ae3004cb1f78"
+      },
+      {
+        "file": "experience85-connection-v3-frozen.json",
+        "sha256": "d00215b94b2a529defbe50976092950afcbe1e3f13d5af8b792d0616d5f54c0f"
+      },
+      {
+        "file": "experience85-connection-v3-result.json",
+        "sha256": "e77081e467391eb2e38c66a00b338e864d24c9bc65bde6db9f7be94383d30194"
+      }
+    ],
+    "askSha256": "9d9b2533e8643c57f6e39d2d8b9453eb1f99a1fcf264ed00653a5c63d8c82a0d",
+    "replySha256": "2002ef6a978744329ac45ac08522a1987ed35cde2385c97c612959205fa15ef0",
+    "askExactlyFrozen": true,
+    "fixtureSha256": "aaffb3764afc68f054d05ff54f4e2b5bf72b5b0abfc259d0bfc1deda666f8065",
+    "promptSha256": "f5c3e687c67c87e6d272efafee247bac79622fcc561247a56dbe6bfb909e1cb6",
+    "partCount": 6,
+    "evidenceCount": 9,
+    "evidence": [
+      {
+        "id": "INTENT",
+        "kind": "user",
+        "textSha256": "fbeac37f9f77bb2018f0d6847bae8fd731f8bf7ed2519ae5425a04dbd75c2325"
+      },
+      {
+        "id": "M01",
+        "kind": "reading",
+        "textSha256": "685652b4b4103d9af471f83f6e90176f82fc0c7ecd1eb4c31074364cbc02396d"
+      },
+      {
+        "id": "M02",
+        "kind": "reading",
+        "textSha256": "19a4cfbb5006def73332a67446bdd12b1911358032acb7b5f2ed4519b1997845"
+      },
+      {
+        "id": "M03",
+        "kind": "reading",
+        "textSha256": "27803ffe49d70f30f5ab4774dd922b9c8ac54e8878683ce33e92d5b409de86bc"
+      },
+      {
+        "id": "M04",
+        "kind": "reading",
+        "textSha256": "ccdba58d3845cfd4483d80eec7c43d4b6818830b8954411ee17f187b611601cc"
+      },
+      {
+        "id": "M05",
+        "kind": "reading",
+        "textSha256": "c5be1ef8f86cca6b969cc53b0553a660d13512c8f03d480cd08a0e4aa28c8e89"
+      },
+      {
+        "id": "M06",
+        "kind": "reading",
+        "textSha256": "173f06fdb28c1902bde5688c804ed5e5e06f429944d0b8b92d1715667605c341"
+      },
+      {
+        "id": "N01",
+        "kind": "record",
+        "textSha256": "cd143d46caf9c613b3a177b9a9964139419bd70780132968785540ed8fb9abdc"
+      },
+      {
+        "id": "N02",
+        "kind": "record",
+        "textSha256": "cf757e7aea50d53e9c428c7ca134e77b53b30152cbe310d3c2d8499e387eec6f"
+      }
+    ],
+    "settings": {
+      "model": "deepseek-flash",
+      "thinking": "enabled",
+      "reasoning_effort": "low",
+      "max_tokens": 8192,
+      "timeoutMs": 60000
+    },
+    "artifactObservation": {
+      "providerRequests": 1,
+      "ms": 7469,
+      "retries": 0,
+      "applied": false,
+      "preserved": true,
+      "eligible": true
+    },
+    "provenance": "고정 공개 README/context.py 발췌 및 이전 저장 AI 읽기, 총괄 작성 가상 구상. 해당 OSS 실행 또는 사용자의 실제 라이브러리 변경 요청이 아니다."
+  },
+  "judgments": [
+    {
+      "criterion": "기존 두 예외 계약 인정",
+      "pass": true,
+      "replyEvidence": [
+        {
+          "path": "$.outcome.reply.summary",
+          "text": "MemoryLimitError, TimeLimitError를 각각 발생시킨다고 독스트링에 적혀 있어 ... 계약은 이미 있습니다"
+        }
+      ],
+      "sourceEvidence": "N01 eval docstring Raises는 메모리 초과와 시간 초과를 두 이름으로 명시한다. M02/M06도 이를 이전 AI 읽기로 제시한다.",
+      "reasoning": "식별 자체가 없거나 완전히 모른다고 하지 않고 기존 계약을 재사용할 수 있는 근거로 인정했다. 새 예외 타입·구분 장치를 만들라는 item을 지어내지 않았다."
+    },
+    {
+      "criterion": "호출자 설명 발췌 미확인",
+      "pass": true,
+      "replyEvidence": [
+        {
+          "path": "$.outcome.reply.summary",
+          "text": "호출자가 사유를 '설명'할 수 있을 만큼 예외 메시지·세부 정보가 실제로 구분되는지는 ... 확인되지 않아"
+        },
+        {
+          "path": "$.outcome.reply.unknowns[1]",
+          "text": "필요한 정보의 형태 ... 와 그 요구 수준"
+        }
+      ],
+      "sourceEvidence": "N01은 eval 경로와 Raises 계약만 보인다. 예외 생성자/메시지·VM 전체 구현·호출자 처리·실행 검사는 없다. N02는 문서 예제와 일반 Error 위치 추적 설명이며 두 제한 예외의 호출자 안내를 입증하지 않는다.",
+      "reasoning": "미기재를 부재로 바꾸지 않았다. 메시지/속성이 반드시 새로 필요하다고 작업으로 강제하지 않고, 예외 타입만으로 충분한지 포함해 요구 수준을 미확인으로 남긴다."
+    },
+    {
+      "criterion": "요구·기존 사실·실행 관측 구별",
+      "pass": true,
+      "replyEvidence": [
+        {
+          "path": "$.outcome.reply.summary",
+          "text": "제공된 자료에서는 ... 독스트링에 적혀 있어"
+        },
+        {
+          "path": "$.outcome.reply.unknowns[0]",
+          "text": "실제로 각각 발생하는지 ... 제공된 자료로 확인되지 않음"
+        },
+        {
+          "path": "$.outcome.reply.unknowns[2]",
+          "text": "위 동작을 검증하는 검사 자료 ... 확인되지 않음"
+        }
+      ],
+      "sourceEvidence": "INTENT는 가상 사용자 구상, M01~M06은 앱이 확인한 사실이 아닌 이전 AI 읽기, N01은 고정 코드 발췌, N02는 문서로 구분되어 들어갔다.",
+      "reasoning": "summary의 기존 명명 계약과 unknowns의 실제 발생 검증은 서로 다른 층위다. unknowns[0]을 두 이름 자체가 미확인이라는 뜻으로 읽지 않는다. 문서/읽기 내용을 실제 통과 검사나 현재 런타임 보장으로 승격하지 않았다."
+    },
+    {
+      "criterion": "PIPE 지시 맥락과 직접 변경 대상 구별",
+      "pass": true,
+      "replyEvidence": [
+        {
+          "path": "$.ask.authoring",
+          "text": "selection/scope 모두 P03 평가 실행 파이프라인"
+        },
+        {
+          "path": "$.outcome.reply.summary",
+          "text": "eval의 메모리/시간 제한 사유와 호출자 설명을 다룸"
+        }
+      ],
+      "sourceEvidence": "P03은 JSContext.eval 아래 평가 파이프라인이며 M03/N01은 그 순서·VM·globals를 서술한다. P04 제한/P06 오류의 관련 내용도 N01에 있다.",
+      "reasoning": "응답은 이 eval/제한 맥락을 유지하고 다른 언어 기능이나 프로젝트 전체 개조로 이동하지 않았다. 직접 제안은 없으므로 partIds도 없다. 선택 P03이 변경 ID로 나와야 한다는 기준은 적용하지 않았다.",
+      "limit": "단일 zero 응답만으로 authoring 필드의 인과 효과나 다른 선택에서도 항상 구별함을 입증하지 않는다."
+    },
+    {
+      "criterion": "eval 순서와 globals 보존",
+      "pass": true,
+      "replyEvidence": [
+        {
+          "path": "$.outcome.reply.preserve[0]",
+          "text": "파싱→바이트코드 컴파일→VM 실행→파이썬 값 변환 순서"
+        },
+        {
+          "path": "$.outcome.reply.preserve[1]",
+          "text": "전역 객체를 복사하지 않고 공유 ... 중첩 eval"
+        },
+        {
+          "path": "$.outcome.reply.preserve[2]",
+          "text": "메모리 한도와 시간 한도를 VM 생성 시 전달"
+        }
+      ],
+      "sourceEvidence": "N01은 Parser.parse→Compiler.compile→VM 생성/한도 전달→vm.globals=self._globals→vm.run→_to_python을 보이며 globals 주석은 복사하지 않는 목적을 설명한다.",
+      "reasoning": "명시 보존 두 조건을 그대로 유지하고 한도 인수 전달도 기존 경로로 보존한다. context 격리·globals 복사·순서 변경을 추가하지 않았다. preserve는 향후 유지 조건이지 실행 검사 통과 선언이 아니다."
+    },
+    {
+      "criterion": "불필요 변경 없음",
+      "pass": true,
+      "replyEvidence": [
+        {
+          "path": "$.outcome.reply.items",
+          "text": "[]"
+        },
+        {
+          "path": "$.outcome.reply.impacts",
+          "text": "[]"
+        },
+        {
+          "path": "$.outcome.reply.summary",
+          "text": "이번 분석에서는 변경안을 제안하지 않습니다."
+        }
+      ],
+      "sourceEvidence": "원기준은 기존 계약을 인정한 no-change/clarification을 허용하고 amendment는 제안 없음과 검증된 변경 불필요를 구별한다.",
+      "reasoning": "단지 빈 배열이라 통과한 것이 아니다. 기존 계약 인정과 호출자 정보의 미확인이 제안 없음의 근거로 함께 제시됐다. unknowns를 선택 가능한 작업으로 승격하지 않았다."
+    },
+    {
+      "criterion": "근거 없는 확정 보증 없음",
+      "pass": true,
+      "replyEvidence": [
+        {
+          "path": "$.outcome.reply.unknowns[0]",
+          "text": "실제로 각각 발생하는지 ... 제공된 자료로 확인되지 않음"
+        },
+        {
+          "path": "$.outcome.reply.unknowns[2]",
+          "text": "위 동작을 검증하는 검사 자료 ... 확인되지 않음"
+        }
+      ],
+      "reasoning": "요구 달성이나 검증된 변경 불필요를 선언하지 않으며 실제 timeout/memory enforcement·호출자 설명·검사 성공을 보장하지 않는다. docstring 계약 인정과 runtime 미검증을 함께 유지한다."
+    }
+  ],
+  "decision": {
+    "semanticGate": "pass",
+    "replayMeaningRecommendation": "총괄의 별도 pass 및 실행 게이트를 충족하면 같은 저장 응답의 PC 읽기를 다음 단계에서 확인할 수 있다. 이 결과 파일은 replay 실행이나 승인 파일 작성 자체가 아니다.",
+    "uiGate": "미검증; 이번 응답을 같은 비교면에서 읽고 필요한 원문 왕복 후 맥락을 보존하는지 별도 확인 필요",
+    "fullGoal": "첫 지도 의미품질·일반 모델 정확도·OSS 실행·전체 제품 완성은 미증명"
+  },
+  "method": {
+    "rootVerdictRead": false,
+    "read": "원계획·amendment, 고정 ask의6부분/9자료 전체와 outcome.reply를 대조했다. provider.raw/숨은 추론문은 판단 근거로 사용하지 않았다.",
+    "executed": "JSON 읽기와 해시 계산만 수행. 새 API·재시도·수선·validator 재실행·제품/runner 수정·UI·replay0.",
+    "originalPreservation": "모든 입력 artifact는 읽기만 했고 결과 한 파일만 새로 작성했다."
+  },
+  "limitations": [
+    "이 결과는 실제 모델의 1회 응답이지만 입력 요구는 검토자가 만든 가상 구상이다.",
+    "summary/preserve/unknowns에는5키 계약상 문장별 refs가 없으므로 이번 평가는 원문 내용 대조에 따른 것이다. UI 자료 접근을 문장별 검증 표시로 부르면 안 된다.",
+    "기존 명명 계약이 있는 것과 사용자에게 필요한 설명이 실제로 충분한지는 다르다. 이번 pass는 후자를 해결했다고 판단하지 않는다."
+  ]
+}

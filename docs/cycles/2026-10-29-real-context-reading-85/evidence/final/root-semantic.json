@@ -1,0 +1,49 @@
+{
+  "task": "AF85 real material connection root semantic judgment",
+  "source": "ffe60935a6f7f5760fb9a1a72ca66e8ab8693fa3",
+  "resultSha256": "e77081e467391eb2e38c66a00b338e864d24c9bc65bde6db9f7be94383d30194",
+  "askSha256": "9d9b2533e8643c57f6e39d2d8b9453eb1f99a1fcf264ed00653a5c63d8c82a0d",
+  "pass": true,
+  "scope": "One fixed actual74 micro material/hypothetical draft response; not general accuracy, executed OSS, first-map quality or goal completion.",
+  "checks": [
+    {
+      "criterion": "Existing named exception contract",
+      "finding": "Summary explicitly says docstring names MemoryLimitError/TimeLimitError and the type distinction already exists. It does not propose missing exception classes.",
+      "pass": true
+    },
+    {
+      "criterion": "Documented/source behavior vs execution",
+      "finding": "The summary limits its claim to the supplied docstring. Unknowns retain actual occurrence, messages/extra information, caller needs and runtime test evidence as unverified. No enforcement/safety guarantee.",
+      "pass": true
+    },
+    {
+      "criterion": "Authoring PIPE reference vs direct target",
+      "finding": "Reads eval pipeline rather than unrelated ES5 or other subsystem. Empty items is permitted by frozen criteria, so no direct target ID is required or falsely fabricated.",
+      "pass": true
+    },
+    {
+      "criterion": "Preservation",
+      "finding": "Keeps parse→compile→VM→Python conversion, shared globals without copying, and existing limit arguments. Third preserve is shown current VM construction, not a new requirement or implementation change.",
+      "pass": true
+    },
+    {
+      "criterion": "Grounded proposal/no proposal",
+      "finding": "items/impacts are empty with a grounded explanation: named contracts exist, caller-visible detail cannot be verified. This is no proposal in this analysis, not verified satisfaction or a new implementation.",
+      "pass": true
+    },
+    {
+      "criterion": "Unknowns and user intent",
+      "finding": "Caller message/attribute form is not specified in the fixed draft; listing it as clarification does not reopen an already fixed requirement. Known exception names are not collapsed into total uncertainty.",
+      "pass": true
+    }
+  ],
+  "limits": [
+    "One deliberately scoped hypothetical request over saved public excerpts; no unseen exception implementation or real runtime execution was inspected.",
+    "An empty proposal response does not establish positive change planning quality or desired caller behavior.",
+    "Normal-PC replay and original-source roundtrip remain separate, pending independent semantic pass."
+  ],
+  "retries": 0,
+  "repair": 0,
+  "providerRequests": 1,
+  "applied": false
+}

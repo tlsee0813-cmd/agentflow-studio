@@ -1,0 +1,40 @@
+{
+  "headRevision": "ffe60935a6f7f5760fb9a1a72ca66e8ab8693fa3",
+  "checks": [
+    {
+      "id": 123118411596,
+      "name": "verify (ubuntu-24.04)",
+      "head_sha": "ffe60935a6f7f5760fb9a1a72ca66e8ab8693fa3",
+      "status": "completed",
+      "conclusion": "success",
+      "details_url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40774010257/job/123118411596",
+      "output": {
+        "title": null,
+        "summary": null,
+        "text": null,
+        "annotations_count": 1
+      }
+    },
+    {
+      "id": 123118411246,
+      "name": "verify (windows-2022)",
+      "head_sha": "ffe60935a6f7f5760fb9a1a72ca66e8ab8693fa3",
+      "status": "completed",
+      "conclusion": "success",
+      "details_url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40774010257/job/123118411246",
+      "output": {
+        "title": null,
+        "summary": null,
+        "text": null,
+        "annotations_count": 1
+      }
+    }
+  ],
+  "statuses": [],
+  "annotations": [],
+  "hasMore": false,
+  "job": null,
+  "jobs": [],
+  "log": null,
+  "logTruncated": false
+}
