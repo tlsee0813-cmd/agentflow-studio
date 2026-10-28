@@ -1,7 +1,15 @@
 {
   "schemaVersion": "agentflow.record74-samples.1",
   "samples": [
-    { "file": "actual-order-backup.json", "kind": "actual-backup",
-      "note": "The experience73 actual-order backup exactly as saved (idea015.project.10, bytes unchanged): the real AgentFlow73 implementation instruction (3,545 characters, pasted[0]) in an otherwise empty project, where the public first map failed. Its quoted correction (정정원문 “…”) is test material inside the instruction: it does not mean AgentFlow is a document converter. Readings are empty: it holds no AI reply. No key, token or access code (checked with the app's secret pattern). The replies in grounded74.test.mjs are written for the test, not a model's." }
+    {
+      "file": "actual-order-backup.json",
+      "kind": "actual-backup",
+      "note": "The experience73 actual-order backup exactly as saved (idea015.project.10, bytes unchanged): the real AgentFlow73 implementation instruction (3,545 characters, pasted[0]) in an otherwise empty project, where the public first map failed. Its quoted correction (정정원문 “…”) is test material inside the instruction: it does not mean AgentFlow is a document converter. Readings are empty: it holds no AI reply. No key, token or access code (checked with the app's secret pattern). The replies in grounded74.test.mjs are written for the test, not a model's."
+    },
+    {
+      "file": "legacy-return-match.json",
+      "kind": "written-compatibility",
+      "note": "The independent compatibility backup as given (idea015.project.11): a normal domain-made return.2 import and a written map-reading.3 whose match on the returned report is stored against the labelled Source.text (from 164 = label length, to 326). Accepted by 26b parseProject/parseBackup; refused by 9d742c5. Written to the older contract; not a record of an earlier UI's use. No key or token."
+    }
   ]
 }

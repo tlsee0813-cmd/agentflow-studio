@@ -447,3 +447,15 @@ test('74-K5 an earlier reading keeps the coordinates it was stored in (the label
   const now = R.itemReading(R.requestMatches(p), { requestId: q.id, itemId: 'change_1' });
   assert.equal(now.state, 'not-made'); assert.equal(now.history[0].match.from, 0); assert.deepEqual(round(p), p);
 });
+
+test('74-K6 the independent project.11 backup (a map-reading.3 match stored at 164..326 of the labelled report) opens as saved and reads at the report as received', () => {
+  const raw = readFileSync(new URL('./fixtures/record74/legacy-return-match.json', import.meta.url), 'utf8').trimEnd(), saved = JSON.parse(raw);
+  const p = parseProject(raw), b = parseBackup(raw).project;
+  assert.deepEqual(b, p); assert.equal(p.schemaVersion, 'idea015.project.12');
+  assert.deepEqual(p.readings, saved.readings, 'the stored reading, its places and its records as they were');
+  assert.deepEqual(JSON.parse(serializeProject(p)).readings, saved.readings, 'saving again writes the same places');
+  const m = R.requestMatches(p)[0], report = R.recordTexts(p).get(m.match.record).read;
+  assert.equal(saved.readings[0].matches[0].from, 164); assert.equal(m.match.from, 0); assert.equal(report.slice(m.match.from, m.match.to), m.match.quote);
+  assert.equal(R.itemReading(R.requestMatches(p), { requestId: 'RQ_4be30332-aba3-4b69-889e-6aebb89440d7', itemId: 'I1' }).state, 'made');
+  assert.ok(!M.unreadRecords(p, studioView(p)).some(r => r.id === m.match.record), 'the report reads as read (326 of the labelled text is all 162 of it)');
+});
