@@ -45,6 +45,7 @@ const clean = (text: string) => text.replace(/[\u0000-\u0008\u000b\u000c\u000e-\
 export { secretLike } from '../shared/secret.js';
 
 export interface PlanInput {
+  origins?: Record<string, import('../shared/request-return.js').EvidenceOrigin[]>;
   /** Evidence as stored in the plan (real ids are the aliases themselves; evidence never names a project id). */
   evidence: Evidence[];
   ask: PlanAsk;
@@ -93,6 +94,7 @@ export function projectInput(o: { project: Project; view: StudioView }, intent: 
   // What was read per part: small, so it goes first; each line keeps its kind, its version as the record named it, its quote and
   // the id of the record it quotes in this same request (N.. pasted, E.. project records), and says it is not verified.
   const recordRef = new Map<string, string>([...pasted.map((r, i) => [r.id, `N${String(i + 1).padStart(2, '0')}`] as const), ...v.records.map((r, i) => [r.id, `E${String(i + 1).padStart(2, '0')}`] as const)]);
+  input.origins = Object.fromEntries([...recordRef].map(([record, ref]) => [ref, [{ record, reading: null, quote: null }]]));
   const cite = (q: { record: string; quote: string }) => `“${q.quote}”${recordRef.has(q.record) ? ` (${recordRef.get(q.record)})` : ''}`;
   let m = 0;
   for (const p of v.parts) {
@@ -106,6 +108,7 @@ export function projectInput(o: { project: Project; view: StudioView }, intent: 
       text: clip(clean(lines.join('\n')), 3000), basis: clip(`붙여넣은 기록을 AI가 읽어 정리한 이해 · 앱이 확인한 사실 아님 · ${fullTime(u.history.at(-1)!.at)}`, 2000) };
     ask.evidence.push(e);
     if (bytes(ask) > PLAN_BYTES - 64) { ask.evidence.pop(); m--; break; }
+    input.origins[e.id] = [...u.roleBasis.map(q => ({ record: q.record, reading: null, quote: q.quote })), ...u.claims.slice(0, 6).map(c => ({ record: c.record, reading: c.reading, quote: c.quote }))].slice(0, 16);
   }
   type Item = { at: string; e: Evidence };
   const items: Item[] = [
@@ -124,6 +127,7 @@ export function projectInput(o: { project: Project; view: StudioView }, intent: 
     input.records.sent++;
   }
   input.basis = `프로젝트 기록 ${input.records.sent === total ? `${total}개` : `${total}개 중 최신 ${input.records.sent}개`}${m ? ` + 읽은 이해 ${m}개` : ''}${extra.length ? ` + 붙인 자료 ${extra.length}개` : ''} · 판 ${o.project.revision} · ${fullTime(new Date().toISOString())}`;
+  input.origins = Object.fromEntries(Object.entries(input.origins).filter(([ref]) => ask.evidence.some(e => e.id === ref)));
   return finish(input);
 }
 function finish(input: PlanInput): PlanInput {

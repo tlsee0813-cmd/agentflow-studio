@@ -1,5 +1,6 @@
 import { API_SCHEMA, SCHEMA, V5_SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Intent, type Background, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket, type Question, GUIDE_SCHEMA, type GuideRequest, type GuideReply, type GuideEnvelope, type GuideTicket, type UnderstandingInput } from './types.js';
-import {V6_SCHEMA,V7_SCHEMA,V8_SCHEMA,CLAIM_KINDS,READINGS_LIMIT,PASTED_TEXT_LIMIT,PASTED_LIMIT,type Area,type PlanStamp,type Point,type ManualPositions,type Backup} from './types.js';
+import {V6_SCHEMA,V7_SCHEMA,V8_SCHEMA,V9_SCHEMA,CLAIM_KINDS,READINGS_LIMIT,PASTED_TEXT_LIMIT,PASTED_LIMIT,type Area,type PlanStamp,type Point,type ManualPositions,type Backup} from './types.js';
+import { validateFrozenRequest, validateStoredMatch, hasTarget, type FrozenRequest, type StoredRequestMatch } from './request-return.js';
 export class ContextError extends Error { constructor(code: string) { super(code); this.name = 'ContextError'; } }
 export function ensure(condition: unknown, code = 'INVALID_DATA'): asserts condition { if (!condition) throw new ContextError(code); }
 function obj(v: unknown, keys: string[]): asserts v is Record<string, unknown> {
@@ -228,7 +229,7 @@ function assertProject(v: unknown): asserts v is Project {
   const tasks=new Set<string>(),returns=new Map<string,{taskId:string;record:ExportRecord}>();
   const areaIds=space(v.space);
   pasted(v.pasted,areaIds);
-  readings(v.readings,areaIds,new Set([...(v.pasted as {id:string}[]).map(r=>r.id),...sources.keys()]));
+  readings(v.readings,areaIds,new Map([...(v.pasted as {id:string;text:string}[]).map(r=>[r.id,r.text] as const),...[...sources.values()].map(r=>[r.id,r.text] as const)]),v.id as string);
   for (const t of v.tasks) {
     const optional=['intentEdit','areaId'].filter(k=>t&&typeof t==='object'&&Object.hasOwn(t,k));
     obj(t,['id','sourceIds','parentTaskId','advice','adviceRevision','mode','manual','suggestions','handoffs','resultFile','background',...optional]); id(t.id);
@@ -334,16 +335,23 @@ function pasted(v:unknown,areaIds:Set<string>) {
 }
 /** Map readings: every part a known area, every quote of a known record (a pasted record or a source), every claim a known
  * kind, and a claim replaced only by a later one of the same area. Relation ids may be gone (the person removed the line). */
-function readings(v:unknown,areaIds:Set<string>,records:Set<string>) {
+function readings(v:unknown,areaIds:Set<string>,records:Map<string,string>,projectId:string) {
   list(v,READINGS_LIMIT);const seen=new Map<string,Map<string,number>>(),hashes=new Set<string>();
   const quote=(q:unknown)=>{obj(q,['record','quote']);ensure(records.has(q.record as string));text(q.quote,300);};
   const entries=new Set<string>();
+  const requestReadings=new Map<string,{requests:FrozenRequest[];matches:StoredRequestMatch[]}>();
   for(const r of v as unknown[]){
+    if(!!r&&typeof r==='object'&&(r as {version?:unknown}).version==='request-correction.1'){
+      obj(r,['version','id','at','reading','index','target']);id(r.id);date(r.at);ensure(!entries.has(r.id as string));entries.add(r.id as string);integer(r.index);
+      const original=requestReadings.get(r.reading as string);ensure(original&&original.matches[r.index as number]);
+      if(r.target!==null){obj(r.target,['requestId','itemId']);ensure(hasTarget(original.requests,r.target as unknown as {requestId:string;itemId:string}));}continue;
+    }
     if(!!r&&typeof r==='object'&&(r as {version?:unknown}).version==='map-correction.1'){
       obj(r,['version','id','at','areaId','text','corrects']);id(r.id);ensure(!entries.has(r.id as string));entries.add(r.id as string);date(r.at);
       ensure(areaIds.has(r.areaId as string));text(r.text,300);ensure(r.corrects===null||seen.has(r.corrects as string));continue;
     }
-    obj(r,['version','id','at','model','prompt','hash','records','summary','parts','relations','candidates','gaps','skipped']);ensure(r.version==='map-reading.1');
+    const two=!!r&&typeof r==='object'&&(r as {version?:unknown}).version==='map-reading.2';
+    obj(r,['version','id','at','model','prompt','hash','records','summary','parts','relations','candidates','gaps','skipped',...(two?['requests','matches']:[])]);ensure(r.version==='map-reading.1'||two);
     id(r.id);ensure(!entries.has(r.id as string));entries.add(r.id as string);date(r.at);text(r.model,80);text(r.prompt,40);ensure(typeof r.hash==='string'&&/^[0-9a-f]{64}$/.test(r.hash)&&!hashes.has(r.hash));hashes.add(r.hash as string);
     list(r.records,16);ensure((r.records as unknown[]).length>0);for(const x of r.records){obj(x,['id','from','to','total']);ensure(records.has(x.id as string));integer(x.from);integer(x.to);integer(x.total);ensure((x.from as number)<(x.to as number)&&(x.to as number)<=(x.total as number));}
     text(r.summary,200,true);list(r.parts,64);const claims=new Map<string,number>(),parts=new Set<string>();
@@ -363,6 +371,11 @@ function readings(v:unknown,areaIds:Set<string>,records:Set<string>) {
     list(r.candidates,16);for(const c of r.candidates){obj(c,['text','areaIds','quote']);text(c.text,240);list(c.areaIds,2);for(const a of c.areaIds)ensure(areaIds.has(a as string));if(c.quote!==null)quote(c.quote);}
     list(r.gaps,2);for(const g of r.gaps)text(g,160);
     list(r.skipped,64);for(const x of r.skipped){obj(x,['what','name','reason']);ensure(['part','relation'].includes(x.what as string));text(x.name,200);ensure(['same-name','archived','removed','exists','parent-skipped'].includes(x.reason as string));}
+    if(two){
+      list(r.requests,8);const requests=(r.requests as unknown[]).map(validateFrozenRequest);ensure(requests.every(q=>q.projectId===projectId)&&new Set(requests.map(q=>q.id)).size===requests.length);
+      list(r.matches,24);const matches=(r.matches as unknown[]).map(m=>validateStoredMatch(m,requests,r.records as {id:string;from:number;to:number}[],records));
+      requestReadings.set(r.id as string,{requests,matches});
+    }
     seen.set(r.id as string,claims);
   }
 }
@@ -539,6 +552,12 @@ function migrateV8(v:unknown):unknown {
   const p=v as {schemaVersion?:unknown};ensure(!!p&&typeof p==='object'&&!Array.isArray(p)&&p.schemaVersion===V8_SCHEMA&&!Object.hasOwn(p,'readings'));
   return {...p,schemaVersion:SCHEMA,readings:[]};
 }
+/** project.9 has only the original map readings and role corrections. No request context is invented. */
+function migrateV9(v:unknown):unknown {
+  const p=v as {schemaVersion?:unknown;readings?:unknown};ensure(p&&p.schemaVersion===V9_SCHEMA);list(p.readings,READINGS_LIMIT);
+  for(const r of p.readings)ensure(!!r&&typeof r==='object'&&['map-reading.1','map-correction.1'].includes((r as {version:string}).version));
+  return {...p,schemaVersion:SCHEMA};
+}
 /** The single acceptance test for persisted bytes: autosave, recovery-file download and import all use it. */
 /** intent-edit.1 (unreleased AI055 candidate) kept the correction in manual.*, where any later work edit
  * would rewrite it. Every one is converted on the first parse, so no later parse reads manual.* again:
@@ -559,7 +578,7 @@ function convertIntentEdits(p:Project):Project {
 export function parseProject(raw: string): Project {
   ensure(new TextEncoder().encode(raw).length <= FILE_LIMIT,'FILE_TOO_LARGE'); const v: unknown=JSON.parse(raw);
   const schema=(v as {schemaVersion?:unknown})?.schemaVersion;
-  const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : schema===V3_SCHEMA ? migrateV3(v) : schema===V4_SCHEMA ? migrateV4(v) : schema===V5_SCHEMA ? migrateV5(v) : schema===V6_SCHEMA ? migrateV6(v) : schema===V7_SCHEMA ? migrateV7(v) : schema===V8_SCHEMA ? migrateV8(v) : v;
+  const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : schema===V3_SCHEMA ? migrateV3(v) : schema===V4_SCHEMA ? migrateV4(v) : schema===V5_SCHEMA ? migrateV5(v) : schema===V6_SCHEMA ? migrateV6(v) : schema===V7_SCHEMA ? migrateV7(v) : schema===V8_SCHEMA ? migrateV8(v) : schema===V9_SCHEMA ? migrateV9(v) : v;
   assertProject(project); return convertIntentEdits(project); // Freshly parsed, not shared: no defensive copy needed.
 }
 

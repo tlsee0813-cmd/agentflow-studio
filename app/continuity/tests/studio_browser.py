@@ -1386,7 +1386,8 @@ def record_flow(browser, base, backup):
     record = ask["sources"][0]
     assert record["kind"] == "record" and record["partIds"] == [] and record["text"] == text and "PC 앱 · 보정" in record["note"]
     # The reading: its own heading, the record's first line under it, no 'no result material' line for a read record.
-    expect(page.locator("#lens .rr-sec > h3")).to_have_text(["붙여넣은 기록에서"])
+    expect(page.locator("#lens .rr-records > h3")).to_have_text("붙여넣은 기록에서")
+    expect(page.locator("#lens .rr-map > h3")).to_contain_text("지도 정리")
     expect(page.locator("#lens .rr-rec-src")).to_have_text(first_line)
     expect(page.locator("#lens .rr-none")).to_have_count(0)
     expect(page.locator("#lens .rr-part.cand")).to_have_text(["PC 앱 · 보정", "장치 펌웨어 · 보정"])
@@ -1414,7 +1415,8 @@ def record_flow(browser, base, backup):
     page.locator("#lens .lens-body").evaluate("e => { e.scrollTop = e.scrollHeight; }")
     expect(page.locator("#lens .rr-back")).to_be_in_viewport()
     page.locator("#lens .rr-back").click()
-    expect(page.locator("#lens .rr-sec > h3")).to_have_text(["붙여넣은 기록에서"])
+    expect(page.locator("#lens .rr-records > h3")).to_have_text("붙여넣은 기록에서")
+    expect(page.locator("#lens .rr-map > h3")).to_contain_text("지도 정리")
     # Back from the quote: the chosen candidate, its reason and its mark are still there.
     expect(page.locator("#lens .rr-rec").nth(2).locator(".rr-why")).to_contain_text("장치 펌웨어 · 보정")
     expect(page.locator("#world .read-mark")).to_have_attribute("data-part", "A_r69_devcal")

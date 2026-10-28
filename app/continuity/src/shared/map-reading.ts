@@ -9,8 +9,10 @@ import { addArea, addChildArea, addRelation, addReading } from './domain.js';
 import { parseProject } from './validation.js';
 import { quoteAt } from './digest-api.js';
 import { secretLike } from './secret.js';
+import { validateFrozenRequest, validateRequestMatch, type FrozenRequest, type RequestMatch, type StoredRequestMatch } from './request-return.js';
 
 export const MAP_SCHEMA = 'studio.map.1' as const;
+export const MAP2_SCHEMA = 'studio.map.2' as const;
 /** The server reads at most this many bytes of a request (the studio routes share one limit). */
 export const MAP_BYTES = 65536;
 export const MAP_RECORDS = 4;
@@ -27,11 +29,12 @@ const RELS: RelationKind[] = ['flow', 'needs', 'shares', 'related'];
 export interface MapAskPart { id: string; name: string; note: string; parentId: string | null; readAs: string | null; role: string; roleBy: 'reading' | 'person' | null; roleAbout: string | null; current: { key: string; kind: ClaimKind; text: string; about: string | null }[] }
 export interface MapAskRecord { id: string; kind: 'pasted' | RecordView['kind']; text: string; note: string; basis: string }
 export interface MapAsk {
-  schemaVersion: typeof MAP_SCHEMA;
+  schemaVersion: typeof MAP_SCHEMA | typeof MAP2_SCHEMA;
   project: { name: string; purpose: string | null };
   parts: MapAskPart[];
   relations: { from: string; to: string; kind: RelationKind; note: string }[];
   records: MapAskRecord[];
+  requests?: FrozenRequest[];
 }
 export interface MapReplyQuote { record: string; quote: string }
 export interface MapReplyClaim { kind: ClaimKind; text: string; record: string; quote: string; about: string | null; replaces: string | null }
@@ -42,6 +45,7 @@ export interface MapReply {
   relations: { from: string; to: string; kind: RelationKind; note: string; record: string; quote: string }[];
   candidates: { text: string; parts: string[]; record: string | null; quote: string | null }[];
   gaps: string[];
+  matches?: RequestMatch[];
 }
 
 const PART = /^P\d{2,3}$/, NEW = /^new:[a-z0-9_-]{1,24}$/, RECORD = /^[NR]\d{2,3}$/, CLAIM = /^C\d{2,3}$/;
@@ -98,8 +102,9 @@ function arr(v: unknown, max: number, code?: string): asserts v is unknown[] { c
 
 /** The whole request within MAP_BYTES of UTF-8 JSON; known aliases, parents and claim keys; nothing is clipped here. */
 export function validateMapAsk(value: unknown): MapAsk {
-  obj(value, ['schemaVersion', 'project', 'parts', 'relations', 'records']);
-  if (value.schemaVersion !== MAP_SCHEMA) throw new Error('UNSUPPORTED_VERSION');
+  const two = !!value && typeof value === 'object' && (value as { schemaVersion?: unknown }).schemaVersion === MAP2_SCHEMA;
+  obj(value, ['schemaVersion', 'project', 'parts', 'relations', 'records', ...(two ? ['requests'] : [])]);
+  if (value.schemaVersion !== MAP_SCHEMA && !two) throw new Error('UNSUPPORTED_VERSION');
   if (bytes(value) > MAP_BYTES) throw new Error('INPUT_TOO_LARGE');
   obj(value.project, ['name', 'purpose']); str(value.project.name, 120); if (value.project.purpose !== null) str(value.project.purpose, 2000);
   arr(value.parts, 200);
@@ -120,6 +125,7 @@ export function validateMapAsk(value: unknown): MapAsk {
     obj(r, ['id', 'kind', 'text', 'note', 'basis']); check(typeof r.id === 'string' && RECORD.test(r.id) && !records.has(r.id)); records.add(r.id);
     check(['pasted', 'request', 'report', 'evidence', 'answer', 'decision'].includes(r.kind as string)); str(r.text, MAP_RECORD_CHARS); str(r.note, 600, true); str(r.basis, 300);
   }
+  if (two) { arr(value.requests, 8); const ids = new Set<string>(); for (const r of value.requests) { const req = validateFrozenRequest(r); check(!ids.has(req.id)); ids.add(req.id); } }
   return structuredClone(value as unknown as MapAsk);
 }
 
@@ -128,7 +134,8 @@ export function validateMapAsk(value: unknown): MapAsk {
  * all this checks: not that a reading is right. */
 export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
   const code = 'INVALID_RESPONSE';
-  obj(value, ['summary', 'parts', 'relations', 'candidates', 'gaps'], code);
+  const two = ask.schemaVersion === MAP2_SCHEMA;
+  obj(value, ['summary', 'parts', 'relations', 'candidates', 'gaps', ...(two ? ['matches'] : [])], code);
   const parts = new Map(ask.parts.map(p => [p.id, p])), records = new Map(ask.records.map(r => [r.id, r]));
   const quote = (rec: unknown, q: unknown): MapReplyQuote => {
     check(typeof rec === 'string' && records.has(rec), code); str(q, 300, false, code);
@@ -196,7 +203,31 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
     return { text: c.text.trim(), parts: [...c.parts as string[]], record: q?.record ?? null, quote: q?.quote ?? null };
   });
   arr(value.gaps, 2, code); const gaps = (value.gaps as unknown[]).map(g => { str(g, 160, false, code); return (g as string).trim(); });
-  const reply: MapReply = { summary: value.summary.trim(), parts: outParts, relations, candidates, gaps };
+  let matches: RequestMatch[] = [];
+  if (two) {
+    arr(value.matches, 24, code);
+    matches = value.matches.map(v => {
+      let m: RequestMatch; try { m = validateRequestMatch(v, ask.requests!); } catch { throw new Error(code); }
+      // Request correspondence quotes the literal sent passage; it does not repair or join excerpts.
+      const rec = records.get(m.record), at = rec ? quoteAt(rec.text, m.quote) : null;
+      check(rec && at && at.length >= 6 && at.length <= 300, code);
+      check(!['code', 'test'].includes(m.kind) || rec!.kind === 'evidence', code);
+      const about = m.about === null ? null : resolveQuote(rec!.text, m.about);
+      check(m.about === null || about !== null, code);
+      check(!secretLike(`${m.text}\n${m.why}`), code);
+      // Identical frozen demands cannot be separated by arrival order. Retain all competing RQ targets, unless the report
+      // explicitly names the request id (or the plan id AND revision) itself.
+      const targets = [...m.targets];
+      for (const t of m.targets) {
+        const req = ask.requests!.find(r => r.id === t.requestId)!, item = req.items.find(i => i.id === t.itemId)!;
+        if (rec!.text.includes(req.id) || new RegExp(`${req.planId}\\s*/\\s*${req.planRevision}(?!\\d)`).test(rec!.text)) continue;
+        for (const other of ask.requests!) for (const i of other.items) if (other.id !== req.id && norm(i.title) === norm(item.title) && norm(i.description) === norm(item.description) && !targets.some(x => x.requestId === other.id && x.itemId === i.id)) targets.push({ requestId: other.id, itemId: i.id });
+      }
+      check(targets.length <= 8, code);
+      return { ...m, quote: rec!.text.slice(at!.at, at!.at + at!.length), about, targets };
+    });
+  }
+  const reply: MapReply = { summary: value.summary.trim(), parts: outParts, relations, candidates, gaps, ...(two ? { matches } : {}) };
   // Words the model wrote (never the quotes, which are the person's own records) must not look like a key.
   const written = [reply.summary, ...gaps, ...outParts.flatMap(p => [p.name ?? '', p.role ?? '', p.roleAbout ?? '', ...p.claims.flatMap(c => [c.text, c.about ?? ''])]), ...relations.map(r => r.note), ...candidates.map(c => c.text)];
   check(!written.some(w => w && secretLike(w)), code);
@@ -231,7 +262,7 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
   let corrected: PartUnderstanding['corrected'] = null;
   const all: CurrentClaim[] = [], replaced = new Set<string>();
   for (const r of p.readings) {
-    if (!isMapReading(r)) { if (r.areaId === areaId) { role = r.text; roleAbout = null; roleBasis = []; corrected = { id: r.id, at: r.at }; } continue; }
+    if (!isMapReading(r)) { if (r.version === 'map-correction.1' && r.areaId === areaId) { role = r.text; roleAbout = null; roleBasis = []; corrected = { id: r.id, at: r.at }; } continue; }
     const part = r.parts.find(x => x.areaId === areaId); if (!part) continue;
     if (part.created) createdName = part.created.name;
     // A correction holds the description only: a later reading's description reads apart, its claims still come in.
@@ -266,6 +297,7 @@ export interface MapInput {
   /** The last reading when this request was made: an answer is applied only on top of it. */
   after: string | null;
   problem: 'NOTHING_NEW' | 'TOO_LARGE' | { secret: string } | null;
+  requestCoverage?: { total: number; sent: number };
 }
 /** Records of a project with text no map reading has read yet, newest first: pasted records as pasted, and the project's own
  * records. A record sent only in part comes back with its unread tail (from the end of what was read). */
@@ -276,7 +308,7 @@ export function unreadRecords(p: Project, view: StudioView): MapRecordSource[] {
   const own: MapRecordSource[] = view.records.map(r => ({ id: r.id, kind: r.kind, text: r.text, at: r.at, label: '프로젝트 기록', from: readTo.get(r.id) ?? 0 }));
   return [...pasted, ...own].filter(r => r.from < r.text.length).sort((a, b) => b.at.localeCompare(a.at));
 }
-export function buildMapAsk(p: Project, view: StudioView): MapInput {
+export function buildMapAsk(p: Project, view: StudioView, requests: FrozenRequest[] = []): MapInput {
   const parts = new Map<string, string>(), alias = new Map<string, string>(), claims = new Map<string, { reading: string; index: number }>();
   view.parts.slice(0, 200).forEach((x, i) => { const a = `P${String(i + 1).padStart(2, '0')}`; parts.set(a, x.id); alias.set(x.id, a); });
   let c = 0;
@@ -295,6 +327,12 @@ export function buildMapAsk(p: Project, view: StudioView): MapInput {
   };
   const unread = unreadRecords(p, view), records = new Map<string, { id: string; from: number; to: number; total: number; text: string }>();
   const input: MapInput = { ask, parts, records, claims, coverage: { fresh: unread.length, sent: 0, partial: 0 }, after: p.readings.filter(isMapReading).at(-1)?.id ?? null, problem: null };
+  // All comparable frozen requests or none: omitting an older, indistinguishable request must never pick the latest one.
+  if (requests.length) {
+    for (const r of requests) { validateFrozenRequest(r); if (r.projectId !== p.id) throw new Error('INVALID_REQUEST_SCOPE'); }
+    if (requests.length <= 8 && bytes(requests) <= 18000) { ask.schemaVersion = MAP2_SCHEMA; ask.requests = structuredClone(requests); }
+    input.requestCoverage = { total: requests.length, sent: ask.requests?.length ?? 0 };
+  }
   if (!unread.length) return { ...input, problem: 'NOTHING_NEW' };
   // Structure first, bounded: the earlier understanding of each part shrinks before any record is left out.
   if (bytes(ask) > META_BYTES) for (const x of ask.parts) { x.current = x.current.slice(0, 2); x.role = cut(x.role, 120); if (bytes(ask) <= META_BYTES) break; }
@@ -383,10 +421,19 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   }
   // A candidate naming a part this reply wanted to add but that was not added keeps its words, without that part.
   for (const c of reply.candidates) candidates.push({ text: c.text, areaIds: c.parts.map(a => ids.get(a)).filter((x): x is string => !!x), quote: c.record ? real({ record: c.record, quote: c.quote! }) : null });
-  const reading: MapReading = { version: 'map-reading.1', id: meta.id, at: meta.at, model: meta.model, prompt: meta.prompt, hash: meta.hash,
+  const matches: StoredRequestMatch[] = (reply.matches ?? []).map(m => {
+    const source = input.records.get(m.record)!, at = quoteAt(source.text, m.quote)!;
+    return { ...m, record: source.id, from: source.from + at.at, to: source.from + at.at + at.length };
+  });
+  const reading: MapReading = { version: input.ask.schemaVersion === MAP2_SCHEMA ? 'map-reading.2' : 'map-reading.1', id: meta.id, at: meta.at, model: meta.model, prompt: meta.prompt, hash: meta.hash,
     records: [...input.records.values()].map(r => ({ id: r.id, from: r.from, to: r.to, total: r.total })),
-    summary: reply.summary, parts, relations, candidates: candidates.slice(0, 16), gaps: reply.gaps, skipped: skipped.slice(0, 64) };
+    summary: reply.summary, parts, relations, candidates: candidates.slice(0, 16), gaps: reply.gaps, skipped: skipped.slice(0, 64),
+    ...(input.ask.schemaVersion === MAP2_SCHEMA ? { requests: structuredClone(input.ask.requests!), matches } : {}) };
   p = addReading(p, reading);
   const next = parseProject(JSON.stringify(p));
-  return { project: next, reading, created, touched: parts.map(x => x.areaId) };
+  const corresponding = matches.filter(m => m.targets.length === 1).flatMap(m => {
+    const target = m.targets[0]!, req = input.ask.requests?.find(q => q.id === target.requestId);
+    return req?.items.find(i => i.id === target.itemId)?.partIds.filter(active) ?? [];
+  });
+  return { project: next, reading, created, touched: [...new Set([...parts.map(x => x.areaId), ...corresponding])] };
 }

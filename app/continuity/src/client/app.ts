@@ -8,6 +8,8 @@ import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, se
 import { CLAIM_LABEL, STATE_LABEL, type Applied, type CurrentClaim } from '../shared/map-reading.js';
 import type { ClaimKind } from '../shared/types.js';
 import { createMapRun, sendLine } from './map-run.js';
+import { requestResults, frozenRequests, displayAbout } from './request-results.js';
+import { correctRequestMatch } from '../shared/request-return.js';
 import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
 import { layoutScope, edgePath, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, ROOT, HEAD, type Box, type Edge, type LabelSpot, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
@@ -1225,10 +1227,12 @@ function renderLens() {
   } else if (part.reading?.role) {
     // Read from records (or corrected by the person): one description, with where it comes from.
     const u = part.reading;
-    put(desc, h('p', { class: 'lens-text' }, u.role), src(u.corrected ? '직접 바로잡은 설명' : `기록에서 읽은 설명${u.roleAbout ? ` · ${u.roleAbout} 기준` : ''}`));
+    put(desc, h('p', { class: 'lens-text' }, u.role), src(u.corrected ? '직접 바로잡은 설명' : `기록에서 읽은 설명${u.roleAbout ? ` · ${displayAbout(u.roleAbout)} 기준` : ''}`));
+    if (u.roleAbout) desc.lastElementChild?.setAttribute('title', u.roleAbout);
   } else put(desc, src(part.status === 'plan' ? (records.length ? `설명 없음 · 요청 기록 없음 · ${recs}` : part.reading ? '기록에서 읽은 주장만 있어요' : '아직 설명도 기록도 없어요') : `${STATUS_LABEL[part.status]} · ${recs} · 받은 정리 없음`));
   if (part.changes.length) desc.append(h('ul', { class: 'lens-changes' }, ...part.changes.slice(0, 2).map(c => h('li', {}, c))));
   if (part.reading?.claims.length) desc.append(claimList(part.reading.claims, 3));
+  const requested = currentRequestResults(o, part.id); if (requested) desc.append(requested);
   // Lines: real ends, read by what they mean. One group per verb and direction ("이 부분이 필요로 함"), each row the real other
   // end; a line drawn from a folded part summarises its inside, so its row also names the inner end.
   const ends = relationEnds(o, part.id), entry = visitEntry(o), cameFrom = entry ? visits.at(-1)!.from.selected : null;
@@ -1577,6 +1581,8 @@ const planView = createPlanView({
   },
   area: () => syncMapArea(),
   readReturn: () => { planView.close(); openReturn(); },
+  pasteReturn: () => { planView.close(); openPaste(selected); },
+  commitProject: next => { const o = opened; return o ? commit(o, next) : Promise.resolve('프로젝트가 열려 있지 않아요.'); },
   frame: (all, fallback) => {
     // Once, when a whole plan comes to read: its changed parts together when they fit beside the pane at this zoom (no zoom,
     // no centring); else the target being read, as for any new target.
@@ -1671,7 +1677,7 @@ const returnView = createReturnView({
   restoreScene: scene => { const o = opened; if (!o) return; returnCamera = scene.camera; go(o.key, scene.selected && partOf(o, scene.selected) ? scene.selected : null, scene.scope && partOf(o, scene.scope) ? scene.scope : null); },
   mapBlock: () => mapBlock(),
   mapMarks: () => { const o = opened; return o && justRead?.key === o.key ? justRead.parts : []; },
-  readIntoMap: id => !!opened?.project.readings.some(r => r.version === 'map-reading.1' && r.records.some(x => x.id === id)),
+  readIntoMap: id => !!opened?.project.readings.some(r => (r.version === 'map-reading.1' || r.version === 'map-reading.2') && r.records.some(x => x.id === id)),
   mapPrimary: () => { const inp = mapRun.input(); return !!inp && !inp.problem && mapRun.can(); }
 });
 
@@ -1682,6 +1688,7 @@ const mapRun = createMapRun({
   current: () => opened,
   status: () => status,
   accessCode: () => sessionCode(),
+  requests: () => opened ? frozenRequests(opened.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : [])) : [],
   commit: next => { const o = opened; return o ? commit(o, next) : Promise.resolve('프로젝트가 열려 있지 않아요.'); },
   done: applied => mapApplied(applied),
   changed: () => mapChanged()
@@ -1775,14 +1782,27 @@ function mapBlock(): HTMLElement | null {
     const cut = last.records.filter(r => r.to < r.total || r.from > 0).length;
     sec.append(h('p', { class: 'rr-prov' }, h('span', { class: 'tag ai' }, `AI 정리 · ${last.model}`), h('span', {}, `기록 ${last.records.length}개${cut ? ` (${cut}개는 일부 구간만)` : ''} · 인용 원문에 근거 · 앱이 확인한 사실 아님`)));
   }
+  const requested = currentRequestResults(o); if (requested) sec.append(requested);
   return sec;
+}
+function currentRequestResults(o: Opened, partId?: string): HTMLElement | null {
+  return requestResults(o.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : []), {
+    ...(partId ? { partId } : {}), compact: true, quote: showQuote,
+    correct: async (reading, index, target) => {
+      try {
+        const error = await commit(o, correctRequestMatch(o.project, reading, index, target));
+        if (!error) { renderSpace('keep'); if (selected) refreshReading(); else returnView.render(); }
+        return error;
+      } catch { return '대응을 고치지 못했어요. 원문은 그대로예요.'; }
+    }
+  });
 }
 const CLAIM_ORDER: ClaimKind[] = ['open', 'differs', 'want', 'reported', 'checked', 'idea', 'describes'];
 /** Claims of a part as short lines, most decision-relevant first, each with the way to its quote. */
 function claimList(claims: CurrentClaim[], max: number): HTMLElement {
   const sorted = [...claims].sort((a, b) => CLAIM_ORDER.indexOf(a.kind) - CLAIM_ORDER.indexOf(b.kind)).slice(0, max);
   return h('ul', { class: 'claims' }, ...sorted.map(c => h('li', { class: `claim k-${c.kind}` },
-    h('span', { class: 'cl-kind' }, CLAIM_LABEL[c.kind]), h('span', { class: 'cl-text' }, c.text, c.about ? h('small', { class: 'cl-about' }, ` · ${c.about}`) : null),
+    h('span', { class: 'cl-kind' }, CLAIM_LABEL[c.kind]), h('span', { class: 'cl-text' }, c.text, c.about ? h('small', { class: 'cl-about', title: c.about }, ` · ${displayAbout(c.about)}`) : null),
     h('button', { type: 'button', class: 'cl-cite', title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote) }, '근거'))));
 }
 /** A quote from the selection: the record in the pane, marked; closing the pane comes back to this part. */
@@ -1809,13 +1829,13 @@ function understoodSection(o: Opened, part: PartView): HTMLElement | null {
     } }, h('label', { for: 'fix-role' }, '설명 바로잡기 ', h('small', {}, '이름·내 설명·기록의 주장은 그대로예요')), area, msg,
       h('div', { class: 'row' }, h('button', { type: 'submit', class: 'primary small' }, '저장'), h('button', { type: 'button', class: 'link-button', onclick: () => { fixingRole = null; renderPanel(false); } }, '취소'))));
   } else if (u.role) {
-    sec.append(h('p', { class: 'und-role' }, u.role), h('p', { class: 'src' }, u.corrected ? `직접 바로잡은 설명 · ${fullTime(u.corrected.at)}` : `기록에서 읽은 설명${u.roleAbout ? ` · ${u.roleAbout} 기준` : ''}`,
+    sec.append(h('p', { class: 'und-role' }, u.role), h('p', { class: 'src', title: u.roleAbout ?? '' }, u.corrected ? `직접 바로잡은 설명 · ${fullTime(u.corrected.at)}` : `기록에서 읽은 설명${u.roleAbout ? ` · ${displayAbout(u.roleAbout)} 기준` : ''}`,
       o.kind === 'saved' ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { fixingRole = part.id; renderPanel(false); requestAnimationFrame(() => document.getElementById('fix-role')?.focus()); } }, ' 설명 바로잡기') : null));
-    if (u.roleAbout) sec.lastElementChild?.prepend(h('span', {}, `${u.roleAbout} 기준 · `));
     // Descriptions read later that did not replace this one (no record said it supersedes it) read apart, with their version.
-    for (const x of u.others.slice(0, 2)) sec.append(h('p', { class: 'und-later' }, h('span', {}, `다른 기록의 설명${x.about ? ` · ${x.about}` : ''} · 현재 설명을 대체한다는 근거 없음`), x.text));
+    for (const x of u.others.slice(0, 2)) sec.append(h('p', { class: 'und-later' }, h('span', { title: x.about ?? '' }, `다른 기록의 설명${x.about ? ` · ${displayAbout(x.about)}` : ''} · 현재 설명을 대체한다는 근거 없음`), x.text));
   }
   if (u.claims.length) sec.append(claimList(u.claims, 12));
+  const requested = currentRequestResults(o, part.id); if (requested) sec.append(requested);
   const hist = h('details', { class: 'und-history' }, h('summary', {}, `근거 이력 · 정리 ${u.history.length}회`),
     h('ol', {}, ...[...u.history].reverse().map(x => h('li', {}, h('span', { class: 'uh-at' }, fullTime(x.at)),
       x.role ? h('span', { class: 'uh-role' }, x.role) : null,

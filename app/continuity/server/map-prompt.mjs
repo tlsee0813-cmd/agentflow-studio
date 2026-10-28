@@ -47,3 +47,16 @@ summary: 이번 정리로 사용자가 이 프로그램에 대해 무엇을 이�
 JSON 객체 하나만 반환한다. 키는 정확히 다음 5개다:
 {"summary":"...","parts":[{"ref":"new:export","name":"내보내기","parent":null,"role":"역할 한 문장","roleAbout":null,"roleReplaces":null,"basis":[{"record":"N01","quote":"원문 그대로"}],"claims":[{"kind":"reported","text":"...","record":"N01","quote":"원문 그대로","about":null,"replaces":null}]},{"ref":"P01","name":null,"parent":null,"role":null,"roleAbout":null,"roleReplaces":null,"basis":[],"claims":[{"kind":"checked","text":"...","record":"N01","quote":"원문 그대로","about":"v2","replaces":null}]}],"relations":[{"from":"new:export","to":"P01","kind":"needs","note":"...","record":"N01","quote":"원문 그대로"}],"candidates":[{"text":"...","parts":["P01"],"record":"N01","quote":"원문 그대로"}],"gaps":[]}
 기존 부분 항목은 role이나 claims 중 하나 이상이 있을 때만 넣는다.`;
+
+/** Same map reading, with frozen requests. No second classification call and no execution receipt. */
+export const MAP2_PROMPT = MAP_PROMPT + `
+
+입력이 studio.map.2이면 위 지도 정리에 더해 requests(생성 당시 동결된 요청 범위)를 records와 대응한다. requests는 앞으로 원했던 결과이며 구현 사실이나 새 원문이 아니다. 지도 설명·역할을 requests만으로 바꾸거나 부분을 만들지 않는다.
+출력의 기존 5키는 그대로 두고 여섯째 키 matches를 반드시 추가한다(대응할 내용이 없으면 []). 각 항목은 정확히 {record,quote,text,kind,about,targets,why}다.
+- record와 quote는 이번 records에 있는 실제 원문 구절(6~300자, 기호까지 그대로, 떨어진 구절 결합 금지). text는 그 구절이 보고·확인·보류한 범위만 한 문장(240자 이내), why는 이 구절이 요청 항목에 어떻게 대응하는지 짧게(240자 이내).
+- targets는 [{requestId:requests의 id,itemId:그 요청의 items.id}] 배열. 확실한 대응은 하나. 어느 요청인지 실제로 구별되지 않으면 가능한 요청을 모두 남기며 하나에 동시 확정하지 않는다. 새 요청·마지막 요청·같은 항목명이라는 이유로 고르지 않는다. 요청 생성 시각은 전달·실행의 증거가 아니다. 요청문과 무관한 부분은 targets:[]로 필요할 때만 짧게 남긴다.
+- 한 구절이 서로 다른 요구를 각각 설명하면 항목별로 별도 matches를 쓸 수 있다. 아직 답하지 않은 항목의 완료·실패·미구현을 만들어 쓰지 않는다. 부분 보고 하나로 전체 요청 충족을 선언하지 않는다.
+- kind는 reported(작성자의 구현 보고), checked(작성자의 검사·확인 보고), open(남은 조건·결정), code(직접 제공된 코드 자료), test(직접 제공된 검사 자료). pasted/report 기록 속 ‘코드를 고쳤다’, ‘검사 통과’ 발언은 reported/checked이며 실제 코드·실행 확인으로 올리지 않는다. code/test는 kind:evidence 원자료의 해당 구절에만 사용한다. 직접 자료도 앱이 실행해 검증한 사실은 아니다.
+- about은 이 구절의 브랜치·판본·커밋·검사 조건을 원문에서 한 연속 구절 그대로 옮긴다(200자 이내). 모르면 null. 근거가 여러 곳에 있으면 지어 합치지 말고 text/quote에서 범위만 좁혀 말한다. feature 브랜치 결과를 main 병합·배포로 올리지 않는다. 기존 단일 문서 검사로 폴더 실패 후 계속이나 성공 보존을 증명하지 않는다.
+- 이전 지도 역할·사용자 설명 정정·claim 대체는 위 기존 규칙만 따른다. 요청 대응을 했다는 이유로 roleReplaces/replaces를 만들지 않는다.
+최대 matches 24개. ID는 targets/record 필드에서만 쓰고 사용자에게 읽힐 문장에는 쓰지 않는다.`;
