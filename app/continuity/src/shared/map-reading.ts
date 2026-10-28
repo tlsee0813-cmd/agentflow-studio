@@ -9,32 +9,44 @@ import { addArea, addChildArea, addRelation, addReading } from './domain.js';
 import { parseProject } from './validation.js';
 import { quoteAt } from './digest-api.js';
 import { secretLike } from './secret.js';
-import { validateFrozenRequest, validateRequestContext, requestContext, validateRequestMatch, type RequestContext, type FrozenRequest, type RequestMatch, type StoredRequestMatch } from './request-return.js';
+import { validateFrozenRequest, validateRequestContext, requestContext, validateRequestMatch, requestMatches, hasTarget, sameTarget, canReplace, MATCH_STANCES, type RequestContext, type FrozenRequest, type RequestMatch, type RequestMatch3, type StoredRequestMatch, type MatchKind, type MatchStance, type RequestTarget } from './request-return.js';
 
 export const MAP_SCHEMA = 'studio.map.1' as const;
 export const MAP2_SCHEMA = 'studio.map.2' as const;
+/** studio.map.2 with a stance on each match and the explicit withdrawal of an earlier one (priors). map.2 stays readable. */
+export const MAP3_SCHEMA = 'studio.map.3' as const;
+/** At most this many earlier matches go as priors, within PRIOR_BYTES (records keep the rest of MAP_BYTES). */
+export const MAP_PRIORS = 24;
+const PRIOR_BYTES = 12000;
 /** The server reads at most this many bytes of a request (the studio routes share one limit). */
 export const MAP_BYTES = 65536;
 export const MAP_RECORDS = 4;
 export const MAP_RECORD_CHARS = 12000;
 const MIN_RECORD_CHARS = 1500, META_BYTES = 30000;
 export const CLAIM_LABEL: Record<ClaimKind, string> = {
-  want: '원함', idea: '구상', reported: '구현 보고', checked: '확인 보고', describes: '설명', open: '남은 선택', differs: '다른 근거'
+  // A report of work says what it says: it may say something was not built. Neither label reads as built.
+  want: '원함', idea: '구상', reported: '작업 보고', checked: '확인 보고', describes: '설명', open: '남은 선택', differs: '다른 근거'
 };
 /** One short state for a part that has no request of its own yet, from what was read (never a verified status). */
-export const STATE_LABEL: Partial<Record<ClaimKind, string>> = { reported: '구현 보고 있음', checked: '확인 보고 있음', want: '요구', idea: '구상', describes: '설명만 있음' };
+export const STATE_LABEL: Partial<Record<ClaimKind, string>> = { reported: '작업 보고 있음', checked: '확인 보고 있음', want: '요구', idea: '구상', describes: '설명만 있음' };
+/** The part's short state, saying when its current report took an earlier one back (the corrected report is read first). */
+export const stateLabel = (u: Pick<PartUnderstanding, 'state' | 'revised'>): string | null => u.state ? (u.revised && (u.state === 'reported' || u.state === 'checked') ? '보고 정정됨' : STATE_LABEL[u.state] ?? null) : null;
 const STATE_ORDER: ClaimKind[] = ['reported', 'checked', 'want', 'idea', 'describes'];
 const RELS: RelationKind[] = ['flow', 'needs', 'shares', 'related'];
 
 export interface MapAskPart { id: string; name: string; note: string; parentId: string | null; readAs: string | null; role: string; roleBy: 'reading' | 'person' | null; roleAbout: string | null; current: { key: string; kind: ClaimKind; text: string; about: string | null }[] }
 export interface MapAskRecord { id: string; kind: 'pasted' | RecordView['kind']; text: string; note: string; basis: string; addedAt?: string }
+/** studio.map.3: an earlier current match the records may explicitly take back, by alias (M01…), with what it said and the one
+ * frozen item it answers. Material, never a new record. */
+export interface MapAskPrior { key: string; quote: string; text: string; kind: MatchKind; stance: MatchStance | null; about: string | null; target: RequestTarget }
 export interface MapAsk {
-  schemaVersion: typeof MAP_SCHEMA | typeof MAP2_SCHEMA;
+  schemaVersion: typeof MAP_SCHEMA | typeof MAP2_SCHEMA | typeof MAP3_SCHEMA;
   project: { name: string; purpose: string | null };
   parts: MapAskPart[];
   relations: { from: string; to: string; kind: RelationKind; note: string }[];
   records: MapAskRecord[];
   requests?: (RequestContext | FrozenRequest)[];
+  priors?: MapAskPrior[];
 }
 export interface MapReplyQuote { record: string; quote: string }
 export interface MapReplyClaim { kind: ClaimKind; text: string; record: string; quote: string; about: string | null; replaces: string | null }
@@ -45,10 +57,10 @@ export interface MapReply {
   relations: { from: string; to: string; kind: RelationKind; note: string; record: string; quote: string }[];
   candidates: { text: string; parts: string[]; record: string | null; quote: string | null }[];
   gaps: string[];
-  matches?: RequestMatch[];
+  matches?: (RequestMatch | RequestMatch3)[];
 }
 
-const PART = /^P\d{2,3}$/, NEW = /^new:[a-z0-9_-]{1,24}$/, RECORD = /^[NR]\d{2,3}$/, CLAIM = /^C\d{2,3}$/;
+const PART = /^P\d{2,3}$/, NEW = /^new:[a-z0-9_-]{1,24}$/, RECORD = /^[NR]\d{2,3}$/, CLAIM = /^C\d{2,3}$/, PRIOR = /^M\d{2}$/;
 const CONTROL = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
 const bytes = (v: unknown) => new TextEncoder().encode(JSON.stringify(v)).length;
 /** Where a quote stands in a record, as the record's own text. Exactly (white space read loosely, as quoteAt); else, narrowly, when
@@ -102,8 +114,9 @@ function arr(v: unknown, max: number, code?: string): asserts v is unknown[] { c
 
 /** The whole request within MAP_BYTES of UTF-8 JSON; known aliases, parents and claim keys; nothing is clipped here. */
 export function validateMapAsk(value: unknown): MapAsk {
-  const two = !!value && typeof value === 'object' && (value as { schemaVersion?: unknown }).schemaVersion === MAP2_SCHEMA;
-  obj(value, ['schemaVersion', 'project', 'parts', 'relations', 'records', ...(two ? ['requests'] : [])]);
+  const version = !!value && typeof value === 'object' ? (value as { schemaVersion?: unknown }).schemaVersion : null;
+  const three = version === MAP3_SCHEMA, two = three || version === MAP2_SCHEMA;
+  obj(value, ['schemaVersion', 'project', 'parts', 'relations', 'records', ...(two ? ['requests'] : []), ...(three ? ['priors'] : [])]);
   if (value.schemaVersion !== MAP_SCHEMA && !two) throw new Error('UNSUPPORTED_VERSION');
   if (bytes(value) > MAP_BYTES) throw new Error('INPUT_TOO_LARGE');
   obj(value.project, ['name', 'purpose']); str(value.project.name, 120); if (value.project.purpose !== null) str(value.project.purpose, 2000);
@@ -127,7 +140,17 @@ export function validateMapAsk(value: unknown): MapAsk {
     check(['pasted', 'request', 'report', 'evidence', 'answer', 'decision'].includes(r.kind as string)); str(r.text, MAP_RECORD_CHARS); str(r.note, 600, true); str(r.basis, 300);
     if (hasTime) { str(r.addedAt, 30); check(Number.isFinite(Date.parse(r.addedAt)) && new Date(r.addedAt).toISOString() === r.addedAt); }
   }
-  if (two) { arr(value.requests, 8); const ids = new Set<string>(); for (const r of value.requests) { const req = r && typeof r === 'object' && (r as { version?: unknown }).version === 'request-scope.1' ? validateFrozenRequest(r) : validateRequestContext(r); check(!ids.has(req.id)); ids.add(req.id); } }
+  const requests: { id: string; items: { id: string }[] }[] = [];
+  if (two) { arr(value.requests, 8); const ids = new Set<string>(); for (const r of value.requests) { const req = r && typeof r === 'object' && (r as { version?: unknown }).version === 'request-scope.1' ? validateFrozenRequest(r) : validateRequestContext(r); check(!ids.has(req.id)); ids.add(req.id); requests.push(req); } }
+  if (three) {
+    arr(value.priors, MAP_PRIORS); const keys = new Set<string>();
+    for (const x of value.priors) {
+      obj(x, ['key', 'quote', 'text', 'kind', 'stance', 'about', 'target']); check(typeof x.key === 'string' && PRIOR.test(x.key) && !keys.has(x.key)); keys.add(x.key);
+      str(x.quote, 300); str(x.text, 240); check(['reported', 'checked', 'code', 'test', 'open'].includes(x.kind as string)); check(x.stance === null || MATCH_STANCES.includes(x.stance as MatchStance));
+      if (x.about !== null) str(x.about, 200);
+      obj(x.target, ['requestId', 'itemId']); check(hasTarget(requests, x.target as unknown as RequestTarget));
+    }
+  }
   return structuredClone(value as unknown as MapAsk);
 }
 
@@ -136,7 +159,7 @@ export function validateMapAsk(value: unknown): MapAsk {
  * all this checks: not that a reading is right. */
 export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
   const code = 'INVALID_RESPONSE';
-  const two = ask.schemaVersion === MAP2_SCHEMA;
+  const three = ask.schemaVersion === MAP3_SCHEMA, two = three || ask.schemaVersion === MAP2_SCHEMA;
   obj(value, ['summary', 'parts', 'relations', 'candidates', 'gaps', ...(two ? ['matches'] : [])], code);
   const parts = new Map(ask.parts.map(p => [p.id, p])), records = new Map(ask.records.map(r => [r.id, r]));
   const quote = (rec: unknown, q: unknown): MapReplyQuote => {
@@ -205,11 +228,12 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
     return { text: c.text.trim(), parts: [...c.parts as string[]], record: q?.record ?? null, quote: q?.quote ?? null };
   });
   arr(value.gaps, 2, code); const gaps = (value.gaps as unknown[]).map(g => { str(g, 160, false, code); return (g as string).trim(); });
-  let matches: RequestMatch[] = [];
+  let matches: (RequestMatch | RequestMatch3)[] = [];
   if (two) {
     arr(value.matches, 24, code);
+    const priors = new Map((ask.priors ?? []).map(x => [x.key, x])), taken = new Set<string>();
     matches = value.matches.map(v => {
-      let m: RequestMatch; try { m = validateRequestMatch(v, ask.requests!); } catch { throw new Error(code); }
+      let m: RequestMatch; try { m = validateRequestMatch(v, ask.requests!, three); } catch { throw new Error(code); }
       // Request correspondence quotes the literal sent passage; it does not repair or join excerpts.
       const rec = records.get(m.record), at = rec ? quoteAt(rec.text, m.quote) : null;
       check(rec && at && at.length >= 6 && at.length <= 300, code);
@@ -230,7 +254,19 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
         for (const other of ask.requests!) for (const i of other.items) if (eligible(other) && other.id !== req.id && norm(i.title) === norm(item.title) && norm(i.description) === norm(item.description) && !targets.some(x => x.requestId === other.id && x.itemId === i.id)) targets.push({ requestId: other.id, itemId: i.id });
       }
       check(targets.length <= 8, code);
-      return { ...m, quote: rec!.text.slice(at!.at, at!.at + at!.length), about, targets };
+      const quoted = rec!.text.slice(at!.at, at!.at + at!.length);
+      if (!three) return { ...m, quote: quoted, about, targets };
+      // A withdrawal names a prior that was sent, for the very item that prior answers: anything else was made up.
+      const key = (v as { replaces: unknown }).replaces;
+      check(key === null || (typeof key === 'string' && priors.has(key)), code);
+      const prior = key === null ? null : priors.get(key as string)!;
+      check(!prior || (m.targets.length === 1 && sameTarget(m.targets[0]!, prior.target)), code);
+      // Doubtful ones keep the passage and drop the link (the two reports then read side by side): a remark that does not say
+      // made or not made, another nature, the prior's own words, a second take-back of the same prior, a target widened to
+      // identical items of other requests, or another named version the record never names.
+      const holds = !!prior && !taken.has(prior.key) && targets.length === 1 && canReplace({ target: prior.target, excluded: false, replaced: false, kind: prior.kind, quote: prior.quote, about: prior.about }, { ...m, quote: quoted, about }, rec!.text);
+      if (holds) taken.add(prior!.key);
+      return { ...m, quote: quoted, about, targets, stance: m.stance!, replaces: holds ? prior!.key : null };
     });
   }
   const reply: MapReply = { summary: value.summary.trim(), parts: outParts, relations, candidates, gaps, ...(two ? { matches } : {}) };
@@ -260,6 +296,11 @@ export interface PartUnderstanding {
   /** The part was added by a reading: the name it was added with (the person may have renamed it since). */
   createdName: string | null;
   state: ClaimKind | null;
+  /** A current report or check here replaced an earlier one of this part (the record said so). */
+  revised: boolean;
+  /** Every quote the current description (as read, never the person's) rests on lies inside a report a later record took back:
+   * the description stays, but no longer reads as resting on current evidence. */
+  roleBasisRevised: boolean;
 }
 const norm = (t: string) => t.replace(/\s+/g, ' ').trim();
 export function partUnderstanding(p: Project, areaId: string): PartUnderstanding | null {
@@ -288,7 +329,58 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
     seen.add(key); claims.push(c);
   }
   const state = STATE_ORDER.find(k => claims.some(c => c.kind === k)) ?? null;
-  return { role, roleAbout, roleBasis, corrected, others: others.slice(0, 6), claims: claims.slice(0, 12), history, createdName, state };
+  const revised = claims.some(c => !!c.replaces && (c.kind === 'reported' || c.kind === 'checked'));
+  const roleBasisRevised = !corrected && roleBasis.length > 0 && roleBasis.every(q => insideRevised(p, areaId, q));
+  // The corrected report reads first (claims are newest first; a replacing one goes ahead of the rest).
+  claims.sort((a, b) => Number(!!b.replaces) - Number(!!a.replaces));
+  return { role, roleAbout, roleBasis, corrected, others: others.slice(0, 6), claims: claims.slice(0, 12), history, createdName, state, revised, roleBasisRevised };
+}
+
+/* ---------- evidence a later record took back ---------- */
+interface Span { record: string; from: number; to: number }
+const spanCache = new WeakMap<Project, Map<string, Span[]>>();
+const recordText = (p: Project, id: string) => p.pasted.find(r => r.id === id)?.text ?? p.sources.find(r => r.id === id)?.text ?? null;
+/** Where a quote stands in its record, only when it stands there once (otherwise which passage is meant is not certain). */
+function spanOnce(p: Project, q: ReadingQuote): Span | null {
+  const t = recordText(p, q.record); if (t === null) return null;
+  const at = t.indexOf(q.quote); return at >= 0 && t.indexOf(q.quote, at + 1) < 0 ? { record: q.record, from: at, to: at + q.quote.length } : null;
+}
+/** Per part: passages of its reports and checks that no longer stand. A map claim of that part a later claim of the same part
+ * replaced (a claim is named by reading, part and index: index alone repeats across parts), and a request match a later record
+ * explicitly withdrew as not made, for the parts of the item it answered. A passage a current report or check of that same part
+ * still rests on is not among them. Derived only; nothing is stored, removed or archived. */
+export function revisedSpans(p: Project): Map<string, Span[]> {
+  const hit = spanCache.get(p); if (hit) return hit;
+  const replaced = new Set<string>(), maps = p.readings.filter(isMapReading), gone = new Map<string, Span[]>(), live = new Map<string, Span[]>();
+  const add = (m: Map<string, Span[]>, area: string, s: Span) => { const l = m.get(area) ?? []; l.push(s); m.set(area, l); };
+  for (const r of maps) for (const part of r.parts) for (const c of part.claims) if (c.replaces) replaced.add(`${c.replaces.reading}|${part.areaId}|${c.replaces.index}`);
+  for (const r of maps) for (const part of r.parts) part.claims.forEach((c, i) => {
+    if (c.kind !== 'reported' && c.kind !== 'checked') return;
+    const s = spanOnce(p, c); if (s) add(replaced.has(`${r.id}|${part.areaId}|${i}`) ? gone : live, part.areaId, s);
+  });
+  for (const x of requestMatches(p)) if (x.replacedBy?.match.stance === 'not-made' && x.target) {
+    const t = x.target, item = x.requests.find(q => q.id === t.requestId)?.items.find(i => i.id === t.itemId);
+    for (const area of item?.partIds ?? []) add(gone, area, { record: x.match.record, from: x.match.from, to: x.match.to });
+  }
+  const out = new Map<string, Span[]>();
+  for (const [area, spans] of gone) {
+    const kept = spans.filter(s => !(live.get(area) ?? []).some(l => l.record === s.record && l.from < s.to && s.from < l.to));
+    if (kept.length) out.set(area, kept);
+  }
+  spanCache.set(p, out); return out;
+}
+function insideRevised(p: Project, area: string, q: ReadingQuote): boolean {
+  const spans = revisedSpans(p).get(area); if (!spans) return false;
+  const s = spanOnce(p, q); return !!s && spans.some(x => x.record === s.record && s.from >= x.from && s.to <= x.to);
+}
+/** Relations a reading added on a quote that lies inside a report one of its two ends took back: the line stays (the person's
+ * map), but it is not read as a current, confirmed connection. A relation the person drew has no quote and is never among them. */
+const relationCache = new WeakMap<Project, Set<string>>();
+export function revisedRelations(p: Project): Set<string> {
+  const hit = relationCache.get(p); if (hit) return hit;
+  const out = new Set<string>();
+  if (revisedSpans(p).size) for (const r of p.readings) if (isMapReading(r)) for (const x of r.relations) if (insideRevised(p, x.from, x.quote) || insideRevised(p, x.to, x.quote)) out.add(x.relationId);
+  relationCache.set(p, out); return out;
 }
 
 /* ---------- the request ---------- */
@@ -306,6 +398,8 @@ export interface MapInput {
   requestCoverage?: { total: number; sent: number };
   /** Full scopes, captured before the call; the wire sends only requestContext(scope). */
   fullRequests?: FrozenRequest[];
+  /** prior alias → the stored match it stands for, its item and the person's last correction of it when this was asked. */
+  priors?: Map<string, { reading: string; index: number; target: RequestTarget; correction: string | null }>;
 }
 /** Records of a project with text no map reading has read yet, newest first: pasted records as pasted, and the project's own
  * records. A record sent only in part comes back with its unread tail (from the end of what was read). */
@@ -352,13 +446,25 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
     const chosen = selectedRequestId ? requests.filter(r => r.id === selectedRequestId) : requests, contexts = chosen.map(requestContext);
     input.requestCoverage = { total: requests.length, sent: 0 };
     if (chosen.length > 8 || bytes(contexts) > 28000) return { ...input, problem: 'REQUEST_CONTEXT_TOO_LARGE' };
-    ask.schemaVersion = MAP2_SCHEMA; ask.requests = contexts; input.fullRequests = structuredClone(chosen);
+    ask.schemaVersion = MAP3_SCHEMA; ask.requests = contexts; input.fullRequests = structuredClone(chosen);
     input.requestCoverage.sent = chosen.length;
+    // What the records may take back: current matches of a single item of these requests, newest first, within their own budget.
+    const ids = new Set(chosen.map(q => q.id)), priors: MapAskPrior[] = [], refs = new Map<string, { reading: string; index: number; target: RequestTarget; correction: string | null }>();
+    for (const x of requestMatches(p)) {
+      if (priors.length >= MAP_PRIORS) break;
+      if (x.excluded || x.replacedBy || !x.target || !ids.has(x.target.requestId) || x.match.kind === 'open' || secretLike(`${x.match.quote}\n${x.match.text}`)) continue;
+      const key = `M${String(priors.length + 1).padStart(2, '0')}`, prior: MapAskPrior = { key, quote: x.match.quote, text: x.match.text, kind: x.match.kind, stance: x.match.stance ?? null, about: x.match.about, target: { ...x.target } };
+      if (bytes([...priors, prior]) > PRIOR_BYTES) break;
+      priors.push(prior); refs.set(key, { reading: x.reading, index: x.index, target: { ...x.target }, correction: x.correction });
+    }
+    ask.priors = priors; input.priors = refs;
   }
   // Structure first, bounded: the earlier understanding of each part shrinks before any record is left out.
-  const mapBytes = () => bytes({ ...ask, ...(ask.requests ? { requests: [] } : {}) });
+  const mapBytes = () => bytes({ ...ask, ...(ask.requests ? { requests: [] } : {}), ...(ask.priors ? { priors: [] } : {}) });
   if (mapBytes() > META_BYTES) for (const x of ask.parts) { x.current = x.current.slice(0, 2); x.role = cut(x.role, 120); if (mapBytes() <= META_BYTES) break; }
   if (mapBytes() > META_BYTES) return { ...input, problem: 'TOO_LARGE' };
+  // Priors give way first (the oldest go): they never keep a report from being read.
+  while (ask.priors?.length && bytes(ask) > MAP_BYTES - MIN_RECORD_CHARS * 3) input.priors!.delete(ask.priors.pop()!.key);
   if (bytes(ask) > MAP_BYTES - MIN_RECORD_CHARS * 3) return { ...input, problem: 'REQUEST_CONTEXT_TOO_LARGE' };
   let n = { N: 0, R: 0 };
   for (const r of unread) {
@@ -391,7 +497,8 @@ export interface Applied { project: Project; reading: MapReading; created: strin
  * the reply names has gone; edits the person made meanwhile (names, notes, places, plans, records) are kept as they are. */
 export function applyReading(project: Project, input: MapInput, reply: MapReply, meta: { id: string; at: string; model: string; prompt: string; hash: string }): Applied {
   if (input.problem) throw new Error(input.problem === 'REQUEST_CONTEXT_TOO_LARGE' ? 'REQUEST_CONTEXT_TOO_LARGE' : 'INVALID_INPUT');
-  const frozen = input.ask.schemaVersion === MAP2_SCHEMA ? input.fullRequests ?? input.ask.requests!.map(validateFrozenRequest) : [];
+  const withRequests = input.ask.schemaVersion !== MAP_SCHEMA, three = input.ask.schemaVersion === MAP3_SCHEMA;
+  const frozen = withRequests ? input.fullRequests ?? input.ask.requests!.map(validateFrozenRequest) : [];
   if (frozen.some(r => r.projectId !== project.id) || JSON.stringify(frozen.map(requestContext)) !== JSON.stringify((input.ask.requests ?? []).map(r => r.version === 'request-scope.1' ? requestContext(r) : r))) throw new Error('INVALID_REQUEST_SCOPE');
   const done = project.readings.filter(isMapReading);
   if ((done.at(-1)?.id ?? null) !== input.after) throw new Error('MAP_CHANGED');
@@ -473,14 +580,21 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   }
   // A candidate naming a part this reply wanted to add but that was not added keeps its words, without that part.
   for (const c of reply.candidates) candidates.push({ text: c.text, areaIds: c.parts.map(a => ids.get(a)).filter((x): x is string => !!x), quote: c.record ? real({ record: c.record, quote: c.quote! }) : null });
+  // A withdrawal holds only for the match it was asked about as it still is: the person may have retargeted or excluded it (or
+  // another record taken it back) while this was being read. Then the passage is kept and the link is not.
+  const now = three ? requestMatches(project) : [];
   const matches: StoredRequestMatch[] = (reply.matches ?? []).map(m => {
-    const source = input.records.get(m.record)!, at = quoteAt(source.text, m.quote)!;
-    return { ...m, record: source.id, from: source.from + at.at, to: source.from + at.at + at.length };
+    const source = input.records.get(m.record)!, at = quoteAt(source.text, m.quote)!, stored = { ...m, record: source.id, from: source.from + at.at, to: source.from + at.at + at.length };
+    if (!three) return stored;
+    const { replaces: key, ...rest } = stored as typeof stored & { replaces: string | null };
+    const ref = key === null ? undefined : input.priors?.get(key), cur = ref && now.find(x => x.reading === ref.reading && x.index === ref.index);
+    const holds = !!cur && !cur.excluded && !cur.replacedBy && !!cur.target && sameTarget(cur.target, ref!.target) && cur.correction === ref!.correction;
+    return { ...rest, replaces: holds ? { reading: ref!.reading, index: ref!.index } : null };
   });
-  const reading: MapReading = { version: input.ask.schemaVersion === MAP2_SCHEMA ? 'map-reading.2' : 'map-reading.1', id: meta.id, at: meta.at, model: meta.model, prompt: meta.prompt, hash: meta.hash,
+  const reading: MapReading = { version: three ? 'map-reading.3' : withRequests ? 'map-reading.2' : 'map-reading.1', id: meta.id, at: meta.at, model: meta.model, prompt: meta.prompt, hash: meta.hash,
     records: [...input.records.values()].map(r => ({ id: r.id, from: r.from, to: r.to, total: r.total })),
     summary: comparisonOnly ? '이미 지도에 읽은 원문을 고른 요청과 다시 대조했어요.' : reply.summary, parts, relations, candidates: candidates.slice(0, 16), gaps: reply.gaps, skipped: skipped.slice(0, 64),
-    ...(input.ask.schemaVersion === MAP2_SCHEMA ? { requests: structuredClone(frozen), matches } : {}) };
+    ...(withRequests ? { requests: structuredClone(frozen), matches } : {}) };
   p = addReading(p, reading);
   const next = parseProject(JSON.stringify(p));
   const corresponding = matches.filter(m => m.targets.length === 1).flatMap(m => {

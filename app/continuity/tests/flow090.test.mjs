@@ -18,7 +18,7 @@ const planned=()=>{let p=D.setBrief(D.createProject(),'동네 미용실 예약 �
 test('F090-1 a project.3 save opens unchanged with an empty space; space and areas survive save, backup and import',()=>{
   let p=exported(respond(put(D.createProject(),'예약 화면 만들기')));p=put(p,'보고: 화면을 만들었다고 주장','report');
   const old=v3(p),opened=parseProject(old);
-  assert.equal(opened.schemaVersion,'idea015.project.10');assert.deepEqual(opened.space,{brief:null,areas:[],relations:[],draftTarget:null,layout:{version:'layout.1',positions:{}},understanding:{},containment:{version:'containment.1',parents:{},revisions:{}}});
+  assert.equal(opened.schemaVersion,'idea015.project.11');assert.deepEqual(opened.space,{brief:null,areas:[],relations:[],draftTarget:null,layout:{version:'layout.1',positions:{}},understanding:{},containment:{version:'containment.1',parents:{},revisions:{}}});
   for(const k of ['sources','bases','currentTaskId','draft'])assert.deepEqual(opened[k],JSON.parse(old)[k],k);
   // FLOW091-C: older work gets background=null (task and export), never the current plan; nothing else changes.
   // AREA17: likewise every older export gets anchor=null (no plan or description revision is estimated for it).
@@ -82,7 +82,7 @@ test('F090-6 a stored project.3 entry opens through the workspace and the next s
   const w=new WorkspaceStore(storage,new Locks());await w.init();assert.equal(w.readError,null);
   const e=w.entries()[0];assert.deepEqual(e.project.space,{brief:null,areas:[],relations:[],draftTarget:null,layout:{version:'layout.1',positions:{}},understanding:{},containment:{version:'containment.1',parents:{},revisions:{}}});assert.deepEqual(e.project.sources,old.sources);
   await w.save({entryId:e.entryId,lifecycle:e.lifecycle,seq:e.seq},D.addArea(e.project,'예약'));
-  const saved=JSON.parse(storage.getItem(WORKSPACE_KEY)).entries[0].project;assert.equal(saved.schemaVersion,'idea015.project.10');assert.equal(saved.space.areas[0].name,'예약');
+  const saved=JSON.parse(storage.getItem(WORKSPACE_KEY)).entries[0].project;assert.equal(saved.schemaVersion,'idea015.project.11');assert.equal(saved.space.areas[0].name,'예약');
 });
 
 test('F090-7 returning to an area continues its latest request (and that request\'s returns), not a late old report',()=>{

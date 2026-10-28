@@ -1718,10 +1718,10 @@ def request71_flow(browser, base):
     def returned(route):
         ask = route.request.post_data_json
         maps.append(ask)
-        assert ask["schemaVersion"] == "studio.map.2" and ask["requests"][0]["id"] == rq
+        assert ask["schemaVersion"] == "studio.map.3" and ask["requests"][0]["id"] == rq and ask["priors"] == []
         rec = next(r for r in ask["records"] if "feature/folder" in r["text"])
-        match = {"record": rec["id"], "quote": "폴더 안 파일을 받는 입력을 바꿨습니다", "text": "[스텁] 폴더 입력 변경 보고", "kind": "reported", "about": "feature/folder@abc1234", "targets": [{"requestId": rq, "itemId": "I1"}], "why": "[스텁] 입력 요구에 대응하는 구절"}
-        check = {**match, "kind": "checked", "quote": "기존 단일 문서 검사 3개 통과", "text": "[스텁] 단일 문서 검사만 통과했다고 보고함"}
+        match = {"record": rec["id"], "quote": "폴더 안 파일을 받는 입력을 바꿨습니다", "text": "[스텁] 폴더 입력 변경 보고", "kind": "reported", "about": "feature/folder@abc1234", "targets": [{"requestId": rq, "itemId": "I1"}], "why": "[스텁] 입력 요구에 대응하는 구절", "stance": "made", "replaces": None}
+        check = {**match, "kind": "checked", "stance": "unclear", "quote": "기존 단일 문서 검사 3개 통과", "text": "[스텁] 단일 문서 검사만 통과했다고 보고함"}
         route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "reply": {"summary": "[스텁] 폴더 입력만 부분 보고됨", "parts": [], "relations": [], "candidates": [], "gaps": [], "matches": [match, check]}}))
     page.route("**/api/studio/map", returned)
     page.locator("#lens .rr-map").get_by_role("button", name="기록 읽고 지도 갱신").click()
@@ -1924,6 +1924,129 @@ def continue72_flow(browser, base):
     context.close()
 
 
+def history73_flow(browser, base):
+    """A withdrawn report's history fold: open it, follow its old quote and come back by the named way. The item, the history
+    fold, the quote's focus, the pane scroll and the camera are as they were; the current-quote path still holds. The same from the
+    map's root (the comparison above the map, nothing selected). The same item answering another part does not open its history
+    there. Written fixture (history73-fixture.mjs), no AI call."""
+    built = json.loads(subprocess.run(["node", str(ROOT / "tests/history73-fixture.mjs")], cwd=APP, check=True, capture_output=True, text=True).stdout)
+    area, other = built["area"], built["other"]
+    context = browser.new_context(viewport={"width": 1280, "height": 640})
+    page = context.new_page()
+    errors, calls = [], []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.on("request", lambda r: calls.append(r.url) if r.method == "POST" and "/api/studio/" in r.url else None)
+    page.goto(base + "/")
+    with tempfile.TemporaryDirectory() as tmp:
+        backup = pathlib.Path(tmp) / "history73.json"
+        backup.write_text(json.dumps(built["project"], ensure_ascii=False), encoding="utf-8")
+        page.locator("#import-file").set_input_files(str(backup))
+        page.wait_for_url(re.compile(r"#/p/E_"))
+    entry = re.search(r"#/p/(E_[^/]+)", page.url).group(1)
+    page.locator(f'#world .node[data-part="{area}"]').click()
+    expect(page.locator("#lens-title")).to_have_text("폴더 일괄 처리")
+    item = page.locator("#lens .request-item").first
+    item.locator(":scope > summary").click()
+    history = item.locator(".request-history")
+    expect(history.locator(":scope > summary")).to_contain_text("철회·정정된 앞 보고 1개")
+    history.locator(":scope > summary").click()
+    body = page.locator("#lens .lens-body")
+
+    def roundtrip(cite, back_to="폴더 일괄 처리"):
+        cite.scroll_into_view_if_needed()
+        cite.focus()
+        scroll = body.evaluate("e => e.scrollTop")
+        assert scroll > 0, "the test must return to a scrolled reading, not its start"
+        url0, camera0, history0 = page.url, page.locator("#world").evaluate(CAMERA), history.evaluate("e => e.open")
+        quote = cite.get_attribute("title")
+        cite.click()
+        expect(page.locator("#lens .rr-mark")).to_have_text(quote)
+        if back_to:
+            expect(page.locator("#lens .rr-back")).to_contain_text(back_to)
+        page.locator("#lens .rr-back").click()
+        expect(page).to_have_url(url0)
+        expect(item).to_have_attribute("open", "")
+        assert history.evaluate("e => e.open") == history0
+        expect(cite).to_be_focused()
+        assert abs(body.evaluate("e => e.scrollTop") - scroll) <= 1
+        page.wait_for_timeout(250)
+        assert page.locator("#world").evaluate(CAMERA) == camera0
+
+    # The old (withdrawn) quote: the history fold comes back open, with that quote focused.
+    old = history.locator(".request-withdrawn .cl-cite").first
+    roundtrip(old)
+    expect(history).to_have_attribute("open", "")
+    roundtrip(old)
+    # The current quote path is unchanged (its history fold stays as the reader left it, open).
+    roundtrip(item.locator(":scope > .request-passage .cl-cite").first)
+    expect(history).to_have_attribute("open", "")
+    # The map's root (nothing selected): the comparison above the map opens the same request reading in the pane; its old quote
+    # and the way back keep that reading's item, history fold, quote focus and scroll too, with no part selected.
+    page.goto(base + f"/#/p/{entry}")
+    page.locator("#world .mu-comparison").click()
+    expect(page.locator("#lens-title")).to_contain_text("돌아와 읽기")
+    item = page.locator("#lens .request-results .request-item").first
+    expect(item).not_to_have_attribute("open", "")
+    item.locator(":scope > summary").click()
+    history = item.locator(".request-history")
+    history.locator(":scope > summary").click()
+    old = history.locator(".request-withdrawn .cl-cite").first
+    roundtrip(old, back_to=None)
+    expect(history).to_have_attribute("open", "")
+    roundtrip(item.locator(":scope > .request-passage .cl-cite").first, back_to=None)
+    page.keyboard.press("Escape")
+    # The same RQ item answers the other part too: nothing opened here opens there.
+    page.goto(base + f"/#/p/{entry}/{other}")
+    expect(page.locator("#lens-title")).to_have_text("터미널 명령 실행")
+    expect(page.locator("#lens .request-item")).to_have_count(1)
+    expect(page.locator("#lens .request-item[open]")).to_have_count(0)
+    expect(page.locator("#lens .request-history[open]")).to_have_count(0)
+    no_page_scroll(page)
+    assert not calls and not errors, (calls, errors)
+    context.close()
+
+
+def revised73_flow(browser, base):
+    """The saved public 72 sequential backup: the folder-input -> converter relation rests only on the withdrawn 71 report. Selected
+    from either end, its line carries one visible '근거 정정' mark clear of parts, heads and other verbs; an ordinary relation's
+    line never does. 1280 and 1440, no AI call."""
+    sample = ROOT.parents[1] / "docs/cycles/2026-10-26-visual-experience-59/request72-sequential-sample.json"
+    data = json.loads(sample.read_text(encoding="utf-8"))
+    area = {a["name"]: a["id"] for a in data["space"]["areas"]}
+    overlaps = """() => { const m = document.querySelector('#world .edge-label.revised'); if (!m) return ['missing'];
+      const r = m.getBoundingClientRect(), hit = e => { const q = e.getBoundingClientRect(); return r.left < q.right && q.left < r.right && r.top < q.bottom && q.top < r.bottom; };
+      return [...document.querySelectorAll('#world .node, #world .frame-head, #world .edge-label')].filter(e => e !== m && hit(e)).map(e => e.className); }"""
+    for width in (1280, 1440):
+        context = browser.new_context(viewport={"width": width, "height": 720})
+        page = context.new_page()
+        errors, calls = [], []
+        page.on("pageerror", lambda e: errors.append(str(e)))
+        page.on("request", lambda r: calls.append(r.url) if r.method == "POST" and "/api/studio/" in r.url else None)
+        page.goto(base + "/")
+        page.locator("#import-file").set_input_files(str(sample))
+        page.wait_for_url(re.compile(r"#/p/E_"))
+        entry = re.search(r"#/p/(E_[^/]+)", page.url).group(1)
+        for name in ("폴더 입력", "변환기"):
+            page.goto(base + f"/#/p/{entry}/{area[name]}")
+            expect(page.locator("#lens-title")).to_have_text(name)
+            expect(page.locator("#world .edge.revised.on")).to_have_count(1)
+            mark = page.locator("#world .edge-label.revised")
+            expect(mark).to_have_count(1)
+            expect(mark).to_be_visible()
+            expect(mark).to_contain_text("근거 정정")
+            assert page.evaluate(overlaps) == [], (width, name, page.evaluate(overlaps))
+            expect(page.locator("#world .edge-label:not(.revised)", has_text="근거 정정")).to_have_count(0)
+        # A part whose relations rest on current reports: no mark anywhere on the map.
+        page.goto(base + f"/#/p/{entry}/{area['입력 경로 읽기']}")
+        expect(page.locator("#lens-title")).to_have_text("입력 경로 읽기")
+        expect(page.locator("#world .edge.on")).not_to_have_count(0)
+        expect(page.locator("#world .edge.revised.on")).to_have_count(0)
+        expect(page.locator("#world .edge-label", has_text="근거 정정")).to_have_count(0)
+        no_page_scroll(page)
+        assert not calls and not errors, (width, calls, errors)
+        context.close()
+
+
 def request71_projection_flow(browser, base):
     """Written, validated fixture in the actual request-results DOM: unrelated excerpts stay folded outside parts, a real
     older-RQ report precedes a newer unanswered RQ, and the shared original component marks/scrolls its exact interval."""
@@ -1941,11 +2064,11 @@ def request71_projection_flow(browser, base):
       const report = '배경 설명을 그대로 보관합니다.\\n'.repeat(300) + `요청문 참조: ${old.id}\\n폴더 입력 처리를 바꿨습니다. 단일 문서 검사 보고입니다. README 오타도 고쳤습니다.`;
       p = D.pasteRecord(p, report, null).project;
       const inp = M.buildMapAsk(p, V.studioView(p), [old.scope,newer.scope]);
-      const match = (quote,text,targets,kind='reported') => ({record:'N01',quote,text,targets,kind,about:null,why:'스텁 대응'});
+      const match = (quote,text,targets,kind='reported') => ({record:'N01',quote,text,targets,kind,about:null,why:'스텁 대응',stance:kind==='reported'?'made':'unclear',replaces:null});
       const reply = M.validateMapReply({summary:'스텁',parts:[],relations:[],candidates:[],gaps:[],matches:[
         match('폴더 입력 처리를 바꿨습니다','[스텁] 입력 변경 보고',[{requestId:old.id,itemId:'I1'}]),
         match('단일 문서 검사 보고입니다','[스텁] 단일 문서 검사',[],'checked'),match('README 오타도 고쳤습니다','[스텁] README 수정',[])]}, inp.ask);
-      p = M.applyReading(p,inp,reply,{id:'R_projection',at:new Date().toISOString(),model:'stub',prompt:'m2-000000000000',hash:'9'.repeat(64)}).project;
+      p = M.applyReading(p,inp,reply,{id:'R_projection',at:new Date().toISOString(),model:'stub',prompt:'m3-000000000000',hash:'9'.repeat(64)}).project;
       const box = document.createElement('div'); box.id='request-fixture'; box.style.cssText='position:fixed;right:0;top:0;width:420px;height:700px;overflow:auto;background:white;padding:12px;z-index:2000';document.body.append(box);
       const render = partId => {box.replaceChildren(UI.requestResults(p,[old.scope,newer.scope],{...(partId?{partId}:{}),correct:async()=>null}));};
       window.renderRequestFixture=render; render(b); return {a,b,old:old.id};
@@ -2420,6 +2543,8 @@ def main():
             request71_projection_flow(browser, base); print("ok  request projection: unrelated excerpts do not spread into parts; older report precedes newer unanswered RQ; exact quoted interval marked/scrolled; written fixture")
             reading72_flow(browser, base); print("ok  saved actual request: second quote/back keeps disclosure, scroll, focus and surface; current contents, exact RQ/revision and other-part isolation")
             continue72_flow(browser, base); print("ok  home continue: scope and selection per workspace entry; imported copies and ambiguous old project memory kept apart")
+            history73_flow(browser, base); print("ok  withdrawn report history: old quote and way back keep the item, its history fold, quote focus, scroll and camera, from a part and from the map root; current quote path; other part untouched")
+            revised73_flow(browser, base); print("ok  corrected-basis relation: selected from either end its line keeps one clear '근거 정정' mark at 1280/1440; ordinary lines never carry it")
             record_fold_flow(browser, base, oss_fixtures()); print("ok  pasted record on Node-RED: a chosen candidate in a folded group opens only its path, holds through a quote, folds back on another choice and on close")
             stale_request_flow(browser, base); print("ok  request only from the analysis of what is written now: typed, forced, A-B-A, cancelled and outdated replies, material")
             actual_reply_flow(browser, base); print("ok  wide comparison of an actual reply without presentation; scope reviews outliving a material change; four changes")
