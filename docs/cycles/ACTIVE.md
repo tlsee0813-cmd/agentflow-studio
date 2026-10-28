@@ -1,5 +1,7 @@
 # AgentFlow 현재 상태
 
+**82 첫 지도 전달 실패 · 2026-10-29:** [실제1회 결과와 반려 근거](https://github.com/tlsee0813-cmd/agentflow-studio/blob/28fda951e95bb2bd8739d4949443522c0dde857a/docs/cycles/2026-10-29-subject-first-82/RESULT.md). 319550c FIRST 지시를 기준79와동일원문/ask/Pro disabled/16384/90초로실행:32.760초 stop·INVALID_RESPONSE. 정밀조건일부회복에도 운영지시제품화·종류오판·미정중복·계약위반이남아 총괄/독립Sol 반려. Node484통과와의미실패구별. 재시도/수선/적용/후속OSS호출0,PR51draft미병합. 공개73/수용80코드/UI75최종693유지. 첫지도품질미해결·전체목표활성. 다음은실패82지시를제외한80에서큰개요·깊은구성·긴설명의PC가독성을실제저장OSS자료로직접확인한다. checkpoint는문서만갱신한다.
+
 **81 검출기 미채택 · 2026-10-29:** [원문 독립 검토 결과](https://github.com/tlsee0813-cmd/agentflow-studio/blob/8da3cab6dc613d9ed6c6675d0ee1b5f80fb7e48c/docs/cycles/2026-10-29-source-review-81/RESULT.md). 저장79 후보를 보존한 별도문맥 검토1회는21.641초 stop·형식valid·지적7개였으나 작업절차의 제품화와 정밀 철회조건을 놓쳤다. 잘못된 위치·과잉 지시도 있어 총괄·독립Sol 판정으로 반려, 새생성·재생성·수선·적용·재시도0. PR50 draft(base80) 미병합, 공개73과 UI75 최종693 및76·78·80 좁은 수용 유지. 전체 목표 활성; 다음은 기존Pro81의 대상·자료층위 우선 단일 생성 순서가 이전 실험과 실질적으로 다른지 설계 대조한다. 이 checkpoint 변경은 문서뿐이다.
 
 **80 범위 수용·81 준비 · 2026-10-29:** [현재 설명의 근거 접근·판정 정정](https://github.com/tlsee0813-cmd/agentflow-studio/blob/9c38769c36193e04589ba8005f26da84394fd63b/docs/cycles/2026-10-29-role-evidence-80/RESULT.md). 런타임589ac62와 Windows 테스트 런처 수리ee3b11a를 총괄1280·독립Cloud1280/1440·Sol 검토 및 양OS CI40736371642로 대조해 접근 범위를 수용했다. 공개73 유지, PR49 draft 미병합. 79의 현재형 역할만으로 구현확정을 단정한 기준은 철회하되 다른 독립 실패로79 미채택은 유지한다. 전체 목표 활성. 다음81은 원문과 저장 후보의 별도 문맥 대조가 실제 의미 오류를 검출하는지 운영 밖에서 먼저 반증한다. 기존 생성·실패수선·새 모델 호출은 아직 없고, 작성 도구만 준비한다.

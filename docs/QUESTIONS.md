@@ -1,5 +1,7 @@
 # 연구 질문과 축적된 근거
 
+82: [대상·조건 우선 첫 지도 미채택](https://github.com/tlsee0813-cmd/agentflow-studio/blob/28fda951e95bb2bd8739d4949443522c0dde857a/docs/cycles/2026-10-29-subject-first-82/RESULT.md). Q02/Q06/Q07 실제지시1회는INVALID_RESPONSE이며 운영지시제품화·종류오판·미정중복도남았다. 일부정밀조건회복은전체성공이아니다. 재시도/수선/적용0,공개73유지. 다음Q04/Q13의큰개요·깊은구성·긴설명은수용80의실제저장OSS자료에서직접확인하며,그화면개선을첫지도품질해결로확대하지않는다.
+
 81: [별도 문맥 검토 검출기 미채택](https://github.com/tlsee0813-cmd/agentflow-studio/blob/8da3cab6dc613d9ed6c6675d0ee1b5f80fb7e48c/docs/cycles/2026-10-29-source-review-81/RESULT.md). Q02/Q06/Q07에서 exact 인용·실재pointer·유효JSON은 의미 검출을 보증하지 않았다. 핵심 대상·조건 오류를 놓치고 정당한 예문경계를 흐리는 지시를 반환하여 새 생성→검토→재생성 전에 중단했다. 실제검토1·새생성/수선/적용0·원본보존. 기존수용범위와공개73 유지, 다음은 대상/층위 우선 단일 작성 설계의 차이를 검토한다.
 
 80: [역할 설명의 정확 근거 접근과 판단 수정](https://github.com/tlsee0813-cmd/agentflow-studio/blob/9c38769c36193e04589ba8005f26da84394fd63b/docs/cycles/2026-10-29-role-evidence-80/RESULT.md)에서 Q04/Q07/Q13의 설명·현재주장·원문 왕복을 실제 저장된 두 OSS 응답과 합성 반례로 대조했다. 양PC Cloud·root 직접 조작·Sol·최종ee3 양OS CI로 해당 범위를 수용한다. 책임의 현재형을 구현완료로 단정하던79 A1기준을 정정하며,79의 별도 계약·귀속·조건누락 실패는 유지한다. 일반 의미이해와 첫 지도 전달은 미해결이고 공개73/미수용74/UI75 구별을 유지한다. 81은 기존실패응답의 블라인드 원문 대조1회부터 준비하며 성공을 가정하지 않는다.
