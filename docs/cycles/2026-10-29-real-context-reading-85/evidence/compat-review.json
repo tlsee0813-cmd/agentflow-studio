@@ -1,0 +1,89 @@
+{
+  "task": "AF85-zero-change-compatibility-review",
+  "source": "a87bf3cf056cae990902db4aa1ef1359d55fde3e",
+  "recommendation": "B 권고. 같은 /api/studio/plan에서 studio.plan.3 discriminant만 추가하고 authoring 입력 모양·분석5키는 유지한다. 새 앱/저장 parser는 items=[]를 수용하되 plan.1/2의 prompt와 응답 nonempty 계약은 유지한다.",
+  "A": {
+    "sufficient": false,
+    "reason": "서버와 정적 앱의 동시 배포는 이미 열린 구형 탭 또는 다른 API base를 쓰는 기존 클라이언트를 갱신하지 않는다. plan.2 자체가 빈 결과를 읽을 능력의 신호가 아니므로 구형 요청에 빈 결과가 돌아가면 client mapReply가 INVALID_CHANGE_PLAN으로 거절한다.",
+    "whenPossible": "모든 구형 클라이언트를 요청 전 실제로 차단/갱신하는 검증된 capability 경계가 따로 있다면 가능하지만 현재 route에는 그 경계가 없다. 이를 새로 만드는 것보다 plan.3이 작다."
+  },
+  "B": {
+    "minimumBoundary": [
+      "PlanAsk의 새 plan.3은 plan.2와 같은 5필드 입력이다. 새 클라이언트만 plan.3을 보낸다. endpoint 추가는 필요 없다.",
+      "서버는 plan.3을 planning으로 분류하고 전용 zero-neutral prompt를 고른다. plan.1/2 prompt는 그대로 둔다.",
+      "공유 parsePlanAnalysis/저장 파서는 빈 items를 읽을 수 있게 하되, validatePlanReply는 ask 판본별로 plan.1/2의 items>0을 별도 강제한다. 공유 파서 완화만으로 옛 API 계약을 바꾸지 않는다.",
+      "새 앱의 createPlan·저장 복원·빈 focus/UI·자료 접근은 빈 분석을 끝까지 처리한다. selected=[]의 요청 생성 차단과 과거 동결 요청/반환의 자체 항목·자료 보존은 유지한다.",
+      "새 클라이언트가 구형 서버에 붙으면 plan.3은 현재 validator에서 거절된다. 이를 plan.2 자동 재호출이나 가짜 항목으로 우회하지 않는다."
+    ],
+    "cost": "서버 분류·prompt 선택·요청 validator의 세 번째 분기와 구형 계약 검사가 추가된다. 판본만 추가해서 빈 focus/UI까지 해결됐다고 볼 수 없다."
+  },
+  "storedCompatibility": {
+    "sameShape": "ChangePlan은 change-plan.1, 파일은 agentflow.change-plan-file.3이다. 모양이 같고 새 reader가 기존 양수 분석도 읽으므로 빈 배열 허용만으로 전면 저장 migration을 요구할 이유는 없다.",
+    "old84Reader": "현재 a87 reader는 .3 format을 알아보지만 parsePersistedPlan→parsePlanAnalysis의 items>0에서 빈 계획을 거절한다. readPlanFile은 메시지를 반환하고 loadBundle은 unreadable=true로 원문을 유지한다. 빈 항목이 구형 renderWork까지 통과하는 경로가 아니다.",
+    "old73Reader": "공개73은 file.2/.1만 받으므로 .3 파일 자체를 초기 format 검사에서 거절한다.",
+    "refusalLimit": "두 경우 모두 조용한 성공이나 강제 item 삽입은 아니지만, 현재 메시지는 정확한 '미지원 판본/업데이트 필요' 안내가 아니다. 그런 명시적 UX가 필수라면 최소 지원 판본 표기/별도 파일 판본 경계를 추가 결정해야 한다.",
+    "concurrentTabLimit": "같은 저장 key를 여러 탭이 편집할 때 이미 캐시된 구형 탭이 예전 bundle로 덮어쓰는 문제까지 plan.3이 막지는 않는다. 이는 새 빈 분석만의 문제가 아니며 동시 편집 보장을 주장하지 않는다. 그 보장까지 필요하면 별도 write/revision 경계가 필요하다."
+  },
+  "code": [
+    {
+      "file": "app/continuity/src/shared/plan-api.ts",
+      "lines": [
+        28,
+        30,
+        56
+      ],
+      "fact": "요청 판본은1/2만, 응답은 공유 parsePlanAnalysis 사용."
+    },
+    {
+      "file": "app/continuity/server/studio.mjs",
+      "lines": [
+        103,
+        118,
+        140
+      ],
+      "fact": "planning 분류·prompt 선택·응답 검증이 요청 판본에 의존."
+    },
+    {
+      "file": "app/continuity/src/client/plan-source.ts",
+      "lines": [
+        77,
+        91,
+        152
+      ],
+      "fact": "현 앱은 plan.2를 전송하고 받은 분석도 공유 parser로 재검증."
+    },
+    {
+      "file": "app/continuity/src/shared/change-plan.ts",
+      "lines": [
+        84,
+        124,
+        141
+      ],
+      "fact": "현재 items>0 제약이 wire 및 저장 읽기 모두에 적용."
+    },
+    {
+      "file": "app/continuity/src/client/plan-store.ts",
+      "lines": [
+        57,
+        126,
+        164,
+        167
+      ],
+      "fact": ".3 파일/entry의 invalid plan을 거절·보존하는 경계."
+    },
+    {
+      "commit": "26b24b935567a95d101720cbf0e06d188d8765d9",
+      "file": "app/continuity/src/client/plan-store.ts",
+      "fact": "공개73 reader의 지원 파일은 .2/.1."
+    }
+  ],
+  "proComparison": "중립 제안 없음·5키 유지·검증 성공 아님이라는 Pro 의미 권고에 동의한다. 다만 현 실제 혼재 경계에는 입력 판본을 그대로 두는 것보다 plan.3 분리가 정확하다.",
+  "actions": {
+    "productEdits": 0,
+    "runnerEdits": 0,
+    "api": 0,
+    "ui": 0,
+    "execution": 0
+  },
+  "status": "설계 권고만. 현 runner의 run/replay 차단 유지. 새 구현·실행 승인 아님."
+}

@@ -1,7 +1,7 @@
 # 85 — 실제 자료의 작성 맥락에서 변경안 읽기까지
 
 ## 선택
-84의 작성 맥락을 [범위 수용](https://github.com/tlsee0813-cmd/agentflow-studio/blob/a2d89ad0dc0b8b19d63ab51e6dd82f184cdb0710/docs/cycles/2026-10-29-authoring-context-84/RESULT.md)한 뒤, 기존 실제 micro 저장자료의 맥락과 새 실제 plan.2 응답을 같은 PC 비교면에서 읽는 연결 하나를 확인한다. 기준 runtime90ac736, app tree9a708ed559b8a8c81f649d812075e1b50a398211. 공개73/UI75 수리와 기존 실패는 유지한다.
+84의 작성 맥락을 [범위 수용](https://github.com/tlsee0813-cmd/agentflow-studio/blob/a2d89ad0dc0b8b19d63ab51e6dd82f184cdb0710/docs/cycles/2026-10-29-authoring-context-84/RESULT.md)한 뒤, 기존 실제 micro 저장자료의 맥락과 새 실제 응답을 같은 PC 비교면에서 읽는 연결 하나를 확인한다. 당초 plan.2를 계획했으나 호출 전 발견한0항목 의존 수리로 새 요청은 plan.3을 쓴다. 자료·의도·모델·한도·최대1회·의미 판정은 유지한다. 기준 runtime90ac736, app tree9a708ed559b8a8c81f649d812075e1b50a398211. 공개73/UI75 수리와 기존 실패는 유지한다.
 
 84의 실제 자료 PC는 스텁 분석, 실제모델5건은 두 부분의 합성 설명이었다. 둘의 독립 통과가 복잡한 실제 자료와 새 맥락을 함께 읽는 품질을 증명하지 않는다.65의 일반 OSS 분석이나70/71의 전체 요청·반환 순환을 반복하지 않는다. 당초 제품 수리 없이 연결을 확인할 계획이었으나, 실제 호출 전에 [0개 변경 계약 충돌](PREFLIGHT.md)을 확인했다. 입력을 더 쉬운 사례로 바꾸지 않고 이 의존 경로를 먼저 수리한다. 환경 설치·새 지도 생성으로 넓히지 않는다.
 

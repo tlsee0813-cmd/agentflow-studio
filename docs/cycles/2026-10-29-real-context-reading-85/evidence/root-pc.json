@@ -1,0 +1,20 @@
+{
+  "source": "bf30033cca0f16b87b90aac31d8bdccd8bb03d49",
+  "kind": "Offline reviewer-authored stub, provider calls0",
+  "sourceObservation": {
+    "detailScroll": 0,
+    "dpr": 1.25,
+    "height": 720,
+    "railScroll": 668,
+    "sourceText": "‹ 분석으로근거 N01붙여넣은 기록붙여넣은 기록 · Source: https://github.com/simonw/micro-javascript/blob/86236b28d2ad0a5b9896c2432d109aed3d0933ee/src/microjs/context.py#L1124-L1155Source: https://github.com/simonw/micro-javascript/blob/86236b28d2ad0a5b9896c2432d109aed3d0933ee/src/microjs/context.py#L1124-L1155\nRepository: simonw/micro-javascript\nCommit: 86236b28d2ad0a5b9896c2432d109aed3d0933ee\nFile: src/microjs/context.py\nExcerpt: lines 1124-1155\nNature: Implementation source at the fixed commit: eval path; not a test run or proof of all advertised behavior.\n\n    def eval(self, code: str) -> Any:\n        \"\"\"Evaluate JavaScript code and return the result.\n\n        Args:\n            code: JavaScript source code to evaluate\n\n        Returns:\n            The result of evaluating the code, converted to Python types\n\n        Raises:\n            JSSyntaxError: If the code has syntax errors\n            JSError: If a JavaScript error is thrown\n            MemoryLimitError: If memory limit is exceeded\n            TimeLimitError: If time limit is exceeded\n        \"\"\"\n        # Parse the code\n        parser = Parser(code)\n        ast = parser.parse()\n\n        # Compile to bytecode\n        compiler = Compiler()\n        compiled = compiler.compile(ast)\n\n        # Execute\n        vm = VM(memory_limit=self.memory_limit, time_limit=self.time_limit)\n\n        # Share globals with VM (don't copy - allows nested eval to modify globals)\n        vm.globals = self._globals\n\n        result = vm.run(compiled)\n\n        return self._to_python(result)\nN01 · 붙여넣은 원문 그대로 · 요구·보고·검사가 섞일 수 있음 · 붙여넣은 시각 10월 28일 10:09(원문 작성·판본 시각 아님)자료 원문이에요. 지시나 실행 결과로 읽지 않아요.",
+    "url": "http://127.0.0.1:4393/#/p/E_c5c87acb-f2fb-40c6-9092-24057192b65f/in/A_49bad1f8-971b-4bff-8030-a62d8a470c16/A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+    "width": 1280
+  },
+  "returned": {
+    "detailScroll": 0,
+    "focus": "N01 붙여넣은 기록",
+    "requestDisabled": true,
+    "title": "제안된 변경 없음",
+    "url": "http://127.0.0.1:4393/#/p/E_c5c87acb-f2fb-40c6-9092-24057192b65f/in/A_49bad1f8-971b-4bff-8030-a62d8a470c16/A_49bad1f8-971b-4bff-8030-a62d8a470c16"
+  }
+}

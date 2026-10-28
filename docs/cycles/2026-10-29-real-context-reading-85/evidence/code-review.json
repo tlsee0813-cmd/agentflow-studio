@@ -1,0 +1,157 @@
+{
+  "task": "AF85-code-independent-delta-review",
+  "base": "860f6e2587f2b744b8f89be0db2365176c682bb1",
+  "source": "bf30033cca0f16b87b90aac31d8bdccd8bb03d49",
+  "appTree": "42803f840f53dce12a047a4cd27912ebf945267f",
+  "conclusion": "11파일 delta의 읽기 검토에서 새 실질 P1/P2 또는 실행 전 코드 차단 사유를 확인하지 못했다. 이는 고정5.8.3 빌드·실제 PC·실제 모델 의미 수용을 대신하지 않는다.",
+  "findings": [],
+  "checks": [
+    {
+      "boundary": "plan.3 / 구형 wire",
+      "evidence": [
+        {
+          "file": "app/continuity/src/shared/plan-api.ts",
+          "line": 28,
+          "detail": "plan.2/3은 같은 authoring 포함5필드이며 판본만 구분한다."
+        },
+        {
+          "file": "app/continuity/src/shared/plan-api.ts",
+          "line": 60,
+          "detail": "공유 parser가 empty를 읽더라도 plan.1/2 응답은 별도로 items>0을 강제한다."
+        },
+        {
+          "file": "app/continuity/src/client/plan-source.ts",
+          "line": 153,
+          "detail": "클라이언트 mapReply도 옛 요청에 대한 empty를 거절한다."
+        },
+        {
+          "file": "app/continuity/server/studio.mjs",
+          "line": 103,
+          "detail": "plan.3을 planning에 포함해 같은 route/예산/validator 경로를 사용한다."
+        },
+        {
+          "file": "app/continuity/server/studio.mjs",
+          "line": 118,
+          "detail": "plan.3만 PLAN3_PROMPT를 선택한다. PLAN_PROMPT/PLAN2_PROMPT 정의는 delta에서 수정하지 않았다."
+        }
+      ],
+      "result": "B 판본 경계와 정합적. 구형 클라이언트에 빈 정상 응답을 보내지 않는다."
+    },
+    {
+      "boundary": "중립 empty / 저장",
+      "evidence": [
+        {
+          "file": "app/continuity/src/shared/change-plan.ts",
+          "line": 87,
+          "detail": "items가 비면 impacts도 비어야 한다.5키·실제 항목/영향의 ref·ID 검증은 유지된다."
+        },
+        {
+          "file": "app/continuity/src/client/plan-store.ts",
+          "line": 59,
+          "detail": "새 .3 저장은 빈 계획을 읽지만 legacy entry의 빈 계획은 거절한다."
+        }
+      ],
+      "result": "옛 .1/.2 writer가 만들 수 없던 empty를 옛 판본으로 수용하지 않는 추가 조건은 이전 provenance 선택과 정합적이다. 새 .3의 빈 배열 허용 때문에 legacy 판본 의미를 완화하지 않는다.",
+      "limit": "old .3 reader는 새 empty를 generic unreadable로 거절하는 기존 경계다. 명시적인 업데이트 안내나 다중 탭 동시 편집 보장이 추가된 것은 아니다."
+    },
+    {
+      "boundary": "null focus / 빈 화면",
+      "evidence": [
+        {
+          "file": "app/continuity/src/client/plan-view.ts",
+          "line": 603,
+          "detail": "빈 계획은 workOpen으로 들어간다."
+        },
+        {
+          "file": "app/continuity/src/client/plan-view.ts",
+          "line": 800,
+          "detail": "null focus를 역참조하지 않고 item=null로 취급한다."
+        },
+        {
+          "file": "app/continuity/src/client/plan-view.ts",
+          "line": 822,
+          "detail": "별도 빈 body로 분기하며 일반 item 렌더링에 들어가지 않는다."
+        },
+        {
+          "file": "app/continuity/src/client/plan-view.ts",
+          "line": 860,
+          "detail": "공통 finishWork의 list/detail 스크롤 복원도 해당 DOM 존재를 확인한다."
+        },
+        {
+          "file": "app/continuity/src/client/plan-view.ts",
+          "line": 875,
+          "detail": "제안 없음과 목표 달성/변경 불필요 검증을 구별하고 summary·preserve·unknowns·자료를 읽게 한다."
+        }
+      ],
+      "result": "0/0 또는 고를 항목 없는 왼쪽 목록으로 유도하지 않는다. 양수 항목에서 선택만0인 기존 상태와 구별된다."
+    },
+    {
+      "boundary": "이전 자료와 새 초안 분리 / 복귀",
+      "evidence": [
+        {
+          "file": "app/continuity/src/client/plan-view.ts",
+          "line": 884,
+          "detail": "빈 분석의 자료 목록은 p.evidence다."
+        },
+        {
+          "file": "app/continuity/src/client/plan-view.ts",
+          "line": 904,
+          "detail": "개별 자료 열기도 p.evidence에서 찾는다. 초안·추가자료 수정 뒤 새 input으로 바꾸지 않는다."
+        },
+        {
+          "file": "app/continuity/src/client/plan-view.ts",
+          "line": 909,
+          "detail": "기존 '읽는 자료' 편집 경로는 writing이면 새 input 자료를 보여주며, 위 '이 분석에 넣은 자료' 경로와 구별된다."
+        },
+        {
+          "file": "app/continuity/src/client/plan-view.ts",
+          "line": 898,
+          "detail": "자료에서 돌아올 때 원래 data-ref 버튼으로 focus를 돌려준다."
+        },
+        {
+          "file": "app/continuity/src/client/plan-view.ts",
+          "line": 982,
+          "detail": "빈 계획에서 지도 복귀는 close를 사용하며 초안과 분석은 보존한다."
+        }
+      ],
+      "result": "빈 분석의 원자료가 미분석 새 초안 자료로 바뀌는 누락은 찾지 못했다. close/open의 기존 CARETS·owner 기반 메모리 키 수리는 delta에서 바꾸지 않았다."
+    },
+    {
+      "boundary": "과거 동결 요청 / 반환",
+      "evidence": [
+        {
+          "file": "app/continuity/src/shared/change-plan.ts",
+          "line": 169,
+          "detail": "requestSnapshot은 selected.length>0을 계속 강제한다."
+        },
+        {
+          "file": "app/continuity/src/client/plan-view.ts",
+          "line": 220,
+          "detail": "canRequest도 선택0을 차단한다."
+        },
+        {
+          "file": "app/continuity/src/client/plan-view.ts",
+          "line": 1311,
+          "detail": "과거 요청 sheet는 snapshot text/labels로 읽고 최신 empty 항목에서 재구성하지 않는다."
+        }
+      ],
+      "result": "analyze의 기존 bundle spread가 snapshots/labels/origins/observations/attached를 남긴다. 새 empty selected=[]로 이전 요청·반환을 삭제하거나 완료 처리하는 코드가 추가되지 않았다."
+    },
+    {
+      "boundary": "84 수리 보존",
+      "result": "legacy per-project marker의 get/save/setAside, draft/analyzed owner guard, origins600/옛match300, 작성 맥락 유지 및 CARETS 코드는 이번 delta에서 제거하지 않았다. 이전 검사를 재실행하지 않았다."
+    }
+  ],
+  "evidenceQuality": {
+    "reviewed": "runtime8파일과 테스트3파일의 delta 및 관련 호출 주변 코드. 제품 HEAD=bf30033, git status --short 출력 없음.",
+    "executedByThisReview": "없음. 제품/runner 수정0, Node 검사0, 브라우저0, API/모델0.",
+    "authorClaims": "94검사·양PC scratch 주장은 작성자 보고다.6.0.2 emit을 고정5.8.3 성공으로 세지 않는다. 정식 Python zero85_flow의 미실행도 보존한다.",
+    "deferred": "총괄의 pinned5.8.3 check/build와 정식 zero85 PC 관찰, 이후 새 실제 응답의 독립 의미 판정이 필요하다. 코드 검토만으로 위 결과를 관측했다고 주장하지 않는다."
+  },
+  "limitations": [
+    "빈 화면의 실제 밀도/스크롤·커서·원문 focus 왕복은 정적 코드만으로 최종 수용할 수 없다.",
+    "item이 없는 summary/preserve/unknowns에는 문장별 refs가 없다. 자료 입구는 분석에 보낸 evidence 접근이며 개별 문장 검증 표시가 아니다.",
+    "0항목 허용은 정당한 표현의 계약 수리다. 그 응답의 내용이 근거에 맞는지는 실제 모델 응답별로 별도 평가해야 한다.",
+    "첫 지도 실패·전체 제품 목표·공개73 배포 상태를 이 검토로 변경하지 않는다."
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "runtimeSource": "bf30033cca0f16b87b90aac31d8bdccd8bb03d49",
+  "providerCalls": 0,
+  "basis": "SHA256 of exact staged Git blob bytes, not Windows checkout normalization",
+  "files": {
+    "docs/cycles/2026-10-29-real-context-reading-85/evidence/code-review.json": "8fd7ce1dafdf6530bd0a0a59cd990b7c5227b8175c70c48df286c05c60ffffc3",
+    "docs/cycles/2026-10-29-real-context-reading-85/evidence/compat-review.json": "cf3d664ba9ef05ebb80cc2e1845c57b6be4d6756b7c00c0650744f6b8b1b863a",
+    "docs/cycles/2026-10-29-real-context-reading-85/evidence/preflight.json": "75934d88c767852d722fada58e2c7926111362edf5d341fcbdd9e3e78ebf3c12",
+    "docs/cycles/2026-10-29-real-context-reading-85/evidence/root-empty-1280.jpg": "3db70df3246b98816552995bc8902dfeeb00cba998a67fe5cb1fd0c656d079e1",
+    "docs/cycles/2026-10-29-real-context-reading-85/evidence/root-pc.json": "8d35129de9e37bc24c425a3773dd57e2a1adafa44800425d92e7b69f8215cc11",
+    "docs/cycles/2026-10-29-real-context-reading-85/evidence/root-source-1280.jpg": "251e8ce6146ed2dddd9db0f2931be3b6bc5cc767ddd8c21577ad2610a28e7ff8"
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "source": "a87bf3cf056cae990902db4aa1ef1359d55fde3e",
+  "fixtureSha256": "aaffb3764afc68f054d05ff54f4e2b5bf72b5b0abfc259d0bfc1deda666f8065",
+  "kind": "Reviewer-authored zero-change clarification candidate; offline contract counterexample, NOT model output",
+  "askSha256": "8c841b1e71b9a2beb2a4aaf3cd2271c83acb194a6114a137476a276e4df64ddc",
+  "parts": 6,
+  "evidence": [
+    {
+      "id": "INTENT",
+      "kind": "user"
+    },
+    {
+      "id": "M01",
+      "kind": "reading"
+    },
+    {
+      "id": "M02",
+      "kind": "reading"
+    },
+    {
+      "id": "M03",
+      "kind": "reading"
+    },
+    {
+      "id": "M04",
+      "kind": "reading"
+    },
+    {
+      "id": "M05",
+      "kind": "reading"
+    },
+    {
+      "id": "M06",
+      "kind": "reading"
+    },
+    {
+      "id": "N01",
+      "kind": "record"
+    },
+    {
+      "id": "N02",
+      "kind": "record"
+    }
+  ],
+  "candidate": {
+    "summary": "제공된 eval 문서에는 메모리 제한과 시간 제한 예외가 이미 별도 이름으로 명시되어 있다. 호출자에게 실제로 보이는 설명은 제공된 자료로 확인되지 않아, 현재 설명을 확인하기 전에는 새로운 변경을 확정하지 않는다.",
+    "items": [],
+    "impacts": [],
+    "preserve": [
+      "기존 eval 실행 순서와 전역 객체 공유"
+    ],
+    "unknowns": [
+      "제공된 발췌에 예외의 구체 메시지와 호출자의 안내가 없어, 현재 설명이 요청을 충족하는지 확인이 필요하다."
+    ]
+  },
+  "outcome": {
+    "accepted": false,
+    "error": "INVALID_CHANGE_PLAN"
+  },
+  "codeBoundaries": [
+    {
+      "file": "app/continuity/src/shared/change-plan.ts",
+      "line": 84,
+      "condition": "check(value.items.length > 0)"
+    },
+    {
+      "file": "app/continuity/src/client/plan-view.ts",
+      "line": 796,
+      "condition": "firstFocus may return null, renderWork dereferences st.focus.id and item"
+    }
+  ],
+  "calls": 0,
+  "applied": false,
+  "conclusion": "Before the planned model call: legitimate no-change/insufficient-evidence result cannot be represented as zero selectable work; merely relaxing the validator is insufficient for the current comparison UI."
+}
