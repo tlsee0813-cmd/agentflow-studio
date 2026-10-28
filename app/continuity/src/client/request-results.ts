@@ -116,10 +116,10 @@ export function requestResults(project: Project, scopes: FrozenRequest[], option
       const { state, lead, current, history } = itemReading(matches, { requestId: q.id, itemId: item.id });
       const itemKey = JSON.stringify([q.id, q.planId, q.planRevision, item.id]);
       const detail = h('details', { class: `request-item${current.length ? ' has' : ''} st-${state}`, 'data-request-item': itemKey, open: !options.compact },
-        h('summary', { 'data-request-focus': itemKey }, item.title, h('small', {}, lead ? ` · ${ITEM_STATE_LABEL[state]} · ${lead.match.text.slice(0, 90)}` : history.length ? ` · ${ITEM_STATE_LABEL[state]}` : ' · 아직 받은 내용 없음')),
+        h('summary', { 'data-request-focus': itemKey }, item.title, h('small', {}, lead ? ` · ${ITEM_STATE_LABEL[state]} · ${lead.match.text.slice(0, 90)}` : history.length ? ` · ${ITEM_STATE_LABEL[state]}` : ' · 연결된 원문 구절 없음')),
         h('p', { class: 'request-want' }, h('span', { class: 'cl-kind' }, '원함'), item.description));
       if (current.length) [...(lead ? [lead] : []), ...current.filter(x => x !== lead)].forEach(x => detail.append(passage(x, itemKey)));
-      else detail.append(h('p', { class: 'request-remains' }, history.length ? '지금 서 있는 대응은 없어요. 앞 보고는 이후 원문이 철회했어요.' : '이 요청에 대응하는 내용은 아직 받지 못했어요.'));
+      else detail.append(h('p', { class: 'request-remains' }, history.length ? '지금 서 있는 대응은 없어요. 앞 보고는 이후 원문이 철회했어요.' : '이 요청 항목에 연결된 프로젝트 원문 구절이 아직 없어요.'));
       if (history.length) detail.append(h('details', { class: 'request-history', 'data-request-history': itemKey }, h('summary', {}, `철회·정정된 앞 보고 ${history.length}개`), ...history.map(x => withdrawn(x, itemKey))));
       group.append(detail);
     }
