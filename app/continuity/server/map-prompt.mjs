@@ -235,6 +235,6 @@ const map6 = (prompt, k = 0) => prompt
   .replace(/("about":(?:null|"[^"]*"),"replaces":null)\}/g, (_, head) => `${head},"key":"s${++k}"}`)
   .replace('"candidates":[{"text":"...","parts":["P01"],"at":null}]', '"candidates":[{"text":"...","target":"attribution","parts":["P01","P02"],"at":null,"statement":{"key":"s9","kind":"reported","text":"...","at":"N01.14","about":null}}]');
 export const MAP6_PROMPT = map6(MAP5_PROMPT);
-export const MAP6_FIRST_PROMPT = map6(MAP5_FIRST_PROMPT);
+export const MAP6_FIRST_PROMPT = map6(MAP5_FIRST_PROMPT).replace('ref "new:짧은영문키"', 'ref "new:짧은영문키"(new: 뒤는 영문 소문자·숫자·_·-로 1~24자, 정규식 ^new:[a-z0-9_-]{1,24}$)');
 export const MAP6_RECIPE = 'map6-recipe.1: first = parts.length === 0 && requests.length === 0 && priors.length === 0; evidence = same-record contiguous range <= 600 UTF-16; span.2; candidates state their target (attribution|identity|parent|holds) and statement keys';
 export const map6Prompt = ask => ask.parts.length === 0 && (ask.requests ?? []).length === 0 && (ask.priors ?? []).length === 0 ? MAP6_FIRST_PROMPT : MAP6_PROMPT;
