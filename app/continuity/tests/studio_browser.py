@@ -1808,7 +1808,7 @@ def reading72_flow(browser, base):
     sample = ROOT.parents[1] / "docs/cycles/2026-10-26-visual-experience-59/request71-sample.json"
     data = json.loads(sample.read_text(encoding="utf-8"))
     area = next(a["id"] for a in data["space"]["areas"] if a["name"] == "폴더 일괄 처리")
-    other = next(a["id"] for a in data["space"]["areas"] if a["name"] == "터미널 진행 표시")
+    other = next(a["id"] for a in data["space"]["areas"] if a["name"] == "터미널 명령 실행")
     page.locator("#import-file").set_input_files(str(sample))
     page.wait_for_url(re.compile(r"#/p/E_"))
     entry = re.search(r"#/p/(E_[^/]+)", page.url).group(1)
@@ -1841,7 +1841,8 @@ def reading72_flow(browser, base):
     roundtrip("#lens")
     # Reusing the same item ids in another part does not unfold them there.
     page.goto(base + f"/#/p/{entry}/{other}")
-    expect(page.locator("#lens-title")).to_have_text("터미널 진행 표시")
+    expect(page.locator("#lens-title")).to_have_text("터미널 명령 실행")
+    expect(page.locator("#lens .request-item")).to_have_count(1)
     expect(page.locator("#lens .request-item[open]")).to_have_count(0)
     page.goto(base + f"/#/p/{entry}/{area}")
     sheet(page, "폴더 일괄 처리")
