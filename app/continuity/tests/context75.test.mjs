@@ -75,3 +75,24 @@ test('E75-4 a group\'s line to a part in a later column or deep inside a sibling
     assert.deepEqual([back[0], back.at(-1)], [end, pts[0]], `${target}: the other direction is the same route, from the inner end`);
   }
 });
+
+// The containment search keeps its lanes inside its group; the ordinary route between two parts does not. Normal layout with the
+// person's own places (no overlap): a and b in one row, two tall groups standing between them, a→b flow. The way round is just
+// past the search edge (above the taller group), and the line must still find it.
+test('E75-5 an ordinary line between two parts still goes round tall groups placed between them (lanes past the search edge)', () => {
+  let p = D.createProject();
+  const pid = n => p.space.areas.find(a => a.name === n).id;
+  for (const n of ['a', 'b', 'near', 'wall']) p = D.addArea(p, n);
+  for (const n of ['near', 'wall']) for (const k of ['1', '2']) p = D.addChildArea(p, pid(n), n + k);
+  p = D.addRelation(p, pid('a'), pid('b'), 'flow');
+  const pos = { root: { [pid('a')]: { x: 0, y: 0 }, [pid('b')]: { x: 730, y: 0 }, [pid('near')]: { x: 205, y: -120 }, [pid('wall')]: { x: 450, y: -200 } },
+    [pid('near')]: { [pid('near1')]: { x: 0, y: 0 }, [pid('near2')]: { x: 0, y: 200 } }, [pid('wall')]: { [pid('wall1')]: { x: 0, y: 0 }, [pid('wall2')]: { x: 0, y: 360 } } };
+  const L = layoutScope(studioView(p), null, () => true, pos), all = [...L.boxes.values()], a = L.boxes.get(pid('a')), b = L.boxes.get(pid('b'));
+  const near = L.boxes.get(pid('near')), wall = L.boxes.get(pid('wall'));
+  assert.equal(near.kind, 'frame'); assert.equal(wall.kind, 'frame');
+  assert.ok(near.x > a.x + a.w && wall.x + wall.w < b.x && wall.y < near.y, 'two groups stand between a and b, the wall the taller');
+  const r = edgePath(a, b, all), seg = runs(r.d);
+  assert.equal(r.clear, true, `a free way round exists: ${r.d}`);
+  for (const f of all.filter(x => x !== a && x !== b)) assert.ok(!seg.some(s => crosses(s, f)), `crosses ${f.id}: ${r.d}`);
+  assert.ok(Math.min(...corners(r.d).map(q => q.y)) < wall.y, `goes over the wall: ${r.d}`);
+});
