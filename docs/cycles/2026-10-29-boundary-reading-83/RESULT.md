@@ -1,5 +1,35 @@
 # AF-UI83 boundary reading — RESULT
 
+## 총괄 최종 검증 — 런타임 f93b095 범위 수용
+
+UI75 최종693d0c7의 관계 우회·전체 설명 접근과 수용80을 계승했다. 81/82의 미채택 지시는 포함하지 않았다.
+공개본73, 미수용74, UI 범위 수용75를 구별하며 이번 UI 수정으로 첫 지도 생성 품질이 해결됐다고 보지 않는다.
+
+- root: 저장된74 micro 응답을 일반 백업 가져오기로 읽었다. 원본 SHA256 `aaffb3764afc68f054d05ff54f4e2b5bf72b5b0abfc259d0bfc1deda666f8065`. 새 모델 호출·OSS 실행 없음.
+- Windows 실제 1280×720, DPR **1.25**: API 범위의 '이 범위' 카드가 같은 범위의 정상 부분 읽기를 연다. 역할 본문, 설명 근거1, 현재 주장1, 전체 읽기 유지. 역할 원문에서 같은 범위·부분·펼친 근거·인용 버튼 초점으로 복귀했다.
+- 같은 Windows의 PIPE 범위에서도 Enter로 같은 scope의 정상 부분 읽기를 열고 역할·설명근거1·현재주장4·전체읽기를 확인했다. 양쪽 경계 caption16px와 카드 사이4px를 실측했다.
+- 같은 Windows의 합성16W×5 조상 경로: 최종 head y292/h80, 대상 카드 y376으로 간격4px. 이전 y360의12px 겹침을 해소했다. 합성 자료의 성공을 실제 OSS 자동 이해로 세지 않는다.
+- root 고정 TypeScript5.8.3 `check.mjs`, `build.mjs`, 관련 boundary83/context75/role80 Node13 검사 모두 exit0. 작성자 TS6 빌드와 구별한다.
+- 독립 native Sol High: f93 코드 차이에서 새 차단 결함 없음. 1px 여유는 모든 Unicode·글꼴·금칙·grapheme 조합의 동일 줄바꿈을 보증하지 않는다. 해당 보장은 실측한 사례로 제한한다. 검토 SHA256 `9e13bd9b6c95c7321ecca918687102bd6baa3313b69faf01a4d7bddd5e4e9613`.
+- Cloud: 기존 세션에 f93 제공 빌드 검토1회 접수. ZIP SHA256 `0ad84a34694e9536455056424edce2953517db71b1403248f24c10de8ff8c029` (1,125,617 bytes, 202 entries, 지정 fixture4). 비밀값0·manifest·CRC 대조. 중간2ad 번들은 전송하지 않았다. 독립 두 PC 검토를 완료했고 아래 보고 정정을 거쳐 해당 범위를 수용했다.
+- [exact f93 CI40749460110](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40749460110) Windows2022·Ubuntu24.04 모두 success. 스텁 제공자의 전체 검사이며 실제 모델 의미 검증을 대신하지 않는다. PR52 draft, 미병합·미배포.
+
+### 독립 Cloud와 총괄 판정
+
+제공 빌드를 Linux Chromium의 1280×720·1440×900, DPR1에서 실행했다. 일반 경계는4px, 긴 합성 경계는5줄80 CSS px와4px를 확보했다. 1280의 자동 카메라 약92%에서는 화면 좌표상73.56px·3.68px이고, 1440은80px·4px이다. 폭300px·11px 글꼴·전체 이름을 유지했다. API/PIPE의 클릭·Enter, 역할/설명근거/현재주장, 전체읽기·정확원문·외부방문 복귀, 동명 다른ID, 부모 연결의 제목/카드 관통0을 확인했다. boundary83와 UI 검토 래퍼 exit0. 새 API·재빌드·CI·이전 전체suite 반복 없음.
+
+최초 Cloud 최종 보고는 외부 문맥 제목 누락 P2 후보로 보류했다. 총괄이 그 보고의 PNG를 직접 회수·열어 SHA256 `a5b85642ce7ac5cb35a2d20bc7d0fd69a0cb5a1599a3c3f0c622885e42e73483` 일치를 확인했을 때 제목이 보였고, 최초 self-click DOM에도 제목 y273/h16/bottom289, 오류 카드y293/gap4가 있었다. Cloud는 기존 원본만 재대조해 관련14스냅샷에 누락 증거가 없음을 확인하고 P2·보류를 철회했다. 코드 수정·새 브라우저/시험/API 실행 없이 보고 오류를 정정했다. 최초 보고/observations는 보존하며 corrected result SHA256은 `f38b27e8ec247328d4aea8f1c3c24cbf2c27810c0537fec9b215ab678253fa8a`다.
+
+총괄은 기존 두 중간 결함의 수리와 최종 UI83 범위를 수용한다. 임의 글꼴·모든 Unicode·일반 의미이해·전체 제품 완성으로 확대하지 않는다. README는 Cloud 번들에 없었고 FIXTURES 출처와 tests를 사용했으며, 공개 저장소 README는 보존한다. 공개73과 draft PR44–52는 그대로다. 후속은 자기 범위 선택에서 변경 구상으로 넘어갈 때 대상·미전송 초안이 유지되는 새 연결만 확인하며 첫 지도 실험을 반복하지 않는다.
+
+![Cloud가 누락으로 잘못 보고했던 원본 — 제목 존재](assets/cloud-api-self-1280.png)
+
+![현재 범위의 설명과 근거로 복귀](assets/self-source-return-1280.jpg)
+![합성 긴 경로의 다섯 줄과 카드 간격](assets/long-context-1280.jpg)
+
+[최소 root 실측](root-evidence.json)
+
+
 ## 작성자 검증 (UI 작성자, 기준 05f64d0)
 
 범위: `app/continuity/src/client/map-layout.ts`, `app.ts`, `public/styles.css`, 새 회귀 `tests/boundary83.test.mjs`. 원본 fixture,
@@ -48,7 +78,7 @@ source/API/schema/prompt, 저장 parent·관계는 바꾸지 않았다.
   바꾸지 않았다.
 - 수리: 경계 이름(.ghost-head)에 한해 `captionLines`가 브라우저가 끊는 자리(공백 뒤, 한글·CJK 글자 사이, 한 줄보다 긴 덩어리는 아무
   데서나 = overflow-wrap anywhere)에서 같은 글꼴 측정(600 11px + 자간)으로 한 줄씩 채워 줄 수를 센다. 측정이 같을 때는 1px 일찍 찬
-  것으로 세어 한 줄 적게 예약하는 일이 없게 했다. 폭 상한·글자 크기·이름·패딩·일반 카드/우회는 그대로.
+  것으로 세어 측정 경계의 오차 여유를 둔다. 모든 문자·글꼴의 과소예약 부재를 보증하지는 않는다. 폭 상한·글자 크기·이름·패딩·일반 카드/우회는 그대로.
 - before(482efcd 레이아웃, 이 컨테이너 기본 글꼴): 16W 이름 5줄 h80, 대상과 gap −12(1280·1440 모두) — root 관찰과 같음.
 - 최종 확인(mock, 새 API 호출 없음): 기본·넓은 글꼴(DejaVu Sans) × 1280/1440 × 짧은 micro·16W 합성 20개 경계 이름 모두 그려진 높이 =
   예약 높이, 이름 하단 + 4px = 카드 상단, 카드·frame 머리·관계 라벨과 겹침 없음, 이름 전체. 16W는 5줄 h80.

@@ -1,0 +1,251 @@
+{
+  "source": "f93b0957839a752c11f233a10be7baf74fa749ff",
+  "observer": "root Windows browser",
+  "newModelCalls": 0,
+  "longSynthetic": {
+    "ghosts": [
+      {
+        "rect": {
+          "bottom": 310,
+          "height": 34,
+          "left": 170.5,
+          "right": 343.5,
+          "top": 276,
+          "width": 173,
+          "x": 170.5,
+          "y": 276
+        },
+        "text": "JSContext.eval 평가 API"
+      },
+      {
+        "rect": {
+          "bottom": 278,
+          "height": 34,
+          "left": 809.5,
+          "right": 921.5,
+          "top": 244,
+          "width": 112,
+          "x": 809.5,
+          "y": 244
+        },
+        "text": "오류 처리"
+      },
+      {
+        "rect": {
+          "bottom": 410,
+          "height": 34,
+          "left": 809.5,
+          "right": 922.5,
+          "top": 376,
+          "width": 113,
+          "x": 809.5,
+          "y": 376
+        },
+        "text": "합성 바깥 대상"
+      }
+    ],
+    "heads": [
+      {
+        "rect": {
+          "bottom": 272,
+          "height": 16,
+          "left": 170.5,
+          "right": 343.5,
+          "top": 256,
+          "width": 173,
+          "x": 170.5,
+          "y": 256
+        },
+        "text": "이 범위"
+      },
+      {
+        "rect": {
+          "bottom": 240,
+          "height": 16,
+          "left": 809.5,
+          "right": 1109.5,
+          "top": 224,
+          "width": 300,
+          "x": 809.5,
+          "y": 224
+        },
+        "text": "밖 · micro-javascript"
+      },
+      {
+        "rect": {
+          "bottom": 372,
+          "height": 80,
+          "left": 809.5,
+          "right": 1109.5,
+          "top": 292,
+          "width": 300,
+          "x": 809.5,
+          "y": 292
+        },
+        "text": "밖 · WWWWWWWWWWWWWWWW › WWWWWWWWWWWWWWWW › WWWWWWWWWWWWWWWW › WWWWWWWWWWWWWWWW › WWWWWWWWWWWWWWWW"
+      }
+    ],
+    "viewport": {
+      "dpr": 1.25,
+      "height": 720,
+      "width": 1280
+    }
+  },
+  "savedMicro": {
+    "viewport": {
+      "dpr": 1.25,
+      "height": 720,
+      "width": 1280
+    },
+    "scopeAndSelectedPart": "A_e0b75f15-9f2e-4af6-9d95-a6562db23680",
+    "lens": "micro-javascriptJSContext.eval 평가 API⋯이름·설명 고치기안에 부분 추가기록 붙여넣기×자바스크립트 소스를 받아 평가하고 결과를 파이썬 값으로 변환하는 공개 API기록에서 읽은 설명설명 근거 1“def eval(self, code: str) -> Any:\n      …”이 부분이 넘겨줌2→평가 실행 파이프라인eval이 파싱·컴파일·VM 실행 단계를 호출한다.→오류 처리micro-javascripteval이 구문·JS·메모리·시간 오류를 예외로 던진다.현재 주장1설명eval 독스트링은 자바스크립트 소스를 평가해 결과를 파이썬 타입으로 변환해 반환한다고 설명한다.근거전체 읽기 ›",
+    "focus": "“def eval(self, code: str) -> Any:\n      …”",
+    "details": [
+      {
+        "open": false,
+        "text": "⋯이름·설명 고치기안에 부분 추가기록 붙여넣기"
+      },
+      {
+        "open": true,
+        "text": "설명 근거 1“def eval(self, code: str) -> Any:\n      …”"
+      }
+    ],
+    "heads": [
+      {
+        "rect": {
+          "bottom": 272,
+          "height": 16,
+          "left": 98.70000457763672,
+          "right": 271.7000045776367,
+          "top": 256,
+          "width": 173,
+          "x": 98.70000457763672,
+          "y": 256
+        },
+        "text": "이 범위"
+      },
+      {
+        "rect": {
+          "bottom": 289,
+          "height": 16,
+          "left": 723.7000122070312,
+          "right": 840.7000122070312,
+          "top": 273,
+          "width": 117,
+          "x": 723.7000122070312,
+          "y": 273
+        },
+        "text": "밖 · micro-javascript"
+      }
+    ],
+    "ghosts": [
+      {
+        "rect": {
+          "bottom": 310,
+          "height": 34,
+          "left": 98.70000457763672,
+          "right": 271.7000045776367,
+          "top": 276,
+          "width": 173,
+          "x": 98.70000457763672,
+          "y": 276
+        },
+        "text": "JSContext.eval 평가 API"
+      },
+      {
+        "rect": {
+          "bottom": 327,
+          "height": 34,
+          "left": 723.7000122070312,
+          "right": 835.7000122070312,
+          "top": 293,
+          "width": 112,
+          "x": 723.7000122070312,
+          "y": 293
+        },
+        "text": "오류 처리"
+      }
+    ]
+  },
+  "acceptance": "AF83 boundary-reading scope accepted; no whole-product or first-map quality claim",
+  "savedMicroPipe": {
+    "focus": "이 범위 평가 실행 파이프라인 읽기",
+    "ghosts": [
+      {
+        "rect": {
+          "bottom": 282.5,
+          "height": 34,
+          "left": 144.6999969482422,
+          "right": 297.6999969482422,
+          "top": 248.5,
+          "width": 153,
+          "x": 144.6999969482422,
+          "y": 248.5
+        },
+        "text": "평가 실행 파이프라인"
+      },
+      {
+        "rect": {
+          "bottom": 282.5,
+          "height": 34,
+          "left": 677.7000122070312,
+          "right": 789.7000122070312,
+          "top": 248.5,
+          "width": 112,
+          "x": 677.7000122070312,
+          "y": 248.5
+        },
+        "text": "오류 처리"
+      }
+    ],
+    "heads": [
+      {
+        "rect": {
+          "bottom": 244.5,
+          "height": 16,
+          "left": 144.6999969482422,
+          "right": 297.6999969482422,
+          "top": 228.5,
+          "width": 153,
+          "x": 144.6999969482422,
+          "y": 228.5
+        },
+        "text": "이 범위"
+      },
+      {
+        "rect": {
+          "bottom": 244.5,
+          "height": 16,
+          "left": 677.7000122070312,
+          "right": 794.7000122070312,
+          "top": 228.5,
+          "width": 117,
+          "x": 677.7000122070312,
+          "y": 228.5
+        },
+        "text": "밖 · micro-javascript"
+      }
+    ],
+    "lens": "micro-javascript›JSContext.eval 평가 API평가 실행 파이프라인⋯이름·설명 고치기안에 부분 추가기록 붙여넣기×소스를 파싱·바이트코드 컴파일한 뒤 VM에서 실행해 결과를 변환하는 평가 흐름기록에서 읽은 설명설명 근거 1“\"\"\"\n        # Parse the code\n        par…”이 부분이 필요로 함1→메모리·시간 제한VM 실행이 컨텍스트의 메모리·시간 한도를 사용한다.이 부분에 넘겨줌1←JSContext.eval 평가 APImicro-javascripteval이 파싱·컴파일·VM 실행 단계를 호출한다.현재 주장4설명eval은 소스를 Parser로 파싱해 AST를 만들고 Compiler로 바이트코드로 컴파일한다.근거설명컴파일된 바이트코드를 메모리·시간 제한을 받은 VM에서 실행한다.근거설명VM에 컨텍스트의 전역 객체를 복사하지 않고 넘겨 중첩 eval이 전역을 수정할 수 있게 한다.근거설명VM 실행 결과를 파이썬 값으로 변환해 반환한다.근거전체 읽기 ›",
+    "viewport": {
+      "dpr": 1.25,
+      "height": 720,
+      "width": 1280
+    }
+  },
+  "resume": {
+    "sameImportedEntry": true,
+    "scopeAndSelection": "A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+    "sameRoleAndFourClaims": true,
+    "observation": "root selected-self → home → 이어서"
+  },
+  "cloudCorrection": {
+    "initial": "unsupported caption-loss P2 / hold",
+    "final": "withdrawn after original evidence audit; accept boundary-reading scope",
+    "applicableSnapshots": 14,
+    "missingSnapshots": [],
+    "pngSHA256": "a5b85642ce7ac5cb35a2d20bc7d0fd69a0cb5a1599a3c3f0c622885e42e73483",
+    "correctedResultSHA256": "f38b27e8ec247328d4aea8f1c3c24cbf2c27810c0537fec9b215ab678253fa8a",
+    "newExecutionForCorrection": false
+  }
+}

@@ -1,5 +1,7 @@
 # 연구 질문과 축적된 근거
 
+83: [경계 읽기 수용과 독립 보고 정정](cycles/2026-10-29-boundary-reading-83/RESULT.md). Q04/Q13의 실제 저장 micro 범위 진입에서 자기 범위를 바깥으로 표시하던 의미와 문맥명/카드 겹침을 수리했다. 큰 VSCode·깊은 Joplin 관찰은 기존 수용과 구별하며, 합성 긴 경로는 자동 OSS 이해 증거가 아니다. root/Cloud·최종 양OS CI 범위 수용, Cloud 오지적은 원본 증거로 철회했다. Q02/Q06 첫 지도 미해결·공개73 유지. 다음은 새 자기범위 선택과 기존 변경 구상의 대상/초안 연결을 좁게 대조한다.
+
 82: [대상·조건 우선 첫 지도 미채택](https://github.com/tlsee0813-cmd/agentflow-studio/blob/28fda951e95bb2bd8739d4949443522c0dde857a/docs/cycles/2026-10-29-subject-first-82/RESULT.md). Q02/Q06/Q07 실제지시1회는INVALID_RESPONSE이며 운영지시제품화·종류오판·미정중복도남았다. 일부정밀조건회복은전체성공이아니다. 재시도/수선/적용0,공개73유지. 다음Q04/Q13의큰개요·깊은구성·긴설명은수용80의실제저장OSS자료에서직접확인하며,그화면개선을첫지도품질해결로확대하지않는다.
 
 81: [별도 문맥 검토 검출기 미채택](https://github.com/tlsee0813-cmd/agentflow-studio/blob/8da3cab6dc613d9ed6c6675d0ee1b5f80fb7e48c/docs/cycles/2026-10-29-source-review-81/RESULT.md). Q02/Q06/Q07에서 exact 인용·실재pointer·유효JSON은 의미 검출을 보증하지 않았다. 핵심 대상·조건 오류를 놓치고 정당한 예문경계를 흐리는 지시를 반환하여 새 생성→검토→재생성 전에 중단했다. 실제검토1·새생성/수선/적용0·원본보존. 기존수용범위와공개73 유지, 다음은 대상/층위 우선 단일 작성 설계의 차이를 검토한다.
