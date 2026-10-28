@@ -3051,21 +3051,43 @@ def reading87_flow(browser, base, size, shots=None):
     expect(pre).to_be_visible()
     assert pre.text_content() == frozen["snapshots"][0]["text"]
     page.keyboard.press("Escape")
-    earlier.get_by_role("button", name="돌아온 기록 · 요청문 1개").click()
-    item = panel.locator(".pw-rail .pp-res li.has details").first
-    item.locator("summary").click()
-    expect(item).to_have_attribute("open", "")
-    expect(item.locator("p", has_text=obs["text"])).to_be_visible()
-    shot("4-return")
-    page.locator("#pw-rail-back").click()
-    expect(srcs).to_have_count(9)
+    # DELTA1: the returned results open from the list's end and come back to the same place and the same control (back and Esc).
+    results = earlier.locator('[data-entry="results"]')
+    expect(results).to_have_text("돌아온 기록 · 요청문 1개")
+    active_entry = "() => [document.activeElement.dataset.entry ?? null, document.activeElement.tagName]"
+    rail.evaluate("r => { r.scrollTop = r.scrollHeight; }")
+    list_at = rail.evaluate("r => r.scrollTop")
+    assert list_at > 0 or not rail.evaluate("r => r.scrollHeight > r.clientHeight"), list_at
+    for way in ("back", "escape"):
+        results.click()
+        expect(panel.locator(".pw-rail-head h3")).to_have_text("돌아온 기록")
+        item = panel.locator(".pw-rail .pp-res li.has details").first
+        if item.get_attribute("open") is None: item.locator("summary").click()
+        expect(item).to_have_attribute("open", "")
+        expect(item.locator("p", has_text=obs["text"])).to_be_visible()
+        if way == "back": shot("4-return")
+        page.locator("#pw-rail-back").click() if way == "back" else page.keyboard.press("Escape")
+        expect(srcs).to_have_count(9)
+        assert rail.evaluate("r => r.scrollTop") == list_at and page.evaluate(active_entry) == ["results", "BUTTON"], (way, rail.evaluate("r => r.scrollTop"), list_at, page.evaluate(active_entry))
+    shot("4b-back-from-return")
     for k in ["snapshots", "labels", "origins", "observations", "attached"]: assert stored()[k] == frozen[k], k
     # A draft edited since and new material: the frozen list stays the plan's; what the next analysis would read is listed apart.
     panel.get_by_role("button", name="문장 고치기").click()
     area.press("End"); area.type(" 추가")
     expect(work.locator(".pw-stale")).to_be_visible()
     expect(srcs).to_have_count(9)
-    panel.locator(".pp-intent .pp-sources-count").click()
+    # The next analysis's material (the editor's count) opens in the list's place and closes back to it: back, Esc, the toggle.
+    toggle = panel.locator(".pp-intent .pp-sources-count")
+    on_toggle = "() => document.activeElement.classList.contains('pp-sources-count')"
+    rail.evaluate("r => { r.scrollTop = r.scrollHeight; }")
+    list_at = rail.evaluate("r => r.scrollTop")
+    for way in ("escape", "toggle"):
+        toggle.click()
+        expect(panel.locator(".pw-rail-head h3")).to_contain_text("읽는 자료")
+        page.keyboard.press("Escape") if way == "escape" else toggle.click()
+        expect(srcs).to_have_count(9)
+        assert rail.evaluate("r => r.scrollTop") == list_at and page.evaluate(on_toggle), (way, rail.evaluate("r => r.scrollTop"), list_at)
+    toggle.click()
     expect(panel.locator(".pw-rail-head h3")).to_contain_text("읽는 자료")
     panel.get_by_role("button", name="+ 자료 추가").click()
     page.locator("#src-title").fill("[테스트] 새로 붙인 보고"); page.locator("#src-text").fill("[테스트] 새 자료 원문"); page.locator("#src-basis").fill("[테스트] 기준")
@@ -3073,6 +3095,7 @@ def reading87_flow(browser, base, size, shots=None):
     expect(panel.locator(".pp-extra")).to_contain_text("[테스트] 새로 붙인 보고")
     page.locator("#pw-rail-back").click()
     expect(srcs).to_have_count(9)
+    assert rail.evaluate("r => r.scrollTop") == list_at and page.evaluate(on_toggle), (rail.evaluate("r => r.scrollTop"), list_at)
     assert [srcs.nth(i).get_attribute("data-ref") for i in range(9)] == [e["id"] for e in plan["evidence"]]
     expect(panel.locator(".pw-srcs")).not_to_contain_text("[테스트] 새로 붙인 보고")
     shot("5-stale-new-material")
