@@ -29,7 +29,7 @@ test('84 same "이 부분" sentence on two real parts: different kept/sent conte
   const { p, input, output, list } = project(), view = studioView(p);
   const atInput = open(p, { selected: input, scope: null }), atList = open(p, { selected: list, scope: input });
   const a = projectInput({ project: p, view }, SENTENCE, [], atInput), b = projectInput({ project: p, view }, SENTENCE, [], atList);
-  for (const x of [a, b]) { assert.equal(x.problem, null); assert.equal(x.ask.schemaVersion, 'studio.plan.2'); validatePlanAsk(x.ask); }
+  for (const x of [a, b]) { assert.equal(x.problem, null); assert.equal(x.ask.schemaVersion, 'studio.plan.3'); validatePlanAsk(x.ask); }
   // Whole parts, same sources: the context never filters the map and never enters INTENT/evidence.
   assert.equal(a.ask.parts.length, view.parts.length); assert.deepEqual(a.ask.parts, b.ask.parts); assert.deepEqual(a.ask.evidence, b.ask.evidence);
   assert.equal(a.ask.evidence.find(e => e.id === 'INTENT').text, SENTENCE);
@@ -191,7 +191,7 @@ test('84 server: studio.plan.2 goes to the plan route with the authoring rule; s
     sent.push(JSON.parse(init.body)); return Response.json({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(reply(inputAlias)) } }] });
   } });
   const post = body => handler(new Request('https://app.test/api/studio/plan', { method: 'POST', headers: { Origin: 'https://app.test', 'Content-Type': 'application/json', 'X-AgentFlow-Request': '1' }, body: JSON.stringify(body) }));
-  const r2 = await post(inp.ask); assert.equal(r2.status, 200); assert.deepEqual((await r2.json()).reply, reply(inputAlias));
+  const r2 = await post({ ...inp.ask, schemaVersion: 'studio.plan.2' }); assert.equal(r2.status, 200); assert.deepEqual((await r2.json()).reply, reply(inputAlias));
   assert.equal(sent[0].messages[0].content, PLAN2_PROMPT); assert.equal(sent[0].max_tokens, 8192);
   assert.ok(sent[0].messages[1].content.includes('"authoring":{"state":"recorded"'));
   const v1 = { schemaVersion: 'studio.plan.1', intent: inp.ask.intent, parts: inp.ask.parts, evidence: inp.ask.evidence };

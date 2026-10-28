@@ -76,12 +76,15 @@ export function parseScopeReview(value: unknown, evidenceIds: string[]): ScopeRe
   return copy(value as unknown as ScopeReview);
 }
 
-/** Reject ungrounded refs and made-up part IDs rather than repairing model output. */
+/** Reject ungrounded refs and made-up part IDs rather than repairing model output.
+ * items=[] reads as 'no change proposed by this analysis' (not 'verified as unneeded', not 'goal done'): its impacts are [] too,
+ * and its summary, preserve and unknowns are all it says. Whether a reply may be empty is the request version's rule
+ * (validatePlanReply); a stored analysis is read either way. */
 export function parsePlanAnalysis(value: unknown, partIds: string[], evidenceIds: string[]): PlanAnalysis {
   ids(partIds, 10000); ids(evidenceIds, MAX_EVIDENCE);
   const parts = new Set(partIds), refs = new Set(evidenceIds);
   object(value, ['summary', 'items', 'impacts', 'preserve', 'unknowns']); text(value.summary, 2000);
-  list(value.items, MAX_ITEMS); check(value.items.length > 0);
+  list(value.items, MAX_ITEMS); list(value.impacts, MAX_IMPACTS); check(value.items.length > 0 || value.impacts.length === 0);
   for (const item of value.items) {
     object(item, ['id', 'title', 'description', 'partIds', 'refs', 'dependsOn'], ['presentation']);
     id(item.id); text(item.title, 200); text(item.description, 4000);

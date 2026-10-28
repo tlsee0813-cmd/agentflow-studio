@@ -2773,12 +2773,169 @@ def authoring84_flow(browser, base):
     context.close()
 
 
+ZERO85_SENTENCE = "이 부분에서 메모리 제한과 시간 제한으로 끝난 이유를 호출자가 구별해 설명할 수 있게 하고 싶다. 기존 eval 실행 순서와 전역 객체 공유 동작은 유지한다."
+ZERO85_PIPE = "A_49bad1f8-971b-4bff-8030-a62d8a470c16"
+# Written by the reviewer, not a model reply: no change proposed; the docstring already names both errors, the callers' side unknown.
+ZERO85_EMPTY = {"summary": "제공된 eval docstring(N01)은 메모리 초과에 MemoryLimitError, 시간 초과에 TimeLimitError를 이미 구별해 명명한다. 호출자가 두 경우를 어떻게 안내받는지는 제공된 자료로 확인되지 않음.",
+    "items": [], "impacts": [], "preserve": ["eval의 parse→compile→VM 실행 순서", "전역 객체를 복사하지 않고 공유하는 동작"],
+    "unknowns": ["두 예외의 구체 메시지와 생성자: 제공된 자료로 확인되지 않음", "호출자 쪽 안내·처리: 제공된 자료로 확인되지 않음"]}
+
+
+def zero85_flow(browser, base, width, shots=None):
+    """AF85: the exact micro-javascript backup with the fixed draft written on the evaluation pipeline (selection and scope). A
+    reviewer-written empty reply (routed in the browser; no provider) reads at once as '제안된 변경 없음' with its summary, what to
+    keep and what is unknown; a source opens and comes back to the same button; close, reopen, reload and a plan file keep it.
+    Then a positive plan with a frozen request and a return: a later empty analysis keeps the request text, labels and return as
+    made and makes no new request. A positive plan with nothing chosen reads apart from an empty one."""
+    context = browser.new_context(viewport={"width": width, "height": 800})
+    page = context.new_page()
+    shot = lambda name: shots and page.screenshot(path=str(pathlib.Path(shots) / f"zero85-{width}-{name}.png"))
+    page.goto(base + "/")
+    page.locator("#import-file").set_input_files(str(ROOT / "tests/fixtures/context75/micro-javascript-backup.json"))
+    expect(page.locator("#crumbs")).to_contain_text("micro-javascript")
+    project = page.evaluate(ENTRY, re.search(r"#/p/([^/]+)", page.url).group(1))
+    assert project["id"] == "P_6a74a281-f0dd-4dd8-8e00-d5b013112326", project["id"]
+    ref = {"id": ZERO85_PIPE, "name": "평가 실행 파이프라인"}
+    bundle = {"draft": ZERO85_SENTENCE, "extra": [], "plan": None, "by": None, "snapshots": [], "labels": {}, "origins": {}, "observations": [], "attached": {},
+        "authoring": {"version": "authoring-context.1", "draft": {"state": "set", "context": {"projectId": project["id"], "selection": ref, "scope": ref, "at": "2026-10-28T00:00:00.000Z", "how": "explicit"}}, "analyzed": None}}
+    page.evaluate("([id, b]) => localStorage.setItem('agentflow.studio.plans.1', JSON.stringify({ version: 'studio.plans.3', projects: { [id]: b } }))", [project["id"], bundle])
+    page.reload()
+    expect(page.locator("#crumbs")).to_contain_text("micro-javascript")
+    stored = lambda: page.evaluate("id => JSON.parse(localStorage.getItem('agentflow.studio.plans.1')).projects[id]", project["id"])
+    where = lambda: [page.url, page.locator("#crumbs").inner_text(), page.locator("#world .selected").count()]
+    before = where()
+    page.locator("#plan-entry").click()
+    area, panel = page.locator("#plan-intent"), page.locator("#plan-panel")
+    expect(area).to_have_value(ZERO85_SENTENCE)
+    expect(page.locator("#plan-ctx")).to_contain_text("평가 실행 파이프라인")
+    sent = []
+    def reply(analysis):
+        def handle(route):
+            sent.append(route.request.post_data_json)
+            route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "reply": analysis(sent[-1]) if callable(analysis) else analysis}))
+        page.unroute("**/api/studio/plan"); page.route("**/api/studio/plan", handle)
+    reply(ZERO85_EMPTY)
+    page.locator("#plan-ask").click()
+    # 1) The request the page sent: .3, the whole map, the draft, its context on the pipeline; then the empty reply reads at once.
+    body = sent[-1]
+    assert body["schemaVersion"] == "studio.plan.3" and body["intent"] == ZERO85_SENTENCE, body["schemaVersion"]
+    assert len(body["parts"]) == 6 and [e["id"] for e in body["evidence"]] == ["INTENT", "M01", "M02", "M03", "M04", "M05", "M06", "N01", "N02"]
+    assert body["authoring"]["selection"]["nameThen"] == "평가 실행 파이프라인" and body["authoring"]["scope"] == body["authoring"]["selection"]
+    sources = {e["id"]: e for e in body["evidence"]}
+    work = panel.locator(".pw-nochange")
+    expect(page.locator("#plan-title")).to_have_text("제안된 변경 없음")
+    expect(work).to_contain_text(ZERO85_EMPTY["summary"])
+    expect(work).to_contain_text("변경이 필요 없다고 확인했거나 바라는 결과가 이미 이루어졌다는 뜻은 아니에요")
+    for line in ZERO85_EMPTY["preserve"] + ZERO85_EMPTY["unknowns"]: expect(work.locator("li", has_text=line)).to_have_count(1)
+    expect(work.locator(".pw-nochange-src .co-ref")).to_have_count(9)
+    expect(panel.locator(".pw-pick, .callout, .pw-list")).to_have_count(0)
+    expect(panel).not_to_contain_text("0/0")
+    expect(page.locator("#plan-make")).to_be_disabled()
+    expect(panel.locator(".pw-req")).to_contain_text("요청에 넣을 변경이 없어요")
+    no_page_scroll(page)
+    shot("1-empty")
+    # The exact source and back to the same button; draft and context untouched.
+    work.locator('[data-ref="N01"]').click()
+    expect(panel.locator(".pw-rail-head h3")).to_have_text("근거 N01")
+    assert panel.locator(".pw-rail .pp-sources details > p").first.text_content() == sources["N01"]["text"]
+    expect(panel.locator(".pw-rail")).to_contain_text("MemoryLimitError")
+    shot("2-source")
+    page.locator("#pw-rail-back").click()
+    assert page.evaluate("() => document.activeElement.dataset.ref") == "N01"
+    kept = stored()
+    assert kept["draft"] == ZERO85_SENTENCE and kept["authoring"]["draft"] == bundle["authoring"]["draft"]
+    assert kept["authoring"]["analyzed"]["authoring"] == bundle["authoring"]["draft"]
+    assert kept["plan"]["analysis"] == ZERO85_EMPTY and kept["plan"]["selected"] == [] and kept["by"]["model"] == "stub-model"
+    # Escape closes to the same map (selection, scope); reopen, reload and a plan file read the same analysis.
+    page.keyboard.press("Escape")
+    expect(panel).to_be_hidden()
+    assert where() == before, (where(), before)
+    page.locator("#toast").get_by_role("button", name="다시 열기").click()
+    expect(page.locator("#plan-title")).to_have_text("제안된 변경 없음")
+    page.reload()
+    page.locator("#plan-entry").click()
+    expect(page.locator("#plan-title")).to_have_text("제안된 변경 없음")
+    expect(work).to_contain_text(ZERO85_EMPTY["summary"])
+    with page.expect_download() as dl: page.get_by_role("button", name="파일로 내보내기").click()
+    plan_path = dl.value.path()
+    assert json.loads(pathlib.Path(plan_path).read_text(encoding="utf-8"))["format"] == "agentflow.change-plan-file.3"
+    page.once("dialog", lambda d: d.accept())
+    page.locator("#plan-import-file").set_input_files(plan_path)
+    expect(panel).to_contain_text("변경안 파일을 가져왔어요.")
+    expect(page.locator("#plan-title")).to_have_text("제안된 변경 없음")
+    assert stored()["plan"] == kept["plan"]
+    # A draft edited after the analysis: the analysis keeps its own material apart from what would be sent next.
+    panel.get_by_role("button", name="문장 고치기").click()
+    area.press("End"); area.type(" 추가")
+    expect(work.locator(".pw-stale")).to_be_visible()
+    expect(work.locator(".pw-nochange-src h4")).to_have_text("이 분석에 넣은 자료 9")
+    expect(page.locator("#plan-ask")).to_have_text("고친 문장으로 살펴보기")
+    area.fill(ZERO85_SENTENCE)
+    expect(work.locator(".pw-stale")).to_be_hidden()
+    # 4) + 2) A positive plan: nothing chosen reads apart from an empty analysis; then a frozen request and a return.
+    def positive(ask):
+        alias = next(p["id"] for p in ask["parts"] if p["name"] == "오류 처리")
+        return {"summary": "[테스트 응답] 두 예외 이름을 재사용한다.", "items": [{"id": "c1", "title": "[테스트] 제한 종류별 안내", "description": "[테스트 응답] 두 예외를 구별해 알린다.",
+            "partIds": [alias], "refs": ["INTENT", "N01"], "dependsOn": []}], "impacts": [], "preserve": [], "unknowns": []}
+    reply(positive)
+    page.locator("#plan-ask").click()
+    expect(page.locator("#plan-strip .ps-item")).to_have_text("[테스트] 제한 종류별 안내")
+    page.locator("#plan-strip .ps-more").click()
+    expect(page.locator("#plan-title")).to_have_text("변경안 · 1가지 변화")
+    page.locator("#pw-inc-c1").uncheck()
+    expect(panel.locator(".pw-count")).to_have_text("0/1 포함")
+    expect(panel.locator(".pw-req")).to_contain_text("왼쪽 목록에서 ‘이번 요청에 포함’을 고르세요")
+    expect(page.locator("#plan-make")).to_be_disabled()
+    expect(panel.locator(".pw-nochange")).to_have_count(0)
+    shot("4-positive-none-chosen")
+    page.locator("#pw-inc-c1").check()
+    page.route("**/api/studio/scope", lambda route: route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model",
+        "reply": {"summary": "[테스트 응답] 추가 전제 없음.", "prerequisites": [], "unknowns": []}})))
+    page.locator("#plan-make").click()
+    expect(page.locator("#plan-sheet")).to_be_visible()
+    page.keyboard.press("Escape")
+    obs = {"id": "O_zero85", "itemId": "c1", "kind": "report", "text": "[테스트] 돌아온 보고 원문", "basis": "[테스트] 작업 보고", "refs": []}
+    page.evaluate("([id, o]) => { const env = JSON.parse(localStorage.getItem('agentflow.studio.plans.1')); const b = env.projects[id]; b.observations.push(o); b.attached[o.id] = b.snapshots[0].id; localStorage.setItem('agentflow.studio.plans.1', JSON.stringify(env)); }", [project["id"], obs])
+    page.reload()
+    frozen = stored()
+    assert len(frozen["snapshots"]) == 1 and frozen["snapshots"][0]["scope"]["items"][0]["title"] == "[테스트] 제한 종류별 안내"
+    page.locator("#plan-entry").click()
+    page.locator("#plan-strip").get_by_role("button", name="문장 고치기").click()
+    reply(ZERO85_EMPTY)
+    page.locator("#plan-ask").click()
+    expect(page.locator("#plan-title")).to_have_text("제안된 변경 없음")
+    expect(page.locator("#plan-make")).to_be_disabled()
+    expect(panel.locator(".pw-req")).to_contain_text("마지막 요청문 뒤로 다시 살펴봤어요")
+    shot("3-empty-after-request")
+    after = stored()
+    for k in ["snapshots", "labels", "origins", "observations", "attached"]: assert after[k] == frozen[k], k
+    assert after["plan"]["analysis"]["items"] == [] and after["plan"]["id"] != frozen["snapshots"][0]["planId"]
+    panel.get_by_role("button", name=re.compile("^마지막 요청문")).click()
+    assert page.locator("#plan-sheet pre").text_content() == frozen["snapshots"][0]["text"]
+    expect(page.locator("#plan-sheet header")).to_contain_text("[테스트] 제한 종류별 안내")
+    page.keyboard.press("Escape")
+    panel.get_by_role("button", name=re.compile("^돌아온 기록 · 요청문 1개")).click()
+    expect(panel.locator(".pw-rail")).to_contain_text("[테스트] 돌아온 보고 원문")
+    page.locator("#pw-rail-back").click()
+    page.reload()
+    page.locator("#plan-entry").click()
+    expect(page.locator("#plan-title")).to_have_text("제안된 변경 없음")
+    assert stored()["snapshots"] == frozen["snapshots"]
+    page.unroute("**/api/studio/plan"); page.unroute("**/api/studio/scope")
+    context.close()
+
+
 def main():
     procs = []
     try:
         with sync_playwright() as p:
             exe = os.environ.get("STUDIO_CHROMIUM")
             browser = p.chromium.launch(**({"executable_path": exe} if exe else {}))
+            if sys.argv[1:2] == ["zero85"]:
+                # Only the AF85 flow (screenshots into the folder named after it, when given); stubbed replies, no provider.
+                proc, base = start("ok"); procs.append(proc)
+                for width in (1280, 1440): zero85_flow(browser, base, width, sys.argv[2] if len(sys.argv) > 2 else None); print(f"ok  AF85 empty analysis at {width}")
+                browser.close(); return
             proc, base = start("ok"); procs.append(proc); main_flow(browser, base); print("ok  entry -> map -> part lens -> sheet -> ask -> evidence -> lens -> map")
             basics_flow(browser, base); print("ok  stable example link (reload, new browser), labels, no map note text, recent range, fold restored")
             map_flow(browser, base); print("ok  drag (node, group), wheel zoom, inside/back with view kept, fold, example places not saved")
@@ -2804,6 +2961,8 @@ def main():
             actual_reply_flow(browser, base); print("ok  wide comparison of an actual reply without presentation; scope reviews outliving a material change; four changes")
             stale_work_flow(browser, base); print("ok  writing in the wide comparison: map ways off at once (forced click a no-op, caret kept), honest way out, draft on reopen")
             authoring84_flow(browser, base); print("ok  AF84 older micro draft at 1280/DPR1.25: set and remove the authoring context keep caret, direction and draft; focus on a live control; boundary line; caret back after close/reopen")
+            for width in (1280, 1440): zero85_flow(browser, base, width)
+            print("ok  AF85 empty analysis on the micro draft at 1280/1440: reads at once, source and back, close/reopen/reload/file, earlier request and return kept, positive with none chosen apart")
             proc, base = start("code"); procs.append(proc); code_flow(browser, base); print("ok  access code kept from an input event")
             proc, base = start("fail"); procs.append(proc); failure_flow(browser, base); print("ok  provider failure -> short error -> retry")
             proc, base = start("fail"); procs.append(proc); return_failure_flow(browser, base); print("ok  return reading failure -> short error and the material -> asking again")

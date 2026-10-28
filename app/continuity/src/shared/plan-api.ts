@@ -2,9 +2,10 @@ import { parsePlanAnalysis, EVIDENCE_KINDS, type Evidence, type PlanAnalysis } f
 import { validAuthoringAsk, type AuthoringAsk } from './authoring-context.js';
 
 /** studio.plan.1: the four keys as before (still accepted). studio.plan.2: the same, plus the draft's authoring context as its own
- * field (never a source, never the request's scope); the app sends only this one now. */
+ * field (never a source, never the request's scope). studio.plan.3: the same five keys as studio.plan.2; its reply may propose no
+ * change (items=[]). The app sends only studio.plan.3 now; a tab still sending .1/.2 never gets an empty reply it cannot read. */
 export interface PlanAsk {
-  schemaVersion: 'studio.plan.1' | 'studio.plan.2';
+  schemaVersion: 'studio.plan.1' | 'studio.plan.2' | 'studio.plan.3';
   intent: string;
   parts: { id: string; name: string; note: string; parentId: string | null }[];
   evidence: Evidence[];
@@ -25,7 +26,7 @@ function id(v: unknown): asserts v is string { text(v, 100); check(/^[A-Za-z0-9_
 /** Byte limit applies to the complete serialized request, including Korean source material. No silent truncation. */
 export function validatePlanAsk(value: unknown): PlanAsk {
   check(value && typeof value === 'object' && !Array.isArray(value));
-  const v2 = (value as Record<string, unknown>).schemaVersion === 'studio.plan.2';
+  const v2 = ['studio.plan.2', 'studio.plan.3'].includes((value as Record<string, unknown>).schemaVersion as string);
   obj(value, ['schemaVersion', 'intent', 'parts', 'evidence', ...(v2 ? ['authoring'] : [])]);
   check(value.schemaVersion === 'studio.plan.1' || v2); text(value.intent, 6000);
   if (size(value) > PLAN_BYTES) throw new Error('INPUT_TOO_LARGE');
@@ -52,8 +53,11 @@ export function validatePlanAsk(value: unknown): PlanAsk {
   if (v2) check(validAuthoringAsk(value.authoring, value.parts as { id: string; name: string }[]));
   return structuredClone(value as unknown as PlanAsk);
 }
+/** Only a studio.plan.3 request may be answered with no proposed change. */
+export const allowsNoChange = (ask: Pick<PlanAsk, 'schemaVersion'>) => ask.schemaVersion === 'studio.plan.3';
 export function validatePlanReply(value: unknown, ask: PlanAsk): PlanAnalysis {
   const reply = parsePlanAnalysis(value, ask.parts.map(p => p.id), ask.evidence.map(e => e.id));
+  check(reply.items.length > 0 || allowsNoChange(ask));
   // AI overview suggestions do not establish a global mandatory-dependency graph.
   // Actual selected scope is evaluated separately; authored examples may still use explicit dependencies.
   check(reply.items.every(item => item.dependsOn.length === 0));

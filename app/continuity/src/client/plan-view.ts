@@ -170,6 +170,8 @@ export function createPlanView(host: PlanHost) {
   }
   const plan = () => s?.bundle.plan ?? null;
   const items = () => plan()?.analysis.items ?? [];
+  /** The analysis proposed no change (items=[]): not 'nothing needs to change' and not 'done'. It reads in the workspace only. */
+  const noChange = () => !!plan() && plan()!.analysis.items.length === 0;
   const itemOf = (id: string) => items().find(i => i.id === id) ?? null;
   const partName = (id: string) => host.current()?.view.parts.find(p => p.id === id)?.name ?? null;
   function itemTargets(item: PlanItem): string[] {
@@ -220,7 +222,7 @@ export function createPlanView(host: PlanHost) {
     const why = staleness();
     return why === 'sentence' ? '고친 문장을 먼저 살펴본 뒤 만들 수 있어요' : why === 'material' ? '바뀐 자료로 먼저 살펴본 뒤 만들 수 있어요'
       : why === 'context' || why === 'missing' ? '지금 작성 맥락으로 먼저 살펴본 뒤 만들 수 있어요'
-      : s?.pending ? '살펴보기가 끝난 뒤 만들 수 있어요' : '만들고 복사해도 보내거나 실행하지 않아요';
+      : s?.pending ? '살펴보기가 끝난 뒤 만들 수 있어요' : noChange() ? '이 분석에는 제안된 변경이 없어 요청문을 만들지 않아요' : '만들고 복사해도 보내거나 실행하지 않아요';
   };
   /** Work in flight belongs to the bundle it started from: replacing the bundle (another example material, an imported file)
    * cancels it, so its reply can never land on the new one. */
@@ -598,7 +600,7 @@ export function createPlanView(host: PlanHost) {
   const panelOpen = () => !!s && !plan();
   /** The wide workspace over the map: the whole plan read and edited (asked for, writing, a sentence or material ahead of the
    * plan, work in flight). Otherwise the plan reads on the map: its strip and one change in the pane. */
-  const workOpen = () => !!s && !!plan() && (s.detail || s.editing || stale() || !!s.pending || !!s.scoping);
+  const workOpen = () => !!s && !!plan() && (s.detail || s.editing || stale() || !!s.pending || !!s.scoping || noChange());
   /** The width the map gives up beside it: the slim panel only. The workspace covers the map without moving it. */
   const width = () => (s && panelOpen() ? inspectorWidth() : 0);
 
@@ -618,8 +620,9 @@ export function createPlanView(host: PlanHost) {
         h('button', { type: 'button', class: 'ps-intent', title: `${p.intent}\n\n넓게 비교에서 문장·근거·요청을 다뤄요`, onclick: () => openWork() }, p.intent)),
       h('p', { class: 'ps-find', title: p.analysis.summary }, h('span', { class: 'ps-find-k' }, '분석이 찾은 것'), firstSentence(p.analysis.summary)),
       h('div', { class: 'ps-row' },
-        h('div', { class: 'ps-items', role: 'group', 'aria-label': '읽을 변경' }, ...p.analysis.items.map(i => h('button', { type: 'button', class: 'ps-item', 'aria-current': focusId === i.id ? 'true' : 'false', title: i.title, onclick: () => focusItem({ kind: 'item', id: i.id }) }, i.title))),
-        h('span', { class: 'ps-inc', title: '이번 요청에 포함한 변경 수' }, `요청에 포함 ${p.selected.length}/${p.analysis.items.length}`),
+        noChange() ? h('span', { class: 'ps-none' }, '제안된 변경 없음')
+          : h('div', { class: 'ps-items', role: 'group', 'aria-label': '읽을 변경' }, ...p.analysis.items.map(i => h('button', { type: 'button', class: 'ps-item', 'aria-current': focusId === i.id ? 'true' : 'false', title: i.title, onclick: () => focusItem({ kind: 'item', id: i.id }) }, i.title))),
+        noChange() ? null : h('span', { class: 'ps-inc', title: '이번 요청에 포함한 변경 수' }, `요청에 포함 ${p.selected.length}/${p.analysis.items.length}`),
         conds ? conditions(p) : null),
       h('div', { class: 'ps-acts' }, h('button', { type: 'button', class: 'link-button ps-edit', onclick: () => edit() }, '문장 고치기'),
         h('button', { type: 'button', class: 'ps-more', onclick: () => openWork(focusId ?? undefined) }, '넓게 비교')),
@@ -793,12 +796,13 @@ export function createPlanView(host: PlanHost) {
     const prevRail = was ? panel.querySelector('.pw-rail-body')?.scrollTop ?? 0 : 0, prevView = panel.dataset.rail ?? '';
     st.workAt = null;
     if (st.focus?.kind !== 'item' || !itemOf(st.focus.id)) st.focus = firstFocus(p);
-    const item = itemOf((st.focus as { id: string }).id)!;
+    // No proposed change: there is no change to read, so no focus (null) and its own body below.
+    const item = st.focus?.kind === 'item' ? itemOf(st.focus.id) : null;
     panel.hidden = false; panel.classList.add('work'); panel.dataset.rail = st.rail;
     const by = st.bundle.by, origin = by?.kind === 'example' ? '작성된 예제 분석' : by?.kind === 'ai' ? `AI 분석 · ${by.model} · ${ago(by.at)}` : '분석';
     const writing = st.editing || stale() || !!st.pending;
     // A short heading: authored for the example's own sentence, otherwise what the plan holds (no invented summary).
-    const heading = by?.kind === 'example' && st.key === CONVERTER_KEY && p.intent === CONVERTER_INTENT ? CONVERTER_HEADING : `변경안 · ${p.analysis.items.length}가지 변화`;
+    const heading = !item ? '제안된 변경 없음' : by?.kind === 'example' && st.key === CONVERTER_KEY && p.intent === CONVERTER_INTENT ? CONVERTER_HEADING : `변경안 · ${p.analysis.items.length}가지 변화`;
     const lead = firstSentence(p.analysis.summary), more = p.analysis.summary.trim().slice(lead.length).trim();
     const head = h('header', { class: 'pw-head' },
       h('p', { class: 'pw-kick' }, h('span', {}, '변경 구상'), st.example ? h('span', { class: 'tag' }, '예제') : null, h('span', { class: 'pw-origin', title: by?.kind === 'ai' ? `${fullTime(by.at)} · ${p.basis}` : p.basis }, origin)),
@@ -815,6 +819,12 @@ export function createPlanView(host: PlanHost) {
       h('details', { class: 'pw-found-more' }, h('summary', {}, more ? '분석 전체' : '이 정리는'), more ? h('p', {}, more) : null, h('p', { class: 'pw-note' }, '변경안을 읽은 정리예요. 실행해서 확인한 결과는 아니에요.')));
     const open = (ref: string) => { st.rail = 'source'; st.railSource = ref; render(); document.getElementById('pw-rail-back')?.focus(); };
     const pick = (id: string) => { st.focus = { kind: 'item', id }; st.evidenceFor = null; render(); document.querySelector<HTMLElement>('.pw-pick[aria-current="true"]')?.focus(); };
+    if (!item) {
+      const main = h('div', { class: 'pw-main' }, head, writing ? intentSection(o) : null, h('div', { class: 'pw-body none' }, noChangeBody(p, open)));
+      finishWork(panel, main, h('aside', { class: 'pw-rail', 'aria-label': '이번 요청' }, h('div', { class: 'pw-rail-body' }, ...railView(o, p, writing).filter((x): x is Node => !!x)), footer(o)),
+        was, back, prevList, prevDetail, prevRail, prevView, '');
+      return;
+    }
     const list = h('nav', { class: 'pw-list', 'aria-label': '바뀌는 것' },
       h('div', { class: 'pw-list-head' }, h('span', {}, `바뀌는 것 ${p.analysis.items.length}`), h('span', { 'aria-hidden': 'true' }, '이번 요청에 포함')),
       h('ul', {}, ...p.analysis.items.map(i => {
@@ -845,15 +855,35 @@ export function createPlanView(host: PlanHost) {
         h('ul', {}, ...near.map(x => h('li', {}, h('p', { class: 'pw-near-name' }, h('strong', {}, partName(x.partId) ?? '지금 지도에 없는 부분'), toMap(x.partId, true)), h('p', {}, x.reason), refLine(p, x.refs, open))))) : null);
     const main = h('div', { class: 'pw-main' }, head, writing ? intentSection(o) : null, found, h('div', { class: 'pw-body' }, list, detail));
     const rail = h('aside', { class: 'pw-rail', 'aria-label': '이번 요청' }, h('div', { class: 'pw-rail-body' }, ...railView(o, p, writing).filter((x): x is Node => !!x)), footer(o));
+    finishWork(panel, main, rail, was, back, prevList, prevDetail, prevRail, prevView, item.id);
+  }
+  function finishWork(panel: HTMLElement, main: HTMLElement, rail: HTMLElement, was: boolean, back: Session['workAt'], prevList: number, prevDetail: number, prevRail: number, prevView: string, itemKey: string) {
     const typed = panel.querySelector<HTMLTextAreaElement>('#plan-intent'), caret = typed && was ? [typed.selectionStart, typed.selectionEnd, document.activeElement === typed] as const : null;
     panel.replaceChildren(main, rail);
     const area = panel.querySelector<HTMLTextAreaElement>('#plan-intent');
     if (area && caret) { area.setSelectionRange(caret[0], caret[1]); if (caret[2]) area.focus({ preventScroll: true }); }
     // The same change keeps where the person was in it; another change starts at its top; back from the map: as left.
-    panel.querySelector('.pw-list')!.scrollTop = back?.list ?? prevList;
-    panel.querySelector('.pw-detail')!.scrollTop = back ? back.detail : item.id === lastWorkItem ? prevDetail : 0;
-    if (prevView === st.rail) panel.querySelector('.pw-rail-body')!.scrollTop = prevRail;
-    lastWorkItem = item.id;
+    const list = panel.querySelector('.pw-list'), detail = panel.querySelector('.pw-detail');
+    if (list) list.scrollTop = back?.list ?? prevList;
+    if (detail) detail.scrollTop = back ? back.detail : itemKey === lastWorkItem ? prevDetail : 0;
+    if (prevView === s!.rail) panel.querySelector('.pw-rail-body')!.scrollTop = prevRail;
+    lastWorkItem = itemKey;
+  }
+  /** An analysis that proposed no change, read whole: what it read (summary), what to keep, what is not known yet, and the material
+   * this analysis was given (each opens its text in the right column and comes back here). It says nothing more than the analysis:
+   * not that no change is needed, not that the goal is met, and the material list is not a per-sentence check of its grounds. */
+  function noChangeBody(p: ChangePlan, open: (ref: string) => void): HTMLElement {
+    const lines = (list: string[], none: string) => list.length ? h('ul', {}, ...list.map(x => h('li', {}, x))) : h('p', { class: 'pw-muted' }, none);
+    return h('article', { class: `pw-detail pw-nochange${stale() ? ' is-stale' : ''}`, 'aria-labelledby': 'pw-nochange-h' },
+      h('p', { class: 'pw-stale', hidden: !stale() }, '아래는 앞 문장·자료·작성 맥락으로 살펴본 분석이에요. 바뀐 내용은 아직 살펴보지 않았어요.'),
+      h('h3', { id: 'pw-nochange-h', class: 'pw-item-title' }, '이번 분석에서 제안된 변경이 없어요'),
+      h('p', { class: 'pw-nochange-note' }, '변경이 필요 없다고 확인했거나 바라는 결과가 이미 이루어졌다는 뜻은 아니에요. 요청에 넣을 변경이 없어 요청문은 만들지 않아요.'),
+      h('section', { class: 'pw-what' }, h('h4', {}, '분석이 읽은 것'), h('p', {}, p.analysis.summary)),
+      h('section', { class: 'pw-nochange-list' }, h('h4', {}, `지킬 것 ${p.analysis.preserve.length}`), lines(p.analysis.preserve, '제시된 유지 조건 없음')),
+      h('section', { class: 'pw-nochange-list' }, h('h4', {}, `아직 확인하지 않은 것 ${p.analysis.unknowns.length}`), lines(p.analysis.unknowns, '제시된 미확인 없음')),
+      h('section', { class: 'pw-nochange-src' }, h('h4', {}, `이 분석에 넣은 자료 ${p.evidence.length}`),
+        h('ul', {}, ...p.evidence.map(e => h('li', {}, h('button', { type: 'button', class: 'co-ref', 'data-ref': e.id, title: e.basis, onclick: () => open(e.id) }, `${e.id} ${EVIDENCE_LABEL[e.kind]}`), h('span', {}, e.title)))),
+        h('p', { class: 'fine' }, '이 분석에 보낸 자료예요. 문장마다 근거를 확인한 표시는 아니에요. 고친 문장이나 붙인 자료는 다시 살펴볼 때 들어가요.')));
   }
   /** Conditions of the whole plan (to keep, not decided yet): once, under the list, folded; never pinned to a change. */
   function planConditions(p: ChangePlan): HTMLElement | null {
@@ -865,8 +895,11 @@ export function createPlanView(host: PlanHost) {
   }
   /** The right column: by default what this request takes and the way to make it; a source, results or every source in its place. */
   function railView(o: PlanOpened, p: ChangePlan, writing: boolean): (Node | null)[] {
-    const st = s!, back = () => { st.rail = 'request'; st.railSource = null; render(); document.getElementById('plan-make')?.focus(); };
-    const top = (title: string) => h('header', { class: 'pw-rail-head' }, h('button', { type: 'button', class: 'link-button', id: 'pw-rail-back', onclick: back }, '‹ 이번 요청으로'), h('h3', {}, title));
+    const st = s!, back = () => {
+      const from = st.railSource; st.rail = 'request'; st.railSource = null; render();
+      (noChange() && from ? document.querySelector<HTMLElement>(`.pw-nochange-src [data-ref="${CSS.escape(from)}"]`) : document.getElementById('plan-make'))?.focus();
+    };
+    const top = (title: string) => h('header', { class: 'pw-rail-head' }, h('button', { type: 'button', class: 'link-button', id: 'pw-rail-back', onclick: back }, noChange() ? '‹ 분석으로' : '‹ 이번 요청으로'), h('h3', {}, title));
     if (st.rail === 'source') {
       const e = p.evidence.find(x => x.id === st.railSource);
       if (e) return [top(`근거 ${e.id}`), sourceList([e], true), h('p', { class: 'fine' }, '자료 원문이에요. 지시나 실행 결과로 읽지 않아요.')];
@@ -891,8 +924,9 @@ export function createPlanView(host: PlanHost) {
       st.bundle.snapshots.length ? h('button', { type: 'button', class: 'link-button quiet', title: '돌아온 기록과 프로젝트 기록을 함께 읽어요. 변경 구상은 닫혀도 초안은 남아요.', onclick: () => host.readReturn() }, '돌아와 읽기') : null);
     return [
       h('section', { class: 'pw-req', 'aria-labelledby': 'pw-req-h' },
-        h('h3', { id: 'pw-req-h' }, '이번 요청', h('span', { class: 'pw-count' }, `${chosen.length}/${p.analysis.items.length} 포함`)),
-        chosen.length ? h('ul', { class: 'pw-req-list' }, ...chosen.map(i => h('li', {}, i.title))) : h('p', { class: 'pw-muted' }, '포함한 변경이 없어요. 왼쪽 목록에서 ‘이번 요청에 포함’을 고르세요.'),
+        h('h3', { id: 'pw-req-h' }, '이번 요청', noChange() ? null : h('span', { class: 'pw-count' }, `${chosen.length}/${p.analysis.items.length} 포함`)),
+        chosen.length ? h('ul', { class: 'pw-req-list' }, ...chosen.map(i => h('li', {}, i.title)))
+          : h('p', { class: 'pw-muted' }, noChange() ? '이 분석에는 요청에 넣을 변경이 없어요. 요청문은 만들지 않아요.' : '포함한 변경이 없어요. 왼쪽 목록에서 ‘이번 요청에 포함’을 고르세요.'),
         ...warns,
         st.scoping
           ? h('div', { class: 'pending', role: 'status' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), h('span', {}, `고른 변경 ${st.scoping.count}개의 전제를 살펴보는 중…`),
@@ -902,8 +936,8 @@ export function createPlanView(host: PlanHost) {
         // Why the button is off while the sentence or material is ahead of the plan (kept in step as the person types).
         h('p', { class: 'fine pp-make-note', id: 'plan-make-note', role: 'status', hidden: !why }, why ? requestTitle() : ''),
         st.scopeError ? h('p', { class: 'pp-error', role: 'alert' }, st.scopeError) : null,
-        !st.scoping && !st.scopeError && !why ? h('p', { class: 'fine' }, authored ? '만들고 복사해도 보내거나 실행하지 않아요.' : '만들 때 고른 변경의 전제를 AI가 한 번 살펴봐요. 보내거나 실행하지 않아요.') : null,
-        changed && !st.scoping ? h('p', { class: 'fine' }, '마지막 요청문 뒤로 변경안이 바뀌었어요. 새로 만들어도 이전 것은 남아요.') : null),
+        !st.scoping && !st.scopeError && !why && !noChange() ? h('p', { class: 'fine' }, authored ? '만들고 복사해도 보내거나 실행하지 않아요.' : '만들 때 고른 변경의 전제를 AI가 한 번 살펴봐요. 보내거나 실행하지 않아요.') : null,
+        changed && !st.scoping ? h('p', { class: 'fine' }, noChange() ? '마지막 요청문 뒤로 다시 살펴봤어요. 이전 요청문과 돌아온 기록은 만든 때 그대로예요.' : '마지막 요청문 뒤로 변경안이 바뀌었어요. 새로 만들어도 이전 것은 남아요.') : null),
       !authored && needsCode() ? accessField() : null,
       tools, writing ? null : conditionSwitch(o)];
   }
@@ -931,7 +965,8 @@ export function createPlanView(host: PlanHost) {
   function backButton(b: HTMLButtonElement): HTMLButtonElement {
     const ok = canLeave();
     b.textContent = ok ? '지도로 돌아가기' : '현재 지도로 (초안 유지)';
-    b.title = ok ? '지도로 (Esc) · 카메라와 읽던 변경은 그대로예요' : '변경 구상을 닫고 현재 지도로 가요. 고친 문장과 이전 변경안·요청문은 그대로 남아요. (Esc)';
+    b.title = ok && noChange() ? '변경 구상을 닫고 지도로 가요. 초안과 이 분석은 그대로 남아요. (Esc)'
+      : ok ? '지도로 (Esc) · 카메라와 읽던 변경은 그대로예요' : '변경 구상을 닫고 현재 지도로 가요. 고친 문장과 이전 변경안·요청문은 그대로 남아요. (Esc)';
     return b;
   }
   /** A part on the map reads this plan there: off while the plan is behind what is written (the stale notice says why). */
@@ -943,6 +978,8 @@ export function createPlanView(host: PlanHost) {
   /** Back to the change map as it was left: same camera, mode, folds and pane; nothing is re-framed. */
   function leaveWork() {
     if (!s || stale() || s.pending || s.scoping) return;
+    // With no proposed change the change map has nothing of its own to read: the way back is the current map (draft and plan kept).
+    if (noChange()) { close(); return; }
     s.detail = false; s.editing = false; s.rail = 'request'; s.railSource = null; s.fromWork = false;
     render();
     document.querySelector<HTMLElement>('#lens .ps-wide, #plan-strip .ps-more')?.focus();

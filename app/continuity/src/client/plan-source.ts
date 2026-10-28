@@ -8,7 +8,7 @@ import { partPath, RECORD_LABEL, clip, type StudioView, type RecordKind } from '
 import { CONVERTER_PARTS, CONVERTER_RELATIONS, CONVERTER_INTENT, converterEvidence } from '../shared/change-plan-example.js';
 import { parsePlanAnalysis, type ChangePlan, type Evidence, type PlanAnalysis } from '../shared/change-plan.js';
 import { SCOPE_BYTES, type ScopeAsk } from '../shared/scope-api.js';
-import { PLAN_BYTES, type PlanAsk } from '../shared/plan-api.js';
+import { PLAN_BYTES, allowsNoChange, type PlanAsk } from '../shared/plan-api.js';
 import { fullTime } from './plan-dom.js';
 import { CLAIM_LABEL } from '../shared/map-reading.js';
 import { secretLike } from '../shared/secret.js';
@@ -74,7 +74,7 @@ export function exampleInput(o: { project: Project; view: StudioView }, conditio
   const parts = new Map([...keys].map(([k, id]) => [k, id]));
   const toKey = new Map([...keys].map(([k, id]) => [id, k]));
   const ctx = authoringAsk(authoring, o.project.id, o.view.parts, toKey);
-  const ask: PlanAsk = { schemaVersion: 'studio.plan.2', intent: intent.trim(),
+  const ask: PlanAsk = { schemaVersion: 'studio.plan.3', intent: intent.trim(),
     parts: o.view.parts.map(p => ({ id: toKey.get(p.id)!, name: p.name, note: p.note, parentId: p.parentId ? toKey.get(p.parentId)! : null })), evidence, authoring: ctx.ask };
   return finish({ evidence, ask, parts, records: { total: 0, sent: 0 }, problem: null, basis: `합성 예제 자료 · ${CONDITION_LABEL[condition]} · main@S0`, analyzed: { authoring, missing: ctx.missing } });
 }
@@ -82,13 +82,13 @@ export function exampleInput(o: { project: Project; view: StudioView }, conditio
 /** A saved project's own material, newest first, as whole sources until the request's byte limit: what the map readings understood
  * per part (derived, kind 'reading'), then records pasted as they came (kind 'record', never promoted to a request, report or
  * check) and the project's own records, by time. Nothing is cut silently: the count left out is shown before sending and kept. */
-/* The draft's authoring context goes as its own field (studio.plan.2): every part is still sent, and the context's parts under this
+/* The draft's authoring context goes as its own field (studio.plan.2, sent now as studio.plan.3): every part is still sent, and the context's parts under this
  * request's aliases. It counts toward the byte limit before any record is added. */
 export function projectInput(o: { project: Project; view: StudioView }, intent: string, extra: Evidence[] = [], authoring: Authoring = { state: 'unrecorded' }): PlanInput {
   const v = o.view, parts = new Map<string, string>(), alias = new Map<string, string>();
   v.parts.forEach((p, i) => { const a = `P${String(i + 1).padStart(2, '0')}`; parts.set(a, p.id); alias.set(p.id, a); });
   const ctx = authoringAsk(authoring, o.project.id, v.parts, alias);
-  const ask: PlanAsk = { schemaVersion: 'studio.plan.2', intent: intent.trim(),
+  const ask: PlanAsk = { schemaVersion: 'studio.plan.3', intent: intent.trim(),
     parts: v.parts.map(p => ({ id: alias.get(p.id)!, name: clip(p.name, 200), note: clip(p.note, 3000), parentId: p.parentId ? alias.get(p.parentId)! : null })),
     evidence: [intentEvidence(intent, false)], authoring: ctx.ask };
   const brief = o.project.space.brief?.text?.trim();
@@ -150,6 +150,7 @@ function finish(input: PlanInput): PlanInput {
 /** Validates the reply against what was sent, then maps aliases back to the real part ids (sources keep their aliases). */
 export function mapReply(reply: unknown, input: PlanInput): PlanAnalysis {
   const sent = parsePlanAnalysis(reply, [...input.parts.keys()], input.evidence.map(e => e.id));
+  if (!sent.items.length && !allowsNoChange(input.ask)) throw new Error('INVALID_CHANGE_PLAN');
   const real = (a: string) => input.parts.get(a)!;
   const mapped: PlanAnalysis = { ...sent, items: sent.items.map(i => ({ ...i, partIds: i.partIds.map(real),
     ...(i.presentation ? { presentation: i.presentation.map(p => ({ ...p, partId: real(p.partId) })) } : {}) })), impacts: sent.impacts.map(x => ({ ...x, partId: real(x.partId) })) };

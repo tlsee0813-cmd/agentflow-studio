@@ -7,7 +7,9 @@ import { parseAuthoringRecord, openRecord, legacyRecord, type AuthoringRecord, t
 
 export const PLANS_KEY = 'agentflow.studio.plans.1';
 export const UNREADABLE_KEY = 'agentflow.studio.plans.1.unreadable';
-/* .3 / studio.plans.3: a bundle may carry its draft's authoring context. Earlier files and envelopes are still read as they are. */
+/* .3 / studio.plans.3: a bundle may carry its draft's authoring context, and its plan may hold an analysis that proposed no change
+ * (items=[], same shape). Earlier files and envelopes are still read as they are; their writers never kept an empty analysis. An
+ * app from before empty analyses refuses such a bundle as unreadable and leaves its raw text as it was (its own boundary). */
 const FILE_FORMAT = 'agentflow.change-plan-file.3';
 const ENVELOPE = 'studio.plans.3';
 
@@ -54,7 +56,7 @@ export function parseBundle(v: unknown, projectId: string, legacy = false): Plan
   }
   if (new Set((v.extra as Evidence[]).map(e => e.id)).size !== v.extra.length) fail();
   let plan: ChangePlan | null = null;
-  if (v.plan !== null) { plan = parsePersistedPlan(v.plan); if (!plan || plan.projectId !== projectId) fail(); }
+  if (v.plan !== null) { plan = parsePersistedPlan(v.plan); if (!plan || plan.projectId !== projectId || (legacy && !plan.analysis.items.length)) fail(); }
   let by: Analyzed | null = null;
   if (v.by !== null) {
     const b = v.by;
