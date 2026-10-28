@@ -1924,6 +1924,71 @@ def continue72_flow(browser, base):
     context.close()
 
 
+def history73_flow(browser, base):
+    """A withdrawn report's history fold: open it, follow its old quote and come back by the named way. The item, the history
+    fold, the quote's focus, the pane scroll and the camera are as they were; the current-quote path still holds; the same
+    item answering another part does not open its history there. Written fixture (history73-fixture.mjs), no AI call."""
+    built = json.loads(subprocess.run(["node", str(ROOT / "tests/history73-fixture.mjs")], cwd=APP, check=True, capture_output=True, text=True).stdout)
+    area, other = built["area"], built["other"]
+    context = browser.new_context(viewport={"width": 1280, "height": 640})
+    page = context.new_page()
+    errors, calls = [], []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.on("request", lambda r: calls.append(r.url) if r.method == "POST" and "/api/studio/" in r.url else None)
+    page.goto(base + "/")
+    with tempfile.TemporaryDirectory() as tmp:
+        backup = pathlib.Path(tmp) / "history73.json"
+        backup.write_text(json.dumps(built["project"], ensure_ascii=False), encoding="utf-8")
+        page.locator("#import-file").set_input_files(str(backup))
+        page.wait_for_url(re.compile(r"#/p/E_"))
+    entry = re.search(r"#/p/(E_[^/]+)", page.url).group(1)
+    page.locator(f'#world .node[data-part="{area}"]').click()
+    expect(page.locator("#lens-title")).to_have_text("폴더 일괄 처리")
+    item = page.locator("#lens .request-item").first
+    item.locator(":scope > summary").click()
+    history = item.locator(".request-history")
+    expect(history.locator(":scope > summary")).to_contain_text("철회·정정된 앞 보고 1개")
+    history.locator(":scope > summary").click()
+    body = page.locator("#lens .lens-body")
+
+    def roundtrip(cite):
+        cite.scroll_into_view_if_needed()
+        cite.focus()
+        scroll = body.evaluate("e => e.scrollTop")
+        assert scroll > 0, "the test must return to a scrolled reading, not its start"
+        url0, camera0, history0 = page.url, page.locator("#world").evaluate(CAMERA), history.evaluate("e => e.open")
+        quote = cite.get_attribute("title")
+        cite.click()
+        expect(page.locator("#lens .rr-mark")).to_have_text(quote)
+        expect(page.locator("#lens .rr-back")).to_contain_text("폴더 일괄 처리")
+        page.locator("#lens .rr-back").click()
+        expect(page).to_have_url(url0)
+        expect(item).to_have_attribute("open", "")
+        assert history.evaluate("e => e.open") == history0
+        expect(cite).to_be_focused()
+        assert abs(body.evaluate("e => e.scrollTop") - scroll) <= 1
+        page.wait_for_timeout(250)
+        assert page.locator("#world").evaluate(CAMERA) == camera0
+
+    # The old (withdrawn) quote: the history fold comes back open, with that quote focused.
+    old = history.locator(".request-withdrawn .cl-cite").first
+    roundtrip(old)
+    expect(history).to_have_attribute("open", "")
+    roundtrip(old)
+    # The current quote path is unchanged (its history fold stays as the reader left it, open).
+    roundtrip(item.locator(":scope > .request-passage .cl-cite").first)
+    expect(history).to_have_attribute("open", "")
+    # The same RQ item answers the other part too: nothing opened here opens there.
+    page.goto(base + f"/#/p/{entry}/{other}")
+    expect(page.locator("#lens-title")).to_have_text("터미널 명령 실행")
+    expect(page.locator("#lens .request-item")).to_have_count(1)
+    expect(page.locator("#lens .request-item[open]")).to_have_count(0)
+    expect(page.locator("#lens .request-history[open]")).to_have_count(0)
+    no_page_scroll(page)
+    assert not calls and not errors, (calls, errors)
+    context.close()
+
+
 def request71_projection_flow(browser, base):
     """Written, validated fixture in the actual request-results DOM: unrelated excerpts stay folded outside parts, a real
     older-RQ report precedes a newer unanswered RQ, and the shared original component marks/scrolls its exact interval."""
@@ -2420,6 +2485,7 @@ def main():
             request71_projection_flow(browser, base); print("ok  request projection: unrelated excerpts do not spread into parts; older report precedes newer unanswered RQ; exact quoted interval marked/scrolled; written fixture")
             reading72_flow(browser, base); print("ok  saved actual request: second quote/back keeps disclosure, scroll, focus and surface; current contents, exact RQ/revision and other-part isolation")
             continue72_flow(browser, base); print("ok  home continue: scope and selection per workspace entry; imported copies and ambiguous old project memory kept apart")
+            history73_flow(browser, base); print("ok  withdrawn report history: old quote and named way back keep the item, its history fold, quote focus, scroll and camera; current quote path; other part untouched")
             record_fold_flow(browser, base, oss_fixtures()); print("ok  pasted record on Node-RED: a chosen candidate in a folded group opens only its path, holds through a quote, folds back on another choice and on close")
             stale_request_flow(browser, base); print("ok  request only from the analysis of what is written now: typed, forced, A-B-A, cancelled and outdated replies, material")
             actual_reply_flow(browser, base); print("ok  wide comparison of an actual reply without presentation; scope reviews outliving a material change; four changes")

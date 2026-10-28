@@ -15,6 +15,8 @@ export const displayAbout = (about: string) => /^[a-f0-9]{40}$/i.test(about) ? a
  * request (even with the same title/item id) from inheriting another one's disclosure or keyboard position. */
 export interface RequestReading {
   items: { key: string; open: boolean }[];
+  /** Each item's folded history of withdrawn reports, by that same exact item identity: whether it was open. */
+  histories: { key: string; open: boolean }[];
   item: string | null;
   focus: string | null;
 }
@@ -22,6 +24,7 @@ export function captureRequestReading(body: Element): RequestReading {
   const active = body.contains(document.activeElement) ? document.activeElement as HTMLElement : null;
   return {
     items: [...body.querySelectorAll<HTMLDetailsElement>('details[data-request-item]')].map(d => ({ key: d.dataset.requestItem!, open: d.open })),
+    histories: [...body.querySelectorAll<HTMLDetailsElement>('details[data-request-history]')].map(d => ({ key: d.dataset.requestHistory!, open: d.open })),
     item: active?.closest<HTMLElement>('[data-request-item]')?.dataset.requestItem ?? null,
     focus: active?.dataset.requestFocus ?? null
   };
@@ -33,6 +36,10 @@ export function restoreRequestReading(body: Element, saved: RequestReading): boo
   if (saved.item && !by.has(saved.item)) return false;
   if (saved.items.length && !saved.items.some(d => by.has(d.key))) return false;
   for (const d of saved.items) { const current = by.get(d.key); if (current) current.open = d.open; }
+  // A history fold opens again only where the fresh data still has one for that very item (never another request's or part's);
+  // what it holds is the current data, and the quote being read is focused inside it.
+  const histories = new Map([...body.querySelectorAll<HTMLDetailsElement>('details[data-request-history]')].map(d => [d.dataset.requestHistory!, d]));
+  for (const d of saved.histories ?? []) { const current = histories.get(d.key); if (current) current.open = d.open; }
   const focus = saved.focus && [...body.querySelectorAll<HTMLElement>('[data-request-focus]')].find(e => e.dataset.requestFocus === saved.focus);
   (focus || (saved.item ? by.get(saved.item)?.querySelector<HTMLElement>('summary') : null))?.focus({ preventScroll: true });
   return true;
@@ -111,7 +118,7 @@ export function requestResults(project: Project, scopes: FrozenRequest[], option
         h('p', { class: 'request-want' }, h('span', { class: 'cl-kind' }, '원함'), item.description));
       if (current.length) [...(lead ? [lead] : []), ...current.filter(x => x !== lead)].forEach(x => detail.append(passage(x, itemKey)));
       else detail.append(h('p', { class: 'request-remains' }, history.length ? '지금 서 있는 대응은 없어요. 앞 보고는 이후 원문이 철회했어요.' : '이 요청에 대응하는 내용은 아직 받지 못했어요.'));
-      if (history.length) detail.append(h('details', { class: 'request-history' }, h('summary', {}, `철회·정정된 앞 보고 ${history.length}개`), ...history.map(x => withdrawn(x, itemKey))));
+      if (history.length) detail.append(h('details', { class: 'request-history', 'data-request-history': itemKey }, h('summary', {}, `철회·정정된 앞 보고 ${history.length}개`), ...history.map(x => withdrawn(x, itemKey))));
       group.append(detail);
     }
     sec.append(group);
