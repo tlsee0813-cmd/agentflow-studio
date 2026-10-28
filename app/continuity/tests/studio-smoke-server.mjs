@@ -81,8 +81,7 @@ function map4Stub(input) {
   else content = { summary: '[스텁] 새 기록의 첫 줄을 첫 부분에 붙인 자리예요.', relations: [], candidates: [], gaps: [],
     parts: [{ ref: input.parts[0].id, name: null, parent: null, role: null, roleAbout: null, roleReplaces: null, basis: [], claims: [claim(pieces[0])] }] };
   Object.assign(content, { matches: [], material: [] });
-  // The reply as the arguments of the one strict function (server/map-tool.mjs), as the provider sends it for studio.map.4.
-  return new Response(JSON.stringify({ choices: [{ finish_reason: 'tool_calls', message: { content: null, tool_calls: [{ id: 'stub', type: 'function', function: { name: 'record_map_reading', arguments: JSON.stringify(content) } }] } }] }), { status: 200 });
+  return new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(content) } }] }), { status: 200 });
 }
 // The browser suite shares this stub process across many flows and can make >10 calls in a minute on a fast CI runner.
 // Only this simulated-provider fixture gets a higher rate; the real server's default remains 10/minute.
