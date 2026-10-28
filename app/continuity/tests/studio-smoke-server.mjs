@@ -12,7 +12,7 @@ const stub = async (url, init) => {
   if (mode === 'fail' && calls === 1) return new Response('{}', { status: 500 });
   const input = JSON.parse(JSON.parse(init.body).messages[1].content.replace(/^[^\n]*\n/, ''));
   if (input.schemaVersion === 'studio.digest.1' || input.schemaVersion === 'studio.digest.2') return digestStub(input);
-  if (input.schemaVersion === 'studio.map.1' || input.schemaVersion === 'studio.map.2') return mapStub(input);
+  if (['studio.map.1', 'studio.map.2', 'studio.map.3'].includes(input.schemaVersion)) return mapStub(input);
   const refs = input.records.slice(0, 2).map(r => r.ref);
   const content = { headline: `[스텁 응답] ${input.part.name} 정리`, situation: [`스텁: ${input.part.name}의 기록 ${input.records.length}개를 받았습니다.`],
     changes: input.current.changes.slice(0, 2), next: ['스텁: 다음 판단 예시'], answer: input.intent === 'question' ? `스텁 답변: ${input.question}` : null, refs };
@@ -65,7 +65,7 @@ function mapStub(input) {
     parts: lines.slice(0, 3).map((l, i) => ({ ref: `new:p${i}`, name: `스텁 부분 ${i + 1}`, parent: null, role: `[스텁] ${i + 1}번째 줄에 근거한 자리`, roleAbout: null, roleReplaces: null, basis: [{ record: rec.id, quote: quote(l) }], claims: [claim(l)] })) };
   else content = { summary: '[스텁] 새 기록의 첫 줄을 첫 부분에 붙인 자리예요.', relations: [], candidates: [], gaps: [],
     parts: [{ ref: input.parts[0].id, name: null, parent: null, role: null, roleAbout: null, roleReplaces: null, basis: [], claims: [claim(lines[0])] }] };
-  if (input.schemaVersion === 'studio.map.2') content.matches = [];
+  if (input.schemaVersion !== 'studio.map.1') content.matches = [];
   return new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(content) } }] }), { status: 200 });
 }
 // The browser suite shares this stub process across many flows and can make >10 calls in a minute on a fast CI runner.

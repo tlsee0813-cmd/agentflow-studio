@@ -13,7 +13,7 @@ import { createMapRun } from '../dist/public/client/map-run.js';
 import { aiStatus } from '../dist/public/client/studio-api.js';
 import { displayAbout, frozenRequests } from '../dist/public/client/request-results.js';
 import { createStudioHandler, mapPromptId } from '../server/studio.mjs';
-import { MAP2_PROMPT } from '../server/map-prompt.mjs';
+import { MAP2_PROMPT, MAP3_PROMPT } from '../server/map-prompt.mjs';
 
 let counter = 0;
 const meta = () => ({ id: `R_t${++counter}`, at: new Date().toISOString(), model: 'stub', prompt: 'm2-000000000000', hash: String(counter).padStart(64, '0') });
@@ -32,15 +32,17 @@ function setup(report = 'feature/folder@abc1234: 폴더 안 파일을 받는 입
   const bundle = { ...emptyBundle(), plan, snapshots: [snap], labels: { [snap.id]: Object.fromEntries(analysis.items.map(i => [i.id, i.title])) }, origins: { [snap.id]: 'reviewed' } };
   return { p, area, plan, snap, bundle };
 }
-const match = (q, opts = {}) => ({ record: 'N01', quote: '폴더 안 파일을 받는 입력을 바꿨습니다', text: '폴더 입력 변경 보고', kind: 'reported', about: 'feature/folder@abc1234', targets: [{ requestId: q.id, itemId: 'I1' }], why: '폴더 입력 요구와 받은 입력 변경 보고가 대응함', ...opts });
+// studio.map.3 matches: a change report says made unless told otherwise; anything else is unclear. No withdrawal by default.
+const match = (q, opts = {}) => { const m = { record: 'N01', quote: '폴더 안 파일을 받는 입력을 바꿨습니다', text: '폴더 입력 변경 보고', kind: 'reported', about: 'feature/folder@abc1234', targets: [{ requestId: q.id, itemId: 'I1' }], why: '폴더 입력 요구와 받은 입력 변경 보고가 대응함', ...opts };
+  return { stance: ['reported', 'code'].includes(m.kind) ? 'made' : 'unclear', replaces: null, ...m }; };
 const input = (p, scopes) => M.buildMapAsk(p, studioView(p), scopes);
 const apply = (p, inp, raw) => M.applyReading(p, inp, M.validateMapReply(raw, inp.ask), meta());
 
 test('71 normal loop: one read saves frozen request + partial correspondence with exact origins, no automatic sidecar observations or fake returns', () => {
   const { p, snap, bundle } = setup(), before = JSON.stringify(bundle), inp = input(p, [snap.scope]);
-  assert.equal(inp.ask.schemaVersion, 'studio.map.2'); M.validateMapAsk(inp.ask);
+  assert.equal(inp.ask.schemaVersion, 'studio.map.3'); M.validateMapAsk(inp.ask);
   const done = apply(p, inp, reply([match(snap), match(snap, { kind: 'checked', quote: '단일 문서 검사 3개 통과', text: '단일 문서 검사만 통과했다고 보고함' })]));
-  assert.equal(done.reading.version, 'map-reading.2'); assert.deepEqual(done.reading.requests, [snap.scope]);
+  assert.equal(done.reading.version, 'map-reading.3'); assert.deepEqual(done.reading.requests, [snap.scope]);
   const got = R.requestMatches(done.project); assert.equal(got.length, 2); assert.ok(got.every(x => x.target.itemId === 'I1'));
   assert.deepEqual(snap.scope.items.filter(i => !got.some(x => x.target.itemId === i.id)).map(i => i.id), ['I2', 'I3']);
   const source = p.pasted[0]; for (const x of got) { assert.equal(x.match.record, source.id); assert.equal(source.text.slice(x.match.from, x.match.to), x.match.quote); }
@@ -103,7 +105,7 @@ test('71 frozen RQ and manual corrections survive a changed demand, late report,
 
 test('71 migration: project9 unchanged readings, legacy sidecar text/manual observations; new snapshot scope stays frozen and exports round-trip', () => {
   const { p, snap, bundle } = setup();
-  const v9 = { ...p, schemaVersion: 'idea015.project.9' }; assert.equal(parseProject(JSON.stringify(v9)).schemaVersion, 'idea015.project.10');
+  const v9 = { ...p, schemaVersion: 'idea015.project.9' }; assert.equal(parseProject(JSON.stringify(v9)).schemaVersion, 'idea015.project.11');
   const legacy = structuredClone(bundle); delete legacy.snapshots[0].scope;
   legacy.observations.push({ id: 'O_legacy', itemId: 'I1', kind: 'report', text: '이전 수동 보고', basis: '직접 붙임', refs: [] }); legacy.attached.O_legacy = snap.id;
   assert.deepEqual(parseBundle(legacy, p.id), legacy);
@@ -116,7 +118,7 @@ test('71 migration: project9 unchanged readings, legacy sidecar text/manual obse
 
 test('71 long report: requests share the byte budget; unseen tail cannot support an item; too many RQs are never silently reduced to latest', () => {
   const { p, snap } = setup('처음 보고 구간입니다.\n' + '긴 원문 기록입니다.\n'.repeat(3000) + '꼬리에서만 검사 성공을 말합니다.');
-  const inp = input(p, [snap.scope]); assert.equal(inp.ask.schemaVersion, 'studio.map.2'); assert.equal(inp.coverage.partial, 1); assert.ok(new TextEncoder().encode(JSON.stringify(inp.ask)).length <= M.MAP_BYTES);
+  const inp = input(p, [snap.scope]); assert.equal(inp.ask.schemaVersion, 'studio.map.3'); assert.equal(inp.coverage.partial, 1); assert.ok(new TextEncoder().encode(JSON.stringify(inp.ask)).length <= M.MAP_BYTES);
   assert.throws(() => M.validateMapReply(reply([match(snap, { quote: '꼬리에서만 검사 성공을 말합니다', about: null })]), inp.ask), /INVALID_RESPONSE/);
   const many = Array.from({ length: 9 }, (_, i) => ({ ...snap.scope, id: `RQ_${i}` }));
   const crowded = input(p, many); assert.equal(crowded.problem, 'REQUEST_CONTEXT_TOO_LARGE'); assert.equal(crowded.requestCoverage.sent, 0); assert.equal(crowded.ask.requests, undefined);
@@ -230,7 +232,7 @@ test('71 request-only replay of a long record does not consume the canonical eff
 test('71 an explicit map-only action unblocks an unrelated note past the RQ limit and still permits later selected comparison', async () => {
   const { p, snap } = setup(), many = Array.from({ length: 9 }, (_, i) => ({ ...snap.scope, id: `RQ_limit_${i}` }));
   const savedFetch = globalThis.fetch; let project = p, calls = [], committed = 0;
-  globalThis.fetch = async (_url, options) => { const ask = JSON.parse(options.body); calls.push(ask); return new Response(JSON.stringify({ model: 'stub', reply: { summary: '설계 메모를 지도에서 읽음', parts: [], relations: [], candidates: [], gaps: [], ...(ask.schemaVersion === 'studio.map.2' ? { matches: [] } : {}) } })); };
+  globalThis.fetch = async (_url, options) => { const ask = JSON.parse(options.body); calls.push(ask); return new Response(JSON.stringify({ model: 'stub', reply: { summary: '설계 메모를 지도에서 읽음', parts: [], relations: [], candidates: [], gaps: [], ...(ask.schemaVersion !== 'studio.map.1' ? { matches: [] } : {}) } })); };
   try {
     const run = createMapRun({ current: () => ({ key: 'map-only-entry', kind: 'saved', project, view: studioView(project) }), requests: () => many,
       status: () => ({ ai: 'deepseek', access: 'open', map: { model: 'stub', prompt: awaitlessPrompt } }), accessCode: () => '',
@@ -238,7 +240,7 @@ test('71 an explicit map-only action unblocks an unrelated note past the RQ limi
     await run.run(); assert.equal(calls.length, 0); assert.equal(committed, 0); assert.match(run.state().error, /읽지 않았어요/);
     await run.runMapOnly(); assert.equal(calls.length, 1); assert.equal(calls[0].schemaVersion, 'studio.map.1'); assert.equal(committed, 1);
     assert.equal(project.pasted[0].text, p.pasted[0].text); assert.equal(M.unreadRecords(project, studioView(project)).length, 0);
-    await run.run(many[3].id); assert.equal(calls.length, 2); assert.equal(calls[1].schemaVersion, 'studio.map.2'); assert.deepEqual(calls[1].requests.map(q => q.id), [many[3].id]);
+    await run.run(many[3].id); assert.equal(calls.length, 2); assert.equal(calls[1].schemaVersion, 'studio.map.3'); assert.deepEqual(calls[1].requests.map(q => q.id), [many[3].id]);
     assert.equal(project.readings.at(-1).requests[0].id, many[3].id);
   } finally { globalThis.fetch = savedFetch; }
 });
@@ -255,15 +257,26 @@ test('71 return passages keep model order inside each reading and newer reading 
   assert.deepEqual(order.filter(x => x.reading === first.reading.id).map(x => x.index), [0, 1, 2]);
 });
 
-test('71 map.2 HTTP uses one combined prompt and rejects invented matching; runner failed commit applies neither map nor correspondence', async () => {
+test('71/73 map.3 HTTP uses one combined prompt, an older tab\'s map.2 still gets its own; runner failed commit applies neither map nor correspondence', async () => {
   const { p, snap } = setup(), inp = input(p, [snap.scope]), raw = reply([match(snap)]);
   let calls = 0, sent;
   const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: 'not-a-real-test-api-key', DEEPSEEK_PLAN_MODEL: 'stub' }, fetchImpl: async (_url, init) => {
     calls++; sent = JSON.parse(init.body); return new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(raw) } }] }), { status: 200 });
   } });
   const response = await handle(new Request('https://studio.example/api/studio/map', { method: 'POST', headers: { 'content-type': 'application/json', 'x-agentflow-request': '1', origin: 'https://studio.example' }, body: JSON.stringify(inp.ask) }));
-  assert.equal(response.status, 200); assert.equal(calls, 1); assert.equal(sent.messages[0].content, MAP2_PROMPT);
+  assert.equal(response.status, 200); assert.equal(calls, 1); assert.equal(sent.messages[0].content, MAP3_PROMPT);
   assert.equal((await response.json()).reply.matches.length, 1);
+  // A tab built before studio.map.3 sends map.2 (no priors, matches without stance): answered as before, never as map.3.
+  const { priors: _priors, ...old } = inp.ask, oldRaw = reply([(({ stance: _s, replaces: _r, ...m }) => m)(match(snap))]);
+  const oldHandle = createStudioHandler({ env: { DEEPSEEK_API_KEY: 'not-a-real-test-api-key', DEEPSEEK_PLAN_MODEL: 'stub' }, fetchImpl: async (_url, init) => {
+    sent = JSON.parse(init.body); return new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(oldRaw) } }] }), { status: 200 }); } });
+  const oldResponse = await oldHandle(new Request('https://studio.example/api/studio/map', { method: 'POST', headers: { 'content-type': 'application/json', 'x-agentflow-request': '1', origin: 'https://studio.example' }, body: JSON.stringify({ ...old, schemaVersion: 'studio.map.2' }) }));
+  assert.equal(oldResponse.status, 200); assert.equal(sent.messages[0].content, MAP2_PROMPT); assert.equal(Object.hasOwn((await oldResponse.json()).reply.matches[0], 'stance'), false);
+  // A map.2 ask cannot carry priors, and a map.3 ask needs them (an empty list is fine).
+  for (const body of [{ ...inp.ask, schemaVersion: 'studio.map.2' }, old]) {
+    const bad = await oldHandle(new Request('https://studio.example/api/studio/map', { method: 'POST', headers: { 'content-type': 'application/json', 'x-agentflow-request': '1', origin: 'https://studio.example' }, body: JSON.stringify(body) }));
+    assert.equal(bad.status, 400);
+  }
   const oldFetch = globalThis.fetch; let project = p, fails = true, doneCount = 0;
   globalThis.fetch = async () => new Response(JSON.stringify({ model: 'stub', reply: raw }), { status: 200 });
   try {
@@ -274,12 +287,12 @@ test('71 map.2 HTTP uses one combined prompt and rejects invented matching; runn
     fails = false; await run.run(); assert.equal(project.readings.length, 1); assert.equal(R.requestMatches(project).length, 1); assert.equal(doneCount, 1);
   } finally { globalThis.fetch = oldFetch; }
 });
-const awaitlessPrompt = 'm2-000000000000';
+const awaitlessPrompt = 'm3-000000000000';
 
-test('71 actual server status stays usable through aiStatus for m2, retains m1 compatibility, and rejects unknown prompt contracts', async () => {
+test('71/73 actual server status stays usable through aiStatus for m3, retains m1/m2 compatibility, and rejects unknown prompt contracts', async () => {
   const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: 'test-status-not-real', DEEPSEEK_PLAN_MODEL: 'stub-model' }, fetchImpl: async () => { throw new Error('status must never call the model'); } });
   const serverStatus = await (await handle(new Request('https://studio.example/api/studio/status'))).json();
-  assert.equal(serverStatus.map.prompt, await mapPromptId()); assert.match(serverStatus.map.prompt, /^m2-/);
+  assert.equal(serverStatus.map.prompt, await mapPromptId()); assert.match(serverStatus.map.prompt, /^m3-/);
   const oldFetch = globalThis.fetch;
   try {
     // The real handler's status response, through the actual client parser used by the UI.
@@ -288,11 +301,11 @@ test('71 actual server status stays usable through aiStatus for m2, retains m1 c
     const { p } = setup();
     const run = createMapRun({ current: () => ({ key: 'status-entry', kind: 'saved', project: p, view: studioView(p) }), status: () => status, accessCode: () => '', commit: async () => null, done: () => {}, changed: () => {} });
     assert.equal(run.can(), true, 'the map action remains available after reading the real status contract');
-    for (const prompt of ['m1-0123456789ab', 'm2-0123456789ab']) {
+    for (const prompt of ['m1-0123456789ab', 'm2-0123456789ab', 'm3-0123456789ab']) {
       globalThis.fetch = async () => new Response(JSON.stringify({ ...serverStatus, map: { ...serverStatus.map, prompt } }));
       assert.equal((await aiStatus()).map.prompt, prompt);
     }
-    for (const prompt of ['m3-0123456789ab', 'm2-bad', 'm2-0123456789ab-extra']) {
+    for (const prompt of ['m4-0123456789ab', 'm3-bad', 'm3-0123456789ab-extra']) {
       globalThis.fetch = async () => new Response(JSON.stringify({ ...serverStatus, map: { ...serverStatus.map, prompt } }));
       assert.equal((await aiStatus()).map, null);
     }

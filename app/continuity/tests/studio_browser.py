@@ -1718,10 +1718,10 @@ def request71_flow(browser, base):
     def returned(route):
         ask = route.request.post_data_json
         maps.append(ask)
-        assert ask["schemaVersion"] == "studio.map.2" and ask["requests"][0]["id"] == rq
+        assert ask["schemaVersion"] == "studio.map.3" and ask["requests"][0]["id"] == rq and ask["priors"] == []
         rec = next(r for r in ask["records"] if "feature/folder" in r["text"])
-        match = {"record": rec["id"], "quote": "폴더 안 파일을 받는 입력을 바꿨습니다", "text": "[스텁] 폴더 입력 변경 보고", "kind": "reported", "about": "feature/folder@abc1234", "targets": [{"requestId": rq, "itemId": "I1"}], "why": "[스텁] 입력 요구에 대응하는 구절"}
-        check = {**match, "kind": "checked", "quote": "기존 단일 문서 검사 3개 통과", "text": "[스텁] 단일 문서 검사만 통과했다고 보고함"}
+        match = {"record": rec["id"], "quote": "폴더 안 파일을 받는 입력을 바꿨습니다", "text": "[스텁] 폴더 입력 변경 보고", "kind": "reported", "about": "feature/folder@abc1234", "targets": [{"requestId": rq, "itemId": "I1"}], "why": "[스텁] 입력 요구에 대응하는 구절", "stance": "made", "replaces": None}
+        check = {**match, "kind": "checked", "stance": "unclear", "quote": "기존 단일 문서 검사 3개 통과", "text": "[스텁] 단일 문서 검사만 통과했다고 보고함"}
         route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "reply": {"summary": "[스텁] 폴더 입력만 부분 보고됨", "parts": [], "relations": [], "candidates": [], "gaps": [], "matches": [match, check]}}))
     page.route("**/api/studio/map", returned)
     page.locator("#lens .rr-map").get_by_role("button", name="기록 읽고 지도 갱신").click()
@@ -1941,11 +1941,11 @@ def request71_projection_flow(browser, base):
       const report = '배경 설명을 그대로 보관합니다.\\n'.repeat(300) + `요청문 참조: ${old.id}\\n폴더 입력 처리를 바꿨습니다. 단일 문서 검사 보고입니다. README 오타도 고쳤습니다.`;
       p = D.pasteRecord(p, report, null).project;
       const inp = M.buildMapAsk(p, V.studioView(p), [old.scope,newer.scope]);
-      const match = (quote,text,targets,kind='reported') => ({record:'N01',quote,text,targets,kind,about:null,why:'스텁 대응'});
+      const match = (quote,text,targets,kind='reported') => ({record:'N01',quote,text,targets,kind,about:null,why:'스텁 대응',stance:kind==='reported'?'made':'unclear',replaces:null});
       const reply = M.validateMapReply({summary:'스텁',parts:[],relations:[],candidates:[],gaps:[],matches:[
         match('폴더 입력 처리를 바꿨습니다','[스텁] 입력 변경 보고',[{requestId:old.id,itemId:'I1'}]),
         match('단일 문서 검사 보고입니다','[스텁] 단일 문서 검사',[],'checked'),match('README 오타도 고쳤습니다','[스텁] README 수정',[])]}, inp.ask);
-      p = M.applyReading(p,inp,reply,{id:'R_projection',at:new Date().toISOString(),model:'stub',prompt:'m2-000000000000',hash:'9'.repeat(64)}).project;
+      p = M.applyReading(p,inp,reply,{id:'R_projection',at:new Date().toISOString(),model:'stub',prompt:'m3-000000000000',hash:'9'.repeat(64)}).project;
       const box = document.createElement('div'); box.id='request-fixture'; box.style.cssText='position:fixed;right:0;top:0;width:420px;height:700px;overflow:auto;background:white;padding:12px;z-index:2000';document.body.append(box);
       const render = partId => {box.replaceChildren(UI.requestResults(p,[old.scope,newer.scope],{...(partId?{partId}:{}),correct:async()=>null}));};
       window.renderRequestFixture=render; render(b); return {a,b,old:old.id};

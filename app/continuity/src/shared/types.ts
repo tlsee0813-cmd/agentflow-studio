@@ -1,5 +1,7 @@
-import type { FrozenRequest, StoredRequestMatch, RequestCorrection } from './request-return.js';
-export const SCHEMA = 'idea015.project.10' as const;
+import type { FrozenRequest, StoredRequestMatch, RequestCorrection, ReplaceCorrection } from './request-return.js';
+export const SCHEMA = 'idea015.project.11' as const;
+/** project.10 had request matches without a stance and no withdrawal links: they read as unclassified reports (no backfill). */
+export const V10_SCHEMA = 'idea015.project.10' as const;
 export const V9_SCHEMA = 'idea015.project.9' as const;
 /** project.8 had no map readings: it reads as none (readings=[]); nothing else changes. */
 export const V8_SCHEMA = 'idea015.project.8' as const;
@@ -206,20 +208,21 @@ export interface ReadingCandidate { text: string; areaIds: string[]; quote: Read
 /** Something the reply proposed that was not applied, and why (kept so the next reading of the same input does not repeat it). */
 export interface ReadingSkip { what: 'part' | 'relation'; name: string; reason: 'same-name' | 'archived' | 'removed' | 'exists' | 'parent-skipped' }
 export interface MapReading {
-  version: 'map-reading.1' | 'map-reading.2'; id: string; at: string; model: string; prompt: string;
+  version: 'map-reading.1' | 'map-reading.2' | 'map-reading.3'; id: string; at: string; model: string; prompt: string;
   /** SHA-256 of the request: the very same request is never sent or applied again. */
   hash: string;
   /** Records read, and which part of each went: characters [from, to) of total. A record's unsent tail is read by a later reading. */
   records: { id: string; from: number; to: number; total: number }[];
   summary: string; parts: ReadingPart[]; relations: ReadingRelation[]; candidates: ReadingCandidate[]; gaps: string[]; skipped: ReadingSkip[];
-  /** map-reading.2 only: the request context actually sent, and correspondence saved in the same project write. */
+  /** map-reading.2/3 only: the request context actually sent, and correspondence saved in the same project write (map-reading.3:
+   * each with its stance and the explicit withdrawal of an earlier match it carries). */
   requests?: FrozenRequest[]; matches?: StoredRequestMatch[];
 }
 /** The person's own correction of a part's description as read (never Area.note, never a return.2 description): it names the
  * reading whose description it corrects. It holds that description only; later claims of later readings still come in. */
 export interface ReadingCorrection { version: 'map-correction.1'; id: string; at: string; areaId: string; text: string; corrects: string | null }
-export type ReadingEntry = MapReading | ReadingCorrection | RequestCorrection;
-export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2';
+export type ReadingEntry = MapReading | ReadingCorrection | RequestCorrection | ReplaceCorrection;
+export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3';
 export const READINGS_LIMIT = 500;
 export const PASTED_LIMIT = 500;
 export interface ContextBasis {

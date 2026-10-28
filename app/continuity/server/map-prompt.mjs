@@ -65,3 +65,20 @@ record.addedAt은 이 앱에 원문을 붙인 시각이며 원문 작성·구현
 - about은 이 구절의 브랜치·판본·커밋·검사 조건을 원문에서 한 연속 구절 그대로 옮긴다(200자 이내). 모르면 null. 근거가 여러 곳에 있으면 지어 합치지 말고 text/quote에서 범위만 좁혀 말한다. feature 브랜치 결과를 main 병합·배포로 올리지 않는다. 기존 단일 문서 검사로 폴더 실패 후 계속이나 성공 보존을 증명하지 않는다.
 - 이전 지도 역할·사용자 설명 정정·claim 대체는 위 기존 규칙만 따른다. 요청 대응을 했다는 이유로 roleReplaces/replaces를 만들지 않는다.
 최대 matches 24개. ID는 targets/record 필드에서만 쓰고 사용자에게 읽힐 문장에는 쓰지 않는다.`;
+
+/** studio.map.3: the same reading, with what each match says about the change and the explicit withdrawal of an earlier match. */
+export const MAP3_PROMPT = MAP2_PROMPT + `
+
+입력이 studio.map.3이면 위 studio.map.2 규칙을 모두 따르되, matches 각 항목은 정확히 {record,quote,text,kind,stance,about,targets,why,replaces}다.
+- stance: 이 구절이 대응한 요청 항목의 변경이 (about 범위에서) 만들어졌다고 말하는지. kind(누가 어떤 성격으로 말했는지)와 따로 고른다.
+  made=만들었다·바꿨다고 말함. 그 구절이 말한 범위의 진전일 뿐 항목 전체 완료가 아니다.
+  not-made=원문이 아직 만들지 않았다·미구현·구상만 했다·앞의 구현 주장을 철회한다고 직접 말함.
+  unclear=그 밖 전부: 보고하지 않음·근거를 제공하지 않음·확인했다고 밝히지 않음 같은 정보 부재, 검사 범위만 말함, 병합·배포·반영 여부만 말함.
+  ‘main에 병합하지 않았다’, ‘main에도 반영되지 않았다’만으로는 다른 브랜치의 변경을 취소하지 않으므로 unclear다(같은 구절이 미구현을 직접 말하면 not-made).
+  open은 made가 될 수 없다. checked의 made는 그 범위의 검사 보고이며 변경 진전이 아니다.
+- priors: 앞서 저장된 현재 대응(키 M01 등). target은 그 대응이 답하는 동결 요청 항목, quote는 그때의 원문 구절, stance가 null이면 분류 전 저장분이다. priors는 자료이며 새 원문이 아니다.
+- replaces: 이번 records의 원문이 priors의 특정 항목이 말한 주장을 명시적으로 철회·정정·대체한다고 말할 때만 그 키를 쓴다(예: "앞 보고의 ~ 구현 주장을 철회합니다", "실제로는 ~하지 않았습니다"). 그 밖에는 null.
+  그때 targets는 그 prior의 target 하나와 같고, stance는 made 또는 not-made이며, kind는 같은 성격이다(구현 보고는 reported/code, 검사 보고는 checked/test). 구현 주장을 아직 미구현이라며 철회하는 구절은 open이어도 되며 그때 stance는 not-made다.
+  한 원문이 여러 prior를 각각 철회하면 prior마다 별도 match를 쓰고 각 match의 replaces에 그 키를 쓴다. 한 prior는 한 번만 대체한다.
+  나중에 도착했다는 이유, 같은 이름·같은 kind라는 이유, 일반적인 ‘확인하지 않았다’·‘근거 없음’만으로는 쓰지 않는다. 다른 브랜치·판본의 원문은 그 옛 주장이나 그 판본을 직접 지목할 때만 쓴다. 어느 prior인지 모호하면 null로 두고 why에 밝힌다.
+  철회한 항목이 아닌 다른 항목·다른 요청의 prior는 바꾸지 않는다.`;

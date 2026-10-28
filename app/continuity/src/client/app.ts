@@ -1,15 +1,15 @@
 /* AgentFlow Studio client: entry → map → focused part. Reads project.7 data (saved projects and built examples) and never
  * rewrites records; the only project write is the user's own part name/note through the domain's editArea. */
-import type { Project } from '../shared/types.js';
+import { isMapReading, type Project } from '../shared/types.js';
 import { FILE_LIMIT } from '../shared/types.js';
 import { WorkspaceStore, type EntryRef, storageErrorCode, readViewState, readEntryView, writeViewState, readEntryPositions, writeEntryPositions, importCopy, serializeBackup } from '../shared/storage.js';
 import { parseBackup, cleanPositions } from '../shared/validation.js';
 import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, secretPasted, correctReadingRole } from '../shared/domain.js';
-import { CLAIM_LABEL, STATE_LABEL, type Applied, type CurrentClaim } from '../shared/map-reading.js';
+import { CLAIM_LABEL, stateLabel, revisedRelations, type Applied, type CurrentClaim } from '../shared/map-reading.js';
 import type { ClaimKind } from '../shared/types.js';
 import { createMapRun, sendLine } from './map-run.js';
 import { requestResults, frozenRequests, displayAbout, captureRequestReading, restoreRequestReading } from './request-results.js';
-import { correctRequestMatch, requestComparison } from '../shared/request-return.js';
+import { correctRequestMatch, unlinkReplacement, requestComparison } from '../shared/request-return.js';
 import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
 import { layoutScope, edgePath, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, ROOT, HEAD, type Box, type Edge, type LabelSpot, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
@@ -666,7 +666,7 @@ function aliasOf(v: StudioView, id: string): string | null {
  * still tells "no records" apart from "a planned note only". */
 function metaLine(p: PartView, last: string | null): string | null {
   // No request of its own yet: what the records said about it (one short state), never a verified status.
-  if (p.status === 'plan') return p.reading?.state ? STATE_LABEL[p.reading.state] ?? null : null;
+  if (p.status === 'plan') return p.reading ? stateLabel(p.reading) : null;
   return `${STATUS_SHORT[p.status]}${last ? ` · ${ago(last)}` : ''}`;
 }
 
@@ -695,7 +695,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   restSums = sums = lay.edges.length > 6 ? summaryEdges(lay.boxes, lay.edges) : [];
   for (const e of [...lay.edges, ...sums]) {
     const fa = frames(e.from), inner = [...frames(e.to)].some(f => fa.has(f)), sum = e.key.startsWith('sum:');
-    const g = svg('g', { class: `edge${sum ? ' sum' : ''} k-${e.kind}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
+    const g = svg('g', { class: `edge${sum ? ' sum' : ''} k-${e.kind}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}${!sum && !e.agg && e.ids.length && e.ids.every(id => revisedLine(o, id)) ? ' revised' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
     // No text on the map: the meaning shows on hover (tip) and in the selected part's 관련 부분.
     // A plain relation ends in the same dot at both ends: it is drawn, not directed.
     g.append(svg('path', { class: 'edge-line', 'marker-end': e.kind === 'related' ? 'url(#dot)' : 'url(#arrow)', 'marker-start': 'url(#dot)' }), svg('path', { class: 'edge-hit' }));
@@ -1240,7 +1240,7 @@ function renderLens() {
   } else if (part.reading?.role) {
     // Read from records (or corrected by the person): one description, with where it comes from.
     const u = part.reading;
-    put(desc, h('p', { class: 'lens-text' }, u.role), src(u.corrected ? '직접 바로잡은 설명' : `기록에서 읽은 설명${u.roleAbout ? ` · ${displayAbout(u.roleAbout)} 기준` : ''}`));
+    put(desc, h('p', { class: 'lens-text' }, u.role), src(u.corrected ? '직접 바로잡은 설명' : `기록에서 읽은 설명${u.roleAbout ? ` · ${displayAbout(u.roleAbout)} 기준` : ''}${u.roleBasisRevised ? REVISED_BASIS : ''}`));
     if (u.roleAbout) desc.lastElementChild?.setAttribute('title', u.roleAbout);
   } else put(desc, src(part.status === 'plan' ? (records.length ? `설명 없음 · 요청 기록 없음 · ${recs}` : part.reading ? '기록에서 읽은 주장만 있어요' : '아직 설명도 기록도 없어요') : `${STATUS_LABEL[part.status]} · ${recs} · 받은 정리 없음`));
   if (part.changes.length) desc.append(h('ul', { class: 'lens-changes' }, ...part.changes.slice(0, 2).map(c => h('li', {}, c))));
@@ -1256,7 +1256,7 @@ function renderLens() {
     return h('li', {}, h('button', { type: 'button', class: `port${came ? ' came' : ''}`, 'data-far': x.far, title: `${far.name}${toParticle(far.name)} 가기${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far); } },
       h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, dirMark(x.r.kind, x.out)), h('strong', {}, far.name), came ? h('span', { class: 'port-came' }, '출발') : null),
       near || where ? h('span', { class: 'port-where' }, [near ? `안쪽 ‘${near}’에서` : '', where ? `${where}` : ''].filter(Boolean).join(' · ')) : null,
-      x.r.note ? h('span', { class: 'port-note' }, x.r.note) : null));
+      x.r.note || revisedLine(o, x.r.id) ? h('span', { class: 'port-note' }, `${x.r.note}${revisedLine(o, x.r.id) ? REVISED_BASIS : ''}`.replace(/^ · /, '')) : null));
   };
   const ports = relationGroups(ends).map(g => h('section', { class: 'lens-ports' }, h('h3', {}, g.label, h('small', {}, String(g.list.length))),
     h('ul', {}, ...g.list.slice(0, 8).map(port)), g.list.length > 8 ? h('button', { type: 'button', class: 'link-button', onclick: () => openSheet() }, `${g.list.length - 8}개 더 · 전체 읽기`) : null));
@@ -1359,7 +1359,7 @@ function renderPanel(scrollTop: boolean) {
   const o = opened!, part = o.view.parts.find(p => p.id === selected)!, panel = $('panel');
   const prevBody = panel.querySelector('.panel-body'), keep = scrollTop ? 0 : prevBody?.scrollTop ?? 0;
   const path = partPath(o.view, part.id).slice(0, -1), records = subtreeRecords(o.view, part.id);
-  const state = part.status === 'plan' ? (part.reading?.state ? STATE_LABEL[part.reading.state] ?? '기록에서 읽음' : records.length ? '요청 기록 없음' : part.note ? '계획 설명만 있음 · 기록 없음' : '기록 없음') : STATUS_LABEL[part.status];
+  const state = part.status === 'plan' ? (part.reading?.state ? stateLabel(part.reading) ?? '기록에서 읽음' : records.length ? '요청 기록 없음' : part.note ? '계획 설명만 있음 · 기록 없음' : '기록 없음') : STATUS_LABEL[part.status];
   const menuItems = [
     o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', onclick: () => { editing = !editing; renderPanel(false); } }, editing ? '고치기 닫기' : '이름·설명 고치기') : null,
     o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null,
@@ -1406,7 +1406,7 @@ function renderPanel(scrollTop: boolean) {
       return h('li', {}, h('a', { href: hashFor(o.key, other.id, scope), 'data-far': other.id, onclick: (e: Event) => follow(other.id, r, e) },
         h('span', { class: 'dir', title: dirTitle(r.kind, out) }, dirMark(r.kind, out)), h('strong', {}, other.name), h('span', { class: 'rel-kind' }, REL_LABEL[r.kind] ?? r.kind)),
         where ? h('span', { class: 'link-where' }, where) : null,
-        r.note ? h('span', { class: 'link-note' }, r.note) : null);
+        r.note || revisedLine(o, r.id) ? h('span', { class: 'link-note' }, `${r.note}${revisedLine(o, r.id) ? REVISED_BASIS : ''}`.replace(/^ · /, '')) : null);
     })));
     body.append(rel);
   }
@@ -1696,7 +1696,7 @@ const returnView = createReturnView({
   },
   mapBlock: () => mapBlock(),
   mapMarks: () => { const o = opened; return o && justRead?.key === o.key ? justRead.parts : []; },
-  readIntoMap: id => !!opened?.project.readings.some(r => (r.version === 'map-reading.1' || r.version === 'map-reading.2') && r.records.some(x => x.id === id)),
+  readIntoMap: id => !!opened?.project.readings.some(r => isMapReading(r) && r.records.some(x => x.id === id)),
   mapPrimary: () => { const inp = mapRun.input(); return !!inp && !inp.problem && mapRun.can(); }
 });
 
@@ -1821,15 +1821,24 @@ function currentRequestResults(o: Opened, partId?: string): HTMLElement | null {
         if (!error) { renderSpace('keep'); if (selected) refreshReading(); else returnView.render(); }
         return error;
       } catch { return '대응을 고치지 못했어요. 원문은 그대로예요.'; }
+    },
+    unlink: async (reading, index) => {
+      try {
+        const error = await commit(o, unlinkReplacement(o.project, reading, index));
+        if (!error) { renderSpace('keep'); if (selected) refreshReading(); else returnView.render(); }
+        return error;
+      } catch { return '연결을 풀지 못했어요. 원문은 그대로예요.'; }
     }
   });
 }
 const CLAIM_ORDER: ClaimKind[] = ['open', 'differs', 'want', 'reported', 'checked', 'idea', 'describes'];
-/** Claims of a part as short lines, most decision-relevant first, each with the way to its quote. */
+/** Said once, where a description or a line rests only on a report a later record took back (it stays; it is not current evidence). */
+const REVISED_BASIS = ' · 근거였던 보고는 이후 정정됨';
+/** Claims of a part as short lines, a report correcting an earlier one first, then most decision-relevant, each with its quote. */
 function claimList(claims: CurrentClaim[], max: number): HTMLElement {
-  const sorted = [...claims].sort((a, b) => CLAIM_ORDER.indexOf(a.kind) - CLAIM_ORDER.indexOf(b.kind)).slice(0, max);
-  return h('ul', { class: 'claims' }, ...sorted.map(c => h('li', { class: `claim k-${c.kind}` },
-    h('span', { class: 'cl-kind' }, CLAIM_LABEL[c.kind]), h('span', { class: 'cl-text' }, c.text, c.about ? h('small', { class: 'cl-about', title: c.about }, ` · ${displayAbout(c.about)}`) : null),
+  const sorted = [...claims].sort((a, b) => Number(!!b.replaces) - Number(!!a.replaces) || CLAIM_ORDER.indexOf(a.kind) - CLAIM_ORDER.indexOf(b.kind)).slice(0, max);
+  return h('ul', { class: 'claims' }, ...sorted.map(c => h('li', { class: `claim k-${c.kind}${c.replaces ? ' replaces' : ''}` },
+    h('span', { class: 'cl-kind' }, c.replaces ? `${CLAIM_LABEL[c.kind]} · 앞 주장 대체` : CLAIM_LABEL[c.kind]), h('span', { class: 'cl-text' }, c.text, c.about ? h('small', { class: 'cl-about', title: c.about }, ` · ${displayAbout(c.about)}`) : null),
     h('button', { type: 'button', class: 'cl-cite', title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote) }, '근거'))));
 }
 /** A quote from the selection: the record in the pane, marked; closing the pane comes back to this part. */
@@ -1856,7 +1865,7 @@ function understoodSection(o: Opened, part: PartView): HTMLElement | null {
     } }, h('label', { for: 'fix-role' }, '설명 바로잡기 ', h('small', {}, '이름·내 설명·기록의 주장은 그대로예요')), area, msg,
       h('div', { class: 'row' }, h('button', { type: 'submit', class: 'primary small' }, '저장'), h('button', { type: 'button', class: 'link-button', onclick: () => { fixingRole = null; renderPanel(false); } }, '취소'))));
   } else if (u.role) {
-    sec.append(h('p', { class: 'und-role' }, u.role), h('p', { class: 'src', title: u.roleAbout ?? '' }, u.corrected ? `직접 바로잡은 설명 · ${fullTime(u.corrected.at)}` : `기록에서 읽은 설명${u.roleAbout ? ` · ${displayAbout(u.roleAbout)} 기준` : ''}`,
+    sec.append(h('p', { class: 'und-role' }, u.role), h('p', { class: 'src', title: u.roleAbout ?? '' }, u.corrected ? `직접 바로잡은 설명 · ${fullTime(u.corrected.at)}` : `기록에서 읽은 설명${u.roleAbout ? ` · ${displayAbout(u.roleAbout)} 기준` : ''}${u.roleBasisRevised ? REVISED_BASIS : ''}`,
       o.kind === 'saved' ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { fixingRole = part.id; renderPanel(false); requestAnimationFrame(() => document.getElementById('fix-role')?.focus()); } }, ' 설명 바로잡기') : null));
     // Descriptions read later that did not replace this one (no record said it supersedes it) read apart, with their version.
     for (const x of u.others.slice(0, 2)) sec.append(h('p', { class: 'und-later' }, h('span', { title: x.about ?? '' }, `다른 기록의 설명${x.about ? ` · ${displayAbout(x.about)}` : ''} · 현재 설명을 대체한다는 근거 없음`), x.text));
@@ -1871,6 +1880,9 @@ function understoodSection(o: Opened, part: PartView): HTMLElement | null {
   sec.append(hist);
   return sec;
 }
+
+/** A relation a reading added on a report a later record took back (revisedRelations): still drawn, read apart. */
+function revisedLine(o: Opened, relationId: string): boolean { return revisedRelations(o.project).has(relationId); }
 
 function sessionCode(): string { try { return sessionStorage.getItem('agentflow.studio.access') ?? accessCodeMemory; } catch { return accessCodeMemory; } }
 
@@ -2079,7 +2091,7 @@ function bindEdgeHints() {
       const edge = edgeOf(g.dataset.key); if (!edge) return;
       g.classList.add('near');
       tip.replaceChildren(h('strong', {}, `${nameOf(edge.from)} ${edge.kind === 'related' ? '—' : '→'} ${nameOf(edge.to)}`), h('span', { class: 'tip-kind' }, `${REL_LABEL[edge.kind] ?? edge.kind}${restOf(edge) ? ` · 선택한 부분의 관계를 뺀 나머지 ${edge.ids.length}개` : edge.agg ? ` · 안쪽 관계 ${edge.ids.length}개의 요약 · 선택하면 실제 끝점` : edge.ids.length > 1 ? ` · 관계 ${edge.ids.length}개를 한 선으로 묶음` : ''}`),
-        ...edge.notes.slice(0, 3).map(n => h('span', {}, n)));
+        ...edge.notes.slice(0, 3).map(n => h('span', {}, n)), ...(!edge.agg && opened && edge.ids.length && edge.ids.every(id => revisedLine(opened!, id)) ? [h('span', { class: 'tip-revised' }, REVISED_BASIS.replace(/^ · /, ''))] : []));
       tip.hidden = false; place(e as PointerEvent); return;
     }
     const part = t.closest<HTMLElement>('.node[data-box], .frame-head[data-part], .ghost[data-box]');

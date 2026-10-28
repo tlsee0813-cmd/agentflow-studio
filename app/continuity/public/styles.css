@@ -190,6 +190,7 @@ button:disabled { opacity: .5; cursor: default; }
 .edge.agg .edge-line { stroke: #ccd2da; stroke-width: 3; stroke-dasharray: none; marker-start: none; }
 .edge.near .edge-line { stroke: var(--text-3); stroke-width: 2.1; stroke-opacity: 1; }
 .edge.near:not(.on):not(.k-related) .edge-line { marker-end: url(#arrow-near); }
+.edge.revised .edge-line { stroke-opacity: .45; }
 .edge.on .edge-line { stroke: var(--accent); stroke-width: 2.25; stroke-opacity: 1; }
 .edge.agg.near .edge-line { stroke: #a9b1bd; stroke-width: 3; }
 .edge.agg.on .edge-line { stroke: #9fb4e6; stroke-width: 3; }
@@ -1204,8 +1205,10 @@ button:disabled { opacity: .5; cursor: default; }
 .request-want .cl-kind, .request-passage .cl-kind { margin-right: 8px; }
 .request-remains { color: var(--text-3); }
 .request-passage { padding: 0 0 8px; }
-.request-quote, .request-fix, .request-excluded { margin-top: 6px; font-size: 12px; color: var(--text-3); }
-.request-quote summary, .request-fix summary, .request-excluded summary { cursor: pointer; }
+.request-quote, .request-fix, .request-excluded, .request-history { margin-top: 6px; font-size: 12px; color: var(--text-3); }
+.request-quote summary, .request-fix summary, .request-excluded summary, .request-history summary { cursor: pointer; }
+.request-withdrawn > p:first-child { color: var(--text-3); }
+.cl-replaces { color: var(--text-2); }
 .request-quote pre { max-height: 260px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; padding: 10px; background: var(--surface-2); color: var(--text); }
 .request-quote mark { background: #f8e9b7; color: inherit; }
 .request-fix select { max-width: 100%; margin: 8px 6px 4px 0; font-size: 12px; }
