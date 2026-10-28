@@ -76,7 +76,9 @@ export function resolveQuote(text: string, quote: string): string | null {
   const strip = (t: string) => { const drop = marks(t), keep: number[] = []; let plain = ''; for (let k = 0; k < t.length; k++) if (!drop.has(k)) { keep.push(k); plain += t[k]; } return { keep, plain }; };
   const { keep, plain } = strip(text), bare = strip(q).plain.trim(); if (!bare || plain === text) return null;
   const pattern = new RegExp(bare.split(/\s+/).map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('\\s+'), 'g');
-  const found = [...plain.matchAll(pattern)];
+  // Unique counts every start, overlapping ones too ('very very' in 'very very very' is two places).
+  const found: RegExpExecArray[] = [];
+  for (let m = pattern.exec(plain); m && found.length < 2; m = pattern.exec(plain)) { found.push(m); pattern.lastIndex = m.index + 1; }
   if (found.length !== 1) return null;
   const m = found[0]!, start = keep[m.index!]!, end = keep[m.index! + m[0].length - 1]! + 1;
   return text.slice(start, end);

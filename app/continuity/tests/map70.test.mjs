@@ -331,6 +331,8 @@ test('M70-Q1 a quote that only leaves out Markdown emphasis resolves to the one 
   assert.equal(M.resolveQuote('- __Closures__: lexical scope', 'Closures: lexical scope'), 'Closures__: lexical scope');
   assert.equal(M.resolveQuote('- **Retries**: up to 3 times', 'Retries: up to 4 times'), null, 'a changed number');
   assert.equal(M.resolveQuote('*Run* fast', 'Run fast'), null, 'single-star emphasis is not repaired (not needed)');
+  assert.equal(M.resolveQuote('**very** very **very**', 'very very'), null, 'two overlapping places once marks are set aside');
+  assert.equal(M.resolveQuote('**very** very **much**', 'very very'), 'very** very', 'one place');
   assert.equal(M.resolveQuote(md, 'Error handling: try/catch with stack traces'), null, 'pieces joined');
   assert.equal(M.resolveQuote(md, 'Error handling: try/catch/finally with stack trace and more'), null);
   assert.equal(M.resolveQuote(md, '2 * 3 = 7'), null, 'a changed number');
