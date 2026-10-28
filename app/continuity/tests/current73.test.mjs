@@ -253,7 +253,11 @@ test('73-M scope identity is by whole identifiers: v1 is not v10, the same branc
   assert.equal(S('feature/folder 브랜치', 'feature/folder의 폴더 입력'), 'same'); assert.equal(S('feature/folder@abc1234', 'feature/folder'), 'same');
   assert.equal(S('feature/folder 브랜치', 'main'), 'different'); assert.equal(S('feature/folder@abc1234', 'feature/folder@def5678'), 'different');
   assert.equal(S('단일 문서 검사 조건', 'v1'), 'unknown'); assert.equal(S(null, 'v1'), 'unknown');
-  assert.equal(R.namesScope('v10 보고: 다른 판입니다', 'v1'), false); assert.equal(R.namesScope('v1의 주장을 철회합니다', 'v1'), true);
+  assert.equal(R.namesDifference('v10 보고: 다른 판입니다', 'v1', 'v10'), false); assert.equal(R.namesDifference('v1의 주장을 철회합니다', 'v1', 'v10'), true);
+  // Only the identifier that differs counts: the shared branch of two commits points at neither commit.
+  assert.equal(R.namesDifference('feature/folder@def5678 정정', 'feature/folder@abc1234', 'feature/folder@def5678'), false);
+  assert.equal(R.namesDifference('abc1234의 주장을 철회합니다', 'feature/folder@abc1234', 'feature/folder@def5678'), true);
+  assert.equal(R.separateLines('feature/folder@abc1234', 'feature/folder@def5678'), false); assert.equal(R.separateLines('v1', 'v10'), true); assert.equal(R.separateLines('main', 'feature/folder'), true);
 });
 
 /** One RQ, one positive report about `about`, then a later record; returns the ask for the later record and the prior's key. */
@@ -328,4 +332,31 @@ test('73-Q MAP3 tells the three replacement forms apart; a reply that mixes them
   assert.throws(() => M.validateMapReply({ ...reply([]), parts: [part] }, s.inp.ask), /INVALID_RESPONSE/);
   assert.throws(() => M.validateMapReply(reply([m(s.q, 'change_1', '이제 폴더 경로를 받습니다', { replaces: 'C01' })]), s.inp.ask), /INVALID_RESPONSE/);
   assert.throws(() => M.validateMapReply(reply([m(s.q, 'change_1', '이제 폴더 경로를 받습니다', { replaces: { record: 'N01', quote: '이제 폴더 경로를 받습니다' } })]), s.inp.ask), /INVALID_RESPONSE/);
+});
+
+test('73-R another commit of the same branch: naming only the shared branch takes nothing back; the two read side by side; naming the old commit does', () => {
+  for (const [later, holds] of [['feature/folder@def5678 정정: 폴더 입력은 아직 구현하지 않았습니다.', false], ['feature/folder@def5678 정정: abc1234의 폴더 입력 주장을 철회합니다. 폴더 입력은 아직 구현하지 않았습니다.', true]]) {
+    const s = scoped('feature/folder@abc1234', later);
+    const v = M.validateMapReply(reply([m(s.q, 'change_1', '폴더 입력은 아직 구현하지 않았습니다', { about: 'feature/folder@def5678', stance: 'not-made', replaces: s.key })]), s.inp.ask);
+    assert.equal(v.matches[0].replaces, holds ? s.key : null);
+    const done = M.applyReading(s.p, s.inp, v, meta()).project, one = item(done, s.q, 'change_1');
+    assert.equal(one.state, holds ? 'not-made' : 'mixed'); assert.equal(one.history.length, holds ? 1 : 0);
+    if (!holds) {
+      // Injected into stored data, the link the wire dropped is refused the same way.
+      const x = structuredClone(done); x.readings.at(-1).matches[0].replaces = { reading: x.readings.find(e => e.version === 'map-reading.3').id, index: 0 };
+      assert.throws(() => parseProject(JSON.stringify(x)));
+    }
+  }
+});
+
+test('73-S a stored withdrawal is judged on the interval that was sent: a version named only in the unsent tail justifies nothing', () => {
+  const tail = '\n꼬리의 관련 없는 문장: v2 문서 목록.';
+  const s = scoped('v2', 'v1 기준: 폴더 입력은 아직 구현하지 않았습니다.\n' + '배경 설명을 그대로 둡니다.\n'.repeat(1000) + tail);
+  const sent = s.inp.ask.records[0].text;
+  assert.ok(!sent.includes('v2') && s.p.pasted.at(-1).text.includes('v2') && s.p.pasted.at(-1).text.length > sent.length);
+  const v = M.validateMapReply(reply([m(s.q, 'change_1', '폴더 입력은 아직 구현하지 않았습니다', { about: 'v1', stance: 'not-made', replaces: s.key })]), s.inp.ask);
+  assert.equal(v.matches[0].replaces, null);
+  const done = M.applyReading(s.p, s.inp, v, meta()).project, x = structuredClone(done);
+  x.readings.at(-1).matches[0].replaces = { reading: x.readings.find(e => e.version === 'map-reading.3').id, index: 0 };
+  assert.throws(() => parseProject(JSON.stringify(x)), undefined, 'the full record names v2, but only in a tail this reading never sent');
 });
