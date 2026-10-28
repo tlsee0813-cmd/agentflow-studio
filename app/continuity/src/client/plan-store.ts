@@ -3,10 +3,13 @@
  * to start over, which first copies the raw text aside. Every write is read back; a write that did not stick is an error. */
 import type { StorageLike } from '../shared/storage.js';
 import { parsePersistedPlan, compareResults, type ChangePlan, type Evidence, type RequestSnapshot, type ResultObservation } from '../shared/change-plan.js';
+import { parseAuthoringRecord, openRecord, legacyRecord, type AuthoringRecord } from '../shared/authoring-context.js';
 
 export const PLANS_KEY = 'agentflow.studio.plans.1';
 export const UNREADABLE_KEY = 'agentflow.studio.plans.1.unreadable';
-const FILE_FORMAT = 'agentflow.change-plan-file.2';
+/* .3 / studio.plans.3: a bundle may carry its draft's authoring context. Earlier files and envelopes are still read as they are. */
+const FILE_FORMAT = 'agentflow.change-plan-file.3';
+const ENVELOPE = 'studio.plans.3';
 
 export type Analyzed = { kind: 'example' } | { kind: 'ai'; model: string; at: string; records: { total: number; sent: number } };
 export interface PlanBundle {
@@ -26,15 +29,22 @@ export interface PlanBundle {
   observations: ResultObservation[];
   /** observation id → the snapshot it was read against */
   attached: Record<string, string>;
+  /** The draft's authoring context and the one the plan was analysed with. Absent in a bundle kept before contexts: its draft and
+   * plan read as unrecorded (authoringOf) and the key stays absent until the person sets or removes a context. */
+  authoring?: AuthoringRecord;
 }
-export const emptyBundle = (draft = ''): PlanBundle => ({ draft, extra: [], plan: null, by: null, snapshots: [], labels: {}, origins: {}, observations: [], attached: {} });
+/** A new draft: its first edit takes the context of the screen. */
+export const emptyBundle = (draft = ''): PlanBundle => ({ draft, extra: [], plan: null, by: null, snapshots: [], labels: {}, origins: {}, observations: [], attached: {}, authoring: openRecord() });
+export const authoringOf = (b: PlanBundle): AuthoringRecord => b.authoring ?? legacyRecord(!!b.plan);
 
 const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
 function fail(): never { throw new Error('INVALID_PLAN_BUNDLE'); }
 
-export function parseBundle(v: unknown, projectId: string): PlanBundle {
+/** legacy: read from an envelope or file version written before authoring contexts, which never carries one. */
+export function parseBundle(v: unknown, projectId: string, legacy = false): PlanBundle {
   if (!isObj(v)) fail();
-  const keys = ['draft', 'extra', 'plan', 'by', 'snapshots', 'labels', 'origins', 'observations', 'attached'];
+  if (legacy && Object.hasOwn(v, 'authoring')) fail();
+  const keys = ['draft', 'extra', 'plan', 'by', 'snapshots', 'labels', 'origins', 'observations', 'attached', ...(Object.hasOwn(v, 'authoring') ? ['authoring'] : [])];
   if (Object.keys(v).length !== keys.length || !keys.every(k => Object.hasOwn(v, k))) fail();
   if (typeof v.draft !== 'string' || v.draft.length > 6000) fail();
   if (!Array.isArray(v.extra) || v.extra.length > 20) fail();
@@ -67,20 +77,23 @@ export function parseBundle(v: unknown, projectId: string): PlanBundle {
   if (Object.keys(attached).length !== observations.length) fail();
   for (const s of snapshots) { try { compareResults(s, observations.filter(o => attached[o.id] === s.id)); } catch { fail(); } }
   if (!observations.every(o => snapshots.some(s => s.id === attached[o.id]))) fail();
-  return structuredClone({ draft: v.draft, extra: v.extra as Evidence[], plan, by, snapshots, labels: v.labels as PlanBundle['labels'], origins: v.origins as PlanBundle['origins'], observations, attached });
+  let authoring: AuthoringRecord | undefined;
+  if (Object.hasOwn(v, 'authoring')) { try { authoring = parseAuthoringRecord(v.authoring, !!plan); } catch { fail(); } }
+  return structuredClone({ draft: v.draft, extra: v.extra as Evidence[], plan, by, snapshots, labels: v.labels as PlanBundle['labels'], origins: v.origins as PlanBundle['origins'], observations, attached, ...(authoring ? { authoring } : {}) });
 }
 
-type Envelope = { version: 'studio.plans.2'; projects: Record<string, unknown> };
-type Read = { ok: true; env: Envelope; raw: string | null } | { ok: false; raw: string };
+type Envelope = { version: typeof ENVELOPE; projects: Record<string, unknown> };
+type Read = { ok: true; env: Envelope; raw: string | null; legacy: boolean } | { ok: false; raw: string };
 function readEnvelope(kv: StorageLike): Read {
   let raw: string | null;
   try { raw = kv.getItem(PLANS_KEY); } catch { return { ok: false, raw: '' }; }
-  if (raw === null) return { ok: true, env: { version: 'studio.plans.2', projects: {} }, raw };
+  if (raw === null) return { ok: true, env: { version: ENVELOPE, projects: {} }, raw, legacy: false };
   try {
     const v = JSON.parse(raw);
-    if (!isObj(v) || !['studio.plans.1', 'studio.plans.2'].includes(v.version as string) || !isObj(v.projects)) return { ok: false, raw };
-    // v1 snapshots keep their original text and have no structured scope. Never backfill from today's plan.
-    return { ok: true, env: { version: 'studio.plans.2', projects: v.projects }, raw };
+    if (!isObj(v) || !['studio.plans.1', 'studio.plans.2', ENVELOPE].includes(v.version as string) || !isObj(v.projects)) return { ok: false, raw };
+    // v1 snapshots keep their original text and have no structured scope; v1/v2 bundles have no authoring context. Never backfill
+    // either from today's plan or screen. Other projects' entries are written back exactly as they were read.
+    return { ok: true, env: { version: ENVELOPE, projects: v.projects }, raw, legacy: v.version !== ENVELOPE };
   } catch { return { ok: false, raw }; }
 }
 
@@ -89,7 +102,7 @@ export function loadBundle(kv: StorageLike, projectId: string): Loaded {
   const r = readEnvelope(kv);
   if (!r.ok) return { bundle: emptyBundle(), unreadable: true };
   if (!Object.hasOwn(r.env.projects, projectId)) return { bundle: emptyBundle(), unreadable: false };
-  try { return { bundle: parseBundle(r.env.projects[projectId], projectId), unreadable: false }; }
+  try { return { bundle: parseBundle(r.env.projects[projectId], projectId, r.legacy), unreadable: false }; }
   catch { return { bundle: emptyBundle(), unreadable: true }; }
 }
 
@@ -114,7 +127,7 @@ export function setAside(kv: StorageLike, projectId: string): string | null {
     try { const v = JSON.parse(kv.getItem(UNREADABLE_KEY) ?? '[]'); if (Array.isArray(v)) kept = v; } catch { return '읽지 못한 변경안을 따로 보관할 자리가 망가져 있어 아무것도 지우지 않았어요.'; }
     writeChecked(kv, UNREADABLE_KEY, JSON.stringify([...kept, { at: new Date().toISOString(), projectId: r.ok ? projectId : null, raw }].slice(-20)));
     if (r.ok) { delete r.env.projects[projectId]; writeChecked(kv, PLANS_KEY, JSON.stringify(r.env)); }
-    else writeChecked(kv, PLANS_KEY, JSON.stringify({ version: 'studio.plans.2', projects: {} }));
+    else writeChecked(kv, PLANS_KEY, JSON.stringify({ version: ENVELOPE, projects: {} }));
     return null;
   } catch { return '읽지 못한 변경안을 따로 보관하지 못해 아무것도 지우지 않았어요.'; }
 }
@@ -127,7 +140,8 @@ export function planFile(bundle: PlanBundle, project: { id: string; name: string
 export function readPlanFile(text: string, projectId: string): PlanBundle | string {
   let v: unknown;
   try { v = JSON.parse(text); } catch { return '변경안 파일이 아니거나 읽을 수 없어요. 아무것도 바꾸지 않았어요.'; }
-  if (!isObj(v) || ![FILE_FORMAT, 'agentflow.change-plan-file.1'].includes(v.format as string) || !isObj(v.project)) return '변경안 파일이 아니에요. 프로젝트 백업 파일은 홈의 ‘백업 파일 가져오기’를 쓰세요.';
+  if (!isObj(v) || ![FILE_FORMAT, 'agentflow.change-plan-file.2', 'agentflow.change-plan-file.1'].includes(v.format as string) || !isObj(v.project)) return '변경안 파일이 아니에요. 프로젝트 백업 파일은 홈의 ‘백업 파일 가져오기’를 쓰세요.';
   if (v.project.id !== projectId) return `다른 프로젝트(‘${String(v.project.name ?? '').slice(0, 60)}’)의 변경안이에요. 가져오지 않았어요.`;
-  try { return parseBundle(v.bundle, projectId); } catch { return '변경안 파일의 내용이 맞지 않아 가져오지 않았어요. 지금 변경안은 그대로예요.'; }
+  // .1/.2 files were written before authoring contexts: one that claims a context is not what that version wrote.
+  try { return parseBundle(v.bundle, projectId, v.format !== FILE_FORMAT); } catch { return '변경안 파일의 내용이 맞지 않아 가져오지 않았어요. 지금 변경안은 그대로예요.'; }
 }

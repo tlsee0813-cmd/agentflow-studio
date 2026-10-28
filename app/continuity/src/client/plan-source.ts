@@ -12,6 +12,7 @@ import { PLAN_BYTES, type PlanAsk } from '../shared/plan-api.js';
 import { fullTime } from './plan-dom.js';
 import { CLAIM_LABEL } from '../shared/map-reading.js';
 import { secretLike } from '../shared/secret.js';
+import { authoringAsk, type Authoring, type AnalyzedWith } from '../shared/authoring-context.js';
 
 export const CONVERTER_KEY = 'ex-converter';
 export type Condition = 'A' | 'B';
@@ -55,6 +56,8 @@ export interface PlanInput {
   /** null when it fits; otherwise why nothing is sent. */
   problem: 'TOO_LARGE' | { secret: string } | null;
   basis: string;
+  /** The draft's authoring context as this request sends it (stable ids, never the request's aliases), kept with the plan made from it. */
+  analyzed: AnalyzedWith;
 }
 const bytes = (v: unknown) => new TextEncoder().encode(JSON.stringify(v)).length;
 
@@ -65,31 +68,35 @@ export function intentEvidence(intent: string, example: boolean): Evidence {
 }
 
 /** The person's added material (taken from the return reading) is read with the example's own, as in a saved project. */
-export function exampleInput(o: { project: Project; view: StudioView }, condition: Condition, intent: string, keys: Map<string, string>, extra: Evidence[] = []): PlanInput {
+export function exampleInput(o: { project: Project; view: StudioView }, condition: Condition, intent: string, keys: Map<string, string>, extra: Evidence[] = [], authoring: Authoring = { state: 'unrecorded' }): PlanInput {
   const changed = intent.trim() !== CONVERTER_INTENT;
   const evidence = [...converterEvidence(condition), ...(changed ? [intentEvidence(intent, true)] : []), ...extra];
   const parts = new Map([...keys].map(([k, id]) => [k, id]));
   const toKey = new Map([...keys].map(([k, id]) => [id, k]));
-  const ask: PlanAsk = { schemaVersion: 'studio.plan.1', intent: intent.trim(),
-    parts: o.view.parts.map(p => ({ id: toKey.get(p.id)!, name: p.name, note: p.note, parentId: p.parentId ? toKey.get(p.parentId)! : null })), evidence };
-  return finish({ evidence, ask, parts, records: { total: 0, sent: 0 }, problem: null, basis: `합성 예제 자료 · ${CONDITION_LABEL[condition]} · main@S0` });
+  const ctx = authoringAsk(authoring, o.project.id, o.view.parts, toKey);
+  const ask: PlanAsk = { schemaVersion: 'studio.plan.2', intent: intent.trim(),
+    parts: o.view.parts.map(p => ({ id: toKey.get(p.id)!, name: p.name, note: p.note, parentId: p.parentId ? toKey.get(p.parentId)! : null })), evidence, authoring: ctx.ask };
+  return finish({ evidence, ask, parts, records: { total: 0, sent: 0 }, problem: null, basis: `합성 예제 자료 · ${CONDITION_LABEL[condition]} · main@S0`, analyzed: { authoring, missing: ctx.missing } });
 }
 
 /** A saved project's own material, newest first, as whole sources until the request's byte limit: what the map readings understood
  * per part (derived, kind 'reading'), then records pasted as they came (kind 'record', never promoted to a request, report or
  * check) and the project's own records, by time. Nothing is cut silently: the count left out is shown before sending and kept. */
-export function projectInput(o: { project: Project; view: StudioView }, intent: string, extra: Evidence[] = []): PlanInput {
+/* The draft's authoring context goes as its own field (studio.plan.2): every part is still sent, and the context's parts under this
+ * request's aliases. It counts toward the byte limit before any record is added. */
+export function projectInput(o: { project: Project; view: StudioView }, intent: string, extra: Evidence[] = [], authoring: Authoring = { state: 'unrecorded' }): PlanInput {
   const v = o.view, parts = new Map<string, string>(), alias = new Map<string, string>();
   v.parts.forEach((p, i) => { const a = `P${String(i + 1).padStart(2, '0')}`; parts.set(a, p.id); alias.set(p.id, a); });
-  const ask: PlanAsk = { schemaVersion: 'studio.plan.1', intent: intent.trim(),
+  const ctx = authoringAsk(authoring, o.project.id, v.parts, alias);
+  const ask: PlanAsk = { schemaVersion: 'studio.plan.2', intent: intent.trim(),
     parts: v.parts.map(p => ({ id: alias.get(p.id)!, name: clip(p.name, 200), note: clip(p.note, 3000), parentId: p.parentId ? alias.get(p.parentId)! : null })),
-    evidence: [intentEvidence(intent, false)] };
+    evidence: [intentEvidence(intent, false)], authoring: ctx.ask };
   const brief = o.project.space.brief?.text?.trim();
   if (brief) ask.evidence.push({ id: 'BRIEF', kind: 'user', title: '프로젝트 목적', text: clip(clean(brief), TEXT_MAX), basis: `프로젝트에 적힌 목적 · ${fullTime(o.project.space.brief!.at)}` });
   ask.evidence.push(...extra);
   const pasted = [...o.project.pasted].reverse(), total = v.records.length + pasted.length;
   const input: PlanInput = { evidence: ask.evidence, ask, parts, records: { total, sent: 0 }, problem: null,
-    basis: `프로젝트 기록 ${total}개 · 판 ${o.project.revision} · ${fullTime(new Date().toISOString())}` };
+    basis: `프로젝트 기록 ${total}개 · 판 ${o.project.revision} · ${fullTime(new Date().toISOString())}`, analyzed: { authoring, missing: ctx.missing } };
   if (bytes(ask) > PLAN_BYTES) return finish({ ...input, problem: 'TOO_LARGE' });
   // What was read per part: small, so it goes first; each line keeps its kind, its version as the record named it, its quote and
   // the id of the record it quotes in this same request (N.. pasted, E.. project records), and says it is not verified.
@@ -134,6 +141,8 @@ function finish(input: PlanInput): PlanInput {
   if (input.problem) return input;
   if (bytes(input.ask) > PLAN_BYTES) return { ...input, problem: 'TOO_LARGE' };
   if (secretLike(input.ask.intent)) return { ...input, problem: { secret: '변경 구상 문장' } };
+  const ctx = input.ask.authoring;
+  if (ctx?.state === 'recorded' && [ctx.selection, ctx.scope].some(r => r && secretLike(r.nameThen))) return { ...input, problem: { secret: '작성 맥락' } };
   const leak = input.ask.evidence.find(e => secretLike(e.text) || secretLike(e.title));
   return leak ? { ...input, problem: { secret: leak.title } } : input;
 }

@@ -1789,6 +1789,7 @@ def request71_flow(browser, base):
     old_id = old["id"]
     old["id"], old["text"] = "RQ_legacy_fixture", "이전 형식 요청 원문: 폴더 입력과 실패 후 계속, 성공 유지."
     del old["scope"]
+    del legacy["authoring"]  # an old-format file holds the bundle's original nine keys (AF84: authoring only from format .3)
     legacy["labels"][old["id"]] = legacy["labels"].pop(old_id)
     legacy["origins"][old["id"]] = legacy["origins"].pop(old_id)
     file = {"format": "agentflow.change-plan-file.1", "project": {"id": project["id"], "name": project["name"]}, "bundle": legacy}

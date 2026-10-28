@@ -8,7 +8,7 @@ import { validateAsk, validateReply, ASK_BYTES } from '../dist/public/shared/stu
 import { validatePlanAsk, validatePlanReply } from '../dist/public/shared/plan-api.js';
 import { validateScopeAsk, validateScopeReply } from '../dist/public/shared/scope-api.js';
 import { validateDigestAsk, validateDigestReply } from '../dist/public/shared/digest-api.js';
-import { PLAN_PROMPT, SCOPE_PROMPT } from './plan-prompt.mjs';
+import { PLAN_PROMPT, PLAN2_PROMPT, SCOPE_PROMPT } from './plan-prompt.mjs';
 import { DIGEST_PROMPT, DIGEST2_PROMPT } from './digest-prompt.mjs';
 import { validateMapAsk, validateMapReply } from '../dist/public/shared/map-reading.js';
 import { SPAN_INDEX, textDigest } from '../dist/public/shared/evidence-span.js';
@@ -100,7 +100,7 @@ async function readLimited(body, max, signal) {
 }
 
 export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetch, signal } = {}) {
-  const planning = ask.schemaVersion === 'studio.plan.1';
+  const plan2 = ask.schemaVersion === 'studio.plan.2', planning = ask.schemaVersion === 'studio.plan.1' || plan2;
   const scope = ask.schemaVersion === 'studio.scope.1';
   const digest2 = ask.schemaVersion === 'studio.digest.2', map6 = ask.schemaVersion === 'studio.map.6', map5 = ask.schemaVersion === 'studio.map.5', map4 = ask.schemaVersion === 'studio.map.4', anchored = map4 || map5 || map6, map3 = ask.schemaVersion === 'studio.map.3', map2 = ask.schemaVersion === 'studio.map.2', map = ask.schemaVersion === 'studio.map.1' || map2 || map3 || anchored, digest = ask.schemaVersion === 'studio.digest.1' || digest2 || map;
   if (!config.apiKey) throw new ApiError('AI_NOT_CONFIGURED', 503);
@@ -115,7 +115,7 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
       body: JSON.stringify({ model: config.model, stream: false, ...(map ? { thinking: { type: config.mapThinking ?? 'enabled' }, ...((config.mapThinking ?? 'enabled') === 'enabled' ? { reasoning_effort: 'low' } : {}), max_tokens: config.mapMaxTokens ?? 16384 }
         : { thinking: { type: scope || planning || digest ? 'enabled' : 'disabled' }, ...(scope || planning || digest ? { reasoning_effort: 'low' } : {}), max_tokens: planning || digest ? 8192 : scope ? 4096 : config.maxTokens }),
         response_format: { type: 'json_object' },
-        messages: [{ role: 'system', content: map6 ? map6Prompt(ask) : map5 ? map5Prompt(ask) : map4 ? map4Prompt(ask) : map3 ? MAP3_PROMPT : map2 ? MAP2_PROMPT : map ? MAP_PROMPT : digest2 ? DIGEST2_PROMPT : digest ? DIGEST_PROMPT : scope ? SCOPE_PROMPT : planning ? PLAN_PROMPT : STUDIO_PROMPT }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }] }) });
+        messages: [{ role: 'system', content: map6 ? map6Prompt(ask) : map5 ? map5Prompt(ask) : map4 ? map4Prompt(ask) : map3 ? MAP3_PROMPT : map2 ? MAP2_PROMPT : map ? MAP_PROMPT : digest2 ? DIGEST2_PROMPT : digest ? DIGEST_PROMPT : scope ? SCOPE_PROMPT : plan2 ? PLAN2_PROMPT : planning ? PLAN_PROMPT : STUDIO_PROMPT }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }] }) });
     if (!response.ok) {
       await response.body?.cancel().catch(() => {});
       if ([401, 403].includes(response.status)) throw new ApiError('AI_AUTH_FAILED', 502);

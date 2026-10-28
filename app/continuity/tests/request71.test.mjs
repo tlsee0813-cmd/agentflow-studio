@@ -106,7 +106,8 @@ test('71 frozen RQ and manual corrections survive a changed demand, late report,
 test('71 migration: project9 unchanged readings, legacy sidecar text/manual observations; new snapshot scope stays frozen and exports round-trip', () => {
   const { p, snap, bundle } = setup();
   const v9 = { ...p, schemaVersion: 'idea015.project.9' }; assert.equal(parseProject(JSON.stringify(v9)).schemaVersion, 'idea015.project.13');
-  const legacy = structuredClone(bundle); delete legacy.snapshots[0].scope;
+  // The legacy fixture is the bundle as earlier versions wrote it: its original nine keys, no authoring context (AF84).
+  const legacy = structuredClone(bundle); delete legacy.snapshots[0].scope; delete legacy.authoring;
   legacy.observations.push({ id: 'O_legacy', itemId: 'I1', kind: 'report', text: '이전 수동 보고', basis: '직접 붙임', refs: [] }); legacy.attached.O_legacy = snap.id;
   assert.deepEqual(parseBundle(legacy, p.id), legacy);
   const raw = JSON.stringify({ version: 'studio.plans.1', projects: { [p.id]: legacy } });

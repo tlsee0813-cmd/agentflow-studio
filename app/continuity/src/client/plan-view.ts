@@ -12,7 +12,8 @@ import { AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
 import { h, put, $, ago, fullTime, inspectorWidth, codeGate, codeNote } from './plan-dom.js';
 import { CONVERTER_KEY, CONDITION_LABEL, EVIDENCE_LABEL, exampleInput, projectInput, mapReply, secretLike, scopeInput, type Condition, type PlanInput } from './plan-source.js';
 import { requestPlan, requestScope } from './plan-request.js';
-import { emptyBundle, loadBundle, saveBundle, setAside, planFile, readPlanFile, type PlanBundle } from './plan-store.js';
+import { emptyBundle, loadBundle, saveBundle, setAside, planFile, readPlanFile, authoringOf, type PlanBundle } from './plan-store.js';
+import { pinOnEdit, screenContext, resolveRef, authoringStale, legacyRecord, type Authoring, type ContextRef } from '../shared/authoring-context.js';
 import { requestResults } from './request-results.js';
 import { correctRequestMatch } from '../shared/request-return.js';
 
@@ -107,7 +108,8 @@ export function createPlanView(host: PlanHost) {
     let plan = createPlan(o.project.id, `합성 예제 자료 · ${CONDITION_LABEL[c]} · main@S0`, CONVERTER_INTENT, converterEvidence(c), converterExampleAnalysis(keysOf(o), c));
     // Condition B's prerequisite is a separate item: first selection is what the person asked for directly.
     if (c === 'B') plan = selectItems(plan, plan.analysis.items.filter(i => i.id !== 'outcomes').map(i => i.id));
-    return { ...emptyBundle(CONVERTER_INTENT), plan, by: { kind: 'example' } };
+    // The authored sentence was not written on this screen: no context is taken for it, and editing it takes none.
+    return { ...emptyBundle(CONVERTER_INTENT), plan, by: { kind: 'example' }, authoring: legacyRecord(true) };
   }
   function bundleFor(o: PlanOpened, c: Condition): { bundle: PlanBundle; unreadable: boolean } {
     const k = memoryKey(o, c), cached = MEMORY.get(k);
@@ -191,19 +193,25 @@ export function createPlanView(host: PlanHost) {
      intent, and the added material among its sources by their U ids). Records and the time in the basis are not part of it:
      newer records are announced beside the plan, never merged into it. */
   const material = (list: Evidence[]) => JSON.stringify(list.filter(e => /^U\d{2}$/.test(e.id)).map(e => [e.id, e.kind, e.title, e.text, e.basis]));
-  /** Why the plan no longer answers what is written now (null: it does). Writing the earlier sentence back makes it current again. */
-  function staleness(): 'sentence' | 'material' | null {
-    const p = plan(); if (!p || !s) return null;
-    return s.bundle.draft.trim() !== p.intent ? 'sentence' : material(s.bundle.extra) !== material(p.evidence) ? 'material' : null;
+  /** Why the plan no longer answers what is written now (null: it does). Writing the earlier sentence back makes it current again.
+   * context: the draft's authoring context is not the one the plan was analysed with (changed, removed, or set on an older draft);
+   * missing: a part of that context is gone from the project. Moving around the map or a renamed part is neither. */
+  type Why = 'sentence' | 'material' | 'context' | 'missing';
+  function staleness(): Why | null {
+    const p = plan(), o = host.current(); if (!p || !s) return null;
+    return s.bundle.draft.trim() !== p.intent ? 'sentence' : material(s.bundle.extra) !== material(p.evidence) ? 'material'
+      : o ? authoringStale(authoringOf(s.bundle), o.project.id, o.view.parts) : null;
   }
   const stale = () => !!staleness();
-  const STALE_LINE = { sentence: '고친 문장은 아직 살펴보지 않았어요. 아래 변경안은 앞 문장 기준이에요.', material: '바뀐 자료는 아직 살펴보지 않았어요. 아래 변경안은 앞 자료 기준이에요.' };
+  const STALE_LINE: Record<Why, string> = { sentence: '고친 문장은 아직 살펴보지 않았어요. 아래 변경안은 앞 문장 기준이에요.', material: '바뀐 자료는 아직 살펴보지 않았어요. 아래 변경안은 앞 자료 기준이에요.',
+    context: '바뀐 작성 맥락은 아직 살펴보지 않았어요. 아래 변경안은 앞 작성 맥락 기준이에요.', missing: '작성 맥락의 부분이 지금 지도에 없어요. 아래 변경안은 그 부분이 있던 때 기준이에요.' };
   const inputKey = (st: Session) => JSON.stringify([st.key, st.condition, st.bundle.draft.trim(), material(st.bundle.extra)]);
   /** A request document comes only from the analysis of what is written now, with nothing being analysed or reviewed. */
   const canRequest = () => { const p = plan(); return !!s && !!p && p.selected.length > 0 && !stale() && !s.pending && !s.scoping; };
   const requestTitle = () => {
     const why = staleness();
     return why === 'sentence' ? '고친 문장을 먼저 살펴본 뒤 만들 수 있어요' : why === 'material' ? '바뀐 자료로 먼저 살펴본 뒤 만들 수 있어요'
+      : why === 'context' || why === 'missing' ? '지금 작성 맥락으로 먼저 살펴본 뒤 만들 수 있어요'
       : s?.pending ? '살펴보기가 끝난 뒤 만들 수 있어요' : '만들고 복사해도 보내거나 실행하지 않아요';
   };
   /** Work in flight belongs to the bundle it started from: replacing the bundle (another example material, an imported file)
@@ -214,7 +222,8 @@ export function createPlanView(host: PlanHost) {
   }
   function input(): PlanInput | null {
     const o = host.current(); if (!o || !s || !s.bundle.draft.trim()) return null;
-    return o.key === CONVERTER_KEY ? exampleInput(o, s.condition, s.bundle.draft, o.alias!.toId, s.bundle.extra) : projectInput(o, s.bundle.draft, s.bundle.extra);
+    const authoring = authoringOf(s.bundle).draft;
+    return o.key === CONVERTER_KEY ? exampleInput(o, s.condition, s.bundle.draft, o.alias!.toId, s.bundle.extra, authoring) : projectInput(o, s.bundle.draft, s.bundle.extra, authoring);
   }
   /** Parts linked to an item's parts: same part, a recorded relation, or a parent/child. Used to show an item's impacts. */
   function nearImpacts(item: PlanItem) {
@@ -426,8 +435,11 @@ export function createPlanView(host: PlanHost) {
       // The reply answers the sentence and material it was asked from, in the project it was asked in; not what is there now.
       if (host.current()?.key !== session.key || inputKey(session) !== key) session.error = '살펴보는 동안 문장이나 자료가 바뀌어 이 결과는 쓰지 않았어요. 지금 문장과 자료로 다시 살펴보세요.';
       else {
+        // The plan keeps the authoring context this request sent. A context changed or removed while it was in flight stays as the
+        // person left it: the plan then reads as made from the earlier context (stale), and nothing is made from it until analysed again.
         const next = createPlan(o.project.id, inp.basis, inp.ask.intent, inp.evidence, analysis, inp.origins);
-        session.bundle = { ...session.bundle, plan: next, by: { kind: 'ai', model: res.model, at: new Date().toISOString(), records: inp.records } };
+        session.bundle = { ...session.bundle, plan: next, by: { kind: 'ai', model: res.model, at: new Date().toISOString(), records: inp.records },
+          authoring: { ...authoringOf(session.bundle), analyzed: inp.analyzed } };
         session.mode = 'preview'; session.focus = firstFocus(next); session.targets = {}; session.editing = false; session.detail = false; moveTarget = true; frameWhole = true;
         persist();
       }
@@ -811,7 +823,7 @@ export function createPlanView(host: PlanHost) {
     const path = (id: string) => { const names: string[] = []; for (let q = o.view.parts.find(x => x.id === id)?.parentId, g = 0; q && g < 64; q = o.view.parts.find(x => x.id === q)?.parentId, g++) names.unshift(partName(q) ?? ''); return names.join(' › '); };
     const toMap = (id: string, impact = false) => mapButton(h('button', { type: 'button', class: 'link-button pw-map', onclick: () => showOnMap(item, id, impact) }, '지도에서 보기') as HTMLButtonElement);
     const detail = h('article', { class: `pw-detail${stale() ? ' is-stale' : ''}`, 'aria-labelledby': 'pw-item-title' },
-      h('p', { class: 'pw-stale', hidden: !stale() }, '아래는 앞 문장과 자료로 만든 변경안이에요. 고친 내용은 아직 살펴보지 않았어요.'),
+      h('p', { class: 'pw-stale', hidden: !stale() }, '아래는 앞 문장·자료·작성 맥락으로 만든 변경안이에요. 바뀐 내용은 아직 살펴보지 않았어요.'),
       h('h3', { id: 'pw-item-title', class: 'pw-item-title' }, item.title),
       // The change's description once: beside '지금' as the wanted result when the change has no pair of its own and one
       // target; otherwise a lead above the parts.
@@ -954,9 +966,9 @@ export function createPlanView(host: PlanHost) {
     const staleLine = h('p', { class: 'pp-stale', id: 'plan-stale', role: 'status' });
     const why = staleness(); staleLine.textContent = why ? STALE_LINE[why] : ''; staleLine.hidden = !why;
     // Typing changes the draft in place (no re-render, the caret stays): everything that depends on it follows at once.
-    area.addEventListener('input', () => { st.bundle = { ...st.bundle, draft: area.value }; persist(); syncStale(); });
+    area.addEventListener('input', () => { const was = st.bundle.authoring; st.bundle = withDraft(st.bundle, area.value); persist(); if (st.bundle.authoring !== was) syncContext(); syncStale(); });
     area.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); area.blur(); } if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void analyze(); } });
-    sec.append(h('label', { for: 'plan-intent', class: 'pp-label' }, '바꾸고 싶은 모습'), area, staleLine,
+    sec.append(h('label', { for: 'plan-intent', class: 'pp-label' }, '바꾸고 싶은 모습'), area, contextLine(), staleLine,
       h('div', { class: 'pp-row' }, sourcesToggle(o), p && !stale() && !st.pending ? h('button', { type: 'button', class: 'link-button', onclick: () => { st.editing = false; render(); } }, '접기') : null));
     put(sec, conditionSwitch(o));
     // Added material is listed apart (with a way to remove it) only in a saved project; an example lists it with its sources.
@@ -964,6 +976,54 @@ export function createPlanView(host: PlanHost) {
     if (st.sources && !p) put(sec, sourceList((input() ?? { evidence: [] }).evidence.filter(e => o.kind !== 'saved' || !st.bundle.extra.some(x => x.id === e.id))), addSource(o));
     put(sec, ...askLine(canAsk, p));
     return sec;
+  }
+  /* ---------- authoring context: one line under the draft ----------
+     A new draft's first edit keeps the screen it was written on (the selected part and the scope being looked at); before that the
+     line shows what would be kept. Opening, moving around, closing or reading sources never changes a kept context; only the
+     person replaces it with the screen they are on or removes it. An older draft stays unrecorded until they choose. */
+  const screenNow = (o: PlanOpened) => { const c = host.capture(); return screenContext(o.project.id, o.view.parts, { selected: c.selected, scope: c.scope }, 'explicit'); };
+  /** The draft text changed: a new draft's first edit takes the screen's context, any other keeps the one it has. */
+  function withDraft(b: PlanBundle, draft: string): PlanBundle {
+    const r = authoringOf(b), o = host.current(), next = o ? pinOnEdit(r.draft, draft, () => ({ ...screenNow(o), how: 'first-edit' })) : r.draft;
+    return next === r.draft ? { ...b, draft } : { ...b, draft, authoring: { ...r, draft: next } };
+  }
+  function setAuthoring(a: Authoring) {
+    if (!s) return;
+    s.bundle = { ...s.bundle, authoring: { ...authoringOf(s.bundle), draft: a } }; persist(); render();
+    (document.querySelector<HTMLElement>('#plan-ctx button') ?? document.getElementById('plan-intent'))?.focus();
+  }
+  /** A part as kept: its name then, and what it is called now or that it is not in this project now (never another part by name). */
+  function refText(o: PlanOpened, ref: ContextRef | null, ctxProject: string, none: string): (Node | string)[] {
+    const r = resolveRef(ref, o.project.id, ctxProject, o.view.parts);
+    if (!r) return [none];
+    const note = r.status === 'renamed' ? h('span', { class: 'pc-note' }, ` → 지금 ‘${r.now}’`) : r.status === 'unresolved' ? h('span', { class: 'pc-note pc-missing' }, ' · 지금 지도에 없음') : null;
+    return note ? [h('b', {}, r.ref.name), note] : [h('b', {}, r.ref.name)];
+  }
+  const CONTEXT_HINT = '‘이 부분’·‘여기’ 같은 말을 읽는 참고예요. 바꿀 범위가 아니며, 문장에 다른 부분이나 전체를 적으면 문장이 우선해요.';
+  function contextBody(o: PlanOpened): (Node | string)[] {
+    const st = s!, a = authoringOf(st.bundle).draft, now = screenNow(o);
+    const btn = (label: string, run: () => void, extra: Record<string, string | boolean> = {}) => h('button', { type: 'button', class: 'link-button', onclick: run, ...extra }, label);
+    const pair = (sel: (Node | string)[], scope: (Node | string)[]) => h('span', { class: 'pc-what' }, '선택 ', ...sel, ' · 보던 범위 ', ...scope);
+    const nowRefs = () => pair(refText(o, now.selection, now.projectId, '없음'), refText(o, now.scope, now.projectId, '프로젝트 전체'));
+    const sameAsNow = a.state === 'set' && a.context.projectId === o.project.id && a.context.selection?.id === now.selection?.id && a.context.scope?.id === now.scope?.id;
+    const nowTitle = `지금 화면: 선택 ${now.selection?.name ?? '없음'} · 보던 범위 ${now.scope?.name ?? '프로젝트 전체'}`;
+    const take = () => setAuthoring({ state: 'set', context: screenNow(o) });
+    const remove = () => setAuthoring({ state: 'removed', at: new Date().toISOString() });
+    if (a.state === 'open') return [h('span', { class: 'pc-k' }, '작성 맥락'), h('span', { class: 'pc-state' }, '쓰기 시작하면 고정'), nowRefs(), btn('없이 쓰기', remove)];
+    if (a.state === 'set') return [h('span', { class: 'pc-k' }, '작성 맥락'),
+      pair(refText(o, a.context.selection, a.context.projectId, '없음'), refText(o, a.context.scope, a.context.projectId, '프로젝트 전체')),
+      btn('현재 화면으로 바꾸기', take, { disabled: sameAsNow, title: sameAsNow ? '지금 화면과 같아요' : nowTitle }), btn('없애기', remove)];
+    const what = a.state === 'removed' ? '없음 · 없앤 뒤로 다시 잡지 않아요' : st.example && st.key === CONVERTER_KEY ? '없음 · 예제 문장' : '기록되지 않음 · 이전에 쓴 초안';
+    return [h('span', { class: 'pc-k' }, '작성 맥락'), h('span', { class: 'pc-state' }, what), btn('현재 화면 맥락으로 지정', take, { title: nowTitle })];
+  }
+  function contextLine(): HTMLElement {
+    const o = host.current()!;
+    return h('p', { class: 'pp-ctx', id: 'plan-ctx', title: CONTEXT_HINT }, ...contextBody(o));
+  }
+  /** The first edit kept the context: the line follows in place (no re-render, the caret stays). */
+  function syncContext() {
+    const line = document.getElementById('plan-ctx'), o = host.current();
+    if (line && o && s) line.replaceChildren(...contextBody(o));
   }
   function proposalCard(): Node | null {
     const st = s!, pr = PROPOSALS.get(st.key); if (!pr) return null;
@@ -989,7 +1049,7 @@ export function createPlanView(host: PlanHost) {
       let n = 1; while (extra.some(x => x.id === `U${String(n).padStart(2, '0')}`)) n++;
       extra.push({ ...e, id: `U${String(n).padStart(2, '0')}` });
     }
-    st.bundle = { ...st.bundle, draft, extra }; PROPOSALS.delete(st.key); st.editing = true; st.error = null; persist(); render();
+    st.bundle = { ...withDraft(st.bundle, draft), extra }; PROPOSALS.delete(st.key); st.editing = true; st.error = null; persist(); render();
     // The new textarea is already in the DOM. Finish its caret placement in this click, before the person can select/type.
     // A deferred selection can collapse a subsequent select-all between selection and insertion, appending to the proposal.
     const a = document.getElementById('plan-intent') as HTMLTextAreaElement | null;
@@ -1024,7 +1084,7 @@ export function createPlanView(host: PlanHost) {
   }
   function askState(btn: HTMLButtonElement) {
     const p = plan(), why = staleness();
-    btn.textContent = p ? (why === 'sentence' ? '고친 문장으로 살펴보기' : why === 'material' ? '바뀐 자료로 살펴보기' : 'AI로 다시 살펴보기') : 'AI로 살펴보기';
+    btn.textContent = p ? (why === 'sentence' ? '고친 문장으로 살펴보기' : why === 'material' ? '바뀐 자료로 살펴보기' : why ? '지금 작성 맥락으로 살펴보기' : 'AI로 다시 살펴보기') : 'AI로 살펴보기';
     btn.className = p && !why ? 'secondary small' : 'primary small';
     const st = host.status();
     codeGate(btn, st.ai === 'deepseek' && st.access === 'code', !!host.accessCode(), st.ai !== 'deepseek' || !s!.bundle.draft.trim());

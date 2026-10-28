@@ -663,6 +663,13 @@ button:disabled { opacity: .5; cursor: default; }
 .pp-intent.compact .link-button { font-size: 12.5px; }
 .pp-intent.compact .pp-acts { margin-top: 0; }
 .pp-stale { margin: 6px 0 0; font-size: 12px; color: var(--change); }
+/* The draft's authoring context: one line that wraps whole names instead of clipping them (long part names and scopes stay readable). */
+.pp-ctx { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; row-gap: 2px; margin: 6px 0 0; font-size: 12px; line-height: 1.5; color: var(--text-2); min-width: 0; }
+.pp-ctx .pc-k { flex: none; font-weight: 650; color: var(--text-3); }
+.pp-ctx .pc-what, .pp-ctx .pc-state { min-width: 0; overflow-wrap: anywhere; word-break: keep-all; }
+.pp-ctx .pc-what b { font-weight: 600; color: var(--text); }
+.pp-ctx .pc-note { color: var(--text-3); } .pp-ctx .pc-missing { color: var(--change); }
+.pp-ctx .link-button { font-size: 12px; white-space: nowrap; }
 .pp-error { margin: 8px 0 0; padding: 7px 10px; border-radius: 8px; background: #fdf1f0; color: #a3271d; font-size: 12.5px; }
 .pp-muted { margin: 4px 0 0; font-size: 12.5px; color: var(--text-3); }
 .pp-cond { display: flex; align-items: center; gap: 3px; margin-top: 10px; font-size: 11.5px; color: var(--text-3); }

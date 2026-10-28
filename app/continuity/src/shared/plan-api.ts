@@ -1,10 +1,14 @@
 import { parsePlanAnalysis, EVIDENCE_KINDS, type Evidence, type PlanAnalysis } from './change-plan.js';
+import { validAuthoringAsk, type AuthoringAsk } from './authoring-context.js';
 
+/** studio.plan.1: the four keys as before (still accepted). studio.plan.2: the same, plus the draft's authoring context as its own
+ * field (never a source, never the request's scope); the app sends only this one now. */
 export interface PlanAsk {
-  schemaVersion: 'studio.plan.1';
+  schemaVersion: 'studio.plan.1' | 'studio.plan.2';
   intent: string;
   parts: { id: string; name: string; note: string; parentId: string | null }[];
   evidence: Evidence[];
+  authoring?: AuthoringAsk;
 }
 export const PLAN_BYTES = 65536;
 const size = (v: unknown) => new TextEncoder().encode(JSON.stringify(v)).length;
@@ -20,8 +24,10 @@ function text(v: unknown, max: number, empty = false): asserts v is string {
 function id(v: unknown): asserts v is string { text(v, 100); check(/^[A-Za-z0-9_-]+$/.test(v)); }
 /** Byte limit applies to the complete serialized request, including Korean source material. No silent truncation. */
 export function validatePlanAsk(value: unknown): PlanAsk {
-  obj(value, ['schemaVersion', 'intent', 'parts', 'evidence']);
-  check(value.schemaVersion === 'studio.plan.1'); text(value.intent, 6000);
+  check(value && typeof value === 'object' && !Array.isArray(value));
+  const v2 = (value as Record<string, unknown>).schemaVersion === 'studio.plan.2';
+  obj(value, ['schemaVersion', 'intent', 'parts', 'evidence', ...(v2 ? ['authoring'] : [])]);
+  check(value.schemaVersion === 'studio.plan.1' || v2); text(value.intent, 6000);
   if (size(value) > PLAN_BYTES) throw new Error('INPUT_TOO_LARGE');
   check(Array.isArray(value.parts) && value.parts.length <= 200);
   const ids = new Set<string>();
@@ -43,6 +49,7 @@ export function validatePlanAsk(value: unknown): PlanAsk {
     check(EVIDENCE_KINDS.includes(source.kind as Evidence['kind']));
     check(!refs.has(source.id)); refs.add(source.id);
   }
+  if (v2) check(validAuthoringAsk(value.authoring, value.parts as { id: string; name: string }[]));
   return structuredClone(value as unknown as PlanAsk);
 }
 export function validatePlanReply(value: unknown, ask: PlanAsk): PlanAnalysis {
