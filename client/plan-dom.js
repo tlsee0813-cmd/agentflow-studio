@@ -1,5 +1,6 @@
 /* Small DOM helpers shared by the map client and the change-plan view. Attributes only through setAttribute and CSSOM, so the
  * page keeps working under style-src 'self'. */
+import { quoteAt } from '../shared/digest-api.js';
 export const $ = (id) => document.getElementById(id);
 export function h(tag, attrs = {}, ...children) {
     const el = document.createElement(tag);
@@ -19,6 +20,11 @@ export function h(tag, attrs = {}, ...children) {
     return el;
 }
 const SVG = 'http://www.w3.org/2000/svg';
+/** Shared original-text rendering, optionally at an exact stored interval (repeated quotes keep their own origin). */
+export function quotedText(text, quote, interval) {
+    const at = interval && text.slice(interval.at, interval.at + interval.length) === quote ? interval : quote ? quoteAt(text, quote) : null;
+    return at ? [text.slice(0, at.at), h('mark', { class: 'rr-mark' }, text.slice(at.at, at.at + at.length)), text.slice(at.at + at.length)] : [text];
+}
 export const put = (el, ...children) => { for (const c of children)
     if (c)
         el.append(c); };

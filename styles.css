@@ -1148,3 +1148,67 @@ button:disabled { opacity: .5; cursor: default; }
 /* An AI action waiting for an access code: off, with the reason beside it. */
 .code-first { font-size: 12px; color: var(--change); }
 .composer > .code-first { display: block; margin: -2px 0 4px; }
+
+/* EXPERIENCE70: reading records into the map. The empty map's first way in; one line of what was understood under the map title;
+ * a part's claims (one short tag per kind, the quote one click away); the evidence history apart and folded. */
+.space-empty { width: min(460px, calc(100% - 32px)); padding: var(--s-4) var(--s-5); text-align: left; z-index: 2; }
+.space-empty h2 { margin: 0 0 6px; font-size: 16px; color: var(--text); }
+.space-empty p { margin: 0; word-break: keep-all; }
+.space-empty .se-lead { font-size: 13.5px; line-height: 1.6; color: var(--text-2); }
+.space-empty .se-gap { margin-top: 10px; padding: 7px 10px; border-radius: 8px; background: var(--surface-2); font-size: 13px; color: var(--text-2); }
+.space-empty .se-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-top: 14px; }
+.space-empty .fine { margin-top: 8px; font-size: 12px; color: var(--text-3); }
+.space-empty .se-direct { margin-top: 12px; font-size: 12.5px; }
+.mu-pending { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-2); }
+.map-understood { margin: var(--s-2) 0 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; word-break: keep-all; font-size: 13.5px; line-height: 1.55; color: var(--text-2); }
+.map-understood .mu-text { color: var(--text); }
+.map-understood .map-more { margin-left: 0; }
+.map-understood .mu-fresh { font-size: 12.5px; color: var(--text-3); }
+.map-understood .mu-error { flex-basis: 100%; font-size: 12.5px; color: #a3271d; }
+.node.rs-reported .node-meta .dot { background: var(--ok); }
+.node.rs-checked .node-meta .dot { background: var(--ok); }
+.node.rs-want .node-meta .dot, .node.rs-idea .node-meta .dot { background: var(--accent-line); }
+.claims { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.claim { display: flex; align-items: baseline; gap: 8px; font-size: 13px; line-height: 1.5; color: var(--text); }
+.cl-kind { flex: none; min-width: 52px; font-size: 11px; font-weight: 650; color: var(--text-3); }
+.claim.k-open .cl-kind, .claim.k-differs .cl-kind { color: #a3271d; }
+.claim.k-want .cl-kind { color: var(--accent); }
+.claim.k-reported .cl-kind, .claim.k-checked .cl-kind { color: #2f7a55; }
+.cl-text { flex: 1; min-width: 0; word-break: keep-all; }
+.cl-about { color: var(--text-3); }
+.cl-cite { flex: none; padding: 0 6px; height: 20px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); font-size: 11.5px; color: var(--text-2); }
+.cl-cite:hover { border-color: var(--accent-line); color: var(--accent); }
+.sec-understood .und-role { margin: 0; font-size: 14px; line-height: 1.6; color: var(--text); word-break: keep-all; }
+.sec-understood .src { margin: 4px 0 0; font-size: 12px; color: var(--text-3); }
+.sec-understood .und-later { margin: 8px 0 0; padding: 6px 10px; border-radius: 8px; background: var(--surface-2); font-size: 12.5px; color: var(--text-2); }
+.sec-understood .und-later span { display: block; font-size: 11px; color: var(--text-3); }
+.und-history { margin-top: 12px; font-size: 12.5px; color: var(--text-2); }
+.und-history summary { cursor: pointer; color: var(--text-3); }
+.und-history ol { margin: 8px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; }
+.und-history li > span { display: block; }
+.und-history .uh-at { font-size: 11.5px; color: var(--text-3); }
+.und-history .uh-claim { display: flex; gap: 6px; align-items: baseline; }
+.rr-map .rm-summary { margin: 6px 0 0; font-size: 14px; line-height: 1.6; color: var(--text); word-break: keep-all; }
+.rr-map h4 { margin: 12px 0 4px; font-size: 12.5px; color: var(--text-2); }
+.rr-map .rm-cands ul, .rr-map .rm-gaps { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--text-2); }
+.rr-map .rm-gaps { margin-top: 8px; }
+.rr-map .rr-prov { margin-top: 10px; }
+.sec-understood .src .link-button { margin-left: 8px; font-size: 12px; }
+.request-results { margin-top: 16px; font-size: 13px; line-height: 1.6; }
+.request-results h3 { margin: 0 0 8px; font-size: 13px; }
+.request-at { margin: 12px 0 4px; font-size: 11.5px; color: var(--text-3); }
+.request-item { padding: 8px 0; border-top: 1px solid var(--line); }
+.request-item > summary { cursor: pointer; font-weight: 600; word-break: keep-all; }
+.request-item > summary small { display: block; margin: 3px 0 0 16px; font-size: 12px; font-weight: 400; color: var(--text-2); }
+.request-want, .request-passage p, .request-remains { margin: 8px 0; word-break: keep-all; }
+.request-want .cl-kind, .request-passage .cl-kind { margin-right: 8px; }
+.request-remains { color: var(--text-3); }
+.request-passage { padding: 0 0 8px; }
+.request-quote, .request-fix, .request-excluded { margin-top: 6px; font-size: 12px; color: var(--text-3); }
+.request-quote summary, .request-fix summary, .request-excluded summary { cursor: pointer; }
+.request-quote pre { max-height: 260px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; padding: 10px; background: var(--surface-2); color: var(--text); }
+.request-quote mark { background: #f8e9b7; color: inherit; }
+.request-fix select { max-width: 100%; margin: 8px 6px 4px 0; font-size: 12px; }
+.request-ambiguous { margin-top: 10px; padding: 8px 12px; border-left: 2px solid var(--accent-line); }
+.request-ambiguous > p { margin: 4px 0; }
+.request-ambiguous > .link-button { display: block; text-align: left; white-space: normal; }

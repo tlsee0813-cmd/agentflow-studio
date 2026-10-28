@@ -1,5 +1,6 @@
 import { areaOf, isReturnTask, areaDescription } from './domain.js';
 import { parseResultFile } from './validation.js';
+import { partUnderstanding } from './map-reading.js';
 /** Observations only: 'active' means a request is recorded and no report came back, not that work is running. */
 export const STATUS_LABEL = { plan: '구상', active: '요청 있음 · 보고 없음', reported: '보고 받음', check: '확인 필요' };
 /** Same meaning, short enough for a map node. */
@@ -40,7 +41,7 @@ export function studioView(p) {
         const status = d.held.length && !cur ? 'check' : !latest ? 'plan' : returned ? 'reported' : 'active';
         return { id: a.id, name: a.name, note: a.note, parentId: parentOf(a.id), depth, childIds: active.filter(c => parentOf(c.id) === a.id).map(c => c.id),
             status, lastAt: own[0]?.at ?? null, recordIds: own.map(r => r.id),
-            summary: cur?.summary ?? null, changes: cur?.changes ?? [], origin: cur?.origin ?? null, proposal: cur?.proposal ?? null };
+            summary: cur?.summary ?? null, changes: cur?.changes ?? [], origin: cur?.origin ?? null, proposal: cur?.proposal ?? null, reading: partUnderstanding(p, a.id) };
     });
     // A part with no request of its own reads its inside: the most pressing status among its descendants (check > active > reported).
     const rank = ['plan', 'reported', 'active', 'check'], byId = new Map(parts.map(x => [x.id, x]));

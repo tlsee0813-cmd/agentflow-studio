@@ -1,5 +1,6 @@
 import { API_SCHEMA, SCHEMA, V5_SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, GUIDE_SCHEMA } from './types.js';
-import { V6_SCHEMA, V7_SCHEMA, PASTED_TEXT_LIMIT, PASTED_LIMIT } from './types.js';
+import { V6_SCHEMA, V7_SCHEMA, V8_SCHEMA, V9_SCHEMA, CLAIM_KINDS, READINGS_LIMIT, PASTED_TEXT_LIMIT, PASTED_LIMIT } from './types.js';
+import { validateFrozenRequest, validateStoredMatch, hasTarget } from './request-return.js';
 export class ContextError extends Error {
     constructor(code) { super(code); this.name = 'ContextError'; }
 }
@@ -363,7 +364,7 @@ export function validateRequest(v) {
 }
 /** Same checks as validateProject without the defensive copy; used on freshly parsed JSON. */
 function assertProject(v) {
-    obj(v, ['schemaVersion', 'id', 'revision', 'name', 'sources', 'bases', 'tasks', 'currentTaskId', 'draft', 'answerDraft', 'basisDraft', 'basisEdits', 'draftKind', 'pending', 'notice', 'space', 'pasted']);
+    obj(v, ['schemaVersion', 'id', 'revision', 'name', 'sources', 'bases', 'tasks', 'currentTaskId', 'draft', 'answerDraft', 'basisDraft', 'basisEdits', 'draftKind', 'pending', 'notice', 'space', 'pasted', 'readings']);
     ensure(v.schemaVersion === SCHEMA, 'UNSUPPORTED_SCHEMA');
     id(v.id);
     integer(v.revision);
@@ -395,6 +396,7 @@ function assertProject(v) {
     const tasks = new Set(), returns = new Map();
     const areaIds = space(v.space);
     pasted(v.pasted, areaIds);
+    readings(v.readings, areaIds, new Map([...v.pasted.map(r => [r.id, r.text]), ...[...sources.values()].map(r => [r.id, r.text])]), v.id, new Set([...sources.values()].filter(s => s.kind === 'evidence').map(s => s.id)));
     for (const t of v.tasks) {
         const optional = ['intentEdit', 'areaId'].filter(k => t && typeof t === 'object' && Object.hasOwn(t, k));
         obj(t, ['id', 'sourceIds', 'parentTaskId', 'advice', 'adviceRevision', 'mode', 'manual', 'suggestions', 'handoffs', 'resultFile', 'background', ...optional]);
@@ -593,6 +595,144 @@ function pasted(v, areaIds) {
         texts.add(r.text);
     }
     unique(v);
+}
+/** Map readings: every part a known area, every quote of a known record (a pasted record or a source), every claim a known
+ * kind, and a claim replaced only by a later one of the same area. Relation ids may be gone (the person removed the line). */
+function readings(v, areaIds, records, projectId, materialIds) {
+    list(v, READINGS_LIMIT);
+    const seen = new Map(), hashes = new Set();
+    const quote = (q) => { obj(q, ['record', 'quote']); ensure(records.has(q.record)); text(q.quote, 300); };
+    const entries = new Set();
+    const requestReadings = new Map();
+    for (const r of v) {
+        if (!!r && typeof r === 'object' && r.version === 'request-correction.1') {
+            obj(r, ['version', 'id', 'at', 'reading', 'index', 'target']);
+            id(r.id);
+            date(r.at);
+            ensure(!entries.has(r.id));
+            entries.add(r.id);
+            integer(r.index);
+            const original = requestReadings.get(r.reading);
+            ensure(original && original.matches[r.index]);
+            if (r.target !== null) {
+                obj(r.target, ['requestId', 'itemId']);
+                ensure(hasTarget(original.requests, r.target));
+            }
+            continue;
+        }
+        if (!!r && typeof r === 'object' && r.version === 'map-correction.1') {
+            obj(r, ['version', 'id', 'at', 'areaId', 'text', 'corrects']);
+            id(r.id);
+            ensure(!entries.has(r.id));
+            entries.add(r.id);
+            date(r.at);
+            ensure(areaIds.has(r.areaId));
+            text(r.text, 300);
+            ensure(r.corrects === null || seen.has(r.corrects));
+            continue;
+        }
+        const two = !!r && typeof r === 'object' && r.version === 'map-reading.2';
+        obj(r, ['version', 'id', 'at', 'model', 'prompt', 'hash', 'records', 'summary', 'parts', 'relations', 'candidates', 'gaps', 'skipped', ...(two ? ['requests', 'matches'] : [])]);
+        ensure(r.version === 'map-reading.1' || two);
+        id(r.id);
+        ensure(!entries.has(r.id));
+        entries.add(r.id);
+        date(r.at);
+        text(r.model, 80);
+        text(r.prompt, 40);
+        ensure(typeof r.hash === 'string' && /^[0-9a-f]{64}$/.test(r.hash) && !hashes.has(r.hash));
+        hashes.add(r.hash);
+        list(r.records, 16);
+        ensure(r.records.length > 0);
+        for (const x of r.records) {
+            obj(x, ['id', 'from', 'to', 'total']);
+            ensure(records.has(x.id));
+            integer(x.from);
+            integer(x.to);
+            integer(x.total);
+            ensure(x.from < x.to && x.to <= x.total);
+        }
+        text(r.summary, 200, true);
+        list(r.parts, 64);
+        const claims = new Map(), parts = new Set();
+        for (const p of r.parts) {
+            obj(p, ['areaId', 'created', 'role', 'roleAbout', 'roleReplaces', 'basis', 'claims']);
+            if (p.roleAbout !== null) {
+                ensure(p.role !== null);
+                text(p.roleAbout, 80);
+            }
+            if (p.roleReplaces !== null) {
+                ensure(p.role !== null && p.created === null);
+                quote(p.roleReplaces);
+            }
+            ensure(areaIds.has(p.areaId) && !parts.has(p.areaId));
+            parts.add(p.areaId);
+            if (p.created !== null) {
+                obj(p.created, ['name', 'parentId']);
+                text(p.created.name, 60);
+                ensure(p.created.parentId === null || areaIds.has(p.created.parentId));
+            }
+            if (p.role !== null)
+                text(p.role, 300);
+            list(p.basis, 4);
+            for (const q of p.basis)
+                quote(q);
+            ensure(p.created === null || p.basis.length > 0);
+            list(p.claims, 8);
+            p.claims.forEach((c, i) => {
+                obj(c, ['kind', 'text', 'record', 'quote', 'about', 'replaces']);
+                ensure(CLAIM_KINDS.includes(c.kind));
+                text(c.text, 240);
+                quote({ record: c.record, quote: c.quote });
+                if (c.about !== null)
+                    text(c.about, 80);
+                if (c.replaces !== null) {
+                    obj(c.replaces, ['reading', 'index']);
+                    integer(c.replaces.index);
+                    const n = seen.get(c.replaces.reading)?.get(p.areaId);
+                    ensure(n !== undefined && c.replaces.index < n);
+                }
+            });
+            claims.set(p.areaId, p.claims.length);
+        }
+        list(r.relations, 32);
+        for (const x of r.relations) {
+            obj(x, ['relationId', 'from', 'to', 'kind', 'quote']);
+            id(x.relationId);
+            ensure(areaIds.has(x.from) && areaIds.has(x.to) && x.from !== x.to);
+            ensure(['flow', 'needs', 'shares', 'related'].includes(x.kind));
+            quote(x.quote);
+        }
+        list(r.candidates, 16);
+        for (const c of r.candidates) {
+            obj(c, ['text', 'areaIds', 'quote']);
+            text(c.text, 240);
+            list(c.areaIds, 2);
+            for (const a of c.areaIds)
+                ensure(areaIds.has(a));
+            if (c.quote !== null)
+                quote(c.quote);
+        }
+        list(r.gaps, 2);
+        for (const g of r.gaps)
+            text(g, 160);
+        list(r.skipped, 64);
+        for (const x of r.skipped) {
+            obj(x, ['what', 'name', 'reason']);
+            ensure(['part', 'relation'].includes(x.what));
+            text(x.name, 200);
+            ensure(['same-name', 'archived', 'removed', 'exists', 'parent-skipped'].includes(x.reason));
+        }
+        if (two) {
+            list(r.requests, 8);
+            const requests = r.requests.map(validateFrozenRequest);
+            ensure(requests.every(q => q.projectId === projectId) && new Set(requests.map(q => q.id)).size === requests.length);
+            list(r.matches, 24);
+            const matches = r.matches.map(m => validateStoredMatch(m, requests, r.records, records, materialIds));
+            requestReadings.set(r.id, { requests, matches });
+        }
+        seen.set(r.id, claims);
+    }
 }
 export const POSITION_LIMIT = 200000;
 function planStamp(v) {
@@ -914,7 +1054,22 @@ function migrateV6(v) {
 function migrateV7(v) {
     const p = v;
     ensure(!!p && typeof p === 'object' && !Array.isArray(p) && p.schemaVersion === V7_SCHEMA && !Object.hasOwn(p, 'pasted'));
-    return { ...p, schemaVersion: SCHEMA, pasted: [] };
+    return migrateV8({ ...p, schemaVersion: V8_SCHEMA, pasted: [] });
+}
+/** project.8 had no map readings: it reads as none. Its own keys and bytes are kept as they were. */
+function migrateV8(v) {
+    const p = v;
+    ensure(!!p && typeof p === 'object' && !Array.isArray(p) && p.schemaVersion === V8_SCHEMA && !Object.hasOwn(p, 'readings'));
+    return { ...p, schemaVersion: SCHEMA, readings: [] };
+}
+/** project.9 has only the original map readings and role corrections. No request context is invented. */
+function migrateV9(v) {
+    const p = v;
+    ensure(p && p.schemaVersion === V9_SCHEMA);
+    list(p.readings, READINGS_LIMIT);
+    for (const r of p.readings)
+        ensure(!!r && typeof r === 'object' && ['map-reading.1', 'map-correction.1'].includes(r.version));
+    return { ...p, schemaVersion: SCHEMA };
 }
 /** The single acceptance test for persisted bytes: autosave, recovery-file download and import all use it. */
 /** intent-edit.1 (unreleased AI055 candidate) kept the correction in manual.*, where any later work edit
@@ -939,7 +1094,7 @@ export function parseProject(raw) {
     ensure(new TextEncoder().encode(raw).length <= FILE_LIMIT, 'FILE_TOO_LARGE');
     const v = JSON.parse(raw);
     const schema = v?.schemaVersion;
-    const project = schema === LEGACY_SCHEMA ? migrateLegacy(v) : schema === PREVIOUS_SCHEMA ? migrateV2(v) : schema === V3_SCHEMA ? migrateV3(v) : schema === V4_SCHEMA ? migrateV4(v) : schema === V5_SCHEMA ? migrateV5(v) : schema === V6_SCHEMA ? migrateV6(v) : schema === V7_SCHEMA ? migrateV7(v) : v;
+    const project = schema === LEGACY_SCHEMA ? migrateLegacy(v) : schema === PREVIOUS_SCHEMA ? migrateV2(v) : schema === V3_SCHEMA ? migrateV3(v) : schema === V4_SCHEMA ? migrateV4(v) : schema === V5_SCHEMA ? migrateV5(v) : schema === V6_SCHEMA ? migrateV6(v) : schema === V7_SCHEMA ? migrateV7(v) : schema === V8_SCHEMA ? migrateV8(v) : schema === V9_SCHEMA ? migrateV9(v) : v;
     assertProject(project);
     return convertIntentEdits(project); // Freshly parsed, not shared: no defensive copy needed.
 }

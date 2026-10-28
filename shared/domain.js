@@ -1,4 +1,4 @@
-import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, PASTED_TEXT_LIMIT } from './types.js';
+import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, PASTED_TEXT_LIMIT, READINGS_LIMIT, isMapReading } from './types.js';
 import { ensure, text, validateEnvelope, digest, sha256, parseResultFile, resultSourceText, parseProject, POSITION_LIMIT, SUMMARY_LIMIT } from './validation.js';
 import { planFacts, planFactsText } from './plan-facts.js';
 import { areaPath, childrenOf } from './hierarchy.js';
@@ -11,7 +11,7 @@ const copy = (value) => structuredClone(value);
 const WORK_KEYS = ['understanding', 'scope', 'next', 'checks'];
 const CONDITION_KEYS = ['scope', 'checks'];
 export function createProject() {
-    return { schemaVersion: SCHEMA, id: uid('P'), revision: 1, name: '나의 프로젝트', sources: [], bases: [], tasks: [], currentTaskId: null, draft: '', answerDraft: '', basisDraft: '', basisEdits: {}, draftKind: 'request', pending: null, notice: null, space: { brief: null, areas: [], relations: [], draftTarget: null, layout: { version: 'layout.1', positions: {} }, understanding: {}, containment: { version: 'containment.1', parents: {}, revisions: {} } }, pasted: [] };
+    return { schemaVersion: SCHEMA, id: uid('P'), revision: 1, name: '나의 프로젝트', sources: [], bases: [], tasks: [], currentTaskId: null, draft: '', answerDraft: '', basisDraft: '', basisEdits: {}, draftKind: 'request', pending: null, notice: null, space: { brief: null, areas: [], relations: [], draftTarget: null, layout: { version: 'layout.1', positions: {} }, understanding: {}, containment: { version: 'containment.1', parents: {}, revisions: {} } }, pasted: [], readings: [] };
 }
 export function taskOf(p, id = p.currentTaskId) { const t = p.tasks.find(t => t.id === id); ensure(t, 'TASK_MISSING'); return t; }
 function change(p) { return { ...copy(p), revision: p.revision + 1, notice: null }; }
@@ -704,6 +704,24 @@ export function pasteRecord(p, value, context) {
     const n = change(p), record = { id: uid('N'), text: value, at: now(), context };
     n.pasted.push(record);
     return { project: n, record: copy(record), duplicate: false };
+}
+/** project.9: keeps one map reading or correction (map-reading.ts builds and checks a reading before it comes here). */
+export function addReading(p, entry) {
+    ensure(p.readings.length < READINGS_LIMIT, 'READINGS_FULL');
+    ensure(!p.readings.some(r => r.id === entry.id));
+    const n = change(p);
+    n.readings.push(copy(entry));
+    return n;
+}
+/** The person corrects a part's description as read (not the part's own note, not a received return.2 description). It names
+ * the reading whose description it corrects and holds that description only. */
+export function correctReadingRole(p, areaId, value) {
+    const v = value.trim();
+    text(v, 300);
+    ensure(p.space.areas.some(a => a.id === areaId && !a.archived), 'AREA_MISSING');
+    const from = [...p.readings].reverse().find(r => isMapReading(r) && r.parts.some(x => x.areaId === areaId && x.role));
+    ensure(p.readings.some(r => isMapReading(r) && r.parts.some(x => x.areaId === areaId)), 'NOTHING_TO_CORRECT');
+    return addReading(p, { version: 'map-correction.1', id: uid('M'), at: now(), areaId, text: v, corrects: from?.id ?? null });
 }
 export function restore(p) {
     return { ...copy(p), pending: null, notice: p.pending ? '중단된 요청의 입력을 복구했습니다. 자동으로 다시 전송하지 않습니다.' : null };

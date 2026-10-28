@@ -1,7 +1,7 @@
 import { parsePersistedPlan, compareResults } from '../shared/change-plan.js';
 export const PLANS_KEY = 'agentflow.studio.plans.1';
 export const UNREADABLE_KEY = 'agentflow.studio.plans.1.unreadable';
-const FILE_FORMAT = 'agentflow.change-plan-file.1';
+const FILE_FORMAT = 'agentflow.change-plan-file.2';
 export const emptyBundle = (draft = '') => ({ draft, extra: [], plan: null, by: null, snapshots: [], labels: {}, origins: {}, observations: [], attached: {} });
 const isObj = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
 function fail() { throw new Error('INVALID_PLAN_BUNDLE'); }
@@ -52,6 +52,8 @@ export function parseBundle(v, projectId) {
     for (const s of snapshots) {
         try {
             compareResults(s, []);
+            if (s.scope && s.scope.projectId !== projectId)
+                fail();
         }
         catch {
             fail();
@@ -93,12 +95,13 @@ function readEnvelope(kv) {
         return { ok: false, raw: '' };
     }
     if (raw === null)
-        return { ok: true, env: { version: 'studio.plans.1', projects: {} }, raw };
+        return { ok: true, env: { version: 'studio.plans.2', projects: {} }, raw };
     try {
         const v = JSON.parse(raw);
-        if (!isObj(v) || v.version !== 'studio.plans.1' || !isObj(v.projects))
+        if (!isObj(v) || !['studio.plans.1', 'studio.plans.2'].includes(v.version) || !isObj(v.projects))
             return { ok: false, raw };
-        return { ok: true, env: v, raw };
+        // v1 snapshots keep their original text and have no structured scope. Never backfill from today's plan.
+        return { ok: true, env: { version: 'studio.plans.2', projects: v.projects }, raw };
     }
     catch {
         return { ok: false, raw };
@@ -154,7 +157,7 @@ export function setAside(kv, projectId) {
             writeChecked(kv, PLANS_KEY, JSON.stringify(r.env));
         }
         else
-            writeChecked(kv, PLANS_KEY, JSON.stringify({ version: 'studio.plans.1', projects: {} }));
+            writeChecked(kv, PLANS_KEY, JSON.stringify({ version: 'studio.plans.2', projects: {} }));
         return null;
     }
     catch {
@@ -174,7 +177,7 @@ export function readPlanFile(text, projectId) {
     catch {
         return '변경안 파일이 아니거나 읽을 수 없어요. 아무것도 바꾸지 않았어요.';
     }
-    if (!isObj(v) || v.format !== FILE_FORMAT || !isObj(v.project))
+    if (!isObj(v) || ![FILE_FORMAT, 'agentflow.change-plan-file.1'].includes(v.format) || !isObj(v.project))
         return '변경안 파일이 아니에요. 프로젝트 백업 파일은 홈의 ‘백업 파일 가져오기’를 쓰세요.';
     if (v.project.id !== projectId)
         return `다른 프로젝트(‘${String(v.project.name ?? '').slice(0, 60)}’)의 변경안이에요. 가져오지 않았어요.`;

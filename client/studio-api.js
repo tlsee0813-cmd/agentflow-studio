@@ -1,4 +1,5 @@
 import { validateDigestReply } from '../shared/digest-api.js';
+import { validateMapReply } from '../shared/map-reading.js';
 import { RUNTIME } from './runtime.js';
 export class AskError extends Error {
     code;
@@ -20,7 +21,8 @@ export async function aiStatus() {
             return { ai: 'none', model: null, access: 'open' };
         const d = v.digest, digest = d && typeof d.model === 'string' && typeof d.prompt === 'string' && /^[\w.-]{1,80}$/.test(d.model) && /^d1-[0-9a-f]{12}$/.test(d.prompt)
             ? { model: d.model, prompt: d.prompt, record: typeof d.record === 'string' && /^d2-[0-9a-f]{12}$/.test(d.record) ? d.record : null } : null;
-        return { ai: v.ai, model: typeof v.model === 'string' ? v.model : null, access: v.access === 'code' ? 'code' : 'open', digest };
+        const m = v.map, map = m && typeof m.model === 'string' && /^[\w.-]{1,80}$/.test(m.model) && typeof m.prompt === 'string' && /^m[12]-[0-9a-f]{12}$/.test(m.prompt) ? { model: m.model, prompt: m.prompt } : null;
+        return { ai: v.ai, model: typeof v.model === 'string' ? v.model : null, access: v.access === 'code' ? 'code' : 'open', digest, map };
     }
     catch {
         return { ai: 'none', model: null, access: 'open' };
@@ -75,6 +77,36 @@ export async function askDigest(ask, signal, accessCode) {
         throw new AskError('INVALID_RESPONSE');
     try {
         return { model: data.model, reply: validateDigestReply(data.reply, ask) };
+    }
+    catch {
+        throw new AskError('INVALID_RESPONSE');
+    }
+}
+/** A map reading. The reply is checked again here against the request that was sent. */
+export async function askMap(ask, signal, accessCode) {
+    if (RUNTIME.apiBase === null)
+        throw new AskError('NO_SERVER');
+    const headers = { 'Content-Type': 'application/json', 'X-AgentFlow-Request': '1' };
+    if (accessCode)
+        headers['X-Studio-Access'] = accessCode;
+    let res;
+    try {
+        res = await fetch(url('/api/studio/map'), { method: 'POST', headers, body: JSON.stringify(ask), signal, credentials: 'same-origin' });
+    }
+    catch {
+        throw new AskError(signal.aborted ? 'CANCELLED' : 'NETWORK');
+    }
+    let data = null;
+    try {
+        data = await res.json();
+    }
+    catch { /* handled below */ }
+    if (!res.ok)
+        throw new AskError(typeof data?.error?.code === 'string' ? data.error.code : 'REQUEST_FAILED');
+    if (typeof data?.model !== 'string')
+        throw new AskError('INVALID_RESPONSE');
+    try {
+        return { model: data.model, reply: validateMapReply(data.reply, ask) };
     }
     catch {
         throw new AskError('INVALID_RESPONSE');

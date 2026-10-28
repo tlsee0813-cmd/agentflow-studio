@@ -6,6 +6,7 @@ import { parsePlanAnalysis } from '../shared/change-plan.js';
 import { SCOPE_BYTES } from '../shared/scope-api.js';
 import { PLAN_BYTES } from '../shared/plan-api.js';
 import { fullTime } from './plan-dom.js';
+import { CLAIM_LABEL } from '../shared/map-reading.js';
 import { secretLike } from '../shared/secret.js';
 export const CONVERTER_KEY = 'ex-converter';
 export const CONDITION_LABEL = { A: '파일별 결과가 있는 코드', B: '파일별 결과가 없는 코드' };
@@ -29,7 +30,7 @@ export function converterKeys(p) {
     return keys;
 }
 const EVIDENCE_KIND = { request: 'user', answer: 'user', decision: 'user', report: 'report', evidence: 'test' };
-export const EVIDENCE_LABEL = { user: '사용자 발언', report: '담당 보고', code: '코드 자료', test: '검사' };
+export const EVIDENCE_LABEL = { user: '사용자 발언', report: '담당 보고', code: '코드 자료', test: '검사', record: '붙여넣은 기록', reading: '기록에서 읽은 이해' };
 const TEXT_MAX = 12000;
 /** The plan contract refuses control characters; records may carry them from pasted terminal output. */
 const clean = (text) => text.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, ' ');
@@ -51,8 +52,9 @@ export function exampleInput(o, condition, intent, keys, extra = []) {
         parts: o.view.parts.map(p => ({ id: toKey.get(p.id), name: p.name, note: p.note, parentId: p.parentId ? toKey.get(p.parentId) : null })), evidence };
     return finish({ evidence, ask, parts, records: { total: 0, sent: 0 }, problem: null, basis: `합성 예제 자료 · ${CONDITION_LABEL[condition]} · main@S0` });
 }
-/** A saved project's own records, newest first, as whole sources until the request's byte limit. Nothing is cut silently: the
- * count of records left out is shown before sending and kept with the analysis. */
+/** A saved project's own material, newest first, as whole sources until the request's byte limit: what the map readings understood
+ * per part (derived, kind 'reading'), then records pasted as they came (kind 'record', never promoted to a request, report or
+ * check) and the project's own records, by time. Nothing is cut silently: the count left out is shown before sending and kept. */
 export function projectInput(o, intent, extra = []) {
     const v = o.view, parts = new Map(), alias = new Map();
     v.parts.forEach((p, i) => { const a = `P${String(i + 1).padStart(2, '0')}`; parts.set(a, p.id); alias.set(p.id, a); });
@@ -63,16 +65,50 @@ export function projectInput(o, intent, extra = []) {
     if (brief)
         ask.evidence.push({ id: 'BRIEF', kind: 'user', title: '프로젝트 목적', text: clip(clean(brief), TEXT_MAX), basis: `프로젝트에 적힌 목적 · ${fullTime(o.project.space.brief.at)}` });
     ask.evidence.push(...extra);
-    const input = { evidence: ask.evidence, ask, parts, records: { total: v.records.length, sent: 0 }, problem: null,
-        basis: `프로젝트 기록 ${v.records.length}개 · 판 ${o.project.revision} · ${fullTime(new Date().toISOString())}` };
+    const pasted = [...o.project.pasted].reverse(), total = v.records.length + pasted.length;
+    const input = { evidence: ask.evidence, ask, parts, records: { total, sent: 0 }, problem: null,
+        basis: `프로젝트 기록 ${total}개 · 판 ${o.project.revision} · ${fullTime(new Date().toISOString())}` };
     if (bytes(ask) > PLAN_BYTES)
         return finish({ ...input, problem: 'TOO_LARGE' });
-    for (const [i, r] of v.records.entries()) {
+    // What was read per part: small, so it goes first; each line keeps its kind, its version as the record named it, its quote and
+    // the id of the record it quotes in this same request (N.. pasted, E.. project records), and says it is not verified.
+    const recordRef = new Map([...pasted.map((r, i) => [r.id, `N${String(i + 1).padStart(2, '0')}`]), ...v.records.map((r, i) => [r.id, `E${String(i + 1).padStart(2, '0')}`])]);
+    input.origins = Object.fromEntries([...recordRef].map(([record, ref]) => [ref, [{ record, reading: null, quote: null }]]));
+    const cite = (q) => `“${q.quote}”${recordRef.has(q.record) ? ` (${recordRef.get(q.record)})` : ''}`;
+    let m = 0;
+    for (const p of v.parts) {
+        const u = p.reading;
+        if (!u || ask.evidence.length >= 24)
+            continue;
+        const lines = [
+            u.role ? `설명${u.corrected ? '(사용자가 바로잡음)' : ''}${u.roleAbout ? ` · ${u.roleAbout} 기준` : u.corrected ? '' : ' · 판본 미기재'}: ${u.role}${u.roleBasis.length ? ` — ${u.roleBasis.slice(0, 2).map(cite).join(' / ')}` : ''}` : '',
+            ...u.others.slice(0, 2).map(x => `다른 기록의 설명(현재 설명을 대체한다는 근거 없음)${x.about ? ` · ${x.about}` : ''}: ${x.text}`),
+            ...u.claims.slice(0, 6).map(c => `- [${CLAIM_LABEL[c.kind]}${c.about ? ` · ${c.about}` : ''}] ${c.text} — ${cite(c)}`)
+        ].filter(Boolean);
+        if (!lines.length)
+            continue;
+        const e = { id: `M${String(++m).padStart(2, '0')}`, kind: 'reading', title: clip(`${partPath(v, p.id).map(x => x.name).join(' › ')} · 기록에서 읽은 이해`, 200),
+            text: clip(clean(lines.join('\n')), 3000), basis: clip(`붙여넣은 기록을 AI가 읽어 정리한 이해 · 앱이 확인한 사실 아님 · ${fullTime(u.history.at(-1).at)}`, 2000) };
+        ask.evidence.push(e);
+        if (bytes(ask) > PLAN_BYTES - 64) {
+            ask.evidence.pop();
+            m--;
+            break;
+        }
+        input.origins[e.id] = [...(u.corrected ? [{ record: null, reading: u.corrected.id, quote: null }] : []), ...u.roleBasis.map(q => ({ record: q.record, reading: null, quote: q.quote })), ...u.claims.slice(0, 6).map(c => ({ record: c.record, reading: c.reading, quote: c.quote }))].slice(0, 16);
+    }
+    const items = [
+        ...pasted.map((r, i) => ({ at: r.at, e: { id: `N${String(i + 1).padStart(2, '0')}`, kind: 'record', title: clip(`붙여넣은 기록 · ${r.text.split('\n').find(l => l.trim())?.trim() ?? ''}`, 200),
+                text: clip(clean(r.text), TEXT_MAX), basis: clip(`붙여넣은 원문 그대로 · 요구·보고·검사가 섞일 수 있음 · 붙여넣은 시각 ${fullTime(r.at)}(원문 작성·판본 시각 아님)${r.text.length > TEXT_MAX ? ` · 앞 ${TEXT_MAX}자` : ''}`, 2000) } })),
+        ...v.records.map((r, i) => {
+            const part = r.partId ? partPath(v, r.partId).map(x => x.name).join(' › ') : '부분 미지정';
+            return { at: r.at, e: { id: `E${String(i + 1).padStart(2, '0')}`, kind: EVIDENCE_KIND[r.kind], title: clip(`${part.split(' › ').at(-1)} · ${RECORD_LABEL[r.kind]}`, 200),
+                    text: clip(clean(r.text), TEXT_MAX), basis: clip(`프로젝트 기록 · ${fullTime(r.at)} · ${part}${r.text.length > TEXT_MAX ? ` · 앞 ${TEXT_MAX}자` : ''}`, 2000) } };
+        })
+    ].sort((a, b) => b.at.localeCompare(a.at));
+    for (const { e } of items) {
         if (ask.evidence.length >= 48)
             break;
-        const part = r.partId ? partPath(v, r.partId).map(x => x.name).join(' › ') : '부분 미지정';
-        const e = { id: `E${String(i + 1).padStart(2, '0')}`, kind: EVIDENCE_KIND[r.kind], title: clip(`${part.split(' › ').at(-1)} · ${RECORD_LABEL[r.kind]}`, 200),
-            text: clip(clean(r.text), TEXT_MAX), basis: clip(`프로젝트 기록 · ${fullTime(r.at)} · ${part}${r.text.length > TEXT_MAX ? ` · 앞 ${TEXT_MAX}자` : ''}`, 2000) };
         ask.evidence.push(e);
         if (bytes(ask) > PLAN_BYTES - 64) {
             ask.evidence.pop();
@@ -80,7 +116,8 @@ export function projectInput(o, intent, extra = []) {
         }
         input.records.sent++;
     }
-    input.basis = `프로젝트 기록 ${input.records.sent === v.records.length ? `${v.records.length}개` : `${v.records.length}개 중 최신 ${input.records.sent}개`}${extra.length ? ` + 붙인 자료 ${extra.length}개` : ''} · 판 ${o.project.revision} · ${fullTime(new Date().toISOString())}`;
+    input.basis = `프로젝트 기록 ${input.records.sent === total ? `${total}개` : `${total}개 중 최신 ${input.records.sent}개`}${m ? ` + 읽은 이해 ${m}개` : ''}${extra.length ? ` + 붙인 자료 ${extra.length}개` : ''} · 판 ${o.project.revision} · ${fullTime(new Date().toISOString())}`;
+    input.origins = Object.fromEntries(Object.entries(input.origins).filter(([ref]) => ask.evidence.some(e => e.id === ref)));
     return finish(input);
 }
 function finish(input) {

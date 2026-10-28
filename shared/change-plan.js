@@ -1,3 +1,5 @@
+import { validateFrozenRequest, validateOrigins } from './request-return.js';
+export const EVIDENCE_KINDS = ['user', 'report', 'code', 'test', 'record', 'reading'];
 const MAX_ITEMS = 32, MAX_EVIDENCE = 48, MAX_IMPACTS = 64, MAX_TEXT = 12000;
 const copy = (value) => structuredClone(value);
 function check(condition) { if (!condition)
@@ -31,7 +33,7 @@ function evidenceList(value) {
         text(v.title, 200);
         text(v.text);
         text(v.basis, 2000);
-        check(['user', 'report', 'code', 'test'].includes(v.kind));
+        check(EVIDENCE_KINDS.includes(v.kind));
     }
     check(new Set(value.map(v => v.id)).size === value.length);
 }
@@ -141,7 +143,7 @@ function analysisParts(analysis) {
     return [...new Set(parts)];
 }
 function validatedPlan(value) {
-    object(value, ['version', 'id', 'projectId', 'revision', 'basis', 'intent', 'evidence', 'analysis', 'selected', 'createdAt']);
+    object(value, ['version', 'id', 'projectId', 'revision', 'basis', 'intent', 'evidence', 'analysis', 'selected', 'createdAt'], ['evidenceOrigins']);
     check(value.version === 'change-plan.1');
     id(value.id);
     id(value.projectId);
@@ -152,6 +154,13 @@ function validatedPlan(value) {
     evidenceList(value.evidence);
     const analysis = parsePlanAnalysis(value.analysis, analysisParts(value.analysis), value.evidence.map(x => x.id));
     const sources = new Map(value.evidence.map(e => [e.id, e]));
+    if (value.evidenceOrigins !== undefined) {
+        check(!!value.evidenceOrigins && typeof value.evidenceOrigins === 'object' && !Array.isArray(value.evidenceOrigins));
+        for (const [ref, origins] of Object.entries(value.evidenceOrigins)) {
+            check(sources.has(ref));
+            validateOrigins(origins);
+        }
+    }
     const normal = (text) => text.replace(/\s+/g, ' ').trim();
     for (const item of analysis.items)
         for (const view of item.presentation ?? []) {
@@ -174,9 +183,9 @@ export function parsePersistedPlan(value) {
         return null;
     }
 }
-export function createPlan(projectId, basis, intent, evidence, analysis) {
+export function createPlan(projectId, basis, intent, evidence, analysis, evidenceOrigins) {
     return validatedPlan({ version: 'change-plan.1', id: `CP_${crypto.randomUUID()}`, projectId, revision: 1, basis, intent, evidence, analysis,
-        selected: analysis.items.map(x => x.id), createdAt: new Date().toISOString() });
+        selected: analysis.items.map(x => x.id), createdAt: new Date().toISOString(), ...(evidenceOrigins ? { evidenceOrigins } : {}) });
 }
 export function selectItems(plan, selected) {
     const next = validatedPlan(plan);
@@ -198,6 +207,7 @@ export function revisePlan(plan, analysis) {
 /** A generated document is a snapshot, not a sent request or an execution record. */
 export function requestSnapshot(plan, review) {
     const p = validatedPlan(plan), selected = p.analysis.items.filter(item => p.selected.includes(item.id));
+    const id = `RQ_${crypto.randomUUID()}`, createdAt = new Date().toISOString();
     check(selected.length > 0);
     const scoped = review === undefined ? undefined : parseScopeReview(review, p.evidence.map(e => e.id));
     const selectedIds = new Set(selected.map(x => x.id)), all = new Map(p.analysis.items.map(x => [x.id, x]));
@@ -220,7 +230,7 @@ export function requestSnapshot(plan, review) {
         all.get(dependency).refs.forEach(ref => usedRefs.add(ref));
     for (const candidate of scoped?.prerequisites ?? [])
         candidate.refs.forEach(ref => usedRefs.add(ref));
-    const lines = ['작업 요청문 초안 · 생성됨 (전달·접수·실행 여부는 확인하지 않음)', `작성 기준: ${p.basis}`, `변경안 판본: ${p.id} / ${p.revision}`,
+    const lines = ['작업 요청문 초안 · 생성됨 (전달·접수·실행 여부는 확인하지 않음)', `요청문 참조: ${id}`, `작성 기준: ${p.basis}`, `변경안 판본: ${p.id} / ${p.revision}`,
         '', '선택한 요청 범위:', ...selected.flatMap(item => [`- ${item.title}`, item.description]),
         '', '이번에 맡기지 않은 항목:', ...p.analysis.items.filter(item => !selectedIds.has(item.id)).map(item => `- ${item.title}`),
         ...(selected.length === p.analysis.items.length ? ['- 없음'] : []),
@@ -238,12 +248,15 @@ export function requestSnapshot(plan, review) {
     // Summary and unknowns may refer to material not cited by a prerequisite. Preserve the full frozen review input.
     for (const e of p.evidence.filter(e => scoped || usedRefs.has(e.id)))
         lines.push(`[${e.id}] ${e.title} · ${e.kind}`, `자료 기준: ${e.basis}`, e.text, '');
-    lines.push('결과는 선택 항목별로 구현 보고, 자료에서 확인한 변경, 대상 판본·조건별 실행 확인을 구별해 알려 주세요. 근거가 없는 항목은 실패·미구현·완료로 단정하지 마세요.');
-    return { id: `RQ_${crypto.randomUUID()}`, planId: p.id, planRevision: p.revision, basis: p.basis, itemIds: selected.map(x => x.id), text: lines.join('\n'), createdAt: new Date().toISOString() };
+    lines.push(`결과에 이 요청문 참조 ${id}를 함께 남겨 주세요. 선택 항목별로 구현 보고, 자료에서 확인한 변경, 대상 판본·조건별 실행 확인을 구별해 알려 주세요. 근거가 없는 항목은 실패·미구현·완료로 단정하지 마세요.`);
+    const scope = validateFrozenRequest({ version: 'request-scope.1', id, projectId: p.projectId, planId: p.id, planRevision: p.revision, createdAt, basis: p.basis, intent: p.intent,
+        items: selected.map(i => ({ id: i.id, title: i.title, description: i.description, partIds: i.partIds,
+            sources: i.refs.map(ref => { const e = p.evidence.find(e => e.id === ref); return { id: ref, title: e.title, basis: e.basis, origins: p.evidenceOrigins?.[ref] ?? [] }; }) })) });
+    return { id, planId: p.id, planRevision: p.revision, basis: p.basis, itemIds: selected.map(x => x.id), text: lines.join('\n'), createdAt, scope };
 }
 /** Exact item matches only. Unknown observations are not silently assigned to other requested items. */
 export function compareResults(snapshot, observations) {
-    object(snapshot, ['id', 'planId', 'planRevision', 'basis', 'itemIds', 'text', 'createdAt']);
+    object(snapshot, ['id', 'planId', 'planRevision', 'basis', 'itemIds', 'text', 'createdAt'], ['scope']);
     id(snapshot.id);
     id(snapshot.planId);
     check(Number.isSafeInteger(snapshot.planRevision) && snapshot.planRevision >= 1);
@@ -251,6 +264,10 @@ export function compareResults(snapshot, observations) {
     ids(snapshot.itemIds, MAX_ITEMS, undefined, true);
     text(snapshot.text, 1_000_000);
     date(snapshot.createdAt);
+    if (snapshot.scope !== undefined) {
+        const scope = validateFrozenRequest(snapshot.scope);
+        check(scope.id === snapshot.id && scope.planId === snapshot.planId && scope.planRevision === snapshot.planRevision && scope.basis === snapshot.basis && scope.createdAt === snapshot.createdAt && JSON.stringify(scope.items.map(i => i.id)) === JSON.stringify(snapshot.itemIds));
+    }
     list(observations, 256);
     const seen = new Set();
     for (const observation of observations) {

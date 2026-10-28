@@ -1,4 +1,7 @@
-export const SCHEMA = 'idea015.project.8';
+export const SCHEMA = 'idea015.project.10';
+export const V9_SCHEMA = 'idea015.project.9';
+/** project.8 had no map readings: it reads as none (readings=[]); nothing else changes. */
+export const V8_SCHEMA = 'idea015.project.8';
 /** project.7 had no pasted records: it reads as none (pasted=[]); nothing else changes. */
 export const V7_SCHEMA = 'idea015.project.7';
 export const V6_SCHEMA = 'idea015.project.6';
@@ -28,6 +31,9 @@ export const REQUEST_BYTES = 131072;
 // Only when full context exceeds REQUEST_BYTES: older, never-edited requests may use marked excerpts.
 export const EXCERPT_CHARS = 200;
 export const PASTED_TEXT_LIMIT = 60000;
+export const CLAIM_KINDS = ['want', 'idea', 'reported', 'checked', 'describes', 'open', 'differs'];
+export const isMapReading = (e) => e.version === 'map-reading.1' || e.version === 'map-reading.2';
+export const READINGS_LIMIT = 500;
 export const PASTED_LIMIT = 500;
 export const SOURCE_LABEL = {
     request: '사용자 요청 원문', report: '가져온 구현 보고 · 앱 미검증',

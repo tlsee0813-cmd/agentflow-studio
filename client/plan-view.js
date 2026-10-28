@@ -6,6 +6,8 @@ import { h, put, $, ago, fullTime, inspectorWidth, codeGate, codeNote } from './
 import { CONVERTER_KEY, CONDITION_LABEL, EVIDENCE_LABEL, exampleInput, projectInput, mapReply, secretLike, scopeInput } from './plan-source.js';
 import { requestPlan, requestScope } from './plan-request.js';
 import { emptyBundle, loadBundle, saveBundle, setAside, planFile, readPlanFile } from './plan-store.js';
+import { requestResults } from './request-results.js';
+import { correctRequestMatch } from '../shared/request-return.js';
 const MEMORY = new Map();
 /** A sentence handed over from the return reading, per project, in this tab only. It enters the draft only when the person
  * says so (write it as the draft when there is none, else add it at the end); dismissing or closing leaves the draft as is. */
@@ -474,7 +476,7 @@ export function createPlanView(host) {
             if (host.current()?.key !== session.key || inputKey(session) !== key)
                 session.error = '살펴보는 동안 문장이나 자료가 바뀌어 이 결과는 쓰지 않았어요. 지금 문장과 자료로 다시 살펴보세요.';
             else {
-                const next = createPlan(o.project.id, inp.basis, inp.ask.intent, inp.evidence, analysis);
+                const next = createPlan(o.project.id, inp.basis, inp.ask.intent, inp.evidence, analysis, inp.origins);
                 session.bundle = { ...session.bundle, plan: next, by: { kind: 'ai', model: res.model, at: new Date().toISOString(), records: inp.records } };
                 session.mode = 'preview';
                 session.focus = firstFocus(next);
@@ -1134,7 +1136,7 @@ export function createPlanView(host) {
     function newerNote(o, p) {
         if (!p || o.kind !== 'saved')
             return null;
-        const newer = o.view.records.filter(r => r.at > p.createdAt).length;
+        const newer = o.view.records.filter(r => r.at > p.createdAt).length + o.project.pasted.filter(r => r.at > p.createdAt).length;
         return newer ? h('p', { class: 'pp-newer' }, `만든 뒤 새 기록 ${newer}개 · 이 안의 기준은 그대로예요`) : null;
     }
     function intentSection(o) {
@@ -1266,6 +1268,8 @@ export function createPlanView(host) {
         const reach = document.getElementById('plan-reach');
         if (reach)
             reach.textContent = reachText();
+        // The count of material follows the typing in place: no re-render, the caret stays.
+        document.querySelectorAll('.pp-sources-count').forEach(el => { el.textContent = sourcesLabel(); });
         document.querySelector('#plan-panel .pp-plan')?.classList.toggle('is-stale', !!why);
         const make = document.getElementById('plan-make');
         if (make) {
@@ -1288,12 +1292,22 @@ export function createPlanView(host) {
         if (banner)
             banner.hidden = !why;
     }
+    /** What the next analysis would read, counted before a sentence is written too (the material does not wait for the sentence). */
+    function sourcesLabel() {
+        const st = s, p = plan(), o = host.current();
+        let n = 0;
+        if (p && !stale() && !st.editing)
+            n = p.evidence.length;
+        else if (o)
+            n = (input() ?? (o.key === CONVERTER_KEY ? exampleInput(o, st.condition, '…', o.alias.toId, st.bundle.extra) : projectInput(o, '…', st.bundle.extra))).evidence.length;
+        return `${st.example && st.key === CONVERTER_KEY ? '예제 원자료' : '읽는 자료'} ${n}개`;
+    }
     function sourcesToggle(_o) {
-        const st = s, p = plan(), n = (p && !stale() && !st.editing ? p.evidence : input()?.evidence ?? []).length, open = p ? st.rail === 'sources' : st.sources;
-        return h('button', { type: 'button', class: 'link-button quiet', 'aria-expanded': String(open), onclick: () => { if (p)
+        const st = s, p = plan(), open = p ? st.rail === 'sources' : st.sources;
+        return h('button', { type: 'button', class: 'link-button quiet pp-sources-count', 'aria-expanded': String(open), onclick: () => { if (p)
                 st.rail = open ? 'request' : 'sources';
             else
-                st.sources = !st.sources; render(); } }, `${st.example && st.key === CONVERTER_KEY ? '예제 원자료' : '읽는 자료'} ${n}개`);
+                st.sources = !st.sources; render(); } }, sourcesLabel());
     }
     function conditionSwitch(o) {
         if (o.key !== CONVERTER_KEY)
@@ -1359,8 +1373,28 @@ export function createPlanView(host) {
             return sel;
         })() : h('span', { class: 'pp-muted' }, `요청문 · ${fullTime(snap.createdAt)}`)));
         const ul = h('ul', { class: 'pp-res' });
+        const current = host.current();
+        const projection = current ? requestResults(current.project, snap.scope ? [snap.scope] : [], { requestId: snap.id,
+            correct: async (reading, index, target) => {
+                const o = host.current();
+                if (!o)
+                    return '프로젝트가 열려 있지 않아요.';
+                try {
+                    const error = await host.commitProject(correctRequestMatch(o.project, reading, index, target));
+                    if (!error)
+                        render();
+                    return error;
+                }
+                catch {
+                    return '대응을 고치지 못했어요. 원문은 그대로예요.';
+                }
+            } }) : null;
+        if (projection)
+            sec.append(projection);
         for (const r of rows) {
             const all = [...r.reported, ...r.code, ...r.tests];
+            if (projection && !all.length)
+                continue;
             const counts = all.length ? `보고 ${r.reported.length} · 코드 자료 ${r.code.length} · 검사 ${r.tests.length}` : '받은 근거 없음';
             const li = h('li', { class: all.length ? 'has' : 'none' }, h('details', {}, h('summary', {}, h('span', { class: 'pp-res-title' }, labels[r.itemId] ?? r.itemId), h('span', { class: 'pp-res-count' }, counts)), all.length ? h('ol', {}, ...all.map(x => h('li', {}, h('span', { class: `pp-kind k-${x.kind}` }, { report: '담당 보고', code: '코드 자료', test: '검사' }[x.kind]), h('p', {}, x.text), h('p', { class: 'pp-ref' }, x.basis)))) : h('p', { class: 'pp-muted' }, '이 항목에 대응하는 보고·코드·검사가 아직 없어요. 미구현이나 실패로 보지 않아요.')));
             ul.append(li);
@@ -1373,12 +1407,16 @@ export function createPlanView(host) {
         const actions = h('div', { class: 'pp-row' });
         if (st.example && origin === 'example' && !loaded)
             actions.append(h('button', { type: 'button', class: 'secondary small', onclick: () => loadExampleResults(snap) }, '돌아온 기록 살펴보기'));
-        if (!st.example || origin !== 'example')
-            actions.append(h('button', { type: 'button', class: 'link-button', 'aria-expanded': String(st.addForm), onclick: () => { st.addForm = !st.addForm; render(); } }, st.addForm ? '붙이기 닫기' : '돌아온 기록 붙이기'));
+        if (!st.example && snap.scope)
+            actions.append(h('button', { type: 'button', class: 'link-button', onclick: () => host.pasteReturn() }, '보고 원문 붙여넣기'), h('button', { type: 'button', class: 'link-button', title: '고른 이 요청문으로 아직 대조하지 않은 보고를 읽어요', onclick: () => host.readRequest(snap.id) }, '이 요청과 보고 읽기'));
+        if ((!st.example && !snap.scope) || (st.example && origin !== 'example'))
+            actions.append(h('button', { type: 'button', class: 'link-button', 'aria-expanded': String(st.addForm), onclick: () => { st.addForm = !st.addForm; render(); } }, st.addForm ? '붙이기 닫기' : '돌아온 기록 직접 붙이기'));
         if (actions.childElementCount)
             sec.append(actions);
         if (st.example && origin !== 'example')
             sec.append(h('p', { class: 'fine' }, '예제의 돌아온 기록은 작성된 예제 항목과만 대응해요. AI 분석 항목에는 받은 글을 직접 붙여 주세요.'));
+        if (!st.example && !snap.scope)
+            sec.append(h('p', { class: 'fine' }, '이전 형식 요청문이라 보고가 자동 대응되지 않아요. 요청문은 그대로 두고 항목에 직접 기록할 수 있어요.'));
         if (st.addForm)
             sec.append(addForm(snap, labels));
         return sec;
@@ -1514,6 +1552,9 @@ export function createPlanView(host) {
         isOpen: () => !!s,
         /** The right panel's width while the whole plan is open there; 0 while the plan reads on the map. */
         open, close, projectChanged, overlay, escape,
+        openResults: () => { if (!s)
+            open(); if (!s)
+            return; s.detail = true; s.rail = 'results'; render(); },
         /** The selection changed on the map while planning: the panel reads it in place of the part panel. */
         selectionChanged: (changed = false) => {
             if (!s)

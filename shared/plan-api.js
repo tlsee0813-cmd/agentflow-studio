@@ -1,4 +1,4 @@
-import { parsePlanAnalysis } from './change-plan.js';
+import { parsePlanAnalysis, EVIDENCE_KINDS } from './change-plan.js';
 export const PLAN_BYTES = 65536;
 const size = (v) => new TextEncoder().encode(JSON.stringify(v)).length;
 function check(ok) { if (!ok)
@@ -48,7 +48,7 @@ export function validatePlanAsk(value) {
         text(source.title, 200);
         text(source.text, 12000);
         text(source.basis, 2000);
-        check(['user', 'report', 'code', 'test'].includes(source.kind));
+        check(EVIDENCE_KINDS.includes(source.kind));
         check(!refs.has(source.id));
         refs.add(source.id);
     }
