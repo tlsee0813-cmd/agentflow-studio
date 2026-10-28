@@ -12,6 +12,7 @@ import { PLAN_PROMPT, SCOPE_PROMPT } from './plan-prompt.mjs';
 import { DIGEST_PROMPT, DIGEST2_PROMPT } from './digest-prompt.mjs';
 import { validateMapAsk, validateMapReply } from '../dist/public/shared/map-reading.js';
 import { SPAN_INDEX, textDigest } from '../dist/public/shared/evidence-span.js';
+import { MAP4_TRANSPORT, map4Tools, map4Arguments } from './map-tool.mjs';
 import { MAP_PROMPT, MAP2_PROMPT, MAP3_PROMPT, MAP4_PROMPT } from './map-prompt.mjs';
 
 const ENDPOINT = 'https://api.deepseek.com/chat/completions';
@@ -49,7 +50,8 @@ let mapId = null;
  * studio.map.4 (evidence by span.2 piece) only to a server whose status names an m4- prompt. A studio.map.1–3 request from an
  * older tab is still answered with its own prompt; status names only the current one. */
 export async function mapPromptId() {
-  if (!mapId) mapId = crypto.subtle.digest('SHA-256', new TextEncoder().encode(MAP4_PROMPT)).then(b => `m4-${[...new Uint8Array(b)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`);
+  // The provider settings and the schema version go into the id too: a reading made through another transport reads apart.
+  if (!mapId) mapId = crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${MAP4_PROMPT}\n${JSON.stringify(MAP4_TRANSPORT)}`)).then(b => `m4-${[...new Uint8Array(b)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`);
   return mapId;
 }
 
@@ -108,12 +110,16 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
   const abort = () => controller.abort(); signal?.addEventListener('abort', abort, { once: true });
   try {
     // Workers supports manual/follow, not redirect:error. Reject 3xx below without forwarding the key.
-    const response = await fetchImpl(ENDPOINT, { method: 'POST', redirect: 'manual', signal: controller.signal,
+    // studio.map.4: the reply is the arguments of one strict function (the beta endpoint, the tool forced, no thinking: a forced
+    // tool with thinking is refused by the provider). Nothing is executed and there is no second call. map.1–3 are as before.
+    const response = await fetchImpl(map4 ? MAP4_TRANSPORT.endpoint : ENDPOINT, { method: 'POST', redirect: 'manual', signal: controller.signal,
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.apiKey}` },
-      body: JSON.stringify({ model: config.model, stream: false, ...(map ? { thinking: { type: config.mapThinking ?? 'enabled' }, ...((config.mapThinking ?? 'enabled') === 'enabled' ? { reasoning_effort: 'low' } : {}), max_tokens: config.mapMaxTokens ?? 16384 }
+      body: JSON.stringify(map4 ? { model: config.model, stream: false, thinking: { type: MAP4_TRANSPORT.thinking }, max_tokens: config.mapMaxTokens ?? 16384,
+        messages: [{ role: 'system', content: MAP4_PROMPT }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }], ...map4Tools(ask) }
+        : { model: config.model, stream: false, ...(map ? { thinking: { type: config.mapThinking ?? 'enabled' }, ...((config.mapThinking ?? 'enabled') === 'enabled' ? { reasoning_effort: 'low' } : {}), max_tokens: config.mapMaxTokens ?? 16384 }
         : { thinking: { type: scope || planning || digest ? 'enabled' : 'disabled' }, ...(scope || planning || digest ? { reasoning_effort: 'low' } : {}), max_tokens: planning || digest ? 8192 : scope ? 4096 : config.maxTokens }),
         response_format: { type: 'json_object' },
-        messages: [{ role: 'system', content: map4 ? MAP4_PROMPT : map3 ? MAP3_PROMPT : map2 ? MAP2_PROMPT : map ? MAP_PROMPT : digest2 ? DIGEST2_PROMPT : digest ? DIGEST_PROMPT : scope ? SCOPE_PROMPT : planning ? PLAN_PROMPT : STUDIO_PROMPT }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }] }) });
+        messages: [{ role: 'system', content: map3 ? MAP3_PROMPT : map2 ? MAP2_PROMPT : map ? MAP_PROMPT : digest2 ? DIGEST2_PROMPT : digest ? DIGEST_PROMPT : scope ? SCOPE_PROMPT : planning ? PLAN_PROMPT : STUDIO_PROMPT }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }] }) });
     if (!response.ok) {
       await response.body?.cancel().catch(() => {});
       if ([401, 403].includes(response.status)) throw new ApiError('AI_AUTH_FAILED', 502);
@@ -126,11 +132,15 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
     try {
       const raw = await readLimited(response.body, REPLY_BYTES, controller.signal);
       const choice = JSON.parse(raw ?? '')?.choices?.[0];
+      // studio.map.4: the reply goes back as its wire (references, not quotes), once it is valid: the browser decodes it again
+      // against the very request it sent, so every passage keeps where it stands. Only the one tool call counts: no free text.
+      if (map4) {
+        const args = map4Arguments(choice); if (args.includes(config.apiKey)) throw new Error();
+        const wire = JSON.parse(args); validateMapReply(wire, ask); return wire;
+      }
       if (choice?.finish_reason !== 'stop' || typeof choice?.message?.content !== 'string') throw new Error();
       if (choice.message.content.includes(config.apiKey)) throw new Error();
-      // studio.map.4: the reply goes back as its wire (references, not quotes), once it is valid: the browser decodes it again
-      // against the very request it sent, so every passage keeps where it stands.
-      reply = map4 ? (() => { const wire = JSON.parse(choice.message.content); validateMapReply(wire, ask); return wire; })() : map ? validateMapReply(JSON.parse(choice.message.content), ask) : digest ? validateDigestReply(JSON.parse(choice.message.content), ask) : scope ? validateScopeReply(JSON.parse(choice.message.content), ask) : planning ? validatePlanReply(JSON.parse(choice.message.content), ask) : validateReply(JSON.parse(choice.message.content), ask);
+      reply = map ? validateMapReply(JSON.parse(choice.message.content), ask) : digest ? validateDigestReply(JSON.parse(choice.message.content), ask) : scope ? validateScopeReply(JSON.parse(choice.message.content), ask) : planning ? validatePlanReply(JSON.parse(choice.message.content), ask) : validateReply(JSON.parse(choice.message.content), ask);
     } catch (e) { if (controller.signal.aborted) throw e; throw new ApiError('INVALID_RESPONSE', 502); }
     return reply;
   } catch (e) {

@@ -19,6 +19,9 @@ import { createMapRun } from '../dist/public/client/map-run.js';
 import { createStudioHandler, mapPromptId } from '../server/studio.mjs';
 import { MAP3_PROMPT, MAP4_PROMPT } from '../server/map-prompt.mjs';
 import { sample } from './understanding17-fixtures.mjs';
+import { MAP4_TOOL, MAP4_TRANSPORT, map4Schema, evidenceRefs, map4Arguments } from '../server/map-tool.mjs';
+/** A provider reply for studio.map.4: the one strict function called with this reply as its arguments. */
+const toolReply = (w, o = {}) => ({ choices: [{ finish_reason: 'tool_calls', message: { content: null, tool_calls: [{ id: 'call_1', type: 'function', function: { name: MAP4_TOOL, arguments: typeof w === 'string' ? w : JSON.stringify(w) } }] }, ...o }] });
 
 const ORDER_RAW = readFileSync(new URL('./fixtures/record74/actual-order-backup.json', import.meta.url), 'utf8');
 const ORDER = JSON.parse(ORDER_RAW).pasted[0].text;
@@ -148,7 +151,7 @@ test('74-C2 the same reply through the real handler and the browser decoder: the
   const { p, inp } = actualOrder(), written = orderReply(inp);
   let sent = null;
   const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: 'test-74-not-real', DEEPSEEK_PLAN_MODEL: 'stub-model' }, fetchImpl: async (_u, init) => {
-    sent = JSON.parse(init.body); return new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(written) } }] }));
+    sent = JSON.parse(init.body); return new Response(JSON.stringify(toolReply(written)));
   } });
   const oldFetch = globalThis.fetch;
   try {
@@ -156,6 +159,7 @@ test('74-C2 the same reply through the real handler and the browser decoder: the
     globalThis.fetch = async (url, o) => { const res = await handle(new Request(`https://studio.example${url}`, { ...o, headers: { ...o.headers, origin: 'https://studio.example' } })); raw = await res.clone().json(); return res; };
     const res = await askMap(inp.ask, new AbortController().signal, '');
     assert.equal(sent.messages[0].content, MAP4_PROMPT); assert.equal(sent.messages[1].content.split('\n').slice(1).join('\n'), JSON.stringify(inp.ask));
+    assert.equal(sent.tools[0].function.strict, true); assert.deepEqual(sent.tool_choice, { type: 'function', function: { name: MAP4_TOOL } });
     assert.equal(raw.reply.parts[0].basis[0], written.parts[0].basis[0], 'the server answers with the references');
     assert.deepEqual(raw.evidence, { index: 'span.2', ask: S.textDigest(JSON.stringify(inp.ask)) });
     assert.equal(res.reply.parts[0].basis[0].quote, ORDER.slice(res.reply.parts[0].basis[0].from, res.reply.parts[0].basis[0].to));
@@ -231,7 +235,7 @@ test('74-F a changed record, another reading meanwhile or a failed save leave on
   assert.equal(u.role, '사용자가 바로잡은 설명'); assert.ok(u.corrected); assert.equal(later.space.areas[0].name, '내 폴더 입력');
   assert.equal(u.others[0].text, 'v3에서 모든 판본에 폴더 입력을 연다.');
   // Through the map run: a save that fails keeps nothing, a cancelled call keeps nothing, and nothing reads as read.
-  const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: 'test-74-not-real' }, fetchImpl: async () => new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(r) } }] })) });
+  const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: 'test-74-not-real' }, fetchImpl: async () => new Response(JSON.stringify(toolReply(r))) });
   const status = { ai: 'deepseek', model: 'm', access: 'open', map: { model: 'm', prompt: await mapPromptId() } };
   const oldFetch = globalThis.fetch; let project = p0, fails = true, bodies = [];
   try {
@@ -400,7 +404,7 @@ test('74-K3 an anchored reply that gets nothing and gives gaps as the reason is 
   const p = D.pasteRecord(D.rename(D.createProject(), 'x-board'), dts, null).project, inp = ask4(p), empty = reply4({ gaps: ['작업 보고를 붙여 주세요.'] });
   refused(() => apply4(p, inp, empty), 'NOTHING_READ');
   assert.equal(M.unreadRecords(p, studioView(p)).length, 1);
-  const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: 'test-74-not-real' }, fetchImpl: async () => new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(empty) } }] })) });
+  const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: 'test-74-not-real' }, fetchImpl: async () => new Response(JSON.stringify(toolReply(empty))) });
   const oldFetch = globalThis.fetch, prompt = await mapPromptId(); let saved = 0;
   try {
     globalThis.fetch = async (url, o) => handle(new Request(`https://studio.example${url}`, o));
@@ -415,7 +419,7 @@ test('74-K3 an anchored reply that gets nothing and gives gaps as the reason is 
 });
 
 test('74-K4 the anchored prompt states every hard limit the validator holds, reads sources as describes, and keeps material out of gaps', () => {
-  assert.match(MAP4_PROMPT, /부분마다 basis 4개\(새 부분은 1~4개\)·claims 4개, relations 12개, candidates 6개\(각 parts 2개\), gaps 2개, material 6개, matches 24개/);
+  assert.match(MAP4_PROMPT, /부분마다 basis 4개\(새 부분은 1~4개\)·claims 4개\(권장 3개\), relations 12개, candidates 6개\(각 parts 2개\), gaps 2개, material 6개, matches 24개/);
   assert.match(MAP4_PROMPT, /parts 24개\(그중 새 부분 12개\)/);
   assert.match(MAP4_PROMPT, /소스 코드·설정·장치 정의\(DTS·스키마 등\)·설명 문서뿐이어도/); assert.match(MAP4_PROMPT, /실행·검사·구현 진전\(reported·checked\)이 아니다/);
   assert.match(MAP4_PROMPT, /summary·gaps·candidates에서도 그것을 이 프로젝트의 누락/); assert.match(MAP4_PROMPT, /빈 줄\(줄바꿈 두 번\)로 끝나면/);
@@ -458,4 +462,76 @@ test('74-K6 the independent project.11 backup (a map-reading.3 match stored at 1
   assert.equal(saved.readings[0].matches[0].from, 164); assert.equal(m.match.from, 0); assert.equal(report.slice(m.match.from, m.match.to), m.match.quote);
   assert.equal(R.itemReading(R.requestMatches(p), { requestId: 'RQ_4be30332-aba3-4b69-889e-6aebb89440d7', itemId: 'I1' }).state, 'made');
   assert.ok(!M.unreadRecords(p, studioView(p)).some(r => r.id === m.match.record), 'the report reads as read (326 of the labelled text is all 162 of it)');
+});
+
+/* ---------- L: studio.map.4 through one strict function (mock transport; the provider's acceptance is root's real call) ---------- */
+function walk(s, visit, path = '$') { visit(s, path); for (const [k, v] of Object.entries(s)) if (v && typeof v === 'object') walk(v, visit, `${path}.${k}`); }
+test('74-L1 the function schema lists exactly the references the request resolves; every object is closed; nothing outside the strict subset', () => {
+  const { inp } = actualOrder(), refs = evidenceRefs(inp.ask), schema = map4Schema(inp.ask);
+  const rec = inp.ask.records[0], { text, spans } = S.decodeSpans(rec.id, { lead: rec.lead, spans: rec.spans });
+  assert.ok(refs.length > spans.length); assert.ok(refs.every(r => { const at = S.resolveRef(r, 'N01', text, spans); return at && at.quote.length <= S.ANCHOR_QUOTE_MAX; }));
+  assert.ok(!refs.includes('N01.32-34') && !refs.some(r => /-\d+-/.test(r)), 'never three pieces');
+  const cross = spans.findIndex((x, i) => spans[i + 1] && spans[i + 1].para !== x.para);
+  assert.ok(!refs.includes(`N01.${String(cross + 1).padStart(2, '0')}-${String(cross + 2).padStart(2, '0')}`), 'never across a paragraph');
+  const enums = [];
+  walk(schema, (x, path) => {
+    for (const k of ['minItems', 'maxItems', 'minLength', 'maxLength', 'pattern', '$ref', '$defs', 'format']) assert.ok(!(k in x) || path.endsWith('.properties'), `${path} has ${k}`);
+    if (x.type === 'object' && !path.endsWith('.properties')) { assert.equal(x.additionalProperties, false, path); assert.deepEqual([...x.required].sort(), Object.keys(x.properties).sort(), path); }
+    if (Array.isArray(x.enum)) { assert.ok(x.enum.length > 0, `${path} empty enum`); enums.push(path); }
+  });
+  const props = schema.properties;
+  assert.deepEqual(Object.keys(props), ['summary', 'parts', 'relations', 'candidates', 'gaps', 'matches', 'material']);
+  assert.deepEqual(props.parts.items.properties.basis.items.enum, refs); assert.deepEqual(props.parts.items.properties.claims.items.properties.at.enum, refs);
+  assert.deepEqual(props.relations.items.properties.at.enum, refs); assert.deepEqual(props.matches.items.properties.at.enum, refs);
+  assert.deepEqual(props.candidates.items.properties.at, { anyOf: [{ type: 'string', enum: refs }, { type: 'null' }] });
+  assert.deepEqual(props.material.items.properties.at, { type: 'string' }, 'a material range may run over paragraphs: checked by the reply validator');
+  // No existing claim or prior here: their replaces can only be null (no empty enum stands in for one).
+  assert.deepEqual(props.parts.items.properties.claims.items.properties.replaces, { type: 'null' }); assert.deepEqual(props.matches.items.properties.replaces, { type: 'null' });
+  // The written actual-order reply fits the schema's enums, and the three-piece reference of the disabled run would not.
+  const r = orderReply(inp); assert.ok([...r.parts.flatMap(p => [...p.basis, ...p.claims.map(c => c.at)]), ...r.relations.map(x => x.at)].every(x => refs.includes(x)));
+});
+
+test('74-L2 map.4 goes to the beta endpoint with the one function forced and thinking disabled; map.1–3 go as before', async () => {
+  const { inp } = actualOrder(); const bodies = [], urls = [];
+  const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: 'test-74-not-real' }, fetchImpl: async (u, init) => { urls.push(u); bodies.push(JSON.parse(init.body));
+    return new Response(JSON.stringify(bodies.at(-1).tools ? toolReply(reply4({})) : { choices: [{ finish_reason: 'stop', message: { content: JSON.stringify({ summary: '', parts: [], relations: [], candidates: [], gaps: [] }) } }] })); } });
+  const post = ask => handle(new Request('https://studio.example/api/studio/map', { method: 'POST', headers: { 'content-type': 'application/json', 'x-agentflow-request': '1' }, body: JSON.stringify(ask) }));
+  assert.equal((await post(inp.ask)).status, 200);
+  const b = bodies[0];
+  assert.equal(urls[0], 'https://api.deepseek.com/beta/chat/completions'); assert.deepEqual(b.thinking, { type: 'disabled' });
+  assert.ok(!('response_format' in b) && !('reasoning_effort' in b)); assert.equal(b.max_tokens, 16384); assert.equal(b.tools.length, 1);
+  assert.deepEqual(Object.keys(b.tools[0].function), ['name', 'description', 'strict', 'parameters']); assert.deepEqual(b.tools[0].function.parameters, map4Schema(inp.ask));
+  const p = D.pasteRecord(D.createProject(), '요구: 단일 문서를 변환한다.', null).project, old = M.buildMapAsk(p, studioView(p));
+  assert.equal((await post(old.ask)).status, 200);
+  assert.equal(urls[1], 'https://api.deepseek.com/chat/completions'); assert.deepEqual(bodies[1].response_format, { type: 'json_object' });
+  assert.ok(!('tools' in bodies[1]) && !('tool_choice' in bodies[1])); assert.deepEqual(bodies[1].thinking, { type: 'enabled' });
+  // The prompt id names the prompt and these provider settings together (status stays m4-).
+  const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${MAP4_PROMPT}\n${JSON.stringify(MAP4_TRANSPORT)}`));
+  assert.equal(await mapPromptId(), `m4-${[...new Uint8Array(bytes)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`);
+});
+
+test('74-L3 only one call of the one function, finished as a tool call, is a map.4 reply: free JSON, two calls, a cut reply or a refused schema fail once, without fallback', async () => {
+  const { inp } = actualOrder(), good = orderReply(inp), key = 'test-74-not-real';
+  const cases = [
+    [{ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(good) } }] }, 'free JSON in the text'],
+    [toolReply(good, { finish_reason: 'stop' }), 'not finished as a tool call'],
+    [toolReply(JSON.stringify(good).slice(0, 400), { finish_reason: 'length' }), 'cut by length'],
+    [{ choices: [{ finish_reason: 'tool_calls', message: { content: null, tool_calls: [toolReply(good).choices[0].message.tool_calls[0], toolReply(good).choices[0].message.tool_calls[0]] } }] }, 'two calls'],
+    [{ choices: [{ finish_reason: 'tool_calls', message: { content: null, tool_calls: [{ id: 'c', type: 'function', function: { name: 'other', arguments: JSON.stringify(good) } }] } }] }, 'another name'],
+    [{ choices: [{ finish_reason: 'tool_calls', message: { content: JSON.stringify(good), tool_calls: toolReply(good).choices[0].message.tool_calls } }] }, 'text beside the call'],
+    [toolReply({ ...good, summary: key }), 'the key in the arguments'],
+    [toolReply({ ...good, parts: [{ ...good.parts[0], basis: ['N01.32-34'] }] }), 'a reference the request cannot resolve'],
+  ];
+  for (const [res, why] of cases) {
+    let calls = 0;
+    const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: key }, fetchImpl: async () => { calls++; return new Response(JSON.stringify(res)); } });
+    const out = await handle(new Request('https://studio.example/api/studio/map', { method: 'POST', headers: { 'content-type': 'application/json', 'x-agentflow-request': '1' }, body: JSON.stringify(inp.ask) }));
+    assert.equal(out.status, 502, why); assert.deepEqual(await out.json(), { error: { code: 'INVALID_RESPONSE' } }, why); assert.equal(calls, 1, `${why}: no second call`);
+  }
+  // The provider refusing the strict schema is said as such, once.
+  let calls = 0;
+  const refused = createStudioHandler({ env: { DEEPSEEK_API_KEY: key }, fetchImpl: async () => { calls++; return new Response('{"error":{"message":"unsupported schema"}}', { status: 400 }); } });
+  const out = await refused(new Request('https://studio.example/api/studio/map', { method: 'POST', headers: { 'content-type': 'application/json', 'x-agentflow-request': '1' }, body: JSON.stringify(inp.ask) }));
+  assert.deepEqual(await out.json(), { error: { code: 'AI_CONFIG_REJECTED' } }); assert.equal(calls, 1);
+  assert.equal(map4Arguments(toolReply(good).choices[0]), JSON.stringify(good));
 });
