@@ -345,10 +345,10 @@ function readings(v:unknown,areaIds:Set<string>,records:Set<string>) {
     }
     obj(r,['version','id','at','model','prompt','hash','records','summary','parts','relations','candidates','gaps','skipped']);ensure(r.version==='map-reading.1');
     id(r.id);ensure(!entries.has(r.id as string));entries.add(r.id as string);date(r.at);text(r.model,80);text(r.prompt,40);ensure(typeof r.hash==='string'&&/^[0-9a-f]{64}$/.test(r.hash)&&!hashes.has(r.hash));hashes.add(r.hash as string);
-    list(r.records,16);ensure((r.records as unknown[]).length>0);for(const x of r.records){obj(x,['id','sent','total']);ensure(records.has(x.id as string));integer(x.sent);integer(x.total);ensure((x.sent as number)<=(x.total as number));}
+    list(r.records,16);ensure((r.records as unknown[]).length>0);for(const x of r.records){obj(x,['id','from','to','total']);ensure(records.has(x.id as string));integer(x.from);integer(x.to);integer(x.total);ensure((x.from as number)<(x.to as number)&&(x.to as number)<=(x.total as number));}
     text(r.summary,200,true);list(r.parts,64);const claims=new Map<string,number>(),parts=new Set<string>();
     for(const p of r.parts){
-      obj(p,['areaId','created','role','basis','claims']);ensure(areaIds.has(p.areaId as string)&&!parts.has(p.areaId as string));parts.add(p.areaId as string);
+      obj(p,['areaId','created','role','roleAbout','basis','claims']);if(p.roleAbout!==null){ensure(p.role!==null);text(p.roleAbout,80);}ensure(areaIds.has(p.areaId as string)&&!parts.has(p.areaId as string));parts.add(p.areaId as string);
       if(p.created!==null){obj(p.created,['name','parentId']);text(p.created.name,60);ensure(p.created.parentId===null||areaIds.has(p.created.parentId as string));}
       if(p.role!==null)text(p.role,300);list(p.basis,4);for(const q of p.basis)quote(q);ensure(p.created===null||(p.basis as unknown[]).length>0);
       list(p.claims,8);(p.claims as unknown[]).forEach((c,i)=>{

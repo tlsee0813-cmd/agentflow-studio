@@ -48,6 +48,10 @@ export interface ReturnHost {
   legacyKey(): string | null;
   /** Back to the scene a paste began from (selection, scope, camera), once the pane has closed. */
   restoreScene(scene: Scene): void;
+  /** The map's own row in a saved project (records to read into the map, the last map reading), built by the host; null when none. */
+  mapBlock(): Node | null;
+  /** Parts the last map reading of this visit added or said something about (marked while nothing else is chosen). */
+  mapMarks(): string[];
 }
 /** Where the person was when a paste began from a part: the part, the scope and the camera. */
 export interface Scene { selected: string | null; scope: string | null; camera: { x: number; y: number; k: number } }
@@ -171,7 +175,7 @@ export function createReturnView(host: ReturnHost) {
     if (s !== st) return;
     if (!kept) { st.pasteMsg = done; render(); return; }
     const r = host.current()?.project.pasted.find(x => x.id === done.id);
-    const said = done.duplicate ? `같은 글을 ${r ? fullTime(r.at) : '앞서'}에 붙여 넣었어요. 새로 저장하지 않았어요.` : '기록을 저장했어요. ‘기록 읽기’로 읽어요.';
+    const said = done.duplicate ? `같은 글을 ${r ? fullTime(r.at) : '앞서'}에 붙여 넣었어요. 새로 저장하지 않았어요.` : '기록을 저장했어요. AI에는 아직 보내지 않았어요.';
     if (!untouched) { st.pasteMsg = `${said} 저장하는 동안 쓴 글은 초안으로 남겨 두었어요.`; render(); void refresh(); return; }
     st.pasteContext = null; st.pasteMsg = null; st.storeMsg = said;
     await refresh();
@@ -318,6 +322,8 @@ export function createReturnView(host: ReturnHost) {
   function readingBody(o: PlanOpened): Node[] {
     const st = s!, r = st.reading, prev = !r ? st.previous : null, use = r ?? prev, from: 'now' | 'previous' = r ? 'now' : 'previous';
     const out: Node[] = [];
+    const map = o.kind === 'saved' ? host.mapBlock() : null;
+    if (map) out.push(map);
     const total = st.input?.coverage.total ?? 0, sent = st.input?.coverage.sent ?? 0;
     const outcome = !!st.input?.ask.sources.some(x => OUTCOME_KINDS.includes(x.kind) || x.kind === 'record');
     if (!st.input) { out.push(h('p', { class: 'fine' }, '자료를 읽는 중…')); return out; }
@@ -420,7 +426,8 @@ export function createReturnView(host: ReturnHost) {
     const read = use && src.recordId ? recordSection(use, from, src.recordId) : null;
     const sentTo = s?.input?.sources.get(src.id)?.sent;
     const ctx = kept?.context && host.current()?.view.parts.some(p => p.id === kept.context) ? kept.context : null;
-    return [h('article', { class: 'rr-source rr-record' },
+    const map = quote ? null : host.mapBlock();
+    return [...(map ? [map] : []), h('article', { class: 'rr-source rr-record' },
       h('p', { class: 'rr-source-kind' }, h('span', { class: 'rr-kind k-record' }, DIGEST_KIND_LABEL.record), kept ? h('span', {}, `붙여넣음 ${fullTime(kept.at)}`) : null),
       h('h3', { title: '원문의 첫 줄이에요' }, src.title),
       ctx ? h('p', { class: 'rr-context' }, h('span', {}, '붙일 때 보던 부분'), partChip(ctx)) : null,
@@ -441,7 +448,7 @@ export function createReturnView(host: ReturnHost) {
       keepDraft(st.key, area.value); count.textContent = area.value ? `${area.value.length.toLocaleString()}자` : ''; warn.hidden = !secretLike(area.value);
     });
     return [h('section', { class: 'rr-sec rr-paste-box' }, h('h3', {}, '기록 붙여넣기'),
-      h('p', { class: 'fine' }, '나누거나 종류·부분을 고르지 않아도 돼요. 저장한 뒤 ‘기록 읽기’를 누르면 읽어요.'),
+      h('p', { class: 'fine' }, '나누거나 종류·부분을 고르지 않아도 돼요. 저장한 뒤 지도 정리나 ‘기록 읽기’를 누를 때만 AI에 보내요.'),
       ctx ? h('p', { class: 'rr-context' }, h('span', {}, '보던 부분'), partChip(ctx),
         h('button', { type: 'button', class: 'link-button quiet', title: '읽기 맥락에서 빼요', onclick: () => { st.pasteContext = null; render(); } }, '빼기')) : null,
       area, warn, count, st.pasteMsg ? h('p', { class: 'pp-error', role: 'alert' }, st.pasteMsg) : null)];
@@ -480,7 +487,8 @@ export function createReturnView(host: ReturnHost) {
     host.show([header(o), body, footer(o)]);
     const v = s.view;
     host.open(s.focus?.list === 'records' && s.focus.part ? s.focus.part : null);
-    host.mark(v.kind === 'source' ? (v.source.kind === 'record' ? focusParts() : v.source.partIds) : focusParts());
+    const marks = v.kind === 'source' ? (v.source.kind === 'record' ? focusParts() : v.source.partIds) : focusParts();
+    host.mark(marks.length || s.focus ? marks : host.mapMarks());
     if (v.kind === 'source' && v.quote) requestAnimationFrame(() => document.querySelector('#lens .rr-mark')?.scrollIntoView({ block: 'center' }));
   }
   function openSource(source: ReadingSource, from: 'now' | 'previous' | 'material', quote: string | null = null) {
@@ -495,9 +503,22 @@ export function createReturnView(host: ReturnHost) {
     const body = document.querySelector('#lens .lens-body'); if (body) body.scrollTop = s.scroll;
   }
 
+  /** A quote of a record a map reading rests on, in the pane, marked; closing comes back to the scene it was opened from. */
+  function openQuote(record: string, quote: string, scene: Scene | null) {
+    const o = host.current(); if (!o || o.kind !== 'saved') return;
+    open(); if (!s) return;
+    if (scene) s.back = scene;
+    let src = sources().find(x => x.recordId === record) ?? null;
+    if (!src) {
+      const r = o.view.records.find(x => x.id === record); if (!r) return;
+      src = { id: r.id, kind: r.kind === 'report' ? 'report' : r.kind === 'evidence' ? 'test' : 'user', title: `프로젝트 기록 · ${r.text.split('\n').find(l => l.trim())?.trim().slice(0, 80) ?? ''}`, text: r.text, note: '', basis: `프로젝트 기록 · ${fullTime(r.at)}`, partIds: r.partId ? [r.partId] : [], url: null };
+    }
+    openSource(src, 'material', quote);
+  }
+
   return {
     isOpen: () => !!s,
-    open, close, toggle: () => (s ? close() : open()), openPaste,
+    open, close, toggle: () => (s ? close() : open()), openPaste, openQuote,
     /** Re-render (the pane came back after a part's reading, or the AI status arrived). */
     render: () => { if (s) { render(); void refresh(); } },
     /** Esc: from a source back to the reading, else close. */

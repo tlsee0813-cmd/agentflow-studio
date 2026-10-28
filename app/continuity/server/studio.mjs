@@ -64,7 +64,11 @@ export function readStudioConfig(env = {}) {
     apiKey: env.AI_MODE === 'mock' ? '' : String(env.DEEPSEEK_API_KEY ?? ''),
     model, planModel: env.DEEPSEEK_PLAN_MODEL && /^[a-zA-Z0-9._-]{1,80}$/.test(env.DEEPSEEK_PLAN_MODEL) ? env.DEEPSEEK_PLAN_MODEL : model,
     origins, accessCode: String(env.STUDIO_ACCESS_CODE ?? ''),
-    timeoutMs: int('STUDIO_TIMEOUT_MS', 30000, 1000, 60000), planTimeoutMs: int('STUDIO_PLAN_TIMEOUT_MS', 60000, 1000, 60000), maxTokens: int('STUDIO_MAX_TOKENS', 1200, 256, 4096),
+    timeoutMs: int('STUDIO_TIMEOUT_MS', 30000, 1000, 60000), planTimeoutMs: int('STUDIO_PLAN_TIMEOUT_MS', 60000, 1000, 60000),
+    // Map reading only: identity and relation judgements keep the model's reasoning (lowest effort); max_tokens counts reasoning
+    // too, so the map gets a budget of its own large enough for both (8192 was used up by reasoning before the JSON finished).
+    mapThinking: env.STUDIO_MAP_THINKING === 'disabled' ? 'disabled' : 'enabled', mapMaxTokens: int('STUDIO_MAP_MAX_TOKENS', 16384, 4096, 32768),
+    mapTimeoutMs: int('STUDIO_MAP_TIMEOUT_MS', 90000, 1000, 120000), maxTokens: int('STUDIO_MAX_TOKENS', 1200, 256, 4096),
     rate: int('STUDIO_REQUESTS_PER_MINUTE', 10, 1, 120), cap: int('STUDIO_CALL_CAP', 300, 1, 100000), concurrency: int('STUDIO_MAX_CONCURRENT', 3, 1, 16)
   };
 }
@@ -97,13 +101,14 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
   if (!config.apiKey) throw new ApiError('AI_NOT_CONFIGURED', 503);
   if (signal?.aborted) throw new ApiError('CANCELLED', 499);
   const controller = new AbortController(); let timedOut = false;
-  const timer = setTimeout(() => { timedOut = true; controller.abort(); }, planning || digest ? (config.planTimeoutMs ?? config.timeoutMs) : config.timeoutMs);
+  const timer = setTimeout(() => { timedOut = true; controller.abort(); }, map ? (config.mapTimeoutMs ?? config.planTimeoutMs ?? config.timeoutMs) : planning || digest ? (config.planTimeoutMs ?? config.timeoutMs) : config.timeoutMs);
   const abort = () => controller.abort(); signal?.addEventListener('abort', abort, { once: true });
   try {
     // Workers supports manual/follow, not redirect:error. Reject 3xx below without forwarding the key.
     const response = await fetchImpl(ENDPOINT, { method: 'POST', redirect: 'manual', signal: controller.signal,
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.apiKey}` },
-      body: JSON.stringify({ model: config.model, stream: false, thinking: { type: scope || planning || digest ? 'enabled' : 'disabled' }, ...(scope || planning || digest ? { reasoning_effort: 'low' } : {}), max_tokens: planning || digest ? 8192 : scope ? 4096 : config.maxTokens,
+      body: JSON.stringify({ model: config.model, stream: false, ...(map ? { thinking: { type: config.mapThinking ?? 'enabled' }, ...((config.mapThinking ?? 'enabled') === 'enabled' ? { reasoning_effort: 'low' } : {}), max_tokens: config.mapMaxTokens ?? 16384 }
+        : { thinking: { type: scope || planning || digest ? 'enabled' : 'disabled' }, ...(scope || planning || digest ? { reasoning_effort: 'low' } : {}), max_tokens: planning || digest ? 8192 : scope ? 4096 : config.maxTokens }),
         response_format: { type: 'json_object' },
         messages: [{ role: 'system', content: map ? MAP_PROMPT : digest2 ? DIGEST2_PROMPT : digest ? DIGEST_PROMPT : scope ? SCOPE_PROMPT : planning ? PLAN_PROMPT : STUDIO_PROMPT }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }] }) });
     if (!response.ok) {

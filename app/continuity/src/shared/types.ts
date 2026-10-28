@@ -192,6 +192,8 @@ export interface ReadingPart {
   created: { name: string; parentId: string | null } | null;
   /** The part's responsibility as read (one or two sentences), null when this reading says nothing new about it. */
   role: string | null;
+  /** Version, commit or time the record names for that description (as written), else null. */
+  roleAbout: string | null;
   basis: ReadingQuote[]; claims: ReadingClaim[];
 }
 export interface ReadingRelation { relationId: string; from: string; to: string; kind: RelationKind; quote: ReadingQuote }
@@ -202,8 +204,8 @@ export interface MapReading {
   version: 'map-reading.1'; id: string; at: string; model: string; prompt: string;
   /** SHA-256 of the request: the very same request is never sent or applied again. */
   hash: string;
-  /** Records read, and how much of each went (characters from the start). */
-  records: { id: string; sent: number; total: number }[];
+  /** Records read, and which part of each went: characters [from, to) of total. A record's unsent tail is read by a later reading. */
+  records: { id: string; from: number; to: number; total: number }[];
   summary: string; parts: ReadingPart[]; relations: ReadingRelation[]; candidates: ReadingCandidate[]; gaps: string[]; skipped: ReadingSkip[];
 }
 /** The person's own correction of a part's description as read (never Area.note, never a return.2 description): it names the

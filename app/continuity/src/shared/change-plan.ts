@@ -1,5 +1,8 @@
 /** A hypothetical change is separate from project requirements and from execution evidence. */
-export interface Evidence { id: string; kind: 'user' | 'report' | 'code' | 'test'; title: string; text: string; basis: string }
+/** record: a record pasted as it came (requests, reports and checks mixed; never promoted to one of them). reading: what the map
+ * readings understood about a part, with its quotes (derived, not a record and not a verified fact). */
+export interface Evidence { id: string; kind: 'user' | 'report' | 'code' | 'test' | 'record' | 'reading'; title: string; text: string; basis: string }
+export const EVIDENCE_KINDS: readonly Evidence['kind'][] = ['user', 'report', 'code', 'test', 'record', 'reading'];
 /** A source-bound reading aid, not graph operations or proof of current product behaviour. */
 export interface PlanPresentation {
   partId: string;
@@ -38,7 +41,7 @@ function evidenceList(value: unknown): asserts value is Evidence[] {
   list(value, MAX_EVIDENCE);
   for (const v of value) {
     object(v, ['id', 'kind', 'title', 'text', 'basis']); id(v.id); text(v.title, 200); text(v.text); text(v.basis, 2000);
-    check(['user', 'report', 'code', 'test'].includes(v.kind as string));
+    check(EVIDENCE_KINDS.includes(v.kind as Evidence['kind']));
   }
   check(new Set(value.map(v => (v as Evidence).id)).size === value.length);
 }

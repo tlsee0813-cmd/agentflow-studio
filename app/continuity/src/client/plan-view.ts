@@ -936,7 +936,7 @@ export function createPlanView(host: PlanHost) {
   /** The plan's basis is fixed; newer records are announced, never merged into it. */
   function newerNote(o: PlanOpened, p: ChangePlan | null) {
     if (!p || o.kind !== 'saved') return null;
-    const newer = o.view.records.filter(r => r.at > p.createdAt).length;
+    const newer = o.view.records.filter(r => r.at > p.createdAt).length + o.project.pasted.filter(r => r.at > p.createdAt).length;
     return newer ? h('p', { class: 'pp-newer' }, `만든 뒤 새 기록 ${newer}개 · 이 안의 기준은 그대로예요`) : null;
   }
   function intentSection(o: PlanOpened) {

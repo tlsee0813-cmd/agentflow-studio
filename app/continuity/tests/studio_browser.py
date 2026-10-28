@@ -317,6 +317,10 @@ def new_project_flow(browser, base):
     page.locator("#new-name").fill("테스트 프로젝트")
     page.locator("#new-form").get_by_role("button", name="만들기").click()
     expect(page.locator("#crumbs")).to_contain_text("테스트 프로젝트")
+    # EXPERIENCE70: records are the first way in; adding a part by hand is the other, one click away.
+    expect(page.locator("#space-empty")).to_contain_text("기록으로 첫 지도를 만들어요")
+    expect(page.locator("#part-form")).to_be_hidden()
+    page.locator("#space-empty .se-direct").click()
     expect(page.locator("#part-form")).to_contain_text("첫 부분 만들기")
     page.locator("#part-name").fill("로그인")
     page.get_by_role("button", name="만들기").click()
@@ -1546,6 +1550,99 @@ def record_fold_flow(browser, base, cases):
     page.close()
 
 
+def map70_flow(browser, base):
+    """EXPERIENCE70: a new project's first map from a pasted record (saving sends nothing; reading into the map is the one action
+    that sends), then select -> quote -> back to the part, the person's rename, place and plan draft kept, a later record updating
+    the same part, and the change plan reading the pasted text as kind 'record' and the derived understanding as 'reading'.
+    Stubbed model (labelled '[스텁]'): layout and round trips only, not reading quality."""
+    cli = (ROOT / "tests/fixtures/record70/synthetic-cli.txt").read_text(encoding="utf-8")
+    later = (ROOT / "tests/fixtures/record70/synthetic-cli-later.txt").read_text(encoding="utf-8")
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    errors, sent = [], []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.on("request", lambda r: sent.append(r.url) if r.url.endswith("/api/studio/map") else None)
+    page.goto(base + "/")
+    page.locator("#new-open").click()
+    page.locator("#new-name").fill("지도 프로젝트")
+    page.locator("#new-form").get_by_role("button", name="만들기").click()
+    entry = page.locator("#space-empty")
+    expect(entry).to_contain_text("기록으로 첫 지도를 만들어요")
+    expect(entry).to_contain_text("저장만 해서는 AI에 보내지 않아요")
+    # Paste and save: kept in the project, nothing sent.
+    entry.get_by_role("button", name="기록 붙여넣기").click()
+    page.locator("#paste-text").fill(cli)
+    expect(page.locator("#lens .rr-foot")).to_contain_text("저장해도 AI에 보내지 않아요")
+    page.locator("#lens").get_by_role("button", name="기록 저장").click()
+    expect(page.locator("#lens .rr-map")).to_be_visible()
+    assert sent == [], sent
+    # The one action that sends says what it sends, then the map is there; the pane says what was understood.
+    expect(entry.locator(".fine")).to_contain_text("기록 1개를 AI에 보내요")
+    entry.get_by_role("button", name="기록으로 지도 정리").click()
+    expect(page.locator("#world .node")).to_have_count(3)
+    assert len(sent) == 1, sent
+    expect(entry).to_be_hidden()
+    expect(page.locator("#lens .rr-map .rm-summary")).to_contain_text("[스텁]")
+    expect(page.locator("#world .map-understood")).to_contain_text("[스텁]")
+    no_page_scroll(page)
+    # Select -> the description and a claim -> its quote, marked -> back to the same part.
+    page.locator("#world .node", has_text="스텁 부분 1").click()
+    expect(page.locator("#lens-title")).to_have_text("스텁 부분 1")
+    expect(page.locator("#lens .lens-src")).to_contain_text("기록에서 읽은 설명")
+    expect(page.locator("#lens .claims .claim")).to_have_count(1)
+    page.locator("#lens .claims .cl-cite").first.click()
+    expect(page.locator("#lens .rr-mark")).to_contain_text("요구:")
+    page.locator("#lens .rr-head .close").click()
+    expect(page.locator("#lens-title")).to_have_text("스텁 부분 1")
+    # The person's own name, place and plan draft.
+    page.locator(".more summary:visible").click()
+    page.get_by_role("menuitem", name="이름·설명 고치기").click()
+    page.locator("#edit-name").fill("변환기")
+    page.locator(".edit-form").get_by_role("button", name="저장").click()
+    expect(page.locator("#world .node", has_text="변환기")).to_have_count(1)
+    page.keyboard.press("Escape")
+    drag(page, page.locator("#world .node", has_text="스텁 부분 2"), 140, 60)
+    placed = page.locator("#world .node", has_text="스텁 부분 2").evaluate("e => e.style.left + ',' + e.style.top")
+    page.locator("#plan-entry").click()
+    page.locator("#plan-intent").fill("폴더째 변환하고 싶어")
+    page.locator("#plan-entry").click()
+    # A later record: saved, then read into the same map; the renamed part keeps its name and the moved one its place.
+    page.locator("#return-entry").click()
+    page.locator("#lens .rr-paste-open").click()
+    page.locator("#paste-text").fill(later)
+    page.locator("#lens").get_by_role("button", name="기록 저장").click()
+    assert len(sent) == 1, sent
+    page.locator("#lens .rr-map").get_by_role("button", name="기록 읽고 지도 갱신").click()
+    expect(page.locator("#lens .rr-map .rm-summary")).to_contain_text("첫 부분")
+    assert len(sent) == 2, sent
+    expect(page.locator("#world .node")).to_have_count(3)
+    expect(page.locator("#world .node", has_text="변환기")).to_have_count(1)
+    assert page.locator("#world .node", has_text="스텁 부분 2").evaluate("e => e.style.left + ',' + e.style.top") == placed
+    page.locator("#lens .rr-head .close").click()
+    page.locator("#world .node", has_text="변환기").click()
+    expect(page.locator("#lens .claims .claim")).to_have_count(2)
+    # The change plan: the draft kept; the pasted text goes as 'record', what was read as 'reading'.
+    page.keyboard.press("Escape")
+    bodies = []
+    def plan(route):
+        bodies.append(json.loads(route.request.post_data))
+        route.fulfill(status=503, content_type="application/json", body=json.dumps({"error": {"code": "AI_UNAVAILABLE"}}))
+    page.route("**/api/studio/plan", plan)
+    page.locator("#plan-entry").click()
+    expect(page.locator("#plan-intent")).to_have_value("폴더째 변환하고 싶어")
+    page.locator("#plan-ask").click()
+    expect(page.locator("#plan-panel .pp-error")).to_be_visible()
+    kinds = {e["kind"] for e in bodies[0]["evidence"]}
+    assert {"record", "reading"} <= kinds and [e["text"] for e in bodies[0]["evidence"] if e["kind"] == "record"] == [later, cli], kinds
+    page.unroute("**/api/studio/plan")
+    # Reload: the map, the reading and the person's edits come back from the saved project.
+    page.reload()
+    expect(page.locator("#world .node")).to_have_count(3)
+    expect(page.locator("#world .map-understood")).to_contain_text("[스텁]")
+    assert not errors, errors
+    context.close()
+
+
 def plan_reply(route, title):
     """A valid analysis of exactly what the page sent (test-only, routed in the browser): one change on the first part, cited
     to the sentence itself. Never a model's reading."""
@@ -1629,6 +1726,7 @@ def stale_request_flow(browser, base):
     page.locator("#new-open").click()
     page.locator("#new-name").fill("자료 프로젝트")
     page.locator("#new-form").get_by_role("button", name="만들기").click()
+    page.locator("#space-empty .se-direct").click()
     page.locator("#part-name").fill("변환")
     page.get_by_role("button", name="만들기").click()
     page.keyboard.press("Escape")
@@ -1686,6 +1784,7 @@ def stale_request_flow(browser, base):
     page.locator("#new-open").click()
     page.locator("#new-name").fill("느린 화면")
     page.locator("#new-form").get_by_role("button", name="만들기").click()
+    page.locator("#space-empty .se-direct").click()
     page.locator("#part-name").fill("변환")
     page.get_by_role("button", name="만들기").click()
     page.keyboard.press("Escape")
@@ -1815,6 +1914,7 @@ def actual_reply_flow(browser, base):
     page.locator("#new-open").click()
     page.locator("#new-name").fill("검토 프로젝트")
     page.locator("#new-form").get_by_role("button", name="만들기").click()
+    page.locator("#space-empty .se-direct").click()
     page.locator("#part-name").fill("변환")
     page.get_by_role("button", name="만들기").click()
     page.keyboard.press("Escape")
@@ -1990,6 +2090,7 @@ def main():
             relation_visit_flow(browser, base, oss_fixtures()); print("ok  relation visit: named way back to its part, selection, camera, sheet and scroll; browser Back the same; no stale way back")
             return_flow(browser, base, oss_fixtures()); print("ok  return reading: no call on open, one per material, exact quote and back, draft never overwritten, Node-RED plan without result")
             record_flow(browser, base, record_fixtures()); print("ok  pasted record: draft kept, exact text, structure untouched, read on request, same-named candidates apart, quote and back, scene restored, repeat/key refused, backup copy without readings")
+            map70_flow(browser, base); print("ok  first map from a pasted record (save sends nothing), quote and back, rename/place/draft kept, later record on the same part, plan reads record and reading")
             record_fold_flow(browser, base, oss_fixtures()); print("ok  pasted record on Node-RED: a chosen candidate in a folded group opens only its path, holds through a quote, folds back on another choice and on close")
             stale_request_flow(browser, base); print("ok  request only from the analysis of what is written now: typed, forced, A-B-A, cancelled and outdated replies, material")
             actual_reply_flow(browser, base); print("ok  wide comparison of an actual reply without presentation; scope reviews outliving a material change; four changes")

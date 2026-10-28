@@ -1,4 +1,4 @@
-import { parsePlanAnalysis, type Evidence, type PlanAnalysis } from './change-plan.js';
+import { parsePlanAnalysis, EVIDENCE_KINDS, type Evidence, type PlanAnalysis } from './change-plan.js';
 
 export interface PlanAsk {
   schemaVersion: 'studio.plan.1';
@@ -40,7 +40,7 @@ export function validatePlanAsk(value: unknown): PlanAsk {
   for (const source of value.evidence) {
     obj(source, ['id', 'kind', 'title', 'text', 'basis']); id(source.id); text(source.title, 200);
     text(source.text, 12000); text(source.basis, 2000);
-    check(['user', 'report', 'code', 'test'].includes(source.kind as string));
+    check(EVIDENCE_KINDS.includes(source.kind as Evidence['kind']));
     check(!refs.has(source.id)); refs.add(source.id);
   }
   return structuredClone(value as unknown as PlanAsk);

@@ -73,12 +73,12 @@ export function savedReading(view: StudioView, bundle: PlanBundle | null, pasted
       text: clean(o.text), note: snap ? `요청문(${fullTime(snap.createdAt)}, ${snap.planId} / ${snap.planRevision})의 항목에 붙인 기록${samePlan ? '' : ' · 현재 변경안과 판본이 달라 현재 부분 연결은 추정하지 않음'}` : '연결된 요청문을 찾을 수 없어 현재 부분 연결은 추정하지 않음', basis: clip(clean(o.basis), 600),
       partIds: (item?.partIds ?? []).filter(id => view.parts.some(p => p.id === id)), url: null });
   }
-  for (const e of bundle?.extra ?? []) out.push({ id: e.id, kind: e.kind === 'user' ? 'user' : e.kind, title: clip(e.title, 200), text: clean(e.text),
+  for (const e of bundle?.extra ?? []) out.push({ id: e.id, kind: e.kind === 'user' ? 'user' : e.kind === 'reading' ? 'plan' : e.kind, title: clip(e.title, 200), text: clean(e.text),
     note: '변경 구상에 붙인 자료', basis: clip(clean(e.basis), 600), partIds: citedBy(e.id), url: null });
   // The plan's own sources that are neither a project record (E..) nor attached material (U..) nor the project purpose.
   let v = 0;
   for (const e of plan?.evidence ?? []) {
-    if (/^(E\d+|U\d+|BRIEF)$/.test(e.id)) continue;
+    if (/^(E\d+|U\d+|N\d+|M\d+|BRIEF)$/.test(e.id)) continue;
     out.push({ id: `V${String(++v).padStart(2, '0')}`, kind: 'plan', title: clip(`변경안 근거 · ${EVIDENCE_LABEL[e.kind]} · ${e.title}`, 200), text: clean(e.text),
       note: '변경 구상이 읽은 자료', basis: clip(clean(e.basis), 600), partIds: citedBy(e.id), url: null });
   }

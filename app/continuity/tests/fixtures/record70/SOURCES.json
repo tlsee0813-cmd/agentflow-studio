@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "agentflow.record70-samples.1",
+  "samples": [
+    { "file": "synthetic-cli.txt", "kind": "synthetic", "note": "Written for EXPERIENCE70: an early CLI document converter with a requirement, an author's implementation report and a folder idea in one record. Not a real report." },
+    { "file": "synthetic-cli-later.txt", "kind": "synthetic", "note": "Written for EXPERIENCE70: a later author's report on the same converter (docx added). Not a real report." }
+  ]
+}
