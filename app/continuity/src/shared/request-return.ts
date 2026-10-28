@@ -81,10 +81,12 @@ export function correctRequestMatch(p: Project, reading: string, index: number, 
   return { ...p, revision: p.revision + 1, readings: [...p.readings, entry] };
 }
 /** Stored origins are checked against the exact received interval, including offsets into a long record. */
-export function validateStoredMatch(v: unknown, requests: FrozenRequest[], intervals: { id: string; from: number; to: number }[], texts: Map<string, string>): StoredRequestMatch {
+export function validateStoredMatch(v: unknown, requests: FrozenRequest[], intervals: { id: string; from: number; to: number }[], texts: Map<string, string>, materialIds: Set<string>): StoredRequestMatch {
   if (!v || typeof v !== 'object') fail();
   const { from, to, ...base } = v as StoredRequestMatch;
   const m = validateRequestMatch(base, requests), source = texts.get(m.record);
   if (!Number.isSafeInteger(from) || !Number.isSafeInteger(to) || from < 0 || to <= from || !source || source.slice(from, to) !== m.quote || !intervals.some(r => r.id === m.record && from >= r.from && to <= r.to)) fail();
+  if (m.about !== null && !intervals.some(r => r.id === m.record && source!.slice(r.from, r.to).includes(m.about!))) fail();
+  if (['code', 'test'].includes(m.kind) && !materialIds.has(m.record)) fail();
   return { ...m, from, to };
 }

@@ -229,7 +229,7 @@ function assertProject(v: unknown): asserts v is Project {
   const tasks=new Set<string>(),returns=new Map<string,{taskId:string;record:ExportRecord}>();
   const areaIds=space(v.space);
   pasted(v.pasted,areaIds);
-  readings(v.readings,areaIds,new Map([...(v.pasted as {id:string;text:string}[]).map(r=>[r.id,r.text] as const),...[...sources.values()].map(r=>[r.id,r.text] as const)]),v.id as string);
+  readings(v.readings,areaIds,new Map([...(v.pasted as {id:string;text:string}[]).map(r=>[r.id,r.text] as const),...[...sources.values()].map(r=>[r.id,r.text] as const)]),v.id as string,new Set([...sources.values()].filter(s=>s.kind==='evidence').map(s=>s.id)));
   for (const t of v.tasks) {
     const optional=['intentEdit','areaId'].filter(k=>t&&typeof t==='object'&&Object.hasOwn(t,k));
     obj(t,['id','sourceIds','parentTaskId','advice','adviceRevision','mode','manual','suggestions','handoffs','resultFile','background',...optional]); id(t.id);
@@ -335,7 +335,7 @@ function pasted(v:unknown,areaIds:Set<string>) {
 }
 /** Map readings: every part a known area, every quote of a known record (a pasted record or a source), every claim a known
  * kind, and a claim replaced only by a later one of the same area. Relation ids may be gone (the person removed the line). */
-function readings(v:unknown,areaIds:Set<string>,records:Map<string,string>,projectId:string) {
+function readings(v:unknown,areaIds:Set<string>,records:Map<string,string>,projectId:string,materialIds:Set<string>) {
   list(v,READINGS_LIMIT);const seen=new Map<string,Map<string,number>>(),hashes=new Set<string>();
   const quote=(q:unknown)=>{obj(q,['record','quote']);ensure(records.has(q.record as string));text(q.quote,300);};
   const entries=new Set<string>();
@@ -373,7 +373,7 @@ function readings(v:unknown,areaIds:Set<string>,records:Map<string,string>,proje
     list(r.skipped,64);for(const x of r.skipped){obj(x,['what','name','reason']);ensure(['part','relation'].includes(x.what as string));text(x.name,200);ensure(['same-name','archived','removed','exists','parent-skipped'].includes(x.reason as string));}
     if(two){
       list(r.requests,8);const requests=(r.requests as unknown[]).map(validateFrozenRequest);ensure(requests.every(q=>q.projectId===projectId)&&new Set(requests.map(q=>q.id)).size===requests.length);
-      list(r.matches,24);const matches=(r.matches as unknown[]).map(m=>validateStoredMatch(m,requests,r.records as {id:string;from:number;to:number}[],records));
+      list(r.matches,24);const matches=(r.matches as unknown[]).map(m=>validateStoredMatch(m,requests,r.records as {id:string;from:number;to:number}[],records,materialIds));
       requestReadings.set(r.id as string,{requests,matches});
     }
     seen.set(r.id as string,claims);

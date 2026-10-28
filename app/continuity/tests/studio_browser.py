@@ -1657,6 +1657,100 @@ def map70_flow(browser, base):
     context.close()
 
 
+def request71_flow(browser, base):
+    """EXPERIENCE71: first map -> own demand -> frozen request -> plain partial report -> one combined map read ->
+    wanted/reported/unanswered beside the same part -> exact quote and back -> durable exclusion. Written HTTP replies,
+    labelled '[스텁]', test the actual UI and storage path, not AI reading quality. No direct localStorage seeding."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    errors, maps = [], []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.goto(base + "/")
+    page.locator("#new-open").click()
+    page.locator("#new-name").fill("요청과 부분 보고")
+    page.locator("#new-form").get_by_role("button", name="만들기").click()
+    page.wait_for_url(re.compile(r"#/p/E_"))
+    entry_id = re.search(r"#/p/(E_[^/]+)", page.url).group(1)
+    page.locator("#space-empty").get_by_role("button", name="기록 붙여넣기").click()
+    page.locator("#paste-text").fill("작업 보고: 변환 명령으로 단일 문서를 PDF로 내보냅니다.")
+    page.locator("#lens").get_by_role("button", name="기록 저장").click()
+    page.locator("#space-empty").get_by_role("button", name="기록으로 지도 정리").click()
+    expect(page.locator("#world .node")).to_have_count(1)
+    area = page.locator("#world .node").get_attribute("data-part")
+
+    def analysis(route):
+        ask = route.request.post_data_json
+        items = [{"id": f"I{i + 1}", "title": title, "description": description, "partIds": [ask["parts"][0]["id"]], "refs": ["INTENT"], "dependsOn": []}
+                 for i, (title, description) in enumerate([("폴더 입력", "폴더 안 파일을 입력받는다."), ("실패 후 계속", "한 파일이 실패해도 다음 파일은 계속한다."), ("성공 유지·실패 모음", "성공 결과를 유지하고 실패를 모아 본다.")])]
+        route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "reply": {"summary": "[스텁] 폴더 변환의 세 요구", "items": items, "impacts": [], "preserve": ["기존 내용 보존"], "unknowns": []}}))
+    page.route("**/api/studio/plan", analysis)
+    page.route("**/api/studio/scope", lambda route: route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "reply": {"summary": "[스텁] 선택 범위", "prerequisites": [], "unknowns": []}})))
+    page.locator("#plan-entry").click()
+    intent = "폴더 입력, 한 파일 실패 후 계속, 성공 유지와 실패 모음을 원해."
+    page.locator("#plan-intent").fill(intent)
+    page.locator("#plan-ask").click()
+    expect(page.locator(".ps-intent")).to_have_text(intent)
+    page.locator(".ps-more").click()
+    page.locator("#plan-make").click()
+    expect(page.locator("#plan-sheet pre")).to_contain_text("폴더 입력")
+    frozen_before = page.evaluate("() => JSON.parse(localStorage.getItem('agentflow.studio.plans.1'))")
+    project = page.evaluate(ENTRY, entry_id)
+    bundle = frozen_before["projects"][project["id"]]
+    assert len(bundle["snapshots"]) == 1 and len(bundle["snapshots"][0]["scope"]["items"]) == 3
+    rq = bundle["snapshots"][0]["id"]
+    page.keyboard.press("Escape")
+    page.get_by_role("button", name=re.compile(r"^돌아온 기록 · 요청문")).click()
+    page.get_by_role("button", name="보고 원문 붙여넣기").click()
+    expect(page.locator("#obs-item")).to_have_count(0)
+    report = "작업 보고: feature/folder@abc1234에서 폴더 안 파일을 받는 입력을 바꿨습니다. 기존 단일 문서 검사 3개 통과."
+    page.locator("#paste-text").fill(report)
+    page.locator("#lens").get_by_role("button", name="기록 저장").click()
+    assert maps == [], "saving the report does not read or classify it"
+    def returned(route):
+        ask = route.request.post_data_json
+        maps.append(ask)
+        assert ask["schemaVersion"] == "studio.map.2" and ask["requests"][0]["id"] == rq
+        rec = next(r for r in ask["records"] if "feature/folder" in r["text"])
+        match = {"record": rec["id"], "quote": "폴더 안 파일을 받는 입력을 바꿨습니다", "text": "[스텁] 폴더 입력 변경 보고", "kind": "reported", "about": "feature/folder@abc1234", "targets": [{"requestId": rq, "itemId": "I1"}], "why": "[스텁] 입력 요구에 대응하는 구절"}
+        check = {**match, "kind": "checked", "quote": "기존 단일 문서 검사 3개 통과", "text": "[스텁] 단일 문서 검사만 통과했다고 보고함"}
+        route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "reply": {"summary": "[스텁] 폴더 입력만 부분 보고됨", "parts": [], "relations": [], "candidates": [], "gaps": [], "matches": [match, check]}}))
+    page.route("**/api/studio/map", returned)
+    page.locator("#lens .rr-map").get_by_role("button", name="기록 읽고 지도 갱신").click()
+    expect(page.locator("#world .map-understood")).to_contain_text("폴더 입력만 부분 보고됨")
+    assert len(maps) == 1
+    assert page.evaluate("() => JSON.parse(localStorage.getItem('agentflow.studio.plans.1'))") == frozen_before, "return reading never writes the plan sidecar"
+    page.locator(f'#world .node[data-part="{area}"]').click()
+    expect(page.locator("#lens .request-item")).to_have_count(3)
+    expect(page.locator("#lens .request-item > summary").nth(0)).to_contain_text("폴더 입력 변경 보고")
+    expect(page.locator("#lens .request-item > summary").nth(1)).to_contain_text("아직 받은 내용 없음")
+    expect(page.locator("#lens .request-item > summary").nth(2)).to_contain_text("아직 받은 내용 없음")
+    page.locator("#lens .request-item > summary").first.click()
+    expect(page.locator("#lens .request-passage").first).to_contain_text("feature/folder@abc1234")
+    page.wait_for_timeout(300)
+    url0, camera0 = page.url, page.locator("#world").evaluate(CAMERA)
+    page.locator("#lens .request-passage", has_text="폴더 입력 변경 보고").get_by_role("button", name="근거", exact=True).click()
+    expect(page.locator("#lens .rr-mark")).to_have_text("폴더 안 파일을 받는 입력을 바꿨습니다")
+    page.locator("#lens .rr-back").click()
+    expect(page).to_have_url(url0)
+    page.wait_for_timeout(300)
+    assert page.locator("#world").evaluate(CAMERA) == camera0
+    # The correction is optional and local to this correspondence; it never changes the request or the map's role.
+    page.locator("#lens .request-item > summary").first.click()
+    page.locator("#lens .request-fix > summary").first.click()
+    page.locator("#lens .request-fix select").first.select_option("")
+    page.locator("#lens .request-fix").first.get_by_role("button", name="저장").click()
+    expect(page.locator("#lens .request-excluded > summary")).to_contain_text("제외한 대응 1개")
+    saved = page.evaluate(ENTRY, entry_id)
+    assert saved["readings"][-1]["version"] == "request-correction.1" and saved["readings"][-1]["target"] is None
+    assert not saved["tasks"] and not saved["sources"]
+    page.reload()
+    page.locator(f'#world .node[data-part="{area}"]').click()
+    expect(page.locator("#lens .request-excluded > summary")).to_contain_text("제외한 대응 1개")
+    no_page_scroll(page)
+    assert len(maps) == 1 and not errors, errors
+    context.close()
+
+
 def plan_reply(route, title):
     """A valid analysis of exactly what the page sent (test-only, routed in the browser): one change on the first part, cited
     to the sentence itself. Never a model's reading."""
@@ -2105,6 +2199,7 @@ def main():
             return_flow(browser, base, oss_fixtures()); print("ok  return reading: no call on open, one per material, exact quote and back, draft never overwritten, Node-RED plan without result")
             record_flow(browser, base, record_fixtures()); print("ok  pasted record: draft kept, exact text, structure untouched, read on request, same-named candidates apart, quote and back, scene restored, repeat/key refused, backup copy without readings")
             map70_flow(browser, base); print("ok  first map from a pasted record (save sends nothing), quote and back, rename/place/draft kept, later record on the same part, plan reads record and reading")
+            request71_flow(browser, base); print("ok  own map -> frozen three-item request -> plain partial report -> one combined read -> unanswered items, feature scope, exact quote/back, durable exclusion; stubbed replies")
             record_fold_flow(browser, base, oss_fixtures()); print("ok  pasted record on Node-RED: a chosen candidate in a folded group opens only its path, holds through a quote, folds back on another choice and on close")
             stale_request_flow(browser, base); print("ok  request only from the analysis of what is written now: typed, forced, A-B-A, cancelled and outdated replies, material")
             actual_reply_flow(browser, base); print("ok  wide comparison of an actual reply without presentation; scope reviews outliving a material change; four changes")

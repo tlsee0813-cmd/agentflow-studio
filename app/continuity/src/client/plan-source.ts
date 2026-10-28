@@ -108,7 +108,7 @@ export function projectInput(o: { project: Project; view: StudioView }, intent: 
       text: clip(clean(lines.join('\n')), 3000), basis: clip(`붙여넣은 기록을 AI가 읽어 정리한 이해 · 앱이 확인한 사실 아님 · ${fullTime(u.history.at(-1)!.at)}`, 2000) };
     ask.evidence.push(e);
     if (bytes(ask) > PLAN_BYTES - 64) { ask.evidence.pop(); m--; break; }
-    input.origins[e.id] = [...u.roleBasis.map(q => ({ record: q.record, reading: null, quote: q.quote })), ...u.claims.slice(0, 6).map(c => ({ record: c.record, reading: c.reading, quote: c.quote }))].slice(0, 16);
+    input.origins[e.id] = [...(u.corrected ? [{ record: null, reading: u.corrected.id, quote: null }] : []), ...u.roleBasis.map(q => ({ record: q.record, reading: null, quote: q.quote })), ...u.claims.slice(0, 6).map(c => ({ record: c.record, reading: c.reading, quote: c.quote }))].slice(0, 16);
   }
   type Item = { at: string; e: Evidence };
   const items: Item[] = [

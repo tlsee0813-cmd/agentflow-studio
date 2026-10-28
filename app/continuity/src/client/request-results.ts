@@ -19,6 +19,7 @@ export function requestResults(project: Project, scopes: FrozenRequest[], option
   const all = frozenRequests(project, scopes), requests = all.filter(q => (!options.requestId || q.id === options.requestId) && (!options.partId || q.items.some(i => i.partIds.includes(options.partId!))));
   if (!requests.length) return null;
   const matches = requestMatches(project), sec = h('section', { class: 'sec request-results', 'aria-label': '원한 것과 돌아온 범위' }, h('h3', {}, '원한 것과 돌아온 범위'));
+  const caption = (q: FrozenRequest) => `요청 ${all.findIndex(r => r.id === q.id) + 1} · ${fullTime(q.createdAt)} · 판 ${q.planRevision}`;
   const source = (m: EffectiveMatch) => {
     if (options.quote) return h('button', { type: 'button', class: 'cl-cite', title: m.match.quote, onclick: () => options.quote!(m.match.record, m.match.quote) }, '근거');
     const text = project.pasted.find(r => r.id === m.match.record)?.text ?? project.sources.find(r => r.id === m.match.record)?.text ?? '';
@@ -31,7 +32,7 @@ export function requestResults(project: Project, scopes: FrozenRequest[], option
     const targets: RequestTarget[] = [];
     for (const q of x.requests) for (const item of q.items) {
       const target = { requestId: q.id, itemId: item.id }, value = String(targets.push(target));
-      select.append(h('option', { value, selected: !!x.target && x.target.requestId === q.id && x.target.itemId === item.id }, `${item.title} · ${fullTime(q.createdAt)} · 판 ${q.planRevision}`));
+      select.append(h('option', { value, selected: !!x.target && x.target.requestId === q.id && x.target.itemId === item.id }, `${item.title} · ${caption(q)}`));
     }
     const msg = h('span', { role: 'status', class: 'form-msg' }), button = h('button', { type: 'button', class: 'link-button', onclick: async () => {
       (button as HTMLButtonElement).disabled = true;
@@ -45,11 +46,12 @@ export function requestResults(project: Project, scopes: FrozenRequest[], option
       x.match.about ? h('small', { class: 'cl-about', title: x.match.about }, ` · ${displayAbout(x.match.about)}`) : null),
     source(x), correction(x));
   for (const q of requests.slice().reverse()) {
-    const group = h('div', { class: 'request-group' }, h('p', { class: 'request-at', title: `${q.id} · ${q.planId} / ${q.planRevision}` }, `${fullTime(q.createdAt)} 요청 · 판 ${q.planRevision}`));
+    const group = h('div', { class: 'request-group' }, h('p', { class: 'request-at', title: `${q.id} · ${q.planId} / ${q.planRevision}` }, caption(q)));
     for (const item of q.items.filter(i => !options.partId || i.partIds.includes(options.partId))) {
       const own = matches.filter(x => !x.excluded && x.target?.requestId === q.id && x.target.itemId === item.id);
+      const lead = own.find(x => x.match.kind === 'reported' || x.match.kind === 'code') ?? own[0];
       const detail = h('details', { class: `request-item${own.length ? ' has' : ''}`, open: !options.compact },
-        h('summary', {}, item.title, h('small', {}, own.length ? ` · ${own[0]!.match.text.slice(0, 90)}` : ' · 아직 받은 내용 없음')),
+        h('summary', {}, item.title, h('small', {}, lead ? ` · ${lead.match.text.slice(0, 90)}` : ' · 아직 받은 내용 없음')),
         h('p', { class: 'request-want' }, h('span', { class: 'cl-kind' }, '원함'), item.description));
       if (own.length) own.forEach(x => detail.append(passage(x)));
       else detail.append(h('p', { class: 'request-remains' }, '이 요청에 대응하는 내용은 아직 받지 못했어요.'));
@@ -65,7 +67,7 @@ export function requestResults(project: Project, scopes: FrozenRequest[], option
       const b = h('button', { type: 'button', class: 'link-button', title: `${q.id} · ${item.description}`, onclick: async () => {
         (b as HTMLButtonElement).disabled = true; const error = await options.correct(x.reading, x.index, t);
         if (error) { (b as HTMLButtonElement).disabled = false; pending.append(h('p', { role: 'alert' }, error)); }
-      } }, `${item.title} · ${fullTime(q.createdAt)} · 판 ${q.planRevision}`); pending.append(b);
+      } }, `${item.title} · ${caption(q)}`); pending.append(b);
     }
     pending.append(correction(x)); sec.append(pending);
   }

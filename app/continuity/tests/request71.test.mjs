@@ -57,7 +57,7 @@ test('71 source-bound contracts reject fabricated ids, omitted quotes, borrowed 
   ]) assert.throws(() => M.validateMapReply(reply([m]), inp.ask), /INVALID_RESPONSE/);
   assert.throws(() => M.validateMapAsk({ ...inp.ask, requests: [{ ...snap.scope, extra: true }] }));
   const done = apply(p, inp, reply([match(snap)]));
-  for (const mutate of [x => x.readings[0].matches[0].to++, x => x.readings[0].requests[0].projectId = 'other', x => x.readings[0].matches[0].targets[0].itemId = 'bad']) {
+  for (const mutate of [x => x.readings[0].matches[0].to++, x => x.readings[0].requests[0].projectId = 'other', x => x.readings[0].matches[0].targets[0].itemId = 'bad', x => x.readings[0].matches[0].about = 'main', x => x.readings[0].matches[0].kind = 'test']) {
     const bad = structuredClone(done.project); mutate(bad); assert.throws(() => parseProject(JSON.stringify(bad)));
   }
 });
