@@ -1,0 +1,148 @@
+{
+  "task": "AF88 old73 -> new107 independent artifact comparison",
+  "completedAt": "2026-10-28T23:25:29.545845+00:00",
+  "verdict": "PASS_SCOPED_MIGRATION_ARTIFACT_PRESERVATION",
+  "blockingP1P2": [],
+  "conclusion": "정상 UI가 회수한 파일 전체 JSON 대조에서 허용 편집과 저장 형식·관련 revision 이외 변경은 없다. 새 export의 정상 import/export 왕복도 보존됐다. 전체 출시 또는 첫 지도 품질 수용 판단은 아니다.",
+  "inputHashes": {
+    "experience88-old73-project-baseline.json": "7386f3b1670148791828371ba26dd3a45869f25b66582332154eec7299dfae88",
+    "experience88-old73-plan-baseline.json": "9e694b60ced2c8410bb64bcb716776b868aeda67c99b192201773a7dc518ff7b",
+    "experience88-new107-first-open-plan.json": "1d07edaf6e59e35ae93d74aa21a2973098b5f7e19626587201eccd6de9446304",
+    "experience88-new107-edited-plan.json": "691d702be83238aad95bb04766af8b8b5e2a15a541f01e4dad8cae26a3a6884a",
+    "experience88-new107-reopened-plan.json": "6585b4a942b8e9ec81065a7b2f60f9568d49371d7bf5464cfc1f8bbd335d1858",
+    "experience88-new107-reopened-project.json": "bd3ebc22fc2d1027b934f0f2cff46f9c751b87b7ebeeef3fe2a0b5009f1478fa",
+    "experience88-new107-quote-roundtrip.json": "cd951187ebf86e7b2f60e8bf543cdd9cf4c316b8847f5cb5f22486358e916b67",
+    "experience88-new107-frozen-request.json": "20dfb418af796e9f153ef587742abd3b22429426a9214d809b201a404c532362",
+    "experience88-new107-reopened-plan-dom.json": "b2bbb1ec5b3361c342b65e01711099620585510c04d50f62be03a1a69f5baf50",
+    "experience88-new107-roundtrip-plan.json": "1e5d2860c73caa0ef9534bc02c939e77ca1fd2ebc7f9a58825f2873babf03b04",
+    "experience88-new107-roundtrip-project.json": "bd3ebc22fc2d1027b934f0f2cff46f9c751b87b7ebeeef3fe2a0b5009f1478fa",
+    "experience88-new107-request-dom-text.txt": "e93a2b3457108f96b728499ce9307e0829e0e70ed74c7365cd2bcd7fcf6c4277"
+  },
+  "source": {
+    "old": "26b24b935567a95d101720cbf0e06d188d8765d9",
+    "new": "107318ac296ecbb1ce6734e630f8ec1f35eb9f6d",
+    "app": "7beb4ba00211a1afd3b9549ef4eb08a55b2a8384"
+  },
+  "fullJsonDiffPaths": {
+    "old73-plan-baseline -> new107-first-open-plan": [
+      "/exportedAt",
+      "/format"
+    ],
+    "new107-first-open-plan -> new107-edited-plan": [
+      "/bundle/draft",
+      "/exportedAt"
+    ],
+    "new107-edited-plan -> new107-reopened-plan": [
+      "/exportedAt"
+    ],
+    "old73-project-baseline -> new107-reopened-project": [
+      "/revision",
+      "/schemaVersion",
+      "/space/areas/0/note",
+      "/space/containment/revisions/A_ffccb029-6ba5-44f9-9a6e-8efa1b17f1c5"
+    ],
+    "new107-reopened-plan -> new107-roundtrip-plan": [
+      "/exportedAt"
+    ],
+    "new107-reopened-project -> new107-roundtrip-project": []
+  },
+  "checks": {
+    "file1ToOldFile2BundleExact": true,
+    "oldFile2ToFirstNewFile3BundleExact": true,
+    "firstNewReadDifferences": [
+      "format file.2 -> file.3",
+      "exportedAt"
+    ],
+    "ownerPreserved": true,
+    "planObjectIncludingAnalysisEvidenceSelectionExact": true,
+    "draftOnlyAllowedAppend": true,
+    "legacyDraftLength": 117,
+    "editedDraftLength": 133,
+    "oldProjectSchema": "idea015.project.11",
+    "newProjectSchema": "idea015.project.13",
+    "projectRevision": [
+      15,
+      16
+    ],
+    "noteEdit": {
+      "area": "A_ffccb029-6ba5-44f9-9a6e-8efa1b17f1c5",
+      "beforeEmpty": true,
+      "afterMarker": "[AF88 저장 전환 확인]",
+      "containmentRevision": [
+        0,
+        1
+      ]
+    },
+    "readingsPastedCoordinatesWithdrawalsExact": true,
+    "allOtherProjectFieldsExact": "전체 recursive diff의 네 경로 외 차이 없음",
+    "snapshotsLabelsOriginsByExtraObservationsAttachedExact": true,
+    "editedVsReopenedBundleExact": true,
+    "reopenedVsNormalReimportExportBundleExact": true,
+    "reopenedVsNormalReimportExportProjectByteExact": true,
+    "authoringBackfillAbsent": true
+  },
+  "existingRequestIdentity": {
+    "snapshotId": "RQ_1edf6fdb-bd02-4ce6-a083-1da06dcf8be1",
+    "readingRequestId": "RQ_efb368df-baa4-4668-ab7c-8e4f156daea8",
+    "differentIdsPreserved": true,
+    "samePlanRevisionItems": true,
+    "forcedReconnection": false,
+    "observations": 0
+  },
+  "sourceRoundtripEvidence": {
+    "kind": "root가 회수한 UI 관측 JSON의 독립 대조; 이 검토자가 UI 실행하지 않음",
+    "markCharacters": 53,
+    "exactClaimQuoteAndOriginalSubstring": true,
+    "sameClaimsUrlCamera": true,
+    "focus": "동일 area/reading/claim0의 근거 버튼으로 복귀한 outerHTML 확인",
+    "provenance": "공개 저장 프로젝트의 기존 합성 순차 정정72 원문. 실제 개발 완료 증거로 해석하지 않음"
+  },
+  "frozenRequestEvidence": {
+    "snapshotCharacters": 4013,
+    "fullSnapshotBytesPreservedInAllBundles": true,
+    "uiReportedPreExact": true,
+    "newDraftMarkerAbsent": true,
+    "limitation": "보존된 실제 PRE 원문 전체를 회수하여 snapshot 본문과 문자·UTF8 바이트 모두 전수 동일함을 독립 확인했다. 새 UI 실행은 하지 않았다.",
+    "domTextFile": "experience88-new107-request-dom-text.txt",
+    "domTextSha256": "e93a2b3457108f96b728499ce9307e0829e0e70ed74c7365cd2bcd7fcf6c4277",
+    "snapshotTextUtf8Sha256": "e93a2b3457108f96b728499ce9307e0829e0e70ed74c7365cd2bcd7fcf6c4277",
+    "domTextCharacters": 4013,
+    "independentFullTextEqual": true,
+    "independentUtf8BytesEqual": true
+  },
+  "requestCloseFocus": {
+    "observed": "root frozen-request.after focusTag BODY / focusId empty",
+    "sourceOld": {
+      "file": "app/continuity/src/client/plan-view.ts",
+      "line": 1208
+    },
+    "sourceNew": {
+      "file": "app/continuity/src/client/plan-view.ts",
+      "line": 1369
+    },
+    "closeFunctionExactlyEqual": true,
+    "mechanism": "render 후 #plan-make, .pw-req .link-button 중 첫 요소에 focus를 시도하는 기존 코드가 동일하다. 실제 복귀 trigger 보존 계약을 새로 증명하지 않는다.",
+    "judgment": "현재 관측은 남은 focus 한계로 기록. 이 마이그레이션에서 새로 도입한 closeSheet 코드 회귀 근거는 없음. 옛 UI 동일 행동을 재실행하여 입증한 것은 아님."
+  },
+  "boundaries": {
+    "reviewerApi": 0,
+    "reviewerBrowser": 0,
+    "tests": 0,
+    "productWrites": 0,
+    "helperWrites": 0,
+    "model": 0,
+    "4388": "기존 저장 상태 경고로 import0/write0 preflight 중단; migration 판정에서 제외",
+    "51888": "root가 빈 저장 상태 확인 뒤 정상 old/new UI 경로 수행했다는 별도 관측에 의존"
+  },
+  "limitations": [
+    "공개73 현재 sidecar는 원래 비어 있었으며 같은 owner의 기존 실제 AI file1을 격리 사본에 import한 계획 이관 검토다. 완전한 공개73 sidecar 동시 보존 사례로 확대하지 않는다.",
+    "프로젝트에 남은 합성 정정 이력과 legacy 실제 AI 계획의 출처를 구별한다.",
+    "단일 실제 저장본의 업그레이드·편집·재열기·정상 파일 왕복 범위이며 모든 legacy schema나 모든 제품 경로를 검증한 것이 아니다."
+  ],
+  "evidenceAmendment": {
+    "at": "2026-10-28T23:26:49.362957+00:00",
+    "previousReviewSha256": "135c6cefff4c92cdf1005c26afb262df12752ed1caf92a0e5d5991f849947f79",
+    "scope": "frozenRequestEvidence의 PRE 전체 원문 독립 확인 및 입력 해시만 추가",
+    "newUiApiTests": 0
+  }
+}

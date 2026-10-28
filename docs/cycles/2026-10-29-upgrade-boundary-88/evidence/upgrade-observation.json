@@ -1,0 +1,47 @@
+{
+  "task": "AF88 scoped upgrade observation",
+  "source": {
+    "public73": "26b24b935567a95d101720cbf0e06d188d8765d9",
+    "candidate": "107318ac296ecbb1ce6734e630f8ec1f35eb9f6d",
+    "runtime": "2999fd65c67754bd7a0bd0d45f9fd841fd3956e5",
+    "appTree": "7beb4ba00211a1afd3b9549ef4eb08a55b2a8384"
+  },
+  "performedBy": "Root coordinator, normal CUA UI, Windows1280x720/DPR1.25",
+  "inputProvenance": "Existing synthetic converter source with historical actual AI results. Public project export recovered normally; its separate public change plan was empty. Same-owner historical actual AI plan file was added only to an isolated review copy.",
+  "publicProjectOriginalSha256": "7386f3b1670148791828371ba26dd3a45869f25b66582332154eec7299dfae88",
+  "legacyPlanOriginalSha256": "446cd2f848d7442f0fdcd8f67c70159441a897f979ece181cfbed933515e76d3",
+  "steps": [
+    "empty local51888 observed",
+    "old73 normal project11 and plan file1 import",
+    "old73 normal exports fixed baseline",
+    "same-origin server changed to exact107/app7beb",
+    "normal page reload and first open",
+    "draft append once and project note edit once",
+    "normal save/reload",
+    "withdrawal quote return to same claim focus/URL/camera",
+    "frozen request PRE full4013 exact",
+    "normal new exports/imports/exports"
+  ],
+  "allowedEdits": {
+    "draftAppend": "\n[AF88 저장 전환 확인]",
+    "area": "A_ffccb029-6ba5-44f9-9a6e-8efa1b17f1c5",
+    "noteBefore": "",
+    "noteAfter": "[AF88 저장 전환 확인]"
+  },
+  "independentReview": "Full exported JSON diff and recovered DOM text comparison; no independent browser rerun",
+  "firstMapAcceptance": false,
+  "releaseAccepted": false,
+  "preflight": "4388 had unreadable existing storage warning. Import/write0; left untouched; excluded from upgrade result.",
+  "remainingFocusLimitation": "Request sheet close returned focus to BODY; old/new closeSheet source exactly equal. No complete keyboard usability claim.",
+  "build": "Old archive app and continuity compile each exit0 with existing TS5.8.3. New87 successful build reused through exact app tree, receipt and complete dist hashes; no new full test suite.",
+  "actions": {
+    "newModelCalls": 0,
+    "externalProviderCalls": 0,
+    "productCodeChanges": 0,
+    "installation": 0,
+    "publicProjectEdits": 0,
+    "deployment": 0
+  },
+  "servers": "All own review servers stopped intentionally with Ctrl-C; shell exits1 are shutdowns, not a claimed test exit0.",
+  "verdict": "ACCEPT_SCOPED_UPGRADE_PRESERVATION; public73 hold and whole goal active"
+}

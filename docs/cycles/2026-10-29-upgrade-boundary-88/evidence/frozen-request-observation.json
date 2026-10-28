@@ -1,0 +1,12 @@
+{
+  "snapshotId": "RQ_1edf6fdb-bd02-4ce6-a083-1da06dcf8be1",
+  "characters": 4013,
+  "equalsFrozenText": true,
+  "newDraftMarkerAbsent": true,
+  "after": {
+    "context": "작성 맥락기록되지 않음 · 이전에 쓴 초안현재 화면 맥락으로 지정",
+    "draft": "폴더 안의 마크다운 문서를 한꺼번에 변환하고 싶어요. 한 파일이 실패해도 나머지는 계속 처리하고, 마지막에는 파일별 성공과 실패를 모아 보여주세요. 기존 원본과 출력 파일을 덮어쓰지 않는 규칙은 유지해 주세요.\n[AF88 저장 전환 확인]",
+    "focusId": "",
+    "focusTag": "BODY"
+  }
+}
