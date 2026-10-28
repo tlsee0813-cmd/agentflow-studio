@@ -1,14 +1,9 @@
 # 연구 질문과 축적된 근거
 
-## 85 사전 계약 수리 진행
-실제 모델 호출 전, 기존 micro 자료의 정당한 0항목 분석이 거절되는 계약 충돌을 확인했다. [사전 근거와 결정](https://github.com/tlsee0813-cmd/agentflow-studio/blob/860f6e2587f2b744b8f89be0db2365176c682bb1/docs/cycles/2026-10-29-real-context-reading-85/PREFLIGHT.md). 검토자 작성 반례이며 모델 실패가 아니다. 실제 제공자 호출0, 적용0이다.
-
-총괄은 '제안된 변경 없음'을 정상적으로 읽되 검증 완료로 올리지 않는 방향을 선택했다. 이미 열린 구형 탭을 보호하기 위해 새 studio.plan.3만 빈 응답을 허용하고 plan.1/2의 prompt·양수 항목 응답 계약은 보존한다. 분석5키와 저장 .3 모양은 유지하며 구형 reader의 거절·원문 보존 한계를 명시한다. 과거 요청·반환·자료·초안·작성 맥락 보존과 0개 결과의 PC 자료 왕복이 완료 조건이다.
-
-Claude 새 주제에서 구현 중이며 아직 수용 전이다. 원래85 자료·의도·최대1회 조건은 그대로이고 수리 검증 뒤 정확 입력/판본/prompt를 동결한다. 공개73·미수용74·UI수용75 및84의 좁은 수용을 전체 완성으로 합치지 않는다. 배포·runtime 병합 없음.
+**85 사전 의존 수리 검증 중 · 2026-10-29:** [후보·직접 화면·독립 코드 근거](https://github.com/tlsee0813-cmd/agentflow-studio/blob/995e03d218636c5c5b1928695a0d7d4b801bc171/docs/cycles/2026-10-29-real-context-reading-85/PROGRESS.md). bf30033에서 중립0항목 읽기와 plan.3 경계를 구현했다. 구형plan.1/2 prompt·양수 응답 계약,저장.3/과거요청/반환/UI75·84수리를보존한다. root고정5.8.3 check/build+41검사와실제1280 micro 원문왕복통과,독립코드새P1/P2없음. Cloud두PC·정식flow·CI는회수전이며아직수용아님. 실제모델0,기존85의도/자료/최대1회유지. PR54draft미병합·미배포,공개73·전체목표활성.
 
 
-85: [실제자료와작성맥락연결설계](https://github.com/tlsee0813-cmd/agentflow-studio/blob/a87bf3cf056cae990902db4aa1ef1359d55fde3e/docs/cycles/2026-10-29-real-context-reading-85/DESIGN.md). Q04/Q14의합성모델5건과실제자료PC를각각확인한것을넘어, 기존micro의혼합근거·보이는맥락→새실제plan2→PC근거읽기한연결을준비한다. 이전실제OSS분석65/전체순환70·71은반복하지않으며새API0이다. 명시된두예외계약을미구현으로오인하지않고, 자료미기재와실행검증부재를유지한다.
+85: [실제자료와작성맥락연결설계](https://github.com/tlsee0813-cmd/agentflow-studio/blob/995e03d218636c5c5b1928695a0d7d4b801bc171/docs/cycles/2026-10-29-real-context-reading-85/DESIGN.md). Q04/Q14의합성모델5건과실제자료PC를각각확인한것을넘어, 기존micro의혼합근거·보이는맥락→새실제plan2→PC근거읽기한연결을준비한다. 이전실제OSS분석65/전체순환70·71은반복하지않으며새API0이다. 명시된두예외계약을미구현으로오인하지않고, 자료미기재와실행검증부재를유지한다.
 
 84: [작성 맥락 범위 수용](https://github.com/tlsee0813-cmd/agentflow-studio/blob/a2d89ad0dc0b8b19d63ab51e6dd82f184cdb0710/docs/cycles/2026-10-29-authoring-context-84/RESULT.md). Q04/Q13/Q14의 초안 맥락을 가시적으로 고정·제거하고 명시 의도/전체 parts/안정 ID를 유지한다. 실제 자료 저장·PC와 합성 실제모델5건, 독립 의미/두PC·정확90 CI를 구별했다. 긴 인용/legacy 승격/소유 검증/커서/이전기준 해소 편집면 수리를 포함하며 실패 원본을 보존한다. 작은5건은 일반 의미 정확도나 Q02/Q06 첫지도 해결이 아니다. 다음85는 기존micro 혼합 기록을 함께 읽은 실제plan2 결과와 PC 비교·근거 왕복의 연결만 준비한다.
 
