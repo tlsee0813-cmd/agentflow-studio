@@ -735,10 +735,11 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
     if (b.kind === 'ghost') {
       const id = b.id.slice(6), p = partOf(o, id)!, path = partPath(view, id).map(x => x.name);
       // Its whole name (the layout sized the card for it); where it belongs reads once over its run (.ghost-head).
-      // The scope itself, as the end of its relations with its own parts, is this scope's boundary: it opens the scope's own
-      // description here, never a move out of the scope. Any other id (the same name included) is a part outside.
+      // The scope itself, as the end of its relations with its own parts, is this scope's boundary: it selects the scope part in
+      // place (its reading as any part's: description, claims, their sources), never a move out of the scope. Any other id (the
+      // same name included) is a part outside.
       if (id === scope) {
-        world.append(h('button', { type: 'button', class: 'ghost self', 'data-box': b.id, 'data-part-ref': id, title: `이 범위 · ${path.join(' › ')} · 범위 설명 보기`, 'aria-label': `이 범위 ${p.name} 설명 보기`, onclick: () => openScopeReading() },
+        world.append(h('button', { type: 'button', class: 'ghost self', 'data-box': b.id, 'data-part-ref': id, title: `이 범위 · ${path.join(' › ')} · 이 부분 읽기`, 'aria-label': `이 범위 ${p.name} 읽기`, onclick: () => go(o.key, id) },
           h('span', { class: 'ghost-name' }, p.name)));
         continue;
       }
@@ -1352,25 +1353,27 @@ function renderLens() {
 
 /** Selection on the map: the part, its lines and the parts at their other ends (drawn representative or side ghost). */
 function markSelection(partId: string | null) {
+  // The scope itself, selected in place, is drawn as its own boundary card (the '이 범위' end of its lines).
+  const me = partId && partId === scope ? `ghost:${partId}` : partId;
   const related = new Set<string>();
   document.querySelectorAll<SVGGElement>('.edge').forEach(el => {
     if (el.classList.contains('sum')) return; // summary lines read only at rest, never as a selection's own lines
-    const on = !!partId && (el.dataset.from === partId || el.dataset.to === partId);
+    const on = !!me && (el.dataset.from === me || el.dataset.to === me);
     // A line the change plan reads as context of its change (.ctx) stays above the groups as well.
     el.classList.toggle('on', on); layerEdge(el);
     const line = el.querySelector('.edge-line')!, plain = el.classList.contains('k-related');
     line.setAttribute('marker-end', plain ? (on ? 'url(#dot-on)' : 'url(#dot)') : on ? 'url(#arrow-on)' : 'url(#arrow)');
     line.setAttribute('marker-start', on ? 'url(#dot-on)' : 'url(#dot)');
-    if (on) related.add(el.dataset.from === partId ? el.dataset.to! : el.dataset.from!);
+    if (on) related.add(el.dataset.from === me ? el.dataset.to! : el.dataset.from!);
   });
   // The summary beside a selection holds every other relation: a line that held some of the selection's relations keeps the
   // rest (its count drops by those, which are drawn one by one), and gives way (.hit, hidden by .sel-sum) only when none is left.
-  sums = partId ? restSummary(lay.boxes, lay.edges, e => e.from === partId || e.to === partId) : restSums;
+  sums = me ? restSummary(lay.boxes, lay.edges, e => e.from === me || e.to === me) : restSums;
   document.querySelectorAll<SVGGElement>('.edge.sum').forEach(el => { const e = edgeOf(el.dataset.key); el.classList.toggle('hit', !e); el.classList.toggle('agg', !!e?.agg); });
   syncLineMode();
   placeEdgeLabels();
   document.querySelectorAll<HTMLElement>('.node[data-part],.frame,.ghost').forEach(el => {
-    el.classList.toggle('selected', !!partId && el.dataset.part === partId);
+    el.classList.toggle('selected', !!partId && (el.dataset.part === partId || (me !== partId && el.dataset.box === me)));
     el.classList.toggle('related', related.has(el.dataset.box!));
   });
   endNotes(partId);

@@ -299,9 +299,10 @@ button:disabled { opacity: .5; cursor: default; }
 .ghost { position: absolute; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: 6px 10px 7px; border: 1px dashed #bcc3cd; border-radius: var(--r-md); background: rgba(255,255,255,.5); font-size: 12.5px; color: var(--text-2); text-align: left; transition: border-color .12s, background .12s, color .12s; }
 .ghost:hover { border-color: var(--text-4); background: var(--surface); color: var(--text); }
 .ghost.related { border-color: var(--accent); background: var(--surface); color: var(--accent); }
-/* The scope's own boundary end (the scope itself): solid, it is here, not elsewhere; it opens the scope's description. */
+/* The scope's own boundary end (the scope itself): solid, it is here, not elsewhere; it selects the scope part in place. */
 .ghost.self { border-style: solid; border-color: var(--line); background: var(--surface-2); color: var(--text-2); }
 .ghost.self.related { border-color: var(--accent-line); color: var(--accent); }
+.ghost.self.selected { border-color: var(--accent); background: var(--surface); color: var(--text); box-shadow: 0 0 0 3px rgba(43,89,195,.16); }
 .ghost-name { max-width: 100%; font-weight: 600; line-height: 17px; overflow-wrap: anywhere; }
 /* Where a run of outside partners belongs, once over the run (map-layout GhostHead): a small tracked caption. */
 /* Drawn as map-layout headNeed measures it (600 11px, .04em = HEAD_TRACK): change both together. */
