@@ -1,6 +1,6 @@
 import { API_SCHEMA, SCHEMA, V5_SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, GUIDE_SCHEMA } from './types.js';
-import { V6_SCHEMA, V7_SCHEMA, V8_SCHEMA, V9_SCHEMA, CLAIM_KINDS, READINGS_LIMIT, PASTED_TEXT_LIMIT, PASTED_LIMIT } from './types.js';
-import { validateFrozenRequest, validateStoredMatch, hasTarget } from './request-return.js';
+import { V6_SCHEMA, V7_SCHEMA, V8_SCHEMA, V9_SCHEMA, V10_SCHEMA, CLAIM_KINDS, READINGS_LIMIT, PASTED_TEXT_LIMIT, PASTED_LIMIT } from './types.js';
+import { validateFrozenRequest, validateStoredMatch, hasTarget, matchLedger } from './request-return.js';
 export class ContextError extends Error {
     constructor(code) { super(code); this.name = 'ContextError'; }
 }
@@ -620,6 +620,17 @@ function readings(v, areaIds, records, projectId, materialIds) {
             }
             continue;
         }
+        if (!!r && typeof r === 'object' && r.version === 'replace-correction.1') {
+            // Whether the link it undoes holds where it stands is the ledger's (below).
+            obj(r, ['version', 'id', 'at', 'reading', 'index']);
+            id(r.id);
+            date(r.at);
+            ensure(!entries.has(r.id));
+            entries.add(r.id);
+            integer(r.index);
+            ensure(!!requestReadings.get(r.reading)?.matches[r.index]?.replaces);
+            continue;
+        }
         if (!!r && typeof r === 'object' && r.version === 'map-correction.1') {
             obj(r, ['version', 'id', 'at', 'areaId', 'text', 'corrects']);
             id(r.id);
@@ -631,7 +642,7 @@ function readings(v, areaIds, records, projectId, materialIds) {
             ensure(r.corrects === null || seen.has(r.corrects));
             continue;
         }
-        const two = !!r && typeof r === 'object' && r.version === 'map-reading.2';
+        const three = !!r && typeof r === 'object' && r.version === 'map-reading.3', two = three || (!!r && typeof r === 'object' && r.version === 'map-reading.2');
         obj(r, ['version', 'id', 'at', 'model', 'prompt', 'hash', 'records', 'summary', 'parts', 'relations', 'candidates', 'gaps', 'skipped', ...(two ? ['requests', 'matches'] : [])]);
         ensure(r.version === 'map-reading.1' || two);
         id(r.id);
@@ -728,11 +739,13 @@ function readings(v, areaIds, records, projectId, materialIds) {
             const requests = r.requests.map(validateFrozenRequest);
             ensure(requests.every(q => q.projectId === projectId) && new Set(requests.map(q => q.id)).size === requests.length);
             list(r.matches, 24);
-            const matches = r.matches.map(m => validateStoredMatch(m, requests, r.records, records, materialIds));
+            const matches = r.matches.map(m => validateStoredMatch(m, requests, r.records, records, materialIds, three));
             requestReadings.set(r.id, { requests, matches });
         }
         seen.set(r.id, claims);
     }
+    // Every withdrawal names an earlier match that, where it stands, answers the very same frozen item; nothing is taken back twice.
+    ensure(!matchLedger(v, records).invalid);
 }
 export const POSITION_LIMIT = 200000;
 function planStamp(v) {
@@ -1071,6 +1084,15 @@ function migrateV9(v) {
         ensure(!!r && typeof r === 'object' && ['map-reading.1', 'map-correction.1'].includes(r.version));
     return { ...p, schemaVersion: SCHEMA };
 }
+/** project.10 has request matches without stances and no withdrawal links: they stay as stored and read as unclassified. */
+function migrateV10(v) {
+    const p = v;
+    ensure(p && p.schemaVersion === V10_SCHEMA);
+    list(p.readings, READINGS_LIMIT);
+    for (const r of p.readings)
+        ensure(!!r && typeof r === 'object' && ['map-reading.1', 'map-reading.2', 'map-correction.1', 'request-correction.1'].includes(r.version));
+    return { ...p, schemaVersion: SCHEMA };
+}
 /** The single acceptance test for persisted bytes: autosave, recovery-file download and import all use it. */
 /** intent-edit.1 (unreleased AI055 candidate) kept the correction in manual.*, where any later work edit
  * would rewrite it. Every one is converted on the first parse, so no later parse reads manual.* again:
@@ -1094,7 +1116,7 @@ export function parseProject(raw) {
     ensure(new TextEncoder().encode(raw).length <= FILE_LIMIT, 'FILE_TOO_LARGE');
     const v = JSON.parse(raw);
     const schema = v?.schemaVersion;
-    const project = schema === LEGACY_SCHEMA ? migrateLegacy(v) : schema === PREVIOUS_SCHEMA ? migrateV2(v) : schema === V3_SCHEMA ? migrateV3(v) : schema === V4_SCHEMA ? migrateV4(v) : schema === V5_SCHEMA ? migrateV5(v) : schema === V6_SCHEMA ? migrateV6(v) : schema === V7_SCHEMA ? migrateV7(v) : schema === V8_SCHEMA ? migrateV8(v) : schema === V9_SCHEMA ? migrateV9(v) : v;
+    const project = schema === LEGACY_SCHEMA ? migrateLegacy(v) : schema === PREVIOUS_SCHEMA ? migrateV2(v) : schema === V3_SCHEMA ? migrateV3(v) : schema === V4_SCHEMA ? migrateV4(v) : schema === V5_SCHEMA ? migrateV5(v) : schema === V6_SCHEMA ? migrateV6(v) : schema === V7_SCHEMA ? migrateV7(v) : schema === V8_SCHEMA ? migrateV8(v) : schema === V9_SCHEMA ? migrateV9(v) : schema === V10_SCHEMA ? migrateV10(v) : v;
     assertProject(project);
     return convertIntentEdits(project); // Freshly parsed, not shared: no defensive copy needed.
 }

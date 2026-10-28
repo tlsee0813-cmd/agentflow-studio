@@ -1,11 +1,14 @@
+/* AgentFlow Studio client: entry → map → focused part. Reads project.7 data (saved projects and built examples) and never
+ * rewrites records; the only project write is the user's own part name/note through the domain's editArea. */
+import { isMapReading } from '../shared/types.js';
 import { FILE_LIMIT } from '../shared/types.js';
 import { WorkspaceStore, storageErrorCode, readViewState, readEntryView, writeViewState, readEntryPositions, writeEntryPositions, importCopy, serializeBackup } from '../shared/storage.js';
 import { parseBackup, cleanPositions } from '../shared/validation.js';
 import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, secretPasted, correctReadingRole } from '../shared/domain.js';
-import { CLAIM_LABEL, STATE_LABEL } from '../shared/map-reading.js';
+import { CLAIM_LABEL, stateLabel, revisedRelations } from '../shared/map-reading.js';
 import { createMapRun, sendLine } from './map-run.js';
-import { requestResults, frozenRequests, displayAbout } from './request-results.js';
-import { correctRequestMatch, requestComparison } from '../shared/request-return.js';
+import { requestResults, frozenRequests, displayAbout, captureRequestReading, restoreRequestReading } from './request-results.js';
+import { correctRequestMatch, unlinkReplacement, requestComparison } from '../shared/request-return.js';
 import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
 import { layoutScope, edgePath, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, ROOT, HEAD } from './map-layout.js';
@@ -406,6 +409,7 @@ async function render() {
     renderedHash = location.hash;
     const r = route();
     if (!r.key) {
+        quoteBack = null;
         if (opened)
             cameras.set(camKey(opened, scope), { ...camera });
         flushView();
@@ -545,6 +549,11 @@ async function render() {
     }
     if (back)
         restoreSurface(back);
+    if (quoteBack) {
+        const from = quoteBack;
+        quoteBack = null;
+        restoreReading(from);
+    }
     if (travelling)
         playTravel(travel);
     rememberPlace();
@@ -620,6 +629,7 @@ function sceneBack() {
     backing = true;
     go(o.key, prev.selected && o.view.parts.some(p => p.id === prev.selected) ? prev.selected : null, prev.scope);
 }
+let quoteBack = null;
 const visitTab = Math.random().toString(36).slice(2, 8);
 let visits = [], ahead = [], pendingVisit = null, visitBack = null, visitSeq = 0;
 function forgetVisits() { visits = []; ahead = []; pendingVisit = null; }
@@ -629,7 +639,11 @@ function herePlace() {
         return null;
     const surface = selected ? (sheetOpen ? 'sheet' : 'lens') : scopeReading ? 'scope' : 'none';
     const body = surface === 'sheet' ? $('panel').querySelector('.panel-body') : surface === 'none' ? null : $('lens').querySelector('.lens-body');
-    return { key: o.key, scope, selected, camera: { ...camera }, surface, sheetReturn, scroll: body?.scrollTop ?? 0 };
+    return { key: o.key, scope, selected, camera: { ...camera }, surface, sheetReturn, scroll: body?.scrollTop ?? 0, requests: body ? captureRequestReading(body) : null };
+}
+function readingScene() {
+    const p = selected ? herePlace() : null;
+    return p ? { key: p.key, selected: p.selected, scope: p.scope, camera: p.camera, reading: p } : null;
 }
 function visitMark() { const s = history.state; return { from: typeof s?.afVisitFrom === 'string' ? s.afVisitFrom : undefined, to: typeof s?.afVisitTo === 'string' ? s.afVisitTo : undefined }; }
 function markEntry(m) {
@@ -666,8 +680,9 @@ function returnFromVisit() {
     visitBack = v.id;
     go(o.key, v.from.selected, v.from.scope);
 }
-function restoreSurface(v) {
-    const f = v.from;
+function restoreReading(f) {
+    if (f.key !== opened?.key || f.selected !== selected || f.scope !== scope)
+        return false;
     if (f.surface === 'sheet' && selected === f.selected) {
         sheetOpen = true;
         showReading(false, false);
@@ -684,8 +699,14 @@ function restoreSurface(v) {
     }
     sheetReturn = f.surface === 'sheet' ? f.sheetReturn : null;
     const body = f.surface === 'sheet' ? $('panel').querySelector('.panel-body') : f.surface === 'none' ? null : $('lens').querySelector('.lens-body');
-    if (body)
+    if (body && (!f.requests || restoreRequestReading(body, f.requests)))
         body.scrollTop = f.scroll;
+    return true;
+}
+function restoreSurface(v) {
+    const f = v.from;
+    if (!restoreReading(f))
+        return;
     // Keyboard: back on the relation it was followed by (without moving the restored reading). Now, while this arrival is the
     // page: never later, when the person may already be typing or reading somewhere else.
     // The surface just restored first (the map title also names a scope's relations); the map title only when nothing reads.
@@ -794,7 +815,7 @@ function rememberPlace() {
         return;
     try {
         const all = lastPlaces();
-        all[o.project.id] = { scope, part: selected, at: new Date().toISOString() };
+        all[o.key] = { scope, part: selected, at: new Date().toISOString() };
         const keys = Object.keys(all);
         for (const k of keys.slice(0, Math.max(0, keys.length - 100)))
             delete all[k];
@@ -813,7 +834,9 @@ function programCard(key, p, example, keyOf) {
         v.records.length || p.pasted.length ? '' : '기록 없음', lastAt ? ago(lastAt) : '', changed ? `최근 바뀐 부분 ${changed}` : ''].filter(Boolean).map(t => h('span', {}, t));
     const base = `#/p/${encodeURIComponent(key)}`, name = (id) => (id ? v.parts.find(x => x.id === id)?.name ?? null : null);
     // Continue: only a remembered place whose parts still exist.
-    const at = example ? null : lastPlaces()[p.id];
+    // Old project-id memory cannot identify an imported copy. Its first own visit starts an entry-id memory instead.
+    const places = lastPlaces(), imported = store.entries().find(e => e.entryId === key)?.origin === 'import';
+    const at = example ? null : places[key] ?? (imported ? null : places[p.id]);
     const cont = at && (at.scope || at.part) && (!at.scope || name(at.scope)) && (!at.part || name(at.part))
         ? h('a', { class: 'program-continue', href: `${base}${at.scope ? `/in/${encodeURIComponent(at.scope)}` : ''}${at.part ? `/${encodeURIComponent(at.part)}` : ''}` }, h('span', {}, '이어서'), h('strong', {}, name(at.part) ?? name(at.scope)), h('small', {}, at.part ? (at.scope ? `선택 · ${name(at.scope)} 안` : '선택') : '안쪽 보기'), h('span', { 'aria-hidden': 'true' }, '→')) : null;
     // Cross-section: the top groups in map order, each with the first parts inside; a part with no inside shows its own sentence.
@@ -968,7 +991,7 @@ function aliasOf(v, id) {
 function metaLine(p, last) {
     // No request of its own yet: what the records said about it (one short state), never a verified status.
     if (p.status === 'plan')
-        return p.reading?.state ? STATE_LABEL[p.reading.state] ?? null : null;
+        return p.reading ? stateLabel(p.reading) : null;
     return `${STATUS_SHORT[p.status]}${last ? ` · ${ago(last)}` : ''}`;
 }
 /** camera: 'fit' (new view), 'restore' (a scope's own last camera, else fit), 'keep' (same view, structure changed). */
@@ -1006,7 +1029,7 @@ function renderSpace(cameraMode = 'fit', planOverlay = true) {
     restSums = sums = lay.edges.length > 6 ? summaryEdges(lay.boxes, lay.edges) : [];
     for (const e of [...lay.edges, ...sums]) {
         const fa = frames(e.from), inner = [...frames(e.to)].some(f => fa.has(f)), sum = e.key.startsWith('sum:');
-        const g = svg('g', { class: `edge${sum ? ' sum' : ''} k-${e.kind}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
+        const g = svg('g', { class: `edge${sum ? ' sum' : ''} k-${e.kind}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}${!sum && edgeRevised(e) ? ' revised' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
         // No text on the map: the meaning shows on hover (tip) and in the selected part's 관련 부분.
         // A plain relation ends in the same dot at both ends: it is drawn, not directed.
         g.append(svg('path', { class: 'edge-line', 'marker-end': e.kind === 'related' ? 'url(#dot)' : 'url(#arrow)', 'marker-start': 'url(#dot)' }), svg('path', { class: 'edge-hit' }));
@@ -1205,11 +1228,14 @@ function placeEdgeLabels() {
     // a number on a verb reads as the relations one line holds, and the pane already counts the fan.
     const sel = selected ? lay.boxes.get(selected) : undefined;
     const side = (e) => { const far = lay.boxes.get(e.from === selected ? e.to : e.from); return !sel || !far ? '' : far.x + far.w / 2 < sel.x + sel.w / 2 ? 'l' : 'r'; };
-    const selKey = (e) => `${e.kind}|${e.kind === 'related' ? '' : e.from === selected}|${side(e)}`;
+    // A line resting only on a withdrawn report never shares its verb with ordinary lines (nor they its mark).
+    const selKey = (e) => `${e.kind}|${e.kind === 'related' ? '' : e.from === selected}|${side(e)}|${edgeRevised(e) ? 'r' : ''}`;
     const fans = new Map(), seenSel = new Set();
     world.querySelectorAll('.edge.on').forEach(g => { const e = lay.edges.find(x => x.key === g.dataset.key); if (e)
         fans.set(selKey(e), (fans.get(selKey(e)) ?? 0) + 1); });
-    const lines = [...world.querySelectorAll('.edge')].filter(g => {
+    // The selection's corrected lines are placed first, so other verbs never take the room their mark needs.
+    const firstRevised = (g) => g.classList.contains('on') && g.classList.contains('revised') ? 0 : 1;
+    const lines = [...world.querySelectorAll('.edge')].sort((a, b) => firstRevised(a) - firstRevised(b)).filter(g => {
         if (g.classList.contains('on'))
             return true;
         if (!few)
@@ -1240,7 +1266,7 @@ function placeEdgeLabels() {
         const on = g.classList.contains('on'), fan = on && (fans.get(selKey(e)) ?? 0) > 1;
         if (on && seenSel.has(selKey(e)))
             continue;
-        const label = h('span', { class: `edge-label k-${e.kind}${on ? ' on' : ''}` }, `${REL_LABEL[e.kind] ?? e.kind}${!fan && e.ids.length > 1 ? ` ${e.ids.length}` : ''}`);
+        const label = h('span', { class: `edge-label k-${e.kind}${on ? ' on' : ''}${edgeRevised(e) ? ' revised' : ''}` }, `${REL_LABEL[e.kind] ?? e.kind}${!fan && e.ids.length > 1 ? ` ${e.ids.length}` : ''}${edgeRevised(e) ? REVISED_EDGE : ''}`);
         box.append(label);
         const w = label.offsetWidth, hh = label.offsetHeight, len = path.getTotalLength();
         let spot = null;
@@ -1250,6 +1276,25 @@ function placeEdgeLabels() {
             if (clear(r)) {
                 spot = r;
                 break;
+            }
+        }
+        // A selected corrected line keeps its meaning on the map: more room along its line (beside it too), then only the short
+        // mark, along the line, then beside the selected card or the other end. Never over a part, a head, the title or a verb.
+        if (!spot && on && edgeRevised(e)) {
+            const along = (wd, ht) => Array.from({ length: 17 }, (_, i) => 0.1 + i * 0.05).flatMap(t => {
+                const q = path.getPointAtLength(len * t);
+                return [[0, 0], [0, -(ht + 4)], [0, ht + 4], [-(wd / 2 + 6), 0], [wd / 2 + 6, 0]].map(([dx, dy]) => ({ x: q.x - wd / 2 + dx, y: q.y - ht / 2 + dy, w: wd, h: ht }));
+            });
+            const beside = (wd, ht) => [lay.boxes.get(selected), lay.boxes.get(e.from === selected ? e.to : e.from)].flatMap(b => !b ? [] : [
+                { x: b.x, y: b.y - ht - 6 }, { x: b.x + b.w - wd, y: b.y - ht - 6 }, { x: b.x, y: b.y + b.h + 6 }, { x: b.x + b.w - wd, y: b.y + b.h + 6 },
+                { x: b.x - wd - 6, y: b.y + b.h / 2 - ht / 2 }, { x: b.x + b.w + 6, y: b.y + b.h / 2 - ht / 2 }
+            ].map(r => ({ ...r, w: wd, h: ht })));
+            spot = along(w, hh).find(clear) ?? null;
+            if (!spot) {
+                label.textContent = REVISED_SHORT;
+                label.classList.add('short');
+                const sw = label.offsetWidth, sh = label.offsetHeight;
+                spot = along(sw, sh).find(clear) ?? beside(sw, sh).find(clear) ?? null;
             }
         }
         if (!spot) {
@@ -1299,7 +1344,7 @@ function placeRestLabels(box, lines, clear) {
         const e = edgeOf(g.dataset.key), path = g.querySelector('.edge-line'), end = e && lay.boxes.get(e.to);
         if (!e || !path || !end)
             continue;
-        const label = h('span', { class: `edge-label k-${e.kind}` }, `${REL_LABEL[e.kind] ?? e.kind}${e.ids.length > 1 ? ` ${e.ids.length}` : ''}`);
+        const label = h('span', { class: `edge-label k-${e.kind}${edgeRevised(e) ? ' revised' : ''}` }, `${REL_LABEL[e.kind] ?? e.kind}${e.ids.length > 1 ? ` ${e.ids.length}` : ''}${edgeRevised(e) ? REVISED_EDGE : ''}`);
         box.append(label);
         const w = label.offsetWidth, hh = label.offsetHeight, len = path.getTotalLength(), tip = path.getPointAtLength(len);
         const mine = [];
@@ -1725,7 +1770,7 @@ function renderLens() {
     else if (part.reading?.role) {
         // Read from records (or corrected by the person): one description, with where it comes from.
         const u = part.reading;
-        put(desc, h('p', { class: 'lens-text' }, u.role), src(u.corrected ? '직접 바로잡은 설명' : `기록에서 읽은 설명${u.roleAbout ? ` · ${displayAbout(u.roleAbout)} 기준` : ''}`));
+        put(desc, h('p', { class: 'lens-text' }, u.role), src(u.corrected ? '직접 바로잡은 설명' : `기록에서 읽은 설명${u.roleAbout ? ` · ${displayAbout(u.roleAbout)} 기준` : ''}${u.roleBasisRevised ? REVISED_BASIS : ''}`));
         if (u.roleAbout)
             desc.lastElementChild?.setAttribute('title', u.roleAbout);
     }
@@ -1745,7 +1790,7 @@ function renderLens() {
         const far = partOf(o, x.far), near = x.near !== part.id ? partOf(o, x.near)?.name : null, farRep = drawnRep(o, x.far);
         const where = farRep === x.far ? null : farRep ? `${partOf(o, farRep).name} 안` : partPath(o.view, x.far).slice(0, -1).map(q => q.name).join(' › ') || o.project.name;
         const came = x.far === cameFrom;
-        return h('li', {}, h('button', { type: 'button', class: `port${came ? ' came' : ''}`, 'data-far': x.far, title: `${far.name}${toParticle(far.name)} 가기${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e) => { follow(x.far, x.r, e); go(o.key, x.far); } }, h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, dirMark(x.r.kind, x.out)), h('strong', {}, far.name), came ? h('span', { class: 'port-came' }, '출발') : null), near || where ? h('span', { class: 'port-where' }, [near ? `안쪽 ‘${near}’에서` : '', where ? `${where}` : ''].filter(Boolean).join(' · ')) : null, x.r.note ? h('span', { class: 'port-note' }, x.r.note) : null));
+        return h('li', {}, h('button', { type: 'button', class: `port${came ? ' came' : ''}`, 'data-far': x.far, title: `${far.name}${toParticle(far.name)} 가기${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e) => { follow(x.far, x.r, e); go(o.key, x.far); } }, h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, dirMark(x.r.kind, x.out)), h('strong', {}, far.name), came ? h('span', { class: 'port-came' }, '출발') : null), near || where ? h('span', { class: 'port-where' }, [near ? `안쪽 ‘${near}’에서` : '', where ? `${where}` : ''].filter(Boolean).join(' · ')) : null, x.r.note || revisedLine(o, x.r.id) ? h('span', { class: 'port-note' }, `${x.r.note}${revisedLine(o, x.r.id) ? REVISED_BASIS : ''}`.replace(/^ · /, '')) : null));
     };
     const ports = relationGroups(ends).map(g => h('section', { class: 'lens-ports' }, h('h3', {}, g.label, h('small', {}, String(g.list.length))), h('ul', {}, ...g.list.slice(0, 8).map(port)), g.list.length > 8 ? h('button', { type: 'button', class: 'link-button', onclick: () => openSheet() }, `${g.list.length - 8}개 더 · 전체 읽기`) : null));
     // A group drawn open: the lines that touch its frame belong to its inner parts. They read here from those parts, by verb and
@@ -1840,7 +1885,7 @@ function renderPanel(scrollTop) {
     const o = opened, part = o.view.parts.find(p => p.id === selected), panel = $('panel');
     const prevBody = panel.querySelector('.panel-body'), keep = scrollTop ? 0 : prevBody?.scrollTop ?? 0;
     const path = partPath(o.view, part.id).slice(0, -1), records = subtreeRecords(o.view, part.id);
-    const state = part.status === 'plan' ? (part.reading?.state ? STATE_LABEL[part.reading.state] ?? '기록에서 읽음' : records.length ? '요청 기록 없음' : part.note ? '계획 설명만 있음 · 기록 없음' : '기록 없음') : STATUS_LABEL[part.status];
+    const state = part.status === 'plan' ? (part.reading?.state ? stateLabel(part.reading) ?? '기록에서 읽음' : records.length ? '요청 기록 없음' : part.note ? '계획 설명만 있음 · 기록 없음' : '기록 없음') : STATUS_LABEL[part.status];
     const menuItems = [
         o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', onclick: () => { editing = !editing; renderPanel(false); } }, editing ? '고치기 닫기' : '이름·설명 고치기') : null,
         o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null,
@@ -1887,7 +1932,7 @@ function renderPanel(scrollTop) {
             rel.append(h('p', { class: 'sub' }, `연결 ${links.length}`), h('ul', { class: 'links' }, ...links.map(({ r, out, near, far }) => {
                 const other = o.view.parts.find(x => x.id === far), inner = near !== part.id ? partOf(o, near)?.name : null;
                 const where = [inner ? `안쪽 ‘${inner}’에서` : '', insideScope(o, other.id) ? '' : `${partPath(o.view, other.id).slice(0, -1).map(x => x.name).join(' › ') || o.project.name} 안`].filter(Boolean).join(' · ');
-                return h('li', {}, h('a', { href: hashFor(o.key, other.id, scope), 'data-far': other.id, onclick: (e) => follow(other.id, r, e) }, h('span', { class: 'dir', title: dirTitle(r.kind, out) }, dirMark(r.kind, out)), h('strong', {}, other.name), h('span', { class: 'rel-kind' }, REL_LABEL[r.kind] ?? r.kind)), where ? h('span', { class: 'link-where' }, where) : null, r.note ? h('span', { class: 'link-note' }, r.note) : null);
+                return h('li', {}, h('a', { href: hashFor(o.key, other.id, scope), 'data-far': other.id, onclick: (e) => follow(other.id, r, e) }, h('span', { class: 'dir', title: dirTitle(r.kind, out) }, dirMark(r.kind, out)), h('strong', {}, other.name), h('span', { class: 'rel-kind' }, REL_LABEL[r.kind] ?? r.kind)), where ? h('span', { class: 'link-where' }, where) : null, r.note || revisedLine(o, r.id) ? h('span', { class: 'link-note' }, `${r.note}${revisedLine(o, r.id) ? REVISED_BASIS : ''}`.replace(/^ · /, '')) : null);
             })));
         body.append(rel);
     }
@@ -2213,7 +2258,7 @@ function openPaste(partId) {
     const o = opened;
     if (!o || o.kind !== 'saved')
         return;
-    const scene = selected ? { selected, scope, camera: { ...camera } } : null;
+    const scene = readingScene();
     openReturn();
     returnView.openPaste(partId, scene);
 }
@@ -2280,11 +2325,17 @@ const returnView = createReturnView({
             return null;
         return store.entries().find(e => e.entryId === o.key)?.origin === 'import' ? null : o.project.id;
     },
-    restoreScene: scene => { const o = opened; if (!o)
-        return; returnCamera = scene.camera; go(o.key, scene.selected && partOf(o, scene.selected) ? scene.selected : null, scene.scope && partOf(o, scene.scope) ? scene.scope : null); },
+    restoreScene: scene => {
+        const o = opened;
+        if (!o || (scene.key && scene.key !== o.key))
+            return;
+        returnCamera = scene.camera;
+        quoteBack = scene.reading ? { ...scene.reading, key: o.key, selected: scene.selected, scope: scene.scope, camera: scene.camera } : null;
+        go(o.key, scene.selected && partOf(o, scene.selected) ? scene.selected : null, scene.scope && partOf(o, scene.scope) ? scene.scope : null);
+    },
     mapBlock: () => mapBlock(),
     mapMarks: () => { const o = opened; return o && justRead?.key === o.key ? justRead.parts : []; },
-    readIntoMap: id => !!opened?.project.readings.some(r => (r.version === 'map-reading.1' || r.version === 'map-reading.2') && r.records.some(x => x.id === id)),
+    readIntoMap: id => !!opened?.project.readings.some(r => isMapReading(r) && r.records.some(x => x.id === id)),
     mapPrimary: () => { const inp = mapRun.input(); return !!inp && !inp.problem && mapRun.can(); }
 });
 /* ---------- reading records into the map (studio.map.1) ---------- */
@@ -2474,21 +2525,44 @@ function currentRequestResults(o, partId) {
             catch {
                 return '대응을 고치지 못했어요. 원문은 그대로예요.';
             }
+        },
+        unlink: async (reading, index) => {
+            try {
+                const error = await commit(o, unlinkReplacement(o.project, reading, index));
+                if (!error) {
+                    renderSpace('keep');
+                    if (selected)
+                        refreshReading();
+                    else
+                        returnView.render();
+                }
+                return error;
+            }
+            catch {
+                return '연결을 풀지 못했어요. 원문은 그대로예요.';
+            }
         }
     });
 }
 const CLAIM_ORDER = ['open', 'differs', 'want', 'reported', 'checked', 'idea', 'describes'];
-/** Claims of a part as short lines, most decision-relevant first, each with the way to its quote. */
+/** Said once, where a description or a line rests only on a report a later record took back (it stays; it is not current evidence). */
+const REVISED_BASIS = ' · 근거였던 보고는 이후 정정됨';
+/** Claims of a part as short lines, a report correcting an earlier one first, then most decision-relevant, each with its quote. */
 function claimList(claims, max) {
-    const sorted = [...claims].sort((a, b) => CLAIM_ORDER.indexOf(a.kind) - CLAIM_ORDER.indexOf(b.kind)).slice(0, max);
-    return h('ul', { class: 'claims' }, ...sorted.map(c => h('li', { class: `claim k-${c.kind}` }, h('span', { class: 'cl-kind' }, CLAIM_LABEL[c.kind]), h('span', { class: 'cl-text' }, c.text, c.about ? h('small', { class: 'cl-about', title: c.about }, ` · ${displayAbout(c.about)}`) : null), h('button', { type: 'button', class: 'cl-cite', title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote) }, '근거'))));
+    const sorted = [...claims].sort((a, b) => Number(!!b.replaces) - Number(!!a.replaces) || CLAIM_ORDER.indexOf(a.kind) - CLAIM_ORDER.indexOf(b.kind)).slice(0, max);
+    return h('ul', { class: 'claims' }, ...sorted.map(c => h('li', { class: `claim k-${c.kind}${c.replaces ? ' replaces' : ''}` }, 
+    // The kind column keeps its usual width; that this one corrects an earlier claim reads on its own line above the text.
+    h('span', { class: 'cl-kind' }, CLAIM_LABEL[c.kind]), h('span', { class: 'cl-text' }, c.replaces ? h('span', { class: 'cl-revises' }, '앞 주장을 대체한 정정') : null, c.text, c.about ? h('small', { class: 'cl-about', title: c.about }, ` · ${displayAbout(c.about)}`) : null), h('button', { type: 'button', class: 'cl-cite', title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote) }, '근거'))));
 }
 /** A quote from the selection: the record in the pane, marked; closing the pane comes back to this part. */
 function showQuote(record, quote) {
     const o = opened;
     if (!o || o.kind !== 'saved')
         return;
-    const scene = selected ? { selected, scope, camera: { ...camera } } : null;
+    const scene = readingScene();
+    // Nothing selected: the quote comes from the pane's own reading (the map's root), kept before reopening it re-renders it.
+    if (!scene && returnView.isOpen())
+        returnView.keepReading();
     openReturn();
     returnView.openQuote(record, quote, scene);
 }
@@ -2525,7 +2599,7 @@ function understoodSection(o, part) {
             } }, h('label', { for: 'fix-role' }, '설명 바로잡기 ', h('small', {}, '이름·내 설명·기록의 주장은 그대로예요')), area, msg, h('div', { class: 'row' }, h('button', { type: 'submit', class: 'primary small' }, '저장'), h('button', { type: 'button', class: 'link-button', onclick: () => { fixingRole = null; renderPanel(false); } }, '취소'))));
     }
     else if (u.role) {
-        sec.append(h('p', { class: 'und-role' }, u.role), h('p', { class: 'src', title: u.roleAbout ?? '' }, u.corrected ? `직접 바로잡은 설명 · ${fullTime(u.corrected.at)}` : `기록에서 읽은 설명${u.roleAbout ? ` · ${displayAbout(u.roleAbout)} 기준` : ''}`, o.kind === 'saved' ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { fixingRole = part.id; renderPanel(false); requestAnimationFrame(() => document.getElementById('fix-role')?.focus()); } }, ' 설명 바로잡기') : null));
+        sec.append(h('p', { class: 'und-role' }, u.role), h('p', { class: 'src', title: u.roleAbout ?? '' }, u.corrected ? `직접 바로잡은 설명 · ${fullTime(u.corrected.at)}` : `기록에서 읽은 설명${u.roleAbout ? ` · ${displayAbout(u.roleAbout)} 기준` : ''}${u.roleBasisRevised ? REVISED_BASIS : ''}`, o.kind === 'saved' ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { fixingRole = part.id; renderPanel(false); requestAnimationFrame(() => document.getElementById('fix-role')?.focus()); } }, ' 설명 바로잡기') : null));
         // Descriptions read later that did not replace this one (no record said it supersedes it) read apart, with their version.
         for (const x of u.others.slice(0, 2))
             sec.append(h('p', { class: 'und-later' }, h('span', { title: x.about ?? '' }, `다른 기록의 설명${x.about ? ` · ${displayAbout(x.about)}` : ''} · 현재 설명을 대체한다는 근거 없음`), x.text));
@@ -2539,6 +2613,11 @@ function understoodSection(o, part) {
     sec.append(hist);
     return sec;
 }
+/** A relation a reading added on a report a later record took back (revisedRelations): still drawn, read apart. */
+function revisedLine(o, relationId) { return revisedRelations(o.project).has(relationId); }
+/** A drawn line all of whose relations rest on withdrawn reports: its own dash and a short title, selected or not. */
+function edgeRevised(e) { return !!opened && !e.agg && e.ids.length > 0 && e.ids.every(id => revisedLine(opened, id)); }
+const REVISED_EDGE = ' · 근거 정정', REVISED_SHORT = '근거 정정';
 function sessionCode() { try {
     return sessionStorage.getItem('agentflow.studio.access') ?? accessCodeMemory;
 }
@@ -2912,7 +2991,7 @@ function bindEdgeHints() {
             if (!edge)
                 return;
             g.classList.add('near');
-            tip.replaceChildren(h('strong', {}, `${nameOf(edge.from)} ${edge.kind === 'related' ? '—' : '→'} ${nameOf(edge.to)}`), h('span', { class: 'tip-kind' }, `${REL_LABEL[edge.kind] ?? edge.kind}${restOf(edge) ? ` · 선택한 부분의 관계를 뺀 나머지 ${edge.ids.length}개` : edge.agg ? ` · 안쪽 관계 ${edge.ids.length}개의 요약 · 선택하면 실제 끝점` : edge.ids.length > 1 ? ` · 관계 ${edge.ids.length}개를 한 선으로 묶음` : ''}`), ...edge.notes.slice(0, 3).map(n => h('span', {}, n)));
+            tip.replaceChildren(h('strong', {}, `${nameOf(edge.from)} ${edge.kind === 'related' ? '—' : '→'} ${nameOf(edge.to)}`), h('span', { class: 'tip-kind' }, `${REL_LABEL[edge.kind] ?? edge.kind}${restOf(edge) ? ` · 선택한 부분의 관계를 뺀 나머지 ${edge.ids.length}개` : edge.agg ? ` · 안쪽 관계 ${edge.ids.length}개의 요약 · 선택하면 실제 끝점` : edge.ids.length > 1 ? ` · 관계 ${edge.ids.length}개를 한 선으로 묶음` : ''}`), ...edge.notes.slice(0, 3).map(n => h('span', {}, n)), ...(edgeRevised(edge) ? [h('span', { class: 'tip-revised' }, REVISED_BASIS.replace(/^ · /, ''))] : []));
             tip.hidden = false;
             place(e);
             return;

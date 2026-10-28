@@ -192,6 +192,9 @@ button:disabled { opacity: .5; cursor: default; }
 .edge.near:not(.on):not(.k-related) .edge-line { marker-end: url(#arrow-near); }
 .edge.on .edge-line { stroke: var(--accent); stroke-width: 2.25; stroke-opacity: 1; }
 .edge.agg.near .edge-line { stroke: #a9b1bd; stroke-width: 3; }
+/* A line resting only on a withdrawn report: its own dash-dot, selected or not (the selection colour stays readable). */
+.edge.revised .edge-line { stroke-dasharray: 8 3 2 3; }
+.edge.revised:not(.on):not(.near) .edge-line { stroke-opacity: .6; }
 .edge.agg.on .edge-line { stroke: #9fb4e6; stroke-width: 3; }
 #arrow path, #dot circle { fill: var(--edge); } #arrow-on path, #dot-on circle { fill: var(--accent); } #arrow-near path { fill: var(--text-3); }
 /* Where supported, every end mark takes its own line's paint (hover, selection, a folded band, a change's context). */
@@ -212,6 +215,7 @@ button:disabled { opacity: .5; cursor: default; }
 .edge-labels { position: absolute; left: 0; top: 0; pointer-events: none; }
 .edge-label { position: absolute; height: 20px; padding: 0 7px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); box-shadow: 0 1px 2px rgba(16,24,40,.05); font-size: 11.5px; line-height: 18px; font-weight: 600; color: var(--text-2); white-space: nowrap; }
 .edge-label.on { border-color: var(--accent-line); background: var(--accent-soft); color: var(--accent-strong); }
+.edge-label.revised { border-style: dashed; }
 .map-title.pinned { opacity: 0; }
 .map-name { margin: 0; word-break: keep-all; font-size: 22px; line-height: 1.25; font-weight: 700; letter-spacing: -.022em; color: var(--text); overflow-wrap: anywhere; }
 .map-purpose { margin: var(--s-2) 0 0; word-break: keep-all; font-size: 14px; line-height: 1.6; color: var(--text-2); }
@@ -1175,6 +1179,7 @@ button:disabled { opacity: .5; cursor: default; }
 .claim.k-want .cl-kind { color: var(--accent); }
 .claim.k-reported .cl-kind, .claim.k-checked .cl-kind { color: #2f7a55; }
 .cl-text { flex: 1; min-width: 0; word-break: keep-all; }
+.cl-revises { display: block; font-size: 11px; font-weight: 650; color: var(--text-2); }
 .cl-about { color: var(--text-3); }
 .cl-cite { flex: none; padding: 0 6px; height: 20px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); font-size: 11.5px; color: var(--text-2); }
 .cl-cite:hover { border-color: var(--accent-line); color: var(--accent); }
@@ -1204,8 +1209,10 @@ button:disabled { opacity: .5; cursor: default; }
 .request-want .cl-kind, .request-passage .cl-kind { margin-right: 8px; }
 .request-remains { color: var(--text-3); }
 .request-passage { padding: 0 0 8px; }
-.request-quote, .request-fix, .request-excluded { margin-top: 6px; font-size: 12px; color: var(--text-3); }
-.request-quote summary, .request-fix summary, .request-excluded summary { cursor: pointer; }
+.request-quote, .request-fix, .request-excluded, .request-history { margin-top: 6px; font-size: 12px; color: var(--text-3); }
+.request-quote summary, .request-fix summary, .request-excluded summary, .request-history summary { cursor: pointer; }
+.request-withdrawn > p:first-child { color: var(--text-3); }
+.cl-replaces { color: var(--text-2); }
 .request-quote pre { max-height: 260px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; padding: 10px; background: var(--surface-2); color: var(--text); }
 .request-quote mark { background: #f8e9b7; color: inherit; }
 .request-fix select { max-width: 100%; margin: 8px 6px 4px 0; font-size: 12px; }

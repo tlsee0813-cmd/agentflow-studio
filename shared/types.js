@@ -1,4 +1,6 @@
-export const SCHEMA = 'idea015.project.10';
+export const SCHEMA = 'idea015.project.11';
+/** project.10 had request matches without a stance and no withdrawal links: they read as unclassified reports (no backfill). */
+export const V10_SCHEMA = 'idea015.project.10';
 export const V9_SCHEMA = 'idea015.project.9';
 /** project.8 had no map readings: it reads as none (readings=[]); nothing else changes. */
 export const V8_SCHEMA = 'idea015.project.8';
@@ -32,7 +34,7 @@ export const REQUEST_BYTES = 131072;
 export const EXCERPT_CHARS = 200;
 export const PASTED_TEXT_LIMIT = 60000;
 export const CLAIM_KINDS = ['want', 'idea', 'reported', 'checked', 'describes', 'open', 'differs'];
-export const isMapReading = (e) => e.version === 'map-reading.1' || e.version === 'map-reading.2';
+export const isMapReading = (e) => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3';
 export const READINGS_LIMIT = 500;
 export const PASTED_LIMIT = 500;
 export const SOURCE_LABEL = {
