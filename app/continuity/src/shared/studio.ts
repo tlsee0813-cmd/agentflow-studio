@@ -3,6 +3,7 @@
 import type { Project, Task, Source, RelationKind } from './types.js';
 import { areaOf, isReturnTask, areaDescription } from './domain.js';
 import { parseResultFile } from './validation.js';
+import { partUnderstanding, type PartUnderstanding } from './map-reading.js';
 
 export type PartStatus = 'plan' | 'active' | 'reported' | 'check';
 /** Observations only: 'active' means a request is recorded and no report came back, not that work is running. */
@@ -23,6 +24,8 @@ export interface PartView {
   status: PartStatus; lastAt: string | null; recordIds: string[];
   /** Current organised description from a received return.2 (valid only), else null. */
   summary: string | null; changes: string[]; origin: string | null; proposal: string | null;
+  /** What map readings understood about this part (project.9), apart from note and summary; null when none said anything. */
+  reading: PartUnderstanding | null;
 }
 export interface RelationView { id: string; from: string; to: string; kind: RelationKind; note: string }
 export interface StudioView { parts: PartView[]; roots: string[]; relations: RelationView[]; records: RecordView[] }
@@ -60,7 +63,7 @@ export function studioView(p: Project): StudioView {
     const status: PartStatus = d.held.length && !cur ? 'check' : !latest ? 'plan' : returned ? 'reported' : 'active';
     return { id: a.id, name: a.name, note: a.note, parentId: parentOf(a.id), depth, childIds: active.filter(c => parentOf(c.id) === a.id).map(c => c.id),
       status, lastAt: own[0]?.at ?? null, recordIds: own.map(r => r.id),
-      summary: cur?.summary ?? null, changes: cur?.changes ?? [], origin: cur?.origin ?? null, proposal: cur?.proposal ?? null };
+      summary: cur?.summary ?? null, changes: cur?.changes ?? [], origin: cur?.origin ?? null, proposal: cur?.proposal ?? null, reading: partUnderstanding(p, a.id) };
   });
   // A part with no request of its own reads its inside: the most pressing status among its descendants (check > active > reported).
   const rank: PartStatus[] = ['plan', 'reported', 'active', 'check'], byId = new Map(parts.map(x => [x.id, x]));

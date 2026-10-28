@@ -1,5 +1,5 @@
 import { API_SCHEMA, SCHEMA, V5_SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Intent, type Background, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket, type Question, GUIDE_SCHEMA, type GuideRequest, type GuideReply, type GuideEnvelope, type GuideTicket, type UnderstandingInput } from './types.js';
-import {V6_SCHEMA,V7_SCHEMA,PASTED_TEXT_LIMIT,PASTED_LIMIT,type Area,type PlanStamp,type Point,type ManualPositions,type Backup} from './types.js';
+import {V6_SCHEMA,V7_SCHEMA,V8_SCHEMA,CLAIM_KINDS,READINGS_LIMIT,PASTED_TEXT_LIMIT,PASTED_LIMIT,type Area,type PlanStamp,type Point,type ManualPositions,type Backup} from './types.js';
 export class ContextError extends Error { constructor(code: string) { super(code); this.name = 'ContextError'; } }
 export function ensure(condition: unknown, code = 'INVALID_DATA'): asserts condition { if (!condition) throw new ContextError(code); }
 function obj(v: unknown, keys: string[]): asserts v is Record<string, unknown> {
@@ -215,7 +215,7 @@ export function validateRequest(v: unknown): ContextRequest {
 }
 /** Same checks as validateProject without the defensive copy; used on freshly parsed JSON. */
 function assertProject(v: unknown): asserts v is Project {
-  obj(v,['schemaVersion','id','revision','name','sources','bases','tasks','currentTaskId','draft','answerDraft','basisDraft','basisEdits','draftKind','pending','notice','space','pasted']);
+  obj(v,['schemaVersion','id','revision','name','sources','bases','tasks','currentTaskId','draft','answerDraft','basisDraft','basisEdits','draftKind','pending','notice','space','pasted','readings']);
   ensure(v.schemaVersion === SCHEMA, 'UNSUPPORTED_SCHEMA'); id(v.id); integer(v.revision); text(v.name,120); text(v.draft,TEXT_LIMIT,true); text(v.answerDraft,TEXT_LIMIT,true); text(v.basisDraft,TEXT_LIMIT,true);
   ensure(['request','report','evidence','test_answer'].includes(v.draftKind as string)); if (v.notice !== null) text(v.notice,2000);
   list(v.sources); list(v.bases); list(v.tasks); for (const s of v.sources) source(s); for (const b of v.bases) basis(b);
@@ -228,6 +228,7 @@ function assertProject(v: unknown): asserts v is Project {
   const tasks=new Set<string>(),returns=new Map<string,{taskId:string;record:ExportRecord}>();
   const areaIds=space(v.space);
   pasted(v.pasted,areaIds);
+  readings(v.readings,areaIds,new Set([...(v.pasted as {id:string}[]).map(r=>r.id),...sources.keys()]));
   for (const t of v.tasks) {
     const optional=['intentEdit','areaId'].filter(k=>t&&typeof t==='object'&&Object.hasOwn(t,k));
     obj(t,['id','sourceIds','parentTaskId','advice','adviceRevision','mode','manual','suggestions','handoffs','resultFile','background',...optional]); id(t.id);
@@ -330,6 +331,39 @@ function pasted(v:unknown,areaIds:Set<string>) {
   list(v,PASTED_LIMIT);const texts=new Set<string>();
   for(const r of v){obj(r,['id','text','at','context']);id(r.id);text(r.text,PASTED_TEXT_LIMIT);date(r.at);ensure(r.context===null||(typeof r.context==='string'&&areaIds.has(r.context)));ensure(!texts.has(r.text as string));texts.add(r.text as string);}
   unique(v as {id:string}[]);
+}
+/** Map readings: every part a known area, every quote of a known record (a pasted record or a source), every claim a known
+ * kind, and a claim replaced only by a later one of the same area. Relation ids may be gone (the person removed the line). */
+function readings(v:unknown,areaIds:Set<string>,records:Set<string>) {
+  list(v,READINGS_LIMIT);const seen=new Map<string,Map<string,number>>(),hashes=new Set<string>();
+  const quote=(q:unknown)=>{obj(q,['record','quote']);ensure(records.has(q.record as string));text(q.quote,300);};
+  const entries=new Set<string>();
+  for(const r of v as unknown[]){
+    if(!!r&&typeof r==='object'&&(r as {version?:unknown}).version==='map-correction.1'){
+      obj(r,['version','id','at','areaId','text','corrects']);id(r.id);ensure(!entries.has(r.id as string));entries.add(r.id as string);date(r.at);
+      ensure(areaIds.has(r.areaId as string));text(r.text,300);ensure(r.corrects===null||seen.has(r.corrects as string));continue;
+    }
+    obj(r,['version','id','at','model','prompt','hash','records','summary','parts','relations','candidates','gaps','skipped']);ensure(r.version==='map-reading.1');
+    id(r.id);ensure(!entries.has(r.id as string));entries.add(r.id as string);date(r.at);text(r.model,80);text(r.prompt,40);ensure(typeof r.hash==='string'&&/^[0-9a-f]{64}$/.test(r.hash)&&!hashes.has(r.hash));hashes.add(r.hash as string);
+    list(r.records,16);ensure((r.records as unknown[]).length>0);for(const x of r.records){obj(x,['id','sent','total']);ensure(records.has(x.id as string));integer(x.sent);integer(x.total);ensure((x.sent as number)<=(x.total as number));}
+    text(r.summary,200,true);list(r.parts,64);const claims=new Map<string,number>(),parts=new Set<string>();
+    for(const p of r.parts){
+      obj(p,['areaId','created','role','basis','claims']);ensure(areaIds.has(p.areaId as string)&&!parts.has(p.areaId as string));parts.add(p.areaId as string);
+      if(p.created!==null){obj(p.created,['name','parentId']);text(p.created.name,60);ensure(p.created.parentId===null||areaIds.has(p.created.parentId as string));}
+      if(p.role!==null)text(p.role,300);list(p.basis,4);for(const q of p.basis)quote(q);ensure(p.created===null||(p.basis as unknown[]).length>0);
+      list(p.claims,8);(p.claims as unknown[]).forEach((c,i)=>{
+        obj(c,['kind','text','record','quote','about','replaces']);ensure(CLAIM_KINDS.includes(c.kind as never));text(c.text,240);quote({record:c.record,quote:c.quote});
+        if(c.about!==null)text(c.about,80);
+        if(c.replaces!==null){obj(c.replaces,['reading','index']);integer(c.replaces.index);const n=seen.get(c.replaces.reading as string)?.get(p.areaId as string);ensure(n!==undefined&&(c.replaces.index as number)<n);}
+      });
+      claims.set(p.areaId as string,(p.claims as unknown[]).length);
+    }
+    list(r.relations,32);for(const x of r.relations){obj(x,['relationId','from','to','kind','quote']);id(x.relationId);ensure(areaIds.has(x.from as string)&&areaIds.has(x.to as string)&&x.from!==x.to);ensure(['flow','needs','shares','related'].includes(x.kind as string));quote(x.quote);}
+    list(r.candidates,16);for(const c of r.candidates){obj(c,['text','areaIds','quote']);text(c.text,240);list(c.areaIds,2);for(const a of c.areaIds)ensure(areaIds.has(a as string));if(c.quote!==null)quote(c.quote);}
+    list(r.gaps,2);for(const g of r.gaps)text(g,160);
+    list(r.skipped,64);for(const x of r.skipped){obj(x,['what','name','reason']);ensure(['part','relation'].includes(x.what as string));text(x.name,200);ensure(['same-name','archived','removed','exists','parent-skipped'].includes(x.reason as string));}
+    seen.set(r.id as string,claims);
+  }
 }
 export const POSITION_LIMIT=200000;
 function planStamp(v:unknown) {
@@ -497,7 +531,12 @@ function migrateV6(v:unknown):unknown {
 /** project.7 had no pasted records: it reads as none. Its own keys and bytes are kept as they were. */
 function migrateV7(v:unknown):unknown {
   const p=v as {schemaVersion?:unknown};ensure(!!p&&typeof p==='object'&&!Array.isArray(p)&&p.schemaVersion===V7_SCHEMA&&!Object.hasOwn(p,'pasted'));
-  return {...p,schemaVersion:SCHEMA,pasted:[]};
+  return migrateV8({...p,schemaVersion:V8_SCHEMA,pasted:[]});
+}
+/** project.8 had no map readings: it reads as none. Its own keys and bytes are kept as they were. */
+function migrateV8(v:unknown):unknown {
+  const p=v as {schemaVersion?:unknown};ensure(!!p&&typeof p==='object'&&!Array.isArray(p)&&p.schemaVersion===V8_SCHEMA&&!Object.hasOwn(p,'readings'));
+  return {...p,schemaVersion:SCHEMA,readings:[]};
 }
 /** The single acceptance test for persisted bytes: autosave, recovery-file download and import all use it. */
 /** intent-edit.1 (unreleased AI055 candidate) kept the correction in manual.*, where any later work edit
@@ -519,7 +558,7 @@ function convertIntentEdits(p:Project):Project {
 export function parseProject(raw: string): Project {
   ensure(new TextEncoder().encode(raw).length <= FILE_LIMIT,'FILE_TOO_LARGE'); const v: unknown=JSON.parse(raw);
   const schema=(v as {schemaVersion?:unknown})?.schemaVersion;
-  const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : schema===V3_SCHEMA ? migrateV3(v) : schema===V4_SCHEMA ? migrateV4(v) : schema===V5_SCHEMA ? migrateV5(v) : schema===V6_SCHEMA ? migrateV6(v) : schema===V7_SCHEMA ? migrateV7(v) : v;
+  const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : schema===V3_SCHEMA ? migrateV3(v) : schema===V4_SCHEMA ? migrateV4(v) : schema===V5_SCHEMA ? migrateV5(v) : schema===V6_SCHEMA ? migrateV6(v) : schema===V7_SCHEMA ? migrateV7(v) : schema===V8_SCHEMA ? migrateV8(v) : v;
   assertProject(project); return convertIntentEdits(project); // Freshly parsed, not shared: no defensive copy needed.
 }
 
