@@ -1272,19 +1272,21 @@ function renderLens() {
     if (u.roleAbout) desc.lastElementChild?.setAttribute('title', u.roleAbout);
   } else put(desc, src(part.status === 'plan' ? (records.length ? `설명 없음 · 요청 기록 없음 · ${recs}` : part.reading ? '기록에서 읽은 주장만 있어요' : '아직 설명도 기록도 없어요') : `${STATUS_LABEL[part.status]} · ${recs} · 받은 정리 없음`));
   if (part.changes.length) desc.append(h('ul', { class: 'lens-changes' }, ...part.changes.slice(0, 2).map(c => h('li', {}, c))));
-  if (part.reading?.claims.length) desc.append(claimList(part.id, part.reading.claims, 3));
-  const requested = currentRequestResults(o, part.id); if (requested) desc.append(requested);
+  // What the records say about it now, after its connections: counted, the first few, the rest unfolded here on request.
+  const claims = part.reading?.claims.length ? lensClaims(o, part.id, part.reading.claims) : null;
+  const requested = currentRequestResults(o, part.id);
   // Lines: real ends, read by what they mean. One group per verb and direction ("이 부분이 필요로 함"), each row the real other
-  // end; a line drawn from a folded part summarises its inside, so its row also names the inner end.
+  // end and its stored note (the reason of that relation, read right under the description); a line drawn from a folded part
+  // summarises its inside, so its row also names the inner end. A row and its line on the map light each other.
   const ends = relationEnds(o, part.id), entry = visitEntry(o), cameFrom = entry ? visits.at(-1)!.from.selected : null;
   const port = (x: End) => {
     const far = partOf(o, x.far)!, near = x.near !== part.id ? partOf(o, x.near)?.name : null, farRep = drawnRep(o, x.far);
     const where = farRep === x.far ? null : farRep ? `${partOf(o, farRep)!.name} 안` : partPath(o.view, x.far).slice(0, -1).map(q => q.name).join(' › ') || o.project.name;
     const came = x.far === cameFrom;
-    return h('li', {}, h('button', { type: 'button', class: `port${came ? ' came' : ''}`, 'data-far': x.far, title: `${far.name}${toParticle(far.name)} 가기${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far); } },
+    return h('li', {}, h('button', { type: 'button', class: `port${came ? ' came' : ''}`, 'data-far': x.far, 'data-rel': x.r.id, title: `${far.name}${toParticle(far.name)} 가기${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far); }, ...lightOn([x.r.id], x.far) },
       h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, dirMark(x.r.kind, x.out)), h('strong', {}, far.name), came ? h('span', { class: 'port-came' }, '출발') : null),
       near || where ? h('span', { class: 'port-where' }, [near ? `안쪽 ‘${near}’에서` : '', where ? `${where}` : ''].filter(Boolean).join(' · ')) : null,
-      x.r.note || revisedLine(o, x.r.id) ? h('span', { class: 'port-note' }, `${x.r.note}${revisedLine(o, x.r.id) ? REVISED_BASIS : ''}`.replace(/^ · /, '')) : null));
+      x.r.note || revisedLine(o, x.r.id) ? h('span', { class: 'port-note', 'data-rel-note': x.r.id }, `${x.r.note}${revisedLine(o, x.r.id) ? REVISED_BASIS : ''}`.replace(/^ · /, '')) : null));
   };
   const ports = relationGroups(ends).map(g => h('section', { class: 'lens-ports' }, h('h3', {}, g.label, h('small', {}, String(g.list.length))),
     h('ul', {}, ...g.list.slice(0, 8).map(port)), g.list.length > 8 ? h('button', { type: 'button', class: 'link-button', onclick: () => openSheet() }, `${g.list.length - 8}개 더 · 전체 읽기`) : null));
@@ -1295,10 +1297,10 @@ function renderLens() {
   const innerRow = (x: End) => {
     const near = partOf(o, x.near), far = partOf(o, x.far); if (!near || !far) return null;
     const where = partPath(o.view, x.far).slice(0, -1).map(q => q.name).join(' › ') || o.project.name, came = x.far === cameFrom;
-    return h('li', {}, h('button', { type: 'button', class: `port fr-port${came ? ' came' : ''}`, 'data-far': x.far, title: `${far.name}${toParticle(far.name)} 가기 · ${REL_LABEL[x.r.kind] ?? x.r.kind}${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far); } },
+    return h('li', {}, h('button', { type: 'button', class: `port fr-port${came ? ' came' : ''}`, 'data-far': x.far, 'data-rel': x.r.id, title: `${far.name}${toParticle(far.name)} 가기 · ${REL_LABEL[x.r.kind] ?? x.r.kind}${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far); }, ...lightOn([x.r.id], x.far) },
       h('span', { class: 'port-top' }, h('span', { class: 'fr-near' }, near.name), h('span', { class: 'port-dir', 'aria-hidden': 'true' }, dirMark(x.r.kind, x.out)), h('strong', {}, far.name), came ? h('span', { class: 'port-came' }, '출발') : null),
       h('span', { class: 'port-where' }, `${where} 안`),
-      x.r.note ? h('span', { class: 'port-note' }, x.r.note) : null));
+      x.r.note ? h('span', { class: 'port-note', 'data-rel-note': x.r.id }, x.r.note) : null));
   };
   const innerSection = inner && (inner.outside.length || inner.within) ? h('section', { class: 'lens-ports frame-rels', 'aria-label': '안쪽 부분의 바깥 연결' },
     inner.outside.length ? h('h3', {}, '안쪽 부분의 바깥 연결', h('small', {}, String(inner.outside.length))) : null,
@@ -1329,11 +1331,12 @@ function renderLens() {
         menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e: Event) => { ((e.currentTarget as HTMLElement).parentElement as HTMLDetailsElement).open = false; } }, ...menuItems)) : null,
         h('button', { type: 'button', class: 'rail-toggle', 'aria-label': '읽기면 접기', 'aria-expanded': 'true', title: '읽기면 접기 · 지도를 넓게 봐요', onclick: () => setRail(true) }, railIcon(true)),
         h('button', { type: 'button', class: 'close', 'aria-label': '선택 해제', title: '닫기 (Esc)', onclick: () => go(o.key) }, '×'))),
-    h('div', { class: 'lens-body' }, desc, ...ports, innerSection, inside),
+    h('div', { class: 'lens-body' }, desc, ...ports, claims, requested, innerSection, inside),
     h('footer', { class: 'lens-foot' },
       h('button', { type: 'button', class: 'lens-more', onclick: () => openSheet() }, records.length ? `근거·기록 ${records.length}` : '전체 읽기', thread ? ` · 정리 ${thread}` : '', h('span', { 'aria-hidden': 'true' }, ' ›')),
       status.ai === 'deepseek' ? h('button', { type: 'button', class: 'link-button', onclick: () => { composerOpen = true; openSheet(() => document.getElementById(status.access === 'code' && !sessionCode() ? 'access-code' : 'ask-input')?.focus()); } }, '질문하기') : null));
   l.hidden = false;
+  clampNotes(l, o, part.id);
 }
 
 /** Selection on the map: the part, its lines and the parts at their other ends (drawn representative or side ghost). */
@@ -1359,6 +1362,47 @@ function markSelection(partId: string | null) {
     el.classList.toggle('selected', !!partId && el.dataset.part === partId);
     el.classList.toggle('related', related.has(el.dataset.box!));
   });
+  endNotes(partId);
+}
+/** The selection's own relations, read where they end: a card at the other end of one of them says that relation's stored note
+ * on its state line (one line; the whole note reads in the pane, on the same row). Only a relation whose two ends are the two
+ * drawn cards: an end drawn as a group, outside the scope, or standing for an inner part (a summarised line) says nothing here,
+ * so no note ever reads as another part's. Cards keep their size and place; the state line comes back when the selection goes. */
+function endNotes(partId: string | null) {
+  const world = $('world'), o = opened;
+  world.querySelectorAll('.node-rel').forEach(el => el.remove());
+  world.querySelectorAll('.node.has-rel').forEach(el => el.classList.remove('has-rel'));
+  if (!o || !partId || planView.isOpen()) return;
+  const sel = partOf(o, partId), byFar = new Map<string, End[]>();
+  for (const x of relationEnds(o, partId)) if (x.near === partId && x.r.note && lay.boxes.get(x.far)?.kind === 'node') byFar.set(x.far, [...(byFar.get(x.far) ?? []), x]);
+  for (const [far, list] of byFar) {
+    const card = world.querySelector<HTMLElement>(`.node[data-box="${CSS.escape(far)}"]`), meta = card?.querySelector('.node-meta');
+    // Only in the room the card already gives its state line: never a line it does not have.
+    if (!card || !meta) continue;
+    const x = list[0]!, name = partOf(o, far)?.name ?? '';
+    meta.after(h('span', { class: `node-rel k-${x.r.kind}`, title: list.map(y => `${y.r.kind === 'related' ? `${sel?.name} — ${name}` : y.out ? `${sel?.name} → ${name}` : `${name} → ${sel?.name}`} · ${REL_LABEL[y.r.kind] ?? y.r.kind}\n${y.r.note}`).join('\n\n') },
+      h('i', { class: 'rel-dot', 'aria-hidden': 'true' }), h('span', { class: 'rel-text' }, x.r.note), list.length > 1 ? h('small', {}, ` 외 ${list.length - 1}`) : null));
+    card.classList.add('has-rel');
+  }
+}
+/** A relation row in the pane and its line and other end on the map light together while one of them is pointed at or
+ * focused; the map's own hover lights the rows of the same relations. Nothing moves and nothing is selected. */
+function lightOn(ids: string[], far: string): Record<string, (e: Event) => void> {
+  const on = () => lightRelations(ids, far), off = () => lightRelations([], null);
+  return { onpointerenter: on, onpointerleave: off, onfocus: on, onblur: off };
+}
+function lightRelations(ids: string[], far: string | null) {
+  const o = opened, world = $('world'), set = new Set(ids);
+  world.querySelectorAll('.lit').forEach(el => el.classList.remove('lit'));
+  if (!o || !set.size) return;
+  world.querySelectorAll<SVGGElement>('.edge:not(.sum)').forEach(g => { if (edgeOf(g.dataset.key)?.ids.some(id => set.has(id))) { g.classList.add('lit'); layerEdge(g); } });
+  const box = far ? drawnRep(o, far) ?? (lay.boxes.has(`ghost:${far}`) ? `ghost:${far}` : null) : null;
+  if (box) world.querySelector(`[data-box="${CSS.escape(box)}"]`)?.classList.add('lit');
+}
+/** The map's hover, read back in the pane: rows of these relations light (none when nothing is hovered). */
+function lightRows(ids: string[]) {
+  const set = new Set(ids);
+  document.querySelectorAll<HTMLElement>('#lens .port[data-rel]').forEach(el => el.classList.toggle('lit', set.has(el.dataset.rel!)));
 }
 function clearHighlight() { document.querySelectorAll('.node.cited,.frame.cited').forEach(el => el.classList.remove('cited')); }
 function highlightParts(ids: Set<string>) {
@@ -1862,13 +1906,46 @@ function currentRequestResults(o: Opened, partId?: string): HTMLElement | null {
 const CLAIM_ORDER: ClaimKind[] = ['open', 'differs', 'want', 'reported', 'checked', 'idea', 'describes'];
 /** Said once, where a description or a line rests only on a report a later record took back (it stays; it is not current evidence). */
 const REVISED_BASIS = ' · 근거였던 보고는 이후 정정됨';
-/** Claims of a part as short lines, a report correcting an earlier one first, then most decision-relevant, each with its quote. */
+/** Claims of a part as short lines, a report correcting an earlier one first, then most decision-relevant, each with its quote.
+ * Claims of one kind keep their reading's own order (newest reading first; within a reading, as it said them), so a sequence
+ * a reading wrote (parse, compile, run) is never read backwards. */
 function claimList(part: string, claims: CurrentClaim[], max: number): HTMLElement {
-  const sorted = [...claims].sort((a, b) => Number(!!b.replaces) - Number(!!a.replaces) || CLAIM_ORDER.indexOf(a.kind) - CLAIM_ORDER.indexOf(b.kind)).slice(0, max);
+  const fresh = new Map<string, number>(); for (const c of claims) if (!fresh.has(c.reading)) fresh.set(c.reading, fresh.size);
+  const sorted = [...claims].sort((a, b) => Number(!!b.replaces) - Number(!!a.replaces) || CLAIM_ORDER.indexOf(a.kind) - CLAIM_ORDER.indexOf(b.kind)
+    || fresh.get(a.reading)! - fresh.get(b.reading)! || a.index - b.index).slice(0, max);
   return h('ul', { class: 'claims' }, ...sorted.map(c => h('li', { class: `claim k-${c.kind}${c.replaces ? ' replaces' : ''}` },
     // The kind column keeps its usual width; that this one corrects an earlier claim reads on its own line above the text.
     h('span', { class: 'cl-kind' }, CLAIM_LABEL[c.kind]), h('span', { class: 'cl-text' }, c.replaces ? h('span', { class: 'cl-revises' }, '앞 주장을 대체한 정정') : null, c.text, c.about ? h('small', { class: 'cl-about', title: c.about }, ` · ${displayAbout(c.about)}`) : null),
     h('button', { type: 'button', class: 'cl-cite', 'data-claim-focus': JSON.stringify([part, c.reading, c.index, c.record, c.from ?? null, c.to ?? null]), title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote, c.from) }, '근거'))));
+}
+/** What the person unfolded in the lens, per part (memory, this tab): the claims past the first ones and long relation notes.
+ * Reading a quote or following a relation and coming back keeps them as they were, like the scroll and the focused citation. */
+const lensOpen = new Set<string>();
+const LENS_CLAIMS = 3;
+/** The lens's current claims: how many there are, the first ones, and the rest unfolded in the same place on request. Only
+ * current claims; the evidence history reads in the sheet. */
+function lensClaims(o: Opened, part: string, claims: CurrentClaim[]): HTMLElement {
+  const key = `${o.key}|${part}|claims`, list = claimList(part, claims, claims.length), items = [...list.children] as HTMLElement[], rest = items.length - LENS_CLAIMS;
+  list.id = 'lens-claims';
+  const toggle = rest > 0 ? h('button', { type: 'button', class: 'link-button claims-more', 'aria-controls': 'lens-claims' }) : null;
+  const sync = () => {
+    const open = lensOpen.has(key);
+    items.forEach((li, i) => { li.hidden = !open && i >= LENS_CLAIMS; });
+    if (toggle) { toggle.textContent = open ? '접기' : `${rest}개 더 보기`; toggle.setAttribute('aria-expanded', String(open)); }
+  };
+  toggle?.addEventListener('click', () => { if (lensOpen.has(key)) lensOpen.delete(key); else lensOpen.add(key); sync(); });
+  sync();
+  return h('section', { class: 'lens-claims', 'aria-label': `현재 주장 ${items.length}개` }, h('h3', {}, '현재 주장', h('small', {}, String(items.length))), list, toggle);
+}
+/** A relation note longer than its three lines reads whole on request, in place (the row itself goes to the other end). */
+function clampNotes(root: HTMLElement, o: Opened, part: string) {
+  root.querySelectorAll<HTMLElement>('.port-note[data-rel-note]').forEach(note => {
+    const key = `${o.key}|${part}|note|${note.dataset.relNote}`, li = note.closest('li');
+    if (!li || note.scrollHeight <= note.clientHeight + 1) return;
+    const sync = () => { const open = lensOpen.has(key); note.classList.toggle('whole', open); more.textContent = open ? '접기' : '전체'; more.setAttribute('aria-expanded', String(open)); };
+    const more = h('button', { type: 'button', class: 'link-button note-more', 'aria-label': '관계 설명 전체', onclick: () => { if (lensOpen.has(key)) lensOpen.delete(key); else lensOpen.add(key); sync(); } });
+    li.append(more); sync();
+  });
 }
 /** A quote from the selection: the record in the pane, marked where it was read (from, when the reading kept it; else where the
  * words stand); closing the pane comes back to this part. */
@@ -2127,13 +2204,17 @@ function bindEdgeHints() {
       g.classList.add('near');
       tip.replaceChildren(h('strong', {}, `${nameOf(edge.from)} ${edge.kind === 'related' ? '—' : '→'} ${nameOf(edge.to)}`), h('span', { class: 'tip-kind' }, `${REL_LABEL[edge.kind] ?? edge.kind}${restOf(edge) ? ` · 선택한 부분의 관계를 뺀 나머지 ${edge.ids.length}개` : edge.agg ? ` · 안쪽 관계 ${edge.ids.length}개의 요약 · 선택하면 실제 끝점` : edge.ids.length > 1 ? ` · 관계 ${edge.ids.length}개를 한 선으로 묶음` : ''}`),
         ...edge.notes.slice(0, 3).map(n => h('span', {}, n)), ...(edgeRevised(edge) ? [h('span', { class: 'tip-revised' }, REVISED_BASIS.replace(/^ · /, ''))] : []));
-      tip.hidden = false; place(e as PointerEvent); return;
+      tip.hidden = false; place(e as PointerEvent);
+      if (g.classList.contains('on')) lightRows(edge.ids);
+      return;
     }
     const part = t.closest<HTMLElement>('.node[data-box], .frame-head[data-part], .ghost[data-box]');
     if (part) {
       // A summary line also lights for a part inside one of its ends whose own relations it holds.
       const id = part.dataset.box ?? part.dataset.part!, mine = new Set(lay.edges.filter(x => x.from === id || x.to === id).flatMap(x => x.ids));
       world.querySelectorAll<SVGGElement>('.edge').forEach(x => x.classList.toggle('near', x.dataset.from === id || x.dataset.to === id || (x.classList.contains('sum') && !!edgeOf(x.dataset.key)?.ids.some(r => mine.has(r)))));
+      // An end of the selection's lines: the pane's rows of those relations light too.
+      lightRows(selected && id !== selected ? lay.edges.filter(x => (x.from === id && x.to === selected) || (x.to === id && x.from === selected)).flatMap(x => x.ids) : []);
     }
   });
   world.addEventListener('pointermove', e => { if (!tip.hidden) place(e); });
@@ -2141,7 +2222,7 @@ function bindEdgeHints() {
     const t = e.target as Element;
     if (t.classList.contains('edge-hit')) tip.hidden = true;
     const to = e.relatedTarget as Element | null;
-    if (!to || !to.closest?.('.node, .frame-head, .ghost, .edge')) world.querySelectorAll('.edge.near').forEach(x => x.classList.remove('near'));
+    if (!to || !to.closest?.('.node, .frame-head, .ghost, .edge')) { world.querySelectorAll('.edge.near').forEach(x => x.classList.remove('near')); lightRows([]); }
   });
 }
 
