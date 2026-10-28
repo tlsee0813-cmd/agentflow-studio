@@ -3,6 +3,8 @@
 // studio_browser.py role80_flow; here: which passages, in what order, where, and when there are none.
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import * as D from '../dist/public/shared/domain.js';
 import * as M from '../dist/public/shared/map-reading.js';
 import { studioView } from '../dist/public/shared/studio.js';
@@ -19,6 +21,14 @@ const part = (ref, o = {}) => ({ ref, name: null, parent: null, role: null, role
 const apply = (p, inp, r) => M.applyReading(p, inp, M.validateMapReply(r, inp.ask), meta()).project;
 const evidence = (p, id) => roleEvidence(id, M.partUnderstanding(p, id));
 const text = (p, q) => p.pasted.find(r => r.id === q.record).text;
+
+test('80-CLI the browser fixture entry prints a backup on this platform, including native Windows paths', () => {
+  const output = execFileSync(process.execPath, [fileURLToPath(new URL('./role80-fixture.mjs', import.meta.url))], { encoding: 'utf8' });
+  const fixture = JSON.parse(output);
+  assert.deepEqual(parseProject(JSON.stringify(fixture.project)), fixture.project);
+  assert.ok(fixture.project.space.areas.some(a => a.id === fixture.eval));
+  assert.ok(fixture.project.space.areas.some(a => a.id === fixture.limit));
+});
 
 test('80-A a description with no claims opens its four passages in order, exactly; the fourth is no claim\'s quote', () => {
   const { project, eval: ev, limit } = build80(), u = M.partUnderstanding(project, ev), e = evidence(project, ev);

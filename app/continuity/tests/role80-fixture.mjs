@@ -5,6 +5,7 @@
 import * as D from '../dist/public/shared/domain.js';
 import * as M from '../dist/public/shared/map-reading.js';
 import { studioView } from '../dist/public/shared/studio.js';
+import { pathToFileURL } from 'node:url';
 
 export const RECORD80 = `[합성 표준 표본 · 실제 소스나 보고가 아님]
 평가 경로 발췌:
@@ -36,4 +37,4 @@ export function build80(at = '2026-10-29T00:00:00.000Z') {
   return { project: out.project, eval: out.created[0], limit: out.created[1] };
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) process.stdout.write(JSON.stringify(build80()));
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) process.stdout.write(JSON.stringify(build80()));
