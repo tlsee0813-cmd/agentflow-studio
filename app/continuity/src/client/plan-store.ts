@@ -3,7 +3,7 @@
  * to start over, which first copies the raw text aside. Every write is read back; a write that did not stick is an error. */
 import type { StorageLike } from '../shared/storage.js';
 import { parsePersistedPlan, compareResults, type ChangePlan, type Evidence, type RequestSnapshot, type ResultObservation } from '../shared/change-plan.js';
-import { parseAuthoringRecord, openRecord, legacyRecord, type AuthoringRecord } from '../shared/authoring-context.js';
+import { parseAuthoringRecord, openRecord, legacyRecord, type AuthoringRecord, type Authoring } from '../shared/authoring-context.js';
 
 export const PLANS_KEY = 'agentflow.studio.plans.1';
 export const UNREADABLE_KEY = 'agentflow.studio.plans.1.unreadable';
@@ -79,6 +79,10 @@ export function parseBundle(v: unknown, projectId: string, legacy = false): Plan
   if (!observations.every(o => snapshots.some(s => s.id === attached[o.id]))) fail();
   let authoring: AuthoringRecord | undefined;
   if (Object.hasOwn(v, 'authoring')) { try { authoring = parseAuthoringRecord(v.authoring, !!plan); } catch { fail(); } }
+  // A kept context belongs to the bundle's own project: one naming another project (a copied or mixed file) is not read, rather
+  // than shown as 'nothing selected · whole project' of this one. Parts gone from the same project stay unresolved, as before.
+  const owned = (a: Authoring | undefined) => !a || a.state !== 'set' || a.context.projectId === projectId;
+  if (authoring && (!owned(authoring.draft) || !owned(authoring.analyzed?.authoring))) fail();
   return structuredClone({ draft: v.draft, extra: v.extra as Evidence[], plan, by, snapshots, labels: v.labels as PlanBundle['labels'], origins: v.origins as PlanBundle['origins'], observations, attached, ...(authoring ? { authoring } : {}) });
 }
 

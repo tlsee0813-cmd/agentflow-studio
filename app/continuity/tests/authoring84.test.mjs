@@ -234,3 +234,38 @@ test('84 older envelope moved to .3 for one project keeps every other entry unde
   for (const legacy of [{ PRJ_none: 'studio.plans.2' }, { PRJ_old: 'studio.plans.3' }, []])
     assert.equal(loadBundle(kv({ [PLANS_KEY]: JSON.stringify({ version: 'studio.plans.3', projects: { PRJ_old: legacyOk }, legacy }) }), 'PRJ_old').unreadable, true);
 });
+
+test('84 a kept context belongs to the bundle owner: another project\'s context is refused on load and import; own removed parts stay unresolved', () => {
+  const { p, input, list } = project(), view = studioView(p), ctx = open(p, { selected: input, scope: null });
+  const plan = C.createPlan(p.id, '기준', SENTENCE, [{ id: 'INTENT', kind: 'user', title: '구상', text: SENTENCE, basis: '초안' }], reply(input));
+  const sent = projectInput({ project: p, view }, SENTENCE, [], ctx).analyzed;
+  const good = { ...emptyBundle(SENTENCE), plan, authoring: { version: AUTHORING_VERSION, draft: ctx, analyzed: sent } };
+  const foreign = sel => ({ state: 'set', context: { ...ctx.context, projectId: 'PRJ_other', selection: sel, scope: null } });
+  const kept = JSON.stringify({ version: 'studio.plans.3', projects: { [p.id]: good } });
+  const cases = {
+    'draft null/null': b => { b.authoring.draft = foreign(null); },
+    'draft with a part': b => { b.authoring.draft = foreign(ctx.context.selection); },
+    'analyzed null/null': b => { b.authoring.analyzed.authoring = foreign(null); },
+    'analyzed with a part': b => { b.authoring.analyzed.authoring = foreign(ctx.context.selection); }
+  };
+  for (const [name, mutate] of Object.entries(cases)) {
+    const b = structuredClone(good); mutate(b);
+    assert.throws(() => parseBundle(b, p.id), undefined, name);
+    // Storage: that project's entry reads as unreadable and its raw text stays as it was.
+    const raw = JSON.stringify({ version: 'studio.plans.3', projects: { [p.id]: b } }), store = kv({ [PLANS_KEY]: raw });
+    assert.equal(loadBundle(store, p.id).unreadable, true, name);
+    assert.equal(saveBundle(store, 'PRJ_x', emptyBundle()), null); assert.deepEqual(JSON.parse(store.m.get(PLANS_KEY)).projects[p.id], b, name);
+    // A .3 file of this project carrying it is refused; the current plan is not replaced (the reader returns only a message).
+    assert.equal(typeof readPlanFile(planFile(b, p), p.id), 'string', name);
+  }
+  assert.deepEqual(loadBundle(kv({ [PLANS_KEY]: kept }), p.id).bundle, good);
+  // Same owner, a kept part removed from the map since: read as before, shown and sent as unresolved.
+  const gone = D.setAreaArchived(D.setAreaArchived(p, list, true), input, true);
+  assert.deepEqual(readPlanFile(planFile(good, gone), gone.id), good);
+  const later = projectInput({ project: gone, view: studioView(gone) }, SENTENCE, [], authoringOf(good).draft);
+  assert.deepEqual(later.ask.authoring.selection, { partId: null, nameThen: '입력', status: 'unresolved' });
+  assert.equal(authoringStale(authoringOf(good), gone.id, studioView(gone).parts), 'missing');
+  // Open, removed and unrecorded drafts carry no project and stay readable.
+  for (const draft of [{ state: 'open' }, { state: 'removed', at: new Date().toISOString() }, { state: 'unrecorded' }])
+    assert.deepEqual(parseBundle({ ...good, authoring: { ...good.authoring, draft } }, p.id).authoring.draft, draft);
+});
