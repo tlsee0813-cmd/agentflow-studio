@@ -106,8 +106,10 @@ export function nodeWidth(name: string, kids: boolean, measure: TextMeasure = es
   const need = measure(name, 'node') * 1.12 + 8, one = measure(name, 'node') + 2;
   // A name that reads on one line beside the toggle and the way in keeps its one line beside the count too: the card widens.
   if (extra && one <= NODE_W - nodeChrome(kids)) return Math.min(NODE_MAX_W, Math.max(NODE_W, Math.ceil(one) + nodeChrome(kids, extra)));
-  if (need <= (NODE_W - nodeChrome(kids, extra)) * 2) return NODE_W;
-  return Math.min(NODE_MAX_W, Math.ceil(need / 2) + nodeChrome(kids, extra));
+  const w = need <= (NODE_W - nodeChrome(kids, extra)) * 2 ? NODE_W : Math.min(NODE_MAX_W, Math.ceil(need / 2) + nodeChrome(kids, extra));
+  // A name on two lines keeps its longest word whole ('JSContext.eval', never 'JSContext.eva|l'), up to NODE_MAX_W.
+  const word = Math.max(0, ...name.split(/\s+/).map(x => measure(x, 'node') + 2));
+  return one > w - nodeChrome(kids, extra) && word > w - nodeChrome(kids, extra) ? Math.min(NODE_MAX_W, Math.ceil(word) + nodeChrome(kids, extra) + 4) : w;
 }
 /** Relations crossing a part's boundary: one end is the part or anything under it (any depth), the other is outside it.
  * Counted from the stored relations only; a plain relation has no direction, so it is neither in nor out. */
@@ -296,10 +298,15 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
     // In a preview the planned lines sit under the name in place of the note (hidden there); the head never shrinks.
     return { w, head: 12 + nl * 22 + Math.max(ll ? 3 + ll * 17 : 0, pl ? 3 + pl * PLAN_LINE : 0) + 14 };
   };
-  /** Group head inside a region: its name only; a long name takes a second line or widens the group (up to 360px). */
+  /** Group head inside a region: its name only. A name keeps one line when the group can widen to hold it (up to 300px, as a
+   * region keeps its own up to 320px); else it takes a second line, broken between words (styles.css: keep-all), the group
+   * widening (up to 360px) so its longest word fits a line and no last letter is left alone. */
   const groupHead = (id: string, w: number): { w: number; head: number } => {
-    const need = measureText(byId.get(id)?.name ?? '', 'sub') * 1.08, room = (x: number) => x - 88 - (hasRecords(id) ? 52 : 0) - chip(id);
-    if (need > room(w) * 2) w = Math.max(w, Math.min(360, Math.ceil(need / 2) + w - room(w) + 12));
+    const name = byId.get(id)?.name ?? '', need = measureText(name, 'sub') * 1.08, room = (x: number) => x - 88 - (hasRecords(id) ? 52 : 0) - chip(id), chrome = w - room(w);
+    if (need > room(w) && need + chrome <= 300) w = Math.ceil(need + chrome);
+    if (need > room(w) * 2) w = Math.max(w, Math.min(360, Math.ceil(need / 2) + chrome + 12));
+    const word = Math.max(0, ...name.split(/\s+/).map(x => measureText(x, 'sub') * 1.08));
+    if (need > room(w) && word > room(w)) w = Math.max(w, Math.min(360, Math.ceil(word) + chrome + 4));
     const pl = plannedLines(id, room(w));
     return { w, head: (need > room(w) ? HEAD_2 : HEAD) + (pl ? 3 + pl * PLAN_LINE : 0) };
   };
@@ -328,6 +335,9 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
       // A folded group's name keeps one line when a card up to NODE_MAX_W holds it beside its count and the way in.
       if (kids && need > w - chrome && need <= NODE_MAX_W - chrome) w = Math.ceil(need) + chrome;
       if (need > (w - chrome) * 2) w = Math.min(NODE_MAX_W + 40, Math.ceil(need / 2) + chrome);
+      // Lines break between words: a name on two lines keeps its longest word whole ('JSContext.eval', never 'JSContext.eva|l').
+      const word = Math.max(0, ...p.name.split(/\s+/).map(x => measureText(x, 'head') * 1.1));
+      if (need > w - chrome && word > w - chrome) w = Math.min(NODE_MAX_W + 40, Math.max(w, Math.ceil(word) + chrome + 4));
       const nl = need > w - chrome ? (need > (w - chrome) * 2 ? 3 : 2) : 1, ll = lines(note, 'note', w - chrome), pl = nodeLines(id, w - chrome);
       m = { w, h: Math.max(NODE_H, 24 + nl * 20 + (ll ? 2 + ll * 17 : 0) + extra * 19, pl ? 24 + nl * 20 + 3 + pl * PLAN_LINE : 0), ox: 0, oy: 0, head: 0, face: 'unit' };
     } else {
@@ -444,6 +454,32 @@ export function edgePath(a: Box, b: Box, others: Iterable<Box> = []): { d: strin
   const segFree = (x1: number, y1: number, x2: number, y2: number, m = LANE_CLEAR) => !blocks.some(o => Math.max(x1, x2) > o.x - m && Math.min(x1, x2) < o.x + o.w + m && Math.max(y1, y2) > o.y - m && Math.min(y1, y2) < o.y + o.h + m);
   const free = (pts: Point[]) => pts.every((p, i) => !i || segFree(pts[i - 1]!.x, pts[i - 1]!.y, p.x, p.y, -1));
   const portY = (x: Box) => (x.kind === 'frame' ? x.y + x.head / 2 : x.y + x.h / 2);
+  // One end holds the other (a group and a part or group inside it): the line leaves the group under its head and runs down the
+  // group's own margin to the side of the inner end (its head row when it is a group), so it never crosses a head or the parts
+  // between them. Reversed when the inner end is where the line starts.
+  // What lies between them inside the group is in the way: every box inside it but the inner end and the groups that hold the
+  // inner end, whose heads are in the way all the same. When that margin route would cross one, the line takes the gaps inside
+  // the group instead (from under its head, into a side of the inner end, or a part's top or bottom).
+  const outer = a.kind === 'frame' && within(b, a) ? a : b.kind === 'frame' && within(a, b) ? b : null;
+  if (outer) {
+    const inner = outer === a ? b : a, lx = outer.x + PAD / 2, top = outer.y + outer.head, iy = Math.max(top + 10, portY(inner));
+    const holds = (o: Box) => o.kind === 'frame' && within(inner, o), inGroup = all.filter(o => o !== outer && o !== inner && within(o, outer));
+    const stop: Rect[] = [...inGroup.filter(o => !holds(o)), ...inGroup.filter(o => holds(o) && o.head > 0).map(o => ({ x: o.x, y: o.y, w: o.w, h: o.head }))];
+    const open = (x1: number, y1: number, x2: number, y2: number, m = LANE_CLEAR) => !stop.some(o => Math.max(x1, x2) > o.x - m && Math.min(x1, x2) < o.x + o.w + m && Math.max(y1, y2) > o.y - m && Math.min(y1, y2) < o.y + o.h + m);
+    const draw = (pts: Point[], mid: Point) => ({ d: rounded(outer === a ? pts : [...pts].reverse(), 6), mx: mid.x, my: mid.y, detour: true, clear: true });
+    const lane = [{ x: lx, y: top }, { x: lx, y: iy }, { x: inner.x, y: iy }];
+    if (lane.every((p, i) => !i || open(lane[i - 1]!.x, lane[i - 1]!.y, p.x, p.y, -1))) return draw(lane, { x: lx, y: (top + iy) / 2 });
+    const LEAD = 12, starts = new Set([lx, outer.x + outer.w - PAD / 2, inner.x + inner.w / 2, inner.x - PAD / 2, inner.x + inner.w + PAD / 2]);
+    const from: Port[] = [...starts].filter(x => x > outer.x && x < outer.x + outer.w).map(x => ({ at: { x, y: top }, lead: { x, y: top + LEAD }, cost: 0 }));
+    const icx = inner.x + inner.w / 2, to: Port[] = [{ at: { x: inner.x, y: iy }, lead: { x: inner.x - LEAD, y: iy }, cost: 0 }, { at: { x: inner.x + inner.w, y: iy }, lead: { x: inner.x + inner.w + LEAD, y: iy }, cost: 0 },
+      ...(inner.kind === 'frame' ? [] : [{ at: { x: icx, y: inner.y }, lead: { x: icx, y: inner.y - LEAD }, cost: 0 }, { at: { x: icx, y: inner.y + inner.h }, lead: { x: icx, y: inner.y + inner.h + LEAD }, cost: 0 }])];
+    const seg = (x1: number, y1: number, x2: number, y2: number) => open(x1, y1, x2, y2);
+    const r = searchRoute(from.filter(p => seg(p.at.x, p.at.y + 1, p.lead.x, p.lead.y)), to.filter(p => seg(p.at.x + Math.sign(p.lead.x - p.at.x), p.at.y + Math.sign(p.lead.y - p.at.y), p.lead.x, p.lead.y)),
+      stop, seg, { x0: outer.x + 2, x1: outer.x + outer.w - 2, y0: top, y1: outer.y + outer.h - 2 }, true);
+    if (r) return draw(r.pts, r.mid);
+    // No free way inside the group: the margin route, said to cross (never claimed clear).
+    return { ...draw(lane, { x: lx, y: (top + iy) / 2 }), clear: false };
+  }
   const acx = a.x + a.w / 2, bcx = b.x + b.w / 2, acy = portY(a), bcy = portY(b);
   const overlapX = a.x < b.x + b.w && b.x < a.x + a.w;
   if (overlapX) {
@@ -482,7 +518,6 @@ export function edgePath(a: Box, b: Box, others: Iterable<Box> = []): { d: strin
  * everywhere. Only boxes near the two ends are searched; null when no such path is found, and the crossing curve stays. */
 function gapRoute(a: Box, b: Box, dir: number, blocks: { x: number; y: number; w: number; h: number }[], segFree: (x1: number, y1: number, x2: number, y2: number) => boolean): { pts: Point[]; mid: Point } | null {
   const LEAD = 12, SIDE = 0, END = 34;
-  type Port = { at: Point; lead: Point; cost: number };
   const ports = (x: Box, face: number): Port[] => {
     const cy = x.kind === 'frame' ? x.y + x.head / 2 : x.y + x.h / 2, cx = x.x + x.w / 2, sx = face > 0 ? x.x + x.w : x.x;
     const out: Port[] = [{ at: { x: sx, y: cy }, lead: { x: sx + face * LEAD, y: cy }, cost: SIDE }];
@@ -492,15 +527,25 @@ function gapRoute(a: Box, b: Box, dir: number, blocks: { x: number; y: number; w
   const from = ports(a, dir), to = ports(b, -dir);
   if (!from.length || !to.length) return null;
   const x0 = Math.min(a.x, b.x) - 160, x1 = Math.max(a.x + a.w, b.x + b.w) + 160, y0 = Math.min(a.y, b.y) - 160, y1 = Math.max(a.y + a.h, b.y + b.h) + 160;
+  return searchRoute(from, to, blocks, segFree, { x0, x1, y0, y1 });
+}
+type Port = { at: Point; lead: Point; cost: number };
+/** The search behind gapRoute: an orthogonal path from one of the from ports to one of the to ports through the lanes between
+ * the blocks near the bounds (fewest turns, then shortest), every step tested with segFree. null when none is found. clip: no
+ * lane past the bounds (a line kept inside its group); gapRoute's lanes are never clipped (a lane just past its search edge
+ * may be the free way round). */
+function searchRoute(from: Port[], to: Port[], blocks: { x: number; y: number; w: number; h: number }[], segFree: (x1: number, y1: number, x2: number, y2: number) => boolean, bounds: { x0: number; x1: number; y0: number; y1: number }, clip = false): { pts: Point[]; mid: Point } | null {
+  const { x0, x1, y0, y1 } = bounds;
   const near = blocks.filter(o => o.x < x1 && x0 < o.x + o.w && o.y < y1 && y0 < o.y + o.h);
-  // Lanes: just outside each nearby box, the middle of every gap between box edges, the ports' own lines and the search edge.
-  const lanes = (edges: number[], extra: number[]) => {
+  // Lanes: just outside each nearby box, the middle of every gap between box edges, the ports' own lines and the search edge
+  // (past the search edge only when not clipped).
+  const lanes = (edges: number[], extra: number[], lo: number, hi: number) => {
     const e = [...new Set(edges)].sort((p, q) => p - q), out = new Set(extra), half = (v: number) => Math.round(v * 2) / 2;
     for (let i = 0; i < e.length; i++) { out.add(e[i]! - 8); out.add(e[i]! + 8); if (i) out.add((e[i - 1]! + e[i]!) / 2); }
-    return [...new Set([...out].map(half))].sort((p, q) => p - q);
+    return [...new Set([...out].map(half))].filter(v => !clip || (v >= lo && v <= hi)).sort((p, q) => p - q);
   };
-  const xs = lanes(near.flatMap(o => [o.x, o.x + o.w]), [x0, x1, ...from.map(p => p.lead.x), ...to.map(p => p.lead.x)]);
-  const ys = lanes(near.flatMap(o => [o.y, o.y + o.h]), [y0, y1, ...from.map(p => p.lead.y), ...to.map(p => p.lead.y)]);
+  const xs = lanes(near.flatMap(o => [o.x, o.x + o.w]), [x0, x1, ...from.map(p => p.lead.x), ...to.map(p => p.lead.x)], x0, x1);
+  const ys = lanes(near.flatMap(o => [o.y, o.y + o.h]), [y0, y1, ...from.map(p => p.lead.y), ...to.map(p => p.lead.y)], y0, y1);
   const X = xs.length, Y = ys.length, N = X * Y, ix = new Map(xs.map((v, i) => [v, i])), iy = new Map(ys.map((v, i) => [v, i]));
   const key = (p: Point) => { const i = ix.get(Math.round(p.x * 2) / 2), j = iy.get(Math.round(p.y * 2) / 2); return i === undefined || j === undefined ? -1 : j * X + i; };
   // Free steps between neighbouring lane crossings (right: 0, down: 1), each tested once.

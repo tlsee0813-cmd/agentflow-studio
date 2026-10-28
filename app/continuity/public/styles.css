@@ -231,7 +231,7 @@ button:disabled { opacity: .5; cursor: default; }
 .frame-head { position: absolute; left: 0; right: 0; top: 0; display: flex; align-items: center; gap: 4px; padding: 0 8px 0 6px; border-radius: var(--r-lg) var(--r-lg) 0 0; cursor: pointer; }
 .frame-title { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 .frame-name { font-weight: 650; font-size: 13px; line-height: 1.3; letter-spacing: -.005em; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.frame-head.tall .frame-name { white-space: normal; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.frame-head.tall .frame-name { white-space: normal; word-break: keep-all; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .region > .frame-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto auto; grid-template-rows: auto auto; align-items: start; column-gap: 4px; row-gap: 3px; padding: 12px 10px 0 6px; border-radius: var(--r-lg) var(--r-lg) 0 0; }
 .region > .frame-head .frame-note { grid-column: 2 / -1; grid-row: 2; }
 .region > .frame-head .frame-name { font-size: 15px; line-height: 20px; color: var(--text); letter-spacing: -.012em; }
@@ -1219,3 +1219,36 @@ button:disabled { opacity: .5; cursor: default; }
 .request-ambiguous { margin-top: 10px; padding: 8px 12px; border-left: 2px solid var(--accent-line); }
 .request-ambiguous > p { margin: 4px 0; }
 .request-ambiguous > .link-button { display: block; text-align: left; white-space: normal; }
+
+/* AF-EXPERIENCE75: a selection reads where its relations end. The card at the other end of one of the selection's own relations
+   says that relation's stored note in the room of its state line (one line; the pane's row reads it whole). */
+.node-rel { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 12px; line-height: 17px; color: var(--accent-strong); white-space: nowrap; overflow: hidden; }
+.node.unit .node-rel { margin-top: 2px; }
+.node-rel .rel-dot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.node-rel .rel-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.node-rel small { flex: none; font-size: 11px; color: var(--text-3); }
+.node.has-rel .node-meta { display: none; }
+.space.z-mid .node.has-rel:not(.selected):not(.related) .node-rel { display: none; }
+/* A pane row and its line and end light together (pointer or keyboard focus). */
+.edge.lit .edge-line { stroke: var(--accent-strong); stroke-width: 3; stroke-opacity: 1; opacity: 1; }
+.node.lit, .node.lit:hover, .ghost.lit { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(43,89,195,.14); }
+.frame.lit { border-color: var(--accent); }
+.port.lit { background: var(--accent-soft); }
+.port.lit strong { color: var(--accent-strong); }
+/* The note is what the relation is: it reads as body text under the other end's name, three lines at most until asked. */
+/* Only a selection's relation notes, which carry their own whole-note control (clampNotes); a scope's notes read whole. */
+.lens-ports .port-note[data-rel-note] { font-size: 13px; color: var(--text); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.lens-ports .port-note[data-rel-note].whole { display: block; -webkit-line-clamp: unset; overflow: visible; }
+.lens-ports li { position: relative; }
+.lens-ports .note-more { margin: -2px 0 4px 28px; font-size: 12px; }
+.lens-ports .fr-port + .note-more { margin-left: 8px; }
+/* Current claims after the connections: counted, the first three, the rest unfolded in place. */
+.lens-claims { margin-top: var(--s-4); padding-top: var(--s-4); border-top: 1px solid var(--hair); }
+.lens-claims h3 { margin: 0; display: flex; align-items: baseline; gap: 6px; font: var(--label); letter-spacing: var(--label-track); color: var(--text-3); }
+.lens-claims h3 small { font-weight: 500; color: var(--text-4); font-variant-numeric: tabular-nums; }
+.lens-claims .claims { margin-top: 6px; }
+.lens-claims .claim[hidden] { display: none; }
+.lens-claims .claims-more { margin-top: 6px; font-size: 12px; }
+/* The selection's lens reads as one column: connections and claims sit a little closer than other sections. */
+.lens-body > .lens-ports, .lens-body > .lens-claims { margin-top: var(--s-3); padding-top: var(--s-3); }
+.lens-body > .lens-ports .port { padding-top: 6px; padding-bottom: 6px; }
