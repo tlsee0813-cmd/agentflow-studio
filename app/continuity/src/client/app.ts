@@ -1272,8 +1272,8 @@ function renderLens() {
     if (u.roleAbout) desc.lastElementChild?.setAttribute('title', u.roleAbout);
   } else put(desc, src(part.status === 'plan' ? (records.length ? `설명 없음 · 요청 기록 없음 · ${recs}` : part.reading ? '기록에서 읽은 주장만 있어요' : '아직 설명도 기록도 없어요') : `${STATUS_LABEL[part.status]} · ${recs} · 받은 정리 없음`));
   if (part.changes.length) desc.append(h('ul', { class: 'lens-changes' }, ...part.changes.slice(0, 2).map(c => h('li', {}, c))));
-  // What the records say about it now, after its connections: counted, the first few, the rest unfolded here on request.
-  const claims = part.reading?.claims.length ? lensClaims(o, part.id, part.reading.claims) : null;
+  // Read the current statements together: a later limitation may qualify an earlier description.
+  const claims = part.reading?.claims.length ? lensClaims(part.id, part.reading.claims) : null;
   const requested = currentRequestResults(o, part.id);
   // Lines: real ends, read by what they mean. One group per verb and direction ("이 부분이 필요로 함"), each row the real other
   // end and its stored note (the reason of that relation, read right under the description); a line drawn from a folded part
@@ -1926,24 +1926,15 @@ function claimList(part: string, claims: CurrentClaim[], max: number): HTMLEleme
     h('span', { class: 'cl-kind' }, CLAIM_LABEL[c.kind]), h('span', { class: 'cl-text' }, c.replaces ? h('span', { class: 'cl-revises' }, '앞 주장을 대체한 정정') : null, c.text, c.about ? h('small', { class: 'cl-about', title: c.about }, ` · ${displayAbout(c.about)}`) : null),
     h('button', { type: 'button', class: 'cl-cite', 'data-claim-focus': JSON.stringify([part, c.reading, c.index, c.record, c.from ?? null, c.to ?? null]), title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote, c.from) }, '근거'))));
 }
-/** What the person unfolded in the lens, per part (memory, this tab): the claims past the first ones and long relation notes.
+/** What the person unfolded in the lens, per part (memory, this tab): long relation notes.
  * Reading a quote or following a relation and coming back keeps them as they were, like the scroll and the focused citation. */
 const lensOpen = new Set<string>();
-const LENS_CLAIMS = 3;
-/** The lens's current claims: how many there are, the first ones, and the rest unfolded in the same place on request. Only
- * current claims; the evidence history reads in the sheet. */
-function lensClaims(o: Opened, part: string, claims: CurrentClaim[]): HTMLElement {
-  const key = `${o.key}|${part}|claims`, list = claimList(part, claims, claims.length), items = [...list.children] as HTMLElement[], rest = items.length - LENS_CLAIMS;
+/** Current statements stay in one continuous reading, including qualifications late in the source. The pane scrolls normally;
+ * position alone cannot make a statement optional. Evidence history still reads in the sheet. */
+function lensClaims(part: string, claims: CurrentClaim[]): HTMLElement {
+  const list = claimList(part, claims, claims.length);
   list.id = 'lens-claims';
-  const toggle = rest > 0 ? h('button', { type: 'button', class: 'link-button claims-more', 'aria-controls': 'lens-claims' }) : null;
-  const sync = () => {
-    const open = lensOpen.has(key);
-    items.forEach((li, i) => { li.hidden = !open && i >= LENS_CLAIMS; });
-    if (toggle) { toggle.textContent = open ? '접기' : `${rest}개 더 보기`; toggle.setAttribute('aria-expanded', String(open)); }
-  };
-  toggle?.addEventListener('click', () => { if (lensOpen.has(key)) lensOpen.delete(key); else lensOpen.add(key); sync(); });
-  sync();
-  return h('section', { class: 'lens-claims', 'aria-label': `현재 주장 ${items.length}개` }, h('h3', {}, '현재 주장', h('small', {}, String(items.length))), list, toggle);
+  return h('section', { class: 'lens-claims', 'aria-label': `현재 주장 ${claims.length}개` }, h('h3', {}, '현재 주장', h('small', {}, String(claims.length))), list);
 }
 /** A relation note longer than its three lines reads whole on request, in place (the row itself goes to the other end). Safe to
  * run again over the same pane (rows shown later, e.g. after '더 보기'): a row that has its control keeps it. */
