@@ -9,7 +9,7 @@ import { addArea, addChildArea, addRelation, addReading } from './domain.js';
 import { parseProject } from './validation.js';
 import { quoteAt } from './digest-api.js';
 import { secretLike } from './secret.js';
-import { validateFrozenRequest, validateRequestContext, requestContext, validateRequestMatch, requestMatches, hasTarget, sameTarget, canReplace, sameScope, MATCH_STANCES, type RequestContext, type FrozenRequest, type RequestMatch, type RequestMatch3, type StoredRequestMatch, type MatchKind, type MatchStance, type RequestTarget } from './request-return.js';
+import { validateFrozenRequest, validateRequestContext, requestContext, validateRequestMatch, requestMatches, hasTarget, sameTarget, canReplace, MATCH_STANCES, type RequestContext, type FrozenRequest, type RequestMatch, type RequestMatch3, type StoredRequestMatch, type MatchKind, type MatchStance, type RequestTarget } from './request-return.js';
 
 export const MAP_SCHEMA = 'studio.map.1' as const;
 export const MAP2_SCHEMA = 'studio.map.2' as const;
@@ -264,8 +264,7 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
       // Doubtful ones keep the passage and drop the link (the two reports then read side by side): a remark that does not say
       // made or not made, another nature, the prior's own words, a second take-back of the same prior, a target widened to
       // identical items of other requests, or another named version the record never names.
-      const holds = !!prior && !taken.has(prior.key) && targets.length === 1 && canReplace({ target: prior.target, excluded: false, replaced: false, kind: prior.kind, quote: prior.quote }, { ...m, quote: quoted })
-        && (sameScope(prior.about, about) || rec!.text.includes(prior.about!));
+      const holds = !!prior && !taken.has(prior.key) && targets.length === 1 && canReplace({ target: prior.target, excluded: false, replaced: false, kind: prior.kind, quote: prior.quote, about: prior.about }, { ...m, quote: quoted, about }, rec!.text);
       if (holds) taken.add(prior!.key);
       return { ...m, quote: quoted, about, targets, stance: m.stance!, replaces: holds ? prior!.key : null };
     });
@@ -331,7 +330,7 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
   }
   const state = STATE_ORDER.find(k => claims.some(c => c.kind === k)) ?? null;
   const revised = claims.some(c => !!c.replaces && (c.kind === 'reported' || c.kind === 'checked'));
-  const spans = revisedSpans(p), roleBasisRevised = !corrected && roleBasis.length > 0 && roleBasis.every(q => insideRevised(p, spans, q));
+  const roleBasisRevised = !corrected && roleBasis.length > 0 && roleBasis.every(q => insideRevised(p, areaId, q));
   // The corrected report reads first (claims are newest first; a replacing one goes ahead of the rest).
   claims.sort((a, b) => Number(!!b.replaces) - Number(!!a.replaces));
   return { role, roleAbout, roleBasis, corrected, others: others.slice(0, 6), claims: claims.slice(0, 12), history, createdName, state, revised, roleBasisRevised };
@@ -339,39 +338,48 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
 
 /* ---------- evidence a later record took back ---------- */
 interface Span { record: string; from: number; to: number }
-const spanCache = new WeakMap<Project, Span[]>();
+const spanCache = new WeakMap<Project, Map<string, Span[]>>();
 const recordText = (p: Project, id: string) => p.pasted.find(r => r.id === id)?.text ?? p.sources.find(r => r.id === id)?.text ?? null;
 /** Where a quote stands in its record, only when it stands there once (otherwise which passage is meant is not certain). */
 function spanOnce(p: Project, q: ReadingQuote): Span | null {
   const t = recordText(p, q.record); if (t === null) return null;
   const at = t.indexOf(q.quote); return at >= 0 && t.indexOf(q.quote, at + 1) < 0 ? { record: q.record, from: at, to: at + q.quote.length } : null;
 }
-/** Passages of reports and checks that no longer stand: a map claim a later claim of the same part replaced (the record said so),
- * and a request match a later record explicitly withdrew as not made. A passage some current report or check of the map still
- * rests on is not among them. Derived only; nothing is stored, removed or archived. */
-export function revisedSpans(p: Project): Span[] {
+/** Per part: passages of its reports and checks that no longer stand. A map claim of that part a later claim of the same part
+ * replaced (a claim is named by reading, part and index: index alone repeats across parts), and a request match a later record
+ * explicitly withdrew as not made, for the parts of the item it answered. A passage a current report or check of that same part
+ * still rests on is not among them. Derived only; nothing is stored, removed or archived. */
+export function revisedSpans(p: Project): Map<string, Span[]> {
   const hit = spanCache.get(p); if (hit) return hit;
-  const replaced = new Set<string>(), maps = p.readings.filter(isMapReading);
-  for (const r of maps) for (const part of r.parts) for (const c of part.claims) if (c.replaces) replaced.add(`${c.replaces.reading}:${c.replaces.index}`);
-  const gone: Span[] = [], live: Span[] = [];
+  const replaced = new Set<string>(), maps = p.readings.filter(isMapReading), gone = new Map<string, Span[]>(), live = new Map<string, Span[]>();
+  const add = (m: Map<string, Span[]>, area: string, s: Span) => { const l = m.get(area) ?? []; l.push(s); m.set(area, l); };
+  for (const r of maps) for (const part of r.parts) for (const c of part.claims) if (c.replaces) replaced.add(`${c.replaces.reading}|${part.areaId}|${c.replaces.index}`);
   for (const r of maps) for (const part of r.parts) part.claims.forEach((c, i) => {
     if (c.kind !== 'reported' && c.kind !== 'checked') return;
-    const s = spanOnce(p, c); if (s) (replaced.has(`${r.id}:${i}`) ? gone : live).push(s);
+    const s = spanOnce(p, c); if (s) add(replaced.has(`${r.id}|${part.areaId}|${i}`) ? gone : live, part.areaId, s);
   });
-  for (const x of requestMatches(p)) if (x.replacedBy?.match.stance === 'not-made') gone.push({ record: x.match.record, from: x.match.from, to: x.match.to });
-  const out = gone.filter(s => !live.some(l => l.record === s.record && l.from < s.to && s.from < l.to));
+  for (const x of requestMatches(p)) if (x.replacedBy?.match.stance === 'not-made' && x.target) {
+    const t = x.target, item = x.requests.find(q => q.id === t.requestId)?.items.find(i => i.id === t.itemId);
+    for (const area of item?.partIds ?? []) add(gone, area, { record: x.match.record, from: x.match.from, to: x.match.to });
+  }
+  const out = new Map<string, Span[]>();
+  for (const [area, spans] of gone) {
+    const kept = spans.filter(s => !(live.get(area) ?? []).some(l => l.record === s.record && l.from < s.to && s.from < l.to));
+    if (kept.length) out.set(area, kept);
+  }
   spanCache.set(p, out); return out;
 }
-function insideRevised(p: Project, spans: Span[], q: ReadingQuote): boolean {
+function insideRevised(p: Project, area: string, q: ReadingQuote): boolean {
+  const spans = revisedSpans(p).get(area); if (!spans) return false;
   const s = spanOnce(p, q); return !!s && spans.some(x => x.record === s.record && s.from >= x.from && s.to <= x.to);
 }
-/** Relations a reading added on a quote that lies inside a report a later record took back: the line stays (the person's map),
- * but it is not read as a current, confirmed connection. A relation the person drew has no quote and is never among them. */
+/** Relations a reading added on a quote that lies inside a report one of its two ends took back: the line stays (the person's
+ * map), but it is not read as a current, confirmed connection. A relation the person drew has no quote and is never among them. */
 const relationCache = new WeakMap<Project, Set<string>>();
 export function revisedRelations(p: Project): Set<string> {
   const hit = relationCache.get(p); if (hit) return hit;
-  const spans = revisedSpans(p), out = new Set<string>();
-  if (spans.length) for (const r of p.readings) if (isMapReading(r)) for (const x of r.relations) if (insideRevised(p, spans, x.quote)) out.add(x.relationId);
+  const out = new Set<string>();
+  if (revisedSpans(p).size) for (const r of p.readings) if (isMapReading(r)) for (const x of r.relations) if (insideRevised(p, x.from, x.quote) || insideRevised(p, x.to, x.quote)) out.add(x.relationId);
   relationCache.set(p, out); return out;
 }
 

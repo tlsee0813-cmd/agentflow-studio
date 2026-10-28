@@ -384,7 +384,7 @@ function readings(v:unknown,areaIds:Set<string>,records:Map<string,string>,proje
     seen.set(r.id as string,claims);
   }
   // Every withdrawal names an earlier match that, where it stands, answers the very same frozen item; nothing is taken back twice.
-  ensure(!matchLedger(v as ReadingEntry[]).invalid);
+  ensure(!matchLedger(v as ReadingEntry[],records).invalid);
 }
 export const POSITION_LIMIT=200000;
 function planStamp(v:unknown) {

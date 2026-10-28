@@ -48,8 +48,37 @@ export interface ReplaceCorrection { version: 'replace-correction.1'; id: string
  * open may take back a change report only by saying it was not made ('철회합니다, 아직 미구현'). */
 export const matchGroup = (k: MatchKind) => k === 'reported' || k === 'code' ? 'change' : k === 'checked' || k === 'test' ? 'check' : 'open';
 const squash = (t: string) => t.replace(/\s+/g, ' ').trim();
-/** Two scopes (about) that may be the same: either unnamed, or one names the other ('feature/folder 브랜치' and 'feature/folder'). */
-export const sameScope = (a: string | null | undefined, b: string | null | undefined) => !a || !b || squash(a).toLowerCase().includes(squash(b).toLowerCase()) || squash(b).toLowerCase().includes(squash(a).toLowerCase());
+/* Scope identity (about), by the identifiers it names, as whole tokens: a branch ('feature/folder', main), a version (v1, 1.2.0) or a
+ * commit (abc1234). Never by plain substring ('v1' is not 'v10') nor by the whole wording ('feature/folder 브랜치' and
+ * 'feature/folder의 입력' name the same branch). */
+type ScopeIds = { branch: Set<string>; version: Set<string>; commit: Set<string> };
+const BRANCH_WORDS = new Set(['main', 'master', 'develop', 'trunk']);
+function scopeIds(t: string): ScopeIds {
+  const out: ScopeIds = { branch: new Set(), version: new Set(), commit: new Set() };
+  for (const raw of t.normalize('NFKC').split(/[\s@]+/).flatMap(w => w.match(/[A-Za-z0-9][A-Za-z0-9._\/-]*/g) ?? [])) {
+    const x = raw.replace(/[._\/-]+$/, '').toLowerCase(); if (!x) continue;
+    if (/^v\d+(?:\.\d+)*$/.test(x) || /^\d+(?:\.\d+)+$/.test(x)) out.version.add(x.replace(/^v/, ''));
+    else if (/^[0-9a-f]{7,40}$/.test(x) && /\d/.test(x) && /[a-f]/.test(x)) out.commit.add(x);
+    else if (x.includes('/') || BRANCH_WORDS.has(x)) out.branch.add(x);
+  }
+  return out;
+}
+const CLASSES = ['branch', 'version', 'commit'] as const;
+/** same: they share an identifier and name no other one of the same class; different: some class is named on both sides with
+ * nothing in common (feature/folder vs main, v1 vs v10, two commits); unknown: either side unnamed, or no identifier to compare. */
+export type ScopeRelation = 'same' | 'different' | 'unknown';
+export function scopeRelation(a: string | null | undefined, b: string | null | undefined): ScopeRelation {
+  if (!a || !b) return 'unknown';
+  const x = scopeIds(a), y = scopeIds(b), shared = (c: typeof CLASSES[number]) => [...x[c]].some(v => y[c].has(v));
+  if (CLASSES.some(c => x[c].size && y[c].size && !shared(c))) return 'different';
+  return CLASSES.some(shared) ? 'same' : 'unknown';
+}
+/** The text names one of the scope's identifiers as a whole token (a record that explicitly points at that older claim's version). */
+export function namesScope(text: string, about: string | null): boolean {
+  if (!about) return false;
+  const want = scopeIds(about), got = scopeIds(text);
+  return CLASSES.some(c => [...want[c]].some(v => got[c].has(v)));
+}
 
 const ID = /^[A-Za-z0-9_-]{1,100}$/;
 const object = (v: unknown, keys: string[]): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length === keys.length && keys.every(k => Object.hasOwn(v, k));
@@ -108,15 +137,17 @@ export interface EffectiveMatch {
 const targetKey = (targets: RequestTarget[]) => targets.map(t => `${t.requestId}/${t.itemId}`).sort().join('|');
 const overlap = (a: StoredRequestMatch, b: StoredRequestMatch) => a.record === b.record && a.from < b.to && b.from < a.to;
 /** Whether a match may withdraw an earlier effective one: the very same single frozen RQ item the earlier one now answers, of the
- * same nature, saying made or not made (an unclear or general remark never takes a report back), from a new passage. */
-export function canReplace(prior: { target: RequestTarget | null; excluded: boolean; replaced: boolean; kind: MatchKind; quote: string }, m: { targets: RequestTarget[]; kind: MatchKind; stance?: MatchStance; quote: string }): boolean {
+ * same nature, saying made or not made (an unclear or general remark never takes a report back), from a new passage, and about
+ * that claim's scope: another named branch, version or commit only when the record (text) names that claim's own one. */
+export function canReplace(prior: { target: RequestTarget | null; excluded: boolean; replaced: boolean; kind: MatchKind; quote: string; about: string | null }, m: { targets: RequestTarget[]; kind: MatchKind; stance?: MatchStance; quote: string; about: string | null }, text: string | null): boolean {
+  if (scopeRelation(prior.about, m.about) === 'different' && !(text !== null && namesScope(text, prior.about))) return false;
   return !!prior.target && !prior.excluded && !prior.replaced && m.targets.length === 1 && sameTarget(prior.target, m.targets[0]!)
     && (m.stance === 'made' || m.stance === 'not-made') && squash(m.quote) !== squash(prior.quote)
     && (matchGroup(m.kind) === 'open' ? m.stance === 'not-made' && matchGroup(prior.kind) === 'change' : matchGroup(m.kind) === matchGroup(prior.kind));
 }
 /** Every stored correspondence in order, with the person's corrections and the explicit withdrawals applied. invalid: a stored
- * withdrawal (or its undoing) that does not hold where it stands. */
-export function matchLedger(readings: readonly ReadingEntry[]): { all: EffectiveMatch[]; invalid: boolean } {
+ * withdrawal (or its undoing) that does not hold where it stands. texts: each record's text, for the scope rule of canReplace. */
+export function matchLedger(readings: readonly ReadingEntry[], texts: ReadonlyMap<string, string>): { all: EffectiveMatch[]; invalid: boolean } {
   const out: EffectiveMatch[] = []; let invalid = false;
   const at = (ref: MatchRef) => out.find(x => x.reading === ref.reading && x.index === ref.index);
   for (const r of readings) {
@@ -144,7 +175,7 @@ export function matchLedger(readings: readonly ReadingEntry[]): { all: Effective
         ...(conflict?.target ? { prior: { reading: conflict.reading, index: conflict.index, target: conflict.target } } : {}) };
       if (match.replaces) {
         const prior = at(match.replaces);
-        if (!prior || prior.reading === r.id || overlap(prior.match, match) || !canReplace({ ...prior, replaced: !!prior.replacedBy, kind: prior.match.kind, quote: prior.match.quote }, match)) invalid = true;
+        if (!prior || prior.reading === r.id || overlap(prior.match, match) || !canReplace({ ...prior, replaced: !!prior.replacedBy, kind: prior.match.kind, quote: prior.match.quote, about: prior.match.about }, match, texts.get(match.record) ?? null)) invalid = true;
         else { prior.replacedBy = { reading: r.id, index, match }; entry.replaces = { ...match.replaces }; }
       }
       out.push(entry);
@@ -152,8 +183,9 @@ export function matchLedger(readings: readonly ReadingEntry[]): { all: Effective
   }
   return { all: out, invalid };
 }
+export const recordTexts = (p: Project): Map<string, string> => new Map([...p.pasted.map(r => [r.id, r.text] as const), ...p.sources.map(r => [r.id, r.text] as const)]);
 export function requestMatches(p: Project): EffectiveMatch[] {
-  const out = matchLedger(p.readings).all;
+  const out = matchLedger(p.readings, recordTexts(p)).all;
   // A replay of the same passage and scope is one correspondence, with the correction kept above.
   const seen = new Set<string>();
   const recent = out.reverse().filter(x => { const key = `${x.match.record}/${x.match.from}/${x.match.to}/${targetKey(x.match.targets)}`; if (seen.has(key)) return false; seen.add(key); return true; });
@@ -172,8 +204,9 @@ export function itemReading(matches: EffectiveMatch[], t: RequestTarget): ItemRe
   const change = current.filter(x => matchGroup(x.match.kind) === 'change');
   // A check that passed is a check of its scope, never progress; a passage saying the change was not made counts however it is labelled.
   const made = change.filter(x => x.match.stance === 'made'), legacy = change.filter(x => x.match.stance === undefined), not = current.filter(x => x.match.stance === 'not-made' && matchGroup(x.match.kind) !== 'check');
-  // Not made in another named scope (main, another version) leaves a report about this one standing.
-  const clash = not.filter(n => [...made, ...legacy].some(x => sameScope(x.match.about, n.match.about)));
+  // Not made in another named scope (main, another version) leaves a report about this one standing; the same or an unnamed
+  // scope is a clash, so a withdrawal that did not hold never leaves the old positive report alone in front.
+  const clash = not.filter(n => [...made, ...legacy].some(x => scopeRelation(x.match.about, n.match.about) !== 'different'));
   const state: ItemState = clash.length ? 'mixed' : made.length ? 'made' : not.length ? 'not-made' : legacy.length ? 'unclassified' : 'none';
   // Newest first: without stances (unclassified) the newest passage leads, never the newest positive-sounding one.
   const lead = (state === 'made' ? made[0] : state === 'not-made' ? not[0] : state === 'mixed' ? current.find(x => change.includes(x) || not.includes(x)) : current[0]) ?? null;
@@ -202,7 +235,7 @@ export function correctRequestMatch(p: Project, reading: string, index: number, 
 }
 /** The person's own act: this match's withdrawal link does not hold, and the report it named reads as current again. */
 export function unlinkReplacement(p: Project, reading: string, index: number): Project {
-  const x = matchLedger(p.readings).all.find(x => x.reading === reading && x.index === index);
+  const x = matchLedger(p.readings, recordTexts(p)).all.find(x => x.reading === reading && x.index === index);
   if (!x?.replaces || p.readings.length >= 500) throw new Error('INVALID_REQUEST_CORRECTION');
   const entry: ReplaceCorrection = { version: 'replace-correction.1', id: `Q_${crypto.randomUUID()}`, at: new Date().toISOString(), reading, index };
   return { ...p, revision: p.revision + 1, readings: [...p.readings, entry] };

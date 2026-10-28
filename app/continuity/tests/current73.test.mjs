@@ -246,3 +246,86 @@ test('73-L labels: a work report and a part state never read as built', () => {
   assert.equal(M.CLAIM_LABEL.reported, '작업 보고'); assert.equal(M.STATE_LABEL.reported, '작업 보고 있음'); assert.equal(R.MATCH_LABEL.reported, '작업 보고');
   assert.equal(M.stateLabel({ state: 'checked', revised: true }), '보고 정정됨'); assert.equal(M.stateLabel({ state: 'want', revised: true }), '요구');
 });
+
+test('73-M scope identity is by whole identifiers: v1 is not v10, the same branch named two ways is one, main is not a feature branch', () => {
+  const S = R.scopeRelation;
+  assert.equal(S('v1', 'v10'), 'different'); assert.equal(S('v1.2', 'v1.20'), 'different'); assert.equal(S('abc1234', 'def5678'), 'different');
+  assert.equal(S('feature/folder 브랜치', 'feature/folder의 폴더 입력'), 'same'); assert.equal(S('feature/folder@abc1234', 'feature/folder'), 'same');
+  assert.equal(S('feature/folder 브랜치', 'main'), 'different'); assert.equal(S('feature/folder@abc1234', 'feature/folder@def5678'), 'different');
+  assert.equal(S('단일 문서 검사 조건', 'v1'), 'unknown'); assert.equal(S(null, 'v1'), 'unknown');
+  assert.equal(R.namesScope('v10 보고: 다른 판입니다', 'v1'), false); assert.equal(R.namesScope('v1의 주장을 철회합니다', 'v1'), true);
+});
+
+/** One RQ, one positive report about `about`, then a later record; returns the ask for the later record and the prior's key. */
+function scoped(about, later) {
+  let p = D.addArea(D.createProject(), '폴더', ''); const area = p.space.areas[0].id, q = plan(p, area).scope;
+  p = D.pasteRecord(p, `${about} 보고: 폴더 입력을 구현했습니다.`, null).project;
+  p = apply(p, ask(p, [q]), reply([m(q, 'change_1', '폴더 입력을 구현했습니다', { about })])).project;
+  p = D.pasteRecord(p, later, null).project;
+  const inp = ask(p, [q]);
+  return { p, q, inp, key: priorOf(inp, '폴더 입력을 구현했습니다') };
+}
+test('73-N the wire takes a withdrawal by scope identity: v1 never takes back v10; the same branch named otherwise does; a dropped one never leaves the old positive alone', () => {
+  // v1 note against a v10 report: link dropped, and a different version's not-made leaves the v10 report standing.
+  let s = scoped('v10', 'v1 기준: 폴더 입력은 아직 구현하지 않았습니다.');
+  let v = M.validateMapReply(reply([m(s.q, 'change_1', '폴더 입력은 아직 구현하지 않았습니다', { about: 'v1', stance: 'not-made', replaces: s.key })]), s.inp.ask);
+  assert.equal(v.matches[0].replaces, null);
+  let done = M.applyReading(s.p, s.inp, v, meta()).project; assert.equal(item(done, s.q, 'change_1').state, 'made');
+  // 'feature/folder 브랜치' then 'feature/folder의 폴더 입력' (the record does not repeat the first wording): one branch, the link holds.
+  s = scoped('feature/folder 브랜치', '정정: feature/folder의 폴더 입력은 앞 보고와 달리 아직 구현하지 않았습니다.');
+  const withdraw = '앞 보고와 달리 아직 구현하지 않았습니다';
+  v = M.validateMapReply(reply([m(s.q, 'change_1', withdraw, { about: 'feature/folder의 폴더 입력', stance: 'not-made', replaces: s.key })]), s.inp.ask);
+  assert.equal(v.matches[0].replaces, s.key);
+  done = M.applyReading(s.p, s.inp, v, meta()).project; assert.equal(item(done, s.q, 'change_1').state, 'not-made'); assert.equal(item(done, s.q, 'change_1').history.length, 1);
+  // The same correction without the link: the two read side by side (mixed), never the old positive alone.
+  done = apply(s.p, s.inp, reply([m(s.q, 'change_1', withdraw, { about: 'feature/folder의 폴더 입력', stance: 'not-made' })])).project;
+  assert.equal(item(done, s.q, 'change_1').state, 'mixed');
+  // Not merged to main is another branch: the feature report stands.
+  s = scoped('feature/folder', 'main 기록: 폴더 입력은 main에 아직 구현되지 않았습니다.');
+  done = apply(s.p, s.inp, reply([m(s.q, 'change_1', '폴더 입력은 main에 아직 구현되지 않았습니다', { about: 'main', stance: 'not-made' })])).project;
+  assert.equal(item(done, s.q, 'change_1').state, 'made');
+});
+
+test('73-O stored data follows the same scope rule: a v2→v1 link the wire would drop is refused when injected; one naming v2 is accepted', () => {
+  for (const [later, ok] of [['v1 기준: 폴더 입력은 아직 구현하지 않았습니다.', false], ['v1 기준: v2의 폴더 입력 주장도 철회합니다. 폴더 입력은 아직 구현하지 않았습니다.', true]]) {
+    const s = scoped('v2', later);
+    const done = apply(s.p, s.inp, reply([m(s.q, 'change_1', '폴더 입력은 아직 구현하지 않았습니다', { about: 'v1', stance: 'not-made', replaces: ok ? s.key : null })])).project;
+    const x = structuredClone(done), r = x.readings.at(-1), first = x.readings.find(e => e.version === 'map-reading.3');
+    r.matches[0].replaces = { reading: first.id, index: 0 };
+    if (ok) { assert.deepEqual(round(x).readings.at(-1).matches[0].replaces, { reading: first.id, index: 0 }); assert.equal(item(round(x), s.q, 'change_1').state, 'not-made'); }
+    else assert.throws(() => parseProject(JSON.stringify(x)));
+  }
+});
+
+test('73-P a withdrawn claim marks only its own part: claim 0 of another part in the same reading, and the same words used by another part, stay current', () => {
+  let p = D.createProject(); p = D.pasteRecord(p, '입력 처리를 바꿨습니다. 출력 저장을 바꿨습니다.', null).project;
+  let inp = M.buildMapAsk(p, studioView(p));
+  const A = '입력 처리를 바꿨습니다', B = '출력 저장을 바꿨습니다';
+  const claim = q => ({ kind: 'reported', text: `${q.slice(0, 5)} 보고`, record: 'N01', quote: q, about: null, replaces: null });
+  p = M.applyReading(p, inp, M.validateMapReply({ summary: '', parts: [
+    { ref: 'new:in', name: '입력', parent: null, role: '입력 처리', roleAbout: null, roleReplaces: null, basis: [{ record: 'N01', quote: A }], claims: [claim(A)] },
+    { ref: 'new:out', name: '출력', parent: null, role: '출력 저장', roleAbout: null, roleReplaces: null, basis: [{ record: 'N01', quote: B }], claims: [claim(B)] },
+    { ref: 'new:log', name: '기록', parent: null, role: '입력 처리 기록', roleAbout: null, roleReplaces: null, basis: [{ record: 'N01', quote: A }], claims: [] }],
+    relations: [{ from: 'new:out', to: 'new:log', kind: 'flow', note: '출력이 기록에 넘김', record: 'N01', quote: B }], candidates: [], gaps: [] }, inp.ask), meta()).project;
+  p = D.pasteRecord(p, '정정: 입력 처리 변경 주장은 철회합니다. 아직 구현하지 않았습니다.', null).project;
+  inp = M.buildMapAsk(p, studioView(p));
+  // P01 is 입력: its C01 is withdrawn. 출력's own claim is index 0 of the same reading too.
+  p = M.applyReading(p, inp, M.validateMapReply({ summary: '', parts: [{ ref: 'P01', name: null, parent: null, role: null, roleAbout: null, roleReplaces: null, basis: [],
+    claims: [{ kind: 'reported', text: '입력 처리는 아직 구현하지 않았다', record: 'N01', quote: '아직 구현하지 않았습니다', about: null, replaces: 'C01' }] }], relations: [], candidates: [], gaps: [] }, inp.ask), meta()).project;
+  const [input, output, log] = p.space.areas.map(a => a.id);
+  assert.equal(M.partUnderstanding(p, input).roleBasisRevised, true);
+  assert.equal(M.partUnderstanding(p, output).roleBasisRevised, false, 'claim 0 of another part is another claim');
+  assert.equal(M.partUnderstanding(p, log).roleBasisRevised, false, 'the same words as another part\'s withdrawn claim are that part\'s own basis');
+  assert.equal(M.revisedRelations(p).size, 0);
+});
+
+test('73-Q MAP3 tells the three replacement forms apart; a reply that mixes them is still refused, never repaired', async () => {
+  const { MAP3_PROMPT } = await import('../server/map-prompt.mjs');
+  assert.match(MAP3_PROMPT, /roleReplaces: 문자열이 아니라 원문 인용 객체 \{"record":"N01","quote":"원문 그대로"\}/);
+  assert.match(MAP3_PROMPT, /claims\[\]\.replaces: 그 부분의 current 주장 키 문자열\("C01"/); assert.match(MAP3_PROMPT, /matches\[\]\.replaces: priors 키 문자열\("M01"/);
+  const s = scoped('v2', 'v2 정정: 이제 폴더 경로를 받습니다.');
+  const part = { ref: 'P01', name: null, parent: null, role: '폴더 경로를 받는 입력', roleAbout: null, roleReplaces: '이제 폴더 경로를 받습니다', basis: [{ record: 'N01', quote: '이제 폴더 경로를 받습니다' }], claims: [] };
+  assert.throws(() => M.validateMapReply({ ...reply([]), parts: [part] }, s.inp.ask), /INVALID_RESPONSE/);
+  assert.throws(() => M.validateMapReply(reply([m(s.q, 'change_1', '이제 폴더 경로를 받습니다', { replaces: 'C01' })]), s.inp.ask), /INVALID_RESPONSE/);
+  assert.throws(() => M.validateMapReply(reply([m(s.q, 'change_1', '이제 폴더 경로를 받습니다', { replaces: { record: 'N01', quote: '이제 폴더 경로를 받습니다' } })]), s.inp.ask), /INVALID_RESPONSE/);
+});

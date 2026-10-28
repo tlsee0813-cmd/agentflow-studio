@@ -695,7 +695,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   restSums = sums = lay.edges.length > 6 ? summaryEdges(lay.boxes, lay.edges) : [];
   for (const e of [...lay.edges, ...sums]) {
     const fa = frames(e.from), inner = [...frames(e.to)].some(f => fa.has(f)), sum = e.key.startsWith('sum:');
-    const g = svg('g', { class: `edge${sum ? ' sum' : ''} k-${e.kind}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}${!sum && !e.agg && e.ids.length && e.ids.every(id => revisedLine(o, id)) ? ' revised' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
+    const g = svg('g', { class: `edge${sum ? ' sum' : ''} k-${e.kind}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}${!sum && edgeRevised(e) ? ' revised' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
     // No text on the map: the meaning shows on hover (tip) and in the selected part's 관련 부분.
     // A plain relation ends in the same dot at both ends: it is drawn, not directed.
     g.append(svg('path', { class: 'edge-line', 'marker-end': e.kind === 'related' ? 'url(#dot)' : 'url(#arrow)', 'marker-start': 'url(#dot)' }), svg('path', { class: 'edge-hit' }));
@@ -879,7 +879,7 @@ function placeEdgeLabels() {
     const e = lay.edges.find(x => x.key === g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'); if (!e || !path) continue;
     const on = g.classList.contains('on'), fan = on && (fans.get(selKey(e)) ?? 0) > 1;
     if (on && seenSel.has(selKey(e))) continue;
-    const label = h('span', { class: `edge-label k-${e.kind}${on ? ' on' : ''}` }, `${REL_LABEL[e.kind] ?? e.kind}${!fan && e.ids.length > 1 ? ` ${e.ids.length}` : ''}`);
+    const label = h('span', { class: `edge-label k-${e.kind}${on ? ' on' : ''}${edgeRevised(e) ? ' revised' : ''}` }, `${REL_LABEL[e.kind] ?? e.kind}${!fan && e.ids.length > 1 ? ` ${e.ids.length}` : ''}${edgeRevised(e) ? REVISED_EDGE : ''}`);
     box.append(label);
     const w = label.offsetWidth, hh = label.offsetHeight, len = path.getTotalLength();
     let spot: Rect | null = null;
@@ -918,7 +918,7 @@ function placeRestLabels(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect
   const spots: (LabelSpot & { el: HTMLElement })[] = [], hidden: SVGGElement[] = [];
   for (const g of lines) {
     const e = edgeOf(g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'), end = e && lay.boxes.get(e.to); if (!e || !path || !end) continue;
-    const label = h('span', { class: `edge-label k-${e.kind}` }, `${REL_LABEL[e.kind] ?? e.kind}${e.ids.length > 1 ? ` ${e.ids.length}` : ''}`);
+    const label = h('span', { class: `edge-label k-${e.kind}${edgeRevised(e) ? ' revised' : ''}` }, `${REL_LABEL[e.kind] ?? e.kind}${e.ids.length > 1 ? ` ${e.ids.length}` : ''}${edgeRevised(e) ? REVISED_EDGE : ''}`);
     box.append(label);
     const w = label.offsetWidth, hh = label.offsetHeight, len = path.getTotalLength(), tip = path.getPointAtLength(len);
     const mine: Rect[] = [];
@@ -1838,7 +1838,8 @@ const REVISED_BASIS = ' · 근거였던 보고는 이후 정정됨';
 function claimList(claims: CurrentClaim[], max: number): HTMLElement {
   const sorted = [...claims].sort((a, b) => Number(!!b.replaces) - Number(!!a.replaces) || CLAIM_ORDER.indexOf(a.kind) - CLAIM_ORDER.indexOf(b.kind)).slice(0, max);
   return h('ul', { class: 'claims' }, ...sorted.map(c => h('li', { class: `claim k-${c.kind}${c.replaces ? ' replaces' : ''}` },
-    h('span', { class: 'cl-kind' }, c.replaces ? `${CLAIM_LABEL[c.kind]} · 앞 주장 대체` : CLAIM_LABEL[c.kind]), h('span', { class: 'cl-text' }, c.text, c.about ? h('small', { class: 'cl-about', title: c.about }, ` · ${displayAbout(c.about)}`) : null),
+    // The kind column keeps its usual width; that this one corrects an earlier claim reads on its own line above the text.
+    h('span', { class: 'cl-kind' }, CLAIM_LABEL[c.kind]), h('span', { class: 'cl-text' }, c.replaces ? h('span', { class: 'cl-revises' }, '앞 주장을 대체한 정정') : null, c.text, c.about ? h('small', { class: 'cl-about', title: c.about }, ` · ${displayAbout(c.about)}`) : null),
     h('button', { type: 'button', class: 'cl-cite', title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote) }, '근거'))));
 }
 /** A quote from the selection: the record in the pane, marked; closing the pane comes back to this part. */
@@ -1883,6 +1884,9 @@ function understoodSection(o: Opened, part: PartView): HTMLElement | null {
 
 /** A relation a reading added on a report a later record took back (revisedRelations): still drawn, read apart. */
 function revisedLine(o: Opened, relationId: string): boolean { return revisedRelations(o.project).has(relationId); }
+/** A drawn line all of whose relations rest on withdrawn reports: its own dash and a short title, selected or not. */
+function edgeRevised(e: Edge): boolean { return !!opened && !e.agg && e.ids.length > 0 && e.ids.every(id => revisedLine(opened!, id)); }
+const REVISED_EDGE = ' · 근거 정정';
 
 function sessionCode(): string { try { return sessionStorage.getItem('agentflow.studio.access') ?? accessCodeMemory; } catch { return accessCodeMemory; } }
 
@@ -2091,7 +2095,7 @@ function bindEdgeHints() {
       const edge = edgeOf(g.dataset.key); if (!edge) return;
       g.classList.add('near');
       tip.replaceChildren(h('strong', {}, `${nameOf(edge.from)} ${edge.kind === 'related' ? '—' : '→'} ${nameOf(edge.to)}`), h('span', { class: 'tip-kind' }, `${REL_LABEL[edge.kind] ?? edge.kind}${restOf(edge) ? ` · 선택한 부분의 관계를 뺀 나머지 ${edge.ids.length}개` : edge.agg ? ` · 안쪽 관계 ${edge.ids.length}개의 요약 · 선택하면 실제 끝점` : edge.ids.length > 1 ? ` · 관계 ${edge.ids.length}개를 한 선으로 묶음` : ''}`),
-        ...edge.notes.slice(0, 3).map(n => h('span', {}, n)), ...(!edge.agg && opened && edge.ids.length && edge.ids.every(id => revisedLine(opened!, id)) ? [h('span', { class: 'tip-revised' }, REVISED_BASIS.replace(/^ · /, ''))] : []));
+        ...edge.notes.slice(0, 3).map(n => h('span', {}, n)), ...(edgeRevised(edge) ? [h('span', { class: 'tip-revised' }, REVISED_BASIS.replace(/^ · /, ''))] : []));
       tip.hidden = false; place(e as PointerEvent); return;
     }
     const part = t.closest<HTMLElement>('.node[data-box], .frame-head[data-part], .ghost[data-box]');

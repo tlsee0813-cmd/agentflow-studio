@@ -81,4 +81,10 @@ export const MAP3_PROMPT = MAP2_PROMPT + `
   그때 targets는 그 prior의 target 하나와 같고, stance는 made 또는 not-made이며, kind는 같은 성격이다(구현 보고는 reported/code, 검사 보고는 checked/test). 구현 주장을 아직 미구현이라며 철회하는 구절은 open이어도 되며 그때 stance는 not-made다.
   한 원문이 여러 prior를 각각 철회하면 prior마다 별도 match를 쓰고 각 match의 replaces에 그 키를 쓴다. 한 prior는 한 번만 대체한다.
   나중에 도착했다는 이유, 같은 이름·같은 kind라는 이유, 일반적인 ‘확인하지 않았다’·‘근거 없음’만으로는 쓰지 않는다. 다른 브랜치·판본의 원문은 그 옛 주장이나 그 판본을 직접 지목할 때만 쓴다. 어느 prior인지 모호하면 null로 두고 why에 밝힌다.
-  철회한 항목이 아닌 다른 항목·다른 요청의 prior는 바꾸지 않는다.`;
+  철회한 항목이 아닌 다른 항목·다른 요청의 prior는 바꾸지 않는다.
+세 가지 대체 표시는 형식이 다르다. 섞어 쓰면 응답 전체가 거절된다.
+- parts[].roleReplaces: 문자열이 아니라 원문 인용 객체 {"record":"N01","quote":"원문 그대로"} 또는 null.
+- parts[].claims[].replaces: 그 부분의 current 주장 키 문자열("C01" 등) 또는 null.
+- matches[].replaces: priors 키 문자열("M01" 등) 또는 null. C 키나 객체를 쓰지 않는다.
+예: {"ref":"P02","name":null,"parent":null,"role":null,"roleAbout":null,"roleReplaces":null,"basis":[],"claims":[{"kind":"reported","text":"폴더 입력은 아직 구현하지 않았다고 정정했다.","record":"N01","quote":"원문 그대로","about":null,"replaces":"C03"}]}
+예: {"record":"N01","quote":"원문 그대로","text":"앞의 폴더 입력 구현 주장을 철회하고 미구현이라고 밝혔다.","kind":"reported","stance":"not-made","about":null,"targets":[{"requestId":"RQ_...","itemId":"change_1"}],"why":"앞 보고의 구현 주장을 명시적으로 철회함","replaces":"M01"}`;
