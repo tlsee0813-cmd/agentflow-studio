@@ -12,7 +12,7 @@ import { PLAN_PROMPT, SCOPE_PROMPT } from './plan-prompt.mjs';
 import { DIGEST_PROMPT, DIGEST2_PROMPT } from './digest-prompt.mjs';
 import { validateMapAsk, validateMapReply } from '../dist/public/shared/map-reading.js';
 import { SPAN_INDEX, textDigest } from '../dist/public/shared/evidence-span.js';
-import { MAP_PROMPT, MAP2_PROMPT, MAP3_PROMPT, MAP4_PROMPT } from './map-prompt.mjs';
+import { MAP_PROMPT, MAP2_PROMPT, MAP3_PROMPT, MAP4_PROMPT, MAP4_FIRST_PROMPT, MAP4_RECIPE, map4Prompt } from './map-prompt.mjs';
 
 const ENDPOINT = 'https://api.deepseek.com/chat/completions';
 const REPLY_BYTES = 131072;
@@ -45,11 +45,13 @@ export async function digestPromptId(version = 1) {
 }
 
 let mapId = null;
-/** Short id of the map reading prompt a current client reads with (m4- and the first 12 hex digits of its SHA-256): a client sends
- * studio.map.4 (evidence by span.2 piece) only to a server whose status names an m4- prompt. A studio.map.1–3 request from an
- * older tab is still answered with its own prompt; status names only the current one. */
+/** Short id of the map reading a current client reads with: m4- and the first 12 hex digits of the SHA-256 of the studio.map.4
+ * recipe, which is the selection rule's version and both prompt texts (first map, later readings). It names the recipe, not one
+ * prompt text: which of the two a stored reading was read with follows from the rule and the request it was made of (the
+ * reading's hash names that request). A client sends studio.map.4 (evidence by span.2 piece) only to a server whose status names
+ * an m4- recipe. A studio.map.1–3 request from an older tab is still answered with its own prompt; status names only the current. */
 export async function mapPromptId() {
-  if (!mapId) mapId = crypto.subtle.digest('SHA-256', new TextEncoder().encode(MAP4_PROMPT)).then(b => `m4-${[...new Uint8Array(b)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`);
+  if (!mapId) mapId = crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ recipe: MAP4_RECIPE, first: MAP4_FIRST_PROMPT, later: MAP4_PROMPT }))).then(b => `m4-${[...new Uint8Array(b)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`);
   return mapId;
 }
 
@@ -113,7 +115,7 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
       body: JSON.stringify({ model: config.model, stream: false, ...(map ? { thinking: { type: config.mapThinking ?? 'enabled' }, ...((config.mapThinking ?? 'enabled') === 'enabled' ? { reasoning_effort: 'low' } : {}), max_tokens: config.mapMaxTokens ?? 16384 }
         : { thinking: { type: scope || planning || digest ? 'enabled' : 'disabled' }, ...(scope || planning || digest ? { reasoning_effort: 'low' } : {}), max_tokens: planning || digest ? 8192 : scope ? 4096 : config.maxTokens }),
         response_format: { type: 'json_object' },
-        messages: [{ role: 'system', content: map4 ? MAP4_PROMPT : map3 ? MAP3_PROMPT : map2 ? MAP2_PROMPT : map ? MAP_PROMPT : digest2 ? DIGEST2_PROMPT : digest ? DIGEST_PROMPT : scope ? SCOPE_PROMPT : planning ? PLAN_PROMPT : STUDIO_PROMPT }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }] }) });
+        messages: [{ role: 'system', content: map4 ? map4Prompt(ask) : map3 ? MAP3_PROMPT : map2 ? MAP2_PROMPT : map ? MAP_PROMPT : digest2 ? DIGEST2_PROMPT : digest ? DIGEST_PROMPT : scope ? SCOPE_PROMPT : planning ? PLAN_PROMPT : STUDIO_PROMPT }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }] }) });
     if (!response.ok) {
       await response.body?.cancel().catch(() => {});
       if ([401, 403].includes(response.status)) throw new ApiError('AI_AUTH_FAILED', 502);

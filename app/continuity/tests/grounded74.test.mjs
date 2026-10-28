@@ -17,7 +17,7 @@ import { serializeBackup, serializeProject } from '../dist/public/shared/storage
 import { askMap, aiStatus } from '../dist/public/client/studio-api.js';
 import { createMapRun } from '../dist/public/client/map-run.js';
 import { createStudioHandler, mapPromptId } from '../server/studio.mjs';
-import { MAP3_PROMPT, MAP4_PROMPT } from '../server/map-prompt.mjs';
+import { MAP3_PROMPT, MAP4_PROMPT, MAP4_FIRST_PROMPT, MAP4_RECIPE, map4Prompt } from '../server/map-prompt.mjs';
 import { sample } from './understanding17-fixtures.mjs';
 
 const ORDER_RAW = readFileSync(new URL('./fixtures/record74/actual-order-backup.json', import.meta.url), 'utf8');
@@ -155,7 +155,7 @@ test('74-C2 the same reply through the real handler and the browser decoder: the
     let raw = null;
     globalThis.fetch = async (url, o) => { const res = await handle(new Request(`https://studio.example${url}`, { ...o, headers: { ...o.headers, origin: 'https://studio.example' } })); raw = await res.clone().json(); return res; };
     const res = await askMap(inp.ask, new AbortController().signal, '');
-    assert.equal(sent.messages[0].content, MAP4_PROMPT); assert.equal(sent.messages[1].content.split('\n').slice(1).join('\n'), JSON.stringify(inp.ask));
+    assert.equal(sent.messages[0].content, MAP4_FIRST_PROMPT, 'an empty map reads with the first-map prompt'); assert.equal(sent.messages[1].content.split('\n').slice(1).join('\n'), JSON.stringify(inp.ask));
     assert.equal(raw.reply.parts[0].basis[0], written.parts[0].basis[0], 'the server answers with the references');
     assert.deepEqual(raw.evidence, { index: 'span.2', ask: S.textDigest(JSON.stringify(inp.ask)) });
     assert.equal(res.reply.parts[0].basis[0].quote, ORDER.slice(res.reply.parts[0].basis[0].from, res.reply.parts[0].basis[0].to));
@@ -458,4 +458,37 @@ test('74-K6 the independent project.11 backup (a map-reading.3 match stored at 1
   assert.equal(saved.readings[0].matches[0].from, 164); assert.equal(m.match.from, 0); assert.equal(report.slice(m.match.from, m.match.to), m.match.quote);
   assert.equal(R.itemReading(R.requestMatches(p), { requestId: 'RQ_4be30332-aba3-4b69-889e-6aebb89440d7', itemId: 'I1' }).state, 'made');
   assert.ok(!M.unreadRecords(p, studioView(p)).some(r => r.id === m.match.record), 'the report reads as read (326 of the labelled text is all 162 of it)');
+});
+
+/* ---------- M: the first map reads with its own short prompt; everything else as 8d ---------- */
+test('74-M1 the first-map prompt is chosen only for an empty map with no request or prior; a later reading keeps MAP4_PROMPT', () => {
+  const { p, inp } = actualOrder();
+  assert.equal(map4Prompt(inp.ask), MAP4_FIRST_PROMPT);
+  assert.equal(map4Prompt({ ...inp.ask, requests: [{ id: 'RQ_x' }] }), MAP4_PROMPT); assert.equal(map4Prompt({ ...inp.ask, priors: [{ key: 'M01' }] }), MAP4_PROMPT);
+  // After the first map, the next record reads against those parts with the full prompt (replacements, versions, requests).
+  const after = apply4(p, inp, orderReply(inp)).project, later = ask4(D.pasteRecord(after, '후속 보고: 요청 비교 집계를 접힌 항목에도 썼다고 보고합니다.', null).project);
+  assert.ok(later.ask.parts.length > 0); assert.equal(map4Prompt(later.ask), MAP4_PROMPT);
+  // A map the person drew by hand (parts, no reading yet) is not a first map either.
+  const drawn = D.pasteRecord(D.addArea(D.createProject(), '내가 그린 부분', ''), '요구: 단일 문서를 변환한다.', null).project;
+  assert.equal(map4Prompt(ask4(drawn).ask), MAP4_PROMPT);
+  // The first-map prompt leaves out what a first map has nothing to apply to, and keeps the reading rules.
+  for (const gone of ['priors: 앞서 저장된', '기존 role이 있으면', 'stance:']) assert.ok(!MAP4_FIRST_PROMPT.includes(gone), gone);
+  for (const kept of ['같은 문단에서 바로 이어지는 두 구간', '빈 줄(줄바꿈 두 번)로 끝나면', 'material에', '연결·사용·접속', '소스 코드·설정·장치 정의·설명 문서뿐이어도', '정리 작업의 보고로 쓰지 않는다', '부분마다 basis 1~4개·claims 4개']) assert.ok(MAP4_FIRST_PROMPT.includes(kept), kept);
+  assert.ok(MAP4_FIRST_PROMPT.length < MAP4_PROMPT.length * 0.6);
+});
+
+test('74-M2 map.4 goes as in 8d (JSON, thinking enabled, low effort, 16384) with the chosen prompt; the id names the recipe of both prompts', async () => {
+  const { p, inp } = actualOrder(), bodies = [], urls = [];
+  const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: 'test-74-not-real' }, fetchImpl: async (u, init) => { urls.push(u); bodies.push(JSON.parse(init.body));
+    return new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(orderReply(inp)) } }] })); } });
+  const post = ask => handle(new Request('https://studio.example/api/studio/map', { method: 'POST', headers: { 'content-type': 'application/json', 'x-agentflow-request': '1' }, body: JSON.stringify(ask) }));
+  assert.equal((await post(inp.ask)).status, 200);
+  const b = bodies[0];
+  assert.equal(urls[0], 'https://api.deepseek.com/chat/completions'); assert.equal(b.messages[0].content, MAP4_FIRST_PROMPT);
+  assert.deepEqual(b.response_format, { type: 'json_object' }); assert.deepEqual(b.thinking, { type: 'enabled' }); assert.equal(b.reasoning_effort, 'low'); assert.equal(b.max_tokens, 16384);
+  assert.ok(!('tools' in b) && !('tool_choice' in b));
+  const later = ask4(D.pasteRecord(apply4(p, inp, orderReply(inp)).project, '후속 보고: 요청 비교 집계를 접힌 항목에도 썼다고 보고합니다.', null).project);
+  await post(later.ask); assert.equal(bodies[1].messages[0].content, MAP4_PROMPT);
+  const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ recipe: MAP4_RECIPE, first: MAP4_FIRST_PROMPT, later: MAP4_PROMPT })));
+  assert.equal(await mapPromptId(), `m4-${[...new Uint8Array(bytes)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`);
 });
