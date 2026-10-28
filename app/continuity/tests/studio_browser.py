@@ -1729,8 +1729,8 @@ def request71_flow(browser, base):
     def returned(route):
         ask = route.request.post_data_json
         maps.append(ask)
-        # studio.map.5 (the stub server's status names m5): span.2 aliases and the exact request body remain bound.
-        assert ask["schemaVersion"] == "studio.map.5" and ask["requests"][0]["id"] == rq and ask["priors"] == []
+        # studio.map.6 (the stub server's status names m6): span.2 aliases and the exact request body remain bound.
+        assert ask["schemaVersion"] == "studio.map.6" and ask["requests"][0]["id"] == rq and ask["priors"] == []
         rec = next(r for r in ask["records"] if "feature/folder" in "".join(x["t"] for x in r["spans"]))
         at = lambda words: next(x["s"] for x in rec["spans"] if x["t"].strip().startswith(words))
         match = {"at": at("작업 보고: feature/folder"), "text": "[스텁] 폴더 입력 변경 보고", "kind": "reported", "about": "feature/folder@abc1234", "targets": [{"requestId": rq, "itemId": "I1"}], "why": "[스텁] 입력 요구에 대응하는 구절", "stance": "made", "replaces": None}

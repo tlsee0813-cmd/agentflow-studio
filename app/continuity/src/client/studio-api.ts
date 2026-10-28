@@ -1,6 +1,6 @@
 import type { StudioAsk, StudioReply } from '../shared/studio.js';
 import { validateDigestReply, type DigestAsk, type DigestReply } from '../shared/digest-api.js';
-import { validateMapReply, MAP4_SCHEMA, MAP5_SCHEMA, type MapAsk, type MapReply } from '../shared/map-reading.js';
+import { validateMapReply, MAP4_SCHEMA, MAP5_SCHEMA, MAP6_SCHEMA, type MapAsk, type MapReply } from '../shared/map-reading.js';
 import { SPAN_INDEX, textDigest } from '../shared/evidence-span.js';
 import { RUNTIME } from './runtime.js';
 
@@ -22,7 +22,7 @@ export async function aiStatus(): Promise<AiStatus> {
     if (!res.ok || !['deepseek', 'off'].includes(v?.ai)) return { ai: 'none', model: null, access: 'open' };
     const d = v.digest, digest = d && typeof d.model === 'string' && typeof d.prompt === 'string' && /^[\w.-]{1,80}$/.test(d.model) && /^d1-[0-9a-f]{12}$/.test(d.prompt)
       ? { model: d.model, prompt: d.prompt, record: typeof d.record === 'string' && /^d2-[0-9a-f]{12}$/.test(d.record) ? d.record : null } : null;
-    const m = v.map, map = m && typeof m.model === 'string' && /^[\w.-]{1,80}$/.test(m.model) && typeof m.prompt === 'string' && /^m[1-5]-[0-9a-f]{12}$/.test(m.prompt) ? { model: m.model, prompt: m.prompt } : null;
+    const m = v.map, map = m && typeof m.model === 'string' && /^[\w.-]{1,80}$/.test(m.model) && typeof m.prompt === 'string' && /^m[1-6]-[0-9a-f]{12}$/.test(m.prompt) ? { model: m.model, prompt: m.prompt } : null;
     return { ai: v.ai, model: typeof v.model === 'string' ? v.model : null, access: v.access === 'code' ? 'code' : 'open', digest, map };
   } catch { return { ai: 'none', model: null, access: 'open' }; }
 }
@@ -70,7 +70,7 @@ export async function askMap(ask: MapAsk, signal: AbortSignal, accessCode: strin
   try { data = await res.json(); } catch { /* handled below */ }
   if (!res.ok) throw new AskError(typeof data?.error?.code === 'string' ? data.error.code : 'REQUEST_FAILED');
   if (typeof data?.model !== 'string') throw new AskError('INVALID_RESPONSE');
-  if ((ask.schemaVersion === MAP4_SCHEMA || ask.schemaVersion === MAP5_SCHEMA) && (data.evidence?.index !== SPAN_INDEX || data.evidence.ask !== textDigest(body))) throw new AskError('INVALID_RESPONSE');
+  if ((ask.schemaVersion === MAP4_SCHEMA || ask.schemaVersion === MAP5_SCHEMA || ask.schemaVersion === MAP6_SCHEMA) && (data.evidence?.index !== SPAN_INDEX || data.evidence.ask !== textDigest(body))) throw new AskError('INVALID_RESPONSE');
   try { return { model: data.model, reply: validateMapReply(data.reply, ask) }; } catch { throw new AskError('INVALID_RESPONSE'); }
 }
 

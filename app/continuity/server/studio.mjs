@@ -12,7 +12,7 @@ import { PLAN_PROMPT, SCOPE_PROMPT } from './plan-prompt.mjs';
 import { DIGEST_PROMPT, DIGEST2_PROMPT } from './digest-prompt.mjs';
 import { validateMapAsk, validateMapReply } from '../dist/public/shared/map-reading.js';
 import { SPAN_INDEX, textDigest } from '../dist/public/shared/evidence-span.js';
-import { MAP_PROMPT, MAP2_PROMPT, MAP3_PROMPT, MAP5_PROMPT, MAP5_FIRST_PROMPT, MAP5_RECIPE, map4Prompt, map5Prompt } from './map-prompt.mjs';
+import { MAP_PROMPT, MAP2_PROMPT, MAP3_PROMPT, MAP6_PROMPT, MAP6_FIRST_PROMPT, MAP6_RECIPE, map4Prompt, map5Prompt, map6Prompt } from './map-prompt.mjs';
 
 const ENDPOINT = 'https://api.deepseek.com/chat/completions';
 const REPLY_BYTES = 131072;
@@ -45,13 +45,13 @@ export async function digestPromptId(version = 1) {
 }
 
 let mapId = null;
-/** Short id of the map reading a current client reads with: m5- and the first 12 hex digits of the SHA-256 of the studio.map.5
+/** Short id of the map reading a current client reads with: m6- and the first 12 hex digits of the SHA-256 of the studio.map.6
  * recipe, which is the selection rule's version and both prompt texts (first map, later readings). It names the recipe, not one
  * prompt text: which of the two a stored reading was read with follows from the rule and the request it was made of (the
- * reading's hash names that request). A client sends studio.map.5 only to a server whose status names an m5- recipe.
- * studio.map.1–4 requests from older tabs are still answered with their own prompts and contracts. */
+ * reading's hash names that request). A client sends studio.map.6 only to a server whose status names an m6- recipe.
+ * studio.map.1–5 requests from older tabs are still answered with their own prompts and contracts. */
 export async function mapPromptId() {
-  if (!mapId) mapId = crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ recipe: MAP5_RECIPE, first: MAP5_FIRST_PROMPT, later: MAP5_PROMPT }))).then(b => `m5-${[...new Uint8Array(b)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`);
+  if (!mapId) mapId = crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ recipe: MAP6_RECIPE, first: MAP6_FIRST_PROMPT, later: MAP6_PROMPT }))).then(b => `m6-${[...new Uint8Array(b)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`);
   return mapId;
 }
 
@@ -102,7 +102,7 @@ async function readLimited(body, max, signal) {
 export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetch, signal } = {}) {
   const planning = ask.schemaVersion === 'studio.plan.1';
   const scope = ask.schemaVersion === 'studio.scope.1';
-  const digest2 = ask.schemaVersion === 'studio.digest.2', map5 = ask.schemaVersion === 'studio.map.5', map4 = ask.schemaVersion === 'studio.map.4', anchored = map4 || map5, map3 = ask.schemaVersion === 'studio.map.3', map2 = ask.schemaVersion === 'studio.map.2', map = ask.schemaVersion === 'studio.map.1' || map2 || map3 || anchored, digest = ask.schemaVersion === 'studio.digest.1' || digest2 || map;
+  const digest2 = ask.schemaVersion === 'studio.digest.2', map6 = ask.schemaVersion === 'studio.map.6', map5 = ask.schemaVersion === 'studio.map.5', map4 = ask.schemaVersion === 'studio.map.4', anchored = map4 || map5 || map6, map3 = ask.schemaVersion === 'studio.map.3', map2 = ask.schemaVersion === 'studio.map.2', map = ask.schemaVersion === 'studio.map.1' || map2 || map3 || anchored, digest = ask.schemaVersion === 'studio.digest.1' || digest2 || map;
   if (!config.apiKey) throw new ApiError('AI_NOT_CONFIGURED', 503);
   if (signal?.aborted) throw new ApiError('CANCELLED', 499);
   const controller = new AbortController(); let timedOut = false;
@@ -115,7 +115,7 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
       body: JSON.stringify({ model: config.model, stream: false, ...(map ? { thinking: { type: config.mapThinking ?? 'enabled' }, ...((config.mapThinking ?? 'enabled') === 'enabled' ? { reasoning_effort: 'low' } : {}), max_tokens: config.mapMaxTokens ?? 16384 }
         : { thinking: { type: scope || planning || digest ? 'enabled' : 'disabled' }, ...(scope || planning || digest ? { reasoning_effort: 'low' } : {}), max_tokens: planning || digest ? 8192 : scope ? 4096 : config.maxTokens }),
         response_format: { type: 'json_object' },
-        messages: [{ role: 'system', content: map5 ? map5Prompt(ask) : map4 ? map4Prompt(ask) : map3 ? MAP3_PROMPT : map2 ? MAP2_PROMPT : map ? MAP_PROMPT : digest2 ? DIGEST2_PROMPT : digest ? DIGEST_PROMPT : scope ? SCOPE_PROMPT : planning ? PLAN_PROMPT : STUDIO_PROMPT }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }] }) });
+        messages: [{ role: 'system', content: map6 ? map6Prompt(ask) : map5 ? map5Prompt(ask) : map4 ? map4Prompt(ask) : map3 ? MAP3_PROMPT : map2 ? MAP2_PROMPT : map ? MAP_PROMPT : digest2 ? DIGEST2_PROMPT : digest ? DIGEST_PROMPT : scope ? SCOPE_PROMPT : planning ? PLAN_PROMPT : STUDIO_PROMPT }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }] }) });
     if (!response.ok) {
       await response.body?.cancel().catch(() => {});
       if ([401, 403].includes(response.status)) throw new ApiError('AI_AUTH_FAILED', 502);
@@ -133,7 +133,13 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
       // studio.map.4: the reply goes back as its wire (references, not quotes), once it is valid: the browser decodes it again
       // against the very request it sent, so every passage keeps where it stands.
       reply = anchored ? (() => { const wire = JSON.parse(choice.message.content); validateMapReply(wire, ask); return wire; })() : map ? validateMapReply(JSON.parse(choice.message.content), ask) : digest ? validateDigestReply(JSON.parse(choice.message.content), ask) : scope ? validateScopeReply(JSON.parse(choice.message.content), ask) : planning ? validatePlanReply(JSON.parse(choice.message.content), ask) : validateReply(JSON.parse(choice.message.content), ask);
-    } catch (e) { if (controller.signal.aborted) throw e; throw new ApiError('INVALID_RESPONSE', 502); }
+    } catch (e) {
+      if (controller.signal.aborted) throw e;
+      // studio.map.6: a contradiction or a wrong reference says where (path), which rule and what it names; never record text.
+      const error = new ApiError('INVALID_RESPONSE', 502);
+      if (e?.name === 'MapReplyError') error.detail = { path: e.path, rule: e.rule, target: e.target };
+      throw error;
+    }
     return reply;
   } catch (e) {
     if (e instanceof ApiError) throw e;
@@ -192,11 +198,11 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
         const requestConfig = url.pathname !== '/api/studio/ask' ? { ...config, model: config.planModel ?? config.model } : config;
         const answer = await callStudioModel(ask, requestConfig, { fetchImpl, signal: request.signal });
         // studio.map.4: the references in the reply name pieces of exactly this request; the browser checks it is its own.
-        return reply(200, { model: requestConfig.model, reply: answer, ...(['studio.map.4', 'studio.map.5'].includes(ask.schemaVersion) ? { evidence: { index: SPAN_INDEX, ask: textDigest(raw) } } : {}) }, cors);
+        return reply(200, { model: requestConfig.model, reply: answer, ...(['studio.map.4', 'studio.map.5', 'studio.map.6'].includes(ask.schemaVersion) ? { evidence: { index: SPAN_INDEX, ask: textDigest(raw) } } : {}) }, cors);
       } finally { release(); }
     } catch (e) {
       const error = e instanceof ApiError ? e : new ApiError('INTERNAL_ERROR', 500);
-      return reply(error.status, { error: { code: error.code } }, cors, error.retryAfter ? { 'Retry-After': String(error.retryAfter) } : {});
+      return reply(error.status, { error: { code: error.code, ...(error.detail ? { detail: error.detail } : {}) } }, cors, error.retryAfter ? { 'Retry-After': String(error.retryAfter) } : {});
     }
   };
 }

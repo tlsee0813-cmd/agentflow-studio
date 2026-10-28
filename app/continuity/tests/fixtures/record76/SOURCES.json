@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "agentflow.record76-samples.1",
+  "samples": [
+    {
+      "file": "zephyr-reel-board.json",
+      "kind": "public-source-excerpt",
+      "note": "The two fixed excerpts the 74 review pack sent as records (text unchanged, with their own Source/Repository/Commit/File/Nature header lines): zephyrproject-rtos/zephyr at 3568e1b6d5cdd51a6b964a2a1d6d29200fea2056, boards/phytec/reel_board/doc/index.rst lines 9-112 and boards/phytec/reel_board/dts/reel_board.dtsi lines 144-171 (Apache-2.0). Board documentation and shared board configuration source, not a device run. No key or token. The replies in uncertainty76.test.mjs are written for the test, not a model's."
+    }
+  ]
+}

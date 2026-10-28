@@ -17,7 +17,7 @@ import { serializeBackup, serializeProject } from '../dist/public/shared/storage
 import { askMap, aiStatus } from '../dist/public/client/studio-api.js';
 import { createMapRun } from '../dist/public/client/map-run.js';
 import { createStudioHandler, mapPromptId } from '../server/studio.mjs';
-import { MAP3_PROMPT, MAP4_PROMPT, MAP4_FIRST_PROMPT, MAP5_PROMPT, MAP5_FIRST_PROMPT, MAP5_RECIPE, map4Prompt } from '../server/map-prompt.mjs';
+import { MAP3_PROMPT, MAP4_PROMPT, MAP4_FIRST_PROMPT, MAP6_PROMPT, MAP6_FIRST_PROMPT, MAP6_RECIPE, map4Prompt } from '../server/map-prompt.mjs';
 import { sample } from './understanding17-fixtures.mjs';
 
 const ORDER_RAW = readFileSync(new URL('./fixtures/record74/actual-order-backup.json', import.meta.url), 'utf8');
@@ -91,7 +91,7 @@ function actualOrder() {
 }
 test('74-B the actual-order backup reads as saved; the instruction goes once as pieces, the quoted correction marked as a quotation', () => {
   const { p, inp } = actualOrder();
-  assert.equal(p.schemaVersion, 'idea015.project.12'); assert.equal(p.pasted[0].text, ORDER); assert.deepEqual(p.readings, []);
+  assert.equal(p.schemaVersion, 'idea015.project.13'); assert.equal(p.pasted[0].text, ORDER); assert.deepEqual(p.readings, []);
   assert.equal(inp.ask.schemaVersion, 'studio.map.4'); assert.equal(inp.problem, null); M.validateMapAsk(inp.ask);
   const rec = inp.ask.records[0];
   assert.deepEqual(Object.keys(rec).sort(), ['addedAt', 'basis', 'id', 'kind', 'lead', 'note', 'spans']); assert.equal(rec.lead + rec.spans.map(x => x.t).join(''), ORDER);
@@ -232,14 +232,15 @@ test('74-F a changed record, another reading meanwhile or a failed save leave on
   assert.equal(u.others[0].text, 'v3에서 모든 판본에 폴더 입력을 연다.');
   // Through the map run: a save that fails keeps nothing, a cancelled call keeps nothing, and nothing reads as read.
   const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: 'test-74-not-real' }, fetchImpl: async () => new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(r) } }] })) });
-  const status = { ai: 'deepseek', model: 'm', access: 'open', map: { model: 'm', prompt: await mapPromptId() } };
+  // An m5 server (the map.5 wire stays served after map.6): this checks the write, not which wire is current.
+  const status = { ai: 'deepseek', model: 'm', access: 'open', map: { model: 'm', prompt: 'm5-0123456789ab' } };
   const oldFetch = globalThis.fetch; let project = p0, fails = true, bodies = [];
   try {
     globalThis.fetch = async (url, o) => { bodies.push(JSON.parse(o.body)); if (o.signal?.aborted) throw new DOMException('aborted', 'AbortError'); return handle(new Request(`https://studio.example${url}`, o)); };
     const run = createMapRun({ current: () => ({ key: 'e', kind: 'saved', project, view: studioView(project) }), status: () => status, accessCode: () => '',
       commit: async next => { if (fails) return '저장 실패'; project = next; return null; }, done: () => {}, changed: () => {} });
     await run.run(); assert.equal(project, p0); assert.match(run.state().error, /저장 실패/); assert.equal(M.unreadRecords(project, studioView(project)).length, 1);
-    assert.equal(bodies[0].schemaVersion, 'studio.map.5', 'the current m5 server is sent the anchored range wire');
+    assert.equal(bodies[0].schemaVersion, 'studio.map.5', 'an m5 server is sent the anchored range wire');
     fails = false; await run.run(); assert.equal(project.readings.length, 1); assert.equal(lastReading(project).version, 'map-reading.4');
     // An m3 server (older deploy) is sent the copied-quote wire it reads.
     bodies = []; const old = createMapRun({ current: () => ({ key: 'o', kind: 'saved', project: p0, view: studioView(p0) }), status: () => ({ ...status, map: { model: 'm', prompt: 'm3-0123456789ab' } }), accessCode: () => '', commit: async () => '중단', done: () => {}, changed: () => {} });
@@ -294,7 +295,7 @@ test('74-I project.11 and earlier stay as stored (no position derived); map-read
   const p0 = D.pasteRecord(D.createProject(), REPEAT, null).project, old = M.buildMapAsk(p0, studioView(p0));
   const legacy = M.applyReading(p0, old, M.validateMapReply({ summary: '', parts: [{ ref: 'new:a', name: '입력 처리', parent: null, role: null, roleAbout: null, roleReplaces: null, basis: [{ record: 'N01', quote: SENT }], claims: [] }], relations: [], candidates: [], gaps: [] }, old.ask), meta()).project;
   const v11 = JSON.stringify({ ...legacy, schemaVersion: 'idea015.project.11' }), read = parseProject(v11);
-  assert.equal(read.schemaVersion, 'idea015.project.12'); assert.deepEqual(read.readings, legacy.readings);
+  assert.equal(read.schemaVersion, 'idea015.project.13'); assert.deepEqual(read.readings, legacy.readings);
   assert.ok(!('from' in read.readings[0].parts[0].basis[0]), 'a repeated legacy quote gets no made-up position');
   const v10 = JSON.parse(ORDER_RAW); assert.equal(parseProject(ORDER_RAW).pasted[0].text, v10.pasted[0].text);
   // An anchored reading, then tampered copies of it.
@@ -314,11 +315,11 @@ test('74-I project.11 and earlier stay as stored (no position derived); map-read
   assert.equal(lastReading(good).parts[0].basis[0].from, REPEAT.lastIndexOf(SENT));
 });
 
-test('74-I2 server and client contracts: status names m5, an older tab\'s studio.map.3 is still answered with its own prompt and quotes', async () => {
-  assert.match(await mapPromptId(), /^m5-[0-9a-f]{12}$/);
+test('74-I2 server and client contracts: status names m6, an older tab\'s studio.map.3 is still answered with its own prompt and quotes', async () => {
+  assert.match(await mapPromptId(), /^m6-[0-9a-f]{12}$/);
   const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: 'test-74-not-real' }, fetchImpl: async () => { throw new Error('status never calls the model'); } });
   const oldFetch = globalThis.fetch;
-  try { globalThis.fetch = async () => handle(new Request('https://studio.example/api/studio/status')); assert.match((await aiStatus()).map.prompt, /^m5-/); } finally { globalThis.fetch = oldFetch; }
+  try { globalThis.fetch = async () => handle(new Request('https://studio.example/api/studio/status')); assert.match((await aiStatus()).map.prompt, /^m6-/); } finally { globalThis.fetch = oldFetch; }
   let p = D.addArea(D.createProject(), '폴더 일괄 처리', ''); const q = plan(p, p.space.areas[0].id).scope;
   p = D.pasteRecord(p, REPORT71.replace(SAMPLE_RQ, q.id), null).project;
   const old = M.buildMapAsk(p, studioView(p), [q]); assert.equal(old.ask.schemaVersion, 'studio.map.3');
@@ -368,7 +369,7 @@ test('74-J Node-RED PR6019 first map and a later record on the anchored wire; re
   assert.equal(one.state, 'not-made'); assert.equal(one.lead.match.quote, '실제로는 그 입력 처리를 구상만 했으며 아직 구현하지 않았습니다. feature/folder의 폴더 입력은 미구현 상태입니다.');
   assert.equal(one.history[0].match.quote.startsWith('feature/folder 브랜치에서'), true);
   assert.deepEqual(round(s), s); assert.deepEqual(parseBackup(serializeBackup(s, null)).project, s);
-  assert.equal(JSON.parse(serializeProject(s)).schemaVersion, 'idea015.project.12');
+  assert.equal(JSON.parse(serializeProject(s)).schemaVersion, 'idea015.project.13');
 });
 
 /* ---------- K: counterexamples of the 48cb real replies and the returned-report record ---------- */
@@ -451,7 +452,7 @@ test('74-K5 an earlier reading keeps the coordinates it was stored in (the label
 test('74-K6 the independent project.11 backup (a map-reading.3 match stored at 164..326 of the labelled report) opens as saved and reads at the report as received', () => {
   const raw = readFileSync(new URL('./fixtures/record74/legacy-return-match.json', import.meta.url), 'utf8').trimEnd(), saved = JSON.parse(raw);
   const p = parseProject(raw), b = parseBackup(raw).project;
-  assert.deepEqual(b, p); assert.equal(p.schemaVersion, 'idea015.project.12');
+  assert.deepEqual(b, p); assert.equal(p.schemaVersion, 'idea015.project.13');
   assert.deepEqual(p.readings, saved.readings, 'the stored reading, its places and its records as they were');
   assert.deepEqual(JSON.parse(serializeProject(p)).readings, saved.readings, 'saving again writes the same places');
   const m = R.requestMatches(p)[0], report = R.recordTexts(p).get(m.match.record).read;
@@ -489,6 +490,6 @@ test('74-M2 map.4 goes as in 8d (JSON, thinking enabled, low effort, 16384) with
   assert.ok(!('tools' in b) && !('tool_choice' in b));
   const later = ask4(D.pasteRecord(apply4(p, inp, orderReply(inp)).project, '후속 보고: 요청 비교 집계를 접힌 항목에도 썼다고 보고합니다.', null).project);
   await post(later.ask); assert.equal(bodies[1].messages[0].content, MAP4_PROMPT);
-  const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ recipe: MAP5_RECIPE, first: MAP5_FIRST_PROMPT, later: MAP5_PROMPT })));
-  assert.equal(await mapPromptId(), `m5-${[...new Uint8Array(bytes)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`);
+  const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ recipe: MAP6_RECIPE, first: MAP6_FIRST_PROMPT, later: MAP6_PROMPT })));
+  assert.equal(await mapPromptId(), `m6-${[...new Uint8Array(bytes)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`);
 });

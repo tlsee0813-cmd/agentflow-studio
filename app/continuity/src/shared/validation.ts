@@ -1,5 +1,5 @@
 import { API_SCHEMA, SCHEMA, V5_SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Intent, type Background, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket, type Question, GUIDE_SCHEMA, type GuideRequest, type GuideReply, type GuideEnvelope, type GuideTicket, type UnderstandingInput } from './types.js';
-import {V6_SCHEMA,V7_SCHEMA,V8_SCHEMA,V9_SCHEMA,V10_SCHEMA,V11_SCHEMA,type ReadingEntry,type PastedRecord,CLAIM_KINDS,READINGS_LIMIT,PASTED_TEXT_LIMIT,PASTED_LIMIT,type Area,type PlanStamp,type Point,type ManualPositions,type Backup} from './types.js';
+import {V6_SCHEMA,V7_SCHEMA,V8_SCHEMA,V9_SCHEMA,V10_SCHEMA,V11_SCHEMA,V12_SCHEMA,type ReadingEntry,type PastedRecord,CLAIM_KINDS,READINGS_LIMIT,PASTED_TEXT_LIMIT,PASTED_LIMIT,type Area,type PlanStamp,type Point,type ManualPositions,type Backup} from './types.js';
 import { validateFrozenRequest, validateStoredMatch, hasTarget, matchLedger, recordTextMap, type FrozenRequest, type StoredRequestMatch, type RecordText } from './request-return.js';
 import { ANCHOR_QUOTE_MAX, textDigest } from './evidence-span.js';
 export class ContextError extends Error { constructor(code: string) { super(code); this.name = 'ContextError'; } }
@@ -371,7 +371,7 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       ensure(areaIds.has(r.areaId as string));text(r.text,300);ensure(r.corrects===null||seen.has(r.corrects as string));continue;
     }
     const version=!!r&&typeof r==='object'?(r as {version?:unknown}).version:null;
-    four=version==='map-reading.4';const three=four||version==='map-reading.3',two=three||version==='map-reading.2';records=four?asRead:raw;
+    const five=version==='map-reading.5';four=five||version==='map-reading.4';const three=four||version==='map-reading.3',two=three||version==='map-reading.2';records=four?asRead:raw;
     obj(r,['version','id','at','model','prompt','hash','records','summary','parts','relations','candidates','gaps','skipped',...(two?['requests','matches']:[]),...(four?['material']:[])]);ensure(r.version==='map-reading.1'||two);
     id(r.id);ensure(!entries.has(r.id as string));entries.add(r.id as string);date(r.at);text(r.model,80);text(r.prompt,40);ensure(typeof r.hash==='string'&&/^[0-9a-f]{64}$/.test(r.hash)&&!hashes.has(r.hash));hashes.add(r.hash as string);
     list(r.records,16);ensure((r.records as unknown[]).length>0);for(const x of r.records){obj(x,['id','from','to','total',...(four?['digest']:[])]);ensure(records.has(x.id as string));integer(x.from);integer(x.to);integer(x.total);ensure((x.from as number)<(x.to as number)&&(x.to as number)<=(x.total as number));
@@ -392,7 +392,11 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       claims.set(p.areaId as string,(p.claims as unknown[]).length);
     }
     list(r.relations,32);for(const x of r.relations){obj(x,['relationId','from','to','kind','quote']);id(x.relationId);ensure(areaIds.has(x.from as string)&&areaIds.has(x.to as string)&&x.from!==x.to);ensure(['flow','needs','shares','related'].includes(x.kind as string));quote(x.quote);}
-    list(r.candidates,16);for(const c of r.candidates){obj(c,['text','areaIds','quote']);text(c.text,240);list(c.areaIds,2);for(const a of c.areaIds)ensure(areaIds.has(a as string));if(c.quote!==null)quote(c.quote);}
+    // map-reading.5: each candidate says what it leaves undecided; an undecided statement is kept in it, exact where it stands.
+    if(five){list(r.candidates,16);}if(five)for(const c of r.candidates as unknown[]){obj(c,['text','areaIds','quote','target','statement']);ensure(['attribution','identity','parent','holds'].includes(c.target as string));
+      const held=c.target==='attribution'||c.target==='holds';ensure(held?c.statement!==null:c.statement===null);list(c.areaIds,c.target==='holds'?1:2);
+      if(c.statement!==null){obj(c.statement,['kind','text','about','quote']);ensure(CLAIM_KINDS.includes(c.statement.kind as never));text(c.statement.text,240);if(c.statement.about!==null)text(c.statement.about,80);quote(c.statement.quote);}}
+    list(r.candidates,16);for(const c of r.candidates){obj(c,['text','areaIds','quote',...(five?['target','statement']:[])]);text(c.text,240);list(c.areaIds,2);for(const a of c.areaIds)ensure(areaIds.has(a as string));if(c.quote!==null)quote(c.quote);}
     list(r.gaps,2);for(const g of r.gaps)text(g,160);
     list(r.skipped,64);for(const x of r.skipped){obj(x,['what','name','reason']);ensure(['part','relation'].includes(x.what as string));text(x.name,200);ensure(['same-name','archived','removed','exists','parent-skipped',...(four?['material']:[])].includes(x.reason as string));}
     if(four){list(r.material,8);for(const x of r.material){obj(x,['record','from','to','what']);ensure(records.has(x.record as string));text(x.what,120);integer(x.from);integer(x.to);ensure((x.from as number)<(x.to as number)&&read.some(y=>y.id===x.record&&y.from<=(x.from as number)&&(x.to as number)<=y.to));}}
@@ -585,6 +589,12 @@ function migrateV9(v:unknown):unknown {
   for(const r of p.readings)ensure(!!r&&typeof r==='object'&&['map-reading.1','map-correction.1'].includes((r as {version:string}).version));
   return {...p,schemaVersion:SCHEMA};
 }
+/** project.12 has map readings up to map-reading.4 (candidates without a stated target): they stay as stored. */
+function migrateV12(v:unknown):unknown {
+  const p=v as {schemaVersion?:unknown;readings?:unknown};ensure(p&&p.schemaVersion===V12_SCHEMA);list(p.readings,READINGS_LIMIT);
+  for(const r of p.readings)ensure(!!r&&typeof r==='object'&&['map-reading.1','map-reading.2','map-reading.3','map-reading.4','map-correction.1','request-correction.1','replace-correction.1'].includes((r as {version:string}).version));
+  return {...p,schemaVersion:SCHEMA};
+}
 /** project.11 has map readings without positions (map-reading.1–3): they stay as stored, and no position is derived for them. */
 function migrateV11(v:unknown):unknown {
   const p=v as {schemaVersion?:unknown;readings?:unknown};ensure(p&&p.schemaVersion===V11_SCHEMA);list(p.readings,READINGS_LIMIT);
@@ -617,7 +627,7 @@ function convertIntentEdits(p:Project):Project {
 export function parseProject(raw: string): Project {
   ensure(new TextEncoder().encode(raw).length <= FILE_LIMIT,'FILE_TOO_LARGE'); const v: unknown=JSON.parse(raw);
   const schema=(v as {schemaVersion?:unknown})?.schemaVersion;
-  const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : schema===V3_SCHEMA ? migrateV3(v) : schema===V4_SCHEMA ? migrateV4(v) : schema===V5_SCHEMA ? migrateV5(v) : schema===V6_SCHEMA ? migrateV6(v) : schema===V7_SCHEMA ? migrateV7(v) : schema===V8_SCHEMA ? migrateV8(v) : schema===V9_SCHEMA ? migrateV9(v) : schema===V10_SCHEMA ? migrateV10(v) : schema===V11_SCHEMA ? migrateV11(v) : v;
+  const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : schema===V3_SCHEMA ? migrateV3(v) : schema===V4_SCHEMA ? migrateV4(v) : schema===V5_SCHEMA ? migrateV5(v) : schema===V6_SCHEMA ? migrateV6(v) : schema===V7_SCHEMA ? migrateV7(v) : schema===V8_SCHEMA ? migrateV8(v) : schema===V9_SCHEMA ? migrateV9(v) : schema===V10_SCHEMA ? migrateV10(v) : schema===V11_SCHEMA ? migrateV11(v) : schema===V12_SCHEMA ? migrateV12(v) : v;
   assertProject(project); return convertIntentEdits(project); // Freshly parsed, not shared: no defensive copy needed.
 }
 

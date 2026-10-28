@@ -46,7 +46,7 @@ function cliFirst() {
 
 test('M70-A1 a first map: parts and relations rest on quotes; Area.note stays empty; one reading kept; no task, return or anchor made', () => {
   const { project: p, created, reading } = cliFirst();
-  assert.equal(p.schemaVersion, 'idea015.project.12');
+  assert.equal(p.schemaVersion, 'idea015.project.13');
   assert.deepEqual(p.space.areas.map(a => [a.name, a.note]), [['문서 변환 명령', ''], ['표 보존', ''], ['docx 출력', '']]);
   assert.equal(created.length, 3); assert.equal(p.space.relations.length, 1); assert.equal(p.readings.length, 1);
   assert.deepEqual(p.tasks, []); assert.deepEqual(p.sources, []); assert.deepEqual(p.space.understanding, {});
@@ -274,7 +274,7 @@ test('M70-E6 a reading of a part with a valid return.2 description leaves that d
 
 test('M70-E7 project.8 reads as no readings; a bad reading is refused (unknown record, area, kind, replaced claim)', () => {
   const p = cliFirst().project, v8 = JSON.parse(serializeProject(p)); v8.schemaVersion = 'idea015.project.8'; delete v8.readings;
-  const read = parseProject(JSON.stringify(v8)); assert.equal(read.schemaVersion, 'idea015.project.12'); assert.deepEqual(read.readings, []);
+  const read = parseProject(JSON.stringify(v8)); assert.equal(read.schemaVersion, 'idea015.project.13'); assert.deepEqual(read.readings, []);
   assert.throws(() => parseProject(JSON.stringify({ ...v8, readings: [] })), 'a project.8 that already has the key is not repaired');
   for (const breakIt of [
     x => { x.readings[0].parts[0].claims[0].record = 'N_nope'; },
@@ -306,7 +306,7 @@ test('M70-H1 HTTP: /api/studio/map validates both ways, keeps reasoning with a m
     fetchImpl: async (url, init) => { seen = JSON.parse(init.body); return new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(good) } }] }), { status: 200 }); } });
   const post = body => new Request('https://studio.example/api/studio/map', { method: 'POST', headers: { 'content-type': 'application/json', 'x-agentflow-request': '1', origin: 'https://studio.example' }, body: JSON.stringify(body) });
   const status = await (await handle(new Request('https://studio.example/api/studio/status'))).json();
-  assert.deepEqual(status.map, { model: 'm-plan', prompt: await mapPromptId() }); assert.match(status.map.prompt, /^m5-[0-9a-f]{12}$/);
+  assert.deepEqual(status.map, { model: 'm-plan', prompt: await mapPromptId() }); assert.match(status.map.prompt, /^m6-[0-9a-f]{12}$/);
   assert.equal((await handle(post({ ...inp.ask, extra: 1 }))).status, 400); assert.equal(seen, null);
   const r = await handle(post(inp.ask)); assert.equal(r.status, 200); assert.deepEqual(await r.json(), { model: 'm-plan', reply: good });
   assert.equal(seen.messages[0].content, MAP_PROMPT); assert.equal(seen.thinking.type, 'enabled'); assert.equal(seen.reasoning_effort, 'low'); assert.equal(seen.max_tokens, 16384);

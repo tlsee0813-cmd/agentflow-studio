@@ -46,7 +46,7 @@ test('R69 project.8: a pasted record is kept exactly, once; project.7 reads as n
   const kept = parseProject(serializeProject(other.project)); assert.deepEqual(kept.pasted, other.project.pasted);
   // project.7 (no key) migrates to none; a project.7 that already has the key is not repaired.
   const v7 = JSON.parse(serializeProject(p)); v7.schemaVersion = 'idea015.project.7'; delete v7.pasted;delete v7.readings;
-  const read = parseProject(JSON.stringify(v7)); assert.equal(read.schemaVersion, 'idea015.project.12'); assert.deepEqual(read.pasted, []);
+  const read = parseProject(JSON.stringify(v7)); assert.equal(read.schemaVersion, 'idea015.project.13'); assert.deepEqual(read.pasted, []);
   assert.deepEqual(read.readings, []);
   assert.deepEqual({ ...read, schemaVersion: v7.schemaVersion, pasted: undefined, readings: undefined }, { ...v7, pasted: undefined, readings: undefined }, 'nothing else changes');
   assert.throws(() => parseProject(JSON.stringify({ ...v7, pasted: [] })));

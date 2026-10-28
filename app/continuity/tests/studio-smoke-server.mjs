@@ -13,7 +13,7 @@ const stub = async (url, init) => {
   const input = JSON.parse(JSON.parse(init.body).messages[1].content.replace(/^[^\n]*\n/, ''));
   if (input.schemaVersion === 'studio.digest.1' || input.schemaVersion === 'studio.digest.2') return digestStub(input);
   if (['studio.map.1', 'studio.map.2', 'studio.map.3'].includes(input.schemaVersion)) return mapStub(input);
-  if (['studio.map.4', 'studio.map.5'].includes(input.schemaVersion)) return map4Stub(input);
+  if (['studio.map.4', 'studio.map.5', 'studio.map.6'].includes(input.schemaVersion)) return map4Stub(input);
   const refs = input.records.slice(0, 2).map(r => r.ref);
   const content = { headline: `[스텁 응답] ${input.part.name} 정리`, situation: [`스텁: ${input.part.name}의 기록 ${input.records.length}개를 받았습니다.`],
     changes: input.current.changes.slice(0, 2), next: ['스텁: 다음 판단 예시'], answer: input.intent === 'question' ? `스텁 답변: ${input.question}` : null, refs };
@@ -73,7 +73,7 @@ function mapStub(input) {
 function map4Stub(input) {
   const rec = input.records[0], pieces = rec.spans.filter(x => /^(요구|작업 보고|구상):/.test(x.t.trim()));
   const kind = t => t.startsWith('요구') ? 'want' : t.startsWith('구상') ? 'idea' : 'reported';
-  const claim = x => ({ kind: kind(x.t.trim()), text: `[스텁] ${x.t.trim().slice(0, 40)}`, at: x.s, about: null, replaces: null });
+  const claim = x => ({ kind: kind(x.t.trim()), text: `[스텁] ${x.t.trim().slice(0, 40)}`, at: x.s, about: null, replaces: null, ...(input.schemaVersion === 'studio.map.6' ? { key: null } : {}) });
   let content;
   if (!pieces.length) content = { summary: '', parts: [], relations: [], candidates: [], gaps: ['[스텁] 프로그램을 말하는 기록을 붙여 주세요.'] };
   else if (!input.parts.length) content = { summary: '[스텁] 기록의 요구·보고·구상 줄을 부분으로 놓은 자리예요.', relations: [], candidates: [], gaps: [],

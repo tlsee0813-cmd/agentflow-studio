@@ -187,7 +187,7 @@ test('73-H stored withdrawals are checked where they stand: tampered links, a pr
   ];
   bad.forEach((mutate, i) => { const x = structuredClone(p); mutate(x); assert.throws(() => parseProject(JSON.stringify(x)), undefined, `case ${i}`); });
   // An unchanged project.10 reads as before (stance-less matches = unclassified), its bytes kept.
-  const v10 = parseProject(RAW); assert.equal(v10.schemaVersion, 'idea015.project.12'); assert.deepEqual(v10.readings, raw.readings);
+  const v10 = parseProject(RAW); assert.equal(v10.schemaVersion, 'idea015.project.13'); assert.deepEqual(v10.readings, raw.readings);
 });
 
 test('73-I the attached actual reply: no false progress, the newest correction leads, and evidence resting only on the withdrawn claim reads apart', () => {

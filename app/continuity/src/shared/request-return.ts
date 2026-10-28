@@ -182,7 +182,7 @@ export function matchLedger(readings: readonly ReadingEntry[], texts: ReadonlyMa
       // Undone where it was made and on every later reading of the same passage that kept it.
       for (const y of out) if (y.replacedBy?.reading === x.reading && y.replacedBy.index === x.index) y.replacedBy = null;
       x.replaces = null;
-    } else if (r.version === 'map-reading.2' || r.version === 'map-reading.3' || r.version === 'map-reading.4') r.matches!.forEach((stored, index) => {
+    } else if (r.version === 'map-reading.2' || r.version === 'map-reading.3' || r.version === 'map-reading.4' || r.version === 'map-reading.5') r.matches!.forEach((stored, index) => {
       const match = asRead(r, stored);
       // An explicit earlier correction of the same quote survives reading that passage again.
       const same = (x: EffectiveMatch) => x.match.record === match.record && x.match.from === match.from && x.match.to === match.to;
@@ -218,7 +218,7 @@ export function recordTextMap(pasted: readonly PastedRecord[], sources: readonly
 export const recordTexts = (p: Project): Map<string, RecordText> => recordTextMap(p.pasted, p.sources, p.tasks);
 /** The text a reading's interval of a record is stored against. map-reading.4: the text as read. map-reading.1–3: the record as it
  * was stored then, the labelled Source.text, when the interval's total is that length; else the text as read (both kept as is). */
-export const storedText = (r: MapReading, total: number, t: RecordText): string => r.version !== 'map-reading.4' && total === t.raw.length ? t.raw : t.read;
+export const storedText = (r: MapReading, total: number, t: RecordText): string => r.version !== 'map-reading.4' && r.version !== 'map-reading.5' && total === t.raw.length ? t.raw : t.read;
 /** How far a reading's stored positions of a record stand from the text as read: the label's length for an earlier reading stored
  * against the labelled text, else 0. */
 export const labelShift = (r: MapReading, total: number, t: RecordText): number => storedText(r, total, t) === t.raw && t.raw !== t.read ? t.shift : 0;
@@ -270,7 +270,7 @@ export function requestComparison(p: Project, reading: MapReading): string | nul
   return [`원한 항목 ${q.items.length}개`, `변경 보고 ${n('made')}개`, n('mixed') ? `보고 엇갈림 ${n('mixed')}개` : '', n('not-made') ? `미구현 보고 ${n('not-made')}개` : '',
     n('unclassified') ? `미분류 보고 ${n('unclassified')}개` : '', n('none') ? `변경 근거 아직 없는 항목 ${n('none')}개` : '', pending ? `대응 미정 ${pending}구절` : ''].filter(Boolean).join(' · ');
 }
-const correctable = (r: ReadingEntry): r is MapReading => r.version === 'map-reading.2' || r.version === 'map-reading.3' || r.version === 'map-reading.4';
+const correctable = (r: ReadingEntry): r is MapReading => r.version === 'map-reading.2' || r.version === 'map-reading.3' || r.version === 'map-reading.4' || r.version === 'map-reading.5';
 export function correctRequestMatch(p: Project, reading: string, index: number, target: RequestTarget | null): Project {
   const r = p.readings.find((r): r is MapReading => correctable(r) && r.id === reading), m = r?.matches?.[index];
   if (!r || !m || (target && !hasTarget(r.requests!, target)) || p.readings.length >= 500) throw new Error('INVALID_REQUEST_CORRECTION');

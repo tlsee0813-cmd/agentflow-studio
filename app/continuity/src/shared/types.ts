@@ -1,5 +1,7 @@
 import type { FrozenRequest, StoredRequestMatch, RequestCorrection, ReplaceCorrection } from './request-return.js';
-export const SCHEMA = 'idea015.project.12' as const;
+export const SCHEMA = 'idea015.project.13' as const;
+/** project.12 had map readings up to map-reading.4 (candidates without a stated target): they stay as stored. */
+export const V12_SCHEMA = 'idea015.project.12' as const;
 /** project.11 had map readings whose quotes carry no position (map-reading.1–3): they stay as stored; no position is derived. */
 export const V11_SCHEMA = 'idea015.project.11' as const;
 /** project.10 had request matches without a stance and no withdrawal links: they read as unclassified reports (no backfill). */
@@ -209,14 +211,22 @@ export interface ReadingPart {
   basis: ReadingQuote[]; claims: ReadingClaim[];
 }
 export interface ReadingRelation { relationId: string; from: string; to: string; kind: RelationKind; quote: ReadingQuote }
-export interface ReadingCandidate { text: string; areaIds: string[]; quote: ReadingQuote | null }
+/** What a candidate leaves undecided (map-reading.5): whose statement this is (attribution), whether two parts are one
+ * (identity), whether a part is inside a parent (parent), or whether a statement holds (holds). An attribution or holds candidate
+ * keeps the undecided statement itself (content, kind, version, exact quote): it is in no part's claims. areaIds name the
+ * alternatives (attribution), the two parts (identity), the part then its parent (parent) or the part (holds). */
+export type CandidateTarget = 'attribution' | 'identity' | 'parent' | 'holds';
+export interface CandidateStatement { kind: ClaimKind; text: string; about: string | null; quote: ReadingQuote }
+export interface ReadingCandidate { text: string; areaIds: string[]; quote: ReadingQuote | null;
+  /** map-reading.5 only. */
+  target?: CandidateTarget; statement?: CandidateStatement | null }
 /** Something the reply proposed that was not applied, and why (kept so the next reading of the same input does not repeat it). */
 export interface ReadingSkip { what: 'part' | 'relation'; name: string; reason: 'same-name' | 'archived' | 'removed' | 'exists' | 'parent-skipped' | 'material' }
 /** map-reading.4: a passage the reading took as material inside the record (an example, a sample under test, another program's
  * words), not as this project's own: [from, to) of the record, with what it is. Nothing of the map rests on it alone. */
 export interface ReadingMaterial { record: string; from: number; to: number; what: string }
 export interface MapReading {
-  version: 'map-reading.1' | 'map-reading.2' | 'map-reading.3' | 'map-reading.4'; id: string; at: string; model: string; prompt: string;
+  version: 'map-reading.1' | 'map-reading.2' | 'map-reading.3' | 'map-reading.4' | 'map-reading.5'; id: string; at: string; model: string; prompt: string;
   /** SHA-256 of the request: the very same request is never sent or applied again. */
   hash: string;
   /** Records read, and which part of each went: characters [from, to) of total. A record's unsent tail is read by a later reading. */
@@ -232,7 +242,7 @@ export interface MapReading {
  * reading whose description it corrects. It holds that description only; later claims of later readings still come in. */
 export interface ReadingCorrection { version: 'map-correction.1'; id: string; at: string; areaId: string; text: string; corrects: string | null }
 export type ReadingEntry = MapReading | ReadingCorrection | RequestCorrection | ReplaceCorrection;
-export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3' || e.version === 'map-reading.4';
+export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3' || e.version === 'map-reading.4' || e.version === 'map-reading.5';
 export const READINGS_LIMIT = 500;
 export const PASTED_LIMIT = 500;
 export interface ContextBasis {

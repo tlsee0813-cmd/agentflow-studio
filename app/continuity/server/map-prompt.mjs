@@ -217,3 +217,24 @@ export const MAP5_PROMPT = map5Evidence(MAP4_PROMPT);
 export const MAP5_FIRST_PROMPT = map5Evidence(MAP4_FIRST_PROMPT).replaceAll('new:eval', 'new:a').replaceAll('new:parse', 'new:b').replaceAll('new:run', 'new:c');
 export const MAP5_RECIPE = 'map5-recipe.1: first = parts.length === 0 && requests.length === 0 && priors.length === 0; evidence = same-record contiguous range <= 600 UTF-16; span.2';
 export const map5Prompt = ask => ask.parts.length === 0 && (ask.requests ?? []).length === 0 && (ask.priors ?? []).length === 0 ? MAP5_FIRST_PROMPT : MAP5_PROMPT;
+
+// studio.map.6: the map.5 prompts with what a candidate leaves undecided stated (target), a reply-local key on statements, and
+// material overlap refused rather than dropped. Everything else (evidence ranges, first/later selection, counts) is map.5's.
+const MAP6_CANDIDATES = `candidates (최대 6개): 기록만으로 가를 수 없고 지도 판단을 실제로 바꾸는 미정만 쓴다. 각 후보는 무엇이 미정인지 target 하나로 밝힌다.
+- attribution: 한 진술이 어느 부분의 것인지 미정. statement에 그 진술 {"key","kind","text","at","about"}을 쓰고 parts에 가능한 부분 1~2개를 쓴다. 그 진술은 어느 부분의 claims에도 쓰지 않는다.
+- holds: 한 진술이 그 부분에 성립하는지 미정. statement에 그 진술, parts에 그 부분 1개. 그 진술을 claims에 쓰지 않는다.
+- identity: 두 부분이 같은 대상인지 미정. parts에 두 부분, statement는 null. 두 부분을 합치거나 한쪽의 근거를 다른 쪽으로 옮기지 않는다.
+- parent: 한 새 부분이 그 부모 안에 있는지 미정. parts에 [그 부분, 그 부모], statement는 null. 그 부분의 parent는 null로 둔다(그 연결만 미정이다).
+- 미정은 그 대상 하나만 보류한다. 같은 문단·같은 구간에 있는 다른 독립 사실(같은 설정의 다른 값, 판본별 대응, 같은 기록의 다른 부분에 대한 사실)은 그대로 해당 부분의 claims에 쓴다. 근거 위치(at)가 겹친다는 것은 같은 진술이라는 뜻이 아니다.
+- 같은 진술을 claims(확정)와 후보(미정)에 함께 쓰거나, 같은 대상을 두 번 후보로 쓰거나, 후보가 미정이라 한 부모에 그 부분을 넣으면 응답 전체가 거절된다. 후보는 이미 있는 사실을 철회하지 않는다.
+- 원문이 이미 답한 것을 다시 묻지 않는다. 요구·계획을 현재 구현으로 확정하거나 그것을 묻는 후보를 만들지 않는다. 정리 작업을 사용자에게 떠넘기는 일반 확인 요청, 분류 선호, 이 프로젝트와 무관한 조건, 일반 면책은 쓰지 않는다. at은 후보 질문의 근거 구간 또는 null.
+- claims의 key: 진술을 구별해 가리킬 필요가 있으면 "s1"·"s2"처럼 응답 안에서 고유한 키, 아니면 null. 후보의 statement.key도 같은 키 공간이다.`;
+const map6 = prompt => prompt
+  .replace(/candidates \(최대 6개\): [^\n]+/, MAP6_CANDIDATES)
+  .replace('근거가 material 범위와 조금이라도 겹치면 지도 근거가 되지 않는다.', '부분·주장·관계·대응·후보 진술의 근거가 material 범위와 조금이라도 겹치면 응답 전체가 거절된다.')
+  .replace(/("about":(?:null|"[^"]*"),"replaces":null)\}/g, '$1,"key":null}')
+  .replace('"candidates":[{"text":"...","parts":["P01"],"at":null}]', '"candidates":[{"text":"...","target":"attribution","parts":["P01","P02"],"at":null,"statement":{"key":"s1","kind":"reported","text":"...","at":"N01.14","about":null}}]');
+export const MAP6_PROMPT = map6(MAP5_PROMPT);
+export const MAP6_FIRST_PROMPT = map6(MAP5_FIRST_PROMPT);
+export const MAP6_RECIPE = 'map6-recipe.1: first = parts.length === 0 && requests.length === 0 && priors.length === 0; evidence = same-record contiguous range <= 600 UTF-16; span.2; candidates state their target (attribution|identity|parent|holds) and statement keys';
+export const map6Prompt = ask => ask.parts.length === 0 && (ask.requests ?? []).length === 0 && (ask.priors ?? []).length === 0 ? MAP6_FIRST_PROMPT : MAP6_PROMPT;
