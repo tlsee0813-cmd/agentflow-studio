@@ -82,19 +82,36 @@ export function parseBundle(v: unknown, projectId: string, legacy = false): Plan
   return structuredClone({ draft: v.draft, extra: v.extra as Evidence[], plan, by, snapshots, labels: v.labels as PlanBundle['labels'], origins: v.origins as PlanBundle['origins'], observations, attached, ...(authoring ? { authoring } : {}) });
 }
 
-type Envelope = { version: typeof ENVELOPE; projects: Record<string, unknown> };
-type Read = { ok: true; env: Envelope; raw: string | null; legacy: boolean } | { ok: false; raw: string };
+/** legacy: entries carried over from an older envelope and not written since, by the version they were read from. Such an entry is
+ * still read by that version's rules (no authoring context), so moving the envelope to .3 for another project never makes an entry
+ * valid that its own version refused. Writing a project's bundle (or setting it aside) ends its marker; nothing else changes it. */
+type LegacyVersion = 'studio.plans.1' | 'studio.plans.2';
+const LEGACY_VERSIONS: readonly string[] = ['studio.plans.1', 'studio.plans.2'];
+type Envelope = { version: typeof ENVELOPE; projects: Record<string, unknown>; legacy?: Record<string, LegacyVersion> };
+type Read = { ok: true; env: Envelope; raw: string | null } | { ok: false; raw: string };
 function readEnvelope(kv: StorageLike): Read {
   let raw: string | null;
   try { raw = kv.getItem(PLANS_KEY); } catch { return { ok: false, raw: '' }; }
-  if (raw === null) return { ok: true, env: { version: ENVELOPE, projects: {} }, raw, legacy: false };
+  if (raw === null) return { ok: true, env: { version: ENVELOPE, projects: {} }, raw };
   try {
     const v = JSON.parse(raw);
-    if (!isObj(v) || !['studio.plans.1', 'studio.plans.2', ENVELOPE].includes(v.version as string) || !isObj(v.projects)) return { ok: false, raw };
+    if (!isObj(v) || !isObj(v.projects)) return { ok: false, raw };
     // v1 snapshots keep their original text and have no structured scope; v1/v2 bundles have no authoring context. Never backfill
-    // either from today's plan or screen. Other projects' entries are written back exactly as they were read.
-    return { ok: true, env: { version: ENVELOPE, projects: v.projects }, raw, legacy: v.version !== ENVELOPE };
+    // either from today's plan or screen. Other projects' entries are written back exactly as they were read, with their provenance.
+    if (LEGACY_VERSIONS.includes(v.version as string)) {
+      const projects = v.projects;
+      return { ok: true, env: { version: ENVELOPE, projects, legacy: Object.fromEntries(Object.keys(projects).map(id => [id, v.version as LegacyVersion])) }, raw };
+    }
+    if (v.version !== ENVELOPE || !Object.keys(v).every(k => ['version', 'projects', 'legacy'].includes(k))) return { ok: false, raw };
+    const legacy = v.legacy ?? {};
+    if (!isObj(legacy) || !Object.entries(legacy).every(([id, ver]) => Object.hasOwn(v.projects as object, id) && LEGACY_VERSIONS.includes(ver as string))) return { ok: false, raw };
+    return { ok: true, env: { version: ENVELOPE, projects: v.projects, legacy: legacy as Record<string, LegacyVersion> }, raw };
   } catch { return { ok: false, raw }; }
+}
+/** The envelope as written: its legacy markers only while there are any. */
+function written(env: Envelope): string {
+  const legacy = env.legacy && Object.keys(env.legacy).length ? env.legacy : null;
+  return JSON.stringify({ version: env.version, projects: env.projects, ...(legacy ? { legacy } : {}) });
 }
 
 export type Loaded = { bundle: PlanBundle; unreadable: boolean };
@@ -102,7 +119,7 @@ export function loadBundle(kv: StorageLike, projectId: string): Loaded {
   const r = readEnvelope(kv);
   if (!r.ok) return { bundle: emptyBundle(), unreadable: true };
   if (!Object.hasOwn(r.env.projects, projectId)) return { bundle: emptyBundle(), unreadable: false };
-  try { return { bundle: parseBundle(r.env.projects[projectId], projectId, r.legacy), unreadable: false }; }
+  try { return { bundle: parseBundle(r.env.projects[projectId], projectId, Object.hasOwn(r.env.legacy ?? {}, projectId)), unreadable: false }; }
   catch { return { bundle: emptyBundle(), unreadable: true }; }
 }
 
@@ -112,8 +129,8 @@ const writeChecked = (kv: StorageLike, key: string, value: string) => { kv.setIt
 export function saveBundle(kv: StorageLike, projectId: string, bundle: PlanBundle): string | null {
   const r = readEnvelope(kv);
   if (!r.ok) return '저장된 변경안 묶음을 읽지 못해 새로 저장하지 않았어요. 원래 내용은 그대로예요.';
-  r.env.projects[projectId] = bundle;
-  try { writeChecked(kv, PLANS_KEY, JSON.stringify(r.env)); return null; }
+  r.env.projects[projectId] = bundle; if (r.env.legacy) delete r.env.legacy[projectId];
+  try { writeChecked(kv, PLANS_KEY, written(r.env)); return null; }
   catch { return '이 브라우저에 저장하지 못했어요. 이 탭을 닫으면 사라지니 파일로 내보내 두세요.'; }
 }
 
@@ -126,7 +143,7 @@ export function setAside(kv: StorageLike, projectId: string): string | null {
     let kept: unknown[] = [];
     try { const v = JSON.parse(kv.getItem(UNREADABLE_KEY) ?? '[]'); if (Array.isArray(v)) kept = v; } catch { return '읽지 못한 변경안을 따로 보관할 자리가 망가져 있어 아무것도 지우지 않았어요.'; }
     writeChecked(kv, UNREADABLE_KEY, JSON.stringify([...kept, { at: new Date().toISOString(), projectId: r.ok ? projectId : null, raw }].slice(-20)));
-    if (r.ok) { delete r.env.projects[projectId]; writeChecked(kv, PLANS_KEY, JSON.stringify(r.env)); }
+    if (r.ok) { delete r.env.projects[projectId]; if (r.env.legacy) delete r.env.legacy[projectId]; writeChecked(kv, PLANS_KEY, written(r.env)); }
     else writeChecked(kv, PLANS_KEY, JSON.stringify({ version: ENVELOPE, projects: {} }));
     return null;
   } catch { return '읽지 못한 변경안을 따로 보관하지 못해 아무것도 지우지 않았어요.'; }

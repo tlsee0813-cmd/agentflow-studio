@@ -2677,6 +2677,55 @@ def serve_static():
     return server
 
 
+def authoring84_flow(browser, base):
+    """AF84: an older draft of the exact micro-javascript backup (unrecorded context) at 1280 and device scale 1.25. Setting the
+    context from the screen and removing it keep the draft, its caret and selection direction; focus lands on a control of the new
+    line that can act (never a disabled one, never the page). The visible boundary line shows only while a context is kept."""
+    context = browser.new_context(viewport={"width": 1280, "height": 800}, device_scale_factor=1.25)
+    page = context.new_page()
+    page.goto(base + "/")
+    page.locator("#import-file").set_input_files(str(ROOT / "tests/fixtures/context75/micro-javascript-backup.json"))
+    expect(page.locator("#crumbs")).to_contain_text("micro-javascript")
+    project = page.evaluate(ENTRY, re.search(r"#/p/([^/]+)", page.url).group(1))
+    draft = ("이 부분은 실패해도 다음 단계로 넘어가게 해줘. " * 4)[:90]
+    old = {"draft": draft, "extra": [], "plan": None, "by": None, "snapshots": [], "labels": {}, "origins": {}, "observations": [], "attached": {}}
+    page.evaluate("([id, b]) => localStorage.setItem('agentflow.studio.plans.1', JSON.stringify({ version: 'studio.plans.2', projects: { [id]: b } }))", [project["id"], old])
+    page.reload()
+    page.locator("#plan-entry").click()
+    area, line, note = page.locator("#plan-intent"), page.locator("#plan-ctx"), page.locator("#plan-ctx-note")
+    expect(area).to_have_value(draft)
+    expect(line).to_contain_text("기록되지 않음")
+    expect(note).to_be_hidden()
+    area.click()
+    page.keyboard.press("Control+Home")
+    page.keyboard.press("ArrowRight")
+    caret = "a => [a.selectionStart, a.selectionEnd, a.selectionDirection, a.value.length]"
+    active = "() => [document.activeElement.tagName, document.activeElement.textContent, !!document.activeElement.disabled]"
+    assert area.evaluate(caret)[:2] == [1, 1] and len(draft) == 90
+    line.get_by_role("button", name="현재 화면 맥락으로 지정").click()
+    assert area.evaluate(caret)[:2] == [1, 1], area.evaluate(caret)
+    # The same-screen replace is off in the new line: focus goes to the control that can act.
+    expect(line.get_by_role("button", name="현재 화면으로 바꾸기")).to_be_disabled()
+    assert page.evaluate(active) == ["BUTTON", "없애기", False], page.evaluate(active)
+    expect(note).to_be_visible()
+    expect(note).to_have_text("변경할 범위는 쓴 문장을 따라요.")
+    page.keyboard.press("Enter")  # removes by keyboard from where focus landed
+    expect(line).to_contain_text("없앤 뒤로 다시 잡지 않아요")
+    assert area.evaluate(caret)[:2] == [1, 1], area.evaluate(caret)
+    assert page.evaluate(active) == ["BUTTON", "현재 화면 맥락으로 지정", False], page.evaluate(active)
+    expect(note).to_be_hidden()
+    # A backward selection keeps its direction through another change; the draft itself is never touched.
+    area.evaluate("a => { a.focus(); a.setSelectionRange(3, 10, 'backward'); }")
+    line.get_by_role("button", name="현재 화면 맥락으로 지정").click()
+    assert area.evaluate(caret) == [3, 10, "backward", 90], area.evaluate(caret)
+    expect(area).to_have_value(draft)
+    kept = page.evaluate("() => JSON.parse(localStorage.getItem('agentflow.studio.plans.1'))")
+    assert kept["version"] == "studio.plans.3" and "legacy" not in kept, kept.get("legacy")
+    assert kept["projects"][project["id"]]["authoring"]["draft"]["context"]["how"] == "explicit"
+    assert kept["projects"][project["id"]]["draft"] == draft
+    context.close()
+
+
 def main():
     procs = []
     try:
@@ -2707,6 +2756,7 @@ def main():
             stale_request_flow(browser, base); print("ok  request only from the analysis of what is written now: typed, forced, A-B-A, cancelled and outdated replies, material")
             actual_reply_flow(browser, base); print("ok  wide comparison of an actual reply without presentation; scope reviews outliving a material change; four changes")
             stale_work_flow(browser, base); print("ok  writing in the wide comparison: map ways off at once (forced click a no-op, caret kept), honest way out, draft on reopen")
+            authoring84_flow(browser, base); print("ok  AF84 older micro draft at 1280/DPR1.25: set and remove the authoring context keep caret, direction and draft; focus on a live control; boundary line")
             proc, base = start("code"); procs.append(proc); code_flow(browser, base); print("ok  access code kept from an input event")
             proc, base = start("fail"); procs.append(proc); failure_flow(browser, base); print("ok  provider failure -> short error -> retry")
             proc, base = start("fail"); procs.append(proc); return_failure_flow(browser, base); print("ok  return reading failure -> short error and the material -> asking again")

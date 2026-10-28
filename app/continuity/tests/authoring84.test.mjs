@@ -7,7 +7,7 @@ import { studioView } from '../dist/public/shared/studio.js';
 import { validatePlanAsk, validatePlanReply, PLAN_BYTES } from '../dist/public/shared/plan-api.js';
 import { pinOnEdit, screenContext, authoringAsk, authoringStale, resolveRef, legacyRecord, AUTHORING_VERSION } from '../dist/public/shared/authoring-context.js';
 import { projectInput, exampleInput, buildConverterProject, converterKeys } from '../dist/public/client/plan-source.js';
-import { emptyBundle, parseBundle, planFile, readPlanFile, loadBundle, saveBundle, authoringOf, PLANS_KEY } from '../dist/public/client/plan-store.js';
+import { emptyBundle, parseBundle, planFile, readPlanFile, loadBundle, saveBundle, setAside, authoringOf, PLANS_KEY, UNREADABLE_KEY } from '../dist/public/client/plan-store.js';
 import * as C from '../dist/public/shared/change-plan.js';
 import { converterExampleAnalysis } from '../dist/public/shared/change-plan-example.js';
 import { PLAN_PROMPT, PLAN2_PROMPT } from '../server/plan-prompt.mjs';
@@ -202,4 +202,35 @@ test('84 server: studio.plan.2 goes to the plan route with the authoring rule; s
   assert.ok(PLAN2_PROMPT.startsWith(PLAN_PROMPT.slice(0, at)) && PLAN2_PROMPT.endsWith(PLAN_PROMPT.slice(at)));
   for (const rule of ['변경 대상이나 요청 범위가 아니다', 'intent가 우선한다', 'evidence가 아니므로', '이름이 같거나 비슷한 다른 부분으로 연결하지 않는다']) assert.ok(PLAN2_PROMPT.includes(rule), rule);
   assert.ok(!JSON.stringify(sent).includes('authoring-server-only-key'));
+});
+
+test('84 older envelope moved to .3 for one project keeps every other entry under its own version: no refused entry becomes valid', () => {
+  const { p, input } = project(), ctx = open(p, { selected: input, scope: null });
+  const legacyOk = { draft: '이전 초안', extra: [], plan: null, by: null, snapshots: [], labels: {}, origins: {}, observations: [], attached: {} };
+  // An entry that its own (.2) version could not have written: it claims an authoring context.
+  const claimed = { ...legacyOk, draft: '다른 프로젝트', authoring: { version: AUTHORING_VERSION, draft: ctx, analyzed: null } };
+  const store = kv({ [PLANS_KEY]: JSON.stringify({ version: 'studio.plans.2', projects: { PRJ_claimed: claimed, PRJ_old: legacyOk } }) });
+  assert.equal(loadBundle(store, 'PRJ_claimed').unreadable, true);
+  // Saving a valid project moves the envelope to .3; the others keep their raw text and the version they were read from.
+  assert.equal(saveBundle(store, p.id, { ...emptyBundle('새 초안'), authoring: { version: AUTHORING_VERSION, draft: ctx, analyzed: null } }), null);
+  let env = JSON.parse(store.m.get(PLANS_KEY));
+  assert.equal(env.version, 'studio.plans.3'); assert.deepEqual(env.legacy, { PRJ_claimed: 'studio.plans.2', PRJ_old: 'studio.plans.2' });
+  assert.deepEqual(env.projects.PRJ_claimed, claimed); assert.deepEqual(env.projects.PRJ_old, legacyOk);
+  assert.equal(loadBundle(store, 'PRJ_claimed').unreadable, true, 'still refused after the envelope moved to .3');
+  assert.deepEqual(loadBundle(store, 'PRJ_old').bundle, legacyOk);
+  assert.equal(loadBundle(store, p.id).bundle.authoring.draft.state, 'set');
+  // Setting aside the valid project, or writing the older one, changes only that project's entry and marker.
+  assert.equal(setAside(store, p.id), null);
+  env = JSON.parse(store.m.get(PLANS_KEY)); assert.deepEqual(env.legacy, { PRJ_claimed: 'studio.plans.2', PRJ_old: 'studio.plans.2' });
+  assert.equal(loadBundle(store, 'PRJ_claimed').unreadable, true); assert.deepEqual(env.projects.PRJ_claimed, claimed);
+  assert.equal(saveBundle(store, 'PRJ_old', { ...legacyOk, draft: '이전 초안 고침' }), null);
+  env = JSON.parse(store.m.get(PLANS_KEY)); assert.deepEqual(env.legacy, { PRJ_claimed: 'studio.plans.2' });
+  assert.equal(loadBundle(store, 'PRJ_claimed').unreadable, true);
+  // Setting the refused entry aside copies its raw text first, then clears only it and its marker.
+  assert.equal(setAside(store, 'PRJ_claimed'), null);
+  env = JSON.parse(store.m.get(PLANS_KEY)); assert.equal(Object.hasOwn(env, 'legacy'), false); assert.equal(Object.hasOwn(env.projects, 'PRJ_claimed'), false);
+  assert.deepEqual(JSON.parse(JSON.parse(store.m.get(UNREADABLE_KEY)).at(-1).raw), claimed);
+  // A .3 envelope whose markers do not name its own entries, or name an unknown version, is not read.
+  for (const legacy of [{ PRJ_none: 'studio.plans.2' }, { PRJ_old: 'studio.plans.3' }, []])
+    assert.equal(loadBundle(kv({ [PLANS_KEY]: JSON.stringify({ version: 'studio.plans.3', projects: { PRJ_old: legacyOk }, legacy }) }), 'PRJ_old').unreadable, true);
 });

@@ -968,7 +968,7 @@ export function createPlanView(host: PlanHost) {
     // Typing changes the draft in place (no re-render, the caret stays): everything that depends on it follows at once.
     area.addEventListener('input', () => { const was = st.bundle.authoring; st.bundle = withDraft(st.bundle, area.value); persist(); if (st.bundle.authoring !== was) syncContext(); syncStale(); });
     area.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); area.blur(); } if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void analyze(); } });
-    sec.append(h('label', { for: 'plan-intent', class: 'pp-label' }, '바꾸고 싶은 모습'), area, contextLine(), staleLine,
+    sec.append(h('label', { for: 'plan-intent', class: 'pp-label' }, '바꾸고 싶은 모습'), area, ...contextLine(), staleLine,
       h('div', { class: 'pp-row' }, sourcesToggle(o), p && !stale() && !st.pending ? h('button', { type: 'button', class: 'link-button', onclick: () => { st.editing = false; render(); } }, '접기') : null));
     put(sec, conditionSwitch(o));
     // Added material is listed apart (with a way to remove it) only in a saved project; an example lists it with its sources.
@@ -989,8 +989,14 @@ export function createPlanView(host: PlanHost) {
   }
   function setAuthoring(a: Authoring) {
     if (!s) return;
+    // The draft is not touched: its caret, selection direction and scroll come back on the re-rendered field, and focus goes to a
+    // control of the new line that can act (the same-screen replace is off), else to the draft.
+    const was = document.getElementById('plan-intent') as HTMLTextAreaElement | null;
+    const caret = was ? { start: was.selectionStart, end: was.selectionEnd, dir: was.selectionDirection, top: was.scrollTop } : null;
     s.bundle = { ...s.bundle, authoring: { ...authoringOf(s.bundle), draft: a } }; persist(); render();
-    (document.querySelector<HTMLElement>('#plan-ctx button') ?? document.getElementById('plan-intent'))?.focus();
+    const area = document.getElementById('plan-intent') as HTMLTextAreaElement | null;
+    if (area && caret) { area.setSelectionRange(caret.start, caret.end, caret.dir); area.scrollTop = caret.top; }
+    (document.querySelector<HTMLElement>('#plan-ctx button:not(:disabled)') ?? area)?.focus({ preventScroll: true });
   }
   /** A part as kept: its name then, and what it is called now or that it is not in this project now (never another part by name). */
   function refText(o: PlanOpened, ref: ContextRef | null, ctxProject: string, none: string): (Node | string)[] {
@@ -1016,14 +1022,19 @@ export function createPlanView(host: PlanHost) {
     const what = a.state === 'removed' ? '없음 · 없앤 뒤로 다시 잡지 않아요' : st.example && st.key === CONVERTER_KEY ? '없음 · 예제 문장' : '기록되지 않음 · 이전에 쓴 초안';
     return [h('span', { class: 'pc-k' }, '작성 맥락'), h('span', { class: 'pc-state' }, what), btn('현재 화면 맥락으로 지정', take, { title: nowTitle })];
   }
-  function contextLine(): HTMLElement {
+  /** The boundary in words, under a context that is or will be kept (the full hint stays in the line's tooltip). */
+  const CONTEXT_NOTE = '변경할 범위는 쓴 문장을 따라요.';
+  const noteHidden = () => !['open', 'set'].includes(authoringOf(s!.bundle).draft.state);
+  function contextLine(): HTMLElement[] {
     const o = host.current()!;
-    return h('p', { class: 'pp-ctx', id: 'plan-ctx', title: CONTEXT_HINT }, ...contextBody(o));
+    return [h('p', { class: 'pp-ctx', id: 'plan-ctx', title: CONTEXT_HINT }, ...contextBody(o)),
+      h('p', { class: 'pp-ctx-note', id: 'plan-ctx-note', hidden: noteHidden() }, CONTEXT_NOTE)];
   }
   /** The first edit kept the context: the line follows in place (no re-render, the caret stays). */
   function syncContext() {
-    const line = document.getElementById('plan-ctx'), o = host.current();
+    const line = document.getElementById('plan-ctx'), note = document.getElementById('plan-ctx-note'), o = host.current();
     if (line && o && s) line.replaceChildren(...contextBody(o));
+    if (note && s) note.hidden = noteHidden();
   }
   function proposalCard(): Node | null {
     const st = s!, pr = PROPOSALS.get(st.key); if (!pr) return null;
