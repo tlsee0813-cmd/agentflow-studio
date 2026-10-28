@@ -1,0 +1,164 @@
+{
+ "schemaVersion": "idea015.project.13",
+ "id": "P_ce2b819c-864e-4e52-8571-ef2197d5d05f",
+ "revision": 6,
+ "name": "역할 근거 표본",
+ "sources": [],
+ "bases": [],
+ "tasks": [],
+ "currentTaskId": null,
+ "draft": "",
+ "answerDraft": "",
+ "basisDraft": "",
+ "basisEdits": {},
+ "draftKind": "request",
+ "pending": null,
+ "notice": null,
+ "space": {
+  "brief": null,
+  "areas": [
+   {
+    "id": "A_12ab0e57-b6b6-47df-ab5c-5783d9a53548",
+    "name": "평가 경로",
+    "note": "",
+    "archived": false,
+    "createdAt": "2026-10-28T17:14:04.049Z"
+   },
+   {
+    "id": "A_29152c78-17eb-4581-8bc9-0a9443ac8637",
+    "name": "실행 한도",
+    "note": "",
+    "archived": false,
+    "createdAt": "2026-10-28T17:14:04.050Z"
+   }
+  ],
+  "relations": [],
+  "draftTarget": null,
+  "layout": {
+   "version": "layout.1",
+   "positions": {
+    "A_12ab0e57-b6b6-47df-ab5c-5783d9a53548": {
+     "x": 40,
+     "y": 40
+    },
+    "A_29152c78-17eb-4581-8bc9-0a9443ac8637": {
+     "x": 340,
+     "y": 40
+    }
+   }
+  },
+  "understanding": {},
+  "containment": {
+   "version": "containment.1",
+   "parents": {},
+   "revisions": {
+    "A_12ab0e57-b6b6-47df-ab5c-5783d9a53548": 0,
+    "A_29152c78-17eb-4581-8bc9-0a9443ac8637": 0
+   }
+  }
+ },
+ "pasted": [
+  {
+   "id": "N_fb9354c0-33cf-45d1-be69-996731c21a30",
+   "text": "[합성 표준 표본 · 실제 소스나 보고가 아님]\n평가 경로 발췌:\n\n    def evaluate(self, code):\n        tree = Parser(code).parse()\n\n        unit = Compiler().compile(tree)\n\n        value = Machine(limits=self.limits).run(unit)\n\n        return self.to_host(value)\n\n요구: 실행 시간이 한도를 넘으면 평가를 멈춘다.\n작업 보고: 시간 한도 검사를 Machine.run 안에 넣었다고 보고합니다. 메모리 한도는 아직 바꾸지 않았습니다.",
+   "at": "2026-10-28T17:14:04.042Z",
+   "context": null
+  }
+ ],
+ "readings": [
+  {
+   "version": "map-reading.5",
+   "id": "R_role80_fixture",
+   "at": "2026-10-29T00:00:00.000Z",
+   "model": "written-fixture",
+   "prompt": "m6-000000000000",
+   "hash": "8888888888888888888888888888888888888888888888888888888888888888",
+   "records": [
+    {
+     "id": "N_fb9354c0-33cf-45d1-be69-996731c21a30",
+     "from": 0,
+     "to": 330,
+     "total": 330,
+     "digest": "f1-ac06ebc4db921e00"
+    }
+   ],
+   "summary": "[합성] 코드를 파싱·컴파일·실행해 호스트 값으로 돌려주는 평가 경로와 시간 한도 요구를 읽은 자리예요.",
+   "parts": [
+    {
+     "areaId": "A_12ab0e57-b6b6-47df-ab5c-5783d9a53548",
+     "created": {
+      "name": "평가 경로",
+      "parentId": null
+     },
+     "role": "코드를 파싱·컴파일·실행한 뒤 결과를 호스트 값으로 돌려준다.",
+     "roleAbout": null,
+     "roleReplaces": null,
+     "basis": [
+      {
+       "record": "N_fb9354c0-33cf-45d1-be69-996731c21a30",
+       "quote": "def evaluate(self, code):\n        tree = Parser(code).parse()",
+       "from": 42,
+       "to": 103
+      },
+      {
+       "record": "N_fb9354c0-33cf-45d1-be69-996731c21a30",
+       "quote": "unit = Compiler().compile(tree)",
+       "from": 113,
+       "to": 144
+      },
+      {
+       "record": "N_fb9354c0-33cf-45d1-be69-996731c21a30",
+       "quote": "value = Machine(limits=self.limits).run(unit)",
+       "from": 154,
+       "to": 199
+      },
+      {
+       "record": "N_fb9354c0-33cf-45d1-be69-996731c21a30",
+       "quote": "return self.to_host(value)",
+       "from": 209,
+       "to": 235
+      }
+     ],
+     "claims": []
+    },
+    {
+     "areaId": "A_29152c78-17eb-4581-8bc9-0a9443ac8637",
+     "created": {
+      "name": "실행 한도",
+      "parentId": null
+     },
+     "role": "실행 시간이 한도를 넘으면 평가를 멈추게 한다.",
+     "roleAbout": null,
+     "roleReplaces": null,
+     "basis": [
+      {
+       "record": "N_fb9354c0-33cf-45d1-be69-996731c21a30",
+       "quote": "요구: 실행 시간이 한도를 넘으면 평가를 멈춘다.",
+       "from": 237,
+       "to": 264
+      }
+     ],
+     "claims": [
+      {
+       "kind": "reported",
+       "text": "시간 한도 검사를 Machine.run 안에 넣었다고 보고함(메모리 한도는 아직 바꾸지 않음)",
+       "record": "N_fb9354c0-33cf-45d1-be69-996731c21a30",
+       "quote": "작업 보고: 시간 한도 검사를 Machine.run 안에 넣었다고 보고합니다.",
+       "from": 265,
+       "to": 308,
+       "about": null,
+       "replaces": null
+      }
+     ]
+    }
+   ],
+   "relations": [],
+   "candidates": [],
+   "gaps": [],
+   "skipped": [],
+   "requests": [],
+   "matches": [],
+   "material": []
+  }
+ ]
+}

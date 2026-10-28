@@ -5,7 +5,8 @@ import { FILE_LIMIT } from '../shared/types.js';
 import { WorkspaceStore, type EntryRef, storageErrorCode, readViewState, readEntryView, writeViewState, readEntryPositions, writeEntryPositions, importCopy, serializeBackup } from '../shared/storage.js';
 import { parseBackup, cleanPositions } from '../shared/validation.js';
 import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, secretPasted, correctReadingRole } from '../shared/domain.js';
-import { CLAIM_LABEL, stateLabel, revisedRelations, candidateReading, type Applied, type CurrentClaim } from '../shared/map-reading.js';
+import { CLAIM_LABEL, stateLabel, revisedRelations, candidateReading, type Applied, type CurrentClaim, type PartUnderstanding } from '../shared/map-reading.js';
+import { roleEvidence } from './role-evidence.js';
 import type { ClaimKind, ReadingQuote } from '../shared/types.js';
 import { createMapRun, sendLine } from './map-run.js';
 import { requestResults, frozenRequests, displayAbout, captureRequestReading, restoreRequestReading } from './request-results.js';
@@ -1270,6 +1271,7 @@ function renderLens() {
     const u = part.reading;
     put(desc, h('p', { class: 'lens-text' }, u.role), src(u.corrected ? '직접 바로잡은 설명' : `기록에서 읽은 설명${u.roleAbout ? ` · ${displayAbout(u.roleAbout)} 기준` : ''}${u.roleBasisRevised ? REVISED_BASIS : ''}`));
     if (u.roleAbout) desc.lastElementChild?.setAttribute('title', u.roleAbout);
+    const basis = roleBasisBlock(o, part.id, u, 'lens'); if (basis) desc.append(basis);
   } else put(desc, src(part.status === 'plan' ? (records.length ? `설명 없음 · 요청 기록 없음 · ${recs}` : part.reading ? '기록에서 읽은 주장만 있어요' : '아직 설명도 기록도 없어요') : `${STATUS_LABEL[part.status]} · ${recs} · 받은 정리 없음`));
   if (part.changes.length) desc.append(h('ul', { class: 'lens-changes' }, ...part.changes.slice(0, 2).map(c => h('li', {}, c))));
   // Read the current statements together: a later limitation may qualify an earlier description.
@@ -1929,6 +1931,17 @@ function claimList(part: string, claims: CurrentClaim[], max: number): HTMLEleme
 /** What the person unfolded in the lens, per part (memory, this tab): long relation notes.
  * Reading a quote or following a relation and coming back keeps them as they were, like the scroll and the focused citation. */
 const lensOpen = new Set<string>();
+/** Under the description as read: the passages it rests on (its own basis only; none for the person's correction), folded to a
+ * count. Each opens its passage exactly; the way back comes to the same part, the same button and the fold as it was left. */
+function roleBasisBlock(o: Opened, part: string, u: PartUnderstanding, surface: 'lens' | 'sheet'): HTMLElement | null {
+  const ev = roleEvidence(part, u); if (!ev) return null;
+  const key = `${o.key}|${part}|role-basis|${surface}`;
+  const fold = h('details', { class: 'role-basis', open: lensOpen.has(key) }, h('summary', {}, `설명 근거 ${ev.count}`),
+    h('ul', {}, ...ev.items.map(x => h('li', {}, h('button', { type: 'button', class: 'cl-cite', 'data-claim-focus': x.key, title: `원문에서 보기 · “${x.quote.quote}”`,
+      onclick: () => showQuote(x.quote.record, x.quote.quote, x.quote.from) }, x.label)))));
+  fold.addEventListener('toggle', () => { if (fold.open) lensOpen.add(key); else lensOpen.delete(key); });
+  return fold;
+}
 /** Current statements stay in one continuous reading, including qualifications late in the source. The pane scrolls normally;
  * position alone cannot make a statement optional. Evidence history still reads in the sheet. */
 function lensClaims(part: string, claims: CurrentClaim[]): HTMLElement {
@@ -1976,6 +1989,7 @@ function understoodSection(o: Opened, part: PartView): HTMLElement | null {
   } else if (u.role) {
     sec.append(h('p', { class: 'und-role' }, u.role), h('p', { class: 'src', title: u.roleAbout ?? '' }, u.corrected ? `직접 바로잡은 설명 · ${fullTime(u.corrected.at)}` : `기록에서 읽은 설명${u.roleAbout ? ` · ${displayAbout(u.roleAbout)} 기준` : ''}${u.roleBasisRevised ? REVISED_BASIS : ''}`,
       o.kind === 'saved' ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { fixingRole = part.id; renderPanel(false); requestAnimationFrame(() => document.getElementById('fix-role')?.focus()); } }, ' 설명 바로잡기') : null));
+    const basis = roleBasisBlock(o, part.id, u, 'sheet'); if (basis) sec.append(basis);
     // Descriptions read later that did not replace this one (no record said it supersedes it) read apart, with their version.
     for (const x of u.others.slice(0, 2)) sec.append(h('p', { class: 'und-later' }, h('span', { title: x.about ?? '' }, `다른 기록의 설명${x.about ? ` · ${displayAbout(x.about)}` : ''} · 현재 설명을 대체한다는 근거 없음`), x.text));
   }

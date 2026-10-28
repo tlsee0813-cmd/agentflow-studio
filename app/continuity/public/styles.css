@@ -1187,6 +1187,11 @@ button:disabled { opacity: .5; cursor: default; }
 .sec-understood .src { margin: 4px 0 0; font-size: 12px; color: var(--text-3); }
 .sec-understood .und-later { margin: 8px 0 0; padding: 6px 10px; border-radius: 8px; background: var(--surface-2); font-size: 12.5px; color: var(--text-2); }
 .sec-understood .und-later span { display: block; font-size: 11px; color: var(--text-3); }
+/* The description's own evidence: a count, folded; each passage a chip that may wrap (the passage opens whole). */
+.role-basis { margin-top: 4px; font-size: 12px; color: var(--text-3); }
+.role-basis summary { cursor: pointer; width: fit-content; }
+.role-basis ul { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.role-basis .cl-cite { height: auto; min-height: 20px; padding: 2px 6px; text-align: left; white-space: normal; overflow-wrap: anywhere; }
 .und-history { margin-top: 12px; font-size: 12.5px; color: var(--text-2); }
 .und-history summary { cursor: pointer; color: var(--text-3); }
 .und-history ol { margin: 8px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; }

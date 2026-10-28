@@ -2013,6 +2013,72 @@ def continue72_flow(browser, base):
     context.close()
 
 
+def role80_flow(browser, base):
+    """AF80: a description read from records opens the passages it rests on (its own basis): folded to a count under the
+    description, each passage exact, and the way back comes to the same part, the same button, the fold open, the same scroll and
+    camera; one passage reads the same way; the part's claim stays its own; the full reading (sheet) the same. Written fixture
+    (role80-fixture.mjs), no AI call."""
+    built = json.loads(subprocess.run(["node", str(ROOT / "tests/role80-fixture.mjs")], cwd=APP, check=True, capture_output=True, text=True).stdout)
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    errors, calls = [], []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.on("request", lambda r: calls.append(r.url) if r.method == "POST" and "/api/studio/" in r.url else None)
+    page.goto(base + "/")
+    with tempfile.TemporaryDirectory() as tmp:
+        backup = pathlib.Path(tmp) / "role80.json"
+        backup.write_text(json.dumps(built["project"], ensure_ascii=False), encoding="utf-8")
+        page.locator("#import-file").set_input_files(str(backup))
+        page.wait_for_url(re.compile(r"#/p/E_"))
+
+    def roundtrip(surface, index, quote, title):
+        fold = page.locator(f"{surface} .role-basis")
+        cite = fold.locator(".cl-cite").nth(index)
+        cite.scroll_into_view_if_needed()
+        body = page.locator(f"{surface} .lens-body" if surface == "#lens" else f"{surface} .panel-body")
+        url0, camera0, scroll0 = page.url, page.locator("#world").evaluate(CAMERA), body.evaluate("e => e.scrollTop")
+        cite.click()
+        expect(page.locator("#lens .rr-mark")).to_have_text(quote)
+        expect(page.locator("#lens .rr-back")).to_contain_text(title)
+        page.locator("#lens .rr-back").click()
+        expect(page).to_have_url(url0)
+        expect(page.locator(f"{surface} .role-basis")).to_have_attribute("open", "")
+        expect(page.locator(f"{surface} .role-basis .cl-cite").nth(index)).to_be_focused()
+        assert abs(body.evaluate("e => e.scrollTop") - scroll0) <= 1
+        page.wait_for_timeout(250)
+        assert page.locator("#world").evaluate(CAMERA) == camera0
+
+    page.locator(f'#world .node[data-part="{built["eval"]}"]').click()
+    expect(page.locator("#lens-title")).to_have_text("평가 경로")
+    fold = page.locator("#lens .role-basis")
+    expect(fold.locator(":scope > summary")).to_have_text("설명 근거 4")
+    assert fold.evaluate("e => e.open") is False, "folded by default"
+    expect(page.locator("#lens .claims .claim")).to_have_count(0)
+    fold.locator(":scope > summary").click()
+    expect(fold.locator(".cl-cite")).to_have_count(4)
+    # The fourth passage is no claim's quote: it opens exactly, and the way back is to this very button.
+    roundtrip("#lens", 3, "return self.to_host(value)", "평가 경로")
+    roundtrip("#lens", 0, "def evaluate(self, code):\n        tree = Parser(code).parse()", "평가 경로")
+    # One passage reads the same way; the narrower report stays the part's own claim.
+    page.locator(f'#world .node[data-part="{built["limit"]}"]').click()
+    expect(page.locator("#lens-title")).to_have_text("실행 한도")
+    expect(page.locator("#lens .role-basis > summary")).to_have_text("설명 근거 1")
+    expect(page.locator("#lens .claims .claim")).to_have_count(1)
+    expect(page.locator("#lens .claims .cl-kind")).to_have_text("작업 보고")
+    page.locator("#lens .role-basis > summary").click()
+    roundtrip("#lens", 0, "요구: 실행 시간이 한도를 넘으면 평가를 멈춘다.", "실행 한도")
+    # The full reading (sheet): the same evidence under the description there.
+    page.locator(f'#world .node[data-part="{built["eval"]}"]').click()
+    page.locator("#lens .lens-more").click()
+    sheet = page.locator("#panel .sec-understood .role-basis")
+    expect(sheet.locator(":scope > summary")).to_have_text("설명 근거 4")
+    sheet.locator(":scope > summary").click()
+    roundtrip("#panel", 3, "return self.to_host(value)", "평가 경로")
+    assert not calls, calls
+    assert not errors, errors
+    context.close()
+
+
 def history73_flow(browser, base):
     """A withdrawn report's history fold: open it, follow its old quote and come back by the named way. The item, the history
     fold, the quote's focus, the pane scroll and the camera are as they were; the current-quote path still holds. The same from the
@@ -2633,6 +2699,7 @@ def main():
             uncertainty76_flow(browser, base); print("ok  AF76 candidate: open attribution label, the statement's kind and words, its exact passage and the way back to the same button; the part's claims apart; stubbed reply")
             reading72_flow(browser, base); print("ok  saved actual request: second quote/back keeps disclosure, scroll, focus and surface; current contents, exact RQ/revision and other-part isolation")
             continue72_flow(browser, base); print("ok  home continue: scope and selection per workspace entry; imported copies and ambiguous old project memory kept apart")
+            role80_flow(browser, base); print("ok  AF80 description evidence: folded count, exact passages (the fourth no claim's), way back to the same part/button/fold/scroll/camera, one passage, claim apart, sheet; written fixture")
             history73_flow(browser, base); print("ok  withdrawn report history: old quote and way back keep the item, its history fold, quote focus, scroll and camera, from a part and from the map root; current quote path; other part untouched")
             revised73_flow(browser, base); print("ok  corrected-basis relation: selected from either end its line keeps one clear '근거 정정' mark at 1280/1440; ordinary lines never carry it")
             record_fold_flow(browser, base, oss_fixtures()); print("ok  pasted record on Node-RED: a chosen candidate in a folded group opens only its path, holds through a quote, folds back on another choice and on close")
