@@ -2,6 +2,7 @@
  * copy and matches in the Project's single commit. No auto observation is written back into the sidecar. */
 import type { Project, MapReading, ReadingEntry, PastedRecord, Source, Task } from './types.js';
 import { sourceText } from './validation.js';
+import { ANCHOR_QUOTE_MAX } from './evidence-span.js';
 
 export interface EvidenceOrigin { record: string | null; reading: string | null; quote: string | null }
 export interface FrozenItem { id: string; title: string; description: string; partIds: string[]; sources: { id: string; title: string; basis: string; origins: EvidenceOrigin[] }[] }
@@ -96,9 +97,12 @@ const object = (v: unknown, keys: string[]): v is Record<string, unknown> => !!v
 const text = (v: unknown, max: number) => typeof v === 'string' && !!v.trim() && v.length <= max && !/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(v);
 const id = (v: unknown): v is string => typeof v === 'string' && ID.test(v);
 function fail(): never { throw new Error('INVALID_REQUEST_SCOPE'); }
+/** An origin quote is carried as the reading stored it: a map reading's anchored passage may be up to ANCHOR_QUOTE_MAX (the same limit
+ * the reading itself was checked against), so a plan, its sources and a frozen request keep it whole. Longer is refused, never cut.
+ * A copied RequestMatch quote keeps its own 300 (validateRequestMatch / validateStoredMatch, unchanged). */
 export function validateOrigins(v: unknown): asserts v is EvidenceOrigin[] {
   if (!Array.isArray(v) || v.length > 16) fail();
-  for (const x of v) if (!object(x, ['record', 'reading', 'quote']) || (x.record !== null && !id(x.record)) || (x.reading !== null && !id(x.reading)) || (x.quote !== null && (!text(x.quote, 300) || x.record === null))) fail();
+  for (const x of v) if (!object(x, ['record', 'reading', 'quote']) || (x.record !== null && !id(x.record)) || (x.reading !== null && !id(x.reading)) || (x.quote !== null && (!text(x.quote, ANCHOR_QUOTE_MAX) || x.record === null))) fail();
 }
 export function validateFrozenRequest(v: unknown): FrozenRequest {
   if (!object(v, ['version', 'id', 'projectId', 'planId', 'planRevision', 'createdAt', 'basis', 'intent', 'items']) || v.version !== 'request-scope.1' || !id(v.id) || !id(v.projectId) || !id(v.planId) || !Number.isSafeInteger(v.planRevision) || (v.planRevision as number) < 1 || !text(v.basis, 2000) || !text(v.intent, 12000) || typeof v.createdAt !== 'string' || !Number.isFinite(Date.parse(v.createdAt)) || new Date(v.createdAt).toISOString() !== v.createdAt || !Array.isArray(v.items) || !v.items.length || v.items.length > 32) fail();
