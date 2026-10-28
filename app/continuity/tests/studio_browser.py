@@ -1854,6 +1854,28 @@ def reading72_flow(browser, base):
 
     roundtrip("#lens")
     roundtrip("#lens")
+    # A current part's ordinary claim is not inside a request item. Its exact citation regains keyboard focus too, while
+    # the request disclosure and the pane's reading position stay where they were. No implementation-key assertions.
+    def part_roundtrip(pane):
+        cite = page.locator(pane + " .claims .cl-cite").last
+        cite.scroll_into_view_if_needed()
+        cite.focus()
+        body = page.locator(pane + (" .panel-body" if pane == "#panel" else " .lens-body"))
+        scroll, title, url0 = body.evaluate("e => e.scrollTop"), cite.get_attribute("title"), page.url
+        camera0 = page.locator("#world").evaluate(CAMERA)
+        cite.click()
+        expect(page.locator("#lens .rr-mark")).to_have_count(1)
+        expect(page.locator("#lens .rr-back")).to_contain_text("폴더 일괄 처리")
+        page.locator("#lens .rr-back").click()
+        expect(page).to_have_url(url0)
+        expect(cite).to_have_attribute("title", title)
+        expect(cite).to_be_focused()
+        expect(page.locator(pane + " .request-item").first).to_have_attribute("open", "")
+        assert abs(body.evaluate("e => e.scrollTop") - scroll) <= 1
+        page.wait_for_timeout(250)
+        assert page.locator("#world").evaluate(CAMERA) == camera0
+
+    part_roundtrip("#lens")
     # Reusing the same item ids in another part does not unfold them there.
     page.goto(base + f"/#/p/{entry}/{other}")
     expect(page.locator("#lens-title")).to_have_text("터미널 명령 실행")
@@ -1863,6 +1885,7 @@ def reading72_flow(browser, base):
     sheet(page, "폴더 일괄 처리")
     page.locator("#panel .request-item > summary").first.click()
     roundtrip("#panel")
+    part_roundtrip("#panel")
     no_page_scroll(page)
     assert not calls and not errors, (calls, errors)
 

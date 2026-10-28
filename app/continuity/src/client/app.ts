@@ -413,7 +413,9 @@ function herePlace(): Place | null {
   const o = opened; if (!o) return null;
   const surface = selected ? (sheetOpen ? 'sheet' : 'lens') : scopeReading ? 'scope' : 'none';
   const body = surface === 'sheet' ? $('panel').querySelector('.panel-body') : surface === 'none' ? null : $('lens').querySelector('.lens-body');
-  return { key: o.key, scope, selected, camera: { ...camera }, surface, sheetReturn, scroll: body?.scrollTop ?? 0, requests: body ? captureRequestReading(body) : null };
+  const active = body?.contains(document.activeElement) ? document.activeElement as HTMLElement : null;
+  return { key: o.key, scope, selected, camera: { ...camera }, surface, sheetReturn, scroll: body?.scrollTop ?? 0,
+    requests: body ? captureRequestReading(body) : null, claimFocus: active?.dataset.claimFocus ?? null };
 }
 function readingScene(): Scene | null {
   const p = selected ? herePlace() : null;
@@ -449,7 +451,14 @@ function restoreReading(f: Place): boolean {
   else if (f.surface === 'scope' && !selected) { scopeReading = true; renderScopeLens(); }
   sheetReturn = f.surface === 'sheet' ? f.sheetReturn : null;
   const body = f.surface === 'sheet' ? $('panel').querySelector('.panel-body') : f.surface === 'none' ? null : $('lens').querySelector('.lens-body');
-  if (body && (!f.requests || restoreRequestReading(body, f.requests))) body.scrollTop = f.scroll;
+  if (body) {
+    const requests = !f.requests || restoreRequestReading(body, f.requests);
+    // The same still-current claim in fresh data, never another citation with the same words or list position. Request folds
+    // keep their own identities; a changed request does not prevent returning to an unchanged part claim beside it.
+    const claim = f.claimFocus ? [...body.querySelectorAll<HTMLButtonElement>('button[data-claim-focus]')].find(b => b.dataset.claimFocus === f.claimFocus) : null;
+    if (requests || claim) body.scrollTop = f.scroll;
+    claim?.focus({ preventScroll: true });
+  }
   return true;
 }
 function restoreSurface(v: Visit) {
@@ -1263,7 +1272,7 @@ function renderLens() {
     if (u.roleAbout) desc.lastElementChild?.setAttribute('title', u.roleAbout);
   } else put(desc, src(part.status === 'plan' ? (records.length ? `설명 없음 · 요청 기록 없음 · ${recs}` : part.reading ? '기록에서 읽은 주장만 있어요' : '아직 설명도 기록도 없어요') : `${STATUS_LABEL[part.status]} · ${recs} · 받은 정리 없음`));
   if (part.changes.length) desc.append(h('ul', { class: 'lens-changes' }, ...part.changes.slice(0, 2).map(c => h('li', {}, c))));
-  if (part.reading?.claims.length) desc.append(claimList(part.reading.claims, 3));
+  if (part.reading?.claims.length) desc.append(claimList(part.id, part.reading.claims, 3));
   const requested = currentRequestResults(o, part.id); if (requested) desc.append(requested);
   // Lines: real ends, read by what they mean. One group per verb and direction ("이 부분이 필요로 함"), each row the real other
   // end; a line drawn from a folded part summarises its inside, so its row also names the inner end.
@@ -1854,12 +1863,12 @@ const CLAIM_ORDER: ClaimKind[] = ['open', 'differs', 'want', 'reported', 'checke
 /** Said once, where a description or a line rests only on a report a later record took back (it stays; it is not current evidence). */
 const REVISED_BASIS = ' · 근거였던 보고는 이후 정정됨';
 /** Claims of a part as short lines, a report correcting an earlier one first, then most decision-relevant, each with its quote. */
-function claimList(claims: CurrentClaim[], max: number): HTMLElement {
+function claimList(part: string, claims: CurrentClaim[], max: number): HTMLElement {
   const sorted = [...claims].sort((a, b) => Number(!!b.replaces) - Number(!!a.replaces) || CLAIM_ORDER.indexOf(a.kind) - CLAIM_ORDER.indexOf(b.kind)).slice(0, max);
   return h('ul', { class: 'claims' }, ...sorted.map(c => h('li', { class: `claim k-${c.kind}${c.replaces ? ' replaces' : ''}` },
     // The kind column keeps its usual width; that this one corrects an earlier claim reads on its own line above the text.
     h('span', { class: 'cl-kind' }, CLAIM_LABEL[c.kind]), h('span', { class: 'cl-text' }, c.replaces ? h('span', { class: 'cl-revises' }, '앞 주장을 대체한 정정') : null, c.text, c.about ? h('small', { class: 'cl-about', title: c.about }, ` · ${displayAbout(c.about)}`) : null),
-    h('button', { type: 'button', class: 'cl-cite', title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote, c.from) }, '근거'))));
+    h('button', { type: 'button', class: 'cl-cite', 'data-claim-focus': JSON.stringify([part, c.reading, c.index, c.record, c.from ?? null, c.to ?? null]), title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote, c.from) }, '근거'))));
 }
 /** A quote from the selection: the record in the pane, marked where it was read (from, when the reading kept it; else where the
  * words stand); closing the pane comes back to this part. */
@@ -1893,7 +1902,7 @@ function understoodSection(o: Opened, part: PartView): HTMLElement | null {
     // Descriptions read later that did not replace this one (no record said it supersedes it) read apart, with their version.
     for (const x of u.others.slice(0, 2)) sec.append(h('p', { class: 'und-later' }, h('span', { title: x.about ?? '' }, `다른 기록의 설명${x.about ? ` · ${displayAbout(x.about)}` : ''} · 현재 설명을 대체한다는 근거 없음`), x.text));
   }
-  if (u.claims.length) sec.append(claimList(u.claims, 12));
+  if (u.claims.length) sec.append(claimList(part.id, u.claims, 12));
   const requested = currentRequestResults(o, part.id); if (requested) sec.append(requested);
   const hist = h('details', { class: 'und-history' }, h('summary', {}, `근거 이력 · 정리 ${u.history.length}회`),
     h('ol', {}, ...[...u.history].reverse().map(x => h('li', {}, h('span', { class: 'uh-at' }, fullTime(x.at)),

@@ -64,6 +64,8 @@ export interface ReadingContext {
   sheetReturn: { x: number; y: number; k: number } | null;
   scroll: number;
   requests: RequestReading | null;
+  /** The current part's citation control, by its reading/source identity; no old element or claim text is held. */
+  claimFocus: string | null;
 }
 /** Where a quote or paste began: this entry, selection, scope, camera and optional reading position. */
 export interface Scene { key?: string; selected: string | null; scope: string | null; camera: { x: number; y: number; k: number }; reading?: ReadingContext }
