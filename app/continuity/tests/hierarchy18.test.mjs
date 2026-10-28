@@ -63,8 +63,8 @@ test('H18 legacy anchor.1/current root remain readable; adding then removing a p
 });
 test('H18 v6 migration preserves exact legacy stamps, raw return files, ids and positions without ancestor backfill',()=>{
  let {p,b}=tree();p=D.submit(D.editDraft(p,'과거 루트'),undefined,b);const t=p.currentTaskId,Hid='H_migrated';p=D.markHandoff(p,t,D.handoffText(p,t,Hid),'download',p.revision,Hid);
- const old=structuredClone(p);old.schemaVersion='idea015.project.6';delete old.pasted;delete old.space.containment;for(const task of old.tasks)for(const h of task.handoffs)if(h.anchor){h.anchor.version='anchor.1';delete h.anchor.stamp.version;delete h.anchor.stamp.revision;delete h.anchor.stamp.ancestors;}
- const migrated=round(old);assert.equal(migrated.schemaVersion,'idea015.project.8');assert.deepEqual(migrated.space.containment.parents,{});assert.ok(Object.values(migrated.space.containment.revisions).every(v=>v===0));assert.deepEqual(migrated.tasks,old.tasks);assert.deepEqual(migrated.space.layout,old.space.layout);assert.deepEqual(round(migrated),migrated);
+ const old=structuredClone(p);old.schemaVersion='idea015.project.6';delete old.pasted;delete old.readings;delete old.space.containment;for(const task of old.tasks)for(const h of task.handoffs)if(h.anchor){h.anchor.version='anchor.1';delete h.anchor.stamp.version;delete h.anchor.stamp.revision;delete h.anchor.stamp.ancestors;}
+ const migrated=round(old);assert.equal(migrated.schemaVersion,'idea015.project.10');assert.deepEqual(migrated.space.containment.parents,{});assert.ok(Object.values(migrated.space.containment.revisions).every(v=>v===0));assert.deepEqual(migrated.tasks,old.tasks);assert.deepEqual(migrated.space.layout,old.space.layout);assert.deepEqual(round(migrated),migrated);
  const extra=structuredClone(migrated);extra.space.containment.parents.foo='missing';assert.throws(()=>round(extra));const mixed=structuredClone(migrated);mixed.tasks[0].handoffs[0].anchor.version='anchor.2';assert.throws(()=>round(mixed));
 });
 test('H18 recorded synthetic question/report/description signals retain exact area owners; relations never duplicate them',()=>{
@@ -88,7 +88,7 @@ test('H18 fixed actual project.6 state paths migrate without rewriting valid/hel
  const missing={...result};delete missing.understanding;assert.throws(()=>parseResultFile(JSON.stringify(missing)),'return.2 requires the optional block key');assert.equal(parseResultFile(JSON.stringify({...result,understanding:null})).understanding,null);
 });
 test('H18 project.5 export has no invented anchor: late return.2 report/raw kept and only description held',()=>{
- const raw=JSON.parse(readFileSync(new URL('./fixtures/hierarchy18/project6-accepted.json',import.meta.url),'utf8'));raw.schemaVersion='idea015.project.5';delete raw.pasted;delete raw.space.understanding;for(const t of raw.tasks)for(const h of t.handoffs)delete h.anchor;
+ const raw=JSON.parse(readFileSync(new URL('./fixtures/hierarchy18/project6-accepted.json',import.meta.url),'utf8'));raw.schemaVersion='idea015.project.5';delete raw.pasted;delete raw.readings;delete raw.space.understanding;for(const t of raw.tasks)for(const h of t.handoffs)delete h.anchor;
  let p=round(raw);const task=p.tasks.find(t=>t.handoffs.length),h=task.handoffs[0],area=task.areaId;
  const file={schemaVersion:'agentflow.return.2',projectId:p.id,taskId:task.id,returnId:h.returnId,report:'[합성] 옛export에온새보고',evidence:null,understanding:{version:'understanding.1',areaId:area,basedOn:0,summary:'없는 옛기준을 추측하지 않는다',changes:[],proposal:null,origin:'합성 호환 경계'}};
  p=bring(p,file);assert.equal(D.areaDescription(p,area).held[0].entry.held,'no-anchor');assert.equal(p.tasks.at(-1).resultFile.rawText,JSON.stringify(file));assert.deepEqual(round(p),p);

@@ -1,4 +1,4 @@
-import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type PreviousIntent, type CurrentIntent, type Intent, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues, type RelationKind, type Point, type Area, type Background, type ExportRecord, type PlanStamp, type ExportAnchor, type UnderstandingEntry, type UnderstandingInput, type HeldReason, type ResultFile, type PastedRecord, PASTED_TEXT_LIMIT } from './types.js';
+import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type PreviousIntent, type CurrentIntent, type Intent, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues, type RelationKind, type Point, type Area, type Background, type ExportRecord, type PlanStamp, type ExportAnchor, type UnderstandingEntry, type UnderstandingInput, type HeldReason, type ResultFile, type PastedRecord, PASTED_TEXT_LIMIT, READINGS_LIMIT, isMapReading, type ReadingEntry } from './types.js';
 import { ensure, text, validateEnvelope, digest, sha256, parseResultFile, resultSourceText, parseProject, POSITION_LIMIT, SUMMARY_LIMIT } from './validation.js';
 import { planFacts, planFactsText } from './plan-facts.js';
 import { areaPath, childrenOf } from './hierarchy.js';
@@ -12,7 +12,7 @@ const copy = <T>(value: T): T => structuredClone(value);
 const WORK_KEYS = ['understanding','scope','next','checks'] as const;
 const CONDITION_KEYS = ['scope','checks'] as const;
 export function createProject(): Project {
-  return {schemaVersion:SCHEMA,id:uid('P'),revision:1,name:'나의 프로젝트',sources:[],bases:[],tasks:[],currentTaskId:null,draft:'',answerDraft:'',basisDraft:'',basisEdits:{},draftKind:'request',pending:null,notice:null,space:{brief:null,areas:[],relations:[],draftTarget:null,layout:{version:'layout.1',positions:{}},understanding:{},containment:{version:'containment.1',parents:{},revisions:{}}},pasted:[]};
+  return {schemaVersion:SCHEMA,id:uid('P'),revision:1,name:'나의 프로젝트',sources:[],bases:[],tasks:[],currentTaskId:null,draft:'',answerDraft:'',basisDraft:'',basisEdits:{},draftKind:'request',pending:null,notice:null,space:{brief:null,areas:[],relations:[],draftTarget:null,layout:{version:'layout.1',positions:{}},understanding:{},containment:{version:'containment.1',parents:{},revisions:{}}},pasted:[],readings:[]};
 }
 export function taskOf(p: Project, id = p.currentTaskId): Task { const t=p.tasks.find(t=>t.id === id); ensure(t,'TASK_MISSING'); return t; }
 function change(p: Project): Project { return {...copy(p),revision:p.revision+1,notice:null}; }
@@ -574,6 +574,19 @@ export function pasteRecord(p: Project, value: string, context: string|null): {p
   text(value,PASTED_TEXT_LIMIT); ensure(!secretLike(value),'SECRET_LIKE'); ensure(context===null||p.space.areas.some(a=>a.id===context));
   const n=change(p), record:PastedRecord={id:uid('N'),text:value,at:now(),context};
   n.pasted.push(record); return {project:n,record:copy(record),duplicate:false};
+}
+/** project.9: keeps one map reading or correction (map-reading.ts builds and checks a reading before it comes here). */
+export function addReading(p: Project, entry: ReadingEntry): Project {
+  ensure(p.readings.length<READINGS_LIMIT,'READINGS_FULL');ensure(!p.readings.some(r=>r.id===entry.id));
+  const n=change(p);n.readings.push(copy(entry));return n;
+}
+/** The person corrects a part's description as read (not the part's own note, not a received return.2 description). It names
+ * the reading whose description it corrects and holds that description only. */
+export function correctReadingRole(p: Project, areaId: string, value: string): Project {
+  const v=value.trim();text(v,300);ensure(p.space.areas.some(a=>a.id===areaId&&!a.archived),'AREA_MISSING');
+  const from=[...p.readings].reverse().find(r=>isMapReading(r)&&r.parts.some(x=>x.areaId===areaId&&x.role));
+  ensure(p.readings.some(r=>isMapReading(r)&&r.parts.some(x=>x.areaId===areaId)),'NOTHING_TO_CORRECT');
+  return addReading(p,{version:'map-correction.1',id:uid('M'),at:now(),areaId,text:v,corrects:from?.id??null});
 }
 export function restore(p: Project): Project {
   return {...copy(p),pending:null,notice:p.pending ? '중단된 요청의 입력을 복구했습니다. 자동으로 다시 전송하지 않습니다.' : null};

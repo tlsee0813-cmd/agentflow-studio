@@ -12,10 +12,11 @@ const stub = async (url, init) => {
   if (mode === 'fail' && calls === 1) return new Response('{}', { status: 500 });
   const input = JSON.parse(JSON.parse(init.body).messages[1].content.replace(/^[^\n]*\n/, ''));
   if (input.schemaVersion === 'studio.digest.1' || input.schemaVersion === 'studio.digest.2') return digestStub(input);
+  if (input.schemaVersion === 'studio.map.1' || input.schemaVersion === 'studio.map.2') return mapStub(input);
   const refs = input.records.slice(0, 2).map(r => r.ref);
   const content = { headline: `[스텁 응답] ${input.part.name} 정리`, situation: [`스텁: ${input.part.name}의 기록 ${input.records.length}개를 받았습니다.`],
     changes: input.current.changes.slice(0, 2), next: ['스텁: 다음 판단 예시'], answer: input.intent === 'question' ? `스텁 답변: ${input.question}` : null, refs };
-  return new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(content) } }] }), { status: 200 });
+    return new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(content) } }] }), { status: 200 });
 };
 // Return reading: a reply built mechanically from the request, labelled as a stub in every sentence (layout and boundary
 // checks only; never a model's reading). Changes cite the newest outcome sources that name a part; without outcome material
@@ -51,7 +52,25 @@ function recordStub(input) {
       related: part ? [{ partId: part.id, quote: line, why: part.parentId && line.includes(part.name) ? '[스텁] 원문 줄에 이 부분과 부모 이름이 있음' : '[스텁] 파일 이름이 원문에 있음' }] : [] };
   });
 }
-const env = mode === 'nokey' ? {} : { DEEPSEEK_API_KEY: 'stub-key', DEEPSEEK_MODEL: 'stub-model', ...(mode === 'code' ? { STUDIO_ACCESS_CODE: 'smoke-code' } : {}) };
+// Map reading: mechanical and labelled. On an empty map, one part per labelled line of the newest record ('요구:', '작업 보고:',
+// '구상:'), each quoting its own line; on a map, the first part gets one claim quoting the record's first such line. A record
+// with no such line (a greeting) gives no part and one gap. Layout and round trips only, never a model's reading.
+function mapStub(input) {
+  const rec = input.records[0], lines = rec.text.split('\n').map(l => l.trim()).filter(l => /^(요구|작업 보고|구상):/.test(l));
+  const quote = l => l.slice(0, 90).trim(), kind = l => l.startsWith('요구') ? 'want' : l.startsWith('구상') ? 'idea' : 'reported';
+  const claim = l => ({ kind: kind(l), text: `[스텁] ${quote(l).slice(0, 40)}`, record: rec.id, quote: quote(l), about: null, replaces: null });
+  let content;
+  if (!lines.length) content = { summary: '', parts: [], relations: [], candidates: [], gaps: ['[스텁] 프로그램을 말하는 기록을 붙여 주세요.'] };
+  else if (!input.parts.length) content = { summary: '[스텁] 기록의 요구·보고·구상 줄을 부분으로 놓은 자리예요.', relations: [], candidates: [], gaps: [],
+    parts: lines.slice(0, 3).map((l, i) => ({ ref: `new:p${i}`, name: `스텁 부분 ${i + 1}`, parent: null, role: `[스텁] ${i + 1}번째 줄에 근거한 자리`, roleAbout: null, roleReplaces: null, basis: [{ record: rec.id, quote: quote(l) }], claims: [claim(l)] })) };
+  else content = { summary: '[스텁] 새 기록의 첫 줄을 첫 부분에 붙인 자리예요.', relations: [], candidates: [], gaps: [],
+    parts: [{ ref: input.parts[0].id, name: null, parent: null, role: null, roleAbout: null, roleReplaces: null, basis: [], claims: [claim(lines[0])] }] };
+  if (input.schemaVersion === 'studio.map.2') content.matches = [];
+  return new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(content) } }] }), { status: 200 });
+}
+// The browser suite shares this stub process across many flows and can make >10 calls in a minute on a fast CI runner.
+// Only this simulated-provider fixture gets a higher rate; the real server's default remains 10/minute.
+const env = mode === 'nokey' ? {} : { DEEPSEEK_API_KEY: 'stub-key', DEEPSEEK_MODEL: 'stub-model', STUDIO_REQUESTS_PER_MINUTE: '120', ...(mode === 'code' ? { STUDIO_ACCESS_CODE: 'smoke-code' } : {}) };
 const studio = createStudioHandler({ env, fetchImpl: stub });
 const config = readConfig({ AI_MODE: 'mock', PORT: process.env.PORT ?? '0' });
 createContinuityApp({ config, studio }).listen(config.port, '127.0.0.1', function () { console.log(`READY http://127.0.0.1:${this.address().port}`); });

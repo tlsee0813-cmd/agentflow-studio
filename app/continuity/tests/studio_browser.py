@@ -317,6 +317,10 @@ def new_project_flow(browser, base):
     page.locator("#new-name").fill("테스트 프로젝트")
     page.locator("#new-form").get_by_role("button", name="만들기").click()
     expect(page.locator("#crumbs")).to_contain_text("테스트 프로젝트")
+    # EXPERIENCE70: records are the first way in; adding a part by hand is the other, one click away.
+    expect(page.locator("#space-empty")).to_contain_text("기록으로 첫 지도를 만들어요")
+    expect(page.locator("#part-form")).to_be_hidden()
+    page.locator("#space-empty .se-direct").click()
     expect(page.locator("#part-form")).to_contain_text("첫 부분 만들기")
     page.locator("#part-name").fill("로그인")
     page.get_by_role("button", name="만들기").click()
@@ -1374,7 +1378,7 @@ def record_flow(browser, base, backup):
     assert calls == [], "saving never calls"
 
     # Read on request: one call, digest.2, the record whole and unlocated, its context only in the note.
-    page.get_by_role("button", name="기록 읽기").click()
+    page.get_by_role("button", name="붙인 기록 요약").click()
     expect(page.locator("#lens .rr-records")).to_be_visible()
     assert len(calls) == 1
     ask = calls[0]
@@ -1382,7 +1386,8 @@ def record_flow(browser, base, backup):
     record = ask["sources"][0]
     assert record["kind"] == "record" and record["partIds"] == [] and record["text"] == text and "PC 앱 · 보정" in record["note"]
     # The reading: its own heading, the record's first line under it, no 'no result material' line for a read record.
-    expect(page.locator("#lens .rr-sec > h3")).to_have_text(["붙여넣은 기록에서"])
+    expect(page.locator("#lens .rr-records > h3")).to_have_text("붙여넣은 기록에서")
+    expect(page.locator("#lens .rr-map > h3")).to_contain_text("지도 정리")
     expect(page.locator("#lens .rr-rec-src")).to_have_text(first_line)
     expect(page.locator("#lens .rr-none")).to_have_count(0)
     expect(page.locator("#lens .rr-part.cand")).to_have_text(["PC 앱 · 보정", "장치 펌웨어 · 보정"])
@@ -1410,7 +1415,8 @@ def record_flow(browser, base, backup):
     page.locator("#lens .lens-body").evaluate("e => { e.scrollTop = e.scrollHeight; }")
     expect(page.locator("#lens .rr-back")).to_be_in_viewport()
     page.locator("#lens .rr-back").click()
-    expect(page.locator("#lens .rr-sec > h3")).to_have_text(["붙여넣은 기록에서"])
+    expect(page.locator("#lens .rr-records > h3")).to_have_text("붙여넣은 기록에서")
+    expect(page.locator("#lens .rr-map > h3")).to_contain_text("지도 정리")
     # Back from the quote: the chosen candidate, its reason and its mark are still there.
     expect(page.locator("#lens .rr-rec").nth(2).locator(".rr-why")).to_contain_text("장치 펌웨어 · 보정")
     expect(page.locator("#world .read-mark")).to_have_attribute("data-part", "A_r69_devcal")
@@ -1456,7 +1462,7 @@ def record_flow(browser, base, backup):
     expect(page.locator("#lens .rr-part.cand")).to_have_count(2)
     assert len(calls) == 1
 
-    # Backup: the existing format with the record exact; its copy is a new entry that shows none of the original's readings.
+    # Backup retains project-owned map readings and raw records, but never this entry's separate digest cache.
     page.goto(base + "/")
     # The home card counts the pasted record apart from work records; it never reads as having none.
     expect(page.locator("#saved-list .program-meta")).to_contain_text("붙인 기록 1")
@@ -1466,11 +1472,14 @@ def record_flow(browser, base, backup):
     path = download.value.path()
     data = json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
     assert data["id"] == "P_record69_same_name" and [(r["text"], r["context"]) for r in data["pasted"]] == [(text, "A_r69_pccal")]
-    assert not any(k in data for k in ("readings", "digest")), "readings are not part of a backup"
+    assert "digest" not in data, "the separate digest cache is not part of a backup"
+    assert data["readings"] == [], "record_flow only summarised a record; it never read it into the map"
+    assert data["space"] == before["space"] and data["sources"] == before["sources"] and data["tasks"] == before["tasks"]
     page.locator("#import-file").set_input_files(path)
     page.wait_for_url(lambda u: "#/p/E_" in u and entry not in u)
     copy = re.search(r"#/p/(E_[^/]+)", page.url).group(1)
-    assert page.evaluate(ENTRY, copy)["pasted"] == saved["pasted"]
+    copied_project = page.evaluate(ENTRY, copy)
+    assert copied_project["pasted"] == saved["pasted"] and copied_project["readings"] == data["readings"]
     page.locator("#return-entry").click()
     expect(page.locator("#lens .rr-head")).to_be_visible()
     expect(page.locator("#lens .rr-lead")).to_have_text("아직 이 자료를 정리하지 않았어요.")
@@ -1492,6 +1501,8 @@ def record_fold_flow(browser, base, cases):
     page = browser.new_page(viewport={"width": 1280, "height": 720})
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))
+    digest_responses = []
+    page.on("response", lambda r: digest_responses.append(r) if r.url.endswith("/api/studio/digest") else None)
     page.goto(base + "/")
     page.locator("#import-file").set_input_files(str(cases / "oss-node-red.json"))
     page.wait_for_url(re.compile(r"#/p/E_"))
@@ -1505,8 +1516,12 @@ def record_fold_flow(browser, base, cases):
     page.get_by_role("menuitem", name="기록 붙여넣기").click()
     page.locator("#paste-text").fill(text)
     page.get_by_role("button", name="기록 저장").click()
-    page.get_by_role("button", name="기록 읽기").click()
-    expect(page.locator("#lens .rr-records")).to_be_visible()
+    page.get_by_role("button", name="붙인 기록 요약").click()
+    try:
+        expect(page.locator("#lens .rr-records")).to_be_visible()
+    except AssertionError as failure:
+        http = [{"status": r.status, "body": r.text()[:600]} for r in digest_responses]
+        raise AssertionError(f"record_fold summary missing: http={http}, pageerrors={errors}, lens={page.locator('#lens').inner_text()[:1800]!r}") from failure
     # The reading alone unfolds nothing.
     expect(page.locator(mqtt)).to_have_count(0)
     assert page.evaluate(DRAWN) == drawn0
@@ -1543,6 +1558,283 @@ def record_fold_flow(browser, base, cases):
     assert page.evaluate(DRAWN) == drawn0
     assert page.locator("#world").evaluate(CAMERA) == cam0
     assert errors == [], errors
+    page.close()
+
+
+def map70_flow(browser, base):
+    """EXPERIENCE70: a new project's first map from a pasted record (saving sends nothing; reading into the map is the one action
+    that sends), then select -> quote -> back to the part, the person's rename, place and plan draft kept, a later record updating
+    the same part, and the change plan reading the pasted text as kind 'record' and the derived understanding as 'reading'.
+    Stubbed model (labelled '[스텁]'): layout and round trips only, not reading quality."""
+    cli = (ROOT / "tests/fixtures/record70/synthetic-cli.txt").read_text(encoding="utf-8")
+    later = (ROOT / "tests/fixtures/record70/synthetic-cli-later.txt").read_text(encoding="utf-8")
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    errors, sent = [], []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.on("request", lambda r: sent.append(r.url) if r.url.endswith("/api/studio/map") else None)
+    page.goto(base + "/")
+    page.locator("#new-open").click()
+    page.locator("#new-name").fill("지도 프로젝트")
+    page.locator("#new-form").get_by_role("button", name="만들기").click()
+    entry = page.locator("#space-empty")
+    expect(entry).to_contain_text("기록으로 첫 지도를 만들어요")
+    expect(entry).to_contain_text("저장만 해서는 AI에 보내지 않아요")
+    # Paste and save: kept in the project, nothing sent.
+    entry.get_by_role("button", name="기록 붙여넣기").click()
+    page.locator("#paste-text").fill(cli)
+    expect(page.locator("#lens .rr-foot")).to_contain_text("저장해도 AI에 보내지 않아요")
+    page.locator("#lens").get_by_role("button", name="기록 저장").click()
+    expect(page.locator("#lens .rr-map")).to_be_visible()
+    assert sent == [], sent
+    # The one action that sends says what it sends, then the map is there; the pane says what was understood.
+    expect(entry.locator(".fine")).to_contain_text("기록 1개를 AI에 보내요")
+    # One main action while records wait for the map; the separate summary steps back.
+    expect(page.locator("#lens").get_by_role("button", name="붙인 기록 요약")).to_have_class(re.compile("secondary"))
+    entry.get_by_role("button", name="기록으로 지도 정리").click()
+    expect(page.locator("#world .node")).to_have_count(3)
+    assert len(sent) == 1, sent
+    expect(entry).to_be_hidden()
+    # The map is what one reads now: the pane closes, the title line says what was understood, the new parts are marked.
+    expect(page.locator("#lens")).to_be_hidden()
+    expect(page.locator("#world .map-understood")).to_contain_text("[스텁]")
+    expect(page.locator("#world .node.read-mark")).to_have_count(3)
+    page.locator("#world .map-understood").get_by_role("button", name="근거").click()
+    expect(page.locator("#lens .rr-map .rm-summary")).to_contain_text("[스텁]")
+    page.locator("#lens .rr-head .close").click()
+    no_page_scroll(page)
+    # Select -> the description and a claim -> its quote, marked -> back to the same part.
+    page.locator("#world .node", has_text="스텁 부분 1").click()
+    expect(page.locator("#lens-title")).to_have_text("스텁 부분 1")
+    expect(page.locator("#lens .lens-src")).to_contain_text("기록에서 읽은 설명")
+    expect(page.locator("#lens .claims .claim")).to_have_count(1)
+    page.locator("#lens .claims .cl-cite").first.click()
+    expect(page.locator("#lens .rr-mark")).to_contain_text("요구:")
+    # The way back at the top names the part the quote was opened from, and goes back to it.
+    expect(page.locator("#lens .rr-back")).to_have_text(re.compile("스텁 부분 1"))
+    page.locator("#lens .rr-back").click()
+    expect(page.locator("#lens-title")).to_have_text("스텁 부분 1")
+    # The person's own name, place and plan draft.
+    page.locator(".more summary:visible").click()
+    page.get_by_role("menuitem", name="이름·설명 고치기").click()
+    page.locator("#edit-name").fill("변환기")
+    page.locator(".edit-form").get_by_role("button", name="저장").click()
+    expect(page.locator("#world .node", has_text="변환기")).to_have_count(1)
+    page.keyboard.press("Escape")
+    drag(page, page.locator("#world .node", has_text="스텁 부분 2"), 140, 60)
+    placed = page.locator("#world .node", has_text="스텁 부분 2").evaluate("e => e.style.left + ',' + e.style.top")
+    page.locator("#plan-entry").click()
+    # The material the analysis would read is counted before a sentence is written, and follows typing without a re-render.
+    expect(page.locator(".pp-sources-count").first).to_have_text(re.compile(r"읽는 자료 [1-9]\d*개"))
+    page.locator("#plan-intent").click()
+    page.keyboard.type("폴더째 변환하고 싶어")
+    assert page.evaluate("() => document.activeElement === document.getElementById('plan-intent')")
+    page.locator("#plan-entry").click()
+    # A later record: saved, then read into the same map; the renamed part keeps its name and the moved one its place.
+    page.locator("#return-entry").click()
+    page.locator("#lens .rr-paste-open").click()
+    page.locator("#paste-text").fill(later)
+    page.locator("#lens").get_by_role("button", name="기록 저장").click()
+    assert len(sent) == 1, sent
+    page.locator("#lens .rr-map").get_by_role("button", name="기록 읽고 지도 갱신").click()
+    expect(page.locator("#world .map-understood")).to_contain_text("첫 부분")
+    assert len(sent) == 2, sent
+    expect(page.locator("#world .node")).to_have_count(3)
+    expect(page.locator("#world .node", has_text="변환기")).to_have_count(1)
+    assert page.locator("#world .node", has_text="스텁 부분 2").evaluate("e => e.style.left + ',' + e.style.top") == placed
+    page.locator("#world .node", has_text="변환기").click()
+    expect(page.locator("#lens .claims .claim")).to_have_count(2)
+    # The change plan: the draft kept; the pasted text goes as 'record', what was read as 'reading'.
+    page.keyboard.press("Escape")
+    bodies = []
+    def plan(route):
+        bodies.append(json.loads(route.request.post_data))
+        route.fulfill(status=503, content_type="application/json", body=json.dumps({"error": {"code": "AI_UNAVAILABLE"}}))
+    page.route("**/api/studio/plan", plan)
+    page.locator("#plan-entry").click()
+    expect(page.locator("#plan-intent")).to_have_value("폴더째 변환하고 싶어")
+    page.locator("#plan-ask").click()
+    expect(page.locator("#plan-panel .pp-error")).to_be_visible()
+    kinds = {e["kind"] for e in bodies[0]["evidence"]}
+    assert {"record", "reading"} <= kinds and [e["text"] for e in bodies[0]["evidence"] if e["kind"] == "record"] == [later, cli], kinds
+    page.unroute("**/api/studio/plan")
+    # Reload: the map, the reading and the person's edits come back from the saved project.
+    page.reload()
+    expect(page.locator("#world .node")).to_have_count(3)
+    expect(page.locator("#world .map-understood")).to_contain_text("[스텁]")
+    assert not errors, errors
+    context.close()
+
+
+def request71_flow(browser, base):
+    """EXPERIENCE71: first map -> own demand -> frozen request -> plain partial report -> one combined map read ->
+    wanted/reported/unanswered beside the same part -> exact quote and back -> durable exclusion. Written HTTP replies,
+    labelled '[스텁]', test the actual UI and storage path, not AI reading quality. No direct localStorage seeding."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    errors, maps = [], []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.goto(base + "/")
+    page.locator("#new-open").click()
+    page.locator("#new-name").fill("요청과 부분 보고")
+    page.locator("#new-form").get_by_role("button", name="만들기").click()
+    page.wait_for_url(re.compile(r"#/p/E_"))
+    entry_id = re.search(r"#/p/(E_[^/]+)", page.url).group(1)
+    page.locator("#space-empty").get_by_role("button", name="기록 붙여넣기").click()
+    page.locator("#paste-text").fill("작업 보고: 변환 명령으로 단일 문서를 PDF로 내보냅니다.")
+    page.locator("#lens").get_by_role("button", name="기록 저장").click()
+    page.locator("#space-empty").get_by_role("button", name="기록으로 지도 정리").click()
+    expect(page.locator("#world .node")).to_have_count(1)
+    area = page.locator("#world .node").get_attribute("data-part")
+
+    def analysis(route):
+        ask = route.request.post_data_json
+        items = [{"id": f"I{i + 1}", "title": title, "description": description, "partIds": [ask["parts"][0]["id"]], "refs": ["INTENT"], "dependsOn": []}
+                 for i, (title, description) in enumerate([("폴더 입력", "폴더 안 파일을 입력받는다."), ("실패 후 계속", "한 파일이 실패해도 다음 파일은 계속한다."), ("성공 유지·실패 모음", "성공 결과를 유지하고 실패를 모아 본다.")])]
+        route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "reply": {"summary": "[스텁] 폴더 변환의 세 요구", "items": items, "impacts": [], "preserve": ["기존 내용 보존"], "unknowns": []}}))
+    page.route("**/api/studio/plan", analysis)
+    page.route("**/api/studio/scope", lambda route: route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "reply": {"summary": "[스텁] 선택 범위", "prerequisites": [], "unknowns": []}})))
+    page.locator("#plan-entry").click()
+    intent = "폴더 입력, 한 파일 실패 후 계속, 성공 유지와 실패 모음을 원해."
+    page.locator("#plan-intent").fill(intent)
+    page.locator("#plan-ask").click()
+    expect(page.locator(".ps-intent")).to_have_text(intent)
+    page.locator(".ps-more").click()
+    page.locator("#plan-make").click()
+    expect(page.locator("#plan-sheet pre")).to_contain_text("폴더 입력")
+    frozen_before = page.evaluate("() => JSON.parse(localStorage.getItem('agentflow.studio.plans.1'))")
+    project = page.evaluate(ENTRY, entry_id)
+    bundle = frozen_before["projects"][project["id"]]
+    assert len(bundle["snapshots"]) == 1 and len(bundle["snapshots"][0]["scope"]["items"]) == 3
+    rq = bundle["snapshots"][0]["id"]
+    page.keyboard.press("Escape")
+    page.get_by_role("button", name=re.compile(r"^돌아온 기록 · 요청문")).click()
+    page.get_by_role("button", name="보고 원문 붙여넣기").click()
+    expect(page.locator("#obs-item")).to_have_count(0)
+    report = "작업 보고: feature/folder@abc1234에서 폴더 안 파일을 받는 입력을 바꿨습니다. 기존 단일 문서 검사 3개 통과."
+    page.locator("#paste-text").fill(report)
+    page.locator("#lens").get_by_role("button", name="기록 저장").click()
+    assert maps == [], "saving the report does not read or classify it"
+    def returned(route):
+        ask = route.request.post_data_json
+        maps.append(ask)
+        assert ask["schemaVersion"] == "studio.map.2" and ask["requests"][0]["id"] == rq
+        rec = next(r for r in ask["records"] if "feature/folder" in r["text"])
+        match = {"record": rec["id"], "quote": "폴더 안 파일을 받는 입력을 바꿨습니다", "text": "[스텁] 폴더 입력 변경 보고", "kind": "reported", "about": "feature/folder@abc1234", "targets": [{"requestId": rq, "itemId": "I1"}], "why": "[스텁] 입력 요구에 대응하는 구절"}
+        check = {**match, "kind": "checked", "quote": "기존 단일 문서 검사 3개 통과", "text": "[스텁] 단일 문서 검사만 통과했다고 보고함"}
+        route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "reply": {"summary": "[스텁] 폴더 입력만 부분 보고됨", "parts": [], "relations": [], "candidates": [], "gaps": [], "matches": [match, check]}}))
+    page.route("**/api/studio/map", returned)
+    page.locator("#lens .rr-map").get_by_role("button", name="기록 읽고 지도 갱신").click()
+    expect(page.locator("#world .map-understood")).to_contain_text("폴더 입력만 부분 보고됨")
+    expect(page.locator("#world .mu-comparison")).to_contain_text("원한 항목 3개 · 변경 보고 1개 · 변경 근거 아직 없는 항목 2개")
+    assert len(maps) == 1
+    assert page.evaluate("() => JSON.parse(localStorage.getItem('agentflow.studio.plans.1'))") == frozen_before, "return reading never writes the plan sidecar"
+    page.locator(f'#world .node[data-part="{area}"]').click()
+    expect(page.locator("#lens .request-item")).to_have_count(3)
+    expect(page.locator("#lens .request-item > summary").nth(0)).to_contain_text("폴더 입력 변경 보고")
+    expect(page.locator("#lens .request-item > summary").nth(1)).to_contain_text("아직 받은 내용 없음")
+    expect(page.locator("#lens .request-item > summary").nth(2)).to_contain_text("아직 받은 내용 없음")
+    page.locator("#lens .request-item > summary").first.click()
+    expect(page.locator("#lens .request-passage").first).to_contain_text("feature/folder@abc1234")
+    page.wait_for_timeout(300)
+    url0, camera0 = page.url, page.locator("#world").evaluate(CAMERA)
+    page.locator("#lens .request-passage", has_text="폴더 입력 변경 보고").get_by_role("button", name="근거", exact=True).click()
+    expect(page.locator("#lens .rr-mark")).to_have_text("폴더 안 파일을 받는 입력을 바꿨습니다")
+    page.locator("#lens .rr-back").click()
+    expect(page).to_have_url(url0)
+    page.wait_for_timeout(300)
+    assert page.locator("#world").evaluate(CAMERA) == camera0
+    # The correction is optional and local to this correspondence; it never changes the request or the map's role.
+    page.locator("#lens .request-item > summary").first.click()
+    page.locator("#lens .request-fix > summary").first.click()
+    page.locator("#lens .request-fix select").first.select_option("")
+    page.locator("#lens .request-fix").first.get_by_role("button", name="저장").click()
+    expect(page.locator("#lens .request-excluded > summary")).to_contain_text("제외한 대응 1개")
+    saved = page.evaluate(ENTRY, entry_id)
+    assert saved["readings"][-1]["version"] == "request-correction.1" and saved["readings"][-1]["target"] is None
+    assert not saved["tasks"] and not saved["sources"]
+    page.reload()
+    page.locator(f'#world .node[data-part="{area}"]').click()
+    expect(page.locator("#lens .request-excluded > summary")).to_contain_text("제외한 대응 1개")
+    no_page_scroll(page)
+    assert len(maps) == 1 and not errors, errors
+    # A project backup carries the full frozen RQ, the map read and the user's override; digest caches stay separate.
+    page.goto(base + "/")
+    with page.expect_download() as download:
+        page.locator("#saved-list .program-backup").first.click()
+    data = json.loads(pathlib.Path(download.value.path()).read_text(encoding="utf-8"))
+    assert data["readings"] == saved["readings"] and data["space"] == saved["space"] and data["pasted"] == saved["pasted"]
+    assert "digest" not in data
+    assert any(r.get("requests", [{}])[0].get("id") == rq for r in data["readings"] if r.get("requests"))
+    # An explicitly imported old-format request has its original words and direct observation entry, without auto CTA.
+    page.goto(url0)
+    page.locator("#plan-entry").click()
+    legacy = json.loads(json.dumps(bundle))
+    old = legacy["snapshots"][0]
+    old_id = old["id"]
+    old["id"], old["text"] = "RQ_legacy_fixture", "이전 형식 요청 원문: 폴더 입력과 실패 후 계속, 성공 유지."
+    del old["scope"]
+    legacy["labels"][old["id"]] = legacy["labels"].pop(old_id)
+    legacy["origins"][old["id"]] = legacy["origins"].pop(old_id)
+    file = {"format": "agentflow.change-plan-file.1", "project": {"id": project["id"], "name": project["name"]}, "bundle": legacy}
+    page.once("dialog", lambda dialog: dialog.accept())
+    page.locator("#plan-import-file").set_input_files({"name": "legacy-request.json", "mimeType": "application/json", "buffer": json.dumps(file).encode("utf-8")})
+    page.locator(".ps-more").click()
+    page.get_by_role("button", name=re.compile(r"^돌아온 기록 · 요청문")).click()
+    expect(page.locator(".pp-results")).to_contain_text("이전 형식 요청문이라 보고가 자동 대응되지 않아요")
+    expect(page.locator(".pp-results").get_by_role("button", name="보고 원문 붙여넣기")).to_have_count(0)
+    page.locator(".pp-results").get_by_role("button", name="돌아온 기록 직접 붙이기").click()
+    page.locator("#obs-item").select_option("I1")
+    page.locator("#obs-text").fill("[스텁] 이전 요청의 직접 기록")
+    page.locator("#obs-basis").fill("사용자가 직접 대응한 보고")
+    page.locator(".pp-results .pp-add").get_by_role("button", name="붙이기", exact=True).click()
+    kept = page.evaluate("() => JSON.parse(localStorage.getItem('agentflow.studio.plans.1'))")["projects"][project["id"]]
+    assert "scope" not in kept["snapshots"][0] and kept["snapshots"][0]["text"] == old["text"]
+    assert kept["observations"][-1]["text"] == "[스텁] 이전 요청의 직접 기록" and kept["attached"][kept["observations"][-1]["id"]] == old["id"]
+    context.close()
+
+
+def request71_projection_flow(browser, base):
+    """Written, validated fixture in the actual request-results DOM: unrelated excerpts stay folded outside parts, a real
+    older-RQ report precedes a newer unanswered RQ, and the shared original component marks/scrolls its exact interval."""
+    page = browser.new_page(viewport={"width": 1280, "height": 720})
+    page.goto(base + "/")
+    fixture = page.evaluate("""async () => {
+      const D = await import('/shared/domain.js'), C = await import('/shared/change-plan.js'), M = await import('/shared/map-reading.js');
+      const V = await import('/shared/studio.js'), UI = await import('/client/request-results.js');
+      let p = D.addArea(D.createProject(), '입력'), a = p.space.areas[0].id;
+      p = D.addArea(p, '실패 모음'); const b = p.space.areas[1].id;
+      const plan = C.createPlan(p.id, '스텁 기준', '입력과 실패 모음', [{id:'INTENT',kind:'user',title:'요구',text:'입력과 실패 모음',basis:'작성 표본'}], {
+        summary:'스텁',items:[{id:'I1',title:'폴더 입력',description:'폴더 안 파일을 받는다',partIds:[a],refs:['INTENT'],dependsOn:[]},
+          {id:'I2',title:'실패 모음',description:'실패를 모은다',partIds:[b],refs:['INTENT'],dependsOn:[]}],impacts:[],preserve:[],unknowns:[]});
+      const old = C.requestSnapshot(plan), newer = C.requestSnapshot(plan);
+      const report = '배경 설명을 그대로 보관합니다.\\n'.repeat(300) + `요청문 참조: ${old.id}\\n폴더 입력 처리를 바꿨습니다. 단일 문서 검사 보고입니다. README 오타도 고쳤습니다.`;
+      p = D.pasteRecord(p, report, null).project;
+      const inp = M.buildMapAsk(p, V.studioView(p), [old.scope,newer.scope]);
+      const match = (quote,text,targets,kind='reported') => ({record:'N01',quote,text,targets,kind,about:null,why:'스텁 대응'});
+      const reply = M.validateMapReply({summary:'스텁',parts:[],relations:[],candidates:[],gaps:[],matches:[
+        match('폴더 입력 처리를 바꿨습니다','[스텁] 입력 변경 보고',[{requestId:old.id,itemId:'I1'}]),
+        match('단일 문서 검사 보고입니다','[스텁] 단일 문서 검사',[],'checked'),match('README 오타도 고쳤습니다','[스텁] README 수정',[])]}, inp.ask);
+      p = M.applyReading(p,inp,reply,{id:'R_projection',at:new Date().toISOString(),model:'stub',prompt:'m2-000000000000',hash:'9'.repeat(64)}).project;
+      const box = document.createElement('div'); box.id='request-fixture'; box.style.cssText='position:fixed;right:0;top:0;width:420px;height:700px;overflow:auto;background:white;padding:12px;z-index:2000';document.body.append(box);
+      const render = partId => {box.replaceChildren(UI.requestResults(p,[old.scope,newer.scope],{...(partId?{partId}:{}),correct:async()=>null}));};
+      window.renderRequestFixture=render; render(b); return {a,b,old:old.id};
+    }""")
+    expect(page.locator("#request-fixture .request-ambiguous")).to_have_count(0)
+    expect(page.locator("#request-fixture .request-fix")).to_have_count(0)
+    expect(page.locator("#request-fixture .request-unrelated")).to_have_count(0)
+    page.evaluate("a => window.renderRequestFixture(a)", fixture["a"])
+    expect(page.locator("#request-fixture .request-group").first.locator(".request-at")).to_have_attribute("title", re.compile(re.escape(fixture["old"])))
+    expect(page.locator("#request-fixture .request-group").first).to_contain_text("입력 변경 보고")
+    expect(page.locator("#request-fixture .request-group").nth(1)).to_contain_text("아직 받은 내용 없음")
+    page.locator("#request-fixture .request-quote > summary").click()
+    expect(page.locator("#request-fixture .request-quote .rr-mark")).to_have_text("폴더 입력 처리를 바꿨습니다")
+    page.wait_for_timeout(100)
+    assert page.locator("#request-fixture .request-quote pre").evaluate("e => e.scrollTop > 0")
+    page.evaluate("() => window.renderRequestFixture(null)")
+    expect(page.locator("#request-fixture .request-unrelated")).to_have_count(1)
+    expect(page.locator("#request-fixture .request-unrelated")).not_to_have_attribute("open", "")
+    expect(page.locator("#request-fixture .request-unrelated .request-fix")).to_have_count(0)
     page.close()
 
 
@@ -1629,6 +1921,7 @@ def stale_request_flow(browser, base):
     page.locator("#new-open").click()
     page.locator("#new-name").fill("자료 프로젝트")
     page.locator("#new-form").get_by_role("button", name="만들기").click()
+    page.locator("#space-empty .se-direct").click()
     page.locator("#part-name").fill("변환")
     page.get_by_role("button", name="만들기").click()
     page.keyboard.press("Escape")
@@ -1686,6 +1979,7 @@ def stale_request_flow(browser, base):
     page.locator("#new-open").click()
     page.locator("#new-name").fill("느린 화면")
     page.locator("#new-form").get_by_role("button", name="만들기").click()
+    page.locator("#space-empty .se-direct").click()
     page.locator("#part-name").fill("변환")
     page.get_by_role("button", name="만들기").click()
     page.keyboard.press("Escape")
@@ -1815,6 +2109,7 @@ def actual_reply_flow(browser, base):
     page.locator("#new-open").click()
     page.locator("#new-name").fill("검토 프로젝트")
     page.locator("#new-form").get_by_role("button", name="만들기").click()
+    page.locator("#space-empty .se-direct").click()
     page.locator("#part-name").fill("변환")
     page.get_by_role("button", name="만들기").click()
     page.keyboard.press("Escape")
@@ -1990,6 +2285,9 @@ def main():
             relation_visit_flow(browser, base, oss_fixtures()); print("ok  relation visit: named way back to its part, selection, camera, sheet and scroll; browser Back the same; no stale way back")
             return_flow(browser, base, oss_fixtures()); print("ok  return reading: no call on open, one per material, exact quote and back, draft never overwritten, Node-RED plan without result")
             record_flow(browser, base, record_fixtures()); print("ok  pasted record: draft kept, exact text, structure untouched, read on request, same-named candidates apart, quote and back, scene restored, repeat/key refused, backup copy without readings")
+            map70_flow(browser, base); print("ok  first map from a pasted record (save sends nothing), quote and back, rename/place/draft kept, later record on the same part, plan reads record and reading")
+            request71_flow(browser, base); print("ok  own map -> frozen three-item request -> plain partial report -> one combined read -> unanswered items, feature scope, exact quote/back, durable exclusion; stubbed replies")
+            request71_projection_flow(browser, base); print("ok  request projection: unrelated excerpts do not spread into parts; older report precedes newer unanswered RQ; exact quoted interval marked/scrolled; written fixture")
             record_fold_flow(browser, base, oss_fixtures()); print("ok  pasted record on Node-RED: a chosen candidate in a folded group opens only its path, holds through a quote, folds back on another choice and on close")
             stale_request_flow(browser, base); print("ok  request only from the analysis of what is written now: typed, forced, A-B-A, cancelled and outdated replies, material")
             actual_reply_flow(browser, base); print("ok  wide comparison of an actual reply without presentation; scope reviews outliving a material change; four changes")

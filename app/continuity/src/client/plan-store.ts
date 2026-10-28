@@ -6,7 +6,7 @@ import { parsePersistedPlan, compareResults, type ChangePlan, type Evidence, typ
 
 export const PLANS_KEY = 'agentflow.studio.plans.1';
 export const UNREADABLE_KEY = 'agentflow.studio.plans.1.unreadable';
-const FILE_FORMAT = 'agentflow.change-plan-file.1';
+const FILE_FORMAT = 'agentflow.change-plan-file.2';
 
 export type Analyzed = { kind: 'example' } | { kind: 'ai'; model: string; at: string; records: { total: number; sent: number } };
 export interface PlanBundle {
@@ -57,7 +57,7 @@ export function parseBundle(v: unknown, projectId: string): PlanBundle {
   }
   if (!Array.isArray(v.snapshots) || v.snapshots.length > 60) fail();
   const snapshots = v.snapshots as RequestSnapshot[];
-  for (const s of snapshots) { try { compareResults(s, []); } catch { fail(); } }
+  for (const s of snapshots) { try { compareResults(s, []); if (s.scope && s.scope.projectId !== projectId) fail(); } catch { fail(); } }
   if (new Set(snapshots.map(s => s.id)).size !== snapshots.length) fail();
   if (!isObj(v.labels)) fail();
   for (const [sid, m] of Object.entries(v.labels)) { if (!snapshots.some(s => s.id === sid) || !isObj(m) || !Object.values(m).every(t => typeof t === 'string' && t.length <= 200)) fail(); }
@@ -70,16 +70,17 @@ export function parseBundle(v: unknown, projectId: string): PlanBundle {
   return structuredClone({ draft: v.draft, extra: v.extra as Evidence[], plan, by, snapshots, labels: v.labels as PlanBundle['labels'], origins: v.origins as PlanBundle['origins'], observations, attached });
 }
 
-type Envelope = { version: 'studio.plans.1'; projects: Record<string, unknown> };
+type Envelope = { version: 'studio.plans.2'; projects: Record<string, unknown> };
 type Read = { ok: true; env: Envelope; raw: string | null } | { ok: false; raw: string };
 function readEnvelope(kv: StorageLike): Read {
   let raw: string | null;
   try { raw = kv.getItem(PLANS_KEY); } catch { return { ok: false, raw: '' }; }
-  if (raw === null) return { ok: true, env: { version: 'studio.plans.1', projects: {} }, raw };
+  if (raw === null) return { ok: true, env: { version: 'studio.plans.2', projects: {} }, raw };
   try {
     const v = JSON.parse(raw);
-    if (!isObj(v) || v.version !== 'studio.plans.1' || !isObj(v.projects)) return { ok: false, raw };
-    return { ok: true, env: v as Envelope, raw };
+    if (!isObj(v) || !['studio.plans.1', 'studio.plans.2'].includes(v.version as string) || !isObj(v.projects)) return { ok: false, raw };
+    // v1 snapshots keep their original text and have no structured scope. Never backfill from today's plan.
+    return { ok: true, env: { version: 'studio.plans.2', projects: v.projects }, raw };
   } catch { return { ok: false, raw }; }
 }
 
@@ -113,7 +114,7 @@ export function setAside(kv: StorageLike, projectId: string): string | null {
     try { const v = JSON.parse(kv.getItem(UNREADABLE_KEY) ?? '[]'); if (Array.isArray(v)) kept = v; } catch { return '읽지 못한 변경안을 따로 보관할 자리가 망가져 있어 아무것도 지우지 않았어요.'; }
     writeChecked(kv, UNREADABLE_KEY, JSON.stringify([...kept, { at: new Date().toISOString(), projectId: r.ok ? projectId : null, raw }].slice(-20)));
     if (r.ok) { delete r.env.projects[projectId]; writeChecked(kv, PLANS_KEY, JSON.stringify(r.env)); }
-    else writeChecked(kv, PLANS_KEY, JSON.stringify({ version: 'studio.plans.1', projects: {} }));
+    else writeChecked(kv, PLANS_KEY, JSON.stringify({ version: 'studio.plans.2', projects: {} }));
     return null;
   } catch { return '읽지 못한 변경안을 따로 보관하지 못해 아무것도 지우지 않았어요.'; }
 }
@@ -126,7 +127,7 @@ export function planFile(bundle: PlanBundle, project: { id: string; name: string
 export function readPlanFile(text: string, projectId: string): PlanBundle | string {
   let v: unknown;
   try { v = JSON.parse(text); } catch { return '변경안 파일이 아니거나 읽을 수 없어요. 아무것도 바꾸지 않았어요.'; }
-  if (!isObj(v) || v.format !== FILE_FORMAT || !isObj(v.project)) return '변경안 파일이 아니에요. 프로젝트 백업 파일은 홈의 ‘백업 파일 가져오기’를 쓰세요.';
+  if (!isObj(v) || ![FILE_FORMAT, 'agentflow.change-plan-file.1'].includes(v.format as string) || !isObj(v.project)) return '변경안 파일이 아니에요. 프로젝트 백업 파일은 홈의 ‘백업 파일 가져오기’를 쓰세요.';
   if (v.project.id !== projectId) return `다른 프로젝트(‘${String(v.project.name ?? '').slice(0, 60)}’)의 변경안이에요. 가져오지 않았어요.`;
   try { return parseBundle(v.bundle, projectId); } catch { return '변경안 파일의 내용이 맞지 않아 가져오지 않았어요. 지금 변경안은 그대로예요.'; }
 }

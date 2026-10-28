@@ -52,9 +52,9 @@ test('C039 v1/v2 migration preserves exact original bytes and null IDs; backup f
   const {p}=fixture();
   for(const [old,key] of [[v1(p),LEGACY_BACKUP_KEY],[v2(p),V2_BACKUP_KEY]]) {
     const raw=JSON.stringify(old,null,2),m=memory();m.setItem(STORAGE_KEY,raw);const store=new ProjectStore(m),loaded=store.load();
-    assert.equal(loaded.schemaVersion,'idea015.project.8');assert.equal(m.getItem(key),raw);assert.deepEqual(loaded.sources,p.sources);assert.deepEqual(loaded.bases.map(b=>b.history),p.bases.map(b=>b.history));
+    assert.equal(loaded.schemaVersion,'idea015.project.10');assert.equal(m.getItem(key),raw);assert.deepEqual(loaded.sources,p.sources);assert.deepEqual(loaded.bases.map(b=>b.history),p.bases.map(b=>b.history));
     assert.ok(loaded.tasks.every(t=>t.resultFile===null&&t.handoffs.every(h=>h.returnId===null)));
-    store.save(D.editDraft(loaded,'계속'));assert.equal(m.getItem(key),raw);assert.equal(JSON.parse(m.getItem(STORAGE_KEY)).schemaVersion,'idea015.project.8');
+    store.save(D.editDraft(loaded,'계속'));assert.equal(m.getItem(key),raw);assert.equal(JSON.parse(m.getItem(STORAGE_KEY)).schemaVersion,'idea015.project.10');
     const fail=memory();fail.setItem(STORAGE_KEY,raw);const adapter={getItem:fail.getItem,setItem(k,v){if(k===key)throw new Error('backup denied');fail.setItem(k,v);}},blocked=new ProjectStore(adapter);
     const kept=blocked.load();assert.throws(()=>blocked.save(kept),/LEGACY_UNPRESERVED/);assert.throws(()=>blocked.replace(kept),/LEGACY_UNPRESERVED/);assert.equal(fail.getItem(STORAGE_KEY),raw);
     const fresh=memory(),replacement=new ProjectStore(fresh);replacement.load();replacement.replace(parseProject(raw));assert.equal(fresh.getItem(key),null);

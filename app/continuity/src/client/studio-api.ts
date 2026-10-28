@@ -1,9 +1,12 @@
 import type { StudioAsk, StudioReply } from '../shared/studio.js';
 import { validateDigestReply, type DigestAsk, type DigestReply } from '../shared/digest-api.js';
+import { validateMapReply, type MapAsk, type MapReply } from '../shared/map-reading.js';
 import { RUNTIME } from './runtime.js';
 
 /** digest: the model and prompt id a return reading would be made with (null when the server does not say). */
-export interface AiStatus { ai: 'deepseek' | 'off' | 'none'; model: string | null; access: 'open' | 'code'; digest?: { model: string; prompt: string; record: string | null } | null }
+export interface AiStatus { ai: 'deepseek' | 'off' | 'none'; model: string | null; access: 'open' | 'code'; digest?: { model: string; prompt: string; record: string | null } | null;
+  /** The model and prompt id a map reading would be made with (null when the server does not offer it). */
+  map?: { model: string; prompt: string } | null }
 export class AskError extends Error { constructor(readonly code: string) { super(code); } }
 
 // same-origin: an owner-private host's own cookies go with same-origin calls; a cross-origin API still gets none.
@@ -18,7 +21,8 @@ export async function aiStatus(): Promise<AiStatus> {
     if (!res.ok || !['deepseek', 'off'].includes(v?.ai)) return { ai: 'none', model: null, access: 'open' };
     const d = v.digest, digest = d && typeof d.model === 'string' && typeof d.prompt === 'string' && /^[\w.-]{1,80}$/.test(d.model) && /^d1-[0-9a-f]{12}$/.test(d.prompt)
       ? { model: d.model, prompt: d.prompt, record: typeof d.record === 'string' && /^d2-[0-9a-f]{12}$/.test(d.record) ? d.record : null } : null;
-    return { ai: v.ai, model: typeof v.model === 'string' ? v.model : null, access: v.access === 'code' ? 'code' : 'open', digest };
+    const m = v.map, map = m && typeof m.model === 'string' && /^[\w.-]{1,80}$/.test(m.model) && typeof m.prompt === 'string' && /^m[12]-[0-9a-f]{12}$/.test(m.prompt) ? { model: m.model, prompt: m.prompt } : null;
+    return { ai: v.ai, model: typeof v.model === 'string' ? v.model : null, access: v.access === 'code' ? 'code' : 'open', digest, map };
   } catch { return { ai: 'none', model: null, access: 'open' }; }
 }
 
@@ -49,6 +53,21 @@ export async function askDigest(ask: DigestAsk, signal: AbortSignal, accessCode:
   if (!res.ok) throw new AskError(typeof data?.error?.code === 'string' ? data.error.code : 'REQUEST_FAILED');
   if (typeof data?.model !== 'string') throw new AskError('INVALID_RESPONSE');
   try { return { model: data.model, reply: validateDigestReply(data.reply, ask) }; } catch { throw new AskError('INVALID_RESPONSE'); }
+}
+
+/** A map reading. The reply is checked again here against the request that was sent. */
+export async function askMap(ask: MapAsk, signal: AbortSignal, accessCode: string): Promise<{ model: string; reply: MapReply }> {
+  if (RUNTIME.apiBase === null) throw new AskError('NO_SERVER');
+  const headers: Record<string, string> = { 'Content-Type': 'application/json', 'X-AgentFlow-Request': '1' };
+  if (accessCode) headers['X-Studio-Access'] = accessCode;
+  let res: Response;
+  try { res = await fetch(url('/api/studio/map'), { method: 'POST', headers, body: JSON.stringify(ask), signal, credentials: 'same-origin' }); }
+  catch { throw new AskError(signal.aborted ? 'CANCELLED' : 'NETWORK'); }
+  let data: { error?: { code?: unknown }; model?: unknown; reply?: unknown } | null = null;
+  try { data = await res.json(); } catch { /* handled below */ }
+  if (!res.ok) throw new AskError(typeof data?.error?.code === 'string' ? data.error.code : 'REQUEST_FAILED');
+  if (typeof data?.model !== 'string') throw new AskError('INVALID_RESPONSE');
+  try { return { model: data.model, reply: validateMapReply(data.reply, ask) }; } catch { throw new AskError('INVALID_RESPONSE'); }
 }
 
 export const ERROR_TEXT: Record<string, string> = {

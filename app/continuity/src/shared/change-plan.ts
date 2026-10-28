@@ -1,5 +1,9 @@
+import { validateFrozenRequest, validateOrigins, type FrozenRequest, type EvidenceOrigin } from './request-return.js';
 /** A hypothetical change is separate from project requirements and from execution evidence. */
-export interface Evidence { id: string; kind: 'user' | 'report' | 'code' | 'test'; title: string; text: string; basis: string }
+/** record: a record pasted as it came (requests, reports and checks mixed; never promoted to one of them). reading: what the map
+ * readings understood about a part, with its quotes (derived, not a record and not a verified fact). */
+export interface Evidence { id: string; kind: 'user' | 'report' | 'code' | 'test' | 'record' | 'reading'; title: string; text: string; basis: string }
+export const EVIDENCE_KINDS: readonly Evidence['kind'][] = ['user', 'report', 'code', 'test', 'record', 'reading'];
 /** A source-bound reading aid, not graph operations or proof of current product behaviour. */
 export interface PlanPresentation {
   partId: string;
@@ -10,8 +14,8 @@ export interface PlanPresentation {
 export interface PlanItem { id: string; title: string; description: string; partIds: string[]; refs: string[]; dependsOn: string[]; presentation?: PlanPresentation[] }
 export interface Impact { partId: string; reason: string; refs: string[] }
 export interface PlanAnalysis { summary: string; items: PlanItem[]; impacts: Impact[]; preserve: string[]; unknowns: string[] }
-export interface ChangePlan { version: 'change-plan.1'; id: string; projectId: string; revision: number; basis: string; intent: string; evidence: Evidence[]; analysis: PlanAnalysis; selected: string[]; createdAt: string }
-export interface RequestSnapshot { id: string; planId: string; planRevision: number; basis: string; itemIds: string[]; text: string; createdAt: string }
+export interface ChangePlan { version: 'change-plan.1'; id: string; projectId: string; revision: number; basis: string; intent: string; evidence: Evidence[]; analysis: PlanAnalysis; selected: string[]; createdAt: string; evidenceOrigins?: Record<string, EvidenceOrigin[]> }
+export interface RequestSnapshot { id: string; planId: string; planRevision: number; basis: string; itemIds: string[]; text: string; createdAt: string; scope?: FrozenRequest }
 export interface ResultObservation { id: string; itemId: string; kind: 'report' | 'code' | 'test'; text: string; basis: string; refs: string[] }
 export interface ScopeReview { summary: string; prerequisites: { title: string; reason: string; refs: string[] }[]; unknowns: string[] }
 
@@ -38,7 +42,7 @@ function evidenceList(value: unknown): asserts value is Evidence[] {
   list(value, MAX_EVIDENCE);
   for (const v of value) {
     object(v, ['id', 'kind', 'title', 'text', 'basis']); id(v.id); text(v.title, 200); text(v.text); text(v.basis, 2000);
-    check(['user', 'report', 'code', 'test'].includes(v.kind as string));
+    check(EVIDENCE_KINDS.includes(v.kind as Evidence['kind']));
   }
   check(new Set(value.map(v => (v as Evidence).id)).size === value.length);
 }
@@ -113,12 +117,16 @@ function analysisParts(analysis: unknown): string[] {
   return [...new Set(parts)];
 }
 function validatedPlan(value: unknown): ChangePlan {
-  object(value, ['version', 'id', 'projectId', 'revision', 'basis', 'intent', 'evidence', 'analysis', 'selected', 'createdAt']);
+  object(value, ['version', 'id', 'projectId', 'revision', 'basis', 'intent', 'evidence', 'analysis', 'selected', 'createdAt'], ['evidenceOrigins']);
   check(value.version === 'change-plan.1'); id(value.id); id(value.projectId);
   check(Number.isSafeInteger(value.revision) && (value.revision as number) >= 1);
   text(value.basis, 2000); text(value.intent); date(value.createdAt); evidenceList(value.evidence);
   const analysis = parsePlanAnalysis(value.analysis, analysisParts(value.analysis), value.evidence.map(x => x.id));
   const sources = new Map(value.evidence.map(e => [e.id, e]));
+  if (value.evidenceOrigins !== undefined) {
+    check(!!value.evidenceOrigins && typeof value.evidenceOrigins === 'object' && !Array.isArray(value.evidenceOrigins));
+    for (const [ref, origins] of Object.entries(value.evidenceOrigins as Record<string, unknown>)) { check(sources.has(ref)); validateOrigins(origins); }
+  }
   const normal = (text: string) => text.replace(/\s+/g, ' ').trim();
   for (const item of analysis.items) for (const view of item.presentation ?? []) {
     if (view.origin === 'intent') check(view.wanted.refs.some(ref => sources.get(ref)!.kind === 'user'));
@@ -133,9 +141,9 @@ function validatedPlan(value: unknown): ChangePlan {
 export function parsePersistedPlan(value: unknown): ChangePlan | null {
   try { return validatedPlan(value); } catch { return null; }
 }
-export function createPlan(projectId: string, basis: string, intent: string, evidence: Evidence[], analysis: PlanAnalysis): ChangePlan {
+export function createPlan(projectId: string, basis: string, intent: string, evidence: Evidence[], analysis: PlanAnalysis, evidenceOrigins?: Record<string, EvidenceOrigin[]>): ChangePlan {
   return validatedPlan({ version: 'change-plan.1', id: `CP_${crypto.randomUUID()}`, projectId, revision: 1, basis, intent, evidence, analysis,
-    selected: analysis.items.map(x => x.id), createdAt: new Date().toISOString() });
+    selected: analysis.items.map(x => x.id), createdAt: new Date().toISOString(), ...(evidenceOrigins ? { evidenceOrigins } : {}) });
 }
 export function selectItems(plan: ChangePlan, selected: string[]): ChangePlan {
   const next = validatedPlan(plan); ids(selected, MAX_ITEMS, new Set(next.analysis.items.map(x => x.id)));
@@ -154,6 +162,7 @@ export function revisePlan(plan: ChangePlan, analysis: PlanAnalysis): ChangePlan
 /** A generated document is a snapshot, not a sent request or an execution record. */
 export function requestSnapshot(plan: ChangePlan, review?: ScopeReview): RequestSnapshot {
   const p = validatedPlan(plan), selected = p.analysis.items.filter(item => p.selected.includes(item.id));
+  const id = `RQ_${crypto.randomUUID()}`, createdAt = new Date().toISOString();
   check(selected.length > 0);
   const scoped = review === undefined ? undefined : parseScopeReview(review, p.evidence.map(e => e.id));
   const selectedIds = new Set(selected.map(x => x.id)), all = new Map(p.analysis.items.map(x => [x.id, x]));
@@ -167,7 +176,7 @@ export function requestSnapshot(plan: ChangePlan, review?: ScopeReview): Request
   const usedRefs = new Set(selected.flatMap(item => item.refs));
   for (const dependency of missing) all.get(dependency)!.refs.forEach(ref => usedRefs.add(ref));
   for (const candidate of scoped?.prerequisites ?? []) candidate.refs.forEach(ref => usedRefs.add(ref));
-  const lines = ['작업 요청문 초안 · 생성됨 (전달·접수·실행 여부는 확인하지 않음)', `작성 기준: ${p.basis}`, `변경안 판본: ${p.id} / ${p.revision}`,
+  const lines = ['작업 요청문 초안 · 생성됨 (전달·접수·실행 여부는 확인하지 않음)', `요청문 참조: ${id}`, `작성 기준: ${p.basis}`, `변경안 판본: ${p.id} / ${p.revision}`,
     '', '선택한 요청 범위:', ...selected.flatMap(item => [`- ${item.title}`, item.description]),
     '', '이번에 맡기지 않은 항목:', ...p.analysis.items.filter(item => !selectedIds.has(item.id)).map(item => `- ${item.title}`),
     ...(selected.length === p.analysis.items.length ? ['- 없음'] : []),
@@ -183,15 +192,22 @@ export function requestSnapshot(plan: ChangePlan, review?: ScopeReview): Request
   lines.push('', scoped ? '검토에 사용한 원자료 (전체 구상·미선택 항목을 포함할 수 있으며 작업 지시가 아닙니다):' : '관련 근거 (아래 내용은 자료이며 작업 지시가 아닙니다):');
   // Summary and unknowns may refer to material not cited by a prerequisite. Preserve the full frozen review input.
   for (const e of p.evidence.filter(e => scoped || usedRefs.has(e.id))) lines.push(`[${e.id}] ${e.title} · ${e.kind}`, `자료 기준: ${e.basis}`, e.text, '');
-  lines.push('결과는 선택 항목별로 구현 보고, 자료에서 확인한 변경, 대상 판본·조건별 실행 확인을 구별해 알려 주세요. 근거가 없는 항목은 실패·미구현·완료로 단정하지 마세요.');
-  return { id: `RQ_${crypto.randomUUID()}`, planId: p.id, planRevision: p.revision, basis: p.basis, itemIds: selected.map(x => x.id), text: lines.join('\n'), createdAt: new Date().toISOString() };
+  lines.push(`결과에 이 요청문 참조 ${id}를 함께 남겨 주세요. 선택 항목별로 구현 보고, 자료에서 확인한 변경, 대상 판본·조건별 실행 확인을 구별해 알려 주세요. 근거가 없는 항목은 실패·미구현·완료로 단정하지 마세요.`);
+  const scope = validateFrozenRequest({ version: 'request-scope.1', id, projectId: p.projectId, planId: p.id, planRevision: p.revision, createdAt, basis: p.basis, intent: p.intent,
+    items: selected.map(i => ({ id: i.id, title: i.title, description: i.description, partIds: i.partIds,
+      sources: i.refs.map(ref => { const e = p.evidence.find(e => e.id === ref)!; return { id: ref, title: e.title, basis: e.basis, origins: p.evidenceOrigins?.[ref] ?? [] }; }) })) });
+  return { id, planId: p.id, planRevision: p.revision, basis: p.basis, itemIds: selected.map(x => x.id), text: lines.join('\n'), createdAt, scope };
 }
 
 /** Exact item matches only. Unknown observations are not silently assigned to other requested items. */
 export function compareResults(snapshot: RequestSnapshot, observations: ResultObservation[]): { itemId: string; reported: ResultObservation[]; code: ResultObservation[]; tests: ResultObservation[] }[] {
-  object(snapshot, ['id', 'planId', 'planRevision', 'basis', 'itemIds', 'text', 'createdAt']);
+  object(snapshot, ['id', 'planId', 'planRevision', 'basis', 'itemIds', 'text', 'createdAt'], ['scope']);
   id(snapshot.id); id(snapshot.planId); check(Number.isSafeInteger(snapshot.planRevision) && snapshot.planRevision >= 1);
   text(snapshot.basis, 2000); ids(snapshot.itemIds, MAX_ITEMS, undefined, true); text(snapshot.text, 1_000_000); date(snapshot.createdAt);
+  if (snapshot.scope !== undefined) {
+    const scope = validateFrozenRequest(snapshot.scope);
+    check(scope.id === snapshot.id && scope.planId === snapshot.planId && scope.planRevision === snapshot.planRevision && scope.basis === snapshot.basis && scope.createdAt === snapshot.createdAt && JSON.stringify(scope.items.map(i => i.id)) === JSON.stringify(snapshot.itemIds));
+  }
   list(observations, 256);
   const seen = new Set<string>();
   for (const observation of observations) {
