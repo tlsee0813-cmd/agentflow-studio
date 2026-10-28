@@ -2723,6 +2723,27 @@ def authoring84_flow(browser, base):
     assert kept["version"] == "studio.plans.3" and "legacy" not in kept, kept.get("legacy")
     assert kept["projects"][project["id"]]["authoring"]["draft"]["context"]["how"] == "explicit"
     assert kept["projects"][project["id"]]["draft"] == draft
+    # Closing and reopening the plan in this tab puts the caret back where it was left in this draft (the same text), also after
+    # moving on the map while it was closed; a backward selection keeps its direction.
+    area.click()
+    page.keyboard.press("Control+Home")
+    for _ in range(5): page.keyboard.press("ArrowRight")
+    before = area.evaluate(caret)
+    assert before[:2] == [5, 5], before
+    page.get_by_role("button", name="변경 구상 닫고 현재 지도로").click()
+    expect(page.locator("#plan-panel")).to_be_hidden()
+    page.locator("#plan-entry").click()
+    expect(area).to_have_value(draft)
+    assert area.evaluate(caret) == before, area.evaluate(caret)
+    assert page.evaluate("() => document.activeElement.id") == "plan-intent"
+    area.evaluate("a => a.setSelectionRange(12, 40, 'backward')")
+    page.locator("#plan-entry").click()  # closed by its toggle
+    page.locator("#world .node").first.click()
+    page.keyboard.press("Escape")
+    page.locator("#plan-entry").click()
+    expect(area).to_have_value(draft)
+    assert area.evaluate(caret) == [12, 40, "backward", 90], area.evaluate(caret)
+    expect(line).to_contain_text("작성 맥락")
     context.close()
 
 
@@ -2756,7 +2777,7 @@ def main():
             stale_request_flow(browser, base); print("ok  request only from the analysis of what is written now: typed, forced, A-B-A, cancelled and outdated replies, material")
             actual_reply_flow(browser, base); print("ok  wide comparison of an actual reply without presentation; scope reviews outliving a material change; four changes")
             stale_work_flow(browser, base); print("ok  writing in the wide comparison: map ways off at once (forced click a no-op, caret kept), honest way out, draft on reopen")
-            authoring84_flow(browser, base); print("ok  AF84 older micro draft at 1280/DPR1.25: set and remove the authoring context keep caret, direction and draft; focus on a live control; boundary line")
+            authoring84_flow(browser, base); print("ok  AF84 older micro draft at 1280/DPR1.25: set and remove the authoring context keep caret, direction and draft; focus on a live control; boundary line; caret back after close/reopen")
             proc, base = start("code"); procs.append(proc); code_flow(browser, base); print("ok  access code kept from an input event")
             proc, base = start("fail"); procs.append(proc); failure_flow(browser, base); print("ok  provider failure -> short error -> retry")
             proc, base = start("fail"); procs.append(proc); return_failure_flow(browser, base); print("ok  return reading failure -> short error and the material -> asking again")

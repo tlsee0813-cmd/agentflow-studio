@@ -90,6 +90,9 @@ const MEMORY = new Map<string, PlanBundle>();
  * says so (write it as the draft when there is none, else add it at the end); dismissing or closing leaves the draft as is. */
 const PROPOSALS = new Map<string, { text: string; sources: Evidence[] }>();
 const memoryKey = (o: PlanOpened, c: Condition) => (o.key === CONVERTER_KEY ? `${o.key}#${c}` : o.project.id);
+/** Where the caret was left in each draft when the plan closed (this tab only, per draft as MEMORY keys it). It comes back on
+ * reopening only to the same text: a draft replaced since (imported, accepted, another example material) starts as usual. */
+const CARETS = new Map<string, { text: string; start: number; end: number; dir: 'forward' | 'backward' | 'none'; top: number }>();
 const short = (text: string, n: number) => { const t = text.replace(/\s+/g, ' ').trim(); return t.length > n ? `${t.slice(0, n)}…` : t; };
 /** The first sentence (or line) of a text, whole: a title or a one-line finding, the rest read where there is room. */
 /** Characters in a region's sizing hint: wider than any region head's room at 12px, so the layout reserves two lines. */
@@ -140,11 +143,16 @@ export function createPlanView(host: PlanHost) {
     moveTarget = true; frameWhole = true; host.chrome(); render();
     // Focus right after the render that made the field (never a frame later, when it can land in a field being typed in).
     (document.getElementById('plan-intent') ?? document.getElementById('plan-title'))?.focus();
+    const area = document.getElementById('plan-intent') as HTMLTextAreaElement | null, left = CARETS.get(memoryKey(o, condition));
+    if (area && left && left.text === area.value) { area.setSelectionRange(left.start, left.end, left.dir); area.scrollTop = left.top; }
   }
   /** Closing keeps the draft and the plan; the map goes back to the latest current view with the earlier selection and camera. */
   function close(restore = true) {
     if (!s) return;
     s.pending?.controller.abort(); s.scoping?.controller.abort();
+    const area = document.getElementById('plan-intent') as HTMLTextAreaElement | null;
+    const key = s.key === CONVERTER_KEY ? `${s.key}#${s.condition}` : s.projectId;
+    if (area) CARETS.set(key, { text: area.value, start: area.selectionStart, end: area.selectionEnd, dir: area.selectionDirection, top: area.scrollTop });
     const ret = s.ret; s = null; host.rows(null); host.targetContext(null, false);
     $('plan-panel').hidden = true; $('plan-panel').replaceChildren(); $('plan-mode').hidden = true; $('plan-sheet').hidden = true;
     $('plan-strip').hidden = true; $('plan-strip').replaceChildren(); host.surface(null, [], false); lastFocusKey = ''; lastShown = ''; cover(false);
