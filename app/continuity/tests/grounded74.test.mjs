@@ -190,7 +190,7 @@ test('74-D the same sentence as a sample and as the real report: the second plac
   assert.equal(R.itemReading(R.requestMatches(project), { requestId: q.id, itemId: 'change_1' }).lead.match.from, at);
   const again = round(project); assert.equal(lastReading(again).parts[0].claims[0].from, at);
   // The copied-quote path (studio.map.3) could only find the first place: the anchored one never re-selects by its words.
-  assert.equal(R.recordTexts(project).get(reading.records[0].id).slice(at, at + SENT.length), SENT);
+  assert.equal(R.recordTexts(project).get(reading.records[0].id).read.slice(at, at + SENT.length), SENT);
 });
 
 /* ---------- E: what a reply cannot do ---------- */
@@ -381,7 +381,7 @@ test('74-K1 a returned report (return.2 import) is read, applied, stored and che
   const { project, reading } = apply4(p, inp, reply4({ parts: [part('P01', { claims: [claim('reported', '반환 보고의 첫 구절', at)] })] }));
   const c = reading.parts[0].claims[0];
   assert.equal(s.file.report.slice(c.from, c.to), c.quote); assert.equal(reading.records.find(r => r.id === src.id).total, s.file.report.length);
-  assert.deepEqual(round(project), project); assert.equal(R.recordTexts(project).get(src.id), s.file.report);
+  assert.deepEqual(round(project), project); assert.equal(R.recordTexts(project).get(src.id).read, s.file.report);
 });
 
 test('74-K2 indented code goes as one piece per block (a call and the line using its result stay together); a range never joins across a blank line', () => {
@@ -422,4 +422,28 @@ test('74-K4 the anchored prompt states every hard limit the validator holds, rea
   // The validator holds those limits: a fifth basis is refused, not cut.
   const p = D.pasteRecord(D.createProject(), MIXED, null).project, inp = ask4(p);
   refused(() => M.validateMapReply(reply4({ parts: [part('new:a', { name: 'a', basis: ['N01.01', 'N01.02', 'N01.03', 'N01.04', 'N01.05'] })] }), inp.ask));
+});
+
+test('74-K5 an earlier reading keeps the coordinates it was stored in (the labelled Source.text); it reads where it stands in the report as received, across versions', () => {
+  const s = sample(); let p = s.p; const q = plan(p, s.area).scope;
+  p = D.importResultFile(p, JSON.stringify(s.file));
+  const src = p.sources.find(x => x.kind === 'report'), shift = src.text.length - s.file.report.length, first = '[공개 고정 코드의 재서술 · 실제 실행 미검증] a964f08은 QuerySubmitted에서 args.QueryText를 FilterKeyList로 전달한다.';
+  assert.ok(shift > 0 && src.text.endsWith(s.file.report));
+  // The older wire (an m3 server): the match is stored against Source.text, as map-reading.3 always was.
+  const old = M.buildMapAsk(p, studioView(p), [q]), alias = [...old.records].find(([, r]) => r.id === src.id)[0];
+  p = M.applyReading(p, old, M.validateMapReply({ summary: '', parts: [], relations: [], candidates: [], gaps: [], matches: [{ record: alias, quote: first, text: '전달 변경 보고', kind: 'reported', about: null, targets: [{ requestId: q.id, itemId: 'change_1' }], why: '스텁', stance: 'made', replaces: null }] }, old.ask), meta()).project;
+  const stored = lastReading(p).matches[0];
+  assert.equal(lastReading(p).version, 'map-reading.3'); assert.deepEqual([stored.from, stored.to], [shift, shift + first.length]); assert.equal(src.text.slice(stored.from, stored.to), first);
+  assert.equal(lastReading(p).records.find(r => r.id === src.id).total, src.text.length);
+  const v11 = JSON.stringify({ ...p, schemaVersion: 'idea015.project.11' }); assert.deepEqual(parseProject(v11).readings, p.readings, 'a project.11 with it reads as stored');
+  // Read where it stands in the report as received: the ledger, the mark and coverage.
+  const lead = () => R.itemReading(R.requestMatches(p), { requestId: q.id, itemId: 'change_1' }).lead;
+  assert.equal(lead().match.from, 0); assert.equal(s.file.report.slice(lead().match.from, lead().match.to), first);
+  assert.ok(!M.unreadRecords(p, studioView(p)).some(r => r.id === src.id), 'the report counts as read');
+  // An anchored correction withdraws it by its prior key, in one coordinate system.
+  p = D.pasteRecord(p, `요청문 ${q.id}의 정정입니다. 앞 보고의 전달 변경 구현 주장을 철회합니다. 실제로는 아직 구현하지 않았습니다.`, null).project;
+  const inp = ask4(p, [q]), key = inp.ask.priors.find(x => x.quote === first).key;
+  p = apply4(p, inp, reply4({ matches: [{ at: `${piece(inp, '앞 보고의')}-${piece(inp, '실제로는').split('.')[1]}`, text: '철회', kind: 'reported', stance: 'not-made', about: null, targets: [{ requestId: q.id, itemId: 'change_1' }], why: '철회', replaces: key }] })).project;
+  const now = R.itemReading(R.requestMatches(p), { requestId: q.id, itemId: 'change_1' });
+  assert.equal(now.state, 'not-made'); assert.equal(now.history[0].match.from, 0); assert.deepEqual(round(p), p);
 });

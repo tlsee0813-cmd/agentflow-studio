@@ -10,7 +10,7 @@ import { addArea, addChildArea, addRelation, addReading } from './domain.js';
 import { parseProject, sourceText } from './validation.js';
 import { quoteAt } from './digest-api.js';
 import { secretLike } from './secret.js';
-import { validateFrozenRequest, validateRequestContext, requestContext, validateRequestMatch, requestMatches, hasTarget, sameTarget, canReplace, MATCH_STANCES, type RequestContext, type FrozenRequest, type RequestMatch, type RequestMatch3, type StoredRequestMatch, type MatchKind, type MatchStance, type RequestTarget } from './request-return.js';
+import { validateFrozenRequest, validateRequestContext, requestContext, validateRequestMatch, requestMatches, hasTarget, sameTarget, canReplace, MATCH_STANCES, recordTexts, readInterval, type RequestContext, type FrozenRequest, type RequestMatch, type RequestMatch3, type StoredRequestMatch, type MatchKind, type MatchStance, type RequestTarget } from './request-return.js';
 
 export const MAP_SCHEMA = 'studio.map.1' as const;
 export const MAP2_SCHEMA = 'studio.map.2' as const;
@@ -478,7 +478,8 @@ export interface MapInput {
  * records. A record sent only in part comes back with its unread tail (from the end of what was read). */
 export function unreadRecords(p: Project, view: StudioView): MapRecordSource[] {
   const readTo = new Map<string, number>();
-  for (const r of p.readings) if (isMapReading(r)) for (const x of r.records) readTo.set(x.id, Math.max(readTo.get(x.id) ?? 0, x.to));
+  const texts = recordTexts(p);
+  for (const r of p.readings) if (isMapReading(r)) for (const x of r.records) { const i = readInterval(r, x, texts); readTo.set(x.id, Math.max(readTo.get(x.id) ?? 0, i.to)); }
   const pasted: MapRecordSource[] = p.pasted.map(r => ({ id: r.id, kind: 'pasted', text: r.text, at: r.at, label: '붙여넣은 기록', from: readTo.get(r.id) ?? 0 }));
   const own: MapRecordSource[] = view.records.map(r => ({ id: r.id, kind: r.kind, text: r.text, at: r.at, label: '프로젝트 기록', from: readTo.get(r.id) ?? 0 }));
   return [...pasted, ...own].filter(r => r.from < r.text.length).sort((a, b) => b.at.localeCompare(a.at));
@@ -509,7 +510,7 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
     if (!requests.some(r => r.id === selectedRequestId)) throw new Error('INVALID_REQUEST_SCOPE');
     // Explicit recovery may compare a report previously read without this RQ. Coverage is per RQ, from its contiguous
     // compared prefix, so an earlier map-only read or a sent tail does not hide an uncompared head forever.
-    const compared = p.readings.filter(isMapReading).filter(r => r.requests?.some(q => q.id === selectedRequestId)).flatMap(r => r.records);
+    const texts = recordTexts(p), compared = p.readings.filter(isMapReading).filter(r => r.requests?.some(q => q.id === selectedRequestId)).flatMap(r => r.records.map(x => readInterval(r, x, texts)));
     const prefix = (id: string) => { let end = 0; for (const r of compared.filter(r => r.id === id).sort((a, b) => a.from - b.from)) if (r.from <= end) end = Math.max(end, r.to); return end; };
     unread = [...p.pasted.map(r => ({ id: r.id, kind: 'pasted' as const, text: r.text, at: r.at, label: '붙여넣은 기록', from: prefix(r.id) })),
       ...view.records.map(r => ({ id: r.id, kind: r.kind, text: r.text, at: r.at, label: '프로젝트 기록', from: prefix(r.id) }))].filter(r => r.from < r.text.length).sort((a, b) => b.at.localeCompare(a.at));
@@ -614,7 +615,7 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   }
   // A comparison may re-read an old interval. Only quotes containing previously unread bytes can change the map again.
   // Request matches still use the full reply below and are saved with their frozen context in the same write.
-  const covered = done.flatMap(r => r.records);
+  const texts = recordTexts(project), covered = done.flatMap(r => r.records.map(x => readInterval(r, x, texts)));
   const freshQuote = (q: MapReplyQuote) => {
     const source = input.records.get(q.record), at = !source ? null : q.from !== undefined && q.to !== undefined ? { at: q.from, length: q.to - q.from } : quoteAt(source.text, q.quote);
     if (!source || !at) return false;
@@ -702,7 +703,8 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   const now = three ? requestMatches(project) : [];
   // Anchored: a passage of material is no report of this project's request, and none is kept as one.
   const matches: StoredRequestMatch[] = (reply.matches ?? []).filter(m => own(m)).map(({ from: rf, to: rt, ...m }) => {
-    const source = input.records.get(m.record)!, at = rf !== undefined && rt !== undefined ? { at: rf, length: rt - rf } : quoteAt(source.text, m.quote)!, stored = { ...m, record: source.id, from: source.from + at.at, to: source.from + at.at + at.length };
+    // An earlier version stores a returned report's place against its labelled Source.text (as such readings always were).
+    const source = input.records.get(m.record)!, at = rf !== undefined && rt !== undefined ? { at: rf, length: rt - rf } : quoteAt(source.text, m.quote)!, shift = four ? 0 : texts.get(source.id)?.shift ?? 0, stored = { ...m, record: source.id, from: shift + source.from + at.at, to: shift + source.from + at.at + at.length };
     if (!three) return stored;
     const { replaces: key, ...rest } = stored as typeof stored & { replaces: string | null };
     const ref = key === null ? undefined : input.priors?.get(key), cur = ref && now.find(x => x.reading === ref.reading && x.index === ref.index);
@@ -710,7 +712,8 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
     return { ...rest, replaces: holds ? { reading: ref!.reading, index: ref!.index } : null };
   });
   const reading: MapReading = { version: four ? 'map-reading.4' : three ? 'map-reading.3' : withRequests ? 'map-reading.2' : 'map-reading.1', id: meta.id, at: meta.at, model: meta.model, prompt: meta.prompt, hash: meta.hash,
-    records: [...input.records.values()].map(r => ({ id: r.id, from: r.from, to: r.to, total: r.total, ...(four ? { digest: textDigest(r.text) } : {}) })),
+    records: [...input.records.values()].map(r => { const shift = four ? 0 : texts.get(r.id)?.shift ?? 0;
+      return shift ? { id: r.id, from: r.from + shift, to: r.to + shift, total: texts.get(r.id)!.raw.length } : { id: r.id, from: r.from, to: r.to, total: r.total, ...(four ? { digest: textDigest(r.text) } : {}) }; }),
     summary: comparisonOnly ? '이미 지도에 읽은 원문을 고른 요청과 다시 대조했어요.' : reply.summary, parts, relations, candidates: candidates.slice(0, 16), gaps: reply.gaps, skipped: skipped.slice(0, 64),
     ...(withRequests ? { requests: structuredClone(frozen), matches } : {}),
     ...(four ? { material: material.map(m => { const source = input.records.get(m.record)!; return { record: source.id, from: source.from + m.from, to: source.from + m.to, what: m.what }; }) } : {}) };

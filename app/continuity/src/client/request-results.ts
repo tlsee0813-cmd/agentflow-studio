@@ -1,6 +1,6 @@
 /* The same small request/return reading in the plan and beside a current part. No second status model. */
 import { isMapReading, type Project } from '../shared/types.js';
-import { requestMatches, itemReading, MATCH_LABEL, ITEM_STATE_LABEL, type FrozenRequest, type EffectiveMatch, type RequestTarget, type StoredRequestMatch } from '../shared/request-return.js';
+import { requestMatches, itemReading, recordTexts, MATCH_LABEL, ITEM_STATE_LABEL, type FrozenRequest, type EffectiveMatch, type RequestTarget, type StoredRequestMatch } from '../shared/request-return.js';
 import { h, fullTime, quotedText } from './plan-dom.js';
 
 /** A passage's label: what kind of material it is, and for a change report what it says of the change (stored before stances:
@@ -64,7 +64,8 @@ export function requestResults(project: Project, scopes: FrozenRequest[], option
   const caption = (q: FrozenRequest) => `요청 ${all.findIndex(r => r.id === q.id) + 1} · ${fullTime(q.createdAt)} · 판 ${q.planRevision}`;
   const source = (m: EffectiveMatch, itemKey?: string) => {
     if (options.quote) return h('button', { type: 'button', class: 'cl-cite', ...(itemKey ? { 'data-request-focus': JSON.stringify([itemKey, m.reading, m.index, m.match.record, m.match.from, m.match.to]) } : {}), title: m.match.quote, onclick: () => options.quote!(m.match.record, m.match.quote, m.match.from) }, '근거');
-    const text = project.pasted.find(r => r.id === m.match.record)?.text ?? project.sources.find(r => r.id === m.match.record)?.text ?? '';
+    // The record as read, where every match stands (an earlier reading's places against the labelled text are read shifted).
+    const text = recordTexts(project).get(m.match.record)?.read ?? '';
     const details = h('details', { class: 'request-quote' }, h('summary', {}, '근거 원문'), h('pre', {}, ...quotedText(text, m.match.quote, { at: m.match.from, length: m.match.to - m.match.from })));
     details.addEventListener('toggle', () => { if (details.open) requestAnimationFrame(() => details.querySelector('mark')?.scrollIntoView({ block: 'nearest' })); });
     return details;

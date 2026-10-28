@@ -1,6 +1,6 @@
 /* Frozen requests and quote-backed correspondence. The generated request lives in the plan sidecar; a reading keeps its own
  * copy and matches in the Project's single commit. No auto observation is written back into the sidecar. */
-import type { Project, MapReading, ReadingEntry } from './types.js';
+import type { Project, MapReading, ReadingEntry, PastedRecord, Source, Task } from './types.js';
 import { sourceText } from './validation.js';
 
 export interface EvidenceOrigin { record: string | null; reading: string | null; quote: string | null }
@@ -161,11 +161,17 @@ export function canReplace(prior: { target: RequestTarget | null; excluded: bool
 /** Every stored correspondence in order, with the person's corrections and the explicit withdrawals applied. invalid: a stored
  * withdrawal (or its undoing) that does not hold where it stands. texts: each record's full text; only the interval each reading
  * was sent is read from it (for the scope rule of canReplace). */
-export function matchLedger(readings: readonly ReadingEntry[], texts: ReadonlyMap<string, string>): { all: EffectiveMatch[]; invalid: boolean } {
+export function matchLedger(readings: readonly ReadingEntry[], texts: ReadonlyMap<string, RecordText>): { all: EffectiveMatch[]; invalid: boolean } {
   const out: EffectiveMatch[] = []; let invalid = false;
   const at = (ref: MatchRef) => out.find(x => x.reading === ref.reading && x.index === ref.index);
-  // What the reading was sent of the match's record: the interval holding the match, as the reply was judged on it.
-  const sentText = (r: MapReading, x: StoredRequestMatch) => { const i = r.records.find(i => i.id === x.record && x.from >= i.from && x.to <= i.to), t = texts.get(x.record); return i && t !== undefined ? t.slice(i.from, i.to) : null; };
+  // What the reading was sent of the match's record: the interval holding the match, as the reply was judged on it (in the
+  // coordinates it was stored in).
+  const sentText = (r: MapReading, x: StoredRequestMatch) => { const i = r.records.find(i => i.id === x.record && x.from >= i.from && x.to <= i.to), t = texts.get(x.record); return i && t ? storedText(r, i.total, t).slice(i.from, i.to) : null; };
+  // Every match reads in the record's read coordinates: an earlier reading's stored ones are shifted here, never rewritten.
+  const asRead = (r: MapReading, x: StoredRequestMatch): StoredRequestMatch => {
+    const i = r.records.find(i => i.id === x.record && x.from >= i.from && x.to <= i.to), t = texts.get(x.record), s = i && t ? labelShift(r, i.total, t) : 0;
+    return s && x.from >= s ? { ...x, from: x.from - s, to: x.to - s } : x;
+  };
   for (const r of readings) {
     if (r.version === 'request-correction.1') {
       const x = at(r);
@@ -176,7 +182,8 @@ export function matchLedger(readings: readonly ReadingEntry[], texts: ReadonlyMa
       // Undone where it was made and on every later reading of the same passage that kept it.
       for (const y of out) if (y.replacedBy?.reading === x.reading && y.replacedBy.index === x.index) y.replacedBy = null;
       x.replaces = null;
-    } else if (r.version === 'map-reading.2' || r.version === 'map-reading.3' || r.version === 'map-reading.4') r.matches!.forEach((match, index) => {
+    } else if (r.version === 'map-reading.2' || r.version === 'map-reading.3' || r.version === 'map-reading.4') r.matches!.forEach((stored, index) => {
+      const match = asRead(r, stored);
       // An explicit earlier correction of the same quote survives reading that passage again.
       const same = (x: EffectiveMatch) => x.match.record === match.record && x.match.from === match.from && x.match.to === match.to;
       const previous = [...out].reverse().find(x => x.corrected && same(x));
@@ -191,7 +198,7 @@ export function matchLedger(readings: readonly ReadingEntry[], texts: ReadonlyMa
         ...(conflict?.target ? { prior: { reading: conflict.reading, index: conflict.index, target: conflict.target } } : {}) };
       if (match.replaces) {
         const prior = at(match.replaces);
-        if (!prior || prior.reading === r.id || overlap(prior.match, match) || !canReplace({ ...prior, replaced: !!prior.replacedBy, kind: prior.match.kind, quote: prior.match.quote, about: prior.match.about }, match, sentText(r, match))) invalid = true;
+        if (!prior || prior.reading === r.id || overlap(prior.match, match) || !canReplace({ ...prior, replaced: !!prior.replacedBy, kind: prior.match.kind, quote: prior.match.quote, about: prior.match.about }, match, sentText(r, stored))) invalid = true;
         else { prior.replacedBy = { reading: r.id, index, match }; entry.replaces = { ...match.replaces }; }
       }
       out.push(entry);
@@ -199,8 +206,28 @@ export function matchLedger(readings: readonly ReadingEntry[], texts: ReadonlyMa
   }
   return { all: out, invalid };
 }
-/** Each record as it was read (a returned report as received: sourceText). */
-export const recordTexts = (p: Project): Map<string, string> => new Map([...p.pasted.map(r => [r.id, r.text] as const), ...p.sources.map(r => [r.id, sourceText(p.tasks, r)] as const)]);
+/** A record's text as stored (raw: Source.text, which for a returned report or evidence is the app's label and then the text as
+ * received) and as read (sourceText: what the map is sent, quotes and marks). shift: that label's length, else 0. */
+export interface RecordText { raw: string; read: string; shift: number }
+export function recordTextMap(pasted: readonly PastedRecord[], sources: readonly Source[], tasks: readonly Task[]): Map<string, RecordText> {
+  const out = new Map<string, RecordText>();
+  for (const r of pasted) out.set(r.id, { raw: r.text, read: r.text, shift: 0 });
+  for (const s of sources) { const read = sourceText(tasks, s); out.set(s.id, { raw: s.text, read, shift: read !== s.text && s.text.endsWith(read) ? s.text.length - read.length : 0 }); }
+  return out;
+}
+export const recordTexts = (p: Project): Map<string, RecordText> => recordTextMap(p.pasted, p.sources, p.tasks);
+/** The text a reading's interval of a record is stored against. map-reading.4: the text as read. map-reading.1–3: the record as it
+ * was stored then, the labelled Source.text, when the interval's total is that length; else the text as read (both kept as is). */
+export const storedText = (r: MapReading, total: number, t: RecordText): string => r.version !== 'map-reading.4' && total === t.raw.length ? t.raw : t.read;
+/** How far a reading's stored positions of a record stand from the text as read: the label's length for an earlier reading stored
+ * against the labelled text, else 0. */
+export const labelShift = (r: MapReading, total: number, t: RecordText): number => storedText(r, total, t) === t.raw && t.raw !== t.read ? t.shift : 0;
+/** A reading's interval of a record where it stands in the text as read (an earlier one stored against the labelled text is shifted
+ * here; the stored interval is never rewritten). */
+export function readInterval(r: MapReading, x: { id: string; from: number; to: number; total: number }, texts: ReadonlyMap<string, RecordText>): { id: string; from: number; to: number; total: number } {
+  const t = texts.get(x.id), s = t ? labelShift(r, x.total, t) : 0;
+  return s ? { id: x.id, from: Math.max(0, x.from - s), to: Math.max(0, x.to - s), total: t!.read.length } : x;
+}
 export function requestMatches(p: Project): EffectiveMatch[] {
   const out = matchLedger(p.readings, recordTexts(p)).all;
   // A replay of the same passage and scope is one correspondence, with the correction kept above.

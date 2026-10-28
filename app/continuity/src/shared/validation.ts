@@ -1,6 +1,6 @@
 import { API_SCHEMA, SCHEMA, V5_SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Intent, type Background, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket, type Question, GUIDE_SCHEMA, type GuideRequest, type GuideReply, type GuideEnvelope, type GuideTicket, type UnderstandingInput } from './types.js';
-import {V6_SCHEMA,V7_SCHEMA,V8_SCHEMA,V9_SCHEMA,V10_SCHEMA,V11_SCHEMA,type ReadingEntry,CLAIM_KINDS,READINGS_LIMIT,PASTED_TEXT_LIMIT,PASTED_LIMIT,type Area,type PlanStamp,type Point,type ManualPositions,type Backup} from './types.js';
-import { validateFrozenRequest, validateStoredMatch, hasTarget, matchLedger, type FrozenRequest, type StoredRequestMatch } from './request-return.js';
+import {V6_SCHEMA,V7_SCHEMA,V8_SCHEMA,V9_SCHEMA,V10_SCHEMA,V11_SCHEMA,type ReadingEntry,type PastedRecord,CLAIM_KINDS,READINGS_LIMIT,PASTED_TEXT_LIMIT,PASTED_LIMIT,type Area,type PlanStamp,type Point,type ManualPositions,type Backup} from './types.js';
+import { validateFrozenRequest, validateStoredMatch, hasTarget, matchLedger, recordTextMap, type FrozenRequest, type StoredRequestMatch, type RecordText } from './request-return.js';
 import { ANCHOR_QUOTE_MAX, textDigest } from './evidence-span.js';
 export class ContextError extends Error { constructor(code: string) { super(code); this.name = 'ContextError'; } }
 export function ensure(condition: unknown, code = 'INVALID_DATA'): asserts condition { if (!condition) throw new ContextError(code); }
@@ -292,8 +292,9 @@ function assertProject(v: unknown): asserts v is Project {
     ensure(!tasks.has(t.id as string)); tasks.add(t.id as string);
   }
   for(const s of sources.values()) ensure(tasks.has(s.taskId));
-  // Readings quote each record as it was read: a returned report or evidence as received (sourceText), once its task is checked.
-  readings(v.readings,areaIds,new Map([...(v.pasted as {id:string;text:string}[]).map(r=>[r.id,r.text] as const),...[...sources.values()].map(r=>[r.id,sourceText(v.tasks as Task[],r)] as const)]),v.id as string,new Set([...sources.values()].filter(s=>s.kind==='evidence').map(s=>s.id)));
+  // Readings are checked once the tasks are: map-reading.4 against each record as read (a returned report as received), earlier
+  // ones against the record as they stored it (Source.text), as before.
+  readings(v.readings,areaIds,recordTextMap(v.pasted as PastedRecord[],[...sources.values()],v.tasks as Task[]),v.id as string,new Set([...sources.values()].filter(s=>s.kind==='evidence').map(s=>s.id)));
   understandingRefs(v.space as Record<string,unknown>,v.tasks as Task[],sources);
   // Imported reports or synthetic answers cannot masquerade as an authoritative decision.
   for(const b of v.bases as Basis[]) {
@@ -344,8 +345,10 @@ function pasted(v:unknown,areaIds:Set<string>) {
 }
 /** Map readings: every part a known area, every quote of a known record (a pasted record or a source), every claim a known
  * kind, and a claim replaced only by a later one of the same area. Relation ids may be gone (the person removed the line). */
-function readings(v:unknown,areaIds:Set<string>,records:Map<string,string>,projectId:string,materialIds:Set<string>) {
+function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,projectId:string,materialIds:Set<string>) {
   list(v,READINGS_LIMIT);const seen=new Map<string,Map<string,number>>(),hashes=new Set<string>();
+  const raw=new Map([...texts].map(([k,t])=>[k,t.raw] as const)),asRead=new Map([...texts].map(([k,t])=>[k,t.read] as const));
+  let records=raw;
   // map-reading.4: a quote is exactly the slice [from, to) of its record, inside an interval that reading was sent.
   let four=false,read:{id:string;from:number;to:number}[]=[];
   const at=(record:unknown,quote:unknown,from:unknown,to:unknown)=>{integer(from);integer(to);ensure((from as number)<(to as number)&&records.get(record as string)!.slice(from as number,to as number)===quote&&read.some(x=>x.id===record&&x.from<=(from as number)&&(to as number)<=x.to));};
@@ -368,7 +371,7 @@ function readings(v:unknown,areaIds:Set<string>,records:Map<string,string>,proje
       ensure(areaIds.has(r.areaId as string));text(r.text,300);ensure(r.corrects===null||seen.has(r.corrects as string));continue;
     }
     const version=!!r&&typeof r==='object'?(r as {version?:unknown}).version:null;
-    four=version==='map-reading.4';const three=four||version==='map-reading.3',two=three||version==='map-reading.2';
+    four=version==='map-reading.4';const three=four||version==='map-reading.3',two=three||version==='map-reading.2';records=four?asRead:raw;
     obj(r,['version','id','at','model','prompt','hash','records','summary','parts','relations','candidates','gaps','skipped',...(two?['requests','matches']:[]),...(four?['material']:[])]);ensure(r.version==='map-reading.1'||two);
     id(r.id);ensure(!entries.has(r.id as string));entries.add(r.id as string);date(r.at);text(r.model,80);text(r.prompt,40);ensure(typeof r.hash==='string'&&/^[0-9a-f]{64}$/.test(r.hash)&&!hashes.has(r.hash));hashes.add(r.hash as string);
     list(r.records,16);ensure((r.records as unknown[]).length>0);for(const x of r.records){obj(x,['id','from','to','total',...(four?['digest']:[])]);ensure(records.has(x.id as string));integer(x.from);integer(x.to);integer(x.total);ensure((x.from as number)<(x.to as number)&&(x.to as number)<=(x.total as number));
@@ -401,7 +404,7 @@ function readings(v:unknown,areaIds:Set<string>,records:Map<string,string>,proje
     seen.set(r.id as string,claims);
   }
   // Every withdrawal names an earlier match that, where it stands, answers the very same frozen item; nothing is taken back twice.
-  ensure(!matchLedger(v as ReadingEntry[],records).invalid);
+  ensure(!matchLedger(v as ReadingEntry[],texts).invalid);
 }
 export const POSITION_LIMIT=200000;
 function planStamp(v:unknown) {
