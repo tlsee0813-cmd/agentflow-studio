@@ -19,7 +19,7 @@ import type { PlanOpened } from './plan-view.js';
 import type { PlanBundle } from './plan-store.js';
 import { secretLike } from './plan-source.js';
 import { h, put, fullTime, codeGate, codeNote, quotedText as quoted } from './plan-dom.js';
-import type { RequestReading } from './request-results.js';
+import { captureRequestReading, restoreRequestReading, type RequestReading } from './request-results.js';
 
 export interface ReturnHost {
   current(): PlanOpened | null;
@@ -74,6 +74,8 @@ interface State {
   key: string; stage: string; view: View; focus: { list: 'changes' | 'open' | 'records'; n: number; part?: string } | null;
   input: ReadingInput | null; hash: string | null; reading: Reading | null; previous: Reading | null;
   pending: AbortController | null; error: string | null; storeMsg: string | null; scroll: number;
+  /** The reading's request results as left (items, history folds, focused quote), restored by identity on fresh data. */
+  requests: RequestReading | null;
   /** The paste being written: the part looked at when it began (context only), and the scene to come back to on close. */
   pasteContext: string | null; back: Scene | null; pasteMsg: string | null; saving: boolean;
   /** A quote opened from a selected part: the way back at the top goes to that part's scene, not to this pane's reading. */
@@ -154,7 +156,7 @@ export function createReturnView(host: ReturnHost) {
     const o = host.current(); if (!o || o.kind === 'legacy') return;
     if (!s || s.key !== o.key) {
       s = { key: o.key, stage: STAGE_MEMORY.get(o.key) ?? UI62_STAGES[0]!.id, view: { kind: 'reading' }, focus: null, input: null, hash: null, reading: null, previous: null,
-        pending: null, error: null, storeMsg: null, scroll: 0, pasteContext: null, back: null, pasteMsg: null, saving: false, quoteFrom: null };
+        pending: null, error: null, storeMsg: null, scroll: 0, requests: null, pasteContext: null, back: null, pasteMsg: null, saving: false, quoteFrom: null };
     }
     host.chrome(); render(); void refresh();
   }
@@ -169,7 +171,7 @@ export function createReturnView(host: ReturnHost) {
   function openPaste(context: string | null, scene: Scene | null) {
     const o = host.current(); if (!o || o.kind !== 'saved') return;
     open(); if (!s) return;
-    if (s.view.kind === 'reading') s.scroll = document.querySelector('#lens .lens-body')?.scrollTop ?? 0;
+    keep();
     s.pasteContext = context; s.quoteFrom = null; if (scene) s.back = scene;
     s.view = { kind: 'paste' }; s.pasteMsg = null; render();
     requestAnimationFrame(() => document.querySelector<HTMLTextAreaElement>('#paste-text')?.focus({ preventScroll: true }));
@@ -504,9 +506,18 @@ export function createReturnView(host: ReturnHost) {
     host.mark(marks.length || s.focus ? marks : host.mapMarks());
     if (v.kind === 'source' && v.quote) requestAnimationFrame(() => document.querySelector('#lens .rr-mark')?.scrollIntoView({ block: 'center' }));
   }
-  function openSource(source: ReadingSource, from: 'now' | 'previous' | 'material', quote: string | null = null) {
+  /** Leaving the reading for a source or the paste box: where it was read (scroll, request items, history folds, focus). held: a
+   * capture the host made before opening the pane again re-rendered it (a quote from the pane's own reading), used once. */
+  let held = false;
+  function keep() {
+    if (!s || s.view.kind !== 'reading') return;
+    const body = document.querySelector('#lens .lens-body');
+    s.scroll = body?.scrollTop ?? 0; s.requests = body ? captureRequestReading(body) : null;
+  }
+  function openSource(source: ReadingSource, from: 'now' | 'previous' | 'material', quote: string | null = null, kept = false) {
     if (!s) return;
-    if (s.view.kind === 'reading') s.scroll = document.querySelector('#lens .lens-body')?.scrollTop ?? 0;
+    if (!kept) keep();
+    held = false;
     s.view = { kind: 'source', source: structuredClone(source), from, quote }; render();
     requestAnimationFrame(() => document.querySelector<HTMLElement>('#lens .rr-back')?.focus({ preventScroll: true }));
   }
@@ -514,12 +525,16 @@ export function createReturnView(host: ReturnHost) {
     if (!s) return;
     s.quoteFrom = null;
     s.view = { kind: 'reading' }; render();
-    const body = document.querySelector('#lens .lens-body'); if (body) body.scrollTop = s.scroll;
+    // The fresh data first, then the same items and folds by their exact identity; an item gone leaves the reading at its start.
+    const body = document.querySelector('#lens .lens-body'), saved = s.requests; s.requests = null;
+    if (body && (!saved || restoreRequestReading(body, saved))) body.scrollTop = s.scroll;
   }
 
   /** A quote of a record a map reading rests on, in the pane, marked; closing comes back to the scene it was opened from. */
   function openQuote(record: string, quote: string, scene: Scene | null) {
     const o = host.current(); if (!o || o.kind !== 'saved') return;
+    // From this pane's own reading (the map's root, nothing selected) the host kept it before reopening the pane re-rendered it.
+    const kept = held && !!s && s.key === o.key; held = false;
     open(); if (!s) return;
     if (scene) s.back = scene;
     s.quoteFrom = scene?.selected ?? null;
@@ -528,12 +543,14 @@ export function createReturnView(host: ReturnHost) {
       const r = o.view.records.find(x => x.id === record); if (!r) return;
       src = { id: r.id, kind: r.kind === 'report' ? 'report' : r.kind === 'evidence' ? 'test' : 'user', title: `프로젝트 기록 · ${r.text.split('\n').find(l => l.trim())?.trim().slice(0, 80) ?? ''}`, text: r.text, note: '', basis: `프로젝트 기록 · ${fullTime(r.at)}`, partIds: r.partId ? [r.partId] : [], url: null };
     }
-    openSource(src, 'material', quote);
+    openSource(src, 'material', quote, kept);
   }
 
   return {
     isOpen: () => !!s,
     open, close, toggle: () => (s ? close() : open()), openPaste, openQuote,
+    /** Keep where this pane's reading is (its request items, history folds, focus, scroll) before a quote from it re-renders the pane. */
+    keepReading: () => { held = false; if (s && s.view.kind === 'reading') { keep(); held = true; } },
     /** A map reading was applied: a note that the record had not been sent yet is no longer true. */
     mapApplied: () => { if (s) { s.storeMsg = null; render(); } },
     /** Re-render (the pane came back after a part's reading, or the AI status arrived). */

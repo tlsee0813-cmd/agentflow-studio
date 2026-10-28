@@ -1926,8 +1926,9 @@ def continue72_flow(browser, base):
 
 def history73_flow(browser, base):
     """A withdrawn report's history fold: open it, follow its old quote and come back by the named way. The item, the history
-    fold, the quote's focus, the pane scroll and the camera are as they were; the current-quote path still holds; the same
-    item answering another part does not open its history there. Written fixture (history73-fixture.mjs), no AI call."""
+    fold, the quote's focus, the pane scroll and the camera are as they were; the current-quote path still holds. The same from the
+    map's root (the comparison above the map, nothing selected). The same item answering another part does not open its history
+    there. Written fixture (history73-fixture.mjs), no AI call."""
     built = json.loads(subprocess.run(["node", str(ROOT / "tests/history73-fixture.mjs")], cwd=APP, check=True, capture_output=True, text=True).stdout)
     area, other = built["area"], built["other"]
     context = browser.new_context(viewport={"width": 1280, "height": 640})
@@ -1951,7 +1952,7 @@ def history73_flow(browser, base):
     history.locator(":scope > summary").click()
     body = page.locator("#lens .lens-body")
 
-    def roundtrip(cite):
+    def roundtrip(cite, back_to="폴더 일괄 처리"):
         cite.scroll_into_view_if_needed()
         cite.focus()
         scroll = body.evaluate("e => e.scrollTop")
@@ -1960,7 +1961,8 @@ def history73_flow(browser, base):
         quote = cite.get_attribute("title")
         cite.click()
         expect(page.locator("#lens .rr-mark")).to_have_text(quote)
-        expect(page.locator("#lens .rr-back")).to_contain_text("폴더 일괄 처리")
+        if back_to:
+            expect(page.locator("#lens .rr-back")).to_contain_text(back_to)
         page.locator("#lens .rr-back").click()
         expect(page).to_have_url(url0)
         expect(item).to_have_attribute("open", "")
@@ -1978,6 +1980,21 @@ def history73_flow(browser, base):
     # The current quote path is unchanged (its history fold stays as the reader left it, open).
     roundtrip(item.locator(":scope > .request-passage .cl-cite").first)
     expect(history).to_have_attribute("open", "")
+    # The map's root (nothing selected): the comparison above the map opens the same request reading in the pane; its old quote
+    # and the way back keep that reading's item, history fold, quote focus and scroll too, with no part selected.
+    page.goto(base + f"/#/p/{entry}")
+    page.locator("#world .mu-comparison").click()
+    expect(page.locator("#lens-title")).to_contain_text("돌아와 읽기")
+    item = page.locator("#lens .request-results .request-item").first
+    expect(item).not_to_have_attribute("open", "")
+    item.locator(":scope > summary").click()
+    history = item.locator(".request-history")
+    history.locator(":scope > summary").click()
+    old = history.locator(".request-withdrawn .cl-cite").first
+    roundtrip(old, back_to=None)
+    expect(history).to_have_attribute("open", "")
+    roundtrip(item.locator(":scope > .request-passage .cl-cite").first, back_to=None)
+    page.keyboard.press("Escape")
     # The same RQ item answers the other part too: nothing opened here opens there.
     page.goto(base + f"/#/p/{entry}/{other}")
     expect(page.locator("#lens-title")).to_have_text("터미널 명령 실행")
@@ -2526,7 +2543,7 @@ def main():
             request71_projection_flow(browser, base); print("ok  request projection: unrelated excerpts do not spread into parts; older report precedes newer unanswered RQ; exact quoted interval marked/scrolled; written fixture")
             reading72_flow(browser, base); print("ok  saved actual request: second quote/back keeps disclosure, scroll, focus and surface; current contents, exact RQ/revision and other-part isolation")
             continue72_flow(browser, base); print("ok  home continue: scope and selection per workspace entry; imported copies and ambiguous old project memory kept apart")
-            history73_flow(browser, base); print("ok  withdrawn report history: old quote and named way back keep the item, its history fold, quote focus, scroll and camera; current quote path; other part untouched")
+            history73_flow(browser, base); print("ok  withdrawn report history: old quote and way back keep the item, its history fold, quote focus, scroll and camera, from a part and from the map root; current quote path; other part untouched")
             revised73_flow(browser, base); print("ok  corrected-basis relation: selected from either end its line keeps one clear '근거 정정' mark at 1280/1440; ordinary lines never carry it")
             record_fold_flow(browser, base, oss_fixtures()); print("ok  pasted record on Node-RED: a chosen candidate in a folded group opens only its path, holds through a quote, folds back on another choice and on close")
             stale_request_flow(browser, base); print("ok  request only from the analysis of what is written now: typed, forced, A-B-A, cancelled and outdated replies, material")
