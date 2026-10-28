@@ -35,7 +35,7 @@ export interface MapAsk {
 }
 export interface MapReplyQuote { record: string; quote: string }
 export interface MapReplyClaim { kind: ClaimKind; text: string; record: string; quote: string; about: string | null; replaces: string | null }
-export interface MapReplyPart { ref: string; name: string | null; parent: string | null; role: string | null; roleAbout: string | null; basis: MapReplyQuote[]; claims: MapReplyClaim[] }
+export interface MapReplyPart { ref: string; name: string | null; parent: string | null; role: string | null; roleAbout: string | null; roleReplaces: MapReplyQuote | null; basis: MapReplyQuote[]; claims: MapReplyClaim[] }
 export interface MapReply {
   summary: string;
   parts: MapReplyPart[];
@@ -47,6 +47,35 @@ export interface MapReply {
 const PART = /^P\d{2,3}$/, NEW = /^new:[a-z0-9_-]{1,24}$/, RECORD = /^[NR]\d{2,3}$/, CLAIM = /^C\d{2,3}$/;
 const CONTROL = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
 const bytes = (v: unknown) => new TextEncoder().encode(JSON.stringify(v)).length;
+/** Where a quote stands in a record, as the record's own text. Exactly (white space read loosely, as quoteAt); else, narrowly, when
+ * the quote only leaves out Markdown emphasis marks (runs of '*' or '_' at a word edge, as in '**Error handling**'), at the one
+ * place it matches with those marks set aside, returned as the record's span with its marks. Never two places, never other changed
+ * characters (an operator inside a word such as a*b is not a mark), never pieces joined: null then. */
+export function resolveQuote(text: string, quote: string): string | null {
+  const q = quote.trim(); if (!q) return null;
+  const at = quoteAt(text, q); if (at) return text.slice(at.at, at.at + at.length);
+  const word = (c: string | undefined) => !!c && /[\p{L}\p{N}]/u.test(c);
+  // Emphasis marks set aside: a run of one to three '*' or '_' not between two word characters (a*b and snake_case stay).
+  const strip = (t: string) => {
+    const keep: number[] = []; let plain = '';
+    for (let i = 0; i < t.length;) {
+      if (t[i] === '*' || t[i] === '_') {
+        let j = i; while (j < t.length && t[j] === t[i] && j - i < 3) j++;
+        if (!(word(t[i - 1]) && word(t[j]))) { i = j; continue; }
+        for (; i < j; i++) { keep.push(i); plain += t[i]; }
+        continue;
+      }
+      keep.push(i); plain += t[i]; i++;
+    }
+    return { keep, plain };
+  };
+  const { keep, plain } = strip(text), bare = strip(q).plain.trim(); if (!bare) return null;
+  const pattern = new RegExp(bare.split(/\s+/).map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('\\s+'), 'g');
+  const found = [...plain.matchAll(pattern)];
+  if (found.length !== 1) return null;
+  const m = found[0]!, start = keep[m.index!]!, end = keep[m.index! + m[0].length - 1]! + 1;
+  return text.slice(start, end);
+}
 const clean = (t: string) => t.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, ' ');
 const cut = (t: string, n: number) => { if (t.length <= n) return t; const c = t.charCodeAt(n - 1); return t.slice(0, c >= 0xd800 && c <= 0xdbff ? n - 1 : n); };
 export const normName = (n: string) => n.normalize('NFKC').replace(/\s+/g, ' ').trim().toLowerCase();
@@ -96,13 +125,14 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
   const parts = new Map(ask.parts.map(p => [p.id, p])), records = new Map(ask.records.map(r => [r.id, r]));
   const quote = (rec: unknown, q: unknown): MapReplyQuote => {
     check(typeof rec === 'string' && records.has(rec), code); str(q, 300, false, code);
-    const t = (q as string).trim(); check(t.length >= 6 && !!quoteAt(records.get(rec)!.text, t), code);
-    return { record: rec, quote: t };
+    const t = (q as string).trim(), span = t.length >= 6 ? resolveQuote(records.get(rec)!.text, t) : null;
+    check(!!span && span.length <= 300, code);
+    return { record: rec, quote: span! };
   };
   str(value.summary, 200, true, code);
   arr(value.parts, 24, code);
   const refs = new Set<string>(), news = new Map<string, string | null>();
-  for (const p of value.parts) { obj(p, ['ref', 'name', 'parent', 'role', 'roleAbout', 'basis', 'claims'], code); check(typeof p.ref === 'string' && (parts.has(p.ref) || NEW.test(p.ref)) && !refs.has(p.ref), code); refs.add(p.ref as string); if (NEW.test(p.ref as string)) news.set(p.ref as string, p.parent as string | null); }
+  for (const p of value.parts) { obj(p, ['ref', 'name', 'parent', 'role', 'roleAbout', 'roleReplaces', 'basis', 'claims'], code); check(typeof p.ref === 'string' && (parts.has(p.ref) || NEW.test(p.ref)) && !refs.has(p.ref), code); refs.add(p.ref as string); if (NEW.test(p.ref as string)) news.set(p.ref as string, p.parent as string | null); }
   check(news.size <= 12, code);
   const outParts: MapReplyPart[] = (value.parts as Record<string, unknown>[]).map(p => {
     const ref = p.ref as string, fresh = news.has(ref);
@@ -112,6 +142,15 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
     } else check(p.name === null && p.parent === null, code);
     if (p.role !== null) str(p.role, 300, false, code);
     if (p.roleAbout !== null) { check(p.role !== null, code); str(p.roleAbout, 80, false, code); }
+    // Replacing the current description needs the record's own words that it supersedes it: only for a part with a description
+    // read from records (never a new part, never the person's own correction).
+    let roleReplaces: MapReplyQuote | null = null;
+    if (p.roleReplaces !== null) {
+      check(p.role !== null, code);
+      obj(p.roleReplaces, ['record', 'quote'], code); const q = quote(p.roleReplaces.record, p.roleReplaces.quote);
+      // Nothing read to replace (a new part, a part without a read description, the person's own): the quote has no effect.
+      roleReplaces = !fresh && parts.get(ref)?.roleBy === 'reading' ? q : null;
+    }
     arr(p.basis, 4, code); check(!fresh || (p.basis as unknown[]).length > 0, code);
     const basis = (p.basis as unknown[]).map(b => { obj(b, ['record', 'quote'], code); return quote(b.record, b.quote); });
     arr(p.claims, 4, code);
@@ -128,7 +167,7 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
     check(fresh || p.role !== null || claims.length > 0, code);
     check(p.role === null || basis.length > 0, code);
     return { ref, name: fresh ? (p.name as string).trim() : null, parent: fresh ? p.parent as string | null : null, role: p.role === null ? null : (p.role as string).trim(),
-      roleAbout: p.roleAbout === null ? null : (p.roleAbout as string).trim(), basis, claims };
+      roleAbout: p.roleAbout === null ? null : (p.roleAbout as string).trim(), roleReplaces, basis, claims };
   });
   // New parts form a forest under known parts: no cycle among them.
   for (const ref of news.keys()) { const seen = new Set<string>(); for (let x: string | null | undefined = ref; x && news.has(x); x = news.get(x)) { check(!seen.has(x), code); seen.add(x); } }
@@ -160,13 +199,16 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
 /* ---------- what earlier readings understood, per part ---------- */
 export interface CurrentClaim extends ReadingClaim { reading: string; index: number; at: string }
 export interface PartUnderstanding {
-  /** The current description: the person's correction when there is one, else the description as read. A later description
-   * replaces it only when it names a version different from the current one's (or the current one names none): a record about
-   * the same version, or one that names none, arriving later is not a later change. */
+  /** The current description: the person's correction when there is one, else the first description read, replaced only by a
+   * later one whose record says in its own words that it supersedes it (roleReplaces). Arrival order and differing version names
+   * are never a reason: a v1 document arriving after v2 does not turn the description back. */
   role: string | null; roleAbout: string | null;
-  /** The person corrected the description (it stays until they correct it again); a reading's later description reads apart. */
+  /** The person corrected the description (it stays until they correct it again). */
   corrected: { id: string; at: string } | null;
-  laterRole: string | null;
+  /** The quotes the current description rests on (none for the person's correction). */
+  roleBasis: ReadingQuote[];
+  /** Descriptions read later that did not replace the current one (another version, the same version, or none named), newest first. */
+  others: { text: string; about: string | null; at: string }[];
   /** Current claims, newest reading first: superseded ones and repeats of the same words are left out. */
   claims: CurrentClaim[];
   /** Each reading that said something about this part, oldest first (the evidence history, apart from the current view). */
@@ -177,17 +219,18 @@ export interface PartUnderstanding {
 }
 const norm = (t: string) => t.replace(/\s+/g, ' ').trim();
 export function partUnderstanding(p: Project, areaId: string): PartUnderstanding | null {
-  const history: PartUnderstanding['history'] = []; let createdName: string | null = null, role: string | null = null, roleAbout: string | null = null, laterRole: string | null = null;
+  const history: PartUnderstanding['history'] = []; let createdName: string | null = null, role: string | null = null, roleAbout: string | null = null;
+  const others: PartUnderstanding['others'] = []; let roleBasis: ReadingQuote[] = [];
   let corrected: PartUnderstanding['corrected'] = null;
   const all: CurrentClaim[] = [], replaced = new Set<string>();
   for (const r of p.readings) {
-    if (!isMapReading(r)) { if (r.areaId === areaId) { role = r.text; roleAbout = null; corrected = { id: r.id, at: r.at }; laterRole = null; } continue; }
+    if (!isMapReading(r)) { if (r.areaId === areaId) { role = r.text; roleAbout = null; roleBasis = []; corrected = { id: r.id, at: r.at }; } continue; }
     const part = r.parts.find(x => x.areaId === areaId); if (!part) continue;
     if (part.created) createdName = part.created.name;
     // A correction holds the description only: a later reading's description reads apart, its claims still come in.
     if (part.role) {
-      const replaces = !role || (!corrected && (!roleAbout || (!!part.roleAbout && part.roleAbout !== roleAbout)));
-      if (replaces) { role = part.role; roleAbout = part.roleAbout; } else laterRole = part.role;
+      if (!role || (!corrected && part.roleReplaces)) { if (role) others.unshift({ text: role, about: roleAbout, at: r.at }); role = part.role; roleAbout = part.roleAbout; roleBasis = part.basis; }
+      else others.unshift({ text: part.role, about: part.roleAbout, at: r.at });
     }
     history.push({ reading: r.id, at: r.at, role: part.role, claims: part.claims, basis: part.basis });
     part.claims.forEach((c, index) => { all.push({ ...c, reading: r.id, index, at: r.at }); if (c.replaces) replaced.add(`${c.replaces.reading}:${c.replaces.index}`); });
@@ -201,7 +244,7 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
     seen.add(key); claims.push(c);
   }
   const state = STATE_ORDER.find(k => claims.some(c => c.kind === k)) ?? null;
-  return { role, roleAbout, corrected, laterRole, claims: claims.slice(0, 12), history, createdName, state };
+  return { role, roleAbout, roleBasis, corrected, others: others.slice(0, 6), claims: claims.slice(0, 12), history, createdName, state };
 }
 
 /* ---------- the request ---------- */
@@ -247,7 +290,7 @@ export function buildMapAsk(p: Project, view: StudioView): MapInput {
   const input: MapInput = { ask, parts, records, claims, coverage: { fresh: unread.length, sent: 0, partial: 0 }, after: p.readings.filter(isMapReading).at(-1)?.id ?? null, problem: null };
   if (!unread.length) return { ...input, problem: 'NOTHING_NEW' };
   // Structure first, bounded: the earlier understanding of each part shrinks before any record is left out.
-  for (const x of ask.parts) if (bytes(ask) > META_BYTES) { x.current = x.current.slice(0, 2); x.role = cut(x.role, 120); }
+  if (bytes(ask) > META_BYTES) for (const x of ask.parts) { x.current = x.current.slice(0, 2); x.role = cut(x.role, 120); if (bytes(ask) <= META_BYTES) break; }
   if (bytes(ask) > META_BYTES) return { ...input, problem: 'TOO_LARGE' };
   let n = { N: 0, R: 0 };
   for (const r of unread) {
@@ -310,7 +353,7 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
       }
       p = parentId ? addChildArea(p, parentId, x.name!, '') : addArea(p, x.name!, '');
       const id = p.space.areas.at(-1)!.id; ids.set(x.ref, id); created.push(id);
-      parts.push({ areaId: id, created: { name: p.space.areas.at(-1)!.name, parentId }, role: x.role, roleAbout: x.roleAbout, basis: x.basis.map(real), claims: x.claims.map(claimOf) });
+      parts.push({ areaId: id, created: { name: p.space.areas.at(-1)!.name, parentId }, role: x.role, roleAbout: x.roleAbout, roleReplaces: null, basis: x.basis.map(real), claims: x.claims.map(claimOf) });
     }
   }
   // What the reply itself leaves undecided between parts is not also settled on one of them: a claim on a part a candidate names,
@@ -318,7 +361,7 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   const unsure = reply.candidates.filter(c => c.quote && c.parts.length).map(c => ({ parts: new Set(c.parts.map(a => ids.get(a))), record: input.records.get(c.record!)!.id, quote: c.quote! }));
   const overlaps = (a: string, b: string) => a.includes(b) || b.includes(a);
   const settled = (areaId: string, c: ReadingClaim) => !unsure.some(u => u.parts.has(areaId) && u.record === c.record && overlaps(u.quote, c.quote));
-  for (const x of reply.parts) if (x.name === null) parts.push({ areaId: ids.get(x.ref)!, created: null, role: x.role, roleAbout: x.roleAbout, basis: x.basis.map(real), claims: x.claims.map(claimOf) });
+  for (const x of reply.parts) if (x.name === null) parts.push({ areaId: ids.get(x.ref)!, created: null, role: x.role, roleAbout: x.roleAbout, roleReplaces: x.roleReplaces ? real(x.roleReplaces) : null, basis: x.basis.map(real), claims: x.claims.map(claimOf) });
   for (const part of parts) part.claims = part.claims.filter(c => settled(part.areaId, c));
   for (let i = parts.length - 1; i >= 0; i--) if (!parts[i]!.created && !parts[i]!.role && !parts[i]!.claims.length) parts.splice(i, 1);
   const relations: ReadingRelation[] = [];

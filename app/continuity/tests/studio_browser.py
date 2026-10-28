@@ -1378,7 +1378,7 @@ def record_flow(browser, base, backup):
     assert calls == [], "saving never calls"
 
     # Read on request: one call, digest.2, the record whole and unlocated, its context only in the note.
-    page.get_by_role("button", name="기록 읽기").click()
+    page.get_by_role("button", name="붙인 기록 요약").click()
     expect(page.locator("#lens .rr-records")).to_be_visible()
     assert len(calls) == 1
     ask = calls[0]
@@ -1509,7 +1509,7 @@ def record_fold_flow(browser, base, cases):
     page.get_by_role("menuitem", name="기록 붙여넣기").click()
     page.locator("#paste-text").fill(text)
     page.get_by_role("button", name="기록 저장").click()
-    page.get_by_role("button", name="기록 읽기").click()
+    page.get_by_role("button", name="붙인 기록 요약").click()
     expect(page.locator("#lens .rr-records")).to_be_visible()
     # The reading alone unfolds nothing.
     expect(page.locator(mqtt)).to_have_count(0)
@@ -1578,12 +1578,19 @@ def map70_flow(browser, base):
     assert sent == [], sent
     # The one action that sends says what it sends, then the map is there; the pane says what was understood.
     expect(entry.locator(".fine")).to_contain_text("기록 1개를 AI에 보내요")
+    # One main action while records wait for the map; the separate summary steps back.
+    expect(page.locator("#lens").get_by_role("button", name="붙인 기록 요약")).to_have_class(re.compile("secondary"))
     entry.get_by_role("button", name="기록으로 지도 정리").click()
     expect(page.locator("#world .node")).to_have_count(3)
     assert len(sent) == 1, sent
     expect(entry).to_be_hidden()
-    expect(page.locator("#lens .rr-map .rm-summary")).to_contain_text("[스텁]")
+    # The map is what one reads now: the pane closes, the title line says what was understood, the new parts are marked.
+    expect(page.locator("#lens")).to_be_hidden()
     expect(page.locator("#world .map-understood")).to_contain_text("[스텁]")
+    expect(page.locator("#world .node.read-mark")).to_have_count(3)
+    page.locator("#world .map-understood").get_by_role("button", name="근거").click()
+    expect(page.locator("#lens .rr-map .rm-summary")).to_contain_text("[스텁]")
+    page.locator("#lens .rr-head .close").click()
     no_page_scroll(page)
     # Select -> the description and a claim -> its quote, marked -> back to the same part.
     page.locator("#world .node", has_text="스텁 부분 1").click()
@@ -1592,7 +1599,9 @@ def map70_flow(browser, base):
     expect(page.locator("#lens .claims .claim")).to_have_count(1)
     page.locator("#lens .claims .cl-cite").first.click()
     expect(page.locator("#lens .rr-mark")).to_contain_text("요구:")
-    page.locator("#lens .rr-head .close").click()
+    # The way back at the top names the part the quote was opened from, and goes back to it.
+    expect(page.locator("#lens .rr-back")).to_have_text(re.compile("스텁 부분 1"))
+    page.locator("#lens .rr-back").click()
     expect(page.locator("#lens-title")).to_have_text("스텁 부분 1")
     # The person's own name, place and plan draft.
     page.locator(".more summary:visible").click()
@@ -1613,12 +1622,11 @@ def map70_flow(browser, base):
     page.locator("#lens").get_by_role("button", name="기록 저장").click()
     assert len(sent) == 1, sent
     page.locator("#lens .rr-map").get_by_role("button", name="기록 읽고 지도 갱신").click()
-    expect(page.locator("#lens .rr-map .rm-summary")).to_contain_text("첫 부분")
+    expect(page.locator("#world .map-understood")).to_contain_text("첫 부분")
     assert len(sent) == 2, sent
     expect(page.locator("#world .node")).to_have_count(3)
     expect(page.locator("#world .node", has_text="변환기")).to_have_count(1)
     assert page.locator("#world .node", has_text="스텁 부분 2").evaluate("e => e.style.left + ',' + e.style.top") == placed
-    page.locator("#lens .rr-head .close").click()
     page.locator("#world .node", has_text="변환기").click()
     expect(page.locator("#lens .claims .claim")).to_have_count(2)
     # The change plan: the draft kept; the pasted text goes as 'record', what was read as 'reading'.

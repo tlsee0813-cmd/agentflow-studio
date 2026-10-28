@@ -194,6 +194,9 @@ export interface ReadingPart {
   role: string | null;
   /** Version, commit or time the record names for that description (as written), else null. */
   roleAbout: string | null;
+  /** The record's own words that this description supersedes the earlier one (a quote); without it a description never
+   * replaces the current one, whatever version either names. */
+  roleReplaces: ReadingQuote | null;
   basis: ReadingQuote[]; claims: ReadingClaim[];
 }
 export interface ReadingRelation { relationId: string; from: string; to: string; kind: RelationKind; quote: ReadingQuote }

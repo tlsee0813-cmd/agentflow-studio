@@ -90,11 +90,17 @@ export function projectInput(o: { project: Project; view: StudioView }, intent: 
   const input: PlanInput = { evidence: ask.evidence, ask, parts, records: { total, sent: 0 }, problem: null,
     basis: `프로젝트 기록 ${total}개 · 판 ${o.project.revision} · ${fullTime(new Date().toISOString())}` };
   if (bytes(ask) > PLAN_BYTES) return finish({ ...input, problem: 'TOO_LARGE' });
-  // What was read per part: small, so it goes first; each line keeps its kind and quote, and says it is not verified.
+  // What was read per part: small, so it goes first; each line keeps its kind, its version as the record named it, its quote and
+  // the id of the record it quotes in this same request (N.. pasted, E.. project records), and says it is not verified.
+  const recordRef = new Map<string, string>([...pasted.map((r, i) => [r.id, `N${String(i + 1).padStart(2, '0')}`] as const), ...v.records.map((r, i) => [r.id, `E${String(i + 1).padStart(2, '0')}`] as const)]);
+  const cite = (q: { record: string; quote: string }) => `“${q.quote}”${recordRef.has(q.record) ? ` (${recordRef.get(q.record)})` : ''}`;
   let m = 0;
   for (const p of v.parts) {
     const u = p.reading; if (!u || ask.evidence.length >= 24) continue;
-    const lines = [u.role ? `설명${u.corrected ? '(사용자가 바로잡음)' : ''}: ${u.role}` : '', ...u.claims.slice(0, 6).map(c => `- [${CLAIM_LABEL[c.kind]}${c.about ? ` · ${c.about}` : ''}] ${c.text} — “${c.quote}”`)].filter(Boolean);
+    const lines = [
+      u.role ? `설명${u.corrected ? '(사용자가 바로잡음)' : ''}${u.roleAbout ? ` · ${u.roleAbout} 기준` : u.corrected ? '' : ' · 판본 미기재'}: ${u.role}${u.roleBasis.length ? ` — ${u.roleBasis.slice(0, 2).map(cite).join(' / ')}` : ''}` : '',
+      ...u.others.slice(0, 2).map(x => `다른 기록의 설명(현재 설명을 대체한다는 근거 없음)${x.about ? ` · ${x.about}` : ''}: ${x.text}`),
+      ...u.claims.slice(0, 6).map(c => `- [${CLAIM_LABEL[c.kind]}${c.about ? ` · ${c.about}` : ''}] ${c.text} — ${cite(c)}`)].filter(Boolean);
     if (!lines.length) continue;
     const e: Evidence = { id: `M${String(++m).padStart(2, '0')}`, kind: 'reading', title: clip(`${partPath(v, p.id).map(x => x.name).join(' › ')} · 기록에서 읽은 이해`, 200),
       text: clip(clean(lines.join('\n')), 3000), basis: clip(`붙여넣은 기록을 AI가 읽어 정리한 이해 · 앱이 확인한 사실 아님 · ${fullTime(u.history.at(-1)!.at)}`, 2000) };

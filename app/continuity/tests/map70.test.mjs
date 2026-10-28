@@ -23,7 +23,7 @@ let n = 0;
 const meta = () => ({ id: `R_test${++n}`, at: new Date(Date.UTC(2026, 9, 28, 0, n)).toISOString(), model: 'stub', prompt: 'm1-000000000000', hash: String(n).padStart(64, '0') });
 const paste = (p, t) => D.pasteRecord(p, t, null).project;
 const ask = p => M.buildMapAsk(p, studioView(p));
-const part = (ref, o = {}) => ({ ref, name: null, parent: null, role: null, roleAbout: null, basis: [], claims: [], ...o });
+const part = (ref, o = {}) => ({ ref, name: null, parent: null, role: null, roleAbout: null, roleReplaces: null, basis: [], claims: [], ...o });
 const fresh = (ref, name, quote, o = {}) => part(ref, { name, basis: [{ record: 'N01', quote }], ...o });
 const claim = (kind, t, quote, o = {}) => ({ kind, text: t, record: 'N01', quote, about: null, replaces: null, ...o });
 const reply = o => ({ summary: '', parts: [], relations: [], candidates: [], gaps: [], ...o });
@@ -98,7 +98,7 @@ test('M70-A3 the person\'s correction holds the description only; later claims s
   p = M.applyReading(p, inp, M.validateMapReply(reply({ parts: [part(pc, { role: 'PDF와 docx를 내보내는 명령', basis: [{ record: 'N01', quote: 'docx 출력을 추가했습니다' }],
     claims: [claim('reported', 'docx 출력을 추가함', 'docx 출력을 추가했습니다')] })] }), inp.ask), meta()).project;
   const u = studioView(p).parts.find(x => x.id === conv).reading;
-  assert.equal(u.role, '사내 문서 변환용 CLI'); assert.ok(u.corrected); assert.equal(u.laterRole, 'PDF와 docx를 내보내는 명령');
+  assert.equal(u.role, '사내 문서 변환용 CLI'); assert.ok(u.corrected); assert.equal(u.others[0].text, 'PDF와 docx를 내보내는 명령');
   assert.ok(u.claims.some(c => c.text === 'docx 출력을 추가함'));
   assert.deepEqual(p.space.understanding, {});
   assert.throws(() => D.correctReadingRole(D.addArea(D.createProject(), '빈 부분'), D.addArea(D.createProject(), '빈 부분').space.areas[0].id, 'x'));
@@ -229,20 +229,34 @@ test('M70-E4 archived parts and removed lines a reading made are not made again 
   assert.equal(out.project.space.relations.length, 1);
 });
 
-test('M70-E5 versions: a later record about the same or no version never replaces a versioned description; same words of another version stay apart', () => {
+test('M70-E5 versions: a description is replaced only by the record\'s own words that it supersedes it; v1 after v2 never turns it back', () => {
   let p = paste(D.createProject(), '보드 v2: 전원 관리 칩이 바뀌었습니다. v2 문서 기준.');
   p = apply(p, reply({ parts: [fresh('new:pw', '전원', '전원 관리 칩이 바뀌었습니다', { role: 'v2 전원 관리', roleAbout: 'v2', claims: [claim('describes', '전원 관리 칩 사용', '전원 관리 칩이 바뀌었습니다', { about: 'v2' })] })] })).project;
-  const id = p.space.areas[0].id, again = (t, r) => { p = paste(p, t); const inp = ask(p), a = [...inp.parts][0][0]; p = M.applyReading(p, inp, M.validateMapReply(reply({ parts: [r(a)] }), inp.ask), meta()).project; };
-  assert.deepEqual(ask(paste(p, 'x 기록입니다 길게')).ask.parts[0].current.map(c => c.about), ['v2'], 'the version goes with the request');
-  again('보드 v1 문서: 전원 관리 칩 없이 직접 공급합니다.', a => part(a, { role: 'v1 직접 공급', roleAbout: null, basis: [{ record: 'N01', quote: '전원 관리 칩 없이 직접 공급합니다' }] }));
-  assert.equal(studioView(p).parts[0].reading.role, 'v2 전원 관리', 'an unversioned late record does not regress it');
+  const id = p.space.areas[0].id, role = () => studioView(p).parts[0].reading;
+  const again = (t, r) => { p = paste(p, t); const inp = ask(p), a = [...inp.parts][0][0]; p = M.applyReading(p, inp, M.validateMapReply(reply({ parts: [r(a)] }), inp.ask), meta()).project; };
+  const sent = ask(paste(p, 'x 기록입니다 길게')).ask.parts[0];
+  assert.deepEqual(sent.current.map(c => c.about), ['v2'], 'claim versions go with the request'); assert.equal(sent.roleAbout, 'v2');
+  // The exact counterexample: v2 first, then a v1 document arriving later, naming another version, with no words of replacement.
+  again('보드 v1 문서: 전원 관리 칩 없이 직접 공급합니다.', a => part(a, { role: 'v1 직접 공급', roleAbout: 'v1', basis: [{ record: 'N01', quote: '전원 관리 칩 없이 직접 공급합니다' }] }));
+  assert.equal(role().role, 'v2 전원 관리', 'a differing version name is not a reason to replace'); assert.deepEqual(role().others.map(x => [x.text, x.about]), [['v1 직접 공급', 'v1']]);
+  // Same version, later document, no words of replacement: kept apart as well.
   again('같은 v2 커밋의 추가 문서: 전원 관리 칩은 I2C로 설정합니다.', a => part(a, { role: 'v2 추가 문서의 설명', roleAbout: 'v2', basis: [{ record: 'N01', quote: '전원 관리 칩은 I2C로 설정합니다' }],
     claims: [claim('describes', '전원 관리 칩 사용', '전원 관리 칩은 I2C로 설정합니다', { about: 'v1' })] }));
-  const u = studioView(p).parts[0].reading;
-  assert.equal(u.role, 'v2 전원 관리', 'the same version arriving later is not a later change'); assert.equal(u.laterRole, 'v2 추가 문서의 설명');
-  assert.equal(u.claims.filter(c => c.text === '전원 관리 칩 사용').length, 2, 'same words, two versions: two claims');
-  again('보드 v3: 전원 관리가 별도 모듈로 나뉘었습니다.', a => part(a, { role: 'v3 별도 모듈', roleAbout: 'v3', basis: [{ record: 'N01', quote: '전원 관리가 별도 모듈로 나뉘었습니다' }] }));
-  assert.equal(studioView(p).parts[0].reading.role, 'v3 별도 모듈'); assert.equal(p.space.areas.find(a => a.id === id).note, '');
+  assert.equal(role().role, 'v2 전원 관리'); assert.equal(role().others[0].text, 'v2 추가 문서의 설명');
+  assert.equal(role().claims.filter(c => c.text === '전원 관리 칩 사용').length, 2, 'same words, two versions: two claims');
+  // Only the record's own words that it supersedes the earlier description replace it; the replaced one stays readable.
+  again('보드 v3: 이제 전원 관리는 별도 모듈로 바뀌었습니다.', a => part(a, { role: 'v3 별도 모듈', roleAbout: 'v3', basis: [{ record: 'N01', quote: '전원 관리는 별도 모듈로 바뀌었습니다' }],
+    roleReplaces: { record: 'N01', quote: '이제 전원 관리는 별도 모듈로 바뀌었습니다' } }));
+  assert.equal(role().role, 'v3 별도 모듈'); assert.ok(role().others.some(x => x.text === 'v2 전원 관리'));
+  assert.equal(p.space.areas.find(a => a.id === id).note, '');
+  // The person's correction stays whatever a record says.
+  p = D.correctReadingRole(p, id, '사용자가 고친 전원 설명');
+  again('보드 v4: 이제 전원 관리는 다시 통합되었습니다.', a => part(a, { role: 'v4 통합', roleAbout: 'v4', basis: [{ record: 'N01', quote: '전원 관리는 다시 통합되었습니다' }],
+    roleReplaces: { record: 'N01', quote: '이제 전원 관리는 다시 통합되었습니다' } }));
+  assert.equal(role().role, '사용자가 고친 전원 설명'); assert.equal(role().others[0].text, 'v4 통합');
+  // A replacement quote must be in what was sent.
+  const inp = ask(paste(p, '보드 v5 문서입니다. 전원은 그대로입니다.'));
+  assert.throws(() => M.validateMapReply(reply({ parts: [part([...inp.parts][0][0], { role: 'x', basis: [{ record: 'N01', quote: '전원은 그대로입니다' }], roleReplaces: { record: 'N01', quote: '원문에 없는 대체 문장' } })] }), inp.ask), /INVALID_RESPONSE/);
 });
 
 test('M70-E6 a reading of a part with a valid return.2 description leaves that description, its revision and anchors valid', () => {
@@ -298,4 +312,36 @@ test('M70-H1 HTTP: /api/studio/map validates both ways, keeps reasoning with a m
   assert.equal(seen.messages[0].content, MAP_PROMPT); assert.equal(seen.thinking.type, 'enabled'); assert.equal(seen.reasoning_effort, 'low'); assert.equal(seen.max_tokens, 16384);
   const bad = createStudioHandler({ env: { DEEPSEEK_API_KEY: key }, fetchImpl: async () => new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(reply({ parts: [part('P01', { claims: [claim('reported', 'x', '없는 문장입니다')] })] })) } }] }), { status: 200 }) });
   assert.equal((await bad(post(inp.ask))).status, 502);
+});
+
+test('M70-Q1 a quote that only leaves out Markdown emphasis resolves to the one span of the record; anything else is still refused', () => {
+  const md = '## Features\n- **Error handling**: try/catch/finally with stack traces\n- **Closures**: lexical scope\n- a*b stays an operator; 2 * 3 = 6\n- **Loops** and **Loops**';
+  assert.equal(M.resolveQuote(md, 'Error handling: try/catch/finally with stack traces'), 'Error handling**: try/catch/finally with stack traces');
+  assert.equal(M.resolveQuote(md, '**Error handling**: try/catch/finally'), '**Error handling**: try/catch/finally', 'exact still exact');
+  assert.equal(M.resolveQuote(md, 'Closures:   lexical scope'), 'Closures**: lexical scope');
+  assert.equal(M.resolveQuote(md, 'ab stays an operator'), null, 'an operator inside a word is not a mark');
+  assert.equal(M.resolveQuote(md, 'Error handling: try/catch with stack traces'), null, 'pieces joined');
+  assert.equal(M.resolveQuote(md, 'Error handling: try/catch/finally with stack trace and more'), null);
+  assert.equal(M.resolveQuote(md, '2 * 3 = 7'), null, 'a changed number');
+  assert.equal(M.resolveQuote('**Run** fast here\n_Run_ fast here', 'Run fast here'), null, 'two places once marks are set aside: ambiguous');
+  // In a reply: the stored quote is the record's own span, found again exactly later.
+  let p = paste(D.createProject(), md); const inp = ask(p);
+  const r = M.validateMapReply(reply({ parts: [fresh('new:e', '오류 처리', 'Error handling: try/catch/finally with stack traces')] }), inp.ask);
+  assert.equal(r.parts[0].basis[0].quote, 'Error handling**: try/catch/finally with stack traces');
+  p = M.applyReading(p, inp, r, meta()).project;
+  assert.ok(md.includes(p.readings[0].parts[0].basis[0].quote));
+  assert.throws(() => M.validateMapReply(reply({ parts: [fresh('new:e', '연산', 'ab stays an operator')] }), inp.ask), /INVALID_RESPONSE/);
+});
+
+test('M70-P2 the plan\'s reading evidence carries the description\'s version, its quotes and the ids of the records quoted in the same request', () => {
+  let p = paste(D.createProject(), '보드 v2: 전원 관리 칩이 바뀌었습니다. v2 문서 기준.');
+  p = apply(p, reply({ parts: [fresh('new:pw', '전원', '전원 관리 칩이 바뀌었습니다', { role: 'v2 전원 관리', roleAbout: 'v2', claims: [claim('describes', '전원 관리 칩 사용', '전원 관리 칩이 바뀌었습니다', { about: 'v2' })] })] })).project;
+  p = paste(p, '보드 v1 문서: 전원 관리 칩 없이 직접 공급합니다.');
+  { const inp = ask(p), a = [...inp.parts][0][0]; p = M.applyReading(p, inp, M.validateMapReply(reply({ parts: [part(a, { role: 'v1 직접 공급', roleAbout: 'v1', basis: [{ record: 'N01', quote: '전원 관리 칩 없이 직접 공급합니다' }] })] }), inp.ask), meta()).project; }
+  const inp = projectInput({ project: p, view: studioView(p) }, '전원 설명을 정리하고 싶어'), e = inp.ask.evidence.find(x => x.kind === 'reading');
+  const n = inp.ask.evidence.find(x => x.kind === 'record' && x.text.startsWith('보드 v2')).id;
+  assert.match(e.text, /설명 · v2 기준: v2 전원 관리 — “전원 관리 칩이 바뀌었습니다” \(N\d\d\)/);
+  assert.ok(e.text.includes(`(${n})`), 'the quoted record\'s id in this request');
+  assert.match(e.text, /다른 기록의 설명\(현재 설명을 대체한다는 근거 없음\) · v1: v1 직접 공급/);
+  assert.match(e.text, /\[설명 · v2\] 전원 관리 칩 사용/);
 });

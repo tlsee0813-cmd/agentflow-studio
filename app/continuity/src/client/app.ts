@@ -1225,7 +1225,7 @@ function renderLens() {
   } else if (part.reading?.role) {
     // Read from records (or corrected by the person): one description, with where it comes from.
     const u = part.reading;
-    put(desc, h('p', { class: 'lens-text' }, u.role), src(`${u.corrected ? '직접 바로잡은 설명' : '기록에서 읽은 설명 · 앱 미확인'}${part.status === 'plan' && u.state && STATE_LABEL[u.state] ? ` · ${STATE_LABEL[u.state]}` : ''}`));
+    put(desc, h('p', { class: 'lens-text' }, u.role), src(u.corrected ? '직접 바로잡은 설명' : `기록에서 읽은 설명${u.roleAbout ? ` · ${u.roleAbout} 기준` : ''}`));
   } else put(desc, src(part.status === 'plan' ? (records.length ? `설명 없음 · 요청 기록 없음 · ${recs}` : part.reading ? '기록에서 읽은 주장만 있어요' : '아직 설명도 기록도 없어요') : `${STATUS_LABEL[part.status]} · ${recs} · 받은 정리 없음`));
   if (part.changes.length) desc.append(h('ul', { class: 'lens-changes' }, ...part.changes.slice(0, 2).map(c => h('li', {}, c))));
   if (part.reading?.claims.length) desc.append(claimList(part.reading.claims, 3));
@@ -1342,7 +1342,7 @@ function renderPanel(scrollTop: boolean) {
   const o = opened!, part = o.view.parts.find(p => p.id === selected)!, panel = $('panel');
   const prevBody = panel.querySelector('.panel-body'), keep = scrollTop ? 0 : prevBody?.scrollTop ?? 0;
   const path = partPath(o.view, part.id).slice(0, -1), records = subtreeRecords(o.view, part.id);
-  const state = part.status === 'plan' ? (part.reading?.state ? `${STATE_LABEL[part.reading.state] ?? '기록에서 읽음'} · 앱 미확인` : records.length ? '요청 기록 없음' : part.note ? '계획 설명만 있음 · 기록 없음' : '기록 없음') : STATUS_LABEL[part.status];
+  const state = part.status === 'plan' ? (part.reading?.state ? STATE_LABEL[part.reading.state] ?? '기록에서 읽음' : records.length ? '요청 기록 없음' : part.note ? '계획 설명만 있음 · 기록 없음' : '기록 없음') : STATUS_LABEL[part.status];
   const menuItems = [
     o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', onclick: () => { editing = !editing; renderPanel(false); } }, editing ? '고치기 닫기' : '이름·설명 고치기') : null,
     o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null,
@@ -1670,7 +1670,9 @@ const returnView = createReturnView({
   },
   restoreScene: scene => { const o = opened; if (!o) return; returnCamera = scene.camera; go(o.key, scene.selected && partOf(o, scene.selected) ? scene.selected : null, scene.scope && partOf(o, scene.scope) ? scene.scope : null); },
   mapBlock: () => mapBlock(),
-  mapMarks: () => { const o = opened; return o && justRead?.key === o.key ? justRead.parts : []; }
+  mapMarks: () => { const o = opened; return o && justRead?.key === o.key ? justRead.parts : []; },
+  readIntoMap: id => !!opened?.project.readings.some(r => r.version === 'map-reading.1' && r.records.some(x => x.id === id)),
+  mapPrimary: () => { const inp = mapRun.input(); return !!inp && !inp.problem && mapRun.can(); }
 });
 
 /* ---------- reading records into the map (studio.map.1) ---------- */
@@ -1694,9 +1696,13 @@ function mapApplied(a: Applied) {
   const o = opened; if (!o) return;
   const first = a.created.length > 0 && o.view.parts.length === a.created.length;
   justRead = { key: o.key, parts: [...new Set([...a.created, ...a.touched])] };
+  // The map is what one reads now: the pane the reading was asked from closes (its long record steps back), the title line says
+  // what was understood and opens the evidence on request; the parts it touched are marked where they are. Only a first map
+  // (nothing was on the map) fits the view; otherwise the camera and places stay as the person left them.
+  if (returnView.isOpen()) { returnView.mapApplied(); returnView.close(); }
   renderSpace(first ? 'fit' : 'keep');
-  if (selected) { refreshReading(); return; }
-  if (!planView.isOpen()) { if (returnView.isOpen()) returnView.render(); else returnView.open(); }
+  readMarks = justRead.parts; applyReadMarks();
+  if (selected) refreshReading();
 }
 /** The map title's line: what the records made understandable (the last reading's sentence), new records to read, the way to it. */
 function understoodLine(o: Opened): HTMLElement | null {
@@ -1803,11 +1809,11 @@ function understoodSection(o: Opened, part: PartView): HTMLElement | null {
     } }, h('label', { for: 'fix-role' }, '설명 바로잡기 ', h('small', {}, '이름·내 설명·기록의 주장은 그대로예요')), area, msg,
       h('div', { class: 'row' }, h('button', { type: 'submit', class: 'primary small' }, '저장'), h('button', { type: 'button', class: 'link-button', onclick: () => { fixingRole = null; renderPanel(false); } }, '취소'))));
   } else if (u.role) {
-    sec.append(h('p', { class: 'und-role' }, u.role), h('p', { class: 'src' }, u.corrected ? `직접 바로잡은 설명 · ${fullTime(u.corrected.at)}` : '기록에서 읽은 설명 · AI 정리 · 앱 미확인',
+    sec.append(h('p', { class: 'und-role' }, u.role), h('p', { class: 'src' }, u.corrected ? `직접 바로잡은 설명 · ${fullTime(u.corrected.at)}` : `기록에서 읽은 설명${u.roleAbout ? ` · ${u.roleAbout} 기준` : ''}`,
       o.kind === 'saved' ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { fixingRole = part.id; renderPanel(false); requestAnimationFrame(() => document.getElementById('fix-role')?.focus()); } }, ' 설명 바로잡기') : null));
     if (u.roleAbout) sec.lastElementChild?.prepend(h('span', {}, `${u.roleAbout} 기준 · `));
-    // A later description that did not replace this one (the person's correction, or the same or an unnamed version) reads apart.
-    if (u.laterRole) sec.append(h('p', { class: 'und-later' }, h('span', {}, u.corrected ? '이후 기록에서 읽은 설명' : '다른 기록의 설명 · 같은 판본이거나 판본 미상'), u.laterRole));
+    // Descriptions read later that did not replace this one (no record said it supersedes it) read apart, with their version.
+    for (const x of u.others.slice(0, 2)) sec.append(h('p', { class: 'und-later' }, h('span', {}, `다른 기록의 설명${x.about ? ` · ${x.about}` : ''} · 현재 설명을 대체한다는 근거 없음`), x.text));
   }
   if (u.claims.length) sec.append(claimList(u.claims, 12));
   const hist = h('details', { class: 'und-history' }, h('summary', {}, `근거 이력 · 정리 ${u.history.length}회`),

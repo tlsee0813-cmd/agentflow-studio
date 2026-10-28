@@ -307,7 +307,7 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
     const cached = memo.get(id); if (cached) return cached;
     const p = byId.get(id)!, kids = kidsOf(id).length > 0, extraW = chip(id), chrome = nodeChrome(kids, extraW);
     // The extra line under a name: the state when there is one, else the parent beside a name that repeats in the project.
-    const extra = p.status !== 'plan' || (names.get(p.name) ?? 0) > 1 ? 1 : 0;
+    const extra = p.status !== 'plan' || !!p.reading?.state || (names.get(p.name) ?? 0) > 1 ? 1 : 0;
     let m: Measure & { face?: Face };
     if (open(id, depth)) {
       const { sizes, at } = anchors(id, depth + 1);

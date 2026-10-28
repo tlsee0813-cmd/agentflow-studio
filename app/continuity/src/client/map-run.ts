@@ -55,7 +55,8 @@ export function createMapRun(host: MapRunHost) {
       catch (e) { state.error = MAP_ERROR[(e as Error).message] ?? '이 결과를 지도에 반영하지 못했어요. 지도와 기록은 그대로예요.'; return; }
       const failed = await host.commit(applied.project);
       if (failed) { state.error = failed; return; }
-      host.done(applied);
+      // Saved to the entry it was asked for; shown only if that entry is still the one open (another one is left as it is).
+      if (host.current()?.key === key) host.done(applied);
     } catch (e) {
       const code = e instanceof AskError ? e.code : 'NETWORK';
       if (code !== 'CANCELLED') state.error = MAP_ERROR[code] ?? ERROR_TEXT[code] ?? '지도를 정리하지 못했어요. 기록은 그대로예요.';

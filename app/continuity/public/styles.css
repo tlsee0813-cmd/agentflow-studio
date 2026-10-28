@@ -1193,3 +1193,4 @@ button:disabled { opacity: .5; cursor: default; }
 .rr-map .rm-cands ul, .rr-map .rm-gaps { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--text-2); }
 .rr-map .rm-gaps { margin-top: 8px; }
 .rr-map .rr-prov { margin-top: 10px; }
+.sec-understood .src .link-button { margin-left: 8px; font-size: 12px; }

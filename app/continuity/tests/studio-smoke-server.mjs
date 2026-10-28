@@ -62,9 +62,9 @@ function mapStub(input) {
   let content;
   if (!lines.length) content = { summary: '', parts: [], relations: [], candidates: [], gaps: ['[스텁] 프로그램을 말하는 기록을 붙여 주세요.'] };
   else if (!input.parts.length) content = { summary: '[스텁] 기록의 요구·보고·구상 줄을 부분으로 놓은 자리예요.', relations: [], candidates: [], gaps: [],
-    parts: lines.slice(0, 3).map((l, i) => ({ ref: `new:p${i}`, name: `스텁 부분 ${i + 1}`, parent: null, role: `[스텁] ${i + 1}번째 줄에 근거한 자리`, roleAbout: null, basis: [{ record: rec.id, quote: quote(l) }], claims: [claim(l)] })) };
+    parts: lines.slice(0, 3).map((l, i) => ({ ref: `new:p${i}`, name: `스텁 부분 ${i + 1}`, parent: null, role: `[스텁] ${i + 1}번째 줄에 근거한 자리`, roleAbout: null, roleReplaces: null, basis: [{ record: rec.id, quote: quote(l) }], claims: [claim(l)] })) };
   else content = { summary: '[스텁] 새 기록의 첫 줄을 첫 부분에 붙인 자리예요.', relations: [], candidates: [], gaps: [],
-    parts: [{ ref: input.parts[0].id, name: null, parent: null, role: null, roleAbout: null, basis: [], claims: [claim(lines[0])] }] };
+    parts: [{ ref: input.parts[0].id, name: null, parent: null, role: null, roleAbout: null, roleReplaces: null, basis: [], claims: [claim(lines[0])] }] };
   return new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(content) } }] }), { status: 200 });
 }
 const env = mode === 'nokey' ? {} : { DEEPSEEK_API_KEY: 'stub-key', DEEPSEEK_MODEL: 'stub-model', ...(mode === 'code' ? { STUDIO_ACCESS_CODE: 'smoke-code' } : {}) };
