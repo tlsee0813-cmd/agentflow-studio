@@ -12,8 +12,8 @@
       "bytes": 646
     },
     "independent-preservation.json": {
-      "sha256": "63210413e3d88b10a29188b249d29753ef46333cc113503546bff25a7fb76747",
-      "bytes": 7383
+      "sha256": "fbeb505b505531a95b0b56165c3e11334269f4bdaeb007592106c08e265cb1c8",
+      "bytes": 7384
     },
     "quote-roundtrip.json": {
       "sha256": "cd951187ebf86e7b2f60e8bf543cdd9cf4c316b8847f5cb5f22486358e916b67",
@@ -24,8 +24,8 @@
       "bytes": 112313
     },
     "upgrade-observation.json": {
-      "sha256": "c2a74213fe7ad68f53e6f7875a879c38d4d874545378270593ce9eb937f4e158",
-      "bytes": 2554
+      "sha256": "5d59f6e023630c606d8475cdb58f243d1a58063d24775ef3a2a1a53970d635c1",
+      "bytes": 2555
     },
     "withdrawal-source.png": {
       "sha256": "661d4b84c933d09d73408e75131bb0637f641204354d2e7caf84b94c1847196a",
