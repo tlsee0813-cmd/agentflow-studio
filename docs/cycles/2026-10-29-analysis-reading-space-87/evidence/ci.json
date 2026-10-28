@@ -1,0 +1,26 @@
+{
+  "source": "2999fd65c67754bd7a0bd0d45f9fd841fd3956e5",
+  "runId": 40781916884,
+  "checks": [
+    {
+      "name": "verify (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40781916884/job/123145458315",
+      "head": "2999fd65c67754bd7a0bd0d45f9fd841fd3956e5"
+    },
+    {
+      "name": "verify (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40781916884/job/123145457947",
+      "head": "2999fd65c67754bd7a0bd0d45f9fd841fd3956e5"
+    }
+  ],
+  "beforeRepair": {
+    "source": "e0ef0ba086c727af91f23ab4cf95202e9896fd5c",
+    "runId": 40780430427,
+    "bothOS": "success"
+  },
+  "meaning": "Exact source CI; independent visual review is separate"
+}

@@ -1,0 +1,59 @@
+{
+  "source": "2999fd65c67754bd7a0bd0d45f9fd841fd3956e5",
+  "appTree": "7beb4ba00211a1afd3b9549ef4eb08a55b2a8384",
+  "bytesMeaning": "Exact Git blob bytes after repository clean filters",
+  "files": {
+    "ci.json": {
+      "bytes": 859,
+      "sha256": "ec2023edce17791ebc8f863be4ad63a91f3fc63a36d92a9c2d751c76bf6fea57"
+    },
+    "cloud-n01-roundtrip-1440.json": {
+      "bytes": 55760,
+      "sha256": "e7edda8f67d0c7285249fd8019200690a4840aa12ebe6f23d7ffa3829e76a5a5"
+    },
+    "cloud-old-report-expanded-1440.json": {
+      "bytes": 69549,
+      "sha256": "c4101b685a54c6e8bb16d0f9994bd5761d8589553171bd1f536a7e4dcd4d2cd3"
+    },
+    "cloud-overview-1440.json": {
+      "bytes": 12672,
+      "sha256": "d3f7c977cc791d7e080a8aa332a696b62282820ce257476401b22f30f46b14f6"
+    },
+    "cloud-reading87-1440x900-1-list.png": {
+      "bytes": 219209,
+      "sha256": "a91f834360733f93788a391b3bda2050dc604e0a61421d199dbfd2768fd23494"
+    },
+    "cloud-reading87-1440x900-4-return.png": {
+      "bytes": 162363,
+      "sha256": "c57c81ec3ea9f0ccc538939af58f62f6c5d2070b4e0951ce1d5e6a30bb0f5bda"
+    },
+    "cloud-result.json": {
+      "bytes": 16352,
+      "sha256": "a9028f45f67cdfea162ef42d12481ef0cfd94ddca5d319e06728795609fb2c96"
+    },
+    "independent-code.json": {
+      "bytes": 4104,
+      "sha256": "c2f761784e1ca48d217a0b4188dae812a220d17c9bef07ff245c1cab1c8c6641"
+    },
+    "root-actual-overview-1280.jpg": {
+      "bytes": 129858,
+      "sha256": "5a593506d3b4d35c28b3cc3a89a7749b4b085746d88e744e30abe3cc74ff0120"
+    },
+    "root-actual-source.json": {
+      "bytes": 1794,
+      "sha256": "ed38abd7ce06bf426cd222784d9c5fb3e2c1c4a7e0ab2b2b552873df793453c0"
+    },
+    "root-build.json": {
+      "bytes": 961,
+      "sha256": "f26a4a6e26bfd469eb18cfda8e66d7372e7bf65fdf1c24db1d303c4669ffacd7"
+    },
+    "root-return-fix.json": {
+      "bytes": 4551,
+      "sha256": "e8bf469e6f83e5aabc15f663754671498fa643c1f2418e1c1279388b5740b444"
+    },
+    "root-synthetic-report-1280.jpg": {
+      "bytes": 92523,
+      "sha256": "ae06b631f4cb59968f88340d546c3c2f0760716373582e94d38119c6a3039814"
+    }
+  }
+}

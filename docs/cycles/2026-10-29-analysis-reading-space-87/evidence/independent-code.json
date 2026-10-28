@@ -1,0 +1,66 @@
+{
+  "task": "AF87-delta1-independent-code-review",
+  "base": "e0ef0ba086c727af91f23ab4cf95202e9896fd5c",
+  "source": "2999fd65c67754bd7a0bd0d45f9fd841fd3956e5",
+  "appTree": "7beb4ba00211a1afd3b9549ef4eb08a55b2a8384",
+  "conclusion": "보고한 P2의 코드 경계가 수리됐다. 두파일 delta에서 새 실질 P1/P2를 발견하지 못했다. 실제 PC의387.2 복원·동일 focus 수용은 총괄 관측과 별도다.",
+  "findings": [],
+  "resolution": {
+    "prior": ".ops/results/experience87-code-review.json#AF87-RESULTS-RETURN-POSITION",
+    "evidence": [
+      {
+        "file": "app/continuity/src/client/plan-view.ts",
+        "symbol": "leaveList",
+        "detail": "zero의 기본 request rail을 떠날 때만 현재 목록 scrollTop과 railEntry를 캡처한다. 다른 읽기 화면의 scroll이 기본 위치를 덮지 않는다."
+      },
+      {
+        "file": "app/continuity/src/client/plan-view.ts",
+        "symbol": "noChangeRail results button",
+        "detail": "돌아온 기록 진입 전에 leaveList('results')를 호출하고 data-entry=results를 둔다."
+      },
+      {
+        "file": "app/continuity/src/client/plan-view.ts",
+        "symbol": "railBack / entryOf",
+        "detail": "진입 제어를 로컬 변수로 가져온 뒤 상태를 초기화하고 기본 rail을 렌더한다. 기존 finishWork의 railAt 복원 후 실제 results/ref/sources 제어에 preventScroll focus한다. zero에서 사라진 plan-make를 찾는 기존 문제를 피한다."
+      },
+      {
+        "file": "app/continuity/src/client/plan-view.ts",
+        "symbol": "sourcesToggle",
+        "detail": "새 자료 관리로 들어갈 때도 leaveList('sources')를 호출한다. 열린 zero 관리 화면에서 toggle로 닫으면 railBack을 재사용해 별도 render가 중복되지 않는다."
+      },
+      {
+        "file": "app/continuity/src/client/plan-view.ts",
+        "symbol": "escape",
+        "detail": "직전87의 zero Escape→railBack 연결이 그대로라 뒤로 버튼과 같은 저장/복귀 상태를 쓴다."
+      }
+    ],
+    "sourceRefPreservation": "N01 등 ref 진입은 leaveList('ref:'+ref)로 같은 구조를 사용한다. CSS.escape로 동일 data-ref 제어를 찾고 preventScroll focus해 목록 복원을 덮지 않는다."
+  },
+  "unchangedBoundaries": [
+    "leaveList는 noChange()와 rail=request에서만 동작한다. 양수 item/selected0의 requestRail 및 기존 plan-make 복귀 경로는 유지된다.",
+    "입력 자료는 같은 p.evidence, 새 입력 자료 관리는 writing에 따른 input().evidence를 쓰는 기존 분리다. 이 delta는 해당 데이터 계산을 바꾸지 않는다.",
+    "이전 요청문·반환·보고 본문·원문 연결 상태와 neutral zero 의미를 바꾸지 않는다.",
+    "새 railEntry는 Session의 같은 탭 읽기 상태다. bundle/store/schema/API/server/model/prompt 변경이 없다.",
+    "직전87의 finishWork selectionDirection 보정은 delta에서 제거하지 않았다."
+  ],
+  "testsRead": {
+    "file": "app/continuity/tests/studio_browser.py",
+    "addedAssertions": "과거 반환의 back/Escape 각각 목록 위치와 results 버튼 focus를 비교한다. 새 자료 관리의 Escape/toggle 및 자료 추가 후 back에서 위치와 count 버튼 focus를 비교한다.",
+    "executed": false,
+    "qualification": "작성된 검사는 이번 코드 반례에 맞는 경계를 확인하도록 되어 있다. 검사가 실제 통과했거나 고정5.8.3/실제 PC에서 수용됐다고 이 리뷰가 주장하지 않는다."
+  },
+  "actions": {
+    "productWrites": 0,
+    "runnerWrites": 0,
+    "ui": 0,
+    "api": 0,
+    "model": 0,
+    "tests": 0,
+    "review": "두파일 diff와 관련 기존 복귀 경로만 읽음",
+    "onlyWrite": ".ops/results/experience87-delta1-code-review.json"
+  },
+  "limits": [
+    "CSS/화면 밀도·실제 scroll 소수점·keyboard focus의 운영체제별 결과는 코드 읽기로 최종 입증하지 못한다.",
+    "직전 수용 범위와 첫 지도·모델 의미 판정을 반복하지 않았다."
+  ]
+}

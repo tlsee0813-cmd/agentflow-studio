@@ -1,0 +1,123 @@
+{
+  "before": {
+    "source": "e0ef0ba086c727af91f23ab4cf95202e9896fd5c",
+    "input": "unchanged recovered Cloud85 reviewer-written synthetic bundle",
+    "viewport": {
+      "width": 1280,
+      "height": 720,
+      "dpr": 1.25
+    },
+    "back": {
+      "beforeScroll": 387.2000122070313,
+      "afterScroll": 0,
+      "focus": {
+        "id": "",
+        "tag": "BODY"
+      }
+    },
+    "escape": {
+      "beforeScroll": 387.2000122070313,
+      "afterScroll": 0,
+      "focus": {
+        "id": "",
+        "tag": "BODY"
+      }
+    },
+    "providerCalls": 0
+  },
+  "after": {
+    "source": "2999fd65c67754bd7a0bd0d45f9fd841fd3956e5",
+    "viewport": {
+      "width": 1280,
+      "height": 720,
+      "dpr": 1.25
+    },
+    "returned": {
+      "before": {
+        "url": "http://127.0.0.1:4393/#/p/E_c5c87acb-f2fb-40c6-9092-24057192b65f/in/A_49bad1f8-971b-4bff-8030-a62d8a470c16/A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+        "detail": 0,
+        "rail": 364.7999877929687,
+        "caret": null,
+        "world": "top: -134px; transform: translate(387.7px, 172px) scale(1);",
+        "focus": {
+          "id": "plan-title",
+          "text": "제안된 변경 없음"
+        }
+      },
+      "back": {
+        "url": "http://127.0.0.1:4393/#/p/E_c5c87acb-f2fb-40c6-9092-24057192b65f/in/A_49bad1f8-971b-4bff-8030-a62d8a470c16/A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+        "detail": 0,
+        "rail": 364.7999877929687,
+        "caret": null,
+        "world": "top: -177px; transform: translate(387.7px, 172px) scale(1);",
+        "focus": {
+          "text": "돌아온 기록 · 요청문 1개"
+        }
+      },
+      "escape": {
+        "url": "http://127.0.0.1:4393/#/p/E_c5c87acb-f2fb-40c6-9092-24057192b65f/in/A_49bad1f8-971b-4bff-8030-a62d8a470c16/A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+        "detail": 0,
+        "rail": 364.7999877929687,
+        "caret": null,
+        "world": "top: -177px; transform: translate(387.7px, 172px) scale(1);",
+        "focus": {
+          "text": "돌아온 기록 · 요청문 1개"
+        }
+      }
+    },
+    "inputMaterials": {
+      "before": {
+        "url": "http://127.0.0.1:4393/#/p/E_c5c87acb-f2fb-40c6-9092-24057192b65f/in/A_49bad1f8-971b-4bff-8030-a62d8a470c16/A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+        "detail": 0,
+        "rail": 364.7999877929687,
+        "caret": [
+          88,
+          88,
+          "forward",
+          "이 부분에서 메모리 제한과 시간 제한으로 끝난 이유를 호출자가 구별해 설명할 수 있게 하고 싶다. 기존 eval 실행 순서와 전역 객체 공유 동작은 유지한다."
+        ],
+        "world": "top: -177px; transform: translate(387.7px, 172px) scale(1);",
+        "focus": {
+          "id": "plan-intent"
+        }
+      },
+      "escape": {
+        "url": "http://127.0.0.1:4393/#/p/E_c5c87acb-f2fb-40c6-9092-24057192b65f/in/A_49bad1f8-971b-4bff-8030-a62d8a470c16/A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+        "detail": 0,
+        "rail": 364.7999877929687,
+        "caret": [
+          88,
+          88,
+          "forward",
+          "이 부분에서 메모리 제한과 시간 제한으로 끝난 이유를 호출자가 구별해 설명할 수 있게 하고 싶다. 기존 eval 실행 순서와 전역 객체 공유 동작은 유지한다."
+        ],
+        "world": "top: -177px; transform: translate(387.7px, 172px) scale(1);",
+        "focus": {
+          "text": "읽는 자료 9개"
+        }
+      },
+      "toggle": {
+        "url": "http://127.0.0.1:4393/#/p/E_c5c87acb-f2fb-40c6-9092-24057192b65f/in/A_49bad1f8-971b-4bff-8030-a62d8a470c16/A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+        "detail": 0,
+        "rail": 364.7999877929687,
+        "caret": [
+          88,
+          88,
+          "forward",
+          "이 부분에서 메모리 제한과 시간 제한으로 끝난 이유를 호출자가 구별해 설명할 수 있게 하고 싶다. 기존 eval 실행 순서와 전역 객체 공유 동작은 유지한다."
+        ],
+        "world": "top: -177px; transform: translate(387.7px, 172px) scale(1);",
+        "focus": {
+          "text": "읽는 자료 9개"
+        }
+      }
+    },
+    "providerCalls": 0
+  },
+  "preservation": {
+    "entireSyntheticBundleEqual": true,
+    "method": "Normal file import/export; no storage injection",
+    "actualAnalysisRestored": true
+  },
+  "geometryNote": "Before imported file message remained visible; after reload that message was gone. Within each run the return position is compared with that run’s own list position."
+}

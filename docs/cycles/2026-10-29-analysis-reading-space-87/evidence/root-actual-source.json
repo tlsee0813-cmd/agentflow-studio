@@ -1,0 +1,46 @@
+{
+  "source": "2999fd65c67754bd7a0bd0d45f9fd841fd3956e5",
+  "viewport": {
+    "width": 1280,
+    "height": 720,
+    "dpr": 1.25
+  },
+  "input": "actual85 saved analysis restored via normal file import",
+  "before": {
+    "caret": [
+      71,
+      88,
+      "backward",
+      "이 부분에서 메모리 제한과 시간 제한으로 끝난 이유를 호출자가 구별해 설명할 수 있게 하고 싶다. 기존 eval 실행 순서와 전역 객체 공유 동작은 유지한다."
+    ],
+    "detail": 144.8000030517578,
+    "focus": {
+      "id": "plan-intent",
+      "ref": null,
+      "text": ""
+    },
+    "rail": 217.6000061035156,
+    "url": "http://127.0.0.1:4393/#/p/E_c5c87acb-f2fb-40c6-9092-24057192b65f/in/A_49bad1f8-971b-4bff-8030-a62d8a470c16/A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+    "world": "top: -177px; transform: translate(387.7px, 172px) scale(1);"
+  },
+  "after": {
+    "caret": [
+      71,
+      88,
+      "backward",
+      "이 부분에서 메모리 제한과 시간 제한으로 끝난 이유를 호출자가 구별해 설명할 수 있게 하고 싶다. 기존 eval 실행 순서와 전역 객체 공유 동작은 유지한다."
+    ],
+    "detail": 144.8000030517578,
+    "focus": {
+      "id": "",
+      "ref": "N01",
+      "text": "붙여넣은 기록N01붙여넣은 기록 · Source: https://github.com/simonw/micro-javascript/blob/86236b28d2ad0a5b9896c2432d109aed3d0933ee/src/microjs/context.py#L1124-L1155"
+    },
+    "rail": 217.6000061035156,
+    "url": "http://127.0.0.1:4393/#/p/E_c5c87acb-f2fb-40c6-9092-24057192b65f/in/A_49bad1f8-971b-4bff-8030-a62d8a470c16/A_49bad1f8-971b-4bff-8030-a62d8a470c16",
+    "world": "top: -177px; transform: translate(387.7px, 172px) scale(1);"
+  },
+  "sourceExact": true,
+  "sourceLength": 1369,
+  "providerCalls": 0
+}

@@ -1,0 +1,32 @@
+{
+  "source": "2999fd65c67754bd7a0bd0d45f9fd841fd3956e5",
+  "appTree": "7beb4ba00211a1afd3b9549ef4eb08a55b2a8384",
+  "compiler": "5.8.3",
+  "compilerSource": "app/node_modules locked dependency",
+  "execSession": 56220,
+  "exitCode": 0,
+  "checks": [
+    "continuity/scripts/check.mjs",
+    "continuity/scripts/build.mjs"
+  ],
+  "targetedNodeTests": {
+    "source": "e0ef0ba086c727af91f23ab4cf95202e9896fd5c",
+    "passed": 40,
+    "rerunOnDelta1": false
+  },
+  "providerCalls": 0,
+  "files": [
+    {
+      "file": "app/continuity/dist/public/client/plan-view.js",
+      "sha256": "9f60e2d8bdc2a2a609456de176f3bb6f7ed7d6a8dde1ef2448122a9522ba4c71"
+    },
+    {
+      "file": "app/continuity/dist/public/styles.css",
+      "sha256": "f0c9e7eadba725e819fdb5a2e958d82852099f8ef15021e7e4ca3dc2b12fd6e4"
+    },
+    {
+      "file": "app/continuity/dist/public/BUILD.txt",
+      "sha256": "85021f388fb91b30b2552eb22cb5e1f7650c832cbd3476c637eb05091f602597"
+    }
+  ]
+}

@@ -1,0 +1,352 @@
+{
+  "viewport": {
+    "width": 1440,
+    "height": 900,
+    "dpr": 1
+  },
+  "colorScheme": "light",
+  "font": "system-ui, -apple-system, \"Segoe UI\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", \"Malgun Gothic\", sans-serif",
+  "language": "ko-KR",
+  "url": "http://127.0.0.1:39807/#/p/E_0bc79aeb-8421-4868-b5e3-8939eeb1e10d",
+  "camera": "translate(293.6px, 332px) scale(1)",
+  "panelVisible": true,
+  "railView": "request",
+  "rail": {
+    "box": {
+      "x": 1081,
+      "y": 52,
+      "width": 359,
+      "height": 781,
+      "bottom": 833,
+      "right": 1440
+    },
+    "scroll": 0,
+    "height": 781,
+    "scrollHeight": 873
+  },
+  "body": {
+    "box": {
+      "x": 0,
+      "y": 128.5625,
+      "width": 1080,
+      "height": 771.4375,
+      "bottom": 900,
+      "right": 1080
+    },
+    "scroll": 0,
+    "height": 771,
+    "scrollHeight": 771
+  },
+  "textarea": null,
+  "focus": {
+    "id": "",
+    "tag": "BODY",
+    "ref": null,
+    "entry": null,
+    "classes": "",
+    "text": "AgentFlow Studio\n프로젝트\n›\nmicro-javascript\n돌아와 읽기\n변경 구상\n현재\n변경 미리보기\nAI 정리 가능\nmicro-javascript\n3\n›\nJSContext.eval 평가 API\n설명만 있음\n↔ 2\n바깥 관계 2\n1\n›\nES5+ 언어 기능\n설명만 있음\n오류 처리\n설명만 있음\nmicro-javascript\n\n순수 파이썬 JavaScript 엔진으로, 소스를 파싱·바이트코드 컴파일·VM 실행해 파이썬"
+  },
+  "document": {
+    "width": 1440,
+    "height": 900
+  },
+  "title": "제안된 변경 없음",
+  "visiblePanel": "변경 구상\nAI 분석 · deepseek-flash · 방금\n\n제안된 변경 없음\n적은 문장 펼쳐 읽기\n문장 고치기\n지도로 돌아가기\n이번 분석에서 제안된 변경이 없어요\n\n변경이 필요 없다고 확인했거나 바라는 결과가 이미 이루어졌다는 뜻은 아니에요. 요청에 넣을 변경이 없어 요청문은 만들지 않아요.\n\n분석이 읽은 것\n\n제공된 자료에서는 eval이 메모리 초과 시 MemoryLimitError, 시간 초과 시 TimeLimitError를 각각 발생시킨다고 독스트링에 적혀 있어 예외 타입으로 사유를 구별하는 계약은 이미 있습니다. 다만 호출자가 사유를 '설명'할 수 있을 만큼 예외 메시지·세부 정보가 실제로 구분되는지는 제공된 자료로 확인되지 않아, 이번 분석에서는 변경안을 제안하지 않습니다.\n\n지킬 것 3\neval의 파싱→바이트코드 컴파일→VM 실행→파이썬 값 변환 순서\nVM에 전역 객체를 복사하지 않고 공유해 중첩 eval이 전역을 수정할 수 있는 동작\n메모리 한도와 시간 한도를 VM 생성 시 전달하는 방식\n아직 확인하지 않은 것 3\nMemoryLimitError와 TimeLimitError가 실제로 각각 발생하는지, 그리고 예외 메시지·부가 정보가 사유를 설명할 만큼 서로 구분되는지(제공된 자료로 확인되지 않음)\n호출자가 구별해 설명하는 데 필요한 정보의 형태(예외 타입 외 메시지, 속성 등)와 그 요구 수준\n위 동작을 검증하는 검사 자료(제공된 자료로 확인되지 않음)\n이번 분석에 넣은 자료 9\n사용자 발언\nINTENT\n지금 쓴 변경 구상\n기록에서 읽은 이해\nM01\nmicro-javascript · 기록에서 읽은 이해\n기록에서 읽은 이해\nM02\nmicro-javascript › JSContext.eval 평가 API · 기록에서 읽은 이해\n기록에서 읽은 이해\nM03\nmicro-javascript › JSContext.eval 평가 API › 평가 실행 파이프라인 · 기록에서 읽은 이해\n기록에서 읽은 이해\nM04\nmicro-javascript › JSContext.eval 평가 API › 평가 실행 파이프라인 › 메모리·시간 제한 · 기록에서 읽은 이해\n기록에서 읽은 이해\nM05\nmicro-javascript › ES5+ 언어 기능 · 기록에서 읽은 이해\n기록에서 읽은 이해\nM06\nmicro-javascript › 오류 처리 · 기록에서 읽은 이해\n붙여넣은 기록\nN01\n붙여넣은 기록 · Source: https://github.com/simonw/micro-javascript/blob/86236b28d2ad0a5b9896c2432d109aed3d0933ee/src/microjs/context.py#L1124-L1155\n붙여넣은 기록\nN02\n붙여넣은 기록 · Source: https://github.com/simonw/micro-javascript/blob/86236b28d2ad0a5b9896c2432d109aed3d0933ee/README.md#L8-L82\n\n이 분석에 보낸 자료예요. 문장마다 근거를 확인한 표시는 아니에요. 고친 문장이나 붙인 자료는 다시 살펴볼 때 들어가요.\n\n이전 요청\n마지막 요청문 · 방금\n돌아온 기록 · 요청문 1개\n돌아와 읽기\n\n마지막 요청문 뒤로 다시 살펴봤어요. 이전 요청문과 돌아온 기록은 만든 때 그대로예요.\n\n이 브라우저에 저장 · 프로젝트 백업과 별도\n파일로 내보내기\n가져오기",
+  "refs": [
+    {
+      "id": "INTENT",
+      "kind": "사용자 발언",
+      "title": "지금 쓴 변경 구상",
+      "box": {
+        "x": 1095,
+        "y": 102.5,
+        "width": 331,
+        "height": 46.59375,
+        "bottom": 149.09375,
+        "right": 1426
+      },
+      "titleBox": {
+        "x": 1101,
+        "y": 126.25,
+        "width": 93.875,
+        "height": 18.84375,
+        "bottom": 145.09375,
+        "right": 1194.875
+      },
+      "titleClip": false
+    },
+    {
+      "id": "M01",
+      "kind": "기록에서 읽은 이해",
+      "title": "micro-javascript · 기록에서 읽은 이해",
+      "box": {
+        "x": 1095,
+        "y": 149.09375,
+        "width": 331,
+        "height": 46.59375,
+        "bottom": 195.6875,
+        "right": 1426
+      },
+      "titleBox": {
+        "x": 1101,
+        "y": 172.84375,
+        "width": 210.015625,
+        "height": 18.84375,
+        "bottom": 191.6875,
+        "right": 1311.015625
+      },
+      "titleClip": false
+    },
+    {
+      "id": "M02",
+      "kind": "기록에서 읽은 이해",
+      "title": "micro-javascript › JSContext.eval 평가 API · 기록에서 읽은 이해",
+      "box": {
+        "x": 1095,
+        "y": 195.6875,
+        "width": 331,
+        "height": 65.4375,
+        "bottom": 261.125,
+        "right": 1426
+      },
+      "titleBox": {
+        "x": 1101,
+        "y": 219.4375,
+        "width": 319,
+        "height": 37.6875,
+        "bottom": 257.125,
+        "right": 1420
+      },
+      "titleClip": false
+    },
+    {
+      "id": "M03",
+      "kind": "기록에서 읽은 이해",
+      "title": "micro-javascript › JSContext.eval 평가 API › 평가 실행 파이프라인 · 기록에서 읽은 이해",
+      "box": {
+        "x": 1095,
+        "y": 261.125,
+        "width": 331,
+        "height": 65.4375,
+        "bottom": 326.5625,
+        "right": 1426
+      },
+      "titleBox": {
+        "x": 1101,
+        "y": 284.875,
+        "width": 319,
+        "height": 37.6875,
+        "bottom": 322.5625,
+        "right": 1420
+      },
+      "titleClip": false
+    },
+    {
+      "id": "M04",
+      "kind": "기록에서 읽은 이해",
+      "title": "micro-javascript › JSContext.eval 평가 API › 평가 실행 파이프라인 › 메모리·시간 제한 · 기록에서 읽은 이해",
+      "box": {
+        "x": 1095,
+        "y": 326.5625,
+        "width": 331,
+        "height": 65.4375,
+        "bottom": 392,
+        "right": 1426
+      },
+      "titleBox": {
+        "x": 1101,
+        "y": 350.3125,
+        "width": 319,
+        "height": 37.6875,
+        "bottom": 388,
+        "right": 1420
+      },
+      "titleClip": false
+    },
+    {
+      "id": "M05",
+      "kind": "기록에서 읽은 이해",
+      "title": "micro-javascript › ES5+ 언어 기능 · 기록에서 읽은 이해",
+      "box": {
+        "x": 1095,
+        "y": 392,
+        "width": 331,
+        "height": 46.59375,
+        "bottom": 438.59375,
+        "right": 1426
+      },
+      "titleBox": {
+        "x": 1101,
+        "y": 415.75,
+        "width": 304.65625,
+        "height": 18.84375,
+        "bottom": 434.59375,
+        "right": 1405.65625
+      },
+      "titleClip": false
+    },
+    {
+      "id": "M06",
+      "kind": "기록에서 읽은 이해",
+      "title": "micro-javascript › 오류 처리 · 기록에서 읽은 이해",
+      "box": {
+        "x": 1095,
+        "y": 438.59375,
+        "width": 331,
+        "height": 46.59375,
+        "bottom": 485.1875,
+        "right": 1426
+      },
+      "titleBox": {
+        "x": 1101,
+        "y": 462.34375,
+        "width": 272.03125,
+        "height": 18.84375,
+        "bottom": 481.1875,
+        "right": 1373.03125
+      },
+      "titleClip": false
+    },
+    {
+      "id": "N01",
+      "kind": "붙여넣은 기록",
+      "title": "붙여넣은 기록 · Source: https://github.com/simonw/micro-javascript/blob/86236b28d2ad0a5b9896c2432d109aed3d0933ee/src/microjs/context.py#L1124-L1155",
+      "box": {
+        "x": 1095,
+        "y": 485.1875,
+        "width": 331,
+        "height": 103.125,
+        "bottom": 588.3125,
+        "right": 1426
+      },
+      "titleBox": {
+        "x": 1101,
+        "y": 508.9375,
+        "width": 319,
+        "height": 75.375,
+        "bottom": 584.3125,
+        "right": 1420
+      },
+      "titleClip": false
+    },
+    {
+      "id": "N02",
+      "kind": "붙여넣은 기록",
+      "title": "붙여넣은 기록 · Source: https://github.com/simonw/micro-javascript/blob/86236b28d2ad0a5b9896c2432d109aed3d0933ee/README.md#L8-L82",
+      "box": {
+        "x": 1095,
+        "y": 588.3125,
+        "width": 331,
+        "height": 103.125,
+        "bottom": 691.4375,
+        "right": 1426
+      },
+      "titleBox": {
+        "x": 1101,
+        "y": 612.0625,
+        "width": 319,
+        "height": 75.375,
+        "bottom": 687.4375,
+        "right": 1420
+      },
+      "titleClip": false
+    }
+  ],
+  "openReports": [],
+  "sourceText": null,
+  "buttons": [
+    {
+      "text": "적은 문장 펼쳐 읽기",
+      "disabled": false,
+      "aria": null
+    },
+    {
+      "text": "문장 고치기",
+      "disabled": false,
+      "aria": null
+    },
+    {
+      "text": "지도로 돌아가기",
+      "disabled": false,
+      "aria": null
+    },
+    {
+      "text": "사용자 발언\nINTENT\n지금 쓴 변경 구상",
+      "disabled": false,
+      "aria": null
+    },
+    {
+      "text": "기록에서 읽은 이해\nM01\nmicro-javascript · 기록에서 읽은 이해",
+      "disabled": false,
+      "aria": null
+    },
+    {
+      "text": "기록에서 읽은 이해\nM02\nmicro-javascript › JSContext.eval 평가 API · 기록에서 읽은 이해",
+      "disabled": false,
+      "aria": null
+    },
+    {
+      "text": "기록에서 읽은 이해\nM03\nmicro-javascript › JSContext.eval 평가 API › 평가 실행 파이프라인 · 기록에서 읽은 이해",
+      "disabled": false,
+      "aria": null
+    },
+    {
+      "text": "기록에서 읽은 이해\nM04\nmicro-javascript › JSContext.eval 평가 API › 평가 실행 파이프라인 › 메모리·시간 제한 · 기록에서 읽은 이해",
+      "disabled": false,
+      "aria": null
+    },
+    {
+      "text": "기록에서 읽은 이해\nM05\nmicro-javascript › ES5+ 언어 기능 · 기록에서 읽은 이해",
+      "disabled": false,
+      "aria": null
+    },
+    {
+      "text": "기록에서 읽은 이해\nM06\nmicro-javascript › 오류 처리 · 기록에서 읽은 이해",
+      "disabled": false,
+      "aria": null
+    },
+    {
+      "text": "붙여넣은 기록\nN01\n붙여넣은 기록 · Source: https://github.com/simonw/micro-javascript/blob/86236b28d2ad0a5b9896c2432d109aed3d0933ee/src/microjs/context.py#L1124-L1155",
+      "disabled": false,
+      "aria": null
+    },
+    {
+      "text": "붙여넣은 기록\nN02\n붙여넣은 기록 · Source: https://github.com/simonw/micro-javascript/blob/86236b28d2ad0a5b9896c2432d109aed3d0933ee/README.md#L8-L82",
+      "disabled": false,
+      "aria": null
+    },
+    {
+      "text": "마지막 요청문 · 방금",
+      "disabled": false,
+      "aria": null
+    },
+    {
+      "text": "돌아온 기록 · 요청문 1개",
+      "disabled": false,
+      "aria": null
+    },
+    {
+      "text": "돌아와 읽기",
+      "disabled": false,
+      "aria": null
+    },
+    {
+      "text": "파일로 내보내기",
+      "disabled": false,
+      "aria": null
+    },
+    {
+      "text": "가져오기",
+      "disabled": false,
+      "aria": null
+    }
+  ],
+  "sequence": 38,
+  "stage": "1-list",
+  "source": "2999fd65c67754bd7a0bd0d45f9fd841fd3956e5",
+  "atUTC": "2026-10-28T22:48:38.102798+00:00",
+  "png": {
+    "path": "/workspace/work/af87-observation/reading87-1440x900-1-list.png",
+    "sha256": "a91f834360733f93788a391b3bda2050dc604e0a61421d199dbfd2768fd23494"
+  }
+}

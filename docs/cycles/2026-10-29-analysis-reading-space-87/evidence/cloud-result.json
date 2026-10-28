@@ -1,0 +1,394 @@
+{
+  "request": "AF-CLOUD-20261029-87",
+  "source": "2999fd65c67754bd7a0bd0d45f9fd841fd3956e5",
+  "appTree": "7beb4ba00211a1afd3b9549ef4eb08a55b2a8384",
+  "providedBuild": true,
+  "zip": {
+    "name": "agentflow-experience87-2999fd6-review.zip",
+    "bytes": 1262340,
+    "sha256": "07b390abdd997af4ff2b572d91661641fa5704821f18ecf4f3f07cb896ce4923",
+    "entries": 247,
+    "payloadHashesVerified": 246,
+    "safePaths": true,
+    "crc": "PASS"
+  },
+  "command": "python3 /workspace/work/af87-run.py",
+  "serverCommand": "studio_browser.start(\"ok\") -> node tests/studio-smoke-server.mjs",
+  "startedUTC": "2026-10-28T22:48:26.870274+00:00",
+  "endedUTC": "2026-10-28T22:48:41.105743+00:00",
+  "durationSeconds": 14.235,
+  "exit": 0,
+  "cleanup": {
+    "browserClosed": true,
+    "serverStopped": true,
+    "serverExit": -15
+  },
+  "verdict": "PASS — AF87 frozen-material reading rail delta only",
+  "findings": [],
+  "resolvedDelta": "N01, returned-report back/Escape and input-management back/Escape/toggle return to the same frozen-list place and correct entry focus at both tested PC sizes.",
+  "visualJudgment": {
+    "accepted": "The left summary/preserve/unknowns and right frozen-input list form clear reading columns; labels and whole titles remain legible, without overlap or horizontal document scrolling. Expanded prior report and source text can be read alongside the unchanged analysis.",
+    "limits": [
+      "Long repeated ancestry and hash-bearing URLs remain visually dense. At 1280 N02 and previous-request entries require list scrolling; this is access cost, not disappearance.",
+      "At 1440 substantial white space remains below the short analysis. Space reduction alone is not evidence of usability success.",
+      "No timed human usability study, first-map quality or overall product completion conclusion."
+    ]
+  },
+  "environment": {
+    "os": "Debian GNU/Linux 13 (Linux)",
+    "node": "v24.19.0",
+    "chromium": "154.0.8037.57 /usr/bin/chromium",
+    "pythonPlaywright": "existing Python3.12 runtime",
+    "colorScheme": "light",
+    "deviceScaleFactor": 1,
+    "locale": "ko-KR",
+    "timezone": "Asia/Seoul",
+    "computedBodyFont": "system-ui, -apple-system, \"Segoe UI\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", \"Malgun Gothic\", sans-serif",
+    "fcMatchSystemUI": "OpenAI Sans Regular; per-glyph Korean fallback not independently enumerated"
+  },
+  "actual85": {
+    "fileSHA256": "21c03c6260a16bd5a65aaea65dea2d152ed17d431d0c7f288f2a9823b1c141c4",
+    "savedSource": "ffe60935a6f7f5760fb9a1a72ca66e8ab8693fa3",
+    "renderSource": "2999fd65c67754bd7a0bd0d45f9fd841fd3956e5",
+    "recordedProviderRequests": 1,
+    "cloudFreshProviderRequests": 0,
+    "askSHA256": "9d9b2533e8643c57f6e39d2d8b9453eb1f99a1fcf264ed00653a5c63d8c82a0d",
+    "askDigestIndependentMatch": true,
+    "replySHA256": "5d08c4c3a8faa6cbf8db8d11b70ed8712fcc76d1ef4d1d0addbaa10492393469",
+    "replyItems": 0,
+    "preserve": 3,
+    "unknowns": 3,
+    "evidence": [
+      [
+        "INTENT",
+        "user",
+        "지금 쓴 변경 구상",
+        88
+      ],
+      [
+        "M01",
+        "reading",
+        "micro-javascript · 기록에서 읽은 이해",
+        1093
+      ],
+      [
+        "M02",
+        "reading",
+        "micro-javascript › JSContext.eval 평가 API · 기록에서 읽은 이해",
+        880
+      ],
+      [
+        "M03",
+        "reading",
+        "micro-javascript › JSContext.eval 평가 API › 평가 실행 파이프라인 · 기록에서 읽은 이해",
+        1396
+      ],
+      [
+        "M04",
+        "reading",
+        "micro-javascript › JSContext.eval 평가 API › 평가 실행 파이프라인 › 메모리·시간 제한 · 기록에서 읽은 이해",
+        570
+      ],
+      [
+        "M05",
+        "reading",
+        "micro-javascript › ES5+ 언어 기능 · 기록에서 읽은 이해",
+        1884
+      ],
+      [
+        "M06",
+        "reading",
+        "micro-javascript › 오류 처리 · 기록에서 읽은 이해",
+        619
+      ],
+      [
+        "N01",
+        "record",
+        "붙여넣은 기록 · Source: https://github.com/simonw/micro-javascript/blob/86236b28d2ad0a5b9896c2432d109aed3d0933ee/src/microjs/context.py#L1124-L1155",
+        1369
+      ],
+      [
+        "N02",
+        "record",
+        "붙여넣은 기록 · Source: https://github.com/simonw/micro-javascript/blob/86236b28d2ad0a5b9896c2432d109aed3d0933ee/README.md#L8-L82",
+        2595
+      ]
+    ],
+    "replayMatch": "Supplied flow checked schema/intent and id-kind-title-text order; evidence basis timestamps were explicitly excluded. No strict full-JSON replay equivalence claimed.",
+    "prior85LocalCopy": "An additional old actual-model.json was not present locally; exact archived blob hash/provenance and contained ask/reply were checked, not an independently fetched old Git blob."
+  },
+  "fixture": {
+    "path": "app/continuity/tests/fixtures/context75/micro-javascript-backup.json",
+    "sha256": "aaffb3764afc68f054d05ff54f4e2b5bf72b5b0abfc259d0bfc1deda666f8065",
+    "provenance": "Actual74 saved model reading over fixed public excerpts; not OSS execution. Old positive plan/request/return and newly added report are reviewer synthetic fixtures. Supplied test seeds review bundle/storage; no fresh model analysis."
+  },
+  "pcs": [
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 720,
+        "dpr": 1
+      },
+      "reading87Flow": "PASS once",
+      "flowSeconds": 6.978,
+      "overviewSequence": 2,
+      "bodyRailWidths": [
+        960,
+        319
+      ],
+      "all9EvidenceIdKindTitleTextOrderPreserved": true,
+      "summaryPreserveUnknowns": "Exact actual85 summary + preserve3 + unknowns3 verified by unchanged flow",
+      "n01Chars": 1369,
+      "n01IndependentScrollBeforeAndAfter": [
+        73,
+        346
+      ],
+      "n01SourceScroll": 870,
+      "n01Selection": [
+        5,
+        12,
+        "backward"
+      ],
+      "n01Invariants": {
+        "url": true,
+        "camera": true,
+        "textarea": true,
+        "draft": true,
+        "authoring": true,
+        "planSHA256": true,
+        "frozenHashes": true
+      },
+      "reportBackAndEscape": "Both committed assertions passed; raw return snapshot after both actions retained",
+      "reportReturnScroll": 346,
+      "reportReturnFocus": "results",
+      "inputManagementEscapeToggleBack": "All committed assertions passed; after-toggle and after-back raw snapshots retained",
+      "inputManagementReturnScroll": 346,
+      "inputManagementReturnFocus": "link-button quiet pp-sources-count",
+      "inputBeforeAddedCount": 9,
+      "inputAfterAddedCount": 10,
+      "frozenEvidenceCountAfterAddition": 9,
+      "oldFrozenHashes": {
+        "snapshots": "267d2fb819c9a772b41189ccccc38b99534bdb0f54be52f43d78e4bf03362ff8",
+        "labels": "000efd766c57a8aacaa05a898bff521021e8b3450e6d050bfd1609da60f3b070",
+        "origins": "3ce9e4b8b7929c5e4f309717b6a49c04669b0d831824492bb7aa760255120806",
+        "observations": "02423d3b73bb6b52c108c7aaa022a81a1b3aca9033898e35649f275661965624",
+        "attached": "54c6d959425ee9415e3ed1206226c649777657e427965c9d87ba928422a93f2f"
+      },
+      "afterFrozenHashes": {
+        "snapshots": "267d2fb819c9a772b41189ccccc38b99534bdb0f54be52f43d78e4bf03362ff8",
+        "labels": "000efd766c57a8aacaa05a898bff521021e8b3450e6d050bfd1609da60f3b070",
+        "origins": "3ce9e4b8b7929c5e4f309717b6a49c04669b0d831824492bb7aa760255120806",
+        "observations": "02423d3b73bb6b52c108c7aaa022a81a1b3aca9033898e35649f275661965624",
+        "attached": "54c6d959425ee9415e3ed1206226c649777657e427965c9d87ba928422a93f2f"
+      },
+      "positiveItemsSelected0": "Native checkbox uncheck/check; request-selection rail retained, make disabled, no zero-source rail",
+      "closeReopenDraftAuthoring": "PASS",
+      "camera": "translate(235.2px, 332px) scale(1)",
+      "cameraUnchangedAllSnapshots": true,
+      "rawObservationSHA256": "854fcf02b9bd3792c83a0888f5d0115ecab7ce3eaca9fe61887c8dd8e949f7b7"
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "dpr": 1
+      },
+      "reading87Flow": "PASS once",
+      "flowSeconds": 5.576,
+      "overviewSequence": 38,
+      "bodyRailWidths": [
+        1080,
+        359
+      ],
+      "all9EvidenceIdKindTitleTextOrderPreserved": true,
+      "summaryPreserveUnknowns": "Exact actual85 summary + preserve3 + unknowns3 verified by unchanged flow",
+      "n01Chars": 1369,
+      "n01IndependentScrollBeforeAndAfter": [
+        0,
+        92
+      ],
+      "n01SourceScroll": 565,
+      "n01Selection": [
+        5,
+        12,
+        "backward"
+      ],
+      "n01Invariants": {
+        "url": true,
+        "camera": true,
+        "textarea": true,
+        "draft": true,
+        "authoring": true,
+        "planSHA256": true,
+        "frozenHashes": true
+      },
+      "reportBackAndEscape": "Both committed assertions passed; raw return snapshot after both actions retained",
+      "reportReturnScroll": 92,
+      "reportReturnFocus": "results",
+      "inputManagementEscapeToggleBack": "All committed assertions passed; after-toggle and after-back raw snapshots retained",
+      "inputManagementReturnScroll": 92,
+      "inputManagementReturnFocus": "link-button quiet pp-sources-count",
+      "inputBeforeAddedCount": 9,
+      "inputAfterAddedCount": 10,
+      "frozenEvidenceCountAfterAddition": 9,
+      "oldFrozenHashes": {
+        "snapshots": "12beb322d4405967f36db765a291d0681d5f812e7f831bbb0014fde687797417",
+        "labels": "d1f4102ae6b4e980db36eccf693cd91f679f92fb8c80587e653a0a13716c72a4",
+        "origins": "70a1707e8004ed3cc8913d3c5116b9e4ebebeb8d3da336dbb78181dd530d8581",
+        "observations": "02423d3b73bb6b52c108c7aaa022a81a1b3aca9033898e35649f275661965624",
+        "attached": "9a5d4daf2ac6e0e7ede7504df4580a502d15e5de17ae2e65f7fe08189ad3b0cf"
+      },
+      "afterFrozenHashes": {
+        "snapshots": "12beb322d4405967f36db765a291d0681d5f812e7f831bbb0014fde687797417",
+        "labels": "d1f4102ae6b4e980db36eccf693cd91f679f92fb8c80587e653a0a13716c72a4",
+        "origins": "70a1707e8004ed3cc8913d3c5116b9e4ebebeb8d3da336dbb78181dd530d8581",
+        "observations": "02423d3b73bb6b52c108c7aaa022a81a1b3aca9033898e35649f275661965624",
+        "attached": "9a5d4daf2ac6e0e7ede7504df4580a502d15e5de17ae2e65f7fe08189ad3b0cf"
+      },
+      "positiveItemsSelected0": "Native checkbox uncheck/check; request-selection rail retained, make disabled, no zero-source rail",
+      "closeReopenDraftAuthoring": "PASS",
+      "camera": "translate(293.6px, 332px) scale(1)",
+      "cameraUnchangedAllSnapshots": true,
+      "rawObservationSHA256": "89fbae1d57c000c36b094bc8dc8f0abbab441bab0a3920cf1a14bc12f810d4b2"
+    }
+  ],
+  "screenReview": {
+    "openedDirectly": [
+      {
+        "sequence": 2,
+        "stage": "1-list",
+        "viewport": {
+          "width": 1280,
+          "height": 720,
+          "dpr": 1
+        },
+        "path": "/workspace/work/af87-observation/reading87-1280x720-1-list.png",
+        "sha256": "1f397a86be26c24ce9572bcbea807359f0973839d765081dfd82d27a653d9c0e"
+      },
+      {
+        "sequence": 4,
+        "stage": "2-source-end",
+        "viewport": {
+          "width": 1280,
+          "height": 720,
+          "dpr": 1
+        },
+        "path": "/workspace/work/af87-observation/reading87-1280x720-2-source-end.png",
+        "sha256": "7dee242789c77e019e9096bf48eaa44a608f60ff5b8230b901fbafcaaf356291"
+      },
+      {
+        "sequence": 38,
+        "stage": "1-list",
+        "viewport": {
+          "width": 1440,
+          "height": 900,
+          "dpr": 1
+        },
+        "path": "/workspace/work/af87-observation/reading87-1440x900-1-list.png",
+        "sha256": "a91f834360733f93788a391b3bda2050dc604e0a61421d199dbfd2768fd23494"
+      },
+      {
+        "sequence": 40,
+        "stage": "2-source-end",
+        "viewport": {
+          "width": 1440,
+          "height": 900,
+          "dpr": 1
+        },
+        "path": "/workspace/work/af87-observation/reading87-1440x900-2-source-end.png",
+        "sha256": "1c6c4a839ad5788fdca3496da620228d30c9efda02a0cea30b55022fe5af4624"
+      },
+      {
+        "sequence": 43,
+        "stage": "4-return",
+        "viewport": {
+          "width": 1440,
+          "height": 900,
+          "dpr": 1
+        },
+        "path": "/workspace/work/af87-observation/reading87-1440x900-4-return.png",
+        "sha256": "c57c81ec3ea9f0ccc538939af58f62f6c5d2070b4e0951ce1d5e6a30bb0f5bda"
+      }
+    ],
+    "totalCapturedPNGs": 5,
+    "archivePNGs": 3,
+    "pairing": "Each retained PNG hash is attached to its immediately preceding DOM snapshot; quote and return stages are kept distinct.",
+    "rawTraceNote": "Python list-comprehension line events produced repeated read-only snapshots at input-management-after-back; they are not repeated UI actions or repeated flow runs."
+  },
+  "scopeBoundaries": {
+    "nativeUIActions": "Normal project import, material/report buttons, disclosure, back/Escape/toggle, adding synthetic material, draft edit/close/reopen; positive selected0 uncheck/check performed natively. Supplied harness initializes authoring bundle and synthetic observation in test storage and assigns backward selection/scroll.",
+    "accessNotOperated": "Return-reading, file export/import and condition-switch entrances retained in visible DOM/code. End-to-end backup roundtrip/return-reading/condition switching were not repeated.",
+    "stubBadge": "AI-available/model label comes from local stub test server. No live provider success inferred.",
+    "notExecuted": [
+      "zero85_flow",
+      "40Node rerun",
+      "old84 or full browser suite",
+      "new API/model request",
+      "remote Git comparison",
+      "source rebuild",
+      "Windows execution/CI",
+      "OSS execution",
+      "full product/first-map acceptance"
+    ]
+  },
+  "network": {
+    "externalBlockedRequests": [],
+    "guard": "Only localhost allowed; plan/scope fulfilled in browser by supplied flow; any unhandled API POST raises. Test server itself uses fixed stub transport and does not read real key."
+  },
+  "testSource": {
+    "path": "/workspace/work/af87-w0_qlnt_/app/continuity/tests/studio_browser.py",
+    "sha256": "63bc499c90fd96f537c4f9678a68e8b68d06ca0b4e6bcb81d38c64041a8e8e3c",
+    "called": "reading87_flow only once per viewport using unchanged start/ROOT",
+    "unchangedAfterExecution": true
+  },
+  "artifacts": [
+    {
+      "name": "reading87-1280x720-1-list.png",
+      "path": "/workspace/work/af87-observation/reading87-1280x720-1-list.png",
+      "bytes": 187311,
+      "sha256": "1f397a86be26c24ce9572bcbea807359f0973839d765081dfd82d27a653d9c0e"
+    },
+    {
+      "name": "overview-1280.json",
+      "path": "/workspace/work/af87-observation/overview-1280.json",
+      "bytes": 12671,
+      "sha256": "7dac2208f18da54d974527b4f4a2bdaae974cd361848088bbc4fb18c1a6e1c88"
+    },
+    {
+      "name": "n01-roundtrip-1280.json",
+      "path": "/workspace/work/af87-observation/n01-roundtrip-1280.json",
+      "bytes": 55803,
+      "sha256": "3c72fe5d63d6b1e2c25b3cc9f56a6af6e2ddd73ea7b333f0ec5815dacf27b2a6"
+    },
+    {
+      "name": "reading87-1440x900-1-list.png",
+      "path": "/workspace/work/af87-observation/reading87-1440x900-1-list.png",
+      "bytes": 219209,
+      "sha256": "a91f834360733f93788a391b3bda2050dc604e0a61421d199dbfd2768fd23494"
+    },
+    {
+      "name": "overview-1440.json",
+      "path": "/workspace/work/af87-observation/overview-1440.json",
+      "bytes": 12672,
+      "sha256": "d3f7c977cc791d7e080a8aa332a696b62282820ce257476401b22f30f46b14f6"
+    },
+    {
+      "name": "n01-roundtrip-1440.json",
+      "path": "/workspace/work/af87-observation/n01-roundtrip-1440.json",
+      "bytes": 55760,
+      "sha256": "e7edda8f67d0c7285249fd8019200690a4840aa12ebe6f23d7ffa3829e76a5a5"
+    },
+    {
+      "name": "reading87-1440x900-4-return.png",
+      "path": "/workspace/work/af87-observation/reading87-1440x900-4-return.png",
+      "bytes": 162363,
+      "sha256": "c57c81ec3ea9f0ccc538939af58f62f6c5d2070b4e0951ce1d5e6a30bb0f5bda"
+    },
+    {
+      "name": "old-report-expanded-1440.json",
+      "path": "/workspace/work/af87-observation/old-report-expanded-1440.json",
+      "bytes": 69549,
+      "sha256": "c4101b685a54c6e8bb16d0f9994bd5761d8589553171bd1f536a7e4dcd4d2cd3"
+    }
+  ]
+}
