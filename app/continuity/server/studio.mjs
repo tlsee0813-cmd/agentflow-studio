@@ -128,13 +128,18 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
     try {
       const raw = await readLimited(response.body, REPLY_BYTES, controller.signal);
       const choice = JSON.parse(raw ?? '')?.choices?.[0];
-      if (choice?.finish_reason !== 'stop' || typeof choice?.message?.content !== 'string') throw new Error();
+      // How the provider ended the reply comes first: only a finished one (stop) is read. One cut by the length limit is
+      // incomplete, and one ended any other way (or without saying) is unfinished; neither is parsed, judged or applied, so
+      // neither reads as a reply that broke the evidence rules (INVALID_RESPONSE is that, for a finished reply only).
+      if (choice?.finish_reason === 'length') throw new ApiError('AI_RESPONSE_INCOMPLETE', 502);
+      if (choice?.finish_reason !== 'stop') throw new ApiError('AI_RESPONSE_UNFINISHED', 502);
+      if (typeof choice?.message?.content !== 'string') throw new Error();
       if (choice.message.content.includes(config.apiKey)) throw new Error();
       // studio.map.4: the reply goes back as its wire (references, not quotes), once it is valid: the browser decodes it again
       // against the very request it sent, so every passage keeps where it stands.
       reply = anchored ? (() => { const wire = JSON.parse(choice.message.content); validateMapReply(wire, ask); return wire; })() : map ? validateMapReply(JSON.parse(choice.message.content), ask) : digest ? validateDigestReply(JSON.parse(choice.message.content), ask) : scope ? validateScopeReply(JSON.parse(choice.message.content), ask) : planning ? validatePlanReply(JSON.parse(choice.message.content), ask) : validateReply(JSON.parse(choice.message.content), ask);
     } catch (e) {
-      if (controller.signal.aborted) throw e;
+      if (controller.signal.aborted || e instanceof ApiError) throw e;
       // studio.map.6: a contradiction or a wrong reference says where (path), which rule and what it names; never record text.
       const error = new ApiError('INVALID_RESPONSE', 502);
       if (e?.name === 'MapReplyError') error.detail = { path: e.path, rule: e.rule, target: e.target };

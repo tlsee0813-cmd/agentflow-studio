@@ -31,6 +31,9 @@ const MAP_ERROR: Record<string, string> = {
   ALREADY_APPLIED: '같은 기록은 이미 지도에 정리했어요.',
   READINGS_FULL: '이 프로젝트에 더 정리할 수 없어요(정리 기록 한도).',
   INVALID_RESPONSE: 'AI 응답이 근거 규칙(원문 인용·알려진 부분)에 맞지 않아 반영하지 않았어요.',
+  // The reply did not end (the server read none of it): nothing about its evidence is said, and nothing was applied.
+  AI_RESPONSE_INCOMPLETE: 'AI가 응답을 끝내지 못해 지도에 반영하지 않았어요. 원문과 기존 지도는 그대로예요.',
+  AI_RESPONSE_UNFINISHED: 'AI 응답이 정상적으로 끝나지 않아 지도에 반영하지 않았어요. 원문과 기존 지도는 그대로예요.',
   NOTHING_READ: '이번 응답에서 정리할 내용을 얻지 못했어요. 원문은 보존됐어요.'
 };
 

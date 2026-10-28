@@ -87,6 +87,8 @@ export const ERROR_TEXT: Record<string, string> = {
   AI_TIMEOUT: '응답이 너무 오래 걸려 멈췄어요.',
   AI_NETWORK_ERROR: '서버가 AI 서비스에 연결하지 못했어요.',
   INVALID_RESPONSE: 'AI 응답이 약속한 형식이 아니어서 보여 드리지 않았어요.',
+  AI_RESPONSE_INCOMPLETE: 'AI가 응답을 끝내지 못해 보여 드리지 않았어요.',
+  AI_RESPONSE_UNFINISHED: 'AI 응답이 정상적으로 끝나지 않아 보여 드리지 않았어요.',
   ACCESS_CODE_REQUIRED: '접속 코드가 맞지 않아요.',
   FORBIDDEN_ORIGIN: '이 주소에서는 AI 서버에 요청할 수 없어요.',
   INPUT_TOO_LARGE: '보낼 기록이 너무 커요.',
