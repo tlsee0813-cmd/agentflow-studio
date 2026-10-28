@@ -10,6 +10,7 @@ import { parseProject } from '../dist/public/shared/validation.js';
 import { emptyBundle, parseBundle, planFile, readPlanFile, loadBundle, PLANS_KEY } from '../dist/public/client/plan-store.js';
 import { projectInput } from '../dist/public/client/plan-source.js';
 import { createMapRun } from '../dist/public/client/map-run.js';
+import { aiStatus } from '../dist/public/client/studio-api.js';
 import { displayAbout, frozenRequests } from '../dist/public/client/request-results.js';
 import { createStudioHandler, mapPromptId } from '../server/studio.mjs';
 import { MAP2_PROMPT } from '../server/map-prompt.mjs';
@@ -190,6 +191,29 @@ test('71 map.2 HTTP uses one combined prompt and rejects invented matching; runn
   } finally { globalThis.fetch = oldFetch; }
 });
 const awaitlessPrompt = 'm2-000000000000';
+
+test('71 actual server status stays usable through aiStatus for m2, retains m1 compatibility, and rejects unknown prompt contracts', async () => {
+  const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: 'test-status-not-real', DEEPSEEK_PLAN_MODEL: 'stub-model' }, fetchImpl: async () => { throw new Error('status must never call the model'); } });
+  const serverStatus = await (await handle(new Request('https://studio.example/api/studio/status'))).json();
+  assert.equal(serverStatus.map.prompt, await mapPromptId()); assert.match(serverStatus.map.prompt, /^m2-/);
+  const oldFetch = globalThis.fetch;
+  try {
+    // The real handler's status response, through the actual client parser used by the UI.
+    globalThis.fetch = async (_url, options) => { assert.equal(options.credentials, 'same-origin'); return handle(new Request('https://studio.example/api/studio/status')); };
+    const status = await aiStatus(); assert.deepEqual(status.map, serverStatus.map);
+    const { p } = setup();
+    const run = createMapRun({ current: () => ({ key: 'status-entry', kind: 'saved', project: p, view: studioView(p) }), status: () => status, accessCode: () => '', commit: async () => null, done: () => {}, changed: () => {} });
+    assert.equal(run.can(), true, 'the map action remains available after reading the real status contract');
+    for (const prompt of ['m1-0123456789ab', 'm2-0123456789ab']) {
+      globalThis.fetch = async () => new Response(JSON.stringify({ ...serverStatus, map: { ...serverStatus.map, prompt } }));
+      assert.equal((await aiStatus()).map.prompt, prompt);
+    }
+    for (const prompt of ['m3-0123456789ab', 'm2-bad', 'm2-0123456789ab-extra']) {
+      globalThis.fetch = async () => new Response(JSON.stringify({ ...serverStatus, map: { ...serverStatus.map, prompt } }));
+      assert.equal((await aiStatus()).map, null);
+    }
+  } finally { globalThis.fetch = oldFetch; }
+});
 
 test('71 display abbreviates only full SHA, while origins, branch and conditions remain full', () => {
   const sha = '0123456789abcdef0123456789abcdef01234567';
