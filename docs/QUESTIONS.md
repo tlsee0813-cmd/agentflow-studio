@@ -1,9 +1,12 @@
 # 연구 질문과 축적된 근거
 
-**85 사전 의존 수리 검증 중 · 2026-10-29:** [후보·직접 화면·독립 코드 근거](https://github.com/tlsee0813-cmd/agentflow-studio/blob/995e03d218636c5c5b1928695a0d7d4b801bc171/docs/cycles/2026-10-29-real-context-reading-85/PROGRESS.md). bf30033에서 중립0항목 읽기와 plan.3 경계를 구현했다. 구형plan.1/2 prompt·양수 응답 계약,저장.3/과거요청/반환/UI75·84수리를보존한다. root고정5.8.3 check/build+41검사와실제1280 micro 원문왕복통과,독립코드새P1/P2없음. Cloud두PC·정식flow·CI는회수전이며아직수용아님. 실제모델0,기존85의도/자료/최대1회유지. PR54draft미병합·미배포,공개73·전체목표활성.
+**85 실제 자료 연결 범위 수용 · 2026-10-29:** [최종 결과·최소 증거](https://github.com/tlsee0813-cmd/agentflow-studio/blob/2b4363d233b47f8c9f394b40c7d16831ba51e9d3/docs/cycles/2026-10-29-real-context-reading-85/RESULT.md). 최종runtime ffe60935a6f7f5760fb9a1a72ca66e8ab8693fa3/appb4984d2. 중립 제안 없음·원문 왕복·구형판본 경계와 반환 채널 문구 수리를 수용했다. 실제DeepSeek1회7.469초/재시도0·총괄과독립의미pass·같은응답1280PC복귀·Cloud두PC차이수용·정확ffe양OS CI40774010257success. Cloud는검토자응답,실제모델PC는root1280임을구별한다. PR54draft미병합·미배포,공개73·미수용74·UI수용75수리유지. Q02/Q06첫지도·전체목표활성. 다음86은기존실패와완료연구회수후새단일가설선택. 아래진행문은당시이력이다.
 
 
-85: [실제자료와작성맥락연결설계](https://github.com/tlsee0813-cmd/agentflow-studio/blob/995e03d218636c5c5b1928695a0d7d4b801bc171/docs/cycles/2026-10-29-real-context-reading-85/DESIGN.md). Q04/Q14의합성모델5건과실제자료PC를각각확인한것을넘어, 기존micro의혼합근거·보이는맥락→새실제plan2→PC근거읽기한연결을준비한다. 이전실제OSS분석65/전체순환70·71은반복하지않으며새API0이다. 명시된두예외계약을미구현으로오인하지않고, 자료미기재와실행검증부재를유지한다.
+**85 사전 의존 수리 검증 중 · 2026-10-29:** [후보·직접 화면·독립 코드 근거](https://github.com/tlsee0813-cmd/agentflow-studio/blob/2b4363d233b47f8c9f394b40c7d16831ba51e9d3/docs/cycles/2026-10-29-real-context-reading-85/PROGRESS.md). bf30033에서 중립0항목 읽기와 plan.3 경계를 구현했다. 구형plan.1/2 prompt·양수 응답 계약,저장.3/과거요청/반환/UI75·84수리를보존한다. root고정5.8.3 check/build+41검사와실제1280 micro 원문왕복통과,독립코드새P1/P2없음. Cloud두PC·정식flow·CI는회수전이며아직수용아님. 실제모델0,기존85의도/자료/최대1회유지. PR54draft미병합·미배포,공개73·전체목표활성.
+
+
+85: [실제자료와작성맥락연결설계](https://github.com/tlsee0813-cmd/agentflow-studio/blob/2b4363d233b47f8c9f394b40c7d16831ba51e9d3/docs/cycles/2026-10-29-real-context-reading-85/DESIGN.md). Q04/Q14의합성모델5건과실제자료PC를각각확인한것을넘어, 기존micro의혼합근거·보이는맥락→새실제plan2→PC근거읽기한연결을준비한다. 이전실제OSS분석65/전체순환70·71은반복하지않으며새API0이다. 명시된두예외계약을미구현으로오인하지않고, 자료미기재와실행검증부재를유지한다.
 
 84: [작성 맥락 범위 수용](https://github.com/tlsee0813-cmd/agentflow-studio/blob/a2d89ad0dc0b8b19d63ab51e6dd82f184cdb0710/docs/cycles/2026-10-29-authoring-context-84/RESULT.md). Q04/Q13/Q14의 초안 맥락을 가시적으로 고정·제거하고 명시 의도/전체 parts/안정 ID를 유지한다. 실제 자료 저장·PC와 합성 실제모델5건, 독립 의미/두PC·정확90 CI를 구별했다. 긴 인용/legacy 승격/소유 검증/커서/이전기준 해소 편집면 수리를 포함하며 실패 원본을 보존한다. 작은5건은 일반 의미 정확도나 Q02/Q06 첫지도 해결이 아니다. 다음85는 기존micro 혼합 기록을 함께 읽은 실제plan2 결과와 PC 비교·근거 왕복의 연결만 준비한다.
 

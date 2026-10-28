@@ -1,9 +1,12 @@
 # AgentFlow 현재 상태
 
-**85 사전 의존 수리 검증 중 · 2026-10-29:** [후보·직접 화면·독립 코드 근거](https://github.com/tlsee0813-cmd/agentflow-studio/blob/995e03d218636c5c5b1928695a0d7d4b801bc171/docs/cycles/2026-10-29-real-context-reading-85/PROGRESS.md). bf30033에서 중립0항목 읽기와 plan.3 경계를 구현했다. 구형plan.1/2 prompt·양수 응답 계약,저장.3/과거요청/반환/UI75·84수리를보존한다. root고정5.8.3 check/build+41검사와실제1280 micro 원문왕복통과,독립코드새P1/P2없음. Cloud두PC·정식flow·CI는회수전이며아직수용아님. 실제모델0,기존85의도/자료/최대1회유지. PR54draft미병합·미배포,공개73·전체목표활성.
+**85 실제 자료 연결 범위 수용 · 2026-10-29:** [최종 결과·최소 증거](https://github.com/tlsee0813-cmd/agentflow-studio/blob/2b4363d233b47f8c9f394b40c7d16831ba51e9d3/docs/cycles/2026-10-29-real-context-reading-85/RESULT.md). 최종runtime ffe60935a6f7f5760fb9a1a72ca66e8ab8693fa3/appb4984d2. 중립 제안 없음·원문 왕복·구형판본 경계와 반환 채널 문구 수리를 수용했다. 실제DeepSeek1회7.469초/재시도0·총괄과독립의미pass·같은응답1280PC복귀·Cloud두PC차이수용·정확ffe양OS CI40774010257success. Cloud는검토자응답,실제모델PC는root1280임을구별한다. PR54draft미병합·미배포,공개73·미수용74·UI수용75수리유지. Q02/Q06첫지도·전체목표활성. 다음86은기존실패와완료연구회수후새단일가설선택. 아래진행문은당시이력이다.
 
 
-**85 실제자료 연결 준비 · 2026-10-29:** [한 장면·출력 전 판정](https://github.com/tlsee0813-cmd/agentflow-studio/blob/995e03d218636c5c5b1928695a0d7d4b801bc171/docs/cycles/2026-10-29-real-context-reading-85/DESIGN.md). 84를 좁게 수용한 뒤 기존micro 평가 실행 맥락과 두 원문/저장 읽기를 받은 새plan.2 응답을 같은 PC 비교면에서 읽는 연결만 선택했다. 이미 명명된 MemoryLimitError/TimeLimitError 계약과 실제 실행 증거를 구별하고, 기존eval순서/globals공유를 유지한다. 아직호출0·다음은실제wire동결이며 최대1회/첫실패중단이다. 완료65/70/71/84와첫지도실패를반복하지않는다. 공개73·전체목표활성유지.
+**85 사전 의존 수리 검증 중 · 2026-10-29:** [후보·직접 화면·독립 코드 근거](https://github.com/tlsee0813-cmd/agentflow-studio/blob/2b4363d233b47f8c9f394b40c7d16831ba51e9d3/docs/cycles/2026-10-29-real-context-reading-85/PROGRESS.md). bf30033에서 중립0항목 읽기와 plan.3 경계를 구현했다. 구형plan.1/2 prompt·양수 응답 계약,저장.3/과거요청/반환/UI75·84수리를보존한다. root고정5.8.3 check/build+41검사와실제1280 micro 원문왕복통과,독립코드새P1/P2없음. Cloud두PC·정식flow·CI는회수전이며아직수용아님. 실제모델0,기존85의도/자료/최대1회유지. PR54draft미병합·미배포,공개73·전체목표활성.
+
+
+**85 실제자료 연결 준비 · 2026-10-29:** [한 장면·출력 전 판정](https://github.com/tlsee0813-cmd/agentflow-studio/blob/2b4363d233b47f8c9f394b40c7d16831ba51e9d3/docs/cycles/2026-10-29-real-context-reading-85/DESIGN.md). 84를 좁게 수용한 뒤 기존micro 평가 실행 맥락과 두 원문/저장 읽기를 받은 새plan.2 응답을 같은 PC 비교면에서 읽는 연결만 선택했다. 이미 명명된 MemoryLimitError/TimeLimitError 계약과 실제 실행 증거를 구별하고, 기존eval순서/globals공유를 유지한다. 아직호출0·다음은실제wire동결이며 최대1회/첫실패중단이다. 완료65/70/71/84와첫지도실패를반복하지않는다. 공개73·전체목표활성유지.
 
 **84 작성 맥락 범위 수용 · 2026-10-29:** [최종 판단·실제 응답·수정 전후 증거](https://github.com/tlsee0813-cmd/agentflow-studio/blob/a2d89ad0dc0b8b19d63ab51e6dd82f184cdb0710/docs/cycles/2026-10-29-authoring-context-84/RESULT.md). 최종90ac736은 첫 편집의 보이는 맥락 고정·구형 무소급·명시 제거/변경·안정 ID·이전 분석 기준을 연결한다. 실제micro 긴 인용 왕복과 Joplin 깊은 구성의 PC 복귀, 합성 실제모델5건/독립 의미 판정, Cloud 두 PC·마지막 편집면 수리, 정확90 양OS CI40764156377로 범위 수용했다. 원본048 커서/편집면 실패와640/90 해소를 별도로 보존했다. 공개73·미수용74·UI75최종693 유지, PR53 draft 미병합·미배포이며 첫지도 의미품질은 미해결이다. 다음85는 기존 실제micro 자료와 작성맥락→새 실제plan2 응답→PC 근거읽기 한 연결만 선택해 준비한다. 완료65/70/71/84 및 실패77/79/81/82 실험은 반복하지 않는다.
 
