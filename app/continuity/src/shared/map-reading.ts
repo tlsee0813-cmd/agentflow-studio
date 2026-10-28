@@ -48,28 +48,33 @@ const PART = /^P\d{2,3}$/, NEW = /^new:[a-z0-9_-]{1,24}$/, RECORD = /^[NR]\d{2,3
 const CONTROL = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
 const bytes = (v: unknown) => new TextEncoder().encode(JSON.stringify(v)).length;
 /** Where a quote stands in a record, as the record's own text. Exactly (white space read loosely, as quoteAt); else, narrowly, when
- * the quote only leaves out Markdown emphasis marks (runs of '*' or '_' at a word edge, as in '**Error handling**'), at the one
- * place it matches with those marks set aside, returned as the record's span with its marks. Never two places, never other changed
- * characters (an operator inside a word such as a*b is not a mark), never pieces joined: null then. */
+ * the quote only leaves out the delimiters of paired Markdown strong emphasis ('**Error handling**', '__x__') that the record
+ * really has: on one line, opening before a non-space and not after a word character, closing after a non-space and not before
+ * one, outside fenced and inline code. Then the one place it matches with those delimiters set aside is returned as the record's
+ * span with its marks. A single or unpaired '*' or '_' (a * b, *value, snake_case, 2 ** 3, a**b**c) is never set aside; two
+ * places, changed characters or joined pieces give null. */
 export function resolveQuote(text: string, quote: string): string | null {
   const q = quote.trim(); if (!q) return null;
   const at = quoteAt(text, q); if (at) return text.slice(at.at, at.at + at.length);
-  const word = (c: string | undefined) => !!c && /[\p{L}\p{N}]/u.test(c);
-  // Emphasis marks set aside: a run of one to three '*' or '_' not between two word characters (a*b and snake_case stay).
-  const strip = (t: string) => {
-    const keep: number[] = []; let plain = '';
-    for (let i = 0; i < t.length;) {
-      if (t[i] === '*' || t[i] === '_') {
-        let j = i; while (j < t.length && t[j] === t[i] && j - i < 3) j++;
-        if (!(word(t[i - 1]) && word(t[j]))) { i = j; continue; }
-        for (; i < j; i++) { keep.push(i); plain += t[i]; }
-        continue;
+  const marks = (t: string): Set<number> => {
+    const out = new Set<number>(); let pos = 0, fenced = false;
+    for (const line of t.split('\n')) {
+      if (/^\s*(```|~~~)/.test(line)) { fenced = !fenced; pos += line.length + 1; continue; }
+      if (!fenced) {
+        // Inline code keeps its characters: masked so no delimiter is found inside it.
+        const masked = line.replace(/`[^`]*`/g, m => ' '.repeat(m.length));
+        for (const m of masked.matchAll(/(\*\*|__)(?=\S)(.+?)(?<=\S)\1/g)) {
+          const a = m.index!, b = a + m[0].length;
+          if (/[\p{L}\p{N}]/u.test(masked[a - 1] ?? '') || /[\p{L}\p{N}]/u.test(masked[b] ?? '')) continue;
+          for (const k of [a, a + 1, b - 2, b - 1]) out.add(pos + k);
+        }
       }
-      keep.push(i); plain += t[i]; i++;
+      pos += line.length + 1;
     }
-    return { keep, plain };
+    return out;
   };
-  const { keep, plain } = strip(text), bare = strip(q).plain.trim(); if (!bare) return null;
+  const strip = (t: string) => { const drop = marks(t), keep: number[] = []; let plain = ''; for (let k = 0; k < t.length; k++) if (!drop.has(k)) { keep.push(k); plain += t[k]; } return { keep, plain }; };
+  const { keep, plain } = strip(text), bare = strip(q).plain.trim(); if (!bare || plain === text) return null;
   const pattern = new RegExp(bare.split(/\s+/).map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('\\s+'), 'g');
   const found = [...plain.matchAll(pattern)];
   if (found.length !== 1) return null;

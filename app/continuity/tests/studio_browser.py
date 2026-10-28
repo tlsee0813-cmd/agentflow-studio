@@ -1613,7 +1613,11 @@ def map70_flow(browser, base):
     drag(page, page.locator("#world .node", has_text="스텁 부분 2"), 140, 60)
     placed = page.locator("#world .node", has_text="스텁 부분 2").evaluate("e => e.style.left + ',' + e.style.top")
     page.locator("#plan-entry").click()
-    page.locator("#plan-intent").fill("폴더째 변환하고 싶어")
+    # The material the analysis would read is counted before a sentence is written, and follows typing without a re-render.
+    expect(page.locator(".pp-sources-count").first).to_have_text(re.compile(r"읽는 자료 [1-9]\d*개"))
+    page.locator("#plan-intent").click()
+    page.keyboard.type("폴더째 변환하고 싶어")
+    assert page.evaluate("() => document.activeElement === document.getElementById('plan-intent')")
     page.locator("#plan-entry").click()
     # A later record: saved, then read into the same map; the renamed part keeps its name and the moved one its place.
     page.locator("#return-entry").click()

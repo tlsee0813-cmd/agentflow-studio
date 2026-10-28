@@ -1031,6 +1031,8 @@ export function createPlanView(host: PlanHost) {
     if (line) { line.textContent = why ? STALE_LINE[why] : ''; line.hidden = !why; }
     const ask = document.getElementById('plan-ask') as HTMLButtonElement | null; if (ask) askState(ask);
     const reach = document.getElementById('plan-reach'); if (reach) reach.textContent = reachText();
+    // The count of material follows the typing in place: no re-render, the caret stays.
+    document.querySelectorAll('.pp-sources-count').forEach(el => { el.textContent = sourcesLabel(); });
     document.querySelector('#plan-panel .pp-plan')?.classList.toggle('is-stale', !!why);
     const make = document.getElementById('plan-make') as HTMLButtonElement | null;
     if (make) { make.disabled = !canRequest(); make.title = requestTitle(); }
@@ -1041,9 +1043,17 @@ export function createPlanView(host: PlanHost) {
     const detail = document.querySelector('#plan-panel .pw-detail'); detail?.classList.toggle('is-stale', !!why);
     const banner = detail?.querySelector<HTMLElement>('.pw-stale'); if (banner) banner.hidden = !why;
   }
+  /** What the next analysis would read, counted before a sentence is written too (the material does not wait for the sentence). */
+  function sourcesLabel(): string {
+    const st = s!, p = plan(), o = host.current();
+    let n = 0;
+    if (p && !stale() && !st.editing) n = p.evidence.length;
+    else if (o) n = (input() ?? (o.key === CONVERTER_KEY ? exampleInput(o, st.condition, '…', o.alias!.toId, st.bundle.extra) : projectInput(o, '…', st.bundle.extra))).evidence.length;
+    return `${st.example && st.key === CONVERTER_KEY ? '예제 원자료' : '읽는 자료'} ${n}개`;
+  }
   function sourcesToggle(_o: PlanOpened) {
-    const st = s!, p = plan(), n = (p && !stale() && !st.editing ? p.evidence : input()?.evidence ?? []).length, open = p ? st.rail === 'sources' : st.sources;
-    return h('button', { type: 'button', class: 'link-button quiet', 'aria-expanded': String(open), onclick: () => { if (p) st.rail = open ? 'request' : 'sources'; else st.sources = !st.sources; render(); } }, `${st.example && st.key === CONVERTER_KEY ? '예제 원자료' : '읽는 자료'} ${n}개`);
+    const st = s!, p = plan(), open = p ? st.rail === 'sources' : st.sources;
+    return h('button', { type: 'button', class: 'link-button quiet pp-sources-count', 'aria-expanded': String(open), onclick: () => { if (p) st.rail = open ? 'request' : 'sources'; else st.sources = !st.sources; render(); } }, sourcesLabel());
   }
   function conditionSwitch(o: PlanOpened) {
     if (o.key !== CONVERTER_KEY) return null;

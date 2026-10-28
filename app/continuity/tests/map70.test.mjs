@@ -320,10 +320,21 @@ test('M70-Q1 a quote that only leaves out Markdown emphasis resolves to the one 
   assert.equal(M.resolveQuote(md, '**Error handling**: try/catch/finally'), '**Error handling**: try/catch/finally', 'exact still exact');
   assert.equal(M.resolveQuote(md, 'Closures:   lexical scope'), 'Closures**: lexical scope');
   assert.equal(M.resolveQuote(md, 'ab stays an operator'), null, 'an operator inside a word is not a mark');
+  // Only paired strong emphasis the record really has: a single or unpaired star, operators and code are never set aside.
+  assert.equal(M.resolveQuote('total = a * b', 'total = a b'), null, 'multiplication with spaces');
+  assert.equal(M.resolveQuote('pointer = *value', 'pointer = value'), null, 'a pointer star');
+  assert.equal(M.resolveQuote('x = 2 ** 3 ** 4', 'x = 2 3 4'), null, 'power operators');
+  assert.equal(M.resolveQuote('y = a**b**c', 'y = abc'), null, 'stars inside a word');
+  assert.equal(M.resolveQuote('call `**kwargs**` here', 'call `kwargs` here'), null, 'inline code keeps its stars');
+  assert.equal(M.resolveQuote('```\nx **not emphasis** y\n```', 'x not emphasis y'), null, 'a fenced block keeps its stars');
+  assert.equal(M.resolveQuote('```\ncode\n```\nx **is emphasis** y', 'x is emphasis y'), 'x **is emphasis** y', 'after the fence closes');
+  assert.equal(M.resolveQuote('- __Closures__: lexical scope', 'Closures: lexical scope'), 'Closures__: lexical scope');
+  assert.equal(M.resolveQuote('- **Retries**: up to 3 times', 'Retries: up to 4 times'), null, 'a changed number');
+  assert.equal(M.resolveQuote('*Run* fast', 'Run fast'), null, 'single-star emphasis is not repaired (not needed)');
   assert.equal(M.resolveQuote(md, 'Error handling: try/catch with stack traces'), null, 'pieces joined');
   assert.equal(M.resolveQuote(md, 'Error handling: try/catch/finally with stack trace and more'), null);
   assert.equal(M.resolveQuote(md, '2 * 3 = 7'), null, 'a changed number');
-  assert.equal(M.resolveQuote('**Run** fast here\n_Run_ fast here', 'Run fast here'), null, 'two places once marks are set aside: ambiguous');
+  assert.equal(M.resolveQuote('**Run** fast here\n__Run__ fast here', 'Run fast here'), null, 'two places once marks are set aside: ambiguous');
   // In a reply: the stored quote is the record's own span, found again exactly later.
   let p = paste(D.createProject(), md); const inp = ask(p);
   const r = M.validateMapReply(reply({ parts: [fresh('new:e', '오류 처리', 'Error handling: try/catch/finally with stack traces')] }), inp.ask);
