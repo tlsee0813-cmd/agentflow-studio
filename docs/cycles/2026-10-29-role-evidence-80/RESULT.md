@@ -1,6 +1,6 @@
 # 80 · 현재 설명의 근거 접근
 
-현재 부분 설명에 저장된 근거를 선택 읽기와 전체 읽기에서 직접 열도록 했다. 런타임 코드 `589ac6247ea5f08c3ed989c6cad2b7d97e2735ac`, 기준78 `e20d7d5ca99a2d6406ca05af69c9fc0a57293e78`, [PR49](https://github.com/tlsee0813-cmd/agentflow-studio/pull/49). **독립 PC 검토는 수용 가능, Windows 테스트 런처 수리 뒤 CI 확인은 대기 중이다.** 공개 수용73, 미수용74, UI 범위 수용75와 후속76·78의 좁은 수용을 구별한다. 미병합 개발 계열이며 배포 변경은 없다.
+현재 부분 설명에 저장된 근거를 선택 읽기와 전체 읽기에서 직접 열도록 했다. 런타임 코드 `589ac6247ea5f08c3ed989c6cad2b7d97e2735ac`, 테스트 런처 수리 `ee3b11a9cae23e9e9a8fc3d2aba8303036a67038`, 기준78 `e20d7d5ca99a2d6406ca05af69c9fc0a57293e78`, [PR49](https://github.com/tlsee0813-cmd/agentflow-studio/pull/49). **총괄 PC·독립 코드/Cloud 검토와 수리 후 양OS CI를 대조해 현재 설명 근거 접근 범위를 수용했다.** 공개 수용73, 미수용74, UI 범위 수용75와 후속76·78의 좁은 수용을 구별한다. 미병합 개발 계열이며 배포 변경은 없다.
 
 ## 판정 기준을 바로잡은 이유
 
@@ -24,7 +24,7 @@ UI75의 중첩 제목·선 우회·아홉째 관계 설명, 76의 명시 불확�
 - 내장 Sol의 독립 코드 검토에서 새 P1/P2는 없었다. 사람이 설명을 수정한 뒤 모델이 명시 대체를 보내도 사람 설명이 유지되고 AI 근거가 붙지 않는 추가 반례를 실행했다. 좌표 없는 구형 반복 인용은 기존 첫 일치 검색의 한계가 있으며, 80이 그 위치를 복원했다고 주장하지 않는다.
 - Cloud에는 기존 검토 세션으로 두 PC 크기의 새 차이만 전달했다. 제공 Windows 빌드 ZIP은1,114,945B, SHA256 `8d8f775e0456a2abd19136a4e4166057ed03c3bda4d6ebdb2e7d3c4cee9cbe13`, 201항목·지정3자료다. 76의 두 OSS 저장 응답과 새 합성 백업을 재사용하며 새 모델 호출은0이다. 제공 빌드 실행은 Cloud 독립 소스 재빌드나 새 CI 성공과 다르다.
 - Cloud는431.3초 후 이번 접근 범위 수용 가능·새 P1/P2 없음으로 반환했다. 실측1280×720·1440×900(DPR1)에서 micro의 첫째/넷째 근거를 선택 읽기·전체 읽기로 왕복하고 면·버튼·펼침·선택·스크롤·카메라 복귀를 확인했다. Zephyr의 명목 모드와 실제 절전 불가 제한은 계속 함께 읽혔다. 합성80의 역할만 있는 부분, 요구와 좁은 보고, 사람 수정도 확인했다. 별도 domain 합성 사본에서 반복 문장의 둘째 `[38,62)`와 첫째 `[6,30)`를 구별했다. `role80_flow` 및 별도 실제 자료 검토 래퍼 각각 exit0. 원문·소스 실행·새 모델 호출 검증으로 확대하지 않는다.
-- [초기 CI40734653403](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40734653403)는 Ubuntu 성공, Windows 실패였다. Windows의 기존 검사들은 통과했으나 새 `role80_flow`가 CLI 자료를 읽기 전에 빈 stdout으로 실패했다. 원인은 `file://${process.argv[1]}`가 Windows 경로를 정상 파일 URL로 변환하지 못한 테스트 런처였다. 총괄 Windows에서도 수정 전 stdout0을 재현했다. `pathToFileURL`로 바꾸고 실제 CLI 하위 프로세스의 JSON 백업을 검사하는 회귀를 추가해 role80 5개가 통과했다. 제품 런타임은 그대로다. 수리 커밋의 새 CI를 확인한 뒤 최종 판정한다.
+- [초기 CI40734653403](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40734653403)는 Ubuntu 성공, Windows 실패였다. Windows의 기존 검사들은 통과했으나 새 `role80_flow`가 CLI 자료를 읽기 전에 빈 stdout으로 실패했다. 원인은 `file://${process.argv[1]}`가 Windows 경로를 정상 파일 URL로 변환하지 못한 테스트 런처였다. 총괄 Windows에서도 수정 전 stdout0을 재현했다. `pathToFileURL`로 바꾸고 실제 CLI 하위 프로세스의 JSON 백업을 검사하는 회귀를 추가해 role80 5개가 통과했다. 제품 런타임은 그대로다. 수리 `ee3b11a`의 [새 CI40736371642](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40736371642)는 Windows·Ubuntu 모두 completed/success로 회수했다. 이후 판정 문서 변경은 해당 실행에서 검사한 코드·테스트를 바꾸지 않는다.
 
 넓은 지도 여백과 긴 읽기면 스크롤, 복잡한 실제 지시에서의 첫 지도 전달 실패는 남아 있다. 이번 근거 입구 수리를 전체 지도 생성 또는 완성된 PC 제품 경험의 수용으로 확대하지 않는다.
 
