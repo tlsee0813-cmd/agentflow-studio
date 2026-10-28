@@ -235,6 +235,27 @@ const map6 = (prompt, k = 0) => prompt
   .replace(/("about":(?:null|"[^"]*"),"replaces":null)\}/g, (_, head) => `${head},"key":"s${++k}"}`)
   .replace('"candidates":[{"text":"...","parts":["P01"],"at":null}]', '"candidates":[{"text":"...","target":"attribution","parts":["P01","P02"],"at":null,"statement":{"key":"s9","kind":"reported","text":"...","at":"N01.14","about":null}}]');
 export const MAP6_PROMPT = map6(MAP5_PROMPT);
-export const MAP6_FIRST_PROMPT = map6(MAP5_FIRST_PROMPT).replace('ref "new:짧은영문키"', 'ref "new:짧은영문키"(new: 뒤는 영문 소문자·숫자·_·-로 1~24자, 정규식 ^new:[a-z0-9_-]{1,24}$)');
+// First-map writing only: preserve statements and their deciding conditions before grouping responsibilities. This changes
+// neither map.6's wire nor the later-reading prompt; earlier prompt versions remain byte-for-byte their stored recipes.
+const MAP6_FIRST_READING = `읽는 순서(과정이나 중간 분류표는 출력하지 않고 마지막 JSON 하나만 쓴다):
+1. 대상과 문맥: project와 앞뒤 기록을 읽어 사용자가 이해하려는 프로그램을 정한다. 각 구간의 행위 주체·대상·수신자를 대조해 그 프로그램에 대한 요구·정의·현재 진단·작성자 보고인지, 이번 담당자에게 작업 방법을 지시하는지, 다른 대상의 내포 예문인지 가른다. 같은 프로그램의 실제 고객 문의나 보고는 인용돼 있어도 그 문맥대로 제품 근거가 된다. 소스·설정이 정의하는 구조도 프로그램에 대한 근거다.
+2. 제품에 대한 진술: 프로그램의 행동·계약·책임을 정하는 말과 실제 문제 진술을 근거와 함께 읽는다. 이번 담당자의 작업·전달 절차 자체는 제품 부분으로 만들지 않는다. 같은 문장에서도 제품의 호환 조건과 담당자의 보고 형식은 갈릴 수 있다. 테스트·브랜치·문서라는 단어만으로 구별하지 않는다. 테스트 도구나 빌드 서비스 자체가 대상 프로그램이면 그 동작은 제품 책임이다. 다른 대상의 내포 예문 범위만 material로 두고, 그 예문을 소개하거나 진단하는 이 프로그램의 문장은 밖에 남긴다. 실제 제품이 사용하는 외부 API·의존 서비스의 응답이나 로그는 실제 접점·동작의 근거일 수 있으므로 외부에서 왔다는 이유만으로 material로 빼지 않는다.
+3. 판단 조건: 진술을 줄이기 전에 조건·예외·부정·적용 대상·판본과 그 결합(모두 필요한 조건인지, 대안인지, 그때만 가능한지)을 함께 읽는다. 앞뒤 문장과 제목의 조건이 어디까지 걸리는지 보존한다. 요구된 책임도 유효한 책임이며 역할의 현재형만으로 구현 완료를 뜻하지 않는다. 주장 종류는 아래 kind 규칙을 따른다.
+4. 책임으로 묶기: 그 진술들이 어느 제품 책임의 판단을 바꾸는지 보고 부분·포함·관계를 정한다. 문서 제목부터 노드를 세워 내용을 채우지 않는다. 같은 책임은 묶되, 독립된 책임 근거가 있을 때만 나눈다. 수량 상한을 맞추려고 조각 노드를 만들지 않는다. 묶는 방식이 달라도 각 진술의 대상과 조건은 같은 뜻으로 남아야 한다.
+5. 최종 문장: role은 책임 요지, claims는 그 책임의 판단을 바꾸는 진술과 조건을 쓴다. 판본은 about·roleAbout에, 조건·예외·부정·적용 대상은 문장에 남긴다. 인용을 열지 않고 최종 설명을 읽었을 때 원문보다 넓게 성립하거나 중요한 구별이 사라지면 다시 표현한다. 인용 속에만 있는 조건은 설명에 남긴 것이 아니다. 진술과 제한자까지 같은 표현만 중복 제거하며, 같은 근거 구간의 독립 사실은 남긴다. 문장을 나눠도 각 진술의 조건 결합을 약하게 만들지 않는다. 모든 원문을 복제하는 대신 판단에 필요한 뜻을 보존하고 표현을 줄인다.
+
+읽기 예시(아래는 방법을 설명하는 별도 예시이며 INPUT 프로그램의 사실이 아니다):
+- 연습실 앱에서 '무료 회원은 하루 2시간, 유료 회원은 제한 없음'이면 두 대상의 한도를 함께 보존한다. '예약은 하루 2시간'은 틀리다. 같은 앱의 실제 고객 문의는 근거일 수 있지만 교육 문서 속 다른 대여 서비스의 문의 예문은 그 앱의 사실이 아니다.
+- 라벨 서비스에서 '국제 배송은 신고서가 있을 때만 발급, 기존 API 응답 형식은 유지, 결과를 PR 표로 보고'이면 앞의 조건과 호환 요구는 제품 설명에 남기고 마지막은 담당자의 전달 절차로 읽는다. 다른 회사 로그는 이 서비스의 동작이 아니며 그 로그 앞의 이 서비스 결함 진단까지 함께 material로 빼지 않는다.
+
+material 표기와 근거 경계:`;
+const map6First = prompt => prompt
+  .replace('이 기록으로 사용자가 자기 프로그램이 무엇을 맡고 어떻게 동작하며 무엇을 지켜야 하는지 읽고 변경의 영향을 판단할 수 있는 첫 지도(부분과 관계)를 만든다.', '이 기록이 사용자 프로그램에 대해 말하는 진술과 판단 조건을 읽고, 그 뜻을 변경 영향을 판단할 책임으로 묶어 첫 지도(부분과 관계)를 만든다.')
+  .replace('자료의 층위:\n- 한 기록에는 사용자·작성자의 직접 지시(앞으로 하라는 것), 지금 상태의 설명(현재 ~이다, ~했다고 보고함), 그 말이 다루는 내포 자료(예문, 검사용 표본, 붙여 넣은 다른 기록, 인용한 정정문)가 섞일 수 있다. 셋을 구별한다.', MAP6_FIRST_READING)
+  .replace('작업을 맡기는 절차(브랜치·커밋·보고 형식·환경·도구), 완료 조건·검사 범위·인계 범위, 개발 방식, ', '')
+  .replace('claims (부분마다 권장 3개·최대 4개, 문장은 내용부터):', 'claims (부분마다 최대 4개, text는 각각 240자 이내, 문장은 내용부터):')
+  .replace('role 한 문장(80자 안팎, 원문이 판본을 적었으면 roleAbout)', 'role 한 문장(300자 이내, 원문이 판본을 적었으면 roleAbout)')
+  .replace('ref "new:짧은영문키"', 'ref "new:짧은영문키"(new: 뒤는 영문 소문자·숫자·_·-로 1~24자, 정규식 ^new:[a-z0-9_-]{1,24}$)');
+export const MAP6_FIRST_PROMPT = map6First(map6(MAP5_FIRST_PROMPT));
 export const MAP6_RECIPE = 'map6-recipe.1: first = parts.length === 0 && requests.length === 0 && priors.length === 0; evidence = same-record contiguous range <= 600 UTF-16; span.2; candidates state their target (attribution|identity|parent|holds) and statement keys';
 export const map6Prompt = ask => ask.parts.length === 0 && (ask.requests ?? []).length === 0 && (ask.priors ?? []).length === 0 ? MAP6_FIRST_PROMPT : MAP6_PROMPT;
