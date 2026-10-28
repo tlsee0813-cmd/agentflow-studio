@@ -1823,7 +1823,7 @@ function mapBlock(): HTMLElement | null {
     const cands = last.candidates.filter(c => c.areaIds.every(id => name(id)));
     if (cands.length) sec.append(h('div', { class: 'rm-cands' }, h('h4', {}, '확인할 것', h('small', {}, String(cands.length))),
       h('ul', {}, ...cands.map(c => h('li', {}, h('span', {}, c.text),
-        h('span', { class: 'rr-chips' }, ...c.areaIds.map(chip), c.quote ? h('button', { type: 'button', class: 'rr-ref rr-cite', title: '원문에서 보기', onclick: () => returnView.openQuote(c.quote!.record, c.quote!.quote, null) }, `“${c.quote.quote.slice(0, 40)}${c.quote.quote.length > 40 ? '…' : ''}”`) : null))))));
+        h('span', { class: 'rr-chips' }, ...c.areaIds.map(chip), c.quote ? h('button', { type: 'button', class: 'rr-ref rr-cite', title: '원문에서 보기', onclick: () => returnView.openQuote(c.quote!.record, c.quote!.quote, null, c.quote!.from) }, `“${c.quote.quote.slice(0, 40)}${c.quote.quote.length > 40 ? '…' : ''}”`) : null))))));
     if (last.gaps.length) sec.append(h('ul', { class: 'rm-gaps' }, ...last.gaps.map(g => h('li', {}, g))));
     const cut = last.records.filter(r => r.to < r.total || r.from > 0).length;
     sec.append(h('p', { class: 'rr-prov' }, h('span', { class: 'tag ai' }, `AI 정리 · ${last.model}`), h('span', {}, `기록 ${last.records.length}개${cut ? ` (${cut}개는 일부 구간만)` : ''} · 인용 원문에 근거 · 앱이 확인한 사실 아님`)));
@@ -1859,15 +1859,16 @@ function claimList(claims: CurrentClaim[], max: number): HTMLElement {
   return h('ul', { class: 'claims' }, ...sorted.map(c => h('li', { class: `claim k-${c.kind}${c.replaces ? ' replaces' : ''}` },
     // The kind column keeps its usual width; that this one corrects an earlier claim reads on its own line above the text.
     h('span', { class: 'cl-kind' }, CLAIM_LABEL[c.kind]), h('span', { class: 'cl-text' }, c.replaces ? h('span', { class: 'cl-revises' }, '앞 주장을 대체한 정정') : null, c.text, c.about ? h('small', { class: 'cl-about', title: c.about }, ` · ${displayAbout(c.about)}`) : null),
-    h('button', { type: 'button', class: 'cl-cite', title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote) }, '근거'))));
+    h('button', { type: 'button', class: 'cl-cite', title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote, c.from) }, '근거'))));
 }
-/** A quote from the selection: the record in the pane, marked; closing the pane comes back to this part. */
-function showQuote(record: string, quote: string) {
+/** A quote from the selection: the record in the pane, marked where it was read (from, when the reading kept it; else where the
+ * words stand); closing the pane comes back to this part. */
+function showQuote(record: string, quote: string, from?: number) {
   const o = opened; if (!o || o.kind !== 'saved') return;
   const scene = readingScene();
   // Nothing selected: the quote comes from the pane's own reading (the map's root), kept before reopening it re-renders it.
   if (!scene && returnView.isOpen()) returnView.keepReading();
-  openReturn(); returnView.openQuote(record, quote, scene);
+  openReturn(); returnView.openQuote(record, quote, scene, from);
 }
 /** In the sheet: the part as read from records (the description and the person's correction of it, the current claims), then the
  * evidence history apart, folded. Correcting the description never touches the name, the note or the claims. */
@@ -1898,7 +1899,7 @@ function understoodSection(o: Opened, part: PartView): HTMLElement | null {
     h('ol', {}, ...[...u.history].reverse().map(x => h('li', {}, h('span', { class: 'uh-at' }, fullTime(x.at)),
       x.role ? h('span', { class: 'uh-role' }, x.role) : null,
       ...x.claims.map(c => h('span', { class: 'uh-claim' }, h('span', { class: 'cl-kind' }, CLAIM_LABEL[c.kind]), c.text, ' ',
-        h('button', { type: 'button', class: 'cl-cite', title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote) }, '근거')))))));
+        h('button', { type: 'button', class: 'cl-cite', title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote, c.from) }, '근거')))))));
   sec.append(hist);
   return sec;
 }

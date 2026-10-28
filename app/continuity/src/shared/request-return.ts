@@ -123,8 +123,9 @@ export function validateRequestContext(v: unknown): RequestContext {
 type TargetScope = { id: string; items: { id: string }[] };
 export const sameTarget = (a: RequestTarget, b: RequestTarget) => a.requestId === b.requestId && a.itemId === b.itemId;
 export function hasTarget(requests: TargetScope[], t: RequestTarget): boolean { return requests.some(r => r.id === t.requestId && r.items.some(i => i.id === t.itemId)); }
-export function validateRequestMatch(v: unknown, requests: TargetScope[], three = false): RequestMatch {
-  if (!object(v, ['record', 'quote', 'text', 'kind', 'about', 'targets', 'why', ...(three ? ['stance', 'replaces'] : [])]) || !id(v.record) || !text(v.quote, 300) || !text(v.text, 240) || !['reported', 'checked', 'code', 'test', 'open'].includes(v.kind as string) || (v.about !== null && !text(v.about, 200)) || !text(v.why, 240) || !Array.isArray(v.targets) || v.targets.length > 8) fail();
+/** quoteMax: an anchored quote (map-reading.4) is an exact passage of up to ANCHOR_QUOTE_MAX; a copied one stays within 300. */
+export function validateRequestMatch(v: unknown, requests: TargetScope[], three = false, quoteMax = 300): RequestMatch {
+  if (!object(v, ['record', 'quote', 'text', 'kind', 'about', 'targets', 'why', ...(three ? ['stance', 'replaces'] : [])]) || !id(v.record) || !text(v.quote, quoteMax) || !text(v.text, 240) || !['reported', 'checked', 'code', 'test', 'open'].includes(v.kind as string) || (v.about !== null && !text(v.about, 200)) || !text(v.why, 240) || !Array.isArray(v.targets) || v.targets.length > 8) fail();
   // Something left open never says the change was made.
   if (three && (!MATCH_STANCES.includes(v.stance as MatchStance) || (v.kind === 'open' && v.stance === 'made'))) fail();
   const seen = new Set<string>();
@@ -174,7 +175,7 @@ export function matchLedger(readings: readonly ReadingEntry[], texts: ReadonlyMa
       // Undone where it was made and on every later reading of the same passage that kept it.
       for (const y of out) if (y.replacedBy?.reading === x.reading && y.replacedBy.index === x.index) y.replacedBy = null;
       x.replaces = null;
-    } else if (r.version === 'map-reading.2' || r.version === 'map-reading.3') r.matches!.forEach((match, index) => {
+    } else if (r.version === 'map-reading.2' || r.version === 'map-reading.3' || r.version === 'map-reading.4') r.matches!.forEach((match, index) => {
       // An explicit earlier correction of the same quote survives reading that passage again.
       const same = (x: EffectiveMatch) => x.match.record === match.record && x.match.from === match.from && x.match.to === match.to;
       const previous = [...out].reverse().find(x => x.corrected && same(x));
@@ -240,7 +241,7 @@ export function requestComparison(p: Project, reading: MapReading): string | nul
   return [`원한 항목 ${q.items.length}개`, `변경 보고 ${n('made')}개`, n('mixed') ? `보고 엇갈림 ${n('mixed')}개` : '', n('not-made') ? `미구현 보고 ${n('not-made')}개` : '',
     n('unclassified') ? `미분류 보고 ${n('unclassified')}개` : '', n('none') ? `변경 근거 아직 없는 항목 ${n('none')}개` : '', pending ? `대응 미정 ${pending}구절` : ''].filter(Boolean).join(' · ');
 }
-const correctable = (r: ReadingEntry): r is MapReading => r.version === 'map-reading.2' || r.version === 'map-reading.3';
+const correctable = (r: ReadingEntry): r is MapReading => r.version === 'map-reading.2' || r.version === 'map-reading.3' || r.version === 'map-reading.4';
 export function correctRequestMatch(p: Project, reading: string, index: number, target: RequestTarget | null): Project {
   const r = p.readings.find((r): r is MapReading => correctable(r) && r.id === reading), m = r?.matches?.[index];
   if (!r || !m || (target && !hasTarget(r.requests!, target)) || p.readings.length >= 500) throw new Error('INVALID_REQUEST_CORRECTION');
@@ -255,11 +256,11 @@ export function unlinkReplacement(p: Project, reading: string, index: number): P
   return { ...p, revision: p.revision + 1, readings: [...p.readings, entry] };
 }
 /** Stored origins are checked against the exact received interval, including offsets into a long record. */
-export function validateStoredMatch(v: unknown, requests: FrozenRequest[], intervals: { id: string; from: number; to: number }[], texts: Map<string, string>, materialIds: Set<string>, three = false): StoredRequestMatch {
+export function validateStoredMatch(v: unknown, requests: FrozenRequest[], intervals: { id: string; from: number; to: number }[], texts: Map<string, string>, materialIds: Set<string>, three = false, quoteMax = 300): StoredRequestMatch {
   if (!v || typeof v !== 'object') fail();
   const { from, to, replaces, ...base } = v as StoredRequestMatch;
   if (three !== Object.hasOwn(v, 'replaces')) fail();
-  const m = validateRequestMatch(three ? { ...base, replaces: null } : base, requests, three), source = texts.get(m.record);
+  const m = validateRequestMatch(three ? { ...base, replaces: null } : base, requests, three, quoteMax), source = texts.get(m.record);
   if (!Number.isSafeInteger(from) || !Number.isSafeInteger(to) || from < 0 || to <= from || !source || source.slice(from, to) !== m.quote || !intervals.some(r => r.id === m.record && from >= r.from && to <= r.to)) fail();
   if (m.about !== null && !intervals.some(r => r.id === m.record && source!.slice(r.from, r.to).includes(m.about!))) fail();
   if (['code', 'test'].includes(m.kind) && !materialIds.has(m.record)) fail();

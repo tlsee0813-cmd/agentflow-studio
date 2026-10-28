@@ -1,5 +1,7 @@
 import type { FrozenRequest, StoredRequestMatch, RequestCorrection, ReplaceCorrection } from './request-return.js';
-export const SCHEMA = 'idea015.project.11' as const;
+export const SCHEMA = 'idea015.project.12' as const;
+/** project.11 had map readings whose quotes carry no position (map-reading.1–3): they stay as stored; no position is derived. */
+export const V11_SCHEMA = 'idea015.project.11' as const;
 /** project.10 had request matches without a stance and no withdrawal links: they read as unclassified reports (no backfill). */
 export const V10_SCHEMA = 'idea015.project.10' as const;
 export const V9_SCHEMA = 'idea015.project.9' as const;
@@ -181,10 +183,13 @@ export const PASTED_TEXT_LIMIT = 60000;
  * differs from the person's own description of the part. Never a status the app verified. */
 export type ClaimKind = 'want' | 'idea' | 'reported' | 'checked' | 'describes' | 'open' | 'differs';
 export const CLAIM_KINDS: readonly ClaimKind[] = ['want', 'idea', 'reported', 'checked', 'describes', 'open', 'differs'];
-/** A quote of a record as it was sent: a pasted record id or a project source id. */
-export interface ReadingQuote { record: string; quote: string }
+/** A quote of a record as it was sent: a pasted record id or a project source id. map-reading.4: also where it stands, [from, to)
+ * in UTF-16 code units of the record's own text (the quote is exactly that slice); earlier readings have no position. */
+export interface ReadingQuote { record: string; quote: string; from?: number; to?: number }
 export interface ReadingClaim {
   kind: ClaimKind; text: string; record: string; quote: string;
+  /** map-reading.4: where the quote stands in its record (see ReadingQuote). */
+  from?: number; to?: number;
   /** Version, commit or time the record itself names for this claim (as written), else null. Never the arrival order. */
   about: string | null;
   /** An earlier claim of the same part this one supersedes, because the record says so. */
@@ -206,23 +211,28 @@ export interface ReadingPart {
 export interface ReadingRelation { relationId: string; from: string; to: string; kind: RelationKind; quote: ReadingQuote }
 export interface ReadingCandidate { text: string; areaIds: string[]; quote: ReadingQuote | null }
 /** Something the reply proposed that was not applied, and why (kept so the next reading of the same input does not repeat it). */
-export interface ReadingSkip { what: 'part' | 'relation'; name: string; reason: 'same-name' | 'archived' | 'removed' | 'exists' | 'parent-skipped' }
+export interface ReadingSkip { what: 'part' | 'relation'; name: string; reason: 'same-name' | 'archived' | 'removed' | 'exists' | 'parent-skipped' | 'material' }
+/** map-reading.4: a passage the reading took as material inside the record (an example, a sample under test, another program's
+ * words), not as this project's own: [from, to) of the record, with what it is. Nothing of the map rests on it alone. */
+export interface ReadingMaterial { record: string; from: number; to: number; what: string }
 export interface MapReading {
-  version: 'map-reading.1' | 'map-reading.2' | 'map-reading.3'; id: string; at: string; model: string; prompt: string;
+  version: 'map-reading.1' | 'map-reading.2' | 'map-reading.3' | 'map-reading.4'; id: string; at: string; model: string; prompt: string;
   /** SHA-256 of the request: the very same request is never sent or applied again. */
   hash: string;
   /** Records read, and which part of each went: characters [from, to) of total. A record's unsent tail is read by a later reading. */
-  records: { id: string; from: number; to: number; total: number }[];
+  records: { id: string; from: number; to: number; total: number; digest?: string }[];
   summary: string; parts: ReadingPart[]; relations: ReadingRelation[]; candidates: ReadingCandidate[]; gaps: string[]; skipped: ReadingSkip[];
   /** map-reading.2/3 only: the request context actually sent, and correspondence saved in the same project write (map-reading.3:
    * each with its stance and the explicit withdrawal of an earlier match it carries). */
   requests?: FrozenRequest[]; matches?: StoredRequestMatch[];
+  /** map-reading.4 only: each record's digest (textDigest of exactly [from, to) read) is in records; and what was read as material. */
+  material?: ReadingMaterial[];
 }
 /** The person's own correction of a part's description as read (never Area.note, never a return.2 description): it names the
  * reading whose description it corrects. It holds that description only; later claims of later readings still come in. */
 export interface ReadingCorrection { version: 'map-correction.1'; id: string; at: string; areaId: string; text: string; corrects: string | null }
 export type ReadingEntry = MapReading | ReadingCorrection | RequestCorrection | ReplaceCorrection;
-export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3';
+export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3' || e.version === 'map-reading.4';
 export const READINGS_LIMIT = 500;
 export const PASTED_LIMIT = 500;
 export interface ContextBasis {

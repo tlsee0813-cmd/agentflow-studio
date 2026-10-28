@@ -1,6 +1,7 @@
 import { API_SCHEMA, SCHEMA, V5_SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Intent, type Background, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket, type Question, GUIDE_SCHEMA, type GuideRequest, type GuideReply, type GuideEnvelope, type GuideTicket, type UnderstandingInput } from './types.js';
-import {V6_SCHEMA,V7_SCHEMA,V8_SCHEMA,V9_SCHEMA,V10_SCHEMA,type ReadingEntry,CLAIM_KINDS,READINGS_LIMIT,PASTED_TEXT_LIMIT,PASTED_LIMIT,type Area,type PlanStamp,type Point,type ManualPositions,type Backup} from './types.js';
+import {V6_SCHEMA,V7_SCHEMA,V8_SCHEMA,V9_SCHEMA,V10_SCHEMA,V11_SCHEMA,type ReadingEntry,CLAIM_KINDS,READINGS_LIMIT,PASTED_TEXT_LIMIT,PASTED_LIMIT,type Area,type PlanStamp,type Point,type ManualPositions,type Backup} from './types.js';
 import { validateFrozenRequest, validateStoredMatch, hasTarget, matchLedger, type FrozenRequest, type StoredRequestMatch } from './request-return.js';
+import { ANCHOR_QUOTE_MAX, textDigest } from './evidence-span.js';
 export class ContextError extends Error { constructor(code: string) { super(code); this.name = 'ContextError'; } }
 export function ensure(condition: unknown, code = 'INVALID_DATA'): asserts condition { if (!condition) throw new ContextError(code); }
 function obj(v: unknown, keys: string[]): asserts v is Record<string, unknown> {
@@ -337,7 +338,10 @@ function pasted(v:unknown,areaIds:Set<string>) {
  * kind, and a claim replaced only by a later one of the same area. Relation ids may be gone (the person removed the line). */
 function readings(v:unknown,areaIds:Set<string>,records:Map<string,string>,projectId:string,materialIds:Set<string>) {
   list(v,READINGS_LIMIT);const seen=new Map<string,Map<string,number>>(),hashes=new Set<string>();
-  const quote=(q:unknown)=>{obj(q,['record','quote']);ensure(records.has(q.record as string));text(q.quote,300);};
+  // map-reading.4: a quote is exactly the slice [from, to) of its record, inside an interval that reading was sent.
+  let four=false,read:{id:string;from:number;to:number}[]=[];
+  const at=(record:unknown,quote:unknown,from:unknown,to:unknown)=>{integer(from);integer(to);ensure((from as number)<(to as number)&&records.get(record as string)!.slice(from as number,to as number)===quote&&read.some(x=>x.id===record&&x.from<=(from as number)&&(to as number)<=x.to));};
+  const quote=(q:unknown)=>{obj(q,['record','quote',...(four?['from','to']:[])]);ensure(records.has(q.record as string));text(q.quote,four?ANCHOR_QUOTE_MAX:300);if(four)at(q.record,q.quote,q.from,q.to);};
   const entries=new Set<string>();
   const requestReadings=new Map<string,{requests:FrozenRequest[];matches:StoredRequestMatch[]}>();
   for(const r of v as unknown[]){
@@ -355,10 +359,14 @@ function readings(v:unknown,areaIds:Set<string>,records:Map<string,string>,proje
       obj(r,['version','id','at','areaId','text','corrects']);id(r.id);ensure(!entries.has(r.id as string));entries.add(r.id as string);date(r.at);
       ensure(areaIds.has(r.areaId as string));text(r.text,300);ensure(r.corrects===null||seen.has(r.corrects as string));continue;
     }
-    const three=!!r&&typeof r==='object'&&(r as {version?:unknown}).version==='map-reading.3',two=three||(!!r&&typeof r==='object'&&(r as {version?:unknown}).version==='map-reading.2');
-    obj(r,['version','id','at','model','prompt','hash','records','summary','parts','relations','candidates','gaps','skipped',...(two?['requests','matches']:[])]);ensure(r.version==='map-reading.1'||two);
+    const version=!!r&&typeof r==='object'?(r as {version?:unknown}).version:null;
+    four=version==='map-reading.4';const three=four||version==='map-reading.3',two=three||version==='map-reading.2';
+    obj(r,['version','id','at','model','prompt','hash','records','summary','parts','relations','candidates','gaps','skipped',...(two?['requests','matches']:[]),...(four?['material']:[])]);ensure(r.version==='map-reading.1'||two);
     id(r.id);ensure(!entries.has(r.id as string));entries.add(r.id as string);date(r.at);text(r.model,80);text(r.prompt,40);ensure(typeof r.hash==='string'&&/^[0-9a-f]{64}$/.test(r.hash)&&!hashes.has(r.hash));hashes.add(r.hash as string);
-    list(r.records,16);ensure((r.records as unknown[]).length>0);for(const x of r.records){obj(x,['id','from','to','total']);ensure(records.has(x.id as string));integer(x.from);integer(x.to);integer(x.total);ensure((x.from as number)<(x.to as number)&&(x.to as number)<=(x.total as number));}
+    list(r.records,16);ensure((r.records as unknown[]).length>0);for(const x of r.records){obj(x,['id','from','to','total',...(four?['digest']:[])]);ensure(records.has(x.id as string));integer(x.from);integer(x.to);integer(x.total);ensure((x.from as number)<(x.to as number)&&(x.to as number)<=(x.total as number));
+      // The digest names exactly the text read: the record is the one this reading was made of, its whole length too.
+      if(four)ensure(records.get(x.id as string)!.length===x.total&&x.digest===textDigest(records.get(x.id as string)!.slice(x.from as number,x.to as number)));}
+    read=r.records as {id:string;from:number;to:number}[];
     text(r.summary,200,true);list(r.parts,64);const claims=new Map<string,number>(),parts=new Set<string>();
     for(const p of r.parts){
       obj(p,['areaId','created','role','roleAbout','roleReplaces','basis','claims']);if(p.roleAbout!==null){ensure(p.role!==null);text(p.roleAbout,80);}
@@ -366,7 +374,7 @@ function readings(v:unknown,areaIds:Set<string>,records:Map<string,string>,proje
       if(p.created!==null){obj(p.created,['name','parentId']);text(p.created.name,60);ensure(p.created.parentId===null||areaIds.has(p.created.parentId as string));}
       if(p.role!==null)text(p.role,300);list(p.basis,4);for(const q of p.basis)quote(q);ensure(p.created===null||(p.basis as unknown[]).length>0);
       list(p.claims,8);(p.claims as unknown[]).forEach((c,i)=>{
-        obj(c,['kind','text','record','quote','about','replaces']);ensure(CLAIM_KINDS.includes(c.kind as never));text(c.text,240);quote({record:c.record,quote:c.quote});
+        obj(c,['kind','text','record','quote',...(four?['from','to']:[]),'about','replaces']);ensure(CLAIM_KINDS.includes(c.kind as never));text(c.text,240);quote({record:c.record,quote:c.quote,...(four?{from:c.from,to:c.to}:{})});
         if(c.about!==null)text(c.about,80);
         if(c.replaces!==null){obj(c.replaces,['reading','index']);integer(c.replaces.index);const n=seen.get(c.replaces.reading as string)?.get(p.areaId as string);ensure(n!==undefined&&(c.replaces.index as number)<n);}
       });
@@ -375,10 +383,11 @@ function readings(v:unknown,areaIds:Set<string>,records:Map<string,string>,proje
     list(r.relations,32);for(const x of r.relations){obj(x,['relationId','from','to','kind','quote']);id(x.relationId);ensure(areaIds.has(x.from as string)&&areaIds.has(x.to as string)&&x.from!==x.to);ensure(['flow','needs','shares','related'].includes(x.kind as string));quote(x.quote);}
     list(r.candidates,16);for(const c of r.candidates){obj(c,['text','areaIds','quote']);text(c.text,240);list(c.areaIds,2);for(const a of c.areaIds)ensure(areaIds.has(a as string));if(c.quote!==null)quote(c.quote);}
     list(r.gaps,2);for(const g of r.gaps)text(g,160);
-    list(r.skipped,64);for(const x of r.skipped){obj(x,['what','name','reason']);ensure(['part','relation'].includes(x.what as string));text(x.name,200);ensure(['same-name','archived','removed','exists','parent-skipped'].includes(x.reason as string));}
+    list(r.skipped,64);for(const x of r.skipped){obj(x,['what','name','reason']);ensure(['part','relation'].includes(x.what as string));text(x.name,200);ensure(['same-name','archived','removed','exists','parent-skipped',...(four?['material']:[])].includes(x.reason as string));}
+    if(four){list(r.material,8);for(const x of r.material){obj(x,['record','from','to','what']);ensure(records.has(x.record as string));text(x.what,120);integer(x.from);integer(x.to);ensure((x.from as number)<(x.to as number)&&read.some(y=>y.id===x.record&&y.from<=(x.from as number)&&(x.to as number)<=y.to));}}
     if(two){
       list(r.requests,8);const requests=(r.requests as unknown[]).map(validateFrozenRequest);ensure(requests.every(q=>q.projectId===projectId)&&new Set(requests.map(q=>q.id)).size===requests.length);
-      list(r.matches,24);const matches=(r.matches as unknown[]).map(m=>validateStoredMatch(m,requests,r.records as {id:string;from:number;to:number}[],records,materialIds,three));
+      list(r.matches,24);const matches=(r.matches as unknown[]).map(m=>validateStoredMatch(m,requests,r.records as {id:string;from:number;to:number}[],records,materialIds,three,four?ANCHOR_QUOTE_MAX:300));
       requestReadings.set(r.id as string,{requests,matches});
     }
     seen.set(r.id as string,claims);
@@ -565,6 +574,12 @@ function migrateV9(v:unknown):unknown {
   for(const r of p.readings)ensure(!!r&&typeof r==='object'&&['map-reading.1','map-correction.1'].includes((r as {version:string}).version));
   return {...p,schemaVersion:SCHEMA};
 }
+/** project.11 has map readings without positions (map-reading.1–3): they stay as stored, and no position is derived for them. */
+function migrateV11(v:unknown):unknown {
+  const p=v as {schemaVersion?:unknown;readings?:unknown};ensure(p&&p.schemaVersion===V11_SCHEMA);list(p.readings,READINGS_LIMIT);
+  for(const r of p.readings)ensure(!!r&&typeof r==='object'&&['map-reading.1','map-reading.2','map-reading.3','map-correction.1','request-correction.1','replace-correction.1'].includes((r as {version:string}).version));
+  return {...p,schemaVersion:SCHEMA};
+}
 /** project.10 has request matches without stances and no withdrawal links: they stay as stored and read as unclassified. */
 function migrateV10(v:unknown):unknown {
   const p=v as {schemaVersion?:unknown;readings?:unknown};ensure(p&&p.schemaVersion===V10_SCHEMA);list(p.readings,READINGS_LIMIT);
@@ -591,7 +606,7 @@ function convertIntentEdits(p:Project):Project {
 export function parseProject(raw: string): Project {
   ensure(new TextEncoder().encode(raw).length <= FILE_LIMIT,'FILE_TOO_LARGE'); const v: unknown=JSON.parse(raw);
   const schema=(v as {schemaVersion?:unknown})?.schemaVersion;
-  const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : schema===V3_SCHEMA ? migrateV3(v) : schema===V4_SCHEMA ? migrateV4(v) : schema===V5_SCHEMA ? migrateV5(v) : schema===V6_SCHEMA ? migrateV6(v) : schema===V7_SCHEMA ? migrateV7(v) : schema===V8_SCHEMA ? migrateV8(v) : schema===V9_SCHEMA ? migrateV9(v) : schema===V10_SCHEMA ? migrateV10(v) : v;
+  const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : schema===V3_SCHEMA ? migrateV3(v) : schema===V4_SCHEMA ? migrateV4(v) : schema===V5_SCHEMA ? migrateV5(v) : schema===V6_SCHEMA ? migrateV6(v) : schema===V7_SCHEMA ? migrateV7(v) : schema===V8_SCHEMA ? migrateV8(v) : schema===V9_SCHEMA ? migrateV9(v) : schema===V10_SCHEMA ? migrateV10(v) : schema===V11_SCHEMA ? migrateV11(v) : v;
   assertProject(project); return convertIntentEdits(project); // Freshly parsed, not shared: no defensive copy needed.
 }
 

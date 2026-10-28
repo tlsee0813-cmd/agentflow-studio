@@ -55,14 +55,15 @@ export function requestResults(project: Project, scopes: FrozenRequest[], option
   correct(reading: string, index: number, target: RequestTarget | null): Promise<string | null>;
   /** Undo a withdrawal link (the person's own act); absent where it cannot be saved. */
   unlink?(reading: string, index: number): Promise<string | null>;
-  quote?(record: string, quote: string): void;
+  /** from: where the passage stands in its record (the stored interval), so a repeated sentence is marked where it was read. */
+  quote?(record: string, quote: string, from?: number): void;
 }): HTMLElement | null {
   const all = frozenRequests(project, scopes), requests = all.filter(q => (!options.requestId || q.id === options.requestId) && (!options.partId || q.items.some(i => i.partIds.includes(options.partId!))));
   if (!requests.length) return null;
   const matches = requestMatches(project), sec = h('section', { class: 'sec request-results', 'aria-label': '원한 것과 돌아온 범위' }, h('h3', {}, '원한 것과 돌아온 범위'));
   const caption = (q: FrozenRequest) => `요청 ${all.findIndex(r => r.id === q.id) + 1} · ${fullTime(q.createdAt)} · 판 ${q.planRevision}`;
   const source = (m: EffectiveMatch, itemKey?: string) => {
-    if (options.quote) return h('button', { type: 'button', class: 'cl-cite', ...(itemKey ? { 'data-request-focus': JSON.stringify([itemKey, m.reading, m.index, m.match.record, m.match.from, m.match.to]) } : {}), title: m.match.quote, onclick: () => options.quote!(m.match.record, m.match.quote) }, '근거');
+    if (options.quote) return h('button', { type: 'button', class: 'cl-cite', ...(itemKey ? { 'data-request-focus': JSON.stringify([itemKey, m.reading, m.index, m.match.record, m.match.from, m.match.to]) } : {}), title: m.match.quote, onclick: () => options.quote!(m.match.record, m.match.quote, m.match.from) }, '근거');
     const text = project.pasted.find(r => r.id === m.match.record)?.text ?? project.sources.find(r => r.id === m.match.record)?.text ?? '';
     const details = h('details', { class: 'request-quote' }, h('summary', {}, '근거 원문'), h('pre', {}, ...quotedText(text, m.match.quote, { at: m.match.from, length: m.match.to - m.match.from })));
     details.addEventListener('toggle', () => { if (details.open) requestAnimationFrame(() => details.querySelector('mark')?.scrollIntoView({ block: 'nearest' })); });

@@ -105,7 +105,7 @@ test('71 frozen RQ and manual corrections survive a changed demand, late report,
 
 test('71 migration: project9 unchanged readings, legacy sidecar text/manual observations; new snapshot scope stays frozen and exports round-trip', () => {
   const { p, snap, bundle } = setup();
-  const v9 = { ...p, schemaVersion: 'idea015.project.9' }; assert.equal(parseProject(JSON.stringify(v9)).schemaVersion, 'idea015.project.11');
+  const v9 = { ...p, schemaVersion: 'idea015.project.9' }; assert.equal(parseProject(JSON.stringify(v9)).schemaVersion, 'idea015.project.12');
   const legacy = structuredClone(bundle); delete legacy.snapshots[0].scope;
   legacy.observations.push({ id: 'O_legacy', itemId: 'I1', kind: 'report', text: '이전 수동 보고', basis: '직접 붙임', refs: [] }); legacy.attached.O_legacy = snap.id;
   assert.deepEqual(parseBundle(legacy, p.id), legacy);
@@ -289,10 +289,10 @@ test('71/73 map.3 HTTP uses one combined prompt, an older tab\'s map.2 still get
 });
 const awaitlessPrompt = 'm3-000000000000';
 
-test('71/73 actual server status stays usable through aiStatus for m3, retains m1/m2 compatibility, and rejects unknown prompt contracts', async () => {
+test('71/73/74 actual server status stays usable through aiStatus for m4, retains m1–m3 compatibility, and rejects unknown prompt contracts', async () => {
   const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: 'test-status-not-real', DEEPSEEK_PLAN_MODEL: 'stub-model' }, fetchImpl: async () => { throw new Error('status must never call the model'); } });
   const serverStatus = await (await handle(new Request('https://studio.example/api/studio/status'))).json();
-  assert.equal(serverStatus.map.prompt, await mapPromptId()); assert.match(serverStatus.map.prompt, /^m3-/);
+  assert.equal(serverStatus.map.prompt, await mapPromptId()); assert.match(serverStatus.map.prompt, /^m4-/);
   const oldFetch = globalThis.fetch;
   try {
     // The real handler's status response, through the actual client parser used by the UI.
@@ -301,11 +301,11 @@ test('71/73 actual server status stays usable through aiStatus for m3, retains m
     const { p } = setup();
     const run = createMapRun({ current: () => ({ key: 'status-entry', kind: 'saved', project: p, view: studioView(p) }), status: () => status, accessCode: () => '', commit: async () => null, done: () => {}, changed: () => {} });
     assert.equal(run.can(), true, 'the map action remains available after reading the real status contract');
-    for (const prompt of ['m1-0123456789ab', 'm2-0123456789ab', 'm3-0123456789ab']) {
+    for (const prompt of ['m1-0123456789ab', 'm2-0123456789ab', 'm3-0123456789ab', 'm4-0123456789ab']) {
       globalThis.fetch = async () => new Response(JSON.stringify({ ...serverStatus, map: { ...serverStatus.map, prompt } }));
       assert.equal((await aiStatus()).map.prompt, prompt);
     }
-    for (const prompt of ['m4-0123456789ab', 'm3-bad', 'm3-0123456789ab-extra']) {
+    for (const prompt of ['m5-0123456789ab', 'm3-bad', 'm4-0123456789ab-extra']) {
       globalThis.fetch = async () => new Response(JSON.stringify({ ...serverStatus, map: { ...serverStatus.map, prompt } }));
       assert.equal((await aiStatus()).map, null);
     }

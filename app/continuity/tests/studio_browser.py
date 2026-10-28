@@ -1666,6 +1666,17 @@ def map70_flow(browser, base):
     context.close()
 
 
+def text_digest(t):
+    """span.1 textDigest (evidence-span.ts): two FNV-1a lanes over UTF-16 code units, as the server names the body it read."""
+    units = [int.from_bytes(t.encode("utf-16-le")[i:i + 2], "little") for i in range(0, len(t.encode("utf-16-le")), 2)]
+    m = 0xffffffff
+    a, b = 0x811c9dc5, (0x01000193 ^ len(units)) & m
+    for i, c in enumerate(units):
+        a = ((a ^ c) * 0x01000193) & m
+        b = (((b ^ c ^ (i & 0xff)) * 0x01000193) & m) ^ (a >> 13)
+    return f"f1-{a:08x}{b:08x}"
+
+
 def request71_flow(browser, base):
     """EXPERIENCE71: first map -> own demand -> frozen request -> plain partial report -> one combined map read ->
     wanted/reported/unanswered beside the same part -> exact quote and back -> durable exclusion. Written HTTP replies,
@@ -1718,11 +1729,14 @@ def request71_flow(browser, base):
     def returned(route):
         ask = route.request.post_data_json
         maps.append(ask)
-        assert ask["schemaVersion"] == "studio.map.3" and ask["requests"][0]["id"] == rq and ask["priors"] == []
-        rec = next(r for r in ask["records"] if "feature/folder" in r["text"])
-        match = {"record": rec["id"], "quote": "폴더 안 파일을 받는 입력을 바꿨습니다", "text": "[스텁] 폴더 입력 변경 보고", "kind": "reported", "about": "feature/folder@abc1234", "targets": [{"requestId": rq, "itemId": "I1"}], "why": "[스텁] 입력 요구에 대응하는 구절", "stance": "made", "replaces": None}
-        check = {**match, "kind": "checked", "stance": "unclear", "quote": "기존 단일 문서 검사 3개 통과", "text": "[스텁] 단일 문서 검사만 통과했다고 보고함"}
-        route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "reply": {"summary": "[스텁] 폴더 입력만 부분 보고됨", "parts": [], "relations": [], "candidates": [], "gaps": [], "matches": [match, check]}}))
+        # studio.map.4 (the stub server's status names an m4 prompt): the reply names span.1 pieces, and says which body it read.
+        assert ask["schemaVersion"] == "studio.map.4" and ask["requests"][0]["id"] == rq and ask["priors"] == []
+        rec = next(r for r in ask["records"] if "feature/folder" in "".join(x["t"] for x in r["spans"]))
+        at = lambda words: next(x["s"] for x in rec["spans"] if x["t"].strip().startswith(words))
+        match = {"at": at("작업 보고: feature/folder"), "text": "[스텁] 폴더 입력 변경 보고", "kind": "reported", "about": "feature/folder@abc1234", "targets": [{"requestId": rq, "itemId": "I1"}], "why": "[스텁] 입력 요구에 대응하는 구절", "stance": "made", "replaces": None}
+        check = {**match, "kind": "checked", "stance": "unclear", "at": at("기존 단일 문서 검사"), "text": "[스텁] 단일 문서 검사만 통과했다고 보고함"}
+        route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "evidence": {"index": "span.1", "ask": text_digest(route.request.post_data)},
+            "reply": {"summary": "[스텁] 폴더 입력만 부분 보고됨", "parts": [], "relations": [], "candidates": [], "gaps": [], "matches": [match, check], "material": []}}))
     page.route("**/api/studio/map", returned)
     page.locator("#lens .rr-map").get_by_role("button", name="기록 읽고 지도 갱신").click()
     expect(page.locator("#world .map-understood")).to_contain_text("폴더 입력만 부분 보고됨")
@@ -1739,7 +1753,7 @@ def request71_flow(browser, base):
     page.wait_for_timeout(300)
     url0, camera0 = page.url, page.locator("#world").evaluate(CAMERA)
     page.locator("#lens .request-passage", has_text="폴더 입력 변경 보고").get_by_role("button", name="근거", exact=True).click()
-    expect(page.locator("#lens .rr-mark")).to_have_text("폴더 안 파일을 받는 입력을 바꿨습니다")
+    expect(page.locator("#lens .rr-mark")).to_have_text("작업 보고: feature/folder@abc1234에서 폴더 안 파일을 받는 입력을 바꿨습니다.")
     page.locator("#lens .rr-back").click()
     expect(page).to_have_url(url0)
     page.wait_for_timeout(300)

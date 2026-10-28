@@ -1,6 +1,7 @@
 import type { StudioAsk, StudioReply } from '../shared/studio.js';
 import { validateDigestReply, type DigestAsk, type DigestReply } from '../shared/digest-api.js';
-import { validateMapReply, type MapAsk, type MapReply } from '../shared/map-reading.js';
+import { validateMapReply, MAP4_SCHEMA, type MapAsk, type MapReply } from '../shared/map-reading.js';
+import { SPAN_INDEX, textDigest } from '../shared/evidence-span.js';
 import { RUNTIME } from './runtime.js';
 
 /** digest: the model and prompt id a return reading would be made with (null when the server does not say). */
@@ -21,7 +22,7 @@ export async function aiStatus(): Promise<AiStatus> {
     if (!res.ok || !['deepseek', 'off'].includes(v?.ai)) return { ai: 'none', model: null, access: 'open' };
     const d = v.digest, digest = d && typeof d.model === 'string' && typeof d.prompt === 'string' && /^[\w.-]{1,80}$/.test(d.model) && /^d1-[0-9a-f]{12}$/.test(d.prompt)
       ? { model: d.model, prompt: d.prompt, record: typeof d.record === 'string' && /^d2-[0-9a-f]{12}$/.test(d.record) ? d.record : null } : null;
-    const m = v.map, map = m && typeof m.model === 'string' && /^[\w.-]{1,80}$/.test(m.model) && typeof m.prompt === 'string' && /^m[123]-[0-9a-f]{12}$/.test(m.prompt) ? { model: m.model, prompt: m.prompt } : null;
+    const m = v.map, map = m && typeof m.model === 'string' && /^[\w.-]{1,80}$/.test(m.model) && typeof m.prompt === 'string' && /^m[1-4]-[0-9a-f]{12}$/.test(m.prompt) ? { model: m.model, prompt: m.prompt } : null;
     return { ai: v.ai, model: typeof v.model === 'string' ? v.model : null, access: v.access === 'code' ? 'code' : 'open', digest, map };
   } catch { return { ai: 'none', model: null, access: 'open' }; }
 }
@@ -55,18 +56,21 @@ export async function askDigest(ask: DigestAsk, signal: AbortSignal, accessCode:
   try { return { model: data.model, reply: validateDigestReply(data.reply, ask) }; } catch { throw new AskError('INVALID_RESPONSE'); }
 }
 
-/** A map reading. The reply is checked again here against the request that was sent. */
+/** A map reading. The reply is checked again here against the request that was sent. studio.map.4: the reply comes as references,
+ * decoded here against this very request (the server says which request body it read), so each passage keeps where it stands. */
 export async function askMap(ask: MapAsk, signal: AbortSignal, accessCode: string): Promise<{ model: string; reply: MapReply }> {
   if (RUNTIME.apiBase === null) throw new AskError('NO_SERVER');
   const headers: Record<string, string> = { 'Content-Type': 'application/json', 'X-AgentFlow-Request': '1' };
   if (accessCode) headers['X-Studio-Access'] = accessCode;
+  const body = JSON.stringify(ask);
   let res: Response;
-  try { res = await fetch(url('/api/studio/map'), { method: 'POST', headers, body: JSON.stringify(ask), signal, credentials: 'same-origin' }); }
+  try { res = await fetch(url('/api/studio/map'), { method: 'POST', headers, body, signal, credentials: 'same-origin' }); }
   catch { throw new AskError(signal.aborted ? 'CANCELLED' : 'NETWORK'); }
-  let data: { error?: { code?: unknown }; model?: unknown; reply?: unknown } | null = null;
+  let data: { error?: { code?: unknown }; model?: unknown; reply?: unknown; evidence?: { index?: unknown; ask?: unknown } } | null = null;
   try { data = await res.json(); } catch { /* handled below */ }
   if (!res.ok) throw new AskError(typeof data?.error?.code === 'string' ? data.error.code : 'REQUEST_FAILED');
   if (typeof data?.model !== 'string') throw new AskError('INVALID_RESPONSE');
+  if (ask.schemaVersion === MAP4_SCHEMA && (data.evidence?.index !== SPAN_INDEX || data.evidence.ask !== textDigest(body))) throw new AskError('INVALID_RESPONSE');
   try { return { model: data.model, reply: validateMapReply(data.reply, ask) }; } catch { throw new AskError('INVALID_RESPONSE'); }
 }
 

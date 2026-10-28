@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "agentflow.record74-samples.1",
+  "samples": [
+    { "file": "actual-order-backup.json", "kind": "actual-backup",
+      "note": "The experience73 actual-order backup exactly as saved (idea015.project.10, bytes unchanged): the real AgentFlow73 implementation instruction (3,545 characters, pasted[0]) in an otherwise empty project, where the public first map failed. Its quoted correction (정정원문 “…”) is test material inside the instruction: it does not mean AgentFlow is a document converter. Readings are empty: it holds no AI reply. No key, token or access code (checked with the app's secret pattern). The replies in grounded74.test.mjs are written for the test, not a model's." }
+  ]
+}
