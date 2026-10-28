@@ -17,7 +17,7 @@ import { serializeBackup, serializeProject } from '../dist/public/shared/storage
 import { askMap, aiStatus } from '../dist/public/client/studio-api.js';
 import { createMapRun } from '../dist/public/client/map-run.js';
 import { createStudioHandler, mapPromptId } from '../server/studio.mjs';
-import { MAP3_PROMPT, MAP4_PROMPT, MAP4_FIRST_PROMPT, MAP4_RECIPE, map4Prompt } from '../server/map-prompt.mjs';
+import { MAP3_PROMPT, MAP4_PROMPT, MAP4_FIRST_PROMPT, MAP5_PROMPT, MAP5_FIRST_PROMPT, MAP5_RECIPE, map4Prompt } from '../server/map-prompt.mjs';
 import { sample } from './understanding17-fixtures.mjs';
 
 const ORDER_RAW = readFileSync(new URL('./fixtures/record74/actual-order-backup.json', import.meta.url), 'utf8');
@@ -239,7 +239,7 @@ test('74-F a changed record, another reading meanwhile or a failed save leave on
     const run = createMapRun({ current: () => ({ key: 'e', kind: 'saved', project, view: studioView(project) }), status: () => status, accessCode: () => '',
       commit: async next => { if (fails) return '저장 실패'; project = next; return null; }, done: () => {}, changed: () => {} });
     await run.run(); assert.equal(project, p0); assert.match(run.state().error, /저장 실패/); assert.equal(M.unreadRecords(project, studioView(project)).length, 1);
-    assert.equal(bodies[0].schemaVersion, 'studio.map.4', 'an m4 server is sent the anchored wire');
+    assert.equal(bodies[0].schemaVersion, 'studio.map.5', 'the current m5 server is sent the anchored range wire');
     fails = false; await run.run(); assert.equal(project.readings.length, 1); assert.equal(lastReading(project).version, 'map-reading.4');
     // An m3 server (older deploy) is sent the copied-quote wire it reads.
     bodies = []; const old = createMapRun({ current: () => ({ key: 'o', kind: 'saved', project: p0, view: studioView(p0) }), status: () => ({ ...status, map: { model: 'm', prompt: 'm3-0123456789ab' } }), accessCode: () => '', commit: async () => '중단', done: () => {}, changed: () => {} });
@@ -314,11 +314,11 @@ test('74-I project.11 and earlier stay as stored (no position derived); map-read
   assert.equal(lastReading(good).parts[0].basis[0].from, REPEAT.lastIndexOf(SENT));
 });
 
-test('74-I2 server and client contracts: status names m4, an older tab\'s studio.map.3 is still answered with its own prompt and quotes', async () => {
-  assert.match(await mapPromptId(), /^m4-[0-9a-f]{12}$/);
+test('74-I2 server and client contracts: status names m5, an older tab\'s studio.map.3 is still answered with its own prompt and quotes', async () => {
+  assert.match(await mapPromptId(), /^m5-[0-9a-f]{12}$/);
   const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: 'test-74-not-real' }, fetchImpl: async () => { throw new Error('status never calls the model'); } });
   const oldFetch = globalThis.fetch;
-  try { globalThis.fetch = async () => handle(new Request('https://studio.example/api/studio/status')); assert.match((await aiStatus()).map.prompt, /^m4-/); } finally { globalThis.fetch = oldFetch; }
+  try { globalThis.fetch = async () => handle(new Request('https://studio.example/api/studio/status')); assert.match((await aiStatus()).map.prompt, /^m5-/); } finally { globalThis.fetch = oldFetch; }
   let p = D.addArea(D.createProject(), '폴더 일괄 처리', ''); const q = plan(p, p.space.areas[0].id).scope;
   p = D.pasteRecord(p, REPORT71.replace(SAMPLE_RQ, q.id), null).project;
   const old = M.buildMapAsk(p, studioView(p), [q]); assert.equal(old.ask.schemaVersion, 'studio.map.3');
@@ -489,6 +489,6 @@ test('74-M2 map.4 goes as in 8d (JSON, thinking enabled, low effort, 16384) with
   assert.ok(!('tools' in b) && !('tool_choice' in b));
   const later = ask4(D.pasteRecord(apply4(p, inp, orderReply(inp)).project, '후속 보고: 요청 비교 집계를 접힌 항목에도 썼다고 보고합니다.', null).project);
   await post(later.ask); assert.equal(bodies[1].messages[0].content, MAP4_PROMPT);
-  const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ recipe: MAP4_RECIPE, first: MAP4_FIRST_PROMPT, later: MAP4_PROMPT })));
-  assert.equal(await mapPromptId(), `m4-${[...new Uint8Array(bytes)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`);
+  const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ recipe: MAP5_RECIPE, first: MAP5_FIRST_PROMPT, later: MAP5_PROMPT })));
+  assert.equal(await mapPromptId(), `m5-${[...new Uint8Array(bytes)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`);
 });

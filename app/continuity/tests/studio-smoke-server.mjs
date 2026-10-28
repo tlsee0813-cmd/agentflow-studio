@@ -13,7 +13,7 @@ const stub = async (url, init) => {
   const input = JSON.parse(JSON.parse(init.body).messages[1].content.replace(/^[^\n]*\n/, ''));
   if (input.schemaVersion === 'studio.digest.1' || input.schemaVersion === 'studio.digest.2') return digestStub(input);
   if (['studio.map.1', 'studio.map.2', 'studio.map.3'].includes(input.schemaVersion)) return mapStub(input);
-  if (input.schemaVersion === 'studio.map.4') return map4Stub(input);
+  if (['studio.map.4', 'studio.map.5'].includes(input.schemaVersion)) return map4Stub(input);
   const refs = input.records.slice(0, 2).map(r => r.ref);
   const content = { headline: `[스텁 응답] ${input.part.name} 정리`, situation: [`스텁: ${input.part.name}의 기록 ${input.records.length}개를 받았습니다.`],
     changes: input.current.changes.slice(0, 2), next: ['스텁: 다음 판단 예시'], answer: input.intent === 'question' ? `스텁 답변: ${input.question}` : null, refs };

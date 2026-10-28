@@ -203,3 +203,17 @@ JSON 객체 하나만 반환한다. 키는 정확히 다음 7개다(matches는 r
  * (nothing earlier to replace or compare), else MAP4_PROMPT. The rule's version goes into the prompt id with both texts. */
 export const MAP4_RECIPE = 'map4-recipe.1: first = parts.length === 0 && requests.length === 0 && priors.length === 0';
 export const map4Prompt = ask => ask.parts.length === 0 && (ask.requests ?? []).length === 0 && (ask.priors ?? []).length === 0 ? MAP4_FIRST_PROMPT : MAP4_PROMPT;
+
+// map.4 remains byte-for-byte its earlier prompt. map.5 changes only the evidence range contract and neutralizes the first
+// map's structural example keys; semantic boundaries, first/later selection, and counts are the same rules as map.4.
+const map5Evidence = prompt => prompt.replace(
+  /- 근거는 원문을 다시 쓰지 않고 구간 이름으로 고른다\.[^\n]+/,
+  '- 근거는 원문을 다시 쓰지 않고 구간 이름으로 고른다. basis의 각 값, roleReplaces, claims·relations·candidates·matches의 at에는 구간 하나("N01.07") 또는 같은 전송 기록의 순서 있는 연속 범위("N01.07-10")를 쓴다. 두 끝점은 실제로 존재해야 하며, 그 사이 모든 원문을 줄바꿈·공백·기호 그대로 포함한 정확한 연속 인용이 600 UTF-16 코드 단위 이내여야 한다. 구간 개수·문단 수·빈 줄은 제한하지 않는다. 다른 기록을 잇기, 떨어진 구간 모으기, 역순·없는 끝점, 600 초과는 응답 전체가 거절된다. 길이를 맞추려고 원문을 자르거나 끝점을 옮기지 않는다.'
+).replace('조건이 다음 구간에 이어지면 두 구간을 함께 고르거나 주장을 그 범위로 좁힌다.', '조건이 다음 구간들에 이어지면 조건을 포함하는 정확한 연속 범위를 고르거나 주장을 그 범위로 좁힌다.').replace(
+  /- 내포 자료로 읽은 범위는 material에 /,
+  '- material의 at은 근거의 600 제한과 별개인 긴 연속 범위다. 근거가 material 범위와 조금이라도 겹치면 지도 근거가 되지 않는다. 예문 앞뒤 본문을 붙여 예문을 프로젝트 근거로 만들지 않는다.\n- 내포 자료로 읽은 범위는 material에 '
+);
+export const MAP5_PROMPT = map5Evidence(MAP4_PROMPT);
+export const MAP5_FIRST_PROMPT = map5Evidence(MAP4_FIRST_PROMPT).replaceAll('new:eval', 'new:a').replaceAll('new:parse', 'new:b').replaceAll('new:run', 'new:c');
+export const MAP5_RECIPE = 'map5-recipe.1: first = parts.length === 0 && requests.length === 0 && priors.length === 0; evidence = same-record contiguous range <= 600 UTF-16; span.2';
+export const map5Prompt = ask => ask.parts.length === 0 && (ask.requests ?? []).length === 0 && (ask.priors ?? []).length === 0 ? MAP5_FIRST_PROMPT : MAP5_PROMPT;

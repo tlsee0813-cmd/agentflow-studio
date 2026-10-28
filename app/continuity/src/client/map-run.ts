@@ -4,7 +4,7 @@
  * (commit): until it succeeds nothing is said to be done, and the records and drafts stay as they were. */
 import { isMapReading, type MapReading, type Project } from '../shared/types.js';
 import type { StudioView } from '../shared/studio.js';
-import { buildMapAsk, applyReading, type MapInput, type Applied } from '../shared/map-reading.js';
+import { buildMapAsk, applyReading, MAP5_SCHEMA, type MapInput, type Applied } from '../shared/map-reading.js';
 import { askMap, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
 import type { FrozenRequest } from '../shared/request-return.js';
 /** SHA-256 of the request's JSON: the very same request is never sent or applied twice. */
@@ -37,8 +37,11 @@ const MAP_ERROR: Record<string, string> = {
 export function createMapRun(host: MapRunHost) {
   const states = new Map<string, MapRunState>();
   const of = (key: string) => { let s = states.get(key); if (!s) { s = { pending: null, error: null }; states.set(key, s); } return s; };
-  /** The server reads evidence by span.2 piece (studio.map.4): its status names an m4- map prompt. Otherwise the earlier wire. */
-  const anchored = () => /^m4-/.test(host.status().map?.prompt ?? '');
+  /** Only an advertised m5 recipe opts into contiguous ranges; m4 and earlier servers retain their earlier wire. */
+  const anchored = (): boolean | typeof MAP5_SCHEMA => {
+    const prompt = host.status().map?.prompt ?? '';
+    return /^m5-[0-9a-f]{12}$/.test(prompt) ? MAP5_SCHEMA : /^m4-[0-9a-f]{12}$/.test(prompt);
+  };
   /** What a reading would send now (nothing is sent). */
   function input(requestId?: string): MapInput | null { const o = host.current(); return o && o.kind === 'saved' ? buildMapAsk(o.project, o.view, host.requests?.() ?? [], requestId, anchored()) : null; }
   function can(): boolean { const st = host.status(); return st.ai === 'deepseek' && !!st.map; }

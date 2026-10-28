@@ -306,7 +306,7 @@ test('M70-H1 HTTP: /api/studio/map validates both ways, keeps reasoning with a m
     fetchImpl: async (url, init) => { seen = JSON.parse(init.body); return new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(good) } }] }), { status: 200 }); } });
   const post = body => new Request('https://studio.example/api/studio/map', { method: 'POST', headers: { 'content-type': 'application/json', 'x-agentflow-request': '1', origin: 'https://studio.example' }, body: JSON.stringify(body) });
   const status = await (await handle(new Request('https://studio.example/api/studio/status'))).json();
-  assert.deepEqual(status.map, { model: 'm-plan', prompt: await mapPromptId() }); assert.match(status.map.prompt, /^m4-[0-9a-f]{12}$/);
+  assert.deepEqual(status.map, { model: 'm-plan', prompt: await mapPromptId() }); assert.match(status.map.prompt, /^m5-[0-9a-f]{12}$/);
   assert.equal((await handle(post({ ...inp.ask, extra: 1 }))).status, 400); assert.equal(seen, null);
   const r = await handle(post(inp.ask)); assert.equal(r.status, 200); assert.deepEqual(await r.json(), { model: 'm-plan', reply: good });
   assert.equal(seen.messages[0].content, MAP_PROMPT); assert.equal(seen.thinking.type, 'enabled'); assert.equal(seen.reasoning_effort, 'low'); assert.equal(seen.max_tokens, 16384);

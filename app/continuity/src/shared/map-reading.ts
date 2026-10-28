@@ -4,7 +4,7 @@
  * derived understanding. It never renames, moves, archives or re-describes an existing part, never writes Area.note and never
  * touches space.understanding (return.2 and its anchors). What is unclear stays a candidate; nothing asks for approval per part. */
 import { CLAIM_KINDS, READINGS_LIMIT, isMapReading, type ClaimKind, type MapReading, type Project, type ReadingCandidate, type ReadingClaim, type ReadingPart, type ReadingQuote, type ReadingRelation, type ReadingSkip, type RelationKind } from './types.js';
-import { indexSpans, encodeSpans, decodeSpans, resolveRef, resolveRange, textDigest, ANCHOR_QUOTE_MAX, SPANS_PER_RECORD, type Span, type SpanWire } from './evidence-span.js';
+import { indexSpans, encodeSpans, decodeSpans, resolveRef, resolveRange, resolveEvidenceRange, textDigest, ANCHOR_QUOTE_MAX, SPANS_PER_RECORD, type Span, type SpanWire } from './evidence-span.js';
 import type { StudioView, RecordView } from './studio.js';
 import { addArea, addChildArea, addRelation, addReading } from './domain.js';
 import { parseProject, sourceText } from './validation.js';
@@ -21,6 +21,9 @@ export const MAP3_SCHEMA = 'studio.map.3' as const;
  * ranges it read as material inside the record (an example, a sample under test), which nothing of the map may rest on alone.
  * Every quote then keeps where it stands ([from, to) of the record) through the reply, the one write, storage and the mark. */
 export const MAP4_SCHEMA = 'studio.map.4' as const;
+/** studio.map.5: the same span.2 wire, with exact contiguous evidence ranges of at most 600 UTF-16 units, across any number
+ * of pieces or paragraphs. map.1–4 retain their own contracts. Stored quotes still use map-reading.4 (exact slice and digest). */
+export const MAP5_SCHEMA = 'studio.map.5' as const;
 /** At most this many earlier matches go as priors, within PRIOR_BYTES (records keep the rest of MAP_BYTES). */
 export const MAP_PRIORS = 24;
 const PRIOR_BYTES = 12000;
@@ -47,7 +50,7 @@ export interface MapAskRecord { id: string; kind: 'pasted' | RecordView['kind'];
  * frozen item it answers. Material, never a new record. */
 export interface MapAskPrior { key: string; quote: string; text: string; kind: MatchKind; stance: MatchStance | null; about: string | null; target: RequestTarget }
 export interface MapAsk {
-  schemaVersion: typeof MAP_SCHEMA | typeof MAP2_SCHEMA | typeof MAP3_SCHEMA | typeof MAP4_SCHEMA;
+  schemaVersion: typeof MAP_SCHEMA | typeof MAP2_SCHEMA | typeof MAP3_SCHEMA | typeof MAP4_SCHEMA | typeof MAP5_SCHEMA;
   project: { name: string; purpose: string | null };
   parts: MapAskPart[];
   relations: { from: string; to: string; kind: RelationKind; note: string }[];
@@ -139,7 +142,7 @@ function arr(v: unknown, max: number, code?: string): asserts v is unknown[] { c
 /** The whole request within MAP_BYTES of UTF-8 JSON; known aliases, parents and claim keys; nothing is clipped here. */
 export function validateMapAsk(value: unknown): MapAsk {
   const version = !!value && typeof value === 'object' ? (value as { schemaVersion?: unknown }).schemaVersion : null;
-  const four = version === MAP4_SCHEMA, three = four || version === MAP3_SCHEMA, two = three || version === MAP2_SCHEMA;
+  const four = version === MAP4_SCHEMA || version === MAP5_SCHEMA, three = four || version === MAP3_SCHEMA, two = three || version === MAP2_SCHEMA;
   obj(value, ['schemaVersion', 'project', 'parts', 'relations', 'records', ...(two ? ['requests'] : []), ...(three ? ['priors'] : [])]);
   if (value.schemaVersion !== MAP_SCHEMA && !two) throw new Error('UNSUPPORTED_VERSION');
   if (bytes(value) > MAP_BYTES) throw new Error('INPUT_TOO_LARGE');
@@ -195,7 +198,7 @@ export function validateMapAsk(value: unknown): MapAsk {
  * all this checks: not that a reading is right. */
 export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
   const code = 'INVALID_RESPONSE';
-  const four = ask.schemaVersion === MAP4_SCHEMA, three = four || ask.schemaVersion === MAP3_SCHEMA, two = three || ask.schemaVersion === MAP2_SCHEMA;
+  const five = ask.schemaVersion === MAP5_SCHEMA, four = five || ask.schemaVersion === MAP4_SCHEMA, three = four || ask.schemaVersion === MAP3_SCHEMA, two = three || ask.schemaVersion === MAP2_SCHEMA;
   obj(value, ['summary', 'parts', 'relations', 'candidates', 'gaps', ...(two ? ['matches'] : []), ...(four ? ['material'] : [])], code);
   const parts = new Map(ask.parts.map(p => [p.id, p])), records = new Map(ask.records.map(r => [r.id, r])), texts = askRecords(ask);
   const quote = (rec: unknown, q: unknown): MapReplyQuote => {
@@ -204,12 +207,12 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
     check(!!span && span.length <= 300, code);
     return { record: rec, quote: span! };
   };
-  // studio.map.4: a reference to one piece or two adjacent pieces of one paragraph of a sent record, read as that exact passage.
+  // map.4 keeps its two-piece/paragraph contract; map.5 allows any exact contiguous range within the evidence length bound.
   const cite = (v: unknown): MapReplyQuote => {
     check(typeof v === 'string', code);
     const rec = /^([NR]\d{2,3})\./.exec(v as string)?.[1], got = rec ? texts.get(rec) : undefined;
     check(!!got?.spans, code);
-    const at = resolveRef(v as string, rec!, got!.text, got!.spans!);
+    const at = (five ? resolveEvidenceRange : resolveRef)(v as string, rec!, got!.text, got!.spans!);
     check(!!at && at.quote.length <= ANCHOR_QUOTE_MAX, code);
     return { record: rec!, quote: at!.quote, from: at!.from, to: at!.to };
   };
@@ -484,9 +487,10 @@ export function unreadRecords(p: Project, view: StudioView): MapRecordSource[] {
   const own: MapRecordSource[] = view.records.map(r => ({ id: r.id, kind: r.kind, text: r.text, at: r.at, label: '프로젝트 기록', from: readTo.get(r.id) ?? 0 }));
   return [...pasted, ...own].filter(r => r.from < r.text.length).sort((a, b) => b.at.localeCompare(a.at));
 }
-/** anchored: the server reads studio.map.4 (its status names an m4- prompt); records then go as span.2 pieces, each excerpt ending
+/** anchored: true for m4, MAP5_SCHEMA for m5 (only after the server advertises that capability); records go as span.2 pieces, ending
  * where a piece ends (a cut excerpt never leaves its last sentence half sent), with requests and priors always present. */
-export function buildMapAsk(p: Project, view: StudioView, requests: FrozenRequest[] = [], selectedRequestId?: string, anchored = false): MapInput {
+export function buildMapAsk(p: Project, view: StudioView, requests: FrozenRequest[] = [], selectedRequestId?: string, anchored: boolean | typeof MAP5_SCHEMA = false): MapInput {
+  const anchoredSchema = anchored === MAP5_SCHEMA ? MAP5_SCHEMA : MAP4_SCHEMA;
   const parts = new Map<string, string>(), alias = new Map<string, string>(), claims = new Map<string, { reading: string; index: number }>();
   view.parts.slice(0, 200).forEach((x, i) => { const a = `P${String(i + 1).padStart(2, '0')}`; parts.set(a, x.id); alias.set(x.id, a); });
   let c = 0;
@@ -504,7 +508,7 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
     records: [],
     ...(anchored ? { requests: [], priors: [] } : {})
   };
-  if (anchored) ask.schemaVersion = MAP4_SCHEMA;
+  if (anchored) ask.schemaVersion = anchoredSchema;
   let unread = unreadRecords(p, view);
   if (selectedRequestId) {
     if (!requests.some(r => r.id === selectedRequestId)) throw new Error('INVALID_REQUEST_SCOPE');
@@ -524,7 +528,7 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
     const chosen = selectedRequestId ? requests.filter(r => r.id === selectedRequestId) : requests, contexts = chosen.map(requestContext);
     input.requestCoverage = { total: requests.length, sent: 0 };
     if (chosen.length > 8 || bytes(contexts) > 28000) return { ...input, problem: 'REQUEST_CONTEXT_TOO_LARGE' };
-    ask.schemaVersion = anchored ? MAP4_SCHEMA : MAP3_SCHEMA; ask.requests = contexts; input.fullRequests = structuredClone(chosen);
+    ask.schemaVersion = anchored ? anchoredSchema : MAP3_SCHEMA; ask.requests = contexts; input.fullRequests = structuredClone(chosen);
     input.requestCoverage.sent = chosen.length;
     // What the records may take back: current matches of a single item of these requests, newest first, within their own budget.
     const ids = new Set(chosen.map(q => q.id)), priors: MapAskPrior[] = [], refs = new Map<string, { reading: string; index: number; target: RequestTarget; correction: string | null }>();
@@ -592,7 +596,7 @@ export interface Applied { project: Project; reading: MapReading; created: strin
  * the reply names has gone; edits the person made meanwhile (names, notes, places, plans, records) are kept as they are. */
 export function applyReading(project: Project, input: MapInput, reply: MapReply, meta: { id: string; at: string; model: string; prompt: string; hash: string }): Applied {
   if (input.problem) throw new Error(input.problem === 'REQUEST_CONTEXT_TOO_LARGE' ? 'REQUEST_CONTEXT_TOO_LARGE' : 'INVALID_INPUT');
-  const withRequests = input.ask.schemaVersion !== MAP_SCHEMA, four = input.ask.schemaVersion === MAP4_SCHEMA, three = four || input.ask.schemaVersion === MAP3_SCHEMA;
+  const withRequests = input.ask.schemaVersion !== MAP_SCHEMA, four = input.ask.schemaVersion === MAP4_SCHEMA || input.ask.schemaVersion === MAP5_SCHEMA, three = four || input.ask.schemaVersion === MAP3_SCHEMA;
   const frozen = withRequests ? input.fullRequests ?? input.ask.requests!.map(validateFrozenRequest) : [];
   if (frozen.some(r => r.projectId !== project.id) || JSON.stringify(frozen.map(requestContext)) !== JSON.stringify((input.ask.requests ?? []).map(r => r.version === 'request-scope.1' ? requestContext(r) : r))) throw new Error('INVALID_REQUEST_SCOPE');
   const done = project.readings.filter(isMapReading);

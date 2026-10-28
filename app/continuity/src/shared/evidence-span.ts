@@ -6,13 +6,14 @@
  * span.1 cut indented code line by line); a sentence
  * longer than SPAN_MAX goes on in the next piece (more). What is marked (heading, list, code, table, quotation) is where a piece
  * stands, not what it means: a quotation is a blockquote line or a passage inside “…”/「…」/『…』 that holds more than one sentence.
- * A reference names one piece ('N01.07') or two adjacent pieces of one paragraph ('N01.07-08'), within the excerpt it was sent in. */
+ * map.4 references one piece or two adjacent pieces of one paragraph; map.5 references an ordered contiguous range of pieces,
+ * at most ANCHOR_QUOTE_MAX UTF-16 units including intervening whitespace. Neither changes this index or its aliases. */
 export const SPAN_INDEX = 'span.2' as const;
 /** A piece's evidence is at most this long; two adjacent pieces of one paragraph are at most 2·SPAN_MAX plus the space between. */
 export const SPAN_MAX = 240;
 /** At most this many pieces in one excerpt: a longer one is sent up to a piece boundary and read on from there next time. */
 export const SPANS_PER_RECORD = 400;
-/** A stored anchored quote is at most this long (two pieces and a short gap). */
+/** An anchored quote is at most this long, including whitespace between its endpoints. */
 export const ANCHOR_QUOTE_MAX = 600;
 export type SpanKind = 'p' | 'h' | 'l' | 'c' | 't';
 export interface Span { from: number; to: number; kind: SpanKind; quoted: boolean; more: boolean; para: number }
@@ -150,6 +151,14 @@ export function resolveRange(ref: string, record: string, text: string, spans: S
   const a = Number(m[2]) - 1, b = m[3] === undefined ? a : Number(m[3]) - 1;
   if (m[2] !== String(a + 1).padStart(2, '0') || (m[3] !== undefined && m[3] !== String(b + 1).padStart(2, '0')) || a < 0 || b < a || b >= spans.length) return null;
   return { from: spans[a]!.from, to: spans[b]!.to };
+}
+/** map.5 evidence: the exact contiguous slice between existing, ordered endpoints of this record. No clipping, joining
+ * disjoint ranges or moving endpoints; paragraph boundaries and piece count do not limit a passage. Material uses resolveRange
+ * separately, without this evidence-length bound. */
+export function resolveEvidenceRange(ref: string, record: string, text: string, spans: Span[]): { from: number; to: number; quote: string } | null {
+  const at = resolveRange(ref, record, text, spans);
+  if (!at || at.to - at.from > ANCHOR_QUOTE_MAX) return null;
+  return { ...at, quote: text.slice(at.from, at.to) };
 }
 /** A short fixed digest of the exact text read (two FNV-1a lanes over UTF-16 code units): binds a stored reading to that text. */
 export function textDigest(t: string): string {
