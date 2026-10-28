@@ -1,0 +1,20 @@
+{
+  "source": "ab8e45cdb34cdba8328c8cee369b010f346ed3ea",
+  "runtime": "2999fd65c67754bd7a0bd0d45f9fd841fd3956e5",
+  "appTree": "7beb4ba00211a1afd3b9549ef4eb08a55b2a8384",
+  "hashBasis": "Exact Git blob bytes, including final newline",
+  "files": {
+    "actual-storage-ui.json": {
+      "sha256": "c5ad2e483f6e26b41ae4d82ff3a548b75e6fab1fec80673d3217230ef3df6369",
+      "bytes": 1266
+    },
+    "execution.json": {
+      "sha256": "bade8d0cac0fe32a8a063f7e968b337a0394cf060dc62c418fdd424b3539dfd9",
+      "bytes": 3310
+    },
+    "semantic-verdicts.json": {
+      "sha256": "f135f56b02821ae3c586a79686fbe4cd4f252f8cb5466c59eff3e2ea8c00bee9",
+      "bytes": 1672
+    }
+  }
+}

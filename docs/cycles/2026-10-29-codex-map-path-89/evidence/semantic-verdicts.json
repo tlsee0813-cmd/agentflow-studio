@@ -1,0 +1,31 @@
+{
+  "reviewer": "Existing independent Sol High agent; no inference rerun",
+  "actualOrder": {
+    "A1": "PASS: improvement requests and existing defect descriptions kept distinct",
+    "A2": "PASS: report kind, progress, partial evidence and legacy unknown kept distinct",
+    "A3": "PASS: targeted prior response, frozen item, version, correction snapshot and withdrawal isolation preserved",
+    "A4": "PASS: shared aggregate, current/history, source return and compatibility preserved",
+    "A5": "PASS: illustrative conversion records not product components",
+    "scope": "One generated response, not confidence estimate or product implementation proof"
+  },
+  "micro": {
+    "M1": "FAIL: internal eval pipeline remains but public JSContext API entry is missing",
+    "M2": "PASS: shared globals and context memory/time limit transfer preserved",
+    "M3": "PASS: exception categories and documented limitations preserved",
+    "M4": "FAIL: install package versus Python import/API identity not readable in active map",
+    "failureCount": "One entry-identity omission affects two retained criteria",
+    "knownPresent": [
+      "eval",
+      "Parser",
+      "Compiler",
+      "VM",
+      "Python result conversion"
+    ],
+    "missingActiveMapIdentifiers": [
+      "JSContext",
+      "microjs"
+    ],
+    "materialObservation": "Usage example includes context creation, but the map does not preserve the public interface identity elsewhere. Example marking is not proof that the validator caused omission."
+  },
+  "decision": "Reject combined candidate. No third-case invocation, no rerun or output repair. Do not generalize one response to all Codex capability."
+}

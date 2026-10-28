@@ -1,0 +1,33 @@
+{
+  "case": "actual-order only",
+  "performedBy": "Root, normal file UI on isolated local origin",
+  "source": "ab8e45cdb34cdba8328c8cee369b010f346ed3ea",
+  "viewport": {
+    "dpr": 1.25,
+    "height": 720,
+    "width": 1280
+  },
+  "steps": [
+    "empty origin observed",
+    "normal import of newly generated private project backup",
+    "select explicit retraction",
+    "read exact highlighted source",
+    "return to same claim focus and URL/camera",
+    "reload",
+    "normal export"
+  ],
+  "allProjectFieldsPreserved": true,
+  "changedProjectPaths": [],
+  "inputProjectSha256": "ccf632f7dacbcd57c36fe9eed8d573c8ea9284aa963c6d287edfe9743fe791f8",
+  "exportSha256": "6bb4f521eb9e3840141a9128a69fa6bf8a8a42dbb904cd61c00e06c80b11bdd0",
+  "sameSelectionUrl": true,
+  "sameCamera": true,
+  "returnedFocus": "same claim evidence button",
+  "quoteUtf16Length": 80,
+  "quoteSha256": "179797dde7f1c0e833f8c2662ce226e3cfe8166738e80350b3a454e933b46bfb",
+  "privateScreenshotSha256": "7f5d93a1a80bab94df934ddfd5ee3b1722e50b993b4cd4f44ae5a32387ca1eaf",
+  "providerCallsDuringUI": 0,
+  "independentBrowserRun": false,
+  "microUiAcceptance": false,
+  "limit": "No whole UX or generation-through-product-API acceptance. Private actual-order screenshot/source remain in Ops."
+}
