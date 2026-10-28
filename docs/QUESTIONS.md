@@ -1,5 +1,8 @@
 # 연구 질문과 축적된 근거
 
+**86 판단·87 자료 읽기 설계 · 2026-10-29:** [첫 지도 새 실험 보류](https://github.com/tlsee0813-cmd/agentflow-studio/blob/982dc0ddaac02d75151fbec56be56f837ae1a89b/docs/cycles/2026-10-29-first-map-decision-86/DECISION.md). 목적 재입력은 원문 정보의 반복이며 기존span복원도새가설이아니다. Q02/Q06미해결·새모델호출0. [87 설계](https://github.com/tlsee0813-cmd/agentflow-studio/blob/982dc0ddaac02d75151fbec56be56f837ae1a89b/docs/cycles/2026-10-29-analysis-reading-space-87/DESIGN.md)는85실제화면에서관측한zero의비활성요청공간을동결자료입구로바꾸는좁은PC개선이다. 자료/원문/본문위치·과거요청/반환·초안맥락보존,양수선택0구별이관문이다. 아직구현·수용전. 공개73·UI75수리·전체목표활성유지.
+
+
 **85 실제 자료 연결 범위 수용 · 2026-10-29:** [최종 결과·최소 증거](https://github.com/tlsee0813-cmd/agentflow-studio/blob/2b4363d233b47f8c9f394b40c7d16831ba51e9d3/docs/cycles/2026-10-29-real-context-reading-85/RESULT.md). 최종runtime ffe60935a6f7f5760fb9a1a72ca66e8ab8693fa3/appb4984d2. 중립 제안 없음·원문 왕복·구형판본 경계와 반환 채널 문구 수리를 수용했다. 실제DeepSeek1회7.469초/재시도0·총괄과독립의미pass·같은응답1280PC복귀·Cloud두PC차이수용·정확ffe양OS CI40774010257success. Cloud는검토자응답,실제모델PC는root1280임을구별한다. PR54draft미병합·미배포,공개73·미수용74·UI수용75수리유지. Q02/Q06첫지도·전체목표활성. 다음86은기존실패와완료연구회수후새단일가설선택. 아래진행문은당시이력이다.
 
 
