@@ -1,0 +1,98 @@
+{
+  "task": "AF104-independent-Zephyr-semantic-review",
+  "verdict": "bounded_semantic_PASS",
+  "conclusion": "The preserved actual result.wire satisfies Z1-Z4 for this first map. No material unsupported assertion or blocking omission was found. Seven parts, five relations and fourteen claims describe the fixed documentation/configuration, including both display/build mappings and the explicit always-on/no-energy-reduction limitation. Counts are descriptive, not acceptance criteria.",
+  "basis": {
+    "sourceCommit": "3568e1b6d5cdd51a6b964a2a1d6d29200fea2056",
+    "prompt": "m6-177d450624b5",
+    "criteriaSha256": "06e415b8ccf53254d90bee930746e8d5d53c08cb55d8e955ab45d45fb49e1365",
+    "resultSha256": "54e9ce774ddb1a039436c543511ee83c190808b2a2add61e9b61f78ca46d909c",
+    "reviewSource": "same preserved original two records, actual request spans and complete untouched wire; private originals retained"
+  },
+  "gates": [
+    {
+      "id": "Z1-board-path",
+      "verdict": "PASS",
+      "output": [
+        "parts[new:board,new:soc,new:debug,new:display,new:sensors,new:led,new:power].role/parent",
+        "claims s2,s3,s8-s13",
+        "relations[0..4]"
+      ],
+      "sourceSpans": [
+        "N01.07-16",
+        "N01.23-40",
+        "N01.49-51",
+        "N01.77-85",
+        "N02.07-12"
+      ],
+      "reason": "Board containment, nRF52840 wireless responsibility and DAPLink/MK20 debug responsibility are retained. SoC-to-display SPI/three-GPIO and SoC-to-LED GPIO directions are correct. TPS610981 power flows toward SoC, sensors and EPD. The sensor role and s8-s11 preserve shared I2C, each sensor identity/function, 0x1d/0x43/0x39 and gpio0 24/25/22/23 interrupts, active-low and the two pull-ups. s9 independently preserves nordic,nrf-twim, status okay, I2C_BITRATE_FAST and default/sleep configurations. No invented sensor-to-display/cloud/application pipeline or duplicated accelerometer from the mma8642fc label spelling appears. A separate sensor-bus edge or one node per sensor is not required when these responsibilities and configurations are explicit."
+    },
+    {
+      "id": "Z2-display-variants",
+      "verdict": "PASS",
+      "output": [
+        "new:display claims s4-s7",
+        "new:soc claim s3"
+      ],
+      "sourceSpans": [
+        "N01.49-51",
+        "N01.56-65",
+        "N01.69-73"
+      ],
+      "reason": "s6 retains GDEH0213B1 / HINK-E0213 / SSD1673 / ssd16xx / reel_board; s7 retains GDEH0213B72 / HINK-E0213A22 / SSD1675A / ssd16xx / reel_board@2. s5 explicitly ties the application build designation to actual display type. s3 keeps PCB1507.1/1507.2 packaging and identical wiring separate. It does not infer @2 from PCB revision or guess the user's physical variant, and it does not reopen the documented mapping as a candidate/question."
+    },
+    {
+      "id": "Z3-power",
+      "verdict": "PASS",
+      "output": [
+        "summary",
+        "new:power.role",
+        "new:power claims s12-s14",
+        "relations[2..4]"
+      ],
+      "sourceSpans": [
+        "N01.77-91"
+      ],
+      "reason": "Battery/microUSB selection, TPS610981 supply responsibility and MODE P1.00 are grounded. s14 distinguishes nominal Active (SoC and peripherals) versus Low Power (SoC only) from the document's explicit actual limitation: both voltages always remain on and Low Power cannot reduce consumption. The summary repeats the no-saving limit. This is an affirmative retained caveat, not merely a vague role, candidate citation, or an invented unresolved mode conflict."
+    },
+    {
+      "id": "Z4-evidence-limit",
+      "verdict": "PASS",
+      "output": [
+        "all fourteen claims kind=describes/about=fixed commit",
+        "new:sensors claims s9-s11",
+        "new:power claim s14",
+        "summary"
+      ],
+      "sourceSpans": [
+        "N01.06",
+        "N01.83-91",
+        "N02.06-12"
+      ],
+      "reason": "The response preserves fixed-source descriptions. Node address/pin claims say they are definitions; status okay is not used as evidence of physical sensor streaming, Bluetooth communication, successful flashing or measured battery performance. The summary frames the power limitation as documentary, and s14 states what the source explicitly says rather than claiming an independent board.c verification. No checked/report promotion or selected physical board variant appears. A generic 'not measured' disclaimer is not needed to correct an overclaim because none was found."
+    }
+  ],
+  "entailment": {
+    "verdict": "PASS_for_reviewed_wire",
+    "review": "Reviewed all seven role/basis groups, all fourteen keyed claims and all five relation notes against their cited N01/N02 spans in the actual ask. Roles and relations preserve target, direction, modality and conditions; the nonadjacent display/power limitations remain in claims with their supporting spans. The power supply role's compound battery/microUSB/converter responsibility is supported by N01.77-81; s14's compound nominal/actual statement is supported by N01.83-91. No raw answer repair or substitute citation was used.",
+    "sourceIntegrityScope": "Frozen identities and same-run source texts were inspected. This semantic report does not substitute for root's separate byte/hash, UI roundtrip or backup verification."
+  },
+  "omissionsAndLimits": [
+    "The first map compresses all sensors into one part. It retains their distinct functions, addresses and GPIO configuration in claims, so grouping does not erase the required dependencies or independent controller facts.",
+    "The response does not reproduce every original string: for example the ti,hdc/ti,hdc1010 and avago,apds9960 compatible property strings, PHYTEC/Hackathon attribution and figure metadata are absent. Sensor identity/address/pins and board/debug/display/power responsibilities remain grounded; these omissions do not block the frozen first-map gates. This is not an exhaustive DTS transcription claim.",
+    "Empty candidates/gaps/material do not by themselves establish completeness and do not cause failure here: no mandatory unresolved product decision or material semantic blocker was identified in these two supplied records. The source's ADPS9960 prose and apds9960 DTS spellings are retained in their local claims without inventing a second sensor.",
+    "This is one observed Zephyr response, not a success-rate estimate, physical hardware verification, proof of all source interpretations, or retroactive acceptance of89/92/96/103 failures.",
+    "UI navigation, edit preservation, ready recovery, explicit application, quote roundtrip and backup integrity are independently owned by root and are not claimed tested by this reviewer."
+  ],
+  "blockers": [],
+  "actions": {
+    "newModelCalls": 0,
+    "replays": 0,
+    "testsOrBuilds": 0,
+    "webOrResearch": 0,
+    "productOrRawWrites": 0,
+    "onlyWrite": "private report, sanitized copy published here"
+  },
+  "finalSelectionOwner": "root coordinator",
+  "reviewClosed": true
+}

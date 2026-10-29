@@ -1,0 +1,60 @@
+{
+  "basis": "3024a88e6cfa0536181904d45cc782f0138429c6",
+  "files": [
+    {
+      "file": "docs/cycles/2026-10-29-zephyr-config-correction-104/OBSERVATION.md",
+      "bytes": 1932,
+      "sha256": "20368f0c2928d2313348adee0dc02c69a69eb288ec7b620739afd57fce1875ad"
+    },
+    {
+      "file": "docs/cycles/2026-10-29-zephyr-config-correction-104/RESULT.md",
+      "bytes": 6190,
+      "sha256": "fa193b573c9469f290d8fa17d6f5250989d40ec127ac032f143602aae5fa8fd1"
+    },
+    {
+      "file": "docs/cycles/2026-10-29-zephyr-config-correction-104/evidence/applied-map.png",
+      "bytes": 50157,
+      "sha256": "0665d05590765c5c88d5dc61aaefd63717518097c1e223a324f6dc0fd43a5bc7"
+    },
+    {
+      "file": "docs/cycles/2026-10-29-zephyr-config-correction-104/evidence/diagnostic.json",
+      "bytes": 1649,
+      "sha256": "8952ca9b3c225383caa5698a847baf2f94ddeeb2b88876325608fa8398ee7b9e"
+    },
+    {
+      "file": "docs/cycles/2026-10-29-zephyr-config-correction-104/evidence/display-reading.png",
+      "bytes": 79294,
+      "sha256": "10ce2cd827c0eb45d689ecf6f4fca9a05683e59422ca3e55552ab2fd36cc1c7f"
+    },
+    {
+      "file": "docs/cycles/2026-10-29-zephyr-config-correction-104/evidence/frozen.json",
+      "bytes": 2196,
+      "sha256": "3385f83850217967b4366fb0927cf61a874c076895a7562e452a1b2dd3677c5e"
+    },
+    {
+      "file": "docs/cycles/2026-10-29-zephyr-config-correction-104/evidence/observation.json",
+      "bytes": 4521,
+      "sha256": "7a8c8981d9804848295d6d61c3e96e1153aa313c622399ac1342d6668f1a2473"
+    },
+    {
+      "file": "docs/cycles/2026-10-29-zephyr-config-correction-104/evidence/other-draft-ready.png",
+      "bytes": 62987,
+      "sha256": "e51f2793f5959f12ce33c3ea4805c8a5ff02b0019e55feca53e114d083a26854"
+    },
+    {
+      "file": "docs/cycles/2026-10-29-zephyr-config-correction-104/evidence/policy-review.json",
+      "bytes": 3934,
+      "sha256": "2752a3e82c2583054b1db716156474b635919e088a6a9be0aeb52455d2e61bfa"
+    },
+    {
+      "file": "docs/cycles/2026-10-29-zephyr-config-correction-104/evidence/power-source.png",
+      "bytes": 81661,
+      "sha256": "fc3012f10cb643685e83a4e7382191e4a3558deb4ed571ca02da332455d0ce49"
+    },
+    {
+      "file": "docs/cycles/2026-10-29-zephyr-config-correction-104/evidence/semantic-review.json",
+      "bytes": 6968,
+      "sha256": "59a92f9882c923180670f62795713b986b400b3bf449e538f875ef27e2917e9a"
+    }
+  ]
+}

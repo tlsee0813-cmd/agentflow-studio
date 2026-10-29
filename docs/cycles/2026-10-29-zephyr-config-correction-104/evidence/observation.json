@@ -1,0 +1,129 @@
+{
+  "task": "AF104-Zephyr-normal-product-observation",
+  "decision": "bounded_acceptance",
+  "scope": "one actual full map through accepted102 executor and100 store; root PC recovery and semantic Z1-Z4",
+  "basis": {
+    "decision": "3024a88e6cfa0536181904d45cc782f0138429c6",
+    "code": "ffcef18769c6f04f75174116cf391272ff703211",
+    "app": "2e9d8d9e003138c85839876c092e7c7b5a115986",
+    "preview": "90e710cdb75e3ebdf8cbd28acca54708eafe1402",
+    "prompt": "m6-177d450624b5",
+    "instructionsSha256": "967f5b3f81906274d122fdb8760dc362d32d5d453186b776a1511cc93c86f998",
+    "askSha256": "3542a38fa56c0e65173b29ffec4c01408620ca80c7df4c1763960e1d4ac4ac92",
+    "sourceRawSha256": "e2844df044db67829387ab9099534b07888e26321cf75092bbbda0ade21edae9",
+    "criteriaSha256": "06e415b8ccf53254d90bee930746e8d5d53c08cb55d8e955ab45d45fb49e1365"
+  },
+  "execution": {
+    "model": "gpt-6.1-sol",
+    "reasoning": "high",
+    "cliVersion": "codex-cli 0.165.0-alpha.1.2",
+    "cliSha256": "5c1b55966bf9f757dcbf00065c9a6cb862ead55d34b015f1be1939ff18e43943",
+    "hostSha256": "9ee661e9325915b56fb37660d5111e8a10cda5d93b3b25b04be810960a8b92b2",
+    "topLevelGenerationCalls": 1,
+    "versionProbes": 1,
+    "automaticRetries": 0,
+    "fallbacks": 0,
+    "selectedAt": "2026-10-29T13:07:21.031Z",
+    "executorStartedAt": "2026-10-29T13:07:21.037Z",
+    "readyAt": "2026-10-29T13:09:21.677Z",
+    "elapsedMs": 120646,
+    "childExit": 0,
+    "finalBytes": 6734,
+    "finalSha256": "54e9ce774ddb1a039436c543511ee83c190808b2a2add61e9b61f78ca46d909c",
+    "actualStdinSha256": "072de611cb9fcf8c3794d67184a711bef42343f5940e89af3a1f2f1e268cf03b",
+    "stdinMatchesFreeze": true,
+    "events": [
+      {
+        "type": "thread.started"
+      },
+      {
+        "type": "turn.started"
+      },
+      {
+        "type": "item.completed",
+        "itemType": "agent_message"
+      },
+      {
+        "type": "turn.completed"
+      }
+    ],
+    "usage": {
+      "input_tokens": 16109,
+      "cached_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 5023,
+      "reasoning_output_tokens": 2588
+    },
+    "stderrBytes": 158,
+    "stderrMeaning": "PowerShell shell snapshot unsupported warning; non-fatal",
+    "rawRepair": false,
+    "tokenOrMoneyHardCap": "unconfirmed",
+    "remoteComputeStop": "unconfirmed",
+    "executorVerdictMs": 120638.95629999999,
+    "policySha256": "bb5caed9c25285b6cc6ebff289fd0a666f540083e505e3c3cf04e687eaf174a9",
+    "permissionsSha256": "503b611008cf71b170ce6aedf247526e85ccf1da896529645866af8a19889396"
+  },
+  "ui": {
+    "viewport": "1280x720",
+    "actualGenerationOverlapSavedRecordAt": "2026-10-29T13:07:56.940Z",
+    "activeReload": true,
+    "readyDraft": {
+      "characters": 118,
+      "selectionStart": 117,
+      "selectionEnd": 118,
+      "direction": "backward",
+      "scrollTop": 0,
+      "focused": true,
+      "deepEqual": true
+    },
+    "explicitApply": true,
+    "powerQuoteRoundtrip": true,
+    "i2cQuoteOpen": true,
+    "displayVariantsVisible": true,
+    "AoriginalRecordsUnchanged": true,
+    "wholeBackupReloadCopyEqual": true,
+    "wholeBackupSha256": "dcda9cc2acbd387fdfc7f1751f7ba4e59a2bbf6b496c5c04bbba24477552bb49",
+    "BonlyExpectedChanges": [
+      "revision +2",
+      "two explicitly saved pasted records"
+    ],
+    "BoriginalRecordsAndOtherFieldsUnchanged": true,
+    "acked": {
+      "outcome": "applied",
+      "at": "2026-10-29T13:15:27.469Z"
+    },
+    "mapCounts": {
+      "parts": 7,
+      "relations": 5,
+      "claims": 14,
+      "readings": 1
+    },
+    "modelGeneratedSummary": "reel board는 무선 통신·전자잉크 화면·환경 센서를 갖춘 Zephyr 평가 보드이며, 문서상 Low Power 모드로 절전할 수 없다."
+  },
+  "semantic": {
+    "root": "PASS",
+    "independentSolHigh": "PASS",
+    "gates": [
+      "Z1-board-path",
+      "Z2-display-variants",
+      "Z3-power",
+      "Z4-evidence-limit"
+    ],
+    "outputUntouched": true
+  },
+  "cleanup": {
+    "server": "STOPPED executor slot=null unsettled=null",
+    "processCheck": "no node.exe/codex.exe with this run path",
+    "leaseAbsent": true,
+    "runsEmpty": true
+  },
+  "notAccepted": [
+    "general success rate",
+    "90s completion",
+    "default public generation path",
+    "physical hardware execution",
+    "request-to-result complete experience",
+    "public deployment"
+  ],
+  "next": "use this accepted map to join understanding, change scope, frozen request and returned evidence; separate delivery eligibility from local CLI availability"
+}
