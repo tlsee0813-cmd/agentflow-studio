@@ -1,0 +1,75 @@
+{
+  "source": "8ae7eb9116cc3bae9253e8d62a30db30bd307c22",
+  "app": "e0d840e809a3f2e4d0c5ebdf725ba93b52fa24cf",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "method": "Normal CUA UI with actual original input, saved89 response through harmless Node child; actual owner/store/HTTP/client",
+  "actualModelInvocations": 0,
+  "productChildReplays": {
+    "failedBeforePathRepair": 2,
+    "readyAfterPathRepair": 1
+  },
+  "fixtureDirectDiagnostic": 1,
+  "firstFailureStderr": "unretained; superseded by second exact ENOENT diagnostic",
+  "relativeStateBug": "r2/root-failure-note.json; fixed8ae7eb9 and new E21 root pass c9fb9f",
+  "sourceAskSha256": "d64857baa4b3e5fce53cc9bc4a2a754c042d64d87ba8bfa0cc3e6935b8cc1d11",
+  "wrapperSha256": "6d218f4df22ad273584cf49d1dfbf125578c830e5d1046ff25613c28f68fcc50",
+  "wireSha256": "99c33f986dfd0f0fa6caecbef7226def28a9ff2821bb1aa5fb0457c900fa6401",
+  "draft": {
+    "length": 4270,
+    "start": 4248,
+    "end": 4270,
+    "direction": "backward",
+    "scrollTop": 4078.39990234375,
+    "focused": true,
+    "preservedAcrossFailures": true,
+    "preservedAcrossReady": true
+  },
+  "restart": {
+    "serverStoppedAfterReady": true,
+    "executorOff": true,
+    "keyOff": true,
+    "reloaded": true,
+    "explicitApply": true,
+    "noNewChild": true
+  },
+  "result": {
+    "parts": 5,
+    "relations": 3,
+    "material": 2,
+    "exactWire": true,
+    "exactPasted": true,
+    "sourceQuoteRoundtrip": true,
+    "ack": "applied"
+  },
+  "backup": {
+    "A": {
+      "sha256": "ad8be05a75b89db972911c4da52660bacc18348ded5e6ad06823ef4e2781abdf",
+      "fullReloadEqual": true,
+      "fullCopyEqual": true
+    },
+    "B": {
+      "sha256": "c4a637a2d050d5cd8c54e94e721e1df58d5e43fc658a03701ab11ecd8e851369",
+      "originalExact": true
+    }
+  },
+  "screenshots": [
+    "experience102-ui-ready-draft.png",
+    "experience102-ui-keyoff-ready.png",
+    "experience102-ui-source-quote.png",
+    "experience102-ui-applied-map.png"
+  ],
+  "limitations": [
+    "Saved response replay, not new model quality or timing evidence",
+    "Node24.19 root; exact Node22.16 CI separate",
+    "Earlier two product path failures preserved, no auto retry"
+  ],
+  "cleanup": {
+    "uiTabClosed": true,
+    "viewportReset": true,
+    "serversStopped": true,
+    "childAndPreviewProcessesRemaining": 0
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "notRetroactivelyAccepted": true,
+  "runs": [
+    {
+      "source": "4eda653",
+      "ciRun": 40868180234,
+      "job": 123428274266,
+      "failure": "E16 copied binary without .exe; direct Windows no-extension ENOENT vs .exe exit0 diagnostic"
+    },
+    {
+      "source": "96943121f38fc94624f06552ff5427bebf4df57f",
+      "root": {
+        "pass": 19,
+        "fail": 2,
+        "skip": 3
+      },
+      "failure": "P1 fixture cleanup marker; E17 immediate cancellation verdict preceding lease cleanup",
+      "repaired": "af84755"
+    },
+    {
+      "source": "8ae7eb9116cc3bae9253e8d62a30db30bd307c22",
+      "ciRun": 40872100865,
+      "job": 123441615627,
+      "continuity": {
+        "tests": 585,
+        "pass": 581,
+        "fail": 1,
+        "skip": 3
+      },
+      "failure": "E21 tempdir on a different drive makes path.relative absolute",
+      "repaired": "a563855"
+    },
+    {
+      "source": "a563855c55ffc879e6322af7bd20da667ac07cdf",
+      "ciRun": 40873100155,
+      "job": 123445061592,
+      "continuity": {
+        "tests": 585,
+        "pass": 581,
+        "fail": 1,
+        "skip": 3
+      },
+      "failure": "P4 killed immediately after job ready, before executor lease cleanup; Windows correctly unsettled",
+      "repaired": "ffcef18769c6f04f75174116cf391272ff703211"
+    }
+  ],
+  "rootUIFailures": {
+    "count": 2,
+    "newModelCalls": 0,
+    "first": "stderr not retained; early partial gate hypothesis superseded, original exact cause not claimed",
+    "second": "captured ENOENT proves relative state/final path nested inside child cwd",
+    "repair": "8ae7eb9116cc3bae9253e8d62a30db30bd307c22",
+    "afterRepair": "one saved-wire child ready; no raw repair or auto retry"
+  }
+}

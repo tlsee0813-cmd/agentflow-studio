@@ -1,0 +1,43 @@
+{
+  "session": "https://claude.ai/code/session_011uVYY6ecyFFwkcaaTDHiLU",
+  "attribution": "Author-reported Linux runs, not root independent execution",
+  "runs": [
+    {
+      "id": 4,
+      "source": "af84755ae852e15aea78386658853e63741112ae",
+      "focused": "25/25",
+      "continuity": "584/584",
+      "check": true,
+      "build": true,
+      "workerDryRun": true,
+      "static": true,
+      "ui": "Chromium child2/jobPOST2; saved fixture"
+    },
+    {
+      "id": 5,
+      "source": "8ae7eb9116cc3bae9253e8d62a30db30bd307c22",
+      "focused": "26/26",
+      "continuity": "585/585",
+      "check": true,
+      "build": true,
+      "workerStaticUIRepeated": false
+    },
+    {
+      "id": 6,
+      "source": "a563855c55ffc879e6322af7bd20da667ac07cdf",
+      "focused": "26/26",
+      "build": true,
+      "tempFoldersRemaining": 0,
+      "fixtureProcessesRemaining": 0
+    },
+    {
+      "id": 7,
+      "source": "ffcef18769c6f04f75174116cf391272ff703211",
+      "focused": "26/26",
+      "cleanTree": true,
+      "tempFoldersRemaining": 0,
+      "fixtureProcessesRemaining": 0
+    }
+  ],
+  "actualModelCalls": 0
+}

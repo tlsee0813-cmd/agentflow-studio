@@ -1,0 +1,95 @@
+{
+  "scope": "AF102 bounded preview implementation/ownership/UI acceptance; actual model generation0",
+  "code": "ffcef18769c6f04f75174116cf391272ff703211",
+  "appTree": "2e9d8d9e003138c85839876c092e7c7b5a115986",
+  "files": {
+    "DESIGN.md": {
+      "bytes": 6230,
+      "sha256": "0415e9deedee78c8e07ca56d0e62ed8d232593026a6264c89ed349c4693d0f93"
+    },
+    "RESULT.md": {
+      "bytes": 6351,
+      "sha256": "f0b854e65f3bbdd0009fc65a673ba1bede1148cc2938da771e515393c7395351"
+    },
+    "ROOT_ACCEPTANCE.md": {
+      "bytes": 6318,
+      "sha256": "33b4729ed2afcab322861faff56023e4da5e0e65c64da562922c83b51bd28869"
+    },
+    "evidence/author-observations.json": {
+      "bytes": 1125,
+      "sha256": "8526dbb32cf3ce818adfc05806b264a146f8f5d87ad87693638f192de62b746a"
+    },
+    "evidence/ci-summary.json": {
+      "bytes": 9051,
+      "sha256": "8a2f4cd7f63d2caf896f454cee4399750180bb46d6d1a4f7a7946deaeccb9a6b"
+    },
+    "evidence/ci-ubuntu-excerpt.log": {
+      "bytes": 1684,
+      "sha256": "cd36d3c311afa74b66e11cb3fa3d631085e1695a64ba096129172be247a77710"
+    },
+    "evidence/ci-windows-excerpt.log": {
+      "bytes": 1718,
+      "sha256": "0ec148d84b14f72b74b84de7e8311fe2f40cb7d2a3e011582c6960a1f4716624"
+    },
+    "evidence/experience102-ui-applied-map.png": {
+      "bytes": 44354,
+      "sha256": "17bc2234e2de812f9d9b927f1699dfe4562c63b2ba6e7094138f0d7ffe262969"
+    },
+    "evidence/experience102-ui-keyoff-ready.png": {
+      "bytes": 38692,
+      "sha256": "eb57a69955c8d4623410f4fb30a1741aae92449f20455088bbd834b88df65583"
+    },
+    "evidence/experience102-ui-ready-draft.png": {
+      "bytes": 74522,
+      "sha256": "92d1140678f67cf626872167dee292f03d88bc36bb68a654658a4d1964da1bba"
+    },
+    "evidence/experience102-ui-source-quote.png": {
+      "bytes": 92583,
+      "sha256": "04604336833fcd230cb2c3970d07b32cbd46bc66850daa84370eb4c78d9e2d1f"
+    },
+    "evidence/failure-history.json": {
+      "bytes": 1721,
+      "sha256": "22b0ad5e61e7651a87253878b764fc76aee749be57f3651db3025bb8ec23c433"
+    },
+    "evidence/independent-delta-review.json": {
+      "bytes": 4106,
+      "sha256": "307fc8cfbff794b4339f5667386e36a51cc165c17fa2961efb5fdfefbd83ba26"
+    },
+    "evidence/provenance.json": {
+      "bytes": 1347,
+      "sha256": "cfeaa42fc694e08c7096c7789bf46747c55819bf9d454ebd7429d31646da4269"
+    },
+    "evidence/root-checks.json": {
+      "bytes": 1449,
+      "sha256": "0ec028f9cd4aa2776159979f741931f00e7f24621407ef88d227b8cce57b6e75"
+    },
+    "evidence/root-ui.json": {
+      "bytes": 2328,
+      "sha256": "5ef201a44b918bde76cdd42040b106eab60fa6bf1097989fefe2755ec0472533"
+    },
+    "preview/check-ui-flow.mjs": {
+      "bytes": 8012,
+      "sha256": "c8e9fdc1c97f6d73e974a430578a05be12f692b0a6974974b8ce370839f2706c"
+    },
+    "preview/cli-capture.mjs": {
+      "bytes": 8773,
+      "sha256": "d47889daddd619127bcafbc247dab2d0f08a4f4e86e449b28cfa1cdc22cb9061"
+    },
+    "preview/cli-executor.mjs": {
+      "bytes": 26184,
+      "sha256": "0deb9fe4e2bf8ad32cf5d8ac2e3e886ce5940f32852319717c9ae6f936f3f618"
+    },
+    "preview/policy.example.json": {
+      "bytes": 801,
+      "sha256": "dd602767772c6170e49443f318e190565da1801276925f89dd5f30ae2b946e82"
+    },
+    "preview/reconcile-lease.mjs": {
+      "bytes": 1986,
+      "sha256": "3f3a4004b5189b965efdd3cdb47b6aaab9bc905c955dcf2caa5109b22c841890"
+    },
+    "preview/serve-preview.mjs": {
+      "bytes": 3490,
+      "sha256": "f27000007179f25af6d1eb9ca514e0dae220fcd64295954af0d588af5bdd19a3"
+    }
+  }
+}

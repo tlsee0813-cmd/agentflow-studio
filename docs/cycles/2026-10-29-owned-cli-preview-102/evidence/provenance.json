@@ -1,0 +1,34 @@
+{
+  "task": "AF102-owned-CLI-preview-bounded-acceptance",
+  "source": "ffcef18769c6f04f75174116cf391272ff703211",
+  "appTree": "2e9d8d9e003138c85839876c092e7c7b5a115986",
+  "previewTree": "90e710cdb75e3ebdf8cbd28acca54708eafe1402",
+  "runtimeUI": {
+    "source": "8ae7eb9116cc3bae9253e8d62a30db30bd307c22",
+    "appTree": "e0d840e809a3f2e4d0c5ebdf725ba93b52fa24cf",
+    "laterChanges": [
+      "app/continuity/tests/owned-cli102-process.test.mjs",
+      "app/continuity/tests/owned-cli102.test.mjs",
+      "docs/cycles/2026-10-29-owned-cli-preview-102/RESULT.md"
+    ]
+  },
+  "prompt": "m6-177d450624b5",
+  "actualModelInvocations": 0,
+  "policy": "101 unchanged; real-call gate is a separate root decision",
+  "publicCheckpoint": "6ab77ffdd0b3b0b0e8763fd865da277e5bca9f89",
+  "publicApp": "b670c0ea300050e28cdba9655515ebcf2e03d9d5",
+  "preserved": {
+    "public73": true,
+    "unaccepted74": true,
+    "uiOnly75": true,
+    "ui75Ancestor": "693d0c7e022bc76b5334b0dd4cf0e6f04ef028ff",
+    "originalStash": "fa07118ead372bcb3201c8032ca603a5ec0a7e7d",
+    "keysAndExistingWork": true
+  },
+  "attribution": {
+    "author": "Claude session011uVYY6ecyFFwkcaaTDHiLU",
+    "independent": "existing Sol High firstmap98_decision",
+    "root": "Windows checks, normal CUA, exactCI/source review and final acceptance"
+  },
+  "publishedPrivateInput": false
+}

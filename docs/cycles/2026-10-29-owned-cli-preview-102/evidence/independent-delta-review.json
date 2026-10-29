@@ -1,0 +1,33 @@
+{
+  "task": "AF102-final-owner-handoff-delta-review",
+  "reviewedCommit": "af84755ae852e15aea78386658853e63741112ae",
+  "comparedTo": "96943121f38fc94624f06552ff5427bebf4df57f",
+  "status": "accept_D102_1_source_repair_no_new_material_product_regression_in_bounded_delta",
+  "scope": "Only remaining state-mutation drain/final-spawn fence plus quick comparison of the two reported Windows fixture failures. No repetition of initial five findings or100 review.",
+  "D102_1Resolution": {
+    "mutationOwnership": "All ownership-sensitive state mutations now enter mutate(): run-create, lease-write, run-remove, and the entire archive/write/check/unlink operation. The tracked promise includes awaited I/O rather than just a pre-I/O boolean check. Once grace ends, close sets fenced, refuses new mutations, drains every mutation already admitted, then releases the OS owner. A mutation already inside writeAtomic/unlink therefore cannot finish after a new owner acquires the store.",
+    "lateCleanup": "Background cleanup that begins after the fence cannot issue a mutation. Already-admitted cleanup completes while ownership is retained. The existing lease-ID comparison remains an additional defense, rather than being mistaken for cross-owner atomic deletion.",
+    "finalSpawn": "runChild rechecks closing||fenced after its awaited setup/hash/beforeSpawn hook and immediately before synchronous capture/spawn. CLOSING becomes a no-child terminal outcome for jobs and is handled by the signal-less version-probe path. It no longer relies only on new prepare/acquire rejection or an optional AbortSignal.",
+    "focusedTest": "E20 holds a lease-release mutation beyond close grace and verifies another executor remains STORE_BUSY until the mutation completes. It then checks ownership can transfer and tests both job and signal-less probe refusing to launch when closing begins at beforeSpawn. This directly targets the residual's two boundaries; no test was rerun by this reviewer.",
+    "judgment": "The requested mutation-drain and final-admission repair is satisfied in the fixed source. No further implementation change is requested by this bounded review."
+  },
+  "fixtureDelta": {
+    "E17": "The test now waits for never-started lease cleanup/ready after the immediate cancellation verdict, then reasserts invocation0. This matches the intentionally separate verdict/cleanup lifetime instead of assuming executing0 means all file cleanup already finished.",
+    "P1": "The fake fixture writes ready-n once its stop watcher exists; the process test waits for that handshake before killing the launcher. Windows/non-Linux cleanup still requests stop-all, accepting either the fixture's self-exit marker or a stopped heartbeat. This addresses the former assumption that a parent-killed child must always execute its own exit-marker code.",
+    "livenessClaimLimit": "No-heartbeat for1500ms is inactivity evidence, not an OS proof of child death; a delayed or suspended process can miss heartbeats. In this test it does not clear the product lease or authorize new execution, so it is not a new product admission regression. Describe that branch as a cleanup observation and do not use it as proof that all Windows descendant processes ended. Root owns actual fixture/process cleanup verification.",
+    "executionAttribution": "The previous969 Windows result of19 pass/2 fail/3 skip remains the previous run. This source review does not convert the updated assertions into a new pass; root will supply exact new execution evidence."
+  },
+  "materialProductFindings": [],
+  "limits": "Static acceptance of the final owner-handoff delta only. No claim of completed CI, Windows execution, actual model/CLI generation, resource hardcap or102 whole-product acceptance. Earlier bounded implementation criteria remain unchanged.",
+  "actions": {
+    "productWrites": 0,
+    "builds": 0,
+    "testsOrProbes": 0,
+    "ui": 0,
+    "modelCalls": 0,
+    "research": 0,
+    "onlyNewFile": ".ops/results/experience102-review-af84755.json"
+  },
+  "reviewClosed": true,
+  "finalAcceptanceOwner": "root coordinator"
+}
