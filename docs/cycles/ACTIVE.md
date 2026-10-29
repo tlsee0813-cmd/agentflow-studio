@@ -1,5 +1,7 @@
 # AgentFlow 현재 상태
 
+**94 요청문 읽기 수리·수용 보류 · 2026-10-29:** [구현·현재 판단](https://github.com/tlsee0813-cmd/agentflow-studio/pull/57). 새 요청문 원문과 읽기 구간을 함께 동결하고 자료 경계·구판 marker·열린 창 축소를 수리했다. 총괄 정상 UI의14,871자/11자료·1280/1440/606 화면, 실제88 저장파일4,013자/전체bundle 보존, 구판93의 무기록 거절을 확인했다. 독립 원본4이미지에서 새 시각P1/P2 없음은 정적 판단이다. 734fe88 CI40812527139는 Ubuntu 성공·Windows request94 복사 문자열 불일치로 실패했으며 원인이 미확정이다. f4e9fdf는 판정 완화 없는 검사 진단만 추가했고 CI40813804935를 회수 중이다. Cloud는 C1/C2 정적 검토를 완료했으나 Chromium 시작 권한 오류로 화면·PNG0이며 재시도/환경변경0. 원본ZIP5379B/SHA8f7c47fa…/3파일을 보존·검증했다. 전체 수용·병합·배포는 보류한다. 공개73·미수용74·UI수용75/693d0c7·키·기존 작업 보존, 첫지도와 인수인계5/8 전체 관문은 미완료·목표 활성. 완료 연구/실패 모델 반복0.
+
 **93 요청문 복귀 범위 수용 · 2026-10-29:** [결과·최소 증거](https://github.com/tlsee0813-cmd/agentflow-studio/blob/4a188df9ae4631e4f0a81ff957c03abe9b48b024/docs/cycles/2026-10-29-request-return-93/RESULT.md). 최종d881/app81c5a4e6. 실제opener/PRE진입·복사중문서위치·긴초안스크롤·늦은복사UI격리를수리했다. root기존저장파일133복원/전체bundle·4013자clipboard일치,Cloud전용두PC각1회21.829초/exit0·7pending,정확양OSCI40798177122success. 합성자료/제공빌드범위를구별하며긴문서읽기부담·첫지도미해결을남긴다. PR56draft미병합/미배포,공개73·UI75수리·목표활성·인수인계5/8관문유지.
 
 **92 고정 우선 전달 후보 반려 · 2026-10-29:** [결과·최소 증거](https://github.com/tlsee0813-cmd/agentflow-studio/blob/bc3a02b9b4fa69252bd0e19ad5531f51dbdb20f6/docs/cycles/2026-10-29-priority-delivery-92/RESULT.md). 같은실제지시에서DS68.693초stop/INVALID_RESPONSE,Sol89초selectioncutoff까지최종0·취소,선택/적용0. 전체90초중1초정리예약·실제최종화89.289초이며receipt쓰기제외를명시했다. 각1회/재제출·수선0,micro/Zephyr·제품통합0. 첫지도미해결·공개73/UI75보존·목표활성. 다음은88에서관측한요청문닫기초점복귀의별도PC수리이며첫지도해결로대체하지않는다.
