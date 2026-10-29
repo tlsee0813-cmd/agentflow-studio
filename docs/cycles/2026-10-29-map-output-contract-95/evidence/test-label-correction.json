@@ -1,0 +1,9 @@
+{
+  "initialScriptSha256": "49e181a1caaa603c16047580f606054f399f542b58bc113c368fe74c76967d28",
+  "correctedScriptSha256": "327d10f5502a545d0177e57ea725cae93b121b37016d4f28f2be75df6f2ea18b",
+  "change": "Label/comment only. Initial result preserves original weak label; no predicate or schema changed.",
+  "initialObservation": "holds-null with missing candidate part is rejected first by unknown-ref check, not isolated statement validation",
+  "replacementEvidence": "experience95-independent-probe.json known-part/evidence baseline passes; holds-null with same valid part is then rejected",
+  "independentProbeSha256": "16dd7143d4f8f9794e280ccc256f2ce9147c08d3079c0ef58cadeec2ba76b970",
+  "fullOriginalResponseChecksRepeated": 0
+}

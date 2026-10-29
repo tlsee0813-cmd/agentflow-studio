@@ -1,0 +1,288 @@
+{
+  "type": "object",
+  "properties": {
+    "summary": {
+      "type": "string"
+    },
+    "parts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ref": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parent": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "role": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "roleAbout": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "roleReplaces": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "basis": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 4,
+            "minItems": 1
+          },
+          "claims": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "want",
+                    "idea",
+                    "reported",
+                    "checked",
+                    "describes",
+                    "open",
+                    "differs"
+                  ]
+                },
+                "text": {
+                  "type": "string"
+                },
+                "at": {
+                  "type": "string"
+                },
+                "about": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "replaces": {
+                  "type": "null"
+                },
+                "key": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "text",
+                "at",
+                "about",
+                "replaces",
+                "key"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 4
+          }
+        },
+        "required": [
+          "ref",
+          "name",
+          "parent",
+          "role",
+          "roleAbout",
+          "roleReplaces",
+          "basis",
+          "claims"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 12
+    },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "flow",
+              "needs",
+              "shares",
+              "related"
+            ]
+          },
+          "note": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "kind",
+          "note",
+          "at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 12
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "parts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 2
+          },
+          "at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "target": {
+            "type": "string",
+            "enum": [
+              "attribution",
+              "identity",
+              "parent",
+              "holds"
+            ]
+          },
+          "statement": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "want",
+                      "idea",
+                      "reported",
+                      "checked",
+                      "describes",
+                      "open",
+                      "differs"
+                    ]
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "at": {
+                    "type": "string"
+                  },
+                  "about": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "key",
+                  "kind",
+                  "text",
+                  "at",
+                  "about"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "text",
+          "parts",
+          "at",
+          "target",
+          "statement"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 6
+    },
+    "gaps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 2
+    },
+    "matches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "maxItems": 0
+    },
+    "material": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "at": {
+            "type": "string"
+          },
+          "what": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "at",
+          "what"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 6
+    }
+  },
+  "required": [
+    "summary",
+    "parts",
+    "relations",
+    "candidates",
+    "gaps",
+    "matches",
+    "material"
+  ],
+  "additionalProperties": false
+}

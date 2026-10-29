@@ -1,0 +1,122 @@
+{
+  "source": "b3e2033783f391d9af1d1421fe7621cf4f23aba4",
+  "schemaFileMatchesExport": true,
+  "manualFieldInventory": [
+    {
+      "name": "root",
+      "required": [
+        "summary",
+        "parts",
+        "relations",
+        "candidates",
+        "gaps",
+        "matches",
+        "material"
+      ],
+      "extrasRejected": true
+    },
+    {
+      "name": "part",
+      "required": [
+        "ref",
+        "name",
+        "parent",
+        "role",
+        "roleAbout",
+        "roleReplaces",
+        "basis",
+        "claims"
+      ],
+      "extrasRejected": true
+    },
+    {
+      "name": "claim",
+      "required": [
+        "kind",
+        "text",
+        "at",
+        "about",
+        "replaces",
+        "key"
+      ],
+      "extrasRejected": true
+    },
+    {
+      "name": "relation",
+      "required": [
+        "from",
+        "to",
+        "kind",
+        "note",
+        "at"
+      ],
+      "extrasRejected": true
+    },
+    {
+      "name": "candidate",
+      "required": [
+        "text",
+        "parts",
+        "at",
+        "target",
+        "statement"
+      ],
+      "extrasRejected": true
+    },
+    {
+      "name": "statement",
+      "required": [
+        "key",
+        "kind",
+        "text",
+        "at",
+        "about"
+      ],
+      "extrasRejected": true
+    },
+    {
+      "name": "material",
+      "required": [
+        "at",
+        "what"
+      ],
+      "extrasRejected": true
+    }
+  ],
+  "claimKindsPreserved": 7,
+  "candidateKindsPreserved": 4,
+  "firstGuardInvalidCases": 7,
+  "groundedNullableCandidateAccepted": true,
+  "holdsNullIsolatedWithKnownPartAndEvidence": {
+    "shapeAccepted": true,
+    "domainRejected": true,
+    "error": {
+      "name": "Error",
+      "message": "INVALID_RESPONSE",
+      "path": null,
+      "rule": null
+    }
+  },
+  "freshNonNullRoleReplacementString": {
+    "shapeAccepted": true,
+    "domainAccepted": true,
+    "normalizedNullAsExistingBehavior": true
+  },
+  "unknownFirstPartAlias": {
+    "shapeAccepted": true,
+    "domainRejected": true
+  },
+  "extraNegativeShapeCases": [
+    "missing claim.text",
+    "null statement.at",
+    "null fresh part.name"
+  ],
+  "method": "Independent hand inventory/case construction; reused only one accepted original citation as a synthetic evidence fixture. No original full-response validation/semantic/UI rerun, no repair. Root evaluator not claimed general JSON Schema/provider.",
+  "execution": {
+    "models": 0,
+    "browser": 0,
+    "network": 0,
+    "productWrites": 0,
+    "installs": 0
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "task": "AF95 offline complete first-map6 output shape",
+  "source": "b3e2033783f391d9af1d1421fe7621cf4f23aba4",
+  "appTree": "501a7a1faa4b50c182e56ad0cd3a21ac65ed6e5d",
+  "status": "OFFLINE_SHAPE_COMPATIBLE_FOR_OBSERVED_CANONICAL_FIRST_MAPS; PROVIDER_ENFORCEMENT_UNVERIFIED",
+  "schemaSha256": "34ba824e98301a66ddb1f696a99faaebfad3a522a9931350f5d25b2a0c56723e",
+  "schemaBytes": 6226,
+  "schemaType": "Existing first-map6 final wire, no changed product schema",
+  "evaluator": "Custom restricted-keyword structural evaluator. Not a general JSON Schema validator and not provider execution.",
+  "archivedCases": [
+    {
+      "id": "actual-order",
+      "originalSha256": "99c33f986dfd0f0fa6caecbef7226def28a9ff2821bb1aa5fb0457c900fa6401",
+      "unchanged": true,
+      "shapeErrors": [],
+      "existingValidator": "accepted",
+      "meaning": "Historical acceptance only; no new model, semantic review or UI run"
+    },
+    {
+      "id": "micro-javascript",
+      "originalSha256": "35344e1e5008c895f1d16e0e868aedd0fddf423e57ac64f842c94374ef7ea008",
+      "unchanged": true,
+      "shapeErrors": [],
+      "existingValidator": "accepted",
+      "meaning": "Historical acceptance only; no new model, semantic review or UI run"
+    }
+  ],
+  "syntheticCases": [
+    {
+      "name": "complete candidate shape; not a valid grounded map",
+      "shapeAccepted": true,
+      "errors": []
+    },
+    {
+      "name": "missing candidate.text",
+      "shapeAccepted": false,
+      "errors": [
+        "$.candidates[0].text:required"
+      ]
+    },
+    {
+      "name": "candidate.text null",
+      "shapeAccepted": false,
+      "errors": [
+        "$.candidates[0].text:type"
+      ]
+    },
+    {
+      "name": "unknown candidate target",
+      "shapeAccepted": false,
+      "errors": [
+        "$.candidates[0].target:enum"
+      ]
+    },
+    {
+      "name": "unexpected root key",
+      "shapeAccepted": false,
+      "errors": [
+        "$.extra:additional"
+      ]
+    },
+    {
+      "name": "nonempty matches on first map",
+      "shapeAccepted": false,
+      "errors": [
+        "$.matches:maxItems"
+      ]
+    },
+    {
+      "name": "candidate parts exceeds bound",
+      "shapeAccepted": false,
+      "errors": [
+        "$.candidates[0].parts:maxItems"
+      ]
+    },
+    {
+      "name": "string body unmodified including emoji and whitespace",
+      "shapeAccepted": true,
+      "errors": []
+    }
+  ],
+  "retainedDomainGuards": [
+    {
+      "name": "unknown candidate references",
+      "shapeAccepted": true,
+      "existingValidatorRejected": true
+    },
+    {
+      "name": "holds without statement",
+      "shapeAccepted": true,
+      "existingValidatorRejected": true
+    },
+    {
+      "name": "UTF16 text bound remains in domain validator",
+      "shapeAccepted": true,
+      "existingValidatorRejected": true
+    }
+  ],
+  "interpretation": "Only wire structure compatibility and missing-field rejection were evaluated. Model latency, semantics, decoder support and full product success are unproved.",
+  "execution": {
+    "newModelCalls": 0,
+    "network": 0,
+    "productWrites": 0,
+    "installs": 0,
+    "oldResponseRepairs": 0,
+    "browser": 0,
+    "originalPayloadsReusedOffline": 2
+  }
+}

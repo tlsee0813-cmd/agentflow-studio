@@ -1,0 +1,129 @@
+{
+  "task": "AF95-independent-review",
+  "at": "2026-10-29T04:30:36.730222+00:00",
+  "source": "b3e2033783f391d9af1d1421fe7621cf4f23aba4",
+  "appTree": "501a7a1faa4b50c182e56ad0cd3a21ac65ed6e5d",
+  "verdict": "NO_CONCRETE_OUTPUT_SHAPE_BLOCKER_FOUND_FOR_VALIDATED_CANONICAL_FIRST_MAP6; OFFLINE_ONLY",
+  "blockers": [],
+  "scope": "Complete canonical first-map6 output structure only. No provider enforcement, decoding success, latency, semantics, apply/save/UI or full-product acceptance established.",
+  "inputsSha256": {
+    ".ops/experience95-independent-order.txt": "12faa824c8af93f9c007639204ea42b3f51f837937993ae2daf53b10bce33113",
+    ".ops/experience95-output-schema.mjs": "5141d20594458773e97e4cf13fd25d9dbe73504a46dbe8cdf85d5f9938f5d0b5",
+    ".ops/experience95-offline-check.mjs": "49e181a1caaa603c16047580f606054f399f542b58bc113c368fe74c76967d28",
+    ".ops/results/experience95-first-map6-output.schema.json": "34ba824e98301a66ddb1f696a99faaebfad3a522a9931350f5d25b2a0c56723e",
+    ".ops/results/experience95-offline-result.json": "8f9f718e74747e7b1607149db45d037a7a4acda2855b06d0cbe04ac0e9208dc7",
+    ".ops/results/experience74-strict-review.json": "07291f64219c21c69072aeee95942ad7327cab76f8332a3778d046d5950b755e",
+    ".ops/results/experience95-independent-probe.json": "16dd7143d4f8f9794e280ccc256f2ce9147c08d3079c0ef58cadeec2ba76b970"
+  },
+  "currentMapValidator": {
+    "path": "app/continuity/src/shared/map-reading.ts",
+    "gitBlobSha256": "e2b4aee3f0a57b8e5469543bd894e4890536fd44ee71b0247ac6c3ea850184d2",
+    "unchangedFromBuilt734": true,
+    "precondition": "The existing domain validator and application/semantic gates remain mandatory; this schema/checker replaces none of them."
+  },
+  "manualContractCrosswalk": {
+    "requiredFieldInventory": "Independent hand inventory of root7, part8, claim6, relation5, candidate5, statement5 and material2 properties matched schema properties/required lists, all additionalProperties=false. Schema JSON matches the exported module object.",
+    "claimKinds": [
+      "want",
+      "idea",
+      "reported",
+      "checked",
+      "describes",
+      "open",
+      "differs"
+    ],
+    "candidateTargets": [
+      "attribution",
+      "identity",
+      "parent",
+      "holds"
+    ],
+    "firstOnlyNarrowing": [
+      {
+        "shape": "parts max12; name string; basis min1/max4",
+        "basis": "Validated FIRST ask has no existing part aliases. Every reply part is fresh; current domain permits max12 new parts and requires fresh name/basis."
+      },
+      {
+        "shape": "claim.replaces=null",
+        "basis": "No existing part/current claim is in FIRST ask, so no own C-key may be replaced."
+      },
+      {
+        "shape": "matches=[]",
+        "basis": "FIRST asks require requests=[] and priors=[]; no legitimate request/item target exists. maxItems0 does not remove a valid FIRST correspondence."
+      }
+    ],
+    "preservedNullability": [
+      "part.parent/role/roleAbout/roleReplaces allow null; roleReplaces also retains string because domain can accept its citation then drop its effect for a fresh part.",
+      "candidate.at may be null even with a grounded undecided statement; identity/parent statement must be null by domain, while attribution/holds require object by domain. Shape deliberately permits either; it does not encode these cross-field implications.",
+      "statement.about/claim.about nullable; candidate.text and statement.text remain required strings. Fresh name null is excluded correctly for FIRST."
+    ],
+    "arrayBounds": {
+      "parts": 12,
+      "basis": [
+        1,
+        4
+      ],
+      "claims": 4,
+      "relations": 12,
+      "candidates": 6,
+      "candidateParts": 2,
+      "gaps": 2,
+      "matches": 0,
+      "material": 6
+    },
+    "wireVersusNormalizedReply": "The schema describes canonical span-wire at strings, not normalized MapReply record/quote/from/to objects. Their omission is correct. No new wire discriminant/product schema is introduced."
+  },
+  "firstAskGuard": {
+    "result": "Correct scoped guard when input already passed validateMapAsk",
+    "testedInvalidScopes": "parts/requests/priors null or nonempty, plus wrong version:7 rejected cases",
+    "limit": "assertFirstMap6Ask is not complete request validation: project/records/relations/unknown keys/byte bounds are not validated there. Future use must retain validateMapAsk and exact input binding before this scope assertion."
+  },
+  "independentProbe": {
+    "file": ".ops/results/experience95-independent-probe.json",
+    "sha256": "16dd7143d4f8f9794e280ccc256f2ce9147c08d3079c0ef58cadeec2ba76b970",
+    "method": "Independent hand field/bound/enum reading plus newly constructed bounded cases; root custom checker and unchanged domain validator run only on synthetic baseline/contrasts, using one accepted89 evidence citation. No accepted full original revalidation or semantic rerun. No general JSON Schema engine/provider exercised.",
+    "results": [
+      "Schema export/file equality and manual property inventory preserved.",
+      "Grounded fresh part baseline accepted by shape and existing domain.",
+      "Attribution with candidate.at=null and valid statement.at accepted by both.",
+      "FIRST fresh non-null roleReplaces citation accepted by both; existing domain normalizes its effect to null.",
+      "Missing claim.text, null statement.at and null fresh part.name rejected structurally.",
+      "Unknown FIRST P01 alias is structurally permitted but domain rejected.",
+      "Known-part holds with statement:null is structurally permitted and domain rejected after the valid baseline eliminates unknown-ref confounding."
+    ]
+  },
+  "retainedEvidenceCorrection": {
+    "rootOriginalCase": "experience95-offline-check.mjs holds without statement uses parts=[] and candidate.parts=[new:a].",
+    "fact": "Root report correctly records shape acceptance/domain rejection, but that original case is rejected by unknown-reference validation before the holds/statement branch. It must not alone be labeled isolated proof of the holds guard.",
+    "rootAction": "Root acknowledged the weak case and will preserve/correct its interpretation; root files were not changed by this reviewer.",
+    "correctIndependentCase": "The new probe first establishes valid known new:probe95 plus a resolving evidence citation; then changes only candidate target/statement to holds/null, obtaining INVALID_RESPONSE. This is a mechanical guard test, not evidence that the statement is semantically supported."
+  },
+  "remainingDomainAndApplicationRules": [
+    "Reference resolution and exact material/evidence span ownership; record existence and from/to UTF-16 limits.",
+    "Nonempty/control/length constraints, reply-local key syntax/uniqueness, same-target/settled-open conflict, parent forest and material-evidence exclusion.",
+    "Candidate target arity/statement applicability; role/about/replacement ownership and valid grounded basis.",
+    "Semantic source entailment, operational-instruction versus product/material boundary, complete source conditions and usable application output. Schema alone can permit an empty/ungrounded proposal; it does not establish first-map delivery success."
+  ],
+  "customEvaluatorLimits": {
+    "claimAllowed": "Restricted current-keyword structural evaluator for this draft, not Ajv/general JSON Schema/constrained-decoder simulation.",
+    "currentSchema": "All inspected nodes use the declared supported keyword subset. No schema-field omission or unsupported canonical narrowing was found.",
+    "nonblockingCaveat": "Unknown keyword rejection is traversal-local: an unvisited optional-property/items branch or short-circuited anyOf branch is not necessarily audited by a shapeErrors call. Do not generalize the one unknown-keyword assertion into a whole-schema extension validator. This does not invalidate the fixed current schema, whose tree was read."
+  },
+  "differenceFrom74Strict": {
+    "archivedResult": "74 strict objective failed: provider tool-call output used two reference ranges excluded by the sent schema; existing wire validation rejected it. Forced-tool/dynamic-schema stub capture did not prove provider enforcement.",
+    "new95Difference": "This is small static FIRST map6 final-wire shape6226B, retaining all canonical output fields and omitting dynamic reference enums/UTF-16 constraints. No endpoint/tool/strict/CLI integration or provider call exists in this experiment.",
+    "interpretation": "95 is a new offline structural correspondence/preparation result, not a successful repetition or repair of74, and not evidence that a different provider enforces it. Later provider/latency/meaning judgment is unselected and separate."
+  },
+  "execution": {
+    "newModels": 0,
+    "network": 0,
+    "browser": 0,
+    "installs": 0,
+    "productWrites": 0,
+    "rootScriptWrites": 0,
+    "failedRawRepairs": 0,
+    "archiveFullResponseOrMeaningReruns": 0,
+    "newBoundedSyntheticProbe": true
+  },
+  "finalRecommendation": "No schema repair required from this narrow review. Preserve the weak original holds case and distinguish the independent corrected contrast. Keep FIRST-only guard preconditions and all existing domain/application/meaning checks; do not report provider or product success."
+}

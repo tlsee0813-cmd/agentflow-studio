@@ -1,0 +1,58 @@
+{
+  "source": "b3e2033783f391d9af1d1421fe7621cf4f23aba4",
+  "appTree": "501a7a1faa4b50c182e56ad0cd3a21ac65ed6e5d",
+  "decision": "OFFLINE_CANONICAL_FIRST_MAP6_SHAPE_COMPATIBLE; PROVIDER_UNVERIFIED",
+  "newModelCalls": 0,
+  "files": [
+    {
+      "path": "evidence/cli-capability.json",
+      "bytes": 1586,
+      "sha256": "95ba8f1d95d844c72fae25580e9722d02c953a62a76ecee09930c9c29b706ce8"
+    },
+    {
+      "path": "evidence/experience95-output-schema.mjs",
+      "bytes": 3857,
+      "sha256": "5141d20594458773e97e4cf13fd25d9dbe73504a46dbe8cdf85d5f9938f5d0b5"
+    },
+    {
+      "path": "evidence/first-map6-output.schema.json",
+      "bytes": 6226,
+      "sha256": "34ba824e98301a66ddb1f696a99faaebfad3a522a9931350f5d25b2a0c56723e"
+    },
+    {
+      "path": "evidence/independent-probe.json",
+      "bytes": 2527,
+      "sha256": "16dd7143d4f8f9794e280ccc256f2ce9147c08d3079c0ef58cadeec2ba76b970"
+    },
+    {
+      "path": "evidence/independent-review.json",
+      "bytes": 9278,
+      "sha256": "5377d4751f44a9c9731eb0c20e91114b12331c6745ab949273ad201d88961bf5"
+    },
+    {
+      "path": "evidence/offline-check-current.mjs",
+      "bytes": 5939,
+      "sha256": "327d10f5502a545d0177e57ea725cae93b121b37016d4f28f2be75df6f2ea18b"
+    },
+    {
+      "path": "evidence/offline-check-initial.mjs",
+      "bytes": 5720,
+      "sha256": "49e181a1caaa603c16047580f606054f399f542b58bc113c368fe74c76967d28"
+    },
+    {
+      "path": "evidence/offline-result.json",
+      "bytes": 3211,
+      "sha256": "8f9f718e74747e7b1607149db45d037a7a4acda2855b06d0cbe04ac0e9208dc7"
+    },
+    {
+      "path": "evidence/test-label-correction.json",
+      "bytes": 733,
+      "sha256": "3476a734e057d941282b3c7348a96230d152d49af29fa8f8f83ca517c433dc94"
+    },
+    {
+      "path": "RESULT.md",
+      "bytes": 9128,
+      "sha256": "541b4b690382d869a07cac895da2b432b3ad5f82501ddd72dae87662cd7cb449"
+    }
+  ]
+}
