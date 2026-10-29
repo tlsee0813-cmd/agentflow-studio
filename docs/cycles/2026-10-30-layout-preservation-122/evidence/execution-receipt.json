@@ -1,0 +1,60 @@
+{
+  "selected": "18506dbb2e120e4d4f4393e346257e2db02c0f26",
+  "product": "be061284af3154b1a746acdbc249fd1cf72a24f4",
+  "app": "7b36f3ebf07a0cea25b36677ef2aedf4c6f23703",
+  "job": "MJ_45755b0e-0ad4-4e25-8530-58a1dcd1a3f1",
+  "actualCalls": 1,
+  "versionProbes": 1,
+  "retry": false,
+  "fallback": false,
+  "repair": false,
+  "state": "ready",
+  "execution": {
+    "executor": "codex-cli-preview.102",
+    "version": "codex-cli 0.165.0-alpha.1.2",
+    "binarySha256": "5c1b55966bf9f757dcbf00065c9a6cb862ead55d34b015f1be1939ff18e43943",
+    "model": "gpt-6.1-sol",
+    "reasoning": "high",
+    "permissions": "503b611008cf71b170ce6aedf247526e85ccf1da896529645866af8a19889396",
+    "wrapper": "dd56ff8327f0b957f18ccc6af7c6334935901014e36539c35c91e16279c02ae5",
+    "scope": "first",
+    "selectionMs": 299000,
+    "verdictMs": 300000,
+    "policy": "bb5caed9c25285b6cc6ebff289fd0a666f540083e505e3c3cf04e687eaf174a9",
+    "promptKind": "first",
+    "prompt": "cef94b26c23e",
+    "promptSha256": "cef94b26c23e8c3c647dccddc399746da6957b127213e891e3d69fe0ada86886",
+    "askSha256": "8a04a5fe1a4853b301411c09e183637830216da82106cee34fb4662a0c87b08c",
+    "observed": {
+      "startedAt": "2026-10-29T21:19:38.790Z",
+      "closedAtMs": 89327.2206,
+      "decidedAtMs": 89329.0214,
+      "closed": true,
+      "exit": 0,
+      "signal": null,
+      "reason": null,
+      "events": 4,
+      "usage": {
+        "input_tokens": 16222,
+        "cached_input_tokens": 8192,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 4618,
+        "reasoning_output_tokens": 2070
+      },
+      "stdoutBytes": 8121,
+      "stderrBytes": 158,
+      "signals": {
+        "sent": 0,
+        "skippedAfterExit": 0
+      },
+      "stdioCut": false,
+      "verdictAtMs": 89332.8083,
+      "finalSha256": "4a3360081e9fc5415d6dfe6089d63de4a9346a066fbd522a4470c87d9c826f67",
+      "finalBytes": 7109
+    }
+  },
+  "acked": {
+    "outcome": "applied",
+    "at": "2026-10-29T21:22:24.551Z"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "selection": "18506dbb2e120e4d4f4393e346257e2db02c0f26",
+  "job": "MJ_45755b0e-0ad4-4e25-8530-58a1dcd1a3f1",
+  "at": "2026-10-29T21:20:07.789Z",
+  "askExact": true,
+  "promptExact": true,
+  "stdinSha": "47c19e79b0f417e2920aea7746e29dc6a56119cfe8f3de019025d72c23b502c0",
+  "bound": {
+    "executor": "codex-cli-preview.102",
+    "version": "codex-cli 0.165.0-alpha.1.2",
+    "binarySha256": "5c1b55966bf9f757dcbf00065c9a6cb862ead55d34b015f1be1939ff18e43943",
+    "model": "gpt-6.1-sol",
+    "reasoning": "high",
+    "permissions": "503b611008cf71b170ce6aedf247526e85ccf1da896529645866af8a19889396",
+    "wrapper": "dd56ff8327f0b957f18ccc6af7c6334935901014e36539c35c91e16279c02ae5",
+    "scope": "first",
+    "selectionMs": 299000,
+    "verdictMs": 300000,
+    "policy": "bb5caed9c25285b6cc6ebff289fd0a666f540083e505e3c3cf04e687eaf174a9",
+    "promptKind": "first",
+    "prompt": "cef94b26c23e",
+    "promptSha256": "cef94b26c23e8c3c647dccddc399746da6957b127213e891e3d69fe0ada86886",
+    "askSha256": "8a04a5fe1a4853b301411c09e183637830216da82106cee34fb4662a0c87b08c"
+  },
+  "otherDraftChars": 125,
+  "otherDraftSha": "4689d96cef4ce15d788e804887021f8fdee78e6917b9c2b770b61e632eb0f05b",
+  "observedState": "accepted",
+  "originProjectBefore": "6ef5d57e2fee24f0e7f6e4e4f86ec00f26723f48b871748e4874e247a9ccd9eb",
+  "originProjectDuring": "6ef5d57e2fee24f0e7f6e4e4f86ec00f26723f48b871748e4874e247a9ccd9eb"
+}

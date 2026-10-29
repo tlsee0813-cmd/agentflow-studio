@@ -1,0 +1,43 @@
+{
+  "originalSourceProjectFileSha": "e73d067de09cedd8661f7ab4dcc1a6fbc859950301ca0219555ed85b845686b0",
+  "derivativeRawExact": true,
+  "before": "6ef5d57e2fee24f0e7f6e4e4f86ec00f26723f48b871748e4874e247a9ccd9eb",
+  "after": "36bcdbd2542210e8220d301309ec84d5ed70434e68af402af7bde056ec67719b",
+  "afterReload": "36bcdbd2542210e8220d301309ec84d5ed70434e68af402af7bde056ec67719b",
+  "normalBackup": "36bcdbd2542210e8220d301309ec84d5ed70434e68af402af7bde056ec67719b",
+  "otherProjectBefore": "27d860b826354f73fe339da397d5d88ea0dccb30ce80ac4632caa3a2e053498f",
+  "otherProjectAfter": "27d860b826354f73fe339da397d5d88ea0dccb30ce80ac4632caa3a2e053498f",
+  "otherBundleBefore": "4689d96cef4ce15d788e804887021f8fdee78e6917b9c2b770b61e632eb0f05b",
+  "otherBundleAfter": "4689d96cef4ce15d788e804887021f8fdee78e6917b9c2b770b61e632eb0f05b",
+  "draftChars": 125,
+  "parts": 6,
+  "readings": 1,
+  "originalRecords": 2,
+  "finalRecords": 2,
+  "ack": {
+    "outcome": "applied",
+    "at": "2026-10-29T21:22:24.551Z"
+  },
+  "ui": {
+    "size": "1280x720",
+    "firstReadyNotApplied": true,
+    "explicitApply": true,
+    "i2cFastDefaultSleep": true,
+    "sensorFunctionsAndAddressPins": true,
+    "displayBothFullMappings": true,
+    "nominalAndActualPowerLimitation": true,
+    "sourceBackSameFocusedButton": [
+      "I2C",
+      "Power supply",
+      "Display"
+    ],
+    "reload": true,
+    "normalProjectDownload": true,
+    "readingBurden": "Power and Display require natural vertical scroll; no hidden claims expander; long source/code lines can horizontally scroll"
+  },
+  "limits": [
+    "No universal paragraph/layout invariance",
+    "12-bit precision remains in preserved source but not direct current claim/role",
+    "This FIRST away scenario is not the missing121 later scenario"
+  ]
+}

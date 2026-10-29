@@ -1,0 +1,95 @@
+{
+  "cycle": 122,
+  "verdict": "BOUNDED_SEMANTIC_PASS_SINGLE_LAYOUT_DERIVATIVE_UI_APPLY_PENDING",
+  "overallSelectedScenarioComplete": false,
+  "actionableP1P2": [],
+  "scope": "Independent semantic review of the new 122 final only. Historical 89/104 responses were not revalidated or repaired. No fixed part/claim/relation count is a success criterion.",
+  "inputsReviewed": [
+    ".ops/experience122-layout-preservation/input.json",
+    ".ops/experience122-layout-preservation/selected.json",
+    ".ops/experience122-layout-preservation/actual-binding-proof.json",
+    ".ops/experience122-layout-preservation/final-response.json",
+    ".ops/experience122-layout-preservation/job-final-private.json",
+    ".ops/experience122-layout-preservation/capture-2-stdout.jsonl event types only",
+    ".ops/results/experience77-reading-criteria.json"
+  ],
+  "identityAndDelivery": {
+    "job": "MJ_45755b0e-0ad4-4e25-8530-58a1dcd1a3f1",
+    "askSha256": "8a04a5fe1a4853b301411c09e183637830216da82106cee34fb4662a0c87b08c",
+    "systemSha256": "cef94b26c23e8c3c647dccddc399746da6957b127213e891e3d69fe0ada86886",
+    "stdinSha256": "47c19e79b0f417e2920aea7746e29dc6a56119cfe8f3de019025d72c23b502c0",
+    "finalSha256": "4a3360081e9fc5415d6dfe6089d63de4a9346a066fbd522a4470c87d9c826f67",
+    "finalBytes": 7109,
+    "jobObservedState": "ready",
+    "executorExit": 0,
+    "verdictMs": 89332.8083,
+    "events": ["thread.started", "turn.started", "item.completed:agent_message", "turn.completed"],
+    "strictContract": "Accepted by the existing normal executor, as recorded in the ready job. This reviewer did not rerun the validator.",
+    "binding": "Selected and actual metadata agree on FIRST6, ask, prompt, stdin, model/reasoning, CLI binary, policy and 299/300-second bounds.",
+    "promptBoundary": "Current FIRST includes the accepted114 MAP6_SOURCES clarification added after104; FIRST98 base otherwise unchanged. This result is not a layout-only causal comparison with104.",
+    "countsForDescriptionOnly": {"parts": 6, "claims": 17, "relations": 5, "candidates": 0, "gaps": 0, "matches": 0, "material": 0}
+  },
+  "criteria": [
+    {
+      "id": "Z1-board-control-power",
+      "verdict": "PASS",
+      "output": ["new:board role/s2/s3", "new:soc role/s4/s5", "new:display role", "relations soc->display and power->soc/sensors/display"],
+      "source": ["N01.07-16", "N01.23-25", "N01.29-32", "N01.48-50", "N01.56-57"],
+      "assessment": "The nRF52840 evaluation board, Cortex-M4F/radio capability, DAPLink/NXP debug responsibility, RGB GPIO control and SoC-to-display SPI plus three GPIO direction are preserved. TPS610981 supplies SoC and peripherals in the correct direction. No sensor-to-cloud/PC application pipeline or extra accelerator from the DTS spelling difference is invented. PCB1507.2 module mounting and identical1507.1/1507.2 wiring remain distinct from display selection."
+    },
+    {
+      "id": "Z1-independent-sensors-and-i2c",
+      "verdict": "PASS",
+      "output": ["new:sensors role/s6/s7/s8/s9", "new:i2c role/s10/s11", "relation sensors->i2c"],
+      "source": ["N01.36-39", "N02.07-11"],
+      "assessment": "The joined prose still yields proximity/ambient-light/color/gesture, humidity/temperature and acceleration functions. Shared I2C and the documentation's per-sensor interrupt GPIO statement survive. Separate DTS descriptions preserve0x1d/GPIO0 24+25 active-low,0x43/GPIO0 22 active-low+pull-up,0x39/GPIO0 23 active-low+pull-up and their compatible values. The documentation's general one-GPIO statement and DTS's two accelerometer interrupts are both retained rather than silently harmonized. nordic,nrf-twim, enabled configuration, FAST rate and the separate default/sleep pinctrl facts remain in s10/s11 despite their newly shared raw span. Sensor grouping is permitted and does not by itself omit these roles."
+    },
+    {
+      "id": "Z2-display-mappings",
+      "verdict": "PASS",
+      "output": ["new:display role/s12/s13/s14"],
+      "source": ["N01.72-81", "N01.85-86", "N01.88-89"],
+      "assessment": "Both complete mappings are explicit: GDEH0213B1 / HINK-E0213 / SSD1673 / ssd16xx / reel_board, and GDEH0213B72 / HINK-E0213A22 / SSD1675A / ssd16xx / reel_board@2. The role ties application build designation to panel type. Nothing infers a display or @2 from PCB revision. Discontinuation and current supply are explicitly framed as statements in the fixed document, rather than today's market observation."
+    },
+    {
+      "id": "Z3-nominal-and-actual-document-limit",
+      "verdict": "PASS",
+      "output": ["new:power role/s15/s16/s17"],
+      "source": ["N01.53-61", "N01.62-67"],
+      "assessment": "Battery/microUSB and switch selection, TPS610981 supply responsibility, nominal Active/Low Power voltage definitions and MODE P1.00 all remain. s17 separately states that the document note says both voltages are always on and Low Power cannot reduce consumption, with board.c as the document's reference. Thus nominal Low Power is not promoted to effective peripheral shutdown or measured power saving."
+    },
+    {
+      "id": "Z4-documentary-provenance",
+      "verdict": "PASS",
+      "output": ["all roles and s1-s17", "new:i2c s10/s11", "new:power s17", "new:display s12"],
+      "source": ["N01.01-06", "N02.01-06", "all cited fact spans"],
+      "assessment": "Every claim is describes, and role/claim conditions use the actual raw fixed commit3568e1b6d5cdd51a6b964a2a1d6d29200fea2056 present in both source headers. These are documentary and DTS declarations, not application-run, flashing, sensor-streaming, radio, physical-board or energy-measurement verification. '활성 상태' in s10 is attached to a configuration description, not a runtime report. s17 attributes the always-on limitation to the document note. The FIRST114 clarification permits pasted literal source to support role/describes without pretending it is typed evidence or independently executed."
+    },
+    {
+      "id": "layout-independent-fact-preservation",
+      "verdict": "BOUNDED_PASS",
+      "output": ["new:sensors and new:i2c", "new:display s13/s14", "new:power s16/s17"],
+      "assessment": "The selected important independent facts survive the single tested sensor-paragraph join, Power/Display reorder and DTS blank-line removal. No core condition is consigned solely to a candidate or deleted as material. This is one successful derivative, not proof that arbitrary paragraph layouts preserve every original fact."
+    }
+  ],
+  "citationAndCoverageReview": {
+    "method": "All six roles,17 claims and five relation notes were read against the new input's cited raw spans. Local exact-reference validity comes from the already accepted strict job, while entailment was judged independently.",
+    "findings": "No material unsupported direction, wrong mapping, source-scope promotion or incorrect negation was found. Some role bases group several raw facts; grouping does not require a separate node or claim for each sentence.",
+    "nonBlockingPrecisionLimit": "The raw sensor description says MMA8652FC is12-bit. The generated role/claim text retains acceleration and the identifying DTS compatible/address/pins but does not explicitly repeat the12-bit resolution. This is not a frozen Z1-Z4 blocker, and the report must not claim complete reproduction of every raw attribute.",
+    "uncertaintyBoundary": "Empty candidates/gaps is not evidence that all uncertainty, missing source knowledge or hardware behavior has been resolved."
+  },
+  "productFlowEvidence": {
+    "actualBindingProofRead": "Root's preserved actual-binding-proof records the origin project unchanged during generation and125 characters of editing in another project after leaving the origin.",
+    "rootMessageAtReview": "Root reports ready after leave/edit/reload, with no silent apply and no explicit apply yet.",
+    "independentlyReplayedUi": false,
+    "remaining": ["Root explicit apply", "1280 current-reading/source quote/back inspection", "reload/export/input-text integrity completion"],
+    "separation": "This FIRST derivative's flow is not a substitute for121's missed later-reading criterion7. Semantic PASS does not close the outstanding selected UI gates."
+  },
+  "limits": [
+    "Single derivative and single actual call only; no distribution, latency reliability or universal layout-invariance claim.",
+    "Does not complete the three-material integrated-route handoff or public release.",
+    "No historical result was retroactively accepted and no failed wire was repaired.",
+    "No hidden reasoning was inspected; capture inspection was limited to event types."
+  ],
+  "reviewerExecution": {"modelCalls": 0, "validatorRuns": 0, "browserRuns": 0, "testOrBuildRuns": 0, "productWrites": 0, "responseRepairs": 0, "historicalRevalidations": 0}
+}

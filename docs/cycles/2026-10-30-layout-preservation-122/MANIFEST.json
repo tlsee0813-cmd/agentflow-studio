@@ -1,0 +1,64 @@
+{
+  "cycle": 122,
+  "selection": "18506dbb2e120e4d4f4393e346257e2db02c0f26",
+  "product": "be061284af3154b1a746acdbc249fd1cf72a24f4",
+  "app": "7b36f3ebf07a0cea25b36677ef2aedf4c6f23703",
+  "verdict": "bounded semantic and normal PC flow acceptance for this single layout derivative",
+  "evidence": [
+    {
+      "path": "evidence/actual-binding-proof.json",
+      "bytes": 1405,
+      "sha256": "a64ebffd3761417b01bc5fa3da90a07e1602e7637d2c8a75ff35b65566735019"
+    },
+    {
+      "path": "evidence/cleanup.json",
+      "bytes": 285,
+      "sha256": "9c198fb653a14a453c0e5c39a5ba47bb516160920ea6c462e506c064c853f4d5"
+    },
+    {
+      "path": "evidence/execution-receipt.json",
+      "bytes": 1973,
+      "sha256": "08e9e609e335e644c1a52b9d2880c27ea0a5291d205b8758daf723ae4e7e9c26"
+    },
+    {
+      "path": "evidence/independent-review.json",
+      "bytes": 8798,
+      "sha256": "d03da4dda58695280d0757ae61a2af6c1b67e319fb91dedde47347acffac78ea"
+    },
+    {
+      "path": "evidence/preservation.json",
+      "bytes": 1781,
+      "sha256": "c906aa3028cd9cb98506689cf50269ad51f8b55c60304096ecd05c371b0e9d27"
+    },
+    {
+      "path": "evidence/ready-before-apply.json",
+      "bytes": 730,
+      "sha256": "f9038abb8d708b032a232e7dc85b11402b5859bb704318c0c09a0906e74fc932"
+    },
+    {
+      "path": "evidence/ui-display-current.png",
+      "bytes": 81223,
+      "sha256": "5548c2c704351bbc8143a8e6cc96611a96f69181b4921a316d2ce562dfb9e857"
+    },
+    {
+      "path": "evidence/ui-i2c-current.png",
+      "bytes": 70728,
+      "sha256": "604ad7e843c1e4d43355bbd6b872dae57c212f5796d092a4a3f29af75a808c10"
+    },
+    {
+      "path": "evidence/ui-power-current.png",
+      "bytes": 82687,
+      "sha256": "f65f8f68d9442fae122e3e4bf97cd6fd667c169781993aa767fc71f3987126ec"
+    },
+    {
+      "path": "evidence/ui-power-source.png",
+      "bytes": 82863,
+      "sha256": "452c2a27919d6639446621308fa712e47aeae3f042714e423fba56a0d3683649"
+    },
+    {
+      "path": "evidence/ui-ready-unapplied.png",
+      "bytes": 38975,
+      "sha256": "000ad3aa810282fbf51020f7f7b152d1077a11bbe94c065c06728587a393c859"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-29T21:22:16.070Z",
+  "serverJob": "ready",
+  "serverAck": null,
+  "originBefore": "6ef5d57e2fee24f0e7f6e4e4f86ec00f26723f48b871748e4874e247a9ccd9eb",
+  "originReady": "6ef5d57e2fee24f0e7f6e4e4f86ec00f26723f48b871748e4874e247a9ccd9eb",
+  "otherProjectBefore": "27d860b826354f73fe339da397d5d88ea0dccb30ce80ac4632caa3a2e053498f",
+  "otherProjectReady": "27d860b826354f73fe339da397d5d88ea0dccb30ce80ac4632caa3a2e053498f",
+  "otherBundleBefore": "4689d96cef4ce15d788e804887021f8fdee78e6917b9c2b770b61e632eb0f05b",
+  "otherBundleReload": "4689d96cef4ce15d788e804887021f8fdee78e6917b9c2b770b61e632eb0f05b",
+  "otherBundleReady": "4689d96cef4ce15d788e804887021f8fdee78e6917b9c2b770b61e632eb0f05b",
+  "draftChars": 125
+}
