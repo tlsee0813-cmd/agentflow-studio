@@ -221,6 +221,7 @@ export const map5Prompt = ask => ask.parts.length === 0 && (ask.requests ?? []).
 // studio.map.6: the map.5 prompts with what a candidate leaves undecided stated (target), a reply-local key on statements, and
 // material overlap refused rather than dropped. Everything else (evidence ranges, first/later selection, counts) is map.5's.
 const MAP6_CANDIDATES = `candidates (최대 6개): 기록만으로 가를 수 없고 지도 판단을 실제로 바꾸는 미정만 쓴다. 각 후보는 무엇이 미정인지 target 하나로 밝힌다.
+- 후보 객체의 키는 정확히 {"text","target","parts","at","statement"}다. text는 무엇이 미정인지 사용자에게 설명하는 필수 문장(비어 있지 않은 문자열, 최대 240 UTF-16 코드 단위)이다. statement.text는 미정인 진술의 내용이며 후보의 text를 대신하지 않는다. identity·parent처럼 statement가 null이어도 후보 text는 쓴다.
 - attribution: 한 진술이 어느 부분의 것인지 미정. statement에 그 진술 {"key","kind","text","at","about"}을 쓰고 parts에 가능한 부분 1~2개를 쓴다. 그 진술은 어느 부분의 claims에도 쓰지 않는다.
 - holds: 한 진술이 그 부분에 성립하는지 미정. statement에 그 진술, parts에 그 부분 1개. 그 진술을 claims에 쓰지 않는다.
 - identity: 두 부분이 같은 대상인지 미정. parts에 두 부분, statement는 null. 두 부분을 합치거나 한쪽의 근거를 다른 쪽으로 옮기지 않는다.
