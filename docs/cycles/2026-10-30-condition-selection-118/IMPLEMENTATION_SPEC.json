@@ -1,0 +1,55 @@
+{
+  "status": "implementation_selected_no_real_generation",
+  "base": "19a89e097056e1ccb8cc1b2626455933a5f17cee",
+  "choice": "B_existing_anchor_length_guidance",
+  "reason": "117 already preserves observation conditions in text and exact evidence; explicit null is truthful. App computes eligibility, model does not count characters. No new raw selector needed.",
+  "format": {
+    "version": "condition-length-guidance.1",
+    "rows": "[startAlias, lastAllowedEndAlias80_or_null, lastAllowedEndAlias200_or_null] in original sent record/span order",
+    "meaning": "Each non-null end denotes every existing end from start through that end inclusive. It does not attest semantic suitability or override ownership/material checks.",
+    "selection": "Emit the unchanged MAP7 alias/range syntax or explicit null. Preserve significant conditions in statement text and its exact at when no honest short condition fits.",
+    "serialization": "compact JSON rows inside a separately delimited generated guidance block; no copied source text/metadata",
+    "annexMaxUtf8Bytes": 65536,
+    "rowsMax": "MAP_RECORDS4 * SPANS_PER_RECORD400 =1600; prove the bounded serialization fits for valid asks",
+    "onUnexpectedOverflow": "honest preflight failure before provider/spawn, never partial table or dropped input"
+  },
+  "recipe": {
+    "baseMap7TextByteUnchanged": true,
+    "revision": "explicit new MAP7_RECIPE revision including renderer format/limits/algorithm identity",
+    "dynamicRenderer": "map7Prompt(validated ask)",
+    "routes": [
+      "standard provider",
+      "owned CLI wrap/prepare/pre-spawn check"
+    ],
+    "actualBinding": "SHA256 of complete rendered prompt for this exact ask; same renderer in both routes; promptKind schema based",
+    "oldReady": "saved old7 input/schema/recipe/actualprompt preserved with zero generation; never replaced with current recipe"
+  },
+  "unchanged": [
+    "all source bytes and metadata",
+    "span.2 aliases/index and evidence digest",
+    "MAP7 accepted wire grammar and validation",
+    "project14/map-reading.5/map-input.1/map-job.1",
+    "FIRST6 and all map1–6 prompts/recipes",
+    "wrapper prefix/suffix",
+    "model/permissions/time/output limits",
+    "public73/UI75/stash"
+  ],
+  "forbidden": [
+    "rewrite117",
+    "post-output clip/null/cell extraction",
+    "new alias namespace/cell catalog/MAP8",
+    "extra model call/retry/fallback",
+    "prototype/hardware/deployment completion claims"
+  ],
+  "checks": [
+    "all eligible ranges vs independent exact raw resolver at79/80/81/199/200/201/204",
+    "real117 ask rawbytes unchanged and named source spans eligibility",
+    "emoji/CRLF/outer/internal whitespace/table/code/paragraph boundary/ranges/max record-span counts",
+    "same dynamic prompt direct provider and CLI; mutation rejected between prepare/spawn",
+    "genuine pre118 producer ready7 recovery/no new call",
+    "oldFIRST6 and old map1–6 prompt hash identity",
+    "normal selectedRQ UI/sourceback/backup preservation with distinct model-free fixture",
+    "Root locked build/check, independent review, exact CI"
+  ],
+  "nextRealGate": "Only after implementation acceptance, separately freeze original117project/fullRQ/source and choose one new observation; full delivery/contract/meaning/UI gates remain."
+}
