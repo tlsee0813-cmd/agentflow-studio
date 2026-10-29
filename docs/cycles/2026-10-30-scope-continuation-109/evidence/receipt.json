@@ -1,0 +1,36 @@
+{
+  "selection": "cff2920a9374494239505a6caa4f5df7fa013a55",
+  "code": "5e84ae811dfaf7197c93f2d05b900d330125cc11",
+  "app": "5736b7949d50ba92c07ae583ff22c618c25c3e94",
+  "delivery": {
+    "status": 200,
+    "elapsedMs": 14118,
+    "bytes": 9257
+  },
+  "finish": "stop",
+  "usage": {
+    "prompt_tokens": 8077,
+    "completion_tokens": 2091,
+    "total_tokens": 10168,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1953
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 8077
+  },
+  "rawSha256": "b53c19b72297a8fc5cb4a4ebc12553b2806b0ac1bc973529b2046878b93858d5",
+  "inputUserEquals107": true,
+  "systemSha256": "00cf7462571b87d80061ff8c65db65bcdaa385b5419646bac2331daae9b25ad6",
+  "verdict": "bounded scope and frozen request PASS",
+  "calls": {
+    "scope": 1,
+    "plan": 0,
+    "map": 0,
+    "digest": 0,
+    "retry": 0
+  },
+  "delivered": 0
+}

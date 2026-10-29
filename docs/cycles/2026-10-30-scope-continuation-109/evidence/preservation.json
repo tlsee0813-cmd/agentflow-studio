@@ -1,0 +1,29 @@
+{
+  "code": "5e84ae811dfaf7197c93f2d05b900d330125cc11",
+  "app": "5736b7949d50ba92c07ae583ff22c618c25c3e94",
+  "selection": "cff2920a9374494239505a6caa4f5df7fa013a55",
+  "snapshotId": "RQ_0797ee20-a84e-4aa7-ace6-b4f053ca87f7",
+  "requestChars": 16202,
+  "requestSha256": "76449ae324375cc73ffb2cbbffa9b2066dc534124f3817d771370f9324db2e6b",
+  "planSame": true,
+  "previousRejectedSnapshotSame": true,
+  "snapshots": 2,
+  "wholeBackupSha256": "dcda9cc2acbd387fdfc7f1751f7ba4e59a2bbf6b496c5c04bbba24477552bb49",
+  "wholeBackupSame": true,
+  "allEvidenceTextsPresent": true,
+  "planUnknowns2Preserved": true,
+  "preserveConditions5Present": true,
+  "normalUI": {
+    "viewport": "1280x720",
+    "route": "existing107 saved plan -> wide comparison -> request creation once -> exported bundle + original project backup",
+    "copyNotClaimed": true
+  },
+  "calls": {
+    "scope": 1,
+    "plan": 0,
+    "map": 0,
+    "digest": 0,
+    "retry": 0
+  },
+  "rawSha256": "b53c19b72297a8fc5cb4a4ebc12553b2806b0ac1bc973529b2046878b93858d5"
+}

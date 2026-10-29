@@ -1,0 +1,30 @@
+{
+  "code": "5e84ae811dfaf7197c93f2d05b900d330125cc11",
+  "app": "5736b7949d50ba92c07ae583ff22c618c25c3e94",
+  "files": [
+    {
+      "path": "docs/cycles/2026-10-30-scope-continuation-109/OBSERVATION.md",
+      "sha256": "adcc287d0070c466dca5b955c280d1d796f8b8c850fd52223119762b88272561"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-scope-continuation-109/RESULT.md",
+      "sha256": "bb1bea80f7c667320a38d101cb4c14f49f273be2eeb49cb468b5af4b18b46cd3"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-scope-continuation-109/evidence/independent-review.json",
+      "sha256": "d25c322ad54b80d6c0f04d53fb79d942f7971a14d86ad83c539c1430fbbc7ed5"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-scope-continuation-109/evidence/preservation.json",
+      "sha256": "2b3f4db9f9aa822ae14d626da6dfd872d88f182ee59ebc2a044f86ecb547da67"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-scope-continuation-109/evidence/request-scope.png",
+      "sha256": "b6ee898622540a110e767a1f2f47ea1559f5d7e0c433c9e632498003ca027be0"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-scope-continuation-109/evidence/receipt.json",
+      "sha256": "436b0121d867d9f456f05ba6d60bb5668abaa7c2418e6e74b4f5873508b9df11"
+    }
+  ]
+}

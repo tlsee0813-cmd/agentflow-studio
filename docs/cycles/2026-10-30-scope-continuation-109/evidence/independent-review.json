@@ -1,0 +1,65 @@
+{
+  "task": "AF109-independent-single-scope-semantic-review",
+  "verdict": "bounded_scope_semantic_PASS; actual_frozen_request_usable_with_explicit_open_details",
+  "conclusion": "The actual response preserves the complete two-label display/controller/driver/build correspondence and the Low Power no-saving limitation, does not reopen an answered output requirement or add future-update scope, and correctly treats the lookup tool itself as the selected work rather than an additional prerequisite. No material semantic blocker was found in this one scope response. The subsequently preserved actual request/export also retains the full intent, table, preservation rules and original plan unknowns, and is usable for this bounded handoff with those open details explicit. No delivery or implementation success is implied.",
+  "basis": {
+    "directory": ".ops/experience109-scope-continuation/",
+    "filesRead": ["frozen.json", "expected-scope.json", "call-1-request.json", "call-1-raw.json", "call-1-receipt.json", "request-after.json", "project-after.json", "request-snapshot.txt", "../experience107-request-continuation/request-after.json", "../experience107-request-continuation/project-after.json"],
+    "acceptedImplementation": "18ffeb69d4e8dd78641794c176dbb50e5f65a923",
+    "code": "5e84ae811dfaf7197c93f2d05b900d330125cc11",
+    "app": "5736b7949d50ba92c07ae583ff22c618c25c3e94",
+    "frozenScopePromptSha256": "00cf7462571b87d80061ff8c65db65bcdaa385b5419646bac2331daae9b25ad6",
+    "identityChecks": "Actual user/system message strings exactly equal expected-scope.user/system. Actual user string exactly equals107 call-2's original scope user string. The same full intent, selected item and source materials were therefore supplied; no replacement summary or repaired prior raw was used.",
+    "delivery": "Preserved receipt HTTP200/14118ms; actual raw finish_reason=stop. One completed scope response with prerequisites=[] and unknowns=[]."
+  },
+  "semanticAssessment": [
+    {
+      "subject": "both display mappings",
+      "output": "/summary sentence1",
+      "source": "actual input.evidence[N02] Display table, corroborated by M04; actual intent requests all four corresponding fields",
+      "judgment": "PASS",
+      "reason": "The response explicitly retains HINK-E0213 -> GDEH0213B1 / SSD1673 / ssd16xx / reel_board and HINK-E0213A22 -> GDEH0213B72 / SSD1675A / ssd16xx / reel_board@2. It no longer asks whether display-model names should be included, and does not infer @2 from PCB revision. This also directly addresses the compact plan-item display-name omission without modifying that stored item."
+    },
+    {
+      "subject": "power caveat and evidence modality",
+      "output": "/summary sentence1",
+      "source": "actual input.evidence[N02] Power supply note; M07; intent's preservation requirement",
+      "judgment": "PASS",
+      "reason": "Low Power cannot save energy remains explicitly named as a documented note available for guidance. The response claims documentary content, not independent board.c analysis, physical measurement or an implemented PC display. It does not promote nominal Low Power operation to effective saving."
+    },
+    {
+      "subject": "selected work versus prerequisites",
+      "output": "/summary sentence2 and /prerequisites",
+      "source": "actual input.selected[0] and intent",
+      "judgment": "PASS",
+      "reason": "The new lookup tool is the chosen work, so creating that same tool is not repeated as a prerequisite. Reusing an existing fixed table is supported. The conclusion is narrowly that supplied materials do not establish an additional unmet minimal prerequisite; it is not a claim that the implementation is already done or that no design/integration work exists."
+    },
+    {
+      "subject": "no scope expansion or invented user questions",
+      "output": "/summary, /prerequisites, /unknowns",
+      "judgment": "PASS",
+      "reason": "No new parts-registration decision, unsolicited command example, display-inclusion alternative, future-variant update mechanism or extra execution behavior is introduced. Known blank/unknown-label and PCB/no-build/hardware-preservation rules are not contradicted or reopened. A scope summary need not repeat every retained plan condition to preserve it."
+    }
+  ],
+  "emptyUnknownsInterpretation": {
+    "judgment": "not_an_unauthorized_resolution_in_this_response",
+    "reason": "This array is scope review's own unknowns, separate from the existing plan's unknowns. The response does not say CLI or GUI was chosen, that an equivalent existing tool is absent everywhere, or that all specification questions are resolved. The plan's two bounded unknowns (execution/presentation form and existing-tool evidence limit) may remain as originally stored. Omitting the previous scope's normalization question is not itself proof of an arbitrary default: no case/whitespace/prefix-matching choice is asserted, and not every unprovided implementation detail must be promoted into a blocking question.",
+    "handoffConstraint": "A receiver still must respect the no-guessing rule and preserve distinct labels; neither prefix matching nor an unapproved interface form becomes authorized merely because scope unknowns is empty. Existing plan unknowns must remain separate and unchanged in the actual request."
+  },
+  "actualHandoffScope": {
+    "usableBehavior": "This scope result supports handing off the bounded functional task already in the accepted107 plan: a PC label-input lookup showing the two complete display/controller/driver/build mappings, explicit confirmation-needed behavior for blank/unknown labels, no PCB-only selection, no actual build/flashing or hardware/power change, and retention of the documented no-saving caveat.",
+    "remainingOpenDetail": "Execution form and concrete interaction presentation remain unspecified; the result is not a claim of a fully settled standalone implementation specification. A handoff can retain those open details without assigning arbitrary approved defaults or inventing unrelated features.",
+    "requestArtifactReview": "After the initial response review, read the normal-UI export request-after.json, project-after.json and request-snapshot.txt. The latest snapshot is RQ_0797ee20-a84e-4aa7-ace6-b4f053ca87f7, text length16202 UTF16 units; exported snapshot text exactly equals the separately preserved text file. The request includes the full direct GDEH/controller/driver/target summary in its prerequisite-review section, all five preservation rules, the original two plan unknown strings, and a separate statement that scope review proposed no additional unknowns. No part-registration/future-update/display-inclusion question was added.",
+    "sourceAndHistoryChecks": "Compared every material body/title/basis sliced by the actual frozen reading spans to the actual scope ask: INTENT,M01-M07,N01,N02 all exactly equal. The spans are contiguous, cover the full text and concatenate back to it. Scope.intent equals plan.intent. Compared JSON structures from the109 and107 exports: the whole plan, whole rejected107 first snapshot and project are unchanged; snapshots now contains that old RQ_b9049be1-4888-4880-83cc-e0c987396b2e plus the new request as separate records. There is no assumed scope.result field: scope holds its selected specification; the review output was inspected in text/reading. These are read-only artifact comparisons, not a rerun of product validation or UI.",
+    "finalRequestJudgment": "PASS for using this exact preserved document as the bounded lookup-tool handoff, retaining explicitly open interaction-form details. Its selected-work sentence stays compact, but the original requested display field and complete two-model table are preserved, and the scope summary now directly spells out both model correspondences in the request body. Source preservation and visible item-summary completeness remain distinct qualities. Root reports delivery0; this review does not send the request or claim the tool has been implemented."
+  },
+  "limits": [
+    "107 scope remains semantic FAIL;109 is a separately selected response under the corrected scope prompt and the same preserved user body. No prior failure was repaired or reclassified.",
+    "One scope PASS does not establish a general model-quality improvement rate or causality, remove pending product/public-release gates, or verify actual tool implementation.",
+    "Root owns the final request/UI/export verification and any actual delegation. This reviewer performs no model/test/browser/build/product mutation."
+  ],
+  "blockersInScopeResponse": [],
+  "actions": {"newModelCalls":0,"replays":0,"researchWeb":0,"testsBuildUI":0,"productOrRawWrites":0,"onlyWrite":".ops/results/experience109-scope-semantic-review.json"},
+  "reviewClosed": true,
+  "finalSelectionOwner": "root coordinator"
+}
