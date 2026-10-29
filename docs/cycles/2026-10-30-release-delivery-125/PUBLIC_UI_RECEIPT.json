@@ -1,0 +1,37 @@
+{
+  "version": "agentflow.public-ui.125",
+  "at": "2026-10-29T22:57:07.537Z",
+  "url": "https://agentflow-studio-existing-map-124.tlsee0813.workers.dev",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "inputProjectSha256": "dcda9cc2acbd387fdfc7f1751f7ba4e59a2bbf6b496c5c04bbba24477552bb49",
+  "inputPlanSha256": "f49713f82e10a970011f0cc32c0ddb787278b75b879e821080288674438ee0f2",
+  "normalImport": true,
+  "projectMigration": "idea015.project.13 -> idea015.project.14; schemaVersion only; entire remaining object deep-equal",
+  "sameOwnerPlanFullBundleExact": true,
+  "projectOwner": "P_09ec5ba4-3082-4f33-adeb-b2f8240ef4d2",
+  "requestId": "RQ_2270d57b-174f-4405-9ad3-72f3b25ed607",
+  "requestCharacters": 16202,
+  "observed": [
+    "home states limited scope and separate-origin migration",
+    "normal project filechooser import",
+    "normal separate plan filechooser import",
+    "Display current claims -> original HINK-E0213A22/SSD1675A/ssd16xx/reel_board@2 table -> original Display selection",
+    "wide comparison preserves explicit unknown label/PCB/build/power constraints",
+    "last request shows existing RQ2270 with source-vs-instruction separation",
+    "return records honestly shows no linked original passage for this request",
+    "reload restores selected Display; normal reopen recovers wide plan and last request"
+  ],
+  "reload": {
+    "workspaceByteExact": true,
+    "plansByteExact": true,
+    "workspaceSha256": "86055d9fbb282c5bfcfdd3de861d483d8a91f53381c41dba4ff05ea8c76b4a09",
+    "plansSha256": "71fec8f52dc3433aebf10c8f20a4befe2102c0c8ac782423e537c1b8cbb96d05",
+    "onlyOtherStorageDifference": "navigation last.1; plan mode is not restored as an open panel"
+  },
+  "newModelCalls": 0,
+  "scope": "Public delivery/import/read/recovery smoke only. No new generation, new request creation or return comparison in cycle125.",
+  "viewportReset": true
+}

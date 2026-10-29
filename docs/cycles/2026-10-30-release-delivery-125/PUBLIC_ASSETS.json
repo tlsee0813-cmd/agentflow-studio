@@ -1,0 +1,385 @@
+{
+  "url": "https://agentflow-studio-existing-map-124.tlsee0813.workers.dev",
+  "source": "cfe993f31a8c53284612c22b3ded0c0739257373",
+  "expectedClosure": "ad5af7a029dae3afa5ced7b2b68183abd3839fa45184c64be718e6867f1f4188",
+  "files": [
+    {
+      "path": "/.nojekyll",
+      "http": 200,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exact": true
+    },
+    {
+      "path": "/BUILD.txt",
+      "http": 200,
+      "bytes": 110,
+      "sha256": "bce2bb913de115e9250152c770cdc3006e9d452bf60a4141698673178a2a7ba6",
+      "exact": true
+    },
+    {
+      "path": "/client/app.js",
+      "http": 200,
+      "bytes": 211363,
+      "sha256": "85bad0cc29058177f18db473298d8414235e75e6261f4267a740e7e156c25130",
+      "exact": true
+    },
+    {
+      "path": "/client/digest-source.js",
+      "http": 200,
+      "bytes": 10951,
+      "sha256": "6ddb12bb3a73f63f175cf11b0eee84d27af9cd004dc8b63c447a10bf039b74ef",
+      "exact": true
+    },
+    {
+      "path": "/client/digest-store.js",
+      "http": 200,
+      "bytes": 6781,
+      "sha256": "a2fc84c13144981ea5d7f407475a60a28b2aed1f50387aee318482b89aa75a86",
+      "exact": true
+    },
+    {
+      "path": "/client/map-jobs.js",
+      "http": 200,
+      "bytes": 7530,
+      "sha256": "a8477afa3f77e4a36e0adcc18a26a3435808ca5a67726efb159546eadc0d4c4e",
+      "exact": true
+    },
+    {
+      "path": "/client/map-layout.js",
+      "http": 200,
+      "bytes": 55121,
+      "sha256": "18300c9b5ef7c0dfe430b32a8a023b8679819e87471a616eadd61ef742dbf6c7",
+      "exact": true
+    },
+    {
+      "path": "/client/map-run.js",
+      "http": 200,
+      "bytes": 42097,
+      "sha256": "b9d34935f8de7a01a7ef7c9cad6f3482a18e02e19a9f782f5409467e6a5c1891",
+      "exact": true
+    },
+    {
+      "path": "/client/plan-dom.js",
+      "http": 200,
+      "bytes": 4149,
+      "sha256": "2ea2b813da5364396428f83563feea4827660e83178fe4e1fc1fd3b8fe323f69",
+      "exact": true
+    },
+    {
+      "path": "/client/plan-request.js",
+      "http": 200,
+      "bytes": 1385,
+      "sha256": "e6be9629a7ddf8b41ce5858923fae005d756ec0e9fc41458dbd52ad754a708e0",
+      "exact": true
+    },
+    {
+      "path": "/client/plan-source.js",
+      "http": 200,
+      "bytes": 14101,
+      "sha256": "216b7407f862027b3b0b6f697629d9a205d77b7d63cd07cb29a51186d9db11c6",
+      "exact": true
+    },
+    {
+      "path": "/client/plan-store.js",
+      "http": 200,
+      "bytes": 13314,
+      "sha256": "3a06f2b27f193b81e88bb77876abd1f568efc05db2eb6609177e70140b76ed89",
+      "exact": true
+    },
+    {
+      "path": "/client/plan-view.js",
+      "http": 200,
+      "bytes": 139263,
+      "sha256": "b47866217bb45bcea691fc00b6554a5726676af995ed302e357e152144353218",
+      "exact": true
+    },
+    {
+      "path": "/client/presentation.js",
+      "http": 200,
+      "bytes": 8313,
+      "sha256": "b0a1b18e2ef737228a1bb0cd53d81ffc6dd7b60f4af60933ff6562c39616fe55",
+      "exact": true
+    },
+    {
+      "path": "/client/request-results.js",
+      "http": 200,
+      "bytes": 12956,
+      "sha256": "a30204dff47f97e79420b1f1e293755164ea671ba2ea20fb42a22e5d4c3a0311",
+      "exact": true
+    },
+    {
+      "path": "/client/return-view.js",
+      "http": 200,
+      "bytes": 57505,
+      "sha256": "5ef13d66402c3d9aafafb9a4043d44426b867beff41cde1287f9d7aa8659b75d",
+      "exact": true
+    },
+    {
+      "path": "/client/role-evidence.js",
+      "http": 200,
+      "bytes": 750,
+      "sha256": "0f647f51eb2bb344146097c0e1c57cb053f5819fa74c8ae7d3e5bffd970d6a26",
+      "exact": true
+    },
+    {
+      "path": "/client/runtime.js",
+      "http": 200,
+      "bytes": 569,
+      "sha256": "7110aaf291d92bbb67e3bbf6d2b0063b2e3991c135c17bd7ea387a36b522a637",
+      "exact": true
+    },
+    {
+      "path": "/client/static-target.js",
+      "http": 200,
+      "bytes": 70,
+      "sha256": "76667dc5fb2ca20b48eca86cc20aef6f206f135244ccc3027ddef7212edbf2df",
+      "exact": true
+    },
+    {
+      "path": "/client/studio-api.js",
+      "http": 200,
+      "bytes": 9302,
+      "sha256": "9d1e36f844a32dce85e5e817231171efadd404687495c32fc62756921a87f070",
+      "exact": true
+    },
+    {
+      "path": "/client/studio-endpoint.js",
+      "http": 200,
+      "bytes": 35,
+      "sha256": "5416603b3844f24cbae5126227fada1393a424c03aefa771806cc13dbf75c9b2",
+      "exact": true
+    },
+    {
+      "path": "/index.html",
+      "http": 200,
+      "bytes": 9976,
+      "sha256": "12d4d87a03b1ab872d6f267a1f2817a3f0543b660cf96cd2a7c0362275309d61",
+      "exact": true
+    },
+    {
+      "path": "/shared/attention.js",
+      "http": 200,
+      "bytes": 6116,
+      "sha256": "55182121cccdf9d54bd8bcb8626d559a199192501386a718a9adb3696198950c",
+      "exact": true
+    },
+    {
+      "path": "/shared/authoring-context.js",
+      "http": 200,
+      "bytes": 8078,
+      "sha256": "08bd0f32f25ff97c854da370b53731182b2cfd3f8fb5cce36e8b1af083477f43",
+      "exact": true
+    },
+    {
+      "path": "/shared/change-plan-example.js",
+      "http": 200,
+      "bytes": 14311,
+      "sha256": "27d0d3d7650d02647a589099de4b6e1b796525b1a0d3a6ccbf8f34786c337ee3",
+      "exact": true
+    },
+    {
+      "path": "/shared/change-plan.js",
+      "http": 200,
+      "bytes": 17159,
+      "sha256": "982240c78c5258ad584d6abaad34ec5a5e103b7fb31df3d0cbb974cd5e37b420",
+      "exact": true
+    },
+    {
+      "path": "/shared/condition-guidance.js",
+      "http": 200,
+      "bytes": 2242,
+      "sha256": "0f4202cb8bde7c234d207a936e61dfd7796048c7d731b4fbf6ec661a2fcbf7ee",
+      "exact": true
+    },
+    {
+      "path": "/shared/digest-api.js",
+      "http": 200,
+      "bytes": 9501,
+      "sha256": "b2c2a81247fda9be1ee756b7a2e385a4e3b5622dffc872320ccd1c53aadb119d",
+      "exact": true
+    },
+    {
+      "path": "/shared/domain.js",
+      "http": 200,
+      "bytes": 81380,
+      "sha256": "3a5cd4acdb5e709b1885f586953cb955f394cd89d9117b6026088f1e72da7b87",
+      "exact": true
+    },
+    {
+      "path": "/shared/evidence-span.js",
+      "http": 200,
+      "bytes": 11791,
+      "sha256": "a8ecf6e1abbb78337ea8ae25423bf30fa5afba1665a1352de5ecc2d101d0ff38",
+      "exact": true
+    },
+    {
+      "path": "/shared/guidance.js",
+      "http": 200,
+      "bytes": 6701,
+      "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "exact": true
+    },
+    {
+      "path": "/shared/hierarchy.js",
+      "http": 200,
+      "bytes": 2489,
+      "sha256": "5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624",
+      "exact": true
+    },
+    {
+      "path": "/shared/map-job.js",
+      "http": 200,
+      "bytes": 8727,
+      "sha256": "42e1b71c11f277022150cf62db3089058d12fde2558c64f8f935fb3cf8fc9f2f",
+      "exact": true
+    },
+    {
+      "path": "/shared/map-reading.js",
+      "http": 200,
+      "bytes": 76831,
+      "sha256": "60079ead93ae415b7400bc5c9d61679fe37d184c34e2cb5b29f8e3f4284f35c7",
+      "exact": true
+    },
+    {
+      "path": "/shared/mock.js",
+      "http": 200,
+      "bytes": 18360,
+      "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "exact": true
+    },
+    {
+      "path": "/shared/outcome.js",
+      "http": 200,
+      "bytes": 4887,
+      "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "exact": true
+    },
+    {
+      "path": "/shared/plan-api.js",
+      "http": 200,
+      "bytes": 4236,
+      "sha256": "7e29da612604836cfabbeeb16579d12bfb854199e7f4e91f17408c71f1c52e9a",
+      "exact": true
+    },
+    {
+      "path": "/shared/plan-facts.js",
+      "http": 200,
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "exact": true
+    },
+    {
+      "path": "/shared/record-source.js",
+      "http": 200,
+      "bytes": 6204,
+      "sha256": "df0c2d5d2daf3fbc32fe32a012a065731c0cad3e3e62a905556c7a0514c38a5f",
+      "exact": true
+    },
+    {
+      "path": "/shared/relation-groups.js",
+      "http": 200,
+      "bytes": 3101,
+      "sha256": "c6437ed52f411c3923b2024cd6180f5458e97c33a571c72d784585a1890b2bea",
+      "exact": true
+    },
+    {
+      "path": "/shared/request-reading.js",
+      "http": 200,
+      "bytes": 9026,
+      "sha256": "da7e7f0d0c037d766791f32ebc357e45ebc007be49315b68bfc535dbe62265a7",
+      "exact": true
+    },
+    {
+      "path": "/shared/request-return.js",
+      "http": 200,
+      "bytes": 21429,
+      "sha256": "8a22fb9e0aaf5d20738180e08e47d1135e2724fad364e5837324998e596fe546",
+      "exact": true
+    },
+    {
+      "path": "/shared/return-material-data.js",
+      "http": 200,
+      "bytes": 17004,
+      "sha256": "63a5d7057c06c2f4fa8637fabb4e37c262db36452a81b9ad6dcc735b2f18f978",
+      "exact": true
+    },
+    {
+      "path": "/shared/return-material.js",
+      "http": 200,
+      "bytes": 2598,
+      "sha256": "bb9458f95dc9f652703f857d5ef5f62dced8e119b4040911f736f23558df6ce9",
+      "exact": true
+    },
+    {
+      "path": "/shared/scope-api.js",
+      "http": 200,
+      "bytes": 2484,
+      "sha256": "e0a206567a88b63a22ae73aea49eea1e82d3c6f40302c7c4e2596cb5c8b96969",
+      "exact": true
+    },
+    {
+      "path": "/shared/secret.js",
+      "http": 200,
+      "bytes": 504,
+      "sha256": "b91f6443aa07f7a6a4aa5d696831d2ee8d2c51139df23ab962166e5a6c4d4f66",
+      "exact": true
+    },
+    {
+      "path": "/shared/source-proposals-example.js",
+      "http": 200,
+      "bytes": 10745,
+      "sha256": "2b20b2c291e58f53deaf60516cc24a401b25b648c795162bef854dfd658f8d4b",
+      "exact": true
+    },
+    {
+      "path": "/shared/source-proposals.js",
+      "http": 200,
+      "bytes": 16007,
+      "sha256": "57ebe66b903fe2f17458b39d02c88487a60704b6b59aebfd7a944a56dd34c71d",
+      "exact": true
+    },
+    {
+      "path": "/shared/storage.js",
+      "http": 200,
+      "bytes": 19695,
+      "sha256": "74182f0f3e73c53a2e97ab0f63e09d7f79f9d2efd565e494ae949ea5d4515efa",
+      "exact": true
+    },
+    {
+      "path": "/shared/studio-examples.js",
+      "http": 200,
+      "bytes": 12840,
+      "sha256": "f755bae7b6f8664632b4ee1a89306b42e23542a95e9a1c8098fe36ccdc6dbbfe",
+      "exact": true
+    },
+    {
+      "path": "/shared/studio.js",
+      "http": 200,
+      "bytes": 13004,
+      "sha256": "370f0bf194ad0555890ae1696ada1051e3d89f6daf38e1d272b15fa3de288c45",
+      "exact": true
+    },
+    {
+      "path": "/shared/types.js",
+      "http": 200,
+      "bytes": 4101,
+      "sha256": "577682011fb3cf4a7da0fa4dad688311ddea361e1e603b337590ab0e504f0305",
+      "exact": true
+    },
+    {
+      "path": "/shared/validation.js",
+      "http": 200,
+      "bytes": 69234,
+      "sha256": "c78f2b6d745bb7b77d5f00248efd997f2389d892c473f170a4a68ba4db6a9962",
+      "exact": true
+    },
+    {
+      "path": "/styles.css",
+      "http": 200,
+      "bytes": 136635,
+      "sha256": "5c0497483549b701457f2c598aa0507829747e080e43c2e85c9ce0726d767b5c",
+      "exact": true
+    }
+  ]
+}

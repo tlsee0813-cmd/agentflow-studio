@@ -1,0 +1,53 @@
+{
+  "at": "2026-10-29T22:51:26.971Z",
+  "url": "https://agentflow-studio-existing-map-124.tlsee0813.workers.dev",
+  "source": "cfe993f31a8c53284612c22b3ded0c0739257373",
+  "appTree": "a0a56c1cb8f2a1fdde5c7afb136bc248c8b61b6b",
+  "selection": "fc0a2bcb57a1894328fcadb3036cc82ceafb2bb3",
+  "attempt": "125-upload-1",
+  "exitCode": 0,
+  "deployment": {
+    "id": "ea308f1f-0cb1-494e-9567-c97539999b8b",
+    "source": "api",
+    "strategy": "percentage",
+    "annotations": {
+      "workers/message": "AgentFlow Studio cfe993f31a8c53284612c22b3ded0c...",
+      "workers/triggered_by": "upload"
+    },
+    "versions": [
+      {
+        "version_id": "1e6644b0-cce3-47cb-b9c8-903ab1f3910a",
+        "percentage": 100
+      }
+    ],
+    "created_on": "2026-10-29T22:49:47.382489Z"
+  },
+  "assets": {
+    "count": 54,
+    "sha256": "ad5af7a029dae3afa5ced7b2b68183abd3839fa45184c64be718e6867f1f4188",
+    "allPublicExact": true
+  },
+  "modules": {
+    "count": 27,
+    "sha256": "1df394bd38dc2ff2cd04deb3d4c01d68be876efb70f88cc09aefba898c5678c9",
+    "allDownloadedExact": true,
+    "entrypoint": "continuity/server/worker-existing-map.mjs"
+  },
+  "status": {
+    "ai": "deepseek",
+    "model": "deepseek-flash",
+    "access": "code",
+    "digest": {
+      "model": "deepseek-flash",
+      "prompt": "d1-9dd94a4850d7",
+      "record": "d2-b880a4b7b529"
+    },
+    "release": "existing-map"
+  },
+  "subdomain": {
+    "enabled": true,
+    "previews_enabled": false
+  },
+  "public73Unchanged": true,
+  "newModelCalls": 0
+}

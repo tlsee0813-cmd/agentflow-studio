@@ -1,0 +1,27 @@
+{
+  "source": "cfe993f31a8c53284612c22b3ded0c0739257373",
+  "appTree": "a0a56c1cb8f2a1fdde5c7afb136bc248c8b61b6b",
+  "capture": "normal CUA getScreenshot JPEG at1280x720; viewport reset",
+  "files": [
+    {
+      "file": "evidence/public-display-source.jpg",
+      "bytes": 72904,
+      "sha256": "293a1069e43733ef082d1845df6a57117b6d9d41bfebc0faaee7d7ea92f4f268"
+    },
+    {
+      "file": "evidence/public-final-compare-1280.jpg",
+      "bytes": 92609,
+      "sha256": "deb282e84cbb687cab8da781bf292d4b51dae96657a11a1a06e65b21a6dcabfd"
+    },
+    {
+      "file": "evidence/public-home.jpg",
+      "bytes": 77094,
+      "sha256": "e3f0e42efc37909b8686f2415de327e42bb1a77fd9ff7cdb18c4ffb204414097"
+    },
+    {
+      "file": "evidence/public-request.jpg",
+      "bytes": 108347,
+      "sha256": "02879794d5c907654ae2170f758774078a65d82c5d91d186b08f3e9115e84748"
+    }
+  ]
+}

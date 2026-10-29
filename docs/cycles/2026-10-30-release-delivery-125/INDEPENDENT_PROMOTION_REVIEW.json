@@ -1,0 +1,43 @@
+{
+  "version": "experience125-promotion-review.1",
+  "decision": "승격 경계는 현재 재사용 deploy script와 맞는다. 발견한 비밀 binding 오류 출력 P2는 후속 최소수리의 정적 대조로 해소됐다. 남은 P1/P2 없음. 본 검토는 실행 또는 배포 승인이 아니다.",
+  "scope": {
+    "guard": ".ops/experience125-release-delivery/promotion-guard.mjs",
+    "initialGuardSha256": "FAF8E06CBB9C0A288060BF3D5DD3403B0D399C799E67D73FC6AA74F0BE1292ED",
+    "guardSha256": "20FA6841EB64C739D9BA3348DDF6423A4A94200EBE85350BE19FC6D76540124A",
+    "acceptedManifest": ".ops/experience124-scoped-release/release-manifest-final.json",
+    "source": "cfe993f31a8c53284612c22b3ded0c0739257373",
+    "appTree": "a0a56c1cb8f2a1fdde5c7afb136bc248c8b61b6b",
+    "target": "agentflow-studio-existing-map-124",
+    "assetCount": 54,
+    "moduleCount": 27,
+    "method": "guard 전체 및 비밀 없는 accepted manifest 식별정보의 정적 읽기. 키 파일 읽기, 환경 비밀 출력, API, 테스트, guard/제품 수정 없음."
+  },
+  "findings": [
+    {
+      "priority": "P2",
+      "status": "closed by static follow-up",
+      "file": ".ops/experience125-release-delivery/promotion-guard.mjs",
+      "line": 43,
+      "title": "비밀 binding 검증 실패가 비밀 값을 오류에 포함할 수 있다",
+      "trigger": "DEEPSEEK_API_KEY 또는 STUDIO_ACCESS_CODE binding이 기대 객체와 다를 때. text 값뿐 아니라 type/name/추가 필드 차이로도 deepEqual이 실패할 수 있다.",
+      "cause": "assert.deepEqual의 actual과 expected 객체에 text: process.env[key] 및 실제 secret binding이 들어간다. 실패하면 AssertionError에 두 객체가 보존되고 기본 Node 오류 표시/호출자 오류 출력이 해당 text를 노출할 수 있다.",
+      "impact": "원래 guard가 차단하려던 잘못된 업로드의 실패 경로에서 키·접속 코드가 stderr/실행 로그에 남을 수 있다. line44의 secretValuesLogged:false는 정상 receipt만 설명하며 실패 경로를 보장하지 않는다. 실제 누출을 관측한 것은 아니다.",
+      "minimalFix": "비밀 객체의 정확한 키 집합과 name/type/text 일치를 boolean으로 계산하고 boolean만 assert한다. 오류는 고정 문구 또는 binding 이름만 포함한다. secret 객체/값을 AssertionError actual/expected 또는 custom message에 넘기지 않는다.",
+      "validation": "후속 guard line43을 직접 다시 읽고 SHA20FA6841…와 일치를 확인했다. 비밀 binding의 정확한 name/type/text 및 keyset 결과를 Boolean 하나로 assert.ok에 넘기며 고정 'secret binding mismatch; values omitted'만 사용한다. 해당 실패 경로의 actual/expected에 비밀 객체를 넣지 않는다. 실제 키·API·실행 없이 원 P2 해소 확인."
+    }
+  ],
+  "verifiedByInspection": [
+    "accepted manifest는 cfe993f/a0a56c, clean=false가 아니라 dirty:false, existing-map 정책과 정확한 새 Worker 이름, 54 asset rows/27 module rows를 명시한다. guard는 HEAD clean 및 실제 prepared manifest 전체 deep equality를 확인하고 준비된 로컬 파일별 bytes/hash를 재확인한다.",
+    "첫 wrapped fetch에서도 verifyPrepared가 선행한다. 첫 non-GET 전에 고정 account의 GET /scripts로 같은 target 부재를 확인하며 그 뒤에만 첫 변경 요청을 nativeFetch로 전달한다. 공개 agentflow-studio에 대한 변경 경로는 allowlist에 없다.",
+    "고정 HTTPS Cloudflare account/workers base와 정확한 method/route allowlist가 있다. 허용된 변경은 지정 target의 assets-upload-session, assets/upload, 지정 target PUT, 지정 target subdomain뿐이다. 재사용 script는 redirect:error를 준다.",
+    "assets-upload-session은 각 경로/hash/size를 accepted package에 맞춘다. 실제 asset multipart bytes는 base64 decode 후 길이/hash/MIME를 비교한다. Worker PUT은 main, compatibility date, assets routing, annotations, 5개 binding 및 실제 module bytes/hash를 확인한다. 이 검사는 같은 실행의 nativeFetch 직전에 수행된다.",
+    "일반 정상 경로 receipt에는 source/worker/phase/route/status/hash만 쓰고 비밀 값을 명시적으로 기록하지 않는다. 발견한 비밀 binding assertion의 예외 객체 경로는 후속 최소수리로 해소했다."
+  ],
+  "remainingConditions": [
+    "수리된 guard SHA는 확인했다. 실제 사용한 preload/entry 실행 인자를 후속 회수한다. 기존 deploy script 재사용과 이 wrapper가 같은 프로세스의 fetch를 가로채는 구성이어야 한다.",
+    "부재 재확인은 첫 mutation 직전의 관측이며 Cloudflare 원자적 create-if-absent 보장은 아니다. 자산 업로드부터 Worker PUT 사이 같은 target을 다른 실행이 만들지 않는 단일 실행 운영 경계를 유지한다. 이 검토에서 실제 동시 작성은 관측하지 않았다.",
+    "multipart 이름 중복/누락까지 독립적으로 배제하는 일반 목적 검증기는 아니다. 현재 고정 cfe deploy script의 unique Map에서 entries를 만드는 경로와 결합해 평가했다. 이후 uploader 변경 시 이 결론을 재사용하지 않는다.",
+    "실제 upload 결과, 새 origin의 제한 status/route 확인, 공개73 원본 유지 및 원래125 문서 branch 복귀는 root가 후속 증거로 회수한다. 본 정적 검토는 API 성공이나 배포 완료로 세지 않는다."
+  ]
+}

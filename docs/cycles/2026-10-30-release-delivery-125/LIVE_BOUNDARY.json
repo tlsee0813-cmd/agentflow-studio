@@ -1,0 +1,57 @@
+{
+  "url": "https://agentflow-studio-existing-map-124.tlsee0813.workers.dev",
+  "cases": [
+    {
+      "route": "/api/studio/map",
+      "http": 403,
+      "body": {
+        "error": {
+          "code": "MAP_WITHHELD"
+        }
+      }
+    },
+    {
+      "route": "/api/studio/map",
+      "http": 403,
+      "body": {
+        "error": {
+          "code": "MAP_WITHHELD"
+        }
+      }
+    },
+    {
+      "route": "/api/studio/jobs",
+      "http": 403,
+      "body": {
+        "error": {
+          "code": "MAP_WITHHELD"
+        }
+      }
+    },
+    {
+      "route": "/api/studio/plan",
+      "http": 401,
+      "body": {
+        "error": {
+          "code": "ACCESS_CODE_REQUIRED"
+        }
+      },
+      "case": "missing recognized access header"
+    },
+    {
+      "route": "/api/studio/plan",
+      "header": "X-Studio-Access",
+      "case": "explicit wrong code",
+      "http": 401,
+      "body": {
+        "error": {
+          "code": "ACCESS_CODE_REQUIRED"
+        }
+      }
+    }
+  ],
+  "usesRealCode": false,
+  "modelCalled": false,
+  "oldBuildExact": true,
+  "oldSettingsExact": true
+}
