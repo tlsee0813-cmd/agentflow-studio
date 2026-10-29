@@ -1,5 +1,5 @@
 {
-  "status": "verification_complete_except_final_ci_not_accepted",
+  "status": "accepted_bounded_contract_and_ui_not_generated_semantics",
   "implementation": "23aef513cc1214c2f0f21502a37334c22b4a1308",
   "tests": "2697bb57470837f5b4093340c539e70732243f63",
   "fixtureRepair": "a39735bd00e1d629cd9b2ce06532424bfa9a6f35",
@@ -75,6 +75,13 @@
       "file": "evidence/root-ui.json",
       "bytes": 1467,
       "sha256": "c41e9ecf1f02c88a9e533ec609b0cb4f15b445054faa6d525c97d719c64d6835"
+    },
+    {
+      "file": "evidence/ci-final.json",
+      "bytes": 1348,
+      "sha256": "1d1464936ea81a29296d1d0e2e38486ddfaf3b5c162406c95e643845db271867"
     }
-  ]
+  ],
+  "testedHead": "47445f30c0f04c98c26bb6c9e96fa05186411c2f",
+  "ciRun": 40938990873
 }

@@ -1,0 +1,43 @@
+{
+  "head": "47445f30c0f04c98c26bb6c9e96fa05186411c2f",
+  "run": 40938990873,
+  "at": "2026-10-29T19:28:22.990Z",
+  "jobs": [
+    {
+      "job": {
+        "id": 123677174255,
+        "head_sha": "47445f30c0f04c98c26bb6c9e96fa05186411c2f",
+        "name": "verify (ubuntu-24.04)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      "logTruncated": true,
+      "summaryLines": [
+        "2026-10-29T19:23:39.2016014Z # tests 617",
+        "2026-10-29T19:23:39.2016184Z # pass 617",
+        "2026-10-29T19:23:39.2016265Z # fail 0",
+        "2026-10-29T19:23:39.2016431Z # skipped 0",
+        "2026-10-29T19:24:47.0421561Z Ran 18 tests in 15.935s",
+        "2026-10-29T19:24:47.0421997Z OK"
+      ]
+    },
+    {
+      "job": {
+        "id": 123677173876,
+        "head_sha": "47445f30c0f04c98c26bb6c9e96fa05186411c2f",
+        "name": "verify (windows-2022)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      "logTruncated": true,
+      "summaryLines": [
+        "2026-10-29T19:23:39.0568580Z # tests 617\r",
+        "2026-10-29T19:23:39.0568669Z # pass 614\r",
+        "2026-10-29T19:23:39.0568708Z # fail 0\r",
+        "2026-10-29T19:23:39.0568803Z # skipped 3\r",
+        "2026-10-29T19:24:55.4459485Z Ran 18 tests in 17.181s\r",
+        "2026-10-29T19:24:55.4459663Z OK\r"
+      ]
+    }
+  ]
+}
