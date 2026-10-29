@@ -3229,30 +3229,40 @@ def request93_flow(browser, base, size, shots=None):
     assert stored() == kept, "reading changes nothing stored"
     # DELTA1: a copy still pending when its document closes, is reopened, or the plan itself closes and opens again (a synthetic
     # clipboard held by the test: writeText is replaced in the page and settled by hand). Its late end says nothing anywhere.
-    page.evaluate("() => { window.__clips = []; window.__late = []; navigator.clipboard.writeText = () => new Promise((res, rej) => window.__clips.push({ res, rej })); addEventListener('unhandledrejection', e => window.__late.push(String(e.reason))); }")
+    page.evaluate("() => { window.__clips = []; window.__late = []; navigator.clipboard.writeText = () => new Promise((res, rej) => window.__clips.push({ res, rej, done: false })); addEventListener('unhandledrejection', e => window.__late.push(String(e.reason))); }")
     status, quiet = sheet.locator("footer [role=status]"), "복사는 이 글을 옮기는 일이에요. 접수·실행·완료를 기록하지 않아요."
+    boundaries = []
+    def press_copy():
+        n = page.evaluate("() => window.__clips.length")
+        sheet.locator('[data-sheet-part="copy"]').click()
+        assert page.evaluate("() => window.__clips.length") == n + 1, "the copy made its own pending attempt"
+        return n
     def held_copy():
         last.click(); expect(sheet).to_be_visible()
-        sheet.locator('[data-sheet-part="copy"]').click()
-        assert page.evaluate("() => window.__clips.length") == held_copy.n + 1; held_copy.n += 1
-    held_copy.n = 0
-    held_copy(); page.keyboard.press("Escape"); expect(sheet).to_be_hidden()
-    page.evaluate("() => window.__clips[0].res()")  # ends after its document closed
+        return press_copy()
+    def settle(n, how, at):
+        """Settle attempt n by hand: it must exist and still be pending (never a silent no-op). Recorded with where it ended."""
+        ok = page.evaluate("([n, how]) => { const c = window.__clips[n]; if (!c || c.done) return false; c.done = true; how === 'res' ? c.res() : c.rej(new Error('late')); return true; }", [n, how])
+        assert ok, (n, how, at)
+        page.wait_for_timeout(100)
+        boundaries.append({"attempt": n, "settled": how, "at": at, "url": page.url, "sheetOpen": sheet.is_visible(), "status": status.inner_text() if sheet.is_visible() else None,
+            "focus": page.evaluate(focused), "late": page.evaluate("() => window.__late"), "errors": list(errors)})
+        if shots: (pathlib.Path(shots) / f"request93-{w}x{hgt}-boundaries.json").write_text(json.dumps(boundaries, ensure_ascii=False, indent=1), encoding="utf-8")
+    first = held_copy(); page.keyboard.press("Escape"); expect(sheet).to_be_hidden()
+    settle(first, "res", "after its document closed")
     page.wait_for_timeout(100)
     assert sheet.is_hidden() and sheet.inner_html() == "" and page.evaluate(focused)[1] == "last", page.evaluate(focused)
-    held_copy(); page.keyboard.press("Escape"); last.click(); expect(sheet).to_be_visible()
-    page.evaluate("() => window.__clips[1].rej(new Error('late'))")  # ends while the same document is open again (a new opening)
-    page.wait_for_timeout(100)
+    second = held_copy(); page.keyboard.press("Escape"); last.click(); expect(sheet).to_be_visible()
+    settle(second, "rej", "the same document opened again (a new opening)")
     expect(status).to_have_text(quiet)
     assert page.evaluate(focused)[1] == "text" and page.evaluate("() => getSelection().toString()") == "", page.evaluate(focused)
     page.keyboard.press("Escape")
-    held_copy(); page.keyboard.press("Escape")
+    third = held_copy(); page.keyboard.press("Escape")
     page.keyboard.press("Escape")  # the stale plan closes to the current map (draft kept); its session ends
     expect(panel).to_be_hidden()
-    page.evaluate("() => window.__clips[2].res()")  # ends with no plan open
+    settle(third, "res", "no plan open (its session closed)")
     page.locator("#plan-entry").click(); expect(page.locator("#plan-title")).to_have_text("변경안 · 1가지 변화")
     expect(area).to_have_value(long_draft)
-    page.evaluate("() => window.__clips[3]?.rej(new Error('none'))")
     last.click(); expect(sheet).to_be_visible()
     page.wait_for_timeout(100)
     expect(status).to_have_text(quiet)  # a new session's document never shows an old attempt's message
@@ -3285,6 +3295,37 @@ def request93_flow(browser, base, size, shots=None):
     for k in ["snapshots", "labels", "origins", "observations", "attached"]: assert after[k] == made[k], k
     assert len(calls) == 3, calls  # the positive analysis, its one scope review, the empty analysis
     assert errors == [], errors
+    # TEST DELTA: two attempts left pending in this document; the plan closes and another project (the converter example, opened
+    # through the normal UI) makes its own request document; only then do the old attempts end. Neither reaches that document.
+    earlier.click(); expect(sheet).to_be_visible()
+    old_fail, old_ok = press_copy(), press_copy()
+    page.keyboard.press("Escape"); expect(sheet).to_be_hidden()
+    page.keyboard.press("Escape"); expect(panel).to_be_hidden()  # the no-change plan closes to the map; its session ends
+    page.locator('#crumbs a[href="#/"]').click()
+    page.locator('.program-head[href="#/p/ex-converter"]').click()
+    expect(page.locator("#crumbs")).to_contain_text("문서 변환기")
+    page.locator("#plan-entry").click()
+    page.locator("#plan-strip .ps-more").click()
+    page.locator("#plan-make").click()  # the authored example's request: made locally, no call
+    expect(sheet).to_be_visible()
+    other = pre.text_content()
+    assert other != text and page.evaluate(focused)[0] == "plan-copy", page.evaluate(focused)
+    settle(old_fail, "rej", "another project's plan session open on its own new document")
+    settle(old_ok, "res", "another project's plan session open on its own new document")
+    expect(status).to_have_text(quiet)
+    assert page.evaluate(focused)[0] == "plan-copy" and pre.text_content() == other and page.evaluate("() => getSelection().toString()") == ""
+    # The latest of two attempts in one open document decides; the earlier one ending later changes nothing.
+    older, newer = press_copy(), press_copy()
+    settle(newer, "rej", "latest attempt, same open document")
+    expect(status).to_have_text("자동 복사가 막혀 있어요. 글을 선택해 직접 복사하세요.")
+    settle(older, "res", "earlier attempt ending after the latest, same open document")
+    expect(status).to_have_text("자동 복사가 막혀 있어요. 글을 선택해 직접 복사하세요.")
+    shot("5-other-project-late-copy")
+    page.keyboard.press("Escape"); expect(sheet).to_be_hidden()
+    assert page.evaluate(focused)[0] == "plan-make", page.evaluate(focused)
+    assert page.evaluate("() => window.__clips.every(c => c.done)") and len(boundaries) == 7, boundaries
+    for k in ["snapshots", "labels", "origins", "observations", "attached"]: assert stored()[k] == made[k], k  # the micro project's own
+    assert len(calls) == 3 and page.evaluate("() => window.__late") == [] and errors == [], (calls, page.evaluate("() => window.__late"), errors)
     page.unroute("**/api/studio/plan"); page.unroute("**/api/studio/scope")
     context.close()
 
