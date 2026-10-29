@@ -37,7 +37,7 @@
 - `python continuity/tests/studio_browser.py map100` 1280×720·1440×900 통과; `… map97` 통과(구형 경로: 스모크 서버가 jobs 미광고).
 - 전체 기본 브라우저 흐름(`python continuity/tests/studio_browser.py`) 두 번을 구별해 기록한다.
   - 1회차(무효): 실행 도중 내가 `dist`를 다시 빌드해 `overview_flow`가 `#import-file` 대기 30초 초과로 실패했다(앞 3개 흐름 통과 후). 원본 로그는 작업 컨테이너 `/tmp/claude-0/keep/browser-full-run1-rebuilt-dist.log`. 코드 판정에 쓰지 않는다.
-  - 2회차(`bf60630`과 같은 소스의 안정 빌드): 진행 중. 결과는 완료 후 이 줄에 기록한다.
+  - 2회차(`bf60630`과 같은 소스의 안정 빌드, 중간 재빌드 없음): exit 0, `ok` 33줄(새 AF100 흐름, AF97, 기존 전체 흐름, 접속 코드·실패·키 없음·정적 상태 포함). 로그는 작업 컨테이너 `/tmp/claude-0/keep/browser-full-run2-stable.log`. Linux 1회이며 Windows·정확 Node 22.16 CI는 root 범위다.
 - app 루트 `npm run check` 통과. `npm test` 277/279: I9.01은 위 `.gitignore`로 원인 확인 후 수리·재통과, I6R `INVALID_EVAL_OPTIONS`는 이 컨테이너 Node v22.22.0(정확히 v22.16.0 요구)의 환경 차이이며 app 소스 변경 없음.
 - provider 호출 수는 stub의 `called-<n>`·호출 카운터로 명시 단언하고, 완료 판정은 조건 대기(서버 상태/파일/저장소)로 한다.
 
