@@ -10,7 +10,7 @@
   "wrapperSha256": "072de611cb9fcf8c3794d67184a711bef42343f5940e89af3a1f2f1e268cf03b",
   "instructionsSha256": "967f5b3f81906274d122fdb8760dc362d32d5d453186b776a1511cc93c86f998",
   "criteriaSha256": "06e415b8ccf53254d90bee930746e8d5d53c08cb55d8e955ab45d45fb49e1365",
-  "policyFileSha256": "e5034a3e3d5930d391821674546e70aa32962410b905103e2564c38bf163bd97",
+  "policyFileSha256": "a70aa79c3686d63c5a33439269fb68c4fe44fd31a8984ccfb3eb0481491a6159",
   "cliSha256": "5c1b55966bf9f757dcbf00065c9a6cb862ead55d34b015f1be1939ff18e43943",
   "cliVersion": "codex-cli 0.165.0-alpha.1.2",
   "observerSha256": "f3ab14a4242b3937e475575ea45afe7bfadefab66a19915f9a7dd28d3577cf88",
@@ -25,5 +25,6 @@
   "remoteBillingStop": "unconfirmed",
   "effectiveTools": "requested disabled; help/flags not proof of actual tool inventory; reject any tool/unknown event",
   "decision": "root selects one Zephyr normal UI observation;102 accepted",
-  "actualStarted": false
+  "actualStarted": false,
+  "contextExclusion": "project_doc_max_bytes=0 prevents workspace AGENTS text entering a source-only observation; policy60args; before first invocation"
 }
