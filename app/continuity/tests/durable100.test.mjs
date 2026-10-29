@@ -303,12 +303,21 @@ async function browser(svc) {
     const store = new JobReservations(shared.kv, shared.locks);
     w.run = createMapRun({ current: () => w.cur, visit: () => w.cur, status: () => w.status, accessCode: () => '', jobs: () => store, pollMs: 2,
       stored: key => { const e = entries.get(key); return e ? { project: e.project, lifecycle: e.lifecycle } : null; },
-      commit: async next => { const o = w.cur; w.commits++; const failed = w.commitImpl ? await w.commitImpl(next, o) : null; if (failed) return failed; o.project = next; o.view = studioView(next); entries.get(o.key).project = next; return null; },
+      commit: async next => {
+        const o = w.cur, e = entries.get(o.key); w.commits++; const failed = w.commitImpl ? await w.commitImpl(next, o) : null; if (failed) return failed;
+        // The workspace's own check: a save only on the save this page read.
+        if (e.seq !== o.ref.seq || e.lifecycle !== o.ref.lifecycle) return '다른 탭에서 바뀌어 저장하지 않았어요.';
+        o.project = next; o.view = studioView(next); e.project = next; e.seq++; o.ref = { ...o.ref, seq: e.seq }; return null;
+      },
       done: a => w.done.push(a), changed: () => {} });
-    w.open = key => { const e = entries.get(key); w.cur = { key, kind: 'saved', project: e.project, view: studioView(e.project), ref: { lifecycle: e.lifecycle, seq: 1 } }; return w.cur; };
+    w.open = key => { const e = entries.get(key); w.cur = { key, kind: 'saved', project: e.project, view: studioView(e.project), ref: { lifecycle: e.lifecycle, seq: e.seq } }; return w.cur; };
+    /** The person's own edit in this page, saved (another tab's save is edit() on the entries directly). */
+    w.edit = change => { const e = entries.get(w.cur.key); const next = change(w.cur.project); e.project = next; e.seq++; Object.assign(w.cur, { project: next, view: studioView(next), ref: { ...w.cur.ref, seq: e.seq } }); };
     return w;
   };
-  return { net, entries, shared, tab, add: (key, p, lifecycle = 1) => entries.set(key, { project: p, lifecycle }) };
+  return { net, entries, shared, tab, add: (key, p, lifecycle = 1) => entries.set(key, { project: p, lifecycle, seq: 1 }),
+    /** Another tab's save of an entry. */
+    saveElsewhere: (key, change) => { const e = entries.get(key); e.project = change(e.project); e.seq++; } };
 }
 const readings = p => p.readings.filter(isMapReading).length;
 let savedFetch;
@@ -390,7 +399,7 @@ test('100-D5 a failed save keeps the result ready (saving again needs no call); 
   t.commitImpl = null; await t.run.applyReady();
   assert.equal(readings(b.entries.get(A).project), 1); assert.equal(svc.prov.calls, 1);
   // Another reading in the same entry, then the entry is trashed and restored (lifecycle 2) before it is applied.
-  b.entries.get(A).project = D.pasteRecord(b.entries.get(A).project, '작업 보고: 폴더 입력은 다음 판에서.', null).project; t.open(A);
+  b.saveElsewhere(A, p => D.pasteRecord(p, '작업 보고: 폴더 입력은 다음 판에서.', null).project); t.open(A);
   await t.run.run(); await until(() => svc.prov.calls === 2, 'called'); t.cur = null; svc.prov.gates[1].open();
   const id = () => reservations(b.shared.kv)[0]?.id;
   await until(() => t.run.stateOf(A).ready, 'ready'); const cap = reservations(b.shared.kv)[0].cap, jid = id();
@@ -439,4 +448,88 @@ test('100-D8 a reservation whose receipt never came (reload): the job is closed 
   // The original submission arriving late (same id and capability) starts nothing.
   const late = await jcall(svc.handle, 'POST', '', r.cap, JSON.stringify({ ...JSON.parse(body), id: r.id }));
   assert.equal(late.state, 'cancelled'); assert.equal(svc.prov.calls, 0); await svc.jobs.close();
+});
+
+test('100-D9 a found-again result applies only on the save it was asked from; this page\'s own edits while it runs are still its own', async () => {
+  const svc = await service(), b = await browser(svc), A = 'E_tab00000-13';
+  b.add(A, project()); const t = b.tab(); t.open(A);
+  // Owned, same page: the person renames the project while it runs; the result applies on top of that (as in 97).
+  await t.run.run(); await until(() => svc.prov.calls === 1, 'called');
+  t.edit(p => D.rename(p, '이름을 바꾼 A'));
+  svc.prov.gates[0].open(); await until(() => readings(b.entries.get(A).project) === 1, 'applied over its own edit');
+  assert.equal(b.entries.get(A).project.name, '이름을 바꾼 A');
+  await until(() => reservations(b.shared.kv).length === 0, 'acknowledged');
+  // Found again after a reload, while another tab saved the entry meanwhile (an edit applyReading would let through): refused.
+  b.saveElsewhere(A, p => D.pasteRecord(p, '작업 보고: 결과 파일은 한 폴더에 모은다.', null).project); t.open(A);
+  await t.run.run(); await until(() => svc.prov.calls === 2, 'called'); t.run.dispose();
+  b.saveElsewhere(A, p => D.rename(p, '다른 탭이 바꾼 이름'));
+  svc.prov.gates[1].open();
+  const page = b.tab(); page.open(A); page.run.resume();
+  await until(() => page.run.state().ready, 'ready'); const { id, cap } = reservations(b.shared.kv)[0];
+  await page.run.applyReady();
+  assert.match(page.run.state().error, /다른 화면에서 저장되어 이번 결과는 반영하지 않았어요/); assert.equal(page.commits, 0);
+  assert.equal(readings(b.entries.get(A).project), 1, 'nothing rebased');
+  await until(async () => (await jcall(svc.handle, 'GET', `/${id}`, cap)).acked === 'discarded', 'let go'); assert.equal(svc.prov.calls, 2);
+  // Found again on the very save it was asked from: applied when asked.
+  b.saveElsewhere(A, p => D.pasteRecord(p, '작업 보고: 변환 실패는 이름과 함께 알린다.', null).project); page.open(A);
+  await page.run.run(); await until(() => svc.prov.calls === 3, 'called'); page.run.dispose(); svc.prov.gates[2].open();
+  const third = b.tab(); third.open(A); third.run.resume(); await until(() => third.run.state().ready, 'ready'); await third.run.applyReady();
+  assert.equal(readings(b.entries.get(A).project), 2); assert.equal(third.run.state().error, null);
+  await until(() => reservations(b.shared.kv).length === 0, 'acknowledged'); await svc.jobs.close();
+});
+
+test('100-D10 an applied reading is recognised only in its own entry, project and lifecycle', async () => {
+  const svc = await service(), b = await browser(svc), A = 'E_tab00000-14';
+  b.add(A, project()); const t = b.tab(); t.open(A);
+  b.net.fail = url => url.endsWith('/ack');
+  await t.run.run(); await until(() => svc.prov.calls === 1, 'called'); svc.prov.gates[0].open();
+  await until(() => reservations(b.shared.kv)[0]?.applied, 'saved, acknowledgement owed'); t.run.dispose();
+  const env = JSON.parse(b.shared.kv.getItem(JOBS_KEY)); env.ops[0].applied = null; b.shared.kv.setItem(JOBS_KEY, JSON.stringify(env));
+  // Trashed and restored since: the same reading in a later lifecycle is not this job's acknowledgement.
+  b.entries.get(A).lifecycle = 2; b.net.fail = null;
+  const page = b.tab(); page.open(A); page.run.resume();
+  await until(() => page.run.state().error, 'told');
+  assert.match(page.run.state().error, /보관되었다가 다시 열려/); assert.equal(page.commits, 0);
+  const { id, cap } = env.ops[0]; await until(async () => (await jcall(svc.handle, 'GET', `/${id}`, cap)).acked === 'discarded', 'let go, not acknowledged as applied');
+  await svc.jobs.close();
+});
+
+test('100-D11 a reservation re-bound to another entry (same id, capability and input) is refused before anything is loaded or acknowledged', async () => {
+  const svc = await service(), b = await browser(svc), A = 'E_tab00000-15', COPY = 'E_tab00000-16';
+  const p = project(); b.add(A, p); b.add(COPY, p); // an import copy: the same project, sources and part ids
+  const t = b.tab(); t.open(A); await t.run.run(); await until(() => svc.prov.calls === 1, 'called'); t.run.dispose();
+  svc.prov.gates[0].open();
+  const env = JSON.parse(b.shared.kv.getItem(JOBS_KEY)), { id, cap } = env.ops[0];
+  await until(async () => (await jcall(svc.handle, 'GET', `/${id}`, cap)).state === 'ready', 'ready');
+  env.ops[0].binding = { ...env.ops[0].binding, entryId: COPY }; b.shared.kv.setItem(JOBS_KEY, JSON.stringify(env));
+  const page = b.tab(); page.open(COPY); page.run.resume();
+  await until(() => page.run.state().error, 'refused');
+  assert.match(page.run.state().error, /맞지 않아 반영하지 않았어요/); assert.equal(page.run.state().ready, false);
+  assert.equal(readings(b.entries.get(COPY).project) + readings(b.entries.get(A).project), 0); assert.equal(page.commits, 0);
+  const v = await jcall(svc.handle, 'GET', `/${id}`, cap); assert.deepEqual([v.state, v.acked, v.binding.entryId], ['ready', null, A], 'the job is untouched');
+  // A forged applied note is not taken as an acknowledgement either.
+  env.ops[0].binding = { ...env.ops[0].binding, entryId: A }; env.ops[0].applied = 'R_00000000-0000-4000-8000-000000000000'; b.shared.kv.setItem(JOBS_KEY, JSON.stringify(env));
+  page.run.dispose(); const again = b.tab(); again.open(A); again.run.resume();
+  await until(() => again.run.state().ready, 'shown as the ready result it is'); assert.equal((await jcall(svc.handle, 'GET', `/${id}`, cap)).acked, null);
+  await again.run.applyReady(); assert.equal(readings(b.entries.get(A).project), 1);
+  await until(() => reservations(b.shared.kv).length === 0, 'acknowledged'); await svc.jobs.close();
+});
+
+test('100-D12 no persistent storage for reservations: nothing is reserved or sent, and the page says why; a failing read never reads as empty', async () => {
+  const svc = await service(), b = await browser(svc), A = 'E_tab00000-17';
+  b.add(A, project()); const prompt = await mapPromptId();
+  const host = (store) => { const w = { cur: null }; w.run = createMapRun({ current: () => w.cur, status: () => ({ ai: 'deepseek', model: 'm', access: 'open', map: { model: 'deepseek-flash', prompt }, jobs: { durable: true, problem: null } }),
+    accessCode: () => '', jobs: () => store, pollMs: 2, commit: async () => null, done: () => {}, changed: () => {} });
+    const e = b.entries.get(A); w.cur = { key: A, kind: 'saved', project: e.project, view: studioView(e.project), ref: { lifecycle: 1, seq: 1 } }; return w; };
+  const memoryOnly = host(new JobReservations(memoryKv(), locks(), false));
+  assert.equal(memoryOnly.run.can(), false); assert.match(memoryOnly.run.blocked(), /예약할 수 없어/);
+  await memoryOnly.run.run(); assert.equal(memoryOnly.run.state().pending, null);
+  // Storage that refuses reads (a privacy setting): the reservation fails, nothing goes, nothing is overwritten.
+  const writes = []; const refusing = { getItem: () => { throw new Error('SecurityError'); }, setItem: (k, v) => writes.push([k, v]) };
+  const store = new JobReservations(refusing, locks());
+  assert.throws(() => store.list()); await assert.rejects(store.reserve({}));
+  const w = host(store); await w.run.run();
+  assert.match(w.run.state().error, /기록하지 못해 보내지 않았어요/); assert.deepEqual(writes, []);
+  assert.equal(svc.prov.calls, 0); assert.ok(!b.net.sent.some(x => x.startsWith('POST /api/studio/jobs')));
+  await svc.jobs.close();
 });

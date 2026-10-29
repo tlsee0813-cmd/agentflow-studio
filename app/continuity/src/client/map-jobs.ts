@@ -5,7 +5,7 @@
 import { RUNTIME } from './runtime.js';
 import { AskError } from './studio-api.js';
 import type { StorageLike, LockManagerLike } from '../shared/storage.js';
-import { validateBinding, JOB_ID, JOB_CAPABILITY, type MapJobBinding } from '../shared/map-job.js';
+import { validateBinding, jobHash, JOB_ID, JOB_CAPABILITY, type MapJobBinding } from '../shared/map-job.js';
 
 export const JOBS_KEY = 'agentflow.studio.map-jobs.1';
 export const JOBS_LOCK = 'agentflow.studio.map-jobs';
@@ -19,7 +19,16 @@ export interface Reservation {
 }
 export type JobState = 'accepted' | 'running' | 'ready' | 'failed' | 'cancelled' | 'interrupted';
 export interface JobResult { model: string; prompt: string; askHash: string; wire: unknown; evidence: { index: string; ask: string }; reading: { id: string; at: string } }
-export interface JobView { id: string; state: JobState; acked: 'applied' | 'discarded' | 'seen' | null; error: { code: string } | null; remote: string | null; input?: unknown; result?: JobResult }
+export interface JobView { id: string; state: JobState; acked: 'applied' | 'discarded' | 'seen' | null; binding: MapJobBinding | null; bindingHash: string | null; error: { code: string } | null; remote: string | null; input?: unknown; result?: JobResult }
+const BINDING_KEYS: (keyof MapJobBinding)[] = ['entryId', 'projectId', 'lifecycle', 'seq', 'after', 'schemaVersion', 'prompt', 'model', 'askHash', 'inputHash'];
+/** The server's answer is about this very job: its id, and the binding it keeps (whole, and by the hash it was accepted under).
+ * A pre-acceptance cancel has no binding: only that end is accepted without one. */
+export async function sameJob(v: JobView, r: { id: string; binding: MapJobBinding }): Promise<boolean> {
+  if (v.id !== r.id) return false;
+  if (v.bindingHash === null) return v.binding === null && v.state === 'cancelled' && v.remote === 'not-sent';
+  if (v.bindingHash !== await jobHash(r.binding)) return false;
+  return v.binding === null || BINDING_KEYS.every(k => v.binding![k] === r.binding[k]);
+}
 /** answered: the server said so (a definite answer); otherwise the request may or may not have arrived. */
 export class JobError extends AskError { constructor(code: string, readonly answered: boolean) { super(code); } }
 
@@ -58,8 +67,10 @@ function parse(raw: string | null): Reservation[] {
 }
 /** Reservations of this address, written whole under one lock. Unreadable storage is never overwritten (JOBS_UNREADABLE). */
 export class JobReservations {
-  constructor(private kv: StorageLike, private locks: LockManagerLike | null) {}
-  get usable(): boolean { return !!this.locks; }
+  /** kv must be this address's persistent storage itself: a read or write that fails throws (never read as empty, never kept in
+   * memory instead). persistent=false (no such storage in this page) makes it unusable, so nothing is sent. */
+  constructor(private kv: StorageLike, private locks: LockManagerLike | null, private persistent = true) {}
+  get usable(): boolean { return !!this.locks && this.persistent; }
   list(): Reservation[] { return parse(this.kv.getItem(JOBS_KEY)); }
   private async locked<T>(change: (ops: Reservation[]) => { next: Reservation[] | null; result: T }): Promise<T> {
     if (!this.locks) throw new Error('LOCKS_UNAVAILABLE');

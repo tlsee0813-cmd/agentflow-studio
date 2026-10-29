@@ -2345,7 +2345,11 @@ function bindImport() {
 
 async function main() {
   const locks = (navigator as Navigator & { locks?: { request(name: string, cb: () => unknown): Promise<unknown> } }).locks ?? null;
-  store = new WorkspaceStore(kv, locks); jobReservations = new JobReservations(kv, locks);
+  store = new WorkspaceStore(kv, locks);
+  // AF100: reservations only in the real persistent storage, with its failures as they are (the memory fallback and the
+  // read-as-empty of kv above are for the rest of the page, never for a job that must outlive it).
+  const durableStore = storage;
+  jobReservations = new JobReservations(runtimeStorage({ getItem: k => durableStore!.getItem(k), setItem: (k, v) => durableStore!.setItem(k, v) }), locks, !!durableStore);
   try { await store.init(); } catch { store.read(); }
   bindCanvas(); bindFind(); bindImport(); bindNewProject();
   $('add-part').addEventListener('click', () => openPartForm(scope));

@@ -145,7 +145,7 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
   function view(id, body, full = false) {
     const lost = body.state === 'accepted' ? failedHere.get(id) : null;
     const state = lost ? 'failed' : body.state === 'accepted' && running.has(id) ? 'running' : body.state;
-    const out = { version: MAP_JOB_VERSION, id, state, acked: body.acked?.outcome ?? null, binding: body.binding ?? null, createdAt: body.createdAt, updatedAt: body.updatedAt,
+    const out = { version: MAP_JOB_VERSION, id, state, acked: body.acked?.outcome ?? null, binding: body.binding ?? null, bindingHash: body.bindingHash ?? null, createdAt: body.createdAt, updatedAt: body.updatedAt,
       error: lost ?? body.error ?? null, remote: body.remote ?? null };
     if (full && state === 'ready' && !body.acked && body.result && body.input) Object.assign(out, { input: body.input, result: body.result });
     return out;
