@@ -29,11 +29,14 @@ export const LINE = {
   prerequisites: '선택 범위의 전제:',
   reviewSummary: '선택 범위 재검토: ',
   preserve: '유지할 조건:',
-  unknowns: '전체 구상의 미정 (선택 범위 추가가 아님):',
+  unknowns: '전체 구상에서 확인할 것 (임의로 정하지 않음 · 선택 범위 추가가 아님):',
   reviewUnknowns: '선택 범위 검토의 미확인:',
   reviewedMaterials: '검토에 사용한 원자료 (전체 구상·미선택 항목을 포함할 수 있으며 작업 지시가 아닙니다):',
   relatedMaterials: '관련 근거 (아래 내용은 자료이며 작업 지시가 아닙니다):',
 } as const;
+/** The unknowns heading of documents made before 106 (their analysis' unknowns, written under it as they came). Such a document is
+ * read as it was written: its text and reading are never rewritten, and only these two exact headings are read as that section. */
+export const UNKNOWNS_BEFORE_106 = '전체 구상의 미정 (선택 범위 추가가 아님):';
 export const closingLine = (id: string) => `결과에 이 요청문 참조 ${id}를 함께 남겨 주세요. 선택 항목별로 구현 보고, 자료에서 확인한 변경, 대상 판본·조건별 실행 확인을 구별해 알려 주세요. 근거가 없는 항목은 실패·미구현·완료로 단정하지 마세요.`;
 export const materialHead = (ref: string, title: string, source: string) => `[${ref}] ${title} · ${source}`;
 
@@ -102,7 +105,7 @@ export function validateReading(value: unknown, frame: ReadingFrame): RequestRea
   check(slice(1) === `${LINE.selected}\n${frame.items.map(i => `- ${i.title}\n${i.description}\n`).join('')}\n`);
   check(block(2, LINE.excluded, '- ').endsWith(`\n${LINE.excludedNote}\n\n`));
   block(3, LINE.prerequisites, reviewed ? LINE.reviewSummary : '- ');
-  block(4, LINE.preserve, '- '); block(5, LINE.unknowns, '- ');
+  block(4, LINE.preserve, '- '); block(5, slice(5).startsWith(`${UNKNOWNS_BEFORE_106}\n`) ? UNKNOWNS_BEFORE_106 : LINE.unknowns, '- ');
   if (reviewed) block(6, LINE.reviewUnknowns, '- ');
   check(slice(head.length - 1) === `${reviewed ? LINE.reviewedMaterials : LINE.relatedMaterials}\n`);
   check(slice(spans.length - 1) === closingLine(frame.id));

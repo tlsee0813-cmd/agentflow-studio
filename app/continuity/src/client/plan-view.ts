@@ -107,12 +107,16 @@ const SECTION: Record<ReadingPart['kind'], { nav: string | null; tag: string | n
   excluded: { nav: '맡기지 않음', tag: '이번 요청 아님' },
   prerequisites: { nav: '전제 후보', tag: '자동으로 포함하지 않음' },
   preserve: { nav: '유지 조건', tag: '지켜야 할 조건' },
-  unknowns: { nav: '미정', tag: '추가 요청 아님' },
+  unknowns: { nav: '확인할 것', tag: '추가 요청 아님' },
   'review-unknowns': { nav: '검토 미확인', tag: '확인되지 않음' },
   materials: { nav: '자료', tag: '자료 · 작업 지시 아님' },
   material: { nav: null, tag: null },
   closing: { nav: '결과 안내', tag: '결과를 돌려줄 때' },
 };
+
+/** An analysis' unknowns are one list: choices still open and checks still needed, as the analysis wrote them (an earlier one too).
+ * Shown whole under one neutral name; never sorted into the person's decisions, filtered or reworded here. */
+const UNKNOWNS_NOTE = '분석이 남긴 미정·확인 사항이에요. 모두 직접 정해야 하는 결정이라는 뜻은 아니에요.';
 
 const MEMORY = new Map<string, PlanBundle>();
 /** A sentence handed over from the return reading, per project, in this tab only. It enters the draft only when the person
@@ -687,15 +691,15 @@ export function createPlanView(host: PlanHost) {
       h('button', { type: 'button', class: `ps-link ps-wide${st.fromWork ? ' back' : ''}`, onclick: () => openWork(item.id) }, st.fromWork ? '‹ 넓은 비교로' : '넓게 비교'),
       refs ? h('button', { type: 'button', class: 'ps-link', 'aria-pressed': String(st.evidenceFor === item.id), onclick: () => { st.evidenceFor = st.evidenceFor === item.id ? null : item.id; st.evidenceRef = null; render(); } }, `근거 ${refs}`) : null);
   }
-  /** Conditions with no part of their own (to keep, not yet decided): read here, never pinned to a part on the map. */
+  /** Conditions with no part of their own (to keep, to check): read here, never pinned to a part on the map. */
   function conditions(p: ChangePlan) {
     const st = s!, open = st.strip === 'conditions';
     const pop = open ? h('div', { class: 'ps-pop', role: 'dialog', 'aria-label': '대상을 정하지 않은 조건' },
       p.analysis.preserve.length ? h('section', {}, h('h3', {}, '지킬 것'), h('ul', {}, ...p.analysis.preserve.map(x => h('li', {}, x)))) : null,
-      p.analysis.unknowns.length ? h('section', {}, h('h3', {}, '아직 정하지 않은 것'), h('ul', {}, ...p.analysis.unknowns.map(x => h('li', {}, x)))) : null,
+      p.analysis.unknowns.length ? h('section', {}, h('h3', {}, '확인할 것'), h('p', { class: 'fine' }, UNKNOWNS_NOTE), h('ul', {}, ...p.analysis.unknowns.map(x => h('li', {}, x)))) : null,
       h('p', { class: 'fine' }, '특정 부분에 걸린 조건이 아니라 이 변경안 전체의 조건이에요.')) : null;
     return h('div', { class: 'ps-conds' }, h('button', { type: 'button', class: 'ps-cond-btn', 'aria-expanded': String(open), onclick: () => { st.strip = open ? null : 'conditions'; render(); } },
-      `지킬 것 ${p.analysis.preserve.length} · 정할 것 ${p.analysis.unknowns.length}`), pop);
+      `지킬 것 ${p.analysis.preserve.length} · 확인할 것 ${p.analysis.unknowns.length}`), pop);
   }
 
   /* ---------- the comparison in the reading pane: what a change wants next to what each of its parts is now ----------
@@ -925,7 +929,7 @@ export function createPlanView(host: PlanHost) {
       h('p', { class: 'pw-nochange-note' }, '변경이 필요 없다고 확인했거나 바라는 결과가 이미 이루어졌다는 뜻은 아니에요. 요청에 넣을 변경이 없어 요청문은 만들지 않아요.'),
       h('section', { class: 'pw-what' }, h('h4', {}, '분석이 읽은 것'), h('p', {}, p.analysis.summary)),
       h('section', { class: 'pw-nochange-list' }, h('h4', {}, `지킬 것 ${p.analysis.preserve.length}`), lines(p.analysis.preserve, '제시된 유지 조건 없음')),
-      h('section', { class: 'pw-nochange-list' }, h('h4', {}, `아직 확인하지 않은 것 ${p.analysis.unknowns.length}`), lines(p.analysis.unknowns, '제시된 미확인 없음')));
+      h('section', { class: 'pw-nochange-list' }, h('h4', {}, `확인할 것 ${p.analysis.unknowns.length}`), p.analysis.unknowns.length ? h('p', { class: 'fine' }, UNKNOWNS_NOTE) : null, lines(p.analysis.unknowns, '제시된 확인할 것 없음')));
   }
   /** The no-change right column's own work: the material this analysis was given, as frozen with the plan (its ids, kinds, titles and
    * order), each opening its text in this column. Never what the next analysis would send (a draft or material edited since). */
@@ -936,12 +940,12 @@ export function createPlanView(host: PlanHost) {
         h('span', { class: 'pw-src-title' }, e.title))))),
       h('p', { class: 'fine' }, '이 분석에 보낸 자료예요. 문장마다 근거를 확인한 표시는 아니에요. 고친 문장이나 붙인 자료는 다시 살펴볼 때 들어가요.'));
   }
-  /** Conditions of the whole plan (to keep, not decided yet): once, under the list, folded; never pinned to a change. */
+  /** Conditions of the whole plan (to keep, to check): once, under the list, folded; never pinned to a change. */
   function planConditions(p: ChangePlan): HTMLElement | null {
     const a = p.analysis.preserve.length, b = p.analysis.unknowns.length; if (!a && !b) return null;
-    return h('details', { class: 'pw-conds' }, h('summary', {}, `지킬 것 ${a} · 정하지 않은 것 ${b}`),
+    return h('details', { class: 'pw-conds' }, h('summary', {}, `지킬 것 ${a} · 확인할 것 ${b}`),
       a ? h('section', {}, h('h4', {}, '지킬 것'), h('ul', {}, ...p.analysis.preserve.map(x => h('li', {}, x)))) : null,
-      b ? h('section', {}, h('h4', {}, '아직 정하지 않은 것'), h('ul', {}, ...p.analysis.unknowns.map(x => h('li', {}, x)))) : null,
+      b ? h('section', {}, h('h4', {}, '확인할 것'), h('p', { class: 'fine' }, UNKNOWNS_NOTE), h('ul', {}, ...p.analysis.unknowns.map(x => h('li', {}, x)))) : null,
       h('p', { class: 'fine' }, '특정 변경에 걸린 조건이 아니라 이 변경안 전체의 조건이에요.'));
   }
   /** The right column: by default what this request takes and the way to make it; a source, results or every source in its place. */

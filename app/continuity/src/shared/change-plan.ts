@@ -197,7 +197,7 @@ export function requestSnapshot(plan: ChangePlan, review?: ScopeReview): Request
   } else lines.push(...(missing.size ? [...missing].map(key => `- 미선택 전제 후보: ${all.get(key)!.title} — 요청 범위에 포함하지 않았습니다. 기존 수단의 존재·재사용 가능성을 확인하거나 필요한 최소 범위를 별도로 판단해 주세요.`) : ['- 분석에서 제안된 전제 중 선택에서 빠진 항목은 없습니다.']));
   lines.push('');
   section('preserve', LINE.preserve, ...(p.analysis.preserve.length ? p.analysis.preserve.map(x => `- ${x}`) : ['- 제공된 유지 조건 없음']), '');
-  section('unknowns', LINE.unknowns, ...(p.analysis.unknowns.length ? p.analysis.unknowns.map(x => `- ${x}`) : ['- 제공된 미정 없음']));
+  section('unknowns', LINE.unknowns, ...(p.analysis.unknowns.length ? p.analysis.unknowns.map(x => `- ${x}`) : ['- 제공된 확인할 것 없음']));
   if (scoped) { lines.push(''); section('review-unknowns', LINE.reviewUnknowns, ...(scoped.unknowns.length ? scoped.unknowns.map(x => `- ${x}`) : ['- 검토에서 제시한 미확인 없음'])); }
   lines.push('');
   section('materials', scoped ? LINE.reviewedMaterials : LINE.relatedMaterials);

@@ -42,3 +42,16 @@ export function withId(id, run) {
   Object.defineProperty(globalThis.crypto, 'randomUUID', { configurable: true, value: () => id.replace(/^RQ_/, '') });
   try { return run(); } finally { if (was) Object.defineProperty(globalThis.crypto, 'randomUUID', was); else delete globalThis.crypto.randomUUID; }
 }
+/** AF106: the same document as the 94–105 generator wrote it (the unknowns heading of then, and its empty line), with every later
+ * range moved by the difference. It stands for a document kept by an app before 106, not for a real saved copy; the result is
+ * the golden pre-94 text again (reading94.test.mjs). */
+export function before106(snapshot, line, old) {
+  const s = structuredClone(snapshot), at = s.reading.spans.findIndex(x => x.kind === 'unknowns'), span = s.reading.spans[at];
+  const part = s.text.slice(span.start, span.end), head = `${line}\n`;
+  if (!part.startsWith(head)) throw new Error('not a 106 document');
+  const body = part.slice(head.length), was = `${old}\n${body === '- 제공된 확인할 것 없음\n\n' ? '- 제공된 미정 없음\n\n' : body}`, delta = was.length - part.length;
+  s.text = s.text.slice(0, span.start) + was + s.text.slice(span.end);
+  span.end += delta;
+  for (const x of s.reading.spans.slice(at + 1)) { x.start += delta; x.end += delta; }
+  return s;
+}

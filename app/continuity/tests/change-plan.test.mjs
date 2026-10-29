@@ -189,7 +189,7 @@ test('request separates excluded outcomes and global unknowns while preserving a
   assert.match(excluded, /- 파일별 결과 구별/); assert.match(excluded, /- 폴더 입력/);
   assert.doesNotMatch(excluded, /입력 파일마다 결과를 대응한다|폴더를 입력받는다/);
   assert.match(excluded, /추가 요청으로 해석하지 마세요/);
-  const globalUnknowns = snapshot.text.split('전체 구상의 미정 (선택 범위 추가가 아님):')[1].split('선택 범위 검토의 미확인:')[0];
+  const globalUnknowns = snapshot.text.split('전체 구상에서 확인할 것 (임의로 정하지 않음 · 선택 범위 추가가 아님):')[1].split('선택 범위 검토의 미확인:')[0];
   const scopeUnknowns = snapshot.text.split('선택 범위 검토의 미확인:')[1].split('검토에 사용한 원자료')[0];
   assert.match(globalUnknowns, /폴더 재시도 방식은 미정/); assert.doesNotMatch(scopeUnknowns, /폴더 재시도/);
   assert.match(scopeUnknowns, /T01로 여러 결과 표시/);

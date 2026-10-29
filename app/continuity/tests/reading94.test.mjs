@@ -4,9 +4,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import * as C from '../dist/public/shared/change-plan.js';
-import { validateReading, readingParts, frozenReading, READING_VERSION } from '../dist/public/shared/request-reading.js';
+import { validateReading, readingParts, frozenReading, READING_VERSION, LINE, UNKNOWNS_BEFORE_106 } from '../dist/public/shared/request-reading.js';
 import { emptyBundle, parseBundle, planFile, readPlanFile, loadBundle, saveBundle, setAside, PLANS_KEY, UNREADABLE_KEY } from '../dist/public/client/plan-store.js';
-import { cases, withId, PROJECT, REVIEW } from './fixtures/reading94/cases.mjs';
+import { cases, withId, PROJECT, REVIEW, before106 } from './fixtures/reading94/cases.mjs';
 
 const GOLD = JSON.parse(readFileSync(new URL('./fixtures/reading94/frozen-texts.json', import.meta.url), 'utf8')).texts;
 const made = name => { const c = cases().find(x => x.name === name); return withId(c.id, () => C.requestSnapshot(C.parsePersistedPlan(c.plan), c.review)); };
@@ -15,10 +15,14 @@ const valid = s => { C.compareResults(s, []); return s; };
 const kinds = s => s.reading.spans.map(x => (x.kind === 'material' ? `material:${x.ref}` : x.kind));
 const bundleOf = (snap, origin) => ({ ...emptyBundle('초안'), snapshots: [snap], labels: { [snap.id]: Object.fromEntries(snap.itemIds.map(i => [i, i])) }, origins: { [snap.id]: origin } });
 
-test('94 same plan, id and review give the pre-94 text exactly; its sections join back to that text', () => {
+// AF106 names the unknowns section neutrally in documents made from now on. The rest of the text is the pre-94 text: the same
+// document with the heading of then (before106) is the golden text exactly, and is still read as it was written.
+const old106 = s => before106(s, LINE.unknowns, UNKNOWNS_BEFORE_106);
+test('94 same plan, id and review give the pre-94 text exactly (106: but the unknowns heading); its sections join back to that text', () => {
   for (const c of cases()) {
-    const s = made(c.name);
-    assert.equal(s.text, GOLD[c.name].text, c.name);
+    const s = made(c.name), old = old106(s);
+    assert.equal(old.text, GOLD[c.name].text, c.name); valid(old);
+    assert.ok(s.text.slice(s.reading.spans[5].start).startsWith(`${LINE.unknowns}\n- `), c.name);
     assert.equal(s.reading.version, READING_VERSION);
     assert.equal(readingParts(s.text, s.reading).map(p => p.heading + p.body + p.gap).join(''), s.text, c.name);
     assert.equal(s.reading.spans.map(x => s.text.slice(x.start, x.end)).join(''), s.text);
@@ -114,7 +118,7 @@ test('94 a later plan never rewrites an earlier document or its reading', () => 
   assert.notEqual(next.text, snap.text); assert.deepEqual(snap, before); valid(snap); valid(next);
   const b = { ...bundleOf(snap, 'reviewed'), snapshots: [snap, next], labels: { [snap.id]: {}, [next.id]: {} }, origins: { [snap.id]: 'reviewed', [next.id]: 'reviewed' } };
   const back = parseBundle(JSON.parse(JSON.stringify(b)), PROJECT); assert.deepEqual(back.snapshots[0], before);
-  assert.equal(back.snapshots[0].text, GOLD['reviewed-all-material'].text);
+  assert.equal(old106(back.snapshots[0]).text, GOLD['reviewed-all-material'].text);
 });
 
 test('94 storage: .4 keeps readings through save, reload, file; .1-.3 never carried one and a mixed older store stays as it was', () => {
@@ -176,7 +180,7 @@ test('94 a malformed reading in a .4 store or file is refused whole: raw kept, n
 test('94 DELTA1 a material list re-cut at a heading inside material text is refused at the snapshot, bundle, file and store', () => {
   const base = made('reviewed-all-material'), at = (r, ref) => r.spans.findIndex(x => x.ref === ref);
   const cut = base.text.indexOf('[N02] 가짜 자료 · user', base.reading.spans[at(base.reading, 'N01')].start);
-  assert.equal(cut, 849, 'the probe\'s offset');
+  assert.equal(cut, 849 + LINE.unknowns.length - UNKNOWNS_BEFORE_106.length, 'the probe\'s offset (94; 106 heading)');
   const fakeHead = '[N02] 가짜 자료 · user\n자료 기준: 가짜\n';
   const recut = (r, n02) => {
     const intent = r.spans[at(r, 'INTENT')], n2 = r.spans[at(r, 'N02')];
