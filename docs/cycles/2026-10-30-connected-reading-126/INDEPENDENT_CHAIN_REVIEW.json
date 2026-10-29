@@ -1,0 +1,230 @@
+{
+  "title": "126 실제 Zephyr 지도에서 요청·시제품·반환까지 이어지는 기록 감사",
+  "at": "2026-10-29T23:04:01.454452+00:00",
+  "source": "f5d2f24188e89d4f0a035e8d57b85994a2924961",
+  "appTree": "a0a56c1cb8f2a1fdde5c7afb136bc248c8b61b6b",
+  "conclusion": "104 → 107의 수용 plan → 109의 수용 scope/RQ0797 → 110 실제 시제품 → 121 실제 반환 읽기는 동일 owner·보존된 원부분·정확 요청과 코드 판본으로 이어지는 실재 작업 계보다. 단일 연속 방문이나 전체 시나리오 완료는 아니다. 107 실패 scope와 121 미실행 방문 전환은 남는다. 122는 같은 owner를 재사용한 별도 FIRST 사본이며, 124/125의 RQ2270은 저장 응답 재생으로 만든 새 요청이다.",
+  "chain": [
+    {
+      "segment": "104 → 107 → 109의 지도",
+      "owner": "P_09ec5ba4-3082-4f33-adeb-b2f8240ef4d2",
+      "whole104BackupSha256": "4790d5a08933449f8e1f1b1f083bf70f513696f4e4e96338a144082d9a946d15",
+      "104ProjectEquals107": true,
+      "104ProjectEquals109": true,
+      "firstReadingId": "R_dc5636a7-e32a-4cf6-97d2-dea8eadfcfa3",
+      "originalPartIds": [
+        "A_e71e041a-605a-4380-9c79-00eac3d12a8e",
+        "A_6f556737-5075-438e-8e54-9afe80efd98e",
+        "A_60d3a105-99f0-4067-832f-2b3063f1bbd4",
+        "A_99d3331f-d27f-4ad1-bda6-99ebf13323f2",
+        "A_6959c141-2919-4d9c-b193-5ef3de089587",
+        "A_335fcbd4-d5bf-440d-8e10-a733acca5992",
+        "A_baa0b352-b823-40ad-a69e-a3fea699be8e"
+      ],
+      "meaning": "104 실제 첫 지도의 7부분·1reading·2원문을 새로 생성하지 않고 변경안과 scope에 사용했다."
+    },
+    {
+      "segment": "107 plan → 109 요청",
+      "planId": "CP_41a38af5-665b-4c2d-9841-02bda0baf26f",
+      "sameAccepted107Plan": true,
+      "rejectedRequest": "RQ_b9049be1-4888-4880-83cc-e0c987396b2e",
+      "acceptedRequest": "RQ_0797ee20-a84e-4aa7-ace6-b4f053ca87f7",
+      "acceptedRequestUTF16": 16202,
+      "acceptedRequestTextSha256": "76449ae324375cc73ffb2cbbffa9b2066dc534124f3817d771370f9324db2e6b",
+      "meaning": "107 plan은 수용됐지만107 scope/RQb9049는 반려됐다. 109는 plan을 재생성하지 않고 scope1회로 RQ0797을 만들었고 실패 문서도 따로 보존했다."
+    },
+    {
+      "segment": "109 → 110",
+      "request": "RQ_0797ee20-a84e-4aa7-ace6-b4f053ca87f7",
+      "implementationCommit": "6d9c2abc8c10f1aaddecd0f9bc7934153dfcc230",
+      "files": "examples/reel-label-guide",
+      "meaning": "요청된 로컬 라벨 안내 도구를 실제 코드로 만들고 root가 좁게 실행 수용했다. 원 Zephyr 하드웨어 구현·플래싱·전력 측정이나 AgentFlow 앱 구현 성공과는 다르다. CLI/GUI 등 열린 구현 형태는 총괄이 선택했다."
+    },
+    {
+      "segment": "110 → 121의 실제 입력·저장 반환",
+      "owner": "P_09ec5ba4-3082-4f33-adeb-b2f8240ef4d2",
+      "full109BundleEquals121Before": true,
+      "original104ReadingExact": true,
+      "original104AreasExact": true,
+      "original104RawRecordsExact": true,
+      "allSixReturnInputRecordsPreserved": true,
+      "typedCode": [
+        {
+          "recordId": "N_dfe50962-b5ed-4229-aac9-74dd52ce942a",
+          "name": "label-lookup.js",
+          "version": "6d9c2abc8c10f1aaddecd0f9bc7934153dfcc230",
+          "recordTextSha256": "d4335980a2b17fdf5cf82ed5778a5ac2b460c542068ff84fb3a14aa55e5eebad",
+          "gitBlobSha256": "d4335980a2b17fdf5cf82ed5778a5ac2b460c542068ff84fb3a14aa55e5eebad",
+          "textEqualsExact110Blob": true
+        },
+        {
+          "recordId": "N_c7339405-1909-47f6-8d6e-fa710cb28327",
+          "name": "app.js",
+          "version": "6d9c2abc8c10f1aaddecd0f9bc7934153dfcc230",
+          "recordTextSha256": "e0f8ddadd01acf12f7ced0821b9d4c011fce423390e5dfff2816b36675555583",
+          "gitBlobSha256": "e0f8ddadd01acf12f7ced0821b9d4c011fce423390e5dfff2816b36675555583",
+          "textEqualsExact110Blob": true
+        }
+      ],
+      "actualAskRequestIds": [
+        "RQ_0797ee20-a84e-4aa7-ace6-b4f053ca87f7"
+      ],
+      "storedReadingId": "R_14df4bf5-804b-4694-9ff3-aefac833df1b",
+      "storedReadingRequestIds": [
+        "RQ_0797ee20-a84e-4aa7-ace6-b4f053ca87f7"
+      ],
+      "allMatchRequestIds": [
+        "RQ_0797ee20-a84e-4aa7-ace6-b4f053ca87f7"
+      ],
+      "matches": 14,
+      "newPartIds": [
+        "A_859757b6-6b3b-4774-aefe-9c87da537f36",
+        "A_1ea0e378-686b-4b02-94f4-e73f6b13427e"
+      ],
+      "afterBackupFileSha256": "5ce98865fdb4eda198d7c04c2fe6f9722a7ff09a61ba4dd83c85c4f21c2a2394",
+      "meaning": "실제110 보고·독립 실행기록·typed 코드 두 개를 읽어 RQ0797만 연결한14개 대응과 새2부분을 현재 저장에 남겼다. 입력 전체 bundle/실패 RQ는 그대로다. 코드 자료 두 개는 선언된110 commit Git blob과 UTF-8 bytes가 실제로 같다."
+    }
+  ],
+  "separateCopies": [
+    {
+      "case": "122 별도 문단·배치 FIRST",
+      "sameOwner": true,
+      "sameRawRecordIds": true,
+      "rawBodiesDifferFrom104": true,
+      "partIdsDisjoint": true,
+      "readingIds": [
+        "R_984add4a-e0ff-4ec8-abfb-24f7e2e63459"
+      ],
+      "requestIds": [],
+      "falseIfMixed": "owner와 N ID가 같다는 이유만으로 122의6부분·새reading에107/109의 부분 대상·RQ0797·110/121 반환을 붙이면 거짓이다. 122는 배치 사본 FIRST 의미·away/ready/명시 적용 성공이며 실제 후속 반환이 아니다. 125 RESULT의 ‘121/122 반환 읽기’ 표현은 분리해 읽어야 한다."
+    },
+    {
+      "case": "124 저장 응답 재생 → 125 공개 읽기",
+      "sameOwner": true,
+      "newPlanId": "CP_adcee85f-4862-47a5-a244-e69e0fe6a94d",
+      "newRequestId": "RQ_2270d57b-174f-4405-9ad3-72f3b25ed607",
+      "newRequestUTF16": 16202,
+      "newRequestTextSha256": "480cba793829ceb0b7c53904d9c378767648968359e6e366eee101aa1351b61e",
+      "sameTextAsRQ0797": false,
+      "falseIfMixed": "두 문서가16202자로 같아도 RQ0797과 RQ2270은 ID·plan ID·text hash가 다르다. 124는 수용107 plan/109 scope 응답을 정확 messages에2회 재생한 요청 경로 검증이며 새 AI 의미 성공이 아니다. 125가 실제 가져온 지도는104/107의7부분·1reading이고 요청은RQ2270이다. 여기에121의14개 RQ0797 대응이 이미 공개판에서 관찰됐다고 주장할 수 없다."
+    }
+  ],
+  "remainingDecision": {
+    "smallestNeededEvidence": "완료121 project와 그 동일 owner의 원래 RQ0797 전체 sidecar를 현재 공개 기존 지도 작업용 버전에 정상 가져왔을 때, RQ0797 선택 → 저장된14개 대응 →110 typed 코드/판본과 긴 실행 조건의 정확 원문 → 같은 대응으로 복귀 →reload 이후 동일 요청·reading 보존을 실제로 읽을 수 있는지 확인하는 연결 증거다. 총괄이 이 구간을 담당 중이며 이 감사에서는 완료로 세지 않는다.",
+    "noRegeneration": "104 첫 지도·107 plan·109 scope·110 도구·121 실제 반환은 다시 생성할 필요가 없다. RQ2270을 완성하려고 새 반환을 만들거나122에원래요청을 억지로 연결할 이유도 없다.",
+    "stillOpenSeparately": "121에서 actual later 생성 중 다른 프로젝트 편집→ready 미반영→명시 적용은 관찰하지 못했다. 104 FIRST,118 모의후속,122 배치 FIRST의 성공으로 이를 소급 통과시키지 않는다. 한편 이 빈칸 때문에 현재 저장 반환의 읽기까지 실패로 취급할 필요는 없다.",
+    "productBoundary": "현재 공개125는 새 map/later/jobs 대조 생성을 정책으로 보류한다. 기존121 저장 반환의 읽기 가능 여부와 새 반환 생성의 공개 허용은 다른 결정이다. 전체 첫 사용자 경험·일반화된 의미 품질·하드웨어 성공을 이 chain만으로 수용하지 않는다."
+  },
+  "publicEvidenceGitBlobs": [
+    {
+      "file": "docs/cycles/2026-10-29-zephyr-config-correction-104/RESULT.md",
+      "gitBlobSha256": "fa193b573c9469f290d8fa17d6f5250989d40ec127ac032f143602aae5fa8fd1"
+    },
+    {
+      "file": "docs/cycles/2026-10-30-request-continuation-107/RESULT.md",
+      "gitBlobSha256": "e89d026f399dcea5ba40af7da52fdbcefe6028904b1aaa75551d59dda99da318"
+    },
+    {
+      "file": "docs/cycles/2026-10-30-scope-continuation-109/RESULT.md",
+      "gitBlobSha256": "bb1bea80f7c667320a38d101cb4c14f49f273be2eeb49cb468b5af4b18b46cd3"
+    },
+    {
+      "file": "docs/cycles/2026-10-30-label-guide-prototype-110/RESULT.md",
+      "gitBlobSha256": "557e44c60e5cb0c40ed43efa36937ac0813fec91c91e0d6d5daa6f3f9ad9f01e"
+    },
+    {
+      "file": "docs/cycles/2026-10-30-label-guide-prototype-110/ROOT_ACCEPTANCE.md",
+      "gitBlobSha256": "10f6c84208dd786060f60361afdb1de383a5ff49fd3dad68ec5aff3a56252d5e"
+    },
+    {
+      "file": "docs/cycles/2026-10-30-reference-return-121/RESULT.md",
+      "gitBlobSha256": "aa60d346e13d48e9e9be68b2e6736d1005f449d74402594fa2c25fa7bee5e9a4"
+    },
+    {
+      "file": "docs/cycles/2026-10-30-layout-preservation-122/RESULT.md",
+      "gitBlobSha256": "5048f1145118acc6913e032685574056daf062a87e17013b67bb5abeffeca726"
+    },
+    {
+      "file": "docs/cycles/2026-10-30-scoped-release-124/ROOT_ACCEPTANCE.md",
+      "gitBlobSha256": "9faccfbc65f1c4418114684c2e9ee371f265ded3467cc978140b2e80ee5ba933"
+    },
+    {
+      "file": "docs/cycles/2026-10-30-release-delivery-125/RESULT.md",
+      "gitBlobSha256": "eb2256baaa30472748795b40a17fb229465f1be69887d260f18ee2b93897f36b"
+    },
+    {
+      "file": "docs/cycles/2026-10-30-reference-return-121/evidence/preservation.json",
+      "gitBlobSha256": "eeddf1d9a47f99fb9836f05a8f1ce9b79134e1e013c22eb5604b3c2fd53a470a"
+    },
+    {
+      "file": "docs/cycles/2026-10-30-scoped-release-124/evidence/replay-proof.json",
+      "gitBlobSha256": "5cec421fc2949c5ca670a199123048d1003a3315bc24cc94d6b6aedc83324302"
+    },
+    {
+      "file": "docs/cycles/2026-10-30-release-delivery-125/PUBLIC_UI_RECEIPT.json",
+      "gitBlobSha256": "bef9be793e52cf8d18c68a94d8cf322296b5f4b2cf379097ed4fa9a8a3fd9a9f"
+    }
+  ],
+  "privateInputs": [
+    {
+      "file": ".ops/experience104-zephyr/zephyr-after.json",
+      "sha256": "4790d5a08933449f8e1f1b1f083bf70f513696f4e4e96338a144082d9a946d15"
+    },
+    {
+      "file": ".ops/experience107-request-continuation/project-after.json",
+      "sha256": "dcda9cc2acbd387fdfc7f1751f7ba4e59a2bbf6b496c5c04bbba24477552bb49"
+    },
+    {
+      "file": ".ops/experience107-request-continuation/plan-after.json",
+      "sha256": "91214efd85eccec9aa25ee50c28bb6b521f4f0a4be7fb43f6182864faa81c34b"
+    },
+    {
+      "file": ".ops/experience109-scope-continuation/project-after.json",
+      "sha256": "dcda9cc2acbd387fdfc7f1751f7ba4e59a2bbf6b496c5c04bbba24477552bb49"
+    },
+    {
+      "file": ".ops/experience109-scope-continuation/request-after.json",
+      "sha256": "53191301ee2f7cfbaa62d1015c3161323cfc83bbed775442542fcab15283b289"
+    },
+    {
+      "file": ".ops/experience121-reference-return/project-before116.json",
+      "sha256": "dd5b31e0792d71ae5fa1aa625a23a0728e1e6742fee89324140f12f6c60b5e54"
+    },
+    {
+      "file": ".ops/experience121-reference-return/request-before-full.json",
+      "sha256": "d8e64fffd9ddcc566e67ea308c3f29a6880727dc61066401f65adaf842552cf7"
+    },
+    {
+      "file": ".ops/experience121-reference-return/input.json",
+      "sha256": "579741cd5aa84d0c6a6b7c0d07e20b8979e88981f450eb702bc143e3f8248e8f"
+    },
+    {
+      "file": ".ops/experience121-reference-return/backup-ui.json",
+      "sha256": "5ce98865fdb4eda198d7c04c2fe6f9722a7ff09a61ba4dd83c85c4f21c2a2394"
+    },
+    {
+      "file": ".ops/experience122-layout-preservation/variant-project.json",
+      "sha256": "3fa2593e2488517e9a8f534f9db5d7291c8c5f85a3cc5a22cbf433bec806c124"
+    },
+    {
+      "file": ".ops/experience122-layout-preservation/backup-ui.json",
+      "sha256": "36bcdbd2542210e8220d301309ec84d5ed70434e68af402af7bde056ec67719b"
+    },
+    {
+      "file": ".ops/experience124-scoped-release/replay-new-request-plan-file.json",
+      "sha256": "f49713f82e10a970011f0cc32c0ddb787278b75b879e821080288674438ee0f2"
+    }
+  ],
+  "limits": [
+    "기존 기록과 JSON의 동일성·ID·hash 및110 두 코드 blob의 bytes를 읽기 계산했다. 새 모델·UI·테스트·환경 설치·키 조회·제품 수정은0이다.",
+    "전체121 UI의 현재 공개판 재현과 원자료·저장값 직접 왕복은 총괄의 별도 확인이다. 이 보고서는 코드/기록 감사이며 독립 브라우저 관찰로 표시하지 않는다.",
+    "공개 문서의 당시 범위 판정을 재작성하거나 과거 실패를 소급 수용하지 않는다. 최종126 수용은 단일 총괄이 판단한다."
+  ],
+  "execution": {
+    "model": 0,
+    "browser": 0,
+    "tests": 0,
+    "productWrites": 0,
+    "onlyNewPrivateFile": ".ops/results/experience126-chain-review.json"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "source": "cfe993f31a8c53284612c22b3ded0c0739257373",
+  "appTree": "a0a56c1cb8f2a1fdde5c7afb136bc248c8b61b6b",
+  "mode": "exact deployed package on isolated localhost51919; not public network smoke",
+  "projectFileSha256": "5ce98865fdb4eda198d7c04c2fe6f9722a7ff09a61ba4dd83c85c4f21c2a2394",
+  "planFileSha256": "53191301ee2f7cfbaa62d1015c3161323cfc83bbed775442542fcab15283b289",
+  "fullProjectExact": true,
+  "fullOriginal109BundleExact": true,
+  "reloadBothStoresByteExact": true,
+  "requestId": "RQ_0797ee20-a84e-4aa7-ace6-b4f053ca87f7",
+  "storedReading": "R_14df4bf5-804b-4694-9ff3-aefac833df1b",
+  "matches": 14,
+  "sourceBack": "typed code index5 focus RQ0797/reading14df/recorddfe509/from1969/to2282 restored; same item open, failed RQb9049 closed",
+  "measure": {
+    "viewport": [
+      1280,
+      720
+    ],
+    "planReturnRail": {
+      "clientWidth": 304,
+      "scrollWidth": 319,
+      "clientHeight": 564,
+      "scrollHeight": 3559
+    }
+  },
+  "findings": [
+    "Stored chain remains readable with exact source/back/reload preservation",
+    "Return14 passages are squeezed into narrow right rail even in wide comparison; horizontal scroll observed",
+    "Map reading and digest-specific no-summary message appear together without clear scope"
+  ],
+  "newAI": 0,
+  "replay": 0,
+  "sourceInjection": 0
+}
