@@ -1,0 +1,55 @@
+{
+  "cycle": 122,
+  "status": "STATIC_ELIGIBLE_FOR_SEPARATE_SELECTION_NOT_GENERATED_OR_ACCEPTED",
+  "recommendation": "Use the prepared Zephyr layout derivative as the single next case, after Root freezes its normal FIRST6 input and criteria. Do not regenerate the unchanged 89/104 originals or call 121 again to fill its missed away gate.",
+  "inputsReviewed": [
+    ".ops/experience122-layout-preservation/source-original.json",
+    ".ops/experience122-layout-preservation/variant-project.json",
+    ".ops/experience122-layout-preservation/variant-proof.json",
+    ".ops/experience104-zephyr/zephyr-input.json"
+  ],
+  "independentStaticComparisons": {
+    "originalProjectDeepEquals104Input": true,
+    "allProjectFieldsExceptNameAndTwoRecordTextsUnchanged": true,
+    "documentPrefixChangesOnlyFiveSensorLinesJoinedWithSpaces": true,
+    "entirePowerSectionIncludingHeadingModeListAndAlwaysOnNoteUnchangedApartFromBoundaryNewlines": true,
+    "entireDisplaySectionIncludingReelBoardDisplayTargetAndMappingTableUnchangedApartFromBoundaryNewlines": true,
+    "dtsChangesOnlyTheSpecifiedTwoBlankLines": true,
+    "noNewClaimOrOmittedConditionFound": true,
+    "originalDocumentChars": 4699,
+    "variantDocumentChars": 4700,
+    "originalDtsChars": 1101,
+    "variantDtsChars": 1099
+  },
+  "meaningAssessment": {
+    "verdict": "MEANING_EQUIVALENT_LAYOUT_DERIVATIVE_IN_THE_REVIEWED_CHANGES",
+    "reason": "Whole Display and Power sections retain their internal wording, RST target, table, note indentation, and scope. Joining the sensor prose retains each independent sensor function and the shared I2C/per-sensor interrupt statement. DTS statement order, tokens, indentation, addresses, GPIOs, FAST setting and default/sleep declarations remain intact.",
+    "importantBoundary": "This is an explicitly labelled derivative of the fixed source excerpt, not a claim that its new line positions are the upstream GitHub line positions. The source URL/commit still identifies the original dependency. Normal input construction must derive evidence spans from the derivative itself; historical 104 aliases must not be transplanted."
+  },
+  "whyThisNextCase": {
+    "existingGap": "The handoff section 5 requires a paragraph/layout-only counterexample that preserves independent facts. Cycle 89 explicitly left paragraph variants unexecuted. Cycle 104 already supplies bounded successful normal-path Zephyr meaning and source-roundtrip evidence.",
+    "directChallenge": "The sensor facts now share one paragraph, while Power and Display change encounter order without changing their claims. This directly tests the known risk that overlap or grouping suppresses independent facts, including nominal Low Power modes versus the explicit always-on limitation.",
+    "comparisonWithMicro": "An unchanged micro normal-path call would address another integrated-route material, since cycle 89 used isolated generation plus import. It would not directly challenge the paragraph/layout omission boundary. Prefer this one derivative now; leave the remaining three-material coverage explicitly open.",
+    "existingReferences": [
+      "docs/COORDINATOR_HANDOFF_2026-10-28_KO.md sections 5 and 8",
+      "docs/cycles/2026-10-29-codex-map-path-89/RESULT.md",
+      "docs/cycles/2026-10-29-zephyr-config-correction-104/RESULT.md",
+      "docs/cycles/2026-10-29-zephyr-config-correction-104/OBSERVATION.md"
+    ]
+  },
+  "selectionGates": [
+    "Freeze this derivative's source hashes and actual normal FIRST6 ask/prompt identity without modifying producer policy or semantic acceptance rules.",
+    "Reuse corrected Z1-Z4: preserve component/control/power directions, independent sensor functions and shared I2C/address/pin facts, both full display mappings with no PCB-to-display inference, nominal modes plus explicit always-on/no-saving limitation, and fixed documentation/DTS provenance rather than runtime physical proof. No fixed node count, name or layout is required.",
+    "Treat any dropped independent fact as a meaning failure even if the response is structurally valid. Inspect raw citations against the derivative, then current storage/UI source roundtrip under the selected normal-path scenario.",
+    "Keep the original 104 project/source/export protected. The derivative retains the same project and record IDs, so import must be a deliberate separate case rather than overwriting the historical accepted project.",
+    "If an away-to-ready/manual-apply scenario is selected for this genuinely new case, freeze it before the call. Its outcome must remain separate from 121's unexecuted criterion 7."
+  ],
+  "limits": [
+    "No model, browser, product validator, build, or test suite was run by this review; only JSON/text comparisons were performed.",
+    "No product or historical response was edited. No old failed response was read, repaired, or revalidated.",
+    "Static source equivalence does not establish generated meaning, PC readability, delivery success, or universal layout invariance.",
+    "A future single outcome cannot isolate layout as a causal effect across historical runtime/model versions or stochastic outputs.",
+    "This case cannot complete all three original materials or the whole handoff/public-release goal."
+  ],
+  "actionableP1P2": []
+}

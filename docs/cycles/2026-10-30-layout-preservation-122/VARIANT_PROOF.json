@@ -1,0 +1,44 @@
+{
+  "status": "prepared_not_selected_no_model_call",
+  "baseResult": "3b85be52b1366c3a82624b68ebad1d7462906802",
+  "baseProject": "e025c0ec61fc9733f851f829223e753821a905041bdac87c2ed470b304dd7670",
+  "variantProject": "e20c60d49c18da984b0203bb9eccecebb53db0ba7980ac55c6aa1ef2e5186420",
+  "changes": [
+    "Move the entire Power supply section, including its heading and complete note, immediately before the Display section; each section internally unchanged.",
+    "Join the five sensor prose lines into one paragraph line with spaces, retaining all words/punctuation/order.",
+    "Remove two blank lines between I2C FAST/default/sleep groups, preserving all code tokens, indentation and statement order.",
+    "Change only project display name to distinguish the test copy; do not overwrite original source or historic generated map."
+  ],
+  "checks": {
+    "documentWhitespaceTokenMultisetExact": true,
+    "dtsNonWhitespaceSequenceExact": true,
+    "originalSourceFilesUntouched": true,
+    "exactNamedSegmentTransform": true,
+    "documentSourceHeaderExact": true,
+    "dtsSourceHeaderExact": true,
+    "displaySectionBytesExact": true,
+    "powerHeadingAndNoteBytesExact": true
+  },
+  "records": [
+    {
+      "id": "N_7f08f8d0-9f0e-4ead-8f5b-f07e03f5bfe1",
+      "originalSha256": "7773b578c568289bd50d30367a9795a0050ef4fc41cd7fc3ba90fdf9360f213d",
+      "variantSha256": "d9c20c20b558aacbdb74ca16b6b764b6cb832a22a46200f8b2804f582b9ce7bf",
+      "originalChars": 4699,
+      "variantChars": 4700
+    },
+    {
+      "id": "N_44d99e25-f04c-4610-a661-13dc202b760e",
+      "originalSha256": "5f05dccea287a0e8d0b5d851e619a40f7d07ba3322c98f7d162acee675b3c904",
+      "variantSha256": "e89e98d634c2a8c4a5fb47018ae5cb68da87b69b2a8720cdb8f8e5eb2b0eefd0",
+      "originalChars": 1101,
+      "variantChars": 1099
+    }
+  ],
+  "limits": [
+    "This reordered copy is an explicit layout counterexample, not the unchanged original historical source.",
+    "No fixed part, candidate or claim count is required.",
+    "One variant outcome cannot prove universal layout invariance.",
+    "No actual model call or product acceptance yet."
+  ]
+}
