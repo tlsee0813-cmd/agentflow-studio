@@ -1,0 +1,101 @@
+{
+  "source": "b3c9edf8483180009a0804a5f8d63dd06fb019a4",
+  "appTree": "7beb4ba00211a1afd3b9549ef4eb08a55b2a8384",
+  "caseId": "actual-order",
+  "inputSha256": "6c5bbfd44899c67e7478618a7d43bbbd69fd392598ef48bb160aafc81c8595b4",
+  "askSha256": "d64857baa4b3e5fce53cc9bc4a2a754c042d64d87ba8bfa0cc3e6935b8cc1d11",
+  "mapInstructionsSha256": "81d6e96834d7c245270785dafe2861bcc010779f12ec14f6b9472b378a8ff846",
+  "wrapperSha256": "45219945020c17be054bcdf46ec584e1ebc2b8537581c513b29e5590f0ddaa31",
+  "prompt": "m6-33ff86d5f2da",
+  "cliVersion": "codex-cli 0.164.0-alpha.11.1",
+  "requestedCliModel": "gpt-6.1-sol",
+  "requestedCliReasoning": "high",
+  "deepseekModel": "deepseek-flash",
+  "deepseekThinking": "enabled",
+  "deepseekMaxTokens": 16384,
+  "deadlineMs": 90000,
+  "selectionDeadlineMs": 89000,
+  "finalizationReserveMs": 1000,
+  "preferredId": "codex",
+  "topLevelPathsMax": 2,
+  "invocationsPerPathMax": 1,
+  "internalTransportRetries": "not observable as a total count",
+  "meaningBasis": {
+    "experience76-acceptance.json": "2ce759129a05b940e9eda2a50e68f219e98c996acc6807632509a6217dc8bf12",
+    "experience76-fresh-meaning.json": "823777410b011e75c4a02b3aee316964e52ff84d72b88d4508d62f9bf8917386",
+    "experience80-role-reading-review.json": "65f9713a0dc1d1758275882265b90d9a23c4822c2108a8977879ac3e3f72af40",
+    "experience89-micro-semantic-amendment.json": "f454ed397625eeeb743bb2e8706a888d1b578c4f29544e8c8c7c9f698d2a4ac9"
+  },
+  "coreHash": "cba154c330d132f81060714ed0686f44b87a2d902d5ae0688d7de3d1ce2a338e",
+  "runnerHash": "4f3d1a366a2d9771689b4b07b06046762e7b55c1fa577a6770ec8efeafd3ee91",
+  "decision": {
+    "error": "AI_TIMEOUT",
+    "decisionMs": 89010.5392
+  },
+  "observations": [
+    {
+      "id": "deepseek",
+      "invocations": 1,
+      "state": "failed",
+      "error": "INVALID_RESPONSE",
+      "completedMs": 68693.4333
+    },
+    {
+      "id": "codex",
+      "invocations": 1,
+      "state": "cancelled",
+      "error": "CANCELLED",
+      "completedMs": 89041.8441
+    }
+  ],
+  "cleanupCompleted": true,
+  "originalUnchanged": true,
+  "sourceUnchanged": true,
+  "applied": false,
+  "finalizationMs": 89288.95079999999,
+  "withinOverallBudget": true,
+  "deepseek": {
+    "status": 200,
+    "finishReason": "stop",
+    "usage": {
+      "prompt_tokens": 6378,
+      "completion_tokens": 13169,
+      "total_tokens": 19547,
+      "prompt_tokens_details": {
+        "cached_tokens": 6144
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 10362
+      },
+      "prompt_cache_hit_tokens": 6144,
+      "prompt_cache_miss_tokens": 234
+    },
+    "withheld": false
+  },
+  "codex": {
+    "code": null,
+    "terminationSignal": "SIGTERM",
+    "ms": 89018.633,
+    "cancelled": true,
+    "finalBytes": 0,
+    "toolUse": false,
+    "events": [
+      {
+        "type": "thread.started"
+      },
+      {
+        "type": "turn.started"
+      }
+    ]
+  },
+  "originalResultSha256": "7f924d52c2c6722a9fbdca5b6a6de790bca95c46ec7d856e000fe4760099d7ac",
+  "frozenSha256": "10196a5d15a5f7768445daa54e22363eb30f91f6a6acc7d09a0410c7d4c881a2",
+  "rootProcessExitCode": 0,
+  "rootExitMeaning": "Failure receipt saved; not model completion",
+  "microInvocations": 0,
+  "zephyrInvocations": 0,
+  "modelResubmissions": 0,
+  "outputRepairs": 0,
+  "productChanges": 0,
+  "finalizationMeasurementExcludes": "Final result.json receipt write; no model work granted after cutoff"
+}

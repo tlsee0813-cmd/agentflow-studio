@@ -1,0 +1,14 @@
+{
+  "verdict": "REJECT_FIXED_PRIORITY_CANDIDATE_DELIVERY_FAILURE",
+  "responsible": "Root coordinator",
+  "basis": "DeepSeek ended with HTTP200/stop but INVALID_RESPONSE at68.693s. Codex had only thread.started and turn.started, no complete final response by89s selection cutoff. No validated cached fallback existed.",
+  "semanticVerdict": "No selected response; no semantic acceptance claimed",
+  "allThreeGateComplete": false,
+  "remainingOneSecond": "Reserved for cleanup and finalization before common90s deadline, not additional generation",
+  "noCounterfactual": "Do not infer whether Codex would have completed during the reserved final second, or replace this run with89 outputs",
+  "next": "Stop candidate. No automatic preference flip, additional provider, time extension, micro/Zephyr invocation or product integration. Repair the already-observed request-sheet return-focus issue as separate PC product work. First-map meaning and delivery remain unresolved.",
+  "reviewHashes": {
+    "experience92-priority-delivery-decision.json": "edc3df8c7587cf612fce1497436d113cc9e81981a57b0072e3d0e84508cf3b9d",
+    "experience92-probe-preflight.json": "78d3df5bc2e7ea785f11667850fc5a18fb609e4817263f85b57f4ff8becf15d4"
+  }
+}

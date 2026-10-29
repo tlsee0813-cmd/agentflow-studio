@@ -1,0 +1,16 @@
+✔ fast backup stays provisional until later primary is valid (7.3803ms)
+✔ cached backup selected only after primary terminal failure (0.696ms)
+✔ invalid primary permits later backup within same budget (1.5168ms)
+✔ selection deadline chooses only already validated backup, late primary cannot replace (48.9884ms)
+✔ no valid cached backup at deadline means failure, not late fallback (31.3918ms)
+✔ cancel discards valid cached backup and aborts pending primary (0.7655ms)
+✔ primary validation crossing selection deadline cannot defeat cached backup (40.7292ms)
+✔ throwing primary validation after deadline still selects prior valid backup (40.9567ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 267.0491

@@ -1,0 +1,28 @@
+{
+  "source": "b3c9edf8483180009a0804a5f8d63dd06fb019a4",
+  "runtime": "2999fd65c67754bd7a0bd0d45f9fd841fd3956e5",
+  "appTree": "7beb4ba00211a1afd3b9549ef4eb08a55b2a8384",
+  "hashBasis": "Exact Git blob bytes including final newline",
+  "files": {
+    "decision.json": {
+      "sha256": "bae640b1da96b09832ac5dc8f6f0eb50a542cfca502e8516b1aa5019af2f334b",
+      "bytes": 1228
+    },
+    "delivery-tests.txt": {
+      "sha256": "1dea8ac96d5896d769ec1c759430bd18f208824b183e197115911334baaf5f69",
+      "bytes": 778
+    },
+    "execution.json": {
+      "sha256": "a900f3b041f722844b63d4c457687a851234381d3b64d79fc0cda57d1e67ee71",
+      "bytes": 3404
+    },
+    "experience92-priority.mjs": {
+      "sha256": "cba154c330d132f81060714ed0686f44b87a2d902d5ae0688d7de3d1ce2a338e",
+      "bytes": 2746
+    },
+    "experience92-priority.test.mjs": {
+      "sha256": "bfef788b9370685fc497036611d5a7bf4c0730ffc3190dc920b653a872c8646f",
+      "bytes": 3617
+    }
+  }
+}
