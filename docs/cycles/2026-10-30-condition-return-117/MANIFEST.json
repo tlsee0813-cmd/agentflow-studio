@@ -1,0 +1,68 @@
+{
+  "status": "rejected_response_contract_no_apply",
+  "selected": "c3a1fc88ac80a77b726486b3194a4dacac65a218",
+  "code": "23aef513cc1214c2f0f21502a37334c22b4a1308",
+  "app": "2ebab21219620eaa9bb875ab459c71413f0b9b0a",
+  "basisAcceptance": "16e066e56bfffa1d16b2aad3b6956cf5ec66cd8f",
+  "realCalls": 1,
+  "versionProbes": 1,
+  "rawRepair": false,
+  "files": [
+    {
+      "file": "evidence/actual-binding.json",
+      "bytes": 1697,
+      "sha256": "a328f6b2d306ff9ce1867d660b6230df73af7415ac0259d580065f3c1e440024"
+    },
+    {
+      "file": "evidence/cleanup.json",
+      "bytes": 322,
+      "sha256": "9e7a12f416945a9189bac7342f5f8a0d0be5a33f0450d7ce3fa3689c5703670e"
+    },
+    {
+      "file": "evidence/diagnosis.json",
+      "bytes": 818,
+      "sha256": "ea6f0b603cb204dca9be7a5262e50c4f71411b239692dd59a02cff48af92e23e"
+    },
+    {
+      "file": "evidence/final-message.txt",
+      "bytes": 10639,
+      "sha256": "fce90a0aa9a467871af17d8ec8c9d17bce52d881db73131aae043a40c9b206a0"
+    },
+    {
+      "file": "evidence/independent-review.json",
+      "bytes": 9284,
+      "sha256": "e99a7b2995d282bc04ab279a696817856f25227dc089796dd3ad059490ceacd0"
+    },
+    {
+      "file": "evidence/normal-import-proof.json",
+      "bytes": 317,
+      "sha256": "ef669f0a627c4b20397d77e971ff13779e43b800f0fc8ff05ccf15b328771f8b"
+    },
+    {
+      "file": "evidence/preselection-review.json",
+      "bytes": 8263,
+      "sha256": "e88d4676613064bc83021e7b8c71b6ea7b2f1274f82e1286a4b71dfc9ba5e20d"
+    },
+    {
+      "file": "evidence/preservation.json",
+      "bytes": 487,
+      "sha256": "fe1d501007dd2bb4d9c0388740413bfbf8d8fab1fd90a4c0c61b0a5d67171803"
+    },
+    {
+      "file": "evidence/receipt.json",
+      "bytes": 2662,
+      "sha256": "14d97e6aeaa6ea5125c082f1b49466e331687f8779cbc3a453a7f7ad3c3ce905"
+    },
+    {
+      "file": "evidence/root-other-draft.png",
+      "bytes": 68110,
+      "sha256": "b3c12d8825a2d7b642b9226f5253615744c44ef2472f580410587219e1b00bc7"
+    },
+    {
+      "file": "evidence/root-rejected.png",
+      "bytes": 47114,
+      "sha256": "bd08134f4449aabb241da922d05a72c2f764851f400d543fffcafe0c962a9164"
+    }
+  ],
+  "independentPostRunReview": "completed_read_only_whole_rejection_confirmed"
+}

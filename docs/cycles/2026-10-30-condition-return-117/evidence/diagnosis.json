@@ -1,0 +1,16 @@
+{
+  "firstFailure": {
+    "code": "INVALID_RESPONSE",
+    "detail": {
+      "path": "matches[5].aboutAt",
+      "rule": "condition-length",
+      "target": "N02.33"
+    }
+  },
+  "rawAnchor": "N02.33",
+  "rawText": "| 6d9c2ab · Chromium headless(Playwright 1.63.0) 1280×720 · 127.0.0.1 http | 키보드 입력, 정상↔미상 전환, Esc, Tab, Enter, HTML 입력 | 두 라벨 정확 대응, 미상 시 값 비움, HTML 미실행, console 오류 0, 외부 요청 0, 정상 입력 상태 17/17 세로 스크롤 없음 |\n",
+  "trimmedUtf16Length": 204,
+  "matchConditionLimit": 200,
+  "meaning": "One atomic markdown table row includes environment, actions and outcomes; condition is just its first cell but anchor resolves whole row.",
+  "mechanicalWholeResponse": "rejected; no modified wire validated or applied"
+}

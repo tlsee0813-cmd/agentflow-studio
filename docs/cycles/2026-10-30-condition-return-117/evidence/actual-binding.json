@@ -1,0 +1,37 @@
+{
+  "acceptedAt": "2026-10-29T19:31:09.510Z",
+  "job": "MJ_607bec3b-6c42-4f2b-b1d4-7c196ba9e12a",
+  "entry": "E_c3c8fc7c-f4f9-4f0b-a5e7-c302bc22eae8",
+  "askSha": "579741cd5aa84d0c6a6b7c0d07e20b8979e88981f450eb702bc143e3f8248e8f",
+  "promptSha": "73286f8b79e80c132aaa5e891d7955748e30fd21bf9e3e7f641ec37b6e480f4b",
+  "stdinSha": "821ac2abfe6ad29f8ff633c5d555d62420f2334367ce4d5ca5a5fd7722701abe",
+  "binding": {
+    "entryId": "E_c3c8fc7c-f4f9-4f0b-a5e7-c302bc22eae8",
+    "projectId": "P_09ec5ba4-3082-4f33-adeb-b2f8240ef4d2",
+    "lifecycle": 1,
+    "seq": 1,
+    "after": "R_dc5636a7-e32a-4cf6-97d2-dea8eadfcfa3",
+    "schemaVersion": "studio.map.7",
+    "prompt": "m7-1a2625a62324",
+    "model": "gpt-6.1-sol",
+    "askHash": "579741cd5aa84d0c6a6b7c0d07e20b8979e88981f450eb702bc143e3f8248e8f",
+    "inputHash": "acf638bc0f250c3c7ac9bb13266743959a4ee36c0195ba397a7952fd9040cd7d"
+  },
+  "execution": {
+    "executor": "codex-cli-preview.102",
+    "version": "codex-cli 0.165.0-alpha.1.2",
+    "binarySha256": "5c1b55966bf9f757dcbf00065c9a6cb862ead55d34b015f1be1939ff18e43943",
+    "model": "gpt-6.1-sol",
+    "reasoning": "high",
+    "permissions": "503b611008cf71b170ce6aedf247526e85ccf1da896529645866af8a19889396",
+    "wrapper": "dd56ff8327f0b957f18ccc6af7c6334935901014e36539c35c91e16279c02ae5",
+    "scope": "map7-later",
+    "selectionMs": 299000,
+    "verdictMs": 300000,
+    "policy": "29f5c36ec1402724c3641ae6b98859d8005d978cc1066fb655930d59cb1e4190",
+    "promptKind": "later7",
+    "prompt": "73286f8b79e8",
+    "promptSha256": "73286f8b79e80c132aaa5e891d7955748e30fd21bf9e3e7f641ec37b6e480f4b",
+    "askSha256": "579741cd5aa84d0c6a6b7c0d07e20b8979e88981f450eb702bc143e3f8248e8f"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "serverPort": 51909,
+  "serverClosed": true,
+  "executorLeaseAbsent": true,
+  "observationTabClosed": true,
+  "viewportReset": true,
+  "claude116SessionPreserved": true,
+  "ui75Ancestor": "693d0c7e022bc76b5334b0dd4cf0e6f04ef028ff",
+  "stashPreserved": "fa07118ead372bcb3201c8032ca603a5ec0a7e7d",
+  "mergeOrDeploy": 0
+}

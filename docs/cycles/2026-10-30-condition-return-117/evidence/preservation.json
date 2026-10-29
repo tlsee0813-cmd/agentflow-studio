@@ -1,0 +1,14 @@
+{
+  "wholeProjectBeforeAfterReloadEqual": true,
+  "projectSha": "dd5b31e0792d71ae5fa1aa625a23a0728e1e6742fee89324140f12f6c60b5e54",
+  "wholeOriginalBundleEqual": true,
+  "bundleSha": "cdf2dc70965e8eaf9c6d701dcef39a022d1baab8e0e0fcf047e4941590f8ba05",
+  "otherProjectDraftPreserved": true,
+  "otherDraftChars": 109,
+  "readings": 1,
+  "pasted": 6,
+  "autoApply": 0,
+  "newReading": 0,
+  "retry": 0,
+  "noticeReload": "failure notice acknowledged and disappears; original state retained"
+}

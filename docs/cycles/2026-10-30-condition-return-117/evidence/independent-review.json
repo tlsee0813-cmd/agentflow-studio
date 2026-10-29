@@ -1,0 +1,59 @@
+{
+  "cycle": 117,
+  "verdict": "WHOLE_RESPONSE_REJECTED_CONDITION_LENGTH_NO_SEMANTIC_PASS",
+  "reviewerActivity": { "modelCalls": 0, "validatorCalls": 0, "testsOrBrowserOrBuildRuns": 0, "productWrites": 0, "wireRepairOrRetagOrDeletion": 0, "hiddenReasoningOrStdoutRead": false },
+  "read": ["selected.json", "input.json", "final-message.txt", "receipt.json", "actual-binding.json"],
+  "directory": ".ops/experience117-condition-return",
+  "delivery": {
+    "classification": "COMPLETE_JSON_DELIVERED_THEN_CONTRACT_REJECTED",
+    "milliseconds": 138677.4591,
+    "exit": 0,
+    "events": 4,
+    "toolEvents": 0,
+    "errorEvents": 0,
+    "finalBytes": 10639,
+    "finalSha256": "fce90a0aa9a467871af17d8ec8c9d17bce52d881db73131aae043a40c9b206a0",
+    "rule": "The receipt reports INVALID_RESPONSE at matches[5].aboutAt / condition-length / N02.33. This is neither a timeout nor invalid JSON. No second strict validation was performed."
+  },
+  "binding": {
+    "schema": "studio.map.7",
+    "recipe": "m7-1a2625a62324",
+    "actualSystemPromptSha256": "73286f8b79e80c132aaa5e891d7955748e30fd21bf9e3e7f641ec37b6e480f4b",
+    "askSha256": "579741cd5aa84d0c6a6b7c0d07e20b8979e88981f450eb702bc143e3f8248e8f",
+    "scope": "map7-later",
+    "assessment": "Selected and accepted execution metadata name the same actual ask and actual later7 prompt. The m7 recipe ID and actual-system SHA are different identity domains by design, not a mismatch. The observation used the existing299/300 single-call policy and selected116 acceptance; this review does not enlarge that policy."
+  },
+  "exactFailure": {
+    "path": "matches[5].aboutAt",
+    "reference": "N02.33",
+    "normalizedUtf16Length": 204,
+    "limit": 200,
+    "excess": 4,
+    "rawRow": "| 6d9c2ab · Chromium headless(Playwright 1.63.0) 1280×720 · 127.0.0.1 http | 키보드 입력, 정상↔미상 전환, Esc, Tab, Enter, HTML 입력 | 두 라벨 정확 대응, 미상 시 값 비움, HTML 미실행, console 오류 0, 외부 요청 0, 정상 입력 상태 17/17 세로 스크롤 없음 |",
+    "measurement": "Read the unchanged sent span, remove only outer whitespace and measure its .NET string Length, which counts UTF-16 units. No response was rewritten or domain validator rerun.",
+    "meaning": "The reference points to the correct author-observed Chromium test row, but the span is a whole Markdown table row: version/environment, exercised actions and results share one indivisible existing anchor. The first cell alone contains the source commit, Chromium/Playwright, viewport and loopback HTTP environment and is72 UTF-16 units; that cell is not independently addressable by the selected span.2/MAP7 grammar. Automatically selecting it after receiving the overlong row would be a different, unauthorized normalization contract.",
+    "nearbyLengths": { "N01.03": 76, "N02.03": 86, "N02.31": 83, "N02.34": 54 },
+    "wholeDisposition": "The entire original reply remains rejected. No null substitution, cell extraction, truncation, partial apply or repaired-pass assertion is permitted for117."
+  },
+  "limitedMeaningObservations": {
+    "status": "READING_OF_REJECTED_CONTENT_ONLY",
+    "structure": "The response separates a local browser label-guide tool and a ReelLabelGuide lookup child, with a needs relation based on describe/result rendering code. It also adds one bounded checked claim to existing P01. There is no fixed required node count, candidate or non-null condition.",
+    "twoMappings": "Claim s5 retains HINK-E0213→GDEH0213B1/SSD1673/ssd16xx/reel_board and HINK-E0213A22→GDEH0213B72/SSD1675A/ssd16xx/reel_board@2 with R02.30-35 evidence. No swapped display/controller/target or PCB→@2 inference was identified.",
+    "lookupAndClear": "Claim s4 and code matches11/12 correctly convey trim-only, whole case-sensitive comparison, no partial/similar-character/hyphen correction, null for empty/unmatched input and DOM clearing to — outside a match. Code references are typed R01/R02 rather than old pasted occurrences.",
+    "powerAndHardware": "Reported claims and matches preserve the Low Power no-saving notice, no actual board build/flash/measurement and no sensor/circuit/power/energy feature change. Existing current hardware understanding remains supplied in the ask; the result does not need to reconstruct every prior hardware claim. The reading does not establish runtime visibility universally from JavaScript alone; the original named root/author observations are retained as reports.",
+    "sourceVersionSeparation": "Typed code conditions are now explicitly null and the dependency Zephyr3568e1b6 commit is identified in s6 as the lookup's fixed document basis, not as the supplied app.js/label-lookup.js version. The115 metadata-only about quotation mistake is not repeated in those slots. Source declarations remain available in the existing source UI, not upgraded to app verification.",
+    "conditionsRetainedInWords": "The rejected Chromium match still names6d9c2ab, Chromium headless, Playwright1.63.0,1280×720, HTTP and the exercised/results limits in text and cites N02.33-34. Null was an available truthful choice for the overlong aboutAt under the selected contract, but the model did not choose it. Other output uses null with branch/commit in text, and N01.03 as the76-unit raw prototype identity for root checks; their report attribution is maintained.",
+    "prototypeAndChecks": "Author Node/Linux/Chromium and root Windows/IAB observations remain checked reports. No supplied test-definition file is invented and no test-kind match is forced. Existing P01 claim s7 combines prototype acceptance and explicit hardware nonexecution limits; its words must continue to be read as a bounded software-report limit, not reel-board acceptance. A rejected wire cannot serve as a normal-PC accepted representation of that attribution.",
+    "requestScope": "All14 matches target only RQ0797/change_label_lookup_tool and replace no prior match. The response explicitly excludes AgentFlow full deployment/product completion. Actual preservation of the old failed request and whole bundle is Root's export/UI evidence, not proven solely by these target fields.",
+    "limit": "These observations do not constitute a whole semantic pass, guarantee that no later validator check would fail, or authorize extracting usable parts. No additional material overclaim was identified in this bounded content reading, but the selected whole-response acceptance gate already failed."
+  },
+  "designFinding": {
+    "sequence": "115 chose a metadata version where a raw quotation was required.116 made raw-reference ownership explicit.117 selected the semantically relevant raw test row but its204-unit atom could not fit the200-unit persisted condition value. These are distinct failures revealing the difference between source provenance, raw context evidence and a short condition identity; they are not evidence that timing or token budget caused the rejection.",
+    "limitsAreStoredContract": "80/200 are not only CSS display widths. validation.ts:400/406/415 caps persisted role/claim/candidate about at80, request-return.ts:133 caps RequestMatch.about at200, and current/prior ask fields inherit those bounds. about also participates in scope/replacement comparison. The short UI display does not make those existing semantic/storage acceptance bounds disappear.",
+    "notPhysicalNecessity": "Those bounds are product schema choices, not an OS/database impossibility. Raising them would nevertheless require an explicit persistent-contract and reader-compatibility decision; increasing200 just to admit the observed204-row is not justified by this failure.",
+    "minimumNextDecision": "Prefer evaluating machine-computed eligibility information for existing MAP7 raw anchors first: expose which existing raw spans fit80/200 and an explicit null path, while preserving scoped statement text and exact evidence. This removes a character-counting task from the model without extracting a different source passage after the fact. For this particular rejected match, its text/evidence already retain the scope, so independent table-cell addressing is not a prerequisite to a lawful next representation.",
+    "notSelectedHere": "A new raw subspan catalog versus existing-anchor eligibility-only is an118 design choice, not part of117 acceptance. Detailed compatibility/cost review is separate and remains pending; no implementation, model retry or automatic repair is selected by this report."
+  },
+  "preservationAndPcLimit": "Root reports full original preservation and server shutdown. Because the operation failed before ready/apply,117 has no successful generated-result explicit apply/source/back/backup path to count.116 implementation acceptance remains separate from117 model outcome.",
+  "conclusion": "117 delivered a complete response and correctly separated much of the code/report/provenance meaning, but the whole response is rejected at a204-unit raw table row under the selected200-unit condition contract. Preserve it as failed. The next small decision should move raw-anchor eligibility computation to the product rather than demand more model counting or enlarge the timer; exact-subspan expansion, if needed, requires its own explicit compatibility boundary."
+}
