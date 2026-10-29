@@ -91,7 +91,7 @@ function actualOrder() {
 }
 test('74-B the actual-order backup reads as saved; the instruction goes once as pieces, the quoted correction marked as a quotation', () => {
   const { p, inp } = actualOrder();
-  assert.equal(p.schemaVersion, 'idea015.project.13'); assert.equal(p.pasted[0].text, ORDER); assert.deepEqual(p.readings, []);
+  assert.equal(p.schemaVersion, 'idea015.project.14'); assert.equal(p.pasted[0].text, ORDER); assert.deepEqual(p.readings, []);
   assert.equal(inp.ask.schemaVersion, 'studio.map.4'); assert.equal(inp.problem, null); M.validateMapAsk(inp.ask);
   const rec = inp.ask.records[0];
   assert.deepEqual(Object.keys(rec).sort(), ['addedAt', 'basis', 'id', 'kind', 'lead', 'note', 'spans']); assert.equal(rec.lead + rec.spans.map(x => x.t).join(''), ORDER);
@@ -296,7 +296,7 @@ test('74-I project.11 and earlier stay as stored (no position derived); map-read
   const p0 = D.pasteRecord(D.createProject(), REPEAT, null).project, old = M.buildMapAsk(p0, studioView(p0));
   const legacy = M.applyReading(p0, old, M.validateMapReply({ summary: '', parts: [{ ref: 'new:a', name: '입력 처리', parent: null, role: null, roleAbout: null, roleReplaces: null, basis: [{ record: 'N01', quote: SENT }], claims: [] }], relations: [], candidates: [], gaps: [] }, old.ask), meta()).project;
   const v11 = JSON.stringify({ ...legacy, schemaVersion: 'idea015.project.11' }), read = parseProject(v11);
-  assert.equal(read.schemaVersion, 'idea015.project.13'); assert.deepEqual(read.readings, legacy.readings);
+  assert.equal(read.schemaVersion, 'idea015.project.14'); assert.deepEqual(read.readings, legacy.readings);
   assert.ok(!('from' in read.readings[0].parts[0].basis[0]), 'a repeated legacy quote gets no made-up position');
   const v10 = JSON.parse(ORDER_RAW); assert.equal(parseProject(ORDER_RAW).pasted[0].text, v10.pasted[0].text);
   // An anchored reading, then tampered copies of it.
@@ -370,7 +370,7 @@ test('74-J Node-RED PR6019 first map and a later record on the anchored wire; re
   assert.equal(one.state, 'not-made'); assert.equal(one.lead.match.quote, '실제로는 그 입력 처리를 구상만 했으며 아직 구현하지 않았습니다. feature/folder의 폴더 입력은 미구현 상태입니다.');
   assert.equal(one.history[0].match.quote.startsWith('feature/folder 브랜치에서'), true);
   assert.deepEqual(round(s), s); assert.deepEqual(parseBackup(serializeBackup(s, null)).project, s);
-  assert.equal(JSON.parse(serializeProject(s)).schemaVersion, 'idea015.project.13');
+  assert.equal(JSON.parse(serializeProject(s)).schemaVersion, 'idea015.project.14');
 });
 
 /* ---------- K: counterexamples of the 48cb real replies and the returned-report record ---------- */
@@ -453,7 +453,7 @@ test('74-K5 an earlier reading keeps the coordinates it was stored in (the label
 test('74-K6 the independent project.11 backup (a map-reading.3 match stored at 164..326 of the labelled report) opens as saved and reads at the report as received', () => {
   const raw = readFileSync(new URL('./fixtures/record74/legacy-return-match.json', import.meta.url), 'utf8').trimEnd(), saved = JSON.parse(raw);
   const p = parseProject(raw), b = parseBackup(raw).project;
-  assert.deepEqual(b, p); assert.equal(p.schemaVersion, 'idea015.project.13');
+  assert.deepEqual(b, p); assert.equal(p.schemaVersion, 'idea015.project.14');
   assert.deepEqual(p.readings, saved.readings, 'the stored reading, its places and its records as they were');
   assert.deepEqual(JSON.parse(serializeProject(p)).readings, saved.readings, 'saving again writes the same places');
   const m = R.requestMatches(p)[0], report = R.recordTexts(p).get(m.match.record).read;

@@ -1,5 +1,7 @@
 import type { FrozenRequest, StoredRequestMatch, RequestCorrection, ReplaceCorrection } from './request-return.js';
-export const SCHEMA = 'idea015.project.13' as const;
+export const SCHEMA = 'idea015.project.14' as const;
+/** project.13 had normal records of exactly four keys (no provided-source declaration): they stay as stored, nothing is derived. */
+export const V13_SCHEMA = 'idea015.project.13' as const;
 /** project.12 had map readings up to map-reading.4 (candidates without a stated target): they stay as stored. */
 export const V12_SCHEMA = 'idea015.project.12' as const;
 /** project.11 had map readings whose quotes carry no position (map-reading.1–3): they stay as stored; no position is derived. */
@@ -178,7 +180,11 @@ export interface Project {
 /** One pasted record: the text exactly as pasted, a stable id, when it was added here (not when it was written or which
  * version it is about) and, optionally, the part being looked at when it was pasted. That part is the reading's context only,
  * never a claim that the whole text is about it. */
-export interface PastedRecord { id: string; text: string; at: string; context: string | null }
+export interface PastedRecord { id: string; text: string; at: string; context: string | null;
+  /** project.14: a provided file the person classified as code or as a check record, with the name, version and origin they
+   * declared (null = not recorded). Absent = a record pasted as it came. The person's declaration, never an execution receipt. */
+  evidence?: RecordEvidence }
+export interface RecordEvidence { kind: 'code' | 'test'; name: string; version: string | null; origin: string | null }
 export const PASTED_TEXT_LIMIT = 60000;
 /** What a reading says about a part, by its nature: what is wanted, what is only an idea, what an author reports was built,
  * what an author reports was checked, how something is described as it stands, a product decision left open, and evidence that

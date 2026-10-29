@@ -3,13 +3,14 @@
  * an exact quote of what was sent. applyReading is the only write: it adds parts and relations and keeps one MapReading with the
  * derived understanding. It never renames, moves, archives or re-describes an existing part, never writes Area.note and never
  * touches space.understanding (return.2 and its anchors). What is unclear stays a candidate; nothing asks for approval per part. */
-import { CLAIM_KINDS, READINGS_LIMIT, isMapReading, type CandidateTarget, type ClaimKind, type MapReading, type Project, type ReadingCandidate, type ReadingClaim, type ReadingPart, type ReadingQuote, type ReadingRelation, type ReadingSkip, type RelationKind } from './types.js';
+import { CLAIM_KINDS, READINGS_LIMIT, isMapReading, type PastedRecord, type RecordEvidence, type CandidateTarget, type ClaimKind, type MapReading, type Project, type ReadingCandidate, type ReadingClaim, type ReadingPart, type ReadingQuote, type ReadingRelation, type ReadingSkip, type RelationKind } from './types.js';
 import { indexSpans, encodeSpans, decodeSpans, resolveRef, resolveRange, resolveEvidenceRange, textDigest, ANCHOR_QUOTE_MAX, SPANS_PER_RECORD, type Span, type SpanWire } from './evidence-span.js';
 import type { StudioView, RecordView } from './studio.js';
 import { addArea, addChildArea, addRelation, addReading } from './domain.js';
 import { parseProject, sourceText } from './validation.js';
 import { quoteAt } from './digest-api.js';
 import { secretLike } from './secret.js';
+import { recordKind, recordLabel, mapBasis, mapNoteHead } from './record-source.js';
 import { validateFrozenRequest, validateRequestContext, requestContext, validateRequestMatch, requestMatches, hasTarget, sameTarget, canReplace, MATCH_STANCES, recordTexts, readInterval, type RequestContext, type FrozenRequest, type RequestMatch, type RequestMatch3, type StoredRequestMatch, type MatchKind, type MatchStance, type RequestTarget } from './request-return.js';
 
 export const MAP_SCHEMA = 'studio.map.1' as const;
@@ -33,7 +34,7 @@ export const MAP6_SCHEMA = 'studio.map.6' as const;
 /** A reply refused for a contradiction or a wrong reference it holds: where (path), which rule and what it names (an alias,
  * a key or a reference, never record text). The code stays INVALID_RESPONSE. */
 export class MapReplyError extends Error {
-  constructor(readonly path: string, readonly rule: 'settled-and-open' | 'duplicate-target' | 'duplicate-key' | 'material-evidence' | 'reference', readonly target: string) { super('INVALID_RESPONSE'); this.name = 'MapReplyError'; }
+  constructor(readonly path: string, readonly rule: 'settled-and-open' | 'duplicate-target' | 'duplicate-key' | 'material-evidence' | 'reference' | 'source-kind', readonly target: string) { super('INVALID_RESPONSE'); this.name = 'MapReplyError'; }
 }
 /** At most this many earlier matches go as priors, within PRIOR_BYTES (records keep the rest of MAP_BYTES). */
 export const MAP_PRIORS = 24;
@@ -352,7 +353,9 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
       check(rec && at && at.length >= (anchor ? 1 : 6) && at.length <= (anchor ? ANCHOR_QUOTE_MAX : 300), code);
       const explicit = new Set(text.match(/\bRQ_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi) ?? []);
       check(!explicit.size || m.targets.every(t => explicit.has(t.requestId)), code);
-      check(!['code', 'test'].includes(m.kind) || rec!.kind === 'evidence', code);
+      // code/test rest on an evidence record only (a project evidence source or a provided source), whatever its alias letter. map.6
+      // names where and which record (its alias and kind, never its text); the whole reply is still refused.
+      if (['code', 'test'].includes(m.kind) && rec!.kind !== 'evidence') { if (six) throw new MapReplyError(`matches[${mi}].kind`, 'source-kind', `${rec!.id}:${rec!.kind}`); check(false, code); }
       const about = m.about === null ? null : resolveQuote(text, m.about);
       check(m.about === null || about !== null, code);
       check(!secretLike(`${m.text}\n${m.why}`), code);
@@ -547,7 +550,12 @@ export function revisedRelations(p: Project): Set<string> {
 
 /* ---------- the request ---------- */
 /** A record with what is still unread of it: characters from 'from' on (0 = never read; > 0 = the tail an earlier reading left). */
-export interface MapRecordSource { id: string; kind: MapAskRecord['kind']; text: string; at: string; label: string; from: number }
+export interface MapRecordSource { id: string; kind: MapAskRecord['kind']; text: string; at: string; label: string; from: number;
+  /** project.14: the person's declaration of a provided source, shown in the request's basis and note (never in its text). */
+  evidence?: RecordEvidence }
+/** A normal record as every map request reads it (unread or an explicit request comparison): pasted as it came, or a provided
+ * source, kind evidence, with its declaration. Only the record's own text is sent as its text. */
+const normalSource = (r: PastedRecord, from: number): MapRecordSource => ({ id: r.id, kind: recordKind(r), text: r.text, at: r.at, label: recordLabel(r), from, ...(r.evidence ? { evidence: r.evidence } : {}) });
 export interface MapInput {
   ask: MapAsk;
   /** alias → area id, record id, earlier claim */
@@ -569,7 +577,7 @@ export function unreadRecords(p: Project, view: StudioView): MapRecordSource[] {
   const readTo = new Map<string, number>();
   const texts = recordTexts(p);
   for (const r of p.readings) if (isMapReading(r)) for (const x of r.records) { const i = readInterval(r, x, texts); readTo.set(x.id, Math.max(readTo.get(x.id) ?? 0, i.to)); }
-  const pasted: MapRecordSource[] = p.pasted.map(r => ({ id: r.id, kind: 'pasted', text: r.text, at: r.at, label: '붙여넣은 기록', from: readTo.get(r.id) ?? 0 }));
+  const pasted: MapRecordSource[] = p.pasted.map(r => normalSource(r, readTo.get(r.id) ?? 0));
   const own: MapRecordSource[] = view.records.map(r => ({ id: r.id, kind: r.kind, text: r.text, at: r.at, label: '프로젝트 기록', from: readTo.get(r.id) ?? 0 }));
   return [...pasted, ...own].filter(r => r.from < r.text.length).sort((a, b) => b.at.localeCompare(a.at));
 }
@@ -602,7 +610,7 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
     // compared prefix, so an earlier map-only read or a sent tail does not hide an uncompared head forever.
     const texts = recordTexts(p), compared = p.readings.filter(isMapReading).filter(r => r.requests?.some(q => q.id === selectedRequestId)).flatMap(r => r.records.map(x => readInterval(r, x, texts)));
     const prefix = (id: string) => { let end = 0; for (const r of compared.filter(r => r.id === id).sort((a, b) => a.from - b.from)) if (r.from <= end) end = Math.max(end, r.to); return end; };
-    unread = [...p.pasted.map(r => ({ id: r.id, kind: 'pasted' as const, text: r.text, at: r.at, label: '붙여넣은 기록', from: prefix(r.id) })),
+    unread = [...p.pasted.map(r => normalSource(r, prefix(r.id))),
       ...view.records.map(r => ({ id: r.id, kind: r.kind, text: r.text, at: r.at, label: '프로젝트 기록', from: prefix(r.id) }))].filter(r => r.from < r.text.length).sort((a, b) => b.at.localeCompare(a.at));
   }
   const records = new Map<string, { id: string; from: number; to: number; total: number; text: string }>();
@@ -657,11 +665,18 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
     const rest = r.text.slice(r.from);
     // Records hold no control characters (they are refused on the way in), so the excerpt is the record's own text.
     let text = anchored ? aligned(rest, cut(rest, MAP_RECORD_CHARS)) : cut(clean(rest), MAP_RECORD_CHARS);
-    const rec: MapAskRecord = { id, kind: r.kind, note: '', basis: `${r.label} · ${r.at} (가져온 시각이며 원문 작성·판본 시각이 아님)`, ...(ask.requests ? { addedAt: r.at } : {}) };
+    const rec: MapAskRecord = { id, kind: r.kind, note: '', basis: r.evidence ? mapBasis(r.evidence, r.at) : `${r.label} · ${r.at} (가져온 시각이며 원문 작성·판본 시각이 아님)`, ...(ask.requests ? { addedAt: r.at } : {}) };
     put(rec, text);
     const earlier = ask.requests?.filter(q => Date.parse(r.at) < Date.parse(q.createdAt)).map(q => q.id) ?? [];
-    const note = () => [r.from > 0 || text.length < rest.length ? `원문 ${r.text.length}자 중 ${r.from + 1}~${r.from + text.length}자 구간만 보냄${r.from > 0 ? ' (앞 구간은 앞선 정리에서 읽음)' : ''}` : '',
-      earlier.length ? `다음 요청문 생성 전에 붙인 이전 자료이며 후속 반환 근거가 아님: ${earlier.join(', ')}` : ''].filter(Boolean).join(' · ');
+    const note = () => {
+      const range = r.from > 0 || text.length < rest.length ? `원문 ${r.text.length}자 중 ${r.from + 1}~${r.from + text.length}자 구간만 보냄${r.from > 0 ? ' (앞 구간은 앞선 정리에서 읽음)' : ''}` : '';
+      const before = earlier.length ? `다음 요청문 생성 전에 붙인 이전 자료이며 후속 반환 근거가 아님: ${earlier.join(', ')}` : '';
+      if (!r.evidence) return [range, before].filter(Boolean).join(' · ');
+      // A provided source's declaration is never cut: when the request ids would not fit beside it, their count goes (each record
+      // still carries addedAt and each request its createdAt, which the reply is held to).
+      const full = [mapNoteHead(r.evidence), range, before].filter(Boolean).join(' · ');
+      return full.length <= 600 ? full : [mapNoteHead(r.evidence), range, `다음 요청문 ${earlier.length}개 생성 전에 붙인 이전 자료이며 후속 반환 근거가 아님`].filter(Boolean).join(' · ');
+    };
     rec.note = note(); ask.records.push(rec);
     // A record takes the room that is left, down to a readable excerpt; one that cannot is left for the next reading.
     for (let g = 0; bytes(ask) > MAP_BYTES - 256 && text.length > MIN_RECORD_CHARS && g < 40; g++) { const shorter = cut(text, Math.floor(text.length * 0.9)); text = anchored ? aligned(rest, shorter) : shorter; put(rec, text); rec.note = note(); }

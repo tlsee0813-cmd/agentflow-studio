@@ -54,6 +54,8 @@ export interface PlanHost {
   /** Read what came back for this project in the return reading (the plan closes; its draft stays). */
   readReturn(): void;
   pasteReturn(): void;
+  /** The provided code/check file form; the frozen request is the context it was opened from, nothing is written to it. */
+  fileReturn(): void;
   readRequest(id: string): void;
   commitProject(project: Project): Promise<string | null>;
 }
@@ -1341,6 +1343,7 @@ export function createPlanView(host: PlanHost) {
     const actions = h('div', { class: 'pp-row' });
     if (st.example && origin === 'example' && !loaded) actions.append(h('button', { type: 'button', class: 'secondary small', onclick: () => loadExampleResults(snap) }, '돌아온 기록 살펴보기'));
     if (!st.example && snap.scope) actions.append(h('button', { type: 'button', class: 'link-button', onclick: () => host.pasteReturn() }, '보고 원문 붙여넣기'),
+      h('button', { type: 'button', class: 'link-button', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요. 이 요청문의 결과로 확정하지 않아요.', onclick: () => host.fileReturn() }, '코드·검사 자료 추가'),
       h('button', { type: 'button', class: 'link-button', title: '고른 이 요청문으로 아직 대조하지 않은 보고를 읽어요', onclick: () => host.readRequest(snap.id) }, '이 요청과 보고 읽기'));
     if ((!st.example && !snap.scope) || (st.example && origin !== 'example')) actions.append(h('button', { type: 'button', class: 'link-button', 'aria-expanded': String(st.addForm), onclick: () => { st.addForm = !st.addForm; render(); } }, st.addForm ? '붙이기 닫기' : '돌아온 기록 직접 붙이기'));
     if (actions.childElementCount) sec.append(actions);

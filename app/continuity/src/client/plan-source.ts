@@ -12,6 +12,7 @@ import { PLAN_BYTES, allowsNoChange, type PlanAsk } from '../shared/plan-api.js'
 import { fullTime } from './plan-dom.js';
 import { CLAIM_LABEL } from '../shared/map-reading.js';
 import { secretLike } from '../shared/secret.js';
+import { EVIDENCE_KIND_LABEL, NOT_EXECUTED, provenanceLine } from '../shared/record-source.js';
 import { authoringAsk, type Authoring, type AnalyzedWith } from '../shared/authoring-context.js';
 
 export const CONVERTER_KEY = 'ex-converter';
@@ -119,8 +120,9 @@ export function projectInput(o: { project: Project; view: StudioView }, intent: 
   }
   type Item = { at: string; e: Evidence };
   const items: Item[] = [
-    ...pasted.map((r, i): Item => ({ at: r.at, e: { id: `N${String(i + 1).padStart(2, '0')}`, kind: 'record', title: clip(`붙여넣은 기록 · ${r.text.split('\n').find(l => l.trim())?.trim() ?? ''}`, 200),
-      text: clip(clean(r.text), TEXT_MAX), basis: clip(`붙여넣은 원문 그대로 · 요구·보고·검사가 섞일 수 있음 · 붙여넣은 시각 ${fullTime(r.at)}(원문 작성·판본 시각 아님)${r.text.length > TEXT_MAX ? ` · 앞 ${TEXT_MAX}자` : ''}`, 2000) } })),
+    // A provided source stays a record here too: its kind, name, version and origin are the person's declaration, never a check.
+    ...pasted.map((r, i): Item => ({ at: r.at, e: { id: `N${String(i + 1).padStart(2, '0')}`, kind: 'record', title: clip(r.evidence ? `사용자 제공 ${EVIDENCE_KIND_LABEL[r.evidence.kind]} · ${r.evidence.name}` : `붙여넣은 기록 · ${r.text.split('\n').find(l => l.trim())?.trim() ?? ''}`, 200),
+      text: clip(clean(r.text), TEXT_MAX), basis: clip(`${r.evidence ? `${NOT_EXECUTED} · ${provenanceLine(r.evidence)} · 가져온 시각` : '붙여넣은 원문 그대로 · 요구·보고·검사가 섞일 수 있음 · 붙여넣은 시각'} ${fullTime(r.at)}(원문 작성·판본 시각 아님)${r.text.length > TEXT_MAX ? ` · 앞 ${TEXT_MAX}자` : ''}`, 2000) } })),
     ...v.records.map((r, i): Item => {
       const part = r.partId ? partPath(v, r.partId).map(x => x.name).join(' › ') : '부분 미지정';
       return { at: r.at, e: { id: `E${String(i + 1).padStart(2, '0')}`, kind: EVIDENCE_KIND[r.kind], title: clip(`${part.split(' › ').at(-1)} · ${RECORD_LABEL[r.kind]}`, 200),

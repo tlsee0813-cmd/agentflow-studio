@@ -298,9 +298,13 @@ export async function openCliExecutor({ policy: raw, stateDir: given, spawnImpl,
       try { bytes = await readBounded(final, FINAL_BYTES); } catch (e) { throw fail('AI_RESPONSE_UNFINISHED', 502, o, { rule: e?.message === 'FINAL_BOUND' ? 'FINAL_BOUND' : 'NO_FINAL' }); }
       let text; try { text = new TextDecoder('utf-8', { fatal: true }).decode(bytes); } catch { throw fail('AI_RESPONSE_REJECTED', 502, o, { rule: 'FINAL_UTF8' }); }
       if (typeof message !== 'string' || !Buffer.from(message, 'utf8').equals(bytes)) throw fail('AI_RESPONSE_REJECTED', 502, o, { rule: 'FINAL_MISMATCH' });
+      // Syntax and contract are told apart: invalid JSON is JSON; valid JSON a validator refuses is CONTRACT, or the structured
+      // MapReplyError (path, rule, target) when the validator names where.
       let wire;
-      try { wire = JSON.parse(text); validateMapReply(wire, ask); }
-      catch (e) { throw fail('INVALID_RESPONSE', 502, { ...o, finalSha256: sha(bytes), finalBytes: bytes.length }, e?.name === 'MapReplyError' ? { path: e.path, rule: e.rule, target: e.target } : { rule: 'JSON' }); }
+      try { wire = JSON.parse(text); }
+      catch { throw fail('INVALID_RESPONSE', 502, { ...o, finalSha256: sha(bytes), finalBytes: bytes.length }, { rule: 'JSON' }); }
+      try { validateMapReply(wire, ask); }
+      catch (e) { throw fail('INVALID_RESPONSE', 502, { ...o, finalSha256: sha(bytes), finalBytes: bytes.length }, e?.name === 'MapReplyError' ? { path: e.path, rule: e.rule, target: e.target } : { rule: 'CONTRACT' }); }
       const verdictAtMs = now() - t0, verdict = { ...o, verdictAtMs, finalSha256: sha(bytes), finalBytes: bytes.length };
       if (verdictAtMs > policy.verdictMs) throw fail('AI_TIMEOUT', 504, verdict);
       if (signal?.aborted) throw fail('CANCELLED', 499, verdict);

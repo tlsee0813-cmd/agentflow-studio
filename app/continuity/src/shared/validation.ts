@@ -1,7 +1,8 @@
 import { API_SCHEMA, SCHEMA, V5_SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Intent, type Background, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket, type Question, GUIDE_SCHEMA, type GuideRequest, type GuideReply, type GuideEnvelope, type GuideTicket, type UnderstandingInput } from './types.js';
-import {V6_SCHEMA,V7_SCHEMA,V8_SCHEMA,V9_SCHEMA,V10_SCHEMA,V11_SCHEMA,V12_SCHEMA,type ReadingEntry,type PastedRecord,CLAIM_KINDS,READINGS_LIMIT,PASTED_TEXT_LIMIT,PASTED_LIMIT,type Area,type PlanStamp,type Point,type ManualPositions,type Backup} from './types.js';
+import {V6_SCHEMA,V7_SCHEMA,V8_SCHEMA,V9_SCHEMA,V10_SCHEMA,V11_SCHEMA,V12_SCHEMA,V13_SCHEMA,type ReadingEntry,type PastedRecord,CLAIM_KINDS,READINGS_LIMIT,PASTED_TEXT_LIMIT,PASTED_LIMIT,type Area,type PlanStamp,type Point,type ManualPositions,type Backup} from './types.js';
 import { validateFrozenRequest, validateStoredMatch, hasTarget, matchLedger, recordTextMap, type FrozenRequest, type StoredRequestMatch, type RecordText } from './request-return.js';
 import { ANCHOR_QUOTE_MAX, textDigest } from './evidence-span.js';
+import { validEvidence, recordIdentity } from './record-source.js';
 export class ContextError extends Error { constructor(code: string) { super(code); this.name = 'ContextError'; } }
 export function ensure(condition: unknown, code = 'INVALID_DATA'): asserts condition { if (!condition) throw new ContextError(code); }
 function obj(v: unknown, keys: string[]): asserts v is Record<string, unknown> {
@@ -294,7 +295,9 @@ function assertProject(v: unknown): asserts v is Project {
   for(const s of sources.values()) ensure(tasks.has(s.taskId));
   // Readings are checked once the tasks are: map-reading.4 against each record as read (a returned report as received), earlier
   // ones against the record as they stored it (Source.text), as before.
-  readings(v.readings,areaIds,recordTextMap(v.pasted as PastedRecord[],[...sources.values()],v.tasks as Task[]),v.id as string,new Set([...sources.values()].filter(s=>s.kind==='evidence').map(s=>s.id)));
+  // A code/test match rests on evidence: a project evidence source, or a provided source the person classified (project.14).
+  const evidenceIds=new Set([...[...sources.values()].filter(s=>s.kind==='evidence').map(s=>s.id),...(v.pasted as PastedRecord[]).filter(r=>r.evidence).map(r=>r.id)]);
+  readings(v.readings,areaIds,recordTextMap(v.pasted as PastedRecord[],[...sources.values()],v.tasks as Task[]),v.id as string,evidenceIds);
   understandingRefs(v.space as Record<string,unknown>,v.tasks as Task[],sources);
   // Imported reports or synthetic answers cannot masquerade as an authoritative decision.
   for(const b of v.bases as Basis[]) {
@@ -337,11 +340,25 @@ function space(v: unknown): Set<string> {
   return ids;
 }
 /** Pasted records: text as pasted (any whitespace kept; control characters other than tab/newline refused, as everywhere),
- * unique ids and texts, and a context that names an existing part or nothing. */
+ * unique ids, and a context that names an existing part or nothing. project.14: a provided source also has its exact declaration
+ * (evidence). Unique by the same identity the domain adds with: a pasted text once; a provided source once per exact text and
+ * declaration; the same bytes pasted and provided are two records. */
 function pasted(v:unknown,areaIds:Set<string>) {
-  list(v,PASTED_LIMIT);const texts=new Set<string>();
-  for(const r of v){obj(r,['id','text','at','context']);id(r.id);text(r.text,PASTED_TEXT_LIMIT);date(r.at);ensure(r.context===null||(typeof r.context==='string'&&areaIds.has(r.context)));ensure(!texts.has(r.text as string));texts.add(r.text as string);}
+  list(v,PASTED_LIMIT);const seen=new Set<string>();
+  for(const r of v){
+    const typed=!!r&&typeof r==='object'&&Object.hasOwn(r,'evidence');
+    obj(r,['id','text','at','context',...(typed?['evidence']:[])]);id(r.id);text(r.text,PASTED_TEXT_LIMIT);date(r.at);ensure(r.context===null||(typeof r.context==='string'&&areaIds.has(r.context)));
+    if(typed)ensure(validEvidence(r.evidence));
+    const key=recordIdentity(r as unknown as PastedRecord);ensure(!seen.has(key));seen.add(key);
+  }
   unique(v as {id:string}[]);
+}
+/** Before project.14 a normal record had exactly its four keys and a text of its own. Every older input is held to that before it
+ * is migrated, so no older-labelled file brings in a provided-source declaration (the final check alone would accept one). */
+function legacyPasted(v:unknown) {
+  const p=v as {pasted?:unknown};if(!p||typeof p!=='object'||!Object.hasOwn(p,'pasted'))return;
+  list(p.pasted,PASTED_LIMIT);const texts=new Set<string>();
+  for(const r of p.pasted){obj(r,['id','text','at','context']);ensure(typeof r.text==='string'&&!texts.has(r.text));texts.add(r.text as string);}
 }
 /** Map readings: every part a known area, every quote of a known record (a pasted record or a source), every claim a known
  * kind, and a claim replaced only by a later one of the same area. Relation ids may be gone (the person removed the line). */
@@ -607,6 +624,11 @@ function migrateV10(v:unknown):unknown {
   for(const r of p.readings)ensure(!!r&&typeof r==='object'&&['map-reading.1','map-reading.2','map-correction.1','request-correction.1'].includes((r as {version:string}).version));
   return {...p,schemaVersion:SCHEMA};
 }
+/** project.13 has normal records of four keys only (checked before every migration): they stay as stored. */
+function migrateV13(v:unknown):unknown {
+  const p=v as {schemaVersion?:unknown};ensure(!!p&&typeof p==='object'&&!Array.isArray(p)&&p.schemaVersion===V13_SCHEMA);
+  return {...p,schemaVersion:SCHEMA};
+}
 /** The single acceptance test for persisted bytes: autosave, recovery-file download and import all use it. */
 /** intent-edit.1 (unreleased AI055 candidate) kept the correction in manual.*, where any later work edit
  * would rewrite it. Every one is converted on the first parse, so no later parse reads manual.* again:
@@ -627,7 +649,8 @@ function convertIntentEdits(p:Project):Project {
 export function parseProject(raw: string): Project {
   ensure(new TextEncoder().encode(raw).length <= FILE_LIMIT,'FILE_TOO_LARGE'); const v: unknown=JSON.parse(raw);
   const schema=(v as {schemaVersion?:unknown})?.schemaVersion;
-  const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : schema===V3_SCHEMA ? migrateV3(v) : schema===V4_SCHEMA ? migrateV4(v) : schema===V5_SCHEMA ? migrateV5(v) : schema===V6_SCHEMA ? migrateV6(v) : schema===V7_SCHEMA ? migrateV7(v) : schema===V8_SCHEMA ? migrateV8(v) : schema===V9_SCHEMA ? migrateV9(v) : schema===V10_SCHEMA ? migrateV10(v) : schema===V11_SCHEMA ? migrateV11(v) : schema===V12_SCHEMA ? migrateV12(v) : v;
+  if([LEGACY_SCHEMA,PREVIOUS_SCHEMA,V3_SCHEMA,V4_SCHEMA,V5_SCHEMA,V6_SCHEMA,V7_SCHEMA,V8_SCHEMA,V9_SCHEMA,V10_SCHEMA,V11_SCHEMA,V12_SCHEMA,V13_SCHEMA].includes(schema as never))legacyPasted(v);
+  const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : schema===V3_SCHEMA ? migrateV3(v) : schema===V4_SCHEMA ? migrateV4(v) : schema===V5_SCHEMA ? migrateV5(v) : schema===V6_SCHEMA ? migrateV6(v) : schema===V7_SCHEMA ? migrateV7(v) : schema===V8_SCHEMA ? migrateV8(v) : schema===V9_SCHEMA ? migrateV9(v) : schema===V10_SCHEMA ? migrateV10(v) : schema===V11_SCHEMA ? migrateV11(v) : schema===V12_SCHEMA ? migrateV12(v) : schema===V13_SCHEMA ? migrateV13(v) : v;
   assertProject(project); return convertIntentEdits(project); // Freshly parsed, not shared: no defensive copy needed.
 }
 

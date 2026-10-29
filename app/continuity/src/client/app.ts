@@ -4,7 +4,7 @@ import { isMapReading, type Project } from '../shared/types.js';
 import { FILE_LIMIT } from '../shared/types.js';
 import { WorkspaceStore, type EntryRef, storageErrorCode, readViewState, readEntryView, writeViewState, readEntryPositions, writeEntryPositions, importCopy, serializeBackup } from '../shared/storage.js';
 import { parseBackup, cleanPositions } from '../shared/validation.js';
-import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, secretPasted, correctReadingRole } from '../shared/domain.js';
+import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, provideRecord, secretPasted, correctReadingRole } from '../shared/domain.js';
 import { CLAIM_LABEL, stateLabel, revisedRelations, candidateReading, type Applied, type CurrentClaim, type PartUnderstanding } from '../shared/map-reading.js';
 import { roleEvidence } from './role-evidence.js';
 import type { ClaimKind, ReadingQuote } from '../shared/types.js';
@@ -1334,7 +1334,8 @@ function renderLens() {
   const menuItems = [
     o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', onclick: () => { editing = true; openSheet(() => document.getElementById('edit-name')?.focus()); } }, '이름·설명 고치기') : null,
     o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null,
-    o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '이 부분을 보던 맥락으로 원문을 붙여 넣어요', onclick: () => openPaste(part.id) }, '기록 붙여넣기') : null
+    o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '이 부분을 보던 맥락으로 원문을 붙여 넣어요', onclick: () => openPaste(part.id) }, '기록 붙여넣기') : null,
+    o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요 (이 부분은 읽기 맥락일 뿐이에요)', onclick: () => openFile(part.id) }, '코드·검사 자료 추가') : null
   ].filter((x): x is HTMLButtonElement => !!x);
   l.classList.remove('compare', 'scope-read'); readingFor = [];
   l.replaceChildren(); put(l, entry,
@@ -1452,7 +1453,8 @@ function renderPanel(scrollTop: boolean) {
   const menuItems = [
     o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', onclick: () => { editing = !editing; renderPanel(false); } }, editing ? '고치기 닫기' : '이름·설명 고치기') : null,
     o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null,
-    o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '이 부분을 보던 맥락으로 원문을 붙여 넣어요', onclick: () => openPaste(part.id) }, '기록 붙여넣기') : null
+    o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '이 부분을 보던 맥락으로 원문을 붙여 넣어요', onclick: () => openPaste(part.id) }, '기록 붙여넣기') : null,
+    o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요 (이 부분은 읽기 맥락일 뿐이에요)', onclick: () => openFile(part.id) }, '코드·검사 자료 추가') : null
   ].filter((x): x is HTMLButtonElement => !!x);
   const head = h('header', { class: 'panel-head' },
     h('div', { class: 'panel-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope) }, x.name)]), path.length ? null : h('span', {}, o.project.name)),
@@ -1687,6 +1689,7 @@ const planView = createPlanView({
   area: () => syncMapArea(),
   readReturn: () => { planView.close(); openReturn(); },
   pasteReturn: () => { planView.close(); openPaste(selected); },
+  fileReturn: () => { planView.close(); openFile(selected); },
   readRequest: id => { planView.close(); void mapRun.run(id); },
   commitProject: next => { const o = opened; return o ? commit(o, next) : Promise.resolve('프로젝트가 열려 있지 않아요.'); },
   frame: (all, fallback) => {
@@ -1744,6 +1747,13 @@ function openPaste(partId: string | null) {
   openReturn();
   returnView.openPaste(partId, scene);
 }
+/** The provided-file form from the map, a part or a request: the same scene discipline as the paste box. */
+function openFile(partId: string | null) {
+  const o = opened; if (!o || o.kind !== 'saved') return;
+  const scene = readingScene();
+  openReturn();
+  returnView.openFile(partId, scene);
+}
 const returnView = createReturnView({
   current: () => opened,
   kv,
@@ -1774,6 +1784,16 @@ const returnView = createReturnView({
     const failed = await commit(o, r.project);
     // A saved record is now a record to read into the map (nothing was sent): the map's own entries say so.
     if (!failed) { renderMapEntry(); refreshUnderstood(); }
+    return failed ?? { id: r.record.id, duplicate: false };
+  },
+  provide: async (key, text, evidence, context) => {
+    // Only the entry the file was chosen in: after a switch nothing is written to the project open now.
+    const o = opened; if (!o || o.kind !== 'saved' || o.key !== key) return '다른 프로젝트가 열려 있어 저장하지 않았어요. 고른 파일은 원래 프로젝트의 양식에 남아 있어요.';
+    let r: ReturnType<typeof provideRecord>;
+    try { r = provideRecord(o.project, text, evidence, context && partOf(o, context) ? context : null); } catch { return '이 자료는 저장할 수 없어요(너무 길거나 쓸 수 없는 문자, 또는 이름·판본·출처의 길이나 문자).'; }
+    if (r.duplicate) return { id: r.record.id, duplicate: true };
+    const failed = await commit(o, r.project);
+    if (!failed && opened === o) { renderMapEntry(); refreshUnderstood(); }
     return failed ?? { id: r.record.id, duplicate: false };
   },
   legacyKey: () => {
@@ -1903,11 +1923,12 @@ function renderMapEntry() {
   const inp = mapRun.input(), st = mapRun.state(), last = mapRun.last(), can = mapRun.can();
   const fresh = inp && inp.problem !== 'NOTHING_NEW' ? inp.coverage.fresh : 0;
   const paste = (primary: boolean) => h('button', { type: 'button', class: primary ? 'primary small' : 'secondary small', onclick: () => openPaste(null) }, '기록 붙여넣기');
+  const file = () => h('button', { type: 'button', class: 'secondary small se-file', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요', onclick: () => openFile(null) }, '코드·검사 자료 추가');
   const acts = h('div', { class: 'se-acts' }), waiting = st.committing || st.ready;
   if (st.pending) put(acts, ...pendingLine('se-durable', '기록을 읽고 지도를 정리하는 중…', 'link-button'));
   else if (waiting) put(acts, ...runReady(st, 'primary small', 'link-button'));
-  else if (fresh && can && !inp!.problem) put(acts, h('button', { type: 'button', class: 'primary small se-run', onclick: () => void mapRun.run() }, '기록으로 지도 정리'), paste(false));
-  else put(acts, paste(true));
+  else if (fresh && can && !inp!.problem) put(acts, h('button', { type: 'button', class: 'primary small se-run', onclick: () => void mapRun.run() }, '기록으로 지도 정리'), paste(false), file());
+  else put(acts, paste(true), file());
   const note = st.pending || waiting ? null : fresh && can && !inp!.problem ? sendLine(inp!) : fresh && !can ? mapRun.blocked() ?? `기록 ${fresh}개가 있어요. AI 서버가 연결된 주소에서 지도로 정리할 수 있어요.` : fresh && inp!.problem ? '보낼 수 없는 기록이 있어요(너무 크거나 키처럼 보이는 글).' : '붙여 넣어 저장만 해서는 AI에 보내지 않아요. 지도로 정리할 때 보내요.';
   box.replaceChildren(); put(box, h('h2', {}, '기록으로 첫 지도를 만들어요'),
     h('p', { class: 'se-lead' }, '작업 AI와 나눈 요구나 보고를 그대로 붙여 넣으면, 원문에 근거가 있는 부분과 연결만 지도로 정리해요. 만들어진 부분의 이름과 위치는 바로 고칠 수 있어요.'),

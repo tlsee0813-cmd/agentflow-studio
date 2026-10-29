@@ -67,7 +67,7 @@ test('102-E1 normal child: the exact final wire is ready, bound at acceptance to
   const st = await statusOf(s.handle);
   assert.equal(st.ai, 'off', 'no DeepSeek key: the other AI features stay off');
   assert.deepEqual(st.map, { model: 'fake-model-102', prompt: await mapPromptId(), via: 'jobs' });
-  assert.equal(st.map.prompt, 'm6-177d450624b5');
+  assert.equal(st.map.prompt, 'm6-943df4fe3fd6'); // AF114: map.6 gained the lawful source-kind clarification
   assert.deepEqual({ ...st.jobs.executor, policy: undefined }, { id: 'codex-cli-preview.102', model: 'fake-model-102', scope: 'first', state: 'ready', problem: null, policy: undefined });
   assert.equal((await jcall(s.handle, 'POST', '', x.cap, x.body)).status, 202);
   const v = await ended(s.handle, x);

@@ -230,11 +230,16 @@ const MAP6_CANDIDATES = `candidates (최대 6개): 기록만으로 가를 수 �
 - 같은 진술을 claims(확정)와 후보(미정)에 함께 쓰거나, 같은 대상을 두 번 후보로 쓰거나, 후보가 미정이라 한 부모에 그 부분을 넣으면 응답 전체가 거절된다. 후보는 이미 있는 사실을 철회하지 않는다.
 - 원문이 이미 답한 것을 다시 묻지 않는다. 요구·계획을 현재 구현으로 확정하거나 그것을 묻는 후보를 만들지 않는다. 정리 작업을 사용자에게 떠넘기는 일반 확인 요청, 분류 선호, 이 프로젝트와 무관한 조건, 일반 면책은 쓰지 않는다. at은 후보 질문의 근거 구간 또는 null.
 - claims의 key: 모든 claim에 "s1"·"s2"처럼 응답 안에서 고유한 key를 쓴다(null 불가). 후보의 statement.key도 같은 키 공간이며 어떤 claim의 key와도 겹치지 않는다.`;
+// AF114: which record a code/test match may rest on, the same code in two records, and an author's words versus the artifact.
+const MAP6_SOURCES = `- 기록의 kind가 자료 종류다. evidence는 사용자가 코드·검사 자료로 분류해 제공한 원문(basis·note의 이름·판본·출처는 사용자 기재이며 앱이 실행·검증한 것이 아니다), pasted는 섞인 보고를 그대로 붙인 원문이다. N·R 별칭 글자, 확장자, 코드처럼 보이는 내용으로 종류를 정하지 않는다. pasted 기록의 코드도 그대로 읽어 role·describes 근거로 쓸 수 있다. 같은 코드가 두 기록에 있어도 같은 대상이면 부분을 하나로 둔다.`;
+const MAP6_MATCH_KIND = `- kind는 reported(작성자의 구현 보고), checked(작성자의 검사·확인 보고), open(남은 조건·결정), code·test(kind:evidence 기록의 실제 해당 구간에만). pasted·report 기록 안의 코드나 ‘코드를 고쳤다’, ‘검사 통과’ 발언은 reported/checked다. 같은 코드가 pasted 기록과 evidence 기록에 함께 있으면 code·test의 at은 evidence 기록의 구간이며 pasted 쪽 구간을 code·test로 인용하면 응답 전체가 거절된다. evidence 기록 안에서도 작성자가 구현·검사를 서술한 문장은 reported/checked다. 검사 정의나 붙인 로그는 이 앱이 실행한 결과가 아니다.`;
 const map6 = (prompt, k = 0) => prompt
   .replace(/candidates \(최대 6개\): [^\n]+/, MAP6_CANDIDATES)
   .replace('근거가 material 범위와 조금이라도 겹치면 지도 근거가 되지 않는다.', '부분·주장·관계·대응·후보 진술의 근거가 material 범위와 조금이라도 겹치면 응답 전체가 거절된다.')
   .replace(/("about":(?:null|"[^"]*"),"replaces":null)\}/g, (_, head) => `${head},"key":"s${++k}"}`)
-  .replace('"candidates":[{"text":"...","parts":["P01"],"at":null}]', '"candidates":[{"text":"...","target":"attribution","parts":["P01","P02"],"at":null,"statement":{"key":"s9","kind":"reported","text":"...","at":"N01.14","about":null}}]');
+  .replace('"candidates":[{"text":"...","parts":["P01"],"at":null}]', '"candidates":[{"text":"...","target":"attribution","parts":["P01","P02"],"at":null,"statement":{"key":"s9","kind":"reported","text":"...","at":"N01.14","about":null}}]')
+  .replace('자료의 층위:\n', `자료의 층위:\n${MAP6_SOURCES}\n`)
+  .replace('- kind는 reported(작성자의 구현 보고), checked(작성자의 검사·확인 보고), open(남은 조건·결정), code·test(kind:evidence 원자료의 해당 구간에만). 발언 속 ‘코드를 고쳤다’, ‘검사 통과’는 reported/checked다.', MAP6_MATCH_KIND);
 export const MAP6_PROMPT = map6(MAP5_PROMPT);
 export const MAP6_FIRST_PROMPT = map6(MAP5_FIRST_PROMPT);
 export const MAP6_RECIPE = 'map6-recipe.1: first = parts.length === 0 && requests.length === 0 && priors.length === 0; evidence = same-record contiguous range <= 600 UTF-16; span.2; candidates state their target (attribution|identity|parent|holds) and statement keys';

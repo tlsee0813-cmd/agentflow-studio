@@ -79,7 +79,7 @@ test('AREA17 return.1 and project.1 through project.5 migrate without invented d
     if(version<=2){for(const t of old.tasks){delete t.resultFile;for(const h of t.handoffs)delete h.returnId;}}
     if(version===1){for(const t of old.tasks){delete t.adviceRevision;for(const h of t.handoffs){h.text='과거 인계 전문';for(const k of ['chars','digest','work','aiExcluded','legacyText'])delete h[k];}}for(const b of old.bases)b.locked=true;}
     for(const t of old.tasks)if(version<=3)delete t.areaId;
-    const migrated=parseProject(JSON.stringify(old));assert.equal(migrated.schemaVersion,'idea015.project.13');assert.deepEqual(migrated.space.understanding,{});assert.ok(migrated.tasks.every(t=>t.handoffs.every(h=>h.anchor===null)));assert.deepEqual(read(migrated),migrated);
+    const migrated=parseProject(JSON.stringify(old));assert.equal(migrated.schemaVersion,'idea015.project.14');assert.deepEqual(migrated.space.understanding,{});assert.ok(migrated.tasks.every(t=>t.handoffs.every(h=>h.anchor===null)));assert.deepEqual(read(migrated),migrated);
   }
 });
 test('AREA17 cross-tab seq rejection preserves the external project including its description',async()=>{

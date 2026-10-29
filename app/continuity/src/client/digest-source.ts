@@ -2,7 +2,8 @@
  * attached to its change plan (added sources, results read against a request document, the plan's own sources). The model
  * request uses short aliases (P01 for parts; R/U/O/V/S + number for sources) and the reply is mapped back to the real ids.
  * Nothing here writes a project, a plan or a record. */
-import type { Project } from '../shared/types.js';
+import type { Project, RecordEvidence } from '../shared/types.js';
+import { EVIDENCE_KIND_LABEL, NOT_EXECUTED, provenanceLine } from '../shared/record-source.js';
 import { RECORD_LABEL, clip, type StudioView, type RecordKind } from '../shared/studio.js';
 import { DIGEST_SCHEMA, DIGEST2_SCHEMA, DIGEST_BYTES, RECORD_SENT_MAX, digestBytes, type DigestAsk, type DigestKind, type DigestReply } from '../shared/digest-api.js';
 import { ui62Sources, ui62Keys } from '../shared/return-material.js';
@@ -12,7 +13,9 @@ import { fullTime } from './plan-dom.js';
 
 /** One readable source with real part ids; url only for public material. A pasted record also names its own id (recordId) and,
  * once sent, how many of its characters went (sent): its readings quote only that part. */
-export interface ReadingSource { id: string; kind: DigestKind; title: string; text: string; note: string; basis: string; partIds: string[]; url: string | null; recordId?: string; sent?: number }
+export interface ReadingSource { id: string; kind: DigestKind; title: string; text: string; note: string; basis: string; partIds: string[]; url: string | null; recordId?: string; sent?: number;
+  /** A provided source's declaration (project.14), shown beside it; the digest still reads it as a record, nothing more. */
+  evidence?: RecordEvidence }
 export interface ReadingInput {
   ask: DigestAsk;
   /** alias → source as shown (real part ids) */
@@ -52,8 +55,14 @@ export function partLabel(view: StudioView, id: string): string {
 /** A pasted record as material: the text as pasted, never located (its context part is a note only). */
 function pastedSource(r: Project['pasted'][number], alias: string, view: StudioView): ReadingSource {
   const at = r.context && view.parts.some(p => p.id === r.context) ? partLabel(view, r.context) : null;
+  const where = at ? `붙일 때 보던 부분: ${at} (읽기 맥락일 뿐 본문 전체가 이 부분에 관한 근거는 아님)` : '';
+  // A provided source reads as a record too (its kind is the person's declaration, not a check the app made); its name, version and
+  // origin go beside the text, never into it.
+  if (r.evidence) return { id: alias, kind: 'record', title: clip(`${EVIDENCE_KIND_LABEL[r.evidence.kind]} · ${r.evidence.name}`, 200), text: clean(r.text),
+    note: [`${NOT_EXECUTED} · ${provenanceLine(r.evidence)}`, where].filter(Boolean).join(' · '),
+    basis: `가져온 시각 ${fullTime(r.at)} (원문 작성·판본 시각 아님)`, partIds: [], url: null, recordId: r.id, evidence: { ...r.evidence } };
   return { id: alias, kind: 'record', title: clip(recordTitle(clean(r.text)) || '붙여넣은 기록', 200), text: clean(r.text),
-    note: ['사용자가 붙여넣은 원문 그대로', at ? `붙일 때 보던 부분: ${at} (읽기 맥락일 뿐 본문 전체가 이 부분에 관한 근거는 아님)` : ''].filter(Boolean).join(' · '),
+    note: ['사용자가 붙여넣은 원문 그대로', where].filter(Boolean).join(' · '),
     basis: `붙여넣은 시각 ${fullTime(r.at)} (원문 작성·판본 시각 아님)`, partIds: [], url: null, recordId: r.id };
 }
 /** A saved project: the newest pasted records first (so a large project's other material never pushes a new one out), then the

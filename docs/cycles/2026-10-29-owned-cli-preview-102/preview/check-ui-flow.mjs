@@ -67,7 +67,7 @@ try {
   await page.waitForFunction(([w, k]) => JSON.parse(localStorage.getItem(w)).entries.find(e => e.entryId === k).project.readings.length === 1, [W, A]);
   await page.locator('#world .node').first().waitFor(); await shot('a-applied');
   const a = await page.evaluate(STORED, [W, A]), reading = a.project.readings[0];
-  assert.deepEqual([reading.model, reading.prompt], ['fake-model-102', 'm6-177d450624b5']);
+  assert.deepEqual([reading.model, reading.prompt], ['fake-model-102', 'm6-943df4fe3fd6']);
   assert.ok(a.project.space.areas.some(x => x.name === '가짜 부분 1'));
   assert.equal(await page.getByRole('button', { name: '질문하기' }).count(), 0, 'questions keep the DeepSeek condition (off)');
 
