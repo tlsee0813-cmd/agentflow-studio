@@ -1,0 +1,34 @@
+{
+  "task": "AF104-narrow-policy-correction-review",
+  "status": "no_specific_objection_to_proposed_delta",
+  "conclusion": "The proposed correction addresses the observed103 startup diagnostic directly: remove only --disable code_mode_host, retain its default host, and explicitly set approval_policy=\"never\". No concrete additional omission or reason for another foundation/installation step was identified in this bounded review. Actual generation remains a separate root-selected operation; this review performs none.",
+  "evidence": {
+    "103Raw": ".ops/experience103-zephyr/capture-2-stdout.jsonl contains thread.started, item.completed with item.type=error stating Code Mode is unavailable because the host is disabled, then turn.started. This is a startup/host compatibility failure. The guard's TOOL_USE category must not be presented as an observed model tool action or semantic-map failure.",
+    "host": "The preserved diagnostic/receipt report an already-present host binary, SHA2569ee661e9325915b56fb37660d5111e8a10cda5d93b3b25b04be810960a8b92b2. No installation is warranted by this evidence.",
+    "nonGenerationDiagnostic": "Preserved codex debug prompt-input exited0 with stderr0 using the host default, read-only configuration and the remaining disable set. It observed functions/collaboration tools and nested capabilities. It proves this diagnostic can render, not that exact exec --ignore-user-config startup or tool exclusion has been verified."
+  },
+  "deltaAssessment": {
+    "arguments": "103's preserved policy has60 arguments. Removing the two host-disable arguments and adding -c plus approval_policy=\"never\" retains60, within the executor's64-argument limit. Other17 disable flags, ignore-user-config, existing authentication, ephemeral/empty read-only cwd, project_doc_max_bytes0, same full ask/prompt/model/high,299/300s limits and rejection guards are unchanged by the proposed delta.",
+    "approval": "Explicit never avoids silently inheriting the diagnostic's observed on-request approval. It does not prove every non-shell/tool action is prevented; no such guarantee should be inferred.",
+    "riskChoice": "Root explicitly distinguishes host startup support from tool authorization. No-tools remains the task instruction and any observed tool/unknown event causes immediate rejection. Post-event rejection cannot retroactively prevent effects, and debug is not the exact isolated exec path. These residual limits must remain in the one-run decision; the report does not hide them or ask for another model test."
+  },
+  "correctionToPriorReview": "The103 static review recommended disabling code_mode_host as if it were only an optional tool route, without startup-compatibility evidence. The actual103 diagnostic showed that assumption was wrong for the installed path. Its recommendation/acceptance was not evidence of effective capability or startup compatibility. The narrow104 correction removes that specific cause rather than replaying the same failed policy.",
+  "beforeRootSelectedCall": "Freeze the corrected final policy/hash and runtime identity, keep103 failed unchanged, use the already-selected single Zephyr normal owned-job path and full semantic criteria, and preserve the prior token/cost/remote-cancel limitations. No actual call is authorized by the debug result alone.",
+  "filesRead": [
+    ".ops/experience103-zephyr/capture-2-stdout.jsonl",
+    ".ops/experience103-zephyr/policy.json",
+    ".ops/experience104-config/diagnostic-summary.json",
+    ".ops/experience104-config/receipt.json",
+    ".ops/experience104-config/prompt-input.json structure only; no unnecessary full private prompt copied"
+  ],
+  "actions": {
+    "execution": 0,
+    "modelCalls": 0,
+    "web": 0,
+    "productWrites": 0,
+    "policyWrites": 0,
+    "onlyNewFile": ".ops/results/experience104-policy-delta-review.json"
+  },
+  "reviewClosed": true,
+  "finalSelectionOwner": "root coordinator"
+}

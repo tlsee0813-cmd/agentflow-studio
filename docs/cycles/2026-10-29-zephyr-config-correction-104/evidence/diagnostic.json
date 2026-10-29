@@ -1,0 +1,49 @@
+{
+  "cliVersion": "codex-cli 0.165.0-alpha.1.2",
+  "cliSha256": "5c1b55966bf9f757dcbf00065c9a6cb862ead55d34b015f1be1939ff18e43943",
+  "hostBinaryPresent": true,
+  "hostBinarySha256": "9ee661e9325915b56fb37660d5111e8a10cda5d93b3b25b04be810960a8b92b2",
+  "command": "codex debug prompt-input (model-visible prompt rendering, no model completion)",
+  "exit": 0,
+  "stderrBytes": 0,
+  "generationInvocations": 0,
+  "configuration": "same disable set except code_mode_host; model Sol/high, sandbox read-only, web disabled, project_doc_max_bytes0",
+  "permissionsObserved": "read-only; network restricted; default on-request approval in this debug path",
+  "toolsObserved": {
+    "namespaces": [
+      {
+        "name": "functions",
+        "tools": [
+          "exec",
+          "wait",
+          "request_user_input",
+          "request_user_input_async"
+        ]
+      },
+      {
+        "name": "collaboration",
+        "tools": [
+          "followup_task",
+          "interrupt_agent",
+          "list_agents",
+          "send_message",
+          "spawn_agent",
+          "wait_agent"
+        ]
+      }
+    ],
+    "nested": [
+      "### `apply_patch`",
+      "### `list_mcp_resource_templates`",
+      "### `list_mcp_resources`",
+      "### `read_mcp_resource`",
+      "### `clock__curr_time`"
+    ]
+  },
+  "limits": [
+    "debug path loads user configuration and lacks exec --ignore-user-config; not exact exec startup proof",
+    "feature false does not prove no tools are exposed",
+    "code-mode host is already installed; no installation warranted",
+    "103 raw startup diagnostic identifies disabled host; no actual tool call observed"
+  ]
+}
