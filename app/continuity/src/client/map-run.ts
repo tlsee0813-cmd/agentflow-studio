@@ -37,6 +37,8 @@ export interface MapRunHost {
   jobs?(): JobReservations | null;
   /** AF100: the entry as saved now (a fresh read, another tab's save included), to tell a reading already applied. */
   stored?(key: string): { project: Project; lifecycle: number } | null;
+  /** AF100: this page itself saved the entry's save number seq (from seq - 1). */
+  ownSave?(key: string, seq: number): boolean;
   /** AF100: how often a job is looked at while it runs (ms). */
   pollMs?: number;
 }
@@ -84,9 +86,9 @@ export const JOB_NOTE = {
  * from; the reply keeps the very input, wire, model, prompt and hash it was made with, and is never re-asked or re-read.
  * AF100: op is its durable job. A job found in storage (a reload, another tab) has no visit of this page and no input until its
  * result is fetched: it is then applied only when the person asks, from its own entry. */
-/** owned: asked from this page (its own later saves are its own, and another tab's save is refused by the workspace's seq check);
- * otherwise found again (a reload, another tab), and then applied only on the very save it was asked from (binding.seq). */
-interface Op { id: string; cap: string; binding: MapJobBinding; payload: string | null; receipt: boolean; state: string; cancelling: boolean; misses: number; tick: number; owned: boolean }
+/** owned: asked from this page (found again otherwise: a reload, another tab). Either way a result is applied only on the save it
+ * was asked from (binding.seq) or on saves this page made itself since (onItsSave). release: this page's hold while it sends. */
+interface Op { id: string; cap: string; binding: MapJobBinding; payload: string | null; receipt: boolean; state: string; cancelling: boolean; misses: number; tick: number; owned: boolean; release: (() => void) | null }
 interface Attempt {
   key: string; project: string; lifecycle: number | null; visit: unknown;
   phase: 'hashing' | 'reserving' | 'asking' | 'ready' | 'committing';
@@ -168,7 +170,7 @@ export function createMapRun(host: MapRunHost) {
       if (saved === 'applied') { await forget(a, null, 'applied', here ? null : JOB_ERROR.ELSEWHERE!); return; }
       // Found again, not asked from this page: only on the very save it was asked from. A save since then (another tab, or the
       // earlier page) is never rebased onto, even when the map and records would still pass applyReading.
-      if (!a.op.owned && (o!.ref?.seq ?? null) !== a.op.binding.seq) { slot.attempt = null; slot.error = JOB_ERROR.SAVED_SINCE!; void settle(a, 'discarded'); host.changed(a.key); return; }
+      if (!onItsSave(a, o!.ref?.seq ?? null)) { slot.attempt = null; slot.error = JOB_ERROR.SAVED_SINCE!; void settle(a, 'discarded'); host.changed(a.key); return; }
     }
     a.meta ??= { id: `R_${crypto.randomUUID()}`, at: new Date().toISOString() };
     let applied: Applied;
@@ -204,6 +206,14 @@ export function createMapRun(host: MapRunHost) {
   const NO_VISIT = Symbol('job found in storage');
   const store = () => host.jobs?.() ?? null;
   const liveOp = (a: Attempt) => of(a.key).attempt === a && !!a.op;
+  /** On the save it was asked from, or on saves since then that this page made itself, each from the one before (the workspace
+   * takes a save only on the save it read, so no other tab's save is among them). A new visit's fresher read is not one of them. */
+  const onItsSave = (a: Attempt, seq: number | null): boolean => {
+    const from = a.op!.binding.seq; if (seq === from) return true;
+    if (seq === null || from === null || seq < from) return false;
+    for (let k = from + 1; k <= seq; k++) if (!host.ownSave?.(a.key, k)) return false;
+    return true;
+  };
   /** The entry as saved now, only while it is still the job's own (the same entry, project and lifecycle). */
   const ownStored = (a: Attempt): Project | null => { const e = host.stored?.(a.key); return e && e.project.id === a.op!.binding.projectId && e.lifecycle === a.op!.binding.lifecycle ? e.project : null; };
   const appliedIn = (p: Project | null, a: Attempt): 'applied' | 'conflict' | null => {
@@ -218,12 +228,12 @@ export function createMapRun(host: MapRunHost) {
     try { wire = encodeMapInput(inp); binding = { entryId: a.key, projectId: a.project, lifecycle: a.lifecycle ?? 1, seq, after: inp.after, schemaVersion: inp.ask.schemaVersion, prompt: a.prompt, model, askHash: a.hash, inputHash: await jobHash(wire) }; }
     catch { if (live()) { slot.attempt = null; slot.error = MAP_ERROR.HASH!; host.changed(a.key); } return; }
     if (!live()) return;
-    let got: { res: Reservation; reused: boolean };
-    try { got = await jobs.reserve(binding); }
-    catch { if (live()) { slot.attempt = null; slot.error = JOB_ERROR.RESERVE!; host.changed(a.key); } return; }
-    if (got.reused) { if (live()) { slot.attempt = null; attach(got.res); schedule(0); } return; }
-    if (!live()) { await jobs.remove(got.res.id).catch(() => {}); return; } // cancelled before it left: nothing was sent
-    a.op = { id: got.res.id, cap: got.res.cap, binding: got.res.binding, payload: JSON.stringify({ version: MAP_JOB_VERSION, id: got.res.id, binding: got.res.binding, input: wire }), receipt: false, state: 'reserved', cancelling: false, misses: 0, tick: 0, owned: true };
+    let got: { res: Reservation; reused: boolean }, release: () => void = () => {};
+    try { const id = jobs.newId(); release = await jobs.hold(id); got = await jobs.reserve(binding, id); }
+    catch { release(); if (live()) { slot.attempt = null; slot.error = JOB_ERROR.RESERVE!; host.changed(a.key); } return; }
+    if (got.reused) { release(); if (live()) { slot.attempt = null; attach(got.res); schedule(0); } return; }
+    if (!live()) { await jobs.remove(got.res.id).catch(() => {}); release(); return; } // cancelled before it left: nothing was sent
+    a.op = { id: got.res.id, cap: got.res.cap, binding: got.res.binding, payload: JSON.stringify({ version: MAP_JOB_VERSION, id: got.res.id, binding: got.res.binding, input: wire }), receipt: false, state: 'reserved', cancelling: false, misses: 0, tick: 0, owned: true, release };
     a.phase = 'asking'; host.changed(a.key);
     await submit(a); schedule();
   }
@@ -231,7 +241,7 @@ export function createMapRun(host: MapRunHost) {
   async function submit(a: Attempt): Promise<void> {
     const op = a.op!;
     for (let i = 0; i < 3 && liveOp(a) && !op.receipt; i++) {
-      try { const v = await jobApi.submit(op.payload!, op.cap, host.accessCode()); op.receipt = true; void store()?.update(op.id, { receipt: true }).catch(() => {}); await seen(a, v); return; }
+      try { const v = await jobApi.submit(op.payload!, op.cap, host.accessCode()); op.receipt = true; await store()?.update(op.id, { receipt: true }).catch(() => {}); op.release?.(); op.release = null; await seen(a, v); return; }
       catch (e) {
         if (e instanceof JobError && e.answered) { await forget(a, errorText(e.code), null); return; }
         await new Promise(r => setTimeout(r, 200 * 2 ** i));
@@ -276,13 +286,15 @@ export function createMapRun(host: MapRunHost) {
     const slot = of(a.key);
     if (slot.attempt === a) { slot.attempt = null; slot.error = error; slot.notice = notice; host.changed(a.key); }
     if (outcome) await settle(a, outcome); else await store()?.remove(a.op!.id).catch(() => {});
+    a.op!.release?.(); a.op!.release = null;
   }
   /** Reservations this page is acknowledging now: not shown again meanwhile (a failed acknowledgement is tried again later). */
   const closing = new Set<string>();
   async function settle(a: Attempt, outcome: 'applied' | 'discarded' | 'seen') {
     const op = a.op!; closing.add(op.id);
     try {
-      if (outcome === 'applied' && a.meta) await store()?.update(op.id, { applied: a.meta.id }).catch(() => {});
+      // The intent is kept first: a lost acknowledgement is tried again, and the result is never shown again meanwhile.
+      await store()?.update(op.id, outcome === 'applied' ? (a.meta ? { applied: a.meta.id } : {}) : { outcome }).catch(() => {});
       try { await jobApi.ack(op.id, op.cap, host.accessCode(), outcome); }
       catch (e) { if (!(e instanceof JobError && e.answered && ['OPERATION_NOT_FOUND', 'OPERATION_DAMAGED', 'OPERATION_CONFLICT'].includes(e.code))) return; } // kept: tried again later
       await store()?.remove(op.id).catch(() => {});
@@ -292,6 +304,15 @@ export function createMapRun(host: MapRunHost) {
   async function owed(r: Reservation) {
     if (closing.has(r.id)) return; closing.add(r.id);
     try {
+      if (r.outcome && !r.applied) {
+        // Let go or seen here before: only that acknowledgement is owed (to this very job).
+        let v: JobView; try { v = await jobApi.get(r.id, r.cap, host.accessCode()); }
+        catch (e) { if (e instanceof JobError && e.answered && ['OPERATION_NOT_FOUND', 'OPERATION_DAMAGED'].includes(e.code)) await store()?.remove(r.id).catch(() => {}); return; }
+        if (!await sameJob(v, r)) { await store()?.remove(r.id).catch(() => {}); return; }
+        try { if (!v.acked) await jobApi.ack(r.id, r.cap, host.accessCode(), r.outcome); }
+        catch (e) { if (!(e instanceof JobError && e.answered && ['OPERATION_CONFLICT', 'OPERATION_STATE'].includes(e.code))) return; }
+        await store()?.remove(r.id).catch(() => {}); return;
+      }
       // Acknowledged as applied only when the server's job is this reservation's, its result carries that reading id, and the
       // entry as saved (the job's own entry, project and lifecycle) holds that reading with the job's hash. Otherwise the note is
       // dropped and the job is looked at as any other.
@@ -317,7 +338,7 @@ export function createMapRun(host: MapRunHost) {
     const slot = of(r.binding.entryId);
     slot.attempt = { key: r.binding.entryId, project: r.binding.projectId, lifecycle: r.binding.lifecycle, visit: NO_VISIT, phase: 'asking', controller: new AbortController(), inp: null,
       prompt: r.binding.prompt, hash: r.binding.askHash, reply: null, model: '', meta: null,
-      op: { id: r.id, cap: r.cap, binding: r.binding, payload: null, receipt: r.receipt, state: 'unknown', cancelling: false, misses: 0, tick: 0, owned: false } };
+      op: { id: r.id, cap: r.cap, binding: r.binding, payload: null, receipt: r.receipt, state: 'unknown', cancelling: false, misses: 0, tick: 0, owned: false, release: null } };
     slot.error = null; slot.notice = null; host.changed(r.binding.entryId);
   }
   async function poll(a: Attempt) {
@@ -332,9 +353,11 @@ export function createMapRun(host: MapRunHost) {
           // the reservation goes: a cancel under the same capability is recorded first, so a submission still on its way can never
           // start later (if it did arrive meanwhile, it is cancelled, or its result is kept, as the server answers).
           if (!op.receipt && op.payload) { await submit(a); return; }
-          let v: JobView;
-          try { v = await jobApi.cancel(op.id, op.cap, host.accessCode()); }
-          catch (c) { if (++op.misses === 3) { of(a.key).notice = JOB_ERROR.UNREACHABLE!; host.changed(a.key); } return; }
+          // Only once the page sending it is gone (its hold is free): a page still sending it is waited for.
+          const closed = await store()?.orphan(op.id, async () => { try { return await jobApi.cancel(op.id, op.cap, host.accessCode()); } catch { return null; } });
+          if (closed === undefined) return;
+          if (closed === null) { if (++op.misses === 3) { of(a.key).notice = JOB_ERROR.UNREACHABLE!; host.changed(a.key); } return; }
+          const v: JobView = closed;
           if (v.state === 'cancelled' && v.remote === 'not-sent') { await forget(a, op.receipt ? JOB_ERROR.GONE! : JOB_ERROR.NOT_ACCEPTED!, 'seen'); return; }
           await seen(a, v); return;
         }
@@ -353,8 +376,8 @@ export function createMapRun(host: MapRunHost) {
     try {
       const jobs = store(); let list: Reservation[] = [];
       try { list = jobs?.list() ?? []; } catch { list = []; }
-      const owing = list.filter(r => r.applied && !closing.has(r.id));
-      for (const r of list) if (!r.applied && !closing.has(r.id) && !of(r.binding.entryId).attempt) attach(r);
+      const owing = list.filter(r => (r.applied || r.outcome) && !closing.has(r.id));
+      for (const r of list) if (!r.applied && !r.outcome && !closing.has(r.id) && !of(r.binding.entryId).attempt) attach(r);
       const watched = [...slots.values()].map(x => x.attempt).filter((a): a is Attempt => !!a?.op && (a.phase === 'asking' || a.phase === 'ready'));
       more = watched.length > 0 || owing.length > 0;
       await Promise.all(owing.map(owed));
@@ -378,7 +401,7 @@ export function createMapRun(host: MapRunHost) {
   return {
     input, can, blocked, run, runMapOnly: () => run(undefined, true), resume,
     /** The page is going: nothing more is looked at or sent from it (its jobs stay with the server and the reservations). */
-    dispose: () => { disposed = true; if (timer !== null) clearTimeout(timer); timer = null; for (const slot of slots.values()) slot.attempt = null; },
+    dispose: () => { disposed = true; if (timer !== null) clearTimeout(timer); timer = null; for (const slot of slots.values()) { slot.attempt?.op?.release?.(); slot.attempt = null; } },
     /** AF100: what the person is told beside the state: the reading continues without this window, cancelling, a notice. */
     detail: (key?: string): { durable: boolean; cancelling: boolean; notice: string | null } => {
       const k = key ?? host.current()?.key; const slot = k ? of(k) : null, a = slot?.attempt;

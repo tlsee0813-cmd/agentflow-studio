@@ -4,7 +4,12 @@
  * header. The job API itself is the local server's (/api/studio/jobs); nothing here retries as a new job. */
 import { RUNTIME } from './runtime.js';
 import { AskError } from './studio-api.js';
-import type { StorageLike, LockManagerLike } from '../shared/storage.js';
+import type { StorageLike } from '../shared/storage.js';
+/** Web Locks as the browser has them (a held lock is let go when its page goes, a reload included). */
+export interface JobLocks {
+  request(name: string, callback: (lock: unknown) => unknown): Promise<unknown>;
+  request(name: string, options: { ifAvailable: boolean }, callback: (lock: unknown) => unknown): Promise<unknown>;
+}
 import { validateBinding, jobHash, JOB_ID, JOB_CAPABILITY, type MapJobBinding } from '../shared/map-job.js';
 
 export const JOBS_KEY = 'agentflow.studio.map-jobs.1';
@@ -15,6 +20,8 @@ export interface Reservation {
   receipt: boolean;
   /** The reading id saved to the project (its acknowledgement may still be owed). */
   applied: string | null;
+  /** The person let the result go (discarded) or saw how the job ended (seen): kept until the server has it, never shown again. */
+  outcome?: 'discarded' | 'seen' | null;
   reservedAt: string;
 }
 export type JobState = 'accepted' | 'running' | 'ready' | 'failed' | 'cancelled' | 'interrupted';
@@ -61,7 +68,8 @@ function parse(raw: string | null): Reservation[] {
   if (v?.version !== 'map-jobs.1' || !Array.isArray(v.ops)) throw new Error('JOBS_UNREADABLE');
   return v.ops.map(o => {
     const r = o as Reservation;
-    if (!r || typeof r.id !== 'string' || !JOB_ID.test(r.id) || typeof r.cap !== 'string' || !JOB_CAPABILITY.test(r.cap) || typeof r.receipt !== 'boolean' || (r.applied !== null && typeof r.applied !== 'string') || typeof r.reservedAt !== 'string') throw new Error('JOBS_UNREADABLE');
+    if (!r || typeof r.id !== 'string' || !JOB_ID.test(r.id) || typeof r.cap !== 'string' || !JOB_CAPABILITY.test(r.cap) || typeof r.receipt !== 'boolean' || (r.applied !== null && typeof r.applied !== 'string') || typeof r.reservedAt !== 'string'
+      || ![undefined, null, 'discarded', 'seen'].includes(r.outcome)) throw new Error('JOBS_UNREADABLE');
     validateBinding(r.binding); return r;
   });
 }
@@ -69,7 +77,7 @@ function parse(raw: string | null): Reservation[] {
 export class JobReservations {
   /** kv must be this address's persistent storage itself: a read or write that fails throws (never read as empty, never kept in
    * memory instead). persistent=false (no such storage in this page) makes it unusable, so nothing is sent. */
-  constructor(private kv: StorageLike, private locks: LockManagerLike | null, private persistent = true) {}
+  constructor(private kv: StorageLike, private locks: JobLocks | null, private persistent = true) {}
   get usable(): boolean { return !!this.locks && this.persistent; }
   list(): Reservation[] { return parse(this.kv.getItem(JOBS_KEY)); }
   private async locked<T>(change: (ops: Reservation[]) => { next: Reservation[] | null; result: T }): Promise<T> {
@@ -80,17 +88,32 @@ export class JobReservations {
       return result;
     }) as T;
   }
-  /** The entry's reservation if it has one (reused), else a new one written before anything is sent. */
-  reserve(binding: MapJobBinding): Promise<{ res: Reservation; reused: boolean }> {
+  /** A new job id with this page's hold on it: taken before the reservation exists (nobody else knows the id yet) and kept while
+   * this page is sending it. Another page tells an orphan (its page gone, a reload) from one still being sent by this lock. */
+  newId(): string { return `MJ_${crypto.randomUUID()}`; }
+  hold(id: string): Promise<() => void> {
+    return new Promise((granted, fail) => {
+      let release!: () => void; const done = new Promise<void>(r => { release = r; });
+      if (!this.locks) { fail(new Error('LOCKS_UNAVAILABLE')); return; }
+      this.locks.request(`${JOBS_LOCK}:${id}`, () => { granted(release); return done; }).catch(fail);
+    });
+  }
+  /** fn runs only while no page holds the job (its sender is gone); otherwise nothing is done (undefined). */
+  async orphan<T>(id: string, fn: () => Promise<T>): Promise<T | undefined> {
+    if (!this.locks) return undefined;
+    return await this.locks.request(`${JOBS_LOCK}:${id}`, { ifAvailable: true }, lock => lock ? fn() : undefined) as T | undefined;
+  }
+  /** The entry's reservation if it has one (reused), else a new one under id, written before anything is sent. */
+  reserve(binding: MapJobBinding, id: string = this.newId()): Promise<{ res: Reservation; reused: boolean }> {
     return this.locked<{ res: Reservation; reused: boolean }>(ops => {
-      // A reservation whose reading is already saved only owes its acknowledgement: it never holds the entry.
-      const had = ops.find(o => o.binding.entryId === binding.entryId && !o.applied);
+      // A reservation whose reading is saved, or that was let go, only owes its acknowledgement: it never holds the entry.
+      const had = ops.find(o => o.binding.entryId === binding.entryId && !o.applied && !o.outcome);
       if (had) return { next: null, result: { res: had, reused: true } };
-      const res: Reservation = { id: `MJ_${crypto.randomUUID()}`, cap: capability(), binding: { ...binding }, receipt: false, applied: null, reservedAt: new Date().toISOString() };
+      const res: Reservation = { id, cap: capability(), binding: { ...binding }, receipt: false, applied: null, outcome: null, reservedAt: new Date().toISOString() };
       return { next: [...ops, res], result: { res, reused: false } };
     });
   }
-  update(id: string, patch: Partial<Pick<Reservation, 'receipt' | 'applied'>>): Promise<void> {
+  update(id: string, patch: Partial<Pick<Reservation, 'receipt' | 'applied' | 'outcome'>>): Promise<void> {
     return this.locked(ops => ops.some(o => o.id === id) ? { next: ops.map(o => o.id === id ? { ...o, ...patch } : o), result: undefined } : { next: null, result: undefined });
   }
   remove(id: string): Promise<void> {

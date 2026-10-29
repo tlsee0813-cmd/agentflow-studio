@@ -3824,6 +3824,153 @@ def map97_flow(browser, base, size, shots=None):
     context.close()
 
 
+MAP100_JOBS = "agentflow.studio.map-jobs.1"
+
+
+def free_port():
+    import socket
+    with socket.socket() as sock:
+        sock.bind(("127.0.0.1", 0)); return sock.getsockname()[1]
+
+
+def start_jobs(store, gate, port):
+    """The smoke server keeping map readings as durable jobs (STUDIO_JOBS_DIR) with each provider call held (STUDIO_STUB_GATE)."""
+    env = {**os.environ, "STUDIO_STUB": "ok", "PORT": str(port), "STUDIO_JOBS_DIR": store, "STUDIO_STUB_GATE": gate}
+    proc = subprocess.Popen(["node", str(ROOT / "tests/studio-smoke-server.mjs")], cwd=APP, env=env, stdout=subprocess.PIPE, text=True)
+    line = proc.stdout.readline()
+    if "jobs=durable" not in line:
+        proc.kill(); raise RuntimeError(f"job server did not start: {line!r}")
+    return proc
+
+
+def map100_flow(browser, size, shots=None):
+    """AF100: a map reading kept by the PC's Studio as a durable job (stubbed provider held per call, no model).
+    1. A asks; the page says it goes on without the window; reloaded, home says so on A's card. 2. On B with a long unsaved paste
+    (backward selection, scrolled) the result arrives: B's paste, selection, scroll and focus stay, A is not saved. 3. On A the
+    result waits for the person (a new visit after the reload) and applies once, asking nothing again. 4. Saved but the
+    acknowledgement lost: after a reload it is settled without applying again. 5. Cancel: said with what it cannot promise; the
+    call is stopped. 6. The Studio server killed during a job and started again: the page says it stopped; nothing sent again.
+    7. A second tab of the same address shows the first tab's job and never sends its own."""
+    w, hgt = size
+    store, gate, port = tempfile.mkdtemp(prefix="af100-store-"), tempfile.mkdtemp(prefix="af100-gate-"), free_port()
+    procs = [start_jobs(store, gate, port)]
+    base = f"http://127.0.0.1:{port}"
+    context = browser.new_context(viewport={"width": w, "height": hgt})
+    page = context.new_page()
+    errors = []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    shot = lambda name, pg=page: shots and pg.screenshot(path=f"{shots}/map100-{w}x{hgt}-{name}.png")
+    stored = lambda key: page.evaluate(MAP97_STORED, [MAP97_W, key])
+    go = lambda key, pg=page: pg.evaluate("k => { location.hash = k ? `#/p/${k}` : ''; }", key)
+    reservations = lambda: page.evaluate("k => JSON.parse(localStorage.getItem(k) ?? '{\"ops\":[]}').ops", MAP100_JOBS)
+    calls = lambda: len([f for f in os.listdir(gate) if f.startswith("called-")])
+
+    def wait(cond, why, ms=15000):
+        for _ in range(ms // 50):
+            if cond(): return
+            page.wait_for_timeout(50)
+        raise AssertionError(f"timed out: {why}")
+
+    def fresh(pg=page):
+        go(None, pg); pg.reload(); pg.wait_for_function("() => document.getElementById('ai-text')?.textContent === 'AI 정리 가능'"); pg.wait_for_timeout(100)
+
+    def release(n):
+        pathlib.Path(gate, f"release-{n}").write_text("")
+
+    def server_state(op):
+        import urllib.request
+        req = urllib.request.Request(f"{base}/api/studio/jobs/{op['id']}", headers={"X-AgentFlow-Request": "1", "X-Studio-Operation": op["cap"]})
+        with urllib.request.urlopen(req) as r: return json.loads(r.read())
+
+    def no_scroll(pg=page):
+        sizes = pg.evaluate("[document.documentElement.scrollWidth, innerWidth]")
+        assert sizes[0] <= sizes[1], f"horizontal page scroll: {sizes}"
+
+    space, line, card = page.locator("#space-empty"), page.locator("#world .map-understood"), page.locator(f'#saved-list [data-run-entry="{MAP97_A}"]')
+    try:
+        page.goto(base + "/"); page.evaluate(MAP97_SEED, [MAP97_W, MAP97_A, MAP97_B]); fresh()
+
+        # 1. A asks; the page says it goes on without the window. Reloaded: home says so on A's card (B has nothing).
+        go(MAP97_A); space.locator(".se-run").click(); space.get_by_text("기록을 읽고 지도를 정리하는 중…").wait_for()
+        space.locator(".mu-durable").get_by_text("창을 닫아도 이 PC의 Studio 실행기가 켜져 있으면 계속 정리해요").wait_for()
+        wait(lambda: calls() == 1, "one provider call"); no_scroll(); shot("a-pending")
+        op = reservations()[0]; assert "cap" in op and op["cap"] not in page.url
+        assert op["cap"] not in json.dumps(stored(MAP97_A)), "the capability is not in the project"
+        fresh(); card.get_by_text("지도 정리 중… · 창을 닫아도 PC에서 계속").wait_for(); shot("home-pending")
+        assert page.locator(f'#saved-list [data-run-entry="{MAP97_B}"]').is_hidden()
+
+        # 2. On B with a long unsaved paste the result arrives; nothing of B moves and A is not saved.
+        go(MAP97_B); space.locator(".se-run").wait_for()
+        space.get_by_role("button", name="기록 붙여넣기").click(); page.locator("#paste-text").fill(MAP97_LONG); page.evaluate(MAP97_SET_PASTE)
+        before = page.evaluate(MAP97_PASTE)
+        assert before["direction"] == "backward" and before["scroll"] > 0 and before["focus"], before
+        release(1); wait(lambda: server_state(op)["state"] == "ready", "ready on the server")
+        with page.expect_response(lambda r: f"/api/studio/jobs/{op['id']}" in r.url): pass
+        page.wait_for_timeout(300)
+        after = page.evaluate(MAP97_PASTE)
+        assert after == before, ("B's paste, selection, scroll and focus stay", {k: (before[k], after[k]) for k in before if k != "value"})
+        assert len(stored(MAP97_A)["project"]["readings"]) == 0 and stored(MAP97_B)["seq"] == 1, "A not saved while away, B untouched"
+        shot("b-paste")
+
+        # 3. A's result waits for the person and applies once, asking nothing again.
+        go(None); card.get_by_text("지도 정리 결과 도착 · 열어서 보기").wait_for()
+        go(MAP97_A); page.locator(".mu-apply").get_by_text("정리 결과 보기").wait_for()
+        assert len(stored(MAP97_A)["project"]["readings"]) == 0, "not applied before the person asks"
+        no_scroll(); shot("a-ready")
+        page.locator(".mu-apply").click()
+        page.wait_for_function("([w, k]) => JSON.parse(localStorage.getItem(w)).entries.find(e => e.entryId === k).project.readings.length === 1", arg=[MAP97_W, MAP97_A])
+        reading = stored(MAP97_A)["project"]["readings"][0]
+        assert reading["id"].startswith("R_") and calls() == 1
+        wait(lambda: reservations() == [], "acknowledged"); assert server_state(op)["acked"] == "applied"
+        page.locator("#world .node").first.wait_for()
+
+        # 4. Saved but the acknowledgement lost: after a reload it is settled without applying again.
+        page.evaluate(MAP97_ADD, [MAP97_W, MAP97_A, "작업 보고: 폴더 입력은 다음 판에서 구현한다."]); fresh()
+        page.route("**/api/studio/jobs/*/ack", lambda route: route.abort())
+        go(MAP97_A); line.locator(".mu-run").click(); wait(lambda: calls() == 2, "second call"); release(2)
+        page.wait_for_function("([w, k]) => JSON.parse(localStorage.getItem(w)).entries.find(e => e.entryId === k).project.readings.length === 2", arg=[MAP97_W, MAP97_A])
+        wait(lambda: reservations() and reservations()[0]["applied"], "saved, acknowledgement owed")
+        op2 = reservations()[0]; assert server_state(op2)["acked"] is None
+        page.unroute("**/api/studio/jobs/*/ack"); fresh()
+        wait(lambda: reservations() == [], "settled after the reload"); assert server_state(op2)["acked"] == "applied"
+        assert len(stored(MAP97_A)["project"]["readings"]) == 2 and calls() == 2
+
+        # 5. Cancel: said with what it cannot promise; the provider call is stopped; nothing applied.
+        page.evaluate(MAP97_ADD, [MAP97_W, MAP97_A, "작업 보고: 결과 파일은 한 폴더에 모은다."]); fresh()
+        go(MAP97_A); line.locator(".mu-run").click(); wait(lambda: calls() == 3, "third call")
+        line.get_by_role("button", name="취소").click()
+        line.get_by_text("요금까지 멈췄는지는 알 수 없어요", exact=False).wait_for(); shot("a-cancelled")
+        wait(lambda: os.path.exists(os.path.join(gate, "aborted-3")), "the call was stopped")
+        wait(lambda: reservations() == [], "closed")
+        assert len(stored(MAP97_A)["project"]["readings"]) == 2
+
+        # 6. The Studio server is killed during a job and started again: the page says it stopped; nothing is sent again.
+        go(MAP97_A); line.locator(".mu-run").click(); wait(lambda: calls() == 4, "fourth call")
+        procs[0].kill(); procs[0].wait()
+        procs.append(start_jobs(store, gate, port))
+        line.get_by_text("PC의 Studio 실행기가 종료되어 이번 정리는 중단됐어요", exact=False).wait_for(timeout=20000); shot("a-interrupted")
+        assert calls() == 4, "nothing sent again"
+        wait(lambda: reservations() == [], "seen")
+
+        # 7. A second tab of the same address shows the first tab's job and sends nothing of its own; the asking tab applies.
+        second = context.new_page(); second.on("pageerror", lambda e: errors.append(str(e)))
+        posts = []; second.on("request", lambda r: posts.append(r.url) if r.method == "POST" and r.url.endswith("/api/studio/jobs") else None)
+        second.goto(base + "/"); fresh(second); go(MAP97_A, second); second.locator("#world .map-understood .mu-run").wait_for()
+        line.locator(".mu-run").click(); wait(lambda: calls() == 5, "fifth call")
+        second.locator("#world .map-understood").get_by_text("기록을 읽고 지도를 갱신하는 중…").wait_for()
+        assert second.locator("#world .map-understood .mu-run").count() == 0, "no second request offered"
+        no_scroll(second); shot("second-tab", second)
+        release(5)
+        page.wait_for_function("([w, k]) => JSON.parse(localStorage.getItem(w)).entries.find(e => e.entryId === k).project.readings.length === 3", arg=[MAP97_W, MAP97_A])
+        second.wait_for_function("() => !document.querySelector('#world .map-understood .mu-pending')")
+        assert posts == [] and calls() == 5, (posts, calls())
+        assert second.locator(".mu-apply").count() == 0, "the other tab offers no second apply"
+        assert not errors, errors
+        context.close()
+    finally:
+        for proc in procs: proc.kill()
+
+
 def main():
     procs = []
     try:
@@ -3854,6 +4001,10 @@ def main():
                 # Only the AF97 flow: a map reading's reply let through while another project or home is open; stubbed provider.
                 proc, base = start("ok"); procs.append(proc)
                 for size in ((1280, 720), (1440, 900)): map97_flow(browser, base, size, sys.argv[2] if len(sys.argv) > 2 else None); print(f"ok  AF97 map return at {size[0]}x{size[1]}")
+                browser.close(); return
+            if sys.argv[1:2] == ["map100"]:
+                # Only the AF100 flow: map readings kept by the PC's Studio as durable jobs; stubbed provider held per call.
+                for size in ((1280, 720), (1440, 900)): map100_flow(browser, size, sys.argv[2] if len(sys.argv) > 2 else None); print(f"ok  AF100 durable map job at {size[0]}x{size[1]}")
                 browser.close(); return
             if sys.argv[1:2] == ["reading87"]:
                 # Only the AF85/87 flows: the stored real 85 reply replayed in the browser, no provider.
@@ -3892,6 +4043,8 @@ def main():
             for size in ((1280, 720), (1440, 900)): request94_flow(browser, base, size)
             request94_resize_flow(browser, base)
             for size in ((1280, 720), (1440, 900)): map97_flow(browser, base, size)
+            for size in ((1280, 720), (1440, 900)): map100_flow(browser, size)
+            print("ok  AF100 durable map job at 1280/1440: kept through a reload, B's paste untouched, applied once on request, lost acknowledgement settled, cancel stopped, server restart said as stopped with nothing resent, second tab sends nothing")
             print("ok  AF97 map return at 1280/1440: B's paste, selection, scroll and focus, B's reading button and the home draft kept while A's reply comes; applied on return without asking again; saving not cancellable; a visit opened during the save takes it")
             print("ok  AF85 empty analysis on the micro draft at 1280/1440: reads at once, source and back, close/reopen/reload/file, earlier request and return kept, positive with none chosen apart")
             proc, base = start("code"); procs.append(proc); code_flow(browser, base); print("ok  access code kept from an input event")

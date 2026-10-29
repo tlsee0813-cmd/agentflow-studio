@@ -5,7 +5,7 @@ import { createContinuityApp } from '../server/app.mjs';
 import { createStudioHandler } from '../server/studio.mjs';
 import { readConfig } from '../../server/config.mjs';
 import { openMapJobs } from '../server/map-jobs.mjs';
-import { existsSync, writeFileSync } from 'node:fs';
+import { existsSync, writeFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 const mode = process.env.STUDIO_STUB ?? 'ok';
 let calls = 0;
@@ -13,7 +13,8 @@ let calls = 0;
 // map call: the stub writes called-<n> when the call reaches it and answers only once release-<n> exists (or the call is aborted),
 // so a test counts provider calls and decides when each answers without timing guesses.
 const gate = process.env.STUDIO_STUB_GATE ?? null;
-let mapCalls = 0;
+// Numbered on from the calls already in the folder, so a server started again on it never reuses an earlier call's release.
+let mapCalls = gate ? readdirSync(gate).filter(f => f.startsWith('called-')).length : 0;
 async function held(signal) {
   const n = ++mapCalls; writeFileSync(join(gate, `called-${n}`), String(Date.now()));
   while (!existsSync(join(gate, `release-${n}`))) {

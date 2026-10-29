@@ -285,7 +285,16 @@ test('100-B8 applied and discarded results shrink to tombstones; a ready result 
 });
 
 /* ---------- D: the browser's reservations, recovery and explicit apply (createMapRun over the real handler) ---------- */
-function locks() { const chains = new Map(); return { request(name, cb) { const prev = chains.get(name) ?? Promise.resolve(), next = prev.then(() => cb()); chains.set(name, next.catch(() => {})); return next; } }; }
+/** Web Locks as a page has them: queued per name, and ifAvailable answers at once (null while another holder has it). */
+function locks() {
+  const chains = new Map(), held = new Set();
+  return { request(name, a, b) {
+    const opts = typeof a === 'function' ? {} : a, cb = typeof a === 'function' ? a : b;
+    if (opts.ifAvailable && held.has(name)) return Promise.resolve(cb(null));
+    const next = (chains.get(name) ?? Promise.resolve()).then(async () => { held.add(name); try { return await cb({ name }); } finally { held.delete(name); } });
+    chains.set(name, next.catch(() => {})); return next;
+  } };
+}
 function memoryKv() { const m = new Map(); return { getItem: k => m.get(k) ?? null, setItem: (k, v) => { if (m.failNext?.(k)) throw new Error('quota'); m.set(k, v); }, map: m }; }
 const reservations = kv => { const v = kv.getItem(JOBS_KEY); return v ? JSON.parse(v).ops : []; };
 async function browser(svc) {
@@ -300,19 +309,19 @@ async function browser(svc) {
   const prompt = await mapPromptId(), entries = new Map(), shared = { kv: memoryKv(), locks: locks() };
   const tab = () => {
     const w = { cur: null, commits: 0, done: [], commitImpl: null, status: { ai: 'deepseek', model: 'm', access: 'open', map: { model: 'deepseek-flash', prompt }, jobs: { durable: true, problem: null } } };
-    const store = new JobReservations(shared.kv, shared.locks);
-    w.run = createMapRun({ current: () => w.cur, visit: () => w.cur, status: () => w.status, accessCode: () => '', jobs: () => store, pollMs: 2,
+    const store = new JobReservations(shared.kv, shared.locks); w.own = new Set();
+    w.run = createMapRun({ ownSave: (key, seq) => w.own.has(`${key}:${seq}`), current: () => w.cur, visit: () => w.cur, status: () => w.status, accessCode: () => '', jobs: () => store, pollMs: 2,
       stored: key => { const e = entries.get(key); return e ? { project: e.project, lifecycle: e.lifecycle } : null; },
       commit: async next => {
         const o = w.cur, e = entries.get(o.key); w.commits++; const failed = w.commitImpl ? await w.commitImpl(next, o) : null; if (failed) return failed;
         // The workspace's own check: a save only on the save this page read.
         if (e.seq !== o.ref.seq || e.lifecycle !== o.ref.lifecycle) return '다른 탭에서 바뀌어 저장하지 않았어요.';
-        o.project = next; o.view = studioView(next); e.project = next; e.seq++; o.ref = { ...o.ref, seq: e.seq }; return null;
+        o.project = next; o.view = studioView(next); e.project = next; e.seq++; w.own.add(`${o.key}:${e.seq}`); o.ref = { ...o.ref, seq: e.seq }; return null;
       },
       done: a => w.done.push(a), changed: () => {} });
     w.open = key => { const e = entries.get(key); w.cur = { key, kind: 'saved', project: e.project, view: studioView(e.project), ref: { lifecycle: e.lifecycle, seq: e.seq } }; return w.cur; };
     /** The person's own edit in this page, saved (another tab's save is edit() on the entries directly). */
-    w.edit = change => { const e = entries.get(w.cur.key); const next = change(w.cur.project); e.project = next; e.seq++; Object.assign(w.cur, { project: next, view: studioView(next), ref: { ...w.cur.ref, seq: e.seq } }); };
+    w.edit = change => { const e = entries.get(w.cur.key); const next = change(w.cur.project); e.project = next; e.seq++; w.own.add(`${w.cur.key}:${e.seq}`); Object.assign(w.cur, { project: next, view: studioView(next), ref: { ...w.cur.ref, seq: e.seq } }); };
     return w;
   };
   return { net, entries, shared, tab, add: (key, p, lifecycle = 1) => entries.set(key, { project: p, lifecycle, seq: 1 }),
@@ -531,5 +540,42 @@ test('100-D12 no persistent storage for reservations: nothing is reserved or sen
   const w = host(store); await w.run.run();
   assert.match(w.run.state().error, /기록하지 못해 보내지 않았어요/); assert.deepEqual(writes, []);
   assert.equal(svc.prov.calls, 0); assert.ok(!b.net.sent.some(x => x.startsWith('POST /api/studio/jobs')));
+  await svc.jobs.close();
+});
+
+test('100-D13 asked here, then another project, another tab saves it, and back: the fresher read is not this page\'s own save', async () => {
+  const svc = await service(), b = await browser(svc), A = 'E_tab00000-18', B = 'E_tab00000-19';
+  b.add(A, project()); b.add(B, project('요구: B는 일정표를 보여 준다.'));
+  const t = b.tab(); t.open(A); await t.run.run(); await until(() => svc.prov.calls === 1, 'called');
+  t.open(B); b.saveElsewhere(A, p => D.rename(p, '다른 탭이 바꾼 이름'));
+  svc.prov.gates[0].open(); await until(() => t.run.stateOf(A).ready, 'ready while away');
+  t.open(A); assert.equal(t.cur.ref.seq, 2); await t.run.applyReady();
+  assert.match(t.run.state().error, /다른 화면에서 저장되어 이번 결과는 반영하지 않았어요/); assert.equal(t.commits, 0);
+  assert.equal(readings(b.entries.get(A).project), 0); assert.equal(b.entries.get(A).project.name, '다른 탭이 바꾼 이름');
+  await until(() => reservations(b.shared.kv).length === 0, 'let go'); assert.equal(svc.prov.calls, 1);
+  // The same path with this page's own edit on return (97: a project left and come back to keeps its own edits): applied.
+  t.open(A); await t.run.run(); await until(() => svc.prov.calls === 2, 'called');
+  t.open(B); t.open(A); t.edit(p => D.rename(p, '내가 다시 바꾼 이름'));
+  svc.prov.gates[1].open(); await until(() => t.run.stateOf(A).ready, 'ready (a new visit waits)');
+  await t.run.applyReady(); assert.equal(readings(b.entries.get(A).project), 1); assert.equal(b.entries.get(A).project.name, '내가 다시 바꾼 이름');
+  await until(() => reservations(b.shared.kv).length === 0, 'acknowledged'); await svc.jobs.close();
+});
+
+test('100-D14 a result let go stays let go: its acknowledgement lost, it is tried again on the next look and on a reload, never shown again', async () => {
+  const svc = await service(), b = await browser(svc), A = 'E_tab00000-1A';
+  b.add(A, project()); const t = b.tab(); t.open(A); t.cur = { ...t.cur }; // asked, then the person is on a new visit of A
+  await t.run.run(); t.open(A); await until(() => svc.prov.calls === 1, 'called'); svc.prov.gates[0].open();
+  await until(() => t.run.state().ready, 'ready'); const { id, cap } = reservations(b.shared.kv)[0];
+  b.net.fail = url => url.endsWith('/ack');
+  t.run.discard(); assert.equal(t.run.state().ready, false);
+  await until(() => reservations(b.shared.kv)[0]?.outcome === 'discarded', 'the intent kept');
+  for (let i = 0; i < 20; i++) await tick();
+  assert.equal(t.run.state().ready, false, 'not shown again while the acknowledgement is owed'); t.run.dispose();
+  const page = b.tab(); page.open(A); page.run.resume();
+  for (let i = 0; i < 20; i++) await tick();
+  assert.equal(page.run.state().ready, false, 'not shown again after a reload');
+  b.net.fail = null; page.run.resume();
+  await until(() => reservations(b.shared.kv).length === 0, 'acknowledged');
+  assert.equal((await jcall(svc.handle, 'GET', `/${id}`, cap)).acked, 'discarded'); assert.equal(readings(b.entries.get(A).project), 0);
   await svc.jobs.close();
 });

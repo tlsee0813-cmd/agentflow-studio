@@ -9,7 +9,7 @@ import { CLAIM_LABEL, stateLabel, revisedRelations, candidateReading, type Appli
 import { roleEvidence } from './role-evidence.js';
 import type { ClaimKind, ReadingQuote } from '../shared/types.js';
 import { createMapRun, sendLine, JOB_NOTE, type MapRunState } from './map-run.js';
-import { JobReservations } from './map-jobs.js';
+import { JobReservations, JOBS_KEY, type JobLocks } from './map-jobs.js';
 import { requestResults, frozenRequests, displayAbout, captureRequestReading, restoreRequestReading } from './request-results.js';
 import { correctRequestMatch, unlinkReplacement, requestComparison } from '../shared/request-return.js';
 import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
@@ -1521,10 +1521,13 @@ function renderPanel(scrollTop: boolean) {
   if (scrollTop) body.scrollTop = 0; else body.scrollTop = keep;
 }
 
+/** AF100: the saves this page made itself (entry and the save number each made), so a job's result is applied on top of this
+ * page's own edits only, never on a save another tab made meanwhile. */
+const ownSaves = new Set<string>();
 /** The one write path for structure edits: saved projects through the workspace store, examples in memory only. */
 async function commit(o: Opened, next: Project): Promise<string | null> {
   if (o.kind === 'saved' && o.ref) {
-    try { o.ref = await store.save(o.ref, next); }
+    try { o.ref = await store.save(o.ref, next); ownSaves.add(`${o.ref.entryId}:${o.ref.seq}`); }
     catch (err) { return storageErrorCode(err) === 'STORAGE_CONFLICT' ? '다른 탭에서 이 프로젝트가 바뀌어 저장하지 않았어요. 새로고침한 뒤 다시 해 주세요.' : '저장하지 못했어요. 바뀐 내용은 적용하지 않았어요.'; }
   } else if (o.kind === 'example') examples.set(o.key, next);
   else return '이 프로젝트는 읽기 전용이에요.';
@@ -1813,6 +1816,7 @@ const mapRun = createMapRun({
   changed: key => mapChanged(key),
   // AF100: reservations of durable jobs, apart from projects and backups (under their own lock); used when the server keeps jobs.
   jobs: () => jobReservations,
+  ownSave: (key, seq) => ownSaves.has(`${key}:${seq}`),
   stored: key => { const fresh = new WorkspaceStore(kv, null); fresh.read(); const e = fresh.entries().find(x => x.entryId === key); return e ? { project: e.project, lifecycle: e.lifecycle } : null; }
 });
 let jobReservations: JobReservations | null = null;
@@ -2349,13 +2353,15 @@ async function main() {
   // AF100: reservations only in the real persistent storage, with its failures as they are (the memory fallback and the
   // read-as-empty of kv above are for the rest of the page, never for a job that must outlive it).
   const durableStore = storage;
-  jobReservations = new JobReservations(runtimeStorage({ getItem: k => durableStore!.getItem(k), setItem: (k, v) => durableStore!.setItem(k, v) }), locks, !!durableStore);
+  jobReservations = new JobReservations(runtimeStorage({ getItem: k => durableStore!.getItem(k), setItem: (k, v) => durableStore!.setItem(k, v) }), locks as JobLocks | null, !!durableStore);
   try { await store.init(); } catch { store.read(); }
   bindCanvas(); bindFind(); bindImport(); bindNewProject();
   $('add-part').addEventListener('click', () => openPartForm(scope));
   $('plan-entry').addEventListener('click', () => planView.toggle());
   $('return-entry').addEventListener('click', () => { if (returnView.isOpen() && !planView.isOpen()) returnView.close(); else openReturn(); });
   statusReady = aiStatus().then(s => { status = s; renderStatus(); planView.statusChanged(); refreshReading(); if (!selected && !planView.isOpen()) returnView.render(); mapRun.resume(); });
+  // AF100: a reservation another tab of this address made (or ended) is looked at now, not at this page's next click.
+  window.addEventListener('storage', e => { if (e.key?.endsWith(JOBS_KEY)) void statusReady?.then(() => mapRun.resume()); });
   window.addEventListener('hashchange', () => void render());
   window.addEventListener('pagehide', flushView);
   document.addEventListener('visibilitychange', () => { if (document.hidden) flushView(); });
