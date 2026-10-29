@@ -1,0 +1,141 @@
+{
+  "head": "ca9b56333273541e318cef1a91641f83f38cae38",
+  "run": 40952043513,
+  "job": 123722382300,
+  "os": "windows-2022",
+  "conclusion": "success",
+  "steps": [
+    {
+      "name": "Set up job",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 1
+    },
+    {
+      "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 2
+    },
+    {
+      "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 3
+    },
+    {
+      "name": "Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 4
+    },
+    {
+      "name": "Record exact runtime and checked-out commit",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5
+    },
+    {
+      "name": "Clean locked install",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 6
+    },
+    {
+      "name": "Type and boundary checks",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 7
+    },
+    {
+      "name": "Build and domain / HTTP / simulated provider tests",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 8
+    },
+    {
+      "name": "Continuity type, syntax and credential boundary checks",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 9
+    },
+    {
+      "name": "Build and test continuity with simulated providers",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 10
+    },
+    {
+      "name": "Prepare Cloudflare modules and assets without credentials or deployment",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 11
+    },
+    {
+      "name": "Build static site (no AI server bundled, no credentials)",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 12
+    },
+    {
+      "name": "Install pinned browser verification tools",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 13
+    },
+    {
+      "name": "Direct browser-to-server verification (original app, AI is still mocked)",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 14
+    },
+    {
+      "name": "Studio smoke - entry, map, part, ask, failure/retry, no-key and static states (stubbed provider, no real key)",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 15
+    },
+    {
+      "name": "Upload only this run's results, not historic snapshot evidence",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 16
+    },
+    {
+      "name": "Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 30
+    },
+    {
+      "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 31
+    },
+    {
+      "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 32
+    },
+    {
+      "name": "Complete job",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 33
+    }
+  ],
+  "logEvidence": [
+    "2026-10-29T20:47:42.8730141Z HEAD is now at ca9b563 docs(120): author result for part-id vocabulary contract\r",
+    "2026-10-29T20:50:49.5866512Z # tests 279\r",
+    "2026-10-29T20:50:49.5866846Z # pass 279\r",
+    "2026-10-29T20:50:49.5867004Z # fail 0\r",
+    "2026-10-29T20:50:49.5867158Z # skipped 0\r",
+    "2026-10-29T20:52:14.6220825Z # tests 629\r",
+    "2026-10-29T20:52:14.6221160Z # pass 626\r",
+    "2026-10-29T20:52:14.6221323Z # fail 0\r",
+    "2026-10-29T20:52:14.6221667Z # skipped 3\r",
+    "2026-10-29T20:53:46.3146606Z Ran 18 tests in 19.495s\r"
+  ]
+}

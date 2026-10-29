@@ -1,0 +1,53 @@
+{
+  "cycle": 120,
+  "review": "one-fixed-delta-plus-small-independent-id-comparison",
+  "base": "b7e7292",
+  "product": "be061284af3154b1a746acdbc249fd1cf72a24f4",
+  "docsHead": "ca9b56333273541e318cef1a91641f83f38cae38",
+  "verdict": "BOUNDED_NO_ACTIONABLE_P1_P2_FOUND",
+  "acceptanceOwner": "Root",
+  "activity": { "productWrites": 0, "models": 0, "119WireReadsRepairsOrRevalidation": 0, "browserRuns": 0, "builds": 0, "wholeSuiteReruns": 0, "independentFreezeInvocations": 1, "independentNewComparisonInvocations": 1 },
+  "findings": [],
+  "independentCases": {
+    "runner": ".ops/experience120-reference-vocabulary/independent-cases.mjs",
+    "frozen": ".ops/experience120-reference-vocabulary/independent-cases.json",
+    "source": "Fresh synthetic tile records only. Manual NEW/known-exact/unique/reference expectations were written and frozen using Root's pre120 module copy before this reviewer inspected the new implementation source. No119 reply or repaired fragment was used.",
+    "result": "79/79 matched on the first new-module comparison:25 expected accepted and54 expected rejected. Accepted normalized outputs are exactly equal to the frozen old outputs. Both ask and wire JSON remain byte-equivalent before/after every validator call. Invalid MAP7 refs produce the frozen expected fixed-category diagnostic; other errors retain their old ordering/shape.",
+    "schemaCounts": { "map7": 33, "map6": 31, "map1": 3, "map2": 3, "map3": 3, "map4": 3, "map5": 3 },
+    "coverage": "Legal one-character letters/digits/_/-, mixed legal suffixes and24-character suffix; CamelCase/uppercase/empty/25/non-ASCII/spaces/colon; exact known P01 versus unknown/case/whitespace; duplicate new and known refs; no casefold repair; valid parent/relation/candidate identity reuse; mismatched/unresolved references; condition-form and exact-object-shape refusals preceding the new ref diagnostic.",
+    "legacyLimit": "Map1-5 each have only a valid-new-key, CamelCase rejection and duplicate-known-part witness, not a repeated comprehensive legacy suite. Map6 carries the wider ID/reference matrix. These finite witnesses complement the static equivalence check; they are not a proof by exhaustive enumeration of every possible wire.",
+    "frozenHashes": {
+      "runner": "9d227d44862da6687c052227d590187bfa3b617f179ec92ccf2915115a966edb",
+      "inputsAndOldExpectations": "cb0e6591c3af63f14fa9e97a47d7e6fe60e1bc06d813ce3b1a64eb5dfc6e6ece",
+      "oldMapReadingJs": "6272445dfe2be77738b329e2b2310ae0c66b64f9e40512010e1d857e4543730b",
+      "newMapReadingJs": "60079ead93ae415b7400bc5c9d61679fe37d184c34e2cb5b29f8e3f4284f35c7"
+    }
+  },
+  "staticDeltaAssessment": [
+    {
+      "file": "app/continuity/src/shared/map-reading.ts",
+      "lines": [116, 277, 279, 281],
+      "assessment": "NEW itself is unchanged. The existing compound string/known-or-NEW/unique condition is retained verbatim as the refusal predicate. form() and exact obj() remain before it, refs/news updates remain after it, and map7 alone gets MapReplyError with parts[i].ref/reference and a fixed category. Nonstrings receive invalid-ref, existing duplicates duplicate-part, malformed new-prefixed keys invalid-new-key, otherwise unknown-part. No rejected value is reflected; no trim/lowercase/ID reassignment occurs. Old1-6 fall through to the same generic check(false). Whole-response atomic rejection is unchanged."
+    },
+    {
+      "file": "app/continuity/server/map-prompt.mjs",
+      "assessment": "MAP7_VOCABULARY accurately states the existing ASCII lowercase/digit/underscore/hyphen1–24 suffix and exact regex, distinguishes display name from internal ID, and requires the same spelling in parent/from/to/candidate parts with no duplicate definitions. It is appended only to the active later7 renderer between the frozen base and unchanged condition guidance. It does not broaden the accepted set, create a new schema/selector or alter FIRST6/map1-6/baseMAP7/source data."
+    },
+    {
+      "file": "app/continuity/server/studio.mjs",
+      "assessment": "Recipe revision3 includes the vocabulary contract, and advertised recipe hashing includes the actual vocabulary text as well as the frozen base and guidance frame. The existing single renderer is still used by the provider and CLI, so current actual-system SHA changes explicitly while the unchanged prepare/start guards continue to bind it. There is no new execution or ready-result rebinding path."
+    }
+  ],
+  "authorTests": {
+    "assessment": "condition120.test adds focused legal/illegal new-ID cases, exact cross-reference checks, no-wire-mutation assertions and form/object/ref ordering; new7 category details; prompt vocabulary/recipe checks and provider stale-recipe refusal. Existing condition118 assertions are updated only for the inserted vocabulary and recipe revision3. The source/capability/guidance checks are not removed.",
+    "scopeCaveat": "The author's120-3 title says map.1–6, but the function constructs only a MAP6 ask and tests its behavior. Do not cite that test alone as executed behavior coverage of all1–6. The separate private independent comparison supplies the limited three-witness-per-schema1–5 coverage described above. Existing hash tests cover old prompt text separately.",
+    "reportedNotReexecuted": "Root reports locked Windows Node24.19/TS5.8.3 build/check and the five focused author tests passed. Author reports89 related tests. This reviewer did not rerun those tests, Root's13 frozen prompt/table checks or the normal PC flows."
+  },
+  "limits": [
+    "This is a normative vocabulary/diagnostic repair. No actual model has shown that it will choose a legal new identifier or preserve every source condition;119 remains wholly rejected.",
+    "The new fixed categories for nonstring refs are statically correct and covered by author tests; the independent string-focused matrix deliberately did not guess a nonstring category before seeing the implementation.",
+    "No product UI code changed. This review requests no repeated whole simulated PC flow. The next actual ready→explicit apply→source/back→backup/meaning gate requires a separate Root selection after120 acceptance.",
+    "Exact-head CI and final publication are Root's gate; static source review and the79-case comparison do not claim whole-product or delivery completion."
+  ],
+  "conclusion": "No actionable P1/P2 was found. The exact existing ID vocabulary is now stated and the same MAP7 refusal gets safe structured detail without changing acceptance or order. Independent frozen old/new cases matched79/79, with explicit limited legacy coverage. Root may finish the selected exact checks and decide narrow implementation acceptance; no new model call is selected here."
+}

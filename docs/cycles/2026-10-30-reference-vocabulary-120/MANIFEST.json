@@ -1,0 +1,70 @@
+{
+  "sourceHead": "ca9b56333273541e318cef1a91641f83f38cae38",
+  "productHead": "be061284af3154b1a746acdbc249fd1cf72a24f4",
+  "appTree": "7b36f3ebf07a0cea25b36677ef2aedf4c6f23703",
+  "review": {
+    "authorRelatedTests": 89,
+    "rootFocusedTests": 5,
+    "independentFiniteCases": 79,
+    "oldPromptStrings": 13,
+    "originalReady7RecoveryCalls": 0,
+    "realGenerationCalls": 0,
+    "failed119ValidatorReplays": 0
+  },
+  "publicStatus": {
+    "public": 73,
+    "unaccepted": 74,
+    "uiOnlyAccepted": 75,
+    "ui75Commit": "693d0c7e022bc76b5334b0dd4cf0e6f04ef028ff",
+    "merged": false,
+    "deployed": false
+  },
+  "evidence": [
+    {
+      "file": "evidence/ci-linux.json",
+      "bytes": 4041,
+      "sha256": "066aa44fd1d6c87ffe351c2eb2d3302bab16c6c38002c797ba5ff300c9a58c72"
+    },
+    {
+      "file": "evidence/ci-windows.json",
+      "bytes": 4022,
+      "sha256": "6037d00ca97c20205094dec4005e63b14bfa87b7db0ddbfe0d4ea45c9966dc8f"
+    },
+    {
+      "file": "evidence/independent-review.json",
+      "bytes": 6743,
+      "sha256": "9f18478db31c05d09ed0c31df78c804ef10522d1458bbffb79ff7f76a29313f9"
+    },
+    {
+      "file": "evidence/old-ready7-recovery.json",
+      "bytes": 641,
+      "sha256": "28fab12d70cc90ef0ccd8a1e21796ada309c884e5a390be148f2d67ccf45877b"
+    },
+    {
+      "file": "evidence/prompt-proof.json",
+      "bytes": 1866,
+      "sha256": "59ceeb197c7d7f8c2192769fbbe479694ef73165137c5fec6d28161feed867ff"
+    },
+    {
+      "file": "evidence/root-checks.json",
+      "bytes": 1528,
+      "sha256": "1cee9797b8e0b61cb45ebd5c2545112227c591aeb73a49d04e82bdea7669cda2"
+    }
+  ],
+  "ci": {
+    "head": "ca9b56333273541e318cef1a91641f83f38cae38",
+    "run": 40952043513,
+    "linux": {
+      "job": 123722382750,
+      "pass": 629,
+      "skip": 0
+    },
+    "windows": {
+      "job": 123722382300,
+      "pass": 626,
+      "skip": 3
+    },
+    "bothSuccess": true,
+    "directEach": 18
+  }
+}

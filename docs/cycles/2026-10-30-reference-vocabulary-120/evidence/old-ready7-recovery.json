@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "source": "original Root118 normal UI ready file, pre120 producer; copied bytes, never reconstructed or regenerated",
+  "oldFileSHA256": "d11448e62c48780bacc3149047fd56e97ec276fa03b9499576507d6ddf1d9577",
+  "oldRecipe": "m7-82631aa43efc",
+  "oldPromptSHA256": "1565dd000fe0729bae45db9bf42341a183aca60942c06717f83598aace8898de",
+  "inputSHA256": "acf638bc0f250c3c7ac9bb13266743959a4ee36c0195ba397a7952fd9040cd7d",
+  "resultSHA256": "b5fe7cc0b9a3a237a506288ec13081d45fa52c0f60bc9d54aeeccaea84076311",
+  "readyInputResultBindingExecutionExact": true,
+  "readOnlyFileExact": true,
+  "runAccesses": 0,
+  "modelCalls": 0
+}
