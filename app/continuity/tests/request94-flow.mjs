@@ -1,5 +1,6 @@
 // AF94 request94 flow, Node Playwright port of studio_browser.py request94_flow (same steps and checks). Runs only this flow:
 //   node continuity/tests/request94-flow.mjs [shots-dir]        (from app/, after the continuity and app builds)
+//   node continuity/tests/request94-flow.mjs resize [shots-dir] (DELTA2 only: a document left open while the window narrows)
 // Author-written fixture: the public micro backup (context75) with stubbed replies routed in the browser ([테스트 응답]), not a
 // model reply. No provider is called. A document made before 94 is the same generator's document with its reading removed (its
 // text is the pre-94 text, see reading94.test.mjs); it stands for a document kept by the 93 app, not for a real saved copy.
@@ -12,7 +13,7 @@ import assert from 'node:assert/strict';
 
 const { chromium } = createRequire(import.meta.url)('playwright');
 const ROOT = fileURLToPath(new URL('..', import.meta.url)), APP = fileURLToPath(new URL('../..', import.meta.url));
-const SHOTS = process.argv[2] ?? null;
+const RESIZE = process.argv[2] === 'resize', SHOTS = process.argv[RESIZE ? 3 : 2] ?? null;
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 const sha = t => createHash('sha256').update(t, 'utf8').digest('hex');
 
@@ -247,8 +248,81 @@ async function flow(browser, base, [w, hgt]) {
   return record;
 }
 
+/** DELTA2: a document open at 1280x720 (U01 unfolded, both views scrolled, focus on its fold) while the window goes to 700, 606
+ * and back to 1280. Below 720 the pane is the whole window; the sheet must then cover the window instead of the empty strip beside
+ * it (it fell to a 2px column). Nothing re-renders: folds, each view's place, focus, the text and the stored request stay; copy
+ * and close stay in view; closing still returns to its opener. */
+async function resizeFlow(browser, base) {
+  const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: base });
+  const page = await context.newPage(), errors = [], record = [];
+  page.on('pageerror', e => errors.push(String(e)));
+  const ev = (fn, arg) => page.evaluate(fn, arg);
+  await page.goto(base + '/');
+  await page.locator('#import-file').setInputFiles(`${ROOT}tests/fixtures/context75/micro-javascript-backup.json`);
+  await page.waitForURL(/#\/p\/[^/]+/);
+  const project = await ev(ENTRY, decodeURIComponent(/#\/p\/([^/]+)/.exec(page.url())[1]));
+  const KEY = 'agentflow.studio.plans.1';
+  await ev(([k, id, b]) => localStorage.setItem(k, JSON.stringify({ version: 'studio.plans.4', projects: { [id]: b } })),
+    [KEY, project.id, { draft: SENTENCE, extra: [U01], plan: null, by: null, snapshots: [], labels: {}, origins: {}, observations: [], attached: {} }]);
+  await page.reload();
+  await page.route('**/api/studio/plan', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ model: 'stub-model', reply: positive(route.request().postDataJSON()) }) }));
+  await page.route('**/api/studio/scope', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ model: 'stub-model', reply: REVIEW }) }));
+  const sheet = page.locator('#plan-sheet'), body = sheet.locator('[data-sheet-part="text"]'), last = page.locator('#plan-panel [data-sheet-entry="last"]');
+  const u01 = sheet.locator('[data-ref="U01"] button'), stored = () => ev(([k, id]) => JSON.parse(localStorage.getItem(k)).projects[id], [KEY, project.id]);
+  await page.locator('#plan-entry').click(); await page.locator('#plan-ask').click();
+  await page.locator('#plan-strip .ps-more').click(); await page.locator('#plan-make').click(); await sheet.waitFor();
+  await page.keyboard.press('Escape'); await sheet.waitFor({ state: 'hidden' });
+  const kept = await stored(), text = kept.snapshots.at(-1).text;
+  await last.click(); await sheet.waitFor();
+  await sheet.locator('[data-sheet-part="go-materials"]').click(); await u01.click();
+  await sheet.locator('[data-sheet-part="view-text"]').click(); await body.evaluate(b => { b.scrollTop = 900; });
+  await sheet.locator('[data-sheet-part="view-reading"]').click(); await body.evaluate(b => { b.scrollTop = 600; });
+  await u01.focus();
+  await body.evaluate(b => { b.__kept = true; }); // the same element after every resize: nothing re-rendered
+  // Where the reading is: the first slice still in view at the top. The browser keeps it there when the text reflows (scroll
+  // anchoring), so the pixel offset may move while the place read does not.
+  const topSlice = () => body.evaluate(b => { const t = b.getBoundingClientRect().top; return [...b.querySelectorAll('[data-at]')].find(e => e.getClientRects().length && e.getBoundingClientRect().bottom > t + 1)?.dataset.at ?? null; });
+  const state = async () => ({ cls: await sheet.getAttribute('class'), box: await sheet.boundingBox(), copy: await sheet.locator('#plan-copy').boundingBox(), x: await sheet.locator('[data-sheet-part="x"]').boundingBox(),
+    view: await sheet.getAttribute('data-view'), same: await body.evaluate(b => b.__kept === true), place: await topSlice(), top: await body.evaluate(b => b.scrollTop),
+    unfolded: await u01.getAttribute('aria-expanded'), focus: (await ev(FOCUSED))[1], shown: (await ev(SHOWN)) === text });
+  const place = await topSlice();
+  const inView = (b, w, hgt) => b && b.x >= 0 && b.y >= 0 && b.x + b.width <= w + 0.5 && b.y + b.height <= hgt + 0.5;
+  for (const w of [1280, 700, 606, 1280]) {
+    await page.setViewportSize({ width: w, height: 720 }); await page.waitForTimeout(250);
+    const at = { w, ...await state() }; record.push(at);
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/request94-resize-${record.length}-${w}x720.png` });
+    assert.ok(inView(at.box, w, 720) && at.box.width >= Math.min(680, w - 24) - 1, JSON.stringify(at));
+    assert.ok(inView(at.copy, w, 720) && inView(at.x, w, 720), JSON.stringify(at));
+    assert.deepEqual([at.cls, at.view, at.same, at.place, at.unfolded, at.focus, at.shown], ['plan-sheet', 'reading', true, place, 'true', 'mat-U01', true], JSON.stringify(at));
+    if (w === 606) {
+      // Narrow: the text view keeps its own place (as left), back to the reading where it was; the copy is the whole text. The
+      // switch re-renders by design, so the resize checks go on from the new body.
+      const readTop = at.top;
+      await sheet.locator('[data-sheet-part="view-text"]').click(); assert.equal(await body.evaluate(b => b.scrollTop), 900);
+      await sheet.locator('[data-sheet-part="view-reading"]').click(); assert.equal(await body.evaluate(b => b.scrollTop), readTop);
+      await sheet.locator('#plan-copy').click(); await sheet.locator('footer [role=status]').getByText('복사했어요').waitFor();
+      assert.equal(await ev(() => navigator.clipboard.readText()), text);
+      assert.equal(await topSlice(), place);
+      await u01.focus(); await body.evaluate(b => { b.__kept = true; });
+    }
+  }
+  // Closed at 700 it goes back to its opener; opened there, it reads across the window from the start.
+  await page.setViewportSize({ width: 700, height: 720 }); await page.waitForTimeout(250);
+  await page.keyboard.press('Escape'); await sheet.waitFor({ state: 'hidden' });
+  assert.equal((await ev(FOCUSED))[1], 'last');
+  await last.click(); await sheet.waitFor(); await page.waitForTimeout(250); // after the sheet's pop-in (its keyframe moves it meanwhile)
+  const reopened = { w: 700, reopened: true, ...await state() }; record.push(reopened);
+  assert.ok(inView(reopened.box, 700, 720) && reopened.box.width >= 675 && reopened.top === 0 && reopened.unfolded === 'false' && reopened.focus === 'text' && !reopened.same, JSON.stringify(reopened));
+  assert.deepEqual(await stored(), kept, 'resizing, folding and copying store nothing');
+  assert.deepEqual(errors, []);
+  if (SHOTS) writeFileSync(`${SHOTS}/request94-resize.json`, JSON.stringify(record, null, 1) + '\n');
+  await context.close();
+}
+
 const { proc, base } = await start();
 const browser = await chromium.launch(process.env.STUDIO_CHROMIUM ? { executablePath: process.env.STUDIO_CHROMIUM } : {});
 try {
-  for (const size of [[1280, 720], [1440, 900]]) { const t = Date.now(); await flow(browser, base, size); console.log(`ok  AF94 request reading at ${size[0]}x${size[1]} (${Date.now() - t} ms)`); }
+  if (RESIZE) { const t = Date.now(); await resizeFlow(browser, base); console.log(`ok  AF94 DELTA2 open document through 1280 -> 700 -> 606 -> 1280 (${Date.now() - t} ms)`); }
+  else for (const size of [[1280, 720], [1440, 900]]) { const t = Date.now(); await flow(browser, base, size); console.log(`ok  AF94 request reading at ${size[0]}x${size[1]} (${Date.now() - t} ms)`); }
 } finally { await browser.close(); proc.kill(); }

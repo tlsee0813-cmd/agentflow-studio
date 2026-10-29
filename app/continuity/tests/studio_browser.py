@@ -3563,6 +3563,77 @@ def request94_flow(browser, base, size, shots=None):
     context.close()
 
 
+def request94_resize_flow(browser, base, shots=None):
+    """AF94 DELTA2 (same steps as `request94-flow.mjs resize`): a document open at 1280x720 (U01 unfolded, both views scrolled,
+    focus on its fold) while the window goes to 700, 606 and back to 1280. Below 720 the pane is the whole window and the sheet
+    covers the window instead of the empty strip beside it (it fell to a 2px column). Nothing re-renders on resize: the same body,
+    the same slice at the top of the view (the browser's scroll anchoring may move the pixel offset), folds, view and focus; copy and
+    close stay in view; the text view keeps its own place; closing returns to its opener; nothing is stored. Stubbed replies."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    context.grant_permissions(["clipboard-read", "clipboard-write"], origin=base)
+    page = context.new_page()
+    errors, record = [], []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.goto(base + "/")
+    page.locator("#import-file").set_input_files(str(ROOT / "tests/fixtures/context75/micro-javascript-backup.json"))
+    expect(page.locator("#crumbs")).to_contain_text("micro-javascript")
+    project = page.evaluate(ENTRY, re.search(r"#/p/([^/]+)", page.url).group(1))
+    page.evaluate("([id, b]) => localStorage.setItem('agentflow.studio.plans.1', JSON.stringify({ version: 'studio.plans.4', projects: { [id]: b } }))",
+        [project["id"], {"draft": ZERO85_SENTENCE, "extra": [AF94_U01], "plan": None, "by": None, "snapshots": [], "labels": {}, "origins": {}, "observations": [], "attached": {}}])
+    page.reload()
+    def plan_route(route):
+        ask = route.request.post_data_json
+        route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "reply": {"summary": "[테스트 응답] 두 예외 이름을 재사용한다.",
+            "items": [{"id": "c1", "title": "[테스트] 제한 종류별 안내", "description": "[테스트 응답] 두 예외를 구별해 알린다.", "partIds": [next(p["id"] for p in ask["parts"] if p["name"] == "오류 처리")],
+                "refs": ["INTENT", "N01"], "dependsOn": []}], "impacts": [], "preserve": ["[테스트 응답] 유지"], "unknowns": []}}))
+    page.route("**/api/studio/plan", plan_route)
+    page.route("**/api/studio/scope", lambda route: route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "reply": AF94_REVIEW})))
+    sheet, body, last = page.locator("#plan-sheet"), page.locator(SHEET_BODY), page.locator('#plan-panel [data-sheet-entry="last"]')
+    u01 = sheet.locator('[data-ref="U01"] button')
+    stored = lambda: page.evaluate("id => JSON.parse(localStorage.getItem('agentflow.studio.plans.1')).projects[id]", project["id"])
+    focused = "() => document.activeElement.dataset.sheetEntry ?? document.activeElement.dataset.sheetPart ?? document.activeElement.tagName"
+    page.locator("#plan-entry").click(); page.locator("#plan-ask").click()
+    page.locator("#plan-strip .ps-more").click(); page.locator("#plan-make").click(); expect(sheet).to_be_visible()
+    page.keyboard.press("Escape"); expect(sheet).to_be_hidden()
+    kept = stored(); text = kept["snapshots"][-1]["text"]
+    last.click(); expect(sheet).to_be_visible()
+    sheet.locator('[data-sheet-part="go-materials"]').click(); u01.click()
+    sheet.locator('[data-sheet-part="view-text"]').click(); body.evaluate("b => { b.scrollTop = 900; }")
+    sheet.locator('[data-sheet-part="view-reading"]').click(); body.evaluate("b => { b.scrollTop = 600; }")
+    u01.focus(); body.evaluate("b => { b.__kept = true; }")
+    top_slice = lambda: body.evaluate("b => { const t = b.getBoundingClientRect().top; return [...b.querySelectorAll('[data-at]')].find(e => e.getClientRects().length && e.getBoundingClientRect().bottom > t + 1)?.dataset.at ?? null; }")
+    def state():
+        return {"cls": sheet.get_attribute("class"), "box": sheet.bounding_box(), "copy": sheet.locator("#plan-copy").bounding_box(), "x": sheet.locator('[data-sheet-part="x"]').bounding_box(),
+            "view": sheet.get_attribute("data-view"), "same": body.evaluate("b => b.__kept === true"), "place": top_slice(), "top": body.evaluate("b => b.scrollTop"),
+            "unfolded": u01.get_attribute("aria-expanded"), "focus": page.evaluate(focused), "shown": page.evaluate(SHEET_TEXT) == text}
+    in_view = lambda b, w, hgt: b and b["x"] >= 0 and b["y"] >= 0 and b["x"] + b["width"] <= w + 0.5 and b["y"] + b["height"] <= hgt + 0.5
+    place = top_slice()
+    for w in (1280, 700, 606, 1280):
+        page.set_viewport_size({"width": w, "height": 720}); page.wait_for_timeout(250)
+        at = {"w": w, **state()}; record.append(at)
+        if shots: page.screenshot(path=str(pathlib.Path(shots) / f"request94-resize-{len(record)}-{w}x720.png"))
+        assert in_view(at["box"], w, 720) and at["box"]["width"] >= min(680, w - 24) - 1, at
+        assert in_view(at["copy"], w, 720) and in_view(at["x"], w, 720), at
+        assert [at["cls"], at["view"], at["same"], at["place"], at["unfolded"], at["focus"], at["shown"]] == ["plan-sheet", "reading", True, place, "true", "mat-U01", True], at
+        if w == 606:
+            read_top = at["top"]
+            sheet.locator('[data-sheet-part="view-text"]').click(); assert body.evaluate("b => b.scrollTop") == 900
+            sheet.locator('[data-sheet-part="view-reading"]').click(); assert body.evaluate("b => b.scrollTop") == read_top
+            sheet.locator("#plan-copy").click(); expect(sheet.locator("footer [role=status]")).to_contain_text("복사했어요")
+            assert page.evaluate("() => navigator.clipboard.readText()") == text and top_slice() == place
+            u01.focus(); body.evaluate("b => { b.__kept = true; }")
+    page.set_viewport_size({"width": 700, "height": 720}); page.wait_for_timeout(250)
+    page.keyboard.press("Escape"); expect(sheet).to_be_hidden()
+    assert page.evaluate(focused) == "last"
+    last.click(); expect(sheet).to_be_visible(); page.wait_for_timeout(250)  # after the sheet's pop-in (its keyframe moves it meanwhile)
+    reopened = {"w": 700, "reopened": True, **state()}; record.append(reopened)
+    assert in_view(reopened["box"], 700, 720) and reopened["box"]["width"] >= 675 and reopened["top"] == 0 and reopened["unfolded"] == "false" and reopened["focus"] == "text" and not reopened["same"], reopened
+    assert stored() == kept, "resizing, folding and copying store nothing"
+    assert errors == [], errors
+    if shots: (pathlib.Path(shots) / "request94-resize.json").write_text(json.dumps(record, ensure_ascii=False, indent=1), encoding="utf-8")
+    context.close()
+
+
 def main():
     procs = []
     try:
@@ -3583,6 +3654,11 @@ def main():
                 # Only the AF94 flow: a new request document read by its frozen sections; stubbed replies, no provider.
                 proc, base = start("ok"); procs.append(proc)
                 for size in ((1280, 720), (1440, 900)): request94_flow(browser, base, size, sys.argv[2] if len(sys.argv) > 2 else None); print(f"ok  AF94 request reading at {size[0]}x{size[1]}")
+                browser.close(); return
+            if sys.argv[1:2] == ["request94resize"]:
+                # Only the AF94 DELTA2 check: an open document through 1280 -> 700 -> 606 -> 1280; stubbed replies, no provider.
+                proc, base = start("ok"); procs.append(proc)
+                request94_resize_flow(browser, base, sys.argv[2] if len(sys.argv) > 2 else None); print("ok  AF94 DELTA2 open document through 1280 -> 700 -> 606 -> 1280")
                 browser.close(); return
             if sys.argv[1:2] == ["reading87"]:
                 # Only the AF85/87 flows: the stored real 85 reply replayed in the browser, no provider.
@@ -3619,6 +3695,7 @@ def main():
             for size in ((1280, 720), (1440, 900)): reading87_flow(browser, base, size)
             for size in ((1280, 720), (1440, 900)): request93_flow(browser, base, size)
             for size in ((1280, 720), (1440, 900)): request94_flow(browser, base, size)
+            request94_resize_flow(browser, base)
             print("ok  AF85 empty analysis on the micro draft at 1280/1440: reads at once, source and back, close/reopen/reload/file, earlier request and return kept, positive with none chosen apart")
             proc, base = start("code"); procs.append(proc); code_flow(browser, base); print("ok  access code kept from an input event")
             proc, base = start("fail"); procs.append(proc); failure_flow(browser, base); print("ok  provider failure -> short error -> retry")

@@ -801,6 +801,9 @@ button:disabled { opacity: .5; cursor: default; }
 @media (max-width: 719.98px) {
   :root { --insp-w: 100vw; }
   .inspector { border-left: 0; }
+  /* AF94 DELTA2: here the pane (--plan-w) is the whole window, so the strip beside it is empty. The sheet covers the window by CSS
+     alone, also when the window narrows with a document already open (no re-render: its folds, view, place and focus stay). */
+  .plan-sheet { left: 50%; width: min(680px, calc(100% - 24px)); }
 }
 .plan-sheet.wide { left: 50%; width: min(680px, calc(100% - 24px)); }
 @media (max-width: 720px) {
