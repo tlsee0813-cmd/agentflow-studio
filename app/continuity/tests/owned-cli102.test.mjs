@@ -9,7 +9,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { EventEmitter } from 'node:events';
 import { PassThrough } from 'node:stream';
 import { createHash } from 'node:crypto';
-import { mkdtempSync, readFileSync, writeFileSync, existsSync, readdirSync, copyFileSync, renameSync, appendFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync, existsSync, readdirSync, copyFileSync, renameSync, appendFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, relative, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -415,14 +415,18 @@ test('102-E20 handoff: a state change already in flight ends before the next own
 });
 
 test('102-E21 a relative state folder (as a launcher may be given) reaches the child as the same absolute place: ready', async () => {
-  const state = relative(process.cwd(), mkdtempSync(join(tmpdir(), 'af102-state-')));
-  assert.ok(!isAbsolute(state));
-  const s = await setup({ state }), x = await submission(project());
-  assert.equal((await jcall(s.handle, 'POST', '', x.cap, x.body)).status, 202);
-  const v = await ended(s.handle, x); assert.equal(v.state, 'ready', JSON.stringify(v.error));
-  assert.equal(invocations(s.ctl).length, 1);
-  await until(() => s.executor.describe().state === 'ready' && readdirSync(join(state, 'runs')).length === 0, 'released under the same folder');
-  await s.close();
+  // Made inside the working folder itself, so it is on the same volume and a relative path to it exists (a temp folder on another
+  // Windows drive would only have an absolute one); removed after the test.
+  const root = mkdtempSync(join(process.cwd(), '.af102-e21-')), state = relative(process.cwd(), join(root, 'state'));
+  try {
+    assert.ok(!isAbsolute(state), state);
+    const s = await setup({ state }), x = await submission(project());
+    assert.equal((await jcall(s.handle, 'POST', '', x.cap, x.body)).status, 202);
+    const v = await ended(s.handle, x); assert.equal(v.state, 'ready', JSON.stringify(v.error));
+    assert.equal(invocations(s.ctl).length, 1);
+    await until(() => s.executor.describe().state === 'ready' && readdirSync(join(state, 'runs')).length === 0, 'released under the same folder');
+    await s.close();
+  } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
 test('102-E8 duplicate POSTs of one id are one invocation; another id while it runs is refused, never queued', async () => {
