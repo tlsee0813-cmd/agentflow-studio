@@ -1,0 +1,39 @@
+{
+  "source": "Claude original session_011uVYY2wvtz7T2sy7TQuZaj final message4, normal UI recovered",
+  "product": "8c70bac0b2876ef052315bee0f36ea7976e2ec66",
+  "core": "bc27a1adb40f003ffcd5443568c7b331a03d3507",
+  "branch": "work/experience123-first-reading",
+  "focusedChecks": {
+    "command": "NODE_PATH=/opt/node-tools/node_modules node continuity/tests/reading123-flow.mjs",
+    "passed": 11,
+    "provider": "stub",
+    "defaultCI": false
+  },
+  "build": {
+    "compiler": "lockfile TypeScript5.8.3",
+    "commands": [
+      "node continuity/scripts/check.mjs",
+      "node continuity/scripts/build.mjs",
+      "npm run check"
+    ],
+    "result": "pass",
+    "setup": "fresh dedicated worktree lacked node_modules; author npm ci --ignore-scripts, no user-machine reinstall"
+  },
+  "baseline046": {
+    "entry": "missing",
+    "order": "desc,ports,claims",
+    "paste": {
+      "direction": "backward to forward",
+      "scrollTop": "200 to 0"
+    }
+  },
+  "limitations": [
+    "Auth-required without code uses unchanged mapRun.can: button visible, server401 asks code; new permission gating not selected",
+    "busy/ready branches unchanged but not rerun in delayed focused test",
+    "8-plus relationship expansion not directly rerun; creation code unchanged",
+    "textarea scroll preserved; enclosing return-reading body scroll not part of repair",
+    "styles.css1358 stale comment remains outside selected files",
+    "author fixture uses record76 with composed stub, not actual122 result"
+  ],
+  "actualModelCalls": 0
+}

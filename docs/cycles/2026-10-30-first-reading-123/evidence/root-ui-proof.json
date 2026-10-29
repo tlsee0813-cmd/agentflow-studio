@@ -1,0 +1,146 @@
+{
+  "product": "bc27a1adb40f003ffcd5443568c7b331a03d3507",
+  "app": "310208b428575ea5f43c66a6b3237a176068244b",
+  "build": {
+    "node": "24.19.0",
+    "typescript": "5.8.3",
+    "source": "app/node_modules locked dependency",
+    "check": "passed",
+    "build": "passed",
+    "session": 99704
+  },
+  "actualModelCalls": 0,
+  "source": "completed122 stored project reused; no regenerated model reply",
+  "projectBefore": "36bcdbd2542210e8220d301309ec84d5ed70434e68af402af7bde056ec67719b",
+  "projectAfter": "36bcdbd2542210e8220d301309ec84d5ed70434e68af402af7bde056ec67719b",
+  "otherProjectExact": true,
+  "powerBefore": {
+    "body": {
+      "bottom": 663.2000274658203,
+      "height": 538.4000244140625,
+      "left": 935.2000122070312,
+      "right": 1280.000030517578,
+      "top": 124.8000030517578,
+      "width": 344.8000183105469,
+      "x": 935.2000122070312,
+      "y": 124.8000030517578
+    },
+    "claims": {
+      "bottom": 840.7999877929688,
+      "height": 285,
+      "left": 955.2000122070312,
+      "right": 1244.8000183105469,
+      "top": 555.7999877929688,
+      "width": 289.6000061035156,
+      "x": 955.2000122070312,
+      "y": 555.7999877929688
+    },
+    "claimsText": "설명배터리와 마이크로 USB 전원을 지원하며 On/Off 스위치로 사용할 전원을 선택한다. · 3568e1b6근거설명변환기의 모드 정의상 Active는 SoC와 주변장치 전압을 켜고 Low Power는 SoC 전압만 켜며, MODE 핀 P1.00으로 모드를 제어한다. · 3568e1b6근거설명실제 동작에 관한 문서 주석은 두 전압이 항상 켜져 있어 Low Power 모드로 소비 전력을 줄일 수 없다고 명시하고 board.c를 참조한다. · 3568e1b6근거",
+    "scrollHeight": 740,
+    "scrollTop": 0,
+    "url": "http://127.0.0.1:51913/#/p/E_b2ab2d28-16c5-435d-8a6f-7481809170cb/A_2766e020-504e-41e1-aa23-7101a0f5d723"
+  },
+  "powerAfter": {
+    "body": {
+      "bottom": 663.2000274658203,
+      "height": 538.4000244140625,
+      "left": 935.2000122070312,
+      "right": 1280.000030517578,
+      "top": 124.8000030517578,
+      "width": 344.8000183105469,
+      "x": 935.2000122070312,
+      "y": 124.8000030517578
+    },
+    "claims": {
+      "bottom": 598.7000122070312,
+      "height": 285,
+      "left": 955.2000122070312,
+      "right": 1244.8000183105469,
+      "top": 313.70001220703125,
+      "width": 289.6000061035156,
+      "x": 955.2000122070312,
+      "y": 313.70001220703125
+    },
+    "claimsText": "설명배터리와 마이크로 USB 전원을 지원하며 On/Off 스위치로 사용할 전원을 선택한다. · 3568e1b6근거설명변환기의 모드 정의상 Active는 SoC와 주변장치 전압을 켜고 Low Power는 SoC 전압만 켜며, MODE 핀 P1.00으로 모드를 제어한다. · 3568e1b6근거설명실제 동작에 관한 문서 주석은 두 전압이 항상 켜져 있어 Low Power 모드로 소비 전력을 줄일 수 없다고 명시하고 board.c를 참조한다. · 3568e1b6근거",
+    "scrollHeight": 740,
+    "scrollTop": 0,
+    "url": "http://127.0.0.1:51913/#/p/E_b2ab2d28-16c5-435d-8a6f-7481809170cb/A_2766e020-504e-41e1-aa23-7101a0f5d723",
+    "worldStyle": "top: 0px; transform: translate(109.2px, 206px) scale(1);"
+  },
+  "displayAfter": {
+    "body": {
+      "bottom": 663.2000274658203,
+      "height": 538.4000244140625,
+      "left": 935.2000122070312,
+      "right": 1280.000030517578,
+      "top": 124.8000030517578,
+      "width": 344.8000183105469,
+      "x": 935.2000122070312,
+      "y": 124.8000030517578
+    },
+    "claims": {
+      "bottom": 637.7000122070312,
+      "height": 324,
+      "left": 955.2000122070312,
+      "right": 1244.8000183105469,
+      "top": 313.70001220703125,
+      "width": 289.6000061035156,
+      "x": 955.2000122070312,
+      "y": 313.70001220703125
+    },
+    "claimsText": "설명2018년 도입 패널 GDEH0213B1은 단종되었으며, 문서의 현재 공급 패널은 GDEH0213B72이다. 짧은 제품 수명으로 향후 교체가 예상된다. · 3568e1b6근거설명GDEH0213B1은 리본 케이블 표시 HINK-E0213, 컨트롤러 SSD1673, 드라이버 ssd16xx와 대응하며 보드 지정은 reel_board이다. · 3568e1b6근거설명GDEH0213B72는 리본 케이블 표시 HINK-E0213A22, 컨트롤러 SSD1675A, 드라이버 ssd16xx와 대응하며 보드 지정은 reel_board@2이다. · 3568e1b6근거",
+    "scrollHeight": 707,
+    "scrollTop": 0,
+    "url": "http://127.0.0.1:51913/#/p/E_b2ab2d28-16c5-435d-8a6f-7481809170cb/A_3c7cc610-3b3d-439a-86b6-b1d4bc6bf929"
+  },
+  "relationReturn": {
+    "before": {
+      "scrollTop": 201.6000061035156,
+      "url": "http://127.0.0.1:51913/#/p/E_b2ab2d28-16c5-435d-8a6f-7481809170cb/A_2766e020-504e-41e1-aa23-7101a0f5d723",
+      "worldStyle": "top: 0px; transform: translate(109.2px, 206px) scale(1);"
+    },
+    "after": {
+      "focus": "→Display승압 변환기가 전자잉크 화면에 공급할 전압을 만든다.",
+      "scrollTop": 201.6000061035156,
+      "url": "http://127.0.0.1:51913/#/p/E_b2ab2d28-16c5-435d-8a6f-7481809170cb/A_2766e020-504e-41e1-aa23-7101a0f5d723",
+      "worldStyle": "top: 0px; transform: translate(109.2px, 206px) scale(1);"
+    }
+  },
+  "delayedStatus": {
+    "kind": "UI-only replay of saved122 readiness; all generation routes rejected",
+    "stats": {
+      "statusRequests": 2,
+      "statusReleased": 2,
+      "postRequests": 0,
+      "otherRequests": 0
+    },
+    "firstButtonAppearedWithoutNavigation": true,
+    "reloadedForm": {
+      "before": {
+        "end": 36,
+        "focus": "part-note",
+        "name": "상태를 기다리며 적던 부분",
+        "note": "지도 상태가 늦게 도착해도 이 설명과 입력 위치는 남아야 합니다.",
+        "start": 36
+      },
+      "after": {
+        "end": 36,
+        "focus": "part-note",
+        "name": "상태를 기다리며 적던 부분",
+        "note": "지도 상태가 늦게 도착해도 이 설명과 입력 위치는 남아야 합니다.",
+        "start": 36
+      }
+    }
+  },
+  "screens": {
+    "at1280": [
+      "power current all3 visible including actual no-saving condition",
+      "display both exact mappings visible",
+      "source back same claim focus, scroll0 and camera",
+      "relation back scroll201.6 and camera exact"
+    ],
+    "at1440": "Display current claims and both incoming relation notes visible",
+    "viewportCorrection": "browser viewport capability applied to latest selected tab38; initial file named1440 was actually1280 and excluded. Explicit tab36 CDP metrics and exact 1440x900 Page.captureScreenshot produced ui-display-verified-1440.png. Override cleared, browser viewport reset.",
+    "risk": "total text/scroll height unchanged; relations follow claims and require natural scroll on1280, not asserted as universally improved"
+  }
+}

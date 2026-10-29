@@ -1,0 +1,296 @@
+{
+  "head": "6a78336ee10cc2fdf29176d97d0637409e4b0a72",
+  "run": 40961069081,
+  "url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40961069081",
+  "jobs": [
+    {
+      "id": 123753654468,
+      "name": "verify (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 40961069081,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Record exact runtime and checked-out commit",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Clean locked install",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Type and boundary checks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Build and domain / HTTP / simulated provider tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Continuity type, syntax and credential boundary checks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Build and test continuity with simulated providers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Prepare Cloudflare modules and assets without credentials or deployment",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Build static site (no AI server bundled, no credentials)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Install pinned browser verification tools",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Direct browser-to-server verification (original app, AI is still mocked)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        },
+        {
+          "name": "Studio smoke - entry, map, part, ask, failure/retry, no-key and static states (stubbed provider, no real key)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        },
+        {
+          "name": "Upload only this run's results, not historic snapshot evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16
+        },
+        {
+          "name": "Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 30
+        },
+        {
+          "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 31
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 32
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 33
+        }
+      ]
+    },
+    {
+      "id": 123753655082,
+      "name": "verify (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 40961069081,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Record exact runtime and checked-out commit",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Clean locked install",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Type and boundary checks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Build and domain / HTTP / simulated provider tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Continuity type, syntax and credential boundary checks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Build and test continuity with simulated providers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Prepare Cloudflare modules and assets without credentials or deployment",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Build static site (no AI server bundled, no credentials)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Install pinned browser verification tools",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Direct browser-to-server verification (original app, AI is still mocked)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        },
+        {
+          "name": "Studio smoke - entry, map, part, ask, failure/retry, no-key and static states (stubbed provider, no real key)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        },
+        {
+          "name": "Upload only this run's results, not historic snapshot evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16
+        },
+        {
+          "name": "Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 30
+        },
+        {
+          "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 31
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 32
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 33
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "originalNodeBoth": {
+      "pass": 279,
+      "fail": 0
+    },
+    "continuityLinux": {
+      "pass": 629,
+      "fail": 0,
+      "skip": 0
+    },
+    "continuityWindows": {
+      "pass": 626,
+      "fail": 0,
+      "skip": 3
+    },
+    "node": "22.16.0",
+    "package": {
+      "assets": 54,
+      "workerModules": 26,
+      "bytes": 1221550,
+      "dryRun": true
+    },
+    "focused123FlowIncluded": false,
+    "actualAICalls": 0
+  },
+  "excerpts": {
+    "linux": "2026-10-29T21:50:12.1965150Z   ref: 6a78336ee10cc2fdf29176d97d0637409e4b0a72\n2026-10-29T21:50:12.7085341Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin 6a78336ee10cc2fdf29176d97d0637409e4b0a72\n2026-10-29T21:50:14.5999206Z  * branch            6a78336ee10cc2fdf29176d97d0637409e4b0a72 -> FETCH_HEAD\n2026-10-29T21:50:14.6011192Z [command]/usr/bin/git rev-parse --verify --quiet 6a78336ee10cc2fdf29176d97d0637409e4b0a72^{object}\n2026-10-29T21:50:14.6031369Z 6a78336ee10cc2fdf29176d97d0637409e4b0a72\n2026-10-29T21:50:14.6211325Z [command]/usr/bin/git checkout --progress --force 6a78336ee10cc2fdf29176d97d0637409e4b0a72\n2026-10-29T21:50:14.8443227Z Note: switching to '6a78336ee10cc2fdf29176d97d0637409e4b0a72'.\n2026-10-29T21:50:14.8555892Z 6a78336ee10cc2fdf29176d97d0637409e4b0a72\n2026-10-29T21:50:19.9379785Z node: v22.16.0\n2026-10-29T21:50:29.2981520Z \u001b[36;1mnode -e \"if(process.version !== 'v22.16.0') process.exit(1)\"\u001b[0m\n2026-10-29T21:50:29.3104699Z 6a78336ee10cc2fdf29176d97d0637409e4b0a72\n2026-10-29T21:50:29.3138346Z v22.16.0\n2026-10-29T21:50:33.0709597Z Syntax, lock alignment and client credential boundary checks passed. Not a full security audit.\n2026-10-29T21:52:35.5143624Z # tests 279\n2026-10-29T21:52:35.5143993Z # pass 279\n2026-10-29T21:52:35.5144174Z # fail 0\n2026-10-29T21:52:35.5144545Z # skipped 0\n2026-10-29T21:52:42.0471528Z IDEA015 type, syntax and client/server boundary checks passed.\n2026-10-29T21:54:19.5747958Z # Subtest: AREA17 an explicitly passed export anchor must be the one this project state gives, with the text it gives\n2026-10-29T21:54:19.5748808Z ok 605 - AREA17 an explicitly passed export anchor must be the one this project state gives, with the text it gives\n2026-10-29T21:54:19.5782269Z # tests 629\n2026-10-29T21:54:19.5782574Z # pass 629\n2026-10-29T21:54:19.5782663Z # fail 0\n2026-10-29T21:54:19.5782838Z # skipped 0\n2026-10-29T21:54:29.7908369Z {\"phase\":\"prepared\",\"source\":\"6a78336ee10cc2fdf29176d97d0637409e4b0a72\",\"worker\":\"agentflow-studio\",\"assets\":54,\"modules\":26,\"bytes\":1221550,\"dryRun\":true}",
+    "windows": "2026-10-29T21:50:11.7361477Z   ref: 6a78336ee10cc2fdf29176d97d0637409e4b0a72\r\n2026-10-29T21:50:15.3147106Z [command]\"C:\\Program Files\\Git\\bin\\git.exe\" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin 6a78336ee10cc2fdf29176d97d0637409e4b0a72\r\n2026-10-29T21:50:17.5221679Z  * branch            6a78336ee10cc2fdf29176d97d0637409e4b0a72 -> FETCH_HEAD\r\n2026-10-29T21:50:17.5269651Z [command]\"C:\\Program Files\\Git\\bin\\git.exe\" rev-parse --verify --quiet 6a78336ee10cc2fdf29176d97d0637409e4b0a72^{object}\r\n2026-10-29T21:50:17.5605236Z 6a78336ee10cc2fdf29176d97d0637409e4b0a72\r\n2026-10-29T21:50:17.6321770Z [command]\"C:\\Program Files\\Git\\bin\\git.exe\" checkout --progress --force 6a78336ee10cc2fdf29176d97d0637409e4b0a72\r\n2026-10-29T21:50:18.2068239Z Note: switching to '6a78336ee10cc2fdf29176d97d0637409e4b0a72'.\r\n2026-10-29T21:50:18.3022985Z 6a78336ee10cc2fdf29176d97d0637409e4b0a72\r\n2026-10-29T21:50:32.4960851Z node: v22.16.0\r\n2026-10-29T21:51:22.8120335Z \u001b[36;1mnode -e \"if(process.version !== 'v22.16.0') process.exit(1)\"\u001b[0m\r\n2026-10-29T21:51:23.0718696Z 6a78336ee10cc2fdf29176d97d0637409e4b0a72\r\n2026-10-29T21:51:23.1187220Z v22.16.0\r\n2026-10-29T21:51:34.1042300Z Syntax, lock alignment and client credential boundary checks passed. Not a full security audit.\r\n2026-10-29T21:53:37.7779822Z # tests 279\r\n2026-10-29T21:53:37.7780147Z # pass 279\r\n2026-10-29T21:53:37.7780307Z # fail 0\r\n2026-10-29T21:53:37.7780647Z # skipped 0\r\n2026-10-29T21:53:46.9189151Z IDEA015 type, syntax and client/server boundary checks passed.\r\n2026-10-29T21:55:09.9544582Z # Subtest: AREA17 an explicitly passed export anchor must be the one this project state gives, with the text it gives\r\n2026-10-29T21:55:09.9545397Z ok 605 - AREA17 an explicitly passed export anchor must be the one this project state gives, with the text it gives\r\n2026-10-29T21:55:09.9575238Z # tests 629\r\n2026-10-29T21:55:09.9575380Z # pass 626\r\n2026-10-29T21:55:09.9575443Z # fail 0\r\n2026-10-29T21:55:09.9575588Z # skipped 3\r\n2026-10-29T21:55:22.4799251Z {\"phase\":\"prepared\",\"source\":\"6a78336ee10cc2fdf29176d97d0637409e4b0a72\",\"worker\":\"agentflow-studio\",\"assets\":54,\"modules\":26,\"bytes\":1221550,\"dryRun\":true}\r"
+  }
+}

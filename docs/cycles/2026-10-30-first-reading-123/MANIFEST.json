@@ -1,0 +1,89 @@
+{
+  "cycle": 123,
+  "source": "6a78336ee10cc2fdf29176d97d0637409e4b0a72",
+  "product": "8c70bac0b2876ef052315bee0f36ea7976e2ec66",
+  "app": "c69120224cf09a0f7252f8bb7283f096d75171a6",
+  "scope": "bounded PC entry, reading order and paste draft preservation; no new AI generation or deployment",
+  "files": [
+    {
+      "file": "evidence/author-focused-summary.json",
+      "bytes": 1533,
+      "sha256": "05dfb551439490443bdc7cc02ff45fab1ce121a6c1f4a1b881d8630cea53f52a"
+    },
+    {
+      "file": "evidence/ci-exact-head.json",
+      "bytes": 13060,
+      "sha256": "5af3d5616132af96498ab4fcb9116728493f5c742de1f5dbb41a146d8bc2c9ad"
+    },
+    {
+      "file": "evidence/cleanup-final.json",
+      "bytes": 510,
+      "sha256": "114e8974b6125ade36543ee0501345900dd8828ba7ed6c83406f4385368d4a1e"
+    },
+    {
+      "file": "evidence/delayed-edit-proof.json",
+      "bytes": 465,
+      "sha256": "55cbbfe7f90592c3415a620b1dfdee88d1731cd72bb11866a37f43145a38aca6"
+    },
+    {
+      "file": "evidence/display-after-1280.jpg",
+      "bytes": 80791,
+      "sha256": "ac9c5781b4f9bfe62ca8a60f750ccad2f9688a839b6bb80b89badf7fc3c26981"
+    },
+    {
+      "file": "evidence/display-after-1440.png",
+      "bytes": 89228,
+      "sha256": "aa73b12d8b65789f8b396d5aa07e0eea4907c9818d9cfaf3d58817cad75b2029"
+    },
+    {
+      "file": "evidence/first-map-ready-1280.jpg",
+      "bytes": 39076,
+      "sha256": "6cacfbd2bccc6207aa3d776d0efbfc6546a83a1df0679b57969a6255b0e9a5c0"
+    },
+    {
+      "file": "evidence/independent-code-review.json",
+      "bytes": 4333,
+      "sha256": "a94d6fc98bbcf74fc2e2f32cc14cbde49bd5382cf5e67e9d2283c197bf3bc3dc"
+    },
+    {
+      "file": "evidence/independent-final-delta.json",
+      "bytes": 6234,
+      "sha256": "40b3b2843a8328f4d8ab4c2cbc6e5e709bcf4ec2837c819ab493e7ae174bae90"
+    },
+    {
+      "file": "evidence/paste-preserved.jpg",
+      "bytes": 81091,
+      "sha256": "38e93b7267a4b1b949003dfc438e49cc31262235f4e351e6e73a0a90767425dc"
+    },
+    {
+      "file": "evidence/paste-repair-proof.json",
+      "bytes": 9861,
+      "sha256": "733ccd8bd3e91d5e928c5fcd3309973c43bb5eb9abfb482b6302056a7f88871b"
+    },
+    {
+      "file": "evidence/paste-server-stats.json",
+      "bytes": 91,
+      "sha256": "1418314673592abe9a80dc729a50d231e35bda3451d12346ad9b562ea572f309"
+    },
+    {
+      "file": "evidence/power-after-1280.jpg",
+      "bytes": 78833,
+      "sha256": "61a71bacafd6d436ff634fad02ee6f628a21af03a805aaffa5782bbac6826c67"
+    },
+    {
+      "file": "evidence/power-before-1280.jpg",
+      "bytes": 77065,
+      "sha256": "aba327513f3630b53e50aef3675ce2ea4aa0ebf693b470abe10af4c8be7dc328"
+    },
+    {
+      "file": "evidence/relation-return.json",
+      "bytes": 603,
+      "sha256": "998c221739f0bdc71344da59866fc2016e2c2ea78a32a7d29f446d7995cba4ad"
+    },
+    {
+      "file": "evidence/root-ui-proof.json",
+      "bytes": 6793,
+      "sha256": "d204eb66e1045b0892bf25219e8b5b36275811c7c4a6097efd123871ffec23d7"
+    }
+  ]
+}

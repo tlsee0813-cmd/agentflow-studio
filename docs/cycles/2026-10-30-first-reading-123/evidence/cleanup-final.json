@@ -1,0 +1,30 @@
+{
+  "at": "2026-10-29T21:56:28.100Z",
+  "ports": [
+    {
+      "port": 51913,
+      "closed": true
+    },
+    {
+      "port": 51914,
+      "closed": true
+    }
+  ],
+  "serverSession": 10263,
+  "exitCode": 1,
+  "reason": "Root Ctrl+C after UI-only verification",
+  "tabsClosed": [
+    "36",
+    "38",
+    "39"
+  ],
+  "viewportReset": true,
+  "actualModelCalls": 0,
+  "stats": {
+    "statusRequests": 2,
+    "statusReleased": 1,
+    "postRequests": 0,
+    "otherRequests": 0
+  },
+  "expiredSetupExcluded": true
+}
