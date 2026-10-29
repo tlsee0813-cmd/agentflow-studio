@@ -6,7 +6,7 @@
  * (not across a reload) and applied when they come back and ask for it, without asking again. */
 import { isMapReading, type MapReading, type Project } from '../shared/types.js';
 import type { StudioView } from '../shared/studio.js';
-import { buildMapAsk, applyReading, validateMapReply, MAP5_SCHEMA, MAP6_SCHEMA, type MapInput, type MapReply, type Applied } from '../shared/map-reading.js';
+import { buildMapAsk, applyReading, validateMapReply, MAP5_SCHEMA, MAP6_SCHEMA, MAP7_SCHEMA, type MapInput, type MapReply, type Applied } from '../shared/map-reading.js';
 import { askMap, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
 import { encodeMapInput, decodeMapInput, jobHash, MAP_JOB_VERSION, type MapJobBinding } from '../shared/map-job.js';
 import { SPAN_INDEX, textDigest } from '../shared/evidence-span.js';
@@ -78,7 +78,7 @@ const JOB_ERROR: Record<string, string> = {
   EXECUTOR_UNSETTLED: '이전 지도 실행이 끝났는지 확인되지 않아 새 정리를 시작하지 않았어요. PC의 Studio 실행기를 확인해 주세요.',
   EXECUTOR_UNAVAILABLE: 'PC의 지도 실행기를 쓸 수 없어 정리를 시작하지 않았어요. 기록과 지도는 그대로예요.',
   EXECUTOR_SCOPE: '이 미리보기 실행기는 아직 부분이 없는 프로젝트의 첫 지도만 정리해요.',
-  EXECUTOR_SCHEMA: '이 미리보기 실행기는 현재 지도 형식(studio.map.6)만 정리해요. 화면을 새로 고친 뒤 다시 정리해 주세요.',
+  EXECUTOR_SCHEMA: '이 미리보기 실행기는 이 지도 요청 형식을 정리하지 않아요. 화면을 새로 고친 뒤 다시 정리해 주세요.',
   EXECUTOR_CHANGED: 'PC의 지도 실행기 설정이 바뀌어 이 정리는 실행하지 않았어요. 기록과 지도는 그대로예요.',
   AI_RESPONSE_REJECTED: 'AI 응답이 실행 규칙에 맞지 않아(도구 사용·오류·형식) 반영하지 않았어요. 원문과 기존 지도는 그대로예요.',
   PROMPT_CHANGED: 'PC의 Studio 실행기 설정이 바뀌어 보내지 않았어요. 화면을 새로 고친 뒤 다시 정리해 주세요.',
@@ -113,11 +113,14 @@ export function createMapRun(host: MapRunHost) {
   const visitOf = () => (host.visit ? host.visit() : host.current()?.key ?? null);
   /** The entry an attempt was made for, still in the lifecycle it was read in (an archived and restored copy is not it). */
   const same = (a: Attempt, o: ReturnType<MapRunHost['current']>) => !!o && o.kind === 'saved' && o.key === a.key && o.project.id === a.project && (o.ref?.lifecycle ?? null) === a.lifecycle;
-  /** The wire the server advertises: m6 (candidates state their target), m5 (contiguous ranges), m4; earlier servers keep theirs. */
-  const anchored = (): boolean | typeof MAP5_SCHEMA | typeof MAP6_SCHEMA => {
-    const prompt = host.status().map?.prompt ?? '';
-    return /^m6-[0-9a-f]{12}$/.test(prompt) ? MAP6_SCHEMA : /^m5-[0-9a-f]{12}$/.test(prompt) ? MAP5_SCHEMA : /^m4-[0-9a-f]{12}$/.test(prompt);
+  /** The wire the server advertises: m6 (candidates state their target), m5 (contiguous ranges), m4; earlier servers keep theirs.
+   * AF116: m6 with a later m7 recipe builds map.6 for a first map and map.7 for a later reading (buildMapAsk decides from the ask). */
+  const anchored = (): boolean | typeof MAP5_SCHEMA | typeof MAP6_SCHEMA | typeof MAP7_SCHEMA => {
+    const map = host.status().map, prompt = map?.prompt ?? '';
+    return /^m6-[0-9a-f]{12}$/.test(prompt) ? (/^m7-[0-9a-f]{12}$/.test(map?.laterPrompt ?? '') ? MAP7_SCHEMA : MAP6_SCHEMA) : /^m5-[0-9a-f]{12}$/.test(prompt) ? MAP5_SCHEMA : /^m4-[0-9a-f]{12}$/.test(prompt);
   };
+  /** The recipe an ask is asked and bound with: the later m7 one for map.7, else the advertised one. */
+  const promptOf = (inp: MapInput, map: NonNullable<AiStatus['map']>): string => inp.ask.schemaVersion === MAP7_SCHEMA ? map.laterPrompt! : map.prompt;
   /** What a reading would send now (nothing is sent). */
   function input(requestId?: string): MapInput | null { const o = host.current(); return o && o.kind === 'saved' ? buildMapAsk(o.project, o.view, host.requests?.() ?? [], requestId, anchored()) : null; }
   /** AF100: the server keeps map readings as durable jobs, and this page can reserve them. */
@@ -140,7 +143,7 @@ export function createMapRun(host: MapRunHost) {
     const inp = buildMapAsk(o.project, o.view, mapOnly ? [] : host.requests?.() ?? [], requestId, anchored());
     if (inp.problem) { slot.error = inp.problem === 'NOTHING_NEW' ? '이 범위에서 새로 읽을 기록이 없어요.' : inp.problem === 'REQUEST_CONTEXT_TOO_LARGE' ? '요청 문맥을 한 번에 대조하기 어려워 보고를 읽지 않았어요. 비교할 요청문을 골라 주세요.' : inp.problem === 'TOO_LARGE' ? '지도가 커서 한 번에 보낼 수 없어요.' : '키나 토큰처럼 보이는 글이 있는 기록이 있어 보내지 않았어요.'; host.changed(key); return; }
     if (blocked()) return;
-    const a: Attempt = { key, project: o.project.id, lifecycle: o.ref?.lifecycle ?? null, visit: visitOf(), phase: 'hashing', controller: new AbortController(), inp, prompt: st.map.prompt, hash: '', reply: null, model: '', meta: null, op: null };
+    const a: Attempt = { key, project: o.project.id, lifecycle: o.ref?.lifecycle ?? null, visit: visitOf(), phase: 'hashing', controller: new AbortController(), inp, prompt: promptOf(inp, st.map), hash: '', reply: null, model: '', meta: null, op: null };
     slot.attempt = a; slot.error = null; slot.notice = null; host.changed(key);
     const live = () => slot.attempt === a;
     try { a.hash = await askHash(inp.ask); }

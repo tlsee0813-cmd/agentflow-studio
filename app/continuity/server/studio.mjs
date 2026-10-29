@@ -12,7 +12,7 @@ import { PLAN_PROMPT, PLAN2_PROMPT, PLAN3_PROMPT, SCOPE_PROMPT } from './plan-pr
 import { DIGEST_PROMPT, DIGEST2_PROMPT } from './digest-prompt.mjs';
 import { validateMapAsk, validateMapReply } from '../dist/public/shared/map-reading.js';
 import { SPAN_INDEX, textDigest } from '../dist/public/shared/evidence-span.js';
-import { MAP_PROMPT, MAP2_PROMPT, MAP3_PROMPT, MAP6_PROMPT, MAP6_FIRST_PROMPT, MAP6_RECIPE, map4Prompt, map5Prompt, map6Prompt } from './map-prompt.mjs';
+import { MAP_PROMPT, MAP2_PROMPT, MAP3_PROMPT, MAP6_PROMPT, MAP6_FIRST_PROMPT, MAP6_RECIPE, MAP7_PROMPT, MAP7_RECIPE, map4Prompt, map5Prompt, map6Prompt } from './map-prompt.mjs';
 
 const ENDPOINT = 'https://api.deepseek.com/chat/completions';
 const REPLY_BYTES = 131072;
@@ -56,6 +56,16 @@ export async function mapPromptId() {
   if (!mapId) mapId = crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ recipe: MAP6_RECIPE, first: MAP6_FIRST_PROMPT, later: MAP6_PROMPT }))).then(b => `m6-${[...new Uint8Array(b)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`);
   return mapId;
 }
+let map7Id = null;
+/** AF116: m7- and the first 12 hex digits of the SHA-256 of the studio.map.7 recipe and its one (later) prompt. Advertised as
+ * map.laterPrompt beside map.prompt (m6, which still names every first map): a client sends studio.map.7 only for a later reading
+ * and only to a server that names it. There is no first map.7 prompt. */
+export async function map7PromptId() {
+  if (!map7Id) map7Id = crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ recipe: MAP7_RECIPE, later: MAP7_PROMPT }))).then(b => `m7-${[...new Uint8Array(b)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`);
+  return map7Id;
+}
+/** The recipe id a map ask of this schema is asked and bound with (a job's binding.prompt). */
+const promptFor = schema => schema === 'studio.map.7' ? map7PromptId() : mapPromptId();
 
 export function readStudioConfig(env = {}) {
   const int = (key, fallback, min, max) => {
@@ -104,7 +114,7 @@ async function readLimited(body, max, signal) {
 export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetch, signal } = {}) {
   const plan3 = ask.schemaVersion === 'studio.plan.3', plan2 = ask.schemaVersion === 'studio.plan.2', planning = ask.schemaVersion === 'studio.plan.1' || plan2 || plan3;
   const scope = ask.schemaVersion === 'studio.scope.1';
-  const digest2 = ask.schemaVersion === 'studio.digest.2', map6 = ask.schemaVersion === 'studio.map.6', map5 = ask.schemaVersion === 'studio.map.5', map4 = ask.schemaVersion === 'studio.map.4', anchored = map4 || map5 || map6, map3 = ask.schemaVersion === 'studio.map.3', map2 = ask.schemaVersion === 'studio.map.2', map = ask.schemaVersion === 'studio.map.1' || map2 || map3 || anchored, digest = ask.schemaVersion === 'studio.digest.1' || digest2 || map;
+  const digest2 = ask.schemaVersion === 'studio.digest.2', map7 = ask.schemaVersion === 'studio.map.7', map6 = ask.schemaVersion === 'studio.map.6', map5 = ask.schemaVersion === 'studio.map.5', map4 = ask.schemaVersion === 'studio.map.4', anchored = map4 || map5 || map6 || map7, map3 = ask.schemaVersion === 'studio.map.3', map2 = ask.schemaVersion === 'studio.map.2', map = ask.schemaVersion === 'studio.map.1' || map2 || map3 || anchored, digest = ask.schemaVersion === 'studio.digest.1' || digest2 || map;
   if (!config.apiKey) throw new ApiError('AI_NOT_CONFIGURED', 503);
   if (signal?.aborted) throw new ApiError('CANCELLED', 499);
   const controller = new AbortController(); let timedOut = false;
@@ -117,7 +127,7 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
       body: JSON.stringify({ model: config.model, stream: false, ...(map ? { thinking: { type: config.mapThinking ?? 'enabled' }, ...((config.mapThinking ?? 'enabled') === 'enabled' ? { reasoning_effort: 'low' } : {}), max_tokens: config.mapMaxTokens ?? 16384 }
         : { thinking: { type: scope || planning || digest ? 'enabled' : 'disabled' }, ...(scope || planning || digest ? { reasoning_effort: 'low' } : {}), max_tokens: planning || digest ? 8192 : scope ? 4096 : config.maxTokens }),
         response_format: { type: 'json_object' },
-        messages: [{ role: 'system', content: map6 ? map6Prompt(ask) : map5 ? map5Prompt(ask) : map4 ? map4Prompt(ask) : map3 ? MAP3_PROMPT : map2 ? MAP2_PROMPT : map ? MAP_PROMPT : digest2 ? DIGEST2_PROMPT : digest ? DIGEST_PROMPT : scope ? SCOPE_PROMPT : plan3 ? PLAN3_PROMPT : plan2 ? PLAN2_PROMPT : planning ? PLAN_PROMPT : STUDIO_PROMPT }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }] }) });
+        messages: [{ role: 'system', content: map7 ? MAP7_PROMPT : map6 ? map6Prompt(ask) : map5 ? map5Prompt(ask) : map4 ? map4Prompt(ask) : map3 ? MAP3_PROMPT : map2 ? MAP2_PROMPT : map ? MAP_PROMPT : digest2 ? DIGEST2_PROMPT : digest ? DIGEST_PROMPT : scope ? SCOPE_PROMPT : plan3 ? PLAN3_PROMPT : plan2 ? PLAN2_PROMPT : planning ? PLAN_PROMPT : STUDIO_PROMPT }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }] }) });
     if (!response.ok) {
       await response.body?.cancel().catch(() => {});
       if ([401, 403].includes(response.status)) throw new ApiError('AI_AUTH_FAILED', 502);
@@ -172,14 +182,18 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
   // are. It answers with a checked wire for the very ask, or fails; there is no fallback to another provider.
   const executor = jobs ? mapExecutor : null;
   const evidenceOf = ask => ({ index: SPAN_INDEX, ask: textDigest(JSON.stringify(ask)) });
-  const runJob = executor ? { configured: () => executor.ready(), prompt: () => mapPromptId(), model: executor.model, prepare: ask => executor.prepare(ask),
+  // AF116: a job is bound to the recipe of its own schema (m7 for a later map.7, m6 otherwise). An executor names map.7 only under
+  // its explicit scope 'map7-later'; the standard provider takes later map.7 readings as well.
+  const later7 = executor ? () => executor.describe().scope === 'map7-later' : () => true;
+  const runJob = executor ? { configured: () => executor.ready(), prompt: promptFor, model: executor.model, prepare: ask => executor.prepare(ask),
     acquire: id => { const own = executor.acquire(id); try { const shared = limiter.acquire(id); return () => { shared(); own(); }; } catch (e) { own(); throw e; } },
     call: async (ask, signal, execution) => { const out = await executor.call(ask, signal, execution); return { model: executor.model, reply: out.wire, evidence: evidenceOf(ask), observed: out.observed }; } }
-    : { configured: () => !!config.apiKey, prompt: () => mapPromptId(), model: mapConfig.model, acquire: id => limiter.acquire(id),
+    : { configured: () => !!config.apiKey, prompt: promptFor, model: mapConfig.model, acquire: id => limiter.acquire(id),
       call: async (ask, signal) => ({ model: mapConfig.model, reply: await callStudioModel(ask, mapConfig, { fetchImpl, signal }), evidence: evidenceOf(ask) }) };
   /** What a map reading would be made with: the executor's model and recipe when one is given (map jobs only), else the key's. */
-  const mapStatus = async () => executor ? (executor.ready() && jobs.describe().durable ? { map: { model: executor.model, prompt: await mapPromptId(), via: 'jobs' } } : {})
-    : config.apiKey ? { map: { model: config.planModel ?? config.model, prompt: await mapPromptId() } } : {};
+  const laterPrompt = async () => later7() ? { laterPrompt: await map7PromptId() } : {};
+  const mapStatus = async () => executor ? (executor.ready() && jobs.describe().durable ? { map: { model: executor.model, prompt: await mapPromptId(), ...await laterPrompt(), via: 'jobs' } } : {})
+    : config.apiKey ? { map: { model: config.planModel ?? config.model, prompt: await mapPromptId(), ...await laterPrompt() } } : {};
   const headersFor = origin => {
     const h = { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Content-Type': 'application/json; charset=utf-8' };
     if (origin) Object.assign(h, { 'Access-Control-Allow-Origin': origin, Vary: 'Origin' });
@@ -234,7 +248,7 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
         const requestConfig = url.pathname !== '/api/studio/ask' ? { ...config, model: config.planModel ?? config.model } : config;
         const answer = await callStudioModel(ask, requestConfig, { fetchImpl, signal: request.signal });
         // studio.map.4: the references in the reply name pieces of exactly this request; the browser checks it is its own.
-        return reply(200, { model: requestConfig.model, reply: answer, ...(['studio.map.4', 'studio.map.5', 'studio.map.6'].includes(ask.schemaVersion) ? { evidence: { index: SPAN_INDEX, ask: textDigest(raw) } } : {}) }, cors);
+        return reply(200, { model: requestConfig.model, reply: answer, ...(['studio.map.4', 'studio.map.5', 'studio.map.6', 'studio.map.7'].includes(ask.schemaVersion) ? { evidence: { index: SPAN_INDEX, ask: textDigest(raw) } } : {}) }, cors);
       } finally { release(); }
     } catch (e) {
       const error = e instanceof ApiError ? e : new ApiError('INTERNAL_ERROR', 500);

@@ -1,6 +1,6 @@
 import type { StudioAsk, StudioReply } from '../shared/studio.js';
 import { validateDigestReply, type DigestAsk, type DigestReply } from '../shared/digest-api.js';
-import { validateMapReply, MAP4_SCHEMA, MAP5_SCHEMA, MAP6_SCHEMA, type MapAsk, type MapReply } from '../shared/map-reading.js';
+import { validateMapReply, MAP4_SCHEMA, MAP5_SCHEMA, MAP6_SCHEMA, MAP7_SCHEMA, type MapAsk, type MapReply } from '../shared/map-reading.js';
 import { SPAN_INDEX, textDigest } from '../shared/evidence-span.js';
 import { RUNTIME } from './runtime.js';
 
@@ -8,10 +8,15 @@ import { RUNTIME } from './runtime.js';
 export interface AiStatus { ai: 'deepseek' | 'off' | 'none'; model: string | null; access: 'open' | 'code'; digest?: { model: string; prompt: string; record: string | null } | null;
   /** The model and prompt id a map reading would be made with (null when the server does not offer it). AF102 via 'jobs': made only
    * as a durable job by the server's own map executor (a local preview), whatever ai says; the other AI features keep ai. */
-  map?: { model: string; prompt: string; via?: 'jobs' } | null;
+  map?: { model: string; prompt: string; via?: 'jobs';
+    /** AF116: the m7 recipe for later readings (studio.map.7), beside prompt (m6, still every first map); absent on older servers. */
+    laterPrompt?: string } | null;
   /** AF100: the server keeps map readings as durable jobs on this PC (durable), or has a job store it cannot use (problem).
    * AF102 executor: the map executor's state (ready, busy, unsettled: an earlier child not known to have ended, unavailable). */
-  jobs?: { durable: boolean; problem: string | null; executor?: { state: string; problem: string | null; scope?: 'first' | 'map6-later' } | null } | null }
+  jobs?: { durable: boolean; problem: string | null; executor?: { state: string; problem: string | null; scope?: ExecutorScope } | null } | null }
+/** AF112/AF116: which map readings a local preview executor takes; unknown values are not shown. */
+export type ExecutorScope = 'first' | 'map6-later' | 'map7-later';
+const SCOPES: readonly string[] = ['first', 'map6-later', 'map7-later'];
 export class AskError extends Error { constructor(readonly code: string) { super(code); } }
 
 // same-origin: an owner-private host's own cookies go with same-origin calls; a cross-origin API still gets none.
@@ -26,9 +31,11 @@ export async function aiStatus(): Promise<AiStatus> {
     if (!res.ok || !['deepseek', 'off'].includes(v?.ai)) return { ai: 'none', model: null, access: 'open' };
     const d = v.digest, digest = d && typeof d.model === 'string' && typeof d.prompt === 'string' && /^[\w.-]{1,80}$/.test(d.model) && /^d1-[0-9a-f]{12}$/.test(d.prompt)
       ? { model: d.model, prompt: d.prompt, record: typeof d.record === 'string' && /^d2-[0-9a-f]{12}$/.test(d.record) ? d.record : null } : null;
-    const m = v.map, map = m && typeof m.model === 'string' && /^[\w.-]{1,80}$/.test(m.model) && typeof m.prompt === 'string' && /^m[1-6]-[0-9a-f]{12}$/.test(m.prompt) ? { model: m.model, prompt: m.prompt, ...(m.via === 'jobs' ? { via: 'jobs' as const } : {}) } : null;
-    // AF112 scope: which map readings the executor takes (first maps only, or later map.6 readings too); unknown values are not shown.
-    const j = v.jobs, x = j?.executor, executor = x && typeof x.state === 'string' ? { state: x.state, problem: typeof x.problem === 'string' ? x.problem : null, ...(x.scope === 'first' || x.scope === 'map6-later' ? { scope: x.scope as 'first' | 'map6-later' } : {}) } : null;
+    const m = v.map, map = m && typeof m.model === 'string' && /^[\w.-]{1,80}$/.test(m.model) && typeof m.prompt === 'string' && /^m[1-6]-[0-9a-f]{12}$/.test(m.prompt) ? { model: m.model, prompt: m.prompt, ...(m.via === 'jobs' ? { via: 'jobs' as const } : {}),
+      // A later recipe is read only beside a current m6 one, and only as an exact m7 id.
+      ...(/^m6-/.test(m.prompt) && typeof m.laterPrompt === 'string' && /^m7-[0-9a-f]{12}$/.test(m.laterPrompt) ? { laterPrompt: m.laterPrompt } : {}) } : null;
+    // AF112 scope: which map readings the executor takes (first maps only, later map.6 readings too, or AF116 later map.7 readings).
+    const j = v.jobs, x = j?.executor, executor = x && typeof x.state === 'string' ? { state: x.state, problem: typeof x.problem === 'string' ? x.problem : null, ...(SCOPES.includes(x.scope) ? { scope: x.scope as ExecutorScope } : {}) } : null;
     const jobs = j && j.version === 'map-job.1' ? { durable: j.durable === true, problem: typeof j.problem === 'string' ? j.problem : null, ...(executor ? { executor } : {}) } : null;
     return { ai: v.ai, model: typeof v.model === 'string' ? v.model : null, access: v.access === 'code' ? 'code' : 'open', digest, map, jobs };
   } catch { return { ai: 'none', model: null, access: 'open' }; }
@@ -79,7 +86,7 @@ export async function askMap(ask: MapAsk, signal: AbortSignal, accessCode: strin
   if (signal.aborted) throw new AskError('CANCELLED');
   if (!res.ok) throw new AskError(typeof data?.error?.code === 'string' ? data.error.code : 'REQUEST_FAILED');
   if (typeof data?.model !== 'string') throw new AskError('INVALID_RESPONSE');
-  if ((ask.schemaVersion === MAP4_SCHEMA || ask.schemaVersion === MAP5_SCHEMA || ask.schemaVersion === MAP6_SCHEMA) && (data.evidence?.index !== SPAN_INDEX || data.evidence.ask !== textDigest(body))) throw new AskError('INVALID_RESPONSE');
+  if ((ask.schemaVersion === MAP4_SCHEMA || ask.schemaVersion === MAP5_SCHEMA || ask.schemaVersion === MAP6_SCHEMA || ask.schemaVersion === MAP7_SCHEMA) && (data.evidence?.index !== SPAN_INDEX || data.evidence.ask !== textDigest(body))) throw new AskError('INVALID_RESPONSE');
   try { return { model: data.model, reply: validateMapReply(data.reply, ask) }; } catch { throw new AskError('INVALID_RESPONSE'); }
 }
 

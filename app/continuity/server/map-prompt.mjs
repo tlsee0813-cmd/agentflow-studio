@@ -244,3 +244,35 @@ export const MAP6_PROMPT = map6(MAP5_PROMPT);
 export const MAP6_FIRST_PROMPT = map6(MAP5_FIRST_PROMPT);
 export const MAP6_RECIPE = 'map6-recipe.1: first = parts.length === 0 && requests.length === 0 && priors.length === 0; evidence = same-record contiguous range <= 600 UTF-16; span.2; candidates state their target (attribution|identity|parent|holds) and statement keys';
 export const map6Prompt = ask => ask.parts.length === 0 && (ask.requests ?? []).length === 0 && (ask.priors ?? []).length === 0 ? MAP6_FIRST_PROMPT : MAP6_PROMPT;
+
+// studio.map.7 (AF116): later readings only. The map.6 later prompt with every condition the reply names given as a sent anchor
+// or null instead of copied words; what a person declared of a source (basis/note) is never a condition. map.1–6 and every FIRST
+// prompt stay byte for byte. Each replacement must find its map.6 text once, so a later edit of map.6 cannot silently skip one.
+const swap = (text, from, to) => { if (text.split(from).length !== 2) throw new Error(`map7: '${from.slice(0, 40)}' not found once`); return text.replace(from, () => to); };
+const MAP7_CONDITIONS = `조건 참조(roleAboutAt·aboutAt, 가장 중요):
+- 조건은 원문의 판본·커밋·브랜치·실행 환경·검사 조건을 말한다. 조건을 글로 다시 쓰지 않고 그 조건이 적힌 원문 구간 이름("N01.04" 또는 "N01.04-05")으로 고르거나 null로 둔다. 서버가 그 구간 원문을 바깥 공백만 지우고 그대로 조건으로 저장한다. 원문 글자·요약·추론한 판본, 구간 일부만 고르기, 여러 구간 잇기는 쓸 수 없다.
+- 기록의 basis·note에 적힌 이름·판본·출처는 사용자가 기재한 자료 정보이며 원문이 아니다. 화면에서 그 자료 옆에 ‘사용자 기재’로 따로 보인다. 그 값을 조건으로 쓰거나, 원문에 없는 판본을 그 값으로 채우거나, 원문이 말한 다른 판본(다른 의존성·다른 문서의 커밋 등)을 그 자료의 판본으로 바꾸어 쓰지 않는다. basis·note·현재 주장(current)·priors·보내지 않은 자료는 조건 구간이 될 수 없다.
+- claims의 aboutAt은 그 주장의 at과 같은 기록, 후보 statement의 aboutAt은 그 statement.at과 같은 기록, matches의 aboutAt은 그 대응의 at과 같은 기록의 구간이어야 한다(같은 기록 앞쪽의 조건 머리글도 된다). roleAboutAt은 그 부분 basis에 실제로 든 기록 하나의 구간이며 role이 null이면 null이다. basis가 여러 기록에 걸쳐 있고 모두에 맞는 조건 하나가 없으면 roleAboutAt은 null로 두고, 기록별 차이는 role·claims·근거로 남긴다. 여러 자료의 판본을 하나로 합치지 않는다.
+- 바깥 공백을 지운 조건 원문은 roleAboutAt·claims·statement는 80자, matches는 200자(UTF-16) 이내여야 한다. 넘으면 응답 전체가 거절되며 서버는 자르거나 null로 바꾸지 않는다. 짧게 고를 수 있는 조건 원문이 없으면 처음부터 null을 쓰되, 중요한 판본·환경·검사 조건은 text에 밝히고 그 조건이 든 정확한 근거 구간(at)을 고른다. null은 조건을 빠뜨려도 된다는 뜻이 아니다.
+- 조건 구간도 근거다. material 범위와 조금이라도 겹치면 응답 전체가 거절된다.
+- 키 이름은 roleAboutAt·aboutAt이다. 이전 형식의 roleAbout·about 키를 쓰거나 두 형식을 함께 쓰면 응답 전체가 거절된다.
+`;
+const map7 = prompt => [
+  ['roleAbout은 그 설명이 다룬 판본), current는 지금 유효한 주장(키 C01 등, about은 그 주장이 다룬 판본).', 'roleAbout은 그 설명이 다룬 판본으로 저장된 글), current는 지금 유효한 주장(키 C01 등, about은 그 주장이 다룬 판본으로 저장된 글). 이 두 값은 지난 기록이며 이번 응답의 조건 구간이 아니다.'],
+  ['자료의 층위:\n', `${MAP7_CONDITIONS}\n자료의 층위:\n`],
+  ['roleAbout은 원문이 판본을 적었을 때만 쓴다.', 'roleAboutAt은 그 설명의 조건이 basis 기록 원문에 있을 때만 그 구간을 쓰고, 아니면 null.'],
+  ['- about: 원문이 그 주장의 판본·커밋·브랜치·시점을 직접 적었으면 그대로 옮기고, 아니면 null.', '- aboutAt: 원문(그 주장의 at과 같은 기록)이 그 주장의 판본·커밋·브랜치·시점·검사 조건을 직접 적었으면 그 구간 이름, 아니면 null.'],
+  ['다른 브랜치·판본 자료는 앞의 주장을 바꾸지 않고 about으로 범위를 밝혀 함께 둔다.', '다른 브랜치·판본 자료는 앞의 주장을 바꾸지 않고 aboutAt으로 범위를 밝혀 함께 둔다.'],
+  ['statement에 그 진술 {"key","kind","text","at","about"}을 쓰고', 'statement에 그 진술 {"key","kind","text","at","aboutAt"}을 쓰고'],
+  ['- matches 각 항목은 정확히 {at,text,kind,stance,about,targets,why,replaces}다.', '- matches 각 항목은 정확히 {at,text,kind,stance,aboutAt,targets,why,replaces}다.'],
+  ['- about은 이 구간의 브랜치·판본·커밋·검사 조건을 원문에서 한 연속 구절 그대로 옮긴다(200자 이내, 모르면 null).', '- aboutAt은 이 구간의 브랜치·판본·커밋·검사 조건이 적힌 같은 기록의 구간 이름이다(바깥 공백을 지운 원문 200자 이내, 없으면 null).'],
+  ['만들어졌다고 말하는지. made', '만들어졌다고 말하는지(aboutAt 범위에서). made'],
+  ['"roleAbout":null,"roleReplaces":null,"basis":["N01.03"]', '"roleAboutAt":null,"roleReplaces":null,"basis":["N01.03"]'],
+  ['"roleAbout":null,"roleReplaces":null,"basis":[]', '"roleAboutAt":null,"roleReplaces":null,"basis":[]'],
+  ['"at":"N01.05-06","about":null', '"at":"N01.05-06","aboutAt":null'],
+  ['"at":"N01.11","about":"feature/x"', '"at":"N01.11","aboutAt":"N01.10"'],
+  ['"at":"N01.14","about":null}', '"at":"N01.14","aboutAt":null}'],
+  ['"stance":"made","about":null', '"stance":"made","aboutAt":null']
+].reduce((t, [from, to]) => swap(t, from, to), swap(prompt, '변경이 (about 범위에서) 만들어졌다고', '변경이 만들어졌다고'));
+export const MAP7_PROMPT = map7(MAP6_PROMPT);
+export const MAP7_RECIPE = 'map7-recipe.1: later only = parts.length > 0 || requests.length > 0 || priors.length > 0 (a first map is map.6); map.6 contract; roleAboutAt/claim.aboutAt/statement.aboutAt/match.aboutAt = sent anchor of the owning record (role: a basis record) | null; resolved exact passage, outer white space trimmed, 80/200 UTF-16, never clipped or nulled; material overlap refused; stored as about string|null';

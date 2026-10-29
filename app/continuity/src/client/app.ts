@@ -2132,7 +2132,7 @@ function renderStatus() {
   const needsCode = status.ai === 'deepseek' && status.access === 'code' && !sessionCode();
   // AF102: a server whose map readings are made only by its own map executor (a local preview) says so; the rest stays as ai says.
   const mapOnly = status.ai !== 'deepseek' && status.map?.via === 'jobs';
-  const later = status.jobs?.executor?.scope === 'map6-later';
+  const later = status.jobs?.executor?.scope === 'map6-later' || status.jobs?.executor?.scope === 'map7-later';
   const mapNote = status.map?.via === 'jobs' ? ` 지도 정리는 이 PC의 지도 실행기(${status.map.model}, 미리보기)가 ${later ? '첫 지도와 이후 기록·요청 대조까지' : '첫 지도만'} 해요.` : '';
   pill.dataset.state = needsCode ? 'code' : mapOnly ? 'map' : status.ai;
   text.textContent = status.ai === 'deepseek' ? (needsCode ? 'AI · 접속 코드 필요' : 'AI 정리 가능') : mapOnly ? '지도 정리만 가능' : status.ai === 'off' ? 'AI 키 없음' : 'AI 서버 미연결';

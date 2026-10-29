@@ -4,8 +4,9 @@
 // - the policy (binary path and SHA-256, version, argument template, model, reasoning, deadlines) is the operator's local file,
 //   read once; the browser can choose none of it. The wrapper is the AF96 executor's fixed text around the current map.6
 //   instructions and the input JSON. Each job is bound to the policy hash when it is accepted and runs only under it.
-// - scope (AF112): a policy admits first maps only unless it names scope 'map6-later' (later studio.map.6 readings too). A job
-//   is bound to the instructions actually selected for its ask and to the ask itself; both are checked again before a start.
+// - scope (AF112): a policy admits first maps only unless it names scope 'map6-later' (later studio.map.6 readings too) or
+//   (AF116) 'map7-later' (first maps as map.6, later readings as studio.map.7 only). A job is bound to the instructions actually
+//   selected for its ask and to the ask itself; both are checked again before a start.
 // - one child at a time (the version probe included), no queue, no retry. Admission is tied to the child's life: a durable lease
 //   is written before a child is started and removed only once the child is known gone (closed, and on POSIX its process group
 //   probed empty) and its output consumed. A lease left by an earlier process keeps every new job out, whatever its id, until
@@ -25,8 +26,8 @@ import { createReadStream } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { ApiError } from '../../../../app/server/errors.mjs';
 import { own, fileIo } from '../../../../app/continuity/server/map-jobs.mjs';
-import { map6Prompt, MAP6_FIRST_PROMPT } from '../../../../app/continuity/server/map-prompt.mjs';
-import { validateMapReply, MAP6_SCHEMA } from '../../../../app/continuity/dist/public/shared/map-reading.js';
+import { map6Prompt, MAP6_FIRST_PROMPT, MAP7_PROMPT } from '../../../../app/continuity/server/map-prompt.mjs';
+import { validateMapReply, MAP6_SCHEMA, MAP7_SCHEMA } from '../../../../app/continuity/dist/public/shared/map-reading.js';
 import { captureCli, groupAlive, CAPTURE_LIMITS } from './cli-capture.mjs';
 
 export const EXECUTOR_ID = 'codex-cli-preview.102';
@@ -42,19 +43,25 @@ export const WRAPPER_SHA256 = sha(JSON.stringify([WRAPPER_PREFIX, WRAPPER_SUFFIX
 const canon = v => JSON.stringify(v, Object.keys(v).sort());
 const iso = () => new Date().toISOString();
 
-/** What a child reads on stdin: the fixed wrapper around the current map.6 instructions (98's FIRST prompt here) and the ask. */
-export const wrap = ask => WRAPPER_PREFIX + map6Prompt(ask) + WRAPPER_SUFFIX + JSON.stringify(ask);
-const isFirst = ask => ask?.schemaVersion === MAP6_SCHEMA && ask.parts.length === 0 && (ask.requests ?? []).length === 0 && (ask.priors ?? []).length === 0;
+/** The instructions an ask is read with: map.7's one later prompt, or the map.6 prompt map6Prompt selects (98's FIRST included). */
+const instructions = ask => ask?.schemaVersion === MAP7_SCHEMA ? MAP7_PROMPT : map6Prompt(ask);
+/** What a child reads on stdin: the fixed wrapper around the selected instructions and the ask. */
+export const wrap = ask => WRAPPER_PREFIX + instructions(ask) + WRAPPER_SUFFIX + JSON.stringify(ask);
+const first = ask => ask.parts.length === 0 && (ask.requests ?? []).length === 0 && (ask.priors ?? []).length === 0;
+const isFirst = ask => ask?.schemaVersion === MAP6_SCHEMA && first(ask);
 /** AF112: which map.6 asks a policy admits. 'first' (the default, and every policy written before AF112): a first map only.
  * 'map6-later' (the operator's explicit opt-in): any studio.map.6 ask, later readings with parts, frozen requests and priors
- * included, each with the instructions map6Prompt selects for it. No other value is read. */
-export const SCOPES = Object.freeze(['first', 'map6-later']);
+ * included, each with the instructions map6Prompt selects for it. 'map7-later' (AF116, explicit opt-in): a first map as map.6 and a
+ * later reading as studio.map.7 only (a first map.7 or a later map.6 is refused). No other value is read. */
+export const SCOPES = Object.freeze(['first', 'map6-later', 'map7-later']);
 /** The refusal of an ask the policy's scope does not admit, or null. */
-const refusal = (scope, ask) => ask?.schemaVersion !== MAP6_SCHEMA ? (scope === 'first' ? 'EXECUTOR_SCOPE' : 'EXECUTOR_SCHEMA') : scope === 'first' && !isFirst(ask) ? 'EXECUTOR_SCOPE' : null;
+const refusal = (scope, ask) => scope === 'map7-later'
+  ? (isFirst(ask) || (ask?.schemaVersion === MAP7_SCHEMA && !first(ask)) ? null : 'EXECUTOR_SCHEMA')
+  : ask?.schemaVersion !== MAP6_SCHEMA ? (scope === 'first' ? 'EXECUTOR_SCOPE' : 'EXECUTOR_SCHEMA') : scope === 'first' && !isFirst(ask) ? 'EXECUTOR_SCOPE' : null;
 /** What a job is bound to about its own ask: the instructions actually selected (which text, its SHA-256 and short id) and the ask. */
 function askBinding(ask) {
-  const selected = map6Prompt(ask), full = sha(selected);
-  return { promptKind: selected === MAP6_FIRST_PROMPT ? 'first' : 'later', prompt: full.slice(0, 12), promptSha256: full, askSha256: sha(JSON.stringify(ask)) };
+  const selected = instructions(ask), full = sha(selected);
+  return { promptKind: selected === MAP6_FIRST_PROMPT ? 'first' : selected === MAP7_PROMPT ? 'later7' : 'later', prompt: full.slice(0, 12), promptSha256: full, askSha256: sha(JSON.stringify(ask)) };
 }
 
 /** Checks a policy file's content; throws POLICY_INVALID with the field. */
@@ -99,7 +106,8 @@ export async function openCliExecutor({ policy: raw, stateDir: given, spawnImpl,
   // from the child's own working folder (a relative --state would otherwise nest under it).
   const stateDir = resolve(given);
   const permissions = sha(JSON.stringify(policy.args)); // the argument template carries sandbox, config and tool settings
-  // The policy hash of a 'first' policy is the one it had before AF112 (scope is left out of it then); 'map6-later' is in it.
+  // The policy hash of a 'first' policy is the one it had before AF112 (scope is left out of it then); 'map6-later' and
+  // 'map7-later' are in it.
   const { scope: _scope, ...hashed } = policy;
   const binding = Object.freeze({ executor: policy.executor, version: policy.version, binarySha256: policy.binarySha256, model: policy.model, reasoning: policy.reasoning,
     permissions, wrapper: WRAPPER_SHA256, scope: policy.scope, selectionMs: policy.selectionMs, verdictMs: policy.verdictMs,

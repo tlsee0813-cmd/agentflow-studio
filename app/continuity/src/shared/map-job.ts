@@ -5,13 +5,14 @@
  * requests (ask.requests holds only their request-context.1 projection, without sources) and the priors with the correction each
  * had when it was asked. Every alias the ask refers to must be in its Map with the value it stands for; a claim alias the ask no
  * longer shows (buildMapAsk maps claims before it trims ask.parts[].current) is kept as it was, never refused or dropped. */
-import { validateMapAsk, askRecords, MAP4_SCHEMA, MAP5_SCHEMA, MAP6_SCHEMA, type MapAsk, type MapInput } from './map-reading.js';
+import { validateMapAsk, askRecords, MAP4_SCHEMA, MAP5_SCHEMA, MAP6_SCHEMA, MAP7_SCHEMA, type MapAsk, type MapInput } from './map-reading.js';
 import { validateFrozenRequest, requestContext, sameTarget, type FrozenRequest, type RequestTarget } from './request-return.js';
 
 export const MAP_INPUT_CODEC = 'map-input.1' as const;
 export const MAP_JOB_VERSION = 'map-job.1' as const;
-/** Only the anchored wires go as jobs: their reply is a wire of references, checked again against the very request. */
-export const JOB_SCHEMAS: readonly string[] = [MAP4_SCHEMA, MAP5_SCHEMA, MAP6_SCHEMA];
+/** Only the anchored wires go as jobs: their reply is a wire of references, checked again against the very request (map.7: later
+ * readings only, bound to its own m7 recipe). */
+export const JOB_SCHEMAS: readonly string[] = [MAP4_SCHEMA, MAP5_SCHEMA, MAP6_SCHEMA, MAP7_SCHEMA];
 export const JOB_ID = /^MJ_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 /** 32 random bytes, base64url without padding. Sent only as a header; the server keeps its SHA-256. */
 export const JOB_CAPABILITY = /^[A-Za-z0-9_-]{43}$/;
@@ -116,7 +117,7 @@ export function decodeMapInput(value: unknown): MapInput {
 export function validateBinding(v: unknown): MapJobBinding {
   keys(v, ['entryId', 'projectId', 'lifecycle', 'seq', 'after', 'schemaVersion', 'prompt', 'model', 'askHash', 'inputHash']);
   check(typeof v.entryId === 'string' && ENTRY.test(v.entryId) && sid(v.projectId) && nat(v.lifecycle, 1) && (v.seq === null || nat(v.seq, 1)) && (v.after === null || sid(v.after)));
-  check(typeof v.schemaVersion === 'string' && JOB_SCHEMAS.includes(v.schemaVersion) && typeof v.prompt === 'string' && /^m[4-6]-[0-9a-f]{12}$/.test(v.prompt) && typeof v.model === 'string' && /^[\w.-]{1,80}$/.test(v.model));
+  check(typeof v.schemaVersion === 'string' && JOB_SCHEMAS.includes(v.schemaVersion) && typeof v.prompt === 'string' && /^m[4-7]-[0-9a-f]{12}$/.test(v.prompt) && typeof v.model === 'string' && /^[\w.-]{1,80}$/.test(v.model));
   check(typeof v.askHash === 'string' && HEX64.test(v.askHash) && typeof v.inputHash === 'string' && HEX64.test(v.inputHash));
   return { ...v } as unknown as MapJobBinding;
 }

@@ -1,6 +1,6 @@
 {
   "_note": "Template only. Copy to a private path, fill exe/binarySha256/version from the frozen binary, and check every argument against that binary's `exec --help` before any real call (not verified for 0.165 here). Keys starting with _ are ignored and not part of the policy hash.",
-  "_scope": "Optional. \"first\" (default when absent): first maps only. \"map6-later\": also later studio.map.6 readings (parts, frozen requests, priors). Any other value is refused.",
+  "_scope": "Optional. \"first\" (default when absent): first maps only. \"map6-later\": also later studio.map.6 readings (parts, frozen requests, priors). \"map7-later\" (AF116): first maps as studio.map.6 and later readings as studio.map.7 only (raw condition anchors); a later map.6 or a first map.7 is refused. Any other value is refused.",
   "executor": "codex-cli-preview.102",
   "scope": "first",
   "exe": "C:\\absolute\\path\\to\\codex.exe",

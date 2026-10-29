@@ -17,7 +17,7 @@ import * as D from '../dist/public/shared/domain.js';
 import * as M from '../dist/public/shared/map-reading.js';
 import * as J from '../dist/public/shared/map-job.js';
 import { studioView } from '../dist/public/shared/studio.js';
-import { createStudioHandler, mapPromptId } from '../server/studio.mjs';
+import { createStudioHandler, mapPromptId, map7PromptId } from '../server/studio.mjs';
 import { openMapJobs } from '../server/map-jobs.mjs';
 import { MAP6_FIRST_PROMPT } from '../server/map-prompt.mjs';
 import { openCliExecutor, wrap, readPolicy, WRAPPER_PREFIX, WRAPPER_SUFFIX, WRAPPER_SHA256 } from '../../../docs/cycles/2026-10-29-owned-cli-preview-102/preview/cli-executor.mjs';
@@ -493,7 +493,8 @@ test('102-E11 the default path is unchanged: no executor, the same status and De
   const h = createStudioHandler({ env: { DEEPSEEK_API_KEY: 'test-102-not-real' }, jobs, fetchImpl });
   const st = await statusOf(h);
   assert.deepEqual(Object.keys(st), ['ai', 'model', 'access', 'digest', 'map', 'jobs']);
-  assert.deepEqual([st.ai, st.map, st.jobs], ['deepseek', { model: 'deepseek-flash', prompt }, { version: 'map-job.1', durable: true }]);
+  // AF116: the same m6 recipe, with the optional later m7 recipe the standard provider names beside it.
+  assert.deepEqual([st.ai, st.map, st.jobs], ['deepseek', { model: 'deepseek-flash', prompt, laterPrompt: await map7PromptId() }, { version: 'map-job.1', durable: true }]);
   const x = await submission(project(), { model: 'deepseek-flash' });
   assert.equal((await jcall(h, 'POST', '', x.cap, x.body)).status, 202);
   const v = await ended(h, x); assert.equal(v.state, 'ready'); assert.equal(v.execution, undefined, 'a DeepSeek job carries no executor binding');
@@ -502,7 +503,7 @@ test('102-E11 the default path is unchanged: no executor, the same status and De
   await jobs.close();
   const fakeExecutor = { ready: () => true, model: 'x', describe: () => ({}), prepare() { throw new Error('used'); }, acquire() { throw new Error('used'); }, call() { throw new Error('used'); } };
   const noStore = createStudioHandler({ env: { DEEPSEEK_API_KEY: 'test-102-not-real' }, mapExecutor: fakeExecutor });
-  const st2 = await statusOf(noStore); assert.deepEqual(st2.map, { model: 'deepseek-flash', prompt }); assert.equal(st2.jobs, undefined);
+  const st2 = await statusOf(noStore); assert.deepEqual(st2.map, { model: 'deepseek-flash', prompt, laterPrompt: await map7PromptId() }); assert.equal(st2.jobs, undefined);
   // With a key and an executor: digest/ask stay DeepSeek's, the map is the executor's (jobs only).
   const ctl = mkdtempSync(join(tmpdir(), 'af102-ctl-')), j2 = await openMapJobs({ dir: mkdtempSync(join(tmpdir(), 'af102-jobs-')) });
   const ex = await openCliExecutor({ policy: policyFor(ctl), stateDir: mkdtempSync(join(tmpdir(), 'af102-state-')) }); opened.add(() => j2.close()); opened.add(() => ex.close());

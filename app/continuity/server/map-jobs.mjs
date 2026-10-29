@@ -190,7 +190,7 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
           return { status: 200, value: view(id, j.body) };
         }
         if (Buffer.byteLength(JSON.stringify(s.input)) > limits.inputBytes) throw new ApiError('INPUT_TOO_LARGE', 413);
-        const prompt = await run.prompt();
+        const prompt = await run.prompt(s.binding.schemaVersion); // AF116: the recipe of the job's own schema
         if (!run.configured()) throw new ApiError('AI_NOT_CONFIGURED', 503);
         if (s.binding.prompt !== prompt || s.binding.model !== run.model) throw new ApiError('PROMPT_CHANGED', 409);
         // AF102: an injected executor fixes what it will run (its identity, binary, permissions and deadline policy) now; the job
@@ -288,7 +288,7 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
   return {
     dir, owner: owner?.kind ?? null,
     describe: () => problem ? { version: MAP_JOB_VERSION, durable: false, problem } : { version: MAP_JOB_VERSION, durable: true },
-    /** One job route. run: { configured(), prompt(), model, acquire(id), call(ask, signal) } from the studio handler. */
+    /** One job route. run: { configured(), prompt(schemaVersion), model, acquire(id), call(ask, signal) } from the studio handler. */
     async handle({ method, rest, cap, body }, run) {
       if (problem || closed) throw new ApiError('JOB_STORE_UNAVAILABLE', 503);
       if (rest.length === 0 && method === 'POST') return submit(body, cap, run);
