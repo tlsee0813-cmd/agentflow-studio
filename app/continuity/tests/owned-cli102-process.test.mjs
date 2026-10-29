@@ -143,6 +143,9 @@ test('102-P4 a ready result survives restarts with the executor off (keyoff) and
   let a = await start(s); const x = await submission();
   assert.equal((await jcall(a.base, 'POST', '', x.cap, x.body)).status, 202);
   let ready; await until(async () => (ready = await jcall(a.base, 'GET', `/${x.id}`, x.cap)).state === 'ready', 'ready');
+  // The ready verdict comes before the child's lease is let go (its own lifetime). This test is about restarts after a normal
+  // end, so the cleanup is observed first: the executor says ready again and no lease is left (a crash before that is P1's case).
+  await until(async () => (await status(a.base)).jobs.executor.state === 'ready' && lease(s) === null, 'the child was let go and its lease removed');
   await kill(a.proc);
   a = await start(s, ['off']); assert.equal(a.executor, 'off');
   const st = await status(a.base); assert.deepEqual([st.ai, st.map, st.jobs], ['off', undefined, { version: 'map-job.1', durable: true }]);
