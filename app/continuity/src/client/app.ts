@@ -1561,6 +1561,8 @@ async function commit(o: Opened, next: Project): Promise<string | null> {
   } else if (o.kind === 'example') examples.set(o.key, next);
   else return '이 프로젝트는 읽기 전용이에요.';
   o.project = next; o.view = studioView(next);
+  // A wide reading open over this project reads the saved data again (said there), keeping its place.
+  wide.render();
   return null;
 }
 
@@ -1863,7 +1865,7 @@ const mapRun = createMapRun({
     // Left and came back while it was saved: this visit may have read the entry just before the save landed. It takes the saved
     // project only when it read the very state this save replaced (same lifecycle and save number), so it is not left stale.
     if (!failed && now && now !== o && now.key === o.key && base && now.ref && now.ref.lifecycle === base.lifecycle && now.ref.seq === base.seq) {
-      now.ref = o.ref; now.project = o.project; now.view = o.view; renderSpace('keep'); if (selected) refreshReading();
+      now.ref = o.ref; now.project = o.project; now.view = o.view; renderSpace('keep'); if (selected) refreshReading(); wide.render();
     }
     return failed;
   },
@@ -1892,6 +1894,7 @@ function mapChanged(key: string) {
   if (o.key !== key) return;
   renderMapEntry(); refreshUnderstood();
   if (returnView.isOpen() && !selected) returnView.render();
+  wide.render();
 }
 /** A project's map reading on its home card, said in place: the home page is not drawn again, so a draft or the focus there stays. */
 function runBadge(el: HTMLElement) {
@@ -1918,6 +1921,8 @@ function mapApplied(a: Applied) {
   renderSpace(first ? 'fit' : 'keep');
   readMarks = justRead.parts; applyReadMarks();
   if (selected) refreshReading();
+  // The pane it may have been opened from has just closed: the wide reading says so and closes to the map.
+  wide.render();
 }
 /** The map title's line: what the records made understandable (the last reading's sentence), new records to read, the way to it. */
 function understoodLine(o: Opened): HTMLElement | null {
