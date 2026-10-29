@@ -616,12 +616,12 @@ export function createReturnView(host: ReturnHost) {
       h('span', { 'aria-hidden': 'true' }, '←'), label));
     const body = h('div', { class: 'lens-body rr-body' });
     if (s.view.kind === 'paste') {
-      // Re-rendering keeps the caret where the person was typing.
-      const area = document.querySelector<HTMLTextAreaElement>('#paste-text'), caret = area ? [area.selectionStart, area.selectionEnd, document.activeElement === area] as const : null;
+      // Re-rendering keeps the caret where the person was typing (with the selection's direction) and where the box was scrolled.
+      const area = document.querySelector<HTMLTextAreaElement>('#paste-text'), caret = area ? [area.selectionStart, area.selectionEnd, document.activeElement === area, area.selectionDirection, area.scrollTop, area.scrollLeft] as const : null;
       put(body, back('정리로'), ...pasteBody(o));
       host.show([header(o), body, pasteFooter()]); host.mark(s.pasteContext ? [s.pasteContext] : []);
       const next = document.querySelector<HTMLTextAreaElement>('#paste-text');
-      if (next && caret) { next.setSelectionRange(caret[0], caret[1]); if (caret[2]) next.focus({ preventScroll: true }); }
+      if (next && caret) { next.setSelectionRange(caret[0], caret[1], caret[3]); if (caret[2]) next.focus({ preventScroll: true }); next.scrollTop = caret[4]; next.scrollLeft = caret[5]; }
       return;
     }
     if (s.view.kind === 'file') {
