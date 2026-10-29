@@ -1,0 +1,21 @@
+{
+  "basis": "88014f77627153577f3024827632ad2fa14d6d07",
+  "selectedCandidate": "전체 구상의 확인 사항 (추가 요청 아님):",
+  "status": "selected narrow wording direction; wait exactWindows diagnostic before final repair acceptance",
+  "reason": "The long draft106 heading repeats scope/decision instructions and adds reading burden. Neutral 확인 사항 plus 추가 요청 아님 preserves the section meaning in a shorter heading; PLAN3/SCOPE rules and original unknown text remain.",
+  "independent": "existing Sol firstmap98_decision agreed semantically acceptable; not generic resize guarantee",
+  "preserve": [
+    "pre106 heading + final heading exact recognition",
+    "original old snapshots text/offsets",
+    "unknown original strings/order",
+    "PLAN1/2 bytes",
+    "same resize assertion and source-position evidence"
+  ],
+  "draft106Use": "root observed actual105 snapshots0 and made no new106 request; only fixture test snapshots",
+  "notClaimed": [
+    "all draft versions mutually readable",
+    "generic resize preservation",
+    "model compliance"
+  ],
+  "ciFirst": 40897491989
+}

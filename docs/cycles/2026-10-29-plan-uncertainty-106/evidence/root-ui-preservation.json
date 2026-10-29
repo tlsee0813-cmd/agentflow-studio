@@ -1,0 +1,27 @@
+{
+  "sha": "d6e7375aeae147cea9f039f475675f299627a4da",
+  "viewport": "1280x720",
+  "server": "localhost51905 AI off/map jobs off",
+  "realSavedSource": "105 plan-after.json unchanged",
+  "checks": {
+    "existingStoredBundleSame": true,
+    "explicitImportExportBundleSame": true,
+    "wholeProjectBackupSame": true,
+    "unknownStrings": 5,
+    "neutralStripAndWide": true,
+    "autoRepair": false,
+    "requestCreation": false,
+    "modelCalls": 0
+  },
+  "bundleHash": "afd5e40f0c1715f3693809bced751328a412496b1ba914a73c5e15dd84e9a702",
+  "projectHash": "dcda9cc2acbd387fdfc7f1751f7ba4e59a2bbf6b496c5c04bbba24477552bb49",
+  "screenshots": [
+    "experience106-neutral-strip.png",
+    "experience106-neutral-wide.png"
+  ],
+  "limitations": [
+    "Old105 semantic failure retained; no corrected model output",
+    "Old frozen request heading compatibility tested with prior94 gold fixtures, not actual105 snapshot (105 had no request)",
+    "Narrow change accepted only after exactCI"
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "code": "ac77a37daf2de88b974bdfdb727f7908f6246611",
+  "app": "b4df87afa9877e0f95e2556135d3e3386b0a4465",
+  "files": [
+    {
+      "path": "docs/cycles/2026-10-29-plan-uncertainty-106/RESULT.md",
+      "sha256": "5113157027e96533ef49f5876c10dc7310317fac6daa49893044a20a44032531"
+    },
+    {
+      "path": "docs/cycles/2026-10-29-plan-uncertainty-106/ROOT_ACCEPTANCE.md",
+      "sha256": "bef13173cccc84c6c9faf52181528593d7d15ed93dd8471fbd393afb8160b6e6"
+    },
+    {
+      "path": "docs/cycles/2026-10-29-plan-uncertainty-106/evidence/root-ui-preservation.json",
+      "sha256": "7efaf6f55428c444981b31768a924090e8f2b73604eea934d02e059384e15672"
+    },
+    {
+      "path": "docs/cycles/2026-10-29-plan-uncertainty-106/evidence/independent-initial.json",
+      "sha256": "20324e902efde7c7bfae5d78e3ac503bfe8fef4cb6f009b9c66e68ff62b9de5b"
+    },
+    {
+      "path": "docs/cycles/2026-10-29-plan-uncertainty-106/evidence/compact-heading-decision.json",
+      "sha256": "631aee03d3cfe93ded2c86b74d8f6b12126be6aa8c1736644329c87c79a8a605"
+    },
+    {
+      "path": "docs/cycles/2026-10-29-plan-uncertainty-106/evidence/compact-ui.json",
+      "sha256": "4627dab41a80e9a7d227c0fdecb8b00c5a863b6dfc7a736e2e7fb22228346ba2"
+    },
+    {
+      "path": "docs/cycles/2026-10-29-plan-uncertainty-106/evidence/neutral-strip.png",
+      "sha256": "4023a914603d8f00f001ad37ee46ea6303f10ccd1c2e8e9b46f8aca757b5d718"
+    },
+    {
+      "path": "docs/cycles/2026-10-29-plan-uncertainty-106/evidence/compact-request-1280.png",
+      "sha256": "3af6a110f4cdac18b31c2246a1f95e0d19094387104e273a7ed5419e4f7dfcc5"
+    },
+    {
+      "path": "docs/cycles/2026-10-29-plan-uncertainty-106/evidence/compact-request-606.png",
+      "sha256": "ce91241fe091b515e12a1d52a35ce32d1c7852f78dda4f09536f85e5e343c09f"
+    },
+    {
+      "path": "docs/cycles/2026-10-29-plan-uncertainty-106/evidence/final-ci.json",
+      "sha256": "7d68b5e22f22123e9753608a44c29bbe259f3ff2f70e0c7485d53802b9f66a73"
+    },
+    {
+      "path": "docs/cycles/2026-10-29-plan-uncertainty-106/evidence/windows-resize-ac77.json",
+      "sha256": "796b0c8a7a35048bf829e5bbf183f423d081a503f9b35997be819a11a9b988c2"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "code": "ac77a37daf2de88b974bdfdb727f7908f6246611",
+  "app": "b4df87afa9877e0f95e2556135d3e3386b0a4465",
+  "scenario": "authored built-in converter example; normal wide comparison -> create request -> check-section navigation",
+  "providerCalls": 0,
+  "project": "ex-converter",
+  "viewport": [
+    1280,
+    606,
+    1280
+  ],
+  "height": 720,
+  "heading": "전체 구상의 확인 사항 (추가 요청 아님):",
+  "result": "heading and four unknown strings visible; section navigation focuses heading and remains focused across resize; screenshot at1280/606; manual check is not the exact CI resize fixture or AI quality proof",
+  "screenshots": [
+    "experience106-compact-request-1280.png",
+    "experience106-compact-request-606.png"
+  ],
+  "viewportReset": true
+}

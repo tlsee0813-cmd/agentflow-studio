@@ -1,0 +1,59 @@
+{
+  "task": "AF106-independent-fixed-delta-review",
+  "head": "d6e7375aeae147cea9f039f475675f299627a4da",
+  "base": "969f1678c998774bbf828ce608f84ecc9d3308b4",
+  "verdict": "static_delta_acceptable_for_narrow_repair; root_acceptance_pending",
+  "conclusion": "No new material P1/P2 issue was found in the nine-file delta. The code changes address the106 normative instruction/presentation boundary without deleting or reclassifying existing unknown strings. Legacy plan1/2 prompt construction is unchanged, new requests use a neutral heading, and new validation accepts both exact old/new headings while retaining section/material/offset checks. This is not evidence of improved actual model behavior or a completed public release.",
+  "findings": [],
+  "reviewedBoundaries": [
+    {
+      "subject": "plan1/2 byte preservation and plan3/scope instructions",
+      "files": ["app/continuity/server/plan-prompt.mjs:32-45", "app/continuity/server/plan-prompt.mjs:56"],
+      "assessment": "The diff leaves PLAN_PROMPT, AUTHORING_RULE and PLAN2_PROMPT construction intact. UNKNOWNS_RULE is added only to PLAN3_PROMPT's existing derivation, before its return format. Source composition therefore leaves evaluated plan1/2 text unchanged; this reviewer did not execute imports or claim a new measured hash. The new instructions exclude application part/schema classification and reopening explicit intent, while retaining actual user-open choices and materially relevant CLI/GUI uncertainty. Scope adds the same selected-result boundary without modifying the selected content or auto-including prerequisites. No runtime dispatch/schema/output validator was changed.",
+      "limits": "Prompt text checks demonstrate the intended rule only. Actual model compliance and whether legitimate material unknowns survive require the separately selected observation;105's failed response remains failed."
+    },
+    {
+      "subject": "neutral UI without source repair",
+      "files": ["app/continuity/src/client/plan-view.ts:110-119", "app/continuity/src/client/plan-view.ts:694-702", "app/continuity/src/client/plan-view.ts:932", "app/continuity/src/client/plan-view.ts:944-949"],
+      "assessment": "The positive-item strip and wide conditions, zero-item view, and request navigation use '확인할 것'. Mixed-list views explain that these are analysis-left open/check items and not all decisions the person must make. Each list still directly maps the original unknown strings in original order; no filter, category inference, replacement or source mutation is introduced. The unchanged aria label about conditions having no target does not assert that every unknown is a user decision. The request body renderer still slices its frozen text, so an old document's literal historical heading remains visible rather than being rewritten for the new navigation label.",
+      "limits": "Static review cannot confirm wrapping, focus or scrolling on the normal1280 UI. Root owns the planned actual105 import/view preservation check."
+    },
+    {
+      "subject": "new request text and exactly two recognized frozen headings",
+      "files": ["app/continuity/src/shared/change-plan.ts:200", "app/continuity/src/shared/request-reading.ts:32-39", "app/continuity/src/shared/request-reading.ts:77-115"],
+      "assessment": "Only newly generated request text uses the new heading and neutral empty fallback. validateReading checks the already-declared unknowns span, not a search of source/material text: it selects the old constant only when that span begins with the exact old heading followed by newline, otherwise it requires the exact new constant. block() then requires heading+newline+'- ' and the existing trailing blank lines. A third heading, suffix, prefix-only heading or heading embedded in material does not gain authority. Contiguous coverage, integer bounds, surrogate boundaries, exact item/header/closing content, material identity/length and source checks are unchanged. No legacy snapshot text or offsets are rewritten in product code.",
+      "limits": "The ordinary unknowns section body remains unrestricted model text as before; recognizing its heading is not semantic acceptance of that body."
+    },
+    {
+      "subject": "test meaningfulness and bounded evidence",
+      "files": ["app/continuity/tests/uncertainty106.test.mjs:25-88", "app/continuity/tests/reading94.test.mjs", "app/continuity/tests/fixtures/reading94/cases.mjs:45-58", "app/continuity/tests/change-plan.test.mjs:192"],
+      "assessment": "Tests distinguish prompt-presence assertions from behavioral tests. Mixed authored strings are carried through plan/request/store/file without deletion or order changes. The prior frozen-text oracle is retained; before106 constructs synthetic old-heading copies, including the old empty fallback, and adjusts later offsets only for that controlled test transformation. These copies must equal the existing golden text, then survive validation/import/export/store without text/reading mutation. Four arbitrary-heading variants exercise compare, bundle and file boundaries. Existing94 material recut protections remain, with their probe offset changed only by the heading-length delta. This is a meaningful backward-read/retention boundary rather than a claim that the old105 model answer has been corrected.",
+      "limits": "The old-heading fixture is authored/derived, not an actual historical105 saved file, and the new suite has no browser execution. Root's planned locked compiler/tests and actual saved105 UI observation are still necessary acceptance evidence. The author's TS6-generated40-pass run is explicitly not counted here as locked5.8.3 acceptance."
+    }
+  ],
+  "schemaStorageAndCompatibility": {
+    "unchanged": "No changed production type/schema, PlanAnalysis unknowns:string[], plan-store file/envelope version, request-reading version, runtime dispatch, project/map-record codec or model/call limits. The request-reading validator's recognized heading set is the explicit changed acceptance boundary. No source/response mutation path was added.",
+    "backwardRead": "New code recognizes exact pre106 frozen headings and keeps old request text/reading offsets as written. Existing documents without a reading keep their existing whole-text behavior. Changing UI navigation labels does not alter copy/export bytes of old snapshots.",
+    "forwardRollbackBoundary": "A106-created request uses a heading the pre106 request-reading.2 validator does not accept, while file/envelope4 and reading.2 labels remain unchanged. An old105 reader can therefore reject a new106 snapshot's project bundle as unreadable; code rollback is not a data downgrade. This is a real known forward-compatibility limitation, explicitly disclosed in author RESULT, not a new finding silently ignored because version numbers stayed the same. The unchanged plan-store path validates per project and retains unreadable raw; this review did not execute downgrade recovery. Do not advertise fully bidirectional compatibility or combine old/new writers without the separate release-boundary decision.",
+    "frozenPreservation": "The product never invokes the test-only before106 transformer. Original105 text and old unknown strings remain intact. No automatic reconstruction, content repair or reclassification is part of this delta."
+  },
+  "unchangedAdjacentBoundary": {
+    "files": ["app/continuity/src/client/digest-source.ts:85-87", "app/continuity/server/digest-prompt.mjs:6,22,26"],
+    "assessment": "The digest input title still says '변경안의 유지 범위와 미정'. Existing digest instructions explicitly treat that input as analysis context, distinguish actual choices from technical investigation/check gaps and do not forward every entry as a user decision. Its unchanged bytes are a disclosed adjacent limit, not a reason to expand106 into a digest redesign. Actual digest behavior was not observed here."
+  },
+  "remainingAcceptance": [
+    "Root locked TypeScript5.8.3 check/build and relevant suites, plus exact final-SHA CI; this review neither executes nor substitutes for them.",
+    "Root normal1280 UI with actual105 stored response: all old unknown strings visible in order under neutral headings, copy/request/import/export preservation and original text unchanged.",
+    "Only after implementation acceptance, root may separately select/freeze any one new plan observation and conditional scope observation. This report does not authorize a call or claim that instructions eliminate the105 semantic failure.",
+    "The106 storage forward/rollback boundary must remain in any105 release decision. This delta does not solve the earlier public73 Worker/candidate assets plan-version incompatibility or approve general public map generation."
+  ],
+  "actions": {
+    "modelCalls": 0,
+    "researchOrWeb": 0,
+    "testBuildOrUIExecution": 0,
+    "productOrRawWrites": 0,
+    "onlyWrite": ".ops/results/experience106-independent-d6e7375.json"
+  },
+  "reviewClosed": true,
+  "finalSelectionOwner": "root coordinator"
+}
