@@ -579,3 +579,20 @@ test('100-D14 a result let go stays let go: its acknowledgement lost, it is trie
   assert.equal((await jcall(svc.handle, 'GET', `/${id}`, cap)).acked, 'discarded'); assert.equal(readings(b.entries.get(A).project), 0);
   await svc.jobs.close();
 });
+
+test('100-D15 letting a result go when neither this address nor the server takes it: still ready, said so, never applied meanwhile', async () => {
+  const svc = await service(), b = await browser(svc), A = 'E_tab00000-1B';
+  b.add(A, project()); const t = b.tab(); t.open(A); t.cur = { ...t.cur };
+  await t.run.run(); t.open(A); await until(() => svc.prov.calls === 1, 'called'); svc.prov.gates[0].open();
+  await until(() => t.run.state().ready, 'ready'); const { id, cap } = reservations(b.shared.kv)[0];
+  b.net.fail = url => url.endsWith('/ack'); b.shared.kv.map.failNext = k => k === JOBS_KEY; // both refuse
+  t.run.discard(); assert.equal(t.run.state().ready, false);
+  await t.run.applyReady(); assert.equal(t.commits, 0, 'nothing applied while it is being let go');
+  await t.run.run(); assert.equal(svc.prov.calls, 1, 'no new reading while it is being let go');
+  await until(() => t.run.state().ready, 'back to ready');
+  assert.match(t.run.state().error, /버리지 못했어요/); assert.equal(reservations(b.shared.kv)[0].outcome, null);
+  assert.equal((await jcall(svc.handle, 'GET', `/${id}`, cap)).acked, null);
+  b.net.fail = null; b.shared.kv.map.failNext = null; t.run.discard();
+  await until(() => reservations(b.shared.kv).length === 0, 'let go'); assert.equal((await jcall(svc.handle, 'GET', `/${id}`, cap)).acked, 'discarded');
+  assert.equal(readings(b.entries.get(A).project), 0); await svc.jobs.close();
+});

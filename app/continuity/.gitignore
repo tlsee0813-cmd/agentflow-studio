@@ -3,3 +3,5 @@ test-results/
 __pycache__/
 static-dist/
 static-preview-dist/
+# AF100: map jobs kept on this PC (private project material, never committed or published).
+.studio-data/

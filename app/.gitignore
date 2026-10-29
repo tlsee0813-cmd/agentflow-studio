@@ -10,6 +10,3 @@ evidence/
 
 # INIT-005: synthetic/live run outputs may contain customer-like text.
 eval-results/
-
-# AF100: map jobs kept on this PC (private project material, never committed or published).
-.studio-data/

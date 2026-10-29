@@ -26,7 +26,7 @@
 
 아래는 위 계약을 구현하기 위해 코드보다 먼저 고정한 선택이다. 구현 결과와 실제 검증은 별도 `RESULT.md`에 기록한다.
 
-**저장 위치·형식.** `STUDIO_JOBS_DIR`가 있으면 그 디렉터리, 없으면 `app/.studio-data/map-jobs-<port>/`(gitignore, 정적·배포 수집 대상 아님). 브라우저 저장이 origin(포트)별이므로 작업 저장소도 포트별이다. port 0(무작위)이며 경로 지정이 없으면 내구 작업을 광고하지 않는다. `STUDIO_JOBS=off`면 끈다. 작업 하나가 `ops/<MJ_uuid>.json` 한 파일이다: `{format:'agentflow.map-job.1', body, sha256(body JSON)}`. POSIX에서 디렉터리 0700·파일 0600.
+**저장 위치·형식.** `STUDIO_JOBS_DIR`가 있으면 그 디렉터리, 없으면 `app/continuity/.studio-data/map-jobs-<port>/`(`app/continuity/.gitignore`; 기존 지문 대상인 `app/.gitignore`는 바꾸지 않음, 정적·배포 수집 대상 아님). 브라우저 저장이 origin(포트)별이므로 작업 저장소도 포트별이다. port 0(무작위)이며 경로 지정이 없으면 내구 작업을 광고하지 않는다. `STUDIO_JOBS=off`면 끈다. 작업 하나가 `ops/<MJ_uuid>.json` 한 파일이다: `{format:'agentflow.map-job.1', body, sha256(body JSON)}`. POSIX에서 디렉터리 0700·파일 0600.
 
 **원자 기록·복구.** 같은 디렉터리의 임시 파일에 쓰고 fsync → rename(교체) → (POSIX) 디렉터리 fsync. rename 전 장애의 임시 파일은 접수된 적 없는 것으로 시작 시 지운다(접수 영수증은 rename 후에만 나가므로 provider 호출도 없다). JSON/형식/해시가 맞지 않는 작업 파일은 **손상**으로 남겨 두고 고치지도 지우지도 않는다. 손상 ID의 조회·취소·확인은 `OPERATION_DAMAGED`, 같은 ID 접수는 거절하며 새 작업으로 취급하지 않는다.
 
@@ -36,7 +36,7 @@
 
 **상한.** 동시 실행은 기존 `STUDIO_MAX_CONCURRENT`(기본3)·분당·프로세스 호출 한도를 그대로 쓰는 limiter를 **접수 시 실행 소유로 획득**하고 terminal에서 반납한다. 조회·취소·확인·재접수(같은 ID)는 limiter를 쓰지 않는다. entry당 비terminal 작업 1개(`ENTRY_BUSY`). 확인 안 된 ready 50개, 원자료를 가진 기록 합계 32 MiB, 작업 파일 1개 512 KiB(입력 ≤ 448 KiB, 응답 wire는 기존 128 KiB 한도), 전체 기록 수(tombstone 포함) 10000. 넘으면 새 접수만 `JOB_STORE_FULL`로 명시 거절하고 기존 기록은 건드리지 않는다. 접수 HTTP 본문은 이 경로만 512 KiB(기존 경로 한도 불변). 90초·model·token·prompt 설정은 바꾸지 않는다.
 
-**권한과 조회.** 브라우저가 operation ID(`MJ_`+UUID)와 32바이트 무작위 회수 권한을 만든다. 권한은 헤더 `X-Studio-Operation`으로만 보내고 서버는 SHA-256만 저장한다. URL·로그·프로젝트·백업 파일에는 넣지 않는다(브라우저의 별도 키 `agentflow.studio.map-jobs.1`). 작업 목록 경로는 없다. 권한이 틀리면 없는 작업과 같은 404. 기존 Host/origin·`X-AgentFlow-Request`·접속 코드 경계가 모든 작업 경로에 그대로 적용된다. AI 키가 없어도 조회·확인은 된다(새 접수만 `AI_NOT_CONFIGURED`).
+**권한과 조회.** 브라우저가 operation ID(`MJ_`+UUID)와 32바이트 무작위 회수 권한을 만든다. 권한은 헤더 `X-Studio-Operation`으로만 보내고 서버는 SHA-256만 저장한다. URL·로그·프로젝트·백업 파일에는 넣지 않는다(브라우저의 별도 키 `agentflow.studio.map-jobs.1`). 작업 목록 경로는 없다. 권한이 틀리면 조회·취소·확인·같은 ID 재접수 모두 없는 작업과 같은 404 `OPERATION_NOT_FOUND`이며, 접수 진행 중(`OPERATION_ACCEPTING`)도 그 접수와 같은 권한에만 알린다. 같은 권한에 다른 본문이면 409 `OPERATION_CONFLICT`. 예외 하나: 손상 파일은 권한을 확인할 수 없으므로 그 ID에는 누구에게나 `OPERATION_DAMAGED`를 준다(무작위 122비트 ID를 맞혀야 하며 내용은 드러나지 않는다). 기존 Host/origin·`X-AgentFlow-Request`·접속 코드 경계가 모든 작업 경로에 그대로 적용된다. AI 키가 없어도 조회·확인은 된다(새 접수만 `AI_NOT_CONFIGURED`).
 
 **프로토콜.** `POST /api/studio/jobs`(접수: id·binding·input·hash) → 내구 기록 후 202 receipt. 같은 ID+같은 권한+같은 제출 해시는 현재 상태만 반환, 다르면 409. `GET /api/studio/jobs/<id>`(상태, ready면 원 입력·wire·model·prompt·ask 해시·evidence·안정 reading ID/time), `POST …/<id>/cancel`(취소를 먼저 내구 기록 후 abort 시도, 원격 중단 미보장 표시), `POST …/<id>/ack`(`applied|discarded|seen`). 접수 연결 종료는 실행 signal과 분리한다. 서버가 binding의 prompt id·model을 현재 map 설정과 대조하고(`PROMPT_CHANGED`), input codec·askHash·inputHash를 다시 계산해 맞지 않으면 접수하지 않는다. 실행 결과는 기존 `validateMapReply`로 검증된 경우에만 ready를 기록한 뒤 노출한다. 저장 실패 시 결과를 노출하지 않고 `failed: JOB_STORE_FAILED`(메모리) — 재시작 후에는 interrupted로 보인다.
 

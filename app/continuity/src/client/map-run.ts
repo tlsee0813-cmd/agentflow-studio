@@ -75,6 +75,7 @@ const JOB_ERROR: Record<string, string> = {
   ENTRY_BUSY: '이 프로젝트의 앞선 정리가 아직 끝나지 않았어요.',
   PROMPT_CHANGED: 'PC의 Studio 실행기 설정이 바뀌어 보내지 않았어요. 화면을 새로 고친 뒤 다시 정리해 주세요.',
   ELSEWHERE: '다른 창에서 이미 이 정리 결과를 지도에 반영했어요. 새로 고치면 보여요.',
+  DISCARD_FAILED: '결과를 버리지 못했어요(이 브라우저에도 PC의 Studio 실행기에도 기록하지 못함). 결과는 그대로 있어요. 다시 버려 주세요.',
   SAVED_SINCE: '정리를 맡긴 뒤 이 프로젝트가 다른 화면에서 저장되어 이번 결과는 반영하지 않았어요. 기록과 지도는 그대로예요. 다시 정리해 주세요.'
 };
 export const JOB_NOTE = {
@@ -91,7 +92,7 @@ export const JOB_NOTE = {
 interface Op { id: string; cap: string; binding: MapJobBinding; payload: string | null; receipt: boolean; state: string; cancelling: boolean; misses: number; tick: number; owned: boolean; release: (() => void) | null }
 interface Attempt {
   key: string; project: string; lifecycle: number | null; visit: unknown;
-  phase: 'hashing' | 'reserving' | 'asking' | 'ready' | 'committing';
+  phase: 'hashing' | 'reserving' | 'asking' | 'ready' | 'committing' | 'closing';
   controller: AbortController; inp: MapInput | null; prompt: string; hash: string;
   reply: MapReply | null; model: string; meta: { id: string; at: string } | null;
   op: Op | null;
@@ -290,15 +291,27 @@ export function createMapRun(host: MapRunHost) {
   }
   /** Reservations this page is acknowledging now: not shown again meanwhile (a failed acknowledgement is tried again later). */
   const closing = new Set<string>();
-  async function settle(a: Attempt, outcome: 'applied' | 'discarded' | 'seen') {
+  /** Tells the job how it ended here. True once that is kept somewhere: the intent in this address's storage (tried again from there)
+   * or the server's acknowledgement. False when neither took it: nothing is said to be done then. */
+  async function settle(a: Attempt, outcome: 'applied' | 'discarded' | 'seen'): Promise<boolean> {
     const op = a.op!; closing.add(op.id);
     try {
       // The intent is kept first: a lost acknowledgement is tried again, and the result is never shown again meanwhile.
-      await store()?.update(op.id, outcome === 'applied' ? (a.meta ? { applied: a.meta.id } : {}) : { outcome }).catch(() => {});
+      const noted = await (store()?.update(op.id, outcome === 'applied' ? (a.meta ? { applied: a.meta.id } : {}) : { outcome }) ?? Promise.reject()).then(() => true, () => false);
       try { await jobApi.ack(op.id, op.cap, host.accessCode(), outcome); }
-      catch (e) { if (!(e instanceof JobError && e.answered && ['OPERATION_NOT_FOUND', 'OPERATION_DAMAGED', 'OPERATION_CONFLICT'].includes(e.code))) return; } // kept: tried again later
+      catch (e) { if (!(e instanceof JobError && e.answered && ['OPERATION_NOT_FOUND', 'OPERATION_DAMAGED', 'OPERATION_CONFLICT'].includes(e.code))) return noted; } // kept: tried again later
       await store()?.remove(op.id).catch(() => {});
+      return true;
     } finally { closing.delete(op.id); }
+  }
+  /** The person lets a kept result go: held (no apply, no new reading) until that is kept locally or by the server; when neither
+   * takes it, the result stays ready and says so, to be let go again. */
+  async function discardJob(a: Attempt) {
+    const slot = of(a.key); a.phase = 'closing'; slot.error = null; slot.notice = null; host.changed(a.key);
+    const kept = await settle(a, 'discarded');
+    if (slot.attempt !== a) return;
+    if (kept) slot.attempt = null; else { a.phase = 'ready'; slot.error = JOB_ERROR.DISCARD_FAILED!; }
+    host.changed(a.key);
   }
   /** A reservation whose reading is saved (the acknowledgement owed): acknowledged quietly, never shown as a reading again. */
   async function owed(r: Reservation) {
@@ -419,7 +432,7 @@ export function createMapRun(host: MapRunHost) {
       a.controller.abort(); s.attempt = null; host.changed(openKey());
     },
     /** Lets a ready reply go unapplied (nothing is saved). A job's result is let go on the server too. */
-    discard: () => { const s = openSlot(), a = s?.attempt; if (!s || !a || a.phase !== 'ready') return; s.attempt = null; s.error = null; s.notice = null; if (a.op) void settle(a, 'discarded'); host.changed(openKey()); },
+    discard: () => { const s = openSlot(), a = s?.attempt; if (!s || !a || a.phase !== 'ready') return; if (a.op) { void discardJob(a); return; } s.attempt = null; s.error = null; s.notice = null; host.changed(openKey()); },
     clearError: () => { const s = openSlot(); if (s) { s.error = null; s.notice = null; } },
     last: (): MapReading | null => { const o = host.current(); return o ? (o.project.readings.filter(isMapReading).at(-1) ?? null) : null; }
   };
