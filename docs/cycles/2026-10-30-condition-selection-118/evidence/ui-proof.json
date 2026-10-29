@@ -1,0 +1,36 @@
+{
+  "status": "PASS bounded model-free normal UI",
+  "head": "8aa7c3d3d8d9e62d0a655adb2a4cfff1dcef699b",
+  "product": "8875b7744d7f384d59b9a4a7cdab35654e81bbab",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "entry": "E_389ad79a-d11a-429b-b9e1-ab19f4e974d0",
+  "job": "MJ_5d3d1bb5-4755-4cdb-96c1-71bfde2217e4",
+  "recipe": "m7-82631aa43efc",
+  "askSHA": "579741cd5aa84d0c6a6b7c0d07e20b8979e88981f450eb702bc143e3f8248e8f",
+  "actualPromptSHA": "1565dd000fe0729bae45db9bf42341a183aca60942c06717f83598aace8898de",
+  "originalProjectSHA": "dd5b31e0792d71ae5fa1aa625a23a0728e1e6742fee89324140f12f6c60b5e54",
+  "wholeBundleSHA": "cdf2dc70965e8eaf9c6d701dcef39a022d1baab8e0e0fcf047e4941590f8ba05",
+  "newProjectSHA": "ce738e5afeba7f1efe284b3b2850e91dfffecec308135d31b7324654408ece6c",
+  "readyAfterOtherProjectAndReloadNoAutoApply": true,
+  "explicitApply": true,
+  "sourceRecordsAndOriginalReadingExact": true,
+  "shortRoleAndClaimExact": true,
+  "nullConditionRetainsTextAndFull204UnitQuote": true,
+  "sourceBackAndFocusedEvidence": true,
+  "normalBackupImportProjectExact": true,
+  "wholeBundleUnchanged": true,
+  "otherDraftChars": 98,
+  "otherDraftUnchanged": true,
+  "newReadingId": "R_3661a9c2-fb60-4727-9912-62a9e29ee074",
+  "modelFreeCalls": {
+    "total": 2,
+    "intendedSelectedRequest": 1,
+    "incidentalBothRequests": 1
+  },
+  "incidentalDisposition": "Root selection mistake, retained ready unapplied; see ui-setup-correction.json",
+  "realModelCalls": 0,
+  "failed117RewritesOrRevalidation": 0
+}

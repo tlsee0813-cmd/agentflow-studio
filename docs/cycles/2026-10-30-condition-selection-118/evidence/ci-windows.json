@@ -1,0 +1,19 @@
+{
+  "head": "8aa7c3d3d8d9e62d0a655adb2a4cfff1dcef699b",
+  "job": {
+    "id": 123703019800,
+    "head_sha": "8aa7c3d3d8d9e62d0a655adb2a4cfff1dcef699b",
+    "name": "verify (windows-2022)",
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "source": "GitHub exact-head check diagnostics; bounded logs",
+  "logTruncated": true,
+  "retainedLines": [
+    "2026-10-29T20:14:11.4100695Z # tests 624\r",
+    "2026-10-29T20:14:11.4100837Z # pass 621\r",
+    "2026-10-29T20:14:11.4100899Z # fail 0\r",
+    "2026-10-29T20:14:11.4101044Z # skipped 3\r",
+    "2026-10-29T20:15:48.7288803Z Ran 18 tests in 20.446s\r"
+  ]
+}

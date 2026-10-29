@@ -1,0 +1,65 @@
+{
+  "cycle": 118,
+  "review": "fixed-implementation-delta-independent-static",
+  "base": "f91e9ee99eb67a5c75864207e13feeae9565659f",
+  "head": "8aa7c3d3d8d9e62d0a655adb2a4cfff1dcef699b",
+  "productCommit": "8875b7744d7f384d59b9a4a7cdab35654e81bbab",
+  "verdict": "BOUNDED_NO_ACTIONABLE_P1_P2_FOUND",
+  "acceptanceOwner": "Root",
+  "activityThisReview": { "productWrites": 0, "oracleOrTestReruns": 0, "builds": 0, "browserRuns": 0, "models": 0, "117FailedResponseReadsOrRevalidation": 0 },
+  "findings": [],
+  "sourceAssessment": [
+    {
+      "area": "Exact raw ranges and UTF-16 eligibility",
+      "file": "app/continuity/src/shared/condition-guidance.ts",
+      "lines": [17, 23, 27, 28, 33, 35],
+      "assessment": "The helper obtains the existing askRecords raw text and decoded spans, slices from the start span.from through the end span.to, applies only JS trim and uses JS string length. This preserves internal whitespace/CRLF/surrogate units and paragraph-crossing range semantics. Each row uses the original wire aliases in original record/span order. There is no subspan extraction, renamed anchor or copied source/metadata text.",
+      "earlyStop": "The raw interval has a fixed start and nondecreasing end, so its trimmed nonempty length cannot shrink. Every decoded valid span is nonblank. Stopping at the first out-of-bound end therefore cannot omit a later fitting end. Since the slot bounds80/200 are below the existing evidence bound600, a fitted interval is also within resolveEvidenceRange's quote-length bound. This is the same arithmetic boundary the private oracle was prepared to compare; it was not rerun here."
+    },
+    {
+      "area": "Meaning and stored contract remain separate",
+      "assessment": "No map-reading validator, input ask shape, source record, project14, map-reading.5, map-input.1 or about normalization is changed by the diff. The guidance states that length is not semantic suitability and does not override ownership/basis/material rules. It directs an initial explicit null when no honest short condition fits and retains important scope in text/at. It performs no post-output clipping, null substitution, record retagging or failed-wire salvage."
+    },
+    {
+      "area": "Bounded complete annex and provider preflight",
+      "files": ["app/continuity/server/map-prompt.mjs:291", "app/continuity/server/map-prompt.mjs:294", "app/continuity/server/map-prompt.mjs:296", "app/continuity/server/studio.mjs:123", "app/continuity/server/studio.mjs:124"],
+      "assessment": "The complete block is constructed from rows with compact tuples and newline separators; both1600 rows and full block65536 UTF-8 bytes are checked. No partial table or input removal occurs on overflow. Standard provider renders before fetch and maps failure to413 INPUT_TOO_LARGE. Valid ask row/alias limits give a small finite output; the code retains the explicit complete-block bound rather than relying solely on the proof."
+    },
+    {
+      "area": "Recipe versus actual dynamic prompt identity",
+      "files": ["app/continuity/server/map-prompt.mjs:300", "app/continuity/server/map-prompt.mjs:301", "app/continuity/server/studio.mjs:65", "app/continuity/server/studio.mjs:135"],
+      "assessment": "map7Prompt(ask) appends computed guidance to the unchanged base MAP7_PROMPT. Recipe revision2 names the format, bounds and algorithm; the advertised m7 recipe hash also includes the complete guidance frame. Both standard provider and CLI import the same renderer. Recipe identity is correctly distinct from the full input-specific system SHA. The public ask JSON/evidence digest is unchanged; the changed system text is explicitly identified instead of silently changing MAP7 wire meaning."
+    },
+    {
+      "area": "CLI acceptance-to-start binding",
+      "file": "docs/cycles/2026-10-29-owned-cli-preview-102/preview/cli-executor.mjs",
+      "lines": [64, 69, 244, 268, 270, 277],
+      "assessment": "prepare binds the full rendered system SHA and actual ask hash. call re-renders with the accepted ask and compares all existing promptKind/prompt/full SHA/ask SHA fields. It then constructs stdin from that exact compared selected string, rather than invoking another potentially different rendering for the child. promptKind follows schema/FIRST path, not equality to a static string. Rendering failure refuses preparation; an execution mismatch fails before the job child. Existing scope/policy/binary/lease/capture/deadline mechanics remain."
+    },
+    {
+      "area": "FIRST and old wire compatibility",
+      "assessment": "All map1-6 text/recipes, FIRST6, wrapper prefix/suffix and MAP7 base text are unchanged. Only the active MAP7 recipe and actual rendered instructions change. Old clients submitting the old m7 recipe get the existing PROMPT_CHANGED refusal rather than a rebound operation. Existing ready7 input/schema/prompt is still consumed through the saved binding because map-run/load and the wire validator are untouched. No new protocol, selector namespace, source index or lifecycle framework is introduced."
+    }
+  ],
+  "focusedTestAssessment": {
+    "condition118": "Seven authored model-free tests compare every start/end via the existing raw resolver without the production early-stop logic, test79/80/81 and199/200/201/204 including emoji/CRLF/table/code/paragraphs, compare listed endpoints and one past them with the actual validator, assert input immutability and no source copying, pin prior prompt hashes, check maximum row count/full block bytes and preflight refusal, compare actual provider/CLI renderings and mutated bindings, and recover a pre118-ready7 job without a call.",
+    "maximumCaseQualification": "The author's maximum-row test uses four N01..N04 records, so it is a maximum row-count witness rather than the longest legal record-ID serialization by itself. The private frozen independent oracle includes three-digit record IDs as well. Root owns the already selected row oracle and full annex-size checks; this review did not repeat them.",
+    "existing116Assertions": "Four existing assertions were changed from static MAP7_PROMPT equality/SHA to map7Prompt(actualAsk). This preserves the actual transport/binding assertion as the prompt becomes dynamic; it does not remove request, source, storage or refusal assertions. FIRST6 assertions are not changed to the new recipe.",
+    "mutationQualification": "The new fake-CLI cases assert rejection of another ask and mismatched accepted prompt SHA/short ID/kind before a data invocation. They do not claim to measure actual model behavior or every possible runtime mutation. Existing immutable-binding guards are reused."
+  },
+  "genuineReady7FixtureAssessment": {
+    "generator": "docs/cycles/2026-10-30-condition-selection-118/make-ready7.mjs",
+    "route": "The generator requires exact f91e9ee HEAD, imports project/builder/codec/validator/handler/store and condition116 fixture from that checkout, rejects a producer with map7Prompt or non-v1 recipe, then checks the injected provider actually received the bare old MAP7_PROMPT. The old real handler/store writes ready7 once. This is not current-code generation followed by an old recipe label.",
+    "manifest": "The manifest records old m7-1a2625a62324 status/binding and full bare-system SHA73286f8b..., one fake provider call and preserved file hashes. Its capability is a disposable synthetic test operation, not a real117 credential.",
+    "consumer": "Test118-7 opens a copy under the new advertised recipe, resumes the existing reservation with the real createMapRun logic, explicitly applies, retains old recipe and ask hash, parses the existing stored shape, acknowledges and asserts zero provider calls. It checks original fixture files remain unchanged.",
+    "limit": "As before, the generator checks HEAD and old exports but not a clean-tree/compiled-module hash manifest. Exact pre118 emitted-build provenance relies additionally on the author's build record; the route and bare-prompt check credibly distinguish it from a new producer. Root's separate original116-ready7 recovery is stronger complementary evidence. This review reproduces neither fixture."
+  },
+  "claimAndScopeLimits": [
+    "Author RESULT identifies remote tsc6.0.2/baseline DOM error and does not claim locked5.8.3 build acceptance. It reports7 focused tests and131 related tests as author execution; these were not executed by this reviewer.",
+    "The author did not have the real117 ask and reports a204-unit diagnosis-row witness rather than full private-input coverage. Root owns the frozen actual input comparison and independent29-case oracle adapter.",
+    "The author did not run the normal UI. Root owns locked Windows build/check, actual117 input, genuine old operation recovery, normal source/back/backup and exact CI acceptance.",
+    "Existing time/token/output limits and wire acceptance stay unchanged. The larger dynamic input is measured guidance, not a claim of unchanged model latency/cost or a hard money cap.",
+    "No actual model has demonstrated that the guidance changes its selection or preserves every important condition.117 remains rejected and untouched; a later generation requires a separate Root selection."
+  ],
+  "conclusion": "No concrete actionable P1/P2 was found in this exact118 implementation delta. The selected length computation, bounded rendering and full dynamic-prompt binding are connected without changing the raw wire/store contract. Root's assigned independent executions and normal-PC evidence remain the implementation acceptance gate; model quality and overall product completion are not established."
+}

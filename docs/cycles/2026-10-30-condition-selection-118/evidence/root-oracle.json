@@ -1,0 +1,347 @@
+{
+  "oracle": {
+    "status": "candidate-rows-match-frozen-oracle",
+    "cases": 29,
+    "results": [
+      {
+        "id": "plain-79",
+        "rows": 1
+      },
+      {
+        "id": "plain-80",
+        "rows": 1
+      },
+      {
+        "id": "plain-81",
+        "rows": 1
+      },
+      {
+        "id": "plain-199",
+        "rows": 1
+      },
+      {
+        "id": "plain-200",
+        "rows": 1
+      },
+      {
+        "id": "plain-201",
+        "rows": 1
+      },
+      {
+        "id": "plain-204",
+        "rows": 1
+      },
+      {
+        "id": "emoji-79",
+        "rows": 1
+      },
+      {
+        "id": "emoji-80",
+        "rows": 1
+      },
+      {
+        "id": "emoji-81",
+        "rows": 1
+      },
+      {
+        "id": "emoji-199",
+        "rows": 1
+      },
+      {
+        "id": "emoji-200",
+        "rows": 1
+      },
+      {
+        "id": "emoji-201",
+        "rows": 1
+      },
+      {
+        "id": "emoji-204",
+        "rows": 1
+      },
+      {
+        "id": "outer-whitespace-80",
+        "rows": 1
+      },
+      {
+        "id": "internal-crlf-80",
+        "rows": 2
+      },
+      {
+        "id": "internal-crlf-81",
+        "rows": 2
+      },
+      {
+        "id": "internal-indent-80",
+        "rows": 2
+      },
+      {
+        "id": "across-paragraph-80",
+        "rows": 2
+      },
+      {
+        "id": "across-paragraph-200",
+        "rows": 2
+      },
+      {
+        "id": "across-paragraph-201",
+        "rows": 2
+      },
+      {
+        "id": "table-row-200",
+        "rows": 1
+      },
+      {
+        "id": "table-row-204",
+        "rows": 1
+      },
+      {
+        "id": "fenced-code-80",
+        "rows": 1
+      },
+      {
+        "id": "fenced-code-83",
+        "rows": 1
+      },
+      {
+        "id": "indented-code-76",
+        "rows": 1
+      },
+      {
+        "id": "emoji-safe-split-242",
+        "rows": 2
+      },
+      {
+        "id": "maximum-valid-4x400",
+        "rows": 1600
+      },
+      {
+        "id": "frozen117-input-only",
+        "rows": 209
+      }
+    ]
+  },
+  "promptChecks": [
+    "MAP2_PROMPT",
+    "MAP3_PROMPT",
+    "MAP4_FIRST_PROMPT",
+    "MAP4_PROMPT",
+    "MAP4_RECIPE",
+    "MAP5_FIRST_PROMPT",
+    "MAP5_PROMPT",
+    "MAP5_RECIPE",
+    "MAP6_FIRST_PROMPT",
+    "MAP6_PROMPT",
+    "MAP6_RECIPE",
+    "MAP7_PROMPT",
+    "MAP_PROMPT"
+  ],
+  "recipe": "m7-82631aa43efc",
+  "sizes": [
+    {
+      "id": "plain-79",
+      "rows": 1,
+      "annexUtf8Bytes": 1402,
+      "promptUtf8Bytes": 25355,
+      "promptSHA256": "25adb1628ab13bfffe271860d56dd26c42c21060043116b6803a17e4b95af996"
+    },
+    {
+      "id": "plain-80",
+      "rows": 1,
+      "annexUtf8Bytes": 1402,
+      "promptUtf8Bytes": 25355,
+      "promptSHA256": "25adb1628ab13bfffe271860d56dd26c42c21060043116b6803a17e4b95af996"
+    },
+    {
+      "id": "plain-81",
+      "rows": 1,
+      "annexUtf8Bytes": 1398,
+      "promptUtf8Bytes": 25351,
+      "promptSHA256": "dc53195b29cb5beb4f87c2e54446802f679ae4e155e1a0a8a5e417298bc034aa"
+    },
+    {
+      "id": "plain-199",
+      "rows": 1,
+      "annexUtf8Bytes": 1398,
+      "promptUtf8Bytes": 25351,
+      "promptSHA256": "dc53195b29cb5beb4f87c2e54446802f679ae4e155e1a0a8a5e417298bc034aa"
+    },
+    {
+      "id": "plain-200",
+      "rows": 1,
+      "annexUtf8Bytes": 1398,
+      "promptUtf8Bytes": 25351,
+      "promptSHA256": "dc53195b29cb5beb4f87c2e54446802f679ae4e155e1a0a8a5e417298bc034aa"
+    },
+    {
+      "id": "plain-201",
+      "rows": 1,
+      "annexUtf8Bytes": 1394,
+      "promptUtf8Bytes": 25347,
+      "promptSHA256": "149b9f2526794aecb8abac6cb81ce23270c9ab8cbd97cde7bdfe36754ac023b8"
+    },
+    {
+      "id": "plain-204",
+      "rows": 1,
+      "annexUtf8Bytes": 1394,
+      "promptUtf8Bytes": 25347,
+      "promptSHA256": "149b9f2526794aecb8abac6cb81ce23270c9ab8cbd97cde7bdfe36754ac023b8"
+    },
+    {
+      "id": "emoji-79",
+      "rows": 1,
+      "annexUtf8Bytes": 1402,
+      "promptUtf8Bytes": 25355,
+      "promptSHA256": "25adb1628ab13bfffe271860d56dd26c42c21060043116b6803a17e4b95af996"
+    },
+    {
+      "id": "emoji-80",
+      "rows": 1,
+      "annexUtf8Bytes": 1402,
+      "promptUtf8Bytes": 25355,
+      "promptSHA256": "25adb1628ab13bfffe271860d56dd26c42c21060043116b6803a17e4b95af996"
+    },
+    {
+      "id": "emoji-81",
+      "rows": 1,
+      "annexUtf8Bytes": 1398,
+      "promptUtf8Bytes": 25351,
+      "promptSHA256": "dc53195b29cb5beb4f87c2e54446802f679ae4e155e1a0a8a5e417298bc034aa"
+    },
+    {
+      "id": "emoji-199",
+      "rows": 1,
+      "annexUtf8Bytes": 1398,
+      "promptUtf8Bytes": 25351,
+      "promptSHA256": "dc53195b29cb5beb4f87c2e54446802f679ae4e155e1a0a8a5e417298bc034aa"
+    },
+    {
+      "id": "emoji-200",
+      "rows": 1,
+      "annexUtf8Bytes": 1398,
+      "promptUtf8Bytes": 25351,
+      "promptSHA256": "dc53195b29cb5beb4f87c2e54446802f679ae4e155e1a0a8a5e417298bc034aa"
+    },
+    {
+      "id": "emoji-201",
+      "rows": 1,
+      "annexUtf8Bytes": 1394,
+      "promptUtf8Bytes": 25347,
+      "promptSHA256": "149b9f2526794aecb8abac6cb81ce23270c9ab8cbd97cde7bdfe36754ac023b8"
+    },
+    {
+      "id": "emoji-204",
+      "rows": 1,
+      "annexUtf8Bytes": 1394,
+      "promptUtf8Bytes": 25347,
+      "promptSHA256": "149b9f2526794aecb8abac6cb81ce23270c9ab8cbd97cde7bdfe36754ac023b8"
+    },
+    {
+      "id": "outer-whitespace-80",
+      "rows": 1,
+      "annexUtf8Bytes": 1402,
+      "promptUtf8Bytes": 25355,
+      "promptSHA256": "25adb1628ab13bfffe271860d56dd26c42c21060043116b6803a17e4b95af996"
+    },
+    {
+      "id": "internal-crlf-80",
+      "rows": 2,
+      "annexUtf8Bytes": 1432,
+      "promptUtf8Bytes": 25385,
+      "promptSHA256": "b38625419443553e10c9315ebd8ca3ad110390d45a348bf501b2bdf849ba269b"
+    },
+    {
+      "id": "internal-crlf-81",
+      "rows": 2,
+      "annexUtf8Bytes": 1432,
+      "promptUtf8Bytes": 25385,
+      "promptSHA256": "8d40f1cf3b2cc4aebc86c629f31ac13fa15b1dd0c7d97ea9c39b15f4b1a25cf3"
+    },
+    {
+      "id": "internal-indent-80",
+      "rows": 2,
+      "annexUtf8Bytes": 1432,
+      "promptUtf8Bytes": 25385,
+      "promptSHA256": "b38625419443553e10c9315ebd8ca3ad110390d45a348bf501b2bdf849ba269b"
+    },
+    {
+      "id": "across-paragraph-80",
+      "rows": 2,
+      "annexUtf8Bytes": 1432,
+      "promptUtf8Bytes": 25385,
+      "promptSHA256": "b38625419443553e10c9315ebd8ca3ad110390d45a348bf501b2bdf849ba269b"
+    },
+    {
+      "id": "across-paragraph-200",
+      "rows": 2,
+      "annexUtf8Bytes": 1424,
+      "promptUtf8Bytes": 25377,
+      "promptSHA256": "1cccf5f9b75237e4d7da70d7c1b405981e24d95ce2685bec72a49bb9f2bbe7c3"
+    },
+    {
+      "id": "across-paragraph-201",
+      "rows": 2,
+      "annexUtf8Bytes": 1424,
+      "promptUtf8Bytes": 25377,
+      "promptSHA256": "955732de99762bd486b53381820e040463b4a2f60b0e732075e59390f08f0ca4"
+    },
+    {
+      "id": "table-row-200",
+      "rows": 1,
+      "annexUtf8Bytes": 1398,
+      "promptUtf8Bytes": 25351,
+      "promptSHA256": "dc53195b29cb5beb4f87c2e54446802f679ae4e155e1a0a8a5e417298bc034aa"
+    },
+    {
+      "id": "table-row-204",
+      "rows": 1,
+      "annexUtf8Bytes": 1394,
+      "promptUtf8Bytes": 25347,
+      "promptSHA256": "149b9f2526794aecb8abac6cb81ce23270c9ab8cbd97cde7bdfe36754ac023b8"
+    },
+    {
+      "id": "fenced-code-80",
+      "rows": 1,
+      "annexUtf8Bytes": 1402,
+      "promptUtf8Bytes": 25355,
+      "promptSHA256": "25adb1628ab13bfffe271860d56dd26c42c21060043116b6803a17e4b95af996"
+    },
+    {
+      "id": "fenced-code-83",
+      "rows": 1,
+      "annexUtf8Bytes": 1398,
+      "promptUtf8Bytes": 25351,
+      "promptSHA256": "dc53195b29cb5beb4f87c2e54446802f679ae4e155e1a0a8a5e417298bc034aa"
+    },
+    {
+      "id": "indented-code-76",
+      "rows": 1,
+      "annexUtf8Bytes": 1402,
+      "promptUtf8Bytes": 25355,
+      "promptSHA256": "25adb1628ab13bfffe271860d56dd26c42c21060043116b6803a17e4b95af996"
+    },
+    {
+      "id": "emoji-safe-split-242",
+      "rows": 2,
+      "annexUtf8Bytes": 1424,
+      "promptUtf8Bytes": 25377,
+      "promptSHA256": "7531561c3c619b77a7f3b62735ae3f50c88bd2e647f115c67a07776f9886fd9b"
+    },
+    {
+      "id": "maximum-valid-4x400",
+      "rows": 1600,
+      "annexUtf8Bytes": 58152,
+      "promptUtf8Bytes": 82105,
+      "promptSHA256": "0f1fa970f02506eecd36e3961c090b7ca78a30de7c74e15ec94399113d9cc596"
+    },
+    {
+      "id": "frozen117-input-only",
+      "rows": 209,
+      "annexUtf8Bytes": 7326,
+      "promptUtf8Bytes": 31279,
+      "promptSHA256": "1565dd000fe0729bae45db9bf42341a183aca60942c06717f83598aace8898de"
+    }
+  ],
+  "realModelCalls": 0,
+  "failedResponseReads": 0
+}

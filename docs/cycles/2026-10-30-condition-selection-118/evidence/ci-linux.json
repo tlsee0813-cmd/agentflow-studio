@@ -1,0 +1,20 @@
+{
+  "head": "8aa7c3d3d8d9e62d0a655adb2a4cfff1dcef699b",
+  "job": {
+    "id": 123703020188,
+    "head_sha": "8aa7c3d3d8d9e62d0a655adb2a4cfff1dcef699b",
+    "name": "verify (ubuntu-24.04)",
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "source": "GitHub exact-head check diagnostics; bounded logs",
+  "logTruncated": true,
+  "retainedLines": [
+    "2026-10-29T20:13:29.3630558Z # tests 624",
+    "2026-10-29T20:13:29.3630727Z # pass 624",
+    "2026-10-29T20:13:29.3630813Z # fail 0",
+    "2026-10-29T20:13:29.3630986Z # skipped 0",
+    "2026-10-29T20:14:19.4428064Z Ran 18 tests in 15.819s",
+    "2026-10-29T20:14:19.4428322Z OK"
+  ]
+}

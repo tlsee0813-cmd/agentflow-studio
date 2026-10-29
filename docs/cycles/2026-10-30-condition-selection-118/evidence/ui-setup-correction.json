@@ -1,0 +1,11 @@
+{
+  "kind": "Root UI setup selection mistake",
+  "firstJob": "MJ_3cf68054-57b4-4a68-a867-0007008182cc",
+  "firstEntry": "E_583eac8a-8d08-4b47-b58e-d94454d8c06e",
+  "cause": "Clicked generic read-update control; it correctly selected both fixed requests. Intended acceptance case requires only selected RQ0797.",
+  "firstAskSHA": "fe5cc69102a77d018e884c759585dadaa7c9a22ea1a17012b6143bc8167260d3",
+  "firstFakeCalls": 1,
+  "realModelCalls": 0,
+  "failed117Replay": false,
+  "disposition": "ready left unapplied and retained, fresh normal imported copy will use the selected request path"
+}

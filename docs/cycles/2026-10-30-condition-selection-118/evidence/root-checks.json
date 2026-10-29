@@ -1,0 +1,49 @@
+{
+  "sourceHead": "8aa7c3d3d8d9e62d0a655adb2a4cfff1dcef699b",
+  "productHead": "8875b7744d7f384d59b9a4a7cdab35654e81bbab",
+  "appTree": "71ddbda17b49bf20bfe26fc399222065fd6339b0",
+  "environment": {
+    "os": "Windows",
+    "node": "24.19.0",
+    "typescript": "5.8.3",
+    "compiler": "app/node_modules locked dependency"
+  },
+  "build": {
+    "command": "node continuity/scripts/build.mjs",
+    "exit": 0
+  },
+  "check": {
+    "command": "node continuity/scripts/check.mjs",
+    "exit": 0
+  },
+  "focused": {
+    "command": "node --test continuity/tests/condition118.test.mjs",
+    "exit": 0,
+    "pass": 7,
+    "fail": 0,
+    "skipped": 0
+  },
+  "oracle": {
+    "cases": 29,
+    "exactFrozenRows": true,
+    "inputMutation": false,
+    "unchangedPromptStrings": 13
+  },
+  "annexBound": {
+    "rowMax": 1600,
+    "longestAliasAsciiChars": 8,
+    "compactRowsUpperBound": 56001,
+    "newlineMax": 1601,
+    "frameUtf8Bytes": 1370,
+    "wholeBlockUpperBound": 58972,
+    "limit": 65536,
+    "overflow": "refuse before data provider/job child; no partial table"
+  },
+  "originalReady7": {
+    "inputResultBindingExecutionExact": true,
+    "runAccess": 0
+  },
+  "normalUi": "see ui-proof.json",
+  "newRealGeneration": 0,
+  "failed117Modified": false
+}

@@ -1,0 +1,143 @@
+{
+  "status": "accepted_bounded_implementation_no_real_generation",
+  "base": "f91e9ee99eb67a5c75864207e13feeae9565659f",
+  "product": "8875b7744d7f384d59b9a4a7cdab35654e81bbab",
+  "author": "8aa7c3d3d8d9e62d0a655adb2a4cfff1dcef699b",
+  "checks": {
+    "sourceHead": "8aa7c3d3d8d9e62d0a655adb2a4cfff1dcef699b",
+    "productHead": "8875b7744d7f384d59b9a4a7cdab35654e81bbab",
+    "appTree": "71ddbda17b49bf20bfe26fc399222065fd6339b0",
+    "environment": {
+      "os": "Windows",
+      "node": "24.19.0",
+      "typescript": "5.8.3",
+      "compiler": "app/node_modules locked dependency"
+    },
+    "build": {
+      "command": "node continuity/scripts/build.mjs",
+      "exit": 0
+    },
+    "check": {
+      "command": "node continuity/scripts/check.mjs",
+      "exit": 0
+    },
+    "focused": {
+      "command": "node --test continuity/tests/condition118.test.mjs",
+      "exit": 0,
+      "pass": 7,
+      "fail": 0,
+      "skipped": 0
+    },
+    "oracle": {
+      "cases": 29,
+      "exactFrozenRows": true,
+      "inputMutation": false,
+      "unchangedPromptStrings": 13
+    },
+    "annexBound": {
+      "rowMax": 1600,
+      "longestAliasAsciiChars": 8,
+      "compactRowsUpperBound": 56001,
+      "newlineMax": 1601,
+      "frameUtf8Bytes": 1370,
+      "wholeBlockUpperBound": 58972,
+      "limit": 65536,
+      "overflow": "refuse before data provider/job child; no partial table"
+    },
+    "originalReady7": {
+      "inputResultBindingExecutionExact": true,
+      "runAccess": 0
+    },
+    "normalUi": "see ui-proof.json",
+    "newRealGeneration": 0,
+    "failed117Modified": false
+  },
+  "ci": {
+    "pull": 67,
+    "head": "8aa7c3d3d8d9e62d0a655adb2a4cfff1dcef699b",
+    "run": 40946465895,
+    "status": "success",
+    "linux": {
+      "job": 123703020188,
+      "pass": 624,
+      "fail": 0,
+      "skip": 0,
+      "directBrowser": 18
+    },
+    "windows": {
+      "job": 123703019800,
+      "pass": 621,
+      "fail": 0,
+      "skip": 3,
+      "directBrowser": 18
+    },
+    "bothStudioSmoke": true
+  },
+  "evidence": [
+    {
+      "path": "evidence/ci-linux.json",
+      "bytes": 650,
+      "sha256": "a01bdae300b4e59faa2b694ac1468b3da19a8c1e7d0487748c1d64229de6e993"
+    },
+    {
+      "path": "evidence/ci-windows.json",
+      "bytes": 621,
+      "sha256": "b259720d15c9760c161a934ac578867cf7d3dd9b1ac04ac12ffe04bc9fcd2fdb"
+    },
+    {
+      "path": "evidence/independent-review.json",
+      "bytes": 9642,
+      "sha256": "67decd233238d3d4c07819c4bc5e6d8f3dfab08221fa3f5454228139bebc454b"
+    },
+    {
+      "path": "evidence/old-ready7-recovery.json",
+      "bytes": 641,
+      "sha256": "294b666c238dc6f236040c7e5b378844aecd17d4a7d9f47435699c83b631954f"
+    },
+    {
+      "path": "evidence/root-checks.json",
+      "bytes": 1250,
+      "sha256": "ac539ae2e8d198ca603ddaea87aaf0c3d9e5a3e0dfb85bd137d2e0c249d5570f"
+    },
+    {
+      "path": "evidence/root-oracle.json",
+      "bytes": 8515,
+      "sha256": "d0ed70f647c376b190a1012ab14302805db4312228e5b80a03c5d1545aed106a"
+    },
+    {
+      "path": "evidence/ui-code-quote.png",
+      "bytes": 87767,
+      "sha256": "0a5443b0b5381ed20339ab8cc2a05cd5d5d49a6d6af84ac6082e45b3a6fa3aeb"
+    },
+    {
+      "path": "evidence/ui-proof.json",
+      "bytes": 1519,
+      "sha256": "1510f027a1ec708eeb49838a4a1fc3d752444da4a2b096cc50b5bd196cee72b3"
+    },
+    {
+      "path": "evidence/ui-ready.png",
+      "bytes": 46364,
+      "sha256": "c2066e808eff21547bde3273407e5842a7ea1f33a6de5bb37bfccc9c4f3e7a6f"
+    },
+    {
+      "path": "evidence/ui-setup-correction.json",
+      "bytes": 588,
+      "sha256": "7fcb88ca708371d4e92e98a752bc626e731afe443bd6bfecb56a56b8c062cb46"
+    },
+    {
+      "path": "evidence/ui-table-quote.png",
+      "bytes": 90534,
+      "sha256": "ce4951a9652637a2d760ca6c3cadbaeffbb55af5455dbf0960e0c20fa3a9c56c"
+    }
+  ],
+  "cleanup": {
+    "server": 74844,
+    "port": 51910,
+    "stopped": true,
+    "executorSlot": null,
+    "executorUnsettled": null,
+    "leasePresent": false,
+    "uiClosed": true,
+    "viewportReset": true
+  }
+}
