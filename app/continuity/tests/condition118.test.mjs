@@ -110,7 +110,7 @@ test('118-2 the validator agrees at every listed end and one past it; the rows n
 
 test('118-3 nothing of the ask changes; the rendering is deterministic, carries no record text, and the base texts are pre118 byte for byte', async () => {
   const { inp } = boundaryAsk(), before = JSON.stringify(inp.ask), one = P.map7Prompt(inp.ask), two = P.map7Prompt(JSON.parse(before));
-  assert.equal(JSON.stringify(inp.ask), before); assert.equal(one, two); assert.ok(one.startsWith(P.MAP7_PROMPT)); assert.equal(one, P.MAP7_PROMPT + P.map7Guidance(inp.ask));
+  assert.equal(JSON.stringify(inp.ask), before); assert.equal(one, two); assert.ok(one.startsWith(P.MAP7_PROMPT)); assert.equal(one, P.MAP7_PROMPT + P.MAP7_VOCABULARY + P.map7Guidance(inp.ask), 'AF120: the vocabulary sits between the base and the guidance');
   const block = P.map7Guidance(inp.ask), json = block.slice(block.lastIndexOf('\n[\n') + 1, block.lastIndexOf('\n]') + 2);
   assert.deepEqual(JSON.parse(json), G.conditionGuidance(inp.ask));
   for (const v of JSON.parse(json).flat()) assert.ok(v === null || /^[NR]\d{2,3}\.\d{2,3}$/.test(v), 'aliases and nulls only');
@@ -122,7 +122,7 @@ test('118-3 nothing of the ask changes; the rendering is deterministic, carries 
   assert.deepEqual([P.MAP4_RECIPE, P.MAP5_RECIPE, P.MAP6_RECIPE].map(h), ['0340413adccd30ac', 'b432f60e7d61d502', '8071e83eafdae2cd']);
   assert.equal(sha(P.MAP7_PROMPT), '73286f8b79e80c132aaa5e891d7955748e30fd21bf9e3e7f641ec37b6e480f4b', 'the base map.7 text of pre118 (117 systemSha)');
   assert.equal(await mapPromptId(), 'm6-6859b864664f');
-  assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.2:') && P.MAP7_RECIPE.includes(G.CONDITION_GUIDANCE));
+  assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.3:') && P.MAP7_RECIPE.includes(G.CONDITION_GUIDANCE), 'AF120: recipe.3 keeps the guidance');
   const m7 = await map7PromptId(); assert.match(m7, /^m7-[0-9a-f]{12}$/); assert.notEqual(m7, 'm7-1a2625a62324', 'a new recipe id (pre118 named m7-1a2625a62324)');
   assert.throws(() => G.conditionGuidance({ ...inp.ask, schemaVersion: 'studio.map.6' }), /INVALID_INPUT/, 'map.7 only');
 });

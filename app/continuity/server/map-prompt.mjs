@@ -296,6 +296,15 @@ export function map7Guidance(ask) {
   if (rows.length > GUIDANCE_ROWS_MAX || new TextEncoder().encode(block).length > GUIDANCE_BYTES_MAX) throw new Error('INPUT_TOO_LARGE');
   return block;
 }
+// AF120: the reply's new part ids, said exactly as the validator reads them (NEW in map-reading.ts), with the rule that every
+// reference to a new part spells its id as parts[].ref wrote it. A later-only addition between MAP7_PROMPT (unchanged) and the
+// condition guidance (unchanged); the validator accepts and refuses exactly what it did.
+export const MAP7_VOCABULARY = `
+
+새 부분 ID 형식(정확히 지킨다, part-id-vocabulary.1):
+- 새 부분의 ref는 "new:" 뒤에 ASCII 소문자 a–z, 숫자 0–9, 밑줄(_), 하이픈(-)만으로 1~24자인 키를 붙인다. 전체 형식은 ^new:[a-z0-9_-]{1,24}$이다. 예: "new:label_guide", "new:label-lookup", "new:a0". 대문자("new:labelGuide"), 공백, 한글 등 그 밖의 문자, 빈 키, 25자 이상의 키는 응답 전체가 거절된다.
+- 사용자에게 보이는 이름은 name에 쓴다. name은 사용자의 언어로 써도 되며 ID와 같을 필요가 없다.
+- 같은 응답에서 새 부분을 parent, relations의 from·to, candidates의 parts로 가리킬 때는 그 부분의 parts[].ref에 쓴 ID를 철자 그대로 쓴다. 기존 부분은 P01 같은 id 그대로 쓴다. parts에 같은 ref를 두 번 쓰지 않는다.`;
 /** The one renderer of the map.7 instructions, for the standard provider and the CLI executor alike. */
-export const map7Prompt = ask => MAP7_PROMPT + map7Guidance(ask);
-export const MAP7_RECIPE = 'map7-recipe.2: later only = parts.length > 0 || requests.length > 0 || priors.length > 0 (a first map is map.6); map.6 contract; roleAboutAt/claim.aboutAt/statement.aboutAt/match.aboutAt = sent anchor of the owning record (role: a basis record) | null; resolved exact passage, outer white space trimmed, 80/200 UTF-16, never clipped or nulled; material overlap refused; stored as about string|null; instructions = MAP7_PROMPT + condition-length-guidance.1 (rows [start, last end <= 80 | null, last end <= 200 | null] per sent piece in sent order, ends contiguous from the start, trimmed UTF-16 of whole pieces of one record, no record text, <= 1600 rows, block <= 65536 UTF-8 bytes, else INPUT_TOO_LARGE before sending)';
+export const map7Prompt = ask => MAP7_PROMPT + MAP7_VOCABULARY + map7Guidance(ask);
+export const MAP7_RECIPE = 'map7-recipe.3: later only = parts.length > 0 || requests.length > 0 || priors.length > 0 (a first map is map.6); map.6 contract; roleAboutAt/claim.aboutAt/statement.aboutAt/match.aboutAt = sent anchor of the owning record (role: a basis record) | null; resolved exact passage, outer white space trimmed, 80/200 UTF-16, never clipped or nulled; material overlap refused; stored as about string|null; instructions = MAP7_PROMPT + condition-length-guidance.1 (rows [start, last end <= 80 | null, last end <= 200 | null] per sent piece in sent order, ends contiguous from the start, trimmed UTF-16 of whole pieces of one record, no record text, <= 1600 rows, block <= 65536 UTF-8 bytes, else INPUT_TOO_LARGE before sending); part-id-vocabulary.1 between them (new part ids exactly ^new:[a-z0-9_-]{1,24}$, references spelled as parts[].ref; validator unchanged)';

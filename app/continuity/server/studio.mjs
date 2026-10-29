@@ -12,7 +12,7 @@ import { PLAN_PROMPT, PLAN2_PROMPT, PLAN3_PROMPT, SCOPE_PROMPT } from './plan-pr
 import { DIGEST_PROMPT, DIGEST2_PROMPT } from './digest-prompt.mjs';
 import { validateMapAsk, validateMapReply } from '../dist/public/shared/map-reading.js';
 import { SPAN_INDEX, textDigest } from '../dist/public/shared/evidence-span.js';
-import { MAP_PROMPT, MAP2_PROMPT, MAP3_PROMPT, MAP6_PROMPT, MAP6_FIRST_PROMPT, MAP6_RECIPE, MAP7_PROMPT, MAP7_RECIPE, MAP7_GUIDANCE_FRAME, map4Prompt, map5Prompt, map6Prompt, map7Prompt } from './map-prompt.mjs';
+import { MAP_PROMPT, MAP2_PROMPT, MAP3_PROMPT, MAP6_PROMPT, MAP6_FIRST_PROMPT, MAP6_RECIPE, MAP7_PROMPT, MAP7_RECIPE, MAP7_GUIDANCE_FRAME, MAP7_VOCABULARY, map4Prompt, map5Prompt, map6Prompt, map7Prompt } from './map-prompt.mjs';
 
 const ENDPOINT = 'https://api.deepseek.com/chat/completions';
 const REPLY_BYTES = 131072;
@@ -60,9 +60,9 @@ let map7Id = null;
 /** AF116: m7- and the first 12 hex digits of the SHA-256 of the studio.map.7 recipe and its one (later) prompt. Advertised as
  * map.laterPrompt beside map.prompt (m6, which still names every first map): a client sends studio.map.7 only for a later reading
  * and only to a server that names it. There is no first map.7 prompt. AF118: the recipe (map7-recipe.2) and the guidance frame are
- * in it too, so it names the renderer; the prompt actually sent for one ask is map7Prompt(ask) (its own SHA-256, not this id). */
+ * in it too (AF120: and the part-id vocabulary, map7-recipe.3), so it names the renderer; the prompt actually sent for one ask is map7Prompt(ask) (its own SHA-256, not this id). */
 export async function map7PromptId() {
-  if (!map7Id) map7Id = crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ recipe: MAP7_RECIPE, later: MAP7_PROMPT, guidance: MAP7_GUIDANCE_FRAME }))).then(b => `m7-${[...new Uint8Array(b)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`);
+  if (!map7Id) map7Id = crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ recipe: MAP7_RECIPE, later: MAP7_PROMPT, vocabulary: MAP7_VOCABULARY, guidance: MAP7_GUIDANCE_FRAME }))).then(b => `m7-${[...new Uint8Array(b)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`);
   return map7Id;
 }
 /** The recipe id a map ask of this schema is asked and bound with (a job's binding.prompt). */

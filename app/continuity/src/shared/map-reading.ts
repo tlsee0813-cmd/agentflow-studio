@@ -274,7 +274,15 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
   str(value.summary, 200, true, code);
   arr(value.parts, 24, code);
   const refs = new Set<string>(), news = new Map<string, string | null>();
-  for (const [pi, p] of value.parts.entries()) { form(p, `parts[${pi}]`, 'roleAbout'); obj(p, ['ref', 'name', 'parent', 'role', seven ? 'roleAboutAt' : 'roleAbout', 'roleReplaces', 'basis', 'claims'], code); check(typeof p.ref === 'string' && (parts.has(p.ref) || NEW.test(p.ref)) && !refs.has(p.ref), code); refs.add(p.ref as string); if (NEW.test(p.ref as string)) news.set(p.ref as string, p.parent as string | null); }
+  for (const [pi, p] of value.parts.entries()) {
+    form(p, `parts[${pi}]`, 'roleAbout'); obj(p, ['ref', 'name', 'parent', 'role', seven ? 'roleAboutAt' : 'roleAbout', 'roleReplaces', 'basis', 'claims'], code);
+    if (!(typeof p.ref === 'string' && (parts.has(p.ref) || NEW.test(p.ref)) && !refs.has(p.ref))) {
+      // AF120 (map.7): the same refusal, said with where and a fixed category, never the ref itself.
+      if (seven) throw new MapReplyError(`parts[${pi}].ref`, 'reference', typeof p.ref !== 'string' ? 'invalid-ref' : refs.has(p.ref) ? 'duplicate-part' : p.ref.startsWith('new:') ? 'invalid-new-key' : 'unknown-part');
+      check(false, code);
+    }
+    refs.add(p.ref as string); if (NEW.test(p.ref as string)) news.set(p.ref as string, p.parent as string | null);
+  }
   check(news.size <= 12, code);
   const outParts: MapReplyPart[] = (value.parts as Record<string, unknown>[]).map((p, pi) => {
     const ref = p.ref as string, fresh = news.has(ref);
