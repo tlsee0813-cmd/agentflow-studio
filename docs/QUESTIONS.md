@@ -1,5 +1,7 @@
 # 연구 질문과 축적된 근거
 
+**97 프로젝트 이동 중 결과 보관 범위 수용 · 2026-10-29:** [결과·최소 증거](https://github.com/tlsee0813-cmd/agentflow-studio/blob/d1ae6be5935b07e888de9466282f8fecaac2d6a0/docs/cycles/2026-10-29-map-return-97/RESULT.md). 최종796da/app25e8532. 요청 중복·취소·entry/visit·저장 경계를 구분하고, 돌아와 재호출 없이 반영한다. 초기7c371의 다른 프로젝트 초안 스크롤/역선택 손실을 독립 검토와 정상UI로 재현해 수리했다. 총괄 실제89 응답 재생·B3290초안 보존·A백업/reload20234b9a와B전체c4a637a 일치, 독립delta와 정확CI40826463621 양OS의279/523검사 및97두PC 흐름을 확인했다. 자동검사300ms 한계·페이지메모리 ready를 명시한다. 새모델0·PR58draft 미병합/미배포·공개73/UI75 보존. 사용자 요청으로97 공유 후 총괄 일시정지,98 시작0. Q02/Q06·인수인계5/8·전체목표 미완료.
+
 **96 출력 스키마 전달 경로 반려 · 2026-10-29:** [결과·최소 증거](https://github.com/tlsee0813-cmd/agentflow-studio/blob/db47350e62cc5fef507541bc79270b1ad68cce9f/docs/cycles/2026-10-29-schema-delivery-96/RESULT.md). 같은 실제지시 전체 map.6/원문·기준·SolHigh에 최종응답 schema만 추가해1회 확인했다. 89초 마감까지 최종응답0, close/원본보존 확인·89.935초 수용검사 종료이나 적용0. 스키마 실제효력·의미·품질개선 미관측, micro/Zephyr·재시도·응답수선·제품통합0. 실행전 바이트/종료상한/보존검사3건을 수리하고 독립 검토했다. 공개73·미수용74·UI75 수리 보존, Q02/Q06·인수인계5/8·전체목표 활성 유지.
 
 **95 첫 지도 출력 구조 오프라인 판정 · 2026-10-29:** [결과·대응표·초안](https://github.com/tlsee0813-cmd/agentflow-studio/blob/d6edeeff5e33336388b03ee4497b791944c87006/docs/cycles/2026-10-29-map-output-contract-95/RESULT.md). 완성FIRST map.6의 모든 필드를 보존한CLI 출력schema 초안을 대조했다. 보존89 수용응답2개는원문불변으로맞고필수candidate.text누락은거절되며,참조·UTF16·충돌·의미는기존validator/수용관문에남는다. 독립필드대조·유효baseline 반례로검증했고최초holds반례의reference선행거절을정정·보존했다. 오프라인구조적합일뿐실제backend강제·의미·시간개선은미확인,새호출/제품코드/실패raw수선0.74strict·77·91/92실험반복0·90제안보류유지. 공개73/UI75·첫지도Q02/Q06·인수인계5/8·전체목표활성유지.
