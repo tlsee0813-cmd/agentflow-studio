@@ -241,7 +241,8 @@ test('74-F a changed record, another reading meanwhile or a failed save leave on
       commit: async next => { if (fails) return '저장 실패'; project = next; return null; }, done: () => {}, changed: () => {} });
     await run.run(); assert.equal(project, p0); assert.match(run.state().error, /저장 실패/); assert.equal(M.unreadRecords(project, studioView(project)).length, 1);
     assert.equal(bodies[0].schemaVersion, 'studio.map.5', 'an m5 server is sent the anchored range wire');
-    fails = false; await run.run(); assert.equal(project.readings.length, 1); assert.equal(lastReading(project).version, 'map-reading.4');
+    // AF97: the failed save keeps the checked reply ready; saving again sends nothing new.
+    assert.equal(run.state().ready, true); fails = false; await run.applyReady(); assert.equal(bodies.length, 1); assert.equal(project.readings.length, 1); assert.equal(lastReading(project).version, 'map-reading.4');
     // An m3 server (older deploy) is sent the copied-quote wire it reads.
     bodies = []; const old = createMapRun({ current: () => ({ key: 'o', kind: 'saved', project: p0, view: studioView(p0) }), status: () => ({ ...status, map: { model: 'm', prompt: 'm3-0123456789ab' } }), accessCode: () => '', commit: async () => '중단', done: () => {}, changed: () => {} });
     await old.run(); assert.equal(bodies[0].schemaVersion, 'studio.map.1');

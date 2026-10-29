@@ -281,13 +281,14 @@ test('71/73 map.3 HTTP uses one combined prompt, an older tab\'s map.2 still get
     assert.equal(bad.status, 400);
   }
   const oldFetch = globalThis.fetch; let project = p, fails = true, doneCount = 0;
-  globalThis.fetch = async () => new Response(JSON.stringify({ model: 'stub', reply: raw }), { status: 200 });
+  let asked = 0; globalThis.fetch = async () => { asked++; return new Response(JSON.stringify({ model: 'stub', reply: raw }), { status: 200 }); };
   try {
     const run = createMapRun({ current: () => ({ key: 'ENTRY1', kind: 'saved', project, view: studioView(project) }), requests: () => [snap.scope],
       status: () => ({ ai: 'deepseek', access: 'open', map: { model: 'stub', prompt: awaitlessPrompt } }), accessCode: () => '',
       commit: async next => { if (fails) return '저장 실패'; project = next; return null; }, done: () => doneCount++, changed: () => {} });
     await run.run(); assert.equal(project, p); assert.equal(project.readings.length, 0); assert.equal(doneCount, 0); assert.match(run.state().error, /저장 실패/);
-    fails = false; await run.run(); assert.equal(project.readings.length, 1); assert.equal(R.requestMatches(project).length, 1); assert.equal(doneCount, 1);
+    // AF97: the failed save keeps the checked reply ready; saving again sends nothing new.
+    assert.equal(run.state().ready, true); fails = false; await run.applyReady(); assert.equal(asked, 1); assert.equal(project.readings.length, 1); assert.equal(R.requestMatches(project).length, 1); assert.equal(doneCount, 1);
   } finally { globalThis.fetch = oldFetch; }
 });
 const awaitlessPrompt = 'm3-000000000000';

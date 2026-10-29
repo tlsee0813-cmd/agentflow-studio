@@ -8,7 +8,7 @@ import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, se
 import { CLAIM_LABEL, stateLabel, revisedRelations, candidateReading, type Applied, type CurrentClaim, type PartUnderstanding } from '../shared/map-reading.js';
 import { roleEvidence } from './role-evidence.js';
 import type { ClaimKind, ReadingQuote } from '../shared/types.js';
-import { createMapRun, sendLine } from './map-run.js';
+import { createMapRun, sendLine, type MapRunState } from './map-run.js';
 import { requestResults, frozenRequests, displayAbout, captureRequestReading, restoreRequestReading } from './request-results.js';
 import { correctRequestMatch, unlinkReplacement, requestComparison } from '../shared/request-return.js';
 import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
@@ -588,7 +588,8 @@ function programCard(key: string, p: Project, example: boolean, keyOf: (id: stri
   const tryPlan = key === CONVERTER_KEY ? h('a', { class: 'program-try', href: base, onclick: () => { openPlanOnArrive = true; } }, h('strong', {}, '변경 구상 시험해 보기'), h('span', {}, '폴더째 변환 · 지금과 구상을 같은 자리에서 비교')) : null;
   return h('li', {}, h('article', { class: `program${example ? ' is-example' : ''}` },
     h('a', { class: 'program-head', href: base },
-      h('strong', { class: 'program-name' }, p.name), h('span', { class: 'program-brief' }, p.space.brief?.text ?? '목적이 아직 적혀 있지 않아요.'), h('span', { class: 'program-meta' }, ...meta)),
+      h('strong', { class: 'program-name' }, p.name), h('span', { class: 'program-brief' }, p.space.brief?.text ?? '목적이 아직 적혀 있지 않아요.'), h('span', { class: 'program-meta' }, ...meta),
+      !example && key !== 'legacy' ? runBadgeFor(key) : null),
     h('div', { class: 'program-body' }, section, cont, tryPlan, tryReturn,
       !example && key !== 'legacy' ? h('button', { type: 'button', class: 'link-button quiet program-backup', title: '붙여넣은 원문 기록과 옮긴 위치를 함께 담은 백업 파일을 내려받아요', onclick: () => saveBackup(key, p) }, '백업 저장') : null)));
 }
@@ -604,6 +605,7 @@ function saveBackup(entryId: string, p: Project) {
   document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+const runBadgeFor = (key: string) => { const el = h('span', { class: 'program-run', 'data-run-entry': key, role: 'status' }); runBadge(el); return el; };
 /** My programs lead; the examples show their real composition on a first visit and step back once there is work of one's own. */
 function renderHome() {
   setBar(null);
@@ -1791,17 +1793,41 @@ const returnView = createReturnView({
 let justRead: { key: string; parts: string[] } | null = null;
 const mapRun = createMapRun({
   current: () => opened,
+  // Each opening of a project is its own visit (projectFor keeps the object while the same project stays open).
+  visit: () => opened,
   status: () => status,
   accessCode: () => sessionCode(),
   requests: () => opened ? frozenRequests(opened.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : [])) : [],
-  commit: next => { const o = opened; return o ? commit(o, next) : Promise.resolve('프로젝트가 열려 있지 않아요.'); },
+  commit: async next => {
+    const o = opened; if (!o) return '프로젝트가 열려 있지 않아요.';
+    const base = o.ref ? { ...o.ref } : null, failed = await commit(o, next), now = opened;
+    // Left and came back while it was saved: this visit may have read the entry just before the save landed. It takes the saved
+    // project only when it read the very state this save replaced (same lifecycle and save number), so it is not left stale.
+    if (!failed && now && now !== o && now.key === o.key && base && now.ref && now.ref.lifecycle === base.lifecycle && now.ref.seq === base.seq) {
+      now.ref = o.ref; now.project = o.project; now.view = o.view; renderSpace('keep'); if (selected) refreshReading();
+    }
+    return failed;
+  },
   done: applied => mapApplied(applied),
   changed: () => mapChanged()
 });
 function mapChanged() {
-  const o = opened; if (!o) return;
+  const o = opened; if (!o) { document.querySelectorAll<HTMLElement>('#saved-list [data-run-entry]').forEach(runBadge); return; }
   renderMapEntry(); refreshUnderstood();
   if (returnView.isOpen() && !selected) returnView.render();
+}
+/** A project's map reading on its home card, said in place: the home page is not drawn again, so a draft or the focus there stays. */
+function runBadge(el: HTMLElement) {
+  const st = mapRun.stateOf(el.dataset.runEntry!);
+  el.textContent = st.committing ? '지도에 반영하는 중…' : st.ready ? '지도 정리 결과 도착 · 열어서 보기' : st.pending ? '지도 정리 중…' : st.error ? '지도 정리 안 됨 · 열어서 확인' : '';
+  el.hidden = !el.textContent;
+}
+/** A reading being saved (no longer cancellable), or a reply waiting for this project: in place of the way to start a reading. */
+function runReady(st: MapRunState, primary: string, link: string): HTMLElement[] {
+  if (st.committing) return [h('span', { class: 'mu-pending mu-committing', role: 'status' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), '지도에 반영하는 중…')];
+  return [h('span', { class: 'mu-ready', role: 'status' }, st.error ? '정리 결과가 아직 지도에 저장되지 않았어요.' : '지도 정리 결과가 도착했어요. 아직 지도에 반영하지 않았어요.'),
+    h('button', { type: 'button', class: `${primary} mu-apply`, title: '다시 요청하지 않고 도착한 결과를 지금 지도와 대조해 반영해요', onclick: () => void mapRun.applyReady() }, st.error ? '다시 반영' : '정리 결과 보기'),
+    h('button', { type: 'button', class: `${link} mu-discard`, onclick: () => mapRun.discard() }, '버리기')];
 }
 /** Applied and saved: the map shows what came in where it is (a first map fits the view), and the pane says what was understood. */
 function mapApplied(a: Applied) {
@@ -1820,16 +1846,18 @@ function mapApplied(a: Applied) {
 function understoodLine(o: Opened): HTMLElement | null {
   if (o.kind !== 'saved' || !o.view.parts.length) return null;
   const last = mapRun.last(), inp = mapRun.input(), st = mapRun.state(), fresh = inp && inp.problem !== 'NOTHING_NEW' ? inp.coverage.fresh : 0;
-  if (!last && !fresh && !st.pending && !st.error) return null;
+  const waiting = st.committing || st.ready;
+  if (!last && !fresh && !st.pending && !st.error && !waiting) return null;
   const line = h('p', { class: 'map-understood' });
   if (last?.summary) line.append(h('span', { class: 'mu-text' }, last.summary));
   const comparison = last ? requestComparison(o.project, last) : null;
   if (comparison) line.append(h('button', { type: 'button', class: 'map-more mu-comparison', onclick: () => openReturn() }, comparison));
   if (st.pending) line.append(h('span', { class: 'mu-pending' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), '기록을 읽고 지도를 갱신하는 중…'), h('button', { type: 'button', class: 'map-more', onclick: () => mapRun.cancel() }, '취소'));
+  else if (waiting) line.append(...runReady(st, 'map-more', 'map-more'));
   else if (fresh && mapRun.can() && !inp!.problem) line.append(h('button', { type: 'button', class: 'map-more mu-run', title: sendLine(inp!), onclick: () => void mapRun.run() }, `새 기록 ${fresh}개 읽고 지도 갱신`));
   else if (fresh) line.append(h('span', { class: 'mu-fresh' }, `아직 지도에 읽지 않은 기록 ${fresh}개`));
   if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE') line.append(h('button', { type: 'button', class: 'map-more', title: sendLine(inp), onclick: () => { if (returnView.isOpen()) returnView.close(); planView.openResults(); } }, '요청문을 골라 대조'));
-  if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && mapRun.can() && !st.pending) line.append(h('button', { type: 'button', class: 'map-more mu-map-only', title: '요청과 대조하지 않고 지도만 정리해요. 원문은 보존되며 나중에 요청문을 골라 대조할 수 있어요.', onclick: () => void mapRun.runMapOnly() }, '요청 대조 없이 지도만 정리'));
+  if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && mapRun.can() && !st.pending && !waiting) line.append(h('button', { type: 'button', class: 'map-more mu-map-only', title: '요청과 대조하지 않고 지도만 정리해요. 원문은 보존되며 나중에 요청문을 골라 대조할 수 있어요.', onclick: () => void mapRun.runMapOnly() }, '요청 대조 없이 지도만 정리'));
   if (last?.version === 'map-reading.1' && frozenRequests(o.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : [])).length) line.append(h('button', { type: 'button', class: 'map-more', title: '지도에 읽힌 원문도 고른 요청과 나중에 대조할 수 있어요', onclick: () => { if (returnView.isOpen()) returnView.close(); planView.openResults(); } }, '나중에 요청문을 골라 대조'));
   if (last) line.append(h('button', { type: 'button', class: 'map-more', title: '이번 정리의 근거와 확인할 것', onclick: () => openReturn() }, '근거'));
   if (st.error) line.append(h('span', { class: 'mu-error', role: 'alert' }, st.error));
@@ -1852,11 +1880,12 @@ function renderMapEntry() {
   const inp = mapRun.input(), st = mapRun.state(), last = mapRun.last(), can = mapRun.can();
   const fresh = inp && inp.problem !== 'NOTHING_NEW' ? inp.coverage.fresh : 0;
   const paste = (primary: boolean) => h('button', { type: 'button', class: primary ? 'primary small' : 'secondary small', onclick: () => openPaste(null) }, '기록 붙여넣기');
-  const acts = h('div', { class: 'se-acts' });
+  const acts = h('div', { class: 'se-acts' }), waiting = st.committing || st.ready;
   if (st.pending) put(acts, h('span', { class: 'mu-pending' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), '기록을 읽고 지도를 정리하는 중…'), h('button', { type: 'button', class: 'link-button', onclick: () => mapRun.cancel() }, '취소'));
+  else if (waiting) put(acts, ...runReady(st, 'primary small', 'link-button'));
   else if (fresh && can && !inp!.problem) put(acts, h('button', { type: 'button', class: 'primary small se-run', onclick: () => void mapRun.run() }, '기록으로 지도 정리'), paste(false));
   else put(acts, paste(true));
-  const note = st.pending ? null : fresh && can && !inp!.problem ? sendLine(inp!) : fresh && !can ? `기록 ${fresh}개가 있어요. AI 서버가 연결된 주소에서 지도로 정리할 수 있어요.` : fresh && inp!.problem ? '보낼 수 없는 기록이 있어요(너무 크거나 키처럼 보이는 글).' : '붙여 넣어 저장만 해서는 AI에 보내지 않아요. 지도로 정리할 때 보내요.';
+  const note = st.pending || waiting ? null : fresh && can && !inp!.problem ? sendLine(inp!) : fresh && !can ? `기록 ${fresh}개가 있어요. AI 서버가 연결된 주소에서 지도로 정리할 수 있어요.` : fresh && inp!.problem ? '보낼 수 없는 기록이 있어요(너무 크거나 키처럼 보이는 글).' : '붙여 넣어 저장만 해서는 AI에 보내지 않아요. 지도로 정리할 때 보내요.';
   box.replaceChildren(); put(box, h('h2', {}, '기록으로 첫 지도를 만들어요'),
     h('p', { class: 'se-lead' }, '작업 AI와 나눈 요구나 보고를 그대로 붙여 넣으면, 원문에 근거가 있는 부분과 연결만 지도로 정리해요. 만들어진 부분의 이름과 위치는 바로 고칠 수 있어요.'),
     last && !last.parts.length ? h('p', { class: 'se-gap' }, last.gaps.length ? last.gaps.join(' ') : '앞서 읽은 기록에서는 프로그램의 부분을 찾지 못했어요.') : null,
@@ -1870,15 +1899,17 @@ function mapBlock(): HTMLElement | null {
   const o = opened; if (!o || o.kind !== 'saved') return null;
   const last = mapRun.last(), inp = mapRun.input(), st = mapRun.state(), can = mapRun.can();
   const fresh = inp && inp.problem !== 'NOTHING_NEW' ? inp.coverage.fresh : 0;
-  if (!last && !fresh && !st.pending && !st.error) return null;
+  const waiting = st.committing || st.ready;
+  if (!last && !fresh && !st.pending && !st.error && !waiting) return null;
   const sec = h('section', { class: 'rr-sec rr-map' }, h('h3', {}, '지도 정리', last ? h('small', {}, fullTime(last.at)) : null));
   if (st.pending) sec.append(h('div', { class: 'pending' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), h('span', {}, '기록을 읽고 지도를 정리하는 중…'), h('button', { type: 'button', class: 'link-button', onclick: () => mapRun.cancel() }, '취소')));
+  else if (waiting) sec.append(h('div', { class: 'pp-row rm-ready' }, ...runReady(st, 'primary small', 'link-button')));
   else if (fresh) sec.append(h('div', { class: 'pp-row' },
     can && !inp!.problem ? h('button', { type: 'button', class: 'primary small', onclick: () => void mapRun.run() }, o.view.parts.length ? '기록 읽고 지도 갱신' : '기록으로 지도 정리') : null,
     h('span', { class: 'fine' }, can && !inp!.problem ? `읽지 않은 기록 ${fresh}개 · ${sendLine(inp!)}` : !can ? `읽지 않은 기록 ${fresh}개 · AI 서버가 연결된 주소에서 정리할 수 있어요` : '보낼 수 없는 기록이 있어요(너무 크거나 키처럼 보이는 글).')));
   if (st.error) sec.append(h('p', { class: 'pp-error', role: 'alert' }, st.error));
   if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE') sec.append(h('p', { class: 'fine' }, sendLine(inp)), h('button', { type: 'button', class: 'link-button', onclick: () => { returnView.close(); planView.openResults(); } }, '요청문을 골라 대조'));
-  if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && can && !st.pending) sec.append(h('button', { type: 'button', class: 'link-button rm-map-only', onclick: () => void mapRun.runMapOnly() }, '요청 대조 없이 지도만 정리'), h('p', { class: 'fine' }, '원문을 보존하며 나중에 요청문을 골라 대조할 수 있어요.'));
+  if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && can && !st.pending && !waiting) sec.append(h('button', { type: 'button', class: 'link-button rm-map-only', onclick: () => void mapRun.runMapOnly() }, '요청 대조 없이 지도만 정리'), h('p', { class: 'fine' }, '원문을 보존하며 나중에 요청문을 골라 대조할 수 있어요.'));
   if (last?.version === 'map-reading.1' && frozenRequests(o.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : [])).length) sec.append(h('p', { class: 'fine' }, '이 읽기는 요청 대조 없이 지도에 정리했어요. 원문은 나중에 요청문을 골라 대조할 수 있어요.'));
   if (last) {
     const name = (id: string) => partOf(o, id)?.name ?? null;

@@ -68,6 +68,8 @@ export async function askMap(ask: MapAsk, signal: AbortSignal, accessCode: strin
   catch { throw new AskError(signal.aborted ? 'CANCELLED' : 'NETWORK'); }
   let data: { error?: { code?: unknown }; model?: unknown; reply?: unknown; evidence?: { index?: unknown; ask?: unknown } } | null = null;
   try { data = await res.json(); } catch { /* handled below */ }
+  // Cancelled while the body was still coming: said as cancelled, never read as a broken reply.
+  if (signal.aborted) throw new AskError('CANCELLED');
   if (!res.ok) throw new AskError(typeof data?.error?.code === 'string' ? data.error.code : 'REQUEST_FAILED');
   if (typeof data?.model !== 'string') throw new AskError('INVALID_RESPONSE');
   if ((ask.schemaVersion === MAP4_SCHEMA || ask.schemaVersion === MAP5_SCHEMA || ask.schemaVersion === MAP6_SCHEMA) && (data.evidence?.index !== SPAN_INDEX || data.evidence.ask !== textDigest(body))) throw new AskError('INVALID_RESPONSE');
