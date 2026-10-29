@@ -1,0 +1,81 @@
+{
+  "source": "796da3ad8fa4d3f8114724fa7882e1e80fc72c9b",
+  "appTree": "25e85324f48e8cf08d7e8edcabc176d92482eced",
+  "scope": "97 lifecycle and return UI only",
+  "decision": "ACCEPT_SCOPE_ONLY",
+  "wholeGoalComplete": false,
+  "pauseRequested": true,
+  "newModelCalls": 0,
+  "files": [
+    {
+      "path": "evidence/experience97-a-applied-796da.jpg",
+      "bytes": 47338,
+      "sha256": "aff32f54fbc4d6dcd8319e717836933ade06dccec0048d3aa0993bfa35505e4c"
+    },
+    {
+      "path": "evidence/experience97-a-ready-796da.jpg",
+      "bytes": 38798,
+      "sha256": "0d9cf0db38c4b53de48193a46bc87e695f073ff76478d5b9ae7d0d199343c89f"
+    },
+    {
+      "path": "evidence/experience97-b-preserved-796da.jpg",
+      "bytes": 75047,
+      "sha256": "31d941c23449c5a2e238c9adba7460f375c7715be2997032ee4012cb986d9cb1"
+    },
+    {
+      "path": "evidence/experience97-current-lifecycle-probe.json",
+      "bytes": 1304,
+      "sha256": "e4e3696dfa38c250b18d2978dee2c01163f068253570e0750eebb3db8aacb487"
+    },
+    {
+      "path": "evidence/experience97-delta1-review.json",
+      "bytes": 5907,
+      "sha256": "3f70b3d697f8162d9b9b9e0915a4e17f1e44da688c3757ee284d9b41d031d7a6"
+    },
+    {
+      "path": "evidence/experience97-exact-ci.json",
+      "bytes": 2107,
+      "sha256": "d095a173266e6a2b6f9ed9a68fbfaa3c6768a14a179c5c490fc0c02ce8188f2f"
+    },
+    {
+      "path": "evidence/experience97-final-delta-review.json",
+      "bytes": 8431,
+      "sha256": "1ffdb0431283bd97278d6ffcdadc673721ed66ecef1248ac5044cc0b51db7473"
+    },
+    {
+      "path": "evidence/experience97-lifecycle-design-review.json",
+      "bytes": 9503,
+      "sha256": "c12f94beea9ab6512d497cc9d30f1b032029cb7418da0f8b2fed86bbb585d7d5"
+    },
+    {
+      "path": "evidence/experience97-public-audit.json",
+      "bytes": 4735,
+      "sha256": "78816c795312cbef9729f49e0713e1c122385ec0be3b14433dc9a5f41a8225ab"
+    },
+    {
+      "path": "evidence/experience97-root-check-7c371.json",
+      "bytes": 735,
+      "sha256": "630bd5b217fcc07ede140509e92e9abccf54a461373f10781cc4025d9a1aaf4b"
+    },
+    {
+      "path": "evidence/experience97-root-final-ui.json",
+      "bytes": 2102,
+      "sha256": "77b01513d3e803abcd0101e4e4703d41fdf429101d20a2de7c193013fd5de1f9"
+    },
+    {
+      "path": "evidence/experience97-root-ui-b-draft-796da.json",
+      "bytes": 482,
+      "sha256": "d4abf8856cd5eb9b8ecca838c2e37d94143cdbc28fe3fbc1e74919f3909706c0"
+    },
+    {
+      "path": "evidence/experience97-root-ui-b-draft-7c371.json",
+      "bytes": 312,
+      "sha256": "a26e3aa2fa793b546062794e65614b4d37166faf9eb674f7184255bc8826064c"
+    },
+    {
+      "path": "RESULT.md",
+      "bytes": 5560,
+      "sha256": "ce7f0c4aadfaba2d83855c5af884aa5dcd67c03d067bb876ca82119dd1dc5538"
+    }
+  ]
+}

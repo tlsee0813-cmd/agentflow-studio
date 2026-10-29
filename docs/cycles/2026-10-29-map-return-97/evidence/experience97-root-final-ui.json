@@ -1,0 +1,62 @@
+{
+  "source": "796da3ad8fa4d3f8114724fa7882e1e80fc72c9b",
+  "appTree": "25e85324f48e8cf08d7e8edcabc176d92482eced",
+  "build": {
+    "compiler": "TypeScript5.8.3 locked",
+    "exec": "8a5b0f",
+    "exit": 0
+  },
+  "deltaTests": {
+    "exec": "525778",
+    "pass": 9,
+    "fail": 0
+  },
+  "normalUI": {
+    "actor": "root CUA Windows",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "source": "normal import of original actual-order and saved89 micro-javascript backups",
+    "replay": "unchanged accepted89 actual wire; no fresh generation or meaning reacceptance",
+    "askSha256": "d64857baa4b3e5fce53cc9bc4a2a754c042d64d87ba8bfa0cc3e6935b8cc1d11",
+    "wireSha256": "99c33f986dfd0f0fa6caecbef7226def28a9ff2821bb1aa5fb0457c900fa6401",
+    "acceptedReplayResponses": 1,
+    "providerCalls": 0,
+    "bDraft": {
+      "characters": 3290,
+      "textExact": true,
+      "selection": [
+        3242,
+        3290
+      ],
+      "direction": "backward",
+      "scrollTop": 3332.800048828125,
+      "focus": "paste-text",
+      "beforeAfterStateExact": true
+    },
+    "aReadyOnReturn": true,
+    "aExplicitApply": true,
+    "aParts": 5,
+    "aRelations": 3,
+    "aMaterial": 2,
+    "quoteSourceAndFocusReturn": true,
+    "comparisonExec": "06a05f",
+    "allReadingFieldsCanonicalExact": true,
+    "canonicalExceptions": [
+      "generated IDs mapped by references",
+      "reading timestamp/model metadata"
+    ],
+    "originalRecordsExact": true,
+    "backupSha256": "20234b9aea68baf973f23060f4eb243203d62283511684033c6283c70d9c519e",
+    "reloadBackupByteExact": true,
+    "microEntireBackupByteExact": true,
+    "microSha256": "c4a637a2d050d5cd8c54e94e721e1df58d5e43fc658a03701ab11ecd8e851369"
+  },
+  "limits": [
+    "Historical89 accepted output replay only; no new model/first-map semantic acceptance.",
+    "Root interactive UI1280 only; two sizes belong to exactCI.",
+    "Root server admits one fixed reply and rejects further requests; complete request count assertion is in unit/CI flow.",
+    "Ready lives in page memory until apply/discard, not across page reload."
+  ]
+}

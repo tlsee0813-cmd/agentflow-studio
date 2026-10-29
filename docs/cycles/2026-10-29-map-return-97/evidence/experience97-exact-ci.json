@@ -1,0 +1,43 @@
+{
+  "source": "796da3ad8fa4d3f8114724fa7882e1e80fc72c9b",
+  "run": 40826463621,
+  "url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40826463621",
+  "jobs": [
+    {
+      "os": "ubuntu-24.04",
+      "id": 123290534391,
+      "conclusion": "success",
+      "exactHeadObserved": true,
+      "counts": [
+        "2026-10-29T06:01:13.5208717Z # tests 279",
+        "2026-10-29T06:01:13.5209092Z # pass 279",
+        "2026-10-29T06:01:13.5209274Z # fail 0",
+        "2026-10-29T06:01:45.6417868Z # tests 523",
+        "2026-10-29T06:01:45.6418044Z # pass 523",
+        "2026-10-29T06:01:45.6418130Z # fail 0"
+      ],
+      "af97": "2026-10-29T06:04:48.1574422Z ok  AF97 map return at 1280/1440: B's paste, selection, scroll and focus, B's reading button and the home draft kept while A's reply comes; applied on return without asking again; saving not cancellable; a visit opened during the save takes it",
+      "originalLogSha256": "29b739fc6156032e645a0ac59494efb23f438afec56ff3123781640680921778"
+    },
+    {
+      "os": "windows-2022",
+      "id": 123290534648,
+      "conclusion": "success",
+      "exactHeadObserved": true,
+      "counts": [
+        "2026-10-29T06:02:45.1091606Z # tests 279",
+        "2026-10-29T06:02:45.1091911Z # pass 279",
+        "2026-10-29T06:02:45.1092061Z # fail 0",
+        "2026-10-29T06:03:25.9299261Z # tests 523",
+        "2026-10-29T06:03:25.9299778Z # pass 523",
+        "2026-10-29T06:03:25.9299846Z # fail 0"
+      ],
+      "af97": "2026-10-29T06:07:34.4623030Z ok  AF97 map return at 1280/1440: B's paste, selection, scroll and focus, B's reading button and the home draft kept while A's reply comes; applied on return without asking again; saving not cancellable; a visit opened during the save takes it",
+      "originalLogSha256": "2c689b070afb8d5a2c3cba60b1773a10c7638e2bbed4f8a3868931db8647f088"
+    }
+  ],
+  "limits": [
+    "No actual provider calls. Browser flow synthetic stub.",
+    "B preservation compares after a300ms response wait without a client-ready latch; root normalUI and static ownership review are distinct evidence."
+  ]
+}

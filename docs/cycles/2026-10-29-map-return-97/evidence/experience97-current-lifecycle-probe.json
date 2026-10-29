@@ -1,0 +1,37 @@
+{
+  "source": "db47350e62cc5fef507541bc79270b1ad68cce9f",
+  "app": "501a7a1faa4b50c182e56ad0cd3a21ac65ed6e5d",
+  "fixture": "Existing78 synthetic record reused; new97 lifecycle interleavings only",
+  "network": 0,
+  "models": 0,
+  "storage": "in-memory host only",
+  "observations": [
+    {
+      "case": "double run during async hash",
+      "requests": 2,
+      "saved": 0,
+      "shown": 0,
+      "finding": "Two requests sent before pending reservation"
+    },
+    {
+      "case": "valid response while another project open",
+      "requests": 1,
+      "saved": 0,
+      "shown": 0,
+      "state": {
+        "pending": null,
+        "error": "다른 프로젝트로 옮겨 이번 결과는 반영하지 않았어요. 돌아와서 다시 정리해 주세요."
+      },
+      "finding": "Valid result discarded; return requires new request"
+    },
+    {
+      "case": "cancel then valid late transport completion",
+      "abortSeen": true,
+      "saved": 1,
+      "shown": 1,
+      "finding": "Late response applied after cancellation; stub intentionally completes despite abort, no actual browser claim"
+    }
+  ],
+  "mapRunSourceSha256": "5d81a9b3557ebd3d1dde19265df4678b17e03be4cc91024a9fa58f4b972e1da2",
+  "mapRunRuntimeSha256": "580bf665b64d6e2b89806f10f429200f4ef0c2a3becb31a40d550603ef3bdb24"
+}

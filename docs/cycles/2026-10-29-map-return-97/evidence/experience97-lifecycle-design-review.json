@@ -1,0 +1,106 @@
+{
+  "task": "AF97-lifecycle-design-review",
+  "at": "2026-10-29T05:26:38.005615+00:00",
+  "source": "db47350e62cc5fef507541bc79270b1ad68cce9f",
+  "appTree": "501a7a1faa4b50c182e56ad0cd3a21ac65ed6e5d",
+  "sourceFilesSha256": {
+    "app/continuity/src/client/map-run.ts": "5d81a9b3557ebd3d1dde19265df4678b17e03be4cc91024a9fa58f4b972e1da2",
+    "app/continuity/src/client/studio-api.ts": "8601502d9a372148363d73c6970e08e5a2ab00936c65f193ca6ac2abdaa24aaf",
+    "app/continuity/src/client/app.ts": "5c4a1aa4937c7288ce93faa80ada0d9dc25c442e2ddca01de8a4fab6e261f776",
+    "app/continuity/src/shared/storage.ts": "bf7ab55be901ba004b3acfe515557e0aa5c85c61a87da1815a5cb01382fe96b3",
+    "app/continuity/src/shared/map-reading.ts": "e2b4aee3f0a57b8e5469543bd894e4890536fd44ee71b0247ac6c3ea850184d2"
+  },
+  "verdict": "MINIMAL_PAGE_SESSION_READY_DESIGN_IS_FEASIBLE; IDENTITY_AND_COMMIT_BOUNDARIES_MUST_BE_EXPLICIT_BEFORE_IMPLEMENTATION",
+  "conclusion": "Entry별 ready와 명시적인 결과 보기를 채택할 근거가 있다. 새 job/서버/저장 schema 없이 map-run과 app host를 좁게 바꿀 수 있다. request attempt, 화면 visit, EntryRef lifecycle/seq를 하나의 generation으로 섞으면 기존 보존을 깨뜨린다.",
+  "currentEvidence": {
+    "rootProbe": ".ops/results/experience97-current-lifecycle-probe.json",
+    "sha256": "e4e3696dfa38c250b18d2978dee2c01163f068253570e0750eebb3db8aacb487",
+    "attribution": "Root executed new97 in-memory interleavings with existing78 synthetic material; reviewer did not rerun. No actual browser/model proof.",
+    "observations": [
+      "Hash-await double-run produced2 requests before pending reservation.",
+      "Valid result arriving on another entry produced no save and a request-to-run-again error.",
+      "Noncooperative late valid reply after cancel produced saved1/show1."
+    ],
+    "source": [
+      "map-run.ts run: pending allocated after askHash; post-response tests key only; no controller/attempt check after await; finally unconditionally clears pending.",
+      "studio-api.ts:61-74 validates exact sent request/evidence and domain reply; abort is only translated on fetch rejection, so valid resolved replies still need caller invalidation.",
+      "app.ts:1792-1802 commit host captures current opened at invocation; commit:1522-1531 saves/ref-updates that Opened object; done/mapApplied uses whichever opened is current after await.",
+      "storage.ts:138,225-248 protects EntryRef lifecycle/seq, independently of Project.revision. projectFor:260-282 reads cached entries and returns opened immediately for same key."
+    ]
+  },
+  "minimumDecisions": [
+    {
+      "boundary": "Request identity versus view identity",
+      "decision": "Use a unique per-entry attempt/token plus controller, reserved synchronously before the first hash await. Navigation alone must not invalidate it. Separately capture the current visit/OpenRef generation to prevent late presentation/focus/camera effects on a different visit."
+    },
+    {
+      "boundary": "Ready meaning and ownership",
+      "decision": "Ready means response validated against the sent ask, not applied/saved/semantically accepted. Keep original MapInput(including Maps/full requests), normalized reply, model/prompt/hash and entry/lifecycle context in memory only. Key by workspace entryId, not Project.id (imported copies can share payload ID). Do not reparse normalized MapReply as wire or rebuild the original ask from current source."
+    },
+    {
+      "boundary": "Navigation and explicit view",
+      "decision": "If another entry is current at validated arrival, park ready and leave both projects unchanged. Returning alone does not apply that parked packet. Explicit result-view applies to current matching entry/lifecycle using existing applyReading, then bound store commit and existing mapApplied after save. Ready blocks another AI request until explicit discard/resolve; repeated result-view clicks latch before await."
+    },
+    {
+      "boundary": "Cancel/discard and old finally",
+      "decision": "Invalidate attempt synchronously and abort. Check controller.aborted plus token ownership after hash, response and before commit; old response/error/finally cannot clear a newer attempt. Cancel-before-hash sends0; cancel/ready-discard ignores noncooperative late success."
+    },
+    {
+      "boundary": "Commit linearization",
+      "decision": "Choose a documented point after which atomic storage cannot be cancelled. Smallest option: latch committing before host.commit and make cancel/discard unavailable then. If cancellation while queued on the workspace lock must prevent writing, it requires an explicit guard inside that locked write, not just a check after its Promise resolves. Do not claim save0 for cancellation after an irreversible write."
+    },
+    {
+      "boundary": "Lifecycle and stale tab",
+      "decision": "A trash/restore or missing entry invalidates a packet even if project text/revision is identical. Retain captured lifecycle and existing store.save seq conflict checks. Do not silently adopt a fresh external seq/ref to make an old tab save succeed. Same-session legitimate changes may use its known current ref and existing applyReading rebase; other-tab conflict remains a refusal."
+    },
+    {
+      "boundary": "Save/error and presentation",
+      "decision": "No done/success/hash-applied marker before durable commit success. Keep a retryable valid ready packet plus save error for explicit save retry without network; irrecoverable map/lifecycle invalidation must be stated. After an awaited commit, reconcile saved data only for the correct entry/ref and gate mapApplied on visit ownership; never render a captured old object as current or touch another entry."
+    }
+  ],
+  "concreteDesignPitfalls": [
+    {
+      "case": "A commit waits on lock; user A->B->A before it completes.",
+      "risk": "The old captured Opened A is updated, but current A may be a different stale object. A key-only done then renders old data or fits/highlights the wrong visit. Bound target/ref plus visit-aware reconcile is required; new token alone is insufficient."
+    },
+    {
+      "case": "Ready after ordinary rename/new record versus after another MapReading or original-record edit.",
+      "risk": "Requiring exact Project.revision/hash-now equality would reject legitimate preserved edits. Replacing captured input with a newly built ask would instead detach evidence. Existing applyReading permits the former and rejects changed reading/archived target/changed anchored source."
+    },
+    {
+      "case": "Lifecycle changes without Project.revision, or another tab changes seq.",
+      "risk": "Checking only Project.id/revision misses lifecycle. Fresh-ref adoption bypasses the current storage conflict contract."
+    }
+  ],
+  "minimumNewAcceptanceCases": [
+    "Deferred hash: rapid double run ->1 fetch; cancel before hash ->0; stale hash completion cannot reserve/send after replacement.",
+    "A pending -> B open -> valid arrival -> readyA/save0/B unchanged; A explicit view ->same reply/save1/done1/network1; repeated view and retry do not create another request.",
+    "Cancel/discard then new attempt: late old success/error/finally changes neither new pending nor its eventual ready/error. Include arrival while A has returned before completion as a distinct ordinary pending case.",
+    "Deferred commit lock with A->B and A->B->A: exactly targeted save, no B mutation, no old-visit focus/camera effect and no stale current A display. Test the chosen cancellation point explicitly.",
+    "Trash/restore same payload, missing entry, imported copy with same Project.id, other-tab seq conflict: no resurrected/foreign apply. Same-tab rename/new record survives; another reading/archive/source edit still refuses through existing domain gates.",
+    "Write failure ->no success/project mutation/hash-applied suppression; explicit retry reuses packet. Page reload ends page-session ready intentionally. NormalUI delayed stub flow should verify status/result-view/cancel and return place; no real model is needed."
+  ],
+  "reuseAndScope": {
+    "implementationMinimum": [
+      "client/map-run.ts per-entry attempt/pending/ready/committing state and actions",
+      "client/app.ts typed entry/ref/visit host + ready/result-view presentation + correct targeted commit reconciliation",
+      "existing WorkspaceStore.save/EntryRef and applyReading validation reused; no storage format or general job service needed for the committing-no-cancel choice"
+    ],
+    "existingEvidence": [
+      "tests/map70.test.mjs M70-E3: same-session rename/new record preserved; another map reading, duplicate hash and archived target refused.",
+      "tests/flow083.test.mjs:61-76 lifecycle invalidation and stale seq conflicts. These are prior evidence, not new97 lifecycle UI proof."
+    ],
+    "preserve": "Existing source quotes/material/uncertainty/wire1-6/domain atomicity, file/store originals, UI75/76/78/80/83/84/85/87/93/94 flow and presentation contracts; do not change provider/model/time/token settings.",
+    "notClaimed": "First-map meaning quality, provider delivery/90s solution, durable background recovery, cross-tab job transfer, global automatic retry or full product/release acceptance."
+  },
+  "execution": {
+    "actor": "independent reviewer",
+    "sourceReadOnly": true,
+    "newTests": 0,
+    "modelAPI": 0,
+    "CLI": 0,
+    "browser": 0,
+    "productWrites": 0,
+    "researchRepeat": 0
+  }
+}

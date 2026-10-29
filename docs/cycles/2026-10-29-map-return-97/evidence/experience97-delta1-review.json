@@ -1,0 +1,74 @@
+{
+  "task": "AF97-DELTA1-independent-code-review",
+  "at": "2026-10-29T06:02:40.1082795Z",
+  "source": "796da3ad8fa4d3f8114724fa7882e1e80fc72c9b",
+  "appTree": "25e85324f48e8cf08d7e8edcabc176d92482eced",
+  "baseline": "7c371458175a25512359addac95c2589e74190c8",
+  "productCleanObserved": true,
+  "sourceFilesSha256": {
+    "app/continuity/src/client/app.ts": "4ea85837e856274a6226697adc3d8c27fe5012885e3e5450056ca8493fd3c970",
+    "app/continuity/src/client/map-run.ts": "5afb414c118d9da4010fcb1b12b2813bdd3af2d05aa86375d319cb178c4178d0",
+    "app/continuity/tests/lifecycle97.test.mjs": "54e4d29d435cbae64743215670e66da0ba2efbd405ee62f7bbc757c847d2a8d0",
+    "app/continuity/tests/map97-flow.mjs": "ff5fee74f346a942802d0a77ada928a1435084826342e869cf66ff5ecb51b162",
+    "app/continuity/tests/studio_browser.py": "b2b4f8a0fc393c460ac05786759263bc30bcb6424a1bb7e27ce6b57337d46ba2"
+  },
+  "originalReview": {
+    "path": ".ops/results/experience97-final-delta-review.json",
+    "sha256": "1ffdb0431283bd97278d6ffcdadc673721ed66ecef1248ac5044cc0b51db7473",
+    "preserved": true
+  },
+  "verdict": "NO_NEW_CONCRETE_P1_P2_IN_DELTA; ORIGINAL_B_RERENDER_PATH_CLOSED_BY_SOURCE; ROOT_UI_AND_PINNED_CI_ACCEPTANCE_SEPARATE",
+  "findings": [],
+  "closure": [
+    {
+      "id": "97-P2-B-surface",
+      "status": "SOURCE_CLOSED",
+      "evidence": [
+        "map-run.ts:79-130 every run/hash/error/ready/apply/save notification carries the owning key, including late off-entry arrivals. cancel/discard:148/150 report the current owning entry.",
+        "app.ts:1812-1821 receives that key and returns at1819 before renderMapEntry/refreshUnderstood/returnView.render when B is open for an A notification. Thus the confirmed B textarea replacement path is not reached.",
+        "app.ts:1818 updates only the matching home badge in place. Other cards/new-project draft are not rebuilt.",
+        "No storage/schema/provider/ask/default map semantics changed in this delta."
+      ],
+      "originalActualObservation": {
+        "path": ".ops/results/experience97-root-ui-b-draft-7c371.json",
+        "sha256": "a26e3aa2fa793b546062794e65614b4d37166faf9eb674f7184255bc8826064c",
+        "provenance": "Root CUA original candidate, not reviewer execution",
+        "observation": "B text3290/selection3242..3290/focus retained, but backward became forward and scroll3332.800048828125 became0."
+      }
+    },
+    {
+      "id": "97-CI-coverage",
+      "status": "WIRED_BY_SOURCE_NOT_EXECUTED_BY_REVIEWER",
+      "evidence": [
+        "studio_browser.py:3894 invokes map97_flow for1280x720 and1440x900 in the default suite; .github/workflows/verify.yml invokes this default Python file. Optional map97 entry also exists at3852-3857.",
+        "lifecycle97.test.mjs:92-93 clears notification history just before A arrival on B and requires the sole unique notified owner to be A. This proves the host receives ownership, not the actual DOM filter by itself.",
+        "studio_browser.py:3767-3778 prepares real nonempty scrolled B textarea with backward selection/focus; full before/after dict equality includes text, start/end/direction, textarea scroll, pane scroll, focused and same original DOM object. It checks A unsaved and B seq1 before applying A on return without an additional request.",
+        "studio_browser.py:3785-3787 keeps the original focused B reading button connected. 3794-3802 checks home draft/focus/first list node identity. 3804-3821 holds the workspace lock, requires noncancellable committing, navigates A-B-A, releases save, then adds a part and requires readings4/seq9/requests4 to detect stale-ref adoption failure."
+      ]
+    }
+  ],
+  "pythonApiReview": {
+    "dependency": "app/tests/browser-requirements.txt pins playwright==1.57.0",
+    "waitForFunction": "All new argument-bearing Python calls at3759,3815,3819 use keyword arg=[...], compatible with the Python sync signature expression, *, arg=... rather than Node positional argument shape.",
+    "route": "hold is a synchronous route callback; held Route objects are continued using route.continue_() without await. let_through enters page.expect_response before continue_, and fourth request is explicitly immediately continued via index3. It does not synchronously wait on a threading Event inside the route callback.",
+    "execution": "No Python/browser import, launch or flow execution by reviewer; this is source/API-shape review, not installation/runtime proof."
+  },
+  "limitations": [
+    "Both Python and auxiliary Node let-through helpers wait for HTTP response then300ms before the B assertion. This does not deterministically prove client decode/validation reached ready while B was still open under arbitrary scheduling; a later home/A ready wait proves eventual delivery only. Author-reported filter-removed red and root actual held-replay evidence are separate from that timing limitation.",
+    "The pane scroll value is compared, but only the textarea scroll is asserted nonzero. This is not a simultaneous nonzero textarea-and-pane scroll stress claim.",
+    "Python flow and CI execution on pinned1.57 are pending root evidence at review time. Author TS6/Node two-PC pass reports are not reviewer execution or fixed5.8.3 proof.",
+    "This review is limited to7c371..796da five files. It does not rerun baseline97, earlier75/93/94 flows, models or first-map meaning evaluation."
+  ],
+  "reviewerExecution": {
+    "sourceReads": true,
+    "newTests": 0,
+    "browser": 0,
+    "model": 0,
+    "network": 0,
+    "productWrites": 0,
+    "privateWrites": [
+      ".ops/results/experience97-delta1-review.json"
+    ]
+  },
+  "acceptanceBoundary": "No new source blocker found in this delta. Root owns real UI/CI integration acceptance; formal lifecycle improvements do not resolve first-map meaning quality or complete the overall product goal."
+}

@@ -1,0 +1,18 @@
+{
+  "before": {
+    "active": "paste-text",
+    "direction": "backward",
+    "end": 3290,
+    "length": 3290,
+    "scroll": 3332.800048828125,
+    "start": 3242
+  },
+  "after": {
+    "active": "paste-text",
+    "direction": "forward",
+    "end": 3290,
+    "length": 3290,
+    "scroll": 0,
+    "start": 3242
+  }
+}

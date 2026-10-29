@@ -1,0 +1,46 @@
+{
+  "task": "AF97-final-public-claims-audit",
+  "at": "2026-10-29T06:10:54.1801570Z",
+  "source": "796da3ad8fa4d3f8114724fa7882e1e80fc72c9b",
+  "appTree": "25e85324f48e8cf08d7e8edcabc176d92482eced",
+  "verdict": "READY_TO_PUBLISH_WITH_STATED_SCOPE_AND_LIMITS",
+  "blockers": [],
+  "minimumWordingCorrections": [],
+  "inputsSha256": {
+    ".ops/experience97-result-draft.md": "ce7f0c4aadfaba2d83855c5af884aa5dcd67c03d067bb876ca82119dd1dc5538",
+    ".ops/experience97-public/experience97-a-applied-796da.jpg": "aff32f54fbc4d6dcd8319e717836933ade06dccec0048d3aa0993bfa35505e4c",
+    ".ops/experience97-public/experience97-a-ready-796da.jpg": "0d9cf0db38c4b53de48193a46bc87e695f073ff76478d5b9ae7d0d199343c89f",
+    ".ops/experience97-public/experience97-b-preserved-796da.jpg": "31d941c23449c5a2e238c9adba7460f375c7715be2997032ee4012cb986d9cb1",
+    ".ops/experience97-public/experience97-current-lifecycle-probe.json": "e4e3696dfa38c250b18d2978dee2c01163f068253570e0750eebb3db8aacb487",
+    ".ops/experience97-public/experience97-delta1-review.json": "3f70b3d697f8162d9b9b9e0915a4e17f1e44da688c3757ee284d9b41d031d7a6",
+    ".ops/experience97-public/experience97-exact-ci.json": "d095a173266e6a2b6f9ed9a68fbfaa3c6768a14a179c5c490fc0c02ce8188f2f",
+    ".ops/experience97-public/experience97-final-delta-review.json": "1ffdb0431283bd97278d6ffcdadc673721ed66ecef1248ac5044cc0b51db7473",
+    ".ops/experience97-public/experience97-lifecycle-design-review.json": "c12f94beea9ab6512d497cc9d30f1b032029cb7418da0f8b2fed86bbb585d7d5",
+    ".ops/experience97-public/experience97-root-check-7c371.json": "630bd5b217fcc07ede140509e92e9abccf54a461373f10781cc4025d9a1aaf4b",
+    ".ops/experience97-public/experience97-root-final-ui.json": "77b01513d3e803abcd0101e4e4703d41fdf429101d20a2de7c193013fd5de1f9",
+    ".ops/experience97-public/experience97-root-ui-b-draft-796da.json": "d4abf8856cd5eb9b8ecca838c2e37d94143cdbc28fe3fbc1e74919f3909706c0",
+    ".ops/experience97-public/experience97-root-ui-b-draft-7c371.json": "a26e3aa2fa793b546062794e65614b4d37166faf9eb674f7184255bc8826064c"
+  },
+  "verified": [
+    "Draft separates original7c371 confirmed B direction/scroll P2 from796da owner-scoped repair; retains original failed review and root before/after receipts.",
+    "Independent Sol review is attributed as static only. Root CUA1280 historical89 output replay is not called a new model result, independent UI execution or first-map meaning acceptance. Two viewport automated coverage belongs to CI synthetic stub flow.",
+    "Exact CI40826463621 source/job identifiers and two success reports are aligned. Ubuntu log SHA29b739fc6156032e645a0ac59494efb23f438afec56ff3123781640680921778 and Windows log SHA2c689b070afb8d5a2c3cba60b1773a10c7638e2bbed4f8a3868931db8647f088 match public evidence; every extracted279/523/pass/fail count and AF97twoPC line occurs in its original local log.",
+    "Root final UI summary supports reported B3290 state equality, explicit A ready/apply, source/focus return, canonical comparison exceptions, A export/reload hash20234b9aea68baf973f23060f4eb243203d62283511684033c6283c70d9c519e and entire B hashc4a637a2d050d5cd8c54e94e721e1df58d5e43fc658a03701ab11ecd8e851369. Audit does not independently repeat those UI/comparison operations.",
+    "Draft and exactCI evidence explicitly retain the300ms-after-response gap without claiming a client-ready latch or timing-complete browser proof. Root real replay observation and source filter are stated separately.",
+    "Draft retains page-session ready loss on reload, saved conflict refusal, original direct-project AI status limitation, no public73 replacement, no whole-product/first-map release claim, and user pause after97/no98.",
+    "Public JSON parsing succeeds. Text review/limited literal scan found no local user absolute path, credential value pattern, pending final placeholder, raw provider reply or full private source body. Three existing images are included as root UI evidence and were not re-viewed in this audit."
+  ],
+  "limits": [
+    "Local original CI log extraction was checked; no remote GitHub polling, tests, browser, model, network or product writes.",
+    "This is claims/provenance audit of the supplied Ops draft and12 evidence files, not staged Gitblob/manifest publication verification. Root owns final publication and scope acceptance.",
+    "Images were hashed for input identity, not newly visually inspected. No broader95/96/first-map research or completed legacy/UI checks repeated."
+  ],
+  "execution": {
+    "reviewerTests": 0,
+    "browser": 0,
+    "modelAPI": 0,
+    "network": 0,
+    "productWrites": 0,
+    "newPrivateFile": ".ops/results/experience97-public-audit.json"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "source": "796da3ad8fa4d3f8114724fa7882e1e80fc72c9b",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "before": {
+    "active": "paste-text",
+    "direction": "backward",
+    "end": 3290,
+    "length": 3290,
+    "scroll": 3332.800048828125,
+    "start": 3242
+  },
+  "after": {
+    "active": "paste-text",
+    "direction": "backward",
+    "end": 3290,
+    "length": 3290,
+    "scroll": 3332.800048828125,
+    "start": 3242
+  },
+  "exact": true,
+  "providerCalls": 0
+}

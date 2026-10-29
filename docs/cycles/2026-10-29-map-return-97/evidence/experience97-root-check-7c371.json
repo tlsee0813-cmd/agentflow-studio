@@ -1,0 +1,26 @@
+{
+  "source": "7c371458175a25512359addac95c2589e74190c8",
+  "appTree": "77da71f24bfa2a8b664d69c4332d681e3d032e3a",
+  "compiler": "TypeScript 5.8.3 app/node_modules locked",
+  "checkBuild": {
+    "exec": "e9f586",
+    "exit": 0
+  },
+  "targetedTests": {
+    "exec": "60ed78",
+    "exit": 0,
+    "pass": 81,
+    "fail": 0,
+    "new97": 9
+  },
+  "actualUI": {
+    "method": "normal CUA import two existing backups, one saved89 response replay held while B paste editing",
+    "networkProviderCalls": 0,
+    "deliveredReplies": 1,
+    "sourceAskExact": true,
+    "readyObservedOnA": true,
+    "applied": 0,
+    "finding": "B textarea direction and scroll changed on unrelated A reply; acceptance hold"
+  },
+  "status": "REPAIR_REQUIRED"
+}

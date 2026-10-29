@@ -1,0 +1,124 @@
+{
+  "task": "AF97-final-delta-review",
+  "at": "2026-10-29T05:52:06.426516+00:00",
+  "source": "7c371458175a25512359addac95c2589e74190c8",
+  "appTree": "77da71f24bfa2a8b664d69c4332d681e3d032e3a",
+  "baseline": "db47350e62cc5fef507541bc79270b1ad68cce9f",
+  "sourceFilesSha256": {
+    "app/continuity/src/client/map-run.ts": "6a09303b1954184c1f072d5e5b995b84dfb3cb6b288e5c66980c75a167aed9fc",
+    "app/continuity/src/client/app.ts": "2e26f138acb6564f7d476caac8a268e5a1df9a0b0686e1b2fae4d0cf3efbe063",
+    "app/continuity/src/client/studio-api.ts": "c64b4a7cb443899b043fee1ec29a6244e3549cfcc05f2382f27f767be6365a61",
+    "app/continuity/tests/lifecycle97.test.mjs": "97430353ce54b44c049ade5dfe1a701e75ccddb04265e2a93e3bef672b75be7e",
+    "app/continuity/tests/map97-flow.mjs": "53969efab4c6a2972054d710f92567f8631adce94b105d1a007e3b63a3b82f22",
+    "app/continuity/tests/grounded74.test.mjs": "ec55328a9eedbafe70ba4d7319638920762617e83bca071995904d8b2ae59284",
+    "app/continuity/tests/request71.test.mjs": "caea71bd723370d6401f9d62667f75b2a2ea1d9a2520e76dc6985470acc62b43"
+  },
+  "verdict": "P2_CONFIRMED_ON_CURRENT_CANDIDATE; OWNER_SCOPED_NOTIFICATION_AND_CI_FLOW_CLOSURE_PENDING",
+  "findings": [
+    {
+      "id": "97-P2-B-surface",
+      "priority": "P2",
+      "locations": [
+        {
+          "file": "app/continuity/src/client/map-run.ts",
+          "area": "ready arrival calls host.changed() without owning entry identity"
+        },
+        {
+          "file": "app/continuity/src/client/app.ts",
+          "lines": [
+            1814,
+            1817,
+            1754
+          ]
+        },
+        {
+          "file": "app/continuity/src/client/return-view.ts",
+          "lines": [
+            485,
+            489
+          ]
+        }
+      ],
+      "trigger": "A has a held valid map response. User is on B return/paste view with a long draft, backward selection and internal textarea scroll. Release A response while B remains open.",
+      "cause": "Attempt guards prevent A storage/done from targeting B, but generic changed() calls renderMapEntry/refreshUnderstood and returnView.render for whichever entry is open. B pane is replaceChildren-rebuilt. Paste restores selectionStart/end/focus only, losing direction and textarea scroll. Other focused B return controls may likewise be removed.",
+      "initialEvidence": "Independent source/control-flow finding; no reviewer browser run.",
+      "rootConfirmation": {
+        "file": ".ops/results/experience97-root-ui-b-draft-7c371.json",
+        "sha256": "a26e3aa2fa793b546062794e65614b4d37166faf9eb674f7184255bc8826064c",
+        "method": "Root CUA exact7c371; one existing89 accepted-response replay on A, publicmicro B, provider0; this is root execution, not independent execution.",
+        "before": {
+          "length": 3290,
+          "start": 3242,
+          "end": 3290,
+          "direction": "backward",
+          "textareaScrollTop": 3332.800048828125,
+          "focus": "paste-text"
+        },
+        "after": {
+          "length": 3290,
+          "start": 3242,
+          "end": 3290,
+          "direction": "forward",
+          "textareaScrollTop": 0,
+          "focus": "paste-text"
+        }
+      },
+      "minimumRepair": "Carry owning entry key through changed notifications and skip unrelated current-project DOM updates. Keep home-card status updates in place. Do not solve this by broad rerender/caret restoration of every unrelated B surface. Add a real B active-return/paste preservation regression before source acceptance.",
+      "coverageGap": "lifecycle97 world.changed only increments a counter; B project equality/done0 assertions do not exercise app DOM. Standalone map97-flow checks B empty map and home new-name focus, not an active B return/paste editor."
+    }
+  ],
+  "contractsReviewedWithoutAdditionalConcreteFinding": [
+    {
+      "boundary": "Hash and attempt ownership",
+      "evidence": "Attempt reserved synchronously before digest await; cancel clears slot and aborts; every post-hash/response/error path checks live attempt; no unconditional old finally. Out-and-back during hash sends0. Different visit after send parks ready."
+    },
+    {
+      "boundary": "Ready packet and identity",
+      "evidence": "Attempt keeps original MapInput(Maps/full requests), validated normalized reply, model/prompt/hash/meta. same checks workspace key, project.id and captured lifecycle. A copied payload under another entry gets no A result. Ready blocks ordinary network run and repeated apply latches committing synchronously."
+    },
+    {
+      "boundary": "Apply/save and cancel",
+      "evidence": "applyReady calls existing applyReading against current project without reconstructing input or reinterpreting old wire. Saving is explicitly committing/noncancellable. Failed commit keeps checked packet/meta for save-only retry; no done before success. Structural/map/source failures drop ready with error."
+    },
+    {
+      "boundary": "A-B-A pending commit adoption",
+      "evidence": "App captures original Opened and EntryRef base before save; new A visit adopts saved data only if same key/lifecycle/base seq, preserving current keep-camera render. Done is gated by original applying visit. Ordinary other-tab/lifecycle changes remain guarded by unchanged WorkspaceStore.save; no automatic external seq adoption was introduced.",
+      "limit": "Static review only; lifecycle unit host deliberately does not test app adoption and the browser flow is needed for it."
+    },
+    {
+      "boundary": "Transport cancellation",
+      "evidence": "studio-api askMap adds signal.aborted check after response JSON parsing, before interpreting status/evidence/domain reply. This complements map-run token checks and does not replace validation."
+    },
+    {
+      "boundary": "Home status",
+      "evidence": "With no opened project, changed updates existing badge nodes rather than drawing home again. This preserves the home draft/list identity by design; unrelated opened B remains the finding above."
+    }
+  ],
+  "existingTestChanges": {
+    "grounded74": "After failed save, test now asserts ready then uses applyReady and verifies bodies.length==1. Original project/unread-record/anchored wire assertions remain. It changes retry semantics to the intended save-only action, not a validator bypass.",
+    "request71": "After failed save, test now asserts ready/applyReady, network asked==1, one reading/request match and doneCount1. Sent reply was still validated by askMap and applied by existing applyReading.",
+    "noFullRerun": "These conclusions are from source diff; old74/71/93/model tests were not repeated by reviewer."
+  },
+  "newTestAndCIReach": {
+    "lifecycle97": "9 targeted unit tests cover hashing/cancel, entry ready/visit, late cancellation/new attempt, valid manual edits, reading/archive/lifecycle/copy invalidation, committing and save-only failure retry. Fake conflict is a host error rather than a new real WorkspaceStore race proof.",
+    "map97Flow": "Standalone Node Playwright flow targets1366x768 and1920x1080 with public synthetic records/stub provider. Covers home draft/focus, A ready/apply/no second request and actual workspace lock A-B-A adoption/edit. Currently not referenced by standard CI/default Python flow.",
+    "implication": "A green current CI/unit suite cannot be cited as automatic97 browser/adoption/B-editor coverage. Root plans portable Python CI integration; review final added regression/invocation in the subsequent source, not inferred here.",
+    "rootReportedChecks": "PinnedTS5.8.3 check/build exact7c371 exec e9f586 exit0;81 selected tests including9 new exec60ed78 exit0. Root reports only; no independent rerun."
+  },
+  "limits": [
+    "Review fixed to7c371, not a later writer repair; preserve this failed candidate evidence.",
+    "No reviewer tests, browser/model/API/CLI/network, installs or product writes. Compiled97 became available during review, but was not used for new execution.",
+    "Root actual89 replay is saved historical output, not new model generation or a first-map quality success.",
+    "Complete97 then pause; no98 research or successor task proposed. First-map/full-product/release gates remain unresolved."
+  ],
+  "execution": {
+    "actor": "independent reviewer",
+    "sourceReadOnly": true,
+    "newTests": 0,
+    "browser": 0,
+    "modelAPI": 0,
+    "CLI": 0,
+    "productWrites": 0,
+    "baselineReruns": 0
+  }
+}
