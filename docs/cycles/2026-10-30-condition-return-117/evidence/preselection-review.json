@@ -1,0 +1,63 @@
+{
+  "cycle": 117,
+  "review": "meaning-gates-only-before-selection",
+  "verdict": "SUITABLE_WITH_EXPLICIT_SCOPE_INTERPRETATIONS_NOT_SELECTED",
+  "actualGenerationAuthorizedByThisReview": false,
+  "activity": { "modelCalls": 0, "productEdits": 0, "browserOrBuildOrTestRuns": 0, "oldFailureWireRepairOrRevalidation": 0, "newResearch": 0 },
+  "read": [
+    ".ops/experience117-condition-return/preparation.json",
+    ".ops/experience117-condition-return/input.json",
+    ".ops/experience115-typed-return/input.json",
+    ".ops/experience115-typed-return/selected.json",
+    ".ops/experience109-scope-continuation/request-snapshot.txt"
+  ],
+  "inputComparison": {
+    "method": "Read and parse both ask JSON objects, compare the complete JSON structure after replacing only117 schemaVersion with the115 schemaVersion. No response validator or model was run.",
+    "equalExceptSchema": true,
+    "schema115": "studio.map.6",
+    "schema117": "studio.map.7",
+    "shape": "7 existing parts,4 sent records,1 selected request and0 priors, unchanged. Typed app.js/label-lookup.js raw spans and user declarations, root and author pasted reports, current Zephyr understanding and selected RQ context are identical.",
+    "sourceProjectSha": "dd5b31e0792d71ae5fa1aa625a23a0728e1e6742fee89324140f12f6c60b5e54",
+    "fullRequestBundleSha": "cdf2dc70965e8eaf9c6d701dcef39a022d1baab8e0e0fcf047e4941590f8ba05",
+    "hashScope": "The preparation's project/bundle hash declarations match115 selected.json. The independently compared file is the ask projection, not a new117 full-bundle byte artifact or final live attempt. Root must still freeze the actual normal-route input/binding after116 acceptance. No116 photo-sorter fixture material occurs in this ask."
+  },
+  "substantiveCriteriaAssessment": {
+    "missingMaterialCriterion": false,
+    "unfairNewMaterialRequirement": false,
+    "reason": "The preparation preserves the original RQ scope and115 meaning criteria, then adds the actual new condition-reference failure boundary: lawful references are not sufficient unless semantically appropriate; important scope must survive null; a dependency/document commit is not the supplied file's declared version. It does not lower exact mapping, unknown handling, power, evidence or preservation criteria to rescue the earlier failure.",
+    "originalRequest": "RQ0797 asks for a small PC lookup tool that shows display/controller/ssd16xx/board designation together for the two ribbon labels, needs-check for empty/unknown, no PCB-based inference, no build/flash or sensor/circuit/power/energy feature changes, and preservation of the Low Power no-saving limitation. The full accepted request also preserves the two display model names in its source/context; its prior unknown execution form is resolved by the explicitly reported later Root implementation choice, not retroactively attributed to Zephyr."
+  },
+  "clarificationsBeforeSelection": [
+    {
+      "criterion": "All four raw condition references",
+      "interpretation": "Every condition slot actually emitted must meet its mechanical and semantic rules. This does not require emitting all four object types, any candidate, a non-null condition, a fixed part count/name, or duplicated statements solely to populate slots. No candidate is needed when there is no actual unresolved attribution/identity/parent/holds question."
+    },
+    {
+      "criterion": "normal ready without auto apply, explicit apply",
+      "interpretation": "Apply this to the planned scenario that leaves the originating visit, edits another project and later retrieves ready. The accepted same-visit immediate-apply behavior is not a new failure criterion. Root should state the chosen leave-and-recover scenario in the final selected record."
+    },
+    {
+      "criterion": "B1/B72 exact mappings",
+      "interpretation": "Use the full correspondences: HINK-E0213→Good Display GDEH0213B1/SSD1673/ssd16xx/reel_board and HINK-E0213A22→Good Display GDEH0213B72/SSD1675A/ssd16xx/reel_board@2. Judge preservation across the existing map, returned reading and exact cited source, without requiring every summary to repeat all values. No swap, PCB→@2 inference or missing display mapping may be hidden by shorthand."
+    },
+    {
+      "criterion": "actual source properties versus reports",
+      "interpretation": "Code/test matches must use eligible supplied evidence occurrences. Literal code in old pasted reports may still support allowed role/describes statements; it must not be relabelled reported/checked merely to evade the code gate. Both new typed files are code, not supplied test definitions. No test-kind match or app-executed verification is required or justified. Root/author test and UI outcomes remain checked reports with their version/environment/limitations."
+    }
+  ],
+  "specificMeaningFailureGates": [
+    "A raw anchor naming Zephyr3568e1b6 is not evidence that app.js or label-lookup.js itself has that source version. The user-declared6d9c2ab version stays beside each source; do not use an unrelated dependency/document anchor to fill a file/tool version condition.",
+    "A null role/claim/candidate/match condition is lawful when appropriate, but loss of a material branch, test environment, observation basis, explicit nonexecution or prototype-only limit remains a semantic failure. Preserve relevant distinctions in statement text and its exact evidence; do not count all-null conditions alone as the success of116.",
+    "Mechanical same-record ownership does not prove that a condition applies to the statement. A branch/environment elsewhere in the record must actually qualify that reported observation; a mixed-basis role cannot merge user-declared source versions or several observation contexts into one asserted version.",
+    "Typed JavaScript supports exact lookup and DOM properties, not claims about unsupplied HTML/CSP, all browser layouts, hardware measurements or an AgentFlow deployment. Such statements may only retain the appropriately bounded pasted report/check attribution.",
+    "Retain Low Power energy-saving impossibility and its documentary scope. Setting the notice text in JavaScript is distinct from proving universal runtime visibility; the pasted root IAB observation supplies only its named environment/states.",
+    "Old Zephyr source records remain stored and the current hardware map remains intact although those two sources are not resent. Do not require reconstructing every old hardware fact as new output or accept erasing it. Previous failed request/115 response remain unchanged and cannot be rehabilitated by117."
+  ],
+  "remainingPreflightConditions": {
+    "implementation": "The preparation correctly says not selected, accepted116=false and no actual attempt prepared. The candidate2697 identity is provisional; Root must fix the final accepted code/app/prompt/policy/normal status and live ask/input/binding fingerprints after exact116 checks/CI. The fixture-only a397 repair does not itself prove later model meaning.",
+    "policy": "Keep the already chosen299/300 timing, one invocation, no retry/fallback and existing permissions/capture guard policy. Carry forward the existing token/money hard-cap and remote-stop observation limits; do not treat timing/byte bounds as new cost or remote-cancellation guarantees.",
+    "input": "At actual preparation, verify the normal UI still sends this request, complete frozen context, identical raw records/declarations and no synthetic116 result. Changed map7 wire/prompt/scope identity is explicit; no extra source report, altered metadata or source text is needed.",
+    "acceptanceLayers": "Delivery, strict whole-wire contract, independent full meaning and the normal ready/apply/source/back/backup preservation path are separate gates. A valid contract or116 synthetic result cannot substitute for117 meaning, and a complete but rejected response must remain a failure."
+  },
+  "conclusion": "No substantive missing or improper acceptance criterion blocks this preparation. Make the slot-population and leave-and-recover interpretations explicit, retain the complete source/condition scope above, and wait for116 acceptance plus a final Root selection. This review executes or selects no generation."
+}
