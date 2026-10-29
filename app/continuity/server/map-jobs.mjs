@@ -92,7 +92,7 @@ async function own(dir) {
  * (describe().durable is false with a problem) and every job route answers JOB_STORE_UNAVAILABLE; nothing falls back to memory.
  */
 export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log = () => {} } = {}) {
-  let problem = null, owner = null, opsDir = null;
+  let problem = null, owner = null, opsDir = null, closed = false;
   const jobs = new Map(); // id -> { body } | { damaged: true }
   try {
     await mkdir(dir, { recursive: true, mode: 0o700 });
@@ -118,7 +118,6 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
     }
   } catch (e) { problem = problem ?? 'STORE_UNWRITABLE'; log(`map jobs: store not usable (${e?.code ?? 'error'})`); }
 
-  let closed = false;
   async function write(id, body) {
     // After close no write of this process reaches the store (a later owner may already be writing it).
     if (closed) throw new ApiError('JOB_STORE_UNAVAILABLE', 503);

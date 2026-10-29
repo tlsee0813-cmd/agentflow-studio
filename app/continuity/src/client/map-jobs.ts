@@ -72,7 +72,8 @@ export class JobReservations {
   /** The entry's reservation if it has one (reused), else a new one written before anything is sent. */
   reserve(binding: MapJobBinding): Promise<{ res: Reservation; reused: boolean }> {
     return this.locked<{ res: Reservation; reused: boolean }>(ops => {
-      const had = ops.find(o => o.binding.entryId === binding.entryId);
+      // A reservation whose reading is already saved only owes its acknowledgement: it never holds the entry.
+      const had = ops.find(o => o.binding.entryId === binding.entryId && !o.applied);
       if (had) return { next: null, result: { res: had, reused: true } };
       const res: Reservation = { id: `MJ_${crypto.randomUUID()}`, cap: capability(), binding: { ...binding }, receipt: false, applied: null, reservedAt: new Date().toISOString() };
       return { next: [...ops, res], result: { res, reused: false } };

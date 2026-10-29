@@ -265,12 +265,25 @@ export function createMapRun(host: MapRunHost) {
     if (slot.attempt === a) { slot.attempt = null; slot.error = error; slot.notice = notice; host.changed(a.key); }
     if (outcome) await settle(a, outcome); else await store()?.remove(a.op!.id).catch(() => {});
   }
+  /** Reservations this page is acknowledging now: not shown again meanwhile (a failed acknowledgement is tried again later). */
+  const closing = new Set<string>();
   async function settle(a: Attempt, outcome: 'applied' | 'discarded' | 'seen') {
-    const op = a.op!;
-    if (outcome === 'applied' && a.meta) await store()?.update(op.id, { applied: a.meta.id }).catch(() => {});
-    try { await jobApi.ack(op.id, op.cap, host.accessCode(), outcome); }
-    catch (e) { if (!(e instanceof JobError && e.answered && ['OPERATION_NOT_FOUND', 'OPERATION_DAMAGED', 'OPERATION_CONFLICT'].includes(e.code))) return; } // kept: tried again later
-    await store()?.remove(op.id).catch(() => {});
+    const op = a.op!; closing.add(op.id);
+    try {
+      if (outcome === 'applied' && a.meta) await store()?.update(op.id, { applied: a.meta.id }).catch(() => {});
+      try { await jobApi.ack(op.id, op.cap, host.accessCode(), outcome); }
+      catch (e) { if (!(e instanceof JobError && e.answered && ['OPERATION_NOT_FOUND', 'OPERATION_DAMAGED', 'OPERATION_CONFLICT'].includes(e.code))) return; } // kept: tried again later
+      await store()?.remove(op.id).catch(() => {});
+    } finally { closing.delete(op.id); }
+  }
+  /** A reservation whose reading is saved (the acknowledgement owed): acknowledged quietly, never shown as a reading again. */
+  async function owed(r: Reservation) {
+    if (closing.has(r.id)) return; closing.add(r.id);
+    try {
+      try { await jobApi.ack(r.id, r.cap, host.accessCode(), 'applied'); }
+      catch (e) { if (!(e instanceof JobError && e.answered && ['OPERATION_NOT_FOUND', 'OPERATION_DAMAGED', 'OPERATION_CONFLICT', 'OPERATION_STATE'].includes(e.code))) return; }
+      await store()?.remove(r.id).catch(() => {});
+    } finally { closing.delete(r.id); }
   }
   /** A job of an earlier lifecycle of its entry (trashed and restored meanwhile): stopped or let go on the server. */
   async function letGo(a: Attempt) {
@@ -308,19 +321,21 @@ export function createMapRun(host: MapRunHost) {
       if (++op.misses === 3) { of(a.key).notice = JOB_ERROR.UNREACHABLE!; host.changed(a.key); }
     }
   }
-  let timer: ReturnType<typeof setTimeout> | null = null, syncing = false;
-  function schedule(ms = host.pollMs ?? 1500) { if (timer === null && durable()) timer = setTimeout(() => { timer = null; void sync(); }, ms); }
+  let timer: ReturnType<typeof setTimeout> | null = null, syncing = false, disposed = false;
+  function schedule(ms = host.pollMs ?? 1500) { if (timer === null && !disposed && durable()) timer = setTimeout(() => { timer = null; void sync(); }, ms); }
   /** Every reservation of this address is its entry's reading; running ones are looked at, ready ones now and then (another tab
    * may apply or discard them). A look never costs a call to the AI service. */
   async function sync() {
-    if (syncing) return; syncing = true;
+    if (syncing || disposed) return; syncing = true;
     let more = false;
     try {
       const jobs = store(); let list: Reservation[] = [];
       try { list = jobs?.list() ?? []; } catch { list = []; }
-      for (const r of list) if (!of(r.binding.entryId).attempt) attach(r);
+      const owing = list.filter(r => r.applied && !closing.has(r.id));
+      for (const r of list) if (!r.applied && !closing.has(r.id) && !of(r.binding.entryId).attempt) attach(r);
       const watched = [...slots.values()].map(x => x.attempt).filter((a): a is Attempt => !!a?.op && (a.phase === 'asking' || a.phase === 'ready'));
-      more = watched.length > 0;
+      more = watched.length > 0 || owing.length > 0;
+      await Promise.all(owing.map(owed));
       await Promise.all(watched.map(a => a.phase === 'asking' || ++a.op!.tick % 4 === 0 ? poll(a) : null));
     } finally { syncing = false; if (more) schedule(); }
   }
@@ -340,6 +355,8 @@ export function createMapRun(host: MapRunHost) {
   const openKey = () => host.current()?.key ?? '';
   return {
     input, can, blocked, run, runMapOnly: () => run(undefined, true), resume,
+    /** The page is going: nothing more is looked at or sent from it (its jobs stay with the server and the reservations). */
+    dispose: () => { disposed = true; if (timer !== null) clearTimeout(timer); timer = null; for (const slot of slots.values()) slot.attempt = null; },
     /** AF100: what the person is told beside the state: the reading continues without this window, cancelling, a notice. */
     detail: (key?: string): { durable: boolean; cancelling: boolean; notice: string | null } => {
       const k = key ?? host.current()?.key; const slot = k ? of(k) : null, a = slot?.attempt;
