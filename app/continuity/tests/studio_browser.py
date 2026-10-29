@@ -3698,6 +3698,132 @@ def request94_resize_flow(browser, base, shots=None):
     context.close()
 
 
+MAP97_W = "agentflow.idea015.workspace"
+MAP97_A, MAP97_B = "E_flow97-aaaa-0001", "E_flow97-bbbb-0002"
+# Built in the page with the app's own modules (the same scripts as map97-flow.mjs).
+MAP97_SEED = """async ([w, a, b]) => {
+  const D = await import('./shared/domain.js'), S = await import('./shared/storage.js');
+  const make = (name, text) => JSON.parse(S.serializeProject(D.pasteRecord(D.rename(D.createProject(), name), text, null).project));
+  const entry = (entryId, project) => ({ entryId, state: 'active', lifecycle: 1, seq: 1, createdAt: new Date().toISOString(), trashedAt: null, origin: 'new', project });
+  localStorage.setItem(w, JSON.stringify({ version: 'agentflow.workspace.1', migratedFromLegacy: false, entries: [
+    entry(a, make('A 변환기', '요구: 폴더 안의 문서를 한 번에 변환한다.\\n작업 보고: 변환기는 문서마다 PDF 하나를 만든다.')), entry(b, make('B 메모', '요구: B는 일정표를 보여 준다.'))] }));
+}"""
+MAP97_ADD = """async ([w, k, text]) => {
+  const D = await import('./shared/domain.js'), S = await import('./shared/storage.js');
+  const env = JSON.parse(localStorage.getItem(w)), e = env.entries.find(x => x.entryId === k);
+  e.project = JSON.parse(S.serializeProject(D.pasteRecord(e.project, text, null).project)); e.seq++; localStorage.setItem(w, JSON.stringify(env));
+}"""
+MAP97_STORED = "([w, k]) => JSON.parse(localStorage.getItem(w)).entries.find(e => e.entryId === k)"
+MAP97_PASTE = """() => { const t = document.getElementById('paste-text'), body = document.querySelector('#lens .lens-body');
+  return { length: t.value.length, value: t.value, start: t.selectionStart, end: t.selectionEnd, direction: t.selectionDirection, scroll: t.scrollTop, pane: body ? body.scrollTop : null, focus: document.activeElement === t, same: t === window.__paste97 }; }"""
+MAP97_SET_PASTE = """() => { const t = document.getElementById('paste-text'); t.focus(); t.setSelectionRange(t.value.length - 48, t.value.length, 'backward'); t.scrollTop = t.scrollHeight;
+  const body = document.querySelector('#lens .lens-body'); if (body) body.scrollTop = body.scrollHeight; window.__paste97 = t; }"""
+MAP97_LONG = "\n".join(f"{i + 1:02d} B의 미저장 붙여넣기: 일정표 화면의 주간 보기와 월간 보기를 견주어 적은 보고 문장입니다." for i in range(60))
+
+
+def map97_flow(browser, base, size, shots=None):
+    """AF97 (same steps as the auxiliary `map97-flow.mjs`): a map reading asked in A, its reply let through while the person is
+    elsewhere. 1. On B with a long unsaved paste (backward selection, scrolled): B's paste, selection and its direction, scroll and
+    focus stay; A's result waits for A and applies on return without asking again. 2. On B with its reading button focused: the
+    same button keeps the focus. 3. At home typing a new project's name: A's card changes in place, the draft, focus and list stay.
+    4. Saving held (the workspace lock taken in the page) while the person goes to B and back: no cancel while saving, and the visit
+    opened meanwhile takes the saved project, so the next edit saves without a conflict. Stubbed provider, no model."""
+    w, hgt = size
+    context = browser.new_context(viewport={"width": w, "height": hgt})
+    page = context.new_page()
+    errors, held, opened = [], [], {3}
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    shot = lambda name: shots and page.screenshot(path=f"{shots}/map97-{w}x{hgt}-{name}.png")
+    stored = lambda key: page.evaluate(MAP97_STORED, [MAP97_W, key])
+    go = lambda key: page.evaluate("k => { location.hash = k ? `#/p/${k}` : ''; }", key)
+
+    def fresh():
+        # Projects open from a page that already has the server's status (a reload straight into a project draws its empty map first).
+        go(None); page.reload(); page.wait_for_function("() => document.getElementById('ai-text')?.textContent === 'AI 정리 가능'"); page.wait_for_timeout(100)
+
+    def hold(route):
+        # Each map request waits in the browser until let through, then goes on to the real local server (its provider is the stub).
+        held.append(route)
+        if len(held) - 1 in opened: route.continue_()
+    page.route("**/api/studio/map", hold)
+
+    def let_through(i):
+        while len(held) <= i: page.wait_for_timeout(50)
+        with page.expect_response(lambda r: r.url.endswith("/api/studio/map")): held[i].continue_()
+        page.wait_for_timeout(300)
+
+    space, line, card = page.locator("#space-empty"), page.locator("#world .map-understood"), page.locator(f'#saved-list [data-run-entry="{MAP97_A}"]')
+
+    def apply_on_a(n):
+        go(MAP97_A); page.locator(".mu-apply").get_by_text("정리 결과 보기").wait_for(); page.locator(".mu-apply").click()
+        page.wait_for_function("([w, k, n]) => JSON.parse(localStorage.getItem(w)).entries.find(e => e.entryId === k).project.readings.length === n", arg=[MAP97_W, MAP97_A, n])
+        assert len(held) == n, ("applied without another request", len(held), n)
+
+    page.goto(base + "/"); page.evaluate(MAP97_SEED, [MAP97_W, MAP97_A, MAP97_B]); fresh()
+
+    # 1. A asks; on B the person pastes a long record and selects its end backwards; A's reply comes in meanwhile.
+    go(MAP97_A); space.locator(".se-run").click(); space.get_by_text("기록을 읽고 지도를 정리하는 중…").wait_for()
+    go(MAP97_B); space.locator(".se-run").wait_for()
+    assert space.get_by_text("기록을 읽고 지도를 정리하는 중…").count() == 0, "B shows nothing of A"
+    space.get_by_role("button", name="기록 붙여넣기").click(); page.locator("#paste-text").fill(MAP97_LONG); page.evaluate(MAP97_SET_PASTE)
+    before = page.evaluate(MAP97_PASTE)
+    assert before["direction"] == "backward" and before["scroll"] > 0 and before["focus"], before
+    let_through(0)
+    after = page.evaluate(MAP97_PASTE)
+    assert after == before, ("B's paste, selection, its direction, scroll and focus stay", {k: (before[k], after[k]) for k in before if k != "value"})
+    shot("b-paste")
+    assert len(stored(MAP97_A)["project"]["readings"]) == 0 and stored(MAP97_B)["seq"] == 1, "A not saved while away, B untouched"
+    go(None); card.get_by_text("지도 정리 결과 도착 · 열어서 보기").wait_for()
+    go(MAP97_A); page.locator(".mu-apply").wait_for()
+    assert space.locator(".se-run").count() == 0, "no ordinary reading button while a result is ready"
+    shot("a-ready")
+    apply_on_a(1); page.locator("#world .node").first.wait_for(); assert stored(MAP97_A)["seq"] == 2
+
+    # 2. A asks again; on B the reading button has the focus when A's reply comes in.
+    page.evaluate(MAP97_ADD, [MAP97_W, MAP97_A, "작업 보고: 폴더 입력은 다음 판에서 구현한다."]); fresh()
+    go(MAP97_A); line.locator(".mu-run").click(); line.get_by_text("기록을 읽고 지도를 갱신하는 중…").wait_for()
+    go(MAP97_B); space.locator(".se-run").wait_for(); page.evaluate("() => { const b = document.querySelector('#space-empty .se-run'); b.focus(); window.__button97 = b; }")
+    let_through(1)
+    assert page.evaluate("() => document.activeElement === window.__button97 && window.__button97.isConnected"), "B's reading button keeps the focus"
+    apply_on_a(2)
+
+    # 3. A asks again; at home the person types a new project's name when A's reply comes in.
+    page.evaluate(MAP97_ADD, [MAP97_W, MAP97_A, "작업 보고: 결과 파일은 한 폴더에 모은다."]); fresh()
+    go(MAP97_A); line.locator(".mu-run").click(); line.get_by_text("기록을 읽고 지도를 갱신하는 중…").wait_for()
+    go(None); card.get_by_text("지도 정리 중…").wait_for()
+    assert page.locator(f'#saved-list [data-run-entry="{MAP97_B}"]').is_hidden(), "B has no reading of its own"
+    page.locator("#new-open").click(); page.locator("#new-name").fill("작성 중인 이름")
+    page.evaluate("() => { window.__list97 = document.querySelector('#saved-list > li'); }")
+    let_through(2)
+    card.get_by_text("지도 정리 결과 도착 · 열어서 보기").wait_for(); shot("home-ready")
+    assert page.locator("#new-name").input_value() == "작성 중인 이름"
+    assert page.evaluate("() => document.activeElement?.id") == "new-name", "focus kept"
+    assert page.evaluate("() => document.querySelector('#saved-list > li') === window.__list97"), "the home list is not drawn again"
+    apply_on_a(3); assert stored(MAP97_A)["seq"] == 6
+
+    # 4. Saved while the person goes to B and back: the save is held by taking the workspace lock in the page.
+    page.evaluate(MAP97_ADD, [MAP97_W, MAP97_A, "작업 보고: 변환 실패는 문서 이름과 함께 알린다."]); fresh()
+    go(MAP97_A)
+    page.evaluate("w => { window.__held = new Promise(r => { window.__release97 = r; }); void navigator.locks.request(w, () => window.__held); }", MAP97_W)
+    line.locator(".mu-run").click()
+    # The reply is back while A is still open in the same visit: it goes straight to saving, which the lock holds.
+    line.get_by_text("지도에 반영하는 중…").wait_for(); shot("a-committing")
+    assert line.get_by_role("button", name="취소").count() == 0, "no cancel while saving"
+    go(MAP97_B); space.locator(".se-run").wait_for()
+    go(MAP97_A); page.locator("#world .node").first.wait_for()
+    page.evaluate("() => window.__release97()")
+    page.wait_for_function("([w, k]) => JSON.parse(localStorage.getItem(w)).entries.find(e => e.entryId === k).project.readings.length === 4", arg=[MAP97_W, MAP97_A])
+    page.wait_for_function("() => !document.querySelector('#world .mu-committing')")
+    # The visit opened during the save took the saved project: adding a part saves on top of it, with no conflict.
+    page.locator("#add-part").click(); page.locator("#part-name").fill("직접 추가한 부분"); page.locator("#part-form button[type=submit]").click()
+    page.wait_for_function("([w, k]) => JSON.parse(localStorage.getItem(w)).entries.find(e => e.entryId === k).project.space.areas.some(a => a.name === '직접 추가한 부분')", arg=[MAP97_W, MAP97_A])
+    last = stored(MAP97_A)
+    assert len(last["project"]["readings"]) == 4 and last["seq"] == 9 and len(held) == 4, (len(last["project"]["readings"]), last["seq"], len(held))
+    shot("a-edited")
+    assert not errors, errors
+    context.close()
+
+
 def main():
     procs = []
     try:
@@ -3723,6 +3849,11 @@ def main():
                 # Only the AF94 DELTA2 check: an open document through 1280 -> 700 -> 606 -> 1280; stubbed replies, no provider.
                 proc, base = start("ok"); procs.append(proc)
                 request94_resize_flow(browser, base, sys.argv[2] if len(sys.argv) > 2 else None); print("ok  AF94 DELTA2 open document through 1280 -> 700 -> 606 -> 1280")
+                browser.close(); return
+            if sys.argv[1:2] == ["map97"]:
+                # Only the AF97 flow: a map reading's reply let through while another project or home is open; stubbed provider.
+                proc, base = start("ok"); procs.append(proc)
+                for size in ((1280, 720), (1440, 900)): map97_flow(browser, base, size, sys.argv[2] if len(sys.argv) > 2 else None); print(f"ok  AF97 map return at {size[0]}x{size[1]}")
                 browser.close(); return
             if sys.argv[1:2] == ["reading87"]:
                 # Only the AF85/87 flows: the stored real 85 reply replayed in the browser, no provider.
@@ -3760,6 +3891,8 @@ def main():
             for size in ((1280, 720), (1440, 900)): request93_flow(browser, base, size)
             for size in ((1280, 720), (1440, 900)): request94_flow(browser, base, size)
             request94_resize_flow(browser, base)
+            for size in ((1280, 720), (1440, 900)): map97_flow(browser, base, size)
+            print("ok  AF97 map return at 1280/1440: B's paste, selection, scroll and focus, B's reading button and the home draft kept while A's reply comes; applied on return without asking again; saving not cancellable; a visit opened during the save takes it")
             print("ok  AF85 empty analysis on the micro draft at 1280/1440: reads at once, source and back, close/reopen/reload/file, earlier request and return kept, positive with none chosen apart")
             proc, base = start("code"); procs.append(proc); code_flow(browser, base); print("ok  access code kept from an input event")
             proc, base = start("fail"); procs.append(proc); failure_flow(browser, base); print("ok  provider failure -> short error -> retry")

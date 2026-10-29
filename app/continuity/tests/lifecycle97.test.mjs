@@ -29,7 +29,7 @@ const until = async (f, why) => { for (let i = 0; i < 200; i++) { if (f()) retur
 
 /** A workspace in memory: entries by entryId, each with its lifecycle; every open() is a new visit (a new object), as in the app. */
 async function world({ ignoreAbort = false } = {}) {
-  const prompt = await mapPromptId(), w = { entries: new Map(), cur: null, commits: [], done: [], changed: 0, calls: 0, sent: [], gates: [], commitImpl: null,
+  const prompt = await mapPromptId(), w = { entries: new Map(), cur: null, commits: [], done: [], changed: [], calls: 0, sent: [], gates: [], commitImpl: null,
     status: { ai: 'deepseek', model: 'm', access: 'open', map: { model: 'm', prompt } } };
   const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: KEY }, fetchImpl: async () => {
     w.calls++; const gate = deferred(); w.gates.push(gate); await gate.promise;
@@ -46,7 +46,7 @@ async function world({ ignoreAbort = false } = {}) {
       const failed = w.commitImpl ? await w.commitImpl(next, o) : null; if (failed) return failed;
       o.project = next; o.view = studioView(next); w.entries.get(o.key).project = next; return null;
     },
-    done: applied => { w.done.push({ key: w.cur?.key, applied }); }, changed: () => { w.changed++; } });
+    done: applied => { w.done.push({ key: w.cur?.key, applied }); }, changed: key => { w.changed.push(key); } });
   return w;
 }
 // The stub answers from the ask the client builds for this project (the same request the run sends).
@@ -89,7 +89,8 @@ test('97-2 before it leaves: a cancel, a failed hash or a move to another entry 
 test('97-3 a reply that comes while B is open waits for A: B and its view untouched, A applies it on return without asking again', async () => {
   const w = await world(), p = base(), q = base('B 보고: B만의 기록.'); w.add('E_A0000003', p); w.add('E_B0000003', q); answer(w, p, '폴더 입력');
   w.open('E_A0000003'); const r = w.run.run(); await until(() => w.gates.length, 'sent');
-  const b = w.open('E_B0000003'), bProject = b.project; w.gates[0].open(); await r; await until(() => w.run.stateOf('E_A0000003').ready, 'ready for A');
+  const b = w.open('E_B0000003'), bProject = b.project; w.changed = []; w.gates[0].open(); await r; await until(() => w.run.stateOf('E_A0000003').ready, 'ready for A');
+  assert.deepEqual([...new Set(w.changed)], ['E_A0000003'], 'the change is told as A\'s own: the host leaves B (open now) as it is');
   assert.equal(w.commits.length, 0, 'nothing saved while B is open'); assert.equal(w.done.length, 0, 'B is never focused or moved');
   assert.deepEqual(w.run.state(), { pending: null, committing: false, ready: false, error: null }, 'B shows nothing of A');
   assert.equal(b.project, bProject); assert.equal(w.entries.get('E_A0000003').project, p, 'A is not saved yet');

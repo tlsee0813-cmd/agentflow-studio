@@ -27,8 +27,9 @@ export interface MapRunHost {
   commit(next: Project): Promise<string | null>;
   /** A reading was applied and saved, in the visit it was applied from. */
   done(applied: Applied): void;
-  /** Anything to show changed (pending, ready, error). */
-  changed(): void;
+  /** Anything to show changed (pending, ready, error) for this entry: the host redraws only what belongs to it (another project
+   * open now is left as it is). */
+  changed(key: string): void;
 }
 /** pending: asked (or about to be) and still cancellable; committing: being saved, no longer cancellable; ready: a checked reply to
  * the very request sent, kept for this entry in this page until the person applies or discards it (never said to be saved). */
@@ -75,17 +76,17 @@ export function createMapRun(host: MapRunHost) {
     const key = o.key, slot = of(key); if (slot.attempt) return;
     const st = host.status(); if (!st.map || st.ai !== 'deepseek') return;
     const inp = buildMapAsk(o.project, o.view, mapOnly ? [] : host.requests?.() ?? [], requestId, anchored());
-    if (inp.problem) { slot.error = inp.problem === 'NOTHING_NEW' ? '이 범위에서 새로 읽을 기록이 없어요.' : inp.problem === 'REQUEST_CONTEXT_TOO_LARGE' ? '요청 문맥을 한 번에 대조하기 어려워 보고를 읽지 않았어요. 비교할 요청문을 골라 주세요.' : inp.problem === 'TOO_LARGE' ? '지도가 커서 한 번에 보낼 수 없어요.' : '키나 토큰처럼 보이는 글이 있는 기록이 있어 보내지 않았어요.'; host.changed(); return; }
+    if (inp.problem) { slot.error = inp.problem === 'NOTHING_NEW' ? '이 범위에서 새로 읽을 기록이 없어요.' : inp.problem === 'REQUEST_CONTEXT_TOO_LARGE' ? '요청 문맥을 한 번에 대조하기 어려워 보고를 읽지 않았어요. 비교할 요청문을 골라 주세요.' : inp.problem === 'TOO_LARGE' ? '지도가 커서 한 번에 보낼 수 없어요.' : '키나 토큰처럼 보이는 글이 있는 기록이 있어 보내지 않았어요.'; host.changed(key); return; }
     const a: Attempt = { key, project: o.project.id, lifecycle: o.ref?.lifecycle ?? null, visit: visitOf(), phase: 'hashing', controller: new AbortController(), inp, prompt: st.map.prompt, hash: '', reply: null, model: '', meta: null };
-    slot.attempt = a; slot.error = null; host.changed();
+    slot.attempt = a; slot.error = null; host.changed(key);
     const live = () => slot.attempt === a;
     try { a.hash = await askHash(inp.ask); }
-    catch { if (live()) { slot.attempt = null; slot.error = MAP_ERROR.HASH!; host.changed(); } return; }
+    catch { if (live()) { slot.attempt = null; slot.error = MAP_ERROR.HASH!; host.changed(key); } return; }
     if (!live()) return; // cancelled before it left: nothing was sent
     // Moved to another entry (or out and back) before it left: nothing goes, for this entry or the one open now.
     const now = host.current();
-    if (!same(a, now) || visitOf() !== a.visit) { slot.attempt = null; host.changed(); return; }
-    if (now!.project.readings.some(r => isMapReading(r) && r.hash === a.hash)) { slot.attempt = null; slot.error = MAP_ERROR.ALREADY_APPLIED!; host.changed(); return; }
+    if (!same(a, now) || visitOf() !== a.visit) { slot.attempt = null; host.changed(key); return; }
+    if (now!.project.readings.some(r => isMapReading(r) && r.hash === a.hash)) { slot.attempt = null; slot.error = MAP_ERROR.ALREADY_APPLIED!; host.changed(key); return; }
     a.phase = 'asking';
     let res: { model: string; reply: MapReply };
     try { res = await askMap(inp.ask, a.controller.signal, host.accessCode()); }
@@ -93,13 +94,13 @@ export function createMapRun(host: MapRunHost) {
       if (!live()) return; // cancelled or discarded: a later attempt or its result is not touched
       const code = e instanceof AskError ? e.code : 'NETWORK';
       slot.attempt = null; if (code !== 'CANCELLED') slot.error = MAP_ERROR[code] ?? ERROR_TEXT[code] ?? '지도를 정리하지 못했어요. 기록은 그대로예요.';
-      host.changed(); return;
+      host.changed(key); return;
     }
     if (!live() || a.controller.signal.aborted) return;
     a.reply = res.reply; a.model = res.model; a.phase = 'ready';
     // Still the visit it was asked from: applied now, as before. Otherwise it waits for this entry until the person comes back
     // to it and asks for it (another project, the home page or a new visit of this one is never changed or moved by it).
-    if (visitOf() === a.visit && same(a, host.current())) await apply(a); else host.changed();
+    if (visitOf() === a.visit && same(a, host.current())) await apply(a); else host.changed(key);
   }
   /** Applies a ready reply to the entry open now, on top of the map as it is now, and saves it. No network: the reply is the one
    * already checked against the request that was sent. Saving cannot be cancelled once begun; a failed save keeps the reply
@@ -108,25 +109,25 @@ export function createMapRun(host: MapRunHost) {
     const slot = of(a.key);
     if (slot.attempt !== a || a.phase !== 'ready' || !a.reply) return;
     const o = host.current();
-    if (!same(a, o)) { if (o?.key === a.key) { slot.attempt = null; slot.error = MAP_ERROR.LIFECYCLE!; host.changed(); } return; }
+    if (!same(a, o)) { if (o?.key === a.key) { slot.attempt = null; slot.error = MAP_ERROR.LIFECYCLE!; host.changed(a.key); } return; }
     a.meta ??= { id: `R_${crypto.randomUUID()}`, at: new Date().toISOString() };
     let applied: Applied;
     try { applied = applyReading(o!.project, a.inp, a.reply, { ...a.meta, model: a.model, prompt: a.prompt, hash: a.hash }); }
     catch (e) {
       const code = (e as Error).message;
       slot.attempt = null; slot.error = code === 'NOTHING_READ' ? [MAP_ERROR.NOTHING_READ!, ...a.reply.gaps].join(' ') : MAP_ERROR[code] ?? '이 결과를 지도에 반영하지 못했어요. 지도와 기록은 그대로예요.';
-      host.changed(); return;
+      host.changed(a.key); return;
     }
-    a.phase = 'committing'; slot.error = null; host.changed();
+    a.phase = 'committing'; slot.error = null; host.changed(a.key);
     const visit = visitOf();
     let failed: string | null;
     try { failed = await host.commit(applied.project); } catch { failed = '저장하지 못했어요. 바뀐 내용은 적용하지 않았어요.'; }
     if (slot.attempt !== a) return;
-    if (failed) { a.phase = 'ready'; slot.error = failed; host.changed(); return; }
+    if (failed) { a.phase = 'ready'; slot.error = failed; host.changed(a.key); return; }
     slot.attempt = null;
     // Saved to the entry it was asked for; shown only in the visit it was applied from (a later one is left as it is).
     if (visitOf() === visit && host.current()?.key === a.key) host.done(applied);
-    host.changed();
+    host.changed(a.key);
   }
   /** What one entry's reading stands at. An attempt of an earlier lifecycle of the open entry is let go here (it says so). */
   function stateOf(key: string): MapRunState {
@@ -136,6 +137,7 @@ export function createMapRun(host: MapRunHost) {
     return { pending: b && (b.phase === 'hashing' || b.phase === 'asking') ? b.controller : null, committing: b?.phase === 'committing', ready: b?.phase === 'ready', error: slot.error };
   }
   const openSlot = () => { const o = host.current(); return o ? of(o.key) : null; };
+  const openKey = () => host.current()?.key ?? '';
   return {
     input, can, run, runMapOnly: () => run(undefined, true),
     /** The ready reply of the entry open now, applied (a second click while it is applied does nothing). */
@@ -143,9 +145,9 @@ export function createMapRun(host: MapRunHost) {
     state: (): MapRunState => { const o = host.current(); return o ? stateOf(o.key) : { pending: null, committing: false, ready: false, error: null }; },
     stateOf,
     /** Cancels a request still on its way; once saving has begun there is nothing to cancel. */
-    cancel: () => { const s = openSlot(), a = s?.attempt; if (!s || !a || (a.phase !== 'hashing' && a.phase !== 'asking')) return; a.controller.abort(); s.attempt = null; host.changed(); },
+    cancel: () => { const s = openSlot(), a = s?.attempt; if (!s || !a || (a.phase !== 'hashing' && a.phase !== 'asking')) return; a.controller.abort(); s.attempt = null; host.changed(openKey()); },
     /** Lets a ready reply go unapplied (nothing is saved). */
-    discard: () => { const s = openSlot(), a = s?.attempt; if (!s || !a || a.phase !== 'ready') return; s.attempt = null; s.error = null; host.changed(); },
+    discard: () => { const s = openSlot(), a = s?.attempt; if (!s || !a || a.phase !== 'ready') return; s.attempt = null; s.error = null; host.changed(openKey()); },
     clearError: () => { const s = openSlot(); if (s) s.error = null; },
     last: (): MapReading | null => { const o = host.current(); return o ? (o.project.readings.filter(isMapReading).at(-1) ?? null) : null; }
   };

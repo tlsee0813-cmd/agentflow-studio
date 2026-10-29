@@ -1809,10 +1809,14 @@ const mapRun = createMapRun({
     return failed;
   },
   done: applied => mapApplied(applied),
-  changed: () => mapChanged()
+  changed: key => mapChanged(key)
 });
-function mapChanged() {
-  const o = opened; if (!o) { document.querySelectorAll<HTMLElement>('#saved-list [data-run-entry]').forEach(runBadge); return; }
+/** Only what belongs to the entry whose reading changed: its home card, or its own map and panes while it is the one open. Another
+ * project open now (its paste, selection, scroll and focus) is never redrawn by it. */
+function mapChanged(key: string) {
+  const o = opened;
+  if (!o) { document.querySelectorAll<HTMLElement>('#saved-list [data-run-entry]').forEach(el => { if (el.dataset.runEntry === key) runBadge(el); }); return; }
+  if (o.key !== key) return;
   renderMapEntry(); refreshUnderstood();
   if (returnView.isOpen() && !selected) returnView.render();
 }
