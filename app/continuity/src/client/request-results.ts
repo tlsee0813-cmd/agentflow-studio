@@ -274,7 +274,11 @@ export function createWideReading(host: WideHost) {
     if (!st || !st.source) return;
     const b = st.back; st.source = null; st.back = null; render();
     const main = el().querySelector<HTMLElement>('.rw-main'); if (main && b) main.scrollTop = b.scroll;
-    if (b?.focus) focusKey(`f:${b.focus}`);
+    if (!b?.focus || !focusKey(`f:${b.focus}`) || !main) return;
+    // The place read from stays as it was, unless the passage moved meanwhile (withdrawn into the history below): then its button
+    // is brought into the column, at a third, instead of being focused out of sight.
+    const x = document.activeElement as HTMLElement, r = x.getBoundingClientRect(), c = main.getBoundingClientRect();
+    if (r.top < c.top || r.bottom > c.bottom) main.scrollTop += r.top - c.top - main.clientHeight / 3;
   }
   /** Focus a control by its identity; one inside a fold closed meanwhile (a passage withdrawn while it was read) opens the fold. */
   function focusKey(key: string): boolean {

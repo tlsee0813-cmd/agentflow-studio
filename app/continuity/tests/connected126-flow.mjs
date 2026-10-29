@@ -175,6 +175,9 @@ const active = page => page.evaluate(() => { const a = document.activeElement; r
 const sideways = (page, sel) => page.evaluate(s => { const d = document.scrollingElement, b = s ? document.querySelector(s) : null;
   return { page: d.scrollWidth - d.clientWidth, box: b ? b.scrollWidth - b.clientWidth : null }; }, sel);
 const wideOpen = page => page.locator('#request-wide:not([hidden])');
+/** The focused control lies wholly inside the reading column as it is scrolled now. */
+const shown = page => page.evaluate(() => { const a = document.activeElement, m = document.querySelector('#request-wide .rw-main'); if (!a || !m || !m.contains(a)) return false;
+  const r = a.getBoundingClientRect(), b = m.getBoundingClientRect(); return r.height > 0 && r.top >= b.top && r.bottom <= b.bottom; });
 async function openPaneItem(page) {
   await page.locator('#return-entry').click(); await page.locator('#lens .rr-map .request-results').waitFor();
   // A's first item, by its exact identity (B's same-titled item reads in its own group).
@@ -225,7 +228,7 @@ async function wide(browser, base) {
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/w-code.png` });
   await page.keyboard.press('Escape');
   await page.locator('.rw-item').waitFor();
-  assert.equal((await active(page)).key, codeKey); assert.ok(Math.abs(await main.evaluate(e => e.scrollTop) - mainScroll) <= 1);
+  assert.equal((await active(page)).key, codeKey); assert.ok(Math.abs(await main.evaluate(e => e.scrollTop) - mainScroll) <= 1); assert.ok(await shown(page), 'an unmoved button: same scroll, in view');
   ok('W typed code original in place, Esc back to the same button and scroll');
   // The long-condition row: its original, then the back button (click).
   const rowCard = page.locator('.rw-card', { hasText: 'Chromium headless 1280×720' }), rowKey = await rowCard.locator('.rw-src').getAttribute('data-rw-focus');
@@ -465,9 +468,11 @@ async function landing(browser, base) {
   assert.ok(notice.includes('지금 저장된 내용으로 다시 읽었어요') && notice.includes('화면은 그 사이 닫혔어요'), notice);
   assert.equal((await page.locator('.rw-back').textContent()).trim(), '‹ 지도');
   assert.equal(await page.locator('#lens:not([hidden]).return-read').count(), 0, 'the return pane closed (mapApplied)');
-  // Back: the same passage's button, now inside the opened history fold; the new correction leads.
+  // Back: the same passage's button, now inside the opened history fold (and in view there: it moved below the old place); the
+  // new correction leads.
   await page.keyboard.press('Escape');
   assert.equal((await active(page)).key, key);
+  assert.ok(await shown(page), 'the button it comes back to is in view in the column');
   assert.equal(await page.locator('.rw-history').getAttribute('open'), '');
   assert.ok((await page.locator('.rw-card.lead').textContent()).includes('[스텁] 늦은 정정'));
   assert.equal(await page.locator('.rw-state').textContent(), '미구현 보고');
