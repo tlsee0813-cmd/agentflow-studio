@@ -4,6 +4,8 @@
 // - the policy (binary path and SHA-256, version, argument template, model, reasoning, deadlines) is the operator's local file,
 //   read once; the browser can choose none of it. The wrapper is the AF96 executor's fixed text around the current map.6
 //   instructions and the input JSON. Each job is bound to the policy hash when it is accepted and runs only under it.
+// - scope (AF112): a policy admits first maps only unless it names scope 'map6-later' (later studio.map.6 readings too). A job
+//   is bound to the instructions actually selected for its ask and to the ask itself; both are checked again before a start.
 // - one child at a time (the version probe included), no queue, no retry. Admission is tied to the child's life: a durable lease
 //   is written before a child is started and removed only once the child is known gone (closed, and on POSIX its process group
 //   probed empty) and its output consumed. A lease left by an earlier process keeps every new job out, whatever its id, until
@@ -43,6 +45,17 @@ const iso = () => new Date().toISOString();
 /** What a child reads on stdin: the fixed wrapper around the current map.6 instructions (98's FIRST prompt here) and the ask. */
 export const wrap = ask => WRAPPER_PREFIX + map6Prompt(ask) + WRAPPER_SUFFIX + JSON.stringify(ask);
 const isFirst = ask => ask?.schemaVersion === MAP6_SCHEMA && ask.parts.length === 0 && (ask.requests ?? []).length === 0 && (ask.priors ?? []).length === 0;
+/** AF112: which map.6 asks a policy admits. 'first' (the default, and every policy written before AF112): a first map only.
+ * 'map6-later' (the operator's explicit opt-in): any studio.map.6 ask, later readings with parts, frozen requests and priors
+ * included, each with the instructions map6Prompt selects for it. No other value is read. */
+export const SCOPES = Object.freeze(['first', 'map6-later']);
+/** The refusal of an ask the policy's scope does not admit, or null. */
+const refusal = (scope, ask) => ask?.schemaVersion !== MAP6_SCHEMA ? (scope === 'first' ? 'EXECUTOR_SCOPE' : 'EXECUTOR_SCHEMA') : scope === 'first' && !isFirst(ask) ? 'EXECUTOR_SCOPE' : null;
+/** What a job is bound to about its own ask: the instructions actually selected (which text, its SHA-256 and short id) and the ask. */
+function askBinding(ask) {
+  const selected = map6Prompt(ask), full = sha(selected);
+  return { promptKind: selected === MAP6_FIRST_PROMPT ? 'first' : 'later', prompt: full.slice(0, 12), promptSha256: full, askSha256: sha(JSON.stringify(ask)) };
+}
 
 /** Checks a policy file's content; throws POLICY_INVALID with the field. */
 export function readPolicy(v) {
@@ -58,7 +71,9 @@ export function readPolicy(v) {
   if (!str(v.model, /^[\w.-]{1,80}$/)) bad('model');
   if (!str(v.reasoning, /^[a-z]{1,20}$/)) bad('reasoning');
   if (!Number.isInteger(v.selectionMs) || !Number.isInteger(v.verdictMs) || v.selectionMs < 1 || v.verdictMs < v.selectionMs + DECIDE_MARGIN_MS || v.verdictMs > 300000) bad('deadline');
-  return Object.freeze({ executor: v.executor, exe: v.exe, binarySha256: v.binarySha256, version: v.version, versionArgs: [...v.versionArgs], args: [...v.args],
+  const scope = v.scope === undefined ? 'first' : v.scope;
+  if (!SCOPES.includes(scope)) bad('scope');
+  return Object.freeze({ scope, executor: v.executor, exe: v.exe, binarySha256: v.binarySha256, version: v.version, versionArgs: [...v.versionArgs], args: [...v.args],
     model: v.model, reasoning: v.reasoning, selectionMs: v.selectionMs, verdictMs: v.verdictMs,
     limits: { stdout: CAPTURE_LIMITS.stdout, stderr: CAPTURE_LIMITS.stderr, final: FINAL_BYTES }, concurrency: 1, queue: 0, retry: 0 });
 }
@@ -84,9 +99,11 @@ export async function openCliExecutor({ policy: raw, stateDir: given, spawnImpl,
   // from the child's own working folder (a relative --state would otherwise nest under it).
   const stateDir = resolve(given);
   const permissions = sha(JSON.stringify(policy.args)); // the argument template carries sandbox, config and tool settings
+  // The policy hash of a 'first' policy is the one it had before AF112 (scope is left out of it then); 'map6-later' is in it.
+  const { scope: _scope, ...hashed } = policy;
   const binding = Object.freeze({ executor: policy.executor, version: policy.version, binarySha256: policy.binarySha256, model: policy.model, reasoning: policy.reasoning,
-    permissions, wrapper: WRAPPER_SHA256, prompt: sha(MAP6_FIRST_PROMPT).slice(0, 12), selectionMs: policy.selectionMs, verdictMs: policy.verdictMs,
-    policy: sha(canon({ ...policy, limits: canon(policy.limits), wrapper: WRAPPER_SHA256 })) });
+    permissions, wrapper: WRAPPER_SHA256, scope: policy.scope, selectionMs: policy.selectionMs, verdictMs: policy.verdictMs,
+    policy: sha(canon({ ...hashed, ...(policy.scope !== 'first' ? { scope: policy.scope } : {}), limits: canon(policy.limits), wrapper: WRAPPER_SHA256 })) });
   let problem = null, owner = null, verified = false, verifying = null, closing = false, fenced = false;
   const boot = await bootId();
   let slot = null; // { id, kind, owner, spawned, lease } from admission until its child is known gone and its output consumed
@@ -206,13 +223,13 @@ export async function openCliExecutor({ policy: raw, stateDir: given, spawnImpl,
 
   async function prepare(ask) {
     if (problem || closing) throw new ApiError('EXECUTOR_UNAVAILABLE', 503);
-    if (!isFirst(ask)) throw new ApiError('EXECUTOR_SCOPE', 409);
+    const refused = refusal(policy.scope, ask); if (refused) throw new ApiError(refused, 409);
     if (unsettled && !slot) await reconcile();
     if (unsettled || lingering()) throw new ApiError('EXECUTOR_UNSETTLED', 503);
     if (!verified) { await verifyVersion(); if (problem) throw new ApiError('EXECUTOR_UNAVAILABLE', 503); if (lingering()) throw new ApiError('EXECUTOR_UNSETTLED', 503); if (!verified) throw new ApiError('EXECUTOR_UNAVAILABLE', 503); }
     // At acceptance the binary is still the verified one (checked again before the start, and on Linux in the started image).
     if (await hashFile(policy.exe) !== policy.binarySha256) { problem = 'BINARY_CHANGED'; throw new ApiError('EXECUTOR_UNAVAILABLE', 503); }
-    return { ...binding };
+    return { ...binding, ...askBinding(ask) };
   }
   /** Taken in the job store's single acceptance step; synchronous, so two jobs can never both pass. */
   function acquire(id) {
@@ -231,7 +248,11 @@ export async function openCliExecutor({ policy: raw, stateDir: given, spawnImpl,
     const fail = (code, status, o, detail) => Object.assign(new ApiError(code, status), { observed: observed(o) }, detail ? { detail } : {});
     if (!mine || mine.kind !== 'job' || mine.lease) throw fail('EXECUTOR_BUSY', 409);
     const free = () => { if (!mine.lease && slot === mine) slot = null; };
-    if (!bound || bound.policy !== binding.policy || problem) { free(); throw fail('EXECUTOR_CHANGED', 409); }
+    if (!bound || bound.policy !== binding.policy || bound.scope !== policy.scope || problem) { free(); throw fail('EXECUTOR_CHANGED', 409); }
+    // Right before anything starts: the very ask and the instructions selected for it now are the ones bound when it was
+    // accepted, and the scope still admits it. Otherwise no lease, no child.
+    const now2 = askBinding(ask);
+    if (refusal(policy.scope, ask) || ['promptKind', 'prompt', 'promptSha256', 'askSha256'].some(k => bound[k] !== now2[k])) { free(); throw fail('EXECUTOR_CHANGED', 409); }
     if (signal?.aborted) { free(); throw fail('CANCELLED', 499); }
     // The verdict (a refusal included) is given by verdictMs - margin whatever the setup, the child or the final read still do; a
     // cancel is given at once. What is still running then keeps the slot, lease and run folder until it has ended (work below).
@@ -290,7 +311,7 @@ export async function openCliExecutor({ policy: raw, stateDir: given, spawnImpl,
   return {
     id: EXECUTOR_ID, model: policy.model,
     ready: () => !problem,
-    describe: () => ({ id: EXECUTOR_ID, model: policy.model, state: state(), problem: problem ?? unsettled?.why ?? (lingering() ? 'CHILD_NOT_CLOSED' : null), policy: binding.policy.slice(0, 12) }),
+    describe: () => ({ id: EXECUTOR_ID, model: policy.model, scope: policy.scope, state: state(), problem: problem ?? unsettled?.why ?? (lingering() ? 'CHILD_NOT_CLOSED' : null), policy: binding.policy.slice(0, 12) }),
     prepare, acquire, call,
     /** Test and launcher view (no paths, no output). */
     held: () => ({ slot: slot ? { job: slot.id, kind: slot.kind, spawned: slot.spawned, pid: slot.lease?.pid ?? null } : null, unsettled }),

@@ -68,7 +68,7 @@ test('102-E1 normal child: the exact final wire is ready, bound at acceptance to
   assert.equal(st.ai, 'off', 'no DeepSeek key: the other AI features stay off');
   assert.deepEqual(st.map, { model: 'fake-model-102', prompt: await mapPromptId(), via: 'jobs' });
   assert.equal(st.map.prompt, 'm6-177d450624b5');
-  assert.deepEqual({ ...st.jobs.executor, policy: undefined }, { id: 'codex-cli-preview.102', model: 'fake-model-102', state: 'ready', problem: null, policy: undefined });
+  assert.deepEqual({ ...st.jobs.executor, policy: undefined }, { id: 'codex-cli-preview.102', model: 'fake-model-102', scope: 'first', state: 'ready', problem: null, policy: undefined });
   assert.equal((await jcall(s.handle, 'POST', '', x.cap, x.body)).status, 202);
   const v = await ended(s.handle, x);
   assert.equal(v.state, 'ready', JSON.stringify(v.error));
@@ -85,7 +85,8 @@ test('102-E1 normal child: the exact final wire is ready, bound at acceptance to
   assert.doesNotThrow(() => M.validateMapReply(v.result.wire, x.inp.ask));
   assert.equal(v.execution.observed.finalSha256, createHash('sha256').update(JSON.stringify(v.result.wire)).digest('hex'), 'the final bytes, unchanged');
   const file = JSON.parse(readFileSync(join(s.dir, 'ops', `${x.id}.json`), 'utf8')).body;
-  assert.deepEqual(Object.keys(file.execution).sort(), ['binarySha256', 'executor', 'model', 'observed', 'permissions', 'policy', 'prompt', 'reasoning', 'selectionMs', 'verdictMs', 'version', 'wrapper']);
+  assert.deepEqual(Object.keys(file.execution).sort(), ['askSha256', 'binarySha256', 'executor', 'model', 'observed', 'permissions', 'policy', 'prompt', 'promptKind', 'promptSha256', 'reasoning', 'scope', 'selectionMs', 'verdictMs', 'version', 'wrapper']);
+  assert.deepEqual([file.execution.scope, file.execution.promptKind, file.execution.prompt], ['first', 'first', createHash('sha256').update(MAP6_FIRST_PROMPT).digest('hex').slice(0, 12)], 'AF112: a first job keeps the prompt id it had');
   assert.deepEqual([file.execution.executor, file.execution.binarySha256, file.execution.version, file.execution.selectionMs, file.execution.verdictMs], ['codex-cli-preview.102', NODE_SHA, 'fake-cli 102-test', 20000, 21000]);
   assert.equal(file.execution.observed.closed, true); assert.equal(file.execution.observed.exit, 0);
   assert.ok(!JSON.stringify(file.execution).includes(s.ctl) && !JSON.stringify(file.execution).includes('가짜 부분'), 'no path or output in the record');

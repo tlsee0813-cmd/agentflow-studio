@@ -11,7 +11,7 @@ export interface AiStatus { ai: 'deepseek' | 'off' | 'none'; model: string | nul
   map?: { model: string; prompt: string; via?: 'jobs' } | null;
   /** AF100: the server keeps map readings as durable jobs on this PC (durable), or has a job store it cannot use (problem).
    * AF102 executor: the map executor's state (ready, busy, unsettled: an earlier child not known to have ended, unavailable). */
-  jobs?: { durable: boolean; problem: string | null; executor?: { state: string; problem: string | null } | null } | null }
+  jobs?: { durable: boolean; problem: string | null; executor?: { state: string; problem: string | null; scope?: 'first' | 'map6-later' } | null } | null }
 export class AskError extends Error { constructor(readonly code: string) { super(code); } }
 
 // same-origin: an owner-private host's own cookies go with same-origin calls; a cross-origin API still gets none.
@@ -27,7 +27,8 @@ export async function aiStatus(): Promise<AiStatus> {
     const d = v.digest, digest = d && typeof d.model === 'string' && typeof d.prompt === 'string' && /^[\w.-]{1,80}$/.test(d.model) && /^d1-[0-9a-f]{12}$/.test(d.prompt)
       ? { model: d.model, prompt: d.prompt, record: typeof d.record === 'string' && /^d2-[0-9a-f]{12}$/.test(d.record) ? d.record : null } : null;
     const m = v.map, map = m && typeof m.model === 'string' && /^[\w.-]{1,80}$/.test(m.model) && typeof m.prompt === 'string' && /^m[1-6]-[0-9a-f]{12}$/.test(m.prompt) ? { model: m.model, prompt: m.prompt, ...(m.via === 'jobs' ? { via: 'jobs' as const } : {}) } : null;
-    const j = v.jobs, x = j?.executor, executor = x && typeof x.state === 'string' ? { state: x.state, problem: typeof x.problem === 'string' ? x.problem : null } : null;
+    // AF112 scope: which map readings the executor takes (first maps only, or later map.6 readings too); unknown values are not shown.
+    const j = v.jobs, x = j?.executor, executor = x && typeof x.state === 'string' ? { state: x.state, problem: typeof x.problem === 'string' ? x.problem : null, ...(x.scope === 'first' || x.scope === 'map6-later' ? { scope: x.scope as 'first' | 'map6-later' } : {}) } : null;
     const jobs = j && j.version === 'map-job.1' ? { durable: j.durable === true, problem: typeof j.problem === 'string' ? j.problem : null, ...(executor ? { executor } : {}) } : null;
     return { ai: v.ai, model: typeof v.model === 'string' ? v.model : null, access: v.access === 'code' ? 'code' : 'open', digest, map, jobs };
   } catch { return { ai: 'none', model: null, access: 'open' }; }

@@ -78,6 +78,7 @@ const JOB_ERROR: Record<string, string> = {
   EXECUTOR_UNSETTLED: '이전 지도 실행이 끝났는지 확인되지 않아 새 정리를 시작하지 않았어요. PC의 Studio 실행기를 확인해 주세요.',
   EXECUTOR_UNAVAILABLE: 'PC의 지도 실행기를 쓸 수 없어 정리를 시작하지 않았어요. 기록과 지도는 그대로예요.',
   EXECUTOR_SCOPE: '이 미리보기 실행기는 아직 부분이 없는 프로젝트의 첫 지도만 정리해요.',
+  EXECUTOR_SCHEMA: '이 미리보기 실행기는 현재 지도 형식(studio.map.6)만 정리해요. 화면을 새로 고친 뒤 다시 정리해 주세요.',
   EXECUTOR_CHANGED: 'PC의 지도 실행기 설정이 바뀌어 이 정리는 실행하지 않았어요. 기록과 지도는 그대로예요.',
   AI_RESPONSE_REJECTED: 'AI 응답이 실행 규칙에 맞지 않아(도구 사용·오류·형식) 반영하지 않았어요. 원문과 기존 지도는 그대로예요.',
   PROMPT_CHANGED: 'PC의 Studio 실행기 설정이 바뀌어 보내지 않았어요. 화면을 새로 고친 뒤 다시 정리해 주세요.',

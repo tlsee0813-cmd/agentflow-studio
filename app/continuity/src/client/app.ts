@@ -2111,7 +2111,8 @@ function renderStatus() {
   const needsCode = status.ai === 'deepseek' && status.access === 'code' && !sessionCode();
   // AF102: a server whose map readings are made only by its own map executor (a local preview) says so; the rest stays as ai says.
   const mapOnly = status.ai !== 'deepseek' && status.map?.via === 'jobs';
-  const mapNote = status.map?.via === 'jobs' ? ` 지도 정리는 이 PC의 지도 실행기(${status.map.model}, 미리보기)가 첫 지도만 해요.` : '';
+  const later = status.jobs?.executor?.scope === 'map6-later';
+  const mapNote = status.map?.via === 'jobs' ? ` 지도 정리는 이 PC의 지도 실행기(${status.map.model}, 미리보기)가 ${later ? '첫 지도와 이후 기록·요청 대조까지' : '첫 지도만'} 해요.` : '';
   pill.dataset.state = needsCode ? 'code' : mapOnly ? 'map' : status.ai;
   text.textContent = status.ai === 'deepseek' ? (needsCode ? 'AI · 접속 코드 필요' : 'AI 정리 가능') : mapOnly ? '지도 정리만 가능' : status.ai === 'off' ? 'AI 키 없음' : 'AI 서버 미연결';
   pill.title = (status.ai === 'deepseek' ? `서버가 ${status.model ?? 'DeepSeek'}에 정리를 요청해요. 키는 서버에만 있어요.${needsCode ? ' 이 서버는 접속 코드를 받아요. 정리를 요청할 때 입력해 주세요.' : ''}` : mapOnly ? '질문·계획·결과 정리는 서버에 AI 키가 없어 꺼져 있어요.' : status.ai === 'off' ? '서버는 연결됐지만 AI 키가 설정되지 않았어요.' : '이 페이지에는 AI 서버가 연결되어 있지 않아요.') + mapNote;
