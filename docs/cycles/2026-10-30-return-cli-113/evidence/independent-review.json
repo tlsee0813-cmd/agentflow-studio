@@ -1,0 +1,53 @@
+{
+  "task": "AF113-independent-original-result-failure-and-next-selection-review",
+  "verdict": "complete_capture_valid_JSON_but_original_wire_rejected_for_source_kind_contract; no_apply_or_semantic_success",
+  "conclusion": "113 delivered one complete final response through the owned CLI path, but the original wire violates the existing source-kind constraint. The first validator failure is matches[12] kind=code on N01 kind=pasted; matches[13] and[14] independently have the same forbidden combination. JSON syntax failure is not supported. Preserve the original failed operation/response and distinguish good evidence of literal-code understanding from accepted request-comparison completion. The most useful next product decision is a bounded explicit typed-source entry on the normal map/request route, not another same-input prompt-prohibition retry or a new owner/store.",
+  "fixedEvidence": {
+    "directory": ".ops/experience113-return-cli/",
+    "filesRead": ["input.json", "final-message.txt", "selected.json", "structural-result.json"],
+    "acceptedImplementation": "c23c24db059121104d016fc888ab7f4aeb4a9190",
+    "code": "0cdabb9e15021a876000fec2f48b8843bad61751",
+    "app": "b042034bffffde23ff69ab53e648dbe4bafcb9cb",
+    "selection": "c8a7171375caa9cb76560140158380ec5dc4d31c",
+    "finalSha256IndependentlyMatched": "300b72e3f664739ffc35d31e143fcc5a702c31b2775e5c683b731f388b05614b",
+    "finalBytes": 11522,
+    "capture": "Preserved observation: closed at151289.938ms,exit0,4events,no capture reason/tool/error rejection,stdioCut=false. Root separately reports exact final-file/agent-message byte equality. This is not a timeout,111-style length/content0 failure, or proof of whole semantic correctness."
+  },
+  "oneAuthorizedLocalDiagnostic": {
+    "method": "Parsed the unchanged final bytes and unchanged input, then called the existing built validateMapReply(wire,ask) exactly once. No alternate record kind, filtered matches, repaired citation, modified wire or applyReading was used. Read the thrown stack's source line afterward without another validator call.",
+    "syntax": "JSON.parse succeeded on the original11522bytes; SHA matched the frozen final.",
+    "result": "Error INVALID_RESPONSE; no structured path/rule fields. Stack points to built app/continuity/dist/public/shared/map-reading.js:474, the source-kind guard corresponding to source map-reading.ts:355.",
+    "firstFailure": "The validator maps matches in order and reaches that guard first for matches[12]: code atN01.27-29. All prior part/relation/candidate/gap/material stages and matches0..11 reached/passed their checks before that throw. This does not prove later/final whole-response checks would pass.",
+    "confirmedSameViolations": [
+      {"path":"matches[12]","kind":"code","at":"N01.27-29","sourceKind":"pasted"},
+      {"path":"matches[13]","kind":"code","at":"N01.33-34","sourceKind":"pasted"},
+      {"path":"matches[14]","kind":"code","at":"N01.50-53","sourceKind":"pasted"}
+    ],
+    "otherViolations": "No additional concrete violation was confirmed in this bounded review. The validator stops at the first error, so this is not a claim that deleting/retagging these three items would make the remainder valid or semantically accepted. No such experiment was performed."
+  },
+  "diagnosticLabelCorrection": {
+    "observed": "structural-result.json initially says reject-original-invalid-json, and the stored executor error reports ruleJSON. Both overstate what occurred.",
+    "cause": "preview/cli-executor.mjs wraps JSON.parse and validateMapReply in the same try. Its catch maps every non-MapReplyError, including generic INVALID_RESPONSE from the source-kind guard, to ruleJSON. The rule here is contract validation, not JSON grammar.",
+    "minimalFutureCorrection": "Separate parse failure from response-contract failure in diagnostics, optionally giving the existing source-kind guard a structured matches[index].kind/record-kind path. Keep rejection atomic and all acceptance constraints unchanged. Correct the derived interpretation record while preserving the original raw/error observation and its history; do not rewrite failed raw or treat a better error label as product-comparison success. This reviewer edits only this report."
+  },
+  "semanticObservationsWithoutAcceptance": {
+    "positive": "The final contains reported implementation and checked author/root observations with version/condition limits, distinguishes the new local tool from unchanged hardware/AgentFlow-wide completion, and explicitly describes the two mappings, trim/whole-case-sensitive lookup and overwrite-on-nonmatch code. It does not simply discard the literal supplied code as example material. The three forbidden code matches correspond to actual supplied implementation passages, so the code-content reading is substantively different from fabricating code that was not supplied.",
+    "boundary": "Nevertheless the selected113 criteria explicitly forbid code/test matches on pasted. Source kind is the current validator's eligibility gate, not a heuristic derived from literal syntax. Understanding a passage as code does not confer evidence-record status. Conversely, future work must not relabel a pure code passage reported solely to evade the validator; reported/checked remain bounded prose reports, and direct code properties can be represented through supported descriptions/roles/claims when truthful.",
+    "decision": "The original response is unusable for atomic application and cannot be called a successful request ledger or full semantic result. No partial application, code-match removal, source retagging or source-kind criterion relaxation is acceptable as a retrospective113 pass."
+  },
+  "nextMinimumProductDecision": {
+    "recommendation": "Prefer a small normal-UI typed-source entry design for the existing map plus frozen-request flow before any further generation. The real gap is that users can supply an actual report, root checks and code on the normal page, but that route persists all of them as pasted while typed evidence is reachable only through a legacy task/source detour. This is a product input/provenance limitation, not missing execution ownership.",
+    "minimalContract": [
+      "Provide an explicit user-declared source class for a newly added normal record, including a clearly named code/check-source evidence class alongside ordinary pasted report text. Classification means supplied-source type, not independently verified execution or whole-product completion. Mixed prose still must be read as reported/checked where appropriate; only actual supporting passages may yield code/test matches.",
+      "Keep raw text, source identity, timestamp/basis and exact coordinates immutable and visible. Preserve all preexisting records as pasted; do not infer evidence from Markdown/file-name/code-looking text, silently migrate old source kinds, or retag113's frozen sources. A future newly classified source/input is a separate observation with explicit provenance, not repair of this failed ask.",
+      "Use the existing project/source persistence and map6 record-kind/evidence machinery with the smallest necessary versioned metadata/validation/import boundary. Do not manufacture unrelated legacy tasks, add another store/owner/queue, or weaken the code/test eligibility validator globally. A new normal source-entry contract must state legacy and duplicate-source behavior instead of relying on accidental text-only deduplication or silent metadata overwrite.",
+      "Before any actual call, verify model-free normal entry -> saved/exported/reloaded source kind -> exact map ask -> supported atomic validation/application, including mixed report/code passages, old pasted records unchanged and rejection of unsupported source-kind/citation combinations. The existing112 lifecycle remains unchanged; no repeat of the whole ownership program is required."
+    ],
+    "whyNotAnotherSmallPromptRetry": "The current prompt already expressly states the evidence restriction, and the pre-call113 criteria already distinguished pasted reports from literal code. Repeating that prohibition and calling the same failed input again would leave the normal typed-source gap intact and add another narrow compliance trial. A dynamically narrowed prompt could be a separately reviewed contract option later, but it is not established as the next useful product step by this result and must not be used as an automatic retry.",
+    "limits": "Typed entry does not guarantee model compliance or prove all evidence types handled. It changes the future input contract and needs its own bounded acceptance. If root instead retains pasted-only input, the honest available result is bounded reported/checked plus direct code descriptions under the current rules, not a promise of typed code/test completion. No implementation/model call is selected by this independent report."
+  },
+  "preservedDecisions": "111 remains incomplete-generation delivery FAIL.112 remains narrowly accepted implementation capability, not generation quality.113 remains original-wire contract rejection despite complete capture and useful local code understanding. No overall product/public-release claim follows.",
+  "actions": {"localValidatorCalls":1,"modelCalls":0,"replays":0,"researchWeb":0,"buildsOrUI":0,"productOrRawWrites":0,"onlyWrite":".ops/results/experience113-independent.json"},
+  "reviewClosed": true,
+  "finalSelectionOwner": "root coordinator"
+}

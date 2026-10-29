@@ -1,0 +1,74 @@
+{
+  "status": "rejected_response_contract",
+  "jsonSyntaxValid": true,
+  "initialJSONClassification": "corrected: generic validator errors mislabeled JSON by executor catch",
+  "error": {
+    "code": "INVALID_RESPONSE",
+    "detail": {
+      "rule": "JSON"
+    }
+  },
+  "finalBytes": 11522,
+  "finalSha256": "300b72e3f664739ffc35d31e143fcc5a702c31b2775e5c683b731f388b05614b",
+  "realCalls": 1,
+  "versionProbes": 1,
+  "toolEvents": 0,
+  "errorEvents": 0,
+  "rawRepair": false,
+  "execution": {
+    "executor": "codex-cli-preview.102",
+    "version": "codex-cli 0.165.0-alpha.1.2",
+    "binarySha256": "5c1b55966bf9f757dcbf00065c9a6cb862ead55d34b015f1be1939ff18e43943",
+    "model": "gpt-6.1-sol",
+    "reasoning": "high",
+    "permissions": "503b611008cf71b170ce6aedf247526e85ccf1da896529645866af8a19889396",
+    "wrapper": "dd56ff8327f0b957f18ccc6af7c6334935901014e36539c35c91e16279c02ae5",
+    "scope": "map6-later",
+    "selectionMs": 299000,
+    "verdictMs": 300000,
+    "policy": "04d806987aac31205589c216be6d732dd04bf32f4d34eb82b8b8b430976a42ae",
+    "promptKind": "later",
+    "prompt": "a6b490a48eaf",
+    "promptSha256": "a6b490a48eaf241f1f1e58f0e2c4367428e69a473a9726a8581a9dc5ad440188",
+    "askSha256": "79a2864f5dc43baa07c63f6c12d932053b294e9ec2230696e0efe16938a494e7",
+    "observed": {
+      "startedAt": "2026-10-29T16:53:58.548Z",
+      "closedAtMs": 151289.93829999992,
+      "decidedAtMs": 151291.14760000003,
+      "closed": true,
+      "exit": 0,
+      "signal": null,
+      "reason": null,
+      "events": 4,
+      "usage": {
+        "input_tokens": 26233,
+        "cached_input_tokens": 8192,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 6552,
+        "reasoning_output_tokens": 3106
+      },
+      "stdoutBytes": 12680,
+      "stderrBytes": 158,
+      "signals": {
+        "sent": 0,
+        "skippedAfterExit": 0
+      },
+      "stdioCut": false,
+      "finalSha256": "300b72e3f664739ffc35d31e143fcc5a702c31b2775e5c683b731f388b05614b",
+      "finalBytes": 11522
+    }
+  },
+  "preservation": {
+    "wholeProjectBeforeAfterReloadEqual": true,
+    "projectSha": "ef7d9b06dcc990ac19e118391c8c48c4be27da06192e823e5cb7ea16dd315067",
+    "wholeBundleEqual": true,
+    "bundleSha": "cdf2dc70965e8eaf9c6d701dcef39a022d1baab8e0e0fcf047e4941590f8ba05",
+    "readings": 1,
+    "pasted": 4,
+    "parts": 7,
+    "autoApply": 0,
+    "newReading": 0,
+    "retry": 0,
+    "noticeReload": "failure banner disappears after ack/reload; data retained (known limitation)"
+  }
+}

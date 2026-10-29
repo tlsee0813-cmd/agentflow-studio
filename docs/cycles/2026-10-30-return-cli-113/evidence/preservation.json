@@ -1,0 +1,13 @@
+{
+  "wholeProjectBeforeAfterReloadEqual": true,
+  "projectSha": "ef7d9b06dcc990ac19e118391c8c48c4be27da06192e823e5cb7ea16dd315067",
+  "wholeBundleEqual": true,
+  "bundleSha": "cdf2dc70965e8eaf9c6d701dcef39a022d1baab8e0e0fcf047e4941590f8ba05",
+  "readings": 1,
+  "pasted": 4,
+  "parts": 7,
+  "autoApply": 0,
+  "newReading": 0,
+  "retry": 0,
+  "noticeReload": "failure banner disappears after ack/reload; data retained (known limitation)"
+}

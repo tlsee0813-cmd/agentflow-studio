@@ -1,0 +1,29 @@
+{
+  "source": "original113final untouched; staged Git blob byte hashes",
+  "files": [
+    {
+      "path": "docs/cycles/2026-10-30-return-cli-113/RESULT.md",
+      "sha256": "e72b6359898732ec49a4e01f786004f857a4b679f1bb447810907e4770550551"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-return-cli-113/evidence/contract-rejected.png",
+      "sha256": "7eeff42e611998a066a1fa55e70c17eeed77b59a3bcbc28c6314cd8dae136495"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-return-cli-113/evidence/final-message.txt",
+      "sha256": "300b72e3f664739ffc35d31e143fcc5a702c31b2775e5c683b731f388b05614b"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-return-cli-113/evidence/independent-review.json",
+      "sha256": "ecf40c58d44a46dc00cec36179563b16b17ae9554d9245191050c9b40c193977"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-return-cli-113/evidence/preservation.json",
+      "sha256": "cda955790c89128d8052a73c83bac291da4a3c00164d8cc8ddaa6ad1ab888cb7"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-return-cli-113/evidence/receipt.json",
+      "sha256": "4bb5d91c13dbc8c6c658f0027b52a601cf465a1d77186d172e4ab8fe076fbfab"
+    }
+  ]
+}
