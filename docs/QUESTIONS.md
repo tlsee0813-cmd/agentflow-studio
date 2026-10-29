@@ -1,5 +1,7 @@
 # 연구 질문과 축적된 근거
 
+**93 요청문 복귀 범위 수용 · 2026-10-29:** [결과·최소 증거](https://github.com/tlsee0813-cmd/agentflow-studio/blob/4a188df9ae4631e4f0a81ff957c03abe9b48b024/docs/cycles/2026-10-29-request-return-93/RESULT.md). 최종d881/app81c5a4e6. 실제opener/PRE진입·복사중문서위치·긴초안스크롤·늦은복사UI격리를수리했다. root기존저장파일133복원/전체bundle·4013자clipboard일치,Cloud전용두PC각1회21.829초/exit0·7pending,정확양OSCI40798177122success. 합성자료/제공빌드범위를구별하며긴문서읽기부담·첫지도미해결을남긴다. PR56draft미병합/미배포,공개73·UI75수리·목표활성·인수인계5/8관문유지.
+
 **92 고정 우선 전달 후보 반려 · 2026-10-29:** [결과·최소 증거](https://github.com/tlsee0813-cmd/agentflow-studio/blob/bc3a02b9b4fa69252bd0e19ad5531f51dbdb20f6/docs/cycles/2026-10-29-priority-delivery-92/RESULT.md). 같은실제지시에서DS68.693초stop/INVALID_RESPONSE,Sol89초selectioncutoff까지최종0·취소,선택/적용0. 전체90초중1초정리예약·실제최종화89.289초이며receipt쓰기제외를명시했다. 각1회/재제출·수선0,micro/Zephyr·제품통합0. 첫지도미해결·공개73/UI75보존·목표활성. 다음은88에서관측한요청문닫기초점복귀의별도PC수리이며첫지도해결로대체하지않는다.
 
 **91 동시 전달 후보 반려 · 2026-10-29:** [결과·최소 증거](https://github.com/tlsee0813-cmd/agentflow-studio/blob/b3c9edf8483180009a0804a5f8d63dd06fb019a4/docs/cycles/2026-10-29-bounded-delivery-91/RESULT.md). 공통90초·각경로1회에서DeepSeek가51.882초첫유효응답으로선택되고Codex는취소됐다. 정리/원문/source보존·privateapply는통과했으나기존A3의정확철회조건설명누락과작업자입력제품화로총괄·독립반려. 후발대체·micro/Zephyr·제품통합0,11전달검사를의미통과로취급하지않음. 공개73·UI75수리·목표활성·인수인계8hold유지. 다음우선경로안은검토만이며미선정/미실행.
