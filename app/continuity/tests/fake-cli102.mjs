@@ -5,8 +5,16 @@
 import { appendFileSync, existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 const argv = process.argv.slice(2);
-if (argv.includes('--version')) { process.stdout.write(`${process.env.FAKE_CLI_VERSION ?? 'fake-cli 102-test'}\n`); process.exit(0); }
 const arg = n => argv[argv.indexOf(n) + 1];
+if (argv.includes('--version')) {
+  // <ctl>/version-mode: ok (default) or grandchild (prints the version, leaves a process holding stdout, exits 0).
+  const c = arg('--ctl'), vm = c && existsSync(`${c}/version-mode`) ? readFileSync(`${c}/version-mode`, 'utf8').trim() : 'ok';
+  if (c) appendFileSync(`${c}/versions`, `${process.pid}\n`);
+  process.stdout.write('fake-cli 102-test\n');
+  if (vm === 'grandchild') { const g = spawn(process.execPath, ['-e', "process.on('SIGTERM',()=>{});setInterval(()=>{},1000)"], { stdio: ['ignore', 'inherit', 'ignore'] }); writeFileSync(`${c}/version-grandchild-pid`, String(g.pid)); g.unref(); }
+  process.stdout.write('', () => process.exit(0));
+} else main();
+function main() {
 const ctl = arg('--ctl'), final = arg('--final'), cwd = arg('--cwd');
 const n = existsSync(`${ctl}/invocations`) ? readFileSync(`${ctl}/invocations`, 'utf8').split('\n').filter(Boolean).length + 1 : 1;
 const modes = existsSync(`${ctl}/mode`) ? readFileSync(`${ctl}/mode`, 'utf8').split('\n').filter(Boolean) : ['ok'];
@@ -20,9 +28,10 @@ const out = s => new Promise(r => process.stdout.write(s, r));
 const chunks = [];
 process.stdin.on('data', c => chunks.push(c));
 process.stdin.on('end', async () => {
-  const text = Buffer.concat(chunks).toString('utf8'), at = text.indexOf('\n\n----- INPUT -----\nINPUT JSON (자료):\n');
+  // The wrapper ends with this line and the input JSON (no newline after it).
+  const text = Buffer.concat(chunks).toString('utf8'), mark = '\nINPUT JSON (자료):\n', at = text.lastIndexOf(mark);
   writeFileSync(`${ctl}/stdin-${n}.sha`, (await import('node:crypto')).createHash('sha256').update(text).digest('hex'));
-  const ask = JSON.parse(text.slice(at + '\n\n----- INPUT -----\nINPUT JSON (자료):\n'.length));
+  const ask = JSON.parse(text.slice(at + mark.length).trim());
   const reply = JSON.stringify(stub(ask)), ev = o => `${JSON.stringify(o)}\n`;
   const head = ev({ type: 'thread.started', thread_id: `fake-${n}` }) + ev({ type: 'turn.started' }) + ev({ type: 'item.completed', item: { id: 'i0', type: 'reasoning', text: '[가짜] 생각' } });
   const tail = (t = reply) => ev({ type: 'item.completed', item: { id: 'i1', type: 'agent_message', text: t } }) + ev({ type: 'turn.completed', usage: { input_tokens: 0, output_tokens: 0 } });
@@ -54,10 +63,11 @@ process.stdin.on('end', async () => {
   if (kind === 'hang') { process.on('SIGTERM', () => {}); await out(head); setInterval(() => {}, 1000); }
   if (kind === 'grandchild') {
     // Leaves a process in its group that holds stdout open and ignores SIGTERM; the CLI itself ends normally.
-    spawn(process.execPath, ['-e', "process.on('SIGTERM',()=>{});setInterval(()=>{},1000)"], { stdio: ['ignore', 'inherit', 'ignore'] }).unref();
+    const g = spawn(process.execPath, ['-e', "process.on('SIGTERM',()=>{});setInterval(()=>{},1000)"], { stdio: ['ignore', 'inherit', 'ignore'] }); writeFileSync(`${ctl}/grandchild-pid`, String(g.pid)); g.unref();
     await done(); process.exit(0);
   }
 });
+}
 /** The 100 smoke stub's first-map rule: the 요구/작업 보고/구상 lines become parts, each claim keyed; labelled synthetic. */
 function stub(input) {
   const rec = input.records[0], pieces = rec.spans.filter(x => /^(요구|작업 보고|구상):/.test(x.t.trim()));
