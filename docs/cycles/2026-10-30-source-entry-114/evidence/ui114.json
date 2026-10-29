@@ -1,0 +1,119 @@
+{
+  "at": "2026-10-29T17:46:08.572Z",
+  "viewport": "1280x800",
+  "fixture": {
+    "backup13Sha256": "cd5937c9f903ed33857e7e168aa6d15b48cc0e08262f06e3224e27e09da180c4",
+    "writer": "pre-114 build (make-fixture13.mjs)"
+  },
+  "paths": {
+    "1-import-add-save-export": {
+      "imported13": true,
+      "schemaAfter": "idea015.project.14",
+      "codeTextSha256": "bbfee919c3b87bb27a0ce475b01fe96853bb2e54d72fac826e1b45d7d1654252",
+      "bomKept": true,
+      "crlf": true,
+      "evidence": {
+        "kind": "code",
+        "name": "convert.ts",
+        "version": "commit 3f2a1c9",
+        "origin": "https://github.com/example/converter/blob/3f2a1c9e0b7d4a6c8f1e2d3c4b5a69788776655/src/convert.ts"
+      },
+      "refusedInvalidUtf8": true,
+      "aiPosts": 0,
+      "exportImportSame": true,
+      "reloadSameBytes": true
+    },
+    "2-duplicates": {
+      "pastedAndProvidedSeparate": [
+        true,
+        true
+      ],
+      "sameDeclarationNoWrite": true,
+      "otherVersionNew": true,
+      "pasteFindsPastedOnly": true,
+      "aiPosts": 0
+    },
+    "3-asks": {
+      "unread": {
+        "N_35cb2283-39db-4cba-8627-361a1d5b8baa": "evidence",
+        "N_88163e0e-134f-44f6-bfa3-fbe75e643792": "evidence",
+        "N_ba2981e1-4b4e-4f70-9ab2-cf92dc3bed5e": "pasted"
+      },
+      "selectedRq": {
+        "N_35cb2283-39db-4cba-8627-361a1d5b8baa": "evidence",
+        "N_88163e0e-134f-44f6-bfa3-fbe75e643792": "evidence",
+        "N_ba2981e1-4b4e-4f70-9ab2-cf92dc3bed5e": "pasted",
+        "N_222ff1ee-971a-482b-9b52-74310f42409c": "pasted"
+      },
+      "requestWhole": true,
+      "rawSpansExact": true
+    },
+    "4-job-apply-quote": {
+      "refusedFirst": "AI 응답이 근거 규칙(원문 인용·알려진 부분)에 맞지 않아 반영하지 않았어요.",
+      "applied": "left-then-apply-button",
+      "applyButton": "정리 결과 보기",
+      "jobPosts": 2,
+      "invocations": 2,
+      "matches": [
+        [
+          "reported",
+          "N_ba2981e1-4b4e-4f70-9ab2-cf92dc3bed5e"
+        ],
+        [
+          "code",
+          "N_88163e0e-134f-44f6-bfa3-fbe75e643792"
+        ],
+        [
+          "test",
+          "N_35cb2283-39db-4cba-8627-361a1d5b8baa"
+        ]
+      ],
+      "quoteRoundtrip": true,
+      "reloadParsed": true,
+      "backupKeeps": true
+    },
+    "5-legacy-failed": {
+      "smuggled13Refused": true,
+      "failedAttempts": [
+        "big.ts",
+        "ctl.ts",
+        "key.ts",
+        "key-like origin"
+      ],
+      "projectUnchanged": true,
+      "rollback": {
+        "pre114ParseProject14": "UNSUPPORTED_SCHEMA",
+        "pre114StoreOpen": {
+          "entries": 0
+        },
+        "rawKept": true
+      }
+    },
+    "6-async-ownership": {
+      "readFinishedAfterSwitch": true,
+      "bUntouched": true,
+      "aKeptFile": true,
+      "pendingReadThenOversize": "refused, not held reading, stale read ignored",
+      "lockedWhileSaving": 1,
+      "keyboardSave": true
+    },
+    "4b-in-visit": {
+      "project": "B",
+      "applied": "in the same visit (stub first-map reply of the 102 fake CLI)",
+      "readings": 1
+    }
+  },
+  "api": {
+    "posts": [
+      "POST /api/studio/jobs",
+      "POST /api/studio/jobs/MJ_cb494e52-1671-4ef7-9825-601c636dbc51/ack",
+      "POST /api/studio/jobs",
+      "POST /api/studio/jobs/MJ_7930f676-c025-4a3e-8dd0-fdc9bca08c23/ack",
+      "POST /api/studio/jobs",
+      "POST /api/studio/jobs/MJ_73b123dd-a1f4-44d9-991b-cc7c07328a00/ack"
+    ],
+    "jobPosts": 3,
+    "directMap": 0,
+    "invocations": 3
+  }
+}

@@ -986,6 +986,33 @@ button:disabled { opacity: .5; cursor: default; }
 .rr-paste-open { height: 32px; padding: 0 var(--s-3); border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); color: var(--text-2); font-size: 12.5px; font-weight: 600; white-space: nowrap; }
 .rr-paste-open:hover { border-color: var(--accent-line); color: var(--accent); }
 .rr-paste-box .fine { margin: 0 0 8px; }
+/* AF114: the provided-file entry (under the pane title) and its form. */
+.rr-head-more { margin: 4px 0 0; }
+.rr-head-more .link-button { padding: 0; font-size: 12.5px; }
+.rr-file-kind { margin: 0 0 12px; padding: 8px 10px 10px; border: 1px solid var(--line); border-radius: 10px; }
+.rr-file-kind legend { padding: 0 4px; font-size: 12.5px; font-weight: 600; color: var(--text-2); }
+.rr-file-choice { display: grid; grid-template-columns: auto 1fr; column-gap: 8px; align-items: baseline; padding: 4px 2px; cursor: pointer; }
+.rr-file-choice span { font-weight: 600; }
+.rr-file-choice small { grid-column: 2; color: var(--text-3, var(--text-2)); font-size: 12px; }
+.rr-file-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 0 0 12px; }
+/* The native control stays in the tab order (Enter/Space opens the dialog); its label is the visible button. */
+.rr-file-row { position: relative; }
+.rr-file-pick { position: absolute; left: 0; top: 0; width: 1px; height: 1px; opacity: 0; }
+.rr-file-label { display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--surface); color: var(--text); font-size: 12.5px; font-weight: 600; cursor: pointer; }
+.rr-file-label:hover { border-color: var(--accent-line); color: var(--accent); }
+.rr-file-row:focus-within .rr-file-label { outline: 2px solid var(--accent-line); outline-offset: 2px; }
+.rr-file-pick:disabled + .rr-file-name, .rr-file-row:has(.rr-file-pick:disabled) .rr-file-label { opacity: .6; cursor: default; }
+.rr-file-name { flex-basis: 100%; font: 12.5px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; }
+.rr-file-field { display: grid; gap: 4px; margin: 0 0 10px; }
+.rr-file-field label { font-size: 12.5px; font-weight: 600; color: var(--text-2); }
+.rr-file-field label small { font-weight: 400; }
+.rr-file-field input { box-sizing: border-box; width: 100%; height: 32px; padding: 0 10px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--surface); color: var(--text); font-size: 13px; }
+.rr-file-field input:focus { outline: 2px solid var(--accent-line); outline-offset: 1px; border-color: var(--accent); }
+.rr-file-preview-box { margin-top: 4px; }
+.rr-file-preview { max-height: 40vh; overflow: auto; margin-top: 4px; }
+.rr-provided-note { margin: 4px 0 8px; font-size: 12.5px; color: var(--text-2); }
+.rr-origin { overflow-wrap: anywhere; }
+.rr-kind.k-provided { background: var(--accent-soft, var(--surface-2)); }
 .rr-paste { display: block; box-sizing: border-box; width: 100%; min-height: 260px; max-height: 52vh; resize: vertical; padding: 10px 12px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--surface); color: var(--text); font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 .rr-paste:focus { outline: 2px solid var(--accent-line); outline-offset: 1px; border-color: var(--accent); }
 .rr-count { display: block; margin-top: 4px; text-align: right; }

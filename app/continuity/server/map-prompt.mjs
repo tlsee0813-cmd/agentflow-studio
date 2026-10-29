@@ -232,7 +232,7 @@ const MAP6_CANDIDATES = `candidates (최대 6개): 기록만으로 가를 수 �
 - claims의 key: 모든 claim에 "s1"·"s2"처럼 응답 안에서 고유한 key를 쓴다(null 불가). 후보의 statement.key도 같은 키 공간이며 어떤 claim의 key와도 겹치지 않는다.`;
 // AF114: which record a code/test match may rest on, the same code in two records, and an author's words versus the artifact.
 const MAP6_SOURCES = `- 기록의 kind가 자료 종류다. evidence는 사용자가 코드·검사 자료로 분류해 제공한 원문(basis·note의 이름·판본·출처는 사용자 기재이며 앱이 실행·검증한 것이 아니다), pasted는 섞인 보고를 그대로 붙인 원문이다. N·R 별칭 글자, 확장자, 코드처럼 보이는 내용으로 종류를 정하지 않는다. pasted 기록의 코드도 그대로 읽어 role·describes 근거로 쓸 수 있다. 같은 코드가 두 기록에 있어도 같은 대상이면 부분을 하나로 둔다.`;
-const MAP6_MATCH_KIND = `- kind는 reported(작성자의 구현 보고), checked(작성자의 검사·확인 보고), open(남은 조건·결정), code·test(kind:evidence 기록의 실제 해당 구간에만). pasted·report 기록 안의 코드나 ‘코드를 고쳤다’, ‘검사 통과’ 발언은 reported/checked다. 같은 코드가 pasted 기록과 evidence 기록에 함께 있으면 code·test의 at은 evidence 기록의 구간이며 pasted 쪽 구간을 code·test로 인용하면 응답 전체가 거절된다. evidence 기록 안에서도 작성자가 구현·검사를 서술한 문장은 reported/checked다. 검사 정의나 붙인 로그는 이 앱이 실행한 결과가 아니다.`;
+const MAP6_MATCH_KIND = `- kind는 reported(작성자의 구현 보고), checked(작성자의 검사·확인 보고), open(남은 조건·결정), code·test(kind:evidence 기록의 실제 해당 구간에만). pasted·report 기록에서 작성자가 ‘코드를 고쳤다’, ‘검사 통과’처럼 구현·검사를 말한 문장은 reported/checked다. pasted·report 기록 안의 코드 자체는 작성자의 보고 문장이 아니므로 reported/checked로 바꾸어 쓰지 않는다. 같은 코드가 evidence 기록에 있으면 code·test는 그 evidence 구간을 인용하고, evidence 기록에 없으면 그 코드로는 code·test 대응을 만들지 않는다. pasted 쪽 구간을 code·test로 인용하면 응답 전체가 거절된다. evidence 기록 안에서도 작성자가 구현·검사를 서술한 문장은 reported/checked다. 검사 정의나 붙인 로그는 이 앱이 실행한 결과가 아니다.`;
 const map6 = (prompt, k = 0) => prompt
   .replace(/candidates \(최대 6개\): [^\n]+/, MAP6_CANDIDATES)
   .replace('근거가 material 범위와 조금이라도 겹치면 지도 근거가 되지 않는다.', '부분·주장·관계·대응·후보 진술의 근거가 material 범위와 조금이라도 겹치면 응답 전체가 거절된다.')

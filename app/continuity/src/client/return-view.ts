@@ -240,7 +240,10 @@ export function createReturnView(host: ReturnHost) {
   async function readFile(file: File) {
     if (!s) return;
     const key = s.key, d = fileOf(key), token = ++d.token;
-    // Bounded before anything is read: a larger file is never read. A refused file leaves the file chosen before as it was.
+    if (d.saving) return;
+    // The file chosen last is the one being read: an earlier read still pending is ignored when it ends, so it no longer holds
+    // the form as reading. Bounded before anything is read: a larger file is never read, and the file chosen before stays.
+    d.reading = false;
     if (file.size > PROVIDED_FILE_BYTES) { d.msg = `‘${clip(file.name, 80)}’: ${FILE_PROBLEM.TOO_LARGE}${d.text ? ' 앞서 고른 파일은 그대로예요.' : ''}`; render(); return; }
     d.reading = true; d.msg = null; render();
     let bytes: Uint8Array | null = null;
@@ -261,17 +264,18 @@ export function createReturnView(host: ReturnHost) {
     if (!d.kind) return say('코드 자료인지 검사 자료인지 골라 주세요. 앱이 파일 이름이나 내용으로 정하지 않아요.');
     const evidence: RecordEvidence = { kind: d.kind, name: d.name, version: d.version.trim() || null, origin: d.origin.trim() || null };
     const bad = evidenceProblem(evidence); if (bad) return say(FIELD_PROBLEM[bad]);
+    // The form is locked while it is saved; and only a draft still exactly as saved (file, kind, version, origin, context) leaves.
     d.saving = true; d.msg = null; render();
-    const token = d.token, text = d.text, done = await host.provide(key, text, evidence, d.context);
+    const snap = JSON.stringify([d.token, d.text, d.name, d.kind, d.version, d.origin, d.context]), text = d.text;
+    const done = await host.provide(key, text, evidence, d.context);
     d.saving = false;
-    const kept = typeof done !== 'string', same = fileDrafts.get(key) === d && d.token === token && d.text === text;
-    // Only the file that was saved leaves the form; one chosen while it was saved stays.
+    const kept = typeof done !== 'string', same = fileDrafts.get(key) === d && JSON.stringify([d.token, d.text, d.name, d.kind, d.version, d.origin, d.context]) === snap;
     if (kept && same) fileDrafts.delete(key);
     if (s !== st) return;
     if (!kept) return say(done);
     const r = host.current()?.project.pasted.find(x => x.id === done.id);
     const said = done.duplicate ? `같은 원문을 같은 종류·이름·판본·출처로 ${r ? fullTime(r.at) : '앞서'}에 저장했어요. 새로 저장하지 않았어요.` : '자료를 저장했어요. AI에는 보내지 않았어요.';
-    if (!same) { d.msg = `${said} 저장하는 동안 고른 파일은 그대로 남겨 두었어요.`; render(); void refresh(); return; }
+    if (!same) { d.msg = `${said} 저장하는 동안 바뀐 양식은 그대로 남겨 두었어요.`; render(); void refresh(); return; }
     st.storeMsg = said;
     await refresh();
     const src = s === st ? sources().find(x => x.recordId === done.id) : null;
@@ -402,9 +406,10 @@ export function createReturnView(host: ReturnHost) {
     return h('header', { class: 'lens-head rr-head' },
       h('h2', { id: 'lens-title' }, '돌아와 읽기', ex ? h('span', { class: 'tag', title: '공개 commit과 결과 문서에서 사후 편집한 자료예요. 당시 실시간으로 받은 기록이 아니에요.' }, '공개 자료 · 사후 편집') : null),
       ex ? stageSwitch() : null,
+      // The provided-file entry under the title, beside the paste action (the head keeps its title room at any pane width).
+      o.kind === 'saved' && s!.view.kind !== 'file' ? h('p', { class: 'rr-head-more' }, h('button', { type: 'button', class: 'link-button rr-file-open', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요', onclick: () => openFile(null, null) }, '코드·검사 자료 추가')) : null,
       h('div', { class: 'head-tools' },
         o.kind === 'saved' && s!.view.kind !== 'paste' ? h('button', { type: 'button', class: 'rr-paste-open', title: '작업 AI가 돌려준 글을 그대로 붙여 넣어요', onclick: () => openPaste(null, null) }, '기록 붙여넣기') : null,
-        o.kind === 'saved' && s!.view.kind !== 'file' ? h('button', { type: 'button', class: 'rr-paste-open rr-file-open', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요', onclick: () => openFile(null, null) }, '코드·검사 자료 추가') : null,
         h('button', { type: 'button', class: 'close', 'aria-label': '돌아와 읽기 닫기', title: '닫기 (Esc)', onclick: close }, '×')));
   }
   function stageSwitch(): Node {
@@ -524,7 +529,9 @@ export function createReturnView(host: ReturnHost) {
     const map = quote ? null : host.mapBlock();
     // A provided source: what the person declared it is (kind, name, version, origin), apart from its text and from when it came.
     const e = kept?.evidence ?? null;
-    return [...(map ? [map] : []), h('article', { class: `rr-source rr-record${e ? ' rr-provided' : ''}` },
+    // A provided source opens on itself (file, declaration, text); the map's row follows it rather than leading.
+    const lead = e ? [] : map ? [map] : [], after = e && map ? [map] : [];
+    return [...lead, h('article', { class: `rr-source rr-record${e ? ' rr-provided' : ''}` },
       h('p', { class: 'rr-source-kind' }, h('span', { class: `rr-kind k-record${e ? ' k-provided' : ''}` }, e ? `사용자 제공 ${EVIDENCE_KIND_LABEL[e.kind]}` : DIGEST_KIND_LABEL.record), kept ? h('span', {}, `${e ? '가져옴' : '붙여넣음'} ${fullTime(kept.at)}`) : null),
       h('h3', { title: e ? '자료를 고를 때의 파일 이름이에요' : '원문의 첫 줄이에요' }, e ? e.name : src.title),
       e ? h('p', { class: 'rr-provided-note', role: 'note' }, `${NOT_EXECUTED}. 자료 종류·판본·출처는 사용자가 적은 것이에요.`) : null,
@@ -535,7 +542,7 @@ export function createReturnView(host: ReturnHost) {
       // Arrived by a quote: the original, with the quote marked, is what this view is for (the readings are one step back).
       quote ? null : read ?? h('p', { class: 'rr-lead' }, s?.pending ? '읽는 중이에요…' : src.recordId && host.readIntoMap(src.recordId) ? '지도 정리에 읽힌 기록이에요. 이 기록의 따로 요약은 아직 없어요.' : '아직 이 기록을 읽지 않았어요.'),
       h('blockquote', { class: `rr-quote rr-raw${e?.kind === 'code' ? ' code' : ''}` }, ...quoted(kept?.text ?? src.text, quote, quote && at !== undefined ? { at, length: quote.length } : undefined)),
-      sentTo !== undefined && sentTo < (kept?.text ?? src.text).length ? h('p', { class: 'fine' }, `읽을 때 앞 ${sentTo.toLocaleString()}자만 보내요 · 전체 ${(kept?.text ?? src.text).length.toLocaleString()}자`) : null)];
+      sentTo !== undefined && sentTo < (kept?.text ?? src.text).length ? h('p', { class: 'fine' }, `읽을 때 앞 ${sentTo.toLocaleString()}자만 보내요 · 전체 ${(kept?.text ?? src.text).length.toLocaleString()}자`) : null), ...after];
   }
   function pasteBody(o: PlanOpened): Node[] {
     const st = s!, text = draftOf(st.key), ctx = st.pasteContext && o.view.parts.some(p => p.id === st.pasteContext) ? st.pasteContext : null;
@@ -565,24 +572,24 @@ export function createReturnView(host: ReturnHost) {
   function fileBody(o: PlanOpened): Node[] {
     const st = s!, d = fileOf(st.key), ctx = d.context && o.view.parts.some(p => p.id === d.context) ? d.context : null;
     const kinds = (['code', 'test'] as const).map(k => {
-      const r = h('input', { type: 'radio', name: 'file-kind', id: `file-kind-${k}`, value: k }) as HTMLInputElement; r.checked = d.kind === k;
+      const r = h('input', { type: 'radio', name: 'file-kind', id: `file-kind-${k}`, value: k }) as HTMLInputElement; r.checked = d.kind === k; r.disabled = d.saving;
       r.addEventListener('change', () => { if (r.checked) d.kind = k; });
       return h('label', { class: 'rr-file-choice', for: `file-kind-${k}` }, r, h('span', {}, EVIDENCE_KIND_LABEL[k]), h('small', {}, k === 'code' ? '소스 코드 파일' : '검사 정의나 실행 기록(로그)'));
     });
-    const pick = h('input', { type: 'file', id: 'file-pick', class: 'rr-file-pick', 'aria-describedby': 'file-rule' }) as HTMLInputElement;
+    const pick = h('input', { type: 'file', id: 'file-pick', class: 'rr-file-pick', 'aria-describedby': 'file-rule' }) as HTMLInputElement; pick.disabled = d.saving;
     pick.addEventListener('change', () => { const f = pick.files?.[0]; pick.value = ''; if (f) void readFile(f); });
     const field = (id: string, label: string, max: number, value: string, set: (v: string) => void, hint: string) => {
       const i = h('input', { id, type: 'text', maxlength: String(max), autocomplete: 'off', spellcheck: 'false', placeholder: hint }) as HTMLInputElement;
-      i.value = value; i.addEventListener('input', () => set(i.value));
+      i.value = value; i.disabled = d.saving; i.addEventListener('input', () => set(i.value));
       return h('div', { class: 'rr-file-field' }, h('label', { for: id }, label, h('small', {}, ` 선택 · ${max}자 이내`)), i);
     };
     return [h('section', { class: 'rr-sec rr-paste-box rr-file-box' }, h('h3', {}, '코드·검사 자료 추가'),
       h('p', { class: 'fine', id: 'file-rule' }, `UTF-8 텍스트 파일 하나(${Math.floor(PROVIDED_FILE_BYTES / 1000)}KB·60,000자 이내)를 원문 그대로 보관해요. 자료 종류·판본·출처는 사용자가 적는 것이고 앱은 파일을 실행·검증하거나 출처를 열지 않아요. 저장해도 AI에 보내지 않아요. 섞인 보고는 ‘기록 붙여넣기’로 붙여요.`),
       ctx ? h('p', { class: 'rr-context' }, h('span', {}, '보던 부분'), partChip(ctx),
-        h('button', { type: 'button', class: 'link-button quiet', title: '읽기 맥락에서 빼요', onclick: () => { d.context = null; render(); } }, '빼기')) : null,
+        h('button', { type: 'button', class: 'link-button quiet', title: '읽기 맥락에서 빼요', disabled: d.saving, onclick: () => { d.context = null; render(); } }, '빼기')) : null,
       h('fieldset', { class: 'rr-file-kind' }, h('legend', {}, '자료 종류 (직접 고르기)'), ...kinds),
-      h('div', { class: 'rr-file-row' }, h('label', { class: 'secondary small rr-file-label', for: 'file-pick' }, d.text ? '다른 파일 고르기' : '파일 고르기'), pick,
-        h('span', { class: 'rr-file-name', title: '파일 이름' }, d.reading ? '읽는 중…' : d.name ?? '아직 고른 파일이 없어요')),
+      h('div', { class: 'rr-file-row' }, pick, h('label', { class: 'rr-file-label', for: 'file-pick' }, d.text ? '다른 파일 고르기' : '파일 고르기'),
+        h('span', { class: 'rr-file-name', title: '고른 파일 이름', role: 'status' }, d.reading ? '읽는 중…' : d.name ?? '아직 고른 파일이 없어요')),
       field('file-version', '판본', EVIDENCE_VERSION_MAX, d.version, v => { d.version = v; }, '예: commit 3f2a1c9 또는 v1.4.0'),
       field('file-origin', '출처', EVIDENCE_ORIGIN_MAX, d.origin, v => { d.origin = v; }, '예: 저장소 경로나 URL (열지 않고 글로만 보관)'),
       d.text !== null ? h('div', { class: 'rr-file-preview-box' }, h('p', { class: 'fine' }, `미리보기 (읽기 전용) · ${d.text.length.toLocaleString()}자 · ${d.size.toLocaleString()}바이트 · ${shape(d.text)} · 앞뒤 공백 포함 그대로 보관`),

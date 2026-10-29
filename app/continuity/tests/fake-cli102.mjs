@@ -46,6 +46,8 @@ process.stdin.on('end', async () => {
   if (kind === 'ok') { await done(); process.exit(0); }
   // file: answers with <ctl>/reply-<n>.json as written by the test (a later map.6 wire built for that very ask), byte for byte.
   if (kind === 'file') { await done(readFileSync(`${ctl}/reply-${n}.json`, 'utf8')); process.exit(0); }
+  // file-delay:<ms>: the same file answer after a wait (AF114: a reading the person leaves and comes back to).
+  if (kind === 'file-delay') { await out(head); await sleep(Number(value)); const t = readFileSync(`${ctl}/reply-${n}.json`, 'utf8'); writeFileSync(final, t); await out(tail(t)); process.exit(0); }
   if (kind === 'delay') { await out(head); await sleep(Number(value)); writeFileSync(final, reply); await out(tail()); process.exit(0); }
   if (kind === 'split') {
     // The JSONL bytes in pieces that cut multi-byte characters (and lines) apart.

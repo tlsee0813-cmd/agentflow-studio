@@ -196,6 +196,9 @@ test('114-9 map.6 prompt: only map.6 gains the source-kind clarification; map.1-
     ['a15660a3a3e7bbe2', '53ef9b4d18d8c6b3', '6ad411b7e893733f', '5317421405406135', '4c8523a1402ca9fa', '6ce308f841f5851c', '37a8237254d69607']);
   for (const t of [MAP6_PROMPT, MAP6_FIRST_PROMPT]) assert.ok(t.includes('기록의 kind가 자료 종류다') && !MAP5_PROMPT.includes('기록의 kind가 자료 종류다'));
   assert.ok(MAP6_PROMPT.includes('pasted 쪽 구간을 code·test로 인용하면 응답 전체가 거절된다'));
+  // Code itself inside a pasted report is not renamed an author's report; without a provided occurrence no code/test match is made.
+  assert.ok(MAP6_PROMPT.includes('코드 자체는 작성자의 보고 문장이 아니므로 reported/checked로 바꾸어 쓰지 않는다') && MAP6_PROMPT.includes('evidence 기록에 없으면 그 코드로는 code·test 대응을 만들지 않는다'));
+  assert.ok(!MAP6_PROMPT.includes('기록 안의 코드나 ‘코드를 고쳤다’'), 'the earlier wording that read code as an author report is gone');
 });
 
 // The executor's final reader tells syntax from contract (the 102 fake CLI answers with each file as written, byte for byte).
