@@ -371,6 +371,49 @@ test('102-E19 the verdict is due by verdictMs whatever setup or the final read d
   await s.close();
 });
 
+test('102-E20 handoff: a state change already in flight ends before the next owner can open; a closing executor starts no child', async () => {
+  const state = mkdtempSync(join(tmpdir(), 'af102-state-')), ctl = mkdtempSync(join(tmpdir(), 'af102-ctl-'));
+  let hold = null, held = false, open;
+  const a = await setup({ ctl, state, hooks: { beforeMutation: async kind => { if (kind === 'lease-release' && hold) { held = true; await hold; } } } });
+  hold = new Promise(r => { open = r; });
+  const x = await submission(project());
+  assert.equal((await jcall(a.handle, 'POST', '', x.cap, x.body)).status, 202);
+  await until(() => held, 'the lease release is in flight (held)');
+  await a.jobs.close();
+  const closing = a.executor.close({ graceMs: 100 }); // grace runs out with the release still in flight
+  await new Promise(r => setTimeout(r, 400));
+  const b = await openCliExecutor({ policy: policyFor(ctl), stateDir: state });
+  assert.deepEqual([b.describe().state, b.describe().problem], ['unavailable', 'EXECUTOR_STATE_BUSY'], 'not handed over while a change is in flight');
+  await b.close();
+  open(); await closing;
+  const lease = existsSync(join(state, 'lease.json'));
+  const c = await openCliExecutor({ policy: policyFor(ctl), stateDir: state }); opened.add(() => c.close());
+  assert.equal(lease, false, 'the in-flight release completed before the handoff'); assert.equal(c.describe().state, 'ready');
+  await c.close();
+  // Closing between the lease and the start: no child; the version probe too (no signal there).
+  const d = await setup({ ctl, hooks: { beforeSpawn: async kind => { if (kind === 'job') void d.executor.close({ graceMs: 2000 }); } } });
+  const before = invocations(ctl).length, y = await submission(project());
+  assert.equal((await jcall(d.handle, 'POST', '', y.cap, y.body)).status, 202);
+  const v = await ended(d.handle, y); assert.deepEqual([v.state, v.error.code, v.execution.observed.started], ['failed', 'EXECUTOR_UNAVAILABLE', false]);
+  assert.equal(invocations(ctl).length, before, 'no child once closing');
+  await d.close();
+  if (process.platform === 'win32') return; // the probe variant below needs the POSIX group probe
+  // The version probe (no signal of its own): it runs at prepare once an earlier lease is proven gone; closing just before its
+  // start starts nothing. The earlier lease names a group of a helper this test started itself (ended through its own handle).
+  const st2 = mkdtempSync(join(tmpdir(), 'af102-state-')), helper = spawn(process.execPath, ['-e', 'setInterval(() => {}, 1000)'], { detached: true, stdio: 'ignore' });
+  let boot = null; try { boot = readFileSync('/proc/sys/kernel/random/boot_id', 'utf8').trim(); } catch { /* not Linux */ }
+  const old = { leaseId: `L_${crypto.randomUUID()}`, job: 'MJ_x', kind: 'job', policy: '0'.repeat(64), platform: process.platform, boot, pid: helper.pid, pgid: helper.pid, state: 'running', at: new Date().toISOString() };
+  writeFileSync(join(st2, 'lease.json'), JSON.stringify({ format: 'agentflow.cli-lease.1', lease: old, sha256: createHash('sha256').update(JSON.stringify(old)).digest('hex') }));
+  const versions = () => existsSync(join(ctl, 'versions')) ? readFileSync(join(ctl, 'versions'), 'utf8').split('\n').filter(Boolean).length : 0, v0 = versions();
+  const e = await setup({ ctl, state: st2, hooks: { beforeSpawn: async kind => { if (kind === 'probe') void e.executor.close({ graceMs: 2000 }); } } });
+  assert.equal(e.executor.describe().state, 'unsettled'); assert.equal(versions(), v0, 'no probe while the old group lives');
+  await new Promise(r => { helper.once('exit', r); helper.kill('SIGKILL'); });
+  const z = await submission(project());
+  assert.equal((await jcall(e.handle, 'POST', '', z.cap, z.body)).status, 503);
+  assert.equal(versions(), v0, 'the probe was not started once closing');
+  await e.close();
+});
+
 test('102-E8 duplicate POSTs of one id are one invocation; another id while it runs is refused, never queued', async () => {
   const s = await setup({ modes: ['delay:400'] }), x = await submission(project());
   const all = await Promise.all([1, 2, 3].map(() => jcall(s.handle, 'POST', '', x.cap, x.body)));

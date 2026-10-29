@@ -73,7 +73,7 @@ test('102-P1 the launcher is killed while its child runs: the child outlives it;
   let a = await start(s); assert.deepEqual([a.jobs, a.executor], ['durable', 'ready']);
   const x = await submission();
   assert.equal((await jcall(a.base, 'POST', '', x.cap, x.body)).status, 202);
-  await running(s, 1);
+  await running(s, 1); await until(() => existsSync(join(s.ctl, 'ready-1')), 'the child set its stop watch');
   const old = lease(s); assert.equal(old.state, 'running'); const pid = Number(readFileSync(join(s.ctl, 'pid-1'), 'utf8')); assert.equal(old.pid, pid);
   if (POSIX) { assert.equal(old.pgid, pid); strays.add(pid); }
   await kill(a.proc);
@@ -87,9 +87,13 @@ test('102-P1 the launcher is killed while its child runs: the child outlives it;
   const r = await jcall(a.base, 'POST', '', y.cap, y.body); assert.deepEqual([r.status, r.error.code], [503, 'EXECUTOR_UNSETTLED']);
   assert.equal(invocations(s).length, 1, 'no second child while the first may live');
   if (process.platform !== 'linux') {
-    // No probe here (P2 covers attestation). The original child is ended by its own control token and its end is confirmed.
+    // No probe here (P2 covers attestation). The original child either already ended with the killed launcher (Windows can end it
+    // with the launcher's job) or ends itself on its control token. Without any pid: its exit marker, or its heartbeat stopped.
     await kill(a.proc); writeFileSync(join(s.ctl, 'stop-all'), '');
-    await until(() => existsSync(join(s.ctl, 'exited-1')), 'the original fake child ended itself', 500);
+    const beat = () => { try { return Number(readFileSync(join(s.ctl, 'beat-1'), 'utf8')); } catch { return 0; } };
+    let how = null;
+    await until(() => { if (existsSync(join(s.ctl, 'exited-1'))) how = 'exited-on-token'; else if (Date.now() - beat() > 1500) how = 'no-heartbeat'; return how; }, 'the original fake child ended', 750);
+    console.log(`102-P1 original child end on ${process.platform}: ${how}`);
     return;
   }
   assert.ok(process.platform !== 'linux' || ownFake(pid)); killOwn(pid); // the test's own fake child, by its command line

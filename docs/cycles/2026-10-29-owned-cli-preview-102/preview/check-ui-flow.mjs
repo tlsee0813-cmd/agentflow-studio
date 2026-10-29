@@ -57,7 +57,7 @@ try {
   await go(B); await space.locator('.se-run').waitFor();
   assert.equal(await space.getByText('기록을 읽고 지도를 정리하는 중…').count(), 0, 'B shows nothing of A');
   await space.getByRole('button', { name: '기록 붙여넣기' }).click(); await page.locator('#paste-text').fill('작업 보고: B 일정표는 주간 보기를 먼저 만든다.');
-  await page.getByRole('button', { name: /저장/ }).first().click();
+  await page.locator('#lens').getByRole('button', { name: '기록 저장' }).click();
   await page.waitForFunction(([w, k]) => JSON.parse(localStorage.getItem(w)).entries.find(e => e.entryId === k).seq === 2, [W, B]);
   await go(null); await page.reload(); await ready();
   await card.getByText('지도 정리 결과 도착 · 열어서 보기').waitFor({ timeout: 20000 }); await shot('home-ready');

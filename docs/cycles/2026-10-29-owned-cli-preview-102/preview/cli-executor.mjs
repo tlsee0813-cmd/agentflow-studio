@@ -89,21 +89,27 @@ export async function openCliExecutor({ policy: raw, stateDir, spawnImpl, now = 
   let slot = null; // { id, kind, owner, spawned, lease } from admission until its child is known gone and its output consumed
   let unsettled = null; // a lease this process cannot prove ended: { leaseId, why }
   const leaseFile = join(stateDir, 'lease.json'), runs = join(stateDir, 'runs');
-  // Fenced once this process lets the state folder go: no lease write or removal of this process reaches it after that (a later
-  // owner may already hold its own lease there). A cleanup still running then leaves the lease for the next owner to judge.
+  // Every change this process makes to the state folder goes through mutate(): none starts once fenced, and close() waits for
+  // those already started (a write or removal in flight) before ownership is let go, so a later owner never meets one of them.
+  // A cleanup that would start after the fence leaves the lease for the next owner to judge.
   const FENCED = () => Object.assign(new Error('FENCED'), { code: 'FENCED' });
-  const write = async lease => { if (fenced) throw FENCED(); await fileIo.writeAtomic(stateDir, 'lease.json', JSON.stringify({ format: LEASE_FORMAT, lease, sha256: sha(JSON.stringify(lease)) })); };
+  const mutations = new Set();
+  function mutate(kind, fn) {
+    if (fenced) return Promise.reject(FENCED());
+    const p = (async () => { await hooks.beforeMutation?.(kind); return fn(); })();
+    mutations.add(p); void p.catch(() => {}).finally(() => mutations.delete(p));
+    return p;
+  }
+  const write = lease => mutate('lease-write', () => fileIo.writeAtomic(stateDir, 'lease.json', JSON.stringify({ format: LEASE_FORMAT, lease, sha256: sha(JSON.stringify(lease)) })));
+  const removeRun = dir => mutate('run-remove', () => rm(dir, { recursive: true, force: true })).catch(() => {});
   const currentLeaseId = async () => { try { const f = JSON.parse(await readFile(leaseFile, 'utf8')); return f?.lease?.leaseId ?? null; } catch { return null; } };
   /** Moves the lease named leaseId to released/, and removes lease.json only while it is still that lease. */
-  const archive = async (lease, why) => {
-    if (fenced) throw FENCED();
+  const archive = (lease, why) => mutate('lease-release', async () => {
     await mkdir(join(stateDir, 'released'), { recursive: true, mode: 0o700 });
     await fileIo.writeAtomic(join(stateDir, 'released'), `${lease.leaseId}.json`, JSON.stringify({ lease, released: { why, at: iso() } }));
-    if (fenced) throw FENCED();
     if (await currentLeaseId() !== lease.leaseId) return; // not ours (or already gone): never remove another lease
-    if (fenced) throw FENCED();
     await unlink(leaseFile).catch(e => { if (e?.code !== 'ENOENT') throw e; });
-  };
+  });
   /** What a lease found on disk proves about its child. */
   async function reconcile() {
     let text; try { text = await readFile(leaseFile, 'utf8'); } catch (e) { if (e?.code === 'ENOENT') { unsettled = null; return; } unsettled = { leaseId: null, why: 'LEASE_UNREADABLE' }; return; }
@@ -137,21 +143,22 @@ export async function openCliExecutor({ policy: raw, stateDir, spawnImpl, now = 
   async function runChild(mine, { t0, args, input, events, selectionMs, decideMs, signal, image = false }) {
     const leaseId = `L_${randomUUID()}`, dir = join(runs, leaseId), cwd = join(dir, 'cwd'), final = join(dir, 'final.txt');
     let lease = { leaseId, job: mine.id, kind: mine.kind, policy: binding.policy, platform: process.platform, boot, pid: null, pgid: null, state: 'starting', at: iso() };
-    try { await mkdir(cwd, { recursive: true, mode: 0o700 }); await write(lease); }
-    catch { await rm(dir, { recursive: true, force: true }).catch(() => {}); if (slot === mine) slot = null; throw new ApiError('EXECUTOR_LEASE_FAILED', 507); }
+    try { await mutate('run-create', () => mkdir(cwd, { recursive: true, mode: 0o700 })); await write(lease); }
+    catch { await removeRun(dir); if (slot === mine) slot = null; throw new ApiError('EXECUTOR_LEASE_FAILED', 507); }
     mine.lease = lease;
-    const notStarted = async code => { await rm(dir, { recursive: true, force: true }).catch(() => {}); await release(mine, lease, 'never-started'); return Object.assign(new Error(code), { code }); };
+    const notStarted = async code => { await removeRun(dir); await release(mine, lease, 'never-started'); return Object.assign(new Error(code), { code }); };
     if (await hashFile(policy.exe) !== policy.binarySha256) { problem = 'BINARY_CHANGED'; throw await notStarted('EXECUTOR_CHANGED'); }
     await hooks.beforeSpawn?.(mine.kind);
     if (signal?.aborted) throw await notStarted('CANCELLED');
     if (now() - t0 >= selectionMs) throw await notStarted('SELECTION_DEADLINE');
+    if (closing || fenced) throw await notStarted('CLOSING'); // the last check before a start: a closing executor starts nothing
     const t1 = now() - t0, fill = a => a.replaceAll('{final}', final).replaceAll('{cwd}', cwd).replaceAll('{model}', policy.model).replaceAll('{reasoning}', policy.reasoning);
     let leaseWrite = Promise.resolve(), consumed; const used = new Promise(r => { consumed = r; });
     mine.spawned = true;
     const run = captureCli({ exe: policy.exe, args: args.map(fill), cwd, input, env: childEnv(), signal, selectionMs: selectionMs - t1, decideMs: decideMs - t1, events,
       spawnImpl, now, termMs, closeMs, verify: image ? hooks.verifyImage ?? imageCheck : null,
       onSpawn: (pid, pgid) => { lease = { ...lease, pid, pgid, state: 'running' }; mine.lease = lease; leaseWrite = write(lease).catch(() => {}); } });
-    const released = Promise.all([run.settled, used]).then(async ([s]) => { await leaseWrite; if (!fenced) await rm(dir, { recursive: true, force: true }).catch(() => {}); await release(mine, mine.lease, s.group === 'never-started' ? 'never-started' : 'closed'); });
+    const released = Promise.all([run.settled, used]).then(async ([s]) => { await leaseWrite; await removeRun(dir); await release(mine, mine.lease, s.group === 'never-started' ? 'never-started' : 'closed'); });
     cleanups.add(released); void released.finally(() => cleanups.delete(released));
     void run.decision.then(out => {
       if (!out.closed) { mine.notGone = true; return; }
@@ -173,7 +180,7 @@ export async function openCliExecutor({ policy: raw, stateDir, spawnImpl, now = 
         if (out.closed && (out.reason || out.completion.code !== 0 || out.stdout.toString('utf8').trim() !== policy.version)) problem = 'VERSION_CHANGED';
         else if (out.closed) verified = true;
         // not closed: the probe child lingers and holds the slot (unsettled) until it is gone
-      } catch (e) { if (e?.code === 'EXECUTOR_CHANGED') problem ??= 'BINARY_CHANGED'; else throw e; }
+      } catch (e) { if (e?.code === 'EXECUTOR_CHANGED') problem ??= 'BINARY_CHANGED'; else if (e?.code !== 'CLOSING') throw e; }
       finally { mine.owner = false; c?.consumed(); if (!mine.spawned && slot === mine) slot = null; }
       // A closed probe is let go before anything is admitted (bounded: a group not found empty turns it unsettled instead).
       if (c && !mine.notGone) await Promise.race([c.released, new Promise(r => { const t = setTimeout(r, GONE_MS + 100); t.unref?.(); })]);
@@ -234,6 +241,7 @@ export async function openCliExecutor({ policy: raw, stateDir, spawnImpl, now = 
         if (code === 'CANCELLED') throw fail('CANCELLED', 499, o);
         if (code === 'SELECTION_DEADLINE') throw fail('AI_TIMEOUT', 504, o);
         if (code === 'EXECUTOR_CHANGED') throw fail('EXECUTOR_CHANGED', 409, o);
+        if (code === 'CLOSING') throw fail('EXECUTOR_UNAVAILABLE', 503, o);
         throw fail('EXECUTOR_LEASE_FAILED', 507, o);
       }
       try { return await decide(c); } finally { c.consumed(); }
@@ -289,7 +297,8 @@ export async function openCliExecutor({ policy: raw, stateDir, spawnImpl, now = 
       closing = true; // nothing new is admitted from here
       const end = Date.now() + graceMs;
       while ((slot?.spawned || slot?.working || verifying || cleanups.size) && Date.now() < end) await new Promise(r => setTimeout(r, 25));
-      fenced = true; // then no write of this process reaches the state folder, and only then is it let go
+      fenced = true; // no new change of this process reaches the state folder from here
+      while (mutations.size) await Promise.allSettled([...mutations]); // the ones already started end before the handoff
       await owner?.release?.();
     }
   };

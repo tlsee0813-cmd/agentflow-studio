@@ -24,7 +24,11 @@ appendFileSync(`${ctl}/invocations`, `${JSON.stringify({ n, mode, model: arg('--
 writeFileSync(`${ctl}/pid-${n}`, String(process.pid));
 process.stdout.on('error', () => {}); process.stderr.on('error', () => {});
 // Bounded cleanup without any pid: a test writes <ctl>/stop-all; a waiting child ends itself and says so in <ctl>/exited-<n>.
-const stopWatch = () => setInterval(() => { if (existsSync(`${ctl}/stop-all`)) { writeFileSync(`${ctl}/exited-${n}`, ''); process.exit(0); } }, 50);
+// <ctl>/ready-<n> says the watch is set; <ctl>/beat-<n> is rewritten with the time every 50 ms while this child runs.
+const stopWatch = () => {
+  writeFileSync(`${ctl}/ready-${n}`, '');
+  return setInterval(() => { if (existsSync(`${ctl}/stop-all`)) { writeFileSync(`${ctl}/exited-${n}`, ''); process.exit(0); } writeFileSync(`${ctl}/beat-${n}`, String(Date.now())); }, 50);
+};
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const out = s => new Promise(r => process.stdout.write(s, r));
 const chunks = [];
