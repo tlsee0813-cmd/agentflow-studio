@@ -1,0 +1,48 @@
+{
+  "task": "AF103-single-Zephyr-precall-policy-review",
+  "status": "policy_gap_addressed_no_additional_specific_policy_blocker_real_call_still_requires102_acceptance_and_root_selection",
+  "scope": "Read-only comparison of the private103 policy draft, preserved CLI preflight,101 DESIGN and current preview executor at product ffcef18769c6f04f75174116cf391272ff703211. No102-wide rereview, new research or execution.",
+  "conclusion": "The revised policy is a concrete, narrowly bounded candidate for the already-selected single Zephyr observation through the real owned job/UI path. The initially omitted direct execution/image/file-runtime feature switches were added and re-read. No further concrete policy defect was identified in this bounded review. This is not an instruction to launch now:102 is not yet accepted, exact CI is in progress, and root must separately freeze/select the final operation and explicitly accept the disclosed token/cost/control limitations.",
+  "fixedIdentityAndControls": {
+    "binary": "codex-cli0.165.0-alpha.1.2",
+    "binarySha256": "5c1b55966bf9f757dcbf00065c9a6cb862ead55d34b015f1be1939ff18e43943",
+    "identityMatchesPreservedPreflight": true,
+    "model": "gpt-6.1-sol/high",
+    "argsAfterRevision": 58,
+    "executorArgumentMaximum": 64,
+    "policy": "ignore-user-config, existing authentication, ephemeral, empty read-only cwd, no output-schema, exact last-message/JSONL capture.299000ms selection/300000ms verdict, one child/no queue/no app retry, stdout512KiB/stderr128KiB/final128KiB. These match the selected101/102 limits rather than changing them to rescue a failed result.",
+    "disabledFeaturesReadBack": ["shell_tool", "apps", "plugins", "remote_plugin", "computer_use", "browser_use", "multi_agent", "multi_agent_v2", "hooks", "memories", "skill_search", "skill_mcp_dependency_install", "code_mode_host", "unified_exec", "view_image", "image_generation", "workspace_dependencies", "sleep_tool"]
+  },
+  "onePolicyIssueAndResolution": {
+    "initialIssue": "The first draft disabled shell/apps/plugins/browser/delegation but omitted code_mode_host, unified_exec, view_image, image_generation, workspace_dependencies and sleep_tool. The preflight showed those as enabled defaults, leaving an avoidable gap between the declared no-tool task and the requested configuration.",
+    "resolution": "Root added all six disable switches. Reviewer re-read the actual updated JSON and confirmed58 arguments, preserved model/hash/time policy and all18 disable names. No new provider call or runtime construction was needed.",
+    "interpretationLimit": "The stored help/default-feature inventory proves option/feature-name availability, not the effective model tool inventory for this invocation. Root additionally reports current documentation permits unified_exec opt-out to be ignored, so features=false alone must not be called complete prevention. The policy combines shell_tool and code_mode_host disabling, read-only/empty cwd, source-as-data instructions and immediate unknown/tool-event rejection. Event rejection detects/rejects a violation; it does not retroactively prevent an action that already occurred. Do not overclaim this boundary."
+  },
+  "remainingConcreteGates": [
+    "Close102 with exact accepted code/app, completed CI/focused tests and root's ownership/UI evidence before any real invocation. In-progress CI and source acceptance do not count as completed102 acceptance.",
+    "Freeze the updated58-argument policy hash, binary/version, exact code/app/prompt/wrapper, original Zephyr ask/full input and Z1-Z4/full independent-fact checklist. The launched executor and durable operation metadata must contain this final policy, not an already-open46-argument draft.",
+    "Root must explicitly select at most one new top-level generation invocation for that source with no automatic retry/replacement/fallback. Unknown output/tool events, invalid map or meaning failure, cutoff or ownership/cleanup violation ends the observation; no failed-raw repair or following material call.",
+    "Honor current executor unsettled/lease admission decisions. Do not bypass unknown-old-child ownership or attest closure merely to admit this observation. Use the accepted normal UI→realjob→other-project editing/reload→original ready→explicit apply route.",
+    "Accept the actual operating bounds explicitly: token/amount hardcap is unconfirmed; elapsed time/output bytes are not billing caps; remote computation/billing stop and internal transport retry count are not guaranteed. rollout_budget and token_budget feature names are not evidence of enforced limits. No additional hardcap is silently assumed.",
+    "Keep the policy private, preserve raw/events privately and publish only necessary bounded metadata. Treat a pass as this source/run under the new version/prompt/owned path, never as a pure time-only comparison or retroactive89/92/96 success."
+  ],
+  "notAdditionalBlockers": "Absence of a demonstrated token/cost hardcap is an explicit known policy limitation, not a newly discovered defect demanding another implementation cycle.101 reserved a separate root decision on whether one invocation/time/byte bounds with that residual exposure are acceptable; root may make that decision openly. This review does not create an independent permission requirement or suggest another provider/model trial.",
+  "evidenceRead": [
+    "Ops .ops/experience103-policy-draft.json initial and revised58-argument JSON",
+    "Ops .ops/results/experience103-cli-preflight.json",
+    "product docs/cycles/2026-10-29-owned-cli-contract-101/DESIGN.md",
+    "product docs/cycles/2026-10-29-owned-cli-preview-102/preview/cli-executor.mjs",
+    "Root's stated future one-run operating-limit choice and documented unified_exec caveat; no external documentation independently searched by reviewer"
+  ],
+  "actions": {
+    "productWrites": 0,
+    "policyWritesByReviewer": 0,
+    "modelOrCliExecution": 0,
+    "tests": 0,
+    "web": 0,
+    "ui": 0,
+    "onlyNewFile": ".ops/results/experience103-gate-review.json"
+  },
+  "reviewClosed": true,
+  "finalSelectionOwner": "root coordinator"
+}
