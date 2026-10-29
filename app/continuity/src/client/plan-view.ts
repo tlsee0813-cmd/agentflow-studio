@@ -14,7 +14,7 @@ import { CONVERTER_KEY, CONDITION_LABEL, EVIDENCE_LABEL, exampleInput, projectIn
 import { requestPlan, requestScope } from './plan-request.js';
 import { emptyBundle, loadBundle, saveBundle, setAside, planFile, readPlanFile, authoringOf, type PlanBundle } from './plan-store.js';
 import { pinOnEdit, screenContext, resolveRef, authoringStale, legacyRecord, type Authoring, type ContextRef } from '../shared/authoring-context.js';
-import { requestResults } from './request-results.js';
+import { requestResults, type WideOpen } from './request-results.js';
 import { correctRequestMatch } from '../shared/request-return.js';
 import { readingParts, type ReadingPart } from '../shared/request-reading.js';
 
@@ -53,6 +53,8 @@ export interface PlanHost {
   frame(all: string[], fallback: string[]): void;
   /** Read what came back for this project in the return reading (the plan closes; its draft stays). */
   readReturn(): void;
+  /** Read the returned results of this exact request (and item) over the whole window; closing comes back to the opener. */
+  readWide(at: WideOpen, opener: HTMLElement): void;
   pasteReturn(): void;
   /** The provided code/check file form; the frozen request is the context it was opened from, nothing is written to it. */
   fileReturn(): void;
@@ -1319,7 +1321,10 @@ export function createPlanView(host: PlanHost) {
       })() : h('span', { class: 'pp-muted' }, `요청문 · ${fullTime(snap.createdAt)}`)));
     const ul = h('ul', { class: 'pp-res' });
     const current = host.current();
-    const projection = current ? requestResults(current.project, snap.scope ? [snap.scope] : [], { requestId: snap.id,
+    const scopes = snap.scope ? [snap.scope] : [];
+    const projection = current ? requestResults(current.project, scopes, { requestId: snap.id,
+      // The very request read here (the select's choice), named: never the last one, never a guess from the open pane.
+      wide: (at, opener) => host.readWide({ ...at, scopes: st.bundle.snapshots.flatMap(x => x.scope ? [x.scope] : []), label: '변경 구상' }, opener),
       correct: async (reading, index, target) => {
         const o = host.current(); if (!o) return '프로젝트가 열려 있지 않아요.';
         try { const error = await host.commitProject(correctRequestMatch(o.project, reading, index, target)); if (!error) render(); return error; }

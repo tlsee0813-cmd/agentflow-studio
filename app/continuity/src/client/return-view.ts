@@ -54,8 +54,11 @@ export interface ReturnHost {
   legacyKey(): string | null;
   /** Back to the scene a paste began from (selection, scope, camera), once the pane has closed. */
   restoreScene(scene: Scene): void;
-  /** The map's own row in a saved project (records to read into the map, the last map reading), built by the host; null when none. */
+  /** The map's own row in a saved project (records to read into the map, the last map reading), built by the host; null when none.
+   * Its presence alone says nothing about what was read: it also offers records not yet read into any map (see mapRead). */
   mapBlock(): Node | null;
+  /** What the project's stored map readings have read: how many records (in whole or in part); null when there is no map reading. */
+  mapRead(): { records: number } | null;
   /** Parts the last map reading of this visit added or said something about (marked while nothing else is chosen). */
   mapMarks(): string[];
   /** Whether a map reading has read (some of) this record. */
@@ -452,7 +455,10 @@ export function createReturnView(host: ReturnHost) {
       const f = st.focus && st.focus.list === 'changes' ? m.changes[st.focus.n] : null;
       if (f && !m.open.length) out.push(h('div', { class: 'rr-acts' }, trialButton(f, use, from, '이 변화에 이어 바꿀 모습 시험')));
     } else if (!st.pending) {
-      out.push(h('p', { class: 'rr-lead' }, st.error ? '정리를 만들지 못했어요. 아래 원자료로 읽을 수 있어요.' : '아직 이 자료를 정리하지 않았어요.'));
+      // A stored map reading is a reading of these records: what is missing here is only the separate summary (the digest).
+      const read = o.kind === 'saved' ? host.mapRead() : null;
+      out.push(h('p', { class: 'rr-lead' }, st.error ? '정리를 만들지 못했어요. 아래 원자료로 읽을 수 있어요.'
+        : read ? `지도 정리는 기록 ${read.records}개를 읽은 그대로 위에 있어요. 이 자료 전체를 따로 요약한 정리는 아직 만들지 않았어요.` : '아직 이 자료를 정리하지 않았어요.'));
       out.push(materialList(o, 5));
     }
     return out;

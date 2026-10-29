@@ -10,7 +10,7 @@ import { roleEvidence } from './role-evidence.js';
 import type { ClaimKind, ReadingQuote } from '../shared/types.js';
 import { createMapRun, sendLine, JOB_NOTE, type MapRunState } from './map-run.js';
 import { JobReservations, JOBS_KEY, type JobLocks } from './map-jobs.js';
-import { requestResults, frozenRequests, displayAbout, captureRequestReading, restoreRequestReading } from './request-results.js';
+import { requestResults, frozenRequests, displayAbout, captureRequestReading, restoreRequestReading, createWideReading } from './request-results.js';
 import { correctRequestMatch, unlinkReplacement, requestComparison } from '../shared/request-return.js';
 import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
@@ -289,6 +289,8 @@ function projectFor(key: string): Opened | null {
 let renderedHash = '';
 async function render() {
   renderedHash = location.hash;
+  // The wide reading belongs to the place it was opened from: another address closes it, restoring nothing.
+  wide.drop();
   const r = route();
   if (!r.key) { quoteBack = null; if (opened) cameras.set(camKey(opened, scope), { ...camera }); flushView(); planView.close(false); if (toastKey) dropToast(); forgetVisits(); opened = null; selected = null; scope = null; renderHome(); return; }
   const next = projectFor(r.key);
@@ -1679,6 +1681,8 @@ let accessCodeMemory = '';
 function keepAccessCode(value: string) { try { sessionStorage.setItem('agentflow.studio.access', value); } catch { /* memory only */ } accessCodeMemory = value; renderStatus(); syncCodeGates(!!value); }
 
 /* ---------- change plan (plan-view.ts) on this map ---------- */
+/** The returned results of one exact request, read over the whole window (opened from the map's return pane, a part or the plan). */
+const wide = createWideReading({ current: () => (opened ? { key: opened.key, project: opened.project } : null) });
 const planView = createPlanView({
   current: () => opened,
   kv,
@@ -1713,6 +1717,7 @@ const planView = createPlanView({
   },
   area: () => syncMapArea(),
   readReturn: () => { planView.close(); openReturn(); },
+  readWide: (at, opener) => wide.open(at, opener),
   pasteReturn: () => { planView.close(); openPaste(selected); },
   fileReturn: () => { planView.close(); openFile(selected); },
   readRequest: id => { planView.close(); void mapRun.run(id); },
@@ -1832,6 +1837,11 @@ const returnView = createReturnView({
     go(o.key, scene.selected && partOf(o, scene.selected) ? scene.selected : null, scene.scope && partOf(o, scene.scope) ? scene.scope : null);
   },
   mapBlock: () => mapBlock(),
+  mapRead: () => {
+    const o = opened; if (!o || o.kind !== 'saved') return null;
+    const maps = o.project.readings.filter(isMapReading);
+    return maps.length ? { records: new Set(maps.flatMap(r => r.records.map(x => x.id))).size } : null;
+  },
   mapMarks: () => { const o = opened; return o && justRead?.key === o.key ? justRead.parts : []; },
   readIntoMap: id => !!opened?.project.readings.some(r => isMapReading(r) && r.records.some(x => x.id === id)),
   mapPrimary: () => { const inp = mapRun.input(); return !!inp && !inp.problem && mapRun.can(); }
@@ -2031,8 +2041,10 @@ function mapBlock(): HTMLElement | null {
   return sec;
 }
 function currentRequestResults(o: Opened, partId?: string): HTMLElement | null {
-  return requestResults(o.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : []), {
+  const scopes = (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : []);
+  return requestResults(o.project, scopes, {
     ...(partId ? { partId } : {}), compact: true, quote: showQuote,
+    wide: (at, opener) => wide.open({ ...at, scopes, label: partId ? partOf(o, partId)?.name ?? '부분' : '돌아와 읽기' }, opener),
     correct: async (reading, index, target) => {
       try {
         const error = await commit(o, correctRequestMatch(o.project, reading, index, target));
@@ -2258,7 +2270,7 @@ function bindFind() {
     if (e.key === 'Escape') { e.stopPropagation(); show(false); button.focus(); }
   });
   button.addEventListener('click', () => show(!findOpen));
-  document.addEventListener('keydown', e => { if (e.key === '/' && opened && !$('space').hidden && !(e.target as HTMLElement).closest('textarea,input,select')) { e.preventDefault(); show(true); } });
+  document.addEventListener('keydown', e => { if (e.key === '/' && opened && !$('space').hidden && !wide.isOpen() && !(e.target as HTMLElement).closest('textarea,input,select')) { e.preventDefault(); show(true); } });
   $('viewport').addEventListener('pointerdown', () => { if (findOpen) show(false); });
   window.addEventListener('hashchange', () => { if (findOpen && !location.hash.startsWith('#/p/')) show(false); });
 }
@@ -2329,6 +2341,8 @@ function bindCanvas() {
   });
   document.addEventListener('keydown', e => {
     if ((e.target as HTMLElement).closest('textarea,select,input:not([type=checkbox]):not([type=radio])')) return; // Esc still works from a checkbox
+    // The wide reading is over everything (its own keys handle Esc inside it; this is focus left on the page).
+    if (wide.isOpen()) { if (e.key === 'Escape') wide.escape(); return; }
     // Innermost first: an open ⋯ menu closes before anything else, and focus goes back to its button.
     const menu = document.querySelector<HTMLDetailsElement>('details.more[open]');
     if (e.key === 'Escape' && menu) { menu.open = false; menu.querySelector<HTMLElement>('summary')?.focus(); return; }
