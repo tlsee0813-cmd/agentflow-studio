@@ -1,0 +1,73 @@
+{
+  "source": "cfe993f31a8c53284612c22b3ded0c0739257373",
+  "app": "a0a56c1cb8f2a1fdde5c7afb136bc248c8b61b6b",
+  "assetSha": "ad5af7a029dae3afa5ced7b2b68183abd3839fa45184c64be718e6867f1f4188",
+  "moduleSha": "1df394bd38dc2ff2cd04deb3d4c01d68be876efb70f88cc09aefba898c5678c9",
+  "coreDifference": [
+    "BUILD.txt",
+    "client/app.js: four P2 CTA guards only"
+  ],
+  "actualProjectLastReading": "map-reading.5",
+  "normalImportOfCoreGeneratedRequest": true,
+  "requestBundleAllExact": true,
+  "actual1280ReadingEvidenceReturn": true,
+  "lateHome": {
+    "before": {
+      "direction": "forward",
+      "end": 16,
+      "focus": true,
+      "start": 16,
+      "value": "124 상태 도착 중 입력 보존"
+    },
+    "after": {
+      "direction": "forward",
+      "end": 16,
+      "focus": true,
+      "start": 16,
+      "value": "124 상태 도착 중 입력 보존"
+    },
+    "note": "기존 지도 작업용 버전이에요. 저장된 지도를 읽고 고치며, 변경안과 요청문을 이어 가요.\n\n원자료로 첫 지도를 만들거나 새 기록으로 지도를 갱신하는 기능은 이 버전에서 제공하지 않아요.\n\n예제로 살펴보기\n지도 백업 가져오기\n기존 공개판 열기\n\n기존 공개판의 자료는 자동으로 옮겨지지 않아요. 지도 백업을 가져오고, 변경안·요청·반환 자료가 있으면 그 지도의 ‘변경 구상’에서 변경안 파일도 따로 가져오세요.\n\n기존 공개판은 그 주소에서 그대로 쓸 수 있어요. 두 주소의 저장 내용은 자동으로 맞춰지지 않아요."
+  },
+  "latePart": {
+    "before": [
+      {
+        "direction": "forward",
+        "end": 14,
+        "focus": false,
+        "start": 14,
+        "value": "상태 도착 중인 직접 부분"
+      },
+      {
+        "direction": "forward",
+        "end": 20,
+        "focus": true,
+        "start": 20,
+        "value": "입력한 설명과 커서를 그대로 유지한다."
+      }
+    ],
+    "after": [
+      {
+        "direction": "forward",
+        "end": 14,
+        "focus": false,
+        "start": 14,
+        "value": "상태 도착 중인 직접 부분"
+      },
+      {
+        "direction": "forward",
+        "end": 20,
+        "focus": true,
+        "start": 20,
+        "value": "입력한 설명과 커서를 그대로 유지한다."
+      }
+    ],
+    "firstEvidenceExcluded": "Empty selector under space-empty did not capture the active direct-part form."
+  },
+  "providerCalls": 0,
+  "p2FixtureClaims": "author6-flow and independent static review, not Root actual map5 as P2 condition",
+  "limits": [
+    "No fresh AI quality judgment",
+    "No deployed-origin acceptance",
+    "Core normal migration evidence retained because parser/store/Worker modules unchanged"
+  ]
+}

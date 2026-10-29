@@ -1,0 +1,44 @@
+{
+  "version": "experience124-final-delta-review.1",
+  "decision": "원 P2 해소. 최종 좁은 delta에서 추가 P1/P2 발견 없음. root의 최종 아티팩트 동결·실행 검증 뒤 제한 릴리스 후보 판단을 진행할 수 있다. 이 읽기 자체는 실행 통과나 배포 승인이 아니다.",
+  "basis": {
+    "base": "f09d12d697f38d42ed247fa65cf1d8d9f44cf084",
+    "head": "cfe993f31a8c53284612c22b3ded0c0739257373",
+    "appTree": "a0a56c1cb8f2a1fdde5c7afb136bc248c8b61b6b",
+    "workingTree": "clean at inspection",
+    "delta": "app.ts 11-line diff plus release124-flow.mjs 254 lines; 2 files, 261 insertions, 4 deletions",
+    "method": "정적 delta 및 새 focused flow 전체 읽기만. 제품 수정·빌드·테스트·브라우저·AI 호출 없음."
+  },
+  "findings": [],
+  "closedFinding": {
+    "previous": "experience124-core-review.json의 P2: 제한판에서 불가능한 요청 대조를 지도 제목에서 계속 권함",
+    "source": "app/continuity/src/client/app.ts:1926-1930, 2003-2006",
+    "resolution": "existing-map일 때 제목의 과대 요청 문맥 CTA와 map-reading.1 후속 대조 CTA를 숨긴다. 반환 패널의 동일 과대 문맥 CTA도 숨기며, map-reading.1 설명에서 불가능한 후속 대조 약속만 제거한다. 과거 읽기의 사실 설명, 저장된 comparison/근거 보기, 일반 서버의 대조 동작은 유지한다.",
+    "scope": "판정은 알려진 status.release === existing-map에만 적용된다. 일반/이전 서버의 누락 상태는 제한판으로 바뀌지 않는다. 서버·프로바이더·저장·마이그레이션 변경 없음."
+  },
+  "focusedFlowAssessment": {
+    "nonVacuous": [
+      "R은 map-reading.1과 frozen request 1개, REQUEST_CONTEXT_TOO_LARGE 조건을 소스 helper 결과로 먼저 확인한다. 동일 seed를 일반/제한 Worker에 넣고 일반 Worker의 제목 CTA 및 반환 설명/CTA 존재를 assert한 뒤 제한판에서 부재와 보존 설명을 assert한다(184-218). 원 P2와 반환 패널 보완 모두를 구별하는 positive control이다.",
+      "H는 status route를 실제 gate로 지연시키고 홈 이름 입력 후 backward selection을 설정한다. status 전 release note 숨김과 status 후 exact value/selection/direction/focus를 검사한다(92-103). 빈 입력이나 이미 완료된 상태만 검사하지 않는다.",
+      "E는 정상 UI로 프로젝트와 원문 기록을 저장한다. 재로딩의 지연 status 전 기존 카드와 후 제한 카드를 대조하고 직접 추가 버튼 focus 및 camera transform 동일성을 검사한다(118-145).",
+      "I는 정상 file chooser import 후 미읽은 기록·제한 설명을 확인하고 실제 HTTP/Worker를 통해 plan3 stub 응답이 화면에 나타남을 기다린다. X는 browser에서 map/jobs를 직접 보내 MAP_WITHHELD와 제공자 호출 수 불변을 검사한다. 별도 control Worker는 같은 assets로 첫지도 진입을 유지한다."
+    ],
+    "limits": [
+      "보조 flow이며 기본 CI에 자동 포함되지 않는다. 이번 리뷰는 소스를 읽었으며 성공 실행을 주장하지 않는다.",
+      "서두 주석은 plan/scope/digest/ask stub을 언급하지만 실제 성공 응답은 49-52의 plan3만 구현한다. 이 파일을 scope/digest/ask 성공이나 전체 요청문 생성의 증거로 세면 안 된다. root가 전달한 실제107 plan+109 scope provider-message 재생 증거는 별도다.",
+      "I는 현재 형식 backup을 생성하고 가져오기 화면 경로를 검사한다. 구판11/.2→14/.4 이행, 모든 key 보존, 첫 편집/reload/export/reimport, old origin 보존/old reader 거절을 자체 검증하지 않는다. 이는 root의 별도 엄격 보존 회수와 구분한다.",
+      "지연 status의 홈 이름 선택과 빈 지도 버튼 focus를 검사하지만 열린 붙여넣기/부분/반환 textarea의 exact value·selectionDirection·scrollTop/Left 보존을 전부 검사하지 않는다. 123 보존 로직의 최종 실행 회수를 대신하지 않는다.",
+      "R은 browser storage seed로 조건을 만드는 회귀 검증이며 정상 import/사용자 전체 흐름의 대체물이 아니다. X의 map body는 불완전하므로 route 선차단 증거이며 유효 map 각 schema 통제는 기존 core 검증과 별개다.",
+      "flow가 실행한 dry-run manifest와 소스 Worker module을 사용하지만 최종 배포 명명·clean·모든 모듈 bytes의 runtime 동등성까지 assert하지 않는다. 무명 dry-run도 가능하고 deployment는 재빌드하므로 최종 동결 manifest와 일치 확인이 필요하다."
+    ]
+  },
+  "rootEvidenceReceivedNotReexecuted": [
+    "정확 core 패키지 정상 UI 구판11/.2→14/.4 import/firstedit/reload/export/reimport 엄격 보존 통과; old origin 변경 없음; old reader 거절 확인.",
+    "107 plan 및109 scope의 exact provider messages 두 개를 재생하여 정상 HTTP 요청문16202자 생성, reload 전체 저장 exact; 새 AI 호출0."
+  ],
+  "remainingGates": [
+    "cfe993f/a0a56c1의 최종 build 및 제한 Worker+assets manifest를 동결하고 검토된 해시와 실제 실행/최종 배포 준비 byte hashes를 연결한다. 기존 core 패키지 증거는 최종 app 변경분 회수와 함께 보고한다.",
+    "root 예정 focused late-status 및 CI 결과를 별도 회수한다. 이 정적 review의 no-findings를 실행 통과로 대체하지 않는다.",
+    "출시 시 별도 origin/명시 Worker 이름, 공개73 보존, project 및 별도 plan 백업/복구 경계를 유지한다. 현재 제한판은 plan/scope/digest 실경로를 가진 기존 지도 작업용 버전이며 미수용 지도 생성, CLI cloud 제공, 전체 목표 완료를 주장하지 않는다."
+  ]
+}

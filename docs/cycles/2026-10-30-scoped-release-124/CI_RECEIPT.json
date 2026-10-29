@@ -1,0 +1,75 @@
+{
+  "runId": 40966300557,
+  "head": "df697411d0569aa02d98007d00ab4cfc3bcb1bb6",
+  "appTree": "a0a56c1cb8f2a1fdde5c7afb136bc248c8b61b6b",
+  "jobs": [
+    {
+      "id": 123771614558,
+      "os": "windows-2022",
+      "conclusion": "success",
+      "node": "22.16.0",
+      "excerpt": [
+        "2026-10-29T22:30:01.7061077Z   ref: df697411d0569aa02d98007d00ab4cfc3bcb1bb6\r",
+        "2026-10-29T22:30:05.1124398Z [command]\"C:\\Program Files\\Git\\bin\\git.exe\" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin df697411d0569aa02d98007d00ab4cfc3bcb1bb6\r",
+        "2026-10-29T22:30:08.0832441Z  * branch            df697411d0569aa02d98007d00ab4cfc3bcb1bb6 -> FETCH_HEAD\r",
+        "2026-10-29T22:30:08.0880291Z [command]\"C:\\Program Files\\Git\\bin\\git.exe\" rev-parse --verify --quiet df697411d0569aa02d98007d00ab4cfc3bcb1bb6^{object}\r",
+        "2026-10-29T22:30:08.1529939Z df697411d0569aa02d98007d00ab4cfc3bcb1bb6\r",
+        "2026-10-29T22:30:08.2260285Z [command]\"C:\\Program Files\\Git\\bin\\git.exe\" checkout --progress --force df697411d0569aa02d98007d00ab4cfc3bcb1bb6\r",
+        "2026-10-29T22:30:08.9867893Z Note: switching to 'df697411d0569aa02d98007d00ab4cfc3bcb1bb6'.\r",
+        "2026-10-29T22:30:09.3591696Z df697411d0569aa02d98007d00ab4cfc3bcb1bb6\r",
+        "2026-10-29T22:31:11.0659138Z df697411d0569aa02d98007d00ab4cfc3bcb1bb6\r",
+        "2026-10-29T22:31:11.1127456Z v22.16.0\r",
+        "2026-10-29T22:33:23.0950349Z # tests 279\r",
+        "2026-10-29T22:33:23.0950669Z # pass 279\r",
+        "2026-10-29T22:33:23.0950823Z # fail 0\r",
+        "2026-10-29T22:33:23.0950965Z # skipped 0\r",
+        "2026-10-29T22:34:18.5471615Z ok 414 - 102-P3 an orderly stop during a run: the child is stopped and gone before the launcher ends; restart reads interrupted and admits # SKIP SIGTERM to a launcher is not deliverable on Windows\r",
+        "2026-10-29T22:34:24.2801774Z ok 424 - 102-E13 a process left in the child group holds the pipe: no close, so no answer; stopped at the cutoff with its group # SKIP process groups are POSIX\r",
+        "2026-10-29T22:34:25.4984741Z ok 426 - 102-E15 the version probe is a child under the same lease: one that does not end keeps the next open from probing or admitting # SKIP process groups are POSIX\r",
+        "2026-10-29T22:34:51.0332492Z # tests 635\r",
+        "2026-10-29T22:34:51.0332643Z # pass 632\r",
+        "2026-10-29T22:34:51.0332714Z # fail 0\r",
+        "2026-10-29T22:34:51.0332859Z # skipped 3\r",
+        "2026-10-29T22:35:03.3014444Z {\"phase\":\"prepared\",\"source\":\"df697411d0569aa02d98007d00ab4cfc3bcb1bb6\",\"worker\":\"agentflow-studio\",\"policy\":null,\"assets\":54,\"modules\":26,\"bytes\":1227695,\"dryRun\":true}\r",
+        "2026-10-29T22:36:31.5704331Z Ran 18 tests in 19.742s\r",
+        "2026-10-29T22:36:31.5704560Z OK\r"
+      ],
+      "fullLogCharacters": 504249
+    },
+    {
+      "id": 123771615010,
+      "os": "ubuntu-24.04",
+      "conclusion": "success",
+      "node": "22.16.0",
+      "excerpt": [
+        "2026-10-29T22:30:01.0073307Z   ref: df697411d0569aa02d98007d00ab4cfc3bcb1bb6",
+        "2026-10-29T22:30:01.4128005Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin df697411d0569aa02d98007d00ab4cfc3bcb1bb6",
+        "2026-10-29T22:30:03.0902534Z  * branch            df697411d0569aa02d98007d00ab4cfc3bcb1bb6 -> FETCH_HEAD",
+        "2026-10-29T22:30:03.0912456Z [command]/usr/bin/git rev-parse --verify --quiet df697411d0569aa02d98007d00ab4cfc3bcb1bb6^{object}",
+        "2026-10-29T22:30:03.0951173Z df697411d0569aa02d98007d00ab4cfc3bcb1bb6",
+        "2026-10-29T22:30:03.1064240Z [command]/usr/bin/git checkout --progress --force df697411d0569aa02d98007d00ab4cfc3bcb1bb6",
+        "2026-10-29T22:30:03.3379194Z Note: switching to 'df697411d0569aa02d98007d00ab4cfc3bcb1bb6'.",
+        "2026-10-29T22:30:03.3489644Z df697411d0569aa02d98007d00ab4cfc3bcb1bb6",
+        "2026-10-29T22:30:17.0968151Z df697411d0569aa02d98007d00ab4cfc3bcb1bb6",
+        "2026-10-29T22:30:17.1006768Z v22.16.0",
+        "2026-10-29T22:32:23.1610944Z # tests 279",
+        "2026-10-29T22:32:23.1611525Z # pass 279",
+        "2026-10-29T22:32:23.1611709Z # fail 0",
+        "2026-10-29T22:32:23.1611890Z # skipped 0",
+        "2026-10-29T22:34:08.3781751Z # tests 635",
+        "2026-10-29T22:34:08.3782131Z # pass 635",
+        "2026-10-29T22:34:08.3782318Z # fail 0",
+        "2026-10-29T22:34:08.3782704Z # skipped 0",
+        "2026-10-29T22:34:18.4217574Z {\"phase\":\"prepared\",\"source\":\"df697411d0569aa02d98007d00ab4cfc3bcb1bb6\",\"worker\":\"agentflow-studio\",\"policy\":null,\"assets\":54,\"modules\":26,\"bytes\":1227695,\"dryRun\":true}",
+        "2026-10-29T22:34:59.4101722Z Ran 18 tests in 15.773s",
+        "2026-10-29T22:34:59.4101990Z OK"
+      ],
+      "fullLogCharacters": 502849
+    }
+  ],
+  "boundaries": {
+    "CI": "default Worker dry-run; existing browser smoke/direct HTTP; no paid AI",
+    "releaseFlow": "new six-scenario flow is author-run standalone, outside CI",
+    "limitedArtifact": "Root named dry-run source cfe993f same appTree, separately frozen and inspected"
+  }
+}

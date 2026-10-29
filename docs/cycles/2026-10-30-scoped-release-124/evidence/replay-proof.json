@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-29T22:27:28.229Z",
+  "source": "f09d12d697f38d42ed247fa65cf1d8d9f44cf084",
+  "input107ProjectSha": "dcda9cc2acbd387fdfc7f1751f7ba4e59a2bbf6b496c5c04bbba24477552bb49",
+  "plan": "accepted107 saved response",
+  "scope": "accepted109 saved response, rejected107 scope excluded",
+  "realHTTP": true,
+  "workerEntry": "continuity/server/worker-existing-map.mjs",
+  "exactProviderMessages": true,
+  "providerReplayCount": 2,
+  "externalCalls": 0,
+  "newAIQuality": false,
+  "requestId": "RQ_2270d57b-174f-4405-9ad3-72f3b25ed607",
+  "requestUTF16": 16202,
+  "reloadExactWholePlanStore": true,
+  "storedReturnReader": "old73 project map-reading.3 withdrawal/matches remain visible; separate snapshot identity not relinked",
+  "newComparisonUnavailable": true
+}

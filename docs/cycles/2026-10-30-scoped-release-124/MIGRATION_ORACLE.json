@@ -1,0 +1,250 @@
+{
+  "title": "124 구판 정상 내보내기의 독립 보존 비교 기준",
+  "description": "이번 73 정상 UI export를 동결 입력으로 삼아, 현재 project.14와 변경안 file.4가 허용하는 판본 차이와 절대 보존 필드를 구분한다. 실제 124 이행 성공이나 제한 출시 전체 수용을 판정한 보고서는 아니다.",
+  "at": "2026-10-29T22:15:32.231520+00:00",
+  "source": "5cfbadb32ff38c7a17591a0495884491cda3f285",
+  "appTree": "c69120224cf09a0f7252f8bb7283f096d75171a6",
+  "sourcesSha256": {
+    "app/continuity/src/shared/types.ts": "eb037afda942a42888d761b00c73e7837aa83dfcd68f12292b2d34d2e9c2247c",
+    "app/continuity/src/shared/validation.ts": "8570453c6354a840d8bbe124211527d91899d15fc34b550db1c65c335205d545",
+    "app/continuity/src/shared/storage.ts": "bf7ab55be901ba004b3acfe515557e0aa5c85c61a87da1815a5cb01382fe96b3",
+    "app/continuity/src/shared/change-plan.ts": "b7d5107c1b491efe4206c592f5b44871751cf324e5289de6d18cd5e2ecedff89",
+    "app/continuity/src/client/plan-store.ts": "d302d2716d0a1bbf524f796a4a62cba4f64c95999e2593a0ebf6b491e7bc34f6"
+  },
+  "inputs": [
+    {
+      "file": ".ops/experience124-scoped-release/inputs/old73-export-project.json",
+      "bytes": 28324,
+      "sha256": "7386f3b1670148791828371ba26dd3a45869f25b66582332154eec7299dfae88"
+    },
+    {
+      "file": ".ops/experience124-scoped-release/inputs/old73-export-plan.json",
+      "bytes": 22148,
+      "sha256": "6d39cbd37b7c4a4a7c5b5d80039a7f25d867d6f86df15ba06468a079fa79a32a"
+    },
+    {
+      "file": ".ops/experience124-scoped-release/old-origin-before.json",
+      "bytes": 50874,
+      "sha256": "f662ebf26cfa3cb9bce5b08fe06a3af45ff715bb87c4e95ca1ba27d7daf723e6"
+    },
+    {
+      "file": ".ops/experience124-scoped-release/old-ui-baseline.json",
+      "bytes": 1244,
+      "sha256": "70deb355946f933a7570f651e562ab2993c3e8f2b6b5953eeab879cf13ba2a20"
+    },
+    {
+      "file": ".ops/experience124-scoped-release/old-source-reuse.json",
+      "bytes": 839,
+      "sha256": "e0fb4bcbf45561475c256e8dd4af9431bb7451a59de86a60b074bbf6b94e5935"
+    }
+  ],
+  "provenance": {
+    "oldSource": "26b24b935567a95d101720cbf0e06d188d8765d9",
+    "oldApp": "b670c0ea300050e28cdba9655515ebcf2e03d9d5",
+    "currentExport": "이번 격리 73 정상 UI에서 project.11과 plan file.2를 내보냈다는 총괄 baseline을 참조한다. 이 검토자의 UI 실행이 아니다.",
+    "historicalPairing": "88 당시 실제 공개 project의 sidecar는 비어 있었다. 같은 owner의 과거 AI plan file.1을 별도로 회수하여 격리 검토 사본에서 import한 조합이다. 완전하게 짝지어진 당시 공개 sidecar라고 주장하지 않는다.",
+    "priorPlanFile1": {
+      "file": ".ops/experience124-scoped-release/inputs/actual-plan-file1.json",
+      "sha256": "446cd2f848d7442f0fdcd8f67c70159441a897f979ece181cfbed933515e76d3"
+    },
+    "originPreservation": "old-origin-before.json은 입력 증거로 읽기만 했다. 기존 공개 원주소의 저장을 교체하거나 초기화하지 않았다. 새 origin의 이행 정책·사전 백업·다운그레이드 성공은 이 oracle의 판정 대상이 아니다."
+  },
+  "comparisonAlgorithm": {
+    "description": "JSON 객체 키 순서와 공백은 무시하되 배열 순서와 값·키의 존재 여부는 엄격히 비교한다. 없던 키와 null은 서로 다르다. 문자열은 trim·줄바꿈 변환·Unicode 정규화를 하지 않는다.",
+    "canonicalHash": "Python json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(comma,colon), allow_nan=False)의 UTF-8 SHA256. 이 입력의 객체 키는 ASCII 식별자·필드이므로 JS 객체 키 정렬과도 순서가 대응한다. 아래 hash는 원본 파일 bytes hash와 별개의 정규 JSON hash다."
+  },
+  "projectOracle": {
+    "owner": "P_db228104-2c12-41fe-a8e9-460876f31fff",
+    "oldSchema": "idea015.project.11",
+    "expectedSchema": "idea015.project.14",
+    "revisionMustRemain": 15,
+    "sourceRule": "validation.ts:616–620의 migrateV11은 구판 reading 종류를 확인한 뒤 schemaVersion만 SCHEMA로 바꾼다. parseProject:649–654는 전체 재검증 후 intent-edit.1만 별도 변환하지만 이 표본 tasks=[]이므로 해당 추가 변화가 없다.",
+    "onlyAllowedPayloadDifference": {
+      "pointer": "/schemaVersion",
+      "before": "idea015.project.11",
+      "after": "idea015.project.14"
+    },
+    "expectedProjectCanonicalSha256": "ecebc6595185d6166600e08fa0ea200141115d330ccb3220f5f572fda3eba0fc",
+    "allOtherTopLevelFieldsCanonicalSha256": {
+      "id": "ed1053638f0ab8b2c163f22f3bffd95093d868b3a2b81be9823fb35b059a03ab",
+      "revision": "e629fa6598d732768f7c726b4b621285f9c3b85303900aa912017db7617d8bdb",
+      "name": "5ea13dd03b01ccf918879bf23c2c11399ff366feb93be60632ba095f2cf03dcb",
+      "sources": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "bases": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "tasks": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "currentTaskId": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "draft": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
+      "answerDraft": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
+      "basisDraft": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
+      "basisEdits": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "draftKind": "8869ad22943e917a9e5aae887407895ca2687608588cb6f5e154e6cc4c617642",
+      "pending": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "notice": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "space": "09c1c55eff64dde384871b94057913ed8dc955e73d6c5d2c7c83fb03d463efe1",
+      "pasted": "bb10c4353245ebe0dbd623d864a6363f2d29ea1e2ca88d0b0fc4bdf0e08d735b",
+      "readings": "bb17854baa2657129f7d799f74db7fd0a9fce0848e128219eed8422de1063b9a"
+    },
+    "absolutePreserve": "이름·revision·draft·notice·sources/bases/tasks·space 전체(areas/relations/understanding/containment/layout.positions)·pasted·readings의 모든 필드와 배열 순서를 보존한다. ID·createdAt·reading at/model/prompt/hash·근거 quote·기존 from/to·request targets/replaces/stance/about도 예외가 아니다. 임의 ID 대응이나 reading 메타 제외를 허용하지 않는다.",
+    "noBackfill": "원래 map-reading.1/.3을 새 reading 판본으로 승격하거나 없던 인용 좌표·provided-source 선언을 계산하지 않는다.",
+    "positions": "입력 파일에는 별도 top-level positions가 없다. space.layout.positions 5개의 ID와 x/y는 그대로여야 한다. 새 nonempty top-level positions나 실제 재배치는 별도 명시된 사용자 편집 없이는 이행 delta로 허용하지 않는다.",
+    "counts": {
+      "areas": 5,
+      "spaceRelations": 2,
+      "pasted": 3,
+      "readings": 3,
+      "tasks": 0
+    },
+    "pasted": [
+      {
+        "id": "N_6a028c71-aefe-4664-a735-546d16557782",
+        "canonicalSha256": "35cdd57813e7016d9a73f66a9249305716c59751caf1b255ec77bcf7792c4187",
+        "textUTF8Sha256": "4f4c08009e50619572b2688b66e3b2c3d5094101cbf00b851a1976076b5a5c65",
+        "textUTF16Length": 371
+      },
+      {
+        "id": "N_4565ac75-3539-45dd-8e2e-5e338cd57d25",
+        "canonicalSha256": "a626e696811cf0025e3bba1347bf6581104b58034489b55b54fe8e1f61a73d50",
+        "textUTF8Sha256": "c0f225052405ba01bc616f7bd203911b33ff1bc8fc94ae8b5f8a498353fd3500",
+        "textUTF16Length": 423
+      },
+      {
+        "id": "N_fb9443c5-1d89-40b4-901c-17f96b136ba3",
+        "canonicalSha256": "43eeeceaf943fb36638532a4d88e74e15a9e6bfa889c6827fe4c1af4cde43bda",
+        "textUTF8Sha256": "bffcbf4c87fdbe957fa727eac9a45b0905ff41934603f0adea1a3e0f4df711db",
+        "textUTF16Length": 408
+      }
+    ],
+    "readings": [
+      {
+        "id": "M_15ebe8ec-bd4b-405d-bcc6-db391bc0dd79",
+        "version": "map-reading.1",
+        "canonicalSha256": "c36710949bf08910e6d5d2ba3516510a99129e4a9d417e5873785b7f2ddf27f8",
+        "matches": 0,
+        "requestsCanonicalSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "id": "R_f61ba7f7-d092-473c-bce3-d5aead92f378",
+        "version": "map-reading.3",
+        "canonicalSha256": "37547b909c300fe8532b03d8bc3c44dbaa24945272dda47ca20c41e58d75ba96",
+        "matches": 5,
+        "requestsCanonicalSha256": "7985d1d120929013b6c9691091e8fbffe39b2bd9fa920c72763db87999507a72"
+      },
+      {
+        "id": "R_0119d7a5-30d7-47f5-9c49-71d9efea1614",
+        "version": "map-reading.3",
+        "canonicalSha256": "b5024426b0cb46ce9ca6a6866518028212fdcaa7b93d85915f8048c45cb6b6d7",
+        "matches": 3,
+        "requestsCanonicalSha256": "7985d1d120929013b6c9691091e8fbffe39b2bd9fa920c72763db87999507a72"
+      }
+    ]
+  },
+  "planOracle": {
+    "owner": {
+      "id": "P_db228104-2c12-41fe-a8e9-460876f31fff",
+      "name": "작은 문서 변환기"
+    },
+    "beforeFormat": "agentflow.change-plan-file.2",
+    "expectedFormat": "agentflow.change-plan-file.4",
+    "sourceRule": "plan-store.ts:52–94 parseBundle는 legacy 판본을 검사하고 검증된 plan/원래 snapshots/labels/origins/observations/attached를 복제한다. authoring 없는 구판에는 authoring을 추가하지 않는다. readPlanFile:184–193은 owner와 원래 file 판본 capability를 확인한다. planFile:180–183은 file.4 wrapper와 새 exportedAt만 만든다.",
+    "allowedWrapperDifferences": [
+      {
+        "pointer": "/format",
+        "before": "agentflow.change-plan-file.2",
+        "after": "agentflow.change-plan-file.4"
+      },
+      {
+        "pointer": "/exportedAt",
+        "rule": "정상 새 내보내기의 유효한 ISO 시각으로 바뀔 수 있다. bundle 안의 시각은 이 예외가 아니다."
+      },
+      {
+        "pointer": "/note",
+        "rule": "현재 planFile writer의 고정 문구만 허용하며 임의 메모나 내용 삭제를 허용하지 않는다.",
+        "expectedUTF8Sha256": "d4a9ec5e5bf2005f24386d1d898f638540815722f468e673e88384a2fafc30b1",
+        "sameAsOriginal": true
+      }
+    ],
+    "bundleCanonicalSha256": "f278c8bb086973547862bc2329803b353d57ca8ffbab68095c069630b7493211",
+    "bundleKeys": [
+      "draft",
+      "extra",
+      "plan",
+      "by",
+      "snapshots",
+      "labels",
+      "origins",
+      "observations",
+      "attached"
+    ],
+    "allBundleFieldsCanonicalSha256": {
+      "draft": "9e6b66b099d831c3aeaaa2d8790a28cbf675a59a2179f4f888516e402b8e59f0",
+      "extra": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "plan": "f6d6403e7ccbef168c01566dd3d74d1d62c2cf5c5dd9c6cc5619aaab01f6392f",
+      "by": "3b8acd43b1083f52c62fa5a88b050fb24a624494787a50967dae7f2609b684fe",
+      "snapshots": "08f094b68555edaa616ef3c1855c4b09d7bf777f087fced7c8a49fdb83a1830d",
+      "labels": "90af5797c815eb81b914ef7183500726135e827523e24326af264c9ec6fb8761",
+      "origins": "8d9f5c8eeee2b9c1c53bcb9962608f7c90757a26de748f4ee637cf5318705098",
+      "observations": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "attached": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    "bundleMustRemain": "draft 117자·extra·plan(analysis/selected/evidence/origins/IDs/revision/createdAt)·by·snapshots 전체·labels·origins·observations·attached가 모두 같아야 한다. wrapper 갱신은 bundle의 어떤 값을 바꿀 허가도 아니다.",
+    "noBackfill": "authoring은 absent 유지. 기존 snapshot에 scope 또는 reading/request-reading을 새로 만들지 않는다. 현재 계획·화면에서 과거 요청을 다시 생성하거나 원문을 보충하지 않는다.",
+    "snapshot": {
+      "id": "RQ_1edf6fdb-bd02-4ce6-a083-1da06dcf8be1",
+      "keys": [
+        "id",
+        "planId",
+        "planRevision",
+        "basis",
+        "itemIds",
+        "text",
+        "createdAt"
+      ],
+      "canonicalSha256": "ce8f50caa39a4dc0d398ced39b48c682a74e85ff6cc87d5c27fdcf34b8f68c57",
+      "textUTF16Length": 4013,
+      "textUTF8Sha256": "e93a2b3457108f96b728499ce9307e0829e0e70ed74c7365cd2bcd7fcf6c4277",
+      "textBytes": 8957,
+      "textExactRule": "4013 UTF-16자 전부와 줄바꿈·공백을 그대로 비교한다. 길이·앞부분·표시 요약만 같은 것으로 합격하지 않는다."
+    },
+    "requestIdentitySeparation": {
+      "snapshotId": "RQ_1edf6fdb-bd02-4ce6-a083-1da06dcf8be1",
+      "readingRequestIds": [
+        "RQ_efb368df-baa4-4668-ab7c-8e4f156daea8"
+      ],
+      "rule": "실제로 서로 다른 ID다. 이름이나 설명이 비슷하다는 이유로 동일 요청으로 연결하거나 snapshot ID를 reading.targets에 대입하지 않는다. 기존 withdrawal/replaces/target linkage는 readings 전체 동일 비교로 보존한다."
+    },
+    "attachedReturnLimit": {
+      "observations": 0,
+      "attached": 0,
+      "rule": "별도 첨부 return은0이다. 프로젝트 reading 안의 matches·철회 자료와 sidecar observations를 혼동하지 않는다."
+    }
+  },
+  "storageBoundary": {
+    "oldWorkspaceVersion": "agentflow.workspace.1",
+    "oldPlanEnvelopeVersion": "studio.plans.2",
+    "allowedOutsidePayload": "정상 import는 새 workspace entryId·createdAt·origin=import·초기 ref를 생성할 수 있고 성공 저장 시 seq를 갱신한다. 이는 project owner/내부 ID/실제 데이터의 재작성 허가가 아니다. 카메라·fold 등 별도 UI 저장값과 데이터 payload를 구별한다.",
+    "planEnvelope": "현재 저장판은 studio.plans.4다. 구판 envelope를 읽는 것만으로 구판 원본을 덮어쓰지 않는다. 쓰기 시 다른 프로젝트는 원래 bundle와 .1/.2/.3 legacy provenance를 유지하고 실제로 쓴 프로젝트 marker만 끝낸다. 이 단일 owner 입력만으로 다른 project 혼합 저장 전체 검증을 완료했다고 주장하지 않는다.",
+    "oldReader": "구판 73이 .14 project나 .4 변경안/저장을 읽는다는 보장은 없다. 구판 reader 거절과 원문 보존을 downgrade 성공으로 표현하지 않는다."
+  },
+  "failureGates": [
+    "허용한 wrapper/schema 경로 외 project 또는 bundle 값·배열 순서·키 존재 여부가 하나라도 달라지면 원본과 정확한 JSON pointer를 보존하고 이행 보존 실패로 보고한다.",
+    "revision 증가·본문 편집·ID 재생성·주장/철회 손실·좌표 변경·기존 요청 재생성·authoring/reading 소급은 자동 이행 차이로 정당화하지 않는다. 실제로 별도 허용한 사용자 편집이 있다면 그 작업을 먼저 명시하고 별도 비교 기준으로 분리한다.",
+    "저장 오류·구판 거절·새 format 수용 실패를 원문 수선/초기화/다른 owner 연결로 구제하지 않는다. 실제 UI가 정상 저장·재열기·내보내기를 완료하는지는 후속 root 증거가 필요하다."
+  ],
+  "execution": {
+    "actor": "독립 보존 기준 작성자",
+    "sourceAndFrozenDataReads": true,
+    "dataHashCalculationOnly": true,
+    "compiledProductParse": false,
+    "browser": 0,
+    "modelAPI": 0,
+    "tests": 0,
+    "productWrites": 0,
+    "oldBaselineWrites": 0,
+    "newPrivateFile": ".ops/results/experience124-migration-oracle.json"
+  },
+  "limits": [
+    "현재123 소스에서 기대되는 변환을 정했다. 새124 최종 SHA는 아직 없으므로 새 구현의 성공·출시·원주소 교체를 판정하지 않는다.",
+    "compiled pure parser는 사용하지 않았다. 별도 새 build나 과거88 전체 검사를 반복하지 않았다.",
+    "원본 본문·동결 요청 전문·비공개 대화는 이 oracle에 복사하지 않고 입력 경로와 hash로 참조한다."
+  ]
+}

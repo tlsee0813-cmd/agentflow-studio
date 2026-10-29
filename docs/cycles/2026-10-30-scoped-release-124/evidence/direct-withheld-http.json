@@ -1,0 +1,73 @@
+{
+  "at": "2026-10-29T22:27:45.324Z",
+  "cases": [
+    {
+      "path": "/api/studio/map",
+      "method": "POST",
+      "inputSchema": "studio.map.6",
+      "status": 403,
+      "body": {
+        "error": {
+          "code": "MAP_WITHHELD"
+        }
+      }
+    },
+    {
+      "path": "/api/studio/map",
+      "method": "POST",
+      "inputSchema": "studio.map.6",
+      "status": 403,
+      "body": {
+        "error": {
+          "code": "MAP_WITHHELD"
+        }
+      }
+    },
+    {
+      "path": "/api/studio/map",
+      "method": "POST",
+      "inputSchema": "studio.map.7",
+      "status": 403,
+      "body": {
+        "error": {
+          "code": "MAP_WITHHELD"
+        }
+      }
+    },
+    {
+      "path": "/api/studio/map",
+      "method": "POST",
+      "inputSchema": "studio.map.1",
+      "status": 403,
+      "body": {
+        "error": {
+          "code": "MAP_WITHHELD"
+        }
+      }
+    },
+    {
+      "path": "/api/studio/jobs",
+      "method": "POST",
+      "status": 403,
+      "body": {
+        "error": {
+          "code": "MAP_WITHHELD"
+        }
+      }
+    },
+    {
+      "path": "/api/studio/jobs/test",
+      "method": "GET",
+      "status": 403,
+      "body": {
+        "error": {
+          "code": "MAP_WITHHELD"
+        }
+      }
+    }
+  ],
+  "providerBefore": 2,
+  "providerAfter": 2,
+  "external": 0,
+  "malformedBodiesPurpose": "route policy refuses before parse; full valid schema matrix covered by focused tests"
+}

@@ -1,0 +1,54 @@
+{
+  "at": "2026-10-29T22:25:55.747Z",
+  "core": "f09d12d697f38d42ed247fa65cf1d8d9f44cf084",
+  "artifact": {
+    "assets": "f533b85bb388fd40c698509e0d72c030b3294b0ca6ad5c3e40d7be26e9dbf8dd",
+    "modules": "1df394bd38dc2ff2cd04deb3d4c01d68be876efb70f88cc09aefba898c5678c9"
+  },
+  "oldProjectSource": "isolated public73 normal export",
+  "oldPlanSource": "separately recovered same-owner historical plan; not historically paired public sidecar",
+  "import": {
+    "projectOnlySchemaChanges": true,
+    "projectRevision": 15,
+    "projectReadingsExact": true,
+    "planBundleAllExact": true,
+    "frozenRequestUTF16": 4013
+  },
+  "edit": {
+    "planOnlyDraftChanges": true,
+    "projectDelta": [
+      {
+        "pointer": "/revision",
+        "before": 15,
+        "after": 16
+      },
+      {
+        "pointer": "/space/areas/1/name",
+        "before": "변환기",
+        "after": "변환기 · 검토 사본"
+      },
+      {
+        "pointer": "/space/containment/revisions/A_3aff74e1-de74-4459-9647-5dfb0941bfab",
+        "before": 0,
+        "after": 1
+      }
+    ],
+    "reloadPreserved": true,
+    "staleRequestDisabled": true
+  },
+  "roundtrip": {
+    "projectAllExact": true,
+    "bundleAllExact": true,
+    "normalUI": true
+  },
+  "oldOrigin": {
+    "afterNewWritesAllStorageExact": true,
+    "project14Rejected": true,
+    "afterProjectRejectAllStorageExact": true,
+    "planFile4Rejected": true,
+    "afterPlanRejectDataExact": true,
+    "onlyNavigationLastChanged": true
+  },
+  "externalAI": 0,
+  "wholeReleaseAcceptance": false
+}

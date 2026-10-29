@@ -1,0 +1,41 @@
+{
+  "version": "experience124-core-review.1",
+  "decision": "제한 작업용 별도 origin 후보의 서버 분리는 타당하다. 한정 정책에서 남아 있는 대조 유도 버튼 P2를 수리하고 정확 아티팩트 및 실제 PC 관문을 통과한 뒤 root가 출시 여부를 결정한다. 배포 승인이나 생성 품질 수용은 아니다.",
+  "basis": {
+    "base": "5cfbadb32ff38c7a17591a0495884491cda3f285",
+    "head": "f09d12d697f38d42ed247fa65cf1d8d9f44cf084",
+    "appTree": "79633c110a38f397e770aba13560d31f27391ac5",
+    "delta": "11 files, 276 insertions, 33 deletions",
+    "method": "HEAD 및 clean 상태 확인, 해당 delta와 직접 연결된 호출부/빌드 스크립트/작성자 테스트 소스의 좁은 정적 읽기. 빌드·테스트·브라우저·모델 호출·제품 수정 없음. 작성자의 635 통과를 독립 실행 결과로 세지 않음."
+  },
+  "findings": [
+    {
+      "priority": "P2",
+      "title": "제한판의 지도 제목에서도 새 요청 대조 안내를 제거해야 한다",
+      "file": "app/continuity/src/client/app.ts",
+      "lines": [1926, 1928],
+      "relatedChangedFile": "app/continuity/src/client/plan-view.ts:1348",
+      "trigger": "existing-map 상태에서 (a) REQUEST_CONTEXT_TOO_LARGE인 저장 지도 또는 (b) 마지막 읽기가 map-reading.1이고 frozen request가 있는 저장 지도를 연다.",
+      "evidence": "understoodLine의 두 분기는 release나 mapRun.can을 확인하지 않고 '요청문을 골라 대조' / '나중에 요청문을 골라 대조'를 보여 준다. 클릭은 planView.openResults로 이동하지만 124의 plan-view:1348은 그 화면의 '이 요청과 보고 읽기'를 숨긴다. map-run:144도 map이 없으면 반환하므로 실제 새 대조는 이 배포에서 불가능하다.",
+      "impact": "가져온 기존 지도에서 사용할 수 없는 후속 작업을 계속 권하는 막힌 경로다. 서버 우회나 데이터 손실은 아니다.",
+      "minimalFix": "existing-map일 때 두 생성/대조 유도 CTA를 숨기거나 이미 저장된 요청·결과 보기라는 정확한 동작으로 바꾼다. 이미 저장된 comparison/근거 보기 자체는 유지한다.",
+      "verification": "두 조건을 가진 기존 저장 상태에서 제한판은 새 대조를 약속하지 않고, 정상 Node/Worker에서는 기존 CTA가 유지되는지 좁게 확인한다. AI 호출 불필요."
+    }
+  ],
+  "staticConclusions": [
+    "trusted worker-existing-map 진입점이 policy를 고정한다. env나 요청으로 이를 바꾸는 경로는 없다. 지도 및 jobs 경로는 origin 확인 뒤, 본문·access code·limiter·제공자/작업 실행 전 MAP_WITHHELD로 끝난다. map6/map7/legacy가 같은 /map 경로여서 모두 포함된다.",
+    "status에서 map/jobs를 생략하고 release 이유를 준다. client는 알려진 existing-map만 인식하고 map/jobs를 null로 정규화한다. 이전 서버의 누락/unknown 상태를 새 제한 정책으로 추정하지 않는다. !!st.map이 can/run의 필수조건이므로 제한 신호는 주로 안내를 위한 것이며 차단을 위한 legacy fallback 수리는 아니다.",
+    "policy=null인 일반 handler/Worker와 Node/CLI 호출의 동작은 유지된다. plan3/scope/digest/ask 분기에 새 제한은 없으며 테스트 소스는 동일 provider 입력을 비교한다. 제한판에서 저장 지도→변경안→scope→요청문으로 가는 길을 새로 막는 분기는 이번 delta에서 발견하지 못했다. 실제 UI/의미 성공까지 증명한 것은 아니다.",
+    "renderRelease는 홈의 별도 노드만 갱신한다. 기존 statusArrived/return-view의 123 보존 로직은 변경하지 않았다. 새 empty-map 분기도 partForm일 때 기존 조기 반환을 유지한다. 정적 delta에서 새로운 입력 소실/focus 회귀를 확정하지 못했으며 실제 지연 상태 검증은 남는다.",
+    "별도 Worker 이름 필수 및 기존 agentflow-studio 이름 금지, non-dry dirty 금지, 운영 비밀 필수, same-origin 빌드가 있다. 모듈 closure/asset bytes를 수집한 뒤 해시하며 해당 수집 bytes가 같은 실행의 업로드에 쓰인다. Node/CLI/job 모듈 금지와 secret scan이 있다. 이름 다른 기존 Worker를 덮지 않는다는 보장은 운영 대상 확인 관문으로 남는다.",
+    "manifest는 이 실행에서 준비한 asset/module bytes를 식별한다. 후속 deploy 실행은 재빌드하므로 과거 dry-run artifact를 그대로 소비하는 승격 기능은 아니다. manifest에는 binding 이름만 있고 DEEPSEEK_MODEL 실제 값은 없으므로 전체 배포 설정까지 동등하다고 부르지 않는다. dry-run에서 worker=null 또는 dirty=true면 배포 승인용 exact candidate가 아니다."
+  ],
+  "independentReleaseGates": [
+    "최종 clean HEAD/appTree와 명시한 새 Worker 이름으로 dry-run manifest를 확보하고 실제 import closure, 두 해시목록, same-origin/CSP, preview 저장 prefix, 비밀 제외를 확인한다. 배포는 검토된 byte hashes와 최종 준비 manifest의 일치 확인을 포함한다. 모델 binding의 실값은 비밀을 노출하지 않는 별도 설정 증거로 남긴다.",
+    "실제 PC에서 기존 공개73 origin을 보존하고 export한 project 및 별도 plan 파일을 새 origin에 정상 UI import한다. project14 이행, plan/request/result 자료, quote/관계/수동 위치, reload/export를 검증한다. 새 origin 기록이 기존 origin에 쓰이지 않고 자동 전송도 없음을 확인한다. 기존 이행 코드가 있다는 사실과 실제 보존 검증은 구분한다.",
+    "공개73의 raw 저장값과 프로젝트·plan 파일 백업을 확보한다. 새 origin의 검증용 작업 후 rollback은 기존 origin으로 돌아가며 새 project14 저장값을 구버전에 덮어쓰지 않는다. old tab/new tab 및 사본 import의 저장 충돌·복구 경계가 유지되는지 좁게 확인한다.",
+    "제한판의 예제·정상 백업 진입, 실제 plan/scope/request 읽기·편집·반환 원문 보존/별도 digest 경로를 정상 UI로 확인한다. 무호출/stub 검증은 연결 구조를 증명할 뿐 새 실제 provider 의미 수용으로 세지 않는다. 첫지도/지도갱신/새 요청대조 미제공 문구와 별도 공개판 이동·비동기화 설명을 확인한다.",
+    "상태 응답을 늦게 도착시킨 실제 PC에서 홈 새 이름, 빈 지도의 붙여넣기/직접 부분 form, 기존 반환 입력의 값·선택 방향·스크롤·focus를 확인한다. map6/map7/legacy/jobs는 직접 요청에서도 provider0이며 plan/scope/digest는 정상 허용되는 좁은 무호출 검증을 수행한다.",
+    "이 별도 origin은 plan3/scope/digest의 실 경로를 가진 제한 작업용 릴리스이며 105의 static 보조 preview와 다르다. 공개73의 Worker/assets는 갱신하지 않는다. 생성 미수용을 해제하거나 전체 제품 목표 완료로 보고하지 않는다."
+  ]
+}
