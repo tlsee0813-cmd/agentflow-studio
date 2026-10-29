@@ -69,6 +69,17 @@
 - Root IAB 관찰 구분: paste/Control+V 도구 경로에서는 314자가 모두 들어가 실제 paste 절단은 재현되지 않았다. 다만 299자 뒤 20자 `pressSequentially`는 300자까지만 남았다. 보정은 브라우저별 입력 경로에 기대지 않으려는 최소 수리다.
 - focused regression(`check-ui-114.mjs` 5관문): 두 입력에 maxlength가 없다. version 81자(`pressSequentially`)는 입력란에 81자 그대로 남고 ‘판본은…’으로 거절된다. origin 299+2자는 301자 그대로 남고 ‘출처는…’으로 거절된다. 두 경우 모두 project 바이트가 그대로다. 최종 코드에서 UI 6관문 전체와 `source-entry114` 10/10이 통과했다(`evidence/ui114.json` 갱신). 관련 없는 전체 검사는 다시 돌리지 않았다(마지막 전체 606/606은 19a8d91 코드 기준이고, 이번 변경은 `return-view.ts`의 입력 속성 하나다).
 
+## 보기 전환 스크롤 보정 (c73fc77 뒤)
+
+- Root 1280 재확인: 원자료 목록을 아래로 내린 뒤 제공 자료를 열면, `host.show`가 같은 pane의 scrollTop을 새 보기에 그대로 적용했다. 그래서 파일명·선언·출처가 화면 위로 사라졌다.
+- 보정(`return-view.ts`): 일회용 `fromTop` 표시를 두었다. 세 진입만 새 보기를 맨 위에서 연다. 제공 자료를 quote 없이 처음 열 때, 저장 성공 뒤 그 자료를 열 때, 파일 양식에 들어갈 때다. 그 밖의 render는 지금처럼 스크롤을 유지하고, render가 일찍 끝나면 표시를 지운다. quote 진입(rr-mark 가운데 정렬)과 `keep()`/`s.scroll` 돌아갈 위치는 그대로다. 양식 미리보기의 죽은 `max-height` 규칙(기존 `.rr-raw`가 이김)은 지웠다(표시 동작 변화 없음).
+- 대상 UI(`check-ui-114-scroll.mjs`, `evidence/ui114-scroll.json`, AI 요청 0):
+  - 읽기 목록을 274로 내린 뒤 near.js를 열면 0이고, 뒤로 가면 274다. 이 구간만 1280×520이다(800에서는 읽기 화면이 스크롤되지 않는다).
+  - 전체 목록을 1295로 내린 뒤 label-lookup.js를 열면 0이다. 머리·선언 문장·출처가 첫 화면에 있다.
+  - 파일 양식은 0에서 열린다. 3433으로 내린 뒤 다른 파일을 골라도(재 render) 3433이 유지되고, 저장하면 새 자료 머리(0)가 보인다.
+  - 변이 확인: dist에서 `scrollTop = 0`을 빼면 ‘near.js: h3 in the first screen’으로 실패한다.
+- 최종 코드에서 `check-ui-114.mjs` 6관문(quote 가운데 정렬·돌아오기 포함)과 `source-entry114` 10/10이 다시 통과했다.
+
 ## 미확인·한계
 
 - 잠긴 TS 5.8.3 build/check, Windows, 정확 CI, `deploy --dry-run`은 총괄 분담이다(위 컴파일러 사정). Root가 72b7e79에서 locked build/check를 통과했다고 알려 왔다. 최종 커밋에서는 다시 확인해야 한다.

@@ -223,6 +223,10 @@ export function createReturnView(host: ReturnHost) {
   }
   /* ---------- a provided code or check file (project.14) ---------- */
   const fileDrafts = new Map<string, FileDraft>();
+  /** The next render opens a new view at its top: a provided source opened without a quote (from a list or after saving) and the
+   * file form. The pane otherwise keeps its scroll across renders, which would carry a long list's place into it. Used once. */
+  let fromTop = false;
+  const toTop = () => { if (!fromTop) return; fromTop = false; const b = document.querySelector<HTMLElement>('#lens .lens-body'); if (b) b.scrollTop = 0; };
   const fileOf = (key: string): FileDraft => {
     let d = fileDrafts.get(key);
     if (!d) { d = { kind: null, name: null, text: null, size: 0, version: '', origin: '', context: null, msg: null, reading: false, saving: false, token: 0 }; fileDrafts.set(key, d); }
@@ -234,7 +238,7 @@ export function createReturnView(host: ReturnHost) {
     open(); if (!s) return;
     keep();
     const d = fileOf(s.key); d.context = context; s.quoteFrom = null; if (scene) s.back = scene;
-    s.view = { kind: 'file' }; render();
+    s.view = { kind: 'file' }; fromTop = true; render();
     requestAnimationFrame(() => document.querySelector<HTMLInputElement>('#lens input[name="file-kind"]:checked, #lens #file-kind-code')?.focus({ preventScroll: true }));
   }
   async function readFile(file: File) {
@@ -279,7 +283,7 @@ export function createReturnView(host: ReturnHost) {
     st.storeMsg = said;
     await refresh();
     const src = s === st ? sources().find(x => x.recordId === done.id) : null;
-    if (s === st && src) { st.view = { kind: 'source', source: structuredClone(src), from: 'material', quote: null }; render(); requestAnimationFrame(() => document.querySelector<HTMLElement>('#lens .rr-back')?.focus({ preventScroll: true })); }
+    if (s === st && src) { st.view = { kind: 'source', source: structuredClone(src), from: 'material', quote: null }; fromTop = true; render(); requestAnimationFrame(() => document.querySelector<HTMLElement>('#lens .rr-back')?.focus({ preventScroll: true })); }
   }
   function setStage(id: string) {
     if (!s || s.stage === id || s.pending) return;
@@ -606,7 +610,7 @@ export function createReturnView(host: ReturnHost) {
   }
 
   function render() {
-    const o = host.current(); if (!s || !o || o.key !== s.key) return;
+    const o = host.current(); if (!s || !o || o.key !== s.key) { fromTop = false; return; }
     // The way back stays at the top of the pane while a long original scrolls under it.
     const back = (label: string) => h('div', { class: 'rr-backbar' }, h('button', { type: 'button', class: 'rr-back', onclick: backToReading },
       h('span', { 'aria-hidden': 'true' }, '←'), label));
@@ -625,7 +629,7 @@ export function createReturnView(host: ReturnHost) {
       const was = document.activeElement instanceof HTMLElement && document.activeElement.closest('#lens') ? document.activeElement : null;
       const id = was?.id ?? null, caret = was instanceof HTMLInputElement && was.type === 'text' ? [was.selectionStart, was.selectionEnd] as const : null;
       put(body, back('정리로'), ...fileBody(o));
-      host.show([header(o), body, fileFooter()]); const d = fileOf(s.key); host.mark(d.context ? [d.context] : []);
+      host.show([header(o), body, fileFooter()]); toTop(); const d = fileOf(s.key); host.mark(d.context ? [d.context] : []);
       const next = id ? document.getElementById(id) : null;
       if (next) { next.focus({ preventScroll: true }); if (caret && next instanceof HTMLInputElement) next.setSelectionRange(caret[0], caret[1]); }
       return;
@@ -642,7 +646,7 @@ export function createReturnView(host: ReturnHost) {
           ...srcLabel(x)))))));
     } else put(body, ...readingBody(o));
     // A quote opened from a part is read and left: no reading action under it.
-    host.show(s.view.kind === 'source' && s.quoteFrom ? [header(o), body] : [header(o), body, footer(o)]);
+    host.show(s.view.kind === 'source' && s.quoteFrom ? [header(o), body] : [header(o), body, footer(o)]); toTop();
     const v = s.view;
     host.open(s.focus?.list === 'records' && s.focus.part ? s.focus.part : null);
     const marks = v.kind === 'source' ? (v.source.kind === 'record' ? focusParts() : v.source.partIds) : focusParts();
@@ -661,7 +665,10 @@ export function createReturnView(host: ReturnHost) {
     if (!s) return;
     if (!kept) keep();
     held = false;
-    s.view = { kind: 'source', source: structuredClone(source), from, quote, ...(at !== undefined ? { at } : {}) }; render();
+    s.view = { kind: 'source', source: structuredClone(source), from, quote, ...(at !== undefined ? { at } : {}) };
+    // A quote is centred where it stands (in render); a provided source opened as itself starts at its own head.
+    if (!quote && source.evidence) fromTop = true;
+    render();
     requestAnimationFrame(() => document.querySelector<HTMLElement>('#lens .rr-back')?.focus({ preventScroll: true }));
   }
   function backToReading() {

@@ -1,0 +1,24 @@
+{
+  "at": "2026-10-29T17:57:45.429Z",
+  "viewport": "1280x800",
+  "readingList": {
+    "viewport": "1280x520",
+    "readingScrolledTo": 274,
+    "sourceOpenedAt": 0,
+    "backTo": 274
+  },
+  "fullList": {
+    "listScrolledTo": 1295,
+    "sourceOpenedAt": 0,
+    "backTo": 0
+  },
+  "fileForm": {
+    "readingBefore": 0,
+    "formOpenedAt": 0,
+    "formScrolledTo": 3433,
+    "afterRerender": 3433,
+    "savedOpenedAt": 0,
+    "backTo": 0
+  },
+  "aiRequests": 0
+}
