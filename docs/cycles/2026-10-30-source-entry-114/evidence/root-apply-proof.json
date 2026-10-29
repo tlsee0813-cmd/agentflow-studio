@@ -1,0 +1,44 @@
+{
+  "sha": "c73fc77715e449350ce13dcabb360d2596452021",
+  "fixtureOnly": true,
+  "normalUiAskHash": "66cd269ff03becde6a83eb4f1d83b20e2beba4a252457b3174b427e8f1de2a2a",
+  "preparedAskExact": true,
+  "job": "MJ_f5a05835-dfb9-4e7d-a6c7-2eed1229b7ff",
+  "beforeApplyWholeProjectUnchanged": true,
+  "explicitApplyOnce": true,
+  "reloadWholeProjectExact": true,
+  "normalBackupCopyWholeProjectExact": true,
+  "old4RecordsAndFirstReadingExact": true,
+  "newMatches": [
+    {
+      "kind": "code",
+      "record": "N_ffacf72c-fa24-4b48-b048-d554129ccc05",
+      "from": 2004,
+      "to": 2066,
+      "quoteSha256": "d748d66041aebc132a7db422559ae0c31628862c1ccd43bb0d8b42e829018e29"
+    },
+    {
+      "kind": "test",
+      "record": "N_be85acf4-36b8-4d3a-8603-fe1022546708",
+      "from": 621,
+      "to": 876,
+      "quoteSha256": "f7580a37bc6aeb140762c877163edfec7cb03a6846fa81fed8381eeedb5fb948"
+    },
+    {
+      "kind": "checked",
+      "record": "N_aa971e58-b3e7-49da-bdbc-205ed54b8aad",
+      "from": 271,
+      "to": 438,
+      "quoteSha256": "6cc78381e3791a4aba5455344a1ad609426ddfe011051dd5ab440cb35f527046"
+    }
+  ],
+  "codeQuoteBack": {
+    "scrollBefore": 256.79998779296875,
+    "scrollAfter": 256.79998779296875,
+    "focus": "근거",
+    "title": "if (typeof raw !== 'string') return '';\n    return raw.trim();",
+    "detailsExact": true
+  },
+  "realModelCalls": 0,
+  "fixtureChildCalls": 1
+}

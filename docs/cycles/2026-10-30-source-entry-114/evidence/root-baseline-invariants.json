@@ -1,0 +1,44 @@
+{
+  "source": "preserved111/113 project and full frozen bundle",
+  "schemaVersion": "idea015.project.13",
+  "projectHash": "ef7d9b06dcc990ac19e118391c8c48c4be27da06192e823e5cb7ea16dd315067",
+  "requestBundleHash": "cdf2dc70965e8eaf9c6d701dcef39a022d1baab8e0e0fcf047e4941590f8ba05",
+  "oldCollections": {
+    "sources": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "bases": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "tasks": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "space": "72045d13d495c7b322fb88d96bfd69cafaed40c897d06b36c9e7765935b5fb5d",
+    "readings": "4a6c9963320580f54e3e41fc6bbde37782353b0bbfd52847762d8f9b7a544ce2",
+    "pasted": "75726bbe0dfe0286b2480a7adaf0701f286e41c39f125831001bfa5053f4ea08",
+    "draft": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
+    "answerDraft": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
+    "basisDraft": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
+    "basisEdits": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "pending": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+    "notice": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+  },
+  "oldPasted": [
+    {
+      "id": "N_7f08f8d0-9f0e-4ead-8f5b-f07e03f5bfe1",
+      "textChars": 4699,
+      "wholeRecordSha256": "dab2d1fc4c5dc87edf7497692ac0fb2c82c61ed31d7fdfaa0cdc87632931f6c1"
+    },
+    {
+      "id": "N_44d99e25-f04c-4610-a661-13dc202b760e",
+      "textChars": 1101,
+      "wholeRecordSha256": "b1f1e4f9606124c73b210396f8ca3fb0a01a104a3ed0b273a902c2e72265c112"
+    },
+    {
+      "id": "N_e301db99-bea0-4bc9-b19c-d3243959b420",
+      "textChars": 2521,
+      "wholeRecordSha256": "a8f3985bdc6a517bbaa800f92aa88504680eaa717dcfb352aafadea4b0e517ef"
+    },
+    {
+      "id": "N_aa971e58-b3e7-49da-bdbc-205ed54b8aad",
+      "textChars": 6842,
+      "wholeRecordSha256": "ab6184c2dad0ef59e513c63d17038cbeefcb985d8ec768e341417b18d6de2f67"
+    }
+  ],
+  "expectedAllowed": "schemaVersion/revision and appended typed pasted records; any other difference requires explicit explanation",
+  "realGenerations": 0
+}

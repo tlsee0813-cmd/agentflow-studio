@@ -1,0 +1,30 @@
+{
+  "job": 123637732264,
+  "run": 40927707675,
+  "sha": "d6c93dffa710e7947e73c319cbee079d5c540adf",
+  "lines": [
+    "2026-10-29T18:07:16.5068869Z   ref: d6c93dffa710e7947e73c319cbee079d5c540adf",
+    "2026-10-29T18:07:16.8979636Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin d6c93dffa710e7947e73c319cbee079d5c540adf",
+    "2026-10-29T18:07:18.8105778Z  * branch            d6c93dffa710e7947e73c319cbee079d5c540adf -> FETCH_HEAD",
+    "2026-10-29T18:07:18.8112910Z [command]/usr/bin/git rev-parse --verify --quiet d6c93dffa710e7947e73c319cbee079d5c540adf^{object}",
+    "2026-10-29T18:07:18.8143809Z d6c93dffa710e7947e73c319cbee079d5c540adf",
+    "2026-10-29T18:07:18.8242617Z [command]/usr/bin/git checkout --progress --force d6c93dffa710e7947e73c319cbee079d5c540adf",
+    "2026-10-29T18:07:18.9883915Z Note: switching to 'd6c93dffa710e7947e73c319cbee079d5c540adf'.",
+    "2026-10-29T18:07:18.9899028Z HEAD is now at d6c93df fix(114): show the file form's refusal in its fixed footer",
+    "2026-10-29T18:07:18.9985105Z d6c93dffa710e7947e73c319cbee079d5c540adf",
+    "2026-10-29T18:07:33.0820622Z d6c93dffa710e7947e73c319cbee079d5c540adf",
+    "2026-10-29T18:07:36.0737259Z Syntax, lock alignment and client credential boundary checks passed. Not a full security audit.",
+    "2026-10-29T18:09:38.1199702Z # tests 279",
+    "2026-10-29T18:09:38.1200005Z # pass 279",
+    "2026-10-29T18:09:38.1200163Z # fail 0",
+    "2026-10-29T18:09:38.1200308Z # skipped 0",
+    "2026-10-29T18:09:43.4122163Z IDEA015 type, syntax and client/server boundary checks passed.",
+    "2026-10-29T18:11:06.5447192Z # Subtest: AREA17 an explicitly passed export anchor must be the one this project state gives, with the text it gives",
+    "2026-10-29T18:11:06.5447831Z ok 582 - AREA17 an explicitly passed export anchor must be the one this project state gives, with the text it gives",
+    "2026-10-29T18:11:06.5473443Z # tests 606",
+    "2026-10-29T18:11:06.5473575Z # pass 606",
+    "2026-10-29T18:11:06.5473644Z # fail 0",
+    "2026-10-29T18:11:06.5473782Z # skipped 0",
+    "2026-10-29T18:11:14.0682627Z {\"phase\":\"prepared\",\"source\":\"d6c93dffa710e7947e73c319cbee079d5c540adf\",\"worker\":\"agentflow-studio\",\"assets\":53,\"modules\":25,\"bytes\":1211448,\"dryRun\":true}"
+  ]
+}

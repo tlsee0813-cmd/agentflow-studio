@@ -1,0 +1,18 @@
+{
+  "sha": "d6c93dffa710e7947e73c319cbee079d5c540adf",
+  "node": "v24.19.0",
+  "steps": [
+    {
+      "name": "build",
+      "status": 0,
+      "signal": null,
+      "ms": 3646
+    },
+    {
+      "name": "check",
+      "status": 0,
+      "signal": null,
+      "ms": 8799
+    }
+  ]
+}

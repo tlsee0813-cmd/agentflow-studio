@@ -1,0 +1,114 @@
+{
+  "cycle": 114,
+  "review": "independent-final-delta",
+  "base": "72b7e79a1d8cf20ec2a9930d135ac40a9f4c3c42",
+  "head": "c73fc77715e449350ce13dcabb360d2596452021",
+  "verdict": "BOUNDED_NO_REMAINING_P1_P2_FINDING",
+  "productAcceptanceOwner": "root",
+  "scope": "Only the final delta: the three interim P2 repairs, metadata maxlength repair, provided-source presentation/style, fake-cli file-delay, UI checker and its recorded evidence/RESULT claims. No repeated whole-source review.",
+  "activity": {
+    "productWrites": 0,
+    "builds": 0,
+    "testsExecuted": 0,
+    "browserExecutions": 0,
+    "modelCalls": 0,
+    "newResearch": 0
+  },
+  "findings": [],
+  "closedBoundaries": [
+    {
+      "id": "AF114-I1",
+      "status": "REPAIRED_IN_SOURCE",
+      "file": "app/continuity/src/client/return-view.ts",
+      "lines": [240, 246, 247, 252],
+      "reason": "The latest selection clears reading before the oversized-file early return. An earlier pending completion remains excluded by the token comparison. A rejected oversized replacement therefore no longer strands the form in reading state or replaces the last accepted file.",
+      "regressionEvidence": "check-ui-114.mjs:237-244 holds a file read, chooses an oversized file, asserts saving is enabled and the prior filename remains, releases the old read, then asserts its text did not replace the kept file. evidence/ui114.json records that path. This reviewer inspected the assertion and receipt but did not execute it."
+    },
+    {
+      "id": "AF114-I2",
+      "status": "REPAIRED_IN_SOURCE",
+      "file": "app/continuity/src/client/return-view.ts",
+      "lines": [269, 272, 575, 579, 584, 590],
+      "reason": "Save now snapshots file token/text/name/kind/version/origin/context and deletes only a still-identical draft. Kind, file picker, version, origin and context removal are disabled while saving. Closing remains possible; the prior state-identity guard still prevents the completed save from reopening the old pane.",
+      "regressionEvidence": "check-ui-114.mjs:245-253 observes the saving render and asserts the five kind/file/metadata controls are disabled. Context removal is additionally visibly disabled in the source; the full snapshot guards context changes. The UI test does not constitute an independent execution by this reviewer."
+    },
+    {
+      "id": "AF114-I3",
+      "status": "REPAIRED_IN_SOURCE",
+      "file": "app/continuity/server/map-prompt.mjs",
+      "line": 235,
+      "reason": "The instruction now restricts reported/checked to actual author implementation/check prose, explicitly says literal pasted code is not to be renamed reported/checked, and requires any code/test match to use an evidence occurrence. If none exists, it makes no code/test match from that code. The companion role/describes permission remains.",
+      "regressionEvidence": "source-entry114.test.mjs:199-201 asserts the corrected distinction and removal of the earlier wording. The validator source-kind gate was not weakened by this final delta. This is a normative instruction repair, not proof of future model compliance."
+    },
+    {
+      "id": "AF114-METADATA-TRUNCATION",
+      "status": "REPAIRED_IN_SOURCE",
+      "file": "app/continuity/src/client/return-view.ts",
+      "lines": [582, 583, 584],
+      "reason": "The text inputs no longer set maxlength. Entire values are retained in the draft and the unchanged evidenceProblem check refuses over-limit metadata at save. No slice was introduced. Existing trim remains limited to optional metadata edge whitespace and does not trim the raw source file.",
+      "regressionEvidence": "check-ui-114.mjs:203-210 asserts maxlength absent, version81 remains81 after pressSequentially, origin299+2 remains301, both produce explicit rejection, and the saved entry remains identical. RESULT distinguishes Root's paste/Control+V314 observation from pressSequentially299+20 being capped at300 in the old form; it does not falsely claim every paste path truncated."
+    }
+  ],
+  "presentationDelta": {
+    "source": "return-view.ts:410 moves the provided-file action below the title; 533 puts the typed source article before the map row. Its declared kind/name/version/origin and not-executed notice remain beside the exact raw text. No source or match meaning is changed by that ordering.",
+    "styles": "styles.css adds the local form/source styles. The native file input remains in the keyboard tab order with a focus-visible label; metadata controls use full-width inputs and origin text wraps. No material source-level regression found. Independent visual acceptance remains Root's task.",
+    "limit": "The authored checker uses Chromium1280x800 and its first-screen assertions check element top positions, not full fit for every real long file/header. Root's normal actual-backup UI observation is the relevant additional evidence; this reviewer did not repeat it."
+  },
+  "testAndClaimAssessment": {
+    "fakeCli": "The added file-delay branch emits the established start events, waits, then writes and emits the exact selected reply file. It supports leaving a real owned job pending; it is not an actual model response.",
+    "sixGates": "The checker covers normal import/file/save/export/reload, typed-versus-pasted dedup, both ask projections, invalid whole-wire rejection and delayed ready/explicit apply/quote return, legacy smuggling/rollback/failed inputs, and per-entry async ownership. It checks same-entry immediate apply separately on B. ui114.json records three fake jobs, three acknowledgements, no direct map call and three fake invocations; file-entry-only paths record zero AI POSTs.",
+    "provenance": "The pre-114 fixture is synthetic and the plan sidecar is loaded for that fixture. RESULT explicitly distinguishes it from Root's private actual111/113 backups and assigns real-backup verification to Root. The lawful and unlawful wires are authored for their respective asks.",
+    "compilerAndRuns": "RESULT accurately labels author Linux TS6.0.2 emission and its unchanged baseline DOM error, does not claim the locked TS5.8.3 gate passed remotely, and distinguishes prior606/606 from the final focused10/10/UI rerun. Root locked checks and exact CI40925411011 are not independently executed or declared finished here.",
+    "promptIds": "The only existing 102 assertions changed in this delta are the automatic map6 prompt-ID expectations; the new source distinction gets dedicated string assertions. No older prompt or validator acceptance relaxation is present in this final delta."
+  },
+  "remainingLimits": [
+    "No actual generation has demonstrated that the model selects eligible typed source spans instead of the preserved old pasted occurrences.",
+    "The preserved113 wire remains invalid; this review does not repair or partially accept it, retag old records, or replace the111/113 failure classification.",
+    "App-provided code/check metadata remains a user declaration, not proof that the app executed code or tests.",
+    "Root still owns final actual-backup UI apply/quote verification, locked validation, exact CI and the narrow implementation acceptance decision."
+  ],
+  "conclusion": "The four requested repair boundaries are closed in this fixed delta and the inspected author evidence is scoped honestly. No remaining actionable P1/P2 was found within the requested final-delta review. This supports Root proceeding with the already selected acceptance checks; it does not establish model quality or overall product completion.",
+  "reviewedSha": "d6c93dffa710e7947e73c319cbee079d5c540adf",
+  "additionalScrollDeltaReview": {
+    "base": "c73fc77715e449350ce13dcabb360d2596452021",
+    "head": "779b37b2f04eb88d23ade39f86588406312e620b",
+    "verdict": "BOUNDED_NO_P1_P2_FINDING",
+    "activity": "Fixed-commit read-only delta and authored evidence inspection. No tests, build, browser, model call or product write. The c73 review above is preserved as its own historical scope.",
+    "sourceFindingClosed": {
+      "file": "app/continuity/src/client/return-view.ts",
+      "lines": [228, 229, 241, 286, 613, 632, 649, 670],
+      "reason": "The one-shot fromTop flag is set only for the three selected transitions: entering the file form, opening a provided source after successful save, and opening a provided source without a quote. toTop consumes the flag after the synchronous host.show call, overriding its inherited scrollTop. Early render exit clears the flag. Ordinary re-renders do not set it. Existing quote-centering and saved-reading scroll restoration remain separate.",
+      "ownership": "The save branch still requires the captured state identity before opening the saved source; the new top request is set only inside that branch. The scroll correction does not add a new async action, mutate source data or change apply ownership."
+    },
+    "styleAssessment": "Removing max-height40vh from rr-file-preview removes a declaration already overridden by the later equal-specificity rr-raw max-height:none. The removed overflow:auto would otherwise govern a separately constrained preview, but with no max-height it is not the scrolling boundary. The lens body remains the intended scrolling surface; no new source-level blocking regression found.",
+    "authoredEvidence": {
+      "checker": "docs/cycles/2026-10-30-source-entry-114/check-ui-114-scroll.mjs",
+      "receipt": "docs/cycles/2026-10-30-source-entry-114/evidence/ui114-scroll.json",
+      "meaning": "The model-free checker asserts a provided source opened from a scrolled reading starts at0 and returning restores274; that path uses1280x520 to create a nonzero reading position. At1280x800 it asserts the long full-list item opens at0 from list scroll1295, and file form open/save start at0 while same-form file re-render preserves3433. It records zero AI requests. The refreshed six-gate receipt continues to record the separately authored quote roundtrip and fake job boundaries.",
+      "limits": "The full-list backTo0 is recorded rather than asserted to restore the material-list position; the source repair and RESULT do not claim full-list-position restoration. The file-form return-to-reading assertion starts from readingBefore0 in this fixture, so nonzero return preservation is established by the separate near.js reading path. The new checker does not independently cover a very long quote; existing six-gate assertions and Root observation remain the quote evidence. No authored or Root execution was repeated by this reviewer.",
+      "claimMatch": "RESULT separates the1280x520 reading case,1280x800 full-list case and same-form re-render case, and labels the author-only mutation test as such. No additional model-quality claim was added."
+    },
+    "rootEvidenceReportedSeparately": "Root reports the c73 normal selected-RQ fake job, leaving to home, ready without project mutation, explicit apply, exact reload, exact code/test quotes and back scroll/focus, then exact backup copy. Those observations are not re-executed here. Root still owns the new scroll UI check and CI40926559126 completion.",
+    "findings": [],
+    "next": "Root may complete the already selected new-scroll normal-UI and fixed-CI checks. No further source repair is requested by this bounded delta review."
+  },
+  "additionalAlertDeltaReview": {
+    "base": "779b37b2f04eb88d23ade39f86588406312e620b",
+    "head": "d6c93dffa710e7947e73c319cbee079d5c540adf",
+    "verdict": "BOUNDED_NO_P1_P2_FINDING",
+    "activity": "Read-only exact delta inspection. No product writes, builds, test execution, browser use, model calls or repeated research. All previous review entries remain unchanged.",
+    "productDelta": {
+      "file": "app/continuity/src/client/return-view.ts",
+      "lines": [598, 603, 606, 632],
+      "assessment": "The existing d.msg alert moves from after the long preview in fileBody to fileFooter immediately above the Save row. role=alert and the existing error styling remain. The footer is outside the scrolling body, so a long preview no longer carries the reason out of the visible pane. No message generation, validation, metadata, source bytes, save ownership or storage behavior changes in this delta. No new actionable P1/P2 found."
+    },
+    "authoredVerificationAssessment": {
+      "checker": "docs/cycles/2026-10-30-source-entry-114/check-ui-114-scroll.mjs:85-110",
+      "meaning": "The new1280x720 case establishes preview text over3000 characters and body overflow over1500px. It triggers invalid UTF-8, an oversized file, version81 and origin301. For each reason it asserts the full alert rectangle lies within the viewport and the center hit-test lands on the alert or its descendant. It checks the long accepted preview remains exact, later verifies metadata and the last accepted filename remain, and asserts the saved entry is identical. This is stronger than only locating an alert node.",
+      "receipt": "evidence/ui114-scroll.json records bad UTF-8 y602/bottom672 and the other three y621/bottom672, with zero AI requests. check-ui-114.mjs changes only the affected alert lookup from form to footer; the previous assertions are retained. RESULT describes the real Root-found visibility defect, the narrow move and the author mutation failure without calling it a model result.",
+      "limits": "These executions and the mutation check are author evidence, not reviewer execution. A center hit-test detects central covering but does not prove every pixel is unobscured at all viewport sizes. The assertions directly support the selected1280x720 long-preview refusal boundary; they do not establish a general responsive-layout guarantee or final exact-CI success."
+    },
+    "findings": [],
+    "next": "Root owns locked build/check, actual long-file alert visibility and final CI. No additional source change is requested within this final single-delta review. The earlier model/source-kind and typed-evidence limitations remain."
+  }
+}

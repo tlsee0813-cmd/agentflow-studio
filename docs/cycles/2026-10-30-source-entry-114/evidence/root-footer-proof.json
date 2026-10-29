@@ -1,0 +1,45 @@
+{
+  "sha": "d6c93dffa710e7947e73c319cbee079d5c540adf",
+  "checks": [
+    {
+      "case": "version81",
+      "inside": true,
+      "rect": {
+        "bottom": 672,
+        "height": 51.5,
+        "left": 955.2000122070312,
+        "right": 1260.000030517578,
+        "top": 620.5,
+        "width": 304.8000183105469,
+        "x": 955.2000122070312,
+        "y": 620.5
+      },
+      "text": "판본은 한 줄 80자 이내로 적어 주세요(줄바꿈·키처럼 보이는 글 없이).",
+      "uncovered": true,
+      "versionLength": 81,
+      "rawExact": true,
+      "rawSha256": "d4335980a2b17fdf5cf82ed5778a5ac2b460c542068ff84fb3a14aa55e5eebad"
+    },
+    {
+      "case": "origin301",
+      "inside": true,
+      "originLength": 301,
+      "rect": {
+        "bottom": 672,
+        "height": 51.5,
+        "left": 955.2000122070312,
+        "right": 1260.000030517578,
+        "top": 620.5,
+        "width": 304.8000183105469,
+        "x": 955.2000122070312,
+        "y": 620.5
+      },
+      "text": "출처는 한 줄 300자 이내로 적어 주세요(줄바꿈·키처럼 보이는 글 없이).",
+      "uncovered": true,
+      "rawExact": true,
+      "rawSha256": "d4335980a2b17fdf5cf82ed5778a5ac2b460c542068ff84fb3a14aa55e5eebad"
+    }
+  ],
+  "workspaceUnchanged": true,
+  "plansUnchanged": true
+}

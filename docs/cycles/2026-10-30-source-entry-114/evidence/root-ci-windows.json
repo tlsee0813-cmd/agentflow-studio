@@ -1,0 +1,30 @@
+{
+  "job": 123637732874,
+  "run": 40927707675,
+  "sha": "d6c93dffa710e7947e73c319cbee079d5c540adf",
+  "lines": [
+    "2026-10-29T18:07:14.3187275Z   ref: d6c93dffa710e7947e73c319cbee079d5c540adf\r",
+    "2026-10-29T18:07:17.6504838Z [command]\"C:\\Program Files\\Git\\bin\\git.exe\" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin d6c93dffa710e7947e73c319cbee079d5c540adf\r",
+    "2026-10-29T18:07:20.1871469Z  * branch            d6c93dffa710e7947e73c319cbee079d5c540adf -> FETCH_HEAD\r",
+    "2026-10-29T18:07:20.1921815Z [command]\"C:\\Program Files\\Git\\bin\\git.exe\" rev-parse --verify --quiet d6c93dffa710e7947e73c319cbee079d5c540adf^{object}\r",
+    "2026-10-29T18:07:20.2248392Z d6c93dffa710e7947e73c319cbee079d5c540adf\r",
+    "2026-10-29T18:07:20.2952010Z [command]\"C:\\Program Files\\Git\\bin\\git.exe\" checkout --progress --force d6c93dffa710e7947e73c319cbee079d5c540adf\r",
+    "2026-10-29T18:07:20.8341920Z Note: switching to 'd6c93dffa710e7947e73c319cbee079d5c540adf'.\r",
+    "2026-10-29T18:07:20.8351398Z HEAD is now at d6c93df fix(114): show the file form's refusal in its fixed footer\r",
+    "2026-10-29T18:07:20.9303294Z d6c93dffa710e7947e73c319cbee079d5c540adf\r",
+    "2026-10-29T18:08:22.6093960Z d6c93dffa710e7947e73c319cbee079d5c540adf\r",
+    "2026-10-29T18:08:34.7164215Z Syntax, lock alignment and client credential boundary checks passed. Not a full security audit.\r",
+    "2026-10-29T18:10:39.0457437Z # tests 279\r",
+    "2026-10-29T18:10:39.0457766Z # pass 279\r",
+    "2026-10-29T18:10:39.0457921Z # fail 0\r",
+    "2026-10-29T18:10:39.0458242Z # skipped 0\r",
+    "2026-10-29T18:10:48.1025105Z IDEA015 type, syntax and client/server boundary checks passed.\r",
+    "2026-10-29T18:12:02.3344321Z # Subtest: AREA17 an explicitly passed export anchor must be the one this project state gives, with the text it gives\r",
+    "2026-10-29T18:12:02.3345222Z ok 582 - AREA17 an explicitly passed export anchor must be the one this project state gives, with the text it gives\r",
+    "2026-10-29T18:12:02.3374824Z # tests 606\r",
+    "2026-10-29T18:12:02.3374966Z # pass 603\r",
+    "2026-10-29T18:12:02.3375036Z # fail 0\r",
+    "2026-10-29T18:12:02.3375177Z # skipped 3\r",
+    "2026-10-29T18:12:14.2963499Z {\"phase\":\"prepared\",\"source\":\"d6c93dffa710e7947e73c319cbee079d5c540adf\",\"worker\":\"agentflow-studio\",\"assets\":53,\"modules\":25,\"bytes\":1211448,\"dryRun\":true}\r"
+  ]
+}
