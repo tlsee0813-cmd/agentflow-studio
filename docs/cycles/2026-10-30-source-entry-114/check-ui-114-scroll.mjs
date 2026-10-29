@@ -1,6 +1,7 @@
 // AF114 targeted 1280x800 check of where a new view starts in the return pane (model-free, no AI request). The pane keeps its scroll
 // across renders; a provided source opened as itself (from a long list, or right after saving) and the file form start at their
-// head, while the way back returns the reading to where it was. Quote entries keep their centring (check-ui-114.mjs path 4).
+// head, while the way back returns the reading to where it was. Quote entries keep their centring (check-ui-114.mjs path 4). And a
+// refusal in the file form reads in sight right after the action, however long the file's preview (section 4, 1280x720).
 //   node docs/cycles/2026-10-30-source-entry-114/check-ui-114-scroll.mjs <evidence-dir>    (from the repo root, after the builds)
 import { createRequire } from 'node:module';
 import { spawn } from 'node:child_process';
@@ -81,6 +82,32 @@ try {
   await lens.locator('.rr-back').click(); await lens.locator('.rr-material').waitFor(); const back3 = await top();
   result.fileForm = { readingBefore: before3, formOpenedAt: formAt, formScrolledTo: formScrolled, afterRerender: rerendered, savedOpenedAt: saved, backTo: back3 };
   assert.ok(Math.abs(back3 - before3) <= 1, `reading back at ${before3}, got ${back3}`);
+  // 4. At 1280x720 with a long code file in the form: why a file or a field is refused reads in sight right after the action (the
+  // fixed footer), not under the preview. The long text, the other inputs, the last good file and the project stay as they were.
+  await page.setViewportSize({ width: 1280, height: 720 }); await page.waitForTimeout(200);
+  const W = 'agentflow.idea015.workspace', key = decodeURIComponent(/#\/p\/([^/]+)/.exec(page.url())[1]);
+  const raw = () => page.evaluate(([w, k]) => JSON.stringify(JSON.parse(localStorage.getItem(w)).entries.find(e => e.entryId === k)), [W, key]);
+  const longText = code('label-lookup.js 4'), alert = lens.locator('.rr-file-alert');
+  const seen = async (words, step) => {
+    await alert.getByText(words).waitFor();
+    const r = await alert.boundingBox(), hit = await alert.evaluate(e => { const b = e.getBoundingClientRect(), x = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2); return !!x && e.contains(x); });
+    assert.ok(r && r.y >= 0 && r.y + r.height <= 720 && hit, `${step}: the reason in sight (${JSON.stringify(r)})`);
+    assert.equal(await lens.locator('.rr-file-preview').evaluate(e => e.textContent), longText, `${step}: the long text stays`);
+    return { step, y: Math.round(r.y), bottom: Math.round(r.y + r.height) };
+  };
+  await lens.locator('.rr-file-open').click(); await lens.locator('#file-kind-code').check();
+  await lens.locator('#file-pick').setInputFiles({ name: 'label-lookup.js', mimeType: 'text/javascript', buffer: Buffer.from(longText) }); await lens.locator('.rr-file-preview').waitFor();
+  assert.ok(longText.length > 3000 && (await body.evaluate(e => e.scrollHeight - e.clientHeight)) > 1500, 'a preview much longer than the pane');
+  const before4 = await raw(), shown4 = [];
+  await lens.locator('#file-pick').setInputFiles({ name: 'bad.js', mimeType: 'text/javascript', buffer: Buffer.from([0x61, 0xff, 0x62]) }); shown4.push(await seen('UTF-8 텍스트 파일이 아니라서', 'bad UTF-8'));
+  await lens.locator('#file-pick').setInputFiles({ name: 'huge.js', mimeType: 'text/javascript', buffer: Buffer.alloc(180004, 0x61) }); shown4.push(await seen('KB를 넘어', 'oversize'));
+  await lens.locator('#file-version').pressSequentially('v'.repeat(81)); await lens.getByRole('button', { name: '자료 저장' }).click(); shown4.push(await seen('판본은', 'version 81'));
+  assert.equal(await lens.locator('#file-version').inputValue(), 'v'.repeat(81));
+  await lens.locator('#file-version').fill('v1.6.0'); await lens.locator('#file-origin').fill('o'.repeat(301)); await lens.getByRole('button', { name: '자료 저장' }).click(); shown4.push(await seen('출처는', 'origin 301'));
+  assert.deepEqual([await lens.locator('#file-version').inputValue(), (await lens.locator('#file-origin').inputValue()).length, await lens.locator('.rr-file-name').innerText()], ['v1.6.0', 301, 'label-lookup.js'], 'inputs as typed, last good file');
+  await page.screenshot({ path: `${OUT}/ui114-scroll-4-refused-in-sight.png` });
+  assert.equal(await raw(), before4, 'nothing saved');
+  result.refusals1280x720 = shown4;
   assert.deepEqual(errors, []); assert.deepEqual(posts, [], 'no AI or job request');
   writeFileSync(`${OUT}/ui114-scroll.json`, JSON.stringify({ at: new Date().toISOString(), viewport: '1280x800', ...result, aiRequests: posts.length }, null, 2));
   console.log('ui114 scroll passed', JSON.stringify(result));

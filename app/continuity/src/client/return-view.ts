@@ -598,12 +598,12 @@ export function createReturnView(host: ReturnHost) {
       field('file-version', '판본', EVIDENCE_VERSION_MAX, d.version, v => { d.version = v; }, '예: commit 3f2a1c9 또는 v1.4.0'),
       field('file-origin', '출처', EVIDENCE_ORIGIN_MAX, d.origin, v => { d.origin = v; }, '예: 저장소 경로나 URL (열지 않고 글로만 보관)'),
       d.text !== null ? h('div', { class: 'rr-file-preview-box' }, h('p', { class: 'fine' }, `미리보기 (읽기 전용) · ${d.text.length.toLocaleString()}자 · ${d.size.toLocaleString()}바이트 · ${shape(d.text)} · 앞뒤 공백 포함 그대로 보관`),
-        h('pre', { class: 'rr-quote rr-raw code rr-file-preview', tabindex: '0', 'aria-label': '파일 원문 미리보기 (읽기 전용)' }, d.text)) : null,
-      d.msg ? h('p', { class: 'pp-error', role: 'alert' }, d.msg) : null)];
+        h('pre', { class: 'rr-quote rr-raw code rr-file-preview', tabindex: '0', 'aria-label': '파일 원문 미리보기 (읽기 전용)' }, d.text)) : null)];
   }
   function fileFooter(): Node {
     const d = fileOf(s!.key);
-    return h('footer', { class: 'lens-foot rr-foot' }, h('div', { class: 'pp-row' },
+    // Why a file or a field was refused reads here, in the fixed footer beside 저장: never below a long preview, out of sight.
+    return h('footer', { class: 'lens-foot rr-foot' }, d.msg ? h('p', { class: 'pp-error rr-file-alert', role: 'alert' }, d.msg) : null, h('div', { class: 'pp-row' },
       h('button', { type: 'button', class: 'primary small', disabled: d.saving || d.reading, onclick: () => void saveFile() }, d.saving ? '저장 중…' : '자료 저장'),
       h('span', { class: 'fine' }, '저장해도 AI에 보내지 않아요'),
       h('button', { type: 'button', class: 'link-button quiet', onclick: backToReading }, '닫기')));

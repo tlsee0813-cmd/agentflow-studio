@@ -80,6 +80,14 @@
   - 변이 확인: dist에서 `scrollTop = 0`을 빼면 ‘near.js: h3 in the first screen’으로 실패한다.
 - 최종 코드에서 `check-ui-114.mjs` 6관문(quote 가운데 정렬·돌아오기 포함)과 `source-entry114` 10/10이 다시 통과했다.
 
+## 거절 안내 위치 보정 (779b37b 뒤)
+
+- Root 실제자료 확인: label-lookup.js(3010자)처럼 미리보기가 길면, 판본 81자·출처 301자 거절은 데이터상 정확했다. 그러나 안내(alert)가 미리보기 아래(y 3290…3342)에 있어 화면 밖이었다. 저장을 눌러도 이유가 보이지 않았고, alert가 있다는 것만으로는 보이는지 검증되지 않았다.
+- 보정(`return-view.ts`): 파일 양식의 거절 안내(`d.msg`, 파일 거절과 필드 거절 공통)를 본문 끝에서 고정 footer의 ‘자료 저장’ 바로 위로 옮겼다. 문구·검증·데이터 처리는 그대로다.
+- 대상 UI(`check-ui-114-scroll.mjs` 4절, 1280×720, 미리보기가 pane보다 1500px 넘게 긺): 잘못된 UTF-8, 180004 bytes, 판본 81, 출처 301 각각 직후에 안내 bbox가 화면 안이다(y 602/621 … bottom 672). 중심점의 요소도 그 안내다. 긴 원문 미리보기, 입력값(판본 v1.6.0, 출처 301자), 마지막 정상 파일 이름은 그대로이고 project 바이트는 변하지 않는다.
+- 변이 확인: dist에서 안내를 미리보기 아래로 되돌리면 ‘bad UTF-8: the reason in sight (y 4157…)’로 실패한다.
+- 최종 코드에서 `check-ui-114.mjs` 6관문(안내 selector를 footer로 바꿈)과 스크롤 대상 검사가 다시 통과했다. continuity 전체 606은 다시 돌리지 않았다(19a8d91 기준 606/606, 이후 제품 변경은 `return-view.ts` 화면 배치와 `styles.css` 한 줄).
+
 ## 미확인·한계
 
 - 잠긴 TS 5.8.3 build/check, Windows, 정확 CI, `deploy --dry-run`은 총괄 분담이다(위 컴파일러 사정). Root가 72b7e79에서 locked build/check를 통과했다고 알려 왔다. 최종 커밋에서는 다시 확인해야 한다.

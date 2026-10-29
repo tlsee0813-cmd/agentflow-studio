@@ -72,7 +72,7 @@ try {
   // A refused file first (invalid UTF-8): nothing is kept, nothing is saved, the form stays.
   await form.locator('#file-kind-code').check();
   await form.locator('#file-pick').setInputFiles({ name: 'bad.ts', mimeType: 'text/plain', buffer: Buffer.from([0x61, 0xff, 0x62]) });
-  await form.getByRole('alert').getByText('UTF-8 텍스트 파일이 아니라서').waitFor();
+  await lens.locator('.rr-file-alert').getByText('UTF-8 텍스트 파일이 아니라서').waitFor();
   await choose('code', fileOf('convert.ts', CASE.CODE_FILE));
   const preview = form.locator('.rr-file-preview'); await preview.waitFor();
   assert.equal(await preview.evaluate(e => e.textContent), CASE.CODE_FILE, 'preview is the decoded file exactly (BOM, CRLF, spaces)');
@@ -197,18 +197,18 @@ try {
   await openForm(); await choose('code', fileOf('good.ts', 'export const good = 1;\n'));
   const fails = [];
   for (const [name, buffer, words] of [['big.ts', Buffer.alloc(180004, 0x61), 'KB를 넘어'], ['ctl.ts', Buffer.from('a\u0007b'), '제어 문자'], ['key.ts', Buffer.from(`k = "sk-${'E'.repeat(24)}"`), '키나 토큰']]) {
-    await form.locator('#file-pick').setInputFiles({ name, mimeType: 'text/plain', buffer }); await form.getByRole('alert').getByText(words).waitFor(); fails.push(name);
+    await form.locator('#file-pick').setInputFiles({ name, mimeType: 'text/plain', buffer }); await lens.locator('.rr-file-alert').getByText(words).waitFor(); fails.push(name);
     assert.equal(await form.locator('.rr-file-preview').evaluate(e => e.textContent), 'export const good = 1;\n', 'the last good file stays');
   }
   // Over the limit is kept whole in the field and refused at save (never cut by the input): version 81, then origin 301.
   assert.equal(await form.locator('#file-version').getAttribute('maxlength'), null); assert.equal(await form.locator('#file-origin').getAttribute('maxlength'), null);
-  await form.locator('#file-version').pressSequentially('v'.repeat(81)); await lens.getByRole('button', { name: '자료 저장' }).click(); await form.getByRole('alert').getByText('판본은').waitFor();
+  await form.locator('#file-version').pressSequentially('v'.repeat(81)); await lens.getByRole('button', { name: '자료 저장' }).click(); await lens.locator('.rr-file-alert').getByText('판본은').waitFor();
   assert.equal(await form.locator('#file-version').inputValue(), 'v'.repeat(81), 'version 81 kept whole'); fails.push('version 81');
   await form.locator('#file-version').fill(''); await form.locator('#file-origin').fill('o'.repeat(299)); await form.locator('#file-origin').pressSequentially('o'.repeat(2));
-  await lens.getByRole('button', { name: '자료 저장' }).click(); await form.getByRole('alert').getByText('출처는').waitFor();
+  await lens.getByRole('button', { name: '자료 저장' }).click(); await lens.locator('.rr-file-alert').getByText('출처는').waitFor();
   assert.equal(await form.locator('#file-origin').inputValue(), 'o'.repeat(301), 'origin 301 kept whole'); fails.push('origin 301');
   assert.equal(await rawEntry(A), rawA, 'refused over-long declarations leave the project as it was');
-  await form.locator('#file-origin').fill(`ghp_${'F'.repeat(30)}`); await lens.getByRole('button', { name: '자료 저장' }).click(); await form.getByRole('alert').getByText('출처는').waitFor(); fails.push('key-like origin');
+  await form.locator('#file-origin').fill(`ghp_${'F'.repeat(30)}`); await lens.getByRole('button', { name: '자료 저장' }).click(); await lens.locator('.rr-file-alert').getByText('출처는').waitFor(); fails.push('key-like origin');
   assert.equal(await rawEntry(A), rawA, 'failed attempts leave the project as it was');
   let rollback = null;
   if (PRE) {
@@ -238,7 +238,7 @@ try {
   // form is no longer 'reading' (save stays possible) and the earlier read, when it ends, is ignored.
   await page.evaluate(() => { window.__hold114 = new Promise(r => { window.__release114 = r; }); });
   await form.locator('#file-pick').setInputFiles(fileOf('late.log', 'late log\n')); await form.getByText('읽는 중…').waitFor();
-  await form.locator('#file-pick').setInputFiles({ name: 'huge.log', mimeType: 'text/plain', buffer: Buffer.alloc(180004, 0x61) }); await form.getByRole('alert').getByText('KB를 넘어').waitFor();
+  await form.locator('#file-pick').setInputFiles({ name: 'huge.log', mimeType: 'text/plain', buffer: Buffer.alloc(180004, 0x61) }); await lens.locator('.rr-file-alert').getByText('KB를 넘어').waitFor();
   assert.equal(await lens.getByRole('button', { name: '자료 저장' }).isDisabled(), false, 'not held as reading'); assert.equal(await form.locator('.rr-file-name').innerText(), 'slow.log');
   await page.evaluate(() => window.__release114()); await page.waitForTimeout(300);
   assert.equal(await form.locator('.rr-file-preview').evaluate(e => e.textContent), 'slow check log\n', 'the stale read is ignored');

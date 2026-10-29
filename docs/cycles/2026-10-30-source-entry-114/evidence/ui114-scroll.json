@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-29T17:57:45.429Z",
+  "at": "2026-10-29T18:05:16.497Z",
   "viewport": "1280x800",
   "readingList": {
     "viewport": "1280x520",
@@ -20,5 +20,27 @@
     "savedOpenedAt": 0,
     "backTo": 0
   },
+  "refusals1280x720": [
+    {
+      "step": "bad UTF-8",
+      "y": 602,
+      "bottom": 672
+    },
+    {
+      "step": "oversize",
+      "y": 621,
+      "bottom": 672
+    },
+    {
+      "step": "version 81",
+      "y": 621,
+      "bottom": 672
+    },
+    {
+      "step": "origin 301",
+      "y": 621,
+      "bottom": 672
+    }
+  ],
   "aiRequests": 0
 }
