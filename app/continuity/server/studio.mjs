@@ -162,13 +162,24 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
  * - POST needs Content-Type application/json and X-AgentFlow-Request: 1 (forces a preflight cross-origin);
  * - when STUDIO_ACCESS_CODE is set, X-Studio-Access must equal it (typed by the person using the site, never bundled).
  */
-export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, config = readStudioConfig(env), jobs = null } = {}) {
+export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, config = readStudioConfig(env), jobs = null, mapExecutor = null } = {}) {
   const limiter = createLimiter(config);
   // AF100: durable map jobs, only when the host gives a job service (the local Node server, server/map-jobs.mjs). The job owns
   // its call: the same map model and recipe as /map, the same limiter (taken when it is accepted), never the request's signal.
   const mapConfig = { ...config, model: config.planModel ?? config.model };
-  const runJob = { configured: () => !!config.apiKey, prompt: () => mapPromptId(), model: mapConfig.model, acquire: id => limiter.acquire(id),
-    call: async (ask, signal) => ({ model: mapConfig.model, reply: await callStudioModel(ask, mapConfig, { fetchImpl, signal }), evidence: { index: SPAN_INDEX, ask: textDigest(JSON.stringify(ask)) } }) };
+  // AF102: a local preview host may give map jobs an executor of its own (a Node-only module it imports itself; never from env or
+  // the browser, never in the Worker). It runs map jobs only; /ask, /plan, /scope, /digest and /map keep the DeepSeek key as they
+  // are. It answers with a checked wire for the very ask, or fails; there is no fallback to another provider.
+  const executor = jobs ? mapExecutor : null;
+  const evidenceOf = ask => ({ index: SPAN_INDEX, ask: textDigest(JSON.stringify(ask)) });
+  const runJob = executor ? { configured: () => executor.ready(), prompt: () => mapPromptId(), model: executor.model, prepare: ask => executor.prepare(ask),
+    acquire: id => { const own = executor.acquire(id); try { const shared = limiter.acquire(id); return () => { shared(); own(); }; } catch (e) { own(); throw e; } },
+    call: async (ask, signal, execution) => { const out = await executor.call(ask, signal, execution); return { model: executor.model, reply: out.wire, evidence: evidenceOf(ask), observed: out.observed }; } }
+    : { configured: () => !!config.apiKey, prompt: () => mapPromptId(), model: mapConfig.model, acquire: id => limiter.acquire(id),
+      call: async (ask, signal) => ({ model: mapConfig.model, reply: await callStudioModel(ask, mapConfig, { fetchImpl, signal }), evidence: evidenceOf(ask) }) };
+  /** What a map reading would be made with: the executor's model and recipe when one is given (map jobs only), else the key's. */
+  const mapStatus = async () => executor ? (executor.ready() && jobs.describe().durable ? { map: { model: executor.model, prompt: await mapPromptId(), via: 'jobs' } } : {})
+    : config.apiKey ? { map: { model: config.planModel ?? config.model, prompt: await mapPromptId() } } : {};
   const headersFor = origin => {
     const h = { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Content-Type': 'application/json; charset=utf-8' };
     if (origin) Object.assign(h, { 'Access-Control-Allow-Origin': origin, Vary: 'Origin' });
@@ -190,9 +201,9 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
       if (url.pathname === '/api/studio/status' && request.method === 'GET') {
         // digest: the model and prompt a reading would be made with, so a browser can tell its stored readings apart.
         return reply(200, { ai: config.apiKey ? 'deepseek' : 'off', model: config.apiKey ? config.model : null, access: config.accessCode ? 'code' : 'open',
-          ...(config.apiKey ? { digest: { model: config.planModel ?? config.model, prompt: await digestPromptId(1), record: await digestPromptId(2) }, map: { model: config.planModel ?? config.model, prompt: await mapPromptId() } } : {}),
+          ...(config.apiKey ? { digest: { model: config.planModel ?? config.model, prompt: await digestPromptId(1), record: await digestPromptId(2) } } : {}), ...await mapStatus(),
           // Said whatever the key: a result already kept can be fetched without one.
-          ...(jobs ? { jobs: jobs.describe() } : {}) }, cors);
+          ...(jobs ? { jobs: { ...jobs.describe(), ...(executor ? { executor: executor.describe() } : {}) } } : {}) }, cors);
       }
       if (jobs && (url.pathname === '/api/studio/jobs' || url.pathname.startsWith('/api/studio/jobs/'))) {
         if (!['GET', 'POST'].includes(request.method)) throw new ApiError('METHOD_NOT_ALLOWED', 405);

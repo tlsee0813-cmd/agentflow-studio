@@ -73,6 +73,13 @@ const JOB_ERROR: Record<string, string> = {
   JOB_STORE_FULL: '확인하지 않은 정리 결과가 많거나 PC의 작업 기록이 가득해 새 정리를 시작하지 않았어요.',
   JOB_STORE_UNAVAILABLE: 'PC의 Studio 실행기가 작업 기록을 열 수 없어 정리를 시작하지 않았어요.',
   ENTRY_BUSY: '이 프로젝트의 앞선 정리가 아직 끝나지 않았어요.',
+  /* AF102: the local preview's map executor (one at a time, first map only). */
+  EXECUTOR_BUSY: 'PC의 지도 실행기가 다른 정리를 하고 있어 시작하지 않았어요. 기록과 지도는 그대로예요.',
+  EXECUTOR_UNSETTLED: '이전 지도 실행이 끝났는지 확인되지 않아 새 정리를 시작하지 않았어요. PC의 Studio 실행기를 확인해 주세요.',
+  EXECUTOR_UNAVAILABLE: 'PC의 지도 실행기를 쓸 수 없어 정리를 시작하지 않았어요. 기록과 지도는 그대로예요.',
+  EXECUTOR_SCOPE: '이 미리보기 실행기는 아직 부분이 없는 프로젝트의 첫 지도만 정리해요.',
+  EXECUTOR_CHANGED: 'PC의 지도 실행기 설정이 바뀌어 이 정리는 실행하지 않았어요. 기록과 지도는 그대로예요.',
+  AI_RESPONSE_REJECTED: 'AI 응답이 실행 규칙에 맞지 않아(도구 사용·오류·형식) 반영하지 않았어요. 원문과 기존 지도는 그대로예요.',
   PROMPT_CHANGED: 'PC의 Studio 실행기 설정이 바뀌어 보내지 않았어요. 화면을 새로 고친 뒤 다시 정리해 주세요.',
   ELSEWHERE: '다른 창에서 이미 이 정리 결과를 지도에 반영했어요. 새로 고치면 보여요.',
   DISCARD_FAILED: '결과를 버리지 못했어요(이 브라우저에도 PC의 Studio 실행기에도 기록하지 못함). 결과는 그대로 있어요. 다시 버려 주세요.',
@@ -116,15 +123,19 @@ export function createMapRun(host: MapRunHost) {
   const durable = (): boolean => host.status().jobs?.durable === true && !!host.jobs?.()?.usable;
   /** Why a reading cannot start although an AI server answered (a job store it cannot use), or null. */
   function blocked(): string | null {
-    const j = host.status().jobs; if (!j) return null;
+    const st = host.status(), j = st.jobs, viaJobs = st.map?.via === 'jobs';
+    if (!j) return viaJobs ? JOB_ERROR.JOB_STORE_UNAVAILABLE! : null;
     if (!j.durable) return `${JOB_ERROR.JOB_STORE_UNAVAILABLE} ${j.problem === 'STORE_BUSY' ? '같은 작업 기록을 다른 Studio 실행기가 쓰고 있어요.' : ''}`.trim();
+    if (viaJobs && (j.executor?.state === 'unsettled' || j.executor?.state === 'unavailable')) return JOB_ERROR[j.executor.state === 'unsettled' ? 'EXECUTOR_UNSETTLED' : 'EXECUTOR_UNAVAILABLE']!;
     return host.jobs?.()?.usable ? null : '이 브라우저에서는 정리 작업을 예약할 수 없어 시작하지 않아요.';
   }
-  function can(): boolean { const st = host.status(); return st.ai === 'deepseek' && !!st.map && !blocked(); }
+  /** A map reading can be asked: with the AI key, or (AF102) only as a durable job of the server's own map executor. */
+  const mapAi = (st: AiStatus): boolean => !!st.map && (st.ai === 'deepseek' || (st.map.via === 'jobs' && !!st.jobs));
+  function can(): boolean { return mapAi(host.status()) && !blocked(); }
   async function run(requestId?: string, mapOnly = false) {
     const o = host.current(); if (!o || o.kind !== 'saved') return;
     const key = o.key, slot = of(key); if (slot.attempt) return;
-    const st = host.status(); if (!st.map || st.ai !== 'deepseek') return;
+    const st = host.status(); if (!st.map || !mapAi(st)) return;
     const inp = buildMapAsk(o.project, o.view, mapOnly ? [] : host.requests?.() ?? [], requestId, anchored());
     if (inp.problem) { slot.error = inp.problem === 'NOTHING_NEW' ? '이 범위에서 새로 읽을 기록이 없어요.' : inp.problem === 'REQUEST_CONTEXT_TOO_LARGE' ? '요청 문맥을 한 번에 대조하기 어려워 보고를 읽지 않았어요. 비교할 요청문을 골라 주세요.' : inp.problem === 'TOO_LARGE' ? '지도가 커서 한 번에 보낼 수 없어요.' : '키나 토큰처럼 보이는 글이 있는 기록이 있어 보내지 않았어요.'; host.changed(key); return; }
     if (blocked()) return;
@@ -139,6 +150,7 @@ export function createMapRun(host: MapRunHost) {
     if (!same(a, now) || visitOf() !== a.visit) { slot.attempt = null; host.changed(key); return; }
     if (now!.project.readings.some(r => isMapReading(r) && r.hash === a.hash)) { slot.attempt = null; slot.error = MAP_ERROR.ALREADY_APPLIED!; host.changed(key); return; }
     if (durable()) return runJob(a, inp, st.map.model, now!.ref?.seq ?? null);
+    if (st.map.via === 'jobs') { slot.attempt = null; slot.error = blocked() ?? JOB_ERROR.JOB_STORE_UNAVAILABLE!; host.changed(key); return; } // never asked directly
     a.phase = 'asking';
     let res: { model: string; reply: MapReply };
     try { res = await askMap(inp.ask, a.controller.signal, host.accessCode()); }

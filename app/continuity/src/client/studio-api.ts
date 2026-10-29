@@ -6,10 +6,12 @@ import { RUNTIME } from './runtime.js';
 
 /** digest: the model and prompt id a return reading would be made with (null when the server does not say). */
 export interface AiStatus { ai: 'deepseek' | 'off' | 'none'; model: string | null; access: 'open' | 'code'; digest?: { model: string; prompt: string; record: string | null } | null;
-  /** The model and prompt id a map reading would be made with (null when the server does not offer it). */
-  map?: { model: string; prompt: string } | null;
-  /** AF100: the server keeps map readings as durable jobs on this PC (durable), or has a job store it cannot use (problem). */
-  jobs?: { durable: boolean; problem: string | null } | null }
+  /** The model and prompt id a map reading would be made with (null when the server does not offer it). AF102 via 'jobs': made only
+   * as a durable job by the server's own map executor (a local preview), whatever ai says; the other AI features keep ai. */
+  map?: { model: string; prompt: string; via?: 'jobs' } | null;
+  /** AF100: the server keeps map readings as durable jobs on this PC (durable), or has a job store it cannot use (problem).
+   * AF102 executor: the map executor's state (ready, busy, unsettled: an earlier child not known to have ended, unavailable). */
+  jobs?: { durable: boolean; problem: string | null; executor?: { state: string; problem: string | null } | null } | null }
 export class AskError extends Error { constructor(readonly code: string) { super(code); } }
 
 // same-origin: an owner-private host's own cookies go with same-origin calls; a cross-origin API still gets none.
@@ -24,8 +26,9 @@ export async function aiStatus(): Promise<AiStatus> {
     if (!res.ok || !['deepseek', 'off'].includes(v?.ai)) return { ai: 'none', model: null, access: 'open' };
     const d = v.digest, digest = d && typeof d.model === 'string' && typeof d.prompt === 'string' && /^[\w.-]{1,80}$/.test(d.model) && /^d1-[0-9a-f]{12}$/.test(d.prompt)
       ? { model: d.model, prompt: d.prompt, record: typeof d.record === 'string' && /^d2-[0-9a-f]{12}$/.test(d.record) ? d.record : null } : null;
-    const m = v.map, map = m && typeof m.model === 'string' && /^[\w.-]{1,80}$/.test(m.model) && typeof m.prompt === 'string' && /^m[1-6]-[0-9a-f]{12}$/.test(m.prompt) ? { model: m.model, prompt: m.prompt } : null;
-    const j = v.jobs, jobs = j && j.version === 'map-job.1' ? { durable: j.durable === true, problem: typeof j.problem === 'string' ? j.problem : null } : null;
+    const m = v.map, map = m && typeof m.model === 'string' && /^[\w.-]{1,80}$/.test(m.model) && typeof m.prompt === 'string' && /^m[1-6]-[0-9a-f]{12}$/.test(m.prompt) ? { model: m.model, prompt: m.prompt, ...(m.via === 'jobs' ? { via: 'jobs' as const } : {}) } : null;
+    const j = v.jobs, x = j?.executor, executor = x && typeof x.state === 'string' ? { state: x.state, problem: typeof x.problem === 'string' ? x.problem : null } : null;
+    const jobs = j && j.version === 'map-job.1' ? { durable: j.durable === true, problem: typeof j.problem === 'string' ? j.problem : null, ...(executor ? { executor } : {}) } : null;
     return { ai: v.ai, model: typeof v.model === 'string' ? v.model : null, access: v.access === 'code' ? 'code' : 'open', digest, map, jobs };
   } catch { return { ai: 'none', model: null, access: 'open' }; }
 }

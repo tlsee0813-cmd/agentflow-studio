@@ -62,8 +62,8 @@ async function storeId(dir) {
   }
   throw new Error('STORE_DAMAGED');
 }
-/** Exclusive ownership of a store by this process, released by the OS when it ends. */
-async function own(dir) {
+/** Exclusive ownership of a store by this process, released by the OS when it ends. AF102: also the preview executor's state. */
+export async function own(dir) {
   const name = `agentflow-map-jobs-${(await storeId(dir)).replace(/-/g, '')}`;
   const path = process.platform === 'win32' ? `\\\\.\\pipe\\${name}` : process.platform === 'linux' ? `\0${name}` : null;
   if (path) {
@@ -129,7 +129,7 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
   // A job's material (the private input and the result) is dropped once it can no longer be applied.
   function strip(body) { const { input: _i, result: _r, ...rest } = body; return rest; }
   const tomb = (body, acked) => ({ id: body.id, capHash: body.capHash, bindingHash: body.bindingHash, state: body.state, error: body.error ?? null,
-    remote: body.remote ?? null, createdAt: body.createdAt, updatedAt: now(), acked, tomb: true });
+    remote: body.remote ?? null, ...(body.execution ? { execution: body.execution } : {}), createdAt: body.createdAt, updatedAt: now(), acked, tomb: true });
 
   const chains = new Map();
   /** Every change of one job runs alone, in order: submit, finish, cancel and ack never interleave. */
@@ -146,7 +146,7 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
     const lost = body.state === 'accepted' ? failedHere.get(id) : null;
     const state = lost ? 'failed' : body.state === 'accepted' && running.has(id) ? 'running' : body.state;
     const out = { version: MAP_JOB_VERSION, id, state, acked: body.acked?.outcome ?? null, binding: body.binding ?? null, bindingHash: body.bindingHash ?? null, createdAt: body.createdAt, updatedAt: body.updatedAt,
-      error: lost ?? body.error ?? null, remote: body.remote ?? null };
+      error: lost ?? body.error ?? null, remote: body.remote ?? null, ...(body.execution ? { execution: body.execution } : {}) };
     if (full && state === 'ready' && !body.acked && body.result && body.input) Object.assign(out, { input: body.input, result: body.result });
     return out;
   }
@@ -193,6 +193,9 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
         const prompt = await run.prompt();
         if (!run.configured()) throw new ApiError('AI_NOT_CONFIGURED', 503);
         if (s.binding.prompt !== prompt || s.binding.model !== run.model) throw new ApiError('PROMPT_CHANGED', 409);
+        // AF102: an injected executor fixes what it will run (its identity, binary, permissions and deadline policy) now; the job
+        // keeps that, never the settings of a later read or restart. Without one (DeepSeek) the job is as it was.
+        const execution = run.prepare ? await run.prepare(checked.input.ask) : null;
         // One acceptance at a time across all ids: the entry check, the room check and the durable record are one step, so two
         // jobs of one entry (or the last free place) are never both accepted.
         return await serial(ACCEPT, async () => {
@@ -200,30 +203,32 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
           capacity();
           // The call is owned by the job from here: the limiter is taken now and given back once, when the call has ended.
           const release = run.acquire(id);
-          const body = { id, capHash, bindingHash, binding: s.binding, state: 'accepted', createdAt: now(), updatedAt: now(), input: s.input };
+          const body = { id, capHash, bindingHash, binding: s.binding, ...(execution ? { execution } : {}), state: 'accepted', createdAt: now(), updatedAt: now(), input: s.input };
           try { await write(id, body); } catch (e) { release(); throw e instanceof ApiError && e.code !== 'JOB_STORE_UNAVAILABLE' ? e : new ApiError('JOB_STORE_FAILED', 507); }
           const controller = new AbortController(); running.set(id, { controller, release });
-          const done = execute(id, checked.input.ask, controller, run).finally(() => executing.delete(done)); executing.add(done);
+          const done = execute(id, checked.input.ask, controller, run, execution).finally(() => executing.delete(done)); executing.add(done);
           return { status: 202, value: view(id, body) };
         });
       });
     } finally { pending.delete(key); }
   }
 
-  async function execute(id, ask, controller, run) {
+  async function execute(id, ask, controller, run, execution) {
     await Promise.resolve(); // the receipt is answered first; the call never waits on the connection that brought it
     let outcome;
-    try { const out = await run.call(ask, controller.signal); outcome = { ok: true, out }; }
-    catch (e) { outcome = { ok: false, error: e instanceof ApiError ? { code: e.code, ...(e.detail ? { detail: e.detail } : {}) } : { code: 'INTERNAL_ERROR' } }; }
+    try { const out = await (execution ? run.call(ask, controller.signal, execution) : run.call(ask, controller.signal)); outcome = { ok: true, out, observed: out.observed }; }
+    catch (e) { outcome = { ok: false, observed: e?.observed, error: e instanceof ApiError ? { code: e.code, ...(e.detail ? { detail: e.detail } : {}) } : { code: 'INTERNAL_ERROR' } }; }
     const live = running.get(id);
     try {
       await serial(id, async () => {
         const body = jobs.get(id)?.body;
         // Cancelled (durably) meanwhile, or this process closed: a late reply never turns it back into a result.
         if (closed || !body || body.state !== 'accepted') return;
-        const failed = error => ({ ...strip(body), state: 'failed', error, updatedAt: now() });
+        // AF102: what the executor observed (times, how the child ended; never its output) stays with the binding it ran under.
+        const ran = body.execution && outcome.observed ? { ...body, execution: { ...body.execution, observed: outcome.observed } } : body;
+        const failed = error => ({ ...strip(ran), state: 'failed', error, updatedAt: now() });
         const next = outcome.ok
-          ? { ...body, state: 'ready', updatedAt: now(), result: { model: outcome.out.model, prompt: body.binding.prompt, askHash: body.binding.askHash, wire: outcome.out.reply, evidence: outcome.out.evidence, reading: { id: `R_${randomUUID()}`, at: now() } } }
+          ? { ...ran, state: 'ready', updatedAt: now(), result: { model: outcome.out.model, prompt: body.binding.prompt, askHash: body.binding.askHash, wire: outcome.out.reply, evidence: outcome.out.evidence, reading: { id: `R_${randomUUID()}`, at: now() } } }
           : failed(outcome.error);
         try { await write(id, next); }
         catch (e) {
