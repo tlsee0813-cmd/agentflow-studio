@@ -539,13 +539,17 @@ export function createPlanView(host: PlanHost) {
     const n = s!.bundle.snapshots.indexOf(snapshot) + 1;
     attach(snapshot, converterObservations().map(x => ({ ...x, id: `${x.id}-${n}` })));
   }
+  let copying = 0;
+  /** How a copy went is told only to the open document it was asked from (same session, same opening, the latest attempt): one that
+   * ends after the document closed, the plan closed or another copy started says nothing and touches nothing. */
   async function copy(text: string) {
-    if (!s) return;
-    try { await navigator.clipboard.writeText(text); s.copyMsg = '복사했어요. 작업 AI에 붙여 넣어 전달하세요.'; }
-    catch {
-      s.copyMsg = '자동 복사가 막혀 있어요. 글을 선택해 직접 복사하세요.';
-      const pre = document.querySelector('#plan-sheet pre'); if (pre) { const r = document.createRange(); r.selectNodeContents(pre); const sel = getSelection(); sel?.removeAllRanges(); sel?.addRange(r); }
-    }
+    const st = s; if (!st) return;
+    const opened = st.sheetFrom, sheet = st.sheet, mine = ++copying;
+    let ok = true;
+    try { await navigator.clipboard.writeText(text); } catch { ok = false; }
+    if (s !== st || st.sheet !== sheet || st.sheetFrom !== opened || mine !== copying) return;
+    st.copyMsg = ok ? '복사했어요. 작업 AI에 붙여 넣어 전달하세요.' : '자동 복사가 막혀 있어요. 글을 선택해 직접 복사하세요.';
+    if (!ok) { const pre = document.querySelector('#plan-sheet pre'); if (pre) { const r = document.createRange(); r.selectNodeContents(pre); const sel = getSelection(); sel?.removeAllRanges(); sel?.addRange(r); } }
     renderSheet();
   }
   function exportPlan() {
@@ -866,10 +870,14 @@ export function createPlanView(host: PlanHost) {
     finishWork(panel, main, rail, was, back, prevList, prevDetail, prevRail, prevView, item.id);
   }
   function finishWork(panel: HTMLElement, main: HTMLElement, rail: HTMLElement, was: boolean, back: Session['workAt'], prevList: number, prevDetail: number, prevRail: number, prevView: string, itemKey: string) {
-    const typed = panel.querySelector<HTMLTextAreaElement>('#plan-intent'), caret = typed && was ? [typed.selectionStart, typed.selectionEnd, document.activeElement === typed, typed.selectionDirection] as const : null;
+    const typed = panel.querySelector<HTMLTextAreaElement>('#plan-intent'), caret = typed && was ? [typed.selectionStart, typed.selectionEnd, document.activeElement === typed, typed.selectionDirection, typed.value, typed.scrollTop] as const : null;
     panel.replaceChildren(main, rail);
     const area = panel.querySelector<HTMLTextAreaElement>('#plan-intent');
-    if (area && caret) { area.setSelectionRange(caret[0], caret[1], caret[3]); if (caret[2]) area.focus({ preventScroll: true }); }
+    if (area && caret) {
+      area.setSelectionRange(caret[0], caret[1], caret[3]); if (caret[2]) area.focus({ preventScroll: true });
+      // Where a long draft was being read, only for the very same text.
+      if (area.value === caret[4]) area.scrollTop = caret[5];
+    }
     // The same change keeps where the person was in it; another change starts at its top; back from the map: as left.
     const list = panel.querySelector('.pw-list'), detail = panel.querySelector('.pw-detail');
     if (list) list.scrollTop = back?.list ?? prevList;

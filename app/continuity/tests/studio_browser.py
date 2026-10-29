@@ -3193,27 +3193,72 @@ def request93_flow(browser, base, size, shots=None):
         else: page.keyboard.press("Escape")
         expect(sheet).to_be_hidden()
         assert page.evaluate(focused)[1:] == ["last", last.inner_text().strip()[:24], "request"], (way, page.evaluate(focused))
-    # 3) A stale draft (make disabled) with a backward selection: closing goes back to '마지막 요청문', the draft untouched.
+    # 3) A long stale draft (make disabled), selected backward by keyboard and scrolled inside the field: opening, a copy in the
+    #    same document and closing (× by keyboard, Esc) keep the text, the selection and the field's own scroll; focus back on
+    #    '마지막 요청문'. (DELTA1: the field's scrollTop was lost on every workspace render.)
     panel.locator(".pw-head-tools").get_by_role("button", name="문장 고치기").click()
-    area.press("End"); area.type(" 추가")
+    long_draft = ZERO85_SENTENCE + "".join(f"\n[AF93 복귀 검사 사본] {n + 1}번째 줄 · 긴 초안 안에서 읽던 위치" for n in range(35))
+    area.fill(long_draft)
     expect(page.locator("#plan-make")).to_be_disabled()
-    area.evaluate("a => a.setSelectionRange(4, 15, 'backward')")
-    caret = "a => [a.selectionStart, a.selectionEnd, a.selectionDirection, a.value]"
+    area.focus(); page.keyboard.press("Control+Home")
+    for _ in range(15): page.keyboard.press("ArrowRight")
+    for _ in range(11): page.keyboard.press("Shift+ArrowLeft")
+    area.evaluate("a => { a.scrollTop = 200; }")
+    caret = "a => [a.selectionStart, a.selectionEnd, a.selectionDirection, a.scrollTop, a.value]"
     left, kept = area.evaluate(caret), stored()
-    for way in ("keyboard", "escape"):
+    assert left[:4] == [4, 15, "backward", 200] and left[4] == long_draft, left[:4]
+    for way in ("keyboard", "copy", "escape"):
         last.click()
         expect(sheet).to_be_visible()
         assert pre.text_content() == text and page.evaluate(focused)[1] == "text", page.evaluate(focused)
+        assert area.evaluate(caret) == left, ("open", way, area.evaluate(caret)[:4])
         if way == "keyboard":  # from the text by keyboard alone: Shift+Tab reaches × and Enter closes
             page.keyboard.press("Shift+Tab")
             assert page.evaluate(focused)[1] == "x", page.evaluate(focused)
             page.keyboard.press("Enter")
+        elif way == "copy":  # the same document re-renders for its copy message; the draft behind it stays as it was read
+            page.keyboard.press("Tab"); page.keyboard.press("Enter")
+            expect(sheet.locator("footer [role=status]")).not_to_have_text("복사는 이 글을 옮기는 일이에요. 접수·실행·완료를 기록하지 않아요.")
+            assert page.evaluate(focused)[1] == "copy" and area.evaluate(caret) == left, area.evaluate(caret)[:4]
+            page.keyboard.press("Escape")
         else: page.keyboard.press("Escape")
         expect(sheet).to_be_hidden()
         assert page.evaluate(focused)[1] == "last", (way, page.evaluate(focused))
-        assert page.locator("#plan-make").is_disabled() and area.evaluate(caret) == left, area.evaluate(caret)
+        assert page.locator("#plan-make").is_disabled() and area.evaluate(caret) == left, (way, area.evaluate(caret)[:4])
     shot("3-stale-back-to-last")
     assert stored() == kept, "reading changes nothing stored"
+    # DELTA1: a copy still pending when its document closes, is reopened, or the plan itself closes and opens again (a synthetic
+    # clipboard held by the test: writeText is replaced in the page and settled by hand). Its late end says nothing anywhere.
+    page.evaluate("() => { window.__clips = []; window.__late = []; navigator.clipboard.writeText = () => new Promise((res, rej) => window.__clips.push({ res, rej })); addEventListener('unhandledrejection', e => window.__late.push(String(e.reason))); }")
+    status, quiet = sheet.locator("footer [role=status]"), "복사는 이 글을 옮기는 일이에요. 접수·실행·완료를 기록하지 않아요."
+    def held_copy():
+        last.click(); expect(sheet).to_be_visible()
+        sheet.locator('[data-sheet-part="copy"]').click()
+        assert page.evaluate("() => window.__clips.length") == held_copy.n + 1; held_copy.n += 1
+    held_copy.n = 0
+    held_copy(); page.keyboard.press("Escape"); expect(sheet).to_be_hidden()
+    page.evaluate("() => window.__clips[0].res()")  # ends after its document closed
+    page.wait_for_timeout(100)
+    assert sheet.is_hidden() and sheet.inner_html() == "" and page.evaluate(focused)[1] == "last", page.evaluate(focused)
+    held_copy(); page.keyboard.press("Escape"); last.click(); expect(sheet).to_be_visible()
+    page.evaluate("() => window.__clips[1].rej(new Error('late'))")  # ends while the same document is open again (a new opening)
+    page.wait_for_timeout(100)
+    expect(status).to_have_text(quiet)
+    assert page.evaluate(focused)[1] == "text" and page.evaluate("() => getSelection().toString()") == "", page.evaluate(focused)
+    page.keyboard.press("Escape")
+    held_copy(); page.keyboard.press("Escape")
+    page.keyboard.press("Escape")  # the stale plan closes to the current map (draft kept); its session ends
+    expect(panel).to_be_hidden()
+    page.evaluate("() => window.__clips[2].res()")  # ends with no plan open
+    page.locator("#plan-entry").click(); expect(page.locator("#plan-title")).to_have_text("변경안 · 1가지 변화")
+    expect(area).to_have_value(long_draft)
+    page.evaluate("() => window.__clips[3]?.rej(new Error('none'))")
+    last.click(); expect(sheet).to_be_visible()
+    page.wait_for_timeout(100)
+    expect(status).to_have_text(quiet)  # a new session's document never shows an old attempt's message
+    page.keyboard.press("Escape")
+    assert page.evaluate("() => window.__late") == [] and errors == [], (page.evaluate("() => window.__late"), errors)
+    shot("3b-late-copy-quiet")
     area.fill(ZERO85_SENTENCE)
     expect(page.locator("#plan-make")).to_be_enabled()
     # 4) A no-change analysis: '이전 요청' at the list's end; closing comes back there at the same list place. The list's own way
