@@ -25,7 +25,10 @@ const POSIX = process.platform !== 'win32';
 const tick = () => new Promise(r => setTimeout(r, 20));
 const until = async (f, why, n = 1500) => { for (let i = 0; i < n; i++) { if (await f()) return; await tick(); } assert.fail(`timed out: ${why}`); };
 const procs = new Set(), strays = new Set();
-test.after(() => { for (const p of procs) p.kill('SIGKILL'); for (const g of strays) { try { if (groupAlive(g)) process.kill(-g, 'SIGKILL'); } catch { /* gone */ } } });
+/** The test's own fake CLI still leads this group (checked by its command line, Linux): only then is the group signalled. */
+const ownFake = pid => { try { return readFileSync(`/proc/${pid}/cmdline`, 'utf8').includes('fake-cli102.mjs'); } catch { return false; } };
+const killOwn = pid => { if (ownFake(pid)) process.kill(-pid, 'SIGKILL'); };
+test.after(() => { for (const p of procs) p.kill('SIGKILL'); for (const g of strays) { try { killOwn(g); } catch { /* gone */ } } });
 const NODE_SHA = createHash('sha256').update(readFileSync(process.execPath)).digest('hex');
 
 function setup() {
@@ -81,8 +84,8 @@ test('102-P1 the launcher is killed while its child runs: the child outlives it;
   const y = await submission('요구: 재시작 뒤 다른 프로젝트.', 'E_proc0102-02');
   const r = await jcall(a.base, 'POST', '', y.cap, y.body); assert.deepEqual([r.status, r.error.code], [503, 'EXECUTOR_UNSETTLED']);
   assert.equal(invocations(s).length, 1, 'no second child while the first may live');
-  if (!POSIX) { await kill(a.proc); return; } // Windows: no probe; P2 covers the attestation path
-  process.kill(-pid, 'SIGKILL'); // the test's own child, checked alive just above
+  if (process.platform !== 'linux') { await kill(a.proc); return; } // Windows: no probe (P2 covers attestation); the cleanup below checks /proc
+  assert.ok(process.platform !== 'linux' || ownFake(pid)); killOwn(pid); // the test's own fake child, by its command line
   await until(() => !groupAlive(pid), 'old group gone');
   const r2 = await jcall(a.base, 'POST', '', y.cap, y.body); assert.equal(r2.status, 202, 'proven gone (group empty): admitted');
   await until(async () => (await jcall(a.base, 'GET', `/${y.id}`, y.cap)).state === 'ready', 'ready');

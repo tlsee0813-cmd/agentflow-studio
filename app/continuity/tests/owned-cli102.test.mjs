@@ -44,15 +44,22 @@ const jcall = async (h, method, path, cap, body, extra = {}) => {
   return { status: res.status, ...(await res.json()) };
 };
 const file0 = (s, x) => JSON.parse(readFileSync(join(s.dir, 'ops', `${x.id}.json`), 'utf8')).body;
+/** A leftover the fake CLI started, signalled only while /proc still shows it is that leftover (Linux; the tests below are POSIX). */
+const killLeftover = pid => { let own = process.platform !== 'linux'; try { own ||= readFileSync(`/proc/${pid}/cmdline`, 'utf8').includes("process.on('SIGTERM'"); } catch { own = false; } if (own) process.kill(pid, 'SIGKILL'); };
 const statusOf = async h => (await h(new Request('http://127.0.0.1/api/studio/status'))).json();
 const ended = async (h, x, extra) => { let v; await until(async () => !['accepted', 'running'].includes((v = await jcall(h, 'GET', `/${x.id}`, x.cap, undefined, extra)).state), `job ${x.id} ended`); return v; };
+/** Everything a test opened is closed after it, also when an assertion failed midway (else its owners keep the file running). */
+const opened = new Set();
+test.afterEach(async () => { for (const close of opened) await close().catch(() => {}); opened.clear(); });
 async function setup({ policy = {}, modes = ['ok'], spawnImpl, now, env = {}, termMs = 300, closeMs = 1500, hooks, ctl = mkdtempSync(join(tmpdir(), 'af102-ctl-')), state = mkdtempSync(join(tmpdir(), 'af102-state-')), versionMode } = {}) {
   const dir = mkdtempSync(join(tmpdir(), 'af102-jobs-'));
   writeFileSync(join(ctl, 'mode'), modes.join('\n')); if (versionMode) writeFileSync(join(ctl, 'version-mode'), versionMode);
   const jobs = await openMapJobs({ dir });
   const executor = await openCliExecutor({ policy: policyFor(ctl, policy), stateDir: state, spawnImpl, now, termMs, closeMs, hooks });
   const handle = createStudioHandler({ env, jobs, mapExecutor: executor });
-  return { ctl, state, dir, jobs, executor, handle, mode: m => writeFileSync(join(ctl, 'mode'), m), close: async () => { await jobs.close(); await executor.close(); } };
+  let closed = null; const close = () => (closed ??= (async () => { opened.delete(close); await jobs.close(); await executor.close(); })());
+  opened.add(close);
+  return { ctl, state, dir, jobs, executor, handle, mode: m => writeFileSync(join(ctl, 'mode'), m), close };
 }
 
 test('102-E1 normal child: the exact final wire is ready, bound at acceptance to the executor policy; status says the executor', async () => {
@@ -217,7 +224,7 @@ test('102-E13 a process left in the child group holds the pipe: no close, so no 
   assert.deepEqual([s.executor.describe().state, s.executor.describe().problem], ['unsettled', 'CHILD_NOT_CLOSED']);
   const y = await submission(project('요구: 다음.'), { entryId: 'E_cli00013-02' });
   assert.equal((await jcall(s.handle, 'POST', '', y.cap, y.body)).error.code, 'EXECUTOR_UNSETTLED');
-  process.kill(g, 'SIGKILL'); // the test's own leftover, by the pid it wrote
+  killLeftover(g); // the test's own leftover, by the pid it wrote
   await until(() => s.executor.describe().state === 'ready', 'gone: pipe closed and the group probed empty');
   assert.equal((await jcall(s.handle, 'POST', '', y.cap, y.body)).status, 202); await ended(s.handle, y);
   await s.close();
@@ -254,7 +261,7 @@ test('102-E15 the version probe is a child under the same lease: one that does n
   assert.equal(versions(), 1, 'no second probe child while the first may live');
   const x = await submission(project());
   assert.equal((await jcall(s.handle, 'POST', '', x.cap, x.body)).error.code, 'EXECUTOR_UNSETTLED'); assert.equal(versions(), 1);
-  const g = Number(readFileSync(join(ctl, 'version-grandchild-pid'), 'utf8')); process.kill(g, 'SIGKILL');
+  const g = Number(readFileSync(join(ctl, 'version-grandchild-pid'), 'utf8')); killLeftover(g);
   await until(() => !groupAlive(probe.pgid), 'old probe group empty');
   assert.equal((await jcall(s.handle, 'POST', '', x.cap, x.body)).status, 202, 'proven gone: probed again, then admitted');
   assert.equal(versions(), 2); assert.equal((await ended(s.handle, x)).state, 'ready');
@@ -360,7 +367,7 @@ test('102-E10 HTTP security with the executor: origin, headers, access code, str
 });
 
 test('102-E11 the default path is unchanged: no executor, the same status and DeepSeek job; an executor without a job store is ignored', async () => {
-  const dir = mkdtempSync(join(tmpdir(), 'af102-def-')), jobs = await openMapJobs({ dir });
+  const dir = mkdtempSync(join(tmpdir(), 'af102-def-')), jobs = await openMapJobs({ dir }); opened.add(() => jobs.close());
   const prompt = await mapPromptId(), sent = [];
   const fetchImpl = async (url, init) => { sent.push(url); const ask = JSON.parse(JSON.parse(init.body).messages[1].content.replace(/^[^\n]*\n/, ''));
     return new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify({ summary: '', parts: [], relations: [], candidates: [], gaps: ['[스텁] 없음'], matches: [], material: [] }) } }] })); };
@@ -379,7 +386,7 @@ test('102-E11 the default path is unchanged: no executor, the same status and De
   const st2 = await statusOf(noStore); assert.deepEqual(st2.map, { model: 'deepseek-flash', prompt }); assert.equal(st2.jobs, undefined);
   // With a key and an executor: digest/ask stay DeepSeek's, the map is the executor's (jobs only).
   const ctl = mkdtempSync(join(tmpdir(), 'af102-ctl-')), j2 = await openMapJobs({ dir: mkdtempSync(join(tmpdir(), 'af102-jobs-')) });
-  const ex = await openCliExecutor({ policy: policyFor(ctl), stateDir: mkdtempSync(join(tmpdir(), 'af102-state-')) });
+  const ex = await openCliExecutor({ policy: policyFor(ctl), stateDir: mkdtempSync(join(tmpdir(), 'af102-state-')) }); opened.add(() => j2.close()); opened.add(() => ex.close());
   const both = await statusOf(createStudioHandler({ env: { DEEPSEEK_API_KEY: 'test-102-not-real' }, jobs: j2, mapExecutor: ex }));
   assert.deepEqual([both.ai, both.model, both.digest.model, both.map], ['deepseek', 'deepseek-flash', 'deepseek-flash', { model: 'fake-model-102', prompt, via: 'jobs' }]);
   await j2.close(); await ex.close();
