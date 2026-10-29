@@ -1,0 +1,22 @@
+{
+  "backupHash": "dcda9cc2acbd387fdfc7f1751f7ba4e59a2bbf6b496c5c04bbba24477552bb49",
+  "backupSame": true,
+  "snapshotId": "RQ_b9049be1-4888-4880-83cc-e0c987396b2e",
+  "requestLength": 16398,
+  "requestSha256": "13354c6894280cab29ca8d21f781ea1112269f71948015b6e2b67014734144b4",
+  "analysisSame": true,
+  "clipboard": {
+    "uiReportedCopied": true,
+    "toolReadLength": 0,
+    "verified": false,
+    "note": "IAB clipboard read returned empty twice; no successful byte-copy claim. Frozen normal export retains full document; no repeated copy/modelcall."
+  },
+  "scopeInputKeys": [
+    "schemaVersion",
+    "intent",
+    "parts",
+    "evidence",
+    "selected",
+    "excluded"
+  ]
+}

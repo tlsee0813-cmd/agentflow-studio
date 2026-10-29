@@ -1,0 +1,60 @@
+{
+  "code": "ac77a37daf2de88b974bdfdb727f7908f6246611",
+  "app": "b4df87afa9877e0f95e2556135d3e3386b0a4465",
+  "selection": "1dac0af3558feb2d0c33efeb345498d71a171172",
+  "plan": {
+    "receipt": {
+      "status": 200,
+      "elapsedMs": 21489,
+      "bytes": 14994
+    },
+    "finish": "stop",
+    "usage": {
+      "prompt_tokens": 9002,
+      "completion_tokens": 3744,
+      "total_tokens": 12746,
+      "prompt_tokens_details": {
+        "cached_tokens": 1792
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 3146
+      },
+      "prompt_cache_hit_tokens": 1792,
+      "prompt_cache_miss_tokens": 7210
+    },
+    "rawSha256": "02cad466eaa7058ce622d81809e2fe6d6cb3d3e8befb7fb504ea70404f0382c2",
+    "verdict": "bounded PASS"
+  },
+  "scope": {
+    "receipt": {
+      "status": 200,
+      "elapsedMs": 14638,
+      "bytes": 8787
+    },
+    "finish": "stop",
+    "usage": {
+      "prompt_tokens": 7777,
+      "completion_tokens": 2088,
+      "total_tokens": 9865,
+      "prompt_tokens_details": {
+        "cached_tokens": 640
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1803
+      },
+      "prompt_cache_hit_tokens": 640,
+      "prompt_cache_miss_tokens": 7137
+    },
+    "rawSha256": "87868ce12316950ff52b28a3c8e41a3a913668cab6a4eefa614819d8b83a2bec",
+    "verdict": "semantic FAIL"
+  },
+  "calls": {
+    "plan": 1,
+    "scope": 1,
+    "map": 0,
+    "digest": 0,
+    "retry": 0
+  },
+  "sourceRepair": 0,
+  "delivered": 0
+}

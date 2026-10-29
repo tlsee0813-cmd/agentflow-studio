@@ -1,0 +1,75 @@
+{
+  "task": "AF107-independent-single-plan-semantic-review",
+  "verdict": "bounded_plan_semantics_and_question_appropriateness_PASS",
+  "conclusion": "This actual plan preserves the requested new PC label lookup tool, correct target mappings and all five important constraints, and no longer invents the105 internal-parts-registration or board-designation-versus-command-example decision. The two remaining unknowns are legitimate bounded missing information rather than extra approvals or scope. The plan is suitable to proceed to the separately gated single scope review. It is not yet an accepted frozen request or an implementation instruction detached from its original intent/table.",
+  "basis": {
+    "directory": ".ops/experience107-request-continuation/",
+    "files": ["frozen.json", "expected-plan.json", "call-1-request.json", "call-1-raw.json", "call-1-receipt.json", "plan-after.json"],
+    "implementation": "ac77a37daf2de88b974bdfdb727f7908f6246611",
+    "acceptedImplementationRecord": "6657689345aab21fa68e53df55b166a9eaf4504a",
+    "selectedObservation": "1dac0af3558feb2d0c33efeb345498d71a171172",
+    "app": "b4df87afa9877e0f95e2556135d3e3386b0a4465",
+    "planPromptHashFrozen": "aacb45c30be76c620da3503ed806c809a520c772c36412982d7dff8b69443a7a",
+    "identityChecks": "Read actual user/system message strings and compared them exactly to expected-plan.user/system: both equal. Actual user message is exactly equal to the105 call's user message. No source, returned text or input was repaired for this assessment.",
+    "delivery": "Preserved receipt is HTTP200/21489ms; actual raw has finish_reason=stop. This is the observed21.489s plan response, not a latency distribution or general model-quality claim."
+  },
+  "requirementsAssessment": [
+    {
+      "requirement": "Create a small PC lookup tool from a ribbon-label input",
+      "output": "items[0].title/description/partIds/refs",
+      "judgment": "PASS",
+      "reason": "One concrete proposed new tool, with partIds=[] following the existing new-part convention, is supported by explicit INTENT. It does not assign the implementation to preserved board hardware or ask the user to decide how AgentFlow should register it."
+    },
+    {
+      "requirement": "Preserve both label/display/controller/driver/build correspondences",
+      "output": "items[0].description, summary, impacts[0], refs INTENT/N02; saved plan.evidence",
+      "judgment": "PASS_for_plan_with_display-name_compression_limit",
+      "reason": "The item explicitly keeps HINK-E0213 -> SSD1673 / ssd16xx / reel_board and HINK-E0213A22 -> SSD1675A / ssd16xx / reel_board@2. N02's actual table supplies GDEH0213B1 and GDEH0213B72 respectively; M04 also preserves them. The original INTENT requires the display field together with the other fields. No contrary mapping or inference from PCB revision is introduced. Model names are not repeated in the compact item description, so the short item alone is not a complete stand-alone display specification. This is a visibility/detail limitation, not loss from the saved plan or grounds to infer that the requested display field was excluded."
+    },
+    {
+      "requirement": "Do not guess blank/unknown labels or select solely from PCB revision",
+      "output": "items[0].description, preserve[0..1]",
+      "judgment": "PASS",
+      "reason": "Both rules are explicit and are not reopened in unknowns."
+    },
+    {
+      "requirement": "No actual build/flashing; no sensor/circuit/power/energy-saving changes",
+      "output": "items[0].description, preserve[2..3]",
+      "judgment": "PASS",
+      "reason": "Execution prohibitions and preserved hardware scope remain explicit. Display/Power supply impacts describe checking source correspondence and wording, not a new hardware implementation scope."
+    },
+    {
+      "requirement": "Keep the documented Low Power no-saving limitation in the guidance",
+      "output": "items[0].description, preserve[4], impacts[1]",
+      "judgment": "PASS",
+      "reason": "The output affirmatively requires the limitation in the new guidance. N02's Power supply note and M07 support it. It does not promote the nominal mode to effective energy saving, ask the user to resolve the already documented limitation, or claim physical measurement."
+    }
+  ],
+  "questionAppropriateness": {
+    "verdict": "PASS_for_this_response",
+    "removedFailures": "No question about registering the PC tool as a parts node, no reopening whether to display the required board designation, no unsolicited command examples, and no table-embedding/document-link choice presented as a prerequisite.",
+    "unknowns0": "Execution form (command-line versus screen) and the input/result presentation manner are not specified in the input. Those affect actual usage and may remain unknown. The surrounding plan already fixes label input, mapped output, no guessing and the power caveat; 'presentation manner' is therefore read as interaction/form detail, not permission to reopen those requirements. The response does not impose a selected default or say the person must approve every implementation detail.",
+    "unknowns1": "The provided materials do not establish an existing equivalent lookup tool/current guidance screen. The response states this as a supplied-evidence limit, not project-wide absence, an extra user decision, or proof that a new implementation is necessarily missing. It does not override the user's explicit wish to make a new tool.",
+    "summaryQualification": "The summary's statement that input/display behavior needs separate definition must be read with the concrete item and first unknown: the interaction form is open, while the user has already fixed required inputs, outputs and prohibitions. On this full response there is no contrary requirement or invented alternative that makes it the105 failure again."
+  },
+  "entailmentAndPreservation": {
+    "judgment": "PASS_with_final_request_verification_remaining",
+    "actualSavedEvidence": "Read plan-after.json normal exported bundle: snapshots=0; plan.intent and INTENT evidence exactly equal the actual ask; N02 text exactly equals the actual ask's N02; both GDEH model names are present; saved unknown strings exactly equal actual raw unknown strings. Thus the compact display-name omission is not a stored-source deletion or a silent response repair.",
+    "referenceAssessment": "Item refs INTENT/N02 are directly relevant. P04 impact refers to the two rows and source version; P07 refers to the documented power wording with N02/M07. No app-selected Display context is used as evidence or sole authority to change hardware. Summary loosely groups reusable display-table data and power wording, which occur in different sections of the same N02 document; the actual claims remain supported.",
+    "codeTraceOnly": "At the accepted ac77 source, client/plan-source.ts scopeInput sends full plan.intent and plan.evidence with the chosen item. shared/change-plan.ts requestSnapshot freezes full intent into scope and includes selected refs INTENT/N02 as full material (with all evidence when scope-reviewed). This supports proceeding without manually expanding the model's item. It is source inspection, not evidence that a future actual scope/request has already preserved those bytes."
+  },
+  "handoffBoundary": {
+    "decision": "No semantic blocker to the one separately gated scope observation was found. Do not treat this as final approval to delegate implementation from the item sentence alone.",
+    "requiredActualCheck": "If root and the scope review both accept the next stage, inspect the resulting actual frozen request: selected work must remain the requested lookup tool; full original INTENT and N02 table including GDEH0213B1/B72 must be transmitted unchanged with the preservation list, and the display field must not be treated as excluded or as a new unresolved product choice. Material being preserved is not proof that every field is clearly visible in the selected-work summary; report those two qualities separately.",
+    "remainingUnspecified": "Do not silently decide CLI/GUI or a concrete interaction format during handoff merely because it remains unknown. Keep any material unresolved detail explicit or obtain it through the normal scoped workflow; no additional approval is invented by this review."
+  },
+  "limits": [
+    "One actual new plan sample supports only this bounded observation. It does not establish model compliance rates, complete display-summary quality or general first-map/change-analysis reliability.",
+    "105 remains core-preservation PASS/question-appropriateness FAIL; neither its raw response nor its assessment was retroactively changed.",
+    "No scope call, frozen request, execution of the proposed PC tool, build/flashing, new map/digest or public deployment is accepted by this report. Root owns the next selection and UI/request checks."
+  ],
+  "blockers": [],
+  "actions": {"newModelCalls":0,"researchWeb":0,"testsBuildUI":0,"productOrRawWrites":0,"onlyWrite":".ops/results/experience107-plan-semantic-review.json"},
+  "reviewClosed": true,
+  "finalSelectionOwner": "root coordinator"
+}

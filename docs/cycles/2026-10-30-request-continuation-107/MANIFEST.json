@@ -1,0 +1,38 @@
+{
+  "code": "ac77a37daf2de88b974bdfdb727f7908f6246611",
+  "app": "b4df87afa9877e0f95e2556135d3e3386b0a4465",
+  "files": [
+    {
+      "path": "docs/cycles/2026-10-30-request-continuation-107/OBSERVATION.md",
+      "sha256": "f6959fbc500efa056b18a740e121e098b57dede70556fe47548a3f0ab3732d50"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-request-continuation-107/RESULT.md",
+      "sha256": "e89d026f399dcea5ba40af7da52fdbcefe6028904b1aaa75551d59dda99da318"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-request-continuation-107/evidence/independent-plan.json",
+      "sha256": "bcd865fc2d270db78f720fd2b3022e2e712a39d3bca07b5533566de9c8fa0569"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-request-continuation-107/evidence/independent-scope.json",
+      "sha256": "7c6100ecb31adb03de52be14aed9f576361027186b799acba98efe48a0ccadfc"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-request-continuation-107/evidence/preservation.json",
+      "sha256": "a90977f8dc74cc9501176f7809513861599700957731d31a4b6a3321aa5b9158"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-request-continuation-107/evidence/plan-unknowns.png",
+      "sha256": "602808e89a98aa986d3b1a785118fc8f044d726fa30a2496e0aecadf717c119d"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-request-continuation-107/evidence/scope-rejected.png",
+      "sha256": "d311aaf0d0ef6724b388bc1fbff070407c3d5237ef6cb37eb24cb500e936d568"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-request-continuation-107/evidence/receipt.json",
+      "sha256": "e9fad1f7034e4212f60357f130422627b84afd688b50d52ddc9ecb64897b82a6"
+    }
+  ]
+}

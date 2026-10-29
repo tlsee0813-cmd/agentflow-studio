@@ -1,0 +1,49 @@
+{
+  "task": "AF107-independent-single-scope-semantic-review",
+  "verdict": "semantic_FAIL; not_accepted_for_usable_handoff",
+  "conclusion": "The scope response correctly identifies reusable mappings and no demonstrated unmet prerequisite, but then reopens the explicitly requested display correspondence and introduces a future-update question outside the selected two-label lookup behavior. Full original intent and the actual table were available in the scope input. This is a new scope-stage semantic failure, not a source-transmission gap. Preserve the prior bounded plan PASS, but do not accept the generated request as usable or delivered.",
+  "evidence": {
+    "directory": ".ops/experience107-request-continuation/",
+    "actualInput": "call-2-request.json#/messages[user]",
+    "actualRaw": "call-2-raw.json#/choices/0/message/content",
+    "receipt": "call-2-receipt.json",
+    "delivery": "HTTP200,14638ms; raw finish_reason=stop. One actual scope call, prerequisites0, unknowns3. Valid completion/delivery does not imply semantic success.",
+    "inputScope": "studio.scope.1 contains the full original intent, the single chosen lookup-tool item, excluded=[], and INTENT/M01-M07/N01/N02 evidence. N02 contains the two display-model/controller/driver/build rows and future-replacement prose. Thus the exact display requirement and values were available, even though the item sentence compressed the model names."
+  },
+  "positiveFindings": [
+    "The summary correctly recognizes that N02 already supplies HINK-E0213/HINK-E0213A22 display/controller/ssd16xx/build mappings and the Low Power no-saving limitation. Reusing those facts rather than constructing another mapping subsystem is supported.",
+    "No unmet prerequisite is demonstrated in the supplied materials; prerequisites=[] does not invent a task that merely restates the selected tool implementation. This is a bounded evidence statement, not proof that implementation is complete or requires no design work.",
+    "No new parts-registration question, execution of build/flashing, hardware modification or physical measurement claim appears."
+  ],
+  "unknownsAssessment": [
+    {
+      "pointer": "/unknowns/0",
+      "judgment": "legitimate_bounded_technical_uncertainty",
+      "reason": "Case/whitespace/hyphen normalization and exact-match semantics are not specified in the supplied intent. HINK-E0213 is indeed a prefix of HINK-E0213A22, so preserving distinct label identities is materially relevant to correct lookup and unknown-value classification. This can remain an implementation/check boundary without inventing another product function or forcing every detail into a user approval. It must not authorize prefix guessing contrary to the explicit no-guessing requirement."
+    },
+    {
+      "pointer": "/unknowns/1",
+      "judgment": "FAIL_reopens_answered_display_requirement",
+      "severity": "P2",
+      "reason": "The original INTENT expressly requests display, controller, ssd16xx and board-designation correspondence together. N02 names the corresponding GDEH0213B1/GDEH0213B72 displays. The response asks whether to include those model names or only label/other values, presenting an already required field as an unresolved alternative. The item's abbreviated wording does not cancel the full intent. The scope response itself acknowledges the full display correspondence in its summary, so it cannot legitimately use absent repetition in the short item as grounds to reopen that requirement.",
+      "sourceReferences": ["actualInput.intent and evidence[INTENT].text", "actualInput.evidence[N02].text: Display table", "actualInput.evidence[M04].text: both model mappings"]
+    },
+    {
+      "pointer": "/unknowns/2",
+      "judgment": "out_of_scope_nonmaterial_unknown",
+      "severity": "P2",
+      "reason": "N02 genuinely says display products may change in the future, but the selected tool covers the two specified labels and already defines how any unknown label must be handled: do not infer a target; say confirmation is needed. No automatic future-catalog update or additional variant support was selected. How to reflect unspecified future replacements is therefore not an unresolved condition of this selected work. Its source statement can remain background; surfacing it as a scope unknown risks creating an unrequested maintenance/update obligation or blocking the already bounded two-label tool.",
+      "sourceReferences": ["actualInput.intent: two named labels and unknown-value rule", "actualInput.selected[0].description", "actualInput.evidence[N02].text: expected future display replacement"]
+    }
+  ],
+  "boundaryJudgment": {
+    "plan": "experience107-plan-semantic-review.json remains bounded plan PASS. That report explicitly noted compact item wording and required the full INTENT/N02/display field to survive actual scope/handoff. The scope input did preserve those sources; this output shows that preserved sources alone did not prevent the next model from reopening a requirement.",
+    "request": "Root reports the automatically generated request is preserved verbatim and not delivered. This reviewer did not alter or repair it. A generated frozen request that carries the rejected scope unknowns is not accepted as an actionable handoff merely because its original materials and offsets are intact.",
+    "noRetroactiveRepair": "Do not remove the second/third unknown from raw or manually rewrite this response and call the107 chain successful. Core preservation, prompt/UI106 normative acceptance, actual plan PASS and actual scope FAIL must remain separate observations.",
+    "nextSelection": "No further model call or retry is authorized by this review. Root owns any subsequent bounded correction or product decision; this report does not prescribe another broad prompt/research cycle."
+  },
+  "blockers": ["Already answered display-model inclusion reopened as an alternative", "Future variants/update handling promoted into selected-scope uncertainty without need"],
+  "actions": {"newModelCalls":0,"replays":0,"researchWeb":0,"testsBuildUI":0,"productOrRawWrites":0,"onlyWrite":".ops/results/experience107-scope-semantic-review.json"},
+  "reviewClosed": true,
+  "finalSelectionOwner": "root coordinator"
+}
