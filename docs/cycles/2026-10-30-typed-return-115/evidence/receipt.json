@@ -1,0 +1,76 @@
+{
+  "status": "rejected_response_contract",
+  "jsonSyntaxValid": true,
+  "error": {
+    "code": "INVALID_RESPONSE",
+    "detail": {
+      "rule": "CONTRACT"
+    }
+  },
+  "realCalls": 1,
+  "versionProbes": 1,
+  "toolEvents": 0,
+  "errorEvents": 0,
+  "rawRepair": false,
+  "finalBytes": 10643,
+  "finalSha256": "02a5467ebd07fdb5b70325640a2cde7187a93e8eba0e57a83d1efff2f7603ba6",
+  "execution": {
+    "executor": "codex-cli-preview.102",
+    "version": "codex-cli 0.165.0-alpha.1.2",
+    "binarySha256": "5c1b55966bf9f757dcbf00065c9a6cb862ead55d34b015f1be1939ff18e43943",
+    "model": "gpt-6.1-sol",
+    "reasoning": "high",
+    "permissions": "503b611008cf71b170ce6aedf247526e85ccf1da896529645866af8a19889396",
+    "wrapper": "dd56ff8327f0b957f18ccc6af7c6334935901014e36539c35c91e16279c02ae5",
+    "scope": "map6-later",
+    "selectionMs": 299000,
+    "verdictMs": 300000,
+    "policy": "04d806987aac31205589c216be6d732dd04bf32f4d34eb82b8b8b430976a42ae",
+    "promptKind": "later",
+    "prompt": "24b6596338d0",
+    "promptSha256": "24b6596338d073faa3015ecb5f76159e52fd8854abb768865c35403de99287ca",
+    "askSha256": "8946d3c556105cd269b7853efa10c27067872556d3ddc94a27f57345e323bba7",
+    "observed": {
+      "startedAt": "2026-10-29T18:22:09.820Z",
+      "closedAtMs": 177950.8348,
+      "decidedAtMs": 177952.3727,
+      "closed": true,
+      "exit": 0,
+      "signal": null,
+      "reason": null,
+      "events": 4,
+      "usage": {
+        "input_tokens": 27078,
+        "cached_input_tokens": 8192,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 7275,
+        "reasoning_output_tokens": 4105
+      },
+      "stdoutBytes": 11719,
+      "stderrBytes": 158,
+      "signals": {
+        "sent": 0,
+        "skippedAfterExit": 0
+      },
+      "stdioCut": false,
+      "finalSha256": "02a5467ebd07fdb5b70325640a2cde7187a93e8eba0e57a83d1efff2f7603ba6",
+      "finalBytes": 10643
+    }
+  },
+  "preservation": {
+    "wholeProjectBeforeAfterReloadEqual": true,
+    "projectSha": "dd5b31e0792d71ae5fa1aa625a23a0728e1e6742fee89324140f12f6c60b5e54",
+    "wholeOriginalBundleEqual": true,
+    "bundleSha": "cdf2dc70965e8eaf9c6d701dcef39a022d1baab8e0e0fcf047e4941590f8ba05",
+    "otherProjectDraftPreserved": true,
+    "otherDraftChars": 94,
+    "readings": 1,
+    "pasted": 6,
+    "parts": 7,
+    "autoApply": 0,
+    "newReading": 0,
+    "retry": 0,
+    "noticeReload": "failure banner acknowledged/disappears after reload; original data retained"
+  },
+  "firstDiagnosedBoundary": "matches[3].about uses declared source metadata commit absent from the original R02 code text; typed evidence kind itself now lawful"
+}

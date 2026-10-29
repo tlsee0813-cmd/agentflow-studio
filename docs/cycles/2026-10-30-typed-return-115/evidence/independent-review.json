@@ -1,0 +1,84 @@
+{
+  "cycle": 115,
+  "verdict": "FAIL_RESPONSE_CONTRACT_NOT_SEMANTIC_ACCEPTANCE",
+  "productCode": "d6c93dffa710e7947e73c319cbee079d5c540adf",
+  "basisAcceptance": "e42ba06043f7bb16ec9a1c664bee7334a1d4bf3d",
+  "selection": "d0dcc26",
+  "sourcesRead": [
+    ".ops/experience115-typed-return/selected.json",
+    ".ops/experience115-typed-return/input.json",
+    ".ops/experience115-typed-return/project-before.json",
+    ".ops/experience115-typed-return/receipt.json",
+    ".ops/experience115-typed-return/final-message.txt"
+  ],
+  "activity": {
+    "strictValidatorCalls": 1,
+    "replyModified": false,
+    "repairOrRetagOrDeletion": false,
+    "secondValidation": false,
+    "modelCallsByReviewer": 0,
+    "productWrites": 0,
+    "browserOrBuildOrTestRuns": 0,
+    "hiddenReasoningOrStdoutRead": false,
+    "newResearch": false
+  },
+  "delivery": {
+    "classification": "COMPLETE_FINAL_DELIVERED_WITHIN_POLICY_THEN_REJECTED",
+    "receiptMilliseconds": 177952.3727,
+    "exit": 0,
+    "events": 4,
+    "toolEvents": 0,
+    "errorEvents": 0,
+    "finalBytes": 10643,
+    "finalSha256": "02a5467ebd07fdb5b70325640a2cde7187a93e8eba0e57a83d1efff2f7603ba6",
+    "jsonSyntaxValid": true,
+    "storedResult": "INVALID_RESPONSE / CONTRACT",
+    "limit": "This is not a timeout, missing final, JSON syntax failure or proof that the first-map/full product quality is accepted. No retry or fallback is proposed."
+  },
+  "contractDiagnostic": {
+    "actualOneCallResult": "validateMapReply unchanged final/unchanged input throws Error INVALID_RESPONSE at dist/public/shared/map-reading.js:483; source shared/map-reading.ts:359-360 resolves match.about against the selected record raw text and refuses a non-null value not found there.",
+    "firstFailureByStaticOrder": {
+      "path": "matches[3].about",
+      "at": "R02.30-35",
+      "value": "6d9c2abc8c10f1aaddecd0f9bc7934153dfcc230",
+      "reason": "The value is the user's declared source version in R02.basis/note, not a contiguous passage in the sent label-lookup.js body. R02 raw text instead names the source Zephyr commit3568e1b6. Earlier matches0-2 use branch/version strings present in N02 raw text and do not encounter this check failure first."
+    },
+    "sameViolationByStaticInspection": [
+      "matches[4].about at R02.43-48 repeats the metadata-only6d9c2ab source version.",
+      "matches[5].about at R02.55-57 repeats that metadata-only source version.",
+      "matches[6].about at R01.33-37 uses the same declared source version absent from app.js raw text.",
+      "matches[7].about at R01.22-24 repeats it."
+    ],
+    "matches13": "matches[13] cites N02.38-39 and uses work/experience110-label-guide-prototype. That exact branch string is in N02.03. The implemented about containment rule searches the whole selected record, not only the at passage; therefore this item is not another failure of the same raw-containment check. Its text accurately limits the report to a separate prototype and excludes AgentFlow deployment/completion. No additional validator execution was made to test it.",
+    "sourceKind": "All five code matches3-7 now select typed evidence records R01/R02. The113 illegal pasted-kind code citation is absent here. This is a concrete distinction from113, not retroactive acceptance of113.",
+    "otherAboutUse": "parts[1].roleAbout and claims s4/s5 also use the user-declared6d9c2ab source version beside R02 code citations. The current part/claim parser only checks their about string shape, unlike match.about containment. Their provenance must still not be described as a version quoted from those code bodies. This reinforces the same metadata-versus-raw contract boundary; it is not a second observed validator failure.",
+    "wholeReplyDisposition": "The entire unchanged reply remains rejected. No matches, parts or relations are extracted as a usable partial result, and the raw fields are not nulled or rewritten."
+  },
+  "meaningInspectionOfRejectedReply": {
+    "status": "CONTENT_OBSERVATIONS_ONLY_NO_PASS",
+    "selectedRequest": "All14 matches target only RQ_0797ee20-a84e-4aa7-ace6-b4f053ca87f7 / change_label_lookup_tool. No previous failed request target or prior replacement is introduced. Actual stored-history preservation is Root's UI/export check, not established merely by the response.",
+    "twoMappings": "Claim s5 explicitly retains both HINK-E0213→GDEH0213B1/SSD1673/ssd16xx/reel_board and HINK-E0213A22→GDEH0213B72/SSD1675A/ssd16xx/reel_board@2. R02.30-35 entails those exact entries. No new mapping is inferred from PCB1507.2.",
+    "matchingAndClear": "Claim s4 and matches4-6 correctly distinguish trim-only, whole case-sensitive equality, empty/unknown entry:null, and DOM replacement of all four values with —. R02.43-48, R02.55-57 and R01.33-37 entail these properties. Claims s2/s3 and matches10/11 describe the pasted root test/UI observations as reported checks rather than newly executed app verification.",
+    "powerAndHardware": "Reported claim s1 and matches2/7 retain the always-shown Low Power energy-saving limitation and limit the implementation to a local PC prototype without board build/flash/hardware changes. R01.22-24 sets the fixed limit text; R02.39-41 explains both voltages remain on and energy cannot be reduced by that mode. The output does not claim new low-power functionality or a changed reel board.",
+    "reportsAndChecks": "N02.31-34 author Linux/Chromium conditions and N01.07-17 root Windows/IAB conditions remain checked reports with their scope, while N02.38-39 remains a separate-prototype report. No test-definition file was sent and no test-kind match is invented. No hardware/energy measurement, current-market board validation or AgentFlow deployment success is claimed.",
+    "structure": "Two new software responsibilities, local UI tool and ReelLabelGuide lookup, are separated by a needs relation supported by R01.33-34. No existing hardware part or current claim is replaced. There is no fixed required node count. The old Zephyr sources were not resent in this selected ask; retaining the existing hardware map rather than reconstructing all seven parts is appropriate for the selected return-comparison task.",
+    "materialLimitation": "Despite otherwise concrete source understanding, the metadata-only about values violate the selected criterion that source declarations must not be invented as raw about-version quotations. The response therefore cannot be accepted as a usable request-comparison completion."
+  },
+  "nextSmallestDecision": {
+    "recommendation": "Choose one narrow provenance-reference contract before another actual generation. Prefer keeping user-declared source version outside model-authored about values: existing citation record IDs already identify typed source metadata, and the existing source UI can label it user declared. For actual raw report/check conditions, consider anchored aboutAt references across role, claim and match slots, resolved deterministically to the existing stored about string/null. Do not search formatted basis/note prose to infer authority.",
+    "why": "The normal typed entry supplies legitimate code evidence, but putting its version beside the raw body exposes a real ambiguity between source provenance and a version literally asserted by the body. A stronger prohibition followed by the same generation would leave that product representation unresolved. Existing source UI already displays the declaration separately; the response contract should preserve that separation.",
+    "smallContractComparison": {
+      "preferred": "Separate source declaration presentation from model-authored raw conditions, reusing record.evidence and existing citation identity. A role with multiple basis records must not merge their declarations into one asserted version. Reuse the existing anchored-quote mechanism for raw conditions rather than adding a second generated declared-provenance object.",
+      "lessPreferred": "A new model-selected declared-source-version union could also distinguish authority, but adds model choices, fields and validation without a demonstrated need: the source identity and user declaration already exist. Simply allowing metadata strings in the current raw about predicate would erase the distinction and is rejected.",
+      "compatibility": "A changed response-field meaning requires an explicit wire/version branch and prompt identity rather than silently changing old map6 interpretation. The server can normalize lawful raw references to existing stored about strings/null; existing project14 metadata, historical readings and request-match storage need no migration solely for this choice. No old reply is rewritten.",
+      "remainingPolicyChoice": "Existing about bounds80/200 are shorter than some anchored paragraphs. Do not truncate an overlong resolved condition. Decide whether it remains in text plus exact citation with about=null, or needs a narrowly bounded reference form; preserve named report/check conditions and do not misclassify them as source declarations."
+    },
+    "bounds": [
+      "Do not relax the existing raw about gate to accept arbitrary metadata-like strings.",
+      "Do not prepend version text to files, retag or alter old pasted records, repair115/113 wires, or reinterpret older failed observations as passes.",
+      "Preserve author/root raw report and check-condition quotations, evidence-kind eligibility, request targets, and old stored readings/requests.",
+      "No new owner/store/queue or time/token retry is justified by this failure. A narrowly versioned wire/normalization change and model-free boundary evidence should be decided separately by Root."
+    ]
+  },
+  "conclusion": "115 delivered a complete final but failed the unchanged response contract at the distinction between declared source version and raw about quotation. It is not a semantic success. The preserved response understands the selected local tool substantially better than an untyped citation failure, yet remains unusable whole; the next useful decision is the smallest explicit provenance-reference contract, not another generation or raw repair."
+}

@@ -1,0 +1,37 @@
+{
+  "selection": "d0dcc26fb0b27de8aed618b8bc419f99d5900639",
+  "app": "601d68f8d91f0907bfd37ee8e51b891a91dc8c41",
+  "status": "rejected_response_contract",
+  "files": [
+    {
+      "file": "contract-rejected.png",
+      "bytes": 47114,
+      "sha256": "bd08134f4449aabb241da922d05a72c2f764851f400d543fffcafe0c962a9164"
+    },
+    {
+      "file": "final-message.txt",
+      "bytes": 10643,
+      "sha256": "02a5467ebd07fdb5b70325640a2cde7187a93e8eba0e57a83d1efff2f7603ba6"
+    },
+    {
+      "file": "independent-review.json",
+      "bytes": 10145,
+      "sha256": "55c9335307ff62510844bcaf43006c0f0294007168754beb0430f92716687827"
+    },
+    {
+      "file": "preflight.json",
+      "bytes": 1527,
+      "sha256": "a071dc44e9c81651cba1da816d7492416e022d2dbfcf9acf6ea2f3137fe8a6e4"
+    },
+    {
+      "file": "preservation.json",
+      "bytes": 508,
+      "sha256": "762f33bff6e4a0d90c0f5151c77337254023f8751301755603d5041b66f97c4c"
+    },
+    {
+      "file": "receipt.json",
+      "bytes": 2622,
+      "sha256": "665796d0cb20ac5b5198a3e14a2375eda5e243c35ca774cb3e97d441cfc75dc8"
+    }
+  ]
+}

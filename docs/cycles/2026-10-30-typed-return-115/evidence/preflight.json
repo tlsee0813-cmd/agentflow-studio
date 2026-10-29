@@ -1,0 +1,37 @@
+{
+  "selectionCommit": "d0dcc26fb0b27de8aed618b8bc419f99d5900639",
+  "code": "d6c93dffa710e7947e73c319cbee079d5c540adf",
+  "app": "601d68f8d91f0907bfd37ee8e51b891a91dc8c41",
+  "askSha": "8946d3c556105cd269b7853efa10c27067872556d3ddc94a27f57345e323bba7",
+  "askBytes": 34202,
+  "systemSha": "24b6596338d073faa3015ecb5f76159e52fd8854abb768865c35403de99287ca",
+  "stdinSha": "f72eb641e06b3a82d76265e2af5172be2d2ed31c0a8a9f88cb61f79802c4216e",
+  "original4RecordsExact": true,
+  "originalFirstReadingExact": true,
+  "fullBundleExact": true,
+  "coverage": {
+    "fresh": 6,
+    "sent": 4,
+    "partial": 0,
+    "omitted": "old Zephyr doc and dtsi remain in stored project/current map, not re-sent in this selected request ask"
+  },
+  "newFiles": [
+    {
+      "name": "label-lookup.js",
+      "kind": "code",
+      "version": "6d9c2abc8c10f1aaddecd0f9bc7934153dfcc230",
+      "origin": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/6d9c2abc8c10f1aaddecd0f9bc7934153dfcc230/examples/reel-label-guide/label-lookup.js",
+      "bytes": 3561,
+      "sha256": "d4335980a2b17fdf5cf82ed5778a5ac2b460c542068ff84fb3a14aa55e5eebad"
+    },
+    {
+      "name": "app.js",
+      "kind": "code",
+      "version": "6d9c2abc8c10f1aaddecd0f9bc7934153dfcc230",
+      "origin": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/6d9c2abc8c10f1aaddecd0f9bc7934153dfcc230/examples/reel-label-guide/app.js",
+      "bytes": 2947,
+      "sha256": "e0f8ddadd01acf12f7ced0821b9d4c011fce423390e5dfff2816b36675555583"
+    }
+  ],
+  "realCalls": 1
+}
