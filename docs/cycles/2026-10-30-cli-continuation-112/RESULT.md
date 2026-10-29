@@ -5,7 +5,7 @@
 ## 판본
 
 - 기준 83d545dc5192a86556cfaffb70a6ec86526eda14(app 5736b7949d50ba92c07ae583ff22c618c25c3e94), branch `work/experience112-cli-continuation`. 102 branch/PR61은 건드리지 않았다.
-- 결과 SHA는 이 문서를 담은 커밋이다(아래 검사 SHA와 같다).
+- 코드·테스트 SHA 0cdabb9e15021a876000fec2f48b8843bad61751. 그 뒤 커밋은 이 문서의 검사 결과 기입뿐이다.
 
 ## 바뀐 곳
 
@@ -15,7 +15,17 @@
 
 ## 검사 (작성자 실행, Linux 원격 Node v22.22.0, 가짜 CLI)
 
-__CHECKS__
+정확 0cdabb9, 작업 트리 clean, `AI_MODE=mock`·`ALLOW_PAID_AI=false`·키 없음:
+
+| 단계 | 결과 |
+|---|---|
+| `continuity/scripts/build.mjs` / `check.mjs`(이 환경 tsc) | 통과 / 통과 |
+| continuity 전체 `node --test continuity/tests/*.test.mjs` (102·102 process·112 포함) | 596/596, 167초 |
+| `deploy-cloudflare.mjs --dry-run` / `build-static.mjs --preview` | 통과 / 통과 |
+| 102 `check-ui-flow.mjs` (Chromium, 첫 지도) | 통과: child 2, job POST 2 |
+| 종료 뒤 가짜 CLI·preview 프로세스 | 0 |
+
+이 전에 102·process·112 focused 첫 실행은 31/32였다(158초, 900초 상한 안에서 스스로 종료, 프로세스 0). 실패 1건은 102-E1이 실행자 status 설명을 새 `scope` 필드 없이 정확 비교한 기대값이었고, 기대값에 `scope: 'first'`만 더해 E1 단독 재확인 뒤 위 전체 실행에 포함했다.
 
 112 새 경계:
 - 112-1 scope 없음=first이며 정책 hash가 112 이전 공식과 동일, first 명시도 동일, map6-later는 hash가 다름, 그 밖의 값(later/all/map6/빈 값/null/숫자)은 정책 오류.
