@@ -3113,6 +3113,137 @@ def reading87_flow(browser, base, size, shots=None):
     context.close()
 
 
+def request93_flow(browser, base, size, shots=None):
+    """AF93: closing a request document (X, the footer's 닫기, Esc) returns to the control that opened it, at the same place: right
+    after making one, '마지막 요청문' beside an enabled '요청문 만들기', the same with a stale draft (make disabled), and a no-change
+    analysis's '이전 요청'. Reading the long frozen document keeps its scroll across a copy; Tab from the text reaches the close
+    controls. Opening and closing makes, sends and changes nothing. Author-written fixture: the exact micro backup with stubbed
+    replies routed in the browser ([테스트]), not a model reply and not root's 88 saved-file check."""
+    w, hgt = size
+    context = browser.new_context(viewport={"width": w, "height": hgt})
+    page = context.new_page()
+    errors, calls = [], []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    shot = lambda name: shots and page.screenshot(path=str(pathlib.Path(shots) / f"request93-{w}x{hgt}-{name}.png"))
+    page.goto(base + "/")
+    page.locator("#import-file").set_input_files(str(ROOT / "tests/fixtures/context75/micro-javascript-backup.json"))
+    expect(page.locator("#crumbs")).to_contain_text("micro-javascript")
+    project = page.evaluate(ENTRY, re.search(r"#/p/([^/]+)", page.url).group(1))
+    ref = {"id": ZERO85_PIPE, "name": "평가 실행 파이프라인"}
+    bundle = {"draft": ZERO85_SENTENCE, "extra": [], "plan": None, "by": None, "snapshots": [], "labels": {}, "origins": {}, "observations": [], "attached": {},
+        "authoring": {"version": "authoring-context.1", "draft": {"state": "set", "context": {"projectId": project["id"], "selection": ref, "scope": ref, "at": "2026-10-28T00:00:00.000Z", "how": "explicit"}}, "analyzed": None}}
+    page.evaluate("([id, b]) => localStorage.setItem('agentflow.studio.plans.1', JSON.stringify({ version: 'studio.plans.3', projects: { [id]: b } }))", [project["id"], bundle])
+    page.reload()
+    stored = lambda: page.evaluate("id => JSON.parse(localStorage.getItem('agentflow.studio.plans.1')).projects[id]", project["id"])
+    panel, sheet, area = page.locator("#plan-panel"), page.locator("#plan-sheet"), page.locator("#plan-intent")
+    rail, pre = panel.locator(".pw-rail-body"), page.locator("#plan-sheet pre")
+    def reply(analysis):
+        def handle(route):
+            calls.append(route.request.url)
+            route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "reply": analysis(route.request.post_data_json) if callable(analysis) else analysis}))
+        page.unroute("**/api/studio/plan"); page.route("**/api/studio/plan", handle)
+    page.route("**/api/studio/scope", lambda route: (calls.append(route.request.url), route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model",
+        "reply": {"summary": "[테스트 응답] 추가 전제 없음.", "prerequisites": [], "unknowns": []}}))))
+    positive = lambda ask: {"summary": "[테스트 응답] 두 예외 이름을 재사용한다.", "items": [{"id": "c1", "title": "[테스트] 제한 종류별 안내", "description": "[테스트 응답] 두 예외를 구별해 알린다.",
+        "partIds": [next(p["id"] for p in ask["parts"] if p["name"] == "오류 처리")], "refs": ["INTENT", "N01"], "dependsOn": []}], "impacts": [], "preserve": [], "unknowns": []}
+    world = lambda: [page.url, page.evaluate("() => document.getElementById('world')?.style.transform ?? ''")]
+    focused = "() => { const a = document.activeElement; return [a.id || null, a.dataset.sheetEntry ?? a.dataset.sheetPart ?? null, a.textContent.trim().slice(0, 24), a.closest('#plan-sheet') ? 'sheet' : a.closest('.pw-earlier') ? 'earlier' : a.closest('.pw-req') ? 'request' : a.tagName]; }"
+    page.locator("#plan-entry").click()
+    reply(positive)
+    page.locator("#plan-ask").click()
+    expect(page.locator("#plan-strip .ps-item")).to_have_text("[테스트] 제한 종류별 안내")
+    page.locator("#plan-strip .ps-more").click()
+    # 1) Right after making it: the document opens on 복사; Tab goes on to 닫기; closing returns to 요청문 만들기 (still enabled).
+    page.locator("#plan-make").click()
+    expect(sheet).to_be_visible()
+    assert page.evaluate(focused)[0] == "plan-copy", page.evaluate(focused)
+    made = stored()
+    assert len(made["snapshots"]) == 1
+    text = made["snapshots"][0]["text"]
+    assert pre.text_content() == text and pre.evaluate("p => p.scrollHeight > p.clientHeight"), "a long frozen document that scrolls"
+    page.keyboard.press("Tab")
+    assert page.evaluate(focused)[1] == "close", page.evaluate(focused)
+    shot("1-made-tab-close")
+    before = [world(), rail.evaluate("r => r.scrollTop")]
+    page.keyboard.press("Enter")
+    expect(sheet).to_be_hidden()
+    assert page.evaluate(focused)[0] == "plan-make" and page.locator("#plan-make").is_enabled(), page.evaluate(focused)
+    assert [world(), rail.evaluate("r => r.scrollTop")] == before
+    # 2) '마지막 요청문' beside an enabled make: reading starts in the text; a copy keeps the read place and focus; every way closes
+    #    back to '마지막 요청문', never to make.
+    last = panel.locator('[data-sheet-entry="last"]')
+    for way in ("x", "close", "escape"):
+        last.click()
+        expect(sheet).to_be_visible()
+        assert page.evaluate(focused)[1] == "text", page.evaluate(focused)
+        pre.evaluate("p => { p.scrollTop = Math.floor((p.scrollHeight - p.clientHeight) / 2); }")
+        top = pre.evaluate("p => p.scrollTop")
+        assert top > 0
+        if way == "close":
+            page.keyboard.press("Tab")  # to 복사
+            assert page.evaluate(focused)[1] == "copy", page.evaluate(focused)
+            page.keyboard.press("Enter")  # copy (or the copy-blocked message): the same document re-renders in place
+            expect(sheet.locator("footer [role=status]")).not_to_have_text("복사는 이 글을 옮기는 일이에요. 접수·실행·완료를 기록하지 않아요.")
+            assert page.evaluate(focused)[1] == "copy" and pre.evaluate("p => p.scrollTop") == top, (page.evaluate(focused), pre.evaluate("p => p.scrollTop"), top)
+            page.keyboard.press("Tab")
+            assert page.evaluate(focused)[1] == "close", page.evaluate(focused)
+            shot("2-last-read-copy-tab")
+            page.keyboard.press("Enter")
+        elif way == "x": sheet.locator('[data-sheet-part="x"]').click()
+        else: page.keyboard.press("Escape")
+        expect(sheet).to_be_hidden()
+        assert page.evaluate(focused)[1:] == ["last", last.inner_text().strip()[:24], "request"], (way, page.evaluate(focused))
+    # 3) A stale draft (make disabled) with a backward selection: closing goes back to '마지막 요청문', the draft untouched.
+    panel.locator(".pw-head-tools").get_by_role("button", name="문장 고치기").click()
+    area.press("End"); area.type(" 추가")
+    expect(page.locator("#plan-make")).to_be_disabled()
+    area.evaluate("a => a.setSelectionRange(4, 15, 'backward')")
+    caret = "a => [a.selectionStart, a.selectionEnd, a.selectionDirection, a.value]"
+    left, kept = area.evaluate(caret), stored()
+    for way in ("keyboard", "escape"):
+        last.click()
+        expect(sheet).to_be_visible()
+        assert pre.text_content() == text and page.evaluate(focused)[1] == "text", page.evaluate(focused)
+        if way == "keyboard":  # from the text by keyboard alone: Shift+Tab reaches × and Enter closes
+            page.keyboard.press("Shift+Tab")
+            assert page.evaluate(focused)[1] == "x", page.evaluate(focused)
+            page.keyboard.press("Enter")
+        else: page.keyboard.press("Escape")
+        expect(sheet).to_be_hidden()
+        assert page.evaluate(focused)[1] == "last", (way, page.evaluate(focused))
+        assert page.locator("#plan-make").is_disabled() and area.evaluate(caret) == left, area.evaluate(caret)
+    shot("3-stale-back-to-last")
+    assert stored() == kept, "reading changes nothing stored"
+    area.fill(ZERO85_SENTENCE)
+    expect(page.locator("#plan-make")).to_be_enabled()
+    # 4) A no-change analysis: '이전 요청' at the list's end; closing comes back there at the same list place. The list's own way
+    #    back (AF87: a material and back) is untouched by the document's.
+    reply(ZERO85_EMPTY)
+    page.locator("#plan-ask").click()
+    expect(page.locator("#plan-title")).to_have_text("제안된 변경 없음")
+    earlier = panel.locator('.pw-earlier [data-sheet-entry="last"]')
+    rail.evaluate("r => { r.scrollTop = r.scrollHeight; }")
+    list_at = rail.evaluate("r => r.scrollTop")
+    for way in ("close", "escape"):
+        earlier.click()
+        expect(sheet).to_be_visible()
+        assert pre.text_content() == text
+        sheet.locator('[data-sheet-part="close"]').click() if way == "close" else page.keyboard.press("Escape")
+        expect(sheet).to_be_hidden()
+        assert page.evaluate(focused)[1:] == ["last", earlier.inner_text().strip()[:24], "earlier"] and rail.evaluate("r => r.scrollTop") == list_at, (way, page.evaluate(focused), rail.evaluate("r => r.scrollTop"), list_at)
+    shot("4-zero-earlier")
+    panel.locator('.pw-srcs [data-ref="N01"]').click()
+    page.locator("#pw-rail-back").click()
+    assert page.evaluate("() => document.activeElement.dataset.ref") == "N01"
+    # Nothing was made, sent or changed by reading: one request, the same text, labels, origins, returns; no other call.
+    after = stored()
+    for k in ["snapshots", "labels", "origins", "observations", "attached"]: assert after[k] == made[k], k
+    assert len(calls) == 3, calls  # the positive analysis, its one scope review, the empty analysis
+    assert errors == [], errors
+    page.unroute("**/api/studio/plan"); page.unroute("**/api/studio/scope")
+    context.close()
+
+
 def main():
     procs = []
     try:
@@ -3123,6 +3254,11 @@ def main():
                 # Only the AF85 flow (screenshots into the folder named after it, when given); stubbed replies, no provider.
                 proc, base = start("ok"); procs.append(proc)
                 for width in (1280, 1440): zero85_flow(browser, base, width, sys.argv[2] if len(sys.argv) > 2 else None); print(f"ok  AF85 empty analysis at {width}")
+                browser.close(); return
+            if sys.argv[1:2] == ["request93"]:
+                # Only the AF93 flow: closing a request document goes back to its opener; stubbed replies, no provider.
+                proc, base = start("ok"); procs.append(proc)
+                for size in ((1280, 720), (1440, 900)): request93_flow(browser, base, size, sys.argv[2] if len(sys.argv) > 2 else None); print(f"ok  AF93 request document back to its opener at {size[0]}x{size[1]}")
                 browser.close(); return
             if sys.argv[1:2] == ["reading87"]:
                 # Only the AF85/87 flows: the stored real 85 reply replayed in the browser, no provider.
@@ -3157,6 +3293,7 @@ def main():
             authoring84_flow(browser, base); print("ok  AF84 older micro draft at 1280/DPR1.25: set and remove the authoring context keep caret, direction and draft; focus on a live control; boundary line; caret back after close/reopen")
             for width in (1280, 1440): zero85_flow(browser, base, width)
             for size in ((1280, 720), (1440, 900)): reading87_flow(browser, base, size)
+            for size in ((1280, 720), (1440, 900)): request93_flow(browser, base, size)
             print("ok  AF85 empty analysis on the micro draft at 1280/1440: reads at once, source and back, close/reopen/reload/file, earlier request and return kept, positive with none chosen apart")
             proc, base = start("code"); procs.append(proc); code_flow(browser, base); print("ok  access code kept from an input event")
             proc, base = start("fail"); procs.append(proc); failure_flow(browser, base); print("ok  provider failure -> short error -> retry")

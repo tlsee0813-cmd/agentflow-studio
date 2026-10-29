@@ -85,7 +85,11 @@ interface Session {
   pending: { controller: AbortController; input: PlanInput } | null; error: string | null;
   /** The one scope review of a request being made from an AI analysis, and why the last one did not produce a document. */
   scoping: { controller: AbortController; count: number } | null; scopeError: string | null;
-  sheet: string | null; sources: boolean; adding: boolean; resultFor: string | null; addForm: boolean; copyMsg: string | null; fileMsg: string | null;
+  sheet: string | null;
+  /** The control that opened the request document now read (this tab only, never stored): closing it returns there, or to the
+   * nearest usable control of the same place when that one is gone or off. Only for that same document. */
+  sheetFrom: { snap: string; entry: 'make' | 'last' } | null;
+  sources: boolean; adding: boolean; resultFor: string | null; addForm: boolean; copyMsg: string | null; fileMsg: string | null;
   ret: PlanReturn;
 }
 
@@ -142,7 +146,7 @@ export function createPlanView(host: PlanHost) {
     const condition: Condition = 'A', { bundle, unreadable } = bundleFor(o, condition);
     s = { key: o.key, projectId: o.project.id, example: o.kind === 'example', condition, bundle, unreadable, storeMsg: null,
       focus: firstFocus(bundle.plan), targets: {}, mode: bundle.plan ? 'preview' : 'current', editing: !bundle.plan, detail: false, strip: null, evidenceFor: null, evidenceRef: null, rail: 'request', railSource: null, railAt: null, railEntry: null, fromWork: false, workAt: null, pending: null, error: null, scoping: null, scopeError: null,
-      sheet: null, sources: false, adding: false, resultFor: bundle.snapshots.at(-1)?.id ?? null, addForm: false, copyMsg: null, fileMsg: null, ret: host.capture() };
+      sheet: null, sheetFrom: null, sources: false, adding: false, resultFor: bundle.snapshots.at(-1)?.id ?? null, addForm: false, copyMsg: null, fileMsg: null, ret: host.capture() };
     if (unreadable) s.storeMsg = null;
     moveTarget = true; frameWhole = true; host.chrome(); render();
     // Focus right after the render that made the field (never a frame later, when it can land in a field being typed in).
@@ -521,9 +525,9 @@ export function createPlanView(host: PlanHost) {
     for (const k of Object.keys(s.bundle.origins)) if (!kept.has(k)) delete s.bundle.origins[k];
     s.bundle.observations = s.bundle.observations.filter(x => kept.has(s!.bundle.attached[x.id]!));
     for (const k of Object.keys(s.bundle.attached)) if (!kept.has(s.bundle.attached[k]!)) delete s.bundle.attached[k];
-    s.sheet = snap.id; s.resultFor = snap.id; s.copyMsg = null;
+    s.sheet = snap.id; s.sheetFrom = { snap: snap.id, entry: 'make' }; s.resultFor = snap.id; s.copyMsg = null;
     persist(); render();
-    document.getElementById('plan-copy')?.focus();
+    document.getElementById('plan-copy')?.focus({ preventScroll: true });
   }
   function attach(snapshot: RequestSnapshot, obs: ResultObservation[]) {
     if (!s) return;
@@ -945,7 +949,7 @@ export function createPlanView(host: PlanHost) {
     const st = s!, last = latestSnapshot(), n = st.bundle.snapshots.length;
     const earlier = last ? h('section', { class: 'pw-req pw-earlier', 'aria-labelledby': 'pw-earlier-h' }, h('h3', { id: 'pw-earlier-h' }, '이전 요청'),
       h('div', { class: 'pw-tools' },
-        h('button', { type: 'button', class: 'link-button', onclick: () => { st.sheet = last.id; st.copyMsg = null; render(); } }, `마지막 요청문 · ${ago(last.createdAt)}`),
+        h('button', { type: 'button', class: 'link-button', 'data-sheet-entry': 'last', onclick: () => openSheet(last.id) }, `마지막 요청문 · ${ago(last.createdAt)}`),
         h('button', { type: 'button', class: 'link-button quiet', 'data-entry': 'results', onclick: () => { leaveList('results'); st.rail = 'results'; render(); } }, `돌아온 기록 · 요청문 ${n}개`),
         h('button', { type: 'button', class: 'link-button quiet', title: '돌아온 기록과 프로젝트 기록을 함께 읽어요. 변경 구상은 닫혀도 초안은 남아요.', onclick: () => host.readReturn() }, '돌아와 읽기')),
       h('p', { class: 'fine' }, '마지막 요청문 뒤로 다시 살펴봤어요. 이전 요청문과 돌아온 기록은 만든 때 그대로예요.')) : null;
@@ -972,7 +976,7 @@ export function createPlanView(host: PlanHost) {
           ? h('div', { class: 'pending', role: 'status' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), h('span', {}, `고른 변경 ${st.scoping.count}개의 전제를 살펴보는 중…`),
               h('button', { type: 'button', class: 'link-button', onclick: () => st.scoping?.controller.abort() }, '취소'))
           : h('div', { class: 'pp-row' }, h('button', { type: 'button', id: 'plan-make', class: 'primary small', disabled: !canRequest(), onclick: makeRequest, title: requestTitle() }, '요청문 만들기'),
-              last ? h('button', { type: 'button', class: 'link-button', onclick: () => { st.sheet = last.id; st.copyMsg = null; render(); } }, `마지막 요청문 · ${ago(last.createdAt)}`) : null),
+              last ? h('button', { type: 'button', class: 'link-button', 'data-sheet-entry': 'last', onclick: () => openSheet(last.id) }, `마지막 요청문 · ${ago(last.createdAt)}`) : null),
         // Why the button is off while the sentence or material is ahead of the plan (kept in step as the person types).
         h('p', { class: 'fine pp-make-note', id: 'plan-make-note', role: 'status', hidden: !why }, why ? requestTitle() : ''),
         st.scopeError ? h('p', { class: 'pp-error', role: 'alert' }, st.scopeError) : null,
@@ -1348,25 +1352,47 @@ export function createPlanView(host: PlanHost) {
   function renderSheet() {
     const sheet = $('plan-sheet'), snap = s ? snapshotOf(s.sheet) : null;
     sheet.hidden = !snap;
-    if (!s || !snap) { sheet.replaceChildren(); return; }
+    if (!s || !snap) { sheet.replaceChildren(); delete sheet.dataset.snap; return; }
     fitSheet();
+    // Re-rendering the same document (a copy message, any render while it is open) keeps where it was read and what had focus.
+    const same = sheet.dataset.snap === snap.id, top = same ? sheet.querySelector('pre')?.scrollTop ?? 0 : 0;
+    const had = same && sheet.contains(document.activeElement) ? (document.activeElement as HTMLElement).dataset.sheetPart ?? null : null;
+    sheet.dataset.snap = snap.id;
     const labels = s.bundle.labels[snap.id] ?? {}, p = plan();
     const old = !p || snap.planId !== p.id || snap.planRevision !== p.revision;
     const total = Object.keys(labels).length || snap.itemIds.length;
     sheet.replaceChildren(
       h('header', {}, h('div', {}, h('h2', { id: 'sheet-title' }, '요청문'), h('p', {}, `맡길 항목 ${snap.itemIds.length}/${total} · ${snap.itemIds.map(id => labels[id] ?? id).join(' · ')}`),
         h('p', { class: 'fine' }, `${fullTime(snap.createdAt)}에 만듦 · ${{ example: '작성된 예제 분석의 고정 전제', reviewed: 'AI가 고른 범위의 전제를 살펴봄', ai: '전제 검토 없이 만든 이전 요청문' }[s.bundle.origins[snap.id] ?? 'ai']}${old ? ' · 지금 변경안과 다른 판' : ''}`)),
-        h('button', { type: 'button', class: 'close', 'aria-label': '요청문 닫기', title: '닫기 (Esc)', onclick: closeSheet }, '×')),
-      h('pre', { tabindex: '0' }, snap.text),
-      h('footer', {}, h('button', { type: 'button', id: 'plan-copy', class: 'primary small', onclick: () => void copy(snap.text) }, '복사'),
+        h('button', { type: 'button', class: 'close', 'data-sheet-part': 'x', 'aria-label': '요청문 닫기', title: '닫기 (Esc)', onclick: closeSheet }, '×')),
+      h('pre', { tabindex: '0', 'data-sheet-part': 'text' }, snap.text),
+      h('footer', {}, h('button', { type: 'button', id: 'plan-copy', 'data-sheet-part': 'copy', class: 'primary small', onclick: () => void copy(snap.text) }, '복사'),
         h('span', { class: 'fine', role: 'status' }, s.copyMsg ?? '복사는 이 글을 옮기는 일이에요. 접수·실행·완료를 기록하지 않아요.'),
-        h('button', { type: 'button', class: 'link-button', onclick: closeSheet }, '닫기')));
+        h('button', { type: 'button', class: 'link-button', 'data-sheet-part': 'close', onclick: closeSheet }, '닫기')));
+    const pre = sheet.querySelector('pre')!; pre.scrollTop = top;
+    if (had) sheet.querySelector<HTMLElement>(`[data-sheet-part="${had}"]`)?.focus({ preventScroll: true });
   }
   /** The sheet reads beside the inspector while the strip left of it is wide enough; otherwise it covers the window. */
   function fitSheet() { $('plan-sheet').classList.toggle('wide', $('space').getBoundingClientRect().width - width() - 48 < 420); }
   // A resized window changes the inspector width: keep the map's reference width and the sheet in step.
   window.addEventListener('resize', () => { if (!s) return; fitSheet(); });
-  function closeSheet() { if (!s) return; s.sheet = null; s.copyMsg = null; render(); document.querySelector<HTMLElement>('#plan-make, .pw-req .link-button')?.focus(); }
+  /** A kept document opened to read: reading starts in it (the keyboard goes on from there), nothing else changes. */
+  function openSheet(id: string) {
+    if (!s) return;
+    s.sheet = id; s.sheetFrom = { snap: id, entry: 'last' }; s.copyMsg = null; render();
+    document.querySelector<HTMLElement>('#plan-sheet pre')?.focus({ preventScroll: true });
+  }
+  /** Closing returns to the control that opened this document when it can take focus; otherwise to the same place's other way to
+   * a request document, then the workspace heading. Never a disabled, hidden or covered control; nothing scrolls to reach it. */
+  function closeSheet() {
+    if (!s) return;
+    const from = s.sheetFrom?.snap === s.sheet ? s.sheetFrom.entry : null;
+    s.sheet = null; s.sheetFrom = null; s.copyMsg = null; render();
+    const usable = (el: HTMLElement | null): el is HTMLElement => !!el && !(el as HTMLButtonElement).disabled && !el.closest('[hidden], [inert]') && el.getClientRects().length > 0;
+    const last = '#plan-panel [data-sheet-entry="last"]', make = '#plan-panel #plan-make';
+    const order = from === 'make' ? [make, last, '#plan-title'] : [last, make, '#plan-title'];
+    order.map(q => document.querySelector<HTMLElement>(q)).find(usable)?.focus({ preventScroll: true });
+  }
 
   /** Escape: the innermost open thing first; the plan itself last. Returns true when handled. */
   function escape(): boolean {
