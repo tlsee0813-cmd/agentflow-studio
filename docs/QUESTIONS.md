@@ -1,5 +1,7 @@
 # 연구 질문과 축적된 근거
 
+**91 동시 전달 후보 반려 · 2026-10-29:** [결과·최소 증거](https://github.com/tlsee0813-cmd/agentflow-studio/blob/b3c9edf8483180009a0804a5f8d63dd06fb019a4/docs/cycles/2026-10-29-bounded-delivery-91/RESULT.md). 공통90초·각경로1회에서DeepSeek가51.882초첫유효응답으로선택되고Codex는취소됐다. 정리/원문/source보존·privateapply는통과했으나기존A3의정확철회조건설명누락과작업자입력제품화로총괄·독립반려. 후발대체·micro/Zephyr·제품통합0,11전달검사를의미통과로취급하지않음. 공개73·UI75수리·목표활성·인수인계8hold유지. 다음우선경로안은검토만이며미선정/미실행.
+
 **89 최종 실행 경로 검토·판정 정정 · 2026-10-29:** [결과·최소 증거](https://github.com/tlsee0813-cmd/agentflow-studio/blob/4a30e485bc05c2f69d85c779fc6edc01c08f6da3/docs/cycles/2026-10-29-codex-map-path-89/RESULT.md). 같은map6/원자료의새CLI SolHigh actual80.743초·micro52.603초는기존적용기준의의미와정상PC인용왕복/reload/export를통과했다. 초기micro반려는76의명시적비차단선례를빠뜨린판정오류로정정·원본보존. 미실행Zephyr만이어90.055초timeout/최종응답0,따라서경로전체·기본공급자채택미수용. 각1invocation/재시도·수선0,배치변형·제품API통합미완료. API경계90초안은새차단수리로선택하지않음. 공개73·UI75·전체목표활성유지.
 
 **89 새 실행 경로 후보 반려 · 2026-10-29:** [결과·최소 증거](https://github.com/tlsee0813-cmd/agentflow-studio/blob/dc948f453e61365828bcb1dd031d13a71686150d/docs/cycles/2026-10-29-codex-map-path-89/RESULT.md). 기존 Sol High CLI에서 같은map6/원자료를 새로 생성했다. 첫 실제지시80.743초는A1–A5·총괄PC원문왕복·reload/export 전체필드보존을통과했지만 micro52.603초는JSContext/import 진입정보누락으로M1/M4반려. 총괄·독립Sol판정, Zephyr/변형/재시도0. 제품provider통합·첫지도전체수용아님. 공개73·UI75·미병합유지,전체목표활성. 다음은API사용근거와예문경계의좁은설계판단이며기존실패응답수선/반복없음.
