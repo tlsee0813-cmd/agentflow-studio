@@ -1797,7 +1797,7 @@ def request71_flow(browser, base):
     page.once("dialog", lambda dialog: dialog.accept())
     page.locator("#plan-import-file").set_input_files({"name": "legacy-request.json", "mimeType": "application/json", "buffer": json.dumps(file).encode("utf-8")})
     # The import ends asynchronously and the plan stays on its strip (the panel is hidden): wait for the stored bundle, not a panel.
-    page.wait_for_function("([id, rq]) => JSON.parse(localStorage.getItem('agentflow.studio.plans.1')).projects[id].snapshots[0]?.id === rq", [project["id"], old["id"]])
+    page.wait_for_function("([id, rq]) => JSON.parse(localStorage.getItem('agentflow.studio.plans.1')).projects[id].snapshots[0]?.id === rq", arg=[project["id"], old["id"]])
     imported = page.evaluate("() => JSON.parse(localStorage.getItem('agentflow.studio.plans.1'))")["projects"][project["id"]]["snapshots"]
     assert [x["id"] for x in imported] == [old["id"]] and imported[0]["text"] == old["text"] and "scope" not in imported[0] and "reading" not in imported[0], imported
     page.locator(".ps-more").click()
