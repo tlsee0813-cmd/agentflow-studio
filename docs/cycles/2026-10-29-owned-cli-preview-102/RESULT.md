@@ -35,6 +35,10 @@ app 루트 `npm test`는 이번 run에 넣지 않았다. 앞선 실행에서 실
 
 UI(Chromium, 가짜 CLI): DeepSeek 키 없이 헤더 `지도 정리만 가능`, 일반 첫 지도 버튼 → 실행 중 다른 프로젝트 기록 저장·새로고침 → 원 프로젝트 카드에 결과 도착 → 원 프로젝트에서만 명시 반영, 질문 버튼 없음, 동기 `/api/studio/map` 호출 0, child 2회.
 
+## 이후 수리 (총괄 CUA 재생에서 발견)
+
+- 상대 `--state`: 실행자가 상태 폴더를 정규화하지 않아 child에 상대 `{cwd}`/`{final}`이 전달되고 child 작업 폴더 아래로 중첩되어 final ENOENT(제품은 failed로 격리). 실행자를 열 때 호출 작업 폴더 기준 절대 경로로 한 번 정규화한다. 반례 E21(상대 상태 폴더 → 무해 child ready), resolve 제거 mutation에서 E21이 exit 1로 실패함을 확인했다.
+
 ## 미확인·한계
 
 - 실제 CLI 0.165.0-alpha.1.2의 인자·격리·event/final 프로토콜, 토큰/과금 hard cap은 확인하지 않았다(실제 호출 0). `policy.example.json`의 인자는 동결 binary의 `exec --help`로 총괄이 확인해야 한다.

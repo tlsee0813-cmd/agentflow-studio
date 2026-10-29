@@ -11,7 +11,7 @@ import { PassThrough } from 'node:stream';
 import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, writeFileSync, existsSync, readdirSync, copyFileSync, renameSync, appendFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, relative, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as D from '../dist/public/shared/domain.js';
 import * as M from '../dist/public/shared/map-reading.js';
@@ -412,6 +412,17 @@ test('102-E20 handoff: a state change already in flight ends before the next own
   assert.equal((await jcall(e.handle, 'POST', '', z.cap, z.body)).status, 503);
   assert.equal(versions(), v0, 'the probe was not started once closing');
   await e.close();
+});
+
+test('102-E21 a relative state folder (as a launcher may be given) reaches the child as the same absolute place: ready', async () => {
+  const state = relative(process.cwd(), mkdtempSync(join(tmpdir(), 'af102-state-')));
+  assert.ok(!isAbsolute(state));
+  const s = await setup({ state }), x = await submission(project());
+  assert.equal((await jcall(s.handle, 'POST', '', x.cap, x.body)).status, 202);
+  const v = await ended(s.handle, x); assert.equal(v.state, 'ready', JSON.stringify(v.error));
+  assert.equal(invocations(s.ctl).length, 1);
+  await until(() => s.executor.describe().state === 'ready' && readdirSync(join(state, 'runs')).length === 0, 'released under the same folder');
+  await s.close();
 });
 
 test('102-E8 duplicate POSTs of one id are one invocation; another id while it runs is refused, never queued', async () => {

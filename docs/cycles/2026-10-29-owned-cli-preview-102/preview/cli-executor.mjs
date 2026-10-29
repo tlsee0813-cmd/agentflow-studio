@@ -20,7 +20,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { mkdir, readFile, rm, unlink, open } from 'node:fs/promises';
 import { createReadStream } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { ApiError } from '../../../../app/server/errors.mjs';
 import { own, fileIo } from '../../../../app/continuity/server/map-jobs.mjs';
 import { map6Prompt, MAP6_FIRST_PROMPT } from '../../../../app/continuity/server/map-prompt.mjs';
@@ -78,8 +78,11 @@ const hashFile = file => new Promise(res => { const h = createHash('sha256'); cr
  * binary at policy.exe has policy.binarySha256 and its --version probe (a child like any other) says policy.version.
  * hooks (tests only): beforeSpawn(), beforeFinalRead().
  */
-export async function openCliExecutor({ policy: raw, stateDir, spawnImpl, now = () => performance.now(), log = () => {}, termMs, closeMs, versionMs = 10000, hooks = {} }) {
+export async function openCliExecutor({ policy: raw, stateDir: given, spawnImpl, now = () => performance.now(), log = () => {}, termMs, closeMs, versionMs = 10000, hooks = {} }) {
   const policy = readPolicy(raw);
+  // Absolute once, against the caller's working folder now: every path given to a child ({cwd}, {final}) must name the same place
+  // from the child's own working folder (a relative --state would otherwise nest under it).
+  const stateDir = resolve(given);
   const permissions = sha(JSON.stringify(policy.args)); // the argument template carries sandbox, config and tool settings
   const binding = Object.freeze({ executor: policy.executor, version: policy.version, binarySha256: policy.binarySha256, model: policy.model, reasoning: policy.reasoning,
     permissions, wrapper: WRAPPER_SHA256, prompt: sha(MAP6_FIRST_PROMPT).slice(0, 12), selectionMs: policy.selectionMs, verdictMs: policy.verdictMs,
