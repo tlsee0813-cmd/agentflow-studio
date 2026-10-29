@@ -29,8 +29,11 @@
     },
     {
       "path": "evidence/experience97-delta1-review.json",
-      "bytes": 5907,
-      "sha256": "3f70b3d697f8162d9b9b9e0915a4e17f1e44da688c3757ee284d9b41d031d7a6"
+      "bytes": 5833,
+      "sha256": "3754ef536c433614cd9b216406faa281e536db9a3968afc61c90a117fec67a0c",
+      "originalLocalSha256": "3f70b3d697f8162d9b9b9e0915a4e17f1e44da688c3757ee284d9b41d031d7a6",
+      "originalLocalBytes": 5907,
+      "textPublication": "Git CRLF-to-LF normalization only; original private receipt preserved"
     },
     {
       "path": "evidence/experience97-exact-ci.json",
@@ -49,8 +52,11 @@
     },
     {
       "path": "evidence/experience97-public-audit.json",
-      "bytes": 4735,
-      "sha256": "78816c795312cbef9729f49e0713e1c122385ec0be3b14433dc9a5f41a8225ab"
+      "bytes": 4689,
+      "sha256": "8e836de31c21a296237076172654c9ba98c0a40f64ccf8a3c36d92c2b2337154",
+      "originalLocalSha256": "78816c795312cbef9729f49e0713e1c122385ec0be3b14433dc9a5f41a8225ab",
+      "originalLocalBytes": 4735,
+      "textPublication": "Git CRLF-to-LF normalization only; original private receipt preserved"
     },
     {
       "path": "evidence/experience97-root-check-7c371.json",
@@ -77,5 +83,6 @@
       "bytes": 5560,
       "sha256": "ce7f0c4aadfaba2d83855c5af884aa5dcd67c03d067bb876ca82119dd1dc5538"
     }
-  ]
+  ],
+  "publicationNote": "sha256/bytes name committed Git blob bytes. originalLocal fields retain differing local CRLF evidence identity. Embedded prior input hashes in reviews refer to their original local inputs."
 }
