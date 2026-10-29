@@ -1,0 +1,87 @@
+{
+  "code": "8875b7744d7f384d59b9a4a7cdab35654e81bbab",
+  "app": "71ddbda17b49bf20bfe26fc399222065fd6339b0",
+  "preview": "1b15cd5a570803a8ed745f106f79398a1c57bd32",
+  "askSha": "579741cd5aa84d0c6a6b7c0d07e20b8979e88981f450eb702bc143e3f8248e8f",
+  "askBytes": 34202,
+  "systemSha": "1565dd000fe0729bae45db9bf42341a183aca60942c06717f83598aace8898de",
+  "wrapperSha": "dd56ff8327f0b957f18ccc6af7c6334935901014e36539c35c91e16279c02ae5",
+  "stdinSha": "da79ffc827e687473e2abbde9bfa12f9ff5eb291b61704b98c1157bca1ca1968",
+  "policyFileSha": "04ec708bab677ae63324ee0ed7bbc5d1bb6babe69adcdfdb41405b36a8f5924b",
+  "observerSha": "a3e376bd40785bed56f38c51a4986f38875a39c795132bce3d9a3c3c9fa439e2",
+  "cliSha": "5c1b55966bf9f757dcbf00065c9a6cb862ead55d34b015f1be1939ff18e43943",
+  "model": "gpt-6.1-sol",
+  "reasoning": "high",
+  "scope": "map7-later",
+  "selectionMs": 299000,
+  "verdictMs": 300000,
+  "records": [
+    {
+      "id": "R01",
+      "kind": "evidence"
+    },
+    {
+      "id": "R02",
+      "kind": "evidence"
+    },
+    {
+      "id": "N01",
+      "kind": "pasted"
+    },
+    {
+      "id": "N02",
+      "kind": "pasted"
+    }
+  ],
+  "requests": [
+    "RQ_0797ee20-a84e-4aa7-ace6-b4f053ca87f7"
+  ],
+  "status": "selected",
+  "basisAcceptance": "dccbcce0b9d116cb1e85155cab282fece76395d7",
+  "testedHead": "8aa7c3d3d8d9e62d0a655adb2a4cfff1dcef699b",
+  "testedRun": 40946465895,
+  "selectedAt": "2026-10-29T20:29:33.449Z",
+  "maxTopLevelCalls": 1,
+  "retry": false,
+  "fallback": false,
+  "tokenAndMoneyHardCap": "unknown; no new claim",
+  "remoteStop": "unconfirmed; local299/300 policy only",
+  "sourceProjectSha": "dd5b31e0792d71ae5fa1aa625a23a0728e1e6742fee89324140f12f6c60b5e54",
+  "fullRequestBundleSha": "cdf2dc70965e8eaf9c6d701dcef39a022d1baab8e0e0fcf047e4941590f8ba05",
+  "criteria": [
+    "one complete final within existing 299/300 policy, strict validator passes without wire repair",
+    "selected RQ0797 only; previous failedRQ unchanged",
+    "recognizes real local PC lookup tool without claiming hardware or AgentFlow deployment changed",
+    "B1/SSD1673/reel_board and B72/SSD1675A/reel_board@2 exact; ssd16xx; trim only whole case-sensitive match; unknown clears targets/no PCB inference; LowPower always retained",
+    "actual source properties cite typed evidence; reports remain reported/checked bounded by named version and observation",
+    "metadata is user declaration, not executed verification or invented raw about-version",
+    "normal ready without auto apply, explicit apply, source/back and backup/reload preserve originals",
+    "All four raw condition references are mechanically lawful AND semantically appropriate to each statement; original source/version/environment distinctions stay visible.",
+    "A null condition may avoid an overlong span but must not erase a material version, branch, test setup or limitation from the statement and exact evidence.",
+    "The Zephyr dependency commit inside label-lookup.js is not the user-declared input file version; never conflate them."
+  ],
+  "interpretations": [
+    "Every emitted condition slot must satisfy its rule; no required non-null slot, candidate or object count.",
+    "Leave originating visit, edit another project, retrieve ready and explicitly apply; same-visit immediate-apply behavior is not this scenario.",
+    "Full HINK-E0213→GDEH0213B1/SSD1673/ssd16xx/reel_board and HINK-E0213A22→GDEH0213B72/SSD1675A/ssd16xx/reel_board@2 across current map/returned reading/exact sources; no needless repetition required.",
+    "Typed code files are not test definitions. Reports stay bounded reports; no app-executed verification or hardware/deployment conclusion."
+  ],
+  "normalImport": {
+    "at": "2026-10-29T20:29:33.449Z",
+    "entry": "E_97735432-1622-4150-a235-9720d7935dfa",
+    "project": "dd5b31e0792d71ae5fa1aa625a23a0728e1e6742fee89324140f12f6c60b5e54",
+    "bundle": "cdf2dc70965e8eaf9c6d701dcef39a022d1baab8e0e0fcf047e4941590f8ba05",
+    "normalUiImport": true,
+    "executor": "off",
+    "realCalls": 0
+  },
+  "forbidden": [
+    "modify115 raw or reinterpret its result",
+    "change raw record bytes or user metadata",
+    "add reports to make the answer easier",
+    "increase timer/token limits"
+  ],
+  "systemBytes": 31279,
+  "stdinBytes": 65841,
+  "recipe": "m7-82631aa43efc"
+}
