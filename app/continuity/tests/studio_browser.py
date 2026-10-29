@@ -1572,7 +1572,7 @@ def map70_flow(browser, base):
     page = context.new_page()
     errors, sent = [], []
     page.on("pageerror", lambda e: errors.append(str(e)))
-    page.on("request", lambda r: sent.append(r.url) if r.url.endswith("/api/studio/map") else None)
+    page.on("request", lambda r: sent.append(r.post_data_json) if r.url.endswith("/api/studio/map") else None)
     page.goto(base + "/")
     page.locator("#new-open").click()
     page.locator("#new-name").fill("지도 프로젝트")
@@ -1594,6 +1594,7 @@ def map70_flow(browser, base):
     entry.get_by_role("button", name="기록으로 지도 정리").click()
     expect(page.locator("#world .node")).to_have_count(3)
     assert len(sent) == 1, sent
+    assert sent[0]["schemaVersion"] == "studio.map.6" and sent[0]["parts"] == [] and sent[0]["requests"] == [] and sent[0]["priors"] == [], "FIRST6 stays unchanged"
     expect(entry).to_be_hidden()
     # The map is what one reads now: the pane closes, the title line says what was understood, the new parts are marked.
     expect(page.locator("#lens")).to_be_hidden()
@@ -1639,6 +1640,7 @@ def map70_flow(browser, base):
     page.locator("#lens .rr-map").get_by_role("button", name="기록 읽고 지도 갱신").click()
     expect(page.locator("#world .map-understood")).to_contain_text("첫 부분")
     assert len(sent) == 2, sent
+    assert sent[1]["schemaVersion"] == "studio.map.7" and sent[1]["parts"], "the advertised later recipe reads the existing map as map.7"
     expect(page.locator("#world .node")).to_have_count(3)
     expect(page.locator("#world .node", has_text="변환기")).to_have_count(1)
     assert page.locator("#world .node", has_text="스텁 부분 2").evaluate("e => e.style.left + ',' + e.style.top") == placed
@@ -1729,11 +1731,11 @@ def request71_flow(browser, base):
     def returned(route):
         ask = route.request.post_data_json
         maps.append(ask)
-        # studio.map.6 (the stub server's status names m6): span.2 aliases and the exact request body remain bound.
-        assert ask["schemaVersion"] == "studio.map.6" and ask["requests"][0]["id"] == rq and ask["priors"] == []
+        # The stub server advertises later m7 beside FIRST6: conditions are raw span.2 references, the exact body stays bound.
+        assert ask["schemaVersion"] == "studio.map.7" and ask["requests"][0]["id"] == rq and ask["priors"] == []
         rec = next(r for r in ask["records"] if "feature/folder" in "".join(x["t"] for x in r["spans"]))
         at = lambda words: next(x["s"] for x in rec["spans"] if x["t"].strip().startswith(words))
-        match = {"at": at("작업 보고: feature/folder"), "text": "[스텁] 폴더 입력 변경 보고", "kind": "reported", "about": "feature/folder@abc1234", "targets": [{"requestId": rq, "itemId": "I1"}], "why": "[스텁] 입력 요구에 대응하는 구절", "stance": "made", "replaces": None}
+        match = {"at": at("작업 보고: feature/folder"), "text": "[스텁] 폴더 입력 변경 보고", "kind": "reported", "aboutAt": at("작업 보고: feature/folder"), "targets": [{"requestId": rq, "itemId": "I1"}], "why": "[스텁] 입력 요구에 대응하는 구절", "stance": "made", "replaces": None}
         check = {**match, "kind": "checked", "stance": "unclear", "at": at("기존 단일 문서 검사"), "text": "[스텁] 단일 문서 검사만 통과했다고 보고함"}
         route.fulfill(status=200, content_type="application/json", body=json.dumps({"model": "stub-model", "evidence": {"index": "span.2", "ask": text_digest(route.request.post_data)},
             "reply": {"summary": "[스텁] 폴더 입력만 부분 보고됨", "parts": [], "relations": [], "candidates": [], "gaps": [], "matches": [match, check], "material": []}}))
@@ -1742,6 +1744,9 @@ def request71_flow(browser, base):
     expect(page.locator("#world .map-understood")).to_contain_text("폴더 입력만 부분 보고됨")
     expect(page.locator("#world .mu-comparison")).to_contain_text("원한 항목 3개 · 변경 보고 1개 · 변경 근거 아직 없는 항목 2개")
     assert len(maps) == 1
+    reading = page.evaluate(ENTRY, entry_id)["readings"][-1]
+    raw_condition = next(x["t"].strip() for r in maps[0]["records"] for x in r["spans"] if x["t"].strip().startswith("작업 보고: feature/folder"))
+    assert reading["version"] == "map-reading.5" and [m["about"] for m in reading["matches"]] == [raw_condition, raw_condition], "map.7 resolves the owning record's condition into the unchanged stored about strings"
     assert page.evaluate("() => JSON.parse(localStorage.getItem('agentflow.studio.plans.1'))") == frozen_before, "return reading never writes the plan sidecar"
     page.locator(f'#world .node[data-part="{area}"]').click()
     expect(page.locator("#lens .request-item")).to_have_count(3)

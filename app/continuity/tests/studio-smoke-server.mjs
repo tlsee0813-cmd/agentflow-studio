@@ -29,7 +29,7 @@ const stub = async (url, init) => {
   const input = JSON.parse(JSON.parse(init.body).messages[1].content.replace(/^[^\n]*\n/, ''));
   if (input.schemaVersion === 'studio.digest.1' || input.schemaVersion === 'studio.digest.2') return digestStub(input);
   if (['studio.map.1', 'studio.map.2', 'studio.map.3'].includes(input.schemaVersion)) return mapStub(input);
-  if (['studio.map.4', 'studio.map.5', 'studio.map.6'].includes(input.schemaVersion)) { if (gate) await held(init.signal); return map4Stub(input); }
+  if (['studio.map.4', 'studio.map.5', 'studio.map.6', 'studio.map.7'].includes(input.schemaVersion)) { if (gate) await held(init.signal); return map4Stub(input); }
   const refs = input.records.slice(0, 2).map(r => r.ref);
   const content = { headline: `[스텁 응답] ${input.part.name} 정리`, situation: [`스텁: ${input.part.name}의 기록 ${input.records.length}개를 받았습니다.`],
     changes: input.current.changes.slice(0, 2), next: ['스텁: 다음 판단 예시'], answer: input.intent === 'question' ? `스텁 답변: ${input.question}` : null, refs };
@@ -85,18 +85,21 @@ function mapStub(input) {
   if (input.schemaVersion !== 'studio.map.1') content.matches = [];
   return new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(content) } }] }), { status: 200 });
 }
-// studio.map.4: the same mechanical reading, citing the span.2 piece each labelled line begins (never a copied quote).
+// Anchored maps: the same mechanical reading, citing the span.2 piece each labelled line begins (never a copied quote).
+// map.7 uses raw condition references (none in this mechanical reading); map.4–6 keep their original condition fields.
 function map4Stub(input) {
   const rec = input.records[0], pieces = rec.spans.filter(x => /^(요구|작업 보고|구상):/.test(x.t.trim()));
   const kind = t => t.startsWith('요구') ? 'want' : t.startsWith('구상') ? 'idea' : 'reported';
-  let keys = 0; // map.6: every claim names its statement with a key unique in the reply.
-  const claim = x => ({ kind: kind(x.t.trim()), text: `[스텁] ${x.t.trim().slice(0, 40)}`, at: x.s, about: null, replaces: null, ...(input.schemaVersion === 'studio.map.6' ? { key: `s${++keys}` } : {}) });
+  const seven = input.schemaVersion === 'studio.map.7', keyed = seven || input.schemaVersion === 'studio.map.6';
+  const roleCondition = seven ? { roleAboutAt: null } : { roleAbout: null };
+  let keys = 0; // map.6/7: every claim names its statement with a key unique in the reply.
+  const claim = x => ({ kind: kind(x.t.trim()), text: `[스텁] ${x.t.trim().slice(0, 40)}`, at: x.s, ...(seven ? { aboutAt: null } : { about: null }), replaces: null, ...(keyed ? { key: `s${++keys}` } : {}) });
   let content;
   if (!pieces.length) content = { summary: '', parts: [], relations: [], candidates: [], gaps: ['[스텁] 프로그램을 말하는 기록을 붙여 주세요.'] };
   else if (!input.parts.length) content = { summary: '[스텁] 기록의 요구·보고·구상 줄을 부분으로 놓은 자리예요.', relations: [], candidates: [], gaps: [],
-    parts: pieces.slice(0, 3).map((x, i) => ({ ref: `new:p${i}`, name: `스텁 부분 ${i + 1}`, parent: null, role: `[스텁] ${i + 1}번째 줄에 근거한 자리`, roleAbout: null, roleReplaces: null, basis: [x.s], claims: [claim(x)] })) };
+    parts: pieces.slice(0, 3).map((x, i) => ({ ref: `new:p${i}`, name: `스텁 부분 ${i + 1}`, parent: null, role: `[스텁] ${i + 1}번째 줄에 근거한 자리`, ...roleCondition, roleReplaces: null, basis: [x.s], claims: [claim(x)] })) };
   else content = { summary: '[스텁] 새 기록의 첫 줄을 첫 부분에 붙인 자리예요.', relations: [], candidates: [], gaps: [],
-    parts: [{ ref: input.parts[0].id, name: null, parent: null, role: null, roleAbout: null, roleReplaces: null, basis: [], claims: [claim(pieces[0])] }] };
+    parts: [{ ref: input.parts[0].id, name: null, parent: null, role: null, ...roleCondition, roleReplaces: null, basis: [], claims: [claim(pieces[0])] }] };
   Object.assign(content, { matches: [], material: [] });
   return new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(content) } }] }), { status: 200 });
 }
