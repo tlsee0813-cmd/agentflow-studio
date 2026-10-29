@@ -1,0 +1,55 @@
+{
+  "task": "AF110-independent-fixed-prototype-delta-review",
+  "head": "f9272cee7bca928c8f0828b4d5821059e4e25158",
+  "base": "dc430bab514e2213920ecbc83201b7e8f2c09fa2",
+  "codeCommit": "6d9c2abc8c10f1aaddecd0f9bc7934153dfcc230",
+  "verdict": "no_code_P1_P2_blocker; RETURN_provenance_correction_required",
+  "conclusion": "The isolated prototype's code implements the two complete frozen mappings, trim-only case-sensitive whole-label matching, immediate clearing of all old target fields on nonmatch, and the permanent documented Low Power caveat. No material code blocker was found. One actionable report-attribution issue in f9272cee RETURN must be corrected before publishing/using that return as the account of the implementation choice. Root has acknowledged the correction; this reviewer did not edit product files.",
+  "basis": {
+    "request": ".ops/experience109-scope-continuation/request-snapshot.txt (RQ_0797ee20-a84e-4aa7-ace6-b4f053ca87f7)",
+    "inspection": "Read fixed-revision examples/reel-label-guide code, HTML, CSS, tests and RESULT/RETURN; compared the bounded task/preservation sections of the accepted109 document and reused its already-reviewed source table.",
+    "scopeIdentity": "git diff shows only examples/reel-label-guide/** plus cycle110 RESULT/RETURN. examples code is unchanged between6d9c2ab and f9272cee. app/** has no diff from dc430ba; app tree remains5736b7949d50ba92c07ae583ff22c618c25c3e94."
+  },
+  "findings": [
+    {
+      "priority": "P2",
+      "file": "docs/cycles/2026-10-30-label-guide-prototype-110/RETURN.md:11",
+      "title": "Attribute the GUI choice to the pre-dispatch coordinator decision",
+      "problem": "RETURN says the worker chose the local browser form because the original request left it open. Root explicitly selected local GUI and trim/exact matching before dispatch; RESULT.md:9 already correctly attributes the implementation form to the coordinator. The return therefore misstates who resolved a known-open choice. This matters when the report is read back as evidence of what was authorized versus independently chosen by the worker; it is not a functional code failure.",
+      "requiredCorrection": "Keep the original request immutable and state that it left the form unspecified, then the coordinator specified the local browser GUI before handoff. Root's proposed sentence is accurate: '원 요청문에는 형태가 정해지지 않았고, 총괄이 전달 전에 지정한 로컬 브라우저 GUI로 구현했다'. Keep trim/exact matching identified as the selected implementation policy rather than an original Zephyr fact.",
+      "disposition": "Root acknowledged and will make this one-sentence provenance correction with the independent acceptance documentation. Author has finished; no further author code work is requested. Correction is pending in the reviewed f9272cee snapshot."
+    }
+  ],
+  "codeAssessment": [
+    {
+      "files": ["examples/reel-label-guide/label-lookup.js:33-48", "examples/reel-label-guide/index.html:55-76"],
+      "result": "Both exact mappings are complete: HINK-E0213 -> Good Display GDEH0213B1 / SSD1673 / ssd16xx / reel_board; HINK-E0213A22 -> Good Display GDEH0213B72 / SSD1675A / ssd16xx / reel_board@2. All four result fields have corresponding DOM targets and labels. No PCB revision or third variant is used to select a row."
+    },
+    {
+      "files": ["examples/reel-label-guide/label-lookup.js:62-90", "examples/reel-label-guide/app.js:41-72"],
+      "result": "Normalization is String.trim only, followed by entry.label===label. No prefix/case/hyphen/fuzzy correction exists. describe returns entry:null for empty/unknown input. Every render overwrites all four displayed values with either the current match or an em dash, so a previous target is not retained on backspace, case/PCB/unknown input, clear or Escape. Input changes render synchronously; submit prevents navigation and rerenders. Escape and clear explicitly clear input and redraw."
+    },
+    {
+      "files": ["examples/reel-label-guide/label-lookup.js:53-59", "examples/reel-label-guide/app.js:24-31", "examples/reel-label-guide/index.html:36-40,79-82"],
+      "result": "The Low Power wording preserves both the nominal description and the explicit always-on/no-saving limitation as documentary content. It is filled outside the per-input match branch and never hidden by an unknown result. The page identifies a fixed source commit and disclaims current-board/physical verification. There is no build, flashing, sensor/circuit/power control or hardware-measurement implementation."
+    },
+    {
+      "files": ["examples/reel-label-guide/app.js:25-52", "examples/reel-label-guide/index.html:6,85-86"],
+      "result": "Input echo and values use textContent; the only link target is the fixed source URL. No source/HTML interpolation, provider call or automatic update path appears. CSP disables connections/form action and loads only local scripts/styles. Following the explicit external documentation link is user navigation, not an automatic lookup network dependency."
+    }
+  ],
+  "reportAndTestScope": {
+    "truthBoundary": "RESULT/RETURN identify the code commit, supplied fixed document/table as source, prototype-only scope and no AgentFlow app/deployment/hardware work. Author Node/browser/mutation-test claims are expressly author observations, with root independent checks listed as not yet received at that report revision. This reviewer cannot independently certify the author's reported executions from source inspection alone; no unsupported execution conclusion was added.",
+    "testMeaning": "Lookup tests cover exact two-row values, prefix collisions, trim/case/Unicode/hyphen/PCB variants and no-target states. Fake-DOM app tests meaningfully exercise overwrite-on-transition, clear/Escape/submit and literal HTML-like input. They do not verify real layout, accessibility, real clipboard or browser behavior; the comments and report distinguish those limits. Test source is consistent with the described behavior, but was not rerun by this reviewer.",
+    "rootExecutionReportedSeparately": "After the code review, root reported Windows Node24.19 tests20pass and real IAB1280 checks of both mappings, valid-to-unknown backspace, whitespace/case/PCB/HTML/Escape/Tab, no1280x720 overflow in observed states and no console warnings/errors. Root judged the instruction copy somewhat long but four values/Low Power readable together. These are root's independent observations, not executions performed by this reviewer."
+  },
+  "limits": [
+    "Static functional review plus root's bounded observations support only this local prototype and selected normalization policy. They do not validate physical reel board behavior, current distribution variants or a full AgentFlow product release.",
+    "The exact matching policy intentionally rejects unsupported case/hyphen/similar-character/prefix variants and only trims ECMAScript boundary whitespace. This is a chosen implementation constraint, not a recovered source requirement.",
+    "No comprehensive cross-browser, Windows font, assistive-technology or arbitrary-length-input usability claim is independently established here. Author expressly records the long-input scroll limit.",
+    "Existing109 request and107 failure remain immutable. The report attribution correction must not rewrite the original open-form request or turn root's subsequent choice into original source evidence."
+  ],
+  "actions": {"modelCalls":0,"researchWeb":0,"testsBuildBrowser":0,"productOrRawWrites":0,"onlyWrite":".ops/results/experience110-independent.json"},
+  "reviewClosed": true,
+  "finalSelectionOwner": "root coordinator"
+}

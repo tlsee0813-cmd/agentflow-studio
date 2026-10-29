@@ -1,0 +1,34 @@
+{
+  "files": [
+    {
+      "path": "docs/cycles/2026-10-30-label-guide-prototype-110/RETURN.md",
+      "sha256": "c15564b783fdaf10ceaf20d7a71bd1267c05bcf8cb18139ef8d1b08e11216db9"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-label-guide-prototype-110/ROOT_ACCEPTANCE.md",
+      "sha256": "10f6c84208dd786060f60361afdb1de383a5ff49fd3dad68ec5aff3a56252d5e"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-label-guide-prototype-110/evidence/experience110-browser-checks.json",
+      "sha256": "75fc271e8083e8761f206d056f5e072b391209b3c5e4aefa135153e5e9215202"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-label-guide-prototype-110/evidence/experience110-known.png",
+      "sha256": "27415cbe9825f972b97b3efd35d85d75942210e1dea6e7dbcebd198b79a81d29"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-label-guide-prototype-110/evidence/experience110-unknown.png",
+      "sha256": "5a4040ef6cbda025d9e346c0dd3e83ab068482afcbf4ee20cfb33a85c3ec8eea"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-label-guide-prototype-110/evidence/independent.json",
+      "sha256": "51ed7f2429e1eb5cc8e98467ee41fe6906d0c1e7c7a1949b28b4a8deae9de3a1"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-label-guide-prototype-110/evidence/root-checks.json",
+      "sha256": "5b83a95a83041e5030a85f1d37ab4d4d19036f0d9362eedee840b2f99319e426"
+    }
+  ],
+  "code": "6d9c2abc8c10f1aaddecd0f9bc7934153dfcc230",
+  "app": "5736b7949d50ba92c07ae583ff22c618c25c3e94"
+}

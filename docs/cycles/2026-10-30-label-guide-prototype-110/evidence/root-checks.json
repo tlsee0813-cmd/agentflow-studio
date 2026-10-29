@@ -1,0 +1,21 @@
+{
+  "code": "6d9c2abc8c10f1aaddecd0f9bc7934153dfcc230",
+  "received": "f9272cee7bca928c8f0828b4d5821059e4e25158",
+  "app": "5736b7949d50ba92c07ae583ff22c618c25c3e94",
+  "base": "dc430bab514e2213920ecbc83201b7e8f2c09fa2",
+  "node": "24.19.0",
+  "command": "node --test examples/reel-label-guide/test/label-lookup.test.js examples/reel-label-guide/test/app.test.js",
+  "exitCode": 0,
+  "tests": {
+    "pass": 20,
+    "fail": 0,
+    "skip": 0
+  },
+  "browser": "Windows IAB CUA at 1280x720",
+  "screenshots": [
+    "experience110-known.png",
+    "experience110-unknown.png"
+  ],
+  "scope": "local prototype only; no hardware or AgentFlow app changes",
+  "returnCorrection": "Coordinator chose GUI before dispatch; correction only, code unchanged"
+}

@@ -1,0 +1,116 @@
+{
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "checks": [
+    {
+      "value": "HINK-E0213A22",
+      "badge": "대응 확인",
+      "echo": "HINK-E0213A22",
+      "height": 720,
+      "img": 0,
+      "limit": "Low Power 모드로 소비 전력을 줄일 수 없음",
+      "values": [
+        "Good Display GDEH0213B72",
+        "SSD1675A",
+        "ssd16xx",
+        "reel_board@2"
+      ],
+      "width": 1280
+    },
+    {
+      "value": "HINK-E0213A2",
+      "badge": "확인 필요",
+      "echo": "HINK-E0213A2",
+      "height": 720,
+      "img": 0,
+      "limit": "Low Power 모드로 소비 전력을 줄일 수 없음",
+      "values": [
+        "—",
+        "—",
+        "—",
+        "—"
+      ],
+      "width": 1280
+    },
+    {
+      "value": "hink-e0213",
+      "badge": "확인 필요",
+      "echo": "hink-e0213",
+      "height": 720,
+      "img": 0,
+      "limit": "Low Power 모드로 소비 전력을 줄일 수 없음",
+      "values": [
+        "—",
+        "—",
+        "—",
+        "—"
+      ],
+      "width": 1280
+    },
+    {
+      "value": "1507.2",
+      "badge": "확인 필요",
+      "echo": "1507.2",
+      "height": 720,
+      "img": 0,
+      "limit": "Low Power 모드로 소비 전력을 줄일 수 없음",
+      "values": [
+        "—",
+        "—",
+        "—",
+        "—"
+      ],
+      "width": 1280
+    },
+    {
+      "value": "   ",
+      "badge": "확인 필요",
+      "echo": "(비어 있음)",
+      "height": 720,
+      "img": 0,
+      "limit": "Low Power 모드로 소비 전력을 줄일 수 없음",
+      "values": [
+        "—",
+        "—",
+        "—",
+        "—"
+      ],
+      "width": 1280
+    },
+    {
+      "value": "  HINK-E0213  ",
+      "badge": "대응 확인",
+      "echo": "HINK-E0213",
+      "height": 720,
+      "img": 0,
+      "limit": "Low Power 모드로 소비 전력을 줄일 수 없음",
+      "values": [
+        "Good Display GDEH0213B1",
+        "SSD1673",
+        "ssd16xx",
+        "reel_board"
+      ],
+      "width": 1280
+    },
+    {
+      "value": "<img src=x onerror=alert(1)>",
+      "badge": "확인 필요",
+      "echo": "<img src=x onerror=alert(1)>",
+      "height": 720,
+      "img": 0,
+      "limit": "Low Power 모드로 소비 전력을 줄일 수 없음",
+      "values": [
+        "—",
+        "—",
+        "—",
+        "—"
+      ],
+      "width": 1280
+    }
+  ],
+  "keyboard": "typed first label; Backspace clears long match; Escape clears input; Tab focuses clear-button",
+  "source": "root CUA Windows IAB",
+  "code": "6d9c2abc8c10f1aaddecd0f9bc7934153dfcc230"
+}
