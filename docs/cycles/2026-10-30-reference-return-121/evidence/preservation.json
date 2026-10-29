@@ -1,0 +1,31 @@
+{
+  "rawRecordsExact": true,
+  "originalReadingExact": true,
+  "originalAreasExact": true,
+  "fullBundleBefore": "cdf2dc70965e8eaf9c6d701dcef39a022d1baab8e0e0fcf047e4941590f8ba05",
+  "fullBundleAfterReload": "cdf2dc70965e8eaf9c6d701dcef39a022d1baab8e0e0fcf047e4941590f8ba05",
+  "projectAfterApply": "5ce98865fdb4eda198d7c04c2fe6f9722a7ff09a61ba4dd83c85c4f21c2a2394",
+  "projectAfterReload": "5ce98865fdb4eda198d7c04c2fe6f9722a7ff09a61ba4dd83c85c4f21c2a2394",
+  "backupProject": "5ce98865fdb4eda198d7c04c2fe6f9722a7ff09a61ba4dd83c85c4f21c2a2394",
+  "partsBefore": 7,
+  "partsAfter": 9,
+  "readingsBefore": 1,
+  "readingsAfter": 2,
+  "rawRecordsBefore": 6,
+  "rawRecordsAfter": 6,
+  "requestsNew": [
+    {
+      "id": "RQ_0797ee20-a84e-4aa7-ace6-b4f053ca87f7",
+      "planId": "CP_41a38af5-665b-4c2d-9841-02bda0baf26f",
+      "planRevision": 1,
+      "itemIds": [
+        "change_label_lookup_tool"
+      ]
+    }
+  ],
+  "matchesNew": 14,
+  "otherProjectDuringGeneration": "not_observed",
+  "readyBeforeExplicitApply": "not_observed",
+  "applyMode": "origin remained open; normal immediate apply observed",
+  "backupScope": "project download only; full plan bundle separately compared in browser storage"
+}

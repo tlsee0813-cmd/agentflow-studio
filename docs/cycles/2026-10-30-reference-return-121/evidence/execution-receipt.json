@@ -1,0 +1,68 @@
+{
+  "selected": "677cbc34d9f07e1c6165d44c909626765a822b08",
+  "code": "be061284af3154b1a746acdbc249fd1cf72a24f4",
+  "app": "7b36f3ebf07a0cea25b36677ef2aedf4c6f23703",
+  "job": "MJ_fd61a015-41ee-4dd0-a9b4-2c54abb55bcf",
+  "actualCalls": 1,
+  "versionProbes": 1,
+  "events": [
+    "thread.started",
+    "turn.started",
+    "item.completed",
+    "turn.completed"
+  ],
+  "execution": {
+    "executor": "codex-cli-preview.102",
+    "version": "codex-cli 0.165.0-alpha.1.2",
+    "binarySha256": "5c1b55966bf9f757dcbf00065c9a6cb862ead55d34b015f1be1939ff18e43943",
+    "model": "gpt-6.1-sol",
+    "reasoning": "high",
+    "permissions": "503b611008cf71b170ce6aedf247526e85ccf1da896529645866af8a19889396",
+    "wrapper": "dd56ff8327f0b957f18ccc6af7c6334935901014e36539c35c91e16279c02ae5",
+    "scope": "map7-later",
+    "selectionMs": 299000,
+    "verdictMs": 300000,
+    "policy": "29f5c36ec1402724c3641ae6b98859d8005d978cc1066fb655930d59cb1e4190",
+    "promptKind": "later7",
+    "prompt": "0e51e2241a82",
+    "promptSha256": "0e51e2241a82fedbcc518af237ef6f55b8e185fb8b85b4a1a8b296a58fac70ef",
+    "askSha256": "579741cd5aa84d0c6a6b7c0d07e20b8979e88981f450eb702bc143e3f8248e8f",
+    "observed": {
+      "startedAt": "2026-10-29T20:59:10.977Z",
+      "closedAtMs": 133882.5799,
+      "decidedAtMs": 133884.35960000003,
+      "closed": true,
+      "exit": 0,
+      "signal": null,
+      "reason": null,
+      "events": 4,
+      "usage": {
+        "input_tokens": 31432,
+        "cached_input_tokens": 8192,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 7330,
+        "reasoning_output_tokens": 4142
+      },
+      "stdoutBytes": 11977,
+      "stderrBytes": 158,
+      "signals": {
+        "sent": 0,
+        "skippedAfterExit": 0
+      },
+      "stdioCut": false,
+      "verdictAtMs": 133890.0085,
+      "finalSha256": "4e39f851e2e3ad3b6db77cfd8e414a7961615b248e98d3ca14da2a400ca83503",
+      "finalBytes": 10867
+    }
+  },
+  "state": "ready",
+  "acked": {
+    "outcome": "applied",
+    "at": "2026-10-29T21:01:25.424Z"
+  },
+  "wireRepair": false,
+  "retry": false,
+  "fallback": false,
+  "actualMeaning": "BOUNDED_MEANING_PASS_SINGLE_RQ_PLANNED_AWAY_DELIVERY_GATE_NOT_EXECUTED",
+  "ui": "origin remained open and applied; required away→other→explicit apply not observed"
+}

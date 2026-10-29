@@ -1,0 +1,79 @@
+{
+  "cycle": 121,
+  "verdict": "BOUNDED_MEANING_PASS_SINGLE_RQ_PLANNED_AWAY_DELIVERY_GATE_NOT_EXECUTED",
+  "overallSelectedScenarioComplete": false,
+  "P1P2": [],
+  "reviewerActivity": { "newModelCalls": 0, "responseValidatorCalls": 0, "old119ResponseRevalidation": 0, "wireRepairs": 0, "productEdits": 0, "browserOrTestOrBuildRuns": 0 },
+  "filesRead": ["input.json", "selected.json", "final-response.json", "capture-2-stdout.jsonl"],
+  "directory": ".ops/experience121-reference-return",
+  "identityAndDelivery": {
+    "product": "be061284af3154b1a746acdbc249fd1cf72a24f4",
+    "accepted120": "14f7fa23f4c7691a1827f4f7891fad2ba5cbe451",
+    "recipe": "m7-94f4e6678496",
+    "actualPromptSha256": "0e51e2241a82fedbcc518af237ef6f55b8e185fb8b85b4a1a8b296a58fac70ef",
+    "askSha256": "579741cd5aa84d0c6a6b7c0d07e20b8979e88981f450eb702bc143e3f8248e8f",
+    "finalSha256": "4e39f851e2e3ad3b6db77cfd8e414a7961615b248e98d3ca14da2a400ca83503",
+    "finalBytes": 10867,
+    "captureVerification": "The sole completed agent_message is10867 UTF-8 bytes and hashes exactly to final-response.json. The four JSONL events are thread.started,turn.started,item.completed(agent_message),turn.completed; no other item/tool/error event is present. Only the actual final text and event metadata were inspected, not hidden reasoning.",
+    "runtimeGate": "Root reports133.890 seconds/exit0 and strict whole-wire ready. No validator was rerun by this reviewer. The original ask hash matches selected.json; the local299/300 policy, single call and no retry/fallback remain.",
+    "causalLimit": "This is one actual successful contract outcome after118/120. It does not prove which instruction caused a particular choice, a success distribution or broader provider/first-map quality. Earlier failures remain unchanged."
+  },
+  "criteria": [
+    {
+      "name": "One selected request and prototype scope",
+      "judgment": "BOUNDED_PASS",
+      "evidence": "All14 matches target only RQ_0797ee20-a84e-4aa7-ace6-b4f053ca87f7 / change_label_lookup_tool, with replaces:null. Part s1 and matches0/13 frame the work as a branch/commit-specific separate local browser prototype; N02.38-39 explicitly excludes AgentFlow app deployment and full product completion. No request scope expansion was identified. Root additionally reports the full original bundlecdf2dc... remains exact, preserving old failedRQb9049; that storage proof is separate from the response target fields."
+    },
+    {
+      "name": "Both full label mappings",
+      "judgment": "PASS",
+      "evidence": "Claim s4 at R02.30-34 and reported match1 at N02.07-13 retain HINK-E0213→GDEH0213B1/SSD1673/ssd16xx/reel_board and HINK-E0213A22→GDEH0213B72/SSD1675A/ssd16xx/reel_board@2. The original current Display understanding and exact source retain the same correspondence. No swap, omitted controller/driver/target or PCB→@2 inference is introduced. Repetition in every summary is not required."
+    },
+    {
+      "name": "Trim, case and whole match; unknown clearing; no PCB selection",
+      "judgment": "PASS",
+      "evidence": "Lookup role and code match5 at R02.43-48 state trim-only whole equality and null on empty/unrecognized input; reported match1 explicitly retains the original case-sensitive whole comparison context and match2 at N02.17-18 records mismatched case/hyphen/partial/PCB inputs as needs-check with four values cleared. Code match6 at R01.33-39 shows four values become — outside a match and input events redraw. These source properties support the local tool behavior, not a physical-board selection algorithm."
+    },
+    {
+      "name": "Low Power and hardware nonexecution",
+      "judgment": "PASS_WITH_DOCUMENTARY_AND_REPORTED_SCOPE",
+      "evidence": "The guide role includes the Low Power restriction and fixed document source. Reported match3 at N02.19-21 preserves no build/flash/hardware access, no sensor/circuit/power/energy code changes and always-shown no-saving notice. The root Windows/IAB report at N01.09-14 independently reports notice persistence in that environment. The existing Power understanding remains documentary evidence of both voltages always on/no saving. Claim s7 and match12 explicitly exclude actual board build/flash/power measurement and broader validation. The response does not claim an energy improvement or changed board circuit."
+    },
+    {
+      "name": "Typed code versus pasted reports/checks",
+      "judgment": "PASS",
+      "evidence": "Code matches4-6 use eligible typed R02/R01 and stance:unclear, without presenting code as an implementation or execution report. Author N02 and root N01 test/UI outcomes stay checked reports with named versions/environments and nonexecution limitations. No supplied test-definition artifact or app-executed verification is invented. Claim s2 uses pasted literal code/comment N01.40 as describes, which is explicitly allowed by the existing contract; it is not an illegal pasted code-kind match or a report relabelled to evade the gate."
+    },
+    {
+      "name": "Raw condition ownership, metadata and source version",
+      "judgment": "PASS_IN_THIS_READING",
+      "evidence": "Roles use null conditions and there is no candidate to force a condition slot. Emitted claim conditions refer to the same N01 record: N01.03 is the actual root report's stated prototype-code identity, and N01.39 literally names app.js @6d9c2ab as the heading for the N01.40 code excerpt. Match conditions N02.03/N02.31 and N01.03 are raw headers/test-row conditions of their own cited records. Typed code aboutAt values are null. User-declared file metadata is not copied into raw conditions. Match7 identifies Zephyr3568e1b6 as the source document, not the supplied JavaScript file's version. No unsupported mixed-basis single version is synthesized."
+    },
+    {
+      "name": "Long N02.33 condition with explicit null",
+      "judgment": "PASS",
+      "evidence": "Checked match9 cites N02.33-34 with aboutAt:null while its text retains6d9c2ab, Chromium headless, Playwright1.63.0,1280×720,127.0.0.1 http, exercised label/unknown/keyboard/HTML behavior, console/external request0,17/17 no vertical scroll and dark/file:// observations. The exact table quote carries the original complete observation. Important environment and limitations are not hidden by null or replaced with an unrelated short identity. No204-unit row is silently clipped or selected as a200-unit condition."
+    },
+    {
+      "name": "Omission, duplication and attribution",
+      "judgment": "NO_MATERIAL_BLOCKER_IDENTIFIED",
+      "evidence": "The two new software responsibilities have distinct roles and typed source bases, linked by needs. Existing board root is not recast as newly implemented hardware; its added s7 report is explicitly about unchanged hardware/nonexecution during the prototype work. Repeated report/check facts in part claims and request correspondences are two views of the same source, not independent corroboration. No fixed node count/candidate is required, no existing claim is replaced, and no material missing requirement or unsupported completion claim was identified."
+    },
+    {
+      "name": "Planned leave→other project→ready→explicit apply",
+      "judgment": "NOT_EXECUTED",
+      "evidence": "The final completed while the originating visit was still open and the accepted same-visit path auto-applied it. This is not an application defect or cross-project apply, but it does not exercise the separately selected away/ready/manual-apply scenario. No repeated call should be made merely to fill this missing scenario."
+    }
+  ],
+  "pcEvidenceReportedByRoot": {
+    "scope": "Same-visit successful reading only, not the planned away scenario.",
+    "observations": "Root reports the long N02.33-34 table and typed R02 citation open/back, reading return, reload and normal backup. All6 original pasted/typed records, old reading1 and old areas7 remained exact; the whole RQ bundlecdf2dc... is unchanged; the new project hash beginning5ce988 is identical across backup/reload. This reviewer did not perform another browser run or independently read the export bytes.",
+    "limit": "That evidence supports actual same-visit reading and source persistence, not universal layout behavior, another browser/OS, cross-project background delivery or a public default deployment."
+  },
+  "acceptanceBoundary": {
+    "mayRecord": "One actual RQ0797 return reading: complete delivery, Root-observed strict ready, bounded meaning pass and reported same-visit automatic apply/source/back/backup preservation.",
+    "mayNotRecord": "Full121 selected-scenario pass, successful away/ready/manual apply, all three real first-map materials, handoff5/8 completion, robust arbitrary paragraph/layout handling or full product/provider/public release acceptance.",
+    "priorFailures": "115/117/119 and their unchanged raw responses remain failed observations. This new response does not repair or retroactively validate them."
+  },
+  "conclusion": "The new121 final meets the selected single-RQ meaning criteria without a material P1/P2 blocker: exact mappings and input handling, honest code/report/source-version separation, and long-condition scope are preserved. The planned away-delivery criterion was not executed, so the overall121 selected gate remains incomplete. Record this as a bounded actual reading success, not the final product or three-material acceptance."
+}

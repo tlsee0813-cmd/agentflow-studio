@@ -1,0 +1,49 @@
+{
+  "cycle": 121,
+  "selection": "677cbc34d9f07e1c6165d44c909626765a822b08",
+  "product": "be061284af3154b1a746acdbc249fd1cf72a24f4",
+  "app": "7b36f3ebf07a0cea25b36677ef2aedf4c6f23703",
+  "verdict": "bounded actual return reading accepted; overall selected scenario incomplete",
+  "evidence": [
+    {
+      "path": "evidence/actual-binding-proof.json",
+      "bytes": 1457,
+      "sha256": "7bf790802080b4dc8340779e7ba2933989502afc975ed0c58387de68aeff647e"
+    },
+    {
+      "path": "evidence/cleanup.json",
+      "bytes": 292,
+      "sha256": "0f3a47dde14e0bf117e6dfae166648927d2489415f217d046db490dca2fec8be"
+    },
+    {
+      "path": "evidence/execution-receipt.json",
+      "bytes": 2286,
+      "sha256": "c6645cd0321c854cfda5327494386781d4c38e52fde3abd135b57ff973b92695"
+    },
+    {
+      "path": "evidence/independent-review.json",
+      "bytes": 9425,
+      "sha256": "5f265ea4813f51251b29ed96845da27b9bf3a604ae33b1d2f2a22cf2001b5295"
+    },
+    {
+      "path": "evidence/preservation.json",
+      "bytes": 1203,
+      "sha256": "eeddf1d9a47f99fb9836f05a8f1ce9b79134e1e013c22eb5604b3c2fd53a470a"
+    },
+    {
+      "path": "evidence/ui-reloaded-map.png",
+      "bytes": 49967,
+      "sha256": "c89e5d75a60d26be0a98c5645f142f8f4fc5b2cb1b74b4e77895643e22c692fb"
+    },
+    {
+      "path": "evidence/ui-source-long-condition.png",
+      "bytes": 97847,
+      "sha256": "c9ab727288d007ebd3cb2bae4252848ada9fd5eddb19ee955da446de7f3fce26"
+    },
+    {
+      "path": "evidence/ui-typed-code.png",
+      "bytes": 87006,
+      "sha256": "2d9025dd4be866be36df62637a0861178cbbba88e10bddc606ecc8d69211f9e3"
+    }
+  ]
+}
