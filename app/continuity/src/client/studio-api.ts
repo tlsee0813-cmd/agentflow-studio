@@ -13,7 +13,19 @@ export interface AiStatus { ai: 'deepseek' | 'off' | 'none'; model: string | nul
     laterPrompt?: string } | null;
   /** AF100: the server keeps map readings as durable jobs on this PC (durable), or has a job store it cannot use (problem).
    * AF102 executor: the map executor's state (ready, busy, unsettled: an earlier child not known to have ended, unavailable). */
-  jobs?: { durable: boolean; problem: string | null; executor?: { state: string; problem: string | null; scope?: ExecutorScope } | null } | null }
+  jobs?: { durable: boolean; problem: string | null; executor?: { state: string; problem: string | null; scope?: ExecutorScope } | null } | null;
+  /** AF124: the server is a limited release that names why it offers no map reading (never read into an older server's silence). */
+  release?: ReleasePolicy | null }
+/** AF124: work on maps one already has. Map readings (a first map, a later one, a return read against the map) are not offered. */
+export type ReleasePolicy = 'existing-map';
+/** The earlier public site, at its own address (opened only by the person; nothing is sent or synchronised between the two). */
+export const PUBLIC_EDITION = 'https://agentflow-studio.tlsee0813.workers.dev/';
+export const RELEASE_TEXT = {
+  intro: '기존 지도 작업용 버전이에요. 저장된 지도를 읽고 고치며, 변경안과 요청문을 이어 가요.',
+  limit: '원자료로 첫 지도를 만들거나 새 기록으로 지도를 갱신하는 기능은 이 버전에서 제공하지 않아요.',
+  move: '기존 공개판의 자료는 자동으로 옮겨지지 않아요. 지도 백업을 가져오고, 변경안·요청·반환 자료가 있으면 그 지도의 ‘변경 구상’에서 변경안 파일도 따로 가져오세요.',
+  apart: '기존 공개판은 그 주소에서 그대로 쓸 수 있어요. 두 주소의 저장 내용은 자동으로 맞춰지지 않아요.'
+};
 /** AF112/AF116: which map readings a local preview executor takes; unknown values are not shown. */
 export type ExecutorScope = 'first' | 'map6-later' | 'map7-later';
 const SCOPES: readonly string[] = ['first', 'map6-later', 'map7-later'];
@@ -37,7 +49,8 @@ export async function aiStatus(): Promise<AiStatus> {
     // AF112 scope: which map readings the executor takes (first maps only, later map.6 readings too, or AF116 later map.7 readings).
     const j = v.jobs, x = j?.executor, executor = x && typeof x.state === 'string' ? { state: x.state, problem: typeof x.problem === 'string' ? x.problem : null, ...(SCOPES.includes(x.scope) ? { scope: x.scope as ExecutorScope } : {}) } : null;
     const jobs = j && j.version === 'map-job.1' ? { durable: j.durable === true, problem: typeof j.problem === 'string' ? j.problem : null, ...(executor ? { executor } : {}) } : null;
-    return { ai: v.ai, model: typeof v.model === 'string' ? v.model : null, access: v.access === 'code' ? 'code' : 'open', digest, map, jobs };
+    const release = v.release === 'existing-map' ? 'existing-map' as const : null;
+    return { ai: v.ai, model: typeof v.model === 'string' ? v.model : null, access: v.access === 'code' ? 'code' : 'open', digest, map: release ? null : map, jobs: release ? null : jobs, release };
   } catch { return { ai: 'none', model: null, access: 'open' }; }
 }
 
@@ -108,6 +121,7 @@ export const ERROR_TEXT: Record<string, string> = {
   ACCESS_CODE_REQUIRED: '접속 코드가 맞지 않아요.',
   FORBIDDEN_ORIGIN: '이 주소에서는 AI 서버에 요청할 수 없어요.',
   INPUT_TOO_LARGE: '보낼 기록이 너무 커요.',
+  MAP_WITHHELD: '이 버전에서는 지도를 새로 만들거나 갱신하지 않아요. 기록과 지도는 그대로예요.',
   NETWORK: 'AI 서버에 연결하지 못했어요.',
   NO_SERVER: '이 페이지에는 연결된 AI 서버가 없어요.'
 };

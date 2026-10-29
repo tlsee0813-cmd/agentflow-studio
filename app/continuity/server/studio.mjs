@@ -177,7 +177,16 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
  * - POST needs Content-Type application/json and X-AgentFlow-Request: 1 (forces a preflight cross-origin);
  * - when STUDIO_ACCESS_CODE is set, X-Studio-Access must equal it (typed by the person using the site, never bundled).
  */
-export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, config = readStudioConfig(env), jobs = null, mapExecutor = null } = {}) {
+/** AF124: release policies a trusted host assembly names in code (never from env or a request). 'existing-map' is a limited release
+ * for work on maps one already has: /ask, /plan, /scope and /digest stay as they are; no map reading of any schema (first or later,
+ * map.1–7) and no map jobs. Their routes are refused before the body, a provider, the limiter or an executor is touched, and status
+ * names the release instead of a map (so a browser does not read a missing map as a missing key). */
+export const RELEASE_POLICIES = Object.freeze(['existing-map']);
+const WITHHELD = path => path === '/api/studio/map' || path === '/api/studio/jobs' || path.startsWith('/api/studio/jobs/');
+
+export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, config = readStudioConfig(env), jobs = null, mapExecutor = null, policy = null } = {}) {
+  if (policy !== null && !RELEASE_POLICIES.includes(policy)) throw new Error('Unknown release policy.');
+  if (policy && (jobs || mapExecutor)) throw new Error('A limited release takes no map jobs or map executor.');
   const limiter = createLimiter(config);
   // AF100: durable map jobs, only when the host gives a job service (the local Node server, server/map-jobs.mjs). The job owns
   // its call: the same map model and recipe as /map, the same limiter (taken when it is accepted), never the request's signal.
@@ -212,6 +221,9 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
       if (!url.pathname.startsWith('/api/studio/')) throw new ApiError('NOT_FOUND', 404);
       if (origin && origin !== url.origin && !cors) throw new ApiError('FORBIDDEN_ORIGIN', 403);
       if (request.headers.get('sec-fetch-site') === 'cross-site' && !cors) throw new ApiError('FORBIDDEN_ORIGIN', 403);
+      // AF124: after the origin boundary, before anything else (a preflight, the access code, the body): the same refusal for a
+      // current page, an older tab's assets or a hand-made request.
+      if (policy && WITHHELD(url.pathname)) throw new ApiError('MAP_WITHHELD', 403);
       if (request.method === 'OPTIONS') {
         if (!cors) throw new ApiError('FORBIDDEN_ORIGIN', 403);
         return new Response(null, { status: 204, headers: { ...headersFor(cors), 'Access-Control-Allow-Methods': 'GET, POST',
@@ -220,7 +232,7 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
       if (url.pathname === '/api/studio/status' && request.method === 'GET') {
         // digest: the model and prompt a reading would be made with, so a browser can tell its stored readings apart.
         return reply(200, { ai: config.apiKey ? 'deepseek' : 'off', model: config.apiKey ? config.model : null, access: config.accessCode ? 'code' : 'open',
-          ...(config.apiKey ? { digest: { model: config.planModel ?? config.model, prompt: await digestPromptId(1), record: await digestPromptId(2) } } : {}), ...await mapStatus(),
+          ...(config.apiKey ? { digest: { model: config.planModel ?? config.model, prompt: await digestPromptId(1), record: await digestPromptId(2) } } : {}), ...(policy ? { release: policy } : await mapStatus()),
           // Said whatever the key: a result already kept can be fetched without one.
           ...(jobs ? { jobs: { ...jobs.describe(), ...(executor ? { executor: executor.describe() } : {}) } } : {}) }, cors);
       }

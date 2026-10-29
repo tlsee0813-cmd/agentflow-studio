@@ -1,18 +1,30 @@
 // Small, dependency-free deployment using Cloudflare's documented Workers + Assets APIs.
 // Secrets are environment inputs, attached as secret_text bindings, never written into assets/logs.
-import { readFile, readdir, writeFile } from 'node:fs/promises';
+import { readFile, readdir, writeFile, mkdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { spawnSync, execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { join, relative, resolve, posix } from 'node:path';
+import { join, relative, resolve, posix, dirname } from 'node:path';
 
 const app = fileURLToPath(new URL('../../', import.meta.url));
-const dry = process.argv.includes('--dry-run');
-if (process.argv.slice(2).some(a => a !== '--dry-run')) throw new Error('Usage: node [--env-file=private.env] continuity/scripts/deploy-cloudflare.mjs [--dry-run]');
+// AF124: --release=existing-map packages the limited existing-map release (its own Worker main, no map reading or jobs);
+// --manifest=<file> also writes the exact Worker + assets manifest there (it is always printed). Without them, as before.
+const usage = 'Usage: node [--env-file=private.env] continuity/scripts/deploy-cloudflare.mjs [--dry-run] [--release=existing-map] [--manifest=<file>]';
+const args = process.argv.slice(2), opt = key => args.find(a => a.startsWith(`--${key}=`))?.slice(key.length + 3) ?? null;
+if (args.some(a => a !== '--dry-run' && !/^--(release|manifest)=./.test(a)) || args.filter(a => a.startsWith('--release=')).length > 1 || args.filter(a => a.startsWith('--manifest=')).length > 1) throw new Error(usage);
+const dry = args.includes('--dry-run'), policy = opt('release'), manifestOut = opt('manifest');
+const RELEASES = { 'existing-map': 'continuity/server/worker-existing-map.mjs' };
+if (policy !== null && !Object.hasOwn(RELEASES, policy)) throw new Error(usage);
 const sha = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: app, encoding: 'utf8' }).trim();
-if (!dry && execFileSync('git', ['status', '--porcelain'], { cwd: app, encoding: 'utf8' }).trim()) throw new Error('Commit the intended release before deployment.');
-const name = process.env.CLOUDFLARE_WORKER_NAME || 'agentflow-studio';
-if (!/^[a-z][a-z0-9-]{2,62}$/.test(name)) throw new Error('Invalid Worker name.');
+const appTree = execFileSync('git', ['rev-parse', 'HEAD:app'], { cwd: app, encoding: 'utf8' }).trim();
+const dirty = !!execFileSync('git', ['status', '--porcelain'], { cwd: app, encoding: 'utf8' }).trim();
+if (!dry && dirty) throw new Error('Commit the intended release before deployment.');
+// The public site's Worker keeps its default name; a limited release goes only to a Worker named for it explicitly, never that one.
+const DEFAULT_NAME = 'agentflow-studio';
+const name = process.env.CLOUDFLARE_WORKER_NAME || (policy ? null : DEFAULT_NAME);
+if (policy && name === DEFAULT_NAME) throw new Error(`The ${policy} release is never deployed to the default Worker ${DEFAULT_NAME}.`);
+if (policy && !name && !dry) throw new Error(`Name the Worker of the ${policy} release with CLOUDFLARE_WORKER_NAME.`);
+if (name !== null && !/^[a-z][a-z0-9-]{2,62}$/.test(name)) throw new Error('Invalid Worker name.');
 const account = process.env.CLOUDFLARE_ACCOUNT_ID, token = process.env.CLOUDFLARE_API_TOKEN;
 const secretNames = ['DEEPSEEK_API_KEY', 'STUDIO_ACCESS_CODE'];
 if (!dry) {
@@ -26,18 +38,19 @@ for (const script of ['build.mjs', 'build-static.mjs']) {
   if (run.status !== 0) throw new Error(`Build failed: ${script}\n${run.stderr}`);
 }
 const assetDir = join(app, 'continuity/static-dist');
-await writeFile(join(assetDir, 'BUILD.txt'), `AgentFlow Studio\nsource=${sha}\nhost=Cloudflare Workers\n`);
+await writeFile(join(assetDir, 'BUILD.txt'), `AgentFlow Studio\nsource=${sha}\nhost=Cloudflare Workers\n${policy ? `release=${policy}\n` : ''}`);
 const files = async dir => (await Promise.all((await readdir(dir, { withFileTypes: true })).map(e => e.isDirectory() ? files(join(dir, e.name)) : [join(dir, e.name)]))).flat();
 const mime = f => f.endsWith('.html') ? 'text/html; charset=utf-8' : f.endsWith('.css') ? 'text/css; charset=utf-8' : f.endsWith('.js') ? 'application/javascript; charset=utf-8' : 'text/plain; charset=utf-8';
 const secrets = [...secretNames, 'CLOUDFLARE_API_TOKEN'].map(k => process.env[k]).filter(Boolean);
 const assertNoSecret = (bytes, label) => { for (const value of secrets) if (bytes.includes(Buffer.from(value))) throw new Error(`Secret found in ${label}; stopped before upload.`); };
-const manifest = {}, assets = new Map();
+const manifest = {}, assets = new Map(), assetList = [];
+const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 for (const file of await files(assetDir)) {
   const path = '/' + relative(assetDir, file).replaceAll('\\', '/');
   if (!/^(\/index\.html|\/styles\.css|\/BUILD\.txt|\/\.nojekyll|\/(client|shared)\/[\w-]+\.js)$/.test(path)) throw new Error(`Unexpected public asset: ${path}`);
   const bytes = await readFile(file); assertNoSecret(bytes, path);
   const hash = createHash('sha256').update(bytes).update(mime(file)).digest('hex').slice(0, 32);
-  manifest[path] = { hash, size: bytes.length }; assets.set(hash, { bytes, type: mime(file) });
+  manifest[path] = { hash, size: bytes.length }; assets.set(hash, { bytes, type: mime(file) }); assetList.push({ path, bytes: bytes.length, sha256: sha256(bytes) });
 }
 // Preserve relative module names; Cloudflare supports native ES modules, so no bundler/runtime install is needed.
 const modules = new Map();
@@ -53,9 +66,24 @@ async function collect(path) {
     await collect(posix.normalize(posix.join(posix.dirname(path), match[1])));
   }
 }
-const main = 'continuity/server/worker.mjs';
+const main = policy ? RELEASES[policy] : 'continuity/server/worker.mjs';
 await collect(main);
-console.log(JSON.stringify({ phase: 'prepared', source: sha, worker: name, assets: assets.size, modules: modules.size, bytes: [...assets.values()].reduce((n, x) => n + x.bytes.length, 0), dryRun: dry }));
+// A limited release carries none of the local Node host: no job store, CLI executor, Node server or its config/static files.
+if (policy) for (const path of modules.keys()) if (/(^|\/)(map-jobs|index|app|config|static-files|mock|[\w-]*(cli|executor)[\w-]*)\.m?js$/i.test(path)) throw new Error(`Local-only module in the ${policy} Worker: ${path}`);
+const built = await readFile(join(assetDir, 'client/static-target.js'), 'utf8'), prefix = /prefix:\s*'([^']+)'/.exec(built)?.[1] ?? null;
+const endpoint = await readFile(join(assetDir, 'client/studio-endpoint.js'), 'utf8');
+if (!/STUDIO_ENDPOINT = "";/.test(endpoint) || !prefix) throw new Error('The packaged UI must call its own origin and name its storage prefix.');
+assetList.sort((a, b) => (a.path < b.path ? -1 : 1));
+const moduleList = [...modules].map(([path, bytes]) => ({ path, bytes: bytes.length, sha256: sha256(bytes) })).sort((a, b) => (a.path < b.path ? -1 : 1));
+const closure = list => sha256(list.map(m => `${m.sha256}  ${m.path}\n`).join(''));
+const release = { version: 'agentflow.release-manifest.1', source: sha, appTree, dirty, policy, worker: name, main, compatibilityDate: '2026-10-24',
+  api: { base: 'same-origin', connectSrc: "'self'", paths: '/api/*' }, storagePrefix: prefix,
+  assets: { count: assetList.length, bytes: assetList.reduce((n, x) => n + x.bytes, 0), sha256: closure(assetList), files: assetList },
+  modules: { count: moduleList.length, bytes: moduleList.reduce((n, x) => n + x.bytes, 0), sha256: closure(moduleList), files: moduleList },
+  bindings: ['ASSETS', ...secretNames, 'AI_MODE', 'DEEPSEEK_MODEL'] };
+if (manifestOut) await mkdir(dirname(resolve(process.cwd(), manifestOut)), { recursive: true }), await writeFile(resolve(process.cwd(), manifestOut), `${JSON.stringify(release, null, 2)}\n`);
+console.log(JSON.stringify({ phase: 'prepared', source: sha, worker: name, policy, assets: assets.size, modules: modules.size, bytes: [...assets.values()].reduce((n, x) => n + x.bytes.length, 0), dryRun: dry }));
+console.log(JSON.stringify({ phase: 'manifest', ...release }));
 if (dry) process.exit(0);
 const base = `https://api.cloudflare.com/client/v4/accounts/${account}/workers`;
 async function api(path, { method = 'GET', body, bearer = token } = {}) {
@@ -83,7 +111,7 @@ const bindings = [{ name: 'ASSETS', type: 'assets' }, ...secretNames.map(name =>
   { name: 'AI_MODE', type: 'plain_text', text: 'deepseek' }, { name: 'DEEPSEEK_MODEL', type: 'plain_text', text: process.env.DEEPSEEK_MODEL || 'deepseek-flash' }];
 const metadata = { main_module: main, compatibility_date: '2026-10-24', bindings,
   assets: { jwt: completion, config: { run_worker_first: ['/api/*'], html_handling: 'auto-trailing-slash', not_found_handling: '404-page' } },
-  annotations: { 'workers/message': `AgentFlow Studio ${sha}`, 'workers/tag': sha.slice(0, 12) } };
+  annotations: { 'workers/message': `AgentFlow Studio ${sha}${policy ? ` ${policy}` : ''}`, 'workers/tag': sha.slice(0, 12) } };
 const form = new FormData(); form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
 for (const [path, bytes] of modules) form.append(path, new Blob([bytes], { type: 'application/javascript+module' }), path);
 const uploaded = await api(`/scripts/${name}`, { method: 'PUT', body: form });

@@ -7,7 +7,7 @@
 import { isMapReading, type MapReading, type Project } from '../shared/types.js';
 import type { StudioView } from '../shared/studio.js';
 import { buildMapAsk, applyReading, validateMapReply, MAP5_SCHEMA, MAP6_SCHEMA, MAP7_SCHEMA, type MapInput, type MapReply, type Applied } from '../shared/map-reading.js';
-import { askMap, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
+import { askMap, AskError, ERROR_TEXT, RELEASE_TEXT, type AiStatus } from './studio-api.js';
 import { encodeMapInput, decodeMapInput, jobHash, MAP_JOB_VERSION, type MapJobBinding } from '../shared/map-job.js';
 import { SPAN_INDEX, textDigest } from '../shared/evidence-span.js';
 import { jobApi, JobError, sameJob, type JobReservations, type JobView, type Reservation } from './map-jobs.js';
@@ -128,6 +128,8 @@ export function createMapRun(host: MapRunHost) {
   /** Why a reading cannot start although an AI server answered (a job store it cannot use), or null. */
   function blocked(): string | null {
     const st = host.status(), j = st.jobs, viaJobs = st.map?.via === 'jobs';
+    // AF124: a limited release says so, never the missing key or server its map's absence would otherwise suggest.
+    if (st.release === 'existing-map') return RELEASE_TEXT.limit;
     if (!j) return viaJobs ? JOB_ERROR.JOB_STORE_UNAVAILABLE! : null;
     if (!j.durable) return `${JOB_ERROR.JOB_STORE_UNAVAILABLE} ${j.problem === 'STORE_BUSY' ? '같은 작업 기록을 다른 Studio 실행기가 쓰고 있어요.' : ''}`.trim();
     if (viaJobs && (j.executor?.state === 'unsettled' || j.executor?.state === 'unavailable')) return JOB_ERROR[j.executor.state === 'unsettled' ? 'EXECUTOR_UNSETTLED' : 'EXECUTOR_UNAVAILABLE']!;

@@ -33,6 +33,7 @@
             <button type="button" id="new-open" class="primary" aria-expanded="false" aria-controls="new-form"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.5v9M3.5 8h9"/></svg>새 프로젝트</button><input id="import-file" type="file" accept="application/json,.json" hidden>
           </div>
         </header>
+        <section id="release-note" class="release-note" aria-label="이 버전에서 할 수 있는 일" hidden></section>
         <form id="new-form" class="new-form" hidden><label for="new-name" class="sr-only">새 프로젝트 이름</label><input id="new-name" maxlength="120" placeholder="새 프로젝트 이름" autocomplete="off"><button type="submit" class="primary small">만들기</button><button type="button" id="new-cancel" class="link-button">취소</button></form>
         <div id="home-message" class="message" role="status" hidden></div>
         <section class="home-mine" aria-label="내 프로젝트">

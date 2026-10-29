@@ -8,7 +8,7 @@ import type { StudioView } from '../shared/studio.js';
 import { createPlan, selectItems, requestSnapshot, compareResults, parseScopeReview, type ChangePlan, type Evidence, type PlanItem, type PlanPresentation, type ResultObservation, type RequestSnapshot } from '../shared/change-plan.js';
 import { CONVERTER_HEADING, CONVERTER_INTENT, converterEvidence, converterExampleAnalysis, converterObservations } from '../shared/change-plan-example.js';
 import { mapLead, type Box } from './map-layout.js';
-import { AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
+import { AskError, ERROR_TEXT, RELEASE_TEXT, type AiStatus } from './studio-api.js';
 import { h, put, $, ago, fullTime, inspectorWidth, codeGate, codeNote, chevron } from './plan-dom.js';
 import { CONVERTER_KEY, CONDITION_LABEL, EVIDENCE_LABEL, exampleInput, projectInput, mapReply, secretLike, scopeInput, type Condition, type PlanInput } from './plan-source.js';
 import { requestPlan, requestScope } from './plan-request.js';
@@ -1344,9 +1344,11 @@ export function createPlanView(host: PlanHost) {
     if (st.example && origin === 'example' && !loaded) actions.append(h('button', { type: 'button', class: 'secondary small', onclick: () => loadExampleResults(snap) }, '돌아온 기록 살펴보기'));
     if (!st.example && snap.scope) actions.append(h('button', { type: 'button', class: 'link-button', onclick: () => host.pasteReturn() }, '보고 원문 붙여넣기'),
       h('button', { type: 'button', class: 'link-button', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요. 이 요청문의 결과로 확정하지 않아요.', onclick: () => host.fileReturn() }, '코드·검사 자료 추가'),
-      h('button', { type: 'button', class: 'link-button', title: '고른 이 요청문으로 아직 대조하지 않은 보고를 읽어요', onclick: () => host.readRequest(snap.id) }, '이 요청과 보고 읽기'));
+      // AF124: a limited release reads no new report against the map; the reports are kept and read as they are.
+      ...(host.status().release ? [] : [h('button', { type: 'button', class: 'link-button', title: '고른 이 요청문으로 아직 대조하지 않은 보고를 읽어요', onclick: () => host.readRequest(snap.id) }, '이 요청과 보고 읽기')]));
     if ((!st.example && !snap.scope) || (st.example && origin !== 'example')) actions.append(h('button', { type: 'button', class: 'link-button', 'aria-expanded': String(st.addForm), onclick: () => { st.addForm = !st.addForm; render(); } }, st.addForm ? '붙이기 닫기' : '돌아온 기록 직접 붙이기'));
     if (actions.childElementCount) sec.append(actions);
+    if (!st.example && snap.scope && host.status().release) sec.append(h('p', { class: 'fine' }, RELEASE_TEXT.limit));
     if (st.example && origin !== 'example') sec.append(h('p', { class: 'fine' }, '예제의 돌아온 기록은 작성된 예제 항목과만 대응해요. AI 분석 항목에는 받은 글을 직접 붙여 주세요.'));
     if (!st.example && !snap.scope) sec.append(h('p', { class: 'fine' }, '이전 형식 요청문이라 보고가 자동 대응되지 않아요. 요청문은 그대로 두고 항목에 직접 기록할 수 있어요.'));
     if (st.addForm) sec.append(addForm(snap, labels));

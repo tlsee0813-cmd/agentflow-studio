@@ -15,7 +15,7 @@ import { correctRequestMatch, unlinkReplacement, requestComparison } from '../sh
 import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
 import { layoutScope, edgePath, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, ROOT, HEAD, type Box, type Edge, type LabelSpot, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
-import { aiStatus, askStudio, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
+import { aiStatus, askStudio, AskError, ERROR_TEXT, RELEASE_TEXT, PUBLIC_EDITION, type AiStatus } from './studio-api.js';
 import { runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
@@ -606,6 +606,29 @@ function saveBackup(entryId: string, p: Project) {
   document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+/* AF124: a limited release (status.release) says what this version is for and the three ways in, each only on the person's own
+ * action: the examples here, a backup file they choose, or the earlier public site at its own address (nothing is sent there or
+ * synchronised with it). Drawn in place when the status comes, so a draft or the focus on the home page stays. */
+let examplesWanted = false;
+function showExamples() {
+  if (route().key) { examplesWanted = true; go(null); return; }
+  $('examples-title').scrollIntoView({ block: 'start' });
+  $('project-list').querySelector<HTMLElement>('a[href]')?.focus({ preventScroll: true });
+}
+function chooseBackup() { if (route().key) go(null); $<HTMLInputElement>('import-file').click(); }
+function releaseActions(first: string): HTMLElement[] {
+  return [h('button', { type: 'button', class: first, onclick: () => showExamples() }, '예제로 살펴보기'),
+    h('button', { type: 'button', class: 'secondary small', title: '이 브라우저에 새 사본으로 가져와요. 원래 파일은 바뀌지 않아요.', onclick: () => chooseBackup() }, '지도 백업 가져오기'),
+    h('a', { class: 'link-button rn-public', href: PUBLIC_EDITION, target: '_blank', rel: 'noopener noreferrer' }, '기존 공개판 열기')];
+}
+function renderRelease() {
+  const box = $('release-note'); if (!box) return;
+  if (status.release !== 'existing-map') { box.hidden = true; box.replaceChildren(); return; }
+  box.replaceChildren(h('p', { class: 'rn-intro' }, RELEASE_TEXT.intro), h('p', {}, RELEASE_TEXT.limit),
+    h('div', { class: 'rn-acts' }, ...releaseActions('primary small')), h('p', { class: 'fine' }, RELEASE_TEXT.move), h('p', { class: 'fine' }, RELEASE_TEXT.apart));
+  box.hidden = false;
+}
+
 const runBadgeFor = (key: string) => { const el = h('span', { class: 'program-run', 'data-run-entry': key, role: 'status' }); runBadge(el); return el; };
 /** My programs lead; the examples show their real composition on a first visit and step back once there is work of one's own. */
 function renderHome() {
@@ -630,6 +653,7 @@ function renderHome() {
   $('saved-list').replaceChildren(...cards);
   $('saved-empty').hidden = !!cards.length;
   $('home').classList.toggle('has-mine', !!cards.length);
+  if (examplesWanted) { examplesWanted = false; showExamples(); }
   const msg = $('home-message');
   const problem = store.readError ? '이 브라우저의 저장 공간을 읽지 못해 저장된 프로젝트를 보여 드릴 수 없어요. 저장된 내용은 바꾸지 않았어요.' : null;
   if (problem) { msg.textContent = problem; msg.hidden = false; } else if (!msg.dataset.keep) msg.hidden = true;
@@ -1932,6 +1956,17 @@ function renderMapEntry() {
   if (o.kind !== 'saved') { box.replaceChildren(h('p', {}, o.view.records.length ? `아직 부분으로 나뉘지 않은 프로젝트예요. 기록 ${o.view.records.length}개는 ‘최근 기록’에서 볼 수 있어요.` : '아직 부분도 기록도 없는 프로젝트예요.')); box.hidden = false; return; }
   const inp = mapRun.input(), st = mapRun.state(), last = mapRun.last(), can = mapRun.can();
   const fresh = inp && inp.problem !== 'NOTHING_NEW' ? inp.coverage.fresh : 0;
+  if (status.release === 'existing-map') {
+    // AF124: no first map here. Records can still be kept and parts added by hand; the ways in are the release's own.
+    box.replaceChildren(); put(box, h('h2', {}, '기존 지도 작업용 버전이에요'), h('p', { class: 'se-lead' }, RELEASE_TEXT.limit),
+      h('div', { class: 'se-acts' }, ...releaseActions('primary small')),
+      h('p', { class: 'fine' }, fresh ? `기록 ${fresh}개는 이 프로젝트에 보관돼 있어요. 기록은 붙여 넣어 보관하고, 부분은 직접 추가할 수 있어요.` : '기록은 붙여 넣어 보관하고, 부분은 직접 추가할 수 있어요.'),
+      h('div', { class: 'se-acts' }, h('button', { type: 'button', class: 'secondary small', onclick: () => openPaste(null) }, '기록 붙여넣기'),
+        h('button', { type: 'button', class: 'secondary small se-file', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요', onclick: () => openFile(null) }, '코드·검사 자료 추가')),
+      st.error ? h('p', { class: 'pp-error', role: 'alert' }, st.error) : null,
+      h('button', { type: 'button', class: 'link-button se-direct', onclick: () => openPartForm(null) }, '부분 직접 추가'));
+    box.hidden = false; return;
+  }
   const paste = (primary: boolean) => h('button', { type: 'button', class: primary ? 'primary small' : 'secondary small', onclick: () => openPaste(null) }, '기록 붙여넣기');
   const file = () => h('button', { type: 'button', class: 'secondary small se-file', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요', onclick: () => openFile(null) }, '코드·검사 자료 추가');
   const acts = h('div', { class: 'se-acts' }), waiting = st.committing || st.ready;
@@ -2143,7 +2178,7 @@ function renderStatus() {
   // AF102: a server whose map readings are made only by its own map executor (a local preview) says so; the rest stays as ai says.
   const mapOnly = status.ai !== 'deepseek' && status.map?.via === 'jobs';
   const later = status.jobs?.executor?.scope === 'map6-later' || status.jobs?.executor?.scope === 'map7-later';
-  const mapNote = status.map?.via === 'jobs' ? ` 지도 정리는 이 PC의 지도 실행기(${status.map.model}, 미리보기)가 ${later ? '첫 지도와 이후 기록·요청 대조까지' : '첫 지도만'} 해요.` : '';
+  const mapNote = status.release === 'existing-map' ? ` ${RELEASE_TEXT.limit}` : status.map?.via === 'jobs' ? ` 지도 정리는 이 PC의 지도 실행기(${status.map.model}, 미리보기)가 ${later ? '첫 지도와 이후 기록·요청 대조까지' : '첫 지도만'} 해요.` : '';
   pill.dataset.state = needsCode ? 'code' : mapOnly ? 'map' : status.ai;
   text.textContent = status.ai === 'deepseek' ? (needsCode ? 'AI · 접속 코드 필요' : 'AI 정리 가능') : mapOnly ? '지도 정리만 가능' : status.ai === 'off' ? 'AI 키 없음' : 'AI 서버 미연결';
   pill.title = (status.ai === 'deepseek' ? `서버가 ${status.model ?? 'DeepSeek'}에 정리를 요청해요. 키는 서버에만 있어요.${needsCode ? ' 이 서버는 접속 코드를 받아요. 정리를 요청할 때 입력해 주세요.' : ''}` : mapOnly ? '질문·계획·결과 정리는 서버에 AI 키가 없어 꺼져 있어요.' : status.ai === 'off' ? '서버는 연결됐지만 AI 키가 설정되지 않았어요.' : '이 페이지에는 AI 서버가 연결되어 있지 않아요.') + mapNote;
@@ -2394,7 +2429,7 @@ async function main() {
   $('add-part').addEventListener('click', () => openPartForm(scope));
   $('plan-entry').addEventListener('click', () => planView.toggle());
   $('return-entry').addEventListener('click', () => { if (returnView.isOpen() && !planView.isOpen()) returnView.close(); else openReturn(); });
-  statusReady = aiStatus().then(s => { status = s; renderStatus(); planView.statusChanged(); refreshReading(); statusArrived(); if (!selected && !planView.isOpen()) returnView.render(); mapRun.resume(); });
+  statusReady = aiStatus().then(s => { status = s; renderStatus(); renderRelease(); planView.statusChanged(); refreshReading(); statusArrived(); if (!selected && !planView.isOpen()) returnView.render(); mapRun.resume(); });
   // AF100: a reservation another tab of this address made (or ended) is looked at now, not at this page's next click.
   window.addEventListener('storage', e => { if (e.key?.endsWith(JOBS_KEY)) void statusReady?.then(() => mapRun.resume()); });
   window.addEventListener('hashchange', () => void render());
