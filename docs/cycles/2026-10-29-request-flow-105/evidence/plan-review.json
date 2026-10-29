@@ -1,0 +1,75 @@
+{
+  "task": "AF105-independent-single-plan-semantic-review",
+  "verdict": "core_preservation_PASS; overall_question_appropriateness_FAIL",
+  "conclusion": "The actual plan substantially preserves the requested PC lookup tool and the important prohibitions. It is not acceptable as an unqualified successful integrated analysis/request experience: it turns an already specified new tool and an application-internal part representation into a user decision, and it reopens required board-designation display as a choice against an unrequested command-example expansion. The UI further promotes every unknown string to something the user must decide. Delivery success and core preservation remain separate positive observations; they do not erase this semantic defect.",
+  "evidence": {
+    "raw": "[private-evidence-retained]",
+    "actualRequest": "[private-evidence-retained]",
+    "sourceScope": "The actual request's INTENT plus N02 board documentation/table/power limitation. N01 is DTS in this105 request; alias order differs from the104 map ask. No prior response was substituted for this actual input.",
+    "sourceReviewRevision": "3b85be52 for the existing renderer/contract only; this reviewer did not execute it",
+    "parentObservation": "One completed plan call reported20.155s, UI shows five unknowns as '정할 것5'; scope call not yet made. This timing/UI statement is root's observation, not this reviewer's execution."
+  },
+  "corePreservation": {
+    "verdict": "PASS_with_narrow_scope",
+    "outputReferences": [
+      "summary",
+      "items[0].title/description/partIds/refs",
+      "preserve[0..4]",
+      "impacts[0..2]"
+    ],
+    "findings": [
+      "One proposed new PC lookup tool is grounded in the explicit intent. partIds=[] follows the system's convention for a new part rather than attaching implementation to an unchanged board component.",
+      "The two ribbon labels retain the corresponding SSD1673/SSD1675A, ssd16xx and reel_board/reel_board@2 mappings. Summary identifies the reusable display/controller/driver/build correspondence table; the actual N02 table supports the proposal.",
+      "Empty/unknown labels are not guessed, PCB revision alone does not determine the target, actual build/flashing is excluded, and sensors/circuit/power/energy-saving behavior are preserved. The documented Low Power no-saving limitation remains explicitly required in the guidance.",
+      "References INTENT/N02 support the proposal. Display/board/power impacts describe information to inspect; they do not by themselves authorize hardware modification. No physical runtime verification or existing PC-tool implementation is claimed.",
+      "The item does not repeat GDEH0213B1/B72 model strings even though it names the label/controller/driver/designation pairs. The summary/impact and N02 table keep the full display correspondence in view; this is a proposal summary, not an exhaustive final specification. A later frozen request must preserve the user's complete display field/table requirement rather than use this shorter item text as its replacement."
+    ]
+  },
+  "unknownsAssessment": [
+    {
+      "pointer": "/unknowns/0",
+      "judgment": "plausible_unprovided_product_detail_plus_verification; not_all_mandatory_user_decisions",
+      "reason": "The user said a small PC tool without selecting CLI/GUI or delivery location. Those may affect implementation, while the existing input/output implementation is merely not confirmed by supplied materials. Missing evidence and an actual choice are different; this combined string does not establish that the user must answer every listed detail before useful work."
+    },
+    {
+      "pointer": "/unknowns/1",
+      "judgment": "implementation_choice_not_established_as_user_blocker",
+      "reason": "Embedding the table versus referring to documentation is not settled in the intent. However, the required observable result is already to show the correspondence. This is a possible implementation/data-maintenance question, not evidence that the output requirement remains undecided. It must not substitute a mere external-document reference for the requested displayed mapping."
+    },
+    {
+      "pointer": "/unknowns/2",
+      "judgment": "specific_copy_or_verification_detail; known_behavior_already_set",
+      "reason": "Exact wording and any further confirmation workflow are not specified. The required behavior itself is explicit: do not guess; state that confirmation is needed. The analysis may preserve unspecified detail, but must not reopen that behavior or impose an invented confirmation procedure."
+    },
+    {
+      "pointer": "/unknowns/3",
+      "judgment": "FAIL_reopens_required_output_and_adds_unrequested_alternative",
+      "reason": "The intent explicitly asks to show the board designation with the other mapped fields. Asking whether to display reel_board/@2 unchanged versus show build-command examples treats the required designation as optional and introduces an additional feature as if it were a user-stated alternative. Command examples are not the same as executing build/flashing, but their absence is not a missing product decision that invalidates the already clear mapping requirement."
+    },
+    {
+      "pointer": "/unknowns/4",
+      "judgment": "FAIL_application_representation_question_promoted_to_user_product_decision",
+      "reason": "The user explicitly wants a new PC tool. The actual system instruction already says new parts use partIds=[], and the proposed item correctly does so. Whether AgentFlow registers that proposed tool in parts is the application's representation/operation policy, not an unresolved tool requirement supplied by this user. The response manufactures a decision about its own schema classification and asks the user to resolve it. No evidence supports this uncertainty as a genuine unanswered product choice."
+    }
+  ],
+  "integratedContractFinding": {
+    "severity": "P2",
+    "mechanism": "The system prompt defines unknowns as both unresolved choices and necessary verification; PlanAnalysis stores only unknowns:string[] (shared/change-plan.ts:17,88-112). The positive-items renderer labels all of them '아직 정하지 않은 것' and counts all as '정할 것' (client/plan-view.ts:695-698,944), although the zero-item path uses '아직 확인하지 않은 것' at928. This turns epistemic/implementation gaps into outstanding user decisions. The malformed fifth item originates in model interpretation; the uniform UI label is a separate concrete integration mismatch.",
+    "downstreamBoundary": "shared/change-plan.ts:200 exports analysis.unknowns into the request's unknowns section, while review unknowns remain separate at201. If this result is used unchanged, its unsupported question can be frozen into a handoff. No scope/request call was observed by this reviewer, so this is the existing code path and risk, not a claim that a bad request has already been sent.",
+    "minimumNeeded": "Preserve the raw result and distinguish what is genuinely open for the user from missing evidence or implementation detail; do not make application graph registration a product question, and do not reopen explicitly requested outputs. A label-only change cannot repair the fabricated fifth unknown; a prompt-only improvement cannot make an overloaded string list safe to label universally as user decisions. Root should choose a bounded contract/presentation correction before accepting the overall105 flow. This review does not prescribe a broad new subsystem or authorize another generation."
+  },
+  "acceptanceLimits": [
+    "Accept the preserved mappings, safety constraints and successful response delivery as bounded observations. Reject overall user-question appropriateness for this response; do not relabel it a complete successful plan because its JSON and principal preserve list are valid.",
+    "Do not delete the offending unknowns from the saved raw, silently rewrite this failed response, or continue to scope merely to manufacture an accepted chain. If root continues any separate UI-only observation, it must remain distinct from semantic acceptance.",
+    "This does not reverse104's map semantic PASS or declare all previous84/85 change-analysis observations failures. It is a new concrete counterexample on the current integrated positive-items path."
+  ],
+  "actions": {
+    "modelCalls": 0,
+    "researchWeb": 0,
+    "testsBuildUI": 0,
+    "productOrRawEdits": 0,
+    "onlyWrite": "[private-evidence-retained]"
+  },
+  "finalSelectionOwner": "root coordinator",
+  "reviewClosed": true
+}

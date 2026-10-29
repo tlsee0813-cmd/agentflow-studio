@@ -1,0 +1,48 @@
+{
+  "basis": "61fd3a24d9642ac32d815c6217c3f4d3bafd7620",
+  "app": "2e9d8d9e003138c85839876c092e7c7b5a115986",
+  "sourceBackupSha256": "dcda9cc2acbd387fdfc7f1751f7ba4e59a2bbf6b496c5c04bbba24477552bb49",
+  "model": "deepseek-flash",
+  "promptSha256": "f5c3e687c67c87e6d272efafee247bac79622fcc561247a56dbe6bfb909e1cb6",
+  "intentSha256": "aef03867fec2b6b3882cf616e9ba5156c4e77664de58143efed2b8197379f4ca",
+  "actualRequestSha256": "a5674c9fe3d036d5c71567aea03a11add21f936f05d070100147242078737e2c",
+  "outputSha256": "022cf87d80c13748eb5a583feca60560d895b9e70a1beff6862864de7b59f15b",
+  "receipt": {
+    "status": 200,
+    "elapsedMs": 20155,
+    "bytes": 13283
+  },
+  "usage": {
+    "prompt_tokens": 8713,
+    "completion_tokens": 3254,
+    "total_tokens": 11967,
+    "prompt_tokens_details": {
+      "cached_tokens": 2048
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 2552
+    },
+    "prompt_cache_hit_tokens": 2048,
+    "prompt_cache_miss_tokens": 6665
+  },
+  "calls": {
+    "plan": 1,
+    "scope": 0,
+    "map": 0,
+    "digest": 0,
+    "retry": 0
+  },
+  "coreSemantics": "pass",
+  "questionSemantics": "fail",
+  "blockingOutput": {
+    "registration": "PC 도구를 parts에 새 부분으로 등록할지 여부가 확인되지 않음",
+    "reopenedTarget": "'보드 지정'에 reel_board와 reel_board@2를 그대로 표시할지, 빌드 명령 예시까지 보여줄지 미정"
+  },
+  "ui": "all unknowns labelled 아직 정하지 않은 것 / 정할 것",
+  "requestSnapshots": 0,
+  "resultObservations": 0,
+  "projectBackupUnchanged": true,
+  "projectBackupSha256": "dcda9cc2acbd387fdfc7f1751f7ba4e59a2bbf6b496c5c04bbba24477552bb49",
+  "cleanup": "server exec terminal; process query found0 matching Node; jobs/ops empty; no new map job",
+  "productCodeChanges": 0
+}

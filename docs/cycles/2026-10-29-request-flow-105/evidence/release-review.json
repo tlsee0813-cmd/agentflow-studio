@@ -1,0 +1,82 @@
+{
+  "task": "AF105-independent-release-boundary-review",
+  "verdict": "reject_unmodified_assets_only_mix; require_explicit_scoped_release_contract",
+  "frozenComparison": {
+    "publicCheckpoint": "e6156fa",
+    "publicAppTree": "b670c0ea300050e28cdba9655515ebcf2e03d9d5",
+    "candidate": "3b85be52",
+    "candidateAppTree": "2e9d8d9e003138c85839876c092e7c7b5a115986",
+    "method": "Read-only git show/diff/grep at the specified revisions and their preserved acceptance documents. No deployed host inspected or changed. Root's in-progress105 document is untracked and was not used as frozen evidence."
+  },
+  "conclusion": "UI reading, manual editing and storage improvements can be delivered independently of CLI102, and the76 storage/uncertainty representation can remain available without enabling map6 generation. However, candidate assets placed over the unchanged public73 Worker closure are not a compatible AI-to-request-to-return release: plan3 is unconditionally sent to a plan1-only server. A full candidate Worker deployment also changes the advertised/default map generation to map6. Neither action is accurately described as a UI-only release. The smallest useful primary-release contract is therefore an explicit accepted existing-map editing/request/return scope with matching plan3 server support, a separate deliberate decision for map-generation capability, and protected one-way storage upgrade. This is a bounded release decision to prepare, not approval to merge everything or to hold every improvement indefinitely.",
+  "acceptanceLedger": [
+    {
+      "cycles": "73/74/75",
+      "evidence": "docs/COORDINATOR_HANDOFF_2026-10-28_KO.md sections2,4,8, especially lines96,105,107",
+      "scope": "73 is the public accepted app tree b670c0ea.74's generation quality was not accepted.75 final693d0c7 accepted relation/detail access, layout regressions and source-return context with exact CI40656231365 and independent two-PC observations. These UI findings are not generation-quality evidence or a deployment authorization."
+    },
+    {
+      "cycles": "76",
+      "evidence": "docs/cycles/2026-10-28-explicit-uncertainty-76/{DECISION,RESULT}.md",
+      "scope": "Explicit uncertainty targets, independent-fact retention, map6/map-reading5/project13 and candidate reading UI were accepted within scope; final current-claim visibility repair eac7b086 and CI40723192596 are recorded. Actual developer instruction failed delivery; two OSS cases passed within their samples. No blanket first-map/default-provider acceptance."
+    },
+    {
+      "cycles": "97/98",
+      "evidence": "docs/cycles/2026-10-29-map-return-97/RESULT.md; docs/cycles/2026-10-29-candidate-contract-98/RESULT.md",
+      "scope": "97 accepted entry/visit ownership, page-memory ready, explicit application and other-project editing preservation at796da3a, CI40826463621.98 repaired candidate.text instructions only at3d280b1, CI40848778881; validator/storage/UI/model limits were unchanged and no actual quality improvement was claimed."
+    },
+    {
+      "cycles": "100/102",
+      "evidence": "docs/cycles/2026-10-29-durable-map-100/ROOT_ACCEPTANCE.md; docs/cycles/2026-10-29-owned-cli-preview-102/ROOT_ACCEPTANCE.md",
+      "scope": "100 accepted local Node durable recovery/ownership atbf606309 with CI40858711030 and recorded-response PC flow.102 accepted a nondefault cycle-local CLI preview, finalffcef187/runtime8ae7eb9, exactCI40874244675 and harmless child/replayed response PC flow. Worker/static stayed without Node ownership;102 is not a public CLI service.104's actual Zephyr success is separately bounded to its selected local executor/policy and does not turn the Worker DeepSeek route into the same tested path."
+    },
+    {
+      "cycles": "88/94 (upgrade evidence needed for this boundary)",
+      "evidence": "docs/cycles/2026-10-29-upgrade-boundary-88/RESULT.md; docs/cycles/2026-10-29-request-reading-94/RESULT.md",
+      "scope": "88 accepted a public73 stored copy's project11-to13 and change-plan2-to3 first-write/reopen/import preservation on an earlier candidate, not all legacy variants/concurrent old tabs/downgrade.94 subsequently introduced change-plan file/envelope4 and preserved request reading with its own frozen-file/UI/CI evidence. Those scopes must accompany a release of the current storage writer;88 alone is not exact current-artifact upgrade acceptance."
+    }
+  ],
+  "mechanicalBoundaries": {
+    "76_vs_74_98": {
+      "coupledToday": "Candidate Worker studio.mjs:55,181-204 derives and advertises m6 from the current recipe whenever its DeepSeek key is configured. map-prompt.mjs:223-241 composes map6 FIRST/later from prior map5 prompts and the98 candidate shape instruction. map-run.ts selects anchored schema from that advertised recipe; shared/map-reading.ts:578-617 builds the matching ask. Therefore deploying the entire candidate Worker implicitly exposes74/76/98 generation behavior.",
+      "separable": "Storage/read representation and generation invocation are not intrinsically the same capability. types.ts:2-6 and validation.ts:590-630 preserve project11/12 reads while writing13; stored map-reading5 can be rendered/imported without a provider call. Server prompts live in server/map-prompt.mjs, outside static assets. Keeping the codec/renderer does not require accepting a new generator, and deleting the codec would lose access to valid new-format stored readings rather than solve model quality."
+    },
+    "Worker_Node_CLI": {
+      "verified": "server/worker.mjs:5-10 creates studio with env only. studio.mjs:165-182 takes jobs/mapExecutor only when explicitly injected; jobs routes at208 are absent without jobs. server/index.mjs:5-13 alone opens the local Node job store. docs/cycles/2026-10-29-owned-cli-preview-102/preview/serve-preview.mjs explicitly injects its executor. Neither ordinary Node index nor Worker activates CLI from browser/env alone.",
+      "deployment": "scripts/deploy-cloudflare.mjs builds same-origin static assets and collects the Worker import closure together. Its import traversal rejects node: and dynamic/nonrelative imports. Existing102 exactCI recorded24 Worker modules/52 assets and successful dry-run. That proves bounded packaging separation, not public durability or provider meaning. Node map-jobs/CLI/state/private policy must stay outside the Worker closure/assets."
+    },
+    "staticAuxiliary": "scripts/build-static.mjs:2-5,16-22,37-42 already supports an unset STUDIO_API_BASE: endpoint=null and CSP connect-src none; studio-api.ts returns ai none and ask calls cannot reach a server. This is a concrete no-code-change auxiliary UI/storage preview boundary, with explicit namespace/import handling. It cannot replace the intended real-AI-to-request-to-return experience or satisfy the full product goal. Root explicitly does not select it as the primary completion path."
+  },
+  "public73_worker_plus_candidate_assets": {
+    "verdict": "not_safe_as_is",
+    "mapNegotiation": "The old studio.mjs advertises m3. Candidate map-run anchored() recognizes only m6/m5/m4, so it builds legacy map1/map3 rather than sending map6 to the old server. Candidate validation retains those versions. This map negotiation is plausible from source, but is not an executed mixed-artifact observation.",
+    "blockingPlanMismatch": "Candidate client/plan-source.ts:77-78,91-93 always creates studio.plan.3 with authoring. Public e6156fa shared/plan-api.ts:23-24 allows exactly schemaVersion,intent,parts,evidence and only studio.plan.1. A normal new change analysis is rejected INVALID_INPUT before any model call. Even replacing that validator alone is insufficient: old server/studio.mjs:99 recognizes only plan1, and lines114/129 use that flag to select the plan prompt/reply validator. An accepted plan3 call needs the matching server semantics, including authoring and zero-change replies, not a renamed schema or dropped context.",
+    "legacyMapCaveat": "Candidate map-reading.ts:776-778 deliberately retains the old overlap-based candidate claim filtering for !six. An m3 server therefore does not activate76's explicit-target/no-silent-independent-fact-removal semantics for new generations. Keeping public73 generator behavior is a distinct retained-baseline policy, not evidence that76 repaired this mixed generation route. No silent m3 downgrade may be described as a map6 quality rollout.",
+    "storageRisk": "Candidate types.ts:2 writes project13 and validation.ts:599-602 migrates11 without inventing readings. Public e6156fa types.ts:2/validation.ts:220,594 accepts project11 and has no13 reader. Current plan-store.ts writes studio.plans.4/change-plan-file.4, whereas public73 predates3/4. A reload of an old tab or deployment rollback cannot be assumed to reopen new saved data. Same origin and unchanged storage prefix preserve continuity but also make mixed-writer/rollback handling material. This is not evidence of automatic deletion; it is a concrete unsupported-reader boundary.",
+    "closureWarning": "If 'old Worker' is rebuilt while its imported dist/shared files come from the candidate, it is no longer the old closure. Freeze every imported module separately from browser assets; neither old studio.mjs alone nor app-tree labels prove the intended mixed artifact."
+  },
+  "minimumPrimaryReleaseContractToChoose": {
+    "oneUsefulScope": "Existing saved/imported maps: read exact evidence, edit parts and intent, analyze a change with the accepted plan3 contract, freeze/read a request, and preserve/compare returns. Keep Node100 durability and CLI102 as separate local capabilities, not public-host promises.",
+    "serverNeed": "Use a matched server/client implementation for the chosen plan/scope/digest versions. The candidate already has plan3 semantics accepted within84/85 scope; a73 backport must include the actual dispatch/prompt/validation behavior or the client must deliberately negotiate a supported contract without discarding authoring/no-change meaning. The unchanged73 closure cannot serve the unchanged candidate client.",
+    "mapDecision": "For a public scope that does not newly roll out the unaccepted default map6 generator, explicitly withhold map generation on that release: omit the status capability AND reject direct /api/studio/map requests before provider acquisition, including old tabs. Leave stored map6 reading/validation intact. Wording must explain the scoped availability rather than promise that merely connecting an AI server enables map generation. Alternatively, retaining73's m3 generator requires an explicit retained-baseline decision acknowledging its legacy filtering; that is not equivalent to the76 fix and is not independently approved here. A current Worker map6 rollout is a different acceptance decision.",
+    "storageNeed": "Keep exact project/plan provenance and old reader semantics. Before first write at the public address, retain a recoverable pre-upgrade project plus sidecar snapshot and state the forward writer/rollback boundary; don't promise that code rollback downgrades data. Either isolate this release's writable store until explicit import/upgrade or demonstrate safe same-origin first-save and old-tab refusal/conflict behavior. Avoid storage resets, namespace accidents or automatic conversions back to11.",
+    "handoff8": "The28 handoff section8 explicitly prohibits replacing public73 before the schema successor and combined exact-SHA CI, independent execution and actual response meaning are accepted.76/98/100/102 are narrower acceptances and104 is one local CLI result. A distinct limited release can be chosen only with an explicit root scope decision and its concrete artifact evidence; relabeling a full candidate deployment UI-only does not satisfy that condition. Existing public73 should remain available as the unchanged reference until that decision."
+  },
+  "exactEvidenceNeededBeforeThatRelease": [
+    "A committed release SHA plus browser-asset hashes and complete Worker module-closure hashes; named target origin, API endpoint configuration and storage prefix. Identify preserved73 modules versus candidate modules and prove CLI/Node filesystem modules/private policy are absent from public assets/Worker.",
+    "Exact release artifact type/boundary/build/Worker dry-run/static and relevant UI/storage/API compatibility results. Existing100/102 CI is useful regression history for the unchanged candidate app tree, not an executed test of a newly mixed or gated release.",
+    "Source-backed capability matrix and no-provider-call boundary evidence for withheld map routes/status, or an explicit retained73 generator policy. No fresh model experiment is implied by this audit. Do not advertise CLI299/300s, local ready-restart or durable owner behavior on Worker/static.",
+    "Current release preservation evidence for public73 project/sidecar before first write, exact retained source/reading/request/withdrawal ownership, new-format reopen/export/import and an old-tab/rollback response that leaves data intact.88's one-copy upgrade and94's request-file acceptance are the starting evidence, with their stated limits.",
+    "The root105 single experience of the actual104 map through change/request/return, with exact input/result provenance, source roundtrip and saved bytes. This reviewer does not duplicate or claim that in-progress UI observation. If server dispatch is changed for release, its exact contract path must be identified rather than inferring equivalence from local CLI104 success."
+  ],
+  "limits": "This review does not decide deployment, inspect live credentials/hosts, merge PRs, revise runtime, add tests or call any AI. It identifies a concrete incompatible mix and the smallest explicit release policy to resolve. It does not demand broad new architecture or reopen completed model research. Root owns the final105 experience and release selection.",
+  "actions": {
+    "researchOrWeb": 0,
+    "models": 0,
+    "testsBuildsUI": 0,
+    "productWrites": 0,
+    "installs": 0,
+    "onlyWrite": "[private-evidence-retained]"
+  },
+  "reviewClosed": true
+}
