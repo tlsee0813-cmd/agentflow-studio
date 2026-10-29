@@ -1,0 +1,87 @@
+{
+  "status": "selected",
+  "askSha": "8a04a5fe1a4853b301411c09e183637830216da82106cee34fb4662a0c87b08c",
+  "askBytes": 9015,
+  "systemSha": "cef94b26c23e8c3c647dccddc399746da6957b127213e891e3d69fe0ada86886",
+  "systemBytes": 11879,
+  "stdinSha": "47c19e79b0f417e2920aea7746e29dc6a56119cfe8f3de019025d72c23b502c0",
+  "stdinBytes": 21254,
+  "wrapperSha": "dd56ff8327f0b957f18ccc6af7c6334935901014e36539c35c91e16279c02ae5",
+  "old104FirstPromptExact": false,
+  "firstDelta114SourcesOnly": true,
+  "policyFileSha": "1d89d563c1a3ed9d5fab0cf72bf0f86513e9e114f8a7ac02db4aadfa4c6a0dfc",
+  "cliSha": "5c1b55966bf9f757dcbf00065c9a6cb862ead55d34b015f1be1939ff18e43943",
+  "observerSha": "789c1d5e55f80491f4c0370fb9368d532f8ec7b446195b4f34de9564a7be230d",
+  "schema": "studio.map.6",
+  "coverage": {
+    "fresh": 2,
+    "sent": 2,
+    "partial": 0
+  },
+  "records": [
+    {
+      "id": "N01",
+      "kind": "pasted",
+      "spans": 90,
+      "note": ""
+    },
+    {
+      "id": "N02",
+      "kind": "pasted",
+      "spans": 12,
+      "note": ""
+    }
+  ],
+  "selectedAt": "2026-10-29T21:18:48.941Z",
+  "basis": "892be294889da1c81dab89013d20ae1b9a1432ee",
+  "product": "be061284af3154b1a746acdbc249fd1cf72a24f4",
+  "app": "7b36f3ebf07a0cea25b36677ef2aedf4c6f23703",
+  "preview": "1b15cd5a570803a8ed745f106f79398a1c57bd32",
+  "scope": "first",
+  "model": "gpt-6.1-sol",
+  "reasoning": "high",
+  "selectionMs": 299000,
+  "verdictMs": 300000,
+  "maxTopLevelCalls": 1,
+  "retry": false,
+  "fallback": false,
+  "tokenAndMoneyHardCap": "unconfirmed; existing one-call exposure",
+  "remoteStop": "unconfirmed",
+  "entry": "E_b2ab2d28-16c5-435d-8a6f-7481809170cb",
+  "normalImportProjectSha": "6ef5d57e2fee24f0e7f6e4e4f86ec00f26723f48b871748e4874e247a9ccd9eb",
+  "derivativeProjectSha": "e20c60d49c18da984b0203bb9eccecebb53db0ba7980ac55c6aa1ef2e5186420",
+  "liveStatus": {
+    "ai": "off",
+    "model": null,
+    "access": "open",
+    "map": {
+      "model": "gpt-6.1-sol",
+      "prompt": "m6-6859b864664f",
+      "via": "jobs"
+    },
+    "jobs": {
+      "version": "map-job.1",
+      "durable": true,
+      "executor": {
+        "id": "codex-cli-preview.102",
+        "model": "gpt-6.1-sol",
+        "scope": "first",
+        "state": "ready",
+        "problem": null,
+        "policy": "bb5caed9c252"
+      }
+    }
+  },
+  "criteria": [
+    "Z1 component/control/power directions; independent sensor functions/shared I2C/address/pins and FAST/default/sleep remain in current stored understanding",
+    "Z2 both exact display/ribbon/controller/driver/board mappings; no PCB-to-display or @2 inference",
+    "Z3 nominal Active/LowPower plus explicit always-on/no-saving restriction remain visible in current reading",
+    "Z4 fixed documentary/DTS scope, no runtime/physical/flash/current-market proof",
+    "Strict contract and semantic correctness separately; no repair, no deleted key fact, no predetermined count",
+    "Normal origin leave during generation, edit other project, ready does not apply silently, explicit apply on return; not substitute for121later criterion7",
+    "1280 source roundtrip, reload/export exact and all input text retained"
+  ],
+  "firstDelta": "Accepted114 MAP6_SOURCES one added line; FIRST98 base otherwise same; no layout-only causal claim",
+  "independentPreflight": "Static review file + existing Sol selection-delta found no blocking issue",
+  "actualCalls": 0
+}

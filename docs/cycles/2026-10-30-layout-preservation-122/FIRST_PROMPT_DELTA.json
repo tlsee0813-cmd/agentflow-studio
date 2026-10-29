@@ -1,0 +1,9 @@
+{
+  "old104Sha": "967f5b3f81906274d122fdb8760dc362d32d5d453186b776a1511cc93c86f998",
+  "currentSha": "cef94b26c23e8c3c647dccddc399746da6957b127213e891e3d69fe0ada86886",
+  "added": [
+    "- 기록의 kind가 자료 종류다. evidence는 사용자가 코드·검사 자료로 분류해 제공한 원문(basis·note의 이름·판본·출처는 사용자 기재이며 앱이 실행·검증한 것이 아니다), pasted는 섞인 보고를 그대로 붙인 원문이다. N·R 별칭 글자, 확장자, 코드처럼 보이는 내용으로 종류를 정하지 않는다. pasted 기록의 코드도 그대로 읽어 role·describes 근거로 쓸 수 있다. 같은 코드가 두 기록에 있어도 같은 대상이면 부분을 하나로 둔다."
+  ],
+  "removed": [],
+  "source": "accepted114 MAP6_SOURCES; FIRST98 base unchanged"
+}
