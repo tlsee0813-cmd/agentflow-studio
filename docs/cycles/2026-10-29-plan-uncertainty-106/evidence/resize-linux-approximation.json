@@ -1,0 +1,17 @@
+{
+  "what": "AF106 request94_resize_flow diagnosis: Linux headless Chromium approximation only. Not Windows evidence; Windows baseline/expected place and per-step rects are not known yet (see af106-request94-resize.json from CI).",
+  "how": "Node Playwright port of the same steps (request94-flow.mjs resize setup with the Python flow's stub reply: preserve ['[테스트 응답] 유지'], unknowns []), dist emitted by PATH tsc 6.0.2 (reference build, not locked TS). Temporary script, not committed. Model calls 0.",
+  "ciFailure": { "run": 40886222483, "sha": "d6e7375", "os": "windows", "at606": { "place": "580", "scrollTop": 621 }, "expectedPlace": "not in the log" },
+  "slicesHead106": { "537": "unknowns heading (new, longer)", "580": "unknowns body '- 제공된 확인할 것 없음'", "596": "review-unknowns heading" },
+  "slicesBase969f167": { "537": "unknowns heading (old)", "563": "unknowns body '- 제공된 미정 없음'", "576": "review-unknowns heading" },
+  "linuxAt1280scroll600": { "head106": { "place": "596", "unknownsBodyBottom": -16.06, "unknownsSectionBottom": -4.06, "nextHeadingTop": 18.94 } },
+  "sectionHeadHeightAt606": { "base": "unknowns 20px (one row)", "head106": "unknowns 42px: the tag '추가 요청 아님' wraps under the longer heading at body width 580" },
+  "resizeTo606": [
+    { "build": "base 969f167", "startScroll": 600, "scrollAt606": 621, "place": "576 -> 576" },
+    { "build": "base 969f167", "startScroll": 594, "scrollAt606": 615, "place": "576 -> 576" },
+    { "build": "head d6e7375", "startScroll": 600, "scrollAt606": 643, "place": "596 -> 596" },
+    { "build": "head d6e7375", "startScroll": 597, "scrollAt606": 640, "place": "596 -> 596" },
+    { "build": "head d6e7375", "startScroll": 594, "scrollAt606": 615, "place": "596 -> 580" }
+  ],
+  "reading": "On Linux, 106 adds a 22px row inside the unknowns section at 606. When the top edge is below that section's border box (start 597/600) the browser's adjustment includes it (+43). With the edge inside the section's bottom padding (start 594), the adjustment is +21 as in base and the previous section's last slice (580) comes into view: the same shape as the Windows record (+21, place 580). Hypothesis only for Windows: its metrics may leave the edge inside that section at scrollTop 600."
+}

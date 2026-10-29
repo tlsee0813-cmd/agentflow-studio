@@ -3627,6 +3627,20 @@ def request94_flow(browser, base, size, shots=None):
     context.close()
 
 
+# AF106 diagnostic for request94_resize_flow (tests only): the top edge of the reading body among its [data-at] slices and sections.
+RESIZE106_PROBE = """b => { const t = b.getBoundingClientRect().top, r = e => { const x = e.getBoundingClientRect(); return [+(x.top - t).toFixed(2), +(x.bottom - t).toFixed(2)]; };
+  const cs = getComputedStyle(b), slices = [...b.querySelectorAll('[data-at]')].filter(e => e.getClientRects().length);
+  const first = slices.findIndex(e => e.getBoundingClientRect().bottom > t + 1);
+  return { scrollTop: b.scrollTop, clientWidth: b.clientWidth, clientHeight: b.clientHeight, padding: cs.padding, font: cs.fontFamily, dpr: devicePixelRatio,
+    place: first < 0 ? null : slices[first].dataset.at,
+    near: slices.slice(Math.max(0, first - 2), first + 3).map(e => ({ at: e.dataset.at, tag: e.tagName, rect: r(e), text: e.textContent.slice(0, 24) })),
+    sections: [...b.querySelectorAll('[data-sec]')].map(e => ({ sec: e.dataset.sec, rect: r(e), head: e.querySelector('.rq-sec-head') ? r(e.querySelector('.rq-sec-head')) : null })).filter(x => x.rect[1] > -120 && x.rect[0] < 120) }; }"""
+def write_resize106(diag):
+    out = os.environ.get("EVIDENCE_DIR")
+    if out: pathlib.Path(out).mkdir(parents=True, exist_ok=True); (pathlib.Path(out) / "af106-request94-resize.json").write_text(json.dumps(diag, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"diag AF106 request94 resize: expected {diag.get('expectedPlace')} · " + " · ".join(f"{x['w']}:{x['probe']['place']}@{x['probe']['scrollTop']}" for x in diag["steps"]))
+
+
 def request94_resize_flow(browser, base, shots=None):
     """AF94 DELTA2 (same steps as `request94-flow.mjs resize`): a document open at 1280x720 (U01 unfolded, both views scrolled,
     focus on its fold) while the window goes to 700, 606 and back to 1280. Below 720 the pane is the whole window and the sheet
@@ -3664,6 +3678,9 @@ def request94_resize_flow(browser, base, shots=None):
     sheet.locator('[data-sheet-part="go-materials"]').click(); u01.click()
     sheet.locator('[data-sheet-part="view-text"]').click(); body.evaluate("b => { b.scrollTop = 900; }")
     sheet.locator('[data-sheet-part="view-reading"]').click(); body.evaluate("b => { b.scrollTop = 600; }")
+    # AF106 diagnostic, tests only: where the top edge sits (before the first focus too: focus() may scroll), then at every step;
+    # written to $EVIDENCE_DIR whether the flow passes or fails. It changes no step and no check.
+    diag = {"platform": sys.platform, "beforeFocus": body.evaluate(RESIZE106_PROBE), "steps": []}
     u01.focus(); body.evaluate("b => { b.__kept = true; }")
     top_slice = lambda: body.evaluate("b => { const t = b.getBoundingClientRect().top; return [...b.querySelectorAll('[data-at]')].find(e => e.getClientRects().length && e.getBoundingClientRect().bottom > t + 1)?.dataset.at ?? null; }")
     def state():
@@ -3671,21 +3688,23 @@ def request94_resize_flow(browser, base, shots=None):
             "view": sheet.get_attribute("data-view"), "same": body.evaluate("b => b.__kept === true"), "place": top_slice(), "top": body.evaluate("b => b.scrollTop"),
             "unfolded": u01.get_attribute("aria-expanded"), "focus": page.evaluate(focused), "shown": page.evaluate(SHEET_TEXT) == text}
     in_view = lambda b, w, hgt: b and b["x"] >= 0 and b["y"] >= 0 and b["x"] + b["width"] <= w + 0.5 and b["y"] + b["height"] <= hgt + 0.5
-    place = top_slice()
-    for w in (1280, 700, 606, 1280):
-        page.set_viewport_size({"width": w, "height": 720}); page.wait_for_timeout(250)
-        at = {"w": w, **state()}; record.append(at)
-        if shots: page.screenshot(path=str(pathlib.Path(shots) / f"request94-resize-{len(record)}-{w}x720.png"))
-        assert in_view(at["box"], w, 720) and at["box"]["width"] >= min(680, w - 24) - 1, at
-        assert in_view(at["copy"], w, 720) and in_view(at["x"], w, 720), at
-        assert [at["cls"], at["view"], at["same"], at["place"], at["unfolded"], at["focus"], at["shown"]] == ["plan-sheet", "reading", True, place, "true", "mat-U01", True], at
-        if w == 606:
-            read_top = at["top"]
-            sheet.locator('[data-sheet-part="view-text"]').click(); assert body.evaluate("b => b.scrollTop") == 900
-            sheet.locator('[data-sheet-part="view-reading"]').click(); assert body.evaluate("b => b.scrollTop") == read_top
-            sheet.locator("#plan-copy").click(); expect(sheet.locator("footer [role=status]")).to_contain_text("복사했어요")
-            assert clipboard_read(page, text, "request94 resize copy at 606x720") == platform_clipboard_text(text) and top_slice() == place
-            u01.focus(); body.evaluate("b => { b.__kept = true; }")
+    place = top_slice(); diag["afterFocus"] = body.evaluate(RESIZE106_PROBE); diag["expectedPlace"] = place
+    try:
+        for w in (1280, 700, 606, 1280):
+            page.set_viewport_size({"width": w, "height": 720}); page.wait_for_timeout(250)
+            at = {"w": w, **state()}; record.append(at); diag["steps"].append({"w": w, "probe": body.evaluate(RESIZE106_PROBE)})
+            if shots: page.screenshot(path=str(pathlib.Path(shots) / f"request94-resize-{len(record)}-{w}x720.png"))
+            assert in_view(at["box"], w, 720) and at["box"]["width"] >= min(680, w - 24) - 1, at
+            assert in_view(at["copy"], w, 720) and in_view(at["x"], w, 720), at
+            assert [at["cls"], at["view"], at["same"], at["place"], at["unfolded"], at["focus"], at["shown"]] == ["plan-sheet", "reading", True, place, "true", "mat-U01", True], at
+            if w == 606:
+                read_top = at["top"]
+                sheet.locator('[data-sheet-part="view-text"]').click(); assert body.evaluate("b => b.scrollTop") == 900
+                sheet.locator('[data-sheet-part="view-reading"]').click(); assert body.evaluate("b => b.scrollTop") == read_top
+                sheet.locator("#plan-copy").click(); expect(sheet.locator("footer [role=status]")).to_contain_text("복사했어요")
+                assert clipboard_read(page, text, "request94 resize copy at 606x720") == platform_clipboard_text(text) and top_slice() == place
+                u01.focus(); body.evaluate("b => { b.__kept = true; }")
+    finally: write_resize106(diag)
     page.set_viewport_size({"width": 700, "height": 720}); page.wait_for_timeout(250)
     page.keyboard.press("Escape"); expect(sheet).to_be_hidden()
     assert page.evaluate(focused) == "last"

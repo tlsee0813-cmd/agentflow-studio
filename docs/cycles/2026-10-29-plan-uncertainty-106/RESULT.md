@@ -50,3 +50,18 @@
 - `client/digest-source.ts`는 plan unknowns를 '변경안의 유지 범위와 미정'이라는 제목으로 돌아와 읽기의 모델 입력에 넣는다. 이 부분은 바꾸지 않았다. 모델 입력 바이트와 digest 지침이 이 제목을 직접 가리키기 때문이다. digest 지침은 이미 미정 항목을 모두 사용자에게 넘기지 말라고 구별한다.
 
 공개73/미수용74/UI75·693 수리는 보존했다. 제품 병합·배포는 0회이고, 전체 목표는 계속 active다.
+
+## 정확 CI 40886222483 Windows resize 실패 진단 (수리 전)
+
+d6e7375에서 Linux는 성공했고 Windows는 `request94_resize_flow`의 606 단계에서 실패했다. 기록된 값은 place '580', scrollTop 621이며, 기대 place와 1280/700 단계 값은 로그에 없다. 무엇이 실패의 원인인지 아직 확정하지 않았다. 재시도·조건 완화·예전 제목 복구는 하지 않았다.
+
+- **Linux 근사**: 같은 단계를 Node Playwright 이식판으로 재현했다. 기준 판은 TS6, 임시 스크립트, 모델 0회다. [수치](evidence/resize-linux-approximation.json)를 남겼다.
+  - 106의 긴 unknowns 제목은 606(본문 폭 580)에서 `추가 요청 아님` 표지를 다음 줄로 밀어 그 구역 머리를 20→42px로 늘린다. 기준 969f167에서는 늘지 않는다.
+  - 시작 600에서 상단 경계는 unknowns 구역 테두리 아래 약 4px에 있다. 그대로 두면 브라우저가 +43px로 보정해 위치가 유지된다.
+  - 경계를 6px 위(구역 안쪽 여백)에서 시작하면 106만 +21px 보정(기준과 같음)이 되고 위치가 580(앞 구역 끝 줄)으로 바뀐다. Windows 기록(+21, 580)과 같은 모양이다.
+  - 따라서 106이 새 줄바꿈으로 구역 안에서 22px 이동을 만들 수 있는 것은 Linux에서 재현된 사실이다. Windows 실패가 이 경로인지는 **미확인**이다.
+- **진단 기록 추가**(`tests/studio_browser.py`): `request94_resize_flow`가 통과·실패와 관계없이 `$EVIDENCE_DIR/af106-request94-resize.json`을 쓴다. CI는 이 파일을 app/test-results 아티팩트로 올린다.
+  - 담는 값: 첫 focus 전후의 기준 위치, 기대 place, 단계별 scrollTop, 상단 주변 slice·구역 rect, 머리 높이, 본문 폭·padding·font-family·DPR·platform.
+  - 한 줄 요약을 stdout에 쓴다.
+  - 단계·검사·수용 조건은 바꾸지 않았다. Python 실행은 이 환경에 Python Playwright가 없어 하지 못했다. probe 스크립트는 Node 재현 페이지에서 같은 값을 돌려주는지 확인했다.
+- **제품 수리는 하지 않았다.** Windows 기록을 받은 뒤 원인이 같으면 plan-view/CSS의 좁은 수리를 판단한다. 후보는 구역 머리 줄바꿈이 고정점 안에서 위치를 밀지 않게 하는 것이다.
