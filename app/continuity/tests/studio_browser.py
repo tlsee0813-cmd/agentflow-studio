@@ -3362,35 +3362,58 @@ AF94_REVIEW = {"summary": "[테스트 응답] 추가 전제 없이 두 예외 �
     "unknowns": ["[테스트 응답] 메시지 문구"]}
 
 
+def platform_clipboard_text(text, platform=None):
+    """AF94 DELTA7: the exact text the operating system clipboard holds after copying text (an oracle for the native copy check
+    only; the frozen text, its DOM, store and file stay exact). On Windows (sys.platform win32) writing plain text applies the
+    platform's line breaks: every CR LF, lone CR and lone LF of the text becomes CR LF (W3C Clipboard API, write content to the
+    clipboard; WPT 63738). Anywhere else it is the text itself. This computes the expected string from the copied text; the read
+    value is never trimmed or normalized, so a missing or extra character, lost whitespace or a wrong line break still fails."""
+    return re.sub(r"\r\n|\r|\n", "\r\n", text) if (platform or sys.platform) == "win32" else text
+
+
 def clipboard_read(page, text, where, known=None):
-    """AF94 DELTA6 diagnostic, tests only: read the clipboard once, as the check always did (the caller still asserts the very same
-    equality), and keep what came back next to what was copied. Native clipboard methods are used as they are, never replaced. On a
-    mismatch it also reads it again 300 ms later and asks which kinds it holds, to tell apart line endings written by the platform,
-    an earlier or other text still there, and a later write. Written to $EVIDENCE_DIR (CI uploads app/test-results) and one line to
-    stdout. It decides nothing and normalizes nothing."""
-    ready = page.evaluate("() => performance.now()")
+    """AF94 DELTA6 diagnostic, tests only: read the clipboard once, as the check always did (readText is the first call, as before;
+    the caller still asserts the very same equality on this first read), and keep what came back next to what was copied. Native
+    clipboard methods are used as they are, never replaced; nothing is normalized. The first comparison is written before any
+    further look. Text from the clipboard is kept raw only when it is one of the texts the flow made (the expected text, it with
+    other line endings, or a known text); anything else is kept as length, SHA-256 and line endings only. It returns the raw read;
+    the caller compares it with platform_clipboard_text(text), recorded here as platformExact apart from exact. On a mismatch it then
+    reads again 300 ms later and asks which kinds it holds; a failure of those further looks is recorded and changes nothing
+    else. Written to $EVIDENCE_DIR (CI uploads app/test-results) and one line to stdout. It decides nothing."""
     clip = page.evaluate("() => navigator.clipboard.readText()")
-    read = page.evaluate("() => performance.now()")
+    try: read_at = page.evaluate("() => performance.now()")  # after the read: no timestamp is taken before it
+    except Exception as e: read_at = f"unavailable: {type(e).__name__}"
     u16 = lambda t: len(t.encode("utf-16-le")) // 2
     ends = lambda t: {"crlf": t.count("\r\n"), "lf_alone": t.count("\n") - t.count("\r\n"), "cr_alone": t.count("\r") - t.count("\r\n")}
+    facts = lambda t: {"length": len(t), "utf16": u16(t), "sha256": hashlib.sha256(t.encode("utf-8")).hexdigest(), "endings": ends(t)}
+    same = {name: clip == t for name, t in (known or {}).items()}
+    platform_text = platform_clipboard_text(text)
+    made = clip == text or clip == platform_text or clip.replace("\r\n", "\n") == text or any(same.values())  # its words are the flow's own
     first = next((i for i, (a, b) in enumerate(zip(text, clip)) if a != b), None if len(text) == len(clip) else min(len(text), len(clip)))
-    diag = {"where": where, "viewport": page.viewport_size, "exact": clip == text, "statusSeenAtMs": ready, "readAtMs": read,
-        "expected": {"length": len(text), "utf16": u16(text), "sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(), "endings": ends(text)},
-        "clip": {"length": len(clip), "utf16": u16(clip), "sha256": hashlib.sha256(clip.encode("utf-8")).hexdigest(), "endings": ends(clip)},
-        "firstDiff": first,
-        "around": None if first is None else {"expected": repr(text[max(0, first - 40):first + 40]), "clip": repr(clip[max(0, first - 40):first + 40])},
-        "clipIsExpectedWithCRLF": clip == text.replace("\n", "\r\n"), "clipIsPrefixOfExpected": text.startswith(clip), "expectedIsPrefixOfClip": clip.startswith(text),
-        "clipIsKnownText": {name: clip == t for name, t in (known or {}).items()}}
-    if clip != text:
-        page.wait_for_timeout(300)
-        later = page.evaluate("() => navigator.clipboard.readText()")
-        diag["later"] = {"length": len(later), "sha256": hashlib.sha256(later.encode("utf-8")).hexdigest(), "sameAsFirstRead": later == clip, "exact": later == text, "endings": ends(later)}
-        diag["kinds"] = page.evaluate("async () => { try { return (await navigator.clipboard.read()).map(i => i.types); } catch (e) { return String(e); } }")
+    window = None if first is None else clip[max(0, first - 40):first + 40]
+    diag = {"where": where, "viewport": page.viewport_size, "platform": sys.platform, "exact": clip == text, "platformExact": clip == platform_text,
+        "readAtMs": read_at, "expected": facts(text), "platformExpected": facts(platform_text), "clip": facts(clip),
+        "firstDiff": first, "clipIsExpectedWithCRLF": clip == text.replace("\n", "\r\n"), "clipIsExpectedWithOtherEndings": clip != text and clip.replace("\r\n", "\n") == text,
+        "clipIsPrefixOfExpected": text.startswith(clip), "expectedIsPrefixOfClip": clip.startswith(text), "clipIsKnownText": same, "clipRawKept": made,
+        "around": None if first is None else {"expected": repr(text[max(0, first - 40):first + 40]), "clip": repr(window) if made else facts(window)}}
     out = os.environ.get("EVIDENCE_DIR")
-    if out:
-        pathlib.Path(out).mkdir(parents=True, exist_ok=True)
-        (pathlib.Path(out) / f"af94-clipboard-{re.sub(r'[^A-Za-z0-9]+', '-', where)}.json").write_text(json.dumps(diag, ensure_ascii=False, indent=1), encoding="utf-8")
-    print(f"diag  AF94 clipboard {where}: exact={diag['exact']} len={len(text)}/{len(clip)} endings={ends(text)}/{ends(clip)} firstDiff={first} crlfForm={diag['clipIsExpectedWithCRLF']}", flush=True)
+    path = pathlib.Path(out) / f"af94-clipboard-{re.sub(r'[^A-Za-z0-9]+', '-', where)}.json" if out else None
+    def keep():
+        if path:
+            try: path.parent.mkdir(parents=True, exist_ok=True); path.write_text(json.dumps(diag, ensure_ascii=False, indent=1), encoding="utf-8")
+            except Exception as e: print(f"diag  AF94 clipboard {where}: could not write {path}: {type(e).__name__}", flush=True)
+    keep()
+    print(f"diag  AF94 clipboard {where}: platform={sys.platform} platformExact={diag['platformExact']} exact={diag['exact']} len={len(text)}/{len(clip)} endings={ends(text)}/{ends(clip)} firstDiff={first} crlfForm={diag['clipIsExpectedWithCRLF']} known={same}", flush=True)
+    if clip != platform_text:
+        try:
+            page.wait_for_timeout(300)
+            later = page.evaluate("() => navigator.clipboard.readText()")
+            diag["later"] = {**facts(later), "sameAsFirstRead": later == clip, "exact": later == text, "platformExact": later == platform_text}
+        except Exception as e: diag["later"] = f"failed: {type(e).__name__}: {str(e)[:200]}"
+        try: diag["kinds"] = page.evaluate("async () => { try { return (await navigator.clipboard.read()).map(i => i.types); } catch (e) { return 'read() failed: ' + e.name; } }")
+        except Exception as e: diag["kinds"] = f"failed: {type(e).__name__}"
+        keep()
+        print(f"diag  AF94 clipboard {where}: later={diag['later'] if isinstance(diag['later'], str) else {k: diag['later'][k] for k in ('length', 'sameAsFirstRead', 'exact')}} kinds={diag['kinds']}", flush=True)
     return clip
 
 
@@ -3483,8 +3506,10 @@ def request94_flow(browser, base, size, shots=None):
     shot("1-reading-default")
     sheet.locator("#plan-copy").click()
     expect(status).to_contain_text("복사했어요")
-    clip = clipboard_read(page, text, f"request94 {w}x{hgt} first copy", {"pre-94 document": old_text})
-    assert clip == text; record["copy"] = {"length": len(clip), "exact": clip == text, "sha256": hashlib.sha256(clip.encode("utf-8")).hexdigest()}
+    clip, on_clipboard = clipboard_read(page, text, f"request94 {w}x{hgt} first copy", {"pre-94 document": old_text}), platform_clipboard_text(text)
+    assert clip == on_clipboard
+    record["copy"] = {"platform": sys.platform, "length": len(clip), "exact": clip == text, "platformExact": clip == on_clipboard, "sha256": hashlib.sha256(clip.encode("utf-8")).hexdigest(),
+        "platformExpected": {"length": len(on_clipboard), "sha256": hashlib.sha256(on_clipboard.encode("utf-8")).hexdigest()}}
     page.keyboard.press("Escape"); expect(sheet).to_be_hidden()
     assert page.evaluate(focused)[0] == "plan-make"
     # 3) A long stale draft, selected backward and scrolled: nothing done in the document touches it.
@@ -3531,7 +3556,7 @@ def request94_flow(browser, base, size, shots=None):
     mid = body.evaluate("b => b.scrollTop"); assert mid > 0
     sheet.locator("#plan-copy").click()
     expect(status).to_contain_text("복사했어요")
-    assert clipboard_read(page, text, f"request94 {w}x{hgt} copy with U01 open", {"pre-94 document": old_text}) == text
+    assert clipboard_read(page, text, f"request94 {w}x{hgt} copy with U01 open", {"pre-94 document": old_text}) == platform_clipboard_text(text)
     assert [page.evaluate(focused)[1], body.evaluate("b => b.scrollTop"), u01.locator("button").get_attribute("aria-expanded")] == ["copy", mid, "true"]
     assert area.evaluate(caret) == left, "the draft behind stays as it was read"
     shot("2-material-open-copied")
@@ -3659,7 +3684,7 @@ def request94_resize_flow(browser, base, shots=None):
             sheet.locator('[data-sheet-part="view-text"]').click(); assert body.evaluate("b => b.scrollTop") == 900
             sheet.locator('[data-sheet-part="view-reading"]').click(); assert body.evaluate("b => b.scrollTop") == read_top
             sheet.locator("#plan-copy").click(); expect(sheet.locator("footer [role=status]")).to_contain_text("복사했어요")
-            assert clipboard_read(page, text, "request94 resize copy at 606x720") == text and top_slice() == place
+            assert clipboard_read(page, text, "request94 resize copy at 606x720") == platform_clipboard_text(text) and top_slice() == place
             u01.focus(); body.evaluate("b => { b.__kept = true; }")
     page.set_viewport_size({"width": 700, "height": 720}); page.wait_for_timeout(250)
     page.keyboard.press("Escape"); expect(sheet).to_be_hidden()

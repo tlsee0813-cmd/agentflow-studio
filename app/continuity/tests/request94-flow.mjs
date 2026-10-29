@@ -16,6 +16,10 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url)), APP = fileURLToPath(
 const RESIZE = process.argv[2] === 'resize', SHOTS = process.argv[RESIZE ? 3 : 2] ?? null;
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 const sha = t => createHash('sha256').update(t, 'utf8').digest('hex');
+/** The exact text the OS clipboard holds after copying text (native copy check only; see platform_clipboard_text in
+ * studio_browser.py): on Windows every CR LF, lone CR and lone LF becomes CR LF; elsewhere the text itself. The read is never
+ * normalized. */
+const onClipboard = (text, platform = process.platform) => (platform === 'win32' ? text.replace(/\r\n|\r|\n/g, '\r\n') : text);
 
 const SENTENCE = '이 부분에서 메모리 제한과 시간 제한으로 끝난 이유를 호출자가 구별해 설명할 수 있게 하고 싶다. 기존 eval 실행 순서와 전역 객체 공유 동작은 유지한다.';
 const PIPE = 'A_49bad1f8-971b-4bff-8030-a62d8a470c16';
@@ -116,7 +120,7 @@ async function flow(browser, base, [w, hgt]) {
   await sheet.locator('#plan-copy').click();
   await status.getByText('복사했어요').waitFor();
   const clip = await ev(() => navigator.clipboard.readText());
-  assert.equal(clip, text); record.copy = { length: clip.length, exact: clip === text, sha256: sha(clip) };
+  assert.equal(clip, onClipboard(text)); record.copy = { platform: process.platform, length: clip.length, exact: clip === text, platformExact: clip === onClipboard(text), sha256: sha(clip) };
   await page.keyboard.press('Escape'); await sheet.waitFor({ state: 'hidden' });
   assert.equal((await ev(FOCUSED))[0], 'plan-make');
 
@@ -169,7 +173,7 @@ async function flow(browser, base, [w, hgt]) {
   // c) A copy keeps the unfolded material, the place and the focus.
   await sheet.locator('#plan-copy').click();
   await status.getByText('복사했어요').waitFor();
-  assert.equal(await ev(() => navigator.clipboard.readText()), text);
+  assert.equal(await ev(() => navigator.clipboard.readText()), onClipboard(text));
   assert.deepEqual([(await ev(FOCUSED))[1], await body.evaluate(b => b.scrollTop), await u01.locator('button').getAttribute('aria-expanded')], ['copy', mid, 'true']);
   assert.deepEqual(await area.evaluate(CARET), caret, 'the draft behind stays as it was read');
   await shot('2-material-open-copied');
@@ -302,7 +306,7 @@ async function resizeFlow(browser, base) {
       await sheet.locator('[data-sheet-part="view-text"]').click(); assert.equal(await body.evaluate(b => b.scrollTop), 900);
       await sheet.locator('[data-sheet-part="view-reading"]').click(); assert.equal(await body.evaluate(b => b.scrollTop), readTop);
       await sheet.locator('#plan-copy').click(); await sheet.locator('footer [role=status]').getByText('복사했어요').waitFor();
-      assert.equal(await ev(() => navigator.clipboard.readText()), text);
+      assert.equal(await ev(() => navigator.clipboard.readText()), onClipboard(text));
       assert.equal(await topSlice(), place);
       await u01.focus(); await body.evaluate(b => { b.__kept = true; });
     }
