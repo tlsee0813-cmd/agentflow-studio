@@ -1,0 +1,47 @@
+{
+  "source": "d881b0ae8d892f6d65cfdce63a6924377ec567d7",
+  "appTree": "81c5a4e6e6428440427d97caa392ba156063e467",
+  "hashBasis": "Exact Git blob bytes including final newline",
+  "files": {
+    "build.json": {
+      "bytes": 2376,
+      "sha256": "681f60ab4187a7b7c472ee37072dbb12a1c87b1a4678d446f26a4f1cf9075830"
+    },
+    "ci.json": {
+      "bytes": 562,
+      "sha256": "25993fd0e491f4f0e937636e3bdd289e7ec5886bf01fe999f2ade2d7a54c6059"
+    },
+    "cloud-request93-1280x720-2-last-read-copy-tab.png": {
+      "bytes": 147213,
+      "sha256": "d6e16a029ea9fcfa5ee39df36fafabbd4af907af5f7cc515d9678901571302d5"
+    },
+    "cloud-request93-1280x720-boundaries.json": {
+      "bytes": 2599,
+      "sha256": "62fd169bb6c6dc9e7dc8e0e60418e95dfe26c83bcd493f7dc08ef392dee26321"
+    },
+    "cloud-request93-1440x900-3-stale-back-to-last.png": {
+      "bytes": 131165,
+      "sha256": "4fef8722ef58af80cfbab8bb765fe8e3fb707b1e65dfd01fcc50b1b0d46d6386"
+    },
+    "cloud-request93-1440x900-boundaries.json": {
+      "bytes": 2599,
+      "sha256": "77d9cb52f396cc38b4f139c597d3e61aa3243d9ab2917566f9725c8c88f359e6"
+    },
+    "cloud-result.json": {
+      "bytes": 12126,
+      "sha256": "bee3db57279b4fe09772d3e7d7a23ab5e86a95e7e84df675d0d30ce9328547c4"
+    },
+    "code-review-summary.json": {
+      "bytes": 3798,
+      "sha256": "ad6bce22fbfdcff83b470af484f85cd7040e64a5a1c6275c8080c19f8a61ca98"
+    },
+    "decision.json": {
+      "bytes": 2679,
+      "sha256": "a31c037a61681932b0ec5e42f603364337bb6fc5463638ec0a08dd5d3650aaf6"
+    },
+    "root-ui-summary.json": {
+      "bytes": 5672,
+      "sha256": "49b4258dd5544a20eebbab6bba2898de61128b36f16221027eb53b91ff5d9cc1"
+    }
+  }
+}

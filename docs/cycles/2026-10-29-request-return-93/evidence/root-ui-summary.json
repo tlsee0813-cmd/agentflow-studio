@@ -1,0 +1,100 @@
+{
+  "status": "SCOPED_ACCEPTED",
+  "rootUiSource": "dc5cf51761f04f519b87f0f189d2fc3c2555d874",
+  "finalSource": "d881b0ae8d892f6d65cfdce63a6924377ec567d7",
+  "reuseBasis": "Final delta changes only browser test code; final build plan-view.js and styles bytes equal the dc5 build. Root UI observations are dc5 observations, not new d881 UI execution.",
+  "provenance": "Previously saved actual-model analysis over authored synthetic document-converter conversation. It is not an actual OSS implementation/execution record. The long draft is an explicitly tagged review-only derivative, not a new model result.",
+  "chronology": [
+    {
+      "source": "bc3a02b9b4fa69252bd0e19ad5531f51dbdb20f6",
+      "observation": "Closing the historical request sheet left BODY focus with a disabled make button."
+    },
+    {
+      "source": "c95362178d94695fbfbed184154e540eb86972e7",
+      "observation": "Exact opener return fixed, but a long draft textarea scroll changed200 to0 while text/selection remained."
+    },
+    {
+      "source": "dc5cf51761f04f519b87f0f189d2fc3c2555d874",
+      "observation": "Same-text textarea scroll restoration and stale clipboard UI ownership guards added; observed long-draft/read/copy/return preservation below."
+    },
+    {
+      "source": "d881b0ae8d892f6d65cfdce63a6924377ec567d7",
+      "observation": "Test-only correction creates real pending promises and settles them after another project document opens; runtime source unchanged."
+    }
+  ],
+  "longDraftObservation": {
+    "characters": 1813,
+    "textUtf8Sha256": "6ad804ae49b74a38cf5ff66033b3a13b2825073f99dac24cb34280ac9daa5875",
+    "selection": [
+      4,
+      15,
+      "backward"
+    ],
+    "textareaScrollTop": 208.8000030517578,
+    "preservedAcross": [
+      "before",
+      "open",
+      "copy",
+      "Esc close"
+    ],
+    "entryFocus": "PRE",
+    "copyFocus": "plan-copy",
+    "returnFocus": "last",
+    "requestScrollAfterReadAndCopy": 804.7999877929688,
+    "requestCharacters": 4013,
+    "requestUtf8Sha256": "e93a2b3457108f96b728499ce9307e0829e0e70ed74c7365cd2bcd7fcf6c4277",
+    "sameCapturedCameraTransformAndUrl": true
+  },
+  "restoredObservation": {
+    "draftCharacters": 133,
+    "closingModes": [
+      "X",
+      "footer close",
+      "Esc"
+    ],
+    "everyEntryFocus": "PRE",
+    "everyReturnFocus": "last",
+    "everyPreExactlyEqualsFrozenSnapshot": true,
+    "restoredBundleAllJsonKeysEqualToExistingBaseline": true,
+    "wholePlanExportDiffPaths": [
+      "/exportedAt"
+    ],
+    "noNewSnapshotOrStoredAuthoringChange": true
+  },
+  "clipboardObservations": {
+    "immediate": {
+      "clipboardCharacters": 4013,
+      "requestCharacters": 4013,
+      "equalsFrozenRequest": true,
+      "basis": "Normal UI copy immediately followed by root clipboard API observation."
+    },
+    "delayed": {
+      "clipboardCharacters": 936,
+      "equalsFrozenRequest": false,
+      "preservedSeparately": true,
+      "interpretation": "Observed after intervening browser actions. Shared clipboard changes cannot be excluded, so this alone is not attributable to product copy failure; its actual external cause is not established."
+    }
+  },
+  "sourceArtifactHashes": {
+    "experience93-before-request-return.json": "9881dd7cf857d3c122a5f46d01c7435dfba4bf5d20e4a9bb73b6f6576ac343e7",
+    "experience93-long-draft-before-delta.json": "9350b0cd62231f27cbefafb0cdf9369d4d4020ac870f96da4bb752574f4d6eb9",
+    "experience93-long-draft-delta1.json": "bd683d2952c1389658103ff32bfc259fe11d4fa3fd762eac8064f7cba591bbb4",
+    "experience93-long-draft-delta1.png": "cbb1c877c6fdecdddc232936c247c6795eec89ef4fee7d25c484f5226a3cf651",
+    "experience93-restored-ui.json": "67c35cc7336c4daeca3010a72639845307cf590f1d9ddf06883b5835f3db1610",
+    "experience93-restored-plan-export.json": "588a0e0324b9b9eabc20d1568c0b4b4e411f40b0f5971aa3e17eecf3505799fd",
+    "experience93-clipboard-immediate-check.json": "75d6c0d148be7c4d7ab4985be588673b3d157ff724c7bdb0f25a6a88acb17f34",
+    "experience93-clipboard-check.json": "5836cb6c8450ab1ffe607af3bd707368f6266132a62a9aea451d2fda4aea512f",
+    "experience93-root-ui-independent-review.json": "a5d71e04c27ddc16279cd76485ae672b3caa03b7449f927d7e4d76bb773bb938"
+  },
+  "limits": [
+    "This summary contains no original source text, whole request or model reply.",
+    "The independent reviewer compared stored artifacts and viewed the PNG, not a new UI run.",
+    "Root observations concern the historical stale positive plan; other opening paths and delayed clipboard schedules are separate final Cloud checks.",
+    "No claim of first-map quality, product provider integration or release completion."
+  ],
+  "completedGates": {
+    "cloud": "전용 request93_flow를1280×720·1440×900/DPR1에서각1회 실행,21.829초/exit0. 합성1479자 초안의역선택/textarea200,12515자 요청문중간스크롤,세진입·닫기와7개지연복사를확인했다. 제공빌드실행·합성stub이며재빌드/실제API/OSclipboard대조는없다. 원본ZIP640698B/SHA637edc77a3011e1866285143bfbec1226363cd2dce5c84b415ea4fb95daf2f1c의CRC·8파일해시를총괄이검증했고,Cloud는PNG4개·총괄은대표원본2개를직접열람했다.",
+    "ci": "정확 d881 source의 [40798177122](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40798177122), Windows123199608112·Ubuntu123199607670 모두completed/success. 실제AI의미수용증거는아니다.",
+    "rootScopeVerdict": "요청문 읽기·복귀·같은 초안 위치 보존·늦은 복사 결과의 화면 격리 범위 수용. PR56은 draft/미병합·미배포로 유지한다. 첫 지도 Q02/Q06과 인수인계5/8 전체 관문은 미완료다."
+  }
+}

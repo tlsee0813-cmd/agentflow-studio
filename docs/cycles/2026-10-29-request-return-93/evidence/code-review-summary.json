@@ -1,0 +1,48 @@
+{
+  "status": "SCOPED_ACCEPTED",
+  "finalSource": "d881b0ae8d892f6d65cfdce63a6924377ec567d7",
+  "clientFixSource": "dc5cf51761f04f519b87f0f189d2fc3c2555d874",
+  "codeFindings": {
+    "c953": "Initial exact opener repair retained a long-draft scroll preservation gap; the existing asynchronous clipboard path also needed session/opening ownership.",
+    "dc5": "No new concrete P1/P2 in the delta: textarea restores scroll only for same text; copy UI effects require same session, sheet ID, sheetFrom opening object and latest attempt.",
+    "d881": "No new false-pass blocker in test-only delta. Missing-promise no-op removed; settle requires existence and pending state, and all7 attempts settle exactly once."
+  },
+  "threeEntryPaths": [
+    "New request creation returns to make when usable.",
+    "Positive last-request opening returns to that opener even beside disabled make.",
+    "Zero-analysis earlier request uses the same last-request opener logic without overwriting source-list return state."
+  ],
+  "preservedData": "Frozen text, snapshots, labels, origins, observations, request selection and storage schema remain outside the focus repair.",
+  "testCorrection": {
+    "newDocumentBeforeOldSettlement": true,
+    "newDocumentLine": 3311,
+    "oldFailureSettlementLine": 3313,
+    "oldSuccessSettlementLine": 3314,
+    "realPendingAttempts": 7,
+    "requiresEveryAttemptDone": true,
+    "latestAttemptSchedule": "newer rejection then older success must retain the newer failure message",
+    "executionClaim": "Static code coverage audit only; final two-PC execution completed separately, see cloud-result.json"
+  },
+  "runtimeReuse": {
+    "planViewExactBytesEqual": true,
+    "planViewSha256": "f7f87c3961d3f27661719ed1405a20677db201ffe462d555a1206f87fd51dee0",
+    "wholeDeltaOnlyTestFile": true,
+    "qualification": "app tree hash changes because tests live under app. Runtime source equality does not independently attest a newly stamped final build.",
+    "planViewSourceFile": "app/continuity/src/client/plan-view.ts"
+  },
+  "independentReviewHashes": {
+    "experience93-code-review.json": "e7b3e75cc78b8335d45df44cc6ec792624ee03ee19ed7fe0839b496f4ab37338",
+    "experience93-delta1-code-review.json": "940ccdcf380453bdf597861279ff02e4f27f64664f70693759fd4679608421f2",
+    "experience93-test-delta-review.json": "6a2ca5628641524f279d7feff0d0386c6f004c56f430fd8237478ef435457a65"
+  },
+  "limitations": [
+    "Clipboard guards prevent stale UI status/selection/render effects, not cancellation or ordering guarantees for already-issued OS clipboard writes.",
+    "Author-controlled or root observations are not independent Cloud execution.",
+    "No source-code test, model, browser run or product edit by the independent preparation writer."
+  ],
+  "completedGates": {
+    "cloud": "전용 request93_flow를1280×720·1440×900/DPR1에서각1회 실행,21.829초/exit0. 합성1479자 초안의역선택/textarea200,12515자 요청문중간스크롤,세진입·닫기와7개지연복사를확인했다. 제공빌드실행·합성stub이며재빌드/실제API/OSclipboard대조는없다. 원본ZIP640698B/SHA637edc77a3011e1866285143bfbec1226363cd2dce5c84b415ea4fb95daf2f1c의CRC·8파일해시를총괄이검증했고,Cloud는PNG4개·총괄은대표원본2개를직접열람했다.",
+    "ci": "정확 d881 source의 [40798177122](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40798177122), Windows123199608112·Ubuntu123199607670 모두completed/success. 실제AI의미수용증거는아니다.",
+    "rootScopeVerdict": "요청문 읽기·복귀·같은 초안 위치 보존·늦은 복사 결과의 화면 격리 범위 수용. PR56은 draft/미병합·미배포로 유지한다. 첫 지도 Q02/Q06과 인수인계5/8 전체 관문은 미완료다."
+  }
+}

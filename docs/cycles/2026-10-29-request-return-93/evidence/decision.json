@@ -1,0 +1,20 @@
+{
+  "source":"d881b0ae8d892f6d65cfdce63a6924377ec567d7",
+  "appTree":"81c5a4e6e6428440427d97caa392ba156063e467",
+  "accepted":true,
+  "scope":"Request document keyboard entry and return, unchanged draft/document scroll preservation, and stale clipboard completion UI isolation",
+  "responsible":"Root coordinator",
+  "rootUiSource":"dc5cf51761f04f519b87f0f189d2fc3c2555d874",
+  "rootUiReuse":"Final d881 changes only test code; pinned final build plan-view.js and styles byte-identical to dc5",
+  "rootViewedOriginalPNGs":["request93-1280x720-2-last-read-copy-tab.png","request93-1440x900-3-stale-back-to-last.png"],
+  "rootVisualJudgment":"Request text and header/footer controls remain readable and accessible. Returning to the stale draft exposes the last-request focus ring beside disabled make. Long raw Markdown remains dense; not a general document-readability acceptance.",
+  "cloudOriginalZip":{"bytes":640698,"sha256":"637edc77a3011e1866285143bfbec1226363cd2dce5c84b415ea4fb95daf2f1c","files":8,"crc":"PASS","allFileHashesVerified":true,"chunksRecovered":96},
+  "cloudResultSha256":"bee3db57279b4fe09772d3e7d7a23ab5e86a95e7e84df675d0d30ce9328547c4",
+  "cloudExecution":{"flow":"request93_flow","runsPerViewport":1,"viewports":["1280x720 DPR1","1440x900 DPR1"],"exit":0,"seconds":21.829,"newP1P2":0,"providedBuildOnly":true,"syntheticClipboardSchedules":7},
+  "rootPreservation":"Original 133-character draft restored by normal file import. Entire bundle equals original; only export timestamp differs. Immediate normal copy yields exact 4013-character frozen request. Long tagged1813 derivative preserves backward4..15, textarea208.8 and document804.8.",
+  "ci":{"runId":40798177122,"exactSource":true,"ubuntu":"success","windows":"success"},
+  "limits":["Synthetic converter-source historical actual-model result and Cloud authored stubs are distinct; neither is fresh actual OSS execution.","Cloud N01 pane text was lost in an observational recorder key collision; no new source-body claim is based on that record. Prior87 evidence is preserved without rerun.","No simultaneous three-scroll stress, closed-opener extra Tab cycle, or OS clipboard write cancellation/ordering guarantee is claimed.","Delayed root clipboard936 mismatch was observed after intervening actions; attribution is unknown and preserved separately from immediate successful4013 comparison.","First-map meaning and delivery remain unresolved. Handoff5/8 full gates and overall product goal remain active."],
+  "release":{"pr":56,"draft":true,"merged":false,"deployed":false,"public73Unchanged":true,"ui75AncestryPreserved":true},
+  "freshModelCalls":0,
+  "completedModelExperimentsRepeated":0
+}

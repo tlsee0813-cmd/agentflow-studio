@@ -1,0 +1,39 @@
+{
+  "status": "SCOPED_ACCEPTED",
+  "source": "d881b0ae8d892f6d65cfdce63a6924377ec567d7",
+  "appTree": "81c5a4e6e6428440427d97caa392ba156063e467",
+  "compiler": "5.8.3",
+  "compilerSource": "app/node_modules locked dependency",
+  "execSession": 44521,
+  "exitCode": 0,
+  "checks": [
+    "continuity/scripts/check.mjs",
+    "continuity/scripts/build.mjs"
+  ],
+  "providerCalls": 0,
+  "files": [
+    {
+      "file": "app/continuity/dist/public/client/plan-view.js",
+      "sha256": "c5af6fe42e67a712d66d63e821b66f9df2c1b96c32ec34ab39fe478bf9cb7961",
+      "bytes": 130311
+    },
+    {
+      "file": "app/continuity/dist/public/styles.css",
+      "sha256": "f0c9e7eadba725e819fdb5a2e958d82852099f8ef15021e7e4ca3dc2b12fd6e4",
+      "bytes": 128408
+    },
+    {
+      "file": "app/continuity/dist/public/BUILD.txt",
+      "sha256": "26a1d1f753f6695eedc357481af77c0e65268deae324a5987dbfcc56aa02fede",
+      "bytes": 207
+    }
+  ],
+  "rootReceiptSha256": "145242ac0898905861069db48dc1708ed720b6e4f2902360e886faaaba4f0764",
+  "dc5BuildReceiptSha256": "1ca7f0c1f05a25af856efd8f812815fcb79bc9f9a1deff7bea22aff4f71a2f5f",
+  "dc5ClientAndStylesByteIdentical": true,
+  "testOnlyDelta": true,
+  "authority": "Root receipt after actual pinned Windows TypeScript5.8.3 check/build execution. Independent preparation did not rerun the compiler. Matching BUILD marker alone is not execution proof.",
+  "ci": "정확 d881 source의 [40798177122](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40798177122), Windows123199608112·Ubuntu123199607670 모두completed/success. 실제AI의미수용증거는아니다.",
+  "cloud": "전용 request93_flow를1280×720·1440×900/DPR1에서각1회 실행,21.829초/exit0. 합성1479자 초안의역선택/textarea200,12515자 요청문중간스크롤,세진입·닫기와7개지연복사를확인했다. 제공빌드실행·합성stub이며재빌드/실제API/OSclipboard대조는없다. 원본ZIP640698B/SHA637edc77a3011e1866285143bfbec1226363cd2dce5c84b415ea4fb95daf2f1c의CRC·8파일해시를총괄이검증했고,Cloud는PNG4개·총괄은대표원본2개를직접열람했다.",
+  "rootScopeVerdict": "요청문 읽기·복귀·같은 초안 위치 보존·늦은 복사 결과의 화면 격리 범위 수용. PR56은 draft/미병합·미배포로 유지한다. 첫 지도 Q02/Q06과 인수인계5/8 전체 관문은 미완료다."
+}

@@ -1,0 +1,307 @@
+{
+  "request": "AF-CLOUD-20261029-93",
+  "verdict": "narrow delta accepted within observed Linux PC scope",
+  "findings": [],
+  "source": "d881b0ae8d892f6d65cfdce63a6924377ec567d7",
+  "appTree": "81c5a4e6e6428440427d97caa392ba156063e467",
+  "providedBuildOnly": true,
+  "remoteGitRebuildOrCIIndependentlyVerified": false,
+  "input": {
+    "name": "agentflow-experience93-d881b0a-review.zip",
+    "bytes": 1265346,
+    "sha256": "2f6e8bce5fbcbbc12d317fcd8a9ade5a570f88a1e0169702c2ed78cc1cf1a5af",
+    "entries": 246,
+    "payloadHashesVerified": 245,
+    "safePathsNoSymlinks": true,
+    "CRC": "PASS",
+    "BUILDManifestSourceAndAppTree": "MATCH",
+    "payloadsUnchangedAfterRun": 245
+  },
+  "fixture": {
+    "file": "app/continuity/tests/fixtures/context75/micro-javascript-backup.json",
+    "sha256": "aaffb3764afc68f054d05ff54f4e2b5bf72b5b0abfc259d0bfc1deda666f8065",
+    "projectId": "P_6a74a281-f0dd-4dd8-8e00-d5b013112326",
+    "libraryEntryIds": "new E_ imported entries, separate per browser context",
+    "provenance": "provided actual74 stored reading over fixed public micro-javascript source excerpts; source marked in input, not remote independently retrieved",
+    "AF93AnalysisAndRequest": "author-written synthetic plan/scope/empty replies; fixed authoring test bundle seeded by supplied flow; not real model understanding or OSS execution",
+    "actual85BlobHash": "21c03c6260a16bd5a65aaea65dea2d152ed17d431d0c7f288f2a9823b1c141c4",
+    "actual85Blob": "included and hash verified; request93 flow uses its authored stub constants, not a fresh actual85 provider call"
+  },
+  "execution": {
+    "command": "python3 /workspace/work/af93-run.py",
+    "serverCommand": "studio_browser.start(\"ok\") -> node tests/studio-smoke-server.mjs",
+    "cliIsolation": "request93 branch lines3344–3348 calls request93_flow only; returns before all other flows",
+    "exit": 0,
+    "durationSeconds": 21.829,
+    "startedUTC": "2026-10-29T01:11:30.596404+00:00",
+    "endedUTC": "2026-10-29T01:11:52.424988+00:00",
+    "environment": {
+      "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+      "browser": "154.0.8037.57",
+      "python": "3.12.14",
+      "node": "v24.19.0",
+      "fontMatchSystemUI": "OpenAI Sans Regular",
+      "koreanGlyphFallback": "not independently enumerated"
+    },
+    "wrapper": "temporary import runner calls unchanged request93_flow once per viewport; observational sys.settrace and screenshot hook; no product/test file edits",
+    "freshModelExternalAPICalls": 0,
+    "browserExternalOrUnhandledAPIAttempts": [],
+    "otherBrowserFlows": [],
+    "NodeTestsOrRebuild": 0,
+    "cleanup": {
+      "browserClosed": true,
+      "serverStopped": true,
+      "serverExit": -15
+    }
+  },
+  "checks": [
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 720,
+        "dpr": 1
+      },
+      "request93FlowRuns": 1,
+      "exit": 0,
+      "durationSeconds": 10.806,
+      "generated": "copy focus -> Tab footer close -> Enter -> enabled plan-make focus; same URL/camera/rail",
+      "lastDocument": "text focus -> X/footer close/Esc -> exact last opener; keyboard text/copy/footer and Shift+Tab/X confirmed",
+      "frozenDocument": {
+        "length": 12515,
+        "middleScrollBefore": 3340,
+        "middleScrollAfterCopy": 3340,
+        "copyFocus": {
+          "id": "plan-copy",
+          "tag": "BUTTON",
+          "part": "copy",
+          "entry": null,
+          "ref": null,
+          "text": "복사",
+          "where": "sheet"
+        },
+        "sameText": true,
+        "sameBundle": true,
+        "sameSnapshotLabelsOriginsObservationsAttached": true
+      },
+      "longStaleDraft": {
+        "length": 1479,
+        "selectionStart": 4,
+        "selectionEnd": 15,
+        "direction": "backward",
+        "requestedTextareaScrollTop": 200,
+        "actualBefore": 200,
+        "afterOpenCopyClose": 200,
+        "textareaClientHeight": 88,
+        "textareaScrollHeight": 904,
+        "sameTextAndBundle": true,
+        "makeDisabled": true,
+        "closedFocusEntry": "last",
+        "beforeSequence": 15,
+        "observedSequences": [
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22
+        ]
+      },
+      "zeroEarlier": {
+        "railScrollBeforeAfter": 346,
+        "closeAndEscapeExactOpener": true,
+        "N01OpenReturn": true,
+        "returnedFocusRef": "N01",
+        "sameURLCamera": true
+      },
+      "clipboard": {
+        "nativeWriteReportedSuccess": "복사했어요. 작업 AI에 붙여 넣어 전달하세요.",
+        "OSClipboardReadNotRun": true,
+        "pendingDoubleCount": 7,
+        "eachAttemptExistsAndSettledExactlyOnce": true,
+        "completionOrder": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          6,
+          5
+        ],
+        "allDone": true,
+        "latestAttemptFailureSurvivesOlderSuccess": true,
+        "otherProjectOwnDocument": "authored converter example opened with normal UI",
+        "staleMessagesFocusMovementUnhandledErrors": false
+      },
+      "routeFulfilledAPICalls": 3,
+      "PNGSteps": [
+        {
+          "sequence": 10,
+          "stage": "2-last-read-copy-tab",
+          "file": "request93-1280x720-2-last-read-copy-tab.png",
+          "sha256": "d6e16a029ea9fcfa5ee39df36fafabbd4af907af5f7cc515d9678901571302d5"
+        },
+        {
+          "sequence": 23,
+          "stage": "3-stale-back-to-last",
+          "file": "request93-1280x720-3-stale-back-to-last.png",
+          "sha256": "83254bc99b6324e70cf8ef13bde2b24e578187905d255a4c7c635c29ef5bd095"
+        }
+      ]
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "dpr": 1
+      },
+      "request93FlowRuns": 1,
+      "exit": 0,
+      "durationSeconds": 9.74,
+      "generated": "copy focus -> Tab footer close -> Enter -> enabled plan-make focus; same URL/camera/rail",
+      "lastDocument": "text focus -> X/footer close/Esc -> exact last opener; keyboard text/copy/footer and Shift+Tab/X confirmed",
+      "frozenDocument": {
+        "length": 12515,
+        "middleScrollBefore": 3250,
+        "middleScrollAfterCopy": 3250,
+        "copyFocus": {
+          "id": "plan-copy",
+          "tag": "BUTTON",
+          "part": "copy",
+          "entry": null,
+          "ref": null,
+          "text": "복사",
+          "where": "sheet"
+        },
+        "sameText": true,
+        "sameBundle": true,
+        "sameSnapshotLabelsOriginsObservationsAttached": true
+      },
+      "longStaleDraft": {
+        "length": 1479,
+        "selectionStart": 4,
+        "selectionEnd": 15,
+        "direction": "backward",
+        "requestedTextareaScrollTop": 200,
+        "actualBefore": 200,
+        "afterOpenCopyClose": 200,
+        "textareaClientHeight": 88,
+        "textareaScrollHeight": 880,
+        "sameTextAndBundle": true,
+        "makeDisabled": true,
+        "closedFocusEntry": "last",
+        "beforeSequence": 50,
+        "observedSequences": [
+          50,
+          51,
+          52,
+          53,
+          54,
+          55,
+          56,
+          57
+        ]
+      },
+      "zeroEarlier": {
+        "railScrollBeforeAfter": 92,
+        "closeAndEscapeExactOpener": true,
+        "N01OpenReturn": true,
+        "returnedFocusRef": "N01",
+        "sameURLCamera": true
+      },
+      "clipboard": {
+        "nativeWriteReportedSuccess": "복사했어요. 작업 AI에 붙여 넣어 전달하세요.",
+        "OSClipboardReadNotRun": true,
+        "pendingDoubleCount": 7,
+        "eachAttemptExistsAndSettledExactlyOnce": true,
+        "completionOrder": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          6,
+          5
+        ],
+        "allDone": true,
+        "latestAttemptFailureSurvivesOlderSuccess": true,
+        "otherProjectOwnDocument": "authored converter example opened with normal UI",
+        "staleMessagesFocusMovementUnhandledErrors": false
+      },
+      "routeFulfilledAPICalls": 3,
+      "PNGSteps": [
+        {
+          "sequence": 45,
+          "stage": "2-last-read-copy-tab",
+          "file": "request93-1440x900-2-last-read-copy-tab.png",
+          "sha256": "87cec179927ab993eab7be028f8fab290443e0677e50ffd44bddc353ceb5205a"
+        },
+        {
+          "sequence": 58,
+          "stage": "3-stale-back-to-last",
+          "file": "request93-1440x900-3-stale-back-to-last.png",
+          "sha256": "4fef8722ef58af80cfbab8bb765fe8e3fb707b1e65dfd01fcc50b1b0d46d6386"
+        }
+      ]
+    }
+  ],
+  "visualReview": {
+    "directlyOpenedOriginalPNGCount": 4,
+    "screenshots": [
+      "request93-1280x720-2-last-read-copy-tab.png",
+      "request93-1280x720-3-stale-back-to-last.png",
+      "request93-1440x900-2-last-read-copy-tab.png",
+      "request93-1440x900-3-stale-back-to-last.png"
+    ],
+    "judgment": "Stable opacity1 frames: sheet heading, 680px body column, copy and both close controls fit; readable Korean/English line spacing; footer remains outside body scroll; returned last opener has visible focus despite adjacent disabled make. No new clipping/overlap P1/P2 seen.",
+    "remainingAestheticLimit": "Raw frozen request contains repeated source titles/excerpts and literal Markdown, making this 12515-character test document dense and long; full understanding still requires vertical reading. This delta establishes access/return preservation, not general document-writing quality or first-map quality.",
+    "rootRetrievedCloudOriginals": false
+  },
+  "limits": [
+    "Linux Chromium only; no Windows/DPR1.25/OS clipboard read or external paste. Native first copy reported success; seven delayed attempts use in-page synthetic clipboard promises.",
+    "N01 was opened/back once per PC and same ref/list scroll/URL/camera recorded; no new 1369-character content assertion, N01 source-end PNG, or full prior AF87 dual-scroll suite was run.",
+    "Request93 flow does not add a separate Tab cycle after the closed-sheet opener; tested sheet keyboard entry/close and actual focus return only.",
+    "Zero-stage N01 roundtrip has no textarea present. Backward4..15 and textarea200 preservation was measured separately in the long stale-draft sheet roundtrip; do not infer a simultaneous three-scroll stress beyond these stages.",
+    "Raw observation source key is the build SHA marker; pane-source text was overwritten by that metadata key in the reviewer recorder and is not retained as source-body evidence. Other recorded focus/URL/camera/scroll/PNG values remain intact. No rerun or original-record rewrite.",
+    "Two offline JSON-summary commands initially treated the source SHA string as a pane object (exit1); reader corrected, no browser/product failure and no flow rerun.",
+    "No 85/87/84/75 suites, first-map work, fresh AI, OSS execution, install, remote Git, full suite, build, merge or deploy. Root chooses final integration/acceptance."
+  ],
+  "evidenceFiles": [
+    {
+      "file": "request93-record.json",
+      "bytes": 987397,
+      "sha256": "ac0d5c2e71e9d19c3b53c22c069ec524c248122997e5f0ac977aa12e941679e4"
+    },
+    {
+      "file": "request93-1280x720-2-last-read-copy-tab.png",
+      "bytes": 147213,
+      "sha256": "d6e16a029ea9fcfa5ee39df36fafabbd4af907af5f7cc515d9678901571302d5"
+    },
+    {
+      "file": "request93-1280x720-3-stale-back-to-last.png",
+      "bytes": 122646,
+      "sha256": "83254bc99b6324e70cf8ef13bde2b24e578187905d255a4c7c635c29ef5bd095"
+    },
+    {
+      "file": "request93-1440x900-2-last-read-copy-tab.png",
+      "bytes": 188119,
+      "sha256": "87cec179927ab993eab7be028f8fab290443e0677e50ffd44bddc353ceb5205a"
+    },
+    {
+      "file": "request93-1440x900-3-stale-back-to-last.png",
+      "bytes": 131165,
+      "sha256": "4fef8722ef58af80cfbab8bb765fe8e3fb707b1e65dfd01fcc50b1b0d46d6386"
+    },
+    {
+      "file": "request93-1280x720-boundaries.json",
+      "bytes": 2599,
+      "sha256": "62fd169bb6c6dc9e7dc8e0e60418e95dfe26c83bcd493f7dc08ef392dee26321"
+    },
+    {
+      "file": "request93-1440x900-boundaries.json",
+      "bytes": 2599,
+      "sha256": "77d9cb52f396cc38b4f139c597d3e61aa3243d9ab2917566f9725c8c88f359e6"
+    }
+  ]
+}

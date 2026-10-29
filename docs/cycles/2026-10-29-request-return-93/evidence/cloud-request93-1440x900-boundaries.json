@@ -1,0 +1,114 @@
+[
+ {
+  "attempt": 0,
+  "settled": "res",
+  "at": "after its document closed",
+  "url": "http://127.0.0.1:32943/#/p/E_9d697b7d-07bb-47d7-a86e-af9619ca123b",
+  "sheetOpen": false,
+  "status": null,
+  "focus": [
+   null,
+   "last",
+   "마지막 요청문 · 방금",
+   "request"
+  ],
+  "late": [],
+  "errors": []
+ },
+ {
+  "attempt": 1,
+  "settled": "rej",
+  "at": "the same document opened again (a new opening)",
+  "url": "http://127.0.0.1:32943/#/p/E_9d697b7d-07bb-47d7-a86e-af9619ca123b",
+  "sheetOpen": true,
+  "status": "복사는 이 글을 옮기는 일이에요. 접수·실행·완료를 기록하지 않아요.",
+  "focus": [
+   null,
+   "text",
+   "작업 요청문 초안 · 생성됨 (전달·접수·실",
+   "sheet"
+  ],
+  "late": [],
+  "errors": []
+ },
+ {
+  "attempt": 2,
+  "settled": "res",
+  "at": "no plan open (its session closed)",
+  "url": "http://127.0.0.1:32943/#/p/E_9d697b7d-07bb-47d7-a86e-af9619ca123b",
+  "sheetOpen": false,
+  "status": null,
+  "focus": [
+   null,
+   null,
+   "AgentFlow Studio\n      \n",
+   "BODY"
+  ],
+  "late": [],
+  "errors": []
+ },
+ {
+  "attempt": 3,
+  "settled": "rej",
+  "at": "another project's plan session open on its own new document",
+  "url": "http://127.0.0.1:32943/#/p/ex-converter",
+  "sheetOpen": true,
+  "status": "복사는 이 글을 옮기는 일이에요. 접수·실행·완료를 기록하지 않아요.",
+  "focus": [
+   "plan-copy",
+   "copy",
+   "복사",
+   "sheet"
+  ],
+  "late": [],
+  "errors": []
+ },
+ {
+  "attempt": 4,
+  "settled": "res",
+  "at": "another project's plan session open on its own new document",
+  "url": "http://127.0.0.1:32943/#/p/ex-converter",
+  "sheetOpen": true,
+  "status": "복사는 이 글을 옮기는 일이에요. 접수·실행·완료를 기록하지 않아요.",
+  "focus": [
+   "plan-copy",
+   "copy",
+   "복사",
+   "sheet"
+  ],
+  "late": [],
+  "errors": []
+ },
+ {
+  "attempt": 6,
+  "settled": "rej",
+  "at": "latest attempt, same open document",
+  "url": "http://127.0.0.1:32943/#/p/ex-converter",
+  "sheetOpen": true,
+  "status": "자동 복사가 막혀 있어요. 글을 선택해 직접 복사하세요.",
+  "focus": [
+   "plan-copy",
+   "copy",
+   "복사",
+   "sheet"
+  ],
+  "late": [],
+  "errors": []
+ },
+ {
+  "attempt": 5,
+  "settled": "res",
+  "at": "earlier attempt ending after the latest, same open document",
+  "url": "http://127.0.0.1:32943/#/p/ex-converter",
+  "sheetOpen": true,
+  "status": "자동 복사가 막혀 있어요. 글을 선택해 직접 복사하세요.",
+  "focus": [
+   "plan-copy",
+   "copy",
+   "복사",
+   "sheet"
+  ],
+  "late": [],
+  "errors": []
+ }
+]

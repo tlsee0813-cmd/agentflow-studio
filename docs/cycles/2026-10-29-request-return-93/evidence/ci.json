@@ -1,0 +1,11 @@
+{
+  "source": "d881b0ae8d892f6d65cfdce63a6924377ec567d7",
+  "runId": 40798177122,
+  "url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40798177122",
+  "observedThrough": "read_pull_request_check_diagnostics; PR56 exact headRevision",
+  "jobs": [
+    {"id":123199608112,"name":"verify (windows-2022)","status":"completed","conclusion":"success"},
+    {"id":123199607670,"name":"verify (ubuntu-24.04)","status":"completed","conclusion":"success"}
+  ],
+  "meaning": "CI acceptance only; not model semantic quality or full product completion."
+}
