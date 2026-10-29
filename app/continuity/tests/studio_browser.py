@@ -1796,10 +1796,13 @@ def request71_flow(browser, base):
     file = {"format": "agentflow.change-plan-file.1", "project": {"id": project["id"], "name": project["name"]}, "bundle": legacy}
     page.once("dialog", lambda dialog: dialog.accept())
     page.locator("#plan-import-file").set_input_files({"name": "legacy-request.json", "mimeType": "application/json", "buffer": json.dumps(file).encode("utf-8")})
-    expect(page.locator("#plan-panel")).to_contain_text("변경안 파일을 가져왔어요.")  # imported, not refused with the earlier request kept
+    # The import ends asynchronously and the plan stays on its strip (the panel is hidden): wait for the stored bundle, not a panel.
+    page.wait_for_function("([id, rq]) => JSON.parse(localStorage.getItem('agentflow.studio.plans.1')).projects[id].snapshots[0]?.id === rq", [project["id"], old["id"]])
     imported = page.evaluate("() => JSON.parse(localStorage.getItem('agentflow.studio.plans.1'))")["projects"][project["id"]]["snapshots"]
     assert [x["id"] for x in imported] == [old["id"]] and imported[0]["text"] == old["text"] and "scope" not in imported[0] and "reading" not in imported[0], imported
     page.locator(".ps-more").click()
+    # Its message is in the plan's footer, shown with the wide comparison: imported, not refused with the earlier request kept.
+    expect(page.locator("#plan-panel")).to_contain_text("변경안 파일을 가져왔어요.")
     page.get_by_role("button", name=re.compile(r"^돌아온 기록 · 요청문")).click()
     expect(page.locator(".pp-results")).to_contain_text("이전 형식 요청문이라 보고가 자동 대응되지 않아요")
     expect(page.locator(".pp-results").get_by_role("button", name="보고 원문 붙여넣기")).to_have_count(0)
