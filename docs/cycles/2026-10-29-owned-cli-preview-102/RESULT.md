@@ -5,7 +5,7 @@
 ## 판본
 
 - 기준 357e9a301fc910c95a3522de3564a9f02863b3ba(app 3fc2ab0421cda167bd3fbb70c5eaa2a2e9dcc0e5).
-- 구현 SHA: __FINAL_SHA__ (WIP 이력 a330ab1 → 2dbc140 → 4eda653 → 9694312 → 93b46c0 → af84755). 중간 커밋은 독립 검토용이며 수용이 아니다.
+- 구현 SHA: af84755ae852e15aea78386658853e63741112ae (코드·테스트 기준). 그 뒤 커밋은 이 문서뿐이다. WIP 이력 a330ab1 → 2dbc140 → 4eda653 → 9694312 → 93b46c0 → af84755는 독립 검토용이며 수용이 아니다.
 
 ## 바뀐 곳
 
@@ -17,7 +17,17 @@
 
 ## 실행한 검사 (작성자 실행, Linux 원격 컨테이너 Node v22.22.0)
 
-__RUN4__
+run4, 정확 af84755 · 작업 트리 clean · `AI_MODE=mock`, `ALLOW_PAID_AI=false`, 키 없음:
+
+| 단계 | 결과 |
+|---|---|
+| `node continuity/scripts/build.mjs` / `check.mjs`(tsc 5.8.3·경계) | 통과 / 통과 |
+| 102 focused (`owned-cli102*.test.mjs`) | 25/25, 159초, 종료 뒤 가짜 CLI 프로세스 0 |
+| continuity 전체 `node --test continuity/tests/*.test.mjs` | 584/584 |
+| `deploy-cloudflare.mjs --dry-run` / `build-static.mjs --preview` | 통과 / 통과 |
+| `check-ui-flow.mjs` (Chromium) | 통과: child 2회, job POST 2, A·B 각 읽기 1 |
+
+app 루트 `npm test`는 이번 run에 넣지 않았다. 앞선 실행에서 실패 1건은 기존 `I6R`의 Node `v22.16.0` 고정 검사(이 환경 v22.22.0)였고 102와 무관하다.
 
 이전 판본의 결과는 판본별로 따로 보존했다: run1(2dbc140 이전 executor) 21/22, run2(4eda653) 22/22 + E13 fixture 누수로 종료 지연, run3(9694312) focused 23/24·전체 582/583(둘 다 E17 테스트 순서 문제)·UI 통과. 총괄 Windows run(9694312) 19 pass/2 fail/3 skip의 두 실패(P1 Windows 정리, E17)는 af84755에서 수리했다.
 
