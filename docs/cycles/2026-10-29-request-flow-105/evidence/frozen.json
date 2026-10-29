@@ -1,0 +1,29 @@
+{
+  "basis": "3b85be52b1366c3a82624b68ebad1d7462906802",
+  "publicCheckpoint": "e6156fa835eabd94cc0fd851c5ba08cd7423fb88",
+  "app": "2e9d8d9e003138c85839876c092e7c7b5a115986",
+  "inputBackupSha256": "dcda9cc2acbd387fdfc7f1751f7ba4e59a2bbf6b496c5c04bbba24477552bb49",
+  "intent": "reel board의 화면 리본 라벨을 입력하면 맞는 빌드 대상을 안내하는 작은 PC용 도구를 새로 만들고 싶어요. HINK-E0213과 HINK-E0213A22에 대해 화면·컨트롤러·ssd16xx·보드 지정의 대응을 함께 보여 주세요. 라벨이 비어 있거나 모르는 값이면 대상을 추정하지 말고 확인이 필요하다고 알려 주세요. PCB 버전만으로 대상을 고르지 마세요. 실제 빌드나 플래싱은 실행하지 않고, 센서·회로·전원 제어와 절전 기능은 바꾸지 않습니다. 현재 문서에 적힌 Low Power 절전 불가 제한은 안내에 유지해 주세요.",
+  "intentSha256": "aef03867fec2b6b3882cf616e9ba5156c4e77664de58143efed2b8197379f4ca",
+  "planPromptSha256": "f5c3e687c67c87e6d272efafee247bac79622fcc561247a56dbe6bfb909e1cb6",
+  "scopePromptSha256": "380b8b1c9a0d41babda9c859e56105c376bf198dc6c794767ddca61fe7c9c924",
+  "selectedCalls": {
+    "plan": 1,
+    "scopeAfterSemanticPlanPass": 1,
+    "map": 0,
+    "digest": 0,
+    "ask": 0,
+    "retries": 0,
+    "fallbacks": 0
+  },
+  "criteria": [
+    "display mappings and label conditional preserved",
+    "empty/unknown label does not infer target or PCB-to-@2",
+    "tool addition proposed, not existing or completed hardware behavior",
+    "no sensor/circuit/power/physical build/flash expansion",
+    "known no-saving limit preserved without reopening as choice",
+    "selected scope readable, previous/original map untouched, request frozen separately"
+  ],
+  "note": "new controlled operator proposal on actual source-derived map; not a new user hardware fact or an upstream Zephyr change",
+  "nextAfterPass": "implement exact frozen request as explicitly bounded local prototype and return actual scoped evidence; choose subsequent map observation separately"
+}
