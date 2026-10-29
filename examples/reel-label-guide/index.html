@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'none'">
+  <title>리본 라벨 빌드 대상 안내</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <h1>reel board 리본 라벨 → 빌드 대상 안내</h1>
+    <p class="lede">화면 리본 케이블에 적힌 라벨을 입력하면 고정 문서 판본에 적힌 화면·컨트롤러·드라이버·보드 지정을 함께 보여 줍니다.</p>
+  </header>
+
+  <main class="layout">
+    <div class="side">
+      <section class="panel input-panel" aria-labelledby="input-heading">
+        <h2 id="input-heading">리본 라벨 입력</h2>
+        <form id="label-form" autocomplete="off" novalidate>
+          <label for="label-input" class="field-label">리본 케이블 라벨</label>
+          <div class="field-row">
+            <input id="label-input" name="label" type="text" spellcheck="false"
+                   autocapitalize="off" autocorrect="off" inputmode="latin"
+                   aria-describedby="input-help" placeholder="예: HINK-E0213A22">
+            <button id="clear-button" type="button" class="clear">지우기</button>
+          </div>
+        </form>
+        <div id="input-help" class="help">
+          <p>라벨 <strong>전체</strong>를 대소문자·하이픈까지 그대로 입력하세요. 앞뒤 공백만 무시합니다. 일부만 맞거나 대소문자가 다르면 대상을 추정하지 않고 확인이 필요하다고 알려 드립니다.</p>
+          <p>문서에 있는 라벨: <code id="known-labels"></code></p>
+          <p>PCB 버전(예: 1507.1, 1507.2)으로는 대상을 고르지 않습니다.</p>
+          <p class="shortcut">입력하는 즉시 결과가 바뀝니다. <kbd>Esc</kbd>로 입력을 지웁니다.</p>
+        </div>
+      </section>
+
+      <footer class="source">
+        <p>기준: <a id="source-link" rel="noopener noreferrer" target="_blank"></a>
+          <span id="source-meta"></span></p>
+        <p>제공된 고정 문서 판본의 표를 보여 줄 뿐이며, 현재 유통 중인 보드나 실제 기기에서 확인한 결과가 아닙니다. 이 도구는 빌드·플래싱을 실행하지 않고 보드에 접근하지 않습니다.</p>
+      </footer>
+    </div>
+
+    <section class="panel result-panel" aria-labelledby="result-heading">
+      <div class="result-head">
+        <h2 id="result-heading">조회 결과</h2>
+        <span id="status-badge" class="badge" data-state="needs-check">확인 필요</span>
+      </div>
+      <div id="status" class="status" role="status" aria-live="polite" aria-atomic="true">
+        <p id="status-message" class="status-message"></p>
+        <p class="echo">입력한 라벨: <span id="status-echo" class="echo-value"></span></p>
+      </div>
+
+      <dl id="result-rows" class="rows" data-state="needs-check">
+        <div class="row">
+          <dt>화면 모델 <span class="term">Display</span></dt>
+          <dd><span class="value" data-field="display">—</span>
+              <span class="hint">리본 라벨에 대응하는 전자잉크 화면</span></dd>
+        </div>
+        <div class="row">
+          <dt>컨트롤러 <span class="term">Controller</span></dt>
+          <dd><span class="value" data-field="controller">—</span>
+              <span class="hint">화면에 들어 있는 구동 칩</span></dd>
+        </div>
+        <div class="row">
+          <dt>드라이버 <span class="term">Driver</span></dt>
+          <dd><span class="value" data-field="driver">—</span>
+              <span class="hint">Zephyr 디스플레이 드라이버</span></dd>
+        </div>
+        <div class="row">
+          <dt>보드 지정 <span class="term">Board Designation</span></dt>
+          <dd><span class="value" data-field="boardDesignation">—</span>
+              <span class="hint">애플리케이션 빌드 때 사용할 보드 지정</span></dd>
+        </div>
+      </dl>
+
+      <aside class="limit" aria-labelledby="limit-title">
+        <h3 id="limit-title"></h3>
+        <p id="limit-detail"></p>
+      </aside>
+    </section>
+  </main>
+
+
+  <script src="label-lookup.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
