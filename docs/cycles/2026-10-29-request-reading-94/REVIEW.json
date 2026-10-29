@@ -1,0 +1,13 @@
+{
+  "source": "4a188df9ae4631e4f0a81ff957c03abe9b48b024",
+  "decision": "Selected design; not implemented or accepted as product",
+  "boundaryReviewSha256": "386f1324d658635b87e0e9a71c90b318f35263539ed0b327ea0904759641ea3a",
+  "designReviewSha256": "02a2d9b9e107ca4b44538f4679e8daee9c757f85ef6390d416a70db6facf9671",
+  "reviewedDesignSha256": "e13bdef4684b29dd96ffac0adbc2faa14f4a23a800074f290df20330cfb042c9",
+  "newConcreteDesignBlockers": [],
+  "reviewer": "Independent Sol High, read-only source and selected-contract review",
+  "freshModelCalls": 0,
+  "productImplementation": 0,
+  "firstMapGate": "Unresolved",
+  "release": "Public73 unchanged; no merge or deployment"
+}
