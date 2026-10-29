@@ -1923,9 +1923,11 @@ function understoodLine(o: Opened): HTMLElement | null {
   else if (waiting) line.append(...runReady(st, 'map-more', 'map-more'));
   else if (fresh && mapRun.can() && !inp!.problem) line.append(h('button', { type: 'button', class: 'map-more mu-run', title: sendLine(inp!), onclick: () => void mapRun.run() }, `새 기록 ${fresh}개 읽고 지도 갱신`));
   else if (fresh) line.append(h('span', { class: 'mu-fresh' }, `아직 지도에 읽지 않은 기록 ${fresh}개`), ...(mapRun.blocked() ? [h('span', { class: 'fine mu-blocked' }, mapRun.blocked()!)] : []));
-  if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE') line.append(h('button', { type: 'button', class: 'map-more', title: sendLine(inp), onclick: () => { if (returnView.isOpen()) returnView.close(); planView.openResults(); } }, '요청문을 골라 대조'));
+  // AF124: a limited release reads no report against a request, so it offers no request to choose for one (stored comparisons stay).
+  const limited = status.release === 'existing-map';
+  if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && !limited) line.append(h('button', { type: 'button', class: 'map-more', title: sendLine(inp), onclick: () => { if (returnView.isOpen()) returnView.close(); planView.openResults(); } }, '요청문을 골라 대조'));
   if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && mapRun.can() && !st.pending && !waiting) line.append(h('button', { type: 'button', class: 'map-more mu-map-only', title: '요청과 대조하지 않고 지도만 정리해요. 원문은 보존되며 나중에 요청문을 골라 대조할 수 있어요.', onclick: () => void mapRun.runMapOnly() }, '요청 대조 없이 지도만 정리'));
-  if (last?.version === 'map-reading.1' && frozenRequests(o.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : [])).length) line.append(h('button', { type: 'button', class: 'map-more', title: '지도에 읽힌 원문도 고른 요청과 나중에 대조할 수 있어요', onclick: () => { if (returnView.isOpen()) returnView.close(); planView.openResults(); } }, '나중에 요청문을 골라 대조'));
+  if (last?.version === 'map-reading.1' && !limited && frozenRequests(o.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : [])).length) line.append(h('button', { type: 'button', class: 'map-more', title: '지도에 읽힌 원문도 고른 요청과 나중에 대조할 수 있어요', onclick: () => { if (returnView.isOpen()) returnView.close(); planView.openResults(); } }, '나중에 요청문을 골라 대조'));
   if (last) line.append(h('button', { type: 'button', class: 'map-more', title: '이번 정리의 근거와 확인할 것', onclick: () => openReturn() }, '근거'));
   if (st.error) line.append(h('span', { class: 'mu-error', role: 'alert' }, st.error));
   const note = runNotice(); if (note) line.append(note);
@@ -1998,9 +2000,10 @@ function mapBlock(): HTMLElement | null {
     h('span', { class: 'fine' }, can && !inp!.problem ? `읽지 않은 기록 ${fresh}개 · ${sendLine(inp!)}` : !can ? `읽지 않은 기록 ${fresh}개 · ${mapRun.blocked() ?? 'AI 서버가 연결된 주소에서 정리할 수 있어요'}` : '보낼 수 없는 기록이 있어요(너무 크거나 키처럼 보이는 글).')));
   if (st.error) sec.append(h('p', { class: 'pp-error', role: 'alert' }, st.error));
   { const note = runNotice(); if (note) sec.append(note); }
-  if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE') sec.append(h('p', { class: 'fine' }, sendLine(inp)), h('button', { type: 'button', class: 'link-button', onclick: () => { returnView.close(); planView.openResults(); } }, '요청문을 골라 대조'));
+  const limited = status.release === 'existing-map';
+  if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && !limited) sec.append(h('p', { class: 'fine' }, sendLine(inp)), h('button', { type: 'button', class: 'link-button', onclick: () => { returnView.close(); planView.openResults(); } }, '요청문을 골라 대조'));
   if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && can && !st.pending && !waiting) sec.append(h('button', { type: 'button', class: 'link-button rm-map-only', onclick: () => void mapRun.runMapOnly() }, '요청 대조 없이 지도만 정리'), h('p', { class: 'fine' }, '원문을 보존하며 나중에 요청문을 골라 대조할 수 있어요.'));
-  if (last?.version === 'map-reading.1' && frozenRequests(o.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : [])).length) sec.append(h('p', { class: 'fine' }, '이 읽기는 요청 대조 없이 지도에 정리했어요. 원문은 나중에 요청문을 골라 대조할 수 있어요.'));
+  if (last?.version === 'map-reading.1' && frozenRequests(o.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : [])).length) sec.append(h('p', { class: 'fine' }, limited ? '이 읽기는 요청 대조 없이 지도에 정리했어요.' : '이 읽기는 요청 대조 없이 지도에 정리했어요. 원문은 나중에 요청문을 골라 대조할 수 있어요.'));
   if (last) {
     const name = (id: string) => partOf(o, id)?.name ?? null;
     if (last.summary) sec.append(h('p', { class: 'rm-summary' }, last.summary));
