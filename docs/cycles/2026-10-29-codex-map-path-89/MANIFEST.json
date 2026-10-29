@@ -1,20 +1,32 @@
 {
-  "source": "ab8e45cdb34cdba8328c8cee369b010f346ed3ea",
+  "source": "dc948f453e61365828bcb1dd031d13a71686150d",
   "runtime": "2999fd65c67754bd7a0bd0d45f9fd841fd3956e5",
   "appTree": "7beb4ba00211a1afd3b9549ef4eb08a55b2a8384",
   "hashBasis": "Exact Git blob bytes, including final newline",
   "files": {
+    "acceptance-correction.json": {
+      "sha256": "b699be29f58ea75c5973773a069a5f95faa974c52932d2b68fb58673f6efe716",
+      "bytes": 1290
+    },
     "actual-storage-ui.json": {
       "sha256": "c5ad2e483f6e26b41ae4d82ff3a548b75e6fab1fec80673d3217230ef3df6369",
       "bytes": 1266
     },
     "execution.json": {
-      "sha256": "bade8d0cac0fe32a8a063f7e968b337a0394cf060dc62c418fdd424b3539dfd9",
-      "bytes": 3310
+      "sha256": "9bbb57ec626830fe3145308cf2ab24e192d39177dff551ab67e4b309063ee02d",
+      "bytes": 4839
+    },
+    "micro-storage-ui.json": {
+      "sha256": "75acedaaa123cf3eee1cffa4a673af208d36acad6a9759775afe98b34eb9e96d",
+      "bytes": 829
+    },
+    "micro-vm.png": {
+      "sha256": "c4fa1888159549bf5dd857f61d6bf011dab247dda8d77290541b124eec488eff",
+      "bytes": 64516
     },
     "semantic-verdicts.json": {
-      "sha256": "f135f56b02821ae3c586a79686fbe4cd4f252f8cb5466c59eff3e2ea8c00bee9",
-      "bytes": 1672
+      "sha256": "5b9a4522bc94951cd591fccf65b4a8327bef264629f178f17bf30dcebe4b62a3",
+      "bytes": 2047
     }
   }
 }

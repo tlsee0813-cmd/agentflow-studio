@@ -1,0 +1,22 @@
+{
+  "case": "micro-javascript",
+  "source": "dc948f453e61365828bcb1dd031d13a71686150d",
+  "runtimeAppUnchanged": true,
+  "performedBy": "Root normal UI import, VM source quote return, reload, export",
+  "viewport": {
+    "width": 1280,
+    "height": 720,
+    "dpr": 1.25
+  },
+  "allProjectFieldsEqual": true,
+  "inputSha256": "6c3dec6666b2604627e49d698c6bdf7404a08d88ebd985d6d532535fc6093c37",
+  "exportSha256": "c4a637a2d050d5cd8c54e94e721e1df58d5e43fc658a03701ab11ecd8e851369",
+  "sameUrl": true,
+  "sameCamera": true,
+  "sameClaimFocus": true,
+  "providerCallsDuringUI": 0,
+  "quoteSha256": "0197e4d09bcc96882fdd1cd94b9674094dfef8819e653fe9c6549e44fcad8d77",
+  "independentBrowserRun": false,
+  "ossExecution": false,
+  "independentFileVerificationSha256": "abeac4974327c6696213468bcbf0cce50b002711a92489577890dfd98375e067"
+}

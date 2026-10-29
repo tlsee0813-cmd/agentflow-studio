@@ -1,0 +1,18 @@
+{
+  "responsible": "Root coordinator, after independent review reconciliation",
+  "supersedesCommit": "dc948f453e61365828bcb1dd031d13a71686150d",
+  "supersededClaim": "The micro API-name omission alone violated the unchanged prior applied acceptance standard.",
+  "finding": "AF76 explicitly treated the same omission as a nonblocking qualitative limitation when the internal pipeline and original API usage material remained readable. AF89 first review overlooked this applied precedent.",
+  "priorPrivateArtifactSha256": "823777410b011e75c4a02b3aee316964e52ff84d72b88d4508d62f9bf8917386",
+  "priorPointers": [
+    "cases/1/evidence/0",
+    "cases/1/qualitativeLimits/1"
+  ],
+  "consistencyReviewSha256": "f8778e433b3ac75a82f6a02bfc0d1d5c7c2ad811954e6e6276e05be125c9869b",
+  "microAmendmentSha256": "f454ed397625eeeb743bb2e8706a888d1b578c4f29544e8c8c7c9f698d2a4ac9",
+  "decision": "Apply the explicit prior nonblocking interpretation consistently; retain the limitation. This corrects evaluation drift, not output. Resume only the previously unrun third case.",
+  "newActualOrMicroInvocations": 0,
+  "rawResponsesModified": false,
+  "schemaOrPromptChanged": false,
+  "material90Proposal": "Not selected as a new blocking repair or implementation. Same API limitation was already known."
+}

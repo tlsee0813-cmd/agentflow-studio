@@ -36,7 +36,8 @@
       "errorEvents": 0,
       "formalPrivateApply": true,
       "meaningVerdict": "PASS_FOR_THIS_BOUNDED_CLI_CANDIDATE_A1_A5",
-      "independentReviewSha256": "4e70ff1a1aa4cec0eae5ddb3182d23138701538c28c01d156631d06c4aea4e51"
+      "independentReviewSha256": "4e70ff1a1aa4cec0eae5ddb3182d23138701538c28c01d156631d06c4aea4e51",
+      "source": "ab8e45cdb34cdba8328c8cee369b010f346ed3ea"
     },
     {
       "cliVersion": "codex-cli 0.164.0-alpha.11.1",
@@ -68,15 +69,46 @@
       "observedToolItems": 0,
       "errorEvents": 0,
       "formalPrivateApply": true,
-      "meaningVerdict": "FAIL_RETAINED_M1_M4_API_ENTRY_IDENTITY",
-      "independentReviewSha256": "84e94b180307f3f08f24e0f14de19ef42e30dadbb08eba58c2824a635b41560f"
+      "meaningVerdict": "SCOPED_MEANING_PASS_WITH_EXISTING_NONBLOCKING_API_LIMIT",
+      "independentReviewSha256": "f454ed397625eeeb743bb2e8706a888d1b578c4f29544e8c8c7c9f698d2a4ac9",
+      "source": "ab8e45cdb34cdba8328c8cee369b010f346ed3ea"
+    },
+    {
+      "source": "dc948f453e61365828bcb1dd031d13a71686150d",
+      "cliVersion": "codex-cli 0.164.0-alpha.11.1",
+      "deadlineMs": 90000,
+      "promptId": "m6-33ff86d5f2da",
+      "inputSha256": "e2844df044db67829387ab9099534b07888e26321cf75092bbbda0ade21edae9",
+      "askSha256": "3542a38fa56c0e65173b29ffec4c01408620ca80c7df4c1763960e1d4ac4ac92",
+      "mapInstructionsSha256": "81d6e96834d7c245270785dafe2861bcc010779f12ec14f6b9472b378a8ff846",
+      "wrapperSha256": "cdd244dd8c377232369b599e781a72c86a3c8dcfb11dd2dcb5e12c2bfbf412b4",
+      "criteriaSha256": "06e415b8ccf53254d90bee930746e8d5d53c08cb55d8e955ab45d45fb49e1365",
+      "ms": 90055,
+      "usage": null,
+      "finalSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finalBytes": 0,
+      "finalMatchesEvent": false,
+      "originalUnchanged": true,
+      "cliInvocations": 1,
+      "timedOut": true,
+      "signal": "SIGTERM",
+      "case": "zephyr-reel-board",
+      "modelExitCode": null,
+      "turnCompleted": false,
+      "observedToolItems": 0,
+      "errorEvents": 0,
+      "formalPrivateApply": false,
+      "meaningVerdict": "NO_FINAL_RESPONSE_TO_EVALUATE",
+      "wrapperExitCode": 0,
+      "wrapperExitMeaning": "Result receipt saved; not model success"
     }
   ],
-  "zephyrInvocations": 0,
+  "zephyrInvocations": 1,
   "layoutVariantInvocations": 0,
   "resubmissionInvocations": 0,
   "internalTransportRetries": "Not observable as a count",
   "productProviderChanges": 0,
   "publicDeployments": 0,
-  "verdict": "REJECT_COMBINED_CANDIDATE"
+  "verdict": "REJECT_COMBINED_CANDIDATE_ZEPHYR_DELIVERY_TIMEOUT",
+  "correctedMicroVerdict": "SCOPED_MEANING_PASS_WITH_EXISTING_NONBLOCKING_API_LIMIT"
 }

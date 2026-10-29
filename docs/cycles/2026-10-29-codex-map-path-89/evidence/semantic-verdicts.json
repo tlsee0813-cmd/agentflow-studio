@@ -9,11 +9,11 @@
     "scope": "One generated response, not confidence estimate or product implementation proof"
   },
   "micro": {
-    "M1": "FAIL: internal eval pipeline remains but public JSContext API entry is missing",
+    "M1": "PASS_WITH_EXISTING_NONBLOCKING_API_LIMIT: internal eval pipeline and original usage material retained, same applied standard as76",
     "M2": "PASS: shared globals and context memory/time limit transfer preserved",
     "M3": "PASS: exception categories and documented limitations preserved",
-    "M4": "FAIL: install package versus Python import/API identity not readable in active map",
-    "failureCount": "One entry-identity omission affects two retained criteria",
+    "M4": "PASS_WITH_EXISTING_NONBLOCKING_API_LIMIT: installation/usage examples kept separate from implementation; no sample subsystem or execution-success claim",
+    "failureCount": 0,
     "knownPresent": [
       "eval",
       "Parser",
@@ -25,7 +25,9 @@
       "JSContext",
       "microjs"
     ],
-    "materialObservation": "Usage example includes context creation, but the map does not preserve the public interface identity elsewhere. Example marking is not proof that the validator caused omission."
+    "materialObservation": "Usage example includes context creation, but the map does not preserve the public interface identity elsewhere. Example marking is not proof that the validator caused omission.",
+    "limit": "JSContext/import identity remains absent from active map. This was explicitly nonblocking in76, not a new89 blocker."
   },
-  "decision": "Reject combined candidate. No third-case invocation, no rerun or output repair. Do not generalize one response to all Codex capability."
+  "decision": "Actual-order and micro scoped meaning pass. Combined candidate rejected because Zephyr delivered no final response within90s. No resubmission or output repair.",
+  "correction": "See acceptance-correction.json. Original84e94 review and dc948 Git commit remain historical; their micro blocker judgment is superseded."
 }
