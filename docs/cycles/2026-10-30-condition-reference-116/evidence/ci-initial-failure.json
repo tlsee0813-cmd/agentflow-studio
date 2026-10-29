@@ -1,0 +1,13 @@
+{
+  "sha": "2697bb57470837f5b4093340c539e70732243f63",
+  "job": {
+    "id": 123669647332,
+    "head_sha": "2697bb57470837f5b4093340c539e70732243f63",
+    "name": "verify (ubuntu-24.04)",
+    "status": "completed",
+    "conclusion": "failure"
+  },
+  "url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40936879760",
+  "cause": "Studio smoke provider dispatch omitted studio.map.7; new client correctly selects later7; older scripted later response also still expects6/plain about. Fix test fixtures, preserve actual capability/contract and FIRST6.",
+  "accepted": false
+}

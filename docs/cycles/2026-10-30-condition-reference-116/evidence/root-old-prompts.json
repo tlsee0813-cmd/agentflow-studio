@@ -1,0 +1,50 @@
+{
+  "MAP2_PROMPT": {
+    "same": true,
+    "sha256": "53ef9b4d18d8c6b3aa46f27109f4efd4adfafc98fd2139de4d2ca29a19ad5510"
+  },
+  "MAP3_PROMPT": {
+    "same": true,
+    "sha256": "6ad411b7e893733fa9a29c5d6f408a630426a62704c07275fea612fa42102f77"
+  },
+  "MAP4_FIRST_PROMPT": {
+    "same": true,
+    "sha256": "4c8523a1402ca9fa0c42e72c0b811637de5e02b3ce026e05a0989b7f77a1c007"
+  },
+  "MAP4_PROMPT": {
+    "same": true,
+    "sha256": "5317421405406135c86b7ddefafbbeb0eb25f149d2890172419bc8ad6757d6c0"
+  },
+  "MAP4_RECIPE": {
+    "same": true,
+    "sha256": "0340413adccd30ac2ea63498e0eb66b40c2811d5158579ea5009340e3cc768f3"
+  },
+  "MAP5_FIRST_PROMPT": {
+    "same": true,
+    "sha256": "37a8237254d69607b2b042635c06b8ecd0d7de5c754b02050eed54f8d941ae4f"
+  },
+  "MAP5_PROMPT": {
+    "same": true,
+    "sha256": "6ce308f841f5851cddf638b149dde6cb5c7934afd389436f14a2bedabe56cccf"
+  },
+  "MAP5_RECIPE": {
+    "same": true,
+    "sha256": "b432f60e7d61d5028112b41cae1010c11e62acf34bf7cbc9f6d963456ba9bef9"
+  },
+  "MAP6_FIRST_PROMPT": {
+    "same": true,
+    "sha256": "cef94b26c23e8c3c647dccddc399746da6957b127213e891e3d69fe0ada86886"
+  },
+  "MAP6_PROMPT": {
+    "same": true,
+    "sha256": "24b6596338d073faa3015ecb5f76159e52fd8854abb768865c35403de99287ca"
+  },
+  "MAP6_RECIPE": {
+    "same": true,
+    "sha256": "8071e83eafdae2cd4e1ab6b8a3d0734114a76bd046e90260d0d833f01a181730"
+  },
+  "MAP_PROMPT": {
+    "same": true,
+    "sha256": "a15660a3a3e7bbe28e14338cad4173877a8c412115dfb5dbc28eafb758873bed"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "cycle": 116,
+  "review": "tests-and-pre116-fixture-addition-only",
+  "base": "23aef513cc1214c2f0f21502a37334c22b4a1308",
+  "head": "2697bb57470837f5b4093340c539e70732243f63",
+  "verdict": "BOUNDED_NO_ACTIONABLE_P1_P2_FINDING",
+  "productCodeChangedInThisDelta": false,
+  "accepted": false,
+  "activity": { "productWrites": 0, "testsOrBuildOrBrowserRuns": 0, "models": 0, "old115Or113WireChangesOrRevalidation": 0, "newResearch": 0 },
+  "findings": [],
+  "pre116FixtureProvenance": {
+    "generator": "docs/cycles/2026-10-30-condition-reference-116/make-ready6.mjs",
+    "producerCommit": "db63a4293aad5983feafca70c4016ec1abc4874d",
+    "assessment": "The generator requires the supplied checkout HEAD to be exactly db63a42, imports all project/domain/map builder/codec/storage/validation/studio handler/job store modules from that checkout, and rejects a map module exporting MAP7_SCHEMA. The new condition116-case helper supplies pure fixture composition and an authored map6 reply through passed-in old modules; it imports no new product implementation. The ask is built by the old producer, encoded by the old codec, validated by the old validator, then submitted to the old real handler/store. An injected provider answers once and the old store writes ready6 bytes. This is materially different from calling the new producer and changing only its schema label to6.",
+    "manifest": "manifest.json records the old m6-only status, ready state, original ask/input hashes, one fake provider call, project/bundle, and SHA256 values for store.json, operation file, project14 backup and bundle. The operation is synthetic and the manifest capability is a disposable fixture capability, not an actual115 operation credential.",
+    "testConsumption": "condition116.test.mjs test116-11 verifies fixture file hashes, copies the complete old store before opening it, observes ready6/m6 binding under a new status advertising later7, resumes an existing reservation with the real createMapRun reader, explicitly applies, verifies old plain-about meaning, reload parsing and acknowledgement, and asserts zero provider calls. It rechecks original fixture file hashes after closing the copy. The test is about a saved old operation, not a newly submitted6 operation alone.",
+    "limit": "The generator checks git HEAD and absence of MAP7_SCHEMA but does not itself bind a clean working tree or compiled producer modules to source hashes. Manifest build text reports offline PATH tsc6.0.2 emission, not a locked build. Exact db63 emitted-module provenance therefore also relies on the author's production/build record. The static route strongly distinguishes old producer from current-schema relabelling, but this reviewer did not independently reproduce the build or fixture generation. This is an evidence qualification, not a request to repeat the build."
+  },
+  "boundaryTestAssessment": [
+    {
+      "tests": "116-1 and116-2",
+      "meaning": "Builder assertions compare the actual later7 ask with its6 counterpart after changing only schemaVersion, including exact mapped record data and full frozen request. FIRST with later capability remains exactly6; first7 asks are rejected; selected-request shape is later. Codec and normalized apply/reload/backup assertions keep project14/map-reading.5 and verify incoming raw wire is unchanged. Declarations remain separate from stored conditions; typed code with no body version uses null."
+    },
+    {
+      "test": "116-3",
+      "meaning": "A table of28 independent wire mutations exercises wrong-record claim/statement/match conditions, role outside basis, null-role condition, unknown/unsent/reversed references, metadata and copied prose, all four length boundaries, all four material-overlap slots, and old/both/missing field forms. It checks the real validateMapReply refusal name/code/path/rule, bounded non-secret target and incoming wire equality. A positive record-header-outside-at case distinguishes same record from same interval. These are meaningful contract boundaries, not tests that simply reproduce a local helper's returned value."
+    },
+    {
+      "test": "116-4",
+      "meaning": "The positive null-overlength witness preserves named environment distinctions in text and the exact long condition in its evidence. The test explicitly demonstrates that a scope-omitting text can remain contract-valid while failing the witness predicate. It does not misrepresent containment validation as semantic acceptance."
+    },
+    {
+      "test": "116-5",
+      "meaning": "Pins pre116 map1-6 prompt and recipe hashes plus the existing m6 identity. Checks the distinct7 prompt's four-slot wording, metadata separation, overflow policy and new-key-only examples. It does not mechanically replace FIRST6 expectations with7 or claim prompt compliance by a real model."
+    },
+    {
+      "tests": "116-6 and116-7",
+      "meaning": "The actual standard HTTP handler is exercised with injected provider responses. Assertions compare actual sent system prompt and raw wire, evidence index/ask fingerprint and client normalization; reject first7 before a call and a malformed7 with a structured path. Job admission refuses m6 binding for7 before provider use, binds ready7 to m7, applies/reloads it, and still accepts an old-style later6 submission."
+    },
+    {
+      "tests": "116-8 and116-9",
+      "meaning": "Actual executor preparation checks the explicit scope matrix. Default first and map6-later retain their schema6 behavior; map7-later advertises only the new later capability. A file-mode fake CLI runs one lawful and one refused response, asserting selected prompt/ask hashes and scope, raw ready normalization, structured failure and two invocations without a retry. This exercises production CLI mechanics but no real model or external command from source material."
+    },
+    {
+      "tests": "116-10 and116-11",
+      "meaning": "Status parsing rejects malformed/misplaced later capability, and the actual createMapRun logic sends6-first,6 to an old capability and7-later with the corresponding prompt identity. The separate persisted old-ready fixture covers saved-schema/prompt recovery rather than today's capability. The harness simulates page/storage/locks; it is not the normal rendered browser UI."
+    }
+  ],
+  "narrowEvidenceLimits": [
+    "Test116-8's comment says historical policy hashes are unchanged, but its assertion only proves the three constructed policies have distinct hashes. Exact historical policy-hash equality is not established by that assertion alone. The production old-policy branch was statically unchanged in the prior review; do not upgrade this particular assertion into historical-byte evidence.",
+    "These authored photo-sorter fixtures are distinct from113/115 and support contract mechanics. Their complete natural-language interpretation is not a substitute for an actual selected request/return semantic review.",
+    "Boundary fixtures use JS string lengths and exact80/81/200/201 units; they do not exhaust every possible Unicode/control-input case. No new failing path is inferred merely from that finite coverage.",
+    "Current apply/reload checks demonstrate the unchanged stored shape in the current reader. Root separately reports an actual fixed pre116 reader parse; that is additional evidence, not a claim this static test alone made.",
+    "The final UI script and RESULT are still being authored and are outside this fixed test-addition delta. This review does not accept unpublished final claims or a future commit."
+  ],
+  "parentReportedEvidenceNotReexecuted": {
+    "lockedChecks": "Root reports locked build/check success and condition116's11 tests/116 internal cases on Windows, all pass with zero skip.",
+    "normalUi": "Root reports actual115 project14 and complete bundle import, a lawful synthetic later7 observation, other-project draft preservation, reload/ready with original project and bundle unchanged, explicit apply, quote/back, reload, normal backup/import and fixed pre116 reader parsing. Private ui-proof.json is reported preserved in the116 directory. This reviewer did not replay the UI or use it to claim a real model response.",
+    "modelAndFailures": "No actual model call was added.115/113 raw failures remain unchanged and are not repaired by these positive fixtures."
+  },
+  "conclusion": "The added tests exercise the selected contract and the fixture has a genuine old-producer route rather than a current-code schema6 label. No actionable P1/P2 was found in this addition. Preserve the provenance/build and simulated-versus-rendered UI qualifications; Root owns final acceptance after the final fixed author delta and selected exact checks."
+}

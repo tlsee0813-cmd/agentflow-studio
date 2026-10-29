@@ -1,0 +1,42 @@
+Traceback (most recent call last):
+2026-10-29T19:11:25.7088008Z   File "/home/runner/work/agentflow-studio/agentflow-studio/app/continuity/tests/studio_browser.py", line 4082, in <module>
+2026-10-29T19:11:25.7088966Z     main()
+2026-10-29T19:11:25.7089195Z     ~~~~^^
+2026-10-29T19:11:25.7089778Z   File "/home/runner/work/agentflow-studio/agentflow-studio/app/continuity/tests/studio_browser.py", line 4045, in main
+2026-10-29T19:11:25.7090918Z     map70_flow(browser, base); print("ok  first map from a pasted record (save sends nothing), quote and back, rename/place/draft kept, later record on the same part, plan reads record and reading")
+2026-10-29T19:11:25.7091650Z     ~~~~~~~~~~^^^^^^^^^^^^^^^
+2026-10-29T19:11:25.7092279Z   File "/home/runner/work/agentflow-studio/agentflow-studio/app/continuity/tests/studio_browser.py", line 1640, in map70_flow
+2026-10-29T19:11:25.7093292Z     expect(page.locator("#world .map-understood")).to_contain_text("첫 부분")
+2026-10-29T19:11:25.7093779Z     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+2026-10-29T19:11:25.7094776Z   File "/opt/hostedtoolcache/Python/3.13.5/x64/lib/python3.13/site-packages/playwright/sync_api/_generated.py", line 19319, in to_contain_text
+2026-10-29T19:11:25.7098721Z     self._sync(
+2026-10-29T19:11:25.7098966Z     ~~~~~~~~~~^
+2026-10-29T19:11:25.7099222Z         self._impl_obj.to_contain_text(
+2026-10-29T19:11:25.7099530Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-29T19:11:25.7099783Z     ...<4 lines>...
+2026-10-29T19:11:25.7100000Z         )
+2026-10-29T19:11:25.7100188Z         ^
+2026-10-29T19:11:25.7100378Z     )
+2026-10-29T19:11:25.7100563Z     ^
+2026-10-29T19:11:25.7101132Z   File "/opt/hostedtoolcache/Python/3.13.5/x64/lib/python3.13/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+2026-10-29T19:11:25.7101725Z     return task.result()
+2026-10-29T19:11:25.7101965Z            ~~~~~~~~~~~^^
+2026-10-29T19:11:25.7102584Z   File "/opt/hostedtoolcache/Python/3.13.5/x64/lib/python3.13/site-packages/playwright/_impl/_assertions.py", line 229, in to_contain_text
+2026-10-29T19:11:25.7103175Z     await self._expect_impl(
+2026-10-29T19:11:25.7103432Z     ...<9 lines>...
+2026-10-29T19:11:25.7103647Z     )
+2026-10-29T19:11:25.7104232Z   File "/opt/hostedtoolcache/Python/3.13.5/x64/lib/python3.13/site-packages/playwright/_impl/_assertions.py", line 85, in _expect_impl
+2026-10-29T19:11:25.7104818Z     raise AssertionError(
+2026-10-29T19:11:25.7105293Z         f"{out_message}\nActual value: {actual}{error_message} {format_call_log(result.get('log'))}"
+2026-10-29T19:11:25.7105935Z     )
+2026-10-29T19:11:25.7106370Z AssertionError: Locator expected to contain text '첫 부분'
+2026-10-29T19:11:25.7107087Z Actual value: [스텁] 기록의 요구·보고·구상 줄을 부분으로 놓은 자리예요.새 기록 1개 읽고 지도 갱신근거서버가 AI 서비스에 연결하지 못했어요.
+2026-10-29T19:11:25.7107475Z Call log:
+2026-10-29T19:11:25.7107749Z   - Expect "to_contain_text" with timeout 5000ms
+2026-10-29T19:11:25.7108123Z   - waiting for locator("#world .map-understood")
+2026-10-29T19:11:25.7108602Z     2 × locator resolved to <p class="map-understood">…</p>
+2026-10-29T19:11:25.7109194Z       - unexpected value "[스텁] 기록의 요구·보고·구상 줄을 부분으로 놓은 자리예요.기록을 읽고 지도를 갱신하는 중…취소근거"
+2026-10-29T19:11:25.7109731Z     7 × locator resolved to <p class="map-understood">…</p>
+2026-10-29T19:11:25.7112188Z       - unexpected value "[스텁] 기록의 요구·보고·구상 줄을 부분으로 놓은 자리예요.새 기록 1개 읽고 지도 갱신근거서버가 AI 서비스에 연결하지 못했어요."
+2026-10-29T19:11:25.7112680Z
+2026-10-29T19:11:25.7503866Z

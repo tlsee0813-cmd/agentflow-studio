@@ -1,0 +1,42 @@
+[
+  {
+    "os": "linux",
+    "job": {
+      "id": 123669647332,
+      "head_sha": "2697bb57470837f5b4093340c539e70732243f63",
+      "name": "verify (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    "head": "2697bb57470837f5b4093340c539e70732243f63",
+    "logTruncated": true,
+    "summary": [
+      "2026-10-29T19:09:36.5246183Z # tests 617",
+      "2026-10-29T19:09:36.5246364Z # pass 617",
+      "2026-10-29T19:09:36.5246453Z # fail 0",
+      "2026-10-29T19:09:36.5246629Z # skipped 0",
+      "2026-10-29T19:10:27.5434800Z Ran 18 tests in 15.835s",
+      "2026-10-29T19:11:25.7106370Z AssertionError: Locator expected to contain text '첫 부분'"
+    ]
+  },
+  {
+    "os": "windows",
+    "job": {
+      "id": 123669647665,
+      "head_sha": "2697bb57470837f5b4093340c539e70732243f63",
+      "name": "verify (windows-2022)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    "head": "2697bb57470837f5b4093340c539e70732243f63",
+    "logTruncated": true,
+    "summary": [
+      "2026-10-29T19:10:21.6982191Z # tests 617",
+      "2026-10-29T19:10:21.6982345Z # pass 614",
+      "2026-10-29T19:10:21.6982416Z # fail 0",
+      "2026-10-29T19:10:21.6982577Z # skipped 3",
+      "2026-10-29T19:11:59.3955887Z Ran 18 tests in 19.826s",
+      "2026-10-29T19:13:01.9720409Z AssertionError: Locator expected to contain text '첫 부분'"
+    ]
+  }
+]

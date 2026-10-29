@@ -1,0 +1,14 @@
+{
+  "implementationSha": "23aef513cc1214c2f0f21502a37334c22b4a1308",
+  "testSha": "2697bb57470837f5b4093340c539e70732243f63",
+  "rootUIInputProjectSHA256": "dd5b31e0792d71ae5fa1aa625a23a0728e1e6742fee89324140f12f6c60b5e54",
+  "rootUIInputBundleSHA256": "cdf2dc70965e8eaf9c6d701dcef39a022d1baab8e0e0fcf047e4941590f8ba05",
+  "newAskSHA256": "579741cd5aa84d0c6a6b7c0d07e20b8979e88981f450eb702bc143e3f8248e8f",
+  "oldAskSHA256": "8946d3c556105cd269b7853efa10c27067872556d3ddc94a27f57345e323bba7",
+  "askOnlySchemaChanged": true,
+  "replyType": "fresh Root-authored model-free fixture; not edited 115 output",
+  "newPromptSHA256": "73286f8b79e80c132aaa5e891d7955748e30fd21bf9e3e7f641ec37b6e480f4b",
+  "normalizedReading": "R_07925a3a-4f4d-41ec-9455-d48f1284f19e",
+  "unchangedPromptCount": 12,
+  "realModelCalls": 0
+}

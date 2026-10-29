@@ -1,0 +1,41 @@
+{
+  "codeSha": "23aef513cc1214c2f0f21502a37334c22b4a1308",
+  "testsSha": "2697bb57470837f5b4093340c539e70732243f63",
+  "kind": "root normal 1280x720 UI, real preserved records, model-free authored wire",
+  "originalEntry": "E_e40afdc9-323d-4cf7-bc73-7d121421b592",
+  "copyEntry": "E_c7db00c8-b939-44fa-9348-636fb3531061",
+  "job": "MJ_19054683-6824-496f-b956-5d2bc8e03239",
+  "callCount": 1,
+  "realModelCalls": 0,
+  "readyBeforeExplicitApply": {
+    "projectEqual": true,
+    "bundleEqual": true,
+    "reloadRecovered": true
+  },
+  "after": {
+    "schema": "idea015.project.14",
+    "readingVersion": "map-reading.5",
+    "readingsAdded": 1,
+    "originalReadingsEqual": true,
+    "rawRecordsEqual": true,
+    "bundleEqual": true,
+    "conditionsExact": true
+  },
+  "backup": {
+    "exportExact": true,
+    "normalImportExact": true,
+    "pre116ReaderExact": true
+  },
+  "ui": {
+    "codeQuoteExactVisible": true,
+    "sourceMetadataUserDeclared": true,
+    "returnToPart": true,
+    "focusRestoredToEvidenceButton": true
+  },
+  "limits": [
+    "No real generated semantics asserted.",
+    "No independent clickable condition-coordinate UI introduced.",
+    "Old reader checked only normalized project14, not an outstanding raw7 reservation."
+  ],
+  "otherDraft": "116 조건 참조 결과를 기다리는 다른 프로젝트의 초안입니다. 원래 Zephyr 기록이나 요청과 섞이지 않아야 합니다. 이 초안으로 AI를 호출하지 않습니다."
+}

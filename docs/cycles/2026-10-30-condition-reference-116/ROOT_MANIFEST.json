@@ -1,0 +1,80 @@
+{
+  "status": "verification_complete_except_final_ci_not_accepted",
+  "implementation": "23aef513cc1214c2f0f21502a37334c22b4a1308",
+  "tests": "2697bb57470837f5b4093340c539e70732243f63",
+  "fixtureRepair": "a39735bd00e1d629cd9b2ce06532424bfa9a6f35",
+  "realModels": 0,
+  "files": [
+    {
+      "file": "evidence/ci-initial-failure-excerpt.log",
+      "bytes": 3810,
+      "sha256": "d20cfc98fd7e28f80df6c5e3f9bf5dfb352684ce6075c4f376330485f2e6b040",
+      "formatting": "Excerpt line-end whitespace removed only; original captured log kept privately."
+    },
+    {
+      "file": "evidence/ci-initial-failure.json",
+      "bytes": 589,
+      "sha256": "3cace2d721a397c445eebb41db729a050206f278f0518b69d13cc9bfbe21313f"
+    },
+    {
+      "file": "evidence/ci-initial-summary.json",
+      "bytes": 1396,
+      "sha256": "425690e4d4f946557034d11b630e746320f2bf2bc59560b9369b55949bff7718"
+    },
+    {
+      "file": "evidence/fixture-repair-review.json",
+      "bytes": 889,
+      "sha256": "e11012d008e85a3733cd7149bdd891eb47d7dc23c7ad6b1964803b4a7abc8598"
+    },
+    {
+      "file": "evidence/independent-code-review.json",
+      "bytes": 8705,
+      "sha256": "e6253b353eb771795a0e6ef190aaf9b281522cf791ebdaa0d2634d51d96d3f2b"
+    },
+    {
+      "file": "evidence/independent-tests-review.json",
+      "bytes": 8711,
+      "sha256": "841e5fdd6e0a00bab8576ba6c6ce8738736533918d4427032b572efa437949dc"
+    },
+    {
+      "file": "evidence/root-build-check.json",
+      "bytes": 282,
+      "sha256": "ee6f1465c2cc78d208eb58e651491c15205e6e83b0f679e5f3fff7e55498dc8b"
+    },
+    {
+      "file": "evidence/root-code-quote.png",
+      "bytes": 85684,
+      "sha256": "e48873ed59a94bd0463a9272fe02858b8732dd2601777b9b2168392edb1b891d"
+    },
+    {
+      "file": "evidence/root-condition-tests.json",
+      "bytes": 86,
+      "sha256": "bb4ebcc2946cbce1a99ee291db433033b66be85f964f2377a4dd67b39bf15d77"
+    },
+    {
+      "file": "evidence/root-condition-tests.log",
+      "bytes": 1647,
+      "sha256": "eb52bc2d8e46ebc625c510a050fc4be6e590be274cc99a4398a07871c0082e4b"
+    },
+    {
+      "file": "evidence/root-old-prompts.json",
+      "bytes": 1495,
+      "sha256": "8afeb33acbd05c8a9814d19185476063846f7804ac946b0a6fdad80996abdaa5"
+    },
+    {
+      "file": "evidence/root-provenance.json",
+      "bytes": 812,
+      "sha256": "c39b1799848c97a200525c0f1730ddfece87f405fca60e7d0723eb6bb28b7a84"
+    },
+    {
+      "file": "evidence/root-ready-before-apply.png",
+      "bytes": 46245,
+      "sha256": "a1c1ef4965e215eeb9e7b877d118c4dbf91ce9e2b6eeee211ade5bc5d7dd6e1d"
+    },
+    {
+      "file": "evidence/root-ui.json",
+      "bytes": 1467,
+      "sha256": "c41e9ecf1f02c88a9e533ec609b0cb4f15b445054faa6d525c97d719c64d6835"
+    }
+  ]
+}

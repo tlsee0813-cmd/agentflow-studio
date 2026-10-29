@@ -1,0 +1,23 @@
+{
+  "base": "2697bb57470837f5b4093340c539e70732243f63",
+  "commit": "a39735bd00e1d629cd9b2ce06532424bfa9a6f35",
+  "files": [
+    "app/continuity/tests/studio-smoke-server.mjs",
+    "app/continuity/tests/studio_browser.py"
+  ],
+  "writer": "existing Sol High firstmap98_decision",
+  "rootReview": "Read exact two-file diff. map7 dispatch/condition keys added only for7; FIRST6 asserted unchanged; selected-RQ later7 raw condition normalized exactly; no production changes.",
+  "writerReportedChecks": {
+    "nodeSyntax": 0,
+    "pythonAst": 0,
+    "diffCheck": 0,
+    "loopbackHTTP": "map4 FIRST,map5 FIRST,FIRST6,later7 all200 and strict validator; request71 same-record54UTF16 condition normalizes both matches",
+    "browserRuns": 0,
+    "realModels": 0
+  },
+  "rootChecked": {
+    "diffCheck": 0,
+    "productionPathsUnchanged": true
+  },
+  "remaining": "full CI of final branch head"
+}

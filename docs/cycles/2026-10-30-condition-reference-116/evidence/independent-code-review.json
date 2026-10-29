@@ -1,0 +1,71 @@
+{
+  "cycle": 116,
+  "review": "interim-independent-fixed-delta",
+  "base": "db63a42",
+  "head": "23aef513cc1214c2f0f21502a37334c22b4a1308",
+  "verdict": "BOUNDED_NO_ACTIONABLE_P1_P2_FOUND_PENDING_EVIDENCE",
+  "accepted": false,
+  "activity": { "productWrites": 0, "models": 0, "testsOrBuildOrBrowserRuns": 0, "oldFailureWireChangesOrRevalidation": 0, "newResearch": 0 },
+  "findings": [],
+  "verifiedInFixedSource": [
+    {
+      "area": "Raw condition decoder and whole-wire shape",
+      "file": "app/continuity/src/shared/map-reading.ts",
+      "lines": [254, 266, 308, 319, 353, 393],
+      "assessment": "MAP7 alone uses roleAboutAt and the three aboutAt slots. The shared condition decoder admits only a known sent span/range or null, resolves raw text with outer trim, rejects blank or over80/200 UTF-16 content, and never cuts or silently nulls a non-null condition. form() explicitly rejects old keys or absence of the new key; exact object validation handles additional keys. Normalized MapReply still uses the existing about strings/null."
+    },
+    {
+      "area": "Ownership and null role",
+      "file": "app/continuity/src/shared/map-reading.ts",
+      "assessment": "Claim condition owns its claim.at record; candidate statement condition owns statement.at rather than optional candidate.at; match condition owns match.at. Role condition owns one of the actually resolved basis records, and null role with non-null roleAboutAt is refused. This is source-location containment, not automatic proof that a raw passage describes the asserted semantic scope. Mixed-source role honesty remains a prompt/meaning gate."
+    },
+    {
+      "area": "Condition versus material",
+      "file": "app/continuity/src/shared/map-reading.ts",
+      "lines": [433, 473],
+      "assessment": "Every non-null decoded condition is retained locally with its resolved coordinates and appended to contradictions() evidence before material-overlap checks. All four condition slots therefore participate in the existing whole-response material rejection. Conditions are not discarded before that check."
+    },
+    {
+      "area": "FIRST6 and later7 production before hashing",
+      "files": ["app/continuity/src/shared/map-reading.ts", "app/continuity/src/client/map-run.ts"],
+      "assessment": "The builder produces the same map6 shape/record selection first and selects schema7 only after the actual complete ask is known non-FIRST at map-reading.ts:739. It returns the same ask object through MapInput. map-run.ts:118 reads laterPrompt only beside a valid m6 base capability; promptOf at123 selects the actual schema's recipe. Attempt input/prompt are fixed at146 and askHash is computed afterward at149. No post-hash schema substitution was introduced. An actual FIRST retains6 even with later7 advertised."
+    },
+    {
+      "area": "Provider, status and job binding",
+      "files": ["app/continuity/server/studio.mjs", "app/continuity/server/map-jobs.mjs", "app/continuity/src/client/studio-api.ts", "app/continuity/src/shared/map-job.ts"],
+      "assessment": "Base map.prompt remains the unchanged m6 recipe and laterPrompt advertises m7 separately. Standard provider dispatches MAP7_PROMPT only for actual schema7 and includes its anchored evidence hash. run.prompt now receives the validated submitted schema, so job admission compares the matching m6/m7 recipe. JOB_SCHEMAS and binding regex admit7 without a codec change. Status parsing ignores malformed later recipes and only accepts an exact m7 ID beside m6. Existing raw checked wire return behavior is retained, so a client can validate the incoming7 form itself."
+    },
+    {
+      "area": "CLI explicit scope and immutable execution metadata",
+      "file": "docs/cycles/2026-10-29-owned-cli-preview-102/preview/cli-executor.mjs",
+      "assessment": "The new explicit map7-later policy accepts FIRST6 or non-FIRST7 and rejects later6/first7. Old first/map6-later semantics are left on their original branch. instructions(), wrap() and askBinding() choose actual7-later versus6 FIRST/later, retaining exact selected prompt and ask hashes in the established acceptance/spawn checks. The policy hash includes the new scope while preserving the special historical first-policy hashing behavior. Capture/lease/limits/permissions/model/timers were not redesigned."
+    },
+    {
+      "area": "Old wire, prompt and persisted shape",
+      "assessment": "map-prompt.mjs only appends the MAP7 derivation; it does not edit map1-6 exports or the m6 recipe. Guarded string replacements build a separate later7 string and distinguish incoming response keys from stored ask history fields. Existing map1-6 validation branches are unchanged except shared version inclusion and no-op calls outside7. applyReading treats7 as inheriting6 and therefore stores existing map-reading.5 in project14. Project/store validators and source metadata shapes were not changed. No FIRST7 prompt was added."
+    },
+    {
+      "area": "Old ready6 recovery path",
+      "file": "app/continuity/src/client/map-run.ts",
+      "lines": [288, 292, 295],
+      "assessment": "load() still decodes the saved job input, checks its immutable hashes/prompt against its own reservation, validates the raw response using inp.ask, and keeps op.binding.prompt. It does not rebuild from current status or reinterpret a saved6 wire as7. This supports the intended compatibility mechanism; a genuine pre116-produced ready6 recovery witness is still needed before claiming it was exercised."
+    }
+  ],
+  "promptContractAssessment": {
+    "source": "app/continuity/server/map-prompt.mjs MAP7_CONDITIONS/MAP7_PROMPT",
+    "assessment": "The prompt explicitly excludes metadata/current/priors/unsent records as raw conditions, forbids using a dependency/document commit as the supplied file version, defines same-record/basis/null-role ownership, specifies the80/200 non-null rejection bounds and null-with-text/evidence preservation, forbids mixed-source version synthesis, and includes material overlap. Existing source-kind restrictions and complete map6 meaning remain inherited.",
+    "limit": "This is a normative contract implementation. No actual model has demonstrated compliance, and the115 reply remains rejected and unchanged. A null condition can be syntactically lawful while omitting material scope; meaning review must still reject that omission."
+  },
+  "testChangesAtThisCommit": {
+    "observed": "Only existing status assertions in map70/owned-cli102 tests are updated to include the standard provider's optional laterPrompt. Existing FIRST6 expected recipe was not mechanically changed to7. The policy example documents the new opt-in but retains scope:first.",
+    "unfinished": "Dedicated condition-reference tests and a genuine pre116-ready6 fixture are not present in this fixed delta. Parent reports the single author is still writing them. This absence is recorded as incomplete evidence, not a newly discovered implementation failure or an acceptance claim.",
+    "requiredBeforeAcceptance": [
+      "Distinct synthetic positive/negative fixtures for all four slots:80/200 exact boundaries, same-record/basis/null-role, old/new shape mixing, metadata/unknown anchors and material overlap; whole rejection and precise paths.",
+      "Before/after producer fingerprints proving the normal selected-RQ ask differs only in explicitly selected schema/capability identity, with raw source spans, declarations, fullRequests, priors and current understanding preserved. Hash the actual selected schema, not a pre-switch ask.",
+      "Normal client capability matrix and actual bound6-first/7-later prompt selection, plus provider/CLI fake response wiring. No model call is required for these mechanics.",
+      "Genuine ready6 input/wire/reservation produced with pre116 code recovered under later7 advertisement using its saved schema/prompt, without another invocation; project14 apply/reload and old records/bundle exact.",
+      "The selected normal UI delayed-ready→explicit apply→source/back→backup/reload path with a lawful distinct synthetic7 response, including truthful source declarations and retained report/check conditions. Root owns locked compilation/focused checks and actual private backup verification."
+    ]
+  },
+  "conclusion": "No concrete actionable P1/P2 was found in this interim fixed source delta. The main designed boundaries are connected, including actual schema-before-hash selection and saved-schema ready recovery. The implementation is not accepted yet: targeted evidence, genuine old-ready witness, locked checks and final author delta remain outstanding. No model-quality or overall-product completion claim is justified."
+}
