@@ -28,12 +28,14 @@ const procs = new Set(), strays = new Set();
 /** The test's own fake CLI still leads this group (checked by its command line, Linux): only then is the group signalled. */
 const ownFake = pid => { try { return readFileSync(`/proc/${pid}/cmdline`, 'utf8').includes('fake-cli102.mjs'); } catch { return false; } };
 const killOwn = pid => { if (ownFake(pid)) process.kill(-pid, 'SIGKILL'); };
-test.after(() => { for (const p of procs) p.kill('SIGKILL'); for (const g of strays) { try { killOwn(g); } catch { /* gone */ } } });
+// Every fake child ends itself once its control folder says stop-all (no pid needed: the Windows path), checked after each test.
+const ctls = new Set();
+test.after(() => { for (const p of procs) p.kill('SIGKILL'); for (const c of ctls) writeFileSync(join(c, 'stop-all'), ''); for (const g of strays) { try { killOwn(g); } catch { /* gone */ } } });
 const NODE_SHA = createHash('sha256').update(readFileSync(process.execPath)).digest('hex');
 
 function setup() {
   const root = mkdtempSync(join(tmpdir(), 'af102-proc-')), ctl = join(root, 'ctl'), state = join(root, 'state'), store = join(root, 'jobs'), policy = join(root, 'policy.json');
-  mkdirSync(ctl);
+  mkdirSync(ctl); ctls.add(ctl);
   writeFileSync(policy, JSON.stringify({ executor: 'codex-cli-preview.102', exe: process.execPath, binarySha256: NODE_SHA, version: 'fake-cli 102-test', versionArgs: [FAKE, '--version', '--ctl', ctl],
     args: [FAKE, '--ctl', ctl, '--final', '{final}', '--cwd', '{cwd}', '--model', '{model}', '--reasoning', '{reasoning}'], model: 'fake-model-102', reasoning: 'high',
     selectionMs: 60000, verdictMs: 61000 }));
@@ -84,7 +86,12 @@ test('102-P1 the launcher is killed while its child runs: the child outlives it;
   const y = await submission('요구: 재시작 뒤 다른 프로젝트.', 'E_proc0102-02');
   const r = await jcall(a.base, 'POST', '', y.cap, y.body); assert.deepEqual([r.status, r.error.code], [503, 'EXECUTOR_UNSETTLED']);
   assert.equal(invocations(s).length, 1, 'no second child while the first may live');
-  if (process.platform !== 'linux') { await kill(a.proc); return; } // Windows: no probe (P2 covers attestation); the cleanup below checks /proc
+  if (process.platform !== 'linux') {
+    // No probe here (P2 covers attestation). The original child is ended by its own control token and its end is confirmed.
+    await kill(a.proc); writeFileSync(join(s.ctl, 'stop-all'), '');
+    await until(() => existsSync(join(s.ctl, 'exited-1')), 'the original fake child ended itself', 500);
+    return;
+  }
   assert.ok(process.platform !== 'linux' || ownFake(pid)); killOwn(pid); // the test's own fake child, by its command line
   await until(() => !groupAlive(pid), 'old group gone');
   const r2 = await jcall(a.base, 'POST', '', y.cap, y.body); assert.equal(r2.status, 202, 'proven gone (group empty): admitted');

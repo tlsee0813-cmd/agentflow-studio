@@ -5,8 +5,10 @@
 // - on POSIX the child leads its own process group. It is signalled (with its group) only while the leader has not been reaped:
 //   until its exit is seen, its pid and group id cannot belong to anyone else. After that no signal is sent by number at all;
 //   the group is only probed (kill 0), and a member left in it keeps the child "not gone" (fail closed, never killed on a guess);
-// - the decision comes by decideMs at the latest, closed or not (closed:false); `settled` resolves only once the child is gone
-//   (closed, and on POSIX its group empty), so the caller keeps its slot and lease until then;
+// - the decision comes by decideMs at the latest, closed or not (closed:false). A decision without a close cuts this side's pipes
+//   (so nothing here waits on a pipe a leftover process holds); that is not the child's end: `settled` resolves only once the
+//   child is gone (exit seen, and on POSIX its group probed empty; on Windows only a close that came by itself, before any cut),
+//   so the caller keeps its slot and lease until then;
 // - verify(pid), when given, runs before any input is written (the executable image check); a refusal stops the child unfed.
 // Nothing here parses the model's answer; the caller decides on the returned bytes.
 import { spawn } from 'node:child_process';
@@ -32,7 +34,7 @@ export function captureCli({ exe, args, cwd, input, env, signal, selectionMs, de
   const blank = { events, stdout: Buffer.alloc(0), stderr: Buffer.alloc(0), completion: {}, closed: true, started: false, pid: null, pgid: null, elapsedMs: 0, closedAtMs: null, stdoutBytesObserved: 0, stderrBytesObserved: 0 };
   // Nothing starts once the job was called off or its selection time is spent.
   if (signal?.aborted || selectionMs <= 0) { decide({ ...blank, reason: signal?.aborted ? 'CANCELLED' : 'SELECTION_DEADLINE' }); settle({ closed: true, group: 'never-started' }); return { decision, settled, pid: null, pgid: null }; }
-  let outBytes = 0, errBytes = 0, pending = '', reason = null, exited = false, closed = false, decided = false, completion = {}, timer, decideTimer, termTimer, closeTimer, closedAt = null, probe = null, signalled = 0, skipped = 0;
+  let outBytes = 0, errBytes = 0, pending = '', reason = null, exited = false, closed = false, decided = false, cut = false, completion = {}, timer, decideTimer, termTimer, closeTimer, closedAt = null, probe = null, signalled = 0, skipped = 0;
   const child = spawnImpl(exe, args, { cwd, env, windowsHide: true, detached: POSIX, stdio: ['pipe', 'pipe', 'pipe'] });
   const pgid = POSIX && Number.isSafeInteger(child.pid) ? child.pid : null;
   const signalTree = sig => {
@@ -40,18 +42,24 @@ export function captureCli({ exe, args, cwd, input, env, signal, selectionMs, de
     try { if (pgid) process.kill(-pgid, sig); else child.kill(sig); signalled++; } catch { /* already gone */ }
   };
   const result = () => ({ events, stdout: Buffer.concat(stdout), stderr: Buffer.concat(stderr), completion, reason, closed, started: true, pid: child.pid ?? null, pgid,
-    elapsedMs: now() - began, closedAtMs: closedAt, stdoutBytesObserved: outBytes, stderrBytesObserved: errBytes, signals: { sent: signalled, skippedAfterExit: skipped } });
-  const finish = () => { if (decided) return; decided = true; clearTimeout(timer); clearTimeout(decideTimer); clearTimeout(closeTimer); signal?.removeEventListener('abort', onAbort); decide(result()); };
+    elapsedMs: now() - began, closedAtMs: closedAt, stdoutBytesObserved: outBytes, stderrBytesObserved: errBytes, signals: { sent: signalled, skippedAfterExit: skipped }, stdioCut: cut });
+  const finish = () => {
+    if (decided) return; decided = true; clearTimeout(timer); clearTimeout(decideTimer); clearTimeout(closeTimer); signal?.removeEventListener('abort', onAbort);
+    // Decided without a close (by closeMs or decideMs): this side's pipes go now, whatever holds the other end.
+    if (!closed) { cut = true; for (const s of [child.stdin, child.stdout, child.stderr]) s?.destroy(); }
+    decide(result());
+  };
   // Gone: closed (stdio drained, exit seen) and, on POSIX, no member left in its group (probed only).
   const gone = () => {
     if (!closed) return;
+    if (!pgid && cut) return; // Windows, pipes cut by us: a close no longer proves nothing holds them (stays unsettled)
     if (!pgid || !groupAlive(pgid)) { clearInterval(probe); clearTimeout(termTimer); settle({ closed: true, group: pgid ? 'empty' : 'not-tracked' }); return; }
     if (!probe) { probe = setInterval(gone, 50); probe.unref?.(); }
   };
   const stop = why => {
     if (decided) return; reason ??= why;
     const left = Math.max(0, decideMs - (now() - began));
-    if (!closeTimer) closeTimer = setTimeout(() => { if (!closed) for (const s of [child.stdin, child.stdout, child.stderr]) s?.destroy(); finish(); }, Math.min(closeMs, left));
+    if (!closeTimer) closeTimer = setTimeout(finish, Math.min(closeMs, left));
     signalTree('SIGTERM');
     if (!termTimer) { termTimer = setTimeout(() => signalTree('SIGKILL'), termMs); termTimer.unref?.(); }
   };

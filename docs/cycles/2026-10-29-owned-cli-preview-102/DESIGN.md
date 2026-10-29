@@ -17,13 +17,15 @@
 
 ## 시간 정책
 
-- child는 299,000ms 선택 구간 안에 close되어야 한다. 모든 결정(거절·close 미수신 포함)은 300,000ms에서 100ms 여유를 둔 시각까지 내린다. 디스크 ready 저장·OS 종료(settled)는 이 보장 밖이며 따로 관측한다.
+- child는 299,000ms 선택 구간 안에 close되어야 한다. child 결정(거절·close 미수신 포함)은 verdict−100ms, call 전체 verdict(설정·lease 기록·hash·final 읽기가 늦어도)는 verdict−50ms에 내린다. 취소 verdict는 즉시다. 늦게 끝나는 설정·child·final 읽기·정리는 verdict 뒤에도 슬롯·lease·run 폴더를 계속 소유하고, 끝난 뒤에만 해제한다. 디스크 ready 저장·OS 종료(settled)는 이 보장 밖이며 따로 관측한다.
+- close 없이 결정하면 이쪽 pipe만 끊는다(남은 프로세스가 pipe를 쥐어도 대기하지 않음). pipe 처리와 child/group lease는 별개다. Windows에서 pipe를 끊은 뒤의 close는 종료 증거가 아니므로 unsettled로 남는다.
 - lease 기록·binary 재확인 뒤 child를 시작하기 직전에 취소 또는 선택 예산 소진을 다시 보고, 해당하면 child를 시작하지 않는다(lease는 never-started로 해제).
 - CLI 토큰·과금 hard cap은 미확인이다. 출력 byte·시간 제한은 토큰/과금 한도가 아니다.
 
 ## 수명·입장(global 1 / queue 0 / retry 0)
 
 - 실행자 상태 폴더는 job store와 같은 OS 소유권(Linux abstract socket, Windows named pipe)으로 한 프로세스만 연다. 포트가 달라도 같은 상태 폴더면 두 번째 launcher는 실행자 없음이다.
+- close: 먼저 새 입장을 막고, 진행 중 child·설정·정리를 grace까지 기다린 뒤 fence한다. fence 뒤 이 프로세스의 lease 쓰기·삭제는 없다. lease.json 삭제는 그 내용의 leaseId가 자기 것일 때만 한다(100의 old-owner write fence와 같은 종류). 늦게 끝난 옛 child의 lease는 다음 소유자가 판정한다.
 - child(버전 probe 포함)마다 시작 전에 내구 lease를 쓰고, child가 사라졌음이 확인되고 결과 소비가 끝난 뒤에만 lease·run 폴더를 지운다. 이 사이에는 다른 ID도 입장하지 못한다.
 - POSIX: child는 자기 process group의 leader다. 신호는 leader가 reap되기 전(exit 미관측)에만 group에 보낸다. 그 뒤에는 숫자로 신호하지 않고 `kill(-pgid, 0)` probe만 한다. group이 비지 않으면 unsettled로 남는다(fail closed). Windows: child만 종료 요청하고 close로 판단한다(group 추적 없음).
 - 재시작: 남은 lease는 Linux boot_id가 다르거나 POSIX group probe가 ESRCH일 때만 자동 해제한다. pid 없는 lease, Windows의 lease, 손상 lease는 운영자 확인(`reconcile-lease.mjs --attest-closed`, 상태 폴더 소유 중에는 거절) 전까지 모든 새 ID를 거절한다. 100의 interrupted 표시만으로 슬롯을 비우지 않는다. 어떤 lease의 pid/group도 kill하지 않는다.

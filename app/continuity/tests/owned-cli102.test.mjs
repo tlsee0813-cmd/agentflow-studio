@@ -5,7 +5,7 @@
 // HTTP security and the unchanged default path. Separate processes (crash, restart, orphan) are in owned-cli102-process.test.mjs.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { EventEmitter } from 'node:events';
 import { PassThrough } from 'node:stream';
 import { createHash } from 'node:crypto';
@@ -205,21 +205,25 @@ test('102-E7 no close: the job fails at its cutoff, the executor stays closed to
   assert.equal((await statusOf(s.handle)).jobs.executor.state, 'unsettled');
   assert.equal(kids.length, 1, 'no second child');
   kids[0].emit('exit', null, 'SIGKILL'); kids[0].emit('close', null, 'SIGKILL'); // it finally ends
-  if (process.platform === 'win32') await until(() => s.executor.describe().state === 'ready', 'freed by its close');
-  else await until(() => s.executor.describe().state === 'ready', 'freed: closed and its (fake) group is empty');
+  if (process.platform === 'win32') {
+    // Windows has no group to probe and the pipes were cut at the decision: a close now proves nothing, so it stays closed.
+    await new Promise(r => setTimeout(r, 300)); assert.equal(s.executor.describe().state, 'unsettled'); await s.close(); return;
+  }
+  await until(() => s.executor.describe().state === 'ready', 'freed: closed and its (fake) group is empty');
   assert.ok(!existsSync(join(s.state, 'lease.json')));
   assert.equal((await jcall(s.handle, 'POST', '', b.cap, b.body)).status, 202);
   await s.close();
 });
 
 test('102-E13 a process left in the child group holds the pipe: no close, so no answer; stopped at the cutoff with its group', { skip: process.platform === 'win32' && 'process groups are POSIX' }, async () => {
-  const s = await setup({ policy: { selectionMs: 3000, verdictMs: 3100 }, modes: ['grandchild'] }), x = await submission(project());
+  const s = await setup({ policy: { selectionMs: 3000, verdictMs: 3100 }, modes: ['grandchild', 'ok'] }), x = await submission(project());
   assert.equal((await jcall(s.handle, 'POST', '', x.cap, x.body)).status, 202);
   const v = await ended(s.handle, x);
   assert.deepEqual([v.state, v.error.code, v.execution.observed.reason, v.execution.observed.closed], ['failed', 'AI_TIMEOUT', 'SELECTION_DEADLINE', false], 'a complete answer whose pipe never closed is not used');
   assert.ok(v.execution.observed.decidedAtMs <= 3100);
   // The leader was reaped: its number names nothing proven any more, so nothing is signalled by it; the slot stays closed.
   assert.ok(v.execution.observed.signals.sent === 0 && v.execution.observed.signals.skippedAfterExit > 0);
+  assert.equal(v.execution.observed.stdioCut, true, 'decided without a close: this side of the pipes is cut, the lease is not');
   const g = Number(readFileSync(join(s.ctl, 'grandchild-pid'), 'utf8'));
   assert.deepEqual([s.executor.describe().state, s.executor.describe().problem], ['unsettled', 'CHILD_NOT_CLOSED']);
   const y = await submission(project('요구: 다음.'), { entryId: 'E_cli00013-02' });
@@ -269,7 +273,8 @@ test('102-E15 the version probe is a child under the same lease: one that does n
 });
 
 /** A private copy of this Node binary used as the "CLI" (so it can be replaced while the executor is open). */
-function nodeCopy() { const exe = join(mkdtempSync(join(tmpdir(), 'af102-bin-')), 'cli-bin'); copyFileSync(process.execPath, exe); return exe; }
+// Windows starts only a file named .exe: the copy keeps that extension there (the swap below keeps it too).
+function nodeCopy() { const exe = join(mkdtempSync(join(tmpdir(), 'af102-bin-')), process.platform === 'win32' ? 'cli-bin.exe' : 'cli-bin'); copyFileSync(process.execPath, exe); return exe; }
 function replace(exe) { const next = `${exe}.next`; copyFileSync(process.execPath, next); appendFileSync(next, '\n'); renameSync(next, exe); }
 test('102-E16 the binary replaced while open: refused at acceptance; replaced after the pre-start hash: the started image is refused unfed (Linux)', async () => {
   const exe = nodeCopy(); let s = await setup({ policy: { exe } });
@@ -308,6 +313,59 @@ test('102-E17 cancelled or out of selection time while the lease is written: no 
   assert.equal((await jcall(s.handle, 'POST', '', y.cap, y.body)).status, 202);
   const v = await ended(s.handle, y); assert.deepEqual([v.state, v.error.code, v.execution.observed.started], ['failed', 'AI_TIMEOUT', false]);
   assert.equal(invocations(s.ctl).length, 0); assert.equal(s.executor.describe().state, 'ready');
+  await s.close();
+});
+
+test('102-E18 a closed executor is fenced: its child ending later never removes the lease a new owner wrote', async () => {
+  const ctl = mkdtempSync(join(tmpdir(), 'af102-ctl-')), state = mkdtempSync(join(tmpdir(), 'af102-state-')), { spawnImpl, kids } = stuckSpawn();
+  const a = await setup({ ctl, state, spawnImpl, policy: { selectionMs: 1500, verdictMs: 1600 }, termMs: 50, closeMs: 200, hooks: { verifyImage: async () => {} } });
+  const x = await submission(project(), { entryId: 'E_cli00018-01' });
+  assert.equal((await jcall(a.handle, 'POST', '', x.cap, x.body)).status, 202);
+  assert.equal((await ended(a.handle, x)).error.code, 'AI_TIMEOUT'); assert.equal(a.executor.describe().state, 'unsettled');
+  const old = JSON.parse(readFileSync(join(state, 'lease.json'), 'utf8')).lease;
+  await a.close(); // its child is still not gone: the lease stays, the state folder is let go fenced
+  const tool = spawnSync(process.execPath, [fileURLToPath(new URL('../../../docs/cycles/2026-10-29-owned-cli-preview-102/preview/reconcile-lease.mjs', import.meta.url)), '--state', state, '--lease', old.leaseId, '--attest-closed'], { encoding: 'utf8' });
+  assert.equal(tool.status, 0, tool.stderr);
+  const b = await setup({ ctl, state, modes: ['delay:1500'] }); assert.equal(b.executor.describe().state, 'ready');
+  const y = await submission(project(), { entryId: 'E_cli00018-02' });
+  assert.equal((await jcall(b.handle, 'POST', '', y.cap, y.body)).status, 202);
+  await until(() => existsSync(join(ctl, 'stdin-1.sha')), 'the new owner child runs');
+  const mine = JSON.parse(readFileSync(join(state, 'lease.json'), 'utf8')).lease; assert.notEqual(mine.leaseId, old.leaseId);
+  kids[0].emit('exit', null, 'SIGKILL'); kids[0].emit('close', null, 'SIGKILL'); // the old child ends only now
+  await new Promise(r => setTimeout(r, 300));
+  assert.equal(JSON.parse(readFileSync(join(state, 'lease.json'), 'utf8')).lease.leaseId, mine.leaseId, 'the new owner lease is untouched');
+  assert.equal((await ended(b.handle, y)).state, 'ready');
+  await b.close();
+});
+
+test('102-E19 the verdict is due by verdictMs whatever setup or the final read do; what still runs keeps the slot until it ends', async () => {
+  // Setup held (between the lease and the start): a timeout verdict at the deadline, no child after it, the slot held meanwhile.
+  let hold = null; const gate = () => { let open; const p = new Promise(r => { open = r; }); hold = p; return open; };
+  let s = await setup({ policy: { selectionMs: 1500, verdictMs: 1700 }, hooks: { beforeSpawn: async kind => { if (kind === 'job' && hold) await hold; } } });
+  let open = gate(); const x = await submission(project());
+  assert.equal((await jcall(s.handle, 'POST', '', x.cap, x.body)).status, 202);
+  let v = await ended(s.handle, x);
+  assert.deepEqual([v.state, v.error.code, v.execution.observed.phase], ['failed', 'AI_TIMEOUT', 'call-deadline']);
+  assert.ok(v.execution.observed.decidedAtMs <= 1700, `${v.execution.observed.decidedAtMs}`);
+  assert.equal(s.executor.describe().state, 'busy', 'the setup still running holds the slot');
+  const other = await submission(project('요구: 다른 일.'), { entryId: 'E_cli00019-02' });
+  assert.equal((await jcall(s.handle, 'POST', '', other.cap, other.body)).error.code, 'EXECUTOR_BUSY');
+  open(); hold = null;
+  await until(() => s.executor.describe().state === 'ready', 'the late setup saw the spent selection time and started nothing');
+  assert.equal(invocations(s.ctl).length, 0);
+  await s.close();
+  // Final read held: the child closed in time, the verdict still comes by the deadline; the run folder and slot wait for the read.
+  s = await setup({ policy: { selectionMs: 4000, verdictMs: 4300 }, hooks: { beforeFinalRead: async () => { if (hold) await hold; } } });
+  open = gate(); const y = await submission(project());
+  assert.equal((await jcall(s.handle, 'POST', '', y.cap, y.body)).status, 202);
+  v = await ended(s.handle, y);
+  assert.deepEqual([v.state, v.error.code, v.execution.observed.phase], ['failed', 'AI_TIMEOUT', 'call-deadline']);
+  assert.ok(v.execution.observed.decidedAtMs <= 4300, `${v.execution.observed.decidedAtMs}`);
+  assert.equal(invocations(s.ctl).length, 1); assert.equal(readdirSync(join(s.state, 'runs')).length, 1, 'kept while its read is pending');
+  assert.equal(s.executor.describe().state, 'busy');
+  open(); hold = null;
+  await until(() => s.executor.describe().state === 'ready' && readdirSync(join(s.state, 'runs')).length === 0, 'released once the read ended');
+  assert.equal((await jcall(s.handle, 'GET', `/${y.id}`, y.cap)).state, 'failed', 'a late valid read never turns it ready');
   await s.close();
 });
 

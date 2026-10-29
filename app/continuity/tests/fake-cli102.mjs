@@ -23,6 +23,8 @@ appendFileSync(`${ctl}/invocations`, `${JSON.stringify({ n, mode, model: arg('--
   keyInEnv: Object.keys(process.env).some(k => /^(DEEPSEEK_|STUDIO_)/.test(k)), pid: process.pid })}\n`);
 writeFileSync(`${ctl}/pid-${n}`, String(process.pid));
 process.stdout.on('error', () => {}); process.stderr.on('error', () => {});
+// Bounded cleanup without any pid: a test writes <ctl>/stop-all; a waiting child ends itself and says so in <ctl>/exited-<n>.
+const stopWatch = () => setInterval(() => { if (existsSync(`${ctl}/stop-all`)) { writeFileSync(`${ctl}/exited-${n}`, ''); process.exit(0); } }, 50);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const out = s => new Promise(r => process.stdout.write(s, r));
 const chunks = [];
@@ -58,9 +60,9 @@ process.stdin.on('end', async () => {
   if (kind === 'bad-wire') { const w = JSON.parse(reply); w.parts[0].basis = ['N99.0']; await done(JSON.stringify(w)); process.exit(0); }
   if (kind === 'late') {
     // Asked to stop, it still finishes a complete answer a moment later and exits 0 (a reply that comes after the cancel).
-    process.on('SIGTERM', async () => { await sleep(150); await done(); process.exit(0); }); await out(head); setInterval(() => {}, 1000);
+    process.on('SIGTERM', async () => { await sleep(150); await done(); process.exit(0); }); await out(head); stopWatch();
   }
-  if (kind === 'hang') { process.on('SIGTERM', () => {}); await out(head); setInterval(() => {}, 1000); }
+  if (kind === 'hang') { process.on('SIGTERM', () => {}); await out(head); stopWatch(); }
   if (kind === 'grandchild') {
     // Leaves a process in its group that holds stdout open and ignores SIGTERM; the CLI itself ends normally.
     const g = spawn(process.execPath, ['-e', "process.on('SIGTERM',()=>{});setInterval(()=>{},1000)"], { stdio: ['ignore', 'inherit', 'ignore'] }); writeFileSync(`${ctl}/grandchild-pid`, String(g.pid)); g.unref();
