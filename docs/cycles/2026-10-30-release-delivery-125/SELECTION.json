@@ -1,0 +1,42 @@
+{
+  "version": "agentflow.release-selection.125",
+  "decision": "Publish the accepted existing-map package to one new dedicated workers.dev origin, then verify exact public bytes and PC entry. Keep public73 untouched.",
+  "at": "2026-10-29T22:45:18.762Z",
+  "acceptedResult": "e50649b90328895a1f101a679c2657574f13344e",
+  "source": "cfe993f31a8c53284612c22b3ded0c0739257373",
+  "appTree": "a0a56c1cb8f2a1fdde5c7afb136bc248c8b61b6b",
+  "worker": "agentflow-studio-existing-map-124",
+  "url": "https://agentflow-studio-existing-map-124.tlsee0813.workers.dev",
+  "assetsSha256": "ad5af7a029dae3afa5ced7b2b68183abd3839fa45184c64be718e6867f1f4188",
+  "modulesSha256": "1df394bd38dc2ff2cd04deb3d4c01d68be876efb70f88cc09aefba898c5678c9",
+  "storagePrefix": "agentflow.studio.preview:",
+  "public73": {
+    "worker": "agentflow-studio",
+    "source": "26b24b935567a95d101720cbf0e06d188d8765d9",
+    "untouched": true
+  },
+  "config": {
+    "AI_MODE": "deepseek",
+    "DEEPSEEK_MODEL": "deepseek-flash",
+    "accessCode": "existing private value reused, required",
+    "apiKey": "existing private value reused, server binding only",
+    "compatibilityDate": "2026-10-24"
+  },
+  "gates": [
+    "target absent under existing authorized account",
+    "clean pinned cfe993f checkout, reuse existing locked dependencies",
+    "rebuild exact source; compare complete manifest with accepted124 before first mutation",
+    "inspect actual upload metadata/module and asset bytes in guard",
+    "one upload attempt; inspect actual state after unknown outcome instead of blind retry",
+    "all54 served assets SHA match; download27 Worker modules and compare; settings release entry/model/access preserved",
+    "normal PC public home/import/read/request recovery; no new AI generation",
+    "public73 before/after BUILD and source/runtime remain unchanged"
+  ],
+  "excluded": [
+    "public73 replacement",
+    "merge cumulative candidates",
+    "new map6/map7/jobs",
+    "new model experiments",
+    "account switch or dependency reinstall"
+  ]
+}

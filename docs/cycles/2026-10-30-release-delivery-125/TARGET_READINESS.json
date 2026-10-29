@@ -1,0 +1,20 @@
+{
+  "at": "2026-10-29T22:43:39.636Z",
+  "target": "agentflow-studio-existing-map-124",
+  "subdomain": "tlsee0813",
+  "targetAbsent": true,
+  "existingScripts": [
+    "agentflow-studio"
+  ],
+  "publicSource": "AgentFlow Studio 26b24b935567a95d101720cbf0e06d188d8765d9",
+  "publicModel": "deepseek-flash",
+  "keysPresent": true,
+  "accountAndKeysUnchanged": true,
+  "methods": [
+    "GET subdomain",
+    "GET scripts",
+    "GET existing public settings",
+    "GET public BUILD.txt"
+  ],
+  "writes": 0
+}
