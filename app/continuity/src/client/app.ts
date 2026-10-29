@@ -1347,7 +1347,8 @@ function renderLens() {
         menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e: Event) => { ((e.currentTarget as HTMLElement).parentElement as HTMLDetailsElement).open = false; } }, ...menuItems)) : null,
         h('button', { type: 'button', class: 'rail-toggle', 'aria-label': '읽기면 접기', 'aria-expanded': 'true', title: '읽기면 접기 · 지도를 넓게 봐요', onclick: () => setRail(true) }, railIcon(true)),
         h('button', { type: 'button', class: 'close', 'aria-label': '선택 해제', title: '닫기 (Esc)', onclick: () => go(o.key) }, '×'))),
-    h('div', { class: 'lens-body' }, desc, ...ports, claims, requested, innerSection, inside),
+    // The current statements read right after the description they may qualify; the lines to other parts follow them.
+    h('div', { class: 'lens-body' }, desc, claims, ...ports, requested, innerSection, inside),
     h('footer', { class: 'lens-foot' },
       h('button', { type: 'button', class: 'lens-more', onclick: () => openSheet() }, records.length ? `근거·기록 ${records.length}` : '전체 읽기', thread ? ` · 정리 ${thread}` : '', h('span', { 'aria-hidden': 'true' }, ' ›')),
       status.ai === 'deepseek' ? h('button', { type: 'button', class: 'link-button', onclick: () => { composerOpen = true; openSheet(() => document.getElementById(status.access === 'code' && !sessionCode() ? 'access-code' : 'ask-input')?.focus()); } }, '질문하기') : null));
@@ -1914,6 +1915,15 @@ function refreshUnderstood() {
   titleH = o.view.parts.length ? t.offsetHeight : 0;
   if (titleH !== hBefore) { lay.bounds = { ...core }; withTitle(); positionWorld(); }
 }
+/** The server's status came after the open project was drawn: its empty map's entry and the title's line say now what a reading
+ * can do (the same mapRun.can/input/blocked as a click; nothing starts or moves). Only the project open now, in place: a focus
+ * inside them stays on the same action, and its selection, panes and camera are not touched. */
+function statusArrived() {
+  const a = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  const near = a?.closest<HTMLElement>('#space-empty, #world .map-title') ?? null, text = a?.textContent ?? '';
+  renderMapEntry(); refreshUnderstood();
+  if (near?.isConnected && a && !a.isConnected) [...near.querySelectorAll<HTMLElement>('button')].find(x => x.textContent === text)?.focus();
+}
 /** An empty saved map: records are the first way in (pasting saves only; reading sends, and says so), adding a part by hand is
  * the other. A project with records already can start from them without pasting again. */
 function renderMapEntry() {
@@ -2384,7 +2394,7 @@ async function main() {
   $('add-part').addEventListener('click', () => openPartForm(scope));
   $('plan-entry').addEventListener('click', () => planView.toggle());
   $('return-entry').addEventListener('click', () => { if (returnView.isOpen() && !planView.isOpen()) returnView.close(); else openReturn(); });
-  statusReady = aiStatus().then(s => { status = s; renderStatus(); planView.statusChanged(); refreshReading(); if (!selected && !planView.isOpen()) returnView.render(); mapRun.resume(); });
+  statusReady = aiStatus().then(s => { status = s; renderStatus(); planView.statusChanged(); refreshReading(); statusArrived(); if (!selected && !planView.isOpen()) returnView.render(); mapRun.resume(); });
   // AF100: a reservation another tab of this address made (or ended) is looked at now, not at this page's next click.
   window.addEventListener('storage', e => { if (e.key?.endsWith(JOBS_KEY)) void statusReady?.then(() => mapRun.resume()); });
   window.addEventListener('hashchange', () => void render());
