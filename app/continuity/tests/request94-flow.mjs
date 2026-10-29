@@ -157,7 +157,9 @@ async function flow(browser, base, [w, hgt]) {
   const u01 = sheet.locator('[data-ref="U01"]');
   await u01.locator('button').click();
   assert.equal(await u01.locator('button').getAttribute('aria-expanded'), 'true');
-  assert.equal(await u01.locator('.rq-text').textContent(), text.slice(spans.find(x => x.ref === 'U01').titleEnd + ' · report\n'.length, spans.find(x => x.ref === 'U01').end - 2));
+  const u = spans.find(x => x.ref === 'U01');
+  assert.deepEqual([u.source, u.title, u.basis, u.length], [U01.kind, U01.title, U01.basis, U01.text.length], 'frozen as the pasted material');
+  assert.equal(await u01.locator('.rq-text').textContent(), text.slice(u.start + `[U01] ${u.title} · report\n`.length, u.end - 2));
   assert.ok((await u01.locator('.rq-text').textContent()).includes('유지할 조건:\n- [테스트] 가짜 유지'));
   assert.equal((await ev(FOCUSED))[1], 'mat-U01');
   await body.evaluate(b => { b.scrollTop = Math.floor((b.scrollHeight - b.clientHeight) / 2); });

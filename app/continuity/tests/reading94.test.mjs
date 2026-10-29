@@ -62,18 +62,25 @@ test('94 a reading out of place is refused whole, never trimmed or repaired', ()
     'section missing': r => { r.spans[1].end = r.spans[2].end; r.spans.splice(2, 1); },
     'section twice': r => { r.spans[2].kind = 'selected'; },
     'review-unknowns dropped into unknowns': r => { r.spans[5].end = r.spans[6].end; r.spans.splice(6, 1); },
-    'material split at its fake heading': r => { const m = r.spans[at('material:N01')], cut = base.text.indexOf('[N02] 가짜 자료', m.start); r.spans.splice(at('material:N01') + 1, 0, { kind: 'material', start: cut, end: m.end, ref: 'N02x', source: 'user', titleEnd: cut + 12 }); m.end = cut; },
+    'material split at its fake heading': r => { const m = r.spans[at('material:N01')], cut = base.text.indexOf('[N02] 가짜 자료', m.start); r.spans.splice(at('material:N01') + 1, 0, { kind: 'material', start: cut, end: m.end, ref: 'N02x', source: 'user', title: '가짜 자료', basis: '가짜', length: m.end - 2 - (cut + '[N02] 가짜 자료 · user\n자료 기준: 가짜\n'.length) }); m.end = cut; },
     'material ref twice': r => { r.spans[at('material:N03')].ref = 'N02'; },
     'material ref not its own': r => { r.spans[at('material:N03')].ref = 'N05'; },
     'material kind changed': r => { r.spans[at('material:N03')].source = 'code'; },
-    'title end off by one': r => { r.spans[at('material:N03')].titleEnd += 1; },
-    'title end inside an emoji': r => { r.spans[at('material:N02')].titleEnd = emoji + 1; },
+    'title not its own': r => { r.spans[at('material:N03')].title = '반복 보고 '; },
+    'basis not its own': r => { r.spans[at('material:N03')].basis = '다른 기준'; },
+    'length one short': r => { r.spans[at('material:N03')].length -= 1; },
+    'length one long': r => { r.spans[at('material:N03')].length += 1; },
+    'length not an integer': r => { r.spans[at('material:N03')].length += 0.5; },
+    'title empty': r => { r.spans[at('material:N03')].title = ''; },
+    'material keys of .1': r => { const m = r.spans[at('material:N03')]; delete m.title; delete m.basis; delete m.length; m.titleEnd = m.start + 10; },
+    'version .1': r => { r.version = 'request-reading.1'; },
+    'boundary inside an emoji (title)': r => { const m = r.spans[at('material:N02')]; m.title = base.text.slice(m.start + 6, emoji + 1); },
     'boundary inside an emoji': r => { r.spans[at('material:N02')].end = emoji + 1; r.spans[at('material:N03')].start = emoji + 1; },
     'a selected source not listed': r => { r.spans.splice(at('material:N02'), 1); r.spans[at('material:N01')].end = r.spans[at('material:N01') + 1].start; },
     'no material at all': r => { const first = at('material:INTENT'); r.spans[first - 1].end = r.spans.at(-2).end; r.spans.splice(first, r.spans.length - 1 - first); },
     'extra key': r => { r.spans[0].note = 'x'; },
     'extra top key': r => { r.text = 'x'; },
-    'version': r => { r.version = 'request-reading.2'; },
+    'version': r => { r.version = 'request-reading.3'; },
     'not a list': r => { r.spans = {}; },
   };
   for (const [name, breakIt] of Object.entries(broken)) {
@@ -161,4 +168,79 @@ test('94 a malformed reading in a .4 store or file is refused whole: raw kept, n
   // Dropping the reading of a .4 document is a pre-94 shape: still read, as its plain text (never given a reading back).
   const plain = structuredClone(b); delete plain.snapshots[0].reading;
   assert.equal(Object.hasOwn(parseBundle(plain, PROJECT).snapshots[0], 'reading'), false);
+});
+
+// DELTA1 C1 (independent review's material probe): the official reviewed-all-material text kept as is, only its reading changed.
+// INTENT is stretched to the fake '[N02] 가짜 자료 · user' heading inside N01 (849), N01 is dropped and N02 starts there as a
+// user material, its end and every other range kept. Its pieces still join to the same text; it must be refused at every boundary.
+test('94 DELTA1 a material list re-cut at a heading inside material text is refused at the snapshot, bundle, file and store', () => {
+  const base = made('reviewed-all-material'), at = (r, ref) => r.spans.findIndex(x => x.ref === ref);
+  const cut = base.text.indexOf('[N02] 가짜 자료 · user', base.reading.spans[at(base.reading, 'N01')].start);
+  assert.equal(cut, 849, 'the probe\'s offset');
+  const fakeHead = '[N02] 가짜 자료 · user\n자료 기준: 가짜\n';
+  const recut = (r, n02) => {
+    const intent = r.spans[at(r, 'INTENT')], n2 = r.spans[at(r, 'N02')];
+    intent.end = cut; r.spans.splice(at(r, 'N01'), 1);
+    Object.assign(n2, { start: cut }, n02(n2));
+  };
+  const variants = {
+    // the probe itself, in this version's fields: N02 named and typed as the fake heading says, INTENT and N02 lengths as frozen
+    'probe: fake title/kind/basis': r => recut(r, () => ({ source: 'user', title: '가짜 자료', basis: '가짜' })),
+    'probe: lengths made to fit the cut': r => { recut(r, n2 => ({ source: 'user', title: '가짜 자료', basis: '가짜', length: n2.end - 2 - (cut + fakeHead.length) }));
+      const intent = r.spans[at(r, 'INTENT')]; intent.length = cut - 2 - (intent.start + `[INTENT] ${intent.title} · user\n자료 기준: ${intent.basis}\n`.length); },
+    'probe: N02 keeps its frozen name': r => recut(r, () => ({})),
+    'N01 folded into INTENT': r => { const i = at(r, 'INTENT'); r.spans[i].end = r.spans[i + 2].start; r.spans.splice(i + 1, 1); },
+    'all material folded into one': r => { const i = at(r, 'INTENT'); r.spans[i].end = r.spans.at(-1).start; r.spans.splice(i + 1, r.spans.length - 2 - i); },
+  };
+  const project = { id: PROJECT, name: '표본' };
+  for (const [name, change] of Object.entries(variants)) {
+    const s = structuredClone(base); change(s.reading);
+    assert.equal(s.reading.spans.map(x => s.text.slice(x.start, x.end)).join(''), s.text, `${name}: still the same text`);
+    assert.throws(() => validateReading(s.reading, { ...s, items: s.scope.items, sources: s.scope.items.flatMap(i => i.sources) }), name);
+    assert.throws(() => C.compareResults(s, []), name);
+    const b = bundleOf(s, 'reviewed');
+    assert.throws(() => parseBundle(b, PROJECT), name);
+    assert.equal(typeof readPlanFile(planFile(b, project), PROJECT), 'string', name);
+    const raw = JSON.stringify({ version: 'studio.plans.4', projects: { [PROJECT]: b } }), store = kv({ [PLANS_KEY]: raw });
+    assert.equal(loadBundle(store, PROJECT).unreadable, true, name); assert.equal(store.m.get(PLANS_KEY), raw, name);
+  }
+  // The listed materials are the review's whole input as frozen: id, kind, title, basis and length each, in order.
+  assert.deepEqual(base.reading.spans.filter(x => x.kind === 'material').map(({ ref, source, title, basis, length }) => [ref, source, title, basis, length]),
+    cases().find(c => c.name === 'reviewed-all-material').plan.evidence.map(e => [e.id, e.kind, e.title, e.basis, e.text.length]));
+});
+
+// DELTA1 C2 (independent review's store probe): project keys that are names on Object.prototype.
+test('94 DELTA1 project keys toString, constructor and __proto__ are ordinary entries: own markers only, no default to .4', () => {
+  const ids = ['toString', 'constructor', '__proto__'];
+  const memo = new Map(), claimed = id => { if (!memo.has(id)) { const b = bundleOf(made('reviewed-all-material'), 'reviewed'); b.snapshots[0].scope.projectId = id; memo.set(id, b); } return structuredClone(memo.get(id)); };
+  for (const id of ids) assert.equal(parseBundle(claimed(id), id).snapshots.length, 1, `${id}: read under .4 rules`);
+  // A .3 envelope (no markers) holding a reading under each key: refused by its own version, before and after a sibling's save.
+  const projects = Object.fromEntries(ids.map(id => [id, claimed(id)])), plain = { ...emptyBundle('구판 초안') }; delete plain.authoring;
+  const raw3 = JSON.stringify({ version: 'studio.plans.3', projects: { ...projects, P_sib: plain } });
+  assert.ok(raw3.includes('"__proto__":{'), 'the probe key is in the stored JSON');
+  const store = kv({ [PLANS_KEY]: raw3 });
+  for (const id of ids) assert.equal(loadBundle(store, id).unreadable, true, `${id} under .3`);
+  assert.deepEqual(loadBundle(store, 'P_sib').bundle, plain);
+  assert.equal(saveBundle(store, 'P_new', emptyBundle('새')), null);
+  const up = JSON.parse(store.m.get(PLANS_KEY));
+  assert.deepEqual(Object.entries(up.legacy).sort(), [...ids, 'P_sib'].map(id => [id, 'studio.plans.3']).sort());
+  for (const id of ids) { assert.equal(loadBundle(store, id).unreadable, true, `${id} after the envelope moved to .4`); assert.deepEqual(up.projects[id], projects[id]); }
+  assert.deepEqual(loadBundle(store, 'P_sib').bundle, plain); assert.equal(loadBundle(store, 'P_new').unreadable, false);
+  // A save of a sibling again keeps every marker; the envelope stays readable.
+  assert.equal(saveBundle(store, 'P_sib', { ...plain, draft: '고침' }), null);
+  for (const id of ids) assert.equal(loadBundle(store, id).unreadable, true, `${id} after a second save`);
+  assert.equal(loadBundle(store, 'P_sib').unreadable, false); assert.equal(loadBundle(store, 'P_new').unreadable, false);
+  // Written by .4 under those keys: kept as own entries, read back, and their markers end on write.
+  const fresh = kv();
+  for (const id of ids) assert.equal(saveBundle(fresh, id, claimed(id)), null);
+  for (const id of ids) assert.deepEqual(loadBundle(fresh, id), { bundle: claimed(id), unreadable: false }, id);
+  assert.deepEqual(Object.keys(JSON.parse(fresh.m.get(PLANS_KEY)).projects).sort(), [...ids].sort());
+  assert.equal(saveBundle(store, '__proto__', claimed('__proto__')), null);
+  assert.equal(loadBundle(store, '__proto__').unreadable, false); assert.equal(Object.hasOwn(JSON.parse(store.m.get(PLANS_KEY)).legacy, '__proto__'), false);
+  // Absent keys under those names read as nothing kept, not as an inherited entry.
+  for (const id of ids) assert.deepEqual(loadBundle(kv({ [PLANS_KEY]: JSON.stringify({ version: 'studio.plans.4', projects: {} }) }), id), { bundle: emptyBundle(), unreadable: false });
+  // Ordinary .1/.2/.3 entries still read by their own version; a marker that is not a version is not read.
+  const marked = v => kv({ [PLANS_KEY]: JSON.stringify({ version: 'studio.plans.4', projects: { toString: claimed('toString') }, legacy: { toString: v } }) });
+  for (const v of ['studio.plans.1', 'studio.plans.2', 'studio.plans.3', 'studio.plans.4', {}, null]) assert.equal(loadBundle(marked(v), 'toString').unreadable, true, String(v));
+  assert.equal(loadBundle(kv({ [PLANS_KEY]: JSON.stringify({ version: 'studio.plans.2', projects: { constructor: plain } }) }), 'constructor').unreadable, false);
 });

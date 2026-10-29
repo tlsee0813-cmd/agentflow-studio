@@ -102,13 +102,20 @@ export function parseBundle(v: unknown, projectId: string, from: BundleFrom = 4)
  * Writing a project's bundle (or setting it aside) ends its marker; nothing else changes it. */
 type LegacyVersion = 'studio.plans.1' | 'studio.plans.2' | 'studio.plans.3';
 const LEGACY_VERSIONS: readonly string[] = ['studio.plans.1', 'studio.plans.2', 'studio.plans.3'];
-const FROM: Record<LegacyVersion, BundleFrom> = { 'studio.plans.1': 1, 'studio.plans.2': 2, 'studio.plans.3': 3 };
+/** Maps keyed by project id hold own entries only: an id such as toString, constructor or __proto__ is an ordinary entry, never
+ * something inherited (read as a marker) or a prototype (written as one). */
+const own = <T>(o: Record<string, T>): Record<string, T> => Object.assign(Object.create(null) as Record<string, T>, o);
+/** The version an entry is read by: its own marker, by an explicit mapping; no marker is .4. Anything else is not a marker. */
+function fromMarker(env: Envelope, id: string): BundleFrom {
+  if (!env.legacy || !Object.hasOwn(env.legacy, id)) return 4;
+  switch (env.legacy[id]) { case 'studio.plans.1': return 1; case 'studio.plans.2': return 2; case 'studio.plans.3': return 3; default: fail(); }
+}
 type Envelope = { version: typeof ENVELOPE; projects: Record<string, unknown>; legacy?: Record<string, LegacyVersion> };
 type Read = { ok: true; env: Envelope; raw: string | null } | { ok: false; raw: string };
 function readEnvelope(kv: StorageLike): Read {
   let raw: string | null;
   try { raw = kv.getItem(PLANS_KEY); } catch { return { ok: false, raw: '' }; }
-  if (raw === null) return { ok: true, env: { version: ENVELOPE, projects: {} }, raw };
+  if (raw === null) return { ok: true, env: { version: ENVELOPE, projects: own({}) }, raw };
   try {
     const v = JSON.parse(raw);
     if (!isObj(v) || !isObj(v.projects)) return { ok: false, raw };
@@ -116,16 +123,16 @@ function readEnvelope(kv: StorageLike): Read {
     // before .4 has a reading. Never backfill any of them from today's plan or screen. Other projects' entries are written back
     // exactly as they were read, with their provenance.
     if (v.version === 'studio.plans.1' || v.version === 'studio.plans.2') {
-      const projects = v.projects;
-      return { ok: true, env: { version: ENVELOPE, projects, legacy: Object.fromEntries(Object.keys(projects).map(id => [id, v.version as LegacyVersion])) }, raw };
+      const projects = own(v.projects);
+      return { ok: true, env: { version: ENVELOPE, projects, legacy: own(Object.fromEntries(Object.keys(projects).map(id => [id, v.version as LegacyVersion]))) }, raw };
     }
     // A .3 envelope could mark only .1/.2 entries; .4 also .3 ones.
     const three = v.version === 'studio.plans.3', marks = three ? LEGACY_VERSIONS.slice(0, 2) : LEGACY_VERSIONS;
     if ((!three && v.version !== ENVELOPE) || !Object.keys(v).every(k => ['version', 'projects', 'legacy'].includes(k))) return { ok: false, raw };
     const legacy = v.legacy ?? {};
     if (!isObj(legacy) || !Object.entries(legacy).every(([id, ver]) => Object.hasOwn(v.projects as object, id) && marks.includes(ver as string))) return { ok: false, raw };
-    const kept = three ? Object.fromEntries(Object.keys(v.projects).map(id => [id, (legacy[id] ?? 'studio.plans.3') as LegacyVersion])) : legacy as Record<string, LegacyVersion>;
-    return { ok: true, env: { version: ENVELOPE, projects: v.projects, legacy: kept }, raw };
+    const kept = three ? Object.fromEntries(Object.keys(v.projects).map(id => [id, (Object.hasOwn(legacy, id) ? legacy[id] : 'studio.plans.3') as LegacyVersion])) : legacy as Record<string, LegacyVersion>;
+    return { ok: true, env: { version: ENVELOPE, projects: own(v.projects), legacy: own(kept) }, raw };
   } catch { return { ok: false, raw }; }
 }
 /** The envelope as written: its legacy markers only while there are any. */
@@ -139,8 +146,7 @@ export function loadBundle(kv: StorageLike, projectId: string): Loaded {
   const r = readEnvelope(kv);
   if (!r.ok) return { bundle: emptyBundle(), unreadable: true };
   if (!Object.hasOwn(r.env.projects, projectId)) return { bundle: emptyBundle(), unreadable: false };
-  const marker = r.env.legacy?.[projectId];
-  try { return { bundle: parseBundle(r.env.projects[projectId], projectId, marker ? FROM[marker] : 4), unreadable: false }; }
+  try { return { bundle: parseBundle(r.env.projects[projectId], projectId, fromMarker(r.env, projectId)), unreadable: false }; }
   catch { return { bundle: emptyBundle(), unreadable: true }; }
 }
 

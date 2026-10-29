@@ -5,14 +5,18 @@
  * text (its own headings, repeated lines, Markdown, a pasted request) never makes a section: ranges are recorded while the text is
  * written, never found again by searching it. Documents made before have no reading and are read as their whole text. */
 
-export const READING_VERSION = 'request-reading.1';
+/* .2: each material also carries its frozen title, basis and text length (.1 carried only where its title ended, so a range
+ * re-cut at a heading inside material text could pass as another material, or a material could fold into its neighbour). */
+export const READING_VERSION = 'request-reading.2';
 /** Every kind of material the generator can list (change-plan's Evidence kinds). */
 export const MATERIAL_KINDS = ['user', 'report', 'code', 'test', 'record', 'reading'] as const;
 export type MaterialKind = typeof MATERIAL_KINDS[number];
 export type SectionKind = 'head' | 'selected' | 'excluded' | 'prerequisites' | 'preserve' | 'unknowns' | 'review-unknowns' | 'materials' | 'closing';
 export interface SectionSpan { kind: SectionKind; start: number; end: number }
-/** One listed material: its id, its kind and where its title ends (the title is the text between `[ref] ` and titleEnd). */
-export interface MaterialSpan { kind: 'material'; start: number; end: number; ref: string; source: MaterialKind; titleEnd: number }
+/** One listed material as the generator knew it when writing: id, kind, title, basis and the length of its text. Its range is then
+ * exactly `[ref] title · kind`, `자료 기준: basis`, that many code units of text and the blank line: each checked against the
+ * text, so these fields are the text's own words, not a second copy that could say something else. */
+export interface MaterialSpan { kind: 'material'; start: number; end: number; ref: string; source: MaterialKind; title: string; basis: string; length: number }
 export type ReadingSpan = SectionSpan | MaterialSpan;
 export interface RequestReading { version: typeof READING_VERSION; spans: ReadingSpan[] }
 
@@ -34,20 +38,23 @@ export const closingLine = (id: string) => `결과에 이 요청문 참조 ${id}
 export const materialHead = (ref: string, title: string, source: string) => `[${ref}] ${title} · ${source}`;
 
 /** Where each section starts, as the generator writes lines (joined by '\n'): a mark names the line its section begins at. */
-export type ReadingMark = { kind: SectionKind; line: number } | { kind: 'material'; line: number; ref: string; source: MaterialKind; title: string };
+export type ReadingMark = { kind: SectionKind; line: number } | { kind: 'material'; line: number; ref: string; source: MaterialKind; title: string; basis: string; length: number };
 export function frozenReading(lines: readonly string[], marks: readonly ReadingMark[]): RequestReading {
   const at: number[] = [0];
   for (const line of lines) at.push(at.at(-1)! + line.length + 1);
   const length = Math.max(0, at.at(-1)! - 1);
   const spans = marks.map((m, i): ReadingSpan => {
     const start = at[m.line]!, end = i + 1 < marks.length ? at[marks[i + 1]!.line]! : length;
-    return m.kind === 'material' ? { kind: 'material', start, end, ref: m.ref, source: m.source, titleEnd: start + `[${m.ref}] `.length + m.title.length } : { kind: m.kind, start, end };
+    return m.kind === 'material' ? { kind: 'material', start, end, ref: m.ref, source: m.source, title: m.title, basis: m.basis, length: m.length } : { kind: m.kind, start, end };
   });
   return { version: READING_VERSION, spans };
 }
 
-/** What the reading is checked against: the snapshot's own text and the frozen fields beside it. */
-export interface ReadingFrame { id: string; basis: string; planId: string; planRevision: number; text: string; items: { title: string; description: string }[]; sources: string[] }
+/** What the reading is checked against: the snapshot's own text and the frozen fields beside it (its scope: the selected items
+ * and their sources' ids, titles and bases, frozen at the same moment). */
+export interface ReadingFrame { id: string; basis: string; planId: string; planRevision: number; text: string; items: { title: string; description: string }[]; sources: { id: string; title: string; basis: string }[] }
+const materialHeadLines = (m: Pick<MaterialSpan, 'ref' | 'title' | 'source' | 'basis'>) => `${materialHead(m.ref, m.title, m.source)}\n자료 기준: ${m.basis}\n`;
+const field = (v: unknown, max: number): v is string => typeof v === 'string' && v.length > 0 && v.length <= max && !!v.trim();
 const ORDER: readonly SectionKind[] = ['head', 'selected', 'excluded', 'prerequisites', 'preserve', 'unknowns'];
 const MAX_SPANS = 9 + 64;
 function check(condition: unknown): asserts condition { if (!condition) throw new Error('INVALID_REQUEST_READING'); }
@@ -65,20 +72,22 @@ export function validateReading(value: unknown, frame: ReadingFrame): RequestRea
   const spans = value.spans;
   check(Array.isArray(spans) && spans.length >= ORDER.length + 3 && spans.length <= MAX_SPANS);
   let at = 0;
-  const refs = new Set<string>();
+  const refs = new Map<string, MaterialSpan>();
   for (const span of spans) {
     check(isObj(span));
     const material = span.kind === 'material';
-    check(exactKeys(span, material ? ['kind', 'start', 'end', 'ref', 'source', 'titleEnd'] : ['kind', 'start', 'end']));
+    check(exactKeys(span, material ? ['kind', 'start', 'end', 'ref', 'source', 'title', 'basis', 'length'] : ['kind', 'start', 'end']));
     check(int(span.start) && int(span.end) && span.start === at && span.end > span.start && span.end <= text.length && !splits(text, span.start));
     at = span.end;
     if (material) {
-      check(typeof span.ref === 'string' && /^[A-Za-z0-9_-]{1,100}$/.test(span.ref) && !refs.has(span.ref)); refs.add(span.ref);
-      check(MATERIAL_KINDS.includes(span.source as MaterialKind));
-      const titleAt = span.start + `[${span.ref}] `.length;
-      check(int(span.titleEnd) && span.titleEnd > titleAt && span.titleEnd < span.end && !splits(text, span.titleEnd));
-      check(text.slice(span.start, titleAt) === `[${span.ref}] ` && text.startsWith(` · ${span.source as string}\n자료 기준: `, span.titleEnd));
-      check(text.slice(span.start, span.end).endsWith('\n\n'));
+      check(typeof span.ref === 'string' && /^[A-Za-z0-9_-]{1,100}$/.test(span.ref) && !refs.has(span.ref));
+      check(MATERIAL_KINDS.includes(span.source as MaterialKind) && field(span.title, 200) && field(span.basis, 2000) && int(span.length) && span.length > 0);
+      const m = span as unknown as MaterialSpan, head = materialHeadLines(m), body = m.start + head.length;
+      // One to one: this material's own lines, exactly its frozen length of text, then the blank line. Nothing is looked up by
+      // searching the text; a heading inside material text cannot start a range that its frozen fields do not describe.
+      check(text.startsWith(head, m.start) && m.end === body + m.length + 2 && text.slice(m.end - 2, m.end) === '\n\n');
+      check(!splits(text, body) && !splits(text, m.end - 2));
+      refs.set(m.ref, m);
     }
   }
   check(at === text.length);
@@ -97,8 +106,9 @@ export function validateReading(value: unknown, frame: ReadingFrame): RequestRea
   if (reviewed) block(6, LINE.reviewUnknowns, '- ');
   check(slice(head.length - 1) === `${reviewed ? LINE.reviewedMaterials : LINE.relatedMaterials}\n`);
   check(slice(spans.length - 1) === closingLine(frame.id));
-  // Every frozen item's sources are among the listed material; a review lists more (its whole input), never fewer.
-  check(frame.sources.every(ref => refs.has(ref)));
+  // Every frozen item's source is listed as itself (same title and basis as frozen in the scope); a review lists more (its
+  // whole input), never fewer.
+  check(frame.sources.every(src => { const m = refs.get(src.id); return !!m && m.title === src.title && m.basis === src.basis; }));
   return structuredClone(value as unknown as RequestReading);
 }
 export const reviewedReading = (r: RequestReading) => r.spans.some(s => s.kind === 'review-unknowns');
@@ -116,9 +126,9 @@ export interface ReadingPart {
 export function readingParts(text: string, reading: RequestReading): ReadingPart[] {
   return reading.spans.map(span => {
     const all = text.slice(span.start, span.end), gapLength = span.kind === 'closing' || span.kind === 'materials' ? 0 : 2;
-    const headEnd = span.kind === 'material' ? span.titleEnd - span.start + ` · ${span.source}\n`.length : span.kind === 'closing' ? 0 : all.indexOf('\n') + 1;
+    const headEnd = span.kind === 'material' ? materialHead(span.ref, span.title, span.source).length + 1 : span.kind === 'closing' ? 0 : all.indexOf('\n') + 1;
     const part: ReadingPart = { kind: span.kind, start: span.start, heading: all.slice(0, headEnd), body: all.slice(headEnd, all.length - gapLength), gap: all.slice(all.length - gapLength) };
-    if (span.kind === 'material') part.material = { ref: span.ref, source: span.source, title: text.slice(span.start + `[${span.ref}] `.length, span.titleEnd) };
+    if (span.kind === 'material') part.material = { ref: span.ref, source: span.source, title: text.slice(span.start + `[${span.ref}] `.length, span.start + `[${span.ref}] `.length + span.title.length) };
     return part;
   });
 }

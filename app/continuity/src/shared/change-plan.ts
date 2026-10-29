@@ -165,7 +165,7 @@ export function revisePlan(plan: ChangePlan, analysis: PlanAnalysis): ChangePlan
 }
 
 const readingFrame = (s: Pick<RequestSnapshot, 'id' | 'basis' | 'planId' | 'planRevision' | 'text'>, scope: FrozenRequest) => ({ id: s.id, basis: s.basis, planId: s.planId,
-  planRevision: s.planRevision, text: s.text, items: scope.items, sources: [...new Set(scope.items.flatMap(i => i.sources.map(x => x.id)))] });
+  planRevision: s.planRevision, text: s.text, items: scope.items, sources: scope.items.flatMap(i => i.sources) });
 /** A generated document is a snapshot, not a sent request or an execution record. */
 export function requestSnapshot(plan: ChangePlan, review?: ScopeReview): RequestSnapshot {
   const p = validatedPlan(plan), selected = p.analysis.items.filter(item => p.selected.includes(item.id));
@@ -203,7 +203,7 @@ export function requestSnapshot(plan: ChangePlan, review?: ScopeReview): Request
   section('materials', scoped ? LINE.reviewedMaterials : LINE.relatedMaterials);
   // Summary and unknowns may refer to material not cited by a prerequisite. Preserve the full frozen review input.
   for (const e of p.evidence.filter(e => scoped || usedRefs.has(e.id))) {
-    marks.push({ kind: 'material', line: lines.length, ref: e.id, source: e.kind, title: e.title });
+    marks.push({ kind: 'material', line: lines.length, ref: e.id, source: e.kind, title: e.title, basis: e.basis, length: e.text.length });
     lines.push(materialHead(e.id, e.title, e.kind), `자료 기준: ${e.basis}`, e.text, '');
   }
   section('closing', closingLine(id));

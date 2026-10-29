@@ -3482,7 +3482,10 @@ def request94_flow(browser, base, size, shots=None):
     u01, u = sheet.locator('[data-ref="U01"]'), next(x for x in spans if x.get("ref") == "U01")
     u01.locator("button").click()
     expect(u01.locator("button")).to_have_attribute("aria-expanded", "true")
-    assert u01.locator(".rq-text").text_content() == text[u["titleEnd"] + len(" · report\n"):u["end"] - 2]
+    assert [u["source"], u["title"], u["basis"], u["length"]] == [AF94_U01["kind"], AF94_U01["title"], AF94_U01["basis"], len(AF94_U01["text"].encode("utf-16-le")) // 2], "frozen as the pasted material"
+    # Reading offsets are UTF-16 code units (JavaScript), not Python code points: slice the UTF-16 encoding (the title has an emoji).
+    u16 = lambda t, a, b: t.encode("utf-16-le")[2 * a:2 * b].decode("utf-16-le")
+    assert u01.locator(".rq-text").text_content() == u16(text, u["start"] + len(f"[U01] {u['title']} · report\n".encode("utf-16-le")) // 2, u["end"] - 2)
     assert "유지할 조건:\n- [테스트] 가짜 유지" in u01.locator(".rq-text").text_content()
     assert page.evaluate(focused)[1] == "mat-U01"
     body.evaluate("b => { b.scrollTop = Math.floor((b.scrollHeight - b.clientHeight) / 2); }")
