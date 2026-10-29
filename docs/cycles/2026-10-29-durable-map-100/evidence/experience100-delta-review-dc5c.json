@@ -1,0 +1,74 @@
+{
+  "task": "AF100-delta-independent-review-dc5c",
+  "reviewedCommit": "dc5c8bf7ef4675c49a25806fcfe33a53390bc2a5",
+  "previousReview": "experience100-core-review-1b8.json retained unchanged",
+  "status": "new_client_ownership_and_persistence_fixes_needed_not_final_acceptance",
+  "newMaterialFindings": [
+    {
+      "id": "D100-1",
+      "priority": "P1",
+      "title": "Durable reservations inherit the app's silent memory fallback",
+      "refs": ["app/continuity/src/client/app.ts:67", "app/continuity/src/client/app.ts:69", "app/continuity/src/client/app.ts:71", "app/continuity/src/client/app.ts:2348", "app/continuity/src/client/map-jobs.ts JobReservations.usable/locked"],
+      "path": "When the localStorage getter throws, app storage becomes null and kv.setItem succeeds in memoryStorage. The same kv is passed to JobReservations, whose usable checks only WebLocks. With locks available, reservation therefore succeeds, the provider starts and the UI promises window-close recovery although the only operation capability/receipt disappears with the page. The server retains an orphaned ready result the browser can no longer retrieve.",
+      "relatedReadFailure": "kv.getItem also catches a storage read error and returns null. For job reservations, unreadable must not be treated as an empty reservation envelope that can be overwritten.",
+      "minimumFix": "Give durable jobs a persistence-required browser storage adapter/availability gate that propagates read/write denial and never falls back to memory. Fail before provider creation if receipt persistence cannot be established. Legacy project/UI fallback behavior can remain separately.",
+      "smallAcceptanceCase": "Inject localStorage getter denial while WebLocks exist, and separate getItem read denial with potential later write success. Assert no provider create and no recovery promise/reservation replacement. Not executed by this reviewer."
+    },
+    {
+      "id": "D100-2",
+      "priority": "P1",
+      "title": "Recovered operations silently adopt the current sequence instead of the captured sequence",
+      "refs": ["app/continuity/src/client/map-run.ts:210", "app/continuity/src/client/map-run.ts:283", "app/continuity/src/client/map-run.ts:169", "app/continuity/src/client/map-run.ts:180", "app/continuity/src/client/app.ts:1803"],
+      "path": "binding.seq is captured but never read in map-run recovery/application. After another tab saves the entry while the job runs, reload opens the newest WorkspaceStore ref, attaches the old operation and commits with that newest ref. If map/source checks pass, the old job is accepted despite the original base sequence having changed. This is exactly the implicit newer-seq adoption the100 contract says not to use.",
+      "minimumFix": "Define and enforce recovered baseSeq ownership before apply while preserving97's explicitly allowed same-page edits. A sound policy can distinguish saves made/owned by the live requesting visit from a reload/other-tab snapshot; do not simply reject all independent edits. Applied-reading reconciliation is a separate allowed path and should precede apply checks.",
+      "smallAcceptanceCase": "Start job at seqN, save unrelated edit from another tab toN+1, reload requesting tab and explicitly apply. Assert the selected stale-seq policy without silently adoptingN+1. Also retain a same-page permitted-edit case. Not executed by this reviewer."
+    },
+    {
+      "id": "D100-3",
+      "priority": "P1",
+      "title": "Server immutable ownership binding is returned but ignored during recovery",
+      "refs": ["app/continuity/server/map-jobs.mjs view binding field", "app/continuity/src/client/map-jobs.ts JobView/call", "app/continuity/src/client/map-run.ts:250", "app/continuity/src/client/map-run.ts:251", "app/continuity/src/client/map-run.ts:258", "app/continuity/src/client/map-run.ts:201"],
+      "path": "Server view includes the operation's immutable binding. Client JobView omits it, call accepts any response ID with a known state, and load checks inputHash/askHash/prompt only. EntryId/projectId/lifecycle/seq and result model are not compared to the server binding. A structurally valid altered browser reservation can retain the real opID/cap/input hashes but point at another imported entry sharing the same Project.id, source IDs and area IDs. same() and applyReading can then pass, apply to the imported copy and ack away the original entry's result.",
+      "minimumFix": "Validate response operation ID and the entire server binding against the stored reservation before consuming status, loading a result or acknowledging it; compare result model/prompt/hash to that binding too. Reconcile saved reading only after confirming stored projectId/lifecycle/entry ownership. Input hashes bind the input, not the separate locally editable ownership fields.",
+      "normalFlowQualification": "Normal importCopy creates a new entryId, so same Project.id alone does not redirect a sound receipt. Trash/restore after a reading was already committed retains that reading; acking it can merely clean up a prior success. Those normal actions alone are not being reported as proven wrong-entry application. The demonstrated gap is the missing rejection of altered/corrupt ownership binding required by100.",
+      "smallAcceptanceCase": "Alter only stored reservation entryId to an imported copy, keeping opID/cap and input hashes. Return the original server binding. Assert mismatch/refusal, original ready retained and neither project modified. Not executed by this reviewer."
+    }
+  ],
+  "previousFindingDelta": [
+    { "old": "C100-1 cross-ID admission", "status": "source fix present", "evidence": "ACCEPT serial section encloses entry/capacity check, limiter acquisition and durable accepted write across IDs." },
+    { "old": "C100-2 canceled running residue", "status": "source fix present", "evidence": "execute finally deletes running and releases limiter across canceled/closed/outcome paths." },
+    { "old": "C100-3 close ownership release", "status": "repair present but author actively debugging", "evidence": "closed fence, executing promises and bounded shutdown were added. Root reports author is still debugging close owner release; this review does not declare final execution acceptance or rediscover it as a new issue." },
+    { "old": "C100-4 capacity", "status": "source fix present", "evidence": "accepted jobs reserve full fileBytes plus ready places. File limit640KiB now leaves room for448KiB input+128KiB wire+envelope. Actual aggregate/persistence tests are author/root responsibility." },
+    { "old": "C100-5 authority status", "status": "source fix present", "evidence": "wrong-cap duplicate create now404; pending status is keyed by ID+capHash instead of ID alone." },
+    { "old": "receiptless404 reservation race", "status": "client source fix present", "evidence": "poll295-304 records same-capability cancel/tombstone before forgetting a receiptless404; an original same-page payload may resubmit only its same ID/body." }
+  ],
+  "knownPostSnapshotRepairsNotNewUnresolvedFindings": [
+    {
+      "issue": "dc5c startup TDZ in closed fence",
+      "snapshotEvidence": "map-jobs116 invokes write during active-record restart recovery; closed is initialized121 and read124, so the immutable snapshot throws ReferenceError and advertises STORE_UNWRITABLE on that path.",
+      "status": "Root reports author independently discovered/fixed this after dc5c and claims an actual process test passed. This review did not read that newer immutable commit or rerun it, and does not count the known repaired-in-progress issue as an additional current discovery."
+    },
+    {
+      "issue": "settling reservation reattachment",
+      "snapshotEvidence": "forget clears slot before settle finishes, while sync reattaches reservations without an attempt. Acknowledgement failure keeps the reservation; discarded/seen intent is not represented in Reservation beyond applied-only marker.",
+      "status": "Author is already debugging this per root. Ensure the repair covers reload while discard/seen ack is outstanding, not only a transient in-page settling Set; otherwise explicit discard can resurrect as ready. This is a variant of the known issue, not counted as a fresh finding."
+    }
+  ],
+  "positiveIntegrationChecks": [
+    "New Node-only index opens the store; Worker handler remains uninjected and does not import Node job service.",
+    "HTTP jobs routes preserve origin/header/access checks and do not gate recovery on current AI-key configuration. Provider run keeps existing mapConfig, mapPromptId, timer and limiter.",
+    "Browser reservation is under its own WebLock and reuses an existing entry reservation rather than minting another ID. Duplicate transport submissions use the same ID/body, with no new-operation fallback.",
+    "Ready load decodes original MapInput and validates exact input/ask hashes, evidence and reply; it does not rebuild from the edited project.",
+    "Stable reading meta is used for commit→ack reconciliation before applyReading; snapshot currently needs the additional ownership/seq guards above.",
+    "The shared codec has no delta from1b8; original rich later-map coverage remains necessary but is not repeated here as a new code defect."
+  ],
+  "actions": {
+    "productEdits": 0,
+    "builds": 0,
+    "tests": 0,
+    "ui": 0,
+    "models": 0,
+    "onlyNewFile": ".ops/results/experience100-delta-review-dc5c.json"
+  },
+  "decisionOwner": "root coordinator"
+}

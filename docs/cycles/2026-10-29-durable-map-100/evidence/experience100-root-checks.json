@@ -1,0 +1,32 @@
+{
+  "source": "52fc9137e71fc760f4d8da0a8d4e26b7190561a3",
+  "code": "bf6063099ab9428f30a9ef2be090f6f40d0dccf5",
+  "appTree": "3fc2ab0421cda167bd3fbb70c5eaa2a2e9dcc0e5",
+  "runtime": "Node v24.19.0",
+  "compiler": "TypeScript5.8.3 locked app/node_modules",
+  "check": {
+    "exit": 0,
+    "exec": "9681cf"
+  },
+  "build": {
+    "exit": 0,
+    "exec": "97fb37"
+  },
+  "tests": {
+    "exit": 0,
+    "exec": "d98ff2",
+    "passed": 45,
+    "failed": 0,
+    "files": [
+      "durable100.test.mjs (27)",
+      "durable100-process.test.mjs (4 actual child processes)",
+      "lifecycle97.test.mjs (9)",
+      "candidate98.test.mjs (5)"
+    ]
+  },
+  "ui75AncestorPreserved": true,
+  "originalStashPreserved": "fa07118ead372bcb3201c8032ca603a5ec0a7e7d",
+  "originalAppGitignoreUnchanged": true,
+  "newModelCalls": 0,
+  "scope": "root execution; exact Node22.16 CI separate"
+}

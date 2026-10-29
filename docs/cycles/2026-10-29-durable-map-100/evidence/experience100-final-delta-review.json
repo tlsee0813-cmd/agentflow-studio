@@ -1,0 +1,36 @@
+{
+  "task": "AF100-final-bounded-delta-review",
+  "reviewedCommit": "bf6063099ab9428f30a9ef2be090f6f40d0dccf5",
+  "appTreeReportedByRoot": "3fc2ab0421cda167bd3fbb70c5eaa2a2e9dcc0e5",
+  "comparedTo": "c412a0a6c37798007751645e9b704343e660d999",
+  "status": "accept_final_implementation_delta_no_remaining_material_finding_in_scope",
+  "conclusion": "The single remaining simultaneous local-intent-write/server-ack failure path is repaired in the reviewed source. Its focused D15 test meaningfully targets the exact failure. Default journal relocation and its ignore scope are internally consistent. No additional implementation change is requested by this bounded static review; execution/CI/UI acceptance remains root-owned.",
+  "closedFinding": {
+    "id": "R100-dual-intent-failure",
+    "source": "app/continuity/src/client/map-run.ts settle()/discardJob()/discard()",
+    "repair": "Durable discard retains the same Attempt in phase closing instead of dropping it before either persistence succeeds. apply requires ready and run refuses an occupied slot, so neither apply nor another generation can proceed during the terminal decision. settle now returns whether the local intent or server acknowledgement was retained. When both fail it returns false, and discardJob restores the original ready result with DISCARD_FAILED instead of claiming completed discard. A later explicit retry uses the same operation/result.",
+    "test": "D15 blocks the local reservation write and server ack together, asserts ready is temporarily unavailable, attempts apply and run with zero commit/new provider call, then requires the original ready result plus explicit error and unchanged server ack. After writes/network recover it retries discard and verifies terminal ack with no saved reading. This directly covers the previously missing dual-failure boundary.",
+    "complementaryEvidence": "The earlier D14 already covers locally persisted discard intent through server-ack failure and reload. D15 addresses the different case where the local durable intent cannot be written; it correctly reports failure and leaves recovery possible rather than pretending persistence can succeed. No execution was repeated here."
+  },
+  "journalAndIgnoreDelta": {
+    "source": "app/continuity/server/index.mjs default URL changed from ../../.studio-data to ../.studio-data relative to continuity/server/index.mjs",
+    "result": "The default now resolves to app/continuity/.studio-data/map-jobs-<port>. The new app/continuity/.gitignore entry covers exactly that subtree. The100 additions to fingerprinted app/.gitignore are removed, leaving that old file's content restored as root intended. Explicit STUDIO_JOBS_DIR and port0/off logic remain unchanged.",
+    "docs": "DESIGN storage-location paragraph and README identify the same continuity-local directory. This is a path/ignore regression repair, not a provider/runtime/timeout change.",
+    "minorDocumentationCorrection": "DESIGN's unchanged '상한' paragraph still states512KiB per job while the previously reviewed core constant is640KiB. Correct that factual limit description before final publication; it is not a new runtime defect or reason to reopen implementation scope."
+  },
+  "scopeAndAttribution": {
+    "notRepeated": "No reinspection of the previously closed admission, cancellation, ownership, codec, seq, capability or sender-lock mechanisms was selected. Only the c412→bf606 delta and focused17-line D15 addition were reviewed.",
+    "executionEvidence": "Root reports FF to this commit and will run exact checks/CI. The author's prior I9.01 fingerprint regression and environment-specific I6R report remain separately attributed; this static review does not convert those reports into a new local test result.",
+    "acceptanceLimits": "Acceptance here concerns the final code delta. It does not establish real provider generation quality,90s completion, remote cancellation/billing stop, final two-PC evidence or CI success. Existing semantic acceptance and historical failures remain unchanged."
+  },
+  "actions": {
+    "productWrites": 0,
+    "builds": 0,
+    "tests": 0,
+    "ui": 0,
+    "modelCalls": 0,
+    "onlyNewFile": ".ops/results/experience100-final-delta-review.json"
+  },
+  "reviewClosed": true,
+  "finalAcceptanceOwner": "root coordinator"
+}

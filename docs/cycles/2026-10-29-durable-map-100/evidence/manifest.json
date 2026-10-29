@@ -1,0 +1,73 @@
+{
+  "code": "bf6063099ab9428f30a9ef2be090f6f40d0dccf5",
+  "appTree": "3fc2ab0421cda167bd3fbb70c5eaa2a2e9dcc0e5",
+  "ciHead": "f2a086df31bf5eebb9ce9c9612b9abea61d9aea3",
+  "scope": "Public bounded implementation evidence. Full CI logs, source fixtures and retrieval capability remain private; no new model generation.",
+  "files": [
+    {
+      "path": "evidence/experience100-core-review-1b8.json",
+      "bytes": 10856,
+      "sha256": "3c4d62955aee4d2df7a2e595369ed81ff3849f0f1e609daf51fec9b3f954bb7d"
+    },
+    {
+      "path": "evidence/experience100-delta-review-dc5c.json",
+      "bytes": 9524,
+      "sha256": "fd9c1d66c0684fe0624026ffac6b568ecb0e50d17d207756b20473d1ff12682b"
+    },
+    {
+      "path": "evidence/experience100-delta-review-0f9435f.json",
+      "bytes": 7578,
+      "sha256": "ce4c0ea3da724a53c3f22c77246c238445f1e5389c53015fee4be714c3b6dc5a"
+    },
+    {
+      "path": "evidence/experience100-delta-review-c412a0a.json",
+      "bytes": 6687,
+      "sha256": "e0bf2845761890e5a9d1df6e9222c4890ac540628fe6fc440d07c8e65ffeabdc"
+    },
+    {
+      "path": "evidence/experience100-final-delta-review.json",
+      "bytes": 4315,
+      "sha256": "446b994b47b3b2e933d7f8c17d1425b1dd9e26904128c99f21553011e30ed3e5"
+    },
+    {
+      "path": "evidence/experience100-root-checks.json",
+      "bytes": 867,
+      "sha256": "1715283e471efba689f3688b57074e0efff4491c364420b54ba08050249cb894"
+    },
+    {
+      "path": "evidence/experience100-root-ui.json",
+      "bytes": 2637,
+      "sha256": "4e862ede7e06400fe5392be03d4f60614a1d4859850474361728676ab0628118"
+    },
+    {
+      "path": "evidence/experience100-ci-summary.json",
+      "bytes": 4710,
+      "sha256": "73b542964f23fc3ef479b7122ccb4caa7331d4ab2aed371db9eeb4edb76b19f2"
+    },
+    {
+      "path": "evidence/experience100-root-ui-bdraft.jpg",
+      "bytes": 71529,
+      "sha256": "9363e185080fecabef579e4e5fb6588290ee98dd95c334d179eb2df365d2a775"
+    },
+    {
+      "path": "evidence/experience100-root-ui-keyoff-ready.jpg",
+      "bytes": 38692,
+      "sha256": "eb57a69955c8d4623410f4fb30a1741aae92449f20455088bbd834b88df65583"
+    },
+    {
+      "path": "evidence/experience100-root-ui-evidence.jpg",
+      "bytes": 95787,
+      "sha256": "a5ce5cb2e56d2bee05b4f3d2f2eb846e59b66c2703b9c7cbd55cfef58f926906"
+    },
+    {
+      "path": "evidence/experience100-root-ui-restored.jpg",
+      "bytes": 43341,
+      "sha256": "ca1bb27b34335afe98425545754b4c906c7dcf9b6dca2249f727460fbd2275a2"
+    },
+    {
+      "path": "evidence/experience100-public-audit.json",
+      "bytes": 6750,
+      "sha256": "458e3bf0f29d9b075fa4b1b1d654e9a1eb3ff2a8e91fdd9350fa384a4bc14d63"
+    }
+  ]
+}

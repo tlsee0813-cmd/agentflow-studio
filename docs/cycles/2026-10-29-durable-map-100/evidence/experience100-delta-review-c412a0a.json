@@ -1,0 +1,42 @@
+{
+  "task": "AF100-final-candidate-delta-review-c412a0a",
+  "reviewedCommit": "c412a0a6c37798007751645e9b704343e660d999",
+  "appTreeReportedByRoot": "b000708b75a2a71da304fa391edc6c8e4441dc5c",
+  "comparedTo": "0f9435fba48cb962d747be07525ec6053a8bd692",
+  "status": "one_residual_ack_intent_failure_boundary_remains",
+  "remainingFinding": {
+    "id": "R100-dual-intent-failure",
+    "origin": "Same previously reviewed discard/seen acknowledgement-intent boundary, not new scope",
+    "priority": "P2",
+    "refs": ["app/continuity/src/client/map-run.ts settle() intent update catch", "app/continuity/src/client/map-run.ts forget()/discard() visible slot removal", "app/continuity/src/client/map-run.ts sync() attach for unmarked reservation"],
+    "path": "settle now writes outcome before ack, which fixes acknowledgement-only failure. However it suppresses failure of the local outcome write and continues. If that write fails and the server ack also fails, the visible Attempt has already been cleared, closing is removed in finally, and the durable reservation still has outcome:null. The next sync/reload reattaches the still-ready result. The user's explicit discard was treated as complete without either local durable intent or server acknowledgement succeeding.",
+    "minimumFix": "Do not silently finish the visible discard when both persistence paths fail. Require either a durable local intent or confirmed durable server acknowledgement before releasing it as discarded; otherwise retain/restore the original result hold and report failure, allowing a deliberate retry. Preserve authority and avoid automatic generation. Applied acknowledgement recovery remains distinct because the saved stable reading itself can prove application.",
+    "focusedVerification": "Starting from a ready result, fail reservation outcome update and server ack together; assert an explicit failure with recoverable hold rather than completed discard. Restore writes/network, retry original discard, then reload and verify no ready resurrection or provider call. D14 currently tests ack-only failure after local outcome succeeds, so it cannot catch this dual failure. Reviewer execution0."
+  },
+  "closedPreviousResiduals": {
+    "ownedVisitSeq": "Replaced page-wide owned exception with onItsSave: start seq is allowed, and every later sequence must be recorded as this page's own successful save. app.commit records those sequences only after WorkspaceStore.save succeeds. A foreign seq creates a missing link even when A is reopened with a fresh ref. This closes the demonstrated A→B→A foreign-save path while preserving97 own edits. D13 directly covers both the refusal path and same-page own-edit control.",
+    "ackOnlyIntent": "Reservation now retains discarded/seen outcome, reserve ignores completed-intent reservations, sync routes them to owed acknowledgement instead of attach, and owed checks sameJob before retry. D14 exercises lost ack across repeated polling/reload without showing ready again. This closes the earlier single-network-failure case; the remaining simultaneous persistence failure above is deliberately separated.",
+    "priorCoreAndOwnership": "No server/shared-core delta changes the previously reviewed admission serialization, canceled execution cleanup, capacity reservation, authority binding, startup/close fence, full MapInput codec or whole bindingHash validation. Persistence-required adapter remains in place. This report does not reopen those checks or claim additional runtime proof."
+  },
+  "senderLockAssessment": {
+    "sourceMechanism": "JobReservations.hold acquires an operation-specific WebLock before its new reservation is published. The sender holds it while submit/receipt is uncertain and releases it after acknowledgement of acceptance or terminal cleanup. Recovery polls a missing operation and runs cancellation only inside orphan(ifAvailable) for that operation lock. Another active tab therefore cannot turn the sender's not-yet-arrived request into a canceled tombstone merely because it observed404. Page destruction releases the browser-held lock; then the original-ID tombstone barrier remains available to genuine orphan recovery.",
+    "scope": "This is a concrete repair for cross-tab pre-acceptance ownership. It does not create a new operation or bypass the server's durable tombstone/idempotency rules. Existing same-ID transport resubmission and no-new-operation fallback remain.",
+    "testMeaning": "The lock fake now models held names and ifAvailable(null). The two-tab browser flow verifies a real second tab observes the first tab's pending state and sends no POST. A deterministic hold-before-handler404 case is still the most direct oracle for the sender race, but this reviewer did not execute or demand another broad run. Source evidence supports the intended repair."
+  },
+  "newTestAndFlowAssessment": {
+    "unitDelta": "D13 targets the exact foreign-sequence navigation failure and preserves own-save behavior. D14 targets durable discard intent when only the server ack is unavailable. These are meaningful boundary tests, with the narrow dual-failure omission stated above.",
+    "browser153LineDelta": "map100_flow uses the real Node smoke server with disk job directory and gated provider stub. It verifies reload while pending, B's unsaved long paste/backward selection/scroll/focus preservation when A becomes ready, explicit apply once after return, saved-reading lost-ack reconciliation across reload, cancel without promised remote billing stop, server kill/restart to interrupted without resubmission, and second-tab no-create behavior. It also checks capability is absent from URL/project and checks page errors/horizontal overflow at the two viewport sizes.",
+    "limits": "The browser provider is a stub. Two viewport flows are not new model generation or semantic acceptance. The source checks B after a matching response plus a short delay; it should not be described as proving all possible response timing. Author claims of pass and full regression remain separate from this static review.",
+    "rootVerificationReported": "Root reports fixed TypeScript5.8.3 check edc217/build2260d6 exit0 and no root source edit. This reviewer did not repeat those runs."
+  },
+  "actions": {
+    "productWrites": 0,
+    "builds": 0,
+    "tests": 0,
+    "ui": 0,
+    "models": 0,
+    "onlyNewFile": ".ops/results/experience100-delta-review-c412a0a.json"
+  },
+  "nextReviewBoundary": "After the author repairs the single remaining dual-failure intent boundary, review only that final delta and its focused evidence. No additional broad code search is selected.",
+  "decisionOwner": "root coordinator"
+}

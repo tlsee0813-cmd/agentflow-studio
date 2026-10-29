@@ -1,0 +1,92 @@
+{
+  "task": "AF100-early-core-review-1b8",
+  "reviewedCommit": "1b8edac1660e5dd6a45476499efb3acd1143180d",
+  "status": "material_core_changes_required_before_integration",
+  "scope": "Exact git-show contents of server/map-jobs.mjs, shared/map-job.ts and durable-map-100/DESIGN.md. HTTP/client connection is intentionally unfinished and its absence is not a finding.",
+  "findings": [
+    {
+      "id": "C100-1",
+      "priority": "P1",
+      "title": "Different operation IDs can concurrently bypass one-entry admission",
+      "file": "app/continuity/server/map-jobs.mjs",
+      "lines": [183, 188],
+      "evidence": "serial() chains only one operation ID. For two different IDs bound to the same entry, both calls can finish validateSubmit/hash/prompt awaits, see no entry in jobs at183, acquire a limiter token and enter write188. jobs.set happens only after writeAtomic resolves. Both can therefore persist and queue provider execution. The same gap bypasses global capacity checks.",
+      "minimumFix": "Serialize or reserve global entry/capacity admission across check→durable acceptance, with rollback on failed persistence. Keep per-operation transition serialization too. A browser WebLock does not make the server contract safe against two IDs or two clients.",
+      "smallProbe": "Pause writeAtomic for the first accepted file, submit a different valid ID for the same entry, then release writes. Exactly one provider invocation is allowed; the other must be ENTRY_BUSY. No probe was executed."
+    },
+    {
+      "id": "C100-2",
+      "priority": "P1",
+      "title": "Completed cancellation permanently keeps its entry busy",
+      "file": "app/continuity/server/map-jobs.mjs",
+      "lines": [183, 204, 210, 248],
+      "evidence": "cancel durably sets body.state=cancelled and aborts. When run.call settles, execute204 returns because state is no longer accepted; finally releases the limiter but never removes running[id]. ENTRY_BUSY183 considers running.has(other) even for canceled body. ack seen248 removes running only when live.failed exists, so normal cancellation plus acknowledgement leaves the entry blocked until service restart.",
+      "minimumFix": "Delete settled execution ownership on every execute outcome, including canceled/removed state, while releasing limiter exactly once. Do not remove a still-running entry early merely to permit a new concurrent provider call.",
+      "smallProbe": "Accept A; cancel A; let aborted provider settle; ack seen; accept B for same entry. B must start normally with no lingering running entry. No probe was executed."
+    },
+    {
+      "id": "C100-3",
+      "priority": "P1",
+      "title": "close releases the store owner before outstanding execution can no longer write",
+      "file": "app/continuity/server/map-jobs.mjs",
+      "lines": [196, 200, 272],
+      "evidence": "close aborts controllers and waits the current chains map, but run.call awaits outside those chains. An unsettled or delayed-abort provider can later enter serial at200 after close has already released the OS ownership name. A second service can own/recover the same directory while the old execution writes ready/failed. handle also remains callable after close because no closing/closed fence is set.",
+      "minimumFix": "Fence new handle/admission calls at close and track all execution completions. Do not release the store owner until outstanding writes/executions are settled or permanently fenced from writing; capture chains that are queued during shutdown as well. Preserve honest interrupted recovery, without assuming external run.call obeys abort synchronously.",
+      "smallProbe": "Use a deferred provider that notices abort but resolves only after explicit release. Call close, attempt reopening the store, then resolve provider. Old service must not write after new ownership begins. No probe was executed."
+    },
+    {
+      "id": "C100-4",
+      "priority": "P2",
+      "title": "Ready and material quotas are checked only before result growth",
+      "file": "app/continuity/server/map-jobs.mjs",
+      "lines": [154, 157, 184, 206, 208],
+      "evidence": "capacity counts only already-ready records and current accepted-file bytes. It reserves no ready slot or result bytes for accepted/running jobs, and execute's ready write checks only per-file size. With49 ready, three sequential new acceptances all pass before finishing and can create52 ready. Aggregate material can similarly exceed32MiB as result payloads are added even without the concurrent admission race.",
+      "minimumFix": "Reserve bounded future ready/material capacity at acceptance, or enforce a separately specified honest completion failure without ever exceeding the advertised global quotas. Include in-flight reservations in admission checks.",
+      "smallProbe": "Use tiny injectable limits and two in-flight distinct-entry jobs that finish after admission. Assert ready/material totals never exceed the declared limit and no existing unacknowledged ready is evicted. No probe was executed."
+    },
+    {
+      "id": "C100-5",
+      "priority": "P2",
+      "title": "Wrong authority exposes acceptance/existence contrary to uniform404 contract",
+      "file": "app/continuity/server/map-jobs.mjs",
+      "lines": [150, 151, 167, 174, 255],
+      "evidence": "For an existing normal record, submit with a wrong well-formed capability returns OPERATION_CONFLICT409 at174 rather than the DESIGN promise of the same404 as an unknown operation. For an operation currently in pending, status find returns null and255 emits OPERATION_ACCEPTING409 without checking capability. Thus pending existence is disclosed to any caller that knows the ID, even with missing/wrong authority. Damaged-record409 is a separately documented diagnostic and should not be confused with this ordinary wrong-capability path.",
+      "minimumFix": "Separate same-authority binding conflicts from unauthorized lookup: wrong capability must return the chosen uniform not-found response, while matching authority with changed immutable payload may409. Bind pending metadata to authority before exposing accepting state; a bare pending Set cannot perform that check.",
+      "smallProbe": "During a held acceptance write, query with missing/wrong/correct capability; repeat create with wrong capability after persist. Only the authorized caller may learn pending state. No probe was executed."
+    }
+  ],
+  "designProtocolFinding": {
+    "priority": "P1-before-client-integration",
+    "location": "DESIGN browser reservation paragraph: receiptless reload GET404→not accepted",
+    "evidence": "A GET404 is an observation, not a terminal fence. A delayed create request may not yet have reached submit/pending.add when reload polls. Clearing/releasing the browser reservation after404 can permit a second operation while the first later starts. pending Set cannot close a network request that has not arrived.",
+    "minimumFix": "Before releasing a receiptless reservation, issue cancel with the original ID/capability and wait for its durable terminal/tombstone acknowledgement. Existing unknown-ID cancel218-225 supplies the needed barrier and prevents the late same-ID submit from running. If cancel fails or capacity prevents the tombstone, retain an unresolved reservation and explicit failure rather than declare not accepted. If the create already won, keep/recover that operation or durably cancel it; never silently mint replacement work.",
+    "probe": "Hold create before its handler receives it, observe404 from recovery, complete cancel tombstone, then deliver create. Provider count0 and no replacement auto-create. No probe was executed."
+  },
+  "capacityClarificationNotMisreportedAsBug": {
+    "fact": "448KiB input plus128KiB wire and metadata can exceed512KiB per-file. write() checks total serialized bytes and execute catches failure, exposing only failed JOB_STORE_FAILED in memory and interrupted after restart. It does not expose a non-durable ready as success.",
+    "needed": "Correct DESIGN's wording that capacity affects only new acceptance and existing jobs are untouched, or reserve enough complete-result space before acceptance. The current code honestly fails this completion, but does not guarantee that every admitted maximum-size input can retain every otherwise-valid maximum-size wire. Do not call this full accepted-capacity support."
+  },
+  "codecReview": {
+    "positive": "Explicit ordered-pair codec retains every MapInput field, preserves extra C aliases from pre-truncation mappings, checks duplicate keys, validates the ask, excerpt coordinate lengths/text, fullRequest context projection, prior target, project scope and input/ask hashes. It does not regenerate from current project. No newly demonstrated codec regression was found in this static pass.",
+    "integrationBoundary": "Codec can validate structural self-consistency but cannot infer whether arbitrary actual area/claim IDs are the original project's correct alias mapping from MapAsk alone. Browser reservation must bind the originally built full input and recheck original entry/project/lifecycle before apply, rather than treat recomputed attacker-supplied hashes as independent authenticity. This is an integration constraint already in100, not a final missing-client bug.",
+    "remainingUsefulFixture": "Rich later-map roundtrip with nonzero excerpt offset, full frozen sources and captured prior correction remains the highest-value codec verification; FIRST-only empty maps would miss these fields."
+  },
+  "positiveCoreProperties": [
+    "Unknown-ID cancel creates a durable capability-bound tombstone, and same-ID late submit returns canceled without provider execution.",
+    "Existing same-ID submit returns state without reacquiring provider limiter or requiring current configured model/key once immutable binding and authority match.",
+    "Cancel persists before controller.abort and execute checks persisted state before publishing a late result.",
+    "Ready input/wire/meta are exposed only after writeAtomic succeeds; failed persistence does not present complete ready output.",
+    "Store ID names OS-held Windows/Linux ownership independently of path aliases; unsupported namespace/PID-lock limits are explicitly stated rather than hidden.",
+    "Restart changes persisted accepted/running to interrupted without resubmitting provider work; ready is retained."
+  ],
+  "actions": {
+    "productWrites": 0,
+    "modelCalls": 0,
+    "web": 0,
+    "ui": 0,
+    "testsOrProbesExecuted": 0,
+    "reasonNoProbe": "New TypeScript codec is not yet built in the unchanged root checkout. Static interleavings are sufficient for these early findings; no build or mutable stage was created.",
+    "onlyNewFile": ".ops/results/experience100-core-review-1b8.json"
+  },
+  "decisionOwner": "root coordinator"
+}

@@ -1,0 +1,70 @@
+{
+  "source": "f2a086df31bf5eebb9ce9c9612b9abea61d9aea3",
+  "code": "bf6063099ab9428f30a9ef2be090f6f40d0dccf5",
+  "appTree": "3fc2ab0421cda167bd3fbb70c5eaa2a2e9dcc0e5",
+  "runId": 40858711030,
+  "url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40858711030",
+  "runtime": "Node22.16.0; TypeScript5.8.3 locked; Python3.13.5; pinned Playwright1.57.0",
+  "jobs": [
+    {
+      "os": "ubuntu",
+      "id": 123396284491,
+      "conclusion": "success",
+      "originalLogBytes": 458210,
+      "originalLogSha256": "f9427c375fff61dcf44d70501471001d3aa0fccd9b5144075049e21cf310e72a",
+      "counts": {
+        "app": 279,
+        "continuity": 559,
+        "new100": 31
+      },
+      "proof": [
+        "2026-10-29T10:37:49.7903496Z # tests 279",
+        "2026-10-29T10:37:49.7903863Z # pass 279",
+        "2026-10-29T10:37:49.7904043Z # fail 0",
+        "2026-10-29T10:38:21.8684740Z ok 132 - 100-P1 the server process is killed while a job runs: started again, the job reads as interrupted and nothing is sent again",
+        "2026-10-29T10:38:21.8691074Z ok 133 - 100-P2 a ready result outlives the process and is fetched by its own capability from a server with no AI key",
+        "2026-10-29T10:38:21.8696506Z ok 134 - 100-P3 two processes on one store (also by another path to it): only the first owns it; the second says so and takes nothing",
+        "2026-10-29T10:38:21.8701401Z ok 135 - 100-P4 a damaged or half-written journal: refused by id, never a new job, never repaired; the rest of the store reads as kept",
+        "2026-10-29T10:38:21.8817557Z ok 162 - 100-D15 letting a result go when neither this address nor the server takes it: still ready, said so, never applied meanwhile",
+        "2026-10-29T10:38:21.9666405Z # tests 559",
+        "2026-10-29T10:38:21.9666575Z # pass 559",
+        "2026-10-29T10:38:21.9666655Z # fail 0",
+        "2026-10-29T10:41:40.4529406Z ok  AF100 durable map job at 1280/1440: kept through a reload, B's paste untouched, applied once on request, lost acknowledgement settled, cancel stopped, server restart said as stopped with nothing resent, second tab sends nothing",
+        "2026-10-29T10:41:40.4531736Z ok  AF97 map return at 1280/1440: B's paste, selection, scroll and focus, B's reading button and the home draft kept while A's reply comes; applied on return without asking again; saving not cancellable; a visit opened during the save takes it"
+      ]
+    },
+    {
+      "os": "windows",
+      "id": 123396285314,
+      "conclusion": "success",
+      "originalLogBytes": 459331,
+      "originalLogSha256": "8f7b6259b15887e1769bbebd755451f65e0935a4d5beafba7bb88e08fa631819",
+      "counts": {
+        "app": 279,
+        "continuity": 559,
+        "new100": 31
+      },
+      "proof": [
+        "2026-10-29T10:38:37.8402735Z # tests 279",
+        "2026-10-29T10:38:37.8402940Z # pass 279",
+        "2026-10-29T10:38:37.8403043Z # fail 0",
+        "2026-10-29T10:39:04.8247513Z ok 132 - 100-P1 the server process is killed while a job runs: started again, the job reads as interrupted and nothing is sent again",
+        "2026-10-29T10:39:04.8250655Z ok 133 - 100-P2 a ready result outlives the process and is fetched by its own capability from a server with no AI key",
+        "2026-10-29T10:39:04.8253278Z ok 134 - 100-P3 two processes on one store (also by another path to it): only the first owns it; the second says so and takes nothing",
+        "2026-10-29T10:39:04.8256078Z ok 135 - 100-P4 a damaged or half-written journal: refused by id, never a new job, never repaired; the rest of the store reads as kept",
+        "2026-10-29T10:39:04.8324642Z ok 162 - 100-D15 letting a result go when neither this address nor the server takes it: still ready, said so, never applied meanwhile",
+        "2026-10-29T10:39:04.8800457Z # tests 559",
+        "2026-10-29T10:39:04.8800547Z # pass 559",
+        "2026-10-29T10:39:04.8800592Z # fail 0",
+        "2026-10-29T10:42:49.9127339Z ok  AF100 durable map job at 1280/1440: kept through a reload, B's paste untouched, applied once on request, lost acknowledgement settled, cancel stopped, server restart said as stopped with nothing resent, second tab sends nothing",
+        "2026-10-29T10:42:49.9129624Z ok  AF97 map return at 1280/1440: B's paste, selection, scroll and focus, B's reading button and the home draft kept while A's reply comes; applied on return without asking again; saving not cancellable; a visit opened during the save takes it"
+      ]
+    }
+  ],
+  "previousRun": {
+    "id": 40858459178,
+    "source": "52fc9137e71fc760f4d8da0a8d4e26b7190561a3",
+    "conclusion": "cancelled by newer docs-only head; not counted as failure/success"
+  },
+  "providerCalls": 0
+}

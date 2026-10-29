@@ -1,0 +1,67 @@
+{
+  "source": "52fc9137e71fc760f4d8da0a8d4e26b7190561a3",
+  "codeSource": "bf6063099ab9428f30a9ef2be090f6f40d0dccf5",
+  "appTree": "3fc2ab0421cda167bd3fbb70c5eaa2a2e9dcc0e5",
+  "scope": "Normal CUA 1280x720 PC, preserved accepted89 response replay through actual Node job API/store. Not a new model/semantic success.",
+  "providerCalls": 0,
+  "replayCalls": 1,
+  "prompt98": "m6-177d450624b5",
+  "wireSha256": "99c33f986dfd0f0fa6caecbef7226def28a9ff2821bb1aa5fb0457c900fa6401",
+  "askSha256": "d64857baa4b3e5fce53cc9bc4a2a754c042d64d87ba8bfa0cc3e6935b8cc1d11",
+  "otherProject": {
+    "draftLength": 3492,
+    "selectionStart": 3481,
+    "selectionEnd": 3492,
+    "selectionDirection": "backward",
+    "scrollTop": 3736,
+    "focus": true,
+    "allDomStateBeforeAfterIdentical": true,
+    "fullSavedProjectUnchanged": true,
+    "projectSha256": "c4a637a2d050d5cd8c54e94e721e1df58d5e43fc658a03701ab11ecd8e851369"
+  },
+  "recovery": {
+    "serverStopped": true,
+    "restartedSameJournal": true,
+    "aiKeyConfigured": false,
+    "browserReloaded": true,
+    "readyBeforeExplicitApply": true,
+    "newProviderCall": false,
+    "originalReadingId": "R_a8404ba7-a1eb-4610-beaa-3c4ffeef6cde",
+    "originalReadingAt": "2026-10-29T10:36:08.318Z",
+    "readingCount": 1,
+    "ackApplied": true,
+    "ackTombstoneRetainsNoInputOrWire": true
+  },
+  "result": {
+    "parts": 5,
+    "relations": 3,
+    "material": 2,
+    "originalPastedRecordsExact": true,
+    "allReadingFieldsCanonicalExact": true,
+    "canonicalExceptions": [
+      "generated reading/area/relation IDs by reference mapping",
+      "reading timestamp/model",
+      "98 prompt identity asserted m6-177d450624b5"
+    ],
+    "quoteRoundTrip": "Explicit withdrawal exact RQ/item/prior/new quote/manual correction conditions highlighted in original source; returned to same part",
+    "backupReloadAndReimportAllFieldsIdentical": true,
+    "projectSha256": "466b7aad66494619c3305d55d3d3b7b2458c200c038cce8e5896554e06e31d44",
+    "copyHasDifferentWorkspaceEntry": true
+  },
+  "screenshots": [
+    "experience100-root-ui-bdraft.jpg",
+    "experience100-root-ui-keyoff-ready.jpg",
+    "experience100-root-ui-evidence.jpg",
+    "experience100-root-ui-restored.jpg"
+  ],
+  "limitations": [
+    "Only one actual89 saved response replay; no new AI generation or first-map semantic acceptance",
+    "Unsaved B draft checked across result delivery, not across full page reload",
+    "Automated two-size flow and exact Node22.16 Windows/Ubuntu CI are separate evidence"
+  ],
+  "cleanup": {
+    "replayProcessStopped": true,
+    "recoveryProcessStopped": true,
+    "testTabClosed": true
+  }
+}

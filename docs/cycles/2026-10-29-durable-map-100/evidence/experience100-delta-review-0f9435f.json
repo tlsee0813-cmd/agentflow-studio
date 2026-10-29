@@ -1,0 +1,50 @@
+{
+  "task": "AF100-bounded-delta-review-0f9435f",
+  "reviewedCommit": "0f9435fba48cb962d747be07525ec6053a8bd692",
+  "comparedTo": "dc5c8bf7ef4675c49a25806fcfe33a53390bc2a5",
+  "status": "two_residual_paths_require_fix_not_final_acceptance",
+  "scope": "Only the delta implementing prior ownership/storage repairs, closure of original core findings, and the new targeted test sources. No product edit, build, execution or broad new search.",
+  "residualFindings": [
+    {
+      "id": "R100-owned-visit-seq",
+      "origin": "Residual of D100-2, not a new unrelated issue",
+      "priority": "P1",
+      "refs": ["app/continuity/src/client/map-run.ts:171", "app/continuity/src/client/map-run.ts runJob owned:true", "app/continuity/src/client/map-run.ts attach owned:false", "app/continuity/src/client/app.ts project reopening/current ref flow"],
+      "path": "A at seqN starts a job with owned=true. The same page opensB. Another tab savesA toN+1. The original page opensA again and reads its fresh refN+1. The old Attempt remains owned=true because owned is tied to the page, not the original opened object/known saves, and it is never revoked when visits change. Result arrival waits because visit differs, but explicit apply skips the !owned seq check and commits with fresh refN+1. WorkspaceStore sees a matching current ref and does not detect the original base-seq conflict.",
+      "whyExistingTestsMissIt": "D9 proves same-page own rename is preserved and a new page's owned=false recovery rejects a foreign save. It does not exercise the same-page A→B→A reopening after a foreign save. A page-level boolean is not evidence that every later ref belongs to that job's original save ownership.",
+      "minimumFix": "Track the original owning Opened/ref or an expected sequence advanced only by this visit's known successful saves, or revoke owned privilege when that owner is replaced. Preserve97 same-page permitted edits and A→B→A when no conflicting save occurred. A blanket ban on navigation is unnecessary.",
+      "focusedAcceptance": "Add exactly the A(seqN)→B→foreign-saveA(N+1)→reopenA→explicit-apply case and its no-foreign-save control. No extra provider call and no foreign-seq adoption; original source/project remain preserved on refusal."
+    },
+    {
+      "id": "R100-discard-ack-intent",
+      "origin": "Previously communicated settling/reattachment variant; still present in this snapshot",
+      "priority": "P2",
+      "refs": ["app/continuity/src/client/map-run.ts:282", "app/continuity/src/client/map-run.ts:285", "app/continuity/src/client/map-run.ts:287", "app/continuity/src/client/map-run.ts:289", "app/continuity/src/client/map-run.ts:356", "app/continuity/src/client/map-run.ts:357", "app/continuity/src/client/map-jobs.ts Reservation"],
+      "path": "Explicit discard clears the visible Attempt, settle('discarded') temporarily adds an in-memory closing marker, and a failed ack returns while leaving the reservation. finally removes closing. No durable intended outcome is stored for discarded/seen, only applied has a persisted marker. Next sync or reload attaches the same reservation as asking, fetches the still-ready result and presents it again despite the user's discard. NO_VISIT prevents automatic application, but the user's explicit terminal intent is lost.",
+      "partialRepair": "The new applied marker plus owed() handles applied acknowledgements and validates stable reading ownership. That fix does not cover discard/seen, and the in-memory closing Set protects only the current request interval.",
+      "minimumFix": "Persist the intended terminal acknowledgement for discard/seen before releasing the visible hold, and recover by retrying only that authorized acknowledgement; never re-present or reapply a result with a durable discard intent. Retain authority until acknowledgement can be reconciled. Keep it separate from a forged applied marker and existing sameJob checks.",
+      "focusedAcceptance": "Force discard ack network failure, allow sync, then reload. The result must remain discarded in UI and no provider call/application may occur; later successful ack clears the receipt."
+    }
+  ],
+  "priorRepairAssessment": {
+    "persistentStorage": "D100-1 source repair is correct in the reviewed app path: JobReservations receives the actual captured localStorage adapter without kv's memory fallback/read-as-empty behavior, with persistent=false when absent. .usable gates sending. D12 tests missing persistence and throwing reads with provider count0/no overwrite. Legacy kv remains separate.",
+    "immutableBinding": "D100-3 source repair is present: server returns bindingHash, sameJob checks ID+full binding hash and fields, and seen()/owed() call it before consuming/acknowledging. ownStored confirms projectId/lifecycle. D11 exercises re-bound imported entry with same capability/input and verifies original ready is untouched. This closes the previously demonstrated ownership drift path statically; no execution was repeated here.",
+    "seq": "The new owned=false branch closes the actual reload/new-tab case from dc5c, but the live-page ownership exception is too broad as described above.",
+    "core": "Cross-ID admission serialization, capacity reservation, wrong-capability404, pending authority binding and execute-finally cleanup remain the prior fixed code. TDZ is now fixed by initializing closed before startup recovery. Close fences future writes and tracks executions; B7's source specifically covers a provider ignoring abort, ownership handoff and no old write. No newly demonstrated core defect was found in this bounded delta check."
+  },
+  "testSourceAssessment": {
+    "codec": "A1 checks nonempty P/C/M mappings, full frozen sources and after, then compares full direct-vs-roundtrip apply output and both claim/prior replacements. A2 checks changed prior correction preserves passage but drops only its replacement. A3 checks nonzero source offset and extra captured C alias. These meaningfully cover the serialization boundary rather than only FIRST empty maps.",
+    "behavior": "B1-B8 target lost create receipt/idempotency, per-entry admission, cancellation/limiter release, capacity reservations, failed writes, pre-acceptance tombstones, shutdown ownership and no-current-key recovery. D9-D12 directly target the preceding review's seq/rebound-binding/persistent-storage issues, with the two residual gaps above.",
+    "realProcess": "The129-line process test source actually spawns separate Node smoke servers against a shared temporary journal, kills/restarts one, and checks interrupted without new provider work, ready recovery without key, second-owner/junction exclusion, and corrupt/partial journal preservation. This is materially stronger than recreating an in-memory service. Its provider is a gated stub; it is not evidence of remote generation quality or remote cancellation.",
+    "executionAttribution": "This reviewer read source only. Author/root execution claims must be recorded separately against their exact build/commit. Browser two-PC flows and CI were still being added at task dispatch and are not accepted by this report."
+  },
+  "actions": {
+    "productWrites": 0,
+    "builds": 0,
+    "tests": 0,
+    "ui": 0,
+    "models": 0,
+    "onlyNewFile": ".ops/results/experience100-delta-review-0f9435f.json"
+  },
+  "limits": "Existing90s/model/token/semantic acceptance is unchanged. This review neither supplies new first-map generation evidence nor reuses failed raw. Root owns the next author instructions and final acceptance."
+}

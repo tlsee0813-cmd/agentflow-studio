@@ -1,0 +1,72 @@
+{
+  "task": "AF100-public-claims-evidence-audit",
+  "status": "accept_prepublication_evidence_bundle_no_material_public_claim_issue_found",
+  "scope": "Prepared uncommitted ROOT_ACCEPTANCE.md, modified DESIGN/RESULT and evidence/manifest.json plus its12 files; fixed Ops UI report/events/backups and two preserved CI logs. Read-only claims/provenance/privacy audit, no product source review or execution repeated.",
+  "conclusion": "The proposed public acceptance is appropriately limited to local Node job storage/recovery and is supported by the preserved evidence. It separates root real-PC replay, author stub verification, independent static review and exact CI. No new generation/semantic success or overall product completion is claimed. The12 manifest records match actual files and the public JSON copies match their fixed Ops originals. No key or retrieval capability exposure was found in the inspected public text/images.",
+  "manifestAndProvenance": {
+    "manifestFiles": 12,
+    "allByteCountsMatch": true,
+    "allSha256Match": true,
+    "publicJsonCopies": 8,
+    "allPublicJsonCopiesMatchPreservedOpsOriginals": true,
+    "code": "bf6063099ab9428f30a9ef2be090f6f40d0dccf5",
+    "ciHead": "f2a086df31bf5eebb9ce9c9612b9abea61d9aea3",
+    "rootUiSource": "52fc9137e71fc760f4d8da0a8d4e26b7190561a3",
+    "resolvedAppTreeForAllThree": "3fc2ab0421cda167bd3fbb70c5eaa2a2e9dcc0e5",
+    "codeToCiDifference": "git diff bf606→f2a lists only durable-map-100/RESULT.md. The exact CI head therefore shares the accepted app tree rather than silently testing a different implementation.",
+    "publicationBoundary": "This audits files before root commit/push. It does not attest that the uncommitted bundle has already been published, merged or deployed. PR draft/base/publication status remains root-supplied metadata, not a new remote query."
+  },
+  "ciAudit": {
+    "run": 40858711030,
+    "ubuntu": {
+      "job": 123396284491,
+      "bytes": 458210,
+      "sha256": "f9427c375fff61dcf44d70501471001d3aa0fccd9b5144075049e21cf310e72a",
+      "byteCountAndHashMatchSummary": true,
+      "everyQuotedProofLineFoundExactly": true
+    },
+    "windows": {
+      "job": 123396285314,
+      "bytes": 459331,
+      "sha256": "8f7b6259b15887e1769bbebd755451f65e0935a4d5beafba7bb88e08fa631819",
+      "byteCountAndHashMatchSummary": true,
+      "everyQuotedProofLineFoundExactly": true
+    },
+    "supportedClaims": "Both logs contain headf2a and exact Node22.16, app279/pass279/fail0, continuity559/pass559/fail0, process P1-P4, D15, and AF100/AF97 1280/1440 completion lines quoted publicly. The public excerpts are genuine selected lines with full-log hashes, not substituted execution output.",
+    "limits": "CI uses a synthetic provider and proves implementation flows, not actual model meaning or remote cancellation. The cancelled52fc run is explicitly excluded from pass/fail evidence. No CI rerun or remote status query was performed by this audit."
+  },
+  "realPcReplayAudit": {
+    "fixedSource": ".ops/results/experience100-root-ui.json and .ops/experience100-ui/r1/events.jsonl",
+    "eventTrace": "Preserved events show one202 create in replay mode, one replay-started/delivered pair, later recovery server-ready on the same source/app tree with keyOn:false, and200 applied acknowledgement. Every event records providerCalls0. This is consistent with one preserved89 response replay and no new model request.",
+    "screenshots": "All four public1280×720 screenshots were inspected. They show B's3492-character draft/selection, key-off ready awaiting explicit application, selected source quotation, and restored map. These support the stated UI stages; numeric DOM/focus/scroll equality is attributed to root's preserved measurement report, not inferred from pixels alone.",
+    "backupHashesIndependentlyCompared": {
+      "a-backup.json": "466b7aad66494619c3305d55d3d3b7b2458c200c038cce8e5896554e06e31d44",
+      "a-reload.json": "466b7aad66494619c3305d55d3d3b7b2458c200c038cce8e5896554e06e31d44",
+      "a-copy.json": "466b7aad66494619c3305d55d3d3b7b2458c200c038cce8e5896554e06e31d44",
+      "b-backup.json": "c4a637a2d050d5cd8c54e94e721e1df58d5e43fc658a03701ab11ecd8e851369"
+    },
+    "claimPrecision": "The public report correctly distinguishes byte-identical final backup/reload/copy from comparison with the earlier89 reading, whose generated IDs/time/model and98 prompt identity require the explicitly disclosed canonical mapping/exceptions. It does not turn the replay into a new semantic acceptance.",
+    "unsavedDraftLimit": "B's unsaved draft equality is claimed across result delivery, not across whole-page reload. That important limit is explicit in the public UI evidence."
+  },
+  "publicTextAndPrivacy": {
+    "inspected": "ROOT_ACCEPTANCE, RESULT, DESIGN, eight public JSON evidence files, manifest and four screenshots.",
+    "textScan": "No key-shaped sk- literal or isolated43-character capability-shaped literal was found in the public MD/JSON bundle. Screenshots show no key/capability or capability-bearing URL. The text scan is corroboration, not a proof that arbitrary encoded secrets cannot exist.",
+    "appropriateOmissions": "No full CI log, raw response/source fixture, browser reservation or retrieval capability is included in the12 evidence files. CI excerpts and full-log hashes preserve provenance without uploading those raw logs. Static review reports contain repository-relative code references and historical findings rather than live credentials.",
+    "limitsAreAdequate": "The documents explicitly retain90s/model/token/semantic criteria; historical89/91/92/96 failures; incomplete Q02/Q06 and handoff5/8; no new provider calls; no merge/deploy; Worker/old-server97 fallback; weak macOS locking and unsupported Linux namespace sharing; finite tombstone capacity and absent manual cleanup UI.",
+    "historicalRecords": "Earlier independent reports retain their then-current defects and the old512KiB documentation note. ROOT_ACCEPTANCE/RESULT explain the repair sequence, and current DESIGN now says640KiB. Keeping those historical reports is not a conflicting claim that those defects remain in the final code.",
+    "resultRootLink": "RESULT now leads with the link to ROOT_ACCEPTANCE while labeling the rest as author-environment synthetic verification, so stale author-only limitations are not mistaken for root's final evidence."
+  },
+  "materialFindings": [],
+  "actions": {
+    "productWrites": 0,
+    "productSourceReview": 0,
+    "builds": 0,
+    "testRuns": 0,
+    "uiActions": 0,
+    "modelCalls": 0,
+    "webOrRemoteQueries": 0,
+    "evidenceImageInspections": 4,
+    "onlyNewFile": ".ops/results/experience100-public-audit.json"
+  },
+  "publicationOwner": "root coordinator"
+}
