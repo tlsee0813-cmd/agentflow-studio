@@ -1,0 +1,17 @@
+{
+  "cycle": 99,
+  "sourceCode": "3d280b1ae7505d33512797aedfd8ec6dac24c3d3",
+  "kind": "read-only-source-trace-and-architecture-decision",
+  "artifacts": [
+    {
+      "path": "evidence/experience99-time-contract-review.json",
+      "bytes": 9199,
+      "sha256": "3ae287a0c24a71db34d825fac0b699d500b1b703272f6a8f046de1ecfcb459f7"
+    },
+    {
+      "path": "evidence/experience99-ownership-trace.json",
+      "bytes": 14388,
+      "sha256": "dc8d5cfd81ef401820be6516d51490dffd8eb407d5f76b5bfe40a673231c3141"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "cycle": 98,
+  "code": "3d280b1ae7505d33512797aedfd8ec6dac24c3d3",
+  "artifacts": [
+    {
+      "path": "evidence/experience98-independent-review.json",
+      "sha256": "f9d9f35a44f3976d4d862296c23810a93182fd2b6f6572ed2a8f843b00786b26",
+      "bytes": 6310,
+      "originalLocalSha256": "f9d9f35a44f3976d4d862296c23810a93182fd2b6f6572ed2a8f843b00786b26"
+    },
+    {
+      "path": "evidence/experience98-root-checks.json",
+      "sha256": "6b83d2c8ed20e81acc115449641dbf97cc746a856eea8ce45ad7351af28761cd",
+      "bytes": 968,
+      "originalLocalSha256": "6b83d2c8ed20e81acc115449641dbf97cc746a856eea8ce45ad7351af28761cd"
+    },
+    {
+      "path": "evidence/prompt-identity.json",
+      "sha256": "7a2a22a6e7e13c3307677bddadea043f643c96b9ed039a79931c4bdf71e1c791",
+      "bytes": 235
+    },
+    {
+      "path": "evidence/exact-ci.json",
+      "sha256": "b4d3c51b2c2f9022a9b4d66a0c5ec343817daf36d166ec6690ebc1c23fa542e7",
+      "bytes": 11368
+    }
+  ]
+}

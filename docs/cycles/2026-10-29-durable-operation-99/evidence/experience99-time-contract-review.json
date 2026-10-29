@@ -1,0 +1,56 @@
+{
+  "task": "AF99-delivery-time-contract-judgment",
+  "status": "select_one_bounded_durable_operation_feasibility_diagnostic",
+  "recommendation": "명시적인 비동기 장기 작업 계약을 별도로 설계할 타당성은 있다. 다음은 timer 변경이나 모델 호출이 아니라, 현재 제품 실행·저장 경계에서 한 작업의 내구 소유권을 구현할 수 있는지 읽기 전용으로 판정하는 한 진단이다.97만으로90초 이후 실행을 승인하거나 과거 실패를 성공으로 바꾸지는 않는다. 최종 선택은 root 책임이다.",
+  "timeRequirementEvidence": {
+    "explicit81": "81 Pro Answer는 전체 전달 예산90초 동결을 '새 제안'이라고 명시하고, 초과를 전달 예산 실패로 제한하며 의미 개선 불가능의 증거로 확대하지 말라고 했다. 제공 근거에서 사용자 직접90초 요구는 확인되지 않는다. 이 문장만으로 모든 과거90초의 최초 기원을 단정하지 않는다.",
+    "bindingExperimentConditions": "89·92·96의 고정 예산은 당시 실험의 진짜 수용 조건이다. 이후 다른 제품 계약을 선택하더라도 당시 실패 판정은 유지한다.92의89초 선택+정리1초 배분과96 cutoff는 새 계약의 실행 증거로 재사용할 수 없다.",
+    "observedCompletion": "89 actual80.743초와 micro52.603초의 좁은 의미 수용은 완성 지도의 전달 가능성 일부를 보인다. Zephyr90.055초 최종0,92 Sol89초 최종0,96 최종0은 그 시점 이후 언제 또는 과연 완결될지를 알려주지 않는다. 더 기다리면 성공한다는 추정은 근거가 없다.",
+    "productGoal": "root가 전달한 사용자 범위는 완성도 있는 PC 경험과 계속 진행이다. 화면을 막지 않는 긴 작업은 이 목표에 부합할 수 있으나 무한 대기·상실·중복 실행·잘못된 프로젝트 반영을 허용하는 계약은 그 목표에 맞지 않는다."
+  },
+  "what97ActuallyAdds": {
+    "substantiveMechanicalEvidence": "97은 단순 대기 화면이 아니다. entry별 예약, entryId/Project.id/lifecycle/방문 구별, 취소된 구요청의 늦은 응답 차단, 원 MapInput+검증 reply+model/prompt/hash 소유, 다른 프로젝트 편집 보존, 명시 반영, 저장만 재시도하는 기계 동작을 구현·좁게 수용했다. 따라서 생성 HTTP 응답과 현재 보이는 화면을 반드시 같은 수명으로 묶을 필요는 없다는 인페이지 근거다.",
+    "notDurableAsync": "97 ready는 페이지 메모리에만 있어 반영 전 새로고침하면 사라진다. provider/model/prompt/token/timeout/shared/storage 계약을 바꾸지 않았다. 과거89 수용 응답의 재생으로 확인했으며 새 장기 모델 생성은0이다. 브라우저 종료·새로고침 후 작업의 지속/재연결·서버 작업 소유권·장기 runtime 지원을 증명하지 않는다.",
+    "verdict": "비동기 제품 계약 논의를 관련 없는 UI로 기각할 필요는 없다. 그러나97 자체를 그 계약의 충분한 구현·성공 근거로 삼을 수도 없다."
+  },
+  "newContractWouldHaveToChange": {
+    "ownership": "사용자에게 접수됐다고 알리기 전에 operation ID와 원 프로젝트/lifecycle, 요청 당시 원자료·ask 또는 변조를 검출할 결속, 적용 기준 seq, prompt/model 판본을 내구 저장해야 한다. 작업 실행자와 결과 보관자가 화면 방문 수명 밖에서 누구인지 하나로 명시해야 한다. 새로고침 후 같은 operation을 조회하고 중복 새 생성 없이 회수할 수 있어야 한다.",
+    "navigationAndApply": "작업 중 다른 프로젝트를 정상 편집하고 돌아올 수 있어야 한다. 완료 결과는 원 요청에 검증해 ready로 보관하며, 사용자의 명시 반영에서 현재 프로젝트 seq/충돌을 확인한다. 오래된 결과를 새 원자료에 조용히 적용하거나 자동 rebase하지 않는다. 전체 map6 원자 적용 조건은 유지한다.",
+    "cancelAndTerminalStates": "접수/실행/ready/반영/실패/취소 등 전이와 소유자가 명확해야 한다. 취소 후 늦은 응답은 반영할 수 없어야 하고, 원격 연산·과금 중단이 실제로 보장되는지와 단지 결과 전달을 차단하는지를 구별해야 한다. 취소·실패·저장 실패의 내구 상태와 정리 책임도 필요하다.",
+    "budget": "사용자 상호작용의 응답성과 작업 완료 예산을 별도 계약으로 정한다. 새 실행 전 작업의 유한한 deadline, token/비용 상한, 동시성·큐·재시도 정책, 결과 보존 기간을 사전 고정해야 한다. 새 근거 없이90를120 또는 임의 장시간으로 바꾸는 것만으로 이 계약이 생기지 않는다. 기존90초 내 완성 전달 약속을 유지하는지 별도 장기 작업으로 대체하는지도 문서에 명시한다.",
+    "semanticAcceptance": "새 계약도 전체 map6 형식·Q02/Q06 의미·핵심 조건/부정/예외/결합 보존을 요구한다. 비동기 결과가 도착했다는 이유로91의 의미 실패나92의 무효 응답을 구제하지 않는다.98 형식 안내 수리는 이 의미 관문을 대체하지 않는다."
+  },
+  "oneNextDiagnostic": {
+    "name": "한 operation의 내구 소유권 경로에 대한 읽기 전용 실행·저장 경계 추적",
+    "boundedQuestion": "현재 선택 가능한 배포/실행 경로에서 브라우저가 새로고침된 뒤에도 동일한 한 생성 작업이 살아 있거나 명시적 실패로 확정되고, 원 프로젝트가 결과를 한 번만 회수·검증·반영할 소유자를 지정할 수 있는가?",
+    "work": "97 map-run의 생성·취소·ready·반영 경로와 현재 server/provider adapter, 실제 배포 설정, 기존 저장 경계만 따라 한 operation의 생성→durable 접수→실행→조회/취소→ready 보관→seq 검증 반영 표를 만든다. 각 칸에 현재 지원/미구현/근거 없는 외부 제약을 적고 책임 주체와 코드·설정 근거를 붙인다. 새로운 worker/queue 서비스를 이미 사용할 수 있다고 가정하지 않는다. 새 모델·웹 조사·실제 장기 실행·실패 raw 재처리는 이 진단에 필요하지 않다.",
+    "falsifiableDecision": "durable 접수 이후 실행/조회/취소/ready를 소유할 구체 경로를 현재 코드·설정에서 결속할 수 없거나, 브라우저 연결 종료 시 실행자 수명을 보장할 근거가 없으면 '현재 경로로는 장기 작업 계약 미지원'으로 종료한다. 결과물은 누락 경계 한 개와 그 구현 필요성이지 timer 변경이 아니다. 모든 필수 소유권을 구체화할 수 있어도 얻는 것은 작은 구현 설계의 타당성뿐이며 장기 생성 성공이나 모델 재실행 승인은 아니다.",
+    "whySubstantive": "모델 출력 지시를 다시 쓰는 대신 결과의 소유 수명을 화면 요청 수명에서 내구 작업으로 옮길 수 있는지 판정한다. 이것은 제품 전달 책임의 변화다.97이 이미 제공한 인페이지 경계와 아직 없는 내구 경계의 정확한 차이를 조사하므로 동일 UI 수리를 반복하지 않는다.",
+    "stopCondition": "산출물이 결국 HTTP timer 값만 늘리거나 실패 응답을 나중에 가져와 통과시키는 설계라면 새로운 계약이 아니므로 선택하지 않는다. 내구 소유권 없는 장기 대기 스피너도 같은 결론이다."
+  },
+  "currentlyUnknown": [
+    "실제 배포 runtime의 HTTP 요청 수명·백그라운드 작업/queue 지원·process 종료 규칙·내구 저장의 가용성과 한도",
+    "선택 provider/API/CLI가 detached 작업 식별자·polling·cancel을 제공하는지, 직접 실행할 경우 서버 작업자가 그 역할을 소유할 수 있는지",
+    "현재 코드에서 본 mapTimeout 기본90000/설정 최대120000은 로컬 설정 경계이지 실제 플랫폼이120초를 보장한다는 근거가 아님",
+    "90초 이후 최종 도착 분포·의미·비용·최적 예산. no-final 기록으로 이를 추정할 수 없음"
+  ],
+  "evidenceRead": [
+    "Ops .ops/results/experience81-pro.log Answer 마지막 예산·중단 조건",
+    "product 4a30e485:docs/cycles/2026-10-29-codex-map-path-89/RESULT.md (앞선98 검토에서 읽은 근거)",
+    "product bc3a02b9b4fa69252bd0e19ad5531f51dbdb20f6:docs/cycles/2026-10-29-priority-delivery-92/RESULT.md",
+    "product db47350:docs/cycles/2026-10-29-schema-delivery-96/RESULT.md (앞선98 검토에서 읽은 근거)",
+    "product docs/cycles/2026-10-29-map-return-97/RESULT.md 전체",
+    "product server/studio.mjs의 기존 mapTimeout 설정/HTTP 호출 경계 (앞선98 소스 검토)",
+    "root의 사용자90초 직접 요구 없음 및 현재 범위 전달; 독립적으로 모든 사용자 과거 대화를 회수한 것은 아님"
+  ],
+  "actions": {
+    "modelCalls": 0,
+    "web": 0,
+    "browser": 0,
+    "tests": 0,
+    "productWrites": 0,
+    "oldFailureRepairOrReuse": 0,
+    "onlyNewFile": ".ops/results/experience99-time-contract-review.json"
+  },
+  "selectionOwner": "root coordinator"
+}

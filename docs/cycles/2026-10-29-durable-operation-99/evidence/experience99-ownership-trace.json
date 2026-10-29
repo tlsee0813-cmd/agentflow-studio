@@ -1,0 +1,87 @@
+{
+  "task": "AF99-current-runtime-durable-ownership-trace",
+  "status": "current_path_is_request_owned_local_node_owner_is_concrete_design_option_worker_support_not_established",
+  "conclusion": "현재 Node와 Worker 경로 모두 생성 HTTP 요청이 실행 소유자이며 내구 job 소유자가 없다. 기존 영속 저장은 브라우저 프로젝트 저장이고 실행·ready 저장은 아니다. 다음 최소 결정은 'PC 로컬 Node가 원자료 요청과 결과를 별도 내구 작업 기록으로 소유하고, 브라우저는 프로젝트 반영만 소유한다'는 범위를 선택할지 여부다. 이 선택은 기존 Node 진입점으로 구체 설계할 수 있으며 새 클라우드 서비스 가용성을 가정하지 않는다. 현재 코드에 이미 구현돼 있거나 PC 재시작 후 원격 생성을 이어갈 수 있다는 주장은 아니다.",
+  "inspectionState": {
+    "observedHeadAtEnd": "3d280b1ae7505d33512797aedfd8ec6dac24c3d3",
+    "scope": "현재 product 소스·진입점·배포 스크립트·저장 구현의 읽기 전용 추적. 배포 상태·프로세스·실제 env 값은 조사하지 않음."
+  },
+  "verifiedTrace": [
+    {
+      "boundary": "client 접수와 소유",
+      "refs": ["app/continuity/src/client/map-run.ts:52", "app/continuity/src/client/map-run.ts:61", "app/continuity/src/client/map-run.ts:80", "app/continuity/src/client/map-run.ts:92", "app/continuity/src/client/map-run.ts:100"],
+      "verified": "Attempt는 entry key/project/lifecycle/visit, AbortController, MapInput, prompt/hash, reply/model/meta를 가진다. slots는 함수 내부 Map이다. 생성은 askMap 단일 await이고 완료 뒤 reply를 ready로 넣는다. 접수·진행·ready를 storage에 쓰는 호출은 이 경로에 없다. entry 이동을 견디지만 JS 페이지 수명을 넘지 못한다."
+    },
+    {
+      "boundary": "browser HTTP",
+      "refs": ["app/continuity/src/client/studio-api.ts:61", "app/continuity/src/client/studio-api.ts:67", "app/continuity/src/client/studio-api.ts:72", "app/continuity/src/client/studio-api.ts:75"],
+      "verified": "POST /api/studio/map에 원 ask와 AbortSignal을 보내고 응답 JSON 전체를 기다린다. 서버 operation ID/접수 영수증/poll/cancel route가 없다. 본문 도중 취소도 CANCELLED이며 evidence ask digest와 reply를 원 ask로 다시 검증한다."
+    },
+    {
+      "boundary": "Node 진입점과 연결 종료",
+      "refs": ["app/continuity/server/index.mjs:6", "app/continuity/server/index.mjs:7", "app/continuity/server/app.mjs:25", "app/continuity/server/app.mjs:26", "app/continuity/server/app.mjs:35", "app/continuity/server/app.mjs:37"],
+      "verified": "로컬 Node는 createStudioHandler를 createContinuityApp에 넣는다. serveStudio는 응답 완료 전 res.close 시 controller.abort를 호출하고 그 signal로 표준 Request를 만든다. studio 결과를 기다린 뒤 연결이 살아 있을 때만 응답한다. 브라우저 연결 상실은 이 코드에서 생성 취소로 이어지며 detached 작업으로 승격되지 않는다."
+    },
+    {
+      "boundary": "공통 provider 호출과 timer",
+      "refs": ["app/continuity/server/studio.mjs:107", "app/continuity/server/studio.mjs:109", "app/continuity/server/studio.mjs:110", "app/continuity/server/studio.mjs:118", "app/continuity/server/studio.mjs:151", "app/continuity/server/studio.mjs:188", "app/continuity/server/studio.mjs:201", "app/continuity/server/studio.mjs:204", "app/continuity/server/studio.mjs:206"],
+      "verified": "handler 경로는 status 및 기존5 POST만 허용한다. 무작위 limiter ID는 접수된 작업 ID가 아니며 저장/조회되지 않는다. request.signal을 callStudioModel에 넘기고 provider fetch를 await한다. timer 또는 외부 signal이 내부 controller를 abort하고 timeout/cancel error로 분기한다. response 검증 후 바로200을 돌려주며 원격 job ID나 내구 receipt는 없다."
+    },
+    {
+      "boundary": "Worker 진입점과 배포 구성",
+      "refs": ["app/continuity/server/worker.mjs:6", "app/continuity/server/worker.mjs:8", "app/continuity/server/worker.mjs:11", "app/continuity/scripts/deploy-cloudflare.mjs:49", "app/continuity/scripts/deploy-cloudflare.mjs:56", "app/continuity/scripts/deploy-cloudflare.mjs:82", "app/continuity/scripts/deploy-cloudflare.mjs:84"],
+      "verified": "Worker는 cached handler에 request를 그대로 전달한다. fetch 시그니처에 실행 context를 받거나 작업 큐/영속 소유자를 호출하는 코드가 없다. 배포 main은 이 Worker이며 수집기는 node: import를 거절한다. 작성된 bindings는 ASSETS, secret_text, AI_MODE/DEEPSEEK_MODEL plain_text뿐이다. 현재 스크립트에는 job용 내구 저장·queue binding·migration이 없다. 이는 이 저장소 구성의 사실이며 Cloudflare 플랫폼 자체가 그런 기능을 제공하지 않는다는 판정이 아니다."
+    },
+    {
+      "boundary": "PC 실행 수명",
+      "refs": ["app/continuity/scripts/start-local.ps1:29", "app/continuity/scripts/start-local.ps1:33", "app/continuity/scripts/start-local.ps1:41", "app/continuity/scripts/start-local.ps1:46"],
+      "verified": "launcher는 기존 서버 status를 확인하고 없으면 Node를 숨긴 별도 프로세스로 시작해 잠시 시작 상태를 확인한다. 따라서 브라우저 창과 다른 프로세스를 둘 구조는 이미 있다. 그러나 재시작 supervisor, 작업 journal, interrupted 복구, 결과 복구 코드는 이 launcher나 서버 진입점에 없다. 실제 현재 실행 중 프로세스/OS 종료 동작은 조사하지 않았다."
+    },
+    {
+      "boundary": "기존 영속 저장",
+      "refs": ["app/continuity/src/client/app.ts:66", "app/continuity/src/client/app.ts:69", "app/continuity/src/client/app.ts:70", "app/continuity/src/client/app.ts:2331", "app/continuity/src/shared/storage.ts:127", "app/continuity/src/shared/storage.ts:135", "app/continuity/src/shared/storage.ts:184", "app/continuity/src/shared/storage.ts:189", "app/continuity/src/shared/storage.ts:225", "app/continuity/src/shared/storage.ts:230", "app/continuity/src/shared/storage.ts:231"],
+      "verified": "클라이언트 kv는 window.localStorage를 사용하고 불가하면 메모리로 돌아간다. WorkspaceStore는 navigator.locks와 한 workspace envelope setItem을 사용한다. entryId/lifecycle/seq 및 프로젝트를 저장하고 다른 탭 seq 충돌·휴지통 상태를 거절한다. 새로고침 후 저장된 프로젝트를 읽을 기반은 있으나 mapRun Attempt/ready나 실행자는 이 envelope에 없다. localStorage/WebLock이 Node/Worker에게 제공되는 공유 작업 저장소도 아니다."
+    },
+    {
+      "boundary": "반영의 기존 안전성 및 복구 영수증 공백",
+      "refs": ["app/continuity/src/client/map-run.ts:113", "app/continuity/src/client/map-run.ts:115", "app/continuity/src/client/map-run.ts:124", "app/continuity/src/client/map-run.ts:126", "app/continuity/src/client/map-run.ts:148", "app/continuity/src/shared/map-reading.ts:683", "app/continuity/src/shared/map-reading.ts:689", "app/continuity/src/shared/map-reading.ts:690", "app/continuity/src/shared/map-reading.ts:693", "app/continuity/src/client/app.ts:1803", "app/continuity/src/shared/storage.ts:232"],
+      "verified": "현재 ready 반영은 같은 entry/lifecycle에서 applyReading 후 workspace 저장한다. applyReading은 앞선 지도 변경·이미 적용된 hash·원자료 불일치를 거절하고 프로젝트를 원자적으로 만든다. 저장 실패는 메모리 ready로 돌아간다. cancel은 hashing/asking에서만 controller를 abort하고 slot을 비운다. 프로젝트 commit과 외부 작업 완료 acknowledgement를 결속하는 내구 영수증은 없다. 단순히 reply를 파일 저장하는 것만으로 이 두 저장소의 적용-응답 crash gap이 해결되지 않는다."
+    }
+  ],
+  "restartAndAbortBehavior": {
+    "projectNavigation": "97 범위에서는 같은 페이지 slots가 살아 있고 다른 entry를 편집해도 원 entry가 결과를 소유한다. 이 경계는 유지 가능한 기반이다.",
+    "clientCancel": "명시 취소는 클라이언트 slot을 비워 늦은 응답 반영을 막고 HTTP fetch에 abort를 전달한다. Node의 res.close 경로 및 공통 request.signal 경로도 provider fetch abort를 시도한다. 원격 계산/과금이 실제 중단됐다는 영수증은 아니다.",
+    "pageReload": "새 페이지에는 slots/원 MapInput/ready가 없다. Node 연결이 완료 전에 닫히면 서버가 abort한다는 코드 근거가 있다. Worker에서 브라우저 단절을 request.signal이 언제 통지하는지나 외부 실행 수명은 실제 플랫폼 검증을 하지 않았으므로 미확인이다. 어느 경우에도 현재 결과 조회 경로가 없어 나중 결과를 회수할 수 있다고 약속할 수 없다.",
+    "nodeOrPCRestart": "현재 서버가 종료되면 메모리 호출·limiter·controller는 복구되지 않는다. 프로젝트 localStorage는 브라우저가 보존하고 쓰기에 성공한 상태까지 재열기 기반이지만, pending/ready는 거기에 없다. 원격 요청이 이미 시작됐는지는 프로세스 재기동 후 조회할 operation receipt가 없으므로 재시도하면 중복 원격 작업 가능성을 배제할 수 없다. PC 재시작 후 연산 재개를 현재 코드로 보장할 수 없다.",
+    "justSavedBeforeCrash": "이미 저장된 reading은 프로젝트에 남을 수 있고 hash 중복 거절이 있다. 그러나 새 내구 job을 만들면 '프로젝트 저장 성공→job ack 전 crash'를 hash/안정 reading ID로 재조회해 반영 완료로 확인하는 별도 복구 규칙이 필요하다. 기존 applyReading을 무조건 재호출하는 것만으로는 MAP_CHANGED/ALREADY_APPLIED 거절과 미반영을 구별하지 못한다."
+  },
+  "oneMinimalArchitectureDecision": {
+    "decision": "장기 작업 첫 구현의 소유자를 기존 PC 로컬 Node로 한정할지 결정한다. 선택한다면 browser는 entry/project의 권위와 명시 반영을 유지하고, Node는 별도 내구 operation journal 및 provider AbortController의 권위를 가진다. 공개 Worker의 장기 작업 지원은 같은 기능으로 자동 포함하지 않는다.",
+    "whyConcrete": "이미 localhost 검증 Node 진입점과 별도 백그라운드 Node launcher가 있다. 이 경로는 Worker 모듈의 node: 제한과 달리 Node 파일 I/O를 사용한 journal 설계를 추가할 수 있다. 외부 queue/account 생성 없이 설계 가능한 최소 소유자다. 실제 writable 경로·원자 파일 교체/복구·개인 원자료 보존 규칙은 아직 선택/검증하지 않았으므로 구현이 승인된 것은 아니다.",
+    "minimalProtocolToSpecifyBeforeCode": [
+      "브라우저가 stable operation ID와 원 entryId/projectId/lifecycle, 요청 결속/원 ask, 재구성 가능한 MapInput 정보를 보내고 Node가 내구 접수 후 receipt를 반환한다. 기존 POST ask만에는 이 entry 귀속이 없으므로 단순 endpoint 재사용으로 충분하지 않다. JS Map을 가진 MapInput을 그대로 JSON 복사 가능하다고 가정하지 않는다.",
+      "접수 연결의 signal과 작업 실행 signal을 분리한다. 명시 cancel endpoint는 canceled 상태를 내구 기록한 뒤 실행 controller를 abort하고, 늦은 완료가 canceled를 ready로 덮지 않게 전이 소유자를 정한다. 응답은 전달 차단 수용과 원격 중단 미확인을 구별한다.",
+      "원 ask로 검증된 raw wire/result와 model/prompt/hash 및 안정 reading meta를 내구 ready에 기록한 뒤 조회에 노출한다. 브라우저는 같은 작업을 재조회하고 원 MapInput을 안전하게 재구성하며 기존 source/지도/seq/lifecycle 관문으로 명시 반영한다.",
+      "프로젝트 commit 후 ack가 사라진 경우 저장 reading의 안정 ID+hash+귀속을 확인해 이미 반영된 것으로 정리한다. 두 저장소를 하나의 분산 원자 transaction이라고 부르지 않는다. 결과를 너무 일찍 삭제하지 않으며 취소·폐기·적용 receipt 보존과 회수 권한/동일 origin 소유를 정의한다.",
+      "Node 재시작 시 진행 중 상태는 자동 재호출하지 않고 interrupted/원격 상태 미확인으로 끝낸다. ready는 회수 가능하게 한다. 이것은 PC 종료 중 연산 지속을 약속하는 계약보다 좁지만 정직한 내구 복구 범위다. 전자까지 필요하면 별도 supervisor/원격 job API 근거가 필요하다."
+    ],
+    "workerAlternative": "공개 Worker를 소유자로 선택하려면 실제 사용 가능한 내구 저장/작업 실행 binding과 조회·취소·권한 모델을 먼저 결정해야 한다. 현재 deploy 스크립트와 worker handler에는 그 경로가 없고 계정/runtime 능력도 조사하지 않았다. global cached Map이나 연결 종료 후 Promise만으로 대체할 수 없다. 이는 불가능 판정이 아니라 현재 근거의 부재다.",
+    "notApproved": "timer 변경·모델/CLI 통합·새 provider·설치·계정 생성·실제 작업 실행은 이 진단으로 승인하지 않는다. 유한한 시간/token/비용/보관 예산 및 의미 수용 기준은 새로운 실행 전에 별도 동결해야 한다."
+  },
+  "remainingLimits": [
+    "현재 timer의 코드상 기본/최대 설정은 실제 Node/Worker 실행 한도나90초 이후 완결 분포의 증거가 아니다. Cloudflare 최신 정책·계정 기능·원격 cancel semantics는 추정하지 않았다.",
+    "전체 map6 의미·조건 보존·실제 첫 지도 품질은 소유권 변경으로 해결되지 않는다.89/92/96 기존 실패를 새 계약 성공으로 재분류하거나 실패 raw를 이어받아 수용하지 않는다.",
+    "한 구현 경로를 선택하기 전의 소스 진단 결과이며 제품/배포 수용·내구 동작 실험은 아니다."
+  ],
+  "actions": {
+    "productWrites": 0,
+    "tests": 0,
+    "modelCalls": 0,
+    "webResearch": 0,
+    "browser": 0,
+    "secretsEnvProfilesRead": 0,
+    "processesMachinesAccountsInstallsCreated": 0,
+    "onlyNewFile": ".ops/results/experience99-ownership-trace.json"
+  },
+  "selectionOwner": "root coordinator"
+}

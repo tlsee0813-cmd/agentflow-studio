@@ -1,0 +1,310 @@
+{
+  "runId": 40848778881,
+  "url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40848778881",
+  "code": "3d280b1ae7505d33512797aedfd8ec6dac24c3d3",
+  "jobs": [
+    {
+      "id": 123362755708,
+      "name": "verify (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Record exact runtime and checked-out commit",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Clean locked install",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Type and boundary checks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Build and domain / HTTP / simulated provider tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Continuity type, syntax and credential boundary checks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Build and test continuity with simulated providers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Prepare Cloudflare modules and assets without credentials or deployment",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Build static site (no AI server bundled, no credentials)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Install pinned browser verification tools",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Direct browser-to-server verification (original app, AI is still mocked)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        },
+        {
+          "name": "Studio smoke - entry, map, part, ask, failure/retry, no-key and static states (stubbed provider, no real key)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        },
+        {
+          "name": "Upload only this run's results, not historic snapshot evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16
+        },
+        {
+          "name": "Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 30
+        },
+        {
+          "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 31
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 32
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 33
+        }
+      ]
+    },
+    {
+      "id": 123362755920,
+      "name": "verify (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Record exact runtime and checked-out commit",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Clean locked install",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Type and boundary checks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Build and domain / HTTP / simulated provider tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Continuity type, syntax and credential boundary checks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Build and test continuity with simulated providers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Prepare Cloudflare modules and assets without credentials or deployment",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Build static site (no AI server bundled, no credentials)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Install pinned browser verification tools",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Direct browser-to-server verification (original app, AI is still mocked)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        },
+        {
+          "name": "Studio smoke - entry, map, part, ask, failure/retry, no-key and static states (stubbed provider, no real key)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        },
+        {
+          "name": "Upload only this run's results, not historic snapshot evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16
+        },
+        {
+          "name": "Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 30
+        },
+        {
+          "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 31
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 32
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 33
+        }
+      ]
+    }
+  ],
+  "logs": [
+    {
+      "os": "ubuntu",
+      "jobId": 123362755920,
+      "sha256": "6224fdf1013bf291de73a258fc6721c887b8e721b29f345cc1aeb6452d547d4a",
+      "bytes": 442503,
+      "excerpts": [
+        "2026-10-29T09:19:57.6235408Z HEAD is now at 3d280b1 fix: declare required question text in map candidate instructions",
+        "2026-10-29T09:22:16.9239838Z # tests 279",
+        "2026-10-29T09:22:16.9240204Z # pass 279",
+        "2026-10-29T09:22:16.9240385Z # fail 0",
+        "2026-10-29T09:22:28.5918897Z ok 18 - 98 effective first/later instructions declare the complete candidate shape; prompt identity changes",
+        "2026-10-29T09:22:28.5965367Z ok 19 - 98 receiver preserves independent question text for attribution and rejects its omission",
+        "2026-10-29T09:22:28.5973743Z ok 20 - 98 receiver preserves independent question text for holds and rejects its omission",
+        "2026-10-29T09:22:28.5979758Z ok 21 - 98 receiver preserves independent question text for identity and rejects its omission",
+        "2026-10-29T09:22:28.5985433Z ok 22 - 98 receiver preserves independent question text for parent and rejects its omission",
+        "2026-10-29T09:22:48.6179117Z # tests 528",
+        "2026-10-29T09:22:48.6179298Z # pass 528",
+        "2026-10-29T09:22:48.6179377Z # fail 0",
+        "2026-10-29T09:25:49.3946518Z ok  AF97 map return at 1280/1440: B's paste, selection, scroll and focus, B's reading button and the home draft kept while A's reply comes; applied on return without asking again; saving not cancellable; a visit opened during the save takes it"
+      ]
+    },
+    {
+      "os": "windows",
+      "jobId": 123362755708,
+      "sha256": "ade8df1547b2da89187192ee157cb014c412e9e76acd284890c0ca12593d32ae",
+      "bytes": 443795,
+      "excerpts": [
+        "2026-10-29T09:20:02.4579088Z HEAD is now at 3d280b1 fix: declare required question text in map candidate instructions\r",
+        "2026-10-29T09:23:15.9760799Z # tests 279\r",
+        "2026-10-29T09:23:15.9761133Z # pass 279\r",
+        "2026-10-29T09:23:15.9761289Z # fail 0\r",
+        "2026-10-29T09:23:30.3048244Z ok 18 - 98 effective first/later instructions declare the complete candidate shape; prompt identity changes\r",
+        "2026-10-29T09:23:30.3091751Z ok 19 - 98 receiver preserves independent question text for attribution and rejects its omission\r",
+        "2026-10-29T09:23:30.3095891Z ok 20 - 98 receiver preserves independent question text for holds and rejects its omission\r",
+        "2026-10-29T09:23:30.3100514Z ok 21 - 98 receiver preserves independent question text for identity and rejects its omission\r",
+        "2026-10-29T09:23:30.3105033Z ok 22 - 98 receiver preserves independent question text for parent and rejects its omission\r",
+        "2026-10-29T09:23:57.9734340Z # tests 528\r",
+        "2026-10-29T09:23:57.9734488Z # pass 528\r",
+        "2026-10-29T09:23:57.9734554Z # fail 0\r",
+        "2026-10-29T09:27:56.5771530Z ok  AF97 map return at 1280/1440: B's paste, selection, scroll and focus, B's reading button and the home draft kept while A's reply comes; applied on return without asking again; saving not cancellable; a visit opened during the save takes it\r"
+      ]
+    }
+  ],
+  "limits": [
+    "No paid/model AI; all CI provider responses simulated. UI regression evidence is not fresh first-map semantic acceptance."
+  ]
+}

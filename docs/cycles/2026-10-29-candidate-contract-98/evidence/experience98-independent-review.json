@@ -1,0 +1,56 @@
+{
+  "task": "AF98-independent-candidate-contract-review",
+  "status": "accept_normative_contract_repair_with_limits",
+  "materialFindings": [],
+  "conclusion": "확인한 변경은81 U81-CANDIDATE-SHAPE의 알려진 미수리 공백을 좁게 메운다. 후보 질문 text를 별도로 선언하고 정확5키와 기존 길이 기준을 알리는 문안은 현재 수신 계약과 일치한다. 차단할 실질 문제를 찾지 못했다. 의미·시간·실제 생성 품질의 수용은 아니다.",
+  "reviewedState": {
+    "base": "d1ae6be5935b07e888de9466282f8fecaac2d6a0",
+    "branch": "work/experience98-candidate-contract",
+    "state": "uncommitted; tracked diff map-prompt.mjs 1 insertion, untracked candidate98.test.mjs",
+    "promptFileSha256": "15d84c9335f52624d7d36ae39693a44da577b8344b1d4a462af901e9b96bcc81",
+    "testFileSha256": "158d037d335d8c46bb82c7195dac7d2e73f09bba74f3b2d87bce2a85cec002d5",
+    "sourceRead": [
+      "app/continuity/server/map-prompt.mjs git diff and current map6 transformation",
+      "app/continuity/tests/candidate98.test.mjs full source",
+      "app/continuity/src/shared/map-reading.ts:148-154,238,293-315",
+      "app/continuity/server/studio.mjs:46-55,118,137-144"
+    ]
+  },
+  "contractAccuracy": {
+    "keys": "새 문안의5키 text,target,parts,at,statement는 validateMapReply의 obj(c,['text','parts','at','target','statement'])와 같다. key 순서는 계약 조건이 아니다.",
+    "text": "candidate.text는 필수이며 trim 후 빈 문자열이 아니어야 하고 원 문자열 길이는240 UTF-16 단위 이내다. 문안의 필수 설명 문장 및240 UTF-16 안내는 이 범위와 일치한다. statement.text는 별도 명제라 후보 설명을 대신하지 않는다는 문장이 정확하다.",
+    "statementNull": "기존 target별 규칙은 attribution/holds에 statement 객체, identity/parent에 null을 요구한다. 새 문장은 null이어도 후보 text가 필요함을 정확히 명시하며 이 규칙을 바꾸지 않는다.",
+    "noMandatoryCandidate": "candidates를 실제 미정에만 쓰라는 기존 규칙과 빈 배열 예시는 유지된다. 완전한 populated 예시를 추가하지 않은 선택은 수리를 무효로 만들지 않는다. 새 한 줄과 기존 target별 설명을 합치면 후보 객체의 완전한 shape를 알 수 있다.",
+    "firstAndLaterScope": "공유 MAP6_CANDIDATES에 추가했으므로 FIRST와 later가 함께 바뀐다. 처음 제안의 FIRST-only보다 텍스트 적용면은 넓지만 두 경로 모두 같은 필수 수신 계약을 가지므로 불필요한 의미 변경은 없다. 공개 설명에서 FIRST만 바뀌었다고 쓰면 안 된다. map1-5 텍스트는 이 변환의 영향을 받지 않는다.",
+    "promptIdentity": "studio.mjs의 기존 mapPromptId는 MAP6_RECIPE와 FIRST/later 텍스트 모두를 JSON으로 묶어 해시한다. 두 텍스트 변경이 자동으로 현재 m6 recipe ID에 반영된다. 개별 FIRST/later ID가 따로 있다는 뜻은 아니다. handler는 map6Prompt(ask)로 실제 선택한다.",
+    "unchanged": "검토 시 tracked 제품 diff는 prompt 한 줄뿐이다. aliases, field thresholds의 수신값, validator, source/span 처리, runtime 공급자·예산, 원자 적용, 저장, UI는 변경하지 않았다. 새 테스트는 제품 동작 코드가 아니다."
+  },
+  "testReview": {
+    "meaningfulCoverage": [
+      "실제 export된 FIRST/later 두 문자열에서 정확5키 선언을 fixture candidate와 대조하고 statement.text의 별도성을 확인한다. 빈 candidate 예시에만 기대던 기존 공백을 직접 겨냥한다.",
+      "네 target 모두 서로 독립된 candidate.text를 가진 합성 wire를 실제 HTTP handler의 injected fetch 경로에 전달한다. valid200과 missing/null/empty/whitespace/UTF-16초과502 INVALID_RESPONSE를 구별한다. 실제 모델·네트워크 호출이 아니다.",
+      "보낸 system message가 수정된 FIRST export와 같음을 확인하여 사용하지 않는 상수만 고치는 실수를 막는다.",
+      "120 emoji=240 UTF-16의 수용과121 emoji=242의 거절은 코드 포인트 수와 UTF-16 길이를 혼동하지 않는 의미 있는 경계 대조다.",
+      "원 ask 동일성을 확인하며 누락 text의 자동 보충이나 원자료 수리를 하지 않는다. map5 legacy에 새 문구가 없는지와 recipe ID 변경도 확인한다."
+    ],
+    "limits": "합성 문구는 target별 자연어 의미가 옳다는 witness가 아니며, 테스트는 generation instruction compliance를 보증하지 않는다. HTTP valid 응답은 저장·PC 왕복 수용 증거가 아니다. 이 테스트 자체로 새 형식 제약을 도입한 것도 아니다.",
+    "reportedExecution": "root가 pinned check/build exit0 및 candidate98+grounded74+uncertainty76 합계36/36을 보고했다. 독립 검토자는 코드를 읽고 그 범위의 적절성을 대조했으며 같은 실행을 반복하지 않았다.",
+    "noAdditionalRunNeeded": "이 한 줄의 규범적 수리에서 의미·속도 효과를 주장하지 않는다면 새 모델 호출이나 UI/전체 테스트 반복을 요구할 이유가 없다."
+  },
+  "publicationLimits": [
+    "새 발견이 아니라81의 미완료 contract-instruction 불일치 수리로 기록한다.92의 나중 실제 missing-text 관측은 관련성을 더하지만 원인을 단독 입증하지 않는다.",
+    "91의 의미 실패와89/96의 최종 응답 부재는 그대로 남는다. text 안내가 Q02/Q06 의미·90초 전달을 해결한다고 주장하지 않는다.",
+    "기존 실패 raw를 바꾸거나 재적용하지 않았으며 형식 준수·의미 수용·전체 경로 수용을 분리한다. 공개73과 전체 인수인계5/8 완료 여부는 이 수정으로 바뀌지 않는다.",
+    "81의 alias·다른 field bounds 공백까지 모두 해결했다고 말하지 않는다. root가 별도로 선택할 후속은 자동 모델 재실행을 포함하지 않는다."
+  ],
+  "actions": {
+    "modelCalls": 0,
+    "web": 0,
+    "browser": 0,
+    "testsExecutedByReviewer": 0,
+    "productWrites": 0,
+    "rawFailureRepairsOrReevaluation": 0,
+    "onlyNewFile": ".ops/results/experience98-independent-review.json"
+  },
+  "publicationOwner": "root coordinator"
+}

@@ -1,0 +1,39 @@
+{
+  "cycle": 98,
+  "base": "d1ae6be5935b07e888de9466282f8fecaac2d6a0",
+  "code": "3d280b1ae7505d33512797aedfd8ec6dac24c3d3",
+  "appTree": "1a1440817b2fa22715ba3b832f136012fa880ac1",
+  "publicCheckpoint": "e51ecaa6a5fc0866a50089afd673e5b100d9c8cf",
+  "checks": {
+    "typeSyntaxBoundary": {
+      "exit": 0,
+      "initialExec": "d7c651",
+      "completionExec": "6ecb22"
+    },
+    "build": {
+      "exit": 0,
+      "exec": "b1c8a6",
+      "compiler": "TypeScript5.8.3 app/node_modules locked"
+    },
+    "relatedTests": {
+      "exit": 0,
+      "exec": "665c9c",
+      "passed": 36,
+      "failed": 0,
+      "files": [
+        "candidate98.test.mjs",
+        "uncertainty76.test.mjs",
+        "grounded74.test.mjs"
+      ]
+    }
+  },
+  "preservation": {
+    "ui75Ancestor": true,
+    "stashObject": "commit"
+  },
+  "newModelCalls": 0,
+  "uiExecution": 0,
+  "limitations": [
+    "Synthetic handler replies, no actual generation or first-map meaning acceptance."
+  ]
+}
