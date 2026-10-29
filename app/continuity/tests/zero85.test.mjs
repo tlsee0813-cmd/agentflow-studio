@@ -117,8 +117,10 @@ test('85 storage: an empty analysis saves, reloads and round-trips as a .3 file;
   delete bundle.authoring;
   const store = kv(); assert.equal(saveBundle(store, project.id, bundle), null);
   const loaded = loadBundle(store, project.id); assert.equal(loaded.unreadable, false); assert.deepEqual(loaded.bundle, bundle);
-  const file = planFile(bundle, project); assert.equal(JSON.parse(file).format, 'agentflow.change-plan-file.3');
+  // AF94: files are written as .4 now; a .3 file (the version that first kept an empty analysis) still reads it.
+  const file = planFile(bundle, project); assert.equal(JSON.parse(file).format, 'agentflow.change-plan-file.4');
   assert.deepEqual(readPlanFile(file, project.id), bundle);
+  assert.deepEqual(readPlanFile(JSON.stringify({ ...JSON.parse(file), format: 'agentflow.change-plan-file.3' }), project.id), bundle);
   // .1/.2 writers never kept an empty analysis: such an entry is not what they wrote (refused, raw kept); their positive ones still read.
   const legacyEmpty = JSON.stringify({ version: 'studio.plans.2', projects: { [project.id]: bundle } }), old = kv({ [PLANS_KEY]: legacyEmpty });
   assert.equal(loadBundle(old, project.id).unreadable, true); assert.equal(old.m.get(PLANS_KEY), legacyEmpty);

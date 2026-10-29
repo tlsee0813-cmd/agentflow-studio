@@ -106,8 +106,9 @@ test('71 frozen RQ and manual corrections survive a changed demand, late report,
 test('71 migration: project9 unchanged readings, legacy sidecar text/manual observations; new snapshot scope stays frozen and exports round-trip', () => {
   const { p, snap, bundle } = setup();
   const v9 = { ...p, schemaVersion: 'idea015.project.9' }; assert.equal(parseProject(JSON.stringify(v9)).schemaVersion, 'idea015.project.13');
-  // The legacy fixture is the bundle as earlier versions wrote it: its original nine keys, no authoring context (AF84).
-  const legacy = structuredClone(bundle); delete legacy.snapshots[0].scope; delete legacy.authoring;
+  // The legacy fixture is the bundle as earlier versions wrote it: its original nine keys, no authoring context (AF84), and no
+  // request reading (AF94: only documents made from .4 on carry one; a reading without its frozen scope is refused).
+  const legacy = structuredClone(bundle); delete legacy.snapshots[0].scope; delete legacy.snapshots[0].reading; delete legacy.authoring;
   legacy.observations.push({ id: 'O_legacy', itemId: 'I1', kind: 'report', text: '이전 수동 보고', basis: '직접 붙임', refs: [] }); legacy.attached.O_legacy = snap.id;
   assert.deepEqual(parseBundle(legacy, p.id), legacy);
   const raw = JSON.stringify({ version: 'studio.plans.1', projects: { [p.id]: legacy } });
@@ -171,7 +172,8 @@ test('71 copied request carries its own real RQ and plan revision while legacy t
   const { p, snap, plan, bundle } = setup();
   assert.ok(snap.text.includes(`요청문 참조: ${snap.id}`)); assert.ok(snap.text.includes(`변경안 판본: ${plan.id} / ${plan.revision}`));
   assert.ok(snap.text.includes(`결과에 이 요청문 참조 ${snap.id}를 함께 남겨 주세요`));
-  const legacy = structuredClone(bundle); delete legacy.snapshots[0].scope; legacy.snapshots[0].text = '이전 복사 요청문 원문';
+  // A pre-94 document: no scope and no reading (AF94: a reading frozen with other text is refused, never kept beside it).
+  const legacy = structuredClone(bundle); delete legacy.snapshots[0].scope; delete legacy.snapshots[0].reading; legacy.snapshots[0].text = '이전 복사 요청문 원문';
   assert.equal(parseBundle(legacy, p.id).snapshots[0].text, '이전 복사 요청문 원문');
 });
 

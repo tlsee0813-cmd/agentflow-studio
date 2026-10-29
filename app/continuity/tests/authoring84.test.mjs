@@ -131,11 +131,13 @@ test('84 storage: older bundles/envelopes/files read losslessly and stay unrecor
   const loaded = loadBundle(store, p.id); assert.equal(loaded.unreadable, false); assert.deepEqual(loaded.bundle, legacy);
   const next = { ...legacy, authoring: { version: AUTHORING_VERSION, draft: ctx, analyzed: { authoring: { state: 'unrecorded' }, missing: [] } } };
   assert.equal(saveBundle(store, p.id, next), null);
-  const env = JSON.parse(store.m.get(PLANS_KEY)); assert.equal(env.version, 'studio.plans.3');
+  // AF94: the writer is .4 now (request readings); the .3 rules this test guards (a context only from .3 on) are unchanged.
+  const env = JSON.parse(store.m.get(PLANS_KEY)); assert.equal(env.version, 'studio.plans.4');
   assert.deepEqual(env.projects.PRJ_other, otherRaw, 'another project\'s older entry is written back as it was');
   assert.deepEqual(loadBundle(store, p.id).bundle, next);
-  const file = JSON.parse(planFile(next, p)); assert.equal(file.format, 'agentflow.change-plan-file.3');
+  const file = JSON.parse(planFile(next, p)); assert.equal(file.format, 'agentflow.change-plan-file.4');
   assert.deepEqual(readPlanFile(JSON.stringify(file), p.id), next);
+  assert.deepEqual(readPlanFile(JSON.stringify({ ...file, format: 'agentflow.change-plan-file.3' }), p.id), next, 'a .3 file still carries its context');
   for (const format of ['agentflow.change-plan-file.1', 'agentflow.change-plan-file.2']) {
     assert.deepEqual(readPlanFile(JSON.stringify({ ...JSON.parse(planFile(legacy, p)), format }), p.id), legacy);
     assert.equal(typeof readPlanFile(JSON.stringify({ ...file, format }), p.id), 'string', 'an older file version never claims a context');
@@ -214,7 +216,8 @@ test('84 older envelope moved to .3 for one project keeps every other entry unde
   // Saving a valid project moves the envelope to .3; the others keep their raw text and the version they were read from.
   assert.equal(saveBundle(store, p.id, { ...emptyBundle('새 초안'), authoring: { version: AUTHORING_VERSION, draft: ctx, analyzed: null } }), null);
   let env = JSON.parse(store.m.get(PLANS_KEY));
-  assert.equal(env.version, 'studio.plans.3'); assert.deepEqual(env.legacy, { PRJ_claimed: 'studio.plans.2', PRJ_old: 'studio.plans.2' });
+  // AF94: the envelope moves to .4 now; .2 markers stay .2 (never .3, which would read a claimed context as valid).
+  assert.equal(env.version, 'studio.plans.4'); assert.deepEqual(env.legacy, { PRJ_claimed: 'studio.plans.2', PRJ_old: 'studio.plans.2' });
   assert.deepEqual(env.projects.PRJ_claimed, claimed); assert.deepEqual(env.projects.PRJ_old, legacyOk);
   assert.equal(loadBundle(store, 'PRJ_claimed').unreadable, true, 'still refused after the envelope moved to .3');
   assert.deepEqual(loadBundle(store, 'PRJ_old').bundle, legacyOk);

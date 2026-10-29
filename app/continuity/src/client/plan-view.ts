@@ -9,13 +9,14 @@ import { createPlan, selectItems, requestSnapshot, compareResults, parseScopeRev
 import { CONVERTER_HEADING, CONVERTER_INTENT, converterEvidence, converterExampleAnalysis, converterObservations } from '../shared/change-plan-example.js';
 import { mapLead, type Box } from './map-layout.js';
 import { AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
-import { h, put, $, ago, fullTime, inspectorWidth, codeGate, codeNote } from './plan-dom.js';
+import { h, put, $, ago, fullTime, inspectorWidth, codeGate, codeNote, chevron } from './plan-dom.js';
 import { CONVERTER_KEY, CONDITION_LABEL, EVIDENCE_LABEL, exampleInput, projectInput, mapReply, secretLike, scopeInput, type Condition, type PlanInput } from './plan-source.js';
 import { requestPlan, requestScope } from './plan-request.js';
 import { emptyBundle, loadBundle, saveBundle, setAside, planFile, readPlanFile, authoringOf, type PlanBundle } from './plan-store.js';
 import { pinOnEdit, screenContext, resolveRef, authoringStale, legacyRecord, type Authoring, type ContextRef } from '../shared/authoring-context.js';
 import { requestResults } from './request-results.js';
 import { correctRequestMatch } from '../shared/request-return.js';
+import { readingParts, type ReadingPart } from '../shared/request-reading.js';
 
 export interface PlanOpened { key: string; kind: 'example' | 'saved' | 'legacy'; project: Project; view: StudioView; alias: { toId: Map<string, string> } | null }
 export interface PlanReturn { selected: string | null; scope: string | null; camera: { x: number; y: number; k: number } }
@@ -89,9 +90,29 @@ interface Session {
   /** The control that opened the request document now read (this tab only, never stored): closing it returns there, or to the
    * nearest usable control of the same place when that one is gone or off. Only for that same document. */
   sheetFrom: { snap: string; entry: 'make' | 'last' } | null;
+  /** How the open document is read in this opening (this tab only, never stored; a new opening starts afresh): by its sections or
+   * as its text, which materials are unfolded, where each view was left, and whether the last copy here was blocked. */
+  sheetRead: SheetRead | null;
   sources: boolean; adding: boolean; resultFor: string | null; addForm: boolean; copyMsg: string | null; fileMsg: string | null;
   ret: PlanReturn;
 }
+
+interface SheetRead { id: number; view: 'reading' | 'text'; open: string[]; at: { reading: number; text: number }; blocked: boolean }
+let openings = 0;
+const freshRead = (): SheetRead => ({ id: ++openings, view: 'reading', open: [], at: { reading: 0, text: 0 }, blocked: false });
+/** Section names in the document's own reading. They name where a range sits; the words shown are always the text's own. */
+const SECTION: Record<ReadingPart['kind'], { nav: string | null; tag: string | null }> = {
+  head: { nav: null, tag: null },
+  selected: { nav: '맡긴 일', tag: '이번에 맡기는 일' },
+  excluded: { nav: '맡기지 않음', tag: '이번 요청 아님' },
+  prerequisites: { nav: '전제 후보', tag: '자동으로 포함하지 않음' },
+  preserve: { nav: '유지 조건', tag: '지켜야 할 조건' },
+  unknowns: { nav: '미정', tag: '추가 요청 아님' },
+  'review-unknowns': { nav: '검토 미확인', tag: '확인되지 않음' },
+  materials: { nav: '자료', tag: '자료 · 작업 지시 아님' },
+  material: { nav: null, tag: null },
+  closing: { nav: '결과 안내', tag: '결과를 돌려줄 때' },
+};
 
 const MEMORY = new Map<string, PlanBundle>();
 /** A sentence handed over from the return reading, per project, in this tab only. It enters the draft only when the person
@@ -146,7 +167,7 @@ export function createPlanView(host: PlanHost) {
     const condition: Condition = 'A', { bundle, unreadable } = bundleFor(o, condition);
     s = { key: o.key, projectId: o.project.id, example: o.kind === 'example', condition, bundle, unreadable, storeMsg: null,
       focus: firstFocus(bundle.plan), targets: {}, mode: bundle.plan ? 'preview' : 'current', editing: !bundle.plan, detail: false, strip: null, evidenceFor: null, evidenceRef: null, rail: 'request', railSource: null, railAt: null, railEntry: null, fromWork: false, workAt: null, pending: null, error: null, scoping: null, scopeError: null,
-      sheet: null, sheetFrom: null, sources: false, adding: false, resultFor: bundle.snapshots.at(-1)?.id ?? null, addForm: false, copyMsg: null, fileMsg: null, ret: host.capture() };
+      sheet: null, sheetFrom: null, sheetRead: null, sources: false, adding: false, resultFor: bundle.snapshots.at(-1)?.id ?? null, addForm: false, copyMsg: null, fileMsg: null, ret: host.capture() };
     if (unreadable) s.storeMsg = null;
     moveTarget = true; frameWhole = true; host.chrome(); render();
     // Focus right after the render that made the field (never a frame later, when it can land in a field being typed in).
@@ -525,7 +546,7 @@ export function createPlanView(host: PlanHost) {
     for (const k of Object.keys(s.bundle.origins)) if (!kept.has(k)) delete s.bundle.origins[k];
     s.bundle.observations = s.bundle.observations.filter(x => kept.has(s!.bundle.attached[x.id]!));
     for (const k of Object.keys(s.bundle.attached)) if (!kept.has(s.bundle.attached[k]!)) delete s.bundle.attached[k];
-    s.sheet = snap.id; s.sheetFrom = { snap: snap.id, entry: 'make' }; s.resultFor = snap.id; s.copyMsg = null;
+    s.sheet = snap.id; s.sheetFrom = { snap: snap.id, entry: 'make' }; s.sheetRead = freshRead(); s.resultFor = snap.id; s.copyMsg = null;
     persist(); render();
     document.getElementById('plan-copy')?.focus({ preventScroll: true });
   }
@@ -541,17 +562,22 @@ export function createPlanView(host: PlanHost) {
   }
   let copying = 0;
   /** How a copy went is told only to the open document it was asked from (same session, same opening, the latest attempt): one that
-   * ends after the document closed, the plan closed or another copy started says nothing and touches nothing. */
+   * ends after the document closed, the plan closed or another copy started says nothing and touches nothing. The copy is always the
+   * whole text, whichever view is read and whatever is folded. */
   async function copy(text: string) {
     const st = s; if (!st) return;
     const opened = st.sheetFrom, sheet = st.sheet, mine = ++copying;
     let ok = true;
     try { await navigator.clipboard.writeText(text); } catch { ok = false; }
     if (s !== st || st.sheet !== sheet || st.sheetFrom !== opened || mine !== copying) return;
-    st.copyMsg = ok ? '복사했어요. 작업 AI에 붙여 넣어 전달하세요.' : '자동 복사가 막혀 있어요. 글을 선택해 직접 복사하세요.';
-    if (!ok) { const pre = document.querySelector('#plan-sheet pre'); if (pre) { const r = document.createRange(); r.selectNodeContents(pre); const sel = getSelection(); sel?.removeAllRanges(); sel?.addRange(r); } }
+    // Read by its sections, the screen does not hold the whole text to select: the text view does, and is selected on the way there.
+    const sections = !!snapshotOf(sheet)?.reading && st.sheetRead?.view === 'reading';
+    if (st.sheetRead) st.sheetRead.blocked = !ok;
+    st.copyMsg = ok ? '복사했어요. 작업 AI에 붙여 넣어 전달하세요.' : sections ? '자동 복사가 막혀 있어요. ‘원문 그대로’를 누르면 원문 전체가 선택돼요. 그대로 직접 복사하세요.' : '자동 복사가 막혀 있어요. 글을 선택해 직접 복사하세요.';
+    if (!ok && !sections) selectText();
     renderSheet();
   }
+  function selectText() { const pre = document.querySelector('#plan-sheet pre'); if (pre) { const r = document.createRange(); r.selectNodeContents(pre); const sel = getSelection(); sel?.removeAllRanges(); sel?.addRange(r); } }
   function exportPlan() {
     const o = host.current(); if (!s || !o) return;
     const blob = new Blob([planFile(s.bundle, o.project)], { type: 'application/json' }), a = document.createElement('a');
@@ -1356,29 +1382,91 @@ export function createPlanView(host: PlanHost) {
     return foot;
   }
 
-  /* The request document reads in its own sheet over the map; closing it returns to the same panel place. */
+  /* The request document reads in its own sheet over the map; closing it returns to the same panel place. A document made with a
+   * reading opens on its sections (the text sliced, never rewritten); one made before reads as its whole text, as it always did. */
   function renderSheet() {
     const sheet = $('plan-sheet'), snap = s ? snapshotOf(s.sheet) : null;
     sheet.hidden = !snap;
-    if (!s || !snap) { sheet.replaceChildren(); delete sheet.dataset.snap; return; }
+    if (!s || !snap) { sheet.replaceChildren(); delete sheet.dataset.snap; delete sheet.dataset.opening; return; }
     fitSheet();
-    // Re-rendering the same document (a copy message, any render while it is open) keeps where it was read and what had focus.
-    const same = sheet.dataset.snap === snap.id, top = same ? sheet.querySelector('pre')?.scrollTop ?? 0 : 0;
+    const read = s.sheetRead ?? (s.sheetRead = freshRead()), parts = snap.reading ? readingParts(snap.text, snap.reading) : null;
+    // Re-rendering in the same opening (a copy message, a fold, a view switch, any render while it is open) keeps where each view
+    // was read and what had focus. Another opening, even of the same document, starts at its top.
+    const same = sheet.dataset.snap === snap.id && sheet.dataset.opening === String(read.id), shown = sheet.dataset.view as SheetRead['view'] | undefined;
+    const scroller = sheet.querySelector<HTMLElement>('[data-sheet-part="text"]');
+    if (same && scroller && shown) read.at[shown] = scroller.scrollTop;
     const had = same && sheet.contains(document.activeElement) ? (document.activeElement as HTMLElement).dataset.sheetPart ?? null : null;
-    sheet.dataset.snap = snap.id;
+    const view = parts ? read.view : 'text';
+    sheet.dataset.snap = snap.id; sheet.dataset.opening = String(read.id); sheet.dataset.view = view;
     const labels = s.bundle.labels[snap.id] ?? {}, p = plan();
     const old = !p || snap.planId !== p.id || snap.planRevision !== p.revision;
     const total = Object.keys(labels).length || snap.itemIds.length;
+    const materials = parts?.filter(x => x.material).length ?? 0;
     sheet.replaceChildren(
-      h('header', {}, h('div', {}, h('h2', { id: 'sheet-title' }, '요청문'), h('p', {}, `맡길 항목 ${snap.itemIds.length}/${total} · ${snap.itemIds.map(id => labels[id] ?? id).join(' · ')}`),
+      h('header', {}, h('div', {}, h('div', { class: 'rq-titlebar' }, h('h2', { id: 'sheet-title' }, '요청문'), parts ? viewSwitch(read, view) : null), h('p', {}, `맡길 항목 ${snap.itemIds.length}/${total} · ${snap.itemIds.map(id => labels[id] ?? id).join(' · ')}`),
         h('p', { class: 'fine' }, `${fullTime(snap.createdAt)}에 만듦 · ${{ example: '작성된 예제 분석의 고정 전제', reviewed: 'AI가 고른 범위의 전제를 살펴봄', ai: '전제 검토 없이 만든 이전 요청문' }[s.bundle.origins[snap.id] ?? 'ai']}${old ? ' · 지금 변경안과 다른 판' : ''}`)),
+        parts && view === 'reading' ? sectionNav(parts) : null,
         h('button', { type: 'button', class: 'close', 'data-sheet-part': 'x', 'aria-label': '요청문 닫기', title: '닫기 (Esc)', onclick: closeSheet }, '×')),
-      h('pre', { tabindex: '0', 'data-sheet-part': 'text' }, snap.text),
-      h('footer', {}, h('button', { type: 'button', id: 'plan-copy', 'data-sheet-part': 'copy', class: 'primary small', onclick: () => void copy(snap.text) }, '복사'),
+      parts && view === 'reading' ? readingBody(parts, read) : h('pre', { tabindex: '0', 'data-sheet-part': 'text' }, snap.text),
+      h('footer', {}, h('button', { type: 'button', id: 'plan-copy', 'data-sheet-part': 'copy', class: 'primary small', onclick: () => void copy(snap.text),
+        ...(parts ? { title: `접혀 있는 자료까지 원문 ${snap.text.length.toLocaleString('ko-KR')}자 전체를 복사해요` } : {}) }, parts ? `전체 복사 · 자료 ${materials}개 포함` : '복사'),
         h('span', { class: 'fine', role: 'status' }, s.copyMsg ?? '복사는 이 글을 옮기는 일이에요. 접수·실행·완료를 기록하지 않아요.'),
         h('button', { type: 'button', class: 'link-button', 'data-sheet-part': 'close', onclick: closeSheet }, '닫기')));
-    const pre = sheet.querySelector('pre')!; pre.scrollTop = top;
+    const body = sheet.querySelector<HTMLElement>('[data-sheet-part="text"]')!; body.scrollTop = same ? read.at[view] : 0;
     if (had) sheet.querySelector<HTMLElement>(`[data-sheet-part="${had}"]`)?.focus({ preventScroll: true });
+  }
+  /** Reading by sections or as the text: a way of reading this opening, never a change to the document. */
+  function viewSwitch(read: SheetRead, view: SheetRead['view']): HTMLElement {
+    const switchTo = (next: SheetRead['view']) => () => {
+      if (!s || read.view === next) return;
+      read.view = next; renderSheet(); // the render keeps where the view being left was read
+      if (next === 'text' && read.blocked) selectText();
+    };
+    return h('div', { class: 'rq-views', role: 'group', 'aria-label': '요청문 보기' },
+      h('button', { type: 'button', 'data-sheet-part': 'view-reading', 'aria-pressed': String(view === 'reading'), onclick: switchTo('reading') }, '구간으로 읽기'),
+      h('button', { type: 'button', 'data-sheet-part': 'view-text', 'aria-pressed': String(view === 'text'), onclick: switchTo('text') }, '원문 그대로'));
+  }
+  /** The moves within the document, one row above it (the reading keeps the sheet's whole width). */
+  function sectionNav(parts: ReadingPart[]): HTMLElement {
+    return h('nav', { class: 'rq-nav', 'aria-label': '요청문 안에서 이동' }, ...parts.filter(x => SECTION[x.kind].nav).map(x =>
+      h('button', { type: 'button', class: 'rq-jump', 'data-sheet-part': `go-${x.kind}`, onclick: () => jump(x.kind) }, x.kind === 'materials' ? `자료 ${parts.filter(m => m.material).length}` : SECTION[x.kind].nav!)));
+  }
+  /** Moving to a section is reading, not editing: the view scrolls to its heading and the keyboard goes on from there. */
+  function jump(kind: ReadingPart['kind']) {
+    const body = document.querySelector<HTMLElement>('#plan-sheet .rq-read'), heading = body?.querySelector<HTMLElement>(`[data-sec="${kind}"] .rq-h`);
+    if (!body || !heading) return;
+    body.scrollTop = (heading.closest<HTMLElement>('[data-sec]')!.offsetTop) - 8;
+    heading.focus({ preventScroll: true });
+  }
+  /** Every piece is a slice of the text in its order (data-at: where it starts): joined, they are the text. Material is listed by
+   * its own id, title and kind and unfolds in place; folded, its text is still in the document and in every copy. */
+  function readingBody(parts: ReadingPart[], read: SheetRead): HTMLElement {
+    const slice = (tag: 'span' | 'div' | 'h3' | 'p', at: number, text: string, cls: string, extra: Record<string, string | boolean> = {}) => h(tag, { class: cls, 'data-at': String(at), ...extra }, text);
+    const gap = (x: ReadingPart) => (x.gap ? slice('span', x.start + x.heading.length + x.body.length, x.gap, 'rq-gap', { hidden: true }) : null);
+    const mats = parts.filter(x => x.material), allOpen = mats.length > 0 && mats.every(x => read.open.includes(x.material!.ref));
+    const toggle = (refs: string[], on: boolean) => { read.open = on ? [...new Set([...read.open, ...refs])] : read.open.filter(r => !refs.includes(r)); renderSheet(); };
+    const out = h('div', { class: 'rq-read', tabindex: '0', 'data-sheet-part': 'text', 'aria-label': '요청문 · 생성 당시 구간' });
+    for (const x of parts) {
+      const tag = SECTION[x.kind].tag ? h('span', { class: 'rq-tag' }, SECTION[x.kind].tag!) : null;
+      if (x.material) {
+        const ref = x.material.ref, open = read.open.includes(ref);
+        out.append(h('div', { class: `rq-mat${open ? ' open' : ''}`, 'data-ref': ref },
+          h('button', { type: 'button', class: 'rq-mat-head', 'aria-expanded': String(open), 'data-sheet-part': `mat-${ref}`, onclick: () => toggle([ref], !open) },
+            chevron(open), slice('span', x.start, x.heading, 'rq-mat-name'), h('span', { class: 'rq-tag' }, '자료'), h('span', { class: 'rq-mat-size' }, `${x.body.length.toLocaleString('ko-KR')}자`)),
+          slice('div', x.start + x.heading.length, x.body, 'rq-text', { hidden: !open }), gap(x)));
+        continue;
+      }
+      const sec = h('section', { class: `rq-sec rq-${x.kind}`, 'data-sec': x.kind });
+      if (x.kind === 'head') put(sec, slice('p', x.start, x.heading, 'rq-h rq-title', { tabindex: '-1', 'data-sheet-part': 'sec-head' }));
+      else if (x.kind !== 'closing') put(sec, h('div', { class: 'rq-sec-head' }, slice('h3', x.start, x.heading, 'rq-h', { tabindex: '-1', 'data-sheet-part': `sec-${x.kind}` }), tag));
+      else put(sec, h('div', { class: 'rq-sec-head' }, h('h3', { class: 'rq-h', tabindex: '-1', 'data-sheet-part': 'sec-closing' }, '결과 안내'), tag));
+      if (x.kind === 'materials') put(sec, h('p', { class: 'rq-mat-note' }, `자료 ${mats.length}개 · 작업 지시가 아니라 읽을 자료예요. 접혀 있어도 전체 복사에 들어가요.`),
+        mats.length ? h('button', { type: 'button', class: 'link-button rq-mat-all', 'data-sheet-part': 'mat-all', onclick: () => toggle(mats.map(m => m.material!.ref), !allOpen) }, allOpen ? '자료 모두 접기' : '자료 모두 펼치기') : null);
+      if (x.body) put(sec, slice('div', x.start + x.heading.length, x.body, 'rq-text'));
+      put(sec, gap(x));
+      out.append(sec);
+    }
+    return out;
   }
   /** The sheet reads beside the inspector while the strip left of it is wide enough; otherwise it covers the window. */
   function fitSheet() { $('plan-sheet').classList.toggle('wide', $('space').getBoundingClientRect().width - width() - 48 < 420); }
@@ -1387,15 +1475,15 @@ export function createPlanView(host: PlanHost) {
   /** A kept document opened to read: reading starts in it (the keyboard goes on from there), nothing else changes. */
   function openSheet(id: string) {
     if (!s) return;
-    s.sheet = id; s.sheetFrom = { snap: id, entry: 'last' }; s.copyMsg = null; render();
-    document.querySelector<HTMLElement>('#plan-sheet pre')?.focus({ preventScroll: true });
+    s.sheet = id; s.sheetFrom = { snap: id, entry: 'last' }; s.sheetRead = freshRead(); s.copyMsg = null; render();
+    document.querySelector<HTMLElement>('#plan-sheet [data-sheet-part="text"]')?.focus({ preventScroll: true });
   }
   /** Closing returns to the control that opened this document when it can take focus; otherwise to the same place's other way to
    * a request document, then the workspace heading. Never a disabled, hidden or covered control; nothing scrolls to reach it. */
   function closeSheet() {
     if (!s) return;
     const from = s.sheetFrom?.snap === s.sheet ? s.sheetFrom.entry : null;
-    s.sheet = null; s.sheetFrom = null; s.copyMsg = null; render();
+    s.sheet = null; s.sheetFrom = null; s.sheetRead = null; s.copyMsg = null; render();
     const usable = (el: HTMLElement | null): el is HTMLElement => !!el && !(el as HTMLButtonElement).disabled && !el.closest('[hidden], [inert]') && el.getClientRects().length > 0;
     const last = '#plan-panel [data-sheet-entry="last"]', make = '#plan-panel #plan-make';
     const order = from === 'make' ? [make, last, '#plan-title'] : [last, make, '#plan-title'];

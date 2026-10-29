@@ -9,9 +9,15 @@ export const PLANS_KEY = 'agentflow.studio.plans.1';
 export const UNREADABLE_KEY = 'agentflow.studio.plans.1.unreadable';
 /* .3 / studio.plans.3: a bundle may carry its draft's authoring context, and its plan may hold an analysis that proposed no change
  * (items=[], same shape). Earlier files and envelopes are still read as they are; their writers never kept an empty analysis. An
- * app from before empty analyses refuses such a bundle as unreadable and leaves its raw text as it was (its own boundary). */
-const FILE_FORMAT = 'agentflow.change-plan-file.3';
-const ENVELOPE = 'studio.plans.3';
+ * app from before empty analyses refuses such a bundle as unreadable and leaves its raw text as it was (its own boundary).
+ * .4 / studio.plans.4: a request document made from now on may carry its reading (request-reading). A .1-.3 writer never kept
+ * one, so a bundle read as one of those versions that claims a reading is not read. An app from before .4 refuses the .4
+ * envelope and file as unreadable and leaves the raw text as it was. */
+const FILE_FORMAT = 'agentflow.change-plan-file.4';
+const ENVELOPE = 'studio.plans.4';
+/** The version of the writer a bundle was read from (its file or envelope, or its entry's legacy marker): 1/2 kept neither an
+ * authoring context nor an empty analysis, 3 kept both but no request reading, 4 any of them. */
+export type BundleFrom = 1 | 2 | 3 | 4;
 
 export type Analyzed = { kind: 'example' } | { kind: 'ai'; model: string; at: string; records: { total: number; sent: number } };
 export interface PlanBundle {
@@ -42,8 +48,9 @@ export const authoringOf = (b: PlanBundle): AuthoringRecord => b.authoring ?? le
 const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
 function fail(): never { throw new Error('INVALID_PLAN_BUNDLE'); }
 
-/** legacy: read from an envelope or file version written before authoring contexts, which never carries one. */
-export function parseBundle(v: unknown, projectId: string, legacy = false): PlanBundle {
+/** from: the version it was read from; an earlier writer's bundle never carries what that writer did not keep. */
+export function parseBundle(v: unknown, projectId: string, from: BundleFrom = 4): PlanBundle {
+  const legacy = from <= 2;
   if (!isObj(v)) fail();
   if (legacy && Object.hasOwn(v, 'authoring')) fail();
   const keys = ['draft', 'extra', 'plan', 'by', 'snapshots', 'labels', 'origins', 'observations', 'attached', ...(Object.hasOwn(v, 'authoring') ? ['authoring'] : [])];
@@ -70,6 +77,7 @@ export function parseBundle(v: unknown, projectId: string, legacy = false): Plan
   if (!Array.isArray(v.snapshots) || v.snapshots.length > 60) fail();
   const snapshots = v.snapshots as RequestSnapshot[];
   for (const s of snapshots) { try { compareResults(s, []); if (s.scope && s.scope.projectId !== projectId) fail(); } catch { fail(); } }
+  if (from < 4 && snapshots.some(s => isObj(s) && Object.hasOwn(s, 'reading'))) fail();
   if (new Set(snapshots.map(s => s.id)).size !== snapshots.length) fail();
   if (!isObj(v.labels)) fail();
   for (const [sid, m] of Object.entries(v.labels)) { if (!snapshots.some(s => s.id === sid) || !isObj(m) || !Object.values(m).every(t => typeof t === 'string' && t.length <= 200)) fail(); }
@@ -89,10 +97,12 @@ export function parseBundle(v: unknown, projectId: string, legacy = false): Plan
 }
 
 /** legacy: entries carried over from an older envelope and not written since, by the version they were read from. Such an entry is
- * still read by that version's rules (no authoring context), so moving the envelope to .3 for another project never makes an entry
- * valid that its own version refused. Writing a project's bundle (or setting it aside) ends its marker; nothing else changes it. */
-type LegacyVersion = 'studio.plans.1' | 'studio.plans.2';
-const LEGACY_VERSIONS: readonly string[] = ['studio.plans.1', 'studio.plans.2'];
+ * still read by that version's rules (.1/.2: no authoring context; .3: no request reading), so moving the envelope to .4 for
+ * another project never makes an entry valid that its own version refused. A .3 envelope's own .1/.2 markers stay as they were.
+ * Writing a project's bundle (or setting it aside) ends its marker; nothing else changes it. */
+type LegacyVersion = 'studio.plans.1' | 'studio.plans.2' | 'studio.plans.3';
+const LEGACY_VERSIONS: readonly string[] = ['studio.plans.1', 'studio.plans.2', 'studio.plans.3'];
+const FROM: Record<LegacyVersion, BundleFrom> = { 'studio.plans.1': 1, 'studio.plans.2': 2, 'studio.plans.3': 3 };
 type Envelope = { version: typeof ENVELOPE; projects: Record<string, unknown>; legacy?: Record<string, LegacyVersion> };
 type Read = { ok: true; env: Envelope; raw: string | null } | { ok: false; raw: string };
 function readEnvelope(kv: StorageLike): Read {
@@ -102,16 +112,20 @@ function readEnvelope(kv: StorageLike): Read {
   try {
     const v = JSON.parse(raw);
     if (!isObj(v) || !isObj(v.projects)) return { ok: false, raw };
-    // v1 snapshots keep their original text and have no structured scope; v1/v2 bundles have no authoring context. Never backfill
-    // either from today's plan or screen. Other projects' entries are written back exactly as they were read, with their provenance.
-    if (LEGACY_VERSIONS.includes(v.version as string)) {
+    // v1 snapshots keep their original text and have no structured scope; v1/v2 bundles have no authoring context; no snapshot
+    // before .4 has a reading. Never backfill any of them from today's plan or screen. Other projects' entries are written back
+    // exactly as they were read, with their provenance.
+    if (v.version === 'studio.plans.1' || v.version === 'studio.plans.2') {
       const projects = v.projects;
       return { ok: true, env: { version: ENVELOPE, projects, legacy: Object.fromEntries(Object.keys(projects).map(id => [id, v.version as LegacyVersion])) }, raw };
     }
-    if (v.version !== ENVELOPE || !Object.keys(v).every(k => ['version', 'projects', 'legacy'].includes(k))) return { ok: false, raw };
+    // A .3 envelope could mark only .1/.2 entries; .4 also .3 ones.
+    const three = v.version === 'studio.plans.3', marks = three ? LEGACY_VERSIONS.slice(0, 2) : LEGACY_VERSIONS;
+    if ((!three && v.version !== ENVELOPE) || !Object.keys(v).every(k => ['version', 'projects', 'legacy'].includes(k))) return { ok: false, raw };
     const legacy = v.legacy ?? {};
-    if (!isObj(legacy) || !Object.entries(legacy).every(([id, ver]) => Object.hasOwn(v.projects as object, id) && LEGACY_VERSIONS.includes(ver as string))) return { ok: false, raw };
-    return { ok: true, env: { version: ENVELOPE, projects: v.projects, legacy: legacy as Record<string, LegacyVersion> }, raw };
+    if (!isObj(legacy) || !Object.entries(legacy).every(([id, ver]) => Object.hasOwn(v.projects as object, id) && marks.includes(ver as string))) return { ok: false, raw };
+    const kept = three ? Object.fromEntries(Object.keys(v.projects).map(id => [id, (legacy[id] ?? 'studio.plans.3') as LegacyVersion])) : legacy as Record<string, LegacyVersion>;
+    return { ok: true, env: { version: ENVELOPE, projects: v.projects, legacy: kept }, raw };
   } catch { return { ok: false, raw }; }
 }
 /** The envelope as written: its legacy markers only while there are any. */
@@ -125,7 +139,8 @@ export function loadBundle(kv: StorageLike, projectId: string): Loaded {
   const r = readEnvelope(kv);
   if (!r.ok) return { bundle: emptyBundle(), unreadable: true };
   if (!Object.hasOwn(r.env.projects, projectId)) return { bundle: emptyBundle(), unreadable: false };
-  try { return { bundle: parseBundle(r.env.projects[projectId], projectId, Object.hasOwn(r.env.legacy ?? {}, projectId)), unreadable: false }; }
+  const marker = r.env.legacy?.[projectId];
+  try { return { bundle: parseBundle(r.env.projects[projectId], projectId, marker ? FROM[marker] : 4), unreadable: false }; }
   catch { return { bundle: emptyBundle(), unreadable: true }; }
 }
 
@@ -163,8 +178,11 @@ export function planFile(bundle: PlanBundle, project: { id: string; name: string
 export function readPlanFile(text: string, projectId: string): PlanBundle | string {
   let v: unknown;
   try { v = JSON.parse(text); } catch { return '변경안 파일이 아니거나 읽을 수 없어요. 아무것도 바꾸지 않았어요.'; }
-  if (!isObj(v) || ![FILE_FORMAT, 'agentflow.change-plan-file.2', 'agentflow.change-plan-file.1'].includes(v.format as string) || !isObj(v.project)) return '변경안 파일이 아니에요. 프로젝트 백업 파일은 홈의 ‘백업 파일 가져오기’를 쓰세요.';
+  const formats: Record<string, BundleFrom> = { [FILE_FORMAT]: 4, 'agentflow.change-plan-file.3': 3, 'agentflow.change-plan-file.2': 2, 'agentflow.change-plan-file.1': 1 };
+  const from = isObj(v) && typeof v.format === 'string' && Object.hasOwn(formats, v.format) ? formats[v.format] : undefined;
+  if (!isObj(v) || !from || !isObj(v.project)) return '변경안 파일이 아니에요. 프로젝트 백업 파일은 홈의 ‘백업 파일 가져오기’를 쓰세요.';
   if (v.project.id !== projectId) return `다른 프로젝트(‘${String(v.project.name ?? '').slice(0, 60)}’)의 변경안이에요. 가져오지 않았어요.`;
-  // .1/.2 files were written before authoring contexts: one that claims a context is not what that version wrote.
-  try { return parseBundle(v.bundle, projectId, v.format !== FILE_FORMAT); } catch { return '변경안 파일의 내용이 맞지 않아 가져오지 않았어요. 지금 변경안은 그대로예요.'; }
+  // .1/.2 files were written before authoring contexts, .3 before request readings: one that claims either is not what that
+  // version wrote.
+  try { return parseBundle(v.bundle, projectId, from); } catch { return '변경안 파일의 내용이 맞지 않아 가져오지 않았어요. 지금 변경안은 그대로예요.'; }
 }

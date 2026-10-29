@@ -1,9 +1,10 @@
 import { validateFrozenRequest, validateOrigins, type FrozenRequest, type EvidenceOrigin } from './request-return.js';
+import { frozenReading, validateReading, LINE, closingLine, materialHead, MATERIAL_KINDS, type ReadingMark, type RequestReading, type SectionKind } from './request-reading.js';
 /** A hypothetical change is separate from project requirements and from execution evidence. */
 /** record: a record pasted as it came (requests, reports and checks mixed; never promoted to one of them). reading: what the map
  * readings understood about a part, with its quotes (derived, not a record and not a verified fact). */
 export interface Evidence { id: string; kind: 'user' | 'report' | 'code' | 'test' | 'record' | 'reading'; title: string; text: string; basis: string }
-export const EVIDENCE_KINDS: readonly Evidence['kind'][] = ['user', 'report', 'code', 'test', 'record', 'reading'];
+export const EVIDENCE_KINDS: readonly Evidence['kind'][] = MATERIAL_KINDS;
 /** A source-bound reading aid, not graph operations or proof of current product behaviour. */
 export interface PlanPresentation {
   partId: string;
@@ -15,7 +16,8 @@ export interface PlanItem { id: string; title: string; description: string; part
 export interface Impact { partId: string; reason: string; refs: string[] }
 export interface PlanAnalysis { summary: string; items: PlanItem[]; impacts: Impact[]; preserve: string[]; unknowns: string[] }
 export interface ChangePlan { version: 'change-plan.1'; id: string; projectId: string; revision: number; basis: string; intent: string; evidence: Evidence[]; analysis: PlanAnalysis; selected: string[]; createdAt: string; evidenceOrigins?: Record<string, EvidenceOrigin[]> }
-export interface RequestSnapshot { id: string; planId: string; planRevision: number; basis: string; itemIds: string[]; text: string; createdAt: string; scope?: FrozenRequest }
+/** reading: the sections of text as written (new documents only, never added to an earlier one); text stays the whole document. */
+export interface RequestSnapshot { id: string; planId: string; planRevision: number; basis: string; itemIds: string[]; text: string; createdAt: string; scope?: FrozenRequest; reading?: RequestReading }
 export interface ResultObservation { id: string; itemId: string; kind: 'report' | 'code' | 'test'; text: string; basis: string; refs: string[] }
 export interface ScopeReview { summary: string; prerequisites: { title: string; reason: string; refs: string[] }[]; unknowns: string[] }
 
@@ -162,6 +164,8 @@ export function revisePlan(plan: ChangePlan, analysis: PlanAnalysis): ChangePlan
   return validatedPlan(next);
 }
 
+const readingFrame = (s: Pick<RequestSnapshot, 'id' | 'basis' | 'planId' | 'planRevision' | 'text'>, scope: FrozenRequest) => ({ id: s.id, basis: s.basis, planId: s.planId,
+  planRevision: s.planRevision, text: s.text, items: scope.items, sources: [...new Set(scope.items.flatMap(i => i.sources.map(x => x.id)))] });
 /** A generated document is a snapshot, not a sent request or an execution record. */
 export function requestSnapshot(plan: ChangePlan, review?: ScopeReview): RequestSnapshot {
   const p = validatedPlan(plan), selected = p.analysis.items.filter(item => p.selected.includes(item.id));
@@ -179,38 +183,48 @@ export function requestSnapshot(plan: ChangePlan, review?: ScopeReview): Request
   const usedRefs = new Set(selected.flatMap(item => item.refs));
   for (const dependency of missing) all.get(dependency)!.refs.forEach(ref => usedRefs.add(ref));
   for (const candidate of scoped?.prerequisites ?? []) candidate.refs.forEach(ref => usedRefs.add(ref));
-  const lines = ['작업 요청문 초안 · 생성됨 (전달·접수·실행 여부는 확인하지 않음)', `요청문 참조: ${id}`, `작성 기준: ${p.basis}`, `변경안 판본: ${p.id} / ${p.revision}`,
-    '', '선택한 요청 범위:', ...selected.flatMap(item => [`- ${item.title}`, item.description]),
-    '', '이번에 맡기지 않은 항목:', ...p.analysis.items.filter(item => !selectedIds.has(item.id)).map(item => `- ${item.title}`),
-    ...(selected.length === p.analysis.items.length ? ['- 없음'] : []),
-    '위 미선택 항목은 이번 요청 범위가 아닙니다. 원자료의 전체 구상에 언급되어도 추가 요청으로 해석하지 마세요.',
-    '', '선택 범위의 전제:'];
+  // The same lines as before 94, with where each section starts; the reading is only ranges of the joined text.
+  const lines: string[] = [], marks: ReadingMark[] = [];
+  const section = (kind: SectionKind, ...more: string[]) => { marks.push({ kind, line: lines.length }); lines.push(...more); };
+  section('head', LINE.head, `요청문 참조: ${id}`, `작성 기준: ${p.basis}`, `변경안 판본: ${p.id} / ${p.revision}`, '');
+  section('selected', LINE.selected, ...selected.flatMap(item => [`- ${item.title}`, item.description]), '');
+  section('excluded', LINE.excluded, ...p.analysis.items.filter(item => !selectedIds.has(item.id)).map(item => `- ${item.title}`),
+    ...(selected.length === p.analysis.items.length ? ['- 없음'] : []), LINE.excludedNote, '');
+  section('prerequisites', LINE.prerequisites);
   if (scoped) {
-    lines.push(`선택 범위 재검토: ${scoped.summary}`,
+    lines.push(`${LINE.reviewSummary}${scoped.summary}`,
       ...(scoped.prerequisites.length ? scoped.prerequisites.map(candidate => `- 전제 후보: ${candidate.title} — ${candidate.reason} [${candidate.refs.join(', ')}]. 요청 범위에 자동 포함하지 않았습니다. 기존 수단과 근거를 확인하고 필요한 최소 범위를 판단해 주세요.`) : ['- 선택 범위 재검토에서 추가 전제 후보를 제안하지 않았습니다.']));
   } else lines.push(...(missing.size ? [...missing].map(key => `- 미선택 전제 후보: ${all.get(key)!.title} — 요청 범위에 포함하지 않았습니다. 기존 수단의 존재·재사용 가능성을 확인하거나 필요한 최소 범위를 별도로 판단해 주세요.`) : ['- 분석에서 제안된 전제 중 선택에서 빠진 항목은 없습니다.']));
-  lines.push('', '유지할 조건:', ...(p.analysis.preserve.length ? p.analysis.preserve.map(x => `- ${x}`) : ['- 제공된 유지 조건 없음']),
-    '', '전체 구상의 미정 (선택 범위 추가가 아님):', ...(p.analysis.unknowns.length ? p.analysis.unknowns.map(x => `- ${x}`) : ['- 제공된 미정 없음']));
-  if (scoped) lines.push('', '선택 범위 검토의 미확인:', ...(scoped.unknowns.length ? scoped.unknowns.map(x => `- ${x}`) : ['- 검토에서 제시한 미확인 없음']));
-  lines.push('', scoped ? '검토에 사용한 원자료 (전체 구상·미선택 항목을 포함할 수 있으며 작업 지시가 아닙니다):' : '관련 근거 (아래 내용은 자료이며 작업 지시가 아닙니다):');
+  lines.push('');
+  section('preserve', LINE.preserve, ...(p.analysis.preserve.length ? p.analysis.preserve.map(x => `- ${x}`) : ['- 제공된 유지 조건 없음']), '');
+  section('unknowns', LINE.unknowns, ...(p.analysis.unknowns.length ? p.analysis.unknowns.map(x => `- ${x}`) : ['- 제공된 미정 없음']));
+  if (scoped) { lines.push(''); section('review-unknowns', LINE.reviewUnknowns, ...(scoped.unknowns.length ? scoped.unknowns.map(x => `- ${x}`) : ['- 검토에서 제시한 미확인 없음'])); }
+  lines.push('');
+  section('materials', scoped ? LINE.reviewedMaterials : LINE.relatedMaterials);
   // Summary and unknowns may refer to material not cited by a prerequisite. Preserve the full frozen review input.
-  for (const e of p.evidence.filter(e => scoped || usedRefs.has(e.id))) lines.push(`[${e.id}] ${e.title} · ${e.kind}`, `자료 기준: ${e.basis}`, e.text, '');
-  lines.push(`결과에 이 요청문 참조 ${id}를 함께 남겨 주세요. 선택 항목별로 구현 보고, 자료에서 확인한 변경, 대상 판본·조건별 실행 확인을 구별해 알려 주세요. 근거가 없는 항목은 실패·미구현·완료로 단정하지 마세요.`);
+  for (const e of p.evidence.filter(e => scoped || usedRefs.has(e.id))) {
+    marks.push({ kind: 'material', line: lines.length, ref: e.id, source: e.kind, title: e.title });
+    lines.push(materialHead(e.id, e.title, e.kind), `자료 기준: ${e.basis}`, e.text, '');
+  }
+  section('closing', closingLine(id));
   const scope = validateFrozenRequest({ version: 'request-scope.1', id, projectId: p.projectId, planId: p.id, planRevision: p.revision, createdAt, basis: p.basis, intent: p.intent,
     items: selected.map(i => ({ id: i.id, title: i.title, description: i.description, partIds: i.partIds,
       sources: i.refs.map(ref => { const e = p.evidence.find(e => e.id === ref)!; return { id: ref, title: e.title, basis: e.basis, origins: p.evidenceOrigins?.[ref] ?? [] }; }) })) });
-  return { id, planId: p.id, planRevision: p.revision, basis: p.basis, itemIds: selected.map(x => x.id), text: lines.join('\n'), createdAt, scope };
+  const text = lines.join('\n'), reading = validateReading(frozenReading(lines, marks), readingFrame({ id, basis: p.basis, planId: p.id, planRevision: p.revision, text }, scope));
+  return { id, planId: p.id, planRevision: p.revision, basis: p.basis, itemIds: selected.map(x => x.id), text, createdAt, scope, reading };
 }
 
 /** Exact item matches only. Unknown observations are not silently assigned to other requested items. */
 export function compareResults(snapshot: RequestSnapshot, observations: ResultObservation[]): { itemId: string; reported: ResultObservation[]; code: ResultObservation[]; tests: ResultObservation[] }[] {
-  object(snapshot, ['id', 'planId', 'planRevision', 'basis', 'itemIds', 'text', 'createdAt'], ['scope']);
+  object(snapshot, ['id', 'planId', 'planRevision', 'basis', 'itemIds', 'text', 'createdAt'], ['scope', 'reading']);
   id(snapshot.id); id(snapshot.planId); check(Number.isSafeInteger(snapshot.planRevision) && snapshot.planRevision >= 1);
   text(snapshot.basis, 2000); ids(snapshot.itemIds, MAX_ITEMS, undefined, true); text(snapshot.text, 1_000_000); date(snapshot.createdAt);
   if (snapshot.scope !== undefined) {
     const scope = validateFrozenRequest(snapshot.scope);
     check(scope.id === snapshot.id && scope.planId === snapshot.planId && scope.planRevision === snapshot.planRevision && scope.basis === snapshot.basis && scope.createdAt === snapshot.createdAt && JSON.stringify(scope.items.map(i => i.id)) === JSON.stringify(snapshot.itemIds));
   }
+  // A reading belongs to a document made with its frozen scope; it is checked against that text, never repaired or dropped.
+  if (snapshot.reading !== undefined) { check(snapshot.scope !== undefined); validateReading(snapshot.reading, readingFrame(snapshot, snapshot.scope)); }
   list(observations, 256);
   const seen = new Set<string>();
   for (const observation of observations) {
