@@ -1,0 +1,40 @@
+{
+  "task": "AF101-first-map-owned-executor-contract",
+  "productSource": "7d7a832a9cb655c81e5f10244e742ba1b8ce6dd9",
+  "appTree": "3fc2ab0421cda167bd3fbb70c5eaa2a2e9dcc0e5",
+  "checkpoint": "2296d26b306065d302ca30fece83b785f1b64d21",
+  "cli": {
+    "observedVersion": "codex-cli 0.165.0-alpha.1.2",
+    "previousVersion": "codex-cli 0.164.0-alpha.11.1",
+    "binarySha256": "5c1b55966bf9f757dcbf00065c9a6cb862ead55d34b015f1be1939ff18e43943",
+    "observations": [
+      "--version",
+      "exec --help"
+    ],
+    "modelInvocation": 0,
+    "installationChange": false
+  },
+  "codeBoundary": {
+    "store": "app/continuity/server/map-jobs.mjs: run.call(ask, signal)",
+    "handler": "app/continuity/server/studio.mjs: createStudioHandler hardwired runJob"
+  },
+  "decision": {
+    "oldIsolatedTimerExtension": false,
+    "next": "non-default Node CLI executor under actual durable owner",
+    "newModelCalls": 0,
+    "productCodeChanges": 0,
+    "realCallGate": "closed until qualified adapter and separately frozen resource-policy decision",
+    "policy": {
+      "selectionMs": 299000,
+      "executorValidationBoundaryMs": 300000,
+      "readyWriteIncludedInHardGuarantee": false,
+      "tokenBillingHardCap": "unconfirmed",
+      "productionTimeoutChanged": false
+    }
+  },
+  "preservation": {
+    "ui75Ancestor": true,
+    "stashExists": true,
+    "publicApp": "b670c0ea300050e28cdba9655515ebcf2e03d9d5"
+  }
+}

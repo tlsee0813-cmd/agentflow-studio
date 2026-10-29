@@ -1,0 +1,30 @@
+{
+  "task": "AF101-prepublication-design-delta-review",
+  "input": ".ops/experience101-design-draft.md",
+  "status": "accept_design_delta_clarification_applied",
+  "conclusion": "A minimal server DI seam plus a cycle-isolated Node CLI adapter is consistent with the accepted101 selection. The draft keeps production defaults, Worker boundaries, historical failures and the closed real-call gate. No literal key/capability or material contradiction was found. Root applied the sole requested child-lifetime/restart-admission clarification; no remaining material design issue was found in this bounded delta.",
+  "requiredClarification": {
+    "boundary": "global CLI concurrency1 after executor crash/restart",
+    "issue": "100 marks old work interrupted and never replays its ID, but process death can release the store/adapter owner while its child is still alive. A new operation after restart could then start a second CLI even though the old operation was not replayed. The draft's no-close→fail-closed rule should explicitly survive that restart boundary.",
+    "minimalText": "After an abnormal executor stop, new CLI admission remains closed until the previous local child is known closed/reaped, or an explicitly documented termination/reconciliation mechanism proves no old child can remain. If that cannot be established, retain an explicit unknown/fail-closed state; do not infer a free slot merely from100 interrupted status or a new Node owner.",
+    "focused102Check": "A fake child outlives the first executor; restart and attempt a new operation. It must not create a second child until the declared old-child closure/admission rule is satisfied. Checking only same-ID no resubmission is insufficient.",
+    "scope": "Clarifies the draft's existing global1/no-close/lifetime contract. It does not require a new account/service or actual model call.",
+    "resolutionVerified": "Re-read revised draft lines39/41. It now explicitly states that100 ownership release/interrupted does not prove old child death, requires verified OS lifetime ownership or durable lease/unknown-child isolation, blocks other-ID admission when closure is unproved, forbids PID-reuse-blind killing or clearing all user processes, and adds the restart-with-old-child-alive/unknown→new-operation invocation0 check. Clarification accepted; this verifies design text only, not implementation."
+  },
+  "acceptedDelta": [
+    "Execution policy/adapter identity plus CLI version/binary hash are durably attached before acceptance; old100 records keep their historical HTTP meaning.",
+    "299s selection and300s executor validation/preservation verdict are policy boundaries. The draft explicitly excludes a promise that ready disk writes or OS/backend termination finish within300s; it therefore does not claim an unsupported full ready-time SLA.",
+    "Installed CLI version change prevents a pure time-only causal comparison, and102 simulated preflight must verify protocol/permission behavior. No actual call is unlocked.",
+    "Token/cost hardcap remains unconfirmed; any later bounded exception requires a separate explicit root decision with observation limits disclosed.",
+    "The future Zephyr observation remains one source/run under full criteria, not replacement of89/92/96 failures or acceptance of all three sources."
+  ],
+  "actions": {
+    "productWrites": 0,
+    "research": 0,
+    "tests": 0,
+    "modelCalls": 0,
+    "ui": 0,
+    "onlyNewFile": ".ops/results/experience101-design-delta-review.json"
+  },
+  "decisionOwner": "root coordinator"
+}

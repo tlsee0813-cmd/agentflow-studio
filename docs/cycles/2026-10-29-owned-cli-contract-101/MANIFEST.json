@@ -1,0 +1,25 @@
+{
+  "scope": "AF101 decision only; no generation or product implementation",
+  "files": {
+    "DESIGN.md": {
+      "bytes": 10930,
+      "sha256": "fffb85dc3d1be39f8908d24b00d098ce1b5b73264790611cbc474673a033513a"
+    },
+    "WORK_ORDER_102.md": {
+      "bytes": 2248,
+      "sha256": "a660e0eb1805037269b7d62a68506a89eb4080bf739ef960e904a03709677642"
+    },
+    "evidence/provenance.json": {
+      "bytes": 1416,
+      "sha256": "97d5e109384d97a42b2f668a5ddd4c9dac2e2902a876e562fb25aea5894d6243"
+    },
+    "evidence/independent-review.json": {
+      "bytes": 13052,
+      "sha256": "748cf0d96bc6ba05cccaba4950044d3eeeea9e0c906a18616755f39c2d645297"
+    },
+    "evidence/design-delta-review.json": {
+      "bytes": 3553,
+      "sha256": "bb4544c3e3fce90b2b594b62f1706c7703c37b060008398cff654fcf9a6c957b"
+    }
+  }
+}
