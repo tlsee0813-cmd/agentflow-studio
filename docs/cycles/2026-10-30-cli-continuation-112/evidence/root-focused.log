@@ -1,0 +1,41 @@
+102-P1 original child end on win32: no-heartbeat
+✔ 102-P1 the launcher is killed while its child runs: the child outlives it; after restart no new id starts until that child is gone (1632.0221ms)
+✔ 102-P2 a lease with no child identity (crash between lease and spawn) stays closed until the operator attests it (2769.7173ms)
+﹣ 102-P3 an orderly stop during a run: the child is stopped and gone before the launcher ends; restart reads interrupted and admits (0.3302ms) # SIGTERM to a launcher is not deliverable on Windows
+✔ 102-P4 a ready result survives restarts with the executor off (keyoff) and on, with the binding it ran under (2236.8136ms)
+✔ 102-P5 two launchers (two ports, two job stores) on one executor state: the second has no executor (790.9136ms)
+✔ 102-E1 normal child: the exact final wire is ready, bound at acceptance to the executor policy; status says the executor (1034.6318ms)
+✔ 102-E2 UTF-8 and lines split across chunks are read whole: the same ready wire (1254.2317ms)
+✔ 102-E3 refusals: invalid UTF-8, tool/error/unknown events, exit and signal, no turn end, missing or different final, JSON, wire (5721.3891ms)
+✔ 102-E4 selection cutoff: a child still running at selectionMs is stopped and refused; one closing just before is kept (5139.9226ms)
+✔ 102-E5 the same-tick races: a close counted after selectionMs is refused; a verdict after verdictMs is refused; just inside is kept (2972.8647ms)
+✔ 102-E6 cancel: recorded first, the child is stopped (SIGTERM ignored → killed); a complete answer after the cancel is never ready (1334.7502ms)
+✔ 102-E7 no close: the job fails at its cutoff, the executor stays closed to every new id until that child is gone (6377.7898ms)
+﹣ 102-E13 a process left in the child group holds the pipe: no close, so no answer; stopped at the cutoff with its group (0.3248ms) # process groups are POSIX
+✔ 102-E14 the final file is read only after the child is gone and its group probed: the run folder outlives the read (1039.855ms)
+﹣ 102-E15 the version probe is a child under the same lease: one that does not end keeps the next open from probing or admitting (0.2069ms) # process groups are POSIX
+✔ 102-E16 the binary replaced while open: refused at acceptance; replaced after the pre-start hash: the started image is refused unfed (Linux) (3174.8137ms)
+✔ 102-E17 cancelled or out of selection time while the lease is written: no child is started, the lease is let go (903.9478ms)
+✔ 102-E18 a closed executor is fenced: its child ending later never removes the lease a new owner wrote (8370.7511ms)
+✔ 102-E19 the verdict is due by verdictMs whatever setup or the final read do; what still runs keeps the slot until it ends (7034.3198ms)
+✔ 102-E20 handoff: a state change already in flight ends before the next owner can open; a closing executor starts no child (2064.9892ms)
+✔ 102-E21 a relative state folder (as a launcher may be given) reaches the child as the same absolute place: ready (735.5149ms)
+✔ 102-E8 duplicate POSTs of one id are one invocation; another id while it runs is refused, never queued (1150.2189ms)
+✔ 102-E9 scope and binding: a later map is not run; a job runs only under the policy it was bound to; a changed binary or version closes it (1017.9861ms)
+✔ 102-E10 HTTP security with the executor: origin, headers, access code, strict body, model binding; zero invocations (751.0102ms)
+✔ 102-E11 the default path is unchanged: no executor, the same status and DeepSeek job; an executor without a job store is ignored (392.782ms)
+✔ 102-E12 Worker and default imports never reach the executor or child_process (1.5472ms)
+✔ 112-1 the policy scope: absent is first (its policy hash as before), map6-later is opted in and hashed, anything else is refused (1420.8951ms)
+✔ 112-2 the default (first) policy refuses a later ask before acceptance: no record, no child (1006.4943ms)
+✔ 112-3 opted in: a later ask runs with its own selected instructions; the whole later reading survives job, ready, keyoff and the browser apply (1186.0466ms)
+✔ 112-4 bound to its own ask and instructions: another ask, prompt, kind or scope under the binding starts nothing (1520.9293ms)
+✔ 112-5 a first ready result kept under the old policy is read the same by an opted-in executor (nothing rebound) (1452.9173ms)
+✔ 112-6 the browser reads the executor scope from status; an unknown value is not shown as a scope (1.6287ms)
+ℹ tests 32
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 3
+ℹ todo 0
+ℹ duration_ms 50757.1149

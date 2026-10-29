@@ -1,0 +1,18 @@
+{
+  "sha": "9e97cbb7becfc3c1d1bf3635bcfd63e21e76112c",
+  "run": 40914102035,
+  "jobs": [
+    {
+      "id": 123589764102,
+      "name": "verify (windows-2022)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 123589764959,
+      "name": "verify (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "task": "AF112-independent-fixed-delta-review",
+  "reviewedHead": "0cdabb9e15021a876000fec2f48b8843bad61751",
+  "base": "83d545dc5192a86556cfaffb70a6ec86526eda14",
+  "verdict": "bounded_static_delta_acceptable; no_actionable_P1_P2_found",
+  "conclusion": "The explicit later-map opt-in, actual prompt/ask binding and scope-specific status delta are coherent. The default remains FIRST, unknown scope is refused, later asks bind the actual selected prompt instead of FIRST metadata, and call rejects mismatched accepted instructions/ask/scope before a job lease/child. Existing owner/capture/codec/default-provider paths are unchanged. This review finds no material blocker, but does not accept actual model quality, declare the full product complete, or substitute for root's in-progress fixed Windows verification.",
+  "findings": [],
+  "codeAssessment": [
+    {
+      "file": "docs/cycles/2026-10-29-owned-cli-preview-102/preview/cli-executor.mjs:47-79,100-106",
+      "assessment": "Only absent/first and explicit map6-later scopes are normalized. Unknown values reject opening the executor. The FIRST normalized policy intentionally omits scope from the hash to retain the pre112 identity; the opt-in includes scope and gets a different policy hash. This preserves default semantics while separating the expanded authorization. The browser still cannot choose scope/binary/arguments/deadline/model. readPolicy's normalized copy, not ignored note fields, is hashed."
+    },
+    {
+      "file": "docs/cycles/2026-10-29-owned-cli-preview-102/preview/cli-executor.mjs:53-57,223-231,245-267",
+      "assessment": "prepare admits only the policy's map6 scope and returns immutable execution metadata with actual map6Prompt kind, full prompt SHA256/short id and exact ask JSON SHA256. call compares policy/scope plus all four askBinding fields and scope admission before creating a job lease. The wrapper still uses map6Prompt(ask); its input string is constructed synchronously before runChild's asynchronous setup, so the checked normal JSON ask is serialized into the payload used by the child. The server's existing submission validation and input/ask hashes remain the external boundary. This is more than deleting the old FIRST guard, and no new source truncation/repair path is introduced."
+    },
+    {
+      "file": "app/continuity/src/client/studio-api.ts:14,28-33; app/continuity/src/client/app.ts:2112-2117; app/continuity/src/client/map-run.ts:79-81",
+      "assessment": "Status retains only first/map6-later scope values, while keeping the existing ai versus map-only separation. Header title differentiates FIRST-only from later records/request comparison. First-only refusal keeps its existing message; opted-in non-map6 preparation uses EXECUTOR_SCHEMA with its own message. An unknown status scope is not advertised as later. Source inspection found no new misleading FIRST refusal for an admitted valid later map6 ask. Actual title layout/normal-UI behavior was not executed by this reviewer."
+    },
+    {
+      "file": "unchanged app/continuity/server/map-jobs.mjs; src/shared/map-job.ts; preview/cli-capture.mjs; server/studio.mjs/worker.mjs; shared/map-reading.ts; server/map-prompt.mjs",
+      "assessment": "The diff changes none of the owner/lease/cancel/fence/capture, durable input codec, result validation/application, default DeepSeek/Worker routing or map prompt text. Existing100/102 accepted-job recovery remains the same; restart marks active work interrupted and does not execute it again. New execution metadata is journaled/passed through the existing opaque execution field. Ready reads do not require the new fields or rebind them to current policy. No pre112 ready shape rejection was introduced in the inspected reader paths."
+    }
+  ],
+  "testAssessment": {
+    "files": ["app/continuity/tests/owned-cli112.test.mjs", "app/continuity/tests/later112-case.mjs", "app/continuity/tests/fake-cli102.mjs", "app/continuity/tests/owned-cli102.test.mjs"],
+    "meaningfulCoverage": [
+      "Default/explicit FIRST policy identity and unknown scope refusal; default later rejection before durable record/child, followed by a still-working FIRST request.",
+      "Actual handler/job path with a harmless child reading the later wrapper/ask; recorded actual prompt/hash/kind/scope; duplicate POST single invocation; key-off executor-off ready recovery; fullRequests/priors/claims/parts/records through decode and apply versus direct application.",
+      "Prior target/correction, claim replacement and explicit withdrawal remain represented. Direct executor mismatched ask/prompt/hash/kind/scope cases exercise refusal before job lease/spawn. Optional status scope parsing is covered.",
+      "Modified102 E1 expectations acknowledge additional metadata rather than dropping existing bound identity fields. The fake file-response mode returns the test-authored wire unchanged and does not simulate actual model compliance."
+    ],
+    "gapsAndLimits": [
+      "112-5 creates a FIRST job using the new112 executor, then opens it under map6-later. It tests old-policy identity and no rebinding, but not a genuine pre112 journal whose execution object lacks scope/promptKind/full hashes. Unchanged opaque ready readers support compatibility by inspection; do not describe this test as an executed historical metadata migration test.",
+      "The full later synthetic case deliberately creates an evidence record through the legacy task path to exercise allowed code/test transport and matching. It is not the real111 normal-paste input and does not demonstrate a normal typed-evidence entry UI or generation semantics. The already-established pasted111 limitation remains unchanged.",
+      "The browser-side application test calls the real codec/validator/apply functions but does not run a browser DOM flow. Status parsing is tested; actual header title/normal-UI later operation remains a separate observation. Root plans to inspect this in113.",
+      "No actual CLI generation, full semantic inference, current111 success or token/cost cap is established by these model-free tests."
+    ]
+  },
+  "pasted111Boundary": "The diff leaves source kinds, match-kind validator, prompts and input UI unchanged. The reviewed report experience112-pasted-evidence-boundary.json remains authoritative for the next frozen semantic criteria. No repeat investigation or requirement to retag111 was added here.",
+  "evidenceAttributionAndPendingWork": {
+    "reviewExecution": "This reviewer ran no tests, build, browser or model call and wrote no product/raw file. Claims below are attributed, not independently rerun.",
+    "authorFinalUpdate": "Root reports final9e97cbb7becfc3c1d1bf3635bcfd63e21e76112c changes only14 RESULT documentation lines from reviewed0cdabb9e, replacing known __CHECKS__ placeholder; author reports596/596 plus check/build/dry-run/static/102fakeUI. The code review remains fixed at0cdabb9e.",
+    "rootUpdate": "Root reports locked check/build pass and Windows focused execution94743 still running. Genuine old-record-shape limits will be stated accurately, and the new scope title will be observed in the later normal path. This report does not mark those unfinished observations successful."
+  },
+  "remainingAcceptance": [
+    "Root's final fixed Windows/CI and related unchanged102 lifecycle regressions must be judged from actual results, without redeveloping or claiming a new owner framework.",
+    "Any real113 call remains a separate selected/frozen operation after implementation acceptance, preserving exact111 input and failure. No automatic retry, timeout/token expansion or fallback was introduced or authorized by this review.",
+    "Publish only bounded implementation capability claims; generation meaning, cost/remote-stop limits and full product/public deployment gates remain separate."
+  ],
+  "actions": {"modelCalls":0,"researchWeb":0,"testsBuildUI":0,"productOrRawWrites":0,"onlyWrite":".ops/results/experience112-independent.json"},
+  "reviewClosed": true,
+  "finalSelectionOwner": "root coordinator"
+}

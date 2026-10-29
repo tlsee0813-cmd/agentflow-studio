@@ -1,0 +1,23 @@
+2026-10-29T16:42:09.6988283Z   ref: 9e97cbb7becfc3c1d1bf3635bcfd63e21e76112c
+2026-10-29T16:42:13.2178441Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin 9e97cbb7becfc3c1d1bf3635bcfd63e21e76112c
+2026-10-29T16:42:15.7490825Z  * branch            9e97cbb7becfc3c1d1bf3635bcfd63e21e76112c -> FETCH_HEAD
+2026-10-29T16:42:15.7540743Z [command]"C:\Program Files\Git\bin\git.exe" rev-parse --verify --quiet 9e97cbb7becfc3c1d1bf3635bcfd63e21e76112c^{object}
+2026-10-29T16:42:15.7878531Z 9e97cbb7becfc3c1d1bf3635bcfd63e21e76112c
+2026-10-29T16:42:15.8582049Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force 9e97cbb7becfc3c1d1bf3635bcfd63e21e76112c
+2026-10-29T16:42:16.3401243Z Note: switching to '9e97cbb7becfc3c1d1bf3635bcfd63e21e76112c'.
+2026-10-29T16:42:16.3408278Z HEAD is now at 9e97cbb docs(112): record the checks on 0cdabb9 (no model call)
+2026-10-29T16:42:16.4373886Z 9e97cbb7becfc3c1d1bf3635bcfd63e21e76112c
+2026-10-29T16:42:28.5319471Z node: v22.16.0
+2026-10-29T16:43:20.3530881Z [36;1mnode -e "if(process.version !== 'v22.16.0') process.exit(1)"[0m
+2026-10-29T16:43:21.0214679Z 9e97cbb7becfc3c1d1bf3635bcfd63e21e76112c
+2026-10-29T16:43:21.0708507Z v22.16.0
+2026-10-29T16:45:33.1516526Z # tests 279
+2026-10-29T16:45:33.1516882Z # pass 279
+2026-10-29T16:45:33.1517059Z # fail 0
+2026-10-29T16:45:33.1517232Z # skipped 0
+2026-10-29T16:47:05.9089828Z # tests 596
+2026-10-29T16:47:05.9089977Z # pass 593
+2026-10-29T16:47:05.9090052Z # fail 0
+2026-10-29T16:47:05.9090201Z # skipped 3
+2026-10-29T16:47:16.6471922Z {"phase":"prepared","source":"9e97cbb7becfc3c1d1bf3635bcfd63e21e76112c","worker":"agentflow-studio","assets":52,"modules":24,"bytes":1179121,"dryRun":true}
+2026-10-29T16:48:45.0696201Z Ran 18 tests in 21.924s

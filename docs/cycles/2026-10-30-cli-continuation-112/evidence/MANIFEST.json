@@ -1,0 +1,38 @@
+{
+  "sourceCode": "0cdabb9e15021a876000fec2f48b8843bad61751",
+  "sha256Of": "staged Git blob bytes",
+  "files": [
+    {
+      "path": "docs/cycles/2026-10-30-cli-continuation-112/ROOT_ACCEPTANCE.md",
+      "sha256": "2a2966370e9ce494580cc00ea94ad47bd6c1d27acb6c37709a2bf164b97c3b2b"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-cli-continuation-112/evidence/ci-linux-excerpt.txt",
+      "sha256": "7e649fee0a40fd6f073c90f682b8d5a9967df3fd638e187b98d849367485ca7e"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-cli-continuation-112/evidence/ci-windows-excerpt.txt",
+      "sha256": "7027c81f5497ec47ec9f5100205982d3b407d36292f72efea7dddef503dfc234"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-cli-continuation-112/evidence/ci.json",
+      "sha256": "eb7fa3c166eeb97c56c2c2830fae47b605b4183d583f6a367605a97c4800004b"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-cli-continuation-112/evidence/independent-review.json",
+      "sha256": "f223d0227deed64fa71b3221f91b7a4cf874e8dafae1dae1fe2733a4287bf540"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-cli-continuation-112/evidence/root-checks.json",
+      "sha256": "b4fdd27678100d370e825603bc2ef5519dec5b0f34459a1f0cc5d55320827247"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-cli-continuation-112/evidence/root-focused.log",
+      "sha256": "3b68f81ff1221d514cf2caa04fbe32ba2c2b048ab254095f0e01d3f0269dc80a"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-cli-continuation-112/evidence/root-verification.json",
+      "sha256": "94facee622aa076f84208159e1e2706b6ed26a61f49ac718dc21282828fecc34"
+    }
+  ]
+}
