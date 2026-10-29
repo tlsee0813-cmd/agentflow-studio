@@ -15,7 +15,7 @@
 | 코드 기준 / app tree | d6edeeff5e33336388b03ee4497b791944c87006 / 501a7a1faa4b50c182e56ad0cd3a21ac65ed6e5d |
 | 모델 / 설정 | 설치 CLI 0.164.0-alpha.11.1, gpt-6.1-sol / high |
 | 실제 호출 | actual-order 한 건, top-level invocation 1회 |
-| 완료 이벤트 | thread.started, turn.started만 관측 |
+| 관측 이벤트 | thread.started, turn.started만 관측 |
 | 선택 마감 | 89,000ms, SELECTION_DEADLINE |
 | capture 반환 / 최종 수용 검사 | 89,082.103ms / 89,934.8609ms |
 | 종료 / 보존 | SIGTERM, close 확인, 보호 파일·원문·source 보존 통과 |

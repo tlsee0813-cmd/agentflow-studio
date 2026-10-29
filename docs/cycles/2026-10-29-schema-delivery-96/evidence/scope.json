@@ -11,7 +11,7 @@
   "overallEligibilityMs": 90000,
   "decisionOwner": "coordinator",
   "priorRecommendation": "AF95 Astra recommended offline compatibility only; AF96 live-path candidate separately selected by coordinator after offline result",
-  "generationStatus": "COMPLETED_WITHOUT_FINAL_RESPONSE; REJECTED",
+  "generationStatus": "TERMINATED_AT_SELECTION_DEADLINE_WITHOUT_FINAL_RESPONSE; REJECTED",
   "scope": "Complete original FIRST map.6 ask and wrapper, unchanged model/reasoning/meaning; CLI --output-schema is new. Not a replay of DeepSeek strict or a claim that prior timeouts were formatting errors.",
   "boundary": "Private candidate application is not product integration, semantic acceptance, UI evidence or publication of user material.",
   "actualInvocations": 1,
