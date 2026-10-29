@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-29T17:46:08.572Z",
+  "at": "2026-10-29T17:51:22.245Z",
   "viewport": "1280x800",
   "fixture": {
     "backup13Sha256": "cd5937c9f903ed33857e7e168aa6d15b48cc0e08262f06e3224e27e09da180c4",
@@ -35,13 +35,13 @@
     },
     "3-asks": {
       "unread": {
-        "N_35cb2283-39db-4cba-8627-361a1d5b8baa": "evidence",
-        "N_88163e0e-134f-44f6-bfa3-fbe75e643792": "evidence",
+        "N_ecbb3a08-9ec6-4908-bf02-67aafcfde76c": "evidence",
+        "N_e7b8c740-7a04-4e1e-b74a-b966895a706e": "evidence",
         "N_ba2981e1-4b4e-4f70-9ab2-cf92dc3bed5e": "pasted"
       },
       "selectedRq": {
-        "N_35cb2283-39db-4cba-8627-361a1d5b8baa": "evidence",
-        "N_88163e0e-134f-44f6-bfa3-fbe75e643792": "evidence",
+        "N_ecbb3a08-9ec6-4908-bf02-67aafcfde76c": "evidence",
+        "N_e7b8c740-7a04-4e1e-b74a-b966895a706e": "evidence",
         "N_ba2981e1-4b4e-4f70-9ab2-cf92dc3bed5e": "pasted",
         "N_222ff1ee-971a-482b-9b52-74310f42409c": "pasted"
       },
@@ -61,11 +61,11 @@
         ],
         [
           "code",
-          "N_88163e0e-134f-44f6-bfa3-fbe75e643792"
+          "N_e7b8c740-7a04-4e1e-b74a-b966895a706e"
         ],
         [
           "test",
-          "N_35cb2283-39db-4cba-8627-361a1d5b8baa"
+          "N_ecbb3a08-9ec6-4908-bf02-67aafcfde76c"
         ]
       ],
       "quoteRoundtrip": true,
@@ -78,6 +78,8 @@
         "big.ts",
         "ctl.ts",
         "key.ts",
+        "version 81",
+        "origin 301",
         "key-like origin"
       ],
       "projectUnchanged": true,
@@ -106,11 +108,11 @@
   "api": {
     "posts": [
       "POST /api/studio/jobs",
-      "POST /api/studio/jobs/MJ_cb494e52-1671-4ef7-9825-601c636dbc51/ack",
+      "POST /api/studio/jobs/MJ_1f68cf9e-3f84-429b-9452-9e891be5e2cd/ack",
       "POST /api/studio/jobs",
-      "POST /api/studio/jobs/MJ_7930f676-c025-4a3e-8dd0-fdc9bca08c23/ack",
+      "POST /api/studio/jobs/MJ_7d63aec3-48d6-4c34-a85e-0f4a8171e9e0/ack",
       "POST /api/studio/jobs",
-      "POST /api/studio/jobs/MJ_73b123dd-a1f4-44d9-991b-cc7c07328a00/ack"
+      "POST /api/studio/jobs/MJ_1b898b43-4ce5-4053-a9b1-9382e617467c/ack"
     ],
     "jobPosts": 3,
     "directMap": 0,

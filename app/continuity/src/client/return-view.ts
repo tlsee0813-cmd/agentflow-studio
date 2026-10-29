@@ -579,7 +579,8 @@ export function createReturnView(host: ReturnHost) {
     const pick = h('input', { type: 'file', id: 'file-pick', class: 'rr-file-pick', 'aria-describedby': 'file-rule' }) as HTMLInputElement; pick.disabled = d.saving;
     pick.addEventListener('change', () => { const f = pick.files?.[0]; pick.value = ''; if (f) void readFile(f); });
     const field = (id: string, label: string, max: number, value: string, set: (v: string) => void, hint: string) => {
-      const i = h('input', { id, type: 'text', maxlength: String(max), autocomplete: 'off', spellcheck: 'false', placeholder: hint }) as HTMLInputElement;
+      // No maxlength: the whole value stays in the draft and an over-long one is refused at save (evidenceProblem), never cut.
+      const i = h('input', { id, type: 'text', autocomplete: 'off', spellcheck: 'false', placeholder: hint }) as HTMLInputElement;
       i.value = value; i.disabled = d.saving; i.addEventListener('input', () => set(i.value));
       return h('div', { class: 'rr-file-field' }, h('label', { for: id }, label, h('small', {}, ` 선택 · ${max}자 이내`)), i);
     };

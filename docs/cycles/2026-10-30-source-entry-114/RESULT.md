@@ -63,6 +63,12 @@
 2. `saveFile`: 저장 중 종류·파일·판본·출처·맥락 빼기를 잠근다. 성공 뒤에는 [token, text, name, kind, version, origin, context] 전체가 저장 시점과 같을 때만 초안을 비운다.
 3. map.6 문구는 위 ‘바뀐 곳’대로 고쳤다. mixed prose의 reported/checked 의미는 그대로다.
 
+## 최종 전 보정 (19a8d91 뒤)
+
+- 판본·출처 입력의 HTML `maxlength`를 없앴다. 입력값 전체를 초안에 두고, 저장할 때 기존 `evidenceProblem`으로 80·300 초과를 명시 거절한다. 화면의 ‘80자/300자 이내’ 안내는 그대로다. 새 제한은 없고, 앞뒤 공백 trim(선택 필드 정리)도 그대로다.
+- Root IAB 관찰 구분: paste/Control+V 도구 경로에서는 314자가 모두 들어가 실제 paste 절단은 재현되지 않았다. 다만 299자 뒤 20자 `pressSequentially`는 300자까지만 남았다. 보정은 브라우저별 입력 경로에 기대지 않으려는 최소 수리다.
+- focused regression(`check-ui-114.mjs` 5관문): 두 입력에 maxlength가 없다. version 81자(`pressSequentially`)는 입력란에 81자 그대로 남고 ‘판본은…’으로 거절된다. origin 299+2자는 301자 그대로 남고 ‘출처는…’으로 거절된다. 두 경우 모두 project 바이트가 그대로다. 최종 코드에서 UI 6관문 전체와 `source-entry114` 10/10이 통과했다(`evidence/ui114.json` 갱신). 관련 없는 전체 검사는 다시 돌리지 않았다(마지막 전체 606/606은 19a8d91 코드 기준이고, 이번 변경은 `return-view.ts`의 입력 속성 하나다).
+
 ## 미확인·한계
 
 - 잠긴 TS 5.8.3 build/check, Windows, 정확 CI, `deploy --dry-run`은 총괄 분담이다(위 컴파일러 사정). Root가 72b7e79에서 locked build/check를 통과했다고 알려 왔다. 최종 커밋에서는 다시 확인해야 한다.

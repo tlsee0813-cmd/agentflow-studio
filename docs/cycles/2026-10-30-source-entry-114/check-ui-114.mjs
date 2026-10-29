@@ -200,6 +200,14 @@ try {
     await form.locator('#file-pick').setInputFiles({ name, mimeType: 'text/plain', buffer }); await form.getByRole('alert').getByText(words).waitFor(); fails.push(name);
     assert.equal(await form.locator('.rr-file-preview').evaluate(e => e.textContent), 'export const good = 1;\n', 'the last good file stays');
   }
+  // Over the limit is kept whole in the field and refused at save (never cut by the input): version 81, then origin 301.
+  assert.equal(await form.locator('#file-version').getAttribute('maxlength'), null); assert.equal(await form.locator('#file-origin').getAttribute('maxlength'), null);
+  await form.locator('#file-version').pressSequentially('v'.repeat(81)); await lens.getByRole('button', { name: '자료 저장' }).click(); await form.getByRole('alert').getByText('판본은').waitFor();
+  assert.equal(await form.locator('#file-version').inputValue(), 'v'.repeat(81), 'version 81 kept whole'); fails.push('version 81');
+  await form.locator('#file-version').fill(''); await form.locator('#file-origin').fill('o'.repeat(299)); await form.locator('#file-origin').pressSequentially('o'.repeat(2));
+  await lens.getByRole('button', { name: '자료 저장' }).click(); await form.getByRole('alert').getByText('출처는').waitFor();
+  assert.equal(await form.locator('#file-origin').inputValue(), 'o'.repeat(301), 'origin 301 kept whole'); fails.push('origin 301');
+  assert.equal(await rawEntry(A), rawA, 'refused over-long declarations leave the project as it was');
   await form.locator('#file-origin').fill(`ghp_${'F'.repeat(30)}`); await lens.getByRole('button', { name: '자료 저장' }).click(); await form.getByRole('alert').getByText('출처는').waitFor(); fails.push('key-like origin');
   assert.equal(await rawEntry(A), rawA, 'failed attempts leave the project as it was');
   let rollback = null;
