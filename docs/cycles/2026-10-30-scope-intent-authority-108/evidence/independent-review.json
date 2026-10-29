@@ -1,0 +1,46 @@
+{
+  "task": "AF108-independent-fixed-scope-prompt-delta-review",
+  "head": "5e84ae811dfaf7197c93f2d05b900d330125cc11",
+  "base": "bcae7a843705a668a0aabe1872dc7cb5cabd92e7",
+  "appTree": "5736b7949d50ba92c07ae583ff22c618c25c3e94",
+  "verdict": "static_delta_acceptable; actual_model_compliance_unobserved",
+  "conclusion": "No material inconsistency or new P1/P2 was found. The five changed SCOPE_PROMPT lines consistently distinguish selected results from the original intent's still-valid conditions on those results, keep independent unselected features outside the request, preserve explicit conflicts, and avoid treating future change as a new task when the chosen fallback already handles it. This is a coherent instruction correction for the107 counterexample, not evidence that the next model will comply.",
+  "findings": [],
+  "boundaryAssessment": [
+    {
+      "file": "app/continuity/server/plan-prompt.mjs:46",
+      "assessment": "selected determines which results are delegated. Its short title/description is no longer incorrectly treated as a complete specification that cancels explicit intent details. The added authority applies only to conditions of those selected results; the same sentence expressly forbids reviving an independent result that exists only in the full intent. Source material remains evidence, not an instruction to execute."
+    },
+    {
+      "file": "app/continuity/server/plan-prompt.mjs:53-54",
+      "assessment": "The existing restriction against reviving unselected batching/continuous-processing/execution methods is retained. The generic tag-search example holds title/date fields as conditions of that selected search, while scheduled publishing remains an independent unselected result. This addresses the distinction without embedding the Zephyr answer or filtering literal response strings. Excluded names are still not treated as a blanket ban on an independently demonstrated minimal prerequisite."
+    },
+    {
+      "file": "app/continuity/server/plan-prompt.mjs:55",
+      "assessment": "An explicit selected-versus-intent/source contradiction must be reported rather than silently resolved for either side. Mere omission in a compressed summary is distinguished from contradiction. The rule therefore does not instruct the model to overwrite a user's narrower explicit choice with older broad intent; an actual clash remains visible. Unknown prerequisites are still allowed. Correctly deciding whether a difference is compression or conflict remains a model interpretation task and is not proven by this text."
+    },
+    {
+      "file": "app/continuity/server/plan-prompt.mjs:57",
+      "assessment": "The future-change rule is conditional: only when the existing selected/intent handling already covers the change does it forbid a new unknown/update obligation. It does not erase new source conflicts, unexplained changed known values, or a genuinely uncovered case. Genuine material uncertainties and explicit user-open choices remain allowed under the unchanged surrounding rules; application part registration and unsolicited functionality remain excluded."
+    }
+  ],
+  "unchangedScopeVerifiedByDiff": {
+    "productionChanges": "Only SCOPE_PROMPT within server/plan-prompt.mjs changes. PLAN_PROMPT/PLAN2_PROMPT/PLAN3_PROMPT source and their derivations are unchanged from the fixed base; the added tests pin their existing9b856ef8/c7c0228a/aacb45c3 SHA values. This reviewer used source/diff inspection, not a fresh executed import/hash claim.",
+    "otherFiles": "The complete diff contains only that prompt file, tests/scope108.test.mjs and docs/cycles/2026-10-30-scope-intent-authority-108/RESULT.md. No schema, validator, client, storage,106 compact heading/resize handling, reading offsets, executor, model, time/call cap or response-application path changes.",
+    "rawPreservation": "No prior107 plan/scope source or returned string is changed, deleted, classified or repaired. No new plan is created by this delta. Its instruction does not grant scope review authority to edit selected content or automatically expand the request."
+  },
+  "testReview": {
+    "file": "app/continuity/tests/scope108.test.mjs:1-37",
+    "assessment": "The two tests pin legacy plan hashes and the intended scope text placement/content, including the generic retained-field, excluded-feature, explicit-conflict and handled-future-change boundaries plus the unchanged final reply contract. They are clearly labeled instruction-text checks. They do not execute semantic counterexamples against a model, demonstrate correct inference, or prove that107's raw failure has been repaired. No misleading behavioral success claim is needed to accept this limited regression guard.",
+    "executionScope": "Author reports2/2 and syntax checks; these are attributed observations only. This reviewer did not run them or build dist. Root's locked compiler checks and exact-SHA CI remain separate acceptance work."
+  },
+  "remainingLimits": [
+    "Actual next scope behavior is unobserved. No success-rate or causal guarantee follows from the narrower instructions.",
+    "The accepted107 plan's compact item remains compact. A future scope/request observation still must preserve full original intent, referenced table/display fields, prohibitions and genuine uncertainties without reviving independent features.",
+    "107 scope semantic FAIL remains unchanged. Reusing its preserved plan for one separately selected scope observation is different from repairing/reclassifying that failed raw; no such call is authorized or performed by this report.",
+    "Root owns locked checks, exactCI, implementation acceptance and any next frozen observation. This review does not approve a public release or the full product goal."
+  ],
+  "actions": {"modelCalls":0,"testsBuildUI":0,"researchWeb":0,"productOrRawWrites":0,"onlyWrite":".ops/results/experience108-independent-5e84ae8.json"},
+  "reviewClosed": true,
+  "finalSelectionOwner": "root coordinator"
+}

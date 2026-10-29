@@ -1,0 +1,43 @@
+{
+  "code": "5e84ae811dfaf7197c93f2d05b900d330125cc11",
+  "app": "5736b7949d50ba92c07ae583ff22c618c25c3e94",
+  "runtime": {
+    "node": "24.19.0",
+    "typescript": "5.8.3 locked"
+  },
+  "check": {
+    "exit": 0,
+    "log": "experience108-root-check.log"
+  },
+  "build": {
+    "exit": 0,
+    "log": "experience108-root-build.log"
+  },
+  "focused": {
+    "exit": 0,
+    "log": "experience108-root-focused.log",
+    "files": [
+      "scope108.test.mjs",
+      "uncertainty106.test.mjs",
+      "plan-api.test.mjs",
+      "change-plan.test.mjs"
+    ],
+    "counts": {
+      "tests": 26,
+      "pass": 26,
+      "fail": 0,
+      "skip": 0
+    }
+  },
+  "hashes": {
+    "PLAN_PROMPT": "9b856ef85e59ab1b9fb80f66cf1c8c8a3507f5300f025225fc427df0cd5aec81",
+    "PLAN2_PROMPT": "c7c0228a981491f2e6a8703cea5466c2b524f78dcaa14e829510ea800d179e87",
+    "PLAN3_PROMPT": "aacb45c30be76c620da3503ed806c809a520c772c36412982d7dff8b69443a7a",
+    "SCOPE_PROMPT": "00cf7462571b87d80061ff8c65db65bcdaa385b5419646bac2331daae9b25ad6"
+  },
+  "ci": {
+    "run": 40904658496,
+    "status": "in_progress"
+  },
+  "limits": "No actual model quality or new UI claim"
+}

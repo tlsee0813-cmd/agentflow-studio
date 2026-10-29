@@ -1,0 +1,46 @@
+{
+  "code": "5e84ae811dfaf7197c93f2d05b900d330125cc11",
+  "app": "5736b7949d50ba92c07ae583ff22c618c25c3e94",
+  "run": 40904658496,
+  "jobs": [
+    {
+      "id": 123556010031,
+      "name": "verify (windows-2022)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 123556010553,
+      "name": "verify (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "linux": [
+    "2026-10-29T15:44:53.7512700Z HEAD is now at 5e84ae8 fix: scope keeps intent's explicit conditions for selected results (108)",
+    "2026-10-29T15:47:10.3300341Z # tests 279",
+    "2026-10-29T15:47:10.3300572Z # pass 279",
+    "2026-10-29T15:47:10.3300687Z # fail 0",
+    "2026-10-29T15:47:10.3300798Z # skipped 0",
+    "2026-10-29T15:48:34.9214367Z # tests 590",
+    "2026-10-29T15:48:34.9214481Z # pass 590",
+    "2026-10-29T15:48:34.9214536Z # fail 0",
+    "2026-10-29T15:48:34.9214652Z # skipped 0",
+    "2026-10-29T15:49:18.5757261Z Ran 18 tests in 14.336s",
+    "2026-10-29T15:51:36.3596425Z diag AF106 request94 resize: expected 578 · 1280:578@600 · 700:578@600 · 606:578@621 · 1280:578@600"
+  ],
+  "windows": [
+    "2026-10-29T15:44:57.8454574Z HEAD is now at 5e84ae8 fix: scope keeps intent's explicit conditions for selected results (108)\r",
+    "2026-10-29T15:48:04.0129249Z # tests 279\r",
+    "2026-10-29T15:48:04.0129458Z # pass 279\r",
+    "2026-10-29T15:48:04.0129556Z # fail 0\r",
+    "2026-10-29T15:48:04.0129651Z # skipped 0\r",
+    "2026-10-29T15:49:07.4683547Z # tests 590\r",
+    "2026-10-29T15:49:07.4683645Z # pass 587\r",
+    "2026-10-29T15:49:07.4683695Z # fail 0\r",
+    "2026-10-29T15:49:07.4683796Z # skipped 3\r",
+    "2026-10-29T15:50:39.2702059Z Ran 18 tests in 18.999s\r",
+    "2026-10-29T15:53:06.3609611Z diag AF106 request94 resize: expected 578 · 1280:578@600 · 700:578@600 · 606:578@621 · 1280:578@600\r"
+  ],
+  "limits": "AI providers mocked; no new semantic observation"
+}

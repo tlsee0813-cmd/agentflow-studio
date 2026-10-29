@@ -1,0 +1,22 @@
+{
+  "code": "5e84ae811dfaf7197c93f2d05b900d330125cc11",
+  "app": "5736b7949d50ba92c07ae583ff22c618c25c3e94",
+  "files": [
+    {
+      "path": "docs/cycles/2026-10-30-scope-intent-authority-108/ROOT_ACCEPTANCE.md",
+      "sha256": "38b22718d9f6de42288ef3b39e8cb52f98e8677a311c530daf981e5855e4fd89"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-scope-intent-authority-108/evidence/final-ci.json",
+      "sha256": "3adc05e49ad44c1dee0c6f9105a66076a7d39f0ac3c7261d4e548c8b601b66a3"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-scope-intent-authority-108/evidence/root-checks.json",
+      "sha256": "e0801ad2794ac44f670bae09d5b3d65d159f7618c1ad185d31fa09368e6b5ffd"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-scope-intent-authority-108/evidence/independent-review.json",
+      "sha256": "82f5e5657b11be38b19b742858df2899a3aa2be58677324dd90f280d3bb55e19"
+    }
+  ]
+}
