@@ -1,0 +1,37 @@
+{
+  "source": "531ac4ee62ac3a09836611d67483371ec14726f3",
+  "appTree": "501a7a1faa4b50c182e56ad0cd3a21ac65ed6e5d",
+  "decision": "ACCEPT_REQUEST_READING_SCOPE_ONLY",
+  "accepted": [
+    "Frozen reading segments and whole-text presentation for new requests; legacy plain text unchanged",
+    "Material-boundary and own legacy-marker repairs; atomic invalid input rejection",
+    "Open-sheet resize repair, view/scroll/focus return within observed cases",
+    "Native clipboard first-read comparison with exact platform expectation; stored and rendered original remain exact"
+  ],
+  "evidence": {
+    "rootNormalUI": "14871 UTF-16 units/11 materials;1280/1440 and606 resize; old88 full bundle and4013 clipboard; old93 refusal",
+    "independentFinalDeltaSha256": "45c92ad189cdc351b8446b2d966c3ae42ef7fd5cd6f7ef9bc5958e59db875be9",
+    "independentVisual": "Four root originals viewed, not independent UI interaction",
+    "CI": "40815349545; both OS successful,514 domain tests and8 named94 tests each,5 native94 clipboard observations each",
+    "build": "Both CI jobs five runtime hashes match root built734 and observed f769 runtime"
+  },
+  "executionSubstitution": "Cloud independent browser launch failed before product UI. Bounded execution assurance uses separate Windows/Ubuntu CI browser automation plus coordinator normal interaction and independent source/helper/still-image review. No claim that Cloud or independent human-like UI flow ran.",
+  "limits": [
+    "No universal usability or clipboard guarantee; earlier734/IAB copy causes remain unattributed",
+    "Reviewer-authored request fixtures and a fixed scope response; no fresh model/OSS execution",
+    "Unsigned reading metadata is structural, not source authentication",
+    "Full first-map Q02/Q06 quality/delivery and handoff5/8 acceptance unresolved"
+  ],
+  "public73Unchanged": true,
+  "unaccepted74Preserved": true,
+  "ui75Ancestor": "693d0c7e022bc76b5334b0dd4cf0e6f04ef028ff",
+  "pullRequest": {
+    "number": 57,
+    "draft": true,
+    "merged": false,
+    "deployed": false
+  },
+  "goal": "active",
+  "newModelExperiments": 0,
+  "instaboxMachinesCreated": 0
+}

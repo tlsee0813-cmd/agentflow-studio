@@ -1,0 +1,141 @@
+{
+  "task": "AF94-delta7-independent-review",
+  "at": "2026-10-29T04:05:32.351437+00:00",
+  "source": "531ac4ee62ac3a09836611d67483371ec14726f3",
+  "appTree": "501a7a1faa4b50c182e56ad0cd3a21ac65ed6e5d",
+  "baseline": "f4e9fdf3b33bfc57240f668b4f4a071121c50a80",
+  "verdict": "NO_CONCRETE_BLOCKER_FOUND_IN_FINAL_TWO_FILE_DELTA; REAL_CI_AND_ROOT_ACCEPTANCE_SEPARATE",
+  "blockers": [],
+  "files": {
+    "app/continuity/tests/studio_browser.py": {
+      "gitBlobSha256": "ed4056724b81dc830aa20c98088d779642adf720a7c56350b435bfdea78a55f5"
+    },
+    "app/continuity/tests/request94-flow.mjs": {
+      "gitBlobSha256": "87488faf12653c6ea9b6e103cd4247cf6fa0340171f27b27604356e54e5caffd"
+    }
+  },
+  "scopeVerified": {
+    "changedSinceF4": [
+      "app/continuity/tests/request94-flow.mjs",
+      "app/continuity/tests/studio_browser.py"
+    ],
+    "changedSince734": [
+      "app/continuity/tests/request94-flow.mjs",
+      "app/continuity/tests/studio_browser.py"
+    ],
+    "runtimeChanged": false,
+    "productWrites": 0
+  },
+  "closureOfDiagnosticFindings": [
+    {
+      "id": "first-read ordering",
+      "result": "PASS_OFFLINE_AND_SOURCE",
+      "evidence": "readText is the first page call; no pre-read timestamp call. Helper returns the exact first string. Both matching and mismatching caller verdicts compare this first value only."
+    },
+    {
+      "id": "first evidence before auxiliary reads",
+      "result": "PASS_OFFLINE_AND_SOURCE",
+      "evidence": "keep() and first metadata stdout occur before the300ms wait/second read. A dedicated fake checks this case-specific file, its first-clip hash and absence of later before the second read throws. Initial broad-folder-existence fake was not used as sole proof; the specific-record confirmation supersedes that weak check."
+    },
+    {
+      "id": "auxiliary exceptions",
+      "result": "PASS_OFFLINE_AND_SOURCE",
+      "evidence": "timestamp, later read and kinds failures are isolated. Later-throw fake retains first evidence and raw return; later-match fake keeps first platformExact=false and cannot rescue it."
+    },
+    {
+      "id": "unknown raw clipboard",
+      "result": "PASS_OFFLINE_AND_SOURCE",
+      "evidence": "Unknown first clipboard/window is kept as facts(hash/length/endings), not repr text; fake unknown marker is absent from emitted JSON. Snippets are eligible only when actual equals flow-created original/platform/known text or the same expected words with CRLF differences. The replace check is diagnostic eligibility only, not verdict or returned-value normalization."
+    }
+  ],
+  "oracleReview": {
+    "python": "platform_clipboard_text computes expected with CRLF|CR|LF consumed as one token sequence only on sys.platform==win32. Others return original.",
+    "node": "onClipboard uses the same single-pass expected conversion only on process.platform==win32. Actual native read is not modified.",
+    "callers": "All3 changed Python and3 Node native copy checks use the platform expected. Python first-copy record keeps platform/original rawExact/platformExact and platformExpected length/hash; helper stores original/platformExpected/clip facts.",
+    "exactDocumentContract": "No DOM/raw-view/stored snapshot/export/import assertion was converted. Only native clipboard assertions changed; no runtime/copy argument code changed.",
+    "diagnosticMetricLimit": "Legacy clipIsExpectedWithCRLF is a literal supplementary comparison, not the mixed-newline oracle. It does not decide pass.",
+    "realisticBoundary": "Supports this locally launched browser host platform and observed Windows text/plain line ending behavior. A native platformExact match is distinct from byte equality with original LF text and is not a universal clipboard/other-application roundtrip guarantee."
+  },
+  "independentOfflineEvidence": {
+    "python": {
+      "file": ".ops/results/experience94-delta7-offline-python.json",
+      "sha256": "385fa422369fcc7670b30cb8aa8ad341b1e9fc231d47b755371b3857c7848da4",
+      "oracleInputs": 7,
+      "platforms": [
+        "win32",
+        "linux",
+        "darwin"
+      ],
+      "invalidWindowsActualVariantsRejected": 6,
+      "fakePageCases": 6,
+      "specificRecordOrdering": {
+        "currentCaseFileCreatedBeforeWait": true,
+        "currentCaseFirstClipHashPersistedBeforeSecondRead": true,
+        "laterReadFailureRecorded": true,
+        "returnsFirstUnmodified": true,
+        "artifactSha256": "bb426990575f3db93712e2ef47dd1edb50fcbc043fead25012ac2c3628c0fd38"
+      },
+      "method": "AST extract only two function definitions; fake page/sys/os and fresh private diagnostic files. No full Python browser module import or browser."
+    },
+    "node": {
+      "file": ".ops/results/experience94-delta7-offline-node.json",
+      "sha256": "e00ab42e2cd0016bb9911638ed514657228f3fa6a41b6b28d4f31da167dda47c",
+      "oracleInputs": 7,
+      "platforms": [
+        "win32",
+        "linux",
+        "darwin"
+      ],
+      "invalidWindowsActualVariantsRejected": 6,
+      "method": "Extract only onClipboard expression to VM; no Playwright/flow import."
+    },
+    "counterexamples": "LF, CRLF, loneCR, mixed breaks, adjacent CR+CRLF+LF, Korean/emoji/tab/space/trailing break, unchanged U+2028/U+2029, wrong actual LF/CRCRLF/missing/extra text; auxiliary throws, timestamp throws, later match, unknown raw withholding and nonWindows exact.",
+    "authorClaims": "Author Python34/Node14 offline pass counts are not adopted as independently executed evidence. Counts above describe this reviewer's separate targeted checks."
+  },
+  "sourceLocations": {
+    "def platform_clipboard_text": [
+      3365
+    ],
+    "def clipboard_read": [
+      3374
+    ],
+    "clip = page.evaluate": [
+      3383
+    ],
+    "keep()": [
+      3401,
+      3405,
+      3415
+    ],
+    "if clip != platform_text:": [
+      3407
+    ],
+    "except Exception as e: diag[\"later\"]": [
+      3412
+    ],
+    "return clip": [
+      3417
+    ],
+    "assert clip == on_clipboard": [
+      3510
+    ]
+  },
+  "CIAndAcceptance": {
+    "rootProvidedInProgressRun": 40815349545,
+    "windowsJob": 123254985534,
+    "ubuntuJob": 123254985785,
+    "independentPolls": 0,
+    "freshCIConclusionClaimed": false,
+    "note": "No new push, CI run/cancel, browser flow, model or environment change performed. Root owns final receipt and acceptance. The archived f4 failure is retained; no734/IAB retrospective cause claim."
+  },
+  "execution": {
+    "offlinePureHelperChecksOnly": true,
+    "realBrowser": 0,
+    "OSClipboardReadsOrWrites": 0,
+    "models": 0,
+    "productWrites": 0,
+    "installs": 0,
+    "completedFlowReruns": 0
+  },
+  "originalReviewSha256": "45c92ad189cdc351b8446b2d966c3ae42ef7fd5cd6f7ef9bc5958e59db875be9"
+}

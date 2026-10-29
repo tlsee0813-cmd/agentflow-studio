@@ -1,0 +1,27 @@
+{
+  "source": "f4e9fdf3b33bfc57240f668b4f4a071121c50a80",
+  "run": 40813804935,
+  "job": 123250067042,
+  "observed": {
+    "expectedCodepoints": 13539,
+    "actualCodepoints": 13884,
+    "expectedLF": 345,
+    "actualCRLF": 345,
+    "entireStringEqualsLFtoCRLF": true
+  },
+  "scope": "This f4 Windows CI run only; earlier 734 and IAB failures remain unattributed.",
+  "decision": "Keep original frozen/DOM/store/export exact comparisons. Test native Windows clipboard against exact platform line-ending expectation; never normalize actual, trim content or use a later read to pass. Non-Windows expected stays original.",
+  "references": [
+    {
+      "url": "https://www.w3.org/TR/2026/WD-clipboard-apis-20260624/#write-content-to-the-clipboard",
+      "status": "W3C Working Draft",
+      "relevance": "text/plain clipboard writing follows platform line-ending conventions"
+    },
+    {
+      "url": "https://github.com/web-platform-tests/wpt/pull/63738",
+      "mergedCommit": "cd06ab9de5f3ea8c6c5581bec775d6c6c9b942cf",
+      "relevance": "Windows test expectation maps CRLF, CR and LF to CRLF"
+    }
+  ],
+  "acceptance": "Final531 independent review found no concrete blocker and CI40815349545 both OS success; accepted only as platform clipboard test boundary."
+}

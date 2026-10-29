@@ -1,0 +1,15 @@
+{
+  "source": "b7694f47d7ceef000b6a9477a9c940ab4aef7722",
+  "generatedOn": "f76922b48033783f72f4cea7627951b1b288697e",
+  "fileSha256": "f61c47931bfebc6070bcfa410f73d31a8ffb5327f52942da2835d800ad951994",
+  "format": "agentflow.change-plan-file.4",
+  "owner": "P_6a74a281-f0dd-4dd8-8e00-d5b013112326",
+  "request": "RQ_ebea7948-06a0-479a-96cf-f0fc985d2ad6",
+  "reading": "request-reading.2",
+  "textChars": 14871,
+  "materials": 11,
+  "fileReadValid": true,
+  "memoryRoundtripValid": true,
+  "memoryWrites": 1,
+  "envelopeProvenance": "Constructed via actual final saveBundle in memory from normal UI export, not browser storage extraction"
+}

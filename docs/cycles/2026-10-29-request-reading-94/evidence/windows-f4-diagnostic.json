@@ -1,0 +1,18 @@
+{
+  "source": "f4e9fdf3b33bfc57240f668b4f4a071121c50a80",
+  "run": 40813804935,
+  "job": 123250067042,
+  "conclusion": "failure",
+  "diagnostic": [
+    "2026-10-29T03:52:43.1225325Z diag  AF94 clipboard request94 1280x720 first copy: exact=False len=13539/13884 endings={'crlf': 0, 'lf_alone': 345, 'cr_alone': 0}/{'crlf': 345, 'lf_alone': 0, 'cr_alone': 0} firstDiff=38 crlfForm=True\r"
+  ],
+  "observed": {
+    "expectedCodepoints": 13539,
+    "clipboardCodepoints": 13884,
+    "expectedLoneLF": 345,
+    "clipboardCRLF": 345,
+    "firstDiffCodepoint": 38,
+    "clipboardEqualsExactLFtoCRLFTransform": true
+  },
+  "inference": "This run mismatch is precisely LF-to-CRLF conversion. Does not retroactively prove unrecorded 734 or IAB prior-paste causes."
+}

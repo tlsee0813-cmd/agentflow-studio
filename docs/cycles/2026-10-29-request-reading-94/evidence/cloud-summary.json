@@ -1,0 +1,110 @@
+{
+  "source": "734fe8870a90952edb3ce6bed758da677366613a",
+  "appTree": "888209909b2da0261e1af1654f0e44d638e7ce82",
+  "verdict": "HOLD: independent PC screen review not executed; Chromium launch blocked",
+  "input": {
+    "bytes": 1314631,
+    "sha256": "3bd5fd30c7826c5ff579e4521b24cbc6abc5110498343ad6ea8eccb6849d2cac",
+    "entries": 253,
+    "payloadHashesVerified": 252,
+    "safePaths": true,
+    "symlinks": 0,
+    "crc": "PASS",
+    "allPayloadUnchangedAfterAttempt": true
+  },
+  "providedBuild": {
+    "marker": "Windows TypeScript5.8.3 root-provided",
+    "remoteGitVerified": false,
+    "CloudRebuild": false,
+    "CIIndependentlyVerified": false
+  },
+  "execution": [
+    {
+      "command": "node --test tests/reading94.test.mjs",
+      "calls": 1,
+      "exit": 0,
+      "reportedDurationMs": 188.718024,
+      "limit": "stdout reports one file-level passing test, not eight individually named results; source has eight test() definitions, individual pass counts not independently recovered"
+    },
+    {
+      "command": "STUDIO_CHROMIUM=/usr/bin/chromium PYTHONPATH=[observer] python3 [provided-root]/app/continuity/tests/studio_browser.py request94 [observation]",
+      "calls": 1,
+      "exit": 1,
+      "durationSeconds": 0.957,
+      "flowCalls": 0
+    },
+    {
+      "command": "python3 app/continuity/tests/studio_browser.py request94resize [shots]",
+      "calls": 0,
+      "reason": "Not started after first browser launch failure; no automatic retry"
+    }
+  ],
+  "failure": {
+    "classification": "environment launch failure, not a product UI finding",
+    "error": "setsockopt: Operation not permitted (1)",
+    "browserTermination": "SIGTRAP; TargetClosedError",
+    "stage": "before local stub server starts and before any browser context/page is created",
+    "productAssertionsReached": 0
+  },
+  "codeReview": {
+    "reading94SourceTests": 8,
+    "C1": {
+      "conclusion": "Static repair consistent with closure; browser not reached",
+      "evidence": [
+        "src/shared/request-reading.ts:75-114: exact keys/version/order/UTF-16 boundaries/full coverage; material exact heading+basis+length+blank separator; selected frozen source id/title/basis crosscheck",
+        "src/shared/change-plan.ts:186-214: marks written during generation; all reviewed plan.evidence material identity/kind/title/basis/body length, in order",
+        "tests/reading94.test.mjs:176-208: fake N02 at 849 and absorbed-material variants rejected by snapshot/bundle/file/store; raw store preserved"
+      ],
+      "limits": "Unsigned reading .2 is structural correspondence, not authenticity; consistent rewrites and same-length body edits are not cryptographically detected."
+    },
+    "C2": {
+      "conclusion": "Static repair consistent with closure; no new blocker identified",
+      "evidence": [
+        "src/client/plan-store.ts:104-148: null-prototype project/legacy maps; Object.hasOwn and explicit version mapping",
+        "tests/reading94.test.mjs:213+: toString/constructor/__proto__ own markers across .3->.4 migration, sibling preservation and absent keys",
+        "src/client/plan-store.ts:188: file format uses own-property lookup"
+      ],
+      "limits": "Only target test file once, not full Node suite or old93-reader execution."
+    },
+    "versionBoundary": ".1/.2/.3 cannot claim new reading; .3 absent-reading snapshot allowed; experimental request-reading.1 refused; sibling legacy markers retained."
+  },
+  "ui": {
+    "requestedViewports": [
+      {
+        "width": 1280,
+        "height": 720,
+        "dpr": 1
+      },
+      {
+        "width": 1440,
+        "height": 900,
+        "dpr": 1
+      }
+    ],
+    "actualMeasuredViewports": [],
+    "PNGCount": 0,
+    "directlyViewedPNG": [],
+    "snapshots": 0,
+    "boundaryJSONs": 0,
+    "browserVersion": "not measured; launch failed",
+    "fonts": "not measured",
+    "stableFrameReadability": "not evaluated",
+    "newProductP1P2": [],
+    "reasonNoFindings": "No product screen reached; empty findings is not a pass."
+  },
+  "cleanup": {
+    "ownServerStarted": false,
+    "ownChromium": "launch failed, SIGTRAP; Playwright confirms process ended and temporary directories cleaned",
+    "retry": 0,
+    "environmentOrPolicyChanges": 0,
+    "install": 0,
+    "actualAPI": 0,
+    "productFileChanges": 0
+  },
+  "originalZip": {
+    "bytes": 5379,
+    "sha256": "8f7c47fa6fefa5acef8acd5de92dd4cc7b2099f92daa272e8c49f7e9e15f13b8",
+    "files": 3,
+    "rootCrcAndHashesVerified": true
+  }
+}

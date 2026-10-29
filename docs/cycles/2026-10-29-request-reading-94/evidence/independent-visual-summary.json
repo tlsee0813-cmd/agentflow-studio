@@ -1,0 +1,78 @@
+{
+  "reviewedSource": "734fe8870a90952edb3ce6bed758da677366613a",
+  "kind": "Independent direct visual inspection of coordinator-provided original screenshots; reviewer UI execution 0",
+  "verdict": "NO_NEW_CONCRETE_P1_P2_VISIBLE_IN_THE_FOUR_STILLS; LIMITED_VISUAL_REVIEW_ONLY",
+  "originalReviewSha256": "92b0ab2cdbdc91852e252e970970d5d260a43b075e1875bd27f6f64d58ce1ab0",
+  "metadataCorrectionSha256": "cb6c1df45b5621393f94c3efddfdabc9083808687b3dba81b8afc7ee1ed2f1ee",
+  "metadataCorrection": "Original filenames ended .png but bytes are JPEG. Incorrect PNG-header dimensions in the original review are superseded; originals remain unchanged.",
+  "images": [
+    {
+      "file": "experience94-final-default1280.jpg",
+      "bytes": 109832,
+      "sha256": "458fc8371de8a411cc6f5ff9506f3339cac733d6e54dba76af57ade193f87eac",
+      "format": "JPEG",
+      "width": 1280,
+      "height": 720,
+      "originalBytesUnchanged": true
+    },
+    {
+      "file": "experience94-final-default1440.jpg",
+      "bytes": 143484,
+      "sha256": "d73be13c7221cdc3fb2e2be667166427a2e1bcc033ab455634f42547586d3c54",
+      "format": "JPEG",
+      "width": 1440,
+      "height": 900,
+      "originalBytesUnchanged": true
+    },
+    {
+      "file": "experience94-material1440.jpg",
+      "bytes": 142043,
+      "sha256": "bb1165eec15336cfccf2a284a5f5c17b51cffad3b28afc0ed4f35e4aff4e0f45",
+      "format": "JPEG",
+      "width": 1440,
+      "height": 900,
+      "originalBytesUnchanged": true
+    },
+    {
+      "file": "experience94-final-resize606.jpg",
+      "bytes": 66935,
+      "sha256": "facf7ed9b2d1d2e7d4acf3cf354b87be2a2d0cb8ed1b59bccc84e078295da508",
+      "format": "JPEG",
+      "width": 606,
+      "height": 720,
+      "originalBytesUnchanged": true
+    }
+  ],
+  "observations": [
+    {
+      "file": "experience94-final-default1280.jpg",
+      "visible": "1280x720 default reader shows request metadata, selected2/3 and both requested outcomes, separated blue selected section and grey excluded section with not-this-request warning. Section navigation names include work/exclusion/prerequisites/preserve/unknown/review-unknown/materials11/closing. Full-copy includes11 materials; footer close and topX are visible.",
+      "assessment": "Selected text wraps within a readable modal column; no overlap or inaccessible visible control is apparent. The bottom of excluded content is outside the body viewport with a visible scroll affordance, not covered as if it were fully visible.",
+      "notProved": "No claim that prerequisite/preserve/unknown/material bodies below this scroll position were read or operable."
+    },
+    {
+      "file": "experience94-final-default1440.jpg",
+      "visible": "1440x900 default reader additionally shows the amber prerequisite section. Its label explicitly says not automatically included; excluded future asynchronous expansion remains separate from the selected2 tasks. Both reading/raw-view controls, navigation and full-copy/close are visible.",
+      "assessment": "Request/exclusion/prerequisite responsibilities are visually distinguished through heading, text and container styling. Footer copy warns it does not record receipt/execution/completion. No new concrete overlap/cutoff in the visible modal.",
+      "notProved": "Chips for preservation/unknowns exist, but their actual bodies are not in this image."
+    },
+    {
+      "file": "experience94-material1440.jpg",
+      "visible": "1440 material position shows several M reading materials and N01/N02 original-source record cards. Long source paths wrap within their cards. U01 is expanded as a report with its own material header; its fake request/condition headings remain inside that material card. Material lengths and kinds are shown; full-copy still says11 materials.",
+      "assessment": "The source-authored fake heading is not drawn as a top-level generated section in this still. Source card identities are readable despite long titles. The repeated/fenced source remains literal text.",
+      "notProved": "Image shows only a subset of11 materials; does not establish full roster correctness, every title/body byte, provenance truth or parser acceptance."
+    },
+    {
+      "file": "experience94-final-resize606.jpg",
+      "visible": "606x720 resized sheet occupies the usable viewport width. Navigation chips wrap to another line. N01/N02 cards and expanded U01 report remain legible in the body viewport. Copy action states11 materials included; bottom close and topX are visible. Own body scrollbar remains present alongside the page scrollbar.",
+      "assessment": "The previously described1.6px sheet collapse is not visible here. Header, body and footer occupy separate areas; no visible control is lost beyond the viewport. A partial prior material at the top is consistent with the shown scrolled position.",
+      "notProved": "A still does not establish the resize transition, scroll continuity, keyboard/focus sequence, touch behavior or all narrower/wider viewport combinations."
+    }
+  ],
+  "limitations": [
+    "Independent two-PC browser execution by this reviewer or Cloud94",
+    "All11 materials or all preserve/unknown bodies visually verified",
+    "Clipboard byte identity, opener focus, draft/caret/scroll, storage/legacy roundtrips independently executed here",
+    "General usability, semantic correctness of the reviewer-authored request, actual OSS execution, first-map Q02/Q06 solution, full product acceptance or public deployment approval"
+  ]
+}

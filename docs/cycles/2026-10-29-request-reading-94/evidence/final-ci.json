@@ -1,0 +1,83 @@
+{
+  "source": "531ac4ee62ac3a09836611d67483371ec14726f3",
+  "appTree": "501a7a1faa4b50c182e56ad0cd3a21ac65ed6e5d",
+  "run": 40815349545,
+  "url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40815349545",
+  "jobs": [
+    {
+      "id": 123254985534,
+      "platform": "win32",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "531ac4ee62ac3a09836611d67483371ec14726f3",
+      "headEvidence": "2026-10-29T04:01:16.4491840Z HEAD is now at 531ac4e AF94 DELTA7: compare the native copy with what the platform clipboard holds\r",
+      "domainTests": 514,
+      "domainPassEvidence": [
+        "2026-10-29T04:05:14.0973951Z # tests 514",
+        "2026-10-29T04:05:14.0974082Z # pass 514"
+      ],
+      "reading94NamedPasses": [
+        "2026-10-29T04:05:14.0803823Z ok 369 - 94 same plan, id and review give the pre-94 text exactly; its sections join back to that text",
+        "2026-10-29T04:05:14.0805023Z ok 370 - 94 sections are the ones written: material headings, repeated lines, Markdown, emoji and a pasted request make none",
+        "2026-10-29T04:05:14.0805805Z ok 371 - 94 a reading out of place is refused whole, never trimmed or repaired",
+        "2026-10-29T04:05:14.0806574Z ok 372 - 94 a later plan never rewrites an earlier document or its reading",
+        "2026-10-29T04:05:14.0807787Z ok 373 - 94 storage: .4 keeps readings through save, reload, file; .1-.3 never carried one and a mixed older store stays as it was",
+        "2026-10-29T04:05:14.0809016Z ok 374 - 94 a malformed reading in a .4 store or file is refused whole: raw kept, no document shown as its plain text instead",
+        "2026-10-29T04:05:14.0810280Z ok 375 - 94 DELTA1 a material list re-cut at a heading inside material text is refused at the snapshot, bundle, file and store",
+        "2026-10-29T04:05:14.0811465Z ok 376 - 94 DELTA1 project keys toString, constructor and __proto__ are ordinary entries: own markers only, no default to .4"
+      ],
+      "clipboardDiagnostics": [
+        "2026-10-29T04:08:49.4458071Z diag  AF94 clipboard request94 1280x720 first copy: platform=win32 platformExact=True exact=False len=13539/13884 endings={'crlf': 0, 'lf_alone': 345, 'cr_alone': 0}/{'crlf': 345, 'lf_alone': 0, 'cr_alone': 0} firstDiff=38 crlfForm=True known={'pre-94 document': False}",
+        "2026-10-29T04:08:50.6070560Z diag  AF94 clipboard request94 1280x720 copy with U01 open: platform=win32 platformExact=True exact=False len=13539/13884 endings={'crlf': 0, 'lf_alone': 345, 'cr_alone': 0}/{'crlf': 345, 'lf_alone': 0, 'cr_alone': 0} firstDiff=38 crlfForm=True known={'pre-94 document': False}",
+        "2026-10-29T04:08:54.2730143Z diag  AF94 clipboard request94 1440x900 first copy: platform=win32 platformExact=True exact=False len=13539/13884 endings={'crlf': 0, 'lf_alone': 345, 'cr_alone': 0}/{'crlf': 345, 'lf_alone': 0, 'cr_alone': 0} firstDiff=38 crlfForm=True known={'pre-94 document': False}",
+        "2026-10-29T04:08:55.4419776Z diag  AF94 clipboard request94 1440x900 copy with U01 open: platform=win32 platformExact=True exact=False len=13539/13884 endings={'crlf': 0, 'lf_alone': 345, 'cr_alone': 0}/{'crlf': 345, 'lf_alone': 0, 'cr_alone': 0} firstDiff=38 crlfForm=True known={'pre-94 document': False}",
+        "2026-10-29T04:09:00.2092886Z diag  AF94 clipboard request94 resize copy at 606x720: platform=win32 platformExact=True exact=False len=13485/13829 endings={'crlf': 0, 'lf_alone': 344, 'cr_alone': 0}/{'crlf': 344, 'lf_alone': 0, 'cr_alone': 0} firstDiff=38 crlfForm=True known={}"
+      ],
+      "runtimeHashes": [
+        "2026-10-29T04:05:32.0275399Z sha256 3a06f2b27f193b81e88bb77876abd1f568efc05db2eb6609177e70140b76ed89  client/plan-store.js",
+        "2026-10-29T04:05:32.0276170Z sha256 5b1777d58a1375e5df78756e442a4e15c652e7e8b2e072f56eaa27b206f643ec  client/plan-view.js",
+        "2026-10-29T04:05:32.0290223Z sha256 42c4e6d2c426f297c5921dc9412a36d9d370eac9ff23fdbdfca0f167d095a799  shared/change-plan.js",
+        "2026-10-29T04:05:32.0298838Z sha256 47d76f4bb6de46f0050147f796b5f55afa7d8c99a91c6ecf86e7a488402391eb  shared/request-reading.js",
+        "2026-10-29T04:05:32.0425996Z sha256 aa25c4b728ca2ce1d4cc8a0f4dd2775aa145d8f05dec076911104bb26ec4673c  styles.css"
+      ]
+    },
+    {
+      "id": 123254985785,
+      "platform": "linux",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "531ac4ee62ac3a09836611d67483371ec14726f3",
+      "headEvidence": "2026-10-29T04:01:12.3674285Z HEAD is now at 531ac4e AF94 DELTA7: compare the native copy with what the platform clipboard holds",
+      "domainTests": 514,
+      "domainPassEvidence": [
+        "2026-10-29T04:03:54.4461132Z # tests 514",
+        "2026-10-29T04:03:54.4461277Z # pass 514"
+      ],
+      "reading94NamedPasses": [
+        "2026-10-29T04:03:54.4313975Z ok 369 - 94 same plan, id and review give the pre-94 text exactly; its sections join back to that text",
+        "2026-10-29T04:03:54.4315109Z ok 370 - 94 sections are the ones written: material headings, repeated lines, Markdown, emoji and a pasted request make none",
+        "2026-10-29T04:03:54.4315857Z ok 371 - 94 a reading out of place is refused whole, never trimmed or repaired",
+        "2026-10-29T04:03:54.4316592Z ok 372 - 94 a later plan never rewrites an earlier document or its reading",
+        "2026-10-29T04:03:54.4317654Z ok 373 - 94 storage: .4 keeps readings through save, reload, file; .1-.3 never carried one and a mixed older store stays as it was",
+        "2026-10-29T04:03:54.4318679Z ok 374 - 94 a malformed reading in a .4 store or file is refused whole: raw kept, no document shown as its plain text instead",
+        "2026-10-29T04:03:54.4319724Z ok 375 - 94 DELTA1 a material list re-cut at a heading inside material text is refused at the snapshot, bundle, file and store",
+        "2026-10-29T04:03:54.4320865Z ok 376 - 94 DELTA1 project keys toString, constructor and __proto__ are ordinary entries: own markers only, no default to .4"
+      ],
+      "clipboardDiagnostics": [
+        "2026-10-29T04:06:19.3273436Z diag  AF94 clipboard request94 1280x720 first copy: platform=linux platformExact=True exact=True len=13539/13539 endings={'crlf': 0, 'lf_alone': 345, 'cr_alone': 0}/{'crlf': 0, 'lf_alone': 345, 'cr_alone': 0} firstDiff=None crlfForm=False known={'pre-94 document': False}",
+        "2026-10-29T04:06:20.2755820Z diag  AF94 clipboard request94 1280x720 copy with U01 open: platform=linux platformExact=True exact=True len=13539/13539 endings={'crlf': 0, 'lf_alone': 345, 'cr_alone': 0}/{'crlf': 0, 'lf_alone': 345, 'cr_alone': 0} firstDiff=None crlfForm=False known={'pre-94 document': False}",
+        "2026-10-29T04:06:23.4311103Z diag  AF94 clipboard request94 1440x900 first copy: platform=linux platformExact=True exact=True len=13539/13539 endings={'crlf': 0, 'lf_alone': 345, 'cr_alone': 0}/{'crlf': 0, 'lf_alone': 345, 'cr_alone': 0} firstDiff=None crlfForm=False known={'pre-94 document': False}",
+        "2026-10-29T04:06:24.4298695Z diag  AF94 clipboard request94 1440x900 copy with U01 open: platform=linux platformExact=True exact=True len=13539/13539 endings={'crlf': 0, 'lf_alone': 345, 'cr_alone': 0}/{'crlf': 0, 'lf_alone': 345, 'cr_alone': 0} firstDiff=None crlfForm=False known={'pre-94 document': False}",
+        "2026-10-29T04:06:28.5425760Z diag  AF94 clipboard request94 resize copy at 606x720: platform=linux platformExact=True exact=True len=13485/13485 endings={'crlf': 0, 'lf_alone': 344, 'cr_alone': 0}/{'crlf': 0, 'lf_alone': 344, 'cr_alone': 0} firstDiff=None crlfForm=False known={}"
+      ],
+      "runtimeHashes": [
+        "2026-10-29T04:04:05.5513194Z sha256 3a06f2b27f193b81e88bb77876abd1f568efc05db2eb6609177e70140b76ed89  client/plan-store.js",
+        "2026-10-29T04:04:05.5516152Z sha256 5b1777d58a1375e5df78756e442a4e15c652e7e8b2e072f56eaa27b206f643ec  client/plan-view.js",
+        "2026-10-29T04:04:05.5536657Z sha256 42c4e6d2c426f297c5921dc9412a36d9d370eac9ff23fdbdfca0f167d095a799  shared/change-plan.js",
+        "2026-10-29T04:04:05.5556928Z sha256 47d76f4bb6de46f0050147f796b5f55afa7d8c99a91c6ecf86e7a488402391eb  shared/request-reading.js",
+        "2026-10-29T04:04:05.5579286Z sha256 aa25c4b728ca2ce1d4cc8a0f4dd2775aa145d8f05dec076911104bb26ec4673c  styles.css"
+      ]
+    }
+  ],
+  "boundary": "Real CI browser execution over reviewer fixtures and stubbed provider; no fresh model/OSS semantics, no independent human interaction claim. Windows platformExact=true is not original LF byte equality."
+}

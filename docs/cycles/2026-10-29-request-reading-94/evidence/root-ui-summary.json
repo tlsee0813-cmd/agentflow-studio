@@ -1,0 +1,250 @@
+{
+  "status": "ACCEPTED_BOUNDED_ROOT_OBSERVATIONS_SEE_ROOT_DECISION",
+  "runtimeSource": "f76922b48033783f72f4cea7627951b1b288697e",
+  "finalSource": "531ac4ee62ac3a09836611d67483371ec14726f3",
+  "runtimeReuse": "Final531 has changes only in two test files since locally built734; complete app excluding tests has no diff and src subtree is242e92a6948c4b39bb48fae805dfe6b9883dc0ef on both. Built734 five runtime files were byte-identical to f769/b769. No final531 local rebuild or repeated UI run claimed.",
+  "provenance": "Normal coordinator UI over public micro saved data plus two reviewer materials and one fixed scope response. New model/provider calls 0. Not real OSS execution.",
+  "providerCalls": 0,
+  "clipboard": {
+    "firstChars": 1240,
+    "firstExact": false,
+    "firstEqualsPriorCoordinatorPaste": true,
+    "attribution": "UI success but clipboard API read returned prior automation prompt; do not count as product pass or proven product failure",
+    "secondClickChars": 14871,
+    "secondClickExact": true
+  },
+  "resize": [
+    {
+      "bodyTop": 1226.4000244140625,
+      "close": {
+        "bottom": 118.8000030517578,
+        "height": 32,
+        "left": 764.4000244140625,
+        "right": 796.4000244140625,
+        "top": 86.80000305175781,
+        "width": 32,
+        "x": 764.4000244140625,
+        "y": 86.80000305175781
+      },
+      "copy": {
+        "bottom": 635.2000122070312,
+        "height": 32,
+        "left": 152,
+        "right": 335.9250030517578,
+        "top": 603.2000122070312,
+        "width": 183.9250030517578,
+        "x": 152,
+        "y": 603.2000122070312
+      },
+      "dpr": 1.25,
+      "focus": "mat-U01",
+      "materialOpen": "true",
+      "sheet": {
+        "bottom": 648,
+        "height": 572,
+        "left": 127.20000457763672,
+        "right": 807.2000045776367,
+        "top": 76,
+        "width": 680,
+        "x": 127.20000457763672,
+        "y": 76
+      },
+      "view": "reading",
+      "viewport": [
+        1280,
+        720
+      ],
+      "textUtf16Length": 14871,
+      "textSha256": "60dd6217edd508442e2ea43dcca2905bd1159a3544b116d7ede731d0b3844cb2"
+    },
+    {
+      "bodyTop": 1226.4000244140625,
+      "close": {
+        "bottom": 118.8000030517578,
+        "height": 32,
+        "left": 645.2000122070312,
+        "right": 677.2000122070312,
+        "top": 86.80000305175781,
+        "width": 32,
+        "x": 645.2000122070312,
+        "y": 86.80000305175781
+      },
+      "copy": {
+        "bottom": 635.2000122070312,
+        "height": 32,
+        "left": 36.79999923706055,
+        "right": 220.72500228881836,
+        "top": 603.2000122070312,
+        "width": 183.9250030517578,
+        "x": 36.79999923706055,
+        "y": 603.2000122070312
+      },
+      "dpr": 1.0000000149011612,
+      "focus": "mat-U01",
+      "materialOpen": "true",
+      "sheet": {
+        "bottom": 648,
+        "height": 572,
+        "left": 12,
+        "right": 688,
+        "top": 76,
+        "width": 676,
+        "x": 12,
+        "y": 76
+      },
+      "view": "reading",
+      "viewport": [
+        700,
+        720
+      ],
+      "textUtf16Length": 14871,
+      "textSha256": "60dd6217edd508442e2ea43dcca2905bd1159a3544b116d7ede731d0b3844cb2"
+    },
+    {
+      "bodyTop": 1304,
+      "close": {
+        "bottom": 118.8000030517578,
+        "height": 32,
+        "left": 551.6000366210938,
+        "right": 583.6000366210938,
+        "top": 86.80000305175781,
+        "width": 32,
+        "x": 551.6000366210938,
+        "y": 86.80000305175781
+      },
+      "copy": {
+        "bottom": 635.2000122070312,
+        "height": 32,
+        "left": 36.79999923706055,
+        "right": 220.72500228881836,
+        "top": 603.2000122070312,
+        "width": 183.9250030517578,
+        "x": 36.79999923706055,
+        "y": 603.2000122070312
+      },
+      "dpr": 1.0000000149011612,
+      "focus": "mat-U01",
+      "materialOpen": "true",
+      "sheet": {
+        "bottom": 648,
+        "height": 572,
+        "left": 12,
+        "right": 594.4000244140625,
+        "top": 76,
+        "width": 582.4000244140625,
+        "x": 12,
+        "y": 76
+      },
+      "view": "reading",
+      "viewport": [
+        606,
+        720
+      ],
+      "textUtf16Length": 14871,
+      "textSha256": "60dd6217edd508442e2ea43dcca2905bd1159a3544b116d7ede731d0b3844cb2"
+    },
+    {
+      "bodyTop": 1226.4000244140625,
+      "close": {
+        "bottom": 118.8000030517578,
+        "height": 32,
+        "left": 764.4000244140625,
+        "right": 796.4000244140625,
+        "top": 86.80000305175781,
+        "width": 32,
+        "x": 764.4000244140625,
+        "y": 86.80000305175781
+      },
+      "copy": {
+        "bottom": 635.2000122070312,
+        "height": 32,
+        "left": 152,
+        "right": 335.9250030517578,
+        "top": 603.2000122070312,
+        "width": 183.9250030517578,
+        "x": 152,
+        "y": 603.2000122070312
+      },
+      "dpr": 1.0000000149011612,
+      "focus": "mat-U01",
+      "materialOpen": "true",
+      "sheet": {
+        "bottom": 648,
+        "height": 572,
+        "left": 127.20000457763672,
+        "right": 807.2000045776367,
+        "top": 76,
+        "width": 680,
+        "x": 127.20000457763672,
+        "y": 76
+      },
+      "view": "reading",
+      "viewport": [
+        1280,
+        720
+      ],
+      "textUtf16Length": 14871,
+      "textSha256": "60dd6217edd508442e2ea43dcca2905bd1159a3544b116d7ede731d0b3844cb2"
+    }
+  ],
+  "rawAt": {
+    "top": 720,
+    "view": "text",
+    "textUtf16Length": 14871,
+    "textSha256": "60dd6217edd508442e2ea43dcca2905bd1159a3544b116d7ede731d0b3844cb2"
+  },
+  "backReading": {
+    "bodyTop": 1226.4000244140625,
+    "close": {
+      "bottom": 118.8000030517578,
+      "height": 32,
+      "left": 764.4000244140625,
+      "right": 796.4000244140625,
+      "top": 86.80000305175781,
+      "width": 32,
+      "x": 764.4000244140625,
+      "y": 86.80000305175781
+    },
+    "copy": {
+      "bottom": 635.2000122070312,
+      "height": 32,
+      "left": 152,
+      "right": 335.9250030517578,
+      "top": 603.2000122070312,
+      "width": 183.9250030517578,
+      "x": 152,
+      "y": 603.2000122070312
+    },
+    "dpr": 1.0000000149011612,
+    "focus": "view-reading",
+    "materialOpen": "true",
+    "sheet": {
+      "bottom": 648,
+      "height": 572,
+      "left": 127.20000457763672,
+      "right": 807.2000045776367,
+      "top": 76,
+      "width": 680,
+      "x": 127.20000457763672,
+      "y": 76
+    },
+    "view": "reading",
+    "viewport": [
+      1280,
+      720
+    ],
+    "textUtf16Length": 14871,
+    "textSha256": "60dd6217edd508442e2ea43dcca2905bd1159a3544b116d7ede731d0b3844cb2"
+  },
+  "backRaw": {
+    "top": 720,
+    "view": "text",
+    "textUtf16Length": 14871,
+    "textSha256": "60dd6217edd508442e2ea43dcca2905bd1159a3544b116d7ede731d0b3844cb2"
+  },
+  "limitations": [
+    "First clipboard read returned prior automation paste; cause unconfirmed. Second normal copy matched 14871 UTF-16 units.",
+    "Resize scroll differences include wrapping and anchoring, not required exact pixel equality.",
+    "Unsigned reading metadata is a presentation contract, not source authenticity."
+  ]
+}

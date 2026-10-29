@@ -1,0 +1,23 @@
+{
+  "task": "AF94-old93-reader-boundary",
+  "at": "2026-10-29T03:14:46.862Z",
+  "oldSource": "d881b0ae8d892f6d65cfdce63a6924377ec567d7",
+  "oldAppTree": "81c5a4e6e6428440427d97caa392ba156063e467",
+  "input": {
+    "fileSha256": "f61c47931bfebc6070bcfa410f73d31a8ffb5327f52942da2835d800ad951994",
+    "envelopeSha256": "60b505c345c1a60b72d2a8759a854127c51b49d6a0b0cad10a7e3a18714c8832",
+    "owner": "P_6a74a281-f0dd-4dd8-8e00-d5b013112326"
+  },
+  "fileRejected": true,
+  "envelopeUnreadable": true,
+  "loadWrites": 0,
+  "attemptedSaveRejected": true,
+  "totalWrites": 0,
+  "rawPreserved": true,
+  "inputFilesUnchanged": true,
+  "actual94GenerationOrValidityVerified": false,
+  "models": 0,
+  "network": 0,
+  "browser": 0,
+  "limit": "Version refusal only; root must separately establish valid actual94 generation/manifest provenance."
+}

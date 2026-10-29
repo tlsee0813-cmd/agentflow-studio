@@ -1,0 +1,25 @@
+{
+  "source": "734fe8870a90952edb3ce6bed758da677366613a",
+  "appTree": "888209909b2da0261e1af1654f0e44d638e7ce82",
+  "compiler": "5.8.3",
+  "exec": 44924,
+  "exitCode": 0,
+  "hashes": {
+    "client/plan-view.js": "5b1777d58a1375e5df78756e442a4e15c652e7e8b2e072f56eaa27b206f643ec",
+    "client/plan-store.js": "3a06f2b27f193b81e88bb77876abd1f568efc05db2eb6609177e70140b76ed89",
+    "shared/request-reading.js": "47d76f4bb6de46f0050147f796b5f55afa7d8c99a91c6ecf86e7a488402391eb",
+    "shared/change-plan.js": "42c4e6d2c426f297c5921dc9412a36d9d370eac9ff23fdbdfca0f167d095a799",
+    "styles.css": "aa25c4b728ca2ce1d4cc8a0f4dd2775aa145d8f05dec076911104bb26ec4673c"
+  },
+  "comparedTo": "b7694f47d7ceef000b6a9477a9c940ab4aef7722",
+  "runtimeFiveFilesByteIdentical": true,
+  "at": "2026-10-29T03:31:51.552Z",
+  "reusedForSource": "531ac4ee62ac3a09836611d67483371ec14726f3",
+  "reuseBasis": {
+    "appExcludingTestsDiffFromBuiltSource": [],
+    "sameSrcTree": "242e92a6948c4b39bb48fae805dfe6b9883dc0ef",
+    "finalSourceLocalBuild": false,
+    "finalSourceCI": "40815349545 bothOS success; five runtime hashes match locally built734"
+  },
+  "finalCiFiveRuntimeHashesIdentical": true
+}

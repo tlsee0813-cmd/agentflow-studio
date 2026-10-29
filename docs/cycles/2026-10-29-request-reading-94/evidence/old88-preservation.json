@@ -1,0 +1,12 @@
+{
+  "source": "b7694f47d7ceef000b6a9477a9c940ab4aef7722",
+  "beforeFormat": "agentflow.change-plan-file.3",
+  "afterFormat": "agentflow.change-plan-file.4",
+  "bundleExact": true,
+  "projectExact": true,
+  "oldTextExact": true,
+  "readingAbsent": true,
+  "clipboardExact": true,
+  "returnPart": "last",
+  "extraModelCalls": 0
+}
