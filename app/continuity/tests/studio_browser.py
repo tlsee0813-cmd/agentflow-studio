@@ -1789,12 +1789,16 @@ def request71_flow(browser, base):
     old_id = old["id"]
     old["id"], old["text"] = "RQ_legacy_fixture", "이전 형식 요청 원문: 폴더 입력과 실패 후 계속, 성공 유지."
     del old["scope"]
+    del old["reading"]  # AF94: a document made here carries its reading; no .1-.3 writer kept one (a .1 file with it is refused)
     del legacy["authoring"]  # an old-format file holds the bundle's original nine keys (AF84: authoring only from format .3)
     legacy["labels"][old["id"]] = legacy["labels"].pop(old_id)
     legacy["origins"][old["id"]] = legacy["origins"].pop(old_id)
     file = {"format": "agentflow.change-plan-file.1", "project": {"id": project["id"], "name": project["name"]}, "bundle": legacy}
     page.once("dialog", lambda dialog: dialog.accept())
     page.locator("#plan-import-file").set_input_files({"name": "legacy-request.json", "mimeType": "application/json", "buffer": json.dumps(file).encode("utf-8")})
+    expect(page.locator("#plan-panel")).to_contain_text("변경안 파일을 가져왔어요.")  # imported, not refused with the earlier request kept
+    imported = page.evaluate("() => JSON.parse(localStorage.getItem('agentflow.studio.plans.1'))")["projects"][project["id"]]["snapshots"]
+    assert [x["id"] for x in imported] == [old["id"]] and imported[0]["text"] == old["text"] and "scope" not in imported[0] and "reading" not in imported[0], imported
     page.locator(".ps-more").click()
     page.get_by_role("button", name=re.compile(r"^돌아온 기록 · 요청문")).click()
     expect(page.locator(".pp-results")).to_contain_text("이전 형식 요청문이라 보고가 자동 대응되지 않아요")
