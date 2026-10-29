@@ -198,7 +198,7 @@ test('116-6 standard provider: m6 and the later m7 named; map.7 asked with its o
   const st = await (await handle(new Request('http://127.0.0.1/api/studio/status'))).json();
   assert.deepEqual(st.map, { model: 'deepseek-flash', prompt: await mapPromptId(), laterPrompt: await map7PromptId() });
   const { inp } = later(), body = JSON.stringify(inp.ask), res = await handle(post('map', body)), out = await res.json();
-  assert.equal(res.status, 200); assert.equal(prov.seen.at(-1).system, P.MAP7_PROMPT);
+  assert.equal(res.status, 200); assert.equal(prov.seen.at(-1).system, P.map7Prompt(inp.ask), 'AF118: the rendered map.7 prompt');
   assert.deepEqual(out.reply, K.replyFor7(inp.ask, inp.records), 'the raw map.7 wire, aboutAt and all, never a normalized copy');
   assert.deepEqual(out.evidence, { index: SPAN_INDEX, ask: textDigest(body) });
   assert.equal(M.validateMapReply(out.reply, inp.ask).parts[1].claims[0].about, K.COND_CRLF, 'the browser decodes it against its own ask');
@@ -226,7 +226,7 @@ test('116-7 standard provider jobs: a map.7 job is bound to m7 (m6 refused for i
     const x = await submission(inp, p, m7, 'deepseek-flash');
     assert.equal((await jcall(handle, 'POST', '', x.cap, x.body)).status, 202);
     let v; await until(async () => (v = await jcall(handle, 'GET', `/${x.id}`, x.cap)).state === 'ready', 'ready');
-    assert.equal(prov.seen.length, 1); assert.equal(prov.seen[0].system, P.MAP7_PROMPT);
+    assert.equal(prov.seen.length, 1); assert.equal(prov.seen[0].system, P.map7Prompt(inp.ask));
     assert.equal(v.result.prompt, m7); assert.deepEqual(v.result.wire, K.replyFor7(inp.ask, inp.records), 'the raw wire is kept');
     const back = J.decodeMapInput(v.input), applied = M.applyReading(p, back, M.validateMapReply(v.result.wire, back.ask), meta('R_116-job', v.result.prompt));
     const saved = parseProject(S.serializeProject(applied.project)); assert.equal(saved.readings.at(-1).version, 'map-reading.5');
@@ -281,7 +281,7 @@ test('116-9 CLI map7-later: a later job bound to m7 and MAP7_PROMPT runs one chi
     assert.equal((await jcall(s.handle, 'POST', '', x.cap, x.body)).status, 202);
     let v; await until(async () => !['accepted', 'running'].includes((v = await jcall(s.handle, 'GET', `/${x.id}`, x.cap)).state), 'ended');
     assert.equal(v.state, 'ready', JSON.stringify(v.error));
-    assert.deepEqual([v.execution.scope, v.execution.promptKind, v.execution.promptSha256, v.execution.askSha256], ['map7-later', 'later7', sha(P.MAP7_PROMPT), sha(JSON.stringify(inp.ask))]);
+    assert.deepEqual([v.execution.scope, v.execution.promptKind, v.execution.promptSha256, v.execution.askSha256], ['map7-later', 'later7', sha(P.map7Prompt(inp.ask)), sha(JSON.stringify(inp.ask))]);
     const back = J.decodeMapInput(v.input), applied = M.applyReading(p, back, M.validateMapReply(v.result.wire, back.ask), meta('R_116-cli', v.result.prompt));
     assert.equal(parseProject(S.serializeProject(applied.project)).readings.at(-1).version, 'map-reading.5');
     // A refused wire is failed with the structured detail; one child each, no retry.
@@ -336,7 +336,7 @@ test('116-10 browser capability: m7 only beside m6 and as an exact id; later ask
   };
   const base = { ai: 'deepseek', model: 'x', access: 'open' }, c = later();
   const n = await runOnce({ ...base, map: { model: 'deepseek-flash', prompt: m6, laterPrompt: m7 } }, c.p, [c.rq]);
-  assert.deepEqual([n.sent.ask.schemaVersion, n.sent.system === P.MAP7_PROMPT, n.reading.prompt, n.reading.version], ['studio.map.7', true, m7, 'map-reading.5']);
+  assert.deepEqual([n.sent.ask.schemaVersion, n.sent.system === P.map7Prompt(n.sent.ask), n.reading.prompt, n.reading.version], ['studio.map.7', true, m7, 'map-reading.5']);
   assert.equal(n.reading.parts.find(x => !x.created).claims[0].about, K.COND_CRLF);
   const o = await runOnce({ ...base, map: { model: 'deepseek-flash', prompt: m6 } }, c.p, [c.rq]);
   assert.deepEqual([o.sent.ask.schemaVersion, o.sent.system === P.MAP6_PROMPT, o.reading.prompt], ['studio.map.6', true, m6], 'an old server: map.6 as before');

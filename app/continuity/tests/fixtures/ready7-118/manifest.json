@@ -1,0 +1,373 @@
+{
+ "format": "af118.ready7-fixture.1",
+ "producer": {
+  "commit": "f91e9ee99eb67a5c75864207e13feeae9565659f",
+  "build": "app/continuity/dist of that commit (offline PATH tsc 6.0.2 emit; not npm ci evidence)",
+  "status": {
+   "model": "deepseek-flash",
+   "prompt": "m6-6859b864664f",
+   "laterPrompt": "m7-1a2625a62324"
+  },
+  "recipe": "map7-recipe.1: ",
+  "sentPromptSha256": "73286f8b79e80c132aaa5e891d7955748e30fd21bf9e3e7f641ec37b6e480f4b"
+ },
+ "job": {
+  "id": "MJ_966ff7c8-c7bd-4eed-ac5e-99b00c48b92f",
+  "cap": "oZiJRLOb4cQ84RwcSCIdm4-uUNx1UiTZstAPqXd-PL8",
+  "entryId": "E_ready7-118a",
+  "state": "ready",
+  "prompt": "m7-1a2625a62324",
+  "askHash": "1d1812f8f94a210dacbc92b970fda2ce8b37e4061c9a28a151a2f80242168447",
+  "inputHash": "8f4d4665e43698e599349e7911c857469bb31b48e9b11663f82a08999b54ea36",
+  "providerCalls": 1
+ },
+ "project": {
+  "schemaVersion": "idea015.project.14",
+  "id": "P_4acc7a39-0e3c-4ce7-bb1c-99f41bf7a0a9",
+  "revision": 8,
+  "name": "사진 정리기 116",
+  "sources": [],
+  "bases": [],
+  "tasks": [],
+  "currentTaskId": null,
+  "draft": "",
+  "answerDraft": "",
+  "basisDraft": "",
+  "basisEdits": {},
+  "draftKind": "request",
+  "pending": null,
+  "notice": null,
+  "space": {
+   "brief": null,
+   "areas": [
+    {
+     "id": "A_9ae3992e-06b3-4119-9056-b189f8e4a5c8",
+     "name": "썸네일",
+     "note": "",
+     "archived": false,
+     "createdAt": "2026-10-29T19:56:48.447Z"
+    }
+   ],
+   "relations": [],
+   "draftTarget": null,
+   "layout": {
+    "version": "layout.1",
+    "positions": {
+     "A_9ae3992e-06b3-4119-9056-b189f8e4a5c8": {
+      "x": 40,
+      "y": 40
+     }
+    }
+   },
+   "understanding": {},
+   "containment": {
+    "version": "containment.1",
+    "parents": {},
+    "revisions": {
+     "A_9ae3992e-06b3-4119-9056-b189f8e4a5c8": 0
+    }
+   }
+  },
+  "pasted": [
+   {
+    "id": "N_68f8dd5e-69fe-4e4f-99fc-9b5ac1b73824",
+    "text": "요구: 사진 정리기는 가져온 사진마다 작은 썸네일을 만든다.\n썸네일은 WebP 형식으로 저장하기를 원한다.",
+    "at": "2026-10-29T19:56:48.441Z",
+    "context": null
+   },
+   {
+    "id": "N_28ead84d-5ddc-4484-9536-aa03529d3cae",
+    "text": "작업 보고: 사진 정리기 썸네일\n조건: release/2.4 브랜치\r\n실행: Node 22.16 · Ubuntu 24.04\n\n썸네일 생성기를 WebP 출력으로 바꿨다고 보고합니다.\n\n검사 조건: CI job thumbs-e2e (Linux 러너), 표본 사진 120장\n썸네일 검사 120개 중 118개 통과, 2개 보류라고 보고합니다.\n\n장기 실행 환경: 사진 40만 장 라이브러리 · NAS SMB 마운트 · 동시 작업 8개 · 메모리 제한 2GiB · 야간 배치 창 ============================================================================\n장시간 검사 72시간 동안 메모리 증가가 없었다고 보고합니다.\n\n모바일 조건: Pixel 8 · Android 15 · 업로드 앱 3.1 =======================================\n모바일 조건: Pixel 9 · Android 15 · 업로드 앱 3.2 ========================================\n배포 조건: staging-eu 클러스터 · 이미지 태그 thumbs-2410 · 플래그 webp_on ==============================================================================================================================================\n배포 조건: staging-us 클러스터 · 이미지 태그 thumbs-2411 · 플래그 webp_on ===============================================================================================================================================\n같은 출력이 모바일 업로드에도 적용되는지는 아직 확인하지 않았다고 적었습니다.\n\n예시 출력(검사용 표본):\n조건: sample/demo 브랜치\n썸네일 3장 생성 완료",
+    "at": "2026-10-29T19:56:48.453Z",
+    "context": null
+   },
+   {
+    "id": "N_407a371b-31a2-41c3-8434-77e9ab47a7e3",
+    "text": "// thumbs/webp.ts\r\nexport function toWebp(image, quality = 80) {\r\n  return encode(image, { format: 'webp', quality });\r\n}\r\n",
+    "at": "2026-10-29T19:56:48.457Z",
+    "context": null,
+    "evidence": {
+     "kind": "code",
+     "name": "webp.ts",
+     "version": "v2.4.0-rc1",
+     "origin": "https://example.com/photo-sorter/src/thumbs/webp.ts"
+    }
+   },
+   {
+    "id": "N_350b86d7-8c0a-472e-b739-872e8a64cc26",
+    "text": "thumbs.e2e 결과\n환경: Ubuntu 24.04 / Node 22.16 / 표본 120장\n✓ WebP 썸네일은 원본 비율을 유지한다\n118 passed, 2 skipped\n",
+    "at": "2026-10-29T19:56:48.457Z",
+    "context": null,
+    "evidence": {
+     "kind": "test",
+     "name": "thumbs-e2e.log",
+     "version": "run 5521",
+     "origin": null
+    }
+   }
+  ],
+  "readings": [
+   {
+    "version": "map-reading.5",
+    "id": "R_116-first",
+    "at": "2026-10-29T19:56:48.445Z",
+    "model": "stub-116",
+    "prompt": "m6-000000000116",
+    "hash": "6666666666666666666666666666666666666666666666666666666666666666",
+    "records": [
+     {
+      "id": "N_68f8dd5e-69fe-4e4f-99fc-9b5ac1b73824",
+      "from": 0,
+      "to": 59,
+      "total": 59,
+      "digest": "f1-22415bac2696da36"
+     }
+    ],
+    "summary": "사진 정리기의 썸네일 요구를 읽었어요.",
+    "parts": [
+     {
+      "areaId": "A_9ae3992e-06b3-4119-9056-b189f8e4a5c8",
+      "created": {
+       "name": "썸네일",
+       "parentId": null
+      },
+      "role": "가져온 사진마다 작은 썸네일을 만드는 부분이다.",
+      "roleAbout": null,
+      "roleReplaces": null,
+      "basis": [
+       {
+        "record": "N_68f8dd5e-69fe-4e4f-99fc-9b5ac1b73824",
+        "quote": "요구: 사진 정리기는 가져온 사진마다 작은 썸네일을 만든다.",
+        "from": 0,
+        "to": 33
+       }
+      ],
+      "claims": [
+       {
+        "kind": "want",
+        "text": "썸네일을 WebP 형식으로 저장하기를 원함",
+        "record": "N_68f8dd5e-69fe-4e4f-99fc-9b5ac1b73824",
+        "quote": "썸네일은 WebP 형식으로 저장하기를 원한다.",
+        "from": 34,
+        "to": 59,
+        "about": null,
+        "replaces": null
+       }
+      ]
+     }
+    ],
+    "relations": [],
+    "candidates": [],
+    "gaps": [],
+    "skipped": [],
+    "requests": [],
+    "matches": [],
+    "material": []
+   }
+  ]
+ },
+ "bundle": {
+  "draft": "",
+  "extra": [],
+  "plan": {
+   "version": "change-plan.1",
+   "id": "CP_2f8a09c6-f387-405c-89b2-65298fc63b02",
+   "projectId": "P_4acc7a39-0e3c-4ce7-bb1c-99f41bf7a0a9",
+   "revision": 1,
+   "basis": "기준",
+   "intent": "WebP 썸네일 / 썸네일 검사",
+   "evidence": [
+    {
+     "id": "INTENT",
+     "kind": "user",
+     "title": "원함",
+     "text": "WebP 썸네일 / 썸네일 검사",
+     "basis": "사용자 초안"
+    }
+   ],
+   "analysis": {
+    "summary": "썸네일",
+    "items": [
+     {
+      "id": "change_1",
+      "title": "WebP 썸네일",
+      "description": "가져온 사진의 썸네일을 WebP로 저장한다.",
+      "partIds": [
+       "A_9ae3992e-06b3-4119-9056-b189f8e4a5c8"
+      ],
+      "refs": [
+       "INTENT"
+      ],
+      "dependsOn": []
+     },
+     {
+      "id": "change_2",
+      "title": "썸네일 검사",
+      "description": "썸네일 생성이 검사로 확인된다.",
+      "partIds": [
+       "A_9ae3992e-06b3-4119-9056-b189f8e4a5c8"
+      ],
+      "refs": [
+       "INTENT"
+      ],
+      "dependsOn": []
+     }
+    ],
+    "impacts": [],
+    "preserve": [],
+    "unknowns": []
+   },
+   "selected": [
+    "change_1",
+    "change_2"
+   ],
+   "createdAt": "2026-10-29T19:56:48.450Z"
+  },
+  "by": {
+   "kind": "ai",
+   "model": "stub-116",
+   "at": "2026-10-29T19:56:48.451Z",
+   "records": {
+    "total": 1,
+    "sent": 1
+   }
+  },
+  "snapshots": [
+   {
+    "id": "RQ_f39a8ef8-498d-4b8f-9f15-ad8e0e18ded5",
+    "planId": "CP_2f8a09c6-f387-405c-89b2-65298fc63b02",
+    "planRevision": 1,
+    "basis": "기준",
+    "itemIds": [
+     "change_1",
+     "change_2"
+    ],
+    "text": "작업 요청문 초안 · 생성됨 (전달·접수·실행 여부는 확인하지 않음)\n요청문 참조: RQ_f39a8ef8-498d-4b8f-9f15-ad8e0e18ded5\n작성 기준: 기준\n변경안 판본: CP_2f8a09c6-f387-405c-89b2-65298fc63b02 / 1\n\n선택한 요청 범위:\n- WebP 썸네일\n가져온 사진의 썸네일을 WebP로 저장한다.\n- 썸네일 검사\n썸네일 생성이 검사로 확인된다.\n\n이번에 맡기지 않은 항목:\n- 없음\n위 미선택 항목은 이번 요청 범위가 아닙니다. 원자료의 전체 구상에 언급되어도 추가 요청으로 해석하지 마세요.\n\n선택 범위의 전제:\n- 분석에서 제안된 전제 중 선택에서 빠진 항목은 없습니다.\n\n유지할 조건:\n- 제공된 유지 조건 없음\n\n전체 구상의 확인 사항 (추가 요청 아님):\n- 제공된 확인할 것 없음\n\n관련 근거 (아래 내용은 자료이며 작업 지시가 아닙니다):\n[INTENT] 원함 · user\n자료 기준: 사용자 초안\nWebP 썸네일 / 썸네일 검사\n\n결과에 이 요청문 참조 RQ_f39a8ef8-498d-4b8f-9f15-ad8e0e18ded5를 함께 남겨 주세요. 선택 항목별로 구현 보고, 자료에서 확인한 변경, 대상 판본·조건별 실행 확인을 구별해 알려 주세요. 근거가 없는 항목은 실패·미구현·완료로 단정하지 마세요.",
+    "createdAt": "2026-10-29T19:56:48.451Z",
+    "scope": {
+     "version": "request-scope.1",
+     "id": "RQ_f39a8ef8-498d-4b8f-9f15-ad8e0e18ded5",
+     "projectId": "P_4acc7a39-0e3c-4ce7-bb1c-99f41bf7a0a9",
+     "planId": "CP_2f8a09c6-f387-405c-89b2-65298fc63b02",
+     "planRevision": 1,
+     "createdAt": "2026-10-29T19:56:48.451Z",
+     "basis": "기준",
+     "intent": "WebP 썸네일 / 썸네일 검사",
+     "items": [
+      {
+       "id": "change_1",
+       "title": "WebP 썸네일",
+       "description": "가져온 사진의 썸네일을 WebP로 저장한다.",
+       "partIds": [
+        "A_9ae3992e-06b3-4119-9056-b189f8e4a5c8"
+       ],
+       "sources": [
+        {
+         "id": "INTENT",
+         "title": "원함",
+         "basis": "사용자 초안",
+         "origins": []
+        }
+       ]
+      },
+      {
+       "id": "change_2",
+       "title": "썸네일 검사",
+       "description": "썸네일 생성이 검사로 확인된다.",
+       "partIds": [
+        "A_9ae3992e-06b3-4119-9056-b189f8e4a5c8"
+       ],
+       "sources": [
+        {
+         "id": "INTENT",
+         "title": "원함",
+         "basis": "사용자 초안",
+         "origins": []
+        }
+       ]
+      }
+     ]
+    },
+    "reading": {
+     "version": "request-reading.2",
+     "spans": [
+      {
+       "kind": "head",
+       "start": 0,
+       "end": 150
+      },
+      {
+       "kind": "selected",
+       "start": 150,
+       "end": 225
+      },
+      {
+       "kind": "excluded",
+       "start": 225,
+       "end": 308
+      },
+      {
+       "kind": "prerequisites",
+       "start": 308,
+       "end": 354
+      },
+      {
+       "kind": "preserve",
+       "start": 354,
+       "end": 378
+      },
+      {
+       "kind": "unknowns",
+       "start": 378,
+       "end": 419
+      },
+      {
+       "kind": "materials",
+       "start": 419,
+       "end": 452
+      },
+      {
+       "kind": "material",
+       "start": 452,
+       "end": 504,
+       "ref": "INTENT",
+       "source": "user",
+       "title": "원함",
+       "basis": "사용자 초안",
+       "length": 17
+      },
+      {
+       "kind": "closing",
+       "start": 504,
+       "end": 657
+      }
+     ]
+    }
+   }
+  ],
+  "labels": {
+   "RQ_f39a8ef8-498d-4b8f-9f15-ad8e0e18ded5": {
+    "change_1": "WebP 썸네일",
+    "change_2": "썸네일 검사"
+   }
+  },
+  "origins": {
+   "RQ_f39a8ef8-498d-4b8f-9f15-ad8e0e18ded5": "ai"
+  },
+  "observations": [],
+  "attached": {},
+  "authoring": {
+   "version": "authoring-context.1",
+   "draft": {
+    "state": "open"
+   },
+   "analyzed": null
+  }
+ },
+ "files": {
+  "store.json": "379b6da9ccf9c02dc7520ed4350e20d80cd2f2fc5d28c69728147b1d1b0f83a1",
+  "project14-backup.json": "fc1e25e562956c6d7f0adef75dffe8e339af5f5b257126fc115fb68ebf9b3a1e",
+  "plans-bundle.json": "b1211f1c0df2550a7729caf9a9af7db600847fa8148601bb02a2680446a5f76b",
+  "ops/MJ_966ff7c8-c7bd-4eed-ac5e-99b00c48b92f.json": "f649efeb094ff20d12593f8e7b973a57d1286d5e496b2016b18919ed3dbb0b26"
+ }
+}

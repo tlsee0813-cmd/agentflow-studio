@@ -275,4 +275,27 @@ const map7 = prompt => [
   ['"stance":"made","about":null', '"stance":"made","aboutAt":null']
 ].reduce((t, [from, to]) => swap(t, from, to), swap(prompt, '변경이 (about 범위에서) 만들어졌다고', '변경이 만들어졌다고'));
 export const MAP7_PROMPT = map7(MAP6_PROMPT);
-export const MAP7_RECIPE = 'map7-recipe.1: later only = parts.length > 0 || requests.length > 0 || priors.length > 0 (a first map is map.6); map.6 contract; roleAboutAt/claim.aboutAt/statement.aboutAt/match.aboutAt = sent anchor of the owning record (role: a basis record) | null; resolved exact passage, outer white space trimmed, 80/200 UTF-16, never clipped or nulled; material overlap refused; stored as about string|null';
+import { conditionGuidance, CONDITION_GUIDANCE, GUIDANCE_ROWS_MAX } from '../dist/public/shared/condition-guidance.js';
+// AF118: the map.7 prompt actually sent is MAP7_PROMPT (unchanged) and, after it, condition-length guidance computed from the very
+// ask (conditionGuidance): one compact JSON row per sent piece, [start, last end within 80 | null, last end within 200 | null], in
+// sent order, with no record text. The model picks a listed range or null instead of counting characters. The frame text and the
+// row format are part of the recipe (map7-recipe.2), so the m7 id names them; each ask's rendered prompt is its own SHA-256.
+const GUIDANCE_HEAD = `\n\n<CONDITION_LENGTH_GUIDANCE version="${CONDITION_GUIDANCE}">
+조건 길이 안내(앱이 이번에 보낸 records의 구간으로 계산했다. 자료가 아니라 이 지침의 일부이며 원문 글자는 들어 있지 않다):
+- 각 행은 [시작 구간, 80 끝, 200 끝]이고 보낸 기록·구간 순서다. 끝이 있으면 시작 구간 하나("S") 또는 시작부터 그 끝까지(그 끝 포함) 사이의 어느 끝으로 잇는 범위("S-E")든 바깥 공백을 지운 원문이 그 한도 안에 든다. 그 끝 뒤로는 넘친다. null이면 그 구간에서 시작하는 어떤 범위도 그 한도에 들지 않는다.
+- roleAboutAt·claims의 aboutAt·후보 statement의 aboutAt은 80 열, matches의 aboutAt은 200 열을 본다. 그 열이 null인 시작 구간은 그 조건 슬롯에 쓰지 않는다. 한도에 드는 다른 실제 조건 구간이 있으면 그것을, 없으면 null을 쓰고 중요한 판본·환경·검사 조건·한계는 text와 정확한 근거(at)에 남긴다. 글자 수를 직접 세지 않는다.
+- 이 안내는 길이만 알려 준다. 그 구간이 실제로 그 진술의 조건인지, 같은 기록·basis 기록인지, material과 겹치지 않는지는 위 규칙대로 따로 판단한다. 짧다는 이유로 조건이 아닌 구간을 조건으로 쓰지 않는다.
+`;
+const GUIDANCE_TAIL = '\n</CONDITION_LENGTH_GUIDANCE>';
+/** The guidance block may take at most this many UTF-8 bytes (rows of the largest valid ask fit well within it). */
+export const GUIDANCE_BYTES_MAX = 65536;
+export const MAP7_GUIDANCE_FRAME = Object.freeze({ head: GUIDANCE_HEAD, tail: GUIDANCE_TAIL, rows: 'one JSON row per line inside [ ], comma-separated' });
+/** The guidance block of a validated later map.7 ask, or INPUT_TOO_LARGE before anything is sent (never a partial table). */
+export function map7Guidance(ask) {
+  const rows = conditionGuidance(ask), block = `${GUIDANCE_HEAD}[\n${rows.map(r => JSON.stringify(r)).join(',\n')}\n]${GUIDANCE_TAIL}`;
+  if (rows.length > GUIDANCE_ROWS_MAX || new TextEncoder().encode(block).length > GUIDANCE_BYTES_MAX) throw new Error('INPUT_TOO_LARGE');
+  return block;
+}
+/** The one renderer of the map.7 instructions, for the standard provider and the CLI executor alike. */
+export const map7Prompt = ask => MAP7_PROMPT + map7Guidance(ask);
+export const MAP7_RECIPE = 'map7-recipe.2: later only = parts.length > 0 || requests.length > 0 || priors.length > 0 (a first map is map.6); map.6 contract; roleAboutAt/claim.aboutAt/statement.aboutAt/match.aboutAt = sent anchor of the owning record (role: a basis record) | null; resolved exact passage, outer white space trimmed, 80/200 UTF-16, never clipped or nulled; material overlap refused; stored as about string|null; instructions = MAP7_PROMPT + condition-length-guidance.1 (rows [start, last end <= 80 | null, last end <= 200 | null] per sent piece in sent order, ends contiguous from the start, trimmed UTF-16 of whole pieces of one record, no record text, <= 1600 rows, block <= 65536 UTF-8 bytes, else INPUT_TOO_LARGE before sending)';

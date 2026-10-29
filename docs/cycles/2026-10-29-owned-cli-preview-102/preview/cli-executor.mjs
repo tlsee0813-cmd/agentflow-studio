@@ -26,7 +26,7 @@ import { createReadStream } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { ApiError } from '../../../../app/server/errors.mjs';
 import { own, fileIo } from '../../../../app/continuity/server/map-jobs.mjs';
-import { map6Prompt, MAP6_FIRST_PROMPT, MAP7_PROMPT } from '../../../../app/continuity/server/map-prompt.mjs';
+import { map6Prompt, map7Prompt } from '../../../../app/continuity/server/map-prompt.mjs';
 import { validateMapReply, MAP6_SCHEMA, MAP7_SCHEMA } from '../../../../app/continuity/dist/public/shared/map-reading.js';
 import { captureCli, groupAlive, CAPTURE_LIMITS } from './cli-capture.mjs';
 
@@ -43,8 +43,9 @@ export const WRAPPER_SHA256 = sha(JSON.stringify([WRAPPER_PREFIX, WRAPPER_SUFFIX
 const canon = v => JSON.stringify(v, Object.keys(v).sort());
 const iso = () => new Date().toISOString();
 
-/** The instructions an ask is read with: map.7's one later prompt, or the map.6 prompt map6Prompt selects (98's FIRST included). */
-const instructions = ask => ask?.schemaVersion === MAP7_SCHEMA ? MAP7_PROMPT : map6Prompt(ask);
+/** The instructions an ask is read with: map.7's prompt with this ask's condition-length guidance (AF118, the renderer the standard
+ * provider uses), or the map.6 prompt map6Prompt selects (98's FIRST included). */
+const instructions = ask => ask?.schemaVersion === MAP7_SCHEMA ? map7Prompt(ask) : map6Prompt(ask);
 /** What a child reads on stdin: the fixed wrapper around the selected instructions and the ask. */
 export const wrap = ask => WRAPPER_PREFIX + instructions(ask) + WRAPPER_SUFFIX + JSON.stringify(ask);
 const first = ask => ask.parts.length === 0 && (ask.requests ?? []).length === 0 && (ask.priors ?? []).length === 0;
@@ -58,11 +59,14 @@ export const SCOPES = Object.freeze(['first', 'map6-later', 'map7-later']);
 const refusal = (scope, ask) => scope === 'map7-later'
   ? (isFirst(ask) || (ask?.schemaVersion === MAP7_SCHEMA && !first(ask)) ? null : 'EXECUTOR_SCHEMA')
   : ask?.schemaVersion !== MAP6_SCHEMA ? (scope === 'first' ? 'EXECUTOR_SCOPE' : 'EXECUTOR_SCHEMA') : scope === 'first' && !isFirst(ask) ? 'EXECUTOR_SCOPE' : null;
-/** What a job is bound to about its own ask: the instructions actually selected (which text, its SHA-256 and short id) and the ask. */
-function askBinding(ask) {
-  const selected = instructions(ask), full = sha(selected);
-  return { promptKind: selected === MAP6_FIRST_PROMPT ? 'first' : selected === MAP7_PROMPT ? 'later7' : 'later', prompt: full.slice(0, 12), promptSha256: full, askSha256: sha(JSON.stringify(ask)) };
+/** What a job is bound to about its own ask: which path its schema selects (first, later map.6, later map.7), the SHA-256 and short
+ * id of the instructions actually rendered for it, and the ask. A map.7 ask whose guidance cannot be rendered is INPUT_TOO_LARGE. */
+function askBinding(ask, selected = instructions(ask)) {
+  const full = sha(selected);
+  return { promptKind: ask.schemaVersion === MAP7_SCHEMA ? 'later7' : isFirst(ask) ? 'first' : 'later', prompt: full.slice(0, 12), promptSha256: full, askSha256: sha(JSON.stringify(ask)) };
 }
+/** The instructions and binding of an ask, or null when they cannot be rendered. */
+const rendered = ask => { try { const selected = instructions(ask); return { selected, bound: askBinding(ask, selected) }; } catch { return null; } };
 
 /** Checks a policy file's content; throws POLICY_INVALID with the field. */
 export function readPolicy(v) {
@@ -237,7 +241,8 @@ export async function openCliExecutor({ policy: raw, stateDir: given, spawnImpl,
     if (!verified) { await verifyVersion(); if (problem) throw new ApiError('EXECUTOR_UNAVAILABLE', 503); if (lingering()) throw new ApiError('EXECUTOR_UNSETTLED', 503); if (!verified) throw new ApiError('EXECUTOR_UNAVAILABLE', 503); }
     // At acceptance the binary is still the verified one (checked again before the start, and on Linux in the started image).
     if (await hashFile(policy.exe) !== policy.binarySha256) { problem = 'BINARY_CHANGED'; throw new ApiError('EXECUTOR_UNAVAILABLE', 503); }
-    return { ...binding, ...askBinding(ask) };
+    const r = rendered(ask); if (!r) throw new ApiError('INPUT_TOO_LARGE', 413);
+    return { ...binding, ...r.bound };
   }
   /** Taken in the job store's single acceptance step; synchronous, so two jobs can never both pass. */
   function acquire(id) {
@@ -259,15 +264,17 @@ export async function openCliExecutor({ policy: raw, stateDir: given, spawnImpl,
     if (!bound || bound.policy !== binding.policy || bound.scope !== policy.scope || problem) { free(); throw fail('EXECUTOR_CHANGED', 409); }
     // Right before anything starts: the very ask and the instructions selected for it now are the ones bound when it was
     // accepted, and the scope still admits it. Otherwise no lease, no child.
-    const now2 = askBinding(ask);
-    if (refusal(policy.scope, ask) || ['promptKind', 'prompt', 'promptSha256', 'askSha256'].some(k => bound[k] !== now2[k])) { free(); throw fail('EXECUTOR_CHANGED', 409); }
+    // AF118: rendered once here; the child's stdin is built from exactly this text, so what it reads is what was compared.
+    const now2 = rendered(ask);
+    if (!now2 || refusal(policy.scope, ask) || ['promptKind', 'prompt', 'promptSha256', 'askSha256'].some(k => bound[k] !== now2.bound[k])) { free(); throw fail('EXECUTOR_CHANGED', 409); }
+    const input = WRAPPER_PREFIX + now2.selected + WRAPPER_SUFFIX + JSON.stringify(ask);
     if (signal?.aborted) { free(); throw fail('CANCELLED', 499); }
     // The verdict (a refusal included) is given by verdictMs - margin whatever the setup, the child or the final read still do; a
     // cancel is given at once. What is still running then keeps the slot, lease and run folder until it has ended (work below).
     mine.working = true;
     const work = (async () => {
       let c;
-      try { c = await runChild(mine, { t0, args: policy.args, input: wrap(ask), events: true, selectionMs: policy.selectionMs, decideMs: policy.verdictMs - DECIDE_MARGIN_MS, signal, image: true }); }
+      try { c = await runChild(mine, { t0, args: policy.args, input, events: true, selectionMs: policy.selectionMs, decideMs: policy.verdictMs - DECIDE_MARGIN_MS, signal, image: true }); }
       catch (e) {
         const code = e?.code ?? e?.message, o = { decidedAtMs: now() - t0, started: false };
         if (code === 'CANCELLED') throw fail('CANCELLED', 499, o);

@@ -12,7 +12,7 @@ import { PLAN_PROMPT, PLAN2_PROMPT, PLAN3_PROMPT, SCOPE_PROMPT } from './plan-pr
 import { DIGEST_PROMPT, DIGEST2_PROMPT } from './digest-prompt.mjs';
 import { validateMapAsk, validateMapReply } from '../dist/public/shared/map-reading.js';
 import { SPAN_INDEX, textDigest } from '../dist/public/shared/evidence-span.js';
-import { MAP_PROMPT, MAP2_PROMPT, MAP3_PROMPT, MAP6_PROMPT, MAP6_FIRST_PROMPT, MAP6_RECIPE, MAP7_PROMPT, MAP7_RECIPE, map4Prompt, map5Prompt, map6Prompt } from './map-prompt.mjs';
+import { MAP_PROMPT, MAP2_PROMPT, MAP3_PROMPT, MAP6_PROMPT, MAP6_FIRST_PROMPT, MAP6_RECIPE, MAP7_PROMPT, MAP7_RECIPE, MAP7_GUIDANCE_FRAME, map4Prompt, map5Prompt, map6Prompt, map7Prompt } from './map-prompt.mjs';
 
 const ENDPOINT = 'https://api.deepseek.com/chat/completions';
 const REPLY_BYTES = 131072;
@@ -59,9 +59,10 @@ export async function mapPromptId() {
 let map7Id = null;
 /** AF116: m7- and the first 12 hex digits of the SHA-256 of the studio.map.7 recipe and its one (later) prompt. Advertised as
  * map.laterPrompt beside map.prompt (m6, which still names every first map): a client sends studio.map.7 only for a later reading
- * and only to a server that names it. There is no first map.7 prompt. */
+ * and only to a server that names it. There is no first map.7 prompt. AF118: the recipe (map7-recipe.2) and the guidance frame are
+ * in it too, so it names the renderer; the prompt actually sent for one ask is map7Prompt(ask) (its own SHA-256, not this id). */
 export async function map7PromptId() {
-  if (!map7Id) map7Id = crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ recipe: MAP7_RECIPE, later: MAP7_PROMPT }))).then(b => `m7-${[...new Uint8Array(b)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`);
+  if (!map7Id) map7Id = crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ recipe: MAP7_RECIPE, later: MAP7_PROMPT, guidance: MAP7_GUIDANCE_FRAME }))).then(b => `m7-${[...new Uint8Array(b)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`);
   return map7Id;
 }
 /** The recipe id a map ask of this schema is asked and bound with (a job's binding.prompt). */
@@ -117,6 +118,10 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
   const digest2 = ask.schemaVersion === 'studio.digest.2', map7 = ask.schemaVersion === 'studio.map.7', map6 = ask.schemaVersion === 'studio.map.6', map5 = ask.schemaVersion === 'studio.map.5', map4 = ask.schemaVersion === 'studio.map.4', anchored = map4 || map5 || map6 || map7, map3 = ask.schemaVersion === 'studio.map.3', map2 = ask.schemaVersion === 'studio.map.2', map = ask.schemaVersion === 'studio.map.1' || map2 || map3 || anchored, digest = ask.schemaVersion === 'studio.digest.1' || digest2 || map;
   if (!config.apiKey) throw new ApiError('AI_NOT_CONFIGURED', 503);
   if (signal?.aborted) throw new ApiError('CANCELLED', 499);
+  // AF118: map.7 instructions carry guidance computed from this ask; one that cannot be rendered within its bounds is refused here,
+  // before anything is sent (never a partial table).
+  let map7System = null;
+  if (map7) { try { map7System = map7Prompt(ask); } catch { throw new ApiError('INPUT_TOO_LARGE', 413); } }
   const controller = new AbortController(); let timedOut = false;
   const timer = setTimeout(() => { timedOut = true; controller.abort(); }, map ? (config.mapTimeoutMs ?? config.planTimeoutMs ?? config.timeoutMs) : planning || digest ? (config.planTimeoutMs ?? config.timeoutMs) : config.timeoutMs);
   const abort = () => controller.abort(); signal?.addEventListener('abort', abort, { once: true });
@@ -127,7 +132,7 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
       body: JSON.stringify({ model: config.model, stream: false, ...(map ? { thinking: { type: config.mapThinking ?? 'enabled' }, ...((config.mapThinking ?? 'enabled') === 'enabled' ? { reasoning_effort: 'low' } : {}), max_tokens: config.mapMaxTokens ?? 16384 }
         : { thinking: { type: scope || planning || digest ? 'enabled' : 'disabled' }, ...(scope || planning || digest ? { reasoning_effort: 'low' } : {}), max_tokens: planning || digest ? 8192 : scope ? 4096 : config.maxTokens }),
         response_format: { type: 'json_object' },
-        messages: [{ role: 'system', content: map7 ? MAP7_PROMPT : map6 ? map6Prompt(ask) : map5 ? map5Prompt(ask) : map4 ? map4Prompt(ask) : map3 ? MAP3_PROMPT : map2 ? MAP2_PROMPT : map ? MAP_PROMPT : digest2 ? DIGEST2_PROMPT : digest ? DIGEST_PROMPT : scope ? SCOPE_PROMPT : plan3 ? PLAN3_PROMPT : plan2 ? PLAN2_PROMPT : planning ? PLAN_PROMPT : STUDIO_PROMPT }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }] }) });
+        messages: [{ role: 'system', content: map7 ? map7System : map6 ? map6Prompt(ask) : map5 ? map5Prompt(ask) : map4 ? map4Prompt(ask) : map3 ? MAP3_PROMPT : map2 ? MAP2_PROMPT : map ? MAP_PROMPT : digest2 ? DIGEST2_PROMPT : digest ? DIGEST_PROMPT : scope ? SCOPE_PROMPT : plan3 ? PLAN3_PROMPT : plan2 ? PLAN2_PROMPT : planning ? PLAN_PROMPT : STUDIO_PROMPT }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }] }) });
     if (!response.ok) {
       await response.body?.cancel().catch(() => {});
       if ([401, 403].includes(response.status)) throw new ApiError('AI_AUTH_FAILED', 502);
