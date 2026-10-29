@@ -1,0 +1,14 @@
+{
+  "before": "ef7d9b06dcc990ac19e118391c8c48c4be27da06192e823e5cb7ea16dd315067",
+  "after": "ef7d9b06dcc990ac19e118391c8c48c4be27da06192e823e5cb7ea16dd315067",
+  "reload": "ef7d9b06dcc990ac19e118391c8c48c4be27da06192e823e5cb7ea16dd315067",
+  "projectExact": true,
+  "bundleExact": true,
+  "bundleHash": "cdf2dc70965e8eaf9c6d701dcef39a022d1baab8e0e0fcf047e4941590f8ba05",
+  "oldRecordsExact": true,
+  "originalReadingsAndSpaceExact": true,
+  "pastedBefore": 4,
+  "pastedAfter": 4,
+  "originalReadings": 1,
+  "afterReadings": 1
+}

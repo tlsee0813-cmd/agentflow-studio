@@ -1,0 +1,24 @@
+{
+  "status": 200,
+  "elapsedMs": 86717,
+  "bytes": 59411,
+  "finishReason": "length",
+  "contentBytes": 0,
+  "usage": {
+    "prompt_tokens": 17418,
+    "completion_tokens": 16384,
+    "total_tokens": 33802,
+    "prompt_tokens_details": {
+      "cached_tokens": 384
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 16384
+    },
+    "prompt_cache_hit_tokens": 384,
+    "prompt_cache_miss_tokens": 17034
+  },
+  "actualModel": "deepseek-flash",
+  "attempts": 1,
+  "classification": "delivery-incomplete; semantic not evaluated",
+  "retry": 0
+}

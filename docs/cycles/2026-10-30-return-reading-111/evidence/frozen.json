@@ -1,0 +1,56 @@
+{
+  "selected": "905ea55e9c90e9f6e3d397640e57b853881c25e6",
+  "basis": "94e6f7048b9624e60ad23786e59d500ba07cfebe",
+  "app": "5736b7949d50ba92c07ae583ff22c618c25c3e94",
+  "requestId": "RQ_0797ee20-a84e-4aa7-ace6-b4f053ca87f7",
+  "systemSha": "a6b490a48eaf241f1f1e58f0e2c4367428e69a473a9726a8581a9dc5ad440188",
+  "userSha": "8c5762db6484dc4f8f9906200cbbe55b7a6b38641fb226a64590f0d70c3c6ff5",
+  "askBytes": 32764,
+  "parts": 7,
+  "records": [
+    {
+      "key": "N01",
+      "id": "N_aa971e58-b3e7-49da-bdbc-205ed54b8aad",
+      "from": 0,
+      "to": 6842,
+      "total": 6842
+    },
+    {
+      "key": "N02",
+      "id": "N_e301db99-bea0-4bc9-b19c-d3243959b420",
+      "from": 0,
+      "to": 2521,
+      "total": 2521
+    },
+    {
+      "key": "N03",
+      "id": "N_7f08f8d0-9f0e-4ead-8f5b-f07e03f5bfe1",
+      "from": 0,
+      "to": 4699,
+      "total": 4699
+    },
+    {
+      "key": "N04",
+      "id": "N_44d99e25-f04c-4610-a661-13dc202b760e",
+      "from": 0,
+      "to": 1101,
+      "total": 1101
+    }
+  ],
+  "coverage": {
+    "fresh": 4,
+    "sent": 4,
+    "partial": 0
+  },
+  "requestCoverage": {
+    "total": 2,
+    "sent": 1
+  },
+  "requestScopeIds": [
+    "RQ_0797ee20-a84e-4aa7-ace6-b4f053ca87f7"
+  ],
+  "model": "deepseek-flash",
+  "mapTimeoutMs": 90000,
+  "mapMaxTokens": 16384,
+  "cap": 1
+}

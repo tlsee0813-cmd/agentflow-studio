@@ -1,0 +1,30 @@
+{
+  "files": [
+    {
+      "path": "docs/cycles/2026-10-30-return-reading-111/RESULT.md",
+      "sha256": "f4dcff4f81c54d2cf4a5a6e0ff49cbbaceb2f65aad745aec50106b6472038456"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-return-reading-111/evidence/experience111-incomplete.png",
+      "sha256": "fd168a0a22d402e491c957a040910b6e21d257871681d04184c77c4445377c8d"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-return-reading-111/evidence/frozen.json",
+      "sha256": "71f79a371ff7d05731fbeade181bc3be4f41b100950b35f6f5783e343e9524b1"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-return-reading-111/evidence/independent-decision.json",
+      "sha256": "c27145b22cb7538cbd4a40c5043f50d9b0be041dbe578095eae3ab5373eadbd5"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-return-reading-111/evidence/preservation.json",
+      "sha256": "06eb761d53f3ab477070b20331de12939c7a88a0b7abd7573e6198faeb75e62e"
+    },
+    {
+      "path": "docs/cycles/2026-10-30-return-reading-111/evidence/receipt.json",
+      "sha256": "c1d09feb7e6ebf71955073c5a60fae4b3729ce5724d71b834dcde760e4704ffe"
+    }
+  ],
+  "basis": "905ea55e9c90e9f6e3d397640e57b853881c25e6",
+  "app": "5736b7949d50ba92c07ae583ff22c618c25c3e94"
+}

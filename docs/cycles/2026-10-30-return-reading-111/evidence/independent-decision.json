@@ -1,0 +1,68 @@
+{
+  "task": "AF111-independent-delivery-classification-and-next-boundary",
+  "verdict": "delivery_FAIL_incomplete_generation; recommend_bounded_existing_owned_CLI_later-map_extension",
+  "classification": {
+    "input": ".ops/experience111-return-reading/{frozen.json,call-1-receipt.json,call-1-request.json,call-1-raw.json}",
+    "facts": "Preserved receipt HTTP200/86717ms. Provider metadata: finish_reason=length, content length0, prompt_tokens17418, completion_tokens16384, reasoning_tokens16384, total33802. Request metadata: studio.map.6,7parts/5relations/4records,1selected request,0priors; frozen ask32764bytes,full records coverage4/4,one of two request scopes selected,timeout90000ms,max_tokens16384,cap1.",
+    "meaning": "The provider HTTP response arrived, but no complete final map/comparison content was delivered. Classify as AI_RESPONSE_INCOMPLETE/delivery failure, not a semantic answer, empty successful map or observed request-comparison result.86.717s below90s and finish=length do not support calling this a timeout. The usage metadata reports the entire completion allocation as reasoning; no reasoning text was inspected and no causal story about its contents is inferred.",
+    "application": "Existing server/studio.mjs rejects length before validating/parsing a reply. Root reports the UI showed AI_RESPONSE_INCOMPLETE and is verifying exact backup preservation; this reviewer does not claim a completed UI/backup audit. No retry occurred and the failed raw must remain unchanged."
+  },
+  "existingEvidenceUsed": {
+    "101": "The finite long-operation contract already separates interaction from completion, retains a real100 durable owner and300s experimental ceiling, and forbids silently lengthening old timers/reclassifying old failures. Its explicit accepted adapter scope was FIRST only, so later-map support is a new bounded product capability rather than an already accepted operation.",
+    "102": "Accepted nondefault Node CLI executor already uses the actual100 handler/store and global one-child/no-queue/no-retry admission, immutable execution metadata, strict capture/final validation, cancellation/deadline/lease recovery. Its later restriction is concrete code, not absence of an owner or need for another framework.",
+    "104": "One real Zephyr FIRST run succeeded through that corrected host-compatible CLI policy and owned delivery path. It supports reusing the installed path/policy mechanisms; it proves neither later prompt/request matching nor successful handling of111's input. Keep103 host-disabled failure and all tool/cost limits intact.",
+    "105_and_107_109": "Request/return quality includes full original intent, exact frozen item identity, source/evidence modality and no reopening answered requirements. The accepted109 request and bounded110 return are existing inputs; no fresh plan, map source rewrite or digest substitution is needed to define the next boundary."
+  },
+  "concreteNextRecommendation": {
+    "decision": "Implement one explicit operator-opted capability in the existing102 preview for validated studio.map.6 later requests, including frozen requests and supported priors. Keep FIRST-only behavior as the default for the existing policy; preserve the normal DeepSeek/Worker/static path. Do not start a model call as part of this implementation decision.",
+    "whyUseful": "The original normal product return-comparison path already constructs the desired full later MapInput and exact selected request;111 exposed delivery failure on that path. Extending the already-owned CLI seam allows that same request-comparison contract to reach the separately bounded executor, without adding another summary layer, storage owner, output-repair step or provider-racing mechanism.",
+    "minimalDelta": [
+      "In the existing executor policy/admission, add a fixed server-side scope/mode choice distinguishing FIRST-only from validated map6-later support. Include this choice in the normalized policy hash before accepting an operation. Browser input must not choose the binary/provider/arguments/deadline or widen that scope. Do not simply remove the FIRST guard.",
+      "Use the existing map6Prompt(ask) selection for both wrapper and immutable execution.prompt. prepare currently binds sha(MAP6_FIRST_PROMPT) regardless of ask; return the actual selected prompt hash and recheck its consistency with bound metadata in call before spawn. Keep the existing map6 recipe identity/model/ask/input hashes as well: recipe and actual selected text identify different things. Existing ready/failed records keep their historical metadata across policy changes/restart.",
+      "Expose the actual supported scope through the existing executor/status surface and adjust the current literal 'first map only' UI note/guard accordingly. Default FIRST policy must still reject later asks before a child is launched; the enabled later policy must not falsely imply accepted generation quality or public/Worker availability. A small capability enum in existing status is sufficient; no generic provider framework is needed.",
+      "Reuse unchanged map-input.1 serialization,100 job ownership and existing validateMapAsk/validateMapReply/applyReading/request-match ledger. Preserve fullRequests, request coverage, prior targets/corrections and all alias maps exactly; do not rebuild them from the currently open project, drop the failed request, reduce to a summary or rewrite the frozen scope. Keep the existing source/claim/material/uncertainty/withdrawal rules and current input/output limits."
+    ]
+  },
+  "verifiedCodeBoundaries": [
+    {
+      "file": "docs/cycles/2026-10-29-owned-cli-preview-102/preview/cli-executor.mjs:44-45,87-89,207-217,228-244",
+      "finding": "wrap already calls map6Prompt(ask), whose recipe chooses later text whenever parts/requests/priors make it non-FIRST. prepare rejects every non-FIRST request with EXECUTOR_SCOPE. Execution binding.prompt is currently the fixed FIRST text hash. call checks the fixed policy identity before using wrap. Therefore guard removal alone would misrecord a later run as FIRST and is not an adequate extension."
+    },
+    {
+      "file": "app/continuity/src/shared/map-job.ts:4-5,59-60,94-112,126-131",
+      "finding": "The durable MapInput codec already stores full frozen requests separately from ask's projected request contexts, plus prior reading/index/target/correction tuples. It checks their relation to ask.requests/priors and the operation project/ask/input hashes. The required representation exists; a new codec/store is not warranted by this failure."
+    },
+    {
+      "file": "app/continuity/server/map-jobs.mjs: submit/execute; app/continuity/server/studio.mjs:165-182",
+      "finding": "The handler already injects an executor into the real Node jobs service. prepare metadata is persisted with the original input before execute calls run.call, and result reading identity is kept for explicit client application/recovery. The extension can remain inside this seam."
+    },
+    {
+      "file": "app/continuity/src/client/app.ts: renderStatus mapNote",
+      "finding": "The current CLI note explicitly says the executor makes FIRST maps only. It must remain accurate when capability is extended rather than advertising an admitted job that will reject at EXECUTOR_SCOPE."
+    }
+  ],
+  "boundedModelFreeVerificationNeeded": [
+    "A default FIRST policy rejects a later ask with0child calls; explicit later scope admits only existing validated map6 asks and rejects malformed/unsupported inputs before launch. Verify actual later wrapper and prompt metadata, not just absence of EXECUTOR_SCOPE.",
+    "One synthetic full later MapInput with a frozen request and prior/correction survives the existing HTTP/job store/reload/result path unchanged. Its exact request-item association and stable reading/source coordinates must survive application; mismatched request/project/prior/prompt/policy must fail atomically. This exercises the new admission/binding boundary, not another full repeat of100.",
+    "A harmless child returns one complete valid later wire through the existing guards, with no new invocation on duplicate POST, key-off ready recovery or explicit application. Preserve the already-tested cancellation/late/no-close/fencing mechanisms and run only the changed-path regressions justified by the delta. Do not use synthetic success as actual semantic/model evidence."
+  ],
+  "simplerExistingPaths": {
+    "normalMapComparison": "The normal selected-request action already exists (plan-view.ts:1343-1344 -> host.readRequest -> map-run). With default DeepSeek it is precisely the path111 attempted; no new UI pipeline is needed, but its existence does not provide a delivered result after this length failure.",
+    "directManualAttachment": "plan-view.ts:1343-1347 exposes report-paste plus 'read this request' for a real snapshot with scope. Its direct ResultObservation attachment form is deliberately limited to old snapshots without scope or authored examples. Reusing that UI as-is cannot complete this current frozen request's normal map/request ledger. Manual inspection can remain an honest human observation, but is not the same automatic exact request comparison.",
+    "digest": "studio.digest.2 produces changes/read/open/recordReadings, not the full map6 frozen request/item/prior-withdrawal match contract. It can summarize a return but cannot be reported as successful completion of this request comparison. plan/scope likewise prepare work rather than classify returned implementation/test evidence against the ledger.",
+    "conclusion": "No simpler already-accepted normal alternate path was found that is equivalent for this current frozen request and automatic comparison. A new manual attachment capability could be a separate product choice, but would change the interaction/evidence contract; it is not a hidden no-code equivalent or the recommended next adapter delta."
+  },
+  "actualCallGateAfterImplementation": {
+    "status": "closed; root must select separately",
+    "requirements": "Freeze the accepted new code, operator mode/policy, unchanged compatible104 tool/capture configuration, actual later prompt, installed binary/version/hash, original later ask/MapInput and semantic criteria. If selected, use the existing111 request/return input on the normal owned local UI path with one explicit operation, no queue/retry/fallback or partial repair. This report selects no generation.",
+    "limits": "Keep299/300s as the existing preview policy, not a prediction or a new production promise. CLI hard token/cost cap and remote compute/billing stop remain unconfirmed; time/byte/one-child limits do not prove them. The new adapter path changes provider/runtime/ownership scope and is not a pure time comparison. An eventual result must still pass full request/return semantics: exact item/version/source, implemented report versus bounded actual checks, preserved hardware/Low Power limits, missing evidence versus failure, and no extrapolated completion.",
+    "excluded": "No DeepSeek timeout/token increase, same111 retry, longer timer by default, broad model/provider roulette, new research/installation/account work, raw salvage, partial item deletion or digest-as-comparison success.111 remains a delivery failure regardless of any later observation."
+  },
+  "rootDecisionAfterReview": {
+    "selection": "Root selects112 as the bounded existing102 adapter extension: explicit opt-in later map6, old policy defaults FIRST, unknown scope rejected, no new store/codec/lifecycle framework, default/public DeepSeek unchanged. Actual map6Prompt hash must be bound in prepare metadata, the same accepted ask hash rechecked at run, scope policy included in binding policy, and existing fullRequests/priors retained. Only related regressions and minimal accurate scope/status copy are in scope; no automatic real call or timer enlargement is selected.",
+    "preservationReported": "Root reports111 original project backups before/after/reload equal (ef7d9b…5067) and plan bundle equal (cdf2d…ba05), server46298 stopped and listener51905 absent. This is root's separate verification, not an independent backup comparison performed here."
+  },
+  "actions": {"reasoningContentInspected":false,"modelCalls":0,"researchWeb":0,"testsBuildUI":0,"productOrRawWrites":0,"onlyWrite":".ops/results/experience111-delivery-decision.json"},
+  "reviewClosed": true,
+  "finalSelectionOwner": "root coordinator"
+}
