@@ -1,0 +1,17 @@
+{
+  "originalProjectBefore": "dd5b31e0792d71ae5fa1aa625a23a0728e1e6742fee89324140f12f6c60b5e54",
+  "originalProjectAfterReload": "dd5b31e0792d71ae5fa1aa625a23a0728e1e6742fee89324140f12f6c60b5e54",
+  "fullBundleBefore": "cdf2dc70965e8eaf9c6d701dcef39a022d1baab8e0e0fcf047e4941590f8ba05",
+  "fullBundleAfterReload": "cdf2dc70965e8eaf9c6d701dcef39a022d1baab8e0e0fcf047e4941590f8ba05",
+  "otherProjectBefore": "cb594c95c2402616f4f8e199d5a8a4c9f7026c878b9de89e9b902373ea536771",
+  "otherProjectAfterReload": "cb594c95c2402616f4f8e199d5a8a4c9f7026c878b9de89e9b902373ea536771",
+  "otherBundleBefore": "5a40c2eb0ab20a3daa42cd5bb8c4e8533d8ee10295a3ccd0abbfbdabc9e7b6a3",
+  "otherBundleAfterReload": "5a40c2eb0ab20a3daa42cd5bb8c4e8533d8ee10295a3ccd0abbfbdabc9e7b6a3",
+  "otherDraftChars": 112,
+  "readingsBefore": 1,
+  "readingsAfter": 1,
+  "rawRecordsBefore": 6,
+  "rawRecordsAfter": 6,
+  "ready": false,
+  "applied": false
+}

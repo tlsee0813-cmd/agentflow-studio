@@ -1,0 +1,23 @@
+{
+  "ai": "off",
+  "model": null,
+  "access": "open",
+  "map": {
+    "model": "gpt-6.1-sol",
+    "prompt": "m6-6859b864664f",
+    "laterPrompt": "m7-82631aa43efc",
+    "via": "jobs"
+  },
+  "jobs": {
+    "version": "map-job.1",
+    "durable": true,
+    "executor": {
+      "id": "codex-cli-preview.102",
+      "model": "gpt-6.1-sol",
+      "scope": "map7-later",
+      "state": "ready",
+      "problem": null,
+      "policy": "29f5c36ec140"
+    }
+  }
+}

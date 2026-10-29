@@ -1,0 +1,60 @@
+{
+  "cycle": 119,
+  "verdict": "WHOLE_RESPONSE_REJECTED_NEW_ID_LEXICON_NO_SEMANTIC_PASS",
+  "directory": ".ops/experience119-condition-return",
+  "read": ["final.txt", "input.json", "selected.json", "actual-binding-proof.json"],
+  "reviewerActivity": { "modelCalls": 0, "responseValidatorCalls": 0, "responseRepairsOrAlternateRevalidation": 0, "productWrites": 0, "testsOrBuildOrBrowserRuns": 0, "hiddenReasoningRead": false },
+  "delivery": {
+    "classification": "COMPLETE_JSON_DELIVERED_THEN_CONTRACT_REJECTED",
+    "duration": "Root reports approximately181 seconds, exit0, within the existing299/300 policy.",
+    "finalBytes": 10703,
+    "finalSha256": "8daf6ca242eef80bd224523afbad26465a767cfb5ad05c0cba53acaaafcc3967",
+    "storedFailure": "INVALID_RESPONSE / CONTRACT, not a successful ready result.",
+    "scope": "One selected real call, no retry/fallback. The complete final is not a timeout or incomplete-response observation."
+  },
+  "binding": {
+    "code": "8875b7744d7f384d59b9a4a7cdab35654e81bbab",
+    "accepted118": "dccbcce0b9d116cb1e85155cab282fece76395d7",
+    "recipe": "m7-82631aa43efc",
+    "actualSystemSha256": "1565dd000fe0729bae45db9bf42341a183aca60942c06717f83598aace8898de",
+    "askSha256": "579741cd5aa84d0c6a6b7c0d07e20b8979e88981f450eb702bc143e3f8248e8f",
+    "stdinSha256": "da79ffc827e687473e2abbde9bfa12f9ff5eb291b61704b98c1157bca1ca1968",
+    "assessment": "selected.json and actual-binding-proof.json agree on the accepted exact ask, full rendered prompt and stdin. The actual system includes118 guidance; the historical map7 base text and the actual rendered system SHA are not interchangeable identities. No new source/project/RQ data was selected to make the task easier."
+  },
+  "staticFirstRefusal": {
+    "source": "app/continuity/src/shared/map-reading.ts at product8875b77",
+    "ruleLine": 116,
+    "firstPassLine": 277,
+    "path": "parts[0].ref",
+    "value": "new:labelGuide",
+    "acceptedNewGrammar": "^new:[a-z0-9_-]{1,24}$",
+    "reason": "The value is a string and is not one of the known input part aliases P01..P07. Its new suffix contains uppercase G, so NEW.test is false. The first-pass compound check rejects it before any part basis/claim/condition/relation/match validation. The shape uses the correct roleAboutAt key and is not rescued by being a consistently reused identifier.",
+    "secondStaticOccurrence": "parts[1].ref=new:labelLookup also contains uppercase L and independently violates the same lexical rule. parent and relation references reuse the same invalid spellings; consistency does not make the new identifiers legal. This is a static observation, not a repaired or second validation run.",
+    "instructionBoundary": "The effective inherited later prompt says new:짧은영문키 and uses lowercase examples, but does not state the exact lowercase-only alphabet and1–24 suffix bound. CamelCase is consistent with the ordinary-language notion of a short English key. This is an incomplete instruction of a pre-existing acceptance rule, not a newly needed semantic rule.",
+    "disposition": "The original entire wire stays rejected. No lowercasing, ID reassignment, global reference substitution, partial extraction or replay is performed."
+  },
+  "conditionGuidanceObservation": {
+    "observedDifference": "The119 response no longer selects N02.33 as aboutAt. Code conditions remain null rather than copying user-declared6d9c2ab metadata. Emitted non-null condition references are N01.03, N02.03 and N02.31, whose already frozen trimmed raw lengths are76,86 and83 respectively; the latter two appear in match slots with200 bounds, while the76-unit N01.03 qualifies the reported root checks in80/200 slots. Observation environments remain in text and exact evidence.",
+    "limit": "The runtime validator stopped in the part-ID first pass, so it did not establish that any later condition or match passed. A static change in one model output cannot demonstrate that118 caused the change, that all condition semantics are correct, or that future length selection is reliable.118 implementation acceptance remains separate from119 outcome."
+  },
+  "limitedMeaningObservations": {
+    "status": "PARTIAL_CONTENT_READING_OF_REJECTED_WIRE_ONLY",
+    "structure": "The proposed software guide and lookup responsibilities are distinct from the existing board. needs connects UI to lookup. related links to existing Display/P04 and Power/P07 describe mapping and notice relationships rather than a new physical control path. Invalid identifier spelling prevents accepting this representation.",
+    "twoMappings": "Claim s4 with R02.30-35 preserves HINK-E0213→GDEH0213B1/SSD1673/ssd16xx/reel_board and HINK-E0213A22→GDEH0213B72/SSD1675A/ssd16xx/reel_board@2. No controller/target swap or PCB-only inference was identified.",
+    "matchingAndClear": "Claim s5 plus code matches11/12 describe trim-only, whole case-sensitive comparison, no prefix/partial/hyphen correction, null for empty/unknown and replacement of all four DOM values with — as input changes. They cite typed R01/R02. Reported matches separately preserve the stated unknown/PCB behavior rather than claiming new hardware knowledge.",
+    "powerAndHardware": "Reported claim s2 and code match13 retain the Low Power no-saving notice and distinguish the UI connection from actual power-control changes. The original current hardware map and its documentary limitations remain in the supplied input. The response reports no actual board build/flash/power measurement and no sensor/circuit/power/energy change.",
+    "provenance": "N02 author version/branch and Node/Chromium observations and N01 Windows/IAB observations remain reported or checked with limits. The source Zephyr3568e1b6 document commit is correctly discussed as documentary basis, not the user-declared JavaScript file version. Code conditions are null and no test-definition artifact is invented.",
+    "scopeRetained": "The long Chromium observation is represented by text identifying6d9c2ab, Chromium headless/Playwright1.63.0/1280×720/local HTTP and dark/file checks with exact N02.33-36 evidence, while aboutAt names the same record's branch header. Reported unexecuted hardware/other-browser/OS/assistive/user checks and AgentFlow deployment limits remain. Those scope words are not lost merely because the204-unit row is not selected as a short condition.",
+    "requestAndPrototype": "All14 matches target the one selected RQ0797/change_label_lookup_tool with replaces:null. The output explicitly bounds the work to a separate local browser prototype and excludes AgentFlow full deployment/completion. Existing P01 checked claim combines prototype acceptance with explicit board nonexecution; it cannot be promoted into board or product acceptance.",
+    "limit": "No separate material meaning blocker was identified in this bounded content reading, but it is not an exhaustive semantic validation or a claim that fixing ID case would yield a valid/acceptable reply. The whole contract has already failed and no result was applied."
+  },
+  "minimumNextChoice": {
+    "recommendation": "State the exact existing new-part ID lexical contract in the active dynamic later7 instructions: lowercase ASCII a-z, digits0-9, underscore or hyphen,1–24 characters after literal new:. Every parent/from/to/candidate part reference must reuse that exact key. Do not add a new schema, alias allocator, owner/store or output normalization framework for this defect.",
+    "diagnosticScope": "In the existing MAP7 parts first pass, after form()/exact object shape checking, expose a structured parts[i].ref diagnostic only when the same current compound ref condition would already reject. Preserve which inputs are accepted, whole-wire atomicity and validation ordering; leave old1–6 interpretation/diagnostics unchanged. Invalid new spelling, unknown known-part reference and duplicate identity may be classified narrowly without accepting any of them.",
+    "safeDetail": "Keep a bounded path/rule and a safe alias or category such as invalid-new-key; never echo arbitrary source text or a secret-looking unconstrained rejected value into public error detail. Do not trim, lowercase, repair, merge or propagate aliases. A source-inspired CamelCase name remains legal as display name, not as the internal new key.",
+    "identity": "Preserve the frozen map1–6/FIRST6 and MAP7 base text; the active later7 instruction addition needs its own explicit recipe/actual rendered prompt identity. Ready jobs retain their saved binding. This is completion of an existing normative vocabulary instruction, not proof of model compliance or permission for another call.",
+    "minimumEvidence": "Use distinct synthetic examples to confirm a legal lowercase new key and consistent cross-references remain accepted, CamelCase is rejected with the precise new path, and no transformation of the incoming wire occurs. Preserve existing prompt/storage compatibility checks. Do not edit119 or rerun its response to manufacture a pass. Root separately chooses any later real observation."
+  },
+  "pcAndPreservation": "Root reports original project/bundle/other-project content remained exact after reload, real1/ready0/apply0, and server/slot/lease cleanup completed.119 therefore contributes no successful generated-result ready/apply/source/back/backup experience. Synthetic118 UI success does not replace that missing actual gate.",
+  "conclusion": "119 has a complete bound response but is wholly rejected by an undisclosed lowercase-only new-ID requirement at parts[0].ref. The observed condition choices avoid the previous overlong row, with important scope still present, but no condition/meaning success can be promoted from an early-rejected wire. The next minimum repair is exact ID vocabulary guidance plus equally narrow structured diagnosis, retaining the current acceptance rules and raw failures."
+}

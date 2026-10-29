@@ -1,0 +1,24 @@
+{
+  "at": "2026-10-29T20:30:51.758Z",
+  "bound": {
+    "executor": "codex-cli-preview.102",
+    "version": "codex-cli 0.165.0-alpha.1.2",
+    "binarySha256": "5c1b55966bf9f757dcbf00065c9a6cb862ead55d34b015f1be1939ff18e43943",
+    "model": "gpt-6.1-sol",
+    "reasoning": "high",
+    "permissions": "503b611008cf71b170ce6aedf247526e85ccf1da896529645866af8a19889396",
+    "wrapper": "dd56ff8327f0b957f18ccc6af7c6334935901014e36539c35c91e16279c02ae5",
+    "scope": "map7-later",
+    "selectionMs": 299000,
+    "verdictMs": 300000,
+    "policy": "29f5c36ec1402724c3641ae6b98859d8005d978cc1066fb655930d59cb1e4190",
+    "promptKind": "later7",
+    "prompt": "1565dd000fe0",
+    "promptSha256": "1565dd000fe0729bae45db9bf42341a183aca60942c06717f83598aace8898de",
+    "askSha256": "579741cd5aa84d0c6a6b7c0d07e20b8979e88981f450eb702bc143e3f8248e8f"
+  },
+  "stdinSha": "da79ffc827e687473e2abbde9bfa12f9ff5eb291b61704b98c1157bca1ca1968",
+  "stdinBytes": 65841,
+  "realCalls": 1,
+  "versionProbe": 1
+}

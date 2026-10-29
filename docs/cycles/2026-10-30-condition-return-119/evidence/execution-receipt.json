@@ -1,0 +1,70 @@
+{
+  "job": "MJ_7ea0b8f5-90ce-4404-9f40-5c3d1c29d650",
+  "selected": "b4f3ef989f60627c460e1db9bfcc5b5da152c9c8",
+  "realCalls": 1,
+  "versionProbes": 1,
+  "retry": false,
+  "fallback": false,
+  "wireRepaired": false,
+  "revalidated": false,
+  "delivery": "complete final JSON",
+  "contract": "failed",
+  "error": {
+    "code": "INVALID_RESPONSE",
+    "detail": {
+      "rule": "CONTRACT"
+    }
+  },
+  "execution": {
+    "executor": "codex-cli-preview.102",
+    "version": "codex-cli 0.165.0-alpha.1.2",
+    "binarySha256": "5c1b55966bf9f757dcbf00065c9a6cb862ead55d34b015f1be1939ff18e43943",
+    "model": "gpt-6.1-sol",
+    "reasoning": "high",
+    "permissions": "503b611008cf71b170ce6aedf247526e85ccf1da896529645866af8a19889396",
+    "wrapper": "dd56ff8327f0b957f18ccc6af7c6334935901014e36539c35c91e16279c02ae5",
+    "scope": "map7-later",
+    "selectionMs": 299000,
+    "verdictMs": 300000,
+    "policy": "29f5c36ec1402724c3641ae6b98859d8005d978cc1066fb655930d59cb1e4190",
+    "promptKind": "later7",
+    "prompt": "1565dd000fe0",
+    "promptSha256": "1565dd000fe0729bae45db9bf42341a183aca60942c06717f83598aace8898de",
+    "askSha256": "579741cd5aa84d0c6a6b7c0d07e20b8979e88981f450eb702bc143e3f8248e8f",
+    "observed": {
+      "startedAt": "2026-10-29T20:30:51.769Z",
+      "closedAtMs": 180966.97749999998,
+      "decidedAtMs": 180968.4385,
+      "closed": true,
+      "exit": 0,
+      "signal": null,
+      "reason": null,
+      "events": 4,
+      "usage": {
+        "input_tokens": 31189,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 8223,
+        "reasoning_output_tokens": 5055
+      },
+      "stdoutBytes": 11846,
+      "stderrBytes": 158,
+      "signals": {
+        "sent": 0,
+        "skippedAfterExit": 0
+      },
+      "stdioCut": false,
+      "finalSha256": "8daf6ca242eef80bd224523afbad26465a767cfb5ad05c0cba53acaaafcc3967",
+      "finalBytes": 10703
+    }
+  },
+  "eventTypes": [
+    "thread.started",
+    "turn.started",
+    "item.completed",
+    "turn.completed"
+  ],
+  "toolEvents": 0,
+  "meaning": "limited review only; whole response not accepted",
+  "ui": "never ready; no apply; originals and separate draft preserved"
+}

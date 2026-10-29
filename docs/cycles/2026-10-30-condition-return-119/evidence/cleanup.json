@@ -1,0 +1,17 @@
+{
+  "port": 51911,
+  "closed": true,
+  "stopped": {
+    "slot": null,
+    "unsettled": null
+  },
+  "executorFiles": [
+    "released",
+    "runs",
+    "store.json"
+  ],
+  "tabClosed": true,
+  "viewportReset": true,
+  "claudeOriginalSessionPreserved": true,
+  "at": "2026-10-29T20:36:37.595Z"
+}

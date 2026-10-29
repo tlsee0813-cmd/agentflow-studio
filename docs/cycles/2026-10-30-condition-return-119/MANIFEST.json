@@ -1,0 +1,58 @@
+{
+  "selection": "b4f3ef989f60627c460e1db9bfcc5b5da152c9c8",
+  "product": "8875b7744d7f384d59b9a4a7cdab35654e81bbab",
+  "app": "71ddbda17b49bf20bfe26fc399222065fd6339b0",
+  "verdict": "delivery_complete_contract_rejected",
+  "evidence": [
+    {
+      "file": "evidence/actual-binding.json",
+      "bytes": 989,
+      "sha256": "9fd1f6ac0118227f6bec22f077dbab9458ed06b8821134ab91ac651460e67d5b"
+    },
+    {
+      "file": "evidence/cleanup.json",
+      "bytes": 292,
+      "sha256": "efe4f990e957d1a882fa190b7181e9789e63765e87dabb063d431367ff46f8a0"
+    },
+    {
+      "file": "evidence/diagnosis.json",
+      "bytes": 698,
+      "sha256": "a368e91a88c0884f0eae5fb8826e62ba41b2daf021cba381198fd031d4e2859a"
+    },
+    {
+      "file": "evidence/execution-receipt.json",
+      "bytes": 2194,
+      "sha256": "5f97922600cd808f3aec6744e8eb086c1f0a40249b6fd56e09c9458df90edfad"
+    },
+    {
+      "file": "evidence/import-proof.json",
+      "bytes": 535,
+      "sha256": "12f84df32886949cdb554f9a91784f6b913e0e47736c46adcca70a28e4cf3cf7"
+    },
+    {
+      "file": "evidence/independent-review.json",
+      "bytes": 9912,
+      "sha256": "2fec12a5e69f0d34c4cfb056c709ae845bd3d6db1e76fee71eeeb477352bb381"
+    },
+    {
+      "file": "evidence/other-draft-preserved.png",
+      "bytes": 67793,
+      "sha256": "c4f63341aba80266c640e303541eb3bad27a1f3ffe1222806d13285009092acf"
+    },
+    {
+      "file": "evidence/preservation.json",
+      "bytes": 916,
+      "sha256": "a887b8e879e3e67c3967797cf4629617ab2afb1b5c017e063f244a0cae51b995"
+    },
+    {
+      "file": "evidence/status-before.json",
+      "bytes": 451,
+      "sha256": "4341024dc84cced7d8409f2fc3c36d9a7582fee659cca619681bc369840ead41"
+    },
+    {
+      "file": "evidence/unchanged-project.png",
+      "bytes": 43804,
+      "sha256": "33b1da3c1bf86885481ad5fb781bda968e6c3c4b38040947424043728ceb351c"
+    }
+  ]
+}

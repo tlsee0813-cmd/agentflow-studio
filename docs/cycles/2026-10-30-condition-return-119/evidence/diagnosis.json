@@ -1,0 +1,23 @@
+{
+  "method": "static raw read + current source inspection; validator not re-run",
+  "runtimeError": {
+    "code": "INVALID_RESPONSE",
+    "detail": {
+      "rule": "CONTRACT"
+    }
+  },
+  "firstFail": {
+    "path": "parts[0].ref",
+    "value": "new:labelGuide",
+    "rule": "NEW /^new:[a-z0-9_-]{1,24}$/",
+    "source": "app/continuity/src/shared/map-reading.ts:116,277"
+  },
+  "alsoInvalidId": "new:labelLookup",
+  "promptWord": "new:짧은영문키",
+  "promptExplicitLowercase": false,
+  "conditional118Effect": "not established by full validator; it stops at new-part ref before conditions",
+  "wireModified": false,
+  "validationRepeated": false,
+  "partialApplied": false,
+  "realCalls": 1
+}
