@@ -305,7 +305,9 @@ test('102-E17 cancelled or out of selection time while the lease is written: no 
   assert.equal((await jcall(s.handle, 'POST', '', x.cap, x.body)).status, 202);
   await until(() => s.jobs.held().executing === 0, 'call ended');
   assert.equal(invocations(s.ctl).length, 0, 'no child after the cancel');
-  assert.ok(!existsSync(join(s.state, 'lease.json')) && s.executor.describe().state === 'ready');
+  // The cancel verdict comes at once; the never-started cleanup (lease release) ends just after it.
+  await until(() => !existsSync(join(s.state, 'lease.json')) && s.executor.describe().state === 'ready', 'lease let go');
+  assert.equal(invocations(s.ctl).length, 0);
   const released = readdirSync(join(s.state, 'released')).map(f => JSON.parse(readFileSync(join(s.state, 'released', f), 'utf8')).released.why);
   assert.ok(released.includes('never-started'));
   const y = await submission(project(), { entryId: 'E_cli00017-02' });
