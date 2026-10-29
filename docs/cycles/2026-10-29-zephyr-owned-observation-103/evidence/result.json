@@ -1,0 +1,117 @@
+{
+  "task": "AF103-Zephyr-owned-normal-UI-observation",
+  "classification": "delivery rejected at CLI startup/configuration boundary; semantic unassessable",
+  "basis": "7852dde4bc5876cd91685fe2bfa7b53817e6e55a",
+  "decisionCommit": "b0e07e47df6796d379a7486f373326e933f25a94",
+  "acceptedCode": "ffcef18769c6f04f75174116cf391272ff703211",
+  "app": "2e9d8d9e003138c85839876c092e7c7b5a115986",
+  "topLevelGenerationInvocations": 1,
+  "versionProbes": 1,
+  "retry": 0,
+  "fallback": 0,
+  "cliThreadStarted": 1,
+  "turnStartedObserved": true,
+  "modelBackendCompletion": "not observed",
+  "modelBillingUsage": "unknown; usage event absent",
+  "finalOutputCount": 0,
+  "elapsedMs": 1424.3032999999996,
+  "operationState": "failed",
+  "apiError": {
+    "code": "AI_RESPONSE_REJECTED",
+    "detail": {
+      "rule": "TOOL_USE"
+    }
+  },
+  "rawEventTypes": [
+    {
+      "type": "thread.started",
+      "itemType": null
+    },
+    {
+      "type": "item.completed",
+      "itemType": "error"
+    },
+    {
+      "type": "turn.started",
+      "itemType": null
+    }
+  ],
+  "startupDiagnostic": "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`.",
+  "interpretation": "item.type=error is a CLI runtime configuration diagnostic. The adapter generic non-agent/reasoning item guard labelled it TOOL_USE; there is no evidence of an actual model tool call. Do not infer a semantic failure or a 299s deadline failure.",
+  "execution": {
+    "executor": "codex-cli-preview.102",
+    "version": "codex-cli 0.165.0-alpha.1.2",
+    "binarySha256": "5c1b55966bf9f757dcbf00065c9a6cb862ead55d34b015f1be1939ff18e43943",
+    "model": "gpt-6.1-sol",
+    "reasoning": "high",
+    "permissions": "19bc72c0e47ed95bc4969dcd794ac8212b1d6119d049170c57cd0cea537e23b8",
+    "wrapper": "dd56ff8327f0b957f18ccc6af7c6334935901014e36539c35c91e16279c02ae5",
+    "prompt": "967f5b3f8190",
+    "selectionMs": 299000,
+    "verdictMs": 300000,
+    "policy": "6eba57362059df0e7392935da37c655b380d6526d64391bf08fd9a05ef301880",
+    "observed": {
+      "startedAt": "2026-10-29T12:51:27.390Z",
+      "closedAtMs": 1423.2217999999993,
+      "decidedAtMs": 1424.3032999999996,
+      "closed": true,
+      "exit": null,
+      "signal": "SIGTERM",
+      "reason": "TOOL_USE",
+      "events": 2,
+      "usage": null,
+      "stdoutBytes": 335,
+      "stderrBytes": 158,
+      "signals": {
+        "sent": 1,
+        "skippedAfterExit": 0
+      },
+      "stdioCut": false
+    }
+  },
+  "sourceIntegrity": {
+    "ZephyrWholeBackupSha256": "ecb845a28be059d57670055e6d8712b3bb0ad1a94ea5ede0c0bf163aee3ffa08",
+    "equalFrozenProject": true,
+    "readingAdded": false,
+    "partsAdded": false
+  },
+  "otherProject": {
+    "savedOneRecord": true,
+    "reloadPreserved": true,
+    "priorPastedSpaceReadingsUnchanged": true,
+    "changedKeys": [
+      "revision",
+      "pasted"
+    ],
+    "overlappedActiveGeneration": false,
+    "reason": "job failed at12:51:28.814Z; other-project save12:52:01.719Z"
+  },
+  "ui": {
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "normalFirstMapButton": true,
+    "afterReload": "original project has no map; generic first-map affordance, no persistent failure message observed",
+    "failureAck": "seen was automatically persisted before navigation/reload",
+    "readyRecoveryAndMeaning": "not exercised due startup failure"
+  },
+  "capture": {
+    "stdoutBytes": 335,
+    "stderrBytes": 158,
+    "retainedRawPrivately": true,
+    "directStdinByteCopy": false,
+    "inputEvidence": "frozen ask equals recovered76 ask; source executor wrap and unchanged source backup; no independent stdin tee"
+  },
+  "cleanup": {
+    "leaseAbsent": true,
+    "runsEmpty": true,
+    "stopLog": "STOPPED executor={slot:null,unsettled:null}",
+    "execSession": 55600,
+    "tabClosed": true,
+    "viewportReset": true,
+    "matchingCodexProcessesRemaining": 0
+  },
+  "next": "Only resolve installed CLI code-mode configuration compatibility without installing or weakening sandbox. No new generation selected by this result.",
+  "overallGoal": "active; first map meaning/time unresolved"
+}

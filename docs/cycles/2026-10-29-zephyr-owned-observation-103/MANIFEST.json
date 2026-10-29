@@ -1,0 +1,30 @@
+{
+  "scope": "one real top-level CLI observation, delivery rejected; no semantic acceptance",
+  "acceptedBase": "7852dde4bc5876cd91685fe2bfa7b53817e6e55a",
+  "files": {
+    "OBSERVATION.md": {
+      "bytes": 3766,
+      "sha256": "89915283861d19def48f2d7450a97566861aae5fbb9d80579c25de2e858d2a45"
+    },
+    "RESULT.md": {
+      "bytes": 3952,
+      "sha256": "2bc47abb4056559284f5b0b3d9326248b1fe69eaf49bae2922d5e23cea1889a5"
+    },
+    "evidence/frozen.json": {
+      "bytes": 1762,
+      "sha256": "1d70cc4e26e38f11ee21db0adea7a1d52c9c8d60788ca11bd34ad9cb97cf9390"
+    },
+    "evidence/gate-review.json": {
+      "bytes": 6144,
+      "sha256": "6505adb09eb3393cb76711f440fec0c4c2f7e6e8315d517c503172ad931e1c74"
+    },
+    "evidence/result.json": {
+      "bytes": 4176,
+      "sha256": "1d9e7661f9282d5246241637831ed6c88f5f1283446efd67ebda515de6bffcf9"
+    },
+    "evidence/no-map-after-reload.png": {
+      "bytes": 36645,
+      "sha256": "037afd6b93093e075bcf6d7945751061254fba1a7688e7e7b1d83035c0348490"
+    }
+  }
+}
