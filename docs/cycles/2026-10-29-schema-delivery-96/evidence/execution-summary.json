@@ -1,0 +1,56 @@
+{
+  "source": "d6edeeff5e33336388b03ee4497b791944c87006",
+  "appTree": "501a7a1faa4b50c182e56ad0cd3a21ac65ed6e5d",
+  "case": "actual-order",
+  "resultSha256": "c4748a08faefba9d71945ddb1e823b94b4ed6770d2c585fbe3e34bafa242b905",
+  "freezeSha256": "24595f62911bbdb03711d5021b255168350aa46d17500d5842e0495dbc1edfed",
+  "harnessSha256": "a681d12cfef25bca70266796609a0b95c98257a45dec562f37cf675b17b5040b",
+  "schemaSha256": "34ba824e98301a66ddb1f696a99faaebfad3a522a9931350f5d25b2a0c56723e",
+  "shapeHelperSha256": "5141d20594458773e97e4cf13fd25d9dbe73504a46dbe8cdf85d5f9938f5d0b5",
+  "inputSha256": "6c5bbfd44899c67e7478618a7d43bbbd69fd392598ef48bb160aafc81c8595b4",
+  "askSha256": "d64857baa4b3e5fce53cc9bc4a2a754c042d64d87ba8bfa0cc3e6935b8cc1d11",
+  "mapInstructionsSha256": "81d6e96834d7c245270785dafe2861bcc010779f12ec14f6b9472b378a8ff846",
+  "wrapperSha256": "45219945020c17be054bcdf46ec584e1ebc2b8537581c513b29e5590f0ddaa31",
+  "criteriaSha256": "06e415b8ccf53254d90bee930746e8d5d53c08cb55d8e955ab45d45fb49e1365",
+  "cliVersion": "codex-cli 0.164.0-alpha.11.1",
+  "model": "gpt-6.1-sol",
+  "reasoning": "high",
+  "selectionMs": 89000,
+  "eligibilityDeadlineMs": 90000,
+  "cliInvocations": 1,
+  "internalTransportRetries": "not observable as a count in this harness",
+  "reason": "SELECTION_DEADLINE",
+  "terminationSignal": "SIGTERM",
+  "code": null,
+  "cleanupCompleted": true,
+  "captureReturnedAtMs": 89082.103,
+  "finalizedAtMs": 89934.8609,
+  "withinOverallBudget": true,
+  "preservationUnchanged": true,
+  "finalReadError": "ENOENT",
+  "finalSha256": null,
+  "finalBytes": null,
+  "eventTypes": [
+    {
+      "type": "thread.started"
+    },
+    {
+      "type": "turn.started"
+    }
+  ],
+  "usage": null,
+  "applied": false,
+  "receiptWriteExcluded": true,
+  "receiptStartedAtMs": 89938.4563,
+  "subsequentCasesInvoked": 0,
+  "productProviderChange": false,
+  "semanticEvaluation": "No final response; not evaluated",
+  "schemaEnforcement": "No final response; not observed",
+  "outcome": "REJECT_CURRENT_PATH_NO_COMPLETE_RESPONSE",
+  "limitations": [
+    "One observation; no latency distribution or causation claim.",
+    "CLI output-schema capability and offline fit are not actual backend enforcement.",
+    "90s bound is candidate eligibility, not guarantee all disk operations or backend termination finish by90s.",
+    "Private raw streams, input text, model content and local absolute paths are excluded."
+  ]
+}

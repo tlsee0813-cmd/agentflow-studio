@@ -1,0 +1,98 @@
+{
+  "task": "AF96-preflight-delta-review",
+  "at": "2026-10-29T05:07:57.684950+00:00",
+  "productSource": "d6edeeff5e33336388b03ee4497b791944c87006",
+  "appTree": "501a7a1faa4b50c182e56ad0cd3a21ac65ed6e5d",
+  "verdict": "PRIOR_THREE_PREFLIGHT_BLOCKERS_CLOSED_BY_REVIEWED_DELTA; NO_NEW_CONCRETE_BLOCKER_FOUND",
+  "filesSha256": {
+    ".ops/experience96-codex-schema-path.mjs": "a681d12cfef25bca70266796609a0b95c98257a45dec562f37cf675b17b5040b",
+    ".ops/experience96-cli-capture.mjs": "7776cde9a44e6b9ee04b810627cdf167b9c4673e7b3a541419605aff2fa81944",
+    ".ops/experience96-guard-probe.mjs": "04ccd029611ba7d38c26ff84f0ccc99e5dc546c96f7691976d95f8fab65cd3c2",
+    ".ops/results/experience96-guard-probe.json": "809802a0fb7bb2b47757e860d8e344c56979ab29351f36fdfe29adad9b655582",
+    ".ops/experience96-codex-schema-path-initial-preserved.mjs": "8e731d4647b70a5eed96d1169a42d712bc8ba8925ba685ce30ff8c11207d398e",
+    ".ops/results/experience96-preflight-review.json": "a4c3dbf58b1268c8490b7ca3dc7978ded8840311ab0d10d8dcaa4327af789e9a"
+  },
+  "findings": [],
+  "closure": [
+    {
+      "initial": "96-P1 UTF8/raw integrity",
+      "result": "CLOSED_IN_SOURCE",
+      "evidence": "Bounded raw stdout/stderr buffers with fatal streaming UTF8 and decoder flush; residual JSONL line is parsed, malformed events fail. Final read is size/read capped131072B and fatal-decodes; SHA/length are actual raw bytes and byte equality is checked against UTF8(last completed agent_message)."
+    },
+    {
+      "initial": "96-P2 output and close bounds",
+      "result": "CLOSED_FOR_ELIGIBILITY_WITH_DECLARED_LIMIT",
+      "evidence": "stdout524288B/stderr131072B/final131072B caps also bound pending/event storage. stop attempts kill and settles after250ms cleanup even without close; streams are destroyed/unref and cleanupCompleted=false forbids acceptance. Completed candidate must precede89s selection and candidate/protection/artifact eligibility must precede90s.",
+      "limit": "No hard guarantee of OS/backend termination, filesystem latency, diagnostic persistence or total process return within90s."
+    },
+    {
+      "initial": "96-P3 preservation gating",
+      "result": "CLOSED_IN_SOURCE",
+      "evidence": "Freeze protection covers runner/capture/shape helper/schema/original/criteria/prior76/all shared JS and head/app/clean status. Prompt/frozen bytes and full protection checked before serialization and again afterward; latest preservationUnchanged/withinOverallBudget/cleanupCompleted hard-clear applied on any failure."
+    }
+  ],
+  "laterBindingAndMetadata": {
+    "prior89": "Wrapper/ask hashes and prompt ID compared to archived89 frozen input, in addition to76 ask/prompt agreement.",
+    "runtime": "734 root build receipt source, unchanged complete src tree and five observed runtime hashes are checked, with every shared JS bound before/after. No local95/96 build claim.",
+    "sequentialGate": "Micro needs accepted actual result/final/frozen hashes; Zephyr needs accepted actual and micro. Prior result must be applied/preserved/in budget.",
+    "latestMetadataDelta": "Runner a681d12c changes the early aggregate flag name to initialPreservationUnchanged and reports finalSha256/finalBytes=null when bounded final read/decode fails. It no longer describes unread bytes as empty-file SHA. Acceptance predicates/transport unchanged."
+  },
+  "rootFakeEvidence": {
+    "file": ".ops/results/experience96-guard-probe.json",
+    "sha256": "809802a0fb7bb2b47757e860d8e344c56979ab29351f36fdfe29adad9b655582",
+    "records": 10,
+    "cases": [
+      "split valid UTF8 plus residual JSONL",
+      "invalid UTF8 rejected",
+      "malformed JSONL rejected",
+      "stdout hard cap",
+      "stderr hard cap",
+      "kill without close bounds decision",
+      "tool event rejected",
+      "final invalid UTF8 rejected",
+      "final size cap before allocation",
+      "final valid bytes preserved"
+    ],
+    "attribution": "Root-executed10 fake-child/rawfinal checks exit0. This reviewer inspected source/results, did not rerun them or execute a child/CLI/version/model.",
+    "coverage": "Meaningful changed-state cases cover per-byte UTF8/residual line, invalidUTF8, malformed JSON, bounds, no-close cleanup, forbidden tool, bounded final and preserved raw bytes. Not OS/process/provider proof."
+  },
+  "budgetAndArtifacts": {
+    "eligibleTime": "finalizedAtMs is after candidate handling and second protection check; withinOverallBudget is eligibility by90s.",
+    "receipt": "Raw diagnostic and final result persistence are excluded, measured separately via receiptStartedAtMs/receiptWriteExcluded. This is explicitly not wall-clock completion of every disk operation by90s.",
+    "partialPrivateArtifacts": "Parsed/backup may exist if the later gate fails; they are private feasibility only. Consumers must require the final result applied/preservation/budget/cleanup gates, not file existence.",
+    "singleRun": "Exclusive started receipt precedes one inference child; no retry/race/fallback. CLI version metadata check exists in prepare/run but neither was executed during review."
+  },
+  "secrecy": {
+    "source": "Unrelated DeepSeek key/access-code environment names stripped before inference child; existing CLI auth retained. Wrapper and final checked; unsafe raw stdout/stderr withheld with hashes and only compact metadata printed.",
+    "limit": "No actual key/auth/environment values read here. Pattern withholding is not universal secret attestation; no leak was observed."
+  },
+  "reviewMethod": "Read initial-to-repaired transport/gates and latest binding/metadata delta only. No completed95/91/92 histories or full tests repeated. No new fake test was necessary beyond source trace and root captured changed-state evidence.",
+  "scopeLimits": [
+    "Preflight clearance is not model invocation, decoder support, first-map completion, semantic acceptance, product API/UI integration or release permission.",
+    "No inference that89 timeout was caused by formatting or74 strict failure solved.",
+    "Root sole writer remains responsible for running only the exact accepted freeze and judging first-case meaning before subsequent cases."
+  ],
+  "execution": {
+    "runnerModes": 0,
+    "CLIInvocations": 0,
+    "versionQueries": 0,
+    "models": 0,
+    "network": 0,
+    "browser": 0,
+    "productWrites": 0,
+    "harnessWrites": 0,
+    "installs": 0,
+    "authFilesOrKeyValuesRead": 0,
+    "completedTestsOrResearchRerun": 0,
+    "actor": "independent reviewer only"
+  },
+  "rootProgressAfterInitialClosureMessage": {
+    "attribution": "root-reported execution, not reviewer execution",
+    "prepareCount": 1,
+    "receipt": "exec5e6754 exit0",
+    "freezeSha256Prefix": "24595f62",
+    "inputBindings": "root reports ask d648 / wrapper4521 / schema34ba and35 protected-file comparison passed",
+    "actualModelRunCount": 0,
+    "note": "Preparation was performed by root while final metadata review was pending; this report adds no model execution claim."
+  }
+}

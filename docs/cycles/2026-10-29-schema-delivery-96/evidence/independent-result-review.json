@@ -1,0 +1,102 @@
+{
+  "task": "AF96-independent-result-review",
+  "at": "2026-10-29T05:12:29.911340+00:00",
+  "source": "d6edeeff5e33336388b03ee4497b791944c87006",
+  "appTree": "501a7a1faa4b50c182e56ad0cd3a21ac65ed6e5d",
+  "verdict": "DELIVERY_FAILURE_AT_89S_SELECTION_CUTOFF; NO_FINAL_MAP_OR_MEANING_RESULT",
+  "receipts": {
+    "frozen": {
+      "file": "experience96-codex-schema-actual-order-r1-frozen.json",
+      "sha256": "24595f62911bbdb03711d5021b255168350aa46d17500d5842e0495dbc1edfed",
+      "bytes": 8353
+    },
+    "started": {
+      "file": "experience96-codex-schema-actual-order-r1-started.json",
+      "sha256": "a95d5948cd6ea91586017bb4a1e14186b24eae3deec94d2487c92886abecc5ab",
+      "bytes": 8413
+    },
+    "accepted": {
+      "file": "experience96-codex-schema-actual-order-r1-accepted.json",
+      "sha256": "f001310942e26fc9c905215aea93c6c8a55b078cc250b509b31bdc3df824a4d5",
+      "bytes": 92
+    },
+    "result": {
+      "file": "experience96-codex-schema-actual-order-r1-result.json",
+      "sha256": "c4748a08faefba9d71945ddb1e823b94b4ed6770d2c585fbe3e34bafa242b905",
+      "bytes": 9345
+    }
+  },
+  "binding": {
+    "startedFreezeExactlySame": true,
+    "resultFreezeExactlySame": true,
+    "runLimit": 1,
+    "runnerMatchesFreeze": true,
+    "shapeHelperMatchesFreeze": true,
+    "promptBytesMatchWrapper": true,
+    "protectedFileCount": 35,
+    "protectedAllMatch": true,
+    "prior89AskWrapperPromptMatch": true,
+    "currentSourceMatches": true,
+    "currentAppMatches": true,
+    "currentClean": true
+  },
+  "observed": {
+    "eventsBytes": 101,
+    "eventsShaMatchesReceipt": true,
+    "stderrShaMatchesReceipt": true,
+    "eventTypes": [
+      "thread.started",
+      "turn.started"
+    ],
+    "acceptedThreadMatches": true,
+    "finalAbsent": true,
+    "parsedAbsent": true,
+    "backupAbsent": true,
+    "scopeStartedFiles": [
+      "experience96-codex-schema-actual-order-r1-started.json"
+    ],
+    "microZephyrStartedAbsent": true
+  },
+  "resultFacts": {
+    "reason": "SELECTION_DEADLINE",
+    "signal": "SIGTERM",
+    "code": null,
+    "ms": 89082.103,
+    "cleanupCompleted": true,
+    "finalizedAtMs": 89934.8609,
+    "withinOverallBudget": true,
+    "receiptStartedAtMs": 89938.4563,
+    "receiptWriteExcluded": true,
+    "preservationUnchanged": true,
+    "initialPreservationUnchanged": true,
+    "applied": false,
+    "finalReadError": "ENOENT",
+    "finalSha256": null,
+    "finalBytes": null,
+    "finalMatchesEvent": false,
+    "usage": null,
+    "cliInvocations": 1,
+    "internalTransportRetries": "not observable as a count in this harness"
+  },
+  "selectionMs": 89000,
+  "deadlineMs": 90000,
+  "conclusion": [
+    "One recorded inference child reached thread.started/turn.started and was terminated at selection cutoff. No turn.completed, final message/file, parsed reply or backup is present.",
+    "Cleanup/preservation/within-budget flags are consistent with failure eligibility finalized before90s; none changes applied=false or establishes valid output.",
+    "Frozen/started/result values and runner/helper/prompt plus35 protected hashes match at inspection. Accepted thread correspondence checked without copying private identifier.",
+    "One actual-order started receipt, no micro/Zephyr started receipts. One recorded CLI inference is supported; provider HTTP/internal retries remain unobservable.",
+    "Schema-option enforcement, completed constrained response, map validity, semantics and timeout causality are unobserved. This is delivery failure, not a semantic judgment or proof of provider schema success/failure.",
+    "No further case/retry/substitution is authorized by this review; root owns final selection."
+  ],
+  "execution": {
+    "actor": "independent reviewer",
+    "CLIInvocations": 0,
+    "models": 0,
+    "network": 0,
+    "browser": 0,
+    "tests": 0,
+    "productWrites": 0,
+    "authOrKeyValuesRead": 0
+  },
+  "privacy": "Only receipt hashes, event types and correspondence/preservation booleans retained. No private input, raw event/stderr payload, thread identifier or authentication material copied."
+}

@@ -1,0 +1,43 @@
+{
+  "source": "d6edeeff5e33336388b03ee4497b791944c87006",
+  "appTree": "501a7a1faa4b50c182e56ad0cd3a21ac65ed6e5d",
+  "decision": "REJECT_CURRENT_PATH_NO_COMPLETE_RESPONSE",
+  "newModelCalls": 1,
+  "files": [
+    {
+      "path": "evidence/execution-summary.json",
+      "bytes": 2426,
+      "sha256": "29a1e5d7a1cdc442aaf46a4097a3b38016bf83c9199c27c2ebcf044bf56e48c1"
+    },
+    {
+      "path": "evidence/experience96-cli-capture.mjs",
+      "bytes": 3217,
+      "sha256": "7776cde9a44e6b9ee04b810627cdf167b9c4673e7b3a541419605aff2fa81944"
+    },
+    {
+      "path": "evidence/guard-probe.json",
+      "bytes": 1337,
+      "sha256": "809802a0fb7bb2b47757e860d8e344c56979ab29351f36fdfe29adad9b655582"
+    },
+    {
+      "path": "evidence/independent-result-review.json",
+      "bytes": 4079,
+      "sha256": "8ec1decf557e576d9990aa629293d182bb6aa0875782bdbdfbcee2a6ff19bf7a"
+    },
+    {
+      "path": "evidence/preflight-delta-review.json",
+      "bytes": 6991,
+      "sha256": "d1f403e4b98296710a3d2179c5555eff266b138dbd67a10d1ce825e0a3a9fa73"
+    },
+    {
+      "path": "evidence/scope.json",
+      "bytes": 1179,
+      "sha256": "d39814b31b2ae4701342f106eca110dca1d8366e0d9b0bfa1f0cbc3a9efe0a2b"
+    },
+    {
+      "path": "RESULT.md",
+      "bytes": 5460,
+      "sha256": "c8f3f4e50ad0d630f79c7107dafcc4dd4670db81dcfe4dddf0d078bbc99d76d0"
+    }
+  ]
+}

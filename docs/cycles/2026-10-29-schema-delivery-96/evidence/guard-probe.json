@@ -1,0 +1,56 @@
+{
+  "scope": "New single CLI guard adaptation only; in-memory child doubles, no CLI/model/network/production fixture mutation",
+  "records": [
+    {
+      "name": "split valid UTF8 plus residual JSONL",
+      "reason": null,
+      "closed": true,
+      "elapsedMs": 5.9328
+    },
+    {
+      "name": "invalid UTF8 rejected",
+      "reason": "INVALID_UTF8",
+      "closed": false,
+      "elapsedMs": 26.59920000000001
+    },
+    {
+      "name": "malformed JSONL rejected",
+      "reason": "MALFORMED_EVENT",
+      "closed": false,
+      "elapsedMs": 15.790500000000009
+    },
+    {
+      "name": "stdout hard cap",
+      "reason": "STDOUT_BOUND",
+      "closed": false,
+      "elapsedMs": 15.618400000000008
+    },
+    {
+      "name": "stderr hard cap",
+      "reason": "STDERR_BOUND",
+      "closed": false,
+      "elapsedMs": 15.819400000000002
+    },
+    {
+      "name": "kill without close bounds decision",
+      "reason": "SELECTION_DEADLINE",
+      "closed": false,
+      "elapsedMs": 30.724400000000003
+    },
+    {
+      "name": "tool event rejected",
+      "reason": "TOOL_USE",
+      "closed": false,
+      "elapsedMs": 15.880099999999999
+    },
+    {
+      "name": "final invalid UTF8 rejected"
+    },
+    {
+      "name": "final size cap before allocation"
+    },
+    {
+      "name": "final valid bytes preserved"
+    }
+  ]
+}

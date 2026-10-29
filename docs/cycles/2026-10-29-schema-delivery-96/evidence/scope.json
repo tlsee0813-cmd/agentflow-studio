@@ -1,0 +1,19 @@
+{
+  "source": "d6edeeff5e33336388b03ee4497b791944c87006",
+  "appTree": "501a7a1faa4b50c182e56ad0cd3a21ac65ed6e5d",
+  "remoteCheckpoint": "5083b016cfd7cb85930c711dd4df468286d0f43c",
+  "public73App": "b670c0ea300050e28cdba9655515ebcf2e03d9d5",
+  "ui75Ancestor": "693d0c7e022bc76b5334b0dd4cf0e6f04ef028ff",
+  "schemaSha256": "34ba824e98301a66ddb1f696a99faaebfad3a522a9931350f5d25b2a0c56723e",
+  "firstCase": "actual-order",
+  "maximumInvocationsPerCase": 1,
+  "selectionMs": 89000,
+  "overallEligibilityMs": 90000,
+  "decisionOwner": "coordinator",
+  "priorRecommendation": "AF95 Astra recommended offline compatibility only; AF96 live-path candidate separately selected by coordinator after offline result",
+  "generationStatus": "COMPLETED_WITHOUT_FINAL_RESPONSE; REJECTED",
+  "scope": "Complete original FIRST map.6 ask and wrapper, unchanged model/reasoning/meaning; CLI --output-schema is new. Not a replay of DeepSeek strict or a claim that prior timeouts were formatting errors.",
+  "boundary": "Private candidate application is not product integration, semantic acceptance, UI evidence or publication of user material.",
+  "actualInvocations": 1,
+  "laterCasesInvoked": 0
+}
