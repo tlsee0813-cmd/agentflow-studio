@@ -4,8 +4,23 @@
 import { createContinuityApp } from '../server/app.mjs';
 import { createStudioHandler } from '../server/studio.mjs';
 import { readConfig } from '../../server/config.mjs';
+import { openMapJobs } from '../server/map-jobs.mjs';
+import { existsSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 const mode = process.env.STUDIO_STUB ?? 'ok';
 let calls = 0;
+// AF100: STUDIO_JOBS_DIR keeps map readings as durable jobs (as the local server does). STUDIO_STUB_GATE (a folder) holds each
+// map call: the stub writes called-<n> when the call reaches it and answers only once release-<n> exists (or the call is aborted),
+// so a test counts provider calls and decides when each answers without timing guesses.
+const gate = process.env.STUDIO_STUB_GATE ?? null;
+let mapCalls = 0;
+async function held(signal) {
+  const n = ++mapCalls; writeFileSync(join(gate, `called-${n}`), String(Date.now()));
+  while (!existsSync(join(gate, `release-${n}`))) {
+    if (signal?.aborted) { writeFileSync(join(gate, `aborted-${n}`), ''); throw new DOMException('aborted', 'AbortError'); }
+    await new Promise(r => setTimeout(r, 25));
+  }
+}
 const stub = async (url, init) => {
   calls++;
   if (url !== 'https://api.deepseek.com/chat/completions' || init.headers.Authorization !== 'Bearer stub-key') return new Response('{}', { status: 401 });
@@ -13,7 +28,7 @@ const stub = async (url, init) => {
   const input = JSON.parse(JSON.parse(init.body).messages[1].content.replace(/^[^\n]*\n/, ''));
   if (input.schemaVersion === 'studio.digest.1' || input.schemaVersion === 'studio.digest.2') return digestStub(input);
   if (['studio.map.1', 'studio.map.2', 'studio.map.3'].includes(input.schemaVersion)) return mapStub(input);
-  if (['studio.map.4', 'studio.map.5', 'studio.map.6'].includes(input.schemaVersion)) return map4Stub(input);
+  if (['studio.map.4', 'studio.map.5', 'studio.map.6'].includes(input.schemaVersion)) { if (gate) await held(init.signal); return map4Stub(input); }
   const refs = input.records.slice(0, 2).map(r => r.ref);
   const content = { headline: `[스텁 응답] ${input.part.name} 정리`, situation: [`스텁: ${input.part.name}의 기록 ${input.records.length}개를 받았습니다.`],
     changes: input.current.changes.slice(0, 2), next: ['스텁: 다음 판단 예시'], answer: input.intent === 'question' ? `스텁 답변: ${input.question}` : null, refs };
@@ -87,6 +102,7 @@ function map4Stub(input) {
 // The browser suite shares this stub process across many flows and can make >10 calls in a minute on a fast CI runner.
 // Only this simulated-provider fixture gets a higher rate; the real server's default remains 10/minute.
 const env = mode === 'nokey' ? {} : { DEEPSEEK_API_KEY: 'stub-key', DEEPSEEK_MODEL: 'stub-model', STUDIO_REQUESTS_PER_MINUTE: '120', ...(mode === 'code' ? { STUDIO_ACCESS_CODE: 'smoke-code' } : {}) };
-const studio = createStudioHandler({ env, fetchImpl: stub });
+const jobs = process.env.STUDIO_JOBS_DIR ? await openMapJobs({ dir: process.env.STUDIO_JOBS_DIR }) : null;
+const studio = createStudioHandler({ env, fetchImpl: stub, jobs });
 const config = readConfig({ AI_MODE: 'mock', PORT: process.env.PORT ?? '0' });
-createContinuityApp({ config, studio }).listen(config.port, '127.0.0.1', function () { console.log(`READY http://127.0.0.1:${this.address().port}`); });
+createContinuityApp({ config, studio }).listen(config.port, '127.0.0.1', function () { console.log(`READY http://127.0.0.1:${this.address().port}${jobs ? ` jobs=${jobs.describe().durable ? 'durable' : jobs.describe().problem}` : ''}`); });

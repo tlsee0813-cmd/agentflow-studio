@@ -16,6 +16,8 @@ import { MAP_PROMPT, MAP2_PROMPT, MAP3_PROMPT, MAP6_PROMPT, MAP6_FIRST_PROMPT, M
 
 const ENDPOINT = 'https://api.deepseek.com/chat/completions';
 const REPLY_BYTES = 131072;
+/** A job submission carries the full input (the ask and what applies it), so its route alone reads up to this much. */
+export const JOB_BYTES = 524288;
 
 export const STUDIO_PROMPT = `너는 AgentFlow Studio의 정리 담당이다. 사용자는 Codex·Claude 같은 도구에서 개발하고, 그 도구에서 온 기록(요청·작업 보고·확인 자료)이 프로젝트의 한 부분에 연결되어 있다.
 할 일: 아래 INPUT JSON의 한 부분(part)과 그 기록(records)을 읽고, 사용자가 이 부분의 현재 상황·최근 변화·다음 판단을 빨리 파악하도록 짧은 한국어로 정리한다.
@@ -160,8 +162,13 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
  * - POST needs Content-Type application/json and X-AgentFlow-Request: 1 (forces a preflight cross-origin);
  * - when STUDIO_ACCESS_CODE is set, X-Studio-Access must equal it (typed by the person using the site, never bundled).
  */
-export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, config = readStudioConfig(env) } = {}) {
+export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, config = readStudioConfig(env), jobs = null } = {}) {
   const limiter = createLimiter(config);
+  // AF100: durable map jobs, only when the host gives a job service (the local Node server, server/map-jobs.mjs). The job owns
+  // its call: the same map model and recipe as /map, the same limiter (taken when it is accepted), never the request's signal.
+  const mapConfig = { ...config, model: config.planModel ?? config.model };
+  const runJob = { configured: () => !!config.apiKey, prompt: () => mapPromptId(), model: mapConfig.model, acquire: id => limiter.acquire(id),
+    call: async (ask, signal) => ({ model: mapConfig.model, reply: await callStudioModel(ask, mapConfig, { fetchImpl, signal }), evidence: { index: SPAN_INDEX, ask: textDigest(JSON.stringify(ask)) } }) };
   const headersFor = origin => {
     const h = { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Content-Type': 'application/json; charset=utf-8' };
     if (origin) Object.assign(h, { 'Access-Control-Allow-Origin': origin, Vary: 'Origin' });
@@ -178,12 +185,25 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
       if (request.method === 'OPTIONS') {
         if (!cors) throw new ApiError('FORBIDDEN_ORIGIN', 403);
         return new Response(null, { status: 204, headers: { ...headersFor(cors), 'Access-Control-Allow-Methods': 'GET, POST',
-          'Access-Control-Allow-Headers': 'Content-Type, X-AgentFlow-Request, X-Studio-Access', 'Access-Control-Max-Age': '600' } });
+          'Access-Control-Allow-Headers': `Content-Type, X-AgentFlow-Request, X-Studio-Access${jobs ? ', X-Studio-Operation' : ''}`, 'Access-Control-Max-Age': '600' } });
       }
       if (url.pathname === '/api/studio/status' && request.method === 'GET') {
         // digest: the model and prompt a reading would be made with, so a browser can tell its stored readings apart.
         return reply(200, { ai: config.apiKey ? 'deepseek' : 'off', model: config.apiKey ? config.model : null, access: config.accessCode ? 'code' : 'open',
-          ...(config.apiKey ? { digest: { model: config.planModel ?? config.model, prompt: await digestPromptId(1), record: await digestPromptId(2) }, map: { model: config.planModel ?? config.model, prompt: await mapPromptId() } } : {}) }, cors);
+          ...(config.apiKey ? { digest: { model: config.planModel ?? config.model, prompt: await digestPromptId(1), record: await digestPromptId(2) }, map: { model: config.planModel ?? config.model, prompt: await mapPromptId() } } : {}),
+          // Said whatever the key: a result already kept can be fetched without one.
+          ...(jobs ? { jobs: jobs.describe() } : {}) }, cors);
+      }
+      if (jobs && (url.pathname === '/api/studio/jobs' || url.pathname.startsWith('/api/studio/jobs/'))) {
+        if (!['GET', 'POST'].includes(request.method)) throw new ApiError('METHOD_NOT_ALLOWED', 405);
+        if (request.headers.get('x-agentflow-request') !== '1') throw new ApiError('FORBIDDEN_ORIGIN', 403);
+        if (request.method === 'POST' && request.headers.get('content-type')?.split(';')[0].trim() !== 'application/json') throw new ApiError('INVALID_CONTENT_TYPE', 415);
+        if (config.accessCode && !sameText(request.headers.get('x-studio-access') ?? '', config.accessCode)) throw new ApiError('ACCESS_CODE_REQUIRED', 401);
+        if (Number(request.headers.get('content-length') ?? 0) > JOB_BYTES) throw new ApiError('INPUT_TOO_LARGE', 413);
+        const rest = url.pathname.slice('/api/studio/jobs'.length).split('/').filter(Boolean);
+        const body = request.method === 'POST' ? await readLimited(request.body, JOB_BYTES) : null;
+        const out = await jobs.handle({ method: request.method, rest, cap: request.headers.get('x-studio-operation'), body }, runJob);
+        return reply(out.status, out.value, cors);
       }
       if (!['/api/studio/ask', '/api/studio/plan', '/api/studio/scope', '/api/studio/digest', '/api/studio/map'].includes(url.pathname)) throw new ApiError('NOT_FOUND', 404);
       if (request.method !== 'POST') throw new ApiError('METHOD_NOT_ALLOWED', 405);

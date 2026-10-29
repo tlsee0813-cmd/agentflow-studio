@@ -1245,6 +1245,10 @@ button:disabled { opacity: .5; cursor: default; }
 .map-understood .map-more { margin-left: 0; }
 .map-understood .mu-fresh { font-size: 12.5px; color: var(--text-3); }
 .map-understood .mu-error { flex-basis: 100%; font-size: 12.5px; color: #a3271d; }
+/* AF100: a reading kept on this PC: it goes on without the window (said once, small), and what a cancel cannot promise. */
+.mu-durable, .mu-notice, .mu-blocked { flex-basis: 100%; font-size: 12px; line-height: 1.5; color: var(--text-3); word-break: keep-all; }
+.space-empty .se-acts .mu-durable { margin-top: 0; }
+.rr-map .pending { flex-wrap: wrap; } .rr-map .pending .mu-pending { flex: 1; min-width: 0; }
 .node.rs-reported .node-meta .dot { background: var(--ok); }
 .node.rs-checked .node-meta .dot { background: var(--ok); }
 .node.rs-want .node-meta .dot, .node.rs-idea .node-meta .dot { background: var(--accent-line); }

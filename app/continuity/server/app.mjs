@@ -22,13 +22,13 @@ async function body(req,validate=validateRequest) {
 }
 // Studio API (fetch handler) behind the same localhost host check. The body is read with its own limit and handed over as a
 // standard Request; the handler applies its own origin/header rules on top.
-async function serveStudio(req,res,studio) {
+async function serveStudio(req,res,studio,path) {
   const controller=new AbortController(),closed=()=>{if(!res.writableEnded)controller.abort();};res.on('close',closed);
   try {
     let body;
     if(req.method==='POST') {
       const chunks=[];let length=0;
-      for await(const chunk of req.iterator({destroyOnReturn:false})){length+=chunk.length;if(length>STUDIO_BODY){req.resume();json(res,413,{error:{code:'INPUT_TOO_LARGE'}});return;}chunks.push(chunk);}
+      for await(const chunk of req.iterator({destroyOnReturn:false})){length+=chunk.length;if(length>(path==='/api/studio/jobs'?JOB_BODY:STUDIO_BODY)){req.resume();json(res,413,{error:{code:'INPUT_TOO_LARGE'}});return;}chunks.push(chunk);}
       body=Buffer.concat(chunks);
     }
     const headers=new Headers();for(const [k,v] of Object.entries(req.headers))if(v!==undefined)headers.set(k,Array.isArray(v)?v.join(', '):v);
@@ -37,7 +37,7 @@ async function serveStudio(req,res,studio) {
     if(!res.destroyed){res.writeHead(response.status,Object.fromEntries(response.headers));res.end(data);}
   } finally {res.off('close',closed);}
 }
-const STUDIO_BODY=70000;
+const STUDIO_BODY=70000,JOB_BODY=524288;
 export function createContinuityApp({config=readConfig(),fetchImpl=globalThis.fetch,mockImpl=mockAdvice,guideImpl=mockGuidance,studio=null}={}) {
   const limiter=createLimiter(config);
   const server=createServer(async(req,res)=>{
@@ -48,7 +48,7 @@ export function createContinuityApp({config=readConfig(),fetchImpl=globalThis.fe
       const hosts=[`127.0.0.1:${req.socket.localPort}`,`localhost:${req.socket.localPort}`];
       if(!hosts.includes(req.headers.host))throw new ApiError('FORBIDDEN_ORIGIN',403);
       const path=(req.url ?? '').split('?')[0];
-      if(studio&&path.startsWith('/api/studio/')){await serveStudio(req,res,studio);return;}
+      if(studio&&path.startsWith('/api/studio/')){await serveStudio(req,res,studio,path);return;}
       if(req.method==='GET' && path==='/api/config') {
         json(res,200,{mode:config.mode,configured:config.mode==='mock'||!!config.apiKey,paidEnabled:config.mode==='deepseek'&&config.allowPaid,scope:'local-development-only',feature:'idea015-continuity'});return;
       }

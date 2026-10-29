@@ -15,9 +15,13 @@ import { ApiError } from '../../server/errors.mjs';
 import { validateSubmit, jobHash, JOB_ID, JOB_CAPABILITY, MAP_JOB_VERSION } from '../dist/public/shared/map-job.js';
 
 export const JOB_FORMAT = 'agentflow.map-job.1';
-export const JOB_LIMITS = Object.freeze({ readyUnacked: 50, materialBytes: 32 * 1024 * 1024, fileBytes: 512 * 1024, inputBytes: 448 * 1024, records: 10000, body: 512 * 1024 });
+/** A ready file holds the input (≤ inputBytes as re-serialised, never more than it came) and the reply wire (the provider's reply is
+ * read up to 128 KiB) with a small envelope, so fileBytes is what a finished job can take; an active job reserves that much and a
+ * ready place before it is accepted, so finishing never goes past readyUnacked or materialBytes. */
+export const JOB_LIMITS = Object.freeze({ readyUnacked: 50, materialBytes: 32 * 1024 * 1024, fileBytes: 640 * 1024, inputBytes: 448 * 1024, records: 10000, body: 512 * 1024 });
 const ACTIVE = new Set(['accepted', 'running']);
 const ENDED = new Set(['failed', 'cancelled', 'interrupted']);
+const ACCEPT = Symbol('acceptance');
 const sha = text => createHash('sha256').update(text).digest('hex');
 const now = () => new Date().toISOString();
 
@@ -114,7 +118,10 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
     }
   } catch (e) { problem = problem ?? 'STORE_UNWRITABLE'; log(`map jobs: store not usable (${e?.code ?? 'error'})`); }
 
+  let closed = false;
   async function write(id, body) {
+    // After close no write of this process reaches the store (a later owner may already be writing it).
+    if (closed) throw new ApiError('JOB_STORE_UNAVAILABLE', 503);
     const text = JSON.stringify({ format: JOB_FORMAT, body, sha256: sha(JSON.stringify(body)) });
     if (Buffer.byteLength(text) > limits.fileBytes) throw new ApiError('JOB_STORE_FULL', 507);
     await io.writeAtomic(opsDir, `${id}.json`, text);
@@ -131,14 +138,16 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
     const prev = chains.get(id) ?? Promise.resolve(), next = prev.then(fn, fn);
     chains.set(id, next.catch(() => {})); return next;
   }
-  const running = new Map(); // id -> { controller, release, failed }
-  const pending = new Set(); // ids being accepted right now (a status read says so instead of 'not found')
+  const running = new Map(); // id -> { controller, release, failed }: from acceptance until its call has ended
+  const failedHere = new Map(); // id -> error: finished but not kept (the store refused); said until seen, interrupted after a restart
+  const executing = new Set(); // the calls in progress, owned so close() can wait for them
+  const pending = new Set(); // `${id}:${capHash}` being accepted now: a read with that same capability is told so, any other gets 'not found'
 
   function view(id, body, full = false) {
-    const live = running.get(id);
-    const state = live?.failed ? 'failed' : body.state === 'accepted' && live ? 'running' : body.state;
+    const lost = body.state === 'accepted' ? failedHere.get(id) : null;
+    const state = lost ? 'failed' : body.state === 'accepted' && running.has(id) ? 'running' : body.state;
     const out = { version: MAP_JOB_VERSION, id, state, acked: body.acked?.outcome ?? null, binding: body.binding ?? null, createdAt: body.createdAt, updatedAt: body.updatedAt,
-      error: live?.failed ?? body.error ?? null, remote: body.remote ?? null };
+      error: lost ?? body.error ?? null, remote: body.remote ?? null };
     if (full && state === 'ready' && !body.acked && body.result && body.input) Object.assign(out, { input: body.input, result: body.result });
     return out;
   }
@@ -151,10 +160,14 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
     if (!sameHash(j.body.capHash, capHashOf(cap))) throw new ApiError('OPERATION_NOT_FOUND', 404);
     return j.body;
   }
-  function capacity(extraBytes) {
-    let material = 0, ready = 0;
-    for (const j of jobs.values()) if (j.body && !j.body.tomb) { if (j.body.input) material += j.size; if (j.body.state === 'ready' && !j.body.acked) ready++; }
-    if (jobs.size >= limits.records || ready >= limits.readyUnacked || material + extraBytes > limits.materialBytes) throw new ApiError('JOB_STORE_FULL', 507);
+  /** Room for one more job as it will be when it ends: every active job already holds a ready place and a whole file. */
+  function capacity() {
+    let material = 0, places = 0;
+    for (const j of jobs.values()) if (j.body && !j.body.tomb) {
+      if (j.body.state === 'accepted') { places++; material += limits.fileBytes; }
+      else if (j.body.state === 'ready' && !j.body.acked) { places++; material += j.size; }
+    }
+    if (jobs.size >= limits.records || places >= limits.readyUnacked || material + limits.fileBytes > limits.materialBytes) throw new ApiError('JOB_STORE_FULL', 507);
   }
 
   async function submit(raw, cap, run) {
@@ -163,7 +176,7 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
     const id = typeof parsed?.id === 'string' && JOB_ID.test(parsed.id) ? parsed.id : null;
     if (!id) throw new ApiError('INVALID_INPUT', 400);
     const capHash = capHashOf(cap);
-    pending.add(id);
+    const key = `${id}:${capHash}`; pending.add(key);
     try {
       return await serial(id, async () => {
         let checked; try { checked = await validateSubmit(parsed); } catch { throw new ApiError('INVALID_INPUT', 400); }
@@ -171,7 +184,8 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
         if (j?.damaged) throw new ApiError('OPERATION_DAMAGED', 409);
         if (j) {
           // The same job asked again (its receipt was lost): its state, never a second call. A cancel that came first holds.
-          if (!sameHash(j.body.capHash, capHash)) throw new ApiError('OPERATION_CONFLICT', 409);
+          // Another capability is told nothing about this id (as for a read); the same capability with another body is a conflict.
+          if (!sameHash(j.body.capHash, capHash)) throw new ApiError('OPERATION_NOT_FOUND', 404);
           if (j.body.bindingHash === null && j.body.state === 'cancelled') return { status: 200, value: view(id, j.body) };
           if (j.body.bindingHash !== bindingHash) throw new ApiError('OPERATION_CONFLICT', 409);
           return { status: 200, value: view(id, j.body) };
@@ -180,35 +194,46 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
         const prompt = await run.prompt();
         if (!run.configured()) throw new ApiError('AI_NOT_CONFIGURED', 503);
         if (s.binding.prompt !== prompt || s.binding.model !== run.model) throw new ApiError('PROMPT_CHANGED', 409);
-        for (const [other, o] of jobs) if (o.body && !o.body.tomb && o.body.binding?.entryId === s.binding.entryId && (ACTIVE.has(o.body.state) || running.has(other))) throw new ApiError('ENTRY_BUSY', 409);
-        capacity(Buffer.byteLength(raw));
-        // The call is owned by the job from here: the limiter is taken now and given back when the job ends.
-        const release = run.acquire(id);
-        const body = { id, capHash, bindingHash, binding: s.binding, state: 'accepted', createdAt: now(), updatedAt: now(), input: s.input };
-        try { await write(id, body); } catch (e) { release(); throw e instanceof ApiError ? e : new ApiError('JOB_STORE_FAILED', 507); }
-        const controller = new AbortController(); running.set(id, { controller, release, failed: null });
-        queueMicrotask(() => { void execute(id, checked.input.ask, controller, run); });
-        return { status: 202, value: view(id, body) };
+        // One acceptance at a time across all ids: the entry check, the room check and the durable record are one step, so two
+        // jobs of one entry (or the last free place) are never both accepted.
+        return await serial(ACCEPT, async () => {
+          for (const o of jobs.values()) if (o.body && !o.body.tomb && o.body.binding?.entryId === s.binding.entryId && o.body.state === 'accepted') throw new ApiError('ENTRY_BUSY', 409);
+          capacity();
+          // The call is owned by the job from here: the limiter is taken now and given back once, when the call has ended.
+          const release = run.acquire(id);
+          const body = { id, capHash, bindingHash, binding: s.binding, state: 'accepted', createdAt: now(), updatedAt: now(), input: s.input };
+          try { await write(id, body); } catch (e) { release(); throw e instanceof ApiError && e.code !== 'JOB_STORE_UNAVAILABLE' ? e : new ApiError('JOB_STORE_FAILED', 507); }
+          const controller = new AbortController(); running.set(id, { controller, release });
+          const done = execute(id, checked.input.ask, controller, run).finally(() => executing.delete(done)); executing.add(done);
+          return { status: 202, value: view(id, body) };
+        });
       });
-    } finally { pending.delete(id); }
+    } finally { pending.delete(key); }
   }
 
   async function execute(id, ask, controller, run) {
+    await Promise.resolve(); // the receipt is answered first; the call never waits on the connection that brought it
     let outcome;
     try { const out = await run.call(ask, controller.signal); outcome = { ok: true, out }; }
     catch (e) { outcome = { ok: false, error: e instanceof ApiError ? { code: e.code, ...(e.detail ? { detail: e.detail } : {}) } : { code: 'INTERNAL_ERROR' } }; }
-    await serial(id, async () => {
-      const live = running.get(id), body = jobs.get(id)?.body;
-      try {
-        // Cancelled (durably) meanwhile: a late reply never turns it back into a result.
-        if (!body || body.state !== 'accepted') return;
+    const live = running.get(id);
+    try {
+      await serial(id, async () => {
+        const body = jobs.get(id)?.body;
+        // Cancelled (durably) meanwhile, or this process closed: a late reply never turns it back into a result.
+        if (closed || !body || body.state !== 'accepted') return;
+        const failed = error => ({ ...strip(body), state: 'failed', error, updatedAt: now() });
         const next = outcome.ok
           ? { ...body, state: 'ready', updatedAt: now(), result: { model: outcome.out.model, prompt: body.binding.prompt, askHash: body.binding.askHash, wire: outcome.out.reply, evidence: outcome.out.evidence, reading: { id: `R_${randomUUID()}`, at: now() } } }
-          : { ...strip(body), state: 'failed', error: outcome.error, updatedAt: now() };
-        try { await write(id, next); running.delete(id); }
-        catch { if (live) live.failed = { code: 'JOB_STORE_FAILED' }; } // not kept: nothing is shown; after a restart it reads as interrupted
-      } finally { live?.release(); }
-    });
+          : failed(outcome.error);
+        try { await write(id, next); }
+        catch (e) {
+          // The result is not kept, so it is not shown. Said as failed (durably when the store still takes that much).
+          const error = { code: e?.code === 'JOB_STORE_FULL' ? 'JOB_STORE_FULL' : 'JOB_STORE_FAILED' };
+          try { await write(id, failed(error)); } catch { if (!closed) failedHere.set(id, error); }
+        }
+      });
+    } finally { running.delete(id); live?.release(); }
   }
 
   async function cancel(id, cap) {
@@ -225,7 +250,7 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
         return { status: 200, value: view(id, body) };
       }
       const body = find(id, cap), live = running.get(id);
-      if (body.state !== 'accepted' || live?.failed) return { status: 200, value: view(id, body) };
+      if (body.state !== 'accepted' || failedHere.has(id)) return { status: 200, value: view(id, body) };
       const next = { ...strip(body), state: 'cancelled', remote: 'unknown', updatedAt: now() };
       try { await write(id, next); } catch (e) { throw e instanceof ApiError ? e : new ApiError('JOB_STORE_FAILED', 507); }
       // Recorded first; only then is the call stopped (whether the provider stops working or charging is not known).
@@ -239,20 +264,20 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
     if (!['applied', 'discarded', 'seen'].includes(outcome)) throw new ApiError('INVALID_INPUT', 400);
     return serial(id, async () => {
       const body = find(id, cap); if (!body) throw new ApiError('OPERATION_NOT_FOUND', 404);
-      const live = running.get(id);
+      const lost = failedHere.get(id);
       if (body.acked) { if (body.acked.outcome !== outcome) throw new ApiError('OPERATION_CONFLICT', 409); return { status: 200, value: view(id, body) }; }
-      const ok = body.state === 'ready' ? outcome === 'applied' || outcome === 'discarded' : (ENDED.has(body.state) || live?.failed) && outcome === 'seen';
+      const ok = body.state === 'ready' ? outcome === 'applied' || outcome === 'discarded' : (ENDED.has(body.state) || (!!lost && body.state === 'accepted')) && outcome === 'seen';
       if (!ok) throw new ApiError('OPERATION_STATE', 409);
-      const next = tomb(live?.failed ? { ...body, state: 'failed', error: live.failed } : body, { outcome, at: now() });
+      const next = tomb(lost && body.state === 'accepted' ? { ...body, state: 'failed', error: lost } : body, { outcome, at: now() });
       try { await write(id, next); } catch (e) { throw e instanceof ApiError ? e : new ApiError('JOB_STORE_FAILED', 507); }
-      if (live?.failed) running.delete(id);
+      failedHere.delete(id);
       return { status: 200, value: view(id, next) };
     });
   }
 
   async function status(id, cap) {
     const body = find(id, cap);
-    if (!body) { if (pending.has(id)) throw new ApiError('OPERATION_ACCEPTING', 409); throw new ApiError('OPERATION_NOT_FOUND', 404); }
+    if (!body) { if (pending.has(`${id}:${capHashOf(cap)}`)) throw new ApiError('OPERATION_ACCEPTING', 409); throw new ApiError('OPERATION_NOT_FOUND', 404); }
     return { status: 200, value: view(id, body, true) };
   }
 
@@ -261,14 +286,24 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
     describe: () => problem ? { version: MAP_JOB_VERSION, durable: false, problem } : { version: MAP_JOB_VERSION, durable: true },
     /** One job route. run: { configured(), prompt(), model, acquire(id), call(ask, signal) } from the studio handler. */
     async handle({ method, rest, cap, body }, run) {
-      if (problem) throw new ApiError('JOB_STORE_UNAVAILABLE', 503);
+      if (problem || closed) throw new ApiError('JOB_STORE_UNAVAILABLE', 503);
       if (rest.length === 0 && method === 'POST') return submit(body, cap, run);
       if (rest.length === 1 && method === 'GET') return status(rest[0], cap);
       if (rest.length === 2 && method === 'POST' && rest[1] === 'cancel') return cancel(rest[0], cap);
       if (rest.length === 2 && method === 'POST' && rest[1] === 'ack') return ack(rest[0], cap, body);
       throw new ApiError(['GET', 'POST'].includes(method) ? 'NOT_FOUND' : 'METHOD_NOT_ALLOWED', ['GET', 'POST'].includes(method) ? 404 : 405);
     },
-    /** For tests and shutdown: lets the OS-held ownership go and waits for changes in progress. */
-    async close() { for (const r of running.values()) r.controller.abort(); await Promise.all([...chains.values()]); await owner?.release?.(); }
+    /** Shutdown: fenced first (no write of this process reaches the store after this), calls called off, then the calls and the
+     * changes in progress are waited for (a call that ignores the abort for longer than graceMs no longer matters: it cannot
+     * write), and only then is the ownership let go. */
+    async close({ graceMs = 2000 } = {}) {
+      closed = true;
+      for (const r of running.values()) r.controller.abort();
+      let timer; await Promise.race([Promise.allSettled([...executing]), new Promise(r => { timer = setTimeout(r, graceMs); })]); clearTimeout(timer);
+      await Promise.allSettled([...chains.values()]);
+      await owner?.release?.();
+    },
+    /** Test view of what this process holds (no material). */
+    held: () => ({ running: running.size, executing: executing.size, failed: failedHere.size })
   };
 }
