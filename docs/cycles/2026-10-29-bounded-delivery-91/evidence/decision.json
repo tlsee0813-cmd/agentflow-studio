@@ -1,0 +1,29 @@
+{
+  "verdict": "REJECT_FIRST_VALID_DELIVERY_CANDIDATE",
+  "responsible": "Root coordinator after independent Sol review",
+  "reason": "The selected full-contract-valid response omits previously fixed core withdrawal conditions from its active explanation. Source quotations alone do not preserve that explanation.",
+  "evidencePointers": [
+    "winner.parts[1].claims[0] (s4): explicit withdrawal and order/name/kind restrictions only; exact frozen item, actual prior match, new quotation and manual correction checks absent from text",
+    "winner.parts[5].claims[3] (s20): frozen item supplied to AI, but no validate/apply requirements",
+    "winner.parts[0].claims[2] (s3): implementer file list represented as product input"
+  ],
+  "missingMeaning": [
+    "exact prior match and frozen request item validation at validate and apply",
+    "manual correction snapshot preservation and change check",
+    "branch/version explicit-target condition and about-string distinction",
+    "map claim replacement versus frozen-request match withdrawal scope"
+  ],
+  "preservedMeaning": [
+    "requirements remain wants; existing defects remain descriptions",
+    "source kind versus progress stance and legacy unclassified reports",
+    "current/history separation, shared aggregate, source return and legacy compatibility",
+    "nested folder example is not made a product subsystem"
+  ],
+  "precedent": "Same A3 interpretation already used in79 and89;80 present-tense-role correction retained. No new API-name criterion.",
+  "winnerReplacement": false,
+  "loserFinalResponseAvailable": false,
+  "allThreeGateComplete": false,
+  "productIntegrated": false,
+  "publicReleaseApproved": false,
+  "next": "Close91 without further calls or integration. A globally preferred-path proposal is under read-only decision review, not selected or executed."
+}

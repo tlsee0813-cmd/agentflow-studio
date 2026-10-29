@@ -1,0 +1,19 @@
+✔ fast invalid result cannot cancel a later valid result (5.0475ms)
+✔ first valid result wins and late valid result is ignored (1.7783ms)
+✔ one path rejects while the other completes (1.4511ms)
+✔ both paths fail without any winner (0.5398ms)
+✔ caller cancellation wins over late successful responses (1.0439ms)
+✔ pre-aborted caller starts no path (0.2977ms)
+✔ common deadline returns even when providers ignore cancellation (25.7853ms)
+✔ near-simultaneous valid responses yield exactly one result (0.769ms)
+✔ a valid but inapplicable response leaves the other path eligible (0.9142ms)
+✔ validation that crosses the deadline cannot win (26.0624ms)
+✔ a validation error after deadline is timeout rather than both-failed (25.6919ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 184.0286

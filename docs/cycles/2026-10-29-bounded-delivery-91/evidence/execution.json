@@ -1,0 +1,85 @@
+{
+  "source": "4a30e485bc05c2f69d85c779fc6edc01c08f6da3",
+  "appTree": "7beb4ba00211a1afd3b9549ef4eb08a55b2a8384",
+  "caseId": "actual-order",
+  "inputSha256": "6c5bbfd44899c67e7478618a7d43bbbd69fd392598ef48bb160aafc81c8595b4",
+  "askSha256": "d64857baa4b3e5fce53cc9bc4a2a754c042d64d87ba8bfa0cc3e6935b8cc1d11",
+  "mapInstructionsSha256": "81d6e96834d7c245270785dafe2861bcc010779f12ec14f6b9472b378a8ff846",
+  "wrapperSha256": "45219945020c17be054bcdf46ec584e1ebc2b8537581c513b29e5590f0ddaa31",
+  "prompt": "m6-33ff86d5f2da",
+  "cliVersion": "codex-cli 0.164.0-alpha.11.1",
+  "requestedCliModel": "gpt-6.1-sol",
+  "requestedCliReasoning": "high",
+  "deepseekModel": "deepseek-flash",
+  "deepseekThinking": "enabled",
+  "deepseekMaxTokens": 16384,
+  "deadlineMs": 90000,
+  "topLevelPathsMax": 2,
+  "invocationsPerPathMax": 1,
+  "internalTransportRetries": "not observable as a total count",
+  "meaningBasis": {
+    "experience76-acceptance.json": "2ce759129a05b940e9eda2a50e68f219e98c996acc6807632509a6217dc8bf12",
+    "experience76-fresh-meaning.json": "823777410b011e75c4a02b3aee316964e52ff84d72b88d4508d62f9bf8917386",
+    "experience80-role-reading-review.json": "65f9713a0dc1d1758275882265b90d9a23c4822c2108a8977879ac3e3f72af40",
+    "experience89-micro-semantic-amendment.json": "f454ed397625eeeb743bb2e8706a888d1b578c4f29544e8c8c7c9f698d2a4ac9"
+  },
+  "coreHash": "6a0c98392a7cc6378dea4facb4854c830e1b9422f8d0ecdf16c9d510622e1f90",
+  "runnerHash": "cb254960c6a856cf26fb7446d53d9a22b1e5f0eb180cf562a18e5e32da2f1dc3",
+  "observations": [
+    {
+      "id": "deepseek",
+      "invocations": 1,
+      "state": "valid",
+      "completedMs": 51881.1653
+    },
+    {
+      "id": "codex",
+      "invocations": 1,
+      "state": "cancelled",
+      "error": "CANCELLED",
+      "completedMs": 51911.554000000004
+    }
+  ],
+  "cleanupCompleted": true,
+  "originalUnchanged": true,
+  "sourceUnchanged": true,
+  "winner": "deepseek",
+  "decisionMs": 51881.638,
+  "deepseekFinishReason": "stop",
+  "deepseekUsage": {
+    "prompt_tokens": 6378,
+    "completion_tokens": 10049,
+    "total_tokens": 16427,
+    "prompt_tokens_details": {
+      "cached_tokens": 6144
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 7780
+    },
+    "prompt_cache_hit_tokens": 6144,
+    "prompt_cache_miss_tokens": 234
+  },
+  "codexTermination": {
+    "code": null,
+    "terminationSignal": "SIGTERM",
+    "ms": 51886.318,
+    "cancelled": true,
+    "finalBytes": 0,
+    "toolUse": false
+  },
+  "privateApply": {
+    "performed": true,
+    "parts": 6,
+    "skipped": [],
+    "meaningAcceptance": false,
+    "productStorage": false
+  },
+  "microInvocations": 0,
+  "zephyrInvocations": 0,
+  "productChanges": 0,
+  "modelResubmissions": 0,
+  "outputRepairs": 0,
+  "originalResultSha256": "c0d74a83f760e83f7573affd70821e98acfef9d75a0e8c5278aa20df8caefd6a",
+  "frozenSha256": "41452bd0ac0cafc4a09cbdee3c7b9db5ddaf0e9e1413491a40654a419ca2c35e",
+  "independentReviewSha256": "09f8f34775927cf492499e88f96569996ecfc69c42da5d7d20182e6f3d0d3af6"
+}
