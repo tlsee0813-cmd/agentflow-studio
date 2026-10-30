@@ -314,6 +314,79 @@ test('SESSIONS-M1 a prompt that starts with markup the person pasted stays as ty
   assert.deepEqual(codex(['<section>\n<h1>제목</h1>\n</section>']), ['<section>\n<h1>제목</h1>\n</section>']);
 });
 
+test('SESSIONS-W1 a session a Claude project drives (a thread, Remote Control): each prompt is the person\'s words from its wake, not the envelope', async () => {
+  const msg = (attrs, text) => `      <message ${attrs}>${text}</message>\n`;
+  const wake = (reason, messages, notes = ['Reply in this thread.']) => `<wake reason="${reason}" current-time="${at(0)}">\n  <project id="chan_test" type="project">\n    <thread ts="cmsg_test">\n${messages.join('')}    </thread>\n  </project>\n${notes.map(n => `  <system-note>${n}</system-note>\n`).join('')}</wake>\n`;
+  const human = 'from="human" trust="principal" author="A" id="cmsg_a" sent-at="2026-10-30T00:00:00Z" surface="app" mention="true"';
+  const rows = [
+    cu(0, `<session-context nonce="n1">project rules</session-context nonce="n1">\n\n${wake('spawn', [msg('trigger="true" from="system" trust="principal"', 'You are a thread')])}\n<relay from="coordinator"><note>start the work</note></relay>`),
+    cu(1, wake('mention', [msg('from="human" trust="peer" author="B"', '옆 사람 말'), msg(`trigger="true" ${human}`, '로그인 버튼 고쳐 줘: a &lt; b &amp;&amp; c &#39;저장&#39; &#x1F600;')]), { promptSource: 'sdk', origin: { kind: 'human' } }),
+    ca(2, '고쳤어요.'),
+    cu(3, wake('remote-control-session-status', [], ['connected', 'idle'])),
+    cu(4, `<system-reminder>ctx</system-reminder>\n${wake('decision-chosen', [msg('trigger="true" from="system" trust="principal"', '카드 알림'), msg(human, '예전 말')])}`),
+    cu(5, `<system-reminder>ctx</system-reminder>\n${wake('decision-chosen', [msg(`trigger="true" ${human}`, '첫째 안')])}`),
+    ca(6, '첫째 안으로 할게요.')
+  ];
+  const want = [['user', '로그인 버튼 고쳐 줘: a < b && c \'저장\' 😀'], ['assistant', '고쳤어요.'], ['user', '첫째 안'], ['assistant', '첫째 안으로 할게요.']];
+  assert.deepEqual(parseClaude(rows).turns.map(t => [t.role, t.text]), want);
+  // Listed by those words too (the reading the server and a picked folder share).
+  const P = await import('../dist/public/shared/session-parse.js'), lines = P.jsonLines(jl(rows));
+  assert.equal(P.sessionSummary('claude-' + 'a'.repeat(24), P.sniffTool(lines), P.parseSession(P.sniffTool(lines), lines), at(9), 1).preview, want[0][1]);
+  // Only a whole envelope is unwrapped: markup the person typed or pasted that starts with a wake, or goes on after one, stays as typed.
+  const one = text => parseClaude([cu(0, text)]).turns.map(t => t.text);
+  for (const text of ['<wake> 태그가 왜 남는지 봐 줘', '<wake>와 </wake> 사이를 지우는 코드 짜 줘', `${wake('mention', [msg(`trigger="true" ${human}`, 'a')])}\n이 봉투는 어디서 와?`])
+    assert.deepEqual(one(text), [text], text);
+  assert.deepEqual(one(`${wake('mention', [msg(`trigger="true" ${human}`, '고쳐 줘')])}\n<relay from="coordinator"><note>context</note></relay>`), ['고쳐 줘']);
+  assert.deepEqual(one(`${wake('mention', [msg(`trigger="true" ${human}`, '고쳐 줘')])}\n<relay from="coordinator"><note>the </wake> tag</note></relay>`), ['고쳐 줘'], 'a relay quoting a wake tag');
+  // A wake with no message that woke it is not a prompt, even when it shows the person's earlier words; a tag that only starts like
+  // a message, or closes itself, is not one.
+  assert.deepEqual(one(wake('status', [msg(human, '예전 말')])), []);
+  assert.deepEqual(one(wake('mention', ['<message-ref id="x">', '<message from="human" trigger="true"/>', msg(`trigger="true" ${human}`, '이것만')])), ['이것만']);
+  // The project's context ends at the tag closed with its own nonce, whatever it quotes; it is context only before a wake.
+  for (const open of ['<session-context nonce="n2">', '<session-context nonce="n2" v="2">'])
+    assert.deepEqual(one(`${open}a </session-context> b</session-context nonce="n2">\n\n${wake('mention', [msg(`trigger="true" ${human}`, '시작해 줘')])}`), ['시작해 줘'], open);
+  const codexOne = text => parseCodex([{ type: 'response_item', payload: { type: 'message', role: 'user', content: [{ type: 'input_text', text }] } }]).turns.map(t => t.text);
+  for (const text of ['<session-context>로그인 화면</session-context>\n이 태그 뭐야?', '<session-context nonce="a">x</session-context nonce="a">\n이 태그 뭐야?']) {
+    assert.deepEqual(one(text), [text], text); assert.deepEqual(codexOne(text), [text], text);
+  }
+  // Read once however it is made: a pasted prompt full of openers that never close is read in time.
+  const started = Date.now();
+  one(`${wake('mention', [])}`.replace('</wake>', `${'<message x'.repeat(90000)}</wake>`)); one(`${'<system-reminder>'.repeat(60000)} 질문`); one(`<wake reason="x">${'<message>x'.repeat(90000)}</wake>`);
+  one(`<command-name>/x</command-name>${'<command-args>'.repeat(100000)}`); one(`<system-reminder>${'</system-reminder '.repeat(50000)}`); one(`<a>${'</a '.repeat(100000)}`);
+  assert.ok(Date.now() - started < 3000, `${Date.now() - started}ms`);
+  // What the person sends while the tool is still working is a queued command, read as a prompt; a background task's notice,
+  // another Claude's message and notes queued the same way are not.
+  const queued = (m, prompt, extra = {}) => ({ type: 'attachment', cwd: '/w', timestamp: at(m), attachment: { type: 'queued_command', prompt, ...extra } });
+  const busy = [cu(0, '테스트 돌려 줘'), ca(1, '돌리는 중이에요.'),
+    queued(2, '실패하면 로그도 보여 줘'),
+    queued(3, [{ type: 'text', text: '이 화면도 봐 줘' }, { type: 'image', source: { type: 'base64', data: 'AAAA' } }], { commandMode: 'prompt' }),
+    queued(4, wake('mention', [msg(`trigger="true" ${human}`, '됐음?')]), { commandMode: 'prompt', origin: { kind: 'human' } }),
+    queued(5, '<task-notification><status>completed</status></task-notification>', { commandMode: 'task-notification', origin: { kind: 'task-notification' } }),
+    queued(6, '<relay from="coordinator"><cited author="user">x</cited><note>y</note></relay>', { commandMode: 'prompt', origin: { kind: 'task-notification', subkind: 'projects-relay' }, isMeta: true }),
+    queued(7, 'ls', { commandMode: 'bash' }),
+    queued(8, '[Subagent hand-back] report', { commandMode: 'prompt', origin: { kind: 'peer' }, isMeta: true }),
+    ca(9, '다 됐어요.')];
+  assert.deepEqual(parseClaude(busy).turns.map(t => [t.role, t.text, t.at]), [['user', '테스트 돌려 줘', at(0)], ['assistant', '돌리는 중이에요.', at(1)],
+    ['user', '실패하면 로그도 보여 줘', at(2)], ['user', '이 화면도 봐 줘', at(3)], ['user', '됐음?', at(4)], ['assistant', '다 됐어요.', at(9)]]);
+  assert.deepEqual(parseClaude([{ ...queued(0, '하위 작업'), isSidechain: true }]).turns, [], 'a subagent\'s queue is its own');
+  // A queued row keeps the time it was sent but is written when the tool reads it, after the work done meanwhile. It is timed just
+  // after that work, so a mark set during the work (a quiet long command) does not leave it behind.
+  const work = [cu(0, '테스트 돌려 줘'), ca(2, '돌릴게요.'), ca(3, [{ type: 'tool_use', id: 'b1', name: 'Bash', input: { command: 'npm test' } }])];
+  const late = parseClaude([...work, cu(5, [{ type: 'tool_result', tool_use_id: 'b1', content: 'ok' }]), queued(1, '실패하면 로그도 보여 줘'), ca(6, '다 됐어요.')]);
+  assert.deepEqual(late.turns.map(t => [t.role, t.at]), [['user', at(0)], ['assistant', at(2)], ['user', '2026-10-29T10:05:00.001Z'], ['assistant', at(6)]]);
+  const detail = P.sessionDetail('claude-' + 'b'.repeat(24), 'claude', late, undefined, at(3));
+  assert.deepEqual(detail.turns.map(t => t.text), ['실패하면 로그도 보여 줘', '다 됐어요.']);
+  const { newTurns } = await import('../dist/public/shared/session-import.js');
+  assert.deepEqual(newTurns(P.sessionDetail('claude-' + 'b'.repeat(24), 'claude', late), { lastAt: at(2), count: 2, updatedAt: at(3) }).map(t => t.text), ['실패하면 로그도 보여 줘', '다 됐어요.']);
+  // Several read together follow one another, so a look between their lines leaves none behind.
+  const two = parseClaude([...work, cu(5, [{ type: 'tool_result', tool_use_id: 'b1', content: 'ok' }]), queued(1, 'Q1'), queued(4, 'Q2'), ca(6, '다 됐어요.')]);
+  assert.deepEqual(two.turns.map(t => t.at), [at(0), at(2), '2026-10-29T10:05:00.001Z', '2026-10-29T10:05:00.002Z', at(6)]);
+  assert.deepEqual(newTurns(P.sessionDetail('claude-' + 'b'.repeat(24), 'claude', two), { lastAt: '2026-10-29T10:05:00.001Z', count: 3, updatedAt: at(5) }).map(t => t.text), ['Q2', '다 됐어요.']);
+  // A line with a time in another form, or far off (a clock set wrong), does not move the prompts after it.
+  const odd = parseClaude([cu(0, '시작'), { type: 'queue-operation', timestamp: 'garbage' }, { type: 'queue-operation', timestamp: '2031-01-01T00:00:00.000Z' }, queued(2, 'Q'), ca(3, '답')]);
+  assert.deepEqual(odd.turns.map(t => t.at), [at(0), at(2), at(3)]);
+});
+
 test('SESSIONS-G1 a reply keeps the time of its first piece while it grows: the same turn at each look, and since brings it back whole', async () => {
   const P = await import('../dist/public/shared/session-parse.js');
   const rows = [cu(0, '마이그레이션 돌려 줘'), ca(1, 'PART1'), ca(2, [{ type: 'tool_use', id: 'b1', name: 'Bash', input: { command: 'x' } }]),

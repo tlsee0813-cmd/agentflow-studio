@@ -41,18 +41,66 @@ const clip = (text: string, n: number) => (text.length > n ? `${text.slice(0, n)
 const INJECTED = /^(system-reminder|command-[a-z]+|local-command-[a-z]+|bash-[a-z]+|user-prompt-submit-hook|user-memory-input|ide_[a-z_]+|task-notification|environment_context|user_instructions|turn_context|turn_aborted|user_action|user_shell_command|recommended_plugins|in-app-browser-context|image|skill|instructions|permissions)$/i;
 /** Messages that are context as a whole (Codex environment, AGENTS.md and permissions), even when their block is not closed. */
 const CONTEXT = /^(<(user_instructions|environment_context|turn_context|instructions|permissions)[\s>]|# AGENTS\.md instructions)/i;
+const XML_CHAR: Record<string, string> = { lt: '<', gt: '>', amp: '&', quot: '"', apos: "'" };
+const unxml = (t: string) => t.replace(/&(?:(lt|gt|amp|quot|apos)|#(\d{1,7})|#x([0-9a-f]{1,6}));/gi, (m, name: string | undefined, dec: string | undefined, hex: string | undefined) => {
+  if (name) return XML_CHAR[name.toLowerCase()]!;
+  const code = dec ? Number(dec) : parseInt(hex!, 16);
+  return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : m;
+});
+/** A session a Claude project drives (one of its threads, or Remote Control on the person's computer) gets each message in a wake
+ * envelope, after the project's <session-context nonce="…"> (closed by the same nonce) and before another Claude's <relay>:
+ * <wake reason="…"><project …><thread …><message trigger="true" from="human" …>what they wrote</message></thread></project>
+ * <system-note>…</system-note></wake>, the words escaped as XML. Only a message that shape is unwrapped: a prompt that merely
+ * starts with a wake tag or a session-context, or goes on after one, is kept as typed. The end of the wake, or -1. */
+const WAKE = /^<wake reason="[^"<>]*"[^<>]*>\s*<project\s[^<>]*>\s*<thread\s[^<>]*>/;
+function wakeEnd(t: string): number {
+  if (!WAKE.test(t)) return -1;
+  // A relay after it can quote a wake tag of its own: the wake ends where the relay starts.
+  const r = t.search(/<\/wake>\s*<relay\s/), tail = r >= 0 ? t.slice(r + 7).trim() : '';
+  if (r >= 0 && tail.endsWith('</relay>')) return r;
+  const e = t.lastIndexOf('</wake>'); return e >= 0 && !t.slice(e + 7).trim() ? e : -1;
+}
+/** What follows the project's context at the start of a message (closed by the tag with its own nonce), or null. */
+function afterContext(t: string): string | null {
+  const open = /^<session-context\s[^<>]*?\bnonce="([^"<>]*)"[^<>]*>/.exec(t); if (!open) return null;
+  const shut = new RegExp(`</session-context\\s[^<>]*?\\bnonce="${open[1]!.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"[^<>]*>`).exec(t.slice(open[0].length));
+  return shut ? t.slice(open[0].length + shut.index + shut[0].length).trim() : null;
+}
+/** The prompt in a wake: what the person wrote in the message that woke the session (others are shown with it as context). A wake
+ * that carries none (a status, another Claude's message, a system note) is not a prompt. Read by position, so a long message is
+ * read once whatever it holds. */
+function woken(t: string, end: number): string | null {
+  const said: string[] = [];
+  for (let i = t.indexOf('<message'); i >= 0 && i < end; i = t.indexOf('<message', i + 1)) {
+    const open = t.indexOf('>', i); if (open < 0 || open > end) break;
+    const attrs = t.slice(i + 8, open);
+    if (!/^(\s|$)/.test(attrs) || attrs.endsWith('/')) { i = open; continue; }
+    const close = t.indexOf('</message>', open); if (close < 0 || close > end) break;
+    if (/\strigger="true"/.test(attrs) && /\sfrom="human"/.test(attrs)) said.push(unxml(t.slice(open + 1, close)).trim());
+    i = close;
+  }
+  return said.filter(Boolean).join('\n\n') || null;
+}
+const REMINDER_END = '</system-reminder>';
 /** What the person typed, without context a tool injects into the same message. Null when nothing typed is left. */
 function typed(text: string): string | null {
-  let t = String(text).replace(/<system-reminder>[\s\S]*?<\/system-reminder>/g, '').trim();
+  // Reminders end where the last one closes: an opening tag after it is not searched to the end again for each one.
+  const raw = String(text), last = raw.lastIndexOf(REMINDER_END) + REMINDER_END.length;
+  let t = (last >= REMINDER_END.length ? raw.slice(0, last).replace(/<system-reminder>[\s\S]*?<\/system-reminder>/g, '') + raw.slice(last) : raw).trim();
   // Claude Code slash commands are stored as tags: kept as the command the person typed; their local output is not a prompt.
   const cmd = /^<command-name>([^<]*)<\/command-name>/.exec(t.replace(/^<command-message>[\s\S]*?<\/command-message>\s*/, ''));
-  if (cmd) { const args = /<command-args>([\s\S]*?)<\/command-args>/.exec(t)?.[1]?.trim(); t = `${cmd[1]!.trim()}${args ? ` ${args}` : ''}`; }
+  if (cmd) {
+    const a = t.indexOf('<command-args>'), b = a >= 0 ? t.indexOf('</command-args>', a) : -1, args = b >= 0 ? t.slice(a + 14, b).trim() : '';
+    t = `${cmd[1]!.trim()}${args ? ` ${args}` : ''}`;
+  }
   if (/^<(local-command-[a-z]+|command-message)>/.test(t)) return null;
   // Whole injected blocks at the start (one or several: <recommended_plugins>…</recommended_plugins><environment_context>…) are
   // context too; what is left after them is what was typed.
   for (let guard = 0; guard < 20; guard++) {
-    const m = /^<([a-z_][\w-]*)(\s[^>]*)?>[\s\S]*?<\/\1(\s[^>]*)?>\s*/i.exec(t); if (!m || !INJECTED.test(m[1]!)) break; t = t.slice(m[0].length);
+    const m = /^<([a-z_][\w-]*)(\s[^>]*)?>[\s\S]*?<\/\1(\s[^<>]*)?>\s*/i.exec(t); if (!m || !INJECTED.test(m[1]!)) break; t = t.slice(m[0].length);
   }
+  const inWake = afterContext(t) ?? t, end = wakeEnd(inWake);
+  if (end >= 0) return woken(inWake, end);
   // Context a tool puts in a user message of its own (Codex environment_context, user_instructions, AGENTS.md…) is not a prompt,
   // nor is a lone opening or closing tag a tool wraps an attachment in (Codex CLI's <image name=[Image #1]> … </image>).
   const lone = /^<\/?([a-z_][\w-]*)(\s[^>]*)?>$/i.exec(t);
@@ -111,16 +159,19 @@ export function parseClaude(lines: unknown[]): ParsedSession {
   const p = claudeParser(); for (const o of lines) p.push(o); return p.done();
 }
 const EDIT_TOOLS = ['Edit', 'Write', 'MultiEdit', 'NotebookEdit'];
+const ISO_TIME = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/, DAY_MS = 24 * 60 * 60 * 1000;
 /** The Claude Code reading, one line at a time (a long file is never held whole). */
 export function claudeParser(): SessionParser {
   const c = collector(), meta = newMeta(), changes: FileChange[] = [], edits = new Map<string, FileChange>();
   const changed = (e: FileChange) => { changes.push(e); c.reply('', e.at, e.files); };
+  let latest = ''; // the latest time a line was written with, in Claude Code's own form (so times compare as strings)
   const push = (o: Row) => {
     if (!o || typeof o !== 'object') return;
+    const was = latest; if (typeof o.timestamp === 'string' && ISO_TIME.test(o.timestamp) && o.timestamp > latest) latest = o.timestamp;
     if (o.type === 'ai-title' && typeof o.aiTitle === 'string') meta.title = o.aiTitle;
     if (o.type === 'summary' && typeof o.summary === 'string' && !meta.title) meta.title = o.summary;
     if (o.type === 'relocated') atFolder(meta, o.relocatedCwd);
-    if (o.type !== 'user' && o.type !== 'assistant') return;
+    if (o.type !== 'user' && o.type !== 'assistant' && !(o.type === 'attachment' && o.attachment?.type === 'queued_command')) return;
     const at = typeof o.timestamp === 'string' ? o.timestamp : null, content = o.message?.content, blocks: Row[] = Array.isArray(content) ? content.filter(b => b && typeof b === 'object') : [];
     // An edit counts once its result came back without an error: one the person refused, or that failed, changed nothing. A
     // subagent's edits count too (its own messages do not).
@@ -133,7 +184,19 @@ export function claudeParser(): SessionParser {
     atFolder(meta, o.cwd);
     if (typeof o.gitBranch === 'string' && o.gitBranch && !meta.branch) meta.branch = o.gitBranch;
     if (at && !meta.startedAt) meta.startedAt = at;
-    if (o.type === 'user') {
+    if (o.type === 'attachment') {
+      // What the person sends while the tool is still working is kept as a queued command, not a user message. A background
+      // task's notice and messages from other sources are queued the same way, told apart by their mode, origin or isMeta. The
+      // row keeps the time it was sent but is written when the tool reads it, after the work done meanwhile: it is timed just
+      // after that work (each one read together a millisecond after the one before), so it stays in order and is not taken as
+      // older than a mark set during the work. A time far from the line before (a clock set wrong) is left as it is.
+      const q = o.attachment;
+      if ((q.commandMode ?? 'prompt') !== 'prompt' || q.isMeta === true || (q.origin && q.origin.kind !== 'human')) return;
+      const late = was && (!at || (ISO_TIME.test(at) && at <= was && Date.parse(was) - Date.parse(at) < DAY_MS));
+      const when = late ? new Date(Date.parse(was) + 1).toISOString() : at;
+      if (late && when! > latest) latest = when!;
+      c.user(typed(textOf(q.prompt, ['text'])), when);
+    } else if (o.type === 'user') {
       if (o.isMeta === true || o.promptSource === 'system' || o.isCompactSummary === true) return;
       if (blocks.some(b => b.type === 'tool_result')) return;
       c.user(typed(textOf(content, ['text'])), at);
