@@ -1,0 +1,24 @@
+{
+  "source": "6badd901b5ac4061353e487ee8bafd10b019efa2",
+  "appTree": "d5a6be031fb06b925a1511e06c5845f15d56ec14",
+  "assets": "b777bac555e8f332771f3b7d296b742ecf7633c3f0a0601bf7ebd246a1b49f98",
+  "modules": "1df394bd38dc2ff2cd04deb3d4c01d68be876efb70f88cc09aefba898c5678c9",
+  "moduleClosureSameAsPublic125": true,
+  "assetDelta": [
+    "/BUILD.txt",
+    "/client/app.js",
+    "/client/plan-view.js",
+    "/client/request-results.js",
+    "/client/return-view.js",
+    "/styles.css"
+  ],
+  "dryRunExit": 0,
+  "guardSha": "80cb0b78053ee444154507335db58aa084b26f1980ad68e822fe9356ea415aed",
+  "publicSettingsSame": true,
+  "previousVersion": [
+    {
+      "version_id": "1e6644b0-cce3-47cb-b9c8-903ab1f3910a",
+      "percentage": 100
+    }
+  ]
+}

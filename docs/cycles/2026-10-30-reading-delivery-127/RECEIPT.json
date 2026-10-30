@@ -1,0 +1,63 @@
+{
+  "source": "6badd901b5ac4061353e487ee8bafd10b019efa2",
+  "appTree": "d5a6be031fb06b925a1511e06c5845f15d56ec14",
+  "selection": "a4fa048f6cfb05ebfdc50e5e2bd1a8b5684f61ce",
+  "url": "https://agentflow-studio-existing-map-124.tlsee0813.workers.dev",
+  "attempt": "127-upload-1",
+  "exitCode": 0,
+  "workerWrites": 1,
+  "deployment": {
+    "id": "461c3759-01fb-4511-9fbf-00f9539740a5",
+    "source": "api",
+    "strategy": "percentage",
+    "annotations": {
+      "workers/message": "AgentFlow Studio 6badd901b5ac4061353e487ee8bafd...",
+      "workers/triggered_by": "upload"
+    },
+    "versions": [
+      {
+        "version_id": "b1e66c2e-56a2-4e99-9cde-6f1b9c46a103",
+        "percentage": 100
+      }
+    ],
+    "created_on": "2026-10-30T00:07:43.541181Z"
+  },
+  "previousDeployment": {
+    "id": "ea308f1f-0cb1-494e-9567-c97539999b8b",
+    "source": "api",
+    "strategy": "percentage",
+    "annotations": {
+      "workers/message": "AgentFlow Studio cfe993f31a8c53284612c22b3ded0c...",
+      "workers/triggered_by": "upload"
+    },
+    "versions": [
+      {
+        "version_id": "1e6644b0-cce3-47cb-b9c8-903ab1f3910a",
+        "percentage": 100
+      }
+    ],
+    "created_on": "2026-10-29T22:49:47.382489Z"
+  },
+  "assets": "b777bac555e8f332771f3b7d296b742ecf7633c3f0a0601bf7ebd246a1b49f98",
+  "modules": "1df394bd38dc2ff2cd04deb3d4c01d68be876efb70f88cc09aefba898c5678c9",
+  "publicAssetCount": 54,
+  "publicModuleCount": 27,
+  "settingsExceptBuildAnnotationsExact": true,
+  "publicStateExact": true,
+  "public73SettingsAndBuildExact": true,
+  "existingBrowserWorkspaceAndPlansByteExactAfterUpgradeAndReadingReload": true,
+  "publicRequest": "RQ_2270d57b-174f-4405-9ad3-72f3b25ed607",
+  "actual121Scope": "tested locally on byte-identical final package in126; not substituted for the existing public107/124 data",
+  "consoleErrorsAndWarnings": 0,
+  "newModelCalls": 0,
+  "replayCalls": 0,
+  "originalKeysReused": true,
+  "queriesCorrected": {
+    "indexHtml": "307 to /; canonical root bytes exact",
+    "contentEndpoint": "GET /content was405; GET Worker script returned27 modules",
+    "jobs": "preliminary /map/jobs 404; exact /api/studio/jobs403",
+    "plan": "preliminary missing request header403; recognized header/no or wrong code401"
+  },
+  "guardSha": "80cb0b78053ee444154507335db58aa084b26f1980ad68e822fe9356ea415aed",
+  "reviewSha": "76a048544c4c29cf4ffe2a12c6bd73fb6686505eb8f1def3578f00b0a37b17d4"
+}
