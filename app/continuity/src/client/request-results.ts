@@ -1,6 +1,6 @@
 /* The same small request/return reading in the plan and beside a current part. No second status model. */
 import { isMapReading, type Project } from '../shared/types.js';
-import { requestMatches, itemReading, recordTexts, matchGroup, MATCH_LABEL, ITEM_STATE_LABEL, type FrozenRequest, type EffectiveMatch, type RequestTarget, type StoredRequestMatch } from '../shared/request-return.js';
+import { requestMatches, matchLedger, itemReading, recordTexts, matchGroup, sameTarget, MATCH_LABEL, ITEM_STATE_LABEL, type FrozenRequest, type FrozenItem, type EffectiveMatch, type RequestTarget, type StoredRequestMatch } from '../shared/request-return.js';
 import { EVIDENCE_KIND_LABEL, NOT_EXECUTED, NOT_RECORDED } from '../shared/record-source.js';
 import { h, fullTime, quotedText } from './plan-dom.js';
 
@@ -10,6 +10,21 @@ export function matchLabel(m: StoredRequestMatch): string {
   if (m.kind === 'reported' || m.kind === 'code') return m.stance === 'made' ? `${MATCH_LABEL[m.kind]} · 변경` : m.stance === 'not-made' ? `${MATCH_LABEL[m.kind]} · 미구현` : MATCH_LABEL[m.kind];
   return MATCH_LABEL[m.kind];
 }
+/** What a valid withdrawal names, read from its stored link only (never from a passage, title or time that looks the same): the
+ * exact earlier entry of the full ledger (its reading and index; requestMatches may have folded it into a later reading of the same
+ * passage), and the request item it was withdrawn for as the withdrawing match stored it (its single target, in its own reading's
+ * frozen requests). now: where the withdrawing passage answers today, which a person's correction may have changed or excluded
+ * (the link holds either way). null: no valid link, so nothing is named. */
+export interface WithdrawalTarget { prior: EffectiveMatch; then: RequestTarget; request: FrozenRequest | null; item: FrozenItem | null; now: 'same' | 'other' | 'excluded' | 'open' }
+export function withdrawalTarget(x: EffectiveMatch, ledger: readonly EffectiveMatch[]): WithdrawalTarget | null {
+  const ref = x.replaces, then = x.match.targets.length === 1 ? x.match.targets[0]! : null;
+  const prior = ref ? ledger.find(y => y.reading === ref.reading && y.index === ref.index) : undefined;
+  if (!prior || !then) return null;
+  const request = x.requests.find(q => q.id === then.requestId) ?? null, item = request?.items.find(i => i.id === then.itemId) ?? null;
+  return { prior, then, request, item, now: x.excluded ? 'excluded' : !x.target ? 'open' : sameTarget(x.target, then) ? 'same' : 'other' };
+}
+/** The full ledger of a project's correspondences, every reading's own entry (requestMatches folds repeated readings of a passage). */
+export const fullLedger = (p: Project) => matchLedger(p.readings, recordTexts(p)).all;
 /** Shorten only a pure full SHA, for display. The stored wording and title stay exact. */
 export const displayAbout = (about: string) => /^[a-f0-9]{40}$/i.test(about) ? about.slice(0, 8) : about;
 /** Only reading position, never a copy of the request or its reported contents. Exact frozen identities keep a later
@@ -69,15 +84,15 @@ export function requestResults(project: Project, scopes: FrozenRequest[], option
 }): HTMLElement | null {
   const all = frozenRequests(project, scopes), requests = all.filter(q => (!options.requestId || q.id === options.requestId) && (!options.partId || q.items.some(i => i.partIds.includes(options.partId!))));
   if (!requests.length) return null;
-  const matches = requestMatches(project), sec = h('section', { class: 'sec request-results', 'aria-label': '원한 것과 돌아온 범위' }, h('h3', {}, '원한 것과 돌아온 범위'));
+  const matches = requestMatches(project), ledger = fullLedger(project), sec = h('section', { class: 'sec request-results', 'aria-label': '원한 것과 돌아온 범위' }, h('h3', {}, '원한 것과 돌아온 범위'));
   const caption = (q: FrozenRequest) => requestCaption(all, q);
   // Every quote button has its exact place: the item's identity, or the fold a passage outside any item reads in (ambiguous,
   // excluded, unrelated), then the stored reading, index and interval.
-  const source = (m: EffectiveMatch, scope: string) => {
-    if (options.quote) return h('button', { type: 'button', class: 'cl-cite', 'data-request-focus': JSON.stringify([scope, m.reading, m.index, m.match.record, m.match.from, m.match.to]), title: m.match.quote, onclick: () => options.quote!(m.match.record, m.match.quote, m.match.from) }, '근거');
+  const source = (m: EffectiveMatch, scope: string, label = '근거', key = JSON.stringify([scope, m.reading, m.index, m.match.record, m.match.from, m.match.to])) => {
+    if (options.quote) return h('button', { type: 'button', class: 'cl-cite', 'data-request-focus': key, title: m.match.quote, onclick: () => options.quote!(m.match.record, m.match.quote, m.match.from) }, label);
     // The record as read, where every match stands (an earlier reading's places against the labelled text are read shifted).
     const text = recordTexts(project).get(m.match.record)?.read ?? '';
-    const details = h('details', { class: 'request-quote' }, h('summary', {}, '근거 원문'), h('pre', {}, ...quotedText(text, m.match.quote, { at: m.match.from, length: m.match.to - m.match.from })));
+    const details = h('details', { class: 'request-quote' }, h('summary', {}, label === '근거' ? '근거 원문' : label), h('pre', {}, ...quotedText(text, m.match.quote, { at: m.match.from, length: m.match.to - m.match.from })));
     details.addEventListener('toggle', () => { if (details.open) requestAnimationFrame(() => details.querySelector('mark')?.scrollIntoView({ block: 'nearest' })); });
     return details;
   };
@@ -97,11 +112,25 @@ export function requestResults(project: Project, scopes: FrozenRequest[], option
     } }, '저장');
     box.append(select, button, msg); return box;
   };
+  /** Under a withdrawing passage, one short line: which earlier report (its kind, words and scope as stored) for which request item
+   * and revision, with that report's own original; and where the passage answers now when a person changed it since. */
+  const withdrawal = (x: EffectiveMatch, scope: string) => {
+    const w = withdrawalTarget(x, ledger); if (!w) return null;
+    const p = w.prior.match, at = w.request ? `${caption(w.request)} · ‘${w.item?.title ?? w.then.itemId}’` : `‘${w.item?.title ?? w.then.itemId}’`;
+    const now = w.now === 'same' ? null : w.now === 'excluded' ? '지금은 이 구절을 요청 대응에서 제외했어요. 철회 연결은 그대로예요.'
+      : w.now === 'open' ? '지금 이 구절의 요청 대응은 미정이에요. 철회 연결은 그대로예요.'
+      : (() => { const r = all.find(q => q.id === x.target!.requestId), i = r?.items.find(i => i.id === x.target!.itemId); return `지금은 이 구절을 ${r ? caption(r) : '다른 요청'} · ‘${i?.title ?? x.target!.itemId}’ 대응으로 고쳤어요. 철회 연결은 그대로예요.`; })();
+    return h('div', { class: 'request-target' },
+      h('p', {}, h('span', { class: 'cl-kind' }, '철회 대상'), `${matchLabel(p)} · ${p.text}`, p.about ? h('small', { class: 'cl-about', title: p.about }, ` · ${displayAbout(p.about)}`) : null,
+        h('small', { class: 'request-target-at' }, ` — ${at}`)),
+      source(w.prior, scope, '철회한 보고 원문', JSON.stringify([scope, 'withdrew', x.reading, x.index, w.prior.reading, w.prior.index])),
+      now ? h('p', { class: 'fine' }, now) : null);
+  };
   const passage = (x: EffectiveMatch, scope: string) => h('div', { class: 'request-passage' },
     h('p', {}, h('span', { class: 'cl-kind' }, matchLabel(x.match)), x.match.text,
       x.match.about ? h('small', { class: 'cl-about', title: x.match.about }, ` · ${displayAbout(x.match.about)}`) : null,
-      x.replaces ? h('small', { class: 'cl-replaces' }, ' · 앞 보고를 철회·정정') : null),
-    source(x, scope), correction(x));
+      x.replaces && !withdrawalTarget(x, ledger) ? h('small', { class: 'cl-replaces' }, ' · 앞 보고를 철회·정정') : null),
+    source(x, scope), withdrawal(x, scope), correction(x));
   // An earlier report a later record took back: its words and source stay, with the passage that took it back and the one way
   // to undo that link. Excluding or retargeting either passage never brings it back.
   const withdrawn = (x: EffectiveMatch, itemKey: string) => {
@@ -300,7 +329,7 @@ export function createWideReading(host: WideHost) {
     const o = host.current(); if (!o || o.key !== st.entry) { drop(); return; }
     const all = frozenRequests(o.project, st.scopes), q = all.find(r => r.id === st!.request.id && r.planId === st!.request.planId && r.planRevision === st!.request.planRevision);
     if (!q) { close(); return; }
-    const s = st, d = el(), matches = requestMatches(o.project), texts = recordTexts(o.project);
+    const s = st, d = el(), matches = requestMatches(o.project), ledger = fullLedger(o.project), texts = recordTexts(o.project);
     // Saved while it was open (a later map reading of this visit, a correction being saved): read again from the data as it is now,
     // and said so. The same section, fold, button and scroll are kept by identity.
     const reqKey = JSON.stringify([q.id, q.planId, q.planRevision]);
@@ -323,18 +352,32 @@ export function createWideReading(host: WideHost) {
     const target = (t: RequestTarget, x: EffectiveMatch) => { const r = x.requests.find(r => r.id === t.requestId) ?? all.find(r => r.id === t.requestId), i = r?.items.find(i => i.id === t.itemId);
       return `${i?.title ?? t.itemId} · ${r ? requestCaption(all, r) : '다른 요청'}`; };
     const keyOf = (scope: string, x: EffectiveMatch) => JSON.stringify([scope, x.reading, x.index, x.match.record, x.match.from, x.match.to]);
+    /** A withdrawing passage names what it took back (the stored link only): the earlier report and the request item and revision it
+     * was withdrawn for, that report's original one step away (back to this very button), and today's correspondence when changed. */
+    const withdrew = (x: EffectiveMatch, scope: string): Node | null => {
+      const w = withdrawalTarget(x, ledger); if (!w) return null;
+      const p = w.prior.match, key = JSON.stringify([scope, 'withdrew', x.reading, x.index, w.prior.reading, w.prior.index]);
+      const now = w.now === 'same' ? null : w.now === 'excluded' ? '요청 대응에서 제외함 (철회 연결은 그대로)' : w.now === 'open' ? '요청 대응 미정 (철회 연결은 그대로)' : `${target(x.target!, x)} (철회 연결은 그대로)`;
+      return h('div', { class: 'rw-target' },
+        h('p', { class: 'rw-by' }, h('span', {}, '철회 대상'), h('span', {}, h('span', { class: 'rw-kind' }, matchLabel(p)), ` ${p.text}`, p.about ? h('span', { class: 'rw-target-about' }, ` · ${p.about}`) : null)),
+        h('p', { class: 'rw-by' }, h('span', {}, '철회한 항목'), `${w.item?.title ?? w.then.itemId} · ${w.request ? requestCaption(all, w.request) : '다른 요청'}`),
+        now ? h('p', { class: 'rw-by' }, h('span', {}, '지금 대응'), now) : null,
+        h('p', { class: 'rw-card-foot' }, h('button', { type: 'button', class: 'rw-src rw-src-prior', 'data-rw-focus': key, onclick: () => openSource(w.prior, key) }, '철회한 보고 원문'),
+          h('span', { class: 'rw-where', title: record(p.record).name }, record(p.record).name)));
+    };
     const tag = (t: string, c = '') => h('span', { class: `rw-tag${c ? ` ${c}` : ''}` }, t);
     /** One passage, whole: what kind of material and what it says of the change, its words, its condition as stored, its quote. */
     const card = (x: EffectiveMatch, scope: string, lead = false, ...extra: (Node | null)[]) => {
       const key = keyOf(scope, x), r = record(x.match.record);
       return h('article', { class: `rw-card g-${matchGroup(x.match.kind)}${lead ? ' lead' : ''}${x.replacedBy ? ' withdrawn' : ''}` },
-        h('p', { class: 'rw-card-k' }, h('span', { class: 'rw-kind' }, matchLabel(x.match)), x.replaces ? tag('앞 보고를 철회·정정') : null,
+        h('p', { class: 'rw-card-k' }, h('span', { class: 'rw-kind' }, matchLabel(x.match)), x.replaces ? tag(withdrawalTarget(x, ledger) ? '철회·정정' : '앞 보고를 철회·정정') : null,
           x.corrected ? tag('직접 고친 대응') : null, x.excluded ? tag('대응에서 제외함') : null, x.replacedBy ? tag('이후 철회·정정됨', 'off') : null),
         h('p', { class: 'rw-card-text' }, x.match.text),
         x.match.about ? h('p', { class: 'rw-cond' }, h('span', {}, '범위·조건'), h('span', {}, x.match.about)) : null,
         h('blockquote', { class: 'rw-q' }, x.match.quote), ...extra,
         h('p', { class: 'rw-card-foot' }, h('button', { type: 'button', class: 'rw-src', 'data-rw-focus': key, onclick: () => openSource(x, key) }, '근거 원문 열기'),
-          h('span', { class: 'rw-where', title: r.name }, r.name)));
+          h('span', { class: 'rw-where', title: r.name }, r.name)),
+        withdrew(x, scope));
     };
     // The sentence the request was made from, whole on request (the request's own words; never summarised here).
     const said = h('details', { class: 'rw-said', open: s.open.has('said') }, h('summary', { 'data-rw-part': 'said' }, '요청할 때 적은 문장'), h('p', {}, q.intent));
@@ -354,7 +397,8 @@ export function createWideReading(host: WideHost) {
         h('span', { class: 'rw-pick-title' }, GROUP_TITLE[g.key]!), h('span', { class: 'rw-pick-counts' }, `${g.list.length}개`))))) : null);
     const main = h('div', { class: 'rw-main', tabindex: '-1' });
     const it = items.find(x => x.key === s.section), group = groups.find(g => g.key === s.section);
-    const found = s.source ? matches.find(x => x.reading === s.source!.reading && x.index === s.source!.index) : null;
+    // The original by its exact stored entry (the full ledger: a withdrawn report folded into a later reading is still itself).
+    const found = s.source ? ledger.find(x => x.reading === s.source!.reading && x.index === s.source!.index) : null;
     if (s.source && !found) { s.source = null; s.back = null; }
     if (s.source && found) main.append(...sourceView(found, record, texts.get(found.match.record)?.read ?? null, it ? it.item.title : GROUP_TITLE[s.section] ?? '목록'));
     else if (it) {

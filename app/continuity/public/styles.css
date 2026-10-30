@@ -1461,3 +1461,14 @@ button:disabled { opacity: .5; cursor: default; }
 .rw-said > summary { cursor: pointer; padding: 4px 0; color: var(--text-3); }
 .rw-said p { margin: 4px 0 8px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; word-break: keep-all; }
 .rw-notice { grid-column: 1 / -1; margin: 0; padding: 8px 12px; border-radius: var(--r-md); background: var(--change-soft); border: 1px solid var(--change-line); color: var(--text); font-size: 13px; line-height: 1.55; }
+
+/* AF135: a withdrawal names what it took back (the stored link): one short line under the passage, its original one step away. */
+.request-target { margin: -2px 0 6px; padding: 4px 0 4px 10px; border-left: 2px solid var(--hair-2); font-size: 12.5px; color: var(--text-2); }
+.request-target > p { margin: 2px 0; overflow-wrap: anywhere; word-break: keep-all; }
+.request-target .cl-kind { margin-right: 8px; }
+.request-target-at { color: var(--text-3); }
+.rw-target { margin: 10px 0 0; padding: 8px 12px 2px; border-radius: var(--r-md); background: var(--surface-2); }
+.rw-target .rw-by { margin-bottom: 4px; }
+.rw-target .rw-kind { margin-right: 2px; }
+.rw-target-about { color: var(--text-3); }
+.rw-target .rw-card-foot { margin: 4px 0 6px; }

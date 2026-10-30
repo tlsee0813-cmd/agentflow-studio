@@ -244,7 +244,8 @@ async function wide(browser, base) {
   await page.locator('.rw-pick[data-rw-section="item:I2"]').focus(); await page.keyboard.press('Enter');
   assert.equal(await page.locator('#rw-item-title').textContent(), T2);
   assert.ok((await page.locator('.rw-state').textContent()) === '미구현 보고');
-  assert.ok((await page.locator('.rw-card.lead').textContent()).includes('앞 보고를 철회·정정'));
+  // AF135: the withdrawing lead names the report it took back (the general mark gives way to it).
+  assert.ok((await page.locator('.rw-card.lead .rw-target').textContent()).includes('대응 규칙 검사 결과를 tests/label-lookup.test.js에 남겼다고 보고함'));
   const hist = page.locator('.rw-history'); await hist.locator(':scope > summary').click();
   const w = hist.locator('.rw-card.withdrawn'); assert.equal(await w.count(), 1);
   assert.ok((await w.textContent()).includes('이후 철회·정정됨') && (await w.textContent()).includes('검사 기록 문장을 철회'));
