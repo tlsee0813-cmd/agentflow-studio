@@ -5,7 +5,7 @@
 ## 판본
 
 - 기준 8d41378581e6e999e54747ae9eaac4973eae94a9(app d5a6be031fb06b925a1511e06c5845f15d56ec14), branch `work/experience128-pc-entry`.
-- 첫 구현 a967c993a44bf6d16fa618f650f7f958c24045d9 (app tree a4d9efc0fb1a20d70245ea3529b8765473e0fe9f, 아래 run1). 독립 검토 P2 두 건 수리 c2ae550b82c3ad5b19c769a246c239150677a609 (app tree 1879efff6a88301ca4894ef7388d85138e708b1a, 아래 run2). 그 뒤 커밋은 이 문서뿐이다.
+- 첫 구현 a967c993a44bf6d16fa618f650f7f958c24045d9 (app tree a4d9efc0fb1a20d70245ea3529b8765473e0fe9f, 아래 run1). 독립 검토 P2 두 건 수리 c2ae550b82c3ad5b19c769a246c239150677a609 (app tree 1879efff6a88301ca4894ef7388d85138e708b1a, 아래 run2). 세 번째 P2(바이너리 없는 종료) 수리 49be2d706cdb1f3b1ada25ad1da4fe68c855a7fd (app tree 3eb96c6dc12a0a97de06d94d720cac78eb0ad33d, 아래 run3). 그 뒤 커밋은 이 문서뿐이다.
 
 ## 사용법
 
@@ -41,7 +41,9 @@ UI fixture: 헤더 `지도 정리만 가능`(title에 범위 `첫 지도와 이�
 
 제어 fixture의 의미: 이 Node binary의 복사본을 codex 자리에, 102 테스트의 무해 가짜 CLI를 응답자로 썼다. 실제 codex 판본·hash·인자 동작은 여기서 실행하지 않았고 고정 정책은 자료로만 대조했다.
 
-__RUN2__
+run2(정확 c2ae550, clean): build·check 통과, `pc-entry128`·`owned-cli102`·`owned-cli102-process` 36/36, UI fixture 통과(job POST 0, child 0), 종료 뒤 프로세스 0.
+
+__RUN3__
 
 ## 독립 검토 P2 두 건과 수리 (c2ae550)
 
@@ -52,15 +54,23 @@ __RUN2__
 
 mutation(run 대상 c2ae550 코드에서): 소유 조건에 map 가용성을 되돌림→128-9 실패, 서버 무조건 종료→128-10 실패, nonce 확인 제거→128-6 실패. 호출 쪽 busy 사전 확인 제거는 128-5를 실패시키지 않는다(서버가 결정하므로 호출 쪽 확인은 빠른 안내일 뿐이다). 진행 중 제출 계수는 결정적 재현 검사가 없다(코드 읽기로만 확인).
 
+## 세 번째 P2와 수리 (49be2d7): 종료에 현재 바이너리가 필요했음
+
+Root 독립 확인: 자기 host가 시작된 뒤 codex 파일의 bytes만 바뀌면 `stop()`이 `check()`의 현재 hash 확인 때문에 `BINARY`(exit 3)로 멈추고 host는 계속 실행됐다. `start-pc.ps1`도 `-Stop` 전에 `-CodexPath`를 `Resolve-Path`해서 지정 경로가 지워지면 종료가 막혔다.
+
+수리: run 파일에 그 run이 시작한 실행 파일 경로를 기록한다. `stop`은 현재 바이너리를 읽지 않고, run 파일(형식·nonce·포트·경로)의 정책 id가 그 경로에 대한 고정 정책 id와 같을 때만, 그리고 포트의 서버가 바로 그 identity와 이 입구의 store·실행자 상태 소유를 가질 때만 nonce 요청을 쓴다. 새 시작은 여전히 고정 hash의 바이너리만 받는다. PowerShell `-Stop`은 `-CodexPath`를 해석하거나 넘기지 않는다. PID 종료·허용 hash 확장·정책 우회는 없다.
+
+검사 128-11(수리 전 `BINARY`로 실패, 로그 보존): 시작 뒤 bytes 변경(PATH 자동 검색)·삭제(지정 경로)에도 STOPPED, 이후 새 시작은 exit 3. 다른 경로·고정 정책이 아닌 정책 id·경로 없는 위조 run 파일은 요청을 쓰기 전에 거절(NO_RUN_FILE/NOT_OURS)하고 서버는 계속 실행. 이 입구 run 파일을 복사해 둔 다른 서버는 NOT_OURS, 서버 없는 stale run 파일은 NOT_RUNNING이며 아무것도 쓰지 않음. 128-6의 두 번째 경우(run 파일이 전혀 없는 다른 서버)는 이제 요청 전 단계에서 NO_RUN_FILE로 거절된다(이전 NOT_OURS; 거절·무기록은 같음). mutation: run 파일 정책 id를 고정 정책에 묶지 않음→128-11 실패, 포트 서버 identity 확인 제거→128-11 실패, 종료에 현재 바이너리 요구 복원→128-11 실패.
+
 ## 증거 구별
 
 - 작성자: 위 Linux 제어 fixture 검사(가짜 binary, 생성 0).
 - 독립 검토: 두 P2 결함 발견과 재현(검토자 쪽, 이 문서는 그 결과를 인용만 한다).
-- Root: a967c99 실제 Windows PowerShell 7.6.5에서 설치된 Codex 자동 검출, 정책 121 전체 동일(policy 29f5c36ec140), 4327 시작 → 정상 121 프로젝트와 109 bundle 가져오기 → 새 원 Zephyr 4,699자 보관(생성 없음) → Stop → 재시작·새로고침 뒤 workspace·plans 바이트 동일 → Stop. Windows PowerShell 5.1은 그 PC의 실행 정책으로 차단(정책 변경 없음), 읽기 전용 parser 오류 0. c2ae550 수리분의 Windows 재확인은 Root 대기.
+- Root: a967c99 실제 Windows PowerShell 7.6.5에서 설치된 Codex 자동 검출, 정책 121 전체 동일(policy 29f5c36ec140), 4327 시작 → 정상 121 프로젝트와 109 bundle 가져오기 → 새 원 Zephyr 4,699자 보관(생성 없음) → Stop → 재시작·새로고침 뒤 workspace·plans 바이트 동일 → Stop. Windows PowerShell 5.1은 그 PC의 실행 정책으로 차단(정책 변경 없음), 읽기 전용 parser 오류 0. Root c2ae550: 실제 Windows에서 128-2..10 9건 통과, 128-1은 sparse checkout에 ACCEPTED_POLICY.json이 없어 ENOENT였고 정확 HEAD blob 복구 뒤 단독 재실행 통과(정책 차이 아님), 독립 F1/F2 수리 검사 2/2 통과, 그리고 세 번째 P2를 확정. 49be2d7의 Windows 재확인은 Root 대기.
 
 ## Root 대기 / 미확인
 
-- 작성자 환경에는 PowerShell이 없어 `start-pc.ps1`을 실행하지 못했다. a967c99의 Windows 정상 경로는 Root가 확인했고(위), c2ae550의 두 수리(판본 바뀐 실행자의 다시 열기/종료, 실행 중 기본 Stop의 BUSY 안내)의 Windows 확인은 Root 대기다.
+- 작성자 환경에는 PowerShell이 없어 `start-pc.ps1`을 실행하지 못했다. a967c99의 Windows 정상 경로와 c2ae550의 128 검사는 Root가 확인했고(위), 49be2d7(바이너리 없는 종료, `-Stop`이 `-CodexPath`를 쓰지 않음)의 Windows 확인은 Root 대기다.
 - 실제 설치 Codex로 정상 시작 → 정확 실행자 → 원문 입력까지의 실사용 증거는 Root 몫이다. 이 결과의 UI 확인은 fixture다.
 - 4327은 4317(기본)과 다른 주소라 브라우저 저장이 다르다. 4317의 기존 프로젝트를 쓰려면 백업 내보내기/가져오기가 필요하다(자동 이전 없음).
 - 첫 지도 일반성·생성 품질·두 자료의 최신 통합 의미·121 실제 away/ready 반영은 여전히 미해결이며 이번 범위가 아니다.
