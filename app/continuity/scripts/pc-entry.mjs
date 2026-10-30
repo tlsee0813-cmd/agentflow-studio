@@ -65,13 +65,15 @@ async function heldBySomeone(dir) {
   const o = await own(dir); if (o.busy) return true; await o.release?.(); return false;
 }
 /** What answers on the port: nothing (free), this entry's own server (ours: the same executor, scope, model and policy identity,
- * a durable job store, and this entry's job store and executor state held by a running owner), or anything else (other). */
+ * a durable job store, and this entry's job store and executor state held by a running owner), or anything else (other).
+ * Whether it can run a map reading now is not part of who it is: an executor that is unavailable (another binary version) or
+ * unsettled is still this entry's, and is said as its state (its kept results stay readable and it stops in order). */
 export async function probePort({ port, policy, places = placesFor(port), timeoutMs = 1500 }) {
   let st;
   try { const res = await fetch(`http://127.0.0.1:${port}/api/studio/status`, { signal: AbortSignal.timeout(timeoutMs) }); st = await res.json(); }
   catch (e) { const code = e?.cause?.code ?? e?.code; return code === 'ECONNREFUSED' ? { port: 'free' } : { port: 'other', why: 'NOT_STUDIO' }; }
   const x = st?.jobs?.executor, want = policyHash(policy).slice(0, 12);
-  const same = st?.jobs?.durable === true && x?.id === EXECUTOR_ID && x?.scope === policy.scope && x?.model === policy.model && x?.policy === want && st?.map?.via === 'jobs';
+  const same = st?.jobs?.durable === true && x?.id === EXECUTOR_ID && x?.scope === policy.scope && x?.model === policy.model && x?.policy === want;
   if (!same) return { port: 'other', why: x ? 'DIFFERENT_EXECUTOR' : 'NO_EXECUTOR' };
   if (!(await heldBySomeone(places.store)) || !(await heldBySomeone(places.state))) return { port: 'other', why: 'NOT_THIS_STATE' };
   return { port: 'ours', executor: { state: x.state, problem: x.problem ?? null } };
@@ -108,15 +110,24 @@ export async function serve({ port = DEFAULT_PORT, exe, policy: given = null, da
   if (!jobs.describe().durable) { log(`REFUSED store=${jobs.describe().problem}`); await jobs.close(); return exit(5); }
   const executor = await openCliExecutor({ policy, stateDir: places.state, log, ...executorOptions });
   if (executor.describe().problem === 'EXECUTOR_STATE_BUSY') { log('REFUSED executor=EXECUTOR_STATE_BUSY'); await jobs.close(); await executor.close(); return exit(5); }
-  const studio = createStudioHandler({ env, jobs, mapExecutor: executor });
+  const handler = createStudioHandler({ env, jobs, mapExecutor: executor });
+  // A stop decides in one step: new job submissions are held off from the moment a request is read, and a submission already on
+  // its way counts as running. So a default stop never ends a job admitted after its caller looked.
+  let draining = false, submitting = 0;
+  const studio = async request => {
+    const u = new URL(request.url), submit = request.method === 'POST' && u.pathname === '/api/studio/jobs';
+    if (!submit) return handler(request);
+    if (draining) return new Response(JSON.stringify({ error: { code: 'STUDIO_STOPPING' } }), { status: 503, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
+    submitting++; try { return await handler(request); } finally { submitting--; }
+  };
   const config = readConfig({ ...env, PORT: String(port) });
-  const nonce = randomBytes(16).toString('hex'), runFile = join(places.run, 'host.json'), stopFile = join(places.run, 'stop.json');
+  const nonce = randomBytes(16).toString('hex'), runFile = join(places.run, 'host.json'), stopFile = join(places.run, 'stop.json'), answerFile = join(places.run, 'stop-answer.json');
   let stopping = false, timer = null;
   const server = createContinuityApp({ config, studio });
   const stop = async () => {
     if (stopping) return; stopping = true; clearInterval(timer); server.close();
     await jobs.close(); await executor.close();
-    for (const f of [stopFile, runFile]) { try { if (JSON.parse(await readFile(f, 'utf8')).nonce === nonce) await unlink(f); } catch { /* not ours or gone */ } }
+    for (const f of [stopFile, answerFile, runFile]) { try { if (JSON.parse(await readFile(f, 'utf8')).nonce === nonce) await unlink(f); } catch { /* not ours or gone */ } }
     log(`STOPPED executor=${JSON.stringify(executor.held())}`); return exit(0);
   };
   await new Promise(res => {
@@ -124,7 +135,20 @@ export async function serve({ port = DEFAULT_PORT, exe, policy: given = null, da
     server.listen(config.port, config.host, async () => {
       await mkdir(places.run, { recursive: true, mode: 0o700 });
       const tmp = `${runFile}.${nonce}.tmp`; await writeFile(tmp, JSON.stringify({ format: RUN_FORMAT, pid: process.pid, port, nonce, policy: policyHash(policy).slice(0, 12), startedAt: new Date().toISOString() }), { mode: 0o600 }); await rename(tmp, runFile);
-      timer = setInterval(async () => { try { if (JSON.parse(await readFile(stopFile, 'utf8')).nonce === nonce) await stop(); } catch { /* no request */ } }, pollMs);
+      timer = setInterval(async () => {
+        let req; try { req = JSON.parse(await readFile(stopFile, 'utf8')); } catch { return; } // no request
+        if (stopping || req?.nonce !== nonce || draining) return;
+        draining = true; // from here no submission is admitted while this decides
+        const busy = submitting > 0 || jobs.held().running > 0 || executor.describe().state === 'busy';
+        if (busy && req.interrupt !== true) {
+          // Refused: said back to that request, the request removed (it never acts later), submissions admitted again.
+          const tmp = `${answerFile}.${nonce}.tmp`;
+          try { await writeFile(tmp, JSON.stringify({ nonce, request: req.request ?? null, outcome: 'BUSY' }), { mode: 0o600 }); await rename(tmp, answerFile); } catch { /* the caller times out */ }
+          try { await unlink(stopFile); } catch { /* gone */ }
+          draining = false; return;
+        }
+        await stop();
+      }, pollMs);
       const x = executor.describe(); log(`READY http://127.0.0.1:${port} executor=${x.state}${x.problem ? `:${x.problem}` : ''}`); res();
     });
   });
@@ -143,9 +167,15 @@ export async function stop({ port = DEFAULT_PORT, explicit = null, interruptRunn
   const places = placesFor(port, data); let run;
   try { run = JSON.parse(await readFile(join(places.run, 'host.json'), 'utf8')); if (run.format !== RUN_FORMAT || !/^[0-9a-f]{32}$/.test(run.nonce) || run.port !== port) throw new Error(); }
   catch { return { stopped: false, why: 'NO_RUN_FILE', message: '이 입구의 실행 기록을 읽지 못해 종료 요청을 보내지 않았어요.', exit: 8 }; }
-  await writeFile(join(places.run, 'stop.json'), JSON.stringify({ nonce: run.nonce, at: new Date().toISOString() }), { mode: 0o600 });
+  // The server decides (a job may have been admitted after the look above): it stops, or answers this request as BUSY.
+  const request = randomBytes(8).toString('hex'), answer = join(places.run, 'stop-answer.json');
+  await writeFile(join(places.run, 'stop.json'), JSON.stringify({ nonce: run.nonce, request, interrupt: interruptRunning === true, at: new Date().toISOString() }), { mode: 0o600 });
   const end = Date.now() + waitMs;
   while (Date.now() < end) {
+    try {
+      const a = JSON.parse(await readFile(answer, 'utf8'));
+      if (a.nonce === run.nonce && a.request === request) { await unlink(answer).catch(() => {}); if (a.outcome === 'BUSY') return { stopped: false, why: 'BUSY', message: '지도 정리가 실행 중이라 종료하지 않았어요. 끝난 뒤 다시 종료하거나, 중단해도 되면 -InterruptRunning을 붙이세요(그 정리는 결과 없이 중단돼요).', exit: 7 }; }
+    } catch { /* no answer yet */ }
     if ((await probePort({ port, policy: { ...fixed, exe: c.exe }, places, timeoutMs: 500 })).port === 'free' && !existsSync(join(places.run, 'host.json'))) return { stopped: true, why: 'STOPPED', message: '종료했어요. 다시 열려면 같은 명령을 실행하세요.', exit: 0 };
     await new Promise(r => setTimeout(r, 250));
   }

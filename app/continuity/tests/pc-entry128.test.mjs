@@ -165,3 +165,35 @@ test('128-8 a store or executor state already owned by another process: no secon
   try { const s = await start(f, port); assert.equal(s.exited(), 5); assert.match(s.logs.at(-1), /^REFUSED executor=EXECUTOR_STATE_BUSY/); } finally { await other.close(); }
   assert.equal(policyHash({ ...f.fixed, exe: f.exe }).slice(0, 12), other.describe().policy, 'the identity the entry compares is the executor own');
 });
+
+test('128-9 a server whose executor became unavailable (version changed) is still this entry: its kept results are read, it stops in order', async () => {
+  const f = fixture(), port = await freePort(); f.mode('ok');
+  let s = await start(f, port); const job = await firstJob(`http://127.0.0.1:${port}`);
+  assert.equal((await job.submit()).status, 202); let ready; await until(async () => (ready = await job.get()).state === 'ready', 'ready');
+  await until(async () => (await check({ port, explicit: f.exe, data: f.data, fixed: f.fixed })).executor?.state === 'ready', 'child let go');
+  assert.equal((await stop({ port, explicit: f.exe, data: f.data, fixed: f.fixed })).why, 'STOPPED');
+  // The same entry again, but the binary now answers another version: no new map reading, the same server identity.
+  writeFileSync(join(f.ctl, 'version-mode'), 'ok'); const changed = { ...f.fixed, version: 'fake-cli 0.0-other' };
+  s = await start({ ...f, fixed: changed }, port); assert.match(s.logs.at(-1), /executor=unavailable:VERSION_CHANGED$/);
+  const c = await check({ port, explicit: f.exe, data: f.data, fixed: changed });
+  assert.deepEqual([c.port, c.executor.state, c.executor.problem, c.exit], ['ours', 'unavailable', 'VERSION_CHANGED', 0]); assert.match(c.message, /쓸 수 없어/);
+  assert.deepEqual([(await job.get()).state, (await job.get()).result], ['ready', ready.result], 'kept results are still read');
+  const r = await stop({ port, explicit: f.exe, data: f.data, fixed: changed });
+  assert.deepEqual([r.stopped, r.why], [true, 'STOPPED']); assert.equal(s.exited(), 0);
+});
+
+test('128-10 a default stop never ends a job admitted after its own check: the server decides, refuses while one runs, and says so', async () => {
+  const f = fixture(), port = await freePort(); f.mode('delay:1500');
+  // A slow poll makes the window between the stop request and the server's decision wide enough to admit a job in it.
+  const s = await start(f, port, { pollMs: 1500 }), run = placesFor(port, f.data).run;
+  const pending = stop({ port, explicit: f.exe, data: f.data, fixed: f.fixed, waitMs: 8000 });
+  await until(() => existsSync(join(run, 'stop.json')), 'stop requested');
+  const job = await firstJob(`http://127.0.0.1:${port}`); assert.equal((await job.submit()).status, 202, 'admitted after the stop check');
+  const r = await pending;
+  assert.deepEqual([r.stopped, r.why, r.exit], [false, 'BUSY', 7], 'the default stop is refused by the server, not a silent interruption');
+  assert.equal(s.exited(), null, 'the server keeps running');
+  await until(async () => (await job.get()).state === 'ready', 'the admitted job finished');
+  assert.ok(!existsSync(join(run, 'stop.json')), 'the refused request is not left to act later');
+  const later = await stop({ port, explicit: f.exe, data: f.data, fixed: f.fixed }); assert.equal(later.why, 'STOPPED');
+});
+
