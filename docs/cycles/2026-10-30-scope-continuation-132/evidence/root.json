@@ -1,0 +1,50 @@
+{
+  "cycle": 132,
+  "decision": "DELIVERY_PASS_SEMANTIC_FAIL_P2",
+  "selected": "08bfe32f8b1e7b99792dde880099d6f800289f6e",
+  "runtime": "f8da20fc5601399eb211b64db31bf347044fba27",
+  "app": "4a22ee1acb844f3b6e67cb137317184da74d390c",
+  "attempt": {
+    "state": "closed: semantic rejected; original request preserved",
+    "requestId": "26068.488",
+    "httpStatus": 200,
+    "httpElapsedMs": 24116,
+    "askExact": true,
+    "newRequestId": "RQ_455de117-b75f-4eea-9fe3-630611e3d57e",
+    "requestChars": 10981,
+    "requestSha256": "e792143f15a0967d2dbd8e278b56bf8fa7e6faa762783bdebae6f6b8880885ba",
+    "scopeCalls": 1,
+    "planCalls": 0,
+    "mapCalls": 0,
+    "retries": 0,
+    "workspaceByteExact": true,
+    "planUnchanged": true,
+    "draftUnchanged": true,
+    "otherProjectsUnchanged": true
+  },
+  "preservation": {
+    "normalExportBundleExact": true,
+    "reloadWorkspaceAndPlansExact": true,
+    "requestSpanPartitionExact": true,
+    "evidenceBodiesAndBasisExact": 7,
+    "intentExact": true,
+    "selectedItemIdsExact": true,
+    "requestSha256": "e792143f15a0967d2dbd8e278b56bf8fa7e6faa762783bdebae6f6b8880885ba",
+    "exportSha256": "0d2fa060449996cd6c331a34f13ead8fadc76f0096c5130f0da9180d2a7f9f89",
+    "reopenedOriginalRequestAfterReload": true
+  },
+  "independentReportSha256": "88b1e086977821968875bff0f20229e28ad0f2c47dfe2b9e37b1ea1ca2b56cf7",
+  "finding": {
+    "id": "P132-TEMPORAL-AUTHORITY",
+    "priority": "P2",
+    "evidence": [
+      "현재 구현만으로는 성립하지 않는다",
+      "처리가 아직 이 경로에 없음을 보여준다",
+      "집계 기준이 아직 갖춰지지 않았다"
+    ],
+    "reason": "Past exact-version defect and future repair instruction do not prove applicable present implementation absence."
+  },
+  "implementationHandoffs": 0,
+  "responseRepairs": 0,
+  "publicDeployments": 0
+}
