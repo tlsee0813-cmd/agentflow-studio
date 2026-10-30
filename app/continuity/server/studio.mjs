@@ -3,6 +3,7 @@
 // Boundary: the key is read from env.DEEPSEEK_API_KEY on the server only; the browser sends project material, never credentials.
 // No mock or substitute answer: without a key /ask fails with AI_NOT_CONFIGURED, and provider errors are returned as codes.
 import { ApiError } from '../../server/errors.mjs';
+import { abortError, providerHttpError } from './provider-errors.mjs';
 import { createLimiter } from '../../server/limiter.mjs';
 import { validateAsk, validateReply, ASK_BYTES } from '../dist/public/shared/studio.js';
 import { validatePlanAsk, validatePlanReply } from '../dist/public/shared/plan-api.js';
@@ -37,32 +38,37 @@ JSON 객체 하나만 반환한다. 키는 정확히 다음 6개다:
 {"headline":"한 줄 요약(80자 이내)","situation":["지금 상황, 각 한두 문장"],"changes":["최근 변화"],"next":["사용자가 다음에 판단할 것"],"answer":"질문에 대한 답 또는 null","refs":["R1"]}
 intent가 question이 아니면 answer는 null이어도 된다. 모든 문자열은 비어 있지 않아야 한다.`;
 
+/** First 12 hex digits of the SHA-256 of text. Web Crypto, so it runs in Node and in a Worker. */
+async function shortSha(text) {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(digest)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('');
+}
+
 const promptIds = new Map();
-/** Short id of a digest prompt text (SHA-256, first 12 hex digits); Web Crypto, so it runs in Node and in a Worker.
- * d1- for studio.digest.1, d2- for studio.digest.2 (material with pasted records). */
+/** Short id of a digest prompt text: d1- for studio.digest.1, d2- for studio.digest.2 (material with pasted records). */
 export async function digestPromptId(version = 1) {
-  if (!promptIds.has(version)) promptIds.set(version, crypto.subtle.digest('SHA-256', new TextEncoder().encode(version === 2 ? DIGEST2_PROMPT : DIGEST_PROMPT))
-    .then(b => `d${version}-${[...new Uint8Array(b)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`));
+  if (!promptIds.has(version)) promptIds.set(version, shortSha(version === 2 ? DIGEST2_PROMPT : DIGEST_PROMPT).then(h => `d${version}-${h}`));
   return promptIds.get(version);
 }
 
 let mapId = null;
-/** Short id of the map reading a current client reads with: m6- and the first 12 hex digits of the SHA-256 of the studio.map.6
- * recipe, which is the selection rule's version and both prompt texts (first map, later readings). It names the recipe, not one
- * prompt text: which of the two a stored reading was read with follows from the rule and the request it was made of (the
- * reading's hash names that request). A client sends studio.map.6 only to a server whose status names an m6- recipe.
- * studio.map.1–5 requests from older tabs are still answered with their own prompts and contracts. */
+/** Short id of the map reading a current client reads with: m6- and the short SHA-256 of the studio.map.6 recipe, which is the
+ * selection rule's version and both prompt texts (first map, later readings). It names the recipe, not one prompt text: which of
+ * the two a stored reading was read with follows from the rule and the request it was made of (the reading's hash names that
+ * request). A client sends studio.map.6 only to a server whose status names an m6- recipe. studio.map.1–5 requests from older
+ * tabs are still answered with their own prompts and contracts. */
 export async function mapPromptId() {
-  if (!mapId) mapId = crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ recipe: MAP6_RECIPE, first: MAP6_FIRST_PROMPT, later: MAP6_PROMPT }))).then(b => `m6-${[...new Uint8Array(b)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`);
+  mapId ??= shortSha(JSON.stringify({ recipe: MAP6_RECIPE, first: MAP6_FIRST_PROMPT, later: MAP6_PROMPT })).then(h => `m6-${h}`);
   return mapId;
 }
 let map7Id = null;
-/** AF116: m7- and the first 12 hex digits of the SHA-256 of the studio.map.7 recipe and its one (later) prompt. Advertised as
- * map.laterPrompt beside map.prompt (m6, which still names every first map): a client sends studio.map.7 only for a later reading
- * and only to a server that names it. There is no first map.7 prompt. AF118: the recipe (map7-recipe.2) and the guidance frame are
- * in it too (AF120: and the part-id vocabulary, map7-recipe.3), so it names the renderer; the prompt actually sent for one ask is map7Prompt(ask) (its own SHA-256, not this id). */
+/** AF116: m7- and the short SHA-256 of the studio.map.7 recipe and its one (later) prompt. Advertised as map.laterPrompt beside
+ * map.prompt (m6, which still names every first map): a client sends studio.map.7 only for a later reading and only to a server
+ * that names it. There is no first map.7 prompt. AF118: the recipe (map7-recipe.2) and the guidance frame are in it too (AF120:
+ * and the part-id vocabulary, map7-recipe.3), so it names the renderer; the prompt actually sent for one ask is map7Prompt(ask)
+ * (its own SHA-256, not this id). */
 export async function map7PromptId() {
-  if (!map7Id) map7Id = crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ recipe: MAP7_RECIPE, later: MAP7_PROMPT, vocabulary: MAP7_VOCABULARY, guidance: MAP7_GUIDANCE_FRAME }))).then(b => `m7-${[...new Uint8Array(b)].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('')}`);
+  map7Id ??= shortSha(JSON.stringify({ recipe: MAP7_RECIPE, later: MAP7_PROMPT, vocabulary: MAP7_VOCABULARY, guidance: MAP7_GUIDANCE_FRAME })).then(h => `m7-${h}`);
   return map7Id;
 }
 /** The recipe id a map ask of this schema is asked and bound with (a job's binding.prompt). */
@@ -112,38 +118,79 @@ async function readLimited(body, max, signal) {
   return new TextDecoder('utf-8', { fatal: true }).decode(all);
 }
 
+/** A request body as text, at most max bytes; INPUT_TOO_LARGE past that (whatever Content-Length said). */
+async function readRequestText(request, max) {
+  const text = await readLimited(request.body, max);
+  if (text === null) throw new ApiError('INPUT_TOO_LARGE', 413);
+  return text;
+}
+
+/** studio.map.4–7: the reply goes back as its wire (references, not quotes), once it is valid: the browser decodes it again
+ * against the very request it sent, so every passage keeps where it stands. */
+const readAnchored = (wire, ask) => { validateMapReply(wire, ask); return wire; };
+const fixed = text => () => text;
+/**
+ * Every ask schema the provider is called with: its kind (which budget and deadline it gets), the system prompt and how the
+ * finished reply is read. kind 'ask' is /ask (no reasoning, the general budget); 'plan', 'scope' and 'digest' read whole evidence
+ * with low reasoning under the plan budget and deadline (AF131: scope too, after a real review ran out of a 4096-token budget);
+ * 'map' has a budget and deadline of its own. anchored replies answer with references into this very request (the response
+ * carries its evidence digest). bounded: the prompt carries guidance computed from the ask (AF118, map.7), and one that cannot be
+ * rendered within its bounds is refused before anything is sent (never a partial table).
+ */
+const SCHEMAS = Object.freeze({
+  'studio.plan.1': { kind: 'plan', system: fixed(PLAN_PROMPT), read: validatePlanReply },
+  'studio.plan.2': { kind: 'plan', system: fixed(PLAN2_PROMPT), read: validatePlanReply },
+  'studio.plan.3': { kind: 'plan', system: fixed(PLAN3_PROMPT), read: validatePlanReply },
+  'studio.scope.1': { kind: 'scope', system: fixed(SCOPE_PROMPT), read: validateScopeReply },
+  'studio.digest.1': { kind: 'digest', system: fixed(DIGEST_PROMPT), read: validateDigestReply },
+  'studio.digest.2': { kind: 'digest', system: fixed(DIGEST2_PROMPT), read: validateDigestReply },
+  'studio.map.1': { kind: 'map', system: fixed(MAP_PROMPT), read: validateMapReply },
+  'studio.map.2': { kind: 'map', system: fixed(MAP2_PROMPT), read: validateMapReply },
+  'studio.map.3': { kind: 'map', system: fixed(MAP3_PROMPT), read: validateMapReply },
+  'studio.map.4': { kind: 'map', anchored: true, system: map4Prompt, read: readAnchored },
+  'studio.map.5': { kind: 'map', anchored: true, system: map5Prompt, read: readAnchored },
+  'studio.map.6': { kind: 'map', anchored: true, system: map6Prompt, read: readAnchored },
+  'studio.map.7': { kind: 'map', anchored: true, bounded: true, system: map7Prompt, read: readAnchored }
+});
+const ASK_SCHEMA = Object.freeze({ kind: 'ask', system: fixed(STUDIO_PROMPT), read: validateReply });
+/** The schema entry of a validated ask; /ask's own schema (and anything not listed) reads as an ask. */
+export const schemaOf = ask => (Object.hasOwn(SCHEMAS, ask?.schemaVersion) ? SCHEMAS[ask.schemaVersion] : ASK_SCHEMA);
+
+/** Provider options for one kind. Map reading keeps the model's reasoning for identity and relation judgements (lowest effort);
+ * max_tokens counts reasoning too, so the map has a budget of its own large enough for both. */
+function modelOptions(kind, config) {
+  if (kind === 'map') {
+    const thinking = config.mapThinking ?? 'enabled';
+    return { thinking: { type: thinking }, ...(thinking === 'enabled' ? { reasoning_effort: 'low' } : {}), max_tokens: config.mapMaxTokens ?? 16384 };
+  }
+  if (kind === 'ask') return { thinking: { type: 'disabled' }, max_tokens: config.maxTokens };
+  return { thinking: { type: 'enabled' }, reasoning_effort: 'low', max_tokens: 8192 };
+}
+function deadlineMs(kind, config) {
+  if (kind === 'map') return config.mapTimeoutMs ?? config.planTimeoutMs ?? config.timeoutMs;
+  if (kind === 'ask') return config.timeoutMs;
+  return config.planTimeoutMs ?? config.timeoutMs;
+}
+
 export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetch, signal } = {}) {
-  const plan3 = ask.schemaVersion === 'studio.plan.3', plan2 = ask.schemaVersion === 'studio.plan.2', planning = ask.schemaVersion === 'studio.plan.1' || plan2 || plan3;
-  const scope = ask.schemaVersion === 'studio.scope.1';
-  const digest2 = ask.schemaVersion === 'studio.digest.2', map7 = ask.schemaVersion === 'studio.map.7', map6 = ask.schemaVersion === 'studio.map.6', map5 = ask.schemaVersion === 'studio.map.5', map4 = ask.schemaVersion === 'studio.map.4', anchored = map4 || map5 || map6 || map7, map3 = ask.schemaVersion === 'studio.map.3', map2 = ask.schemaVersion === 'studio.map.2', map = ask.schemaVersion === 'studio.map.1' || map2 || map3 || anchored, digest = ask.schemaVersion === 'studio.digest.1' || digest2 || map;
+  const schema = schemaOf(ask);
   if (!config.apiKey) throw new ApiError('AI_NOT_CONFIGURED', 503);
   if (signal?.aborted) throw new ApiError('CANCELLED', 499);
-  // AF118: map.7 instructions carry guidance computed from this ask; one that cannot be rendered within its bounds is refused here,
-  // before anything is sent (never a partial table).
-  let map7System = null;
-  if (map7) { try { map7System = map7Prompt(ask); } catch { throw new ApiError('INPUT_TOO_LARGE', 413); } }
-  // AF131: scope reads the same whole evidence with reasoning as a plan. A real review ended by length under the 4096-token
-  // budget, before the general deadline. Scope now uses the plan budget/timer; its prompt, checks and single attempt stay its own.
+  let bounded = null;
+  if (schema.bounded) { try { bounded = schema.system(ask); } catch { throw new ApiError('INPUT_TOO_LARGE', 413); } }
   const controller = new AbortController(); let timedOut = false;
-  const timer = setTimeout(() => { timedOut = true; controller.abort(); }, map ? (config.mapTimeoutMs ?? config.planTimeoutMs ?? config.timeoutMs) : planning || digest || scope ? (config.planTimeoutMs ?? config.timeoutMs) : config.timeoutMs);
+  const timer = setTimeout(() => { timedOut = true; controller.abort(); }, deadlineMs(schema.kind, config));
   const abort = () => controller.abort(); signal?.addEventListener('abort', abort, { once: true });
   try {
+    const messages = [{ role: 'system', content: bounded ?? schema.system(ask) }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }];
     // Workers supports manual/follow, not redirect:error. Reject 3xx below without forwarding the key.
     const response = await fetchImpl(ENDPOINT, { method: 'POST', redirect: 'manual', signal: controller.signal,
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.apiKey}` },
-      body: JSON.stringify({ model: config.model, stream: false, ...(map ? { thinking: { type: config.mapThinking ?? 'enabled' }, ...((config.mapThinking ?? 'enabled') === 'enabled' ? { reasoning_effort: 'low' } : {}), max_tokens: config.mapMaxTokens ?? 16384 }
-        : { thinking: { type: scope || planning || digest ? 'enabled' : 'disabled' }, ...(scope || planning || digest ? { reasoning_effort: 'low' } : {}), max_tokens: planning || digest || scope ? 8192 : config.maxTokens }),
-        response_format: { type: 'json_object' },
-        messages: [{ role: 'system', content: map7 ? map7System : map6 ? map6Prompt(ask) : map5 ? map5Prompt(ask) : map4 ? map4Prompt(ask) : map3 ? MAP3_PROMPT : map2 ? MAP2_PROMPT : map ? MAP_PROMPT : digest2 ? DIGEST2_PROMPT : digest ? DIGEST_PROMPT : scope ? SCOPE_PROMPT : plan3 ? PLAN3_PROMPT : plan2 ? PLAN2_PROMPT : planning ? PLAN_PROMPT : STUDIO_PROMPT }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }] }) });
+      body: JSON.stringify({ model: config.model, stream: false, ...modelOptions(schema.kind, config), response_format: { type: 'json_object' }, messages }) });
     if (!response.ok) {
       await response.body?.cancel().catch(() => {});
-      if ([401, 403].includes(response.status)) throw new ApiError('AI_AUTH_FAILED', 502);
-      if (response.status === 402) throw new ApiError('AI_BALANCE_REQUIRED', 502);
-      if (response.status === 429) throw new ApiError('AI_RATE_LIMIT', 429, 30);
-      if ([400, 404, 422].includes(response.status)) throw new ApiError('AI_CONFIG_REJECTED', 502);
-      throw new ApiError('AI_UNAVAILABLE', 503);
+      throw providerHttpError(response.status, 30);
     }
-    let reply;
     try {
       const raw = await readLimited(response.body, REPLY_BYTES, controller.signal);
       const choice = JSON.parse(raw ?? '')?.choices?.[0];
@@ -154,9 +201,7 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
       if (choice?.finish_reason !== 'stop') throw new ApiError('AI_RESPONSE_UNFINISHED', 502);
       if (typeof choice?.message?.content !== 'string') throw new Error();
       if (choice.message.content.includes(config.apiKey)) throw new Error();
-      // studio.map.4: the reply goes back as its wire (references, not quotes), once it is valid: the browser decodes it again
-      // against the very request it sent, so every passage keeps where it stands.
-      reply = anchored ? (() => { const wire = JSON.parse(choice.message.content); validateMapReply(wire, ask); return wire; })() : map ? validateMapReply(JSON.parse(choice.message.content), ask) : digest ? validateDigestReply(JSON.parse(choice.message.content), ask) : scope ? validateScopeReply(JSON.parse(choice.message.content), ask) : planning ? validatePlanReply(JSON.parse(choice.message.content), ask) : validateReply(JSON.parse(choice.message.content), ask);
+      return schema.read(JSON.parse(choice.message.content), ask);
     } catch (e) {
       if (controller.signal.aborted || e instanceof ApiError) throw e;
       // studio.map.6: a contradiction or a wrong reference says where (path), which rule and what it names; never record text.
@@ -164,12 +209,27 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
       if (e?.name === 'MapReplyError') error.detail = { path: e.path, rule: e.rule, target: e.target };
       throw error;
     }
-    return reply;
   } catch (e) {
     if (e instanceof ApiError) throw e;
-    if (controller.signal.aborted) throw new ApiError(timedOut ? 'AI_TIMEOUT' : 'CANCELLED', timedOut ? 504 : 499);
+    if (controller.signal.aborted) throw abortError(timedOut);
     throw new ApiError('AI_NETWORK_ERROR', 503);
   } finally { clearTimeout(timer); signal?.removeEventListener('abort', abort); }
+}
+
+/** The one-shot reading routes and the validator of the ask each accepts. */
+const READ_ROUTES = Object.freeze({
+  '/api/studio/ask': validateAsk, '/api/studio/plan': validatePlanAsk, '/api/studio/scope': validateScopeAsk,
+  '/api/studio/digest': validateDigestAsk, '/api/studio/map': validateMapAsk
+});
+const JOBS = '/api/studio/jobs', SESSIONS = '/api/studio/sessions';
+/** The path segments below prefix when path is prefix itself or under it; null when it is elsewhere. */
+export const segmentsUnder = (path, prefix) => path === prefix ? [] : path.startsWith(`${prefix}/`) ? path.slice(prefix.length + 1).split('/').filter(Boolean) : null;
+/** A validator's refusal as the code the browser reads: size and version are their own codes, everything else is INVALID_INPUT. */
+function inputError(e) {
+  if (e instanceof ApiError) return e;
+  if (e?.message === 'INPUT_TOO_LARGE') return new ApiError('INPUT_TOO_LARGE', 413);
+  if (e?.message === 'UNSUPPORTED_VERSION') return new ApiError('UNSUPPORTED_VERSION', 400);
+  return new ApiError('INVALID_INPUT', 400);
 }
 
 /**
@@ -184,15 +244,14 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
  * map.1–7) and no map jobs. Their routes are refused before the body, a provider, the limiter or an executor is touched, and status
  * names the release instead of a map (so a browser does not read a missing map as a missing key). */
 export const RELEASE_POLICIES = Object.freeze(['existing-map']);
-const WITHHELD = path => path === '/api/studio/map' || path === '/api/studio/jobs' || path.startsWith('/api/studio/jobs/');
+const WITHHELD = path => path === '/api/studio/map' || segmentsUnder(path, JOBS) !== null;
 
 export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, config = readStudioConfig(env), jobs = null, mapExecutor = null, policy = null, sessions = null } = {}) {
   if (policy !== null && !RELEASE_POLICIES.includes(policy)) throw new Error('Unknown release policy.');
   if (policy && (jobs || mapExecutor || sessions)) throw new Error('A limited release takes no map jobs, map executor or local sessions.');
   const limiter = createLimiter(config);
-  // AF100: durable map jobs, only when the host gives a job service (the local Node server, server/map-jobs.mjs). The job owns
-  // its call: the same map model and recipe as /map, the same limiter (taken when it is accepted), never the request's signal.
-  const mapConfig = { ...config, model: config.planModel ?? config.model };
+  // Every reading except /ask (plan, scope, digest, map and map jobs) is made with the plan model.
+  const planConfig = { ...config, model: config.planModel ?? config.model };
   // AF102: a local preview host may give map jobs an executor of its own (a Node-only module it imports itself; never from env or
   // the browser, never in the Worker). It runs map jobs only; /ask, /plan, /scope, /digest and /map keep the DeepSeek key as they
   // are. It answers with a checked wire for the very ask, or fails; there is no fallback to another provider.
@@ -201,15 +260,47 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
   // AF116: a job is bound to the recipe of its own schema (m7 for a later map.7, m6 otherwise). An executor names map.7 only under
   // its explicit scope 'map7-later'; the standard provider takes later map.7 readings as well.
   const later7 = executor ? () => executor.describe().scope === 'map7-later' : () => true;
-  const runJob = executor ? { configured: () => executor.ready(), prompt: promptFor, model: executor.model, prepare: ask => executor.prepare(ask),
+  // AF100: durable map jobs, only when the host gives a job service (the local Node server, server/map-jobs.mjs). The job owns
+  // its call: the same map model and recipe as /map, the same limiter (taken when it is accepted), never the request's signal.
+  const runJob = executor ? {
+    configured: () => executor.ready(), prompt: promptFor, model: executor.model, prepare: ask => executor.prepare(ask),
     acquire: id => { const own = executor.acquire(id); try { const shared = limiter.acquire(id); return () => { shared(); own(); }; } catch (e) { own(); throw e; } },
-    call: async (ask, signal, execution) => { const out = await executor.call(ask, signal, execution); return { model: executor.model, reply: out.wire, evidence: evidenceOf(ask), observed: out.observed }; } }
-    : { configured: () => !!config.apiKey, prompt: promptFor, model: mapConfig.model, acquire: id => limiter.acquire(id),
-      call: async (ask, signal) => ({ model: mapConfig.model, reply: await callStudioModel(ask, mapConfig, { fetchImpl, signal }), evidence: evidenceOf(ask) }) };
+    call: async (ask, signal, execution) => { const out = await executor.call(ask, signal, execution); return { model: executor.model, reply: out.wire, evidence: evidenceOf(ask), observed: out.observed }; }
+  } : {
+    configured: () => !!config.apiKey, prompt: promptFor, model: planConfig.model, acquire: id => limiter.acquire(id),
+    call: async (ask, signal) => ({ model: planConfig.model, reply: await callStudioModel(ask, planConfig, { fetchImpl, signal }), evidence: evidenceOf(ask) })
+  };
   /** What a map reading would be made with: the executor's model and recipe when one is given (map jobs only), else the key's. */
-  const laterPrompt = async () => later7() ? { laterPrompt: await map7PromptId() } : {};
-  const mapStatus = async () => executor ? (executor.ready() && jobs.describe().durable ? { map: { model: executor.model, prompt: await mapPromptId(), ...await laterPrompt(), via: 'jobs' } } : {})
-    : config.apiKey ? { map: { model: config.planModel ?? config.model, prompt: await mapPromptId(), ...await laterPrompt() } } : {};
+  const mapStatus = async () => {
+    const later = later7() ? { laterPrompt: await map7PromptId() } : {};
+    if (executor) return executor.ready() && jobs.describe().durable ? { map: { model: executor.model, prompt: await mapPromptId(), ...later, via: 'jobs' } } : {};
+    return config.apiKey ? { map: { model: planConfig.model, prompt: await mapPromptId(), ...later } } : {};
+  };
+  const statusBody = async () => ({
+    ai: config.apiKey ? 'deepseek' : 'off', model: config.apiKey ? config.model : null, access: config.accessCode ? 'code' : 'open',
+    // digest: the model and prompt a reading would be made with, so a browser can tell its stored readings apart.
+    ...(config.apiKey ? { digest: { model: planConfig.model, prompt: await digestPromptId(1), record: await digestPromptId(2) } } : {}),
+    ...(policy ? { release: policy } : await mapStatus()),
+    // Said whatever the key: a result already kept can be fetched without one.
+    ...(jobs ? { jobs: { ...jobs.describe(), ...(executor ? { executor: executor.describe() } : {}) } } : {}),
+    // Local session records (server/sessions.mjs): offered only by a host that gives the service (the local Node server).
+    ...(sessions ? { sessions: sessions.describe() } : {})
+  });
+  /** The other origin a request comes from when STUDIO_ALLOWED_ORIGINS lists it (it gets CORS headers); otherwise null. */
+  const corsOrigin = request => {
+    const origin = request.headers.get('origin');
+    return origin && origin !== new URL(request.url).origin && config.origins.includes(origin) ? origin : null;
+  };
+  /** The request rules every route past status shares, in this order: an allowed method, the custom header (a cross-site page
+   * cannot send it without a preflight; a sameOriginOnly route also refuses an allowed other origin here), a JSON body on POST,
+   * the access code when one is set, and the declared body size. */
+  const admit = (request, { methods, maxBytes = null, sameOriginOnly = false }) => {
+    if (!methods.includes(request.method)) throw new ApiError('METHOD_NOT_ALLOWED', 405);
+    if ((sameOriginOnly && corsOrigin(request)) || request.headers.get('x-agentflow-request') !== '1') throw new ApiError('FORBIDDEN_ORIGIN', 403);
+    if (request.method === 'POST' && request.headers.get('content-type')?.split(';')[0].trim() !== 'application/json') throw new ApiError('INVALID_CONTENT_TYPE', 415);
+    if (config.accessCode && !sameText(request.headers.get('x-studio-access') ?? '', config.accessCode)) throw new ApiError('ACCESS_CODE_REQUIRED', 401);
+    if (maxBytes !== null && Number(request.headers.get('content-length') ?? 0) > maxBytes) throw new ApiError('INPUT_TOO_LARGE', 413);
+  };
   const headersFor = origin => {
     const h = { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Content-Type': 'application/json; charset=utf-8' };
     if (origin) Object.assign(h, { 'Access-Control-Allow-Origin': origin, Vary: 'Origin' });
@@ -217,8 +308,7 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
   };
   const reply = (status, value, origin, extra = {}) => new Response(JSON.stringify(value), { status, headers: { ...headersFor(origin), ...extra } });
   return async function handle(request) {
-    const url = new URL(request.url), origin = request.headers.get('origin');
-    const cors = origin && origin !== url.origin && config.origins.includes(origin) ? origin : null;
+    const url = new URL(request.url), origin = request.headers.get('origin'), cors = corsOrigin(request);
     try {
       if (!url.pathname.startsWith('/api/studio/')) throw new ApiError('NOT_FOUND', 404);
       if (origin && origin !== url.origin && !cors) throw new ApiError('FORBIDDEN_ORIGIN', 403);
@@ -231,59 +321,37 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
         return new Response(null, { status: 204, headers: { ...headersFor(cors), 'Access-Control-Allow-Methods': 'GET, POST',
           'Access-Control-Allow-Headers': `Content-Type, X-AgentFlow-Request, X-Studio-Access${jobs ? ', X-Studio-Operation' : ''}`, 'Access-Control-Max-Age': '600' } });
       }
-      if (url.pathname === '/api/studio/status' && request.method === 'GET') {
-        // digest: the model and prompt a reading would be made with, so a browser can tell its stored readings apart.
-        return reply(200, { ai: config.apiKey ? 'deepseek' : 'off', model: config.apiKey ? config.model : null, access: config.accessCode ? 'code' : 'open',
-          ...(config.apiKey ? { digest: { model: config.planModel ?? config.model, prompt: await digestPromptId(1), record: await digestPromptId(2) } } : {}), ...(policy ? { release: policy } : await mapStatus()),
-          // Said whatever the key: a result already kept can be fetched without one.
-          ...(jobs ? { jobs: { ...jobs.describe(), ...(executor ? { executor: executor.describe() } : {}) } } : {}),
-          // Local session records (server/sessions.mjs): offered only by a host that gives the service (the local Node server).
-          ...(sessions ? { sessions: sessions.describe() } : {}) }, cors);
-      }
-      if (jobs && (url.pathname === '/api/studio/jobs' || url.pathname.startsWith('/api/studio/jobs/'))) {
-        if (!['GET', 'POST'].includes(request.method)) throw new ApiError('METHOD_NOT_ALLOWED', 405);
-        if (request.headers.get('x-agentflow-request') !== '1') throw new ApiError('FORBIDDEN_ORIGIN', 403);
-        if (request.method === 'POST' && request.headers.get('content-type')?.split(';')[0].trim() !== 'application/json') throw new ApiError('INVALID_CONTENT_TYPE', 415);
-        if (config.accessCode && !sameText(request.headers.get('x-studio-access') ?? '', config.accessCode)) throw new ApiError('ACCESS_CODE_REQUIRED', 401);
-        if (Number(request.headers.get('content-length') ?? 0) > JOB_BYTES) throw new ApiError('INPUT_TOO_LARGE', 413);
-        const rest = url.pathname.slice('/api/studio/jobs'.length).split('/').filter(Boolean);
-        const body = request.method === 'POST' ? await readLimited(request.body, JOB_BYTES) : null;
-        const out = await jobs.handle({ method: request.method, rest, cap: request.headers.get('x-studio-operation'), body }, runJob);
+      if (url.pathname === '/api/studio/status' && request.method === 'GET') return reply(200, await statusBody(), cors);
+      const jobPath = jobs ? segmentsUnder(url.pathname, JOBS) : null;
+      if (jobPath) {
+        admit(request, { methods: ['GET', 'POST'], maxBytes: JOB_BYTES });
+        const body = request.method === 'POST' ? await readRequestText(request, JOB_BYTES) : null;
+        const out = await jobs.handle({ method: request.method, rest: jobPath, cap: request.headers.get('x-studio-operation'), body }, runJob);
         return reply(out.status, out.value, cors);
       }
-      if (sessions && (url.pathname === '/api/studio/sessions' || url.pathname.startsWith('/api/studio/sessions/'))) {
-        if (request.method !== 'GET') throw new ApiError('METHOD_NOT_ALLOWED', 405);
-        // The person's own files: the same custom header (a cross-site page cannot send it without a preflight) and access code.
-        // Same origin only, even for an origin listed in STUDIO_ALLOWED_ORIGINS: no other site reads these files.
-        if (cors || request.headers.get('x-agentflow-request') !== '1') throw new ApiError('FORBIDDEN_ORIGIN', 403);
-        if (config.accessCode && !sameText(request.headers.get('x-studio-access') ?? '', config.accessCode)) throw new ApiError('ACCESS_CODE_REQUIRED', 401);
-        const rest = url.pathname.slice('/api/studio/sessions'.length).split('/').filter(Boolean);
-        if (rest.length > 1) throw new ApiError('NOT_FOUND', 404);
+      const sessionPath = sessions ? segmentsUnder(url.pathname, SESSIONS) : null;
+      if (sessionPath) {
+        // The person's own files: same origin only, even for an origin listed in STUDIO_ALLOWED_ORIGINS (no other site reads them).
+        admit(request, { methods: ['GET'], sameOriginOnly: true });
+        if (sessionPath.length > 1) throw new ApiError('NOT_FOUND', 404);
         const folder = url.searchParams.get('folder'), since = url.searchParams.get('since');
         if (folder !== null && (!folder || folder.length > 1024)) throw new ApiError('INVALID_INPUT', 400);
         if (since !== null && (since.length > 64 || !Number.isFinite(Date.parse(since)))) throw new ApiError('INVALID_INPUT', 400);
-        let id = null; if (rest.length) { try { id = decodeURIComponent(rest[0]); } catch { throw new ApiError('SESSION_NOT_FOUND', 404); } }
-        return reply(200, id !== null ? await sessions.read(id, { since }) : await sessions.list(folder), cors);
+        if (!sessionPath.length) return reply(200, await sessions.list(folder), cors);
+        let id; try { id = decodeURIComponent(sessionPath[0]); } catch { throw new ApiError('SESSION_NOT_FOUND', 404); }
+        return reply(200, await sessions.read(id, { since }), cors);
       }
-      if (!['/api/studio/ask', '/api/studio/plan', '/api/studio/scope', '/api/studio/digest', '/api/studio/map'].includes(url.pathname)) throw new ApiError('NOT_FOUND', 404);
-      if (request.method !== 'POST') throw new ApiError('METHOD_NOT_ALLOWED', 405);
-      if (request.headers.get('x-agentflow-request') !== '1') throw new ApiError('FORBIDDEN_ORIGIN', 403);
-      if (request.headers.get('content-type')?.split(';')[0].trim() !== 'application/json') throw new ApiError('INVALID_CONTENT_TYPE', 415);
-      if (config.accessCode && !sameText(request.headers.get('x-studio-access') ?? '', config.accessCode)) throw new ApiError('ACCESS_CODE_REQUIRED', 401);
-      if (Number(request.headers.get('content-length') ?? 0) > ASK_BYTES) throw new ApiError('INPUT_TOO_LARGE', 413);
+      if (!Object.hasOwn(READ_ROUTES, url.pathname)) throw new ApiError('NOT_FOUND', 404);
+      admit(request, { methods: ['POST'], maxBytes: ASK_BYTES });
       let ask, raw;
-      try {
-        raw = await readLimited(request.body, ASK_BYTES);
-        if (raw === null) throw new ApiError('INPUT_TOO_LARGE', 413);
-        ask = (url.pathname === '/api/studio/map' ? validateMapAsk : url.pathname === '/api/studio/digest' ? validateDigestAsk : url.pathname === '/api/studio/scope' ? validateScopeAsk : url.pathname === '/api/studio/plan' ? validatePlanAsk : validateAsk)(JSON.parse(raw));
-      } catch (e) { throw e instanceof ApiError ? e : new ApiError(e?.message === 'INPUT_TOO_LARGE' ? 'INPUT_TOO_LARGE' : e?.message === 'UNSUPPORTED_VERSION' ? 'UNSUPPORTED_VERSION' : 'INVALID_INPUT', e?.message === 'INPUT_TOO_LARGE' ? 413 : 400); }
+      try { raw = await readRequestText(request, ASK_BYTES); ask = READ_ROUTES[url.pathname](JSON.parse(raw)); } catch (e) { throw inputError(e); }
       if (!config.apiKey) throw new ApiError('AI_NOT_CONFIGURED', 503);
       const release = limiter.acquire(crypto.randomUUID());
       try {
-        const requestConfig = url.pathname !== '/api/studio/ask' ? { ...config, model: config.planModel ?? config.model } : config;
+        const requestConfig = url.pathname === '/api/studio/ask' ? config : planConfig;
         const answer = await callStudioModel(ask, requestConfig, { fetchImpl, signal: request.signal });
-        // studio.map.4: the references in the reply name pieces of exactly this request; the browser checks it is its own.
-        return reply(200, { model: requestConfig.model, reply: answer, ...(['studio.map.4', 'studio.map.5', 'studio.map.6', 'studio.map.7'].includes(ask.schemaVersion) ? { evidence: { index: SPAN_INDEX, ask: textDigest(raw) } } : {}) }, cors);
+        // studio.map.4–7: the references in the reply name pieces of exactly this request; the browser checks it is its own.
+        return reply(200, { model: requestConfig.model, reply: answer, ...(schemaOf(ask).anchored ? { evidence: { index: SPAN_INDEX, ask: textDigest(raw) } } : {}) }, cors);
       } finally { release(); }
     } catch (e) {
       const error = e instanceof ApiError ? e : new ApiError('INTERNAL_ERROR', 500);
