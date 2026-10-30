@@ -186,7 +186,10 @@ test('128-9 a server whose executor became unavailable (version changed) is stil
 test('128-10 a default stop never ends a job admitted after its own check: the server decides, refuses while one runs, and says so', async () => {
   const f = fixture(), port = await freePort(); f.mode('delay:1500');
   // A slow poll makes the window between the stop request and the server's decision wide enough to admit a job in it.
-  const s = await start(f, port, { pollMs: 1500 }), run = placesFor(port, f.data).run;
+  // The admitted job's own lease release is held open after it is ready (the owned child's settlement), released by the test.
+  let hold = null, holding = false, open;
+  const s = await start(f, port, { pollMs: 1500, executorOptions: { hooks: { beforeMutation: async kind => { if (kind === 'lease-release' && hold) { holding = true; await hold; } } } } }), run = placesFor(port, f.data).run;
+  hold = new Promise(r => { open = r; });
   const pending = stop({ port, explicit: f.exe, data: f.data, fixed: f.fixed, waitMs: 8000 });
   await until(() => existsSync(join(run, 'stop.json')), 'stop requested');
   const job = await firstJob(`http://127.0.0.1:${port}`); assert.equal((await job.submit()).status, 202, 'admitted after the stop check');
@@ -195,7 +198,21 @@ test('128-10 a default stop never ends a job admitted after its own check: the s
   assert.equal(s.exited(), null, 'the server keeps running');
   await until(async () => (await job.get()).state === 'ready', 'the admitted job finished');
   assert.ok(!existsSync(join(run, 'stop.json')), 'the refused request is not left to act later');
-  const later = await stop({ port, explicit: f.exe, data: f.data, fixed: f.fixed }); assert.equal(later.why, 'STOPPED');
+  // Ready is not settled: until its child is known gone and its lease released, the job's owned child still counts as running,
+  // so a default stop is still refused (deterministic here: the release is held).
+  await until(() => holding, 'the lease release is in progress');
+  const c = await check({ port, explicit: f.exe, data: f.data, fixed: f.fixed }); assert.equal(c.executor.state, 'busy');
+  const during = await stop({ port, data: f.data, fixed: f.fixed, waitMs: 4000 }); assert.deepEqual([during.stopped, during.why], [false, 'BUSY']);
+  // The server itself decides the same way (a request from a caller that looked before the job ran): answered BUSY, still running.
+  const nonce = JSON.parse(readFileSync(join(run, 'host.json'), 'utf8')).nonce;
+  writeFileSync(join(run, 'stop.json'), JSON.stringify({ nonce, request: 'late-look', interrupt: false }));
+  await until(() => existsSync(join(run, 'stop-answer.json')), 'the server answered');
+  assert.equal(JSON.parse(readFileSync(join(run, 'stop-answer.json'), 'utf8')).outcome, 'BUSY'); assert.equal(s.exited(), null);
+  assert.ok(!existsSync(join(run, 'stop.json')));
+  // Settled (observed, not slept): then the default stop ends it.
+  open(); hold = null;
+  await until(async () => (await check({ port, explicit: f.exe, data: f.data, fixed: f.fixed })).executor?.state === 'ready' && s.jobs.held().running === 0, 'the owned child settled');
+  const later = await stop({ port, data: f.data, fixed: f.fixed }); assert.equal(later.why, 'STOPPED');
 });
 
 test('128-11 stopping this entry needs no binary: changed or deleted after start (found or named) it still stops; forged or other run files do not', async () => {
