@@ -417,8 +417,10 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
         // map.7: the match's own record (an earlier condition header of that record included), resolved before the match rules.
         if (seven) { const { aboutAt, ...plain } = wire as Record<string, unknown>; condition7 = condition(aboutAt, `matches[${mi}].aboutAt`, 200, new Set([anchor.record])); wire = { ...plain, about: condition7?.quote ?? null }; }
       }
-      // map.7: the request-match rules refused it; which of them is not told (only that the match did not hold).
-      let m: RequestMatch; try { m = validateRequestMatch(wire, ask.requests!, three, four ? ANCHOR_QUOTE_MAX : 300); } catch { throw seven ? new MapReplyError(`matches[${mi}]`, 'contract', 'match-contract') : new Error(code); }
+      // map.7: the request-match rules refused it (their own INVALID_REQUEST_SCOPE); which of them is not told. Any other exception
+      // stays the generic refusal it was, never said as a contract guard.
+      let m: RequestMatch; try { m = validateRequestMatch(wire, ask.requests!, three, four ? ANCHOR_QUOTE_MAX : 300); }
+      catch (e) { throw seven && e instanceof Error && e.message === 'INVALID_REQUEST_SCOPE' ? new MapReplyError(`matches[${mi}]`, 'contract', 'match-contract') : new Error(code); }
       // Request correspondence quotes the literal sent passage; it does not repair or join excerpts.
       const rec = records.get(m.record), text = rec ? texts.get(rec.id)!.text : '', at = anchor ? { at: anchor.from!, length: anchor.to! - anchor.from! } : rec ? quoteAt(text, m.quote) : null;
       need(rec && at && at.length >= (anchor ? 1 : 6) && at.length <= (anchor ? ANCHOR_QUOTE_MAX : 300), `matches[${mi}].at`, 'quote');

@@ -6,9 +6,9 @@
 import { writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 const [baseRoot, outFile] = process.argv.slice(2);
-const here = resolve(new URL('../../..', import.meta.url).pathname), at = (root, rel) => import(pathToFileURL(join(root, 'app/continuity', rel)).href);
+const here = fileURLToPath(new URL('../../..', import.meta.url)), at = (root, rel) => import(pathToFileURL(join(root, 'app/continuity', rel)).href);
 const sha = root => execFileSync('git', ['-C', root, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 const tree = root => execFileSync('git', ['-C', root, 'rev-parse', 'HEAD:app'], { encoding: 'utf8' }).trim();
 const dirty = root => execFileSync('git', ['-C', root, 'status', '--short', 'app/continuity/src'], { encoding: 'utf8' }).trim();
