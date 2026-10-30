@@ -1,0 +1,61 @@
+{
+  "cycle": 137,
+  "status": "FINAL_DELTA_REVIEW_COMPLETE",
+  "reviewedProductSha": "5de745afcc7e9dfb1143ff10eb9d2b3bfc27a664",
+  "reviewedDocsSha": "e8a2dd418ae5669865534526e4078db4882318bc",
+  "base": "bf11f298382da28dcd8587b27f95ab5c33eefdf9",
+  "reviewedFinalSha": "d79673e83b230ff685024fb33234b1ee6f0227f1",
+  "finalProductSha": "2a57f730e19dd8f279b9be204911d7c5ef09b7e5",
+  "finalAppTree": "78f6842b3ba302df8444a58a904f92025ad9e3af",
+  "finalVerdict": "BOUNDED_STATIC_DELTA_PASS_NO_OPEN_P1_P2",
+  "openP1P2": [],
+  "findings": [
+    {
+      "id": "D137-DELEGATE-UNEXPECTED",
+      "priority": "P2",
+      "location": "app/continuity/src/shared/map-reading.ts validateRequestMatch catch, near420",
+      "status": "RESOLVED_IN_FINAL_2a57f73_STATICALLY_CONFIRMED",
+      "issue": "The new catch converts every delegated exception into matches[i]/contract/match-contract, while DESIGN requires unexpected exceptions to retain generic CONTRACT fallback. It therefore labels both explicit contract refusal and a delegated runtime failure as the same known guard category.",
+      "reachableBoundary": "All explicit validateRequestMatch refusals use plain Error('INVALID_REQUEST_SCOPE'). The function then calls structuredClone(v), which is a separate runtime boundary. Normal bounded parsed JSON plus a validated ask does not provide an ordinary TypeError reproducer in the inspected shape guards. The unvalidated replaces value reaches structuredClone before the later map prior-type guard, but this review did not execute or prove a depth/resource exception from a particular JSON value.",
+      "neededFix": "For map7, translate only the exact expected plain Error marker INVALID_REQUEST_SCOPE to match-contract. For any other exception retain a generic Error(INVALID_RESPONSE) so existing executor fallback stays CONTRACT without message/stack leakage. Preserve the legacy map1-6 catch behavior.",
+      "neededTargetedEvidence": "A controlled clone/delegate fault injection, explicitly labelled an injected unexpected failure rather than a real model/ordinary JSON failure, should retain generic fallback. Normal synthetic bad matches should retain match-contract. No whole49-case rerun by this reviewer.",
+      "finalResolution": "The final catch tags map7 only when e instanceof Error and e.message is the expected INVALID_REQUEST_SCOPE marker. All other failures become the old generic Error(INVALID_RESPONSE), so no exception message or stack is forwarded. New137-4 checks the normal marker and injects a target getter TypeError, asserting one field read and generic sanitized errors for map7 and map6. The injection is explicitly identified as synthetic; it is not claimed to occur in ordinary model JSON."
+    },
+    {
+      "id": "D137-WINDOWS-COMPARE-PATH",
+      "priority": "P2",
+      "location": "docs/cycles/2026-10-30-contract-diagnostics-137/compare-base.mjs here path initialization",
+      "status": "RESOLVED_IN_FINAL_2a57f73_STATICALLY_CONFIRMED",
+      "issue": "resolve(new URL('../../..', import.meta.url).pathname) is not a filesystem URL conversion. On Root's Windows path it retains the URL drive prefix and percent-encoded Korean text, producing the reported C:\\C:\\Users\\%EC... root instead of the checkout.",
+      "neededFix": "Use fileURLToPath for the URL before filesystem path handling. This is a comparison-tool portability correction, not a product validator change.",
+      "attribution": "The actual Windows reproduction belongs to Root; reviewer read the same faulty conversion and did not execute the tool.",
+      "finalResolution": "The tool now obtains here with fileURLToPath(new URL('../../..', import.meta.url)), removing the raw pathname/percent-encoded Windows path conversion. Root reports the locked baseline/candidate49-case comparison passes after this repair."
+    }
+  ],
+  "otherwiseStaticAssessment": {
+    "acceptRejectAndNormalization": "The diff retains original predicates and the valid output construction. Local object/field/list wrappers delegate to old helpers for non-map7. Replaced need guards keep INVALID_RESPONSE plain errors for map1-6. Split relation guards preserve short-circuit rejection order for parsed JSON. The final secret scan traverses the same normalized string sequence and names its first matching location. No changed accepted output or acceptance predicate was found statically.",
+    "existingStructuredErrors": "Existing reference/source-kind/condition/contradiction throws remain at their original positions. condition120's changed exact-key expectation records the intended newly structured error before invalid-ref; it does not relax acceptance.",
+    "safeNewDetails": "ContractGuard is a fixed vocabulary. New paths derive only from literal protocol fields and numeric indexes; target is the fixed guard classification. Unknown keys, offending string values, source quotations and exception messages/stacks are not newly serialized. Existing older structured-error value excerpts are unchanged and must not be described as newly sanitized.",
+    "boundedScope": "Only map-reading.ts is changed product code. No prompt/model/budget/apply/schema/store/CLI capture/lifecycle or raw retention change is present. Existing executor/server MapReplyError detail transport is reused."
+  },
+  "testReview": {
+    "corpusActualScope": "The new49-case corpus contains map7 and map6 cases only, including2 lawful outputs,35 generic map7 faults and prior structured refusals. It is not an executed map1-5 equivalence corpus. The broader map1-6 invariance conclusion relies additionally on static branch inspection and existing tests.",
+    "substantiveChecks": [
+      "Several nested guard paths/classes, malformed/extra-key/secret-like markers, unchanged failed wires and prior structured errors.",
+      "Base/candidate accept-reject agreement and JSON-equal accepted outputs on the same corpus objects, once Root can run the path-corrected tool.",
+      "Standard /map plus a fake CLI job persist the same safe failure detail through existing transport, with one fake child and no retry. These are meaningful transport tests, not real model evidence."
+    ],
+    "limits": "The corpus is sampled guard coverage, not proof of every branch or all runtime exceptions. Author reports3 new tests and140 related checks; reviewer did not execute them. Root owns locked build/corpus/CI."
+  },
+  "finalDeltaAssessment": {
+    "compared": "Exact e8a2dd4..d79673e delta only, preserving the initial review above.",
+    "productChange": "Only the acknowledged delegated-error catch is narrowed; no acceptance predicate, first-guard order, normalization, old-version behavior or transport/cleanup change is introduced by this final product delta.",
+    "testAndToolChange": "137-4 adds the narrowly labelled injected unexpected-exception boundary; compare-base uses correct file URL conversion. No raw retention or new model fixture appears.",
+    "documentTruth": "Final RESULT identifies initial5de745a140/140 as historical, final2a57f734/4 and49-case comparison separately, and describes the TypeError as injected. It retains136 cause-unknown, pre-existing structured-error excerpts and compiler/CI limitations.",
+    "rootReportedVerification": "Locked build passed; independently built TS5.8.3 baseline and candidate agree on49 acceptance decisions and successful outputs. This is Root evidence, not reviewer execution.",
+    "remaining": "Exact final CI and acceptance belong to Root. Real future diagnostic usefulness requires a separately selected observation; no real136 cause, future model correctness or generic acceptance proof is established."
+  },
+  "historicalBoundary": "136 remains undiagnosed and rejected. No137 diagnostic can recover its missing original response or retrospectively identify a field.",
+  "reviewerExecution": {"modelCalls": 0, "productWrites": 0, "browserRuns": 0, "testOrBuildRuns": 0, "historicalResponseRevalidations": 0, "faultInjectionRuns": 0},
+  "decisionOwner": "Root"
+}

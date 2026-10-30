@@ -1,0 +1,219 @@
+{
+  "head": "d79673e83b230ff685024fb33234b1ee6f0227f1",
+  "product": "2a57f730e19dd8f279b9be204911d7c5ef09b7e5",
+  "app": "78f6842b3ba302df8444a58a904f92025ad9e3af",
+  "base": "bf11f298382da28dcd8587b27f95ab5c33eefdf9",
+  "lockedCompiler": "5.8.3",
+  "node": "v24.19.0",
+  "check": {
+    "exit": 0,
+    "logSha256": "db4a063fdd0982bcf1bbbefce383f2309c67b403057eaef217ed79f5d96070c4"
+  },
+  "build": {
+    "exit": 0,
+    "logSha256": "1e6b3d1609ce5e24c0430229a6bc81d75abc473846bf616ffc6ed8425ead59ce"
+  },
+  "tests": {
+    "exit": 0,
+    "pass": 72,
+    "fail": 0,
+    "skip": 0,
+    "logSha256": "35fa78cd6302b255a831a090e0e29b6d44080d5d75165de14a5a8888650e69a5",
+    "suites": [
+      "contract137",
+      "condition116",
+      "condition118",
+      "condition120",
+      "map70",
+      "request71",
+      "source-entry114"
+    ]
+  },
+  "comparison": {
+    "exit": 0,
+    "cases": 49,
+    "accepted": 2,
+    "problems": 0,
+    "baselineCompiledSeparately": true,
+    "reportSha256": "8dd7be08e43c9366f3b303658494fe1fc5eff8e3e7ff72262b814a93ee759353"
+  },
+  "newModelCalls": 0,
+  "raw136Repaired": false,
+  "source136Cause": "unknown",
+  "rootFoundRepairs": [
+    "Windows compare-base file URL conversion",
+    "Unexpected request-match exceptions must retain generic fallback"
+  ],
+  "existingStructuredEcho": "unchanged; not a guarantee that all historical diagnostics omit values",
+  "map1to5": "covered by existing related tests, not by 49-case map6/7 corpus",
+  "uiChanged": false,
+  "promptChanged": false,
+  "executionPolicyChanged": false,
+  "ci": {
+    "run": 40999222137,
+    "head": "d79673e83b230ff685024fb33234b1ee6f0227f1",
+    "jobs": [
+      {
+        "id": 123879448475,
+        "name": "verify (windows-2022)",
+        "status": "completed",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+            "conclusion": "success"
+          },
+          {
+            "name": "Record exact runtime and checked-out commit",
+            "conclusion": "success"
+          },
+          {
+            "name": "Clean locked install",
+            "conclusion": "success"
+          },
+          {
+            "name": "Type and boundary checks",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build and domain / HTTP / simulated provider tests",
+            "conclusion": "success"
+          },
+          {
+            "name": "Continuity type, syntax and credential boundary checks",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build and test continuity with simulated providers",
+            "conclusion": "success"
+          },
+          {
+            "name": "Prepare Cloudflare modules and assets without credentials or deployment",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build static site (no AI server bundled, no credentials)",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install pinned browser verification tools",
+            "conclusion": "success"
+          },
+          {
+            "name": "Direct browser-to-server verification (original app, AI is still mocked)",
+            "conclusion": "success"
+          },
+          {
+            "name": "Studio smoke - entry, map, part, ask, failure/retry, no-key and static states (stubbed provider, no real key)",
+            "conclusion": "success"
+          },
+          {
+            "name": "Upload only this run's results, not historic snapshot evidence",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 123879448769,
+        "name": "verify (ubuntu-24.04)",
+        "status": "completed",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+            "conclusion": "success"
+          },
+          {
+            "name": "Record exact runtime and checked-out commit",
+            "conclusion": "success"
+          },
+          {
+            "name": "Clean locked install",
+            "conclusion": "success"
+          },
+          {
+            "name": "Type and boundary checks",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build and domain / HTTP / simulated provider tests",
+            "conclusion": "success"
+          },
+          {
+            "name": "Continuity type, syntax and credential boundary checks",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build and test continuity with simulated providers",
+            "conclusion": "success"
+          },
+          {
+            "name": "Prepare Cloudflare modules and assets without credentials or deployment",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build static site (no AI server bundled, no credentials)",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install pinned browser verification tools",
+            "conclusion": "success"
+          },
+          {
+            "name": "Direct browser-to-server verification (original app, AI is still mocked)",
+            "conclusion": "success"
+          },
+          {
+            "name": "Studio smoke - entry, map, part, ask, failure/retry, no-key and static states (stubbed provider, no real key)",
+            "conclusion": "success"
+          },
+          {
+            "name": "Upload only this run's results, not historic snapshot evidence",
+            "conclusion": "success"
+          }
+        ]
+      }
+    ],
+    "linux": {
+      "app": 279,
+      "continuity": 654,
+      "skip": 0,
+      "fail": 0
+    },
+    "windows": {
+      "app": 279,
+      "continuity": 651,
+      "skip": 3,
+      "fail": 0
+    }
+  },
+  "independent": {
+    "sha256": "41e0ec432ddda1dfeda39b650fb3258bcbb3c702d509a68b738fd07f174550b5",
+    "verdict": "BOUNDED_STATIC_DELTA_PASS_NO_OPEN_P1_P2",
+    "execution": 0
+  }
+}
