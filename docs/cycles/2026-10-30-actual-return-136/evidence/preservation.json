@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "job": "MJ_7e76055e-3e66-4660-9ade-3d2e72fdc05c",
+  "state": "failed",
+  "error": {
+    "code": "INVALID_RESPONSE",
+    "detail": {
+      "rule": "CONTRACT"
+    }
+  },
+  "durationMs": 178210,
+  "generated": 1,
+  "retries": 0,
+  "applied": 0,
+  "workspaceByteExact": true,
+  "reloadWorkspaceAndPlansByteExact": true,
+  "backupProjectByteExact": true,
+  "priorPlansAllExact": true,
+  "onlyNewPlanProject": [
+    "P_392f37ba-1087-47ef-947d-2171ecaf1069"
+  ],
+  "originalRQ": "RQ_93168eb4-c5bc-40b7-93e6-0ba660df3f3f",
+  "oldRejectedRQPreserved": "RQ_455de117-b75f-4eea-9fe3-630611e3d57e",
+  "projectSha256": "45ea2fd128a94fdfa28627bae334346774e0c6cb21268d780071be5e0aa028c4",
+  "workspaceSha256": "56bdd568d13adbc90dfb948d90f9a6c18269a753af4cb72d108c902da7d101b7",
+  "execution": {
+    "executor": "codex-cli-preview.102",
+    "version": "codex-cli 0.165.0-alpha.1.2",
+    "binarySha256": "5c1b55966bf9f757dcbf00065c9a6cb862ead55d34b015f1be1939ff18e43943",
+    "model": "gpt-6.1-sol",
+    "reasoning": "high",
+    "permissions": "503b611008cf71b170ce6aedf247526e85ccf1da896529645866af8a19889396",
+    "wrapper": "dd56ff8327f0b957f18ccc6af7c6334935901014e36539c35c91e16279c02ae5",
+    "scope": "map7-later",
+    "selectionMs": 299000,
+    "verdictMs": 300000,
+    "policy": "5704c8b7660c78f9a9eed0be215d5283d1fe800c413f09085b1345274c679954",
+    "promptKind": "later7",
+    "prompt": "660b84fdfbdc",
+    "promptSha256": "660b84fdfbdcab0760f27d69c5c0c385dea8fc7f78afdc445ee4b1e779fea747",
+    "askSha256": "844b1ef79bb41bceab08b77371b7e7bba87542102dd3148ca9c3db146ffc4a23",
+    "observed": {
+      "startedAt": "2026-10-30T03:18:35.848Z",
+      "closedAtMs": 178198.195,
+      "decidedAtMs": 178199.29379999998,
+      "closed": true,
+      "exit": 0,
+      "signal": null,
+      "reason": null,
+      "events": 4,
+      "usage": {
+        "input_tokens": 34672,
+        "cached_input_tokens": 8192,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5958,
+        "reasoning_output_tokens": 3106
+      },
+      "stdoutBytes": 10992,
+      "stderrBytes": 158,
+      "signals": {
+        "sent": 0,
+        "skippedAfterExit": 0
+      },
+      "stdioCut": false,
+      "finalSha256": "d7bbf386fd21798acd28d0352e87a6a770b9d9c82de9298459ffd80df686e414",
+      "finalBytes": 9974
+    }
+  },
+  "rawFinalAvailable": false,
+  "rawUnavailableReason": "fixed CLI --ephemeral; executor consumed cleanup removes run folder; only hash/size and generic CONTRACT persisted",
+  "meaning": "not_assessable",
+  "awayDraftReload": "observed exact",
+  "failureNoticeAfterReload": "disappeared; persisted terminal job and project unaffected"
+}
