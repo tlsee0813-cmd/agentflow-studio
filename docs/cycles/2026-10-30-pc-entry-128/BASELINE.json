@@ -1,0 +1,10 @@
+{
+  "public": "https://agentflow-studio-existing-map-124.tlsee0813.workers.dev/",
+  "source": "6badd901b5ac4061353e487ee8bafd10b019efa2",
+  "observed": "Public home explicitly withholds first map and record refresh; new project form only name. Opened and cancelled without creating.",
+  "defaultLauncher": "app/continuity/scripts/start-local.ps1",
+  "defaultMode": "deepseek",
+  "ownedPath": "docs/cycles/2026-10-29-owned-cli-preview-102/preview/serve-preview.mjs",
+  "pro": "UI usage limit shown; prompt not submitted; no account changes",
+  "newGenerations": 0
+}

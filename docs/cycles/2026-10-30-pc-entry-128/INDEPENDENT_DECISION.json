@@ -1,0 +1,14 @@
+{
+  "basis": "8a3bf347364e9615f3023d59bf5604835455d3f0",
+  "reviewer": "existing mechanism86_decision",
+  "recommendation": "Explicit optional PC entry using existing owned CLI and fixed successful policy; do not promote public/default generation.",
+  "accepted": true,
+  "reason": "Current default launcher uses DeepSeek; successful CLI path still needs an operator policy and cycle command. 123 already repaired in-product first-map affordance.",
+  "limits": [
+    "Do not claim first-map generality",
+    "Other two materials current integrated semantics remain open",
+    "Public73/127 and original default stay unchanged",
+    "No new model generation for startup acceptance"
+  ],
+  "next": "Root narrow design + one Claude writer"
+}
