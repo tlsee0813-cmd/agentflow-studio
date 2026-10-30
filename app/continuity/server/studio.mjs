@@ -221,7 +221,7 @@ const READ_ROUTES = Object.freeze({
   '/api/studio/ask': validateAsk, '/api/studio/plan': validatePlanAsk, '/api/studio/scope': validateScopeAsk,
   '/api/studio/digest': validateDigestAsk, '/api/studio/map': validateMapAsk
 });
-const JOBS = '/api/studio/jobs';
+const JOBS = '/api/studio/jobs', SESSIONS = '/api/studio/sessions';
 /** The path segments below prefix when path is prefix itself or under it; null when it is elsewhere. */
 export const segmentsUnder = (path, prefix) => path === prefix ? [] : path.startsWith(`${prefix}/`) ? path.slice(prefix.length + 1).split('/').filter(Boolean) : null;
 /** A validator's refusal as the code the browser reads: size and version are their own codes, everything else is INVALID_INPUT. */
@@ -246,9 +246,9 @@ function inputError(e) {
 export const RELEASE_POLICIES = Object.freeze(['existing-map']);
 const WITHHELD = path => path === '/api/studio/map' || segmentsUnder(path, JOBS) !== null;
 
-export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, config = readStudioConfig(env), jobs = null, mapExecutor = null, policy = null } = {}) {
+export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, config = readStudioConfig(env), jobs = null, mapExecutor = null, policy = null, sessions = null } = {}) {
   if (policy !== null && !RELEASE_POLICIES.includes(policy)) throw new Error('Unknown release policy.');
-  if (policy && (jobs || mapExecutor)) throw new Error('A limited release takes no map jobs or map executor.');
+  if (policy && (jobs || mapExecutor || sessions)) throw new Error('A limited release takes no map jobs, map executor or local sessions.');
   const limiter = createLimiter(config);
   // Every reading except /ask (plan, scope, digest, map and map jobs) is made with the plan model.
   const planConfig = { ...config, model: config.planModel ?? config.model };
@@ -282,13 +282,21 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
     ...(config.apiKey ? { digest: { model: planConfig.model, prompt: await digestPromptId(1), record: await digestPromptId(2) } } : {}),
     ...(policy ? { release: policy } : await mapStatus()),
     // Said whatever the key: a result already kept can be fetched without one.
-    ...(jobs ? { jobs: { ...jobs.describe(), ...(executor ? { executor: executor.describe() } : {}) } } : {})
+    ...(jobs ? { jobs: { ...jobs.describe(), ...(executor ? { executor: executor.describe() } : {}) } } : {}),
+    // Local session records (server/sessions.mjs): offered only by a host that gives the service (the local Node server).
+    ...(sessions ? { sessions: sessions.describe() } : {})
   });
+  /** The other origin a request comes from when STUDIO_ALLOWED_ORIGINS lists it (it gets CORS headers); otherwise null. */
+  const corsOrigin = request => {
+    const origin = request.headers.get('origin');
+    return origin && origin !== new URL(request.url).origin && config.origins.includes(origin) ? origin : null;
+  };
   /** The request rules every route past status shares, in this order: an allowed method, the custom header (a cross-site page
-   * cannot send it without a preflight), a JSON body on POST, the access code when one is set, and the declared body size. */
-  const admit = (request, { methods, maxBytes = null }) => {
+   * cannot send it without a preflight; a sameOriginOnly route also refuses an allowed other origin here), a JSON body on POST,
+   * the access code when one is set, and the declared body size. */
+  const admit = (request, { methods, maxBytes = null, sameOriginOnly = false }) => {
     if (!methods.includes(request.method)) throw new ApiError('METHOD_NOT_ALLOWED', 405);
-    if (request.headers.get('x-agentflow-request') !== '1') throw new ApiError('FORBIDDEN_ORIGIN', 403);
+    if ((sameOriginOnly && corsOrigin(request)) || request.headers.get('x-agentflow-request') !== '1') throw new ApiError('FORBIDDEN_ORIGIN', 403);
     if (request.method === 'POST' && request.headers.get('content-type')?.split(';')[0].trim() !== 'application/json') throw new ApiError('INVALID_CONTENT_TYPE', 415);
     if (config.accessCode && !sameText(request.headers.get('x-studio-access') ?? '', config.accessCode)) throw new ApiError('ACCESS_CODE_REQUIRED', 401);
     if (maxBytes !== null && Number(request.headers.get('content-length') ?? 0) > maxBytes) throw new ApiError('INPUT_TOO_LARGE', 413);
@@ -300,8 +308,7 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
   };
   const reply = (status, value, origin, extra = {}) => new Response(JSON.stringify(value), { status, headers: { ...headersFor(origin), ...extra } });
   return async function handle(request) {
-    const url = new URL(request.url), origin = request.headers.get('origin');
-    const cors = origin && origin !== url.origin && config.origins.includes(origin) ? origin : null;
+    const url = new URL(request.url), origin = request.headers.get('origin'), cors = corsOrigin(request);
     try {
       if (!url.pathname.startsWith('/api/studio/')) throw new ApiError('NOT_FOUND', 404);
       if (origin && origin !== url.origin && !cors) throw new ApiError('FORBIDDEN_ORIGIN', 403);
@@ -321,6 +328,18 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
         const body = request.method === 'POST' ? await readRequestText(request, JOB_BYTES) : null;
         const out = await jobs.handle({ method: request.method, rest: jobPath, cap: request.headers.get('x-studio-operation'), body }, runJob);
         return reply(out.status, out.value, cors);
+      }
+      const sessionPath = sessions ? segmentsUnder(url.pathname, SESSIONS) : null;
+      if (sessionPath) {
+        // The person's own files: same origin only, even for an origin listed in STUDIO_ALLOWED_ORIGINS (no other site reads them).
+        admit(request, { methods: ['GET'], sameOriginOnly: true });
+        if (sessionPath.length > 1) throw new ApiError('NOT_FOUND', 404);
+        const folder = url.searchParams.get('folder'), since = url.searchParams.get('since');
+        if (folder !== null && (!folder || folder.length > 1024)) throw new ApiError('INVALID_INPUT', 400);
+        if (since !== null && (since.length > 64 || !Number.isFinite(Date.parse(since)))) throw new ApiError('INVALID_INPUT', 400);
+        if (!sessionPath.length) return reply(200, await sessions.list(folder), cors);
+        let id; try { id = decodeURIComponent(sessionPath[0]); } catch { throw new ApiError('SESSION_NOT_FOUND', 404); }
+        return reply(200, await sessions.read(id, { since }), cors);
       }
       if (!Object.hasOwn(READ_ROUTES, url.pathname)) throw new ApiError('NOT_FOUND', 404);
       admit(request, { methods: ['POST'], maxBytes: ASK_BYTES });

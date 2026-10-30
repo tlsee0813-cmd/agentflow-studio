@@ -67,3 +67,19 @@ test('ROUTES-R1 reading routes refuse an unknown path, a wrong method and a miss
   const r = await ask('/api/studio/plan');
   assert.deepEqual([r.status, (await r.json()).error.code], [400, 'INVALID_INPUT'], 'input is judged before the key');
 });
+
+test('ROUTES-X1 session routes: GET only, same origin only (even a listed one), then the shared rules', async () => {
+  const seen = [], sessions = { describe: () => ({ readable: true }), list: async f => { seen.push(['list', f]); return { sessions: [] }; }, read: async (id, o) => { seen.push(['read', id, o.since]); return { id }; } };
+  const handle = createStudioHandler({ env: { STUDIO_ALLOWED_ORIGINS: 'https://ui.example' }, sessions });
+  const get = (path, headers = {}, method = 'GET') => handle(new Request(`${BASE}${path}`, { method, headers: { 'x-agentflow-request': '1', ...headers } }));
+  assert.equal((await get('/api/studio/sessions', { origin: 'https://ui.example' }, 'POST')).status, 405, 'the method is judged first');
+  assert.equal((await get('/api/studio/sessions', { origin: 'https://ui.example' })).status, 403, 'a listed other origin never reads these files');
+  assert.equal((await get('/api/studio/sessions', { 'x-agentflow-request': '0' })).status, 403);
+  assert.equal((await get('/api/studio/sessions/a/b')).status, 404);
+  assert.equal((await get('/api/studio/sessions/%E0%A4%A')).status, 404);
+  assert.equal((await get('/api/studio/sessions/s1?since=never')).status, 400);
+  assert.equal((await get('/api/studio/sessions?folder=C%3A%5Cwork')).status, 200);
+  assert.equal((await get('/api/studio/sessions/s%201?since=2026-10-30T00:00:00Z')).status, 200);
+  assert.deepEqual(seen, [['list', 'C:\\work'], ['read', 's 1', '2026-10-30T00:00:00Z']]);
+  assert.deepEqual((await (await get('/api/studio/status')).json()).sessions, { readable: true });
+});
