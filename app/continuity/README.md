@@ -1,12 +1,14 @@
 # AgentFlow Studio (continuity)
 
+> 저장소 전체 안내는 [README](../../README.md), 코드 구조는 [구조 개요](../../docs/ARCHITECTURE_KO.md)에 있습니다. 이 문서는 Studio 앱의 실행·API·배포 세부를 다룹니다.
+
 Codex·Claude에서 평소처럼 개발한 기록(요청·작업 보고·확인 자료)을 프로젝트의 부분에 연결해서 보여 줍니다.
 보이는 것은 구조, 최근 변화, 진행 상태, 다음에 판단할 것입니다. 기록 연결기는 아직 없습니다. 예제는 전달받았다고
 가정하고 쓴 기록이며, 실제 수신 모델(`agentflow.return.2`)로 만들어집니다.
 
 ## 화면
 
-1. **프로젝트**: 예제 2개와 이 브라우저에 저장된 프로젝트(`idea015.project.7`, 기존 저장 그대로)가 보입니다.
+1. **프로젝트**: 공통 예제와 이 브라우저에 저장된 프로젝트가 보입니다. 예전 판으로 저장한 프로젝트도 그대로 읽습니다.
 2. **지도**: 창에 고정된 캔버스입니다. 노드는 고정 크기이고 이름과 상태만 표시합니다. 그룹은 저장된 포함 관계(containment)
    그대로 그리고, 선은 저장된 관계(relations)를 그립니다. 왼쪽에는 최근 변화가 있습니다. 드래그로 이동하고,
    Ctrl/⌘+휠이나 버튼으로 확대·축소합니다.
@@ -63,8 +65,9 @@ Windows에서 빌드가 이미 있다면 PowerShell로 `./continuity/scripts/sta
 
 | 경로 | 내용 |
 |---|---|
-| `GET /api/studio/status` | `{ ai: 'deepseek' \| 'off', model, access: 'open' \| 'code' }` |
+| `GET /api/studio/status` | `{ ai: 'deepseek' \| 'off', model, access: 'open' \| 'code' }`와, 해당할 때 `digest`·`map`·`release`·`jobs` 상태 |
 | `POST /api/studio/ask` | `studio.1` 요청(부분과 기록 최대 14개) → 검증된 `{ headline, situation[], changes[], next[], answer, refs[] }` |
+| `POST /api/studio/map`, `/plan`, `/scope`, `/digest` | 기록으로 지도 정리, 변경 구상, 고른 범위의 전제 검토, 여러 부분 자료 읽기. 요청·응답 계약은 `src/shared/map-reading.ts`, `plan-api.ts`, `scope-api.ts`, `digest-api.ts`. 제한 공개판(`worker-existing-map.mjs`)은 `map`과 `jobs`를 `MAP_WITHHELD`로 거절 |
 | `POST /api/studio/jobs`, `GET /api/studio/jobs/<id>`, `POST …/<id>/cancel`, `POST …/<id>/ack` | AF100, 로컬 Node 서버만: 지도 정리를 이 PC의 작업으로 보관(`server/map-jobs.mjs`, 기본 `continuity/.studio-data/map-jobs-<port>`, `STUDIO_JOBS_DIR`/`STUDIO_JOBS=off`). 회수 권한은 `X-Studio-Operation` 헤더로만. 창을 닫아도 실행기가 켜져 있으면 계속되고, 실행기가 꺼지면 중단으로 남는다. Worker·정적 빌드는 광고하지 않는다. |
 
 - 키: `env.DEEPSEEK_API_KEY`에서만 읽습니다. 공급자 Authorization 헤더로만 쓰고, 응답·로그·번들에는 넣지 않습니다.

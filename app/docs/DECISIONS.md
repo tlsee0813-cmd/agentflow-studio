@@ -1,5 +1,7 @@
 # 구현 결정 — INIT-003
 
+> **기록 문서** · 첫 요청 정리 앱(INIT-003·004, 2026-10-10)의 당시 기록입니다. 지금 화면은 [Studio 앱](../continuity/README.md)이고, 전체 안내는 [저장소 README](../../README.md)에 있습니다.
+
 2026-10-10. 아래는 사용자 결정이 아니라 위임 범위의 구현 선택이다.
 
 INIT-002의 TypeScript DOM UI + Node HTTP ESM 구조를 유지한다. React/Vite가 최종 제외된 것은 아니다.

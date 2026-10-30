@@ -37,6 +37,8 @@
 | docs/transfer | 과거 전달·독립 검증용 산출물 | 당시 SHA와 범위의 기록. 최신 앱을 대신하지 않음 |
 | docs/REPOSITORY_ARCHIVE.md | 10월15일의 이전 보관 기록 | 현재 브랜치 목록은 이 문서의 새 저장소 안내를 사용 |
 
+전체 문서의 현행/기록 구분은 [문서 지도](README.md), 코드 배치와 실행 형태는 [구조 개요](ARCHITECTURE_KO.md)에 정리했다.
+
 기존 PROJECT_STATUS·START_HERE·NEW_COORDINATOR_START 본문에는 옛 판본 설명이 남아 있다. app/README.md와 app/docs/PROJECT_STATUS.md는 이전 기본 앱의 기록이고, app/continuity/README.md도 일부 schema/API 설명이 오래돼 최신 판본표로 쓰면 안 된다. 이 정리에서 현행 안내를 위에 두고 과거 기록임을 표시한다. 과거 결과의 원문을 최신 사실처럼 고쳐 쓰지 않는다.
 
 ## 새 Claude 세션에 전달할 짧은 문장
