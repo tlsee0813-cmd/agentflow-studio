@@ -5,7 +5,7 @@
 ## 판본
 
 - 기준 8d41378581e6e999e54747ae9eaac4973eae94a9(app d5a6be031fb06b925a1511e06c5845f15d56ec14), branch `work/experience128-pc-entry`.
-- 코드·검사 SHA a967c993a44bf6d16fa618f650f7f958c24045d9 (app tree a4d9efc0fb1a20d70245ea3529b8765473e0fe9f). 그 뒤 커밋은 이 문서뿐이다.
+- 첫 구현 a967c993a44bf6d16fa618f650f7f958c24045d9 (app tree a4d9efc0fb1a20d70245ea3529b8765473e0fe9f, 아래 run1). 독립 검토 P2 두 건 수리 c2ae550b82c3ad5b19c769a246c239150677a609 (app tree 1879efff6a88301ca4894ef7388d85138e708b1a, 아래 run2). 그 뒤 커밋은 이 문서뿐이다.
 
 ## 사용법
 
@@ -41,9 +41,26 @@ UI fixture: 헤더 `지도 정리만 가능`(title에 범위 `첫 지도와 이�
 
 제어 fixture의 의미: 이 Node binary의 복사본을 codex 자리에, 102 테스트의 무해 가짜 CLI를 응답자로 썼다. 실제 codex 판본·hash·인자 동작은 여기서 실행하지 않았고 고정 정책은 자료로만 대조했다.
 
+__RUN2__
+
+## 독립 검토 P2 두 건과 수리 (c2ae550)
+
+결함은 독립 검토가 찾았고, 작성자가 수리 전 실패하는 집중 검사로 재현한 뒤 수리했다(수리 전 로그 보존).
+
+1. **실행 능력과 소유권 혼동.** `probePort`가 `status.map.via === 'jobs'`를 자기 서버 조건에 넣어, 실행자가 version probe에서 `VERSION_CHANGED`로 unavailable이면(그때 status가 map을 빼므로) 자기 서버를 `other/DIFFERENT_EXECUTOR`로 보고 `stop`이 `NOT_OURS`로 거절했다. 수리: 소유 판단은 실행자 ID·scope·model·정책 identity·durable store·자기 store/상태 소유로만 하고, 실행 가능 여부는 상태(ready/unavailable/unsettled…)로 따로 알린다. 모르는 서버(기본 서버, 다른 경로 정책, status만 흉내 내는 서버)는 128-3대로 계속 거절. 검사 128-9: 판본이 바뀐 실행자에서도 ours·`unavailable:VERSION_CHANGED` 안내, 보관 결과 읽기, 순서 종료.
+2. **기본 Stop과 새 작업 입장의 경합.** 호출 쪽의 busy 확인과 서버의 stop 파일 확인 사이에 들어온 작업(202, executor busy)도 서버가 무조건 종료했다. 수리: 요청에 `interrupt`와 요청 id를 담고, 서버가 요청을 읽는 즉시 새 작업 제출을 막은 채(진행 중인 제출은 실행 중으로 셈) 한 번에 판단한다. 실행 중이고 `interrupt`가 아니면 그 요청에 BUSY로 답하고 요청 파일을 지운 뒤 제출을 다시 받는다. `-InterruptRunning`일 때만 중단한다. 새 IPC 없이 기존 run 파일 범위다. 검사 128-10: 종료 요청 뒤 입장한 작업 → `BUSY`(exit 7), 서버 계속 실행, 작업 ready, 남은 요청 없음, 이후 종료 STOPPED.
+
+mutation(run 대상 c2ae550 코드에서): 소유 조건에 map 가용성을 되돌림→128-9 실패, 서버 무조건 종료→128-10 실패, nonce 확인 제거→128-6 실패. 호출 쪽 busy 사전 확인 제거는 128-5를 실패시키지 않는다(서버가 결정하므로 호출 쪽 확인은 빠른 안내일 뿐이다). 진행 중 제출 계수는 결정적 재현 검사가 없다(코드 읽기로만 확인).
+
+## 증거 구별
+
+- 작성자: 위 Linux 제어 fixture 검사(가짜 binary, 생성 0).
+- 독립 검토: 두 P2 결함 발견과 재현(검토자 쪽, 이 문서는 그 결과를 인용만 한다).
+- Root: a967c99 실제 Windows PowerShell 7.6.5에서 설치된 Codex 자동 검출, 정책 121 전체 동일(policy 29f5c36ec140), 4327 시작 → 정상 121 프로젝트와 109 bundle 가져오기 → 새 원 Zephyr 4,699자 보관(생성 없음) → Stop → 재시작·새로고침 뒤 workspace·plans 바이트 동일 → Stop. Windows PowerShell 5.1은 그 PC의 실행 정책으로 차단(정책 변경 없음), 읽기 전용 parser 오류 0. c2ae550 수리분의 Windows 재확인은 Root 대기.
+
 ## Root 대기 / 미확인
 
-- `start-pc.ps1`은 이 환경에 PowerShell이 없어 실행하지 못했다. Windows에서의 Hidden 시작·다시 열기·`-Stop`·한국어 출력, 실제 설치 경로 탐색(PATH/`%APPDATA%\npm` vendor)과 실제 binary hash 일치는 Root PC 확인이 필요하다.
+- 작성자 환경에는 PowerShell이 없어 `start-pc.ps1`을 실행하지 못했다. a967c99의 Windows 정상 경로는 Root가 확인했고(위), c2ae550의 두 수리(판본 바뀐 실행자의 다시 열기/종료, 실행 중 기본 Stop의 BUSY 안내)의 Windows 확인은 Root 대기다.
 - 실제 설치 Codex로 정상 시작 → 정확 실행자 → 원문 입력까지의 실사용 증거는 Root 몫이다. 이 결과의 UI 확인은 fixture다.
 - 4327은 4317(기본)과 다른 주소라 브라우저 저장이 다르다. 4317의 기존 프로젝트를 쓰려면 백업 내보내기/가져오기가 필요하다(자동 이전 없음).
 - 첫 지도 일반성·생성 품질·두 자료의 최신 통합 의미·121 실제 away/ready 반영은 여전히 미해결이며 이번 범위가 아니다.
