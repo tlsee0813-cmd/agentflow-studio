@@ -259,7 +259,9 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
         if (config.accessCode && !sameText(request.headers.get('x-studio-access') ?? '', config.accessCode)) throw new ApiError('ACCESS_CODE_REQUIRED', 401);
         const rest = url.pathname.slice('/api/studio/sessions'.length).split('/').filter(Boolean);
         if (rest.length > 1) throw new ApiError('NOT_FOUND', 404);
-        return reply(200, rest.length ? await sessions.read(decodeURIComponent(rest[0])) : await sessions.list(), cors);
+        const folder = url.searchParams.get('folder');
+        if (folder !== null && (!folder || folder.length > 1024)) throw new ApiError('INVALID_INPUT', 400);
+        return reply(200, rest.length ? await sessions.read(decodeURIComponent(rest[0])) : await sessions.list(folder), cors);
       }
       if (!['/api/studio/ask', '/api/studio/plan', '/api/studio/scope', '/api/studio/digest', '/api/studio/map'].includes(url.pathname)) throw new ApiError('NOT_FOUND', 404);
       if (request.method !== 'POST') throw new ApiError('METHOD_NOT_ALLOWED', 405);

@@ -119,7 +119,10 @@ async function getSessions(path: string, accessCode: string): Promise<unknown> {
   if (!res.ok) throw new AskError(typeof data?.error?.code === 'string' ? data.error.code : 'REQUEST_FAILED');
   return data;
 }
-export async function listSessions(accessCode: string): Promise<SessionSummary[]> { return readSessionList(await getSessions('/api/studio/sessions', accessCode)); }
+/** folder: only sessions whose working folder is it or inside it. */
+export async function listSessions(accessCode: string, folder: string | null = null): Promise<SessionSummary[]> {
+  return readSessionList(await getSessions(`/api/studio/sessions${folder ? `?folder=${encodeURIComponent(folder)}` : ''}`, accessCode));
+}
 export async function readSession(id: string, accessCode: string): Promise<SessionDetail> {
   const d = readSessionDetail(await getSessions(`/api/studio/sessions/${encodeURIComponent(id)}`, accessCode));
   if (!d) throw new AskError('INVALID_RESPONSE');

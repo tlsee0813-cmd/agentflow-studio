@@ -67,3 +67,37 @@ export function readSessionDetail(v: unknown): SessionDetail | null {
   }
   return { id: x.id, tool: x.tool === 'codex' ? 'codex' : 'claude', label: str(x.label) ?? '', title: str(x.title), cwd: str(x.cwd), branch: str(x.branch), startedAt: str(x.startedAt), turns, omitted: Number(x.omitted) || 0 };
 }
+
+/* ---------- automatic connection: a project bound to a working folder takes each session's new turns as records ---------- */
+/** How far one session was taken: the time of the last turn taken (null when its turns carry none) and how many were taken. */
+export interface SessionMark { lastAt: string | null; count: number; updatedAt: string }
+/** The turns of a session not taken yet: after the mark's time, or past its count when the turns have no times. Without a mark,
+ * the turns at or after `from` (all when null). The server's own omissions count as taken: they are older than what it sent. */
+export function newTurns(s: SessionDetail, mark: SessionMark | null, from: string | null = null): SessionTurn[] {
+  if (!mark) return from ? s.turns.filter(t => !t.at || t.at >= from) : s.turns;
+  if (mark.lastAt) return s.turns.filter(t => !!t.at && t.at > mark.lastAt!);
+  return s.turns.slice(Math.max(0, mark.count - s.omitted));
+}
+/** Record texts for these turns of one session, in order, each within `limit` characters and each with the session's header line,
+ * so a long stretch becomes several records and no turn is left out (one turn longer than a record is cut at its end). */
+export function sessionChunks(s: SessionDetail, turns: SessionTurn[], limit = PASTED_TEXT_LIMIT): string[] {
+  const out: string[] = []; let rest = turns;
+  while (rest.length) {
+    // sessionText keeps the newest that fit; taking from the front, the earliest turns go first, each chunk as full as it can be.
+    let n = rest.length;
+    for (;;) {
+      const got = sessionText({ ...s, turns: rest.slice(0, n), omitted: 0 }, limit);
+      if (got.turns === n || n === 1) { out.push(got.text); rest = rest.slice(n); break; }
+      n = Math.max(1, Math.min(n - 1, got.turns));
+    }
+  }
+  return out;
+}
+/** When a session counts as settled: its file has not changed for this long, so a reply being written is not taken half-way. */
+export const SETTLE_MS = 2 * 60 * 1000;
+/** Automatic map readings of one project: at least this far apart, and at most this many a day (each is one paid AI call). */
+export const AUTO_RUN_GAP_MS = 5 * 60 * 1000;
+export const AUTO_RUNS_PER_DAY = 30;
+/** When a project is first connected, sessions of its folder this recent are taken (newest ones, at most this many). */
+export const BACKFILL_MS = 14 * 24 * 60 * 60 * 1000;
+export const BACKFILL_SESSIONS = 10;

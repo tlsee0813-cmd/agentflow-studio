@@ -16,7 +16,7 @@ import { join, relative, isAbsolute, sep } from 'node:path';
 import { ApiError } from '../../server/errors.mjs';
 
 export const SESSION_VERSION = 'sessions.1';
-export const SESSION_LIMITS = Object.freeze({ list: 60, headBytes: 256 * 1024, fileBytes: 64 * 1024 * 1024, turnChars: 20000, replyChars: 300000, preview: 160 });
+export const SESSION_LIMITS = Object.freeze({ list: 60, scan: 400, headBytes: 256 * 1024, fileBytes: 64 * 1024 * 1024, turnChars: 20000, replyChars: 300000, preview: 160 });
 const TOOL_LABEL = { claude: 'Claude Code', codex: 'Codex' };
 export const SESSION_ID = /^(claude|codex)-[0-9a-f]{24}$/;
 
@@ -137,10 +137,22 @@ async function readAll(path) {
 async function dirs(path) { try { return (await readdir(path, { withFileTypes: true })).filter(d => d.isDirectory()).map(d => join(path, d.name)); } catch { return []; } }
 async function files(path, test) { try { return (await readdir(path, { withFileTypes: true })).filter(d => d.isFile() && test(d.name)).map(d => join(path, d.name)); } catch { return []; } }
 
-/** The session files of each tool (no content read). Codex: sessions/YYYY/MM/DD only, the layout it writes. */
-async function candidates(roots) {
-  const out = [];
-  if (roots.claude) for (const d of await dirs(join(roots.claude, 'projects'))) for (const f of await files(d, n => n.endsWith('.jsonl'))) out.push({ tool: 'claude', path: f });
+/** Claude Code names a project's folder after its working folder, every character but letters and digits made '-'. */
+export const claudeFolder = cwd => String(cwd).replace(/[^A-Za-z0-9]/g, '-');
+/** Whether a session's working folder is the folder asked for or inside it. */
+export function within(cwd, folder) {
+  if (typeof cwd !== 'string' || !folder) return false;
+  const a = cwd.replace(/[\\/]+$/, ''), b = String(folder).replace(/[\\/]+$/, '');
+  return a === b || a.startsWith(`${b}/`) || a.startsWith(`${b}\\`);
+}
+/** The session files of each tool (no content read). Codex: sessions/YYYY/MM/DD only, the layout it writes. With a folder, only
+ * Claude Code project folders named after it (or a folder inside it) are looked in. */
+async function candidates(roots, folder = null) {
+  const out = [], prefix = folder ? claudeFolder(String(folder).replace(/[\\/]+$/, '')) : null;
+  if (roots.claude) for (const d of await dirs(join(roots.claude, 'projects'))) {
+    if (prefix && !d.slice(d.lastIndexOf(sep) + 1).startsWith(prefix)) continue;
+    for (const f of await files(d, n => n.endsWith('.jsonl'))) out.push({ tool: 'claude', path: f });
+  }
   if (roots.codex) for (const y of await dirs(join(roots.codex, 'sessions'))) for (const m of await dirs(y)) for (const d of await dirs(m))
     for (const f of await files(d, n => /^rollout-.*\.jsonl$/.test(n))) out.push({ tool: 'codex', path: f });
   return out;
@@ -157,24 +169,28 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
   let known = new Map(); // id -> { tool, path }
   const idOf = (tool, real) => `${tool}-${createHash('sha256').update(real).digest('hex').slice(0, 24)}`;
 
-  async function list() {
+  /** Newest first. folder: only sessions whose working folder is it or inside it (the files are read to know). */
+  async function list(folder = null) {
     const found = [];
-    for (const c of await candidates(where)) {
+    for (const c of await candidates(where, folder)) {
       try { const s = await stat(c.path); if (s.size > 0) found.push({ ...c, size: s.size, mtime: s.mtimeMs }); } catch { /* gone meanwhile */ }
     }
     found.sort((a, b) => b.mtime - a.mtime);
     const next = new Map(), out = [];
-    for (const f of found) {
+    // At most `scan` newest files are opened, so a folder with no session left does not read a whole history.
+    for (const f of found.slice(0, limits.scan ?? 400)) {
       if (out.length >= limits.list) break;
       let real; try { real = await realpath(f.path); } catch { continue; }
       let head; try { head = await readHead(real, limits.headBytes); } catch { continue; }
       const { meta, turns } = (f.tool === 'claude' ? parseClaude : parseCodex)(jsonLines(head, f.size > limits.headBytes));
       const first = turns.find(t => t.role === 'user'); if (!first) continue;
-      const id = idOf(f.tool, real); next.set(id, { tool: f.tool, path: real });
+      const id = idOf(f.tool, real); known.set(id, { tool: f.tool, path: real }); next.set(id, { tool: f.tool, path: real });
+      if (folder && !within(meta.cwd, folder)) continue;
       out.push({ id, tool: f.tool, title: meta.title ?? null, preview: first.text.replace(/\s+/g, ' ').slice(0, limits.preview), cwd: meta.cwd, branch: meta.branch,
         startedAt: meta.startedAt, updatedAt: new Date(f.mtime).toISOString(), bytes: f.size });
     }
-    known = next;
+    // A folder listing adds to what is known (a session listed before stays readable); a whole listing replaces it.
+    if (!folder) known = next;
     return { version: SESSION_VERSION, sessions: out };
   }
 

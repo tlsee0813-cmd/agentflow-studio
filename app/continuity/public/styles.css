@@ -1504,3 +1504,25 @@ button:disabled { opacity: .5; cursor: default; }
 .rr-session small { grid-column: 2; color: var(--text-3); font-size: 12px; overflow-wrap: anywhere; }
 .rr-session-tool { grid-row: span 2; align-self: start; padding: 1px 6px; border-radius: 999px; background: var(--chip); color: var(--text-2); font: var(--label); }
 .rr-session-busy { color: var(--accent) !important; }
+/* Automatic connection to a working folder's sessions: a pill in the bar and its panel. */
+.sync-pill { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 24px; margin-right: 6px; padding: 0 10px 0 9px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font: 500 12px/1 var(--font); color: var(--text-3); white-space: nowrap; cursor: pointer; }
+.sync-pill:hover { border-color: var(--accent-line); color: var(--accent); }
+.sync-pill i { width: 6px; height: 6px; border-radius: 50%; background: var(--plan); }
+.sync-pill[data-state="on"] i { background: var(--ok); }
+.sync-pill[data-state="busy"] i { background: var(--accent); }
+.sync-pill[data-state="error"] i { background: var(--warn); }
+.sync-panel { position: fixed; top: 52px; right: 12px; z-index: 40; box-sizing: border-box; width: min(420px, calc(100vw - 24px)); max-height: calc(100vh - 72px); overflow: auto; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-lg); }
+.sync-panel h3 { margin: 0 0 6px; font-size: 14px; }
+.sync-panel .fine { margin: 0 0 10px; }
+.sync-folder { margin: 0 0 8px; font: 12.5px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; }
+.sync-facts { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; margin: 0 0 10px; font-size: 12.5px; }
+.sync-facts dt { color: var(--text-3); }
+.sync-facts dd { margin: 0; }
+.sync-folders { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 4px; }
+.sync-folder-pick { display: grid; width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); color: var(--text); text-align: left; font: inherit; cursor: pointer; }
+.sync-folder-pick:hover { border-color: var(--accent-line); }
+.sync-folder-pick strong { font: 600 12.5px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; }
+.sync-folder-pick small { color: var(--text-3); font-size: 12px; }
+.sync-manual { display: flex; gap: 6px; }
+.sync-path { flex: 1; min-width: 0; height: 30px; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: var(--r-sm); font: inherit; font-size: 12.5px; }
+.sync-panel .pp-row { display: flex; align-items: center; gap: 10px; }

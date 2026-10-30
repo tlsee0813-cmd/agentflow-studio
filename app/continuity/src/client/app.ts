@@ -21,6 +21,7 @@ import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, codeGate, codeN
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
 import { createPlanView } from './plan-view.js';
 import { createReturnView, type Scene, type ReadingContext } from './return-view.js';
+import { createAutoSync } from './auto-sync.js';
 import { UI62_KEY, buildUi62Project, ui62Keys } from '../shared/return-material.js';
 import { REL_LABEL, relationGroups, dirMark, dirTitle, insideEnds } from '../shared/relation-groups.js';
 
@@ -292,7 +293,7 @@ async function render() {
   // The wide reading belongs to the place it was opened from: another address closes it, restoring nothing.
   wide.drop();
   const r = route();
-  if (!r.key) { quoteBack = null; if (opened) cameras.set(camKey(opened, scope), { ...camera }); flushView(); planView.close(false); if (toastKey) dropToast(); forgetVisits(); opened = null; selected = null; scope = null; renderHome(); return; }
+  if (!r.key) { quoteBack = null; if (opened) cameras.set(camKey(opened, scope), { ...camera }); flushView(); planView.close(false); if (toastKey) dropToast(); forgetVisits(); opened = null; selected = null; scope = null; renderHome(); autoSync.render(); return; }
   const next = projectFor(r.key);
   if (!next) { go(null); return; }
   const fresh = opened?.key !== next.key;
@@ -321,7 +322,7 @@ async function render() {
     while (scenes.length && scenes.at(-1)!.scope === nextScope) scenes.pop();
     if (scenes.length > 12) scenes = scenes.slice(-12);
     opened = next; scope = nextScope; lastClick.id = '';
-    if (fresh) { planView.projectChanged(); returnView.projectChanged(); readMarks = []; readingCamera = null; loadView(next); }
+    if (fresh) { planView.projectChanged(); returnView.projectChanged(); readMarks = []; readingCamera = null; loadView(next); autoSync.opened(); }
     // A new project starts with the map alone: the previous project's reading pane must not narrow its first view.
     if (fresh) { selected = null; ask = null; editing = false; partForm = null; composerOpen = false; sheetOpen = false; scopeReading = false; $('panel').hidden = true; $('panel').replaceChildren(); hideLens(); }
     tempExpand.clear();
@@ -1913,6 +1914,27 @@ const mapRun = createMapRun({
   stored: key => { const fresh = new WorkspaceStore(kv, null); fresh.read(); const e = fresh.entries().find(x => x.entryId === key); return e ? { project: e.project, lifecycle: e.lifecycle } : null; }
 });
 let jobReservations: JobReservations | null = null;
+
+/* ---------- automatic connection to a working folder's Claude Code / Codex sessions (auto-sync.ts) ---------- */
+const autoSync = createAutoSync({
+  current: () => opened,
+  status: () => status,
+  accessCode: () => sessionCode(),
+  kv,
+  save: async (key, texts) => {
+    // Only the entry the sessions were looked at for: after a switch nothing is written to the project open now.
+    const o = opened; if (!o || o.kind !== 'saved' || o.key !== key) return '다른 프로젝트가 열려 있어 저장하지 않았어요.';
+    let next = o.project;
+    try { for (const t of texts) next = pasteRecord(next, t, null).project; } catch { return '세션 기록을 저장하지 못했어요(너무 길거나 쓸 수 없는 문자).'; }
+    if (next === o.project) return null;
+    const failed = await commit(o, next);
+    if (!failed) { renderMapEntry(); refreshUnderstood(); if (!selected && !planView.isOpen()) returnView.render(); }
+    return failed;
+  },
+  canRead: () => { const inp = mapRun.input(), st = mapRun.state(); return !!inp && !inp.problem && mapRun.can() && !st.pending && !st.ready && !st.committing; },
+  read: () => void mapRun.run(),
+  readBlocked: () => (status.release === 'existing-map' ? RELEASE_TEXT.limit : mapRun.can() ? null : mapRun.blocked() ?? '지도 정리에 쓸 AI가 이 서버에 연결되어 있지 않아요.')
+});
 /** AF100: while a reading runs as a job, the person is told it goes on without this window but not without the PC's Studio. */
 function pendingLine(cls: string, text: string, cancelClass: string): HTMLElement[] {
   const d = mapRun.detail();
@@ -2500,7 +2522,8 @@ async function main() {
   $('add-part').addEventListener('click', () => openPartForm(scope));
   $('plan-entry').addEventListener('click', () => planView.toggle());
   $('return-entry').addEventListener('click', () => { if (returnView.isOpen() && !planView.isOpen()) returnView.close(); else openReturn(); });
-  statusReady = aiStatus().then(s => { status = s; renderStatus(); renderRelease(); planView.statusChanged(); refreshReading(); statusArrived(); if (!selected && !planView.isOpen()) returnView.render(); mapRun.resume(); });
+  statusReady = aiStatus().then(s => { status = s; renderStatus(); renderRelease(); planView.statusChanged(); refreshReading(); statusArrived(); if (!selected && !planView.isOpen()) returnView.render(); mapRun.resume(); autoSync.opened(); autoSync.start(); });
+  $('sync-pill').addEventListener('click', () => autoSync.toggle());
   // AF100: a reservation another tab of this address made (or ended) is looked at now, not at this page's next click.
   window.addEventListener('storage', e => { if (e.key?.endsWith(JOBS_KEY)) void statusReady?.then(() => mapRun.resume()); });
   window.addEventListener('hashchange', () => void render());

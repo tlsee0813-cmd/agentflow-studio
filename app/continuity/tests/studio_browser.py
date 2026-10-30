@@ -11,8 +11,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 APP = ROOT.parent
 
 
-def start(stub):
-    env = {**os.environ, "STUDIO_STUB": stub, "PORT": "0"}
+def start(stub, **extra):
+    env = {**os.environ, "STUDIO_STUB": stub, "PORT": "0", **extra}
     proc = subprocess.Popen(["node", str(ROOT / "tests/studio-smoke-server.mjs")], cwd=APP, env=env, stdout=subprocess.PIPE, text=True)
     line = proc.stdout.readline()
     m = re.search(r"READY (http://\S+)", line)
@@ -2693,6 +2693,64 @@ def question_retry_flow(browser, base):
     page.close()
 
 
+def sessions_flow(browser, base):
+    """Local session records (synthetic home folder, stubbed model): a new project connected once to a working folder takes that
+    folder's recent Claude Code / Codex sessions as records and reads its first map without a click; a reload takes nothing twice;
+    the paste box can also take one session by hand, credential-like text hidden."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    errors, maps = [], []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.on("request", lambda r: maps.append(r.url) if r.url.endswith("/api/studio/map") else None)
+    page.goto(base + "/")
+    expect(page.locator("#sync-pill")).to_be_hidden()  # home: no project to connect
+    page.locator("#new-open").click()
+    page.locator("#new-name").fill("미용실 예약")
+    page.locator("#new-form").get_by_role("button", name="만들기").click()
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 안 됨")
+    page.locator("#sync-pill").click()
+    pick = page.locator("#sync-panel .sync-folder-pick")
+    expect(pick).to_have_count(1)
+    expect(pick).to_contain_text("/work/salon")
+    expect(pick).to_contain_text("Claude Code")
+    expect(pick).to_contain_text("Codex")
+    assert maps == [], maps
+    pick.click()
+    # Connected: the folder's sessions became records and the first map was read without asking.
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon")
+    # The stub reads only "요구:"-style lines, so it answers this conversation with its gap; the request itself is the point.
+    expect(page.locator("#space-empty")).to_contain_text("[스텁] 프로그램을 말하는 기록을 붙여 주세요", timeout=15000)
+    assert len(maps) == 1, maps
+    page.locator("#sync-pill").click()
+    expect(page.locator("#sync-panel")).to_contain_text("가져온 기록2개")
+    expect(page.locator("#sync-panel")).to_contain_text("오늘 자동 지도 갱신1 / 30회")
+    page.reload()
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon")
+    page.locator("#sync-pill").click()
+    page.locator("#sync-panel").get_by_role("button", name="지금 확인").click()
+    expect(page.locator("#sync-panel")).to_contain_text("마지막 확인")
+    expect(page.locator("#sync-panel")).to_contain_text("가져온 기록2개")  # nothing taken twice
+    assert len(maps) == 1, maps
+    page.locator("#sync-pill").click()
+    # By hand: the paste box takes one session as written; tool output and the key are not in it.
+    page.locator("#return-entry").click()
+    page.locator("#lens .rr-paste-open").click()
+    page.locator("#lens").get_by_role("button", name="내 AI 세션에서 가져오기").click()
+    expect(page.locator("#lens .rr-session")).to_have_count(3)
+    page.locator("#lens .rr-session", has_text="휴무일 연결").click()
+    draft = page.locator("#paste-text")
+    expect(draft).to_have_value(re.compile("예약 화면에서 휴무일을 영업시간 설정과 연결해 줘"))
+    value = draft.input_value()
+    assert "[가려진 비밀값]" in value and "sk-abc" not in value and "SHOULD NOT APPEAR" not in value, value
+    assert "(바꾼 파일: src/hours.ts, tests/hours.test.ts)" in value, value
+    expect(page.locator("#lens .rr-sessions-note")).to_contain_text("키·토큰처럼 보이는 1곳은 가렸어요")
+    page.locator("#sync-pill").click()
+    page.locator("#sync-panel").get_by_role("button", name="연결 끊기").click()
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 안 됨")
+    assert not errors, errors
+    context.close()
+
+
 def off_flow(browser, base, expected_pill):
     page = browser.new_page(viewport={"width": 1280, "height": 720})
     page.goto(base)
@@ -4103,6 +4161,7 @@ def main():
             proc, base = start("fail"); procs.append(proc); failure_flow(browser, base); print("ok  provider failure -> short error -> retry")
             proc, base = start("fail"); procs.append(proc); question_retry_flow(browser, base); print("ok  failed question retried after another was typed: the retry answers the first, the new one stays in the box")
             proc, base = start("fail"); procs.append(proc); return_failure_flow(browser, base); print("ok  return reading failure -> short error and the material -> asking again")
+            proc, base = start("ok", STUDIO_SESSIONS_FIXTURE="1"); procs.append(proc); sessions_flow(browser, base); print("ok  local sessions: connect a folder once -> its sessions become records -> first map without a click; nothing taken twice; one session by hand, key hidden")
             proc, base = start("nokey"); procs.append(proc); off_flow(browser, base + "/", "AI 키 없음"); print("ok  server without key -> honest off state")
             if (ROOT / "static-dist/index.html").exists():
                 server = serve_static()
