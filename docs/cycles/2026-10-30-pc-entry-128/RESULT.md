@@ -5,7 +5,7 @@
 ## 판본
 
 - 기준 8d41378581e6e999e54747ae9eaac4973eae94a9(app d5a6be031fb06b925a1511e06c5845f15d56ec14), branch `work/experience128-pc-entry`.
-- 코드·검사 SHA __SHA__ (app tree __TREE__). 그 뒤 커밋은 이 문서뿐이다.
+- 코드·검사 SHA a967c993a44bf6d16fa618f650f7f958c24045d9 (app tree a4d9efc0fb1a20d70245ea3529b8765473e0fe9f). 그 뒤 커밋은 이 문서뿐이다.
 
 ## 사용법
 
@@ -25,7 +25,19 @@
 
 ## 작성자 검사 (Linux 원격 컨테이너, Node v22.22.0, 잠긴 TS 5.8.3 — 제어 fixture)
 
-__CHECKS__
+정확 a967c99, 작업 트리 clean, `AI_MODE=mock`·`ALLOW_PAID_AI=false`·키 없음. 실행 명령은 `app/`에서:
+
+| 단계 | 결과 |
+|---|---|
+| `node continuity/scripts/build.mjs` / `node continuity/scripts/check.mjs` (TS 5.8.3) | 통과 / 통과 |
+| `node --test continuity/tests/{pc-entry128,owned-cli102,owned-cli102-process,owned-cli112,condition116,condition118,source-entry114}.test.mjs` | 68/68, 154초 |
+| `node continuity/scripts/deploy-cloudflare.mjs --dry-run` | 통과. `worker.mjs`·`index.mjs`·`studio.mjs`는 `pc-entry`/`cli-executor`를 import하지 않음 |
+| `node ../docs/cycles/2026-10-30-pc-entry-128/check-entry-ui.mjs` (Chromium 1280×720) | 통과: job POST 0, child 0 |
+| 종료 뒤 가짜 CLI·pc-entry 프로세스 | 0 |
+
+pc-entry128(8건): 고정 정책 = ACCEPTED_POLICY(경로 제외), 모르는 binary 실행 없이 거절(지정·PATH·npm vendor, `.cmd` 제외, 명령줄 정책 옵션 거절), 포트 free/ours/other(기본 서버·다른 경로 정책·같은 status를 흉내만 내는 서버) 구별, nonce 종료·다시 열기 뒤 보관 결과 동일·생성 0, 실행 중 종료 거절과 명시 중단 뒤 interrupted, 오래된 run 파일·다른 서버에는 종료 요청이 닿지 않음, 미확정 lease 유지·새 지도 닫힘, 다른 프로세스가 소유한 store/state 위에 서버를 띄우지 않음. 네 가드(상태 소유 확인·nonce·실행 중 거절·hash)를 각각 제거하는 mutation은 해당 검사를 실패시켰다.
+
+UI fixture: 헤더 `지도 정리만 가능`(title에 범위 `첫 지도와 이후 기록·요청 대조까지`와 다른 기능 off), 새 프로젝트 → 기록 붙여넣기·저장 → `기록으로 지도 정리` 버튼 활성(누르지 않음), 질문 버튼 없음, 순서 종료 → 같은 주소 재시작 → 같은 프로젝트·기록과 버튼.
 
 제어 fixture의 의미: 이 Node binary의 복사본을 codex 자리에, 102 테스트의 무해 가짜 CLI를 응답자로 썼다. 실제 codex 판본·hash·인자 동작은 여기서 실행하지 않았고 고정 정책은 자료로만 대조했다.
 
