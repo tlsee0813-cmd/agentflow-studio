@@ -77,6 +77,17 @@ export function createAutoSync(host: AutoSyncHost) {
     if (further(m, cur.marks[s.id])) cur.marks[s.id] = m;
     put_(key, cur);
   }
+  /** Marks kept under an id a listed session had before move to its id now, whether or not it is read this time: once its file
+   * moves (Codex archives a thread) the id its old path gave is no longer listed with it. */
+  function adopt(key: string, list: SessionSummary[]) {
+    const cur = stored(key); if (!cur) return; let moved = false;
+    for (const s of list) for (const a of s.aliases ?? []) {
+      const m = cur.marks[a]; if (!m) continue;
+      if (further(m, cur.marks[s.id])) cur.marks[s.id] = m;
+      delete cur.marks[a]; moved = true;
+    }
+    if (moved) put_(key, cur);
+  }
   function put_(key: string, b: Binding | null) {
     const v = all(); if (b) v[key] = b; else delete v[key];
     try { host.kv.setItem(AUTOSYNC_KEY, JSON.stringify(v)); } catch { /* the binding holds for this page only */ }
@@ -106,6 +117,9 @@ export function createAutoSync(host: AutoSyncHost) {
         let list: SessionSummary[];
         try { list = await src.list(f.path); }
         catch (e) { failed = `${folderName(f.path)}: ${failText(e, '세션 기록을 확인하지 못했어요.')}`; continue; }
+        adopt(key, list);
+        // A picked folder that could not be read is said, and the first look of this folder is not done until it can be.
+        const missed = src.partial?.() ?? null; if (missed) failed = missed;
         // Folders inside one another list the same session once.
         let mine = list.filter(s => !seen.has(s.id) && s.updatedAt >= f.since);
         // A folder's first look takes its recent history (newest sessions first, those taken already counted); later ones only what
@@ -114,7 +128,7 @@ export function createAutoSync(host: AutoSyncHost) {
         mine = mine.filter(s => markOf(b, s)?.updatedAt !== s.updatedAt);
         const ready = mine.filter(s => force || now - Date.parse(s.updatedAt) >= SETTLE_MS);
         // Its first look is done only when every one of them was read and kept: one still being written is taken whole later.
-        if (ready.length === mine.length) whole.add(f);
+        if (ready.length === mine.length && !missed) whole.add(f);
         for (const s of mine) seen.add(s.id);
         for (const s of ready) due.push({ s, f });
       }

@@ -9,7 +9,8 @@ import { readSessionList, readSessionDetail, type SessionDetail, type SessionSum
 import { SESSION_LIMITS, jsonLines, parseSession, sessionParser, pushLine, withSubagents, tailFolders, hasPrompt, atFolder, sniffTool, sessionSummary, sessionDetail, sessionId, sessionKey, within, type ParsedSession, type SessionTool } from '../shared/session-parse.js';
 
 /** read(id, since): only turns from that time on (a turn with no time is kept), as the server does. */
-export interface SessionSource { kind: 'server' | 'folder'; list(folder?: string | null): Promise<SessionSummary[]>; read(id: string, since?: string | null): Promise<SessionDetail> }
+/** partial: after a listing, why it holds only some of the picked folders' sessions (a folder could not be read), or null. */
+export interface SessionSource { kind: 'server' | 'folder'; list(folder?: string | null): Promise<SessionSummary[]>; read(id: string, since?: string | null): Promise<SessionDetail>; partial?(): string | null }
 export type FolderState = 'unsupported' | 'none' | 'prompt' | 'granted';
 
 /* Minimal shapes of the File System Access handles this file uses (a test may stand in its own). */
@@ -121,7 +122,7 @@ async function walk(root: DirHandle, rootKey: string): Promise<{ found: Found[];
     const p = named(list, 'projects'), s = named(list, 'sessions'), a = named(list, 'archived_sessions');
     if (p) await claude(await entries(p, true), `${path}projects/`); if (s) await codex(await entries(s, true), `${path}sessions/`);
     if (a) await archived(await entries(a), a, `${path}archived_sessions/`);
-    return !!(p || s);
+    return !!(p || s || a);
   };
   // Any other folder: its .jsonl files, the tool told by where they lie or else by their lines.
   const any = async (dir: DirHandle, list: AsyncIterable<Entry> | Entry[], path: string, depth: number): Promise<void> => {
@@ -165,7 +166,9 @@ async function readHead(f: Found, file: File): Promise<Head> {
   if (partial) for (const c of tailFolders(await file.slice(Math.max(0, file.size - SESSION_LIMITS.tailBytes)).text())) atFolder(parsed.meta, c);
   const base = sessionSummary(await sessionId(tool, sessionKey(tool, parsed.meta, f.path)), tool, parsed, new Date(file.lastModified).toISOString(), file.size);
   // The id made from the file's path before ids were made from the session itself.
-  return { key, tool, row: base && { ...base, aliases: [await sessionId(tool, f.path)] }, cwds: parsed.meta.cwds, parent };
+  // An archived Codex thread lay in sessions/YYYY/MM/DD/ under the same name (its date is in it): that path's id is its alias too.
+  const pre = tool === 'codex' ? f.path.replace(/(^|\/)archived_sessions\/(rollout-(\d{4})-(\d{2})-(\d{2})T[^/]*)$/, '$1sessions/$3/$4/$5/$2') : f.path;
+  return { key, tool, row: base && { ...base, aliases: [await sessionId(tool, f.path), ...(pre !== f.path ? [await sessionId(tool, pre)] : [])] }, cwds: parsed.meta.cwds, parent };
 }
 // Files with no session in them (Codex subagents' rollouts, a session left before its first prompt) do not use up the scan of
 // SESSION_LIMITS.scan sessions; at most this many of them are opened in one look.
@@ -183,9 +186,13 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
   const rootKeys = new WeakMap<DirHandle, string>(); let rootCount = 0;
   const rootKey = (r: DirHandle) => { let k = rootKeys.get(r); if (!k) rootKeys.set(r, (k = `${++rootCount}`)); return k; };
   // What to say beside the picked folders: why a pick added nothing, and how the last look went (a folder not read, a walk cut short).
-  let lastFound: Found[] = [], picked: string | null = null, looked: string | null = null;
-  /** The picked folders as named on the page: two of one name (a Windows and a WSL .claude) are told apart by number. */
-  const labels = () => roots.map(r => { const same = roots.filter(x => x.name === r.name); return same.length > 1 ? `${r.name} (${same.indexOf(r) + 1})` : r.name; });
+  let lastFound: Found[] = [], picked: string | null = null, looked: string | null = null, missed: string | null = null;
+  /** The picked folders as named on the page: two of one name (a Windows and a WSL .claude) are told apart by number, and one whose
+   * name is such a label ('.claude (1)', a copy) by its place, so each label names one folder (forget() goes by it). */
+  const labels = () => {
+    const named = roots.map(r => { const same = roots.filter(x => x.name === r.name); return same.length > 1 ? `${r.name} (${same.indexOf(r) + 1})` : r.name; });
+    return named.map((l, i) => (named.indexOf(l) !== named.lastIndexOf(l) ? `${l} · ${i + 1}번째` : l));
+  };
 
   /** The subagent sessions a session started (they begin after it), as the server finds them. Codex: rollouts of the last walk
    * naming it as parent. Claude Code: transcripts kept beside it (<session>/subagents/*.jsonl), or, in earlier versions, agent-*.jsonl
@@ -236,11 +243,13 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
         // others are read; when none can be read the look fails, rather than show folders with no sessions.
         try { const w = await walk(r, rootKey(r)); found.push(...w.found); cut ||= w.cut; } catch (e) { bad.push(names[i]!); cause = e; }
       }
-      const unreadable = bad.length ? `${bad.join(', ')} 폴더를 읽지 못했어요.` : null;
+      const unreadable = bad.length ? `${bad.join(', ')} 폴더를 읽지 못했어요.` : null; missed = unreadable;
       if (roots.length && bad.length === roots.length) { looked = unreadable; throw Object.assign(new Error('SESSION_FOLDER_UNREADABLE'), { code: 'SESSION_FOLDER_UNREADABLE', cause }); }
-      found.sort((a, b) => b.at - a.at); lastFound = found;
+      // A file found through two picked folders (one inside the other) is looked at once.
+      const once = new Set<string>();
+      found.sort((a, b) => b.at - a.at); lastFound = found.filter(f => { const k = `${f.handle.name}:${f.size}:${f.at}`; return !once.has(k) && !!once.add(k); });
       const out: SessionSummary[] = [], byId = new Map<string, SessionSummary>(); let sessions = 0, quiet = 0;
-      for (const f of found) {
+      for (const f of lastFound) {
         // At most `scan` session files are opened, so a folder with no session left does not read a whole history.
         if (out.length >= SESSION_LIMITS.list || sessions >= SESSION_LIMITS.scan) break;
         if (quiet >= QUIET_FILES) { cut = true; break; }
@@ -251,10 +260,11 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
         if (!h) continue;
         if (h.tool === 'codex') parents.set(f.key, { key: h.key, parent: h.parent });
         if (!h.row) { quiet++; continue; }
-        sessions++;
-        // Two files of one session (picked folders that overlap, a copy left behind): the newest one is the session.
+        // Two files of one session (a copy left behind, a thread in sessions and archived_sessions): the newest one is the session,
+        // and only it counts against the scan.
         const had = byId.get(h.row.id);
         if (had) { for (const a of h.row.aliases ?? []) if (!had.aliases?.includes(a)) had.aliases?.push(a); continue; }
+        sessions++;
         const row: SessionSummary = { ...h.row, aliases: [...(h.row.aliases ?? [])] }; byId.set(row.id, row);
         known.set(row.id, { ...f, tool: row.tool });
         if (folder && !within(h.cwds, folder)) continue;
@@ -263,6 +273,7 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
       looked = [unreadable, cut ? '세션 파일이 너무 많아 일부만 읽었어요.' : null].filter(Boolean).join(' ') || null;
       return readSessionList({ version: 'sessions.1', sessions: out });
     },
+    partial: () => missed,
     async read(id, since = null) {
       if (!known.has(id)) await folderSource.list();
       const f = known.get(id); if (!f) throw Object.assign(new Error('SESSION_NOT_FOUND'), { code: 'SESSION_NOT_FOUND' });

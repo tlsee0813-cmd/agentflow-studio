@@ -95,7 +95,10 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
         let real; try { real = await realpath(f.path); } catch { continue; }
         let parsed; try { parsed = await readListed(f.tool, real, f.size, limits); } catch { continue; }
         const id = idOf(f.tool, sessionKey(f.tool, parsed.meta, real)), base = sessionSummary(id, f.tool, parsed, new Date(f.mtime).toISOString(), f.size, limits);
-        h = { size: f.size, mtime: f.mtime, real, id, row: base && { ...base, aliases: [idOf(f.tool, real)] }, cwds: parsed.meta.cwds }; heads.set(f.path, h);
+        // An archived Codex thread lay in sessions/YYYY/MM/DD/ under the same name (its date is in it): that path's id is its alias too.
+        const day = f.tool === 'codex' && basename(dirname(real)) === 'archived_sessions' ? /^rollout-(\d{4})-(\d{2})-(\d{2})T/.exec(basename(real)) : null;
+        const aliases = [idOf(f.tool, real), ...(day ? [idOf(f.tool, join(dirname(dirname(real)), 'sessions', day[1], day[2], day[3], basename(real)))] : [])];
+        h = { size: f.size, mtime: f.mtime, real, id, row: base && { ...base, aliases }, cwds: parsed.meta.cwds }; heads.set(f.path, h);
       }
       // Two files of one session (a copy left behind): the newest one is the session.
       if (!h.row || next.has(h.id)) continue;

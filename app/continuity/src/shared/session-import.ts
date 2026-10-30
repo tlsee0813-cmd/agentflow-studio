@@ -27,8 +27,10 @@ export const cleanText = (t: string) => t.replace(/\u001b\[[0-9;?]*[ -/]*[@-~]/g
 function block(t: TakenTurn, tool: string): string {
   const head = `── ${t.role === 'user' ? '사용자 요청' : `${tool} 답변${t.cont ? '(이어서)' : ''}`}${t.at ? ` · ${stamp(t.at)}` : ''} ──`;
   const files = t.role === 'assistant' && t.files?.length ? `\n(바꾼 파일: ${t.files.join(', ')})` : '';
-  // A handover document the person pasted to start this session is already the project's own: one line names it instead.
-  const text = t.role === 'user' ? foldHandover(t.text) : t.text;
+  // A handover document the person pasted to start this session is already the project's own: one line names it instead. A
+  // NEXT_RECORD line the conversation itself holds (a draft of this box pasted into it) is written a dash shorter, so only the
+  // box's own line cuts a draft.
+  const text = (t.role === 'user' ? foldHandover(t.text) : t.text).replace(NEXT_LINE, '$1─────── 다음 기록 ───────$2');
   return `${head}${text ? `\n${text}` : ''}${files}`;
 }
 
@@ -39,7 +41,9 @@ export interface SessionText { text: string; turns: number; left: number; redact
  * hidden and control characters taken out, so the text can always be kept as a record. */
 export function sessionText(s: SessionDetail & { turns: TakenTurn[] }, limit = PASTED_TEXT_LIMIT): SessionText {
   const tool = TOOL_NAME[s.tool];
-  const where = [s.title, s.cwd ? `작업 폴더 ${s.cwd}` : null, s.branch ? `브랜치 ${s.branch}` : null, s.startedAt ? `${stamp(s.startedAt, true)} 시작` : null, `세션 ${s.id}`].filter(Boolean).join(' · ');
+  // A title that reads like one of the fields after it ('브랜치 정리', '세션 만료 · 브랜치 main') is put in 「」, so it stays the title.
+  const title = s.title && (s.title.startsWith('「') || s.title.split(' · ').some(p => Object.values(HEAD_FIELD).some(re => re.test(p.trim())))) ? `「${s.title}」` : s.title;
+  const where = [title, s.cwd ? `작업 폴더 ${s.cwd}` : null, s.branch ? `브랜치 ${s.branch}` : null, s.startedAt ? `${stamp(s.startedAt, true)} 시작` : null, `세션 ${s.id}`].filter(Boolean).join(' · ');
   const top = redactSecrets(cleanText(`[${tool} 세션 기록${where ? ` · ${where}` : ''}]`).replace(/[\r\n]+/g, ' ')), head = top.text;
   const blocks = s.turns.map(t => { const r = redactSecrets(cleanText(block(t, tool))); return { text: r.text, redacted: r.count }; });
   const note = (n: number) => (n ? `\n(앞의 대화 ${n}개는 길이 제한으로 넣지 않았어요.)` : '');
@@ -96,7 +100,9 @@ export function textSum(t: string): string { let h = 0x811c9dc5; for (let i = 0;
  * The reply taken last, when it went on since, comes first with only what it gained (cont). */
 export function newTurns(s: SessionDetail, mark: SessionMark | null, from: string | null = null): TakenTurn[] {
   if (!mark) return from ? s.turns.filter(t => !t.at || t.at >= from) : s.turns;
-  const lastAt = mark.lastAt, i = lastAt ? s.turns.findIndex(t => !!t.at && t.at >= lastAt) : mark.count - 1 - s.omitted;
+  // The turn taken last: the last one at the mark's time (turns can share a time to the millisecond), else the first after it.
+  const lastAt = mark.lastAt, eq = lastAt ? s.turns.map(t => t.at).lastIndexOf(lastAt) : -1;
+  const i = !lastAt ? mark.count - 1 - s.omitted : eq >= 0 ? eq : s.turns.findIndex(t => !!t.at && t.at > lastAt);
   const after = lastAt ? s.turns.filter(t => !!t.at && t.at > lastAt) : s.turns.slice(Math.max(0, mark.count - s.omitted));
   const head = i >= 0 ? s.turns[i] : undefined, r = mark.reply;
   if (!head || head.role !== 'assistant' || !r) return after;
@@ -105,9 +111,13 @@ export function newTurns(s: SessionDetail, mark: SessionMark | null, from: strin
   const same = head.text.length >= r.chars && textSum(head.text.slice(0, r.chars)) === r.sum;
   if (!same && lastAt && head.at !== lastAt) return after;
   const taken = r.files, more = same ? head.text.slice(r.chars).replace(/^\s+/, '') : '';
-  const files = Array.isArray(taken) ? (head.files ?? []).filter(f => !taken.includes(f)) : (head.files ?? []).slice(taken);
+  const files = Array.isArray(taken) ? (head.files ?? []).filter(f => !taken.some(x => sameFile(x, f))) : (head.files ?? []).slice(taken);
   return [...(more || files.length ? [{ role: 'assistant' as const, at: head.at, text: more, files, cont: true }] : []), ...after.filter(t => t !== head)];
 }
+/** Whether a file taken under one name is the one now named so. A file outside the session's folders is named by its whole path
+ * until the session works in a folder that holds it (a later line names that folder); from then on by the rest of that path. */
+const whole = (f: string) => /^(?:[A-Za-z]:[\\/]|\\\\|\/)/.test(f);
+const sameFile = (was: string, now: string) => was === now || (whole(was) && !whole(now) && was.replace(/\\/g, '/').endsWith(`/${now.replace(/\\/g, '/')}`));
 /** The mark once every turn of this reading is taken: its last time, and how much of its last turn when that is a reply. */
 export function markAfter(s: SessionDetail, was: SessionMark | null, updatedAt: string): SessionMark {
   const last = s.turns.at(-1); if (!last) return was ? { ...was, updatedAt } : { lastAt: null, count: s.omitted, updatedAt };
@@ -143,6 +153,13 @@ export function sessionChunks(s: SessionDetail, turns: TakenTurn[], limit = PAST
  * session's header is read at the start of a record only). Only this line cuts a draft: a header line quoted inside a conversation
  * (a record pasted into a session, a reply that writes the format) stays where it is. */
 export const NEXT_RECORD = '──────── 다음 기록 ────────';
+const NEXT_LINE = /^([ \t]*)──────── 다음 기록 ────────([ \t]*)$/gm;
+/** The header line a session record starts with: written by the import (Claude Code, Codex) or by a web session asked with
+ * WEB_RECORD_ASK (handover.ts). Its fields follow the tool's name, ' · ' between them. */
+export const RECORD_HEAD = /^\[(Claude Code|Codex|웹 AI) 세션 기록(?: · ([^\n]*))?\]/;
+/** The fields of a header line, as sessionText writes them after the title (a web AI may write them in another order). */
+export const HEAD_FIELD = { id: /^세션 ((?:claude|codex)-[0-9a-f]{24})$/, start: /^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}) 시작$/,
+  branch: /^브랜치 ((?:\[가려진 비밀값\]|\S)+)$/, cwd: /^작업 폴더 ((?:[A-Za-z]:[\\/]|\\\\|\/|~[\\/]?).*)$/ };
 /** A draft cut at each NEXT_RECORD line, each part kept as a record of its own. One part when there is none. */
 export function recordParts(text: string): string[] {
   // A draft with no such line is kept exactly as written.

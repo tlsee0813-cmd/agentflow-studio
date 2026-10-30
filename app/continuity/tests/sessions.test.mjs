@@ -477,3 +477,50 @@ test('SESSIONS-A1 a Codex thread archived before a look took it is still listed 
     assert.equal((await openSessions({ env: {}, roots }).list()).sessions.filter(x => x.preview.startsWith('휴무일을 예약')).length, 1);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
+
+test('SESSIONS-A2 an archived Codex thread also carries the id its sessions/ path gave, so a mark kept under that id still holds', async () => {
+  const { realpathSync } = await import('node:fs'), { sessionId } = await import('../dist/public/shared/session-parse.js');
+  const dir = home();
+  try {
+    const roots = writeSessionHome(dir), arch = join(roots.codex, 'archived_sessions'), name = 'rollout-2026-10-29T10-00-00-parent.jsonl'; mkdirSync(arch, { recursive: true });
+    writeFileSync(join(arch, name), desktopParent().map(r => JSON.stringify(r)).join('\n'));
+    const [row] = (await openSessions({ env: {}, roots }).list()).sessions.filter(x => x.preview.startsWith('휴무일을 예약'));
+    assert.ok(row.aliases.includes(await sessionId('codex', join(realpathSync(roots.codex), 'sessions', '2026', '10', '29', name))), row.aliases.join());
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('SESSIONS-B2 picked folders: one inside another reads each session once (the scan is not spent twice), a folder that cannot be read is said, labels name one folder each', async () => {
+  const { readdirSync } = await import('node:fs'), { basename } = await import('node:path'), { sessionId } = await import('../dist/public/shared/session-parse.js');
+  const file = path => ({ kind: 'file', name: basename(path), getFile: async () => new File([readFileSync(path)], basename(path), { lastModified: statSync(path).mtimeMs }) });
+  const folder = (path, name = basename(path), bad = false) => ({ kind: 'directory', name, queryPermission: async () => 'granted',
+    async *values() { if (bad) throw new DOMException('gone', 'NotFoundError'); for (const d of readdirSync(path, { withFileTypes: true })) yield d.isDirectory() ? folder(join(path, d.name)) : file(join(path, d.name)); } });
+  const { createSessionSources } = await import('../dist/public/client/session-source.js');
+  const dir = home(), had = globalThis.window;
+  try {
+    const me = join(dir, 'me'), other = join(me, '.claude', 'projects', '-other'), target = join(me, '.claude', 'projects', '-target');
+    mkdirSync(other, { recursive: true }); mkdirSync(target, { recursive: true });
+    writeFileSync(join(target, 't.jsonl'), jl([cu(0, '오래된 대상 작업', { cwd: '/target' }), ca(1, '했어요', { cwd: '/target' })]));
+    utimesSync(join(target, 't.jsonl'), new Date(Date.now() - 86400000), new Date(Date.now() - 86400000));
+    for (let i = 0; i < 260; i++) writeFileSync(join(other, `o${i}.jsonl`), jl([cu(0, `다른 작업 ${i}`, { cwd: '/other' })]));
+    const arch = join(me, '.codex', 'archived_sessions'), name = 'rollout-2026-10-29T10-00-00-parent.jsonl'; mkdirSync(arch, { recursive: true });
+    writeFileSync(join(arch, name), desktopParent().map(r => JSON.stringify(r)).join('\n')); utimesSync(join(arch, name), new Date(Date.now() + 60000), new Date(Date.now() + 60000));
+    const picks = [folder(join(me, '.claude')), folder(me), folder(dir, 'broken', true)];
+    globalThis.window = { showDirectoryPicker: async () => picks.shift() };
+    const sources = createSessionSources({ status: () => ({ ai: 'none' }), accessCode: () => '' });
+    await sources.load(); for (let i = 0; i < 3; i++) assert.equal(await sources.pick(), true);
+    const src = sources.current(), found = await src.list('/target');
+    assert.deepEqual(found.map(x => x.preview), ['오래된 대상 작업'], 'found past 260 newer sessions, read through both folders');
+    assert.equal(src.partial(), 'broken 폴더를 읽지 못했어요.');
+    const all = await src.list();
+    assert.equal(new Set(all.map(x => x.id)).size, all.length, 'each session once');
+    const thread = all.find(x => x.preview.startsWith('휴무일을 예약'));
+    assert.ok(thread.aliases.includes(await sessionId('codex', `me/.codex/sessions/2026/10/29/${name}`)), 'the id its sessions/ path gave');
+    await sources.forget('broken'); await src.list(); assert.equal(src.partial(), null);
+    // Two .claude folders and one named like a numbered label: each label names one folder, and leaving one leaves that one.
+    picks.push(folder(join(me, '.claude'), '.claude'), folder(join(me, '.claude'), '.claude (1)'));
+    await sources.pick(); await sources.pick();
+    const labels = sources.folders(); assert.equal(new Set(labels).size, labels.length, labels.join(' | '));
+    await sources.forget(labels[3]);
+    assert.deepEqual(sources.folders(), ['.claude (1)', 'me', '.claude (2)']);
+  } finally { globalThis.window = had; rmSync(dir, { recursive: true, force: true }); }
+});

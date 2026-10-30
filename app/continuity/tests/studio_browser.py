@@ -2971,6 +2971,11 @@ def folder_sessions_flow(browser, base):
     # A web chat keeps no file here: it is given the request text to write its own record.
     page.locator("#lens").get_by_role("button", name="웹 대화용 기록 요청 문구 복사").click()
     expect(page.locator("#lens .rr-sessions")).to_contain_text(re.compile("기록 요청 문구를 복사했어요|\\[웹 AI 세션 기록"))
+    # Its answer pasted under what is in the box is kept as a record of its own: the box puts the next-record line between them.
+    web = "[웹 AI 세션 기록 · 결제 문구 · 작업 폴더 /work/salon]\n\n── 사용자 요청 ──\n결제 버튼 문구 바꿔 줘\n\n── 웹 AI 답변 ──\n바꿨어요\n(바꾼 파일: src/pay.ts)"
+    draft.evaluate("""(el, t) => { el.focus(); el.setSelectionRange(el.value.length, el.value.length); const dt = new DataTransfer(); dt.setData('text/plain', t);
+      el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true })); }""", web)
+    expect(draft).to_have_value(re.compile("재시도를 넣어 줘[\\s\\S]*\\n\\n──────── 다음 기록 ────────\\n\\n\\[웹 AI 세션 기록 · 결제 문구[\\s\\S]*src/pay\\.ts\\)$"))
     # A session Codex is still writing is taken as it was when the read began (the file grows while it is read), with the file
     # its subagent changed.
     page.evaluate("() => window.__growOnRead('me/.codex/sessions/2026/10/28/rollout-2026-10-28T09-20-00-x1.jsonl')")

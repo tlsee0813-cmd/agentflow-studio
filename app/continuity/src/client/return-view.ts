@@ -15,7 +15,7 @@ import { clip } from '../shared/studio.js';
 import { ui62Reading, savedReading, readingInput, recordTitle, partLabel, type ReadingInput, type ReadingSource } from './digest-source.js';
 import { digestStore, askHash, makeReading, type Reading } from './digest-store.js';
 import { askDigest, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
-import { sessionText, recordParts, NEXT_RECORD, stamp, TOOL_NAME, type SessionSummary, type SessionDetail } from '../shared/session-import.js';
+import { sessionText, recordParts, NEXT_RECORD, RECORD_HEAD, stamp, TOOL_NAME, type SessionSummary, type SessionDetail } from '../shared/session-import.js';
 import { readSessionFile, type SessionSources } from './session-source.js';
 import { WEB_RECORD_ASK, foldRecord } from '../shared/handover.js';
 import { PASTED_TEXT_LIMIT } from '../shared/types.js';
@@ -664,6 +664,17 @@ export function createReturnView(host: ReturnHost) {
     area.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); backToReading(); } });
     area.addEventListener('input', () => {
       keepDraft(st.key, area.value); count.textContent = area.value ? `${area.value.length.toLocaleString()}자` : ''; warn.hidden = !secretLike(area.value);
+    });
+    // A session record pasted beside other text (a web AI's answer written with WEB_RECORD_ASK, another record) is kept as a record of
+    // its own: the box puts the NEXT_RECORD line between them, as it does for a session it brings in.
+    area.addEventListener('paste', e => {
+      const got = (e.clipboardData?.getData('text/plain') ?? '').trim(); if (!RECORD_HEAD.test(got)) return;
+      const before = area.value.slice(0, area.selectionStart).replace(/\s+$/, ''), after = area.value.slice(area.selectionEnd).replace(/^\s+/, '');
+      if (!before && !after) return;
+      e.preventDefault();
+      const line = `\n\n${NEXT_RECORD}\n\n`, at = (before ? before.length + line.length : 0) + got.length;
+      area.value = [before, got, after].filter(Boolean).join(line); area.setSelectionRange(at, at);
+      area.dispatchEvent(new Event('input'));
     });
     return [h('section', { class: 'rr-sec rr-paste-box' }, h('h3', {}, '기록 붙여넣기'),
       h('p', { class: 'fine' }, '나누거나 종류·부분을 고르지 않아도 돼요. 저장한 뒤 지도 정리나 요약을 누를 때만 AI에 보내요.'),

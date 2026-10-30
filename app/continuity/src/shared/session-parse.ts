@@ -326,7 +326,13 @@ export function sessionDetail(id: string, tool: SessionTool, s: ParsedSession, l
   const forward = Number.isFinite(from), kept: SessionTurn[] = []; let used = 0;
   for (let k = 0; k < turns.length; k++) {
     const t = turns[forward ? k : turns.length - 1 - k]!, text = clip(t.role === 'user' ? foldHandover(t.text) : t.text, limits.turnChars), files = [...new Set((t.files ?? []).map(x => shortPath(x, s.meta.cwds.find(c => shortPath(x, c) !== x) ?? s.meta.cwd)))];
-    used += text.length + files.join('').length; if (used > limits.replyChars && kept.length >= (forward ? 2 : 1)) break;
+    used += text.length + files.join('').length;
+    if (used > limits.replyChars && kept.length >= (forward ? 2 : 1)) {
+      // A reading from a mark ends past the mark's own time and never between turns of one time: the next is read from the last time
+      // it holds, and a turn at that time it did not hold would be taken as read.
+      const last = kept.at(-1)!.at;
+      if (!forward || (t.at !== last && !!last && Date.parse(last) > from)) break;
+    }
     const turn = { role: t.role, at: t.at, text, ...(t.role === 'assistant' ? { files } : {}) };
     if (forward) kept.push(turn); else kept.unshift(turn);
   }

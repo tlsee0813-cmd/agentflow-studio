@@ -6,30 +6,32 @@ import { isMapReading, type ClaimKind, type MapReading, type Project } from './t
 import { CLAIM_LABEL, candidateReading } from './map-reading.js';
 import { studioView, type PartView, type StudioView } from './studio.js';
 import { REL_LABEL } from './relation-groups.js';
-import { stamp } from './session-import.js';
+import { stamp, RECORD_HEAD, HEAD_FIELD } from './session-import.js';
 import { HANDOVER_TAG, foldHandover, quoteReceived, receivedHandovers } from './handover-mark.js';
 export { HANDOVER_TAG, foldHandover, handoverCode, receivedHandovers } from './handover-mark.js';
 
 /* ---------- which session a record came from ---------- */
 export interface SessionOrigin { id: string | null; tool: 'claude' | 'codex' | 'web'; title: string | null; cwd: string | null; branch: string | null }
 const ORIGIN_NAME: Record<SessionOrigin['tool'], string> = { claude: 'Claude Code', codex: 'Codex', web: '웹 AI' };
-/** The header line of a session record: written by the import (Claude Code, Codex) or by a web session asked with WEB_RECORD_ASK. */
-const HEAD = /^\[(Claude Code|Codex|웹 AI) 세션 기록(?: · ([^\n]*))?\]/;
 /** The session a record was taken from (its header line, session-import.ts), or null for any other record. */
 export function sessionOrigin(text: string): SessionOrigin | null {
-  const m = HEAD.exec(text); if (!m) return null;
+  const m = RECORD_HEAD.exec(text); if (!m) return null;
   const tool = m[1] === 'Codex' ? 'codex' : m[1] === '웹 AI' ? 'web' : 'claude', fields = (m[2] ?? '').split(' · ').map(f => f.trim()).filter(Boolean);
-  // A field is told by its shape, wherever it stands (a web AI may add one or change the order): a session id, a start time, a branch
-  // name (no spaces, as git has it), a folder path. Each is taken once, from the end, where sessionText writes them; everything else
-  // is the title, so a title that starts like a field ('세션 만료 처리', '브랜치 전략 정하기', '작업 폴더 정리') or holds ' · ' stays whole.
-  const FIELD: Record<'id' | 'start' | 'branch' | 'cwd', RegExp> = { id: /^세션 ((?:claude|codex)-[0-9a-f]{24})$/, start: /^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}) 시작$/,
-    branch: /^브랜치 ((?:[^\s·]|\[가려진 비밀값\])+)$/, cwd: /^작업 폴더 ((?:[A-Za-z]:[\\/]|\\\\|\/|~[\\/]?)[^·]*)$/ };
-  const got: Partial<Record<keyof typeof FIELD, string>> = {}, title: string[] = [];
-  for (const f of [...fields].reverse()) {
-    const kind = (Object.keys(FIELD) as (keyof typeof FIELD)[]).find(k => !got[k] && FIELD[k].test(f));
-    if (kind) got[kind] = FIELD[kind].exec(f)![1]!.trim(); else title.unshift(f);
+  // The title comes first: in 「」 when it reads like a field (sessionText puts it so), and always first in a web AI's header
+  // (WEB_RECORD_ASK asks for it there) unless that field is a folder, a time or an id.
+  let title: string[] = [], rest = fields;
+  const end = fields[0]?.startsWith('「') ? fields.findIndex(f => f.endsWith('」')) : -1;
+  if (end >= 0) { title = [fields.slice(0, end + 1).join(' · ').slice(1, -1)]; rest = fields.slice(end + 1); }
+  else if (tool === 'web' && fields[0] && !(['id', 'start', 'cwd'] as const).some(k => HEAD_FIELD[k].test(fields[0]!))) { title = [fields[0]]; rest = fields.slice(1); }
+  // The other fields are told by their shape, wherever they stand (a web AI may add one or change the order): a session id, a start
+  // time, a branch name (no spaces, as git has it), a folder path. Each is taken once, from the end, where sessionText writes them;
+  // anything else belongs to the title ('세션 만료 처리', '작업 폴더 정리', a title that holds ' · ').
+  const got: Partial<Record<keyof typeof HEAD_FIELD, string>> = {}, more: string[] = [];
+  for (const f of [...rest].reverse()) {
+    const kind = (Object.keys(HEAD_FIELD) as (keyof typeof HEAD_FIELD)[]).find(k => !got[k] && HEAD_FIELD[k].test(f));
+    if (kind) got[kind] = HEAD_FIELD[kind].exec(f)![1]!.trim(); else more.unshift(f);
   }
-  return { id: got.id ?? null, tool, title: title.join(' · ') || null, cwd: got.cwd ?? null, branch: got.branch ?? null };
+  return { id: got.id ?? null, tool, title: [...title, ...more].join(' · ') || null, cwd: got.cwd ?? null, branch: got.branch ?? null };
 }
 /** A session record pasted by hand (a web session's, written back with WEB_RECORD_ASK): each request folded as the import folds
  * it, so a handover document the session started from is not kept again as a record of work. Any other text stays as written. */

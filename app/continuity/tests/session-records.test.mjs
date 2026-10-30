@@ -59,6 +59,48 @@ test('SESSIONS-RD1 redaction hides the common credentials a session can hold, ke
     assert.deepEqual(redactSecrets(text), { text, count: 0 }, text);
 });
 
+test('SESSIONS-RD2 a value is weighed by what its name says and what it looks like: secrets in any setting form go, code and names stay, fast', () => {
+  const hide = [
+    ['JWT_SECRET=thisisaverylongsecretphraseforjwt', 'thisisaverylong'], ['SECRET_KEY=FAKEfakeFAKEfakeFAKEfakeFAKEfake', 'FAKEfake'],
+    ['apiKey: "FAKEfakeFAKEfakeFAKEfake"', 'FAKEfake'], ['SESSION_SECRET=keyboardcat', 'keyboardcat'], ['SECRET_KEY=changeme', 'changeme'],
+    ['ACCESS_TOKEN: 1234567890123456', '1234567890123456'], ['AWS_SECRET_ACCESS_KEY=/FAKEfakeFAKE0123fakeFAKEfake0123fakeFAKE', 'FAKEfakeFAKE0123'],
+    ['DB_PASSWORD=Xy7(kL2!m>Q9', 'Xy7(kL2'], ['POSTGRES_PASSWORD=Kq9,mZ2!xP0', 'Kq9'], ['ADMIN_PASSWORD="Fa(ke)0123"', 'Fa(ke)0123'],
+    ['DB_PASSWORD=~Fake0123!', 'Fake0123'], ['DB_PASSWORD=.Fake0123', 'Fake0123'], ['SECRET_KEY=ab(FAKE0123FAKEfake0123)', 'FAKE0123FAKE'],
+    ['DB_PASSWORD=Fake01;moreFAKE99', 'moreFAKE99'], ['JWT_SECRET="super_secret_value"', 'super_secret_value'],
+    ['{"headers":{"X-Api-Auth":"Bearer FAKEfake0123FAKEfake0123"},"endpoint":"https://api.example.test/v1/items"}', 'FAKEfake0123FAKE'],
+    ['token: Bearer FAKEfake0123FAKEfake0123/x.y', 'FAKEfake0123FAKE'],
+    [f('client.login("', 'OTk5ODg3NzY2NTU0NDMzMjEx', '.GabcDE.', 'FAKEfake'.repeat(4), '01")'), 'OTk5ODg3'],
+    ['apiKey := "FAKEfake0123fakeFAKE"', 'FAKEfake0123'], ["'password' => 'FakePass0123'", 'FakePass0123'],
+    ['REDIS_URL=redis://:FakePass0123@redis.example.test:6379/0', 'FakePass0123'], ['EMAIL_PASS=abcdefghijklmnop', 'abcdefghijklmnop'],
+    ['curl -u admin:FakePass0123 https://api.example.test', 'FakePass0123'], ['{\\"password\\":\\"FakePass0123\\"}', 'FakePass0123'],
+    ['docker run -e DB_PASSWORD=hunterhunter postgres', 'hunterhunter'], ['--password hunter22', 'hunter22'],
+    ['docker exec -it db mysql -uroot -pFake0123', 'Fake0123'], ['"Authorization": "FAKEfake0123FAKEfake0123"', 'FAKEfake0123'],
+    ['  password: correcthorse', 'correcthorse']
+  ];
+  for (const [text, secret] of hide) {
+    const r = redactSecrets(text);
+    assert.ok(!r.text.includes(secret) && r.count >= 1, `${text} -> ${r.text}`);
+    assert.deepEqual(redactSecrets(r.text), { text: r.text, count: 0 }, 'hidden once, never again');
+  }
+  for (const text of ['const token = req.headers.authorization?.split(" ")[1];', 'const key = crypto.randomBytes(32)', 'secret = settings.SECRET_KEY',
+    'access_token = create_access_token(identity=user.id)', 'apiKey: config.openai.apiKey', 'const storageKey = "agentflow.autosync.v1"',
+    '"key": "settings.profile.title"', 'Key: "uploads/user123/avatar.png"', 'secretKeyRef: { name: db, key: DATABASE_PASSWORD }',
+    'const cacheKey = `session:${userId}:${projectId}`', 'Authorization: this.authService.getToken()', 'const user = await User.create({ email, password: hashedPassword });',
+    'password: passwordHash,', 'password: SecretStr', 'password: Annotated[str, Form()]', '  -p, --password string   Password', 'use --password option',
+    'docker run --name mysql -p3306:3306 -d mysql:8', 'SORT_KEY=createdAt', 'KEY_FILE=/etc/ssl/private/server.key', 'if (password === input) return',
+    'API key: 발급받은 키를 넣어 주세요', 'the token: required for every call', 'Bearer tokens/session2.ts', 'password = os.environ["DB_PASSWORD"]',
+    'token = jwt.encode(payload, SECRET, algorithm="HS256")'])
+    assert.deepEqual(redactSecrets(text), { text, count: 0 }, text);
+  // A long name never makes a value slow to weigh, and a long text takes time in proportion to its length.
+  for (const n of [30, 60, 5000]) {
+    const w = 'authenticationserviceprovider'.repeat(Math.ceil(n / 29)).slice(0, n), t0 = performance.now();
+    for (const t of [`headers: { Authorization: ${w}.currentToken }`, `export const token = ${w}.current;`, `password: ${w}.`, `Bearer ${w}1`]) redactSecrets(t);
+    assert.ok(performance.now() - t0 < 200, `${n} letters`);
+  }
+  const big = 'const accessToken = userAuthenticationResponse.data.accessToken; password: hashedPassword, DB_PASSWORD=Fake0123 '.repeat(20000), t1 = performance.now();
+  assert.equal(redactSecrets(big).count, 20000); assert.ok(performance.now() - t1 < 3000, 'a 2 MB text');
+});
+
 test('SESSIONS-RT1 the whole record is hidden and cleaned, its header too, so it can always be kept', () => {
   const d = session([{ role: 'user', at: T(0), text: '색 출력 \u001b[31m빨강\u001b[0m 그리고 제목\u000b부제목\u0007' }, { role: 'assistant', at: T(1), text: '고쳤어요', files: ['src/a.ts'] }],
     { cwd: 'C:\\work\\sk-telecom-portal-renewal', branch: 'feature/sk-1234-fix-login-redirect', title: `키 ${f('sk-', 'proj-', 'FAKE'.repeat(6))} 넣고 테스트` });
@@ -287,4 +329,68 @@ test('SESSIONS-AS6 each session is marked as soon as its records are kept: a loo
 
 test('SESSIONS-RT3 a draft with no next-record line is kept exactly, its last line break too', () => {
   for (const t of ['기록 한 줄\n', '  들여쓴 글\n\n\n', '[Claude Code 세션 기록 · 세션 claude-0123456789abcdef01234567]\n\n── 사용자 요청 ──\n가\n']) assert.deepEqual(recordParts(t), [t]);
+});
+
+test('SESSIONS-RC4 turns that share a time are never split between readings: each is taken once, and a reading always moves on', () => {
+  const parsed = turns => ({ meta: { cwd: '/work/salon', cwds: ['/work/salon'], branch: 'main', startedAt: null, title: null, thread: null, parent: null }, turns, changes: [] });
+  for (const size of [1000, 3000]) {
+    // A prompt and its reply written in the same millisecond, at every place a reading could end.
+    const turns = [{ role: 'user', at: T(0), text: '시작' }, { role: 'assistant', at: T(1), text: '좋아요' }];
+    for (let i = 0; i < 6; i++) turns.push({ role: 'user', at: T(10 + i), text: `요청 ${i}` }, { role: 'assistant', at: T(10 + i), text: `답 ${i} ${'r'.repeat(size)}` });
+    let mark = markAfter(session(turns.slice(0, 2)), null, T(2)); const got = [];
+    for (let page = 0; page < 20; page++) {
+      const d = readSessionDetail(JSON.parse(JSON.stringify(sessionDetail(ID, 'claude', parsed(turns), { turnChars: 20000, replyChars: 2500 }, mark.lastAt))));
+      got.push(...newTurns(d, mark).map(t => t.text.split(' ').slice(0, 2).join(' ')));
+      const next = markAfter(d, mark, T(40)); if (!d.rest) break;
+      assert.ok(next.lastAt > mark.lastAt, 'each reading moves the mark on'); mark = next;
+    }
+    for (let i = 0; i < 6; i++) { assert.equal(got.filter(x => x === `요청 ${i}`).length, 1, `요청 ${i}`); assert.equal(got.filter(x => x === `답 ${i}`).length, 1, `답 ${i}`); }
+  }
+});
+
+test('SESSIONS-RC5 a file taken under its whole path is the same file once the session works in its folder: no continuation for it', () => {
+  const was = session([{ role: 'assistant', at: T(1), text: PART1, files: ['src/a.ts', '/work/app/api/types.ts'] }]), mark = markAfter(was, null, T(2));
+  assert.deepEqual(newTurns(session([{ role: 'assistant', at: T(1), text: PART1, files: ['src/a.ts', 'api/types.ts'] }]), mark), []);
+  assert.deepEqual(newTurns(session([{ role: 'assistant', at: T(1), text: PART1, files: ['src/a.ts', 'api/types.ts', 'api/index.ts'] }]), mark).map(t => t.files), [['api/index.ts']]);
+  const win = markAfter(session([{ role: 'assistant', at: T(1), text: PART1, files: ['C:\\work\\api\\types.ts'] }]), null, T(2));
+  assert.deepEqual(newTurns(session([{ role: 'assistant', at: T(1), text: PART1, files: ['api/types.ts'] }]), win), []);
+  // A file of another name stays new, whatever path it shares an end with.
+  assert.deepEqual(newTurns(session([{ role: 'assistant', at: T(1), text: PART1, files: ['src/a.ts', '/work/app/api/types.ts', 'lib/src/a.ts'] }]), mark).map(t => t.files), [['lib/src/a.ts']]);
+});
+
+test('SESSIONS-RT4 a header reads back as written: a folder or branch with a middle dot, a title like a field, a web header without a branch', () => {
+  const back = extra => { const o = sessionOrigin(sessionText(session([{ role: 'user', at: T(0), text: '가' }], extra)).text); return [o.title, o.cwd, o.branch, o.id]; };
+  assert.deepEqual(back({ cwd: '/Users/me/기획·디자인/salon', title: '로그인 수정' }), ['로그인 수정', '/Users/me/기획·디자인/salon', 'main', ID]);
+  assert.deepEqual(back({ cwd: '/Users/me/repos', branch: null, title: '브랜치 정리' }), ['브랜치 정리', '/Users/me/repos', null, ID]);
+  assert.deepEqual(back({ cwd: null, branch: null, title: '브랜치 정리' }), ['브랜치 정리', null, null, ID]);
+  assert.deepEqual(back({ cwd: 'C:\\work\\salon', branch: 'feat/a·b', title: '세션 만료 · 브랜치 main' }), ['세션 만료 · 브랜치 main', 'C:\\work\\salon', 'feat/a·b', ID]);
+  assert.deepEqual(back({ title: '「인용」 제목' }), ['「인용」 제목', '/work/salon', 'main', ID]);
+  const web = t => { const o = sessionOrigin(t); return [o.title, o.cwd, o.branch]; };
+  assert.deepEqual(web('[웹 AI 세션 기록 · 브랜치 정리 · 작업 폴더 /work/x]'), ['브랜치 정리', '/work/x', null]);
+  assert.deepEqual(web('[웹 AI 세션 기록 · 작업 폴더 /work/x · 브랜치 main]'), [null, '/work/x', 'main']);
+  // A separator line the conversation itself holds does not cut its record.
+  const quoting = sessionText(session([{ role: 'user', at: T(0), text: `이 초안이 왜 둘로 저장돼?\n${NEXT_RECORD}\n[Codex 세션 기록 · 세션 codex-aaaaaaaaaaaaaaaaaaaaaaaa]` }, { role: 'assistant', at: T(1), text: '봤어요', files: ['a.ts'] }])).text;
+  assert.deepEqual(recordParts(quoting), [quoting]); assert.equal(sessionOrigin(quoting).id, ID);
+});
+
+test('SESSIONS-AS7 a mark under an old id moves to the session\'s id when it is listed, read or not: an archived thread is not taken again', async () => {
+  const S1 = { id: ID, aliases: [OLD], cwd: '/w', updatedAt: ago(10), turns: pair(60, 'PROMPT-ONE', 'one') }, src = source([S1]), t = tab(src);
+  t.kv.setItem(AUTOSYNC_KEY, JSON.stringify({ E1: { folders: [{ path: '/w', connectedAt: ago(100), since: ago(20000), backfilled: true }], marks: { [OLD]: { lastAt: S1.turns[1].at, count: 2, updatedAt: S1.updatedAt } }, runs: { day: 'x', n: 0, last: null }, taken: 1, lastCheck: null, error: null } }));
+  await t.sync.tick();
+  assert.equal(src.reads.length, 0, 'not changed: not read'); assert.deepEqual(Object.keys(t.binding().marks), [ID]);
+  // Codex archives it: the same id, another alias. Nothing is taken again.
+  S1.aliases = ['claude-fedcba9876543210fedcba98']; await t.sync.tick(true);
+  assert.equal(src.reads.length, 0); assert.equal(t.texts().length, 0);
+});
+
+test('SESSIONS-AS8 a picked folder that cannot be read is said, and the first look waits for it: its sessions\' history comes in once it can be read', async () => {
+  const A = { id: ID, cwd: '/w', updatedAt: ago(30), turns: pair(300, 'HISTORY-A', 'a') }, B = { id: OLD, cwd: '/w', updatedAt: ago(40), turns: pair(400, 'HISTORY-B', 'b') };
+  const all = [A, B], src = source(all), list = src.list.bind(src); let down = true;
+  src.list = async folder => (await list(folder)).filter(s => !down || s.id !== OLD);
+  src.partial = () => (down ? 'wsl 폴더를 읽지 못했어요.' : null);
+  const t = tab(src); t.sync.connect('/w'); await settle();
+  assert.ok(t.texts().some(x => x.includes('HISTORY-A'))); assert.equal(t.binding().folders[0].backfilled, false); assert.equal(t.binding().error, 'wsl 폴더를 읽지 못했어요.');
+  down = false; await t.sync.tick();
+  assert.ok(t.texts().some(x => x.includes('HISTORY-B')), 'history from before the connection'); assert.equal(t.texts().filter(x => x.includes('HISTORY-A')).length, 1);
+  assert.equal(t.binding().folders[0].backfilled, true); assert.equal(t.binding().error, null);
 });
