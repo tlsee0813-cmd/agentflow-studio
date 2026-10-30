@@ -1,0 +1,99 @@
+{
+  "title": "142 제한 공개 읽기 조합과 승격 guard 배포 전 검토",
+  "description": "정확142 격리 조합과138 대비 manifest/guard 경계만 읽었다. 추가 숨은 의존성이나 공개 권한·검증기 누수의 구체 차단 사유는 발견하지 않았다. 현재 범위에서는 배포 전 검토를 마감할 수 있으며 실제 공개 bytes/정책/UI 수용은 배포 후 Root 확인과 구별한다.",
+  "at": "2026-10-30T06:16:21.681750+00:00",
+  "source": "76e3dc8a2939a4055ab1b99526b5cc1c98fd75e7",
+  "appTree": "29386393a5cc1a7db8ffc86d761711bf9b41686d",
+  "base": "73f6f253e8ce9921504011b7281584955d41716d",
+  "acceptedClient": "8961db44898835a82daec1d3ce51616982991ee3",
+  "cleanReleaseWorktreeObserved": true,
+  "verdict": "배포 전 검토 범위 차단 없음",
+  "findings": [],
+  "inputsSha256": {
+    ".ops/experience142-reading-delivery/source.json": "954260a6dbc5a74b73f2dda8eb0780fc383e768ef5d36980c9ecb5c425146abc",
+    ".ops/experience142-reading-delivery/preparation.json": "60790b49d4d4a0f2e339ca50358084308dd617f62d4825485001f212253e3bfc",
+    ".ops/experience142-reading-delivery/expected-manifest.json": "d0704f6c82ee5a34a5b947110773a7893aeb6b3db95929879d42aa4dc59dc6d9",
+    ".ops/experience142-reading-delivery/promotion-guard.mjs": "376224ba94be85e99dca829959a3197a27ba3bdae3cab658e2829a7509a96b12",
+    ".ops/experience142-reading-delivery/live-before.json": "4da2d6146d12827eb0b6a0518d4b8e6ad25b259567d399e98040d9d513decb41",
+    ".ops/experience142-reading-delivery/coupling.log": "13d0c93f319e0d2aed1fb3effe8ecc978eee2cb6ba3f618b43690be3a9bba137"
+  },
+  "baselineInputsSha256": {
+    ".ops/experience138-reading-delivery/expected-manifest.json": "47695a3807cb597fb335abec6139ddfc019b075065277b753e713509a54d9480",
+    ".ops/experience138-reading-delivery/promotion-guard.mjs": "5b7cf413232d2360788bc4b2b70e22bf4b3bd1a96e54344fee5e52692aa88eb6",
+    ".ops/experience138-reading-delivery/live-after.json": "4da2d6146d12827eb0b6a0518d4b8e6ad25b259567d399e98040d9d513decb41"
+  },
+  "composition": {
+    "sourceDelta": "135 대비 변경은 app.ts/styles.css/shared map-reading.ts 세 파일뿐이다. app.ts와CSS는 수용1408961의 정확 Git blob과 동일하다. shared는135 파일의 partUnderstanding 반환 claims.slice(0,12)만 claims로 바뀐다.",
+    "dependencyAssessment": "140 클라이언트가 사용하는 history.reading·role/claim/scene 및 기존 plan-view/request-wide/표시 API는135에 이미 있다. client 디렉터리의135→140 차이도 app.ts뿐이며 plan-view 등 다른 클라이언트 의존성을 누락한 조합이 아니다. Root 잠금 check/dry build는 별도 실행 근거다.",
+    "sharedScope": "state/role/history/replaces/dedup·map current6/plan source6·validator/apply/prompt는 변경하지 않았다. shared 파일이 서버 module에도 포함되므로 서버 bytes 전체 불변이라고 표현하면 안 되며, 실제 module변경 한 개를 아래에 명시한다.",
+    "validatorPolicy": "base135의 validator와 모든 server/Worker 정책은 그대로다.137 진단 변경은 조합하지 않았다. entry worker-existing-map.mjs와 studio 제한정책·접속 코드·bindings·storage prefix가 유지돼 새 map/jobs/대조 생성이나141 반려 scope를 공개하는 코드변경이 아니다."
+  },
+  "manifestDelta": {
+    "assets": {
+      "count": 54,
+      "added": [],
+      "removed": [],
+      "changed": [
+        "/BUILD.txt",
+        "/client/app.js",
+        "/shared/map-reading.js",
+        "/styles.css"
+      ]
+    },
+    "modules": {
+      "count": 27,
+      "added": [],
+      "removed": [],
+      "changed": [
+        "continuity/dist/public/shared/map-reading.js"
+      ]
+    }
+  },
+  "preparedByteRead": "준비된 package assets54개와 정확 release build modules27개, 총81파일을 읽어 manifest의 bytes/SHA와 비교했으며 불일치0이었다. 새 build나 제품 실행은 아니다.",
+  "sameManifestFields": {
+    "policy": true,
+    "worker": true,
+    "main": true,
+    "compatibilityDate": true,
+    "api": true,
+    "storagePrefix": true
+  },
+  "liveBeforeEquals138After": {
+    "settings": true,
+    "deployments": true,
+    "subdomain": true,
+    "public73Settings": true,
+    "build": true,
+    "public73Build": true
+  },
+  "guardAssessment": [
+    "138 guard와의 코드 차이는 prepared manifest 오류 문구 하나뿐이다. 실행 경로·허용 목적지·비밀 binding 검사·단일 PUT 제한은 재사용됐다.",
+    "시작 시 정확 HEAD/clean을 요구하고 실제 prepared manifest 전체를 expected와 비교한다. 로컬 모듈/asset bytes 및 실제 asset upload와 PUT module body를 expectedhash에 결속한다.",
+    "첫 mutation 전에 동일 Worker settings/deployment/subdomain과 공개73 settings/두 BUILD를 live-before와 대조한다. 이번 live-before의6필드는138 live-after와 모두 같다. 예상 drift가 있으면 그 mutation 전에 거절한다.",
+    "대상 Worker·허용 route/method·PUT1회·subdomain 쓰기1회를 제한하고 main module/compatibilityDate/asset 설정/source annotation을 검증한다. bindings5개와 secret type/name/text를 현재 process.env 값에 비교하며 mismatch 메시지는 값을 넣지 않는다. 이 검토자는 환경·키 값을 조회하지 않았다.",
+    "guard는 프로세스 내 단일 업로드와 첫 mutation 전 drift 경계다. 원격 변경을 원자적 CAS로 잠그거나 다른 프로세스 재실행까지 자동 중복 방지한다고 확대하지 않는다. 접수 불명확 시 기존 receipt/배포부터 회수하고 재업로드하지 않는 Root 선택을 유지한다."
+  ],
+  "checksAttribution": {
+    "rootBuild": "preparation.json에 잠금 checkExit0/dryExit0 및 uploadAttempts0이 기록돼 있다. 독립 실행으로 세지 않는다.",
+    "coupling": "coupling.log에서 정확142 조합의 modules를 대상으로 한 기존 claims1402개 실행2/pass2/fail0/skip0을 확인했다. import주소만 바꾼 Root 연결검증이며 모델/새 전체suite 검증이 아니다.",
+    "publicBefore": "Root가 기존 공개138 실제Zephyr의 전체 읽기345.6px와workspace/plans 불변을 회수했다. 이는 배포 전 기준이며142의 넓어진 최종 UI를 이미 관찰했다는 뜻은 아니다."
+  },
+  "remainingRootGate": [
+    "이 guard를 사용한 실제 업로드 영수증과 원격54assets/27modules bytes·정책 동일성 확인은 아직 수행하지 않았다.",
+    "배포 후 기존 실제 저장 자료의 전체 읽기·정확 원문·복귀·reload 및workspace/plans 보존은 Root 별도 정상 UI 판단 대상이다.",
+    "140 전체CI를 이 조합의 직접 실행 증거로 쓰지 않는다.141 질문 draft 손실·scope 필수성 오판과 새 AI 생성/전체 제품 수용은 이 읽기 전달 범위 밖이다."
+  ],
+  "execution": {
+    "actor": "독립 조합/guard 읽기 검토자",
+    "preparedFilesHashed": 81,
+    "tests": 0,
+    "builds": 0,
+    "deploy": 0,
+    "API": 0,
+    "browser": 0,
+    "model": 0,
+    "keysRead": 0,
+    "productWrites": 0,
+    "onlyNewPrivateFile": ".ops/results/experience142-delivery-review.json"
+  }
+}

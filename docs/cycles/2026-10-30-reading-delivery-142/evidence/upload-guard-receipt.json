@@ -1,0 +1,114 @@
+{
+  "source": "76e3dc8a2939a4055ab1b99526b5cc1c98fd75e7",
+  "worker": "agentflow-studio-existing-map-124",
+  "events": [
+    {
+      "at": "2026-10-30T06:17:12.212Z",
+      "phase": "accepted-manifest-and-local-bytes-exact",
+      "assets": "8afb1adcad134c9b08cad100a22520d6bba8e2b2c5e25273abbbd6992e8bd2cb",
+      "modules": "883fccd7858b557d338fd43b51e825c7ef0f18a22e41fdc4366d12c107ee9d9c"
+    },
+    {
+      "at": "2026-10-30T06:17:12.215Z",
+      "phase": "request",
+      "method": "GET",
+      "route": "/subdomain"
+    },
+    {
+      "at": "2026-10-30T06:17:12.781Z",
+      "phase": "response",
+      "method": "GET",
+      "route": "/subdomain",
+      "status": 200
+    },
+    {
+      "at": "2026-10-30T06:17:15.299Z",
+      "phase": "existing-target-settings-deployment-public-state-exact-before-first-mutation",
+      "previousDeployment": "dd704c0b-6089-4aa4-a667-693078c39383"
+    },
+    {
+      "at": "2026-10-30T06:17:15.301Z",
+      "phase": "request",
+      "method": "POST",
+      "route": "/scripts/agentflow-studio-existing-map-124/assets-upload-session"
+    },
+    {
+      "at": "2026-10-30T06:17:16.457Z",
+      "phase": "response",
+      "method": "POST",
+      "route": "/scripts/agentflow-studio-existing-map-124/assets-upload-session",
+      "status": 200
+    },
+    {
+      "at": "2026-10-30T06:17:16.463Z",
+      "phase": "request",
+      "method": "POST",
+      "route": "/assets/upload?base64=true"
+    },
+    {
+      "at": "2026-10-30T06:17:17.531Z",
+      "phase": "response",
+      "method": "POST",
+      "route": "/assets/upload?base64=true",
+      "status": 202
+    },
+    {
+      "at": "2026-10-30T06:17:17.534Z",
+      "phase": "request",
+      "method": "POST",
+      "route": "/assets/upload?base64=true"
+    },
+    {
+      "at": "2026-10-30T06:17:18.571Z",
+      "phase": "response",
+      "method": "POST",
+      "route": "/assets/upload?base64=true",
+      "status": 202
+    },
+    {
+      "at": "2026-10-30T06:17:18.577Z",
+      "phase": "request",
+      "method": "POST",
+      "route": "/assets/upload?base64=true"
+    },
+    {
+      "at": "2026-10-30T06:17:19.640Z",
+      "phase": "response",
+      "method": "POST",
+      "route": "/assets/upload?base64=true",
+      "status": 201
+    },
+    {
+      "at": "2026-10-30T06:17:19.648Z",
+      "phase": "actual-upload-body-exact",
+      "moduleCount": 27,
+      "secretValuesLogged": false
+    },
+    {
+      "at": "2026-10-30T06:17:19.660Z",
+      "phase": "request",
+      "method": "PUT",
+      "route": "/scripts/agentflow-studio-existing-map-124"
+    },
+    {
+      "at": "2026-10-30T06:17:20.355Z",
+      "phase": "response",
+      "method": "PUT",
+      "route": "/scripts/agentflow-studio-existing-map-124",
+      "status": 200
+    },
+    {
+      "at": "2026-10-30T06:17:20.358Z",
+      "phase": "request",
+      "method": "POST",
+      "route": "/scripts/agentflow-studio-existing-map-124/subdomain"
+    },
+    {
+      "at": "2026-10-30T06:17:20.676Z",
+      "phase": "response",
+      "method": "POST",
+      "route": "/scripts/agentflow-studio-existing-map-124/subdomain",
+      "status": 200
+    }
+  ]
+}

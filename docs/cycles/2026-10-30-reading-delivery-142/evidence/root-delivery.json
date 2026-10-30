@@ -1,0 +1,111 @@
+{
+  "decision": "ACCEPT_LIMITED_EXISTING_MAP_DELIVERY",
+  "source": "76e3dc8a2939a4055ab1b99526b5cc1c98fd75e7",
+  "appTree": "29386393a5cc1a7db8ffc86d761711bf9b41686d",
+  "deployment": {
+    "id": "efeda6bf-446b-48be-b055-6a9bc5e9ba7f",
+    "source": "api",
+    "strategy": "percentage",
+    "annotations": {
+      "workers/message": "AgentFlow Studio 76e3dc8a2939a4055ab1b99526b5cc...",
+      "workers/triggered_by": "upload"
+    },
+    "versions": [
+      {
+        "version_id": "2c1f8fe5-a775-412e-909b-2e78f62bd927",
+        "percentage": 100
+      }
+    ],
+    "created_on": "2026-10-30T06:17:19.296659Z"
+  },
+  "worker": "agentflow-studio-existing-map-124",
+  "uploadExit": 0,
+  "workerPutCount": 1,
+  "assets": {
+    "count": 54,
+    "allExact": true
+  },
+  "modules": {
+    "count": 27,
+    "allExact": true
+  },
+  "boundary": {
+    "/api/studio/map": {
+      "status": 403,
+      "body": {
+        "error": {
+          "code": "MAP_WITHHELD"
+        }
+      }
+    },
+    "/api/studio/jobs": {
+      "status": 403,
+      "body": {
+        "error": {
+          "code": "MAP_WITHHELD"
+        }
+      }
+    },
+    "/api/studio/plan": {
+      "status": 401,
+      "body": {
+        "error": {
+          "code": "ACCESS_CODE_REQUIRED"
+        }
+      }
+    }
+  },
+  "ui": {
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "before": {
+      "panelClass": "panel inspector",
+      "scroll": null,
+      "url": "https://agentflow-studio-existing-map-124.tlsee0813.workers.dev/#/p/E_edafb6ad-cb4a-4e61-9b70-4bac83b27cb5/A_99d3331f-d27f-4ad1-bda6-99ebf13323f2",
+      "width": 345.6000061035156,
+      "world": "top: 0px; transform: translate(160px, 206px) scale(1);"
+    },
+    "after": {
+      "locks": [
+        {
+          "inert": true,
+          "selector": "#viewport"
+        },
+        {
+          "inert": true,
+          "selector": ".controls"
+        }
+      ],
+      "panelClass": "panel inspector reading",
+      "url": "https://agentflow-studio-existing-map-124.tlsee0813.workers.dev/#/p/E_edafb6ad-cb4a-4e61-9b70-4bac83b27cb5/A_99d3331f-d27f-4ad1-bda6-99ebf13323f2",
+      "width": 819.2000122070312,
+      "world": "top: 0px; transform: translate(160px, 206px) scale(1);"
+    },
+    "returned": {
+      "active": null,
+      "activeText": "근거",
+      "panelClass": "panel inspector reading",
+      "panelHidden": false,
+      "url": "https://agentflow-studio-existing-map-124.tlsee0813.workers.dev/#/p/E_edafb6ad-cb4a-4e61-9b70-4bac83b27cb5/A_99d3331f-d27f-4ad1-bda6-99ebf13323f2",
+      "width": 819.2000122070312,
+      "world": "top: 0px; transform: translate(160px, 206px) scale(1);"
+    },
+    "exactSourceQuote": "| Good Display | HINK-E0213A22      | SSD1675A /           | reel_board@2      |\n| GDEH0213B72  |                    | ssd16xx              |                   |",
+    "quoteExistsInStoredSource": true,
+    "allFourDisplayClaimsVisible": true,
+    "workspaceSha256": "86055d9fbb282c5bfcfdd3de861d483d8a91f53381c41dba4ff05ea8c76b4a09",
+    "plansSha256": "71fec8f52dc3433aebf10c8f20a4befe2102c0c8ac782423e537c1b8cbb96d05",
+    "storageExactAfterReadAndReload": true,
+    "scrollPositionNotAsserted": true
+  },
+  "newModelCalls": 0,
+  "public73BuildUnchanged": true,
+  "limitations": [
+    "existing-map only",
+    "136 RETURN rejected, cause unresolved",
+    "141 false prerequisite rejected; question draft bug unresolved",
+    "No new generation or end-to-end acceptance"
+  ]
+}
