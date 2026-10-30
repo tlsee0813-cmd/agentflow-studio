@@ -1,0 +1,311 @@
+{
+ "base": {
+  "commit": "bf11f298382da28dcd8587b27f95ab5c33eefdf9",
+  "appTree": "3960c16dbaf229f6100291f0252b34c50301cf33",
+  "srcDirty": false
+ },
+ "candidate": {
+  "commit": "5de745afcc7e9dfb1143ff10eb9d2b3bfc27a664",
+  "appTree": "9fae413ae208735c7a81932380c42a203ff9fa0f",
+  "srcDirty": false
+ },
+ "cases": 49,
+ "accepted": 2,
+ "problems": 0,
+ "rows": [
+  {
+   "name": "7:lawful",
+   "base": "accept",
+   "candidate": "accept",
+   "problems": []
+  },
+  {
+   "name": "7:root array",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "reply | contract | shape",
+   "problems": []
+  },
+  {
+   "name": "7:root extra key",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "reply | contract | keys",
+   "problems": []
+  },
+  {
+   "name": "7:summary number",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "summary | contract | shape",
+   "problems": []
+  },
+  {
+   "name": "7:summary over 200",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "summary | contract | text",
+   "problems": []
+  },
+  {
+   "name": "7:summary secret-like",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "summary | contract | secret-like",
+   "problems": []
+  },
+  {
+   "name": "7:parts object",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "parts | contract | shape",
+   "problems": []
+  },
+  {
+   "name": "7:parts 25",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "parts | contract | count",
+   "problems": []
+  },
+  {
+   "name": "7:part extra key",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "parts[1] | contract | keys",
+   "problems": []
+  },
+  {
+   "name": "7:new part parent unknown",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "parts[0].parent | contract | parent",
+   "problems": []
+  },
+  {
+   "name": "7:existing part named",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "parts[1] | contract | existing-name-parent",
+   "problems": []
+  },
+  {
+   "name": "7:new part name blank",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "parts[0].name | contract | text",
+   "problems": []
+  },
+  {
+   "name": "7:new part no basis",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "parts[0].basis | contract | basis-required",
+   "problems": []
+  },
+  {
+   "name": "7:claims 5",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "parts[1].claims | contract | count",
+   "problems": []
+  },
+  {
+   "name": "7:claim kind",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "parts[1].claims[2].kind | contract | kind",
+   "problems": []
+  },
+  {
+   "name": "7:claim text control",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "parts[1].claims[1].text | contract | text",
+   "problems": []
+  },
+  {
+   "name": "7:claim replaces unknown",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "parts[1].claims[0].replaces | contract | replaces",
+   "problems": []
+  },
+  {
+   "name": "7:claim extra key",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "parts[1].claims[3] | contract | keys",
+   "problems": []
+  },
+  {
+   "name": "7:new parts cycle",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "parts[0].parent | contract | parent-cycle",
+   "problems": []
+  },
+  {
+   "name": "7:relation kind",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "relations[0].kind | contract | kind",
+   "problems": []
+  },
+  {
+   "name": "7:relation end unknown",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "relations[0] | contract | ends",
+   "problems": []
+  },
+  {
+   "name": "7:relation note number",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "relations[0].note | contract | shape",
+   "problems": []
+  },
+  {
+   "name": "7:candidate text over 240",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "candidates[0].text | contract | text",
+   "problems": []
+  },
+  {
+   "name": "7:candidate statement kind",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "candidates[0].statement.kind | contract | kind",
+   "problems": []
+  },
+  {
+   "name": "7:candidate statement extra key",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "candidates[0].statement | contract | keys",
+   "problems": []
+  },
+  {
+   "name": "7:gaps 3",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "gaps | contract | count",
+   "problems": []
+  },
+  {
+   "name": "7:gap over 160",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "gaps[0] | contract | text",
+   "problems": []
+  },
+  {
+   "name": "7:material what blank",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "material[0].what | contract | text",
+   "problems": []
+  },
+  {
+   "name": "7:material at number",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "material[0].at | contract | shape",
+   "problems": []
+  },
+  {
+   "name": "7:match record key",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "matches[2] | contract | shape",
+   "problems": []
+  },
+  {
+   "name": "7:match stance",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "matches[0] | contract | match-contract",
+   "problems": []
+  },
+  {
+   "name": "7:match unknown request",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "matches[1] | contract | match-contract",
+   "problems": []
+  },
+  {
+   "name": "7:match extra key",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "matches[3] | contract | match-contract",
+   "problems": []
+  },
+  {
+   "name": "7:match text secret-like",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "matches[3] | contract | secret-like",
+   "problems": []
+  },
+  {
+   "name": "7:match replaces unknown prior",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "matches[3].replaces | contract | prior",
+   "problems": []
+  },
+  {
+   "name": "7:matches 25",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "matches | contract | count",
+   "problems": []
+  },
+  {
+   "name": "7:kept: condition not-anchor",
+   "base": "matches[1].aboutAt | reference | not-anchor",
+   "candidate": "matches[1].aboutAt | reference | not-anchor",
+   "problems": []
+  },
+  {
+   "name": "7:kept: invalid new key",
+   "base": "parts[0].ref | reference | invalid-new-key",
+   "candidate": "parts[0].ref | reference | invalid-new-key",
+   "problems": []
+  },
+  {
+   "name": "7:kept: condition-length",
+   "base": "parts[1].claims[0].aboutAt | condition-length | N01.10",
+   "candidate": "parts[1].claims[0].aboutAt | condition-length | N01.10",
+   "problems": []
+  },
+  {
+   "name": "7:kept: claim key",
+   "base": "parts[1].claims[0].key | reference | SECRET_MARKER_137",
+   "candidate": "parts[1].claims[0].key | reference | SECRET_MARKER_137",
+   "problems": []
+  },
+  {
+   "name": "6:lawful",
+   "base": "accept",
+   "candidate": "accept",
+   "problems": []
+  },
+  {
+   "name": "6:root extra key",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "Error:INVALID_RESPONSE",
+   "problems": []
+  },
+  {
+   "name": "6:summary over 200",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "Error:INVALID_RESPONSE",
+   "problems": []
+  },
+  {
+   "name": "6:claim kind",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "Error:INVALID_RESPONSE",
+   "problems": []
+  },
+  {
+   "name": "6:existing part named",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "Error:INVALID_RESPONSE",
+   "problems": []
+  },
+  {
+   "name": "6:match stance",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "Error:INVALID_RESPONSE",
+   "problems": []
+  },
+  {
+   "name": "6:match text secret-like",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "Error:INVALID_RESPONSE",
+   "problems": []
+  },
+  {
+   "name": "6:gaps 3",
+   "base": "Error:INVALID_RESPONSE",
+   "candidate": "Error:INVALID_RESPONSE",
+   "problems": []
+  },
+  {
+   "name": "6:kept: source-kind",
+   "base": "matches[1].kind | source-kind | N01:pasted",
+   "candidate": "matches[1].kind | source-kind | N01:pasted",
+   "problems": []
+  }
+ ]
+}
