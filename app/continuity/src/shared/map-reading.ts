@@ -550,7 +550,7 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
   const roleBasisRevised = !corrected && roleBasis.length > 0 && roleBasis.every(q => insideRevised(p, areaId, q));
   // The corrected report reads first (claims are newest first; a replacing one goes ahead of the rest).
   claims.sort((a, b) => Number(!!b.replaces) - Number(!!a.replaces));
-  return { role, roleAbout, roleBasis, corrected, others: others.slice(0, 6), claims: claims.slice(0, 12), history, createdName, state, revised, roleBasisRevised };
+  return { role, roleAbout, roleBasis, corrected, others: others.slice(0, 6), claims, history, createdName, state, revised, roleBasisRevised };
 }
 
 /* ---------- evidence a later record took back ---------- */
