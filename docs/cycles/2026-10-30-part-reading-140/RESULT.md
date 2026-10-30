@@ -94,6 +94,29 @@
   - 실제 Python workspace_flow 실행은 Root(잠금 환경)와 CI에서 한다.
 - **기존 Q1/Q2 send 관찰**은 계속 수리하지 않은 별도 항목이다.
 
+## 후속 수리 6 (Root 실제 134 프로젝트 CUA 재현, 후보 b59a14f) — 제품 수리
+
+- **재현된 순서.** 일반 sheet A → 관계 B → B에서 변경 구상(지도 비교, work=false) → 브라우저 Back으로 A → plan strip ‘문장 고치기’ Enter(work=true) → Forward로 B.
+- **결과.** `#plan-panel.work`는 보이는데 `#viewport/.controls.inert`가 false이고 표시(mark)도 없었다.
+- **원인(직접 확인, 두 가지).**
+  1. `restoreReading`이 plan 가드 없이 part sheet를 다시 열었다(select()는 plan이 열려 있으면 pane을 plan에 맡긴다). 그래서 Back에서 part panel이 plan 위에 놓이고 읽기 표시가 켜졌다.
+  2. 표시만으로 소유권을 나타내서, 그 사이 plan이 같은 잠금을 걸었는데도 읽기가 닫힐 때 표시와 함께 잠금을 풀었다.
+- **수리(app.ts만, plan-view 불변, 새 overlay 체계 없음).**
+  1. plan이 열려 있는 동안 `restoreReading`은 part 렌즈·sheet를 다시 놓지 않는다(select()와 같은 가드).
+  2. 읽기 표시를 풀 때 plan work가 지금 보이면(cover(workOpen())가 잠그는 바로 그 상태) 잠금은 두고 표시만 지운다. 지도 비교(work=false)까지 잠그지는 않는다.
+- **검증.** `part140-flow` H에서 예제 converter로 같은 순서를 밟았다.
+  - b59a14f에서 관찰한 상태는 Root의 CUA와 같다: Back `{work:false, part:true, vp:true, mark:"1"}`, Forward `{work:true, vp:false, controls:false, mark:null}`. 실패한다.
+  - 수리 후: Back에서 part sheet가 놓이지 않고, Forward 뒤에도 넓게 비교가 지도를 덮는다(inert 유지). 넓게 비교를 닫으면 풀리고 표시는 남지 않는다.
+  - 일반 읽기 닫기와 plan work 닫기의 정상 해제(B·W)를 포함해 `part140-flow` 14/14 통과.
+  - Root는 실제 자료로 수리 전후를 CUA 검증한다.
+
+## 후속 7 (CI 41008285556 linux, relation_visit_flow 1022) — 검사 전제 보완(제품 회귀 아님)
+
+- **관측.** `assert scrolled > 40`이 0으로 실패했다.
+- **확인.** 같은 fixture(visual58 oss-collector)의 traces 전체 읽기를 같은 단계로 측정했다. 1280×720에서 넓어진 읽기 면(819px)에 내용이 다 들어간다(scrollHeight 415 = clientHeight 415, scrollTop 0). 같은 함수 앞부분에서도 쓰는 1280×500에서는 넘친다(scrollTop 187).
+- **변경(`studio_browser.py`의 setup만).** sheet 왕복 구간에만 1280×500을 설정하고, reload 구간 앞에서 1280×720으로 되돌린다. 원래 검사(>40, 복귀 스크롤 동일, 최신 초안, 답 없음, Back의 초안, reload·history)는 그대로다. 넓은 레이아웃을 되돌리거나 기대값을 낮추지 않았다.
+- **확인 범위.** 이 구간(1015~1041행)을 Node로 단계별로 옮겨 수정 빌드에서 확인했다(scrolled 187, 모든 단언 통과). 이 환경에는 Python Playwright가 없어 Python 원본은 CI가 실행한다. 이것은 넓은 읽기 설계에 맞춘 검사 전제 보완이며, 제품 회귀 수리와는 구별된다.
+
 ## 실행하지 않은 검사와 한계
 
 - 잠금 TS 5.8.3, continuity 전체 node, Python 브라우저 회귀(75 관계 note 왕복 등 `studio_browser.py`), 75/126/129/139 전체 suite는 돌리지 않았다(지시대로). 새 AI 호출, 136 재시도, 생성도 0이다.

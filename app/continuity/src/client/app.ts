@@ -449,6 +449,8 @@ function returnFromVisit() {
 }
 function restoreReading(f: Place): boolean {
   if (f.key !== opened?.key || f.selected !== selected || f.scope !== scope) return false;
+  // AF140: while the change plan is open it owns the pane, as select() has it: a part's lens or sheet is never laid back over it.
+  if (planView.isOpen()) return false;
   if (f.surface === 'sheet' && selected === f.selected) { sheetOpen = true; showReading(false, false); }
   // The same part read in another surface since (A0 summary -> B -> A1 sheet, then two steps back): the summary it left.
   else if (f.surface === 'lens' && selected === f.selected && sheetOpen) { sheetOpen = false; editing = false; showReading(false, false); }
@@ -1185,12 +1187,14 @@ function syncMapArea() {
   const vp = $('viewport'), world = $('world'), pane = paneWidth();
   // AF140: behind the full reading the map is shown, not used: no pan, zoom, selection, drag or focus reaches it until it closes.
   // Only the lock this reading set is its to lift (marked); one already there (the change plan's wide comparison covers the same
-  // map: plan-view cover) is never taken over or released here.
+  // map: plan-view cover) is never taken over or released here, nor one the comparison took while the reading's mark was on (the
+  // mark goes, the lock stays while the comparison is open: the very state cover(workOpen()) locks under).
   const reading = !$('panel').hidden && $('panel').classList.contains('reading');
+  const planCover = !$('plan-panel').hidden && $('plan-panel').classList.contains('work');
   for (const el of [vp, document.querySelector<HTMLElement>('#space > .controls')]) {
     if (!el) continue;
     if (reading && !el.inert) { el.inert = true; el.dataset.readingInert = '1'; }
-    else if (!reading && el.dataset.readingInert) { delete el.dataset.readingInert; el.inert = false; }
+    else if (!reading && el.dataset.readingInert) { delete el.dataset.readingInert; if (!planCover) el.inert = false; }
   }
   $('space').classList.toggle('sheet-read', reading);
   $('space').style.setProperty('--plan-w', `${pane}px`);

@@ -15,7 +15,9 @@
 //   S2. The same part's correction closed and opened again while its first save waits: the new form, words and caret stay.
 //   A. The question box after an answer: empty (as studio_browser.py main_flow:144 expects); a failed answer keeps the question.
 //   W. The change plan's wide comparison keeps its own lock over the map (studio_browser.py:520); the reading lifts only its own.
-//   (ONLY=followup: T, S, S2, A, W; ONLY=saves: S, S2; ONLY=reopen: S2; ONLY=ask: A; ONLY=edits: A, R, S, S2; ONLY=locks: W.)
+//   H. History across the plan (Root's 134 CUA sequence, on the example converter): Back lays no part sheet over the open plan; after
+//      '문장 고치기' (Enter) and Forward the wide comparison still covers the map.
+//   (ONLY=followup: T, S, S2, A, W, H; ONLY=saves: S, S2; ONLY=reopen: S2; ONLY=ask: A; ONLY=edits: A, R, S, S2; ONLY=locks: W, H.)
 import { createRequire } from 'node:module';
 import { spawn } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
@@ -289,6 +291,43 @@ async function locks(browser, base) {
   } finally { await ctx.close(); }
 }
 
+/* ---------- H: history across the plan (Root's 134 CUA sequence on the example converter): sheet A → relation B → change plan
+   (map comparison) → Back → '문장 고치기' by Enter (the comparison opens wide) → Forward. The comparison keeps covering the map. ---------- */
+async function historyLocks(browser, base) {
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 } }), page = await ctx.newPage(), errors = [];
+  page.on('pageerror', e => errors.push(String(e)));
+  const state = () => page.evaluate(() => { const vp = document.getElementById('viewport'), c = document.querySelector('#space > .controls'), pp = document.getElementById('plan-panel'), panel = document.getElementById('panel');
+    return { work: !pp.hidden && pp.classList.contains('work'), part: !panel.hidden, vp: vp.inert, controls: c.inert, mark: vp.dataset.readingInert ?? null }; });
+  try {
+    await page.goto(`${base}/#/p/ex-converter`); await page.locator('#world .node').first().waitFor();
+    // A: the first part whose full reading names a relation; its sheet, then the relation to B.
+    const ids = await page.locator('#world .node[data-part]').evaluateAll(n => n.map(x => x.dataset.part));
+    let found = false;
+    for (const id of ids) {
+      await page.locator(`#world .node[data-part="${id}"]`).click(); await page.locator('#lens .lens-more').click(); await page.locator('#panel.reading').waitFor();
+      if (await page.locator('#panel .links a[data-far]').count()) { found = true; break; }
+      await page.keyboard.press('Escape'); await page.keyboard.press('Escape'); await page.waitForTimeout(100);
+    }
+    assert.ok(found, 'a part with a relation');
+    await page.locator('#panel .links a[data-far]').first().click(); await page.waitForTimeout(300);
+    await page.locator('#plan-entry').click(); await page.locator('#plan-strip:not([hidden])').waitFor(); await page.waitForTimeout(200);
+    assert.equal((await state()).work, false, 'the change plan reads on the map (comparison, not wide)');
+    await page.goBack(); await page.waitForTimeout(400);
+    const back = await state();
+    assert.equal(back.part, false, 'Back while the plan is open: no part sheet laid over the plan');
+    await page.locator('#plan-strip').getByRole('button', { name: '문장 고치기' }).focus(); await page.keyboard.press('Enter');
+    await page.locator('#plan-panel.work').waitFor(); await page.waitForTimeout(200);
+    await page.goForward(); await page.waitForTimeout(400);
+    const end = await state();
+    assert.deepEqual({ work: end.work, vp: end.vp, controls: end.controls }, { work: true, vp: true, controls: true }, `the wide comparison still covers the map: ${JSON.stringify(end)}`);
+    // Its own close lifts its lock (the reading left none).
+    await page.locator('#pw-back').click(); await page.waitForTimeout(300);
+    const closed = await state(); assert.equal(closed.work, false); assert.deepEqual([closed.vp, closed.mark], [false, null]);
+    assert.deepEqual(errors, []);
+    ok('H history across the plan: Back lays no part sheet over it; after Enter on 문장 고치기 and Forward the wide comparison still covers the map; its close lifts it', JSON.stringify(back));
+  } finally { await ctx.close(); }
+}
+
 /* ---------- A: the question box after an answer (the same steps as studio_browser.py main_flow to its line 144; stub answers) ---------- */
 async function askDraft(browser) {
   const serve = stub => new Promise((res, rej) => { const proc = spawn(process.execPath, [`${ROOT}tests/studio-smoke-server.mjs`], { cwd: APP, env: { ...process.env, STUDIO_STUB: stub, PORT: '0' }, stdio: ['ignore', 'pipe', 'inherit'] });
@@ -327,11 +366,11 @@ const { proc, base } = await start();
 const browser = await chromium.launch();
 try {
   if (!process.env.ONLY) { await wide(browser, base); await follow(browser, base); await late(browser, base); await narrow(browser, base); }
-  if (process.env.ONLY === 'locks') await locks(browser, base);
+  if (process.env.ONLY === 'locks') { await locks(browser, base); await historyLocks(browser, base); }
   else if (process.env.ONLY === 'ask') await askDraft(browser);
   else if (process.env.ONLY === 'edits') { await askDraft(browser); await late(browser, base); await slowSave(browser, base); await reopened(browser, base); }
   else if (process.env.ONLY === 'reopen') await reopened(browser, base);
   else if (process.env.ONLY === 'saves') { await slowSave(browser, base); await reopened(browser, base); }
-  else { await twinHistory(browser, base); await slowSave(browser, base); await reopened(browser, base); await askDraft(browser); await locks(browser, base); }
+  else { await twinHistory(browser, base); await slowSave(browser, base); await reopened(browser, base); await askDraft(browser); await locks(browser, base); await historyLocks(browser, base); }
   console.log(`# ${results.length} checks passed`);
 } finally { await browser.close(); proc.kill(); }
