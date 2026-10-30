@@ -46,7 +46,7 @@ const TICK_MS = 60 * 1000;
 const day = (d = new Date()) => `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
 
 export function createAutoSync(host: AutoSyncHost) {
-  let busy = false, timer: ReturnType<typeof setInterval> | null = null, panelOpen = false;
+  let busy = false, again = false, timer: ReturnType<typeof setInterval> | null = null, panelOpen = false;
   let folders: { folder: string; count: number; latest: string; tools: Set<string> }[] | null = null, foldersError: string | null = null, foldersLoading = false;
   let typed = '', adding = false;
 
@@ -63,7 +63,9 @@ export function createAutoSync(host: AutoSyncHost) {
 
   /** Looks once at the open project's folder: takes what settled since, then reads the map if it can and may. */
   async function tick(force = false) {
-    const o = open(); if (!o || busy || !offered()) return;
+    const o = open(); if (!o || !offered()) return;
+    // A look asked for while one runs (a folder just added, '지금 확인') follows it instead of being dropped.
+    if (busy) { if (force) again = true; return; }
     const key = o.key, b = bindingOf(key); if (!b) return;
     busy = true; render();
     try {
@@ -99,9 +101,15 @@ export function createAutoSync(host: AutoSyncHost) {
         if (b.runs.n < AUTO_RUNS_PER_DAY && gap) { b.runs.n++; b.runs.last = new Date().toISOString(); host.read(); }
       }
     } finally {
-      b.lastCheck = new Date().toISOString();
-      if (bindingOf(key)) put_(key, b);
+      // What this look learned goes onto the binding as it is now: a folder added or left meanwhile is kept as the person left it.
+      const cur = bindingOf(key);
+      if (cur) {
+        Object.assign(cur.marks, b.marks); cur.taken = b.taken; cur.runs = b.runs; cur.error = b.error; cur.lastCheck = new Date().toISOString();
+        for (const f of cur.folders) if (b.folders.some(x => x.path === f.path && x.connectedAt === f.connectedAt && x.backfilled)) f.backfilled = true;
+        put_(key, cur);
+      }
       busy = false; render();
+      if (again) { again = false; void tick(true); }
     }
   }
 

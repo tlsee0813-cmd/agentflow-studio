@@ -2744,13 +2744,19 @@ def sessions_flow(browser, base):
     assert "[가려진 비밀값]" in value and "sk-abc" not in value and "SHOULD NOT APPEAR" not in value, value
     assert "(바꾼 파일: src/hours.ts, tests/hours.test.ts)" in value, value
     expect(page.locator("#lens .rr-sessions-note")).to_contain_text("키·토큰처럼 보이는 1곳은 가렸어요")
-    # A second working folder (another repository) joins the same connection; leaving it keeps the first.
+    # A second working folder (another repository) joins the same connection; leaving it keeps the first. It is added while a
+    # look is still running (folder listings held 2 s here): that look ends without dropping the folder, and one follows it.
+    page.evaluate("""() => { const f = window.fetch; window.fetch = async (u, o) => { if (String(u).includes('folder=')) await new Promise(r => setTimeout(r, 2000)); return f(u, o); }; }""")
     page.locator("#sync-pill").click()
+    page.locator("#sync-panel").get_by_role("button", name="지금 확인").click()
     page.locator("#sync-panel").get_by_role("button", name="폴더 추가").click()
     expect(page.locator("#sync-panel h3")).to_have_text("작업 폴더 추가")
     expect(page.locator("#sync-panel .sync-folder-pick")).to_have_count(0)  # the one folder with sessions is linked already
     page.locator("#sync-panel .sync-path").fill("/work/salon-api")
     page.locator("#sync-panel").get_by_role("button", name="연결", exact=True).click()
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon 외 1")
+    expect(page.locator("#sync-pill")).to_have_attribute("data-state", "busy")
+    expect(page.locator("#sync-pill")).to_have_attribute("data-state", "on", timeout=15000)
     expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon 외 1")
     page.locator("#sync-pill").click()
     expect(page.locator("#sync-panel .sync-linked li")).to_have_count(2)
