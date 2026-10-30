@@ -261,3 +261,30 @@ test('SESSIONS-D4 a long file is listed by what lies past its head: a first prom
     assert.equal(moved.length, 1); assert.ok(moved[0].preview.startsWith('시작')); assert.equal(moved[0].cwd, '/work/moved');
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
+
+test('SESSIONS-K1 ids come from the session itself (same on the server and in the page), the path-made id is an alias; since leaves out what was taken', async () => {
+  const P = await import('../dist/public/shared/session-parse.js');
+  const { createHash } = await import('node:crypto');
+  const { realpathSync } = await import('node:fs');
+  const dir = home();
+  try {
+    const roots = writeSessionHome(dir), day = join(roots.codex, 'sessions', '2026', '10', '29'); mkdirSync(day, { recursive: true });
+    writeFileSync(join(day, 'rollout-2026-10-29T10-00-00-parent.jsonl'), desktopParent().map(r => JSON.stringify(r)).join('\n'));
+    const sessions = openSessions({ env: {}, roots }), list = (await sessions.list()).sessions;
+    const parent = list.find(x => x.preview.startsWith('휴무일을 예약'));
+    assert.equal(parent.id, await P.sessionId('codex', `codex:${PARENT}`), 'a Codex id is its thread id');
+    const claude = list.find(x => x.tool === 'claude');
+    assert.match(claude.id, SESSION_ID);
+    const real = realpathSync(join(day, 'rollout-2026-10-29T10-00-00-parent.jsonl'));
+    assert.deepEqual(parent.aliases, [`codex-${createHash('sha256').update(real).digest('hex').slice(0, 24)}`]);
+    assert.deepEqual(readSessionList({ version: 'sessions.1', sessions: [parent] })[0].aliases, parent.aliases);
+    // since: turns before it are left out and do not count as omitted.
+    const all = await sessions.read(parent.id), later = await sessions.read(parent.id, { since: at(20) });
+    assert.equal(all.turns.length, 4); assert.deepEqual(later.turns.map(t => t.text), ['다음은 알림', '알림을 붙였어요.']); assert.equal(later.omitted, 0);
+    const handler = createStudioHandler({ env: {}, sessions });
+    assert.equal((await handler(req(`/api/studio/sessions/${parent.id}?since=nonsense`))).status, 400);
+    assert.equal((await handler(req('/api/studio/sessions/%E0%A4%A'))).status, 404);
+    const viaRoute = await (await handler(req(`/api/studio/sessions/${parent.id}?since=${encodeURIComponent(at(20))}`))).json();
+    assert.equal(viaRoute.turns.length, 2);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});

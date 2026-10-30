@@ -123,8 +123,9 @@ async function getSessions(path: string, accessCode: string): Promise<unknown> {
 export async function listSessions(accessCode: string, folder: string | null = null): Promise<SessionSummary[]> {
   return readSessionList(await getSessions(`/api/studio/sessions${folder ? `?folder=${encodeURIComponent(folder)}` : ''}`, accessCode));
 }
-export async function readSession(id: string, accessCode: string): Promise<SessionDetail> {
-  const d = readSessionDetail(await getSessions(`/api/studio/sessions/${encodeURIComponent(id)}`, accessCode));
+/** since: only turns from that time on (the server then spends its reply budget on what was not taken yet). */
+export async function readSession(id: string, accessCode: string, since: string | null = null): Promise<SessionDetail> {
+  const d = readSessionDetail(await getSessions(`/api/studio/sessions/${encodeURIComponent(id)}${since ? `?since=${encodeURIComponent(since)}` : ''}`, accessCode));
   if (!d) throw new AskError('INVALID_RESPONSE');
   return d;
 }

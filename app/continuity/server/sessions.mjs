@@ -14,7 +14,7 @@ import { createInterface } from 'node:readline';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { ApiError } from '../../server/errors.mjs';
-import { SESSION_VERSION, SESSION_LIMITS, SESSION_ID, parseClaude, parseCodex, parseSession, sessionParser, pushLine, jsonLines, withSubagents, tailFolders, hasPrompt, atFolder, claudeFolder, within, sessionSummary, sessionDetail } from '../dist/public/shared/session-parse.js';
+import { SESSION_VERSION, SESSION_LIMITS, SESSION_ID, parseClaude, parseCodex, parseSession, sessionParser, pushLine, jsonLines, withSubagents, tailFolders, hasPrompt, atFolder, claudeFolder, within, sessionSummary, sessionDetail, sessionKey } from '../dist/public/shared/session-parse.js';
 
 export { SESSION_VERSION, SESSION_LIMITS, SESSION_ID, parseClaude, parseCodex, claudeFolder, within };
 
@@ -61,7 +61,8 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
   const where = roots ?? { claude: env.CLAUDE_CONFIG_DIR || join(home, '.claude'), codex: env.CODEX_HOME || join(home, '.codex') };
   let known = new Map(); // id -> { tool, path }
   const threads = new Map(); // Codex file path -> { mtime, parent } (from its first lines)
-  const idOf = (tool, real) => `${tool}-${createHash('sha256').update(real).digest('hex').slice(0, 24)}`;
+  // An id is made from the session itself (sessionKey), as the page makes it; the one made from the file's path before is its alias.
+  const idOf = (tool, name) => `${tool}-${createHash('sha256').update(name).digest('hex').slice(0, 24)}`;
 
   /** Newest first. folder: only sessions whose working folder is it or inside it (the files are read to know). */
   async function list(folder = null) {
@@ -76,7 +77,10 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
       if (out.length >= limits.list) break;
       let real; try { real = await realpath(f.path); } catch { continue; }
       let parsed; try { parsed = await readListed(f.tool, real, f.size, limits); } catch { continue; }
-      const id = idOf(f.tool, real), row = sessionSummary(id, f.tool, parsed, new Date(f.mtime).toISOString(), f.size, limits); if (!row) continue;
+      const id = idOf(f.tool, sessionKey(f.tool, parsed.meta, real)), base = sessionSummary(id, f.tool, parsed, new Date(f.mtime).toISOString(), f.size, limits);
+      // Two files of one session (a copy left behind): the newest one is the session.
+      if (!base || next.has(id)) continue;
+      const row = { ...base, aliases: [idOf(f.tool, real)] };
       known.set(id, { tool: f.tool, path: real }); next.set(id, { tool: f.tool, path: real });
       if (folder && !within(parsed.meta.cwds, folder)) continue;
       out.push(row);
@@ -103,14 +107,15 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
     return out;
   }
 
-  async function read(id) {
+  /** since: only turns from that time on (what was taken before does not use up the reply budget). */
+  async function read(id, { since = null } = {}) {
     if (typeof id !== 'string' || !SESSION_ID.test(id)) throw new ApiError('SESSION_NOT_FOUND', 404);
     if (!known.has(id)) await list();
     const f = known.get(id); if (!f) throw new ApiError('SESSION_NOT_FOUND', 404);
     let size; try { size = (await stat(f.path)).size; } catch { throw new ApiError('SESSION_NOT_FOUND', 404); }
     if (size > limits.fileBytes) throw new ApiError('SESSION_TOO_LARGE', 413);
     const parsed = await readParsed(f.tool, f.path);
-    return sessionDetail(id, f.tool, f.tool === 'codex' ? withSubagents(parsed, await subagents(parsed)) : parsed, limits);
+    return sessionDetail(id, f.tool, f.tool === 'codex' ? withSubagents(parsed, await subagents(parsed)) : parsed, limits, since);
   }
 
   return { describe: () => ({ version: SESSION_VERSION, tools: Object.keys(where).filter(k => where[k]) }), list, read };

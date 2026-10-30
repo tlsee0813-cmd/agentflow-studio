@@ -243,6 +243,14 @@ export function shortPath(file: string, cwd: string | null): string {
   return key.startsWith(`${base}/`) ? f.slice(base.length + 1) : file;
 }
 
+/** What names a session whatever folder its file was found through, or moved to (Codex archives old threads): Claude Code names
+ * each file after its session id, Codex writes its thread id in the first line (an early file without one goes by its name). The
+ * server and the page make the same id of it (sessionId), so marks taken through one hold for the other. */
+export function sessionKey(tool: SessionTool, meta: Pick<SessionMeta, 'thread'>, fileName: string): string {
+  const base = String(fileName).split(/[\\/]/).pop()!.replace(/\.jsonl$/i, '');
+  return `${tool}:${tool === 'codex' && meta.thread ? meta.thread : base}`;
+}
+
 /** A listing row of one parsed session head, or null when it holds no prompt. */
 export function sessionSummary(id: string, tool: SessionTool, head: ParsedSession, updatedAt: string, bytes: number, limits: Pick<SessionLimits, 'preview'> = SESSION_LIMITS): SessionSummary | null {
   const first = head.turns.find(t => t.role === 'user'); if (!first) return null;
@@ -250,16 +258,19 @@ export function sessionSummary(id: string, tool: SessionTool, head: ParsedSessio
     startedAt: head.meta.startedAt, updatedAt, bytes };
 }
 /** A whole parsed session as sent to the page: newest turns within the reply budget (the earlier ones counted as omitted), each
- * turn clipped, changed files relative to the working folder. */
-export function sessionDetail(id: string, tool: SessionTool, s: ParsedSession, limits: Pick<SessionLimits, 'turnChars' | 'replyChars'> = SESSION_LIMITS): SessionDetail & { version: string } {
+ * turn clipped, changed files relative to the working folder. since: only turns from that time on (a turn with no time is kept),
+ * so what was already taken does not use up the budget and nothing newer is left out for it. */
+export function sessionDetail(id: string, tool: SessionTool, s: ParsedSession, limits: Pick<SessionLimits, 'turnChars' | 'replyChars'> = SESSION_LIMITS, since: string | null = null): SessionDetail & { version: string } {
+  const from = since ? Date.parse(since) : NaN;
+  const turns = Number.isFinite(from) ? s.turns.filter(t => !t.at || !(Date.parse(t.at) < from)) : s.turns;
   const kept: SessionTurn[] = []; let used = 0;
-  for (let i = s.turns.length - 1; i >= 0; i--) {
-    const t = s.turns[i]!, text = clip(t.text, limits.turnChars), files = [...new Set((t.files ?? []).map(x => shortPath(x, s.meta.cwds.find(c => shortPath(x, c) !== x) ?? s.meta.cwd)))];
+  for (let i = turns.length - 1; i >= 0; i--) {
+    const t = turns[i]!, text = clip(t.text, limits.turnChars), files = [...new Set((t.files ?? []).map(x => shortPath(x, s.meta.cwds.find(c => shortPath(x, c) !== x) ?? s.meta.cwd)))];
     used += text.length + files.join('').length; if (used > limits.replyChars && kept.length) break;
     kept.unshift({ role: t.role, at: t.at, text, ...(t.role === 'assistant' ? { files } : {}) });
   }
   return { version: SESSION_VERSION, id, tool, label: TOOL_LABEL[tool], title: s.meta.title, cwd: s.meta.cwd, branch: s.meta.branch, startedAt: s.meta.startedAt,
-    turns: kept, omitted: s.turns.length - kept.length };
+    turns: kept, omitted: turns.length - kept.length };
 }
 /** An opaque session id from a stable name of its file (a real path on the server, a path inside the picked folder in the page). */
 export async function sessionId(tool: SessionTool, name: string): Promise<string> {

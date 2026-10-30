@@ -259,9 +259,11 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
         if (config.accessCode && !sameText(request.headers.get('x-studio-access') ?? '', config.accessCode)) throw new ApiError('ACCESS_CODE_REQUIRED', 401);
         const rest = url.pathname.slice('/api/studio/sessions'.length).split('/').filter(Boolean);
         if (rest.length > 1) throw new ApiError('NOT_FOUND', 404);
-        const folder = url.searchParams.get('folder');
+        const folder = url.searchParams.get('folder'), since = url.searchParams.get('since');
         if (folder !== null && (!folder || folder.length > 1024)) throw new ApiError('INVALID_INPUT', 400);
-        return reply(200, rest.length ? await sessions.read(decodeURIComponent(rest[0])) : await sessions.list(folder), cors);
+        if (since !== null && (since.length > 64 || !Number.isFinite(Date.parse(since)))) throw new ApiError('INVALID_INPUT', 400);
+        let id = null; if (rest.length) { try { id = decodeURIComponent(rest[0]); } catch { throw new ApiError('SESSION_NOT_FOUND', 404); } }
+        return reply(200, id !== null ? await sessions.read(id, { since }) : await sessions.list(folder), cors);
       }
       if (!['/api/studio/ask', '/api/studio/plan', '/api/studio/scope', '/api/studio/digest', '/api/studio/map'].includes(url.pathname)) throw new ApiError('NOT_FOUND', 404);
       if (request.method !== 'POST') throw new ApiError('METHOD_NOT_ALLOWED', 405);

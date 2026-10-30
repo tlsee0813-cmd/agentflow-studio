@@ -6,7 +6,9 @@ import { redactSecrets } from './secret.js';
 import { foldHandover } from './handover-mark.js';
 
 export interface SessionTurn { role: 'user' | 'assistant'; at: string | null; text: string; files?: string[] }
-export interface SessionSummary { id: string; tool: 'claude' | 'codex'; title: string | null; preview: string; cwd: string | null; branch: string | null; startedAt: string | null; updatedAt: string; bytes: number }
+/** aliases: ids the same session had before ids were made from the session itself (from its file's path): marks kept under one
+ * of them still hold. */
+export interface SessionSummary { id: string; tool: 'claude' | 'codex'; title: string | null; preview: string; cwd: string | null; branch: string | null; startedAt: string | null; updatedAt: string; bytes: number; aliases?: string[] }
 export interface SessionDetail { id: string; tool: 'claude' | 'codex'; label: string; title: string | null; cwd: string | null; branch: string | null; startedAt: string | null; turns: SessionTurn[]; omitted: number }
 export const TOOL_NAME: Record<SessionDetail['tool'], string> = { claude: 'Claude Code', codex: 'Codex' };
 
@@ -54,8 +56,10 @@ export function readSessionList(v: unknown): SessionSummary[] {
   const list = (v as { version?: unknown; sessions?: unknown })?.version === 'sessions.1' ? (v as { sessions: unknown }).sessions : null;
   if (!Array.isArray(list)) return [];
   const str = (x: unknown) => (typeof x === 'string' ? x : null);
-  return list.filter(x => x && typeof x === 'object' && typeof x.id === 'string' && /^(claude|codex)-[0-9a-f]{24}$/.test(x.id) && typeof x.preview === 'string' && typeof x.updatedAt === 'string')
-    .map(x => ({ id: x.id, tool: x.tool === 'codex' ? 'codex' : 'claude', title: str(x.title), preview: x.preview, cwd: str(x.cwd), branch: str(x.branch), startedAt: str(x.startedAt), updatedAt: x.updatedAt, bytes: Number(x.bytes) || 0 }));
+  const ID = /^(claude|codex)-[0-9a-f]{24}$/;
+  return list.filter(x => x && typeof x === 'object' && typeof x.id === 'string' && ID.test(x.id) && typeof x.preview === 'string' && typeof x.updatedAt === 'string')
+    .map(x => ({ id: x.id, tool: x.tool === 'codex' ? 'codex' : 'claude', title: str(x.title), preview: x.preview, cwd: str(x.cwd), branch: str(x.branch), startedAt: str(x.startedAt), updatedAt: x.updatedAt, bytes: Number(x.bytes) || 0,
+      ...(Array.isArray(x.aliases) ? { aliases: x.aliases.filter((a: unknown): a is string => typeof a === 'string' && ID.test(a) && a !== x.id) } : {}) }));
 }
 /** One session as sent by the server, checked; null when it is not one. */
 export function readSessionDetail(v: unknown): SessionDetail | null {

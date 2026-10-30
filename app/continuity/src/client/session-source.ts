@@ -6,9 +6,10 @@
  * click, before the page can read them on a later visit. A single file chosen by hand works in every browser. */
 import { listSessions, readSession, type AiStatus } from './studio-api.js';
 import { readSessionList, readSessionDetail, type SessionDetail, type SessionSummary } from '../shared/session-import.js';
-import { SESSION_LIMITS, jsonLines, parseSession, sessionParser, pushLine, withSubagents, tailFolders, hasPrompt, atFolder, sniffTool, sessionSummary, sessionDetail, sessionId, within, type ParsedSession, type SessionTool } from '../shared/session-parse.js';
+import { SESSION_LIMITS, jsonLines, parseSession, sessionParser, pushLine, withSubagents, tailFolders, hasPrompt, atFolder, sniffTool, sessionSummary, sessionDetail, sessionId, sessionKey, within, type ParsedSession, type SessionTool } from '../shared/session-parse.js';
 
-export interface SessionSource { kind: 'server' | 'folder'; list(folder?: string | null): Promise<SessionSummary[]>; read(id: string): Promise<SessionDetail> }
+/** read(id, since): only turns from that time on (a turn with no time is kept), as the server does. */
+export interface SessionSource { kind: 'server' | 'folder'; list(folder?: string | null): Promise<SessionSummary[]>; read(id: string, since?: string | null): Promise<SessionDetail> }
 export type FolderState = 'unsupported' | 'none' | 'prompt' | 'granted';
 
 /* Minimal shapes of the File System Access handles this file uses (a test may stand in its own). */
@@ -109,7 +110,7 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
   }
   function load(): Promise<void> { return (loaded ??= (async () => { if (picker()) roots = await loadRoots(); await check(); })()); }
 
-  const server: SessionSource = { kind: 'server', list: (folder = null) => listSessions(host.accessCode(), folder), read: id => readSession(id, host.accessCode()) };
+  const server: SessionSource = { kind: 'server', list: (folder = null) => listSessions(host.accessCode(), folder), read: (id, since = null) => readSession(id, host.accessCode(), since) };
   const folderSource: SessionSource = {
     kind: 'folder',
     async list(folder = null) {
@@ -129,7 +130,9 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
           // Read further while the head holds no prompt yet, and the end of the file for a folder the session moved to late.
           if (!hasPrompt(parsed) && partial) parsed = parseSession(tool, jsonLines(await f.file.slice(0, SESSION_LIMITS.promptBytes).text(), f.file.size > SESSION_LIMITS.promptBytes));
           if (partial) for (const c of tailFolders(await f.file.slice(Math.max(0, f.file.size - SESSION_LIMITS.tailBytes)).text())) atFolder(parsed.meta, c);
-          row = sessionSummary(await sessionId(tool, f.path), tool, parsed, new Date(f.file.lastModified).toISOString(), f.file.size);
+          const base = sessionSummary(await sessionId(tool, sessionKey(tool, parsed.meta, f.path)), tool, parsed, new Date(f.file.lastModified).toISOString(), f.file.size);
+          // The id made from the file's path before ids were made from the session itself.
+          row = base ? { ...base, aliases: [await sessionId(tool, f.path)] } : null;
           cwds = parsed.meta.cwds; heads.set(f.path, { key, row, cwds });
         }
         if (!row) continue;
@@ -139,13 +142,13 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
       }
       return readSessionList({ version: 'sessions.1', sessions: out });
     },
-    async read(id) {
+    async read(id, since = null) {
       if (!known.has(id)) await folderSource.list();
       const f = known.get(id); if (!f) throw Object.assign(new Error('SESSION_NOT_FOUND'), { code: 'SESSION_NOT_FOUND' });
       const file = await f.handle.getFile();
       if (file.size > SESSION_LIMITS.fileBytes) throw Object.assign(new Error('SESSION_TOO_LARGE'), { code: 'SESSION_TOO_LARGE' });
       const parsed = await readParsed(f.tool, file);
-      const d = readSessionDetail(sessionDetail(id, f.tool, f.tool === 'codex' ? withSubagents(parsed, await subagents(parsed)) : parsed));
+      const d = readSessionDetail(sessionDetail(id, f.tool, f.tool === 'codex' ? withSubagents(parsed, await subagents(parsed)) : parsed, SESSION_LIMITS, since));
       if (!d) throw Object.assign(new Error('SESSION_NOT_FOUND'), { code: 'SESSION_NOT_FOUND' });
       return d;
     }
@@ -182,5 +185,5 @@ export async function readSessionFile(file: File): Promise<SessionDetail | null>
   if (file.size > SESSION_LIMITS.fileBytes) throw Object.assign(new Error('SESSION_TOO_LARGE'), { code: 'SESSION_TOO_LARGE' });
   const tool = sniffTool(jsonLines(await file.slice(0, SESSION_LIMITS.headBytes).text(), file.size > SESSION_LIMITS.headBytes)); if (!tool) return null;
   const parsed = await readParsed(tool, file); if (!parsed.turns.some(t => t.role === 'user')) return null;
-  return readSessionDetail(sessionDetail(await sessionId(tool, `file/${file.name}/${file.size}/${file.lastModified}`), tool, parsed));
+  return readSessionDetail(sessionDetail(await sessionId(tool, sessionKey(tool, parsed.meta, file.name)), tool, parsed));
 }
