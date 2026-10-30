@@ -1,0 +1,52 @@
+{
+  "head": "f8da20fc5601399eb211b64db31bf347044fba27",
+  "app": "4a22ee1acb844f3b6e67cb137317184da74d390c",
+  "node": "v24.19.0",
+  "compiler": "locked5.8.3",
+  "check": 0,
+  "build": 0,
+  "focused": 0,
+  "ci": {
+    "runId": 40988734869,
+    "status": "completed",
+    "conclusion": "success",
+    "head": "f8da20fc5601399eb211b64db31bf347044fba27",
+    "jobs": [
+      {
+        "id": 123845745280,
+        "name": "verify (windows-2022)",
+        "conclusion": "success"
+      },
+      {
+        "id": 123845745455,
+        "name": "verify (ubuntu-24.04)",
+        "conclusion": "success"
+      }
+    ],
+    "windows": {
+      "appPass": 279,
+      "continuityPass": 647,
+      "skip": 3
+    },
+    "linux": {
+      "appPass": 279,
+      "continuityPass": 650,
+      "skip": 0
+    },
+    "browser": "both direct and studio steps success"
+  },
+  "independent": {
+    "verdict": "no P1/P2",
+    "sha256": "f990077306a3ecf18337de33095e60ef49764dec649aaa8e3c80d69f2d21fc32"
+  },
+  "runtimeDelta": "scope included only in max_tokens8192 and planTimeoutMs branches",
+  "commentOnlyIntegration": "e5ddfb5 to f8da20f clarifies length before deadline",
+  "realModelCalls": 0,
+  "publicChanges": 0,
+  "pcServer": "normal Stop exit0 before locked rebuild",
+  "preserved": {
+    "ui75": true,
+    "stash": "fa07118ead372bcb3201c8032ca603a5ec0a7e7d"
+  },
+  "verdict": "scope budget/time implementation accepted; actual scope not yet observed"
+}
