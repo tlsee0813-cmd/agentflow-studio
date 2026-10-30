@@ -2148,7 +2148,8 @@ function showQuote(record: string, quote: string, from?: number) {
 }
 /** In the sheet: the part as read from records (the description and the person's correction of it, the current claims), then the
  * evidence history apart, folded. Correcting the description never touches the name, the note or the claims. */
-/** The description being corrected: this entry's part (an imported copy shares part ids, so the entry is part of it). */
+/** The description being corrected: this entry's part (an imported copy shares part ids, so the entry is part of it). Each opening
+ * of the form is its own session (its own object): a save ends only the session it was submitted from. */
 let fixingRole: { key: string; part: string } | null = null;
 function understoodSection(o: Opened, part: PartView): HTMLElement | null {
   const u = part.reading; if (!u) return null;
@@ -2160,9 +2161,11 @@ function understoodSection(o: Opened, part: PartView): HTMLElement | null {
       e.preventDefault();
       let next: Project;
       try { next = correctReadingRole(o.project, part.id, area.value); } catch { msg.textContent = '설명은 1~300자로 적어 주세요.'; return; }
+      const session = fixingRole;
       const failed = await commit(o, next); if (failed) { msg.textContent = failed; return; }
-      // This correction is done; one begun meanwhile on another part (or entry) is that part's own and stays open.
-      if (fixingRole?.key === o.key && fixingRole.part === part.id) fixingRole = null;
+      // This session is done; one begun meanwhile (on another part or entry, or this part's form closed and opened again) is its
+      // own and stays open with what is written in it.
+      if (fixingRole === session) fixingRole = null;
       if (opened !== o) return;
       renderSpace('keep'); if (selected === part.id) select(part.id);
     } }, h('label', { for: 'fix-role' }, '설명 바로잡기 ', h('small', {}, '이름·내 설명·기록의 주장은 그대로예요')), area, msg,

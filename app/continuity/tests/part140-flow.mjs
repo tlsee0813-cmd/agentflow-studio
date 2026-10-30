@@ -12,7 +12,8 @@
 //   N. 1000×700 and 700×800: the surface fits the window, its way back in view, no sideways scroll; reload: stores byte for byte.
 //   T. Two history readings with the same time, quote, place and index: back to the second one's own button.
 //   S. A slow description correction of A ends while B's own is being written: B's form, text and caret stay over a late status.
-//   (ONLY=followup runs T and S alone.)
+//   S2. The same part's correction closed and opened again while its first save waits: the new form, words and caret stay.
+//   (ONLY=followup runs T, S and S2 alone; ONLY=saves runs S and S2; ONLY=reopen runs S2 alone.)
 import { createRequire } from 'node:module';
 import { spawn } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
@@ -233,10 +234,38 @@ async function slowSave(browser, base) {
   await ctx.close();
 }
 
+/* ---------- S2: A's slow save, its form closed and A's correction opened again with new words ---------- */
+async function reopened(browser, base) {
+  const { ctx, page, errors, sent, release } = await context(browser, base, [1280, 720], true);
+  await selectPart(page, X.engine); await openSurface(page);
+  const sec = page.locator('#panel .sec-understood');
+  await sec.getByRole('button', { name: '설명 바로잡기' }).click(); await page.locator('#fix-role').fill('[스텁] A의 먼저 저장한 설명');
+  await page.evaluate(() => { window.__hold = new Promise(r => { window.__open = r; }); navigator.locks.request('agentflow.idea015.workspace', () => window.__hold); });
+  await sec.getByRole('button', { name: '저장' }).click(); await page.waitForTimeout(200);
+  // While that save waits: the form is cancelled, then the same part's correction is opened again and new words written.
+  await sec.getByRole('button', { name: '취소' }).click(); assert.equal(await page.locator('#fix-role').count(), 0);
+  await sec.getByRole('button', { name: '설명 바로잡기' }).click();
+  const fix = page.locator('#fix-role'); await fix.fill('[스텁] A의 다시 연 새 설명'); await fix.evaluate(e => e.setSelectionRange(4, 9, 'backward'));
+  const state = () => page.evaluate(() => { const e = document.getElementById('fix-role'); return e ? { here: document.activeElement === e, v: e.value, s: e.selectionStart, t: e.selectionEnd, d: e.selectionDirection } : null; });
+  const want = { here: true, v: '[스텁] A의 다시 연 새 설명', s: 4, t: 9, d: 'backward' };
+  // The old save ends (its own re-render of A, select), then a late status re-renders again.
+  await page.evaluate(() => window.__open()); await page.waitForFunction(k => JSON.parse(localStorage.getItem(k)).entries[0].project.readings.some(r => r.version === 'map-correction.1'), W);
+  await page.waitForTimeout(250); assert.deepEqual(await state(), want, 'after the old save\'s re-render');
+  release(); await page.waitForFunction(() => document.getElementById('ai-pill')?.dataset.state !== 'checking'); await page.waitForTimeout(250);
+  assert.deepEqual(await state(), want, 'after the late status too');
+  const saved = await page.evaluate(k => JSON.parse(localStorage.getItem(k)).entries[0].project.readings.filter(r => r.version === 'map-correction.1').map(r => r.text), W);
+  assert.deepEqual(saved, ['[스텁] A의 먼저 저장한 설명'], 'only the first session was saved');
+  assert.deepEqual(sent, []); assert.deepEqual(errors, []);
+  ok('S2 the same part\'s correction opened again while its first save waits: the new form, words and caret stay over that save and a late status');
+  await ctx.close();
+}
+
 const { proc, base } = await start();
 const browser = await chromium.launch();
 try {
-  if (process.env.ONLY !== 'followup') { await wide(browser, base); await follow(browser, base); await late(browser, base); await narrow(browser, base); }
-  await twinHistory(browser, base); await slowSave(browser, base);
+  if (!process.env.ONLY) { await wide(browser, base); await follow(browser, base); await late(browser, base); await narrow(browser, base); }
+  if (process.env.ONLY === 'reopen') await reopened(browser, base);
+  else if (process.env.ONLY === 'saves') { await slowSave(browser, base); await reopened(browser, base); }
+  else { await twinHistory(browser, base); await slowSave(browser, base); await reopened(browser, base); }
   console.log(`# ${results.length} checks passed`);
 } finally { await browser.close(); proc.kill(); }
