@@ -1,5 +1,7 @@
 # 128 결과 — 설치된 Codex로 시작하는 선택형 PC 입구 (작성자 구현·fixture 검증)
 
+> 이후 Root 한정 수용 완료: [ROOT_ACCEPTANCE.md](ROOT_ACCEPTANCE.md). 아래 작성자 검증 당시의 대기 표시는 역사적 기록이며, 실제 Windows 확인과 정확 최종 CI는 Root 판정에서 구별한다.
+
 단일 작성자(Claude Code)의 결과다. 실제 Windows PC 확인·고정 정책 실물 대조·독립 검토·최종 CI는 Root 담당이며 아직이다. **새 AI 생성 0**(시작·health·version probe 포함 실제 CLI 실행 0), 104·121·122 재실행 0, 설치·로그인·계정·키·기본 공급자 변경 0. 기본 `start-local.ps1`(DeepSeek)·Worker·공개73/127은 바꾸지 않았다. 결정은 [DESIGN.md](DESIGN.md).
 
 ## 판본

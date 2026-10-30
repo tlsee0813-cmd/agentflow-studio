@@ -1,0 +1,219 @@
+{
+  "schema": "agentflow.root.pc-entry.128",
+  "candidate": "87afee7cdd93f9563b9f57965ba5f8bf77ea8be3",
+  "app": "581571feee480a0079b4e105151409bb8be8ac92",
+  "runtimeSource": "4cfd008a85f6beab7b15bea747be829ac38786a0",
+  "runtimeUnchangedAfter4cfd": true,
+  "scope": "Optional local PC start with existing accepted Codex installation; no new generation",
+  "actualWindows": {
+    "source": "a967c993a44bf6d16fa618f650f7f958c24045d9",
+    "app": "a4d9efc0fb1a20d70245ea3529b8765473e0fe9f",
+    "status": "core observations only; two independent P2 repairs required",
+    "environment": {
+      "platform": "Windows",
+      "powershell": "7.6.5",
+      "node": "24.19.0",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      }
+    },
+    "launch": {
+      "script": "app/continuity/scripts/start-pc.ps1",
+      "actions": [
+        "start -NoBrowser -NodePath existing-node",
+        "Stop",
+        "start same address",
+        "Stop"
+      ],
+      "exits": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "port": 4327,
+      "binary": "automatically discovered existing accepted binary",
+      "policyDataExactlyEqualsAccepted121": true,
+      "policyIdentity": "29f5c36ec140",
+      "generationCalls": 0
+    },
+    "ui": {
+      "original121ProjectImportedThroughFileChooser": true,
+      "original109BundleImportedThroughFileChooser": true,
+      "importedWholeProjectExact": true,
+      "importedWholeBundleExact": true,
+      "newProject": "PC 시작 검증 · 원문 보관",
+      "source": "Original public Zephyr doc excerpt already used in121",
+      "sourceCharacters": 4699,
+      "sourceTextExact": true,
+      "firstMapButtonEnabled": true,
+      "firstMapButtonPressed": false,
+      "restartWorkspaceBytesExact": true,
+      "restartPlanBytesExact": true
+    },
+    "cleanup": {
+      "hostFileRemoved": true,
+      "executorLeaseAbsent": true,
+      "keysUnchanged": true,
+      "stashUnchanged": true
+    },
+    "separateLimit": {
+      "windowsPowerShell51": "File execution refused by existing execution policy; no policy change. Read-only parser found no syntax errors. Not claimed as executed.",
+      "meaning": "No new model generation; no first-map semantics or actual121 away flow claimed."
+    }
+  },
+  "binaryStop": {
+    "source": "49be2d7",
+    "app": "3eb96c6dc12a0a97de06d94d720cac78eb0ad33d",
+    "testExecutables": "Byte-identical private copy of installed accepted Codex; original untouched",
+    "startPort": 4328,
+    "startExit": 0,
+    "rename": "Private copy codex.exe to codex-renamed.exe; verified same parent",
+    "stop": {
+      "explicitCodexPathNowMissing": true,
+      "port": 4328,
+      "exit": 0
+    },
+    "originalBinaryUnchanged": true,
+    "generationCalls": 0,
+    "focused": {
+      "names": [
+        "128-6",
+        "128-10",
+        "128-11"
+      ],
+      "passed": 3,
+      "failed": 0,
+      "exit": 0
+    },
+    "openFinding": "Printed Stop command omits custom Port; one-line repair requested"
+  },
+  "printedPort": {
+    "source": "4cfd008a85f6beab7b15bea747be829ac38786a0",
+    "app": "e2542d86cfc823ca2b3ef2fdda7cb7eb4df5f54e",
+    "command": "./continuity/scripts/start-pc.ps1 -Port 4328 -NoBrowser",
+    "nodeAndCodexAutoDiscovery": true,
+    "startExit": 0,
+    "printedStop": "./continuity/scripts/start-pc.ps1 -Stop -Port 4328",
+    "followedPrintedStopExit": 0,
+    "generationCalls": 0
+  },
+  "fixtureCorrection": {
+    "source": "87afee7cdd93f9563b9f57965ba5f8bf77ea8be3",
+    "app": "581571feee480a0079b4e105151409bb8be8ac92",
+    "command": "node --test --test-name-pattern=\"128-10 \" continuity/tests/pc-entry128.test.mjs",
+    "environment": "Windows / Node24.19.0",
+    "exit": 0,
+    "tests": 1,
+    "pass": 1,
+    "fail": 0,
+    "durationMs": 6885.7851,
+    "productRuntimeChangedFrom4cfd": false,
+    "generationCalls": 0
+  },
+  "firstCI": {
+    "run": 40982791208,
+    "source": "4cfd008a85f6beab7b15bea747be829ac38786a0",
+    "windows": {
+      "job": 123826619714,
+      "conclusion": "failure",
+      "failure": "128-10 line198: after job.ready, later stop returned BUSY rather than STOPPED",
+      "totals": [
+        "2026-10-30T00:59:38.6434249Z # tests 279\r",
+        "2026-10-30T00:59:38.6434508Z # pass 279\r",
+        "2026-10-30T00:59:38.6434629Z # fail 0\r",
+        "2026-10-30T00:59:38.6434898Z # skipped 0\r",
+        "2026-10-30T00:59:38.6435169Z # duration_ms 120545.3186\r",
+        "2026-10-30T01:00:53.9964270Z # tests 646\r",
+        "2026-10-30T01:00:53.9964388Z # pass 642\r",
+        "2026-10-30T01:00:53.9964446Z # fail 1\r",
+        "2026-10-30T01:00:53.9964560Z # skipped 3\r",
+        "2026-10-30T01:00:53.9964701Z # duration_ms 63791.8056\r"
+      ]
+    },
+    "linux": {
+      "job": 123826619258,
+      "conclusion": "success"
+    },
+    "logsUrl": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40982791208"
+  },
+  "finalCI": {
+    "id": 40983872999,
+    "source": "87afee7cdd93f9563b9f57965ba5f8bf77ea8be3",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "job": 123830167826,
+        "conclusion": "success",
+        "totals": [
+          "2026-10-30T01:10:28.1054122Z # tests 279\r",
+          "2026-10-30T01:10:28.1054439Z # pass 279\r",
+          "2026-10-30T01:10:28.1054592Z # fail 0\r",
+          "2026-10-30T01:10:28.1054736Z # skipped 0\r",
+          "2026-10-30T01:11:59.0723882Z # tests 646\r",
+          "2026-10-30T01:11:59.0724019Z # pass 643\r",
+          "2026-10-30T01:11:59.0724087Z # fail 0\r",
+          "2026-10-30T01:11:59.0724230Z # skipped 3\r"
+        ],
+        "shaLines": [
+          "2026-10-30T01:07:05.7705925Z   ref: 87afee7cdd93f9563b9f57965ba5f8bf77ea8be3\r",
+          "2026-10-30T01:07:09.1325407Z [command]\"C:\\Program Files\\Git\\bin\\git.exe\" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin 87afee7cdd93f9563b9f57965ba5f8bf77ea8be3\r",
+          "2026-10-30T01:07:11.3636437Z  * branch            87afee7cdd93f9563b9f57965ba5f8bf77ea8be3 -> FETCH_HEAD\r",
+          "2026-10-30T01:07:11.3684649Z [command]\"C:\\Program Files\\Git\\bin\\git.exe\" rev-parse --verify --quiet 87afee7cdd93f9563b9f57965ba5f8bf77ea8be3^{object}\r"
+        ]
+      },
+      {
+        "job": 123830168048,
+        "conclusion": "success",
+        "totals": [
+          "2026-10-30T01:09:28.8876636Z # tests 279",
+          "2026-10-30T01:09:28.8877013Z # pass 279",
+          "2026-10-30T01:09:28.8877194Z # fail 0",
+          "2026-10-30T01:09:28.8877582Z # skipped 0",
+          "2026-10-30T01:11:16.8153083Z # tests 646",
+          "2026-10-30T01:11:16.8153262Z # pass 646",
+          "2026-10-30T01:11:16.8153473Z # fail 0",
+          "2026-10-30T01:11:16.8153651Z # skipped 0"
+        ],
+        "shaLines": [
+          "2026-10-30T01:07:05.8262478Z   ref: 87afee7cdd93f9563b9f57965ba5f8bf77ea8be3",
+          "2026-10-30T01:07:06.3142489Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin 87afee7cdd93f9563b9f57965ba5f8bf77ea8be3",
+          "2026-10-30T01:07:07.9875127Z  * branch            87afee7cdd93f9563b9f57965ba5f8bf77ea8be3 -> FETCH_HEAD",
+          "2026-10-30T01:07:07.9896653Z [command]/usr/bin/git rev-parse --verify --quiet 87afee7cdd93f9563b9f57965ba5f8bf77ea8be3^{object}"
+        ]
+      }
+    ]
+  },
+  "independent": [
+    {
+      "report": "experience128-core-review.json",
+      "sha256": "4313a7c4aa0de9c154fe23cf99afe21b9598df9043be801d08e57bb94890a353",
+      "scope": "F1/F2 reproduced, repair required"
+    },
+    {
+      "report": "experience128-repair-review.json",
+      "sha256": "6999ede35a91208693f972f21208fe979fa029c6224969530a595b8c423e99a2",
+      "scope": "F1/F2 repaired; F3 reproduced"
+    },
+    {
+      "report": "experience128-final-review.json",
+      "sha256": "63b9881371f81921b323c11fe8a0240fcacdac4d9f6aa48fed6f4d3d89b68fa0",
+      "scope": "F3 repair static review; no additional P1/P2"
+    },
+    {
+      "report": "experience128-ci-fixture-review.json",
+      "sha256": "31b8cce75d38c2c3bf93f681fb343ef2cc6679772ef302563fb97ed8406cbdb6",
+      "scope": "Static test-only settlement delta; no additional P1/P2"
+    }
+  ],
+  "preservation": {
+    "defaultLauncherGitBlob": "c52e6a5534b29d94f7572ed40f6b807ebc7b0108",
+    "ui75Commit693d0c7Ancestor": true,
+    "stash": "fa07118ead372bcb3201c8032ca603a5ec0a7e7d",
+    "public73Unchanged": true,
+    "public127Unchanged": true
+  },
+  "generationCalls": 0
+}
