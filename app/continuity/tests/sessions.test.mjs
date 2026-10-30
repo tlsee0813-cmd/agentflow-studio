@@ -479,13 +479,14 @@ test('SESSIONS-A1 a Codex thread archived before a look took it is still listed 
 });
 
 test('SESSIONS-A2 an archived Codex thread also carries the id its sessions/ path gave, so a mark kept under that id still holds', async () => {
-  const { realpathSync } = await import('node:fs'), { sessionId } = await import('../dist/public/shared/session-parse.js');
+  // The server's own realpath (fs/promises): on Windows the sync one can keep an 8.3 short name.
+  const { realpath } = await import('node:fs/promises'), { sessionId } = await import('../dist/public/shared/session-parse.js');
   const dir = home();
   try {
     const roots = writeSessionHome(dir), arch = join(roots.codex, 'archived_sessions'), name = 'rollout-2026-10-29T10-00-00-parent.jsonl'; mkdirSync(arch, { recursive: true });
     writeFileSync(join(arch, name), desktopParent().map(r => JSON.stringify(r)).join('\n'));
     const [row] = (await openSessions({ env: {}, roots }).list()).sessions.filter(x => x.preview.startsWith('휴무일을 예약'));
-    assert.ok(row.aliases.includes(await sessionId('codex', join(realpathSync(roots.codex), 'sessions', '2026', '10', '29', name))), row.aliases.join());
+    assert.ok(row.aliases.includes(await sessionId('codex', join(await realpath(roots.codex), 'sessions', '2026', '10', '29', name))), row.aliases.join());
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
