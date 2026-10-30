@@ -57,6 +57,19 @@ node --env-file-if-exists=.env continuity/server/index.mjs
 
 Windows에서 빌드가 이미 있다면 PowerShell로 `./continuity/scripts/start-local.ps1`을 실행할 수 있습니다. `app/.env`가 있으면 읽고(없으면 AI만 꺼짐) 백그라운드에서 실행한 뒤 `http://127.0.0.1:4317`을 엽니다. 키 파일을 다른 비공개 위치에 보관했다면 `-EnvFile 'C:\private\studio.env'`를 지정합니다. 기존 Node 또는 Codex에 설치된 Node를 재사용하며 패키지를 설치하지 않습니다. 이미 같은 포트의 Studio가 실행 중이면 다시 띄우지 않습니다. 브라우저 저장은 주소별이므로 같은 포트를 계속 사용하세요.
 
+### 시작이 안 될 때
+
+서버는 시작하지 못하면 `AgentFlow Studio did not start: …` 한 줄을 남기고 종료 코드 1로 끝납니다. 스택이나 키 값은 출력하지 않습니다.
+
+| 안내 | 할 일 |
+|---|---|
+| `only --mock is supported` | `--mock` 말고는 인자를 받지 않습니다. 키·주소는 `app/.env`에 둡니다 |
+| `port … is already in use` | 이미 같은 포트에서 무언가 돌고 있습니다. `PORT=3100`처럼 다른 포트를 줍니다 |
+| `INVALID_SERVER_CONFIG` 등 | `PORT`, `AI_MODE`, `AI_*` 한도, `DEEPSEEK_BASE_URL` 값을 확인합니다 |
+| `… is not a usable value and was ignored` | 시작은 됩니다. 이름이 나온 `STUDIO_*`·`DEEPSEEK_*` 설정을 쓸 수 없어 기본값을 썼다는 경고입니다 |
+
+Ctrl+C나 서비스 종료(SIGTERM)를 받으면 지도 작업 보관소를 정리해 닫고 종료 코드 0으로 끝납니다. 그때 돌던 지도 정리는 다음 시작 때 "중단됨"으로 남습니다.
+
 ### PC에서 설치된 Codex로 지도 정리하기 (선택)
 
 이 PC에 이미 설치·로그인된 Codex CLI로 첫 지도와 이후 기록 대조를 하려면 `start-local.ps1` 대신 아래를 실행합니다(`app/` 디렉터리, 빌드 후). 정책 파일을 쓸 필요가 없습니다.
