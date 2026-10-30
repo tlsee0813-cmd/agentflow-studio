@@ -1,0 +1,308 @@
+{
+  "decision": "BOUNDED_IMPLEMENTATION_ACCEPTED",
+  "final": "4b47eec5f4faa952f50a281b3638f1e743fae066",
+  "app": "e0e443c888c8c02f08af373cf30994e6fb34f313",
+  "root": {
+    "head": "4b47eec5f4faa952f50a281b3638f1e743fae066",
+    "app": "e0e443c888c8c02f08af373cf30994e6fb34f313",
+    "runtimeUnchangedFrom": "100232e692fd99a16ff7a8cd1653ea9680cedcb4",
+    "sourceCheckBuild": {
+      "head": "100232e692fd99a16ff7a8cd1653ea9680cedcb4",
+      "app": "387b81ab58cd86301b3b737cd9b503ae5750a908",
+      "compiler": "locked5.8.3",
+      "node": "v24.19.0",
+      "check": {
+        "exit": 0,
+        "tail": "IDEA015 type, syntax and client/server boundary checks passed.\napp/node_modules (locked dependency)\n"
+      },
+      "build": {
+        "exit": 0,
+        "tail": "IDEA015 built separately; existing app/dist and historic gates unchanged.\napp/node_modules (locked dependency)\n"
+      },
+      "focused": {
+        "exit": 0,
+        "tail": "e plan route with its own prompt and the same budget; an empty reply is refused for .1/.2 (27.8157ms)\n✔ 85 real micro material: the reviewer-written empty reply becomes a plan with nothing to request; the request material stays as sent (4.7045ms)\n✔ 85 storage: an empty analysis saves, reloads and round-trips as a .3 file; older versions never carried one (7.3954ms)\n✔ 85 an empty re-analysis after a request: earlier request text, labels, origins and returns stay as made; no new request (5.8504ms)\nℹ tests 26\nℹ suites 0\nℹ pass 26\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 311.8967\n"
+      }
+    },
+    "finalFocused": {
+      "exit": 0,
+      "tail": "e plan route with its own prompt and the same budget; an empty reply is refused for .1/.2 (27.8148ms)\n✔ 85 real micro material: the reviewer-written empty reply becomes a plan with nothing to request; the request material stays as sent (4.6544ms)\n✔ 85 storage: an empty analysis saves, reloads and round-trips as a .3 file; older versions never carried one (6.9543ms)\n✔ 85 an empty re-analysis after a request: earlier request text, labels, origins and returns stay as made; no new request (5.7747ms)\nℹ tests 24\nℹ suites 0\nℹ pass 24\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 274.0755\n"
+    }
+  },
+  "independentSha256": "0a25820a9b869322301cc589b2addb848eb56bb7efebb1435521f7a19b18131a",
+  "ci": {
+    "run": 40991762537,
+    "jobs": [
+      {
+        "id": 123856056363,
+        "name": "verify (windows-2022)",
+        "status": "completed",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Record exact runtime and checked-out commit",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Clean locked install",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Type and boundary checks",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Build and domain / HTTP / simulated provider tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Continuity type, syntax and credential boundary checks",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Build and test continuity with simulated providers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Prepare Cloudflare modules and assets without credentials or deployment",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11
+          },
+          {
+            "name": "Build static site (no AI server bundled, no credentials)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12
+          },
+          {
+            "name": "Install pinned browser verification tools",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13
+          },
+          {
+            "name": "Direct browser-to-server verification (original app, AI is still mocked)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14
+          },
+          {
+            "name": "Studio smoke - entry, map, part, ask, failure/retry, no-key and static states (stubbed provider, no real key)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15
+          },
+          {
+            "name": "Upload only this run's results, not historic snapshot evidence",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16
+          },
+          {
+            "name": "Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 30
+          },
+          {
+            "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 31
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 32
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 33
+          }
+        ]
+      },
+      {
+        "id": 123856056578,
+        "name": "verify (ubuntu-24.04)",
+        "status": "completed",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Record exact runtime and checked-out commit",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Clean locked install",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Type and boundary checks",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Build and domain / HTTP / simulated provider tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Continuity type, syntax and credential boundary checks",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Build and test continuity with simulated providers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Prepare Cloudflare modules and assets without credentials or deployment",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11
+          },
+          {
+            "name": "Build static site (no AI server bundled, no credentials)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12
+          },
+          {
+            "name": "Install pinned browser verification tools",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13
+          },
+          {
+            "name": "Direct browser-to-server verification (original app, AI is still mocked)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14
+          },
+          {
+            "name": "Studio smoke - entry, map, part, ask, failure/retry, no-key and static states (stubbed provider, no real key)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15
+          },
+          {
+            "name": "Upload only this run's results, not historic snapshot evidence",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16
+          },
+          {
+            "name": "Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 30
+          },
+          {
+            "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 31
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 32
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 33
+          }
+        ]
+      }
+    ],
+    "counts": {
+      "appBoth": 279,
+      "continuityLinux": {
+        "pass": 650,
+        "skip": 0
+      },
+      "continuityWindows": {
+        "pass": 647,
+        "skip": 3
+      }
+    }
+  },
+  "realGenerations": 0,
+  "publicDeployments": 0,
+  "past132": "semantic rejected unchanged"
+}
