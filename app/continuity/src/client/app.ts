@@ -1,8 +1,8 @@
 /* AgentFlow Studio client: entry → map → focused part. Reads project.7 data (saved projects and built examples) and never
  * rewrites records; the only project write is the user's own part name/note through the domain's editArea. */
 import { isMapReading, type Project } from '../shared/types.js';
-import { FILE_LIMIT } from '../shared/types.js';
-import { WorkspaceStore, type EntryRef, storageErrorCode, readViewState, readEntryView, writeViewState, readEntryPositions, writeEntryPositions, importCopy, serializeBackup } from '../shared/storage.js';
+import { FILE_LIMIT, PASTED_LIMIT } from '../shared/types.js';
+import { WorkspaceStore, type EntryRef, storageErrorCode, serializeProject, readViewState, readEntryView, writeViewState, readEntryPositions, writeEntryPositions, importCopy, serializeBackup } from '../shared/storage.js';
 import { parseBackup, cleanPositions } from '../shared/validation.js';
 import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, provideRecord, secretPasted, correctReadingRole } from '../shared/domain.js';
 import { CLAIM_LABEL, stateLabel, revisedRelations, candidateReading, type Applied, type CurrentClaim, type PartUnderstanding } from '../shared/map-reading.js';
@@ -12,7 +12,7 @@ import { createMapRun, sendLine, JOB_NOTE, type MapRunState } from './map-run.js
 import { JobReservations, JOBS_KEY, type JobLocks } from './map-jobs.js';
 import { requestResults, frozenRequests, displayAbout, captureRequestReading, restoreRequestReading, createWideReading } from './request-results.js';
 import { correctRequestMatch, unlinkReplacement, requestComparison } from '../shared/request-return.js';
-import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
+import { studioView, subtreeRecords, partPath, buildAsk, draftAfterAnswer, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
 import { layoutScope, edgePath, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, ROOT, HEAD, type Box, type Edge, type LabelSpot, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
 import { aiStatus, askStudio, AskError, ERROR_TEXT, RELEASE_TEXT, PUBLIC_EDITION, type AiStatus } from './studio-api.js';
@@ -21,6 +21,10 @@ import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, codeGate, codeN
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
 import { createPlanView } from './plan-view.js';
 import { createReturnView, type Scene, type ReadingContext } from './return-view.js';
+import { createAutoSync } from './auto-sync.js';
+import { createSessionSources } from './session-source.js';
+import { createHandoverView } from './handover-view.js';
+import { partSessions, originLabel } from '../shared/handover.js';
 import { UI62_KEY, buildUi62Project, ui62Keys } from '../shared/return-material.js';
 import { REL_LABEL, relationGroups, dirMark, dirTitle, insideEnds } from '../shared/relation-groups.js';
 
@@ -292,7 +296,7 @@ async function render() {
   // The wide reading belongs to the place it was opened from: another address closes it, restoring nothing.
   wide.drop();
   const r = route();
-  if (!r.key) { quoteBack = null; if (opened) cameras.set(camKey(opened, scope), { ...camera }); flushView(); planView.close(false); if (toastKey) dropToast(); forgetVisits(); opened = null; selected = null; scope = null; renderHome(); return; }
+  if (!r.key) { quoteBack = null; if (opened) cameras.set(camKey(opened, scope), { ...camera }); flushView(); planView.close(false); if (toastKey) dropToast(); forgetVisits(); opened = null; selected = null; scope = null; renderHome(); autoSync.render(); return; }
   const next = projectFor(r.key);
   if (!next) { go(null); return; }
   const fresh = opened?.key !== next.key;
@@ -321,7 +325,7 @@ async function render() {
     while (scenes.length && scenes.at(-1)!.scope === nextScope) scenes.pop();
     if (scenes.length > 12) scenes = scenes.slice(-12);
     opened = next; scope = nextScope; lastClick.id = '';
-    if (fresh) { planView.projectChanged(); returnView.projectChanged(); readMarks = []; readingCamera = null; loadView(next); }
+    if (fresh) { planView.projectChanged(); returnView.projectChanged(); readMarks = []; readingCamera = null; loadView(next); autoSync.opened(); }
     // A new project starts with the map alone: the previous project's reading pane must not narrow its first view.
     if (fresh) { selected = null; ask = null; editing = false; partForm = null; composerOpen = false; sheetOpen = false; scopeReading = false; $('panel').hidden = true; $('panel').replaceChildren(); hideLens(); }
     tempExpand.clear();
@@ -1378,7 +1382,8 @@ function renderLens() {
     o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', onclick: () => { editing = true; openSheet(() => document.getElementById('edit-name')?.focus()); } }, '이름·설명 고치기') : null,
     o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null,
     o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '이 부분을 보던 맥락으로 원문을 붙여 넣어요', onclick: () => openPaste(part.id) }, '기록 붙여넣기') : null,
-    o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요 (이 부분은 읽기 맥락일 뿐이에요)', onclick: () => openFile(part.id) }, '코드·검사 자료 추가') : null
+    o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요 (이 부분은 읽기 맥락일 뿐이에요)', onclick: () => openFile(part.id) }, '코드·검사 자료 추가') : null,
+    o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', title: '이 부분을 새 세션에 넘길 문서를 만들어요', onclick: () => handover.open(part.id, document.querySelector<HTMLElement>('#lens details.more summary')) }, '이 부분 인수인계 문서') : null
   ].filter((x): x is HTMLButtonElement => !!x);
   l.classList.remove('compare', 'scope-read'); readingFor = [];
   l.replaceChildren(); put(l, entry,
@@ -1391,7 +1396,7 @@ function renderLens() {
         h('button', { type: 'button', class: 'rail-toggle', 'aria-label': '읽기면 접기', 'aria-expanded': 'true', title: '읽기면 접기 · 지도를 넓게 봐요', onclick: () => setRail(true) }, railIcon(true)),
         h('button', { type: 'button', class: 'close', 'aria-label': '선택 해제', title: '닫기 (Esc)', onclick: () => go(o.key) }, '×'))),
     // The current statements read right after the description they may qualify; the lines to other parts follow them.
-    h('div', { class: 'lens-body' }, desc, claims, ...ports, requested, innerSection, inside),
+    h('div', { class: 'lens-body' }, desc, claims, sessionsLine(o.project, part.id), ...ports, requested, innerSection, inside),
     h('footer', { class: 'lens-foot' },
       h('button', { type: 'button', class: 'lens-more', onclick: () => openSheet() }, records.length ? `근거·기록 ${records.length}` : '전체 읽기', thread ? ` · 정리 ${thread}` : '', h('span', { 'aria-hidden': 'true' }, ' ›')),
       status.ai === 'deepseek' ? h('button', { type: 'button', class: 'link-button', onclick: () => { composerOpen = true; openSheet(() => document.getElementById(status.access === 'code' && !sessionCode() ? 'access-code' : 'ask-input')?.focus()); } }, '질문하기') : null));
@@ -1399,6 +1404,12 @@ function renderLens() {
   clampNotes(l, o, part.id);
 }
 
+/** The AI sessions behind a part, in one line under what was read (the full reading lists them with their folder and branch). */
+function sessionsLine(project: Project, partId: string): HTMLElement | null {
+  const list = partSessions(project, partId); if (!list.length) return null;
+  return h('p', { class: 'lens-sessions', title: '이 부분의 근거가 된 기록을 남긴 세션, 또는 인수인계 문서로 이 부분을 이어받은 세션' },
+    h('span', { class: 'lens-sessions-label' }, '다룬 세션'), list.slice(0, 3).map(x => `${originLabel(x)}${x.tookOver ? ' · 이어받음' : ''}`).join(', '), list.length > 3 ? h('small', {}, ` 외 ${list.length - 3}`) : null);
+}
 /** Selection on the map: the part, its lines and the parts at their other ends (drawn representative or side ghost). */
 function markSelection(partId: string | null) {
   // The scope itself, selected in place, is drawn as its own boundary card (the '이 범위' end of its lines).
@@ -1555,6 +1566,12 @@ function renderPanel(scrollTop: boolean) {
     })));
     body.append(rel);
   }
+  // The AI sessions behind this part: the ones whose records the map quotes for it, and the ones that took it over by a handover.
+  const sessions = partSessions(o.project, part.id);
+  if (sessions.length) body.append(h('section', { class: 'sec sec-sessions' }, h('h3', {}, '다룬 세션 ', h('small', {}, `${sessions.length}`)),
+    h('ul', { class: 'part-sessions' }, ...sessions.slice(0, 6).map(x => h('li', {},
+      h('strong', {}, originLabel(x)), x.tookOver ? h('span', { class: 'chip plain' }, '인수인계로 이어받음') : null,
+      h('small', {}, [x.cwd ? x.cwd.split(/[\\/]/).filter(Boolean).at(-1) : null, x.branch, `기록 ${ago(x.lastAt)}`].filter(Boolean).join(' · ')))))));
   // What to do next with this part: going inside is explicit, never a side effect of selecting.
   if (part.childIds.length && part.id !== scope) body.append(h('div', { class: 'sec-acts' },
     h('button', { type: 'button', class: 'secondary go-in', onclick: () => go(o.key, null, part.id) }, `안으로 들어가기 · ${part.childIds.length}`, h('span', { 'aria-hidden': 'true' }, ' ›'))));
@@ -1586,11 +1603,13 @@ function renderPanel(scrollTop: boolean) {
 /** AF100: the saves this page made itself (entry and the save number each made), so a job's result is applied on top of this
  * page's own edits only, never on a save another tab made meanwhile. */
 const ownSaves = new Set<string>();
+/** Why the last save was refused (storageErrorCode), for a caller that says more than commit's own text. */
+let saveFailure: string | null = null;
 /** The one write path for structure edits: saved projects through the workspace store, examples in memory only. */
 async function commit(o: Opened, next: Project): Promise<string | null> {
   if (o.kind === 'saved' && o.ref) {
     try { o.ref = await store.save(o.ref, next); ownSaves.add(`${o.ref.entryId}:${o.ref.seq}`); }
-    catch (err) { return storageErrorCode(err) === 'STORAGE_CONFLICT' ? '다른 탭에서 이 프로젝트가 바뀌어 저장하지 않았어요. 새로고침한 뒤 다시 해 주세요.' : '저장하지 못했어요. 바뀐 내용은 적용하지 않았어요.'; }
+    catch (err) { saveFailure = storageErrorCode(err); return saveFailure === 'STORAGE_CONFLICT' ? '다른 탭에서 이 프로젝트가 바뀌어 저장하지 않았어요. 새로고침한 뒤 다시 해 주세요.' : '저장하지 못했어요. 바뀐 내용은 적용하지 않았어요.'; }
   } else if (o.kind === 'example') examples.set(o.key, next);
   else return '이 프로젝트는 읽기 전용이에요.';
   o.project = next; o.view = studioView(next);
@@ -1822,9 +1841,12 @@ function openFile(partId: string | null) {
   openReturn();
   returnView.openFile(partId, scene);
 }
+/** Where AI session records come from: the local server when it reads this PC's sessions, else folders picked in this browser. */
+const sessionSources = createSessionSources({ status: () => status, accessCode: () => sessionCode() });
 const returnView = createReturnView({
   current: () => opened,
   kv,
+  sources: sessionSources,
   status: () => status,
   accessCode: () => sessionCode(), keepAccessCode,
   bundle: () => planView.bundleOf(),
@@ -1844,15 +1866,16 @@ const returnView = createReturnView({
   trial: (text, sources) => { planView.propose(text, sources); },
   compare: ids => { planView.focusParts(ids); },
   chrome: () => { const o = opened; if (o) setBar(o); },
-  paste: async (text, context) => {
+  paste: async (texts, context) => {
     const o = opened; if (!o || o.kind !== 'saved') return '이 프로젝트에는 기록을 저장할 수 없어요.';
-    let r: ReturnType<typeof pasteRecord>;
-    try { r = pasteRecord(o.project, text, context && partOf(o, context) ? context : null); } catch { return '이 글은 저장할 수 없어요(너무 길거나 쓸 수 없는 문자).'; }
-    if (r.duplicate) return { id: r.record.id, duplicate: true };
-    const failed = await commit(o, r.project);
+    let next = o.project, id = '', fresh = false;
+    try { for (const t of texts) { const r = pasteRecord(next, t, context && partOf(o, context) ? context : null); next = r.project; id = r.record.id; fresh ||= !r.duplicate; } }
+    catch { return '이 글은 저장할 수 없어요(너무 길거나 쓸 수 없는 문자).'; }
+    if (!fresh) return { id, duplicate: true };
+    const failed = await commit(o, next);
     // A saved record is now a record to read into the map (nothing was sent): the map's own entries say so.
     if (!failed) { renderMapEntry(); refreshUnderstood(); }
-    return failed ?? { id: r.record.id, duplicate: false };
+    return failed ?? { id, duplicate: false };
   },
   provide: async (key, text, evidence, context) => {
     // Only the entry the file was chosen in: after a switch nothing is written to the project open now.
@@ -1913,6 +1936,40 @@ const mapRun = createMapRun({
   stored: key => { const fresh = new WorkspaceStore(kv, null); fresh.read(); const e = fresh.entries().find(x => x.entryId === key); return e ? { project: e.project, lifecycle: e.lifecycle } : null; }
 });
 let jobReservations: JobReservations | null = null;
+
+/* ---------- automatic connection to a working folder's Claude Code / Codex sessions (auto-sync.ts) ---------- */
+const handover = createHandoverView({ current: () => opened });
+const utf8 = (t: string) => new TextEncoder().encode(t).length;
+/** Why these records cannot be added to the project (a project keeps at most PASTED_LIMIT of them and FILE_LIMIT bytes in all), or
+ * null. With none, whether even a small one still fits. */
+function recordRoom(p: Project, texts: string[]): string | null {
+  const more = ' 새 대화는 더 들어오지 않아요. 새 프로젝트를 만들어 연결해 주세요.';
+  if (p.pasted.length + Math.max(1, texts.length) > PASTED_LIMIT) return `이 프로젝트에 기록이 가득 찼어요(${PASTED_LIMIT}개까지).${more}`;
+  // Each record is also its id, time and part in the saved file.
+  const adds = texts.length ? texts.reduce((n, t) => n + utf8(JSON.stringify(t)) + 120, 0) : 4096;
+  return utf8(serializeProject(p)) + adds > FILE_LIMIT ? `이 프로젝트에 담을 수 있는 기록의 양(${FILE_LIMIT / 1e6}MB)이 다 찼어요.${more}` : null;
+}
+const autoSync = createAutoSync({
+  current: () => opened,
+  sources: sessionSources,
+  kv,
+  save: async (key, texts) => {
+    // Only the entry the sessions were looked at for: after a switch nothing is written to the project open now.
+    const o = opened; if (!o || o.kind !== 'saved' || o.key !== key) return { error: '다른 프로젝트가 열려 있어 저장하지 않았어요.', refused: false };
+    const full = recordRoom(o.project, texts); if (full) return { error: full, refused: false };
+    let next = o.project;
+    try { for (const t of texts) next = pasteRecord(next, t, null).project; } catch { return { error: '세션 기록 하나를 저장하지 못했어요(쓸 수 없는 문자나 키처럼 보이는 글). 다른 세션은 계속 들어와요.', refused: true }; }
+    if (next === o.project) return null;
+    const failed = await commit(o, next);
+    if (!failed) { renderMapEntry(); refreshUnderstood(); if (!selected && !planView.isOpen()) returnView.render(); return null; }
+    // Nothing more is tried until the person asks: said so, and for a full browser storage, why.
+    return { error: saveFailure === 'QUOTA' ? '이 브라우저의 저장 공간이 가득 차서 세션 기록을 저장하지 못했어요. 자동으로 다시 하지 않아요.' : `${failed} 자동으로 다시 하지 않아요.`, refused: false };
+  },
+  full: () => { const o = opened; return o && o.kind === 'saved' ? recordRoom(o.project, []) : null; },
+  canRead: () => { const inp = mapRun.input(), st = mapRun.state(); return !!inp && !inp.problem && mapRun.can() && !st.pending && !st.ready && !st.committing; },
+  read: () => void mapRun.run(),
+  readBlocked: () => (status.release === 'existing-map' ? RELEASE_TEXT.limit : mapRun.can() ? null : mapRun.blocked() ?? '지도 정리에 쓸 AI가 이 서버에 연결되어 있지 않아요.')
+});
 /** AF100: while a reading runs as a job, the person is told it goes on without this window but not without the PC's Studio. */
 function pendingLine(cls: string, text: string, cancelClass: string): HTMLElement[] {
   const d = mapRun.detail();
@@ -2224,7 +2281,8 @@ async function send(intent: AskIntent, question: string | null) {
     const res = await askStudio(payload, controller.signal, sessionCode());
     addAnswer(o, partId, { at: new Date().toISOString(), intent, question, model: res.model, reply: res.reply, refs: Object.fromEntries(refs), coverage });
     ask = null;
-    if (intent === 'question') setDraft(o, partId, '');
+    // A retried question can succeed after the person has typed another one: only the question that went out leaves the box.
+    if (intent === 'question' && question !== null) setDraft(o, partId, draftAfterAnswer(getDraft(o, partId), question));
   } catch (e) {
     const code = e instanceof AskError ? e.code : 'REQUEST_FAILED';
     ask = code === 'CANCELLED' ? null : { partId, intent, question, controller: null, error: ERROR_TEXT[code] ?? `응답을 받지 못했어요 (${code}).`, coverage };
@@ -2394,6 +2452,7 @@ function bindCanvas() {
   });
   document.addEventListener('keydown', e => {
     if ((e.target as HTMLElement).closest('textarea,select,input:not([type=checkbox]):not([type=radio])')) return; // Esc still works from a checkbox
+    if (handover.isOpen()) return; // the handover document is modal: its own Esc closes it and nothing under it
     // The wide reading is over everything (its own keys handle Esc inside it; this is focus left on the page).
     if (wide.isOpen()) { if (e.key === 'Escape') wide.escape(); return; }
     // Innermost first: an open ⋯ menu closes before anything else, and focus goes back to its button.
@@ -2498,8 +2557,11 @@ async function main() {
   bindCanvas(); bindFind(); bindImport(); bindNewProject();
   $('add-part').addEventListener('click', () => openPartForm(scope));
   $('plan-entry').addEventListener('click', () => planView.toggle());
+  $('handover-open').addEventListener('click', e => handover.open(scope, e.currentTarget as HTMLElement));
   $('return-entry').addEventListener('click', () => { if (returnView.isOpen() && !planView.isOpen()) returnView.close(); else openReturn(); });
-  statusReady = aiStatus().then(s => { status = s; renderStatus(); renderRelease(); planView.statusChanged(); refreshReading(); statusArrived(); if (!selected && !planView.isOpen()) returnView.render(); mapRun.resume(); });
+  statusReady = aiStatus().then(s => { status = s; renderStatus(); renderRelease(); planView.statusChanged(); refreshReading(); statusArrived(); if (!selected && !planView.isOpen()) returnView.render(); mapRun.resume(); autoSync.opened(); autoSync.start();
+    void sessionSources.load().then(() => { autoSync.sourcesChanged(); if (opened && autoSync.bindingOf(opened.key)) void autoSync.tick(); if (!selected && !planView.isOpen()) returnView.render(); }); });
+  $('sync-pill').addEventListener('click', () => autoSync.toggle());
   // AF100: a reservation another tab of this address made (or ended) is looked at now, not at this page's next click.
   window.addEventListener('storage', e => { if (e.key?.endsWith(JOBS_KEY)) void statusReady?.then(() => mapRun.resume()); });
   window.addEventListener('hashchange', () => void render());

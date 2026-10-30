@@ -5,6 +5,10 @@ import { createContinuityApp } from '../server/app.mjs';
 import { createStudioHandler } from '../server/studio.mjs';
 import { readConfig } from '../../server/config.mjs';
 import { openMapJobs } from '../server/map-jobs.mjs';
+import { openSessions } from '../server/sessions.mjs';
+import { writeSessionHome } from './sessions-fixture.mjs';
+import { mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { existsSync, writeFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 const mode = process.env.STUDIO_STUB ?? 'ok';
@@ -107,6 +111,8 @@ function map4Stub(input) {
 // Only this simulated-provider fixture gets a higher rate; the real server's default remains 10/minute.
 const env = mode === 'nokey' ? {} : { DEEPSEEK_API_KEY: 'stub-key', DEEPSEEK_MODEL: 'stub-model', STUDIO_REQUESTS_PER_MINUTE: '120', ...(mode === 'code' ? { STUDIO_ACCESS_CODE: 'smoke-code' } : {}) };
 const jobs = process.env.STUDIO_JOBS_DIR ? await openMapJobs({ dir: process.env.STUDIO_JOBS_DIR }) : null;
-const studio = createStudioHandler({ env, fetchImpl: stub, jobs });
+// STUDIO_SESSIONS_FIXTURE=1: local session records read from a synthetic home folder (tests/sessions-fixture.mjs), never the real one.
+const sessions = process.env.STUDIO_SESSIONS_FIXTURE === '1' ? openSessions({ env: {}, roots: writeSessionHome(mkdtempSync(join(tmpdir(), 'af-sessions-'))) }) : null;
+const studio = createStudioHandler({ env, fetchImpl: stub, jobs, sessions });
 const config = readConfig({ AI_MODE: 'mock', PORT: process.env.PORT ?? '0' });
 createContinuityApp({ config, studio }).listen(config.port, '127.0.0.1', function () { console.log(`READY http://127.0.0.1:${this.address().port}${jobs ? ` jobs=${jobs.describe().durable ? 'durable' : jobs.describe().problem}` : ''}`); });

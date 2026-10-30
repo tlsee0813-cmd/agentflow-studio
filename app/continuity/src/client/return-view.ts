@@ -15,6 +15,10 @@ import { clip } from '../shared/studio.js';
 import { ui62Reading, savedReading, readingInput, recordTitle, partLabel, type ReadingInput, type ReadingSource } from './digest-source.js';
 import { digestStore, askHash, makeReading, type Reading } from './digest-store.js';
 import { askDigest, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
+import { sessionText, recordParts, NEXT_RECORD, NEXT_LINE, RECORD_HEAD, stamp, TOOL_NAME, type SessionSummary, type SessionDetail } from '../shared/session-import.js';
+import { readSessionFile, type SessionSources } from './session-source.js';
+import { WEB_RECORD_ASK, foldRecord } from '../shared/handover.js';
+import { PASTED_TEXT_LIMIT } from '../shared/types.js';
 import type { PlanOpened } from './plan-view.js';
 import type { PlanBundle } from './plan-store.js';
 import { secretLike } from './plan-source.js';
@@ -27,6 +31,8 @@ export interface ReturnHost {
   current(): PlanOpened | null;
   kv: StorageLike;
   status(): AiStatus;
+  /** Where AI session records come from (the local server, or folders picked in this browser). */
+  sources: SessionSources;
   accessCode(): string; keepAccessCode(value: string): void;
   /** The project's change plan as kept (read only); null when there is none. */
   bundle(): PlanBundle | null;
@@ -44,8 +50,9 @@ export interface ReturnHost {
   /** Open the change plan on the change that touches these parts, same map, current/preview. */
   compare(parts: string[]): void;
   chrome(): void;
-  /** Keep a pasted record in the saved project (the very same text already kept is that record again). Text when not kept. */
-  paste(text: string, context: string | null): Promise<{ id: string; duplicate: boolean } | string>;
+  /** Keep pasted records in the saved project, in order, in one save (the very same text already kept is that record again): the
+   * last one's id, and whether every one was kept already. Text when not kept. */
+  paste(texts: string[], context: string | null): Promise<{ id: string; duplicate: boolean } | string>;
   /** Keep a provided code or check file as a new record of entry `key`, only while that entry is the one open (the very same text
    * and declaration already kept is that record again). Text when not kept. */
   provide(key: string, text: string, evidence: RecordEvidence, context: string | null): Promise<{ id: string; duplicate: boolean } | string>;
@@ -110,6 +117,8 @@ interface State {
 /** Paste drafts, per workspace entry (an imported copy has its own), in this browser apart from the project. A draft that looks
  * like it holds a key stays in this tab only. */
 const PASTE_DRAFT_KEY = 'agentflow.studio.paste-draft.1';
+// A text that ends with a next-record line, or starts with one.
+const SEP_END = /(?:^|\n)[ \t]*──────── 다음 기록 ────────[ \t]*$/, SEP_START = /^[ \t]*──────── 다음 기록 ────────[ \t]*(?:\n|$)/;
 /** A note (what the record explains as it stands) carries no tag: it is neither a change nor a check. */
 const READING_KIND: Record<RecordReading['kind'], string | null> = { change: '변화', check: '확인 범위', open: '남은 판단', note: null };
 const STAGE_MEMORY = new Map<string, string>();
@@ -209,20 +218,113 @@ export function createReturnView(host: ReturnHost) {
     if (secretLike(text)) { s.pasteMsg = '키나 토큰처럼 보이는 글이 있어 저장하지 않았어요. 그 부분을 지우고 다시 저장하세요.'; render(); return; }
     // The box stays editable while saving: only the text that was saved leaves the draft. Whatever was written meanwhile stays,
     // and the box stays open with it. A pane closed or reopened meanwhile is another state: it is only told by the draft.
-    const st = s; st.saving = true; render();
-    const done = await host.paste(text, st.pasteContext);
+    // A session put after other text is kept as its own record (the box put a NEXT_RECORD line before it): a session is told by its
+    // header line at a record's start. A handover document a pasted session started from is kept as one line, as the import keeps it.
+    const st = s, parts = recordParts(text).map(foldRecord); st.saving = true; render();
+    const done = await host.paste(parts, st.pasteContext);
     st.saving = false;
     const kept = typeof done !== 'string', untouched = draftOf(key) === text;
     if (kept && untouched) keepDraft(key, '');
     if (s !== st) return;
     if (!kept) { st.pasteMsg = done; render(); return; }
     const r = host.current()?.project.pasted.find(x => x.id === done.id);
-    const said = done.duplicate ? `같은 글을 ${r ? fullTime(r.at) : '앞서'}에 붙여 넣었어요. 새로 저장하지 않았어요.` : '기록을 저장했어요.';
+    const said = done.duplicate ? `같은 글을 ${r ? fullTime(r.at) : '앞서'}에 붙여 넣었어요. 새로 저장하지 않았어요.` : parts.length > 1 ? '세션마다 기록을 하나씩 나눠 저장했어요.' : '기록을 저장했어요.';
     if (!untouched) { st.pasteMsg = `${said} 저장하는 동안 쓴 글은 초안으로 남겨 두었어요.`; render(); void refresh(); return; }
     st.pasteContext = null; st.pasteMsg = null; st.storeMsg = said;
     await refresh();
     const src = s === st ? sources().find(x => x.recordId === done.id) : null;
     if (s === st && src) { st.view = { kind: 'source', source: structuredClone(src), from: 'material', quote: null }; render(); }
+  }
+  /* ---------- a session Claude Code or Codex kept on this PC, brought into the paste box: listed by the local server or from
+   * the folders picked in this browser, or one session file chosen by hand; a web chat writes its own (WEB_RECORD_ASK) ---------- */
+  /** The session list of the paste box (per entry): open or not, what was listed, a filter, which session is being read, and what
+   * the last pick did. Nothing here is saved: a picked session only fills the paste draft, which the person then reads and saves. */
+  interface SessionPick { open: boolean; loading: boolean; list: SessionSummary[] | null; filter: string; reading: string | null; error: string | null; note: string | null }
+  const picks = new Map<string, SessionPick>();
+  const pickOf = (key: string): SessionPick => {
+    let p = picks.get(key); if (!p) { p = { open: false, loading: false, list: null, filter: '', reading: null, error: null, note: null }; picks.set(key, p); }
+    return p;
+  };
+  async function loadSessions() {
+    if (!s) return;
+    const key = s.key, p = pickOf(key); if (p.loading) return;
+    p.open = true; p.loading = true; p.error = null; render();
+    const src = host.sources.current();
+    try { if (!src) throw new Error('NO_SOURCE'); p.list = await src.list(); }
+    catch (e) { p.error = ERROR_TEXT[(e as { code?: string } | null)?.code ?? ''] ?? '세션 목록을 불러오지 못했어요.'; }
+    p.loading = false; if (s?.key === key) render();
+  }
+  async function takeSession(id: string) {
+    if (!s) return;
+    const key = s.key, p = pickOf(key), src = host.sources.current(); if (p.reading || !src) return;
+    p.reading = id; p.error = null; p.note = null; render();
+    try { fill(key, p, await src.read(id)); }
+    catch (e) { p.error = ERROR_TEXT[(e as { code?: string } | null)?.code ?? ''] ?? '세션 기록을 읽지 못했어요.'; }
+    p.reading = null; if (s?.key === key) render();
+  }
+  /** One session file chosen by hand (.jsonl of Claude Code or Codex), read in this page. */
+  async function takeFile(file: File) {
+    if (!s) return;
+    const key = s.key, p = pickOf(key); if (p.reading) return;
+    p.reading = file.name; p.error = null; p.note = null; render();
+    try { const d = await readSessionFile(file); if (d) fill(key, p, d); else p.error = 'Claude Code·Codex 세션 기록 파일(.jsonl)이 아니거나, 가져올 대화가 없어요.'; }
+    catch (e) { p.error = ERROR_TEXT[(e as { code?: string } | null)?.code ?? ''] ?? '세션 파일을 읽지 못했어요.'; }
+    p.reading = null; if (s?.key === key) render();
+  }
+  /** Whatever is in the box stays: the session comes after it, under a NEXT_RECORD line, within what one record can hold, and is
+   * saved as a record of its own (recordParts), so it is still told by its header. */
+  function fill(key: string, p: SessionPick, detail: SessionDetail) {
+    const before = draftOf(key).replace(/\s+$/, ''), room = PASTED_TEXT_LIMIT - (before ? before.length + NEXT_RECORD.length + 4 : 0);
+    if (room < 2000) { p.error = '초안칸에 이미 글이 많아요. 지금 글을 저장하거나 비운 뒤 가져오세요.'; return; }
+    const got = sessionText(detail, room);
+    if (!got.turns) { p.error = '이 세션에는 가져올 대화가 없어요.'; return; }
+    keepDraft(key, before ? `${before}\n\n${NEXT_RECORD}\n\n${got.text}` : got.text);
+    p.open = false;
+    p.note = [`${TOOL_NAME[detail.tool]} 세션에서 대화 ${got.turns}개를 넣었어요.`, got.left ? `앞의 ${got.left}개는 길이 제한으로 뺐어요.` : '',
+      got.redacted ? `키·토큰처럼 보이는 ${got.redacted}곳은 가렸어요.` : '', before ? '앞에 있던 글과는 따로 저장돼요.' : '', '읽어 보고 ‘기록 저장’을 누르세요.'].filter(Boolean).join(' ');
+  }
+  async function copyWebAsk(p: SessionPick) {
+    let ok = true; try { await navigator.clipboard.writeText(WEB_RECORD_ASK); } catch { ok = false; }
+    p.error = null; p.note = ok ? '기록 요청 문구를 복사했어요. 웹 AI 대화에 붙여 넣고, 나온 답을 이 칸에 그대로 붙여 넣어 저장하세요.' : null;
+    if (!ok) p.error = `자동 복사가 막혀 있어요. 아래 문구를 직접 복사하세요.\n\n${WEB_RECORD_ASK}`;
+    render();
+  }
+  function sessionBox(key: string): Node | null {
+    const p = pickOf(key), src = host.sources, current = src.current(), state = src.folderState();
+    const where = current?.kind === 'server' ? `이 PC의 ${(host.status().sessions?.tools ?? []).map(t => TOOL_NAME[t]).join('·')} 대화 기록` : `고른 세션 폴더(${src.folders().join(', ')})의 대화 기록`;
+    const file = h('input', { type: 'file', class: 'rr-session-file', accept: '.jsonl,application/x-ndjson,application/json', 'aria-label': '세션 기록 파일 올리기', hidden: true }) as HTMLInputElement;
+    file.addEventListener('change', () => { const f = file.files?.[0]; file.value = ''; if (f) void takeFile(f); });
+    const others = h('div', { class: 'pp-row rr-session-ways' },
+      !current && state === 'none' ? h('button', { type: 'button', class: 'link-button rr-session-pick', title: '.claude 또는 .codex 폴더를 한 번 골라 두면 목록에서 바로 가져와요 (크롬·엣지)', onclick: async () => { if (await src.pick()) void loadSessions(); else render(); } }, '세션 폴더 고르기') : null,
+      !current && state === 'prompt' ? h('button', { type: 'button', class: 'link-button rr-session-grant', onclick: async () => { await src.grant(); if (src.current()) void loadSessions(); else render(); } }, '세션 폴더 다시 허용') : null,
+      h('button', { type: 'button', class: 'link-button', title: 'Claude Code나 Codex의 .jsonl 세션 파일 하나를 골라 넣어요', disabled: !!p.reading, onclick: () => file.click() }, '세션 파일 올리기'), file,
+      h('button', { type: 'button', class: 'link-button', title: '웹 AI 대화에 붙여 넣으면, 그 대화가 기록을 이 칸에 맞는 형식으로 써 줘요', onclick: () => void copyWebAsk(p) }, '웹 대화용 기록 요청 문구 복사'));
+    if (!p.open) return h('div', { class: 'rr-sessions' },
+      current ? h('button', { type: 'button', class: 'secondary small', onclick: () => void loadSessions() }, '내 AI 세션에서 가져오기') : null,
+      current ? h('span', { class: 'fine' }, `${where}을 골라 넣어요`) : h('span', { class: 'fine' }, 'AI 세션 기록을 원문 그대로 넣을 수 있어요'),
+      others, p.reading && !current ? h('p', { class: 'fine' }, '읽는 중…') : null,
+      p.note ? h('p', { class: 'fine rr-sessions-note', role: 'status' }, p.note) : null,
+      p.error ? h('p', { class: 'pp-error', role: 'alert' }, p.error) : null);
+    const tools = where;
+    const q = p.filter.trim().toLowerCase();
+    const shown = (p.list ?? []).filter(x => !q || [x.title, x.preview, x.cwd, x.branch].some(v => v?.toLowerCase().includes(q)));
+    const filter = h('input', { type: 'search', class: 'rr-sessions-filter', placeholder: '제목·내용·폴더로 찾기', 'aria-label': '세션 찾기', value: p.filter }) as HTMLInputElement;
+    filter.addEventListener('input', () => { p.filter = filter.value; const at = filter.selectionStart; render(); const f = document.querySelector<HTMLInputElement>('#lens .rr-sessions-filter'); if (f) { f.focus({ preventScroll: true }); f.setSelectionRange(at, at); } });
+    const rows = shown.map(x => h('li', {}, h('button', { type: 'button', class: 'rr-session', disabled: !!p.reading, onclick: () => void takeSession(x.id) },
+      h('span', { class: 'rr-session-tool' }, TOOL_NAME[x.tool]),
+      h('strong', {}, clip(x.title ?? x.preview, 90)),
+      h('small', {}, [x.title ? clip(x.preview, 70) : null, x.cwd, stamp(x.updatedAt, true)].filter(Boolean).join(' · ')),
+      p.reading === x.id ? h('small', { class: 'rr-session-busy' }, '읽는 중…') : null)));
+    return h('div', { class: 'rr-sessions open' },
+      h('div', { class: 'pp-row' }, h('strong', {}, '내 AI 세션'), h('span', { class: 'fine' }, '사람이 쓴 요청과 AI의 답변·바꾼 파일만 원문 그대로 넣어요. 도구 출력과 추론은 빼요.'),
+        h('button', { type: 'button', class: 'link-button quiet', onclick: () => { p.open = false; render(); } }, '접기')),
+      p.loading ? h('p', { class: 'fine' }, '세션을 찾는 중…') : null,
+      p.error ? h('p', { class: 'pp-error', role: 'alert' }, p.error) : null,
+      // What the last look at the picked folders could not read (a folder gone, a walk cut short).
+      current?.kind === 'folder' && src.notice() ? h('p', { class: 'fine rr-sessions-notice' }, src.notice()) : null,
+      p.list && !p.list.length ? h('p', { class: 'fine' }, `${tools}에서 세션을 찾지 못했어요.`) : null,
+      p.list?.length ? filter : null,
+      rows.length ? h('ul', { class: 'rr-session-list' }, ...rows) : p.list?.length ? h('p', { class: 'fine' }, '찾는 말과 맞는 세션이 없어요.') : null);
   }
   /* ---------- a provided code or check file (project.14) ---------- */
   const fileDrafts = new Map<string, FileDraft>();
@@ -565,11 +667,40 @@ export function createReturnView(host: ReturnHost) {
     area.addEventListener('input', () => {
       keepDraft(st.key, area.value); count.textContent = area.value ? `${area.value.length.toLocaleString()}자` : ''; warn.hidden = !secretLike(area.value);
     });
+    // A session record pasted beside other text (a web AI's answer written with WEB_RECORD_ASK, another record) is kept as a record of
+    // its own: the box puts the NEXT_RECORD line between them, as it does for a session it brings in. It goes after the record the
+    // caret is in (a record is never cut in two), before the first one with the caret at the start, and at a next-record line the
+    // caret is on or a selection takes in (that line is never written over). A next-record line the record quotes is written a dash
+    // shorter, as the import writes it, so it does not cut the record.
+    area.addEventListener('paste', e => {
+      const got = (e.clipboardData?.getData('text/plain') ?? '').replace(/\r\n?/g, '\n').trim().replace(NEXT_LINE, '$1─────── 다음 기록 ───────$2');
+      if (!RECORD_HEAD.test(got)) return;
+      e.preventDefault();
+      const was = area.value, s0 = area.selectionStart, s1 = area.selectionEnd, line = `\n\n${NEXT_RECORD}\n\n`;
+      const lines = [...was.matchAll(NEXT_LINE)].map(m => [m.index, m.index + m[0].length] as const);
+      // Everything selected (or an empty box) is replaced, as any paste does.
+      const every = !was.slice(0, s0).trim() && !was.slice(s1).trim();
+      const on = every ? undefined : lines.find(([a, b]) => s0 < b && Math.max(s1, s0 + 1) > a)?.[1];
+      const pre = every ? '' : was.slice(0, on ?? s0), post = every ? '' : was.slice(on ?? s1), next = post.search(NEXT_LINE);
+      const head = pre.trimEnd(), atStart = !head || SEP_END.test(head);
+      // [kept before, the pasted record, kept after]: the record the caret is in stays whole before it, a next record after.
+      const [a, b] = atStart ? [head, post.trimStart()] : next < 0 ? [`${pre}${post}`.trimEnd(), ''] : [`${pre}${post.slice(0, next)}`.trimEnd(), post.slice(next).trimStart()];
+      const sep = (x: string, end: boolean) => !x ? '' : (end ? SEP_END : SEP_START).test(x) ? '\n\n' : line;
+      const upTo = `${a}${sep(a, true)}${got}`, value = `${upTo}${sep(b, false)}${b}`, at = upTo.length;
+      // Only what changed is written, as typing would (one undo takes the paste back); where that cannot be, the value is set.
+      let from = 0; while (from < was.length && from < value.length && was[from] === value[from]) from++;
+      let tail = 0; while (tail < was.length - from && tail < value.length - from && was.at(-1 - tail) === value.at(-1 - tail)) tail++;
+      area.focus(); area.setSelectionRange(from, was.length - tail);
+      if (!document.execCommand('insertText', false, value.slice(from, value.length - tail)) || area.value !== value) {
+        area.value = value; area.dispatchEvent(new Event('input'));
+      }
+      area.setSelectionRange(at, at);
+    });
     return [h('section', { class: 'rr-sec rr-paste-box' }, h('h3', {}, '기록 붙여넣기'),
       h('p', { class: 'fine' }, '나누거나 종류·부분을 고르지 않아도 돼요. 저장한 뒤 지도 정리나 요약을 누를 때만 AI에 보내요.'),
       ctx ? h('p', { class: 'rr-context' }, h('span', {}, '보던 부분'), partChip(ctx),
         h('button', { type: 'button', class: 'link-button quiet', title: '읽기 맥락에서 빼요', onclick: () => { st.pasteContext = null; render(); } }, '빼기')) : null,
-      area, warn, count, st.pasteMsg ? h('p', { class: 'pp-error', role: 'alert' }, st.pasteMsg) : null)];
+      sessionBox(st.key), area, warn, count, st.pasteMsg ? h('p', { class: 'pp-error', role: 'alert' }, st.pasteMsg) : null)];
   }
   function pasteFooter(): Node {
     const st = s!;
