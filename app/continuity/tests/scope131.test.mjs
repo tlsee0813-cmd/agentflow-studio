@@ -16,7 +16,7 @@ const review = { summary: '[작성 표본] 기존 결과를 재사용한다.', p
 const reply = (content, finish = 'stop') => Response.json({ choices: [{ finish_reason: finish, message: { content: typeof content === 'string' ? content : JSON.stringify(content) } }] });
 
 test('131 scope route: the plan budget (8192, thinking low) with the same prompt, input and model; one call', async () => {
-  assert.equal(sha(SCOPE_PROMPT), '00cf7462571b87d80061ff8c65db65bcdaa385b5419646bac2331daae9b25ad6');
+  assert.equal(sha(SCOPE_PROMPT), 'b56c507bda06cc1bdb052bc70546f77d427e066af84f5a6b7480428bf844a9db'); // 133: its evidence-time rule (131 sent 00cf7462)
   assert.equal(sha(PLAN3_PROMPT), 'aacb45c30be76c620da3503ed806c809a520c772c36412982d7dff8b69443a7a');
   const sent = [], body = scopeAsk();
   const handler = createStudioHandler({ env: { DEEPSEEK_API_KEY: 'scope131-server-only-key', DEEPSEEK_PLAN_MODEL: 'plan-model-x' }, fetchImpl: async (url, init) => { sent.push(JSON.parse(init.body)); return reply(review); } });
