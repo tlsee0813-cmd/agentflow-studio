@@ -1,0 +1,87 @@
+{
+  "selected": "0de4a543da830af96f2c81953539ec85517f9479",
+  "runtimeApp": "78f6842b3ba302df8444a58a904f92025ad9e3af",
+  "entry": "E_ca219e3f-47bc-468e-94a0-6a98a3ad4f71",
+  "project": "P_e3811513-ce75-4131-987e-1885f3214de4",
+  "job": "MJ_8e7c8433-050c-4be4-adac-1fe43165e5cd",
+  "invocations": 1,
+  "retries": 0,
+  "planScopeReturnCalls": 0,
+  "askSha256": "0dc6a91cd9c2c6d8aceb37af6fc9f26dfefdec06d11ab02f0ac3292767d2d22c",
+  "prompt": "m6-6859b864664f",
+  "promptSha256": "cef94b26c23e8c3c647dccddc399746da6957b127213e891e3d69fe0ada86886",
+  "coverage": {
+    "fresh": 2,
+    "sent": 2,
+    "partial": 0
+  },
+  "createdAt": "2026-10-30T04:25:14.664Z",
+  "readyAt": "2026-10-30T04:26:26.953Z",
+  "deliveryMs": 72289,
+  "execution": {
+    "startedAt": "2026-10-30T04:25:14.671Z",
+    "closedAtMs": 72275.27480000001,
+    "decidedAtMs": 72277.2426,
+    "closed": true,
+    "exit": 0,
+    "signal": null,
+    "reason": null,
+    "events": 4,
+    "usage": {
+      "input_tokens": 15197,
+      "cached_input_tokens": 8192,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 3012,
+      "reasoning_output_tokens": 1552
+    },
+    "stdoutBytes": 5355,
+    "stderrBytes": 158,
+    "signals": {
+      "sent": 0,
+      "skippedAfterExit": 0
+    },
+    "stdioCut": false,
+    "verdictAtMs": 72280.60450000002,
+    "finalSha256": "2ade4a908ae406aaedad547c8760ca35b6278fa5a4c4c8dd771cabdfdc2d3007",
+    "finalBytes": 4577
+  },
+  "strict": "pass",
+  "meaning": "bounded pass with existing76/89 nonblocking API detail limit",
+  "independentSha256": "b5c5dc627e6252fb33e17fbb96599f7369602903274b8c4674b18d95c7c9514c",
+  "preservation": {
+    "preRestartStorageExact": true,
+    "beforeApplyWorkspaceAndPlansExact": true,
+    "awayReloadExact": true,
+    "explicitApply": true,
+    "afterApplyReloadExact": true,
+    "priorProjectsExact": true,
+    "allPriorPlansExact": true,
+    "sourceStringsExact": true,
+    "normalBackupFullProjectExact": true,
+    "projectSha256": "9735704ae17e377aba11a0c43ef740d0cd772f28f6d3980b39a83fb27b2690a9",
+    "backupFileSha256": "9735704ae17e377aba11a0c43ef740d0cd772f28f6d3980b39a83fb27b2690a9"
+  },
+  "ui": {
+    "viewport": "1280x720",
+    "readingPath": [
+      "eval",
+      "Parser: AST + recursive-depth limit",
+      "Compiler: bytecode",
+      "VM: shared globals + inherited memory/time limits",
+      "exact implementation source",
+      "return to same VM selection",
+      "reload",
+      "engine documented features and limitations",
+      "normal backup"
+    ],
+    "homeReadyObservation": "First home snapshot after away reload did not show a ready badge. Opening the original project immediately showed ready and explicit result button. No new request was needed. Cause not established.",
+    "density": "Whole reading still uses a narrow right rail; long feature claims occupy many lines and the limitation falls near/below fold while central map area remains broad."
+  },
+  "notProven": [
+    "Generic generation quality",
+    "136 RETURN success/cause",
+    "Automated connector",
+    "Whole product completeness",
+    "OSS execution or limits enforcement"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "verdict": "BOUNDED_MEANING_PASS_M1_M4_UI_APPLICATION_PENDING",
+  "scope": "Static comparison of new source/ask/wire; UI/application verified separately by Root",
+  "reportSha256": "b5c5dc627e6252fb33e17fbb96599f7369602903274b8c4674b18d95c7c9514c",
+  "actionableP1P2": [],
+  "sourceBytesVerified": true,
+  "criterionIds": [
+    "M1",
+    "M2",
+    "M3",
+    "M4"
+  ],
+  "priorInterpretation": "76/89 API-name active-map omission remains nonblocking if internal path and original usage material are preserved",
+  "modelCalls": 0,
+  "productWrites": 0
+}
