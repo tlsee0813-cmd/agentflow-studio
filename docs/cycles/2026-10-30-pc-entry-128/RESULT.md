@@ -66,6 +66,15 @@ Root 독립 확인: 자기 host가 시작된 뒤 codex 파일의 bytes만 바뀌
 
 Root 확인: `start-pc.ps1`이 시작 뒤 항상 `-Stop`만 안내해, `-Port 4328`로 시작한 사용자가 그대로 따르면 기본 4327을 종료 시도하거나 NOT_RUNNING을 받았다. 안내를 `./continuity/scripts/start-pc.ps1 -Stop -Port $Port`(실제 선택한 포트)로 바꿨다. 이 환경에는 PowerShell이 없어 출력은 Root가 확인한다.
 
+## 최종 CI Windows 실패 한 건 (PR72, run 40982791208, job 123826619714) — fixture 동기화 결함
+
+- 실패: 128-10 마지막 `later` 종료가 `STOPPED` 기대, 실제 `BUSY`. 앞선 단정(종료 요청 뒤 입장한 작업 202, BUSY exit 7, 서버 생존, 작업 ready)은 통과.
+- 원인(코드 근거): 작업의 ready와 소유 child의 정리는 102 설계상 다른 수명이다. 호출은 결과를 소비한 뒤 끝나고(`cli-executor.mjs` 290), job store가 ready를 쓴 다음 `running`에서 지운다(`map-jobs.mjs` 223/240). 실행자 슬롯은 child가 사라지고 lease가 보관된 뒤에야 비워지며(`cli-executor.mjs` 197, 그때까지 상태 `busy`, 165), 서버의 기본 종료 판단은 이 `busy`를 실행 중으로 센다(`pc-entry.mjs` 142). 테스트가 ready 직후 종료를 불러, 정리가 느린 Windows에서 그 창에 걸렸다. 제품 동작은 의도한 보호이며 바꾸지 않았다.
+- 수리(테스트만, d882de4): 128-10이 ready 뒤의 정리 창을 hook으로 열어 둔 상태에서 기본 종료가 호출 쪽 확인과 서버 판단 모두에서 BUSY임을 확인하고, 이어 실행자 `ready`와 `running` 0을 상태로 관측한 뒤 종료가 STOPPED임을 확인한다. 고정 sleep·종료 재시도·전체 timeout 증가 없음. 단정 삭제 없음.
+- 확인: 수리 전 끝맺음(ready 직후 종료)을 정리 창이 열린 채 돌리면 CI와 같은 `'BUSY' !== 'STOPPED'`로 실패(결정적 재현). 서버가 정리 중 child를 세지 않게 바꾸는 mutation은 새 128-10을 실패시킨다(보호 유지 확인).
+- 판본: 마지막 코드(테스트) SHA d882de427a48b5a1901f484bd0d5cec1d0b7d864, app tree 581571feee480a0079b4e105151409bb8be8ac92. 4cfd008 대비 `pc-entry128.test.mjs`만 바뀜.
+- 집중 명령(`app/`, 빌드 후): `node --test --test-name-pattern="128-10 " continuity/tests/pc-entry128.test.mjs` 1/1, `node --test continuity/tests/pc-entry128.test.mjs` 11/11(Linux, 종료 뒤 프로세스 0). Windows·전체 CI는 Root 대기.
+
 ## 증거 구별
 
 - 작성자: 위 Linux 제어 fixture 검사(가짜 binary, 생성 0).
