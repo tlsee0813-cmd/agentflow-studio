@@ -1,5 +1,10 @@
 # AgentFlow Studio 제품 기준과 공개 버전
 
+> **현재 검토 안내(2026-10-30): [설계 검토 시작점](REVIEW_START_HERE_KO.md)을 먼저 읽으세요.** 최신 개발 코드·제한 공개142·기존 공개73과 브랜치 보관 상태를 구분해 안내합니다. 아래 본문은 각 작성 시점의 역사 기록이며 현재 판본 안내를 대체하지 않습니다.
+
+## 기존 기록 (원문 보존)
+
+
 2026-10-24 KST. **현재는 Studio43의 로컬 실제 AI 데모다.** 사용자가42의 시각·사용 경험을 반려해 프로젝트 입구, 창에 고정된 지도, 선택한 부분의 기록·짧은 AI 답변으로 기본 화면을 다시 구성했다. [PR25](https://github.com/tlsee0813-cmd/agentflow-studio/pull/25) · [로컬 실행](../app/continuity/README.md) · [현재 상태와 실행 근거](cycles/ACTIVE.md).
 
 source `00ca5753e46d34c42a535f7acbcea9b0a88d16b2`, app tree `c342d89bdc8a4edecd51d4e1c8d7d3124a57dca7`, merge `af4675b881f85e3e9ad6457478f97ab001f9fa3c`. 최종 source의 [Ubuntu·Windows CI](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40076048672) 모두 성공했다. 실제 AI는 사용자 PC의 비공개 env 키로 실행하며 별도 Sites 배포는 중단했다. Pages `27505ed018676f87c725eae742c488c471a121e5`는 같은 화면의 정적 체험으로, AI 미연결을 표시하고 이전 preview 저장 공간을 보존한다. 자동 로그 수집·프로젝트 연결은 아직 미구현이다. 예제와 실제 수신 성공을 혼동하지 않는다.

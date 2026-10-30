@@ -1,0 +1,93 @@
+[
+  {
+    "name": "public73",
+    "base": "https://agentflow-studio.tlsee0813.workers.dev",
+    "checkedAt": "2026-10-30T07:10:02.914Z",
+    "paths": [
+      {
+        "path": "/",
+        "status": 200,
+        "finalUrl": "https://agentflow-studio.tlsee0813.workers.dev/",
+        "bytes": 9853,
+        "sha256": "ca6477cbb18c11bf8615dc9097a8e5f3b63290a97ec56338969daf6a02173fdf",
+        "title": "AgentFlow Studio"
+      },
+      {
+        "path": "/BUILD.txt",
+        "status": 200,
+        "finalUrl": "https://agentflow-studio.tlsee0813.workers.dev/BUILD.txt",
+        "bytes": 89,
+        "sha256": "e17b6bbda1240060a91e626e0ab47fa7c17e07f1e0536657fc7c2217080a5e8d",
+        "build": "AgentFlow Studio\nsource=26b24b935567a95d101720cbf0e06d188d8765d9\nhost=Cloudflare Workers\n"
+      }
+    ]
+  },
+  {
+    "name": "existing-map142",
+    "base": "https://agentflow-studio-existing-map-124.tlsee0813.workers.dev",
+    "checkedAt": "2026-10-30T07:10:03.845Z",
+    "paths": [
+      {
+        "path": "/",
+        "status": 200,
+        "finalUrl": "https://agentflow-studio-existing-map-124.tlsee0813.workers.dev/",
+        "bytes": 9976,
+        "sha256": "12d4d87a03b1ab872d6f267a1f2817a3f0543b660cf96cd2a7c0362275309d61",
+        "title": "AgentFlow Studio"
+      },
+      {
+        "path": "/BUILD.txt",
+        "status": 200,
+        "finalUrl": "https://agentflow-studio-existing-map-124.tlsee0813.workers.dev/BUILD.txt",
+        "bytes": 110,
+        "sha256": "dbbfb311a5d1551437c33b2c53d2405057365713247d6fc66722003f727ed33b",
+        "build": "AgentFlow Studio\nsource=76e3dc8a2939a4055ab1b99526b5cc1c98fd75e7\nhost=Cloudflare Workers\nrelease=existing-map\n"
+      }
+    ]
+  },
+  {
+    "name": "legacy-pages",
+    "base": "https://tlsee0813-cmd.github.io/agentflow-studio",
+    "checkedAt": "2026-10-30T07:10:04.779Z",
+    "paths": [
+      {
+        "path": "/",
+        "status": 200,
+        "finalUrl": "https://tlsee0813-cmd.github.io/agentflow-studio/",
+        "bytes": 9853,
+        "sha256": "4280006a7d68c6f70c6142b900b89f170d907e3892a8dd120f0b915a8252696a",
+        "title": "AgentFlow Studio"
+      },
+      {
+        "path": "/BUILD.txt",
+        "status": 200,
+        "finalUrl": "https://tlsee0813-cmd.github.io/agentflow-studio/BUILD.txt",
+        "bytes": 144,
+        "sha256": "3e95fb2cffa6f17293861a83cf00211b44ab6b786286b7edb8249f8d0aa9cf7d",
+        "build": "AgentFlow Studio auxiliary static build\nsource=26b24b935567a95d101720cbf0e06d188d8765d9\nprimary=https://agentflow-studio.tlsee0813.workers.dev/\n"
+      }
+    ]
+  },
+  {
+    "name": "local-pc",
+    "base": "http://127.0.0.1:4327",
+    "checkedAt": "2026-10-30T07:10:05.482Z",
+    "paths": [
+      {
+        "path": "/",
+        "status": 200,
+        "finalUrl": "http://127.0.0.1:4327/",
+        "bytes": 9719,
+        "sha256": "419ff7ca094d0e0f02a57c7a426a4c922ed7856c433cbcdb10428c449a9aae00",
+        "title": "AgentFlow Studio"
+      },
+      {
+        "path": "/BUILD.txt",
+        "status": 404,
+        "finalUrl": "http://127.0.0.1:4327/BUILD.txt",
+        "bytes": 30,
+        "sha256": "0fe0c0acf4499fe6dbf3ea3bb6f4126a1ae537b38b4ad40063cd00f2a86f3c18"
+      }
+    ]
+  }
+]

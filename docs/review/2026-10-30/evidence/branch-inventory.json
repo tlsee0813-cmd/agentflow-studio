@@ -1,0 +1,2310 @@
+[
+  {
+    "branch": "candidate/work-reference-29-fix2",
+    "originalSha": "aa0938ecbe96ec5fdb15eb4783e865bf7ab70c7b",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/candidate/work-reference-29-fix2",
+      "candidate/work-reference-29-fix2"
+    ],
+    "includedIn": [
+      "refs/heads/checkpoint/2026-10-15",
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "checkpoint/2026-10-15",
+    "originalSha": "a43b46d4e44cdf139ea6ae3d582fa9816578f7a9",
+    "disposition": "RETAINED_CURRENT_OR_PR_DEPENDENCY",
+    "archiveTags": [],
+    "includedIn": [],
+    "pullRequests": [
+      {
+        "number": 3,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 4,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 5,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 6,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 7,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 8,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 9,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 10,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 11,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 12,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 13,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 14,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 15,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 16,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 17,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 18,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 19,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 20,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 21,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 22,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 23,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 24,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 25,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 26,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 27,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 28,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 29,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 30,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 31,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 32,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 33,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 34,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 35,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 36,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 37,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 38,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 39,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 40,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 41,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 42,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 43,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      },
+      {
+        "number": 44,
+        "stateBefore": "open",
+        "mergedBefore": false
+      },
+      {
+        "number": 46,
+        "stateBefore": "open",
+        "mergedBefore": false
+      },
+      {
+        "number": 69,
+        "stateBefore": "open",
+        "mergedBefore": false
+      },
+      {
+        "number": 70,
+        "stateBefore": "open",
+        "mergedBefore": false
+      },
+      {
+        "number": 71,
+        "stateBefore": "open",
+        "mergedBefore": false
+      },
+      {
+        "number": 72,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "총괄 인수인계와 보존 기준이며 열린 PR의 base이므로 반드시 유지."
+  },
+  {
+    "branch": "delivery/ui02-fix3-evidence",
+    "originalSha": "fd79e7e74b0956bcb8eb9878cfdaa62254688c49",
+    "disposition": "RETAINED_INDEPENDENT_HISTORY",
+    "archiveTags": [],
+    "includedIn": [],
+    "pullRequests": [],
+    "reason": "지정된 유지 기준에 정확한 tip이 포함되지 않은 독자 계보이다. PR merged 상태만으로 원래 커밋 보존을 증명할 수 없어 유지한다."
+  },
+  {
+    "branch": "design/study51-atlas",
+    "originalSha": "8c63010287014e6fb0bf9161c2faba671bf9d31b",
+    "disposition": "RETAINED_INDEPENDENT_HISTORY",
+    "archiveTags": [],
+    "includedIn": [],
+    "pullRequests": [],
+    "reason": "지정된 유지 기준에 정확한 tip이 포함되지 않은 독자 계보이다. PR merged 상태만으로 원래 커밋 보존을 증명할 수 없어 유지한다."
+  },
+  {
+    "branch": "design/study51-sections",
+    "originalSha": "08726b96b366c6327b3e198f1d48f526e4617843",
+    "disposition": "RETAINED_INDEPENDENT_HISTORY",
+    "archiveTags": [],
+    "includedIn": [],
+    "pullRequests": [],
+    "reason": "지정된 유지 기준에 정확한 tip이 포함되지 않은 독자 계보이다. PR merged 상태만으로 원래 커밋 보존을 증명할 수 없어 유지한다."
+  },
+  {
+    "branch": "gh-pages",
+    "originalSha": "cddc0634a535e7fb53951ad9d1ee40a9e4b7b347",
+    "disposition": "RETAINED_CURRENT_OR_PR_DEPENDENCY",
+    "archiveTags": [],
+    "includedIn": [],
+    "pullRequests": [],
+    "reason": "게시 이력과 웹 진입 자료의 브랜치이므로 반드시 유지."
+  },
+  {
+    "branch": "main",
+    "originalSha": "896dcf3848fec70357d0f9bd4fd6c09cab70db37",
+    "disposition": "RETAINED_CURRENT_OR_PR_DEPENDENCY",
+    "archiveTags": [],
+    "includedIn": [],
+    "pullRequests": [
+      {
+        "number": 1,
+        "stateBefore": "closed",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "기본 브랜치이므로 반드시 유지."
+  },
+  {
+    "branch": "product/area-understanding-17",
+    "originalSha": "f7f8176f1b78834a62dad623efead6c2c820344d",
+    "disposition": "RETAINED_INDEPENDENT_HISTORY",
+    "archiveTags": [],
+    "includedIn": [],
+    "pullRequests": [
+      {
+        "number": 8,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "지정된 유지 기준에 정확한 tip이 포함되지 않은 독자 계보이다. PR merged 상태만으로 원래 커밋 보존을 증명할 수 없어 유지한다."
+  },
+  {
+    "branch": "product/blank-project-21",
+    "originalSha": "799077ea2f645f1753f29da7fe9d4b50a81971e6",
+    "disposition": "RETAINED_INDEPENDENT_HISTORY",
+    "archiveTags": [],
+    "includedIn": [],
+    "pullRequests": [
+      {
+        "number": 12,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "지정된 유지 기준에 정확한 tip이 포함되지 않은 독자 계보이다. PR merged 상태만으로 원래 커밋 보존을 증명할 수 없어 유지한다."
+  },
+  {
+    "branch": "product/branch-records-31",
+    "originalSha": "72940a043d7a7fdc225a9582ce48831fa0418cc0",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/product/branch-records-31",
+      "product/branch-records-31"
+    ],
+    "includedIn": [
+      "refs/heads/checkpoint/2026-10-15",
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [
+      {
+        "number": 16,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "product/correction-context-23",
+    "originalSha": "689c47888fb7ab5040d184c2d36f2adff8f2a575",
+    "disposition": "RETAINED_INDEPENDENT_HISTORY",
+    "archiveTags": [],
+    "includedIn": [],
+    "pullRequests": [
+      {
+        "number": 13,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "지정된 유지 기준에 정확한 tip이 포함되지 않은 독자 계보이다. PR merged 상태만으로 원래 커밋 보존을 증명할 수 없어 유지한다."
+  },
+  {
+    "branch": "product/description-refresh-27",
+    "originalSha": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/product/description-refresh-27",
+      "product/description-refresh-27"
+    ],
+    "includedIn": [
+      "refs/heads/checkpoint/2026-10-15",
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [
+      {
+        "number": 14,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "product/entry-integration-38",
+    "originalSha": "c7329aa8b941791633d5f22da4ca105188aab0be",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/product/entry-integration-38",
+      "product/entry-integration-38"
+    ],
+    "includedIn": [
+      "refs/heads/checkpoint/2026-10-15",
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [
+      {
+        "number": 21,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "product/isolated-preview-35",
+    "originalSha": "81f8a32dcd12a6004274d38bb6edf1ff9a5cdafb",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/product/isolated-preview-35",
+      "product/isolated-preview-35"
+    ],
+    "includedIn": [
+      "refs/heads/checkpoint/2026-10-15",
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [
+      {
+        "number": 19,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "product/map-priority-36",
+    "originalSha": "38beb55922e3e982f0f32fddacd5e18a5e157a15",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/product/map-priority-36",
+      "product/map-priority-36"
+    ],
+    "includedIn": [
+      "refs/heads/checkpoint/2026-10-15",
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [
+      {
+        "number": 20,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "product/map-signals-34",
+    "originalSha": "e059ec6d90e195263121c21817a39ea9ad0534a7",
+    "disposition": "RETAINED_INDEPENDENT_HISTORY",
+    "archiveTags": [],
+    "includedIn": [],
+    "pullRequests": [],
+    "reason": "지정된 유지 기준에 정확한 tip이 포함되지 않은 독자 계보이다. PR merged 상태만으로 원래 커밋 보존을 증명할 수 없어 유지한다."
+  },
+  {
+    "branch": "product/mixed-depth-18",
+    "originalSha": "73fd6ff82ca035dd9b2e74385ce9194db0b57791",
+    "disposition": "RETAINED_INDEPENDENT_HISTORY",
+    "archiveTags": [],
+    "includedIn": [],
+    "pullRequests": [
+      {
+        "number": 9,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "지정된 유지 기준에 정확한 tip이 포함되지 않은 독자 계보이다. PR merged 상태만으로 원래 커밋 보존을 증명할 수 없어 유지한다."
+  },
+  {
+    "branch": "product/pc-map-space-13",
+    "originalSha": "606120500eeea50a20f00fb4678bced7a7d93d98",
+    "disposition": "RETAINED_INDEPENDENT_HISTORY",
+    "archiveTags": [],
+    "includedIn": [],
+    "pullRequests": [
+      {
+        "number": 4,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "지정된 유지 기준에 정확한 tip이 포함되지 않은 독자 계보이다. PR merged 상태만으로 원래 커밋 보존을 증명할 수 없어 유지한다."
+  },
+  {
+    "branch": "product/pc-reading-return-12",
+    "originalSha": "9613208f40f1f7f8506504ac6025f06e421edd4d",
+    "disposition": "RETAINED_INDEPENDENT_HISTORY",
+    "archiveTags": [],
+    "includedIn": [],
+    "pullRequests": [
+      {
+        "number": 3,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "지정된 유지 기준에 정확한 tip이 포함되지 않은 독자 계보이다. PR merged 상태만으로 원래 커밋 보존을 증명할 수 없어 유지한다."
+  },
+  {
+    "branch": "product/project-entry-37",
+    "originalSha": "0fa38e0b528c138465e46edea491cc45e06ebcfe",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/product/project-entry-37",
+      "product/project-entry-37"
+    ],
+    "includedIn": [
+      "refs/heads/checkpoint/2026-10-15",
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "product/project-home-15",
+    "originalSha": "1e51f0f9b56ed51e9ec4c529ca518aa256ad1ecf",
+    "disposition": "RETAINED_INDEPENDENT_HISTORY",
+    "archiveTags": [],
+    "includedIn": [],
+    "pullRequests": [
+      {
+        "number": 5,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "지정된 유지 기준에 정확한 tip이 포함되지 않은 독자 계보이다. PR merged 상태만으로 원래 커밋 보존을 증명할 수 없어 유지한다."
+  },
+  {
+    "branch": "product/project-home-read-full-15",
+    "originalSha": "a5a48a715c41d1f8ea928af48a33d264c295a128",
+    "disposition": "RETAINED_INDEPENDENT_HISTORY",
+    "archiveTags": [],
+    "includedIn": [],
+    "pullRequests": [
+      {
+        "number": 6,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "지정된 유지 기준에 정확한 tip이 포함되지 않은 독자 계보이다. PR merged 상태만으로 원래 커밋 보존을 증명할 수 없어 유지한다."
+  },
+  {
+    "branch": "product/received-result-20",
+    "originalSha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+    "disposition": "RETAINED_INDEPENDENT_HISTORY",
+    "archiveTags": [],
+    "includedIn": [],
+    "pullRequests": [
+      {
+        "number": 11,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "지정된 유지 기준에 정확한 tip이 포함되지 않은 독자 계보이다. PR merged 상태만으로 원래 커밋 보존을 증명할 수 없어 유지한다."
+  },
+  {
+    "branch": "product/report-area-16",
+    "originalSha": "a0f0ae786c580a8919cede07db48d4397b58b114",
+    "disposition": "RETAINED_INDEPENDENT_HISTORY",
+    "archiveTags": [],
+    "includedIn": [],
+    "pullRequests": [
+      {
+        "number": 7,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "지정된 유지 기준에 정확한 tip이 포함되지 않은 독자 계보이다. PR merged 상태만으로 원래 커밋 보존을 증명할 수 없어 유지한다."
+  },
+  {
+    "branch": "product/task-context-33",
+    "originalSha": "bfa6591fab4b04727f25de721a41f755a88b3205",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/product/task-context-33",
+      "product/task-context-33"
+    ],
+    "includedIn": [
+      "refs/heads/checkpoint/2026-10-15",
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [
+      {
+        "number": 18,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "product/viewport-return-30",
+    "originalSha": "e5a5bf40d544cad62b4644ab13cc2958671b0869",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/product/viewport-return-30",
+      "product/viewport-return-30"
+    ],
+    "includedIn": [
+      "refs/heads/checkpoint/2026-10-15",
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [
+      {
+        "number": 17,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "product/work-reference-29",
+    "originalSha": "aa0938ecbe96ec5fdb15eb4783e865bf7ab70c7b",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/product/work-reference-29",
+      "product/work-reference-29"
+    ],
+    "includedIn": [
+      "refs/heads/checkpoint/2026-10-15",
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [
+      {
+        "number": 15,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "product/workspace-records-19",
+    "originalSha": "acfafd2dd6426e3fa6fa5443bd2e67d8461608c9",
+    "disposition": "RETAINED_INDEPENDENT_HISTORY",
+    "archiveTags": [],
+    "includedIn": [],
+    "pullRequests": [
+      {
+        "number": 10,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "지정된 유지 기준에 정확한 tip이 포함되지 않은 독자 계보이다. PR merged 상태만으로 원래 커밋 보존을 증명할 수 없어 유지한다."
+  },
+  {
+    "branch": "release/experience142-reading",
+    "originalSha": "76e3dc8a2939a4055ab1b99526b5cc1c98fd75e7",
+    "disposition": "RETAINED_CURRENT_OR_PR_DEPENDENCY",
+    "archiveTags": [],
+    "includedIn": [],
+    "pullRequests": [],
+    "reason": "정확한 제한 공개 조합의 별도 계보이므로 반드시 유지."
+  },
+  {
+    "branch": "research/map-reading-28",
+    "originalSha": "77c47af95a24f02f290560a86de62e95a63452d8",
+    "disposition": "RETAINED_INDEPENDENT_HISTORY",
+    "archiveTags": [],
+    "includedIn": [],
+    "pullRequests": [],
+    "reason": "지정된 유지 기준에 정확한 tip이 포함되지 않은 독자 계보이다. PR merged 상태만으로 원래 커밋 보존을 증명할 수 없어 유지한다."
+  },
+  {
+    "branch": "work/experience100-durable-map",
+    "originalSha": "7d7a832a9cb655c81e5f10244e742ba1b8ce6dd9",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience100-durable-map",
+      "work/experience100-durable-map"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 60,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "100 로컬 Node 작업 보관·복구 범위 수용"
+  },
+  {
+    "branch": "work/experience101-owned-cli-contract",
+    "originalSha": "357e9a301fc910c95a3522de3564a9f02863b3ba",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience101-owned-cli-contract",
+      "work/experience101-owned-cli-contract"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 61,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience102-owned-cli-preview",
+    "originalSha": "7852dde4bc5876cd91685fe2bfa7b53817e6e55a",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience102-owned-cli-preview",
+      "work/experience102-owned-cli-preview"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 61,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "102 비기본 owned CLI preview 연결 범위 수용"
+  },
+  {
+    "branch": "work/experience103-zephyr-owned-observation",
+    "originalSha": "8737246fd1a445f4a5a74bee90e16da976602cf5",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience103-zephyr-owned-observation",
+      "work/experience103-zephyr-owned-observation"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience104-zephyr-config-correction",
+    "originalSha": "3b85be52b1366c3a82624b68ebad1d7462906802",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience104-zephyr-config-correction",
+      "work/experience104-zephyr-config-correction"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience105-request-flow",
+    "originalSha": "969f1678c998774bbf828ce608f84ecc9d3308b4",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience105-request-flow",
+      "work/experience105-request-flow"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 62,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience106-plan-uncertainty",
+    "originalSha": "6657689345aab21fa68e53df55b166a9eaf4504a",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience106-plan-uncertainty",
+      "work/experience106-plan-uncertainty"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 62,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "106 중립 확인 사항·요청 읽기 구현 수용"
+  },
+  {
+    "branch": "work/experience107-request-continuation",
+    "originalSha": "bcae7a843705a668a0aabe1872dc7cb5cabd92e7",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience107-request-continuation",
+      "work/experience107-request-continuation"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 63,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience108-scope-intent-authority",
+    "originalSha": "18ffeb69d4e8dd78641794c176dbb50e5f65a923",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience108-scope-intent-authority",
+      "work/experience108-scope-intent-authority"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 63,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "108 scope 원요구 세부조건 권위 구현 수용"
+  },
+  {
+    "branch": "work/experience109-scope-continuation",
+    "originalSha": "dc430bab514e2213920ecbc83201b7e8f2c09fa2",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience109-scope-continuation",
+      "work/experience109-scope-continuation"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience110-label-guide-prototype",
+    "originalSha": "94e6f7048b9624e60ad23786e59d500ba07cfebe",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience110-label-guide-prototype",
+      "work/experience110-label-guide-prototype"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience111-return-reading",
+    "originalSha": "83d545dc5192a86556cfaffb70a6ec86526eda14",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience111-return-reading",
+      "work/experience111-return-reading"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 64,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience112-cli-continuation",
+    "originalSha": "c23c24db059121104d016fc888ab7f4aeb4a9190",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience112-cli-continuation",
+      "work/experience112-cli-continuation"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 64,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "112 CLI 후속 읽기 opt-in·실행 결속 구현 수용"
+  },
+  {
+    "branch": "work/experience113-return-cli",
+    "originalSha": "ec6b3c49faac0d8081ff44e2c69653ebfd7d56c6",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience113-return-cli",
+      "work/experience113-return-cli"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 65,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience114-source-entry",
+    "originalSha": "e42ba06043f7bb16ec9a1c664bee7334a1d4bf3d",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience114-source-entry",
+      "work/experience114-source-entry"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 65,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "114 자료 종류·출처 입력 및 보존 범위 수용"
+  },
+  {
+    "branch": "work/experience115-typed-return",
+    "originalSha": "06c144315782a6108725f8161b4b9987dab2f7d8",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience115-typed-return",
+      "work/experience115-typed-return"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 66,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience116-condition-reference",
+    "originalSha": "16e066e56bfffa1d16b2aad3b6956cf5ec66cd8f",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience116-condition-reference",
+      "work/experience116-condition-reference"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 66,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "116 후속 조건 원문 참조 계약·정상 PC 경로 수용"
+  },
+  {
+    "branch": "work/experience117-condition-return",
+    "originalSha": "19a89e097056e1ccb8cc1b2626455933a5f17cee",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience117-condition-return",
+      "work/experience117-condition-return"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 67,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience118-condition-selection",
+    "originalSha": "dccbcce0b9d116cb1e85155cab282fece76395d7",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience118-condition-selection",
+      "work/experience118-condition-selection"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 67,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "118 조건 구간 선택 안내·prompt 결속 구현 수용"
+  },
+  {
+    "branch": "work/experience119-condition-return",
+    "originalSha": "4858121f20e97e9c10ab523b1a8945a5ba003064",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience119-condition-return",
+      "work/experience119-condition-return"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 68,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience120-reference-vocabulary",
+    "originalSha": "14f7fa23f4c7691a1827f4f7891fad2ba5cbe451",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience120-reference-vocabulary",
+      "work/experience120-reference-vocabulary"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 68,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "120 ID 어휘 안내·거절 진단 범위 수용"
+  },
+  {
+    "branch": "work/experience121-reference-return",
+    "originalSha": "1d72b74f3f785e9504035f453a10a78d06949bab",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience121-reference-return",
+      "work/experience121-reference-return"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience122-layout-preservation",
+    "originalSha": "b8e9d5d4c56c7f2490dfe3996d83697f959310fa",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience122-layout-preservation",
+      "work/experience122-layout-preservation"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience123-first-reading",
+    "originalSha": "5cfc1d14b8cca51a9b2a0d3dad8303f30df1bb15",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience123-first-reading",
+      "work/experience123-first-reading"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 69,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "123 PC 읽기·시작·초안 보존 범위 수용"
+  },
+  {
+    "branch": "work/experience124-scoped-release",
+    "originalSha": "e50649b90328895a1f101a679c2657574f13344e",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience124-scoped-release",
+      "work/experience124-scoped-release"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 70,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "124 기존 지도 제한 Worker·진입 안내 구현 수용 및125 별도 전달 기록"
+  },
+  {
+    "branch": "work/experience125-release-delivery",
+    "originalSha": "f5d2f24188e89d4f0a035e8d57b85994a2924961",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience125-release-delivery",
+      "work/experience125-release-delivery"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience126-connected-reading",
+    "originalSha": "2f9d1efd95e03a4dc84199ff92b0fc9c5a023ed2",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience126-connected-reading",
+      "work/experience126-connected-reading"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 71,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "126 연결된 반환 읽기 UI 수용 및127 별도 전달 기록"
+  },
+  {
+    "branch": "work/experience127-reading-delivery",
+    "originalSha": "8a3bf347364e9615f3023d59bf5604835455d3f0",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience127-reading-delivery",
+      "work/experience127-reading-delivery"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience128-pc-entry",
+    "originalSha": "46c3cf270aff7d588babcd2a0ed0050d9489f3cc",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience128-pc-entry",
+      "work/experience128-pc-entry"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 72,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "128 선택형 PC 입구·정상 종료 범위 수용"
+  },
+  {
+    "branch": "work/experience129-normal-first-map",
+    "originalSha": "5f95d264059528c27c6d5afa2cfde5ce210e1982",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience129-normal-first-map",
+      "work/experience129-normal-first-map"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience130-pc-continuation",
+    "originalSha": "fe1ea972d902cc3a176268bf592c7e49123b5aa9",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience130-pc-continuation",
+      "work/experience130-pc-continuation"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 73,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience131-scope-budget",
+    "originalSha": "ef0780ba54763f9ce259aa89f862c92b215df827",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience131-scope-budget",
+      "work/experience131-scope-budget"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 73,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "131 scope 유한 예산·타이머 구현 수용"
+  },
+  {
+    "branch": "work/experience132-scope-continuation",
+    "originalSha": "1096a10003fa1cd8b0c91b8eeb6dd8bab1b47a20",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience132-scope-continuation",
+      "work/experience132-scope-continuation"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 74,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience133-scope-time-authority",
+    "originalSha": "1ca0a446bf982cd758bc1f64919968b430d6de17",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience133-scope-time-authority",
+      "work/experience133-scope-time-authority"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 74,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "133 시점/판본 근거 지침 구현 수용;134 단일 scope 사례 한정 수용"
+  },
+  {
+    "branch": "work/experience134-scope-time-observation",
+    "originalSha": "324f6193135c81f3f75e919b26e14b662e608b55",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience134-scope-time-observation",
+      "work/experience134-scope-time-observation"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 75,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience135-withdrawal-target-reading",
+    "originalSha": "7a44c0530740d91a9fdfa0c7160f3a53168322e1",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience135-withdrawal-target-reading",
+      "work/experience135-withdrawal-target-reading"
+    ],
+    "includedIn": [
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 75,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "135 정확한 철회 대상 읽기 UI 범위 수용"
+  },
+  {
+    "branch": "work/experience136-actual-return",
+    "originalSha": "1658ed617916ef4857c6b6247abecd6e47bd0eb0",
+    "disposition": "RETAINED_CURRENT_OR_PR_DEPENDENCY",
+    "archiveTags": [],
+    "includedIn": [
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 76,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "열린 PR의 head 또는 base이다. 다른 기준에 포함되어도 브랜치와 PR 관계를 보존하며 자동 폐쇄·삭제를 권고하지 않는다."
+  },
+  {
+    "branch": "work/experience137-contract-diagnostics",
+    "originalSha": "ae3fc28c8ea940a79386ace4e219eedb4b534fda",
+    "disposition": "RETAINED_CURRENT_OR_PR_DEPENDENCY",
+    "archiveTags": [],
+    "includedIn": [
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 76,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "열린 PR의 head 또는 base이다. 다른 기준에 포함되어도 브랜치와 PR 관계를 보존하며 자동 폐쇄·삭제를 권고하지 않는다."
+  },
+  {
+    "branch": "work/experience138-reading-delivery",
+    "originalSha": "c7cbe1e28b5587538c8fb26256eb1e89dbe99b6d",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience138-reading-delivery",
+      "work/experience138-reading-delivery"
+    ],
+    "includedIn": [
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience139-normal-micro",
+    "originalSha": "4c5ca8bf0dbd3a95d3d0f4fe7efc2bfaea2c3929",
+    "disposition": "RETAINED_CURRENT_OR_PR_DEPENDENCY",
+    "archiveTags": [],
+    "includedIn": [
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 77,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "열린 PR의 head 또는 base이다. 다른 기준에 포함되어도 브랜치와 PR 관계를 보존하며 자동 폐쇄·삭제를 권고하지 않는다."
+  },
+  {
+    "branch": "work/experience140-part-reading",
+    "originalSha": "284613c8754719fe3f008adfd6398e259ed1de79",
+    "disposition": "RETAINED_CURRENT_OR_PR_DEPENDENCY",
+    "archiveTags": [],
+    "includedIn": [
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 77,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "열린 PR의 head 또는 base이다. 다른 기준에 포함되어도 브랜치와 PR 관계를 보존하며 자동 폐쇄·삭제를 권고하지 않는다."
+  },
+  {
+    "branch": "work/experience141-question-draft-request",
+    "originalSha": "34a272b0af3928fe9a75a006e7f862fbd40bd147",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience141-question-draft-request",
+      "work/experience141-question-draft-request"
+    ],
+    "includedIn": [
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience142-reading-delivery",
+    "originalSha": "1e85b729d5e02c235ca47d457b47af2d07d36a07",
+    "disposition": "RETAINED_CURRENT_OR_PR_DEPENDENCY",
+    "archiveTags": [],
+    "includedIn": [],
+    "pullRequests": [],
+    "reason": "최신 작업·142 완료 및 중지 인수인계 기준이므로 반드시 유지."
+  },
+  {
+    "branch": "work/experience63-contract-fixes",
+    "originalSha": "71651cde46bb88d6725a69d2038f59172d2856fc",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience63-contract-fixes",
+      "work/experience63-contract-fixes"
+    ],
+    "includedIn": [
+      "refs/heads/checkpoint/2026-10-15",
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience63-integration",
+    "originalSha": "3b28ac0133f7ad0fe82f44e287b0a7e75e4440ac",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience63-integration",
+      "work/experience63-integration"
+    ],
+    "includedIn": [
+      "refs/heads/checkpoint/2026-10-15",
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [
+      {
+        "number": 35,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience63-return-reading",
+    "originalSha": "64220ef44526e92820ebae26c828a546d4ba81a5",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience63-return-reading",
+      "work/experience63-return-reading"
+    ],
+    "includedIn": [
+      "refs/heads/checkpoint/2026-10-15",
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience64-relation-reading",
+    "originalSha": "f5036013f4d18f24c02eadb354c45816f2de9110",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience64-relation-reading",
+      "work/experience64-relation-reading"
+    ],
+    "includedIn": [
+      "refs/heads/checkpoint/2026-10-15",
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [
+      {
+        "number": 36,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience65-change-workspace",
+    "originalSha": "3764788fc07dd99a2861f8136717e74ea6e91dd0",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience65-change-workspace",
+      "work/experience65-change-workspace"
+    ],
+    "includedIn": [
+      "refs/heads/checkpoint/2026-10-15",
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [
+      {
+        "number": 37,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience66-complex-reading",
+    "originalSha": "d037ef01f4a819b250d161e9e4229500a707bb4c",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience66-complex-reading",
+      "work/experience66-complex-reading"
+    ],
+    "includedIn": [
+      "refs/heads/checkpoint/2026-10-15",
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [
+      {
+        "number": 38,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience67-polish",
+    "originalSha": "0dc84a1703bc9f1dbc785de8bee51d90bebd69ba",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience67-polish",
+      "work/experience67-polish"
+    ],
+    "includedIn": [
+      "refs/heads/checkpoint/2026-10-15",
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [
+      {
+        "number": 39,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience69-record-reading",
+    "originalSha": "a5a3f537323a8dde75964be70076ae997a5ffa60",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience69-record-reading",
+      "work/experience69-record-reading"
+    ],
+    "includedIn": [
+      "refs/heads/checkpoint/2026-10-15",
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [
+      {
+        "number": 40,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience70-grounded-map",
+    "originalSha": "4e160961b7234fa96cd4642883f73d48d7396226",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience70-grounded-map",
+      "work/experience70-grounded-map"
+    ],
+    "includedIn": [
+      "refs/heads/checkpoint/2026-10-15",
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [
+      {
+        "number": 41,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience71-request-return",
+    "originalSha": "4e160961b7234fa96cd4642883f73d48d7396226",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience71-request-return",
+      "work/experience71-request-return"
+    ],
+    "includedIn": [
+      "refs/heads/checkpoint/2026-10-15",
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience72-reading-context",
+    "originalSha": "9b5ee83bae19ec913cfa05376146b1846e2f4465",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience72-reading-context",
+      "work/experience72-reading-context"
+    ],
+    "includedIn": [
+      "refs/heads/checkpoint/2026-10-15",
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [
+      {
+        "number": 42,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience73-current-reports",
+    "originalSha": "26b24b935567a95d101720cbf0e06d188d8765d9",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience73-current-reports",
+      "work/experience73-current-reports"
+    ],
+    "includedIn": [
+      "refs/heads/checkpoint/2026-10-15",
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [
+      {
+        "number": 43,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience74-grounded-map",
+    "originalSha": "d971d0c6a042e57dd87ec7a2a44ab2da1826e7d4",
+    "disposition": "RETAINED_CURRENT_OR_PR_DEPENDENCY",
+    "archiveTags": [],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [
+      {
+        "number": 44,
+        "stateBefore": "open",
+        "mergedBefore": false
+      },
+      {
+        "number": 45,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "열린 PR의 head 또는 base이다. 다른 기준에 포함되어도 브랜치와 PR 관계를 보존하며 자동 폐쇄·삭제를 권고하지 않는다."
+  },
+  {
+    "branch": "work/experience75-context-reading",
+    "originalSha": "693d0c7e022bc76b5334b0dd4cf0e6f04ef028ff",
+    "disposition": "RETAINED_CURRENT_OR_PR_DEPENDENCY",
+    "archiveTags": [],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 45,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "사용자가 지정한 UI75 보호 기준이자 열린 PR45의 head이므로 반드시 유지."
+  },
+  {
+    "branch": "work/experience76-explicit-uncertainty",
+    "originalSha": "9c27ef618cf50e6f9ccd8b40c5329083ef385094",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience76-explicit-uncertainty",
+      "work/experience76-explicit-uncertainty"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 46,
+        "stateBefore": "open",
+        "mergedBefore": false
+      },
+      {
+        "number": 47,
+        "stateBefore": "open",
+        "mergedBefore": false
+      },
+      {
+        "number": 48,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "76 명시 불확실성 계약·UI 범위 수용, 실제 개발 지시 전달 실패 유지"
+  },
+  {
+    "branch": "work/experience77-first-reading",
+    "originalSha": "fd1eb017ca4eafdded9900c767ff01f3689ba658",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience77-first-reading",
+      "work/experience77-first-reading"
+    ],
+    "includedIn": [],
+    "pullRequests": [
+      {
+        "number": 47,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "77 typed 첫 읽기 미채택 확정"
+  },
+  {
+    "branch": "work/experience78-response-failure",
+    "originalSha": "e20d7d5ca99a2d6406ca05af69c9fc0a57293e78",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience78-response-failure",
+      "work/experience78-response-failure"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 48,
+        "stateBefore": "open",
+        "mergedBefore": false
+      },
+      {
+        "number": 49,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "78 중단 응답 설명·기록 보존 범위 수용; 별도79 모델 비교 반려 유지"
+  },
+  {
+    "branch": "work/experience80-role-evidence",
+    "originalSha": "9c38769c36193e04589ba8005f26da84394fd63b",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience80-role-evidence",
+      "work/experience80-role-evidence"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 49,
+        "stateBefore": "open",
+        "mergedBefore": false
+      },
+      {
+        "number": 50,
+        "stateBefore": "open",
+        "mergedBefore": false
+      },
+      {
+        "number": 52,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "80 현재 설명의 정확 근거 접근 범위 수용"
+  },
+  {
+    "branch": "work/experience81-source-review",
+    "originalSha": "8da3cab6dc613d9ed6c6675d0ee1b5f80fb7e48c",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience81-source-review",
+      "work/experience81-source-review"
+    ],
+    "includedIn": [],
+    "pullRequests": [
+      {
+        "number": 50,
+        "stateBefore": "open",
+        "mergedBefore": false
+      },
+      {
+        "number": 51,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "81 원문 검토 검출기 미채택 확정"
+  },
+  {
+    "branch": "work/experience82-subject-first",
+    "originalSha": "28fda951e95bb2bd8739d4949443522c0dde857a",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience82-subject-first",
+      "work/experience82-subject-first"
+    ],
+    "includedIn": [],
+    "pullRequests": [
+      {
+        "number": 51,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "82 대상·조건 우선 생성 실험 미채택 확정"
+  },
+  {
+    "branch": "work/experience83-overview-reading",
+    "originalSha": "ef7f257618c32bbe0333ec32b9ec3bc79cd3ca03",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience83-overview-reading",
+      "work/experience83-overview-reading"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 52,
+        "stateBefore": "open",
+        "mergedBefore": false
+      },
+      {
+        "number": 53,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "83 범위/경계 읽기 UI 범위 수용"
+  },
+  {
+    "branch": "work/experience84-authoring-context",
+    "originalSha": "a2d89ad0dc0b8b19d63ab51e6dd82f184cdb0710",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience84-authoring-context",
+      "work/experience84-authoring-context"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 53,
+        "stateBefore": "open",
+        "mergedBefore": false
+      },
+      {
+        "number": 54,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "84 작성 맥락·저장/전달·복귀 범위 수용"
+  },
+  {
+    "branch": "work/experience85-real-context-reading",
+    "originalSha": "2b4363d233b47f8c9f394b40c7d16831ba51e9d3",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience85-real-context-reading",
+      "work/experience85-real-context-reading"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 54,
+        "stateBefore": "open",
+        "mergedBefore": false
+      },
+      {
+        "number": 55,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "85 제안 없는 분석 읽기와 실제 고정 사례 원문 왕복 범위 수용"
+  },
+  {
+    "branch": "work/experience87-analysis-reading-space",
+    "originalSha": "107318ac296ecbb1ce6734e630f8ec1f35eb9f6d",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience87-analysis-reading-space",
+      "work/experience87-analysis-reading-space"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 55,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "87 분석 자료 읽기·복귀 범위 수용"
+  },
+  {
+    "branch": "work/experience88-upgrade-boundary",
+    "originalSha": "ab8e45cdb34cdba8328c8cee369b010f346ed3ea",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience88-upgrade-boundary",
+      "work/experience88-upgrade-boundary"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience89-codex-map-path",
+    "originalSha": "4a30e485bc05c2f69d85c779fc6edc01c08f6da3",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience89-codex-map-path",
+      "work/experience89-codex-map-path"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience91-bounded-delivery",
+    "originalSha": "b3c9edf8483180009a0804a5f8d63dd06fb019a4",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience91-bounded-delivery",
+      "work/experience91-bounded-delivery"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience92-priority-delivery",
+    "originalSha": "bc3a02b9b4fa69252bd0e19ad5531f51dbdb20f6",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience92-priority-delivery",
+      "work/experience92-priority-delivery"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 56,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience93-request-return",
+    "originalSha": "4a188df9ae4631e4f0a81ff957c03abe9b48b024",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience93-request-return",
+      "work/experience93-request-return"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 56,
+        "stateBefore": "open",
+        "mergedBefore": false
+      },
+      {
+        "number": 57,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "93 요청문 읽기·복귀 범위 수용"
+  },
+  {
+    "branch": "work/experience94-request-reading",
+    "originalSha": "b3e2033783f391d9af1d1421fe7621cf4f23aba4",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience94-request-reading",
+      "work/experience94-request-reading"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 57,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "94 요청문 읽기·구판 보존·창 축소 수리 범위 수용"
+  },
+  {
+    "branch": "work/experience95-map-output-contract",
+    "originalSha": "d6edeeff5e33336388b03ee4497b791944c87006",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience95-map-output-contract",
+      "work/experience95-map-output-contract"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience96-schema-delivery",
+    "originalSha": "db47350e62cc5fef507541bc79270b1ad68cce9f",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience96-schema-delivery",
+      "work/experience96-schema-delivery"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 58,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/experience97-map-return",
+    "originalSha": "d1ae6be5935b07e888de9466282f8fecaac2d6a0",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience97-map-return",
+      "work/experience97-map-return"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 58,
+        "stateBefore": "open",
+        "mergedBefore": false
+      },
+      {
+        "number": 59,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "97 결과 보관·명시 반영·초안 보존 범위 수용"
+  },
+  {
+    "branch": "work/experience98-candidate-contract",
+    "originalSha": "033ef84cce35a6f34865a545c4d32cd2fbdbfa3f",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/experience98-candidate-contract",
+      "work/experience98-candidate-contract"
+    ],
+    "includedIn": [
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery"
+    ],
+    "pullRequests": [
+      {
+        "number": 59,
+        "stateBefore": "open",
+        "mergedBefore": false
+      },
+      {
+        "number": 60,
+        "stateBefore": "open",
+        "mergedBefore": false
+      }
+    ],
+    "reason": "98 후보 필수 계약 안내 구현 수용"
+  },
+  {
+    "branch": "work/visual59-anchored-lens",
+    "originalSha": "e46475853d627669ad7e2327338ce63fd50a5ec9",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/visual59-anchored-lens",
+      "work/visual59-anchored-lens"
+    ],
+    "includedIn": [
+      "refs/heads/checkpoint/2026-10-15",
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  },
+  {
+    "branch": "work/visual59-presentation-data",
+    "originalSha": "c61fc59396a8c6d61b1adbdc2683fdff0111a68e",
+    "disposition": "RETAINED_INDEPENDENT_HISTORY",
+    "archiveTags": [],
+    "includedIn": [],
+    "pullRequests": [],
+    "reason": "지정된 유지 기준에 정확한 tip이 포함되지 않은 독자 계보이다. PR merged 상태만으로 원래 커밋 보존을 증명할 수 없어 유지한다."
+  },
+  {
+    "branch": "work/visual62-composed-workspace",
+    "originalSha": "bcf88bbdcaa683b5d2e781a0ab97135ea6f00fb8",
+    "disposition": "ARCHIVED_HEAD_REMOVED",
+    "archiveTags": [
+      "archive/2026-10-30/work/visual62-composed-workspace",
+      "work/visual62-composed-workspace"
+    ],
+    "includedIn": [
+      "refs/heads/checkpoint/2026-10-15",
+      "refs/heads/release/experience142-reading",
+      "refs/heads/work/experience142-reading-delivery",
+      "refs/heads/work/experience75-context-reading"
+    ],
+    "pullRequests": [
+      {
+        "number": 34,
+        "stateBefore": "closed",
+        "mergedBefore": true
+      }
+    ],
+    "reason": "Completed historical tip; exact ancestor of retained anchor"
+  }
+]
