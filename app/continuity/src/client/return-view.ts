@@ -17,7 +17,7 @@ import { digestStore, askHash, makeReading, type Reading } from './digest-store.
 import { askDigest, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
 import { sessionText, recordParts, stamp, TOOL_NAME, type SessionSummary, type SessionDetail } from '../shared/session-import.js';
 import { readSessionFile, type SessionSources } from './session-source.js';
-import { WEB_RECORD_ASK } from '../shared/handover.js';
+import { WEB_RECORD_ASK, foldRecord } from '../shared/handover.js';
 import { PASTED_TEXT_LIMIT } from '../shared/types.js';
 import type { PlanOpened } from './plan-view.js';
 import type { PlanBundle } from './plan-store.js';
@@ -216,8 +216,9 @@ export function createReturnView(host: ReturnHost) {
     if (secretLike(text)) { s.pasteMsg = '키나 토큰처럼 보이는 글이 있어 저장하지 않았어요. 그 부분을 지우고 다시 저장하세요.'; render(); return; }
     // The box stays editable while saving: only the text that was saved leaves the draft. Whatever was written meanwhile stays,
     // and the box stays open with it. A pane closed or reopened meanwhile is another state: it is only told by the draft.
-    // Each session record in the draft is kept as its own record: a session is told by its header line at a record's start.
-    const st = s, parts = recordParts(text); st.saving = true; render();
+    // Each session record in the draft is kept as its own record: a session is told by its header line at a record's start. A
+    // handover document a pasted session started from is kept as one line, as the import keeps it.
+    const st = s, parts = recordParts(text).map(foldRecord); st.saving = true; render();
     const done = await host.paste(parts, st.pasteContext);
     st.saving = false;
     const kept = typeof done !== 'string', untouched = draftOf(key) === text;
@@ -292,7 +293,7 @@ export function createReturnView(host: ReturnHost) {
     const file = h('input', { type: 'file', class: 'rr-session-file', accept: '.jsonl,application/x-ndjson,application/json', 'aria-label': '세션 기록 파일 올리기', hidden: true }) as HTMLInputElement;
     file.addEventListener('change', () => { const f = file.files?.[0]; file.value = ''; if (f) void takeFile(f); });
     const others = h('div', { class: 'pp-row rr-session-ways' },
-      !current && state === 'none' ? h('button', { type: 'button', class: 'link-button rr-session-pick', title: '.claude 또는 .codex 폴더를 한 번 골라 두면 목록에서 바로 가져와요 (크롬·엣지)', onclick: async () => { if (await src.pick()) void loadSessions(); } }, '세션 폴더 고르기') : null,
+      !current && state === 'none' ? h('button', { type: 'button', class: 'link-button rr-session-pick', title: '.claude 또는 .codex 폴더를 한 번 골라 두면 목록에서 바로 가져와요 (크롬·엣지)', onclick: async () => { if (await src.pick()) void loadSessions(); else render(); } }, '세션 폴더 고르기') : null,
       !current && state === 'prompt' ? h('button', { type: 'button', class: 'link-button rr-session-grant', onclick: async () => { await src.grant(); if (src.current()) void loadSessions(); else render(); } }, '세션 폴더 다시 허용') : null,
       h('button', { type: 'button', class: 'link-button', title: 'Claude Code나 Codex의 .jsonl 세션 파일 하나를 골라 넣어요', disabled: !!p.reading, onclick: () => file.click() }, '세션 파일 올리기'), file,
       h('button', { type: 'button', class: 'link-button', title: '웹 AI 대화에 붙여 넣으면, 그 대화가 기록을 이 칸에 맞는 형식으로 써 줘요', onclick: () => void copyWebAsk(p) }, '웹 대화용 기록 요청 문구 복사'));
@@ -317,6 +318,8 @@ export function createReturnView(host: ReturnHost) {
         h('button', { type: 'button', class: 'link-button quiet', onclick: () => { p.open = false; render(); } }, '접기')),
       p.loading ? h('p', { class: 'fine' }, '세션을 찾는 중…') : null,
       p.error ? h('p', { class: 'pp-error', role: 'alert' }, p.error) : null,
+      // What the last look at the picked folders could not read (a folder gone, a walk cut short).
+      current?.kind === 'folder' && src.notice() ? h('p', { class: 'fine rr-sessions-notice' }, src.notice()) : null,
       p.list && !p.list.length ? h('p', { class: 'fine' }, `${tools}에서 세션을 찾지 못했어요.`) : null,
       p.list?.length ? filter : null,
       rows.length ? h('ul', { class: 'rr-session-list' }, ...rows) : p.list?.length ? h('p', { class: 'fine' }, '찾는 말과 맞는 세션이 없어요.') : null);

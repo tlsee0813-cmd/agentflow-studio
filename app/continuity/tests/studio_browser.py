@@ -2999,6 +2999,7 @@ def folder_sessions_flow(browser, base):
     page.locator("#sync-pill").click()
     page.locator("#sync-pill").click()
     expect(panel).to_contain_text("읽는 세션 폴더: .claude, me")
+    expect(panel.locator(".sync-source-notice")).to_have_text("이미 고른 폴더(me) 안에 있어서 따로 더하지 않았어요.")  # said why
     expect(panel.locator("[role=alert]")).to_have_count(0)
     page.locator("#sync-pill").click()
     page.locator("#lens").get_by_role("button", name="내 AI 세션에서 가져오기").click()

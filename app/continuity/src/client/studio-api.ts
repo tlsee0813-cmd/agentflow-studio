@@ -152,5 +152,6 @@ export const ERROR_TEXT: Record<string, string> = {
   NETWORK: 'AI 서버에 연결하지 못했어요.',
   SESSION_NOT_FOUND: '그 세션 기록을 찾지 못했어요. 목록을 새로 불러오세요.',
   SESSION_TOO_LARGE: '세션 기록 파일이 너무 커서 읽지 않았어요.',
+  SESSION_FOLDER_UNREADABLE: '고른 세션 폴더를 읽지 못했어요. 폴더를 옮겼거나 지웠다면 빼고 다시 골라 주세요.',
   NO_SERVER: '이 페이지에는 연결된 AI 서버가 없어요.'
 };

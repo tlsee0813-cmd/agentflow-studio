@@ -41,10 +41,11 @@ async function saveRoots(roots: DirHandle[]): Promise<void> {
 }
 
 /** A whole session file read in pieces into the tool's parser: a file of hundreds of MB is never held whole as text. Each piece is
- * looked through once (a line is joined only when its end comes), and a line longer than LINE_CHARS is skipped, as on the server.
+ * looked through once (a line is joined only when its end comes), and a line longer than the server's cap on one line
+ * (SESSION_LIMITS.lineBytes, counted here in characters) is skipped, as on the server.
  * With its handle, a file an agent is still writing is read on through a fresh look when the first goes stale (Chrome cannot read
  * a File once the file on disk changed), up to the size it had: a session file only ever has lines added at its end. */
-const LINE_CHARS = 64 * 1024 * 1024, READ_TRIES = 20;
+const LINE_CHARS = SESSION_LIMITS.lineBytes, READ_TRIES = 20;
 async function readParsed(tool: SessionTool, file: File, handle: FileHandle | null = null): Promise<ParsedSession> {
   const parser = sessionParser(tool), decoder = new TextDecoder(), end = file.size;
   let reader = file.stream().getReader(), at = 0, tries = 0, line: string[] = [], len = 0;
@@ -83,8 +84,8 @@ const WALK_DEPTH = 6, WALK_ENTRIES = 20000, WALK_FILES = 20000;
 // Never sessions of their own: archived Codex threads (the server leaves them out too) and subagents' transcripts.
 const SKIP = new Set(['node_modules', 'archived_sessions', 'subagents']);
 /** A session file found. path: inside the picked folder, starting with its name (the old id was made of it); key: the same, per
- * picked folder (two may share a name). */
-interface Found { tool: SessionTool | null; path: string; key: string; handle: FileHandle; size: number; at: number }
+ * picked folder (two may share a name); dir: the folder it lies in (a Claude Code session's subagents are in a folder beside it). */
+interface Found { tool: SessionTool | null; path: string; key: string; handle: FileHandle; dir: DirHandle; size: number; at: number }
 /** A folder's entries. One that vanished meanwhile (a session folder the tool cleaned up) is skipped; must: it has to be read. */
 async function entries(dir: DirHandle, must = false): Promise<Entry[]> {
   const out: Entry[] = [];
@@ -98,19 +99,19 @@ const newest = (list: Entry[]) => dirs(list).sort((a, b) => (a.name < b.name ? 1
  * tools' folders in it) not readable at all rejects. */
 async function walk(root: DirHandle, rootKey: string): Promise<{ found: Found[]; cut: boolean }> {
   const found: Found[] = [], top = await entries(root, true); let cut = false, seen = 0;
-  const add = async (e: FileHandle, path: string, tool: SessionTool | null) => {
+  const add = async (e: FileHandle, dir: DirHandle, path: string, tool: SessionTool | null) => {
     if (found.length >= WALK_FILES) { cut = true; return; }
     let file: File; try { file = await e.getFile(); } catch { return; }
-    if (file.size) found.push({ tool, path: `${root.name}/${path}`, key: `${rootKey}/${path}`, handle: e, size: file.size, at: file.lastModified });
+    if (file.size) found.push({ tool, path: `${root.name}/${path}`, key: `${rootKey}/${path}`, handle: e, dir, size: file.size, at: file.lastModified });
   };
   // Claude Code: projects/<folder>/<session>.jsonl (a session's own subfolder holds its subagents' and tools' files).
   const claude = async (list: Entry[], path: string) => {
-    for (const d of dirs(list)) for (const e of await entries(d)) { if (cut) return; if (e.kind === 'file' && e.name.endsWith('.jsonl')) await add(e, `${path}${d.name}/${e.name}`, 'claude'); }
+    for (const d of dirs(list)) for (const e of await entries(d)) { if (cut) return; if (e.kind === 'file' && e.name.endsWith('.jsonl')) await add(e, d, `${path}${d.name}/${e.name}`, 'claude'); }
   };
   // Codex: sessions/YYYY/MM/DD/rollout-*.jsonl, newest days first, so a bound cuts the oldest (archived_sessions is not read).
   const codex = async (list: Entry[], path: string) => {
     for (const y of newest(list)) for (const m of newest(await entries(y))) for (const d of newest(await entries(m)))
-      for (const e of await entries(d)) { if (cut) return; if (e.kind === 'file' && /^rollout-.*\.jsonl$/.test(e.name)) await add(e, `${path}${y.name}/${m.name}/${d.name}/${e.name}`, 'codex'); }
+      for (const e of await entries(d)) { if (cut) return; if (e.kind === 'file' && /^rollout-.*\.jsonl$/.test(e.name)) await add(e, d, `${path}${y.name}/${m.name}/${d.name}/${e.name}`, 'codex'); }
   };
   const tools = async (list: Entry[], path: string) => {
     const p = named(list, 'projects'), s = named(list, 'sessions');
@@ -118,14 +119,14 @@ async function walk(root: DirHandle, rootKey: string): Promise<{ found: Found[];
     return !!(p || s);
   };
   // Any other folder: its .jsonl files, the tool told by where they lie or else by their lines.
-  const any = async (list: AsyncIterable<Entry> | Entry[], path: string, depth: number): Promise<void> => {
+  const any = async (dir: DirHandle, list: AsyncIterable<Entry> | Entry[], path: string, depth: number): Promise<void> => {
     try {
       for await (const e of list) {
         if (cut) return; if (++seen > WALK_ENTRIES) { cut = true; return; }
-        if (e.kind === 'directory') { if (depth < WALK_DEPTH && !SKIP.has(e.name) && !(depth > 0 && e.name.startsWith('.'))) await any(e.values(), `${path}${e.name}/`, depth + 1); continue; }
+        if (e.kind === 'directory') { if (depth < WALK_DEPTH && !SKIP.has(e.name) && !(depth > 0 && e.name.startsWith('.'))) await any(e, e.values(), `${path}${e.name}/`, depth + 1); continue; }
         if (!e.name.endsWith('.jsonl')) continue;
         const p = `${path}${e.name}`;
-        await add(e, p, /(^|\/)projects\//.test(p) ? 'claude' : /(^|\/)sessions\/.*rollout-[^/]*\.jsonl$/.test(p) || /^rollout-/.test(e.name) ? 'codex' : null);
+        await add(e, dir, p, /(^|\/)projects\//.test(p) ? 'claude' : /(^|\/)sessions\/.*rollout-[^/]*\.jsonl$/.test(p) || /^rollout-/.test(e.name) ? 'codex' : null);
       }
     } catch { /* a folder that vanished meanwhile is skipped */ }
   };
@@ -136,7 +137,7 @@ async function walk(root: DirHandle, rootKey: string): Promise<{ found: Found[];
   else {
     let home = false;
     for (const n of ['.claude', '.codex']) { const d = named(top, n); if (d && (await tools(await entries(d, true), `${n}/`))) home = true; }
-    if (!home && !(await tools(top, ''))) await any(top, '', 0);
+    if (!home && !(await tools(top, ''))) await any(root, top, '', 0);
   }
   return { found, cut };
 }
@@ -175,8 +176,8 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
   const picker = (): Picker | null => (typeof window !== 'undefined' && typeof (window as unknown as { showDirectoryPicker?: Picker }).showDirectoryPicker === 'function' ? (window as unknown as { showDirectoryPicker: Picker }).showDirectoryPicker : null);
   // Per file: what its head said, while its size and time stay the same (a look every minute reads only what changed).
   const heads = new Map<string, Head>();
-  const known = new Map<string, { tool: SessionTool; handle: FileHandle }>();
-  // Per Codex file: which session started it, when it is a subagent's (from its first lines).
+  const known = new Map<string, Found & { tool: SessionTool }>();
+  // Per Codex file (and Claude Code agent-*.jsonl): which session started it, when it is a subagent's (from its first lines).
   const parents = new Map<string, { key: string; parent: string | null }>();
   // Each picked folder's own key for those (two picked folders may share a name).
   const rootKeys = new WeakMap<DirHandle, string>(); let rootCount = 0;
@@ -186,21 +187,32 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
   /** The picked folders as named on the page: two of one name (a Windows and a WSL .claude) are told apart by number. */
   const labels = () => roots.map(r => { const same = roots.filter(x => x.name === r.name); return same.length > 1 ? `${r.name} (${same.indexOf(r) + 1})` : r.name; });
 
-  /** The Codex subagent sessions a session started, among the files of the last walk (they begin after it). */
-  async function subagents(parsed: ParsedSession): Promise<ParsedSession[]> {
-    const out: ParsedSession[] = [], since = Date.parse(parsed.meta.startedAt ?? '') || 0;
-    if (!parsed.meta.thread) return out;
+  /** The subagent sessions a session started (they begin after it), as the server finds them. Codex: rollouts of the last walk
+   * naming it as parent. Claude Code: transcripts kept beside it (<session>/subagents/*.jsonl), or, in earlier versions, agent-*.jsonl
+   * in its project folder naming it by its sessionId. Only the files they changed are used. */
+  async function subagents(s: Found & { tool: SessionTool }, parsed: ParsedSession): Promise<ParsedSession[]> {
+    const out: ParsedSession[] = [], since = Date.parse(parsed.meta.startedAt ?? '') || 0, base = s.handle.name.replace(/\.jsonl$/, '');
+    const parent = s.tool === 'codex' ? parsed.meta.thread : base, folder = s.key.slice(0, s.key.lastIndexOf('/') + 1);
+    if (!parent) return out;
+    // Claude Code's own subagents folder is never walked (its files are not sessions): read here, each file this session's.
+    const beside = s.tool === 'claude' ? named(await entries(s.dir), base) : undefined, kept = beside && named(await entries(beside), 'subagents');
+    for (const e of kept ? await entries(kept) : []) {
+      if (e.kind !== 'file' || !e.name.endsWith('.jsonl')) continue;
+      try { if ((await e.getFile()).lastModified >= since) out.push(await readFile(e, 'claude')); } catch { /* too large, changed or gone */ }
+    }
+    const near = (f: Found) => (s.tool === 'codex' ? f.tool !== 'claude' : f.key.startsWith(folder) && !f.key.includes('/', folder.length) && f.key !== s.key && /^agent-.*\.jsonl$/.test(f.handle.name));
     for (const f of lastFound) {
-      if (f.tool === 'claude' || f.at < since || f.size > SESSION_LIMITS.fileBytes) continue;
+      if (!near(f) || f.at < since || f.size > SESSION_LIMITS.fileBytes) continue;
       let t = parents.get(f.key);
       // Each file is looked at afresh; one that cannot be read now is left out this time.
       try {
         if (t?.key !== `${f.size}:${f.at}`) t = await fresh(f.handle, async file => {
           const lines = jsonLines(await file.slice(0, SESSION_LIMITS.headBytes).text(), file.size > SESSION_LIMITS.headBytes);
-          return { key: `${file.size}:${file.lastModified}`, parent: (f.tool ?? sniffTool(lines)) === 'codex' ? parseSession('codex', lines).meta.parent : null };
+          const sid = s.tool === 'claude' ? lines.map(o => (o as { sessionId?: unknown } | null)?.sessionId).find((x): x is string => typeof x === 'string') ?? null : null;
+          return { key: `${file.size}:${file.lastModified}`, parent: s.tool === 'claude' ? sid : (f.tool ?? sniffTool(lines)) === 'codex' ? parseSession('codex', lines).meta.parent : null };
         });
         parents.set(f.key, t);
-        if (t.parent === parsed.meta.thread) out.push(await readFile(f.handle, 'codex'));
+        if (t.parent === parent) out.push(await readFile(f.handle, s.tool));
       } catch { /* changed or gone meanwhile */ }
     }
     return out;
@@ -243,7 +255,7 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
         const had = byId.get(h.row.id);
         if (had) { for (const a of h.row.aliases ?? []) if (!had.aliases?.includes(a)) had.aliases?.push(a); continue; }
         const row: SessionSummary = { ...h.row, aliases: [...(h.row.aliases ?? [])] }; byId.set(row.id, row);
-        known.set(row.id, { tool: row.tool, handle: f.handle });
+        known.set(row.id, { ...f, tool: row.tool });
         if (folder && !within(h.cwds, folder)) continue;
         out.push(row);
       }
@@ -254,7 +266,7 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
       if (!known.has(id)) await folderSource.list();
       const f = known.get(id); if (!f) throw Object.assign(new Error('SESSION_NOT_FOUND'), { code: 'SESSION_NOT_FOUND' });
       const parsed = await readFile(f.handle, f.tool);
-      const d = readSessionDetail(sessionDetail(id, f.tool, f.tool === 'codex' ? withSubagents(parsed, await subagents(parsed)) : parsed, SESSION_LIMITS, since));
+      const d = readSessionDetail(sessionDetail(id, f.tool, withSubagents(parsed, await subagents(f, parsed)), SESSION_LIMITS, since));
       if (!d) throw Object.assign(new Error('SESSION_NOT_FOUND'), { code: 'SESSION_NOT_FOUND' });
       return d;
     }

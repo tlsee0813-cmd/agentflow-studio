@@ -7,7 +7,7 @@ import { CLAIM_LABEL, candidateReading } from './map-reading.js';
 import { studioView, type PartView, type StudioView } from './studio.js';
 import { REL_LABEL } from './relation-groups.js';
 import { stamp } from './session-import.js';
-import { HANDOVER_TAG, quoteReceived, receivedHandovers } from './handover-mark.js';
+import { HANDOVER_TAG, foldHandover, quoteReceived, receivedHandovers } from './handover-mark.js';
 export { HANDOVER_TAG, foldHandover, handoverCode, receivedHandovers } from './handover-mark.js';
 
 /* ---------- which session a record came from ---------- */
@@ -25,6 +25,12 @@ export function sessionOrigin(text: string): SessionOrigin | null {
   const id = back(/^세션 ((?:claude|codex)-[0-9a-f]{24})$/); back(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}) 시작$/);
   const branch = back(/^브랜치 (.+)$/), cwd = back(/^작업 폴더 (.+)$/);
   return { id, tool, title: fields.join(' · ') || null, cwd, branch };
+}
+/** A session record pasted by hand (a web session's, written back with WEB_RECORD_ASK): each request folded as the import folds
+ * it, so a handover document the session started from is not kept again as a record of work. Any other text stays as written. */
+export function foldRecord(text: string): string {
+  if (!text.includes(HANDOVER_TAG) || !sessionOrigin(text)) return text;
+  return text.split(/^(?=── )/m).map(b => (b.startsWith('── 사용자 요청') ? foldHandover(b) : b)).join('');
 }
 const originKey = (o: SessionOrigin) => o.id ?? `${o.tool}|${o.title ?? ''}|${o.cwd ?? ''}`;
 export const originLabel = (o: Pick<SessionOrigin, 'tool' | 'title'>) => `${ORIGIN_NAME[o.tool]}${o.title ? ` 「${o.title}」` : ' 세션'}`;

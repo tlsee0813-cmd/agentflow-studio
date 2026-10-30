@@ -200,6 +200,8 @@ export function createAutoSync(host: AutoSyncHost) {
     pill.setAttribute('aria-expanded', String(panelOpen));
     pill.replaceChildren(h('i', { 'aria-hidden': 'true' }), h('span', {}, b ? `자동 연결 · ${name}${waiting ? ' · 허용 필요' : ''}` : '자동 연결 안 됨'));
     panel.hidden = !panelOpen; if (!panelOpen) return;
+    // A redraw (a look starting or ending, the folders found) keeps a path being typed in focus, caret and all.
+    const typing = panel.querySelector<HTMLInputElement>('.sync-path'), caret = typing && document.activeElement === typing ? [typing.selectionStart, typing.selectionEnd] as const : null;
     panel.replaceChildren();
     const setup = sourceSetup();
     if (b && !adding) {
@@ -240,13 +242,15 @@ export function createAutoSync(host: AutoSyncHost) {
       h('div', { class: 'pp-row sync-manual' }, input, h('button', { type: 'button', class: 'secondary small', onclick: () => connect(typed) }, '연결')),
       setup,
       b ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { adding = false; render(); } }, '취소') : null);
+    if (caret) { input.focus({ preventScroll: true }); input.setSelectionRange(caret[0], caret[1]); }
   }
   /** Where sessions come from when no local server reads them: the .claude / .codex folders picked in this browser. Null with a
    * server (it reads this PC's own folders). */
   function sourceSetup(): HTMLElement | null {
     const src = host.sources; if (src.usesServer()) return null;
     const state = src.folderState(), names = src.folders();
-    const pick = async () => { if (await src.pick()) { folders = null; foldersError = null; render(); void tick(true); } };
+    // A pick that added nothing (the folder is already read) says why, under the picked folders.
+    const pick = async () => { if (await src.pick()) { folders = null; foldersError = null; render(); void tick(true); } else render(); };
     const grant = async () => { await src.grant(); folders = null; foldersError = null; render(); void tick(true); };
     if (state === 'unsupported') return null;
     if (state === 'none') return h('div', { class: 'sync-source' },
@@ -254,6 +258,7 @@ export function createAutoSync(host: AutoSyncHost) {
       h('button', { type: 'button', class: 'primary small sync-pick-root', onclick: () => void pick() }, '세션 폴더 고르기'));
     return h('div', { class: 'sync-source' },
       h('p', { class: 'fine' }, `읽는 세션 폴더: ${names.join(', ')}`),
+      src.notice() ? h('p', { class: 'fine sync-source-notice' }, src.notice()) : null,
       state === 'prompt' ? h('p', { class: 'fine sync-blocked' }, '브라우저가 이 폴더를 다시 읽어도 되는지 물어봐야 해요.') : null,
       h('div', { class: 'pp-row' },
         state === 'prompt' ? h('button', { type: 'button', class: 'primary small sync-grant', onclick: () => void grant() }, '다시 허용') : null,

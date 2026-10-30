@@ -8,7 +8,7 @@ import * as M from '../dist/public/shared/map-reading.js';
 import { studioView } from '../dist/public/shared/studio.js';
 import { sessionText, sessionChunks, newTurns } from '../dist/public/shared/session-import.js';
 import { SESSION_LIMITS } from '../dist/public/shared/session-parse.js';
-import { handoverText, handoverDoc, handoverCode, foldHandover, receivedHandovers, sessionOrigin, partSessions, HANDOVER_CHARS } from '../dist/public/shared/handover.js';
+import { handoverText, handoverDoc, handoverCode, foldHandover, foldRecord, receivedHandovers, sessionOrigin, partSessions, HANDOVER_CHARS } from '../dist/public/shared/handover.js';
 
 const ID = 'claude-0123456789abcdef01234567', NEXT = 'codex-89abcdef0123456789abcdef';
 const session = (id, turns, extra = {}) => ({ id, tool: id.startsWith('codex') ? 'codex' : 'claude', label: '', title: '휴무일 연결', cwd: '/work/salon', branch: 'main', startedAt: '2026-10-28T09:00:00.000Z', turns, omitted: 0, ...extra });
@@ -93,6 +93,20 @@ test('HANDOVER-B1 a web chat writes its own record from the request text: the re
   const p = D.pasteRecord(D.createProject(), answer, null).project;
   const t = handoverText(p, { scope: null, code: 'WEB234', at: '2026-10-30T05:00:00.000Z' });
   assert.ok(t.includes('- 웹 AI 「결제 연결」 · 브랜치 pay') && t.includes('- 결제 버튼을 붙여 줘 → 바꾼 파일: src/pay.ts'), t);
+});
+
+test('HANDOVER-B2 a web record pasted back keeps a handover document its request started from as one line, as the import does', () => {
+  const { p, booking } = mapped();
+  const doc = handoverText(p, { scope: booking, code: 'QW3RTY', at: '2026-10-30T05:00:00.000Z' });
+  const line = `[AgentFlow 인수인계 문서를 받아 이어감 · af-handover:QW3RTY:${booking} · 나의 프로젝트 › 예약 화면]`;
+  const web = `[웹 AI 세션 기록 · 결제 연결]\n\n── 사용자 요청 ──\n${doc}\n\n결제 버튼을 붙여 줘\n\n── 웹 AI 답변 ──\n문서의 ${doc.split('\n')[0]} 줄을 보고 이어서 붙였어요.\n(바꾼 파일: src/pay.ts)`;
+  const kept = foldRecord(web);
+  assert.equal(kept, `[웹 AI 세션 기록 · 결제 연결]\n\n── 사용자 요청 ──\n${line}\n\n결제 버튼을 붙여 줘\n\n── 웹 AI 답변 ──\n문서의 ${doc.split('\n')[0]} 줄을 보고 이어서 붙였어요.\n(바꾼 파일: src/pay.ts)`);
+  assert.equal(foldRecord(kept), kept, 'folding again changes nothing');
+  assert.deepEqual(receivedHandovers(kept), [{ code: 'QW3RTY', areaId: booking }]);
+  // Text that is not a session record (the document kept on its own, a note) stays as written.
+  assert.equal(foldRecord(doc), doc);
+  assert.equal(foldRecord(`메모\n${doc}`), `메모\n${doc}`);
 });
 
 const AT = '2026-10-30T05:00:00.000Z';

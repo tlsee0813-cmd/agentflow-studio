@@ -396,6 +396,35 @@ test('SESSIONS-C3 Claude Code subagents: the files they changed join the reply t
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
+test('SESSIONS-B1 a folder picked in the browser reads Claude Code subagents as the server does: same id, same files', async () => {
+  const { readdirSync } = await import('node:fs'), { basename } = await import('node:path');
+  // File System Access stand-ins over the real folder (a File is a snapshot of the file, as in Chrome).
+  const file = path => ({ kind: 'file', name: basename(path), getFile: async () => new File([readFileSync(path)], basename(path), { lastModified: statSync(path).mtimeMs }) });
+  const folder = path => ({ kind: 'directory', name: basename(path), queryPermission: async () => 'granted',
+    async *values() { for (const d of readdirSync(path, { withFileTypes: true })) yield d.isDirectory() ? folder(join(path, d.name)) : file(join(path, d.name)); } });
+  const { createSessionSources } = await import('../dist/public/client/session-source.js');
+  const side = { isSidechain: true }, task = (m, id) => ca(m, [{ type: 'tool_use', id, name: 'Task', input: { prompt: '고쳐' } }]);
+  const done = (m, id, extra = {}) => cu(m, [{ type: 'tool_result', tool_use_id: id, content: 'TOOL OUTPUT SHOULD NOT APPEAR' }], extra);
+  const work = (m, path, extra) => [cu(m, '고쳐', extra), ca(m, [{ type: 'tool_use', id: `s${m}`, name: 'Write', input: { file_path: path, content: 'x' } }], extra), done(m, `s${m}`, extra)];
+  const dir = home(), had = globalThis.window;
+  try {
+    const roots = writeSessionHome(dir), p = join(roots.claude, 'projects', '-w'); mkdirSync(join(p, 'main', 'subagents'), { recursive: true });
+    writeFileSync(join(p, 'main.jsonl'), jl([cu(0, '알림이랑 예약 고쳐 줘'), task(1, 'k1'), done(5, 'k1'), ca(6, '둘 다 고쳤어요.')]));
+    writeFileSync(join(p, 'main', 'subagents', 'agent-a1.jsonl'), jl(work(2, '/w/src/notify.ts', { ...side, sessionId: 'main' })));
+    writeFileSync(join(p, 'agent-b2.jsonl'), jl(work(3, '/w/src/booking.ts', { ...side, sessionId: 'main' })));
+    writeFileSync(join(p, 'agent-c3.jsonl'), jl(work(3, '/w/src/other.ts', { ...side, sessionId: 'other' })));
+    const server = openSessions({ env: {}, roots }), [s] = (await server.list('/w')).sessions;
+    globalThis.window = { showDirectoryPicker: async () => folder(roots.claude) };
+    const sources = createSessionSources({ status: () => ({ ai: 'none' }), accessCode: () => '' });
+    await sources.load(); assert.equal(await sources.pick(), true);
+    const list = await sources.current().list('/w');
+    assert.deepEqual(list.map(x => [x.id, x.preview]), [[s.id, '알림이랑 예약 고쳐 줘']]);
+    const got = await sources.current().read(s.id), want = await server.read(s.id);
+    assert.deepEqual(got.turns, readSessionDetail(want).turns);
+    assert.deepEqual(got.turns.at(-1).files, ['src/notify.ts', 'src/booking.ts']);
+  } finally { globalThis.window = had; rmSync(dir, { recursive: true, force: true }); }
+});
+
 test('SESSIONS-F1 a handover document longer than a turn is folded before the prompt is clipped, so the words after it are kept', async () => {
   const P = await import('../dist/public/shared/session-parse.js');
   const doc = ['──────── AgentFlow 인수인계 문서 · af-handover:QW3RTY ────────', '# 인수인계: 나의 프로젝트', ...Array.from({ length: 400 }, (_, i) => `- 부분 ${i}: ${'설명 '.repeat(20)}`),
