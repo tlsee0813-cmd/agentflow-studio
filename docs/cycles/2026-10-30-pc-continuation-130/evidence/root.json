@@ -1,0 +1,60 @@
+{
+  "cycle": 130,
+  "base": "28f260e2971c47fb65f02ec08eaf65ece1936319",
+  "app": "581571feee480a0079b4e105151409bb8be8ac92",
+  "runtimeChanges": 0,
+  "plan": {
+    "submitted": true,
+    "requestId": "26068.392",
+    "status": 200,
+    "httpElapsedMs": 19793,
+    "askExact": true,
+    "responseSha256": "5cceca1d08f9e0890394c43a0b90fe7145a8cb77b0ab87fcc1b23dc6f5ef7762",
+    "planCalls": 1,
+    "scopeCalls": 0,
+    "mapCalls": 0,
+    "meaning": "bounded-pass",
+    "independentSha256": "1e66c4a4c9fd1a1f7361a5f1f5ff9d2f6843953ad3457415a37a47ba6d3bfe6c",
+    "items": 2,
+    "preserve": 4,
+    "unknowns": 3,
+    "askSha256": "c788e6f0fb740a403f0db5c63109a48c6d48de5bba59c29615730408e396b9d1",
+    "promptSha256": "aacb45c30be76c620da3503ed806c809a520c772c36412982d7dff8b69443a7a"
+  },
+  "scope": {
+    "requestId": "26068.393",
+    "status": 502,
+    "httpElapsedMs": 28329,
+    "error": "AI_RESPONSE_INCOMPLETE",
+    "askExact": true,
+    "newRequestDocuments": 0,
+    "workspaceByteExact": true,
+    "plansByteExact": true,
+    "planCalls": 1,
+    "scopeCalls": 1,
+    "mapCalls": 0,
+    "retries": 0,
+    "classification": "delivery incomplete, not timeout and not semantic verdict",
+    "codeEvidence": "server/studio.mjs maps provider finish_reason length to AI_RESPONSE_INCOMPLETE before JSON validation",
+    "providerUsageObserved": false,
+    "askSha256": "25995bc10375304bd1c0b3b8fcf3efd3222fbcb4b2c1f200c64397c6850c8391",
+    "promptSha256": "00cf7462571b87d80061ff8c65db65bcdaa385b5419646bac2331daae9b25ad6",
+    "maxTokens": 4096,
+    "timeoutMs": 30000
+  },
+  "preservation": {
+    "reloadWorkspaceAndPlansExact": true,
+    "normalExportBundleExact": true,
+    "planExportSha256": "36c71c9f0db00b14f4f226b6cf98195d52abf26502621c89babd7ac5a56c816f",
+    "ui75Ancestor": true,
+    "stash": "fa07118ead372bcb3201c8032ca603a5ec0a7e7d",
+    "keyCopies": 0,
+    "publicDeploymentChanges": 0
+  },
+  "limits": [
+    "No generated request document",
+    "No implementation or return result in this chain",
+    "No new map generation",
+    "Unknown1/3 duplicate current display uncertainty"
+  ]
+}
