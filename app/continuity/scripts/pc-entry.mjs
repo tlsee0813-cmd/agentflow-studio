@@ -16,6 +16,7 @@ import { readConfig } from '../../server/config.mjs';
 import { createContinuityApp } from '../server/app.mjs';
 import { createStudioHandler } from '../server/studio.mjs';
 import { openMapJobs, own } from '../server/map-jobs.mjs';
+import { openSessions } from '../server/sessions.mjs';
 import { openCliExecutor, policyHash, readPolicy, EXECUTOR_ID } from '../../../docs/cycles/2026-10-29-owned-cli-preview-102/preview/cli-executor.mjs';
 
 export const DEFAULT_PORT = 4327;
@@ -110,7 +111,7 @@ export async function serve({ port = DEFAULT_PORT, exe, policy: given = null, da
   if (!jobs.describe().durable) { log(`REFUSED store=${jobs.describe().problem}`); await jobs.close(); return exit(5); }
   const executor = await openCliExecutor({ policy, stateDir: places.state, log, ...executorOptions });
   if (executor.describe().problem === 'EXECUTOR_STATE_BUSY') { log('REFUSED executor=EXECUTOR_STATE_BUSY'); await jobs.close(); await executor.close(); return exit(5); }
-  const handler = createStudioHandler({ env, jobs, mapExecutor: executor });
+  const handler = createStudioHandler({ env, jobs, mapExecutor: executor, sessions: openSessions({ env }) });
   // A stop decides in one step: new job submissions are held off from the moment a request is read, and a submission already on
   // its way counts as running. So a default stop never ends a job admitted after its caller looked.
   let draining = false, submitting = 0;

@@ -3,6 +3,7 @@ import { validateDigestReply, type DigestAsk, type DigestReply } from '../shared
 import { validateMapReply, MAP4_SCHEMA, MAP5_SCHEMA, MAP6_SCHEMA, MAP7_SCHEMA, type MapAsk, type MapReply } from '../shared/map-reading.js';
 import { SPAN_INDEX, textDigest } from '../shared/evidence-span.js';
 import { RUNTIME } from './runtime.js';
+import { readSessionList, readSessionDetail, type SessionSummary, type SessionDetail } from '../shared/session-import.js';
 
 /** digest: the model and prompt id a return reading would be made with (null when the server does not say). */
 export interface AiStatus { ai: 'deepseek' | 'off' | 'none'; model: string | null; access: 'open' | 'code'; digest?: { model: string; prompt: string; record: string | null } | null;
@@ -15,7 +16,9 @@ export interface AiStatus { ai: 'deepseek' | 'off' | 'none'; model: string | nul
    * AF102 executor: the map executor's state (ready, busy, unsettled: an earlier child not known to have ended, unavailable). */
   jobs?: { durable: boolean; problem: string | null; executor?: { state: string; problem: string | null; scope?: ExecutorScope } | null } | null;
   /** AF124: the server is a limited release that names why it offers no map reading (never read into an older server's silence). */
-  release?: ReleasePolicy | null }
+  release?: ReleasePolicy | null;
+  /** The local server can read the Claude Code / Codex sessions kept on this PC (server/sessions.mjs); absent elsewhere. */
+  sessions?: { tools: ('claude' | 'codex')[] } | null }
 /** AF124: work on maps one already has. Map readings (a first map, a later one, a return read against the map) are not offered. */
 export type ReleasePolicy = 'existing-map';
 /** The earlier public site, at its own address (opened only by the person; nothing is sent or synchronised between the two). */
@@ -50,7 +53,8 @@ export async function aiStatus(): Promise<AiStatus> {
     const j = v.jobs, x = j?.executor, executor = x && typeof x.state === 'string' ? { state: x.state, problem: typeof x.problem === 'string' ? x.problem : null, ...(SCOPES.includes(x.scope) ? { scope: x.scope as ExecutorScope } : {}) } : null;
     const jobs = j && j.version === 'map-job.1' ? { durable: j.durable === true, problem: typeof j.problem === 'string' ? j.problem : null, ...(executor ? { executor } : {}) } : null;
     const release = v.release === 'existing-map' ? 'existing-map' as const : null;
-    return { ai: v.ai, model: typeof v.model === 'string' ? v.model : null, access: v.access === 'code' ? 'code' : 'open', digest, map: release ? null : map, jobs: release ? null : jobs, release };
+    const sv = v.sessions, sessions = sv && sv.version === 'sessions.1' && Array.isArray(sv.tools) ? { tools: sv.tools.filter((t: unknown): t is 'claude' | 'codex' => t === 'claude' || t === 'codex') } : null;
+    return { ai: v.ai, model: typeof v.model === 'string' ? v.model : null, access: v.access === 'code' ? 'code' : 'open', digest, map: release ? null : map, jobs: release ? null : jobs, release, sessions };
   } catch { return { ai: 'none', model: null, access: 'open' }; }
 }
 
@@ -103,6 +107,29 @@ export async function askMap(ask: MapAsk, signal: AbortSignal, accessCode: strin
   try { return { model: data.model, reply: validateMapReply(data.reply, ask) }; } catch { throw new AskError('INVALID_RESPONSE'); }
 }
 
+/** The sessions this PC's tools keep (newest first), or one of them; only from a local server that offers them. */
+async function getSessions(path: string, accessCode: string): Promise<unknown> {
+  if (RUNTIME.apiBase === null) throw new AskError('NO_SERVER');
+  const headers: Record<string, string> = { 'X-AgentFlow-Request': '1' };
+  if (accessCode) headers['X-Studio-Access'] = accessCode;
+  let res: Response;
+  try { res = await fetch(url(path), { headers, credentials: 'same-origin' }); } catch { throw new AskError('NETWORK'); }
+  let data: { error?: { code?: unknown } } | null = null;
+  try { data = await res.json(); } catch { /* handled below */ }
+  if (!res.ok) throw new AskError(typeof data?.error?.code === 'string' ? data.error.code : 'REQUEST_FAILED');
+  return data;
+}
+/** folder: only sessions whose working folder is it or inside it. */
+export async function listSessions(accessCode: string, folder: string | null = null): Promise<SessionSummary[]> {
+  return readSessionList(await getSessions(`/api/studio/sessions${folder ? `?folder=${encodeURIComponent(folder)}` : ''}`, accessCode));
+}
+/** since: only turns from that time on (the server then spends its reply budget on what was not taken yet). */
+export async function readSession(id: string, accessCode: string, since: string | null = null): Promise<SessionDetail> {
+  const d = readSessionDetail(await getSessions(`/api/studio/sessions/${encodeURIComponent(id)}${since ? `?since=${encodeURIComponent(since)}` : ''}`, accessCode));
+  if (!d) throw new AskError('INVALID_RESPONSE');
+  return d;
+}
+
 export const ERROR_TEXT: Record<string, string> = {
   AI_NOT_CONFIGURED: '서버에 AI 키가 설정되지 않았어요.',
   AI_AUTH_FAILED: 'AI 서비스가 서버의 키를 받아들이지 않았어요.',
@@ -123,5 +150,8 @@ export const ERROR_TEXT: Record<string, string> = {
   INPUT_TOO_LARGE: '보낼 기록이 너무 커요.',
   MAP_WITHHELD: '이 버전에서는 지도를 새로 만들거나 갱신하지 않아요. 기록과 지도는 그대로예요.',
   NETWORK: 'AI 서버에 연결하지 못했어요.',
+  SESSION_NOT_FOUND: '그 세션 기록을 찾지 못했어요. 목록을 새로 불러오세요.',
+  SESSION_TOO_LARGE: '세션 기록 파일이 너무 커서 읽지 않았어요.',
+  SESSION_FOLDER_UNREADABLE: '고른 세션 폴더를 읽지 못했어요. 폴더를 옮겼거나 지웠다면 빼고 다시 골라 주세요.',
   NO_SERVER: '이 페이지에는 연결된 AI 서버가 없어요.'
 };

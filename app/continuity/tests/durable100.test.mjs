@@ -173,12 +173,13 @@ test('100-B2 while a submission is being recorded, only its own capability hears
   const a = await submission(p), b = await submission(p);
   const pa = jcall(handle, 'POST', '', a.cap, a.body), pb = jcall(handle, 'POST', '', b.cap, b.body);
   await until(() => held === 1, 'first write held');
-  assert.equal((await jcall(handle, 'GET', `/${a.id}`, a.cap)).error.code, 'OPERATION_ACCEPTING');
+  // Either may reach the acceptance first (they are sent together): while one is recorded, each is accepting to its own capability.
+  for (const x of [a, b]) assert.equal((await jcall(handle, 'GET', `/${x.id}`, x.cap)).error.code, 'OPERATION_ACCEPTING');
   assert.equal((await jcall(handle, 'GET', `/${a.id}`, newCap())).error.code, 'OPERATION_NOT_FOUND');
-  hold.open(); const [ra, rb] = await Promise.all([pa, pb]);
-  assert.deepEqual([ra.status, rb.status, rb.error?.code], [202, 409, 'ENTRY_BUSY']);
+  hold.open(); const got = await Promise.all([pa, pb]), lost = [a, b][got.findIndex(r => r.status !== 202)];
+  assert.deepEqual(got.map(r => [r.status, r.error?.code ?? null]).sort(), [[202, null], [409, 'ENTRY_BUSY']]);
   await until(() => prov.calls === 1, 'one call'); assert.equal(prov.calls, 1);
-  assert.ok(!existsSync(join(jobs.dir, 'ops', `${b.id}.json`)), 'the refused one left nothing');
+  assert.ok(lost && !existsSync(join(jobs.dir, 'ops', `${lost.id}.json`)), 'the refused one left nothing');
   prov.gates[0].open(); await until(() => jobs.held().running === 0, 'ended'); await jobs.close();
 });
 
