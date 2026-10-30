@@ -1016,6 +1016,9 @@ def relation_visit_flow(browser, base, cases):
     page.locator("#lens .lens-more").click()
     page.locator(".ask-open").click()
     page.locator("#ask-input").fill("receiver 식별은 어디서 와?")
+    # AF140: the full reading is wider now, so at 1280x720 this sheet fits without scrolling (scrollHeight == clientHeight). The
+    # round trip is checked where it does scroll: the same shorter window this flow uses above, for this segment only.
+    page.set_viewport_size({"width": 1280, "height": 500})
     body = page.locator("#panel .panel-body")
     body.evaluate("e => { e.scrollTop = e.scrollHeight }")
     scrolled = body.evaluate("e => e.scrollTop")
@@ -1034,6 +1037,7 @@ def relation_visit_flow(browser, base, cases):
     page.go_back()
     expect(page.locator("#panel-title")).to_have_text("traces")
     expect(page.locator("#ask-input")).to_have_value("receiver 식별은 어디서 와?")
+    page.set_viewport_size({"width": 1280, "height": 720})
     # A reload or another project keeps no stale way back.
     page.locator("#panel .links a", has_text="처리 · traces").click()
     expect(back).to_have_count(1)

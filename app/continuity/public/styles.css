@@ -1472,3 +1472,20 @@ button:disabled { opacity: .5; cursor: default; }
 .rw-target .rw-kind { margin-right: 2px; }
 .rw-target-about { color: var(--text-3); }
 .rw-target .rw-card-foot { margin: 4px 0 6px; }
+
+/* ---------- AF140: the full reading of a part (the sheet), over the map ----------
+   The lens keeps its width. The explicit full reading widens to a reading surface over the map, its text in one paragraph-wide
+   column; the map stays in view at its left, shown but not used (inert) until the reading closes. Nothing is clamped or cut. */
+.panel.reading { width: clamp(var(--insp-w), 64vw, 900px); }
+.panel.reading :is(.panel-head, .panel-body, .composer) { padding-left: max(24px, calc((100% - 720px) / 2)); }
+.panel.reading :is(.panel-body, .composer) { padding-right: max(24px, calc((100% - 720px) / 2)); }
+.panel.reading .panel-head { padding-right: max(150px, calc((100% - 720px) / 2)); }
+.panel.reading .panel-path a { max-width: 260px; }
+.panel.reading .panel-head h2 { font-size: 21px; line-height: 28px; }
+.panel.reading .sec-understood .und-role { font-size: 15px; line-height: 1.7; }
+.panel.reading .claim { font-size: 14px; line-height: 1.6; }
+.panel.reading .links { font-size: 13.5px; }
+.sheet-back { height: 32px; padding: 0 10px; font-size: 13px; white-space: nowrap; }
+.panel:not(.reading) .sheet-back { display: none; }
+.space.sheet-read .viewport { opacity: .55; }
+.space.sheet-read .controls { opacity: .5; }

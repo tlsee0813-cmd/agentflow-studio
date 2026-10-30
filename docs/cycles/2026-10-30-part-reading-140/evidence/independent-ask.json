@@ -1,0 +1,45 @@
+{
+  "title": "140 질문 입력 typed 복원 회귀의 최소 수리 확인",
+  "description": "a3cee3 이후9628e985 delta만 읽었다. 질문칸의 값을 권위 있는 draft 상태에 맡기도록 복원 대상을 좁혀, 성공한 질문이 DOM 복원으로 되살아나는140 회귀는 코드상 해소됐다. 새 구체 차단 사유는 발견하지 않았다. 기존 send의 다른 draft 손실은 이 판정에서 명시적으로 제외한다.",
+  "at": "2026-10-30T05:14:55.482606+00:00",
+  "baseline": "a3cee3eefa839ec47a4bdfc7d73bf38e55734a35",
+  "source": "9628e98589f3685d63bda2e78086409e1ebc5364",
+  "appTree": "4b1384f70c6fab6c87b629ab5df5b2ef4a8fb2d5",
+  "workingTreeObservation": "검토 시 DESIGN.md는 총괄 수정 중이었다. 코드 검토는 정확 HEAD delta에 한정한다.",
+  "fileSha256": {
+    "app/continuity/src/client/app.ts": "3a6608b5a412a18406d48e04b7452d67fec1b47ade7edec5e5b5038667be4c1a",
+    "app/continuity/tests/part140-flow.mjs": "62814225624ee0d2e66224c00379276b18af79888893f416cdc00a507ef88284"
+  },
+  "resultGitBlobSha256": "c4b71ae155ac2d219b196cbe7c71a1584e2e15ced6393105ab6aecb943fdeb91",
+  "verdict": "140 typed 회귀 해소 — 정확 Python CI와 최종 범위 수용은 별도",
+  "findings": [],
+  "closure": {
+    "where": "app.ts:1487–1493,1566 이후,1687–1688,2217",
+    "code": "typed 수집이 edit-name/edit-note/fix-role의 명시 목록이며 같은 panel 내부로 제한된다. ask-input은 제외돼 composer가 getDraft 값으로 만든 새 textarea를 옛 DOM.value로 덮지 않는다. 성공의 빈 draft와 실패 시 기존 draft가 그대로 화면의 권위를 갖는다.",
+    "caret": "기존 caret/focus/scroll 복원은 값 대입 없이 위치만 복원한다. 내용이 비워졌으면 선택 범위는 새 값의 유효 범위로 제한되며, 이 경로로 옛 질문 본문을 다시 만들 수 없다. 기존 비관리 편집 폼의 글 보존은 유지된다.",
+    "scope": "send/getDraft/setDraft의 성공·실패·재시도 의미는 이 delta에서 바뀌지 않았다."
+  },
+  "tests": {
+    "A": "기존 Python main_flow의 질문 작성→부분 이동/복귀→Enter→답변 성공 후 빈칸 기대를 Node flow에 옮겼다. 성공 시 answer2개와 ask-input 빈값을 별도로 assert하고, 실패 시 질문이 남는 것도 assert한다. 대기 helper의 catch 뒤에도 실제 값 assertion이 남아 있어 실패를 성공으로 대체하지 않는다.",
+    "edits": "ONLY=edits는 A의 성공/실패2개와 R/S/S2를 실제로 호출한다. 원래 main_flow의 기대값이나 기존 T/S/S2 실패 조건을 약화하는 diff는 없다.",
+    "attribution": "작성자의 a3 기준 실패·수정 통과와5/5는 전달받은 실행 보고다. 독립 검토자는 실행하지 않았다. CI41007155003의 실제 Python 결과는 총괄 회수 대상이며 이 보고서에서 통과로 선기록하지 않는다."
+  },
+  "explicitlyExcludedExistingSendLimit": {
+    "sequence": "Q1 실패 → 활성 입력에 아직 보내지 않은 Q2 작성 → 오류의 다시 시도로 보존 Q1 재전송 → Q1 성공이 setDraft(빈값)을 무조건 실행해Q2 삭제.",
+    "baselineEvidence": ".ops/results/experience140-ask-ownership-review.json에137 수용 runtime2a57f730의 동일 send 경로와 재현 순서가 보존돼 있다.",
+    "observation": "작성자 RESULT는 기존 fail fixture에서 한 번 관찰하고 수리하지 않았음을 명시한다. 이것은 작성자 실행이며 이 검토자의 새 재현이 아니다.",
+    "acceptanceBoundary": "140의 전체 읽기/편집 복원/질문 성공 후 비우기 수용이 새 미전송 draft의 안전한 재시도·모든 late 질문 소유권까지 수용했다는 뜻은 아니다. 후속 제품 과제 선택은 Root가 한다."
+  },
+  "limits": [
+    "전체140/139/기존 S2·모델·브라우저 검사를 반복하지 않았다. 앞선 이력 identity와 역할 세션 수리도 이 검토에서 재연구하지 않았다.",
+    "정확 후보 잠금 빌드·Python CI·실제 PC 최종 보존은 별도 근거다. 이 정적 delta 확인만으로 전체 제품이나 모든 질문 수명주기의 완성을 주장하지 않는다."
+  ],
+  "execution": {
+    "actor": "독립 delta 검토자",
+    "tests": 0,
+    "browser": 0,
+    "modelAPI": 0,
+    "productWrites": 0,
+    "onlyNewPrivateFile": ".ops/results/experience140-final-review-ask.json"
+  }
+}

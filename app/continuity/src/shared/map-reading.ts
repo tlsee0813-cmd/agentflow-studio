@@ -574,7 +574,9 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
   const roleBasisRevised = !corrected && roleBasis.length > 0 && roleBasis.every(q => insideRevised(p, areaId, q));
   // The corrected report reads first (claims are newest first; a replacing one goes ahead of the rest).
   claims.sort((a, b) => Number(!!b.replaces) - Number(!!a.replaces));
-  return { role, roleAbout, roleBasis, corrected, others: others.slice(0, 6), claims: claims.slice(0, 12), history, createdName, state, revised, roleBasisRevised };
+  // AF140: every claim that still stands, never a silent cut (a limitation read early is as current as a feature read late). A reader
+  // that needs fewer takes its own (the map ask and the plan's source take the first 6 of this same order).
+  return { role, roleAbout, roleBasis, corrected, others: others.slice(0, 6), claims, history, createdName, state, revised, roleBasisRevised };
 }
 
 /* ---------- evidence a later record took back ---------- */

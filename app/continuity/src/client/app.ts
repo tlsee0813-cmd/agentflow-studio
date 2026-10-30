@@ -449,6 +449,8 @@ function returnFromVisit() {
 }
 function restoreReading(f: Place): boolean {
   if (f.key !== opened?.key || f.selected !== selected || f.scope !== scope) return false;
+  // AF140: while the change plan is open it owns the pane, as select() has it: a part's lens or sheet is never laid back over it.
+  if (planView.isOpen()) return false;
   if (f.surface === 'sheet' && selected === f.selected) { sheetOpen = true; showReading(false, false); }
   // The same part read in another surface since (A0 summary -> B -> A1 sheet, then two steps back): the summary it left.
   else if (f.surface === 'lens' && selected === f.selected && sheetOpen) { sheetOpen = false; editing = false; showReading(false, false); }
@@ -1141,6 +1143,9 @@ function select(partId: string | null) {
 /** scrollTop: a new selection starts its sheet at the top. move: bring the part into view (a new selection or a new surface). */
 function showReading(scrollTop: boolean, move: boolean) {
   const panel = $('panel');
+  // AF140: the explicit full reading is the reading surface over the map (its own width, a paragraph's column); the lens stays as it
+  // was. The map's area (paneWidth) is the same either way, so opening it moves the camera exactly as before and no more.
+  panel.classList.toggle('reading', sheetOpen);
   if (sheetOpen) { hideLens(); panel.hidden = false; renderPanel(scrollTop); syncMapArea(); if (move) reveal(selected!); return; }
   panel.hidden = true; panel.replaceChildren();
   renderLens(); syncMapArea();
@@ -1180,6 +1185,18 @@ const mapBottom = () => $('viewport').offsetTop + $('viewport').clientHeight;
  * relative to the space, so neither moves anything already drawn. */
 function syncMapArea() {
   const vp = $('viewport'), world = $('world'), pane = paneWidth();
+  // AF140: behind the full reading the map is shown, not used: no pan, zoom, selection, drag or focus reaches it until it closes.
+  // Only the lock this reading set is its to lift (marked); one already there (the change plan's wide comparison covers the same
+  // map: plan-view cover) is never taken over or released here, nor one the comparison took while the reading's mark was on (the
+  // mark goes, the lock stays while the comparison is open: the very state cover(workOpen()) locks under).
+  const reading = !$('panel').hidden && $('panel').classList.contains('reading');
+  const planCover = !$('plan-panel').hidden && $('plan-panel').classList.contains('work');
+  for (const el of [vp, document.querySelector<HTMLElement>('#space > .controls')]) {
+    if (!el) continue;
+    if (reading && !el.inert) { el.inert = true; el.dataset.readingInert = '1'; }
+    else if (!reading && el.dataset.readingInert) { delete el.dataset.readingInert; if (!planCover) el.inert = false; }
+  }
+  $('space').classList.toggle('sheet-read', reading);
   $('space').style.setProperty('--plan-w', `${pane}px`);
   vp.style.right = pane + 'px';
   const top = $('plan-strip').hidden ? 0 : topInset();
@@ -1475,6 +1492,15 @@ function openRecord(id: string) {
 function renderPanel(scrollTop: boolean) {
   const o = opened!, part = o.view.parts.find(p => p.id === selected)!, panel = $('panel');
   const prevBody = panel.querySelector('.panel-body'), keep = scrollTop ? 0 : prevBody?.scrollTop ?? 0;
+  // The same part read again (an answer, a status, a save): the control that had focus keeps it, a field its caret and selection.
+  const same = panel.dataset.read === `${o.key}|${part.id}` && !scrollTop, had = same && panel.contains(document.activeElement) ? document.activeElement as HTMLElement : null;
+  const field = had instanceof HTMLTextAreaElement || had instanceof HTMLInputElement ? had : null;
+  const caret = field && field.id ? { id: field.id, start: field.selectionStart, end: field.selectionEnd, dir: field.selectionDirection, top: field.scrollTop } : null;
+  const mark = had && !caret ? (['claimFocus', 'requestFocus', 'far'] as const).map(k => [k, had.dataset[k]] as const).find(([, v]) => v !== undefined) ?? null : null;
+  // What is written in a form whose words live nowhere else until saved (name/description, the description correction: rebuilt from
+  // the saved part). The question box is not among them: its draft is kept apart (getDraft/setDraft) and is the authority, e.g.
+  // emptied once the question is answered.
+  const typed = same ? (['edit-name', 'edit-note', 'fix-role'] as const).map(id => document.getElementById(id)).filter((f): f is HTMLInputElement | HTMLTextAreaElement => (f instanceof HTMLInputElement || f instanceof HTMLTextAreaElement) && panel.contains(f)).map(f => [f.id, f.value] as const) : [];
   const path = partPath(o.view, part.id).slice(0, -1), records = subtreeRecords(o.view, part.id);
   const state = part.status === 'plan' ? (part.reading?.state ? stateLabel(part.reading) ?? '기록에서 읽음' : records.length ? '요청 기록 없음' : part.note ? '계획 설명만 있음 · 기록 없음' : '기록 없음') : STATUS_LABEL[part.status];
   const menuItems = [
@@ -1490,6 +1516,7 @@ function renderPanel(scrollTop: boolean) {
       records.length ? h('span', { class: 'chip plain' }, `기록 ${records.length}${records[0] ? ` · ${ago(records[0].at)}` : ''}`) : null),
     h('div', { class: 'head-tools' },
       menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e: Event) => { ((e.currentTarget as HTMLElement).parentElement as HTMLDetailsElement).open = false; } }, ...menuItems)) : null,
+      h('button', { type: 'button', class: 'link-button sheet-back', title: '전체 읽기를 닫고 지도와 요약으로 (Esc)', onclick: closeSheet }, '요약으로'),
       h('button', { type: 'button', class: 'close', 'aria-label': '요약으로 돌아가기', title: '요약으로 (Esc)', onclick: closeSheet }, '×')));
   const body = h('div', { class: 'panel-body' });
   if (editing) body.append(editForm(o, part));
@@ -1547,7 +1574,13 @@ function renderPanel(scrollTop: boolean) {
     body.append(sec);
   }
   panel.replaceChildren(...[visitEntry(o), head, body, composer(o, part)].filter((x): x is HTMLElement => !!x));
+  panel.dataset.read = `${o.key}|${part.id}`;
+  for (const [id, v] of typed) { const f = document.getElementById(id); if ((f instanceof HTMLTextAreaElement || f instanceof HTMLInputElement) && panel.contains(f) && f.value !== v) f.value = v; }
   if (scrollTop) body.scrollTop = 0; else body.scrollTop = keep;
+  if (caret) {
+    const f = document.getElementById(caret.id);
+    if ((f instanceof HTMLTextAreaElement || f instanceof HTMLInputElement) && panel.contains(f) && !f.disabled) { f.focus({ preventScroll: true }); try { f.setSelectionRange(caret.start, caret.end, caret.dir ?? 'none'); } catch { /* not a text field */ } f.scrollTop = caret.top; }
+  } else if (mark) [...panel.querySelectorAll<HTMLElement>(`[data-${mark[0].replace(/[A-Z]/g, c => `-${c.toLowerCase()}`)}]`)].find(x => x.dataset[mark[0]] === mark[1])?.focus({ preventScroll: true });
 }
 
 /** AF100: the saves this page made itself (entry and the save number each made), so a job's result is applied on top of this
@@ -1603,6 +1636,9 @@ function editForm(o: Opened, part: PartView): HTMLElement {
     let next: Project;
     try { next = editArea(o.project, part.id, name.value, note.value); } catch { msg.textContent = '이름은 1~60자, 설명은 2,000자까지 쓸 수 있어요.'; return; }
     const failed = await commit(o, next); if (failed) { msg.textContent = failed; return; }
+    // Saved; read again only where it was asked (another project or part since keeps its own reading).
+    if (opened !== o) return;
+    if (selected !== part.id) { renderSpace('keep'); return; }
     editing = false;
     renderSpace('keep'); select(part.id);
   } },
@@ -2124,35 +2160,47 @@ function showQuote(record: string, quote: string, from?: number) {
 }
 /** In the sheet: the part as read from records (the description and the person's correction of it, the current claims), then the
  * evidence history apart, folded. Correcting the description never touches the name, the note or the claims. */
-let fixingRole: string | null = null;
+/** The description being corrected: this entry's part (an imported copy shares part ids, so the entry is part of it). Each opening
+ * of the form is its own session (its own object): a save ends only the session it was submitted from. */
+let fixingRole: { key: string; part: string } | null = null;
 function understoodSection(o: Opened, part: PartView): HTMLElement | null {
   const u = part.reading; if (!u) return null;
   const sec = h('section', { class: 'sec sec-understood' }, h('h3', {}, '기록에서 읽은 이해'));
-  if (fixingRole === part.id && o.kind === 'saved') {
+  if (fixingRole?.key === o.key && fixingRole.part === part.id && o.kind === 'saved') {
     const area = h('textarea', { id: 'fix-role', rows: '3', maxlength: '300' }) as HTMLTextAreaElement; area.value = u.role ?? '';
     const msg = h('p', { class: 'form-msg', role: 'status' });
     sec.append(h('form', { class: 'edit-form', onsubmit: async (e: Event) => {
       e.preventDefault();
       let next: Project;
       try { next = correctReadingRole(o.project, part.id, area.value); } catch { msg.textContent = '설명은 1~300자로 적어 주세요.'; return; }
+      const session = fixingRole;
       const failed = await commit(o, next); if (failed) { msg.textContent = failed; return; }
-      fixingRole = null; renderSpace('keep'); select(part.id);
+      // This session is done; one begun meanwhile (on another part or entry, or this part's form closed and opened again) is its
+      // own and stays open with what is written in it.
+      if (fixingRole === session) fixingRole = null;
+      if (opened !== o) return;
+      renderSpace('keep'); if (selected === part.id) select(part.id);
     } }, h('label', { for: 'fix-role' }, '설명 바로잡기 ', h('small', {}, '이름·내 설명·기록의 주장은 그대로예요')), area, msg,
       h('div', { class: 'row' }, h('button', { type: 'submit', class: 'primary small' }, '저장'), h('button', { type: 'button', class: 'link-button', onclick: () => { fixingRole = null; renderPanel(false); } }, '취소'))));
   } else if (u.role) {
     sec.append(h('p', { class: 'und-role' }, u.role), h('p', { class: 'src', title: u.roleAbout ?? '' }, u.corrected ? `직접 바로잡은 설명 · ${fullTime(u.corrected.at)}` : `기록에서 읽은 설명${u.roleAbout ? ` · ${displayAbout(u.roleAbout)} 기준` : ''}${u.roleBasisRevised ? REVISED_BASIS : ''}`,
-      o.kind === 'saved' ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { fixingRole = part.id; renderPanel(false); requestAnimationFrame(() => document.getElementById('fix-role')?.focus()); } }, ' 설명 바로잡기') : null));
+      o.kind === 'saved' ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { fixingRole = { key: o.key, part: part.id }; renderPanel(false); requestAnimationFrame(() => document.getElementById('fix-role')?.focus()); } }, ' 설명 바로잡기') : null));
     const basis = roleBasisBlock(o, part.id, u, 'sheet'); if (basis) sec.append(basis);
     // Descriptions read later that did not replace this one (no record said it supersedes it) read apart, with their version.
     for (const x of u.others.slice(0, 2)) sec.append(h('p', { class: 'und-later' }, h('span', { title: x.about ?? '' }, `다른 기록의 설명${x.about ? ` · ${displayAbout(x.about)}` : ''} · 현재 설명을 대체한다는 근거 없음`), x.text));
   }
-  if (u.claims.length) sec.append(claimList(part.id, u.claims, 12));
+  // The full reading reads every current claim, as the lens does (claimList takes them all).
+  if (u.claims.length) sec.append(claimList(part.id, u.claims, u.claims.length));
   const requested = currentRequestResults(o, part.id); if (requested) sec.append(requested);
-  const hist = h('details', { class: 'und-history' }, h('summary', {}, `근거 이력 · 정리 ${u.history.length}회`),
+  // The history fold and its quotes keep their identity (this entry and part; each quote by its stored reading, index and place):
+  // back from an original the fold is open again and the same quote has focus, also between two readings with the same time.
+  const histKey = `${o.key}|${part.id}|history`;
+  const hist = h('details', { class: 'und-history', open: lensOpen.has(histKey) }, h('summary', {}, `근거 이력 · 정리 ${u.history.length}회`),
     h('ol', {}, ...[...u.history].reverse().map(x => h('li', {}, h('span', { class: 'uh-at' }, fullTime(x.at)),
       x.role ? h('span', { class: 'uh-role' }, x.role) : null,
-      ...x.claims.map(c => h('span', { class: 'uh-claim' }, h('span', { class: 'cl-kind' }, CLAIM_LABEL[c.kind]), c.text, ' ',
-        h('button', { type: 'button', class: 'cl-cite', title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote, c.from) }, '근거')))))));
+      ...x.claims.map((c, j) => h('span', { class: 'uh-claim' }, h('span', { class: 'cl-kind' }, CLAIM_LABEL[c.kind]), c.text, ' ',
+        h('button', { type: 'button', class: 'cl-cite', 'data-claim-focus': JSON.stringify([part.id, 'history', x.reading, j, c.record, c.from ?? null]), title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote, c.from) }, '근거')))))));
+  hist.addEventListener('toggle', () => { if (hist.open) lensOpen.add(histKey); else lensOpen.delete(histKey); });
   sec.append(hist);
   return sec;
 }
@@ -2275,7 +2323,7 @@ function bindFind() {
     if (e.key === 'Escape') { e.stopPropagation(); show(false); button.focus(); }
   });
   button.addEventListener('click', () => show(!findOpen));
-  document.addEventListener('keydown', e => { if (e.key === '/' && opened && !$('space').hidden && !wide.isOpen() && !(e.target as HTMLElement).closest('textarea,input,select')) { e.preventDefault(); show(true); } });
+  document.addEventListener('keydown', e => { if (e.key === '/' && opened && !$('space').hidden && !wide.isOpen() && !$('space').classList.contains('sheet-read') && !(e.target as HTMLElement).closest('textarea,input,select')) { e.preventDefault(); show(true); } });
   $('viewport').addEventListener('pointerdown', () => { if (findOpen) show(false); });
   window.addEventListener('hashchange', () => { if (findOpen && !location.hash.startsWith('#/p/')) show(false); });
 }

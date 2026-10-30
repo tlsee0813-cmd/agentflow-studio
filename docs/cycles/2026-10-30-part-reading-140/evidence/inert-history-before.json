@@ -1,0 +1,66 @@
+[
+  {
+    "hash": "#/p/E_ae0f0178-2c05-4fe2-a382-7c8ffeb76686/A_61ddca01-0bd0-4e0c-b68b-c270db2d9262",
+    "marker": "1",
+    "partClass": "panel inspector reading",
+    "partHidden": false,
+    "phase": "back-A-with-plan",
+    "planPanelClass": "plan-panel inspector",
+    "viewportInert": true
+  },
+  {
+    "hash": "#/p/E_ae0f0178-2c05-4fe2-a382-7c8ffeb76686/A_61ddca01-0bd0-4e0c-b68b-c270db2d9262",
+    "marker": "1",
+    "partHidden": false,
+    "phase": "work-over-restored-sheet",
+    "planPanelClass": "plan-panel inspector",
+    "viewportInert": true
+  },
+  {
+    "controlsInert": false,
+    "hash": "#/p/E_ae0f0178-2c05-4fe2-a382-7c8ffeb76686/A_93c35e52-a729-435d-887c-a35b0790a8cf",
+    "marker": null,
+    "partHidden": true,
+    "phase": "forward-B-work-open",
+    "planHidden": true,
+    "planPanelClass": "plan-panel inspector",
+    "viewportInert": false
+  },
+  {
+    "hash": "#/p/E_ae0f0178-2c05-4fe2-a382-7c8ffeb76686/A_61ddca01-0bd0-4e0c-b68b-c270db2d9262",
+    "marker": "1",
+    "partHidden": false,
+    "phase": "edit-work-over-restored-sheet",
+    "planHidden": true,
+    "planPanelClass": "plan-panel inspector",
+    "viewportInert": true
+  },
+  {
+    "controlsInert": false,
+    "hash": "#/p/E_ae0f0178-2c05-4fe2-a382-7c8ffeb76686/A_93c35e52-a729-435d-887c-a35b0790a8cf",
+    "marker": null,
+    "partHidden": true,
+    "phase": "forward-B-edit-work-open",
+    "planHidden": true,
+    "planPanelClass": "plan-panel inspector",
+    "viewportInert": false
+  },
+  {
+    "marker": "1",
+    "partHidden": false,
+    "phase": "keyboard-edit-work-open",
+    "planClass": "plan-panel inspector work",
+    "planHidden": false,
+    "viewportInert": true
+  },
+  {
+    "controlsInert": false,
+    "hash": "#/p/E_ae0f0178-2c05-4fe2-a382-7c8ffeb76686/A_93c35e52-a729-435d-887c-a35b0790a8cf",
+    "marker": null,
+    "partHidden": true,
+    "phase": "forward-B-after-keyboard-edit",
+    "planClass": "plan-panel inspector work",
+    "planHidden": false,
+    "viewportInert": false
+  }
+]

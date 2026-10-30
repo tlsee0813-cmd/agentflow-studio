@@ -1,0 +1,60 @@
+{
+  "title": "140 관계 이력 복원 잠금 P2와 스크롤 fixture 최종 delta 확인",
+  "description": "b59a14f 대비8961db4의 정확 delta만 읽었다. 총괄이 실제134 자료에서 확정한 history/marker 잠금 P2는 두 코드 수리로 닫혔다. 종료 후 잠금 잔여의 새 구체 반례는 발견하지 않았다. Python 높이 변경은 원래 단언을 유지한 스크롤 전제 보완이며 별도 해상도 범위로 기록해야 한다.",
+  "at": "2026-10-30T05:41:28.892155+00:00",
+  "baseline": "b59a14f3514fe2780544585f7fa4896708bfc6f4",
+  "source": "8961db44898835a82daec1d3ce51616982991ee3",
+  "appTree": "93be1c55734f95e0040cd333e0d8bba3d3adb12b",
+  "workingTreeObservation": "DESIGN.md 총괄 수정은 제품 코드 delta와 분리했다.",
+  "fileSha256": {
+    "app/continuity/src/client/app.ts": "bc0c14dc37016ca92af444304b2dcea93629c2f2423216c4091dee98e8b03846",
+    "app/continuity/tests/part140-flow.mjs": "7bdb2e539e10030df2e2d4ba3ed812dc006cce16e362cc90a3bafa0c16b3f431",
+    "app/continuity/tests/studio_browser.py": "597398941db74b9f28a7ad941fde37abd98f309e617986338edde246acac0343"
+  },
+  "priorFinding": {
+    "file": ".ops/results/experience140-final-review-inert.json",
+    "sha256": "a91388ae361ccd4384cba043b489f22a511405a2cd3768fa60b7f15107d8dc20",
+    "preserved": true
+  },
+  "rootBeforeReceipt": {
+    "file": ".ops/experience140-part-reading/inert-history-before.json",
+    "sha256": "41143e68600b609e54258fb1b386f8d58b18c53eda7dded571fb34686afcc559",
+    "attribution": "Root 실제134 자료 CUA 재현. 독립 브라우저 실행이 아니다."
+  },
+  "verdict": "확정 history 잠금 P2 코드상 해소 — 새 구체 차단 없음",
+  "findings": [],
+  "closure": [
+    {
+      "where": "app.ts:450–454 restoreReading",
+      "assessment": "owner/부분/범위 확인 뒤 planView.isOpen이면 복원을 중단한다. select의 기존 plan 우선권과 맞추므로 render 끝 restoreSurface가 일반 sheet를 다시 보여 marker를 만드는 우회를 차단한다. false를 받은 restoreSurface는 숨은 일반 pane의 근거/관계에 초점을 보내지도 않는다."
+    },
+    {
+      "where": "app.ts:1187–1197 syncMapArea",
+      "assessment": "기존 reading marker를 없애더라도 현재 plan-panel이 실제 visible work이면 inert를false로 대입하지 않는다. marker만 끝내고 현재 plan 소유 잠금을 유지한다. work가 아닌 단순 plan 지도 비교까지 isOpen만으로 잠그지 않는다."
+    },
+    {
+      "where": "plan-view.ts 기존 render/cover/close 순서와 위 delta",
+      "assessment": "renderWork는 panel.hidden=false/class work를 만들고 cover(workOpen)를 호출한 뒤 host.area로 간다. 지도 비교 전환은 work를 숨기고 class를 제거하며 cover(false)를 실행한다. close도 plan-panel을 숨기고 cover(false)를 호출한다. 따라서 planCover가 실제 현재 덮개와 대응하고, marker를 제거한 뒤 work가 종료되면 기존 owner가 잠금을 풀 수 있어 이 수리가 영구 잠금을 남기는 경로는 확인되지 않았다."
+    }
+  ],
+  "testDelta": {
+    "H": "예제 converter에서 일반 sheet A→실제 relation B→plan 지도 비교(work=false 확인)→Browser Back→문장 고치기 focus/Enter→work→Browser Forward를 밟는다. Back의 part panel 비노출과 끝의 work=true·viewport/controls=true를 assert하며, work닫기 후 viewport=false·marker없음도 확인한다. Root의 실제 입력 방식을 피하지 않고 키보드 Enter를 유지한 의미 있는 반례다.",
+    "scope": "H는 실제134 원자료가 아닌 기존 작성 예제 fixture다. 작성자 baseline 반려/수정 통과와 전체 part14014/14는 보고된 실행이며 이 검토자는 재실행하지 않았다. Root가 실제134 같은 경로를 따로 확인한다.",
+    "pythonFixture": "studio_browser.py relation_visit_flow의 sheet 왕복 직전에1280×500을 설정하고 reload 전1280×720으로 복귀시킨다. 같은 함수의 앞쪽에도500높이로 실제 scroll을 만드는 선례가 있다. 원래 scrolled>40, 원위치 오차<=1, 질문 draft, 답변0, 관계 Back, reload stale-history 단언을 삭제하거나 낮추지 않았다.",
+    "honestClaim": "이 부분은1280×500에서 실제 스크롤 복귀를 검증하는 setup다. 720높이에서 스크롤이 없다는 관측을 가리는 것이 아니라 넓어진 본문에 맞게 nonzero scroll 전제를 만든 것이다. 기존720에서 강제 스크롤이 생긴다거나 Python 원본을 작성자가 직접 실행했다고 주장하면 안 된다."
+  },
+  "unverified": [
+    "정확8961db4의 잠금TS/build·실제134 재현 후 상태·저장 보존·CI41009319891 최종 결과는 Root의 별도 회수 대상이다. 이 보고서는 그 통과를 선기록하지 않는다.",
+    "앞선 전체140/139·질문·역할 세션·cap 영향 검토나 전체 suite를 반복하지 않았다. 요청 넓은 읽기의 기존 처리도 새 framework로 바꾸지 않았다.",
+    "기존 Q1재시도→미전송Q2 삭제 send 한계는 이번 수정에서도 제외한다. 일반 부분 전체 읽기 범위 수용을 모든 질문 소유권/전체 제품 완성으로 확대하지 않는다."
+  ],
+  "execution": {
+    "actor": "독립 최종 history delta 검토자",
+    "tests": 0,
+    "browser": 0,
+    "modelAPI": 0,
+    "externalTransmission": 0,
+    "productWrites": 0,
+    "onlyNewPrivateFile": ".ops/results/experience140-final-review-history.json"
+  }
+}

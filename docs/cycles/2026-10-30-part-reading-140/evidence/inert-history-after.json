@@ -1,0 +1,75 @@
+[
+  {
+    "locks": [
+      {
+        "inert": false,
+        "owner": null,
+        "selector": "#viewport"
+      },
+      {
+        "inert": false,
+        "owner": null,
+        "selector": ".controls"
+      }
+    ],
+    "panelHidden": true,
+    "planClass": "plan-panel inspector",
+    "planHidden": true,
+    "step": "back-A-plan-open",
+    "url": "http://127.0.0.1:4327/#/p/E_ae0f0178-2c05-4fe2-a382-7c8ffeb76686/A_61ddca01-0bd0-4e0c-b68b-c270db2d9262"
+  },
+  {
+    "locks": [
+      {
+        "inert": true,
+        "owner": null,
+        "selector": "#viewport"
+      },
+      {
+        "inert": true,
+        "owner": null,
+        "selector": ".controls"
+      }
+    ],
+    "panelHidden": true,
+    "planClass": "plan-panel inspector work",
+    "planHidden": false,
+    "step": "edit-work-open"
+  },
+  {
+    "locks": [
+      {
+        "inert": true,
+        "owner": null,
+        "selector": "#viewport"
+      },
+      {
+        "inert": true,
+        "owner": null,
+        "selector": ".controls"
+      }
+    ],
+    "panelHidden": true,
+    "planClass": "plan-panel inspector work",
+    "planHidden": false,
+    "step": "forward-B-work-open",
+    "url": "http://127.0.0.1:4327/#/p/E_ae0f0178-2c05-4fe2-a382-7c8ffeb76686/A_93c35e52-a729-435d-887c-a35b0790a8cf"
+  },
+  {
+    "locks": [
+      {
+        "inert": false,
+        "owner": null,
+        "selector": "#viewport"
+      },
+      {
+        "inert": false,
+        "owner": null,
+        "selector": ".controls"
+      }
+    ],
+    "panelHidden": true,
+    "planHidden": true,
+    "step": "close-work"
+  }
+]

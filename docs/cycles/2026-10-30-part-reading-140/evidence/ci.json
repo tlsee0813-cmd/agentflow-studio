@@ -1,0 +1,205 @@
+{
+  "source": "8961db44898835a82daec1d3ce51616982991ee3",
+  "run": 41009319891,
+  "url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/41009319891",
+  "jobs": [
+    {
+      "id": 123911363733,
+      "name": "verify (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Record exact runtime and checked-out commit",
+          "conclusion": "success"
+        },
+        {
+          "name": "Clean locked install",
+          "conclusion": "success"
+        },
+        {
+          "name": "Type and boundary checks",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build and domain / HTTP / simulated provider tests",
+          "conclusion": "success"
+        },
+        {
+          "name": "Continuity type, syntax and credential boundary checks",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build and test continuity with simulated providers",
+          "conclusion": "success"
+        },
+        {
+          "name": "Prepare Cloudflare modules and assets without credentials or deployment",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build static site (no AI server bundled, no credentials)",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install pinned browser verification tools",
+          "conclusion": "success"
+        },
+        {
+          "name": "Direct browser-to-server verification (original app, AI is still mocked)",
+          "conclusion": "success"
+        },
+        {
+          "name": "Studio smoke - entry, map, part, ask, failure/retry, no-key and static states (stubbed provider, no real key)",
+          "conclusion": "success"
+        },
+        {
+          "name": "Upload only this run's results, not historic snapshot evidence",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 123911363996,
+      "name": "verify (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Record exact runtime and checked-out commit",
+          "conclusion": "success"
+        },
+        {
+          "name": "Clean locked install",
+          "conclusion": "success"
+        },
+        {
+          "name": "Type and boundary checks",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build and domain / HTTP / simulated provider tests",
+          "conclusion": "success"
+        },
+        {
+          "name": "Continuity type, syntax and credential boundary checks",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build and test continuity with simulated providers",
+          "conclusion": "success"
+        },
+        {
+          "name": "Prepare Cloudflare modules and assets without credentials or deployment",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build static site (no AI server bundled, no credentials)",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install pinned browser verification tools",
+          "conclusion": "success"
+        },
+        {
+          "name": "Direct browser-to-server verification (original app, AI is still mocked)",
+          "conclusion": "success"
+        },
+        {
+          "name": "Studio smoke - entry, map, part, ask, failure/retry, no-key and static states (stubbed provider, no real key)",
+          "conclusion": "success"
+        },
+        {
+          "name": "Upload only this run's results, not historic snapshot evidence",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "originalAppTests": {
+    "windows": 279,
+    "linux": 279
+  },
+  "continuityTests": {
+    "windows": {
+      "pass": 653,
+      "skip": 3,
+      "fail": 0
+    },
+    "linux": {
+      "pass": 656,
+      "skip": 0,
+      "fail": 0
+    }
+  },
+  "directBrowser": {
+    "windows": 18,
+    "linux": 18
+  },
+  "studioBrowser": "original Python script completed successfully both OS; providers mocked",
+  "deployment": 0
+}

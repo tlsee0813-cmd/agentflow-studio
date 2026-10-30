@@ -1,0 +1,91 @@
+{
+  "source": "b59a14f3514fe2780544585f7fa4896708bfc6f4",
+  "beforeSource": "9628e98589f3685d63bda2e78086409e1ebc5364",
+  "before": {
+    "planWork": true,
+    "values": [
+      {
+        "inert": true,
+        "selector": "#lens"
+      },
+      {
+        "inert": true,
+        "selector": "#plan-strip"
+      },
+      {
+        "inert": false,
+        "selector": "#viewport"
+      },
+      {
+        "inert": false,
+        "selector": ".controls"
+      }
+    ]
+  },
+  "after": {
+    "camera": "top: -134px; transform: translate(231.2px, 311px) scale(1);",
+    "values": [
+      {
+        "inert": true,
+        "marker": null,
+        "selector": "#lens"
+      },
+      {
+        "inert": true,
+        "marker": null,
+        "selector": "#plan-strip"
+      },
+      {
+        "inert": true,
+        "marker": null,
+        "selector": "#viewport"
+      },
+      {
+        "inert": true,
+        "marker": null,
+        "selector": ".controls"
+      }
+    ]
+  },
+  "requestCloseThenResize": {
+    "size": [
+      1000,
+      700
+    ],
+    "values": [
+      {
+        "inert": true,
+        "selector": "#lens"
+      },
+      {
+        "inert": true,
+        "selector": "#plan-strip"
+      },
+      {
+        "inert": true,
+        "selector": "#viewport"
+      },
+      {
+        "inert": true,
+        "selector": ".controls"
+      }
+    ]
+  },
+  "closed": {
+    "camera": "top: -134px; transform: translate(231.2px, 311px) scale(1);",
+    "values": [
+      {
+        "inert": false,
+        "marker": null,
+        "selector": "#viewport"
+      },
+      {
+        "inert": false,
+        "marker": null,
+        "selector": ".controls"
+      }
+    ]
+  },
+  "actualData": "saved134 real plan and RQ93168; no new model",
+  "storageExact": true
+}
