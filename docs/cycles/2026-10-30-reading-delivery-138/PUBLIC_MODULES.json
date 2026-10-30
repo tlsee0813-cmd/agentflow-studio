@@ -1,0 +1,169 @@
+{
+  "source": "73f6f253e8ce9921504011b7281584955d41716d",
+  "entrypoint": "continuity/server/worker-existing-map.mjs",
+  "expectedClosure": "18b53cc79f6c8da572c8f164506bd69cc27cc162dccadb8a8beedffe2a2f0958",
+  "files": [
+    {
+      "path": "continuity/dist/public/shared/authoring-context.js",
+      "bytes": 8078,
+      "sha256": "08bd0f32f25ff97c854da370b53731182b2cfd3f8fb5cce36e8b1af083477f43",
+      "exact": true
+    },
+    {
+      "path": "continuity/dist/public/shared/change-plan.js",
+      "bytes": 17159,
+      "sha256": "982240c78c5258ad584d6abaad34ec5a5e103b7fb31df3d0cbb974cd5e37b420",
+      "exact": true
+    },
+    {
+      "path": "continuity/dist/public/shared/condition-guidance.js",
+      "bytes": 2242,
+      "sha256": "0f4202cb8bde7c234d207a936e61dfd7796048c7d731b4fbf6ec661a2fcbf7ee",
+      "exact": true
+    },
+    {
+      "path": "continuity/dist/public/shared/digest-api.js",
+      "bytes": 9501,
+      "sha256": "b2c2a81247fda9be1ee756b7a2e385a4e3b5622dffc872320ccd1c53aadb119d",
+      "exact": true
+    },
+    {
+      "path": "continuity/dist/public/shared/domain.js",
+      "bytes": 81380,
+      "sha256": "3a5cd4acdb5e709b1885f586953cb955f394cd89d9117b6026088f1e72da7b87",
+      "exact": true
+    },
+    {
+      "path": "continuity/dist/public/shared/evidence-span.js",
+      "bytes": 11791,
+      "sha256": "a8ecf6e1abbb78337ea8ae25423bf30fa5afba1665a1352de5ecc2d101d0ff38",
+      "exact": true
+    },
+    {
+      "path": "continuity/dist/public/shared/hierarchy.js",
+      "bytes": 2489,
+      "sha256": "5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624",
+      "exact": true
+    },
+    {
+      "path": "continuity/dist/public/shared/map-reading.js",
+      "bytes": 76831,
+      "sha256": "60079ead93ae415b7400bc5c9d61679fe37d184c34e2cb5b29f8e3f4284f35c7",
+      "exact": true
+    },
+    {
+      "path": "continuity/dist/public/shared/outcome.js",
+      "bytes": 4887,
+      "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "exact": true
+    },
+    {
+      "path": "continuity/dist/public/shared/plan-api.js",
+      "bytes": 4236,
+      "sha256": "7e29da612604836cfabbeeb16579d12bfb854199e7f4e91f17408c71f1c52e9a",
+      "exact": true
+    },
+    {
+      "path": "continuity/dist/public/shared/plan-facts.js",
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "exact": true
+    },
+    {
+      "path": "continuity/dist/public/shared/record-source.js",
+      "bytes": 6204,
+      "sha256": "df0c2d5d2daf3fbc32fe32a012a065731c0cad3e3e62a905556c7a0514c38a5f",
+      "exact": true
+    },
+    {
+      "path": "continuity/dist/public/shared/request-reading.js",
+      "bytes": 9026,
+      "sha256": "da7e7f0d0c037d766791f32ebc357e45ebc007be49315b68bfc535dbe62265a7",
+      "exact": true
+    },
+    {
+      "path": "continuity/dist/public/shared/request-return.js",
+      "bytes": 21429,
+      "sha256": "8a22fb9e0aaf5d20738180e08e47d1135e2724fad364e5837324998e596fe546",
+      "exact": true
+    },
+    {
+      "path": "continuity/dist/public/shared/scope-api.js",
+      "bytes": 2484,
+      "sha256": "e0a206567a88b63a22ae73aea49eea1e82d3c6f40302c7c4e2596cb5c8b96969",
+      "exact": true
+    },
+    {
+      "path": "continuity/dist/public/shared/secret.js",
+      "bytes": 504,
+      "sha256": "b91f6443aa07f7a6a4aa5d696831d2ee8d2c51139df23ab962166e5a6c4d4f66",
+      "exact": true
+    },
+    {
+      "path": "continuity/dist/public/shared/studio.js",
+      "bytes": 13004,
+      "sha256": "370f0bf194ad0555890ae1696ada1051e3d89f6daf38e1d272b15fa3de288c45",
+      "exact": true
+    },
+    {
+      "path": "continuity/dist/public/shared/types.js",
+      "bytes": 4101,
+      "sha256": "577682011fb3cf4a7da0fa4dad688311ddea361e1e603b337590ab0e504f0305",
+      "exact": true
+    },
+    {
+      "path": "continuity/dist/public/shared/validation.js",
+      "bytes": 69234,
+      "sha256": "c78f2b6d745bb7b77d5f00248efd997f2389d892c473f170a4a68ba4db6a9962",
+      "exact": true
+    },
+    {
+      "path": "continuity/server/digest-prompt.mjs",
+      "bytes": 14653,
+      "sha256": "0010cee8b86d13df97a58a8d092ca18c9524f83416cb1a9ab31caf29bb859f8d",
+      "exact": true
+    },
+    {
+      "path": "continuity/server/map-prompt.mjs",
+      "bytes": 66683,
+      "sha256": "ad39d4f74d4363ac27c0a444900d73c201a3314183a1822b38aa894e830d8d77",
+      "exact": true
+    },
+    {
+      "path": "continuity/server/plan-prompt.mjs",
+      "bytes": 17794,
+      "sha256": "3d7bc49ddc19e599707a17e6a2a8eec0f81be2bb382d89ce2524d9e923f6f296",
+      "exact": true
+    },
+    {
+      "path": "continuity/server/studio.mjs",
+      "bytes": 26377,
+      "sha256": "ac6d6a2da9b615143103ac2bd2acecbf22a8bc09432b0a684b488a54d7405976",
+      "exact": true
+    },
+    {
+      "path": "continuity/server/worker-existing-map.mjs",
+      "bytes": 329,
+      "sha256": "b42084e5bfb3a73771bcae717f66aa2ad9cd47d802e363ce51c731bf099bcd16",
+      "exact": true
+    },
+    {
+      "path": "continuity/server/worker.mjs",
+      "bytes": 1118,
+      "sha256": "3b47710545eb7bd45a6ce6d17139064595e5c4b711c2f33d6d6d30235ca3b2b6",
+      "exact": true
+    },
+    {
+      "path": "server/errors.mjs",
+      "bytes": 511,
+      "sha256": "975f10b518897cabde44613cba896065f1d357b296ddbd292c4ccbccab831c96",
+      "exact": true
+    },
+    {
+      "path": "server/limiter.mjs",
+      "bytes": 868,
+      "sha256": "b0e9e96b7ad193f23e98ec8da5ee216aeea7d1380439884778127d5d83e0db42",
+      "exact": true
+    }
+  ]
+}

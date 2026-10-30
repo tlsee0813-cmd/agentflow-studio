@@ -1,0 +1,34 @@
+{
+  "review": "experience138-release-independent-static-delta",
+  "openP1P2": [],
+  "conclusion": "검토한 좁은 guard 및 패키지 delta에서 열린 P1/P2를 발견하지 못함. 기존 127과 같은 target/업로드 경계를 재사용하는 선택 범위에 맞음. 실제 배포 승인·완료 판정은 Root 책임이며 이번 검토에서 업로드하지 않음.",
+  "limits": [
+    "로컬 정적 검토와 파일 hash 대조만 수행. 네트워크/API/배포/모델/브라우저/키 조회/환경 파일 읽기/제품 수정 0.",
+    "live-before는 저장된 기준 스냅샷이다. 검토 시점의 원격 상태를 새로 확인한 증거는 아니며, guard의 첫 mutation 직전 재조회 및 Root의 배포 후 검증이 별도로 필요하다.",
+    "secret binding 검사는 업로드 값이 실행 환경 값과 정확히 같은지 값을 출력하지 않고 비교한다. 원격 settings의 secret 이름/type만으로 기존 원격 secret 값과 환경 값의 동일성을 독립 증명하지는 못한다. 동일한 승인 환경을 사용하는 기존 127 전달 전제는 유지된다.",
+    "PUT 1회는 guard 프로세스 한 번의 scriptWrites 제한이다. 실패·불명확 뒤 프로세스를 재시작하지 않는 Root의 운영 조건도 계속 필요하다. 전후 원격 설정의 원자적 transaction까지 보장하는 장치는 아니다."
+  ],
+  "source": "73f6f253e8ce9921504011b7281584955d41716d",
+  "appTree": "3960c16dbaf229f6100291f0252b34c50301cf33",
+  "guardSha256": "5b7cf413232d2360788bc4b2b70e22bf4b3bd1a96e54344fee5e52692aa88eb6",
+  "guardDelta": "127→138은 frozen assets 경로를 이번 package/assets로 바꾸고 manifest mismatch의 accepted126 표기를 accepted135로 바꾼 두 줄뿐이다. 검증 로직/허용 route/secret 처리/PUT 제한은 동일하다.",
+  "boundaryEvidence": [
+    "guard:15–19는 정확 worker명, deepseek-flash, 필요한 환경 입력 존재, expected source의 HEAD 및 clean 상태를 요구한다. 준비된 upload manifest 전체가 expected와 같아야 하며 실제 cwd assets/modules의 길이와 SHA를 다시 확인한다(28–32).",
+    "첫 mutation 전 target settings/deployment/subdomain, public73 settings와 두 BUILD를 native GET으로 재조회하여 live-before와 exact 비교한다(39–45). subdomain enabled=true/previews_enabled=false도 고정한다. snapshot의 현 target deployment는 461c3759-01fb-4511-9fbf-00f9539740a5/version b1e66c2e-56a2-4e99-9cde-6f1b9c46a103, public73 source는 26b24b935567a95d101720cbf0e06d188d8765d9이다.",
+    "허용하는 mutation은 같은 target의 asset session, account asset upload, 같은 Worker의 PUT 및 같은 subdomain 상태 POST뿐이다(35–37). public73 쓰기 route는 없다. 제품 deploy script의 fetch는 redirect:error를 사용하며 자동 재시도 없이 순차 호출한다.",
+    "asset session의 모든 path/hash/size를 검증하고 실제 base64 업로드 bytes/길이/hash/MIME를 frozen asset과 대조한다(47–48). PUT은 한 번만 허용하고 metadata/main/date/assets config/annotation, 모듈 수와 각 실제 multipart bytes를 검증한다(49–53).",
+    "binding은 정확히 5개이며 ASSETS, 두 secret의 이름/type/text/keyset, AI_MODE=deepseek, DEEPSEEK_MODEL=deepseek-flash를 검사한다. secret 불일치는 고정된 values omitted 메시지만 내며 receipt에 secret 원문을 기록하지 않는다."
+  ],
+  "packageEvidence": {
+    "assets": {"count":54,"sha256":"26ff01dc876fc7d0af387195f0073b60d563919471f17acc30d89fea00ae6585"},
+    "modules": {"count":27,"sha256":"18b53cc79f6c8da572c8f164506bd69cc27cc162dccadb8a8beedffe2a2f0958"},
+    "independentFileCheck": "expected manifest의 54 frozen asset 및 27 release-worktree module 전부 실제 길이/SHA와 대조하여 mismatch 0. release worktree HEAD는 source exact이고 git status --short는 비어 있었다.",
+    "versus127": {
+      "changedAssets": ["/BUILD.txt", "/client/request-results.js", "/styles.css"],
+      "changedModules": ["continuity/server/plan-prompt.mjs", "continuity/server/studio.mjs"]
+    },
+    "serverScope": "127 source→135 source의 server diff를 직접 읽었다. plan-prompt는 scope의 보고 시점/판본·현재 상태 근거 구분 지침(133) 추가이고 studio는 scope의 8192/plan timer 선택(131)뿐이다. 다른 prompt/model/validator/취소/단일시도/route policy의 변경은 없다.",
+    "unchangedBoundary": "Worker entry, map prompt, shared map-reading/storage/types 및 나머지 module/asset 행은 127 manifest와 동일하다. existing-map 정책과 same-origin API, storagePrefix agentflow.studio.preview:가 유지된다. Node PC launcher/CLI executor는 이 27-module 묶음에 없다."
+  },
+  "remainingReleaseChecks": "Root의 첫 mutation 직전 guard 성공, PUT 영수증과 원격 version, 전체 공개 assets/modules bytes, settings/bindings/subdomain, map/jobs MAP_WITHHELD·plan 접근보호, 공개73 불변 및 실제 public workspace/plans·원RQ복귀 보존을 확인해야 전달 완료로 판단할 수 있다. 수용된 로컬135 검증을 공개 자료에서 새로 실행한 성공으로 바꾸지 않는다."
+}

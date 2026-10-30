@@ -1,0 +1,37 @@
+{
+  "source": "73f6f253e8ce9921504011b7281584955d41716d",
+  "appTree": "3960c16dbaf229f6100291f0252b34c50301cf33",
+  "assets": "26ff01dc876fc7d0af387195f0073b60d563919471f17acc30d89fea00ae6585",
+  "modules": "18b53cc79f6c8da572c8f164506bd69cc27cc162dccadb8a8beedffe2a2f0958",
+  "changes": {
+    "assets": [
+      "/BUILD.txt",
+      "/client/request-results.js",
+      "/styles.css"
+    ],
+    "modules": [
+      "continuity/server/plan-prompt.mjs",
+      "continuity/server/studio.mjs"
+    ]
+  },
+  "dryRunExit": 0,
+  "guardSha256": "5b7cf413232d2360788bc4b2b70e22bf4b3bd1a96e54344fee5e52692aa88eb6",
+  "priorDeployment": {
+    "id": "461c3759-01fb-4511-9fbf-00f9539740a5",
+    "source": "api",
+    "strategy": "percentage",
+    "annotations": {
+      "workers/message": "AgentFlow Studio 6badd901b5ac4061353e487ee8bafd...",
+      "workers/triggered_by": "upload"
+    },
+    "versions": [
+      {
+        "version_id": "b1e66c2e-56a2-4e99-9cde-6f1b9c46a103",
+        "percentage": 100
+      }
+    ],
+    "created_on": "2026-10-30T00:07:43.541181Z"
+  },
+  "publicStorageUnchangedSince127": true,
+  "uploadAttempts": 0
+}

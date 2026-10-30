@@ -1,0 +1,51 @@
+{
+  "usesRealCode": false,
+  "modelCalled": false,
+  "checks": [
+    {
+      "path": "/api/studio/map",
+      "method": "POST",
+      "expected": 403,
+      "status": 403,
+      "body": {
+        "error": {
+          "code": "MAP_WITHHELD"
+        }
+      }
+    },
+    {
+      "path": "/api/studio/jobs",
+      "method": "GET",
+      "expected": 403,
+      "status": 403,
+      "body": {
+        "error": {
+          "code": "MAP_WITHHELD"
+        }
+      }
+    },
+    {
+      "path": "/api/studio/plan",
+      "method": "POST",
+      "expected": 401,
+      "status": 401,
+      "body": {
+        "error": {
+          "code": "ACCESS_CODE_REQUIRED"
+        }
+      }
+    },
+    {
+      "path": "/api/studio/plan",
+      "method": "POST",
+      "expected": 401,
+      "wrong": true,
+      "status": 401,
+      "body": {
+        "error": {
+          "code": "ACCESS_CODE_REQUIRED"
+        }
+      }
+    }
+  ]
+}

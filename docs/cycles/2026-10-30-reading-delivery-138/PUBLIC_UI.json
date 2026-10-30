@@ -1,0 +1,29 @@
+{
+  "source": "73f6f253e8ce9921504011b7281584955d41716d",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "observedAt": "2026-10-30T04:12:40.476Z",
+  "existingProject": "zephyr-reel-board",
+  "entry": "E_edafb6ad-cb4a-4e61-9b70-4bac83b27cb5",
+  "request": "RQ_2270d57b-174f-4405-9ad3-72f3b25ed607",
+  "plan": "CP_adcee85f-4862-47a5-a244-e69e0fe6a94d/1",
+  "steps": [
+    "reload deployed home",
+    "continue Display",
+    "open existing change plan",
+    "wide comparison",
+    "returned records",
+    "read this item wide",
+    "return to same request and item",
+    "reload retained project"
+  ],
+  "workspaceByteExact": true,
+  "plansByteExact": true,
+  "workspaceSha256": "86055d9fbb282c5bfcfdd3de861d483d8a91f53381c41dba4ff05ea8c76b4a09",
+  "plansSha256": "71fec8f52dc3433aebf10c8f20a4befe2102c0c8ac782423e537c1b8cbb96d05",
+  "newAiCalls": 0,
+  "rawStatePublic": false,
+  "limit": "Public saved request has no connected return excerpts. Actual withdrawal semantics remain the separately accepted135 local evidence, not a fresh public generation success."
+}

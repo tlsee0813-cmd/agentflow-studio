@@ -1,0 +1,27 @@
+{
+  "attempt": "138-upload-1",
+  "exit": 0,
+  "source": "73f6f253e8ce9921504011b7281584955d41716d",
+  "appTree": "3960c16dbaf229f6100291f0252b34c50301cf33",
+  "deployment": {
+    "id": "dd704c0b-6089-4aa4-a667-693078c39383",
+    "source": "api",
+    "strategy": "percentage",
+    "annotations": {
+      "workers/message": "AgentFlow Studio 73f6f253e8ce9921504011b7281584...",
+      "workers/triggered_by": "upload"
+    },
+    "versions": [
+      {
+        "version_id": "cf4a5f10-d992-4d96-8b7e-df85e15fca97",
+        "percentage": 100
+      }
+    ],
+    "created_on": "2026-10-30T04:04:52.282451Z"
+  },
+  "workerPutCount": 1,
+  "settingsExceptBuildAnnotationsExact": true,
+  "subdomainExact": true,
+  "public73Exact": true,
+  "guardSha256": "5b7cf413232d2360788bc4b2b70e22bf4b3bd1a96e54344fee5e52692aa88eb6"
+}
