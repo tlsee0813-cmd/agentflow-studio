@@ -1,0 +1,23 @@
+{
+  "originalFile": "experience70-9199c24-recovered-micro-javascript-initial.json",
+  "originalSha256": "fd241de7ecfb12c663751b267b66942740cffb84c1334515270ea36d578c1fbe",
+  "texts": [
+    {
+      "file": "source-1.txt",
+      "utf16": 2595,
+      "utf8": 2595,
+      "sha256": "cf757e7aea50d53e9c428c7ca134e77b53b30152cbe310d3c2d8499e387eec6f"
+    },
+    {
+      "file": "source-2.txt",
+      "utf16": 1369,
+      "utf8": 1369,
+      "sha256": "cd143d46caf9c613b3a177b9a9964139419bd70780132968785540ed8fb9abdc"
+    }
+  ],
+  "oldResponseImported": false,
+  "sourceRewritten": false,
+  "criteriaFile": "experience77-reading-criteria.json",
+  "criteriaSha256": "06e415b8ccf53254d90bee930746e8d5d53c08cb55d8e955ab45d45fb49e1365",
+  "modelCalls": 0
+}
