@@ -122,15 +122,17 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
   // before anything is sent (never a partial table).
   let map7System = null;
   if (map7) { try { map7System = map7Prompt(ask); } catch { throw new ApiError('INPUT_TOO_LARGE', 413); } }
+  // AF131: the scope review reads the same whole evidence with reasoning as a plan, so it takes the plan's budget and timer (4096
+  // tokens and the general timeout cut a real review by length). Its prompt, input, checks and single attempt stay its own.
   const controller = new AbortController(); let timedOut = false;
-  const timer = setTimeout(() => { timedOut = true; controller.abort(); }, map ? (config.mapTimeoutMs ?? config.planTimeoutMs ?? config.timeoutMs) : planning || digest ? (config.planTimeoutMs ?? config.timeoutMs) : config.timeoutMs);
+  const timer = setTimeout(() => { timedOut = true; controller.abort(); }, map ? (config.mapTimeoutMs ?? config.planTimeoutMs ?? config.timeoutMs) : planning || digest || scope ? (config.planTimeoutMs ?? config.timeoutMs) : config.timeoutMs);
   const abort = () => controller.abort(); signal?.addEventListener('abort', abort, { once: true });
   try {
     // Workers supports manual/follow, not redirect:error. Reject 3xx below without forwarding the key.
     const response = await fetchImpl(ENDPOINT, { method: 'POST', redirect: 'manual', signal: controller.signal,
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.apiKey}` },
       body: JSON.stringify({ model: config.model, stream: false, ...(map ? { thinking: { type: config.mapThinking ?? 'enabled' }, ...((config.mapThinking ?? 'enabled') === 'enabled' ? { reasoning_effort: 'low' } : {}), max_tokens: config.mapMaxTokens ?? 16384 }
-        : { thinking: { type: scope || planning || digest ? 'enabled' : 'disabled' }, ...(scope || planning || digest ? { reasoning_effort: 'low' } : {}), max_tokens: planning || digest ? 8192 : scope ? 4096 : config.maxTokens }),
+        : { thinking: { type: scope || planning || digest ? 'enabled' : 'disabled' }, ...(scope || planning || digest ? { reasoning_effort: 'low' } : {}), max_tokens: planning || digest || scope ? 8192 : config.maxTokens }),
         response_format: { type: 'json_object' },
         messages: [{ role: 'system', content: map7 ? map7System : map6 ? map6Prompt(ask) : map5 ? map5Prompt(ask) : map4 ? map4Prompt(ask) : map3 ? MAP3_PROMPT : map2 ? MAP2_PROMPT : map ? MAP_PROMPT : digest2 ? DIGEST2_PROMPT : digest ? DIGEST_PROMPT : scope ? SCOPE_PROMPT : plan3 ? PLAN3_PROMPT : plan2 ? PLAN2_PROMPT : planning ? PLAN_PROMPT : STUDIO_PROMPT }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }] }) });
     if (!response.ok) {
