@@ -4,24 +4,24 @@
  * the code inside the document is how a session that starts from it is known later (it comes back in that session's records). */
 import type { Project } from '../shared/types.js';
 import { studioView } from '../shared/studio.js';
-import { handoverText, handoverCode } from '../shared/handover.js';
+import { handoverDoc, handoverCode, type Handover } from '../shared/handover.js';
 import { h } from './plan-dom.js';
 
 export interface HandoverHost { current(): { key: string; kind: string; project: Project } | null }
 
 export function createHandoverView(host: HandoverHost) {
   let dialog: HTMLDialogElement | null = null, from: HTMLElement | null = null;
-  let state: { key: string; scope: string | null; code: string; at: string; text: string; msg: string | null } | null = null;
+  let state: { key: string; scope: string | null; code: string; at: string; text: string; trimmed: number; msg: string | null } | null = null;
 
-  function make(project: Project, scope: string | null, code: string, at: string): string | null {
-    try { return handoverText(project, { scope, code, at }); } catch { return null; }
+  function make(project: Project, scope: string | null, code: string, at: string): Handover | null {
+    try { return handoverDoc(project, { scope, code, at }); } catch { return null; }
   }
   function render() {
     const o = host.current(); if (!dialog || !state || !o || o.key !== state.key) return;
     const view = studioView(o.project), st = state;
     const pick = h('select', { id: 'handover-scope', 'data-act': 'scope', 'aria-label': '인수인계 범위', onchange: (e: Event) => {
-      const v = (e.target as HTMLSelectElement).value, scope = v || null, text = make(o.project, scope, st.code, st.at);
-      if (text !== null) { st.scope = scope; st.text = text; st.msg = null; render(); }
+      const v = (e.target as HTMLSelectElement).value, scope = v || null, doc = make(o.project, scope, st.code, st.at);
+      if (doc) { st.scope = scope; st.text = doc.text; st.trimmed = doc.trimmed; st.msg = null; render(); }
     } }, h('option', { value: '' }, '프로젝트 전체'));
     const walk = (id: string, depth: number) => {
       const part = view.parts.find(x => x.id === id); if (!part) return;
@@ -43,7 +43,8 @@ export function createHandoverView(host: HandoverHost) {
       h('div', { class: 'handover-acts' },
         h('button', { type: 'button', class: 'primary', 'data-act': 'copy', onclick: copy }, '복사'),
         h('button', { type: 'button', class: 'secondary', 'data-act': 'save', onclick: save }, '.md로 저장'),
-        h('span', { class: 'handover-msg', role: 'status' }, st.msg ?? `${st.text.length.toLocaleString()}자`)));
+        // A document cut down to fit one prompt says so here too, not only inside the text.
+        h('span', { class: 'handover-msg', role: 'status' }, st.msg ?? `${st.text.length.toLocaleString()}자${st.trimmed ? ` · 길어서 부분 ${st.trimmed}개는 줄여 적었어요` : ''}`)));
     if (had) dialog.querySelector<HTMLElement>(`[data-act="${had}"]`)?.focus();
   }
   async function copy() {
@@ -63,9 +64,9 @@ export function createHandoverView(host: HandoverHost) {
   }
   function open(scope: string | null, opener: HTMLElement | null = null) {
     const o = host.current(); if (!o) return;
-    const code = handoverCode(), at = new Date().toISOString(), text = make(o.project, scope, code, at) ?? make(o.project, null, code, at);
-    if (text === null) return;
-    state = { key: o.key, scope: text.includes(`:${code}:`) ? scope : null, code, at, text, msg: null };
+    const code = handoverCode(), at = new Date().toISOString(), doc = make(o.project, scope, code, at) ?? make(o.project, null, code, at);
+    if (!doc) return;
+    state = { key: o.key, scope: doc.text.includes(`:${code}:`) ? scope : null, code, at, text: doc.text, trimmed: doc.trimmed, msg: null };
     if (!dialog) {
       dialog = h('dialog', { id: 'handover-sheet', class: 'handover-sheet', 'aria-labelledby': 'handover-title' });
       // Esc closes this dialog only: the page's own Esc (closing a part, leaving a scope) does not run under it.

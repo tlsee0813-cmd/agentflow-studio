@@ -7,7 +7,7 @@ import { CLAIM_LABEL, candidateReading } from './map-reading.js';
 import { studioView, type PartView, type StudioView } from './studio.js';
 import { REL_LABEL } from './relation-groups.js';
 import { stamp } from './session-import.js';
-import { HANDOVER_TAG, receivedHandovers } from './handover-mark.js';
+import { HANDOVER_TAG, quoteReceived, receivedHandovers } from './handover-mark.js';
 export { HANDOVER_TAG, foldHandover, handoverCode, receivedHandovers } from './handover-mark.js';
 
 /* ---------- which session a record came from ---------- */
@@ -18,11 +18,13 @@ const HEAD = /^\[(Claude Code|Codex|웹 AI) 세션 기록(?: · ([^\n]*))?\]/;
 /** The session a record was taken from (its header line, session-import.ts), or null for any other record. */
 export function sessionOrigin(text: string): SessionOrigin | null {
   const m = HEAD.exec(text); if (!m) return null;
-  const tool = m[1] === 'Codex' ? 'codex' : m[1] === '웹 AI' ? 'web' : 'claude', fields = (m[2] ?? '').split(' · ');
-  const field = (prefix: string) => fields.find(f => f.startsWith(prefix))?.slice(prefix.length).trim() || null;
-  const id = field('세션 '), known = /^(작업 폴더 |브랜치 |세션 |\d{4}-\d{2}-\d{2} \d{2}:\d{2} 시작$)/;
-  const title = fields.filter(f => f && !known.test(f)).join(' · ') || null;
-  return { id: id && /^(claude|codex)-[0-9a-f]{24}$/.test(id) ? id : null, tool, title, cwd: field('작업 폴더 '), branch: field('브랜치 ') };
+  const tool = m[1] === 'Codex' ? 'codex' : m[1] === '웹 AI' ? 'web' : 'claude', fields = (m[2] ?? '').split(' · ').map(f => f.trim()).filter(Boolean);
+  // sessionText writes the title first, then folder, branch, start and id, each only when known: they are read back from the end in
+  // that order and what is left is the title, so a title that starts like a field ('세션 만료 처리') or holds ' · ' stays whole.
+  const back = (re: RegExp) => { const x = fields.length ? re.exec(fields.at(-1)!) : null; if (x) fields.pop(); return x?.[1]?.trim() || null; };
+  const id = back(/^세션 ((?:claude|codex)-[0-9a-f]{24})$/); back(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}) 시작$/);
+  const branch = back(/^브랜치 (.+)$/), cwd = back(/^작업 폴더 (.+)$/);
+  return { id, tool, title: fields.join(' · ') || null, cwd, branch };
 }
 const originKey = (o: SessionOrigin) => o.id ?? `${o.tool}|${o.title ?? ''}|${o.cwd ?? ''}`;
 export const originLabel = (o: Pick<SessionOrigin, 'tool' | 'title'>) => `${ORIGIN_NAME[o.tool]}${o.title ? ` 「${o.title}」` : ' 세션'}`;
@@ -51,53 +53,65 @@ export function partSessions(p: Project, areaId: string | null): PartSession[] {
 
 /* ---------- the document ---------- */
 export interface HandoverOptions { scope: string | null; code: string; at: string }
+/** A document, and how many of its parts were written shorter (or by name only) to keep it within HANDOVER_CHARS. */
+export interface Handover { text: string; trimmed: number }
+/** The longest document made. It is pasted as a new session's first prompt, and a prompt is read whole only up to 20,000 characters
+ * (session-parse.ts turnChars): past that its end line and the person's own words after it would be cut off. */
+export const HANDOVER_CHARS = 15000;
 const CLAIM_ORDER: ClaimKind[] = ['want', 'idea', 'reported', 'checked', 'describes', 'open', 'differs'];
-const CLAIMS_PER_PART = 10, RECENT_REQUESTS = 6, RECENT_FILES = 24, LINE = 240;
+const CLAIMS_PER_PART = 10, RECENT_REQUESTS = 6, RECENT_FILES = 24, LINE = 240, NAMES = 600;
 const one = (t: string, n = LINE) => { const s = t.replace(/\s+/g, ' ').trim(); return s.length > n ? `${s.slice(0, n - 1)}…` : s; };
+/** How much of a part is written: in full, or briefly when the whole document would be too long. */
+const FULL = { text: 400, claims: CLAIMS_PER_PART, claim: LINE, rels: 10, sessions: 4 }, BRIEF = { text: 160, claims: 3, claim: 120, rels: 3, sessions: 2 };
 
 function subtree(view: StudioView, id: string): PartView[] {
   const out: PartView[] = [], walk = (x: string) => { const part = view.parts.find(q => q.id === x); if (!part) return; out.push(part); part.childIds.forEach(walk); };
   walk(id); return out;
 }
-function partBlock(p: Project, view: StudioView, part: PartView, top: number): string[] {
+function partBlock(view: StudioView, part: PartView, sessions: PartSession[], top: number, k = FULL): string[] {
   const lines = [`${'#'.repeat(Math.min(6, 3 + part.depth - top))} ${part.name}`];
   const u = part.reading;
   const role = u?.role ?? part.summary ?? null;
-  if (role) lines.push(`역할: ${one(role, 400)}${u?.corrected ? ' (사용자가 고친 설명)' : ''}`);
-  if (part.note) lines.push(`사용자 메모: ${one(part.note, 400)}`);
+  if (role) lines.push(`역할: ${one(role, k.text)}${u?.corrected ? ' (사용자가 고친 설명)' : ''}`);
+  if (part.note) lines.push(`사용자 메모: ${one(part.note, k.text)}`);
   const claims = (u?.claims ?? []).slice().sort((a, b) => CLAIM_ORDER.indexOf(a.kind) - CLAIM_ORDER.indexOf(b.kind));
-  for (const c of claims.slice(0, CLAIMS_PER_PART)) lines.push(`- ${CLAIM_LABEL[c.kind]}: ${one(c.text)}${c.about ? ` (${c.about})` : ''}`);
-  if (claims.length > CLAIMS_PER_PART) lines.push(`- (그 밖에 ${claims.length - CLAIMS_PER_PART}개는 지도에서 볼 수 있어요)`);
+  for (const c of claims.slice(0, k.claims)) lines.push(`- ${CLAIM_LABEL[c.kind]}: ${one(c.text, k.claim)}${c.about ? ` (${one(c.about, 80)})` : ''}`);
+  if (claims.length > k.claims) lines.push(`- (그 밖에 ${claims.length - k.claims}개는 지도에서 볼 수 있어요)`);
   if (!role && !part.note && !claims.length) lines.push('- 아직 이 부분에 대해 읽힌 내용이 없어요.');
   const rels = view.relations.filter(r => r.from === part.id || r.to === part.id).map(r => {
     const out = r.from === part.id, other = view.parts.find(x => x.id === (out ? r.to : r.from));
     return other ? `${out ? '→' : '←'} ${other.name} (${REL_LABEL[r.kind] ?? r.kind}${r.note ? ` · ${one(r.note, 80)}` : ''})` : null;
   }).filter(Boolean);
-  if (rels.length) lines.push(`관련: ${rels.join(', ')}`);
-  const sessions = partSessions(p, part.id);
-  if (sessions.length) lines.push(`다룬 세션: ${sessions.slice(0, 4).map(s => `${originLabel(s)}${s.tookOver ? ' (인수인계로 이어받음)' : ''}`).join(', ')}`);
+  if (rels.length) lines.push(`관련: ${rels.slice(0, k.rels).join(', ')}${rels.length > k.rels ? ` 외 ${rels.length - k.rels}개` : ''}`);
+  if (sessions.length) lines.push(`다룬 세션: ${sessions.slice(0, k.sessions).map(s => `${originLabel(s)}${s.tookOver ? ' (인수인계로 이어받음)' : ''}`).join(', ')}`);
   return lines;
 }
 
 interface Turn { at: string; text: string; files: string[]; origin: SessionOrigin }
 /** The person's requests in session records, oldest first, with the files the tool's next answer reported changing. */
 function sessionTurns(p: Project, only: Set<string> | null): Turn[] {
-  const out: Turn[] = [];
+  // An answer's files belong to the last request of its own session, which may sit in an earlier record (taken before the reply
+  // came), never to another session's request; when that request's record is outside the scope, they are not shown.
+  const out: Turn[] = [], asked = new Map<string, Turn | null>();
   for (const rec of p.pasted) {
-    if (only && !only.has(rec.id)) continue;
     const origin = sessionOrigin(rec.text); if (!origin) continue;
-    const parts = rec.text.split(/^── /m).slice(1);
-    for (const part of parts) {
+    const key = originKey(origin), shown = !only || only.has(rec.id);
+    for (const part of rec.text.split(/^── /m).slice(1)) {
       const nl = part.indexOf('\n'), head = part.slice(0, nl), body = part.slice(nl + 1).trim();
-      if (head.startsWith('사용자 요청')) out.push({ at: `${rec.at}|${out.length}`, text: body, files: [], origin });
-      else { const f = /\(바꾼 파일: ([^)\n]+)\)\s*$/.exec(body); const last = out.at(-1); if (f && last) last.files.push(...f[1]!.split(', ')); }
+      if (head.startsWith('사용자 요청')) { const t = shown ? { at: `${rec.at}|${out.length}`, text: body, files: [], origin } : null; if (t) out.push(t); asked.set(key, t); continue; }
+      // The list is the answer's last line, read to its last ')' so a name like app/(auth)/page.tsx stays whole.
+      const f = /^\(바꾼 파일: (.+)\)$/.exec(body.slice(body.lastIndexOf('\n') + 1).trim()), last = asked.get(key);
+      if (f && last) last.files.push(...f[1]!.split(', '));
     }
   }
   return out;
 }
 
 /** The document for the whole project (scope null) or one part with everything inside it. */
-export function handoverText(p: Project, opts: HandoverOptions): string {
+export function handoverText(p: Project, opts: HandoverOptions): string { return handoverDoc(p, opts).text; }
+/** The document and how much of it was shortened: past HANDOVER_CHARS its parts are written briefly from the last one back, and
+ * those that still do not fit are named only; the document says so, and the map keeps everything. */
+export function handoverDoc(p: Project, opts: HandoverOptions): Handover {
   const view = studioView(p), scoped = opts.scope ? view.parts.find(x => x.id === opts.scope) ?? null : null;
   if (opts.scope && !scoped) throw new Error('HANDOVER_SCOPE');
   const tag = `${HANDOVER_TAG}:${opts.code}${scoped ? `:${scoped.id}` : ''}`;
@@ -124,38 +138,53 @@ export function handoverText(p: Project, opts: HandoverOptions): string {
   const summary = [...maps].reverse().find(r => r.summary)?.summary;
   if (summary) out.push('## 프로젝트 한눈에', one(summary, 1200), '');
   // Where the work happens: the sessions behind this scope (their folder and branch), newest first.
-  const scopeIds = new Set(parts.map(x => x.id));
-  const sessions = scoped ? dedupe(parts.flatMap(x => partSessions(p, x.id))) : partSessions(p, null);
+  const scopeIds = new Set(parts.map(x => x.id)), by = new Map(parts.map(x => [x.id, partSessions(p, x.id)]));
+  const sessions = scoped ? dedupe(parts.flatMap(x => by.get(x.id)!)) : partSessions(p, null);
   if (sessions.length) {
     out.push('## 작업 장소와 세션');
-    for (const s of sessions.slice(0, 8)) out.push(`- ${originLabel(s)}${s.cwd ? ` · 작업 폴더 ${s.cwd}` : ''}${s.branch ? ` · 브랜치 ${s.branch}` : ''} · 마지막 기록 ${stamp(s.lastAt, true)}${s.tookOver ? ' · 인수인계로 이어받은 세션' : ''}`);
+    for (const s of sessions.slice(0, 8)) out.push(one(`- ${originLabel(s)}${s.cwd ? ` · 작업 폴더 ${s.cwd}` : ''}${s.branch ? ` · 브랜치 ${s.branch}` : ''} · 마지막 기록 ${stamp(s.lastAt, true)}${s.tookOver ? ' · 인수인계로 이어받은 세션' : ''}`, 320));
     out.push('');
   }
   out.push(scoped ? '## 이 범위의 현재 상태' : '## 부분별 현재 상태');
   if (!parts.length) out.push('아직 지도에 부분이 없어요. 아래 최근 흐름과 사용자의 설명에서 시작하세요.');
-  const top = scoped ? scoped.depth : 0;
-  for (const part of parts) out.push(...partBlock(p, view, part, top), '');
+  const after: string[] = [];
   // What is undecided: candidates the readings left open and what the latest reading could not tell, for this scope.
   const open: string[] = [];
   for (const r of maps) for (const c of r.candidates) {
     if (scoped && !c.areaIds.some(a => scopeIds.has(a))) continue;
     const read = candidateReading(c), names = c.areaIds.map(a => view.parts.find(x => x.id === a)?.name).filter(Boolean);
-    open.push(`- ${read.label ? `${read.label}: ` : ''}${one(read.statement?.text ?? c.text)}${names.length ? ` (${names.join(', ')})` : ''}`);
+    open.push(`- ${read.label ? `${read.label}: ` : ''}${one(read.statement?.text ?? c.text)}${names.length ? ` (${one(names.join(', '), 80)})` : ''}`);
   }
   if (!scoped && latest) for (const g of latest.gaps) open.push(`- 기록에서 알 수 없었음: ${one(g)}`);
-  if (open.length) out.push('## 아직 정하지 않은 것', ...dedupeLines(open).slice(-12), '');
-  // The latest requests the person made in the sessions, with the files changed answering them.
+  if (open.length) after.push('## 아직 정하지 않은 것', ...dedupeLines(open).slice(-12), '');
+  // The latest requests the person made in the sessions, with the files changed answering them. A request that started from an
+  // earlier handover names it in words, so this document quoting it is not read as that takeover when it is pasted in turn.
   const only = scoped ? new Set(maps.flatMap(r => r.parts.filter(x => scopeIds.has(x.areaId)).flatMap(x => [...x.basis.map(q => q.record), ...x.claims.map(c => c.record)]))) : null;
   const turns = sessionTurns(p, only).slice(-RECENT_REQUESTS);
   if (turns.length) {
-    out.push('## 최근 흐름 (사용자가 세션에서 한 요청, 오래된 것부터)');
-    for (const t of turns) out.push(`- ${one(t.text, 300)}${t.files.length ? ` → 바꾼 파일: ${[...new Set(t.files)].slice(0, 8).join(', ')}` : ''}`);
+    after.push('## 최근 흐름 (사용자가 세션에서 한 요청, 오래된 것부터)');
+    for (const t of turns) after.push(`- ${one(quoteReceived(t.text), 300)}${t.files.length ? ` → 바꾼 파일: ${one([...new Set(t.files)].slice(0, 8).join(', '), 300)}` : ''}`);
     const files = [...new Set(turns.flatMap(t => t.files))].slice(-RECENT_FILES);
-    if (files.length) out.push('', `최근에 바뀐 파일: ${files.join(', ')}`);
-    out.push('');
+    if (files.length) after.push('', `최근에 바뀐 파일: ${one(files.join(', '), NAMES)}`);
+    after.push('');
   }
-  out.push(`──────── 인수인계 문서 끝 · ${HANDOVER_TAG}:${opts.code} ────────`);
-  return out.join('\n');
+  after.push(`──────── 인수인계 문서 끝 · ${tag} ────────`);
+  // The parts within HANDOVER_CHARS: each in full while every part after it still fits briefly, else briefly, else by name only.
+  const top = scoped ? scoped.depth : 0, full = parts.map(x => partBlock(view, x, by.get(x.id)!, top)), size = (b: string[]) => b.join('\n').length + 2;
+  const compose = (blocks: string[][], note: string[]) => [...out, ...note, ...blocks.flatMap(b => [...b, '']), ...after].join('\n');
+  const whole = compose(full, []);
+  if (whole.length <= HANDOVER_CHARS) return { text: whole, trimmed: 0 };
+  const brief = parts.map(x => partBlock(view, x, by.get(x.id)!, top, BRIEF)), rest = brief.map(size);
+  for (let i = rest.length - 2; i >= 0; i--) rest[i] = rest[i]! + rest[i + 1]!;
+  const room = HANDOVER_CHARS - compose([], ['x'.repeat(120), '']).length - NAMES - 2, shown: string[][] = [];
+  for (let i = 0, used = 0; i < parts.length; i++) {
+    const b = used + size(full[i]!) + (rest[i + 1] ?? 0) <= room ? full[i]! : used + size(brief[i]!) <= room ? brief[i]! : null;
+    if (!b) break;
+    shown.push(b); used += size(b);
+  }
+  const left = parts.slice(shown.length), trimmed = left.length + shown.filter((b, i) => b.join('\n') !== full[i]!.join('\n')).length;
+  const names = left.length ? [[one(`그 밖의 부분 ${left.length}개 (이름만): ${left.map(x => x.name).join(', ')}`, NAMES)]] : [];
+  return { text: compose([...shown, ...names], trimmed ? [`(문서가 길어서 부분 ${trimmed}개는 줄여 적었어요. 빠진 내용은 AgentFlow 지도에 있어요.)`, ''] : []), trimmed };
 }
 function pathOf(view: StudioView, id: string): PartView[] {
   const out: PartView[] = []; for (let x = view.parts.find(q => q.id === id), g = 0; x && g < 64; x = x.parentId ? view.parts.find(q => q.id === x!.parentId) : undefined, g++) out.unshift(x);
