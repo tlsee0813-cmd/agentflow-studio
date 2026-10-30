@@ -1,7 +1,5 @@
 # 공통 계약 0.1.1 — 입력·질문·요약에 한정
 
-> **기록 문서** · 첫 요청 정리 앱(INIT-003·004, 2026-10-10)의 당시 기록입니다. 지금 화면은 [Studio 앱](../continuity/README.md)이고, 전체 안내는 [저장소 README](../../README.md)에 있습니다.
-
 타입 src/shared/contracts.ts, 검증 validation.ts, 상태 전이 project.ts.
 Task/Graph/Export 등 미래 전체 데이터는 설계하거나 고정하지 않는다.
 
