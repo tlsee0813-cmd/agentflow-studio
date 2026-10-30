@@ -63,7 +63,7 @@ Windows 전용 실행 스크립트, PC에 설치된 Codex로 지도를 정리하
 ```text
 app/
   continuity/        현재 Studio 앱 (화면·공통 계약·서버·배포 스크립트·테스트)
-  server/, src/      초기 요청 정리 앱(INIT-004). 설정·오류·한도 모듈은 Studio 서버도 함께 씁니다.
+  server/, src/      초기 요청 정리 앱(INIT-004). 설정·오류·한도 모듈은 Studio 서버도 함께 씁니다. 해시로 고정된 기록이라 고치지 않습니다.
   tests/, scripts/   초기 앱의 테스트와 빌드
 docs/                설계 문서, 사이클별 기록, 연구, 검토 자료  →  docs/README.md
 experiments/         프롬프트·평가 실험 (제품 기능 아님)
@@ -86,5 +86,5 @@ examples/            Studio 요청 흐름으로 실제로 만들어 본 작은 �
 
 ## 진행 중인 작업
 
-화면 다듬기와 서버·API 구조 정리(#80)가 별도 PR로 진행 중입니다.
+화면 다듬기와 서버 시작·설정 점검 개선이 별도 PR로 이어지고 있습니다.
 병합 전까지는 위 설명과 다를 수 있는 세부 사항이 있으니, 최신 상태는 [열린 PR 목록](https://github.com/tlsee0813-cmd/agentflow-studio/pulls)에서 확인하세요.

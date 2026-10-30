@@ -3,7 +3,7 @@
 AgentFlow Studio가 어떤 조각으로 이뤄져 있고, 자료가 어디서 어디로 흐르는지 한 장으로 설명합니다.
 세부 계약과 수용 근거는 각 사이클 기록에 있고, 여기서는 **처음 코드를 여는 사람이 길을 잃지 않을 정도**만 다룹니다.
 
-기준: `work/experience142-reading-delivery` (2026-10-30, 세션 자동 연결기 #78 병합 후). 화면·서버 정리 작업이 별도 PR로 진행 중이라, 파일 이름이나 경로 같은 세부 사항은 병합 후 달라질 수 있습니다.
+기준: `work/experience142-reading-delivery` (2026-10-30, 세션 자동 연결기 #78과 서버 정리 #80 병합 후).
 
 ## 한눈에 보기
 
@@ -45,10 +45,10 @@ flowchart LR
 | --- | --- |
 | `app/continuity/src/shared/` | 브라우저와 서버가 함께 쓰는 순수 TypeScript. 프로젝트 스키마(`types.ts`), 도메인 조작(`domain.ts`), 저장·백업(`storage.ts`), 지도 읽기 계약(`map-reading.ts`), 각 API의 요청·응답 검증(`studio.ts`, `plan-api.ts`, `scope-api.ts`, `digest-api.ts`), 세션 기록 해석(`session-parse.ts`, `session-import.ts`), 인수인계 문서(`handover.ts`), 키 가리기(`secret.ts`) |
 | `app/continuity/src/client/` | 화면. 진입점은 `app.ts`(홈·지도·부분 상세)이며, 변경 구상은 `plan-*.ts`, 돌아온 결과 읽기는 `return-view.ts`, 서버 호출은 `studio-api.ts`, 세션 자동 연결은 `auto-sync.ts`·`session-source.ts`, 인수인계 문서는 `handover-view.ts` |
-| `app/continuity/server/` | `studio.mjs`는 표준 `(Request) => Response` 핸들러라 Node와 Cloudflare Worker에서 같은 코드로 돕니다. `app.mjs`·`index.mjs`는 로컬 Node 호스트, `worker*.mjs`는 Worker 호스트, `map-jobs.mjs`는 로컬 지도 작업 보관, `sessions.mjs`는 이 PC의 세션 기록 읽기, `*-prompt.mjs`는 AI 지시문 |
+| `app/continuity/server/` | `studio.mjs`는 표준 `(Request) => Response` 핸들러라 Node와 Cloudflare Worker에서 같은 코드로 돕니다. `app.mjs`·`index.mjs`는 로컬 Node 호스트이고 그 HTTP 공통 처리(보안 헤더, 본문 한도, localhost 검사, 오류 본문)는 `http.mjs`에 모여 있습니다. `worker*.mjs`는 Worker 호스트, `provider-errors.mjs`는 공급자 오류 변환(Worker에서도 동작), `map-jobs.mjs`는 로컬 지도 작업 보관, `sessions.mjs`는 이 PC의 세션 기록 읽기, `*-prompt.mjs`는 AI 지시문 |
 | `app/continuity/scripts/` | 빌드(`build.mjs`), 정적 빌드(`build-static.mjs`), Worker 배포(`deploy-cloudflare.mjs`), Windows 실행(`start-local.ps1`, `start-pc.ps1` + `pc-entry.mjs`) |
 | `app/continuity/tests/` | Node 테스트(`*.test.mjs`, 대부분 사이클 번호가 이름에 붙음)와 브라우저 스모크(`studio_browser.py`) |
-| `app/server/`, `app/src/` | 초기 요청 정리 앱(INIT-004). 지금 화면에는 쓰이지 않지만 `config.mjs`·`errors.mjs`·`limiter.mjs`·`static-files.mjs`는 Studio 서버가 가져다 씁니다 |
+| `app/server/`, `app/src/` | 초기 요청 정리 앱(INIT-004). 지금 화면에는 쓰이지 않지만 `config.mjs`·`errors.mjs`·`limiter.mjs`·`static-files.mjs`는 Studio 서버가 가져다 씁니다. 과거 평가 게이트가 해시로 고정한 트리라 고치지 않습니다(같은 처리가 필요하면 `continuity/server/`에 둡니다) |
 
 ## 서버가 받는 요청
 
@@ -66,7 +66,7 @@ flowchart LR
 | `GET sessions`, `GET sessions/<id>` | 로컬 Node 서버에서만. 이 PC의 Claude Code·Codex 세션 목록(작업 폴더로 거르기)과 한 세션의 대화. 같은 주소에서만 허용 |
 
 제한 공개판(`worker-existing-map.mjs`)은 `map`과 `jobs`를 본문을 읽기 전에 `MAP_WITHHELD`로 거절하고, Worker에는 세션 읽기가 아예 없습니다.
-API 세부는 서버 정리 작업에서 바뀔 수 있으니, 정확한 계약은 `server/studio.mjs`와 `src/shared/*-api.ts`를 기준으로 봅니다.
+정확한 계약은 `server/studio.mjs`의 경로표(`READ_ROUTES`)와 스키마표(`SCHEMAS`), 그리고 `src/shared/*-api.ts`를 기준으로 봅니다.
 
 ## 실행 형태
 
