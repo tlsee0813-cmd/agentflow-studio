@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { EXAMPLES, buildExample } from '../dist/public/shared/studio-examples.js';
-import { studioView, subtreeRecords, buildAsk, validateAsk, validateReply, askBytes, ASK_BYTES, ASK_RECORDS, RECORD_CHARS } from '../dist/public/shared/studio.js';
+import { studioView, subtreeRecords, buildAsk, validateAsk, validateReply, askBytes, draftAfterAnswer, ASK_BYTES, ASK_RECORDS, RECORD_CHARS } from '../dist/public/shared/studio.js';
 import { parseProject, parseResultFile } from '../dist/public/shared/validation.js';
 import { editArea } from '../dist/public/shared/domain.js';
 import { layoutScope, NODE_W, NODE_H, ROOT, ghostId } from '../dist/public/client/map-layout.js';
@@ -223,4 +223,13 @@ test('STUDIO-C2 long Korean material fits ASK_BYTES as UTF-8: newest first, exce
   assert.equal((await handle(post(legacy))).status, 200);
   // A coverage that does not match the records is refused.
   assert.throws(() => validateAsk({ ...JSON.parse(JSON.stringify(ask)), coverage: { ...coverage, records: { ...coverage.records, sent: 99 } } }));
+});
+
+test('STUDIO-Q1 an answer empties the question box only when it still holds the question that was sent', () => {
+  assert.equal(draftAfterAnswer('휴무일은 어디서 정해?', '휴무일은 어디서 정해?'), '');
+  assert.equal(draftAfterAnswer('  휴무일은 어디서 정해?\n', '휴무일은 어디서 정해?'), '', 'spaces around the same question');
+  assert.equal(draftAfterAnswer('', '휴무일은 어디서 정해?'), '');
+  // Retry of a failed Q1 after Q2 was typed: Q2 is kept exactly as typed.
+  assert.equal(draftAfterAnswer('  비용은 얼마나 들어?', '문자는 언제 보내?'), '  비용은 얼마나 들어?');
+  assert.equal(draftAfterAnswer('문자는 언제 보내? 그리고 비용은?', '문자는 언제 보내?'), '문자는 언제 보내? 그리고 비용은?');
 });

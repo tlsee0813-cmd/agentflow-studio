@@ -2669,6 +2669,30 @@ def failure_flow(browser, base):
     page.close()
 
 
+def question_retry_flow(browser, base):
+    """A failed question retried after another one was typed: the retry answers the first, the second stays unsent in the box."""
+    page = browser.new_page(viewport={"width": 1280, "height": 720})
+    page.goto(base + "/")
+    page.locator('.program-head[href="#/p/ex-salon"]').click()
+    page.locator(".node", has_text="문자 알림").click()
+    sheet(page, "문자 알림")
+    page.locator(".ask-open").click()
+    page.locator("#ask-input").fill("문자는 언제 보내?")
+    page.locator("#ask-input").press("Enter")
+    expect(page.locator(".failed")).to_contain_text("AI 서비스가 응답하지 않아요")
+    expect(page.locator("#ask-input")).to_have_value("문자는 언제 보내?")  # a failure keeps the question
+    page.locator("#ask-input").fill("  비용은 얼마나 들어?")
+    page.get_by_role("button", name="다시 시도").click()
+    expect(page.locator(".answer")).to_have_count(1)
+    expect(page.locator(".answer .ans-ask")).to_contain_text("문자는 언제 보내?")
+    expect(page.locator("#ask-input")).to_have_value("  비용은 얼마나 들어?")  # typed after the failure: never sent, never cleared
+    page.locator("#ask-input").press("Enter")
+    expect(page.locator(".answer")).to_have_count(2)
+    expect(page.locator(".answer").nth(1).locator(".ans-ask")).to_contain_text("비용은 얼마나 들어?")
+    expect(page.locator("#ask-input")).to_have_value("")  # the question that went out leaves the box
+    page.close()
+
+
 def off_flow(browser, base, expected_pill):
     page = browser.new_page(viewport={"width": 1280, "height": 720})
     page.goto(base)
@@ -4077,6 +4101,7 @@ def main():
             print("ok  AF85 empty analysis on the micro draft at 1280/1440: reads at once, source and back, close/reopen/reload/file, earlier request and return kept, positive with none chosen apart")
             proc, base = start("code"); procs.append(proc); code_flow(browser, base); print("ok  access code kept from an input event")
             proc, base = start("fail"); procs.append(proc); failure_flow(browser, base); print("ok  provider failure -> short error -> retry")
+            proc, base = start("fail"); procs.append(proc); question_retry_flow(browser, base); print("ok  failed question retried after another was typed: the retry answers the first, the new one stays in the box")
             proc, base = start("fail"); procs.append(proc); return_failure_flow(browser, base); print("ok  return reading failure -> short error and the material -> asking again")
             proc, base = start("nokey"); procs.append(proc); off_flow(browser, base + "/", "AI 키 없음"); print("ok  server without key -> honest off state")
             if (ROOT / "static-dist/index.html").exists():
