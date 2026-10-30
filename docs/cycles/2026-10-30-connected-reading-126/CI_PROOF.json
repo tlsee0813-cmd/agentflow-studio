@@ -1,0 +1,58 @@
+{
+  "run": 40975830264,
+  "head": "6badd901b5ac4061353e487ee8bafd10b019efa2",
+  "url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40975830264",
+  "jobs": {
+    "linux": {
+      "job": 123803603551,
+      "conclusion": "success",
+      "excerpt": [
+        "2026-10-29T23:51:00.2248650Z   ref: 6badd901b5ac4061353e487ee8bafd10b019efa2",
+        "2026-10-29T23:51:00.7263400Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin 6badd901b5ac4061353e487ee8bafd10b019efa2",
+        "2026-10-29T23:51:02.2952812Z  * branch            6badd901b5ac4061353e487ee8bafd10b019efa2 -> FETCH_HEAD",
+        "2026-10-29T23:51:02.2963764Z [command]/usr/bin/git rev-parse --verify --quiet 6badd901b5ac4061353e487ee8bafd10b019efa2^{object}",
+        "2026-10-29T23:51:02.3000859Z 6badd901b5ac4061353e487ee8bafd10b019efa2",
+        "2026-10-29T23:51:02.3128911Z [command]/usr/bin/git checkout --progress --force 6badd901b5ac4061353e487ee8bafd10b019efa2",
+        "2026-10-29T23:51:02.5421856Z Note: switching to '6badd901b5ac4061353e487ee8bafd10b019efa2'.",
+        "2026-10-29T23:51:02.5556086Z 6badd901b5ac4061353e487ee8bafd10b019efa2",
+        "2026-10-29T23:51:16.6083733Z 6badd901b5ac4061353e487ee8bafd10b019efa2",
+        "2026-10-29T23:53:23.0651501Z # tests 279",
+        "2026-10-29T23:53:23.0651883Z # pass 279",
+        "2026-10-29T23:53:23.0652066Z # fail 0",
+        "2026-10-29T23:53:23.0652237Z # skipped 0",
+        "2026-10-29T23:55:08.1382734Z # tests 635",
+        "2026-10-29T23:55:08.1382902Z # pass 635",
+        "2026-10-29T23:55:08.1382985Z # fail 0",
+        "2026-10-29T23:55:08.1383154Z # skipped 0",
+        "2026-10-29T23:55:18.9573374Z {\"phase\":\"prepared\",\"source\":\"6badd901b5ac4061353e487ee8bafd10b019efa2\",\"worker\":\"agentflow-studio\",\"policy\":null,\"assets\":54,\"modules\":26,\"bytes\":1264914,\"dryRun\":true}",
+        "2026-10-29T23:56:00.1775653Z \u001b[36;1mpython continuity/tests/studio_browser.py 2>&1 | tee test-results/studio-browser.log\u001b[0m"
+      ]
+    },
+    "windows": {
+      "job": 123803603775,
+      "conclusion": "success",
+      "excerpt": [
+        "2026-10-29T23:51:31.9236906Z   ref: 6badd901b5ac4061353e487ee8bafd10b019efa2\r",
+        "2026-10-29T23:51:34.9880279Z [command]\"C:\\Program Files\\Git\\bin\\git.exe\" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin 6badd901b5ac4061353e487ee8bafd10b019efa2\r",
+        "2026-10-29T23:51:37.5665808Z  * branch            6badd901b5ac4061353e487ee8bafd10b019efa2 -> FETCH_HEAD\r",
+        "2026-10-29T23:51:37.5703527Z [command]\"C:\\Program Files\\Git\\bin\\git.exe\" rev-parse --verify --quiet 6badd901b5ac4061353e487ee8bafd10b019efa2^{object}\r",
+        "2026-10-29T23:51:37.5960095Z 6badd901b5ac4061353e487ee8bafd10b019efa2\r",
+        "2026-10-29T23:51:37.6475372Z [command]\"C:\\Program Files\\Git\\bin\\git.exe\" checkout --progress --force 6badd901b5ac4061353e487ee8bafd10b019efa2\r",
+        "2026-10-29T23:51:38.0827687Z Note: switching to '6badd901b5ac4061353e487ee8bafd10b019efa2'.\r",
+        "2026-10-29T23:51:38.1616384Z 6badd901b5ac4061353e487ee8bafd10b019efa2\r",
+        "2026-10-29T23:52:31.5446397Z 6badd901b5ac4061353e487ee8bafd10b019efa2\r",
+        "2026-10-29T23:54:40.1002688Z # tests 279\r",
+        "2026-10-29T23:54:40.1003036Z # pass 279\r",
+        "2026-10-29T23:54:40.1003197Z # fail 0\r",
+        "2026-10-29T23:54:40.1003545Z # skipped 0\r",
+        "2026-10-29T23:55:56.8599956Z # tests 635\r",
+        "2026-10-29T23:55:56.8600075Z # pass 632\r",
+        "2026-10-29T23:55:56.8600122Z # fail 0\r",
+        "2026-10-29T23:55:56.8600237Z # skipped 3\r",
+        "2026-10-29T23:56:05.2630776Z {\"phase\":\"prepared\",\"source\":\"6badd901b5ac4061353e487ee8bafd10b019efa2\",\"worker\":\"agentflow-studio\",\"policy\":null,\"assets\":54,\"modules\":26,\"bytes\":1264914,\"dryRun\":true}\r",
+        "2026-10-29T23:57:20.9323507Z \u001b[36;1mpython continuity/tests/studio_browser.py 2>&1 | tee test-results/studio-browser.log\u001b[0m\r"
+      ]
+    }
+  },
+  "boundary": "CI runs default packaging (26 modules), not the named existing-map release (27 modules). Root separately built and verified the frozen named release. connected126-flow is author-run, not this workflow."
+}

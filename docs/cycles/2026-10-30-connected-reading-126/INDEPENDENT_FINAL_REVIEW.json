@@ -1,0 +1,27 @@
+{
+  "version": "experience126-visibility-review.1",
+  "decision": "후속 P2 F3는 이 좁은 delta에서 해소됐다. 잔여 P1/P2를 발견하지 못했다. 기존 F1/F2 수용 근거를 바꾸지 않으며 최종 실제 UI·동결 패키지·CI 판단은 root의 회수에 따른다.",
+  "basis": {
+    "base": "ea2e325bb2a89f95923344ae3ab6746f4662cbe2",
+    "head": "6badd901b5ac4061353e487ee8bafd10b019efa2",
+    "appTree": "d5a6be031fb06b925a1511e06c5845f15d56ec14",
+    "workingTree": "clean",
+    "scope": "request-results back() 수리, connected126-flow의 shown/W/L 검사 및 RESULT의 후속 P2 기록만 정적으로 읽음",
+    "execution": "제품 수정·checkout·build/test·UI·AI 실행0."
+  },
+  "findings": [],
+  "closedFinding": {
+    "id": "F3",
+    "file": "app/continuity/src/client/request-results.ts",
+    "lines": [276, 277, 280, 281],
+    "resolution": "기존 b.scroll을 먼저 복원하고 정확 key로 focus 및 필요한 history fold를 연 뒤 실제 버튼과 rw-main의 rect를 비교한다. 버튼이 위/아래로 벗어났을 때만 rw-main.scrollTop을 보정해 1/3 지점으로 드러낸다. 가시 범위에 있던 동일 구절은 스크롤을 변경하지 않는다. 다른 컨테이너나 페이지를 scrollIntoView로 함께 움직이지 않는다.",
+    "regressionAssessment": "focusKey 실패 또는 main 부재에는 보정을 하지 않는다. 요청/구절 identity, current/history 판정, 저장·원문 내용 및 원래 면 복귀 계약은 바꾸지 않는다. 추가된 코드는 이전 수리의 state-sync나 request-switch 경로를 확장하지 않는다."
+  },
+  "testAssessment": [
+    "shown은 activeElement가 실제 rw-main 자손이고 높이가 양수이며 top/bottom 모두 rw-main 세로 viewport 안에 드는지 검사한다. 단순 focus나 DOM 존재를 가시성으로 오인하지 않는다.",
+    "L은 이전 검증대로 실제 지연 반영에 의해 대표가 history로 옮겨진 후 exact key를 확인하고 새 shown assertion을 추가했다. 원래 F3의 화면 밖 focus를 구분한다.",
+    "W는 이동하지 않은 typed-code 구절의 exact key 및 scroll ±1에 shown을 함께 추가했다. 무조건 스크롤을 초기화하거나 매번 중앙으로 보내는 잘못된 수리는 이 대조를 통과하지 못한다.",
+    "ea2 기준 새 assertion FAIL 및 수리 후19/19 PASS는 작성자 RESULT의 실행 주장이다. 본 reviewer는 원인과 assertion의 대응을 정적으로 확인했으며 재실행하지 않았다."
+  ],
+  "remainingBoundary": "Root의 고정 응답1회 정상 UI L·가시성 확인과 실제121+109 보존, 최종 appTree에 결합된 잠금 build/CI를 별도 증거로 유지한다. 본 결과는 새 AI 성공·배포 승인·전체 생성 일반성 완료 판정이 아니다."
+}
