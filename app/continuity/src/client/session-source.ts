@@ -15,7 +15,9 @@ export type FolderState = 'unsupported' | 'none' | 'prompt' | 'granted';
 /* Minimal shapes of the File System Access handles this file uses (a test may stand in its own). */
 interface FileHandle { kind: 'file'; name: string; getFile(): Promise<File> }
 interface DirHandle { kind: 'directory'; name: string; values(): AsyncIterable<FileHandle | DirHandle>;
-  queryPermission?(o: { mode: 'read' }): Promise<PermissionState>; requestPermission?(o: { mode: 'read' }): Promise<PermissionState> }
+  queryPermission?(o: { mode: 'read' }): Promise<PermissionState>; requestPermission?(o: { mode: 'read' }): Promise<PermissionState>;
+  isSameEntry?(other: DirHandle): Promise<boolean>; resolve?(other: DirHandle): Promise<string[] | null> }
+type Entry = FileHandle | DirHandle;
 type Picker = (o: { id?: string; mode?: 'read' }) => Promise<DirHandle>;
 
 const DB = 'agentflow.studio.session-folders', STORE = 'roots', KEY = 'roots';
@@ -38,66 +40,168 @@ async function saveRoots(roots: DirHandle[]): Promise<void> {
   try { db.transaction(STORE, 'readwrite').objectStore(STORE).put(roots, KEY); } catch { /* this page only */ }
 }
 
-/** A whole session file read in pieces into the tool's parser: a file of hundreds of MB is never held whole as text. */
-async function readParsed(tool: SessionTool, file: File): Promise<ParsedSession> {
-  const parser = sessionParser(tool), decoder = new TextDecoder(), reader = file.stream().getReader();
-  let rest = '';
+/** A whole session file read in pieces into the tool's parser: a file of hundreds of MB is never held whole as text. Each piece is
+ * looked through once (a line is joined only when its end comes), and a line longer than LINE_CHARS is skipped, as on the server.
+ * With its handle, a file an agent is still writing is read on through a fresh look when the first goes stale (Chrome cannot read
+ * a File once the file on disk changed), up to the size it had: a session file only ever has lines added at its end. */
+const LINE_CHARS = 64 * 1024 * 1024, READ_TRIES = 20;
+async function readParsed(tool: SessionTool, file: File, handle: FileHandle | null = null): Promise<ParsedSession> {
+  const parser = sessionParser(tool), decoder = new TextDecoder(), end = file.size;
+  let reader = file.stream().getReader(), at = 0, tries = 0, line: string[] = [], len = 0;
+  const take = (s: string) => { len += s.length; if (len > LINE_CHARS) line = []; else line.push(s); };
+  const feed = (text: string) => {
+    let from = 0;
+    for (let nl = text.indexOf('\n'); nl >= 0; from = nl + 1, nl = text.indexOf('\n', from)) { take(text.slice(from, nl)); if (len <= LINE_CHARS) pushLine(parser, line.join('')); line = []; len = 0; }
+    take(text.slice(from));
+  };
   for (;;) {
-    const { done, value } = await reader.read();
-    rest += done ? decoder.decode() : decoder.decode(value, { stream: true });
-    const lines = rest.split('\n'); rest = done ? '' : lines.pop()!;
-    for (const l of lines) pushLine(parser, l);
-    if (done) break;
+    const r = await reader.read().catch(async (e: unknown) => {
+      if (!handle || ++tries > READ_TRIES) throw e;
+      const now = await handle.getFile(); if (now.size < end) throw e;
+      reader = now.slice(at, end).stream().getReader(); return null;
+    });
+    if (!r) continue; if (r.done) break;
+    at += r.value.length; feed(decoder.decode(r.value, { stream: true }));
   }
+  feed(decoder.decode()); if (len <= LINE_CHARS) pushLine(parser, line.join(''));
   return parser.done();
 }
+/** A whole session file, through a fresh look at it. */
+async function readFile(h: FileHandle, tool: SessionTool): Promise<ParsedSession> {
+  const file = await h.getFile();
+  if (file.size > SESSION_LIMITS.fileBytes) throw Object.assign(new Error('SESSION_TOO_LARGE'), { code: 'SESSION_TOO_LARGE' });
+  return readParsed(tool, file, h);
+}
+/** One look at a file through a fresh File (one taken earlier cannot be read once the file changed), tried again if it changed meanwhile. */
+async function fresh<T>(h: FileHandle, use: (file: File) => Promise<T>): Promise<T> {
+  try { return await use(await h.getFile()); } catch { return use(await h.getFile()); }
+}
 
-/** How deep and how wide a picked folder is walked for .jsonl files (a home folder picked by mistake stays bounded). */
-const WALK_DEPTH = 6, WALK_ENTRIES = 20000;
-interface Found { tool: SessionTool | null; path: string; handle: FileHandle; file: File }
-async function walk(root: DirHandle): Promise<Found[]> {
-  const out: Found[] = []; let seen = 0;
-  async function go(dir: DirHandle, path: string, depth: number) {
-    for await (const e of dir.values()) {
-      if (++seen > WALK_ENTRIES) return;
-      if (e.kind === 'directory') { if (depth < WALK_DEPTH && e.name !== 'node_modules' && !(depth > 0 && e.name.startsWith('.'))) await go(e, `${path}${e.name}/`, depth + 1); continue; }
-      if (!e.name.endsWith('.jsonl')) continue;
-      let file: File; try { file = await e.getFile(); } catch { continue; }
-      if (!file.size) continue;
-      // The layout tells the tool when it is the tools' own (projects/… or sessions/…/rollout-…); otherwise the lines do.
-      const p = `${path}${e.name}`, tool: SessionTool | null = /(^|\/)projects\//.test(p) ? 'claude' : /(^|\/)sessions\/.*rollout-[^/]*\.jsonl$/.test(p) || /^rollout-/.test(e.name) ? 'codex' : null;
-      out.push({ tool, path: `${root.name}/${p}`, handle: e, file });
-    }
-  }
-  await go(root, '', 0);
+/** How far a picked folder is walked. The tools' own folders are walked as the server reads them (Codex days newest first), up to
+ * WALK_FILES session files; any other folder (one picked by mistake) WALK_DEPTH deep and WALK_ENTRIES entries in all. */
+const WALK_DEPTH = 6, WALK_ENTRIES = 20000, WALK_FILES = 20000;
+// Never sessions of their own: archived Codex threads (the server leaves them out too) and subagents' transcripts.
+const SKIP = new Set(['node_modules', 'archived_sessions', 'subagents']);
+/** A session file found. path: inside the picked folder, starting with its name (the old id was made of it); key: the same, per
+ * picked folder (two may share a name). */
+interface Found { tool: SessionTool | null; path: string; key: string; handle: FileHandle; size: number; at: number }
+/** A folder's entries. One that vanished meanwhile (a session folder the tool cleaned up) is skipped; must: it has to be read. */
+async function entries(dir: DirHandle, must = false): Promise<Entry[]> {
+  const out: Entry[] = [];
+  try { for await (const e of dir.values()) out.push(e); } catch (e) { if (must) throw e; }
   return out;
 }
+const dirs = (list: Entry[]) => list.filter((e): e is DirHandle => e.kind === 'directory');
+const named = (list: Entry[], name: string) => dirs(list).find(e => e.name === name);
+const newest = (list: Entry[]) => dirs(list).sort((a, b) => (a.name < b.name ? 1 : a.name > b.name ? -1 : 0));
+/** The session files of a picked folder (nothing read in them) and whether a bound cut the walk short. The picked folder (or the
+ * tools' folders in it) not readable at all rejects. */
+async function walk(root: DirHandle, rootKey: string): Promise<{ found: Found[]; cut: boolean }> {
+  const found: Found[] = [], top = await entries(root, true); let cut = false, seen = 0;
+  const add = async (e: FileHandle, path: string, tool: SessionTool | null) => {
+    if (found.length >= WALK_FILES) { cut = true; return; }
+    let file: File; try { file = await e.getFile(); } catch { return; }
+    if (file.size) found.push({ tool, path: `${root.name}/${path}`, key: `${rootKey}/${path}`, handle: e, size: file.size, at: file.lastModified });
+  };
+  // Claude Code: projects/<folder>/<session>.jsonl (a session's own subfolder holds its subagents' and tools' files).
+  const claude = async (list: Entry[], path: string) => {
+    for (const d of dirs(list)) for (const e of await entries(d)) { if (cut) return; if (e.kind === 'file' && e.name.endsWith('.jsonl')) await add(e, `${path}${d.name}/${e.name}`, 'claude'); }
+  };
+  // Codex: sessions/YYYY/MM/DD/rollout-*.jsonl, newest days first, so a bound cuts the oldest (archived_sessions is not read).
+  const codex = async (list: Entry[], path: string) => {
+    for (const y of newest(list)) for (const m of newest(await entries(y))) for (const d of newest(await entries(m)))
+      for (const e of await entries(d)) { if (cut) return; if (e.kind === 'file' && /^rollout-.*\.jsonl$/.test(e.name)) await add(e, `${path}${y.name}/${m.name}/${d.name}/${e.name}`, 'codex'); }
+  };
+  const tools = async (list: Entry[], path: string) => {
+    const p = named(list, 'projects'), s = named(list, 'sessions');
+    if (p) await claude(await entries(p, true), `${path}projects/`); if (s) await codex(await entries(s, true), `${path}sessions/`);
+    return !!(p || s);
+  };
+  // Any other folder: its .jsonl files, the tool told by where they lie or else by their lines.
+  const any = async (list: AsyncIterable<Entry> | Entry[], path: string, depth: number): Promise<void> => {
+    try {
+      for await (const e of list) {
+        if (cut) return; if (++seen > WALK_ENTRIES) { cut = true; return; }
+        if (e.kind === 'directory') { if (depth < WALK_DEPTH && !SKIP.has(e.name) && !(depth > 0 && e.name.startsWith('.'))) await any(e.values(), `${path}${e.name}/`, depth + 1); continue; }
+        if (!e.name.endsWith('.jsonl')) continue;
+        const p = `${path}${e.name}`;
+        await add(e, p, /(^|\/)projects\//.test(p) ? 'claude' : /(^|\/)sessions\/.*rollout-[^/]*\.jsonl$/.test(p) || /^rollout-/.test(e.name) ? 'codex' : null);
+      }
+    } catch { /* a folder that vanished meanwhile is skipped */ }
+  };
+  // The tools' own folder (.claude, .codex, or the projects / sessions folder in them), or a home folder holding them picked instead
+  // (looked at first: a home folder may have a projects folder of its own).
+  if (root.name === 'projects') await claude(top, '');
+  else if (root.name === 'sessions') await codex(top, '');
+  else {
+    let home = false;
+    for (const n of ['.claude', '.codex']) { const d = named(top, n); if (d && (await tools(await entries(d, true), `${n}/`))) home = true; }
+    if (!home && !(await tools(top, ''))) await any(top, '', 0);
+  }
+  return { found, cut };
+}
+/** How a folder just picked lies to one picked before: the same folder, inside it, around it, or apart (or the browser cannot tell). */
+async function relation(d: DirHandle, r: DirHandle): Promise<'same' | 'inside' | 'around' | null> {
+  try {
+    if (await d.isSameEntry?.(r)) return 'same';
+    if (await r.resolve?.(d)) return 'inside';
+    if (await d.resolve?.(r)) return 'around';
+  } catch { /* cannot tell */ }
+  return null;
+}
+
+/** What a listing knows of one session file: its row (null when it holds no prompt: not a session, or a Codex subagent's), the
+ * folders it worked in, and for a Codex subagent's the session that started it. key: the size and time it was read at. */
+interface Head { key: string; tool: SessionTool | null; row: SessionSummary | null; cwds: string[]; parent: string | null }
+async function readHead(f: Found, file: File): Promise<Head> {
+  const key = `${file.size}:${file.lastModified}`, partial = file.size > SESSION_LIMITS.headBytes, lines = jsonLines(await file.slice(0, SESSION_LIMITS.headBytes).text(), partial);
+  const tool = f.tool ?? sniffTool(lines); if (!tool) return { key, tool, row: null, cwds: [], parent: null };
+  let parsed = parseSession(tool, lines);
+  // Read further while the head holds no prompt yet (a Codex subagent's never does: what it was asked is in the session that started it).
+  if (!hasPrompt(parsed) && partial && !parsed.meta.parent) parsed = parseSession(tool, jsonLines(await file.slice(0, SESSION_LIMITS.promptBytes).text(), file.size > SESSION_LIMITS.promptBytes));
+  const parent = tool === 'codex' ? parsed.meta.parent : null; if (!hasPrompt(parsed)) return { key, tool, row: null, cwds: [], parent };
+  // The end of the file, for a folder the session moved to late.
+  if (partial) for (const c of tailFolders(await file.slice(Math.max(0, file.size - SESSION_LIMITS.tailBytes)).text())) atFolder(parsed.meta, c);
+  const base = sessionSummary(await sessionId(tool, sessionKey(tool, parsed.meta, f.path)), tool, parsed, new Date(file.lastModified).toISOString(), file.size);
+  // The id made from the file's path before ids were made from the session itself.
+  return { key, tool, row: base && { ...base, aliases: [await sessionId(tool, f.path)] }, cwds: parsed.meta.cwds, parent };
+}
+// Files with no session in them (Codex subagents' rollouts, a session left before its first prompt) do not use up the scan of
+// SESSION_LIMITS.scan sessions; at most this many of them are opened in one look.
+const QUIET_FILES = SESSION_LIMITS.scan * 10;
 
 export function createSessionSources(host: { status(): AiStatus; accessCode(): string }) {
   let roots: DirHandle[] = [], state: FolderState = 'none', loaded: Promise<void> | null = null;
   const picker = (): Picker | null => (typeof window !== 'undefined' && typeof (window as unknown as { showDirectoryPicker?: Picker }).showDirectoryPicker === 'function' ? (window as unknown as { showDirectoryPicker: Picker }).showDirectoryPicker : null);
   // Per file: what its head said, while its size and time stay the same (a look every minute reads only what changed).
-  const heads = new Map<string, { key: string; row: SessionSummary | null; cwds: string[] }>();
-  const known = new Map<string, Found & { tool: SessionTool }>();
+  const heads = new Map<string, Head>();
+  const known = new Map<string, { tool: SessionTool; handle: FileHandle }>();
   // Per Codex file: which session started it, when it is a subagent's (from its first lines).
   const parents = new Map<string, { key: string; parent: string | null }>();
-  let lastFound: Found[] = [];
+  // Each picked folder's own key for those (two picked folders may share a name).
+  const rootKeys = new WeakMap<DirHandle, string>(); let rootCount = 0;
+  const rootKey = (r: DirHandle) => { let k = rootKeys.get(r); if (!k) rootKeys.set(r, (k = `${++rootCount}`)); return k; };
+  // What to say beside the picked folders: why a pick added nothing, and how the last look went (a folder not read, a walk cut short).
+  let lastFound: Found[] = [], picked: string | null = null, looked: string | null = null;
+  /** The picked folders as named on the page: two of one name (a Windows and a WSL .claude) are told apart by number. */
+  const labels = () => roots.map(r => { const same = roots.filter(x => x.name === r.name); return same.length > 1 ? `${r.name} (${same.indexOf(r) + 1})` : r.name; });
 
   /** The Codex subagent sessions a session started, among the files of the last walk (they begin after it). */
   async function subagents(parsed: ParsedSession): Promise<ParsedSession[]> {
     const out: ParsedSession[] = [], since = Date.parse(parsed.meta.startedAt ?? '') || 0;
     if (!parsed.meta.thread) return out;
     for (const f of lastFound) {
-      if (f.tool === 'claude' || f.file.lastModified < since || f.file.size > SESSION_LIMITS.fileBytes) continue;
-      const key = `${f.file.size}:${f.file.lastModified}`; let t = parents.get(f.path);
-      // A file that changed since the walk can no longer be read through it: it is left out this time.
+      if (f.tool === 'claude' || f.at < since || f.size > SESSION_LIMITS.fileBytes) continue;
+      let t = parents.get(f.key);
+      // Each file is looked at afresh; one that cannot be read now is left out this time.
       try {
-        if (t?.key !== key) {
-          const lines = jsonLines(await f.file.slice(0, SESSION_LIMITS.headBytes).text(), f.file.size > SESSION_LIMITS.headBytes);
-          t = { key, parent: (f.tool ?? sniffTool(lines)) === 'codex' ? parseSession('codex', lines).meta.parent : null }; parents.set(f.path, t);
-        }
-        if (t.parent === parsed.meta.thread) out.push(await readParsed('codex', f.file));
-      } catch { /* changed meanwhile */ }
+        if (t?.key !== `${f.size}:${f.at}`) t = await fresh(f.handle, async file => {
+          const lines = jsonLines(await file.slice(0, SESSION_LIMITS.headBytes).text(), file.size > SESSION_LIMITS.headBytes);
+          return { key: `${file.size}:${file.lastModified}`, parent: (f.tool ?? sniffTool(lines)) === 'codex' ? parseSession('codex', lines).meta.parent : null };
+        });
+        parents.set(f.key, t);
+        if (t.parent === parsed.meta.thread) out.push(await readFile(f.handle, 'codex'));
+      } catch { /* changed or gone meanwhile */ }
     }
     return out;
   }
@@ -114,40 +218,42 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
   const folderSource: SessionSource = {
     kind: 'folder',
     async list(folder = null) {
-      const found: Found[] = [];
-      for (const r of roots) found.push(...await walk(r).catch(() => []));
-      found.sort((a, b) => b.file.lastModified - a.file.lastModified); lastFound = found;
-      const out: SessionSummary[] = [];
-      for (const f of found.slice(0, SESSION_LIMITS.scan)) {
-        if (out.length >= SESSION_LIMITS.list) break;
-        const key = `${f.file.size}:${f.file.lastModified}`, was = heads.get(f.path);
-        let row = was?.key === key ? was.row : undefined, cwds = was?.cwds ?? [];
-        if (row === undefined) {
-          const partial = f.file.size > SESSION_LIMITS.headBytes, lines = jsonLines(await f.file.slice(0, SESSION_LIMITS.headBytes).text(), partial);
-          const tool = f.tool ?? sniffTool(lines);
-          if (!tool) { heads.set(f.path, { key, row: null, cwds: [] }); continue; }
-          let parsed = parseSession(tool, lines);
-          // Read further while the head holds no prompt yet, and the end of the file for a folder the session moved to late.
-          if (!hasPrompt(parsed) && partial) parsed = parseSession(tool, jsonLines(await f.file.slice(0, SESSION_LIMITS.promptBytes).text(), f.file.size > SESSION_LIMITS.promptBytes));
-          if (partial) for (const c of tailFolders(await f.file.slice(Math.max(0, f.file.size - SESSION_LIMITS.tailBytes)).text())) atFolder(parsed.meta, c);
-          const base = sessionSummary(await sessionId(tool, sessionKey(tool, parsed.meta, f.path)), tool, parsed, new Date(f.file.lastModified).toISOString(), f.file.size);
-          // The id made from the file's path before ids were made from the session itself.
-          row = base ? { ...base, aliases: [await sessionId(tool, f.path)] } : null;
-          cwds = parsed.meta.cwds; heads.set(f.path, { key, row, cwds });
-        }
-        if (!row) continue;
-        known.set(row.id, { ...f, tool: row.tool });
-        if (folder && !within(cwds, folder)) continue;
+      const found: Found[] = [], names = labels(); let cut = false;
+      for (const [i, r] of roots.entries()) {
+        // A picked folder that cannot be read at all (moved, deleted, a WSL folder while WSL is off) fails the look, rather than
+        // show it as a folder with no sessions.
+        const w = await walk(r, rootKey(r)).catch((e: unknown) => { looked = `${names[i]} 폴더를 읽지 못했어요.`; throw Object.assign(new Error('SESSION_FOLDER_UNREADABLE'), { code: 'SESSION_FOLDER_UNREADABLE', cause: e }); });
+        found.push(...w.found); cut ||= w.cut;
+      }
+      found.sort((a, b) => b.at - a.at); lastFound = found;
+      const out: SessionSummary[] = [], byId = new Map<string, SessionSummary>(); let sessions = 0, quiet = 0;
+      for (const f of found) {
+        // At most `scan` session files are opened, so a folder with no session left does not read a whole history.
+        if (out.length >= SESSION_LIMITS.list || sessions >= SESSION_LIMITS.scan) break;
+        if (quiet >= QUIET_FILES) { cut = true; break; }
+        // A changed file is read through a fresh look at it; one that cannot be read now (an agent writing it) keeps what it said
+        // before, or waits for the next look.
+        let h = heads.get(f.key);
+        if (h?.key !== `${f.size}:${f.at}`) h = await fresh(f.handle, file => readHead(f, file)).then(x => { heads.set(f.key, x); return x; }, () => h);
+        if (!h) continue;
+        if (h.tool === 'codex') parents.set(f.key, { key: h.key, parent: h.parent });
+        if (!h.row) { quiet++; continue; }
+        sessions++;
+        // Two files of one session (picked folders that overlap, a copy left behind): the newest one is the session.
+        const had = byId.get(h.row.id);
+        if (had) { for (const a of h.row.aliases ?? []) if (!had.aliases?.includes(a)) had.aliases?.push(a); continue; }
+        const row: SessionSummary = { ...h.row, aliases: [...(h.row.aliases ?? [])] }; byId.set(row.id, row);
+        known.set(row.id, { tool: row.tool, handle: f.handle });
+        if (folder && !within(h.cwds, folder)) continue;
         out.push(row);
       }
+      looked = cut ? '세션 파일이 너무 많아 일부만 읽었어요.' : null;
       return readSessionList({ version: 'sessions.1', sessions: out });
     },
     async read(id, since = null) {
       if (!known.has(id)) await folderSource.list();
       const f = known.get(id); if (!f) throw Object.assign(new Error('SESSION_NOT_FOUND'), { code: 'SESSION_NOT_FOUND' });
-      const file = await f.handle.getFile();
-      if (file.size > SESSION_LIMITS.fileBytes) throw Object.assign(new Error('SESSION_TOO_LARGE'), { code: 'SESSION_TOO_LARGE' });
-      const parsed = await readParsed(f.tool, file);
+      const parsed = await readFile(f.handle, f.tool);
       const d = readSessionDetail(sessionDetail(id, f.tool, f.tool === 'codex' ? withSubagents(parsed, await subagents(parsed)) : parsed, SESSION_LIMITS, since));
       if (!d) throw Object.assign(new Error('SESSION_NOT_FOUND'), { code: 'SESSION_NOT_FOUND' });
       return d;
@@ -162,12 +268,22 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
     offered(): boolean { return !!host.status().sessions?.tools.length || (state !== 'unsupported'); },
     usesServer: () => !!host.status().sessions?.tools.length,
     folderState: () => state,
-    folders: () => roots.map(r => r.name),
+    /** The picked folders' names as shown, each one forget() takes. */
+    folders: labels,
+    /** A short line to show beside the picked folders, or null: why a pick added nothing, a folder that could not be read, or a
+     * look that read only part of the folders. */
+    notice: (): string | null => [picked, looked].filter(Boolean).join(' ') || null,
     /** Asks the person for a folder (their .claude or .codex). True when one was added. Must run from a click. */
     async pick(): Promise<boolean> {
       const p = picker(); if (!p) return false;
       let d: DirHandle; try { d = await p.call(window, { id: 'af-sessions', mode: 'read' }); } catch { return false; }
-      if (!roots.some(r => r.name === d.name)) roots = [...roots, d];
+      // A folder already read (the same one, or one inside a picked folder) adds nothing; one around picked folders takes their place.
+      const near = await Promise.all(roots.map(r => relation(d, r))), names = labels();
+      const same = near.indexOf('same'), inside = near.indexOf('inside'), around = names.filter((_, i) => near[i] === 'around');
+      if (same >= 0) { picked = `이미 고른 폴더(${names[same]})예요.`; return false; }
+      if (inside >= 0) { picked = `이미 고른 폴더(${names[inside]}) 안에 있어서 따로 더하지 않았어요.`; return false; }
+      picked = around.length ? `이미 고른 폴더(${around.join(', ')})를 품은 폴더라 하나로 합쳤어요.` : null;
+      roots = [...roots.filter((_, i) => near[i] !== 'around'), d];
       heads.clear(); await saveRoots(roots); await check(); return true;
     },
     /** Asks the browser again to let this page read the picked folders. Must run from a click. */
@@ -175,7 +291,11 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
       for (const r of roots) { try { await r.requestPermission?.({ mode: 'read' }); } catch { /* still asked */ } }
       return check();
     },
-    async forget(name: string): Promise<void> { roots = roots.filter(r => r.name !== name); heads.clear(); known.clear(); await saveRoots(roots); await check(); }
+    /** name: one of folders(). */
+    async forget(name: string): Promise<void> {
+      const i = labels().indexOf(name); if (i < 0) return;
+      roots = roots.filter((_, j) => j !== i); picked = null; looked = null; heads.clear(); known.clear(); await saveRoots(roots); await check();
+    }
   };
 }
 export type SessionSources = ReturnType<typeof createSessionSources>;

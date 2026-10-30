@@ -2839,26 +2839,65 @@ def handover_flow(browser, base):
 
 
 FAKE_PICKER = """(files) => {
-  // Stand-in folder handles (Chrome's picker cannot be driven): each pick hands the next home folder (.claude, then .codex).
-  const dir = (name, entries) => ({ kind: 'directory', name, async *values() { yield* entries; },
-    queryPermission: async () => 'granted', requestPermission: async () => 'granted' });
-  const tree = {};
-  for (const [root, path, text, at] of files) {
-    let node = (tree[root] ??= {}); const parts = path.split('/'), file = parts.pop();
-    for (const p of parts) node = (node[p] ??= {});
-    node[file] = new File([text], file, { lastModified: at });
-  }
-  const build = (name, node) => dir(name, Object.entries(node).map(([k, v]) => v instanceof File ? { kind: 'file', name: k, getFile: async () => v } : build(k, v)));
-  const queue = ['.claude', '.codex'].map(r => build(r, tree[r]));
-  window.showDirectoryPicker = async () => { if (!queue.length) throw new DOMException('cancelled', 'AbortError'); return queue.shift(); };
+  // Stand-in folder handles (Chrome's picker cannot be driven): each pick hands the folder next in window.__picks. As Chrome's
+  // do, a handle keeps its identity (isSameEntry, resolve) and a File taken from it cannot be read once its file changed.
+  // window.__write adds a file or adds to one; window.__onList(name) runs as a folder of that name is listed, and
+  // window.__growOnRead(path) adds a line to that file as it is first read whole (both: a file changing during a look).
+  const disk = { name: '', kids: new Map() };
+  const at = path => path.split('/').reduce((n, p) => { if (!n.kids.has(p)) n.kids.set(p, { name: p, kids: new Map() }); return n.kids.get(p); }, disk);
+  const snapshot = f => {
+    const v = f.version, ok = () => { if (f.version !== v) throw new DOMException('The requested file could not be read', 'NotReadableError'); };
+    const wrap = b => Object.assign(b, { slice: (...a) => wrap(Blob.prototype.slice.apply(b, a)), text: async () => { ok(); return Blob.prototype.text.call(b); },
+      stream: () => { ok(); const r = Blob.prototype.stream.call(b).getReader();
+        return new ReadableStream({ async pull(c) { f.onRead?.(); ok(); const { done, value } = await r.read(); if (done) c.close(); else c.enqueue(value); } }); } });
+    return wrap(new File([f.text], f.name, { lastModified: f.at }));
+  };
+  const handle = n => (n.handle ??= n.kids ? {
+    kind: 'directory', name: n.name, queryPermission: async () => 'granted', requestPermission: async () => 'granted',
+    async *values() { window.__onList?.(n.name); yield* [...n.kids.values()].map(handle); },
+    isSameEntry: async o => o === n.handle,
+    resolve: async o => { const find = (x, path) => (x.handle === o ? path : x.kids ? [...x.kids.values()].reduce((r, k) => r ?? find(k, [...path, k.name]), null) : null); return find(n, []); }
+  } : { kind: 'file', name: n.name, getFile: async () => snapshot(n) });
+  window.__write = (path, text, ms) => {
+    const parts = path.split('/'), name = parts.pop(), dir = at(parts.join('/')), f = dir.kids.get(name);
+    if (f) { f.text += text; f.at = ms ?? f.at + 1000; f.version++; } else dir.kids.set(name, { name, text, at: ms ?? Date.now(), version: 0 });
+  };
+  window.__growOnRead = path => { const f = at(path); f.onRead = () => { f.onRead = null; window.__grown = (window.__grown ?? 0) + 1;
+    window.__write(path, JSON.stringify({ timestamp: new Date().toISOString(), type: 'turn_context', payload: { cwd: '/work/salon' } }) + '\\n'); }; };
+  for (const [path, text, ms] of files) window.__write(path, text, ms);
+  window.__picks = ['me/.claude', 'me/.codex', 'wsl/.claude', 'me', 'me/.codex'];
+  window.showDirectoryPicker = async () => { const p = window.__picks.shift(); if (!p) throw new DOMException('cancelled', 'AbortError'); return handle(at(p)); };
 }"""
+
+
+def folder_files():
+    """The fixture's session files as they lie in a home folder ('me'), with what lies beside them that is no session of its own: an
+    archived Codex thread, subagents' transcripts and rollouts newer than every session (as many of each as one look opens; one
+    rollout changed a file for the Codex session), a .jsonl elsewhere in the home folder, and a second .claude (Claude Code in WSL)."""
+    fixture = json.loads(subprocess.run(["node", str(ROOT / "tests/sessions-fixture.mjs")], cwd=APP, capture_output=True, text=True, encoding="utf-8", check=True).stdout)
+    files = [[f"me/{root}/{path}", text, at] for root, path, text, at in fixture]
+    base = min(f[2] for f in files) - 1000
+    jl = lambda *rows: "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows)
+    ask = lambda cwd, text, when, **o: {"type": "user", "cwd": cwd, "sessionId": "s", "timestamp": when, "message": {"role": "user", "content": text}, **o}
+    meta = lambda id, when, **o: {"timestamp": when, "type": "session_meta", "payload": {"id": id, "timestamp": when, "cwd": "/work/salon", **o}}
+    files.append(["me/.codex/archived_sessions/rollout-2026-10-20T09-00-00-arch.jsonl", jl(meta("arch", "2026-10-20T09:00:00.000Z"),
+        {"timestamp": "2026-10-20T09:00:01.000Z", "type": "response_item", "payload": {"type": "message", "role": "user", "content": [{"type": "input_text", "text": "보관해 둔 옛 대화"}]}}), base + 5000])
+    files.append(["me/work/notes/chat.jsonl", jl(ask("/work/notes", "홈 폴더에 둔 다른 기록", "2026-10-28T09:40:00.000Z")), base + 6000])
+    files.append(["wsl/.claude/projects/-work-salon/w1.jsonl", jl(ask("/work/salon", "예약 문자 문구를 바꿔 줘", "2026-10-28T09:45:00.000Z")), base + 7000])
+    for i in range(400):
+        files.append([f"me/.claude/projects/-work-salon/c1/subagents/agent-{i}.jsonl", jl(ask("/work/salon", "하위 작업", "2026-10-28T09:50:00.000Z", isSidechain=True)), base + 10000 + i])
+        change = [{"timestamp": "2026-10-28T09:21:30.000Z", "type": "event_msg", "payload": {"type": "item_completed", "item": {"type": "FileChange", "status": "completed", "changes": {"/work/salon/src/retry.ts": {"type": "update"}}}}}] if i == 0 else []
+        files.append([f"me/.codex/sessions/2026/10/28/rollout-2026-10-28T09-21-00-sub{i}.jsonl", jl(meta(f"sub{i}", "2026-10-28T09:21:00.000Z", parent_thread_id="x1" if i == 0 else "y9"), *change), base + 20000 + i])
+    return files
 
 
 def folder_sessions_flow(browser, base):
     """Without a local session reader (a hosted or plain local server), the person picks their .claude and .codex folders once in the
     browser: the same automatic connection runs on them (folders found, sessions taken, first map without a click), the paste box
-    lists them, one .jsonl file can be chosen by hand, and a web chat gets a request text that writes its own record."""
-    files = json.loads(subprocess.run(["node", str(ROOT / "tests/sessions-fixture.mjs")], cwd=APP, capture_output=True, text=True, encoding="utf-8", check=True).stdout)
+    lists them, one .jsonl file can be chosen by hand, and a web chat gets a request text that writes its own record. Only the
+    tools' own layout is read (no archived thread, no subagent transcript, nothing else in a home folder picked by mistake); a file
+    an agent writes during a look breaks nothing; a folder already picked adds nothing, and two of one name are told apart."""
+    files = folder_files()
     context = browser.new_context(viewport={"width": 1280, "height": 720})
     context.add_init_script(f"({FAKE_PICKER})({json.dumps(files)})")
     page = context.new_page()
@@ -2874,6 +2913,7 @@ def folder_sessions_flow(browser, base):
     panel = page.locator("#sync-panel")
     expect(panel.locator("h3")).to_have_text("내 AI 세션 연결")
     panel.get_by_role("button", name="세션 폴더 고르기").click()
+    # Newer subagent transcripts beside the session do not crowd it out.
     pick = panel.locator(".sync-folder-pick")
     expect(pick).to_have_count(1)
     expect(pick).to_contain_text("/work/salon")
@@ -2888,7 +2928,7 @@ def folder_sessions_flow(browser, base):
     expect(page.locator("#space-empty")).to_contain_text("[스텁] 프로그램을 말하는 기록을 붙여 주세요", timeout=15000)
     assert len(maps) == 1, maps
     page.locator("#sync-pill").click()
-    expect(panel).to_contain_text("가져온 기록2개")
+    expect(panel).to_contain_text("가져온 기록2개")  # the archived thread is not taken
     page.locator("#sync-pill").click()
     # The paste box lists the picked folders' sessions and takes one as written.
     page.locator("#return-entry").click()
@@ -2903,8 +2943,8 @@ def folder_sessions_flow(browser, base):
     value = draft.input_value()
     assert "[가려진 비밀값]" in value and "sk-abc" not in value and "(바꾼 파일: src/hours.ts, tests/hours.test.ts)" in value, value
     # One file chosen by hand comes after what is in the box.
-    codex = next(f for f in files if f[1].endswith("x1.jsonl"))
-    page.locator("#lens .rr-session-file").set_input_files(files=[{"name": "rollout-x1.jsonl", "mimeType": "application/json", "buffer": codex[2].encode("utf-8")}])
+    codex = next(f for f in files if f[0].endswith("x1.jsonl"))
+    page.locator("#lens .rr-session-file").set_input_files(files=[{"name": "rollout-x1.jsonl", "mimeType": "application/json", "buffer": codex[1].encode("utf-8")}])
     expect(draft).to_have_value(re.compile("휴무일[\\s\\S]*문자 알림 발송 실패 시 재시도를 넣어 줘"))
     expect(page.locator("#lens .rr-sessions-note")).to_contain_text("Codex 세션에서 대화")
     page.locator("#lens .rr-session-file").set_input_files(files=[{"name": "notes.jsonl", "mimeType": "application/json", "buffer": b'{"a":1}\n'}])
@@ -2912,6 +2952,51 @@ def folder_sessions_flow(browser, base):
     # A web chat keeps no file here: it is given the request text to write its own record.
     page.locator("#lens").get_by_role("button", name="웹 대화용 기록 요청 문구 복사").click()
     expect(page.locator("#lens .rr-sessions")).to_contain_text(re.compile("기록 요청 문구를 복사했어요|\\[웹 AI 세션 기록"))
+    # A session Codex is still writing is taken as it was when the read began (the file grows while it is read), with the file
+    # its subagent changed.
+    page.evaluate("() => window.__growOnRead('me/.codex/sessions/2026/10/28/rollout-2026-10-28T09-20-00-x1.jsonl')")
+    page.locator("#lens").get_by_role("button", name="내 AI 세션에서 가져오기").click()
+    page.locator("#lens .rr-session", has_text="문자 알림 발송").click()
+    expect(draft).to_have_value(re.compile("\\(바꾼 파일: [^\\n]*src/retry\\.ts"))
+    expect(page.locator("#lens .rr-sessions [role=alert]")).to_have_count(0)
+    assert page.evaluate("() => window.__grown") == 1
+    # An agent writes in another project while the folders are looked at: the look goes on.
+    live = json.dumps({"type": "user", "cwd": "/work/other", "sessionId": "s", "timestamp": "2026-10-28T09:55:00.000Z", "message": {"role": "user", "content": "다른 작업 진행 중"}}, ensure_ascii=False) + "\n"
+    page.evaluate("""(line) => { window.__write('me/.claude/projects/-work-other/live.jsonl', line);
+      window.__onList = name => { if (name !== 'sessions') return; window.__onList = null; window.__write('me/.claude/projects/-work-other/live.jsonl', line); }; }""", live)
+    page.locator("#sync-pill").click()
+    panel.get_by_role("button", name="지금 확인").click()
+    page.wait_for_function("() => window.__onList === null")
+    expect(page.locator("#sync-pill")).to_have_attribute("data-state", "on")
+    expect(panel.locator("[role=alert]")).to_have_count(0)
+    # Claude Code in WSL too: a second .claude is kept apart from the first by number.
+    panel.get_by_role("button", name="세션 폴더 더 고르기").click()
+    expect(panel).to_contain_text("읽는 세션 폴더: .claude (1), .codex, .claude (2)")
+    # The home folder picked by mistake takes the place of the .claude and .codex in it, and only they are read in it.
+    panel.get_by_role("button", name="세션 폴더 더 고르기").click()
+    expect(panel).to_contain_text("읽는 세션 폴더: .claude, me")
+    # A folder inside one already picked adds nothing.
+    panel.get_by_role("button", name="세션 폴더 더 고르기").click()
+    page.wait_for_function("() => !window.__picks.length")
+    page.wait_for_timeout(300)
+    page.locator("#sync-pill").click()
+    page.locator("#sync-pill").click()
+    expect(panel).to_contain_text("읽는 세션 폴더: .claude, me")
+    expect(panel.locator("[role=alert]")).to_have_count(0)
+    page.locator("#sync-pill").click()
+    page.locator("#lens").get_by_role("button", name="내 AI 세션에서 가져오기").click()
+    sessions = page.locator("#lens .rr-session")
+    expect(sessions).to_have_count(5)
+    expect(sessions.filter(has_text="휴무일 연결")).to_have_count(1)
+    expect(sessions.filter(has_text="예약 문자 문구를 바꿔 줘")).to_have_count(1)
+    expect(sessions.filter(has_text="다른 작업 진행 중")).to_have_count(1)
+    expect(sessions.filter(has_text=re.compile("보관해 둔 옛 대화|홈 폴더에 둔 다른 기록|하위 작업"))).to_have_count(0)
+    box.get_by_role("button", name="접기").click()
+    expect(box).to_contain_text("고른 세션 폴더(.claude, me)의 대화 기록")
+    # Leaving the WSL folder leaves the home folder.
+    page.locator("#sync-pill").click()
+    panel.get_by_role("button", name=".claude 세션 폴더 빼기").click()
+    expect(panel).to_contain_text("읽는 세션 폴더: me")
     assert not errors, errors
     context.close()
 
