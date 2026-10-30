@@ -126,6 +126,10 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
     await io.writeAtomic(opsDir, `${id}.json`, text);
     jobs.set(id, { body, size: Buffer.byteLength(text) });
   }
+  /** write() for a route: a store error that is not already a code is said as JOB_STORE_FAILED. */
+  async function persist(id, body) {
+    try { await write(id, body); } catch (e) { throw e instanceof ApiError ? e : new ApiError('JOB_STORE_FAILED', 507); }
+  }
   // A job's material (the private input and the result) is dropped once it can no longer be applied.
   function strip(body) { const { input: _i, result: _r, ...rest } = body; return rest; }
   const tomb = (body, acked) => ({ id: body.id, capHash: body.capHash, bindingHash: body.bindingHash, state: body.state, error: body.error ?? null,
@@ -250,13 +254,13 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
         if (!JOB_ID.test(id)) throw new ApiError('OPERATION_NOT_FOUND', 404);
         if (jobs.size >= limits.records) throw new ApiError('JOB_STORE_FULL', 507);
         const body = { id, capHash, bindingHash: null, state: 'cancelled', createdAt: now(), updatedAt: now(), remote: 'not-sent', acked: null, tomb: true };
-        try { await write(id, body); } catch (e) { throw e instanceof ApiError ? e : new ApiError('JOB_STORE_FAILED', 507); }
+        await persist(id, body);
         return { status: 200, value: view(id, body) };
       }
       const body = find(id, cap), live = running.get(id);
       if (body.state !== 'accepted' || failedHere.has(id)) return { status: 200, value: view(id, body) };
       const next = { ...strip(body), state: 'cancelled', remote: 'unknown', updatedAt: now() };
-      try { await write(id, next); } catch (e) { throw e instanceof ApiError ? e : new ApiError('JOB_STORE_FAILED', 507); }
+      await persist(id, next);
       // Recorded first; only then is the call stopped (whether the provider stops working or charging is not known).
       live?.controller.abort();
       return { status: 200, value: view(id, next) };
@@ -273,7 +277,7 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
       const ok = body.state === 'ready' ? outcome === 'applied' || outcome === 'discarded' : (ENDED.has(body.state) || (!!lost && body.state === 'accepted')) && outcome === 'seen';
       if (!ok) throw new ApiError('OPERATION_STATE', 409);
       const next = tomb(lost && body.state === 'accepted' ? { ...body, state: 'failed', error: lost } : body, { outcome, at: now() });
-      try { await write(id, next); } catch (e) { throw e instanceof ApiError ? e : new ApiError('JOB_STORE_FAILED', 507); }
+      await persist(id, next);
       failedHere.delete(id);
       return { status: 200, value: view(id, next) };
     });
@@ -288,7 +292,8 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
   return {
     dir, owner: owner?.kind ?? null,
     describe: () => problem ? { version: MAP_JOB_VERSION, durable: false, problem } : { version: MAP_JOB_VERSION, durable: true },
-    /** One job route. run: { configured(), prompt(schemaVersion), model, acquire(id), call(ask, signal) } from the studio handler. */
+    /** One job route. run: { configured(), prompt(schemaVersion), model, acquire(id), call(ask, signal, execution?), prepare?(ask) } from
+     * the studio handler (prepare only with an injected executor). */
     async handle({ method, rest, cap, body }, run) {
       if (problem || closed) throw new ApiError('JOB_STORE_UNAVAILABLE', 503);
       if (rest.length === 0 && method === 'POST') return submit(body, cap, run);

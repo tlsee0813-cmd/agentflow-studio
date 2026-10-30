@@ -2,7 +2,7 @@
 // every route past status, and the job route's own body limit. A fake provider and a fake job service; nothing is sent anywhere.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createStudioHandler, schemaOf, segmentsUnder, JOB_BYTES, STUDIO_PROMPT } from '../server/studio.mjs';
+import { createStudioHandler, readStudioConfig, schemaOf, segmentsUnder, studioConfigProblems, JOB_BYTES, STUDIO_PROMPT } from '../server/studio.mjs';
 import { PLAN_PROMPT, PLAN2_PROMPT, PLAN3_PROMPT, SCOPE_PROMPT } from '../server/plan-prompt.mjs';
 import { DIGEST_PROMPT, DIGEST2_PROMPT } from '../server/digest-prompt.mjs';
 import { MAP_PROMPT, MAP2_PROMPT, MAP3_PROMPT } from '../server/map-prompt.mjs';
@@ -82,4 +82,14 @@ test('ROUTES-X1 session routes: GET only, same origin only (even a listed one), 
   assert.equal((await get('/api/studio/sessions/s%201?since=2026-10-30T00:00:00Z')).status, 200);
   assert.deepEqual(seen, [['list', 'C:\\work'], ['read', 's 1', '2026-10-30T00:00:00Z']]);
   assert.deepEqual((await (await get('/api/studio/status')).json()).sessions, { readable: true });
+});
+
+test('ROUTES-C1 settings that are set aside are named, fall back whole, and an unset one is never a problem', () => {
+  const env = { STUDIO_TIMEOUT_MS: '500', STUDIO_MAX_TOKENS: '2048', DEEPSEEK_MODEL: 'bad model', DEEPSEEK_PLAN_MODEL: 'plan-1', STUDIO_ALLOWED_ORIGINS: 'https://a.example, https://b.example/path',
+    STUDIO_MAP_THINKING: 'maybe', STUDIO_CALL_CAP: '', STUDIO_ACCESS_CODE: 'not a problem' };
+  assert.deepEqual(studioConfigProblems(env).sort(), ['DEEPSEEK_MODEL', 'STUDIO_ALLOWED_ORIGINS', 'STUDIO_MAP_THINKING', 'STUDIO_TIMEOUT_MS']);
+  const c = readStudioConfig(env);
+  assert.deepEqual([c.timeoutMs, c.maxTokens, c.model, c.planModel, c.origins, c.mapThinking, c.cap], [30000, 2048, 'deepseek-flash', 'plan-1', ['https://a.example'], 'enabled', 300]);
+  assert.deepEqual(studioConfigProblems({}), []);
+  assert.deepEqual(readStudioConfig({}), readStudioConfig());
 });
