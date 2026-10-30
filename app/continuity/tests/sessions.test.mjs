@@ -17,7 +17,7 @@ const leaks = text => /SHOULD NOT APPEAR|private reasoning|injected context/.tes
 
 test('SESSIONS-C1 Claude Code: typed prompts and final replies only, one reply per prompt with the files it changed', () => {
   const { meta, turns } = parseClaude(claudeRows());
-  assert.deepEqual(meta, { cwd: '/work/salon', branch: 'main', startedAt: '2026-10-28T09:00:00.000Z', title: '휴무일 연결' });
+  assert.deepEqual(meta, { cwd: '/work/salon', cwds: ['/work/salon'], branch: 'main', startedAt: '2026-10-28T09:00:00.000Z', title: '휴무일 연결', thread: null, parent: null });
   assert.deepEqual(turns.map(t => t.role), ['user', 'assistant', 'user', 'assistant']);
   assert.equal(turns[0].text, CLAUDE_PROMPT, 'injected reminder removed, words kept as typed');
   assert.equal(turns[1].text, `먼저 코드를 볼게요.\n\n${CLAUDE_REPLY}`, 'tool round trip and sidechain do not split or leak into the reply');
@@ -157,4 +157,87 @@ test('SESSIONS-P1 the shared reading: a file tells its tool by its lines; ids ar
   assert.equal(P.shortPath('C:\\work\\salon\\src\\a.ts', 'C:\\work\\salon'), 'src/a.ts');
   assert.equal(P.shortPath('/work/salon/src/a.ts', '/work/salon/'), 'src/a.ts');
   assert.equal(P.shortPath('/elsewhere/a.ts', '/work/salon'), '/elsewhere/a.ts');
+});
+
+// Shapes seen in real files on a Windows PC (Codex Desktop, multi-agent; a Claude Code session that moved folders). Only their
+// structure is copied here; the words are made up.
+const W = 'C:\\Users\\me\\salon';
+const at = m => `2026-10-29T10:${String(m).padStart(2, '0')}:00.000Z`;
+const desktopUser = (m, parts) => ({ timestamp: at(m), type: 'response_item', payload: { type: 'message', role: 'user', content: parts.map(([, text]) => ({ type: 'input_text', text })),
+  internal_chat_message_metadata_passthrough: { content_item_kinds: parts.map(([k]) => k) } } });
+const fileChange = (m, changes, status = 'completed') => ({ timestamp: at(m), type: 'event_msg', payload: { type: 'item_completed', item: { type: 'FileChange', id: `fc${m}`, changes, status, stdout: '', stderr: '' } } });
+const desktopMeta = (id, extra = {}) => ({ timestamp: at(0), type: 'session_meta', payload: { id, session_id: `s-${id}`, timestamp: at(0), cwd: W, originator: 'Codex Desktop', source: 'vscode', ...extra } });
+const PARENT = '11111111-2222-3333-4444-555555555555';
+function desktopParent() {
+  return [desktopMeta(PARENT),
+    { timestamp: at(1), type: 'response_item', payload: { type: 'message', role: 'developer', content: [{ type: 'input_text', text: 'DEVELOPER SHOULD NOT APPEAR' }] } },
+    desktopUser(1, [['environments.environment_context', '<environment_context><cwd>C:\\x</cwd></environment_context>'], ['user.heartbeat', 'HEARTBEAT SHOULD NOT APPEAR']]),
+    desktopUser(2, [['environments.environment_context', '<environment_context>x</environment_context>'],
+      ['user.text', '# Files mentioned by the user:\n\n## hours.ts: C:\\Users\\me\\salon\\src\\hours.ts\n\n# In app browser:\n<in-app-browser-context>PAGE SHOULD NOT APPEAR</in-app-browser-context>\n\n## My request:\n휴무일을 예약 화면에 반영해 줘\n\n## 확인할 것\n- 테스트'],
+      ['user.heartbeat', 'HEARTBEAT SHOULD NOT APPEAR']]),
+    { timestamp: at(3), type: 'response_item', payload: { type: 'custom_tool_call', name: 'exec', call_id: 'e1', input: 'const p = root + "/x";\nawait apply_patch(`*** Begin Patch\n*** Update File: ${p}\n*** End Patch`)' } },
+    fileChange(4, { [`${W}\\src\\hours.ts`]: { type: 'update', unified_diff: '@@', move_path: null }, [`${W}\\src\\old.ts`]: { type: 'update', unified_diff: '@@', move_path: `${W}\\src\\new.ts` } }),
+    fileChange(4, { [`${W}\\src\\failed.ts`]: { type: 'add', content: 'x' } }, 'failed'),
+    { timestamp: at(5), type: 'response_item', payload: { type: 'message', role: 'assistant', content: [{ type: 'output_text', text: '반영했어요.' }] } },
+    desktopUser(20, [['user.text', '다음은 알림']]),
+    { timestamp: at(21), type: 'response_item', payload: { type: 'message', role: 'assistant', content: [{ type: 'output_text', text: '알림을 붙였어요.' }] } }];
+}
+function desktopChild(id, m) {
+  return [desktopMeta(id, { parent_thread_id: PARENT, source: { subagent: { thread_spawn: { parent_thread_id: PARENT, depth: 1, agent_path: 'agents/a', agent_nickname: 'helper', agent_role: null } } }, thread_source: 'subagent' }),
+    { timestamp: at(m), type: 'response_item', payload: { type: 'message', role: 'user', content: [{ type: 'input_text', text: '<environment_context>x</environment_context>' }],
+      internal_chat_message_metadata_passthrough: { content_item_kinds: ['environments.environment_context'] } } },
+    { timestamp: at(m), type: 'response_item', payload: { type: 'agent_message', content: [{ type: 'input_text', text: 'TASK SHOULD NOT APPEAR' }] } },
+    fileChange(m + 1, { [`${W}\\tests\\hours.test.ts`]: { type: 'add', content: 'x' } })];
+}
+
+test('SESSIONS-D1 Codex Desktop: only typed parts of a prompt, the request under its attachments, files from FileChange items, not from scripts', async () => {
+  const P = await import('../dist/public/shared/session-parse.js');
+  const s = parseCodex(desktopParent());
+  assert.deepEqual(s.meta.thread, PARENT); assert.equal(s.meta.parent, null);
+  assert.deepEqual(s.turns.map(t => [t.role, t.text]), [['user', '휴무일을 예약 화면에 반영해 줘\n\n## 확인할 것\n- 테스트'], ['assistant', '반영했어요.'], ['user', '다음은 알림'], ['assistant', '알림을 붙였어요.']]);
+  assert.deepEqual(s.turns[1].files, [`${W}\\src\\hours.ts`, `${W}\\src\\old.ts`, `${W}\\src\\new.ts`], 'moved file named at both ends; a failed change and a script are not files');
+  assert.ok(!/SHOULD NOT APPEAR/.test(JSON.stringify(s.turns)));
+  assert.deepEqual(P.sessionDetail('codex-' + 'a'.repeat(24), 'codex', s).turns[1].files, ['src/hours.ts', 'src/old.ts', 'src/new.ts'], 'Windows paths shown relative to the folder');
+  // Several tag blocks before what was typed, in one part.
+  assert.equal(parseCodex([desktopUser(1, [['user.text', '<recommended_plugins>a</recommended_plugins>\n<environment_context>b</environment_context>\n이것만 남아요']])]).turns[0].text, '이것만 남아요');
+});
+
+test('SESSIONS-D2 Codex subagents: their files join the reply to the prompt that was running; listed and read through the session that started them', async () => {
+  const P = await import('../dist/public/shared/session-parse.js');
+  const child = parseCodex(desktopChild('c1', 10));
+  assert.equal(child.meta.parent, PARENT); assert.equal(child.turns.filter(t => t.role === 'user').length, 0);
+  const merged = P.withSubagents(parseCodex(desktopParent()), [child, parseCodex(desktopChild('c2', 25))]);
+  assert.deepEqual(merged.turns[1].files.at(-1), `${W}\\tests\\hours.test.ts`);
+  assert.deepEqual(merged.turns[3].files, [`${W}\\tests\\hours.test.ts`], 'a change after the second prompt joins its reply');
+  const dir = home();
+  try {
+    const roots = writeSessionHome(dir), day = join(roots.codex, 'sessions', '2026', '10', '29'); mkdirSync(day, { recursive: true });
+    const write = (name, rows) => writeFileSync(join(day, name), rows.map(r => JSON.stringify(r)).join('\r\n'));
+    write('rollout-2026-10-29T10-00-00-parent.jsonl', desktopParent()); write('rollout-2026-10-29T10-10-00-child.jsonl', desktopChild('c1', 10));
+    const sessions = openSessions({ env: {}, roots });
+    const list = (await sessions.list()).sessions;
+    assert.equal(list.filter(x => x.preview.startsWith('휴무일을 예약')).length, 1, 'the subagent is not its own session');
+    const parent = list.find(x => x.preview.startsWith('휴무일을 예약'));
+    assert.deepEqual((await sessions.list('c:/users/ME/salon/')).sessions.map(x => x.id), [parent.id], 'a Windows folder matches whatever its letter case and separators');
+    const got = await sessions.read(parent.id);
+    assert.deepEqual(got.turns[1].files, ['src/hours.ts', 'src/old.ts', 'src/new.ts', 'tests/hours.test.ts']);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('SESSIONS-D3 a Claude Code session that moved folders is found under each; within() compares Windows folders as Windows does', async () => {
+  const P = await import('../dist/public/shared/session-parse.js');
+  const rows = [{ type: 'user', cwd: '/tmp/scratch', timestamp: at(1), message: { role: 'user', content: '시작' } },
+    { type: 'relocated', sessionId: 'x', relocatedCwd: '/work/salon' },
+    { type: 'user', cwd: '/work/salon', timestamp: at(2), message: { role: 'user', content: '이어서' } }];
+  const { meta } = parseClaude(rows);
+  assert.equal(meta.cwd, '/work/salon'); assert.deepEqual(meta.cwds, ['/tmp/scratch', '/work/salon']);
+  assert.ok(P.within(meta.cwds, '/tmp/scratch') && P.within(meta.cwds, '/work/salon') && !P.within(meta.cwds, '/work'.concat('/sal')));
+  assert.ok(P.within('C:\\Users\\Me\\Proj\\app', 'c:/users/me/proj') && !P.within('/Work/Salon', '/work/salon'));
+  const dir = home();
+  try {
+    const roots = writeSessionHome(dir), p = join(roots.claude, 'projects', 'C--Users-Me-Moved'); mkdirSync(p, { recursive: true });
+    writeFileSync(join(p, 'moved.jsonl'), rows.map(r => JSON.stringify(r)).join('\n'));
+    const sessions = openSessions({ env: {}, roots });
+    for (const f of ['/tmp/scratch', '/work/salon']) assert.ok((await sessions.list(f)).sessions.some(x => x.preview === '시작'), f);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
 });

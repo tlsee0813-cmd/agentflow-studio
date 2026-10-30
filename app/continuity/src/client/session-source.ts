@@ -6,7 +6,7 @@
  * click, before the page can read them on a later visit. A single file chosen by hand works in every browser. */
 import { listSessions, readSession, type AiStatus } from './studio-api.js';
 import { readSessionList, readSessionDetail, type SessionDetail, type SessionSummary } from '../shared/session-import.js';
-import { SESSION_LIMITS, jsonLines, parseSession, sniffTool, sessionSummary, sessionDetail, sessionId, within, type SessionTool } from '../shared/session-parse.js';
+import { SESSION_LIMITS, jsonLines, parseSession, sessionParser, pushLine, withSubagents, sniffTool, sessionSummary, sessionDetail, sessionId, within, type ParsedSession, type SessionTool } from '../shared/session-parse.js';
 
 export interface SessionSource { kind: 'server' | 'folder'; list(folder?: string | null): Promise<SessionSummary[]>; read(id: string): Promise<SessionDetail> }
 export type FolderState = 'unsupported' | 'none' | 'prompt' | 'granted';
@@ -37,6 +37,20 @@ async function saveRoots(roots: DirHandle[]): Promise<void> {
   try { db.transaction(STORE, 'readwrite').objectStore(STORE).put(roots, KEY); } catch { /* this page only */ }
 }
 
+/** A whole session file read in pieces into the tool's parser: a file of hundreds of MB is never held whole as text. */
+async function readParsed(tool: SessionTool, file: File): Promise<ParsedSession> {
+  const parser = sessionParser(tool), decoder = new TextDecoder(), reader = file.stream().getReader();
+  let rest = '';
+  for (;;) {
+    const { done, value } = await reader.read();
+    rest += done ? decoder.decode() : decoder.decode(value, { stream: true });
+    const lines = rest.split('\n'); rest = done ? '' : lines.pop()!;
+    for (const l of lines) pushLine(parser, l);
+    if (done) break;
+  }
+  return parser.done();
+}
+
 /** How deep and how wide a picked folder is walked for .jsonl files (a home folder picked by mistake stays bounded). */
 const WALK_DEPTH = 6, WALK_ENTRIES = 20000;
 interface Found { tool: SessionTool | null; path: string; handle: FileHandle; file: File }
@@ -62,8 +76,30 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
   let roots: DirHandle[] = [], state: FolderState = 'none', loaded: Promise<void> | null = null;
   const picker = (): Picker | null => (typeof window !== 'undefined' && typeof (window as unknown as { showDirectoryPicker?: Picker }).showDirectoryPicker === 'function' ? (window as unknown as { showDirectoryPicker: Picker }).showDirectoryPicker : null);
   // Per file: what its head said, while its size and time stay the same (a look every minute reads only what changed).
-  const heads = new Map<string, { key: string; row: SessionSummary | null; cwd: string | null }>();
+  const heads = new Map<string, { key: string; row: SessionSummary | null; cwds: string[] }>();
   const known = new Map<string, Found & { tool: SessionTool }>();
+  // Per Codex file: which session started it, when it is a subagent's (from its first lines).
+  const parents = new Map<string, { key: string; parent: string | null }>();
+  let lastFound: Found[] = [];
+
+  /** The Codex subagent sessions a session started, among the files of the last walk (they begin after it). */
+  async function subagents(parsed: ParsedSession): Promise<ParsedSession[]> {
+    const out: ParsedSession[] = [], since = Date.parse(parsed.meta.startedAt ?? '') || 0;
+    if (!parsed.meta.thread) return out;
+    for (const f of lastFound) {
+      if (f.tool === 'claude' || f.file.lastModified < since || f.file.size > SESSION_LIMITS.fileBytes) continue;
+      const key = `${f.file.size}:${f.file.lastModified}`; let t = parents.get(f.path);
+      // A file that changed since the walk can no longer be read through it: it is left out this time.
+      try {
+        if (t?.key !== key) {
+          const lines = jsonLines(await f.file.slice(0, SESSION_LIMITS.headBytes).text(), f.file.size > SESSION_LIMITS.headBytes);
+          t = { key, parent: (f.tool ?? sniffTool(lines)) === 'codex' ? parseSession('codex', lines).meta.parent : null }; parents.set(f.path, t);
+        }
+        if (t.parent === parsed.meta.thread) out.push(await readParsed('codex', f.file));
+      } catch { /* changed meanwhile */ }
+    }
+    return out;
+  }
 
   async function check(): Promise<FolderState> {
     if (!picker()) return (state = 'unsupported');
@@ -79,23 +115,23 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
     async list(folder = null) {
       const found: Found[] = [];
       for (const r of roots) found.push(...await walk(r).catch(() => []));
-      found.sort((a, b) => b.file.lastModified - a.file.lastModified);
+      found.sort((a, b) => b.file.lastModified - a.file.lastModified); lastFound = found;
       const out: SessionSummary[] = [];
       for (const f of found.slice(0, SESSION_LIMITS.scan)) {
         if (out.length >= SESSION_LIMITS.list) break;
         const key = `${f.file.size}:${f.file.lastModified}`, was = heads.get(f.path);
-        let row = was?.key === key ? was.row : undefined, cwd = was?.cwd ?? null;
+        let row = was?.key === key ? was.row : undefined, cwds = was?.cwds ?? [];
         if (row === undefined) {
           const partial = f.file.size > SESSION_LIMITS.headBytes, lines = jsonLines(await f.file.slice(0, SESSION_LIMITS.headBytes).text(), partial);
           const tool = f.tool ?? sniffTool(lines);
-          if (!tool) { heads.set(f.path, { key, row: null, cwd: null }); continue; }
+          if (!tool) { heads.set(f.path, { key, row: null, cwds: [] }); continue; }
           const parsed = parseSession(tool, lines);
           row = sessionSummary(await sessionId(tool, f.path), tool, parsed, new Date(f.file.lastModified).toISOString(), f.file.size);
-          cwd = parsed.meta.cwd; heads.set(f.path, { key, row, cwd });
+          cwds = parsed.meta.cwds; heads.set(f.path, { key, row, cwds });
         }
         if (!row) continue;
         known.set(row.id, { ...f, tool: row.tool });
-        if (folder && !within(cwd, folder)) continue;
+        if (folder && !within(cwds, folder)) continue;
         out.push(row);
       }
       return readSessionList({ version: 'sessions.1', sessions: out });
@@ -105,7 +141,8 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
       const f = known.get(id); if (!f) throw Object.assign(new Error('SESSION_NOT_FOUND'), { code: 'SESSION_NOT_FOUND' });
       const file = await f.handle.getFile();
       if (file.size > SESSION_LIMITS.fileBytes) throw Object.assign(new Error('SESSION_TOO_LARGE'), { code: 'SESSION_TOO_LARGE' });
-      const d = readSessionDetail(sessionDetail(id, f.tool, parseSession(f.tool, jsonLines(await file.text()))));
+      const parsed = await readParsed(f.tool, file);
+      const d = readSessionDetail(sessionDetail(id, f.tool, f.tool === 'codex' ? withSubagents(parsed, await subagents(parsed)) : parsed));
       if (!d) throw Object.assign(new Error('SESSION_NOT_FOUND'), { code: 'SESSION_NOT_FOUND' });
       return d;
     }
@@ -140,7 +177,7 @@ export type SessionSources = ReturnType<typeof createSessionSources>;
 /** One session file the person chose (any browser): read here, the tool told by its lines. Null when it is not a session file. */
 export async function readSessionFile(file: File): Promise<SessionDetail | null> {
   if (file.size > SESSION_LIMITS.fileBytes) throw Object.assign(new Error('SESSION_TOO_LARGE'), { code: 'SESSION_TOO_LARGE' });
-  const lines = jsonLines(await file.text()), tool = sniffTool(lines); if (!tool) return null;
-  const parsed = parseSession(tool, lines); if (!parsed.turns.some(t => t.role === 'user')) return null;
+  const tool = sniffTool(jsonLines(await file.slice(0, SESSION_LIMITS.headBytes).text(), file.size > SESSION_LIMITS.headBytes)); if (!tool) return null;
+  const parsed = await readParsed(tool, file); if (!parsed.turns.some(t => t.role === 'user')) return null;
   return readSessionDetail(sessionDetail(await sessionId(tool, `file/${file.name}/${file.size}/${file.lastModified}`), tool, parsed));
 }

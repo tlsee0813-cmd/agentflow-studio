@@ -6,13 +6,23 @@
 import type { SessionDetail, SessionSummary, SessionTurn } from './session-import.js';
 
 export const SESSION_VERSION = 'sessions.1';
-export const SESSION_LIMITS = Object.freeze({ list: 60, scan: 400, headBytes: 256 * 1024, fileBytes: 64 * 1024 * 1024, turnChars: 20000, replyChars: 300000, preview: 160 });
+// fileBytes: a long agent session runs to hundreds of MB (tool output it never shows); it is read line by line, never held whole.
+export const SESSION_LIMITS = Object.freeze({ list: 60, scan: 400, headBytes: 256 * 1024, fileBytes: 2 * 1024 * 1024 * 1024, turnChars: 20000, replyChars: 300000, preview: 160 });
 export type SessionLimits = typeof SESSION_LIMITS;
 export const SESSION_ID = /^(claude|codex)-[0-9a-f]{24}$/;
 export type SessionTool = 'claude' | 'codex';
 const TOOL_LABEL: Record<SessionTool, string> = { claude: 'Claude Code', codex: 'Codex' };
-export interface SessionMeta { cwd: string | null; branch: string | null; startedAt: string | null; title: string | null }
-export interface ParsedSession { meta: SessionMeta; turns: SessionTurn[] }
+/** cwd: the working folder the session was last in; cwds: every one it worked in (a session can move to another folder).
+ * thread / parent: Codex's own id of the session and, for a subagent it started, the id of the session that started it. */
+export interface SessionMeta { cwd: string | null; cwds: string[]; branch: string | null; startedAt: string | null; title: string | null; thread: string | null; parent: string | null }
+const newMeta = (): SessionMeta => ({ cwd: null, cwds: [], branch: null, startedAt: null, title: null, thread: null, parent: null });
+function atFolder(meta: SessionMeta, cwd: unknown) {
+  if (typeof cwd !== 'string' || !cwd) return;
+  meta.cwd = cwd; if (!meta.cwds.some(c => sameFolder(c, cwd))) meta.cwds.push(cwd);
+}
+/** changes: each time files were changed, with when (a subagent's are added to the session that started it). */
+export interface ParsedSession { meta: SessionMeta; turns: SessionTurn[]; changes: FileChange[] }
+interface FileChange { at: string | null; files: string[] }
 type Row = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 /** Text of a message content: a string, or the text parts of a list of blocks (tool calls, results and reasoning left out). */
@@ -29,15 +39,34 @@ function typed(text: string): string | null {
   const cmd = /^<command-name>([^<]*)<\/command-name>/.exec(t.replace(/^<command-message>[\s\S]*?<\/command-message>\s*/, ''));
   if (cmd) { const args = /<command-args>([\s\S]*?)<\/command-args>/.exec(t)?.[1]?.trim(); t = `${cmd[1]!.trim()}${args ? ` ${args}` : ''}`; }
   if (/^<(local-command-[a-z]+|command-message)>/.test(t)) return null;
-  // Context a tool puts in a user message (Codex environment_context, user_instructions, AGENTS.md…), or any message that is one
-  // whole tagged block, is not a prompt.
+  // Context a tool puts in a user message (Codex environment_context, user_instructions, AGENTS.md…) is not a prompt.
   if (/^(<user_instructions>|<environment_context>|<turn_context>|<instructions>|<permissions|# AGENTS\.md instructions)/i.test(t)) return null;
-  if (/^<([a-z_-]+)(\s[^>]*)?>[\s\S]*<\/\1>$/i.test(t)) return null;
+  // Whole tagged blocks at the start (one or several: <recommended_plugins>…</recommended_plugins><environment_context>…) are
+  // context too; what is left after them is what was typed.
+  for (let guard = 0; guard < 20; guard++) { const m = /^<([a-z_][\w-]*)(\s[^>]*)?>[\s\S]*?<\/\1>\s*/i.exec(t); if (!m) break; t = t.slice(m[0].length); }
+  // Codex Desktop puts what it attached (browser state, files mentioned or pasted) under headings before '## My request:'.
+  // The request may hold headings of its own, so it is everything after the first '## My request:'.
+  const ask = t.indexOf('## My request:');
+  if (ask >= 0 && /^#\s/.test(t)) t = t.slice(ask + '## My request:'.length).trim();
   return t || null;
 }
 const PATCH_FILE = /^\*\*\* (?:Add|Update|Delete) File: (.+)$|^\*\*\* Move to: (.+)$/gm;
-// The patch may sit inside JSON-encoded call arguments, where its line breaks are escaped.
-const patchFiles = (text: string) => [...new Set([...String(text).replace(/\\n/g, '\n').matchAll(PATCH_FILE)].map(m => (m[1] ?? m[2])!.trim().replace(/\\?"[,}\]]*$/, '')))];
+/** Files an apply_patch call changes: only the lines between its '*** Begin Patch' and '*** End Patch' (the patch may sit inside
+ * JSON-encoded arguments, where its line breaks are escaped). A script that merely contains such text changes nothing here. */
+function patchFiles(text: string): string[] {
+  const t = String(text).replace(/\\r\\n|\\n/g, '\n').replace(/\\"/g, '"'), out: string[] = [];
+  for (const block of t.matchAll(/\*\*\* Begin Patch\s*$([\s\S]*?)(?:^\*\*\* End Patch|$(?![\s\S]))/gm))
+    for (const m of block[1]!.matchAll(PATCH_FILE)) { const f = (m[1] ?? m[2])!.trim().replace(/"[,}\]]*$/, ''); if (f && !out.includes(f)) out.push(f); }
+  return out;
+}
+/** A tool call that applies a patch: Codex's apply_patch tool, or a shell call whose command is apply_patch. A script that runs
+ * apply_patch among other things (Codex Desktop's exec) is not read: its FileChange item names the files. */
+function patchCall(p: Row): string | null {
+  const args = typeof p.input === 'string' ? p.input : typeof p.arguments === 'string' ? p.arguments : '';
+  if (p.name === 'apply_patch') return args;
+  if (typeof p.name === 'string' && /^(shell|local_shell|exec_command|container\.exec)$/.test(p.name) && /^\s*\{?\s*"?(command|cmd)"?\s*:\s*\[\s*"apply_patch"/.test(args)) return args;
+  return null;
+}
 
 /** Builds turns from (role, text, at, files) events: one user turn per prompt, then one reply with everything the tool said and
  * changed until the next prompt. */
@@ -58,62 +87,110 @@ function collector() {
 
 /** Claude Code JSONL lines (each a JSON object) → meta and turns. Subagent (sidechain) lines and injected messages are left out. */
 export function parseClaude(lines: unknown[]): ParsedSession {
-  const c = collector(), meta: SessionMeta = { cwd: null, branch: null, startedAt: null, title: null };
-  for (const o of lines as Row[]) {
-    if (!o || typeof o !== 'object') continue;
+  const p = claudeParser(); for (const o of lines) p.push(o); return p.done();
+}
+/** The Claude Code reading, one line at a time (a long file is never held whole). */
+export function claudeParser(): SessionParser {
+  const c = collector(), meta = newMeta();
+  const push = (o: Row) => {
+    if (!o || typeof o !== 'object') return;
     if (o.type === 'ai-title' && typeof o.aiTitle === 'string') meta.title = o.aiTitle;
     if (o.type === 'summary' && typeof o.summary === 'string' && !meta.title) meta.title = o.summary;
-    if (o.isSidechain === true || (o.type !== 'user' && o.type !== 'assistant')) continue;
-    if (typeof o.cwd === 'string' && !meta.cwd) meta.cwd = o.cwd;
+    if (o.type === 'relocated') atFolder(meta, o.relocatedCwd);
+    if (o.isSidechain === true || (o.type !== 'user' && o.type !== 'assistant')) return;
+    atFolder(meta, o.cwd);
     if (typeof o.gitBranch === 'string' && o.gitBranch && !meta.branch) meta.branch = o.gitBranch;
     const at = typeof o.timestamp === 'string' ? o.timestamp : null; if (at && !meta.startedAt) meta.startedAt = at;
     const content = o.message?.content;
     if (o.type === 'user') {
-      if (o.isMeta === true || o.promptSource === 'system' || o.isCompactSummary === true) continue;
-      if (Array.isArray(content) && content.some(b => b?.type === 'tool_result')) continue;
+      if (o.isMeta === true || o.promptSource === 'system' || o.isCompactSummary === true) return;
+      if (Array.isArray(content) && content.some(b => b?.type === 'tool_result')) return;
       c.user(textOf(content, ['text']), at);
     } else {
       const files = Array.isArray(content) ? content.filter(b => b?.type === 'tool_use' && ['Edit', 'Write', 'MultiEdit', 'NotebookEdit'].includes(b.name))
         .map(b => b.input?.file_path ?? b.input?.notebook_path).filter((f): f is string => typeof f === 'string') : [];
       c.reply(textOf(content, ['text']), at, files);
     }
-  }
-  return { meta, turns: c.turns };
+  };
+  return { push: o => push(o as Row), done: () => ({ meta, turns: c.turns, changes: [] }) };
+}
+
+/** What the person typed in a Codex user message. Codex Desktop tags each part of it (user.text, user.heartbeat,
+ * environments.environment_context…): only typed text is kept, each part read on its own. */
+function codexUserText(p: Row): string {
+  const meta = p.internal_chat_message_metadata_passthrough, kinds = Array.isArray(meta?.content_item_kinds) ? meta.content_item_kinds : Array.isArray(p.content_item_kinds) ? p.content_item_kinds : null;
+  if (!Array.isArray(p.content)) return textOf(p.content, ['input_text', 'text']);
+  return p.content.map((b: Row, i: number) => (kinds && typeof kinds[i] === 'string' && kinds[i] !== 'user.text' ? null : typed(textOf([b], ['input_text', 'text']))))
+    .filter((x: string | null): x is string => !!x).join('\n\n');
+}
+/** The files a Codex Desktop FileChange item changed: the keys of its changes, and where a moved file went. */
+function changedFiles(item: Row): string[] {
+  if (!item.changes || typeof item.changes !== 'object' || (item.status && item.status !== 'completed')) return [];
+  const out: string[] = [];
+  for (const [file, c] of Object.entries(item.changes as Record<string, Row>)) { out.push(file); if (typeof c?.move_path === 'string' && c.move_path) out.push(c.move_path); }
+  return out;
 }
 
 /** Codex rollout JSONL lines → meta and turns. Current files wrap each item ({type, payload}); early ones had the items bare. The
  * event stream (user_message / agent_message) is what the person saw; response items are read only when a file has no events. */
 export function parseCodex(lines: unknown[]): ParsedSession {
-  const meta: SessionMeta = { cwd: null, branch: null, startedAt: null, title: null }, events = collector(), items = collector();
+  const p = codexParser(); for (const o of lines) p.push(o); return p.done();
+}
+/** The Codex reading, one line at a time. */
+export function codexParser(): SessionParser {
+  const meta = newMeta(), events = collector(), items = collector(), changes: FileChange[] = [];
   let sawEvents = false;
-  for (const raw of lines as Row[]) {
-    if (!raw || typeof raw !== 'object') continue;
+  const changed = (at: string | null, files: string[]) => { if (!files.length) return; changes.push({ at, files }); events.reply('', at, files); items.reply('', at, files); };
+  const push = (raw: Row) => {
+    if (!raw || typeof raw !== 'object') return;
     const wrapped = typeof raw.type === 'string' && raw.payload && typeof raw.payload === 'object';
     const kind = wrapped ? raw.type : 'response_item', p: Row = wrapped ? raw.payload : raw, at = typeof raw.timestamp === 'string' ? raw.timestamp : null;
     if (kind === 'session_meta' || (!wrapped && typeof raw.id === 'string' && typeof raw.instructions !== 'undefined')) {
-      meta.cwd = typeof p.cwd === 'string' ? p.cwd : meta.cwd; meta.startedAt = typeof p.timestamp === 'string' ? p.timestamp : meta.startedAt;
+      atFolder(meta, p.cwd); meta.startedAt = typeof p.timestamp === 'string' ? p.timestamp : meta.startedAt;
       if (typeof p.git?.branch === 'string') meta.branch = p.git.branch;
-      continue;
+      if (typeof p.id === 'string' && !meta.thread) meta.thread = p.id;
+      const parent = p.parent_thread_id ?? p.source?.subagent?.thread_spawn?.parent_thread_id;
+      if (typeof parent === 'string' && parent && !meta.parent) meta.parent = parent;
+      return;
     }
     if (at && !meta.startedAt) meta.startedAt = at;
-    if (kind === 'turn_context' && typeof p.cwd === 'string' && !meta.cwd) meta.cwd = p.cwd;
+    if (kind === 'turn_context') atFolder(meta, p.cwd);
     if (kind === 'event_msg') {
       if (p.type === 'user_message' && typeof p.message === 'string') { sawEvents = true; events.user(p.message, at); }
       else if (p.type === 'agent_message' && typeof p.message === 'string') { sawEvents = true; events.reply(p.message, at); }
-      continue;
+      else if (p.type === 'item_completed' && p.item?.type === 'FileChange') changed(at, changedFiles(p.item));
+      return;
     }
-    if (kind !== 'response_item') continue;
-    if (p.type === 'message' && p.role === 'user') items.user(textOf(p.content, ['input_text', 'text']), at);
+    if (kind !== 'response_item') return;
+    if (p.type === 'message' && p.role === 'user') items.user(codexUserText(p), at);
     else if (p.type === 'message' && p.role === 'assistant') items.reply(textOf(p.content, ['output_text', 'text']), at);
     else if (p.type === 'custom_tool_call' || p.type === 'function_call') {
-      const files = patchFiles(typeof p.input === 'string' ? p.input : typeof p.arguments === 'string' ? p.arguments : '');
-      if (files.length) { events.reply('', at, files); items.reply('', at, files); }
+      const args = patchCall(p); changed(at, args === null ? [] : patchFiles(args));
     }
-  }
+  };
   // A changed file seen before any event is kept with the events too (patches are only response items).
-  return { meta, turns: sawEvents ? events.turns : items.turns };
+  return { push: o => push(o as Row), done: () => ({ meta, turns: sawEvents ? events.turns : items.turns, changes }) };
 }
+export interface SessionParser { push(line: unknown): void; done(): ParsedSession }
 export const parseSession = (tool: SessionTool, lines: unknown[]): ParsedSession => (tool === 'claude' ? parseClaude : parseCodex)(lines);
+export const sessionParser = (tool: SessionTool): SessionParser => (tool === 'claude' ? claudeParser : codexParser)();
+/** One JSON line into a parser (blank or damaged lines are skipped). */
+export function pushLine(parser: SessionParser, line: string) { if (!line.trim()) return; try { parser.push(JSON.parse(line)); } catch { /* skipped */ } }
+
+/** A session with the files its subagents changed, each put in the reply to the prompt that was running when it changed them
+ * (a subagent's own messages are left out: the session that started it says what came of them). */
+export function withSubagents(s: ParsedSession, subagents: ParsedSession[]): ParsedSession {
+  const turns = s.turns.map(t => (t.role === 'assistant' ? { ...t, files: [...(t.files ?? [])] } : t));
+  for (const c of subagents.flatMap(x => x.changes)) {
+    let u = -1;
+    for (let i = 0; i < turns.length; i++) if (turns[i]!.role === 'user' && (!c.at || !turns[i]!.at || turns[i]!.at! <= c.at)) u = i;
+    if (u < 0) continue;
+    let r = turns[u + 1];
+    if (!r || r.role !== 'assistant') { r = { role: 'assistant', at: c.at, text: '', files: [] }; turns.splice(u + 1, 0, r); }
+    for (const f of c.files) if (!r.files!.includes(f)) r.files!.push(f);
+  }
+  return { ...s, turns, changes: [...s.changes, ...subagents.flatMap(x => x.changes)] };
+}
 
 /** JSON lines of a file's text; a damaged line is skipped, and the last one too when the text was cut there (a head read). */
 export function jsonLines(text: string, partialLast = false): unknown[] {
@@ -135,18 +212,23 @@ export function sniffTool(lines: unknown[]): SessionTool | null {
 
 /** Claude Code names a project's folder after its working folder, every character but letters and digits made '-'. */
 export const claudeFolder = (cwd: string) => String(cwd).replace(/[^A-Za-z0-9]/g, '-');
-/** Whether a session's working folder is the folder asked for or inside it. */
+/** A folder path compared as Windows does when it is a Windows path (either separator, any letter case), else as written. */
+function folderKey(path: string): string {
+  const t = String(path).replace(/\\/g, '/').replace(/\/+$/, '');
+  return /^[a-z]:(\/|$)/i.test(t) || t.startsWith('//') ? t.toLowerCase() : t;
+}
+const sameFolder = (a: string, b: string) => folderKey(a) === folderKey(b);
+/** Whether a session's working folder (any of them, when it moved) is the folder asked for or inside it. */
 export function within(cwd: unknown, folder: string | null): boolean {
-  if (typeof cwd !== 'string' || !folder) return false;
-  const a = cwd.replace(/[\\/]+$/, ''), b = String(folder).replace(/[\\/]+$/, '');
-  return a === b || a.startsWith(`${b}/`) || a.startsWith(`${b}\\`);
+  if (!folder) return false;
+  const list = Array.isArray(cwd) ? cwd : [cwd], b = folderKey(folder);
+  return list.some(c => typeof c === 'string' && (folderKey(c) === b || folderKey(c).startsWith(`${b}/`)));
 }
 /** A changed file named relative to the session's working folder when it lies inside it (as the tool would show it). */
 export function shortPath(file: string, cwd: string | null): string {
   if (!cwd) return file;
-  const base = cwd.replace(/[\\/]+$/, '');
-  if (!(file.startsWith(`${base}/`) || file.startsWith(`${base}\\`))) return file;
-  return file.slice(base.length + 1).replace(/\\/g, '/');
+  const f = file.replace(/\\/g, '/'), base = folderKey(cwd), key = folderKey(f);
+  return key.startsWith(`${base}/`) ? f.slice(base.length + 1) : file;
 }
 
 /** A listing row of one parsed session head, or null when it holds no prompt. */
@@ -160,7 +242,7 @@ export function sessionSummary(id: string, tool: SessionTool, head: ParsedSessio
 export function sessionDetail(id: string, tool: SessionTool, s: ParsedSession, limits: Pick<SessionLimits, 'turnChars' | 'replyChars'> = SESSION_LIMITS): SessionDetail & { version: string } {
   const kept: SessionTurn[] = []; let used = 0;
   for (let i = s.turns.length - 1; i >= 0; i--) {
-    const t = s.turns[i]!, text = clip(t.text, limits.turnChars), files = (t.files ?? []).map(x => shortPath(x, s.meta.cwd));
+    const t = s.turns[i]!, text = clip(t.text, limits.turnChars), files = [...new Set((t.files ?? []).map(x => shortPath(x, s.meta.cwds.find(c => shortPath(x, c) !== x) ?? s.meta.cwd)))];
     used += text.length + files.join('').length; if (used > limits.replyChars && kept.length) break;
     kept.unshift({ role: t.role, at: t.at, text, ...(t.role === 'assistant' ? { files } : {}) });
   }

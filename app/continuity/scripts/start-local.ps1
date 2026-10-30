@@ -15,6 +15,12 @@ if (-not $NodePath) {
   else {
     $bundledNode = Join-Path $env:USERPROFILE '.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node.exe'
     if (Test-Path -LiteralPath $bundledNode) { $NodePath = $bundledNode }
+    elseif ($env:LOCALAPPDATA) {
+      # The Codex desktop app keeps its own Node under its runtimes folder (the newest one found is used).
+      $appNode = Get-ChildItem -Path (Join-Path $env:LOCALAPPDATA 'OpenAI\Codex\runtimes') -Filter node.exe -Recurse -ErrorAction SilentlyContinue |
+        Sort-Object LastWriteTime -Descending | Select-Object -First 1
+      if ($appNode) { $NodePath = $appNode.FullName }
+    }
   }
 }
 if (-not $NodePath -or -not (Test-Path -LiteralPath $NodePath)) {
