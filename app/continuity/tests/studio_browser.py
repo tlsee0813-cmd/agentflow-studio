@@ -2744,9 +2744,90 @@ def sessions_flow(browser, base):
     assert "[가려진 비밀값]" in value and "sk-abc" not in value and "SHOULD NOT APPEAR" not in value, value
     assert "(바꾼 파일: src/hours.ts, tests/hours.test.ts)" in value, value
     expect(page.locator("#lens .rr-sessions-note")).to_contain_text("키·토큰처럼 보이는 1곳은 가렸어요")
+    # A second working folder (another repository) joins the same connection; leaving it keeps the first.
     page.locator("#sync-pill").click()
+    page.locator("#sync-panel").get_by_role("button", name="폴더 추가").click()
+    expect(page.locator("#sync-panel h3")).to_have_text("작업 폴더 추가")
+    expect(page.locator("#sync-panel .sync-folder-pick")).to_have_count(0)  # the one folder with sessions is linked already
+    page.locator("#sync-panel .sync-path").fill("/work/salon-api")
+    page.locator("#sync-panel").get_by_role("button", name="연결", exact=True).click()
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon 외 1")
+    page.locator("#sync-pill").click()
+    expect(page.locator("#sync-panel .sync-linked li")).to_have_count(2)
+    expect(page.locator("#sync-panel")).to_contain_text("가져온 기록2개")  # nothing new in the other folder
+    page.locator("#sync-panel").get_by_role("button", name="/work/salon-api 연결 빼기").click()
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon")
     page.locator("#sync-panel").get_by_role("button", name="연결 끊기").click()
     expect(page.locator("#sync-pill")).to_have_text("자동 연결 안 됨")
+    assert not errors, errors
+    context.close()
+
+
+def handover_flow(browser, base):
+    """Handover document (stubbed map reply): a part read from a session record lists that session; its ⋯ menu makes the part's
+    document (its path, scope rule and marker), the range switches to the whole project in place, Esc closes only the document;
+    the bar's button makes the whole project's, saved as a .md file. Nothing is sent to the AI for it."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720}, accept_downloads=True)
+    page = context.new_page()
+    errors, maps = [], []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.on("request", lambda r: maps.append(r.url) if "/api/studio/" in r.url and r.method == "POST" else None)
+    page.goto(base + "/")
+    page.locator("#new-open").click()
+    page.locator("#new-name").fill("인수인계 시험")
+    page.locator("#new-form").get_by_role("button", name="만들기").click()
+    page.locator("#space-empty").get_by_role("button", name="기록 붙여넣기").click()
+    record = ("[Claude Code 세션 기록 · 휴무일 연결 · 작업 폴더 /work/salon · 브랜치 main · 세션 claude-0123456789abcdef01234567]\n\n"
+              "── 사용자 요청 · 09:00 ──\n요구: 휴무일에는 예약을 막는다.\n\n── Claude Code 답변 · 09:05 ──\n작업 보고: 휴무일 예약 버튼을 막았다.\n(바꾼 파일: src/hours.ts)")
+    page.locator("#paste-text").fill(record)
+    page.locator("#lens").get_by_role("button", name="기록 저장").click()
+    page.locator("#space-empty").get_by_role("button", name="기록으로 지도 정리").click()
+    expect(page.locator("#world .node")).to_have_count(2)
+    sent = len(maps)
+    page.locator("#world .node", has_text="스텁 부분 1").click()
+    expect(page.locator("#lens .lens-sessions")).to_have_text("다룬 세션Claude Code 「휴무일 연결」")
+    # The full reading lists it with its folder and branch.
+    page.locator("#lens .lens-more").click()
+    sessions = page.locator("#panel .sec-sessions")
+    expect(sessions).to_contain_text("Claude Code 「휴무일 연결」")
+    expect(sessions).to_contain_text("salon · main")
+    page.locator("#panel").get_by_role("button", name="요약으로 돌아가기").click()
+    # The part's document from its ⋯ menu.
+    page.locator("#lens details.more summary").click()
+    page.locator("#lens").get_by_role("menuitem", name="이 부분 인수인계 문서").click()
+    sheet = page.locator("#handover-sheet")
+    expect(sheet).to_be_visible()
+    text = page.locator("#handover-text")
+    expect(text).to_have_value(re.compile(r"^──────── AgentFlow 인수인계 문서 · af-handover:[A-Z2-9]{6}:A_"))
+    value = text.input_value()
+    assert "# 인수인계: 인수인계 시험 › 스텁 부분 1" in value and '범위는 "스텁 부분 1"' in value, value
+    assert "### 스텁 부분 1" in value and "### 스텁 부분 2" not in value, value
+    assert "Claude Code 「휴무일 연결」 · 작업 폴더 /work/salon · 브랜치 main" in value, value
+    assert "요구: 휴무일에는 예약을 막는다. → 바꾼 파일: src/hours.ts" in value, value
+    code = re.search(r"af-handover:([A-Z2-9]{6})", value).group(1)
+    # The whole project, in place, under the same code.
+    page.locator("#handover-scope").select_option("")
+    expect(text).to_have_value(re.compile("범위: 프로젝트 전체 \\(부분 2개\\)"))
+    whole = text.input_value()
+    assert f"af-handover:{code} " in whole and "### 스텁 부분 1" in whole and "### 스텁 부분 2" in whole, whole
+    page.locator("#handover-sheet").get_by_role("button", name="복사").click()
+    expect(page.locator("#handover-sheet .handover-msg")).to_have_text(re.compile("복사했어요|자동 복사가 막혀 있어요"))
+    page.keyboard.press("Escape")
+    expect(sheet).to_be_hidden()
+    expect(page.locator("#lens-title")).to_have_text("스텁 부분 1")  # Esc closed the document only
+    # From the bar: the whole project, saved as a file.
+    page.locator("#handover-open").click()
+    expect(sheet).to_be_visible()
+    expect(page.locator("#handover-scope")).to_have_value("")
+    with page.expect_download() as dl:
+        page.locator("#handover-sheet").get_by_role("button", name=".md로 저장").click()
+    d = dl.value
+    assert re.fullmatch(r"인수인계 시험-인수인계-[A-Z2-9]{6}\.md", d.suggested_filename), d.suggested_filename
+    saved = open(d.path(), encoding="utf-8").read()
+    assert saved == page.locator("#handover-text").input_value(), "the file is the document as shown"
+    page.locator("#handover-sheet").get_by_role("button", name="닫기").click()
+    expect(sheet).to_be_hidden()
+    assert len(maps) == sent, maps  # making documents sent nothing
     assert not errors, errors
     context.close()
 
@@ -4162,6 +4243,7 @@ def main():
             proc, base = start("fail"); procs.append(proc); question_retry_flow(browser, base); print("ok  failed question retried after another was typed: the retry answers the first, the new one stays in the box")
             proc, base = start("fail"); procs.append(proc); return_failure_flow(browser, base); print("ok  return reading failure -> short error and the material -> asking again")
             proc, base = start("ok", STUDIO_SESSIONS_FIXTURE="1"); procs.append(proc); sessions_flow(browser, base); print("ok  local sessions: connect a folder once -> its sessions become records -> first map without a click; nothing taken twice; one session by hand, key hidden")
+            proc, base = start("ok"); procs.append(proc); handover_flow(browser, base); print("ok  handover document: a part's sessions, its document and the whole project's, copied and saved, nothing sent")
             proc, base = start("nokey"); procs.append(proc); off_flow(browser, base + "/", "AI 키 없음"); print("ok  server without key -> honest off state")
             if (ROOT / "static-dist/index.html").exists():
                 server = serve_static()

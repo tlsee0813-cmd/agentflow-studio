@@ -3,6 +3,7 @@
  * newest turns are kept when the whole session does not fit one record, and credential-like parts are hidden. */
 import { PASTED_TEXT_LIMIT } from './types.js';
 import { redactSecrets } from './secret.js';
+import { foldHandover } from './handover-mark.js';
 
 export interface SessionTurn { role: 'user' | 'assistant'; at: string | null; text: string; files?: string[] }
 export interface SessionSummary { id: string; tool: 'claude' | 'codex'; title: string | null; preview: string; cwd: string | null; branch: string | null; startedAt: string | null; updatedAt: string; bytes: number }
@@ -19,7 +20,8 @@ export function stamp(at: string | null, withDate = false): string {
 function block(t: SessionTurn, tool: string): string {
   const head = `── ${t.role === 'user' ? '사용자 요청' : `${tool} 답변`}${t.at ? ` · ${stamp(t.at)}` : ''} ──`;
   const files = t.role === 'assistant' && t.files?.length ? `\n(바꾼 파일: ${t.files.join(', ')})` : '';
-  return `${head}\n${t.text}${files}`;
+  // A handover document the person pasted to start this session is already the project's own: one line names it instead.
+  return `${head}\n${t.role === 'user' ? foldHandover(t.text) : t.text}${files}`;
 }
 
 export interface SessionText { text: string; turns: number; left: number; redacted: number }
@@ -28,7 +30,7 @@ export interface SessionText { text: string; turns: number; left: number; redact
  * cut at its end, never dropped. */
 export function sessionText(s: SessionDetail, limit = PASTED_TEXT_LIMIT): SessionText {
   const tool = TOOL_NAME[s.tool];
-  const where = [s.title, s.cwd ? `작업 폴더 ${s.cwd}` : null, s.branch ? `브랜치 ${s.branch}` : null, s.startedAt ? `${stamp(s.startedAt, true)} 시작` : null].filter(Boolean).join(' · ');
+  const where = [s.title, s.cwd ? `작업 폴더 ${s.cwd}` : null, s.branch ? `브랜치 ${s.branch}` : null, s.startedAt ? `${stamp(s.startedAt, true)} 시작` : null, `세션 ${s.id}`].filter(Boolean).join(' · ');
   const head = `[${tool} 세션 기록${where ? ` · ${where}` : ''}]`;
   const blocks = s.turns.map(t => { const r = redactSecrets(block(t, tool)); return { text: r.text, redacted: r.count }; });
   const note = (n: number) => (n ? `\n(앞의 대화 ${n}개는 기록 하나의 길이 제한으로 넣지 않았어요.)` : '');

@@ -1526,3 +1526,30 @@ button:disabled { opacity: .5; cursor: default; }
 .sync-manual { display: flex; gap: 6px; }
 .sync-path { flex: 1; min-width: 0; height: 30px; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: var(--r-sm); font: inherit; font-size: 12.5px; }
 .sync-panel .pp-row { display: flex; align-items: center; gap: 10px; }
+
+/* Handover document: a button beside the reading modes, a modal with the range, the text, copy and save. */
+.handover-open { height: 32px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text-2); font-size: 13px; font-weight: 600; white-space: nowrap; }
+.handover-open:hover { border-color: var(--line-strong); color: var(--text); background: var(--surface-2); }
+.handover-sheet { box-sizing: border-box; width: min(760px, calc(100vw - 32px)); max-height: calc(100vh - 48px); padding: 0; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); color: var(--text); box-shadow: var(--shadow-lg); }
+.handover-sheet[open] { display: flex; flex-direction: column; }
+.handover-sheet::backdrop { background: rgba(16,24,40,.32); }
+.handover-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px 8px; }
+.handover-head h2 { margin: 0; font-size: 16px; }
+.handover-head .close { width: 30px; height: 30px; border: 0; border-radius: var(--r-md); background: none; color: var(--text-3); font-size: 20px; line-height: 1; }
+.handover-head .close:hover { background: var(--surface-2); color: var(--text); }
+.handover-lead { margin: 0 18px 10px; color: var(--text-2); font-size: 13px; line-height: 1.6; word-break: keep-all; }
+.handover-scope { display: flex; align-items: center; gap: 8px; margin: 0 18px 10px; font-size: 13px; font-weight: 600; color: var(--text-2); }
+.handover-scope select { min-width: 0; max-width: 100%; height: 32px; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--surface); color: var(--text); font: inherit; font-weight: 500; }
+.handover-text { flex: 1 1 auto; min-height: 240px; margin: 0 18px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface-2); color: var(--text); font: 12.5px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; resize: vertical; white-space: pre-wrap; }
+.handover-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 18px 16px; }
+.handover-msg { margin-left: auto; color: var(--text-3); font-size: 12.5px; }
+.sec-sessions .part-sessions { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.sec-sessions .part-sessions li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; font-size: 13px; }
+.sec-sessions .part-sessions small { color: var(--text-3); }
+@media (max-width: 720px) { .handover-open { padding: 0 8px; font-size: 12px; } .handover-word { display: none; } }
+.lens-sessions { margin: 10px 0 0; font-size: 12.5px; color: var(--text-2); line-height: 1.5; word-break: keep-all; }
+.lens-sessions-label { display: inline-block; margin-right: 6px; font-weight: 650; color: var(--text-3); }
+.sync-linked { margin: 0 0 8px; padding: 0; list-style: none; display: grid; gap: 4px; }
+.sync-linked li { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.sync-linked .sync-folder { margin: 0; }
+.sync-remove { flex: none; font-size: 12px; }

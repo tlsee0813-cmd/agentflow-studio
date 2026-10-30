@@ -113,7 +113,7 @@ test('SESSIONS-T1 record text: header, turns in order with files, credentials hi
     const list = readSessionList(await sessions.list());
     const detail = readSessionDetail(await sessions.read(list[0].id));
     const got = sessionText(detail);
-    assert.match(got.text, /^\[Claude Code 세션 기록 · 휴무일 연결 · 작업 폴더 \/work\/salon · 브랜치 main · \d{4}-\d{2}-\d{2} \d{2}:\d{2} 시작\]\n\n── 사용자 요청 · \d{2}:\d{2} ──\n/);
+    assert.match(got.text, /^\[Claude Code 세션 기록 · 휴무일 연결 · 작업 폴더 \/work\/salon · 브랜치 main · \d{4}-\d{2}-\d{2} \d{2}:\d{2} 시작 · 세션 claude-[0-9a-f]{24}\]\n\n── 사용자 요청 · \d{2}:\d{2} ──\n/);
     assert.ok(got.text.includes(`${CLAUDE_PROMPT}\n\n── Claude Code 답변`));
     assert.ok(got.text.includes('(바꾼 파일: src/hours.ts, tests/hours.test.ts)'));
     assert.ok(got.text.indexOf(CLAUDE_PROMPT) < got.text.indexOf('/review hours.ts'));

@@ -22,6 +22,8 @@ import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-sour
 import { createPlanView } from './plan-view.js';
 import { createReturnView, type Scene, type ReadingContext } from './return-view.js';
 import { createAutoSync } from './auto-sync.js';
+import { createHandoverView } from './handover-view.js';
+import { partSessions, originLabel } from '../shared/handover.js';
 import { UI62_KEY, buildUi62Project, ui62Keys } from '../shared/return-material.js';
 import { REL_LABEL, relationGroups, dirMark, dirTitle, insideEnds } from '../shared/relation-groups.js';
 
@@ -1379,7 +1381,8 @@ function renderLens() {
     o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', onclick: () => { editing = true; openSheet(() => document.getElementById('edit-name')?.focus()); } }, '이름·설명 고치기') : null,
     o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null,
     o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '이 부분을 보던 맥락으로 원문을 붙여 넣어요', onclick: () => openPaste(part.id) }, '기록 붙여넣기') : null,
-    o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요 (이 부분은 읽기 맥락일 뿐이에요)', onclick: () => openFile(part.id) }, '코드·검사 자료 추가') : null
+    o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요 (이 부분은 읽기 맥락일 뿐이에요)', onclick: () => openFile(part.id) }, '코드·검사 자료 추가') : null,
+    o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', title: '이 부분을 새 세션에 넘길 문서를 만들어요', onclick: () => handover.open(part.id, document.querySelector<HTMLElement>('#lens details.more summary')) }, '이 부분 인수인계 문서') : null
   ].filter((x): x is HTMLButtonElement => !!x);
   l.classList.remove('compare', 'scope-read'); readingFor = [];
   l.replaceChildren(); put(l, entry,
@@ -1392,7 +1395,7 @@ function renderLens() {
         h('button', { type: 'button', class: 'rail-toggle', 'aria-label': '읽기면 접기', 'aria-expanded': 'true', title: '읽기면 접기 · 지도를 넓게 봐요', onclick: () => setRail(true) }, railIcon(true)),
         h('button', { type: 'button', class: 'close', 'aria-label': '선택 해제', title: '닫기 (Esc)', onclick: () => go(o.key) }, '×'))),
     // The current statements read right after the description they may qualify; the lines to other parts follow them.
-    h('div', { class: 'lens-body' }, desc, claims, ...ports, requested, innerSection, inside),
+    h('div', { class: 'lens-body' }, desc, claims, sessionsLine(o.project, part.id), ...ports, requested, innerSection, inside),
     h('footer', { class: 'lens-foot' },
       h('button', { type: 'button', class: 'lens-more', onclick: () => openSheet() }, records.length ? `근거·기록 ${records.length}` : '전체 읽기', thread ? ` · 정리 ${thread}` : '', h('span', { 'aria-hidden': 'true' }, ' ›')),
       status.ai === 'deepseek' ? h('button', { type: 'button', class: 'link-button', onclick: () => { composerOpen = true; openSheet(() => document.getElementById(status.access === 'code' && !sessionCode() ? 'access-code' : 'ask-input')?.focus()); } }, '질문하기') : null));
@@ -1400,6 +1403,12 @@ function renderLens() {
   clampNotes(l, o, part.id);
 }
 
+/** The AI sessions behind a part, in one line under what was read (the full reading lists them with their folder and branch). */
+function sessionsLine(project: Project, partId: string): HTMLElement | null {
+  const list = partSessions(project, partId); if (!list.length) return null;
+  return h('p', { class: 'lens-sessions', title: '이 부분의 근거가 된 기록을 남긴 세션, 또는 인수인계 문서로 이 부분을 이어받은 세션' },
+    h('span', { class: 'lens-sessions-label' }, '다룬 세션'), list.slice(0, 3).map(x => `${originLabel(x)}${x.tookOver ? ' · 이어받음' : ''}`).join(', '), list.length > 3 ? h('small', {}, ` 외 ${list.length - 3}`) : null);
+}
 /** Selection on the map: the part, its lines and the parts at their other ends (drawn representative or side ghost). */
 function markSelection(partId: string | null) {
   // The scope itself, selected in place, is drawn as its own boundary card (the '이 범위' end of its lines).
@@ -1556,6 +1565,12 @@ function renderPanel(scrollTop: boolean) {
     })));
     body.append(rel);
   }
+  // The AI sessions behind this part: the ones whose records the map quotes for it, and the ones that took it over by a handover.
+  const sessions = partSessions(o.project, part.id);
+  if (sessions.length) body.append(h('section', { class: 'sec sec-sessions' }, h('h3', {}, '다룬 세션 ', h('small', {}, `${sessions.length}`)),
+    h('ul', { class: 'part-sessions' }, ...sessions.slice(0, 6).map(x => h('li', {},
+      h('strong', {}, originLabel(x)), x.tookOver ? h('span', { class: 'chip plain' }, '인수인계로 이어받음') : null,
+      h('small', {}, [x.cwd ? x.cwd.split(/[\\/]/).filter(Boolean).at(-1) : null, x.branch, `기록 ${ago(x.lastAt)}`].filter(Boolean).join(' · ')))))));
   // What to do next with this part: going inside is explicit, never a side effect of selecting.
   if (part.childIds.length && part.id !== scope) body.append(h('div', { class: 'sec-acts' },
     h('button', { type: 'button', class: 'secondary go-in', onclick: () => go(o.key, null, part.id) }, `안으로 들어가기 · ${part.childIds.length}`, h('span', { 'aria-hidden': 'true' }, ' ›'))));
@@ -1916,6 +1931,7 @@ const mapRun = createMapRun({
 let jobReservations: JobReservations | null = null;
 
 /* ---------- automatic connection to a working folder's Claude Code / Codex sessions (auto-sync.ts) ---------- */
+const handover = createHandoverView({ current: () => opened });
 const autoSync = createAutoSync({
   current: () => opened,
   status: () => status,
@@ -2417,6 +2433,7 @@ function bindCanvas() {
   });
   document.addEventListener('keydown', e => {
     if ((e.target as HTMLElement).closest('textarea,select,input:not([type=checkbox]):not([type=radio])')) return; // Esc still works from a checkbox
+    if (handover.isOpen()) return; // the handover document is modal: its own Esc closes it and nothing under it
     // The wide reading is over everything (its own keys handle Esc inside it; this is focus left on the page).
     if (wide.isOpen()) { if (e.key === 'Escape') wide.escape(); return; }
     // Innermost first: an open ⋯ menu closes before anything else, and focus goes back to its button.
@@ -2521,6 +2538,7 @@ async function main() {
   bindCanvas(); bindFind(); bindImport(); bindNewProject();
   $('add-part').addEventListener('click', () => openPartForm(scope));
   $('plan-entry').addEventListener('click', () => planView.toggle());
+  $('handover-open').addEventListener('click', e => handover.open(scope, e.currentTarget as HTMLElement));
   $('return-entry').addEventListener('click', () => { if (returnView.isOpen() && !planView.isOpen()) returnView.close(); else openReturn(); });
   statusReady = aiStatus().then(s => { status = s; renderStatus(); renderRelease(); planView.statusChanged(); refreshReading(); statusArrived(); if (!selected && !planView.isOpen()) returnView.render(); mapRun.resume(); autoSync.opened(); autoSync.start(); });
   $('sync-pill').addEventListener('click', () => autoSync.toggle());
