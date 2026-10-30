@@ -265,7 +265,8 @@ test('SESSIONS-D4 a long file is listed by what lies past its head: a first prom
 test('SESSIONS-K1 ids come from the session itself (same on the server and in the page), the path-made id is an alias; since leaves out what was taken', async () => {
   const P = await import('../dist/public/shared/session-parse.js');
   const { createHash } = await import('node:crypto');
-  const { realpathSync } = await import('node:fs');
+  // The server's own realpath (native: on Windows a temp folder's short 8.3 name comes back long, unlike realpathSync).
+  const { realpath } = await import('node:fs/promises');
   const dir = home();
   try {
     const roots = writeSessionHome(dir), day = join(roots.codex, 'sessions', '2026', '10', '29'); mkdirSync(day, { recursive: true });
@@ -275,7 +276,7 @@ test('SESSIONS-K1 ids come from the session itself (same on the server and in th
     assert.equal(parent.id, await P.sessionId('codex', `codex:${PARENT}`), 'a Codex id is its thread id');
     const claude = list.find(x => x.tool === 'claude');
     assert.match(claude.id, SESSION_ID);
-    const real = realpathSync(join(day, 'rollout-2026-10-29T10-00-00-parent.jsonl'));
+    const real = await realpath(join(day, 'rollout-2026-10-29T10-00-00-parent.jsonl'));
     assert.deepEqual(parent.aliases, [`codex-${createHash('sha256').update(real).digest('hex').slice(0, 24)}`]);
     assert.deepEqual(readSessionList({ version: 'sessions.1', sessions: [parent] })[0].aliases, parent.aliases);
     // since: turns before it are left out and do not count as omitted.
