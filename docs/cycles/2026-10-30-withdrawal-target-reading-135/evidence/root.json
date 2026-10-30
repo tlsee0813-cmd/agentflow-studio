@@ -1,0 +1,142 @@
+{
+  "code": "73f6f253e8ce9921504011b7281584955d41716d",
+  "appTree": "3960c16dbaf229f6100291f0252b34c50301cf33",
+  "checks": [
+    {
+      "name": "check",
+      "code": 0,
+      "log": "check.log"
+    },
+    {
+      "name": "build",
+      "code": 0,
+      "log": "build.log"
+    },
+    {
+      "name": "related-tests",
+      "code": 0,
+      "log": "related-tests.log"
+    }
+  ],
+  "runtime": "Windows Node24.19.0; app locked TypeScript5.8.3",
+  "ui": {
+    "mode": "Root CUA normal backup import on keyless candidate localhost51920",
+    "viewport": [
+      1280,
+      720
+    ],
+    "synthetic": {
+      "source": "author135 fixture exported without browser execution",
+      "normalImport": true,
+      "fullLedgerHiddenPrior": "R_135_first/0",
+      "repeatedQuoteOffset": 114,
+      "narrowAndWideSourceBack": true,
+      "sameOpenerVisible": true,
+      "readOnlyStoresByteExact": true,
+      "crossRequestRetarget": {
+        "from": "Q1/I1",
+        "to": "Q2/I1 same title",
+        "originalContextRetained": true,
+        "currentAttributionSeparate": true,
+        "q2OriginalPositiveRetained": true,
+        "onlyOneCorrectionAppended": true,
+        "otherProjectFieldsUnchanged": true,
+        "reloadByteExact": true
+      },
+      "horizontalOverflow": 0
+    },
+    "actual": {
+      "source": "original accepted121 project; no regeneration",
+      "sourceSha": "5ce98865fdb4eda198d7c04c2fe6f9722a7ff09a61ba4dd83c85c4f21c2a2394",
+      "normalImportFullProjectExact": true,
+      "request": "RQ_0797ee20-a84e-4aa7-ace6-b4f053ca87f7",
+      "cards": 14,
+      "unlinkedWithdrawalUI": 0,
+      "exactCodeSourceBack": {
+        "reading": "R_14df4bf5-804b-4694-9ff3-aefac833df1b",
+        "index": 5,
+        "from": 1969,
+        "to": 2282,
+        "visible": true
+      },
+      "storeReadReloadByteExact": true
+    },
+    "network": {
+      "post": 0,
+      "truncated": false
+    },
+    "screenshots": [
+      "narrow.jpg",
+      "wide.jpg",
+      "retarget-other-request.jpg",
+      "actual-code-source.jpg"
+    ]
+  },
+  "authorOnly": {
+    "focusedFixture": 6,
+    "connected126": 19,
+    "baselineDifferentiation": "5 checks fail base; rail P not run on base",
+    "noRootClaimOfRerunningAuthorFlows": true
+  },
+  "newAI": 0,
+  "limitations": [
+    "new withdrawal UI is tested on labelled synthetic boundary data, not newly model-produced withdrawal",
+    "actual121 read-only regression does not prove new generation quality",
+    "link removed concurrently while its target original is open was not directly observed"
+  ],
+  "publicDeployment": false,
+  "ci": {
+    "run": 40995004476,
+    "head": "73f6f253e8ce9921504011b7281584955d41716d",
+    "jobs": [
+      {
+        "id": 123865962855,
+        "name": "verify (windows-2022)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 123865962948,
+        "name": "verify (ubuntu-24.04)",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "linux": {
+      "job": 123865962948,
+      "head": "73f6f253e8ce9921504011b7281584955d41716d",
+      "exactHeadObserved": true,
+      "lines": [
+        "2026-10-30T03:03:50.7861090Z # tests 279",
+        "2026-10-30T03:03:50.7861385Z # pass 279",
+        "2026-10-30T03:03:50.7861528Z # fail 0",
+        "2026-10-30T03:03:50.7861669Z # skipped 0",
+        "2026-10-30T03:05:26.0780281Z # tests 650",
+        "2026-10-30T03:05:26.0780419Z # pass 650",
+        "2026-10-30T03:05:26.0780486Z # fail 0",
+        "2026-10-30T03:05:26.0780629Z # skipped 0",
+        "2026-10-30T03:05:33.9218132Z {\"phase\":\"prepared\",\"source\":\"73f6f253e8ce9921504011b7281584955d41716d\",\"worker\":\"agentflow-studio\",\"policy\":null,\"assets\":54,\"modules\":26,\"bytes\":1270098,\"dryRun\":true}"
+      ]
+    },
+    "windows": {
+      "job": 123865962855,
+      "head": "73f6f253e8ce9921504011b7281584955d41716d",
+      "exactHeadObserved": true,
+      "lines": [
+        "2026-10-30T03:04:56.8081770Z # tests 279\r",
+        "2026-10-30T03:04:56.8082089Z # pass 279\r",
+        "2026-10-30T03:04:56.8082244Z # fail 0\r",
+        "2026-10-30T03:04:56.8082564Z # skipped 0\r",
+        "2026-10-30T03:06:32.9095681Z # tests 650\r",
+        "2026-10-30T03:06:32.9095816Z # pass 647\r",
+        "2026-10-30T03:06:32.9095882Z # fail 0\r",
+        "2026-10-30T03:06:32.9096020Z # skipped 3\r",
+        "2026-10-30T03:06:45.5431279Z {\"phase\":\"prepared\",\"source\":\"73f6f253e8ce9921504011b7281584955d41716d\",\"worker\":\"agentflow-studio\",\"policy\":null,\"assets\":54,\"modules\":26,\"bytes\":1270098,\"dryRun\":true}\r"
+      ]
+    }
+  },
+  "independent": {
+    "sha256": "05a10f05e8cc1630010f794127a85bce7be23802f9f40082eed5697f266a48ca",
+    "verdict": "BOUNDED_STATIC_DELTA_PASS_NO_CONFIRMED_P1_P2"
+  }
+}
