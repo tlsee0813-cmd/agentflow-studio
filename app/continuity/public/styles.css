@@ -28,6 +28,7 @@
   --label: 650 11.5px/16px var(--font); --label-track: .03em;
   --font: system-ui, -apple-system, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
   --insp-w: clamp(336px, 27vw, 392px);
+  --download: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 2.5v7.5M4.75 6.9 8 10.1l3.25-3.2M3 13h10'/%3E%3C/svg%3E");
   --dots: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='3.5' cy='8' r='1.35'/%3E%3Ccircle cx='8' cy='8' r='1.35'/%3E%3Ccircle cx='12.5' cy='8' r='1.35'/%3E%3C/svg%3E");
   color-scheme: light;
 }
@@ -148,7 +149,7 @@ button:disabled { opacity: .5; cursor: default; }
 .program-section small { color: var(--text-4); font-size: 12px; }
 .program-section .quiet { color: var(--text-3); }
 .program-section .more a { justify-content: center; align-items: center; font-size: 12.5px; font-weight: 600; color: var(--text-3); background: none; border-style: dashed; border-color: var(--line); }
-.program-empty { margin: 0; font-size: 13px; color: var(--text-3); }
+.program-empty { margin: 0; padding: 10px var(--s-3); border: 1px dashed var(--line-strong); border-radius: var(--r-md); background: var(--surface-2); font-size: 13px; line-height: 18px; color: var(--text-3); word-break: keep-all; }
 .program-continue, .program-try { align-self: stretch; display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px var(--s-2); min-height: 36px; padding: 8px var(--s-3); border: 1px solid transparent; border-radius: var(--r-md); text-decoration: none; font-size: 13px; line-height: 18px; }
 .program-continue { background: var(--accent-soft); border-color: #d6e1f8; color: var(--accent); }
 .program-continue strong { font-weight: 650; } .program-continue small { color: var(--text-3); }
@@ -830,6 +831,16 @@ button:disabled { opacity: .5; cursor: default; }
   .recent { width: calc(100% - 32px); }
   .home-foot { flex-direction: column; align-items: flex-start; }
 }
+/* Phone-narrow windows: the path keeps its row beside the brand and the reading modes take a second row of their own,
+   instead of pushing the path out of the bar. */
+@media (max-width: 600px) {
+  .app { grid-template-rows: auto 1fr; }
+  .bar { flex-wrap: wrap; row-gap: 6px; min-height: 52px; padding: 10px var(--s-3); }
+  .context { flex: 1 1 0; }
+  .modebar:not([hidden]) { order: 3; flex: 1 0 100%; display: flex; }
+  .modebar .mode-seg { flex: 1; }
+  .modebar .mode-seg .plan-entry { flex: 1; }
+}
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 
 /* The scope's name when its title on the map is out of view. */
@@ -1052,7 +1063,10 @@ button:disabled { opacity: .5; cursor: default; }
 .rr-mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 1px; box-shadow: 0 0 0 1px var(--mark-line); }
 .rr-raw { max-height: none; font-size: 13px; }
 .rr-kind.k-record { background: var(--record-soft); color: var(--record-text); }
-.program-backup { align-self: flex-start; font-size: 12px; }
+/* The backup is a real control, quiet but clearly pressable: a small outlined button with its download mark, at the card's foot. */
+.program-backup { align-self: flex-start; margin-top: auto; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 8px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); font-size: 12px; transition: border-color .12s, background .12s; }
+.program-backup::before { content: ""; flex: none; width: 14px; height: 14px; background: currentColor; -webkit-mask: var(--download) center / 14px no-repeat; mask: var(--download) center / 14px no-repeat; }
+.program-backup:hover { border-color: var(--line-strong); background: var(--surface-2); color: var(--text); text-decoration: none; }
 .rr-foot { flex-direction: column; align-items: stretch; gap: 6px; padding-top: 9px; padding-bottom: 10px; }
 .rr-foot .pp-row { margin-top: 0; }
 .rr-prov { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 12px; color: var(--text-3); }
