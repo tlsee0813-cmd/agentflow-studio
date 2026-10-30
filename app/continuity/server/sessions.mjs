@@ -14,14 +14,22 @@ import { createInterface } from 'node:readline';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { ApiError } from '../../server/errors.mjs';
-import { SESSION_VERSION, SESSION_LIMITS, SESSION_ID, parseClaude, parseCodex, parseSession, sessionParser, pushLine, jsonLines, withSubagents, claudeFolder, within, sessionSummary, sessionDetail } from '../dist/public/shared/session-parse.js';
+import { SESSION_VERSION, SESSION_LIMITS, SESSION_ID, parseClaude, parseCodex, parseSession, sessionParser, pushLine, jsonLines, withSubagents, tailFolders, hasPrompt, atFolder, claudeFolder, within, sessionSummary, sessionDetail } from '../dist/public/shared/session-parse.js';
 
 export { SESSION_VERSION, SESSION_LIMITS, SESSION_ID, parseClaude, parseCodex, claudeFolder, within };
 
-async function readHead(path, bytes) {
+async function readHead(path, bytes, from = 0) {
   const h = await open(path, 'r');
-  try { const buf = Buffer.alloc(bytes); const { bytesRead } = await h.read(buf, 0, bytes, 0); return buf.subarray(0, bytesRead).toString('utf8'); }
+  try { const buf = Buffer.alloc(bytes); const { bytesRead } = await h.read(buf, 0, bytes, from); return buf.subarray(0, bytesRead).toString('utf8'); }
   finally { await h.close(); }
+}
+/** What a listing knows of a file: its head (read further while no prompt is in it), with the folders named at its end. */
+async function readListed(tool, path, size, limits) {
+  let parsed = parseSession(tool, jsonLines(await readHead(path, limits.headBytes), size > limits.headBytes));
+  const more = limits.promptBytes ?? SESSION_LIMITS.promptBytes, tail = limits.tailBytes ?? SESSION_LIMITS.tailBytes;
+  if (!hasPrompt(parsed) && size > limits.headBytes) parsed = parseSession(tool, jsonLines(await readHead(path, more), size > more));
+  if (size > limits.headBytes) for (const c of tailFolders(await readHead(path, tail, Math.max(0, size - tail)))) atFolder(parsed.meta, c);
+  return parsed;
 }
 /** A whole session read line by line into the tool's parser: a file of hundreds of MB is never held whole. */
 async function readParsed(tool, path) {
@@ -67,8 +75,7 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
     for (const f of found.slice(0, limits.scan ?? 400)) {
       if (out.length >= limits.list) break;
       let real; try { real = await realpath(f.path); } catch { continue; }
-      let head; try { head = await readHead(real, limits.headBytes); } catch { continue; }
-      const parsed = parseSession(f.tool, jsonLines(head, f.size > limits.headBytes));
+      let parsed; try { parsed = await readListed(f.tool, real, f.size, limits); } catch { continue; }
       const id = idOf(f.tool, real), row = sessionSummary(id, f.tool, parsed, new Date(f.mtime).toISOString(), f.size, limits); if (!row) continue;
       known.set(id, { tool: f.tool, path: real }); next.set(id, { tool: f.tool, path: real });
       if (folder && !within(parsed.meta.cwds, folder)) continue;

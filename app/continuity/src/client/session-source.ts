@@ -6,7 +6,7 @@
  * click, before the page can read them on a later visit. A single file chosen by hand works in every browser. */
 import { listSessions, readSession, type AiStatus } from './studio-api.js';
 import { readSessionList, readSessionDetail, type SessionDetail, type SessionSummary } from '../shared/session-import.js';
-import { SESSION_LIMITS, jsonLines, parseSession, sessionParser, pushLine, withSubagents, sniffTool, sessionSummary, sessionDetail, sessionId, within, type ParsedSession, type SessionTool } from '../shared/session-parse.js';
+import { SESSION_LIMITS, jsonLines, parseSession, sessionParser, pushLine, withSubagents, tailFolders, hasPrompt, atFolder, sniffTool, sessionSummary, sessionDetail, sessionId, within, type ParsedSession, type SessionTool } from '../shared/session-parse.js';
 
 export interface SessionSource { kind: 'server' | 'folder'; list(folder?: string | null): Promise<SessionSummary[]>; read(id: string): Promise<SessionDetail> }
 export type FolderState = 'unsupported' | 'none' | 'prompt' | 'granted';
@@ -125,7 +125,10 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
           const partial = f.file.size > SESSION_LIMITS.headBytes, lines = jsonLines(await f.file.slice(0, SESSION_LIMITS.headBytes).text(), partial);
           const tool = f.tool ?? sniffTool(lines);
           if (!tool) { heads.set(f.path, { key, row: null, cwds: [] }); continue; }
-          const parsed = parseSession(tool, lines);
+          let parsed = parseSession(tool, lines);
+          // Read further while the head holds no prompt yet, and the end of the file for a folder the session moved to late.
+          if (!hasPrompt(parsed) && partial) parsed = parseSession(tool, jsonLines(await f.file.slice(0, SESSION_LIMITS.promptBytes).text(), f.file.size > SESSION_LIMITS.promptBytes));
+          if (partial) for (const c of tailFolders(await f.file.slice(Math.max(0, f.file.size - SESSION_LIMITS.tailBytes)).text())) atFolder(parsed.meta, c);
           row = sessionSummary(await sessionId(tool, f.path), tool, parsed, new Date(f.file.lastModified).toISOString(), f.file.size);
           cwds = parsed.meta.cwds; heads.set(f.path, { key, row, cwds });
         }

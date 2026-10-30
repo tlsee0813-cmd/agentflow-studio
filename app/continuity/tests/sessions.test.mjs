@@ -241,3 +241,23 @@ test('SESSIONS-D3 a Claude Code session that moved folders is found under each; 
     for (const f of ['/tmp/scratch', '/work/salon']) assert.ok((await sessions.list(f)).sessions.some(x => x.preview === '시작'), f);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
+
+test('SESSIONS-D4 a long file is listed by what lies past its head: a first prompt in a line too long for it, a folder the session moved to at its end', async () => {
+  const dir = home();
+  try {
+    const roots = writeSessionHome(dir), limits = { list: 60, scan: 400, headBytes: 4096, promptBytes: 64 * 1024, tailBytes: 2048, fileBytes: 1e8, turnChars: 20000, replyChars: 300000, preview: 160 };
+    const day = join(roots.codex, 'sessions', '2026', '10', '29'); mkdirSync(day, { recursive: true });
+    writeFileSync(join(day, 'rollout-2026-10-29T11-00-00-img.jsonl'), [desktopMeta('img'),
+      desktopUser(1, [['plugins.recommendations', '<recommended_plugins>a</recommended_plugins>'], ['environments.environment_context', '<environment_context>b</environment_context>']]),
+      desktopUser(2, [['user.image', `<image>${'A'.repeat(20000)}</image>`], ['user.text', '이 화면대로 바꿔 줘']])].map(r => JSON.stringify(r)).join('\n'));
+    const p = join(roots.claude, 'projects', '-tmp-scratch'); mkdirSync(p, { recursive: true });
+    const rows = [{ type: 'user', cwd: '/tmp/scratch', timestamp: at(1), message: { role: 'user', content: '시작 ' + '가'.repeat(3000) } }];
+    for (let i = 0; i < 20; i++) rows.push({ type: 'assistant', cwd: '/tmp/scratch', timestamp: at(2), message: { role: 'assistant', content: [{ type: 'text', text: '진행 '.repeat(100) }] } });
+    rows.push({ type: 'relocated', sessionId: 'x', relocatedCwd: '/work/moved' }, { type: 'user', cwd: '/work/moved', timestamp: at(3), message: { role: 'user', content: '이어서' } });
+    writeFileSync(join(p, 'late.jsonl'), rows.map(r => JSON.stringify(r)).join('\n'));
+    const sessions = openSessions({ env: {}, roots, limits });
+    assert.ok((await sessions.list()).sessions.some(x => x.preview === '이 화면대로 바꿔 줘'), 'first prompt past the head');
+    const moved = (await sessions.list('/work/moved')).sessions;
+    assert.equal(moved.length, 1); assert.ok(moved[0].preview.startsWith('시작')); assert.equal(moved[0].cwd, '/work/moved');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});

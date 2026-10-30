@@ -7,7 +7,9 @@ import type { SessionDetail, SessionSummary, SessionTurn } from './session-impor
 
 export const SESSION_VERSION = 'sessions.1';
 // fileBytes: a long agent session runs to hundreds of MB (tool output it never shows); it is read line by line, never held whole.
-export const SESSION_LIMITS = Object.freeze({ list: 60, scan: 400, headBytes: 256 * 1024, fileBytes: 2 * 1024 * 1024 * 1024, turnChars: 20000, replyChars: 300000, preview: 160 });
+// headBytes is read to list a file; promptBytes when the head holds no prompt yet (a first prompt can carry pasted images);
+// tailBytes from the end, for a working folder a long session moved to late.
+export const SESSION_LIMITS = Object.freeze({ list: 60, scan: 400, headBytes: 256 * 1024, promptBytes: 8 * 1024 * 1024, tailBytes: 64 * 1024, fileBytes: 2 * 1024 * 1024 * 1024, turnChars: 20000, replyChars: 300000, preview: 160 });
 export type SessionLimits = typeof SESSION_LIMITS;
 export const SESSION_ID = /^(claude|codex)-[0-9a-f]{24}$/;
 export type SessionTool = 'claude' | 'codex';
@@ -16,7 +18,7 @@ const TOOL_LABEL: Record<SessionTool, string> = { claude: 'Claude Code', codex: 
  * thread / parent: Codex's own id of the session and, for a subagent it started, the id of the session that started it. */
 export interface SessionMeta { cwd: string | null; cwds: string[]; branch: string | null; startedAt: string | null; title: string | null; thread: string | null; parent: string | null }
 const newMeta = (): SessionMeta => ({ cwd: null, cwds: [], branch: null, startedAt: null, title: null, thread: null, parent: null });
-function atFolder(meta: SessionMeta, cwd: unknown) {
+export function atFolder(meta: SessionMeta, cwd: unknown) {
   if (typeof cwd !== 'string' || !cwd) return;
   meta.cwd = cwd; if (!meta.cwds.some(c => sameFolder(c, cwd))) meta.cwds.push(cwd);
 }
@@ -176,6 +178,16 @@ export const parseSession = (tool: SessionTool, lines: unknown[]): ParsedSession
 export const sessionParser = (tool: SessionTool): SessionParser => (tool === 'claude' ? claudeParser : codexParser)();
 /** One JSON line into a parser (blank or damaged lines are skipped). */
 export function pushLine(parser: SessionParser, line: string) { if (!line.trim()) return; try { parser.push(JSON.parse(line)); } catch { /* skipped */ } }
+
+/** Working folders named in the last lines of a file (text read from somewhere inside it: its first, cut line is skipped). */
+export function tailFolders(text: string): string[] {
+  const out: string[] = [];
+  for (const o of jsonLines(text.slice(text.indexOf('\n') + 1)) as Row[])
+    for (const c of [o?.cwd, o?.relocatedCwd, o?.payload?.cwd]) if (typeof c === 'string' && c && !out.some(x => sameFolder(x, c))) out.push(c);
+  return out;
+}
+/** Whether a parsed head holds a prompt (a listing row needs one). */
+export const hasPrompt = (s: ParsedSession) => s.turns.some(t => t.role === 'user');
 
 /** A session with the files its subagents changed, each put in the reply to the prompt that was running when it changed them
  * (a subagent's own messages are left out: the session that started it says what came of them). */
