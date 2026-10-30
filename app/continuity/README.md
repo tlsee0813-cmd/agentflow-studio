@@ -36,6 +36,24 @@ node --env-file-if-exists=.env continuity/server/index.mjs
 
 Windows에서 빌드가 이미 있다면 PowerShell로 `./continuity/scripts/start-local.ps1`을 실행할 수 있습니다. `app/.env`를 읽고 백그라운드에서 실행한 뒤 `http://127.0.0.1:4317`을 엽니다. 키 파일을 다른 비공개 위치에 보관했다면 `-EnvFile 'C:\private\studio.env'`를 지정합니다. 기존 Node 또는 Codex에 설치된 Node를 재사용하며 패키지를 설치하지 않습니다. 이미 같은 포트의 Studio가 실행 중이면 다시 띄우지 않습니다. 브라우저 저장은 주소별이므로 같은 포트를 계속 사용하세요.
 
+### PC에서 설치된 Codex로 지도 정리하기 (선택)
+
+이 PC에 이미 설치·로그인된 Codex CLI로 첫 지도와 이후 기록 대조를 하려면 `start-local.ps1` 대신 아래를 실행합니다(`app/` 디렉터리, 빌드 후). 정책 파일을 쓸 필요가 없습니다.
+
+```powershell
+./continuity/scripts/start-pc.ps1                          # 시작(이미 실행 중이면 다시 열기), 브라우저가 열림
+./continuity/scripts/start-pc.ps1 -CodexPath 'C:\…\codex.exe'  # codex.exe를 찾지 못했다고 하면 경로를 알려 주기
+./continuity/scripts/start-pc.ps1 -Stop                    # 종료
+```
+
+- 주소는 `http://127.0.0.1:4327`입니다(기본 DeepSeek 실행 4317과 다른 주소). 브라우저 저장은 주소별이라 4317에서 만든 프로젝트는 여기에서 보이지 않습니다. 옮기려면 백업 파일로 내보내고 가져오세요.
+- 허용된 Codex(codex-cli 0.165.0-alpha.1.2, 정해진 SHA-256)만 씁니다. 다른 판본이면 설명하고 시작하지 않습니다. 설치·업데이트·다운로드·로그인·계정 변경은 하지 않습니다. 모델(gpt-6.1-sol, high)·권한·시간(299초 선택/300초 판정)은 고정이며 고를 수 없습니다.
+- 시작·다시 열기·종료는 생성 요청을 보내지 않습니다. 지도 정리는 화면에서 ‘기록으로 지도 정리’를 누를 때만 합니다.
+- 4327에 다른 서버가 있으면 이 입구로 착각하지 않고 멈춥니다(`-Port`로 다른 포트 선택). 다른 프로세스를 끝내거나 작업 기록·실행 잠금을 지우지 않습니다.
+- 지도 정리가 실행 중이면 `-Stop`은 종료하지 않습니다. 결과 없이 중단해도 되면 `-Stop -InterruptRunning`.
+- 이전 실행이 끝났는지 확인되지 않으면(예: PC가 갑자기 꺼짐) 새 지도 정리는 막힌 채로 시작하고 그렇게 알려 줍니다. 이미 받은 결과는 읽을 수 있습니다.
+- `app/.env`에 DeepSeek 키가 있으면 질문·변경 구상 등 다른 기능에 쓰고, 없으면 그 기능만 꺼집니다(지도 정리와 무관).
+
 ## Studio API
 
 `server/studio.mjs`의 `createStudioHandler({ env })`는 표준 `(Request) => Promise<Response>`입니다. `node:` import가 없습니다.

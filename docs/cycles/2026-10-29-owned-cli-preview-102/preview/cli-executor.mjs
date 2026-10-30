@@ -104,18 +104,22 @@ const hashFile = file => new Promise(res => { const h = createHash('sha256'); cr
  * binary at policy.exe has policy.binarySha256 and its --version probe (a child like any other) says policy.version.
  * hooks (tests only): beforeSpawn(), beforeFinalRead().
  */
+/** The policy identity a job is bound to (binding.policy), from a policy file's content; pure, nothing is opened. AF128: a launcher
+ * tells its own running server from another one by it. The policy hash of a 'first' policy is the one it had before AF112 (scope
+ * is left out of it then); 'map6-later' and 'map7-later' are in it. */
+export function policyHash(raw) {
+  const policy = readPolicy(raw), { scope: _scope, ...hashed } = policy;
+  return sha(canon({ ...hashed, ...(policy.scope !== 'first' ? { scope: policy.scope } : {}), limits: canon(policy.limits), wrapper: WRAPPER_SHA256 }));
+}
+
 export async function openCliExecutor({ policy: raw, stateDir: given, spawnImpl, now = () => performance.now(), log = () => {}, termMs, closeMs, versionMs = 10000, hooks = {} }) {
   const policy = readPolicy(raw);
   // Absolute once, against the caller's working folder now: every path given to a child ({cwd}, {final}) must name the same place
   // from the child's own working folder (a relative --state would otherwise nest under it).
   const stateDir = resolve(given);
   const permissions = sha(JSON.stringify(policy.args)); // the argument template carries sandbox, config and tool settings
-  // The policy hash of a 'first' policy is the one it had before AF112 (scope is left out of it then); 'map6-later' and
-  // 'map7-later' are in it.
-  const { scope: _scope, ...hashed } = policy;
   const binding = Object.freeze({ executor: policy.executor, version: policy.version, binarySha256: policy.binarySha256, model: policy.model, reasoning: policy.reasoning,
-    permissions, wrapper: WRAPPER_SHA256, scope: policy.scope, selectionMs: policy.selectionMs, verdictMs: policy.verdictMs,
-    policy: sha(canon({ ...hashed, ...(policy.scope !== 'first' ? { scope: policy.scope } : {}), limits: canon(policy.limits), wrapper: WRAPPER_SHA256 })) });
+    permissions, wrapper: WRAPPER_SHA256, scope: policy.scope, selectionMs: policy.selectionMs, verdictMs: policy.verdictMs, policy: policyHash(raw) });
   let problem = null, owner = null, verified = false, verifying = null, closing = false, fenced = false;
   const boot = await bootId();
   let slot = null; // { id, kind, owner, spawned, lease } from admission until its child is known gone and its output consumed
