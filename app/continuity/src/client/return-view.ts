@@ -15,7 +15,7 @@ import { clip } from '../shared/studio.js';
 import { ui62Reading, savedReading, readingInput, recordTitle, partLabel, type ReadingInput, type ReadingSource } from './digest-source.js';
 import { digestStore, askHash, makeReading, type Reading } from './digest-store.js';
 import { askDigest, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
-import { sessionText, stamp, TOOL_NAME, type SessionSummary, type SessionDetail } from '../shared/session-import.js';
+import { sessionText, recordParts, stamp, TOOL_NAME, type SessionSummary, type SessionDetail } from '../shared/session-import.js';
 import { readSessionFile, type SessionSources } from './session-source.js';
 import { WEB_RECORD_ASK } from '../shared/handover.js';
 import { PASTED_TEXT_LIMIT } from '../shared/types.js';
@@ -50,8 +50,9 @@ export interface ReturnHost {
   /** Open the change plan on the change that touches these parts, same map, current/preview. */
   compare(parts: string[]): void;
   chrome(): void;
-  /** Keep a pasted record in the saved project (the very same text already kept is that record again). Text when not kept. */
-  paste(text: string, context: string | null): Promise<{ id: string; duplicate: boolean } | string>;
+  /** Keep pasted records in the saved project, in order, in one save (the very same text already kept is that record again): the
+   * last one's id, and whether every one was kept already. Text when not kept. */
+  paste(texts: string[], context: string | null): Promise<{ id: string; duplicate: boolean } | string>;
   /** Keep a provided code or check file as a new record of entry `key`, only while that entry is the one open (the very same text
    * and declaration already kept is that record again). Text when not kept. */
   provide(key: string, text: string, evidence: RecordEvidence, context: string | null): Promise<{ id: string; duplicate: boolean } | string>;
@@ -215,15 +216,16 @@ export function createReturnView(host: ReturnHost) {
     if (secretLike(text)) { s.pasteMsg = '키나 토큰처럼 보이는 글이 있어 저장하지 않았어요. 그 부분을 지우고 다시 저장하세요.'; render(); return; }
     // The box stays editable while saving: only the text that was saved leaves the draft. Whatever was written meanwhile stays,
     // and the box stays open with it. A pane closed or reopened meanwhile is another state: it is only told by the draft.
-    const st = s; st.saving = true; render();
-    const done = await host.paste(text, st.pasteContext);
+    // Each session record in the draft is kept as its own record: a session is told by its header line at a record's start.
+    const st = s, parts = recordParts(text); st.saving = true; render();
+    const done = await host.paste(parts, st.pasteContext);
     st.saving = false;
     const kept = typeof done !== 'string', untouched = draftOf(key) === text;
     if (kept && untouched) keepDraft(key, '');
     if (s !== st) return;
     if (!kept) { st.pasteMsg = done; render(); return; }
     const r = host.current()?.project.pasted.find(x => x.id === done.id);
-    const said = done.duplicate ? `같은 글을 ${r ? fullTime(r.at) : '앞서'}에 붙여 넣었어요. 새로 저장하지 않았어요.` : '기록을 저장했어요.';
+    const said = done.duplicate ? `같은 글을 ${r ? fullTime(r.at) : '앞서'}에 붙여 넣었어요. 새로 저장하지 않았어요.` : parts.length > 1 ? '세션마다 기록을 하나씩 나눠 저장했어요.' : '기록을 저장했어요.';
     if (!untouched) { st.pasteMsg = `${said} 저장하는 동안 쓴 글은 초안으로 남겨 두었어요.`; render(); void refresh(); return; }
     st.pasteContext = null; st.pasteMsg = null; st.storeMsg = said;
     await refresh();
@@ -266,7 +268,8 @@ export function createReturnView(host: ReturnHost) {
     catch (e) { p.error = ERROR_TEXT[(e as { code?: string } | null)?.code ?? ''] ?? '세션 파일을 읽지 못했어요.'; }
     p.reading = null; if (s?.key === key) render();
   }
-  /** Whatever is in the box stays: the session comes after it, within what one record can hold. */
+  /** Whatever is in the box stays: the session comes after it, within what one record can hold, and is saved as a record of its
+   * own (recordParts), so it is still told by its header. */
   function fill(key: string, p: SessionPick, detail: SessionDetail) {
     const before = draftOf(key), room = PASTED_TEXT_LIMIT - (before ? before.length + 2 : 0);
     if (room < 2000) { p.error = '초안칸에 이미 글이 많아요. 지금 글을 저장하거나 비운 뒤 가져오세요.'; return; }
@@ -275,7 +278,7 @@ export function createReturnView(host: ReturnHost) {
     keepDraft(key, before ? `${before}\n\n${got.text}` : got.text);
     p.open = false;
     p.note = [`${TOOL_NAME[detail.tool]} 세션에서 대화 ${got.turns}개를 넣었어요.`, got.left ? `앞의 ${got.left}개는 길이 제한으로 뺐어요.` : '',
-      got.redacted ? `키·토큰처럼 보이는 ${got.redacted}곳은 가렸어요.` : '', '읽어 보고 ‘기록 저장’을 누르세요.'].filter(Boolean).join(' ');
+      got.redacted ? `키·토큰처럼 보이는 ${got.redacted}곳은 가렸어요.` : '', before ? '앞에 있던 글과는 따로 저장돼요.' : '', '읽어 보고 ‘기록 저장’을 누르세요.'].filter(Boolean).join(' ');
   }
   async function copyWebAsk(p: SessionPick) {
     let ok = true; try { await navigator.clipboard.writeText(WEB_RECORD_ASK); } catch { ok = false; }

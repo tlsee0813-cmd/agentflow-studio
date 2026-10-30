@@ -2695,8 +2695,9 @@ def question_retry_flow(browser, base):
 
 def sessions_flow(browser, base):
     """Local session records (synthetic home folder, stubbed model): a new project connected once to a working folder takes that
-    folder's recent Claude Code / Codex sessions as records and reads its first map without a click; a reload takes nothing twice;
-    the paste box can also take one session by hand, credential-like text hidden."""
+    folder's recent Claude Code / Codex sessions as records (credential-like text hidden) and reads its first map without a click;
+    a reload takes nothing twice; the paste box can also take one session by hand, kept as its own record after a note typed
+    first; disconnecting and connecting the same folder again takes nothing twice either."""
     context = browser.new_context(viewport={"width": 1280, "height": 720})
     page = context.new_page()
     errors, maps = [], []
@@ -2714,6 +2715,7 @@ def sessions_flow(browser, base):
     expect(pick).to_contain_text("/work/salon")
     expect(pick).to_contain_text("Claude Code")
     expect(pick).to_contain_text("Codex")
+    expect(page.locator("#sync-panel")).to_contain_text("지도를 갱신할 때 이 기록을 AI에게 보내요")  # said before connecting
     assert maps == [], maps
     pick.click()
     # Connected: the folder's sessions became records and the first map was read without asking.
@@ -2721,6 +2723,8 @@ def sessions_flow(browser, base):
     # The stub reads only "요구:"-style lines, so it answers this conversation with its gap; the request itself is the point.
     expect(page.locator("#space-empty")).to_contain_text("[스텁] 프로그램을 말하는 기록을 붙여 주세요", timeout=15000)
     assert len(maps) == 1, maps
+    stored = page.evaluate("Object.values(localStorage).join('\\n')")
+    assert "[가려진 비밀값]" in stored and "sk-abcdefghijklmnopqrstuvwx" not in stored, "the key in a reply is never kept"
     page.locator("#sync-pill").click()
     expect(page.locator("#sync-panel")).to_contain_text("가져온 기록2개")
     expect(page.locator("#sync-panel")).to_contain_text("오늘 자동 지도 갱신1 / 30회")
@@ -2732,18 +2736,24 @@ def sessions_flow(browser, base):
     expect(page.locator("#sync-panel")).to_contain_text("가져온 기록2개")  # nothing taken twice
     assert len(maps) == 1, maps
     page.locator("#sync-pill").click()
-    # By hand: the paste box takes one session as written; tool output and the key are not in it.
+    # By hand: the paste box takes one session as written; tool output and the key are not in it. Put after a note typed first,
+    # it is still kept as a record of its own (told by its header), and the note as another.
     page.locator("#return-entry").click()
     page.locator("#lens .rr-paste-open").click()
+    draft = page.locator("#paste-text")
+    draft.fill("메모: 문자 발송은 다음 주에")
     page.locator("#lens").get_by_role("button", name="내 AI 세션에서 가져오기").click()
     expect(page.locator("#lens .rr-session")).to_have_count(3)
     page.locator("#lens .rr-session", has_text="휴무일 연결").click()
-    draft = page.locator("#paste-text")
-    expect(draft).to_have_value(re.compile("예약 화면에서 휴무일을 영업시간 설정과 연결해 줘"))
+    expect(draft).to_have_value(re.compile("^메모: 문자 발송은 다음 주에\\n\\n\\[Claude Code 세션 기록 · 휴무일 연결[\\s\\S]*예약 화면에서 휴무일을 영업시간 설정과 연결해 줘"))
     value = draft.input_value()
     assert "[가려진 비밀값]" in value and "sk-abc" not in value and "SHOULD NOT APPEAR" not in value, value
     assert "(바꾼 파일: src/hours.ts, tests/hours.test.ts)" in value, value
     expect(page.locator("#lens .rr-sessions-note")).to_contain_text("키·토큰처럼 보이는 1곳은 가렸어요")
+    expect(page.locator("#lens .rr-sessions-note")).to_contain_text("앞에 있던 글과는 따로 저장돼요")
+    page.locator("#lens").get_by_role("button", name="기록 저장").click()
+    expect(page.locator("#lens")).to_contain_text("세션마다 기록을 하나씩 나눠 저장했어요")
+    assert '"text":"메모: 문자 발송은 다음 주에"' in page.evaluate("Object.values(localStorage).join('\\n')"), "the note is a record of its own"
     # A second working folder (another repository) joins the same connection; leaving it keeps the first. It is added while a
     # look is still running (folder listings held 2 s here): that look ends without dropping the folder, and one follows it.
     page.evaluate("""() => { const f = window.fetch; window.fetch = async (u, o) => { if (String(u).includes('folder=')) await new Promise(r => setTimeout(r, 2000)); return f(u, o); }; }""")
@@ -2765,6 +2775,13 @@ def sessions_flow(browser, base):
     expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon")
     page.locator("#sync-panel").get_by_role("button", name="연결 끊기").click()
     expect(page.locator("#sync-pill")).to_have_text("자동 연결 안 됨")
+    # Connecting the same folder again goes on from where each session was taken: nothing comes in twice.
+    page.locator("#sync-panel .sync-folder-pick", has_text="/work/salon").click()
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon")
+    expect(page.locator("#sync-pill")).to_have_attribute("data-state", "on", timeout=15000)
+    page.locator("#sync-pill").click()
+    expect(page.locator("#sync-panel")).to_contain_text("가져온 기록2개")
+    assert len(maps) == 1, maps
     assert not errors, errors
     context.close()
 

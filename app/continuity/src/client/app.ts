@@ -1,8 +1,8 @@
 /* AgentFlow Studio client: entry → map → focused part. Reads project.7 data (saved projects and built examples) and never
  * rewrites records; the only project write is the user's own part name/note through the domain's editArea. */
 import { isMapReading, type Project } from '../shared/types.js';
-import { FILE_LIMIT } from '../shared/types.js';
-import { WorkspaceStore, type EntryRef, storageErrorCode, readViewState, readEntryView, writeViewState, readEntryPositions, writeEntryPositions, importCopy, serializeBackup } from '../shared/storage.js';
+import { FILE_LIMIT, PASTED_LIMIT } from '../shared/types.js';
+import { WorkspaceStore, type EntryRef, storageErrorCode, serializeProject, readViewState, readEntryView, writeViewState, readEntryPositions, writeEntryPositions, importCopy, serializeBackup } from '../shared/storage.js';
 import { parseBackup, cleanPositions } from '../shared/validation.js';
 import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, provideRecord, secretPasted, correctReadingRole } from '../shared/domain.js';
 import { CLAIM_LABEL, stateLabel, revisedRelations, candidateReading, type Applied, type CurrentClaim, type PartUnderstanding } from '../shared/map-reading.js';
@@ -1603,11 +1603,13 @@ function renderPanel(scrollTop: boolean) {
 /** AF100: the saves this page made itself (entry and the save number each made), so a job's result is applied on top of this
  * page's own edits only, never on a save another tab made meanwhile. */
 const ownSaves = new Set<string>();
+/** Why the last save was refused (storageErrorCode), for a caller that says more than commit's own text. */
+let saveFailure: string | null = null;
 /** The one write path for structure edits: saved projects through the workspace store, examples in memory only. */
 async function commit(o: Opened, next: Project): Promise<string | null> {
   if (o.kind === 'saved' && o.ref) {
     try { o.ref = await store.save(o.ref, next); ownSaves.add(`${o.ref.entryId}:${o.ref.seq}`); }
-    catch (err) { return storageErrorCode(err) === 'STORAGE_CONFLICT' ? '다른 탭에서 이 프로젝트가 바뀌어 저장하지 않았어요. 새로고침한 뒤 다시 해 주세요.' : '저장하지 못했어요. 바뀐 내용은 적용하지 않았어요.'; }
+    catch (err) { saveFailure = storageErrorCode(err); return saveFailure === 'STORAGE_CONFLICT' ? '다른 탭에서 이 프로젝트가 바뀌어 저장하지 않았어요. 새로고침한 뒤 다시 해 주세요.' : '저장하지 못했어요. 바뀐 내용은 적용하지 않았어요.'; }
   } else if (o.kind === 'example') examples.set(o.key, next);
   else return '이 프로젝트는 읽기 전용이에요.';
   o.project = next; o.view = studioView(next);
@@ -1864,15 +1866,16 @@ const returnView = createReturnView({
   trial: (text, sources) => { planView.propose(text, sources); },
   compare: ids => { planView.focusParts(ids); },
   chrome: () => { const o = opened; if (o) setBar(o); },
-  paste: async (text, context) => {
+  paste: async (texts, context) => {
     const o = opened; if (!o || o.kind !== 'saved') return '이 프로젝트에는 기록을 저장할 수 없어요.';
-    let r: ReturnType<typeof pasteRecord>;
-    try { r = pasteRecord(o.project, text, context && partOf(o, context) ? context : null); } catch { return '이 글은 저장할 수 없어요(너무 길거나 쓸 수 없는 문자).'; }
-    if (r.duplicate) return { id: r.record.id, duplicate: true };
-    const failed = await commit(o, r.project);
+    let next = o.project, id = '', fresh = false;
+    try { for (const t of texts) { const r = pasteRecord(next, t, context && partOf(o, context) ? context : null); next = r.project; id = r.record.id; fresh ||= !r.duplicate; } }
+    catch { return '이 글은 저장할 수 없어요(너무 길거나 쓸 수 없는 문자).'; }
+    if (!fresh) return { id, duplicate: true };
+    const failed = await commit(o, next);
     // A saved record is now a record to read into the map (nothing was sent): the map's own entries say so.
     if (!failed) { renderMapEntry(); refreshUnderstood(); }
-    return failed ?? { id: r.record.id, duplicate: false };
+    return failed ?? { id, duplicate: false };
   },
   provide: async (key, text, evidence, context) => {
     // Only the entry the file was chosen in: after a switch nothing is written to the project open now.
@@ -1936,20 +1939,33 @@ let jobReservations: JobReservations | null = null;
 
 /* ---------- automatic connection to a working folder's Claude Code / Codex sessions (auto-sync.ts) ---------- */
 const handover = createHandoverView({ current: () => opened });
+const utf8 = (t: string) => new TextEncoder().encode(t).length;
+/** Why these records cannot be added to the project (a project keeps at most PASTED_LIMIT of them and FILE_LIMIT bytes in all), or
+ * null. With none, whether even a small one still fits. */
+function recordRoom(p: Project, texts: string[]): string | null {
+  const more = ' 새 대화는 더 들어오지 않아요. 새 프로젝트를 만들어 연결해 주세요.';
+  if (p.pasted.length + Math.max(1, texts.length) > PASTED_LIMIT) return `이 프로젝트에 기록이 가득 찼어요(${PASTED_LIMIT}개까지).${more}`;
+  // Each record is also its id, time and part in the saved file.
+  const adds = texts.length ? texts.reduce((n, t) => n + utf8(JSON.stringify(t)) + 120, 0) : 4096;
+  return utf8(serializeProject(p)) + adds > FILE_LIMIT ? `이 프로젝트에 담을 수 있는 기록의 양(${FILE_LIMIT / 1e6}MB)이 다 찼어요.${more}` : null;
+}
 const autoSync = createAutoSync({
   current: () => opened,
   sources: sessionSources,
   kv,
   save: async (key, texts) => {
     // Only the entry the sessions were looked at for: after a switch nothing is written to the project open now.
-    const o = opened; if (!o || o.kind !== 'saved' || o.key !== key) return '다른 프로젝트가 열려 있어 저장하지 않았어요.';
+    const o = opened; if (!o || o.kind !== 'saved' || o.key !== key) return { error: '다른 프로젝트가 열려 있어 저장하지 않았어요.', refused: false };
+    const full = recordRoom(o.project, texts); if (full) return { error: full, refused: false };
     let next = o.project;
-    try { for (const t of texts) next = pasteRecord(next, t, null).project; } catch { return '세션 기록을 저장하지 못했어요(너무 길거나 쓸 수 없는 문자).'; }
+    try { for (const t of texts) next = pasteRecord(next, t, null).project; } catch { return { error: '세션 기록 하나를 저장하지 못했어요(쓸 수 없는 문자나 키처럼 보이는 글). 다른 세션은 계속 들어와요.', refused: true }; }
     if (next === o.project) return null;
     const failed = await commit(o, next);
-    if (!failed) { renderMapEntry(); refreshUnderstood(); if (!selected && !planView.isOpen()) returnView.render(); }
-    return failed;
+    if (!failed) { renderMapEntry(); refreshUnderstood(); if (!selected && !planView.isOpen()) returnView.render(); return null; }
+    // Nothing more is tried until the person asks: said so, and for a full browser storage, why.
+    return { error: saveFailure === 'QUOTA' ? '이 브라우저의 저장 공간이 가득 차서 세션 기록을 저장하지 못했어요. 자동으로 다시 하지 않아요.' : `${failed} 자동으로 다시 하지 않아요.`, refused: false };
   },
+  full: () => { const o = opened; return o && o.kind === 'saved' ? recordRoom(o.project, []) : null; },
   canRead: () => { const inp = mapRun.input(), st = mapRun.state(); return !!inp && !inp.problem && mapRun.can() && !st.pending && !st.ready && !st.committing; },
   read: () => void mapRun.run(),
   readBlocked: () => (status.release === 'existing-map' ? RELEASE_TEXT.limit : mapRun.can() ? null : mapRun.blocked() ?? '지도 정리에 쓸 AI가 이 서버에 연결되어 있지 않아요.')
