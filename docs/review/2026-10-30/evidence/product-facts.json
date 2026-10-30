@@ -1,0 +1,294 @@
+{
+  "basis": {
+    "product": "C:/Users/이준혁/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product-handoff-20261024",
+    "head": "1e85b729d5e02c235ca47d457b47af2d07d36a07",
+    "appTree": "93be1c55734f95e0040cd333e0d8bba3d3adb12b",
+    "checkpoint": "a43b46d4e44cdf139ea6ae3d582fa9816578f7a9",
+    "checkpointAppTree": "b670c0ea300050e28cdba9655515ebcf2e03d9d5",
+    "release142": "76e3dc8a2939a4055ab1b99526b5cc1c98fd75e7",
+    "release142AppTree": "29386393a5cc1a7db8ffc86d761711bf9b41686d",
+    "config": ".ops/review-preparation-20261030/audit-config.json",
+    "configSha256": "3877caa1000550d68e970a31200365b67c58dab6b2bce299b35a1fc8739424a9",
+    "prSnapshot": ".ops/review-preparation-20261030/pull-requests-before.json",
+    "prSnapshotSha256": "55ac6fa7a77272c86e2aa46d6e1637097c29adafeeff499033564978d94c6550",
+    "method": "Read existing local Git objects, current source and already-published acceptance/result documents. No GitHub live refresh, web research, model call, test, build, browser or deployment. Product working tree was clean at read checkpoints."
+  },
+  "editions": [
+    {
+      "edition": "Original public73 / checkpoint app",
+      "url": "https://agentflow-studio.tlsee0813.workers.dev/",
+      "appTree": "b670c0ea300050e28cdba9655515ebcf2e03d9d5",
+      "codeAvailable": "Older Worker-backed Studio: manual records/map editing and reading, standard DeepSeek ask/plan/scope/digest/map routes under access checks. The checkpoint source advertises m3 and project.11. It has neither the later local Node durable-job/CLI host nor the project14 typed-file input and later m7 additions.",
+      "actualEvidence": "Latest pause table and 142 RESULT explicitly preserve public73 BUILD/settings; this audit did not rerun its provider or inspect a live deployment.",
+      "limits": "Public availability of an API is not acceptance of all raw-record FIRST/RETURN semantic quality. This app is not the latest development app and not the existing-map142 assembly."
+    },
+    {
+      "edition": "Existing-map limited public142",
+      "url": "https://agentflow-studio-existing-map-124.tlsee0813.workers.dev/",
+      "source": "76e3dc8a2939a4055ab1b99526b5cc1c98fd75e7",
+      "appTree": "29386393a5cc1a7db8ffc86d761711bf9b41686d",
+      "codeAvailable": "Work on existing/imported maps: reading, manual edits, source/citation round trips, change-plan/scope/frozen requests and already-stored returned-reading comparison. ask/plan/scope/digest remain provider-backed where configured and authorized.",
+      "explicitlyUnavailable": "Every map generation route, including FIRST, later map/RETURN comparison and jobs, is withheld by trusted existing-map policy before provider/executor. No local Node/CLI host. 'Existing returned readings can be read' does not mean new returned sources can receive a fresh AI map comparison here.",
+      "assembly": "135 public base plus final140 client/CSS and the single partUnderstanding claims-cap removal. 137 diagnostic changes are excluded. This is not an upload of current full HEAD.",
+      "actualEvidence": "142 RESULT: one Worker PUT; all54 assets/27 modules exact; actual saved Zephyr Display full reading, exact source table/back, reload and workspace/plans byte preservation. map/jobs403 MAP_WITHHELD and missing-code plan401; new models0.",
+      "acceptanceDocs": [
+        "docs/cycles/2026-10-30-scoped-release-124/ROOT_ACCEPTANCE.md",
+        "docs/cycles/2026-10-30-reading-delivery-142/RESULT.md"
+      ],
+      "policyCode": [
+        "app/continuity/server/worker-existing-map.mjs:1",
+        "app/continuity/server/studio.mjs:182-191",
+        "app/continuity/server/studio.mjs:228"
+      ]
+    },
+    {
+      "edition": "Local full development140 runtime at current HEAD",
+      "appTree": "93be1c55734f95e0040cd333e0d8bba3d3adb12b",
+      "codeAvailable": "Standard local DeepSeek server plus optional existing installed Codex PC entry. PC entry uses4327, FIRST6/later7 map jobs via fixed Sol High CLI policy; other AI features require the separate DeepSeek key. Default local DeepSeek path4317 is retained. Normal map generation, plan/scope and RETURN paths are implemented, with strict validation and bounded admission.",
+      "hostRequirements": "Accepted PC entry was observed on one Windows PC with existing allowed CLI0.165.0-alpha.1.2/binary hash and login, PowerShell7/Node. It does not install/update/login or establish universal PC support. A missing DeepSeek key leaves CLI map functionality separate from disabled plan/question features.",
+      "actualEvidence": "128 ROOT_ACCEPTANCE startup/stop/restart/import/storage; 129/139 actual normal FIRST; 121 bounded RETURN; 140 ROOT_ACCEPTANCE current reading/editor ownership and regression fixes. Runtime source at HEAD remains140; later142 changes in this branch are documents.",
+      "limits": "Opt-in local capability is not public rollout or generally reliable model completion. Fixed299/300sec, one-call policies and stream bounds do not establish token/money caps or guaranteed remote-computation cancellation. Q1 retry/Q2 loss remains unfixed.",
+      "code": [
+        "app/continuity/scripts/start-pc.ps1",
+        "app/continuity/scripts/pc-entry.mjs:19-32",
+        "app/continuity/server/studio.mjs:193-212",
+        "docs/cycles/2026-10-29-owned-cli-preview-102/preview/cli-executor.mjs:240"
+      ]
+    }
+  ],
+  "userFlows": [
+    {
+      "flow": "자료 입력 / source input",
+      "implemented": "Normal project raw paste and explicit provided UTF-8 code/test file input with user-declared filename/version/origin; original raw text and citation offsets retained. Mixed pasted reports are not silently retagged as code/test. Duplicate handling and async file/project ownership checks exist.",
+      "code": [
+        "app/continuity/src/client/return-view.ts:197",
+        "app/continuity/src/client/return-view.ts:239-274",
+        "app/continuity/src/shared/domain.ts:573-584",
+        "app/continuity/src/shared/types.ts:183-187",
+        "app/continuity/src/shared/record-source.ts"
+      ],
+      "acceptedEvidence": "114 ROOT_ACCEPTANCE: actual111/113 backup import, exact BOM/CRLF and real110 source files, duplicate no-write, metadata overflow refusal visible above Save, explicit fixture application/citation/back/reload/backup; generation quality not counted. 129/139 separately demonstrate real raw paste entering actual FIRST.",
+      "acceptanceDoc": "docs/cycles/2026-10-30-source-entry-114/ROOT_ACCEPTANCE.md",
+      "limit": "Manual source entry, not an automatic Codex/Claude/repository collector or execution attestation. project14 is not editable by pre14 readers; old originals/backups and safe rejection matter."
+    },
+    {
+      "flow": "FIRST / 기록으로 지도 정리",
+      "implemented": "Input assembly sends eligible bounded source spans with coverage, strict wire validation, map construction and source-anchored claims/material/candidates. Map6 remains first schema; later7 is separately negotiated. Local jobs can keep a result while another project is edited, then explicitly apply it on return.",
+      "code": [
+        "app/continuity/src/shared/map-reading.ts:657-773",
+        "app/continuity/src/shared/map-reading.ts:231",
+        "app/continuity/src/shared/map-reading.ts:782-906",
+        "app/continuity/src/client/map-run.ts:110-200",
+        "app/continuity/src/client/map-run.ts:224-301"
+      ],
+      "acceptedEvidence": [
+        "129: original3545char actual historical work instruction, normalPC one FIRST/110.533sec, bounded A1-A5 meaning, away/edit/reload/ready/explicitapply/source/backup.",
+        "139: unchanged2595+1369char micro sources, normalPC one FIRST/72.289sec, bounded M1-M4 meaning, ready/explicitapply/flow/limits/source/reload/backup; plan/scope/RETURN0.",
+        "104 and122: actual Zephyr FIRST with two display mappings, sensors/I2C and independent configuration facts, nominal modes plus always-on/no LowPower saving;122 is a specific layout-equivalent copy, not a controlled model-only comparison."
+      ],
+      "acceptanceDocs": [
+        "docs/cycles/2026-10-30-normal-first-map-129/RESULT.md",
+        "docs/cycles/2026-10-30-normal-micro-139/RESULT.md",
+        "docs/cycles/2026-10-29-zephyr-config-correction-104/RESULT.md",
+        "docs/cycles/2026-10-30-layout-preservation-122/RESULT.md"
+      ],
+      "limit": "These are bounded source-specific observations, not a general success rate or proof that no fact is omitted. micro API-name detail omissions were explicitly nonblocking under preserved76/89 interpretation; accepted role descriptions do not attest OSS execution/security. Existing-map142 cannot perform this generation."
+    },
+    {
+      "flow": "부분 읽기 / structure, claims, history, source and navigation",
+      "implemented": "Map part selection, contained parts and directed relations, current/historical claims and evidence, explicit full reading and exact source/back.140 widens normal full reading and removes two13-to12 claim truncation caps without changing aggregation semantics.135 resolves the exact withdrawing prior reading/index and frozen request/item, separately from current manual retarget/exclusion.",
+      "code": [
+        "app/continuity/src/client/app.ts:1396",
+        "app/continuity/src/client/app.ts:1519",
+        "app/continuity/src/shared/map-reading.ts:547",
+        "app/continuity/src/client/request-results.ts:19",
+        "app/continuity/src/client/request-results.ts:75",
+        "app/continuity/src/client/request-results.ts:238-260",
+        "app/continuity/src/client/request-results.ts:472"
+      ],
+      "acceptedEvidence": "140 ROOT_ACCEPTANCE: actual139micro and stored Zephyr reading/quote/back plus actual134 editor/history ownership and storage preservation; exactCI41009319891 bothOS, model-free regressions.135 ROOT_ACCEPTANCE: synthetic exact withdrawal/second repeated quote plus Root normalUI retarget to another same-title RQ and actual121 nonwithdrawal regression.142 additionally delivered bounded full reading publicly.",
+      "acceptanceDocs": [
+        "docs/cycles/2026-10-30-part-reading-140/ROOT_ACCEPTANCE.md",
+        "docs/cycles/2026-10-30-withdrawal-target-reading-135/ROOT_ACCEPTANCE.md",
+        "docs/cycles/2026-10-30-reading-delivery-142/RESULT.md"
+      ],
+      "limit": "Source/raw wording and reported/code/test evidence are not proof of implementation completion.135's newly added withdrawal edge observations were synthetic; exact open-link unlink concurrent refresh was not directly observed. General very-large-claim performance is unestablished."
+    },
+    {
+      "flow": "변경 구상 / PLAN",
+      "implemented": "Intent plus current project evidence and explicitly supplied extra code/report/test evidence -> bounded provider plan -> selectable items with preserve/unknowns -> persisted per-project change plan. Ownership checks reject stale results after input/project changes. PLAN remains DeepSeek-backed, separate from CLI maps.",
+      "code": [
+        "app/continuity/src/client/plan-source.ts:88",
+        "app/continuity/src/client/plan-view.ts:464-495",
+        "app/continuity/src/client/plan-request.ts:24",
+        "app/continuity/src/shared/change-plan.ts:149",
+        "app/continuity/src/client/plan-store.ts:145-160"
+      ],
+      "acceptedEvidence": "141 RESULT and independent-plan evidence: actual19.319sec one-item plan preserves originalQ1 retry, unsentQ2/noautosend, normalclear/failurekeep and existing storage/work. Its unknowns describe observation/postrepair verification, not reopened policy. The plan is boundedPASS even though its later scope is rejected.",
+      "acceptanceDoc": "docs/cycles/2026-10-30-question-draft-request-141/RESULT.md",
+      "limit": "Existing-map public requests need access/configuration. CLI-only local launch without DeepSeek cannot analyze a change plan (directly observed129). A generated valid plan is not a commissioned or completed repair."
+    },
+    {
+      "flow": "선택 scope -> 고정 RQ / request document",
+      "implemented": "One scope review over selected items and original evidence; strict parse; project/planID/revision/basis/staleness binding; frozen request document with selected/excluded material, preserve/unknowns/source sections, structured reading ranges and stable RQ identity. Export and reopen are implemented; the app does not itself execute the work.",
+      "code": [
+        "app/continuity/src/client/plan-source.ts:164",
+        "app/continuity/src/client/plan-view.ts:514-558",
+        "app/continuity/src/client/plan-request.ts:26",
+        "app/continuity/src/shared/change-plan.ts:170-187",
+        "app/continuity/src/client/plan-store.ts:180-184"
+      ],
+      "acceptedEvidence": "134 RESULT: real20.384sec HTTP200 creates RQ93168/10490chars, preserves source7/oldplan/failed132RQ, distinguishes historical requirements from unknown current implementation; normal export/reload/reopen.109 separately accepted actual RQ0797 for a specific label-guide implementation.141 proves the generation/storage path can succeed structurally while semantic necessity judgment fails.",
+      "acceptanceDocs": [
+        "docs/cycles/2026-10-30-scope-time-observation-134/RESULT.md",
+        "docs/cycles/2026-10-30-scope-continuation-109/RESULT.md",
+        "docs/cycles/2026-10-30-question-draft-request-141/RESULT.md"
+      ],
+      "limit": "Scope contract validity is not reliable prerequisite truth.134's prerequisites0 is not current-code completion.141's RQ00cefece is preserved but rejected and undispatched, despite HTTP200/valid document."
+    },
+    {
+      "flow": "결과 반환 / supplied reports+code+tests compared with exact frozen request",
+      "implemented": "Normal record/file input and exact selected frozen RQ enter later map7 with full request/prior context. Strict source-kind, anchored raw-condition and reference contracts, apply binding and stable reading IDs retain old history/manual corrections. Request results distinguish implementation reports, code properties, checked evidence and withdrawal/current targets.",
+      "code": [
+        "app/continuity/src/shared/map-reading.ts:669-773",
+        "app/continuity/src/shared/map-reading.ts:231",
+        "app/continuity/src/shared/map-reading.ts:782",
+        "app/continuity/src/shared/request-return.ts",
+        "app/continuity/src/client/request-results.ts:69-75",
+        "app/continuity/src/client/return-view.ts:670-691",
+        "app/continuity/server/studio.mjs:200-208"
+      ],
+      "acceptedEvidence": "121 RESULT: one actual strict-ready SolHigh response/133.890sec, bounded meaning for real110 code/reports against RQ0797; exact mappings/trimcase/unknownclear/noPCB/LowPower and reported-vs-code-vs-check provenance; Root quote/back/reload/project backup and original bundle preservation.",
+      "acceptanceDoc": "docs/cycles/2026-10-30-reference-return-121/RESULT.md",
+      "limit": "121 ended in the original visit and applied normally before Root moved away; its selected actual away->otherdraft->ready->explicitapply gate was not performed.136 is a different real chain and failed CONTRACT with no original final retained. Neither UI reading135/140 nor diagnostics137 retroactively accepts136. Existing-map142 only reads already-stored results and refuses fresh map/RETURN generation."
+    },
+    {
+      "flow": "저장 / export, import, reload, job recovery",
+      "implemented": "Origin-local workspace and project JSON, separate plans/request bundle, separate view/positions/question drafts and local job reservations. Project backup and plan file are different artifacts. Workspace import creates a copy; browser storage does not synchronize between addresses/accounts. Node map-job journal and capability-bound recovery are distinct from browser project storage.",
+      "code": [
+        "app/continuity/src/shared/storage.ts:9-13",
+        "app/continuity/src/shared/storage.ts:132-155",
+        "app/continuity/src/shared/storage.ts:252",
+        "app/continuity/src/client/plan-store.ts:8-17",
+        "app/continuity/src/client/plan-store.ts:179-184",
+        "app/continuity/src/client/map-jobs.ts:15-37",
+        "app/continuity/server/map-jobs.mjs:1-10",
+        "app/continuity/src/client/map-run.ts:284-325"
+      ],
+      "acceptedEvidence": "100 ROOT_ACCEPTANCE: real Node HTTP/journal existing accepted response, switch-project draft/cursor preserved, actual server restart/keyoff ready recovery and explicitapply without new call, exact backup/import.114 adds project14 old-reader rejection/raw preservation.128 actual PC stop/restart/import and whole workspace/plans exact.129/139/140/142 supply later actual-source/save/reading preservation receipts.",
+      "acceptanceDocs": [
+        "docs/cycles/2026-10-29-durable-map-100/ROOT_ACCEPTANCE.md",
+        "docs/cycles/2026-10-30-source-entry-114/ROOT_ACCEPTANCE.md",
+        "docs/cycles/2026-10-30-pc-entry-128/ROOT_ACCEPTANCE.md"
+      ],
+      "limit": "No cloud/account sync or continuing computation while PC/server is off. Active jobs become interrupted and are not auto-recalled; unknown old CLI child termination blocks new execution. Operation capability/reservations are not ordinary project backups. Old readers safely rejecting new versions is not downgrade compatibility."
+    }
+  ],
+  "openIssuesAndNonpasses": [
+    {
+      "id": "136_RETURN",
+      "status": "REJECTED; precise cause unknown",
+      "fact": "178.210sec exit0, complete9974byte JSON, generic CONTRACT rejection. Ephemeral executor consumed/cleaned final text; hash/receipt survive but original response does not. No semantic verdict or exact violated field can be recovered from that receipt. No retry/apply.137 only improves future fixed diagnostics, preserving acceptance.",
+      "evidence": [
+        "docs/cycles/2026-10-30-actual-return-136/RESULT.md",
+        "docs/cycles/2026-10-30-contract-diagnostics-137/ROOT_ACCEPTANCE.md"
+      ]
+    },
+    {
+      "id": "141_SCOPE",
+      "status": "SEMANTIC_P2_REJECTED; plan boundedPASS",
+      "fact": "Scope incorrectly calls new retry/new-submit call information indispensable, despite supplied current getDraft and sent question allowing a distinguishing path for observedQ1!=Q2. Candidate/no-auto-include wording does not cure the unsupported necessity. RQ36286chars preserved; dispatch/implementation/RETURN/regeneration0.",
+      "evidence": "docs/cycles/2026-10-30-question-draft-request-141/RESULT.md"
+    },
+    {
+      "id": "Q1_RETRY_Q2_LOSS",
+      "status": "UNFIXED_PRODUCT_DEFECT",
+      "fact": "After failedQ1, typing unsentQ2 then successful retry of originalQ1 clearsQ2. One author simulated-provider UI observation plus versioned/static code support; not a real external-provider outage reproduction. Current app.ts:2227 still unconditionally clears the part draft after question success.140 fixed its own DOM restoration regressions, not this older send defect. Simple equality comparison is not established as the complete repair.",
+      "evidence": [
+        "app/continuity/src/client/app.ts:2227",
+        "docs/cycles/2026-10-30-part-reading-140/ROOT_ACCEPTANCE.md",
+        "docs/COORDINATOR_PAUSE_2026-10-30_KO.md:18-23"
+      ]
+    },
+    {
+      "id": "historical_delivery_and_contract_nonpasses",
+      "status": "PRESERVED; not rescaled as successes",
+      "fact": "111 was output-length/incomplete delivery;113 pasted-source code-match contract failure;117 overlong raw-condition reference;119 invalid camelcase new-part references.121's later bounded successful observation does not rewrite them.130 scope delivery ended AI_RESPONSE_INCOMPLETE/length;132's structurally valid scope overclaimed historical defect as current absence, before separately accepted134.",
+      "evidence": [
+        "docs/cycles/ACTIVE.md historical dated entries",
+        "docs/cycles/2026-10-30-condition-return-117/RESULT.md",
+        "docs/cycles/2026-10-30-condition-return-119/RESULT.md",
+        "docs/cycles/2026-10-30-reference-return-121/RESULT.md",
+        "docs/cycles/2026-10-30-scope-time-observation-134/RESULT.md"
+      ],
+      "scope": "Representative relevant preserved failures, not an exhaustive experiment inventory; no old raw response revalidated."
+    },
+    {
+      "id": "general_product_limits",
+      "status": "UNESTABLISHED_OR_NOT_IMPLEMENTED",
+      "fact": "General model semantic reliability, automatic record/repository connectors and one fully completed real record->understanding->prospective accepted request->implementation->accepted returned change experience remain unestablished.121's missing actual away/apply step and136/141 failures remain separate.139's FIRST success or142's public reading delivery does not close them. Failure alerts can disappear on reload (recorded136), and139's first postreload list snapshot lacked a result badge although opening the project recovered the result; the badge cause is unconfirmed.",
+      "evidence": [
+        "docs/cycles/2026-10-30-reference-return-121/RESULT.md",
+        "docs/cycles/2026-10-30-normal-micro-139/RESULT.md",
+        "docs/cycles/2026-10-30-actual-return-136/RESULT.md",
+        "docs/COORDINATOR_PAUSE_2026-10-30_KO.md"
+      ]
+    }
+  ],
+  "documentationConflicts": [
+    {
+      "file": "docs/PROJECT_STATUS.md:3-5",
+      "currentWording": "Current Studio43 local real-AI demo with source00ca/appc342 and oldPages reference.",
+      "actual": "Latest local runtime140/app93be, original public73 and separately composed existing-map142; latest ACTIVE/QUESTIONS/pause table supersede this current-sounding introduction.",
+      "kind": "Stale product entry-point summary; historical records can remain historical but are not current edition facts."
+    },
+    {
+      "file": "docs/PROJECT_STATUS.md section 어떤 버전인가",
+      "currentWording": "Calls caf6126/app42 the product checkpoint and oldMOCK42 the current public PC edition.",
+      "actual": "Audit checkpoint a43b46d has public73 appb670, while full development HEAD has app93be and limitedrelease142 app2938.",
+      "kind": "Stale current-version table within a history-heavy document."
+    },
+    {
+      "file": "app/README.md:1-14,45-57",
+      "currentWording": "INIT-004; graph/persistence/export/CLI are future work; reload loses input; currentNode92 tests; loopback-only/no public deployment.",
+      "actual": "These describe the old base app's own boundary, not the implemented continuity product. Current continuity has persistent graph/workspace/plan export, optional localCLI and publicWorkers. Root README naming makes the old subsystem appear to describe the whole repository.",
+      "kind": "Ambiguous subsystem/current-product authority; old base app facts are not disproved as historical/subsystem facts."
+    },
+    {
+      "file": "app/docs/PROJECT_STATUS.md opening and 미완료와 승인 경계",
+      "currentWording": "INIT-004 independent review pending; realDeepSeek wholly unverified and no deployment.",
+      "actual": "Numerous later actual provider observations and bounded public deployments exist for continuity, including failures. This is not the latest product status.",
+      "kind": "Historical base-app status exposed under an unqualified PROJECT_STATUS filename."
+    },
+    {
+      "file": "app/continuity/README.md:9",
+      "currentWording": "Saved projects idea015.project.7.",
+      "actual": "Local full/current limited release use project14; public73 checkpoint uses project11. Current types.ts:2 is project14 and114 acceptance records migration/old-reader rejection.",
+      "kind": "Stale schema statement beside otherwise updated PC-entry instructions."
+    },
+    {
+      "file": "app/continuity/README.md:60-68",
+      "currentWording": "API table lists status/ask/jobs only.",
+      "actual": "Implemented routes also include plan/scope/digest/map, and the existing-map release deliberately withholds map/jobs. A generic Worker/local description alone does not communicate the three live edition boundaries.",
+      "kind": "Incomplete route/edition inventory, not evidence that omitted routes do not exist."
+    },
+    {
+      "file": "docs/cycles/ACTIVE.md:3 and dated older entries below",
+      "currentWording": "Latest first summary correctly states142/pause; below it remain earlier next115/in-progress text and historical plans.",
+      "actual": "Latest summary, immutable result/acceptance docs and pause handoff distinguish completed/failed/untouched work. Older dated next-step paragraphs are historical, not current running jobs.",
+      "kind": "History requires temporal reading; do not treat all in-progress paragraphs as simultaneously current."
+    }
+  ],
+  "notPerformed": {
+    "productWrites": 0,
+    "tests": 0,
+    "builds": 0,
+    "browserActions": 0,
+    "modelCalls": 0,
+    "deployments": 0,
+    "externalMessages": 0,
+    "webResearch": 0,
+    "newDesign": 0,
+    "oldFailedResponseRevalidation": 0
+  }
+}

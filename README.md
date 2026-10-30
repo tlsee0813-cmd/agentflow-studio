@@ -1,11 +1,12 @@
 # AgentFlow Studio
 
-외부 AI 개발 과정에서 프로그램의 부분·관계·목적·요청·결과·변경을 잃지 않고 이어 가도록 돕는 공간형 작업 도구입니다.
+개발 기록에서 프로그램의 부분·관계와 근거를 읽고, 변경 요청과 돌아온 결과를 이어서 이해하도록 돕는 PC 작업 도구입니다. 실제 기록 자동 연결과 전체 AI 작업 왕복은 아직 완성되지 않았습니다.
 
-**[제품 기준·공개 버전·한계](docs/PROJECT_STATUS.md)** · **[현재 진행과 배정](docs/cycles/ACTIVE.md)** · [공개 MOCK 체험](https://tlsee0813-cmd.github.io/agentflow-studio/) · [새 총괄 시작 안내](docs/NEW_COORDINATOR_START_KO.md)
+**[설계 검토 시작점](docs/REVIEW_START_HERE_KO.md)** · [만들어진 기능과 남은 문제](docs/review/2026-10-30/IMPLEMENTED.md) · [웹사이트 안내](docs/review/2026-10-30/WEBSITES.md) · [브랜치·PR·보관/복구](docs/review/2026-10-30/REPOSITORY.md)
 
-이 `checkpoint/2026-10-15`에는 [PR #3](https://github.com/tlsee0813-cmd/agentflow-studio/pull/3)의 **PC 영역 읽기 → 명시 이어가기·수동 편집 → 출발 지도 복귀**가 제품 코드에 반영됐습니다. [제품12 결과](docs/cycles/2026-10-16-product-reading-return-12/RESULT.md)에 독립 검사·두 OS CI·공유 증거·남은 제약을 연결했습니다. 연구 시안의 모든 기능이 제품에 들어간 것은 아닙니다.
+- **지금 읽기 체험:** [기존 지도 작업용 공개142](https://agentflow-studio-existing-map-124.tlsee0813.workers.dev/). 기존 지도 읽기·근거·변경 구상용이며 첫 지도 생성과 지도 갱신은 보류합니다.
+- **전체 개발 코드:** [work/experience142-reading-delivery](https://github.com/tlsee0813-cmd/agentflow-studio/tree/work/experience142-reading-delivery). 공개142와 다른 개발 계열입니다.
+- **기존 공개73:** [Cloudflare](https://agentflow-studio.tlsee0813.workers.dev/) · [보조 정적 Pages](https://tlsee0813-cmd.github.io/agentflow-studio/).
+- **현재 판단:** [ACTIVE](docs/cycles/ACTIVE.md) · [QUESTIONS](docs/QUESTIONS.md).142 전달을 마친 뒤 제품개발은 일시정지했으며, 이번 변경은 검토 자료와 저장소 정리입니다.
 
-공개 체험판은 아직 [USE106 배포63f5540d](https://github.com/tlsee0813-cmd/agentflow-studio/commit/63f5540d062861439f0932cd7311c6c5510e227c)입니다. 실제 AI가 없는 정적 browser MOCK이며 작업문 복사·저장이 외부 도구 실행을 뜻하지 않습니다. 제품12의 별도 [정적 실행물과 재현 안내](https://github.com/tlsee0813-cmd/agentflow-studio/blob/398a91adf918113bd77dfbd3454fc3c85b00cc3d/docs/transfer/pc-reading-return-12/independent-fix2/preview/START.md)도 GitHub에서 회수할 수 있습니다.
-
-실제 AI 후보 GUIDE107은 **HOLD·미통합**입니다. `main`은 초기 커밋이므로 최신 제품 기준으로 사용하지 마세요. 과거 Draft PR #1·#2는 미병합으로 닫았고 [이전22개 브랜치의 보관·복원 기록](docs/REPOSITORY_ARCHIVE.md)을 유지합니다.
+GitHub 기본 main은 초기 역사 기준이며 최신 제품 코드를 담고 있지 않습니다. checkpoint/2026-10-15도 제품 코드는 공개73이고 문서만 최신화됩니다. 소스·배포·부분 수용을 같은 판본으로 보지 마세요. 세부 SHA와 실제 검증 근거는 위 검토 시작점에 있습니다.

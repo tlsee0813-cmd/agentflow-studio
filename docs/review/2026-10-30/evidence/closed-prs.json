@@ -1,0 +1,281 @@
+[
+  {
+    "number": 44,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience74-grounded-map",
+    "head_sha": "d971d0c6a042e57dd87ec7a2a44ab2da1826e7d4",
+    "base": "checkpoint/2026-10-15",
+    "at": "2026-10-30T07:24:04Z"
+  },
+  {
+    "number": 46,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience76-explicit-uncertainty",
+    "head_sha": "9c27ef618cf50e6f9ccd8b40c5329083ef385094",
+    "base": "checkpoint/2026-10-15",
+    "at": "2026-10-30T07:24:06Z"
+  },
+  {
+    "number": 47,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience77-first-reading",
+    "head_sha": "fd1eb017ca4eafdded9900c767ff01f3689ba658",
+    "base": "work/experience76-explicit-uncertainty",
+    "at": "2026-10-30T07:24:07Z"
+  },
+  {
+    "number": 48,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience78-response-failure",
+    "head_sha": "e20d7d5ca99a2d6406ca05af69c9fc0a57293e78",
+    "base": "work/experience76-explicit-uncertainty",
+    "at": "2026-10-30T07:24:09Z"
+  },
+  {
+    "number": 49,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience80-role-evidence",
+    "head_sha": "9c38769c36193e04589ba8005f26da84394fd63b",
+    "base": "work/experience78-response-failure",
+    "at": "2026-10-30T07:24:10Z"
+  },
+  {
+    "number": 50,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience81-source-review",
+    "head_sha": "8da3cab6dc613d9ed6c6675d0ee1b5f80fb7e48c",
+    "base": "work/experience80-role-evidence",
+    "at": "2026-10-30T07:24:12Z"
+  },
+  {
+    "number": 51,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience82-subject-first",
+    "head_sha": "28fda951e95bb2bd8739d4949443522c0dde857a",
+    "base": "work/experience81-source-review",
+    "at": "2026-10-30T07:24:14Z"
+  },
+  {
+    "number": 52,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience83-overview-reading",
+    "head_sha": "ef7f257618c32bbe0333ec32b9ec3bc79cd3ca03",
+    "base": "work/experience80-role-evidence",
+    "at": "2026-10-30T07:24:15Z"
+  },
+  {
+    "number": 53,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience84-authoring-context",
+    "head_sha": "a2d89ad0dc0b8b19d63ab51e6dd82f184cdb0710",
+    "base": "work/experience83-overview-reading",
+    "at": "2026-10-30T07:24:17Z"
+  },
+  {
+    "number": 54,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience85-real-context-reading",
+    "head_sha": "2b4363d233b47f8c9f394b40c7d16831ba51e9d3",
+    "base": "work/experience84-authoring-context",
+    "at": "2026-10-30T07:24:19Z"
+  },
+  {
+    "number": 55,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience87-analysis-reading-space",
+    "head_sha": "107318ac296ecbb1ce6734e630f8ec1f35eb9f6d",
+    "base": "work/experience85-real-context-reading",
+    "at": "2026-10-30T07:24:42Z"
+  },
+  {
+    "number": 56,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience93-request-return",
+    "head_sha": "4a188df9ae4631e4f0a81ff957c03abe9b48b024",
+    "base": "work/experience92-priority-delivery",
+    "at": "2026-10-30T07:24:44Z"
+  },
+  {
+    "number": 57,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience94-request-reading",
+    "head_sha": "b3e2033783f391d9af1d1421fe7621cf4f23aba4",
+    "base": "work/experience93-request-return",
+    "at": "2026-10-30T07:24:46Z"
+  },
+  {
+    "number": 58,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience97-map-return",
+    "head_sha": "d1ae6be5935b07e888de9466282f8fecaac2d6a0",
+    "base": "work/experience96-schema-delivery",
+    "at": "2026-10-30T07:24:47Z"
+  },
+  {
+    "number": 59,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience98-candidate-contract",
+    "head_sha": "033ef84cce35a6f34865a545c4d32cd2fbdbfa3f",
+    "base": "work/experience97-map-return",
+    "at": "2026-10-30T07:24:49Z"
+  },
+  {
+    "number": 60,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience100-durable-map",
+    "head_sha": "7d7a832a9cb655c81e5f10244e742ba1b8ce6dd9",
+    "base": "work/experience98-candidate-contract",
+    "at": "2026-10-30T07:24:51Z"
+  },
+  {
+    "number": 61,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience102-owned-cli-preview",
+    "head_sha": "7852dde4bc5876cd91685fe2bfa7b53817e6e55a",
+    "base": "work/experience101-owned-cli-contract",
+    "at": "2026-10-30T07:24:53Z"
+  },
+  {
+    "number": 62,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience106-plan-uncertainty",
+    "head_sha": "6657689345aab21fa68e53df55b166a9eaf4504a",
+    "base": "work/experience105-request-flow",
+    "at": "2026-10-30T07:24:54Z"
+  },
+  {
+    "number": 63,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience108-scope-intent-authority",
+    "head_sha": "18ffeb69d4e8dd78641794c176dbb50e5f65a923",
+    "base": "work/experience107-request-continuation",
+    "at": "2026-10-30T07:24:56Z"
+  },
+  {
+    "number": 64,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience112-cli-continuation",
+    "head_sha": "c23c24db059121104d016fc888ab7f4aeb4a9190",
+    "base": "work/experience111-return-reading",
+    "at": "2026-10-30T07:24:58Z"
+  },
+  {
+    "number": 65,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience114-source-entry",
+    "head_sha": "e42ba06043f7bb16ec9a1c664bee7334a1d4bf3d",
+    "base": "work/experience113-return-cli",
+    "at": "2026-10-30T07:25:21Z"
+  },
+  {
+    "number": 66,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience116-condition-reference",
+    "head_sha": "16e066e56bfffa1d16b2aad3b6956cf5ec66cd8f",
+    "base": "work/experience115-typed-return",
+    "at": "2026-10-30T07:25:22Z"
+  },
+  {
+    "number": 67,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience118-condition-selection",
+    "head_sha": "dccbcce0b9d116cb1e85155cab282fece76395d7",
+    "base": "work/experience117-condition-return",
+    "at": "2026-10-30T07:25:24Z"
+  },
+  {
+    "number": 68,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience120-reference-vocabulary",
+    "head_sha": "14f7fa23f4c7691a1827f4f7891fad2ba5cbe451",
+    "base": "work/experience119-condition-return",
+    "at": "2026-10-30T07:25:26Z"
+  },
+  {
+    "number": 69,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience123-first-reading",
+    "head_sha": "5cfc1d14b8cca51a9b2a0d3dad8303f30df1bb15",
+    "base": "checkpoint/2026-10-15",
+    "at": "2026-10-30T07:25:28Z"
+  },
+  {
+    "number": 70,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience124-scoped-release",
+    "head_sha": "e50649b90328895a1f101a679c2657574f13344e",
+    "base": "checkpoint/2026-10-15",
+    "at": "2026-10-30T07:25:29Z"
+  },
+  {
+    "number": 71,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience126-connected-reading",
+    "head_sha": "2f9d1efd95e03a4dc84199ff92b0fc9c5a023ed2",
+    "base": "checkpoint/2026-10-15",
+    "at": "2026-10-30T07:25:31Z"
+  },
+  {
+    "number": 72,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience128-pc-entry",
+    "head_sha": "46c3cf270aff7d588babcd2a0ed0050d9489f3cc",
+    "base": "checkpoint/2026-10-15",
+    "at": "2026-10-30T07:25:32Z"
+  },
+  {
+    "number": 73,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience131-scope-budget",
+    "head_sha": "ef0780ba54763f9ce259aa89f862c92b215df827",
+    "base": "work/experience130-pc-continuation",
+    "at": "2026-10-30T07:25:34Z"
+  },
+  {
+    "number": 74,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience133-scope-time-authority",
+    "head_sha": "1ca0a446bf982cd758bc1f64919968b430d6de17",
+    "base": "work/experience132-scope-continuation",
+    "at": "2026-10-30T07:25:35Z"
+  },
+  {
+    "number": 75,
+    "state": "closed",
+    "merged": false,
+    "head": "work/experience135-withdrawal-target-reading",
+    "head_sha": "7a44c0530740d91a9fdfa0c7160f3a53168322e1",
+    "base": "work/experience134-scope-time-observation",
+    "at": "2026-10-30T07:25:37Z"
+  }
+]
