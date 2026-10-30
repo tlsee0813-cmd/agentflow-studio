@@ -122,8 +122,8 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
   // before anything is sent (never a partial table).
   let map7System = null;
   if (map7) { try { map7System = map7Prompt(ask); } catch { throw new ApiError('INPUT_TOO_LARGE', 413); } }
-  // AF131: the scope review reads the same whole evidence with reasoning as a plan, so it takes the plan's budget and timer (4096
-  // tokens and the general timeout cut a real review by length). Its prompt, input, checks and single attempt stay its own.
+  // AF131: scope reads the same whole evidence with reasoning as a plan. A real review ended by length under the 4096-token
+  // budget, before the general deadline. Scope now uses the plan budget/timer; its prompt, checks and single attempt stay its own.
   const controller = new AbortController(); let timedOut = false;
   const timer = setTimeout(() => { timedOut = true; controller.abort(); }, map ? (config.mapTimeoutMs ?? config.planTimeoutMs ?? config.timeoutMs) : planning || digest || scope ? (config.planTimeoutMs ?? config.timeoutMs) : config.timeoutMs);
   const abort = () => controller.abort(); signal?.addEventListener('abort', abort, { once: true });
