@@ -13,7 +13,8 @@
 //   T. Two history readings with the same time, quote, place and index: back to the second one's own button.
 //   S. A slow description correction of A ends while B's own is being written: B's form, text and caret stay over a late status.
 //   S2. The same part's correction closed and opened again while its first save waits: the new form, words and caret stay.
-//   (ONLY=followup runs T, S and S2 alone; ONLY=saves runs S and S2; ONLY=reopen runs S2 alone.)
+//   A. The question box after an answer: empty (as studio_browser.py main_flow:144 expects); a failed answer keeps the question.
+//   (ONLY=followup: T, S, S2, A; ONLY=saves: S, S2; ONLY=reopen: S2; ONLY=ask: A; ONLY=edits: A, R, S, S2.)
 import { createRequire } from 'node:module';
 import { spawn } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
@@ -260,12 +261,48 @@ async function reopened(browser, base) {
   await ctx.close();
 }
 
+/* ---------- A: the question box after an answer (the same steps as studio_browser.py main_flow to its line 144; stub answers) ---------- */
+async function askDraft(browser) {
+  const serve = stub => new Promise((res, rej) => { const proc = spawn(process.execPath, [`${ROOT}tests/studio-smoke-server.mjs`], { cwd: APP, env: { ...process.env, STUDIO_STUB: stub, PORT: '0' }, stdio: ['ignore', 'pipe', 'inherit'] });
+    proc.stdout.once('data', d => { const m = /READY (http:\/\/\S+)/.exec(String(d)); m ? res({ proc, base: m[1] }) : rej(new Error(String(d))); }); proc.once('exit', c => rej(new Error(`server exit ${c}`))); });
+  const Q = '휴무일은 어디서 정해?';
+  for (const stub of ['ok', 'fail']) {
+    const { proc, base } = await serve(stub), ctx = await browser.newContext({ viewport: { width: 1280, height: 720 } }), page = await ctx.newPage(), errors = [];
+    page.on('pageerror', e => errors.push(String(e)));
+    try {
+      await page.goto(`${base}/`); await page.waitForFunction(() => document.getElementById('ai-text')?.textContent.includes('AI 정리'));
+      await page.locator('.program-head[href="#/p/ex-salon"]').click(); await page.locator('.node', { hasText: '시간 고르기' }).click();
+      await page.locator('#lens-title', { hasText: '시간 고르기' }).waitFor(); await page.locator('#lens .lens-more').click(); await page.locator('#panel-title', { hasText: '시간 고르기' }).waitFor();
+      if (stub === 'ok') { await page.getByRole('button', { name: '지금 상황 정리' }).first().click(); await page.locator('.answer').first().waitFor(); }
+      // A draft survives switching parts, then is sent with Enter.
+      await page.locator('.ask-open').click(); await page.locator('#ask-input').fill(Q);
+      await page.locator('.kid, .panel-path a').first().click(); await page.locator('#lens-title', { hasText: '예약하기' }).waitFor();
+      await page.goBack(); await page.locator('#lens-title', { hasText: '시간 고르기' }).waitFor(); await page.locator('#lens .lens-more').click(); await page.locator('#panel-title', { hasText: '시간 고르기' }).waitFor();
+      assert.equal(await page.locator('#ask-input').inputValue(), Q, 'the draft survived switching parts');
+      await page.locator('#ask-input').press('Enter');
+      if (stub === 'ok') {
+        await page.waitForFunction(() => document.querySelectorAll('.answer').length === 2);
+        await page.waitForFunction(() => document.getElementById('ask-input')?.value === '', null, { timeout: 5000 }).catch(() => {});
+        assert.equal(await page.locator('#ask-input').inputValue(), '', 'answered: the question box is empty (studio_browser.py:144)');
+        ok('A answered: the question box is empty, as main_flow expects (stub answer)');
+      } else {
+        await page.locator('#panel .failed').waitFor();
+        assert.equal(await page.locator('#ask-input').inputValue(), Q, 'not answered: the question stays to send again');
+        ok('A not answered (the stub fails): the question stays in the box');
+      }
+      assert.deepEqual(errors, []);
+    } finally { await ctx.close(); proc.kill(); }
+  }
+}
+
 const { proc, base } = await start();
 const browser = await chromium.launch();
 try {
   if (!process.env.ONLY) { await wide(browser, base); await follow(browser, base); await late(browser, base); await narrow(browser, base); }
-  if (process.env.ONLY === 'reopen') await reopened(browser, base);
+  if (process.env.ONLY === 'ask') await askDraft(browser);
+  else if (process.env.ONLY === 'edits') { await askDraft(browser); await late(browser, base); await slowSave(browser, base); await reopened(browser, base); }
+  else if (process.env.ONLY === 'reopen') await reopened(browser, base);
   else if (process.env.ONLY === 'saves') { await slowSave(browser, base); await reopened(browser, base); }
-  else { await twinHistory(browser, base); await slowSave(browser, base); await reopened(browser, base); }
+  else { await twinHistory(browser, base); await slowSave(browser, base); await reopened(browser, base); await askDraft(browser); }
   console.log(`# ${results.length} checks passed`);
 } finally { await browser.close(); proc.kill(); }

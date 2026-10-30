@@ -1487,8 +1487,10 @@ function renderPanel(scrollTop: boolean) {
   const field = had instanceof HTMLTextAreaElement || had instanceof HTMLInputElement ? had : null;
   const caret = field && field.id ? { id: field.id, start: field.selectionStart, end: field.selectionEnd, dir: field.selectionDirection, top: field.scrollTop } : null;
   const mark = had && !caret ? (['claimFocus', 'requestFocus', 'far'] as const).map(k => [k, had.dataset[k]] as const).find(([, v]) => v !== undefined) ?? null : null;
-  // What is being written there and not saved yet (the name/description and role correction forms are rebuilt from the saved part).
-  const typed = same ? [...panel.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('textarea[id], input[id]:not([type=password]):not([type=file]):not([type=checkbox]):not([type=radio])')].map(f => [f.id, f.value] as const) : [];
+  // What is written in a form whose words live nowhere else until saved (name/description, the description correction: rebuilt from
+  // the saved part). The question box is not among them: its draft is kept apart (getDraft/setDraft) and is the authority, e.g.
+  // emptied once the question is answered.
+  const typed = same ? (['edit-name', 'edit-note', 'fix-role'] as const).map(id => document.getElementById(id)).filter((f): f is HTMLInputElement | HTMLTextAreaElement => (f instanceof HTMLInputElement || f instanceof HTMLTextAreaElement) && panel.contains(f)).map(f => [f.id, f.value] as const) : [];
   const path = partPath(o.view, part.id).slice(0, -1), records = subtreeRecords(o.view, part.id);
   const state = part.status === 'plan' ? (part.reading?.state ? stateLabel(part.reading) ?? '기록에서 읽음' : records.length ? '요청 기록 없음' : part.note ? '계획 설명만 있음 · 기록 없음' : '기록 없음') : STATUS_LABEL[part.status];
   const menuItems = [
