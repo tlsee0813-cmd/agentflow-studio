@@ -1,0 +1,28 @@
+{
+  "nature": "Preparation only from original legacy source, not the eventual UI job",
+  "schema": "studio.map.6",
+  "parts": 0,
+  "requests": 0,
+  "priors": 0,
+  "records": 1,
+  "askSha256": "d64857baa4b3e5fce53cc9bc4a2a754c042d64d87ba8bfa0cc3e6935b8cc1d11",
+  "promptSha256": "cef94b26c23e8c3c647dccddc399746da6957b127213e891e3d69fe0ada86886",
+  "inputKeys": [
+    "ask",
+    "parts",
+    "records",
+    "claims",
+    "coverage",
+    "after",
+    "problem"
+  ],
+  "skipped": null,
+  "coverage": {
+    "fresh": 1,
+    "sent": 1,
+    "partial": 0
+  },
+  "sourceTextSha256": "756db4bbad76cf675161432ddad31198e8f0a3ed2212bd66273e44865320c079",
+  "sourceCharacters": 3545,
+  "generationCalls": 0
+}
