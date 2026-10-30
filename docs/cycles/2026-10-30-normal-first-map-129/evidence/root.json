@@ -1,0 +1,144 @@
+{
+  "schema": "agentflow.root.normal-first-map.129",
+  "source": "0a63dcb7eb46fb7a0485a24d3f1451312f8c0b6f",
+  "app": "581571feee480a0079b4e105151409bb8be8ac92",
+  "runtimeCI": {
+    "source": "87afee7cdd93f9563b9f57965ba5f8bf77ea8be3",
+    "run": 40983872999,
+    "unchanged": true
+  },
+  "sourceRecord": {
+    "characters": 3545,
+    "sha256": "756db4bbad76cf675161432ddad31198e8f0a3ed2212bd66273e44865320c079",
+    "originalBackupSha256": "6c5bbfd44899c67e7478618a7d43bbbd69fd392598ef48bb160aafc81c8595b4",
+    "private": true
+  },
+  "request": {
+    "normalButton": true,
+    "posts": 1,
+    "httpStatus": 202,
+    "job": "MJ_a560f026-0527-4e93-b6cb-fc948e0d49ec",
+    "askSha256": "7d135bfeaecb82558bff9017b9e3f4a41f5235fe444da5633726e9c5cb3f90c3",
+    "actualAskExactlyFrozen": true,
+    "coverage": {
+      "fresh": 1,
+      "sent": 1,
+      "partial": 0
+    },
+    "schema": "studio.map.6",
+    "parts": 0,
+    "requests": 0,
+    "priors": 0,
+    "execution": {
+      "executor": "codex-cli-preview.102",
+      "version": "codex-cli 0.165.0-alpha.1.2",
+      "binarySha256": "5c1b55966bf9f757dcbf00065c9a6cb862ead55d34b015f1be1939ff18e43943",
+      "model": "gpt-6.1-sol",
+      "reasoning": "high",
+      "permissions": "503b611008cf71b170ce6aedf247526e85ccf1da896529645866af8a19889396",
+      "wrapper": "dd56ff8327f0b957f18ccc6af7c6334935901014e36539c35c91e16279c02ae5",
+      "scope": "map7-later",
+      "selectionMs": 299000,
+      "verdictMs": 300000,
+      "policy": "5704c8b7660c78f9a9eed0be215d5283d1fe800c413f09085b1345274c679954",
+      "promptKind": "first",
+      "prompt": "cef94b26c23e",
+      "promptSha256": "cef94b26c23e8c3c647dccddc399746da6957b127213e891e3d69fe0ada86886",
+      "askSha256": "7d135bfeaecb82558bff9017b9e3f4a41f5235fe444da5633726e9c5cb3f90c3",
+      "observed": {
+        "startedAt": "2026-10-30T01:21:44.688Z",
+        "closedAtMs": 110519.76360000003,
+        "decidedAtMs": 110521.5612,
+        "closed": true,
+        "exit": 0,
+        "signal": null,
+        "reason": null,
+        "events": 4,
+        "usage": {
+          "input_tokens": 16179,
+          "cached_input_tokens": 0,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 5083,
+          "reasoning_output_tokens": 3106
+        },
+        "stdoutBytes": 8235,
+        "stderrBytes": 158,
+        "signals": {
+          "sent": 0,
+          "skippedAfterExit": 0
+        },
+        "stdioCut": false,
+        "verdictAtMs": 110525.13010000001,
+        "finalSha256": "6a11dd309aedba968cc94ad9b03e01355add15b3b7e5b05769fbc3fc361e5e8a",
+        "finalBytes": 7304
+      }
+    }
+  },
+  "delivery": {
+    "state": "ready",
+    "acceptedAt": "2026-10-30T01:21:44.681Z",
+    "readyAt": "2026-10-30T01:23:35.214Z",
+    "elapsedMs": 110533,
+    "meaningNotInferredFromDelivery": true,
+    "leaseReleased": {
+      "why": "closed",
+      "at": "2026-10-30T01:23:35.218Z"
+    },
+    "providerInternalRetryCount": "unobserved",
+    "providerUsage": "not exposed in saved job result",
+    "cost": "unknown"
+  },
+  "meaning": {
+    "A1": "summary/role describe requested improvement; two known defects describes, requirements want; no implementation-complete claim",
+    "A2": "partial progress, narrow tests, unknown, unmerged and old unclassified reports separated",
+    "A3": "same exact request/item and specific prior match; branch/version, manual correction snapshot, validate/apply and ambiguous target preserved",
+    "A4": "shared aggregate, current/history, source-return, legacy/backup responsibilities retained",
+    "A5": "folder conversion and nested RQ kept as material; no real subsystem or request match created"
+  },
+  "independent": {
+    "report": "experience129-independent-review.json",
+    "sha256": "37a68bb89a46bf81cc2b2808d991df04a4bead33b58f7b649e4a39e522faa7a8",
+    "verdict": "A1-A5 bounded PASS; no additional P1/P2",
+    "scope": "new response and source only; UI owned by Root"
+  },
+  "ui": {
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "awayProjectDraftCharacters": 98,
+    "awayDraftSurvivedReload": true,
+    "originHadZeroPartsBeforeExplicitApply": true,
+    "homeShowedResultArrived": true,
+    "explicitResultView": true,
+    "areas": 5,
+    "relations": 2,
+    "readings": 1,
+    "wireMaterialRecords": 2,
+    "noExampleFolderSubsystem": true,
+    "quoteMatchedOriginal": true,
+    "quoteBackSameSelectedURL": true,
+    "sourceTextExact": true,
+    "workspaceAcrossReloadByteExact": true,
+    "plansAcrossReloadByteExact": true,
+    "priorEntriesWholeExact": true,
+    "normalDownloadedBackupWholeProjectExact": true,
+    "nextIntentSavedAndReloaded": true,
+    "nextPlanButtonDisabled": true,
+    "nextBoundary": "Server has no AI key; map-only PC entry. No plan/scope call."
+  },
+  "limits": [
+    "One bounded normal FIRST product case; no generic quality estimate",
+    "Does not close121 actual RETURN away/ready flow",
+    "Full reading remains narrow and dense for long requirements",
+    "Source reader shows original examples but no distinct material labels observed",
+    "One new-project click while job pending did not leave form open; cause not established, continued via existing separate project",
+    "No new connector or full request-to-return proof"
+  ],
+  "generationInvocations": 1,
+  "retriesByCoordinator": 0,
+  "outputRepairs": 0,
+  "planCalls": 0,
+  "scopeCalls": 0,
+  "publicDeployments": 0
+}
