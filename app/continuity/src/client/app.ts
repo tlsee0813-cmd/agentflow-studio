@@ -2148,11 +2148,12 @@ function showQuote(record: string, quote: string, from?: number) {
 }
 /** In the sheet: the part as read from records (the description and the person's correction of it, the current claims), then the
  * evidence history apart, folded. Correcting the description never touches the name, the note or the claims. */
-let fixingRole: string | null = null;
+/** The description being corrected: this entry's part (an imported copy shares part ids, so the entry is part of it). */
+let fixingRole: { key: string; part: string } | null = null;
 function understoodSection(o: Opened, part: PartView): HTMLElement | null {
   const u = part.reading; if (!u) return null;
   const sec = h('section', { class: 'sec sec-understood' }, h('h3', {}, '기록에서 읽은 이해'));
-  if (fixingRole === part.id && o.kind === 'saved') {
+  if (fixingRole?.key === o.key && fixingRole.part === part.id && o.kind === 'saved') {
     const area = h('textarea', { id: 'fix-role', rows: '3', maxlength: '300' }) as HTMLTextAreaElement; area.value = u.role ?? '';
     const msg = h('p', { class: 'form-msg', role: 'status' });
     sec.append(h('form', { class: 'edit-form', onsubmit: async (e: Event) => {
@@ -2160,13 +2161,15 @@ function understoodSection(o: Opened, part: PartView): HTMLElement | null {
       let next: Project;
       try { next = correctReadingRole(o.project, part.id, area.value); } catch { msg.textContent = '설명은 1~300자로 적어 주세요.'; return; }
       const failed = await commit(o, next); if (failed) { msg.textContent = failed; return; }
+      // This correction is done; one begun meanwhile on another part (or entry) is that part's own and stays open.
+      if (fixingRole?.key === o.key && fixingRole.part === part.id) fixingRole = null;
       if (opened !== o) return;
-      fixingRole = null; renderSpace('keep'); if (selected === part.id) select(part.id);
+      renderSpace('keep'); if (selected === part.id) select(part.id);
     } }, h('label', { for: 'fix-role' }, '설명 바로잡기 ', h('small', {}, '이름·내 설명·기록의 주장은 그대로예요')), area, msg,
       h('div', { class: 'row' }, h('button', { type: 'submit', class: 'primary small' }, '저장'), h('button', { type: 'button', class: 'link-button', onclick: () => { fixingRole = null; renderPanel(false); } }, '취소'))));
   } else if (u.role) {
     sec.append(h('p', { class: 'und-role' }, u.role), h('p', { class: 'src', title: u.roleAbout ?? '' }, u.corrected ? `직접 바로잡은 설명 · ${fullTime(u.corrected.at)}` : `기록에서 읽은 설명${u.roleAbout ? ` · ${displayAbout(u.roleAbout)} 기준` : ''}${u.roleBasisRevised ? REVISED_BASIS : ''}`,
-      o.kind === 'saved' ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { fixingRole = part.id; renderPanel(false); requestAnimationFrame(() => document.getElementById('fix-role')?.focus()); } }, ' 설명 바로잡기') : null));
+      o.kind === 'saved' ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { fixingRole = { key: o.key, part: part.id }; renderPanel(false); requestAnimationFrame(() => document.getElementById('fix-role')?.focus()); } }, ' 설명 바로잡기') : null));
     const basis = roleBasisBlock(o, part.id, u, 'sheet'); if (basis) sec.append(basis);
     // Descriptions read later that did not replace this one (no record said it supersedes it) read apart, with their version.
     for (const x of u.others.slice(0, 2)) sec.append(h('p', { class: 'und-later' }, h('span', { title: x.about ?? '' }, `다른 기록의 설명${x.about ? ` · ${displayAbout(x.about)}` : ''} · 현재 설명을 대체한다는 근거 없음`), x.text));
@@ -2174,14 +2177,14 @@ function understoodSection(o: Opened, part: PartView): HTMLElement | null {
   // The full reading reads every current claim, as the lens does (claimList takes them all).
   if (u.claims.length) sec.append(claimList(part.id, u.claims, u.claims.length));
   const requested = currentRequestResults(o, part.id); if (requested) sec.append(requested);
-  // The history fold and its quotes keep their identity (this entry, part and reading time): back from an original it is open again
-  // and the same quote has focus.
+  // The history fold and its quotes keep their identity (this entry and part; each quote by its stored reading, index and place):
+  // back from an original the fold is open again and the same quote has focus, also between two readings with the same time.
   const histKey = `${o.key}|${part.id}|history`;
   const hist = h('details', { class: 'und-history', open: lensOpen.has(histKey) }, h('summary', {}, `근거 이력 · 정리 ${u.history.length}회`),
     h('ol', {}, ...[...u.history].reverse().map(x => h('li', {}, h('span', { class: 'uh-at' }, fullTime(x.at)),
       x.role ? h('span', { class: 'uh-role' }, x.role) : null,
       ...x.claims.map((c, j) => h('span', { class: 'uh-claim' }, h('span', { class: 'cl-kind' }, CLAIM_LABEL[c.kind]), c.text, ' ',
-        h('button', { type: 'button', class: 'cl-cite', 'data-claim-focus': JSON.stringify([part.id, 'history', x.at, j, c.record, c.from ?? null]), title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote, c.from) }, '근거')))))));
+        h('button', { type: 'button', class: 'cl-cite', 'data-claim-focus': JSON.stringify([part.id, 'history', x.reading, j, c.record, c.from ?? null]), title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote, c.from) }, '근거')))))));
   hist.addEventListener('toggle', () => { if (hist.open) lensOpen.add(histKey); else lensOpen.delete(histKey); });
   sec.append(hist);
   return sec;

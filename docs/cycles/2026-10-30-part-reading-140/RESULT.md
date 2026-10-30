@@ -35,6 +35,18 @@
 - **기준 대비(별도 worktree, 0dd12a7).** 같은 node 검사 2/2와 흐름이 실패한다(렌즈 주장 12개). 같은 저장 project를 두 빌드로 읽은 지도 ask와 변경안 원자료 ask·origins는 바이트 동일하다(14,490 bytes). 다른 것은 주장 수(12→13)뿐이다.
 - **관련 회귀.** `partUnderstanding`을 쓰는 node 검사 7개 파일 92/92(current73, grounded74, map70, request71, role80, uncertainty76, claims140). `reading123-flow` 11 ok(123 설명→주장→관계), `connected126-flow` 19 ok(126 넓은 읽기).
 
+## 후속 수리 2건 (Root·독립 Sol 코드 검토, 후보 d1f0e98)
+
+1. **결함 — 근거 이력 단추 키 충돌.** 근거 이력 단추의 키가 `x.at`·index·record·from이었다. 시각, 인용, 위치, index가 같은 다른 reading 두 건(재대조·복사가 저장한 replay)이면 키가 같아서, 원문에서 돌아올 때 첫 단추로 갔다.
+   - **수리.** 키를 저장된 history의 `x.reading` ID로 바꿨다. index·record·from 좌표는 유지한다.
+2. **결함 — 다른 부분의 설명 바로잡기 폼이 지워짐.** A의 설명 바로잡기 저장이 끝날 때 `fixingRole = null`이 전역으로 실행됐다. 그 사이 같은 project의 B에서 바로잡기를 쓰고 있었다면, 다음 재렌더에 B의 저장 전 폼이 사라졌다.
+   - **수리.** 바로잡기 상태를 {entry key, part}로 두었다(가져온 사본은 part id를 공유하므로 entry key가 필요하다). A의 저장은 지금 상태가 바로 그 A일 때만 닫는다. B의 폼, 글, caret은 기존 재렌더 보존으로 남는다.
+- **검증(작성자 fixture, 원 fixture와 분리).**
+  - T: `part140-case.mjs` `twins()`로 같은 시각·인용·위치·index의 두 reading을 만들고, 두 번째 원문을 연 뒤 돌아오면 그 두 번째 단추에 초점이 가고 접힘이 열려 있다.
+  - S: 작업공간 lock을 잡아 A의 저장을 늦춘다. 그 사이 B에서 바로잡기를 작성(caret 5–12 backward)하고, A 저장이 끝나고 늦은 status가 도착해도 B의 폼·글·caret이 남는다. 저장된 것은 A의 정정 1건뿐이다.
+  - 두 검사 모두 d1f0e98 별도 worktree에서는 실패하고(키 동일, B 폼 사라짐) 수리 후 통과한다.
+  - 이 회차에는 `part140-flow` 9/9(`ONLY=followup`이면 T·S만), `claims140` 2/2, 타입 검사만 다시 돌렸다. 이미 통과한 다른 기존 회귀는 반복하지 않았다.
+
 ## 실행하지 않은 검사와 한계
 
 - 잠금 TS 5.8.3, continuity 전체 node, Python 브라우저 회귀(75 관계 note 왕복 등 `studio_browser.py`), 75/126/129/139 전체 suite는 돌리지 않았다(지시대로). 새 AI 호출, 136 재시도, 생성도 0이다.
@@ -49,4 +61,4 @@
 
 ## 변경 파일
 
-`app/continuity/src/client/app.ts`, `app/continuity/public/styles.css`, `app/continuity/src/shared/map-reading.ts`(`partUnderstanding` 반환 잘림 1줄), 새 검사 `app/continuity/tests/{part140-case.mjs, part140-flow.mjs, claims140.test.mjs}`, 이 RESULT.
+`app/continuity/src/client/app.ts`, `app/continuity/public/styles.css`, `app/continuity/src/shared/map-reading.ts`(`partUnderstanding` 반환 잘림 1줄), 새 검사 `app/continuity/tests/{part140-case.mjs(build, twins), part140-flow.mjs, claims140.test.mjs}`, 이 RESULT.

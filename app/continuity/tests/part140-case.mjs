@@ -46,3 +46,17 @@ export function build({ D, M, S, studioView }) {
   more(LIMITS, inp => [c(LIMITS.slice(4), piece(inp, '제한:'))]);
   return { project: JSON.parse(S.serializeProject(p)), engine, evalId, vm };
 }
+
+/** AF140 follow-up fixture: one part whose history holds two readings with the same time and the very same claim (same record,
+ * quote, place and index), as a stored replay of a reading keeps them (a re-comparison or a copy); only their reading ids differ. */
+export function twins({ D, M, S, studioView }) {
+  let p = D.pasteRecord(D.rename(D.createProject(), '같은 시각 두 읽기 · 140'), '요구: 설정 화면은 저장 전에 입력을 검사한다.\n검사에 실패하면 저장하지 않는다.', null).project;
+  const inp = M.buildMapAsk(p, studioView(p), [], undefined, M.MAP6_SCHEMA), at = w => inp.ask.records.flatMap(r => r.spans).find(s => s.t.trimStart().startsWith(w)).s;
+  const reply = { summary: '[스텁] 설정 화면', candidates: [], gaps: [], matches: [], material: [], relations: [], parts: [{ ref: 'new:settings', name: '설정 화면', parent: null, role: '[스텁] 저장 전에 입력을 검사하는 화면이다.', roleAbout: null, roleReplaces: null,
+    basis: [at('요구:')], claims: [{ kind: 'want', text: '[스텁] 검사에 실패하면 저장하지 않기를 원함', at: at('검사에 실패하면'), about: null, replaces: null, key: 's1' }] }] };
+  const when = '2026-10-30T01:00:00.000Z';
+  const { project, created } = M.applyReading(p, inp, M.validateMapReply(reply, inp.ask), { id: 'R_twin_a', at: when, model: 'stub', prompt: 'm6-000000000140', hash: 'b'.repeat(64) });
+  const first = project.readings.find(r => r.id === 'R_twin_a');
+  const both = { ...project, readings: [...project.readings, { ...structuredClone(first), id: 'R_twin_b', hash: 'c'.repeat(64) }] };
+  return { project: JSON.parse(S.serializeProject(both)), part: created[0] };
+}

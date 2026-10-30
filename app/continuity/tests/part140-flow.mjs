@@ -10,6 +10,9 @@
 //   F. A relation followed from the surface, then Back: the same surface, scroll and camera; Esc to the lens with the camera, Esc out.
 //   R. A late status re-renders the surface: the focused quote keeps focus; an edit field keeps its text, caret and selection.
 //   N. 1000×700 and 700×800: the surface fits the window, its way back in view, no sideways scroll; reload: stores byte for byte.
+//   T. Two history readings with the same time, quote, place and index: back to the second one's own button.
+//   S. A slow description correction of A ends while B's own is being written: B's form, text and caret stay over a late status.
+//   (ONLY=followup runs T and S alone.)
 import { createRequire } from 'node:module';
 import { spawn } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
@@ -25,10 +28,11 @@ const W = 'agentflow.idea015.workspace', PLANS = 'agentflow.studio.plans.1', MAI
 const CAMERA = () => document.getElementById('world').style.transform;
 
 /* ---------- the project (author-written: part140-case.mjs) ---------- */
-const { FEATURES, LIMITS, build } = await import('./part140-case.mjs');
+const { FEATURES, LIMITS, build, twins } = await import('./part140-case.mjs');
 const X = build({ D, M, S, studioView });
 const entry = (entryId, project) => ({ entryId, state: 'active', lifecycle: 1, seq: 1, createdAt: new Date().toISOString(), trashedAt: null, origin: 'new', project });
-const SEED = { [W]: JSON.stringify({ version: 'agentflow.workspace.1', migratedFromLegacy: false, entries: [entry(MAIN, X.project)] }) };
+const seedOf = project => ({ [W]: JSON.stringify({ version: 'agentflow.workspace.1', migratedFromLegacy: false, entries: [entry(MAIN, project)] }) });
+const SEED = seedOf(X.project), TW = twins({ D, M, S, studioView });
 
 /* ---------- server, page ---------- */
 function start() {
@@ -37,7 +41,7 @@ function start() {
 }
 const results = [];
 const ok = (name, detail = '') => { results.push(name); console.log(`ok - ${name}${detail ? ` · ${detail}` : ''}`); };
-async function context(browser, base, size = [1280, 720], hold = false) {
+async function context(browser, base, size = [1280, 720], hold = false, seed = SEED) {
   const ctx = await browser.newContext({ viewport: { width: size[0], height: size[1] } });
   const page = await ctx.newPage(), errors = [], sent = [];
   page.on('pageerror', e => errors.push(String(e)));
@@ -45,7 +49,7 @@ async function context(browser, base, size = [1280, 720], hold = false) {
   let release = () => {};
   if (hold) { const gate = new Promise(r => { release = r; }); await page.route('**/api/studio/status', async route => { await gate; await route.continue(); }); }
   await page.goto(`${base}/`);
-  await page.evaluate(x => { localStorage.clear(); sessionStorage.clear(); for (const [k, v] of Object.entries(x)) localStorage.setItem(k, v); }, SEED);
+  await page.evaluate(x => { localStorage.clear(); sessionStorage.clear(); for (const [k, v] of Object.entries(x)) localStorage.setItem(k, v); }, seed);
   await page.evaluate(h => history.replaceState(null, '', h), `#/p/${MAIN}`); await page.reload();
   await page.locator('#world .node').first().waitFor();
   return { ctx, page, errors, sent, release };
@@ -185,9 +189,54 @@ async function narrow(browser, base) {
   }
 }
 
+/* ---------- T: two readings with the same time and the same quote: back to the second one's own button ---------- */
+async function twinHistory(browser, base) {
+  const { ctx, page, errors, sent } = await context(browser, base, [1280, 720], false, seedOf(TW.project));
+  await selectPart(page, TW.part); await openSurface(page);
+  const hist = page.locator('#panel .und-history'); await hist.locator(':scope > summary').click();
+  const cites = hist.locator('.cl-cite'); assert.equal(await cites.count(), 2);
+  const keys = await cites.evaluateAll(b => b.map(x => x.dataset.claimFocus)); assert.notEqual(keys[0], keys[1], 'two buttons, two identities');
+  assert.deepEqual(await hist.locator('.uh-at').allTextContents().then(t => new Set(t).size), 1, 'the same time');
+  await cites.nth(1).focus(); await cites.nth(1).click(); await page.locator('#lens .rr-mark').waitFor();
+  assert.equal(await page.locator('#lens .rr-mark').textContent(), '검사에 실패하면 저장하지 않는다.');
+  await page.keyboard.press('Escape'); await surface(page).waitFor();
+  assert.equal(await page.evaluate(() => [...document.querySelectorAll('#panel .und-history .cl-cite')].indexOf(document.activeElement)), 1, 'the second button, not the first');
+  assert.equal(await page.locator('#panel .und-history').getAttribute('open'), '');
+  assert.deepEqual(sent, []); assert.deepEqual(errors, []);
+  ok('T two history readings with the same time, quote, place and index: back to the second one\'s own button (its reading id)');
+  await ctx.close();
+}
+
+/* ---------- S: a slow description correction of A, B's own correction begun meanwhile ---------- */
+async function slowSave(browser, base) {
+  const { ctx, page, errors, sent, release } = await context(browser, base, [1280, 720], true);
+  await selectPart(page, X.engine); await openSurface(page);
+  await page.locator('#panel .sec-understood').getByRole('button', { name: '설명 바로잡기' }).click();
+  await page.locator('#fix-role').fill('[스텁] A의 바로잡은 설명');
+  // The save waits on the workspace lock (held here), as a slow storage would make it.
+  await page.evaluate(() => { window.__hold = new Promise(r => { window.__open = r; }); navigator.locks.request('agentflow.idea015.workspace', () => window.__hold); });
+  await page.locator('#panel .sec-understood').getByRole('button', { name: '저장' }).click(); await page.waitForTimeout(200);
+  // B: the eval part, from the surface's own inside link; its own correction begun.
+  await page.locator(`#panel .kids a`).first().click(); await page.locator('#lens .lens-more').waitFor(); await openSurface(page);
+  assert.equal(await page.locator('#panel-title').textContent(), 'eval');
+  await page.locator('#panel .sec-understood').getByRole('button', { name: '설명 바로잡기' }).click();
+  const fix = page.locator('#fix-role'); await fix.fill('[스텁] B의 아직 저장하지 않은 설명'); await fix.evaluate(e => e.setSelectionRange(5, 12, 'backward'));
+  // A's save ends, then a late status re-renders the surface.
+  await page.evaluate(() => window.__open()); await page.waitForFunction(k => JSON.parse(localStorage.getItem(k)).entries[0].project.readings.some(r => r.version === 'map-correction.1'), W);
+  release(); await page.waitForFunction(() => document.getElementById('ai-pill')?.dataset.state !== 'checking'); await page.waitForTimeout(250);
+  const st = await page.evaluate(() => { const e = document.getElementById('fix-role'); return e ? { here: document.activeElement === e, v: e.value, s: e.selectionStart, t: e.selectionEnd, d: e.selectionDirection } : null; });
+  assert.deepEqual(st, { here: true, v: '[스텁] B의 아직 저장하지 않은 설명', s: 5, t: 12, d: 'backward' }, 'B\'s correction stays open with its text and caret');
+  const saved = await page.evaluate(k => JSON.parse(localStorage.getItem(k)).entries[0].project.readings.filter(r => r.version === 'map-correction.1').map(r => r.text), W);
+  assert.deepEqual(saved, ['[스텁] A의 바로잡은 설명'], 'only A\'s correction was saved');
+  assert.deepEqual(sent, []); assert.deepEqual(errors, []);
+  ok('S A\'s slow correction ends while B\'s is being written: B\'s form, text and caret stay over a late status; only A saved');
+  await ctx.close();
+}
+
 const { proc, base } = await start();
 const browser = await chromium.launch();
 try {
-  await wide(browser, base); await follow(browser, base); await late(browser, base); await narrow(browser, base);
+  if (process.env.ONLY !== 'followup') { await wide(browser, base); await follow(browser, base); await late(browser, base); await narrow(browser, base); }
+  await twinHistory(browser, base); await slowSave(browser, base);
   console.log(`# ${results.length} checks passed`);
 } finally { await browser.close(); proc.kill(); }
