@@ -321,11 +321,12 @@ test('SESSIONS-G1 a reply keeps the time of its first piece while it grows: the 
   assert.equal(parseClaude(rows.slice(0, 3)).turns[1].at, at(1));
   assert.deepEqual(parseClaude(rows).turns[1], { role: 'assistant', at: at(1), text: 'PART1\n\nPART2', files: [] });
   assert.deepEqual(P.sessionDetail('claude-' + 'a'.repeat(24), 'claude', parseClaude(rows), undefined, at(1)).turns.map(t => t.text), ['PART1\n\nPART2']);
-  // A subagent's change before the reply's first words gives the reply its time, whichever of the two was read first.
+  // A subagent's change gives a reply its time only when it has none: a reply keeps its own time, so a change that comes back late
+  // (an edit approved later, timed when it was asked) never moves a reply taken before back behind its mark.
   const said = { timestamp: at(5), type: 'response_item', payload: { type: 'message', role: 'assistant', content: [{ type: 'output_text', text: '붙였어요.' }] } };
   const parent = [desktopMeta(PARENT), desktopUser(1, [['user.text', '알림 붙여 줘']])], child = [parseCodex(desktopChild('c1', 2))];
   assert.equal(P.withSubagents(parseCodex(parent), child).turns[1].at, at(3));
-  assert.equal(P.withSubagents(parseCodex([...parent, said]), child).turns[1].at, at(3));
+  assert.equal(P.withSubagents(parseCodex([...parent, said]), child).turns[1].at, at(5));
 });
 
 test('SESSIONS-X3 a Codex thread continued across the CLI and Desktop keeps both sides, each prompt once', () => {
@@ -459,5 +460,20 @@ test('SESSIONS-L2 a listing reads a file again only when its size or time change
     assert.equal(await title(), '휴무일 연결', 'same size and time: what was read before holds');
     utimesSync(f, st.atime, new Date(st.mtimeMs + 1000));
     assert.equal(await title(), '휴무일 이음');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('SESSIONS-A1 a Codex thread archived before a look took it is still listed (archived_sessions), once by its id', async () => {
+  const dir = home();
+  try {
+    const roots = writeSessionHome(dir), arch = join(roots.codex, 'archived_sessions'); mkdirSync(arch, { recursive: true });
+    writeFileSync(join(arch, 'rollout-2026-10-29T10-00-00-parent.jsonl'), desktopParent().map(r => JSON.stringify(r)).join('\n'));
+    const sessions = openSessions({ env: {}, roots });
+    const listed = (await sessions.list()).sessions.filter(x => x.preview.startsWith('휴무일을 예약'));
+    assert.equal(listed.length, 1); assert.equal(listed[0].id, await (await import('../dist/public/shared/session-parse.js')).sessionId('codex', `codex:${PARENT}`));
+    // The same thread still in sessions/ too (a copy left behind): one session, the newest file.
+    const day = join(roots.codex, 'sessions', '2026', '10', '29'); mkdirSync(day, { recursive: true });
+    writeFileSync(join(day, 'rollout-2026-10-29T10-00-00-parent.jsonl'), desktopParent().map(r => JSON.stringify(r)).join('\n'));
+    assert.equal((await openSessions({ env: {}, roots }).list()).sessions.filter(x => x.preview.startsWith('휴무일을 예약')).length, 1);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });

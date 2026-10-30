@@ -253,7 +253,8 @@ export function withSubagents(s: ParsedSession, subagents: ParsedSession[]): Par
     if (u < 0) continue;
     let r = turns[u + 1];
     if (!r || r.role !== 'assistant') { r = { role: 'assistant', at: c.at, text: '', files: [] }; turns.splice(u + 1, 0, r); }
-    else if (c.at && (!r.at || c.at < r.at)) r.at = c.at;
+    // A reply keeps the time it had: a subagent's change that comes back late (an approval) must not move it before a mark.
+    else if (c.at && !r.at) r.at = c.at;
     for (const f of c.files) if (!r.files!.includes(f)) r.files!.push(f);
   }
   return { ...s, turns, changes: [...s.changes, ...subagents.flatMap(x => x.changes)] };
@@ -316,19 +317,21 @@ export function sessionSummary(id: string, tool: SessionTool, head: ParsedSessio
 }
 /** A whole parsed session as sent to the page: newest turns within the reply budget (the earlier ones counted as omitted), each
  * turn clipped, changed files relative to the working folder. since: only turns from that time on (a turn with no time is kept),
- * so what was already taken does not use up the budget and nothing newer is left out for it. A handover document the person
+ * oldest first within the budget, so a reading from a mark goes on where it stopped: rest counts the newer turns not sent yet
+ * (read again from the new mark); the first two are always sent, so such a reading always moves on. A handover document the person
  * pasted is folded to its one line before a prompt is clipped, so their own words after a long document are kept. */
 export function sessionDetail(id: string, tool: SessionTool, s: ParsedSession, limits: Pick<SessionLimits, 'turnChars' | 'replyChars'> = SESSION_LIMITS, since: string | null = null): SessionDetail & { version: string } {
   const from = since ? Date.parse(since) : NaN;
   const turns = Number.isFinite(from) ? s.turns.filter(t => !t.at || !(Date.parse(t.at) < from)) : s.turns;
-  const kept: SessionTurn[] = []; let used = 0;
-  for (let i = turns.length - 1; i >= 0; i--) {
-    const t = turns[i]!, text = clip(t.role === 'user' ? foldHandover(t.text) : t.text, limits.turnChars), files = [...new Set((t.files ?? []).map(x => shortPath(x, s.meta.cwds.find(c => shortPath(x, c) !== x) ?? s.meta.cwd)))];
-    used += text.length + files.join('').length; if (used > limits.replyChars && kept.length) break;
-    kept.unshift({ role: t.role, at: t.at, text, ...(t.role === 'assistant' ? { files } : {}) });
+  const forward = Number.isFinite(from), kept: SessionTurn[] = []; let used = 0;
+  for (let k = 0; k < turns.length; k++) {
+    const t = turns[forward ? k : turns.length - 1 - k]!, text = clip(t.role === 'user' ? foldHandover(t.text) : t.text, limits.turnChars), files = [...new Set((t.files ?? []).map(x => shortPath(x, s.meta.cwds.find(c => shortPath(x, c) !== x) ?? s.meta.cwd)))];
+    used += text.length + files.join('').length; if (used > limits.replyChars && kept.length >= (forward ? 2 : 1)) break;
+    const turn = { role: t.role, at: t.at, text, ...(t.role === 'assistant' ? { files } : {}) };
+    if (forward) kept.push(turn); else kept.unshift(turn);
   }
   return { version: SESSION_VERSION, id, tool, label: TOOL_LABEL[tool], title: s.meta.title, cwd: s.meta.cwd, branch: s.meta.branch, startedAt: s.meta.startedAt,
-    turns: kept, omitted: turns.length - kept.length };
+    turns: kept, omitted: forward ? 0 : turns.length - kept.length, ...(forward ? { rest: turns.length - kept.length } : {}) };
 }
 /** An opaque session id from a stable name of its file (a real path on the server, a path inside the picked folder in the page). */
 export async function sessionId(tool: SessionTool, name: string): Promise<string> {

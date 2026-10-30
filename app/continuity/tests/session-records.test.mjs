@@ -5,7 +5,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as D from '../dist/public/shared/domain.js';
 import { redactSecrets, secretLike } from '../dist/public/shared/secret.js';
-import { sessionText, sessionChunks, newTurns, markAfter, leftSince, recordParts, readSessionDetail, stamp } from '../dist/public/shared/session-import.js';
+import { sessionText, sessionChunks, newTurns, markAfter, leftSince, recordParts, NEXT_RECORD, readSessionDetail, stamp } from '../dist/public/shared/session-import.js';
 import { sessionDetail, within } from '../dist/public/shared/session-parse.js';
 import { sessionOrigin, partSessions } from '../dist/public/shared/handover.js';
 import { PASTED_TEXT_LIMIT } from '../dist/public/shared/types.js';
@@ -78,7 +78,7 @@ test('SESSIONS-RC1 a reply taken while it was being written comes back with only
   const look1 = session([{ role: 'user', at: T(0), text: '테스트 고쳐 줘' }, { role: 'assistant', at: T(1), text: PART1, files: ['src/a.ts'] }]);
   assert.equal(newTurns(look1, null).length, 2);
   const mark = markAfter(look1, null, T(2));
-  assert.equal(mark.lastAt, T(1)); assert.equal(mark.reply.chars, PART1.length); assert.equal(mark.reply.files, 1);
+  assert.equal(mark.lastAt, T(1)); assert.equal(mark.reply.chars, PART1.length); assert.deepEqual(mark.reply.files, ['src/a.ts']);
   // Read from the mark on: the reply (its time is its first piece's) went on and changed another file; a new prompt followed.
   const grown = [{ role: 'assistant', at: T(1), text: `${PART1}\n\n${PART2}`, files: ['src/a.ts', 'src/b.ts'] }, { role: 'user', at: T(9), text: '다음 것도' }];
   const taken = newTurns(session(grown), mark);
@@ -96,6 +96,11 @@ test('SESSIONS-RC1 a reply taken while it was being written comes back with only
   assert.deepEqual(newTurns(session([{ role: 'assistant', at: T(1), text: `${'x'.repeat(50)}\n…(이후 900자 생략)`, files: ['a.ts', 'c.ts'] }]), cmark).map(t => [t.text, t.files, !!t.cont]), [['', ['c.ts'], true]]);
   const files = sessionChunks(session([]), [{ role: 'assistant', at: T(1), text: '', files: ['c.ts'], cont: true }])[0];
   assert.ok(files.endsWith(`── Claude Code 답변(이어서) · ${stamp(T(1))} ──\n(바꾼 파일: c.ts)`), files);
+  // A subagent's file joins a reply after its own ones: files are told by name, so a new file of the reply's own is never lost
+  // behind one taken before, and none is taken twice. A mark kept before (a count) still reads.
+  const sub = markAfter(session([{ role: 'assistant', at: T(1), text: PART1, files: ['src/notify.ts'] }]), null, T(2));
+  assert.deepEqual(newTurns(session([{ role: 'assistant', at: T(1), text: PART1, files: ['src/booking.ts', 'src/notify.ts'] }]), sub).map(t => t.files), [['src/booking.ts']]);
+  assert.deepEqual(newTurns(session(grown), { ...mark, reply: { ...mark.reply, files: 1 } }).map(t => t.files ?? null), [['src/b.ts'], null]);
   // A mark from before (no reply kept): the turn at its time counts as taken, as it did.
   assert.deepEqual(newTurns(session(grown), { lastAt: T(1), count: 2, updatedAt: T(2) }).map(t => t.text), ['다음 것도']);
   // Turns with no times go by count: the reply taken last is the count's last.
@@ -104,22 +109,26 @@ test('SESSIONS-RC1 a reply taken while it was being written comes back with only
   assert.deepEqual(newTurns(untimed([look1.turns[0], ...grown]), umark).map(t => [t.text, !!t.cont]), [[PART2, true], ['다음 것도', false]]);
 });
 
-test('SESSIONS-RC2 turns after the mark that a reading left out (its budget) are said in the first record, never dropped silently', () => {
+test('SESSIONS-RC2 turns after the mark that one reading cannot hold are read on from each new mark, oldest first: none is dropped', () => {
   const turns = [{ role: 'user', at: T(0), text: '시작' }, { role: 'assistant', at: T(1), text: '좋아요' }];
   for (let i = 0; i < 10; i++) turns.push({ role: 'user', at: T(10 + 2 * i), text: `요청 ${i}` }, { role: 'assistant', at: T(11 + 2 * i), text: 'r'.repeat(1000) });
-  const mark = markAfter(session(turns.slice(0, 2)), null, T(2));
+  let mark = markAfter(session(turns.slice(0, 2)), null, T(2));
   const parsed = { meta: { cwd: '/work/salon', cwds: ['/work/salon'], branch: 'main', startedAt: null, title: null, thread: null, parent: null }, turns, changes: [] };
   const read = (limits, since) => readSessionDetail(JSON.parse(JSON.stringify(sessionDetail(ID, 'claude', parsed, limits, since))));
-  const d = read({ turnChars: 20000, replyChars: 5000 }, mark.lastAt);
-  assert.ok(d.omitted > 1 && d.turns[0].at > mark.lastAt);
-  // The reply taken last is the oldest left out: the rest are the new ones not read.
-  assert.equal(leftSince(d, mark), d.omitted - 1);
-  const first = sessionChunks(d, newTurns(d, mark), undefined, leftSince(d, mark))[0];
-  assert.ok(first.includes(`(앞의 대화 ${d.omitted - 1}개는 길이 제한으로 넣지 않았어요.)`), first);
-  // Nothing left out, or a reading that still holds the mark's turn (no gap): nothing to say.
-  assert.equal(leftSince(read({ turnChars: 20000, replyChars: 300000 }, mark.lastAt), mark), 0);
+  const got = []; let pages = 0;
+  for (;;) {
+    const d = read({ turnChars: 20000, replyChars: 5000 }, mark.lastAt); pages++;
+    assert.equal(d.omitted, 0); assert.equal(leftSince(d, mark), 0, 'a reading from the mark leaves nothing out before what it sends');
+    got.push(...sessionChunks(d, newTurns(d, mark)));
+    const next = markAfter(d, mark, T(40)); if (!d.rest) break;
+    assert.ok(next.lastAt > mark.lastAt, 'each reading moves the mark on'); mark = next;
+  }
+  assert.ok(pages > 2);
+  for (let i = 0; i < 10; i++) assert.equal(got.filter(t => new RegExp(`요청 ${i}(?:\\n|$)`).test(t)).length, 1, `요청 ${i}`);
+  // A reading with no time (the paste box) still sends the newest turns and says how many earlier ones were left.
+  assert.ok(read({ turnChars: 20000, replyChars: 5000 }, null).omitted > 0);
   assert.equal(leftSince({ ...session(turns.slice(0, 6)), omitted: 2 }, mark), 0, 'a reading from before the mark (no since) has no gap');
-  assert.equal(leftSince({ ...d, omitted: 3 }, null), 3, 'with no mark, every turn left out is said');
+  assert.equal(leftSince({ ...session(turns), omitted: 3 }, null), 3, 'with no mark, every turn left out is said');
 });
 
 test('SESSIONS-RC3 a long stretch becomes several records within the limit, every turn once and in order', () => {
@@ -132,15 +141,18 @@ test('SESSIONS-RC3 a long stretch becomes several records within the limit, ever
   assert.ok(chunks[0].includes('(앞의 대화 4개는') && !chunks.slice(1).some(c => c.includes('(앞의 대화')));
 });
 
-test('SESSIONS-RT2 a draft holding sessions after other text is kept as one record per session, each told by its own header', () => {
+test('SESSIONS-RT2 a session put after other text is kept as a record of its own (the box puts a line between); a header quoted inside a conversation does not cut it', () => {
   const A = sessionText(session([{ role: 'user', at: T(0), text: '화면 고쳐 줘' }, { role: 'assistant', at: T(1), text: '했어요', files: ['a.ts'] }], { cwd: '/work/front' })).text;
   const B = sessionText(session([{ role: 'user', at: T(2), text: '[AgentFlow 인수인계 문서를 받아 이어감 · af-handover:QW3RTY:A_api · 나의 프로젝트 › 서버]\n서버 이어서' }], { id: OLD, cwd: '/work/server', branch: 'api' })).text;
   assert.deepEqual(recordParts(A), [A], 'one session: the text exactly as written');
   assert.deepEqual(recordParts('메모만 있어요\n\n둘째 줄'), ['메모만 있어요\n\n둘째 줄']);
-  assert.deepEqual(recordParts(`${A}\n\n${B}`), [A, B]);
-  assert.deepEqual(recordParts(`서버 쪽 작업 기록\n\n${B}\n\n`), ['서버 쪽 작업 기록', B]);
+  assert.deepEqual(recordParts(`${A}\n\n${NEXT_RECORD}\n\n${B}`), [A, B]);
+  assert.deepEqual(recordParts(`서버 쪽 작업 기록\n\n${NEXT_RECORD}\n\n${B}\n\n`), ['서버 쪽 작업 기록', B]);
+  // A record quoted in a prompt (pasted into the tool) or written by a reply stays inside the session that holds it.
+  const quoting = sessionText(session([{ role: 'user', at: T(3), text: `이 기록 봐 줘\n\n${B}\n\n여기까지가 기록이야. 결제 화면부터 해 줘` }, { role: 'assistant', at: T(4), text: '했어요', files: ['a.ts'] }])).text;
+  assert.deepEqual(recordParts(quoting), [quoting]);
   let p = D.createProject();
-  for (const t of recordParts(`${A}\n\n${B}`)) p = D.pasteRecord(p, t, null).project;
+  for (const t of recordParts(`${A}\n\n${NEXT_RECORD}\n\n${B}`)) p = D.pasteRecord(p, t, null).project;
   assert.deepEqual(partSessions(p, null).map(s => [s.id, s.cwd]).sort(), [[ID, '/work/front'], [OLD, '/work/server']].sort());
   assert.deepEqual(partSessions(p, 'A_api').map(s => [s.id, s.tookOver]), [[OLD, true]], 'the takeover is credited to the session that took it');
 });
@@ -226,13 +238,14 @@ test('SESSIONS-AS4 a reply read while being written is continued, reading from t
   await t.sync.tick();
   assert.deepEqual(src.reads.at(-1), [ID, S1.turns[1].at], 'read from the mark on');
   assert.equal(t.texts().length, 2); assert.ok(t.texts()[1].includes(PART2) && !t.texts()[1].includes('PART-ONE'), t.texts()[1]);
-  // A long stretch after the mark that the reading cannot send whole: the first record says how much was left out.
+  // A long stretch after the mark that one reading cannot send whole: it is read on from each new mark, every turn once.
   const S2 = { id: OLD, cwd: '/x', updatedAt: ago(100), turns: pair(120, '시작', '좋아요') }, src2 = source([S2], { limits: { turnChars: 20000, replyChars: 5000 } }), u = tab(src2);
   u.sync.connect('/x'); await settle();
   for (let i = 0; i < 10; i++) S2.turns.push({ role: 'user', at: ago(90 - 2 * i), text: `요청 ${i}` }, { role: 'assistant', at: ago(89 - 2 * i), text: 'r'.repeat(1000) });
   S2.updatedAt = ago(5); await u.sync.tick();
-  assert.match(u.texts()[1], /\(앞의 대화 \d+개는 길이 제한으로 넣지 않았어요\.\)/);
-  assert.ok(u.texts()[1].includes('요청 9') && !u.texts()[1].includes('요청 0\n'));
+  const later = u.texts().slice(1).join('\n');
+  assert.ok(!later.includes('길이 제한으로 넣지 않았어요'), later);
+  for (let i = 0; i < 10; i++) assert.equal(u.texts().filter(x => new RegExp(`요청 ${i}(?:\\n|$)`).test(x)).length, 1, `요청 ${i}`);
 });
 
 test('SESSIONS-AS5 marks hold across ids, disconnecting and other tabs: nothing is taken twice', async () => {
@@ -255,4 +268,23 @@ test('SESSIONS-AS5 marks hold across ids, disconnecting and other tabs: nothing 
   assert.notDeepEqual(t.binding().marks[ID], before); assert.ok(t.binding().marks[ID].lastAt > before.lastAt);
   await t.sync.tick(true);
   assert.equal(t.texts().filter(x => x.includes('PROMPT-THREE')).length, 1);
+});
+
+test('SESSIONS-AS6 each session is marked as soon as its records are kept: a look cut short (a tab closed) takes nothing twice', async () => {
+  const A = { id: ID, cwd: '/w', updatedAt: ago(30), turns: pair(40, 'A-ONE', 'a') }, B = { id: OLD, cwd: '/w', updatedAt: ago(29), turns: pair(38, 'B-ONE', 'b') };
+  const src = source([A, B]), read = src.read.bind(src); let hang = false;
+  src.read = (id, since) => (hang && id === OLD ? new Promise(() => {}) : read(id, since));
+  const t = tab(src); t.sync.connect('/w'); await settle();
+  assert.equal(t.texts().length, 2);
+  A.turns.push(...pair(10, 'A-TWO', 'a2')); A.updatedAt = ago(5); B.turns.push(...pair(9, 'B-TWO', 'b2')); B.updatedAt = ago(4);
+  hang = true; void t.sync.tick(true); await settle();
+  assert.equal(t.texts().filter(x => x.includes('A-TWO')).length, 1);
+  assert.ok(t.binding().marks[ID].lastAt >= A.turns.at(-1).at, 'A is marked while B is still being read');
+  // The tab is gone; another one opens the project and looks.
+  hang = false; const u = tab(src, { kv: t.kv, opened: t.opened }); await u.sync.tick(true);
+  assert.equal(u.texts().filter(x => x.includes('A-TWO')).length, 1); assert.equal(u.texts().filter(x => x.includes('B-TWO')).length, 1);
+});
+
+test('SESSIONS-RT3 a draft with no next-record line is kept exactly, its last line break too', () => {
+  for (const t of ['기록 한 줄\n', '  들여쓴 글\n\n\n', '[Claude Code 세션 기록 · 세션 claude-0123456789abcdef01234567]\n\n── 사용자 요청 ──\n가\n']) assert.deepEqual(recordParts(t), [t]);
 });

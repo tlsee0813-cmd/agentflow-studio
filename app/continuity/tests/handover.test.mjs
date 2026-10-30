@@ -207,3 +207,14 @@ test('HANDOVER-X1 an answer\'s files go to the request of its own session, even 
   const s = handoverText(q, { scope: pay, code: 'XRS234', at: AT });
   assert.ok(s.includes('- 로그인 화면 문구만 바꿔 줘, 결제 버튼 글자도 → 바꾼 파일: src/login.tsx\n') && !s.includes('src/pay.ts'), s);
 });
+
+test('HANDOVER-B3 a web record header is read by the shape of its fields, in any order; its files line may follow a bullet', () => {
+  const o = t => { const x = sessionOrigin(t); return [x.title, x.cwd, x.branch]; };
+  assert.deepEqual(o('[웹 AI 세션 기록 · 브랜치 전략 정하기]'), ['브랜치 전략 정하기', null, null], 'a branch name has no spaces');
+  assert.deepEqual(o('[웹 AI 세션 기록 · 작업 폴더 구조 정리]'), ['작업 폴더 구조 정리', null, null], 'a folder is a path');
+  assert.deepEqual(o('[웹 AI 세션 기록 · 로그인 수정 · 작업 폴더 C:\\work\\salon · 브랜치 main · 2026-10-29]'), ['로그인 수정 · 2026-10-29', 'C:\\work\\salon', 'main']);
+  assert.deepEqual(o('[웹 AI 세션 기록 · 로그인 수정 · 브랜치 main · 작업 폴더 /work/바탕 화면/salon]'), ['로그인 수정', '/work/바탕 화면/salon', 'main']);
+  const answer = '[웹 AI 세션 기록 · 로그인 수정]\n\n── 사용자 요청 ──\n로그인 버튼 고쳐 줘\n\n── 웹 AI 답변 ──\n고쳤어요\n- (바꾼 파일: src/login.tsx, app/(auth)/page.tsx)';
+  const p = D.pasteRecord(D.createProject(), answer, null).project;
+  assert.ok(handoverText(p, { scope: null, code: 'WEB345', at: '2026-10-30T05:00:00.000Z' }).includes('- 로그인 버튼 고쳐 줘 → 바꾼 파일: src/login.tsx, app/(auth)/page.tsx'));
+});

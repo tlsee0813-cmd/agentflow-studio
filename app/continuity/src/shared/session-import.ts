@@ -9,7 +9,8 @@ export interface SessionTurn { role: 'user' | 'assistant'; at: string | null; te
 /** aliases: ids the same session had before ids were made from the session itself (from its file's path): marks kept under one
  * of them still hold. */
 export interface SessionSummary { id: string; tool: 'claude' | 'codex'; title: string | null; preview: string; cwd: string | null; branch: string | null; startedAt: string | null; updatedAt: string; bytes: number; aliases?: string[] }
-export interface SessionDetail { id: string; tool: 'claude' | 'codex'; label: string; title: string | null; cwd: string | null; branch: string | null; startedAt: string | null; turns: SessionTurn[]; omitted: number }
+/** omitted: earlier turns left out; rest (a reading from a time on): newer turns not sent yet, read from the new mark. */
+export interface SessionDetail { id: string; tool: 'claude' | 'codex'; label: string; title: string | null; cwd: string | null; branch: string | null; startedAt: string | null; turns: SessionTurn[]; omitted: number; rest?: number }
 export const TOOL_NAME: Record<SessionDetail['tool'], string> = { claude: 'Claude Code', codex: 'Codex' };
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -79,14 +80,15 @@ export function readSessionDetail(v: unknown): SessionDetail | null {
     if (!t || (t.role !== 'user' && t.role !== 'assistant') || typeof t.text !== 'string') return null;
     turns.push({ role: t.role, at: str(t.at), text: t.text, ...(Array.isArray(t.files) ? { files: t.files.filter((f): f is string => typeof f === 'string') } : {}) });
   }
-  return { id: x.id, tool: x.tool === 'codex' ? 'codex' : 'claude', label: str(x.label) ?? '', title: str(x.title), cwd: str(x.cwd), branch: str(x.branch), startedAt: str(x.startedAt), turns, omitted: Number(x.omitted) || 0 };
+  return { id: x.id, tool: x.tool === 'codex' ? 'codex' : 'claude', label: str(x.label) ?? '', title: str(x.title), cwd: str(x.cwd), branch: str(x.branch), startedAt: str(x.startedAt), turns, omitted: Number(x.omitted) || 0, ...(Number(x.rest) > 0 ? { rest: Number(x.rest) } : {}) };
 }
 
 /* ---------- automatic connection: a project bound to a working folder takes each session's new turns as records ---------- */
 /** How far one session was taken: the time of the last turn taken (null when its turns carry none) and how many were taken.
- * reply: when that last turn was a reply, how much of it was taken (its length, a checksum of it, how many files), so a reply that
- * was still being written gives only what it gained when it is read again. */
-export interface SessionMark { lastAt: string | null; count: number; updatedAt: string; reply?: { chars: number; sum: string; files: number } }
+ * reply: when that last turn was a reply, how much of it was taken (its length, a checksum of it, the files it named), so a reply
+ * that was still being written gives only what it gained when it is read again. A file joins a reply in no fixed place (a subagent's
+ * changes come after the reply's own), so files are told by name; a mark kept before that holds their count. */
+export interface SessionMark { lastAt: string | null; count: number; updatedAt: string; reply?: { chars: number; sum: string; files: string[] | number } }
 /** A short checksum of a text (FNV-1a): whether a reply still starts with what was taken of it. */
 export function textSum(t: string): string { let h = 0x811c9dc5; for (let i = 0; i < t.length; i++) h = Math.imul(h ^ t.charCodeAt(i), 0x01000193); return (h >>> 0).toString(16); }
 /** The turns of a session not taken yet: after the mark's time, or past its count when the turns have no times. Without a mark,
@@ -102,7 +104,8 @@ export function newTurns(s: SessionDetail, mark: SessionMark | null, from: strin
   // it still starts with what was taken). A reply cut at its length limit reads differently once it grew: its new files only.
   const same = head.text.length >= r.chars && textSum(head.text.slice(0, r.chars)) === r.sum;
   if (!same && lastAt && head.at !== lastAt) return after;
-  const more = same ? head.text.slice(r.chars).replace(/^\s+/, '') : '', files = (head.files ?? []).slice(r.files);
+  const taken = r.files, more = same ? head.text.slice(r.chars).replace(/^\s+/, '') : '';
+  const files = Array.isArray(taken) ? (head.files ?? []).filter(f => !taken.includes(f)) : (head.files ?? []).slice(taken);
   return [...(more || files.length ? [{ role: 'assistant' as const, at: head.at, text: more, files, cont: true }] : []), ...after.filter(t => t !== head)];
 }
 /** The mark once every turn of this reading is taken: its last time, and how much of its last turn when that is a reply. */
@@ -110,7 +113,7 @@ export function markAfter(s: SessionDetail, was: SessionMark | null, updatedAt: 
   const last = s.turns.at(-1); if (!last) return was ? { ...was, updatedAt } : { lastAt: null, count: s.omitted, updatedAt };
   const lastAt = [...s.turns].reverse().find(t => t.at)?.at ?? was?.lastAt ?? null;
   return { lastAt, count: s.omitted + s.turns.length, updatedAt,
-    ...(last.role === 'assistant' && (last.at ?? null) === lastAt ? { reply: { chars: last.text.length, sum: textSum(last.text), files: last.files?.length ?? 0 } } : {}) };
+    ...(last.role === 'assistant' && (last.at ?? null) === lastAt ? { reply: { chars: last.text.length, sum: textSum(last.text), files: [...(last.files ?? [])] } } : {}) };
 }
 /** Turns after the mark that the reading left out (it sends the newest within its budget): the first record says how many. */
 export function leftSince(s: SessionDetail, mark: SessionMark | null): number {
@@ -136,12 +139,16 @@ export function sessionChunks(s: SessionDetail, turns: TakenTurn[], limit = PAST
   }
   return out;
 }
-/** A draft cut where each session record in it starts (its header line), so each is kept as a record of its own: a session's
- * header is read at the start of a record only, so one put after other text would not be told. One part when there is none. */
+/** The line the paste box puts between what was in it and a session put after it: each side is kept as a record of its own (a
+ * session's header is read at the start of a record only). Only this line cuts a draft: a header line quoted inside a conversation
+ * (a record pasted into a session, a reply that writes the format) stays where it is. */
+export const NEXT_RECORD = '──────── 다음 기록 ────────';
+/** A draft cut at each NEXT_RECORD line, each part kept as a record of its own. One part when there is none. */
 export function recordParts(text: string): string[] {
-  const at = [...text.matchAll(/^\[(?:Claude Code|Codex|웹 AI) 세션 기록(?: · [^\n]*)?\]/gm)].map(m => m.index).filter(i => i > 0);
-  if (!at.length) return [text];
-  return [0, ...at].map((i, k, all) => text.slice(i, all[k + 1] ?? text.length).replace(/\s+$/, '')).filter(t => t.trim());
+  // A draft with no such line is kept exactly as written.
+  const cut = text.split(/^[ \t]*──────── 다음 기록 ────────[ \t]*$/m); if (cut.length === 1) return [text];
+  const parts = cut.map(t => t.replace(/^\s*\n/, '').replace(/\s+$/, '')).filter(t => t.trim());
+  return parts.length ? parts : [text];
 }
 /** When a session counts as settled: its file has not changed for this long, so a reply being written is not taken half-way. */
 export const SETTLE_MS = 2 * 60 * 1000;

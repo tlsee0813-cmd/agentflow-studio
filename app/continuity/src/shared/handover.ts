@@ -19,12 +19,17 @@ const HEAD = /^\[(Claude Code|Codex|웹 AI) 세션 기록(?: · ([^\n]*))?\]/;
 export function sessionOrigin(text: string): SessionOrigin | null {
   const m = HEAD.exec(text); if (!m) return null;
   const tool = m[1] === 'Codex' ? 'codex' : m[1] === '웹 AI' ? 'web' : 'claude', fields = (m[2] ?? '').split(' · ').map(f => f.trim()).filter(Boolean);
-  // sessionText writes the title first, then folder, branch, start and id, each only when known: they are read back from the end in
-  // that order and what is left is the title, so a title that starts like a field ('세션 만료 처리') or holds ' · ' stays whole.
-  const back = (re: RegExp) => { const x = fields.length ? re.exec(fields.at(-1)!) : null; if (x) fields.pop(); return x?.[1]?.trim() || null; };
-  const id = back(/^세션 ((?:claude|codex)-[0-9a-f]{24})$/); back(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}) 시작$/);
-  const branch = back(/^브랜치 (.+)$/), cwd = back(/^작업 폴더 (.+)$/);
-  return { id, tool, title: fields.join(' · ') || null, cwd, branch };
+  // A field is told by its shape, wherever it stands (a web AI may add one or change the order): a session id, a start time, a branch
+  // name (no spaces, as git has it), a folder path. Each is taken once, from the end, where sessionText writes them; everything else
+  // is the title, so a title that starts like a field ('세션 만료 처리', '브랜치 전략 정하기', '작업 폴더 정리') or holds ' · ' stays whole.
+  const FIELD: Record<'id' | 'start' | 'branch' | 'cwd', RegExp> = { id: /^세션 ((?:claude|codex)-[0-9a-f]{24})$/, start: /^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}) 시작$/,
+    branch: /^브랜치 ((?:[^\s·]|\[가려진 비밀값\])+)$/, cwd: /^작업 폴더 ((?:[A-Za-z]:[\\/]|\\\\|\/|~[\\/]?)[^·]*)$/ };
+  const got: Partial<Record<keyof typeof FIELD, string>> = {}, title: string[] = [];
+  for (const f of [...fields].reverse()) {
+    const kind = (Object.keys(FIELD) as (keyof typeof FIELD)[]).find(k => !got[k] && FIELD[k].test(f));
+    if (kind) got[kind] = FIELD[kind].exec(f)![1]!.trim(); else title.unshift(f);
+  }
+  return { id: got.id ?? null, tool, title: title.join(' · ') || null, cwd: got.cwd ?? null, branch: got.branch ?? null };
 }
 /** A session record pasted by hand (a web session's, written back with WEB_RECORD_ASK): each request folded as the import folds
  * it, so a handover document the session started from is not kept again as a record of work. Any other text stays as written. */
@@ -105,8 +110,9 @@ function sessionTurns(p: Project, only: Set<string> | null): Turn[] {
     for (const part of rec.text.split(/^── /m).slice(1)) {
       const nl = part.indexOf('\n'), head = part.slice(0, nl), body = part.slice(nl + 1).trim();
       if (head.startsWith('사용자 요청')) { const t = shown ? { at: `${rec.at}|${out.length}`, text: body, files: [], origin } : null; if (t) out.push(t); asked.set(key, t); continue; }
-      // The list is the answer's last line, read to its last ')' so a name like app/(auth)/page.tsx stays whole.
-      const f = /^\(바꾼 파일: (.+)\)$/.exec(body.slice(body.lastIndexOf('\n') + 1).trim()), last = asked.get(key);
+      // The list is on the answer's last line (a web AI may put it after a bullet), read to its last ')' so a name like
+      // app/(auth)/page.tsx stays whole.
+      const f = /\(바꾼 파일: (.+)\)\s*$/.exec(body.slice(body.lastIndexOf('\n') + 1).trim()), last = asked.get(key);
       if (f && last) last.files.push(...f[1]!.split(', '));
     }
   }

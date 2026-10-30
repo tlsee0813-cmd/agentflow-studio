@@ -81,8 +81,8 @@ async function fresh<T>(h: FileHandle, use: (file: File) => Promise<T>): Promise
 /** How far a picked folder is walked. The tools' own folders are walked as the server reads them (Codex days newest first), up to
  * WALK_FILES session files; any other folder (one picked by mistake) WALK_DEPTH deep and WALK_ENTRIES entries in all. */
 const WALK_DEPTH = 6, WALK_ENTRIES = 20000, WALK_FILES = 20000;
-// Never sessions of their own: archived Codex threads (the server leaves them out too) and subagents' transcripts.
-const SKIP = new Set(['node_modules', 'archived_sessions', 'subagents']);
+// Never sessions of their own: subagents' transcripts (read with the session that started them).
+const SKIP = new Set(['node_modules', 'subagents']);
 /** A session file found. path: inside the picked folder, starting with its name (the old id was made of it); key: the same, per
  * picked folder (two may share a name); dir: the folder it lies in (a Claude Code session's subagents are in a folder beside it). */
 interface Found { tool: SessionTool | null; path: string; key: string; handle: FileHandle; dir: DirHandle; size: number; at: number }
@@ -108,14 +108,19 @@ async function walk(root: DirHandle, rootKey: string): Promise<{ found: Found[];
   const claude = async (list: Entry[], path: string) => {
     for (const d of dirs(list)) for (const e of await entries(d)) { if (cut) return; if (e.kind === 'file' && e.name.endsWith('.jsonl')) await add(e, d, `${path}${d.name}/${e.name}`, 'claude'); }
   };
-  // Codex: sessions/YYYY/MM/DD/rollout-*.jsonl, newest days first, so a bound cuts the oldest (archived_sessions is not read).
+  // Codex: sessions/YYYY/MM/DD/rollout-*.jsonl, newest days first, so a bound cuts the oldest. A thread archived in Codex moves to
+  // archived_sessions/ with its id: it is read there too (one archived before a look took it is not lost; its id is the same).
+  const archived = async (list: Entry[], dir: DirHandle, path: string) => {
+    for (const e of list) { if (cut) return; if (e.kind === 'file' && /^rollout-.*\.jsonl$/.test(e.name)) await add(e, dir, `${path}${e.name}`, 'codex'); }
+  };
   const codex = async (list: Entry[], path: string) => {
     for (const y of newest(list)) for (const m of newest(await entries(y))) for (const d of newest(await entries(m)))
       for (const e of await entries(d)) { if (cut) return; if (e.kind === 'file' && /^rollout-.*\.jsonl$/.test(e.name)) await add(e, d, `${path}${y.name}/${m.name}/${d.name}/${e.name}`, 'codex'); }
   };
   const tools = async (list: Entry[], path: string) => {
-    const p = named(list, 'projects'), s = named(list, 'sessions');
+    const p = named(list, 'projects'), s = named(list, 'sessions'), a = named(list, 'archived_sessions');
     if (p) await claude(await entries(p, true), `${path}projects/`); if (s) await codex(await entries(s, true), `${path}sessions/`);
+    if (a) await archived(await entries(a), a, `${path}archived_sessions/`);
     return !!(p || s);
   };
   // Any other folder: its .jsonl files, the tool told by where they lie or else by their lines.
@@ -134,6 +139,7 @@ async function walk(root: DirHandle, rootKey: string): Promise<{ found: Found[];
   // (looked at first: a home folder may have a projects folder of its own).
   if (root.name === 'projects') await claude(top, '');
   else if (root.name === 'sessions') await codex(top, '');
+  else if (root.name === 'archived_sessions') await archived(top, root, '');
   else {
     let home = false;
     for (const n of ['.claude', '.codex']) { const d = named(top, n); if (d && (await tools(await entries(d, true), `${n}/`))) home = true; }
@@ -141,15 +147,9 @@ async function walk(root: DirHandle, rootKey: string): Promise<{ found: Found[];
   }
   return { found, cut };
 }
-/** How a folder just picked lies to one picked before: the same folder, inside it, around it, or apart (or the browser cannot tell). */
-async function relation(d: DirHandle, r: DirHandle): Promise<'same' | 'inside' | 'around' | null> {
-  try {
-    if (await d.isSameEntry?.(r)) return 'same';
-    if (await r.resolve?.(d)) return 'inside';
-    if (await d.resolve?.(r)) return 'around';
-  } catch { /* cannot tell */ }
-  return null;
-}
+/** Whether a folder just picked is one picked before (folders inside one another are both kept: a walk does not read everything
+ * under a folder, and a session found through both is listed once by its id). */
+async function same(d: DirHandle, r: DirHandle): Promise<boolean> { try { return !!(await d.isSameEntry?.(r)); } catch { return false; } }
 
 /** What a listing knows of one session file: its row (null when it holds no prompt: not a session, or a Codex subagent's), the
  * folders it worked in, and for a Codex subagent's the session that started it. key: the size and time it was read at. */
@@ -230,13 +230,14 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
   const folderSource: SessionSource = {
     kind: 'folder',
     async list(folder = null) {
-      const found: Found[] = [], names = labels(); let cut = false;
+      const found: Found[] = [], names = labels(), bad: string[] = []; let cut = false, cause: unknown = null;
       for (const [i, r] of roots.entries()) {
-        // A picked folder that cannot be read at all (moved, deleted, a WSL folder while WSL is off) fails the look, rather than
-        // show it as a folder with no sessions.
-        const w = await walk(r, rootKey(r)).catch((e: unknown) => { looked = `${names[i]} 폴더를 읽지 못했어요.`; throw Object.assign(new Error('SESSION_FOLDER_UNREADABLE'), { code: 'SESSION_FOLDER_UNREADABLE', cause: e }); });
-        found.push(...w.found); cut ||= w.cut;
+        // A picked folder that cannot be read at all (moved, deleted, a WSL folder while WSL is off) is named on the panel and the
+        // others are read; when none can be read the look fails, rather than show folders with no sessions.
+        try { const w = await walk(r, rootKey(r)); found.push(...w.found); cut ||= w.cut; } catch (e) { bad.push(names[i]!); cause = e; }
       }
+      const unreadable = bad.length ? `${bad.join(', ')} 폴더를 읽지 못했어요.` : null;
+      if (roots.length && bad.length === roots.length) { looked = unreadable; throw Object.assign(new Error('SESSION_FOLDER_UNREADABLE'), { code: 'SESSION_FOLDER_UNREADABLE', cause }); }
       found.sort((a, b) => b.at - a.at); lastFound = found;
       const out: SessionSummary[] = [], byId = new Map<string, SessionSummary>(); let sessions = 0, quiet = 0;
       for (const f of found) {
@@ -259,7 +260,7 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
         if (folder && !within(h.cwds, folder)) continue;
         out.push(row);
       }
-      looked = cut ? '세션 파일이 너무 많아 일부만 읽었어요.' : null;
+      looked = [unreadable, cut ? '세션 파일이 너무 많아 일부만 읽었어요.' : null].filter(Boolean).join(' ') || null;
       return readSessionList({ version: 'sessions.1', sessions: out });
     },
     async read(id, since = null) {
@@ -289,13 +290,10 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
     async pick(): Promise<boolean> {
       const p = picker(); if (!p) return false;
       let d: DirHandle; try { d = await p.call(window, { id: 'af-sessions', mode: 'read' }); } catch { return false; }
-      // A folder already read (the same one, or one inside a picked folder) adds nothing; one around picked folders takes their place.
-      const near = await Promise.all(roots.map(r => relation(d, r))), names = labels();
-      const same = near.indexOf('same'), inside = near.indexOf('inside'), around = names.filter((_, i) => near[i] === 'around');
-      if (same >= 0) { picked = `이미 고른 폴더(${names[same]})예요.`; return false; }
-      if (inside >= 0) { picked = `이미 고른 폴더(${names[inside]}) 안에 있어서 따로 더하지 않았어요.`; return false; }
-      picked = around.length ? `이미 고른 폴더(${around.join(', ')})를 품은 폴더라 하나로 합쳤어요.` : null;
-      roots = [...roots.filter((_, i) => near[i] !== 'around'), d];
+      // The same folder picked again adds nothing.
+      const at = (await Promise.all(roots.map(r => same(d, r)))).indexOf(true);
+      if (at >= 0) { picked = `이미 고른 폴더(${labels()[at]})예요.`; return false; }
+      picked = null; roots = [...roots, d];
       heads.clear(); await saveRoots(roots); await check(); return true;
     },
     /** Asks the browser again to let this page read the picked folders. Must run from a click. */

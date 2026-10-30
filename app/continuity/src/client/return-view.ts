@@ -15,7 +15,7 @@ import { clip } from '../shared/studio.js';
 import { ui62Reading, savedReading, readingInput, recordTitle, partLabel, type ReadingInput, type ReadingSource } from './digest-source.js';
 import { digestStore, askHash, makeReading, type Reading } from './digest-store.js';
 import { askDigest, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
-import { sessionText, recordParts, stamp, TOOL_NAME, type SessionSummary, type SessionDetail } from '../shared/session-import.js';
+import { sessionText, recordParts, NEXT_RECORD, stamp, TOOL_NAME, type SessionSummary, type SessionDetail } from '../shared/session-import.js';
 import { readSessionFile, type SessionSources } from './session-source.js';
 import { WEB_RECORD_ASK, foldRecord } from '../shared/handover.js';
 import { PASTED_TEXT_LIMIT } from '../shared/types.js';
@@ -216,8 +216,8 @@ export function createReturnView(host: ReturnHost) {
     if (secretLike(text)) { s.pasteMsg = '키나 토큰처럼 보이는 글이 있어 저장하지 않았어요. 그 부분을 지우고 다시 저장하세요.'; render(); return; }
     // The box stays editable while saving: only the text that was saved leaves the draft. Whatever was written meanwhile stays,
     // and the box stays open with it. A pane closed or reopened meanwhile is another state: it is only told by the draft.
-    // Each session record in the draft is kept as its own record: a session is told by its header line at a record's start. A
-    // handover document a pasted session started from is kept as one line, as the import keeps it.
+    // A session put after other text is kept as its own record (the box put a NEXT_RECORD line before it): a session is told by its
+    // header line at a record's start. A handover document a pasted session started from is kept as one line, as the import keeps it.
     const st = s, parts = recordParts(text).map(foldRecord); st.saving = true; render();
     const done = await host.paste(parts, st.pasteContext);
     st.saving = false;
@@ -269,14 +269,14 @@ export function createReturnView(host: ReturnHost) {
     catch (e) { p.error = ERROR_TEXT[(e as { code?: string } | null)?.code ?? ''] ?? '세션 파일을 읽지 못했어요.'; }
     p.reading = null; if (s?.key === key) render();
   }
-  /** Whatever is in the box stays: the session comes after it, within what one record can hold, and is saved as a record of its
-   * own (recordParts), so it is still told by its header. */
+  /** Whatever is in the box stays: the session comes after it, under a NEXT_RECORD line, within what one record can hold, and is
+   * saved as a record of its own (recordParts), so it is still told by its header. */
   function fill(key: string, p: SessionPick, detail: SessionDetail) {
-    const before = draftOf(key), room = PASTED_TEXT_LIMIT - (before ? before.length + 2 : 0);
+    const before = draftOf(key).replace(/\s+$/, ''), room = PASTED_TEXT_LIMIT - (before ? before.length + NEXT_RECORD.length + 4 : 0);
     if (room < 2000) { p.error = '초안칸에 이미 글이 많아요. 지금 글을 저장하거나 비운 뒤 가져오세요.'; return; }
     const got = sessionText(detail, room);
     if (!got.turns) { p.error = '이 세션에는 가져올 대화가 없어요.'; return; }
-    keepDraft(key, before ? `${before}\n\n${got.text}` : got.text);
+    keepDraft(key, before ? `${before}\n\n${NEXT_RECORD}\n\n${got.text}` : got.text);
     p.open = false;
     p.note = [`${TOOL_NAME[detail.tool]} 세션에서 대화 ${got.turns}개를 넣었어요.`, got.left ? `앞의 ${got.left}개는 길이 제한으로 뺐어요.` : '',
       got.redacted ? `키·토큰처럼 보이는 ${got.redacted}곳은 가렸어요.` : '', before ? '앞에 있던 글과는 따로 저장돼요.' : '', '읽어 보고 ‘기록 저장’을 누르세요.'].filter(Boolean).join(' ');

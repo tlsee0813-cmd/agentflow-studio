@@ -1,7 +1,7 @@
 // Local session records: the conversations Claude Code and Codex already keep on this PC, read so the person can bring one into a
 // project without copying it by hand. Local Node server only (never the Worker or a static build): it reads the person's own files.
 //   Claude Code: <CLAUDE_CONFIG_DIR or ~/.claude>/projects/<folder>/<session>.jsonl
-//   Codex:       <CODEX_HOME or ~/.codex>/sessions/YYYY/MM/DD/rollout-*.jsonl
+//   Codex:       <CODEX_HOME or ~/.codex>/sessions/YYYY/MM/DD/rollout-*.jsonl (and archived_sessions/rollout-*.jsonl)
 // Read only. Nothing is written, sent to a provider or kept here: the browser gets a session's turns when the person opens it, and
 // what it keeps is what the person then saves through the ordinary paste box (with its own secret check).
 // The browser never names a path: a session is asked for by an opaque id from the latest listing, so no request can reach a file
@@ -57,6 +57,8 @@ async function candidates(roots) {
     for (const f of await files(d, n => n.endsWith('.jsonl'))) out.push({ tool: 'claude', path: f });
   if (roots.codex) for (const y of await dirs(join(roots.codex, 'sessions'))) for (const m of await dirs(y)) for (const d of await dirs(m))
     for (const f of await files(d, n => /^rollout-.*\.jsonl$/.test(n))) out.push({ tool: 'codex', path: f });
+  // A thread archived in Codex moves here with its id (one archived before a look took it is still taken; listed once by its id).
+  if (roots.codex) for (const f of await files(join(roots.codex, 'archived_sessions'), n => /^rollout-.*\.jsonl$/.test(n))) out.push({ tool: 'codex', path: f });
   return out;
 }
 

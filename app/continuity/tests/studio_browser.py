@@ -2737,7 +2737,7 @@ def sessions_flow(browser, base):
     assert len(maps) == 1, maps
     page.locator("#sync-pill").click()
     # By hand: the paste box takes one session as written; tool output and the key are not in it. Put after a note typed first,
-    # it is still kept as a record of its own (told by its header), and the note as another.
+    # it comes under a '다음 기록' line and is kept as a record of its own (told by its header), and the note as another.
     page.locator("#return-entry").click()
     page.locator("#lens .rr-paste-open").click()
     draft = page.locator("#paste-text")
@@ -2745,7 +2745,7 @@ def sessions_flow(browser, base):
     page.locator("#lens").get_by_role("button", name="내 AI 세션에서 가져오기").click()
     expect(page.locator("#lens .rr-session")).to_have_count(3)
     page.locator("#lens .rr-session", has_text="휴무일 연결").click()
-    expect(draft).to_have_value(re.compile("^메모: 문자 발송은 다음 주에\\n\\n\\[Claude Code 세션 기록 · 휴무일 연결[\\s\\S]*예약 화면에서 휴무일을 영업시간 설정과 연결해 줘"))
+    expect(draft).to_have_value(re.compile("^메모: 문자 발송은 다음 주에\\n\\n──────── 다음 기록 ────────\\n\\n\\[Claude Code 세션 기록 · 휴무일 연결[\\s\\S]*예약 화면에서 휴무일을 영업시간 설정과 연결해 줘"))
     value = draft.input_value()
     assert "[가려진 비밀값]" in value and "sk-abc" not in value and "SHOULD NOT APPEAR" not in value, value
     assert "(바꾼 파일: src/hours.ts, tests/hours.test.ts)" in value, value
@@ -2888,8 +2888,8 @@ FAKE_PICKER = """(files) => {
 
 
 def folder_files():
-    """The fixture's session files as they lie in a home folder ('me'), with what lies beside them that is no session of its own: an
-    archived Codex thread, subagents' transcripts and rollouts newer than every session (as many of each as one look opens; one
+    """The fixture's session files as they lie in a home folder ('me'), with a Codex thread archived before any look took it (still a
+    session: it is taken), and what lies beside them that is no session of its own: subagents' transcripts and rollouts newer than every session (as many of each as one look opens; one
     rollout changed a file for the Codex session), a .jsonl elsewhere in the home folder, and a second .claude (Claude Code in WSL)."""
     fixture = json.loads(subprocess.run(["node", str(ROOT / "tests/sessions-fixture.mjs")], cwd=APP, capture_output=True, text=True, encoding="utf-8", check=True).stdout)
     files = [[f"me/{root}/{path}", text, at] for root, path, text, at in fixture]
@@ -2912,8 +2912,9 @@ def folder_sessions_flow(browser, base):
     """Without a local session reader (a hosted or plain local server), the person picks their .claude and .codex folders once in the
     browser: the same automatic connection runs on them (folders found, sessions taken, first map without a click), the paste box
     lists them, one .jsonl file can be chosen by hand, and a web chat gets a request text that writes its own record. Only the
-    tools' own layout is read (no archived thread, no subagent transcript, nothing else in a home folder picked by mistake); a file
-    an agent writes during a look breaks nothing; a folder already picked adds nothing, and two of one name are told apart."""
+    tools' own layout is read (with archived threads, no subagent transcript, nothing else in a home folder picked by mistake); a file
+    an agent writes during a look breaks nothing; folders inside one another are both kept, the same folder picked again adds
+    nothing, and two of one name are told apart."""
     files = folder_files()
     context = browser.new_context(viewport={"width": 1280, "height": 720})
     context.add_init_script(f"({FAKE_PICKER})({json.dumps(files)})")
@@ -2938,14 +2939,14 @@ def folder_sessions_flow(browser, base):
     expect(panel).to_contain_text("읽는 세션 폴더: .claude")
     panel.get_by_role("button", name="세션 폴더 더 고르기").click()
     expect(panel).to_contain_text("읽는 세션 폴더: .claude, .codex")
-    expect(pick).to_contain_text("Claude Code·Codex")
+    expect(pick).to_contain_text(re.compile("Claude Code·Codex|Codex·Claude Code"))
     assert maps == [], maps
     pick.click()
     expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon")
     expect(page.locator("#space-empty")).to_contain_text("[스텁] 프로그램을 말하는 기록을 붙여 주세요", timeout=15000)
     assert len(maps) == 1, maps
     page.locator("#sync-pill").click()
-    expect(panel).to_contain_text("가져온 기록2개")  # the archived thread is not taken
+    expect(panel).to_contain_text("가져온 기록3개")  # the archived thread is taken too, once
     page.locator("#sync-pill").click()
     # The paste box lists the picked folders' sessions and takes one as written.
     page.locator("#return-entry").click()
@@ -2953,7 +2954,8 @@ def folder_sessions_flow(browser, base):
     box = page.locator("#lens .rr-sessions")
     expect(box).to_contain_text("고른 세션 폴더(.claude, .codex)의 대화 기록")
     page.locator("#lens").get_by_role("button", name="내 AI 세션에서 가져오기").click()
-    expect(page.locator("#lens .rr-session")).to_have_count(3)
+    expect(page.locator("#lens .rr-session")).to_have_count(4)  # the archived thread is listed too
+    expect(page.locator("#lens .rr-session", has_text="보관해 둔 옛 대화")).to_have_count(1)
     page.locator("#lens .rr-session", has_text="휴무일 연결").click()
     draft = page.locator("#paste-text")
     expect(draft).to_have_value(re.compile("예약 화면에서 휴무일을 영업시간 설정과 연결해 줘"))
@@ -2989,32 +2991,34 @@ def folder_sessions_flow(browser, base):
     # Claude Code in WSL too: a second .claude is kept apart from the first by number.
     panel.get_by_role("button", name="세션 폴더 더 고르기").click()
     expect(panel).to_contain_text("읽는 세션 폴더: .claude (1), .codex, .claude (2)")
-    # The home folder picked by mistake takes the place of the .claude and .codex in it, and only they are read in it.
+    # The home folder picked as well is kept beside them (only the .claude and .codex in it are read, and a session found through
+    # both is listed once).
     panel.get_by_role("button", name="세션 폴더 더 고르기").click()
-    expect(panel).to_contain_text("읽는 세션 폴더: .claude, me")
-    # A folder inside one already picked adds nothing.
+    expect(panel).to_contain_text("읽는 세션 폴더: .claude (1), .codex, .claude (2), me")
+    # The same folder picked again adds nothing.
     panel.get_by_role("button", name="세션 폴더 더 고르기").click()
     page.wait_for_function("() => !window.__picks.length")
     page.wait_for_timeout(300)
     page.locator("#sync-pill").click()
     page.locator("#sync-pill").click()
-    expect(panel).to_contain_text("읽는 세션 폴더: .claude, me")
-    expect(panel.locator(".sync-source-notice")).to_have_text("이미 고른 폴더(me) 안에 있어서 따로 더하지 않았어요.")  # said why
+    expect(panel).to_contain_text("읽는 세션 폴더: .claude (1), .codex, .claude (2), me")
+    expect(panel.locator(".sync-source-notice")).to_have_text("이미 고른 폴더(.codex)예요.")  # said why
     expect(panel.locator("[role=alert]")).to_have_count(0)
     page.locator("#sync-pill").click()
     page.locator("#lens").get_by_role("button", name="내 AI 세션에서 가져오기").click()
     sessions = page.locator("#lens .rr-session")
-    expect(sessions).to_have_count(5)
+    expect(sessions).to_have_count(6)
     expect(sessions.filter(has_text="휴무일 연결")).to_have_count(1)
     expect(sessions.filter(has_text="예약 문자 문구를 바꿔 줘")).to_have_count(1)
     expect(sessions.filter(has_text="다른 작업 진행 중")).to_have_count(1)
-    expect(sessions.filter(has_text=re.compile("보관해 둔 옛 대화|홈 폴더에 둔 다른 기록|하위 작업"))).to_have_count(0)
+    expect(sessions.filter(has_text="보관해 둔 옛 대화")).to_have_count(1)
+    expect(sessions.filter(has_text=re.compile("홈 폴더에 둔 다른 기록|하위 작업"))).to_have_count(0)
     box.get_by_role("button", name="접기").click()
-    expect(box).to_contain_text("고른 세션 폴더(.claude, me)의 대화 기록")
-    # Leaving the WSL folder leaves the home folder.
+    expect(box).to_contain_text("고른 세션 폴더(.claude (1), .codex, .claude (2), me)의 대화 기록")
+    # Leaving the WSL folder leaves the others, and the first .claude loses its number.
     page.locator("#sync-pill").click()
-    panel.get_by_role("button", name=".claude 세션 폴더 빼기").click()
-    expect(panel).to_contain_text("읽는 세션 폴더: me")
+    panel.get_by_role("button", name=".claude (2) 세션 폴더 빼기").click()
+    expect(panel).to_contain_text("읽는 세션 폴더: .claude, .codex, me")
     assert not errors, errors
     context.close()
 

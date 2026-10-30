@@ -51,6 +51,8 @@ export interface AutoSyncHost {
 }
 
 const TICK_MS = 60 * 1000;
+/** How many readings of one session a look makes at most (each within the reading's budget); what is left waits for the next. */
+const PAGES = 8;
 const day = (d = new Date()) => `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
 
 export function createAutoSync(host: AutoSyncHost) {
@@ -68,6 +70,13 @@ export function createAutoSync(host: AutoSyncHost) {
   function stored(key: string): Binding | null { return readBinding(all()[key]); }
   /** A session's mark, also one kept under an id the session had before (made from its file's path). */
   const markOf = (b: Binding, s: SessionSummary): SessionMark | null => b.marks[s.id] ?? s.aliases?.map(a => b.marks[a]).find(m => !!m) ?? null;
+  /** One session's mark onto the binding as it is now, where it is further on (its old ids' marks give way to it). */
+  function keepMark(key: string, s: SessionSummary, m: SessionMark) {
+    const cur = stored(key); if (!cur) return;
+    for (const id of s.aliases ?? []) delete cur.marks[id];
+    if (further(m, cur.marks[s.id])) cur.marks[s.id] = m;
+    put_(key, cur);
+  }
   function put_(key: string, b: Binding | null) {
     const v = all(); if (b) v[key] = b; else delete v[key];
     try { host.kv.setItem(AUTOSYNC_KEY, JSON.stringify(v)); } catch { /* the binding holds for this page only */ }
@@ -110,25 +119,36 @@ export function createAutoSync(host: AutoSyncHost) {
         for (const s of ready) due.push({ s, f });
       }
       due.sort((x, y) => x.s.updatedAt.localeCompare(y.s.updatedAt)); // oldest first, so records keep the order the work happened in
-      for (const { s, f } of due) {
-        const was = markOf(b, s), first = !was && !f.backfilled;
-        // Read from the mark on (the reply taken last comes back too, in case it went on); a new session from the connection on.
-        let d: SessionDetail;
-        try { d = await src.read(s.id, was ? was.lastAt : f.backfilled ? f.connectedAt : null); }
-        catch (e) { failed = `${folderName(f.path)}: ${failText(e, '세션 기록을 읽지 못했어요.')}`; continue; }
-        const turns = newTurns(d, was, f.backfilled ? f.connectedAt : null);
-        // A first look takes one record of each session's newest turns; later ones every new turn, in as many records as it takes.
-        const texts = !turns.length ? [] : first ? [sessionText({ ...d, turns }).text] : sessionChunks(d, turns, undefined, leftSince(d, was));
-        if (texts.length) {
-          // Kept only on the entry still open; otherwise nothing is marked and the next look takes the same turns again.
-          if (open()?.key !== key) return;
-          const no = await host.save(key, texts);
-          // A text refused leaves only its session to be taken again; anything else stops this look (and the next, until asked).
-          if (no?.refused) { failed = no.error; continue; }
-          if (no) { error = no.error; halted.set(key, no.error); return; }
-          taken += texts.length;
+      sessions: for (const { s, f } of due) {
+        let was = markOf(b, s);
+        const first = !was && !f.backfilled;
+        // A reading from a mark sends the turns after it oldest first within its budget; the rest is read from the new mark, a few
+        // pages a look (a long stretch since the last look is taken whole, over several looks if need be).
+        for (let page = 0; page < PAGES; page++) {
+          // Read from the mark on (the reply taken last comes back too, in case it went on); a new session from the connection on.
+          let d: SessionDetail;
+          try { d = await src.read(s.id, was ? was.lastAt : f.backfilled ? f.connectedAt : null); }
+          catch (e) { failed = `${folderName(f.path)}: ${failText(e, '세션 기록을 읽지 못했어요.')}`; continue sessions; }
+          const turns = newTurns(d, was, f.backfilled ? f.connectedAt : null);
+          // A first look takes one record of each session's newest turns; later ones every new turn, in as many records as it takes.
+          const texts = !turns.length ? [] : first ? [sessionText({ ...d, turns }).text] : sessionChunks(d, turns, undefined, leftSince(d, was));
+          if (texts.length) {
+            // Kept only on the entry still open; otherwise nothing is marked and the next look takes the same turns again.
+            if (open()?.key !== key) return;
+            const no = await host.save(key, texts);
+            // A text refused leaves only its session to be taken again; anything else stops this look (and the next, until asked).
+            if (no?.refused) { failed = no.error; continue sessions; }
+            if (no) { error = no.error; halted.set(key, no.error); return; }
+            taken += texts.length;
+          }
+          // More to read when the reading left newer turns and moved on; until they are read the mark does not match the file's
+          // time, so the next look comes back to this session even if it does not change.
+          const end = markAfter(d, was, s.updatedAt), more = !first && !!d.rest && end.lastAt !== (was?.lastAt ?? null), next = more ? { ...end, updatedAt: '' } : end;
+          // Marked as soon as it is kept: a tab closed later in this look does not take these turns again.
+          keepMark(key, s, next); marks[s.id] = next; moved.push(...s.aliases ?? []); kept.add(s.id);
+          if (!more) break;
+          was = next;
         }
-        marks[s.id] = markAfter(d, was, s.updatedAt); moved.push(...s.aliases ?? []); kept.add(s.id);
       }
       error = failed;
       const runs = stored(key)?.runs ?? b.runs, today = day(), n = runs.day === today ? runs.n : 0;
