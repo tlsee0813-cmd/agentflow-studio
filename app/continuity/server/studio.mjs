@@ -74,19 +74,33 @@ export async function map7PromptId() {
 /** The recipe id a map ask of this schema is asked and bound with (a job's binding.prompt). */
 const promptFor = schema => schema === 'studio.map.7' ? map7PromptId() : mapPromptId();
 
-export function readStudioConfig(env = {}) {
+/** The studio settings from env, and the names of the settings that were given but could not be used (each falls back to
+ * its default). A setting is never half applied: an out-of-range number, a malformed model name or origin is set aside whole. */
+function parseStudioEnv(env) {
+  const ignored = [];
+  const given = key => env[key] !== undefined && env[key] !== '';
   const int = (key, fallback, min, max) => {
-    const v = env[key] === undefined || env[key] === '' ? fallback : Number(env[key]);
-    return Number.isInteger(v) && v >= min && v <= max ? v : fallback;
+    if (!given(key)) return fallback;
+    const v = Number(env[key]);
+    if (Number.isInteger(v) && v >= min && v <= max) return v;
+    ignored.push(key); return fallback;
   };
-  const model = env.DEEPSEEK_MODEL && /^[a-zA-Z0-9._-]{1,80}$/.test(env.DEEPSEEK_MODEL) ? env.DEEPSEEK_MODEL : 'deepseek-flash';
-  const origins = String(env.STUDIO_ALLOWED_ORIGINS ?? '').split(',').map(s => s.trim()).filter(Boolean).filter(o => {
+  const modelName = (key, fallback) => {
+    if (!given(key)) return fallback;
+    if (/^[a-zA-Z0-9._-]{1,80}$/.test(env[key])) return env[key];
+    ignored.push(key); return fallback;
+  };
+  const model = modelName('DEEPSEEK_MODEL', 'deepseek-flash');
+  const listed = String(env.STUDIO_ALLOWED_ORIGINS ?? '').split(',').map(s => s.trim()).filter(Boolean);
+  const origins = listed.filter(o => {
     try { const u = new URL(o); return ['https:', 'http:'].includes(u.protocol) && u.origin === o; } catch { return false; }
   });
-  return {
+  if (origins.length !== listed.length) ignored.push('STUDIO_ALLOWED_ORIGINS');
+  if (given('STUDIO_MAP_THINKING') && !['enabled', 'disabled'].includes(env.STUDIO_MAP_THINKING)) ignored.push('STUDIO_MAP_THINKING');
+  const config = {
     // AI_MODE=mock (the local --mock run) keeps every studio call off: mock never means a substitute answer.
     apiKey: env.AI_MODE === 'mock' ? '' : String(env.DEEPSEEK_API_KEY ?? ''),
-    model, planModel: env.DEEPSEEK_PLAN_MODEL && /^[a-zA-Z0-9._-]{1,80}$/.test(env.DEEPSEEK_PLAN_MODEL) ? env.DEEPSEEK_PLAN_MODEL : model,
+    model, planModel: modelName('DEEPSEEK_PLAN_MODEL', model),
     origins, accessCode: String(env.STUDIO_ACCESS_CODE ?? ''),
     timeoutMs: int('STUDIO_TIMEOUT_MS', 30000, 1000, 60000), planTimeoutMs: int('STUDIO_PLAN_TIMEOUT_MS', 60000, 1000, 60000),
     // Map reading only: identity and relation judgements keep the model's reasoning (lowest effort); max_tokens counts reasoning
@@ -95,7 +109,11 @@ export function readStudioConfig(env = {}) {
     mapTimeoutMs: int('STUDIO_MAP_TIMEOUT_MS', 90000, 1000, 120000), maxTokens: int('STUDIO_MAX_TOKENS', 1200, 256, 4096),
     rate: int('STUDIO_REQUESTS_PER_MINUTE', 10, 1, 120), cap: int('STUDIO_CALL_CAP', 300, 1, 100000), concurrency: int('STUDIO_MAX_CONCURRENT', 3, 1, 16)
   };
+  return { config, ignored };
 }
+export function readStudioConfig(env = {}) { return parseStudioEnv(env).config; }
+/** Names of the studio settings in env that were set aside (never their values: STUDIO_ACCESS_CODE and the key never appear). */
+export function studioConfigProblems(env = {}) { return parseStudioEnv(env).ignored; }
 
 function sameText(a, b) {
   if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
