@@ -1141,6 +1141,9 @@ function select(partId: string | null) {
 /** scrollTop: a new selection starts its sheet at the top. move: bring the part into view (a new selection or a new surface). */
 function showReading(scrollTop: boolean, move: boolean) {
   const panel = $('panel');
+  // AF140: the explicit full reading is the reading surface over the map (its own width, a paragraph's column); the lens stays as it
+  // was. The map's area (paneWidth) is the same either way, so opening it moves the camera exactly as before and no more.
+  panel.classList.toggle('reading', sheetOpen);
   if (sheetOpen) { hideLens(); panel.hidden = false; renderPanel(scrollTop); syncMapArea(); if (move) reveal(selected!); return; }
   panel.hidden = true; panel.replaceChildren();
   renderLens(); syncMapArea();
@@ -1180,6 +1183,10 @@ const mapBottom = () => $('viewport').offsetTop + $('viewport').clientHeight;
  * relative to the space, so neither moves anything already drawn. */
 function syncMapArea() {
   const vp = $('viewport'), world = $('world'), pane = paneWidth();
+  // AF140: behind the full reading the map is shown, not used: no pan, zoom, selection, drag or focus reaches it until it closes.
+  const reading = !$('panel').hidden && $('panel').classList.contains('reading');
+  for (const el of [vp, document.querySelector<HTMLElement>('#space > .controls')]) if (el) el.inert = reading;
+  $('space').classList.toggle('sheet-read', reading);
   $('space').style.setProperty('--plan-w', `${pane}px`);
   vp.style.right = pane + 'px';
   const top = $('plan-strip').hidden ? 0 : topInset();
@@ -1475,6 +1482,13 @@ function openRecord(id: string) {
 function renderPanel(scrollTop: boolean) {
   const o = opened!, part = o.view.parts.find(p => p.id === selected)!, panel = $('panel');
   const prevBody = panel.querySelector('.panel-body'), keep = scrollTop ? 0 : prevBody?.scrollTop ?? 0;
+  // The same part read again (an answer, a status, a save): the control that had focus keeps it, a field its caret and selection.
+  const same = panel.dataset.read === `${o.key}|${part.id}` && !scrollTop, had = same && panel.contains(document.activeElement) ? document.activeElement as HTMLElement : null;
+  const field = had instanceof HTMLTextAreaElement || had instanceof HTMLInputElement ? had : null;
+  const caret = field && field.id ? { id: field.id, start: field.selectionStart, end: field.selectionEnd, dir: field.selectionDirection, top: field.scrollTop } : null;
+  const mark = had && !caret ? (['claimFocus', 'requestFocus', 'far'] as const).map(k => [k, had.dataset[k]] as const).find(([, v]) => v !== undefined) ?? null : null;
+  // What is being written there and not saved yet (the name/description and role correction forms are rebuilt from the saved part).
+  const typed = same ? [...panel.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('textarea[id], input[id]:not([type=password]):not([type=file]):not([type=checkbox]):not([type=radio])')].map(f => [f.id, f.value] as const) : [];
   const path = partPath(o.view, part.id).slice(0, -1), records = subtreeRecords(o.view, part.id);
   const state = part.status === 'plan' ? (part.reading?.state ? stateLabel(part.reading) ?? '기록에서 읽음' : records.length ? '요청 기록 없음' : part.note ? '계획 설명만 있음 · 기록 없음' : '기록 없음') : STATUS_LABEL[part.status];
   const menuItems = [
@@ -1490,6 +1504,7 @@ function renderPanel(scrollTop: boolean) {
       records.length ? h('span', { class: 'chip plain' }, `기록 ${records.length}${records[0] ? ` · ${ago(records[0].at)}` : ''}`) : null),
     h('div', { class: 'head-tools' },
       menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e: Event) => { ((e.currentTarget as HTMLElement).parentElement as HTMLDetailsElement).open = false; } }, ...menuItems)) : null,
+      h('button', { type: 'button', class: 'link-button sheet-back', title: '전체 읽기를 닫고 지도와 요약으로 (Esc)', onclick: closeSheet }, '요약으로'),
       h('button', { type: 'button', class: 'close', 'aria-label': '요약으로 돌아가기', title: '요약으로 (Esc)', onclick: closeSheet }, '×')));
   const body = h('div', { class: 'panel-body' });
   if (editing) body.append(editForm(o, part));
@@ -1547,7 +1562,13 @@ function renderPanel(scrollTop: boolean) {
     body.append(sec);
   }
   panel.replaceChildren(...[visitEntry(o), head, body, composer(o, part)].filter((x): x is HTMLElement => !!x));
+  panel.dataset.read = `${o.key}|${part.id}`;
+  for (const [id, v] of typed) { const f = document.getElementById(id); if ((f instanceof HTMLTextAreaElement || f instanceof HTMLInputElement) && panel.contains(f) && f.value !== v) f.value = v; }
   if (scrollTop) body.scrollTop = 0; else body.scrollTop = keep;
+  if (caret) {
+    const f = document.getElementById(caret.id);
+    if ((f instanceof HTMLTextAreaElement || f instanceof HTMLInputElement) && panel.contains(f) && !f.disabled) { f.focus({ preventScroll: true }); try { f.setSelectionRange(caret.start, caret.end, caret.dir ?? 'none'); } catch { /* not a text field */ } f.scrollTop = caret.top; }
+  } else if (mark) [...panel.querySelectorAll<HTMLElement>(`[data-${mark[0].replace(/[A-Z]/g, c => `-${c.toLowerCase()}`)}]`)].find(x => x.dataset[mark[0]] === mark[1])?.focus({ preventScroll: true });
 }
 
 /** AF100: the saves this page made itself (entry and the save number each made), so a job's result is applied on top of this
@@ -1603,6 +1624,9 @@ function editForm(o: Opened, part: PartView): HTMLElement {
     let next: Project;
     try { next = editArea(o.project, part.id, name.value, note.value); } catch { msg.textContent = '이름은 1~60자, 설명은 2,000자까지 쓸 수 있어요.'; return; }
     const failed = await commit(o, next); if (failed) { msg.textContent = failed; return; }
+    // Saved; read again only where it was asked (another project or part since keeps its own reading).
+    if (opened !== o) return;
+    if (selected !== part.id) { renderSpace('keep'); return; }
     editing = false;
     renderSpace('keep'); select(part.id);
   } },
@@ -2136,7 +2160,8 @@ function understoodSection(o: Opened, part: PartView): HTMLElement | null {
       let next: Project;
       try { next = correctReadingRole(o.project, part.id, area.value); } catch { msg.textContent = '설명은 1~300자로 적어 주세요.'; return; }
       const failed = await commit(o, next); if (failed) { msg.textContent = failed; return; }
-      fixingRole = null; renderSpace('keep'); select(part.id);
+      if (opened !== o) return;
+      fixingRole = null; renderSpace('keep'); if (selected === part.id) select(part.id);
     } }, h('label', { for: 'fix-role' }, '설명 바로잡기 ', h('small', {}, '이름·내 설명·기록의 주장은 그대로예요')), area, msg,
       h('div', { class: 'row' }, h('button', { type: 'submit', class: 'primary small' }, '저장'), h('button', { type: 'button', class: 'link-button', onclick: () => { fixingRole = null; renderPanel(false); } }, '취소'))));
   } else if (u.role) {
@@ -2146,13 +2171,18 @@ function understoodSection(o: Opened, part: PartView): HTMLElement | null {
     // Descriptions read later that did not replace this one (no record said it supersedes it) read apart, with their version.
     for (const x of u.others.slice(0, 2)) sec.append(h('p', { class: 'und-later' }, h('span', { title: x.about ?? '' }, `다른 기록의 설명${x.about ? ` · ${displayAbout(x.about)}` : ''} · 현재 설명을 대체한다는 근거 없음`), x.text));
   }
-  if (u.claims.length) sec.append(claimList(part.id, u.claims, 12));
+  // The full reading reads every current claim, as the lens does (claimList takes them all).
+  if (u.claims.length) sec.append(claimList(part.id, u.claims, u.claims.length));
   const requested = currentRequestResults(o, part.id); if (requested) sec.append(requested);
-  const hist = h('details', { class: 'und-history' }, h('summary', {}, `근거 이력 · 정리 ${u.history.length}회`),
+  // The history fold and its quotes keep their identity (this entry, part and reading time): back from an original it is open again
+  // and the same quote has focus.
+  const histKey = `${o.key}|${part.id}|history`;
+  const hist = h('details', { class: 'und-history', open: lensOpen.has(histKey) }, h('summary', {}, `근거 이력 · 정리 ${u.history.length}회`),
     h('ol', {}, ...[...u.history].reverse().map(x => h('li', {}, h('span', { class: 'uh-at' }, fullTime(x.at)),
       x.role ? h('span', { class: 'uh-role' }, x.role) : null,
-      ...x.claims.map(c => h('span', { class: 'uh-claim' }, h('span', { class: 'cl-kind' }, CLAIM_LABEL[c.kind]), c.text, ' ',
-        h('button', { type: 'button', class: 'cl-cite', title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote, c.from) }, '근거')))))));
+      ...x.claims.map((c, j) => h('span', { class: 'uh-claim' }, h('span', { class: 'cl-kind' }, CLAIM_LABEL[c.kind]), c.text, ' ',
+        h('button', { type: 'button', class: 'cl-cite', 'data-claim-focus': JSON.stringify([part.id, 'history', x.at, j, c.record, c.from ?? null]), title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote, c.from) }, '근거')))))));
+  hist.addEventListener('toggle', () => { if (hist.open) lensOpen.add(histKey); else lensOpen.delete(histKey); });
   sec.append(hist);
   return sec;
 }
@@ -2275,7 +2305,7 @@ function bindFind() {
     if (e.key === 'Escape') { e.stopPropagation(); show(false); button.focus(); }
   });
   button.addEventListener('click', () => show(!findOpen));
-  document.addEventListener('keydown', e => { if (e.key === '/' && opened && !$('space').hidden && !wide.isOpen() && !(e.target as HTMLElement).closest('textarea,input,select')) { e.preventDefault(); show(true); } });
+  document.addEventListener('keydown', e => { if (e.key === '/' && opened && !$('space').hidden && !wide.isOpen() && !$('space').classList.contains('sheet-read') && !(e.target as HTMLElement).closest('textarea,input,select')) { e.preventDefault(); show(true); } });
   $('viewport').addEventListener('pointerdown', () => { if (findOpen) show(false); });
   window.addEventListener('hashchange', () => { if (findOpen && !location.hash.startsWith('#/p/')) show(false); });
 }

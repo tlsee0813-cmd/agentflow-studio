@@ -1,0 +1,193 @@
+// AF140 the full reading of a part over the map. Auxiliary Node Playwright flow (like reading123-flow.mjs), not part of CI:
+//   node continuity/tests/part140-flow.mjs [shots-dir]        (from app/, after the continuity build)
+// Real local app (studio-smoke-server, no key: nothing is sent). The project is author-written in the shape of the 139 engine map,
+// never a model's reading (labelled '[스텁]'): an engine part with 13 current claims over four readings, the last read its limitations, an eval group with
+// Parser, Compiler and VM (VM with 2 claims), relations with their notes.
+//   L. The lens keeps its width; '전체 읽기' opens the reading surface over the map: title, path, a clear way back, every claim to
+//      the last limitation at a paragraph's width, no clamp, no sideways scroll; the camera and the stored layout do not move.
+//   B. Behind it the map is shown, not used: wheel, click, Shift+Tab and '/' do nothing there.
+//   Q. A claim's original and back: the same surface, scroll and button; the history fold's quote: the fold open again, same button.
+//   F. A relation followed from the surface, then Back: the same surface, scroll and camera; Esc to the lens with the camera, Esc out.
+//   R. A late status re-renders the surface: the focused quote keeps focus; an edit field keeps its text, caret and selection.
+//   N. 1000×700 and 700×800: the surface fits the window, its way back in view, no sideways scroll; reload: stores byte for byte.
+import { createRequire } from 'node:module';
+import { spawn } from 'node:child_process';
+import { mkdirSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import assert from 'node:assert/strict';
+
+const { chromium } = createRequire(import.meta.url)('playwright');
+const ROOT = fileURLToPath(new URL('..', import.meta.url)), APP = fileURLToPath(new URL('../..', import.meta.url));
+const SHOTS = process.argv[2] ?? null; if (SHOTS) mkdirSync(SHOTS, { recursive: true });
+const D = await import(`${ROOT}dist/public/shared/domain.js`), S = await import(`${ROOT}dist/public/shared/storage.js`);
+const M = await import(`${ROOT}dist/public/shared/map-reading.js`), { studioView } = await import(`${ROOT}dist/public/shared/studio.js`);
+const W = 'agentflow.idea015.workspace', PLANS = 'agentflow.studio.plans.1', MAIN = 'E_part140-aaaa-0001';
+const CAMERA = () => document.getElementById('world').style.transform;
+
+/* ---------- the project (author-written: part140-case.mjs) ---------- */
+const { FEATURES, LIMITS, build } = await import('./part140-case.mjs');
+const X = build({ D, M, S, studioView });
+const entry = (entryId, project) => ({ entryId, state: 'active', lifecycle: 1, seq: 1, createdAt: new Date().toISOString(), trashedAt: null, origin: 'new', project });
+const SEED = { [W]: JSON.stringify({ version: 'agentflow.workspace.1', migratedFromLegacy: false, entries: [entry(MAIN, X.project)] }) };
+
+/* ---------- server, page ---------- */
+function start() {
+  const proc = spawn(process.execPath, [`${ROOT}tests/studio-smoke-server.mjs`], { cwd: APP, env: { ...process.env, STUDIO_STUB: 'nokey', PORT: '0' }, stdio: ['ignore', 'pipe', 'inherit'] });
+  return new Promise((res, rej) => { proc.stdout.once('data', d => { const m = /READY (http:\/\/\S+)/.exec(String(d)); m ? res({ proc, base: m[1] }) : rej(new Error(String(d))); }); proc.once('exit', c => rej(new Error(`server exit ${c}`))); });
+}
+const results = [];
+const ok = (name, detail = '') => { results.push(name); console.log(`ok - ${name}${detail ? ` · ${detail}` : ''}`); };
+async function context(browser, base, size = [1280, 720], hold = false) {
+  const ctx = await browser.newContext({ viewport: { width: size[0], height: size[1] } });
+  const page = await ctx.newPage(), errors = [], sent = [];
+  page.on('pageerror', e => errors.push(String(e)));
+  page.on('request', r => { if (r.method() !== 'GET') sent.push(`${r.method()} ${r.url()}`); });
+  let release = () => {};
+  if (hold) { const gate = new Promise(r => { release = r; }); await page.route('**/api/studio/status', async route => { await gate; await route.continue(); }); }
+  await page.goto(`${base}/`);
+  await page.evaluate(x => { localStorage.clear(); sessionStorage.clear(); for (const [k, v] of Object.entries(x)) localStorage.setItem(k, v); }, SEED);
+  await page.evaluate(h => history.replaceState(null, '', h), `#/p/${MAIN}`); await page.reload();
+  await page.locator('#world .node').first().waitFor();
+  return { ctx, page, errors, sent, release };
+}
+const stores = page => page.evaluate(([a, b]) => [localStorage.getItem(a), localStorage.getItem(b)], [W, PLANS]);
+const sideways = (page, sel) => page.evaluate(s => { const d = document.scrollingElement, b = document.querySelector(s); return [d.scrollWidth - d.clientWidth, b ? b.scrollWidth - b.clientWidth : null]; }, sel);
+const focusKey = page => page.evaluate(() => document.activeElement?.dataset.claimFocus ?? document.activeElement?.dataset.far ?? document.activeElement?.id ?? null);
+const surface = page => page.locator('#panel.reading:not([hidden])');
+/** A leaf is a node; a part with parts inside is a frame whose head is what selects it. */
+async function selectPart(page, id) {
+  const node = page.locator(`#world .node[data-part="${id}"]`);
+  await ((await node.count()) ? node.first() : page.locator(`#world .frame-head[data-part="${id}"] .frame-name`)).click();
+  await page.locator('#lens .lens-more').waitFor();
+}
+async function openSurface(page) { await page.locator('#lens .lens-more').click(); await surface(page).waitFor(); await page.waitForTimeout(200); }
+
+/* ---------- L, B ---------- */
+async function wide(browser, base) {
+  const { ctx, page, errors, sent } = await context(browser, base);
+  const before = await stores(page);
+  await selectPart(page, X.engine); await page.waitForTimeout(250);
+  const lensW = await page.locator('#lens').evaluate(e => e.getBoundingClientRect().width), camera0 = await page.evaluate(CAMERA), url0 = page.url();
+  assert.equal(await page.locator('#lens .lens-claims .claim').count(), 13, 'the lens reads every current claim too');
+  await openSurface(page);
+  const s = await page.evaluate(() => { const p = document.getElementById('panel'), r = p.getBoundingClientRect(), role = p.querySelector('.und-role'), claims = [...p.querySelectorAll('.sec-understood .claims .claim')];
+    return { w: r.width, left: r.left, title: p.querySelector('#panel-title').textContent, path: p.querySelector('.panel-path').textContent, back: !!p.querySelector('.sheet-back'),
+      text: role.getBoundingClientRect().width, claims: claims.map(c => c.querySelector('.cl-text').textContent), clamp: claims.some(c => getComputedStyle(c.querySelector('.cl-text')).webkitLineClamp !== 'none' || c.querySelector('.cl-text').scrollHeight > c.querySelector('.cl-text').clientHeight + 1),
+      bodyH: p.querySelector('.panel-body').scrollHeight, bodyView: p.querySelector('.panel-body').clientHeight }; });
+  assert.ok(lensW < 400, `the lens keeps its width (${lensW})`);
+  assert.ok(s.w > 700 && s.text >= 640 && s.text <= 720, JSON.stringify(s));
+  assert.equal(s.title, 'micro-javascript'); assert.equal(s.path, 'micro-javascript · 140'); assert.ok(s.back);
+  // Every current claim, the limitation (read last: newest first) included, in its whole words.
+  assert.equal(s.claims.length, 13, 'every current claim, none cut');
+  // The claim a cut to 12 left out: the first reading's first (partUnderstanding orders newest first, so it was the 13th).
+  assert.ok(s.claims.includes(`[스텁] ${FEATURES[0]}을(를) 지원 대상으로 설명한다`), 'the claim a cut to 12 left out'); assert.ok(s.claims.some(t => t === `[스텁] ${LIMITS.slice(4)}`), s.claims.join(' | '));
+  assert.equal(s.clamp, false); assert.deepEqual(await sideways(page, '#panel .panel-body'), [0, 0]);
+  assert.equal(await page.evaluate(CAMERA), camera0, 'opening the surface does not move the map'); assert.equal(page.url(), url0);
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/l-engine.png` });
+  ok('L the lens keeps its width; the full reading over the map: title, path, way back, all 13 claims (the oldest and the limitation whole), no clamp', `lens ${Math.round(lensW)}px → surface ${Math.round(s.w)}px · text ${Math.round(s.text)}px · ${s.bodyH}px in ${s.bodyView}px · camera unchanged`);
+  // B: the map at its left is shown, not used.
+  assert.equal(await page.evaluate(() => document.getElementById('viewport').inert), true);
+  const strip = { x: Math.max(40, s.left / 2), y: 360 };
+  await page.mouse.move(strip.x, strip.y); await page.mouse.wheel(0, -400); await page.mouse.click(strip.x, strip.y); await page.waitForTimeout(200);
+  assert.equal(await page.evaluate(CAMERA), camera0, 'no wheel zoom'); assert.equal(page.url(), url0, 'no selection change'); assert.equal(await surface(page).count(), 1);
+  await page.locator('#panel .panel-path a, #panel .sheet-back').first().focus(); for (let i = 0; i < 6; i++) await page.keyboard.press('Shift+Tab');
+  assert.equal(await page.evaluate(() => !!document.activeElement?.closest('#viewport')), false, 'Shift+Tab never lands on a part under it');
+  await page.locator('#panel-title').focus(); await page.keyboard.press('/'); await page.waitForTimeout(150);
+  assert.equal(await page.locator('.find:not([hidden])').count(), 0, "'/' does not open find over it");
+  assert.deepEqual(await stores(page), before); assert.deepEqual(sent, []); assert.deepEqual(errors, []);
+  ok('B behind the surface: wheel, click, Shift+Tab and / do nothing to the map; nothing stored');
+  // Q: a claim's original (the last limitation) and back; the history fold's quote and back.
+  // That claim's own quote button (the one a cut to 12 left out).
+  const body = page.locator('#panel .panel-body'), cite = page.locator('#panel .sec-understood .claims .claim', { hasText: FEATURES[0] }).locator('.cl-cite');
+  await cite.scrollIntoViewIfNeeded(); await body.evaluate(e => { e.scrollTop += 60; }); await cite.scrollIntoViewIfNeeded(); await cite.focus();
+  const key = await cite.getAttribute('data-claim-focus'), at = await body.evaluate(e => e.scrollTop);
+  assert.ok(at > 0);
+  await cite.click(); await page.locator('#lens .rr-mark').waitFor();
+  assert.equal(await page.locator('#lens .rr-mark').textContent(), `지원: ${FEATURES[0]}을(를) 지원 대상으로 설명한다.`, 'its exact original line');
+  await page.locator('#lens .rr-back').click(); await surface(page).waitFor();
+  assert.equal(await focusKey(page), key); assert.ok(Math.abs(await body.evaluate(e => e.scrollTop) - at) <= 1);
+  assert.equal(await page.evaluate(CAMERA), camera0);
+  const hist = page.locator('#panel .und-history'); await hist.locator(':scope > summary').click();
+  const hc = hist.locator('.cl-cite').first(); await hc.scrollIntoViewIfNeeded(); await hc.focus(); const hk = await hc.getAttribute('data-claim-focus'), hat = await body.evaluate(e => e.scrollTop);
+  await hc.click(); await page.locator('#lens .rr-mark').waitFor(); await page.keyboard.press('Escape'); await surface(page).waitFor();
+  assert.equal(await page.locator('#panel .und-history').getAttribute('open'), ''); assert.equal(await focusKey(page), hk);
+  assert.ok(Math.abs(await body.evaluate(e => e.scrollTop) - hat) <= 1);
+  assert.deepEqual(await stores(page), before); assert.deepEqual(errors, []);
+  ok('Q originals and back: the same surface, scroll and quote; the history fold open again with its quote focused');
+  await ctx.close();
+}
+
+/* ---------- F: relation and back, Esc ---------- */
+async function follow(browser, base) {
+  const { ctx, page, errors, sent } = await context(browser, base);
+  const before = await stores(page);
+  await selectPart(page, X.vm); await page.waitForTimeout(250); const lensCam = await page.evaluate(CAMERA);
+  await openSurface(page);
+  assert.equal(await page.locator('#panel .sec-understood .claims .claim').count(), 2);
+  const body = page.locator('#panel .panel-body'), link = page.locator(`#panel .links a[data-far="${X.evalId}"]`);
+  await link.scrollIntoViewIfNeeded(); const at = await body.evaluate(e => e.scrollTop), cam = await page.evaluate(CAMERA), url0 = page.url();
+  await link.click(); await page.waitForTimeout(400);
+  assert.notEqual(page.url(), url0);
+  await page.goBack(); await surface(page).waitFor(); await page.waitForTimeout(300);
+  assert.equal(page.url(), url0); assert.equal(await page.evaluate(CAMERA), cam, 'the camera as it was');
+  assert.ok(Math.abs(await body.evaluate(e => e.scrollTop) - at) <= 1, 'the same scroll');
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/f-vm.png` });
+  await page.keyboard.press('Escape'); await page.waitForTimeout(250);
+  assert.equal(await surface(page).count(), 0); assert.equal(await page.locator('#lens:not([hidden]) .lens-more').count(), 1, 'back to the lens');
+  assert.equal(await page.evaluate(CAMERA), lensCam); assert.equal(await page.evaluate(() => document.getElementById('viewport').inert), false, 'the map is used again');
+  await page.keyboard.press('Escape'); await page.waitForTimeout(200); assert.equal(await page.locator('#lens:not([hidden])').count(), 0);
+  assert.deepEqual(await stores(page), before); assert.deepEqual(sent, []); assert.deepEqual(errors, []);
+  ok('F VM: 2 claims; a relation followed and Back: same surface, scroll, camera; Esc to the lens (camera kept, map usable), Esc out');
+  await ctx.close();
+}
+
+/* ---------- R: a late status re-renders the surface ---------- */
+async function late(browser, base) {
+  const { ctx, page, errors, release } = await context(browser, base, [1280, 720], true);
+  await selectPart(page, X.engine); await openSurface(page);
+  const cite = page.locator('#panel .sec-understood .claims .cl-cite').nth(5); await cite.scrollIntoViewIfNeeded(); await cite.focus();
+  const key = await cite.getAttribute('data-claim-focus'), body = page.locator('#panel .panel-body'), at = await body.evaluate(e => e.scrollTop);
+  await page.locator('#panel .panel-body').evaluate(e => { e.dataset.old = '1'; });
+  release(); await page.waitForFunction(() => document.getElementById('ai-pill')?.dataset.state !== 'checking'); await page.waitForTimeout(250);
+  assert.equal(await page.locator('#panel .panel-body[data-old]').count(), 0, 're-rendered');
+  assert.equal(await focusKey(page), key); assert.ok(Math.abs(await body.evaluate(e => e.scrollTop) - at) <= 1);
+  await ctx.close();
+  // An edit field keeps its text, caret and selection over the same re-render.
+  const b = await context(browser, base, [1280, 720], true);
+  await selectPart(b.page, X.engine); await openSurface(b.page);
+  await b.page.locator('#panel .more summary').click(); await b.page.getByRole('menuitem', { name: '이름·설명 고치기' }).click();
+  const note = b.page.locator('#edit-note'); await note.fill('아직 저장하지 않은 설명 초안입니다.'); await note.evaluate(e => { e.setSelectionRange(3, 9, 'backward'); });
+  b.release(); await b.page.waitForFunction(() => document.getElementById('ai-pill')?.dataset.state !== 'checking'); await b.page.waitForTimeout(250);
+  const st = await b.page.evaluate(() => { const e = document.activeElement; return { id: e.id, v: e.value, s: e.selectionStart, t: e.selectionEnd, d: e.selectionDirection }; });
+  assert.deepEqual(st, { id: 'edit-note', v: '아직 저장하지 않은 설명 초안입니다.', s: 3, t: 9, d: 'backward' });
+  assert.deepEqual(errors, []); assert.deepEqual(b.errors, []);
+  ok('R a late status re-renders the surface: the focused quote and scroll stay; an edit field keeps text, caret and selection');
+  await b.ctx.close();
+}
+
+/* ---------- N: narrower windows; reload ---------- */
+async function narrow(browser, base) {
+  for (const size of [[1000, 700], [700, 800]]) {
+    const { ctx, page, errors, sent } = await context(browser, base, size);
+    const before = await stores(page);
+    await selectPart(page, X.engine); await openSurface(page);
+    const m = await page.evaluate(() => { const p = document.getElementById('panel').getBoundingClientRect(), b = document.querySelector('#panel .sheet-back').getBoundingClientRect(), x = document.querySelector('#panel .close').getBoundingClientRect();
+      return { right: Math.round(p.right), width: Math.round(p.width), back: b.right <= innerWidth && b.width > 0, close: x.right <= innerWidth, text: Math.round(document.querySelector('#panel .und-role').getBoundingClientRect().width) }; });
+    assert.ok(m.back && m.close && m.right <= size[0], JSON.stringify(m)); assert.deepEqual(await sideways(page, '#panel .panel-body'), [0, 0]);
+    assert.equal(await page.locator('#panel .sec-understood .claims .claim').count(), 13);
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/n-${size[0]}.png` });
+    await page.locator('#panel .sheet-back').click(); await page.waitForTimeout(200); assert.equal(await surface(page).count(), 0);
+    await page.reload(); await page.locator('#world .node').first().waitFor(); await page.waitForTimeout(200);
+    assert.deepEqual(await stores(page), before, 'reading, closing and reloading store nothing');
+    assert.deepEqual(sent, []); assert.deepEqual(errors, []);
+    ok(`N ${size[0]}×${size[1]}: the surface fits, its ways back in view, all claims, no sideways scroll; reload: stores byte for byte`, `surface ${m.width}px · text ${m.text}px`);
+    await ctx.close();
+  }
+}
+
+const { proc, base } = await start();
+const browser = await chromium.launch();
+try {
+  await wide(browser, base); await follow(browser, base); await late(browser, base); await narrow(browser, base);
+  console.log(`# ${results.length} checks passed`);
+} finally { await browser.close(); proc.kill(); }
