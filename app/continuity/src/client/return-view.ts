@@ -569,7 +569,11 @@ export function createReturnView(host: ReturnHost) {
   function srcLabel(x: ReadingSource): Node[] {
     const e = x.evidence;
     return [h('span', { class: `rr-kind k-${x.kind}${e ? ' k-provided' : ''}` }, e ? `사용자 제공 ${EVIDENCE_KIND_LABEL[e.kind]}` : DIGEST_KIND_LABEL[x.kind]), h('strong', {}, e ? e.name : x.title),
-      h('small', {}, e ? `판본 ${e.version ?? NOT_RECORDED} · 출처 ${e.origin ?? NOT_RECORDED} (사용자 기재) · 앱 미실행·미검증` : [versionOf(x.basis), x.partIds.map(partName).join(' · ')].filter(Boolean).join(' · '))];
+      e ? h('small', {}, `판본 ${e.version ?? NOT_RECORDED} · 출처 ${e.origin ?? NOT_RECORDED} (사용자 기재) · 앱 미실행·미검증`) : srcWhere(versionOf(x.basis), x.partIds.map(partName).join(' · '))];
+  }
+  /** The version (a commit id) reads in the code face; the part names after it stay in the text face. */
+  function srcWhere(version: string | null, parts: string): Node {
+    return h('small', {}, version ? h('code', {}, version) : null, version && parts ? ' · ' : '', parts);
   }
   /** The material itself: kind, title and version per source; the quote one click away. */
   function materialList(o: PlanOpened, max: number): Node {
