@@ -1,0 +1,28 @@
+{
+  "task": "AF141 actual PLAN1 independent meaning review",
+  "verdict": "BOUNDED_PASS",
+  "decision": "The unchanged plan is suitable for the separately selected scope review. This does not accept the subsequent scope or request document.",
+  "plan": {"id":"CP_af5b1bd3-d309-473b-b879-401d541b8419","revision":1,"selected":["change_1"]},
+  "evidence": {
+    "directory":".ops/experience141-question-draft",
+    "plan-input.json":"6d40fd8aea11609f9914c725c93c6bb46d1c6273c66d9351662de17eff026ef4",
+    "plan-response.json":"35770ee66acd109bd21299323582af0d02f699b30b7ca4474a8a481ab7f67d00",
+    "plan-actual.json":"8131fd4501198f6a9d2cd3002fae5825cdaf09eb54eddb802d450e02259532f8",
+    "intent.txt":"4372f4cc7e0a31528db72c71133b778e5b845ca7dffdeaca148ea63b46b626b7",
+    "code-source.txt":"471427970332849b6eb44bfe4bfad3ef6bba050aa14a4e1066aba535018bb94e",
+    "observed-source.txt":"b65b56530496a4c9392af5c53b5593d2bc26cf70b571dd7e9556ba349c902f63",
+    "exactInputChecks":"plan-input.ask evidence INTENT/U01/U02 text equals the corresponding frozen file, case-sensitively and without normalization; U01 7184 and U02 835 UTF-16 units."
+  },
+  "criteria": [
+    {"result":"PASS","field":"items[0].description; preserve[0..3]","reason":"The retry continues to send original Q1; success must preserve unsent Q2 and must not auto-send it. Normal successful submission still clears its input and failure still preserves the draft."},
+    {"result":"PASS","field":"summary; items[0].presentation[0].current","reason":"The current defect is grounded in versioned U01, not inferred from old map prose. U01 lines83-94 retains the sent question but unconditionally calls setDraft(o, partId, '') after a successful question. The quoted Q1-success/empty-input observation is from U02's explicitly simulated-provider UI observation."},
+    {"result":"PASS","field":"items[0]; impacts; preserve[4..5]","reason":"One draft-loss change uses existing draft and retry facilities, with no new storage/executor or old withdrawal work added. Existing frozen requests, records/map and other-project work remain explicit preservation conditions."},
+    {"result":"PASS_WITH_LIMIT","field":"unknowns[0]","reason":"Real-model/external-outage reproduction is unobserved, truthfully matching U02. This is an observation limit, not an unanswered product policy and not a new mandatory paid-model/outage experiment before repair."},
+    {"result":"PASS","field":"unknowns[1]","reason":"Postchange normal-success clear and failure-keep checks are future verification of supplied invariants, not a request to decide them again."},
+    {"result":"PASS_WITH_LIMIT","field":"evidence authority","reason":"Old 129 understanding and unreflected 135 records are not promoted to current whole-code proof. U02 explicitly separates accepted 140 reading work, the still-unfixed send defect, and 136's rejected model response."}
+  ],
+  "findings":[],
+  "deliveryClassification":{"source":"Root report, not an independent network execution","modelCalls":1,"successfulProviderResponse":"HTTP200","earlier429":"PROCESS_CALL_CAP before model execution; consumed prior process cap and preserved ask. Stop/start selected cap2 for plan1 and conditional scope1. This is not a second plan model generation or repaired response."},
+  "limits":["No independent UI/network execution or preservation-store verification; Root owns those receipts.","No implementation or RETURN has occurred. Plan meaning does not establish a successful repair or prospective full experience.","Subsequent scope and generated RQ require a separate judgment; their defects must not retroactively erase this bounded plan result."],
+  "actions":{"modelCalls":0,"browserActions":0,"testsOrBuilds":0,"productWrites":0,"responseRepairs":0,"onlyOutput":".ops/results/experience141-plan-meaning.json"}
+}

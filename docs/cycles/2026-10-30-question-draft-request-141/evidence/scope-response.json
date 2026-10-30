@@ -1,0 +1,17 @@
+{
+  "model": "deepseek-flash",
+  "reply": {
+    "summary": "질문 초안을 part별로 저장·복원하는 getDraft/setDraft와 실패한 Q1을 ask.question으로 다시 보내는 재시도 버튼은 이미 재사용할 수 있다. 다만 send 성공 경로가 intent가 'question'이면 현재 초안을 무조건 비우고, 재시도와 새 질문 제출이 같은 intent와 question만 전달하므로 선택한 ‘재시도 성공 시 새 Q2 초안 보존’은 아직 충족되지 않는다.",
+    "prerequisites": [
+      {
+        "title": "재시도 전송과 새 질문 제출을 구별해 성공 후 초안 비움 여부를 결정할 호출 정보",
+        "reason": "재시도 버튼은 send(ask!.intent, ask!.question)로 새 질문 제출과 동일한 intent 'question' 및 question을 넘기고, send 성공 시 intent === 'question'이면 현재 part의 draft를 무조건 지운다. 제공된 발췌에는 두 전송을 구별하는 값이 없어 Q2 초안 보존 조건을 판단할 수 없다.",
+        "refs": [
+          "U01",
+          "U02"
+        ]
+      }
+    ],
+    "unknowns": []
+  }
+}

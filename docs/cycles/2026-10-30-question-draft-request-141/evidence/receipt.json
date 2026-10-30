@@ -1,0 +1,42 @@
+{
+  "frontdoorRejected": {
+    "request": "26068.1477",
+    "http": 429,
+    "code": "PROCESS_CALL_CAP",
+    "providerCalls": 0
+  },
+  "plan": {
+    "request": "26068.1478",
+    "http": 200,
+    "elapsedMs": 19319,
+    "askSHA256": "7a18192f46ca416e92f42d88e29439f31cf017bb011b7c35774eaea223168519",
+    "replySHA256": "113613abbb94d01f7c82e7c82748cb8f86494ede91906299b6100ffc42d5dca8",
+    "model": "deepseek-flash",
+    "items": 1,
+    "providerAttempts": 1,
+    "retries": 0
+  },
+  "scope": {
+    "request": "26068.1479",
+    "http": 200,
+    "elapsedMs": 13958,
+    "askSHA256": "2c1f40fff1ad2d820f4b9eb271a57ba37492540217eb5c7e422c0de50ef82b8e",
+    "replySHA256": "f78f4cccc30f088caaef32cc5ef06c3d1ef052a88d904c97021bd60a257dfe30",
+    "providerAttempts": 1,
+    "retries": 0,
+    "meaning": "rejected: new invocation metadata falsely required despite existing current draft and sent question"
+  },
+  "existingSnapshotsExact": true,
+  "projectWorkspaceExact": true,
+  "implementationDispatch": 0,
+  "returnCalls": 0,
+  "request": {
+    "id": "RQ_00cefece-338c-41fb-9a6c-aa5a619dffa7",
+    "createdAt": "2026-10-30T05:52:57.670Z",
+    "textSHA256": "debdfcd98f814a65ea84282ce97c22cfd3b60b27a581c0e11d960ebc5fce6c80",
+    "chars": 36286,
+    "dispatched": false,
+    "accepted": false,
+    "rejection": "unsupported prerequisite necessity"
+  }
+}

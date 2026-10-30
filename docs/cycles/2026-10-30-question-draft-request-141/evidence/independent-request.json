@@ -1,0 +1,42 @@
+{
+  "task":"AF141 actual scope and prospective frozen request independent meaning review",
+  "verdict":"FAIL_P2",
+  "decision":"Do not accept the unchanged generated RQ as a faithful implementation handoff. Keep the separately reviewed plan BOUNDED_PASS and preserve this scope/RQ unchanged as the failed observation.",
+  "request":{"id":"RQ_00cefece-338c-41fb-9a6c-aa5a619dffa7","planId":"CP_af5b1bd3-d309-473b-b879-401d541b8419","planRevision":1,"itemIds":["change_1"],"textUtf16Length":36286,"implementationDispatched":false},
+  "evidence":{
+    "directory":".ops/experience141-question-draft",
+    "scope-response.json":"3bf82f7f3975c84910e3f031d169084be1d33286103dfa8eceb26dc7191b4cc2",
+    "scope-input.json":"26253b870ae97c0993a9d24ec5faac6badd53b60614c07b37ba32c63d50d60b3",
+    "ui-request-created.json":"6152e159627f5fec6a08ae811a8687de6159b1b8eef22454587b0538a162039d",
+    "codeSourceCommit":"9628e98589f3685d63bda2e78086409e1ebc5364",
+    "sourceApplicability":"Versioned U01 excerpts; relevant send/draft/retry behavior previously independently compared unchanged at 8961db44. U02 explicitly limits its UI observation to a simulated provider.",
+    "inputChecks":"scope-input intent and complete evidence array equal plan-input.ask intent/evidence. The selected change is the same Q1/Q2 loss repair; excluded is empty. No new source or missing plan-policy decision explains this output.",
+    "requestLocation":"ui-request-created.json result.value JSON -> plans JSON -> projects[P_c83c8a25-5991-4499-bb22-9d6f35333538].snapshots[id=RQ_00cefece-338c-41fb-9a6c-aa5a619dffa7].text"
+  },
+  "findings":[{
+    "priority":"P2",
+    "category":"Unsupported necessary implementation dependency",
+    "outputLocation":"reply.prerequisites[0].title/reason; same paragraph under the frozen request's 선택 범위의 전제",
+    "claim":"The reply says missing retry-versus-new-submission call information prevents judging whether Q2 should be preserved.",
+    "sourceLocations":["code-source.txt:10-14 getDraft(o, partId) retrieves current draft by project/part","code-source.txt:33 retry passes original ask.intent and ask.question","code-source.txt:60-63 composer records input and submits its trimmed text","code-source.txt:83-94 send retains question and o/partId while awaiting the response, then unconditionally clears the draft"],
+    "counterexample":"For the supplied Q1 != Q2 scenario, success handling can inspect the current draft for the captured project/part and compare it with the sent Q1. A differing current Q2 can be preserved while the original Q1 answer is recorded; no extra retry/new-call marker is logically required for that distinction. These values and lookup already occur in the supplied excerpts.",
+    "whyMaterial":"An optional flag or other implementation mechanism is presented as a necessary missing capability and exported as a dependency rationale. That can steer a prospective implementer toward extra plumbing or an incorrect premise despite the user's explicit request to reuse existing facilities.",
+    "qualification":"A flag can be a valid design choice. A simple string comparison is not established here as a complete repair for every whitespace, edit-away-and-back, lifecycle or same-text ownership case. The review establishes only that the stated necessity and inability-to-judge claim do not follow from the evidence.",
+    "summaryBoundary":"The summary correctly identifies the existing unconditional successful-question clear and the demonstrated unmet Q2-preservation behavior. Its causal reference to identical call parameters does not establish that a new call discriminator is mandatory.",
+    "caveatInsufficient":"The final document labels the dependency a candidate and says it was not automatically added to scope, but retains the categorical claim that Q2 preservation cannot be judged without the missing value. A request-boundary caveat does not correct that factual/mechanism assertion."
+  }],
+  "preservedStrengths":[
+    "The selected item and preservation list retain Q1 retry, unsent Q2 preservation/no auto-send, normal success clear, failure keep and no new storage/executor.",
+    "The current defect is tied to supplied versioned code and one simulated-provider observation, rather than being inferred from a historical repair instruction.",
+    "The snapshot includes the original intent and U01/U02 source material. Both previous RQ IDs remain present in the exported snapshot list. This presence check does not independently certify all prior bytes unchanged.",
+    "No unsupported current implementation completion is claimed, and old withdrawal work is not added to the selected repair item."
+  ],
+  "nextMinimumDecision":{
+    "recommendation":"Treat the current scope/RQ as rejected for the unsupported necessity claim; do not silently edit it or dispatch it as accepted. Before any separately selected replacement observation, narrowly require scope prerequisites to identify a genuinely missing ability after considering the supplied existing values/state. Keep an optional mechanism distinct from an indispensable capability.",
+    "notNeeded":"No new storage/schema/queue, broader model study, new evidence collection or lifecycle foundation is justified by this counterexample. The actual supplied code already exposes the relevant state.",
+    "implementationBoundary":"Choose the smallest behavior-preserving repair only after a valid prospective handoff decision. This static counterexample is not a completed implementation, an acceptance test, or authorization for another AI call.",
+    "priorDecisionBoundary":"The earlier mechanism86 reasoning is relevant only as the distinction between a new mechanism claim and an actual missing responsibility/information boundary; its old first-map experiment decision does not decide this concrete code defect."
+  },
+  "limits":["HTTP200 is Root's delivery receipt; this review independently parsed and read the returned body and exported request, without network/browser execution.","No whole implementation correctness or hypothetical complete equality-based algorithm was tested.","No automatic repair, replacement scope generation, implementation, RETURN or retrospective success is claimed."],
+  "actions":{"modelCalls":0,"browserActions":0,"testsOrBuilds":0,"productWrites":0,"responseRepairs":0,"onlyOutput":".ops/results/experience141-request-meaning.json"}
+}

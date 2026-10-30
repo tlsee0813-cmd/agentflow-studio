@@ -1,0 +1,38 @@
+{
+  "review": "experience141-mechanism-next-decision",
+  "decisionOwner": "Root",
+  "conclusion": "141 scope의 필수 전제 판단은 의미 반려를 권고한다. 새 생성 메커니즘·prompt 수리·141 즉시 재호출은 선택하지 않는다. 다음 한 단계는 독립 수용140 UI를 현재 공개138/135 기반에 좁게 조합하는 142 제한 전달 준비로 권고한다. 141 정확성은 별도 열린 결함으로 보존한다.",
+  "scopeJudgment": {
+    "supported": "버전 고정 U01의 send 성공 경로는 intent==='question'이면 현재 초안을 무조건 지운다. U02의 Q1 실패→미전송 Q2→Q1 재시도 성공 뒤 Q2 손실은 그 코드와 일치한다. 기존 getDraft/setDraft와 Q1 재전송 흐름이 재사용 가능하다는 summary 부분도 타당하다.",
+    "unsupportedNecessity": "재시도/새 제출 호출 정보를 별도로 구별해야만 Q2 보존을 판단할 수 있다는 필수성은 입증되지 않았다. U01에는 원래 전송 question과 프로젝트/part에 묶인 현재 getDraft가 이미 있다. 관측된 Q1과 Q2가 다른 문자열인 경우, 기존 값의 대응만으로 현재 초안이 원래 질문과 다르다는 것을 알 수 있으므로 '제공된 발췌에는 구별 값이 없어 판단 불가'라는 이유는 과도하다. 성공 후 무엇을 지울지 고치는 일 자체도 selected에 이미 포함된 변경이다.",
+    "counterexampleLimit": "이 반례는 새 caller 정보의 필수성을 깨는 것이지 문자열 비교만으로 전체 제품 수리가 완료된다는 증명이 아니다. 같은 문자열을 새 초안으로 다시 쓴 경우, 공백 정규화, 진행 중 편집 및 프로젝트 전환의 정확한 보존 방법은 구현 판단과 검증 대상이다. 새 flag가 가능한 해법인 것과 선행 필수 전제인 것은 다르다.",
+    "rqEffect": "request-text는 원 scope 전제를 그대로 포함하고 있으므로 정상 plan→scope→RQ 경로가 수행됐다는 증거는 남기되, RQ 전체 의미 수용으로 세지 않는다. '전제 후보이며 자동 포함하지 않았다'는 표시가 그 후보의 근거 없는 필수성 판단을 정확하게 만들지는 않는다. 원 응답·RQ를 고쳐 과거 결과를 통과시키지 않는다.",
+    "separateGates": "root-plan-meaning의 계획 범위 수용은 유지한다. firstmap98의 독립 실제 RQ 판정은 Root가 합쳐 결정한다. 구현 전달/RETURN/실제 수리 완료는 아직 0이다."
+  },
+  "reusedRulesAndLearning": [
+    "현재 SCOPE_PROMPT 50–53은 기존 기능 재사용, 다른 구현이 가능할 때 특정 방식을 필수로 삼지 않기, 선택 작업 자체를 전제로 반복하지 않기, 발췌에 없다는 이유만으로 결여 확정하지 않기를 이미 명시한다. 이번은 규칙 부재보다 제공 근거와 기존 규칙 적용의 실패다.",
+    "86에서 이미 있던 목적·원문 정보를 반복 입력하는 후보와 이미 구현된 handle 복원을 새 메커니즘으로 재제안하지 않았다. 같은 방식으로 이번 오류를 문구만 추가한 새 메커니즘이라고 부르지 않는다.",
+    "88은 독립 출처 연결이 모든 개선의 유일 필요조건이라는86의 과도한 범위를 정정했다. 이번에는 필요한 현재 초안/전송 질문 정보가 이미 있으므로 추가 출처가 생길 때까지 기다려야 한다고 결론내리지 않는다. 다만 같은 입력을 더 정확히 판단할 가능성과 지금 새 호출을 선택할 근거는 구분한다.",
+    "95의 구현 계약·형식 유효성과 실제 의미·전달 관문 분리를 유지한다. 완성 JSON, refs 유효, 원문 보존, 정상 RQ 생성만으로 잘못된 필수 전제를 수용하지 않는다. 131 예산 수리나133 시점/판본 지침을 이번 특정 구현 필수화의 해결 증거로 바꾸지 않는다."
+  ],
+  "oneNextSelection": {
+    "name": "142 수용140 읽기 UI의 제한 공개 전달을 위한 정확 조합 아티팩트 준비",
+    "whyNow": "이미 수용한 읽기 개선을 실제 사용자에게 전달하는 독립적인 진전이다. 141의 다른 의미 결함을 즉시 고치고 같은 scope를 반복해야만 UI를 전달할 수 있다는 의존관계는 없다. 새 연구나 검사 수 증가 대신 전체 경험의 이미 수용된 구간을 실제 공개 사용에 연결한다.",
+    "reusePriorSelectionCarefully": "experience141-delivery-selection은 예전 a3 후보의 typed-input 회귀 때문에 보류됐던 보고다. Root가 현재140 284613/app93be1c55의 수용 완료를 전달했으므로 그 과거 후보의 미수용 상태를 현재140에 반복 적용하지 않는다. 다만 해당 보고는 최종 조합 아티팩트의 수용 증거가 아니며 source 분리 근거만 재사용한다.",
+    "minimumScope": "공개138이 사용한 정확135 source73f6f253/app3960c16d를 기반으로 최종 수용140의 app.ts와 styles.css를 사용하고, shared/map-reading.ts는 partUnderstanding의 claims.slice(0,12) 투영 제한 제거만 반영한다. 137 diagnostics 전체 파일·현 HEAD 전체를 가져오지 않는다. 별도 immutable commit/tree/manifest를 만든다. 이 조합에서 shared/map-reading의 browser/server 배포 hash 변경은 예상되며 모든 server module 불변이라고 주장하면 안 된다.",
+    "preserved": "기존-map 정책, map/jobs 보류, 보호된 plan/scope/digest, 승인된135 server/prompt/model 설정, 저장 schema/prefix, 공개73, 계정·키 및 기존 사용자 자료를 유지한다. 141의 scope 응답 수정이나 Q2 수리 구현은 이번 UI 전달에 끼워 넣지 않는다.",
+    "endCondition": "최종 수용 client의 exactness, 좁은 shared-cap 차이, 잠금 패키지/manifest 및 조합 연결성을 확인하고, Root의 별도 전달 선택 아래 실제 공개 읽기·원문 복귀·reload·저장 보존과 원격 bytes/정책을 검증하면142 전달 범위로 종료한다. 기존140 전체 검사를 반복하거나 모델 호출·합성 자료 주입으로 공개 성공을 만들지 않는다. unexpected 의존성/validator137 유입/저장·설정 drift가 있으면 그 구체 차이에서 멈추며 전체 최신 HEAD로 범위를 넓히지 않는다.",
+    "authorizationBoundary": "이번 문서는 다음 선택 권고다. 아티팩트 생성·코드 수정·배포 승인을 실행한 것이 아니며 Root가 선택한다."
+  },
+  "noNewCallDecision": "141은 완주된 의미 실패로 보존한다. 모델 변경·예산 확대·같은 scope 재시도·새 의미 검토자 호출·완료86 연구 재실행을 정당화할 새 차이는 이번 자료에 없다. 미래 정확성 작업은 기존 필수성 규칙과 달리 실제 무엇이 바뀌는지 먼저 특정할 때 별도 선택한다. 전체 목표의 완료나 중단을 뜻하지 않는다.",
+  "evidenceSha256": {
+    "scope-response.json": "3bf82f7f3975c84910e3f031d169084be1d33286103dfa8eceb26dc7191b4cc2",
+    "scope-input.json": "26253b870ae97c0993a9d24ec5faac6badd53b60614c07b37ba32c63d50d60b3",
+    "code-source.txt": "471427970332849b6eb44bfe4bfad3ef6bba050aa14a4e1066aba535018bb94e",
+    "intent.txt": "4372f4cc7e0a31528db72c71133b778e5b845ca7dffdeaca148ea63b46b626b7",
+    "request-text.txt": "debdfcd98f814a65ea84282ce97c22cfd3b60b27a581c0e11d960ebc5fce6c80",
+    "root-plan-meaning.json": "7771c3dddb6d9f3e87f6e15f78ea078b95592ec52d60258a9cec7004a7f644fa"
+  },
+  "actions": {"newModelCalls":0,"apiCalls":0,"externalTransmission":0,"productWrites":0,"experiments":0,"tests":0,"onlyNewFile":".ops/results/experience141-mechanism-next.json"},
+  "reportedRunAccounting": "Root가 전달한141 실제 모델 호출은 plan1+scope1 총2회. 한도 전429는 provider0, 구현RETURN0. 이번 리뷰로 새 호출/성공을 추가하지 않는다."
+}

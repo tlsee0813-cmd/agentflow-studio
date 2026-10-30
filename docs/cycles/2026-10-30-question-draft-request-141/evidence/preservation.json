@@ -1,0 +1,27 @@
+{
+  "beforeWorkspaceSHA256": "34569839ef24e59746ee64bc567175ed3cbf69db17eaada3c895f9d345f5de1d",
+  "afterWorkspaceSHA256": "34569839ef24e59746ee64bc567175ed3cbf69db17eaada3c895f9d345f5de1d",
+  "workspaceExact": true,
+  "otherPlansExact": true,
+  "oldSnapshots": [
+    {
+      "id": "RQ_455de117-b75f-4eea-9fe3-630611e3d57e",
+      "sha256": "1a3303506c69be5c91d8ef18c8d436510b8274a5ad7fd7979ebe735799015ed0",
+      "unchanged": true
+    },
+    {
+      "id": "RQ_93168eb4-c5bc-40b7-93e6-0ba660df3f3f",
+      "sha256": "7da493774d520ee3fc20d46f79db868e87ba75fa587d35f83d756f541d375a54",
+      "unchanged": true
+    }
+  ],
+  "newSnapshot": {
+    "id": "RQ_00cefece-338c-41fb-9a6c-aa5a619dffa7",
+    "textSha256": "debdfcd98f814a65ea84282ce97c22cfd3b60b27a581c0e11d960ebc5fce6c80",
+    "generatedBeforeImplementation": true
+  },
+  "planChangedAsIntended": true,
+  "normalExportBeforeExact": true,
+  "normalExportAfterExact": true,
+  "reloadWholeWorkspacePlansExact": true
+}
