@@ -65,5 +65,5 @@ if ($c.result.port -eq 'free') {
 } else {
   Write-Output "AgentFlow Studio(PC, Codex): $url  ·  $($c.result.message)"
 }
-Write-Output "종료: ./continuity/scripts/start-pc.ps1 -Stop"
+Write-Output "종료: ./continuity/scripts/start-pc.ps1 -Stop -Port $Port"
 if (-not $NoBrowser) { Start-Process $url }

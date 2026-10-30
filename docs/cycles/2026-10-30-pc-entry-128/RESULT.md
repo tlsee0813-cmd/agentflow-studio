@@ -5,7 +5,7 @@
 ## 판본
 
 - 기준 8d41378581e6e999e54747ae9eaac4973eae94a9(app d5a6be031fb06b925a1511e06c5845f15d56ec14), branch `work/experience128-pc-entry`.
-- 첫 구현 a967c993a44bf6d16fa618f650f7f958c24045d9 (app tree a4d9efc0fb1a20d70245ea3529b8765473e0fe9f, 아래 run1). 독립 검토 P2 두 건 수리 c2ae550b82c3ad5b19c769a246c239150677a609 (app tree 1879efff6a88301ca4894ef7388d85138e708b1a, 아래 run2). 세 번째 P2(바이너리 없는 종료) 수리 49be2d706cdb1f3b1ada25ad1da4fe68c855a7fd (app tree 3eb96c6dc12a0a97de06d94d720cac78eb0ad33d, 아래 run3). 그 뒤 커밋은 이 문서뿐이다.
+- 첫 구현 a967c993a44bf6d16fa618f650f7f958c24045d9 (app tree a4d9efc0fb1a20d70245ea3529b8765473e0fe9f, 아래 run1). 독립 검토 P2 두 건 수리 c2ae550b82c3ad5b19c769a246c239150677a609 (app tree 1879efff6a88301ca4894ef7388d85138e708b1a, 아래 run2). 세 번째 P2(바이너리 없는 종료) 수리 49be2d706cdb1f3b1ada25ad1da4fe68c855a7fd (app tree 3eb96c6dc12a0a97de06d94d720cac78eb0ad33d, 아래 run3). 마지막 커밋은 `start-pc.ps1`의 종료 안내 한 줄(선택한 `-Port` 포함)과 이 문서이며, 그 한 줄은 Node 검사·fixture가 읽지 않는다(Root가 출력을 직접 확인).
 
 ## 사용법
 
@@ -43,7 +43,7 @@ UI fixture: 헤더 `지도 정리만 가능`(title에 범위 `첫 지도와 이�
 
 run2(정확 c2ae550, clean): build·check 통과, `pc-entry128`·`owned-cli102`·`owned-cli102-process` 36/36, UI fixture 통과(job POST 0, child 0), 종료 뒤 프로세스 0.
 
-__RUN3__
+run3(정확 49be2d7, clean): build·check 통과, `pc-entry128`(11건)·`owned-cli102`·`owned-cli102-process` 37/37, UI fixture 통과(job POST 0, child 0), 종료 뒤 프로세스 0.
 
 ## 독립 검토 P2 두 건과 수리 (c2ae550)
 
@@ -62,15 +62,19 @@ Root 독립 확인: 자기 host가 시작된 뒤 codex 파일의 bytes만 바뀌
 
 검사 128-11(수리 전 `BINARY`로 실패, 로그 보존): 시작 뒤 bytes 변경(PATH 자동 검색)·삭제(지정 경로)에도 STOPPED, 이후 새 시작은 exit 3. 다른 경로·고정 정책이 아닌 정책 id·경로 없는 위조 run 파일은 요청을 쓰기 전에 거절(NO_RUN_FILE/NOT_OURS)하고 서버는 계속 실행. 이 입구 run 파일을 복사해 둔 다른 서버는 NOT_OURS, 서버 없는 stale run 파일은 NOT_RUNNING이며 아무것도 쓰지 않음. 128-6의 두 번째 경우(run 파일이 전혀 없는 다른 서버)는 이제 요청 전 단계에서 NO_RUN_FILE로 거절된다(이전 NOT_OURS; 거절·무기록은 같음). mutation: run 파일 정책 id를 고정 정책에 묶지 않음→128-11 실패, 포트 서버 identity 확인 제거→128-11 실패, 종료에 현재 바이너리 요구 복원→128-11 실패.
 
+## 종료 안내 한 줄 수리
+
+Root 확인: `start-pc.ps1`이 시작 뒤 항상 `-Stop`만 안내해, `-Port 4328`로 시작한 사용자가 그대로 따르면 기본 4327을 종료 시도하거나 NOT_RUNNING을 받았다. 안내를 `./continuity/scripts/start-pc.ps1 -Stop -Port $Port`(실제 선택한 포트)로 바꿨다. 이 환경에는 PowerShell이 없어 출력은 Root가 확인한다.
+
 ## 증거 구별
 
 - 작성자: 위 Linux 제어 fixture 검사(가짜 binary, 생성 0).
 - 독립 검토: 두 P2 결함 발견과 재현(검토자 쪽, 이 문서는 그 결과를 인용만 한다).
-- Root: a967c99 실제 Windows PowerShell 7.6.5에서 설치된 Codex 자동 검출, 정책 121 전체 동일(policy 29f5c36ec140), 4327 시작 → 정상 121 프로젝트와 109 bundle 가져오기 → 새 원 Zephyr 4,699자 보관(생성 없음) → Stop → 재시작·새로고침 뒤 workspace·plans 바이트 동일 → Stop. Windows PowerShell 5.1은 그 PC의 실행 정책으로 차단(정책 변경 없음), 읽기 전용 parser 오류 0. Root c2ae550: 실제 Windows에서 128-2..10 9건 통과, 128-1은 sparse checkout에 ACCEPTED_POLICY.json이 없어 ENOENT였고 정확 HEAD blob 복구 뒤 단독 재실행 통과(정책 차이 아님), 독립 F1/F2 수리 검사 2/2 통과, 그리고 세 번째 P2를 확정. 49be2d7의 Windows 재확인은 Root 대기.
+- Root: a967c99 실제 Windows PowerShell 7.6.5에서 설치된 Codex 자동 검출, 정책 121 전체 동일(policy 29f5c36ec140), 4327 시작 → 정상 121 프로젝트와 109 bundle 가져오기 → 새 원 Zephyr 4,699자 보관(생성 없음) → Stop → 재시작·새로고침 뒤 workspace·plans 바이트 동일 → Stop. Windows PowerShell 5.1은 그 PC의 실행 정책으로 차단(정책 변경 없음), 읽기 전용 parser 오류 0. Root c2ae550: 실제 Windows에서 128-2..10 9건 통과, 128-1은 sparse checkout에 ACCEPTED_POLICY.json이 없어 ENOENT였고 정확 HEAD blob 복구 뒤 단독 재실행 통과(정책 차이 아님), 독립 F1/F2 수리 검사 2/2 통과, 그리고 세 번째 P2를 확정. 49be2d7: Root 실제 Windows에서 128-6/10/11 3/3 통과, 독립 최종 검토(63b98813) 추가 P1/P2 없음, 공식 binary와 같은 사본을 4328에서 `-CodexPath`로 시작 → 사본 이름 변경(원본 불변) → `-Stop -Port 4328 -CodexPath <사라진 경로>` exit 0. 종료 안내 한 줄은 Root 출력 확인 대기.
 
 ## Root 대기 / 미확인
 
-- 작성자 환경에는 PowerShell이 없어 `start-pc.ps1`을 실행하지 못했다. a967c99의 Windows 정상 경로와 c2ae550의 128 검사는 Root가 확인했고(위), 49be2d7(바이너리 없는 종료, `-Stop`이 `-CodexPath`를 쓰지 않음)의 Windows 확인은 Root 대기다.
+- 작성자 환경에는 PowerShell이 없어 `start-pc.ps1`을 실행하지 못했다. a967c99의 Windows 정상 경로와 c2ae550의 128 검사는 Root가 확인했고(위), 49be2d7의 바이너리 없는 종료는 Root가 Windows에서 확인했고, 마지막 종료 안내 한 줄의 출력 확인과 최종 CI가 Root 대기다.
 - 실제 설치 Codex로 정상 시작 → 정확 실행자 → 원문 입력까지의 실사용 증거는 Root 몫이다. 이 결과의 UI 확인은 fixture다.
 - 4327은 4317(기본)과 다른 주소라 브라우저 저장이 다르다. 4317의 기존 프로젝트를 쓰려면 백업 내보내기/가져오기가 필요하다(자동 이전 없음).
 - 첫 지도 일반성·생성 품질·두 자료의 최신 통합 의미·121 실제 away/ready 반영은 여전히 미해결이며 이번 범위가 아니다.
