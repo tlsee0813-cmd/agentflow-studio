@@ -11,8 +11,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 APP = ROOT.parent
 
 
-def start(stub):
-    env = {**os.environ, "STUDIO_STUB": stub, "PORT": "0"}
+def start(stub, **extra):
+    env = {**os.environ, "STUDIO_STUB": stub, "PORT": "0", **extra}
     proc = subprocess.Popen(["node", str(ROOT / "tests/studio-smoke-server.mjs")], cwd=APP, env=env, stdout=subprocess.PIPE, text=True)
     line = proc.stdout.readline()
     m = re.search(r"READY (http://\S+)", line)
@@ -2669,6 +2669,392 @@ def failure_flow(browser, base):
     page.close()
 
 
+def question_retry_flow(browser, base):
+    """A failed question retried after another one was typed: the retry answers the first, the second stays unsent in the box."""
+    page = browser.new_page(viewport={"width": 1280, "height": 720})
+    page.goto(base + "/")
+    page.locator('.program-head[href="#/p/ex-salon"]').click()
+    page.locator(".node", has_text="문자 알림").click()
+    sheet(page, "문자 알림")
+    page.locator(".ask-open").click()
+    page.locator("#ask-input").fill("문자는 언제 보내?")
+    page.locator("#ask-input").press("Enter")
+    expect(page.locator(".failed")).to_contain_text("AI 서비스가 응답하지 않아요")
+    expect(page.locator("#ask-input")).to_have_value("문자는 언제 보내?")  # a failure keeps the question
+    page.locator("#ask-input").fill("  비용은 얼마나 들어?")
+    page.get_by_role("button", name="다시 시도").click()
+    expect(page.locator(".answer")).to_have_count(1)
+    expect(page.locator(".answer .ans-ask")).to_contain_text("문자는 언제 보내?")
+    expect(page.locator("#ask-input")).to_have_value("  비용은 얼마나 들어?")  # typed after the failure: never sent, never cleared
+    page.locator("#ask-input").press("Enter")
+    expect(page.locator(".answer")).to_have_count(2)
+    expect(page.locator(".answer").nth(1).locator(".ans-ask")).to_contain_text("비용은 얼마나 들어?")
+    expect(page.locator("#ask-input")).to_have_value("")  # the question that went out leaves the box
+    page.close()
+
+
+def sessions_flow(browser, base):
+    """Local session records (synthetic home folder, stubbed model): a new project connected once to a working folder takes that
+    folder's recent Claude Code / Codex sessions as records (credential-like text hidden) and reads its first map without a click;
+    a reload takes nothing twice; the paste box can also take one session by hand, kept as its own record after a note typed
+    first; disconnecting and connecting the same folder again takes nothing twice either."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    errors, maps = [], []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.on("request", lambda r: maps.append(r.url) if r.url.endswith("/api/studio/map") else None)
+    page.goto(base + "/")
+    expect(page.locator("#sync-pill")).to_be_hidden()  # home: no project to connect
+    page.locator("#new-open").click()
+    page.locator("#new-name").fill("미용실 예약")
+    page.locator("#new-form").get_by_role("button", name="만들기").click()
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 안 됨")
+    page.locator("#sync-pill").click()
+    pick = page.locator("#sync-panel .sync-folder-pick")
+    expect(pick).to_have_count(1)
+    expect(pick).to_contain_text("/work/salon")
+    expect(pick).to_contain_text("Claude Code")
+    expect(pick).to_contain_text("Codex")
+    expect(page.locator("#sync-panel")).to_contain_text("지도를 갱신할 때 이 기록을 AI에게 보내요")  # said before connecting
+    assert maps == [], maps
+    pick.click()
+    # Connected: the folder's sessions became records and the first map was read without asking.
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon")
+    # The stub reads only "요구:"-style lines, so it answers this conversation with its gap; the request itself is the point.
+    expect(page.locator("#space-empty")).to_contain_text("[스텁] 프로그램을 말하는 기록을 붙여 주세요", timeout=15000)
+    assert len(maps) == 1, maps
+    stored = page.evaluate("Object.values(localStorage).join('\\n')")
+    assert "[가려진 비밀값]" in stored and "sk-abcdefghijklmnopqrstuvwx" not in stored, "the key in a reply is never kept"
+    page.locator("#sync-pill").click()
+    expect(page.locator("#sync-panel")).to_contain_text("가져온 기록2개")
+    expect(page.locator("#sync-panel")).to_contain_text("오늘 자동 지도 갱신1 / 30회")
+    page.reload()
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon")
+    page.locator("#sync-pill").click()
+    page.locator("#sync-panel").get_by_role("button", name="지금 확인").click()
+    expect(page.locator("#sync-panel")).to_contain_text("마지막 확인")
+    expect(page.locator("#sync-panel")).to_contain_text("가져온 기록2개")  # nothing taken twice
+    assert len(maps) == 1, maps
+    page.locator("#sync-pill").click()
+    # By hand: the paste box takes one session as written; tool output and the key are not in it. Put after a note typed first,
+    # it comes under a '다음 기록' line and is kept as a record of its own (told by its header), and the note as another.
+    page.locator("#return-entry").click()
+    page.locator("#lens .rr-paste-open").click()
+    draft = page.locator("#paste-text")
+    draft.fill("메모: 문자 발송은 다음 주에")
+    page.locator("#lens").get_by_role("button", name="내 AI 세션에서 가져오기").click()
+    expect(page.locator("#lens .rr-session")).to_have_count(3)
+    page.locator("#lens .rr-session", has_text="휴무일 연결").click()
+    expect(draft).to_have_value(re.compile("^메모: 문자 발송은 다음 주에\\n\\n──────── 다음 기록 ────────\\n\\n\\[Claude Code 세션 기록 · 휴무일 연결[\\s\\S]*예약 화면에서 휴무일을 영업시간 설정과 연결해 줘"))
+    value = draft.input_value()
+    assert "[가려진 비밀값]" in value and "sk-abc" not in value and "SHOULD NOT APPEAR" not in value, value
+    assert "(바꾼 파일: src/hours.ts, tests/hours.test.ts)" in value, value
+    expect(page.locator("#lens .rr-sessions-note")).to_contain_text("키·토큰처럼 보이는 1곳은 가렸어요")
+    expect(page.locator("#lens .rr-sessions-note")).to_contain_text("앞에 있던 글과는 따로 저장돼요")
+    page.locator("#lens").get_by_role("button", name="기록 저장").click()
+    expect(page.locator("#lens")).to_contain_text("세션마다 기록을 하나씩 나눠 저장했어요")
+    assert '"text":"메모: 문자 발송은 다음 주에"' in page.evaluate("Object.values(localStorage).join('\\n')"), "the note is a record of its own"
+    # A second working folder (another repository) joins the same connection; leaving it keeps the first. It is added while a
+    # look is still running (folder listings held 2 s here): that look ends without dropping the folder, and one follows it.
+    page.evaluate("""() => { const f = window.fetch; window.fetch = async (u, o) => { if (String(u).includes('folder=')) await new Promise(r => setTimeout(r, 2000)); return f(u, o); }; }""")
+    page.locator("#sync-pill").click()
+    page.locator("#sync-panel").get_by_role("button", name="지금 확인").click()
+    page.locator("#sync-panel").get_by_role("button", name="폴더 추가").click()
+    expect(page.locator("#sync-panel h3")).to_have_text("작업 폴더 추가")
+    expect(page.locator("#sync-panel .sync-folder-pick")).to_have_count(0)  # the one folder with sessions is linked already
+    page.locator("#sync-panel .sync-path").fill("/work/salon-api")
+    page.locator("#sync-panel").get_by_role("button", name="연결", exact=True).click()
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon 외 1")
+    expect(page.locator("#sync-pill")).to_have_attribute("data-state", "busy")
+    expect(page.locator("#sync-pill")).to_have_attribute("data-state", "on", timeout=15000)
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon 외 1")
+    page.locator("#sync-pill").click()
+    expect(page.locator("#sync-panel .sync-linked li")).to_have_count(2)
+    expect(page.locator("#sync-panel")).to_contain_text("가져온 기록2개")  # nothing new in the other folder
+    page.locator("#sync-panel").get_by_role("button", name="/work/salon-api 연결 빼기").click()
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon")
+    page.locator("#sync-panel").get_by_role("button", name="연결 끊기").click()
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 안 됨")
+    # Connecting the same folder again goes on from where each session was taken: nothing comes in twice.
+    page.locator("#sync-panel .sync-folder-pick", has_text="/work/salon").click()
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon")
+    expect(page.locator("#sync-pill")).to_have_attribute("data-state", "on", timeout=15000)
+    page.locator("#sync-pill").click()
+    expect(page.locator("#sync-panel")).to_contain_text("가져온 기록2개")
+    assert len(maps) == 1, maps
+    assert not errors, errors
+    context.close()
+
+
+def handover_flow(browser, base):
+    """Handover document (stubbed map reply): a part read from a session record lists that session; its ⋯ menu makes the part's
+    document (its path, scope rule and marker), the range switches to the whole project in place, Esc closes only the document;
+    the bar's button makes the whole project's, saved as a .md file. Nothing is sent to the AI for it."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720}, accept_downloads=True)
+    page = context.new_page()
+    errors, maps = [], []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.on("request", lambda r: maps.append(r.url) if "/api/studio/" in r.url and r.method == "POST" else None)
+    page.goto(base + "/")
+    page.locator("#new-open").click()
+    page.locator("#new-name").fill("인수인계 시험")
+    page.locator("#new-form").get_by_role("button", name="만들기").click()
+    page.locator("#space-empty").get_by_role("button", name="기록 붙여넣기").click()
+    record = ("[Claude Code 세션 기록 · 휴무일 연결 · 작업 폴더 /work/salon · 브랜치 main · 세션 claude-0123456789abcdef01234567]\n\n"
+              "── 사용자 요청 · 09:00 ──\n요구: 휴무일에는 예약을 막는다.\n\n── Claude Code 답변 · 09:05 ──\n작업 보고: 휴무일 예약 버튼을 막았다.\n(바꾼 파일: src/hours.ts)")
+    page.locator("#paste-text").fill(record)
+    page.locator("#lens").get_by_role("button", name="기록 저장").click()
+    page.locator("#space-empty").get_by_role("button", name="기록으로 지도 정리").click()
+    expect(page.locator("#world .node")).to_have_count(2)
+    sent = len(maps)
+    page.locator("#world .node", has_text="스텁 부분 1").click()
+    expect(page.locator("#lens .lens-sessions")).to_have_text("다룬 세션Claude Code 「휴무일 연결」")
+    # The full reading lists it with its folder and branch.
+    page.locator("#lens .lens-more").click()
+    sessions = page.locator("#panel .sec-sessions")
+    expect(sessions).to_contain_text("Claude Code 「휴무일 연결」")
+    expect(sessions).to_contain_text("salon · main")
+    page.locator("#panel").get_by_role("button", name="요약으로 돌아가기").click()
+    # The part's document from its ⋯ menu.
+    page.locator("#lens details.more summary").click()
+    page.locator("#lens").get_by_role("menuitem", name="이 부분 인수인계 문서").click()
+    sheet = page.locator("#handover-sheet")
+    expect(sheet).to_be_visible()
+    text = page.locator("#handover-text")
+    expect(text).to_have_value(re.compile(r"^──────── AgentFlow 인수인계 문서 · af-handover:[A-Z2-9]{6}:A_"))
+    value = text.input_value()
+    assert "# 인수인계: 인수인계 시험 › 스텁 부분 1" in value and '범위는 "스텁 부분 1"' in value, value
+    assert "### 스텁 부분 1" in value and "### 스텁 부분 2" not in value, value
+    assert "Claude Code 「휴무일 연결」 · 작업 폴더 /work/salon · 브랜치 main" in value, value
+    assert "요구: 휴무일에는 예약을 막는다. → 바꾼 파일: src/hours.ts" in value, value
+    code = re.search(r"af-handover:([A-Z2-9]{6})", value).group(1)
+    # The whole project, in place, under the same code.
+    page.locator("#handover-scope").select_option("")
+    expect(text).to_have_value(re.compile("범위: 프로젝트 전체 \\(부분 2개\\)"))
+    whole = text.input_value()
+    assert f"af-handover:{code} " in whole and "### 스텁 부분 1" in whole and "### 스텁 부분 2" in whole, whole
+    page.locator("#handover-sheet").get_by_role("button", name="복사").click()
+    expect(page.locator("#handover-sheet .handover-msg")).to_have_text(re.compile("복사했어요|자동 복사가 막혀 있어요"))
+    page.keyboard.press("Escape")
+    expect(sheet).to_be_hidden()
+    expect(page.locator("#lens-title")).to_have_text("스텁 부분 1")  # Esc closed the document only
+    # From the bar: the whole project, saved as a file.
+    page.locator("#handover-open").click()
+    expect(sheet).to_be_visible()
+    expect(page.locator("#handover-scope")).to_have_value("")
+    with page.expect_download() as dl:
+        page.locator("#handover-sheet").get_by_role("button", name=".md로 저장").click()
+    d = dl.value
+    assert re.fullmatch(r"인수인계 시험-인수인계-[A-Z2-9]{6}\.md", d.suggested_filename), d.suggested_filename
+    saved = open(d.path(), encoding="utf-8").read()
+    assert saved == page.locator("#handover-text").input_value(), "the file is the document as shown"
+    page.locator("#handover-sheet").get_by_role("button", name="닫기").click()
+    expect(sheet).to_be_hidden()
+    assert len(maps) == sent, maps  # making documents sent nothing
+    assert not errors, errors
+    context.close()
+
+
+FAKE_PICKER = """(files) => {
+  // Stand-in folder handles (Chrome's picker cannot be driven): each pick hands the folder next in window.__picks. As Chrome's
+  // do, a handle keeps its identity (isSameEntry, resolve) and a File taken from it cannot be read once its file changed.
+  // window.__write adds a file or adds to one; window.__onList(name) runs as a folder of that name is listed, and
+  // window.__growOnRead(path) adds a line to that file as it is first read whole (both: a file changing during a look).
+  const disk = { name: '', kids: new Map() };
+  const at = path => path.split('/').reduce((n, p) => { if (!n.kids.has(p)) n.kids.set(p, { name: p, kids: new Map() }); return n.kids.get(p); }, disk);
+  const snapshot = f => {
+    const v = f.version, ok = () => { if (f.version !== v) throw new DOMException('The requested file could not be read', 'NotReadableError'); };
+    const wrap = b => Object.assign(b, { slice: (...a) => wrap(Blob.prototype.slice.apply(b, a)), text: async () => { ok(); return Blob.prototype.text.call(b); },
+      stream: () => { ok(); const r = Blob.prototype.stream.call(b).getReader();
+        return new ReadableStream({ async pull(c) { f.onRead?.(); ok(); const { done, value } = await r.read(); if (done) c.close(); else c.enqueue(value); } }); } });
+    return wrap(new File([f.text], f.name, { lastModified: f.at }));
+  };
+  const handle = n => (n.handle ??= n.kids ? {
+    kind: 'directory', name: n.name, queryPermission: async () => 'granted', requestPermission: async () => 'granted',
+    async *values() { window.__onList?.(n.name); yield* [...n.kids.values()].map(handle); },
+    isSameEntry: async o => o === n.handle,
+    resolve: async o => { const find = (x, path) => (x.handle === o ? path : x.kids ? [...x.kids.values()].reduce((r, k) => r ?? find(k, [...path, k.name]), null) : null); return find(n, []); }
+  } : { kind: 'file', name: n.name, getFile: async () => snapshot(n) });
+  window.__write = (path, text, ms) => {
+    const parts = path.split('/'), name = parts.pop(), dir = at(parts.join('/')), f = dir.kids.get(name);
+    if (f) { f.text += text; f.at = ms ?? f.at + 1000; f.version++; } else dir.kids.set(name, { name, text, at: ms ?? Date.now(), version: 0 });
+  };
+  window.__growOnRead = path => { const f = at(path); f.onRead = () => { f.onRead = null; window.__grown = (window.__grown ?? 0) + 1;
+    window.__write(path, JSON.stringify({ timestamp: new Date().toISOString(), type: 'turn_context', payload: { cwd: '/work/salon' } }) + '\\n'); }; };
+  for (const [path, text, ms] of files) window.__write(path, text, ms);
+  window.__picks = ['me/.claude', 'me/.codex', 'wsl/.claude', 'me', 'me/.codex'];
+  window.showDirectoryPicker = async () => { const p = window.__picks.shift(); if (!p) throw new DOMException('cancelled', 'AbortError'); return handle(at(p)); };
+}"""
+
+
+def folder_files():
+    """The fixture's session files as they lie in a home folder ('me'), with a Codex thread archived before any look took it (still a
+    session: it is taken), and what lies beside them that is no session of its own: subagents' transcripts and rollouts newer than every session (as many of each as one look opens; one
+    rollout changed a file for the Codex session), a .jsonl elsewhere in the home folder, and a second .claude (Claude Code in WSL)."""
+    fixture = json.loads(subprocess.run(["node", str(ROOT / "tests/sessions-fixture.mjs")], cwd=APP, capture_output=True, text=True, encoding="utf-8", check=True).stdout)
+    files = [[f"me/{root}/{path}", text, at] for root, path, text, at in fixture]
+    base = min(f[2] for f in files) - 1000
+    jl = lambda *rows: "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows)
+    ask = lambda cwd, text, when, **o: {"type": "user", "cwd": cwd, "sessionId": "s", "timestamp": when, "message": {"role": "user", "content": text}, **o}
+    meta = lambda id, when, **o: {"timestamp": when, "type": "session_meta", "payload": {"id": id, "timestamp": when, "cwd": "/work/salon", **o}}
+    files.append(["me/.codex/archived_sessions/rollout-2026-10-20T09-00-00-arch.jsonl", jl(meta("arch", "2026-10-20T09:00:00.000Z"),
+        {"timestamp": "2026-10-20T09:00:01.000Z", "type": "response_item", "payload": {"type": "message", "role": "user", "content": [{"type": "input_text", "text": "보관해 둔 옛 대화"}]}}), base + 5000])
+    files.append(["me/work/notes/chat.jsonl", jl(ask("/work/notes", "홈 폴더에 둔 다른 기록", "2026-10-28T09:40:00.000Z")), base + 6000])
+    files.append(["wsl/.claude/projects/-work-salon/w1.jsonl", jl(ask("/work/salon", "예약 문자 문구를 바꿔 줘", "2026-10-28T09:45:00.000Z")), base + 7000])
+    for i in range(400):
+        files.append([f"me/.claude/projects/-work-salon/c1/subagents/agent-{i}.jsonl", jl(ask("/work/salon", "하위 작업", "2026-10-28T09:50:00.000Z", isSidechain=True)), base + 10000 + i])
+        change = [{"timestamp": "2026-10-28T09:21:30.000Z", "type": "event_msg", "payload": {"type": "item_completed", "item": {"type": "FileChange", "status": "completed", "changes": {"/work/salon/src/retry.ts": {"type": "update"}}}}}] if i == 0 else []
+        files.append([f"me/.codex/sessions/2026/10/28/rollout-2026-10-28T09-21-00-sub{i}.jsonl", jl(meta(f"sub{i}", "2026-10-28T09:21:00.000Z", parent_thread_id="x1" if i == 0 else "y9"), *change), base + 20000 + i])
+    return files
+
+
+def folder_sessions_flow(browser, base):
+    """Without a local session reader (a hosted or plain local server), the person picks their .claude and .codex folders once in the
+    browser: the same automatic connection runs on them (folders found, sessions taken, first map without a click), the paste box
+    lists them, one .jsonl file can be chosen by hand, and a web chat gets a request text that writes its own record. Only the
+    tools' own layout is read (with archived threads, no subagent transcript, nothing else in a home folder picked by mistake); a file
+    an agent writes during a look breaks nothing; folders inside one another are both kept, the same folder picked again adds
+    nothing, and two of one name are told apart."""
+    files = folder_files()
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    context.add_init_script(f"({FAKE_PICKER})({json.dumps(files)})")
+    page = context.new_page()
+    errors, maps = [], []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.on("request", lambda r: maps.append(r.url) if r.url.endswith("/api/studio/map") else None)
+    page.goto(base + "/")
+    page.locator("#new-open").click()
+    page.locator("#new-name").fill("폴더로 연결")
+    page.locator("#new-form").get_by_role("button", name="만들기").click()
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 안 됨")
+    page.locator("#sync-pill").click()
+    panel = page.locator("#sync-panel")
+    expect(panel.locator("h3")).to_have_text("내 AI 세션 연결")
+    panel.get_by_role("button", name="세션 폴더 고르기").click()
+    # Newer subagent transcripts beside the session do not crowd it out.
+    pick = panel.locator(".sync-folder-pick")
+    expect(pick).to_have_count(1)
+    expect(pick).to_contain_text("/work/salon")
+    expect(pick).to_contain_text("Claude Code")
+    expect(panel).to_contain_text("읽는 세션 폴더: .claude")
+    panel.get_by_role("button", name="세션 폴더 더 고르기").click()
+    expect(panel).to_contain_text("읽는 세션 폴더: .claude, .codex")
+    expect(pick).to_contain_text(re.compile("Claude Code·Codex|Codex·Claude Code"))
+    assert maps == [], maps
+    pick.click()
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon")
+    expect(page.locator("#space-empty")).to_contain_text("[스텁] 프로그램을 말하는 기록을 붙여 주세요", timeout=15000)
+    assert len(maps) == 1, maps
+    page.locator("#sync-pill").click()
+    expect(panel).to_contain_text("가져온 기록3개")  # the archived thread is taken too, once
+    page.locator("#sync-pill").click()
+    # The paste box lists the picked folders' sessions and takes one as written.
+    page.locator("#return-entry").click()
+    page.locator("#lens .rr-paste-open").click()
+    box = page.locator("#lens .rr-sessions")
+    expect(box).to_contain_text("고른 세션 폴더(.claude, .codex)의 대화 기록")
+    page.locator("#lens").get_by_role("button", name="내 AI 세션에서 가져오기").click()
+    expect(page.locator("#lens .rr-session")).to_have_count(4)  # the archived thread is listed too
+    expect(page.locator("#lens .rr-session", has_text="보관해 둔 옛 대화")).to_have_count(1)
+    page.locator("#lens .rr-session", has_text="휴무일 연결").click()
+    draft = page.locator("#paste-text")
+    expect(draft).to_have_value(re.compile("예약 화면에서 휴무일을 영업시간 설정과 연결해 줘"))
+    value = draft.input_value()
+    assert "[가려진 비밀값]" in value and "sk-abc" not in value and "(바꾼 파일: src/hours.ts, tests/hours.test.ts)" in value, value
+    # One file chosen by hand comes after what is in the box.
+    codex = next(f for f in files if f[0].endswith("x1.jsonl"))
+    page.locator("#lens .rr-session-file").set_input_files(files=[{"name": "rollout-x1.jsonl", "mimeType": "application/json", "buffer": codex[1].encode("utf-8")}])
+    expect(draft).to_have_value(re.compile("휴무일[\\s\\S]*문자 알림 발송 실패 시 재시도를 넣어 줘"))
+    expect(page.locator("#lens .rr-sessions-note")).to_contain_text("Codex 세션에서 대화")
+    page.locator("#lens .rr-session-file").set_input_files(files=[{"name": "notes.jsonl", "mimeType": "application/json", "buffer": b'{"a":1}\n'}])
+    expect(page.locator("#lens .rr-sessions [role=alert]")).to_contain_text("세션 기록 파일(.jsonl)이 아니거나")
+    # A web chat keeps no file here: it is given the request text to write its own record.
+    page.locator("#lens").get_by_role("button", name="웹 대화용 기록 요청 문구 복사").click()
+    expect(page.locator("#lens .rr-sessions")).to_contain_text(re.compile("기록 요청 문구를 복사했어요|\\[웹 AI 세션 기록"))
+    # Its answer pasted under what is in the box is kept as a record of its own: the box puts the next-record line between them.
+    web = "[웹 AI 세션 기록 · 결제 문구 · 작업 폴더 /work/salon]\n\n── 사용자 요청 ──\n결제 버튼 문구 바꿔 줘\n\n── 웹 AI 답변 ──\n바꿨어요\n(바꾼 파일: src/pay.ts)"
+    paste = """(el, [t, at]) => { el.focus(); const i = at === null ? el.value.length : el.value.indexOf(at); el.setSelectionRange(i, i);
+      const dt = new DataTransfer(); dt.setData('text/plain', t); el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true })); }"""
+    before = draft.input_value()
+    draft.evaluate(paste, [web, None])
+    expect(draft).to_have_value(re.compile("재시도를 넣어 줘[\\s\\S]*\\n\\n──────── 다음 기록 ────────\\n\\n\\[웹 AI 세션 기록 · 결제 문구[\\s\\S]*src/pay\\.ts\\)$"))
+    # One undo takes the paste back, as it does for any paste.
+    page.keyboard.press("Control+z")
+    expect(draft).to_have_value(before)
+    # Pasted with the caret inside a record (copied from Windows, with CRLF line breaks), it goes after that record, which stays whole.
+    draft.evaluate(paste, [web.replace("\n", "\r\n"), "영업시간 설정과"])
+    expect(draft).to_have_value(re.compile("^\\[Claude Code 세션 기록[^\\n]*\\][\\s\\S]*예약 화면에서 휴무일을 영업시간 설정과 연결해 줘[\\s\\S]*\\n\\n──────── 다음 기록 ────────\\n\\n"
+      "\\[웹 AI 세션 기록 · 결제 문구[^\\n]*\\]\\n\\n── 사용자 요청 ──\\n결제 버튼 문구 바꿔 줘[\\s\\S]*src/pay\\.ts\\)\\n\\n──────── 다음 기록 ────────\\n\\n\\[Codex 세션 기록[\\s\\S]*재시도를 넣어 줘"))
+    assert "\r" not in draft.input_value() and draft.input_value().count("──────── 다음 기록 ────────") == 2
+    # A selection over a next-record line (or the caret on one) is not written over: the record goes in at that line.
+    kept = draft.input_value()
+    draft.evaluate("""(el, t) => { el.focus(); const i = el.value.indexOf('──────── 다음 기록'); el.setSelectionRange(i - 5, i + 8);
+      const dt = new DataTransfer(); dt.setData('text/plain', t); el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true })); }""",
+      web.replace("결제 문구", "환불 문구"))
+    expect(draft).to_have_value(re.compile("연결해 줘[\\s\\S]*\\n\\n──────── 다음 기록 ────────\\n\\n\\[웹 AI 세션 기록 · 환불 문구[\\s\\S]*src/pay\\.ts\\)\\n\\n"
+      "──────── 다음 기록 ────────\\n\\n\\[웹 AI 세션 기록 · 결제 문구[\\s\\S]*src/pay\\.ts\\)\\n\\n──────── 다음 기록 ────────\\n\\n\\[Codex 세션 기록"))
+    page.keyboard.press("Control+z")
+    expect(draft).to_have_value(kept)
+    # Everything selected is replaced, as any paste does; a next-record line the pasted record quotes does not cut it, and the line
+    # breaks around it do not hide its header.
+    quoting = web.replace("결제 버튼 문구 바꿔 줘", "이 초안 봐 줘\n──────── 다음 기록 ────────\n둘째 초안")
+    draft.evaluate("""(el, t) => { el.focus(); el.select(); const dt = new DataTransfer(); dt.setData('text/plain', t);
+      el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true })); }""", "\n\n" + quoting)
+    expect(draft).to_have_value(quoting.replace("──────── 다음 기록 ────────", "─────── 다음 기록 ───────"))
+    page.keyboard.press("Control+z")
+    expect(draft).to_have_value(kept)
+    # A session Codex is still writing is taken as it was when the read began (the file grows while it is read), with the file
+    # its subagent changed.
+    page.evaluate("() => window.__growOnRead('me/.codex/sessions/2026/10/28/rollout-2026-10-28T09-20-00-x1.jsonl')")
+    page.locator("#lens").get_by_role("button", name="내 AI 세션에서 가져오기").click()
+    page.locator("#lens .rr-session", has_text="문자 알림 발송").click()
+    expect(draft).to_have_value(re.compile("\\(바꾼 파일: [^\\n]*src/retry\\.ts"))
+    expect(page.locator("#lens .rr-sessions [role=alert]")).to_have_count(0)
+    assert page.evaluate("() => window.__grown") == 1
+    # An agent writes in another project while the folders are looked at: the look goes on.
+    live = json.dumps({"type": "user", "cwd": "/work/other", "sessionId": "s", "timestamp": "2026-10-28T09:55:00.000Z", "message": {"role": "user", "content": "다른 작업 진행 중"}}, ensure_ascii=False) + "\n"
+    page.evaluate("""(line) => { window.__write('me/.claude/projects/-work-other/live.jsonl', line);
+      window.__onList = name => { if (name !== 'sessions') return; window.__onList = null; window.__write('me/.claude/projects/-work-other/live.jsonl', line); }; }""", live)
+    page.locator("#sync-pill").click()
+    panel.get_by_role("button", name="지금 확인").click()
+    page.wait_for_function("() => window.__onList === null")
+    expect(page.locator("#sync-pill")).to_have_attribute("data-state", "on")
+    expect(panel.locator("[role=alert]")).to_have_count(0)
+    # Claude Code in WSL too: a second .claude is kept apart from the first by number.
+    panel.get_by_role("button", name="세션 폴더 더 고르기").click()
+    expect(panel).to_contain_text("읽는 세션 폴더: .claude (1), .codex, .claude (2)")
+    # The home folder picked as well is kept beside them (only the .claude and .codex in it are read, and a session found through
+    # both is listed once).
+    panel.get_by_role("button", name="세션 폴더 더 고르기").click()
+    expect(panel).to_contain_text("읽는 세션 폴더: .claude (1), .codex, .claude (2), me")
+    # The same folder picked again adds nothing.
+    panel.get_by_role("button", name="세션 폴더 더 고르기").click()
+    page.wait_for_function("() => !window.__picks.length")
+    page.wait_for_timeout(300)
+    page.locator("#sync-pill").click()
+    page.locator("#sync-pill").click()
+    expect(panel).to_contain_text("읽는 세션 폴더: .claude (1), .codex, .claude (2), me")
+    expect(panel.locator(".sync-source-notice")).to_have_text("이미 고른 폴더(.codex)예요.")  # said why
+    expect(panel.locator("[role=alert]")).to_have_count(0)
+    page.locator("#sync-pill").click()
+    page.locator("#lens").get_by_role("button", name="내 AI 세션에서 가져오기").click()
+    sessions = page.locator("#lens .rr-session")
+    expect(sessions).to_have_count(6)
+    expect(sessions.filter(has_text="휴무일 연결")).to_have_count(1)
+    expect(sessions.filter(has_text="예약 문자 문구를 바꿔 줘")).to_have_count(1)
+    expect(sessions.filter(has_text="다른 작업 진행 중")).to_have_count(1)
+    expect(sessions.filter(has_text="보관해 둔 옛 대화")).to_have_count(1)
+    expect(sessions.filter(has_text=re.compile("홈 폴더에 둔 다른 기록|하위 작업"))).to_have_count(0)
+    box.get_by_role("button", name="접기").click()
+    expect(box).to_contain_text("고른 세션 폴더(.claude (1), .codex, .claude (2), me)의 대화 기록")
+    # Leaving the WSL folder leaves the others, and the first .claude loses its number.
+    page.locator("#sync-pill").click()
+    panel.get_by_role("button", name=".claude (2) 세션 폴더 빼기").click()
+    expect(panel).to_contain_text("읽는 세션 폴더: .claude, .codex, me")
+    assert not errors, errors
+    context.close()
+
+
 def off_flow(browser, base, expected_pill):
     page = browser.new_page(viewport={"width": 1280, "height": 720})
     page.goto(base)
@@ -4077,7 +4463,11 @@ def main():
             print("ok  AF85 empty analysis on the micro draft at 1280/1440: reads at once, source and back, close/reopen/reload/file, earlier request and return kept, positive with none chosen apart")
             proc, base = start("code"); procs.append(proc); code_flow(browser, base); print("ok  access code kept from an input event")
             proc, base = start("fail"); procs.append(proc); failure_flow(browser, base); print("ok  provider failure -> short error -> retry")
+            proc, base = start("fail"); procs.append(proc); question_retry_flow(browser, base); print("ok  failed question retried after another was typed: the retry answers the first, the new one stays in the box")
             proc, base = start("fail"); procs.append(proc); return_failure_flow(browser, base); print("ok  return reading failure -> short error and the material -> asking again")
+            proc, base = start("ok", STUDIO_SESSIONS_FIXTURE="1"); procs.append(proc); sessions_flow(browser, base); print("ok  local sessions: connect a folder once -> its sessions become records -> first map without a click; nothing taken twice; one session by hand, key hidden")
+            proc, base = start("ok"); procs.append(proc); folder_sessions_flow(browser, base); print("ok  session folders picked in the browser (no local reader): automatic connection, paste-box list, one file by hand, web request text")
+            proc, base = start("ok"); procs.append(proc); handover_flow(browser, base); print("ok  handover document: a part's sessions, its document and the whole project's, copied and saved, nothing sent")
             proc, base = start("nokey"); procs.append(proc); off_flow(browser, base + "/", "AI 키 없음"); print("ok  server without key -> honest off state")
             if (ROOT / "static-dist/index.html").exists():
                 server = serve_static()

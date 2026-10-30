@@ -7,14 +7,20 @@ param(
 $ErrorActionPreference = 'Stop'
 $appRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $studioRoot = Join-Path $appRoot 'continuity'
-if (-not $EnvFile) { $EnvFile = Join-Path $appRoot '.env' }
-$EnvFile = (Resolve-Path -LiteralPath $EnvFile).Path
+# An env file named on the command line must exist; the default app/.env may be missing (AI then stays off, sessions still work).
+if ($EnvFile) { $EnvFile = (Resolve-Path -LiteralPath $EnvFile).Path } else { $EnvFile = Join-Path $appRoot '.env' }
 if (-not $NodePath) {
   $nodeCommand = Get-Command node -ErrorAction SilentlyContinue
   if ($nodeCommand) { $NodePath = $nodeCommand.Source }
   else {
     $bundledNode = Join-Path $env:USERPROFILE '.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node.exe'
     if (Test-Path -LiteralPath $bundledNode) { $NodePath = $bundledNode }
+    elseif ($env:LOCALAPPDATA) {
+      # The Codex desktop app keeps its own Node under its runtimes folder (the newest one found is used).
+      $appNode = Get-ChildItem -Path (Join-Path $env:LOCALAPPDATA 'OpenAI\Codex\runtimes') -Filter node.exe -Recurse -ErrorAction SilentlyContinue |
+        Sort-Object LastWriteTime -Descending | Select-Object -First 1
+      if ($appNode) { $NodePath = $appNode.FullName }
+    }
   }
 }
 if (-not $NodePath -or -not (Test-Path -LiteralPath $NodePath)) {
@@ -38,7 +44,7 @@ if (-not $running) {
     $env:PORT = "$Port"
     $env:AI_MODE = 'deepseek'
     $server = Join-Path $studioRoot 'server/index.mjs'
-    $process = Start-Process -FilePath $NodePath -ArgumentList @("--env-file=`"$EnvFile`"", "`"$server`"") -WorkingDirectory $appRoot -WindowStyle Hidden -PassThru
+    $process = Start-Process -FilePath $NodePath -ArgumentList @("--env-file-if-exists=`"$EnvFile`"", "`"$server`"") -WorkingDirectory $appRoot -WindowStyle Hidden -PassThru
   } finally {
     $env:PORT = $oldPort
     $env:AI_MODE = $oldMode

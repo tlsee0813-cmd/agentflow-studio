@@ -99,6 +99,9 @@ export interface StudioAsk {
   coverage?: AskCoverage;
 }
 export interface StudioReply { headline: string; situation: string[]; changes: string[]; next: string[]; answer: string | null; refs: string[] }
+/** The question box after an answer to `sent` arrived: emptied only when it still holds that question (spaces aside). Text
+ * written since, e.g. a new question typed while an earlier one failed and was then retried, stays unsent and in place. */
+export const draftAfterAnswer = (draft: string, sent: string): string => (draft.trim() === sent.trim() ? '' : draft);
 
 /** What part of the material went out: newest records first, within ASK_BYTES of UTF-8 JSON. Optional on input, so a
  * request from an older open tab (no coverage) is still accepted. */
