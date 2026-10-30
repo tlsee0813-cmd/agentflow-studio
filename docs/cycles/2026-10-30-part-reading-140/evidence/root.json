@@ -1,0 +1,346 @@
+{
+  "source": "8961db44898835a82daec1d3ce51616982991ee3",
+  "appTree": "93be1c55734f95e0040cd333e0d8bba3d3adb12b",
+  "rootBuild": {
+    "compiler": "locked TypeScript 5.8.3",
+    "check": 0,
+    "build": 0,
+    "logs": [
+      "check-history.log",
+      "build-history.log"
+    ]
+  },
+  "served": {
+    "client/app.js": {
+      "status": 200,
+      "bytes": 218549,
+      "sha": "0abc0316f8ffbb33d07ba2f16d517f6d735631b1035cdcc637dc18dcaad1435e",
+      "exact": true
+    },
+    "shared/map-reading.js": {
+      "status": 200,
+      "bytes": 80127,
+      "sha": "fe499aee0d1d53de505eacc5dea48462472ed179d5614ee8a4d48704d9c168c5",
+      "exact": true
+    },
+    "styles.css": {
+      "status": 200,
+      "bytes": 146901,
+      "sha": "c6fc23b72d59415387ed672c8d330eea9a792ca623eda2f48fef934695e85213",
+      "exact": true
+    }
+  },
+  "rootActual": {
+    "microFirstCandidate": "d1f0e989f4fbbc4b67ee3c68d0a637414883d6d6",
+    "priorActual": {
+      "ui-after-micro-first.json": {
+        "workspaceExact": true,
+        "plansExact": true
+      },
+      "ui-reloaded-first.json": {
+        "workspaceExact": true,
+        "plansExact": true
+      },
+      "vmQuote": {
+        "scroll": true,
+        "camera": true,
+        "key": true,
+        "fold": true
+      },
+      "vmRelation": {
+        "scroll": true,
+        "camera": true,
+        "hash": true,
+        "reading": true
+      }
+    },
+    "finalCandidate": "8961db44898835a82daec1d3ce51616982991ee3",
+    "zephyr": {
+      "exactOriginal265Chars": true,
+      "currentClaims": 3,
+      "historyReadings": 2,
+      "historyRetained": true,
+      "readingRetained": true,
+      "cameraExact": true,
+      "hashExact": true,
+      "focusKey": "[\"A_e71e041a-605a-4380-9c79-00eac3d12a8e\",\"history\",\"R_dc5636a7-e32a-4cf6-97d2-dea8eadfcfa3\",0,\"N_7f08f8d0-9f0e-4ead-8f5b-f07e03f5bfe1\",992]",
+      "scrollObservation": "75.20 before click; locator scroll moved quote into view; return203.20. Not asserted equal to pre-click scroll. Exact returned button focused. Prior VM exact scroll separately verified.",
+      "originalKinds": "historical board documentation and actual reports, not hardware execution"
+    },
+    "storage": {
+      "workspaceExact": true,
+      "plansExact": true,
+      "workspaceSHA256": "34569839ef24e59746ee64bc567175ed3cbf69db17eaada3c895f9d345f5de1d",
+      "plansSHA256": "db3d0313be993bdbbedb7cc95bcb6f2ecc421beddac8616ed6399603ac6a2479",
+      "entries": 4,
+      "after": [
+        "micro and reload on d1f",
+        "Zephyr and final reload on a3cee3",
+        "final question repair reload and whole-reading",
+        "final background ownership actual134 plan/RQ reading/resize/back",
+        "8961 actual134 history/work cover close and micro whole-reading"
+      ]
+    },
+    "viewport": {
+      "root": [
+        [
+          1280,
+          720
+        ],
+        [
+          1000,
+          700
+        ]
+      ],
+      "authorAlso": [
+        [
+          700,
+          800
+        ]
+      ],
+      "overrideReset": true
+    },
+    "zephyrCandidate": "a3cee3eefa839ec47a4bdfc7d73bf38e55734a35",
+    "actualPlanInert": "evidence/root-inert.json",
+    "historyCoverFailure": "actual134 CUA keyboard editor path; evidence/inert-history-before.json",
+    "historyCoverFixed": "evidence/inert-history-after.json"
+  },
+  "authorExecution": {
+    "fixture": "13 claims across four readings, no real generated result",
+    "baseBoundaryFails": true,
+    "baselineFocusAndCrossPartFails": true,
+    "samePartReopenFailsOn": "d7b52a5",
+    "finalSaveCases": "S/S2 2/2 author only",
+    "fullFixture": "9/9 prior d7, S/S2 changed-path only on final",
+    "claims": "2/2",
+    "promptComparison": "same frozen project map and plan/origins 14490 bytes equal, author only",
+    "finalEdits": "ONLY=edits 5/5 (A success/failure, R, S, S2); author port through main_flow144, actual Python CI pending",
+    "finalInert": "part140 13/13 and connected126 19/19 after affected overlap repair; original9628 W/P fail",
+    "finalHistory": "part140 14/14 author fixture; baselineb59 H fails and8961 H passes"
+  },
+  "independent": {
+    "sharedImpact": "15ea6c7e2d6f160c70351cc3e9626c5981b09819e69e422d5fcbdeae9ecaf9ea",
+    "finalSession": "e309df8348ec2b15ad0cdfa823950a7f11f2a46e644e10e8ce0d72ba3978d5ac",
+    "openConcreteBlockers": 0,
+    "mode": "code review, no rerun",
+    "finalAsk": "1d69c5a5eb2003440ac09a5f204c60a608ad0b5968ce305d2c921edb5582f4d6",
+    "finalInert": "a91388ae361ccd4384cba043b489f22a511405a2cd3768fa60b7f15107d8dc20",
+    "finalHistory": "ede70b27edea38ca25b956c89627dafbefd7e222f16b121b37d7bcf186278d39"
+  },
+  "modelCalls": 0,
+  "deployments": 0,
+  "wholeProductComplete": false,
+  "return136": "rejected, cause unknown, not rerun",
+  "retainedExistingQuestionBug": {
+    "baseline": "2a57f730e19dd8f279b9be204911d7c5ef09b7e5",
+    "observed": "author stub product UI one time: Q1 fails, type unsent Q2, retry Q1, success clears Q2",
+    "fixed": false,
+    "distinction": "existing send state clear, separate from140 typed DOM regression"
+  },
+  "status": "accepted limited general part reading; not deployed",
+  "ci": {
+    "source": "8961db44898835a82daec1d3ce51616982991ee3",
+    "run": 41009319891,
+    "url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/41009319891",
+    "jobs": [
+      {
+        "id": 123911363733,
+        "name": "verify (windows-2022)",
+        "status": "completed",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+            "conclusion": "success"
+          },
+          {
+            "name": "Record exact runtime and checked-out commit",
+            "conclusion": "success"
+          },
+          {
+            "name": "Clean locked install",
+            "conclusion": "success"
+          },
+          {
+            "name": "Type and boundary checks",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build and domain / HTTP / simulated provider tests",
+            "conclusion": "success"
+          },
+          {
+            "name": "Continuity type, syntax and credential boundary checks",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build and test continuity with simulated providers",
+            "conclusion": "success"
+          },
+          {
+            "name": "Prepare Cloudflare modules and assets without credentials or deployment",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build static site (no AI server bundled, no credentials)",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install pinned browser verification tools",
+            "conclusion": "success"
+          },
+          {
+            "name": "Direct browser-to-server verification (original app, AI is still mocked)",
+            "conclusion": "success"
+          },
+          {
+            "name": "Studio smoke - entry, map, part, ask, failure/retry, no-key and static states (stubbed provider, no real key)",
+            "conclusion": "success"
+          },
+          {
+            "name": "Upload only this run's results, not historic snapshot evidence",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 123911363996,
+        "name": "verify (ubuntu-24.04)",
+        "status": "completed",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+            "conclusion": "success"
+          },
+          {
+            "name": "Record exact runtime and checked-out commit",
+            "conclusion": "success"
+          },
+          {
+            "name": "Clean locked install",
+            "conclusion": "success"
+          },
+          {
+            "name": "Type and boundary checks",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build and domain / HTTP / simulated provider tests",
+            "conclusion": "success"
+          },
+          {
+            "name": "Continuity type, syntax and credential boundary checks",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build and test continuity with simulated providers",
+            "conclusion": "success"
+          },
+          {
+            "name": "Prepare Cloudflare modules and assets without credentials or deployment",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build static site (no AI server bundled, no credentials)",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install pinned browser verification tools",
+            "conclusion": "success"
+          },
+          {
+            "name": "Direct browser-to-server verification (original app, AI is still mocked)",
+            "conclusion": "success"
+          },
+          {
+            "name": "Studio smoke - entry, map, part, ask, failure/retry, no-key and static states (stubbed provider, no real key)",
+            "conclusion": "success"
+          },
+          {
+            "name": "Upload only this run's results, not historic snapshot evidence",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      }
+    ],
+    "originalAppTests": {
+      "windows": 279,
+      "linux": 279
+    },
+    "continuityTests": {
+      "windows": {
+        "pass": 653,
+        "skip": 3,
+        "fail": 0
+      },
+      "linux": {
+        "pass": 656,
+        "skip": 0,
+        "fail": 0
+      }
+    },
+    "directBrowser": {
+      "windows": 18,
+      "linux": 18
+    },
+    "studioBrowser": "original Python script completed successfully both OS; providers mocked",
+    "deployment": 0
+  }
+}

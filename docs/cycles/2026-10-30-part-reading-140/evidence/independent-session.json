@@ -1,0 +1,43 @@
+{
+  "title": "140 역할 정정 편집 세션 잔여 P2 수리 확인",
+  "description": "d7b52 이후 a3cee3의 역할 편집 객체 identity와 S2 반례만 읽었다. 같은 부분에서 다시 연 새 편집을 옛 저장 완료가 지우는 잔여 P2는 코드상 해소됐다. 이 delta에서 추가 차단 사유는 발견하지 않았다.",
+  "at": "2026-10-30T05:03:51.531126+00:00",
+  "baseline": "d7b52a5d1b424275d60d0c1da34c895a345bb107",
+  "source": "a3cee3eefa839ec47a4bdfc7d73bf38e55734a35",
+  "appTree": "faa8165c5a6083fe82bc7890b80fef08edeb97a4",
+  "productCleanObserved": true,
+  "fileSha256": {
+    "app/continuity/src/client/app.ts": "edf6c121700f3f4a9aa6d9340e45897ee5a9f307a31e6bf957a99ce076bc7054",
+    "app/continuity/tests/part140-flow.mjs": "d887f87f81a1992388011219caa289e260c42d6720a846f93c862942ea597692"
+  },
+  "previousReview": {
+    "file": ".ops/results/experience140-final-review-fixed.json",
+    "sha256": "06030df2db94b62f01b1b5b0eeef2ab716dc5b22d540246e3bcfedd97126830c",
+    "preserved": true
+  },
+  "verdict": "잔여 P2 해소 — 이 delta의 새 구체 차단 없음",
+  "findings": [],
+  "closure": {
+    "id": "140-F3-same-part-new-editor",
+    "code": "정정 submit은 await commit 전에 const session=fixingRole를 캡처한다. 완료 시 fixingRole===session인 경우에만 clear한다. 매번 폼을 여는 기존 행동은 새 객체를 만들므로 key/part 값이 같아도 취소 후 재개한 편집과는 identity가 다르다.",
+    "controlOrder": "옛 저장이 완료된 뒤 같은 A를 select해 재렌더하더라도 새 fixingRole 객체가 남아 있어 정정 폼을 다시 만든다. 기존 renderPanel의 같은 owner/part typed·caret 복원이 현재 새 초안과 역방향 선택을 다시 채운다. 다른 부분/entry와 늦은 opened guard는 그대로다. 따라서 앞서 확인한 동일 부분 새 편집 손실 경로가 닫힌다."
+  },
+  "testDelta": {
+    "S2": "workspace lock으로 첫 A 저장을 보류하고, 취소로 폼이 사라짐을 확인한 뒤 같은 A 편집을 다시 열어 다른 글과 역방향4..9 선택을 만든다. 옛 저장 완료 뒤와 지연 status 뒤 각각 새 폼/본문/초점/선택을 비교하고, 저장된 것은 첫 세션 글 하나뿐인지도 검사한다. 잔여 반례에 맞는 assertion이며 새 글을 원래 글로 바꾸거나 저장 실패로 우회하지 않는다.",
+    "entry": "ONLY=saves는 기존 S와 새 S2를 모두 호출한다. 기본 실행도 S2를 포함하고, ONLY=reopen은 새 반례 하나를 고립해 확인할 수 있다.",
+    "executionAttribution": "작성자의 d7 기준 실패·수정 성공 및 S/S2 2/2 재검사는 전달받은 실행 보고다. 이 검토자는 코드를 읽었으며 재실행하지 않았다."
+  },
+  "unverified": [
+    "이 좁은 코드 확인은 이전 전체140 UI/공통 투영 감사·현재139 실제 자료·CI·잠금 빌드의 재검증이 아니다. 총괄이 별도 근거로 최종 범위 수용한다.",
+    "새 편집이 유지되는 소유권 경로를 확인했으며 모든 비동기 작업이나 전체 제품의 완전성을 보증하지 않는다."
+  ],
+  "execution": {
+    "actor": "독립 잔여 delta 검토자",
+    "tests": 0,
+    "browser": 0,
+    "modelAPI": 0,
+    "externalTransmission": 0,
+    "productWrites": 0,
+    "onlyNewPrivateFile": ".ops/results/experience140-final-review-session.json"
+  }
+}

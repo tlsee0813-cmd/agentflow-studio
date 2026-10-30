@@ -25,3 +25,14 @@
 ## 선택 근거
 
 [139 실제 화면과 결과](https://github.com/tlsee0813-cmd/agentflow-studio/blob/4c5ca8bf0dbd3a95d3d0f4fe7efc2bfaea2c3929/docs/cycles/2026-10-30-normal-micro-139/RESULT.md). Sol High 독립 설계 검토는 실제 캡처2개와 기존 코드 읽기만 수행했다(브라우저/생성0); private 보고 SHA2561843fde30ecbc77dfbf773692689cd6ccff4f4ff776703dea38567b78cf76887. Root는 일반 렌즈 유지+명시적 전체 읽기 확장을 채택했다.
+
+## 실행 중 승인한 경계 보완
+
+13개 주장을 가진 작성자 경계 사례가 12개만 보이는 원인을 추적하니, client뿐 아니라 shared/map-reading.ts의 partUnderstanding 반환에서도 claims.slice(0,12)로 잘리고 있었다. Root는 원래 client/CSS 경계를 이 한 줄의 반환 cap 제거까지 명시적으로 확장했다. 현재·이력·replaces·중복 제거·정렬·상태·schema·validator·적용·프롬프트는 바꾸지 않는다. buildMapAsk/plan-source의 기존 첫6개 선택은 유지하며, 같은 고정 프로젝트의 map/plan 입력 바이트 동일은 작성자 검사, 간접 소비 경로는 별도 독립 코드 검토로 대조했다. 원래부터 허용한 변경으로 소급하지 않는다. 매우 많은 주장 전체의 성능은 이번 수용 근거에 없다.
+
+
+## 최종 검증 중 발견한 경계 보완
+
+동일 이력 시각의 reading ID 초점, 늦은 설명 저장의 편집 객체 소유권, 질문 draft와 DOM 편집값의 분리, 기존 변경 구상 cover와 전체 읽기 잠금의 소유권·history 복원 경계를 포함했다. 이는 새 읽기면 변경이 기존 작업을 손상하지 않게 하는 범위다. 일반 질문 Q1 재시도 성공이 새 Q2 초안을 지우는 기존 send 결함은 별도 후속이며 여기서 고치지 않는다.
+
+넓어진 읽기면에 기존 relation fixture가1280×720에서 전부 들어가 스크롤이 생기지 않아, 왕복 구간만1280×500으로 바꾸고 reload 전에720으로 돌린다. 단언을 완화하지 않고 실제 overflow에서 초안·스크롤·history를 검증한다. 작성자 Node 포트와 CI Python 원본의 검증 출처를 구별한다.

@@ -1,0 +1,88 @@
+{
+  "title": "140 현재 주장 투영의 12개 제한 제거 영향",
+  "description": "구현 도착 전 기준 소스에서 공통 투영과 간접 입력 소비 경로를 읽었다. 현재 주장 전체를 읽기 위해 무음 제한을 제거할 수 있으며, 확인된 소비 경로에는 별도의 입력 투영이 있어 그것을 함께 넓힐 필요는 없다. 이 조건을 지키는 한 설계 차단 사유는 발견하지 않았다.",
+  "at": "2026-10-30T04:49:19.740861+00:00",
+  "source": "0dd12a714fe2cdf20c45f3ffe7f076b641bcac1d",
+  "implementationReceived": false,
+  "sourceFilesSha256": {
+    "app/continuity/src/shared/map-reading.ts": "4ff16a1200967afb51bbf2cf4427e584fe0bfcf425d8136f7e571b7af1b095fb",
+    "app/continuity/src/shared/studio.ts": "e1d36f3fa0f631af34f301074e2c1ab14120af4b39c0996a9972f4d75ac34dbf",
+    "app/continuity/src/client/plan-source.ts": "743b97abc31a4767da6d9bd03a77edae54b63534081353ea57822ff0a6bf3b36",
+    "app/continuity/src/client/digest-source.ts": "212a14c93366f391a4fc204efc415495333802d0070fa0a380da522c1dadb9f1",
+    "app/continuity/src/shared/request-return.ts": "aa664fc65001698471d7511419f8d436f1eb5c491b052c17cf9b89b7e85acd0f",
+    "app/continuity/src/client/request-results.ts": "709936765ecf7c46301586bdb1c1cd6e5d421835ca8409b4ab30062f4a04bd93",
+    "app/continuity/src/client/app.ts": "db6afc573fc22c6f12a274162e8c0deadd8d187ba9c61c430b792450e66d3223"
+  },
+  "verdict": "조건부 진행 가능 — 최종 구현은 별도 정확 SHA로 확인",
+  "blockers": [],
+  "effects": [
+    {
+      "consumer": "공통 partUnderstanding → StudioView",
+      "files": "shared/map-reading.ts:547–577; shared/studio.ts:38–59",
+      "impact": "읽기 전용 PartUnderstanding.claims와 StudioView.parts[].reading.claims에 13번째 이후의 살아 있는 현재 진술이 추가된다. Project 저장값이나 읽기 이력 자체가 늘어나는 것은 아니다. 실제 전체 배열을 반환하게 되므로 화면·개수 등 관찰값은 의도적으로 달라진다.",
+      "preserve": "현재 all.reverse 순회, replaces 제외, kind+정규화 text+about 중복 제거와 replaces 우선 정렬을 그대로 둔다. role/roleBasis/corrected/others/history/createdName은 손대지 않는다."
+    },
+    {
+      "consumer": "state·정정 표시·지도 배치",
+      "files": "shared/map-reading.ts:572–577; client/app.ts:708,795; client/map-layout.ts:342",
+      "impact": "state/revised/roleBasisRevised는 기존에도 claims.slice(0,12) 전에 전체 현재 진술에서 계산됐다. 반환 cap만 제거하면 이 값과 상태 라벨·지도 상태 클래스·그 상태 기반 카드 여백은 바뀌지 않는다. 새로 노출된13번째 진술을 추가 완료/검증 상태로 계산하는 별도 규칙을 넣지 않는다."
+    },
+    {
+      "consumer": "일반 렌즈·전체 읽기",
+      "files": "client/app.ts:1316,2075–2082,2100대 lensClaims,2149",
+      "impact": "렌즈는 claims.length로 목록을 만들기 때문에 공통 cap 제거 후 전체를 그린다. 전체 읽기의 claimList(...,12)를 함께 제거해야 렌즈와 전체 읽기가 다시 다른 수를 보이지 않는다. claimList의 종류·정정·reading/index 정렬과 정확 근거 버튼 identity는 유지한다.",
+      "qualification": "공통 배열의 앞12개는 그대로지만, UI는 전체 배열을 종류별로 다시 정렬한다. 새로 보인 진술이 UI 앞쪽으로 배치될 수 있으므로 화면에서 이전12개가 모두 같은 시각 위치에 남는다고 약속하면 안 된다. 모든 진술을 그대로 읽는 것이 수리 목적이다."
+    },
+    {
+      "consumer": "변경 구상 plan 입력 및 origins",
+      "files": "client/plan-source.ts:88–120; client/plan-view.ts:273",
+      "impact": "projectInput은 PartUnderstanding을 소비하지만 본문은 u.claims.slice(0,6), origins도 같은 slice(0,6)를 사용한다. 공통 반환의 기존 앞6개가 보존되므로 plan의 파생 reading 근거·그 origins는 내용이 그대로다. role와 others 및 별도 evidence/byte 상한도 그대로 유지한다.",
+      "preserve": "본문과 origins의 같은6개 경계를 동시에 유지한다. 화면이 전체를 보인다는 이유로 여기의6개 제한·3천자 clipping·24개 evidence/byte 한도까지 함께 없애지 않는다."
+    },
+    {
+      "consumer": "선택 범위 scope와 고정 요청문",
+      "files": "client/plan-source.ts:164 이후 scopeInput; client/plan-request.ts; shared/change-plan.ts",
+      "impact": "scope는 parts의 id/name/note/parent와 이미 저장한 plan.evidence·selected/excluded를 사용하며 현재 claims 전체를 직렬화하지 않는다. 고정 요청문도 plan/범위/고정 원자료를 사용하므로 기존 snapshot을 고치거나 누락 claim을 소급 추가할 이유가 없다. 새 plan 입력이 위6개 경계를 유지하면 이 cap 제거만으로 scope/요청 내용이 넓어지는 경로는 확인되지 않았다."
+    },
+    {
+      "consumer": "digest·돌아와 읽기 입력",
+      "files": "client/digest-source.ts:70–106 savedReading,111–139 readingInput",
+      "impact": "savedReading은 붙인 원문·관찰·extra·저장 plan.evidence/조건·view.records를 모은다. readingInput의 부분은 id/name/note/parent다. PartUnderstanding.claims 전체를 새 source로 넣지 않는다. 이미 저장된 reading 종류 evidence가 포함될 수는 있지만 새 공통 투영을 직접 펼친 것이 아니며 그 plan 입력도 앞6개로 유지된다. 따라서 digest 내용·입력 예산 확대가 필요한 변경은 아니다."
+    },
+    {
+      "consumer": "일반 부분 질문·현재 상황 정리",
+      "files": "shared/studio.ts:117–150 buildAsk; client/app.ts:2170 이후 send",
+      "impact": "StudioAsk는 부분 이름/note/path/children/links와 기존 summary/changes, 원기록을 별도로 투영한다. part.reading.claims를 넣지 않는다. 전체 StudioView를 wire에 통째로 JSON 직렬화하는 경로는 이 소비자에서 확인되지 않았다."
+    },
+    {
+      "consumer": "요청 대응·철회·126 넓은 반환 읽기",
+      "files": "shared/request-return.ts:168 matchLedger,235 requestMatches,249 itemReading; client/request-results.ts:87,159–160,276,332",
+      "impact": "요청 대응은 Project.readings에 저장된 matches와 request target·correction·withdrawal ledger를 직접 사용한다. PartUnderstanding.claims cap과는 다른 진술 체계다. cap 제거를 이유로 lead/current/history/excluded/ambiguous 판정이나 RQ 연결을 변경할 필요가 없다."
+    },
+    {
+      "consumer": "map 후속 입력",
+      "files": "shared/map-reading.ts:673–677 buildMapAsk",
+      "impact": "총괄이 확인한 own current의 별도 slice(0,6)는 유지한다. 앞6개가 같으면 C key 할당과 원래 reading/index 매핑도 이 변경 때문에 바뀌지 않는다. 이 경로를 넓히는 안은 이번 허용 범위가 아니다."
+    }
+  ],
+  "minimumPreservationConditions": [
+    "반환 직전의 claims.slice(0,12)와 전체 읽기의 로컬 max12만 제거한다. 현재/과거 판별·replaces·dedup·정렬·state/role·schema·validator·apply·prompt는 그대로 둔다.",
+    "13개 fixture에서 현재13번째의 본문·종류·판본·정확 근거를 실제 현재 목록에 포함시키는 원래 검사를 유지한다. cap을 다른 곳으로 옮기거나 검사에서13번째를 제외하지 않는다. 공통 투영의 기존 앞6개와 plan 본문/origins·map current6의 대응이 유지되는지도 좁게 확인하면 된다.",
+    "원문·readings 전체·history·role 근거·수동 정정·저장 project와 기존 요청 snapshot/bundle이 변하지 않아야 한다. 현재 주장 더보기를 부활시키거나 후행 제한을 숨기는 대체 cap을 넣지 않는다.",
+    "새로 보인 진술도 기존 reading/index/record/from/to 근거 identity를 그대로 사용한다. 원문에서 돌아올 때 같은 현재 진술을 복구하고, 정렬된 목록의 단순 n번째를 identity로 사용하지 않는다.",
+    "읽기량과 렌더 크기가 실제로 늘어나는 효과를 숨기지 않는다. READINGS_LIMIT500과 reading별 부분 claims 최대8에서 한 부분의 보수적 상한은4000개다(다른 파일 크기·배열 조건에 의해 더 작을 수 있음). 이미 전체 배열을 모으던 계산이지만 반환 StudioView와 DOM은 더 커질 수 있다. 새로운 무음 상한·가상화 설계로 확대하지 말고 이번13개 및 실제139 읽기에서 필요한 범위의 읽기/복귀만 확인한다."
+  ],
+  "limits": [
+    "현재 기준 소스의 정적 소비 경로 감사다. 새 구현은 아직 받지 않았고 실제 plan/digest/map wire의 bytes 비교나 브라우저 성능 측정은 실행하지 않았다. 동일한 입력 내용 기대와 실행으로 확인한 byte 동일성을 혼동하지 않는다.",
+    "경로상 plan의 basis 시각 등 평소 동적 메타데이터는 존재한다. cap 제거와 무관한 정상 시각 차이를 입력 변경 결함으로 판정하지 않는다.",
+    "공통 reading 투영 확대를 새로운 모델 입력 전사나 의미 완전성 보장으로 표현하지 않는다. UI140 전체 수용과 첫 지도139 의미 판정은 별도다."
+  ],
+  "execution": {
+    "actor": "독립 읽기 전용 영향 검토자",
+    "tests": 0,
+    "browser": 0,
+    "model": 0,
+    "productWrites": 0,
+    "onlyNewPrivateFile": ".ops/results/experience140-claims-impact.json"
+  }
+}
