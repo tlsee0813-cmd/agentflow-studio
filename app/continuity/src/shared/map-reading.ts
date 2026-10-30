@@ -44,8 +44,12 @@ export const firstAsk = (ask: Pick<MapAsk, 'parts' | 'requests' | 'priors'>): bo
 /** A reply refused for a contradiction or a wrong reference it holds: where (path), which rule and what it names (an alias,
  * a key or a reference, never record text). The code stays INVALID_RESPONSE. */
 export class MapReplyError extends Error {
-  constructor(readonly path: string, readonly rule: 'settled-and-open' | 'duplicate-target' | 'duplicate-key' | 'material-evidence' | 'reference' | 'source-kind' | 'condition-form' | 'condition-source' | 'condition-length', readonly target: string) { super('INVALID_RESPONSE'); this.name = 'MapReplyError'; }
+  constructor(readonly path: string, readonly rule: 'settled-and-open' | 'duplicate-target' | 'duplicate-key' | 'material-evidence' | 'reference' | 'source-kind' | 'condition-form' | 'condition-source' | 'condition-length' | 'contract', readonly target: string) { super('INVALID_RESPONSE'); this.name = 'MapReplyError'; }
 }
+/** AF137: the fixed categories of a map.7 generic guard (rule 'contract'); a refusal names one of these, never a value or a key. */
+export type ContractGuard = 'shape' | 'keys' | 'text' | 'count' | 'new-count' | 'parent' | 'existing-name-parent' | 'role-required' | 'basis-required' | 'kind' | 'replaces'
+  | 'empty-part' | 'role-basis' | 'parent-cycle' | 'ends' | 'duplicate' | 'match-contract' | 'quote' | 'explicit-request' | 'about' | 'secret-like' | 'target-time' | 'target-count'
+  | 'prior' | 'prior-target';
 /** At most this many earlier matches go as priors, within PRIOR_BYTES (records keep the rest of MAP_BYTES). */
 export const MAP_PRIORS = 24;
 const PRIOR_BYTES = 12000;
@@ -227,7 +231,20 @@ export function validateMapAsk(value: unknown): MapAsk {
 export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
   const code = 'INVALID_RESPONSE';
   const seven = ask.schemaVersion === MAP7_SCHEMA, six = seven || ask.schemaVersion === MAP6_SCHEMA, five = six || ask.schemaVersion === MAP5_SCHEMA, four = five || ask.schemaVersion === MAP4_SCHEMA, three = four || ask.schemaVersion === MAP3_SCHEMA, two = three || ask.schemaVersion === MAP2_SCHEMA;
-  obj(value, ['summary', 'parts', 'relations', 'candidates', 'gaps', ...(two ? ['matches'] : []), ...(four ? ['material'] : [])], code);
+  // AF137: map.7's generic guards say where (a static path) and which (a fixed category) through MapReplyError, rule 'contract'.
+  // Each is the same condition at the same place; map.1–6 go through check/obj/str/arr unchanged (a plain INVALID_RESPONSE).
+  function need(ok: unknown, path: string, what: ContractGuard): asserts ok { if (!ok) throw seven ? new MapReplyError(path, 'contract', what) : new Error(code); }
+  function object(v: unknown, keys: string[], path: string): asserts v is Record<string, unknown> {
+    if (!seven) return obj(v, keys, code);
+    need(!!v && typeof v === 'object' && !Array.isArray(v), path, 'shape');
+    need(Object.keys(v as object).length === keys.length && keys.every(k => Object.hasOwn(v as object, k)), path, 'keys');
+  }
+  function field(v: unknown, max: number, empty: boolean, path: string): asserts v is string {
+    if (!seven) return str(v, max, empty, code);
+    need(typeof v === 'string', path, 'shape'); need((v as string).length <= max && (empty || !!(v as string).trim()) && !CONTROL.test(v as string), path, 'text');
+  }
+  function list(v: unknown, max: number, path: string): asserts v is unknown[] { if (!seven) return arr(v, max, code); need(Array.isArray(v), path, 'shape'); need((v as unknown[]).length <= max, path, 'count'); }
+  object(value, ['summary', 'parts', 'relations', 'candidates', 'gaps', ...(two ? ['matches'] : []), ...(four ? ['material'] : [])], 'reply');
   const parts = new Map(ask.parts.map(p => [p.id, p])), records = new Map(ask.records.map(r => [r.id, r])), texts = askRecords(ask);
   const quote = (rec: unknown, q: unknown): MapReplyQuote => {
     check(typeof rec === 'string' && records.has(rec), code); str(q, 300, false, code);
@@ -271,11 +288,11 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
   // The evidence of an item, by its wire: a reference (map.4) or a record and a copied quote (map.1–3).
   const evidence = (o: Record<string, unknown>, path = ''): MapReplyQuote => four ? cite(o.at, path) : quote(o.record, o.quote);
   const evidenceKeys = four ? ['at'] : ['record', 'quote'];
-  str(value.summary, 200, true, code);
-  arr(value.parts, 24, code);
+  field(value.summary, 200, true, 'summary');
+  list(value.parts, 24, 'parts');
   const refs = new Set<string>(), news = new Map<string, string | null>();
   for (const [pi, p] of value.parts.entries()) {
-    form(p, `parts[${pi}]`, 'roleAbout'); obj(p, ['ref', 'name', 'parent', 'role', seven ? 'roleAboutAt' : 'roleAbout', 'roleReplaces', 'basis', 'claims'], code);
+    form(p, `parts[${pi}]`, 'roleAbout'); object(p, ['ref', 'name', 'parent', 'role', seven ? 'roleAboutAt' : 'roleAbout', 'roleReplaces', 'basis', 'claims'], `parts[${pi}]`);
     if (!(typeof p.ref === 'string' && (parts.has(p.ref) || NEW.test(p.ref)) && !refs.has(p.ref))) {
       // AF120 (map.7): the same refusal, said with where and a fixed category, never the ref itself.
       if (seven) throw new MapReplyError(`parts[${pi}].ref`, 'reference', typeof p.ref !== 'string' ? 'invalid-ref' : refs.has(p.ref) ? 'duplicate-part' : p.ref.startsWith('new:') ? 'invalid-new-key' : 'unknown-part');
@@ -283,68 +300,68 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
     }
     refs.add(p.ref as string); if (NEW.test(p.ref as string)) news.set(p.ref as string, p.parent as string | null);
   }
-  check(news.size <= 12, code);
+  need(news.size <= 12, 'parts', 'new-count');
   const outParts: MapReplyPart[] = (value.parts as Record<string, unknown>[]).map((p, pi) => {
     const ref = p.ref as string, fresh = news.has(ref);
     if (fresh) {
-      str(p.name, 60, false, code);
-      check(p.parent === null || (typeof p.parent === 'string' && (parts.has(p.parent) || (news.has(p.parent) && p.parent !== ref))), code);
-    } else check(p.name === null && p.parent === null, code);
-    if (p.role !== null) str(p.role, 300, false, code);
+      field(p.name, 60, false, `parts[${pi}].name`);
+      need(p.parent === null || (typeof p.parent === 'string' && (parts.has(p.parent) || (news.has(p.parent) && p.parent !== ref))), `parts[${pi}].parent`, 'parent');
+    } else need(p.name === null && p.parent === null, `parts[${pi}]`, 'existing-name-parent');
+    if (p.role !== null) field(p.role, 300, false, `parts[${pi}].role`);
     if (!seven && p.roleAbout !== null) { check(p.role !== null, code); str(p.roleAbout, 80, false, code); }
     if (seven && p.role === null && p.roleAboutAt !== null) throw new MapReplyError(`parts[${pi}].roleAboutAt`, 'condition-source', 'role:null');
     // Replacing the current description needs the record's own words that it supersedes it: only for a part with a description
     // read from records (never a new part, never the person's own correction).
     let roleReplaces: MapReplyQuote | null = null;
     if (p.roleReplaces !== null) {
-      check(p.role !== null, code);
+      need(p.role !== null, `parts[${pi}].roleReplaces`, 'role-required');
       let q: MapReplyQuote;
       if (four) q = cite(p.roleReplaces, `parts[${pi}].roleReplaces`); else { obj(p.roleReplaces, ['record', 'quote'], code); q = quote(p.roleReplaces.record, p.roleReplaces.quote); }
       // Nothing read to replace (a new part, a part without a read description, the person's own): the quote has no effect.
       roleReplaces = !fresh && parts.get(ref)?.roleBy === 'reading' ? q : null;
     }
-    arr(p.basis, 4, code); check(!fresh || (p.basis as unknown[]).length > 0, code);
+    list(p.basis, 4, `parts[${pi}].basis`); need(!fresh || (p.basis as unknown[]).length > 0, `parts[${pi}].basis`, 'basis-required');
     const basis = (p.basis as unknown[]).map((b, j) => { if (four) return cite(b, `parts[${pi}].basis[${j}]`); obj(b, ['record', 'quote'], code); return quote(b.record, b.quote); });
-    arr(p.claims, 4, code);
+    list(p.claims, 4, `parts[${pi}].claims`);
     const own = new Set(parts.get(ref)?.current.map(c => c.key) ?? []);
     const claims = (p.claims as unknown[]).map((c, j): MapReplyClaim => {
       form(c, `parts[${pi}].claims[${j}]`, 'about');
-      obj(c, ['kind', 'text', ...evidenceKeys, seven ? 'aboutAt' : 'about', 'replaces', ...(six ? ['key'] : [])], code);
-      check(CLAIM_KINDS.includes(c.kind as ClaimKind), code); str(c.text, 240, false, code);
+      object(c, ['kind', 'text', ...evidenceKeys, seven ? 'aboutAt' : 'about', 'replaces', ...(six ? ['key'] : [])], `parts[${pi}].claims[${j}]`);
+      need(CLAIM_KINDS.includes(c.kind as ClaimKind), `parts[${pi}].claims[${j}].kind`, 'kind'); field(c.text, 240, false, `parts[${pi}].claims[${j}].text`);
       const q = evidence(c, `parts[${pi}].claims[${j}].at`);
       if (!seven && c.about !== null) str(c.about, 80, false, code);
       const about = seven ? condition(c.aboutAt, `parts[${pi}].claims[${j}].aboutAt`, 80, new Set([q.record]))?.quote ?? null : c.about === null ? null : (c.about as string).trim();
-      check(c.replaces === null || (typeof c.replaces === 'string' && own.has(c.replaces)), code);
+      need(c.replaces === null || (typeof c.replaces === 'string' && own.has(c.replaces)), `parts[${pi}].claims[${j}].replaces`, 'replaces');
       // map.6: every claim names its statement with a key unique in the reply (a statement settled under one key and left open
       // under another is not caught by this; it only makes the settled/open clash of one key checkable).
       if (six && !(typeof c.key === 'string' && KEY.test(c.key))) throw new MapReplyError(`parts[${pi}].claims[${j}].key`, 'reference', String(c.key));
       return { kind: c.kind as ClaimKind, text: c.text.trim(), ...q, about, replaces: c.replaces as string | null, ...(six ? { key: c.key as string | null } : {}) };
     });
     // A description, new or changed, rests on its own quote: an existing part's role never comes in without one.
-    check(fresh || p.role !== null || claims.length > 0, code);
-    check(p.role === null || basis.length > 0, code);
+    need(fresh || p.role !== null || claims.length > 0, `parts[${pi}]`, 'empty-part');
+    need(p.role === null || basis.length > 0, `parts[${pi}].basis`, 'role-basis');
     // map.7: a role's condition is one record of its own basis (a mixed basis has no one condition for all its records).
     const roleAbout = seven ? condition(p.roleAboutAt, `parts[${pi}].roleAboutAt`, 80, new Set(basis.map(b => b.record)))?.quote ?? null : p.roleAbout === null ? null : (p.roleAbout as string).trim();
     return { ref, name: fresh ? (p.name as string).trim() : null, parent: fresh ? p.parent as string | null : null, role: p.role === null ? null : (p.role as string).trim(),
       roleAbout, roleReplaces, basis, claims };
   });
   // New parts form a forest under known parts: no cycle among them.
-  for (const ref of news.keys()) { const seen = new Set<string>(); for (let x: string | null | undefined = ref; x && news.has(x); x = news.get(x)) { check(!seen.has(x), code); seen.add(x); } }
-  arr(value.relations, 12, code);
+  for (const ref of news.keys()) { const seen = new Set<string>(); for (let x: string | null | undefined = ref; x && news.has(x); x = news.get(x)) { need(!seen.has(x), `parts[${(value.parts as { ref: unknown }[]).findIndex(p => p.ref === ref)}].parent`, 'parent-cycle'); seen.add(x); } }
+  list(value.relations, 12, 'relations');
   const ends = new Set([...parts.keys(), ...news.keys()]);
   const relations = (value.relations as unknown[]).map((r, i) => {
-    obj(r, ['from', 'to', 'kind', 'note', ...evidenceKeys], code);
-    check(typeof r.from === 'string' && typeof r.to === 'string' && ends.has(r.from) && ends.has(r.to) && r.from !== r.to && RELS.includes(r.kind as RelationKind), code);
-    str(r.note, 200, true, code); const q = evidence(r, `relations[${i}].at`);
+    object(r, ['from', 'to', 'kind', 'note', ...evidenceKeys], `relations[${i}]`);
+    need(typeof r.from === 'string' && typeof r.to === 'string' && ends.has(r.from) && ends.has(r.to) && r.from !== r.to, `relations[${i}]`, 'ends'); need(RELS.includes(r.kind as RelationKind), `relations[${i}].kind`, 'kind');
+    field(r.note, 200, true, `relations[${i}].note`); const q = evidence(r, `relations[${i}].at`);
     return { from: r.from, to: r.to, kind: r.kind as RelationKind, note: r.note.trim(), record: q.record, quote: q.quote, ...(q.from !== undefined ? { span: { from: q.from, to: q.to! } } : {}) };
   });
-  arr(value.candidates, 6, code);
+  list(value.candidates, 6, 'candidates');
   const candidates = (value.candidates as unknown[]).map((c, i) => {
-    obj(c, ['text', 'parts', ...evidenceKeys, ...(six ? ['target', 'statement'] : [])], code); str(c.text, 240, false, code);
+    object(c, ['text', 'parts', ...evidenceKeys, ...(six ? ['target', 'statement'] : [])], `candidates[${i}]`); field(c.text, 240, false, `candidates[${i}].text`);
     // A candidate names known parts or parts this same reply adds (new:...); nothing else.
-    arr(c.parts, 2, code);
+    list(c.parts, 2, `candidates[${i}].parts`);
     for (const x of c.parts) if (!(typeof x === 'string' && ends.has(x))) { if (six) throw new MapReplyError(`candidates[${i}].parts`, 'reference', String(x).slice(0, 40)); check(false, code); }
-    check(new Set(c.parts).size === c.parts.length, code);
+    need(new Set(c.parts).size === c.parts.length, `candidates[${i}].parts`, 'duplicate');
     if (six) {
       // What it leaves undecided, and only that: a statement's part (attribution: 1–2 alternatives), two parts being one
       // (identity), a part inside a parent (parent: the part, then the parent), a statement holding for a part (holds).
@@ -353,9 +370,9 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
       if (!(target === 'attribution' ? n >= 1 : target === 'holds' ? n === 1 : n === 2)) throw new MapReplyError(`candidates[${i}].parts`, 'reference', target);
       let statement: MapReplyStatement | null = null;
       if (target === 'attribution' || target === 'holds') {
-        const st = c.statement; form(st, `candidates[${i}].statement`, 'about'); obj(st, ['key', 'kind', 'text', 'at', seven ? 'aboutAt' : 'about'], code);
+        const st = c.statement; form(st, `candidates[${i}].statement`, 'about'); object(st, ['key', 'kind', 'text', 'at', seven ? 'aboutAt' : 'about'], `candidates[${i}].statement`);
         if (typeof st.key !== 'string' || !KEY.test(st.key)) throw new MapReplyError(`candidates[${i}].statement.key`, 'reference', String(st.key));
-        check(CLAIM_KINDS.includes(st.kind as ClaimKind), code); str(st.text, 240, false, code); if (!seven && st.about !== null) str(st.about, 80, false, code);
+        need(CLAIM_KINDS.includes(st.kind as ClaimKind), `candidates[${i}].statement.kind`, 'kind'); field(st.text, 240, false, `candidates[${i}].statement.text`); if (!seven && st.about !== null) str(st.about, 80, false, code);
         const q = cite(st.at, `candidates[${i}].statement.at`);
         // map.7: the statement's own record, whatever the candidate's optional at cites.
         const about = seven ? condition(st.aboutAt, `candidates[${i}].statement.aboutAt`, 80, new Set([q.record]))?.quote ?? null : st.about === null ? null : (st.about as string).trim();
@@ -372,13 +389,13 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
     const q = c.record === null ? null : quote(c.record, c.quote);
     return { text: c.text.trim(), parts: [...c.parts as string[]], record: q?.record ?? null, quote: q?.quote ?? null };
   });
-  arr(value.gaps, 2, code); const gaps = (value.gaps as unknown[]).map(g => { str(g, 160, false, code); return (g as string).trim(); });
+  list(value.gaps, 2, 'gaps'); const gaps = (value.gaps as unknown[]).map((g, k) => { field(g, 160, false, `gaps[${k}]`); return (g as string).trim(); });
   // What the reply read as material inside a record (an example, a sample under test): a range of whole pieces of one record.
   let material: MapReplyMaterial[] = [];
   if (four) {
-    arr(value.material, 6, code);
+    list(value.material, 6, 'material');
     material = (value.material as unknown[]).map((x, i) => {
-      obj(x, ['at', 'what'], code); str(x.what, 120, false, code); check(typeof x.at === 'string', code);
+      object(x, ['at', 'what'], `material[${i}]`); field(x.what, 120, false, `material[${i}].what`); need(typeof x.at === 'string', `material[${i}].at`, 'shape');
       const rec = /^([NR]\d{2,3})\./.exec(x.at as string)?.[1], got = rec ? texts.get(rec) : undefined;
       const at = got?.spans ? resolveRange(x.at as string, rec!, got.text, got.spans) : null;
       if (!at && six) throw new MapReplyError(`material[${i}].at`, 'reference', (x.at as string).slice(0, 40)); check(!!at, code);
@@ -387,49 +404,50 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
   }
   let matches: MapReplyMatch[] = [];
   if (two) {
-    arr(value.matches, 24, code);
+    list(value.matches, 24, 'matches');
     const priors = new Map((ask.priors ?? []).map(x => [x.key, x])), taken = new Set<string>();
     matches = value.matches.map((v, mi) => {
       // map.4: the passage is the cited one, exactly where it stands; then the same rules as a copied quote.
       let anchor: MapReplyQuote | null = null, wire = v;
       let condition7: MapReplyQuote | null = null;
       if (four) {
-        check(!!v && typeof v === 'object' && !Array.isArray(v) && Object.hasOwn(v, 'at') && !Object.hasOwn(v, 'record') && !Object.hasOwn(v, 'quote'), code);
+        need(!!v && typeof v === 'object' && !Array.isArray(v) && Object.hasOwn(v, 'at') && !Object.hasOwn(v, 'record') && !Object.hasOwn(v, 'quote'), `matches[${mi}]`, 'shape');
         form(v, `matches[${mi}]`, 'about');
         const { at, ...rest } = v as Record<string, unknown>; anchor = cite(at, `matches[${mi}].at`); wire = { record: anchor.record, quote: anchor.quote, ...rest };
         // map.7: the match's own record (an earlier condition header of that record included), resolved before the match rules.
         if (seven) { const { aboutAt, ...plain } = wire as Record<string, unknown>; condition7 = condition(aboutAt, `matches[${mi}].aboutAt`, 200, new Set([anchor.record])); wire = { ...plain, about: condition7?.quote ?? null }; }
       }
-      let m: RequestMatch; try { m = validateRequestMatch(wire, ask.requests!, three, four ? ANCHOR_QUOTE_MAX : 300); } catch { throw new Error(code); }
+      // map.7: the request-match rules refused it; which of them is not told (only that the match did not hold).
+      let m: RequestMatch; try { m = validateRequestMatch(wire, ask.requests!, three, four ? ANCHOR_QUOTE_MAX : 300); } catch { throw seven ? new MapReplyError(`matches[${mi}]`, 'contract', 'match-contract') : new Error(code); }
       // Request correspondence quotes the literal sent passage; it does not repair or join excerpts.
       const rec = records.get(m.record), text = rec ? texts.get(rec.id)!.text : '', at = anchor ? { at: anchor.from!, length: anchor.to! - anchor.from! } : rec ? quoteAt(text, m.quote) : null;
-      check(rec && at && at.length >= (anchor ? 1 : 6) && at.length <= (anchor ? ANCHOR_QUOTE_MAX : 300), code);
+      need(rec && at && at.length >= (anchor ? 1 : 6) && at.length <= (anchor ? ANCHOR_QUOTE_MAX : 300), `matches[${mi}].at`, 'quote');
       const explicit = new Set(text.match(/\bRQ_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi) ?? []);
-      check(!explicit.size || m.targets.every(t => explicit.has(t.requestId)), code);
+      need(!explicit.size || m.targets.every(t => explicit.has(t.requestId)), `matches[${mi}].targets`, 'explicit-request');
       // code/test rest on an evidence record only (a project evidence source or a provided source), whatever its alias letter. map.6
       // names where and which record (its alias and kind, never its text); the whole reply is still refused.
       if (['code', 'test'].includes(m.kind) && rec!.kind !== 'evidence') { if (six) throw new MapReplyError(`matches[${mi}].kind`, 'source-kind', `${rec!.id}:${rec!.kind}`); check(false, code); }
       const about = seven ? condition7?.quote ?? null : m.about === null ? null : resolveQuote(text, m.about);
-      check(m.about === null || about !== null, code);
-      check(!secretLike(`${m.text}\n${m.why}`), code);
+      need(m.about === null || about !== null, `matches[${mi}].about`, 'about');
+      need(!secretLike(`${m.text}\n${m.why}`), `matches[${mi}]`, 'secret-like');
       // Identical frozen demands cannot be separated by arrival order. Retain all competing RQ targets, unless the report
       // explicitly names the request id (or the plan id AND revision) itself.
       const targets = [...m.targets];
       const eligible = (request: { createdAt: string }) => !rec!.addedAt || Date.parse(rec!.addedAt) >= Date.parse(request.createdAt);
-      check(targets.every(t => eligible(ask.requests!.find(r => r.id === t.requestId)!)), code);
+      need(targets.every(t => eligible(ask.requests!.find(r => r.id === t.requestId)!)), `matches[${mi}].targets`, 'target-time');
       for (const t of m.targets) {
         const req = ask.requests!.find(r => r.id === t.requestId)!, item = req.items.find(i => i.id === t.itemId)!;
         if (text.includes(req.id) || new RegExp(`${req.planId}\\s*/\\s*${req.planRevision}(?!\\d)`).test(text)) continue;
         for (const other of ask.requests!) for (const i of other.items) if (eligible(other) && other.id !== req.id && norm(i.title) === norm(item.title) && norm(i.description) === norm(item.description) && !targets.some(x => x.requestId === other.id && x.itemId === i.id)) targets.push({ requestId: other.id, itemId: i.id });
       }
-      check(targets.length <= 8, code);
+      need(targets.length <= 8, `matches[${mi}].targets`, 'target-count');
       const quoted = text.slice(at!.at, at!.at + at!.length), where = anchor ? { from: anchor.from!, to: anchor.to! } : {};
       if (!three) return { ...m, quote: quoted, about, targets };
       // A withdrawal names a prior that was sent, for the very item that prior answers: anything else was made up.
       const key = (v as { replaces: unknown }).replaces;
-      check(key === null || (typeof key === 'string' && priors.has(key)), code);
+      need(key === null || (typeof key === 'string' && priors.has(key)), `matches[${mi}].replaces`, 'prior');
       const prior = key === null ? null : priors.get(key as string)!;
-      check(!prior || (m.targets.length === 1 && sameTarget(m.targets[0]!, prior.target)), code);
+      need(!prior || (m.targets.length === 1 && sameTarget(m.targets[0]!, prior.target)), `matches[${mi}].replaces`, 'prior-target');
       // Doubtful ones keep the passage and drop the link (the two reports then read side by side): a remark that does not say
       // made or not made, another nature, the prior's own words, a second take-back of the same prior, a target widened to
       // identical items of other requests, or another named version the record never names.
@@ -441,8 +459,12 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
   if (six) contradictions(outParts, relations, candidates, matches, material, conditions);
   const reply: MapReply = { summary: value.summary.trim(), parts: outParts, relations, candidates, gaps, ...(two ? { matches } : {}), ...(four ? { material } : {}) };
   // Words the model wrote (never the quotes, which are the person's own records) must not look like a key.
-  const written = [reply.summary, ...gaps, ...outParts.flatMap(p => [p.name ?? '', p.role ?? '', p.roleAbout ?? '', ...p.claims.flatMap(c => [c.text, c.about ?? ''])]), ...relations.map(r => r.note), ...candidates.map(c => c.text), ...material.map(x => x.what)];
-  check(!written.some(w => w && secretLike(w)), code);
+  // map.7 names the first such place (the same strings, the same rule).
+  const written: [string, string][] = [['summary', reply.summary], ...gaps.map((g, k): [string, string] => [`gaps[${k}]`, g]),
+    ...outParts.flatMap((p, i): [string, string][] => [[`parts[${i}].name`, p.name ?? ''], [`parts[${i}].role`, p.role ?? ''], [`parts[${i}].roleAboutAt`, p.roleAbout ?? ''], ...p.claims.flatMap((c, j): [string, string][] => [[`parts[${i}].claims[${j}].text`, c.text], [`parts[${i}].claims[${j}].aboutAt`, c.about ?? '']])]),
+    ...relations.map((r, i): [string, string] => [`relations[${i}].note`, r.note]), ...candidates.map((c, i): [string, string] => [`candidates[${i}].text`, c.text]), ...material.map((x, i): [string, string] => [`material[${i}].what`, x.what])];
+  const leaked = written.find(([, w]) => w && secretLike(w));
+  need(!leaked, leaked?.[0] ?? 'reply', 'secret-like');
   return reply;
 }
 

@@ -67,7 +67,8 @@ test('120-2 map.7 refusals at parts[i].ref: one fixed category each, never the r
   const both = withIds(ask, inp.records, ['new:x']); both.parts[2].ref = 'new:Bad'; both.parts[2].roleAbout = null; delete both.parts[2].roleAboutAt;
   assert.deepEqual([refusal(() => M.validateMapReply(both, ask)).rule, refusal(() => M.validateMapReply(both, ask)).path], ['condition-form', 'parts[2].roleAbout']);
   const extra = withIds(ask, inp.records, ['new:x']); extra.parts[2].ref = 'new:Bad'; extra.parts[2].extra = 1;
-  assert.equal(refusal(() => M.validateMapReply(extra, ask)).name, 'Error', 'the exact-key check comes first, as a plain contract refusal');
+  const ek = refusal(() => M.validateMapReply(extra, ask));
+  assert.deepEqual([ek.path, ek.rule, ek.target], ['parts[2]', 'contract', 'keys'], 'the exact-key check comes first (AF137: now said with its path and category)');
 });
 
 test('120-3 map.1–6 keep their plain refusal and the same accepted set', () => {
