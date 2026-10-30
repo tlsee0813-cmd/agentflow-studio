@@ -79,6 +79,21 @@
   - 결과: 성공 뒤 `send()`의 무조건 `setDraft(…, '')` 때문에 Q2가 지워진다(질문칸 '', 표시된 답은 Q1).
   - 같은 fail fixture에서 1회 관찰했고 수리하지 않았다. 140 typed 회귀 수리로 해결했다고 주장하지 않는다. 후속 과제 선택은 Root가 한다.
 
+## 후속 수리 5 (CI 41007155003, 후보 9628e98)
+
+- **CI 결과.** main_flow 질문 회귀는 통과했다. 양 OS의 `studio_browser.py` workspace_flow 520행이 실패했다: 넓게 비교(`#plan-panel.work`)를 연 뒤 `#lens/#plan-strip/#viewport/.controls`가 inert여야 하는데 `#viewport`가 false였다.
+- **원인(140 회귀, 직접 확인).**
+  - plan-view `render()`가 `cover(workOpen())`로 `#space` 자식(UNCOVERED 제외)을 inert로 만든 뒤 `host.area()`, 즉 `syncMapArea`를 부른다.
+  - 140이 넣은 `syncMapArea`의 `vp/.controls.inert = reading`이 읽기 면이 아닐 때 무조건 false를 써서 그 잠금을 풀었다.
+  - 126 요청 넓게 읽기는 지도에 inert를 걸지 않는다(body의 aria-modal 대화창 + 자체 Tab 순환). 그래서 그쪽과 해제 순서가 충돌할 일은 없다.
+- **수리(app.ts만, plan-view 불변).** 전체 읽기는 자기가 건 잠금만 표시(`data-reading-inert`)하고 풀 때도 그것만 푼다. 이미 걸린 잠금(변경 구상 넓게 비교의 cover)은 넘겨받지도 풀지도 않는다. 새 overlay 체계는 만들지 않았다. `studio_browser.py` 520행 기대값은 바꾸지 않았다.
+- **검증(작성자 fixture와 예제 converter).**
+  - `part140-flow` W: 예제 converter의 넓게 비교에서 네 요소가 inert(520행과 같은 검사)다. 다른 변경 선택(재렌더)과 창 크기 변경(`syncMapArea`)을 지나도 유지되고, ‘지도로 돌아가기’에서 plan이 스스로 푼다. 이어서 전체 읽기가 자기 잠금만 걸고 닫을 때 표시까지 지운다.
+  - `connected126-flow` P에 두 확인을 더했다. 부분 렌즈의 넓게 읽기는 잠금을 남기지 않는다. 전체 읽기 위에서 연 넓게 읽기를 먼저 닫으면 읽기 잠금은 유지되고, 읽기를 닫아야 풀린다. 변경 구상 rail에서 연 넓게 읽기를 닫아도 넓게 비교의 cover가 유지된다.
+  - 9628e98 별도 worktree: W는 520행 지점에서, 126 P는 rail 확인(‘the comparison keeps covering the map’)에서 실패한다. 수리 후 `part140-flow` 13/13, `connected126-flow` 19/19 통과.
+  - 실제 Python workspace_flow 실행은 Root(잠금 환경)와 CI에서 한다.
+- **기존 Q1/Q2 send 관찰**은 계속 수리하지 않은 별도 항목이다.
+
 ## 실행하지 않은 검사와 한계
 
 - 잠금 TS 5.8.3, continuity 전체 node, Python 브라우저 회귀(75 관계 note 왕복 등 `studio_browser.py`), 75/126/129/139 전체 suite는 돌리지 않았다(지시대로). 새 AI 호출, 136 재시도, 생성도 0이다.

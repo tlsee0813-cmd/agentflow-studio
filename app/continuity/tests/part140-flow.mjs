@@ -14,7 +14,8 @@
 //   S. A slow description correction of A ends while B's own is being written: B's form, text and caret stay over a late status.
 //   S2. The same part's correction closed and opened again while its first save waits: the new form, words and caret stay.
 //   A. The question box after an answer: empty (as studio_browser.py main_flow:144 expects); a failed answer keeps the question.
-//   (ONLY=followup: T, S, S2, A; ONLY=saves: S, S2; ONLY=reopen: S2; ONLY=ask: A; ONLY=edits: A, R, S, S2.)
+//   W. The change plan's wide comparison keeps its own lock over the map (studio_browser.py:520); the reading lifts only its own.
+//   (ONLY=followup: T, S, S2, A, W; ONLY=saves: S, S2; ONLY=reopen: S2; ONLY=ask: A; ONLY=edits: A, R, S, S2; ONLY=locks: W.)
 import { createRequire } from 'node:module';
 import { spawn } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
@@ -261,6 +262,33 @@ async function reopened(browser, base) {
   await ctx.close();
 }
 
+/* ---------- W: the change plan's wide comparison keeps its own lock over the map; the full reading takes and lifts only its own ---------- */
+async function locks(browser, base) {
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 } }), page = await ctx.newPage(), errors = [];
+  page.on('pageerror', e => errors.push(String(e)));
+  const inert = () => page.evaluate(() => Object.fromEntries(['#lens', '#plan-strip', '#viewport', '#space > .controls'].map(s => [s, !!document.querySelector(s)?.inert])));
+  const all = v => ({ '#lens': v, '#plan-strip': v, '#viewport': v, '#space > .controls': v });
+  try {
+    await page.goto(`${base}/#/p/ex-converter`); await page.locator('#world .node').first().waitFor();
+    await page.locator('#plan-entry').click(); await page.locator('#lens .ps-wide').click(); await page.locator('#plan-panel.work').waitFor();
+    assert.deepEqual(await inert(), all(true), 'the wide comparison covers the map (studio_browser.py:520)');
+    // Its own re-renders and a resize (each runs syncMapArea) keep that lock.
+    await page.locator('.pw-pick').nth(1).click(); await page.setViewportSize({ width: 1200, height: 720 }); await page.setViewportSize({ width: 1280, height: 720 }); await page.waitForTimeout(200);
+    assert.deepEqual(await inert(), all(true), 'still covered after its re-render and a resize');
+    await page.locator('#pw-back').click(); await page.waitForTimeout(200);
+    assert.equal(await page.locator('#plan-panel.work:not([hidden])').count(), 0);
+    assert.equal((await inert())['#viewport'], false, 'back to the change map: the plan lifts its own lock');
+    await page.keyboard.press('Escape'); await page.waitForTimeout(150); if (await page.evaluate(() => !document.getElementById('plan-strip').hidden)) { await page.keyboard.press('Escape'); await page.waitForTimeout(150); }
+    // The full reading: its own lock, lifted on close (and nothing left marked).
+    await page.locator('#world .node').first().click(); await page.locator('#lens .lens-more').click(); await page.locator('#panel.reading').waitFor();
+    assert.equal((await inert())['#viewport'], true);
+    await page.keyboard.press('Escape'); await page.waitForTimeout(150);
+    assert.deepEqual(await page.evaluate(() => [document.getElementById('viewport').inert, document.getElementById('viewport').dataset.readingInert ?? null]), [false, null]);
+    assert.deepEqual(errors, []);
+    ok('W the wide comparison keeps its lock over the map through its re-render and a resize, and lifts it itself; the reading lifts only its own');
+  } finally { await ctx.close(); }
+}
+
 /* ---------- A: the question box after an answer (the same steps as studio_browser.py main_flow to its line 144; stub answers) ---------- */
 async function askDraft(browser) {
   const serve = stub => new Promise((res, rej) => { const proc = spawn(process.execPath, [`${ROOT}tests/studio-smoke-server.mjs`], { cwd: APP, env: { ...process.env, STUDIO_STUB: stub, PORT: '0' }, stdio: ['ignore', 'pipe', 'inherit'] });
@@ -299,10 +327,11 @@ const { proc, base } = await start();
 const browser = await chromium.launch();
 try {
   if (!process.env.ONLY) { await wide(browser, base); await follow(browser, base); await late(browser, base); await narrow(browser, base); }
-  if (process.env.ONLY === 'ask') await askDraft(browser);
+  if (process.env.ONLY === 'locks') await locks(browser, base);
+  else if (process.env.ONLY === 'ask') await askDraft(browser);
   else if (process.env.ONLY === 'edits') { await askDraft(browser); await late(browser, base); await slowSave(browser, base); await reopened(browser, base); }
   else if (process.env.ONLY === 'reopen') await reopened(browser, base);
   else if (process.env.ONLY === 'saves') { await slowSave(browser, base); await reopened(browser, base); }
-  else { await twinHistory(browser, base); await slowSave(browser, base); await reopened(browser, base); await askDraft(browser); }
+  else { await twinHistory(browser, base); await slowSave(browser, base); await reopened(browser, base); await askDraft(browser); await locks(browser, base); }
   console.log(`# ${results.length} checks passed`);
 } finally { await browser.close(); proc.kill(); }

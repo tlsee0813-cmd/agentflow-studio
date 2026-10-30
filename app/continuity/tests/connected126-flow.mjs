@@ -346,7 +346,17 @@ async function partAndPlan(browser, base) {
   await opener.click(); await wideOpen(page).waitFor();
   assert.equal((await page.locator('.rw-back').textContent()).trim(), '‹ 리본 라벨 조회');
   await page.keyboard.press('Escape'); assert.equal((await active(page)).key, key);
-  ok('P a part lens opens the request at its item and comes back to it (named by the part)');
+  assert.equal(await page.evaluate(() => document.getElementById('viewport').inert), false, 'the wide reading took no lock of the map; none is left');
+  // AF140: the part's full reading over the map (its own lock), the wide reading over that, closed first: the reading's lock stays,
+  // then closing the reading lifts it.
+  await page.locator('#lens .lens-more').click(); await page.locator('#panel.reading').waitFor();
+  const sheetItem = page.locator('#panel .request-item').filter({ has: page.locator(`summary[data-request-focus^='["${X.A.id}"']`) }).first(); await sheetItem.locator(':scope > summary').click();
+  await sheetItem.locator('.request-wide.item').click(); await wideOpen(page).waitFor();
+  await page.keyboard.press('Escape'); assert.equal(await wideOpen(page).count(), 0);
+  assert.equal(await page.evaluate(() => document.getElementById('viewport').inert), true, 'the reading still holds its lock');
+  await page.keyboard.press('Escape'); await page.waitForTimeout(150);
+  assert.equal(await page.evaluate(() => document.getElementById('viewport').inert), false, 'closing the reading lifts it');
+  ok('P a part lens opens the request at its item and comes back to it (named by the part); over the full reading, the reading keeps its lock until it closes');
   await page.keyboard.press('Escape');
   // The plan's wide comparison, its results rail: the select's request, explicitly.
   await page.locator('#plan-entry').click(); await page.waitForTimeout(200);
@@ -366,6 +376,8 @@ async function partAndPlan(browser, base) {
     assert.equal(await page.locator('.rw-main .rw-card').count(), which === 'last' ? 8 : 6);
     if (SHOTS && which === 'last') await page.screenshot({ path: `${SHOTS}/p-plan.png` });
     await page.locator('.rw-back').click();
+    // The plan's wide comparison still covers the map after the wide reading closes (its lock, not the reading's).
+    assert.equal(await page.evaluate(() => document.getElementById('viewport').inert), true, 'the comparison keeps covering the map');
     assert.equal((await active(page)).key, k); assert.ok(Math.abs(await rail.evaluate(e => e.scrollTop) - at) <= 1);
   }
   assert.deepEqual(await stores(page), before);

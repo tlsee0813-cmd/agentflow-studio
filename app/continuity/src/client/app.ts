@@ -1184,8 +1184,14 @@ const mapBottom = () => $('viewport').offsetTop + $('viewport').clientHeight;
 function syncMapArea() {
   const vp = $('viewport'), world = $('world'), pane = paneWidth();
   // AF140: behind the full reading the map is shown, not used: no pan, zoom, selection, drag or focus reaches it until it closes.
+  // Only the lock this reading set is its to lift (marked); one already there (the change plan's wide comparison covers the same
+  // map: plan-view cover) is never taken over or released here.
   const reading = !$('panel').hidden && $('panel').classList.contains('reading');
-  for (const el of [vp, document.querySelector<HTMLElement>('#space > .controls')]) if (el) el.inert = reading;
+  for (const el of [vp, document.querySelector<HTMLElement>('#space > .controls')]) {
+    if (!el) continue;
+    if (reading && !el.inert) { el.inert = true; el.dataset.readingInert = '1'; }
+    else if (!reading && el.dataset.readingInert) { delete el.dataset.readingInert; el.inert = false; }
+  }
   $('space').classList.toggle('sheet-read', reading);
   $('space').style.setProperty('--plan-w', `${pane}px`);
   vp.style.right = pane + 'px';
