@@ -1,7 +1,5 @@
 # AgentFlow Studio — INIT-004
 
-> **기록 문서** · 첫 요청 정리 앱(INIT-003·004, 2026-10-10)의 당시 안내입니다. 지금 화면은 [Studio 앱](continuity/README.md)이고, 전체 안내는 [저장소 README](../README.md)에 있습니다.
-
 코드 0.0.3 / 공통 요청 계약 0.1.1. 기존 R1~R4 수정 기반에 R5 선택 충돌 해결 흐름을 추가했다.
 전체 MVP·실제 DeepSeek 연결·공개 운영 준비 완료가 아니다.
 
