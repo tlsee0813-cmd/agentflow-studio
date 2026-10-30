@@ -10,9 +10,8 @@
 import { createReadStream } from 'node:fs';
 import { open, readdir, realpath, stat } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-import { createInterface } from 'node:readline';
 import { homedir } from 'node:os';
-import { join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { ApiError } from '../../server/errors.mjs';
 import { SESSION_VERSION, SESSION_LIMITS, SESSION_ID, parseClaude, parseCodex, parseSession, sessionParser, pushLine, jsonLines, withSubagents, tailFolders, hasPrompt, atFolder, claudeFolder, within, sessionSummary, sessionDetail, sessionKey } from '../dist/public/shared/session-parse.js';
 
@@ -31,10 +30,19 @@ async function readListed(tool, path, size, limits) {
   if (size > limits.headBytes) for (const c of tailFolders(await readHead(path, tail, Math.max(0, size - tail)))) atFolder(parsed.meta, c);
   return parsed;
 }
-/** A whole session read line by line into the tool's parser: a file of hundreds of MB is never held whole. */
-async function readParsed(tool, path) {
-  const parser = sessionParser(tool), rl = createInterface({ input: createReadStream(path, { encoding: 'utf8' }), crlfDelay: Infinity });
-  for await (const r of rl) pushLine(parser, r);
+/** A whole session read in chunks, line by line, into the tool's parser: a file of hundreds of MB is never held whole. A line over
+ * `cap` bytes (a damaged file, a huge paste) is skipped rather than built into a string past what Node can hold, and a failed read
+ * fails this read only. Lines are split on the newline byte, which never occurs inside a UTF-8 character. */
+async function readParsed(tool, path, cap = SESSION_LIMITS.lineBytes) {
+  const parser = sessionParser(tool); let parts = [], size = 0;
+  const add = b => { size += b.length; if (size > cap) parts = []; else if (b.length) parts.push(b); };
+  const line = () => { if (size <= cap && parts.length) pushLine(parser, (parts.length === 1 ? parts[0] : Buffer.concat(parts)).toString('utf8')); parts = []; size = 0; };
+  for await (const chunk of createReadStream(path)) {
+    let from = 0;
+    for (let nl = chunk.indexOf(10); nl >= 0; from = nl + 1, nl = chunk.indexOf(10, from)) { add(chunk.subarray(from, nl)); line(); }
+    add(chunk.subarray(from));
+  }
+  line();
   return parser.done();
 }
 async function dirs(path) { try { return (await readdir(path, { withFileTypes: true })).filter(d => d.isDirectory()).map(d => join(path, d.name)); } catch { return []; } }
@@ -60,7 +68,11 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
   if (env.STUDIO_SESSIONS === 'off') return null;
   const where = roots ?? { claude: env.CLAUDE_CONFIG_DIR || join(home, '.claude'), codex: env.CODEX_HOME || join(home, '.codex') };
   let known = new Map(); // id -> { tool, path }
-  const threads = new Map(); // Codex file path -> { mtime, parent } (from its first lines)
+  const threads = new Map(); // subagent file path -> { mtime, parent } (from its first lines)
+  // Listed file path -> what its listing read gave ({ size, mtime, real, id, row, cwds }; row null with no prompt): auto-sync lists
+  // every minute, and a file is read again only when its size or time changed (a prompt-less subagent file is not read each time).
+  const heads = new Map();
+  const lineCap = limits.lineBytes ?? SESSION_LIMITS.lineBytes;
   // An id is made from the session itself (sessionKey), as the page makes it; the one made from the file's path before is its alias.
   const idOf = (tool, name) => `${tool}-${createHash('sha256').update(name).digest('hex').slice(0, 24)}`;
 
@@ -71,38 +83,51 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
       try { const s = await stat(c.path); if (s.size > 0) found.push({ ...c, size: s.size, mtime: s.mtimeMs }); } catch { /* gone meanwhile */ }
     }
     found.sort((a, b) => b.mtime - a.mtime);
+    const there = new Set(found.map(f => f.path)); for (const p of heads.keys()) if (!there.has(p)) heads.delete(p);
     const next = new Map(), out = [];
     // At most `scan` newest files are opened, so a folder with no session left does not read a whole history.
     for (const f of found.slice(0, limits.scan ?? 400)) {
       if (out.length >= limits.list) break;
-      let real; try { real = await realpath(f.path); } catch { continue; }
-      let parsed; try { parsed = await readListed(f.tool, real, f.size, limits); } catch { continue; }
-      const id = idOf(f.tool, sessionKey(f.tool, parsed.meta, real)), base = sessionSummary(id, f.tool, parsed, new Date(f.mtime).toISOString(), f.size, limits);
+      let h = heads.get(f.path);
+      if (h?.size !== f.size || h.mtime !== f.mtime) {
+        let real; try { real = await realpath(f.path); } catch { continue; }
+        let parsed; try { parsed = await readListed(f.tool, real, f.size, limits); } catch { continue; }
+        const id = idOf(f.tool, sessionKey(f.tool, parsed.meta, real)), base = sessionSummary(id, f.tool, parsed, new Date(f.mtime).toISOString(), f.size, limits);
+        h = { size: f.size, mtime: f.mtime, real, id, row: base && { ...base, aliases: [idOf(f.tool, real)] }, cwds: parsed.meta.cwds }; heads.set(f.path, h);
+      }
       // Two files of one session (a copy left behind): the newest one is the session.
-      if (!base || next.has(id)) continue;
-      const row = { ...base, aliases: [idOf(f.tool, real)] };
-      known.set(id, { tool: f.tool, path: real }); next.set(id, { tool: f.tool, path: real });
-      if (folder && !within(parsed.meta.cwds, folder)) continue;
-      out.push(row);
+      if (!h.row || next.has(h.id)) continue;
+      known.set(h.id, { tool: f.tool, path: h.real }); next.set(h.id, { tool: f.tool, path: h.real });
+      if (folder && !within(h.cwds, folder)) continue;
+      out.push({ ...h.row });
     }
     // A folder listing adds to what is known (a session listed before stays readable); a whole listing replaces it.
     if (!folder) known = next;
     return { version: SESSION_VERSION, sessions: out };
   }
 
-  /** The Codex subagent sessions a session started (their files name it as parent; they begin after it). */
-  async function subagents(parsed) {
-    const out = [], since = Date.parse(parsed.meta.startedAt ?? '') || 0;
-    if (!where.codex || !parsed.meta.thread) return out;
-    for (const c of await candidates({ codex: where.codex })) {
-      let st; try { st = await stat(c.path); } catch { continue; }
-      if (st.mtimeMs < since) continue;
-      let t = threads.get(c.path);
-      if (t?.mtime !== st.mtimeMs) {
-        let head; try { head = await readHead(c.path, limits.headBytes); } catch { continue; }
-        t = { mtime: st.mtimeMs, parent: parseSession('codex', jsonLines(head, st.size > limits.headBytes)).meta.parent }; threads.set(c.path, t);
-      }
-      if (t.parent === parsed.meta.thread && st.size <= limits.fileBytes) out.push(await readParsed('codex', c.path));
+  /** Subagent files that name the session they work for in their first lines (read again only when they change). */
+  async function parentOf(path, st, tool) {
+    let t = threads.get(path);
+    if (t?.mtime !== st.mtimeMs) {
+      let head; try { head = jsonLines(await readHead(path, limits.headBytes), st.size > limits.headBytes); } catch { return null; }
+      t = { mtime: st.mtimeMs, parent: tool === 'codex' ? parseSession('codex', head).meta.parent : head.find(o => typeof o?.sessionId === 'string')?.sessionId ?? null }; threads.set(path, t);
+    }
+    return t.parent;
+  }
+  /** The subagent sessions a session started (they begin after it; one that cannot be read is left out). Codex: rollouts naming it
+   * as parent. Claude Code: transcripts kept beside it (<session>/subagents/*.jsonl), or, in earlier versions, agent-*.jsonl in its
+   * project folder naming it by its sessionId. Only the files they changed are used. */
+  async function subagents(tool, path, parsed) {
+    const out = [], since = Date.parse(parsed.meta.startedAt ?? '') || 0, base = basename(path, '.jsonl');
+    const own = tool === 'claude' ? await files(join(dirname(path), base, 'subagents'), n => n.endsWith('.jsonl')) : [];
+    const near = tool === 'claude' ? await files(dirname(path), n => /^agent-.*\.jsonl$/.test(n) && n !== `${base}.jsonl`)
+      : where.codex && parsed.meta.thread ? (await candidates({ codex: where.codex })).map(c => c.path) : [];
+    for (const p of [...own, ...near]) {
+      let st; try { st = await stat(p); } catch { continue; }
+      if (st.mtimeMs < since || st.size > limits.fileBytes) continue;
+      if (!own.includes(p) && (await parentOf(p, st, tool)) !== (tool === 'codex' ? parsed.meta.thread : base)) continue;
+      try { out.push(await readParsed(tool, p, lineCap)); } catch { /* gone meanwhile */ }
     }
     return out;
   }
@@ -114,8 +139,8 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
     const f = known.get(id); if (!f) throw new ApiError('SESSION_NOT_FOUND', 404);
     let size; try { size = (await stat(f.path)).size; } catch { throw new ApiError('SESSION_NOT_FOUND', 404); }
     if (size > limits.fileBytes) throw new ApiError('SESSION_TOO_LARGE', 413);
-    const parsed = await readParsed(f.tool, f.path);
-    return sessionDetail(id, f.tool, f.tool === 'codex' ? withSubagents(parsed, await subagents(parsed)) : parsed, limits, since);
+    const parsed = await readParsed(f.tool, f.path, lineCap);
+    return sessionDetail(id, f.tool, withSubagents(parsed, await subagents(f.tool, f.path, parsed)), limits, since);
   }
 
   return { describe: () => ({ version: SESSION_VERSION, tools: Object.keys(where).filter(k => where[k]) }), list, read };

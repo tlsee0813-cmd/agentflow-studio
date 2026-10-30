@@ -20,8 +20,13 @@ export function claudeRows(cwd = '/work/salon') {
     { type: 'assistant', ...base, timestamp: T(2), message: { role: 'assistant', content: [{ type: 'thinking', thinking: 'private reasoning' }, { type: 'text', text: '먼저 코드를 볼게요.' }, { type: 'tool_use', id: 't1', name: 'Read', input: { file_path: `${cwd}/src/hours.ts` } }] } },
     { type: 'user', ...base, timestamp: T(3), message: { role: 'user', content: [{ type: 'tool_result', tool_use_id: 't1', content: 'TOOL OUTPUT SHOULD NOT APPEAR' }] } },
     { type: 'assistant', ...base, timestamp: T(4), message: { role: 'assistant', content: [{ type: 'tool_use', id: 't2', name: 'Edit', input: { file_path: `${cwd}/src/hours.ts`, old_string: 'a', new_string: 'b' } }] } },
+    { type: 'user', ...base, timestamp: T(4, 10), message: { role: 'user', content: [{ type: 'tool_result', tool_use_id: 't2', content: 'TOOL OUTPUT SHOULD NOT APPEAR' }] } },
+    // An edit the person refused changed nothing.
+    { type: 'assistant', ...base, timestamp: T(4, 20), message: { role: 'assistant', content: [{ type: 'tool_use', id: 't4', name: 'Edit', input: { file_path: `${cwd}/config/prod.json`, old_string: 'a', new_string: 'b' } }] } },
+    { type: 'user', ...base, timestamp: T(4, 25), message: { role: 'user', content: [{ type: 'tool_result', tool_use_id: 't4', is_error: true, content: 'REFUSAL SHOULD NOT APPEAR' }] } },
     { type: 'assistant', ...base, timestamp: T(4, 30), isSidechain: true, message: { role: 'assistant', content: [{ type: 'text', text: 'SIDECHAIN SHOULD NOT APPEAR' }] } },
     { type: 'assistant', ...base, timestamp: T(5), message: { role: 'assistant', content: [{ type: 'tool_use', id: 't3', name: 'Write', input: { file_path: `${cwd}/tests/hours.test.ts`, content: 'x' } }, { type: 'text', text: CLAUDE_REPLY }] } },
+    { type: 'user', ...base, timestamp: T(5, 10), message: { role: 'user', content: [{ type: 'tool_result', tool_use_id: 't3', content: 'TOOL OUTPUT SHOULD NOT APPEAR' }] } },
     { type: 'user', ...base, timestamp: T(6), message: { role: 'user', content: '<command-name>/review</command-name>\n<command-message>review</command-message>\n<command-args>hours.ts</command-args>' } },
     { type: 'user', ...base, timestamp: T(6, 5), message: { role: 'user', content: '<local-command-stdout>LOCAL OUTPUT SHOULD NOT APPEAR</local-command-stdout>' } },
     { type: 'assistant', ...base, timestamp: T(7), message: { role: 'assistant', content: [{ type: 'text', text: `검토했어요. 설정 파일의 ${FAKE_KEY} 같은 키는 커밋하지 마세요.` }] } },

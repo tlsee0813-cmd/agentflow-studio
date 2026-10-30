@@ -1,10 +1,10 @@
 // Local session records: Claude Code / Codex files read into turns, the sessions service and routes, and the record text.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, mkdirSync, rmSync, utimesSync, statSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { parseClaude, parseCodex, openSessions, SESSION_ID } from '../server/sessions.mjs';
+import { parseClaude, parseCodex, openSessions, SESSION_ID, SESSION_LIMITS } from '../server/sessions.mjs';
 import { createStudioHandler } from '../server/studio.mjs';
 import { sessionText, readSessionList, readSessionDetail } from '../dist/public/shared/session-import.js';
 import { secretLike, redactSecrets } from '../dist/public/shared/secret.js';
@@ -31,7 +31,8 @@ test('SESSIONS-X1 Codex: event stream preferred (no doubled prompt), context and
   assert.equal(meta.cwd, '/work/salon'); assert.equal(meta.branch, 'notify');
   assert.deepEqual(turns, [
     { role: 'user', at: '2026-10-28T09:20:02.000Z', text: CODEX_PROMPT },
-    { role: 'assistant', at: '2026-10-28T09:22:00.000Z', text: CODEX_REPLY, files: ['src/notify.ts', 'tests/notify.test.ts'] }]);
+    // A reply is timed by its first piece (here the patch), so it stays one turn while it grows.
+    { role: 'assistant', at: '2026-10-28T09:21:05.000Z', text: CODEX_REPLY, files: ['src/notify.ts', 'tests/notify.test.ts'] }]);
   assert.ok(!leaks(JSON.stringify(turns)));
   // Patch text inside JSON-encoded shell arguments (escaped line breaks) still names its files.
   const shell = parseCodex([{ type: 'event_msg', payload: { type: 'user_message', message: 'go' } },
@@ -287,5 +288,147 @@ test('SESSIONS-K1 ids come from the session itself (same on the server and in th
     assert.equal((await handler(req('/api/studio/sessions/%E0%A4%A'))).status, 404);
     const viaRoute = await (await handler(req(`/api/studio/sessions/${parent.id}?since=${encodeURIComponent(at(20))}`))).json();
     assert.equal(viaRoute.turns.length, 2);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+// Claude Code lines in a working folder /w, timed by minute.
+const cu = (m, content, extra = {}) => ({ type: 'user', cwd: '/w', timestamp: at(m), ...extra, message: { role: 'user', content } });
+const ca = (m, content, extra = {}) => ({ type: 'assistant', cwd: '/w', timestamp: at(m), ...extra, message: { role: 'assistant', content: typeof content === 'string' ? [{ type: 'text', text: content }] : content } });
+const jl = rows => rows.map(r => JSON.stringify(r)).join('\n');
+
+test('SESSIONS-M1 a prompt that starts with markup the person pasted stays as typed; only the tools\' own tags are context', () => {
+  const said = text => parseClaude([cu(1, '첫 요청'), ca(2, '첫 답'), cu(3, text), ca(4, '둘째 답')]).turns.map(t => [t.role, t.text]);
+  for (const text of ['<button class="primary">저장</button>\n이 버튼 색을 파랗게 바꿔 줘', '<div class="a"><div class="b">x</div></div> 이 중첩 구조 정리해 줘', '<template>\n  <div>{{ name }}</div>\n</template>', '<Header title="x"></Header> 컴포넌트 이름 바꿔 줘'])
+    assert.deepEqual(said(text), [['user', '첫 요청'], ['assistant', '첫 답'], ['user', text], ['assistant', '둘째 답']], text);
+  // What Claude Code puts in a user message: IDE state, hook output, a background task's notice.
+  assert.equal(said('<ide_opened_file>The user opened /w/a.ts</ide_opened_file>\n<ide_selection>lines 1-2</ide_selection>\na.ts 고쳐 줘')[2][1], 'a.ts 고쳐 줘');
+  assert.equal(said('<user-prompt-submit-hook>hook said</user-prompt-submit-hook>\n저장 버튼 고쳐 줘')[2][1], '저장 버튼 고쳐 줘');
+  assert.deepEqual(said('<task-notification>task done</task-notification>').map(t => t[1]), ['첫 요청', '첫 답\n\n둘째 답'], 'a notice is not a prompt');
+  // What Codex puts there: a shell command, an interruption, an image's wrapper, its environment, the IDE extension's headings.
+  const codex = parts => parseCodex([{ type: 'response_item', payload: { type: 'message', role: 'user', content: parts.map(text => ({ type: 'input_text', text })) } }]).turns.map(t => t.text);
+  assert.deepEqual(codex(['<image name=[Image #1]>', '</image>', '이 화면대로 바꿔 줘']), ['이 화면대로 바꿔 줘']);
+  assert.deepEqual(codex(['<user_shell_command>\n<command>ls</command>\n</user_shell_command>']), []);
+  assert.deepEqual(codex(['<turn_aborted>\nThe user interrupted\n</turn_aborted>']), []);
+  assert.deepEqual(codex(['<environment_context>\n<cwd>/w</cwd>\n</environment_context>\n이어서 해 줘']), ['이어서 해 줘']);
+  assert.deepEqual(codex(['# Context from my IDE setup:\n\n## Open tabs:\n- a.ts\n\n## My request for Codex:\n탭 정리해 줘']), ['탭 정리해 줘']);
+  assert.deepEqual(codex(['<section>\n<h1>제목</h1>\n</section>']), ['<section>\n<h1>제목</h1>\n</section>']);
+});
+
+test('SESSIONS-G1 a reply keeps the time of its first piece while it grows: the same turn at each look, and since brings it back whole', async () => {
+  const P = await import('../dist/public/shared/session-parse.js');
+  const rows = [cu(0, '마이그레이션 돌려 줘'), ca(1, 'PART1'), ca(2, [{ type: 'tool_use', id: 'b1', name: 'Bash', input: { command: 'x' } }]),
+    cu(7, [{ type: 'tool_result', tool_use_id: 'b1', content: 'ok' }]), ca(8, 'PART2')];
+  assert.equal(parseClaude(rows.slice(0, 3)).turns[1].at, at(1));
+  assert.deepEqual(parseClaude(rows).turns[1], { role: 'assistant', at: at(1), text: 'PART1\n\nPART2', files: [] });
+  assert.deepEqual(P.sessionDetail('claude-' + 'a'.repeat(24), 'claude', parseClaude(rows), undefined, at(1)).turns.map(t => t.text), ['PART1\n\nPART2']);
+  // A subagent's change before the reply's first words gives the reply its time, whichever of the two was read first.
+  const said = { timestamp: at(5), type: 'response_item', payload: { type: 'message', role: 'assistant', content: [{ type: 'output_text', text: '붙였어요.' }] } };
+  const parent = [desktopMeta(PARENT), desktopUser(1, [['user.text', '알림 붙여 줘']])], child = [parseCodex(desktopChild('c1', 2))];
+  assert.equal(P.withSubagents(parseCodex(parent), child).turns[1].at, at(3));
+  assert.equal(P.withSubagents(parseCodex([...parent, said]), child).turns[1].at, at(3));
+});
+
+test('SESSIONS-X3 a Codex thread continued across the CLI and Desktop keeps both sides, each prompt once', () => {
+  const itemU = (m, text, kinds) => ({ timestamp: at(m), type: 'response_item', payload: { type: 'message', role: 'user', content: [{ type: 'input_text', text }], ...(kinds ? { internal_chat_message_metadata_passthrough: { content_item_kinds: kinds } } : {}) } });
+  const itemA = (m, text) => ({ timestamp: at(m), type: 'response_item', payload: { type: 'message', role: 'assistant', content: [{ type: 'output_text', text }] } });
+  const ev = (m, type, message) => ({ timestamp: at(m), type: 'event_msg', payload: { type, message } });
+  const read = rows => parseCodex([desktopMeta('t'), ...rows]).turns.map(t => [t.role, t.text]);
+  const cli = [itemU(1, 'CLI 요청'), ev(1, 'user_message', 'CLI 요청'), itemA(2, 'CLI 답'), ev(2, 'agent_message', 'CLI 답')], desk = [itemU(10, 'Desktop 요청', ['user.text']), itemA(11, 'Desktop 답')];
+  assert.deepEqual(read([...cli, ...desk]), [['user', 'CLI 요청'], ['assistant', 'CLI 답'], ['user', 'Desktop 요청'], ['assistant', 'Desktop 답']]);
+  assert.deepEqual(read([...desk, ...cli]), [['user', 'Desktop 요청'], ['assistant', 'Desktop 답'], ['user', 'CLI 요청'], ['assistant', 'CLI 답']]);
+  // An event written before its response item is the same prompt; a stray event does not hide Desktop's replies.
+  assert.deepEqual(read([ev(1, 'user_message', 'CLI 요청'), itemU(1, 'CLI 요청'), ev(2, 'agent_message', 'CLI 답'), itemA(2, 'CLI 답')]), [['user', 'CLI 요청'], ['assistant', 'CLI 답']]);
+  assert.deepEqual(read([...desk, ev(12, 'agent_message', 'stray')]), [['user', 'Desktop 요청'], ['assistant', 'Desktop 답']]);
+  // The same words asked again after a reply are a new prompt.
+  assert.equal(read([...cli, itemU(3, 'CLI 요청'), ev(3, 'user_message', 'CLI 요청'), ev(4, 'agent_message', '또 답')]).length, 4);
+});
+
+test('SESSIONS-C2 Claude Code: an edit counts once its result came back without an error; a refused or failed one changed nothing', () => {
+  const edit = (m, id, file) => ca(m, [{ type: 'tool_use', id, name: 'Edit', input: { file_path: file, old_string: 'a', new_string: 'b' } }]);
+  const result = (m, id, extra = {}) => cu(m, [{ type: 'tool_result', tool_use_id: id, content: 'ok', ...extra }]);
+  const rows = [cu(0, '설정 바꿔 줘'), edit(1, 'e1', '/w/config/prod.json'), result(2, 'e1', { is_error: true, content: "The user doesn't want to proceed with this tool use." }),
+    edit(3, 'e2', '/w/src/missing.ts'), result(4, 'e2', { content: '<tool_use_error>String to replace not found in file.</tool_use_error>' }),
+    edit(5, 'e3', '/w/config/dev.json'), result(6, 'e3'), edit(7, 'e4', '/w/src/pending.ts'), ca(8, 'dev 설정만 바꿨어요.')];
+  assert.deepEqual(parseClaude(rows).turns[1], { role: 'assistant', at: at(5), text: 'dev 설정만 바꿨어요.', files: ['/w/config/dev.json'] }, 'an edit still waiting for its result is not listed yet');
+  assert.deepEqual(parseClaude([...rows, result(9, 'e4')]).turns[1].files, ['/w/config/dev.json', '/w/src/pending.ts']);
+});
+
+test('SESSIONS-X4 Codex patches name their files in any form: raw Windows paths, JSON arguments, heredocs, string commands', async () => {
+  const P = await import('../dist/public/shared/session-parse.js');
+  const patch = f => `*** Begin Patch\n*** Update File: ${f}\n@@\n-a\n+b\n*** End Patch\n`, fn = (name, args) => ({ type: 'function_call', name, call_id: 'c', arguments: JSON.stringify(args) });
+  const read = payload => parseCodex([desktopMeta('t'), { type: 'event_msg', payload: { type: 'user_message', message: '고쳐 줘' } }, { type: 'response_item', payload }]);
+  const files = payload => read(payload).turns[1]?.files ?? [];
+  const raw = { type: 'custom_tool_call', name: 'apply_patch', call_id: 'c', input: patch(`${W}\\src\\notify.ts`) };
+  assert.deepEqual(files(raw), [`${W}\\src\\notify.ts`], 'a raw patch is read as it is: no \\n in a Windows path is a line break');
+  assert.deepEqual(P.sessionDetail('codex-' + 'a'.repeat(24), 'codex', read(raw)).turns[1].files, ['src/notify.ts']);
+  assert.deepEqual(P.sessionDetail('codex-' + 'a'.repeat(24), 'codex', read({ ...raw, input: patch('src\\routes\\reserve.ts') })).turns[1].files, ['src/routes/reserve.ts'], 'a relative Windows name shown as the others');
+  assert.equal(P.shortPath('src\\odd.ts', '/work/salon'), 'src\\odd.ts', 'a backslash in a POSIX name is a character');
+  assert.deepEqual(files(fn('shell', { command: ['apply_patch', patch(`${W}\\src\\a.ts`)] })), [`${W}\\src\\a.ts`], 'JSON escapes undone once');
+  assert.deepEqual(files(fn('shell', { workdir: '/w', command: ['bash', '-lc', `cd /w && apply_patch <<'EOF'\n${patch('src/a.ts')}EOF\n`] })), ['src/a.ts']);
+  assert.deepEqual(files(fn('exec_command', { cmd: `apply_patch <<'EOF'\n${patch('src/b.ts')}EOF\n` })), ['src/b.ts']);
+  assert.deepEqual(files(fn('shell_command', { command: `apply_patch <<'EOF'\n${patch('src/c.ts')}EOF\n` })), ['src/c.ts']);
+  assert.deepEqual(files(fn('apply_patch', { input: patch('src/d.ts') })), ['src/d.ts']);
+  assert.deepEqual(files({ type: 'local_shell_call', call_id: 'c', status: 'completed', action: { type: 'exec', command: ['apply_patch', patch('src/e.ts')] } }), ['src/e.ts']);
+  // Patch text a command only writes somewhere, or a Desktop script (its FileChange item names the files), changes nothing here.
+  assert.deepEqual(files(fn('shell', { command: ['bash', '-lc', `cat > notes.md <<'EOF'\n${patch('src/x.ts')}EOF\n`] })), []);
+  assert.deepEqual(files({ type: 'custom_tool_call', name: 'exec', call_id: 'c', input: `await apply_patch(\`${patch('src/y.ts')}\`)` }), []);
+});
+
+test('SESSIONS-C3 Claude Code subagents: the files they changed join the reply they worked for (not their words), in the file or beside it', async () => {
+  const side = { isSidechain: true }, task = (m, id) => ca(m, [{ type: 'tool_use', id, name: 'Task', input: { prompt: '고쳐' } }]);
+  const done = (m, id, extra = {}) => cu(m, [{ type: 'tool_result', tool_use_id: id, content: 'TOOL OUTPUT SHOULD NOT APPEAR' }], extra);
+  const work = (m, file, extra) => [cu(m, '고쳐', extra), ca(m, [{ type: 'text', text: 'SIDECHAIN SHOULD NOT APPEAR' }, { type: 'tool_use', id: `s${m}`, name: 'Write', input: { file_path: file, content: 'x' } }], extra), done(m, `s${m}`, extra)];
+  const s = parseClaude([cu(0, '알림 모듈 고쳐 줘'), task(1, 'k1'), ...work(2, '/w/src/notify.ts', side), done(3, 'k1'), ca(4, '서브에이전트가 notify.ts를 고쳤어요.')]);
+  assert.deepEqual(s.turns.map(t => [t.role, t.text, t.files]), [['user', '알림 모듈 고쳐 줘', undefined], ['assistant', '서브에이전트가 notify.ts를 고쳤어요.', ['/w/src/notify.ts']]]);
+  const dir = home();
+  try {
+    const roots = writeSessionHome(dir), p = join(roots.claude, 'projects', '-w'); mkdirSync(join(p, 'main', 'subagents'), { recursive: true });
+    writeFileSync(join(p, 'main.jsonl'), jl([cu(0, '알림이랑 예약 고쳐 줘'), task(1, 'k1'), done(5, 'k1'), ca(6, '둘 다 고쳤어요.')]));
+    // Beside the session (<session>/subagents/), or in earlier versions agent-*.jsonl in its project folder naming it.
+    writeFileSync(join(p, 'main', 'subagents', 'agent-a1.jsonl'), jl(work(2, '/w/src/notify.ts', { ...side, sessionId: 'main' })));
+    writeFileSync(join(p, 'agent-b2.jsonl'), jl(work(3, '/w/src/booking.ts', { ...side, sessionId: 'main' })));
+    writeFileSync(join(p, 'agent-c3.jsonl'), jl(work(3, '/w/src/other.ts', { ...side, sessionId: 'other' })));
+    const sessions = openSessions({ env: {}, roots }), list = (await sessions.list('/w')).sessions;
+    assert.deepEqual(list.map(x => x.preview), ['알림이랑 예약 고쳐 줘'], 'a subagent file is not a session of its own');
+    const got = await sessions.read(list[0].id);
+    assert.deepEqual(got.turns.map(t => [t.role, t.text, t.files]), [['user', '알림이랑 예약 고쳐 줘', undefined], ['assistant', '둘 다 고쳤어요.', ['src/notify.ts', 'src/booking.ts']]]);
+    assert.ok(!leaks(JSON.stringify(got)));
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('SESSIONS-F1 a handover document longer than a turn is folded before the prompt is clipped, so the words after it are kept', async () => {
+  const P = await import('../dist/public/shared/session-parse.js');
+  const doc = ['──────── AgentFlow 인수인계 문서 · af-handover:QW3RTY ────────', '# 인수인계: 나의 프로젝트', ...Array.from({ length: 400 }, (_, i) => `- 부분 ${i}: ${'설명 '.repeat(20)}`),
+    '──────── 인수인계 문서 끝 · af-handover:QW3RTY ────────'].join('\n');
+  assert.ok(doc.length > SESSION_LIMITS.turnChars);
+  const d = P.sessionDetail('claude-' + 'a'.repeat(24), 'claude', parseClaude([cu(1, `${doc}\n\n결제 화면부터 이어서 해 줘`), ca(2, '이어서 할게요.')]));
+  assert.equal(d.turns[0].text, '[AgentFlow 인수인계 문서를 받아 이어감 · af-handover:QW3RTY · 나의 프로젝트]\n\n결제 화면부터 이어서 해 줘');
+  assert.ok(sessionText(readSessionDetail(d)).text.includes('결제 화면부터 이어서 해 줘'));
+});
+
+test('SESSIONS-L1 a line too long to be a session line is skipped, the lines around it still read, the read itself never fails for it', async () => {
+  const dir = home();
+  try {
+    const roots = writeSessionHome(dir), p = join(roots.claude, 'projects', '-w'); mkdirSync(p, { recursive: true });
+    // A reply line longer than one read chunk, with characters cut between chunks; a line over the cap mid-file (skipped whole,
+    // though it is whole JSON) and damage over it at the end.
+    const long = '뒤 답 ' + 'ㅋ'.repeat(70000);
+    writeFileSync(join(p, 'big.jsonl'), [jl([cu(1, '앞 요청'), ca(2, '앞 답'), ca(2, `OVER THE CAP ${'x'.repeat(400 * 1024)}`)]), jl([cu(3, '뒤 요청'), ca(4, long)]), '\0'.repeat(400 * 1024)].join('\n'));
+    const sessions = openSessions({ env: {}, roots, limits: { ...SESSION_LIMITS, lineBytes: 300 * 1024, turnChars: 100000 } }), [s] = (await sessions.list('/w')).sessions;
+    assert.deepEqual((await sessions.read(s.id)).turns.map(t => t.text), ['앞 요청', '앞 답', '뒤 요청', long]);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('SESSIONS-L2 a listing reads a file again only when its size or time changed', async () => {
+  const dir = home();
+  try {
+    const roots = writeSessionHome(dir), f = join(roots.claude, 'projects', '-work-salon', 'c1.jsonl'), sessions = openSessions({ env: {}, roots });
+    const title = async () => (await sessions.list()).sessions.find(s => s.tool === 'claude').title;
+    assert.equal(await title(), '휴무일 연결');
+    const st = statSync(f); writeFileSync(f, readFileSync(f, 'utf8').replace('휴무일 연결', '휴무일 이음')); utimesSync(f, st.atime, st.mtime);
+    assert.equal(statSync(f).size, st.size);
+    assert.equal(await title(), '휴무일 연결', 'same size and time: what was read before holds');
+    utimesSync(f, st.atime, new Date(st.mtimeMs + 1000));
+    assert.equal(await title(), '휴무일 이음');
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });

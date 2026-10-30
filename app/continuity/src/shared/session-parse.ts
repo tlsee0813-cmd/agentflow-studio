@@ -4,12 +4,14 @@
  *   Claude Code: <~/.claude>/projects/<folder>/<session>.jsonl
  *   Codex:       <~/.codex>/sessions/YYYY/MM/DD/rollout-*.jsonl */
 import type { SessionDetail, SessionSummary, SessionTurn } from './session-import.js';
+import { foldHandover } from './handover-mark.js';
 
 export const SESSION_VERSION = 'sessions.1';
 // fileBytes: a long agent session runs to hundreds of MB (tool output it never shows); it is read line by line, never held whole.
 // headBytes is read to list a file; promptBytes when the head holds no prompt yet (a first prompt can carry pasted images);
-// tailBytes from the end, for a working folder a long session moved to late.
-export const SESSION_LIMITS = Object.freeze({ list: 60, scan: 400, headBytes: 256 * 1024, promptBytes: 8 * 1024 * 1024, tailBytes: 64 * 1024, fileBytes: 2 * 1024 * 1024 * 1024, turnChars: 20000, replyChars: 300000, preview: 160 });
+// tailBytes from the end, for a working folder a long session moved to late. lineBytes: a longer line (a damaged file, a huge
+// paste) is skipped whole rather than built into a string past what the runtime can hold; a turn is clipped far below it anyway.
+export const SESSION_LIMITS = Object.freeze({ list: 60, scan: 400, headBytes: 256 * 1024, promptBytes: 8 * 1024 * 1024, tailBytes: 64 * 1024, fileBytes: 2 * 1024 * 1024 * 1024, lineBytes: 64 * 1024 * 1024, turnChars: 20000, replyChars: 300000, preview: 160 });
 export type SessionLimits = typeof SESSION_LIMITS;
 export const SESSION_ID = /^(claude|codex)-[0-9a-f]{24}$/;
 export type SessionTool = 'claude' | 'codex';
@@ -34,6 +36,11 @@ function textOf(content: unknown, kinds: string[]): string {
   return content.filter(b => b && kinds.includes(b.type) && typeof b.text === 'string').map(b => b.text).join('\n\n');
 }
 const clip = (text: string, n: number) => (text.length > n ? `${text.slice(0, n)}\n…(이후 ${(text.length - n).toLocaleString()}자 생략)` : text);
+/** Tags Claude Code and Codex (CLI, IDE and Desktop) put in a user message with what was typed. Only these are context: a prompt
+ * that starts with other markup (HTML, JSX, XML the person pasted) is kept as typed. */
+const INJECTED = /^(system-reminder|command-[a-z]+|local-command-[a-z]+|bash-[a-z]+|user-prompt-submit-hook|user-memory-input|ide_[a-z_]+|task-notification|environment_context|user_instructions|turn_context|turn_aborted|user_action|user_shell_command|recommended_plugins|in-app-browser-context|image|skill|instructions|permissions)$/i;
+/** Messages that are context as a whole (Codex environment, AGENTS.md and permissions), even when their block is not closed. */
+const CONTEXT = /^(<(user_instructions|environment_context|turn_context|instructions|permissions)[\s>]|# AGENTS\.md instructions)/i;
 /** What the person typed, without context a tool injects into the same message. Null when nothing typed is left. */
 function typed(text: string): string | null {
   let t = String(text).replace(/<system-reminder>[\s\S]*?<\/system-reminder>/g, '').trim();
@@ -41,89 +48,107 @@ function typed(text: string): string | null {
   const cmd = /^<command-name>([^<]*)<\/command-name>/.exec(t.replace(/^<command-message>[\s\S]*?<\/command-message>\s*/, ''));
   if (cmd) { const args = /<command-args>([\s\S]*?)<\/command-args>/.exec(t)?.[1]?.trim(); t = `${cmd[1]!.trim()}${args ? ` ${args}` : ''}`; }
   if (/^<(local-command-[a-z]+|command-message)>/.test(t)) return null;
-  // Context a tool puts in a user message (Codex environment_context, user_instructions, AGENTS.md…) is not a prompt.
-  if (/^(<user_instructions>|<environment_context>|<turn_context>|<instructions>|<permissions|# AGENTS\.md instructions)/i.test(t)) return null;
-  // Whole tagged blocks at the start (one or several: <recommended_plugins>…</recommended_plugins><environment_context>…) are
+  // Whole injected blocks at the start (one or several: <recommended_plugins>…</recommended_plugins><environment_context>…) are
   // context too; what is left after them is what was typed.
-  for (let guard = 0; guard < 20; guard++) { const m = /^<([a-z_][\w-]*)(\s[^>]*)?>[\s\S]*?<\/\1>\s*/i.exec(t); if (!m) break; t = t.slice(m[0].length); }
-  // Codex Desktop puts what it attached (browser state, files mentioned or pasted) under headings before '## My request:'.
-  // The request may hold headings of its own, so it is everything after the first '## My request:'.
-  const ask = t.indexOf('## My request:');
-  if (ask >= 0 && /^#\s/.test(t)) t = t.slice(ask + '## My request:'.length).trim();
+  for (let guard = 0; guard < 20; guard++) {
+    const m = /^<([a-z_][\w-]*)(\s[^>]*)?>[\s\S]*?<\/\1(\s[^>]*)?>\s*/i.exec(t); if (!m || !INJECTED.test(m[1]!)) break; t = t.slice(m[0].length);
+  }
+  // Context a tool puts in a user message of its own (Codex environment_context, user_instructions, AGENTS.md…) is not a prompt,
+  // nor is a lone opening or closing tag a tool wraps an attachment in (Codex CLI's <image name=[Image #1]> … </image>).
+  const lone = /^<\/?([a-z_][\w-]*)(\s[^>]*)?>$/i.exec(t);
+  if (CONTEXT.test(t) || (lone && INJECTED.test(lone[1]!))) return null;
+  // Codex Desktop and the IDE extension put what they attached (browser state, files mentioned or pasted, open tabs) under
+  // headings before '## My request:' ('## My request for Codex:'). The request may hold headings of its own, so it is everything
+  // after the first such line.
+  const ask = /^## My request(?: for Codex)?:/m.exec(t);
+  if (ask && /^#\s/.test(t)) t = t.slice(ask.index + ask[0].length).trim();
   return t || null;
 }
 const PATCH_FILE = /^\*\*\* (?:Add|Update|Delete) File: (.+)$|^\*\*\* Move to: (.+)$/gm;
-/** Files an apply_patch call changes: only the lines between its '*** Begin Patch' and '*** End Patch' (the patch may sit inside
- * JSON-encoded arguments, where its line breaks are escaped). A script that merely contains such text changes nothing here. */
+/** Files a patch changes: only the lines between its '*** Begin Patch' and '*** End Patch'. */
 function patchFiles(text: string): string[] {
-  const t = String(text).replace(/\\r\\n|\\n/g, '\n').replace(/\\"/g, '"'), out: string[] = [];
-  for (const block of t.matchAll(/\*\*\* Begin Patch\s*$([\s\S]*?)(?:^\*\*\* End Patch|$(?![\s\S]))/gm))
+  const out: string[] = [];
+  for (const block of String(text).matchAll(/\*\*\* Begin Patch\s*$([\s\S]*?)(?:^\*\*\* End Patch|$(?![\s\S]))/gm))
     for (const m of block[1]!.matchAll(PATCH_FILE)) { const f = (m[1] ?? m[2])!.trim().replace(/"[,}\]]*$/, ''); if (f && !out.includes(f)) out.push(f); }
   return out;
 }
-/** A tool call that applies a patch: Codex's apply_patch tool, or a shell call whose command is apply_patch. A script that runs
- * apply_patch among other things (Codex Desktop's exec) is not read: its FileChange item names the files. */
-function patchCall(p: Row): string | null {
-  const args = typeof p.input === 'string' ? p.input : typeof p.arguments === 'string' ? p.arguments : '';
-  if (p.name === 'apply_patch') return args;
-  if (typeof p.name === 'string' && /^(shell|local_shell|exec_command|container\.exec)$/.test(p.name) && /^\s*\{?\s*"?(command|cmd)"?\s*:\s*\[\s*"apply_patch"/.test(args)) return args;
-  return null;
+/** JSON string escapes undone, for arguments that are not whole JSON (a Windows path's backslash stays one backslash). */
+const unescaped = (t: string) => t.replace(/\\(?:r\\n|[n"\\/t])/g, m => ({ '"': '"', '\\': '\\', '/': '/', t: '\t' } as Record<string, string>)[m.slice(-1)] ?? '\n');
+/** The patch of a tool call that applies one: Codex's apply_patch tool (its raw input as it is, or JSON arguments), or a shell call
+ * that runs apply_patch (a command list or string, a heredoc too, its arguments in any order). A script that runs apply_patch
+ * among other things (Codex Desktop's exec) is not read: its FileChange item names the files; nor is a command that merely holds
+ * patch text without running apply_patch. */
+function patchText(p: Row): string | null {
+  const name = typeof p.name === 'string' ? p.name : p.type === 'local_shell_call' ? 'local_shell' : '';
+  if (name !== 'apply_patch' && !/^(shell|local_shell|shell_command|exec_command|container\.exec)$/.test(name)) return null;
+  let text = typeof p.input === 'string' ? p.input : '', args: Row | null = p.action && typeof p.action === 'object' ? p.action : null;
+  if (typeof p.input !== 'string' && !args && typeof p.arguments === 'string') try { args = JSON.parse(p.arguments); } catch { text = unescaped(p.arguments); }
+  if (typeof p.input !== 'string' && args && typeof args === 'object') text = ['input', 'patch', 'command', 'cmd'].flatMap(k => args![k]).filter((x): x is string => typeof x === 'string').join('\n');
+  return name === 'apply_patch' || /(^|[\s;&|(])apply_patch\b[\s\S]*\*\*\* Begin Patch/.test(text) ? text : null;
 }
 
-/** Builds turns from (role, text, at, files) events: one user turn per prompt, then one reply with everything the tool said and
- * changed until the next prompt. */
+/** Builds turns from (role, text, at, files) events: one user turn per prompt (already read as typed), then one reply with
+ * everything the tool said and changed until the next prompt. A reply keeps the time of its first piece, so it stays the same
+ * turn while it grows (what was taken of it is known by that time). */
 function collector() {
   const turns: SessionTurn[] = []; let reply: (SessionTurn & { files: string[] }) | null = null;
   return {
-    user(text: string, at: string | null) { const t = typed(text); if (!t) return; reply = null; turns.push({ role: 'user', at: at ?? null, text: t }); },
+    user(t: string | null, at: string | null) { if (!t) return; reply = null; turns.push({ role: 'user', at: at ?? null, text: t }); },
     reply(text: unknown, at: string | null, files: string[] = []) {
       const t = String(text ?? '').trim(); if (!t && !files.length) return;
       if (!reply) { reply = { role: 'assistant', at: at ?? null, text: '', files: [] }; turns.push(reply); }
       if (t) reply.text = reply.text ? `${reply.text}\n\n${t}` : t;
       for (const f of files) if (!reply.files.includes(f)) reply.files.push(f);
-      if (at) reply.at = at;
+      if (at && !reply.at) reply.at = at;
     },
     turns
   };
 }
 
-/** Claude Code JSONL lines (each a JSON object) → meta and turns. Subagent (sidechain) lines and injected messages are left out. */
+/** Claude Code JSONL lines (each a JSON object) → meta and turns. Subagent (sidechain) messages and injected ones are left out;
+ * the files a subagent changed join the reply it worked for. */
 export function parseClaude(lines: unknown[]): ParsedSession {
   const p = claudeParser(); for (const o of lines) p.push(o); return p.done();
 }
+const EDIT_TOOLS = ['Edit', 'Write', 'MultiEdit', 'NotebookEdit'];
 /** The Claude Code reading, one line at a time (a long file is never held whole). */
 export function claudeParser(): SessionParser {
-  const c = collector(), meta = newMeta();
+  const c = collector(), meta = newMeta(), changes: FileChange[] = [], edits = new Map<string, FileChange>();
+  const changed = (e: FileChange) => { changes.push(e); c.reply('', e.at, e.files); };
   const push = (o: Row) => {
     if (!o || typeof o !== 'object') return;
     if (o.type === 'ai-title' && typeof o.aiTitle === 'string') meta.title = o.aiTitle;
     if (o.type === 'summary' && typeof o.summary === 'string' && !meta.title) meta.title = o.summary;
     if (o.type === 'relocated') atFolder(meta, o.relocatedCwd);
-    if (o.isSidechain === true || (o.type !== 'user' && o.type !== 'assistant')) return;
+    if (o.type !== 'user' && o.type !== 'assistant') return;
+    const at = typeof o.timestamp === 'string' ? o.timestamp : null, content = o.message?.content, blocks: Row[] = Array.isArray(content) ? content.filter(b => b && typeof b === 'object') : [];
+    // An edit counts once its result came back without an error: one the person refused, or that failed, changed nothing. A
+    // subagent's edits count too (its own messages do not).
+    for (const b of blocks) {
+      const file = b.input?.file_path ?? b.input?.notebook_path, done = typeof b.tool_use_id === 'string' ? edits.get(b.tool_use_id) : undefined;
+      if (o.type === 'assistant' && b.type === 'tool_use' && EDIT_TOOLS.includes(b.name) && typeof file === 'string') { if (typeof b.id === 'string') edits.set(b.id, { at, files: [file] }); else changed({ at, files: [file] }); }
+      if (o.type === 'user' && b.type === 'tool_result' && done) { edits.delete(b.tool_use_id); if (b.is_error !== true && !/^\s*<tool_use_error>/.test(textOf(b.content, ['text']))) changed(done); }
+    }
+    if (o.isSidechain === true) return;
     atFolder(meta, o.cwd);
     if (typeof o.gitBranch === 'string' && o.gitBranch && !meta.branch) meta.branch = o.gitBranch;
-    const at = typeof o.timestamp === 'string' ? o.timestamp : null; if (at && !meta.startedAt) meta.startedAt = at;
-    const content = o.message?.content;
+    if (at && !meta.startedAt) meta.startedAt = at;
     if (o.type === 'user') {
       if (o.isMeta === true || o.promptSource === 'system' || o.isCompactSummary === true) return;
-      if (Array.isArray(content) && content.some(b => b?.type === 'tool_result')) return;
-      c.user(textOf(content, ['text']), at);
-    } else {
-      const files = Array.isArray(content) ? content.filter(b => b?.type === 'tool_use' && ['Edit', 'Write', 'MultiEdit', 'NotebookEdit'].includes(b.name))
-        .map(b => b.input?.file_path ?? b.input?.notebook_path).filter((f): f is string => typeof f === 'string') : [];
-      c.reply(textOf(content, ['text']), at, files);
-    }
+      if (blocks.some(b => b.type === 'tool_result')) return;
+      c.user(typed(textOf(content, ['text'])), at);
+    } else c.reply(textOf(content, ['text']), at);
   };
-  return { push: o => push(o as Row), done: () => ({ meta, turns: c.turns, changes: [] }) };
+  return { push: o => push(o as Row), done: () => ({ meta, turns: c.turns, changes }) };
 }
 
 /** What the person typed in a Codex user message. Codex Desktop tags each part of it (user.text, user.heartbeat,
  * environments.environment_context…): only typed text is kept, each part read on its own. */
-function codexUserText(p: Row): string {
+function codexUserText(p: Row): string | null {
   const meta = p.internal_chat_message_metadata_passthrough, kinds = Array.isArray(meta?.content_item_kinds) ? meta.content_item_kinds : Array.isArray(p.content_item_kinds) ? p.content_item_kinds : null;
-  if (!Array.isArray(p.content)) return textOf(p.content, ['input_text', 'text']);
+  if (!Array.isArray(p.content)) return typed(textOf(p.content, ['input_text', 'text']));
   return p.content.map((b: Row, i: number) => (kinds && typeof kinds[i] === 'string' && kinds[i] !== 'user.text' ? null : typed(textOf([b], ['input_text', 'text']))))
-    .filter((x: string | null): x is string => !!x).join('\n\n');
+    .filter((x: string | null): x is string => !!x).join('\n\n') || null;
 }
 /** The files a Codex Desktop FileChange item changed: the keys of its changes, and where a moved file went. */
 function changedFiles(item: Row): string[] {
@@ -134,15 +159,33 @@ function changedFiles(item: Row): string[] {
 }
 
 /** Codex rollout JSONL lines → meta and turns. Current files wrap each item ({type, payload}); early ones had the items bare. The
- * event stream (user_message / agent_message) is what the person saw; response items are read only when a file has no events. */
+ * CLI writes each prompt and reply twice, as an event (user_message / agent_message: what the person saw) and as a response item;
+ * Codex Desktop and the IDE extension write response items only, and one thread can be continued in either. So each prompt is
+ * read once, its reply from the events where the CLI wrote it and from the response items where it did not. */
 export function parseCodex(lines: unknown[]): ParsedSession {
   const p = codexParser(); for (const o of lines) p.push(o); return p.done();
 }
+/** One prompt of a Codex file (null before the first) and what came after it: reply pieces from either stream, files changed. */
+interface Stretch { user: SessionTurn | null; item: boolean; event: boolean; pieces: { from: 'item' | 'event' | 'file'; text: string; at: string | null; files: string[] }[] }
+const flat = (t: string) => t.replace(/\s+/g, ' ').trim();
 /** The Codex reading, one line at a time. */
 export function codexParser(): SessionParser {
-  const meta = newMeta(), events = collector(), items = collector(), changes: FileChange[] = [];
-  let sawEvents = false;
-  const changed = (at: string | null, files: string[]) => { if (!files.length) return; changes.push({ at, files }); events.reply('', at, files); items.reply('', at, files); };
+  const meta = newMeta(), stretches: Stretch[] = [], changes: FileChange[] = [];
+  const piece = (from: Stretch['pieces'][number]['from'], text: string, at: string | null, files: string[] = []) => {
+    if (!stretches.length) stretches.push({ user: null, item: false, event: false, pieces: [] });
+    stretches.at(-1)!.pieces.push({ from, text, at, files });
+  };
+  // The CLI writes a prompt as a response item and as an event, one right after the other: one prompt, in the event's words.
+  const prompt = (text: string | null, at: string | null, event: boolean) => {
+    if (!text) return;
+    const s = stretches.at(-1), a = s?.user ? flat(s.user.text) : '', b = flat(text);
+    if (s?.user && !s.pieces.length && (event ? s.item && !s.event : s.event && !s.item) && (a.includes(b) || b.includes(a))) {
+      if (event) { s.event = true; s.user.text = text; } else s.item = true;
+      return;
+    }
+    stretches.push({ user: { role: 'user', at, text }, item: !event, event, pieces: [] });
+  };
+  const changed = (at: string | null, files: string[]) => { if (!files.length) return; changes.push({ at, files }); piece('file', '', at, files); };
   const push = (raw: Row) => {
     if (!raw || typeof raw !== 'object') return;
     const wrapped = typeof raw.type === 'string' && raw.payload && typeof raw.payload === 'object';
@@ -158,20 +201,30 @@ export function codexParser(): SessionParser {
     if (at && !meta.startedAt) meta.startedAt = at;
     if (kind === 'turn_context') atFolder(meta, p.cwd);
     if (kind === 'event_msg') {
-      if (p.type === 'user_message' && typeof p.message === 'string') { sawEvents = true; events.user(p.message, at); }
-      else if (p.type === 'agent_message' && typeof p.message === 'string') { sawEvents = true; events.reply(p.message, at); }
+      if (p.type === 'user_message' && typeof p.message === 'string') prompt(typed(p.message), at, true);
+      else if (p.type === 'agent_message' && typeof p.message === 'string') piece('event', p.message, at);
       else if (p.type === 'item_completed' && p.item?.type === 'FileChange') changed(at, changedFiles(p.item));
       return;
     }
     if (kind !== 'response_item') return;
-    if (p.type === 'message' && p.role === 'user') items.user(codexUserText(p), at);
-    else if (p.type === 'message' && p.role === 'assistant') items.reply(textOf(p.content, ['output_text', 'text']), at);
-    else if (p.type === 'custom_tool_call' || p.type === 'function_call') {
-      const args = patchCall(p); changed(at, args === null ? [] : patchFiles(args));
+    if (p.type === 'message' && p.role === 'user') prompt(codexUserText(p), at, false);
+    else if (p.type === 'message' && p.role === 'assistant') piece('item', textOf(p.content, ['output_text', 'text']), at);
+    else if (p.type === 'custom_tool_call' || p.type === 'function_call' || p.type === 'local_shell_call') {
+      const patch = patchText(p); changed(at, patch === null ? [] : patchFiles(patch));
     }
   };
-  // A changed file seen before any event is kept with the events too (patches are only response items).
-  return { push: o => push(o as Row), done: () => ({ meta, turns: sawEvents ? events.turns : items.turns, changes }) };
+  const done = (): ParsedSession => {
+    const c = collector();
+    for (const s of stretches) {
+      c.user(s.user?.text ?? null, s.user?.at ?? null);
+      // The events where the CLI wrote the prompt; else the response items (a stray event does not hide them), or the events when
+      // they are all there is. Changed files are kept from both (patches are only response items).
+      const from = s.event || !s.pieces.some(x => x.from === 'item' && x.text.trim()) ? 'event' : 'item';
+      for (const x of s.pieces) if (x.from === from || x.from === 'file') c.reply(x.text, x.at, x.files);
+    }
+    return { meta, turns: c.turns, changes };
+  };
+  return { push: o => push(o as Row), done };
 }
 export interface SessionParser { push(line: unknown): void; done(): ParsedSession }
 export const parseSession = (tool: SessionTool, lines: unknown[]): ParsedSession => (tool === 'claude' ? parseClaude : parseCodex)(lines);
@@ -190,7 +243,8 @@ export function tailFolders(text: string): string[] {
 export const hasPrompt = (s: ParsedSession) => s.turns.some(t => t.role === 'user');
 
 /** A session with the files its subagents changed, each put in the reply to the prompt that was running when it changed them
- * (a subagent's own messages are left out: the session that started it says what came of them). */
+ * (a subagent's own messages are left out: the session that started it says what came of them). A reply keeps the time of its
+ * first piece, a subagent's change among them, so it stays the same turn whichever was written first. */
 export function withSubagents(s: ParsedSession, subagents: ParsedSession[]): ParsedSession {
   const turns = s.turns.map(t => (t.role === 'assistant' ? { ...t, files: [...(t.files ?? [])] } : t));
   for (const c of subagents.flatMap(x => x.changes)) {
@@ -199,6 +253,7 @@ export function withSubagents(s: ParsedSession, subagents: ParsedSession[]): Par
     if (u < 0) continue;
     let r = turns[u + 1];
     if (!r || r.role !== 'assistant') { r = { role: 'assistant', at: c.at, text: '', files: [] }; turns.splice(u + 1, 0, r); }
+    else if (c.at && (!r.at || c.at < r.at)) r.at = c.at;
     for (const f of c.files) if (!r.files!.includes(f)) r.files!.push(f);
   }
   return { ...s, turns, changes: [...s.changes, ...subagents.flatMap(x => x.changes)] };
@@ -225,9 +280,10 @@ export function sniffTool(lines: unknown[]): SessionTool | null {
 /** Claude Code names a project's folder after its working folder, every character but letters and digits made '-'. */
 export const claudeFolder = (cwd: string) => String(cwd).replace(/[^A-Za-z0-9]/g, '-');
 /** A folder path compared as Windows does when it is a Windows path (either separator, any letter case), else as written. */
+const windows = (t: string) => /^[a-z]:(\/|$)/i.test(t) || t.startsWith('//');
 function folderKey(path: string): string {
   const t = String(path).replace(/\\/g, '/').replace(/\/+$/, '');
-  return /^[a-z]:(\/|$)/i.test(t) || t.startsWith('//') ? t.toLowerCase() : t;
+  return windows(t) ? t.toLowerCase() : t;
 }
 const sameFolder = (a: string, b: string) => folderKey(a) === folderKey(b);
 /** Whether a session's working folder (any of them, when it moved) is the folder asked for or inside it. */
@@ -236,11 +292,12 @@ export function within(cwd: unknown, folder: string | null): boolean {
   const list = Array.isArray(cwd) ? cwd : [cwd], b = folderKey(folder);
   return list.some(c => typeof c === 'string' && (folderKey(c) === b || folderKey(c).startsWith(`${b}/`)));
 }
-/** A changed file named relative to the session's working folder when it lies inside it (as the tool would show it). */
+/** A changed file named relative to the session's working folder when it lies inside it (as the tool would show it). A relative
+ * name a Windows session wrote with backslashes (a patch) is shown with '/', as the files made relative here are. */
 export function shortPath(file: string, cwd: string | null): string {
   if (!cwd) return file;
   const f = file.replace(/\\/g, '/'), base = folderKey(cwd), key = folderKey(f);
-  return key.startsWith(`${base}/`) ? f.slice(base.length + 1) : file;
+  return key.startsWith(`${base}/`) ? f.slice(base.length + 1) : windows(base) && !/^([a-z]:|\/)/i.test(f) ? f : file;
 }
 
 /** What names a session whatever folder its file was found through, or moved to (Codex archives old threads): Claude Code names
@@ -259,13 +316,14 @@ export function sessionSummary(id: string, tool: SessionTool, head: ParsedSessio
 }
 /** A whole parsed session as sent to the page: newest turns within the reply budget (the earlier ones counted as omitted), each
  * turn clipped, changed files relative to the working folder. since: only turns from that time on (a turn with no time is kept),
- * so what was already taken does not use up the budget and nothing newer is left out for it. */
+ * so what was already taken does not use up the budget and nothing newer is left out for it. A handover document the person
+ * pasted is folded to its one line before a prompt is clipped, so their own words after a long document are kept. */
 export function sessionDetail(id: string, tool: SessionTool, s: ParsedSession, limits: Pick<SessionLimits, 'turnChars' | 'replyChars'> = SESSION_LIMITS, since: string | null = null): SessionDetail & { version: string } {
   const from = since ? Date.parse(since) : NaN;
   const turns = Number.isFinite(from) ? s.turns.filter(t => !t.at || !(Date.parse(t.at) < from)) : s.turns;
   const kept: SessionTurn[] = []; let used = 0;
   for (let i = turns.length - 1; i >= 0; i--) {
-    const t = turns[i]!, text = clip(t.text, limits.turnChars), files = [...new Set((t.files ?? []).map(x => shortPath(x, s.meta.cwds.find(c => shortPath(x, c) !== x) ?? s.meta.cwd)))];
+    const t = turns[i]!, text = clip(t.role === 'user' ? foldHandover(t.text) : t.text, limits.turnChars), files = [...new Set((t.files ?? []).map(x => shortPath(x, s.meta.cwds.find(c => shortPath(x, c) !== x) ?? s.meta.cwd)))];
     used += text.length + files.join('').length; if (used > limits.replyChars && kept.length) break;
     kept.unshift({ role: t.role, at: t.at, text, ...(t.role === 'assistant' ? { files } : {}) });
   }
