@@ -186,9 +186,9 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
 export const RELEASE_POLICIES = Object.freeze(['existing-map']);
 const WITHHELD = path => path === '/api/studio/map' || path === '/api/studio/jobs' || path.startsWith('/api/studio/jobs/');
 
-export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, config = readStudioConfig(env), jobs = null, mapExecutor = null, policy = null } = {}) {
+export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, config = readStudioConfig(env), jobs = null, mapExecutor = null, policy = null, sessions = null } = {}) {
   if (policy !== null && !RELEASE_POLICIES.includes(policy)) throw new Error('Unknown release policy.');
-  if (policy && (jobs || mapExecutor)) throw new Error('A limited release takes no map jobs or map executor.');
+  if (policy && (jobs || mapExecutor || sessions)) throw new Error('A limited release takes no map jobs, map executor or local sessions.');
   const limiter = createLimiter(config);
   // AF100: durable map jobs, only when the host gives a job service (the local Node server, server/map-jobs.mjs). The job owns
   // its call: the same map model and recipe as /map, the same limiter (taken when it is accepted), never the request's signal.
@@ -236,7 +236,9 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
         return reply(200, { ai: config.apiKey ? 'deepseek' : 'off', model: config.apiKey ? config.model : null, access: config.accessCode ? 'code' : 'open',
           ...(config.apiKey ? { digest: { model: config.planModel ?? config.model, prompt: await digestPromptId(1), record: await digestPromptId(2) } } : {}), ...(policy ? { release: policy } : await mapStatus()),
           // Said whatever the key: a result already kept can be fetched without one.
-          ...(jobs ? { jobs: { ...jobs.describe(), ...(executor ? { executor: executor.describe() } : {}) } } : {}) }, cors);
+          ...(jobs ? { jobs: { ...jobs.describe(), ...(executor ? { executor: executor.describe() } : {}) } } : {}),
+          // Local session records (server/sessions.mjs): offered only by a host that gives the service (the local Node server).
+          ...(sessions ? { sessions: sessions.describe() } : {}) }, cors);
       }
       if (jobs && (url.pathname === '/api/studio/jobs' || url.pathname.startsWith('/api/studio/jobs/'))) {
         if (!['GET', 'POST'].includes(request.method)) throw new ApiError('METHOD_NOT_ALLOWED', 405);
@@ -248,6 +250,16 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
         const body = request.method === 'POST' ? await readLimited(request.body, JOB_BYTES) : null;
         const out = await jobs.handle({ method: request.method, rest, cap: request.headers.get('x-studio-operation'), body }, runJob);
         return reply(out.status, out.value, cors);
+      }
+      if (sessions && (url.pathname === '/api/studio/sessions' || url.pathname.startsWith('/api/studio/sessions/'))) {
+        if (request.method !== 'GET') throw new ApiError('METHOD_NOT_ALLOWED', 405);
+        // The person's own files: the same custom header (a cross-site page cannot send it without a preflight) and access code.
+        // Same origin only, even for an origin listed in STUDIO_ALLOWED_ORIGINS: no other site reads these files.
+        if (cors || request.headers.get('x-agentflow-request') !== '1') throw new ApiError('FORBIDDEN_ORIGIN', 403);
+        if (config.accessCode && !sameText(request.headers.get('x-studio-access') ?? '', config.accessCode)) throw new ApiError('ACCESS_CODE_REQUIRED', 401);
+        const rest = url.pathname.slice('/api/studio/sessions'.length).split('/').filter(Boolean);
+        if (rest.length > 1) throw new ApiError('NOT_FOUND', 404);
+        return reply(200, rest.length ? await sessions.read(decodeURIComponent(rest[0])) : await sessions.list(), cors);
       }
       if (!['/api/studio/ask', '/api/studio/plan', '/api/studio/scope', '/api/studio/digest', '/api/studio/map'].includes(url.pathname)) throw new ApiError('NOT_FOUND', 404);
       if (request.method !== 'POST') throw new ApiError('METHOD_NOT_ALLOWED', 405);

@@ -14,7 +14,9 @@ import type { StorageLike } from '../shared/storage.js';
 import { clip } from '../shared/studio.js';
 import { ui62Reading, savedReading, readingInput, recordTitle, partLabel, type ReadingInput, type ReadingSource } from './digest-source.js';
 import { digestStore, askHash, makeReading, type Reading } from './digest-store.js';
-import { askDigest, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
+import { askDigest, AskError, ERROR_TEXT, listSessions, readSession, type AiStatus } from './studio-api.js';
+import { sessionText, stamp, TOOL_NAME, type SessionSummary } from '../shared/session-import.js';
+import { PASTED_TEXT_LIMIT } from '../shared/types.js';
 import type { PlanOpened } from './plan-view.js';
 import type { PlanBundle } from './plan-store.js';
 import { secretLike } from './plan-source.js';
@@ -223,6 +225,69 @@ export function createReturnView(host: ReturnHost) {
     await refresh();
     const src = s === st ? sources().find(x => x.recordId === done.id) : null;
     if (s === st && src) { st.view = { kind: 'source', source: structuredClone(src), from: 'material', quote: null }; render(); }
+  }
+  /* ---------- a session Claude Code or Codex kept on this PC, brought into the paste box (local server only) ---------- */
+  /** The session list of the paste box (per entry): open or not, what was listed, a filter, which session is being read, and what
+   * the last pick did. Nothing here is saved: a picked session only fills the paste draft, which the person then reads and saves. */
+  interface SessionPick { open: boolean; loading: boolean; list: SessionSummary[] | null; filter: string; reading: string | null; error: string | null; note: string | null }
+  const picks = new Map<string, SessionPick>();
+  const pickOf = (key: string): SessionPick => {
+    let p = picks.get(key); if (!p) { p = { open: false, loading: false, list: null, filter: '', reading: null, error: null, note: null }; picks.set(key, p); }
+    return p;
+  };
+  async function loadSessions() {
+    if (!s) return;
+    const key = s.key, p = pickOf(key); if (p.loading) return;
+    p.open = true; p.loading = true; p.error = null; render();
+    try { p.list = await listSessions(host.accessCode()); }
+    catch (e) { p.error = ERROR_TEXT[e instanceof AskError ? e.code : ''] ?? '세션 목록을 불러오지 못했어요.'; }
+    p.loading = false; if (s?.key === key) render();
+  }
+  async function takeSession(id: string) {
+    if (!s) return;
+    const key = s.key, p = pickOf(key); if (p.reading) return;
+    p.reading = id; p.error = null; p.note = null; render();
+    try {
+      const detail = await readSession(id, host.accessCode());
+      // Whatever is in the box stays: the session comes after it, within what one record can hold.
+      const before = draftOf(key), room = PASTED_TEXT_LIMIT - (before ? before.length + 2 : 0);
+      if (room < 2000) p.error = '초안칸에 이미 글이 많아요. 지금 글을 저장하거나 비운 뒤 가져오세요.';
+      else {
+        const got = sessionText(detail, room);
+        if (!got.turns) p.error = '이 세션에는 가져올 대화가 없어요.';
+        else {
+          keepDraft(key, before ? `${before}\n\n${got.text}` : got.text);
+          p.open = false;
+          p.note = [`${TOOL_NAME[detail.tool]} 세션에서 대화 ${got.turns}개를 넣었어요.`, got.left ? `앞의 ${got.left}개는 길이 제한으로 뺐어요.` : '',
+            got.redacted ? `키·토큰처럼 보이는 ${got.redacted}곳은 가렸어요.` : '', '읽어 보고 ‘기록 저장’을 누르세요.'].filter(Boolean).join(' ');
+        }
+      }
+    } catch (e) { p.error = ERROR_TEXT[e instanceof AskError ? e.code : ''] ?? '세션 기록을 읽지 못했어요.'; }
+    p.reading = null; if (s?.key === key) render();
+  }
+  function sessionBox(key: string): Node | null {
+    const st = host.status(); if (!st.sessions?.tools.length) return null;
+    const p = pickOf(key), tools = st.sessions.tools.map(t => TOOL_NAME[t]).join('·');
+    if (!p.open) return h('div', { class: 'rr-sessions' }, h('button', { type: 'button', class: 'secondary small', onclick: () => void loadSessions() }, '내 AI 세션에서 가져오기'),
+      h('span', { class: 'fine' }, `이 PC의 ${tools} 대화 기록을 골라 넣어요`), p.note ? h('p', { class: 'fine rr-sessions-note', role: 'status' }, p.note) : null,
+      p.error ? h('p', { class: 'pp-error', role: 'alert' }, p.error) : null);
+    const q = p.filter.trim().toLowerCase();
+    const shown = (p.list ?? []).filter(x => !q || [x.title, x.preview, x.cwd, x.branch].some(v => v?.toLowerCase().includes(q)));
+    const filter = h('input', { type: 'search', class: 'rr-sessions-filter', placeholder: '제목·내용·폴더로 찾기', 'aria-label': '세션 찾기', value: p.filter }) as HTMLInputElement;
+    filter.addEventListener('input', () => { p.filter = filter.value; const at = filter.selectionStart; render(); const f = document.querySelector<HTMLInputElement>('#lens .rr-sessions-filter'); if (f) { f.focus({ preventScroll: true }); f.setSelectionRange(at, at); } });
+    const rows = shown.map(x => h('li', {}, h('button', { type: 'button', class: 'rr-session', disabled: !!p.reading, onclick: () => void takeSession(x.id) },
+      h('span', { class: 'rr-session-tool' }, TOOL_NAME[x.tool]),
+      h('strong', {}, clip(x.title ?? x.preview, 90)),
+      h('small', {}, [x.title ? clip(x.preview, 70) : null, x.cwd, stamp(x.updatedAt, true)].filter(Boolean).join(' · ')),
+      p.reading === x.id ? h('small', { class: 'rr-session-busy' }, '읽는 중…') : null)));
+    return h('div', { class: 'rr-sessions open' },
+      h('div', { class: 'pp-row' }, h('strong', {}, '내 AI 세션'), h('span', { class: 'fine' }, '사람이 쓴 요청과 AI의 답변·바꾼 파일만 원문 그대로 넣어요. 도구 출력과 추론은 빼요.'),
+        h('button', { type: 'button', class: 'link-button quiet', onclick: () => { p.open = false; render(); } }, '접기')),
+      p.loading ? h('p', { class: 'fine' }, '세션을 찾는 중…') : null,
+      p.error ? h('p', { class: 'pp-error', role: 'alert' }, p.error) : null,
+      p.list && !p.list.length ? h('p', { class: 'fine' }, `이 PC에서 ${tools} 세션 기록을 찾지 못했어요.`) : null,
+      p.list?.length ? filter : null,
+      rows.length ? h('ul', { class: 'rr-session-list' }, ...rows) : p.list?.length ? h('p', { class: 'fine' }, '찾는 말과 맞는 세션이 없어요.') : null);
   }
   /* ---------- a provided code or check file (project.14) ---------- */
   const fileDrafts = new Map<string, FileDraft>();
@@ -569,7 +634,7 @@ export function createReturnView(host: ReturnHost) {
       h('p', { class: 'fine' }, '나누거나 종류·부분을 고르지 않아도 돼요. 저장한 뒤 지도 정리나 요약을 누를 때만 AI에 보내요.'),
       ctx ? h('p', { class: 'rr-context' }, h('span', {}, '보던 부분'), partChip(ctx),
         h('button', { type: 'button', class: 'link-button quiet', title: '읽기 맥락에서 빼요', onclick: () => { st.pasteContext = null; render(); } }, '빼기')) : null,
-      area, warn, count, st.pasteMsg ? h('p', { class: 'pp-error', role: 'alert' }, st.pasteMsg) : null)];
+      sessionBox(st.key), area, warn, count, st.pasteMsg ? h('p', { class: 'pp-error', role: 'alert' }, st.pasteMsg) : null)];
   }
   function pasteFooter(): Node {
     const st = s!;
