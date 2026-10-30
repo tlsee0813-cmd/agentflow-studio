@@ -1,0 +1,51 @@
+{
+  "cycle": 134,
+  "decision": "BOUNDED_ACTUAL_REQUEST_ACCEPTED",
+  "selected": "c04642974b9cc2ed7f02d96d5296bf7d65918d03",
+  "runtime": "4b47eec5f4faa952f50a281b3638f1e743fae066",
+  "app": "e0e443c888c8c02f08af373cf30994e6fb34f313",
+  "attempt": {
+    "state": "accepted for this scope/request; implementation not yet done",
+    "requestId": "26068.583",
+    "askExact": true,
+    "scopeCalls": 1,
+    "planCalls": 0,
+    "mapCalls": 0,
+    "retries": 0,
+    "httpStatus": 200,
+    "httpElapsedMs": 20384,
+    "newRequestId": "RQ_93168eb4-c5bc-40b7-93e6-0ba660df3f3f",
+    "requestChars": 10490,
+    "requestSha256": "25f703560c1a039001c286216b3b4f65457ba27bd72b0206a14b1ecdda5d7acd",
+    "workspaceByteExact": true,
+    "planUnchanged": true,
+    "draftUnchanged": true,
+    "otherProjectsUnchanged": true,
+    "old132SnapshotExact": true
+  },
+  "preservation": {
+    "normalExportBundleExact": true,
+    "reloadWorkspaceAndPlansExact": true,
+    "requestSpanPartitionExact": true,
+    "evidenceBodiesAndBasisExact": 7,
+    "intentExact": true,
+    "selectedItemIdsExact": true,
+    "old132SnapshotExact": true,
+    "requestSha256": "25f703560c1a039001c286216b3b4f65457ba27bd72b0206a14b1ecdda5d7acd",
+    "exportSha256": "6d45039987b623ed54f343aed5e6878b98a17ec549901a6e33ef0417a41c0598",
+    "reopenedNewRequestAfterReload": true,
+    "oldAndNewRequestSelectableAfterReload": true
+  },
+  "promptSha256": "b56c507bda06cc1bdb052bc70546f77d427e066af84f5a6b7480428bf844a9db",
+  "askSha256": "25995bc10375304bd1c0b3b8fcf3efd3222fbcb4b2c1f200c64397c6850c8391",
+  "independentSha256": "9d2a00b598d8c5bded7ab61633a3a7882880bbb228064cb124e815f00146bbae",
+  "meaning": {
+    "prerequisites": 0,
+    "unknowns": 2,
+    "currentImplementation": "unverified",
+    "past132": "P2 semantic rejection unchanged"
+  },
+  "implementationHandoffs": 0,
+  "responseRepairs": 0,
+  "publicDeployments": 0
+}
