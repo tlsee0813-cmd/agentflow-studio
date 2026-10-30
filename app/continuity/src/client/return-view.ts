@@ -15,7 +15,7 @@ import { clip } from '../shared/studio.js';
 import { ui62Reading, savedReading, readingInput, recordTitle, partLabel, type ReadingInput, type ReadingSource } from './digest-source.js';
 import { digestStore, askHash, makeReading, type Reading } from './digest-store.js';
 import { askDigest, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
-import { sessionText, recordParts, NEXT_RECORD, RECORD_HEAD, stamp, TOOL_NAME, type SessionSummary, type SessionDetail } from '../shared/session-import.js';
+import { sessionText, recordParts, NEXT_RECORD, NEXT_LINE, RECORD_HEAD, stamp, TOOL_NAME, type SessionSummary, type SessionDetail } from '../shared/session-import.js';
 import { readSessionFile, type SessionSources } from './session-source.js';
 import { WEB_RECORD_ASK, foldRecord } from '../shared/handover.js';
 import { PASTED_TEXT_LIMIT } from '../shared/types.js';
@@ -117,6 +117,8 @@ interface State {
 /** Paste drafts, per workspace entry (an imported copy has its own), in this browser apart from the project. A draft that looks
  * like it holds a key stays in this tab only. */
 const PASTE_DRAFT_KEY = 'agentflow.studio.paste-draft.1';
+// A text that ends with a next-record line, or starts with one.
+const SEP_END = /(?:^|\n)[ \t]*──────── 다음 기록 ────────[ \t]*$/, SEP_START = /^[ \t]*──────── 다음 기록 ────────[ \t]*(?:\n|$)/;
 /** A note (what the record explains as it stands) carries no tag: it is neither a change nor a check. */
 const READING_KIND: Record<RecordReading['kind'], string | null> = { change: '변화', check: '확인 범위', open: '남은 판단', note: null };
 const STAGE_MEMORY = new Map<string, string>();
@@ -666,15 +668,33 @@ export function createReturnView(host: ReturnHost) {
       keepDraft(st.key, area.value); count.textContent = area.value ? `${area.value.length.toLocaleString()}자` : ''; warn.hidden = !secretLike(area.value);
     });
     // A session record pasted beside other text (a web AI's answer written with WEB_RECORD_ASK, another record) is kept as a record of
-    // its own: the box puts the NEXT_RECORD line between them, as it does for a session it brings in.
+    // its own: the box puts the NEXT_RECORD line between them, as it does for a session it brings in. It goes after the record the
+    // caret is in (a record is never cut in two), before the first one with the caret at the start, and at a next-record line the
+    // caret is on or a selection takes in (that line is never written over). A next-record line the record quotes is written a dash
+    // shorter, as the import writes it, so it does not cut the record.
     area.addEventListener('paste', e => {
-      const got = (e.clipboardData?.getData('text/plain') ?? '').trim(); if (!RECORD_HEAD.test(got)) return;
-      const before = area.value.slice(0, area.selectionStart).replace(/\s+$/, ''), after = area.value.slice(area.selectionEnd).replace(/^\s+/, '');
-      if (!before && !after) return;
+      const got = (e.clipboardData?.getData('text/plain') ?? '').replace(/\r\n?/g, '\n').trim().replace(NEXT_LINE, '$1─────── 다음 기록 ───────$2');
+      if (!RECORD_HEAD.test(got)) return;
       e.preventDefault();
-      const line = `\n\n${NEXT_RECORD}\n\n`, at = (before ? before.length + line.length : 0) + got.length;
-      area.value = [before, got, after].filter(Boolean).join(line); area.setSelectionRange(at, at);
-      area.dispatchEvent(new Event('input'));
+      const was = area.value, s0 = area.selectionStart, s1 = area.selectionEnd, line = `\n\n${NEXT_RECORD}\n\n`;
+      const lines = [...was.matchAll(NEXT_LINE)].map(m => [m.index, m.index + m[0].length] as const);
+      // Everything selected (or an empty box) is replaced, as any paste does.
+      const every = !was.slice(0, s0).trim() && !was.slice(s1).trim();
+      const on = every ? undefined : lines.find(([a, b]) => s0 < b && Math.max(s1, s0 + 1) > a)?.[1];
+      const pre = every ? '' : was.slice(0, on ?? s0), post = every ? '' : was.slice(on ?? s1), next = post.search(NEXT_LINE);
+      const head = pre.trimEnd(), atStart = !head || SEP_END.test(head);
+      // [kept before, the pasted record, kept after]: the record the caret is in stays whole before it, a next record after.
+      const [a, b] = atStart ? [head, post.trimStart()] : next < 0 ? [`${pre}${post}`.trimEnd(), ''] : [`${pre}${post.slice(0, next)}`.trimEnd(), post.slice(next).trimStart()];
+      const sep = (x: string, end: boolean) => !x ? '' : (end ? SEP_END : SEP_START).test(x) ? '\n\n' : line;
+      const upTo = `${a}${sep(a, true)}${got}`, value = `${upTo}${sep(b, false)}${b}`, at = upTo.length;
+      // Only what changed is written, as typing would (one undo takes the paste back); where that cannot be, the value is set.
+      let from = 0; while (from < was.length && from < value.length && was[from] === value[from]) from++;
+      let tail = 0; while (tail < was.length - from && tail < value.length - from && was.at(-1 - tail) === value.at(-1 - tail)) tail++;
+      area.focus(); area.setSelectionRange(from, was.length - tail);
+      if (!document.execCommand('insertText', false, value.slice(from, value.length - tail)) || area.value !== value) {
+        area.value = value; area.dispatchEvent(new Event('input'));
+      }
+      area.setSelectionRange(at, at);
     });
     return [h('section', { class: 'rr-sec rr-paste-box' }, h('h3', {}, '기록 붙여넣기'),
       h('p', { class: 'fine' }, '나누거나 종류·부분을 고르지 않아도 돼요. 저장한 뒤 지도 정리나 요약을 누를 때만 AI에 보내요.'),

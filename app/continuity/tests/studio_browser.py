@@ -2973,9 +2973,36 @@ def folder_sessions_flow(browser, base):
     expect(page.locator("#lens .rr-sessions")).to_contain_text(re.compile("기록 요청 문구를 복사했어요|\\[웹 AI 세션 기록"))
     # Its answer pasted under what is in the box is kept as a record of its own: the box puts the next-record line between them.
     web = "[웹 AI 세션 기록 · 결제 문구 · 작업 폴더 /work/salon]\n\n── 사용자 요청 ──\n결제 버튼 문구 바꿔 줘\n\n── 웹 AI 답변 ──\n바꿨어요\n(바꾼 파일: src/pay.ts)"
-    draft.evaluate("""(el, t) => { el.focus(); el.setSelectionRange(el.value.length, el.value.length); const dt = new DataTransfer(); dt.setData('text/plain', t);
-      el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true })); }""", web)
+    paste = """(el, [t, at]) => { el.focus(); const i = at === null ? el.value.length : el.value.indexOf(at); el.setSelectionRange(i, i);
+      const dt = new DataTransfer(); dt.setData('text/plain', t); el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true })); }"""
+    before = draft.input_value()
+    draft.evaluate(paste, [web, None])
     expect(draft).to_have_value(re.compile("재시도를 넣어 줘[\\s\\S]*\\n\\n──────── 다음 기록 ────────\\n\\n\\[웹 AI 세션 기록 · 결제 문구[\\s\\S]*src/pay\\.ts\\)$"))
+    # One undo takes the paste back, as it does for any paste.
+    page.keyboard.press("Control+z")
+    expect(draft).to_have_value(before)
+    # Pasted with the caret inside a record (copied from Windows, with CRLF line breaks), it goes after that record, which stays whole.
+    draft.evaluate(paste, [web.replace("\n", "\r\n"), "영업시간 설정과"])
+    expect(draft).to_have_value(re.compile("^\\[Claude Code 세션 기록[^\\n]*\\][\\s\\S]*예약 화면에서 휴무일을 영업시간 설정과 연결해 줘[\\s\\S]*\\n\\n──────── 다음 기록 ────────\\n\\n"
+      "\\[웹 AI 세션 기록 · 결제 문구[^\\n]*\\]\\n\\n── 사용자 요청 ──\\n결제 버튼 문구 바꿔 줘[\\s\\S]*src/pay\\.ts\\)\\n\\n──────── 다음 기록 ────────\\n\\n\\[Codex 세션 기록[\\s\\S]*재시도를 넣어 줘"))
+    assert "\r" not in draft.input_value() and draft.input_value().count("──────── 다음 기록 ────────") == 2
+    # A selection over a next-record line (or the caret on one) is not written over: the record goes in at that line.
+    kept = draft.input_value()
+    draft.evaluate("""(el, t) => { el.focus(); const i = el.value.indexOf('──────── 다음 기록'); el.setSelectionRange(i - 5, i + 8);
+      const dt = new DataTransfer(); dt.setData('text/plain', t); el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true })); }""",
+      web.replace("결제 문구", "환불 문구"))
+    expect(draft).to_have_value(re.compile("연결해 줘[\\s\\S]*\\n\\n──────── 다음 기록 ────────\\n\\n\\[웹 AI 세션 기록 · 환불 문구[\\s\\S]*src/pay\\.ts\\)\\n\\n"
+      "──────── 다음 기록 ────────\\n\\n\\[웹 AI 세션 기록 · 결제 문구[\\s\\S]*src/pay\\.ts\\)\\n\\n──────── 다음 기록 ────────\\n\\n\\[Codex 세션 기록"))
+    page.keyboard.press("Control+z")
+    expect(draft).to_have_value(kept)
+    # Everything selected is replaced, as any paste does; a next-record line the pasted record quotes does not cut it, and the line
+    # breaks around it do not hide its header.
+    quoting = web.replace("결제 버튼 문구 바꿔 줘", "이 초안 봐 줘\n──────── 다음 기록 ────────\n둘째 초안")
+    draft.evaluate("""(el, t) => { el.focus(); el.select(); const dt = new DataTransfer(); dt.setData('text/plain', t);
+      el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true })); }""", "\n\n" + quoting)
+    expect(draft).to_have_value(quoting.replace("──────── 다음 기록 ────────", "─────── 다음 기록 ───────"))
+    page.keyboard.press("Control+z")
+    expect(draft).to_have_value(kept)
     # A session Codex is still writing is taken as it was when the read began (the file grows while it is read), with the file
     # its subagent changed.
     page.evaluate("() => window.__growOnRead('me/.codex/sessions/2026/10/28/rollout-2026-10-28T09-20-00-x1.jsonl')")

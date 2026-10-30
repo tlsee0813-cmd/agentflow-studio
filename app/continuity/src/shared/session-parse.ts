@@ -336,7 +336,7 @@ export function sessionDetail(id: string, tool: SessionTool, s: ParsedSession, l
     const turn = { role: t.role, at: t.at, text, ...(t.role === 'assistant' ? { files } : {}) };
     if (forward) kept.push(turn); else kept.unshift(turn);
   }
-  return { version: SESSION_VERSION, id, tool, label: TOOL_LABEL[tool], title: s.meta.title, cwd: s.meta.cwd, branch: s.meta.branch, startedAt: s.meta.startedAt,
+  return { version: SESSION_VERSION, id, tool, label: TOOL_LABEL[tool], title: s.meta.title, cwd: s.meta.cwd, cwds: s.meta.cwds, branch: s.meta.branch, startedAt: s.meta.startedAt,
     turns: kept, omitted: forward ? 0 : turns.length - kept.length, ...(forward ? { rest: turns.length - kept.length } : {}) };
 }
 /** An opaque session id from a stable name of its file (a real path on the server, a path inside the picked folder in the page). */

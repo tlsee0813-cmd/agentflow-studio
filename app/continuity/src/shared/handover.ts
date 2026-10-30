@@ -13,16 +13,21 @@ export { HANDOVER_TAG, foldHandover, handoverCode, receivedHandovers } from './h
 /* ---------- which session a record came from ---------- */
 export interface SessionOrigin { id: string | null; tool: 'claude' | 'codex' | 'web'; title: string | null; cwd: string | null; branch: string | null }
 const ORIGIN_NAME: Record<SessionOrigin['tool'], string> = { claude: 'Claude Code', codex: 'Codex', web: '웹 AI' };
+const EMPTY_FIELD = /^(?:(?:작업 폴더|브랜치)\s*)?(?:\(?(?:없음|없어요|없습니다|해당 없음|모름|알 수 없음|n\/a|none|null|unknown|-+|—)\)?|\([^()]*(?:있으면|짧은 제목)[^()]*\))$/i;
 /** The session a record was taken from (its header line, session-import.ts), or null for any other record. */
 export function sessionOrigin(text: string): SessionOrigin | null {
   const m = RECORD_HEAD.exec(text); if (!m) return null;
-  const tool = m[1] === 'Codex' ? 'codex' : m[1] === '웹 AI' ? 'web' : 'claude', fields = (m[2] ?? '').split(' · ').map(f => f.trim()).filter(Boolean);
+  // A field a web AI filled with nothing (브랜치 없음, 작업 폴더 (없음), N/A) or left as the ask's placeholder says nothing.
+  const tool = m[1] === 'Codex' ? 'codex' : m[1] === '웹 AI' ? 'web' : 'claude';
+  const raw = (m[2] ?? '').split(' · ').map(f => f.trim()).filter(Boolean), fields = raw.filter(f => !(tool === 'web' && EMPTY_FIELD.test(f)));
   // The title comes first: in 「」 when it reads like a field (sessionText puts it so), and always first in a web AI's header
-  // (WEB_RECORD_ASK asks for it there) unless that field is a folder, a time or an id.
+  // (WEB_RECORD_ASK asks for it there) unless that field is a folder, a time or an id. In 「」 it runs to the last field ending
+  // in 」 that only fields follow (a title can hold 」 · 「, and end in what reads as a field: 「결제」 · 브랜치 정리).
   let title: string[] = [], rest = fields;
-  const end = fields[0]?.startsWith('「') ? fields.findIndex(f => f.endsWith('」')) : -1;
+  const closes = fields[0]?.startsWith('「') ? fields.flatMap((f, i) => (f.endsWith('」') ? [i] : [])) : [];
+  const end = [...closes].reverse().find(i => fields.slice(i + 1).every(f => Object.values(HEAD_FIELD).some(r => r.test(f)))) ?? closes[0] ?? -1;
   if (end >= 0) { title = [fields.slice(0, end + 1).join(' · ').slice(1, -1)]; rest = fields.slice(end + 1); }
-  else if (tool === 'web' && fields[0] && !(['id', 'start', 'cwd'] as const).some(k => HEAD_FIELD[k].test(fields[0]!))) { title = [fields[0]]; rest = fields.slice(1); }
+  else if (tool === 'web' && fields[0] && fields[0] === raw[0] && !(['id', 'start', 'cwd'] as const).some(k => HEAD_FIELD[k].test(fields[0]!))) { title = [fields[0]]; rest = fields.slice(1); }
   // The other fields are told by their shape, wherever they stand (a web AI may add one or change the order): a session id, a start
   // time, a branch name (no spaces, as git has it), a folder path. Each is taken once, from the end, where sessionText writes them;
   // anything else belongs to the title ('세션 만료 처리', '작업 폴더 정리', a title that holds ' · ').
@@ -217,7 +222,7 @@ const dedupeLines = (l: string[]) => [...new Set(l)];
 export const WEB_RECORD_ASK = [
   '[AgentFlow 기록 요청] 이 대화에서 지금까지 내가 한 요청과 네가 한 작업을 아래 형식 그대로 적어 줘. 요약하지 말고 내가 쓴 요청은 원문 그대로 옮기고, 네 답변은 실제로 한 일·바꾼 파일·확인한 것·남은 일을 중심으로 적어 줘. 키·토큰·비밀번호는 [가려진 비밀값]으로 바꿔 줘. 형식 밖의 말은 쓰지 마.',
   '',
-  '[웹 AI 세션 기록 · (이 대화의 짧은 제목) · 작업 폴더 (있으면 경로) · 브랜치 (있으면 이름)]',
+  '[웹 AI 세션 기록 · (이 대화의 짧은 제목) · 작업 폴더 (있으면 경로, 없으면 이 칸을 빼) · 브랜치 (있으면 이름, 없으면 이 칸을 빼)]',
   '',
   '── 사용자 요청 ──',
   '(내가 쓴 요청 원문)',

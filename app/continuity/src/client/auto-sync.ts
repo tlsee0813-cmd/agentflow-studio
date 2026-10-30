@@ -22,6 +22,8 @@ export interface FolderLink { path: string; connectedAt: string; since: string; 
 export interface Binding { folders: FolderLink[]; marks: Record<string, SessionMark>;
   runs: { day: string; n: number; last: string | null }; taken: number; lastCheck: string | null; error: string | null }
 const folderName = (path: string) => path.split(/[\\/]/).filter(Boolean).pop() ?? path;
+/** A session begun at or after its folder was connected. */
+const begunSince = (s: SessionSummary, f: FolderLink) => !!s.startedAt && Date.parse(s.startedAt) >= Date.parse(f.connectedAt);
 /** A binding as kept: the first form (one folder in place) is read as a binding with that one folder. */
 function readBinding(v: unknown): Binding | null {
   const b = v as Partial<Binding> & { folder?: unknown; connectedAt?: unknown; since?: unknown; backfilled?: unknown } | null;
@@ -107,7 +109,7 @@ export function createAutoSync(host: AutoSyncHost) {
     halted.delete(key);
     busy = true; render();
     // What this look did, and only that, goes onto the binding at its end: the marks of the sessions it kept, what it took.
-    const marks: Record<string, SessionMark> = {}, moved: string[] = [], kept = new Set<string>(), whole = new Set<FolderLink>(), due: { s: SessionSummary; f: FolderLink }[] = [];
+    const marks: Record<string, SessionMark> = {}, moved: string[] = [], kept = new Set<string>(), whole = new Set<FolderLink>(), due: { s: SessionSummary; f: FolderLink; history: boolean }[] = [];
     let taken = 0, ran: string | null = null, error: string | null | undefined;
     try {
       // A project that can take no more is not read at all (its records can still be read into the map).
@@ -123,28 +125,36 @@ export function createAutoSync(host: AutoSyncHost) {
         // Folders inside one another list the same session once.
         let mine = list.filter(s => !seen.has(s.id) && s.updatedAt >= f.since);
         // A folder's first look takes its recent history (newest sessions first, those taken already counted); later ones only what
-        // changed.
-        if (!f.backfilled) mine = mine.slice(0, BACKFILL_SESSIONS);
+        // changed. A session taken from before, or worked in since the folder was connected, is always followed.
+        const history = new Set(f.backfilled ? [] : mine.slice(0, BACKFILL_SESSIONS).filter(s => !begunSince(s, f)).map(s => s.id));
+        if (!f.backfilled) mine = mine.filter(s => history.has(s.id) || !!markOf(b, s) || Date.parse(s.updatedAt) >= Date.parse(f.connectedAt));
         mine = mine.filter(s => markOf(b, s)?.updatedAt !== s.updatedAt);
         const ready = mine.filter(s => force || now - Date.parse(s.updatedAt) >= SETTLE_MS);
         // Its first look is done only when every one of them was read and kept: one still being written is taken whole later.
         if (ready.length === mine.length && !missed) whole.add(f);
         for (const s of mine) seen.add(s.id);
-        for (const s of ready) due.push({ s, f });
+        for (const s of ready) due.push({ s, f, history: history.has(s.id) });
       }
       due.sort((x, y) => x.s.updatedAt.localeCompare(y.s.updatedAt)); // oldest first, so records keep the order the work happened in
-      sessions: for (const { s, f } of due) {
-        let was = markOf(b, s);
-        const first = !was && !f.backfilled;
+      sessions: for (const { s, f, history } of due) {
+        // Any session but the first look's history is work done since the folder was connected: taken whole, from the connection on.
+        const from = history ? null : f.connectedAt;
+        // A mark of nothing taken (an empty reading, as marked before) is no mark: read from the connection, or as history.
+        let was = markOf(b, s); if (was && !was.lastAt && !was.count && !was.reply) was = null;
+        let first = !was && history;
         // A reading from a mark sends the turns after it oldest first within its budget; the rest is read from the new mark, a few
         // pages a look (a long stretch since the last look is taken whole, over several looks if need be).
         for (let page = 0; page < PAGES; page++) {
           // Read from the mark on (the reply taken last comes back too, in case it went on); a new session from the connection on.
           let d: SessionDetail;
-          try { d = await src.read(s.id, was ? was.lastAt : f.backfilled ? f.connectedAt : null); }
+          try { d = await src.read(s.id, was ? was.lastAt : from); }
           catch (e) { failed = `${folderName(f.path)}: ${failText(e, '세션 기록을 읽지 못했어요.')}`; continue sessions; }
-          const turns = newTurns(d, was, f.backfilled ? f.connectedAt : null);
+          let turns = newTurns(d, was, from);
           // A first look takes one record of each session's newest turns; later ones every new turn, in as many records as it takes.
+          // A history session worked in since the connection gives its history up to the connection; the work since is read on from
+          // there, as a later look reads it.
+          const upTo = first && Date.parse(s.updatedAt) >= Date.parse(f.connectedAt) ? new Date(Date.parse(f.connectedAt) - 1).toISOString() : null;
+          if (upTo) turns = turns.filter(t => !t.at || t.at <= upTo);
           const texts = !turns.length ? [] : first ? [sessionText({ ...d, turns }).text] : sessionChunks(d, turns, undefined, leftSince(d, was));
           if (texts.length) {
             // Kept only on the entry still open; otherwise nothing is marked and the next look takes the same turns again.
@@ -157,11 +167,14 @@ export function createAutoSync(host: AutoSyncHost) {
           }
           // More to read when the reading left newer turns and moved on; until they are read the mark does not match the file's
           // time, so the next look comes back to this session even if it does not change.
-          const end = markAfter(d, was, s.updatedAt), more = !first && !!d.rest && end.lastAt !== (was?.lastAt ?? null), next = more ? { ...end, updatedAt: '' } : end;
+          // Its history taken, it is marked at its last turn before the connection (a reply still being written then goes on from
+          // there), or at the connection when the reading held none.
+          const end = upTo ? (turns.length ? markAfter({ ...d, turns }, null, '') : { lastAt: upTo, count: 0, updatedAt: '' }) : markAfter(d, was, s.updatedAt, from);
+          const more = !!upTo || (!first && !!d.rest && end.lastAt !== (was?.lastAt ?? null)), next = more ? { ...end, updatedAt: '' } : end;
           // Marked as soon as it is kept: a tab closed later in this look does not take these turns again.
           keepMark(key, s, next); marks[s.id] = next; moved.push(...s.aliases ?? []); kept.add(s.id);
           if (!more) break;
-          was = next;
+          was = next; first = false;
         }
       }
       error = failed;
@@ -297,7 +310,7 @@ export function createAutoSync(host: AutoSyncHost) {
       h('div', { class: 'pp-row' },
         state === 'prompt' ? h('button', { type: 'button', class: 'primary small sync-grant', onclick: () => void grant() }, '다시 허용') : null,
         h('button', { type: 'button', class: 'link-button sync-pick-root', onclick: () => void pick() }, '세션 폴더 더 고르기'),
-        ...names.map(n => h('button', { type: 'button', class: 'link-button quiet', 'aria-label': `${n} 세션 폴더 빼기`, onclick: async () => { await src.forget(n); folders = null; render(); } }, `${n} 빼기`))));
+        ...names.map(n => h('button', { type: 'button', class: 'link-button quiet', 'aria-label': `${n} 세션 폴더 빼기`, onclick: async () => { await src.forget(n); folders = null; render(); void tick(true); } }, `${n} 빼기`))));
   }
   function toggle() { panelOpen = !panelOpen; adding = false; if (panelOpen) { folders = null; foldersError = null; } render(); }
   function close() { if (panelOpen) { panelOpen = false; adding = false; render(); } }

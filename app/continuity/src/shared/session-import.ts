@@ -4,13 +4,15 @@
 import { PASTED_TEXT_LIMIT } from './types.js';
 import { redactSecrets, secretLike } from './secret.js';
 import { foldHandover } from './handover-mark.js';
+import { shortPath } from './session-parse.js';
 
 export interface SessionTurn { role: 'user' | 'assistant'; at: string | null; text: string; files?: string[] }
 /** aliases: ids the same session had before ids were made from the session itself (from its file's path): marks kept under one
  * of them still hold. */
 export interface SessionSummary { id: string; tool: 'claude' | 'codex'; title: string | null; preview: string; cwd: string | null; branch: string | null; startedAt: string | null; updatedAt: string; bytes: number; aliases?: string[] }
 /** omitted: earlier turns left out; rest (a reading from a time on): newer turns not sent yet, read from the new mark. */
-export interface SessionDetail { id: string; tool: 'claude' | 'codex'; label: string; title: string | null; cwd: string | null; branch: string | null; startedAt: string | null; turns: SessionTurn[]; omitted: number; rest?: number }
+/** cwds: every folder the session worked in, files named from the first that holds them (the server's own folder order). */
+export interface SessionDetail { id: string; tool: 'claude' | 'codex'; label: string; title: string | null; cwd: string | null; cwds?: string[]; branch: string | null; startedAt: string | null; turns: SessionTurn[]; omitted: number; rest?: number }
 export const TOOL_NAME: Record<SessionDetail['tool'], string> = { claude: 'Claude Code', codex: 'Codex' };
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -27,12 +29,13 @@ export const cleanText = (t: string) => t.replace(/\u001b\[[0-9;?]*[ -/]*[@-~]/g
 function block(t: TakenTurn, tool: string): string {
   const head = `── ${t.role === 'user' ? '사용자 요청' : `${tool} 답변${t.cont ? '(이어서)' : ''}`}${t.at ? ` · ${stamp(t.at)}` : ''} ──`;
   const files = t.role === 'assistant' && t.files?.length ? `\n(바꾼 파일: ${t.files.join(', ')})` : '';
-  // A handover document the person pasted to start this session is already the project's own: one line names it instead. A
-  // NEXT_RECORD line the conversation itself holds (a draft of this box pasted into it) is written a dash shorter, so only the
-  // box's own line cuts a draft.
-  const text = (t.role === 'user' ? foldHandover(t.text) : t.text).replace(NEXT_LINE, '$1─────── 다음 기록 ───────$2');
+  // A handover document the person pasted to start this session is already the project's own: one line names it instead.
+  const text = t.role === 'user' ? foldHandover(t.text) : t.text;
   return `${head}${text ? `\n${text}` : ''}${files}`;
 }
+/** A turn as kept: control characters out, then a NEXT_RECORD line the conversation itself holds (a draft of this box pasted into
+ * it, maybe behind a colour code or a soft line break) written a dash shorter, so only the box's own line cuts a draft. */
+const turnText = (t: TakenTurn, tool: string) => cleanText(block(t, tool)).replace(NEXT_LINE, '$1─────── 다음 기록 ───────$2');
 
 export interface SessionText { text: string; turns: number; left: number; redacted: number }
 /** The record text of a session within `limit` characters: a header line, then whole turns, newest kept first and printed in order.
@@ -42,10 +45,11 @@ export interface SessionText { text: string; turns: number; left: number; redact
 export function sessionText(s: SessionDetail & { turns: TakenTurn[] }, limit = PASTED_TEXT_LIMIT): SessionText {
   const tool = TOOL_NAME[s.tool];
   // A title that reads like one of the fields after it ('브랜치 정리', '세션 만료 · 브랜치 main') is put in 「」, so it stays the title.
-  const title = s.title && (s.title.startsWith('「') || s.title.split(' · ').some(p => Object.values(HEAD_FIELD).some(re => re.test(p.trim())))) ? `「${s.title}」` : s.title;
+  const named = s.title && cleanText(s.title).replace(/[\r\n\u2028\u2029]+/g, ' ');
+  const title = named && (named.startsWith('「') || named.split(' · ').some(p => Object.values(HEAD_FIELD).some(re => re.test(p.trim())))) ? `「${named}」` : named;
   const where = [title, s.cwd ? `작업 폴더 ${s.cwd}` : null, s.branch ? `브랜치 ${s.branch}` : null, s.startedAt ? `${stamp(s.startedAt, true)} 시작` : null, `세션 ${s.id}`].filter(Boolean).join(' · ');
-  const top = redactSecrets(cleanText(`[${tool} 세션 기록${where ? ` · ${where}` : ''}]`).replace(/[\r\n]+/g, ' ')), head = top.text;
-  const blocks = s.turns.map(t => { const r = redactSecrets(cleanText(block(t, tool))); return { text: r.text, redacted: r.count }; });
+  const top = redactSecrets(cleanText(`[${tool} 세션 기록${where ? ` · ${where}` : ''}]`).replace(/[\r\n\u2028\u2029]+/g, ' ')), head = top.text;
+  const blocks = s.turns.map(t => { const r = redactSecrets(turnText(t, tool)); return { text: r.text, redacted: r.count }; });
   const note = (n: number) => (n ? `\n(앞의 대화 ${n}개는 길이 제한으로 넣지 않았어요.)` : '');
   const kept: typeof blocks = [];
   let used = head.length + note(blocks.length + s.omitted).length;
@@ -84,7 +88,8 @@ export function readSessionDetail(v: unknown): SessionDetail | null {
     if (!t || (t.role !== 'user' && t.role !== 'assistant') || typeof t.text !== 'string') return null;
     turns.push({ role: t.role, at: str(t.at), text: t.text, ...(Array.isArray(t.files) ? { files: t.files.filter((f): f is string => typeof f === 'string') } : {}) });
   }
-  return { id: x.id, tool: x.tool === 'codex' ? 'codex' : 'claude', label: str(x.label) ?? '', title: str(x.title), cwd: str(x.cwd), branch: str(x.branch), startedAt: str(x.startedAt), turns, omitted: Number(x.omitted) || 0, ...(Number(x.rest) > 0 ? { rest: Number(x.rest) } : {}) };
+  return { id: x.id, tool: x.tool === 'codex' ? 'codex' : 'claude', label: str(x.label) ?? '', title: str(x.title), cwd: str(x.cwd),
+    ...(Array.isArray(x.cwds) ? { cwds: x.cwds.filter((c: unknown): c is string => typeof c === 'string').slice(0, 200) } : {}), branch: str(x.branch), startedAt: str(x.startedAt), turns, omitted: Number(x.omitted) || 0, ...(Number(x.rest) > 0 ? { rest: Number(x.rest) } : {}) };
 }
 
 /* ---------- automatic connection: a project bound to a working folder takes each session's new turns as records ---------- */
@@ -111,16 +116,27 @@ export function newTurns(s: SessionDetail, mark: SessionMark | null, from: strin
   const same = head.text.length >= r.chars && textSum(head.text.slice(0, r.chars)) === r.sum;
   if (!same && lastAt && head.at !== lastAt) return after;
   const taken = r.files, more = same ? head.text.slice(r.chars).replace(/^\s+/, '') : '';
-  const files = Array.isArray(taken) ? (head.files ?? []).filter(f => !taken.some(x => sameFile(x, f))) : (head.files ?? []).slice(taken);
+  const files = Array.isArray(taken) ? untaken(taken, head.files ?? [], s) : (head.files ?? []).slice(taken);
   return [...(more || files.length ? [{ role: 'assistant' as const, at: head.at, text: more, files, cont: true }] : []), ...after.filter(t => t !== head)];
 }
-/** Whether a file taken under one name is the one now named so. A file outside the session's folders is named by its whole path
- * until the session works in a folder that holds it (a later line names that folder); from then on by the rest of that path. */
-const whole = (f: string) => /^(?:[A-Za-z]:[\\/]|\\\\|\/)/.test(f);
-const sameFile = (was: string, now: string) => was === now || (whole(was) && !whole(now) && was.replace(/\\/g, '/').endsWith(`/${now.replace(/\\/g, '/')}`));
-/** The mark once every turn of this reading is taken: its last time, and how much of its last turn when that is a reply. */
-export function markAfter(s: SessionDetail, was: SessionMark | null, updatedAt: string): SessionMark {
-  const last = s.turns.at(-1); if (!last) return was ? { ...was, updatedAt } : { lastAt: null, count: s.omitted, updatedAt };
+/** The files a reply names now that were not taken with it. A file outside the session's folders is named by its whole path until
+ * the session works in a folder that holds it (a later line names that folder); from then on by the rest of that path, as the
+ * reading names it (the first of its folders that holds it). So a whole name taken stands for the name it has now, and for no
+ * other file (another repository's src/index.ts is not this folder's). Without the folders (an older server), it stands for one
+ * name that ends so, the longest. */
+const whole = (f: string) => /^(?:[A-Za-z]:[\\/]|\\\\|\/)/.test(f), slashed = (f: string) => f.replace(/\\/g, '/');
+function untaken(taken: string[], now: string[], s: Pick<SessionDetail, 'cwd' | 'cwds'>): string[] {
+  const moved = taken.filter(x => whole(x) && !now.includes(x)), same = new Set<string>();
+  if (s.cwds) for (const x of moved) { const n = shortPath(x, s.cwds.find(c => shortPath(x, c) !== x) ?? s.cwd); if (n !== x) same.add(n); }
+  else for (const f of now.filter(f => !whole(f) && !taken.includes(f)).sort((a, b) => b.length - a.length)) {
+    const i = moved.findIndex(x => slashed(x).endsWith(`/${slashed(f)}`)); if (i >= 0) { same.add(f); moved.splice(i, 1); }
+  }
+  return now.filter(f => !taken.includes(f) && !same.has(f));
+}
+/** The mark once every turn of this reading is taken: its last time, and how much of its last turn when that is a reply. since:
+ * where a reading with no mark began (none read before it is taken): with no turn from there, the mark stands there. */
+export function markAfter(s: SessionDetail, was: SessionMark | null, updatedAt: string, since: string | null = null): SessionMark {
+  const last = s.turns.at(-1); if (!last) return was ? { ...was, updatedAt } : { lastAt: since, count: s.omitted, updatedAt };
   const lastAt = [...s.turns].reverse().find(t => t.at)?.at ?? was?.lastAt ?? null;
   return { lastAt, count: s.omitted + s.turns.length, updatedAt,
     ...(last.role === 'assistant' && (last.at ?? null) === lastAt ? { reply: { chars: last.text.length, sum: textSum(last.text), files: [...(last.files ?? [])] } } : {}) };
@@ -153,7 +169,8 @@ export function sessionChunks(s: SessionDetail, turns: TakenTurn[], limit = PAST
  * session's header is read at the start of a record only). Only this line cuts a draft: a header line quoted inside a conversation
  * (a record pasted into a session, a reply that writes the format) stays where it is. */
 export const NEXT_RECORD = '──────── 다음 기록 ────────';
-const NEXT_LINE = /^([ \t]*)──────── 다음 기록 ────────([ \t]*)$/gm;
+/** A NEXT_RECORD line, with what stands around it on that line (spaces). */
+export const NEXT_LINE = /^([ \t]*)──────── 다음 기록 ────────([ \t]*)$/gm;
 /** The header line a session record starts with: written by the import (Claude Code, Codex) or by a web session asked with
  * WEB_RECORD_ASK (handover.ts). Its fields follow the tool's name, ' · ' between them. */
 export const RECORD_HEAD = /^\[(Claude Code|Codex|웹 AI) 세션 기록(?: · ([^\n]*))?\]/;
