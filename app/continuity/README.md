@@ -45,7 +45,7 @@ Windows에서 빌드가 이미 있다면 PowerShell로 `./continuity/scripts/sta
 ```powershell
 ./continuity/scripts/start-pc.ps1                          # 시작(이미 실행 중이면 다시 열기), 브라우저가 열림
 ./continuity/scripts/start-pc.ps1 -CodexPath 'C:\…\codex.exe'  # codex.exe를 찾지 못했다고 하면 경로를 알려 주기
-./continuity/scripts/start-pc.ps1 -Stop                    # 종료
+./continuity/scripts/start-pc.ps1 -Stop                    # 종료(시작 뒤 codex.exe가 바뀌거나 지워져도 종료됨)
 ```
 
 - 주소는 `http://127.0.0.1:4327`입니다(기본 DeepSeek 실행 4317과 다른 주소). 브라우저 저장은 주소별이라 4317에서 만든 프로젝트는 여기에서 보이지 않습니다. 옮기려면 백업 파일로 내보내고 가져오세요.

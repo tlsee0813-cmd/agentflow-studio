@@ -5,7 +5,7 @@
 // in to anything, and starting, checking or stopping makes no generation (the executor's --version probe is not one).
 //   node continuity/scripts/pc-entry.mjs check [--port 4327] [--codex <codex.exe>]   what a start would do (JSON)
 //   node continuity/scripts/pc-entry.mjs serve --codex <codex.exe> [--port 4327]       the server (start-pc.ps1 runs it hidden)
-//   node continuity/scripts/pc-entry.mjs stop [--port 4327] [--interrupt-running]      an orderly stop of this entry's own server
+//   node continuity/scripts/pc-entry.mjs stop [--port 4327] [--interrupt-running]      an orderly stop of this entry's own server (no binary needed)
 // Keys: none are read or written here; an optional DeepSeek key for the other features comes only from the env file Node is given.
 import { createHash, randomBytes } from 'node:crypto';
 import { createReadStream, existsSync, readdirSync, statSync } from 'node:fs';
@@ -134,7 +134,7 @@ export async function serve({ port = DEFAULT_PORT, exe, policy: given = null, da
     server.once('error', async e => { log(`REFUSED port=${e?.code ?? 'error'}`); await jobs.close(); await executor.close(); res(); exit(6); });
     server.listen(config.port, config.host, async () => {
       await mkdir(places.run, { recursive: true, mode: 0o700 });
-      const tmp = `${runFile}.${nonce}.tmp`; await writeFile(tmp, JSON.stringify({ format: RUN_FORMAT, pid: process.pid, port, nonce, policy: policyHash(policy).slice(0, 12), startedAt: new Date().toISOString() }), { mode: 0o600 }); await rename(tmp, runFile);
+      const tmp = `${runFile}.${nonce}.tmp`; await writeFile(tmp, JSON.stringify({ format: RUN_FORMAT, pid: process.pid, port, nonce, exe: policy.exe, policy: policyHash(policy).slice(0, 12), startedAt: new Date().toISOString() }), { mode: 0o600 }); await rename(tmp, runFile);
       timer = setInterval(async () => {
         let req; try { req = JSON.parse(await readFile(stopFile, 'utf8')); } catch { return; } // no request
         if (stopping || req?.nonce !== nonce || draining) return;
@@ -157,16 +157,23 @@ export async function serve({ port = DEFAULT_PORT, exe, policy: given = null, da
 }
 
 /** stop: asks this entry's own server on the port to stop, and waits for it to say so. It never signals or kills a process: the
- * request is a file only that run can match (its nonce). A run in progress is not interrupted unless asked. */
-export async function stop({ port = DEFAULT_PORT, explicit = null, interruptRunning = false, data = DATA, waitMs = 30000, fixed = FIXED_POLICY, ...where } = {}) {
-  const c = await check({ port, explicit, data, fixed, ...where });
-  if (c.binary !== 'accepted') return { stopped: false, why: 'BINARY', message: c.message, exit: c.exit };
-  if (c.port === 'free') return { stopped: true, why: 'NOT_RUNNING', message: '실행 중인 이 입구가 없어요.', exit: 0 };
-  if (c.port !== 'ours') return { stopped: false, why: 'NOT_OURS', message: `포트 ${port}의 서버는 이 입구가 아니라 종료 요청을 보내지 않았어요.`, exit: 4 };
-  if (c.executor.state === 'busy' && !interruptRunning) return { stopped: false, why: 'BUSY', message: '지도 정리가 실행 중이라 종료하지 않았어요. 끝난 뒤 다시 종료하거나, 중단해도 되면 -InterruptRunning을 붙이세요(그 정리는 결과 없이 중단돼요).', exit: 7 };
-  const places = placesFor(port, data); let run;
-  try { run = JSON.parse(await readFile(join(places.run, 'host.json'), 'utf8')); if (run.format !== RUN_FORMAT || !/^[0-9a-f]{32}$/.test(run.nonce) || run.port !== port) throw new Error(); }
-  catch { return { stopped: false, why: 'NO_RUN_FILE', message: '이 입구의 실행 기록을 읽지 못해 종료 요청을 보내지 않았어요.', exit: 8 }; }
+ * request is a file only that run can match (its nonce). A run in progress is not interrupted unless asked.
+ * It needs no binary: the executable on disk may have changed or gone since the start. The run file says which executable that
+ * run was started with; it counts only when its policy id is the fixed policy's for that path, and only when the server on the
+ * port has that very identity and holds this entry's own store and executor state. Starting anew still takes only the accepted
+ * binary (check). fixed: FIXED_POLICY (a test passes its own fake one, the command line cannot). */
+export async function stop({ port = DEFAULT_PORT, interruptRunning = false, data = DATA, waitMs = 30000, fixed = FIXED_POLICY } = {}) {
+  const places = placesFor(port, data), runFile = join(places.run, 'host.json');
+  const BUSY = { stopped: false, why: 'BUSY', message: '지도 정리가 실행 중이라 종료하지 않았어요. 끝난 뒤 다시 종료하거나, 중단해도 되면 -InterruptRunning을 붙이세요(그 정리는 결과 없이 중단돼요).', exit: 7 };
+  if (!(await answers(port))) return { stopped: true, why: 'NOT_RUNNING', message: '실행 중인 이 입구가 없어요.', exit: 0 };
+  let run = null; try { run = JSON.parse(await readFile(runFile, 'utf8')); } catch { /* below */ }
+  const policyOf = r => { try { return policyHash({ ...fixed, exe: r.exe }).slice(0, 12); } catch { return null; } };
+  if (!run || run.format !== RUN_FORMAT || !/^[0-9a-f]{32}$/.test(run.nonce ?? '') || run.port !== port || typeof run.exe !== 'string' || run.policy !== policyOf(run))
+    return { stopped: false, why: 'NO_RUN_FILE', message: '이 입구의 실행 기록을 읽지 못해(또는 고정 정책의 기록이 아니어서) 종료 요청을 보내지 않았어요.', exit: 8 };
+  const policy = { ...fixed, exe: run.exe }, p = await probePort({ port, policy, places });
+  if (p.port === 'free') return { stopped: true, why: 'NOT_RUNNING', message: '실행 중인 이 입구가 없어요.', exit: 0 };
+  if (p.port !== 'ours') return { stopped: false, why: 'NOT_OURS', message: `포트 ${port}의 서버는 이 입구가 아니라 종료 요청을 보내지 않았어요.`, exit: 4 };
+  if (p.executor.state === 'busy' && !interruptRunning) return BUSY;
   // The server decides (a job may have been admitted after the look above): it stops, or answers this request as BUSY.
   const request = randomBytes(8).toString('hex'), answer = join(places.run, 'stop-answer.json');
   await writeFile(join(places.run, 'stop.json'), JSON.stringify({ nonce: run.nonce, request, interrupt: interruptRunning === true, at: new Date().toISOString() }), { mode: 0o600 });
@@ -174,27 +181,32 @@ export async function stop({ port = DEFAULT_PORT, explicit = null, interruptRunn
   while (Date.now() < end) {
     try {
       const a = JSON.parse(await readFile(answer, 'utf8'));
-      if (a.nonce === run.nonce && a.request === request) { await unlink(answer).catch(() => {}); if (a.outcome === 'BUSY') return { stopped: false, why: 'BUSY', message: '지도 정리가 실행 중이라 종료하지 않았어요. 끝난 뒤 다시 종료하거나, 중단해도 되면 -InterruptRunning을 붙이세요(그 정리는 결과 없이 중단돼요).', exit: 7 }; }
+      if (a.nonce === run.nonce && a.request === request) { await unlink(answer).catch(() => {}); if (a.outcome === 'BUSY') return BUSY; }
     } catch { /* no answer yet */ }
-    if ((await probePort({ port, policy: { ...fixed, exe: c.exe }, places, timeoutMs: 500 })).port === 'free' && !existsSync(join(places.run, 'host.json'))) return { stopped: true, why: 'STOPPED', message: '종료했어요. 다시 열려면 같은 명령을 실행하세요.', exit: 0 };
+    if (!(await answers(port, 500)) && !existsSync(runFile)) return { stopped: true, why: 'STOPPED', message: '종료했어요. 다시 열려면 같은 명령을 실행하세요.', exit: 0 };
     await new Promise(r => setTimeout(r, 250));
   }
   return { stopped: false, why: 'TIMEOUT', message: '종료 요청을 보냈지만 아직 끝나지 않았어요. 잠시 뒤 다시 확인하세요(강제로 끝내지 않았어요).', exit: 9 };
+}
+/** Whether anything answers HTTP on the port (connection refused: nothing). */
+async function answers(port, timeoutMs = 1500) {
+  try { await fetch(`http://127.0.0.1:${port}/api/studio/status`, { signal: AbortSignal.timeout(timeoutMs) }); return true; }
+  catch (e) { return (e?.cause?.code ?? e?.code) !== 'ECONNREFUSED'; }
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const [cmd, ...rest] = process.argv.slice(2), opt = n => { const i = rest.indexOf(n); return i >= 0 ? rest[i + 1] : undefined; };
   const port = opt('--port') === undefined ? DEFAULT_PORT : Number(opt('--port'));
   if (!Number.isInteger(port) || port < 1024 || port > 65535) { console.error('port must be 1024-65535'); process.exit(2); }
-  const known = { check: ['--port', '--codex'], serve: ['--port', '--codex'], stop: ['--port', '--codex', '--interrupt-running'] }[cmd];
+  const known = { check: ['--port', '--codex'], serve: ['--port', '--codex'], stop: ['--port', '--interrupt-running'] }[cmd];
   for (let i = 0; known && i < rest.length; i++) { if (!known.includes(rest[i])) { known.length = 0; break; } if (rest[i] !== '--interrupt-running') i++; }
-  if (!known?.length) { console.error('usage: pc-entry.mjs check|serve|stop [--port N] [--codex <path>] [--interrupt-running]'); process.exit(2); }
+  if (!known?.length) { console.error('usage: pc-entry.mjs check|serve [--port N] [--codex <path>] | stop [--port N] [--interrupt-running]'); process.exit(2); }
   if (cmd === 'serve') {
     const found = await findCodex({ explicit: opt('--codex') ?? null });
     if (!found.exe) { console.log('REFUSED binary=unknown'); process.exit(3); }
     await serve({ port, exe: found.exe });
   } else {
-    const r = cmd === 'check' ? await check({ port, explicit: opt('--codex') ?? null }) : await stop({ port, explicit: opt('--codex') ?? null, interruptRunning: rest.includes('--interrupt-running') });
+    const r = cmd === 'check' ? await check({ port, explicit: opt('--codex') ?? null }) : await stop({ port, interruptRunning: rest.includes('--interrupt-running') });
     console.log(JSON.stringify(r)); process.exit(r.exit);
   }
 }

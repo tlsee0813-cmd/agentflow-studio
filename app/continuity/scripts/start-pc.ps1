@@ -26,7 +26,6 @@ if (-not $NodePath) {
 }
 if (-not $NodePath -or -not (Test-Path -LiteralPath $NodePath)) { throw 'Node.js를 찾지 못했어요. -NodePath로 기존 node.exe를 알려 주세요.' }
 if ($Port -lt 1024 -or $Port -gt 65535) { throw '포트는 1024~65535 사이여야 해요.' }
-$codexArgs = @(); if ($CodexPath) { $codexArgs = @('--codex', (Resolve-Path -LiteralPath $CodexPath).Path) }
 function Invoke-Entry([string[]]$entryArgs) {
   $out = & $NodePath $entry @entryArgs
   $code = $LASTEXITCODE
@@ -36,12 +35,14 @@ function Invoke-Entry([string[]]$entryArgs) {
 $url = "http://127.0.0.1:$Port"
 
 if ($Stop) {
-  $stopArgs = @('stop', '--port', "$Port") + $codexArgs
+  # Stopping needs no Codex executable: the running entry is told by its own run record (a changed or removed codex.exe still stops).
+  $stopArgs = @('stop', '--port', "$Port")
   if ($InterruptRunning) { $stopArgs += '--interrupt-running' }
   $s = Invoke-Entry $stopArgs
   Write-Output $s.result.message
   exit $s.code
 }
+$codexArgs = @(); if ($CodexPath) { $codexArgs = @('--codex', (Resolve-Path -LiteralPath $CodexPath).Path) }
 if (-not (Test-Path -LiteralPath (Join-Path $appRoot 'continuity/dist/public/client/app.js'))) {
   throw '먼저 Studio를 빌드하세요: node continuity/scripts/build.mjs (app/에서).'
 }

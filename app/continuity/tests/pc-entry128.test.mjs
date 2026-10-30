@@ -144,7 +144,8 @@ test('128-6 a stop request never reaches another run or another server: a stale 
   writeFileSync(join(run, 'host.json'), JSON.stringify(mine));
   const p2 = await freePort(), def = createContinuityApp({ config: readConfig({ PORT: String(p2) }), studio: createStudioHandler({ env: {} }) });
   await new Promise(x => def.listen(p2, '127.0.0.1', x));
-  try { const o = await stop({ port: p2, explicit: f.exe, data: f.data, fixed: f.fixed }); assert.deepEqual([o.why, o.exit], ['NOT_OURS', 4]); assert.ok(!existsSync(placesFor(p2, f.data).run)); }
+  // No run file of this entry for that port: refused before anything is asked (with one copied there it is NOT_OURS: 128-11).
+  try { const o = await stop({ port: p2, data: f.data, fixed: f.fixed }); assert.deepEqual([o.stopped, o.why, o.exit], [false, 'NO_RUN_FILE', 8]); assert.ok(!existsSync(placesFor(p2, f.data).run)); }
   finally { def.close(); }
 });
 
@@ -195,5 +196,38 @@ test('128-10 a default stop never ends a job admitted after its own check: the s
   await until(async () => (await job.get()).state === 'ready', 'the admitted job finished');
   assert.ok(!existsSync(join(run, 'stop.json')), 'the refused request is not left to act later');
   const later = await stop({ port, explicit: f.exe, data: f.data, fixed: f.fixed }); assert.equal(later.why, 'STOPPED');
+});
+
+test('128-11 stopping this entry needs no binary: changed or deleted after start (found or named) it still stops; forged or other run files do not', async () => {
+  const { unlinkSync, rmSync } = await import('node:fs');
+  for (const [how, change, named] of [['bytes changed, found on PATH', exe => appendFileSync(exe, '\n'), false], ['deleted, named', exe => unlinkSync(exe), true]]) {
+    const f = fixture(), port = await freePort(), s = await start(f, port);
+    change(f.exe);
+    const r = await stop({ port, data: f.data, fixed: f.fixed, ...(named ? { explicit: f.exe } : { env: { PATH: f.bin } }) });
+    assert.deepEqual([r.stopped, r.why, r.exit], [true, 'STOPPED', 0], how); assert.equal(s.exited(), 0, how);
+    // A new start still takes only the accepted binary.
+    assert.equal((await check({ port, data: f.data, fixed: f.fixed, ...(named ? { explicit: f.exe } : { env: { PATH: f.bin } }) })).exit, 3, how);
+  }
+  // A run file that does not stand for this entry's running server: another executable path, a policy id not of the fixed policy.
+  const f = fixture(), port = await freePort(), s = await start(f, port), run = placesFor(port, f.data).run;
+  const mine = JSON.parse(readFileSync(join(run, 'host.json'), 'utf8')), other = join(f.root, 'elsewhere', 'codex');
+  mkdirSync(join(f.root, 'elsewhere')); copyFileSync(process.execPath, other);
+  for (const [why, forged] of [['another exe', { ...mine, exe: other, policy: policyHash({ ...f.fixed, exe: other }).slice(0, 12) }], ['policy not of the fixed policy', { ...mine, policy: '0'.repeat(12) }], ['no exe', (({ exe: _e, ...x }) => x)(mine)]]) {
+    writeFileSync(join(run, 'host.json'), JSON.stringify(forged));
+    const r = await stop({ port, data: f.data, fixed: f.fixed, waitMs: 600 });
+    assert.equal(r.stopped, false, why); assert.notEqual(r.why, 'TIMEOUT', `${why}: refused before any request`); assert.equal(s.exited(), null, why);
+    assert.ok(!existsSync(join(run, 'stop.json')), `${why}: no request written`);
+  }
+  writeFileSync(join(run, 'host.json'), JSON.stringify(mine));
+  // Another server on a port, with this entry's run file copied next to it: not ours.
+  const p2 = await freePort(), def = createContinuityApp({ config: readConfig({ PORT: String(p2) }), studio: createStudioHandler({ env: {} }) });
+  await new Promise(x => def.listen(p2, '127.0.0.1', x)); const run2 = placesFor(p2, f.data).run; mkdirSync(run2, { recursive: true });
+  writeFileSync(join(run2, 'host.json'), JSON.stringify({ ...mine, port: p2 }));
+  try { const o = await stop({ port: p2, data: f.data, fixed: f.fixed }); assert.deepEqual([o.stopped, o.why], [false, 'NOT_OURS']); assert.ok(!existsSync(join(run2, 'stop.json'))); }
+  finally { def.close(); }
+  // A stale run file with nothing on its port: not running, nothing written.
+  const p3 = await freePort(), run3 = placesFor(p3, f.data).run; mkdirSync(run3, { recursive: true }); writeFileSync(join(run3, 'host.json'), JSON.stringify({ ...mine, port: p3 }));
+  const n = await stop({ port: p3, data: f.data, fixed: f.fixed }); assert.equal(n.why, 'NOT_RUNNING'); assert.ok(!existsSync(join(run3, 'stop.json')));
+  assert.equal((await stop({ port, data: f.data, fixed: f.fixed })).why, 'STOPPED');
 });
 
