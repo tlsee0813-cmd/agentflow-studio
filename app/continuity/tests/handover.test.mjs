@@ -83,3 +83,13 @@ test('HANDOVER-O1 session origin: header fields read back; other records are not
   const t = handoverText(D.createProject(), { scope: null, code: 'EMPTY2', at: '2026-10-30T05:00:00.000Z' });
   assert.ok(t.includes('아직 지도에 부분이 없어요.'));
 });
+
+test('HANDOVER-B1 a web chat writes its own record from the request text: the record reads as that session and its requests', async () => {
+  const { WEB_RECORD_ASK } = await import('../dist/public/shared/handover.js');
+  assert.ok(WEB_RECORD_ASK.includes('[웹 AI 세션 기록 · ') && WEB_RECORD_ASK.includes('── 사용자 요청 ──'));
+  const answer = '[웹 AI 세션 기록 · 결제 연결 · 브랜치 pay]\n\n── 사용자 요청 ──\n결제 버튼을 붙여 줘\n\n── 웹 AI 답변 ──\n결제 버튼을 붙였어요.\n(바꾼 파일: src/pay.ts)';
+  assert.deepEqual(sessionOrigin(answer), { id: null, tool: 'web', title: '결제 연결', cwd: null, branch: 'pay' });
+  const p = D.pasteRecord(D.createProject(), answer, null).project;
+  const t = handoverText(p, { scope: null, code: 'WEB234', at: '2026-10-30T05:00:00.000Z' });
+  assert.ok(t.includes('- 웹 AI 「결제 연결」 · 브랜치 pay') && t.includes('- 결제 버튼을 붙여 줘 → 바꾼 파일: src/pay.ts'), t);
+});

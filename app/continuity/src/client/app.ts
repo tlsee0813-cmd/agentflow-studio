@@ -22,6 +22,7 @@ import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-sour
 import { createPlanView } from './plan-view.js';
 import { createReturnView, type Scene, type ReadingContext } from './return-view.js';
 import { createAutoSync } from './auto-sync.js';
+import { createSessionSources } from './session-source.js';
 import { createHandoverView } from './handover-view.js';
 import { partSessions, originLabel } from '../shared/handover.js';
 import { UI62_KEY, buildUi62Project, ui62Keys } from '../shared/return-material.js';
@@ -1838,9 +1839,12 @@ function openFile(partId: string | null) {
   openReturn();
   returnView.openFile(partId, scene);
 }
+/** Where AI session records come from: the local server when it reads this PC's sessions, else folders picked in this browser. */
+const sessionSources = createSessionSources({ status: () => status, accessCode: () => sessionCode() });
 const returnView = createReturnView({
   current: () => opened,
   kv,
+  sources: sessionSources,
   status: () => status,
   accessCode: () => sessionCode(), keepAccessCode,
   bundle: () => planView.bundleOf(),
@@ -1934,8 +1938,7 @@ let jobReservations: JobReservations | null = null;
 const handover = createHandoverView({ current: () => opened });
 const autoSync = createAutoSync({
   current: () => opened,
-  status: () => status,
-  accessCode: () => sessionCode(),
+  sources: sessionSources,
   kv,
   save: async (key, texts) => {
     // Only the entry the sessions were looked at for: after a switch nothing is written to the project open now.
@@ -2540,7 +2543,8 @@ async function main() {
   $('plan-entry').addEventListener('click', () => planView.toggle());
   $('handover-open').addEventListener('click', e => handover.open(scope, e.currentTarget as HTMLElement));
   $('return-entry').addEventListener('click', () => { if (returnView.isOpen() && !planView.isOpen()) returnView.close(); else openReturn(); });
-  statusReady = aiStatus().then(s => { status = s; renderStatus(); renderRelease(); planView.statusChanged(); refreshReading(); statusArrived(); if (!selected && !planView.isOpen()) returnView.render(); mapRun.resume(); autoSync.opened(); autoSync.start(); });
+  statusReady = aiStatus().then(s => { status = s; renderStatus(); renderRelease(); planView.statusChanged(); refreshReading(); statusArrived(); if (!selected && !planView.isOpen()) returnView.render(); mapRun.resume(); autoSync.opened(); autoSync.start();
+    void sessionSources.load().then(() => { autoSync.sourcesChanged(); if (opened && autoSync.bindingOf(opened.key)) void autoSync.tick(); if (!selected && !planView.isOpen()) returnView.render(); }); });
   $('sync-pill').addEventListener('click', () => autoSync.toggle());
   // AF100: a reservation another tab of this address made (or ended) is looked at now, not at this page's next click.
   window.addEventListener('storage', e => { if (e.key?.endsWith(JOBS_KEY)) void statusReady?.then(() => mapRun.resume()); });

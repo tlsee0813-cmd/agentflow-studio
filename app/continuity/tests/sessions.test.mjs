@@ -145,3 +145,16 @@ test('SESSIONS-V1 malformed listings and details from a server are not read', ()
   assert.deepEqual(readSessionList({ version: 'sessions.1', sessions: [{ id: '../x', preview: 'a', updatedAt: 'b' }] }), []);
   assert.equal(readSessionDetail({ version: 'sessions.1', id: 'x', turns: [{ role: 'system', text: 'a' }] }), null);
 });
+
+test('SESSIONS-P1 the shared reading: a file tells its tool by its lines; ids are the server\'s; paths are made relative', async () => {
+  const P = await import('../dist/public/shared/session-parse.js');
+  assert.equal(P.sniffTool(claudeRows()), 'claude');
+  assert.equal(P.sniffTool(codexRows()), 'codex');
+  assert.equal(P.sniffTool(codexBareRows()), 'codex');
+  assert.equal(P.sniffTool([{ a: 1 }]), null);
+  const { createHash } = await import('node:crypto');
+  assert.equal(await P.sessionId('claude', '/x/y.jsonl'), `claude-${createHash('sha256').update('/x/y.jsonl').digest('hex').slice(0, 24)}`);
+  assert.equal(P.shortPath('C:\\work\\salon\\src\\a.ts', 'C:\\work\\salon'), 'src/a.ts');
+  assert.equal(P.shortPath('/work/salon/src/a.ts', '/work/salon/'), 'src/a.ts');
+  assert.equal(P.shortPath('/elsewhere/a.ts', '/work/salon'), '/elsewhere/a.ts');
+});

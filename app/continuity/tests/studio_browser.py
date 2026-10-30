@@ -2838,6 +2838,84 @@ def handover_flow(browser, base):
     context.close()
 
 
+FAKE_PICKER = """(files) => {
+  // Stand-in folder handles (Chrome's picker cannot be driven): each pick hands the next home folder (.claude, then .codex).
+  const dir = (name, entries) => ({ kind: 'directory', name, async *values() { yield* entries; },
+    queryPermission: async () => 'granted', requestPermission: async () => 'granted' });
+  const tree = {};
+  for (const [root, path, text, at] of files) {
+    let node = (tree[root] ??= {}); const parts = path.split('/'), file = parts.pop();
+    for (const p of parts) node = (node[p] ??= {});
+    node[file] = new File([text], file, { lastModified: at });
+  }
+  const build = (name, node) => dir(name, Object.entries(node).map(([k, v]) => v instanceof File ? { kind: 'file', name: k, getFile: async () => v } : build(k, v)));
+  const queue = ['.claude', '.codex'].map(r => build(r, tree[r]));
+  window.showDirectoryPicker = async () => { if (!queue.length) throw new DOMException('cancelled', 'AbortError'); return queue.shift(); };
+}"""
+
+
+def folder_sessions_flow(browser, base):
+    """Without a local session reader (a hosted or plain local server), the person picks their .claude and .codex folders once in the
+    browser: the same automatic connection runs on them (folders found, sessions taken, first map without a click), the paste box
+    lists them, one .jsonl file can be chosen by hand, and a web chat gets a request text that writes its own record."""
+    files = json.loads(subprocess.run(["node", str(ROOT / "tests/sessions-fixture.mjs")], cwd=APP, capture_output=True, text=True, encoding="utf-8", check=True).stdout)
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    context.add_init_script(f"({FAKE_PICKER})({json.dumps(files)})")
+    page = context.new_page()
+    errors, maps = [], []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.on("request", lambda r: maps.append(r.url) if r.url.endswith("/api/studio/map") else None)
+    page.goto(base + "/")
+    page.locator("#new-open").click()
+    page.locator("#new-name").fill("폴더로 연결")
+    page.locator("#new-form").get_by_role("button", name="만들기").click()
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 안 됨")
+    page.locator("#sync-pill").click()
+    panel = page.locator("#sync-panel")
+    expect(panel.locator("h3")).to_have_text("내 AI 세션 연결")
+    panel.get_by_role("button", name="세션 폴더 고르기").click()
+    pick = panel.locator(".sync-folder-pick")
+    expect(pick).to_have_count(1)
+    expect(pick).to_contain_text("/work/salon")
+    expect(pick).to_contain_text("Claude Code")
+    expect(panel).to_contain_text("읽는 세션 폴더: .claude")
+    panel.get_by_role("button", name="세션 폴더 더 고르기").click()
+    expect(panel).to_contain_text("읽는 세션 폴더: .claude, .codex")
+    expect(pick).to_contain_text("Claude Code·Codex")
+    assert maps == [], maps
+    pick.click()
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon")
+    expect(page.locator("#space-empty")).to_contain_text("[스텁] 프로그램을 말하는 기록을 붙여 주세요", timeout=15000)
+    assert len(maps) == 1, maps
+    page.locator("#sync-pill").click()
+    expect(panel).to_contain_text("가져온 기록2개")
+    page.locator("#sync-pill").click()
+    # The paste box lists the picked folders' sessions and takes one as written.
+    page.locator("#return-entry").click()
+    page.locator("#lens .rr-paste-open").click()
+    box = page.locator("#lens .rr-sessions")
+    expect(box).to_contain_text("고른 세션 폴더(.claude, .codex)의 대화 기록")
+    page.locator("#lens").get_by_role("button", name="내 AI 세션에서 가져오기").click()
+    expect(page.locator("#lens .rr-session")).to_have_count(3)
+    page.locator("#lens .rr-session", has_text="휴무일 연결").click()
+    draft = page.locator("#paste-text")
+    expect(draft).to_have_value(re.compile("예약 화면에서 휴무일을 영업시간 설정과 연결해 줘"))
+    value = draft.input_value()
+    assert "[가려진 비밀값]" in value and "sk-abc" not in value and "(바꾼 파일: src/hours.ts, tests/hours.test.ts)" in value, value
+    # One file chosen by hand comes after what is in the box.
+    codex = next(f for f in files if f[1].endswith("x1.jsonl"))
+    page.locator("#lens .rr-session-file").set_input_files(files=[{"name": "rollout-x1.jsonl", "mimeType": "application/json", "buffer": codex[2].encode("utf-8")}])
+    expect(draft).to_have_value(re.compile("휴무일[\\s\\S]*문자 알림 발송 실패 시 재시도를 넣어 줘"))
+    expect(page.locator("#lens .rr-sessions-note")).to_contain_text("Codex 세션에서 대화")
+    page.locator("#lens .rr-session-file").set_input_files(files=[{"name": "notes.jsonl", "mimeType": "application/json", "buffer": b'{"a":1}\n'}])
+    expect(page.locator("#lens .rr-sessions [role=alert]")).to_contain_text("세션 기록 파일(.jsonl)이 아니거나")
+    # A web chat keeps no file here: it is given the request text to write its own record.
+    page.locator("#lens").get_by_role("button", name="웹 대화용 기록 요청 문구 복사").click()
+    expect(page.locator("#lens .rr-sessions")).to_contain_text(re.compile("기록 요청 문구를 복사했어요|\\[웹 AI 세션 기록"))
+    assert not errors, errors
+    context.close()
+
+
 def off_flow(browser, base, expected_pill):
     page = browser.new_page(viewport={"width": 1280, "height": 720})
     page.goto(base)
@@ -4249,6 +4327,7 @@ def main():
             proc, base = start("fail"); procs.append(proc); question_retry_flow(browser, base); print("ok  failed question retried after another was typed: the retry answers the first, the new one stays in the box")
             proc, base = start("fail"); procs.append(proc); return_failure_flow(browser, base); print("ok  return reading failure -> short error and the material -> asking again")
             proc, base = start("ok", STUDIO_SESSIONS_FIXTURE="1"); procs.append(proc); sessions_flow(browser, base); print("ok  local sessions: connect a folder once -> its sessions become records -> first map without a click; nothing taken twice; one session by hand, key hidden")
+            proc, base = start("ok"); procs.append(proc); folder_sessions_flow(browser, base); print("ok  session folders picked in the browser (no local reader): automatic connection, paste-box list, one file by hand, web request text")
             proc, base = start("ok"); procs.append(proc); handover_flow(browser, base); print("ok  handover document: a part's sessions, its document and the whole project's, copied and saved, nothing sent")
             proc, base = start("nokey"); procs.append(proc); off_flow(browser, base + "/", "AI 키 없음"); print("ok  server without key -> honest off state")
             if (ROOT / "static-dist/index.html").exists():

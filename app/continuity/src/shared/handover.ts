@@ -6,24 +6,26 @@ import { isMapReading, type ClaimKind, type MapReading, type Project } from './t
 import { CLAIM_LABEL, candidateReading } from './map-reading.js';
 import { studioView, type PartView, type StudioView } from './studio.js';
 import { REL_LABEL } from './relation-groups.js';
-import { TOOL_NAME, stamp } from './session-import.js';
+import { stamp } from './session-import.js';
 import { HANDOVER_TAG, receivedHandovers } from './handover-mark.js';
 export { HANDOVER_TAG, foldHandover, handoverCode, receivedHandovers } from './handover-mark.js';
 
 /* ---------- which session a record came from ---------- */
-export interface SessionOrigin { id: string | null; tool: 'claude' | 'codex'; title: string | null; cwd: string | null; branch: string | null }
-const HEAD = /^\[(Claude Code|Codex) 세션 기록(?: · ([^\n]*))?\]/;
+export interface SessionOrigin { id: string | null; tool: 'claude' | 'codex' | 'web'; title: string | null; cwd: string | null; branch: string | null }
+const ORIGIN_NAME: Record<SessionOrigin['tool'], string> = { claude: 'Claude Code', codex: 'Codex', web: '웹 AI' };
+/** The header line of a session record: written by the import (Claude Code, Codex) or by a web session asked with WEB_RECORD_ASK. */
+const HEAD = /^\[(Claude Code|Codex|웹 AI) 세션 기록(?: · ([^\n]*))?\]/;
 /** The session a record was taken from (its header line, session-import.ts), or null for any other record. */
 export function sessionOrigin(text: string): SessionOrigin | null {
   const m = HEAD.exec(text); if (!m) return null;
-  const tool = m[1] === 'Codex' ? 'codex' : 'claude', fields = (m[2] ?? '').split(' · ');
+  const tool = m[1] === 'Codex' ? 'codex' : m[1] === '웹 AI' ? 'web' : 'claude', fields = (m[2] ?? '').split(' · ');
   const field = (prefix: string) => fields.find(f => f.startsWith(prefix))?.slice(prefix.length).trim() || null;
   const id = field('세션 '), known = /^(작업 폴더 |브랜치 |세션 |\d{4}-\d{2}-\d{2} \d{2}:\d{2} 시작$)/;
   const title = fields.filter(f => f && !known.test(f)).join(' · ') || null;
   return { id: id && /^(claude|codex)-[0-9a-f]{24}$/.test(id) ? id : null, tool, title, cwd: field('작업 폴더 '), branch: field('브랜치 ') };
 }
 const originKey = (o: SessionOrigin) => o.id ?? `${o.tool}|${o.title ?? ''}|${o.cwd ?? ''}`;
-export const originLabel = (o: Pick<SessionOrigin, 'tool' | 'title'>) => `${TOOL_NAME[o.tool]}${o.title ? ` 「${o.title}」` : ' 세션'}`;
+export const originLabel = (o: Pick<SessionOrigin, 'tool' | 'title'>) => `${ORIGIN_NAME[o.tool]}${o.title ? ` 「${o.title}」` : ' 세션'}`;
 
 export interface PartSession extends SessionOrigin { key: string; lastAt: string; worked: boolean; tookOver: boolean }
 /** The sessions behind a part: those whose records the map quotes for it (it worked on it), and those that started from a handover
@@ -166,3 +168,20 @@ function dedupe(list: PartSession[]): PartSession[] {
   return [...m.values()].sort((a, b) => b.lastAt.localeCompare(a.lastAt));
 }
 const dedupeLines = (l: string[]) => [...new Set(l)];
+
+/** What to paste into a session that keeps no file on this PC (a web chat): it asks that session to write its own record in the
+ * shape a session import has, so pasting its answer back gives a record that reads (and is attributed) like an imported one. */
+export const WEB_RECORD_ASK = [
+  '[AgentFlow 기록 요청] 이 대화에서 지금까지 내가 한 요청과 네가 한 작업을 아래 형식 그대로 적어 줘. 요약하지 말고 내가 쓴 요청은 원문 그대로 옮기고, 네 답변은 실제로 한 일·바꾼 파일·확인한 것·남은 일을 중심으로 적어 줘. 키·토큰·비밀번호는 [가려진 비밀값]으로 바꿔 줘. 형식 밖의 말은 쓰지 마.',
+  '',
+  '[웹 AI 세션 기록 · (이 대화의 짧은 제목) · 작업 폴더 (있으면 경로) · 브랜치 (있으면 이름)]',
+  '',
+  '── 사용자 요청 ──',
+  '(내가 쓴 요청 원문)',
+  '',
+  '── 웹 AI 답변 ──',
+  '(한 일, 확인한 것, 남은 일)',
+  '(바꾼 파일: 경로1, 경로2)',
+  '',
+  '(요청마다 위의 사용자 요청·답변 두 덩어리를 차례로 되풀이)'
+].join('\n');

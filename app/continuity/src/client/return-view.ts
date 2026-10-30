@@ -14,8 +14,10 @@ import type { StorageLike } from '../shared/storage.js';
 import { clip } from '../shared/studio.js';
 import { ui62Reading, savedReading, readingInput, recordTitle, partLabel, type ReadingInput, type ReadingSource } from './digest-source.js';
 import { digestStore, askHash, makeReading, type Reading } from './digest-store.js';
-import { askDigest, AskError, ERROR_TEXT, listSessions, readSession, type AiStatus } from './studio-api.js';
-import { sessionText, stamp, TOOL_NAME, type SessionSummary } from '../shared/session-import.js';
+import { askDigest, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
+import { sessionText, stamp, TOOL_NAME, type SessionSummary, type SessionDetail } from '../shared/session-import.js';
+import { readSessionFile, type SessionSources } from './session-source.js';
+import { WEB_RECORD_ASK } from '../shared/handover.js';
 import { PASTED_TEXT_LIMIT } from '../shared/types.js';
 import type { PlanOpened } from './plan-view.js';
 import type { PlanBundle } from './plan-store.js';
@@ -29,6 +31,8 @@ export interface ReturnHost {
   current(): PlanOpened | null;
   kv: StorageLike;
   status(): AiStatus;
+  /** Where AI session records come from (the local server, or folders picked in this browser). */
+  sources: SessionSources;
   accessCode(): string; keepAccessCode(value: string): void;
   /** The project's change plan as kept (read only); null when there is none. */
   bundle(): PlanBundle | null;
@@ -226,7 +230,8 @@ export function createReturnView(host: ReturnHost) {
     const src = s === st ? sources().find(x => x.recordId === done.id) : null;
     if (s === st && src) { st.view = { kind: 'source', source: structuredClone(src), from: 'material', quote: null }; render(); }
   }
-  /* ---------- a session Claude Code or Codex kept on this PC, brought into the paste box (local server only) ---------- */
+  /* ---------- a session Claude Code or Codex kept on this PC, brought into the paste box: listed by the local server or from
+   * the folders picked in this browser, or one session file chosen by hand; a web chat writes its own (WEB_RECORD_ASK) ---------- */
   /** The session list of the paste box (per entry): open or not, what was listed, a filter, which session is being read, and what
    * the last pick did. Nothing here is saved: a picked session only fills the paste draft, which the person then reads and saves. */
   interface SessionPick { open: boolean; loading: boolean; list: SessionSummary[] | null; filter: string; reading: string | null; error: string | null; note: string | null }
@@ -239,38 +244,62 @@ export function createReturnView(host: ReturnHost) {
     if (!s) return;
     const key = s.key, p = pickOf(key); if (p.loading) return;
     p.open = true; p.loading = true; p.error = null; render();
-    try { p.list = await listSessions(host.accessCode()); }
-    catch (e) { p.error = ERROR_TEXT[e instanceof AskError ? e.code : ''] ?? '세션 목록을 불러오지 못했어요.'; }
+    const src = host.sources.current();
+    try { if (!src) throw new Error('NO_SOURCE'); p.list = await src.list(); }
+    catch (e) { p.error = ERROR_TEXT[(e as { code?: string } | null)?.code ?? ''] ?? '세션 목록을 불러오지 못했어요.'; }
     p.loading = false; if (s?.key === key) render();
   }
   async function takeSession(id: string) {
     if (!s) return;
-    const key = s.key, p = pickOf(key); if (p.reading) return;
+    const key = s.key, p = pickOf(key), src = host.sources.current(); if (p.reading || !src) return;
     p.reading = id; p.error = null; p.note = null; render();
-    try {
-      const detail = await readSession(id, host.accessCode());
-      // Whatever is in the box stays: the session comes after it, within what one record can hold.
-      const before = draftOf(key), room = PASTED_TEXT_LIMIT - (before ? before.length + 2 : 0);
-      if (room < 2000) p.error = '초안칸에 이미 글이 많아요. 지금 글을 저장하거나 비운 뒤 가져오세요.';
-      else {
-        const got = sessionText(detail, room);
-        if (!got.turns) p.error = '이 세션에는 가져올 대화가 없어요.';
-        else {
-          keepDraft(key, before ? `${before}\n\n${got.text}` : got.text);
-          p.open = false;
-          p.note = [`${TOOL_NAME[detail.tool]} 세션에서 대화 ${got.turns}개를 넣었어요.`, got.left ? `앞의 ${got.left}개는 길이 제한으로 뺐어요.` : '',
-            got.redacted ? `키·토큰처럼 보이는 ${got.redacted}곳은 가렸어요.` : '', '읽어 보고 ‘기록 저장’을 누르세요.'].filter(Boolean).join(' ');
-        }
-      }
-    } catch (e) { p.error = ERROR_TEXT[e instanceof AskError ? e.code : ''] ?? '세션 기록을 읽지 못했어요.'; }
+    try { fill(key, p, await src.read(id)); }
+    catch (e) { p.error = ERROR_TEXT[(e as { code?: string } | null)?.code ?? ''] ?? '세션 기록을 읽지 못했어요.'; }
     p.reading = null; if (s?.key === key) render();
   }
+  /** One session file chosen by hand (.jsonl of Claude Code or Codex), read in this page. */
+  async function takeFile(file: File) {
+    if (!s) return;
+    const key = s.key, p = pickOf(key); if (p.reading) return;
+    p.reading = file.name; p.error = null; p.note = null; render();
+    try { const d = await readSessionFile(file); if (d) fill(key, p, d); else p.error = 'Claude Code·Codex 세션 기록 파일(.jsonl)이 아니거나, 가져올 대화가 없어요.'; }
+    catch (e) { p.error = ERROR_TEXT[(e as { code?: string } | null)?.code ?? ''] ?? '세션 파일을 읽지 못했어요.'; }
+    p.reading = null; if (s?.key === key) render();
+  }
+  /** Whatever is in the box stays: the session comes after it, within what one record can hold. */
+  function fill(key: string, p: SessionPick, detail: SessionDetail) {
+    const before = draftOf(key), room = PASTED_TEXT_LIMIT - (before ? before.length + 2 : 0);
+    if (room < 2000) { p.error = '초안칸에 이미 글이 많아요. 지금 글을 저장하거나 비운 뒤 가져오세요.'; return; }
+    const got = sessionText(detail, room);
+    if (!got.turns) { p.error = '이 세션에는 가져올 대화가 없어요.'; return; }
+    keepDraft(key, before ? `${before}\n\n${got.text}` : got.text);
+    p.open = false;
+    p.note = [`${TOOL_NAME[detail.tool]} 세션에서 대화 ${got.turns}개를 넣었어요.`, got.left ? `앞의 ${got.left}개는 길이 제한으로 뺐어요.` : '',
+      got.redacted ? `키·토큰처럼 보이는 ${got.redacted}곳은 가렸어요.` : '', '읽어 보고 ‘기록 저장’을 누르세요.'].filter(Boolean).join(' ');
+  }
+  async function copyWebAsk(p: SessionPick) {
+    let ok = true; try { await navigator.clipboard.writeText(WEB_RECORD_ASK); } catch { ok = false; }
+    p.error = null; p.note = ok ? '기록 요청 문구를 복사했어요. 웹 AI 대화에 붙여 넣고, 나온 답을 이 칸에 그대로 붙여 넣어 저장하세요.' : null;
+    if (!ok) p.error = `자동 복사가 막혀 있어요. 아래 문구를 직접 복사하세요.\n\n${WEB_RECORD_ASK}`;
+    render();
+  }
   function sessionBox(key: string): Node | null {
-    const st = host.status(); if (!st.sessions?.tools.length) return null;
-    const p = pickOf(key), tools = st.sessions.tools.map(t => TOOL_NAME[t]).join('·');
-    if (!p.open) return h('div', { class: 'rr-sessions' }, h('button', { type: 'button', class: 'secondary small', onclick: () => void loadSessions() }, '내 AI 세션에서 가져오기'),
-      h('span', { class: 'fine' }, `이 PC의 ${tools} 대화 기록을 골라 넣어요`), p.note ? h('p', { class: 'fine rr-sessions-note', role: 'status' }, p.note) : null,
+    const p = pickOf(key), src = host.sources, current = src.current(), state = src.folderState();
+    const where = current?.kind === 'server' ? `이 PC의 ${(host.status().sessions?.tools ?? []).map(t => TOOL_NAME[t]).join('·')} 대화 기록` : `고른 세션 폴더(${src.folders().join(', ')})의 대화 기록`;
+    const file = h('input', { type: 'file', class: 'rr-session-file', accept: '.jsonl,application/x-ndjson,application/json', 'aria-label': '세션 기록 파일 올리기', hidden: true }) as HTMLInputElement;
+    file.addEventListener('change', () => { const f = file.files?.[0]; file.value = ''; if (f) void takeFile(f); });
+    const others = h('div', { class: 'pp-row rr-session-ways' },
+      !current && state === 'none' ? h('button', { type: 'button', class: 'link-button rr-session-pick', title: '.claude 또는 .codex 폴더를 한 번 골라 두면 목록에서 바로 가져와요 (크롬·엣지)', onclick: async () => { if (await src.pick()) void loadSessions(); } }, '세션 폴더 고르기') : null,
+      !current && state === 'prompt' ? h('button', { type: 'button', class: 'link-button rr-session-grant', onclick: async () => { await src.grant(); if (src.current()) void loadSessions(); else render(); } }, '세션 폴더 다시 허용') : null,
+      h('button', { type: 'button', class: 'link-button', title: 'Claude Code나 Codex의 .jsonl 세션 파일 하나를 골라 넣어요', disabled: !!p.reading, onclick: () => file.click() }, '세션 파일 올리기'), file,
+      h('button', { type: 'button', class: 'link-button', title: '웹 AI 대화에 붙여 넣으면, 그 대화가 기록을 이 칸에 맞는 형식으로 써 줘요', onclick: () => void copyWebAsk(p) }, '웹 대화용 기록 요청 문구 복사'));
+    if (!p.open) return h('div', { class: 'rr-sessions' },
+      current ? h('button', { type: 'button', class: 'secondary small', onclick: () => void loadSessions() }, '내 AI 세션에서 가져오기') : null,
+      current ? h('span', { class: 'fine' }, `${where}을 골라 넣어요`) : h('span', { class: 'fine' }, 'AI 세션 기록을 원문 그대로 넣을 수 있어요'),
+      others, p.reading && !current ? h('p', { class: 'fine' }, '읽는 중…') : null,
+      p.note ? h('p', { class: 'fine rr-sessions-note', role: 'status' }, p.note) : null,
       p.error ? h('p', { class: 'pp-error', role: 'alert' }, p.error) : null);
+    const tools = where;
     const q = p.filter.trim().toLowerCase();
     const shown = (p.list ?? []).filter(x => !q || [x.title, x.preview, x.cwd, x.branch].some(v => v?.toLowerCase().includes(q)));
     const filter = h('input', { type: 'search', class: 'rr-sessions-filter', placeholder: '제목·내용·폴더로 찾기', 'aria-label': '세션 찾기', value: p.filter }) as HTMLInputElement;
@@ -285,7 +314,7 @@ export function createReturnView(host: ReturnHost) {
         h('button', { type: 'button', class: 'link-button quiet', onclick: () => { p.open = false; render(); } }, '접기')),
       p.loading ? h('p', { class: 'fine' }, '세션을 찾는 중…') : null,
       p.error ? h('p', { class: 'pp-error', role: 'alert' }, p.error) : null,
-      p.list && !p.list.length ? h('p', { class: 'fine' }, `이 PC에서 ${tools} 세션 기록을 찾지 못했어요.`) : null,
+      p.list && !p.list.length ? h('p', { class: 'fine' }, `${tools}에서 세션을 찾지 못했어요.`) : null,
       p.list?.length ? filter : null,
       rows.length ? h('ul', { class: 'rr-session-list' }, ...rows) : p.list?.length ? h('p', { class: 'fine' }, '찾는 말과 맞는 세션이 없어요.') : null);
   }

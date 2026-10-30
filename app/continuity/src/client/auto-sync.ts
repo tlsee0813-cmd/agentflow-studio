@@ -1,12 +1,14 @@
 /* Automatic connection: a saved project bound to a working folder takes the new turns of that folder's Claude Code / Codex sessions
- * as pasted records and reads them into the map, without a click. The person connects once (a folder the local server found in
- * the sessions it reads); from then on, while the project is open in this tab, each settled session's new turns are kept as they
+ * as pasted records and reads them into the map, without a click. The person connects once (a working folder found in the sessions
+ * the local server reads, or, with no such server, in the .claude / .codex folder they picked in this browser: session-source.ts);
+ * from then on, while the project is open in this tab, each settled session's new turns are kept as they
  * were written (credential-like parts hidden) and an automatic map reading follows, at most AUTO_RUNS_PER_DAY a day and
  * AUTO_RUN_GAP_MS apart. Nothing is done for a project that is not open: what came meanwhile is taken when it is opened again.
  * The binding and how far each session was taken are kept in this browser beside the project (never in the project data). */
 import type { StorageLike } from '../shared/storage.js';
 import type { Project } from '../shared/types.js';
-import { listSessions, readSession, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
+import { ERROR_TEXT } from './studio-api.js';
+import type { SessionSources } from './session-source.js';
 import { newTurns, sessionChunks, stamp, TOOL_NAME, SETTLE_MS, AUTO_RUN_GAP_MS, AUTO_RUNS_PER_DAY, BACKFILL_MS, BACKFILL_SESSIONS, type SessionMark, type SessionSummary } from '../shared/session-import.js';
 import { h, put } from './plan-dom.js';
 
@@ -30,8 +32,7 @@ function readBinding(v: unknown): Binding | null {
 
 export interface AutoSyncHost {
   current(): { key: string; kind: string; project: Project } | null;
-  status(): AiStatus;
-  accessCode(): string;
+  sources: SessionSources;
   kv: StorageLike;
   /** Keeps these texts as pasted records of entry `key` (only while it is the one open), in order, in one save; text when not kept. */
   save(key: string, texts: string[]): Promise<string | null>;
@@ -58,7 +59,8 @@ export function createAutoSync(host: AutoSyncHost) {
     const v = all(); if (b) v[key] = b; else delete v[key];
     try { host.kv.setItem(AUTOSYNC_KEY, JSON.stringify(v)); } catch { /* the binding holds for this page only */ }
   }
-  const offered = () => !!host.status().sessions?.tools.length;
+  const offered = () => host.sources.offered();
+  const failText = (e: unknown, fallback: string) => ERROR_TEXT[(e as { code?: string } | null)?.code ?? ''] ?? fallback;
   const open = () => { const o = host.current(); return o && o.kind === 'saved' ? o : null; };
 
   /** Looks once at the open project's folder: takes what settled since, then reads the map if it can and may. */
@@ -66,15 +68,15 @@ export function createAutoSync(host: AutoSyncHost) {
     const o = open(); if (!o || !offered()) return;
     // A look asked for while one runs (a folder just added, '지금 확인') follows it instead of being dropped.
     if (busy) { if (force) again = true; return; }
-    const key = o.key, b = bindingOf(key); if (!b) return;
+    const key = o.key, b = bindingOf(key), src = host.sources.current(); if (!b || !src) return;
     busy = true; render();
     try {
       const now = Date.now(), seen = new Set<string>(), due: { s: SessionSummary; f: FolderLink }[] = [], looked: FolderLink[] = [];
       let failed: string | null = null;
       for (const f of b.folders) {
         let list: SessionSummary[];
-        try { list = await listSessions(host.accessCode(), f.path); }
-        catch (e) { failed = `${folderName(f.path)}: ${ERROR_TEXT[e instanceof AskError ? e.code : ''] ?? '세션 기록을 확인하지 못했어요.'}`; continue; }
+        try { list = await src.list(f.path); }
+        catch (e) { failed = `${folderName(f.path)}: ${failText(e, '세션 기록을 확인하지 못했어요.')}`; continue; }
         looked.push(f);
         // Folders inside one another list the same session once.
         let mine = list.filter(s => !seen.has(s.id) && s.updatedAt >= f.since && b.marks[s.id]?.updatedAt !== s.updatedAt && (force || now - Date.parse(s.updatedAt) >= SETTLE_MS));
@@ -85,7 +87,7 @@ export function createAutoSync(host: AutoSyncHost) {
       due.sort((x, y) => x.s.updatedAt.localeCompare(y.s.updatedAt)); // oldest first, so records keep the order the work happened in
       const texts: string[] = [], marks: Record<string, SessionMark> = {};
       for (const { s, f } of due) {
-        let d; try { d = await readSession(s.id, host.accessCode()); } catch { continue; }
+        let d; try { d = await src.read(s.id); } catch { continue; }
         const mark = b.marks[s.id] ?? null, turns = newTurns(d, mark, f.backfilled ? f.connectedAt : null);
         const at = [...d.turns].reverse().find(t => t.at)?.at ?? null;
         marks[s.id] = { lastAt: at ?? mark?.lastAt ?? null, count: d.omitted + d.turns.length, updatedAt: s.updatedAt };
@@ -114,17 +116,17 @@ export function createAutoSync(host: AutoSyncHost) {
   }
 
   async function loadFolders() {
-    if (foldersLoading) return;
+    const src = host.sources.current(); if (foldersLoading || !src) return;
     foldersLoading = true; foldersError = null; render();
     try {
       const by = new Map<string, { folder: string; count: number; latest: string; tools: Set<string> }>();
-      for (const s of await listSessions(host.accessCode())) {
+      for (const s of await src.list()) {
         if (!s.cwd) continue;
         const f = by.get(s.cwd) ?? { folder: s.cwd, count: 0, latest: s.updatedAt, tools: new Set<string>() };
         f.count++; if (s.updatedAt > f.latest) f.latest = s.updatedAt; f.tools.add(TOOL_NAME[s.tool]); by.set(s.cwd, f);
       }
       folders = [...by.values()].sort((a, b) => b.latest.localeCompare(a.latest));
-    } catch (e) { foldersError = ERROR_TEXT[e instanceof AskError ? e.code : ''] ?? '세션 기록을 찾지 못했어요.'; }
+    } catch (e) { foldersError = failText(e, '세션 기록을 찾지 못했어요.'); }
     foldersLoading = false; render();
   }
   /** Connects the open project to a folder: the first one makes the connection, another is added to it (once). */
@@ -150,11 +152,14 @@ export function createAutoSync(host: AutoSyncHost) {
     const o = open();
     if (!o || !offered()) { pill.hidden = true; panel.hidden = true; return; }
     const b = bindingOf(o.key), name = b ? `${folderName(b.folders[0]!.path)}${b.folders.length > 1 ? ` 외 ${b.folders.length - 1}` : ''}` : null;
-    pill.hidden = false; pill.dataset.state = !b ? 'off' : b.error ? 'error' : busy ? 'busy' : 'on';
+    // Connected, but the picked session folders wait for this browser's permission again (a later visit): said on the pill.
+    const waiting = !!b && !host.sources.current();
+    pill.hidden = false; pill.dataset.state = !b ? 'off' : b.error || waiting ? 'error' : busy ? 'busy' : 'on';
     pill.setAttribute('aria-expanded', String(panelOpen));
-    pill.replaceChildren(h('i', { 'aria-hidden': 'true' }), h('span', {}, b ? `자동 연결 · ${name}` : '자동 연결 안 됨'));
+    pill.replaceChildren(h('i', { 'aria-hidden': 'true' }), h('span', {}, b ? `자동 연결 · ${name}${waiting ? ' · 허용 필요' : ''}` : '자동 연결 안 됨'));
     panel.hidden = !panelOpen; if (!panelOpen) return;
     panel.replaceChildren();
+    const setup = sourceSetup();
     if (b && !adding) {
       const runs = b.runs.day === day() ? b.runs.n : 0;
       put(panel, h('h3', {}, '작업 폴더에 자동 연결됨'),
@@ -165,12 +170,19 @@ export function createAutoSync(host: AutoSyncHost) {
           h('dt', {}, '오늘 자동 지도 갱신'), h('dd', {}, `${runs} / ${AUTO_RUNS_PER_DAY}회`)),
         host.readBlocked() ? h('p', { class: 'fine sync-blocked' }, `기록은 들어오지만 지도는 갱신하지 않아요: ${host.readBlocked()}`) : null,
         b.error ? h('p', { class: 'pp-error', role: 'alert' }, b.error) : null,
-        h('div', { class: 'pp-row' }, h('button', { type: 'button', class: 'secondary small', disabled: busy, onclick: () => void tick(true) }, busy ? '확인 중…' : '지금 확인'),
+        setup,
+        h('div', { class: 'pp-row' }, h('button', { type: 'button', class: 'secondary small', disabled: busy || waiting, onclick: () => void tick(true) }, busy ? '확인 중…' : '지금 확인'),
           h('button', { type: 'button', class: 'link-button sync-add', onclick: () => { adding = true; folders = null; foldersError = null; render(); } }, '폴더 추가'),
           h('button', { type: 'button', class: 'link-button quiet sync-off', onclick: disconnect }, '연결 끊기')));
       return;
     }
     const linked = new Set(b?.folders.map(f => f.path) ?? []), picks = folders?.filter(f => !linked.has(f.folder)) ?? null;
+    // No source yet: the session folders are picked (or allowed again) first.
+    if (!host.sources.current()) {
+      put(panel, h('h3', {}, '내 AI 세션 연결'), setup,
+        b ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { adding = false; render(); } }, '취소') : null);
+      return;
+    }
     // Looking the folders up draws the panel itself (its loading state, then the list).
     if (!folders && !foldersLoading && !foldersError) { void loadFolders(); return; }
     const input = h('input', { type: 'text', class: 'sync-path', placeholder: '작업 폴더 경로 (예: C:\\work\\salon)', 'aria-label': '작업 폴더 경로', value: typed }) as HTMLInputElement;
@@ -184,7 +196,27 @@ export function createAutoSync(host: AutoSyncHost) {
       picks?.length ? h('ul', { class: 'sync-folders' }, ...picks.slice(0, 12).map(f => h('li', {}, h('button', { type: 'button', class: 'sync-folder-pick', onclick: () => connect(f.folder) },
         h('strong', {}, f.folder), h('small', {}, `${[...f.tools].join('·')} 세션 ${f.count}개 · 최근 ${stamp(f.latest, true)}`))))) : null,
       h('div', { class: 'pp-row sync-manual' }, input, h('button', { type: 'button', class: 'secondary small', onclick: () => connect(typed) }, '연결')),
+      setup,
       b ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { adding = false; render(); } }, '취소') : null);
+  }
+  /** Where sessions come from when no local server reads them: the .claude / .codex folders picked in this browser. Null with a
+   * server (it reads this PC's own folders). */
+  function sourceSetup(): HTMLElement | null {
+    const src = host.sources; if (src.usesServer()) return null;
+    const state = src.folderState(), names = src.folders();
+    const pick = async () => { if (await src.pick()) { folders = null; foldersError = null; render(); void tick(true); } };
+    const grant = async () => { await src.grant(); folders = null; foldersError = null; render(); void tick(true); };
+    if (state === 'unsupported') return null;
+    if (state === 'none') return h('div', { class: 'sync-source' },
+      h('p', { class: 'fine' }, '설치 없이 이 브라우저가 AI 세션 기록을 직접 읽어요. Claude Code 앱·CLI는 사용자 폴더의 .claude, Codex 앱·CLI는 .codex 폴더를 골라 주세요. 둘 다 쓰면 하나씩 두 번 고르면 돼요. 기록은 이 브라우저 밖으로 나가지 않아요.'),
+      h('button', { type: 'button', class: 'primary small sync-pick-root', onclick: () => void pick() }, '세션 폴더 고르기'));
+    return h('div', { class: 'sync-source' },
+      h('p', { class: 'fine' }, `읽는 세션 폴더: ${names.join(', ')}`),
+      state === 'prompt' ? h('p', { class: 'fine sync-blocked' }, '브라우저가 이 폴더를 다시 읽어도 되는지 물어봐야 해요.') : null,
+      h('div', { class: 'pp-row' },
+        state === 'prompt' ? h('button', { type: 'button', class: 'primary small sync-grant', onclick: () => void grant() }, '다시 허용') : null,
+        h('button', { type: 'button', class: 'link-button sync-pick-root', onclick: () => void pick() }, '세션 폴더 더 고르기'),
+        ...names.map(n => h('button', { type: 'button', class: 'link-button quiet', 'aria-label': `${n} 세션 폴더 빼기`, onclick: async () => { await src.forget(n); folders = null; render(); } }, `${n} 빼기`))));
   }
   function toggle() { panelOpen = !panelOpen; adding = false; if (panelOpen) { folders = null; foldersError = null; } render(); }
   function close() { if (panelOpen) { panelOpen = false; adding = false; render(); } }
@@ -192,6 +224,8 @@ export function createAutoSync(host: AutoSyncHost) {
   return {
     /** The open project or the server's status changed: redraw, and look at once when it is a connected project. */
     opened() { panelOpen = false; adding = false; render(); if (open() && bindingOf(open()!.key)) void tick(); },
+    /** The picked session folders were looked up (or the server's status came): redraw. */
+    sourcesChanged() { folders = null; foldersError = null; render(); },
     start() {
       if (timer === null) timer = setInterval(() => { if (document.visibilityState === 'visible') void tick(); }, TICK_MS);
       document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') void tick(); });

@@ -52,16 +52,23 @@ export function codexBareRows() {
 }
 
 /** Writes both tools' folders under home, the Claude session newest. Returns the roots openSessions takes. */
-export function writeSessionHome(home) {
-  const claudeDir = join(home, '.claude', 'projects', '-work-salon'), codexDir = join(home, '.codex', 'sessions', '2026', '10', '28');
-  mkdirSync(claudeDir, { recursive: true }); mkdirSync(codexDir, { recursive: true });
-  const files = [
-    [join(codexDir, 'rollout-2026-10-28T09-00-00-old.jsonl'), jsonl(codexBareRows()), 1000],
-    [join(codexDir, 'rollout-2026-10-28T09-20-00-x1.jsonl'), jsonl(codexRows()), 2000],
-    [join(claudeDir, 'c1.jsonl'), jsonl(claudeRows()), 3000],
+/** The synthetic session files as they lie under a home folder: [root, path inside it, text, modified time (ms)]. */
+export function sessionFiles() {
+  const at = n => Date.parse('2026-10-28T10:00:00Z') + n;
+  return [
+    ['.codex', 'sessions/2026/10/28/rollout-2026-10-28T09-00-00-old.jsonl', jsonl(codexBareRows()), at(1000)],
+    ['.codex', 'sessions/2026/10/28/rollout-2026-10-28T09-20-00-x1.jsonl', jsonl(codexRows()), at(2000)],
+    ['.claude', 'projects/-work-salon/c1.jsonl', jsonl(claudeRows()), at(3000)],
     // A file with no prompt (only injected context) is not listed.
-    [join(claudeDir, 'empty.jsonl'), jsonl([claudeRows()[0]]), 4000]
+    ['.claude', 'projects/-work-salon/empty.jsonl', jsonl([claudeRows()[0]]), at(4000)]
   ];
-  for (const [f, text, at] of files) { writeFileSync(f, text); utimesSync(f, new Date(Date.parse('2026-10-28T10:00:00Z') + at), new Date(Date.parse('2026-10-28T10:00:00Z') + at)); }
+}
+export function writeSessionHome(home) {
+  for (const [root, path, text, at] of sessionFiles()) {
+    const f = join(home, root, ...path.split('/'));
+    mkdirSync(join(f, '..'), { recursive: true }); writeFileSync(f, text); utimesSync(f, new Date(at), new Date(at));
+  }
   return { claude: join(home, '.claude'), codex: join(home, '.codex') };
 }
+// `node sessions-fixture.mjs` prints the files as JSON (the browser flow builds a picked folder from them).
+if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split(/[\\/]/).pop())) console.log(JSON.stringify(sessionFiles()));
