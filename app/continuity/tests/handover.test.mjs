@@ -110,6 +110,13 @@ test('HANDOVER-B2 a web record pasted back keeps a handover document its request
   assert.equal(kept, `[웹 AI 세션 기록 · 결제 연결]\n\n── 사용자 요청 ──\n${line}\n\n결제 버튼을 붙여 줘\n\n── 웹 AI 답변 ──\n문서의 ${doc.split('\n')[0]} 줄을 보고 이어서 붙였어요.\n(바꾼 파일: src/pay.ts)`);
   assert.equal(foldRecord(kept), kept, 'folding again changes nothing');
   assert.deepEqual(receivedHandovers(kept), [{ code: 'QW3RTY', areaId: booking }]);
+  // Copied without its end line, the document folds to the end of the request: the answer's head still starts its own line, so the
+  // answer stays the AI's and its files stay its files.
+  const cut = foldRecord(`[웹 AI 세션 기록 · 취소 마감]\n\n── 사용자 요청 ──\n${doc.split('\n').slice(0, -1).join('\n').trimEnd()}\n\n── 웹 AI 답변 ──\n고쳤어요.\n(바꾼 파일: src/cancel.ts)`);
+  assert.equal(cut, `[웹 AI 세션 기록 · 취소 마감]\n\n── 사용자 요청 ──\n${line}\n\n── 웹 AI 답변 ──\n고쳤어요.\n(바꾼 파일: src/cancel.ts)`);
+  assert.equal(foldRecord(cut), cut);
+  assert.deepEqual(receivedHandovers(cut), [{ code: 'QW3RTY', areaId: booking }]);
+  assert.ok(handoverText(D.pasteRecord(p, cut, null).project, { scope: null, code: 'CUT234', at: '2026-10-30T05:00:00.000Z' }).includes('\n- (인수인계 문서로 시작 · 나의 프로젝트 › 예약 화면) → 바꾼 파일: src/cancel.ts\n'));
   // Text that is not a session record (the document kept on its own, a note) stays as written.
   assert.equal(foldRecord(doc), doc);
   assert.equal(foldRecord(`메모\n${doc}`), `메모\n${doc}`);

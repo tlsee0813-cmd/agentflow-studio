@@ -23,7 +23,8 @@ export function foldHandover(text: string): string {
     const m = START.exec(out);
     if (m) {
       const end = END(m[1]!).exec(out.slice(m.index + m[0].length));
-      from = m.index; to = end ? from + m[0].length + end.index + end[0].length : out.length; code = m[1]!; area = m[2];
+      // Folded to the end (its end line not copied), the blank lines after it stay: in a pasted record they set off the next block's head.
+      from = m.index; to = end ? from + m[0].length + end.index + end[0].length : out.trimEnd().length; code = m[1]!; area = m[2];
     } else {
       const end = END(CODE).exec(out), head = end ? [...out.slice(0, end.index).matchAll(/^# 인수인계: /gm)].at(-1) : undefined;
       if (!end || !head) break;
