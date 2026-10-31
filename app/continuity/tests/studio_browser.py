@@ -2912,7 +2912,7 @@ def handover_flow(browser, base):
     page.locator("#lens .lens-more").click()
     sessions = page.locator("#panel .sec-sessions")
     expect(sessions).to_contain_text("Claude Code 「휴무일 연결」")
-    expect(sessions).to_contain_text("salon · main")
+    expect(sessions.locator(".part-sessions small")).to_have_text("salon · main")  # no time: the record's is when it was taken in
     page.locator("#panel").get_by_role("button", name="요약으로 돌아가기").click()
     # The part's document from its ⋯ menu.
     page.locator("#lens details.more summary").click()

@@ -1417,7 +1417,8 @@ function sessionsSection(project: Project, partId: string): HTMLElement | null {
   return h('section', { class: 'sec sec-sessions' }, h('h3', {}, '다룬 세션 ', h('small', {}, `${list.length}`)),
     h('ul', { class: 'part-sessions' }, ...list.slice(0, 6).map(x => h('li', {},
       h('strong', {}, originLabel(x)), x.tookOver ? h('span', { class: 'chip plain' }, '인수인계로 이어받음') : null,
-      h('small', {}, [x.cwd ? x.cwd.split(/[\\/]/).filter(Boolean).at(-1) : null, x.branch, `기록 ${ago(x.lastAt)}`].filter(Boolean).join(' · '))))));
+      // No time: a record's is when it was taken in (a folder's past sessions all at once), not when its session ran.
+      h('small', {}, [x.cwd ? x.cwd.split(/[\\/]/).filter(Boolean).at(-1) : null, x.branch].filter(Boolean).join(' · '))))));
 }
 /** A session record kept while a part is read (the automatic connection): only its sessions are drawn again, so the scroll, the
  * focus and a form open there stay. A part that had none yet is read again whole. */
