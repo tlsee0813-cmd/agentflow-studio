@@ -12,6 +12,7 @@ import { ERROR_TEXT } from './studio-api.js';
 import type { SessionSources } from './session-source.js';
 import { newTurns, markAfter, leftSince, sessionText, sessionChunks, stamp, TOOL_NAME, SETTLE_MS, AUTO_RUN_GAP_MS, AUTO_RUNS_PER_DAY, BACKFILL_MS, BACKFILL_SESSIONS, type SessionDetail, type SessionMark, type SessionSummary } from '../shared/session-import.js';
 import { sameFolder, within } from '../shared/session-parse.js';
+import { foldRecord } from '../shared/handover.js';
 import { h, put, ago } from './plan-dom.js';
 
 export const AUTOSYNC_KEY = 'agentflow.studio.autosync.1';
@@ -24,7 +25,9 @@ export interface Binding { folders: FolderLink[]; marks: Record<string, SessionM
   runs: { day: string; n: number; last: string | null }; taken: number; lastCheck: string | null; error: string | null;
   /** The person called off a map reading (cancelled it, or let its result go) when this many records had been taken: no automatic
    * reading starts again until one more comes in. Their own click still reads. */
-  held?: number | null }
+  held?: number | null;
+  /** The last AgentFlow connector record taken (its number on the local server), when the server keeps them. */
+  connector?: number }
 const folderName = (path: string) => path.split(/[\\/]/).filter(Boolean).pop() ?? path;
 /** A session begun at or after its folder was connected. */
 const begunSince = (s: SessionSummary, f: FolderLink) => !!s.startedAt && Date.parse(s.startedAt) >= Date.parse(f.connectedAt);
@@ -62,6 +65,14 @@ export interface AutoSyncHost {
   readBlocked(): string | null;
   /** The open project was connected or its connection ended (its empty map offers the connection, or says it is on). */
   bound?(): void;
+  /** The AgentFlow connector's mailbox on the local server, when it keeps one (else null). */
+  connector?(): ConnectorHost | null;
+}
+/** What the automatic connection does with the connector: takes the records AI sessions left for the project's folders, and leaves
+ * the project's handover document for a session that asks for it (the host makes it, and only when the project changed). */
+export interface ConnectorHost {
+  records(after: number, folders: string[]): Promise<{ records: { seq: number; at: string; folder: string | null; text: string }[]; last: number; more: boolean }>;
+  publish(key: string, folders: string[]): Promise<void>;
 }
 
 const TICK_MS = 60 * 1000;
@@ -205,6 +216,28 @@ export function createAutoSync(host: AutoSyncHost) {
           if (!more) break;
           was = next; first = false;
         }
+      }
+      // Records AI sessions left through the AgentFlow connector for these folders (each made in one of them, after it was linked),
+      // oldest first, a few pages a look; marked by number as soon as they are kept.
+      const cx = host.connector?.() ?? null;
+      if (cx && !full) {
+        try {
+          for (let page = 0; page < 4; page++) {
+            const cur = stored(key); if (!cur?.folders.length || open()?.key !== key) break;
+            const got = await cx.records(cur.connector ?? 0, cur.folders.map(f => f.path));
+            const texts = got.records.filter(r => cur.folders.some(f => within([r.folder], f.path) && r.at >= f.since)).map(r => foldRecord(r.text));
+            const upTo = got.more ? Math.max(cur.connector ?? 0, ...got.records.map(r => r.seq)) : got.last;
+            if (texts.length) {
+              if (open()?.key !== key) return;
+              const no = await host.save(key, texts);
+              if (no && !no.refused) { error = no.error; halted.set(key, no.error); return; }
+              if (no) failed = no.error;
+            }
+            const now2 = stored(key); if (now2) { now2.connector = upTo; now2.taken += texts.length; put_(key, now2); }
+            if (!got.more) break;
+          }
+          await cx.publish(key, b.folders.map(f => f.path));
+        } catch (e) { failed = failed ?? `AgentFlow 커넥터: ${failText(e, '커넥터 기록을 확인하지 못했어요.')}`; }
       }
       error = failed;
       const runs = stored(key)?.runs ?? b.runs, today = day(), n = runs.day === today ? runs.n : 0;

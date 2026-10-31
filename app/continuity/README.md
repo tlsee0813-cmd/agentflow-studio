@@ -41,6 +41,19 @@ Codex·Claude에서 평소처럼 개발한 기록(요청·작업 보고·확인 
 **키·비밀번호 가리기.** 세션에서 가져온 기록뿐 아니라 직접 붙여 넣은 글, 웹 AI가 써 준 기록도 저장할 때 키·토큰·비밀번호처럼 보이는 곳을 `[가려진 비밀값]`으로 바꿉니다. "비밀번호는 …", "토큰은 …"처럼 한국어로 적은 것도 가립니다.
 저장소가 나뉜 프로젝트는 **폴더 추가**로 여러 작업 폴더를 묶을 수 있고, 지도에서 부분마다 어느 세션이 다뤘는지 보입니다.
 
+## AI 세션에 커넥터로 붙이기 (AgentFlow 커넥터)
+
+자동 읽기 말고 AI 세션에 직접 붙일 수도 있습니다. `connector/agentflow-mcp.mjs`는 패키지 설치 없이 Node로 도는 MCP 서버(stdio)로, 이 PC의 Studio에만 연결합니다.
+세션 안의 AI가 `agentflow_handover`로 이 작업 폴더에 연결된 프로젝트의 최신 인수인계를 직접 받고, 요청 하나를 끝내면 `agentflow_record`로 요청 원문·한 일·바꾼 파일(변경 요청문을 따른 일이면 그 `RQ_` id)을 남깁니다. 남긴 기록은 그 폴더에 자동 연결된 프로젝트가 열려 있을 때 1분 안에 세션 기록과 같은 형식으로 들어오고, 인수인계 문서는 프로젝트가 바뀔 때마다 Studio가 새로 만들어 둡니다.
+
+```sh
+claude mcp add agentflow -- node "<저장소>/app/continuity/connector/agentflow-mcp.mjs"   # Claude Code, 작업 폴더에서
+```
+
+Codex는 `~/.codex/config.toml`에 `[mcp_servers.agentflow]`(`command = "node"`, `args = ["<저장소>/app/continuity/connector/agentflow-mcp.mjs"]`)를 둡니다. 다른 포트면 `AGENTFLOW_URL`, 작업 폴더를 정하려면 `AGENTFLOW_FOLDER`, 접속 코드를 걸었다면 `AGENTFLOW_ACCESS_CODE`를 줍니다.
+Studio는 받은 기록(최근 14일, 500개)과 프로젝트별 최신 인수인계를 `continuity/.studio-data/connector-<port>/`에 두고(`STUDIO_CONNECTOR_DIR`, `STUDIO_CONNECTOR=off`), 비밀값처럼 보이는 곳은 쓰기 전에 가립니다. 같은 origin만 받으며 Worker·정적 빌드에는 없습니다.
+Claude Code·Codex에서 자동 읽기와 기록 도구를 함께 쓰면 같은 요청이 원문과 AI 요약으로 두 번 들어갈 수 있습니다. 설계와 웹 claude.ai용 원격 커넥터 계획은 [커넥터 설계](../../docs/CONNECTOR_KO.md)에 있습니다.
+
 ## 인수인계 문서
 
 세션을 바꿀 때는 지도 위 **인수인계 문서**(프로젝트 전체) 또는 부분의 ⋯ 메뉴(그 부분만)에서 문서를 만들어 새 세션에 그대로 붙여 넣습니다.
@@ -112,6 +125,7 @@ Ctrl+C나 서비스 종료(SIGTERM)를 받으면 지도 작업 보관소를 정�
 | `POST /api/studio/ask` | `studio.1` 요청(부분과 기록 최대 14개) → 검증된 `{ headline, situation[], changes[], next[], answer, refs[] }` |
 | `POST /api/studio/map`, `/plan`, `/scope`, `/digest` | 기록으로 지도 정리, 변경 구상, 고른 범위의 전제 검토, 여러 부분 자료 읽기. 요청·응답 계약은 `src/shared/map-reading.ts`, `plan-api.ts`, `scope-api.ts`, `digest-api.ts`. 제한 공개판(`worker-existing-map.mjs`)은 `map`과 `jobs`를 `MAP_WITHHELD`로 거절 |
 | `GET /api/studio/sessions?folder=…`, `GET /api/studio/sessions/<id>?since=…` | 로컬 Node 서버만(`server/sessions.mjs`, `STUDIO_SESSIONS=off`로 끔): 이 PC의 Claude Code(`CLAUDE_CONFIG_DIR` 또는 `~/.claude`)·Codex(`CODEX_HOME` 또는 `~/.codex`) 세션 목록과 한 세션의 대화. 읽기만 하며 경로가 아니라 목록의 ID로만 요청. 같은 origin만 허용 |
+| `GET·POST /api/studio/connector/records`, `GET·POST /api/studio/connector/handover` | 로컬 Node 서버만(`server/connector.mjs`): AgentFlow 커넥터가 남긴 기록을 받아 두고 브라우저가 가져감, 브라우저가 둔 최신 인수인계를 커넥터가 받아 감. 같은 origin만 허용 |
 | `POST /api/studio/jobs`, `GET /api/studio/jobs/<id>`, `POST …/<id>/cancel`, `POST …/<id>/ack` | AF100, 로컬 Node 서버만: 지도 정리를 이 PC의 작업으로 보관(`server/map-jobs.mjs`, 기본 `continuity/.studio-data/map-jobs-<port>`, `STUDIO_JOBS_DIR`/`STUDIO_JOBS=off`). 회수 권한은 `X-Studio-Operation` 헤더로만. 창을 닫아도 실행기가 켜져 있으면 계속되고, 실행기가 꺼지면 중단으로 남는다. Worker·정적 빌드는 광고하지 않는다. |
 
 - 키: `env.DEEPSEEK_API_KEY`에서만 읽습니다. 공급자 Authorization 헤더로만 쓰고, 응답·로그·번들에는 넣지 않습니다.

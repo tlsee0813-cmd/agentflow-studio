@@ -15,7 +15,7 @@ import { correctRequestMatch, unlinkReplacement, requestComparison } from '../sh
 import { studioView, subtreeRecords, partPath, buildAsk, draftAfterAnswer, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
 import { layoutScope, edgePath, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, ROOT, HEAD, type Box, type Edge, type LabelSpot, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
-import { aiStatus, askStudio, AskError, ERROR_TEXT, RELEASE_TEXT, PUBLIC_EDITION, type AiStatus } from './studio-api.js';
+import { aiStatus, askStudio, AskError, ERROR_TEXT, RELEASE_TEXT, PUBLIC_EDITION, connectorRecords, publishHandover, type AiStatus } from './studio-api.js';
 import { runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
@@ -24,7 +24,7 @@ import { AUTO_SENDS, createReturnView, type Scene, type ReadingContext } from '.
 import { createAutoSync } from './auto-sync.js';
 import { createSessionSources } from './session-source.js';
 import { createHandoverView } from './handover-view.js';
-import { partSessions, originLabel } from '../shared/handover.js';
+import { partSessions, originLabel, handoverDoc, handoverCode } from '../shared/handover.js';
 import { UI62_KEY, buildUi62Project, ui62Keys } from '../shared/return-material.js';
 import { REL_LABEL, relationGroups, dirMark, dirTitle, insideEnds } from '../shared/relation-groups.js';
 
@@ -1964,6 +1964,22 @@ function recordRoom(p: Project, texts: string[]): string | null {
   const adds = texts.length ? texts.reduce((n, t) => n + utf8(JSON.stringify(t)) + 120, 0) : 4096;
   return utf8(serializeProject(p)) + adds > FILE_LIMIT ? `이 프로젝트에 담을 수 있는 기록의 양(${FILE_LIMIT / 1e6}MB)이 다 찼어요.${more}` : null;
 }
+/** The AgentFlow connector (an MCP server an AI session runs beside it, connector/agentflow-mcp.mjs) through the local server: the
+ * records sessions leave come in with the automatic connection, and the open project's handover document is left for a session
+ * that asks for it, made again only when the project changed (one code per project while this page is open). */
+const handoverLeft = new Map<string, { revision: number; folders: string; code: string }>();
+const connectorHost = {
+  records: (after: number, folders: string[]) => connectorRecords(sessionCode(), after, folders),
+  publish: async (key: string, folders: string[]) => {
+    const o = opened; if (!o || o.kind !== 'saved' || o.key !== key || !folders.length) return;
+    const was = handoverLeft.get(key), joined = folders.join('\n');
+    if (was && was.revision === o.project.revision && was.folders === joined) return;
+    const code = was?.code ?? handoverCode();
+    let text: string; try { text = handoverDoc(o.project, { scope: null, code, at: new Date().toISOString(), requests: frozenRequests(o.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : [])) }).text; } catch { return; }
+    await publishHandover(sessionCode(), { key, code, name: o.project.name, folders, text });
+    handoverLeft.set(key, { revision: o.project.revision, folders: joined, code });
+  }
+};
 const autoSync = createAutoSync({
   current: () => opened,
   sources: sessionSources,
@@ -1984,6 +2000,7 @@ const autoSync = createAutoSync({
   canRead: () => { const inp = mapRun.input(), st = mapRun.state(); return !!inp && !inp.problem && mapRun.can() && !st.pending && !st.ready && !st.committing; },
   read: () => void mapRun.run(),
   bound: () => renderMapEntry(),
+  connector: () => (status.connector && status.sessions ? connectorHost : null),
   readBlocked: () => (status.release === 'existing-map' ? RELEASE_TEXT.limit : mapRun.can() ? null : mapRun.blocked() ?? '지도 정리에 쓸 AI가 이 서버에 연결되어 있지 않아요.')
 });
 /** AF100: while a reading runs as a job, the person is told it goes on without this window but not without the PC's Studio. */

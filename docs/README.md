@@ -31,6 +31,7 @@
 | [제품 방향과 연구 계획](PRODUCT_DIRECTION_AND_RESEARCH_PLAN_KO.md) | 제품의 목적, 원칙, 연구 주제 (개정 3.1, 2026-10-15) | 방향 기준 |
 | [검토 반영 기록](REVIEW_DECISIONS_APPENDIX_KO.md) | 방향 문서의 판단 이유와 코드 근거 | 부록 |
 | [소프트웨어 지도 설계](SOFTWARE_MAP_DESIGN_KO.md) | 전체 구성·묶음·표현 설계 (v1.3.1, 2026-10-26) | 설계 제안, 일부만 구현 |
+| [AgentFlow 커넥터 설계](CONNECTOR_KO.md) | AI 세션에 직접 붙이는 세 가지 연결 방법, 로컬 MCP 커넥터, 웹 claude.ai용 원격 커넥터 계획 (2026-10-31) | 로컬 커넥터 구현, 웹은 설계만 |
 | [design/](design/) | 지도·구성 시안 HTML과 이미지, SPATIAL101 시안 | 시안 |
 
 ## 4. 인수인계와 운영 기록 (기록)
