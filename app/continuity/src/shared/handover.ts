@@ -174,7 +174,7 @@ export function handoverDoc(p: Project, opts: HandoverOptions): Handover {
     out.push('');
   }
   out.push(scoped ? '## 이 범위의 현재 상태' : '## 부분별 현재 상태');
-  // The parts are what the last reading saw: records it has not read (often the newest work) are only in the recent flow.
+  // The parts are what the last reading saw: records it has not read (often the newest work) are not in them, and the document says so.
   const unread = latest && parts.length ? unreadRecords(p, view).length : 0;
   if (unread) out.push(`(지도는 ${stamp(latest!.at, true)}에 읽은 기록까지예요. 아직 지도에 담기지 않은 기록이 ${unread}개 있어서, 아래 최근 흐름이 더 새로울 수 있어요.)`, '');
   if (!parts.length) out.push('아직 지도에 부분이 없어요. 아래 최근 흐름과 사용자의 설명에서 시작하세요.', '');
