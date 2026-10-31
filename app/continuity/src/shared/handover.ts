@@ -163,12 +163,13 @@ export function handoverDoc(p: Project, opts: HandoverOptions): Handover {
   ];
   const summary = [...maps].reverse().find(r => r.summary)?.summary;
   if (summary) out.push('## 프로젝트 한눈에', one(summary, 1200), '');
-  // Where the work happens: the sessions behind this scope (their folder and branch), newest first.
+  // Where the work happens: the sessions behind this scope (their folder and branch), newest first. No time is written: a record's
+  // is when AgentFlow took it in (a folder's past sessions all at once), not when its session ran.
   const scopeIds = new Set(parts.map(x => x.id)), by = new Map(parts.map(x => [x.id, partSessions(p, x.id)]));
   const sessions = scoped ? dedupe(parts.flatMap(x => by.get(x.id)!)) : partSessions(p, null);
   if (sessions.length) {
     out.push('## 작업 장소와 세션');
-    for (const s of sessions.slice(0, 8)) out.push(one(`- ${originLabel(s)}${s.cwd ? ` · 작업 폴더 ${s.cwd}` : ''}${s.branch ? ` · 브랜치 ${s.branch}` : ''} · 마지막 기록 ${stamp(s.lastAt, true)}${s.tookOver ? ' · 인수인계로 이어받은 세션' : ''}`, 320));
+    for (const s of sessions.slice(0, 8)) out.push(one(`- ${originLabel(s)}${s.cwd ? ` · 작업 폴더 ${s.cwd}` : ''}${s.branch ? ` · 브랜치 ${s.branch}` : ''}${s.tookOver ? ' · 인수인계로 이어받은 세션' : ''}`, 320));
     out.push('');
   }
   out.push(scoped ? '## 이 범위의 현재 상태' : '## 부분별 현재 상태');
