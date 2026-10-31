@@ -72,6 +72,8 @@ export function createAutoSync(host: AutoSyncHost) {
   function stored(key: string): Binding | null { return readBinding(all()[key]); }
   /** A session's mark, also one kept under an id the session had before (made from its file's path). */
   const markOf = (b: Binding, s: SessionSummary): SessionMark | null => b.marks[s.id] ?? s.aliases?.map(a => b.marks[a]).find(m => !!m) ?? null;
+  /** Whether this folder is still linked as it was when a look began (the person may have left it, or ended the connection). */
+  const stillLinked = (key: string, f: FolderLink) => !!stored(key)?.folders.some(x => x.path === f.path && x.connectedAt === f.connectedAt);
   /** One session's mark onto the binding as it is now, where it is further on (its old ids' marks give way to it). */
   function keepMark(key: string, s: SessionSummary, m: SessionMark) {
     const cur = stored(key); if (!cur) return;
@@ -157,8 +159,10 @@ export function createAutoSync(host: AutoSyncHost) {
           if (upTo) turns = turns.filter(t => !t.at || t.at <= upTo);
           const texts = !turns.length ? [] : first ? [sessionText({ ...d, turns }).text] : sessionChunks(d, turns, undefined, leftSince(d, was));
           if (texts.length) {
-            // Kept only on the entry still open; otherwise nothing is marked and the next look takes the same turns again.
+            // Kept only on the entry still open; otherwise nothing is marked and the next look takes the same turns again. A folder the
+            // person left meanwhile (or the connection they ended) takes nothing more.
             if (open()?.key !== key) return;
+            if (!stillLinked(key, f)) continue sessions;
             const no = await host.save(key, texts);
             // A text refused leaves only its session to be taken again; anything else stops this look (and the next, until asked).
             if (no?.refused) { failed = no.error; continue sessions; }
@@ -179,7 +183,8 @@ export function createAutoSync(host: AutoSyncHost) {
       }
       error = failed;
       const runs = stored(key)?.runs ?? b.runs, today = day(), n = runs.day === today ? runs.n : 0;
-      if (open()?.key === key && host.canRead() && !host.readBlocked() && n < AUTO_RUNS_PER_DAY && (!runs.last || now - Date.parse(runs.last) >= AUTO_RUN_GAP_MS)) {
+      // A connection ended meanwhile starts no reading: what it kept before then is read by the person's own click.
+      if (open()?.key === key && bindingOf(key) && host.canRead() && !host.readBlocked() && n < AUTO_RUNS_PER_DAY && (!runs.last || now - Date.parse(runs.last) >= AUTO_RUN_GAP_MS)) {
         ran = new Date().toISOString(); host.read();
       }
     } finally {

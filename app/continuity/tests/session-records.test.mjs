@@ -574,3 +574,39 @@ test('SESSIONS-AS13 a reply begun before the connection and still written after 
   const all = t.texts().join('\n');
   for (const n of ['LONG-TASK', 'PART-A', 'PART-B']) assert.equal(all.split(n).length - 1, 1, `${n}\n${all}`);
 });
+
+/* ---------- the connection as the person changes it, on the same stand-in host ---------- */
+/** A tab like tab()'s whose map reading can always start (`reads` counts the readings started); save keeps every text. */
+function readingTab(src, opened = { key: 'E1', kind: 'saved', project: D.createProject() }) {
+  const kv = memKv(), t = { reads: 0, opened, kv, texts: () => opened.project.pasted.map(r => r.text), binding: () => JSON.parse(kv.getItem(AUTOSYNC_KEY))[opened.key] };
+  t.sync = createAutoSync({ current: () => opened, kv, sources: { offered: () => true, current: () => src, usesServer: () => true, folderState: () => 'none', folders: () => [] },
+    async save(key, texts) { for (const x of texts) opened.project = D.pasteRecord(opened.project, x, null).project; return null; },
+    full: () => null, canRead: () => true, read() { t.reads++; }, readBlocked: () => null });
+  return t;
+}
+/** Holds the source's readings until the returned function is called: a look still running while the person acts. */
+function held(src) { let go; const gate = new Promise(r => { go = r; }), read = src.read.bind(src); src.read = async (id, since) => { await gate; return read(id, since); }; return () => go(); }
+const folderLink = path => ({ path, connectedAt: ago(1), since: ago(20000), backfilled: false });
+
+test('SESSIONS-AC1 a connection ended, or a folder left, while a look runs takes nothing more from it, and no map reading starts for it', async () => {
+  const A = { id: ID, cwd: '/w', updatedAt: ago(30), turns: pair(40, 'W-ONE', 'a') }, B = { id: OLD, cwd: '/w', updatedAt: ago(29), turns: pair(38, 'W-TWO', 'b') };
+  const src = source([A, B]), go = held(src), t = readingTab(src);
+  t.sync.connect('/w'); await settle();
+  t.sync.disconnect(); assert.equal(t.sync.bindingOf('E1'), null);
+  go(); await settle();
+  assert.equal(t.texts().length, 0, 'nothing kept after the connection ended'); assert.equal(t.reads, 0, 'no map reading');
+  assert.deepEqual(t.binding().marks, {}, 'nothing marked: connecting again takes them');
+  t.sync.connect('/w'); await settle();
+  assert.equal(t.texts().length, 2); assert.equal(t.reads, 1);
+  // Ended and connected again meanwhile: the look that connecting queued takes them, once.
+  const src3 = source([A, B]), go3 = held(src3), r = readingTab(src3);
+  r.sync.connect('/w'); await settle(); r.sync.disconnect(); r.sync.connect('/w'); go3(); await settle();
+  assert.equal(r.texts().length, 2); assert.equal(r.binding().folders.length, 1);
+  // One of two folders left meanwhile: the other one's sessions still come in and are read into the map.
+  const V = { id: 'claude-fedcba9876543210fedcba98', cwd: '/v', updatedAt: ago(28), turns: pair(37, 'V-ONE', 'v') }, src2 = source([A, V]), go2 = held(src2), u = readingTab(src2);
+  u.kv.setItem(AUTOSYNC_KEY, JSON.stringify({ E1: { folders: [folderLink('/w'), folderLink('/v')], marks: {}, runs: { day: 'x', n: 0, last: null }, taken: 0, lastCheck: null, error: null } }));
+  void u.sync.tick(true); await settle();
+  u.sync.removeFolder('/v'); go2(); await settle();
+  assert.ok(u.texts().some(x => x.includes('W-ONE')) && !u.texts().some(x => x.includes('V-ONE')), u.texts().join('\n'));
+  assert.deepEqual(Object.keys(u.binding().marks), [ID]); assert.equal(u.reads, 1);
+});
