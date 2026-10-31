@@ -3250,7 +3250,7 @@ def folder_sessions_flow(browser, base):
 
 
 def final_client_flow(browser, base):
-    """Picked session folders, one tool only (.claude): a session started from a part's handover document and taken by '지금 확인'
+    """Picked session folders, one tool only (.claude): the panel says only Claude Code comes in and how to add Codex; a session started from a part's handover document and taken by '지금 확인'
     shows on that part's summary at once, marked as the handover sheet says, with no reading in between."""
     jl = lambda *rows: "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows)
     when = lambda minutes: time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime(time.time() - minutes * 60))
@@ -3271,8 +3271,16 @@ def final_client_flow(browser, base):
     panel, pill = page.locator("#sync-panel"), page.locator("#sync-pill")
     pill.click()
     panel.get_by_role("button", name="세션 폴더 고르기").click()
+    # Only .claude picked: the panel names the one tool it reads, and how to add the other's folder, before and after connecting.
+    one = "지금은 Claude Code 대화만 읽어요. Codex도 쓴다면 ‘세션 폴더 더 고르기’로 .codex 폴더도 골라 주세요."
+    expect(panel.locator(".sync-lead").first).to_have_text("이 프로젝트를 작업 폴더에 묶으면, 그 폴더의 Claude Code 대화가 저절로 기록으로 들어오고 지도가 갱신돼요.")
+    expect(panel.locator(".sync-one-tool")).to_have_text(one)
     panel.locator(".sync-folder-pick", has_text="/work/salon").click()
     expect(page.locator("#world .node")).to_have_count(2, timeout=15000)
+    pill.click()
+    expect(panel).to_contain_text("이 폴더의 Claude Code 대화가 잠잠해지면")
+    expect(panel.locator(".sync-one-tool")).to_have_text(one)
+    pill.click()
     assert len(maps) == 1, maps
     # The next session starts from the part's handover document and comes back through '지금 확인', with no reading in between
     # (the last one was just now): the part's summary says so at once, in the sheet's words.

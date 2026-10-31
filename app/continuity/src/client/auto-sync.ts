@@ -100,6 +100,8 @@ export function createAutoSync(host: AutoSyncHost) {
     try { host.kv.setItem(AUTOSYNC_KEY, JSON.stringify(v)); } catch { /* the binding holds for this page only */ }
   }
   const offered = () => host.sources.offered();
+  /** The tools whose conversations come in, as the panel names them (both until the picked folders were looked at). */
+  const toolNames = () => host.sources.tools().map(t => TOOL_NAME[t]).join('·') || 'Claude Code·Codex';
   const failText = (e: unknown, fallback: string) => ERROR_TEXT[(e as { code?: string } | null)?.code ?? ''] ?? fallback;
   const open = () => { const o = host.current(); return o && o.kind === 'saved' ? o : null; };
 
@@ -294,7 +296,7 @@ export function createAutoSync(host: AutoSyncHost) {
           h('button', { type: 'button', class: 'primary small sync-grant', 'data-act': 'grant', onclick: () => void grant() }, '다시 허용')) : null,
         h('ul', { class: 'sync-linked' }, ...b.folders.map(f => h('li', {}, h('span', { class: 'sync-folder' }, f.path),
           b.folders.length > 1 ? h('button', { type: 'button', class: 'link-button quiet sync-remove', 'aria-label': `${f.path} 연결 빼기`, 'data-act': `leave:${f.path}`, onclick: () => removeFolder(f.path) }, '빼기') : null))),
-        h('p', { class: 'fine' }, `${b.folders.length > 1 ? '이 폴더들' : '이 폴더'}의 Claude Code·Codex 대화가 잠잠해지면(약 ${SETTLE_MS / 60000}분) 기록으로 들어오고 지도가 자동으로 갱신돼요(그때 기록을 AI에게 보내요). 이 탭이 열려 있을 때만 확인하고, 닫혀 있던 동안의 대화는 다시 열면 들어와요.`),
+        h('p', { class: 'fine' }, `${b.folders.length > 1 ? '이 폴더들' : '이 폴더'}의 ${toolNames()} 대화가 잠잠해지면(약 ${SETTLE_MS / 60000}분) 기록으로 들어오고 지도가 자동으로 갱신돼요(그때 기록을 AI에게 보내요). 이 탭이 열려 있을 때만 확인하고, 닫혀 있던 동안의 대화는 다시 열면 들어와요.`),
         h('dl', { class: 'sync-facts' }, h('dt', {}, '가져온 기록'), h('dd', {}, `${b.taken}개`), h('dt', {}, '마지막 확인'), h('dd', b.lastCheck ? { title: stamp(b.lastCheck, true) } : {}, b.lastCheck ? ago(b.lastCheck) : busy ? '확인 중…' : '아직'),
           h('dt', {}, '오늘 자동 지도 갱신'), h('dd', {}, `${runs} / ${AUTO_RUNS_PER_DAY}회`)),
         // Why the map does not follow (no AI for maps, today's automatic readings used up), or a connection that found nothing yet.
@@ -327,7 +329,7 @@ export function createAutoSync(host: AutoSyncHost) {
     input.addEventListener('compositionend', () => { delete input.dataset.composing; if (input.dataset.redraw) setTimeout(() => { if (input.isConnected) render(); }); });
     put(panel, h('h3', { tabindex: '-1' }, b ? '작업 폴더 추가' : '작업 폴더 자동 연결'),
       b ? h('p', { class: 'fine' }, '저장소가 나뉜 프로젝트라면 다른 작업 폴더도 함께 묶어요. 그 폴더의 세션도 같은 방식으로 들어오고, 지도에서 부분마다 어느 세션이 다뤘는지 보여요.')
-        : h('p', { class: 'sync-lead' }, '이 프로젝트를 작업 폴더에 묶으면, 그 폴더의 Claude Code·Codex 대화가 저절로 기록으로 들어오고 지도가 갱신돼요.'),
+        : h('p', { class: 'sync-lead' }, `이 프로젝트를 작업 폴더에 묶으면, 그 폴더의 ${toolNames()} 대화가 저절로 기록으로 들어오고 지도가 갱신돼요.`),
       // Before connecting: what comes in first, what is kept of it, and that it goes to the AI.
       b ? null : h('ul', { class: 'sync-points' },
         h('li', {}, `처음 연결하면 최근 ${BACKFILL_MS / 86400000}일의 세션(${BACKFILL_SESSIONS}개까지)을 가져와 지도에 담아요.`),
@@ -361,13 +363,16 @@ export function createAutoSync(host: AutoSyncHost) {
         h('kbd', {}, '⌘+Shift+.'), ' 키로 숨은 폴더를 보이게 하세요.'),
       h('p', { class: 'fine' }, '폴더는 이 브라우저 안에서만 읽어요. 가져온 대화는 이 프로젝트의 기록이 되고, 지도를 갱신할 때(자동 갱신도) AI에게 보내요.'),
       h('button', { type: 'button', class: 'primary small sync-pick-root', 'data-act': 'pick', onclick: () => void pick() }, '세션 폴더 고르기'));
-    const ask = state === 'prompt' && !asked, notice = src.notice();
+    const ask = state === 'prompt' && !asked, notice = src.notice(), tools = src.tools();
+    // One tool's folder picked: the other's conversations do not come in, said with the way to add its folder.
+    const other = tools.length === 1 ? (tools[0] === 'claude' ? 'codex' : 'claude') : null;
     return h('div', { class: 'sync-source' },
       h('h4', {}, '읽는 세션 폴더'),
       h('ul', { class: 'sync-linked' }, ...names.map(n => h('li', {}, h('span', { class: 'sync-folder' }, n),
         h('button', { type: 'button', class: 'link-button quiet sync-remove', 'aria-label': `${n} 세션 폴더 빼기`, 'data-act': `forget:${n}`, onclick: async () => { await src.forget(n); folders = null; render(); void tick(true); } }, '빼기')))),
       notice && !shown?.includes(notice) ? h('p', { class: 'fine sync-source-notice' }, notice) : null,
       ask ? h('p', { class: 'fine sync-blocked' }, '브라우저가 위 세션 폴더를 다시 읽어도 되는지 물어봐야 해요. ‘다시 허용’을 눌러 주세요.') : null,
+      other ? h('p', { class: 'fine sync-one-tool' }, `지금은 ${TOOL_NAME[tools[0]!]} 대화만 읽어요. ${TOOL_NAME[other]}도 쓴다면 ‘세션 폴더 더 고르기’로 ${other === 'codex' ? '.codex' : '.claude'} 폴더도 골라 주세요.`) : null,
       h('div', { class: 'pp-row' },
         ask ? h('button', { type: 'button', class: 'primary small sync-grant', 'data-act': 'grant', onclick: () => void grant() }, '다시 허용') : null,
         h('button', { type: 'button', class: 'link-button sync-pick-root', 'data-act': 'pick', onclick: () => void pick() }, '세션 폴더 더 고르기')));

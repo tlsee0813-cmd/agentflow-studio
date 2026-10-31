@@ -296,6 +296,8 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
     folderState: () => state,
     /** The picked folders' names as shown, each one forget() takes. */
     folders: labels,
+    /** The tools whose sessions are read: the server's, or those the last look found in the picked folders (none before one). */
+    tools: (): SessionTool[] => host.status().sessions?.tools.length ? host.status().sessions!.tools : (['claude', 'codex'] as const).filter(t => lastFound.some(f => f.tool === t)),
     /** A short line to show beside the picked folders, or null: why a pick added nothing, a folder that could not be read, or a
      * look that read only part of the folders. */
     notice: (): string | null => [picked, looked].filter(Boolean).join(' ') || null,
