@@ -16,7 +16,8 @@ import { SESSION_VERSION, SESSION_LIMITS, SESSION_ID, parseClaude, parseCodex, p
 
 export { SESSION_LIMITS, SESSION_ID, parseClaude, parseCodex };
 
-async function readHead(path, bytes, from = 0) {
+/** `bytes` bytes of a file from `from` on (its head, or its tail), as text. */
+async function readRange(path, bytes, from = 0) {
   const h = await open(path, 'r');
   try { const buf = Buffer.alloc(bytes); const { bytesRead } = await h.read(buf, 0, bytes, from); return buf.subarray(0, bytesRead).toString('utf8'); }
   finally { await h.close(); }
@@ -24,9 +25,9 @@ async function readHead(path, bytes, from = 0) {
 /** What a listing knows of a file: its head (read further while no prompt is in it), with the folders named at its end. */
 async function readListed(tool, path, size, limits) {
   const { headBytes: head, promptBytes: more, tailBytes: tail } = limits;
-  let parsed = parseSession(tool, jsonLines(await readHead(path, head), size > head));
-  if (!hasPrompt(parsed) && size > head) parsed = parseSession(tool, jsonLines(await readHead(path, more), size > more));
-  if (size > head) for (const c of tailFolders(await readHead(path, tail, Math.max(0, size - tail)))) atFolder(parsed.meta, c);
+  let parsed = parseSession(tool, jsonLines(await readRange(path, head), size > head));
+  if (!hasPrompt(parsed) && size > head) parsed = parseSession(tool, jsonLines(await readRange(path, more), size > more));
+  if (size > head) for (const c of tailFolders(await readRange(path, tail, Math.max(0, size - tail)))) atFolder(parsed.meta, c);
   return parsed;
 }
 /** A whole session read in chunks, line by line, into the tool's parser: a file of hundreds of MB is never held whole. A line over
@@ -114,7 +115,7 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
   async function parentOf(path, st, tool) {
     let t = threads.get(path);
     if (t?.mtime !== st.mtimeMs) {
-      let head; try { head = jsonLines(await readHead(path, limits.headBytes), st.size > limits.headBytes); } catch { return null; }
+      let head; try { head = jsonLines(await readRange(path, limits.headBytes), st.size > limits.headBytes); } catch { return null; }
       t = { mtime: st.mtimeMs, parent: tool === 'codex' ? parseSession('codex', head).meta.parent : head.find(o => typeof o?.sessionId === 'string')?.sessionId ?? null }; threads.set(path, t);
     }
     return t.parent;
