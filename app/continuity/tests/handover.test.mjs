@@ -207,6 +207,18 @@ test('HANDOVER-O2 a title that starts like a header field or holds " · " stays 
   assert.deepEqual(partSessions(p, null).map(s => [s.id, s.title]).sort(), [[ID, '세션 만료 처리'], ['claude-89abcdef0123456789abcdef', '세션 저장 방식 바꾸기']]);
 });
 
+test('HANDOVER-O3 the recent flow is in the order the requests were made: a session taken in later that ran earlier comes first', () => {
+  const NEW = 'codex-aaaaaaaaaaaaaaaaaaaaaaaa', OLD = 'codex-bbbbbbbbbbbbbbbbbbbbbbbb';
+  const run = (id, start, asks) => sessionText(session(id, asks.flatMap(([at, text]) => [{ role: 'user', at, text }, { role: 'assistant', at, text: '했어요.' }]), { title: null, startedAt: start })).text;
+  let p = D.pasteRecord(D.createProject(), run(NEW, '2026-10-30T00:30:00.000Z', ['환불 기능부터 해 줘', '부분 환불도 해 줘', '관리자 로그인 붙여 줘', '예약 확인 문자 문구 써 줘'].map((x, i) => [`2026-10-30T0${i + 1}:00:00.000Z`, x])), null).project;
+  // Taken in after it (a folder connected later): a session that ran ten days before, and went on a day after the newest request.
+  p = D.pasteRecord(p, run(OLD, '2026-10-20T00:30:00.000Z', [['2026-10-20T01:00:00.000Z', '처음 화면 시안 세 가지 만들어 줘'], ['2026-10-20T02:00:00.000Z', '2번 시안으로 가자'], ['2026-10-31T01:00:00.000Z', '시안 글꼴만 바꿔 줘']]), null).project;
+  // A web chat's record has no times: it stays after what was taken in before it.
+  p = D.pasteRecord(p, '[웹 AI 세션 기록 · 문구 고민]\n\n── 사용자 요청 ──\n환불 안내 문구 다듬어 줘\n\n── 웹 AI 답변 ──\n다듬었어요.', null).project;
+  const t = handoverText(p, { scope: null, code: 'ORD234', at: AT }), flow = t.slice(t.indexOf('## 최근 흐름')).split('\n\n')[0].split('\n').filter(l => l.startsWith('- '));
+  assert.deepEqual(flow, ['- 환불 기능부터 해 줘', '- 부분 환불도 해 줘', '- 관리자 로그인 붙여 줘', '- 예약 확인 문자 문구 써 줘', '- 시안 글꼴만 바꿔 줘', '- 환불 안내 문구 다듬어 줘'], t);
+});
+
 test('HANDOVER-R1 a takeover counts only where a request starts from it: an older one quoted by a later document or by an answer does not', () => {
   const { p, booking } = mapped(), X = 'claude-111111111111111111111111', Y = 'claude-222222222222222222222222';
   const old = handoverText(p, { scope: booking, code: 'OLD234', at: AT });

@@ -136,20 +136,30 @@ function partBlock(view: StudioView, part: PartView, sessions: PartSession[], to
 // A web record saved by an older page, from a document copied without its end line, has the answer's head glued to the folded line
 // ('…]── 웹 AI 답변 ──'): read with that head on a line of its own, its answer stays the AI's. The stored text is not changed.
 const GLUED = /(\[AgentFlow 인수인계 문서를 받아 이어감 · [^\]\n]*\])(?=── (?:웹 AI|Claude Code|Codex) 답변)/g;
-/** A request, the files changed answering it, and the records both came from. */
-interface Ask { text: string; files: string[]; records: string[] }
+/** A request, the files changed answering it, the records both came from, and when it was made (at: its session's start date with
+ * its own time, as YYYY-MM-DD HH:MM). */
+interface Ask { text: string; files: string[]; records: string[]; at: string }
 /** The person's requests in session records, oldest first, with the files the tool's next answer reported changing: all of them, or
  * those of the records in `only` and of the records `also` admits (by their session's key and the record's id). */
 function sessionAsks(p: Project, only: Set<string> | null, also: (key: string, id: string) => boolean): Ask[] {
   // An answer's files belong to the last request of its own session, which may sit in an earlier record (taken before the reply
   // came), never to another session's request; when that request's record is outside the scope, they are not shown.
   const out: Ask[] = [], asked = new Map<string, Ask | null>();
+  let latest = '';
   for (const rec of p.pasted) {
     const origin = sessionOrigin(rec.text); if (!origin) continue;
     const key = originKey(origin), shown = !only || only.has(rec.id) || also(key, rec.id);
     for (const part of rec.text.replace(GLUED, '$1\n').split(/^── /m).slice(1)) {
       const nl = part.indexOf('\n'), head = part.slice(0, nl), body = part.slice(nl + 1).trim();
-      if (head.startsWith('사용자 요청')) { const t = shown ? { text: body, files: [], records: [rec.id] } : null; if (t) out.push(t); asked.set(key, t); continue; }
+      if (head.startsWith('사용자 요청')) {
+        // Put in order by when it was asked, not when it was taken in (a folder connected later brings its older sessions after the
+        // rest). Its head has the time, and the date when it is not the session's first day; one with neither (a web chat's) stays
+        // after what was taken in before it.
+        const m = /· (?:(\d\d-\d\d) )?(\d\d:\d\d) ──$/.exec(head), start = origin.start;
+        const at = m && start ? `${m[1] ? `${+start.slice(0, 4) + (m[1] < start.slice(5, 10) ? 1 : 0)}-${m[1]}` : start.slice(0, 10)} ${m[2]}` : latest;
+        if (at > latest) latest = at;
+        const t = shown ? { text: body, files: [], records: [rec.id], at } : null; if (t) out.push(t); asked.set(key, t); continue;
+      }
       // The list is on the answer's last line (a web AI may put it after a bullet), read to its last ')' so a name like
       // app/(auth)/page.tsx stays whole.
       const f = /\(바꾼 파일: (.+)\)\s*$/.exec(body.slice(body.lastIndexOf('\n') + 1).trim()), last = asked.get(key);
@@ -157,7 +167,7 @@ function sessionAsks(p: Project, only: Set<string> | null, also: (key: string, i
       if (f && last) { last.files.push(...f[1]!.split(', ').filter(x => !(origin.tool === 'web' && EMPTY_FIELD.test(x.trim())))); last.records.push(rec.id); }
     }
   }
-  return out;
+  return out.sort((a, b) => a.at.localeCompare(b.at));
 }
 /** What the note above the parts says of the records the map has not read: how many there are and where this document has them.
  * inFlow of them have their requests and changed files in the recent flow (some only their latest requests, when cut); in a part's
