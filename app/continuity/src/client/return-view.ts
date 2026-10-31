@@ -15,7 +15,7 @@ import { clip } from '../shared/studio.js';
 import { ui62Reading, savedReading, readingInput, recordTitle, partLabel, type ReadingInput, type ReadingSource } from './digest-source.js';
 import { digestStore, askHash, makeReading, type Reading } from './digest-store.js';
 import { askDigest, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
-import { sessionText, recordParts, NEXT_RECORD, NEXT_LINE, RECORD_HEAD, stamp, TOOL_NAME, type SessionSummary, type SessionDetail } from '../shared/session-import.js';
+import { sessionText, recordParts, quoteNext, NEXT_RECORD, NEXT_LINE, RECORD_HEAD, stamp, TOOL_NAME, type SessionSummary, type SessionDetail } from '../shared/session-import.js';
 import { readSessionFile, type SessionSources } from './session-source.js';
 import { WEB_RECORD_ASK, foldRecord } from '../shared/handover.js';
 import { PASTED_TEXT_LIMIT } from '../shared/types.js';
@@ -118,7 +118,7 @@ interface State {
  * like it holds a key stays in this tab only. */
 const PASTE_DRAFT_KEY = 'agentflow.studio.paste-draft.1';
 // A text that ends with a next-record line, or starts with one.
-const SEP_END = /(?:^|\n)[ \t]*──────── 다음 기록 ────────[ \t]*$/, SEP_START = /^[ \t]*──────── 다음 기록 ────────[ \t]*(?:\n|$)/;
+const SEP_END = new RegExp(`(?:^|\\n)[ \\t]*${NEXT_RECORD}[ \\t]*$`), SEP_START = new RegExp(`^[ \\t]*${NEXT_RECORD}[ \\t]*(?:\\n|$)`);
 /** A note (what the record explains as it stands) carries no tag: it is neither a change nor a check. */
 const READING_KIND: Record<RecordReading['kind'], string | null> = { change: '변화', check: '확인 범위', open: '남은 판단', note: null };
 const STAGE_MEMORY = new Map<string, string>();
@@ -673,7 +673,7 @@ export function createReturnView(host: ReturnHost) {
     // caret is on or a selection takes in (that line is never written over). A next-record line the record quotes is written a dash
     // shorter, as the import writes it, so it does not cut the record.
     area.addEventListener('paste', e => {
-      const got = (e.clipboardData?.getData('text/plain') ?? '').replace(/\r\n?/g, '\n').trim().replace(NEXT_LINE, '$1─────── 다음 기록 ───────$2');
+      const got = quoteNext((e.clipboardData?.getData('text/plain') ?? '').replace(/\r\n?/g, '\n').trim());
       if (!RECORD_HEAD.test(got)) return;
       e.preventDefault();
       const was = area.value, s0 = area.selectionStart, s1 = area.selectionEnd, line = `\n\n${NEXT_RECORD}\n\n`;

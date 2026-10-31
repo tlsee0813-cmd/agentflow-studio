@@ -6,6 +6,8 @@ const START = new RegExp(`^─+ AgentFlow 인수인계 문서 · ${HANDOVER_TAG}
 // The end line names the part too (older documents name only the code), so a document copied without its first line still folds.
 const END = (code: string) => new RegExp(`^─+ 인수인계 문서 끝 · ${HANDOVER_TAG}:(${code})(?::(${AREA}))? ─+$`, 'm');
 const RECEIVED = `\\[AgentFlow 인수인계 문서를 받아 이어감 · ${HANDOVER_TAG}:(${CODE})(?::(${AREA}))?(?: · ([^\\]\\n]*))?\\]`;
+/** The one line a folded document leaves (RECEIVED reads it back). */
+const received = (code: string, area: string | undefined, title: string | undefined) => `[AgentFlow 인수인계 문서를 받아 이어감 · ${HANDOVER_TAG}:${code}${area ? `:${area}` : ''}${title ? ` · ${title.replace(/[\]\n]/g, ' ')}` : ''}]`;
 
 /** A fresh six-character code (no 0/O/1/I to misread). */
 export function handoverCode(): string {
@@ -30,7 +32,7 @@ export function foldHandover(text: string): string {
       from = head.index!; to = end.index + end[0].length; code = end[1]!; area = end[2];
     }
     const title = /^# 인수인계: (.+)$/m.exec(out.slice(from, to))?.[1]?.trim();
-    out = `${out.slice(0, from)}[AgentFlow 인수인계 문서를 받아 이어감 · ${HANDOVER_TAG}:${code}${area ? `:${area}` : ''}${title ? ` · ${title.replace(/[\]\n]/g, ' ')}` : ''}]${out.slice(to)}`;
+    out = `${out.slice(0, from)}${received(code, area, title)}${out.slice(to)}`;
   }
   return out;
 }

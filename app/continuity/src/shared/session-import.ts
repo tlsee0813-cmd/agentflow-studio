@@ -38,7 +38,7 @@ function block(t: TakenTurn, tool: string): string {
 }
 /** A turn as kept: control characters out, then a NEXT_RECORD line the conversation itself holds (a draft of this box pasted into
  * it, maybe behind a colour code or a soft line break) written a dash shorter, so only the box's own line cuts a draft. */
-const turnText = (t: TakenTurn, tool: string) => cleanText(block(t, tool)).replace(NEXT_LINE, '$1─────── 다음 기록 ───────$2');
+const turnText = (t: TakenTurn, tool: string) => quoteNext(cleanText(block(t, tool)));
 
 export interface SessionText { text: string; turns: number; left: number; redacted: number }
 /** The record text of a session within `limit` characters: a header line, then whole turns, newest kept first and printed in order.
@@ -175,7 +175,10 @@ export function sessionChunks(s: SessionDetail, turns: TakenTurn[], limit = PAST
  * (a record pasted into a session, a reply that writes the format) stays where it is. */
 export const NEXT_RECORD = '──────── 다음 기록 ────────';
 /** A NEXT_RECORD line, with what stands around it on that line (spaces). */
-export const NEXT_LINE = /^([ \t]*)──────── 다음 기록 ────────([ \t]*)$/gm;
+export const NEXT_LINE = new RegExp(`^([ \\t]*)${NEXT_RECORD}([ \\t]*)$`, 'gm');
+/** Text with each NEXT_RECORD line in it written a dash shorter, so a conversation or a pasted answer that quotes one does not cut
+ * the draft it goes into. */
+export const quoteNext = (t: string) => t.replace(NEXT_LINE, `$1${NEXT_RECORD.slice(1, -1)}$2`);
 /** The header line a session record starts with: written by the import (Claude Code, Codex) or by a web session asked with
  * WEB_RECORD_ASK (handover.ts). Its fields follow the tool's name, ' · ' between them. */
 export const RECORD_HEAD = /^\[(Claude Code|Codex|웹 AI) 세션 기록(?: · ([^\n]*))?\]/;
@@ -185,7 +188,7 @@ export const HEAD_FIELD = { id: /^세션 ((?:claude|codex)-[0-9a-f]{24})$/, star
 /** A draft cut at each NEXT_RECORD line, each part kept as a record of its own. One part when there is none. */
 export function recordParts(text: string): string[] {
   // A draft with no such line is kept exactly as written.
-  const cut = text.split(/^[ \t]*──────── 다음 기록 ────────[ \t]*$/m); if (cut.length === 1) return [text];
+  const cut = text.split(new RegExp(`^[ \\t]*${NEXT_RECORD}[ \\t]*$`, 'm')); if (cut.length === 1) return [text];
   const parts = cut.map(t => t.replace(/^\s*\n/, '').replace(/\s+$/, '')).filter(t => t.trim());
   return parts.length ? parts : [text];
 }
