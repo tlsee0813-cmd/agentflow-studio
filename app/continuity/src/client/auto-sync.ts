@@ -245,7 +245,10 @@ export function createAutoSync(host: AutoSyncHost) {
     const waiting = !!b && !host.sources.current(), error = b ? halted.get(o.key) ?? b.error : null;
     pill.hidden = false; pill.dataset.state = !b ? 'off' : error || waiting ? 'error' : busy ? 'busy' : 'on';
     pill.setAttribute('aria-expanded', String(panelOpen));
-    pill.replaceChildren(h('i', { 'aria-hidden': 'true' }), h('span', {}, b ? `자동 연결 · ${name}${waiting ? ' · 허용 필요' : ''}` : '자동 연결 안 됨'));
+    // The state in words as well as the dot's colour; a phone keeps the dot only (the whole line stays its name and title).
+    const more = b ? ` · ${name}${waiting ? ' · 허용 필요' : ''}` : ' 안 됨';
+    pill.title = `자동 연결${more}`; pill.setAttribute('aria-label', pill.title);
+    pill.replaceChildren(h('i', { 'aria-hidden': 'true' }), h('span', {}, '자동 연결', h('span', {}, more)));
     panel.hidden = !panelOpen; if (!panelOpen) return;
     // A redraw (a look starting or ending, the folders found) keeps a path being typed in focus, caret and all.
     const typing = panel.querySelector<HTMLInputElement>('.sync-path'), caret = typing && document.activeElement === typing ? [typing.selectionStart, typing.selectionEnd] as const : null;

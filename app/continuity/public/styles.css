@@ -1511,6 +1511,8 @@ button:disabled { opacity: .5; cursor: default; }
 .sync-pill[data-state="on"] i { background: var(--ok); }
 .sync-pill[data-state="busy"] i { background: var(--accent); }
 .sync-pill[data-state="error"] i { background: var(--warn); }
+/* On a phone the pill is a round 28px button with its state dot: the words would push the bar past the screen. */
+@media (max-width: 720px) { .sync-pill { width: 28px; height: 28px; margin-right: 0; padding: 0; justify-content: center; } .sync-pill > span { display: none; } .sync-pill i { width: 8px; height: 8px; } }
 .sync-panel { position: fixed; top: 52px; right: 12px; z-index: 40; box-sizing: border-box; width: min(420px, calc(100vw - 24px)); max-height: calc(100vh - 72px); overflow: auto; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-lg); }
 .sync-panel h3 { margin: 0 0 6px; font-size: 14px; }
 .sync-panel .fine { margin: 0 0 10px; }

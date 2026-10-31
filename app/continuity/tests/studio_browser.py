@@ -2709,6 +2709,14 @@ def sessions_flow(browser, base):
     page.locator("#new-name").fill("미용실 예약")
     page.locator("#new-form").get_by_role("button", name="만들기").click()
     expect(page.locator("#sync-pill")).to_have_text("자동 연결 안 됨")
+    # On a phone the pill is its dot alone (its words stay its name): opened, the bar stays within the window and nothing slides.
+    page.set_viewport_size({"width": 390, "height": 844})
+    page.locator("#sync-pill").click()
+    expect(page.locator("#sync-panel .sync-folder-pick")).to_have_count(1)
+    assert page.evaluate("[document.body.scrollLeft, document.querySelector('.bar').scrollWidth <= innerWidth]") == [0, True]
+    expect(page.locator("#sync-pill")).to_have_accessible_name("자동 연결 안 됨")
+    page.locator("#sync-pill").click()
+    page.set_viewport_size({"width": 1280, "height": 720})
     page.locator("#sync-pill").click()
     pick = page.locator("#sync-panel .sync-folder-pick")
     expect(pick).to_have_count(1)
