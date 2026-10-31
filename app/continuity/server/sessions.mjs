@@ -22,11 +22,12 @@ async function readRange(path, bytes, from = 0) {
   try { const buf = Buffer.alloc(bytes); const { bytesRead } = await h.read(buf, 0, bytes, from); return buf.subarray(0, bytesRead).toString('utf8'); }
   finally { await h.close(); }
 }
-/** What a listing knows of a file: its head (read further while no prompt is in it), with the folders named at its end. */
+/** What a listing knows of a file: its head (read further while no prompt is in it, but for a Codex subagent's rollout, which never
+ * holds one), with the folders named at its end. */
 async function readListed(tool, path, size, limits) {
   const { headBytes: head, promptBytes: more, tailBytes: tail } = limits;
   let parsed = parseSession(tool, jsonLines(await readRange(path, head), size > head));
-  if (!hasPrompt(parsed) && size > head) parsed = parseSession(tool, jsonLines(await readRange(path, more), size > more));
+  if (!hasPrompt(parsed) && size > head && !parsed.meta.parent) parsed = parseSession(tool, jsonLines(await readRange(path, more), size > more));
   if (size > head) for (const c of tailFolders(await readRange(path, tail, Math.max(0, size - tail)))) atFolder(parsed.meta, c);
   return parsed;
 }
@@ -85,14 +86,16 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
     }
     found.sort((a, b) => b.mtime - a.mtime);
     const there = new Set(found.map(f => f.path)); for (const p of heads.keys()) if (!there.has(p)) heads.delete(p);
-    const next = new Map(), out = [];
-    // At most `scan` newest files are opened, so a folder with no session left does not read a whole history.
-    for (const f of found.slice(0, limits.scan)) {
-      if (out.length >= limits.list) break;
+    const next = new Map(), out = [], scan = limits.scan; let sessions = 0, quiet = 0;
+    // At most `scan` session files are opened, so a folder with no session left does not read a whole history. Files with no session
+    // in them (Codex subagents' rollouts, Claude Code's agent-*.jsonl, one that cannot be read) do not use it up, as in the page: ten
+    // times as many of them.
+    for (const f of found) {
+      if (out.length >= limits.list || sessions >= scan || quiet >= scan * 10) break;
       let h = heads.get(f.path);
       if (h?.size !== f.size || h.mtime !== f.mtime) {
-        let real; try { real = await realpath(f.path); } catch { continue; }
-        let parsed; try { parsed = await readListed(f.tool, real, f.size, limits); } catch { continue; }
+        let real; try { real = await realpath(f.path); } catch { quiet++; continue; }
+        let parsed; try { parsed = await readListed(f.tool, real, f.size, limits); } catch { quiet++; continue; }
         // An id is made from the session itself (sessionKey), as the page makes it; the one made from the file's path before is its alias.
         const id = await sessionId(f.tool, sessionKey(f.tool, parsed.meta, real)), base = sessionSummary(id, f.tool, parsed, new Date(f.mtime).toISOString(), f.size, limits);
         // An archived Codex thread lay in sessions/YYYY/MM/DD/ under the same name (its date is in it): that path's id is its alias too.
@@ -100,9 +103,10 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
         const aliases = [await sessionId(f.tool, real), ...(day ? [await sessionId(f.tool, join(dirname(dirname(real)), 'sessions', day[1], day[2], day[3], basename(real)))] : [])];
         h = { size: f.size, mtime: f.mtime, real, id, row: base && { ...base, aliases }, cwds: parsed.meta.cwds }; heads.set(f.path, h);
       }
-      // Two files of one session (a copy left behind): the newest one is the session.
-      if (!h.row || next.has(h.id)) continue;
-      known.set(h.id, { tool: f.tool, path: h.real }); next.set(h.id, { tool: f.tool, path: h.real });
+      if (!h.row) { quiet++; continue; }
+      // Two files of one session (a copy left behind): the newest one is the session, and only it counts against the scan.
+      if (next.has(h.id)) continue;
+      sessions++; known.set(h.id, { tool: f.tool, path: h.real }); next.set(h.id, { tool: f.tool, path: h.real });
       if (folder && !within(h.cwds, folder)) continue;
       out.push({ ...h.row });
     }

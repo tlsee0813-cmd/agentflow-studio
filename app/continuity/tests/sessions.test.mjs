@@ -598,3 +598,18 @@ test('SESSIONS-B2 picked folders: one inside another reads each session once (th
     assert.deepEqual(sources.folders(), ['.claude (1)', 'me', '.claude (2)']);
   } finally { globalThis.window = had; rmSync(dir, { recursive: true, force: true }); }
 });
+
+test('SESSIONS-Q1 files with no session in them (Codex subagents\' rollouts) do not use up the scan, up to ten times as many of them', async () => {
+  const dir = home();
+  try {
+    const roots = { codex: join(dir, '.codex') }, day = join(roots.codex, 'sessions', '2026', '10', '29'); mkdirSync(day, { recursive: true });
+    const put = (name, rows, minutesAgo) => { const f = join(day, name); writeFileSync(f, rows.map(r => JSON.stringify(r)).join('\n')); const t = new Date(Date.now() - minutesAgo * 60000); utimesSync(f, t, t); };
+    put('rollout-2026-10-29T10-00-00-parent.jsonl', desktopParent(), 60);
+    for (let i = 0; i < 9; i++) put(`rollout-2026-10-29T10-0${i}-30-c${i}.jsonl`, desktopChild(`c${i}`, 10 + i), 50 - i);
+    const salon = async scan => (await openSessions({ env: {}, roots, limits: { ...SESSION_LIMITS, scan } }).list(W)).sessions.map(x => x.preview);
+    assert.deepEqual(await salon(3), ['휴무일을 예약 화면에 반영해 줘 ## 확인할 것 - 테스트'], 'nine newer subagent rollouts do not hide the session');
+    assert.equal((await salon(1)).length, 1, 'nine quiet files are within ten times a scan of one');
+    put('rollout-2026-10-29T10-09-30-c9.jsonl', desktopChild('c9', 19), 40);
+    assert.deepEqual(await salon(1), [], 'the tenth quiet file ends a look with a scan of one');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
