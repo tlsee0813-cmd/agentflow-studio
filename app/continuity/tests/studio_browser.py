@@ -3258,8 +3258,10 @@ WEB_VALUES = ("FakePass123", "sk_live_", "eyJzdWIi")
 
 def final_paste_flow(browser, base):
     """The paste box keeps no credential: a web AI's record pasted back is saved with what looks like a key hidden (said before
-    and after saving) and is never kept as a draft in this browser."""
+    and after saving, saved said as done) and is never kept as a draft in this browser. Once the project is connected, the box,
+    the file form and the connect point say that what is saved by hand goes to the AI with the next automatic map reading."""
     context = browser.new_context(viewport={"width": 1280, "height": 720})
+    context.add_init_script(f"({FAKE_PICKER})({json.dumps(folder_files())})")
     page = context.new_page()
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))
@@ -3271,6 +3273,9 @@ def final_paste_flow(browser, base):
     entry = re.search(r"#/p/(E_[^/]+)", page.url).group(1)
     page.locator("#space-empty").get_by_role("button", name="기록 붙여넣기").click()
     draft = page.locator("#paste-text")
+    box, foot = page.locator("#lens .rr-paste-box > .fine").first, page.locator("#lens .rr-foot .pp-row > .fine")
+    expect(box).to_have_text("나누거나 종류·부분을 고르지 않아도 돼요. 저장한 뒤 지도 정리나 요약을 누를 때만 AI에 보내요.")
+    expect(foot).to_have_text("저장해도 AI에 보내지 않아요")
     # Said before saving, quietly (it is no refusal); the draft stays in this tab only.
     draft.fill(WEB_RECORD)
     expect(page.locator("#lens .rr-paste-hides")).to_have_text("키·토큰처럼 보이는 글이 있어요. 저장할 때 그 부분은 가려요.")
@@ -3295,6 +3300,24 @@ def final_paste_flow(browser, base):
     expect(said).to_contain_text("새로 저장하지 않았어요")
     expect(said).to_have_class("pp-ok")
     assert len(page.evaluate(ENTRY, entry)["pasted"]) == 1
+    # Connected, the next automatic map reading sends every record not read yet, those saved by hand too: said before connecting,
+    # in the box, beside its button, and in the file form.
+    page.locator("#lens .rr-head .close").click()
+    page.locator("#sync-pill").click()
+    panel = page.locator("#sync-panel")
+    panel.get_by_role("button", name="세션 폴더 고르기").click()
+    expect(panel.locator(".sync-points")).to_contain_text("지도를 갱신할 때 이 기록을 AI에게 보내요. 직접 붙여 넣거나 추가한 기록·자료도 함께 보내요.")
+    panel.locator(".sync-folder-pick").click()
+    expect(page.locator("#sync-pill")).to_have_attribute("data-state", "on", timeout=15000)
+    page.locator("#sync-pill").click()
+    page.locator("#return-entry").click()
+    page.locator("#lens .rr-paste-open").click()
+    expect(box).to_have_text("나누거나 종류·부분을 고르지 않아도 돼요. 자동 연결 중이라, 저장하면 다음 자동 지도 갱신 때 AI에 보내요.")
+    expect(foot).to_have_text("저장하면 다음 자동 지도 갱신 때 AI에 보내요")
+    page.locator("#space-empty .se-file").click()
+    expect(page.locator("#lens #file-rule")).to_contain_text("자동 연결 중이라, 저장하면 다음 자동 지도 갱신 때 AI에 보내요.")
+    expect(page.locator("#lens #file-rule")).not_to_contain_text("저장해도 AI에 보내지 않아요")
+    expect(foot).to_have_text("저장하면 다음 자동 지도 갱신 때 AI에 보내요")
     assert not errors, errors
     context.close()
 

@@ -73,7 +73,11 @@ export interface ReturnHost {
   readIntoMap(recordId: string): boolean;
   /** Records wait to be read into the map: that is the pane's one main action, and this reading's summary steps back. */
   mapPrimary(): boolean;
+  /** The project is connected (자동 연결): its next automatic map reading sends every record not read yet, those added here too. */
+  autoConnected(): boolean;
 }
+/** Said where a record or file is saved while the project is connected, and on the empty map's card in the same words. */
+export const AUTO_SENDS = '자동 연결 중이라, 저장하면 다음 자동 지도 갱신 때 AI에 보내요.';
 /** Memory of the caller's reading surface. No source text or rendered nodes are held: the host renders current data first. */
 export interface ReadingContext {
   surface: 'lens' | 'sheet' | 'scope' | 'none';
@@ -151,6 +155,8 @@ export function createReturnView(host: ReturnHost) {
     } catch { /* this tab keeps it */ }
   }
   const partName = (id: string) => { const v = host.current()?.view; return v ? partLabel(v, id) : '부분'; };
+  /** Beside a save button: whether saving sends anything. */
+  const sends = () => (host.autoConnected() ? '저장하면 다음 자동 지도 갱신 때 AI에 보내요' : '저장해도 AI에 보내지 않아요');
 
   /* ---------- material and the reading of it ---------- */
   function sources(): ReadingSource[] {
@@ -405,7 +411,7 @@ export function createReturnView(host: ReturnHost) {
     if (s !== st) return;
     if (!kept) return say(done);
     const r = host.current()?.project.pasted.find(x => x.id === done.id);
-    const said = done.duplicate ? `같은 원문을 같은 종류·이름·판본·출처로 ${r ? fullTime(r.at) : '앞서'}에 저장했어요. 새로 저장하지 않았어요.` : '자료를 저장했어요. AI에는 보내지 않았어요.';
+    const said = done.duplicate ? `같은 원문을 같은 종류·이름·판본·출처로 ${r ? fullTime(r.at) : '앞서'}에 저장했어요. 새로 저장하지 않았어요.` : `자료를 저장했어요. ${host.autoConnected() ? '다음 자동 지도 갱신 때 AI에 보내요.' : 'AI에는 보내지 않았어요.'}`;
     if (!same) { d.msg = `${said} 저장하는 동안 바뀐 양식은 그대로 남겨 두었어요.`; render(); void refresh(); return; }
     st.storeMsg = { text: said, ok: true };
     await refresh();
@@ -726,7 +732,7 @@ export function createReturnView(host: ReturnHost) {
       area.setSelectionRange(at, at);
     });
     return [h('section', { class: 'rr-sec rr-paste-box' }, h('h3', {}, '기록 붙여넣기'),
-      h('p', { class: 'fine' }, '나누거나 종류·부분을 고르지 않아도 돼요. 저장한 뒤 지도 정리나 요약을 누를 때만 AI에 보내요.'),
+      h('p', { class: 'fine' }, `나누거나 종류·부분을 고르지 않아도 돼요. ${host.autoConnected() ? AUTO_SENDS : '저장한 뒤 지도 정리나 요약을 누를 때만 AI에 보내요.'}`),
       ctx ? h('p', { class: 'rr-context' }, h('span', {}, '보던 부분'), partChip(ctx),
         h('button', { type: 'button', class: 'link-button quiet', title: '읽기 맥락에서 빼요', onclick: () => { st.pasteContext = null; render(); } }, '빼기')) : null,
       sessionBox(st.key), area, warn, count, hiding, st.pasteMsg ? h('p', { class: st.pasteMsg.ok ? 'pp-ok' : 'pp-error', role: st.pasteMsg.ok ? 'status' : 'alert' }, st.pasteMsg.text) : null)];
@@ -735,7 +741,7 @@ export function createReturnView(host: ReturnHost) {
     const st = s!;
     return h('footer', { class: 'lens-foot rr-foot' }, h('div', { class: 'pp-row' },
       h('button', { type: 'button', class: 'primary small', disabled: st.saving, onclick: () => void savePaste() }, st.saving ? '저장 중…' : '기록 저장'),
-      h('span', { class: 'fine' }, '저장해도 AI에 보내지 않아요'),
+      h('span', { class: 'fine' }, sends()),
       h('button', { type: 'button', class: 'link-button quiet', onclick: backToReading }, '닫기')));
   }
 
@@ -755,7 +761,7 @@ export function createReturnView(host: ReturnHost) {
       return h('div', { class: 'rr-file-field' }, h('label', { for: id }, label, h('small', {}, ` 선택 · ${max}자 이내`)), i);
     };
     return [h('section', { class: 'rr-sec rr-paste-box rr-file-box' }, h('h3', {}, '코드·검사 자료 추가'),
-      h('p', { class: 'fine', id: 'file-rule' }, `UTF-8 텍스트 파일 하나(${Math.floor(PROVIDED_FILE_BYTES / 1000)}KB·60,000자 이내)를 원문 그대로 보관해요. 자료 종류·판본·출처는 사용자가 적는 것이고 앱은 파일을 실행·검증하거나 출처를 열지 않아요. 저장해도 AI에 보내지 않아요. 섞인 보고는 ‘기록 붙여넣기’로 붙여요.`),
+      h('p', { class: 'fine', id: 'file-rule' }, `UTF-8 텍스트 파일 하나(${Math.floor(PROVIDED_FILE_BYTES / 1000)}KB·60,000자 이내)를 원문 그대로 보관해요. 자료 종류·판본·출처는 사용자가 적는 것이고 앱은 파일을 실행·검증하거나 출처를 열지 않아요. ${host.autoConnected() ? AUTO_SENDS : '저장해도 AI에 보내지 않아요.'} 섞인 보고는 ‘기록 붙여넣기’로 붙여요.`),
       ctx ? h('p', { class: 'rr-context' }, h('span', {}, '보던 부분'), partChip(ctx),
         h('button', { type: 'button', class: 'link-button quiet', title: '읽기 맥락에서 빼요', disabled: d.saving, onclick: () => { d.context = null; render(); } }, '빼기')) : null,
       h('fieldset', { class: 'rr-file-kind' }, h('legend', {}, '자료 종류 (직접 고르기)'), ...kinds),
@@ -771,7 +777,7 @@ export function createReturnView(host: ReturnHost) {
     // Why a file or a field was refused reads here, in the fixed footer beside 저장: never below a long preview, out of sight.
     return h('footer', { class: 'lens-foot rr-foot' }, d.msg ? h('p', { class: 'pp-error rr-file-alert', role: 'alert' }, d.msg) : null, h('div', { class: 'pp-row' },
       h('button', { type: 'button', class: 'primary small', disabled: d.saving || d.reading, onclick: () => void saveFile() }, d.saving ? '저장 중…' : '자료 저장'),
-      h('span', { class: 'fine' }, '저장해도 AI에 보내지 않아요'),
+      h('span', { class: 'fine' }, sends()),
       h('button', { type: 'button', class: 'link-button quiet', onclick: backToReading }, '닫기')));
   }
 

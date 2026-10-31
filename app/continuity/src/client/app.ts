@@ -1846,6 +1846,7 @@ const sessionSources = createSessionSources({ status: () => status, accessCode: 
 const returnView = createReturnView({
   current: () => opened,
   kv,
+  autoConnected: () => autoSync.connected(),
   sources: sessionSources,
   status: () => status,
   accessCode: () => sessionCode(), keepAccessCode,
