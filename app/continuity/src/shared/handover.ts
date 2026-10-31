@@ -5,7 +5,7 @@
 import { isMapReading, type ClaimKind, type MapReading, type Project } from './types.js';
 import { CLAIM_LABEL, candidateReading } from './map-reading.js';
 import { studioView, type PartView, type StudioView } from './studio.js';
-import { REL_LABEL } from './relation-groups.js';
+import { relLabel } from './relation-groups.js';
 import { stamp, RECORD_HEAD, HEAD_FIELD } from './session-import.js';
 import { HANDOVER_TAG, foldHandover, quoteReceived, receivedHandovers } from './handover-mark.js';
 export { HANDOVER_TAG, foldHandover, handoverCode, receivedHandovers } from './handover-mark.js';
@@ -101,7 +101,8 @@ function partBlock(view: StudioView, part: PartView, sessions: PartSession[], to
   if (!role && !part.note && !claims.length) lines.push('- 아직 이 부분에 대해 읽힌 내용이 없어요.');
   const rels = view.relations.filter(r => r.from === part.id || r.to === part.id).map(r => {
     const out = r.from === part.id, other = view.parts.find(x => x.id === (out ? r.to : r.from));
-    return other ? `${out ? '→' : '←'} ${other.name} (${REL_LABEL[r.kind] ?? r.kind}${r.note ? ` · ${one(r.note, 80)}` : ''})` : null;
+    // Read from this part, as its panel reads it: '이 부분이 필요로 함' or '이 부분을 필요로 함', never an arrow to decode.
+    return other ? `${other.name} (${relLabel(r.kind, out)}${r.note ? ` · ${one(r.note, 80)}` : ''})` : null;
   }).filter(Boolean);
   if (rels.length) lines.push(`- 관련: ${rels.slice(0, k.rels).join(', ')}${rels.length > k.rels ? ` 외 ${rels.length - k.rels}개` : ''}`);
   if (sessions.length) lines.push(`- 다룬 세션: ${sessions.slice(0, k.sessions).map(s => `${originLabel(s)}${s.tookOver ? ' (인수인계로 이어받음)' : ''}`).join(', ')}`);
