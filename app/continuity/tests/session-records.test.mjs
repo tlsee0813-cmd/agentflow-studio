@@ -657,3 +657,14 @@ test('SESSIONS-AC5 the records a look kept are counted as each session is marked
   const t = tab(src); t.sync.connect('/w'); await settle();
   assert.equal(t.texts().length, 1); assert.deepEqual(Object.keys(t.binding().marks), [ID]); assert.equal(t.binding().taken, 1);
 });
+
+test('SESSIONS-AC6 leaving the folder that could not be read while a look runs: the look ends without bringing its message back', async () => {
+  const src = source([{ id: ID, cwd: '/v', updatedAt: ago(30), turns: pair(40, 'V-PROMPT', 'ok') }]), list = src.list.bind(src);
+  src.list = async folder => { if (folder === '/gone') throw Object.assign(new Error('x'), { code: 'NETWORK' }); return list(folder); };
+  const go = held(src), t = tab(src);
+  t.kv.setItem(AUTOSYNC_KEY, JSON.stringify({ E1: { folders: [folderLink('/gone'), folderLink('/v')], marks: {}, runs: { day: 'x', n: 0, last: null }, taken: 0, lastCheck: null, error: null } }));
+  void t.sync.tick(true); await settle();
+  t.sync.removeFolder('/gone'); assert.equal(t.binding().error, null);
+  go(); await settle();
+  assert.deepEqual(t.binding().folders.map(f => f.path), ['/v']); assert.equal(t.texts().length, 1); assert.equal(t.binding().error, null);
+});

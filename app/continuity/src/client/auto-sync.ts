@@ -114,7 +114,8 @@ export function createAutoSync(host: AutoSyncHost) {
     busy = true; render();
     // What this look did, and only that, goes onto the binding at its end: the marks of the sessions it kept.
     const marks: Record<string, SessionMark> = {}, moved: string[] = [], kept = new Set<string>(), whole = new Set<FolderLink>(), due: { s: SessionSummary; f: FolderLink; history: boolean }[] = [];
-    let ran: string | null = null, error: string | null | undefined;
+    // failedAt: the last failure of one folder, with that folder (the person may leave it before the look ends).
+    let ran: string | null = null, error: string | null | undefined, failedAt: { f: FolderLink; text: string } | null = null;
     try {
       // A project that can take no more is not read at all (its records can still be read into the map).
       const now = Date.now(), seen = new Set<string>(), full = host.full();
@@ -123,7 +124,7 @@ export function createAutoSync(host: AutoSyncHost) {
         let list: SessionSummary[];
         try { list = await src.list(f.path); }
         // Picked folders this browser asks about again (their permission withdrawn) are said on the pill, with the way to allow them.
-        catch (e) { if (host.sources.current()) failed = `${folderName(f.path)}: ${failText(e, '세션 기록을 확인하지 못했어요.')}`; continue; }
+        catch (e) { if (host.sources.current()) failedAt = { f, text: failed = `${folderName(f.path)}: ${failText(e, '세션 기록을 확인하지 못했어요.')}` }; continue; }
         adopt(key, list);
         // A picked folder that could not be read is said, and the first look of this folder is not done until it can be.
         const missed = src.partial?.() ?? null; if (missed) failed = missed;
@@ -153,7 +154,7 @@ export function createAutoSync(host: AutoSyncHost) {
           // Read from the mark on (the reply taken last comes back too, in case it went on); a new session from the connection on.
           let d: SessionDetail;
           try { d = await src.read(s.id, was ? was.lastAt : from); }
-          catch (e) { failed = `${folderName(f.path)}: ${failText(e, '세션 기록을 읽지 못했어요.')}`; continue sessions; }
+          catch (e) { failedAt = { f, text: failed = `${folderName(f.path)}: ${failText(e, '세션 기록을 읽지 못했어요.')}` }; continue sessions; }
           let turns = newTurns(d, was, from);
           // A first look takes one record of each session's newest turns; later ones every new turn, in as many records as it takes.
           // A history session worked in since the connection gives its history up to the connection; the work since is read on from
@@ -191,13 +192,14 @@ export function createAutoSync(host: AutoSyncHost) {
       }
     } finally {
       // Onto the binding as it is now (another tab, or the person, may have changed it meanwhile): a mark only where it is further
-      // on, a folder's first look done only when all of it was kept, a folder added or left meanwhile kept as the person left it.
-      const cur = stored(key);
+      // on, a folder's first look done only when all of it was kept, a folder added or left meanwhile kept as the person left it (a
+      // folder left says its failure no more: leaving it took its message away).
+      const cur = stored(key), unsaid = !!failedAt && failedAt.text === error && !stillLinked(key, failedAt.f);
       if (cur) {
         for (const id of moved) delete cur.marks[id];
         for (const [id, m] of Object.entries(marks)) if (further(m, cur.marks[id])) cur.marks[id] = m;
         for (const f of cur.folders) if ([...whole].some(x => x.path === f.path && x.connectedAt === f.connectedAt) && due.every(x => x.f.path !== f.path || kept.has(x.s.id))) f.backfilled = true;
-        cur.lastCheck = new Date().toISOString(); if (error !== undefined) cur.error = error;
+        cur.lastCheck = new Date().toISOString(); if (error !== undefined) cur.error = unsaid ? null : error;
         if (ran) { const today = day(); cur.runs = { day: today, n: (cur.runs.day === today ? cur.runs.n : 0) + 1, last: ran }; }
         put_(key, cur);
       }
