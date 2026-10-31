@@ -34,7 +34,8 @@ function withIds(ask, records, ids) {
   w.candidates.push({ text: '두 부분이 같은 대상인지 아직 정해지지 않았어요.', target: 'identity', parts: [ids.at(-1), 'P01'], at: null, statement: null });
   return w;
 }
-const refusal = f => { try { f(); } catch (e) { return e; } assert.fail('not refused'); };
+// A map.7 item set aside (PCRUN100) is its refusal too: the same path, rule and category, the rest of the reply read.
+const refusal = f => { let r; try { r = f(); } catch (e) { return e; } const a = M.setAside(r)[0]; if (a) return a; assert.fail('not refused'); };
 
 test('120-1 lowercase ids of 1–24 units with digits, _ and - are accepted; parent, relation and candidate spell them as written', () => {
   const { p, inp } = later(), ids = ['new:a', 'new:label_guide', 'new:label-guide', 'new:a0', `new:${KEY24}`];
@@ -61,7 +62,7 @@ test('120-2 map.7 refusals at parts[i].ref: one fixed category each, never the r
   assert.deepEqual([refusal(() => M.validateMapReply(dup, ask)).path, refusal(() => M.validateMapReply(dup, ask)).target], ['parts[3].ref', 'duplicate-part']);
   // A reference spelled otherwise than its part is refused as before (no alias repair).
   for (const change of [w => { w.parts[3].parent = 'new:X'; }, w => { w.relations.at(-1).from = 'new:Label'; }, w => { w.candidates.at(-1).parts[0] = 'new:y'; }]) {
-    const w = withIds(ask, inp.records, ['new:x', 'new:y2']); change(w); assert.throws(() => M.validateMapReply(w, ask), e => e.message === 'INVALID_RESPONSE');
+    const w = withIds(ask, inp.records, ['new:x', 'new:y2']); change(w); assert.equal(refusal(() => M.validateMapReply(w, ask)).message, 'INVALID_RESPONSE');
   }
   // Order: the old about form, then the exact keys, then the ref (each refusal is the one it was).
   const both = withIds(ask, inp.records, ['new:x']); both.parts[2].ref = 'new:Bad'; both.parts[2].roleAbout = null; delete both.parts[2].roleAboutAt;

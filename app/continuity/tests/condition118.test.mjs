@@ -93,7 +93,9 @@ test('118-2 the validator agrees at every listed end and one past it; the rows n
   const reply = (aboutAt, matchAt) => ({ summary: '', relations: [], candidates: [], gaps: [], material: [],
     parts: [{ ref: 'P01', name: null, parent: null, role: null, roleAboutAt: null, roleReplaces: null, basis: [], claims: [{ kind: 'describes', text: '경계 검사', at: r.spans[0].s, aboutAt, replaces: null, key: 's1' }] }],
     matches: matchAt === undefined ? [] : [{ at: r.spans[0].s, text: '경계', kind: 'reported', stance: 'unclear', aboutAt: matchAt, targets: [{ requestId: q.id, itemId: 'change_1' }], why: '스텁', replaces: null }] });
-  const ok = f => { try { f(); return true; } catch (e) { assert.ok(['condition-length', 'material-evidence'].includes(e.rule) || e.message === 'INVALID_RESPONSE', String(e.rule)); return false; } };
+  // PCRUN100: an item set aside is refused too (the rest of the reply stands).
+  const no = e => { assert.ok(['condition-length', 'material-evidence'].includes(e.rule) || e.message === 'INVALID_RESPONSE', String(e.rule)); return false; };
+  const ok = f => { try { const a = M.setAside(f())[0]; return a ? no(a) : true; } catch (e) { return no(e); } };
   const idx = alias => r.spans.findIndex(s => s.s === alias), ref = (a, b) => a === b ? r.spans[a].s : `${r.spans[a].s}-${r.spans[b].s.split('.')[1]}`;
   let checked = 0;
   for (const [start, e80, e200] of rows.filter(x => x[0].startsWith(`${rec}.`))) {

@@ -6,7 +6,7 @@
  * (not across a reload) and applied when they come back and ask for it, without asking again. */
 import { isMapReading, type MapReading, type Project } from '../shared/types.js';
 import type { StudioView } from '../shared/studio.js';
-import { buildMapAsk, applyReading, validateMapReply, MAP5_SCHEMA, MAP6_SCHEMA, MAP7_SCHEMA, type MapInput, type MapReply, type Applied } from '../shared/map-reading.js';
+import { buildMapAsk, applyReading, validateMapReply, setAside, MAP5_SCHEMA, MAP6_SCHEMA, MAP7_SCHEMA, type MapInput, type MapReply, type Applied } from '../shared/map-reading.js';
 import { askMap, AskError, ERROR_TEXT, RELEASE_TEXT, type AiStatus } from './studio-api.js';
 import { encodeMapInput, decodeMapInput, jobHash, MAP_JOB_VERSION, type MapJobBinding } from '../shared/map-job.js';
 import { SPAN_INDEX, textDigest } from '../shared/evidence-span.js';
@@ -214,6 +214,9 @@ export function createMapRun(host: MapRunHost) {
     if (slot.attempt !== a) return;
     if (failed) { a.phase = 'ready'; slot.error = failed; host.changed(a.key); return; }
     slot.attempt = null;
+    // map.7: what the reading set aside (an item breaking a rule of its own) is said by count; the rest is what was applied.
+    const left = setAside(a.reply).length;
+    slot.notice = left ? `AI 답 가운데 ${left}개 항목은 근거나 형식이 규칙에 맞지 않아 빼고 반영했어요.` : null;
     // Saved: the job is told so. Two stores, no shared transaction: a lost acknowledgement is settled later by the reading id.
     if (a.op) void settle(a, 'applied');
     // Saved to the entry it was asked for; shown only in the visit it was applied from (a later one is left as it is).
