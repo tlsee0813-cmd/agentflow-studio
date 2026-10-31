@@ -574,3 +574,15 @@ test('SESSIONS-AS13 a reply begun before the connection and still written after 
   const all = t.texts().join('\n');
   for (const n of ['LONG-TASK', 'PART-A', 'PART-B']) assert.equal(all.split(n).length - 1, 1, `${n}\n${all}`);
 });
+
+test('SESSIONS-RT7 a turn on another day than the session\'s start names its date; on that day, or with no start, only its time', () => {
+  const start = '2026-10-27T09:00:00.000Z', later = '2026-10-29T10:00:00.000Z';
+  const turns = [{ role: 'user', at: start, text: '첫 요청' }, { role: 'user', at: later, text: '이틀 뒤 요청' }, { role: 'assistant', at: later, text: '했어요', files: [] }];
+  const text = sessionText(session(turns, { startedAt: start })).text, onDay = stamp(later, true).slice(5);
+  assert.match(onDay, /^\d{2}-\d{2} \d{2}:\d{2}$/);
+  assert.ok(text.includes(`${stamp(start, true)} 시작`) && text.includes(`── 사용자 요청 · ${stamp(start)} ──\n첫 요청`), text);
+  assert.ok(text.includes(`── 사용자 요청 · ${onDay} ──\n이틀 뒤 요청`), text);
+  // A later record of the automatic connection carries the same header line: its turns say their day as well.
+  assert.ok(sessionChunks(session(turns, { startedAt: start }), turns.slice(1))[0].includes(`── Claude Code 답변 · ${onDay} ──\n했어요`));
+  assert.ok(sessionText(session(turns)).text.includes(`── 사용자 요청 · ${stamp(later)} ──\n이틀 뒤 요청`), 'a record with no start keeps plain times');
+});
