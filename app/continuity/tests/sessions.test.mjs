@@ -491,6 +491,20 @@ test('SESSIONS-X3 a Codex thread continued across the CLI and Desktop keeps both
   assert.equal(read([...cli, itemU(3, 'CLI 요청'), ev(3, 'user_message', 'CLI 요청'), ev(4, 'agent_message', '또 답')]).length, 4);
 });
 
+test('SESSIONS-X6 Codex Desktop: an answer to a question its agent asked is read as the answer with its question, not as markup', () => {
+  const reply = (m, items, after = '\n') => desktopUser(m, [['user.text', `<send_user_message_question_reply>\n${JSON.stringify(items)}\n</send_user_message_question_reply>${after}`]]);
+  const ask = (m, question) => ({ timestamp: at(m), type: 'response_item', payload: { type: 'function_call', name: 'request_user_input_async', call_id: `call_${m}`, arguments: JSON.stringify({ questions: [{ question, options: ['현장 결제', '선결제'] }] }) } });
+  const done = (m, text) => ({ timestamp: at(m), type: 'event_msg', payload: { type: 'item_completed', item: { type: 'UserMessage', id: `u${m}`, client_id: `c${m}`, content: [{ type: 'text', text, text_elements: [] }] } } });
+  const id = n => JSON.stringify(['request_user_input_async', `call_${n}`, 0]);
+  const first = reply(3, [{ questionItemId: id(2), question: '결제는  어떻게 받을까요?', answer: '현장 결제' }]);
+  const rows = [desktopMeta('q'), desktopUser(1, [['user.text', '예약 화면에 결제 붙여 줘']]), ask(2, '결제는 어떻게 받을까요?'), first, done(3, first.payload.content[0].text),
+    reply(5, [{ questionItemId: id(4), question: '알림은?', answer: '문자' }, { questionItemId: id(4), question: '', answer: '오늘 안에' }], '\n그리고 테스트도'),
+    desktopUser(7, [['user.text', '<send_user_message_question_reply>\n깨진 내용\n</send_user_message_question_reply>']])];
+  assert.deepEqual(parseCodex(rows).turns.filter(t => t.role === 'user').map(t => t.text), ['예약 화면에 결제 붙여 줘',
+    '현장 결제 (AI의 질문 「결제는 어떻게 받을까요?」에 대한 답)', '문자 (AI의 질문 「알림은?」에 대한 답)\n오늘 안에\n그리고 테스트도',
+    '<send_user_message_question_reply>\n깨진 내용\n</send_user_message_question_reply>']);
+});
+
 test('SESSIONS-C2 Claude Code: an edit counts once its result came back without an error; a refused or failed one changed nothing', () => {
   const edit = (m, id, file) => ca(m, [{ type: 'tool_use', id, name: 'Edit', input: { file_path: file, old_string: 'a', new_string: 'b' } }]);
   const result = (m, id, extra = {}) => cu(m, [{ type: 'tool_result', tool_use_id: id, content: 'ok', ...extra }]);
