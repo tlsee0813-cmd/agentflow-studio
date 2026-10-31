@@ -531,6 +531,9 @@ test('SESSIONS-FK1 a forked Codex thread and a branched Claude Code session give
     assert.deepEqual(s.turns.map(t => [t.role, t.text]), want, name); assert.deepEqual(s.changes, [], name);
     assert.deepEqual([s.meta.thread, s.meta.startedAt, s.meta.branch], ['F', forkAt, 'try-red'], name);
   }
+  // A fork made before the first request (its first request edited) copies nothing: what follows at once is its own.
+  const first = [meta, { timestamp: forkAt, type: 'turn_context', payload: { cwd: '/w' } }, { ...own[0], timestamp: forkAt }, own[1]];
+  assert.deepEqual(parseCodex(first).turns.map(t => [t.role, t.text]), want);
   // Claude Code: each copied row names where it came from (its time and id kept); the branch's own rows do not.
   const from = (row, uuid) => ({ ...row, sessionId: 'B', uuid, forkedFrom: { sessionId: 'A', messageUuid: uuid } });
   const b = parseClaude([from(cu(0, '결제 화면에 현장 결제 안내 문구 넣어 줘'), 'u1'), from(ca(1, [{ type: 'tool_use', id: 't1', name: 'Edit', input: { file_path: '/w/src/pay/notice.tsx', old_string: 'a', new_string: 'b' } }]), 'a1'),

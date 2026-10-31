@@ -289,9 +289,10 @@ export function codexParser(): SessionParser {
     calls.delete(id as string); if (done) return;
     c.piece.files = []; changes.splice(changes.indexOf(c.change), 1);
   };
-  // A fork (and a subagent started with its parent's history) begins with a copy of the conversation it came from, each line
-  // stamped when it was copied: none of it is this session's own. The copy ends at the fork's own settings line, or in files from
-  // before Codex wrote one at the first pause (a copy is written at once). A paginated subagent names the first line of its own.
+  // A fork (and a subagent started with its parent's history) begins with a copy of the conversation it came from, from that one's
+  // first line on, each line stamped when it was copied: none of it is this session's own. The copy ends at the fork's own settings
+  // line, or in files from before Codex wrote one at the first pause (a copy is written at once). A fork made before the first
+  // request copies nothing. A paginated subagent names the first line of its own.
   let copy = false, copiedAt = NaN, ownFrom = -1;
   const push = (raw: Row) => {
     if (!raw || typeof raw !== 'object') return;
@@ -304,14 +305,13 @@ export function codexParser(): SessionParser {
       copy = false;
     }
     if (kind === 'session_meta' || (!wrapped && typeof raw.id === 'string' && typeof raw.instructions !== 'undefined')) {
-      // The first line of the session the copy came from (it names another thread) says nothing of this one.
+      // The first line of the session the copy came from (it names another thread) starts the copy, and says nothing of this one.
       if (meta.thread && typeof p.id === 'string' && p.id !== meta.thread) { copy = true; copiedAt = at ? Date.parse(at) : NaN; return; }
       atFolder(meta, p.cwd); meta.startedAt = typeof p.timestamp === 'string' ? p.timestamp : meta.startedAt;
       if (typeof p.git?.branch === 'string') meta.branch = p.git.branch;
       if (typeof p.id === 'string' && !meta.thread) meta.thread = p.id;
       const parent = p.parent_thread_id ?? p.source?.subagent?.thread_spawn?.parent_thread_id;
       if (typeof parent === 'string' && parent && !meta.parent) meta.parent = parent;
-      if (typeof p.forked_from_id === 'string' && p.forked_from_id) copy = true;
       if (typeof p.subagent_history_start_ordinal === 'number') ownFrom = p.subagent_history_start_ordinal;
       return;
     }
