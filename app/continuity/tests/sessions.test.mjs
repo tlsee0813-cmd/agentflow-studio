@@ -427,6 +427,17 @@ test('SESSIONS-C2 Claude Code: an edit counts once its result came back without 
   assert.deepEqual(parseClaude([...rows, result(9, 'e4')]).turns[1].files, ['/w/config/dev.json', '/w/src/pending.ts']);
 });
 
+test('SESSIONS-C4 Claude Code\'s row for a press of Esc is not a request; a prompt that only mentions it is', async () => {
+  const P = await import('../dist/public/shared/session-parse.js');
+  const stop = (m, text) => cu(m, [{ type: 'text', text }]);
+  const rows = [cu(0, '예약 목록을 날짜순으로 정렬해 줘'), ca(1, '정렬 코드를 볼게요.'), stop(2, '[Request interrupted by user]'), cu(3, '아니, 최신순으로'),
+    ca(4, [{ type: 'tool_use', id: 'e1', name: 'Edit', input: { file_path: '/w/src/list.ts', old_string: 'a', new_string: 'b' } }]), stop(5, '[Request interrupted by user for tool use]')];
+  assert.deepEqual(parseClaude(rows).turns.filter(t => t.role === 'user').map(t => t.text), ['예약 목록을 날짜순으로 정렬해 줘', '아니, 최신순으로']);
+  // Listed by the first request typed after it.
+  assert.equal(P.sessionSummary('claude-' + 'a'.repeat(24), 'claude', parseClaude(rows.slice(2)), at(9), 1).preview, '아니, 최신순으로');
+  assert.deepEqual(parseClaude([cu(0, '[Request interrupted by user] 이 문구는 어디서 나와?')]).turns.map(t => t.text), ['[Request interrupted by user] 이 문구는 어디서 나와?']);
+});
+
 test('SESSIONS-X4 Codex patches name their files in any form: raw Windows paths, JSON arguments, heredocs, string commands', async () => {
   const P = await import('../dist/public/shared/session-parse.js');
   const patch = f => `*** Begin Patch\n*** Update File: ${f}\n@@\n-a\n+b\n*** End Patch\n`, fn = (name, args) => ({ type: 'function_call', name, call_id: 'c', arguments: JSON.stringify(args) });

@@ -160,7 +160,7 @@ export function parseClaude(lines: unknown[]): ParsedSession {
   const p = claudeParser(); for (const o of lines) p.push(o); return p.done();
 }
 const EDIT_TOOLS = ['Edit', 'Write', 'MultiEdit', 'NotebookEdit'];
-const ISO_TIME = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/, DAY_MS = 24 * 60 * 60 * 1000;
+const ISO_TIME = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/, DAY_MS = 24 * 60 * 60 * 1000, INTERRUPTED = /^\[Request interrupted by user[^\]]*\]$/;
 /** The Claude Code reading, one line at a time (a long file is never held whole). */
 export function claudeParser(): SessionParser {
   const c = collector(), meta = newMeta(), changes: FileChange[] = [], edits = new Map<string, FileChange>();
@@ -200,7 +200,9 @@ export function claudeParser(): SessionParser {
     } else if (o.type === 'user') {
       if (o.isMeta === true || o.promptSource === 'system' || o.isCompactSummary === true) return;
       if (blocks.some(b => b.type === 'tool_result')) return;
-      c.user(typed(textOf(content, ['text'])), at);
+      // Pressing Esc leaves a row of Claude Code's own ('[Request interrupted by user]', '… for tool use'): not a request.
+      const t = typed(textOf(content, ['text'])); if (t && INTERRUPTED.test(t)) return;
+      c.user(t, at);
     } else c.reply(textOf(content, ['text']), at);
   };
   return { push: o => push(o as Row), done: () => ({ meta, turns: c.turns, changes }) };
