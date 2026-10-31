@@ -75,12 +75,13 @@ export function createAutoSync(host: AutoSyncHost) {
   const markOf = (b: Binding, s: SessionSummary): SessionMark | null => b.marks[s.id] ?? s.aliases?.map(a => b.marks[a]).find(m => !!m) ?? null;
   /** Whether this folder is still linked as it was when a look began (the person may have left it, or ended the connection). */
   const stillLinked = (key: string, f: FolderLink) => !!stored(key)?.folders.some(x => x.path === f.path && x.connectedAt === f.connectedAt);
-  /** One session's mark onto the binding as it is now, where it is further on (its old ids' marks give way to it). */
-  function keepMark(key: string, s: SessionSummary, m: SessionMark) {
+  /** One session's mark onto the binding as it is now, where it is further on (its old ids' marks give way to it), with the records
+   * it kept counted (a tab closed later in the look does not lose them from the count). */
+  function keepMark(key: string, s: SessionSummary, m: SessionMark, taken = 0) {
     const cur = stored(key); if (!cur) return;
     for (const id of s.aliases ?? []) delete cur.marks[id];
     if (further(m, cur.marks[s.id])) cur.marks[s.id] = m;
-    put_(key, cur);
+    cur.taken += taken; put_(key, cur);
   }
   /** Marks kept under an id a listed session had before move to its id now, whether or not it is read this time: once its file
    * moves (Codex archives a thread) the id its old path gave is no longer listed with it. */
@@ -111,9 +112,9 @@ export function createAutoSync(host: AutoSyncHost) {
     if (halted.has(key) && !force) return;
     halted.delete(key);
     busy = true; render();
-    // What this look did, and only that, goes onto the binding at its end: the marks of the sessions it kept, what it took.
+    // What this look did, and only that, goes onto the binding at its end: the marks of the sessions it kept.
     const marks: Record<string, SessionMark> = {}, moved: string[] = [], kept = new Set<string>(), whole = new Set<FolderLink>(), due: { s: SessionSummary; f: FolderLink; history: boolean }[] = [];
-    let taken = 0, ran: string | null = null, error: string | null | undefined;
+    let ran: string | null = null, error: string | null | undefined;
     try {
       // A project that can take no more is not read at all (its records can still be read into the map).
       const now = Date.now(), seen = new Set<string>(), full = host.full();
@@ -168,7 +169,6 @@ export function createAutoSync(host: AutoSyncHost) {
             // A text refused leaves only its session to be taken again; anything else stops this look (and the next, until asked).
             if (no?.refused) { failed = no.error; continue sessions; }
             if (no) { error = no.error; halted.set(key, no.error); return; }
-            taken += texts.length;
           }
           // More to read when the reading left newer turns and moved on; until they are read the mark does not match the file's
           // time, so the next look comes back to this session even if it does not change.
@@ -176,8 +176,8 @@ export function createAutoSync(host: AutoSyncHost) {
           // there), or at the connection when the reading held none.
           const end = upTo ? (turns.length ? markAfter({ ...d, turns }, null, '') : { lastAt: upTo, count: 0, updatedAt: '' }) : markAfter(d, was, s.updatedAt, from);
           const more = !!upTo || (!first && !!d.rest && end.lastAt !== (was?.lastAt ?? null)), next = more ? { ...end, updatedAt: '' } : end;
-          // Marked as soon as it is kept: a tab closed later in this look does not take these turns again.
-          keepMark(key, s, next); marks[s.id] = next; moved.push(...s.aliases ?? []); kept.add(s.id);
+          // Marked and counted as soon as it is kept: a tab closed later in this look does not take these turns again, nor lose them.
+          keepMark(key, s, next, texts.length); marks[s.id] = next; moved.push(...s.aliases ?? []); kept.add(s.id);
           if (!more) break;
           was = next; first = false;
         }
@@ -196,7 +196,7 @@ export function createAutoSync(host: AutoSyncHost) {
         for (const id of moved) delete cur.marks[id];
         for (const [id, m] of Object.entries(marks)) if (further(m, cur.marks[id])) cur.marks[id] = m;
         for (const f of cur.folders) if ([...whole].some(x => x.path === f.path && x.connectedAt === f.connectedAt) && due.every(x => x.f.path !== f.path || kept.has(x.s.id))) f.backfilled = true;
-        cur.taken += taken; cur.lastCheck = new Date().toISOString(); if (error !== undefined) cur.error = error;
+        cur.lastCheck = new Date().toISOString(); if (error !== undefined) cur.error = error;
         if (ran) { const today = day(); cur.runs = { day: today, n: (cur.runs.day === today ? cur.runs.n : 0) + 1, last: ran }; }
         put_(key, cur);
       }

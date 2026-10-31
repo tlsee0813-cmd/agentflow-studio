@@ -637,3 +637,11 @@ test('SESSIONS-AC4 leaving the folder that could not be read takes its message a
   await settle();
   assert.deepEqual(looked, ['/v']); assert.deepEqual(t.binding().folders.map(f => f.path), ['/v']); assert.equal(t.binding().error, null); assert.equal(t.texts().length, 1);
 });
+
+test('SESSIONS-AC5 the records a look kept are counted as each session is marked: a look cut short (a tab closed) loses none from the count', async () => {
+  const A = { id: ID, cwd: '/w', updatedAt: ago(30), turns: pair(40, 'A-ONE', 'a') }, B = { id: OLD, cwd: '/w', updatedAt: ago(29), turns: pair(38, 'B-ONE', 'b') };
+  const src = source([A, B]), read = src.read.bind(src);
+  src.read = (id, since) => (id === OLD ? new Promise(() => {}) : read(id, since));
+  const t = tab(src); t.sync.connect('/w'); await settle();
+  assert.equal(t.texts().length, 1); assert.deepEqual(Object.keys(t.binding().marks), [ID]); assert.equal(t.binding().taken, 1);
+});
