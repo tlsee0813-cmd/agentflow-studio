@@ -3335,6 +3335,7 @@ def final_paste_flow(browser, base):
     expect(foot).to_have_text("저장하면 다음 자동 지도 갱신 때 AI에 보내요")
     # Picked again by hand, a session taken already is said so: saving it would bring in what came before a second time.
     page.locator("#lens").get_by_role("button", name="내 AI 세션에서 가져오기").click()
+    expect(page.locator("#lens .rr-session", has_text="휴무일 연결").locator("small").first).to_contain_text("이미 가져옴")
     page.locator("#lens .rr-session", has_text="휴무일 연결").click()
     expect(page.locator("#lens .rr-sessions-note")).to_contain_text("이미 가져온 세션이에요. 저장하면 앞서 들어온 대화가 한 번 더 들어갈 수 있어요.")
     page.locator("#space-empty .se-file").click()

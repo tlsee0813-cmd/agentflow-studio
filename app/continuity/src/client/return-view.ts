@@ -344,10 +344,12 @@ export function createReturnView(host: ReturnHost) {
     const results = (): HTMLElement => {
       const q = p.filter.trim().toLowerCase();
       const shown = (p.list ?? []).filter(x => !q || [x.title, x.preview, x.cwd, x.branch].some(v => v?.toLowerCase().includes(q)));
+      // A session this project holds a record of already says so on its row (taking it again may bring its talk in twice).
+      const had = new Set(host.current()?.project.pasted.map(r => sessionOrigin(r.text)?.id).filter(Boolean));
       const rows = shown.map(x => h('li', {}, h('button', { type: 'button', class: 'rr-session', disabled: !!p.reading, onclick: () => void takeSession(x.id) },
         h('span', { class: 'rr-session-tool' }, TOOL_NAME[x.tool]),
         h('strong', {}, clip(x.title ?? x.preview, 90)),
-        h('small', {}, [x.title ? clip(x.preview, 70) : null, x.cwd, stamp(x.updatedAt, true)].filter(Boolean).join(' · ')),
+        h('small', {}, [had.has(x.id) || x.aliases?.some(a => had.has(a)) ? '이미 가져옴' : null, x.title ? clip(x.preview, 70) : null, x.cwd, stamp(x.updatedAt, true)].filter(Boolean).join(' · ')),
         p.reading === x.id ? h('small', { class: 'rr-session-busy' }, '읽는 중…') : null)));
       return rows.length ? h('ul', { class: 'rr-session-list' }, ...rows) : p.list?.length ? h('p', { class: 'fine' }, '찾는 말과 맞는 세션이 없어요.') : h('span', { hidden: true });
     };
