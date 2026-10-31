@@ -6,7 +6,7 @@
  * click, before the page can read them on a later visit. A single file chosen by hand works in every browser. */
 import { listSessions, readSession, type AiStatus } from './studio-api.js';
 import { readSessionList, readSessionDetail, type SessionDetail, type SessionSummary } from '../shared/session-import.js';
-import { SESSION_LIMITS, jsonLines, parseSession, sessionParser, pushLine, withSubagents, tailFolders, hasPrompt, atFolder, sniffTool, sessionSummary, sessionDetail, sessionId, sessionKey, within, worktreeSteps, worktreeFolder, type ParsedSession, type SessionMeta, type SessionTool } from '../shared/session-parse.js';
+import { SESSION_LIMITS, jsonLines, parseSession, sessionParser, pushLine, withSubagents, tailFolders, hasPrompt, atFolder, sniffTool, sessionSummary, sessionDetail, sessionId, sessionKey, within, worktreeSteps, worktreeFolder, type ParsedSession, type SessionMeta, type SessionParser, type SessionTool } from '../shared/session-parse.js';
 
 /** read(id, since): only turns from that time on (a turn with no time is kept), as the server does. partial: after a listing, why it
  * holds only some of the picked folders' sessions (a folder could not be read), or null. */
@@ -45,15 +45,20 @@ async function saveRoots(roots: DirHandle[]): Promise<void> {
  * looked through once (a line is joined only when its end comes), and a line longer than the server's cap on one line
  * (SESSION_LIMITS.lineBytes, counted here in characters) is skipped, as on the server.
  * With its handle, a file an agent is still writing is read on through a fresh look when the first goes stale (Chrome cannot read
- * a File once the file on disk changed), up to the size it had: a session file only ever has lines added at its end. */
+ * a File once the file on disk changed), up to the size it had: a session file only ever has lines added at its end.
+ * partial: the file is the start of a longer one (its last, cut line left out); until: the reading stops at the first line after
+ * which it holds. */
 const LINE_CHARS = SESSION_LIMITS.lineBytes, READ_TRIES = 20;
-async function readParsed(tool: SessionTool, file: File, handle: FileHandle | null = null): Promise<ParsedSession> {
+async function readParsed(tool: SessionTool, file: Blob, handle: FileHandle | null = null, { partial = false, until = null }: { partial?: boolean; until?: ((p: SessionParser) => boolean) | null } = {}): Promise<ParsedSession> {
   const parser = sessionParser(tool), decoder = new TextDecoder(), end = file.size;
-  let reader = file.stream().getReader(), at = 0, tries = 0, line: string[] = [], len = 0;
+  let reader = file.stream().getReader(), at = 0, tries = 0, line: string[] = [], len = 0, stopped = false;
   const take = (s: string) => { len += s.length; if (len > LINE_CHARS) line = []; else line.push(s); };
   const feed = (text: string) => {
     let from = 0;
-    for (let nl = text.indexOf('\n'); nl >= 0; from = nl + 1, nl = text.indexOf('\n', from)) { take(text.slice(from, nl)); if (len <= LINE_CHARS) pushLine(parser, line.join('')); line = []; len = 0; }
+    for (let nl = text.indexOf('\n'); nl >= 0; from = nl + 1, nl = text.indexOf('\n', from)) {
+      take(text.slice(from, nl)); if (len <= LINE_CHARS) pushLine(parser, line.join('')); line = []; len = 0;
+      if (until?.(parser)) { stopped = true; return; }
+    }
     take(text.slice(from));
   };
   for (;;) {
@@ -64,8 +69,9 @@ async function readParsed(tool: SessionTool, file: File, handle: FileHandle | nu
     });
     if (!r) continue; if (r.done) break;
     at += r.value.length; feed(decoder.decode(r.value, { stream: true }));
+    if (stopped) { reader.cancel().catch(() => { /* done with it */ }); return parser.done(); }
   }
-  feed(decoder.decode()); if (len <= LINE_CHARS) pushLine(parser, line.join(''));
+  feed(decoder.decode()); if (!stopped && !partial && len <= LINE_CHARS) pushLine(parser, line.join(''));
   return parser.done();
 }
 /** A whole session file, through a fresh look at it. */
@@ -173,10 +179,15 @@ async function inRepository(meta: SessionMeta, codex: DirHandle) {
 async function readHead(f: Found, file: File, codex: DirHandle | null = null): Promise<Head> {
   const key = `${file.size}:${file.lastModified}`, partial = file.size > SESSION_LIMITS.headBytes, lines = jsonLines(await file.slice(0, SESSION_LIMITS.headBytes).text(), partial);
   const tool = f.tool ?? sniffTool(lines); if (!tool) return { key, tool, row: null, cwds: [], parent: null };
-  let parsed = parseSession(tool, lines);
+  let parsed = parseSession(tool, lines), read = SESSION_LIMITS.headBytes;
   // Read further while the head holds no prompt yet (a Codex subagent's is never a session of its own, whatever it holds: what it was
-  // asked, a copy of its parent's history, is read through the session that started it).
-  if (!hasPrompt(parsed) && partial && !parsed.meta.parent) parsed = parseSession(tool, jsonLines(await file.slice(0, SESSION_LIMITS.promptBytes).text(), file.size > SESSION_LIMITS.promptBytes));
+  // asked, a copy of its parent's history, is read through the session that started it). A fork whose head ends inside its copy of
+  // the session it came from is read on line by line (up to the file limit) to its first prompt of its own, as on the server.
+  if (!hasPrompt(parsed) && partial && !parsed.meta.parent && !parsed.copy) { parsed = parseSession(tool, jsonLines(await file.slice(0, SESSION_LIMITS.promptBytes).text(), file.size > SESSION_LIMITS.promptBytes)); read = SESSION_LIMITS.promptBytes; }
+  if (!hasPrompt(parsed) && file.size > read && !parsed.meta.parent && parsed.copy) {
+    const cut = file.size > SESSION_LIMITS.fileBytes;
+    parsed = await readParsed(tool, cut ? file.slice(0, SESSION_LIMITS.fileBytes) : file, null, { partial: cut, until: p => p.prompted() });
+  }
   const parent = tool === 'codex' ? parsed.meta.parent : null; if (!hasPrompt(parsed) || parent) return { key, tool, row: null, cwds: [], parent };
   // The end of the file, for a folder the session moved to late.
   if (partial) for (const c of tailFolders(await file.slice(Math.max(0, file.size - SESSION_LIMITS.tailBytes)).text())) atFolder(parsed.meta, c);
