@@ -258,6 +258,13 @@ test('HANDOVER-P1 changed files whose names hold ")" (route groups) are read who
   const t = handoverText(p, { scope: null, code: 'PAR234', at: AT });
   // One request's files are not listed again under it.
   assert.ok(t.includes('- 로그인 페이지 만들어 줘 → 바꾼 파일: app/(auth)/login/page.tsx, lib/auth.ts\n') && !t.includes('최근에 바뀐 파일'), t);
+  // The files of all requests are listed once only when that names a file their own lines leave out (one list was cut short), not
+  // when it would repeat them, a file changed twice included.
+  const ten = Array.from({ length: 10 }, (_, i) => `src/f${i}.ts`), files = (asks, ...lists) => handoverText(D.pasteRecord(D.createProject(), sessionText(session(ID,
+    asks.flatMap((text, i) => [{ role: 'user', at: AT, text }, { role: 'assistant', at: AT, text: '했어요', files: lists[i] }]))).text, null).project, { scope: null, code: 'PAR234', at: AT });
+  const cut = files(['파일 정리해 줘', '하나 더 고쳐 줘'], ten, ['src/f0.ts']);
+  assert.ok(cut.includes(`\n- 파일 정리해 줘 → 바꾼 파일: ${ten.slice(0, 8).join(', ')}\n`) && cut.includes(`\n최근에 바뀐 파일: ${ten.join(', ')}\n`), cut);
+  assert.ok(!files(['결제 고쳐 줘', '결제 다시 고쳐 줘'], ['src/pay.ts', 'src/a.ts'], ['src/pay.ts']).includes('최근에 바뀐 파일'));
 });
 
 test('HANDOVER-X1 an answer\'s files go to the request of its own session, even when another session\'s record came in between', () => {
@@ -270,7 +277,7 @@ test('HANDOVER-X1 an answer\'s files go to the request of its own session, even 
   for (const [s, mark] of [[y1, null], [x, null], [y2, { lastAt: T('01'), count: 1, updatedAt: T('01') }]]) for (const t of sessionChunks(s, newTurns(s, mark))) p = D.pasteRecord(p, t, null).project;
   const t = handoverText(p, { scope: null, code: 'XRS234', at: AT });
   assert.ok(t.includes('- 결제 모듈 리팩터링 → 바꾼 파일: src/pay.ts, src/pay.test.ts\n- 로그인 화면 문구만 바꿔 줘, 결제 버튼 글자도 → 바꾼 파일: src/login.tsx\n'), t);
-  assert.ok(t.includes('\n최근에 바뀐 파일: src/pay.ts, src/pay.test.ts, src/login.tsx\n'), 'the files of several requests, once each');
+  assert.ok(!t.includes('최근에 바뀐 파일'), 'each file is named above: not listed again');
   // A part's document leaves out the record holding the prompt: the reply's files go nowhere rather than to another request.
   const q = readAs(p, [['결제', ['결제 버튼 글자도', '리팩터링 끝']]]), pay = q.space.areas.find(a => a.name === '결제').id;
   const s = handoverText(q, { scope: pay, code: 'XRS234', at: AT });

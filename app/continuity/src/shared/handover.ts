@@ -224,10 +224,13 @@ export function handoverDoc(p: Project, opts: HandoverOptions): Handover {
   if (open.length) after.push('## 아직 정하지 않은 것', ...dedupeLines(open).slice(-12), '');
   if (asks.length) {
     after.push('## 최근 흐름 (사용자가 세션에서 한 요청, 오래된 것부터)');
-    for (const t of asks) after.push(`- ${one(quoteReceived(t.text), 300)}${t.files.length ? ` → 바꾼 파일: ${one([...new Set(t.files)].slice(0, FILES_PER_ASK).join(', '), 300)}` : ''}`);
-    const files = [...new Set(asks.flatMap(t => t.files))].slice(-RECENT_FILES);
-    // Written when it says more than the lines above: the files of several requests, or more than one request's line names.
-    if (asks.filter(t => t.files.length).length > 1 || files.length > FILES_PER_ASK) after.push('', `최근에 바뀐 파일: ${one(files.join(', '), NAMES)}`);
+    // Each request names its own files, as many as FILES_PER_ASK and one line hold.
+    const each = asks.map(t => [...new Set(t.files)]), list = (f: string[]) => f.slice(0, FILES_PER_ASK).join(', ');
+    asks.forEach((t, i) => after.push(`- ${one(quoteReceived(t.text), 300)}${each[i]!.length ? ` → 바꾼 파일: ${one(list(each[i]!), 300)}` : ''}`));
+    // All of them once, written only when it names a file the lines above leave out (a request's list was cut short): otherwise it
+    // would only repeat them, even when a file was changed more than once.
+    const files = [...new Set(each.flat())].slice(-RECENT_FILES);
+    if (each.some(f => f.length > FILES_PER_ASK || list(f).length > 300)) after.push('', `최근에 바뀐 파일: ${one(files.join(', '), NAMES)}`);
     after.push('');
   }
   after.push(`──────── 인수인계 문서 끝 · ${tag} ────────`);
