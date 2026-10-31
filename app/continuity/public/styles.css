@@ -1528,6 +1528,8 @@ button:disabled { opacity: .5; cursor: default; }
 .sync-manual { display: flex; gap: 6px; }
 .sync-path { flex: 1; min-width: 0; height: 30px; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: var(--r-sm); font: inherit; font-size: 12.5px; }
 .sync-panel .pp-row { display: flex; align-items: center; gap: 10px; }
+/* '지금 확인' while a look runs: shown as unavailable but kept focusable (a disabled button would drop focus). */
+.sync-panel .secondary[aria-disabled="true"], .sync-panel .secondary[aria-disabled="true"]:hover { opacity: .5; cursor: default; background: var(--surface); border-color: var(--line-strong); }
 
 /* Handover document: a button beside the reading modes, a modal with the range, the text, copy and save. */
 .handover-open { height: 32px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text-2); font-size: 13px; font-weight: 600; white-space: nowrap; }

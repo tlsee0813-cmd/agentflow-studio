@@ -2715,7 +2715,8 @@ def sessions_flow(browser, base):
     expect(page.locator("#sync-panel .sync-folder-pick")).to_have_count(1)
     assert page.evaluate("[document.body.scrollLeft, document.querySelector('.bar').scrollWidth <= innerWidth]") == [0, True]
     expect(page.locator("#sync-pill")).to_have_accessible_name("자동 연결 안 됨")
-    page.locator("#sync-pill").click()
+    page.mouse.click(200, 600)  # a press outside closes the panel, as a popover does
+    expect(page.locator("#sync-panel")).to_be_hidden()
     page.set_viewport_size({"width": 1280, "height": 720})
     page.locator("#sync-pill").click()
     pick = page.locator("#sync-panel .sync-folder-pick")
@@ -2738,12 +2739,18 @@ def sessions_flow(browser, base):
     expect(page.locator("#sync-panel")).to_contain_text("오늘 자동 지도 갱신1 / 30회")
     page.reload()
     expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon")
+    expect(page.locator("#sync-pill")).to_have_attribute("data-state", "on", timeout=15000)
     page.locator("#sync-pill").click()
-    page.locator("#sync-panel").get_by_role("button", name="지금 확인").click()
+    # From the keyboard: '지금 확인' keeps focus through the look it starts, and Esc closes the panel with focus back on its pill.
+    page.locator("#sync-panel").get_by_role("button", name="지금 확인").press("Enter")
     expect(page.locator("#sync-panel")).to_contain_text("마지막 확인")
+    expect(page.locator("#sync-pill")).to_have_attribute("data-state", "on", timeout=15000)
     expect(page.locator("#sync-panel")).to_contain_text("가져온 기록2개")  # nothing taken twice
+    expect(page.locator("#sync-panel").get_by_role("button", name="지금 확인")).to_be_focused()
     assert len(maps) == 1, maps
-    page.locator("#sync-pill").click()
+    page.keyboard.press("Escape")
+    expect(page.locator("#sync-panel")).to_be_hidden()
+    expect(page.locator("#sync-pill")).to_be_focused()
     # By hand: the paste box takes one session as written; tool output and the key are not in it. Put after a note typed first,
     # it comes under a '다음 기록' line and is kept as a record of its own (told by its header), and the note as another.
     page.locator("#return-entry").click()
@@ -2766,9 +2773,17 @@ def sessions_flow(browser, base):
     # look is still running (folder listings held 2 s here): that look ends without dropping the folder, and one follows it.
     page.evaluate("""() => { const f = window.fetch; window.fetch = async (u, o) => { if (String(u).includes('folder=')) await new Promise(r => setTimeout(r, 2000)); return f(u, o); }; }""")
     page.locator("#sync-pill").click()
+    # Esc with focus left on the page closes only the panel (the paste box under it stays), however the pill was pressed.
+    page.evaluate("() => document.activeElement.blur()")
+    page.keyboard.press("Escape")
+    expect(page.locator("#sync-panel")).to_be_hidden()
+    expect(page.locator("#lens .rr-paste-open, #paste-text").first).to_be_visible()
+    page.locator("#sync-pill").click()
     page.locator("#sync-panel").get_by_role("button", name="지금 확인").click()
-    page.locator("#sync-panel").get_by_role("button", name="폴더 추가").click()
+    # Pressed from the keyboard, '폴더 추가' leaves focus in the panel (at its heading), not on the page.
+    page.locator("#sync-panel").get_by_role("button", name="폴더 추가").press("Enter")
     expect(page.locator("#sync-panel h3")).to_have_text("작업 폴더 추가")
+    expect(page.locator("#sync-panel h3")).to_be_focused()
     expect(page.locator("#sync-panel .sync-folder-pick")).to_have_count(0)  # the one folder with sessions is linked already
     page.locator("#sync-panel .sync-path").fill("/work/salon-api")
     page.locator("#sync-panel").get_by_role("button", name="연결", exact=True).click()
