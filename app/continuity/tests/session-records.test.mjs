@@ -574,3 +574,97 @@ test('SESSIONS-AS13 a reply begun before the connection and still written after 
   const all = t.texts().join('\n');
   for (const n of ['LONG-TASK', 'PART-A', 'PART-B']) assert.equal(all.split(n).length - 1, 1, `${n}\n${all}`);
 });
+
+test('SESSIONS-RT7 a turn on another day than the session\'s start names its date; on that day, or with no start, only its time', () => {
+  const start = '2026-10-27T09:00:00.000Z', later = '2026-10-29T10:00:00.000Z';
+  const turns = [{ role: 'user', at: start, text: '첫 요청' }, { role: 'user', at: later, text: '이틀 뒤 요청' }, { role: 'assistant', at: later, text: '했어요', files: [] }];
+  const text = sessionText(session(turns, { startedAt: start })).text, onDay = stamp(later, true).slice(5);
+  assert.match(onDay, /^\d{2}-\d{2} \d{2}:\d{2}$/);
+  assert.ok(text.includes(`${stamp(start, true)} 시작`) && text.includes(`── 사용자 요청 · ${stamp(start)} ──\n첫 요청`), text);
+  assert.ok(text.includes(`── 사용자 요청 · ${onDay} ──\n이틀 뒤 요청`), text);
+  // A later record of the automatic connection carries the same header line: its turns say their day as well.
+  assert.ok(sessionChunks(session(turns, { startedAt: start }), turns.slice(1))[0].includes(`── Claude Code 답변 · ${onDay} ──\n했어요`));
+  assert.ok(sessionText(session(turns)).text.includes(`── 사용자 요청 · ${stamp(later)} ──\n이틀 뒤 요청`), 'a record with no start keeps plain times');
+});
+
+/* ---------- the connection as the person changes it, on the same stand-in host ---------- */
+/** A tab like tab()'s whose map reading can always start (`reads` counts the readings started); save keeps every text. */
+function readingTab(src, opened = { key: 'E1', kind: 'saved', project: D.createProject() }) {
+  const kv = memKv(), t = { reads: 0, opened, kv, texts: () => opened.project.pasted.map(r => r.text), binding: () => JSON.parse(kv.getItem(AUTOSYNC_KEY))[opened.key] };
+  t.sync = createAutoSync({ current: () => opened, kv, sources: { offered: () => true, current: () => src, usesServer: () => true, folderState: () => 'none', folders: () => [] },
+    async save(key, texts) { for (const x of texts) opened.project = D.pasteRecord(opened.project, x, null).project; return null; },
+    full: () => null, canRead: () => true, read() { t.reads++; }, readBlocked: () => null });
+  return t;
+}
+/** Holds the source's readings until the returned function is called: a look still running while the person acts. */
+function held(src) { let go; const gate = new Promise(r => { go = r; }), read = src.read.bind(src); src.read = async (id, since) => { await gate; return read(id, since); }; return () => go(); }
+const folderLink = path => ({ path, connectedAt: ago(1), since: ago(20000), backfilled: false });
+
+test('SESSIONS-AC1 a connection ended, or a folder left, while a look runs takes nothing more from it, and no map reading starts for it', async () => {
+  const A = { id: ID, cwd: '/w', updatedAt: ago(30), turns: pair(40, 'W-ONE', 'a') }, B = { id: OLD, cwd: '/w', updatedAt: ago(29), turns: pair(38, 'W-TWO', 'b') };
+  const src = source([A, B]), go = held(src), t = readingTab(src);
+  t.sync.connect('/w'); await settle();
+  t.sync.disconnect(); assert.equal(t.sync.bindingOf('E1'), null);
+  go(); await settle();
+  assert.equal(t.texts().length, 0, 'nothing kept after the connection ended'); assert.equal(t.reads, 0, 'no map reading');
+  assert.deepEqual(t.binding().marks, {}, 'nothing marked: connecting again takes them');
+  t.sync.connect('/w'); await settle();
+  assert.equal(t.texts().length, 2); assert.equal(t.reads, 1);
+  // Ended and connected again meanwhile: the look that connecting queued takes them, once.
+  const src2 = source([A, B]), go2 = held(src2), r = readingTab(src2);
+  r.sync.connect('/w'); await settle(); r.sync.disconnect(); r.sync.connect('/w'); go2(); await settle();
+  assert.equal(r.texts().length, 2); assert.equal(r.binding().folders.length, 1);
+  // One of two folders left meanwhile: the other one's sessions still come in and are read into the map.
+  const V = { id: 'claude-fedcba9876543210fedcba98', cwd: '/v', updatedAt: ago(28), turns: pair(37, 'V-ONE', 'v') }, src3 = source([A, V]), go3 = held(src3), u = readingTab(src3);
+  u.kv.setItem(AUTOSYNC_KEY, JSON.stringify({ E1: { folders: [folderLink('/w'), folderLink('/v')], marks: {}, runs: { day: 'x', n: 0, last: null }, taken: 0, lastCheck: null, error: null } }));
+  void u.sync.tick(true); await settle();
+  u.sync.removeFolder('/v'); go3(); await settle();
+  assert.ok(u.texts().some(x => x.includes('W-ONE')) && !u.texts().some(x => x.includes('V-ONE')), u.texts().join('\n'));
+  assert.deepEqual(Object.keys(u.binding().marks), [ID]); assert.equal(u.reads, 1);
+});
+
+test('SESSIONS-AC2 a folder path pasted in quotes (Windows Explorer\'s "copy as path") connects to the folder inside them', async () => {
+  for (const typed of ['"C:\\work\\salon"', "  'C:\\work\\salon' "]) {
+    const t = tab(source([{ id: ID, cwd: 'C:\\work\\salon', updatedAt: ago(30), turns: pair(40, 'WIN-PROMPT', 'ok') }]));
+    t.sync.connect(typed); await settle();
+    assert.equal(t.binding().folders[0].path, 'C:\\work\\salon', typed); assert.equal(t.texts().length, 1, typed);
+  }
+});
+
+test('SESSIONS-AC3 one Windows folder written with another drive-letter case or a trailing separator is linked once; other paths keep their case', async () => {
+  const t = tab(source([{ id: ID, cwd: 'C:\\work\\salon', updatedAt: ago(30), turns: pair(40, 'WIN-PROMPT', 'ok') }]));
+  t.sync.connect('C:\\work\\salon'); await settle(); t.sync.connect('c:\\work\\salon\\'); await settle();
+  assert.deepEqual(t.binding().folders.map(f => f.path), ['C:\\work\\salon']); assert.equal(t.texts().length, 1);
+  const u = tab(source([]));
+  u.sync.connect('/work/Salon'); await settle(); u.sync.connect('/work/salon'); await settle();
+  assert.deepEqual(u.binding().folders.map(f => f.path), ['/work/Salon', '/work/salon']);
+});
+
+test('SESSIONS-AC4 leaving the folder that could not be read takes its message away at once; the folders left are looked at again', async () => {
+  const src = source([{ id: ID, cwd: '/v', updatedAt: ago(30), turns: pair(40, 'V-PROMPT', 'ok') }]), list = src.list.bind(src), looked = [];
+  src.list = async folder => { looked.push(folder); if (folder === '/gone') throw Object.assign(new Error('x'), { code: 'NETWORK' }); return list(folder); };
+  const t = tab(src); t.sync.connect('/v'); await settle(); t.sync.connect('/gone'); await settle();
+  assert.ok(t.binding().error.startsWith('gone: '), t.binding().error);
+  looked.length = 0; t.sync.removeFolder('/gone'); assert.equal(t.binding().error, null);
+  await settle();
+  assert.deepEqual(looked, ['/v']); assert.deepEqual(t.binding().folders.map(f => f.path), ['/v']); assert.equal(t.binding().error, null); assert.equal(t.texts().length, 1);
+});
+
+test('SESSIONS-AC5 the records a look kept are counted as each session is marked: a look cut short (a tab closed) loses none from the count', async () => {
+  const A = { id: ID, cwd: '/w', updatedAt: ago(30), turns: pair(40, 'A-ONE', 'a') }, B = { id: OLD, cwd: '/w', updatedAt: ago(29), turns: pair(38, 'B-ONE', 'b') };
+  const src = source([A, B]), read = src.read.bind(src);
+  src.read = (id, since) => (id === OLD ? new Promise(() => {}) : read(id, since));
+  const t = tab(src); t.sync.connect('/w'); await settle();
+  assert.equal(t.texts().length, 1); assert.deepEqual(Object.keys(t.binding().marks), [ID]); assert.equal(t.binding().taken, 1);
+});
+
+test('SESSIONS-AC6 leaving the folder that could not be read while a look runs: the look ends without bringing its message back', async () => {
+  const src = source([{ id: ID, cwd: '/v', updatedAt: ago(30), turns: pair(40, 'V-PROMPT', 'ok') }]), list = src.list.bind(src);
+  src.list = async folder => { if (folder === '/gone') throw Object.assign(new Error('x'), { code: 'NETWORK' }); return list(folder); };
+  const go = held(src), t = tab(src);
+  t.kv.setItem(AUTOSYNC_KEY, JSON.stringify({ E1: { folders: [folderLink('/gone'), folderLink('/v')], marks: {}, runs: { day: 'x', n: 0, last: null }, taken: 0, lastCheck: null, error: null } }));
+  void t.sync.tick(true); await settle();
+  t.sync.removeFolder('/gone'); assert.equal(t.binding().error, null);
+  go(); await settle();
+  assert.deepEqual(t.binding().folders.map(f => f.path), ['/v']); assert.equal(t.texts().length, 1); assert.equal(t.binding().error, null);
+});

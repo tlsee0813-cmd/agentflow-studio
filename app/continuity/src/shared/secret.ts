@@ -97,10 +97,12 @@ const SETTING = new RegExp(`(?<keep>\\b(?<name>[A-Za-z0-9_.-]{0,40}?(?:password|
 // PHP's define('DB_PASSWORD', '…') (wp-config.php): a quoted value is one as written; an unquoted one is code (getenv('…'), a
 // constant).
 const DEFINE = new RegExp(`(?<keep>\\bdefine\\(\\s*["'](?<name>[A-Za-z0-9_]{0,40}?(?:password|passwd|pass|secret|key|token|salt))["']\\s*,\\s*)(?:${QUOTED}|(?<uv>[^\\s,)"']{1,500}))`, 'gi');
-// An Authorization header's value: after a scheme no rule above names (ApiKey, SSWS, Negotiate; maybe as a parameter, SSWS
+// An Authorization header's name and what sets it (JSON escaped too), and the schemes HIDE takes whole (AUTH_SCHEME weighs the others).
+const AUTH_HEAD = `\\bAuthorization\\\\?["']?[ \\t]*[:=][ \\t]*`, AUTH_KNOWN = 'Bearer|Basic|Token|Bot|Digest';
+// An Authorization header's value: after a scheme not in AUTH_KNOWN (ApiKey, SSWS, Negotiate; maybe as a parameter, SSWS
 // token="…"), and with no scheme at all. A scheme is a word of letters followed by another word; a credential holds digits.
-const AUTH_SCHEME = /(?<keep>\bAuthorization\\?["']?[ \t]*[:=][ \t]*\\?["']?(?!(?:Bearer|Basic|Token|Bot|Digest)\s)[A-Za-z][A-Za-z-]{1,30}[ \t]+(?:[A-Za-z_][\w-]{0,40}=(?!=))?)(?:(?<q>\\?["'])(?<qv>(?:(?!\k<q>)[^\n]){1,2000}?)\k<q>|(?<uv>[^\s"'\\,;]{1,2000}))/gi;
-const AUTH = /(?<keep>\bAuthorization\\?["']?[ \t]*[:=][ \t]*)(?:(?<q>\\?["'])(?![A-Za-z][A-Za-z-]{1,30}\s)(?<qv>(?:(?!\k<q>)[^\n]){1,2000}?)\k<q>|(?![A-Za-z][A-Za-z-]{1,30}[ \t]+\S)(?<uv>[^\s"'`]{1,2000}))/gi;
+const AUTH_SCHEME = new RegExp(`(?<keep>${AUTH_HEAD}\\\\?["']?(?!(?:${AUTH_KNOWN})\\s)[A-Za-z][A-Za-z-]{1,30}[ \\t]+(?:[A-Za-z_][\\w-]{0,40}=(?!=))?)(?:(?<q>\\\\?["'])(?<qv>(?:(?!\\k<q>)[^\\n]){1,2000}?)\\k<q>|(?<uv>[^\\s"'\\\\,;]{1,2000}))`, 'gi');
+const AUTH = new RegExp(`(?<keep>${AUTH_HEAD})(?:(?<q>\\\\?["'])(?![A-Za-z][A-Za-z-]{1,30}\\s)(?<qv>(?:(?!\\k<q>)[^\\n]){1,2000}?)\\k<q>|(?![A-Za-z][A-Za-z-]{1,30}[ \\t]+\\S)(?<uv>[^\\s"'\`]{1,2000}))`, 'gi');
 /** What redactSecrets hides, beyond what secretLike refuses: a session can hold any credential the person pasted into the tool,
  * and what is taken from it is kept and read by the AI without a person reading it first. Each pattern's `keep` group (a name,
  * an `Authorization: Bearer ` or a URL's user) stays, so the record still says what was there; the rest is hidden. These are
@@ -121,7 +123,7 @@ const HIDE: RegExp[] = [
   /\b\d{6,12}:AA[A-Za-z0-9_-]{30,}/g,
   /\b[MNO][A-Za-z\d_-]{17,27}\.[A-Za-z\d_-]{6}\.[A-Za-z\d_-]{27,}/g,
   // An Authorization header's value after a known scheme: anything token-like.
-  new RegExp(`(?<keep>\\bAuthorization\\\\?["']?[ \\t]*[:=][ \\t]*\\\\?["']?(?:Bearer|Basic|Token|Bot|Digest)[ \\t]+)${NOT_REF}[^\\s"'\\\\,;]{8,}`, 'gi'),
+  new RegExp(`(?<keep>${AUTH_HEAD}\\\\?["']?(?:${AUTH_KNOWN})[ \\t]+)${NOT_REF}[^\\s"'\\\\,;]{8,}`, 'gi'),
   // A password in a URL (scheme://user:password@host, the user may be empty), and on a command line (mysql -pPASSWORD, curl -u).
   /(?<keep>\b[a-z][a-z0-9+.-]{0,20}:\/\/[^\s:@/]{0,200}:)(?!\[가려진 비밀값\])[^\s@/]+(?=@)/gi,
   /(?<keep>\bmysql(?:dump|admin)?\b[^\n]{0,500}?\s-p)(?!\[가려진 비밀값\])(?=\S*[A-Za-z])(?=\S*\d)\S{6,}/g,

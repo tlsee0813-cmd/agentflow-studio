@@ -15,7 +15,8 @@ export const SESSION_LIMITS = Object.freeze({ list: 60, scan: 400, headBytes: 25
 export type SessionLimits = typeof SESSION_LIMITS;
 export const SESSION_ID = /^(claude|codex)-[0-9a-f]{24}$/;
 export type SessionTool = 'claude' | 'codex';
-const TOOL_LABEL: Record<SessionTool, string> = { claude: 'Claude Code', codex: 'Codex' };
+/** Each tool's name as the person knows it: in record headers, the session list and a reading's label (sessionDetail). */
+export const TOOL_NAME: Record<SessionTool, string> = { claude: 'Claude Code', codex: 'Codex' };
 /** cwd: the working folder the session was last in; cwds: every one it worked in (a session can move to another folder).
  * thread / parent: Codex's own id of the session and, for a subagent it started, the id of the session that started it. */
 export interface SessionMeta { cwd: string | null; cwds: string[]; branch: string | null; startedAt: string | null; title: string | null; thread: string | null; parent: string | null }
@@ -335,21 +336,18 @@ export function sniffTool(lines: unknown[]): SessionTool | null {
     if (!o || typeof o !== 'object') continue;
     if (typeof o.payload === 'object' && ['session_meta', 'response_item', 'event_msg', 'turn_context'].includes(o.type)) return 'codex';
     if (typeof o.instructions !== 'undefined' && typeof o.id === 'string') return 'codex';
-    if ((o.type === 'user' || o.type === 'assistant') && o.message && typeof o.sessionId === 'string') return 'claude';
     if ((o.type === 'user' || o.type === 'assistant') && o.message) return 'claude';
   }
   return null;
 }
 
-/** Claude Code names a project's folder after its working folder, every character but letters and digits made '-'. */
-export const claudeFolder = (cwd: string) => String(cwd).replace(/[^A-Za-z0-9]/g, '-');
 /** A folder path compared as Windows does when it is a Windows path (either separator, any letter case), else as written. */
 const windows = (t: string) => /^[a-z]:(\/|$)/i.test(t) || t.startsWith('//');
 function folderKey(path: string): string {
   const t = String(path).replace(/\\/g, '/').replace(/\/+$/, '');
   return windows(t) ? t.toLowerCase() : t;
 }
-const sameFolder = (a: string, b: string) => folderKey(a) === folderKey(b);
+export const sameFolder = (a: string, b: string) => folderKey(a) === folderKey(b);
 /** Whether a session's working folder (any of them, when it moved) is the folder asked for or inside it. */
 export function within(cwd: unknown, folder: string | null): boolean {
   if (!folder) return false;
@@ -363,6 +361,8 @@ export function shortPath(file: string, cwd: string | null): string {
   const f = file.replace(/\\/g, '/'), base = folderKey(cwd), key = folderKey(f);
   return key.startsWith(`${base}/`) ? f.slice(base.length + 1) : windows(base) && !/^([a-z]:|\/)/i.test(f) ? f : file;
 }
+/** A changed file as a session names it: from the first of its working folders that holds it, else from the one it was last in. */
+export const changedPath = (file: string, s: { cwd: string | null; cwds?: string[] }) => shortPath(file, (s.cwds ?? []).find(c => shortPath(file, c) !== file) ?? s.cwd);
 
 /** What names a session whatever folder its file was found through, or moved to (Codex archives old threads): Claude Code names
  * each file after its session id, Codex writes its thread id in the first line (an early file without one goes by its name). The
@@ -388,7 +388,7 @@ export function sessionDetail(id: string, tool: SessionTool, s: ParsedSession, l
   const turns = Number.isFinite(from) ? s.turns.filter(t => !t.at || !(Date.parse(t.at) < from)) : s.turns;
   const forward = Number.isFinite(from), kept: SessionTurn[] = []; let used = 0;
   for (let k = 0; k < turns.length; k++) {
-    const t = turns[forward ? k : turns.length - 1 - k]!, text = clip(t.role === 'user' ? foldHandover(t.text) : t.text, limits.turnChars), files = [...new Set((t.files ?? []).map(x => shortPath(x, s.meta.cwds.find(c => shortPath(x, c) !== x) ?? s.meta.cwd)))];
+    const t = turns[forward ? k : turns.length - 1 - k]!, text = clip(t.role === 'user' ? foldHandover(t.text) : t.text, limits.turnChars), files = [...new Set((t.files ?? []).map(x => changedPath(x, s.meta)))];
     used += text.length + files.join('').length;
     if (used > limits.replyChars && kept.length >= (forward ? 2 : 1)) {
       // A reading from a mark ends past the mark's own time and never between turns of one time: the next is read from the last time
@@ -399,10 +399,11 @@ export function sessionDetail(id: string, tool: SessionTool, s: ParsedSession, l
     const turn = { role: t.role, at: t.at, text, ...(t.role === 'assistant' ? { files } : {}) };
     if (forward) kept.push(turn); else kept.unshift(turn);
   }
-  return { version: SESSION_VERSION, id, tool, label: TOOL_LABEL[tool], title: s.meta.title, cwd: s.meta.cwd, cwds: s.meta.cwds, branch: s.meta.branch, startedAt: s.meta.startedAt,
+  return { version: SESSION_VERSION, id, tool, label: TOOL_NAME[tool], title: s.meta.title, cwd: s.meta.cwd, cwds: s.meta.cwds, branch: s.meta.branch, startedAt: s.meta.startedAt,
     turns: kept, omitted: forward ? 0 : turns.length - kept.length, ...(forward ? { rest: turns.length - kept.length } : {}) };
 }
-/** An opaque session id from a stable name of its file (a real path on the server, a path inside the picked folder in the page). */
+/** An opaque session id from a stable name: the session's own key (sessionKey), or for an alias its file's path (a real path on the
+ * server, a path inside the picked folder in the page). The server and the page both make it here, so marks hold for either. */
 export async function sessionId(tool: SessionTool, name: string): Promise<string> {
   const bytes = new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256', new TextEncoder().encode(name)));
   return `${tool}-${[...bytes.slice(0, 12)].map(b => b.toString(16).padStart(2, '0')).join('')}`;

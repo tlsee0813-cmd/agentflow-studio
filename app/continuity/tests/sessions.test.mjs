@@ -598,3 +598,37 @@ test('SESSIONS-B2 picked folders: one inside another reads each session once (th
     assert.deepEqual(sources.folders(), ['.claude (1)', 'me', '.claude (2)']);
   } finally { globalThis.window = had; rmSync(dir, { recursive: true, force: true }); }
 });
+
+test('SESSIONS-Q1 files with no session in them (Codex subagents\' rollouts) do not use up the scan, up to ten times as many of them', async () => {
+  const dir = home();
+  try {
+    const roots = { codex: join(dir, '.codex') }, day = join(roots.codex, 'sessions', '2026', '10', '29'); mkdirSync(day, { recursive: true });
+    const put = (name, rows, minutesAgo) => { const f = join(day, name); writeFileSync(f, rows.map(r => JSON.stringify(r)).join('\n')); const t = new Date(Date.now() - minutesAgo * 60000); utimesSync(f, t, t); };
+    put('rollout-2026-10-29T10-00-00-parent.jsonl', desktopParent(), 60);
+    for (let i = 0; i < 9; i++) put(`rollout-2026-10-29T10-0${i}-30-c${i}.jsonl`, desktopChild(`c${i}`, 10 + i), 50 - i);
+    const salon = async scan => (await openSessions({ env: {}, roots, limits: { ...SESSION_LIMITS, scan } }).list(W)).sessions.map(x => x.preview);
+    assert.deepEqual(await salon(3), ['휴무일을 예약 화면에 반영해 줘 ## 확인할 것 - 테스트'], 'nine newer subagent rollouts do not hide the session');
+    assert.equal((await salon(1)).length, 1, 'nine quiet files are within ten times a scan of one');
+    put('rollout-2026-10-29T10-09-30-c9.jsonl', desktopChild('c9', 19), 40);
+    assert.deepEqual(await salon(1), [], 'the tenth quiet file ends a look with a scan of one');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('SESSIONS-K2 a whole listing that stops short of a folder\'s older session (another tab) leaves it readable while its file is there', async () => {
+  const dir = home();
+  try {
+    const roots = { claude: join(dir, '.claude') };
+    const put = (folder, cwd, prompt, minutesAgo) => {
+      const d = join(roots.claude, 'projects', folder), f = join(d, `${folder.slice(1)}.jsonl`), t = new Date(Date.now() - minutesAgo * 60000); mkdirSync(d, { recursive: true });
+      writeFileSync(f, jl([cu(0, prompt, { cwd }), ca(1, '했어요', { cwd })])); utimesSync(f, t, t); return f;
+    };
+    const file = put('-work-salon', '/work/salon', '오래된 살롱 작업', 60); put('-work-other', '/work/other', '다른 작업', 1);
+    const sessions = openSessions({ env: {}, roots, limits: { ...SESSION_LIMITS, list: 1 } });
+    const [old] = (await sessions.list('/work/salon')).sessions;
+    assert.equal(old.preview, '오래된 살롱 작업');
+    assert.deepEqual((await sessions.list()).sessions.map(x => x.preview), ['다른 작업'], 'the whole listing stops before it');
+    assert.equal((await sessions.read(old.id)).turns[0].text, '오래된 살롱 작업', 'the folder\'s look still reads it');
+    rmSync(file); await sessions.list();
+    await assert.rejects(sessions.read(old.id), e => e.code === 'SESSION_NOT_FOUND', 'a session whose file is gone is not kept');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});

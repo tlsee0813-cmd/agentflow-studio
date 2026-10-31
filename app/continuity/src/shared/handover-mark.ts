@@ -6,6 +6,8 @@ const START = new RegExp(`^─+ AgentFlow 인수인계 문서 · ${HANDOVER_TAG}
 // The end line names the part too (older documents name only the code), so a document copied without its first line still folds.
 const END = (code: string) => new RegExp(`^─+ 인수인계 문서 끝 · ${HANDOVER_TAG}:(${code})(?::(${AREA}))? ─+$`, 'm');
 const RECEIVED = `\\[AgentFlow 인수인계 문서를 받아 이어감 · ${HANDOVER_TAG}:(${CODE})(?::(${AREA}))?(?: · ([^\\]\\n]*))?\\]`;
+/** The one line a folded document leaves (RECEIVED reads it back). */
+const received = (code: string, area: string | undefined, title: string | undefined) => `[AgentFlow 인수인계 문서를 받아 이어감 · ${HANDOVER_TAG}:${code}${area ? `:${area}` : ''}${title ? ` · ${title.replace(/[\]\n]/g, ' ')}` : ''}]`;
 
 /** A fresh six-character code (no 0/O/1/I to misread). */
 export function handoverCode(): string {
@@ -23,14 +25,15 @@ export function foldHandover(text: string): string {
     const m = START.exec(out);
     if (m) {
       const end = END(m[1]!).exec(out.slice(m.index + m[0].length));
-      from = m.index; to = end ? from + m[0].length + end.index + end[0].length : out.length; code = m[1]!; area = m[2];
+      // Folded to the end (its end line not copied), the blank lines after it stay: in a pasted record they set off the next block's head.
+      from = m.index; to = end ? from + m[0].length + end.index + end[0].length : out.trimEnd().length; code = m[1]!; area = m[2];
     } else {
       const end = END(CODE).exec(out), head = end ? [...out.slice(0, end.index).matchAll(/^# 인수인계: /gm)].at(-1) : undefined;
       if (!end || !head) break;
       from = head.index!; to = end.index + end[0].length; code = end[1]!; area = end[2];
     }
     const title = /^# 인수인계: (.+)$/m.exec(out.slice(from, to))?.[1]?.trim();
-    out = `${out.slice(0, from)}[AgentFlow 인수인계 문서를 받아 이어감 · ${HANDOVER_TAG}:${code}${area ? `:${area}` : ''}${title ? ` · ${title.replace(/[\]\n]/g, ' ')}` : ''}]${out.slice(to)}`;
+    out = `${out.slice(0, from)}${received(code, area, title)}${out.slice(to)}`;
   }
   return out;
 }

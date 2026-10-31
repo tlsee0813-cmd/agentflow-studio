@@ -11,7 +11,8 @@ import type { Project } from '../shared/types.js';
 import { ERROR_TEXT } from './studio-api.js';
 import type { SessionSources } from './session-source.js';
 import { newTurns, markAfter, leftSince, sessionText, sessionChunks, stamp, TOOL_NAME, SETTLE_MS, AUTO_RUN_GAP_MS, AUTO_RUNS_PER_DAY, BACKFILL_MS, BACKFILL_SESSIONS, type SessionDetail, type SessionMark, type SessionSummary } from '../shared/session-import.js';
-import { h, put } from './plan-dom.js';
+import { sameFolder } from '../shared/session-parse.js';
+import { h, put, ago } from './plan-dom.js';
 
 export const AUTOSYNC_KEY = 'agentflow.studio.autosync.1';
 /** One working folder of a project. since: its sessions updated before it are not taken; backfilled: its first look (recent
@@ -60,7 +61,8 @@ const day = (d = new Date()) => `${d.getFullYear()}-${d.getMonth() + 1}-${d.getD
 export function createAutoSync(host: AutoSyncHost) {
   let busy = false, again = false, timer: ReturnType<typeof setInterval> | null = null, panelOpen = false;
   let folders: { folder: string; count: number; latest: string; tools: Set<string> }[] | null = null, foldersError: string | null = null, foldersLoading = false;
-  let typed = '', adding = false;
+  // said: the error the open panel last drew, which it does not read out again when it is drawn again.
+  let typed = '', adding = false, said: string | null = null;
   // Projects whose last look in this tab could not save: no look runs for them until the person asks ('지금 확인', connecting).
   const halted = new Map<string, string>();
 
@@ -72,12 +74,15 @@ export function createAutoSync(host: AutoSyncHost) {
   function stored(key: string): Binding | null { return readBinding(all()[key]); }
   /** A session's mark, also one kept under an id the session had before (made from its file's path). */
   const markOf = (b: Binding, s: SessionSummary): SessionMark | null => b.marks[s.id] ?? s.aliases?.map(a => b.marks[a]).find(m => !!m) ?? null;
-  /** One session's mark onto the binding as it is now, where it is further on (its old ids' marks give way to it). */
-  function keepMark(key: string, s: SessionSummary, m: SessionMark) {
+  /** Whether this folder is still linked as it was when a look began (the person may have left it, or ended the connection). */
+  const stillLinked = (key: string, f: FolderLink) => !!stored(key)?.folders.some(x => x.path === f.path && x.connectedAt === f.connectedAt);
+  /** One session's mark onto the binding as it is now, where it is further on (its old ids' marks give way to it), with the records
+   * it kept counted (a tab closed later in the look does not lose them from the count). */
+  function keepMark(key: string, s: SessionSummary, m: SessionMark, taken = 0) {
     const cur = stored(key); if (!cur) return;
     for (const id of s.aliases ?? []) delete cur.marks[id];
     if (further(m, cur.marks[s.id])) cur.marks[s.id] = m;
-    put_(key, cur);
+    cur.taken += taken; put_(key, cur);
   }
   /** Marks kept under an id a listed session had before move to its id now, whether or not it is read this time: once its file
    * moves (Codex archives a thread) the id its old path gave is no longer listed with it. */
@@ -108,9 +113,10 @@ export function createAutoSync(host: AutoSyncHost) {
     if (halted.has(key) && !force) return;
     halted.delete(key);
     busy = true; render();
-    // What this look did, and only that, goes onto the binding at its end: the marks of the sessions it kept, what it took.
+    // What this look did, and only that, goes onto the binding at its end: the marks of the sessions it kept.
     const marks: Record<string, SessionMark> = {}, moved: string[] = [], kept = new Set<string>(), whole = new Set<FolderLink>(), due: { s: SessionSummary; f: FolderLink; history: boolean }[] = [];
-    let taken = 0, ran: string | null = null, error: string | null | undefined;
+    // failedAt: the last failure of one folder, with that folder (the person may leave it before the look ends).
+    let ran: string | null = null, error: string | null | undefined, failedAt: { f: FolderLink; text: string } | null = null;
     try {
       // A project that can take no more is not read at all (its records can still be read into the map).
       const now = Date.now(), seen = new Set<string>(), full = host.full();
@@ -118,7 +124,8 @@ export function createAutoSync(host: AutoSyncHost) {
       for (const f of full ? [] : b.folders) {
         let list: SessionSummary[];
         try { list = await src.list(f.path); }
-        catch (e) { failed = `${folderName(f.path)}: ${failText(e, '세션 기록을 확인하지 못했어요.')}`; continue; }
+        // Picked folders this browser asks about again (their permission withdrawn) are said on the pill, with the way to allow them.
+        catch (e) { if (host.sources.current()) failedAt = { f, text: failed = `${folderName(f.path)}: ${failText(e, '세션 기록을 확인하지 못했어요.')}` }; continue; }
         adopt(key, list);
         // A picked folder that could not be read is said, and the first look of this folder is not done until it can be.
         const missed = src.partial?.() ?? null; if (missed) failed = missed;
@@ -148,7 +155,7 @@ export function createAutoSync(host: AutoSyncHost) {
           // Read from the mark on (the reply taken last comes back too, in case it went on); a new session from the connection on.
           let d: SessionDetail;
           try { d = await src.read(s.id, was ? was.lastAt : from); }
-          catch (e) { failed = `${folderName(f.path)}: ${failText(e, '세션 기록을 읽지 못했어요.')}`; continue sessions; }
+          catch (e) { failedAt = { f, text: failed = `${folderName(f.path)}: ${failText(e, '세션 기록을 읽지 못했어요.')}` }; continue sessions; }
           let turns = newTurns(d, was, from);
           // A first look takes one record of each session's newest turns; later ones every new turn, in as many records as it takes.
           // A history session worked in since the connection gives its history up to the connection; the work since is read on from
@@ -157,13 +164,14 @@ export function createAutoSync(host: AutoSyncHost) {
           if (upTo) turns = turns.filter(t => !t.at || t.at <= upTo);
           const texts = !turns.length ? [] : first ? [sessionText({ ...d, turns }).text] : sessionChunks(d, turns, undefined, leftSince(d, was));
           if (texts.length) {
-            // Kept only on the entry still open; otherwise nothing is marked and the next look takes the same turns again.
+            // Kept only on the entry still open; otherwise nothing is marked and the next look takes the same turns again. A folder the
+            // person left meanwhile (or the connection they ended) takes nothing more.
             if (open()?.key !== key) return;
+            if (!stillLinked(key, f)) continue sessions;
             const no = await host.save(key, texts);
             // A text refused leaves only its session to be taken again; anything else stops this look (and the next, until asked).
             if (no?.refused) { failed = no.error; continue sessions; }
             if (no) { error = no.error; halted.set(key, no.error); return; }
-            taken += texts.length;
           }
           // More to read when the reading left newer turns and moved on; until they are read the mark does not match the file's
           // time, so the next look comes back to this session even if it does not change.
@@ -171,26 +179,28 @@ export function createAutoSync(host: AutoSyncHost) {
           // there), or at the connection when the reading held none.
           const end = upTo ? (turns.length ? markAfter({ ...d, turns }, null, '') : { lastAt: upTo, count: 0, updatedAt: '' }) : markAfter(d, was, s.updatedAt, from);
           const more = !!upTo || (!first && !!d.rest && end.lastAt !== (was?.lastAt ?? null)), next = more ? { ...end, updatedAt: '' } : end;
-          // Marked as soon as it is kept: a tab closed later in this look does not take these turns again.
-          keepMark(key, s, next); marks[s.id] = next; moved.push(...s.aliases ?? []); kept.add(s.id);
+          // Marked and counted as soon as it is kept: a tab closed later in this look does not take these turns again, nor lose them.
+          keepMark(key, s, next, texts.length); marks[s.id] = next; moved.push(...s.aliases ?? []); kept.add(s.id);
           if (!more) break;
           was = next; first = false;
         }
       }
       error = failed;
       const runs = stored(key)?.runs ?? b.runs, today = day(), n = runs.day === today ? runs.n : 0;
-      if (open()?.key === key && host.canRead() && !host.readBlocked() && n < AUTO_RUNS_PER_DAY && (!runs.last || now - Date.parse(runs.last) >= AUTO_RUN_GAP_MS)) {
+      // A connection ended meanwhile starts no reading: what it kept before then is read by the person's own click.
+      if (open()?.key === key && bindingOf(key) && host.canRead() && !host.readBlocked() && n < AUTO_RUNS_PER_DAY && (!runs.last || now - Date.parse(runs.last) >= AUTO_RUN_GAP_MS)) {
         ran = new Date().toISOString(); host.read();
       }
     } finally {
       // Onto the binding as it is now (another tab, or the person, may have changed it meanwhile): a mark only where it is further
-      // on, a folder's first look done only when all of it was kept, a folder added or left meanwhile kept as the person left it.
-      const cur = stored(key);
+      // on, a folder's first look done only when all of it was kept, a folder added or left meanwhile kept as the person left it (a
+      // folder left says its failure no more: leaving it took its message away).
+      const cur = stored(key), unsaid = !!failedAt && failedAt.text === error && !stillLinked(key, failedAt.f);
       if (cur) {
         for (const id of moved) delete cur.marks[id];
         for (const [id, m] of Object.entries(marks)) if (further(m, cur.marks[id])) cur.marks[id] = m;
         for (const f of cur.folders) if ([...whole].some(x => x.path === f.path && x.connectedAt === f.connectedAt) && due.every(x => x.f.path !== f.path || kept.has(x.s.id))) f.backfilled = true;
-        cur.taken += taken; cur.lastCheck = new Date().toISOString(); if (error !== undefined) cur.error = error;
+        cur.lastCheck = new Date().toISOString(); if (error !== undefined) cur.error = unsaid ? null : error;
         if (ran) { const today = day(); cur.runs = { day: today, n: (cur.runs.day === today ? cur.runs.n : 0) + 1, last: ran }; }
         put_(key, cur);
       }
@@ -206,27 +216,30 @@ export function createAutoSync(host: AutoSyncHost) {
       const by = new Map<string, { folder: string; count: number; latest: string; tools: Set<string> }>();
       for (const s of await src.list()) {
         if (!s.cwd) continue;
-        const f = by.get(s.cwd) ?? { folder: s.cwd, count: 0, latest: s.updatedAt, tools: new Set<string>() };
-        f.count++; if (s.updatedAt > f.latest) f.latest = s.updatedAt; f.tools.add(TOOL_NAME[s.tool]); by.set(s.cwd, f);
+        // One folder written two ways (C:\work and c:\work, a trailing separator) is one row, named as its newest session has it.
+        const k = [...by.keys()].find(x => sameFolder(x, s.cwd!)) ?? s.cwd, f = by.get(k) ?? { folder: s.cwd, count: 0, latest: s.updatedAt, tools: new Set<string>() };
+        f.count++; if (s.updatedAt > f.latest) { f.latest = s.updatedAt; f.folder = s.cwd; } f.tools.add(TOOL_NAME[s.tool]); by.set(k, f);
       }
       folders = [...by.values()].sort((a, b) => b.latest.localeCompare(a.latest));
     } catch (e) { foldersError = failText(e, '세션 기록을 찾지 못했어요.'); }
     foldersLoading = false; render();
   }
-  /** Connects the open project to a folder: the first one makes the connection, another is added to it (once). */
+  /** Connects the open project to a folder: the first one makes the connection, another is added to it (once, however it is written). */
   function connect(folder: string) {
-    const o = open(), path = folder.trim(); if (!o || !path) return;
+    // A path copied from Windows Explorer ('경로로 복사', Ctrl+Shift+C) comes in quotes: the folder is what is inside them.
+    const o = open(), path = folder.trim().replace(/^(["'])(.+)\1$/, '$2').trim(); if (!o || !path) return;
     const now = new Date(), link: FolderLink = { path, connectedAt: now.toISOString(), since: new Date(now.getTime() - BACKFILL_MS).toISOString(), backfilled: false };
     // Connecting again after the connection ended goes on from the sessions' marks kept with it.
     const b = stored(o.key);
-    if (b) { if (!b.folders.some(f => f.path === path)) b.folders.push(link); if (b.folders.length === 1) b.error = null; put_(o.key, b); }
+    if (b) { if (!b.folders.some(f => sameFolder(f.path, path))) b.folders.push(link); if (b.folders.length === 1) b.error = null; put_(o.key, b); }
     else put_(o.key, { folders: [link], marks: {}, runs: { day: day(now), n: 0, last: null }, taken: 0, lastCheck: null, error: null });
-    panelOpen = false; adding = false; typed = ''; render(); void tick(true);
+    panelOpen = false; adding = false; typed = ''; render(); document.getElementById('sync-pill')?.focus(); void tick(true);
   }
   /** Leaves one folder (its records stay); the last one leaving ends the connection (the marks stay with the project). */
   function removeFolder(path: string) {
     const o = open(), b = o ? bindingOf(o.key) : null; if (!o || !b) return;
-    b.folders = b.folders.filter(f => f.path !== path); if (!b.folders.length) { b.error = null; halted.delete(o.key); } put_(o.key, b); render();
+    // What the last look said may have been about this folder: the next look says what is still wrong.
+    b.folders = b.folders.filter(f => f.path !== path); b.error = null; if (!b.folders.length) halted.delete(o.key); put_(o.key, b); render(); if (b.folders.length) void tick();
   }
   function disconnect() {
     const o = open(), b = o ? stored(o.key) : null; if (!o) return;
@@ -235,6 +248,7 @@ export function createAutoSync(host: AutoSyncHost) {
   }
 
   /* ---------- the bar's pill and its panel ---------- */
+  /** Draws the pill and, while it is open, the panel. */
   function render() {
     const pill = document.getElementById('sync-pill'), panel = document.getElementById('sync-panel');
     if (!pill || !panel) return;
@@ -245,75 +259,122 @@ export function createAutoSync(host: AutoSyncHost) {
     const waiting = !!b && !host.sources.current(), error = b ? halted.get(o.key) ?? b.error : null;
     pill.hidden = false; pill.dataset.state = !b ? 'off' : error || waiting ? 'error' : busy ? 'busy' : 'on';
     pill.setAttribute('aria-expanded', String(panelOpen));
-    pill.replaceChildren(h('i', { 'aria-hidden': 'true' }), h('span', {}, b ? `자동 연결 · ${name}${waiting ? ' · 허용 필요' : ''}` : '자동 연결 안 됨'));
-    panel.hidden = !panelOpen; if (!panelOpen) return;
-    // A redraw (a look starting or ending, the folders found) keeps a path being typed in focus, caret and all.
-    const typing = panel.querySelector<HTMLInputElement>('.sync-path'), caret = typing && document.activeElement === typing ? [typing.selectionStart, typing.selectionEnd] as const : null;
-    panel.replaceChildren();
-    const setup = sourceSetup();
+    // The state in words as well as the dot's colour (a look running only turns the dot, so the pill does not change width every
+    // minute); a phone keeps the dot only, and the folder's name gives way first (the whole line stays its name and title).
+    const tail = waiting ? ' · 허용 필요' : error ? ' · 확인 필요' : '';
+    pill.title = `자동 연결${b ? ` · ${name}${tail}` : ' 안 됨'}`; pill.setAttribute('aria-label', pill.title);
+    pill.replaceChildren(h('i', { 'aria-hidden': 'true' }), h('span', {}, h('span', {}, '자동 연결'), h('span', b ? { class: 'sync-pill-name' } : {}, b ? ` · ${name}` : ' 안 됨'), tail ? h('span', {}, tail) : null));
+    panel.hidden = !panelOpen; if (!panelOpen) { said = null; return; }
+    // A folder name being composed (a Korean syllable) is not drawn over: a new field would end the composition and split the
+    // syllable. The redraw follows once it is committed (draw).
+    const typing = panel.querySelector<HTMLInputElement>('.sync-path');
+    if (typing?.dataset.composing && document.activeElement === typing) { typing.dataset.redraw = '1'; return; }
+    // A redraw (a look starting or ending, the folders found) keeps a path being typed in focus, caret and all, and a control pressed
+    // in the panel in focus (each control has a data-act to be found by); when that control is gone, focus stays at its heading.
+    const caret = typing && document.activeElement === typing ? [typing.selectionStart, typing.selectionEnd] as const : null;
+    const had = !caret && panel.contains(document.activeElement) ? (document.activeElement as HTMLElement).dataset.act ?? '' : null;
+    panel.replaceChildren(); draw(panel, b, error, waiting);
+    const input = caret && panel.querySelector<HTMLInputElement>('.sync-path');
+    if (input) { input.focus({ preventScroll: true }); input.setSelectionRange(caret[0], caret[1]); }
+    else if (had !== null && !panel.contains(document.activeElement)) (panel.querySelector<HTMLElement>(`[data-act="${CSS.escape(had)}"]`) ?? panel.querySelector('h3'))?.focus({ preventScroll: true });
+  }
+  /** An error of the panel, an alert only when it first shows (or the panel opens): the panel is drawn again as each look starts and
+   * ends, and a screen reader would read the same error out each time. */
+  function errorLine(text: string | null) { const fresh = text !== said; said = text; return text ? h('p', { class: 'pp-error', ...(fresh ? { role: 'alert' } : {}) }, text) : null; }
+  /** '취소' of adding a folder: back to the connection, with focus on '폴더 추가', which opened it. */
+  const back = () => { adding = false; render(); document.querySelector<HTMLElement>('#sync-panel [data-act="add"]')?.focus(); };
+  /** The panel's content: the connection (its folders, what it took, what to do), or a working folder to connect or add. */
+  function draw(panel: HTMLElement, b: Binding | null, error: string | null, waiting: boolean) {
+    const asking = !!b && !adding && host.sources.folderState() === 'prompt', setup = sourceSetup(b && !adding ? error : null, asking);
     if (b && !adding) {
       const runs = b.runs.day === day() ? b.runs.n : 0;
-      put(panel, h('h3', {}, '작업 폴더에 자동 연결됨'),
+      put(panel, h('h3', { tabindex: '-1' }, '작업 폴더에 자동 연결됨'),
+        // The one thing to do after the browser was closed: allow the picked folders again, first in the panel.
+        asking ? h('div', { class: 'sync-ask' }, h('p', {}, '브라우저가 세션 폴더를 다시 읽어도 되는지 물어봐야 해요. 허용하면 그동안의 대화가 들어와요.'),
+          h('button', { type: 'button', class: 'primary small sync-grant', 'data-act': 'grant', onclick: () => void grant() }, '다시 허용')) : null,
         h('ul', { class: 'sync-linked' }, ...b.folders.map(f => h('li', {}, h('span', { class: 'sync-folder' }, f.path),
-          b.folders.length > 1 ? h('button', { type: 'button', class: 'link-button quiet sync-remove', 'aria-label': `${f.path} 연결 빼기`, onclick: () => removeFolder(f.path) }, '빼기') : null))),
+          b.folders.length > 1 ? h('button', { type: 'button', class: 'link-button quiet sync-remove', 'aria-label': `${f.path} 연결 빼기`, 'data-act': `leave:${f.path}`, onclick: () => removeFolder(f.path) }, '빼기') : null))),
         h('p', { class: 'fine' }, `${b.folders.length > 1 ? '이 폴더들' : '이 폴더'}의 Claude Code·Codex 대화가 잠잠해지면(약 ${SETTLE_MS / 60000}분) 기록으로 들어오고 지도가 자동으로 갱신돼요(그때 기록을 AI에게 보내요). 이 탭이 열려 있을 때만 확인하고, 닫혀 있던 동안의 대화는 다시 열면 들어와요.`),
-        h('dl', { class: 'sync-facts' }, h('dt', {}, '가져온 기록'), h('dd', {}, `${b.taken}개`), h('dt', {}, '마지막 확인'), h('dd', {}, b.lastCheck ? stamp(b.lastCheck, true) : busy ? '확인 중…' : '아직'),
+        h('dl', { class: 'sync-facts' }, h('dt', {}, '가져온 기록'), h('dd', {}, `${b.taken}개`), h('dt', {}, '마지막 확인'), h('dd', b.lastCheck ? { title: stamp(b.lastCheck, true) } : {}, b.lastCheck ? ago(b.lastCheck) : busy ? '확인 중…' : '아직'),
           h('dt', {}, '오늘 자동 지도 갱신'), h('dd', {}, `${runs} / ${AUTO_RUNS_PER_DAY}회`)),
-        host.readBlocked() ? h('p', { class: 'fine sync-blocked' }, `기록은 들어오지만 지도는 갱신하지 않아요: ${host.readBlocked()}`) : null,
-        error ? h('p', { class: 'pp-error', role: 'alert' }, error) : null,
-        setup,
-        h('div', { class: 'pp-row' }, h('button', { type: 'button', class: 'secondary small', disabled: busy || waiting, onclick: () => void tick(true) }, busy ? '확인 중…' : '지금 확인'),
-          h('button', { type: 'button', class: 'link-button sync-add', onclick: () => { adding = true; folders = null; foldersError = null; render(); } }, '폴더 추가'),
-          h('button', { type: 'button', class: 'link-button quiet sync-off', onclick: disconnect }, '연결 끊기')));
+        // Why the map does not follow (no AI for maps, today's automatic readings used up), or a connection that found nothing yet.
+        host.readBlocked() ? h('p', { class: 'fine sync-blocked' }, `기록은 들어오지만 지도는 갱신하지 않아요: ${host.readBlocked()}`)
+          : runs >= AUTO_RUNS_PER_DAY ? h('p', { class: 'fine sync-blocked' }, `오늘 자동 지도 갱신 ${AUTO_RUNS_PER_DAY}회를 다 썼어요. 기록은 계속 들어와요. 지도는 ‘돌아와 읽기’의 ‘기록 읽고 지도 갱신’으로 직접 갱신할 수 있고, 내일 다시 자동으로 갱신해요.`)
+          : !b.taken && b.lastCheck && !busy && !error && !waiting ? h('p', { class: 'fine' }, `${b.folders.length > 1 ? '이 폴더들' : '이 폴더'}에서 최근 ${BACKFILL_MS / 86400000}일 안의 대화를 아직 찾지 못했어요. 새로 대화하면 들어와요. 경로를 직접 적었다면 맞는지 확인해 주세요.`) : null,
+        errorLine(error),
+        // '지금 확인' is only marked unavailable while it cannot run, so focus can stay on it through the look it started.
+        h('div', { class: 'pp-row' }, h('button', { type: 'button', class: 'secondary small', 'data-act': 'check', 'aria-disabled': String(busy || waiting), onclick: () => { if (!busy && !waiting) void tick(true); } }, busy ? '확인 중…' : '지금 확인'),
+          h('button', { type: 'button', class: 'link-button sync-add', 'data-act': 'add', onclick: () => { adding = true; folders = null; foldersError = null; render(); } }, '폴더 추가'),
+          h('button', { type: 'button', class: 'link-button quiet sync-off', 'data-act': 'off', onclick: disconnect }, '연결 끊기')),
+        setup);
       return;
     }
-    const linked = new Set(b?.folders.map(f => f.path) ?? []), picks = folders?.filter(f => !linked.has(f.folder)) ?? null;
+    const picks = folders?.filter(f => !b?.folders.some(x => sameFolder(x.path, f.folder))) ?? null;
     // No source yet: the session folders are picked (or allowed again) first.
     if (!host.sources.current()) {
-      put(panel, h('h3', {}, '내 AI 세션 연결'), setup,
-        b ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { adding = false; render(); } }, '취소') : null);
+      put(panel, h('h3', { tabindex: '-1' }, '내 AI 세션 연결'), setup,
+        b ? h('button', { type: 'button', class: 'link-button quiet', 'data-act': 'back', onclick: back }, '취소') : null);
       return;
     }
     // Looking the folders up draws the panel itself (its loading state, then the list).
     if (!folders && !foldersLoading && !foldersError) { void loadFolders(); return; }
     const input = h('input', { type: 'text', class: 'sync-path', placeholder: '작업 폴더 경로 (예: C:\\work\\salon)', 'aria-label': '작업 폴더 경로', value: typed }) as HTMLInputElement;
-    input.addEventListener('input', () => { typed = input.value; });
-    put(panel, h('h3', {}, b ? '작업 폴더 추가' : '작업 폴더 자동 연결'),
-      h('p', { class: 'fine' }, b ? '저장소가 나뉜 프로젝트라면 다른 작업 폴더도 함께 묶어요. 그 폴더의 세션도 같은 방식으로 들어오고, 지도에서 부분마다 어느 세션이 다뤘는지 보여요.'
-        : `이 프로젝트를 작업 폴더에 묶어요. 그 폴더의 최근 대화(${BACKFILL_MS / 86400000}일, 세션 ${BACKFILL_SESSIONS}개까지)로 첫 지도를 만들고, 이후 대화도 저절로 들어와요. 사람이 쓴 요청과 AI의 답변·바꾼 파일만 원문 그대로 가져오고, 키·토큰처럼 보이는 부분은 가려요. 지도를 갱신할 때 이 기록을 AI에게 보내요. 저장소가 여러 개라면 연결한 뒤 폴더를 더할 수 있어요.`),
+    // '연결' waits for a path: pressed with none it would do nothing and say nothing.
+    const go = h('button', { type: 'button', class: 'secondary small', 'data-act': 'go', disabled: !typed.trim(), onclick: () => connect(typed) }, '연결');
+    input.addEventListener('input', () => { typed = input.value; go.disabled = !typed.trim(); });
+    // A redraw held while a syllable was composed (render) follows its commit, after the keystroke that may start the next one.
+    input.addEventListener('compositionstart', () => { input.dataset.composing = '1'; });
+    input.addEventListener('compositionend', () => { delete input.dataset.composing; if (input.dataset.redraw) setTimeout(() => { if (input.isConnected) render(); }); });
+    put(panel, h('h3', { tabindex: '-1' }, b ? '작업 폴더 추가' : '작업 폴더 자동 연결'),
+      b ? h('p', { class: 'fine' }, '저장소가 나뉜 프로젝트라면 다른 작업 폴더도 함께 묶어요. 그 폴더의 세션도 같은 방식으로 들어오고, 지도에서 부분마다 어느 세션이 다뤘는지 보여요.')
+        : h('p', { class: 'sync-lead' }, '이 프로젝트를 작업 폴더에 묶으면, 그 폴더의 Claude Code·Codex 대화가 저절로 기록으로 들어오고 지도가 갱신돼요.'),
+      // Before connecting: what comes in first, what is kept of it, and that it goes to the AI.
+      b ? null : h('ul', { class: 'sync-points' },
+        h('li', {}, `처음 연결하면 최근 ${BACKFILL_MS / 86400000}일의 세션(${BACKFILL_SESSIONS}개까지)을 가져와 지도에 담아요.`),
+        h('li', {}, '내가 쓴 요청과 AI의 답변·바꾼 파일만 그대로 가져오고, 키·토큰처럼 보이는 글은 가려요.'),
+        h('li', {}, '지도를 갱신할 때 이 기록을 AI에게 보내요.')),
       foldersLoading ? h('p', { class: 'fine' }, '이 PC의 세션에서 작업 폴더를 찾는 중…') : null,
-      foldersError ? h('p', { class: 'pp-error', role: 'alert' }, foldersError) : null,
+      errorLine(foldersError),
       picks && !picks.length ? h('p', { class: 'fine' }, b ? '세션이 있는 다른 작업 폴더를 찾지 못했어요. 폴더 경로를 직접 적을 수도 있어요.' : '이 PC에서 Claude Code·Codex 세션을 찾지 못했어요. 폴더 경로를 직접 적을 수도 있어요.') : null,
-      picks?.length ? h('ul', { class: 'sync-folders' }, ...picks.slice(0, 12).map(f => h('li', {}, h('button', { type: 'button', class: 'sync-folder-pick', onclick: () => connect(f.folder) },
-        h('strong', {}, f.folder), h('small', {}, `${[...f.tools].join('·')} 세션 ${f.count}개 · 최근 ${stamp(f.latest, true)}`))))) : null,
-      h('div', { class: 'pp-row sync-manual' }, input, h('button', { type: 'button', class: 'secondary small', onclick: () => connect(typed) }, '연결')),
-      setup,
-      b ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { adding = false; render(); } }, '취소') : null);
-    if (caret) { input.focus({ preventScroll: true }); input.setSelectionRange(caret[0], caret[1]); }
+      picks?.length ? h('ul', { class: 'sync-folders' }, ...picks.slice(0, 12).map(f => h('li', {}, h('button', { type: 'button', class: 'sync-folder-pick', 'data-act': `folder:${f.folder}`, onclick: () => connect(f.folder) },
+        h('strong', {}, f.folder), h('small', { title: stamp(f.latest, true) }, `${[...f.tools].join('·')} 세션 ${f.count}개 · 최근 대화 ${ago(f.latest)}`),
+        // What a press does, as the typed path's own '연결' says it (left out of the card's name, which stays the folder).
+        h('span', { class: 'sync-folder-go', 'aria-hidden': 'true' }, '연결 ›'))))) : null,
+      h('div', { class: 'pp-row sync-manual' }, input, go, b ? h('button', { type: 'button', class: 'link-button quiet', 'data-act': 'back', onclick: back }, '취소') : null),
+      setup);
   }
+  /** Asks the browser again to read the picked folders (from a click), then looks at once. */
+  async function grant() { await host.sources.grant(); folders = null; foldersError = null; render(); void tick(true); }
   /** Where sessions come from when no local server reads them: the .claude / .codex folders picked in this browser. Null with a
-   * server (it reads this PC's own folders). */
-  function sourceSetup(): HTMLElement | null {
+   * server (it reads this PC's own folders). shown: the error the panel already says (not said again here); asked: the panel asks
+   * for permission at its top. */
+  function sourceSetup(shown: string | null, asked: boolean): HTMLElement | null {
     const src = host.sources; if (src.usesServer()) return null;
     const state = src.folderState(), names = src.folders();
     // A pick that added nothing (the folder is already read) says why, under the picked folders.
     const pick = async () => { if (await src.pick()) { folders = null; foldersError = null; render(); void tick(true); } else render(); };
-    const grant = async () => { await src.grant(); folders = null; foldersError = null; render(); void tick(true); };
     if (state === 'unsupported') return null;
     if (state === 'none') return h('div', { class: 'sync-source' },
-      h('p', { class: 'fine' }, '설치 없이 이 브라우저가 AI 세션 기록을 직접 읽어요. Claude Code 앱·CLI는 사용자 폴더의 .claude, Codex 앱·CLI는 .codex 폴더를 골라 주세요. 둘 다 쓰면 하나씩 두 번 고르면 돼요. 폴더는 이 브라우저 안에서만 읽어요. 거기서 가져온 대화는 이 프로젝트의 기록이 되고, 지도를 갱신할 때(자동 갱신도) AI에게 보내요.'),
-      h('button', { type: 'button', class: 'primary small sync-pick-root', onclick: () => void pick() }, '세션 폴더 고르기'));
+      h('p', { class: 'sync-lead' }, '설치 없이 이 브라우저가 AI 세션 기록을 직접 읽어요. 세션 기록이 담긴 세션 폴더를 골라 주세요. Claude Code는 내 사용자 폴더 안의 .claude, Codex는 .codex 폴더예요. 둘 다 쓰면 하나씩 두 번 고르면 돼요.'),
+      // Where those folders are: a Mac's picker hides folders whose name starts with a dot until asked.
+      h('p', { class: 'fine' }, 'Windows는 C:\\Users\\(내 이름) 폴더 안에 있어요. Mac은 고르는 창에서 ', h('kbd', {}, '⌘+Shift+H'), ' 키로 내 폴더로 간 뒤, ',
+        h('kbd', {}, '⌘+Shift+.'), ' 키로 숨은 폴더를 보이게 하세요.'),
+      h('p', { class: 'fine' }, '폴더는 이 브라우저 안에서만 읽어요. 가져온 대화는 이 프로젝트의 기록이 되고, 지도를 갱신할 때(자동 갱신도) AI에게 보내요.'),
+      h('button', { type: 'button', class: 'primary small sync-pick-root', 'data-act': 'pick', onclick: () => void pick() }, '세션 폴더 고르기'));
+    const ask = state === 'prompt' && !asked, notice = src.notice();
     return h('div', { class: 'sync-source' },
-      h('p', { class: 'fine' }, `읽는 세션 폴더: ${names.join(', ')}`),
-      src.notice() ? h('p', { class: 'fine sync-source-notice' }, src.notice()) : null,
-      state === 'prompt' ? h('p', { class: 'fine sync-blocked' }, '브라우저가 이 폴더를 다시 읽어도 되는지 물어봐야 해요.') : null,
+      h('h4', {}, '읽는 세션 폴더'),
+      h('ul', { class: 'sync-linked' }, ...names.map(n => h('li', {}, h('span', { class: 'sync-folder' }, n),
+        h('button', { type: 'button', class: 'link-button quiet sync-remove', 'aria-label': `${n} 세션 폴더 빼기`, 'data-act': `forget:${n}`, onclick: async () => { await src.forget(n); folders = null; render(); void tick(true); } }, '빼기')))),
+      notice && !shown?.includes(notice) ? h('p', { class: 'fine sync-source-notice' }, notice) : null,
+      ask ? h('p', { class: 'fine sync-blocked' }, '브라우저가 위 세션 폴더를 다시 읽어도 되는지 물어봐야 해요. ‘다시 허용’을 눌러 주세요.') : null,
       h('div', { class: 'pp-row' },
-        state === 'prompt' ? h('button', { type: 'button', class: 'primary small sync-grant', onclick: () => void grant() }, '다시 허용') : null,
-        h('button', { type: 'button', class: 'link-button sync-pick-root', onclick: () => void pick() }, '세션 폴더 더 고르기'),
-        ...names.map(n => h('button', { type: 'button', class: 'link-button quiet', 'aria-label': `${n} 세션 폴더 빼기`, onclick: async () => { await src.forget(n); folders = null; render(); void tick(true); } }, `${n} 빼기`))));
+        ask ? h('button', { type: 'button', class: 'primary small sync-grant', 'data-act': 'grant', onclick: () => void grant() }, '다시 허용') : null,
+        h('button', { type: 'button', class: 'link-button sync-pick-root', 'data-act': 'pick', onclick: () => void pick() }, '세션 폴더 더 고르기')));
   }
   function toggle() { panelOpen = !panelOpen; adding = false; if (panelOpen) { folders = null; foldersError = null; } render(); }
-  function close() { if (panelOpen) { panelOpen = false; adding = false; render(); } }
+  /** Closes the panel; from a key, focus goes back to its pill. */
+  function close(refocus = true) { if (panelOpen) { panelOpen = false; adding = false; render(); if (refocus) document.getElementById('sync-pill')?.focus(); } }
 
   return {
     /** The open project or the server's status changed: redraw, and look at once when it is a connected project. */
@@ -323,7 +384,11 @@ export function createAutoSync(host: AutoSyncHost) {
     start() {
       if (timer === null) timer = setInterval(() => { if (document.visibilityState === 'visible') void tick(); }, TICK_MS);
       document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') void tick(); });
+      // The panel closes as a popover does: Esc in it (its path field too: nothing under it runs), a press outside it and its pill.
+      document.getElementById('sync-panel')?.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); close(); } });
+      document.addEventListener('pointerdown', e => { if (panelOpen && !(e.target as Element).closest('#sync-panel, #sync-pill')) close(false); });
     },
+    isOpen: () => panelOpen,
     toggle, close, render, tick, bindingOf, connect, removeFolder, disconnect
   };
 }
