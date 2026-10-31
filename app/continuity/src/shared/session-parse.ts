@@ -4,7 +4,8 @@
  *   Claude Code: <~/.claude>/projects/<folder>/<session>.jsonl
  *   Codex:       <~/.codex>/sessions/YYYY/MM/DD/rollout-*.jsonl */
 import type { SessionDetail, SessionSummary, SessionTurn } from './session-import.js';
-import { foldHandover } from './handover-mark.js';
+import { foldHandover, quoteReceived } from './handover-mark.js';
+import { redactSecrets } from './secret.js';
 
 export const SESSION_VERSION = 'sessions.1';
 // fileBytes: a long agent session runs to hundreds of MB (tool output it never shows); it is read line by line, never held whole.
@@ -374,10 +375,13 @@ export function sessionKey(tool: SessionTool, meta: Pick<SessionMeta, 'thread'>,
   return `${tool}:${tool === 'codex' && meta.thread ? meta.thread : base}`;
 }
 
-/** A listing row of one parsed session head, or null when it holds no prompt. */
+/** A listing row of one parsed session head, or null when it holds no prompt. The first prompt is shown as a record shows it: a
+ * handover document it starts with named in words (so the person's own words follow), credential-like parts hidden. */
 export function sessionSummary(id: string, tool: SessionTool, head: ParsedSession, updatedAt: string, bytes: number, limits: Pick<SessionLimits, 'preview'> = SESSION_LIMITS): SessionSummary | null {
   const first = head.turns.find(t => t.role === 'user'); if (!first) return null;
-  return { id, tool, title: head.meta.title ?? null, preview: first.text.replace(/\s+/g, ' ').slice(0, limits.preview), cwd: head.meta.cwd, branch: head.meta.branch,
+  // Only the start is shown: a huge first prompt is not weighed whole at each look.
+  const preview = redactSecrets(quoteReceived(first.text).slice(0, 4000)).text.replace(/\s+/g, ' ').trim().slice(0, limits.preview);
+  return { id, tool, title: head.meta.title ? redactSecrets(head.meta.title).text : null, preview, cwd: head.meta.cwd, branch: head.meta.branch,
     startedAt: head.meta.startedAt, updatedAt, bytes };
 }
 /** A whole parsed session as sent to the page: newest turns within the reply budget (the earlier ones counted as omitted), each

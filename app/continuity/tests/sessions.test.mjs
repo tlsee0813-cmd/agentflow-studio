@@ -520,6 +520,23 @@ test('SESSIONS-F1 a handover document longer than a turn is folded before the pr
   assert.ok(sessionText(readSessionDetail(d)).text.includes('결제 화면부터 이어서 해 줘'));
 });
 
+test('SESSIONS-F2 a session listed by its first prompt as a record shows it: a handover it started from named in words, a key hidden', async () => {
+  const doc = code => [`──────── AgentFlow 인수인계 문서 · af-handover:${code}:A_f00834f4-0562-4208-b103-9e5e94acddcc ────────`, '# 인수인계: 미용실 예약 › 결제', '- 부분 설명',
+    `──────── 인수인계 문서 끝 · af-handover:${code}:A_f00834f4-0562-4208-b103-9e5e94acddcc ────────`].join('\n');
+  const key = 'sk-ant-' + 'FAKE'.repeat(5) + '0000', dir = home();
+  try {
+    const roots = writeSessionHome(dir), day = join(roots.codex, 'sessions', '2026', '10', '29'), p = join(roots.claude, 'projects', '-w'); mkdirSync(day, { recursive: true }); mkdirSync(p, { recursive: true });
+    const codex = (name, text) => writeFileSync(join(day, name), jl([desktopMeta(name), desktopUser(1, [['user.text', text]])]));
+    codex('rollout-2026-10-29T10-00-00-a.jsonl', `${doc('ZXC234')}\n\n취소 마감 시간부터 고쳐 줘`); codex('rollout-2026-10-29T10-00-01-b.jsonl', `${doc('QW3RTY')}\n\n카드 결제 실패 문구를 바꿔 줘`);
+    writeFileSync(join(p, 'k.jsonl'), jl([cu(0, `ANTHROPIC_API_KEY=${key} 로 문자 발송 서버 연결해 줘`), { type: 'ai-title', aiTitle: `${key} 연결` }]));
+    const list = (await openSessions({ env: {}, roots }).list()).sessions, of = text => list.find(s => s.preview.includes(text));
+    assert.equal(of('취소 마감').preview, '(인수인계 문서로 시작 · 미용실 예약 › 결제) 취소 마감 시간부터 고쳐 줘');
+    assert.ok(of('결제 실패') && !list.some(s => s.preview.includes('af-handover')), 'two sessions told apart by what was asked');
+    const k = of('문자 발송');
+    assert.equal(k.preview, 'ANTHROPIC_API_KEY=[가려진 비밀값] 로 문자 발송 서버 연결해 줘'); assert.equal(k.title, '[가려진 비밀값] 연결');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
 test('SESSIONS-L1 a line too long to be a session line is skipped, the lines around it still read, the read itself never fails for it', async () => {
   const dir = home();
   try {
