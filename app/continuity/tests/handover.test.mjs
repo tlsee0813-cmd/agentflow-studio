@@ -86,10 +86,10 @@ test('HANDOVER-F1 a new session that starts from the document: the document fold
   // those of a later record of it, which does not repeat the marker.
   const later = sessionText(session(NEXT, [{ role: 'user', at: '2026-10-30T06:10:00.000Z', text: '실패한 테스트 고쳐 줘' }, { role: 'assistant', at: '2026-10-30T06:20:00.000Z', text: '고쳤어요.', files: ['src/booking.ts'] }], { title: null })).text;
   const again = handoverText(D.pasteRecord(q, later, null).project, { scope: booking, code: 'ZXC234', at: '2026-10-30T07:00:00.000Z' });
-  for (const s of ['\n- 이거 읽고 이어서 해 줘 (인수인계 문서로 시작 · 나의 프로젝트 › 예약 화면) 먼저 테스트부터 돌려 줘\n', '\n- 실패한 테스트 고쳐 줘 → 바꾼 파일: src/booking.ts\n'])
+  for (const s of ['\n- (지도에 아직 없음) 이거 읽고 이어서 해 줘 (인수인계 문서로 시작 · 나의 프로젝트 › 예약 화면) 먼저 테스트부터 돌려 줘\n  - 답변: 테스트를 돌렸어요.\n', '\n- (지도에 아직 없음) 실패한 테스트 고쳐 줘 → 바꾼 파일: src/booking.ts\n  - 답변: 고쳤어요.\n'])
     assert.ok(again.includes(s), `missing: ${s}\n${again}`);
   // Its part reads as the map last saw it, and the document says the map is behind and where those records are.
-  assert.match(again, /\n## 이 범위의 현재 상태\n\(지도는 \d{4}-\d\d-\d\d \d\d:\d\d에 읽은 기록까지예요\. 아직 지도에 담기지 않은 기록이 2개 있어요\. 그 기록의 요청과 바꾼 파일은 아래 최근 흐름에 있어요\.\)\n\n### 예약 화면\n/);
+  assert.match(again, /\n## 이 범위의 현재 상태\n\(지도는 \d{4}-\d\d-\d\d \d\d:\d\d에 읽은 기록까지예요\. 아직 지도에 담기지 않은 기록이 2개 있어요\. 그 기록의 요청과 바꾼 파일, 답변은 아래 최근 흐름에 "지도에 아직 없음"으로 표시돼 있어요\. 위 부분 상태에는 아직 반영되지 않은 내용이에요\.\)\n\n### 예약 화면\n/);
   assert.ok(!handoverText(p, { scope: booking, code: 'ZXC234', at: '2026-10-30T07:00:00.000Z' }).includes('지도에 담기지 않은'), 'all read: no note');
 });
 
@@ -136,11 +136,11 @@ test('HANDOVER-B2 a web record pasted back keeps a handover document its request
   assert.equal(cut, `[웹 AI 세션 기록 · 취소 마감]\n\n── 사용자 요청 ──\n${line}\n\n── 웹 AI 답변 ──\n고쳤어요.\n(바꾼 파일: src/cancel.ts)`);
   assert.equal(foldRecord(cut), cut);
   assert.deepEqual(receivedHandovers(cut), [{ code: 'QW3RTY', areaId: booking }]);
-  assert.ok(handoverText(D.pasteRecord(p, cut, null).project, { scope: null, code: 'CUT234', at: '2026-10-30T05:00:00.000Z' }).includes('\n- (인수인계 문서로 시작 · 나의 프로젝트 › 예약 화면) → 바꾼 파일: src/cancel.ts\n'));
+  assert.ok(handoverText(D.pasteRecord(p, cut, null).project, { scope: null, code: 'CUT234', at: '2026-10-30T05:00:00.000Z' }).includes('\n- (지도에 아직 없음) (인수인계 문서로 시작 · 나의 프로젝트 › 예약 화면) → 바꾼 파일: src/cancel.ts\n  - 답변: 고쳤어요.\n'));
   // Such a record an older page saved with the answer's head glued to the folded line is still read so, though it stays as stored.
   const glued = '[웹 AI 세션 기록 · 취소 마감]\n\n── 사용자 요청 ──\n[AgentFlow 인수인계 문서를 받아 이어감 · af-handover:QW3RTY · 나의 프로젝트]── 웹 AI 답변 ──\n고쳤어요.\n(바꾼 파일: src/cancel.ts)';
   const old = handoverText(D.pasteRecord(p, glued, null).project, { scope: null, code: 'CUT234', at: '2026-10-30T05:00:00.000Z' });
-  assert.ok(old.includes('\n- (인수인계 문서로 시작 · 나의 프로젝트) → 바꾼 파일: src/cancel.ts\n') && !old.includes('웹 AI 답변') && foldRecord(glued) === glued, old);
+  assert.ok(old.includes('\n- (지도에 아직 없음) (인수인계 문서로 시작 · 나의 프로젝트) → 바꾼 파일: src/cancel.ts\n  - 답변: 고쳤어요.\n') && !old.includes('웹 AI 답변') && foldRecord(glued) === glued, old);
   // Text that is not a session record (the document kept on its own, a note) stays as written.
   assert.equal(foldRecord(doc), doc);
   assert.equal(foldRecord(`메모\n${doc}`), `메모\n${doc}`);
@@ -225,7 +225,7 @@ test('HANDOVER-R1 a takeover counts only where a request starts from it: an olde
   const q = D.pasteRecord(p, sessionText(ask(X, `${old}\n\n예약 화면 이어서`)).text, null).project;
   // The later document names the earlier start in words, without its code.
   const doc = handoverText(q, { scope: null, code: 'NEW234', at: AT });
-  assert.ok(!doc.includes('OLD234') && doc.includes('\n- (인수인계 문서로 시작 · 나의 프로젝트 › 예약 화면) 예약 화면 이어서\n'), doc);
+  assert.ok(!doc.includes('OLD234') && doc.includes('\n- (지도에 아직 없음) (인수인계 문서로 시작 · 나의 프로젝트 › 예약 화면) 예약 화면 이어서\n  - 답변: 네\n'), doc);
   const NEW = [{ code: 'NEW234', areaId: null }], got = (text, reply) => receivedHandovers(sessionText(ask(Y, text, reply)).text);
   assert.deepEqual(got(`${doc}\n\n이어서 해 줘`), NEW);
   // Copied without its first line: folded from its title line, and still known by its end line.
@@ -344,7 +344,7 @@ test('HANDOVER-X1 an answer\'s files go to the request of its own session, even 
   let p = D.createProject();
   for (const [s, mark] of [[y1, null], [x, null], [y2, { lastAt: T('01'), count: 1, updatedAt: T('01') }]]) for (const t of sessionChunks(s, newTurns(s, mark))) p = D.pasteRecord(p, t, null).project;
   const t = handoverText(p, { scope: null, code: 'XRS234', at: AT });
-  assert.ok(t.includes('- 결제 모듈 리팩터링 → 바꾼 파일: src/pay.ts, src/pay.test.ts\n- 로그인 화면 문구만 바꿔 줘, 결제 버튼 글자도 → 바꾼 파일: src/login.tsx\n'), t);
+  assert.ok(t.includes('- 결제 모듈 리팩터링 → 바꾼 파일: src/pay.ts, src/pay.test.ts\n  - 답변: 리팩터링 끝\n- 로그인 화면 문구만 바꿔 줘, 결제 버튼 글자도 → 바꾼 파일: src/login.tsx\n  - 답변: 바꿨어요\n'), t);
   assert.ok(!t.includes('최근에 바뀐 파일'), 'each file is named above: not listed again');
   // A part's document has a request whose answer its reading quoted, though the answer came in a later record: the reply's files
   // stay with it, never with another request.
@@ -366,7 +366,7 @@ test('HANDOVER-Q1 a part\'s recent flow is the requests its readings quoted, not
   // Read only in part (a long record is read a piece at a time): what is not read yet of it is kept, what was read only if quoted.
   const half = { ...p, readings: p.readings.map(r => ({ ...r, records: r.records.map(x => ({ ...x, to: p.pasted[0].text.lastIndexOf('── 사용자 요청', p.pasted[0].text.indexOf('결제 내역 페이지')) })) })) };
   const t = handoverText(half, { scope: half.space.areas.find(a => a.name === '예약 화면').id, code: 'QTE234', at: AT }), lines = t.slice(t.indexOf('## 최근 흐름')).split('\n\n')[0];
-  assert.ok(lines.includes('- 예약 화면에서 휴무일에는') && lines.includes('- 결제 내역 페이지 만들어 줘') && lines.includes('- 결제 테스트 돌려 줘') && !lines.includes('- 토스 결제창'), lines);
+  assert.ok(lines.includes('\n- 예약 화면에서 휴무일에는') && lines.includes('\n- (지도에 아직 없음) 결제 내역 페이지 만들어 줘') && lines.includes('\n- (지도에 아직 없음) 결제 테스트 돌려 줘') && !lines.includes('토스 결제창'), lines);
 });
 
 test('HANDOVER-B3 a web record header is read by the shape of its fields, in any order; its files line may follow a bullet', () => {
@@ -388,6 +388,26 @@ test('HANDOVER-K1 a shared relation has no direction: both parts read it the sam
   assert.ok(t.includes('\n- 관련: 정산 (이 부분과 함께 씀 · 결제 기록)\n') && t.includes('\n- 관련: 결제 (이 부분과 함께 씀 · 결제 기록)\n') && !t.split('\n').some(l => l.startsWith('- 관련:') && /[←→]/.test(l)), t);
 });
 
+test('HANDOVER-N2 work the map has not read keeps how its answer ended, marked as not on the map, so a blocked task does not read as done', () => {
+  const S = 'codex-89abcdef0123456789abcdef', T = h => `2026-10-28T0${h}:00:00.000Z`;
+  const first = session(S, [{ role: 'user', at: T(1), text: '관리자 메뉴판에 품절 표시 넣어 줘' }, { role: 'assistant', at: T(2), text: '품절 표시를 넣었어요. 저장을 로컬스토리지로 할지 서버로 할지 정해 주세요.', files: ['src/pages/AdminMenu.tsx'] }], { title: null });
+  let p = readAs(D.pasteRecord(D.createProject(), sessionText(first).text, null).project, [['관리자 메뉴판', ['품절 표시 넣어 줘'], [['reported', '품절 표시를 넣었어요'], ['open', '저장을 로컬스토리지로 할지 서버로 할지']]]]);
+  // The session goes on after the reading: the person settles the open choice, and the tool says it is blocked.
+  const blocked = '서버 저장은 아직 못 했어요. 서버 API 주소가 없어서 막혔어요. 지금은 저장해도 새로 고치면 품절 표시가 사라져요.';
+  const next = session(S, [...first.turns, { role: 'user', at: T(3), text: '품절 저장은 서버로 하자. 로컬스토리지는 빼.' }, { role: 'assistant', at: T(4), text: `서버 저장 코드를 먼저 볼게요.\n\n${'API 설정 파일과 환경 변수를 차례로 확인했어요. '.repeat(6)}\n\n${blocked}`, files: ['src/api/soldout.ts'] }], { title: null });
+  for (const t of sessionChunks(next, newTurns(next, { lastAt: T(2), count: 2, updatedAt: T(2) }))) p = D.pasteRecord(p, t, null).project;
+  const flow = t => t.slice(t.indexOf('## 최근 흐름')).split('\n\n')[0];
+  const doc = handoverText(p, { scope: p.space.areas[0].id, code: 'BLK234', at: AT }), lines = flow(doc).split('\n');
+  assert.equal(lines[1], '- 관리자 메뉴판에 품절 표시 넣어 줘 → 바꾼 파일: src/pages/AdminMenu.tsx', 'read: the part above holds it');
+  assert.equal(lines[2], '- (지도에 아직 없음) 품절 저장은 서버로 하자. 로컬스토리지는 빼. → 바꾼 파일: src/api/soldout.ts');
+  // The end of a long answer, where it says how the work ended.
+  assert.ok(lines[3].startsWith('  - 답변: …') && lines[3].endsWith(blocked) && lines[3].length <= 220 && lines.length === 4, lines.join('\n'));
+  assert.ok(doc.includes('- 남은 선택: 저장을 로컬스토리지로 할지 서버로 할지') && doc.includes('위 부분 상태에는 아직 반영되지 않은 내용이에요.)'), doc);
+  // Nothing read at all (no AI key yet): every answer is there, with no mark where the map has no part.
+  const none = flow(handoverText(D.pasteRecord(D.createProject(), sessionText(next).text, null).project, { scope: null, code: 'BLK234', at: AT }));
+  assert.ok(none.includes('\n- 관리자 메뉴판에 품절 표시 넣어 줘 → 바꾼 파일: src/pages/AdminMenu.tsx\n  - 답변: 품절 표시를 넣었어요. 저장을 로컬스토리지로 할지 서버로 할지 정해 주세요.\n- 품절 저장은') && none.endsWith(blocked) && !none.includes('지도에 아직 없음'), none);
+});
+
 test('HANDOVER-N1 records the map has not read: a part shows those of its own sessions, and the note says truly where each one is', () => {
   const PAY = 'codex-89abcdef0123456789abcdef', SETTLE = 'claude-222222222222222222222222', OTHER = 'claude-333333333333333333333333';
   const rec = (id, asks, files) => sessionText(session(id, asks.flatMap(text => [{ role: 'user', at: AT, text }, { role: 'assistant', at: AT, text: '했어요.', files }]), { title: null })).text;
@@ -402,21 +422,21 @@ test('HANDOVER-N1 records the map has not read: a part shows those of its own se
   // The same session goes on after the reading: the part's document has its new request, and says that is where it is.
   const q = add(p, rec(PAY, ['결제 실패하면 다시 시도 버튼을 보여 줘'], ['src/pay/retry.ts']));
   const one = doc(q, pay);
-  assert.ok(one.includes('\n- 결제 화면에서 토스 결제창을 열어 줘 → 바꾼 파일: src/pay/checkout.ts\n- 결제 실패하면 다시 시도 버튼을 보여 줘 → 바꾼 파일: src/pay/retry.ts\n') && !one.includes('정산표'), one);
-  assert.ok(AT_MAP.test(note(one)) && note(one).endsWith(' 아직 지도에 담기지 않은 기록이 1개 있어요. 그 기록의 요청과 바꾼 파일은 아래 최근 흐름에 있어요.)'), note(one));
+  assert.ok(one.includes('\n- 결제 화면에서 토스 결제창을 열어 줘 → 바꾼 파일: src/pay/checkout.ts\n- (지도에 아직 없음) 결제 실패하면 다시 시도 버튼을 보여 줘 → 바꾼 파일: src/pay/retry.ts\n  - 답변: 했어요.\n') && !one.includes('정산표'), one);
+  assert.ok(AT_MAP.test(note(one)) && note(one).endsWith(' 아직 지도에 담기지 않은 기록이 1개 있어요. 그 기록의 요청과 바꾼 파일, 답변은 아래 최근 흐름에 "지도에 아직 없음"으로 표시돼 있어요. 위 부분 상태에는 아직 반영되지 않은 내용이에요.)'), note(one));
   // Another session's record and a pasted note, not read either: counted, and said not to be in the part's document.
   const r = add(q, rec(OTHER, ['예약 화면 취소 버튼 고쳐 줘'], ['src/booking/cancel.ts']), '결제는 현장 결제로 정했어요. 선결제는 하지 않아요.');
   const part = doc(r, pay), whole = doc(r);
-  assert.ok(note(part).endsWith(' 아직 지도에 담기지 않은 기록이 3개 있어요. 그중 이 범위를 다룬 세션의 기록 1개는 요청과 바꾼 파일이 아래 최근 흐름에 있고, 나머지 2개는 이 문서에 없어요. 필요하면 사용자에게 물어보세요.)'), note(part));
+  assert.ok(note(part).endsWith(' 아직 지도에 담기지 않은 기록이 3개 있어요. 그중 이 범위를 다룬 세션의 기록 1개는 요청과 바꾼 파일, 답변이 아래 최근 흐름에 "지도에 아직 없음"으로 표시돼 있고, 나머지 2개는 이 문서에 없어요. 표시된 내용은 위 부분 상태에 아직 반영되지 않았고, 나머지는 필요하면 사용자에게 물어보세요.)'), note(part));
   assert.ok(part.includes('src/pay/retry.ts') && !part.includes('취소 버튼') && !part.includes('현장 결제'), part);
-  assert.ok(note(whole).endsWith(' 아직 지도에 담기지 않은 기록이 3개 있어요. 그중 2개는 요청과 바꾼 파일이 아래 최근 흐름에 있고, 나머지 1개는 이 문서에 없어요. 필요하면 사용자에게 물어보세요.)'), note(whole));
-  assert.ok(whole.includes('\n- 예약 화면 취소 버튼 고쳐 줘 → 바꾼 파일: src/booking/cancel.ts\n') && !whole.includes('현장 결제'), whole);
+  assert.ok(note(whole).endsWith(' 아직 지도에 담기지 않은 기록이 3개 있어요. 그중 2개는 요청과 바꾼 파일, 답변이 아래 최근 흐름에 "지도에 아직 없음"으로 표시돼 있고, 나머지 1개는 이 문서에 없어요. 표시된 내용은 위 부분 상태에 아직 반영되지 않았고, 나머지는 필요하면 사용자에게 물어보세요.)'), note(whole));
+  assert.ok(whole.includes('\n- (지도에 아직 없음) 예약 화면 취소 버튼 고쳐 줘 → 바꾼 파일: src/booking/cancel.ts\n') && !whole.includes('현장 결제'), whole);
   // Only a pasted note not read: nothing in the document holds it, and the note does not send the reader below for it.
   const n = add(p, '결제는 현장 결제로 정했어요.');
   for (const t of [doc(n), doc(n, pay)]) { assert.ok(note(t).endsWith(' 아직 지도에 담기지 않은 기록이 1개 있어요. 그 내용은 이 문서에 없으니, 필요하면 사용자에게 물어보세요.)'), note(t)); sends(t); }
   // A record of more requests than the recent flow holds: the note says only its latest ones are below.
   const many = doc(add(p, rec(PAY, Array.from({ length: 7 }, (_, i) => `결제 문구 ${i + 1}번 고쳐 줘`), ['src/pay/text.ts'])), pay);
-  assert.ok(note(many).endsWith(' 그 기록의 최근 요청과 바꾼 파일은 아래 최근 흐름에 있어요.)') && !many.includes('결제 문구 1번') && many.includes('결제 문구 7번'), many);
+  assert.ok(note(many).endsWith(' 그 기록의 최근 요청과 바꾼 파일, 답변은 아래 최근 흐름에 "지도에 아직 없음"으로 표시돼 있어요. 위 부분 상태에는 아직 반영되지 않은 내용이에요.)') && !many.includes('결제 문구 1번') && many.includes('결제 문구 7번'), many);
   // Parts drawn by hand, nothing read yet: the note says so, and that the records are not in the document.
   const hand = doc(add(D.addArea(D.createProject(), '결제'), '결제는 현장 결제로 정했어요.'));
   assert.ok(hand.includes('\n(지도는 아직 기록을 읽지 않았어요. 아직 지도에 담기지 않은 기록이 1개 있어요. 그 내용은 이 문서에 없으니, 필요하면 사용자에게 물어보세요.)\n'), hand);
