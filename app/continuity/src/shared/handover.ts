@@ -120,7 +120,8 @@ function sessionTurns(p: Project, only: Set<string> | null, took: Set<string>): 
       // The list is on the answer's last line (a web AI may put it after a bullet), read to its last ')' so a name like
       // app/(auth)/page.tsx stays whole.
       const f = /\(바꾼 파일: (.+)\)\s*$/.exec(body.slice(body.lastIndexOf('\n') + 1).trim()), last = asked.get(key);
-      if (f && last) last.files.push(...f[1]!.split(', '));
+      // A web AI may write the line with nothing in it ('(바꾼 파일: 없음)'): no file is named so.
+      if (f && last) last.files.push(...f[1]!.split(', ').filter(x => !(origin.tool === 'web' && EMPTY_FIELD.test(x.trim()))));
     }
   }
   return out;
@@ -221,7 +222,7 @@ const dedupeLines = (l: string[]) => [...new Set(l)];
 /** What to paste into a session that keeps no file on this PC (a web chat): it asks that session to write its own record in the
  * shape a session import has, so pasting its answer back gives a record that reads (and is attributed) like an imported one. */
 export const WEB_RECORD_ASK = [
-  '[AgentFlow 기록 요청] 이 대화에서 지금까지 내가 한 요청과 네가 한 작업을 아래 형식 그대로 적어 줘. 요약하지 말고 내가 쓴 요청은 원문 그대로 옮기고, 네 답변은 실제로 한 일·바꾼 파일·확인한 것·남은 일을 중심으로 적어 줘. 키·토큰·비밀번호는 [가려진 비밀값]으로 바꿔 줘. 형식 밖의 말은 쓰지 마.',
+  '[AgentFlow 기록 요청] 이 대화에서 지금까지 내가 한 요청과 네가 한 작업을 아래 형식 그대로 적어 줘. 내 요청은 요약하지 말고 원문 그대로 옮기고, 네 답변은 실제로 한 일·바꾼 파일·확인한 것·남은 일만 적어 줘. 이 기록 요청은 넣지 마. 내 요청에 AgentFlow 인수인계 문서가 들어 있었다면 문서 본문은 옮기지 말고 af-handover가 적힌 첫 줄과 끝 줄만 그대로 적어 줘. 바꾼 파일이 없으면 (바꾼 파일: …) 줄은 빼 줘. 키·토큰·비밀번호는 [가려진 비밀값]으로 바꿔 줘. 형식 밖의 말은 쓰지 마.',
   '',
   '[웹 AI 세션 기록 · (이 대화의 짧은 제목) · 작업 폴더 (있으면 경로, 없으면 이 칸을 빼) · 브랜치 (있으면 이름, 없으면 이 칸을 빼)]',
   '',

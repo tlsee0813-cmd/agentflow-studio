@@ -99,6 +99,15 @@ test('HANDOVER-B1 a web chat writes its own record from the request text: the re
   const p = D.pasteRecord(D.createProject(), answer, null).project;
   const t = handoverText(p, { scope: null, code: 'WEB234', at: '2026-10-30T05:00:00.000Z' });
   assert.ok(t.includes('- 웹 AI 「결제 연결」 · 브랜치 pay') && t.includes('- 결제 버튼을 붙여 줘 → 바꾼 파일: src/pay.ts'), t);
+  // A chat that changed nothing may still write the files line, with nothing in it: no file is named 없음.
+  const talk = '[웹 AI 세션 기록 · 결제 방식 고민]\n\n── 사용자 요청 ──\n현장 결제랑 선결제 중에 뭐가 나을까?\n\n── 웹 AI 답변 ──\n노쇼가 많으면 선결제가 나아요.\n(바꾼 파일: 없음)';
+  const u = handoverText(D.pasteRecord(p, talk, null).project, { scope: null, code: 'WEB234', at: '2026-10-30T05:00:00.000Z' });
+  assert.ok(u.includes('\n- 현장 결제랑 선결제 중에 뭐가 나을까?\n') && !u.includes('파일: 없음') && !/바뀐 파일: .*없음/.test(u), u);
+  // Asked to write a handover document it was given as its first and end line only, the chat's record still names that handover.
+  assert.ok(WEB_RECORD_ASK.includes('af-handover가 적힌 첫 줄과 끝 줄만') && WEB_RECORD_ASK.includes('이 기록 요청은 넣지 마'));
+  const lines = t.split('\n'), short = `[웹 AI 세션 기록 · 이어받기]\n\n── 사용자 요청 ──\n${lines[0]}\n${lines.at(-1)}\n\n이어서 해 줘\n\n── 웹 AI 답변 ──\n이어서 했어요.`;
+  assert.equal(foldRecord(short), '[웹 AI 세션 기록 · 이어받기]\n\n── 사용자 요청 ──\n[AgentFlow 인수인계 문서를 받아 이어감 · af-handover:WEB234]\n\n이어서 해 줘\n\n── 웹 AI 답변 ──\n이어서 했어요.');
+  assert.deepEqual(receivedHandovers(short), [{ code: 'WEB234', areaId: null }]);
 });
 
 test('HANDOVER-B2 a web record pasted back keeps a handover document its request started from as one line, as the import does', () => {
