@@ -16,6 +16,8 @@ const REF = /^(?:\[가려진|process\.|os\.environ|import\.meta|env[.(\[]|secret
 /* ---------- what a value after a name is: told in code, not in one pattern (a pattern that weighs a value's shape backtracks) ---------- */
 // Words a value can be without holding a secret: types, empty values, placeholders, fetch's credentials modes and words of prose.
 const PLAIN = /^(?:string|str|number|int|integer|float|bool|boolean|bytes|any|unknown|object|none|null|nil|undefined|true|false|required|optional|empty|hidden|password|passwd|secret|token|key|value|option|flag|argument|arg|parameter|param|prompt|field|input|text|here|yes|no|include|same-origin|omit)$/i;
+// A hash, cipher or encoding named where a value could be (비밀번호는 argon2로 해시, password: sha256).
+const SCHEME = /^(?:sha-?\d{1,3}|sha3-\d{3}|md5|s?crypt|bcrypt|argon2(?:id|i|d)?|pbkdf2(?:-sha\d{3})?|aes-?\d{3}(?:-[a-z]{2,3})?|[hre]s\d{3}|ed25519|base64(?:url)?|utf-?8)$/i;
 // A type written where a value could be (password: SecretStr, password: Annotated[str, Form()]).
 const TYPE = /^(?:SecretStr|SecretBytes|Optional|Annotated|Union|Literal|List|Dict|Field|Mapped|Column|Option|Record|Partial|Readonly|Array|Promise|Buffer|Uint8Array)\b/;
 // One name in code: camelCase, PascalCase or UPPER_SNAKE (createdAt, hashedPassword, DATABASE_PASSWORD), and lower_snake
@@ -65,7 +67,7 @@ function secretPart(raw: string, w: Where): [string, string] | null {
   // A value followed by ',' or ';' on a line of its own is code (a property, a statement), not a setting; so is one left unquoted
   // under a quoted name.
   const literal = w.quoted || (w.literal && !rest), code = !(w.secret && literal) || (w.keyQuoted && !w.quoted);
-  if (!v || REF.test(v) || !/[A-Za-z0-9]/.test(v) || PLAIN.test(v) || TYPE.test(v) || /^![A-Za-z][\w:-]*$/.test(v)) return null;
+  if (!v || REF.test(v) || !/[A-Za-z0-9]/.test(v) || PLAIN.test(v) || SCHEME.test(v) || TYPE.test(v) || /^![A-Za-z][\w:-]*$/.test(v)) return null;
   // Under a quoted name (JSON, a dict) a value as written is quoted: a bare name is a variable ("password": user_password). A type
   // followed by its default (api_key: APIKey = Security(…)) is no value either.
   if ((w.keyQuoted && !w.quoted && /^[A-Za-z_$][\w$]*$/.test(v)) || (w.colon && /^[ \t]*=(?!=)/.test(w.next))) return null;
@@ -93,7 +95,14 @@ const QUOTED = `(?<q>\\\\?["'\`])(?<qv>(?:(?!\\k<q>)[^\\n]){1,500}?)\\k<q>`;
 // A name ending in what it holds (apiKey, DB_PASSWORD, x-api-key, client_secret, "token", EMAIL_PASS, os.environ["X_API_KEY"]),
 // then ':', '=', ':=' or '=>' (not '==' or '::'), maybe quoted (JSON escaped too): .env, shell, YAML, JSON, code, PHP, Go, headers.
 // MAX_TOKENS does not end so.
-const SETTING = new RegExp(`(?<keep>\\b(?<name>[A-Za-z0-9_.-]{0,40}?(?:password|passwd|passphrase|pwd|pass|secret|token|key|key_base|credentials?|sess(?:ion)?_?id))\\\\?["']?\\]?[ \\t]*(?::=|=>|[:=](?![=:]))[ \\t]*)(?:${QUOTED}|(?<uv>[^\\s"'\`]{1,2000}))`, 'gi');
+const SETTING = new RegExp(`(?<keep>\\b(?<name>[A-Za-z0-9_.-]{0,40}?(?:password|passwd|passphrase|pwd|pw|pass|secret|token|key|key_base|credentials?|sess(?:ion)?_?id))\\\\?["']?\\]?[ \\t]*(?::=|=>|[:=](?![=:]))[ \\t]*)(?:${QUOTED}|(?<uv>[^\\s"'\`]{1,2000}))`, 'gi');
+// A value given in a sentence. Unquoted it is ASCII only, so the Korean after it ends it (FakePass123!이고), and it never runs into
+// a value hidden already. The name may take a Korean topic, subject or object particle (비밀번호는, token은).
+const SAID = `(?:${QUOTED}|(?<uv>[!-~]{1,500})(?![!-~]|가려진 비밀값\\]))`, PARTICLE = '(?:은|는|이|가|을|를)';
+// A name said in Korean (비밀번호는 …, 토큰: …, API 키 …); 암호화 (encryption) is no name.
+const KOREAN_NAME = new RegExp(`(?<keep>(?<name>비밀\\s?번호|비번|패스워드|암호(?!화)|토큰|시크릿|인증\\s?키|비밀\\s?키|액세스\\s?키|API\\s?키)값?${PARTICLE}?[ \\t]*(?:[:=：][ \\t]*)?)${SAID}`, 'gi');
+// An English name followed by a Korean particle (token은 …), or by a space as in a sentence (password …).
+const SAID_NAME = new RegExp(`(?<keep>\\b(?<name>[A-Za-z0-9_.-]{0,40}?(?:password|passwd|pwd|pw|secret|token|(?:api|access)[ _-]?key))(?<then>${PARTICLE}[ \\t]*(?:[:=：][ \\t]*)?|[ \\t]+))${SAID}`, 'gi');
 // PHP's define('DB_PASSWORD', '…') (wp-config.php): a quoted value is one as written; an unquoted one is code (getenv('…'), a
 // constant).
 const DEFINE = new RegExp(`(?<keep>\\bdefine\\(\\s*["'](?<name>[A-Za-z0-9_]{0,40}?(?:password|passwd|pass|secret|key|token|salt))["']\\s*,\\s*)(?:${QUOTED}|(?<uv>[^\\s,)"']{1,500}))`, 'gi');
@@ -147,7 +156,12 @@ const WEIGHED: Weighed[] = [
   { re: /(?<keep><(?<name>[\w:.-]{0,40}?(?:password|passwd|passphrase|secret|token|apikey|api_key|api-key))>)(?<uv>[^<\n]{1,500})(?=<\/)/gi,
     where: () => ({ secret: true, env: false, literal: true }) },
   { re: DEFINE, where: g => ({ secret: true, env: false, literal: g.qv !== undefined }) },
-  { re: SETTING, setting: true, where: g => { const secret = SECRET_NAME.test(g.name ?? ''); return { secret, env: !secret && /^[A-Z][A-Z0-9_]*$/.test(g.name ?? ''), literal: false }; } }
+  { re: SETTING, setting: true, where: g => { const secret = SECRET_NAME.test(g.name ?? ''); return { secret, env: !secret && /^[A-Z][A-Z0-9_]*$/.test(g.name ?? ''), literal: false }; } },
+  // In a sentence a password is said to be one (비밀번호는 bcrypt로 해시 stays); a token or key named so is hidden only when it
+  // looks made by a machine (컨텍스트 토큰 200000개 stays), and so is a value after an English name and a space (Go's
+  // Password []byte, SQL's token TEXT).
+  { re: KOREAN_NAME, where: g => ({ secret: /비밀\s?번호|비번|패스워드|암호/.test(g.name ?? ''), env: false, literal: false }) },
+  { re: SAID_NAME, where: g => ({ secret: /\S/.test(g.then ?? '') && (SECRET_NAME.test(g.name ?? '') || /pw$/i.test(g.name ?? '')), env: false, literal: false }) }
 ];
 /** One weighed pattern over a text; count is told of each part hidden. */
 function weigh(rule: Weighed, text: string, hid: () => void): string {

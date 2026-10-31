@@ -178,6 +178,33 @@ test('SESSIONS-RD4 a password in a connection string, a value starting with $ { 
     assert.deepEqual(redactSecrets(text), { text, count: 0 }, text);
 });
 
+test('SESSIONS-RD5 a password, token or key named in Korean, or by an English name before a particle or a space, is hidden; the sentences about them stay', () => {
+  const FAKE = f('FAKEfake', 'FAKE0123', '456789fake');
+  const hide = [
+    ['DB 비밀번호는 FakePass123!이고', 'DB 비밀번호는 [가려진 비밀값]이고'], ['비밀번호: FakePass123', '비밀번호: [가려진 비밀값]'], ['비번 FakePass123', '비번 [가려진 비밀값]'],
+    ['암호: FakePass123', '암호: [가려진 비밀값]'], ['와이파이 비번은 hunter22', '와이파이 비번은 [가려진 비밀값]'], ['DB 비밀번호를 FakePass123으로 바꿔 줘', 'DB 비밀번호를 [가려진 비밀값]으로 바꿔 줘'],
+    ['비밀번호는 "Fake Pass 123"이야', '비밀번호는 "[가려진 비밀값]"이야'], ['패스워드：FakePass123', '패스워드：[가려진 비밀값]'],
+    [`관리자 토큰: ${FAKE} 야.`, '관리자 토큰: [가려진 비밀값] 야.'], [`API 키: ${FAKE}`, 'API 키: [가려진 비밀값]'], [`인증키 ${FAKE} 넣어`, '인증키 [가려진 비밀값] 넣어'],
+    ['pw: FakePass123', 'pw: [가려진 비밀값]'], ['PW=FakePass123', 'PW=[가려진 비밀값]'], [`token은 ${FAKE}`, 'token은 [가려진 비밀값]'],
+    [`api_key는 ${FAKE} 입니다`, 'api_key는 [가려진 비밀값] 입니다'], ['password FakePass123', 'password [가려진 비밀값]'], [`API key ${FAKE}`, 'API key [가려진 비밀값]']
+  ];
+  for (const [text, want] of hide) {
+    const r = redactSecrets(text);
+    assert.equal(r.text, want, text); assert.equal(r.count, 1, text);
+    assert.deepEqual(redactSecrets(r.text), { text: r.text, count: 0 }, 'hidden once, never again');
+  }
+  // Taken from a session, the record keeps none of them.
+  const d = session([{ role: 'user', at: T(0), text: `DB 비밀번호는 FakePass123!이고 관리자 토큰: ${FAKE} 야. 예약 화면 만들어줘` },
+    { role: 'assistant', at: T(1), text: '.env에 비밀번호: FakePass123! 를 넣었습니다.' }]);
+  const got = sessionText(d);
+  assert.ok(!got.text.includes('FakePass123') && !got.text.includes(FAKE) && got.redacted === 3, got.text);
+  for (const text of ['비밀번호 변경 화면 만들어 줘', '토큰 만료되면 다시 로그인하게 해 줘', 'API 키 넣는 칸 추가해 줘', '암호화는 나중에', '비밀번호는 bcrypt로 해시해 줘',
+    '비밀번호는 argon2id로 바꿔 줘', '암호는 AES-256-GCM으로 해 줘', '비밀번호는 최소 8자 이상', '토큰은 JWT로 만들어', '토큰은 localStorage에 저장하지 말고', '컨텍스트 토큰 200000개',
+    'API 키는 config.ts에 있어', 'API 키는 process.env.OPENAI_API_KEY에서 읽어', '비밀번호를 user.password와 비교해', '비밀번호: ${DB_PASSWORD}', 'max_token 100000',
+    'password VARCHAR(255) NOT NULL', 'Password []byte `json:"password"`', 'Token *oauth2.Token', 'access token expires in 3600 seconds', 'return token && token.length > 0'])
+    assert.deepEqual(redactSecrets(text), { text, count: 0 }, text);
+});
+
 test('SESSIONS-RT1 the whole record is hidden and cleaned, its header too, so it can always be kept', () => {
   const d = session([{ role: 'user', at: T(0), text: '색 출력 \u001b[31m빨강\u001b[0m 그리고 제목\u000b부제목\u0007' }, { role: 'assistant', at: T(1), text: '고쳤어요', files: ['src/a.ts'] }],
     { cwd: 'C:\\work\\sk-telecom-portal-renewal', branch: 'feature/sk-1234-fix-login-redirect', title: `키 ${f('sk-', 'proj-', 'FAKE'.repeat(6))} 넣고 테스트` });
