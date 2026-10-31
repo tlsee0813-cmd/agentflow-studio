@@ -234,7 +234,8 @@ export function createAutoSync(host: AutoSyncHost) {
   /** Leaves one folder (its records stay); the last one leaving ends the connection (the marks stay with the project). */
   function removeFolder(path: string) {
     const o = open(), b = o ? bindingOf(o.key) : null; if (!o || !b) return;
-    b.folders = b.folders.filter(f => f.path !== path); if (!b.folders.length) { b.error = null; halted.delete(o.key); } put_(o.key, b); render();
+    // What the last look said may have been about this folder: the next look says what is still wrong.
+    b.folders = b.folders.filter(f => f.path !== path); b.error = null; if (!b.folders.length) halted.delete(o.key); put_(o.key, b); render(); if (b.folders.length) void tick();
   }
   function disconnect() {
     const o = open(), b = o ? stored(o.key) : null; if (!o) return;

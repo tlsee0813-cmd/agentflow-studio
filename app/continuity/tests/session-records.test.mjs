@@ -627,3 +627,13 @@ test('SESSIONS-AC3 one Windows folder written with another drive-letter case or 
   u.sync.connect('/work/Salon'); await settle(); u.sync.connect('/work/salon'); await settle();
   assert.deepEqual(u.binding().folders.map(f => f.path), ['/work/Salon', '/work/salon']);
 });
+
+test('SESSIONS-AC4 leaving the folder that could not be read takes its message away at once; the folders left are looked at again', async () => {
+  const src = source([{ id: ID, cwd: '/v', updatedAt: ago(30), turns: pair(40, 'V-PROMPT', 'ok') }]), list = src.list.bind(src), looked = [];
+  src.list = async folder => { looked.push(folder); if (folder === '/gone') throw Object.assign(new Error('x'), { code: 'NETWORK' }); return list(folder); };
+  const t = tab(src); t.sync.connect('/v'); await settle(); t.sync.connect('/gone'); await settle();
+  assert.ok(t.binding().error.startsWith('gone: '), t.binding().error);
+  looked.length = 0; t.sync.removeFolder('/gone'); assert.equal(t.binding().error, null);
+  await settle();
+  assert.deepEqual(looked, ['/v']); assert.deepEqual(t.binding().folders.map(f => f.path), ['/v']); assert.equal(t.binding().error, null); assert.equal(t.texts().length, 1);
+});
