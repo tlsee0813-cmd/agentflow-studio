@@ -335,14 +335,11 @@ export function sniffTool(lines: unknown[]): SessionTool | null {
     if (!o || typeof o !== 'object') continue;
     if (typeof o.payload === 'object' && ['session_meta', 'response_item', 'event_msg', 'turn_context'].includes(o.type)) return 'codex';
     if (typeof o.instructions !== 'undefined' && typeof o.id === 'string') return 'codex';
-    if ((o.type === 'user' || o.type === 'assistant') && o.message && typeof o.sessionId === 'string') return 'claude';
     if ((o.type === 'user' || o.type === 'assistant') && o.message) return 'claude';
   }
   return null;
 }
 
-/** Claude Code names a project's folder after its working folder, every character but letters and digits made '-'. */
-export const claudeFolder = (cwd: string) => String(cwd).replace(/[^A-Za-z0-9]/g, '-');
 /** A folder path compared as Windows does when it is a Windows path (either separator, any letter case), else as written. */
 const windows = (t: string) => /^[a-z]:(\/|$)/i.test(t) || t.startsWith('//');
 function folderKey(path: string): string {

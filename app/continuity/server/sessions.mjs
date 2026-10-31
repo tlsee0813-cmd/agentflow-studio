@@ -13,9 +13,9 @@ import { createHash } from 'node:crypto';
 import { homedir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
 import { ApiError } from '../../server/errors.mjs';
-import { SESSION_VERSION, SESSION_LIMITS, SESSION_ID, parseClaude, parseCodex, parseSession, sessionParser, pushLine, jsonLines, withSubagents, tailFolders, hasPrompt, atFolder, claudeFolder, within, sessionSummary, sessionDetail, sessionKey } from '../dist/public/shared/session-parse.js';
+import { SESSION_VERSION, SESSION_LIMITS, SESSION_ID, parseClaude, parseCodex, parseSession, sessionParser, pushLine, jsonLines, withSubagents, tailFolders, hasPrompt, atFolder, within, sessionSummary, sessionDetail, sessionKey } from '../dist/public/shared/session-parse.js';
 
-export { SESSION_VERSION, SESSION_LIMITS, SESSION_ID, parseClaude, parseCodex, claudeFolder, within };
+export { SESSION_LIMITS, SESSION_ID, parseClaude, parseCodex };
 
 async function readHead(path, bytes, from = 0) {
   const h = await open(path, 'r');
