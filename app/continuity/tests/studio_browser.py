@@ -2693,6 +2693,20 @@ def question_retry_flow(browser, base):
     page.close()
 
 
+# Counts what is put in the connection panel from now on: alerts (a screen reader reads each one out) and the panel drawn again.
+PANEL_DRAWS = """() => { window.__alerts = 0; window.__draws = 0; new MutationObserver(list => { for (const m of list) for (const n of m.addedNodes) if (n.nodeType === 1) {
+  if (n.matches('[role=alert]') || n.querySelector('[role=alert]')) window.__alerts++; if (n.matches('h3')) window.__draws++; } })
+  .observe(document.getElementById('sync-panel'), { childList: true, subtree: true }); }"""
+
+
+def ime(cdp, *keys):
+    """Korean typed through an input method, as Chrome gets it (composition events, not plain key presses): each key is the syllable
+    being composed, and one ending in '|' is committed. 예약 in 2-beolsik: "ㅇ", "예", "옝", "예|", "야", "약", "약|"."""
+    for k in keys:
+        if k.endswith("|"): cdp.send("Input.insertText", {"text": k[:-1]})
+        else: cdp.send("Input.imeSetComposition", {"text": k, "selectionStart": len(k), "selectionEnd": len(k)})
+
+
 def sessions_flow(browser, base):
     """Local session records (synthetic home folder, stubbed model): a new project connected once to a working folder takes that
     folder's recent Claude Code / Codex sessions as records (credential-like text hidden) and reads its first map without a click;
@@ -2725,6 +2739,7 @@ def sessions_flow(browser, base):
     expect(pick).to_contain_text("Claude Code")
     expect(pick).to_contain_text("Codex")
     expect(page.locator("#sync-panel")).to_contain_text("지도를 갱신할 때 이 기록을 AI에게 보내요")  # said before connecting
+    expect(page.locator("#sync-panel .sync-points")).to_contain_text(re.compile(r"처음 연결하면 최근 \d+일의 세션\(\d+개까지\)을 가져와 지도에 담아요"))
     assert maps == [], maps
     pick.click()
     # Connected: the folder's sessions became records and the first map was read without asking.
@@ -2785,7 +2800,30 @@ def sessions_flow(browser, base):
     expect(page.locator("#sync-panel h3")).to_have_text("작업 폴더 추가")
     expect(page.locator("#sync-panel h3")).to_be_focused()
     expect(page.locator("#sync-panel .sync-folder-pick")).to_have_count(0)  # the one folder with sessions is linked already
-    page.locator("#sync-panel .sync-path").fill("/work/salon-api")
+    # A look redraws the panel as it starts and as it ends: a Korean folder name composed meanwhile comes out as typed.
+    pill, path, look = page.locator("#sync-pill"), page.locator("#sync-panel .sync-path"), "() => document.dispatchEvent(new Event('visibilitychange'))"
+    expect(pill).to_have_attribute("data-state", "on", timeout=15000)  # the look '지금 확인' started has ended
+    path.fill("/work/")
+    cdp = page.context.new_cdp_session(page)
+    ime(cdp, "ㅇ", "예")
+    page.evaluate(look)
+    expect(pill).to_have_attribute("data-state", "busy")
+    ime(cdp, "옝", "예|", "야", "약")
+    expect(pill).to_have_attribute("data-state", "on", timeout=15000)
+    ime(cdp, "약|")
+    expect(path).to_have_value("/work/예약")
+    expect(path).to_be_focused()
+    path.fill("/work/salon-api")
+    # A control in focus keeps it through the look's redraws too, as it starts ('연결') and as it ends ('취소').
+    go, cancel = page.locator("#sync-panel").get_by_role("button", name="연결", exact=True), page.locator("#sync-panel").get_by_role("button", name="취소")
+    go.focus()
+    page.evaluate(look)
+    expect(pill).to_have_attribute("data-state", "busy")
+    expect(go).to_be_focused()
+    cancel.focus()
+    expect(pill).to_have_attribute("data-state", "on", timeout=15000)
+    expect(cancel).to_be_focused()
+    page.evaluate(look)  # '연결' is pressed while this look runs
     page.locator("#sync-panel").get_by_role("button", name="연결", exact=True).click()
     expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon 외 1")
     expect(page.locator("#sync-pill")).to_have_attribute("data-state", "busy")
@@ -2804,6 +2842,36 @@ def sessions_flow(browser, base):
     expect(page.locator("#sync-pill")).to_have_attribute("data-state", "on", timeout=15000)
     page.locator("#sync-pill").click()
     expect(page.locator("#sync-panel")).to_contain_text("가져온 기록2개")
+    assert len(maps) == 1, maps
+    # Working folders that could not be looked up are said once as well, not again at each look's redraw.
+    listing = re.compile(r"/api/studio/sessions$")
+    page.route(listing, lambda route: route.fulfill(status=500, content_type="application/json", body="{}"))
+    page.locator("#sync-panel").get_by_role("button", name="폴더 추가").click()
+    expect(page.locator("#sync-panel [role=alert]")).to_have_count(1)
+    page.evaluate(PANEL_DRAWS)
+    page.evaluate(look)
+    expect(pill).to_have_attribute("data-state", "busy")
+    expect(pill).to_have_attribute("data-state", "on", timeout=15000)
+    expect(page.locator("#sync-panel .pp-error")).to_have_count(1)
+    assert page.evaluate("() => [window.__alerts, window.__draws >= 2]") == [0, True], page.evaluate("() => [window.__alerts, window.__draws]")
+    page.unroute(listing)
+    # On a tablet a long folder name in the pill gives way before the project's name in the bar (left out, then cut short on a wider
+    # screen); the state words stay, and the pill's name keeps the whole line.
+    failing = re.compile(r"/api/studio/sessions\?folder=")
+    page.route(failing, lambda route: route.fulfill(status=500, content_type="application/json", body="{}"))
+    page.locator("#sync-panel").get_by_role("button", name="취소").click()
+    page.locator("#sync-panel").get_by_role("button", name="연결 끊기").click()
+    page.locator("#sync-panel .sync-path").fill("/work/hair-salon-booking-system-v2")
+    page.locator("#sync-panel").get_by_role("button", name="연결", exact=True).click()
+    expect(pill).to_have_attribute("data-state", "error", timeout=15000)
+    expect(pill).to_have_accessible_name("자동 연결 · hair-salon-booking-system-v2 · 확인 필요")
+    for width in (744, 820, 901):
+        page.set_viewport_size({"width": width, "height": 720})
+        bar = page.evaluate("() => document.querySelector('.bar .context').getBoundingClientRect().width")
+        assert bar >= 100, (width, bar)
+        if width < 900: assert pill.inner_text() == "자동 연결 · 확인 필요", pill.inner_text()
+    page.unroute(failing)
+    page.set_viewport_size({"width": 1280, "height": 720})
     assert len(maps) == 1, maps
     assert not errors, errors
     context.close()
@@ -2961,6 +3029,7 @@ def folder_sessions_flow(browser, base):
     page.locator("#sync-pill").click()
     panel = page.locator("#sync-panel")
     expect(panel.locator("h3")).to_have_text("내 AI 세션 연결")
+    expect(panel.locator(".sync-source .sync-lead")).to_contain_text("세션 기록이 담긴 세션 폴더를 골라 주세요")  # named as the button names it
     panel.get_by_role("button", name="세션 폴더 고르기").click()
     # Newer subagent transcripts beside the session do not crowd it out.
     pick = panel.locator(".sync-folder-pick")
@@ -3060,7 +3129,7 @@ def folder_sessions_flow(browser, base):
     panel.get_by_role("button", name="지금 확인").click()
     page.wait_for_function("() => window.__onList === null")
     expect(page.locator("#sync-pill")).to_have_attribute("data-state", "on")
-    expect(panel.locator("[role=alert]")).to_have_count(0)
+    expect(panel.locator(".pp-error")).to_have_count(0)
     # Claude Code in WSL too: a second .claude is kept apart from the first by number.
     panel.get_by_role("button", name="세션 폴더 더 고르기").click()
     expect(panel.locator(".sync-source .sync-folder")).to_have_text([".claude (1)", ".codex", ".claude (2)"])
@@ -3076,7 +3145,7 @@ def folder_sessions_flow(browser, base):
     page.locator("#sync-pill").click()
     expect(panel.locator(".sync-source .sync-folder")).to_have_text([".claude (1)", ".codex", ".claude (2)", "me"])
     expect(panel.locator(".sync-source-notice")).to_have_text("이미 고른 폴더(.codex)예요.")  # said why
-    expect(panel.locator("[role=alert]")).to_have_count(0)
+    expect(panel.locator(".pp-error")).to_have_count(0)
     page.locator("#sync-pill").click()
     page.locator("#lens").get_by_role("button", name="내 AI 세션에서 가져오기").click()
     sessions = page.locator("#lens .rr-session")
@@ -3098,6 +3167,12 @@ def folder_sessions_flow(browser, base):
     expect(panel.locator("[role=alert]")).to_contain_text(".codex")
     expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon · 확인 필요")  # in words, not by the dot's colour alone
     assert panel.inner_text().count("폴더를 읽지 못했어요") == 1, panel.inner_text()
+    # Said once: the next look draws the same error again (as it starts and ends) without reading it out again.
+    page.evaluate(PANEL_DRAWS)
+    panel.get_by_role("button", name="지금 확인").click()
+    expect(panel.locator("[data-act=check]")).to_have_text("지금 확인")
+    expect(panel.locator(".pp-error")).to_contain_text(".codex")
+    assert page.evaluate("() => [window.__alerts, window.__draws >= 2]") == [0, True], page.evaluate("() => [window.__alerts, window.__draws]")
     page.evaluate("() => { window.__broken = null; }")
     # Permission withdrawn while the page is open (the browser asks again): listing the paste box's sessions asks again there, with
     # no error that says to leave the folders and pick them again.
@@ -3116,22 +3191,32 @@ def folder_sessions_flow(browser, base):
     expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon · 허용 필요")
     expect(panel.locator(".sync-ask")).to_contain_text("다시 읽어도 되는지")
     expect(panel.locator(".sync-grant")).to_have_count(1)
-    expect(panel.locator("[role=alert]")).to_have_count(0)
+    expect(panel.locator(".pp-error")).to_have_count(0)
     panel.locator(".sync-ask").get_by_role("button", name="다시 허용").click()
     expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon")
     expect(page.locator("#sync-pill")).to_have_attribute("data-state", "on", timeout=15000)
-    expect(panel.locator("[role=alert]")).to_have_count(0)
+    expect(panel.locator(".pp-error")).to_have_count(0)
     # A record the connection keeps while the session search is being typed in leaves the search in focus, typing and all.
     page.locator("#sync-pill").click()
     expect(page.locator("#lens .rr-session", has_text="휴무일 연결")).to_have_count(1)  # still listed from the permission step above
+    expect(page.locator("#lens .rr-session", has_text="보관해 둔 옛 대화")).to_have_count(1)
+    # Typed in Korean through the input method, the search filters as each syllable forms, and a record kept mid-syllable splits none.
     find = page.locator("#lens .rr-sessions-filter")
     find.click()
-    page.keyboard.type("예약")
     expect(page.locator("#sync-pill")).to_have_attribute("data-state", "on")
+    cdp = page.context.new_cdp_session(page)
+    ime(cdp, "ㅇ", "예")
+    expect(page.locator("#lens .rr-session", has_text="보관해 둔 옛 대화")).to_have_count(0)  # filtered while the syllable is composed
+    expect(page.locator("#lens .rr-session", has_text="휴무일 연결")).to_have_count(1)
+    ime(cdp, "옝", "예|", "야")
     page.evaluate("""() => { window.__write('me/.claude/projects/-work-salon/typed.jsonl', JSON.stringify({ type: 'user', cwd: '/work/salon', sessionId: 's',
       timestamp: new Date().toISOString(), message: { role: 'user', content: '검색 중에 들어온 요청' } }) + '\\n', Date.now() - 10 * 60000);
       document.dispatchEvent(new Event('visibilitychange')); }""")
     page.wait_for_function("() => Object.values(localStorage).join('\\n').includes('검색 중에 들어온 요청')")
+    ime(cdp, "약", "약|")
+    expect(find).to_have_value("예약")
+    expect(find).to_be_focused()
+    expect(page.locator("#lens .rr-session", has_text="휴무일 연결")).to_have_count(1)
     page.keyboard.type("화면")
     expect(find).to_be_focused()
     expect(find).to_have_value("예약화면")
