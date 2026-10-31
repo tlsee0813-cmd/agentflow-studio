@@ -80,10 +80,13 @@ export const HANDOVER_CHARS = 15000;
 const CLAIM_ORDER: ClaimKind[] = ['want', 'idea', 'reported', 'checked', 'describes', 'open', 'differs'];
 const CLAIMS_PER_PART = 10, RECENT_REQUESTS = 6, FILES_PER_ASK = 8, RECENT_FILES = 24, LINE = 240, NAMES = 600;
 const one = (t: string, n = LINE) => { const s = t.replace(/\s+/g, ' ').trim(); return s.length > n ? `${s.slice(0, n - 1)}…` : s; };
-/** How much of a part is written: in full, or briefly when the whole document would be too long (then what is left to ask comes
- * first: an open choice is what the next session must not decide alone). */
+/** The claims a part keeps when it holds more than it has room for: what is left to ask first (an open choice is what the next
+ * session must not decide alone), then what was wanted and reported. */
+const KEEP_FIRST: ClaimKind[] = ['open', 'differs', 'want', 'reported', 'checked', 'idea', 'describes'];
+/** How much of a part is written: in full, or briefly when the whole document would be too long (then what is left to ask is also
+ * written first). */
 const FULL = { text: 400, claims: CLAIMS_PER_PART, claim: LINE, rels: 10, sessions: 4, order: CLAIM_ORDER };
-const BRIEF = { text: 160, claims: 3, claim: 120, rels: 3, sessions: 2, order: ['open', 'differs', 'want', 'reported', 'checked', 'idea', 'describes'] as ClaimKind[] };
+const BRIEF = { text: 160, claims: 3, claim: 120, rels: 3, sessions: 2, order: KEEP_FIRST };
 
 function subtree(view: StudioView, id: string): PartView[] {
   const out: PartView[] = [], walk = (x: string) => { const part = view.parts.find(q => q.id === x); if (!part) return; out.push(part); part.childIds.forEach(walk); };
@@ -96,11 +99,13 @@ function partBlock(view: StudioView, part: PartView, sessions: PartSession[], to
   // Every line a list item: in a Markdown viewer a plain line after a list runs into its last item.
   if (role) lines.push(`- 역할: ${one(role, k.text)}${u?.corrected ? ' (사용자가 고친 설명)' : ''}`);
   if (part.note) lines.push(`- 사용자 메모: ${one(part.note, k.text)}`);
-  const claims = (u?.claims ?? []).slice().sort((a, b) => k.order.indexOf(a.kind) - k.order.indexOf(b.kind));
-  for (const c of claims.slice(0, k.claims)) lines.push(`- ${CLAIM_LABEL[c.kind]}: ${one(c.text, k.claim)}${c.about ? ` (${one(c.about, 80)})` : ''}`);
+  // Chosen by KEEP_FIRST in either mode (the newest of a kind first, as the map lists them), then written in the mode's order.
+  const all = u?.claims ?? [], keep = new Set(all.slice().sort((a, b) => KEEP_FIRST.indexOf(a.kind) - KEEP_FIRST.indexOf(b.kind)).slice(0, k.claims));
+  const claims = all.filter(c => keep.has(c)).sort((a, b) => k.order.indexOf(a.kind) - k.order.indexOf(b.kind));
+  for (const c of claims) lines.push(`- ${CLAIM_LABEL[c.kind]}: ${one(c.text, k.claim)}${c.about ? ` (${one(c.about, 80)})` : ''}`);
   // The next session cannot see the map: it is told what is left out, not where to look.
-  if (claims.length > k.claims) lines.push(`- (그 밖에 ${claims.length - k.claims}개는 이 문서에 넣지 않았어요)`);
-  if (!role && !part.note && !claims.length) lines.push('- 아직 이 부분에 대해 읽힌 내용이 없어요.');
+  if (all.length > claims.length) lines.push(`- (그 밖에 ${all.length - claims.length}개는 이 문서에 넣지 않았어요)`);
+  if (!role && !part.note && !all.length) lines.push('- 아직 이 부분에 대해 읽힌 내용이 없어요.');
   const rels = view.relations.filter(r => r.from === part.id || r.to === part.id).map(r => {
     const out = r.from === part.id, other = view.parts.find(x => x.id === (out ? r.to : r.from));
     // Read from this part, as its panel reads it: '이 부분이 필요로 함' or '이 부분을 필요로 함', never an arrow to decode. Sharing has

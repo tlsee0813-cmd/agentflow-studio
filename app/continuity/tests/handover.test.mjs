@@ -144,12 +144,13 @@ test('HANDOVER-B2 a web record pasted back keeps a handover document its request
 
 const AT = '2026-10-30T05:00:00.000Z';
 const ask = (id, text, reply = '네') => session(id, [{ role: 'user', at: '2026-10-30T06:00:00.000Z', text }, { role: 'assistant', at: '2026-10-30T06:01:00.000Z', text: reply }], { title: null });
-/** A map reading whose parts quote the records holding these words (each part: a name, the words its basis quotes, and claims of
- * it as [kind, the words they quote]), and relations between them as [from, to (parts by place), kind, note, the words quoted]. */
+/** A map reading whose parts quote the records holding these words (each part: a name, or the alias P01… of a part already on the
+ * map, the words its basis quotes, and claims of it as [kind, the words they quote]), and relations between them as [from, to (parts
+ * by place), kind, note, the words quoted]. */
 function readAs(p, parts, relations = []) {
   const inp = M.buildMapAsk(p, studioView(p)), rec = q => inp.ask.records.find(r => (r.text ?? '').includes(q)).id;
   const reply = { summary: '시험 프로젝트예요.', relations: relations.map(([from, to, kind, note, q]) => ({ from: `new:p${from}`, to: `new:p${to}`, kind, note, record: rec(q), quote: q })), candidates: [], gaps: [],
-    parts: parts.map(([name, quotes, claims = []], i) => ({ ref: `new:p${i}`, name, parent: null, role: `${name}을 맡아요.`, roleAbout: null, roleReplaces: null, basis: quotes.map(q => ({ record: rec(q), quote: q })),
+    parts: parts.map(([name, quotes, claims = []], i, _, had = /^P\d\d$/.test(name)) => ({ ref: had ? name : `new:p${i}`, name: had ? null : name, parent: null, role: had ? null : `${name}을 맡아요.`, roleAbout: null, roleReplaces: null, basis: quotes.map(q => ({ record: rec(q), quote: q })),
       claims: claims.map(([kind, q]) => ({ kind, text: q, record: rec(q), quote: q, about: null, replaces: null })) })) };
   return M.applyReading(p, inp, M.validateMapReply(reply, inp.ask), meta()).project;
 }
@@ -229,10 +230,22 @@ test('HANDOVER-U1 what is left to ask stays: a part written briefly keeps its op
   const doc = handoverDoc(p, { scope: null, code: 'ASK234', at: AT }), block = doc.text.slice(doc.text.indexOf('### 문자\n')).split('\n\n')[0];
   assert.ok(doc.trimmed > 0 && block.includes('\n- (그 밖에 1개는 이 문서에 넣지 않았어요)'), block);
   assert.ok(block.includes('\n- 남은 선택: 문자 업체는 아직 못 정했어\n'), block);
+  // Written in full, a part with more claims than it has room for still keeps its open choice: what is left out is of the kinds
+  // asked about last (구상, 확인 보고), and what is kept is written in the full order. Three readings of one part, four claims each.
+  const kinds = ['want', 'want', 'want', 'want', 'reported', 'reported', 'reported', 'reported', 'want', 'idea', 'checked', 'open'];
+  let q = D.createProject();
+  for (let r = 0; r < 3; r++) {
+    const say = kinds.slice(r * 4, r * 4 + 4).map((_, i) => `말 ${r * 4 + i}번이에요`);
+    q = D.pasteRecord(q, sessionText(session(ID, [{ role: 'user', at: AT, text: say.join('. ') }, { role: 'assistant', at: AT, text: '네' }])).text, null).project;
+    q = readAs(q, [[r ? 'P01' : '문자', [say[0]], say.map((x, i) => [kinds[r * 4 + i], x])]]);
+  }
+  const full = handoverDoc(q, { scope: null, code: 'ASK234', at: AT }), part = full.text.slice(full.text.indexOf('### 문자\n')).split('\n\n')[0];
+  assert.ok(full.trimmed === 0 && part.includes('\n- 남은 선택: 말 11번이에요\n- (그 밖에 2개는 이 문서에 넣지 않았어요)\n'), part);
+  assert.ok(!part.includes('- 구상:') && !part.includes('- 확인 보고:') && part.indexOf('- 원함:') < part.indexOf('- 작업 보고:'), part);
   // A candidate is listed with its part's name until that part is put away; then it goes, as it does from the map's own list.
-  const { p: q, hours } = mapped([['휴무일을 매주 같은 요일로 둘지 정하지 않았어요.', ['new:p1']]]);
-  assert.ok(handoverText(q, { scope: null, code: 'ASK234', at: AT }).includes('\n- 휴무일을 매주 같은 요일로 둘지 정하지 않았어요. (영업시간 설정)\n'));
-  assert.ok(!handoverText(D.setAreaArchived(q, hours, true), { scope: null, code: 'ASK234', at: AT }).includes('매주 같은 요일'));
+  const { p: m, hours } = mapped([['휴무일을 매주 같은 요일로 둘지 정하지 않았어요.', ['new:p1']]]);
+  assert.ok(handoverText(m, { scope: null, code: 'ASK234', at: AT }).includes('\n- 휴무일을 매주 같은 요일로 둘지 정하지 않았어요. (영업시간 설정)\n'));
+  assert.ok(!handoverText(D.setAreaArchived(m, hours, true), { scope: null, code: 'ASK234', at: AT }).includes('매주 같은 요일'));
 });
 
 test('HANDOVER-P1 changed files whose names hold ")" (route groups) are read whole', () => {
