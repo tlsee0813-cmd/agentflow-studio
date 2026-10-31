@@ -2820,6 +2820,7 @@ def handover_flow(browser, base):
     page.locator("#lens").get_by_role("menuitem", name="이 부분 인수인계 문서").click()
     sheet = page.locator("#handover-sheet")
     expect(sheet).to_be_visible()
+    expect(sheet.locator(".handover-lead")).to_contain_text("그 아래에 이어서 할 일을 적으세요")  # the person's next step goes under it
     text = page.locator("#handover-text")
     expect(text).to_have_value(re.compile(r"^──────── AgentFlow 인수인계 문서 · af-handover:[A-Z2-9]{6}:A_"))
     value = text.input_value()

@@ -39,7 +39,7 @@ test('HANDOVER-W1 whole project: rules, summary, each part with its claims and r
   const t = handoverText(p, { scope: null, code, at: '2026-10-30T05:00:00.000Z' });
   assert.ok(t.startsWith(`──────── AgentFlow 인수인계 문서 · af-handover:${code} ────────\n# 인수인계: `), t.slice(0, 120));
   assert.ok(t.endsWith(`──────── 인수인계 문서 끝 · af-handover:${code} ────────`));
-  for (const s of ['## 이어받는 방법', '혼자 정하지 말고 사용자에게', '## 프로젝트 한눈에\n미용실 예약 프로그램이에요.', '### 예약 화면', '역할: 손님이 시간을 골라 예약해요.',
+  for (const s of ['## 이어받는 방법\n- 이 문서 앞이나 뒤에 사용자가 할 일을 적었다면 그것이 첫 할 일이에요.', '"구상"은 아직 하기로 정하지 않은 생각', '혼자 정하지 말고 사용자에게', '## 프로젝트 한눈에\n미용실 예약 프로그램이에요.', '### 예약 화면', '역할: 손님이 시간을 골라 예약해요.',
     '- 원함: 휴무일과 영업시간 연결', '- 작업 보고: 휴무일 예약 막음', '관련: → 영업시간 설정 (필요로 함 · 휴무일)', '다룬 세션: Claude Code 「휴무일 연결」',
     '- Claude Code 「휴무일 연결」 · 작업 폴더 /work/salon · 브랜치 main', '- 기록에서 알 수 없었음: 결제 방식은 기록에 없어요.',
     '- 예약 화면에서 휴무일을 영업시간 설정과 연결해 줘 → 바꾼 파일: src/hours.ts, tests/hours.test.ts'])
