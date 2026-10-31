@@ -30,8 +30,10 @@ export function stamp(at: string | null, withDate = false): string {
 export type TakenTurn = SessionTurn & { cont?: boolean };
 /** Control characters a record cannot hold (terminal colour codes, an Office soft line break): a line break stays one. */
 export const cleanText = (t: string) => t.replace(/\u001b\[[0-9;?]*[ -/]*[@-~]/g, '').replace(/[\u000b\u000c]/g, '\n').replace(/[\u0000-\u0008\u000e-\u001f\u007f]/g, '');
-function block(t: TakenTurn, tool: string): string {
-  const head = `── ${t.role === 'user' ? '사용자 요청' : `${tool} 답변${t.cont ? '(이어서)' : ''}`}${t.at ? ` · ${stamp(t.at)}` : ''} ──`;
+/** A turn as a record writes it: a line saying who and when, its text, and the files a reply changed. A turn on another day than
+ * the session's start (`day`) names its date, so a session resumed days later does not read as if it all happened on its first. */
+function block(t: TakenTurn, tool: string, day: string): string {
+  const head = `── ${t.role === 'user' ? '사용자 요청' : `${tool} 답변${t.cont ? '(이어서)' : ''}`}${t.at ? ` · ${day && stamp(t.at, true).slice(0, 10) !== day ? stamp(t.at, true).slice(5) : stamp(t.at)}` : ''} ──`;
   const files = t.role === 'assistant' && t.files?.length ? `\n(바꾼 파일: ${t.files.join(', ')})` : '';
   // A handover document the person pasted to start this session is already the project's own: one line names it instead.
   const text = t.role === 'user' ? foldHandover(t.text) : t.text;
@@ -39,7 +41,7 @@ function block(t: TakenTurn, tool: string): string {
 }
 /** A turn as kept: control characters out, then a NEXT_RECORD line the conversation itself holds (a draft of this box pasted into
  * it, maybe behind a colour code or a soft line break) written a dash shorter, so only the box's own line cuts a draft. */
-const turnText = (t: TakenTurn, tool: string) => quoteNext(cleanText(block(t, tool)));
+const turnText = (t: TakenTurn, tool: string, day: string) => quoteNext(cleanText(block(t, tool, day)));
 
 export interface SessionText { text: string; turns: number; left: number; redacted: number }
 /** The record text of a session within `limit` characters: a header line, then whole turns, newest kept first and printed in order.
@@ -53,7 +55,7 @@ export function sessionText(s: SessionDetail & { turns: TakenTurn[] }, limit = P
   const title = named && (named.startsWith('「') || named.split(' · ').some(p => Object.values(HEAD_FIELD).some(re => re.test(p.trim())))) ? `「${named}」` : named;
   const where = [title, s.cwd ? `작업 폴더 ${s.cwd}` : null, s.branch ? `브랜치 ${s.branch}` : null, s.startedAt ? `${stamp(s.startedAt, true)} 시작` : null, `세션 ${s.id}`].filter(Boolean).join(' · ');
   const top = redactSecrets(cleanText(`[${tool} 세션 기록${where ? ` · ${where}` : ''}]`).replace(/[\r\n\u2028\u2029]+/g, ' ')), head = top.text;
-  const blocks = s.turns.map(t => { const r = redactSecrets(turnText(t, tool)); return { text: r.text, redacted: r.count }; });
+  const day = stamp(s.startedAt, true).slice(0, 10), blocks = s.turns.map(t => { const r = redactSecrets(turnText(t, tool, day)); return { text: r.text, redacted: r.count }; });
   const note = (n: number) => (n ? `\n(앞의 대화 ${n}개는 길이 제한으로 넣지 않았어요.)` : '');
   const kept: typeof blocks = [];
   let used = head.length + note(blocks.length + s.omitted).length;
