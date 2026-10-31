@@ -228,8 +228,9 @@ test('SESSIONS-D2 Codex subagents: their files join the reply to the prompt that
 test('SESSIONS-D5 a Codex subagent that holds a prompt (its task, a copy of its parent\'s history) is never a session of its own; only what it changed itself joins its parent', async () => {
   const { readdirSync } = await import('node:fs'), { basename } = await import('node:path'), { createSessionSources } = await import('../dist/public/client/session-source.js');
   const file = path => ({ kind: 'file', name: basename(path), getFile: async () => new File([readFileSync(path)], basename(path), { lastModified: statSync(path).mtimeMs }) });
+  // Listed newest name first, as no folder here lists them: the children's order is not the order they worked in.
   const folder = path => ({ kind: 'directory', name: basename(path), queryPermission: async () => 'granted',
-    async *values() { for (const d of readdirSync(path, { withFileTypes: true })) yield d.isDirectory() ? folder(join(path, d.name)) : file(join(path, d.name)); } });
+    async *values() { for (const d of readdirSync(path, { withFileTypes: true }).sort((a, b) => (a.name < b.name ? 1 : -1))) yield d.isDirectory() ? folder(join(path, d.name)) : file(join(path, d.name)); } });
   const spawned = { parent_thread_id: PARENT, source: { subagent: { thread_spawn: { parent_thread_id: PARENT, depth: 1 } } } };
   const patch = (m, f) => ({ timestamp: at(m), type: 'response_item', payload: { type: 'custom_tool_call', name: 'apply_patch', call_id: `p${m}`, input: `*** Begin Patch\n*** Add File: ${f}\n+x\n*** End Patch` } });
   // Multi-agent V1: the task the parent's model wrote comes in as user input.

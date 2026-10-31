@@ -388,7 +388,9 @@ export const hasPrompt = (s: ParsedSession) => s.turns.some(t => t.role === 'use
  * first piece, a subagent's change among them, so it stays the same turn whichever was written first. */
 export function withSubagents(s: ParsedSession, subagents: ParsedSession[]): ParsedSession {
   const turns = s.turns.map(t => (t.role === 'assistant' ? { ...t, files: [...(t.files ?? [])] } : t));
-  for (const c of subagents.flatMap(x => x.changes)) {
+  // In the order they were made, whatever order the folder listed the subagents' files in (Windows lists by name).
+  const theirs = subagents.flatMap(x => x.changes).sort((a, b) => ((a.at ?? '\uffff') < (b.at ?? '\uffff') ? -1 : (a.at ?? '\uffff') > (b.at ?? '\uffff') ? 1 : 0));
+  for (const c of theirs) {
     let u = -1;
     for (let i = 0; i < turns.length; i++) if (turns[i]!.role === 'user' && (!c.at || !turns[i]!.at || turns[i]!.at! <= c.at)) u = i;
     if (u < 0) continue;
@@ -398,7 +400,7 @@ export function withSubagents(s: ParsedSession, subagents: ParsedSession[]): Par
     else if (c.at && !r.at) r.at = c.at;
     for (const f of c.files) if (!r.files!.includes(f)) r.files!.push(f);
   }
-  return { ...s, turns, changes: [...s.changes, ...subagents.flatMap(x => x.changes)] };
+  return { ...s, turns, changes: [...s.changes, ...theirs] };
 }
 
 /** JSON lines of a file's text; a damaged line is skipped, and the last one too when the text was cut there (a head read). */
