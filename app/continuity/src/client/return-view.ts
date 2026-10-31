@@ -17,7 +17,7 @@ import { digestStore, askHash, makeReading, type Reading } from './digest-store.
 import { askDigest, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
 import { sessionText, recordParts, quoteNext, NEXT_RECORD, NEXT_LINE, RECORD_HEAD, stamp, TOOL_NAME, type SessionSummary, type SessionDetail } from '../shared/session-import.js';
 import { readSessionFile, type SessionSources } from './session-source.js';
-import { WEB_RECORD_ASK, foldRecord } from '../shared/handover.js';
+import { WEB_RECORD_ASK, foldRecord, sessionOrigin, originLabel } from '../shared/handover.js';
 import { PASTED_TEXT_LIMIT } from '../shared/types.js';
 import type { PlanOpened } from './plan-view.js';
 import type { PlanBundle } from './plan-store.js';
@@ -132,6 +132,11 @@ const STAGE_MEMORY = new Map<string, string>();
 const short = (text: string, n: number) => { const t = text.replace(/\s+/g, ' ').trim(); return t.length > n ? `${t.slice(0, n)}…` : t; };
 /** A version named in a source's basis (a commit), else nothing. */
 const versionOf = (basis: string) => /\b[0-9a-f]{7}\b/.exec(basis)?.[0] ?? null;
+/** A record taken from a session reads as that session's (its tool, title and work folder), not as pasted under its header line.
+ * Display only: the AI is sent the record named as before (recordLabel, the source's title). */
+const sessionOf = (src: ReadingSource) => (src.kind === 'record' && !src.evidence ? sessionOrigin(src.text) : null);
+const kindOf = (src: ReadingSource) => { const o = sessionOf(src); return o ? `${originLabel({ tool: o.tool, title: null })} 기록` : DIGEST_KIND_LABEL[src.kind]; };
+const nameOf = (src: ReadingSource) => { const o = sessionOf(src); return o ? [originLabel(o), o.cwd?.split(/[\\/]/).filter(Boolean).at(-1)].filter(Boolean).join(' · ') : src.title; };
 
 export function createReturnView(host: ReturnHost) {
   const saved = digestStore(host.kv), memory = digestStore(null);
@@ -243,7 +248,7 @@ export function createReturnView(host: ReturnHost) {
     if (s !== st) return;
     if (!kept) { st.pasteMsg = { text: done, ok: false }; render(); return; }
     const r = host.current()?.project.pasted.find(x => x.id === done.id);
-    const said = done.duplicate ? `같은 글을 ${r ? fullTime(r.at) : '앞서'}에 붙여 넣었어요. 새로 저장하지 않았어요.`
+    const said = done.duplicate ? `같은 기록이 ${r ? `${fullTime(r.at)}부터 ` : '이미 '}이 프로젝트에 있어요. 새로 저장하지 않았어요.`
       : `${parts.length > 1 ? '세션마다 기록을 하나씩 나눠 저장했어요.' : '기록을 저장했어요.'}${n ? ` 키·토큰처럼 보이는 ${n}곳은 가려서 저장했어요.` : ''}`;
     if (!untouched) { st.pasteMsg = { text: `${said} 저장하는 동안 쓴 글은 초안으로 남겨 두었어요.`, ok: true }; render(); void refresh(); return; }
     st.pasteContext = null; st.pasteMsg = null; st.storeMsg = { text: said, ok: true };
@@ -298,8 +303,12 @@ export function createReturnView(host: ReturnHost) {
     if (!got.turns) { p.error = '이 세션에는 가져올 대화가 없어요.'; return; }
     keepDraft(key, before ? `${before}\n\n${NEXT_RECORD}\n\n${got.text}` : got.text);
     p.open = false;
+    // A session in the project already (the connection took it, or it was picked before) is saved whole again: what came in before
+    // can come in twice.
+    const taken = !!host.current()?.project.pasted.some(r => sessionOrigin(r.text)?.id === detail.id);
     p.note = [`${TOOL_NAME[detail.tool]} 세션에서 대화 ${got.turns}개를 넣었어요.`, got.left ? `앞의 ${got.left}개는 길이 제한으로 뺐어요.` : '',
-      got.redacted ? `키·토큰처럼 보이는 ${got.redacted}곳은 가렸어요.` : '', before ? '앞에 있던 글과는 따로 저장돼요.' : '', '읽어 보고 ‘기록 저장’을 누르세요.'].filter(Boolean).join(' ');
+      got.redacted ? `키·토큰처럼 보이는 ${got.redacted}곳은 가렸어요.` : '', before ? '앞에 있던 글과는 따로 저장돼요.' : '',
+      taken ? '이미 가져온 세션이에요. 저장하면 앞서 들어온 대화가 한 번 더 들어갈 수 있어요.' : '', '읽어 보고 ‘기록 저장’을 누르세요.'].filter(Boolean).join(' ');
   }
   /** Copies the web chat's request text; when copying is blocked it is shown whole and selected, to copy by hand. */
   async function copyWebAsk(p: SessionPick) {
@@ -487,16 +496,16 @@ export function createReturnView(host: ReturnHost) {
     if (!all.length) return null;
     const titles = [...new Set(all.map(({ x }) => x.source?.recordId))];
     const head = !only && titles.length === 1 && all[0]!.x.source
-      ? h('button', { type: 'button', class: 'rr-rec-src', title: '붙여넣은 원문 보기', onclick: () => openSource(all[0]!.x.source!, from, null) }, all[0]!.x.source.title) : null;
+      ? h('button', { type: 'button', class: 'rr-rec-src', title: '원문 보기', onclick: () => openSource(all[0]!.x.source!, from, null) }, nameOf(all[0]!.x.source)) : null;
     return h('section', { class: 'rr-sec rr-records' }, h('h3', {}, only ? '이 기록에서 읽은 것' : '붙여넣은 기록에서'), head,
       ...all.map(({ x, n }) => recordItem(x, n, from)));
   }
   function chipFor(id: string, r: Reading | null, from: 'now' | 'previous') {
     const src = sourceOf(r, id); if (!src) return null;
     const v = versionOf(src.basis);
-    const label = `${src.title} · ${DIGEST_KIND_LABEL[src.kind]} · ${src.basis}`;
+    const label = `${nameOf(src)} · ${kindOf(src)} · ${src.basis}`;
     return h('button', { type: 'button', class: `rr-ref k-${src.kind}`, title: label, 'aria-label': label, onclick: (e: Event) => { e.stopPropagation(); openSource(src, from); } },
-      h('span', { class: 'rr-ref-kind' }, DIGEST_KIND_LABEL[src.kind]), h('span', { class: 'rr-ref-title' }, src.title), v ? h('code', {}, v) : null);
+      h('span', { class: 'rr-ref-kind' }, kindOf(src)), h('span', { class: 'rr-ref-title' }, nameOf(src)), v ? h('code', {}, v) : null);
   }
   function partChip(id: string) {
     return h('button', { type: 'button', class: 'rr-part', title: `지도에서 ‘${partName(id)}’ 보기`, onclick: (e: Event) => { e.stopPropagation(); host.mark([id]); host.reveal([id]); } },
@@ -596,7 +605,7 @@ export function createReturnView(host: ReturnHost) {
   /** A source's row: its kind, title and version; a provided source's declared kind, version and origin, as declared. */
   function srcLabel(x: ReadingSource): Node[] {
     const e = x.evidence;
-    return [h('span', { class: `rr-kind k-${x.kind}${e ? ' k-provided' : ''}` }, e ? `사용자 제공 ${EVIDENCE_KIND_LABEL[e.kind]}` : DIGEST_KIND_LABEL[x.kind]), h('strong', {}, e ? e.name : x.title),
+    return [h('span', { class: `rr-kind k-${x.kind}${e ? ' k-provided' : ''}` }, e ? `사용자 제공 ${EVIDENCE_KIND_LABEL[e.kind]}` : kindOf(x)), h('strong', {}, e ? e.name : nameOf(x)),
       e ? h('small', {}, `판본 ${e.version ?? NOT_RECORDED} · 출처 ${e.origin ?? NOT_RECORDED} (사용자 기재) · 앱 미실행·미검증`) : srcWhere(versionOf(x.basis), x.partIds.map(partName).join(' · '))];
   }
   /** The version (a commit id) reads in the code face; the part names after it stay in the text face. */
@@ -672,12 +681,12 @@ export function createReturnView(host: ReturnHost) {
     const ctx = kept?.context && host.current()?.view.parts.some(p => p.id === kept.context) ? kept.context : null;
     const map = quote ? null : host.mapBlock();
     // A provided source: what the person declared it is (kind, name, version, origin), apart from its text and from when it came.
-    const e = kept?.evidence ?? null;
+    const e = kept?.evidence ?? null, o = sessionOf(src);
     // A provided source opens on itself (file, declaration, text); the map's row follows it rather than leading.
     const lead = e ? [] : map ? [map] : [], after = e && map ? [map] : [];
     return [...lead, h('article', { class: `rr-source rr-record${e ? ' rr-provided' : ''}` },
-      h('p', { class: 'rr-source-kind' }, h('span', { class: `rr-kind k-record${e ? ' k-provided' : ''}` }, e ? `사용자 제공 ${EVIDENCE_KIND_LABEL[e.kind]}` : DIGEST_KIND_LABEL.record), kept ? h('span', {}, `${e ? '가져옴' : '붙여넣음'} ${fullTime(kept.at)}`) : null),
-      h('h3', { title: e ? '자료를 고를 때의 파일 이름이에요' : '원문의 첫 줄이에요' }, e ? e.name : src.title),
+      h('p', { class: 'rr-source-kind' }, h('span', { class: `rr-kind k-record${e ? ' k-provided' : ''}` }, e ? `사용자 제공 ${EVIDENCE_KIND_LABEL[e.kind]}` : kindOf(src)), kept ? h('span', {}, `${e || (o && o.tool !== 'web') ? '가져옴' : '붙여넣음'} ${fullTime(kept.at)}`) : null),
+      h('h3', { title: e ? '자료를 고를 때의 파일 이름이에요' : o ? '이 기록이 나온 세션이에요' : '원문의 첫 줄이에요' }, e ? e.name : nameOf(src)),
       e ? h('p', { class: 'rr-provided-note', role: 'note' }, `${NOT_EXECUTED}. 자료 종류·판본·출처는 사용자가 적은 것이에요.`) : null,
       e ? h('dl', { class: 'rr-meta' }, h('dt', {}, '자료 종류'), h('dd', {}, `${EVIDENCE_KIND_LABEL[e.kind]} (사용자 분류)`),
         h('dt', {}, '판본'), h('dd', {}, e.version ?? `${NOT_RECORDED}`, e.version ? ' (사용자 기재)' : null),
