@@ -3249,6 +3249,97 @@ def folder_sessions_flow(browser, base):
     context.close()
 
 
+# A web AI's record written back with the request text, holding what a person pastes into a chat (all values fake).
+WEB_RECORD = ("[웹 AI 세션 기록 · 결제 연결 · 작업 폴더 C:\\Users\\leek\\projects\\salon-booking · 브랜치 main]\n\n── 사용자 요청 ──\n.env 이렇게 했어\n"
+    "DATABASE_URL=postgresql://admin:FakePass123@db.example.com:5432/prod\nSTRIPE_SECRET_KEY=sk_live_" + "FAKEfake" * 3 + "\n"
+    "JWT=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJGQUtFIn0." + "FAKEfake" * 3 + "\n요구: 결제 화면에 스트라이프 붙여줘\n\n── 웹 AI 답변 ──\n결제 화면에 Stripe Checkout을 연결하는 코드를 드렸어요.")
+WEB_VALUES = ("FakePass123", "sk_live_", "eyJzdWIi")
+
+
+def final_paste_flow(browser, base):
+    """The paste box keeps no credential: a web AI's record pasted back is saved with what looks like a key hidden (said before
+    and after saving, saved said as done) and is never kept as a draft in this browser. Once the project is connected, the box,
+    the file form and the connect point say that what is saved by hand goes to the AI with the next automatic map reading. A
+    record from a session is shown as that session's (tool, title, work folder), taken or pasted, never under its header line; a
+    session taken already is said so when it is picked again."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    context.add_init_script(f"({FAKE_PICKER})({json.dumps(folder_files())})")
+    page = context.new_page()
+    errors = []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.goto(base + "/")
+    page.locator("#new-open").click()
+    page.locator("#new-name").fill("미용실 결제")
+    page.locator("#new-form").get_by_role("button", name="만들기").click()
+    page.wait_for_url(re.compile(r"#/p/E_"))
+    entry = re.search(r"#/p/(E_[^/]+)", page.url).group(1)
+    page.locator("#space-empty").get_by_role("button", name="기록 붙여넣기").click()
+    draft = page.locator("#paste-text")
+    box, foot = page.locator("#lens .rr-paste-box > .fine").first, page.locator("#lens .rr-foot .pp-row > .fine")
+    expect(box).to_have_text("나누거나 종류·부분을 고르지 않아도 돼요. 저장한 뒤 지도 정리나 요약을 누를 때만 AI에 보내요.")
+    expect(foot).to_have_text("저장해도 AI에 보내지 않아요")
+    # Said before saving, quietly (it is no refusal); the draft stays in this tab only.
+    draft.fill(WEB_RECORD)
+    expect(page.locator("#lens .rr-paste-hides")).to_have_text("키·토큰처럼 보이는 글이 있어요. 저장할 때 그 부분은 가려요.")
+    expect(page.locator("#lens .rr-paste-box .pp-error")).to_be_hidden()
+    stored = page.evaluate("Object.values(localStorage).join('\\n')")
+    assert not any(v in stored for v in WEB_VALUES), "a draft that holds keys is not kept in this browser"
+    page.locator("#lens").get_by_role("button", name="기록 저장").click()
+    said = page.locator("#lens .rr-foot p[role=status]")
+    expect(said).to_have_text("기록을 저장했어요. 키·토큰처럼 보이는 3곳은 가려서 저장했어요.")
+    # Saved is said as done, in the quiet green the app uses for success, not in the red box of a refusal.
+    expect(said).to_have_class("pp-ok")
+    assert said.evaluate("e => getComputedStyle(e).color") == "rgb(45, 110, 77)"
+    kept = page.evaluate(ENTRY, entry)["pasted"]
+    assert len(kept) == 1 and kept[0]["text"].count("[가려진 비밀값]") == 3, kept
+    assert "postgresql://admin:[가려진 비밀값]@db.example.com" in kept[0]["text"] and "요구: 결제 화면에 스트라이프 붙여줘" in kept[0]["text"], kept
+    stored = page.evaluate("Object.values(localStorage).join('\\n')")
+    assert not any(v in stored for v in WEB_VALUES), "nothing in this browser holds them"
+    # The saved record opens as the web AI session it came from, pasted by the person.
+    expect(page.locator("#lens .rr-source-kind .rr-kind")).to_have_text("웹 AI 세션 기록")
+    expect(page.locator("#lens .rr-source-kind > span").last).to_contain_text("붙여넣음")
+    expect(page.locator("#lens .rr-record h3")).to_have_text("웹 AI 「결제 연결」 · salon-booking")
+    # The same record again is not saved twice: said as such, as nothing went wrong.
+    page.locator("#lens .rr-paste-open").click()
+    draft.fill(WEB_RECORD)
+    page.locator("#lens").get_by_role("button", name="기록 저장").click()
+    expect(said).to_have_text(re.compile(r"^같은 기록이 .+부터 이 프로젝트에 있어요\. 새로 저장하지 않았어요\.$"))
+    expect(said).to_have_class("pp-ok")
+    assert len(page.evaluate(ENTRY, entry)["pasted"]) == 1
+    # Connected, the next automatic map reading sends every record not read yet, those saved by hand too: said before connecting,
+    # in the box, beside its button, and in the file form.
+    page.locator("#lens .rr-head .close").click()
+    page.locator("#sync-pill").click()
+    panel = page.locator("#sync-panel")
+    panel.get_by_role("button", name="세션 폴더 고르기").click()
+    expect(panel.locator(".sync-points")).to_contain_text("지도를 갱신할 때 이 기록을 AI에게 보내요. 직접 붙여 넣거나 추가한 기록·자료도 함께 보내요.")
+    panel.locator(".sync-folder-pick").click()
+    expect(page.locator("#sync-pill")).to_have_attribute("data-state", "on", timeout=15000)
+    page.locator("#sync-pill").click()
+    page.locator("#return-entry").click()
+    # What the connection took is listed and opened as the session it is, taken (not pasted).
+    row = page.locator("#lens .rr-src", has_text="휴무일 연결")
+    expect(row.locator(".rr-kind")).to_have_text("Claude Code 세션 기록")
+    expect(row.locator("strong")).to_have_text("Claude Code 「휴무일 연결」 · salon")
+    expect(page.locator("#lens .rr-src .rr-kind", has_text="붙여넣은 기록")).to_have_count(0)
+    row.click()
+    expect(page.locator("#lens .rr-source-kind > span").last).to_contain_text("가져옴")
+    expect(page.locator("#lens .rr-record h3")).to_have_text("Claude Code 「휴무일 연결」 · salon")
+    page.locator("#lens .rr-paste-open").click()
+    expect(box).to_have_text("나누거나 종류·부분을 고르지 않아도 돼요. 자동 연결 중이라, 저장하면 다음 자동 지도 갱신 때 AI에 보내요.")
+    expect(foot).to_have_text("저장하면 다음 자동 지도 갱신 때 AI에 보내요")
+    # Picked again by hand, a session taken already is said so: saving it would bring in what came before a second time.
+    page.locator("#lens").get_by_role("button", name="내 AI 세션에서 가져오기").click()
+    page.locator("#lens .rr-session", has_text="휴무일 연결").click()
+    expect(page.locator("#lens .rr-sessions-note")).to_contain_text("이미 가져온 세션이에요. 저장하면 앞서 들어온 대화가 한 번 더 들어갈 수 있어요.")
+    page.locator("#space-empty .se-file").click()
+    expect(page.locator("#lens #file-rule")).to_contain_text("자동 연결 중이라, 저장하면 다음 자동 지도 갱신 때 AI에 보내요.")
+    expect(page.locator("#lens #file-rule")).not_to_contain_text("저장해도 AI에 보내지 않아요")
+    expect(foot).to_have_text("저장하면 다음 자동 지도 갱신 때 AI에 보내요")
+    assert not errors, errors
+    context.close()
+
+
 def off_flow(browser, base, expected_pill):
     page = browser.new_page(viewport={"width": 1280, "height": 720})
     page.goto(base)
@@ -4662,6 +4753,7 @@ def main():
             proc, base = start("ok", STUDIO_SESSIONS_FIXTURE="1"); procs.append(proc); sessions_flow(browser, base); print("ok  local sessions: connect a folder once -> its sessions become records -> first map without a click; nothing taken twice; one session by hand, key hidden")
             proc, base = start("ok"); procs.append(proc); folder_sessions_flow(browser, base); print("ok  session folders picked in the browser (no local reader): automatic connection, paste-box list, one file by hand, web request text")
             proc, base = start("ok"); procs.append(proc); handover_flow(browser, base); print("ok  handover document: a part's sessions, its document and the whole project's, copied and saved, nothing sent")
+            proc, base = start("ok"); procs.append(proc); final_paste_flow(browser, base); print("ok  paste box: a web AI's record saved with keys hidden, said before and after, never kept as a draft")
             proc, base = start("nokey"); procs.append(proc); off_flow(browser, base + "/", "AI 키 없음"); print("ok  server without key -> honest off state")
             if (ROOT / "static-dist/index.html").exists():
                 server = serve_static()

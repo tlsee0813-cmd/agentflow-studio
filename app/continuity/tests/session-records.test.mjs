@@ -181,6 +181,86 @@ test('SESSIONS-RD4 a password in a connection string, a value starting with $ { 
     assert.deepEqual(redactSecrets(text), { text, count: 0 }, text);
 });
 
+test('SESSIONS-RD5 a password, token or key named in Korean, or by an English name before a particle or a space, is hidden; the sentences about them stay', () => {
+  const FAKE = f('FAKEfake', 'FAKE0123', '456789fake');
+  const hide = [
+    ['DB 비밀번호는 FakePass123!이고', 'DB 비밀번호는 [가려진 비밀값]이고'], ['비밀번호: FakePass123', '비밀번호: [가려진 비밀값]'], ['비번 FakePass123', '비번 [가려진 비밀값]'],
+    ['암호: FakePass123', '암호: [가려진 비밀값]'], ['와이파이 비번은 hunter22', '와이파이 비번은 [가려진 비밀값]'], ['DB 비밀번호를 FakePass123으로 바꿔 줘', 'DB 비밀번호를 [가려진 비밀값]으로 바꿔 줘'],
+    ['비밀번호는 "Fake Pass 123"이야', '비밀번호는 "[가려진 비밀값]"이야'], ['패스워드：FakePass123', '패스워드：[가려진 비밀값]'],
+    [`관리자 토큰: ${FAKE} 야.`, '관리자 토큰: [가려진 비밀값] 야.'], [`API 키: ${FAKE}`, 'API 키: [가려진 비밀값]'], [`인증키 ${FAKE} 넣어`, '인증키 [가려진 비밀값] 넣어'],
+    ['pw: FakePass123', 'pw: [가려진 비밀값]'], ['PW=FakePass123', 'PW=[가려진 비밀값]'], [`token은 ${FAKE}`, 'token은 [가려진 비밀값]'],
+    [`api_key는 ${FAKE} 입니다`, 'api_key는 [가려진 비밀값] 입니다'], ['password FakePass123', 'password [가려진 비밀값]'], [`API key ${FAKE}`, 'API key [가려진 비밀값]']
+  ];
+  for (const [text, want] of hide) {
+    const r = redactSecrets(text);
+    assert.equal(r.text, want, text); assert.equal(r.count, 1, text);
+    assert.deepEqual(redactSecrets(r.text), { text: r.text, count: 0 }, 'hidden once, never again');
+  }
+  // Taken from a session, the record keeps none of them.
+  const d = session([{ role: 'user', at: T(0), text: `DB 비밀번호는 FakePass123!이고 관리자 토큰: ${FAKE} 야. 예약 화면 만들어줘` },
+    { role: 'assistant', at: T(1), text: '.env에 비밀번호: FakePass123! 를 넣었습니다.' }]);
+  const got = sessionText(d);
+  assert.ok(!got.text.includes('FakePass123') && !got.text.includes(FAKE) && got.redacted === 3, got.text);
+  for (const text of ['비밀번호 변경 화면 만들어 줘', '토큰 만료되면 다시 로그인하게 해 줘', 'API 키 넣는 칸 추가해 줘', '암호화는 나중에', '비밀번호는 bcrypt로 해시해 줘',
+    '비밀번호는 argon2id로 바꿔 줘', '암호는 AES-256-GCM으로 해 줘', '비밀번호는 최소 8자 이상', '토큰은 JWT로 만들어', '토큰은 localStorage에 저장하지 말고', '컨텍스트 토큰 200000개',
+    'API 키는 config.ts에 있어', 'API 키는 process.env.OPENAI_API_KEY에서 읽어', '비밀번호를 user.password와 비교해', '비밀번호: ${DB_PASSWORD}', 'max_token 100000',
+    'password VARCHAR(255) NOT NULL', 'Password []byte `json:"password"`', 'Token *oauth2.Token', 'access token expires in 3600 seconds', 'return token && token.length > 0'])
+    assert.deepEqual(redactSecrets(text), { text, count: 0 }, text);
+});
+
+test('SESSIONS-RD6 a key given to a flag after a space, as the next element of an args array or with setx is hidden; flags that hold none stay', () => {
+  const FAKE = f('FAKEctx7', 'FAKEfake', '0123456789');
+  const hide = [
+    [`claude mcp add context7 -- npx -y @upstash/context7-mcp --api-key ${FAKE}`, '--api-key [가려진 비밀값]'],
+    [`.mcp.json에 {"mcpServers":{"brave":{"command":"npx","args":["-y","brave-mcp","--api-key","${FAKE}"]}}} 넣었어`, '"--api-key","[가려진 비밀값]"'],
+    [`{\\"args\\":[\\"--api-key\\", \\"${FAKE}\\"]}`, '\\"--api-key\\", \\"[가려진 비밀값]\\"'],
+    [`setx GROQ_API_KEY "${FAKE}"`, 'setx GROQ_API_KEY "[가려진 비밀값]"'], [`python bot.py --token ${FAKE}`, '--token [가려진 비밀값]'],
+    [`--access-key ${FAKE}`, '--access-key [가려진 비밀값]'], ['--password=hunter22', '--password=[가려진 비밀값]']
+  ];
+  for (const [text, want] of hide) {
+    const r = redactSecrets(text);
+    assert.ok(r.text.includes(want) && !r.text.includes(FAKE) && r.count === 1, `${text} -> ${r.text}`);
+    assert.deepEqual(redactSecrets(r.text), { text: r.text, count: 0 }, 'hidden once, never again');
+  }
+  for (const text of ['--max-tokens 4096', '--token $GITHUB_TOKEN', '--api-key YOUR_API_KEY', '--api-key <your-key>', '--token-file ./t.txt', '--secret-name app-secret',
+    'docker login --password-stdin', '"args": ["--api-key", "${BRAVE_API_KEY}"]', 'setx PATH "%PATH%;C:\\tools"', 'setx OPENAI_API_KEY %OPENAI_API_KEY%', 'use --token flag to pass it',
+    '--api-key 옵션으로 넘겨'])
+    assert.deepEqual(redactSecrets(text), { text, count: 0 }, text);
+});
+
+test('SESSIONS-RD7 a URL password holding a slash or an unencoded @ is hidden whole; a port before a path and an @ in a path stay', () => {
+  for (const [text, secret, want] of [
+    ['REDIS_URL=redis://default:FAKEfake/FAKE+0123456789@fake-redis.example.com:6379 로 연결해줘', 'FAKEfake/', 'redis://default:[가려진 비밀값]@fake-redis.example.com:6379 로'],
+    ['DATABASE_URL="postgresql://postgres.fakeref:Fake/Pass+word123@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres"', 'Pass+word', 'postgres.fakeref:[가려진 비밀값]@aws-0-'],
+    ['DATABASE_URL=postgres://admin:Fake@Pass123@db.example.com/prod', 'Pass123', 'postgres://admin:[가려진 비밀값]@db.example.com/prod'],
+    ['mongodb+srv://u:FakePass1@c0.example.mongodb.net/?retryWrites=true', 'FakePass1', 'u:[가려진 비밀값]@c0.example.mongodb.net/?retryWrites=true']]) {
+    const r = redactSecrets(text);
+    assert.ok(!r.text.includes(secret) && r.text.includes(want) && r.count === 1, `${text} -> ${r.text}`);
+    assert.deepEqual(redactSecrets(r.text), { text: r.text, count: 0 }, 'hidden once, never again');
+  }
+  for (const text of ['http://localhost:3000/@me', 'https://medium.com:443/@alice', 'http://host:8080/users/x@example.com', 'ssh://git@host:22/x', 'postgres://u:@host/db',
+    'https://a.com:8443?x=a@b.com'])
+    assert.deepEqual(redactSecrets(text), { text, count: 0 }, text);
+});
+
+test('SESSIONS-RD8 keys of a known shape are hidden with no name before them; a Discord webhook keeps its address, aws configure and kubeconfig their names', () => {
+  const FAKE = f('FAKEfake', 'FAKEfake', '0123456789'), HEX = '0123456789abcdef';
+  for (const [text, keep] of [
+    [f('이 키 써줘 ', 'gsk_', FAKE, 'FAKEfake01'), '이 키 써줘 '], [f('SG.', 'FAKEfakeFAKEfake012345', '.', FAKE, 'FAKEfake012345', ' 이게 sendgrid 키야'), ' 이게 sendgrid 키야'],
+    [f('디스코드 웹훅 https://discord.com/api/webhooks/', '123456789012345678/', FAKE, '-FAKE 로 알림 보내줘'), 'https://discord.com/api/webhooks/'],
+    [f('구글 로그인 client secret ', 'GOCSPX-', FAKE), '구글 로그인 client secret '], [f('shopify 토큰 ', 'shpat_', HEX, HEX), 'shopify 토큰 '],
+    [f('r8_', FAKE, 'FAKEfake'), ''], [f('pplx-', FAKE, FAKE), ''], [f('dop_v1_', HEX.repeat(4)), ''], [f('ATATT', '3xFfGF0', FAKE), ''],
+    [f('lin_api_', FAKE, 'FAKE'), ''], [f('ntn_', FAKE, 'FAKEfake'), ''], [f('xapp-', '1-A0FAKE0FAKE-1234567890123-', HEX), ''],
+    [f('AWS Secret Access Key [None]: ', 'FAKEfakeFAKE/fake+', FAKE), 'AWS Secret Access Key [None]: '],
+    [f('    client-key-data: ', 'LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpN', 'SUlFRkFLRQ=='), '    client-key-data: ']]) {
+    const r = redactSecrets(text);
+    assert.ok(!r.text.includes('FAKEfake') && !r.text.includes(HEX) && !r.text.includes('LS0tLS1') && r.text.includes(keep) && r.text.includes(hidden) && r.count === 1, `${text} -> ${r.text}`);
+    assert.deepEqual(redactSecrets(r.text), { text: r.text, count: 0 }, 'hidden once, never again');
+  }
+  for (const text of ['https://discord.com/developers/docs/resources/webhook', 'Groq 키 받는 곳 링크 걸어 줘', 'GOCSPX로 시작하는 값은 클라이언트 시크릿이야', 'the r8_ prefix'])
+    assert.deepEqual(redactSecrets(text), { text, count: 0 }, text);
+});
+
 test('SESSIONS-RT1 the whole record is hidden and cleaned, its header too, so it can always be kept', () => {
   const d = session([{ role: 'user', at: T(0), text: '색 출력 \u001b[31m빨강\u001b[0m 그리고 제목\u000b부제목\u0007' }, { role: 'assistant', at: T(1), text: '고쳤어요', files: ['src/a.ts'] }],
     { cwd: 'C:\\work\\sk-telecom-portal-renewal', branch: 'feature/sk-1234-fix-login-redirect', title: `키 ${f('sk-', 'proj-', 'FAKE'.repeat(6))} 넣고 테스트` });

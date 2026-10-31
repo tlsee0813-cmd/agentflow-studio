@@ -332,7 +332,7 @@ export function createAutoSync(host: AutoSyncHost) {
       b ? null : h('ul', { class: 'sync-points' },
         h('li', {}, `처음 연결하면 최근 ${BACKFILL_MS / 86400000}일의 세션(${BACKFILL_SESSIONS}개까지)을 가져와 지도에 담아요.`),
         h('li', {}, '내가 쓴 요청과 AI의 답변·바꾼 파일만 그대로 가져오고, 키·토큰처럼 보이는 글은 가려요.'),
-        h('li', {}, '지도를 갱신할 때 이 기록을 AI에게 보내요.')),
+        h('li', {}, '지도를 갱신할 때 이 기록을 AI에게 보내요. 직접 붙여 넣거나 추가한 기록·자료도 함께 보내요.')),
       foldersLoading ? h('p', { class: 'fine' }, '이 PC의 세션에서 작업 폴더를 찾는 중…') : null,
       errorLine(foldersError),
       picks && !picks.length ? h('p', { class: 'fine' }, b ? '세션이 있는 다른 작업 폴더를 찾지 못했어요. 폴더 경로를 직접 적을 수도 있어요.' : '이 PC에서 Claude Code·Codex 세션을 찾지 못했어요. 폴더 경로를 직접 적을 수도 있어요.') : null,
@@ -389,6 +389,8 @@ export function createAutoSync(host: AutoSyncHost) {
       document.addEventListener('pointerdown', e => { if (panelOpen && !(e.target as Element).closest('#sync-panel, #sync-pill')) close(false); });
     },
     isOpen: () => panelOpen,
+    /** The open project is connected: what is saved into it goes to the AI with its next automatic map reading. */
+    connected: () => { const o = open(); return !!o && !!bindingOf(o.key); },
     toggle, close, render, tick, bindingOf, connect, removeFolder, disconnect
   };
 }
