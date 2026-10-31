@@ -2,8 +2,8 @@
 // project without copying it by hand. Local Node server only (never the Worker or a static build): it reads the person's own files.
 //   Claude Code: <CLAUDE_CONFIG_DIR or ~/.claude>/projects/<folder>/<session>.jsonl
 //   Codex:       <CODEX_HOME or ~/.codex>/sessions/YYYY/MM/DD/rollout-*.jsonl (and archived_sessions/rollout-*.jsonl)
-// Read only. Nothing is written, sent to a provider or kept here: the browser gets a session's turns when the person opens it, and
-// what it keeps is what the person then saves through the ordinary paste box (with its own secret check).
+// Read only. Nothing is written, sent to a provider or kept here: the browser gets a session's turns when it asks (the paste box's
+// session list, or the automatic connection), and what it keeps it saves as an ordinary pasted record (with its own secret check).
 // The browser never names a path: a session is asked for by an opaque id from the latest listing, so no request can reach a file
 // outside these two folders. Only what the person typed and the tools' final replies are read (plus which files a reply changed);
 // tool output, reasoning and injected context are left out (the reading itself is shared/session-parse.ts, also used by the page).

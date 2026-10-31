@@ -1,6 +1,8 @@
-/* A session kept by Claude Code or Codex on this PC (server/sessions.mjs, sessions.1) turned into the text of one pasted record:
- * what the person asked and what the tool answered, in order, as they were written. Nothing is summarised or reworded; the
- * newest turns are kept when the whole session does not fit one record, and credential-like parts are hidden. */
+/* A Claude Code or Codex session (sessions.1: from this PC's server, server/sessions.mjs, or a folder picked in the page) turned
+ * into the text of pasted records: what the person asked and what the tool answered, in order, as they were written. Nothing is
+ * summarised or reworded and credential-like parts are hidden. One record keeps the newest turns that fit (sessionText: the paste
+ * box, and a folder's first look); after that the automatic connection takes every turn after its mark, in as many records as it
+ * takes (newTurns, sessionChunks). Also a record's header line (RECORD_HEAD) and the line that cuts a draft (NEXT_RECORD). */
 import { PASTED_TEXT_LIMIT } from './types.js';
 import { redactSecrets, secretLike } from './secret.js';
 import { foldHandover } from './handover-mark.js';
@@ -10,8 +12,9 @@ export interface SessionTurn { role: 'user' | 'assistant'; at: string | null; te
 /** aliases: ids the same session had before ids were made from the session itself (from its file's path): marks kept under one
  * of them still hold. */
 export interface SessionSummary { id: string; tool: 'claude' | 'codex'; title: string | null; preview: string; cwd: string | null; branch: string | null; startedAt: string | null; updatedAt: string; bytes: number; aliases?: string[] }
-/** omitted: earlier turns left out; rest (a reading from a time on): newer turns not sent yet, read from the new mark. */
-/** cwds: every folder the session worked in, files named from the first that holds them (the server's own folder order). */
+/** omitted: earlier turns left out; rest (a reading from a time on): newer turns not sent yet, read from the new mark. cwds: every
+ * folder the session worked in, files named from the first that holds them (the server's own folder order). label: the tool's
+ * name, part of sessions.1; the page names the tool from TOOL_NAME itself. */
 export interface SessionDetail { id: string; tool: 'claude' | 'codex'; label: string; title: string | null; cwd: string | null; cwds?: string[]; branch: string | null; startedAt: string | null; turns: SessionTurn[]; omitted: number; rest?: number }
 export const TOOL_NAME: Record<SessionDetail['tool'], string> = { claude: 'Claude Code', codex: 'Codex' };
 
@@ -93,7 +96,9 @@ export function readSessionDetail(v: unknown): SessionDetail | null {
 }
 
 /* ---------- automatic connection: a project bound to a working folder takes each session's new turns as records ---------- */
-/** How far one session was taken: the time of the last turn taken (null when its turns carry none) and how many were taken.
+/** How far one session was taken: the time of the last turn taken (null when its turns carry none), how many were taken, and the
+ * session's updatedAt when it was marked (a session still listed at that time has nothing new; '' while turns are left to read, so
+ * the next look comes back to it).
  * reply: when that last turn was a reply, how much of it was taken (its length, a checksum of it, the files it named), so a reply
  * that was still being written gives only what it gained when it is read again. A file joins a reply in no fixed place (a subagent's
  * changes come after the reply's own), so files are told by name; a mark kept before that holds their count. */
