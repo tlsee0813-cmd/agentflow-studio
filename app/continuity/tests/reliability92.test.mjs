@@ -21,6 +21,9 @@ const { createMapRun } = await import('../dist/public/client/map-run.js');
 
 function memKv() { const m = new Map(); return { getItem: k => m.get(k) ?? null, setItem: (k, v) => m.set(k, String(v)), removeItem: k => m.delete(k) }; }
 const settle = () => new Promise(r => setTimeout(r, 30));
+/** Waits for the look a connection starts (it reads real files through the server: slower on a busy Windows runner than any fixed
+ * pause), up to a few seconds; the assertion after it says what was expected. */
+const until = async (done, ms = 5000) => { for (const end = Date.now() + ms; !done() && Date.now() < end;) await settle(); };
 const ago = min => new Date(Date.now() - min * 60000).toISOString();
 const ID = 'claude-0123456789abcdef01234567';
 /** One tab with an open project; `reads` counts the automatic map readings it started. */
@@ -67,7 +70,7 @@ test('REL92-1 a subagent that finishes after its session was taken: its own file
     const server = openSessions({ env: {}, roots });
     const src = { kind: 'server', list: async f => readSessionList(await server.list(f)), read: async (id, since) => readSessionDetail(await server.read(id, { since })) };
     const t = tab(src);
-    t.sync.connect('/w'); await settle();
+    t.sync.connect('/w'); await until(() => t.texts().length > 0);
     assert.equal(t.texts().length, 1); assert.ok(t.texts()[0].includes('src/notify.ts') && !t.texts()[0].includes('src/booking.ts'), t.texts()[0]);
     const before = (await server.list('/w')).sessions[0].updatedAt;
     // The background subagent ends after the look: only its own file is written; the session's file keeps its time.
@@ -120,7 +123,7 @@ test('REL92-1b a Codex subagent\'s rollout written after its session dates that 
 test('REL92-2 a reply written at the same time as the request a look took is taken, once; so is a request at the time of a reply', async () => {
   const at = ago(40), S = { id: ID, cwd: '/w', updatedAt: ago(30), turns: [{ role: 'user', at, text: '예약 취소 마감 고쳐 줘' }] };
   const t = tab(memSource([S]), { canRead: () => false });
-  t.sync.connect('/w'); await settle();
+  t.sync.connect('/w'); await until(() => t.texts().length > 0);
   assert.equal(t.texts().length, 1); assert.ok(t.texts()[0].includes('예약 취소 마감 고쳐 줘'));
   S.turns.push({ role: 'assistant', at, text: '마감을 하루 전으로 바꿨어요.' }); S.updatedAt = ago(20);
   await t.sync.tick();
@@ -171,7 +174,7 @@ test('REL92-3 a handover copied without its end line folds the document only: th
 test('REL92-4 a map reading the person cancelled is not started again by the automatic connection until new records come in', async () => {
   const S = { id: ID, cwd: '/w', updatedAt: ago(30), turns: [{ role: 'user', at: ago(40), text: '예약 고쳐 줘' }, { role: 'assistant', at: ago(39), text: '고쳤어요.' }] };
   const t = tab(memSource([S]));
-  t.sync.connect('/w'); await settle();
+  t.sync.connect('/w'); await until(() => t.reads > 0);
   assert.equal(t.reads, 1, 'the connection read its records into the map');
   // The person cancels that reading; time passes (past the gap between automatic readings) with nothing new.
   t.sync.hold('E1');
