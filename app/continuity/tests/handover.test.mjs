@@ -177,6 +177,23 @@ test('HANDOVER-T1 a session without a title is named by its first request, else 
   assert.ok(!t.includes('Codex 세션 ·') && !t.includes('Codex 세션,'), t);
 });
 
+test('HANDOVER-C1 more sessions than the lists hold: the rest are counted, and a folder or branch only they worked in is named', () => {
+  // Ten sessions saved oldest first, as a folder's first look saves them; the two oldest worked in another folder and branch.
+  let p = D.createProject();
+  for (let i = 0; i < 10; i++) p = D.pasteRecord(p, sessionText(ask(`claude-${String(i).repeat(24)}`, `작업 ${i}번 해 줘`)).text.replace('[Claude Code 세션 기록 · ', `[Claude Code 세션 기록 · 작업 ${i} · `), null).project;
+  p = { ...p, pasted: p.pasted.map((r, i) => ({ ...r, at: new Date(Date.parse(AT) + i * 1000).toISOString(), text: i < 2 ? r.text.replace('/work/salon · 브랜치 main', '/work/salon-pay · 브랜치 feature/pay') : r.text })) };
+  const t = handoverText(p, { scope: null, code: 'CUT345', at: AT }), list = t.slice(t.indexOf('## 작업 장소와 세션\n')).split('\n\n')[0].split('\n');
+  assert.equal(list.length, 10, list.join('\n'));
+  assert.equal(list.at(-1), '- 그 밖에 세션 2개 (작업 폴더 /work/salon-pay · 브랜치 feature/pay)');
+  // Nothing more to name when the rest worked where the listed ones did.
+  const same = { ...p, pasted: p.pasted.map(r => ({ ...r, text: r.text.replace('/work/salon-pay · 브랜치 feature/pay', '/work/salon · 브랜치 main') })) };
+  assert.ok(handoverText(same, { scope: null, code: 'CUT345', at: AT }).includes('\n- Claude Code 「작업 2」 · 작업 폴더 /work/salon · 브랜치 main\n- 그 밖에 세션 2개\n'));
+  // A part names as many as it has room for, and says how many more there are (read from eight sessions, four at a time).
+  let q = p;
+  for (const r of [0, 1]) { const said = M.unreadRecords(q, studioView(q)).slice(0, 4).map(x => /작업 \d번 해 줘/.exec(x.text)[0]); q = readAs(q, [[r ? 'P01' : '결제', said, said.map(x => ['want', x])]]); }
+  assert.match(handoverText(q, { scope: null, code: 'CUT345', at: AT }), /\n- 다룬 세션: Claude Code 「작업 \d」, Claude Code 「작업 \d」, Claude Code 「작업 \d」, Claude Code 「작업 \d」 외 4개\n/);
+});
+
 test('HANDOVER-O2 a title that starts like a header field or holds " · " stays the title: the fields are read back from the end', () => {
   for (const title of ['세션 만료 처리', '브랜치 정리하고 PR 만들기', '로그인 · 세션 유지 기능', '작업 폴더 정리', '2026-10-28 09:00 시작'])
     assert.deepEqual(sessionOrigin(sessionText(session(ID, TURNS, { title, cwd: 'C:\\work\\salon' })).text), { id: ID, tool: 'claude', title, cwd: 'C:\\work\\salon', branch: 'main', start: START }, title);

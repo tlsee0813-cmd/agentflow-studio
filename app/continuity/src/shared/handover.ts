@@ -124,7 +124,7 @@ function partBlock(view: StudioView, part: PartView, sessions: PartSession[], to
     return other ? `${other.name} (${r.kind === 'shares' ? '이 부분과 함께 씀' : relLabel(r.kind, out)}${r.note ? ` · ${one(r.note, 80)}` : ''})` : null;
   }).filter(Boolean);
   if (rels.length) lines.push(`- 관련: ${rels.slice(0, k.rels).join(', ')}${rels.length > k.rels ? ` 외 ${rels.length - k.rels}개` : ''}`);
-  if (sessions.length) lines.push(`- 다룬 세션: ${sessions.slice(0, k.sessions).map(s => `${originLabel(s)}${s.tookOver ? ' (인수인계로 이어받음)' : ''}`).join(', ')}`);
+  if (sessions.length) lines.push(`- 다룬 세션: ${sessions.slice(0, k.sessions).map(s => `${originLabel(s)}${s.tookOver ? ' (인수인계로 이어받음)' : ''}`).join(', ')}${sessions.length > k.sessions ? ` 외 ${sessions.length - k.sessions}개` : ''}`);
   return lines;
 }
 
@@ -203,7 +203,11 @@ export function handoverDoc(p: Project, opts: HandoverOptions): Handover {
   const sessions = scoped ? dedupe(parts.flatMap(x => by.get(x.id)!)) : partSessions(p, null);
   if (sessions.length) {
     out.push('## 작업 장소와 세션');
-    for (const s of sessions.slice(0, 8)) out.push(one(`- ${originLabel(s)}${s.cwd ? ` · 작업 폴더 ${s.cwd}` : ''}${s.branch ? ` · 브랜치 ${s.branch}` : ''}${s.tookOver ? ' · 인수인계로 이어받은 세션' : ''}`, 320));
+    const place = (s: PartSession) => [s.cwd ? `작업 폴더 ${s.cwd}` : '', s.branch ? `브랜치 ${s.branch}` : ''].filter(Boolean).join(' · '), few = sessions.slice(0, 8);
+    for (const s of few) out.push(one(`- ${[originLabel(s), place(s), s.tookOver ? '인수인계로 이어받은 세션' : ''].filter(Boolean).join(' · ')}`, 320));
+    // The rest are counted, and a folder or branch only they worked in is named: the reader is told to look at those.
+    const more = [...new Set(sessions.slice(8).map(place))].filter(x => x && !few.some(s => place(s) === x));
+    if (sessions.length > 8) out.push(one(`- 그 밖에 세션 ${sessions.length - 8}개${more.length ? ` (${more.join(', ')})` : ''}`, 320));
     out.push('');
   }
   // The latest requests the person made in the sessions, with the files changed answering them: in a part's document, those of the
