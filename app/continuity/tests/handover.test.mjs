@@ -7,7 +7,6 @@ import * as D from '../dist/public/shared/domain.js';
 import * as M from '../dist/public/shared/map-reading.js';
 import { studioView } from '../dist/public/shared/studio.js';
 import { sessionText, sessionChunks, newTurns } from '../dist/public/shared/session-import.js';
-import { SESSION_LIMITS } from '../dist/public/shared/session-parse.js';
 import { handoverText, handoverDoc, handoverCode, foldHandover, foldRecord, receivedHandovers, sessionOrigin, partSessions, HANDOVER_CHARS } from '../dist/public/shared/handover.js';
 
 const ID = 'claude-0123456789abcdef01234567', NEXT = 'codex-89abcdef0123456789abcdef';
@@ -201,8 +200,7 @@ test('HANDOVER-R1 a takeover counts only where a request starts from it: an olde
   assert.deepEqual(partSessions(r, null).filter(s => s.tookOver).map(s => s.id), [Y]);
 });
 
-test('HANDOVER-L1 a document for a large map stays within one prompt: parts are written briefly from the last one back, the rest named, and it says so', () => {
-  assert.ok(HANDOVER_CHARS <= SESSION_LIMITS.turnChars - 4000, 'room for the person\'s own words after the document');
+test('HANDOVER-L1 a document for a large map stays within HANDOVER_CHARS: parts are written briefly from the last one back, the rest named, and it says so', () => {
   const note = '손님이 예약 시간을 고르고 휴무일과 영업시간을 확인한 뒤 결제까지 마치는 흐름을 맡아요. '.repeat(5).trim();
   const big = n => { let p = D.createProject(); for (let i = 0; i < n; i++) p = D.addArea(p, `부분 ${i}`, note); return handoverDoc(p, { scope: null, code: 'BIG234', at: AT }); };
   const { p } = mapped();
@@ -221,7 +219,6 @@ test('HANDOVER-L1 a document for a large map stays within one prompt: parts are 
   assert.match(far.text, /\n그 밖의 부분 \d+개 \(이름만\): 부분 \d+, .*부분 99\n/);
   // Pasted with the person's words after it, the whole message is read: it folds to one line and the words stay.
   const prompt = `${far.text}\n\n결제 화면부터 이어서 해 줘`;
-  assert.ok(prompt.length <= SESSION_LIMITS.turnChars);
   assert.ok(sessionText(ask(NEXT, prompt)).text.includes('[AgentFlow 인수인계 문서를 받아 이어감 · af-handover:BIG234 · 나의 프로젝트]\n\n결제 화면부터 이어서 해 줘'));
 });
 

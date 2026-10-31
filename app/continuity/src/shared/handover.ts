@@ -74,8 +74,9 @@ export function partSessions(p: Project, areaId: string | null): PartSession[] {
 export interface HandoverOptions { scope: string | null; code: string; at: string }
 /** A document, and how many of its parts were written shorter (or by name only) to keep it within HANDOVER_CHARS. */
 export interface Handover { text: string; trimmed: number }
-/** The longest document made. It is pasted as a new session's first prompt, and a prompt is read whole only up to 20,000 characters
- * (session-parse.ts turnChars): past that its end line and the person's own words after it would be cut off. */
+/** The longest document made. It is pasted as a new session's first message (a web chat's too), so it stays short enough to copy
+ * and read whole. Its length costs nothing of the words the person writes after it: a session import folds it to one line before
+ * a prompt is clipped (session-parse.ts sessionDetail). */
 export const HANDOVER_CHARS = 15000;
 const CLAIM_ORDER: ClaimKind[] = ['want', 'idea', 'reported', 'checked', 'describes', 'open', 'differs'];
 const CLAIMS_PER_PART = 10, RECENT_REQUESTS = 6, FILES_PER_ASK = 8, RECENT_FILES = 24, LINE = 240, NAMES = 600;
