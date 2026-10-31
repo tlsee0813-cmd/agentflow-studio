@@ -97,7 +97,8 @@ function partBlock(view: StudioView, part: PartView, sessions: PartSession[], to
   if (part.note) lines.push(`- 사용자 메모: ${one(part.note, k.text)}`);
   const claims = (u?.claims ?? []).slice().sort((a, b) => k.order.indexOf(a.kind) - k.order.indexOf(b.kind));
   for (const c of claims.slice(0, k.claims)) lines.push(`- ${CLAIM_LABEL[c.kind]}: ${one(c.text, k.claim)}${c.about ? ` (${one(c.about, 80)})` : ''}`);
-  if (claims.length > k.claims) lines.push(`- (그 밖에 ${claims.length - k.claims}개는 지도에서 볼 수 있어요)`);
+  // The next session cannot see the map: it is told what is left out, not where to look.
+  if (claims.length > k.claims) lines.push(`- (그 밖에 ${claims.length - k.claims}개는 이 문서에 넣지 않았어요)`);
   if (!role && !part.note && !claims.length) lines.push('- 아직 이 부분에 대해 읽힌 내용이 없어요.');
   const rels = view.relations.filter(r => r.from === part.id || r.to === part.id).map(r => {
     const out = r.from === part.id, other = view.parts.find(x => x.id === (out ? r.to : r.from));
@@ -216,7 +217,7 @@ export function handoverDoc(p: Project, opts: HandoverOptions): Handover {
   }
   const left = parts.slice(shown.length), trimmed = left.length + shown.filter((b, i) => b.join('\n') !== full[i]!.join('\n')).length;
   const names = left.length ? [[one(`그 밖의 부분 ${left.length}개 (이름만): ${left.map(x => x.name).join(', ')}`, NAMES)]] : [];
-  return { text: compose([...shown, ...names], trimmed ? [`(문서가 길어서 부분 ${trimmed}개는 줄여 적었어요. 빠진 내용은 AgentFlow 지도에 있어요.)`, ''] : []), trimmed };
+  return { text: compose([...shown, ...names], trimmed ? [`(문서가 길어서 부분 ${trimmed}개는 줄여 적었어요. 어느 부분을 더 알아야 하면, 그 부분만 담은 인수인계 문서를 사용자에게 따로 부탁하세요.)`, ''] : []), trimmed };
 }
 function pathOf(view: StudioView, id: string): PartView[] {
   const out: PartView[] = []; for (let x = view.parts.find(q => q.id === id), g = 0; x && g < 64; x = x.parentId ? view.parts.find(q => q.id === x!.parentId) : undefined, g++) out.unshift(x);

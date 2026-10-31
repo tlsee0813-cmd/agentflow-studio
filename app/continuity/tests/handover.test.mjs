@@ -203,7 +203,7 @@ test('HANDOVER-L1 a document for a large map stays within one prompt: parts are 
   // Somewhat over: the first parts in full, the later ones briefly, every part still there.
   const mid = big(60), lines = mid.text.split('\n');
   assert.ok(mid.text.length <= HANDOVER_CHARS && mid.trimmed > 0 && mid.trimmed < 60, `${mid.text.length} ${mid.trimmed}`);
-  assert.ok(lines.includes(`(문서가 길어서 부분 ${mid.trimmed}개는 줄여 적었어요. 빠진 내용은 AgentFlow 지도에 있어요.)`));
+  assert.ok(lines.includes(`(문서가 길어서 부분 ${mid.trimmed}개는 줄여 적었어요. 어느 부분을 더 알아야 하면, 그 부분만 담은 인수인계 문서를 사용자에게 따로 부탁하세요.)`));
   assert.equal(lines[lines.indexOf('### 부분 0') + 1], `- 사용자 메모: ${note}`);
   assert.ok(lines[lines.indexOf('### 부분 59') + 1].endsWith('…') && lines[lines.indexOf('### 부분 59') + 1].length < note.length);
   assert.ok(mid.text.endsWith('──────── 인수인계 문서 끝 · af-handover:BIG234 ────────'));
@@ -224,7 +224,7 @@ test('HANDOVER-U1 what is left to ask stays: a part written briefly keeps its op
   p = readAs(p, [['문자', [said[0]], [['want', said[0]], ['idea', said[2]], ['reported', said[3]], ['open', said[1]]]]]);
   for (let i = 0; i < 99; i++) p = D.addArea(p, `부분 ${i}`, note); // so many that every part is written briefly
   const doc = handoverDoc(p, { scope: null, code: 'ASK234', at: AT }), block = doc.text.slice(doc.text.indexOf('### 문자\n')).split('\n\n')[0];
-  assert.ok(doc.trimmed > 0 && block.includes('(그 밖에 1개는'), block);
+  assert.ok(doc.trimmed > 0 && block.includes('\n- (그 밖에 1개는 이 문서에 넣지 않았어요)'), block);
   assert.ok(block.includes('\n- 남은 선택: 문자 업체는 아직 못 정했어\n'), block);
   // A candidate is listed with its part's name until that part is put away; then it goes, as it does from the map's own list.
   const { p: q, hours } = mapped([['휴무일을 매주 같은 요일로 둘지 정하지 않았어요.', ['new:p1']]]);
