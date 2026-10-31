@@ -105,23 +105,27 @@ export interface SessionMark { lastAt: string | null; count: number; updatedAt: 
 /** A short checksum of a text (FNV-1a): whether a reply still starts with what was taken of it. */
 export function textSum(t: string): string { let h = 0x811c9dc5; for (let i = 0; i < t.length; i++) h = Math.imul(h ^ t.charCodeAt(i), 0x01000193); return (h >>> 0).toString(16); }
 /** The turns of a session not taken yet: after the mark's time, or past its count when the turns have no times. Without a mark,
- * the turns at or after `from` (all when null). The server's own omissions count as taken: they are older than what it sent.
+ * the turns at or after `since` (all when null). The server's own omissions count as taken: they are older than what it sent.
  * The reply taken last, when it went on since, comes first with only what it gained (cont). */
-export function newTurns(s: SessionDetail, mark: SessionMark | null, from: string | null = null): TakenTurn[] {
-  if (!mark) return from ? s.turns.filter(t => !t.at || t.at >= from) : s.turns;
-  // The turn taken last: the last one at the mark's time (turns can share a time to the millisecond), else the first after it.
-  const lastAt = mark.lastAt, eq = lastAt ? s.turns.map(t => t.at).lastIndexOf(lastAt) : -1;
-  const i = !lastAt ? mark.count - 1 - s.omitted : eq >= 0 ? eq : s.turns.findIndex(t => !!t.at && t.at > lastAt);
-  const after = lastAt ? s.turns.filter(t => !!t.at && t.at > lastAt) : s.turns.slice(Math.max(0, mark.count - s.omitted));
-  const head = i >= 0 ? s.turns[i] : undefined, r = mark.reply;
-  if (!head || head.role !== 'assistant' || !r) return after;
+export function newTurns(s: SessionDetail, mark: SessionMark | null, since: string | null = null): TakenTurn[] {
+  if (!mark) return since ? s.turns.filter(t => !t.at || t.at >= since) : s.turns;
+  const lastAt = mark.lastAt, after = lastAt ? s.turns.filter(t => !!t.at && t.at > lastAt) : s.turns.slice(Math.max(0, mark.count - s.omitted));
+  const last = lastTaken(s, mark), reply = mark.reply;
+  if (!last || last.role !== 'assistant' || !reply) return after;
   // That reply is the first turn read from the mark on: at the mark's time, or later when its time moved with it (then only while
   // it still starts with what was taken). A reply cut at its length limit reads differently once it grew: its new files only.
-  const same = head.text.length >= r.chars && textSum(head.text.slice(0, r.chars)) === r.sum;
-  if (!same && lastAt && head.at !== lastAt) return after;
-  const taken = r.files, more = same ? head.text.slice(r.chars).replace(/^\s+/, '') : '';
-  const files = Array.isArray(taken) ? untaken(taken, head.files ?? [], s) : (head.files ?? []).slice(taken);
-  return [...(more || files.length ? [{ role: 'assistant' as const, at: head.at, text: more, files, cont: true }] : []), ...after.filter(t => t !== head)];
+  const same = last.text.length >= reply.chars && textSum(last.text.slice(0, reply.chars)) === reply.sum;
+  if (!same && lastAt && last.at !== lastAt) return after;
+  const more = same ? last.text.slice(reply.chars).replace(/^\s+/, '') : '', now = last.files ?? [];
+  const files = Array.isArray(reply.files) ? untaken(reply.files, now, s) : now.slice(reply.files);
+  return [...(more || files.length ? [{ role: 'assistant' as const, at: last.at, text: more, files, cont: true }] : []), ...after.filter(t => t !== last)];
+}
+/** The turn a mark was taken at: by count when its turns had no times; else the last one at the mark's time (turns can share a
+ * time to the millisecond), or the first after it when that turn's time moved on with it. */
+function lastTaken(s: SessionDetail, mark: SessionMark): SessionTurn | undefined {
+  const lastAt = mark.lastAt; if (!lastAt) return s.turns[mark.count - 1 - s.omitted];
+  const i = s.turns.map(t => t.at).lastIndexOf(lastAt);
+  return i >= 0 ? s.turns[i] : s.turns.find(t => !!t.at && t.at > lastAt);
 }
 /** The files a reply names now that were not taken with it. A file outside the session's folders is named by its whole path until
  * the session works in a folder that holds it (a later line names that folder); from then on by the rest of that path, as the
