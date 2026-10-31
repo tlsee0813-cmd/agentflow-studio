@@ -2854,6 +2854,24 @@ def sessions_flow(browser, base):
     expect(page.locator("#sync-panel .pp-error")).to_have_count(1)
     assert page.evaluate("() => [window.__alerts, window.__draws >= 2]") == [0, True], page.evaluate("() => [window.__alerts, window.__draws]")
     page.unroute(listing)
+    # On a tablet a long folder name in the pill gives way before the project's name in the bar (left out, then cut short on a wider
+    # screen); the state words stay, and the pill's name keeps the whole line.
+    failing = re.compile(r"/api/studio/sessions\?folder=")
+    page.route(failing, lambda route: route.fulfill(status=500, content_type="application/json", body="{}"))
+    page.locator("#sync-panel").get_by_role("button", name="취소").click()
+    page.locator("#sync-panel").get_by_role("button", name="연결 끊기").click()
+    page.locator("#sync-panel .sync-path").fill("/work/hair-salon-booking-system-v2")
+    page.locator("#sync-panel").get_by_role("button", name="연결", exact=True).click()
+    expect(pill).to_have_attribute("data-state", "error", timeout=15000)
+    expect(pill).to_have_accessible_name("자동 연결 · hair-salon-booking-system-v2 · 확인 필요")
+    for width in (744, 820, 901):
+        page.set_viewport_size({"width": width, "height": 720})
+        bar = page.evaluate("() => document.querySelector('.bar .context').getBoundingClientRect().width")
+        assert bar >= 100, (width, bar)
+        if width < 900: assert pill.inner_text() == "자동 연결 · 확인 필요", pill.inner_text()
+    page.unroute(failing)
+    page.set_viewport_size({"width": 1280, "height": 720})
+    assert len(maps) == 1, maps
     assert not errors, errors
     context.close()
 

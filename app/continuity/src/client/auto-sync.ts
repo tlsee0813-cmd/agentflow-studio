@@ -260,10 +260,10 @@ export function createAutoSync(host: AutoSyncHost) {
     pill.hidden = false; pill.dataset.state = !b ? 'off' : error || waiting ? 'error' : busy ? 'busy' : 'on';
     pill.setAttribute('aria-expanded', String(panelOpen));
     // The state in words as well as the dot's colour (a look running only turns the dot, so the pill does not change width every
-    // minute); a phone keeps the dot only (the whole line stays its name and title).
-    const more = b ? ` · ${name}${waiting ? ' · 허용 필요' : error ? ' · 확인 필요' : ''}` : ' 안 됨';
-    pill.title = `자동 연결${more}`; pill.setAttribute('aria-label', pill.title);
-    pill.replaceChildren(h('i', { 'aria-hidden': 'true' }), h('span', {}, '자동 연결', h('span', {}, more)));
+    // minute); a phone keeps the dot only, and the folder's name gives way first (the whole line stays its name and title).
+    const tail = waiting ? ' · 허용 필요' : error ? ' · 확인 필요' : '';
+    pill.title = `자동 연결${b ? ` · ${name}${tail}` : ' 안 됨'}`; pill.setAttribute('aria-label', pill.title);
+    pill.replaceChildren(h('i', { 'aria-hidden': 'true' }), h('span', {}, '자동 연결', b ? h('span', { class: 'sync-pill-name' }, ` · ${name}`) : ' 안 됨', tail));
     panel.hidden = !panelOpen; if (!panelOpen) { said = null; return; }
     // A folder name being composed (a Korean syllable) is not drawn over: a new field would end the composition and split the
     // syllable. The redraw follows once it is committed (draw).
