@@ -37,7 +37,7 @@ export function createHandoverView(host: HandoverHost) {
     dialog.replaceChildren(
       h('header', { class: 'handover-head' }, h('h2', { id: 'handover-title' }, '인수인계 문서'),
         h('button', { type: 'button', class: 'close', 'data-act': 'close', 'aria-label': '닫기', title: '닫기 (Esc)', onclick: close }, '×')),
-      h('p', { class: 'handover-lead' }, '새 세션의 첫 메시지에 이 문서를 그대로 붙여 넣고, 그 아래에 이어서 할 일을 적으세요. 지도와 기록에 있는 것만 옮겼고, 만들 때 AI를 부르지 않아요. 그 세션의 기록이 들어오면 지도에 ‘인수인계로 이어받음’으로 표시돼요.'),
+      h('p', { class: 'handover-lead' }, '새 세션의 첫 메시지에 이 문서를 그대로 붙여 넣고, 그 아래에 이어서 할 일을 적으세요. 지도와 기록에 있는 내용만 옮겼어요(만들 때 AI를 부르지 않아요). 그 세션의 기록이 들어오면 지도에 ‘인수인계로 이어받음’으로 표시돼요.'),
       h('label', { class: 'handover-scope', for: 'handover-scope' }, h('span', {}, '범위'), pick),
       text,
       h('div', { class: 'handover-acts' },
