@@ -18,8 +18,19 @@ function readBinding(v) {
     const { folder, connectedAt, since, backfilled, ...rest } = b;
     return { ...rest, folders: [{ path: folder, connectedAt: String(connectedAt), since: String(since), backfilled: !!backfilled }] };
 }
-/** Which of two marks of one session is further on (the later one wins, so an older copy never takes a session back). */
-const further = (m, was) => !was || (m.lastAt ?? '') > (was.lastAt ?? '') || ((m.lastAt ?? '') === (was.lastAt ?? '') && m.updatedAt >= was.updatedAt);
+/** Which of two marks of one session is further on (the later one wins, so an older copy never takes a session back): by time, then
+ * by how many turns at that time were taken, then by when it was marked. */
+function further(m, was) {
+    if (!was)
+        return true;
+    const a = m.lastAt ?? '', b = was.lastAt ?? '';
+    if (a !== b)
+        return a > b;
+    const x = m.same ?? 0, y = was.same ?? 0;
+    if (x !== y)
+        return x > y;
+    return m.updatedAt >= was.updatedAt;
+}
 const TICK_MS = 60 * 1000;
 /** How many readings of one session a look makes at most (each within the reading's budget); what is left waits for the next. */
 const PAGES = 8;
@@ -91,6 +102,11 @@ export function createAutoSync(host) {
         }
         catch { /* the binding holds for this page only */ }
     }
+    /** A reading the person called off, with no record taken since (held). */
+    const withheld = (b) => !!b && typeof b.held === 'number' && b.taken <= b.held;
+    /** The person called off a map reading of this project: the automatic connection starts none again until a new record comes in. */
+    function hold(key) { const b = stored(key); if (!b)
+        return; b.held = b.taken; put_(key, b); render(); }
     const offered = () => host.sources.offered();
     /** The tools whose conversations come in, as the panel names them (both until the picked folders were looked at). */
     const toolNames = () => host.sources.tools().map(t => TOOL_NAME[t]).join('·') || 'Claude Code·Codex';
@@ -226,8 +242,9 @@ export function createAutoSync(host) {
             }
             error = failed;
             const runs = stored(key)?.runs ?? b.runs, today = day(), n = runs.day === today ? runs.n : 0;
-            // A connection ended meanwhile starts no reading: what it kept before then is read by the person's own click.
-            if (open()?.key === key && bindingOf(key) && host.canRead() && !host.readBlocked() && n < AUTO_RUNS_PER_DAY && (!runs.last || now - Date.parse(runs.last) >= AUTO_RUN_GAP_MS)) {
+            // A connection ended meanwhile starts no reading: what it kept before then is read by the person's own click. Nor does a
+            // reading the person called off with nothing new since: what they cancelled is not asked again behind their back.
+            if (open()?.key === key && bindingOf(key) && !withheld(stored(key)) && host.canRead() && !host.readBlocked() && n < AUTO_RUNS_PER_DAY && (!runs.last || now - Date.parse(runs.last) >= AUTO_RUN_GAP_MS)) {
                 ran = new Date().toISOString();
                 host.read();
             }
@@ -415,10 +432,12 @@ export function createAutoSync(host) {
             asking ? h('div', { class: 'sync-ask' }, h('p', {}, '브라우저가 세션 폴더를 다시 읽어도 되는지 물어봐야 해요. 허용하면 그동안의 대화가 들어와요.'), h('button', { type: 'button', class: 'primary small sync-grant', 'data-act': 'grant', onclick: () => void grant() }, '다시 허용')) : null, h('ul', { class: 'sync-linked' }, ...b.folders.map(f => h('li', {}, h('span', { class: 'sync-folder' }, f.path), b.folders.length > 1 ? h('button', { type: 'button', class: 'link-button quiet sync-remove', 'aria-label': `${f.path} 연결 빼기`, 'data-act': `leave:${f.path}`, onclick: () => removeFolder(f.path) }, '빼기') : null))), h('p', { class: 'fine' }, `${b.folders.length > 1 ? '이 폴더들' : '이 폴더'}의 ${toolNames()} 대화가 잠잠해지면(약 ${SETTLE_MS / 60000}분) 기록으로 들어오고 지도가 자동으로 갱신돼요(그때 기록을 AI에게 보내요). 이 탭이 열려 있을 때만 확인하고, 닫혀 있던 동안의 대화는 다시 열면 들어와요.`), h('dl', { class: 'sync-facts' }, h('dt', {}, '가져온 기록'), h('dd', {}, `${b.taken}개`), h('dt', {}, '마지막 확인'), h('dd', b.lastCheck ? { title: stamp(b.lastCheck, true) } : {}, b.lastCheck ? ago(b.lastCheck) : busy ? '확인 중…' : '아직'), h('dt', {}, '오늘 자동 지도 갱신'), h('dd', {}, `${runs} / ${AUTO_RUNS_PER_DAY}회`)), 
             // Why the map does not follow (no AI for maps, today's automatic readings used up, not yet), or a connection that found nothing yet.
             host.readBlocked() ? h('p', { class: 'fine sync-blocked' }, `기록은 들어오지만 지도는 갱신하지 않아요: ${host.readBlocked()}`)
-                : runs >= AUTO_RUNS_PER_DAY ? h('p', { class: 'fine sync-blocked' }, `오늘 자동 지도 갱신 ${AUTO_RUNS_PER_DAY}회를 다 썼어요. 기록은 계속 들어와요. 지도는 ‘돌아와 읽기’의 ‘기록 읽고 지도 갱신’으로 직접 갱신할 수 있고, 내일 다시 자동으로 갱신해요.`)
-                    // New records in, but the last automatic reading was a moment ago: when the map follows, and the way to it now.
-                    : host.canRead() && !busy && b.runs.last && Date.now() - Date.parse(b.runs.last) < AUTO_RUN_GAP_MS ? h('p', { class: 'fine sync-next' }, `새 기록이 들어왔어요. 지도는 ${stamp(new Date(Date.parse(b.runs.last) + AUTO_RUN_GAP_MS).toISOString())}쯤 자동으로 갱신돼요. 지금 하려면 지도의 ‘${host.current()?.project.space.areas.some(a => !a.archived) ? '새 기록 읽고 지도 갱신' : '기록으로 지도 정리'}’ 버튼을 누르세요.`)
-                        : !b.taken && b.lastCheck && !busy && !error && !waiting ? h('p', { class: 'fine' }, `${b.folders.length > 1 ? '이 폴더들' : '이 폴더'}에서 최근 ${BACKFILL_MS / 86400000}일 안의 대화를 아직 찾지 못했어요. 새로 대화하면 들어와요. 경로를 직접 적었다면 맞는지 확인해 주세요.`) : null, errorLine(error), 
+                // A reading called off: said, with the way to read now, until a new record lifts it.
+                : withheld(b) && host.canRead() && !busy ? h('p', { class: 'fine sync-blocked' }, `지도 갱신을 취소해서, 새 기록이 들어올 때까지 자동으로 다시 하지 않아요. 지금 하려면 지도의 ‘${host.current()?.project.space.areas.some(a => !a.archived) ? '새 기록 읽고 지도 갱신' : '기록으로 지도 정리'}’ 버튼을 누르세요.`)
+                    : runs >= AUTO_RUNS_PER_DAY ? h('p', { class: 'fine sync-blocked' }, `오늘 자동 지도 갱신 ${AUTO_RUNS_PER_DAY}회를 다 썼어요. 기록은 계속 들어와요. 지도는 ‘돌아와 읽기’의 ‘기록 읽고 지도 갱신’으로 직접 갱신할 수 있고, 내일 다시 자동으로 갱신해요.`)
+                        // New records in, but the last automatic reading was a moment ago: when the map follows, and the way to it now.
+                        : host.canRead() && !busy && b.runs.last && Date.now() - Date.parse(b.runs.last) < AUTO_RUN_GAP_MS ? h('p', { class: 'fine sync-next' }, `새 기록이 들어왔어요. 지도는 ${stamp(new Date(Date.parse(b.runs.last) + AUTO_RUN_GAP_MS).toISOString())}쯤 자동으로 갱신돼요. 지금 하려면 지도의 ‘${host.current()?.project.space.areas.some(a => !a.archived) ? '새 기록 읽고 지도 갱신' : '기록으로 지도 정리'}’ 버튼을 누르세요.`)
+                            : !b.taken && b.lastCheck && !busy && !error && !waiting ? h('p', { class: 'fine' }, `${b.folders.length > 1 ? '이 폴더들' : '이 폴더'}에서 최근 ${BACKFILL_MS / 86400000}일 안의 대화를 아직 찾지 못했어요. 새로 대화하면 들어와요. 경로를 직접 적었다면 맞는지 확인해 주세요.`) : null, errorLine(error), 
             // '지금 확인' is only marked unavailable while it cannot run, so focus can stay on it through the look it started.
             h('div', { class: 'pp-row' }, h('button', { type: 'button', class: 'secondary small', 'data-act': 'check', 'aria-disabled': String(busy || waiting), onclick: () => { if (!busy && !waiting)
                     void tick(true); } }, busy ? '확인 중…' : '지금 확인'), h('button', { type: 'button', class: 'link-button sync-add', 'data-act': 'add', onclick: () => { adding = true; folders = null; foldersError = null; render(); } }, '폴더 추가'), h('button', { type: 'button', class: 'link-button quiet sync-off', 'data-act': 'off', onclick: disconnect }, '연결 끊기')), setup);
@@ -516,6 +535,6 @@ export function createAutoSync(host) {
         isOpen: () => panelOpen,
         /** The open project is connected: what is saved into it goes to the AI with its next automatic map reading. */
         connected: () => { const o = open(); return !!o && !!bindingOf(o.key); },
-        toggle, close, render, tick, bindingOf, connect, removeFolder, disconnect
+        toggle, close, render, tick, bindingOf, connect, removeFolder, disconnect, hold
     };
 }

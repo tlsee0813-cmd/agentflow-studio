@@ -103,7 +103,8 @@ export function textSum(t) { let h = 0x811c9dc5; for (let i = 0; i < t.length; i
 export function newTurns(s, mark, since = null) {
     if (!mark)
         return since ? s.turns.filter(t => !t.at || t.at >= since) : s.turns;
-    const lastAt = mark.lastAt, after = lastAt ? s.turns.filter(t => !!t.at && t.at > lastAt) : s.turns.slice(Math.max(0, mark.count - s.omitted));
+    const lastAt = mark.lastAt, at = lastAt && mark.same !== undefined ? s.turns.filter(t => t.at === lastAt).slice(mark.same) : [];
+    const after = lastAt ? s.turns.filter(t => !!t.at && (t.at > lastAt || at.includes(t))) : s.turns.slice(Math.max(0, mark.count - s.omitted));
     const last = lastTaken(s, mark), reply = mark.reply;
     if (!last || last.role !== 'assistant' || !reply)
         return after;
@@ -122,6 +123,10 @@ function lastTaken(s, mark) {
     const lastAt = mark.lastAt;
     if (!lastAt)
         return s.turns[mark.count - 1 - s.omitted];
+    // Counted: the last of those taken at that time (one written since at the same time is not it).
+    const at = s.turns.filter(t => t.at === lastAt);
+    if (mark.same !== undefined && at.length)
+        return at[Math.max(0, Math.min(mark.same, at.length) - 1)];
     const i = s.turns.map(t => t.at).lastIndexOf(lastAt);
     return i >= 0 ? s.turns[i] : s.turns.find(t => !!t.at && t.at > lastAt);
 }
@@ -146,7 +151,11 @@ export function markAfter(s, was, updatedAt, since = null) {
     if (!last)
         return was ? { ...was, updatedAt } : { lastAt: since, count: s.omitted, updatedAt };
     const lastAt = [...s.turns].reverse().find(t => t.at)?.at ?? was?.lastAt ?? null;
-    return { lastAt, count: s.omitted + s.turns.length, updatedAt,
+    // The turns at that time this reading holds (a reading from a mark holds every turn from its time on, and never ends between
+    // turns of one time): all of them are taken now.
+    const same = lastAt ? s.turns.filter(t => t.at === lastAt).length : 0;
+    const counted = same ? { same } : lastAt && was?.lastAt === lastAt && was.same !== undefined ? { same: was.same } : {};
+    return { lastAt, count: s.omitted + s.turns.length, updatedAt, ...counted,
         ...(last.role === 'assistant' && (last.at ?? null) === lastAt ? { reply: { chars: last.text.length, sum: textSum(last.text), files: [...(last.files ?? [])] } } : {}) };
 }
 /** Turns after the mark that the reading left out (it sends the newest within its budget): the first record says how many. A mark
