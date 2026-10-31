@@ -137,6 +137,10 @@ test('HANDOVER-B2 a web record pasted back keeps a handover document its request
   assert.equal(foldRecord(cut), cut);
   assert.deepEqual(receivedHandovers(cut), [{ code: 'QW3RTY', areaId: booking }]);
   assert.ok(handoverText(D.pasteRecord(p, cut, null).project, { scope: null, code: 'CUT234', at: '2026-10-30T05:00:00.000Z' }).includes('\n- (인수인계 문서로 시작 · 나의 프로젝트 › 예약 화면) → 바꾼 파일: src/cancel.ts\n'));
+  // Such a record an older page saved with the answer's head glued to the folded line is still read so, though it stays as stored.
+  const glued = '[웹 AI 세션 기록 · 취소 마감]\n\n── 사용자 요청 ──\n[AgentFlow 인수인계 문서를 받아 이어감 · af-handover:QW3RTY · 나의 프로젝트]── 웹 AI 답변 ──\n고쳤어요.\n(바꾼 파일: src/cancel.ts)';
+  const old = handoverText(D.pasteRecord(p, glued, null).project, { scope: null, code: 'CUT234', at: '2026-10-30T05:00:00.000Z' });
+  assert.ok(old.includes('\n- (인수인계 문서로 시작 · 나의 프로젝트) → 바꾼 파일: src/cancel.ts\n') && !old.includes('웹 AI 답변') && foldRecord(glued) === glued, old);
   // Text that is not a session record (the document kept on its own, a note) stays as written.
   assert.equal(foldRecord(doc), doc);
   assert.equal(foldRecord(`메모\n${doc}`), `메모\n${doc}`);

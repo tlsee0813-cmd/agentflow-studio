@@ -117,6 +117,9 @@ function partBlock(view: StudioView, part: PartView, sessions: PartSession[], to
   return lines;
 }
 
+// A web record saved by an older page, from a document copied without its end line, has the answer's head glued to the folded line
+// ('…]── 웹 AI 답변 ──'): read with that head on a line of its own, its answer stays the AI's. The stored text is not changed.
+const GLUED = /(\[AgentFlow 인수인계 문서를 받아 이어감 · [^\]\n]*\])(?=── (?:웹 AI|Claude Code|Codex) 답변)/g;
 interface Ask { text: string; files: string[] }
 /** The person's requests in session records, oldest first, with the files the tool's next answer reported changing. */
 function sessionAsks(p: Project, only: Set<string> | null, took: Set<string>): Ask[] {
@@ -126,7 +129,7 @@ function sessionAsks(p: Project, only: Set<string> | null, took: Set<string>): A
   for (const rec of p.pasted) {
     const origin = sessionOrigin(rec.text); if (!origin) continue;
     const key = originKey(origin), shown = !only || only.has(rec.id) || took.has(key);
-    for (const part of rec.text.split(/^── /m).slice(1)) {
+    for (const part of rec.text.replace(GLUED, '$1\n').split(/^── /m).slice(1)) {
       const nl = part.indexOf('\n'), head = part.slice(0, nl), body = part.slice(nl + 1).trim();
       if (head.startsWith('사용자 요청')) { const t = shown ? { text: body, files: [] } : null; if (t) out.push(t); asked.set(key, t); continue; }
       // The list is on the answer's last line (a web AI may put it after a bullet), read to its last ')' so a name like
