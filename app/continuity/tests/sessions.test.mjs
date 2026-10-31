@@ -584,7 +584,7 @@ test('SESSIONS-B2 picked folders: one inside another reads each session once (th
     await sources.load(); for (let i = 0; i < 3; i++) assert.equal(await sources.pick(), true);
     const src = sources.current(), found = await src.list('/target');
     assert.deepEqual(found.map(x => x.preview), ['오래된 대상 작업'], 'found past 260 newer sessions, read through both folders');
-    assert.equal(src.partial(), 'broken 폴더를 읽지 못했어요.');
+    assert.equal(src.partial(), 'broken 폴더를 읽지 못했어요. 옮겼거나 지웠다면 빼고 다시 골라 주세요.');
     const all = await src.list();
     assert.equal(new Set(all.map(x => x.id)).size, all.length, 'each session once');
     const thread = all.find(x => x.preview.startsWith('휴무일을 예약'));

@@ -245,7 +245,8 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
       }
       // A folder this browser no longer lets the page read (its permission withdrawn while the page was open) is asked for again.
       if (bad.length) await check();
-      const unreadable = bad.length ? `${bad.join(', ')} 폴더를 읽지 못했어요.` : null; missed = unreadable;
+      // Said the same whether some or all of them failed (the panel shows it once, as its error).
+      const unreadable = bad.length ? `${bad.join(', ')} 폴더를 읽지 못했어요. 옮겼거나 지웠다면 빼고 다시 골라 주세요.` : null; missed = unreadable;
       if (roots.length && bad.length === roots.length) { looked = unreadable; throw Object.assign(new Error('SESSION_FOLDER_UNREADABLE'), { code: 'SESSION_FOLDER_UNREADABLE', cause }); }
       // A file found through two picked folders (one inside the other) is looked at once.
       const once = new Set<string>();

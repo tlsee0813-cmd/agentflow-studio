@@ -129,7 +129,11 @@ export function createAutoSync(host: AutoSyncHost) {
         let list: SessionSummary[];
         try { list = await src.list(f.path); }
         // Picked folders this browser asks about again (their permission withdrawn) are said on the pill, with the way to allow them.
-        catch (e) { if (host.sources.current()) failedAt = { f, text: failed = `${folderName(f.path)}: ${failText(e, '세션 기록을 확인하지 못했어요.')}` }; continue; }
+        // None of the picked session folders read is said as one of them is, by their names (not this working folder's).
+        catch (e) {
+          const none = (e as { code?: string } | null)?.code === 'SESSION_FOLDER_UNREADABLE' ? src.partial?.() : null;
+          if (host.sources.current()) failedAt = { f, text: failed = none || `${folderName(f.path)}: ${failText(e, '세션 기록을 확인하지 못했어요.')}` }; continue;
+        }
         adopt(key, list);
         // A picked folder that could not be read is said, and the first look of this folder is not done until it can be.
         const missed = src.partial?.() ?? null; if (missed) failed = missed;

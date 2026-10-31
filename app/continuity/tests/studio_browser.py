@@ -3257,7 +3257,7 @@ def folder_sessions_flow(browser, base):
 def final_client_flow(browser, base):
     """A new project's empty map offers the automatic connection first. Picked session folders, one tool only (.claude): the panel says only Claude Code comes in and how to add Codex; a session started from a part's handover document and taken by '지금 확인'
     shows on that part's summary at once, marked as the handover sheet says, with no reading in between (the panel says when the map
-    follows)."""
+    follows). That one folder unreadable is said once, by its name."""
     jl = lambda *rows: "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows)
     when = lambda minutes: time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime(time.time() - minutes * 60))
     row = lambda kind, text, minutes: {"type": kind, "cwd": "/work/salon", "sessionId": "a1", "timestamp": when(minutes),
@@ -3324,6 +3324,13 @@ def final_client_flow(browser, base):
     page.keyboard.press("Escape")
     expect(lens).to_have_text("다룬 세션Claude Code 「휴무일 이어서」 · 인수인계로 이어받음, Claude Code 「휴무일 막기」")
     assert len(maps) == 1, maps
+    # The one picked session folder cannot be read: said once, by its own name, not under the working folder's.
+    page.evaluate("() => { window.__broken = '.claude'; }")
+    pill.click()
+    panel.get_by_role("button", name="지금 확인").click()
+    expect(pill).to_have_text("자동 연결 · salon · 확인 필요")
+    expect(panel.locator(".pp-error")).to_have_text(".claude 폴더를 읽지 못했어요. 옮겼거나 지웠다면 빼고 다시 골라 주세요.")
+    assert panel.inner_text().count("폴더를 읽지 못했어요") == 1, panel.inner_text()
     assert not errors, errors
     context.close()
 
