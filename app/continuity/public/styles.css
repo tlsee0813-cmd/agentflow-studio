@@ -1489,7 +1489,7 @@ button:disabled { opacity: .5; cursor: default; }
 .panel:not(.reading) .sheet-back { display: none; }
 .space.sheet-read .viewport { opacity: .55; }
 .space.sheet-read .controls { opacity: .5; }
-/* A session kept on this PC, picked into the paste box (local server only). */
+/* A session kept on this PC, picked into the paste box (listed by the local server or from the folders picked in this browser). */
 .rr-sessions { margin: 0 0 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; word-break: keep-all; }
 .rr-sessions .fine { margin: 0; }
 .rr-sessions.open { display: block; padding: 10px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface-2); }
@@ -1514,7 +1514,6 @@ button:disabled { opacity: .5; cursor: default; }
 .sync-pill:hover { border-color: var(--accent-line); color: var(--accent); }
 .sync-pill i { width: 6px; height: 6px; border-radius: 50%; background: var(--plan); }
 .sync-pill[data-state="on"] i { background: var(--ok); }
-.sync-pill[data-state="busy"] i { background: var(--accent); }
 .sync-pill[data-state="error"] i { background: var(--warn); }
 /* A look running turns the dot into a small spinner (stopped with reduced motion); the open panel's pill reads as pressed. */
 .sync-pill[data-state="busy"] i { width: 8px; height: 8px; margin: -1px; border: 1.5px solid var(--accent-line); border-top-color: var(--accent); background: none; animation: spin .8s linear infinite; }
