@@ -346,10 +346,27 @@ test('HANDOVER-X1 an answer\'s files go to the request of its own session, even 
   const t = handoverText(p, { scope: null, code: 'XRS234', at: AT });
   assert.ok(t.includes('- 결제 모듈 리팩터링 → 바꾼 파일: src/pay.ts, src/pay.test.ts\n- 로그인 화면 문구만 바꿔 줘, 결제 버튼 글자도 → 바꾼 파일: src/login.tsx\n'), t);
   assert.ok(!t.includes('최근에 바뀐 파일'), 'each file is named above: not listed again');
-  // A part's document leaves out the record holding the prompt: the reply's files go nowhere rather than to another request.
+  // A part's document has a request whose answer its reading quoted, though the answer came in a later record: the reply's files
+  // stay with it, never with another request.
   const q = readAs(p, [['결제', ['결제 버튼 글자도', '리팩터링 끝']]]), pay = q.space.areas.find(a => a.name === '결제').id;
   const s = handoverText(q, { scope: pay, code: 'XRS234', at: AT });
-  assert.ok(s.includes('- 로그인 화면 문구만 바꿔 줘, 결제 버튼 글자도 → 바꾼 파일: src/login.tsx\n') && !s.includes('src/pay.ts'), s);
+  assert.ok(s.includes('\n- 결제 모듈 리팩터링 → 바꾼 파일: src/pay.ts, src/pay.test.ts\n- 로그인 화면 문구만 바꿔 줘, 결제 버튼 글자도 → 바꾼 파일: src/login.tsx\n'), s);
+});
+
+test('HANDOVER-Q1 a part\'s recent flow is the requests its readings quoted, not every request of a record that also holds other parts\' work', () => {
+  // One long session, taken as one record: two requests on the booking screen, then six on payment. One reading quotes it for both.
+  const asks = [['예약 화면에서 휴무일에는 예약 버튼을 막아 줘', '휴무일이면 예약 버튼을 막았어요.', ['src/booking/Booking.tsx', 'src/booking/holiday.ts']], ['예약 달력에서 오늘 날짜를 굵게 보여 줘', '오늘 날짜를 굵게 했어요.', ['src/booking/Calendar.tsx']],
+    ...['토스 결제창 붙여 줘', '결제 실패하면 다시 시도 버튼 보여 줘', '결제 완료 화면 문구 바꿔 줘', '결제 금액에 부가세 표시해 줘', '결제 내역 페이지 만들어 줘', '결제 테스트 돌려 줘'].map((x, i) => [x, '했어요.', [`src/pay/step${i}.ts`]])];
+  let p = D.pasteRecord(D.createProject(), sessionText(session(ID, asks.flatMap(([text, reply, files], i) => [{ role: 'user', at: `2026-10-30T0${i}:00:00.000Z`, text }, { role: 'assistant', at: `2026-10-30T0${i}:05:00.000Z`, text: reply, files }]), { title: '예약과 결제' })).text, null).project;
+  p = readAs(p, [['예약 화면', ['휴무일에는 예약 버튼을 막아 줘'], [['reported', '오늘 날짜를 굵게 했어요.']]], ['결제', ['토스 결제창 붙여 줘'], [['reported', '결제 테스트 돌려 줘']]]]);
+  const flow = id => { const t = handoverText(p, { scope: p.space.areas.find(a => a.name === id).id, code: 'QTE234', at: AT }); return t.slice(t.indexOf('## 최근 흐름')).split('\n\n')[0].split('\n').slice(1); };
+  // The request itself quoted, or the answer to it.
+  assert.deepEqual(flow('예약 화면'), ['- 예약 화면에서 휴무일에는 예약 버튼을 막아 줘 → 바꾼 파일: src/booking/Booking.tsx, src/booking/holiday.ts', '- 예약 달력에서 오늘 날짜를 굵게 보여 줘 → 바꾼 파일: src/booking/Calendar.tsx']);
+  assert.deepEqual(flow('결제'), ['- 토스 결제창 붙여 줘 → 바꾼 파일: src/pay/step0.ts', '- 결제 테스트 돌려 줘 → 바꾼 파일: src/pay/step5.ts']);
+  // Read only in part (a long record is read a piece at a time): what is not read yet of it is kept, what was read only if quoted.
+  const half = { ...p, readings: p.readings.map(r => ({ ...r, records: r.records.map(x => ({ ...x, to: p.pasted[0].text.lastIndexOf('── 사용자 요청', p.pasted[0].text.indexOf('결제 내역 페이지')) })) })) };
+  const t = handoverText(half, { scope: half.space.areas.find(a => a.name === '예약 화면').id, code: 'QTE234', at: AT }), lines = t.slice(t.indexOf('## 최근 흐름')).split('\n\n')[0];
+  assert.ok(lines.includes('- 예약 화면에서 휴무일에는') && lines.includes('- 결제 내역 페이지 만들어 줘') && lines.includes('- 결제 테스트 돌려 줘') && !lines.includes('- 토스 결제창'), lines);
 });
 
 test('HANDOVER-B3 a web record header is read by the shape of its fields, in any order; its files line may follow a bullet', () => {
