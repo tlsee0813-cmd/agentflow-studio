@@ -42,7 +42,8 @@ function later(anchored = M.MAP7_SCHEMA) {
   return { ...c, p, inp: M.buildMapAsk(p, studioView(p), [c.rq], c.rq.id, anchored) };
 }
 const firstProject = () => D.pasteRecord(D.rename(D.createProject(), '첫 지도 116'), K.REQUIREMENT, null).project;
-const refusal = (f) => { try { f(); } catch (e) { return e; } assert.fail('not refused'); };
+// A map.7 item set aside (PCRUN100) is its refusal too: the same path, rule and category, the rest of the reply read.
+const refusal = f => { let r; try { r = f(); } catch (e) { return e; } const a = M.setAside(r)[0]; if (a) return a; assert.fail('not refused'); };
 
 test('116-1 the builder: a later ask goes as map.7 with the map.6 content, a first map stays map.6, map.7 is never a first map', () => {
   const { p, rq, inp } = later(), six = M.buildMapAsk(p, studioView(p), [rq], rq.id, M.MAP6_SCHEMA);
@@ -213,7 +214,9 @@ test('116-6 standard provider: m6 and the later m7 named; map.7 asked with its o
   assert.equal(r7.status, 400); assert.equal((await r7.json()).error.code, 'INVALID_INPUT'); assert.equal(prov2.seen.length, calls, 'no call');
   const bad = provider(ask => { const w = K.replyFor7(ask, M.askRecords(ask)); w.matches[1].aboutAt = K.CODE_META.version; return w; });
   const h3 = createStudioHandler({ env: { DEEPSEEK_API_KEY: 'k-116', STUDIO_REQUESTS_PER_MINUTE: '60' }, fetchImpl: bad.fetchImpl }), r3 = await h3(post('map', body));
-  assert.equal(r3.status, 502); assert.deepEqual((await r3.json()).error, { code: 'INVALID_RESPONSE', detail: { path: 'matches[1].aboutAt', rule: 'reference', target: 'not-anchor' } });
+  // PCRUN100: one match breaking a rule is set aside, not the reply: the raw wire comes back, and the client's own check says which.
+  assert.equal(r3.status, 200); const a3 = M.setAside(M.validateMapReply((await r3.json()).reply, inp.ask));
+  assert.deepEqual(a3.map(e => [e.path, e.rule, e.target]), [['matches[1].aboutAt', 'reference', 'not-anchor']]);
 });
 
 test('116-7 standard provider jobs: a map.7 job is bound to m7 (m6 refused for it), runs MAP7_PROMPT, and its ready wire applies', async () => {
@@ -291,7 +294,9 @@ test('116-9 CLI map7-later: a later job bound to m7 and MAP7_PROMPT runs one chi
     const y = await submission(inp, p, m7, 'fake-model-102', 'E_cond0116-05');
     assert.equal((await jcall(s.handle, 'POST', '', y.cap, y.body)).status, 202);
     await until(async () => !['accepted', 'running'].includes((v = await jcall(s.handle, 'GET', `/${y.id}`, y.cap)).state), 'ended');
-    assert.deepEqual([v.state, v.error.code, v.error.detail], ['failed', 'INVALID_RESPONSE', { path: 'parts[1].claims[0].aboutAt', rule: 'condition-source', target: K.aliases(inp.ask, inp.records).code }]);
+    // PCRUN100: the one claim is set aside, not the job: ready, and the reader's check says which (as the refusal would have).
+    assert.equal(v.state, 'ready');
+    assert.deepEqual(M.setAside(M.validateMapReply(v.result.wire, J.decodeMapInput(v.input).ask)).map(e => [e.path, e.rule, e.target]), [['parts[1].claims[0].aboutAt', 'condition-source', K.aliases(inp.ask, inp.records).code]]);
     assert.equal(readFileSync(join(s.ctl, 'invocations'), 'utf8').split('\n').filter(Boolean).length, 2);
   } finally { await s.close(); }
 });
