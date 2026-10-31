@@ -2887,7 +2887,7 @@ def sessions_flow(browser, base):
 
 def handover_flow(browser, base):
     """Handover document (stubbed map reply): a part read from a session record lists that session; its ⋯ menu makes the part's
-    document (its path, scope rule and marker), the range switches to the whole project in place, Esc closes only the document;
+    document (its path, scope rule and marker) and says how a web chat's record comes back, the range switches to the whole project in place, Esc closes only the document;
     the bar's button makes the whole project's, saved as a .md file. Nothing is sent to the AI for it."""
     context = browser.new_context(viewport={"width": 1280, "height": 720}, accept_downloads=True)
     page = context.new_page()
@@ -2921,6 +2921,10 @@ def handover_flow(browser, base):
     expect(sheet).to_be_visible()
     expect(sheet.locator(".handover-lead")).to_contain_text("그 아래에 이어서 할 일을 적으세요")  # the person's next step goes under it
     expect(sheet.locator(".handover-lead")).to_contain_text("지도와 기록에 있는 내용만 옮겼어요(만들 때 AI를 부르지 않아요).")
+    # A web chat's record does not come back by itself: the sheet says how, with the request text one press away.
+    expect(sheet.locator(".handover-web")).to_have_text("웹 AI 대화에서 이어 가면 기록이 저절로 들어오지 않아요. 일을 마친 뒤 기록 요청 문구 복사를 눌러 그 대화에 붙여 넣고, 나온 답을 ‘돌아와 읽기 › 기록 붙여넣기’에 넣어 저장하세요.")
+    sheet.get_by_role("button", name="기록 요청 문구 복사").click()
+    expect(sheet.locator(".handover-msg")).to_have_text(re.compile("기록 요청 문구를 복사했어요|자동 복사가 막혀 있어요"))
     text = page.locator("#handover-text")
     expect(text).to_have_value(re.compile(r"^──────── AgentFlow 인수인계 문서 · af-handover:[A-Z2-9]{6}:A_"))
     value = text.input_value()
@@ -2934,7 +2938,7 @@ def handover_flow(browser, base):
     expect(text).to_have_value(re.compile("범위: 프로젝트 전체 \\(부분 2개\\)"))
     whole = text.input_value()
     assert f"af-handover:{code} " in whole and "### 스텁 부분 1" in whole and "### 스텁 부분 2" in whole, whole
-    page.locator("#handover-sheet").get_by_role("button", name="복사").click()
+    page.locator("#handover-sheet").get_by_role("button", name="복사", exact=True).click()
     expect(page.locator("#handover-sheet .handover-msg")).to_have_text(re.compile("복사했어요|자동 복사가 막혀 있어요"))
     page.keyboard.press("Escape")
     expect(sheet).to_be_hidden()
@@ -3063,6 +3067,7 @@ def folder_sessions_flow(browser, base):
     expect(box).to_contain_text("고른 세션 폴더(.claude, .codex)의 대화 기록")
     page.locator("#lens").get_by_role("button", name="내 AI 세션에서 가져오기").click()
     expect(page.locator("#lens .rr-session")).to_have_count(4)  # the archived thread is listed too
+    expect(page.locator("#lens").get_by_role("button", name="웹 대화용 기록 요청 문구 복사")).to_be_visible()  # a web chat's way stays
     expect(page.locator("#lens .rr-session", has_text="보관해 둔 옛 대화")).to_have_count(1)
     page.locator("#lens .rr-session", has_text="휴무일 연결").click()
     draft = page.locator("#paste-text")

@@ -4,7 +4,7 @@
  * the code inside the document is how a session that starts from it is known later (it comes back in that session's records). */
 import type { Project } from '../shared/types.js';
 import { studioView } from '../shared/studio.js';
-import { handoverDoc, handoverCode, type Handover } from '../shared/handover.js';
+import { handoverDoc, handoverCode, WEB_RECORD_ASK, type Handover } from '../shared/handover.js';
 import { h } from './plan-dom.js';
 
 export interface HandoverHost { current(): { key: string; kind: string; project: Project } | null }
@@ -38,6 +38,10 @@ export function createHandoverView(host: HandoverHost) {
       h('header', { class: 'handover-head' }, h('h2', { id: 'handover-title' }, '인수인계 문서'),
         h('button', { type: 'button', class: 'close', 'data-act': 'close', 'aria-label': '닫기', title: '닫기 (Esc)', onclick: close }, '×')),
       h('p', { class: 'handover-lead' }, '새 세션의 첫 메시지에 이 문서를 그대로 붙여 넣고, 그 아래에 이어서 할 일을 적으세요. 지도와 기록에 있는 내용만 옮겼어요(만들 때 AI를 부르지 않아요). 그 세션의 기록이 들어오면 지도에 ‘인수인계로 이어받음’으로 표시돼요.'),
+      // A web chat keeps no session file: its record comes back only through the request text, pasted by hand.
+      h('p', { class: 'handover-web' }, '웹 AI 대화에서 이어 가면 기록이 저절로 들어오지 않아요. 일을 마친 뒤 ',
+        h('button', { type: 'button', class: 'link-button', 'data-act': 'web', onclick: copyWebAsk }, '기록 요청 문구 복사'),
+        '를 눌러 그 대화에 붙여 넣고, 나온 답을 ‘돌아와 읽기 › 기록 붙여넣기’에 넣어 저장하세요.'),
       h('label', { class: 'handover-scope', for: 'handover-scope' }, h('span', {}, '범위'), pick),
       text,
       h('div', { class: 'handover-acts' },
@@ -54,6 +58,13 @@ export function createHandoverView(host: HandoverHost) {
     st.msg = ok ? '복사했어요. 새 세션에 붙여 넣으세요.' : '자동 복사가 막혀 있어요. 글을 선택해 직접 복사하세요.';
     render();
     if (!ok) { const t = document.getElementById('handover-text') as HTMLTextAreaElement | null; t?.focus(); t?.select(); }
+  }
+  async function copyWebAsk() {
+    const st = state; if (!st) return;
+    let ok = true; try { await navigator.clipboard.writeText(WEB_RECORD_ASK); } catch { ok = false; }
+    if (state !== st) return;
+    st.msg = ok ? '기록 요청 문구를 복사했어요. 웹 AI 대화에서 일을 마친 뒤 붙여 넣으세요.' : '자동 복사가 막혀 있어요. ‘기록 붙여넣기’의 ‘웹 대화용 기록 요청 문구 복사’에서 직접 복사하세요.';
+    render();
   }
   function save() {
     const o = host.current(), st = state; if (!o || !st) return;

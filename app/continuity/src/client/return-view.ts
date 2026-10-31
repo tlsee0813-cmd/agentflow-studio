@@ -288,8 +288,9 @@ export function createReturnView(host: ReturnHost) {
   /** Copies the web chat's request text; when copying is blocked it is shown whole and selected, to copy by hand. */
   async function copyWebAsk(p: SessionPick) {
     let ok = true; try { await navigator.clipboard.writeText(WEB_RECORD_ASK); } catch { ok = false; }
-    // Said as the handover document says it: a quiet line, not an error (the text is right there to copy).
-    p.error = null; p.manual = !ok;
+    // Said as the handover document says it: a quiet line, not an error (the text is right there to copy). Pressed under the
+    // open list, the list folds so the line shows.
+    p.error = null; p.manual = !ok; p.open = false;
     p.note = ok ? '기록 요청 문구를 복사했어요. 웹 AI 대화에 붙여 넣고, 나온 답을 이 칸에 그대로 붙여 넣어 저장하세요.' : '자동 복사가 막혀 있어요. 아래 칸의 문구를 직접 복사하세요(선택해 두었어요).';
     render();
     if (!ok) { const t = document.querySelector<HTMLTextAreaElement>('#lens .rr-web-ask'); t?.focus(); t?.select(); t?.scrollTo(0, 0); }
@@ -336,7 +337,9 @@ export function createReturnView(host: ReturnHost) {
       // What the last look at the picked folders could not read (a folder gone, a walk cut short).
       current?.kind === 'folder' && src.notice() ? h('p', { class: 'fine rr-sessions-notice' }, src.notice()) : null,
       p.list && !p.list.length ? h('p', { class: 'fine' }, `${tools}에서 세션을 찾지 못했어요.`) : null,
-      p.list?.length ? filter : null, list);
+      p.list?.length ? filter : null, list,
+      // A session kept nowhere here (a web chat, a file) is still one press away while the list is open.
+      others);
   }
   /* ---------- a provided code or check file (project.14) ---------- */
   const fileDrafts = new Map<string, FileDraft>();
