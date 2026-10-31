@@ -44,7 +44,7 @@ export const firstAsk = (ask: Pick<MapAsk, 'parts' | 'requests' | 'priors'>): bo
 /** A reply refused for a contradiction or a wrong reference it holds: where (path), which rule and what it names (an alias,
  * a key or a reference, never record text). The code stays INVALID_RESPONSE. */
 export class MapReplyError extends Error {
-  constructor(readonly path: string, readonly rule: 'settled-and-open' | 'duplicate-target' | 'duplicate-key' | 'material-evidence' | 'reference' | 'source-kind' | 'condition-form' | 'condition-source' | 'condition-length' | 'contract', readonly target: string) { super('INVALID_RESPONSE'); this.name = 'MapReplyError'; }
+  constructor(readonly path: string, readonly rule: 'settled-and-open' | 'duplicate-target' | 'duplicate-key' | 'material-evidence' | 'reference' | 'length' | 'source-kind' | 'condition-form' | 'condition-source' | 'condition-length' | 'contract', readonly target: string) { super('INVALID_RESPONSE'); this.name = 'MapReplyError'; }
 }
 /** AF137: the fixed categories of a map.7 generic guard (rule 'contract'); a refusal names one of these, never a value or a key. */
 export type ContractGuard = 'shape' | 'keys' | 'text' | 'count' | 'new-count' | 'parent' | 'existing-name-parent' | 'role-required' | 'basis-required' | 'kind' | 'replaces'
@@ -231,6 +231,12 @@ export function validateMapAsk(value: unknown): MapAsk {
 export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
   const code = 'INVALID_RESPONSE';
   const seven = ask.schemaVersion === MAP7_SCHEMA, six = seven || ask.schemaVersion === MAP6_SCHEMA, five = six || ask.schemaVersion === MAP5_SCHEMA, four = five || ask.schemaVersion === MAP4_SCHEMA, three = four || ask.schemaVersion === MAP3_SCHEMA, two = three || ask.schemaVersion === MAP2_SCHEMA;
+  // map.6–7: a list the reply left out names nothing (no relation, candidate, gap, match or material), as an empty one does. A real
+  // reading on a PC left out material it had none of, and the whole map was refused for that alone. Every other key stays exact.
+  if (six && value && typeof value === 'object' && !Array.isArray(value)) {
+    const lists = ['relations', 'candidates', 'gaps', 'matches', 'material'].filter(k => !Object.hasOwn(value as object, k));
+    if (lists.length) value = { ...value, ...Object.fromEntries(lists.map(k => [k, []])) };
+  }
   // AF137: map.7's generic guards say where (a static path) and which (a fixed category) through MapReplyError, rule 'contract'.
   // Each is the same condition at the same place; map.1–6 go through check/obj/str/arr unchanged (a plain INVALID_RESPONSE).
   function need(ok: unknown, path: string, what: ContractGuard): asserts ok { if (!ok) throw seven ? new MapReplyError(path, 'contract', what) : new Error(code); }
@@ -254,15 +260,24 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
   };
   // map.4 keeps its two-piece/paragraph contract; map.5 allows any exact contiguous range within the evidence length bound.
   // map.6: a reference that resolves to nothing in this request is refused with where it stands (path) and what it said.
+  // map.6–7: a range of pieces that are there but run past ANCHOR_QUOTE_MAX is refused as too long ('length'), not as a reference
+  // to nothing; a claim, or one of several basis quotes, resting on one is left out instead (below).
   const cite = (v: unknown, path = ''): MapReplyQuote => {
     const bad = () => { throw six ? new MapReplyError(path, 'reference', typeof v === 'string' ? v.slice(0, 40) : String(v)) : new Error(code); };
     if (typeof v !== 'string') bad();
     const rec = /^([NR]\d{2,3})\./.exec(v as string)?.[1], got = rec ? texts.get(rec) : undefined;
     if (!got?.spans) bad();
+    if (six) {
+      const range = resolveRange(v as string, rec!, got!.text, got!.spans!);
+      if (!range) bad();
+      if (range!.to - range!.from > ANCHOR_QUOTE_MAX) throw new MapReplyError(path, 'length', (v as string).slice(0, 40));
+    }
     const at = (five ? resolveEvidenceRange : resolveRef)(v as string, rec!, got!.text, got!.spans!);
     if (!at || at.quote.length > ANCHOR_QUOTE_MAX) bad();
     return { record: rec!, quote: at!.quote, from: at!.from, to: at!.to };
   };
+  /** A quote too long to keep: what rests on it alone is left out of the reply rather than the reply refused. */
+  const tooLong = (e: unknown) => six && e instanceof MapReplyError && e.rule === 'length';
   // map.7: a condition is a sent anchor (whole pieces of one record, as material is named) or null. It belongs to the records it may
   // come from (owners: the record of the item's own at, or a role's basis records), then is the record's exact passage with its
   // outer white space trimmed, within max. Never clipped, never turned into null. Its place stays for the material check.
@@ -321,14 +336,22 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
       roleReplaces = !fresh && parts.get(ref)?.roleBy === 'reading' ? q : null;
     }
     list(p.basis, 4, `parts[${pi}].basis`); need(!fresh || (p.basis as unknown[]).length > 0, `parts[${pi}].basis`, 'basis-required');
-    const basis = (p.basis as unknown[]).map((b, j) => { if (four) return cite(b, `parts[${pi}].basis[${j}]`); obj(b, ['record', 'quote'], code); return quote(b.record, b.quote); });
+    let long: unknown = null;
+    const basis = (p.basis as unknown[]).flatMap((b, j) => {
+      if (!four) { obj(b, ['record', 'quote'], code); return [quote(b.record, b.quote)]; }
+      try { return [cite(b, `parts[${pi}].basis[${j}]`)]; } catch (e) { if (!tooLong(e)) throw e; long ??= e; return []; }
+    });
+    // A part keeps the basis quotes within bounds; one whose every quote was too long is refused as before (it would rest on none).
+    if (long && !basis.length) throw long;
     list(p.claims, 4, `parts[${pi}].claims`);
     const own = new Set(parts.get(ref)?.current.map(c => c.key) ?? []);
-    const claims = (p.claims as unknown[]).map((c, j): MapReplyClaim => {
+    const claims = (p.claims as unknown[]).map((c, j): MapReplyClaim | null => {
       form(c, `parts[${pi}].claims[${j}]`, 'about');
       object(c, ['kind', 'text', ...evidenceKeys, seven ? 'aboutAt' : 'about', 'replaces', ...(six ? ['key'] : [])], `parts[${pi}].claims[${j}]`);
       need(CLAIM_KINDS.includes(c.kind as ClaimKind), `parts[${pi}].claims[${j}].kind`, 'kind'); field(c.text, 240, false, `parts[${pi}].claims[${j}].text`);
-      const q = evidence(c, `parts[${pi}].claims[${j}].at`);
+      // A claim whose quote runs past the bound is left out (its condition with it); the rest of the reply is read as it is.
+      let q: MapReplyQuote;
+      try { q = evidence(c, `parts[${pi}].claims[${j}].at`); } catch (e) { if (tooLong(e)) return null; throw e; }
       if (!seven && c.about !== null) str(c.about, 80, false, code);
       const about = seven ? condition(c.aboutAt, `parts[${pi}].claims[${j}].aboutAt`, 80, new Set([q.record]))?.quote ?? null : c.about === null ? null : (c.about as string).trim();
       need(c.replaces === null || (typeof c.replaces === 'string' && own.has(c.replaces)), `parts[${pi}].claims[${j}].replaces`, 'replaces');
@@ -336,7 +359,7 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
       // under another is not caught by this; it only makes the settled/open clash of one key checkable).
       if (six && !(typeof c.key === 'string' && KEY.test(c.key))) throw new MapReplyError(`parts[${pi}].claims[${j}].key`, 'reference', String(c.key));
       return { kind: c.kind as ClaimKind, text: c.text.trim(), ...q, about, replaces: c.replaces as string | null, ...(six ? { key: c.key as string | null } : {}) };
-    });
+    }).filter((x): x is MapReplyClaim => x !== null);
     // A description, new or changed, rests on its own quote: an existing part's role never comes in without one.
     need(fresh || p.role !== null || claims.length > 0, `parts[${pi}]`, 'empty-part');
     need(p.role === null || basis.length > 0, `parts[${pi}].basis`, 'role-basis');

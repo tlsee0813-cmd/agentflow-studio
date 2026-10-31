@@ -120,6 +120,8 @@ Ctrl+C나 서비스 종료(SIGTERM)를 받으면 지도 작업 보관소를 정�
   POST에는 `X-AgentFlow-Request: 1` 헤더와 JSON이 필요합니다. `STUDIO_ACCESS_CODE`를 설정하면 사용자가 입력한
   코드(`X-Studio-Access`)를 요구합니다.
 - 한도(선택): `STUDIO_TIMEOUT_MS`, `STUDIO_MAX_TOKENS`, `STUDIO_REQUESTS_PER_MINUTE`, `STUDIO_MAX_CONCURRENT`, `STUDIO_CALL_CAP`.
+- 지도 생각(추론): `STUDIO_MAP_THINKING`을 정하지 않으면, 보내는 자료가 24,000바이트 이하일 때만 생각을 켜고 그보다 크면 끕니다. 실제 저장소 기록(약 64KB)에서는 생각을 켜면 시간 초과나 출력 한도에 걸렸고, 끄면 20초 안팎에 끝났습니다. `enabled`·`disabled`로 정하면 크기와 상관없이 그대로 따릅니다.
+- 지도 답 검사: 600자를 넘는 구간을 근거로 든 주장은 그 주장만 빼고, 근거가 여럿인 부분은 넘는 근거만 뺍니다(남는 근거가 없으면 길이 초과로 탈락). 답에서 빠진 빈 목록(관계·후보·모르는 것·대조·자료 구간)은 빈 것으로 읽습니다.
 - 탈락한 답 보관(로컬 Node만, 선택): `STUDIO_KEEP_REFUSED=on`이면 서버가 쓰지 않은 AI 답(출력 한도에서 잘림, 끝나지 않음, 검사 탈락)을 `continuity/.studio-data/refused-<port>/`에 파일로 남깁니다(폴더 경로를 직접 적을 수도 있음). 보낸 요청, 끝난 방식(`finish_reason`)과 토큰 수, 키 모양 글자를 가린 답 본문이 들어가고 키는 들어가지 않습니다. 지도나 보고 읽기가 왜 탈락했는지 PC에서 보기 위한 것이며, 다시 읽어 쓰지 않습니다. Worker와 제한 공개판에는 없습니다.
 - 로컬 Node: `server/app.mjs`가 기존 localhost Host 검사를 먼저 하고 그다음 `/api/studio/*`를 handler에 넘깁니다.
   기존 `/api/continuity`·`/api/guidance` 경계는 바뀌지 않았습니다.

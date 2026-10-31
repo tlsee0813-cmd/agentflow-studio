@@ -106,7 +106,8 @@ function parseStudioEnv(env) {
     timeoutMs: int('STUDIO_TIMEOUT_MS', 30000, 1000, 60000), planTimeoutMs: int('STUDIO_PLAN_TIMEOUT_MS', 60000, 1000, 60000),
     // Map reading only: identity and relation judgements keep the model's reasoning (lowest effort); max_tokens counts reasoning
     // too, so the map gets a budget of its own large enough for both (8192 was used up by reasoning before the JSON finished).
-    mapThinking: env.STUDIO_MAP_THINKING === 'disabled' ? 'disabled' : 'enabled', mapMaxTokens: int('STUDIO_MAP_MAX_TOKENS', 16384, 4096, 32768),
+    // Unset, the map's reasoning is kept for asks of the size it was measured on and turned off above MAP_THINKING_BYTES (mapAuto).
+    mapThinking: env.STUDIO_MAP_THINKING === 'disabled' ? 'disabled' : 'enabled', mapAuto: !given('STUDIO_MAP_THINKING'), mapMaxTokens: int('STUDIO_MAP_MAX_TOKENS', 16384, 4096, 32768),
     mapTimeoutMs: int('STUDIO_MAP_TIMEOUT_MS', 90000, 1000, 120000), maxTokens: int('STUDIO_MAX_TOKENS', 1200, 256, 4096),
     rate: int('STUDIO_REQUESTS_PER_MINUTE', 10, 1, 120), cap: int('STUDIO_CALL_CAP', 300, 1, 100000), concurrency: int('STUDIO_MAX_CONCURRENT', 3, 1, 16)
   };
@@ -177,9 +178,14 @@ export const schemaOf = ask => (Object.hasOwn(SCHEMAS, ask?.schemaVersion) ? SCH
 
 /** Provider options for one kind. Map reading keeps the model's reasoning for identity and relation judgements (lowest effort);
  * max_tokens counts reasoning too, so the map has a budget of its own large enough for both. */
-function modelOptions(kind, config) {
+/** Above this many bytes of ask JSON the map reads without reasoning unless STUDIO_MAP_THINKING says otherwise. A first reading of
+ * a real repository on a PC (four session records, 63,660 bytes) never finished with it: past 90 s, then cut at 16,384 tokens
+ * after 98 s; without it the same ask was answered whole in 18–24 s. Earlier measured readings (about 6,400 prompt tokens) spent
+ * 7,800–10,400 tokens reasoning within the budget. */
+export const MAP_THINKING_BYTES = 24000;
+function modelOptions(kind, config, askBytes = 0) {
   if (kind === 'map') {
-    const thinking = config.mapThinking ?? 'enabled';
+    const thinking = config.mapAuto && askBytes > MAP_THINKING_BYTES ? 'disabled' : config.mapThinking ?? 'enabled';
     return { thinking: { type: thinking }, ...(thinking === 'enabled' ? { reasoning_effort: 'low' } : {}), max_tokens: config.mapMaxTokens ?? 16384 };
   }
   if (kind === 'ask') return { thinking: { type: 'disabled' }, max_tokens: config.maxTokens };
@@ -210,11 +216,11 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
   const timer = setTimeout(() => { timedOut = true; controller.abort(); }, deadlineMs(schema.kind, config));
   const abort = () => controller.abort(); signal?.addEventListener('abort', abort, { once: true });
   try {
-    const messages = [{ role: 'system', content: bounded ?? schema.system(ask) }, { role: 'user', content: `INPUT JSON (자료):\n${JSON.stringify(ask)}` }];
+    const input = JSON.stringify(ask), messages = [{ role: 'system', content: bounded ?? schema.system(ask) }, { role: 'user', content: `INPUT JSON (자료):\n${input}` }];
     // Workers supports manual/follow, not redirect:error. Reject 3xx below without forwarding the key.
     const response = await fetchImpl(ENDPOINT, { method: 'POST', redirect: 'manual', signal: controller.signal,
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.apiKey}` },
-      body: JSON.stringify({ model: config.model, stream: false, ...modelOptions(schema.kind, config), response_format: { type: 'json_object' }, messages }) });
+      body: JSON.stringify({ model: config.model, stream: false, ...modelOptions(schema.kind, config, new TextEncoder().encode(input).length), response_format: { type: 'json_object' }, messages }) });
     if (!response.ok) {
       await response.body?.cancel().catch(() => {});
       throw providerHttpError(response.status, 30);

@@ -52,29 +52,32 @@ const originKey = (o: SessionOrigin) => o.id ?? `${o.tool}|${o.title ?? ''}|${o.
 export const originLabel = (o: Pick<SessionOrigin, 'tool' | 'title' | 'start'>) => `${ORIGIN_NAME[o.tool]}${o.title ? ` 「${o.title}」` : ` 세션${o.start ? ` (${o.start.slice(5)} 시작)` : ''}`}`;
 /** The first words of a record's first request, as the paste box's list names a session; a handover it started from is not them.
  * One the person typed comes before one another Claude relayed (a project's thread starts from one), which is named by its own
- * words without the mark that says so: the mark alone would fill the name. relayed: only relayed requests were found. */
-function askName(text: string): { name: string; relayed: boolean } | null {
-  let got: { name: string; relayed: boolean } | null = null;
+ * words without the mark that says so: the mark alone would fill the name. weak: only relayed or very short requests were found, so a
+ * later record of the session may name it better. */
+function askName(text: string): { name: string; weak: boolean } | null {
+  let got: { name: string; weak: boolean } | null = null, short: string | null = null;
   for (const ask of text.split(/^── /m).filter(b => b.startsWith('사용자 요청'))) {
     const line = ask.split('\n').slice(1).map(l => l.trim()).find(l => l && !l.startsWith('[AgentFlow 인수인계 문서를 받아 이어감'));
     if (!line) continue;
-    if (!line.startsWith(RELAYED)) return { name: one(line, 25), relayed: false };
+    // A reply of a few letters ('ㅇㅇ', '네') names nothing: a longer request after it does, else it is the name of last resort.
+    if (!line.startsWith(RELAYED)) { if (line.length >= SHORT_ASK) return { name: one(line, 25), weak: false }; short ??= line; continue; }
     const own = line.slice(RELAYED.length).trim();
-    if (own && !got) got = { name: one(own, 25), relayed: true };
+    if (own && !got) got = { name: one(own, 25), weak: true };
   }
-  return got;
+  return got ?? (short ? { name: one(short, 25), weak: true } : null);
 }
+const SHORT_ASK = 6;
 /** The first request each untitled session's records hold, in the order they were kept (by originKey). Made once for each list of
  * records: a project changed is a copy, so its list is another (its length is checked too). */
 const ASKED = new WeakMap<Project['pasted'], { n: number; names: Map<string, string> }>();
 function askNames(p: Project): Map<string, string> {
   const was = ASKED.get(p.pasted); if (was && was.n === p.pasted.length) return was.names;
-  const names = new Map<string, string>(), relayed = new Set<string>();
+  const names = new Map<string, string>(), weak = new Set<string>();
   for (const rec of p.pasted) {
     const o = sessionOrigin(rec.text); if (!o || o.title) continue;
-    const key = originKey(o); if (names.has(key) && !relayed.has(key)) continue;
-    const got = askName(rec.text); if (!got || names.has(key) && got.relayed) continue;
-    names.set(key, got.name); if (got.relayed) relayed.add(key); else relayed.delete(key);
+    const key = originKey(o); if (names.has(key) && !weak.has(key)) continue;
+    const got = askName(rec.text); if (!got || names.has(key) && got.weak) continue;
+    names.set(key, got.name); if (got.weak) weak.add(key); else weak.delete(key);
   }
   ASKED.set(p.pasted, { n: p.pasted.length, names }); return names;
 }

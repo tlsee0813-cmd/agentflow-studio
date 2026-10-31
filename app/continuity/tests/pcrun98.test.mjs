@@ -79,3 +79,62 @@ test('PCRUN98-2 the handover names the change requests made and what came back f
   const folded = foldHandover(`${doc.split('\n').slice(0, -1).join('\n')}\n\n이어서 해 줘`);
   assert.ok(folded.endsWith('\n\n이어서 해 줘') && !folded.includes('맡긴 변경 요청'), folded);
 });
+
+/* ---------- 3. a reading refused whole for one quote too long, or one empty list left out (the PC's own replies) ---------- */
+import * as M from '../dist/public/shared/map-reading.js';
+import { studioView } from '../dist/public/shared/studio.js';
+
+function longAsk() {
+  const lines = Array.from({ length: 12 }, (_, i) => `${i + 1}번째 줄: 세션 파싱이 하위 에이전트 파일과 같은 시각 답변을 읽는 방법을 설명해요. ${'자세히 '.repeat(8)}`);
+  const p = D.pasteRecord(D.createProject(), lines.join('\n'), null).project, inp = M.buildMapAsk(p, studioView(p), [], undefined, M.MAP6_SCHEMA);
+  const r = inp.ask.records[0], ids = r.spans.map(s => s.s), lastNo = ids.at(-1).split('.')[1];
+  return { inp, rec: r.id, first: ids[0], second: ids[1], whole: `${r.id}.${ids[0].split('.')[1]}-${lastNo}` };
+}
+const part = (basis, claims) => ({ ref: 'new:p0', name: '세션 파싱', parent: null, role: '세션 파일을 읽어 요청과 답으로 나눠요.', roleAbout: null, roleReplaces: null, basis, claims });
+const claim = (at, key) => ({ kind: 'describes', text: '하위 에이전트 파일도 읽어요.', at, about: null, replaces: null, key });
+
+test('PCRUN98-3 a claim resting on a range past the quote bound is left out; the rest of the reading stands', () => {
+  const { inp, first, second, whole } = longAsk();
+  const wire = { summary: '연결기', parts: [part([first], [claim(second, 's1'), claim(whole, 's2')])], relations: [], candidates: [], gaps: [], matches: [], material: [] };
+  const got = M.validateMapReply(wire, inp.ask);
+  assert.equal(got.parts.length, 1); assert.deepEqual(got.parts[0].claims.map(c => c.key), ['s1']);
+  // A basis quote too long is left out when another stands; with none left, the part (and the reading) is refused as too long.
+  assert.equal(M.validateMapReply({ ...wire, parts: [part([whole, first], [])] }, inp.ask).parts[0].basis.length, 1);
+  assert.throws(() => M.validateMapReply({ ...wire, parts: [part([whole], [])] }, inp.ask), e => e.rule === 'length' && e.path === 'parts[0].basis[0]');
+  // A reference to pieces that are not there is still refused as a reference.
+  assert.throws(() => M.validateMapReply({ ...wire, parts: [part([first], [claim('N01.900', 's1')])] }, inp.ask), e => e.rule === 'reference');
+});
+
+test('PCRUN98-4 an empty list the reply left out (material, gaps, …) is read as empty; summary and parts are still required', () => {
+  const { inp, first } = longAsk();
+  const full = { summary: '연결기', parts: [part([first], [])], relations: [], candidates: [], gaps: [], matches: [], material: [] };
+  const { material: _m, gaps: _g, ...without } = full;
+  assert.deepEqual(M.validateMapReply(without, inp.ask), M.validateMapReply(full, inp.ask));
+  const { parts: _p, ...noParts } = full;
+  assert.throws(() => M.validateMapReply(noParts, inp.ask));
+  assert.throws(() => M.validateMapReply({ ...full, extra: [] }, inp.ask), 'a key it was not asked for is still refused');
+});
+
+test('PCRUN98-5 a session is not named by a reply of a few letters when a longer request follows', async () => {
+  const { sessionName, sessionOrigin } = await import('../dist/public/shared/handover.js');
+  const S = 'claude-0123456789abcdef01234567', T = m => new Date(Date.parse(AT) + m * 60000).toISOString();
+  const rec = turns => sessionText({ id: S, tool: 'claude', label: '', title: null, cwd: '/w', branch: null, startedAt: AT, omitted: 0, turns }).text;
+  const p = D.pasteRecord(D.createProject(), rec([{ role: 'user', at: T(0), text: 'ㅇㅇ' }, { role: 'assistant', at: T(1), text: '네' }, { role: 'user', at: T(2), text: '지도 정리 실패 원인 찾아 줘' }]), null).project;
+  assert.equal(sessionName(p, sessionOrigin(p.pasted[0].text)), 'Claude Code 「지도 정리 실패 원인 찾아 줘」');
+  const only = D.pasteRecord(D.createProject(), rec([{ role: 'user', at: T(0), text: 'ㅇㅇ' }, { role: 'assistant', at: T(1), text: '네' }]), null).project;
+  assert.equal(sessionName(only, sessionOrigin(only.pasted[0].text)), 'Claude Code 「ㅇㅇ」');
+});
+
+test('PCRUN98-6 a large map ask is read without reasoning unless STUDIO_MAP_THINKING says otherwise; a small one keeps it', async () => {
+  const { readStudioConfig, MAP_THINKING_BYTES } = await import('../server/studio.mjs');
+  const ask = n => { const p = D.pasteRecord(D.createProject(), Array.from({ length: n }, (_, i) => `${i + 1}번째 줄: 세션 기록의 한 줄이에요. ${'내용 '.repeat(20)}`).join('\n'), null).project;
+    return M.buildMapAsk(p, studioView(p), [], undefined, M.MAP6_SCHEMA).ask; };
+  const sent = async (a, env) => { let b; await callStudioModel(a, readStudioConfig({ DEEPSEEK_API_KEY: KEY, ...env }), { fetchImpl: async (u, init) => { b = JSON.parse(init.body); return reply('{', 'length'); } }).catch(() => {}); return b; };
+  const small = ask(10), large = ask(400);
+  assert.ok(new TextEncoder().encode(JSON.stringify(small)).length < MAP_THINKING_BYTES && new TextEncoder().encode(JSON.stringify(large)).length > MAP_THINKING_BYTES);
+  assert.deepEqual([(await sent(small, {})).thinking, (await sent(small, {})).reasoning_effort], [{ type: 'enabled' }, 'low']);
+  const big = await sent(large, {});
+  assert.deepEqual([big.thinking, big.reasoning_effort, big.max_tokens], [{ type: 'disabled' }, undefined, 16384]);
+  assert.deepEqual((await sent(large, { STUDIO_MAP_THINKING: 'enabled' })).thinking, { type: 'enabled' }, 'said outright, it stands');
+  assert.deepEqual((await sent(small, { STUDIO_MAP_THINKING: 'disabled' })).thinking, { type: 'disabled' });
+});
