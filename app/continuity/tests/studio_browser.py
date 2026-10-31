@@ -2739,6 +2739,7 @@ def sessions_flow(browser, base):
     expect(pick).to_contain_text("Claude Code")
     expect(pick).to_contain_text("Codex")
     expect(page.locator("#sync-panel")).to_contain_text("지도를 갱신할 때 이 기록을 AI에게 보내요")  # said before connecting
+    expect(page.locator("#sync-panel .sync-points")).to_contain_text(re.compile(r"처음 연결하면 최근 \d+일의 세션\(\d+개까지\)을 가져와 지도에 담아요"))
     assert maps == [], maps
     pick.click()
     # Connected: the folder's sessions became records and the first map was read without asking.
@@ -3027,6 +3028,7 @@ def folder_sessions_flow(browser, base):
     page.locator("#sync-pill").click()
     panel = page.locator("#sync-panel")
     expect(panel.locator("h3")).to_have_text("내 AI 세션 연결")
+    expect(panel.locator(".sync-source .sync-lead")).to_contain_text("세션 기록이 담긴 세션 폴더를 골라 주세요")  # named as the button names it
     panel.get_by_role("button", name="세션 폴더 고르기").click()
     # Newer subagent transcripts beside the session do not crowd it out.
     pick = panel.locator(".sync-folder-pick")

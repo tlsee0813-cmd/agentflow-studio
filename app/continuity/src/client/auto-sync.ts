@@ -299,7 +299,7 @@ export function createAutoSync(host: AutoSyncHost) {
           h('dt', {}, '오늘 자동 지도 갱신'), h('dd', {}, `${runs} / ${AUTO_RUNS_PER_DAY}회`)),
         // Why the map does not follow (no AI for maps, today's automatic readings used up), or a connection that found nothing yet.
         host.readBlocked() ? h('p', { class: 'fine sync-blocked' }, `기록은 들어오지만 지도는 갱신하지 않아요: ${host.readBlocked()}`)
-          : runs >= AUTO_RUNS_PER_DAY ? h('p', { class: 'fine sync-blocked' }, `오늘 자동 갱신 ${AUTO_RUNS_PER_DAY}회를 다 썼어요. 기록은 계속 들어오고, 지도는 직접 갱신할 수 있어요. 내일 다시 자동으로 갱신해요.`)
+          : runs >= AUTO_RUNS_PER_DAY ? h('p', { class: 'fine sync-blocked' }, `오늘 자동 지도 갱신 ${AUTO_RUNS_PER_DAY}회를 다 썼어요. 기록은 계속 들어와요. 지도는 ‘돌아와 읽기’의 ‘기록 읽고 지도 갱신’으로 직접 갱신할 수 있고, 내일 다시 자동으로 갱신해요.`)
           : !b.taken && b.lastCheck && !busy && !error && !waiting ? h('p', { class: 'fine' }, `${b.folders.length > 1 ? '이 폴더들' : '이 폴더'}에서 최근 ${BACKFILL_MS / 86400000}일 안의 대화를 아직 찾지 못했어요. 새로 대화하면 들어와요. 경로를 직접 적었다면 맞는지 확인해 주세요.`) : null,
         errorLine(error),
         // '지금 확인' is only marked unavailable while it cannot run, so focus can stay on it through the look it started.
@@ -330,7 +330,7 @@ export function createAutoSync(host: AutoSyncHost) {
         : h('p', { class: 'sync-lead' }, '이 프로젝트를 작업 폴더에 묶으면, 그 폴더의 Claude Code·Codex 대화가 저절로 기록으로 들어오고 지도가 갱신돼요.'),
       // Before connecting: what comes in first, what is kept of it, and that it goes to the AI.
       b ? null : h('ul', { class: 'sync-points' },
-        h('li', {}, `처음엔 최근 ${BACKFILL_MS / 86400000}일의 대화(세션 ${BACKFILL_SESSIONS}개까지)로 첫 지도를 만들어요.`),
+        h('li', {}, `처음 연결하면 최근 ${BACKFILL_MS / 86400000}일의 세션(${BACKFILL_SESSIONS}개까지)을 가져와 지도에 담아요.`),
         h('li', {}, '내가 쓴 요청과 AI의 답변·바꾼 파일만 그대로 가져오고, 키·토큰처럼 보이는 글은 가려요.'),
         h('li', {}, '지도를 갱신할 때 이 기록을 AI에게 보내요.')),
       foldersLoading ? h('p', { class: 'fine' }, '이 PC의 세션에서 작업 폴더를 찾는 중…') : null,
@@ -355,7 +355,7 @@ export function createAutoSync(host: AutoSyncHost) {
     const pick = async () => { if (await src.pick()) { folders = null; foldersError = null; render(); void tick(true); } else render(); };
     if (state === 'unsupported') return null;
     if (state === 'none') return h('div', { class: 'sync-source' },
-      h('p', { class: 'sync-lead' }, '설치 없이 이 브라우저가 AI 대화 기록을 직접 읽어요. 내 사용자 폴더 안의 .claude 폴더(Claude Code)나 .codex 폴더(Codex)를 골라 주세요. 둘 다 쓰면 하나씩 두 번 고르면 돼요.'),
+      h('p', { class: 'sync-lead' }, '설치 없이 이 브라우저가 AI 세션 기록을 직접 읽어요. 세션 기록이 담긴 세션 폴더를 골라 주세요. Claude Code는 내 사용자 폴더 안의 .claude, Codex는 .codex 폴더예요. 둘 다 쓰면 하나씩 두 번 고르면 돼요.'),
       // Where those folders are: a Mac's picker hides folders whose name starts with a dot until asked.
       h('p', { class: 'fine' }, 'Windows는 C:\\Users\\(내 이름) 폴더 안에 있어요. Mac은 고르는 창에서 ', h('kbd', {}, '⌘+Shift+H'), ' 키로 내 폴더로 간 뒤, ',
         h('kbd', {}, '⌘+Shift+.'), ' 키로 숨은 폴더를 보이게 하세요.'),
@@ -367,7 +367,7 @@ export function createAutoSync(host: AutoSyncHost) {
       h('ul', { class: 'sync-linked' }, ...names.map(n => h('li', {}, h('span', { class: 'sync-folder' }, n),
         h('button', { type: 'button', class: 'link-button quiet sync-remove', 'aria-label': `${n} 세션 폴더 빼기`, 'data-act': `forget:${n}`, onclick: async () => { await src.forget(n); folders = null; render(); void tick(true); } }, '빼기')))),
       notice && !shown?.includes(notice) ? h('p', { class: 'fine sync-source-notice' }, notice) : null,
-      ask ? h('p', { class: 'fine sync-blocked' }, '브라우저가 이 폴더를 다시 읽어도 되는지 물어봐야 해요.') : null,
+      ask ? h('p', { class: 'fine sync-blocked' }, '브라우저가 위 세션 폴더를 다시 읽어도 되는지 물어봐야 해요. ‘다시 허용’을 눌러 주세요.') : null,
       h('div', { class: 'pp-row' },
         ask ? h('button', { type: 'button', class: 'primary small sync-grant', 'data-act': 'grant', onclick: () => void grant() }, '다시 허용') : null,
         h('button', { type: 'button', class: 'link-button sync-pick-root', 'data-act': 'pick', onclick: () => void pick() }, '세션 폴더 더 고르기')));
