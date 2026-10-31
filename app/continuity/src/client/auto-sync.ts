@@ -264,10 +264,13 @@ export function createAutoSync(host: AutoSyncHost) {
   const back = () => { adding = false; render(); document.querySelector<HTMLElement>('#sync-panel [data-act="add"]')?.focus(); };
   /** The panel's content: the connection (its folders, what it took, what to do), or a working folder to connect or add. */
   function draw(panel: HTMLElement, b: Binding | null, error: string | null, waiting: boolean) {
-    const setup = sourceSetup();
+    const asking = !!b && !adding && host.sources.folderState() === 'prompt', setup = sourceSetup(b && !adding ? error : null, asking);
     if (b && !adding) {
       const runs = b.runs.day === day() ? b.runs.n : 0;
       put(panel, h('h3', { tabindex: '-1' }, '작업 폴더에 자동 연결됨'),
+        // The one thing to do after the browser was closed: allow the picked folders again, first in the panel.
+        asking ? h('div', { class: 'sync-ask' }, h('p', {}, '브라우저가 세션 폴더를 다시 읽어도 되는지 물어봐야 해요. 허용하면 그동안의 대화가 들어와요.'),
+          h('button', { type: 'button', class: 'primary small sync-grant', 'data-act': 'grant', onclick: () => void grant() }, '다시 허용')) : null,
         h('ul', { class: 'sync-linked' }, ...b.folders.map(f => h('li', {}, h('span', { class: 'sync-folder' }, f.path),
           b.folders.length > 1 ? h('button', { type: 'button', class: 'link-button quiet sync-remove', 'aria-label': `${f.path} 연결 빼기`, 'data-act': `leave:${f.path}`, onclick: () => removeFolder(f.path) }, '빼기') : null))),
         h('p', { class: 'fine' }, `${b.folders.length > 1 ? '이 폴더들' : '이 폴더'}의 Claude Code·Codex 대화가 잠잠해지면(약 ${SETTLE_MS / 60000}분) 기록으로 들어오고 지도가 자동으로 갱신돼요(그때 기록을 AI에게 보내요). 이 탭이 열려 있을 때만 확인하고, 닫혀 있던 동안의 대화는 다시 열면 들어와요.`),
@@ -275,11 +278,11 @@ export function createAutoSync(host: AutoSyncHost) {
           h('dt', {}, '오늘 자동 지도 갱신'), h('dd', {}, `${runs} / ${AUTO_RUNS_PER_DAY}회`)),
         host.readBlocked() ? h('p', { class: 'fine sync-blocked' }, `기록은 들어오지만 지도는 갱신하지 않아요: ${host.readBlocked()}`) : null,
         error ? h('p', { class: 'pp-error', role: 'alert' }, error) : null,
-        setup,
         // '지금 확인' is only marked unavailable while it cannot run, so focus can stay on it through the look it started.
         h('div', { class: 'pp-row' }, h('button', { type: 'button', class: 'secondary small', 'data-act': 'check', 'aria-disabled': String(busy || waiting), onclick: () => { if (!busy && !waiting) void tick(true); } }, busy ? '확인 중…' : '지금 확인'),
           h('button', { type: 'button', class: 'link-button sync-add', 'data-act': 'add', onclick: () => { adding = true; folders = null; foldersError = null; render(); } }, '폴더 추가'),
-          h('button', { type: 'button', class: 'link-button quiet sync-off', 'data-act': 'off', onclick: disconnect }, '연결 끊기')));
+          h('button', { type: 'button', class: 'link-button quiet sync-off', 'data-act': 'off', onclick: disconnect }, '연결 끊기')),
+        setup);
       return;
     }
     const linked = new Set(b?.folders.map(f => f.path) ?? []), picks = folders?.filter(f => !linked.has(f.folder)) ?? null;
@@ -305,26 +308,30 @@ export function createAutoSync(host: AutoSyncHost) {
       setup,
       b ? h('button', { type: 'button', class: 'link-button quiet', onclick: back }, '취소') : null);
   }
+  /** Asks the browser again to read the picked folders (from a click), then looks at once. */
+  async function grant() { await host.sources.grant(); folders = null; foldersError = null; render(); void tick(true); }
   /** Where sessions come from when no local server reads them: the .claude / .codex folders picked in this browser. Null with a
-   * server (it reads this PC's own folders). */
-  function sourceSetup(): HTMLElement | null {
+   * server (it reads this PC's own folders). shown: the error the panel already says (not said again here); asked: the panel asks
+   * for permission at its top. */
+  function sourceSetup(shown: string | null, asked: boolean): HTMLElement | null {
     const src = host.sources; if (src.usesServer()) return null;
     const state = src.folderState(), names = src.folders();
     // A pick that added nothing (the folder is already read) says why, under the picked folders.
     const pick = async () => { if (await src.pick()) { folders = null; foldersError = null; render(); void tick(true); } else render(); };
-    const grant = async () => { await src.grant(); folders = null; foldersError = null; render(); void tick(true); };
     if (state === 'unsupported') return null;
     if (state === 'none') return h('div', { class: 'sync-source' },
       h('p', { class: 'fine' }, '설치 없이 이 브라우저가 AI 세션 기록을 직접 읽어요. Claude Code 앱·CLI는 사용자 폴더의 .claude, Codex 앱·CLI는 .codex 폴더를 골라 주세요. 둘 다 쓰면 하나씩 두 번 고르면 돼요. 폴더는 이 브라우저 안에서만 읽어요. 거기서 가져온 대화는 이 프로젝트의 기록이 되고, 지도를 갱신할 때(자동 갱신도) AI에게 보내요.'),
       h('button', { type: 'button', class: 'primary small sync-pick-root', 'data-act': 'pick', onclick: () => void pick() }, '세션 폴더 고르기'));
+    const ask = state === 'prompt' && !asked, notice = src.notice();
     return h('div', { class: 'sync-source' },
-      h('p', { class: 'fine' }, `읽는 세션 폴더: ${names.join(', ')}`),
-      src.notice() ? h('p', { class: 'fine sync-source-notice' }, src.notice()) : null,
-      state === 'prompt' ? h('p', { class: 'fine sync-blocked' }, '브라우저가 이 폴더를 다시 읽어도 되는지 물어봐야 해요.') : null,
+      h('h4', {}, '읽는 세션 폴더'),
+      h('ul', { class: 'sync-linked' }, ...names.map(n => h('li', {}, h('span', { class: 'sync-folder' }, n),
+        h('button', { type: 'button', class: 'link-button quiet sync-remove', 'aria-label': `${n} 세션 폴더 빼기`, 'data-act': `forget:${n}`, onclick: async () => { await src.forget(n); folders = null; render(); void tick(true); } }, '빼기')))),
+      notice && !shown?.includes(notice) ? h('p', { class: 'fine sync-source-notice' }, notice) : null,
+      ask ? h('p', { class: 'fine sync-blocked' }, '브라우저가 이 폴더를 다시 읽어도 되는지 물어봐야 해요.') : null,
       h('div', { class: 'pp-row' },
-        state === 'prompt' ? h('button', { type: 'button', class: 'primary small sync-grant', 'data-act': 'grant', onclick: () => void grant() }, '다시 허용') : null,
-        h('button', { type: 'button', class: 'link-button sync-pick-root', 'data-act': 'pick', onclick: () => void pick() }, '세션 폴더 더 고르기'),
-        ...names.map(n => h('button', { type: 'button', class: 'link-button quiet', 'aria-label': `${n} 세션 폴더 빼기`, 'data-act': `forget:${n}`, onclick: async () => { await src.forget(n); folders = null; render(); void tick(true); } }, `${n} 빼기`))));
+        ask ? h('button', { type: 'button', class: 'primary small sync-grant', 'data-act': 'grant', onclick: () => void grant() }, '다시 허용') : null,
+        h('button', { type: 'button', class: 'link-button sync-pick-root', 'data-act': 'pick', onclick: () => void pick() }, '세션 폴더 더 고르기')));
   }
   function toggle() { panelOpen = !panelOpen; adding = false; if (panelOpen) { folders = null; foldersError = null; } render(); }
   /** Closes the panel; from a key, focus goes back to its pill. */

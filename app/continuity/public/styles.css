@@ -1559,3 +1559,12 @@ button:disabled { opacity: .5; cursor: default; }
 .sync-linked li { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 .sync-linked .sync-folder { margin: 0; }
 .sync-remove { flex: none; font-size: 12px; }
+/* The session folders read in this browser: the panel's last section, under a hairline (or the whole panel before any is picked). */
+.sync-source { margin-top: var(--s-3); padding-top: var(--s-3); border-top: 1px solid var(--hair); }
+.sync-panel h3 + .sync-source { margin-top: 0; padding-top: 0; border-top: 0; }
+.sync-source h4 { margin: 0 0 6px; font: var(--label); letter-spacing: var(--label-track); color: var(--text-3); }
+/* Permission to ask for again, and why the map does not follow: the warning palette of .pp-warn. */
+.sync-ask { display: flex; align-items: center; gap: var(--s-3); margin: 0 0 var(--s-3); padding: 8px 10px; border-radius: var(--r-md); background: var(--change-soft); color: #7a3f07; font-size: 12.5px; line-height: 1.5; }
+.sync-ask p { flex: 1; margin: 0; }
+.sync-ask .primary { flex: none; }
+.sync-panel .sync-blocked { padding: 6px 10px; border-radius: var(--r-md); background: var(--change-soft); color: #7a3f07; font-size: 12px; line-height: 1.5; }
