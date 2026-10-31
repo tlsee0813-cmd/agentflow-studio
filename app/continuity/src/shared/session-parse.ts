@@ -410,6 +410,25 @@ export function within(cwd: unknown, folder: string | null): boolean {
   const list = Array.isArray(cwd) ? cwd : [cwd], b = folderKey(folder);
   return list.some(c => typeof c === 'string' && (folderKey(c) === b || folderKey(c).startsWith(`${b}/`)));
 }
+const ABSOLUTE = /^(?:[A-Za-z]:[\\/]|\\\\|\/)/;
+/** A Codex app thread run in Worktree mode works in a checkout of its own under the Codex folder (<codex>/worktrees/…). The folders
+ * from there down to its working folder, or null when it is not in one. codex: the Codex folder's whole path (the server), or only
+ * its name (a folder picked in the page, whose path is not known). */
+export function worktreeSteps(cwd: string, codex: string): string[] | null {
+  const t = String(cwd).replace(/\\/g, '/'), win = windows(t), key = win ? t.toLowerCase() : t, base = `${folderKey(codex)}/worktrees/`;
+  const i = key.indexOf(win ? base.toLowerCase() : base);
+  if (i < 0 || (i > 0 && (ABSOLUTE.test(codex) || key[i - 1] !== '/'))) return null;
+  const steps = t.slice(i + base.length).split('/').filter(Boolean);
+  return steps.length && !steps.some(x => x === '.' || x === '..') ? steps : null;
+}
+/** The folder of the repository a worktree checkout came from, from the checkout's .git file (gitdir: <repo>/.git/worktrees/<name>),
+ * with the folders below the checkout (under) after it, written as the session wrote its folder. Null when the file names none. */
+export function worktreeFolder(gitFile: string, under: string[], cwd: string): string | null {
+  const repo = /^gitdir:[ \t]*(.+?)[\\/]\.git[\\/]worktrees[\\/][^\\/\r\n]+[\\/]?[ \t]*\r?$/m.exec(gitFile)?.[1];
+  if (!repo || !ABSOLUTE.test(repo)) return null;
+  const path = [repo, ...under].join('/');
+  return String(cwd).includes('\\') ? path.replace(/\//g, '\\') : path;
+}
 /** A changed file named relative to the session's working folder when it lies inside it (as the tool would show it). A relative
  * name a Windows session wrote with backslashes (a patch) is shown with '/', as the files made relative here are. */
 export function shortPath(file: string, cwd: string | null): string {

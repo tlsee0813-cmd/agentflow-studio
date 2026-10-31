@@ -6,7 +6,7 @@
  * click, before the page can read them on a later visit. A single file chosen by hand works in every browser. */
 import { listSessions, readSession, type AiStatus } from './studio-api.js';
 import { readSessionList, readSessionDetail, type SessionDetail, type SessionSummary } from '../shared/session-import.js';
-import { SESSION_LIMITS, jsonLines, parseSession, sessionParser, pushLine, withSubagents, tailFolders, hasPrompt, atFolder, sniffTool, sessionSummary, sessionDetail, sessionId, sessionKey, within, type ParsedSession, type SessionTool } from '../shared/session-parse.js';
+import { SESSION_LIMITS, jsonLines, parseSession, sessionParser, pushLine, withSubagents, tailFolders, hasPrompt, atFolder, sniffTool, sessionSummary, sessionDetail, sessionId, sessionKey, within, worktreeSteps, worktreeFolder, type ParsedSession, type SessionMeta, type SessionTool } from '../shared/session-parse.js';
 
 /** read(id, since): only turns from that time on (a turn with no time is kept), as the server does. */
 /** partial: after a listing, why it holds only some of the picked folders' sessions (a folder could not be read), or null. */
@@ -155,7 +155,22 @@ async function same(d: DirHandle, r: DirHandle): Promise<boolean> { try { return
 /** What a listing knows of one session file: its row (null when it holds no prompt, or is a Codex subagent's: read through the
  * session that started it), the folders it worked in, and for a Codex subagent's that session. key: the size and time it was read at. */
 interface Head { key: string; tool: SessionTool | null; row: SessionSummary | null; cwds: string[]; parent: string | null }
-async function readHead(f: Found, file: File): Promise<Head> {
+/** A Codex app thread run in Worktree mode works in a checkout of its own under the Codex folder: it is also in the folder of the
+ * repository the checkout came from, as the server reads it (its .git file), through the picked .codex folder. */
+async function inRepository(meta: SessionMeta, codex: DirHandle) {
+  for (const cwd of [...meta.cwds]) {
+    const steps = worktreeSteps(cwd, codex.name); if (!steps) continue;
+    let dir = named(await entries(codex), 'worktrees');
+    for (let i = 0; dir && i < Math.min(steps.length, 3); i++) {
+      dir = named(await entries(dir), steps[i]!); if (!dir) break;
+      const git = (await entries(dir)).find((e): e is FileHandle => e.kind === 'file' && e.name === '.git'); if (!git) continue;
+      try { const repo = worktreeFolder(await (await git.getFile()).text(), steps.slice(i + 1), cwd); if (repo) atFolder(meta, repo); } catch { /* gone meanwhile */ }
+      break;
+    }
+  }
+}
+/** codex: the picked .codex folder the file lies in, when one was picked (a Codex app worktree's checkout is in it too). */
+async function readHead(f: Found, file: File, codex: DirHandle | null = null): Promise<Head> {
   const key = `${file.size}:${file.lastModified}`, partial = file.size > SESSION_LIMITS.headBytes, lines = jsonLines(await file.slice(0, SESSION_LIMITS.headBytes).text(), partial);
   const tool = f.tool ?? sniffTool(lines); if (!tool) return { key, tool, row: null, cwds: [], parent: null };
   let parsed = parseSession(tool, lines);
@@ -165,6 +180,7 @@ async function readHead(f: Found, file: File): Promise<Head> {
   const parent = tool === 'codex' ? parsed.meta.parent : null; if (!hasPrompt(parsed) || parent) return { key, tool, row: null, cwds: [], parent };
   // The end of the file, for a folder the session moved to late.
   if (partial) for (const c of tailFolders(await file.slice(Math.max(0, file.size - SESSION_LIMITS.tailBytes)).text())) atFolder(parsed.meta, c);
+  if (tool === 'codex' && codex) await inRepository(parsed.meta, codex);
   const base = sessionSummary(await sessionId(tool, sessionKey(tool, parsed.meta, f.path)), tool, parsed, new Date(file.lastModified).toISOString(), file.size);
   // The id made from the file's path before ids were made from the session itself.
   // An archived Codex thread lay in sessions/YYYY/MM/DD/ under the same name (its date is in it): that path's id is its alias too.
@@ -186,6 +202,11 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
   // Each picked folder's own key for those (two picked folders may share a name).
   const rootKeys = new WeakMap<DirHandle, string>(); let rootCount = 0;
   const rootKey = (r: DirHandle) => { let k = rootKeys.get(r); if (!k) rootKeys.set(r, (k = `${++rootCount}`)); return k; };
+  // The picked .codex folder a Codex file was found in: the picked folder itself, or the .codex folder in a picked home folder.
+  const codexOf = async (f: Found): Promise<DirHandle | null> => {
+    const r = f.tool === 'codex' ? roots.find(x => f.key.startsWith(`${rootKey(x)}/`)) : undefined, path = r ? f.key.slice(rootKey(r).length + 1) : '';
+    return !r ? null : path.startsWith('.codex/') ? named(await entries(r), '.codex') ?? null : /^(sessions|archived_sessions)\//.test(path) ? r : null;
+  };
   // What to say beside the picked folders: why a pick added nothing, and how the last look went (a folder not read, a walk cut short).
   let lastFound: Found[] = [], picked: string | null = null, looked: string | null = null, missed: string | null = null;
   /** The picked folders as named on the page: two of one name (a Windows and a WSL .claude) are told apart by number, and one whose
@@ -259,7 +280,7 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
         // A changed file is read through a fresh look at it; one that cannot be read now (an agent writing it) keeps what it said
         // before, or waits for the next look.
         let h = heads.get(f.key);
-        if (h?.key !== `${f.size}:${f.at}`) h = await fresh(f.handle, file => readHead(f, file)).then(x => { heads.set(f.key, x); return x; }, () => h);
+        if (h?.key !== `${f.size}:${f.at}`) h = await fresh(f.handle, async file => readHead(f, file, await codexOf(f))).then(x => { heads.set(f.key, x); return x; }, () => h);
         if (!h) continue;
         if (h.tool === 'codex') parents.set(f.key, { key: h.key, parent: h.parent });
         if (!h.row) { quiet++; continue; }

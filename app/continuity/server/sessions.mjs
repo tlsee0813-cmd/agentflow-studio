@@ -12,7 +12,7 @@ import { open, readdir, realpath, stat } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
 import { ApiError } from '../../server/errors.mjs';
-import { SESSION_VERSION, SESSION_LIMITS, SESSION_ID, parseClaude, parseCodex, parseSession, sessionParser, pushLine, jsonLines, withSubagents, tailFolders, hasPrompt, atFolder, within, sessionSummary, sessionDetail, sessionKey, sessionId } from '../dist/public/shared/session-parse.js';
+import { SESSION_VERSION, SESSION_LIMITS, SESSION_ID, parseClaude, parseCodex, parseSession, sessionParser, pushLine, jsonLines, withSubagents, tailFolders, hasPrompt, atFolder, within, worktreeSteps, worktreeFolder, sessionSummary, sessionDetail, sessionKey, sessionId } from '../dist/public/shared/session-parse.js';
 
 export { SESSION_LIMITS, SESSION_ID, parseClaude, parseCodex };
 
@@ -78,6 +78,20 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
   // every minute, and a file is read again only when its size or time changed (a prompt-less subagent file is not read each time).
   const heads = new Map();
 
+  /** A Codex app thread run in Worktree mode works in a checkout of its own under the Codex folder: it is also in the folder of the
+   * repository the checkout came from (its .git file names it), so the project connected to that folder finds it. Only that file is
+   * read, from the first folder under worktrees/ that holds one (<id>/<name> as the app makes them). */
+  async function inRepository(meta) {
+    for (const cwd of [...meta.cwds]) {
+      const steps = worktreeSteps(cwd, where.codex) ?? [];
+      for (let i = 1; i <= Math.min(steps.length, 3); i++) {
+        let text; try { text = await readRange(join(where.codex, 'worktrees', ...steps.slice(0, i), '.git'), 4096); } catch { continue; }
+        const repo = worktreeFolder(text, steps.slice(i), cwd); if (repo) atFolder(meta, repo);
+        break;
+      }
+    }
+  }
+
   /** Newest first. folder: only sessions whose working folder is it or inside it (the files are read to know). */
   async function list(folder = null) {
     const found = [];
@@ -97,6 +111,7 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
       if (h?.size !== f.size || h.mtime !== f.mtime) {
         let real; try { real = await realpath(f.path); } catch { quiet++; continue; }
         let parsed; try { parsed = await readListed(f.tool, real, f.size, limits); } catch { quiet++; continue; }
+        if (f.tool === 'codex' && where.codex) await inRepository(parsed.meta);
         // An id is made from the session itself (sessionKey), as the page makes it; the one made from the file's path before is its alias.
         const id = await sessionId(f.tool, sessionKey(f.tool, parsed.meta, real)), base = sessionSummary(id, f.tool, parsed, new Date(f.mtime).toISOString(), f.size, limits);
         // An archived Codex thread lay in sessions/YYYY/MM/DD/ under the same name (its date is in it): that path's id is its alias too.

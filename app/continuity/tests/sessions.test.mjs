@@ -261,6 +261,43 @@ test('SESSIONS-D5 a Codex subagent that holds a prompt (its task, a copy of its 
   } finally { globalThis.window = had; rmSync(dir, { recursive: true, force: true }); }
 });
 
+test('SESSIONS-D6 a Codex app thread run in its own worktree is found under the repository it was checked out from, on the server and in a picked folder', async () => {
+  const P = await import('../dist/public/shared/session-parse.js'), { createSessionSources } = await import('../dist/public/client/session-source.js');
+  const { readdirSync } = await import('node:fs'), { basename } = await import('node:path');
+  const file = path => ({ kind: 'file', name: basename(path), getFile: async () => new File([readFileSync(path)], basename(path), { lastModified: statSync(path).mtimeMs }) });
+  const folder = path => ({ kind: 'directory', name: basename(path), queryPermission: async () => 'granted',
+    async *values() { for (const d of readdirSync(path, { withFileTypes: true })) yield d.isDirectory() ? folder(join(path, d.name)) : file(join(path, d.name)); } });
+  const dir = home(), had = globalThis.window;
+  try {
+    const roots = writeSessionHome(dir), repo = join(dir, 'salon'), day = join(roots.codex, 'sessions', '2026', '10', '29'); mkdirSync(day, { recursive: true });
+    const tree = (id, git) => { const t = join(roots.codex, 'worktrees', id, 'salon'); mkdirSync(join(t, 'app'), { recursive: true }); if (git) writeFileSync(join(t, '.git'), git); return t; };
+    let n = 0; const thread = (name, cwd, ask) => { const f = join(day, name), t = new Date(Date.now() - 60000 + ++n * 1000);
+      writeFileSync(f, jl([{ ...desktopMeta(name), payload: { ...desktopMeta(name).payload, cwd, git: { branch: 'codex/cancel' } } }, { timestamp: at(1), type: 'turn_context', payload: { cwd } }, desktopUser(2, [['user.text', ask]])]));
+      utimesSync(f, t, t); };
+    thread('rollout-2026-10-29T10-00-00-wt.jsonl', tree('4f2a', `gitdir: ${repo}/.git/worktrees/salon\n`), '예약 취소 버튼 추가해 줘');
+    thread('rollout-2026-10-29T10-01-00-sub.jsonl', join(tree('9c1d', `gitdir: ${repo}/.git/worktrees/salon1\r\n`), 'app'), '앱 폴더만 고쳐 줘');
+    thread('rollout-2026-10-29T10-02-00-gone.jsonl', tree('77aa', null), '지워진 작업 트리');
+    const server = openSessions({ env: {}, roots });
+    assert.deepEqual((await server.list(repo)).sessions.map(x => [x.preview, x.cwd]), [['앱 폴더만 고쳐 줘', join(repo, 'app')], ['예약 취소 버튼 추가해 줘', repo]]);
+    assert.deepEqual((await server.list(join(repo, 'app'))).sessions.map(x => x.preview), ['앱 폴더만 고쳐 줘']);
+    assert.ok((await server.list()).sessions.some(x => x.preview === '지워진 작업 트리' && x.cwd.includes('worktrees')), 'a checkout whose .git is gone stays where it worked');
+    // The same through a picked .codex folder, or a home folder holding it.
+    for (const picked of [roots.codex, dir]) {
+      globalThis.window = { showDirectoryPicker: async () => folder(picked) };
+      const sources = createSessionSources({ status: () => ({ ai: 'none' }), accessCode: () => '' });
+      await sources.load(); assert.equal(await sources.pick(), true);
+      assert.deepEqual((await sources.current().list(repo)).map(x => x.preview), ['앱 폴더만 고쳐 줘', '예약 취소 버튼 추가해 줘'], picked);
+    }
+    // Only a checkout under the Codex folder's worktrees/ is looked at, and never above it.
+    assert.deepEqual(P.worktreeSteps('C:\\Users\\Me\\.codex\\worktrees\\4f2a\\Salon\\app', 'c:/users/me/.codex'), ['4f2a', 'Salon', 'app']);
+    assert.deepEqual(P.worktreeSteps('/home/me/.codex/worktrees/4f2a/salon', '.codex'), ['4f2a', 'salon']);
+    for (const [cwd, codex] of [['/home/me/.codex/worktrees/../../etc', '/home/me/.codex'], ['/srv/x/home/me/.codex/worktrees/a', '/home/me/.codex'], ['/home/me/my.codex/worktrees/a', '.codex'], ['/home/me/salon', '/home/me/.codex']])
+      assert.equal(P.worktreeSteps(cwd, codex), null, cwd);
+    assert.equal(P.worktreeFolder('gitdir: C:/Users/Me/salon/.git/worktrees/salon', ['app'], 'C:\\Users\\Me\\.codex\\worktrees\\4f2a\\salon\\app'), 'C:\\Users\\Me\\salon\\app');
+    assert.equal(P.worktreeFolder('gitdir: ../../salon/.git/worktrees/salon', [], '/x'), null, 'a relative link is not followed');
+  } finally { globalThis.window = had; rmSync(dir, { recursive: true, force: true }); }
+});
+
 test('SESSIONS-D3 a Claude Code session that moved folders is found under each; within() compares Windows folders as Windows does', async () => {
   const P = await import('../dist/public/shared/session-parse.js');
   const rows = [{ type: 'user', cwd: '/tmp/scratch', timestamp: at(1), message: { role: 'user', content: '시작' } },
