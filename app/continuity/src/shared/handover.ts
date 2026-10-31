@@ -111,7 +111,12 @@ function partBlock(view: StudioView, part: PartView, sessions: PartSession[], to
   if (role) lines.push(`- 역할: ${one(role, k.text)}${u?.corrected ? ' (사용자가 고친 설명)' : ''}`);
   if (part.note) lines.push(`- 사용자 메모: ${one(part.note, k.text)}`);
   // Chosen by KEEP_FIRST in either mode (the newest of a kind first, as the map lists them), then written in the mode's order.
-  const all = u?.claims ?? [], keep = new Set(all.slice().sort((a, b) => KEEP_FIRST.indexOf(a.kind) - KEEP_FIRST.indexOf(b.kind)).slice(0, k.claims));
+  const all = u?.claims ?? [], kept = all.slice().sort((a, b) => KEEP_FIRST.indexOf(a.kind) - KEEP_FIRST.indexOf(b.kind)).slice(0, k.claims);
+  // Wants pile up over readings: the newest report or check takes the place of the last one kept that is not left to ask, so a
+  // part that was worked on does not read as only wanted.
+  const done = (c: { kind: ClaimKind }) => c.kind === 'reported' || c.kind === 'checked', last = kept.map(c => c.kind !== 'open' && c.kind !== 'differs').lastIndexOf(true);
+  if (all.some(done) && !kept.some(done) && last >= 0) kept[last] = all.find(done)!;
+  const keep = new Set(kept);
   const claims = all.filter(c => keep.has(c)).sort((a, b) => k.order.indexOf(a.kind) - k.order.indexOf(b.kind));
   for (const c of claims) lines.push(`- ${CLAIM_LABEL[c.kind]}: ${one(c.text, k.claim)}${c.about ? ` (${one(c.about, 80)})` : ''}`);
   // The next session cannot see the map: it is told what is left out, not where to look.

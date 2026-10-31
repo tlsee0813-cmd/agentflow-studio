@@ -267,6 +267,14 @@ test('HANDOVER-U1 what is left to ask stays: a part written briefly keeps its op
   const doc = handoverDoc(p, { scope: null, code: 'ASK234', at: AT }), block = doc.text.slice(doc.text.indexOf('### 문자\n')).split('\n\n')[0];
   assert.ok(doc.trimmed > 0 && block.includes('\n- (그 밖에 1개는 이 문서에 넣지 않았어요)'), block);
   assert.ok(block.includes('\n- 남은 선택: 문자 업체는 아직 못 정했어\n'), block);
+  // Wants that piled up over readings do not push out every report: the newest report keeps a place, so the part does not read
+  // as only wanted.
+  const wants = ['환불 화면 로딩이 빨라야 해', '모바일에서도 잘 보여야 해', '환불 정책은 원장님께 물어보고 정할게', '환불 목록에 페이지 나누기를 넣었어요'];
+  let pr = D.pasteRecord(D.createProject(), sessionText(session(ID, [{ role: 'user', at: AT, text: `${wants[0]}. ${wants[1]}. ${wants[2]}.` }, { role: 'assistant', at: AT, text: `${wants[3]}.` }])).text, null).project;
+  pr = readAs(pr, [['환불', [wants[0]], [['want', wants[0]], ['want', wants[1]], ['reported', wants[3]], ['open', wants[2]]]]]);
+  for (let i = 0; i < 99; i++) pr = D.addArea(pr, `부분 ${i}`, note);
+  const short = handoverDoc(pr, { scope: null, code: 'ASK234', at: AT }).text, refund = short.slice(short.indexOf('### 환불\n')).split('\n\n')[0];
+  assert.ok(refund.includes('\n- 남은 선택: 환불 정책은 원장님께 물어보고 정할게\n') && refund.includes('\n- 작업 보고: 환불 목록에 페이지 나누기를 넣었어요\n') && refund.includes('\n- (그 밖에 1개는 이 문서에 넣지 않았어요)'), refund);
   // Written in full, a part with more claims than it has room for still keeps its open choice: what is left out is of the kinds
   // asked about last (구상, 확인 보고), and what is kept is written in the full order. Three readings of one part, four claims each.
   const kinds = ['want', 'want', 'want', 'want', 'reported', 'reported', 'reported', 'reported', 'want', 'idea', 'checked', 'open'];
