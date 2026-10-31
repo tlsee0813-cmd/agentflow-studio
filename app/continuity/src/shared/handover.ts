@@ -77,7 +77,7 @@ export interface Handover { text: string; trimmed: number }
  * (session-parse.ts turnChars): past that its end line and the person's own words after it would be cut off. */
 export const HANDOVER_CHARS = 15000;
 const CLAIM_ORDER: ClaimKind[] = ['want', 'idea', 'reported', 'checked', 'describes', 'open', 'differs'];
-const CLAIMS_PER_PART = 10, RECENT_REQUESTS = 6, RECENT_FILES = 24, LINE = 240, NAMES = 600;
+const CLAIMS_PER_PART = 10, RECENT_REQUESTS = 6, FILES_PER_ASK = 8, RECENT_FILES = 24, LINE = 240, NAMES = 600;
 const one = (t: string, n = LINE) => { const s = t.replace(/\s+/g, ' ').trim(); return s.length > n ? `${s.slice(0, n - 1)}…` : s; };
 /** How much of a part is written: in full, or briefly when the whole document would be too long (then what is left to ask comes
  * first: an open choice is what the next session must not decide alone). */
@@ -196,9 +196,10 @@ export function handoverDoc(p: Project, opts: HandoverOptions): Handover {
   const asks = sessionAsks(p, only, new Set(sessions.filter(s => s.tookOver).map(s => s.key))).slice(-RECENT_REQUESTS);
   if (asks.length) {
     after.push('## 최근 흐름 (사용자가 세션에서 한 요청, 오래된 것부터)');
-    for (const t of asks) after.push(`- ${one(quoteReceived(t.text), 300)}${t.files.length ? ` → 바꾼 파일: ${one([...new Set(t.files)].slice(0, 8).join(', '), 300)}` : ''}`);
+    for (const t of asks) after.push(`- ${one(quoteReceived(t.text), 300)}${t.files.length ? ` → 바꾼 파일: ${one([...new Set(t.files)].slice(0, FILES_PER_ASK).join(', '), 300)}` : ''}`);
     const files = [...new Set(asks.flatMap(t => t.files))].slice(-RECENT_FILES);
-    if (files.length) after.push('', `최근에 바뀐 파일: ${one(files.join(', '), NAMES)}`);
+    // Written when it says more than the lines above: the files of several requests, or more than one request's line names.
+    if (asks.filter(t => t.files.length).length > 1 || files.length > FILES_PER_ASK) after.push('', `최근에 바뀐 파일: ${one(files.join(', '), NAMES)}`);
     after.push('');
   }
   after.push(`──────── 인수인계 문서 끝 · ${tag} ────────`);
