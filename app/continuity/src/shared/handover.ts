@@ -120,26 +120,37 @@ function partBlock(view: StudioView, part: PartView, sessions: PartSession[], to
 // A web record saved by an older page, from a document copied without its end line, has the answer's head glued to the folded line
 // ('…]── 웹 AI 답변 ──'): read with that head on a line of its own, its answer stays the AI's. The stored text is not changed.
 const GLUED = /(\[AgentFlow 인수인계 문서를 받아 이어감 · [^\]\n]*\])(?=── (?:웹 AI|Claude Code|Codex) 답변)/g;
-interface Ask { text: string; files: string[] }
-/** The person's requests in session records, oldest first, with the files the tool's next answer reported changing. */
-function sessionAsks(p: Project, only: Set<string> | null, took: Set<string>): Ask[] {
+/** A request, the files changed answering it, and the records both came from. */
+interface Ask { text: string; files: string[]; records: string[] }
+/** The person's requests in session records, oldest first, with the files the tool's next answer reported changing: all of them, or
+ * those of the records in `only` and of the records `also` admits (by their session's key and the record's id). */
+function sessionAsks(p: Project, only: Set<string> | null, also: (key: string, id: string) => boolean): Ask[] {
   // An answer's files belong to the last request of its own session, which may sit in an earlier record (taken before the reply
   // came), never to another session's request; when that request's record is outside the scope, they are not shown.
   const out: Ask[] = [], asked = new Map<string, Ask | null>();
   for (const rec of p.pasted) {
     const origin = sessionOrigin(rec.text); if (!origin) continue;
-    const key = originKey(origin), shown = !only || only.has(rec.id) || took.has(key);
+    const key = originKey(origin), shown = !only || only.has(rec.id) || also(key, rec.id);
     for (const part of rec.text.replace(GLUED, '$1\n').split(/^── /m).slice(1)) {
       const nl = part.indexOf('\n'), head = part.slice(0, nl), body = part.slice(nl + 1).trim();
-      if (head.startsWith('사용자 요청')) { const t = shown ? { text: body, files: [] } : null; if (t) out.push(t); asked.set(key, t); continue; }
+      if (head.startsWith('사용자 요청')) { const t = shown ? { text: body, files: [], records: [rec.id] } : null; if (t) out.push(t); asked.set(key, t); continue; }
       // The list is on the answer's last line (a web AI may put it after a bullet), read to its last ')' so a name like
       // app/(auth)/page.tsx stays whole.
       const f = /\(바꾼 파일: (.+)\)\s*$/.exec(body.slice(body.lastIndexOf('\n') + 1).trim()), last = asked.get(key);
       // A web AI may write the line with nothing in it ('(바꾼 파일: 없음)'): no file is named so.
-      if (f && last) last.files.push(...f[1]!.split(', ').filter(x => !(origin.tool === 'web' && EMPTY_FIELD.test(x.trim()))));
+      if (f && last) { last.files.push(...f[1]!.split(', ').filter(x => !(origin.tool === 'web' && EMPTY_FIELD.test(x.trim())))); last.records.push(rec.id); }
     }
   }
   return out;
+}
+/** What the note above the parts says of the records the map has not read: how many there are and where this document has them.
+ * inFlow of them have their requests and changed files in the recent flow (some only their latest requests, when cut); in a part's
+ * document those are the records of the sessions behind it. The rest are not in the document. */
+function unreadWhere(count: number, inFlow: number, scoped: boolean, cut: boolean): string {
+  const lead = `아직 지도에 담기지 않은 기록이 ${count}개 있어요.`, what = `${cut ? '최근 ' : ''}요청과 바꾼 파일`;
+  if (inFlow === count) return `${lead} 그 기록의 ${what}은 아래 최근 흐름에 있어요.`;
+  if (!inFlow) return `${lead} 그 내용은 이 문서에 없으니, 필요하면 사용자에게 물어보세요.`;
+  return `${lead} 그중 ${scoped ? '이 범위를 다룬 세션의 기록 ' : ''}${inFlow}개는 ${what}이 아래 최근 흐름에 있고, 나머지 ${count - inFlow}개는 이 문서에 없어요. 필요하면 사용자에게 물어보세요.`;
 }
 
 /** The document for the whole project (scope null) or one part with everything inside it. */
@@ -184,11 +195,22 @@ export function handoverDoc(p: Project, opts: HandoverOptions): Handover {
     for (const s of sessions.slice(0, 8)) out.push(one(`- ${originLabel(s)}${s.cwd ? ` · 작업 폴더 ${s.cwd}` : ''}${s.branch ? ` · 브랜치 ${s.branch}` : ''}${s.tookOver ? ' · 인수인계로 이어받은 세션' : ''}`, 320));
     out.push('');
   }
+  // The latest requests the person made in the sessions, with the files changed answering them: in a part's document, those of the
+  // records the readings quoted for it, every record of a session that started from a handover of it (its work is the newest here,
+  // read or not), and the records not read yet of the other sessions behind it. A request that started from an earlier handover
+  // names it in words, so this document quoting it is not read as that takeover when it is pasted in turn.
+  const fresh = new Set(unreadRecords(p, view).map(r => r.id)), behind = new Set(sessions.map(s => s.key)), took = new Set(sessions.filter(s => s.tookOver).map(s => s.key));
+  const only = scoped ? new Set(maps.flatMap(r => r.parts.filter(x => scopeIds.has(x.areaId)).flatMap(x => [...x.basis.map(q => q.record), ...x.claims.map(c => c.record)]))) : null;
+  const listed = sessionAsks(p, only, (key, id) => took.has(key) || behind.has(key) && fresh.has(id)), asks = listed.slice(-RECENT_REQUESTS);
+  // The records not read yet that the recent flow holds (cut: one of them has older requests it leaves out); the rest are not here.
+  const seen = new Set(asks.flatMap(a => a.records)), inFlow = [...fresh].filter(id => seen.has(id)).length;
+  const cut = listed.slice(0, -RECENT_REQUESTS).some(a => a.records.some(id => fresh.has(id) && seen.has(id))), absent = fresh.size - inFlow;
   out.push(scoped ? '## 이 범위의 현재 상태' : '## 부분별 현재 상태');
-  // The parts are what the last reading saw: records it has not read (often the newest work) are not in them, and the document says so.
-  const unread = latest && parts.length ? unreadRecords(p, view).length : 0;
-  if (unread) out.push(`(지도는 ${stamp(latest!.at, true)}에 읽은 기록까지예요. 아직 지도에 담기지 않은 기록이 ${unread}개 있어서, 아래 최근 흐름이 더 새로울 수 있어요.)`, '');
-  if (!parts.length) out.push('아직 지도에 부분이 없어요. 아래 최근 흐름과 사용자의 설명에서 시작하세요.', '');
+  // The parts are what the last reading saw: records it has not read (often the newest work) are not in them, and the document says
+  // so and where they are. With no part yet, nothing is below but the recent flow, if any.
+  if (parts.length && fresh.size) out.push(`(${latest ? `지도는 ${stamp(latest.at, true)}에 읽은 기록까지예요.` : '지도는 아직 기록을 읽지 않았어요.'} ${unreadWhere(fresh.size, inFlow, !!scoped, cut)})`, '');
+  if (!parts.length) out.push(`아직 지도에 부분이 없어요. ${asks.length ? `아래 최근 흐름과 사용자의 설명에서 시작하세요.${absent ? ` 다른 기록 ${absent}개는 이 문서에 없으니, 필요하면 사용자에게 물어보세요.` : ''}`
+    : absent ? `기록이 ${absent}개 있지만 이 문서에는 없으니, 사용자에게 지금까지의 상황을 먼저 물어보세요.` : '사용자의 설명에서 시작하세요.'}`, '');
   const after: string[] = [];
   // What is undecided: candidates the readings left open and what the latest reading could not tell, for this scope.
   const open: string[] = [];
@@ -200,11 +222,6 @@ export function handoverDoc(p: Project, opts: HandoverOptions): Handover {
   }
   if (!scoped && latest) for (const g of latest.gaps) open.push(`- 기록에서 알 수 없었음: ${one(g)}`);
   if (open.length) after.push('## 아직 정하지 않은 것', ...dedupeLines(open).slice(-12), '');
-  // The latest requests the person made in the sessions, with the files changed answering them. A request that started from an
-  // earlier handover names it in words, so this document quoting it is not read as that takeover when it is pasted in turn.
-  const only = scoped ? new Set(maps.flatMap(r => r.parts.filter(x => scopeIds.has(x.areaId)).flatMap(x => [...x.basis.map(q => q.record), ...x.claims.map(c => c.record)]))) : null;
-  // A session that started from a handover of this scope counts with all its records: its work is the newest here, read or not.
-  const asks = sessionAsks(p, only, new Set(sessions.filter(s => s.tookOver).map(s => s.key))).slice(-RECENT_REQUESTS);
   if (asks.length) {
     after.push('## 최근 흐름 (사용자가 세션에서 한 요청, 오래된 것부터)');
     for (const t of asks) after.push(`- ${one(quoteReceived(t.text), 300)}${t.files.length ? ` → 바꾼 파일: ${one([...new Set(t.files)].slice(0, FILES_PER_ASK).join(', '), 300)}` : ''}`);
