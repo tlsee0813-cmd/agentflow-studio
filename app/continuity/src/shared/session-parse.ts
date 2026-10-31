@@ -215,11 +215,16 @@ export function claudeParser(): SessionParser {
       c.user(t, at);
     } else c.reply(textOf(content, ['text']), at);
   };
-  // A rewind (Esc Esc, /rewind) leaves the rows it went back over in the file: the prompt sent again hangs off the row before them,
-  // and Claude Code names the row it cut from. So each row of the conversation is known by its uuid, with how many turns and changes
-  // were read before and after it, and what was gone back over is taken out again. Rows without uuids are read as written.
+  // A rewind (Esc Esc, /rewind) leaves the rows it went back over in the file: the prompt sent again hangs off the row before them
+  // (none, after a rewind to the very first message), and Claude Code names the row it cut from. So each row of the conversation is
+  // known by its uuid, with how many turns and changes were read before and after it, and what was gone back over is taken out
+  // again. Rows without uuids are read as written.
   const rows = new Map<string, { before: number[]; after: number[] }>(); let prev: string | null = null, cutFrom: string | null = null;
   const back = (to: number[], end = [c.turns.length, changes.length]) => { c.cut(to[0]!, end[0]!); changes.splice(to[1]!, end[1]! - to[1]!); };
+  /** The rows after `key` are forgotten (and it too unless kept; all of them when null), so no later row is read against them. */
+  const forget = (key: string | null, keep = false) => {
+    let gone = key === null; for (const k of rows.keys()) { if (gone) rows.delete(k); else if (k === key) { gone = true; if (!keep) rows.delete(k); } }
+  };
   const read = (o: Row) => {
     if (!o || typeof o !== 'object') return;
     // The row a rewind cut from, used when no row of the conversation follows it (no prompt sent again yet). A later checkpoint
@@ -228,12 +233,21 @@ export function claudeParser(): SessionParser {
     const id = typeof o.uuid === 'string' && o.isSidechain !== true && o.type !== 'progress' ? o.uuid : null;
     let before = [c.turns.length, changes.length]; push(o);
     if (!id) return;
+    const prompt = o.type === 'user' && c.turns.length > before[0]! && c.turns.at(-1)!.role === 'user';
     // A prompt that hangs off an earlier row than the one before it: the turns read since that row were gone back over (they are
     // forgotten too, so no later row is read against them).
     const from = typeof o.parentUuid === 'string' && o.parentUuid !== prev ? rows.get(o.parentUuid) : undefined;
-    if (from && o.type === 'user' && c.turns.length > before[0]! && c.turns.at(-1)!.role === 'user' && from.after[0]! < before[0]!) {
-      back(from.after, before); before = from.after;
-      let gone = false; for (const k of rows.keys()) { if (gone) rows.delete(k); else gone = k === o.parentUuid; }
+    const parent = typeof o.parentUuid === 'string' ? rows.get(o.parentUuid) : undefined, cut = cutFrom ? rows.get(cutFrom)! : undefined;
+    if (prompt && from && from.after[0]! < before[0]!) {
+      back(from.after, before); before = from.after; forget(o.parentUuid, true);
+    } else if (prompt && o.parentUuid === null && before[0]! > 0) {
+      // A prompt that hangs off no row after turns were read (only a session's first row does; a compaction's boundary is a row of
+      // its own) was sent again after a rewind to the very first message: everything before it was gone back over.
+      back([0, 0], before); before = [0, 0]; forget(null);
+    } else if (prompt && cut && !(parent && parent.after[0]! > cut.before[0]!)) {
+      // A rewind Claude Code named, the prompt sent again hanging off a row not read here: what it cut from is taken out first (a
+      // prompt hanging off a row inside that stretch goes on from it instead: the rewind did not go through).
+      back(cut.before, before); before = cut.before; forget(cutFrom);
     }
     cutFrom = null; prev = id;
     if (!rows.has(id)) rows.set(id, { before, after: [c.turns.length, changes.length] });

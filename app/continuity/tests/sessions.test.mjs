@@ -614,6 +614,44 @@ test('SESSIONS-C5 after a Claude Code rewind only the conversation that goes on 
   assert.equal(said(compacted)[0].length, 6);
 });
 
+test('SESSIONS-C6 after a Claude Code rewind to the very first message only what was sent again is read; ordinary sessions keep every turn', () => {
+  const row = (r, uuid, parentUuid) => ({ ...r, uuid, parentUuid });
+  const said = rows => { const s = parseClaude(rows); return [s.turns.map(t => [t.role, t.text, t.files ?? null]), s.changes.flatMap(c => c.files)]; };
+  const before = [row(cu(0, '결제 페이지 만들어 줘'), 'u1', null), row(ca(1, [{ type: 'tool_use', id: 't1', name: 'Write', input: { file_path: '/w/src/pay/page.tsx', content: 'x' } }]), 'a1', 'u1'),
+    row(cu(2, [{ type: 'tool_result', tool_use_id: 't1', content: 'ok' }]), 'r1', 'a1'), row(ca(3, '결제 페이지를 만들었어요.'), 'a2', 'r1'),
+    row(cu(4, '카드 결제도 붙여 줘'), 'u2', 'a2'), row(ca(5, '카드 결제를 붙였어요.'), 'a3', 'u2')];
+  const mark = cutUuid => ({ type: 'last-prompt', lastPrompt: '결제 페이지 만들어 줘', leafUuid: null, explicit: true, rewound: true, cutUuid, sessionId: 'x' });
+  const again = [row(cu(8, '예약 페이지부터 만들어 줘'), 'u3', null), row(ca(9, '예약 페이지를 만들었어요.'), 'a4', 'u3')];
+  const more = [['user', '예약 페이지부터 만들어 줘', null], ['assistant', '예약 페이지를 만들었어요.', []]];
+  assert.deepEqual(said([...before, mark('u1'), ...again]), [more, []], 'rewound to the first message, sent again');
+  assert.deepEqual(said([...before, ...again]), [more, []], 'a version that wrote no rewind mark');
+  assert.deepEqual(said([...before, mark('u1')]), [[], []], 'rewound, nothing sent again yet');
+  // It goes on from there as any session does: a later rewind to its second request.
+  const on = [row(cu(10, '예약 확인 문자도'), 'u4', 'a4'), row(ca(11, '문자를 붙였어요.'), 'a5', 'u4'), row(cu(12, '예약 확인 메일로'), 'u5', 'a4'), row(ca(13, '메일로 보내요.'), 'a6', 'u5')];
+  assert.deepEqual(said([...before, ...again, ...on])[0].map(t => t[1]), ['예약 페이지부터 만들어 줘', '예약 페이지를 만들었어요.', '예약 확인 메일로', '메일로 보내요.']);
+  // A rewind Claude Code named, the prompt sent again hanging off a row not read here (a progress row): what it cut from is taken out.
+  const kept = said(before.slice(0, 4))[0];
+  assert.deepEqual(said([...before, mark('u2'), row(cu(8, '현장 결제만 둘게요'), 'u3', 'p9'), row(ca(9, '현장 결제만 뒀어요.'), 'a4', 'u3')]),
+    [[...kept, ['user', '현장 결제만 둘게요', null], ['assistant', '현장 결제만 뒀어요.', []]], ['/w/src/pay/page.tsx']]);
+  // Ordinary sessions keep every turn: one that starts with a meta row (and is rewound to its first request through it), one
+  // resumed (/resume, --continue: the next prompt hangs off where it stopped, a hook's context row between), a subagent's first
+  // row, which hangs off none, a compacted one (its boundary hangs off none), and a prompt hanging off the stretch a rewind mark
+  // named (that rewind did not go through).
+  const all = said(before); assert.equal(all[0].length, 4); assert.deepEqual(all[1], ['/w/src/pay/page.tsx']);
+  const meta = [row(cu(0, '<local-command-caveat>Caveat</local-command-caveat>', { isMeta: true }), 'm0', null), ...before.map(r => (r.uuid === 'u1' ? { ...r, parentUuid: 'm0' } : r))];
+  assert.deepEqual(said(meta), all);
+  assert.deepEqual(said([...meta, row(cu(8, '예약 페이지부터 만들어 줘'), 'u3', 'm0'), again[1]]), [more, []]);
+  const resumed = [...before, { type: 'attachment', uuid: 'h1', parentUuid: 'a3', timestamp: at(30), attachment: { type: 'hook_additional_context', content: ['resume'] } },
+    row(cu(31, '이어서 환불도'), 'u6', 'h1'), row(ca(32, '환불을 붙였어요.'), 'a7', 'u6')];
+  assert.equal(said(resumed)[0].length, 6);
+  const side = [...before.slice(0, 2), row(cu(1, '고쳐', { isSidechain: true }), 's1', null), row(ca(1, '고쳤어요.', { isSidechain: true }), 's2', 's1'), ...before.slice(2)];
+  assert.deepEqual(said(side), all);
+  const compacted = [...before, { type: 'system', subtype: 'compact_boundary', uuid: 'b1', parentUuid: null, logicalParentUuid: 'a3', timestamp: at(6) },
+    row(cu(6, '요약', { isCompactSummary: true }), 's1', 'b1'), row(cu(7, '이어서 환불도'), 'u4', 's1'), row(ca(8, '넣었어요.'), 'a5', 'u4')];
+  assert.equal(said(compacted)[0].length, 6);
+  assert.deepEqual(said([...before, mark('u2'), row(cu(8, '이어서 환불도'), 'u6', 'a3'), row(ca(9, '환불을 붙였어요.'), 'a7', 'u6')])[0].length, 6);
+});
+
 test('SESSIONS-X4 Codex patches name their files in any form: raw Windows paths, JSON arguments, heredocs, string commands', async () => {
   const P = await import('../dist/public/shared/session-parse.js');
   const patch = f => `*** Begin Patch\n*** Update File: ${f}\n@@\n-a\n+b\n*** End Patch\n`, fn = (name, args) => ({ type: 'function_call', name, call_id: 'c', arguments: JSON.stringify(args) });
