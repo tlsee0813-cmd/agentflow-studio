@@ -261,6 +261,26 @@ test('SESSIONS-RD8 keys of a known shape are hidden with no name before them; a 
     assert.deepEqual(redactSecrets(text), { text, count: 0 }, text);
 });
 
+test('SESSIONS-RD9 after a name said in a sentence, a file, a setting, a route or words joined by - _ + stay; a password and a machine-made token still go', () => {
+  const MACHINE = f('abcd1234', 'EFGH5678', 'ijkl'), HEX = f('9f86d081', '884c7d65', '9a2feaa0', 'c55ad015');
+  for (const [text, want] of [
+    ['비밀번호는 FakePass123!이고', '비밀번호는 [가려진 비밀값]이고'], ['DB 비밀번호: Fake#Pass2024', 'DB 비밀번호: [가려진 비밀값]'], ['비밀번호는 hunter-22야', '비밀번호는 [가려진 비밀값]야'],
+    [`토큰은 ${MACHINE} 이야`, '토큰은 [가려진 비밀값] 이야'], [`토큰 ${HEX} 넣어 줘`, '토큰 [가려진 비밀값] 넣어 줘'], ['토큰은 "gpt4omini2024"', '토큰은 "[가려진 비밀값]"'],
+    [f('API 키는 ', 'sk-', 'proj-', 'FAKE'.repeat(6)), 'API 키는 [가려진 비밀값]'], ['pw: FakePass123', 'pw: [가려진 비밀값]'], ['password FakePass123', 'password [가려진 비밀값]']]) {
+    const r = redactSecrets(text);
+    assert.equal(r.text, want, text); assert.equal(r.count, 1, text);
+  }
+  const keep = ['DB 비밀번호는 docker-compose.yml에 있어요', '비밀번호는 .env.local에 넣어 두었어', '관리자 비밀번호를 .env.production에서 읽도록 바꿔 줘', '비밀번호는 next-auth로 처리해 줘',
+    '비밀번호를 bcrypt-ts로 해시해 줘', '비밀번호 confirm-password 필드도 추가해 줘', '비밀번호를 type=password로 가려 줘', '비밀번호 /reset-password 페이지 디자인 바꿔 줘',
+    '비밀번호는 zod-schema.ts에서 검증', '비밀번호를 sha256+salt로', '비밀번호는 i18n-ko 문구로', '시크릿은 AWS-SecretsManager로 옮겨 줘', '토큰은 claude-sonnet-4-5 기준으로 계산해 줘',
+    '토큰 gpt-4o-mini-2024 기준 비용 표시', '토큰은 cl100k_base 기준으로 세 주세요', 'Added token refresh-v2 endpoint', 'password reset-flow-v2 is broken', '비밀번호 reset-flow 수정',
+    '비밀번호는 `docker-compose.yml`에 있어', 'Added token refresh2token endpoint'];
+  for (const text of keep) assert.deepEqual(redactSecrets(text), { text, count: 0 }, text);
+  // A session's title is weighed the same way: one about a password flow is kept as written.
+  const got = sessionText(session([{ role: 'user', at: T(0), text: '로그인 화면 고쳐 줘' }], { title: '비밀번호 reset-flow 수정' }));
+  assert.ok(got.text.includes('비밀번호 reset-flow 수정') && got.redacted === 0, got.text);
+});
+
 test('SESSIONS-RT1 the whole record is hidden and cleaned, its header too, so it can always be kept', () => {
   const d = session([{ role: 'user', at: T(0), text: '색 출력 \u001b[31m빨강\u001b[0m 그리고 제목\u000b부제목\u0007' }, { role: 'assistant', at: T(1), text: '고쳤어요', files: ['src/a.ts'] }],
     { cwd: 'C:\\work\\sk-telecom-portal-renewal', branch: 'feature/sk-1234-fix-login-redirect', title: `키 ${f('sk-', 'proj-', 'FAKE'.repeat(6))} 넣고 테스트` });

@@ -47,8 +47,9 @@ const SECRET_NAME = /pass|pwd|secret|credential|salt|sess(?:ion)?[_-]?id$|(?:api
  * literal: written as it is, not code (a .env or YAML line, a query string, a command-line flag, a cookie); lineStart: a setting's
  * name starts the line (an INI or Python assignment too); colon: set with ':' (YAML, or a property in code); keyQuoted: the name
  * is quoted (JSON, a Python dict: a value written as it is there is quoted too); name: the setting's own name; next: the
- * characters after it; dotenv: an environment name set with '=' alone on its line (a .env or shell line, never code). */
-interface Where { secret: boolean; env: boolean; quoted: boolean; literal: boolean; lineStart: boolean; colon: boolean; keyQuoted: boolean; dotenv: boolean; name: string; next: string }
+ * characters after it; dotenv: an environment name set with '=' alone on its line (a .env or shell line, never code); said: the
+ * name is said in a sentence (비밀번호는 …, token은 …, password …). */
+interface Where { secret: boolean; env: boolean; quoted: boolean; literal: boolean; lineStart: boolean; colon: boolean; keyQuoted: boolean; dotenv: boolean; name: string; next: string; said?: boolean }
 const PAIR: Record<string, string> = { ')': '(', ']': '[', '}': '{' };
 /** The part of a value that is a secret and what follows it, or null when it holds none. raw: as written after the name (quoted:
  * between its quotes). */
@@ -83,6 +84,13 @@ function secretPart(raw: string, w: Where): [string, string] | null {
   if (!w.quoted && ((!w.dotenv && ((MEMBER.test(v) && !v.split(MEMBER_PART).some(machine)) || CALL.test(v))) || (OPEN_CALL.test(v) && /^["'`]/.test(w.next)))) return null;
   if (pathLike(v) || /^[a-z][a-z0-9+.-]*:\/\//i.test(v)) return null;
   const strong = w.secret || w.env;
+  // In a sentence what follows a name is as often what the request is about: a file (docker-compose.yml, .env.local), a setting
+  // or a route (type=password, /reset-password), or words joined by '-', '_' or '+' (next-auth, confirm-password, cl100k_base,
+  // sha256+salt; after a token's name claude-sonnet-4-5 too, while a password's name keeps hunter-22 a password).
+  if (w.said && (/^[./]|=|\.[a-z]{1,5}$/.test(v) || (/^[a-z][a-z0-9]*(?:[-_+][a-z0-9]+)+$/i.test(v) && !machine(v) && !(strong && /[-_+]\d+(?![a-z])/i.test(v))))) return null;
+  // After a token's or key's name, or an English name and a space, a value unquoted is one only when it looks made by a machine
+  // (abcd1234EFGH5678ijkl, a hex digest; FakePass123 mixes case and digits), not a word holding a number (refresh2token).
+  if (w.said && !strong && !w.quoted && !machine(v) && !(v.length >= 10 && /\d/.test(v) && /[a-z]/.test(v) && /[A-Z]/.test(v)) && !/^(?=.*\d)(?=.*[a-f])[a-f\d]{16,}$/i.test(v)) return null;
   if (/^\d+$/.test(v)) return v.length >= (strong ? 6 : 10) ? [v, rest] : null;
   const digit = /\d/.test(v), letter = /[A-Za-z]/.test(v), symbol = /[^A-Za-z0-9]/.test(v), mixed = /[a-z]/.test(v) && /[A-Z]/.test(v);
   // Said to be a credential: a value written as it is (keyboardcat, changeme, an INI line) is one from 6 characters, or 4 with a
@@ -148,7 +156,7 @@ const HIDE: RegExp[] = [
 // name alone on its line makes its value written as it is (a header name alone on its line is as often a property in code:
 // Authorization: this.auth.getToken()).
 type Groups = Record<string, string | undefined>;
-interface Weighed { re: RegExp; where(g: Groups): { secret: boolean; env: boolean; literal: boolean }; setting?: boolean; min?: number }
+interface Weighed { re: RegExp; where(g: Groups): { secret: boolean; env: boolean; literal: boolean }; setting?: boolean; said?: boolean; min?: number }
 const WEIGHED: Weighed[] = [
   // After a scheme of its own a credential is long (an API key, a Kerberos ticket); a short word is prose (Authorization: via OAuth2).
   { re: AUTH_SCHEME, min: 16, where: () => ({ secret: true, env: false, literal: false }) },
@@ -172,9 +180,9 @@ const WEIGHED: Weighed[] = [
   { re: SETTING, setting: true, where: g => { const secret = SECRET_NAME.test(g.name ?? ''); return { secret, env: !secret && /^[A-Z][A-Z0-9_]*$/.test(g.name ?? ''), literal: false }; } },
   // In a sentence a password is said to be one (비밀번호는 bcrypt로 해시 stays); a token or key named so is hidden only when it
   // looks made by a machine (컨텍스트 토큰 200000개 stays), and so is a value after an English name and a space (Go's
-  // Password []byte, SQL's token TEXT).
-  { re: KOREAN_NAME, where: g => ({ secret: /비밀\s?번호|비번|패스워드|암호/.test(g.name ?? ''), env: false, literal: false }) },
-  { re: SAID_NAME, where: g => ({ secret: /\S/.test(g.then ?? '') && (SECRET_NAME.test(g.name ?? '') || /pw$/i.test(g.name ?? '')), env: false, literal: false }) }
+  // Password []byte, SQL's token TEXT); a file, a route or words joined by '-' stay (said).
+  { re: KOREAN_NAME, said: true, where: g => ({ secret: /비밀\s?번호|비번|패스워드|암호/.test(g.name ?? ''), env: false, literal: false }) },
+  { re: SAID_NAME, said: true, where: g => ({ secret: /\S/.test(g.then ?? '') && (SECRET_NAME.test(g.name ?? '') || /pw$/i.test(g.name ?? '')), env: false, literal: false }) }
 ];
 /** One weighed pattern over a text; count is told of each part hidden. */
 function weigh(rule: Weighed, text: string, hid: () => void): string {
@@ -189,9 +197,9 @@ function weigh(rule: Weighed, text: string, hid: () => void): string {
     const value = cut >= 0 ? raw.slice(0, cut) : raw, tail = cut >= 0 ? weigh(rule, raw.slice(cut), hid) : '';
     // A setting on a line of its own (.env, YAML, also after a diff's or a quote's mark) or an environment name set without spaces is
     // written as it is; 'name = value' is as often code.
-    const setting = !!rule.setting, spaced = /[ \t](?::=|=>|=)[ \t]/.test(keep), kind = rule.where(g), upper = /^[A-Z][A-Z0-9_]*$/.test(name);
+    const setting = !!rule.setting, said = !!rule.said, spaced = /[ \t](?::=|=>|=)[ \t]/.test(keep), kind = rule.where(g), upper = /^[A-Z][A-Z0-9_]*$/.test(name);
     const lineStart = setting && /^[ \t]*(?:[-+>][ \t]*)*(?:export[ \t]+|set[ \t]+)?["']?$/.test(line);
-    const part = value.length < (rule.min ?? 0) ? null : secretPart(value, { ...kind, quoted, name, next: src.slice(at + all.length, at + all.length + 4), lineStart,
+    const part = value.length < (rule.min ?? 0) ? null : secretPart(value, { ...kind, quoted, name, next: src.slice(at + all.length, at + all.length + 4), lineStart, said,
       colon: /:[ \t]*$/.test(keep), keyQuoted: setting && /["']\]?[ \t]*(?::=|=>|[:=])[ \t]*$/.test(keep), dotenv: lineStart && upper && !spaced && /(?<![:=!<>])=$/.test(keep),
       literal: kind.literal || query || (setting && !spaced && (lineStart || upper)) });
     if (!part && cut < 0) return all;
