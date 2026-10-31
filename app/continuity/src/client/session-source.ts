@@ -152,16 +152,17 @@ async function walk(root: DirHandle, rootKey: string): Promise<{ found: Found[];
  * under a folder, and a session found through both is listed once by its id). */
 async function same(d: DirHandle, r: DirHandle): Promise<boolean> { try { return !!(await d.isSameEntry?.(r)); } catch { return false; } }
 
-/** What a listing knows of one session file: its row (null when it holds no prompt: not a session, or a Codex subagent's), the
- * folders it worked in, and for a Codex subagent's the session that started it. key: the size and time it was read at. */
+/** What a listing knows of one session file: its row (null when it holds no prompt, or is a Codex subagent's: read through the
+ * session that started it), the folders it worked in, and for a Codex subagent's that session. key: the size and time it was read at. */
 interface Head { key: string; tool: SessionTool | null; row: SessionSummary | null; cwds: string[]; parent: string | null }
 async function readHead(f: Found, file: File): Promise<Head> {
   const key = `${file.size}:${file.lastModified}`, partial = file.size > SESSION_LIMITS.headBytes, lines = jsonLines(await file.slice(0, SESSION_LIMITS.headBytes).text(), partial);
   const tool = f.tool ?? sniffTool(lines); if (!tool) return { key, tool, row: null, cwds: [], parent: null };
   let parsed = parseSession(tool, lines);
-  // Read further while the head holds no prompt yet (a Codex subagent's never does: what it was asked is in the session that started it).
+  // Read further while the head holds no prompt yet (a Codex subagent's is never a session of its own, whatever it holds: what it was
+  // asked, a copy of its parent's history, is read through the session that started it).
   if (!hasPrompt(parsed) && partial && !parsed.meta.parent) parsed = parseSession(tool, jsonLines(await file.slice(0, SESSION_LIMITS.promptBytes).text(), file.size > SESSION_LIMITS.promptBytes));
-  const parent = tool === 'codex' ? parsed.meta.parent : null; if (!hasPrompt(parsed)) return { key, tool, row: null, cwds: [], parent };
+  const parent = tool === 'codex' ? parsed.meta.parent : null; if (!hasPrompt(parsed) || parent) return { key, tool, row: null, cwds: [], parent };
   // The end of the file, for a folder the session moved to late.
   if (partial) for (const c of tailFolders(await file.slice(Math.max(0, file.size - SESSION_LIMITS.tailBytes)).text())) atFolder(parsed.meta, c);
   const base = sessionSummary(await sessionId(tool, sessionKey(tool, parsed.meta, f.path)), tool, parsed, new Date(file.lastModified).toISOString(), file.size);

@@ -22,8 +22,8 @@ async function readRange(path, bytes, from = 0) {
   try { const buf = Buffer.alloc(bytes); const { bytesRead } = await h.read(buf, 0, bytes, from); return buf.subarray(0, bytesRead).toString('utf8'); }
   finally { await h.close(); }
 }
-/** What a listing knows of a file: its head (read further while no prompt is in it, but for a Codex subagent's rollout, which never
- * holds one), with the folders named at its end. */
+/** What a listing knows of a file: its head (read further while no prompt is in it, but for a Codex subagent's rollout, which is
+ * never a session of its own), with the folders named at its end. */
 async function readListed(tool, path, size, limits) {
   const { headBytes: head, promptBytes: more, tailBytes: tail } = limits;
   let parsed = parseSession(tool, jsonLines(await readRange(path, head), size > head));
@@ -89,7 +89,8 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
     const next = new Map(), out = [], scan = limits.scan; let sessions = 0, quiet = 0;
     // At most `scan` session files are opened, so a folder with no session left does not read a whole history. Files with no session
     // in them (Codex subagents' rollouts, Claude Code's agent-*.jsonl, one that cannot be read) do not use it up, as in the page: ten
-    // times as many of them.
+    // times as many of them. A Codex subagent's rollout is read through the session that started it, even when it holds a prompt
+    // (the task the AI gave it, or a copy of that session's history).
     for (const f of found) {
       if (out.length >= limits.list || sessions >= scan || quiet >= scan * 10) break;
       let h = heads.get(f.path);
@@ -101,7 +102,7 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
         // An archived Codex thread lay in sessions/YYYY/MM/DD/ under the same name (its date is in it): that path's id is its alias too.
         const day = f.tool === 'codex' && basename(dirname(real)) === 'archived_sessions' ? /^rollout-(\d{4})-(\d{2})-(\d{2})T/.exec(basename(real)) : null;
         const aliases = [await sessionId(f.tool, real), ...(day ? [await sessionId(f.tool, join(dirname(dirname(real)), 'sessions', day[1], day[2], day[3], basename(real)))] : [])];
-        h = { size: f.size, mtime: f.mtime, real, id, row: base && { ...base, aliases }, cwds: parsed.meta.cwds }; heads.set(f.path, h);
+        h = { size: f.size, mtime: f.mtime, real, id, row: base && !parsed.meta.parent ? { ...base, aliases } : null, cwds: parsed.meta.cwds }; heads.set(f.path, h);
       }
       if (!h.row) { quiet++; continue; }
       // Two files of one session (a copy left behind): the newest one is the session, and only it counts against the scan.

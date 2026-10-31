@@ -225,6 +225,42 @@ test('SESSIONS-D2 Codex subagents: their files join the reply to the prompt that
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
+test('SESSIONS-D5 a Codex subagent that holds a prompt (its task, a copy of its parent\'s history) is never a session of its own; only what it changed itself joins its parent', async () => {
+  const { readdirSync } = await import('node:fs'), { basename } = await import('node:path'), { createSessionSources } = await import('../dist/public/client/session-source.js');
+  const file = path => ({ kind: 'file', name: basename(path), getFile: async () => new File([readFileSync(path)], basename(path), { lastModified: statSync(path).mtimeMs }) });
+  const folder = path => ({ kind: 'directory', name: basename(path), queryPermission: async () => 'granted',
+    async *values() { for (const d of readdirSync(path, { withFileTypes: true })) yield d.isDirectory() ? folder(join(path, d.name)) : file(join(path, d.name)); } });
+  const spawned = { parent_thread_id: PARENT, source: { subagent: { thread_spawn: { parent_thread_id: PARENT, depth: 1 } } } };
+  const patch = (m, f) => ({ timestamp: at(m), type: 'response_item', payload: { type: 'custom_tool_call', name: 'apply_patch', call_id: `p${m}`, input: `*** Begin Patch\n*** Add File: ${f}\n+x\n*** End Patch` } });
+  // Multi-agent V1: the task the parent's model wrote comes in as user input.
+  const v1 = [desktopMeta('c-v1', spawned), desktopUser(20, [['user.text', 'src/notify 아래 문자 발송 코드를 정리하고 테스트를 추가하라']]), patch(21, 'src/notify/sms.ts')];
+  // fork_context: the parent's history copied in at the spawn, then the child's own settings line, task and change.
+  const forked = [desktopMeta('c-fork', { ...spawned, forked_from_id: PARENT }), ...desktopParent().map(r => ({ ...r, timestamp: at(22) })),
+    { timestamp: at(22), type: 'event_msg', payload: { type: 'thread_settings_applied', thread_id: 'c-fork', thread_settings: {} } }, desktopUser(23, [['user.text', '테스트만 맡아라']]),
+    fileChange(24, { [`${W}\\tests\\notify.test.ts`]: { type: 'add', content: 'x' } })];
+  // Paginated: the records before subagent_history_start_ordinal are its parent's.
+  const paged = [{ ...desktopMeta('c-page', { ...spawned, subagent_history_start_ordinal: 3 }), ordinal: 0 }, { ...fileChange(25, { [`${W}\\src\\hours.ts`]: { type: 'update' } }), ordinal: 1 },
+    { ...desktopUser(25, [['user.text', '예전 요청']]), ordinal: 2 }, { ...patch(26, 'src/notify/kakao.ts'), ordinal: 3 }];
+  const dir = home(), had = globalThis.window;
+  try {
+    const roots = writeSessionHome(dir), day = join(roots.codex, 'sessions', '2026', '10', '29'); mkdirSync(day, { recursive: true });
+    const write = (name, rows) => writeFileSync(join(day, name), jl(rows));
+    write('rollout-2026-10-29T10-00-00-parent.jsonl', desktopParent()); write('rollout-2026-10-29T10-20-00-v1.jsonl', v1);
+    write('rollout-2026-10-29T10-22-00-fork.jsonl', forked); write('rollout-2026-10-29T10-25-00-page.jsonl', paged);
+    const server = openSessions({ env: {}, roots }), listed = (await server.list(W)).sessions;
+    assert.deepEqual(listed.map(x => x.preview), ['휴무일을 예약 화면에 반영해 줘 ## 확인할 것 - 테스트']);
+    const got = await server.read(listed[0].id);
+    assert.deepEqual(got.turns[1].files, ['src/hours.ts', 'src/old.ts', 'src/new.ts']);
+    assert.deepEqual(got.turns[3].files, ['src/notify/sms.ts', 'tests/notify.test.ts', 'src/notify/kakao.ts'], 'no file of the copied history comes in again');
+    // A folder picked in the page reads them the same way.
+    globalThis.window = { showDirectoryPicker: async () => folder(roots.codex) };
+    const sources = createSessionSources({ status: () => ({ ai: 'none' }), accessCode: () => '' });
+    await sources.load(); assert.equal(await sources.pick(), true);
+    assert.deepEqual((await sources.current().list(W)).map(x => x.id), [listed[0].id]);
+    assert.deepEqual((await sources.current().read(listed[0].id)).turns, readSessionDetail(got).turns);
+  } finally { globalThis.window = had; rmSync(dir, { recursive: true, force: true }); }
+});
+
 test('SESSIONS-D3 a Claude Code session that moved folders is found under each; within() compares Windows folders as Windows does', async () => {
   const P = await import('../dist/public/shared/session-parse.js');
   const rows = [{ type: 'user', cwd: '/tmp/scratch', timestamp: at(1), message: { role: 'user', content: '시작' } },

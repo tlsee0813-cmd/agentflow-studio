@@ -258,8 +258,8 @@ export function codexParser(): SessionParser {
   const changed = (at: string | null, files: string[]) => { if (!files.length) return; changes.push({ at, files }); piece('file', '', at, files); };
   // A fork (and a subagent started with its parent's history) begins with a copy of the conversation it came from, each line
   // stamped when it was copied: none of it is this session's own. The copy ends at the fork's own settings line, or in files from
-  // before Codex wrote one at the first pause (a copy is written at once).
-  let copy = false, copiedAt = NaN;
+  // before Codex wrote one at the first pause (a copy is written at once). A paginated subagent names the first line of its own.
+  let copy = false, copiedAt = NaN, ownFrom = -1;
   const push = (raw: Row) => {
     if (!raw || typeof raw !== 'object') return;
     const wrapped = typeof raw.type === 'string' && raw.payload && typeof raw.payload === 'object';
@@ -279,8 +279,10 @@ export function codexParser(): SessionParser {
       const parent = p.parent_thread_id ?? p.source?.subagent?.thread_spawn?.parent_thread_id;
       if (typeof parent === 'string' && parent && !meta.parent) meta.parent = parent;
       if (typeof p.forked_from_id === 'string' && p.forked_from_id) copy = true;
+      if (typeof p.subagent_history_start_ordinal === 'number') ownFrom = p.subagent_history_start_ordinal;
       return;
     }
+    if (typeof raw.ordinal === 'number' && raw.ordinal < ownFrom) return;
     if (at && !meta.startedAt) meta.startedAt = at;
     if (kind === 'turn_context') atFolder(meta, p.cwd);
     if (kind === 'event_msg') {
