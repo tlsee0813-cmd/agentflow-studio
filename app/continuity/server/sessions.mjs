@@ -121,21 +121,46 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
         // An archived Codex thread lay in sessions/YYYY/MM/DD/ under the same name (its date is in it): that path's id is its alias too.
         const day = f.tool === 'codex' && basename(dirname(real)) === 'archived_sessions' ? /^rollout-(\d{4})-(\d{2})-(\d{2})T/.exec(basename(real)) : null;
         const aliases = [await sessionId(f.tool, real), ...(day ? [await sessionId(f.tool, join(dirname(dirname(real)), 'sessions', day[1], day[2], day[3], basename(real)))] : [])];
-        h = { size: f.size, mtime: f.mtime, real, id, row: base && !parsed.meta.parent ? { ...base, aliases } : null, cwds: parsed.meta.cwds }; heads.set(f.path, h);
+        h = { size: f.size, mtime: f.mtime, real, id, row: base && !parsed.meta.parent ? { ...base, aliases } : null, cwds: parsed.meta.cwds, thread: parsed.meta.thread, parent: parsed.meta.parent }; heads.set(f.path, h);
       }
       if (!h.row) { quiet++; continue; }
       // Two files of one session (a copy left behind): the newest one is the session, and only it counts against the scan.
       if (next.has(h.id)) continue;
       sessions++; known.set(h.id, { tool: f.tool, path: h.real }); next.set(h.id, { tool: f.tool, path: h.real });
       if (folder && !within(h.cwds, folder)) continue;
-      out.push({ ...h.row });
+      out.push({ ...h.row, updatedAt: new Date(await lastChange(f, h, found)).toISOString() });
     }
+    // Dated by their last change (a subagent's included), newest first.
+    out.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
     // A folder listing adds to what is known (a session listed before stays readable); a whole listing replaces it, keeping a session
     // whose file is still there (a folder's look may read it after another tab's listing stopped short of it).
     if (!folder) { const alive = new Set([...heads.values()].map(x => x.real)); known = new Map([...[...known].filter(([id, k]) => !next.has(id) && alive.has(k.path)), ...next]); }
     return { version: SESSION_VERSION, sessions: out };
   }
 
+  /** When a session last changed: its own file's time, or a later time of a file a subagent of it wrote. A subagent working in the
+   * background can end after the session's own last line, and then only its file is written: the session is dated by it, so a look
+   * that took the session before reads it again and takes that work. Only files newer than the session's own are looked at (found is
+   * newest first); a subagent file is told as the reading tells it (subagents()). */
+  async function lastChange(f, h, found) {
+    let at = f.mtime;
+    if (f.tool === 'claude') {
+      const base = basename(h.real, '.jsonl');
+      for (const p of await files(join(dirname(h.real), base, 'subagents'), n => n.endsWith('.jsonl'))) { try { const st = await stat(p); if (st.mtimeMs > at) at = st.mtimeMs; } catch { /* gone meanwhile */ } }
+      for (const g of found) {
+        if (g.mtime <= at) break;
+        if (g.tool === 'claude' && dirname(g.path) === dirname(f.path) && /^agent-.*\.jsonl$/.test(basename(g.path)) && (await parentOf(g.path, { mtimeMs: g.mtime, size: g.size }, 'claude')) === base) at = g.mtime;
+      }
+    } else if (h.thread) {
+      for (const g of found) {
+        if (g.mtime <= at) break;
+        if (g.tool !== 'codex' || g.path === f.path) continue;
+        const k = heads.get(g.path), parent = k && k.size === g.size && k.mtime === g.mtime ? k.parent : await parentOf(g.path, { mtimeMs: g.mtime, size: g.size }, 'codex');
+        if (parent === h.thread) at = g.mtime;
+      }
+    }
+    return at;
+  }
   /** Subagent files that name the session they work for in their first lines (read again only when they change). */
   async function parentOf(path, st, tool) {
     let t = threads.get(path);

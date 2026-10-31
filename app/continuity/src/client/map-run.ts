@@ -41,6 +41,8 @@ export interface MapRunHost {
   ownSave?(key: string, seq: number): boolean;
   /** AF100: how often a job is looked at while it runs (ms). */
   pollMs?: number;
+  /** The person called off this entry's reading (cancelled it, or let its result go): nothing should ask it again on its own. */
+  withdrawn?(key: string): void;
 }
 /** pending: asked (or about to be) and still cancellable; committing: being saved, no longer cancellable; ready: a checked reply to
  * the very request sent, kept for this entry in this page until the person applies or discards it (never said to be saved). */
@@ -445,12 +447,13 @@ export function createMapRun(host: MapRunHost) {
     /** Cancels a request still on its way; once saving has begun there is nothing to cancel. */
     cancel: () => {
       const s = openSlot(), a = s?.attempt; if (!s || !a || (a.phase !== 'hashing' && a.phase !== 'reserving' && a.phase !== 'asking')) return;
+      host.withdrawn?.(a.key);
       // A job: its cancel is recorded by the server first; only then is it called off (a reply ready before that is kept).
       if (a.op) { void cancelJob(a); return; }
       a.controller.abort(); s.attempt = null; host.changed(openKey());
     },
     /** Lets a ready reply go unapplied (nothing is saved). A job's result is let go on the server too. */
-    discard: () => { const s = openSlot(), a = s?.attempt; if (!s || !a || a.phase !== 'ready') return; if (a.op) { void discardJob(a); return; } s.attempt = null; s.error = null; s.notice = null; host.changed(openKey()); },
+    discard: () => { const s = openSlot(), a = s?.attempt; if (!s || !a || a.phase !== 'ready') return; host.withdrawn?.(a.key); if (a.op) { void discardJob(a); return; } s.attempt = null; s.error = null; s.notice = null; host.changed(openKey()); },
     clearError: () => { const s = openSlot(); if (s) { s.error = null; s.notice = null; } },
     last: (): MapReading | null => { const o = host.current(); return o ? (o.project.readings.filter(isMapReading).at(-1) ?? null) : null; }
   };

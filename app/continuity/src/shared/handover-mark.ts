@@ -9,15 +9,35 @@ const RECEIVED = `\\[AgentFlow 인수인계 문서를 받아 이어감 · ${HAND
 /** The one line a folded document leaves (RECEIVED reads it back). */
 const received = (code: string, area: string | undefined, title: string | undefined) => `[AgentFlow 인수인계 문서를 받아 이어감 · ${HANDOVER_TAG}:${code}${area ? `:${area}` : ''}${title ? ` · ${title.replace(/[\]\n]/g, ' ')}` : ''}]`;
 
+/** The headings of a document's sections, as handover.ts writes them (a part's own heading is ### or deeper). */
+export const HANDOVER_SECTIONS = ['## 이어받는 방법', '## 프로젝트 한눈에', '## 작업 장소와 세션', '## 부분별 현재 상태', '## 이 범위의 현재 상태', '## 아직 정하지 않은 것', '## 최근 흐름'];
+/** The other lines a document starts a paragraph with (after a blank line, or under a heading). */
+const OPENERS = ['이 문서는 AgentFlow Studio가', '아직 지도에 부분이 없어요', '최근에 바뀐 파일: ', '그 밖의 부분 ', '(지도는 ', '(문서가 길어서 '];
+/** Where a document whose end line was not copied ends: after its last line of a document's shape. Each of its lines is a heading,
+ * a list item, the one line under a heading (the time it was made, the project's summary) or one of its own paragraph openers, and
+ * after a blank line only a heading or an opener follows. The first line of any other shape is the person's own (what they wrote
+ * under the document), and from there on nothing is folded. from: just after the start line. */
+function documentEnd(text: string, from: number): number {
+  const lines = text.slice(from).split('\n'); let end = from, at = from + lines[0]!.length, prev: 'head' | 'item' | 'blank' = 'head';
+  for (const line of lines.slice(1)) {
+    at += 1;
+    if (!line.trim()) { prev = 'blank'; at += line.length; continue; }
+    const head = /^#{3,6} \S/.test(line) || /^# 인수인계: /.test(line) || HANDOVER_SECTIONS.some(h => line.startsWith(h)), opener = OPENERS.some(o => line.startsWith(o));
+    if (!(head || opener || (prev !== 'blank' && (/^ *- /.test(line) || prev === 'head')))) break;
+    at += line.length; end = at; prev = head ? 'head' : 'item';
+  }
+  return end;
+}
+
 /** A fresh six-character code (no 0/O/1/I to misread). */
 export function handoverCode(): string {
   const abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', b = new Uint8Array(6); globalThis.crypto.getRandomValues(b);
   return [...b].map(x => abc[x % abc.length]).join('');
 }
 
-/** A person's message that carries a handover document: the document (start marker to its end marker, or to the end of the message
- * when the end was not pasted; from its title line when the start line was not copied) becomes one line naming it, the person's own
- * words around it stay as written. */
+/** A person's message that carries a handover document: the document (start marker to its end marker, or to its last line of a
+ * document's shape when the end was not pasted: documentEnd; from its title line when the start line was not copied) becomes one line
+ * naming it, the person's own words around it stay as written. */
 export function foldHandover(text: string): string {
   let out = text;
   for (let guard = 0; guard < 8; guard++) {
@@ -25,8 +45,9 @@ export function foldHandover(text: string): string {
     const m = START.exec(out);
     if (m) {
       const end = END(m[1]!).exec(out.slice(m.index + m[0].length));
-      // Folded to the end (its end line not copied), the blank lines after it stay: in a pasted record they set off the next block's head.
-      from = m.index; to = end ? from + m[0].length + end.index + end[0].length : out.trimEnd().length; code = m[1]!; area = m[2];
+      // Its end line not copied: folded to its last line, so what the person wrote under it stays; the blank lines after it stay too
+      // (in a pasted record they set off the next block's head).
+      from = m.index; to = end ? from + m[0].length + end.index + end[0].length : documentEnd(out, from + m[0].length); code = m[1]!; area = m[2];
     } else {
       const end = END(CODE).exec(out), head = end ? [...out.slice(0, end.index).matchAll(/^# 인수인계: /gm)].at(-1) : undefined;
       if (!end || !head) break;
