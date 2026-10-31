@@ -313,15 +313,21 @@ export function createReturnView(host: ReturnHost) {
       // The request text to copy by hand, line breaks and all (the web AI writes its record in that shape).
       p.manual ? h('textarea', { class: 'rr-web-ask', readonly: true, rows: '6', spellcheck: 'false', 'aria-label': '웹 대화용 기록 요청 문구' }, WEB_RECORD_ASK) : null);
     const tools = where;
-    const q = p.filter.trim().toLowerCase();
-    const shown = (p.list ?? []).filter(x => !q || [x.title, x.preview, x.cwd, x.branch].some(v => v?.toLowerCase().includes(q)));
+    // The sessions the search finds (a hidden stand-in when there is nothing to say), drawn again on their own as it is typed in:
+    // the search itself stays, so a syllable being composed in it (Korean) is not cut.
+    const results = (): HTMLElement => {
+      const q = p.filter.trim().toLowerCase();
+      const shown = (p.list ?? []).filter(x => !q || [x.title, x.preview, x.cwd, x.branch].some(v => v?.toLowerCase().includes(q)));
+      const rows = shown.map(x => h('li', {}, h('button', { type: 'button', class: 'rr-session', disabled: !!p.reading, onclick: () => void takeSession(x.id) },
+        h('span', { class: 'rr-session-tool' }, TOOL_NAME[x.tool]),
+        h('strong', {}, clip(x.title ?? x.preview, 90)),
+        h('small', {}, [x.title ? clip(x.preview, 70) : null, x.cwd, stamp(x.updatedAt, true)].filter(Boolean).join(' · ')),
+        p.reading === x.id ? h('small', { class: 'rr-session-busy' }, '읽는 중…') : null)));
+      return rows.length ? h('ul', { class: 'rr-session-list' }, ...rows) : p.list?.length ? h('p', { class: 'fine' }, '찾는 말과 맞는 세션이 없어요.') : h('span', { hidden: true });
+    };
     const filter = h('input', { type: 'search', class: 'rr-sessions-filter', placeholder: '제목·내용·폴더로 찾기', 'aria-label': '세션 찾기', value: p.filter }) as HTMLInputElement;
-    filter.addEventListener('input', () => { p.filter = filter.value; render(); });
-    const rows = shown.map(x => h('li', {}, h('button', { type: 'button', class: 'rr-session', disabled: !!p.reading, onclick: () => void takeSession(x.id) },
-      h('span', { class: 'rr-session-tool' }, TOOL_NAME[x.tool]),
-      h('strong', {}, clip(x.title ?? x.preview, 90)),
-      h('small', {}, [x.title ? clip(x.preview, 70) : null, x.cwd, stamp(x.updatedAt, true)].filter(Boolean).join(' · ')),
-      p.reading === x.id ? h('small', { class: 'rr-session-busy' }, '읽는 중…') : null)));
+    let list = results();
+    filter.addEventListener('input', () => { p.filter = filter.value; const next = results(); list.replaceWith(next); list = next; });
     return h('div', { class: 'rr-sessions open' },
       h('div', { class: 'pp-row' }, h('strong', {}, '내 AI 세션'), h('span', { class: 'fine' }, '내가 쓴 요청과 AI의 답변·바꾼 파일만 그대로 넣어요. AI가 실행한 명령의 출력과 생각 과정은 빼요.'),
         h('button', { type: 'button', class: 'link-button quiet', onclick: () => { p.open = false; render(); } }, '접기')),
@@ -330,8 +336,7 @@ export function createReturnView(host: ReturnHost) {
       // What the last look at the picked folders could not read (a folder gone, a walk cut short).
       current?.kind === 'folder' && src.notice() ? h('p', { class: 'fine rr-sessions-notice' }, src.notice()) : null,
       p.list && !p.list.length ? h('p', { class: 'fine' }, `${tools}에서 세션을 찾지 못했어요.`) : null,
-      p.list?.length ? filter : null,
-      rows.length ? h('ul', { class: 'rr-session-list' }, ...rows) : p.list?.length ? h('p', { class: 'fine' }, '찾는 말과 맞는 세션이 없어요.') : null);
+      p.list?.length ? filter : null, list);
   }
   /* ---------- a provided code or check file (project.14) ---------- */
   const fileDrafts = new Map<string, FileDraft>();
@@ -753,8 +758,15 @@ export function createReturnView(host: ReturnHost) {
       h('button', { type: 'button', class: 'link-button quiet', onclick: backToReading }, '닫기')));
   }
 
+  /** A field of the pane a syllable is being composed in (Korean, Japanese): drawing the pane again under it would end the
+   * composition and split the syllable, so a redraw asked for meanwhile (a record the automatic connection keeps) waits until it is
+   * committed. Its end comes in the same keystroke as the next syllable's start: the redraw follows that keystroke. */
+  let composing: Element | null = null, deferred = false;
+  document.addEventListener('compositionstart', e => { const t = e.target as Element; composing = t.closest?.('#lens') ? t : null; });
+  document.addEventListener('compositionend', () => { composing = null; if (deferred) setTimeout(() => { if (deferred) { deferred = false; render(); } }); });
   function render() {
     const o = host.current(); if (!s || !o || o.key !== s.key) { fromTop = false; return; }
+    if (composing?.isConnected && document.activeElement === composing) { deferred = true; return; }
     // The way back stays at the top of the pane while a long original scrolls under it.
     const back = (label: string) => h('div', { class: 'rr-backbar' }, h('button', { type: 'button', class: 'rr-back', onclick: backToReading },
       h('span', { 'aria-hidden': 'true' }, '←'), label));

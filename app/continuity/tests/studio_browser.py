@@ -2693,6 +2693,14 @@ def question_retry_flow(browser, base):
     page.close()
 
 
+def ime(cdp, *keys):
+    """Korean typed through an input method, as Chrome gets it (composition events, not plain key presses): each key is the syllable
+    being composed, and one ending in '|' is committed. 예약 in 2-beolsik: "ㅇ", "예", "옝", "예|", "야", "약", "약|"."""
+    for k in keys:
+        if k.endswith("|"): cdp.send("Input.insertText", {"text": k[:-1]})
+        else: cdp.send("Input.imeSetComposition", {"text": k, "selectionStart": len(k), "selectionEnd": len(k)})
+
+
 def sessions_flow(browser, base):
     """Local session records (synthetic home folder, stubbed model): a new project connected once to a working folder takes that
     folder's recent Claude Code / Codex sessions as records (credential-like text hidden) and reads its first map without a click;
@@ -3123,14 +3131,24 @@ def folder_sessions_flow(browser, base):
     # A record the connection keeps while the session search is being typed in leaves the search in focus, typing and all.
     page.locator("#sync-pill").click()
     expect(page.locator("#lens .rr-session", has_text="휴무일 연결")).to_have_count(1)  # still listed from the permission step above
+    expect(page.locator("#lens .rr-session", has_text="보관해 둔 옛 대화")).to_have_count(1)
+    # Typed in Korean through the input method, the search filters as each syllable forms, and a record kept mid-syllable splits none.
     find = page.locator("#lens .rr-sessions-filter")
     find.click()
-    page.keyboard.type("예약")
     expect(page.locator("#sync-pill")).to_have_attribute("data-state", "on")
+    cdp = page.context.new_cdp_session(page)
+    ime(cdp, "ㅇ", "예")
+    expect(page.locator("#lens .rr-session", has_text="보관해 둔 옛 대화")).to_have_count(0)  # filtered while the syllable is composed
+    expect(page.locator("#lens .rr-session", has_text="휴무일 연결")).to_have_count(1)
+    ime(cdp, "옝", "예|", "야")
     page.evaluate("""() => { window.__write('me/.claude/projects/-work-salon/typed.jsonl', JSON.stringify({ type: 'user', cwd: '/work/salon', sessionId: 's',
       timestamp: new Date().toISOString(), message: { role: 'user', content: '검색 중에 들어온 요청' } }) + '\\n', Date.now() - 10 * 60000);
       document.dispatchEvent(new Event('visibilitychange')); }""")
     page.wait_for_function("() => Object.values(localStorage).join('\\n').includes('검색 중에 들어온 요청')")
+    ime(cdp, "약", "약|")
+    expect(find).to_have_value("예약")
+    expect(find).to_be_focused()
+    expect(page.locator("#lens .rr-session", has_text="휴무일 연결")).to_have_count(1)
     page.keyboard.type("화면")
     expect(find).to_be_focused()
     expect(find).to_have_value("예약화면")
