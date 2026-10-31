@@ -2453,6 +2453,7 @@ function bindCanvas() {
   document.addEventListener('keydown', e => {
     if ((e.target as HTMLElement).closest('textarea,select,input:not([type=checkbox]):not([type=radio])')) return; // Esc still works from a checkbox
     if (handover.isOpen()) return; // the handover document is modal: its own Esc closes it and nothing under it
+    if (e.key === 'Escape' && autoSync.isOpen()) { autoSync.close(); return; } // the sync panel is a popover over everything below
     // The wide reading is over everything (its own keys handle Esc inside it; this is focus left on the page).
     if (wide.isOpen()) { if (e.key === 'Escape') wide.escape(); return; }
     // Innermost first: an open ⋯ menu closes before anything else, and focus goes back to its button.

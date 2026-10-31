@@ -1489,43 +1489,64 @@ button:disabled { opacity: .5; cursor: default; }
 .panel:not(.reading) .sheet-back { display: none; }
 .space.sheet-read .viewport { opacity: .55; }
 .space.sheet-read .controls { opacity: .5; }
-/* A session kept on this PC, picked into the paste box (local server only). */
-.rr-sessions { margin: 0 0 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+/* A session kept on this PC, picked into the paste box (listed by the local server or from the folders picked in this browser). */
+.rr-sessions { margin: 0 0 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; word-break: keep-all; }
 .rr-sessions .fine { margin: 0; }
 .rr-sessions.open { display: block; padding: 10px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface-2); }
 .rr-sessions.open > .pp-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-bottom: 8px; }
+/* The list's heading line: its name, then '접기' at the right; the note under them. */
+.rr-sessions.open > .pp-row:first-child > .fine { order: 1; flex-basis: 100%; }
+.rr-sessions.open > .pp-row:first-child > .link-button { margin-left: auto; }
 .rr-sessions-note { flex-basis: 100%; color: var(--text-2); }
+/* The web chat's request text, shown whole to copy by hand when the browser blocks copying. */
+.rr-web-ask { width: 100%; margin-top: 2px; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); color: var(--text); font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; resize: vertical; }
 .rr-sessions-filter { box-sizing: border-box; width: 100%; height: 32px; margin-bottom: 8px; padding: 0 10px; border: 1px solid var(--line-strong); border-radius: var(--r-sm); background: var(--surface); color: var(--text); font: inherit; }
 .rr-session-list { list-style: none; margin: 0; padding: 0; max-height: 280px; overflow: auto; display: grid; gap: 4px; }
-.rr-session { display: grid; grid-template-columns: auto 1fr; column-gap: 8px; width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); color: var(--text); text-align: left; font: inherit; cursor: pointer; }
+.rr-session { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 8px; width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); color: var(--text); text-align: left; font: inherit; cursor: pointer; }
 .rr-session:hover:not(:disabled) { border-color: var(--accent-line); }
 .rr-session:disabled { cursor: progress; opacity: .7; }
-.rr-session strong { font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
-.rr-session small { grid-column: 2; color: var(--text-3); font-size: 12px; overflow-wrap: anywhere; }
-.rr-session-tool { grid-row: span 2; align-self: start; padding: 1px 6px; border-radius: 999px; background: var(--chip); color: var(--text-2); font: var(--label); }
+.rr-session strong { grid-column: 1; grid-row: 1; font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
+.rr-session small { grid-column: 1 / -1; color: var(--text-3); font-size: 12px; overflow-wrap: anywhere; }
+.rr-session-tool { grid-column: 2; grid-row: 1; align-self: start; padding: 1px 6px; border-radius: 999px; background: var(--chip); color: var(--text-2); font: var(--label); }
 .rr-session-busy { color: var(--accent) !important; }
 /* Automatic connection to a working folder's sessions: a pill in the bar and its panel. */
 .sync-pill { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 24px; margin-right: 6px; padding: 0 10px 0 9px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font: 500 12px/1 var(--font); color: var(--text-3); white-space: nowrap; cursor: pointer; }
 .sync-pill:hover { border-color: var(--accent-line); color: var(--accent); }
 .sync-pill i { width: 6px; height: 6px; border-radius: 50%; background: var(--plan); }
 .sync-pill[data-state="on"] i { background: var(--ok); }
-.sync-pill[data-state="busy"] i { background: var(--accent); }
 .sync-pill[data-state="error"] i { background: var(--warn); }
-.sync-panel { position: fixed; top: 52px; right: 12px; z-index: 40; box-sizing: border-box; width: min(420px, calc(100vw - 24px)); max-height: calc(100vh - 72px); overflow: auto; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-lg); }
+/* A look running turns the dot into a small spinner (stopped with reduced motion); the open panel's pill reads as pressed. */
+.sync-pill[data-state="busy"] i { width: 8px; height: 8px; margin: -1px; border: 1.5px solid var(--accent-line); border-top-color: var(--accent); background: none; animation: spin .8s linear infinite; }
+.sync-pill[aria-expanded="true"] { border-color: var(--accent-line); background: var(--accent-soft); color: var(--accent); }
+/* On a phone the pill is a round 28px button with its state dot: the words would push the bar past the screen. */
+@media (max-width: 720px) { .sync-pill { width: 28px; height: 28px; margin-right: 0; padding: 0; justify-content: center; } .sync-pill > span { display: none; } .sync-pill i { width: 8px; height: 8px; } }
+.sync-panel { position: fixed; top: 52px; right: 12px; z-index: 40; box-sizing: border-box; width: min(420px, calc(100vw - 24px)); max-height: calc(100vh - 72px); overflow: auto; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-lg); word-break: keep-all; }
 .sync-panel h3 { margin: 0 0 6px; font-size: 14px; }
+/* Before connecting: one plain sentence, then the few points that matter, above the fine print. */
+.sync-lead { margin: 0 0 6px; font-size: 13px; line-height: 1.55; color: var(--text-2); }
+.sync-points { margin: 0 0 12px; padding-left: 16px; font-size: 12px; line-height: 1.6; color: var(--text-3); }
 .sync-panel .fine { margin: 0 0 10px; }
 .sync-folder { margin: 0 0 8px; font: 12.5px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; }
 .sync-facts { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; margin: 0 0 10px; font-size: 12.5px; }
 .sync-facts dt { color: var(--text-3); }
 .sync-facts dd { margin: 0; }
 .sync-folders { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 4px; }
-.sync-folder-pick { display: grid; width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); color: var(--text); text-align: left; font: inherit; cursor: pointer; }
+.sync-folder-pick { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 8px; width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); color: var(--text); text-align: left; font: inherit; cursor: pointer; }
 .sync-folder-pick:hover { border-color: var(--accent-line); }
 .sync-folder-pick strong { font: 600 12.5px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; }
 .sync-folder-pick small { color: var(--text-3); font-size: 12px; }
+.sync-folder-pick strong, .sync-folder-pick small { grid-column: 1; }
+.sync-folder-go { grid-column: 2; grid-row: 1 / span 2; align-self: center; color: var(--accent); font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.sync-folder-pick:hover .sync-folder-go { text-decoration: underline; text-underline-offset: 3px; }
 .sync-manual { display: flex; gap: 6px; }
-.sync-path { flex: 1; min-width: 0; height: 30px; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: var(--r-sm); font: inherit; font-size: 12.5px; }
-.sync-panel .pp-row { display: flex; align-items: center; gap: 10px; }
+.sync-path { flex: 1; min-width: 0; height: 32px; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: var(--r-sm); background: var(--surface); color: var(--text); font: inherit; font-size: 12.5px; }
+.sync-path:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(43,89,195,.12); }
+.sync-manual .link-button { flex: none; }
+.sync-panel .pp-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+/* '연결 끊기' ends the connection at once: kept apart from '폴더 추가' at the row's far end. */
+.sync-off { margin-left: auto; }
+/* '지금 확인' while a look runs: shown as unavailable but kept focusable (a disabled button would drop focus). */
+.sync-panel .secondary[aria-disabled="true"], .sync-panel .secondary[aria-disabled="true"]:hover { opacity: .5; cursor: default; background: var(--surface); border-color: var(--line-strong); }
 
 /* Handover document: a button beside the reading modes, a modal with the range, the text, copy and save. */
 .handover-open { height: 32px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text-2); font-size: 13px; font-weight: 600; white-space: nowrap; }
@@ -1551,3 +1572,13 @@ button:disabled { opacity: .5; cursor: default; }
 .sync-linked li { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 .sync-linked .sync-folder { margin: 0; }
 .sync-remove { flex: none; font-size: 12px; }
+/* The session folders read in this browser: the panel's last section, under a hairline (or the whole panel before any is picked). */
+.sync-source { margin-top: var(--s-3); padding-top: var(--s-3); border-top: 1px solid var(--hair); }
+.sync-panel h3 + .sync-source { margin-top: 0; padding-top: 0; border-top: 0; }
+.sync-source h4 { margin: 0 0 6px; font: var(--label); letter-spacing: var(--label-track); color: var(--text-3); }
+.sync-source kbd { display: inline-block; padding: 0 4px; border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: 4px; background: var(--surface-2); font: 600 11px/15px var(--font); color: var(--text-2); white-space: nowrap; }
+/* Permission to ask for again, and why the map does not follow: the warning palette of .pp-warn. */
+.sync-ask { display: flex; align-items: center; gap: var(--s-3); margin: 0 0 var(--s-3); padding: 8px 10px; border-radius: var(--r-md); background: var(--change-soft); color: #7a3f07; font-size: 12.5px; line-height: 1.5; }
+.sync-ask p { flex: 1; margin: 0; }
+.sync-ask .primary { flex: none; }
+.sync-panel .sync-blocked { padding: 6px 10px; border-radius: var(--r-md); background: var(--change-soft); color: #7a3f07; font-size: 12px; line-height: 1.5; }

@@ -243,6 +243,8 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
         // others are read; when none can be read the look fails, rather than show folders with no sessions.
         try { const w = await walk(r, rootKey(r)); found.push(...w.found); cut ||= w.cut; } catch (e) { bad.push(names[i]!); cause = e; }
       }
+      // A folder this browser no longer lets the page read (its permission withdrawn while the page was open) is asked for again.
+      if (bad.length) await check();
       const unreadable = bad.length ? `${bad.join(', ')} 폴더를 읽지 못했어요.` : null; missed = unreadable;
       if (roots.length && bad.length === roots.length) { looked = unreadable; throw Object.assign(new Error('SESSION_FOLDER_UNREADABLE'), { code: 'SESSION_FOLDER_UNREADABLE', cause }); }
       // A file found through two picked folders (one inside the other) is looked at once.

@@ -2709,6 +2709,15 @@ def sessions_flow(browser, base):
     page.locator("#new-name").fill("미용실 예약")
     page.locator("#new-form").get_by_role("button", name="만들기").click()
     expect(page.locator("#sync-pill")).to_have_text("자동 연결 안 됨")
+    # On a phone the pill is its dot alone (its words stay its name): opened, the bar stays within the window and nothing slides.
+    page.set_viewport_size({"width": 390, "height": 844})
+    page.locator("#sync-pill").click()
+    expect(page.locator("#sync-panel .sync-folder-pick")).to_have_count(1)
+    assert page.evaluate("[document.body.scrollLeft, document.querySelector('.bar').scrollWidth <= innerWidth]") == [0, True]
+    expect(page.locator("#sync-pill")).to_have_accessible_name("자동 연결 안 됨")
+    page.mouse.click(200, 600)  # a press outside closes the panel, as a popover does
+    expect(page.locator("#sync-panel")).to_be_hidden()
+    page.set_viewport_size({"width": 1280, "height": 720})
     page.locator("#sync-pill").click()
     pick = page.locator("#sync-panel .sync-folder-pick")
     expect(pick).to_have_count(1)
@@ -2730,12 +2739,18 @@ def sessions_flow(browser, base):
     expect(page.locator("#sync-panel")).to_contain_text("오늘 자동 지도 갱신1 / 30회")
     page.reload()
     expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon")
+    expect(page.locator("#sync-pill")).to_have_attribute("data-state", "on", timeout=15000)
     page.locator("#sync-pill").click()
-    page.locator("#sync-panel").get_by_role("button", name="지금 확인").click()
+    # From the keyboard: '지금 확인' keeps focus through the look it starts, and Esc closes the panel with focus back on its pill.
+    page.locator("#sync-panel").get_by_role("button", name="지금 확인").press("Enter")
     expect(page.locator("#sync-panel")).to_contain_text("마지막 확인")
+    expect(page.locator("#sync-pill")).to_have_attribute("data-state", "on", timeout=15000)
     expect(page.locator("#sync-panel")).to_contain_text("가져온 기록2개")  # nothing taken twice
+    expect(page.locator("#sync-panel").get_by_role("button", name="지금 확인")).to_be_focused()
     assert len(maps) == 1, maps
-    page.locator("#sync-pill").click()
+    page.keyboard.press("Escape")
+    expect(page.locator("#sync-panel")).to_be_hidden()
+    expect(page.locator("#sync-pill")).to_be_focused()
     # By hand: the paste box takes one session as written; tool output and the key are not in it. Put after a note typed first,
     # it comes under a '다음 기록' line and is kept as a record of its own (told by its header), and the note as another.
     page.locator("#return-entry").click()
@@ -2758,9 +2773,17 @@ def sessions_flow(browser, base):
     # look is still running (folder listings held 2 s here): that look ends without dropping the folder, and one follows it.
     page.evaluate("""() => { const f = window.fetch; window.fetch = async (u, o) => { if (String(u).includes('folder=')) await new Promise(r => setTimeout(r, 2000)); return f(u, o); }; }""")
     page.locator("#sync-pill").click()
+    # Esc with focus left on the page closes only the panel (the paste box under it stays), however the pill was pressed.
+    page.evaluate("() => document.activeElement.blur()")
+    page.keyboard.press("Escape")
+    expect(page.locator("#sync-panel")).to_be_hidden()
+    expect(page.locator("#lens .rr-paste-open, #paste-text").first).to_be_visible()
+    page.locator("#sync-pill").click()
     page.locator("#sync-panel").get_by_role("button", name="지금 확인").click()
-    page.locator("#sync-panel").get_by_role("button", name="폴더 추가").click()
+    # Pressed from the keyboard, '폴더 추가' leaves focus in the panel (at its heading), not on the page.
+    page.locator("#sync-panel").get_by_role("button", name="폴더 추가").press("Enter")
     expect(page.locator("#sync-panel h3")).to_have_text("작업 폴더 추가")
+    expect(page.locator("#sync-panel h3")).to_be_focused()
     expect(page.locator("#sync-panel .sync-folder-pick")).to_have_count(0)  # the one folder with sessions is linked already
     page.locator("#sync-panel .sync-path").fill("/work/salon-api")
     page.locator("#sync-panel").get_by_role("button", name="연결", exact=True).click()
@@ -2861,6 +2884,8 @@ FAKE_PICKER = """(files) => {
   // do, a handle keeps its identity (isSameEntry, resolve) and a File taken from it cannot be read once its file changed.
   // window.__write adds a file or adds to one; window.__onList(name) runs as a folder of that name is listed, and
   // window.__growOnRead(path) adds a line to that file as it is first read whole (both: a file changing during a look).
+  // window.__broken names a folder that cannot be listed (moved, WSL off); window.__perm = 'prompt' withdraws the page's permission
+  // to read (the browser asks again, and allowing gives it back).
   const disk = { name: '', kids: new Map() };
   const at = path => path.split('/').reduce((n, p) => { if (!n.kids.has(p)) n.kids.set(p, { name: p, kids: new Map() }); return n.kids.get(p); }, disk);
   const snapshot = f => {
@@ -2871,8 +2896,12 @@ FAKE_PICKER = """(files) => {
     return wrap(new File([f.text], f.name, { lastModified: f.at }));
   };
   const handle = n => (n.handle ??= n.kids ? {
-    kind: 'directory', name: n.name, queryPermission: async () => 'granted', requestPermission: async () => 'granted',
-    async *values() { window.__onList?.(n.name); yield* [...n.kids.values()].map(handle); },
+    kind: 'directory', name: n.name, queryPermission: async () => window.__perm ?? 'granted', requestPermission: async () => (window.__perm = 'granted'),
+    async *values() {
+      if (window.__broken === n.name) throw new DOMException('gone', 'NotFoundError');
+      if (window.__perm === 'prompt') throw new DOMException('not allowed', 'NotAllowedError');
+      window.__onList?.(n.name); yield* [...n.kids.values()].map(handle);
+    },
     isSameEntry: async o => o === n.handle,
     resolve: async o => { const find = (x, path) => (x.handle === o ? path : x.kids ? [...x.kids.values()].reduce((r, k) => r ?? find(k, [...path, k.name]), null) : null); return find(n, []); }
   } : { kind: 'file', name: n.name, getFile: async () => snapshot(n) });
@@ -2937,9 +2966,9 @@ def folder_sessions_flow(browser, base):
     expect(pick).to_have_count(1)
     expect(pick).to_contain_text("/work/salon")
     expect(pick).to_contain_text("Claude Code")
-    expect(panel).to_contain_text("읽는 세션 폴더: .claude")
+    expect(panel.locator(".sync-source .sync-folder")).to_have_text([".claude"])
     panel.get_by_role("button", name="세션 폴더 더 고르기").click()
-    expect(panel).to_contain_text("읽는 세션 폴더: .claude, .codex")
+    expect(panel.locator(".sync-source .sync-folder")).to_have_text([".claude", ".codex"])
     expect(pick).to_contain_text(re.compile("Claude Code·Codex|Codex·Claude Code"))
     assert maps == [], maps
     pick.click()
@@ -2972,6 +3001,16 @@ def folder_sessions_flow(browser, base):
     # A web chat keeps no file here: it is given the request text to write its own record.
     page.locator("#lens").get_by_role("button", name="웹 대화용 기록 요청 문구 복사").click()
     expect(page.locator("#lens .rr-sessions")).to_contain_text(re.compile("기록 요청 문구를 복사했어요|\\[웹 AI 세션 기록"))
+    # Copying blocked (a page opened by its network address is no secure context): the text is shown whole, line breaks and all,
+    # and selected to copy by hand, with a quiet line saying so (not an error).
+    page.evaluate("() => { navigator.clipboard.writeText = () => Promise.reject(new DOMException('blocked', 'NotAllowedError')); }")
+    page.locator("#lens").get_by_role("button", name="웹 대화용 기록 요청 문구 복사").click()
+    ask = page.locator("#lens .rr-web-ask")
+    expect(ask).to_be_focused()
+    expect(ask).to_have_value(re.compile("^\\[AgentFlow 기록 요청\\][\\s\\S]*\\n── 사용자 요청 ──\\n[\\s\\S]*\\n── 웹 AI 답변 ──\\n"))
+    assert ask.evaluate("t => [t.selectionStart, t.selectionEnd === t.value.length]") == [0, True]
+    expect(page.locator("#lens .rr-sessions-note")).to_have_text("자동 복사가 막혀 있어요. 아래 칸의 문구를 직접 복사하세요(선택해 두었어요).")
+    expect(page.locator("#lens .rr-sessions [role=alert]")).to_have_count(0)
     # Its answer pasted under what is in the box is kept as a record of its own: the box puts the next-record line between them.
     web = "[웹 AI 세션 기록 · 결제 문구 · 작업 폴더 /work/salon]\n\n── 사용자 요청 ──\n결제 버튼 문구 바꿔 줘\n\n── 웹 AI 답변 ──\n바꿨어요\n(바꾼 파일: src/pay.ts)"
     paste = """(el, [t, at]) => { el.focus(); const i = at === null ? el.value.length : el.value.indexOf(at); el.setSelectionRange(i, i);
@@ -3023,18 +3062,18 @@ def folder_sessions_flow(browser, base):
     expect(panel.locator("[role=alert]")).to_have_count(0)
     # Claude Code in WSL too: a second .claude is kept apart from the first by number.
     panel.get_by_role("button", name="세션 폴더 더 고르기").click()
-    expect(panel).to_contain_text("읽는 세션 폴더: .claude (1), .codex, .claude (2)")
+    expect(panel.locator(".sync-source .sync-folder")).to_have_text([".claude (1)", ".codex", ".claude (2)"])
     # The home folder picked as well is kept beside them (only the .claude and .codex in it are read, and a session found through
     # both is listed once).
     panel.get_by_role("button", name="세션 폴더 더 고르기").click()
-    expect(panel).to_contain_text("읽는 세션 폴더: .claude (1), .codex, .claude (2), me")
+    expect(panel.locator(".sync-source .sync-folder")).to_have_text([".claude (1)", ".codex", ".claude (2)", "me"])
     # The same folder picked again adds nothing.
     panel.get_by_role("button", name="세션 폴더 더 고르기").click()
     page.wait_for_function("() => !window.__picks.length")
     page.wait_for_timeout(300)
     page.locator("#sync-pill").click()
     page.locator("#sync-pill").click()
-    expect(panel).to_contain_text("읽는 세션 폴더: .claude (1), .codex, .claude (2), me")
+    expect(panel.locator(".sync-source .sync-folder")).to_have_text([".claude (1)", ".codex", ".claude (2)", "me"])
     expect(panel.locator(".sync-source-notice")).to_have_text("이미 고른 폴더(.codex)예요.")  # said why
     expect(panel.locator("[role=alert]")).to_have_count(0)
     page.locator("#sync-pill").click()
@@ -3051,7 +3090,36 @@ def folder_sessions_flow(browser, base):
     # Leaving the WSL folder leaves the others, and the first .claude loses its number.
     page.locator("#sync-pill").click()
     panel.get_by_role("button", name=".claude (2) 세션 폴더 빼기").click()
-    expect(panel).to_contain_text("읽는 세션 폴더: .claude, .codex, me")
+    expect(panel.locator(".sync-source .sync-folder")).to_have_text([".claude", ".codex", "me"])
+    # A picked folder that cannot be read (moved, or WSL turned off) is said once, as the panel's error, above the folders to leave.
+    page.evaluate("() => { window.__broken = '.codex'; }")
+    panel.get_by_role("button", name="지금 확인").click()
+    expect(panel.locator("[role=alert]")).to_contain_text(".codex")
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon · 확인 필요")  # in words, not by the dot's colour alone
+    assert panel.inner_text().count("폴더를 읽지 못했어요") == 1, panel.inner_text()
+    page.evaluate("() => { window.__broken = null; }")
+    # Permission withdrawn while the page is open (the browser asks again): listing the paste box's sessions asks again there, with
+    # no error that says to leave the folders and pick them again.
+    page.evaluate("() => { window.__perm = 'prompt'; }")
+    page.keyboard.press("Escape")  # the panel covers the paste box beside it
+    expect(panel).to_be_hidden()
+    page.locator("#lens").get_by_role("button", name="내 AI 세션에서 가져오기").click()
+    expect(box.get_by_role("button", name="세션 폴더 다시 허용")).to_be_visible()
+    expect(box.locator("[role=alert]")).to_have_count(0)
+    box.get_by_role("button", name="세션 폴더 다시 허용").click()
+    expect(page.locator("#lens .rr-session", has_text="휴무일 연결")).to_have_count(1)
+    # So does the panel: the pill says so and the panel asks first, with '다시 허용'; allowing them gives the connection back.
+    page.evaluate("() => { window.__perm = 'prompt'; }")
+    page.locator("#sync-pill").click()
+    panel.get_by_role("button", name="지금 확인").click()
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon · 허용 필요")
+    expect(panel.locator(".sync-ask")).to_contain_text("다시 읽어도 되는지")
+    expect(panel.locator(".sync-grant")).to_have_count(1)
+    expect(panel.locator("[role=alert]")).to_have_count(0)
+    panel.locator(".sync-ask").get_by_role("button", name="다시 허용").click()
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon")
+    expect(page.locator("#sync-pill")).to_have_attribute("data-state", "on", timeout=15000)
+    expect(panel.locator("[role=alert]")).to_have_count(0)
     # A record the connection keeps while the session search is being typed in leaves the search in focus, typing and all.
     page.locator("#sync-pill").click()
     page.locator("#lens").get_by_role("button", name="내 AI 세션에서 가져오기").click()
