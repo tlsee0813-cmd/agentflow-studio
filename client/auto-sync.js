@@ -1,6 +1,7 @@
 import { ERROR_TEXT } from './studio-api.js';
 import { newTurns, markAfter, leftSince, sessionText, sessionChunks, stamp, TOOL_NAME, SETTLE_MS, AUTO_RUN_GAP_MS, AUTO_RUNS_PER_DAY, BACKFILL_MS, BACKFILL_SESSIONS } from '../shared/session-import.js';
-import { sameFolder } from '../shared/session-parse.js';
+import { sameFolder, within } from '../shared/session-parse.js';
+import { foldRecord } from '../shared/handover.js';
 import { h, put, ago } from './plan-dom.js';
 export const AUTOSYNC_KEY = 'agentflow.studio.autosync.1';
 const folderName = (path) => path.split(/[\\/]/).filter(Boolean).pop() ?? path;
@@ -240,6 +241,46 @@ export function createAutoSync(host) {
                     first = false;
                 }
             }
+            // Records AI sessions left through the AgentFlow connector for these folders (each made in one of them, after it was linked),
+            // oldest first, a few pages a look; marked by number as soon as they are kept.
+            const cx = host.connector?.() ?? null;
+            if (cx && !full) {
+                try {
+                    for (let page = 0; page < 4; page++) {
+                        const cur = stored(key);
+                        if (!cur?.folders.length || open()?.key !== key)
+                            break;
+                        // Made in one of its folders since it was linked, or (a web AI session through the cloud) named for this project, or for none yet.
+                        const got = await cx.records(cur.connector ?? 0, cur.folders.map(f => f.path), key);
+                        const texts = got.records.filter(r => r.folder ? cur.folders.some(f => within([r.folder], f.path) && r.at >= f.since) : !r.project || r.project === key).map(r => foldRecord(r.text));
+                        const upTo = got.more ? Math.max(cur.connector ?? 0, ...got.records.map(r => r.seq)) : got.last;
+                        if (texts.length) {
+                            if (open()?.key !== key)
+                                return;
+                            const no = await host.save(key, texts);
+                            if (no && !no.refused) {
+                                error = no.error;
+                                halted.set(key, no.error);
+                                return;
+                            }
+                            if (no)
+                                failed = no.error;
+                        }
+                        const now2 = stored(key);
+                        if (now2) {
+                            now2.connector = upTo;
+                            now2.taken += texts.length;
+                            put_(key, now2);
+                        }
+                        if (!got.more)
+                            break;
+                    }
+                    await cx.publish(key, b.folders.map(f => f.path));
+                }
+                catch (e) {
+                    failed = failed ?? `AgentFlow 커넥터: ${failText(e, '커넥터 기록을 확인하지 못했어요.')}`;
+                }
+            }
             error = failed;
             const runs = stored(key)?.runs ?? b.runs, today = day(), n = runs.day === today ? runs.n : 0;
             // A connection ended meanwhile starts no reading: what it kept before then is read by the person's own click. Nor does a
@@ -302,7 +343,17 @@ export function createAutoSync(host) {
                 f.tools.add(TOOL_NAME[s.tool]);
                 by.set(k, f);
             }
-            folders = [...by.values()].sort((a, b) => b.latest.localeCompare(a.latest));
+            // A folder takes the sessions of the folders inside it too (within): its row counts them, so a repository whose sessions
+            // mostly ran in a subfolder (app/) does not read as the row with fewer. It keeps its own place and time, so a folder that holds
+            // everything (the home folder) is not put first for it.
+            const own = [...by.values()], rows = own.map(f => ({ ...f, tools: new Set(f.tools), inner: 0 }));
+            rows.forEach((f, i) => own.forEach((g, j) => { if (i !== j && within(g.folder, f.folder)) {
+                f.count += g.count;
+                f.inner += g.count;
+                for (const t of g.tools)
+                    f.tools.add(t);
+            } }));
+            folders = rows.sort((a, b) => b.latest.localeCompare(a.latest));
         }
         catch (e) {
             foldersError = failText(e, '세션 기록을 찾지 못했어요.');
@@ -443,7 +494,8 @@ export function createAutoSync(host) {
                     void tick(true); } }, busy ? '확인 중…' : '지금 확인'), h('button', { type: 'button', class: 'link-button sync-add', 'data-act': 'add', onclick: () => { adding = true; folders = null; foldersError = null; render(); } }, '폴더 추가'), h('button', { type: 'button', class: 'link-button quiet sync-off', 'data-act': 'off', onclick: disconnect }, '연결 끊기')), setup);
             return;
         }
-        const picks = folders?.filter(f => !b?.folders.some(x => sameFolder(x.path, f.folder))) ?? null;
+        // A folder inside one linked already comes in through it, so it is not offered again.
+        const picks = folders?.filter(f => !b?.folders.some(x => within(f.folder, x.path))) ?? null;
         // No source yet: the session folders are picked (or allowed again) first.
         if (!host.sources.current()) {
             put(panel, h('h3', { tabindex: '-1' }, '내 AI 세션 연결'), setup, b ? h('button', { type: 'button', class: 'link-button quiet', 'data-act': 'back', onclick: back }, '취소') : null);
@@ -466,7 +518,7 @@ export function createAutoSync(host) {
         put(panel, h('h3', { tabindex: '-1' }, b ? '작업 폴더 추가' : '작업 폴더 자동 연결'), b ? h('p', { class: 'fine' }, '저장소가 나뉜 프로젝트라면 다른 작업 폴더도 함께 묶어요. 그 폴더의 세션도 같은 방식으로 들어오고, 지도에서 부분마다 어느 세션이 다뤘는지 보여요.')
             : h('p', { class: 'sync-lead' }, `이 프로젝트를 작업 폴더에 묶으면, 그 폴더의 ${toolNames()} 대화가 저절로 기록으로 들어오고 지도가 갱신돼요.`), 
         // Before connecting: what comes in first, what is kept of it, and that it goes to the AI.
-        b ? null : h('ul', { class: 'sync-points' }, h('li', {}, `처음 연결하면 최근 ${BACKFILL_MS / 86400000}일의 세션(${BACKFILL_SESSIONS}개까지)을 가져와 지도에 담아요.`), h('li', {}, '내가 쓴 요청과 AI의 답변·바꾼 파일만 그대로 가져오고, 키·토큰처럼 보이는 글은 가려요.'), h('li', {}, '지도를 갱신할 때 이 기록을 AI에게 보내요. 직접 붙여 넣거나 추가한 기록·자료도 함께 보내요.')), foldersLoading ? h('p', { class: 'fine' }, '이 PC의 세션에서 작업 폴더를 찾는 중…') : null, errorLine(foldersError), picks && !picks.length ? h('p', { class: 'fine' }, b ? '세션이 있는 다른 작업 폴더를 찾지 못했어요. 폴더 경로를 직접 적을 수도 있어요.' : '이 PC에서 Claude Code·Codex 세션을 찾지 못했어요. 폴더 경로를 직접 적을 수도 있어요.') : null, picks?.length ? h('ul', { class: 'sync-folders' }, ...picks.slice(0, 12).map(f => h('li', {}, h('button', { type: 'button', class: 'sync-folder-pick', 'data-act': `folder:${f.folder}`, onclick: () => connect(f.folder) }, h('strong', {}, f.folder), h('small', { title: stamp(f.latest, true) }, `${[...f.tools].join('·')} 세션 ${f.count}개 · 최근 대화 ${ago(f.latest)}`), 
+        b ? null : h('ul', { class: 'sync-points' }, h('li', {}, `처음 연결하면 최근 ${BACKFILL_MS / 86400000}일의 세션(${BACKFILL_SESSIONS}개까지)을 가져와 지도에 담아요.`), h('li', {}, '내가 쓴 요청과 AI의 답변·바꾼 파일만 그대로 가져오고, 키·토큰처럼 보이는 글은 가려요.'), h('li', {}, '지도를 갱신할 때 이 기록을 AI에게 보내요. 직접 붙여 넣거나 추가한 기록·자료도 함께 보내요.')), foldersLoading ? h('p', { class: 'fine' }, '이 PC의 세션에서 작업 폴더를 찾는 중…') : null, errorLine(foldersError), picks && !picks.length ? h('p', { class: 'fine' }, b ? '세션이 있는 다른 작업 폴더를 찾지 못했어요. 폴더 경로를 직접 적을 수도 있어요.' : '이 PC에서 Claude Code·Codex 세션을 찾지 못했어요. 폴더 경로를 직접 적을 수도 있어요.') : null, picks?.length ? h('ul', { class: 'sync-folders' }, ...picks.slice(0, 12).map(f => h('li', {}, h('button', { type: 'button', class: 'sync-folder-pick', 'data-act': `folder:${f.folder}`, onclick: () => connect(f.folder) }, h('strong', {}, f.folder), h('small', { title: stamp(f.latest, true) }, `${[...f.tools].join('·')} 세션 ${f.count}개${f.inner ? ` (안쪽 폴더의 ${f.inner}개 포함)` : ''} · 최근 대화 ${ago(f.latest)}`), 
         // What a press does, as the typed path's own '연결' says it (left out of the card's name, which stays the folder).
         h('span', { class: 'sync-folder-go', 'aria-hidden': 'true' }, '연결 ›'))))) : null, h('div', { class: 'pp-row sync-manual' }, input, go, b ? h('button', { type: 'button', class: 'link-button quiet', 'data-act': 'back', onclick: back }, '취소') : null), setup);
     }

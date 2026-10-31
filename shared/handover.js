@@ -7,8 +7,9 @@ import { CLAIM_LABEL, unreadRecords } from './map-reading.js';
 import { studioView } from './studio.js';
 import { relLabel } from './relation-groups.js';
 import { stamp, RECORD_HEAD, HEAD_FIELD } from './session-import.js';
-import { TOOL_NAME } from './session-parse.js';
+import { TOOL_NAME, RELAYED } from './session-parse.js';
 import { HANDOVER_TAG, foldHandover, quoteReceived, receivedHandovers } from './handover-mark.js';
+import { MATCH_LABEL } from './request-return.js';
 export { HANDOVER_TAG, HANDOVER_SECTIONS, foldHandover, handoverCode, receivedHandovers } from './handover-mark.js';
 const ORIGIN_NAME = { ...TOOL_NAME, web: '웹 AI' };
 const EMPTY_FIELD = /^(?:(?:작업 폴더|브랜치)\s*)?(?:\(?(?:없음|없어요|없습니다|해당 없음|모름|알 수 없음|n\/a|none|null|unknown|-+|—)\)?|\([^()]*(?:있으면|짧은 제목)[^()]*\))$/i;
@@ -57,12 +58,30 @@ export function foldRecord(text) {
 const originKey = (o) => o.id ?? `${o.tool}|${o.title ?? ''}|${o.cwd ?? ''}`;
 /** A session by its title (partSessions gives one without a title its first request), else by when it started. */
 export const originLabel = (o) => `${ORIGIN_NAME[o.tool]}${o.title ? ` 「${o.title}」` : ` 세션${o.start ? ` (${o.start.slice(5)} 시작)` : ''}`}`;
-/** The first words of a record's first request, as the paste box's list names a session; a handover it started from is not them. */
+/** The first words of a record's first request, as the paste box's list names a session; a handover it started from is not them.
+ * One the person typed comes before one another Claude relayed (a project's thread starts from one), which is named by its own
+ * words without the mark that says so: the mark alone would fill the name. weak: only relayed or very short requests were found, so a
+ * later record of the session may name it better. */
 function askName(text) {
-    const ask = text.split(/^── /m).find(b => b.startsWith('사용자 요청'));
-    const line = ask?.split('\n').slice(1).map(l => l.trim()).find(l => l && !l.startsWith('[AgentFlow 인수인계 문서를 받아 이어감'));
-    return line ? one(line, 25) : null;
+    let got = null, short = null;
+    for (const ask of text.split(/^── /m).filter(b => b.startsWith('사용자 요청'))) {
+        const line = ask.split('\n').slice(1).map(l => l.trim()).find(l => l && !l.startsWith('[AgentFlow 인수인계 문서를 받아 이어감'));
+        if (!line)
+            continue;
+        // A reply of a few letters ('ㅇㅇ', '네') names nothing: a longer request after it does, else it is the name of last resort.
+        if (!line.startsWith(RELAYED)) {
+            if (line.length >= SHORT_ASK)
+                return { name: one(line, 25), weak: false };
+            short ??= line;
+            continue;
+        }
+        const own = line.slice(RELAYED.length).trim();
+        if (own && !got)
+            got = { name: one(own, 25), weak: true };
+    }
+    return got ?? (short ? { name: one(short, 25), weak: true } : null);
 }
+const SHORT_ASK = 6;
 /** The first request each untitled session's records hold, in the order they were kept (by originKey). Made once for each list of
  * records: a project changed is a copy, so its list is another (its length is checked too). */
 const ASKED = new WeakMap();
@@ -70,14 +89,22 @@ function askNames(p) {
     const was = ASKED.get(p.pasted);
     if (was && was.n === p.pasted.length)
         return was.names;
-    const names = new Map();
+    const names = new Map(), weak = new Set();
     for (const rec of p.pasted) {
         const o = sessionOrigin(rec.text);
         if (!o || o.title)
             continue;
-        const key = originKey(o), name = !names.has(key) && askName(rec.text);
-        if (name)
-            names.set(key, name);
+        const key = originKey(o);
+        if (names.has(key) && !weak.has(key))
+            continue;
+        const got = askName(rec.text);
+        if (!got || names.has(key) && got.weak)
+            continue;
+        names.set(key, got.name);
+        if (got.weak)
+            weak.add(key);
+        else
+            weak.delete(key);
     }
     ASKED.set(p.pasted, { n: p.pasted.length, names });
     return names;
@@ -124,7 +151,32 @@ const CLAIM_ORDER = ['want', 'idea', 'reported', 'checked', 'describes', 'open',
 const CLAIMS_PER_PART = 10, RECENT_REQUESTS = 6, FILES_PER_ASK = 8, RECENT_FILES = 24, LINE = 240, NAMES = 600;
 const one = (t, n = LINE) => { const s = t.replace(/\s+/g, ' ').trim(); return s.length > n ? `${s.slice(0, n - 1)}…` : s; };
 /** The end of a text on one line: an answer says last how the work ended. */
-const tail = (t, n) => { const s = t.replace(/\s+/g, ' ').trim(); return s.length > n ? `…${s.slice(1 - n)}` : s; };
+/** How an answer ended, where a tool's reply says what came of the work (done, blocked, not tested): its last paragraphs as fit in
+ * n, else its last paragraph from the first sentence that starts in the last n characters (cut in the middle only when none does). */
+const ending = (t, n) => {
+    const paras = t.split(/\n\s*\n/).map(x => x.replace(/\s+/g, ' ').trim()).filter(Boolean);
+    let out = '', k = 0;
+    for (let i = paras.length - 1; i >= 0; i--) {
+        const next = out ? `${paras[i]} ${out}` : paras[i];
+        if (next.length > n)
+            break;
+        out = next;
+        k++;
+    }
+    if (out)
+        return k < paras.length ? `… ${out}` : out;
+    const win = (paras.at(-1) ?? '').slice(2 - n), at = /[.!?。] +\S/.exec(win);
+    return at && at.index < win.length / 2 ? `… ${win.slice(at.index + at[0].length - 1)}` : `…${win}`;
+};
+/** A whole path an answer names outside the sessions' working folders (a scratch folder under the person's profile, another
+ * checkout) is said as such: the next session would read it as a place of the project. A path inside a working folder stays. */
+const ABSOLUTE = /(?<![\w.:/\\])(?:[A-Za-z]:\\[^\s`'"<>|*?]+|\/(?:home|Users|tmp|root|var|private|mnt)\/[^\s`'"<>]+)/g;
+const awayPaths = (t, homes) => {
+    const norm = (x) => x.replace(/\\/g, '/').replace(/\/+$/, '').toLowerCase(), roots = homes.map(norm).filter(Boolean);
+    return t.replace(ABSOLUTE, f => { const n = norm(f); return roots.some(r => n === r || n.startsWith(`${r}/`)) ? f : '(작업 폴더 밖 경로)'; });
+};
+/** A changed file named by its whole path: outside every working folder of its session (a scratch file, another checkout). */
+const outside = (f) => /^(?:[A-Za-z]:[\\/]|\\\\|\/)/.test(f);
 /** The claims a part keeps when it holds more than it has room for: what is left to ask first (an open choice is what the next
  * session must not decide alone), then what was wanted and reported. */
 const KEEP_FIRST = ['open', 'differs', 'want', 'reported', 'checked', 'idea', 'describes'];
@@ -225,8 +277,9 @@ function sessionAsks(p, unread, scope) {
             }
             // An answer the map has not read is the only place the document tells how that work ended (blocked, not tested, done).
             const said = (f ? body.slice(0, body.lastIndexOf('\n') + 1) : body).trim();
+            // The reply that came last is how it ended: a new one is kept in place of the one before, the rest of one (이어서) after it.
             if (late && said) {
-                last.answer = last.answer ? `${last.answer}\n\n${said}` : said;
+                last.answer = last.answer && head.includes('답변(이어서)') ? `${last.answer}\n\n${said}` : said;
                 last.late = true;
                 last.records.push(rec.id);
             }
@@ -245,6 +298,38 @@ function unreadWhere(count, inFlow, scoped, cut) {
     if (!inFlow)
         return `${lead} 그 내용은 이 문서에 없으니, 필요하면 사용자에게 물어보세요.`;
     return `${lead} 그중 ${scoped ? '이 범위를 다룬 세션의 기록 ' : ''}${inFlow}개는 ${what}이 ${where} 있고, 나머지 ${count - inFlow}개는 이 문서에 없어요. 표시된 내용은 위 부분 상태에 아직 반영되지 않았고, 나머지는 필요하면 사용자에게 물어보세요.`;
+}
+/** The change requests made (newest last, the latest REQUESTS_SHOWN), each with what it asked and what came back for it: the
+ * report passages a reading matched to it, by kind, and records that name it but no reading has matched yet. In a part's document,
+ * those with an item on a part in it. What came back is what was said, not what was checked. */
+const REQUESTS_SHOWN = 5;
+/** What a matched report said of the item it answers, as the handover writes it. */
+const STANCE_SAID = { made: '바꿨다고 함', 'not-made': '미구현', unclear: '분명하지 않음' };
+function requestLines(p, all, scope) {
+    const asked = [...new Map(all.map(q => [q.id, q])).values()].filter(q => !scope || q.items.some(i => i.partIds.some(x => scope.has(x))))
+        .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    if (!asked.length)
+        return [];
+    const maps = p.readings.filter(isMapReading), read = new Set(maps.flatMap(r => r.records.map(x => x.id)));
+    const out = ['## 맡긴 변경 요청 (요청문을 만든 것, 오래된 것부터)'];
+    if (asked.length > REQUESTS_SHOWN)
+        out.push(`(그 앞의 요청문 ${asked.length - REQUESTS_SHOWN}개는 이 문서에 넣지 않았어요.)`);
+    for (const q of asked.slice(-REQUESTS_SHOWN)) {
+        const items = q.items.filter(i => !scope || i.partIds.some(x => scope.has(x)));
+        out.push(one(`- ${q.id} · ${stamp(q.createdAt, true)} · ${q.intent}`, 300));
+        if (items.length)
+            out.push(`  - 항목: ${one(items.map(i => i.title).join('; '), 290)}`);
+        const matched = maps.flatMap(r => r.matches ?? []).filter(m => m.targets.some(t => t.requestId === q.id));
+        // Each kind with what it said of the item (made, not made, unclear): the next session reads what came back, not only that it did.
+        const kinds = [...new Set(matched.map(m => m.kind))].map(k => {
+            const of = matched.filter(m => m.kind === k), said = [...new Set(of.map(m => m.stance))].map(s => [STANCE_SAID[s ?? 'unclear'], of.filter(m => m.stance === s).length]);
+            return `${MATCH_LABEL[k]} ${of.length}개(${said.length === 1 ? said[0][0] : said.map(([w, n]) => `${w} ${n}`).join(', ')})`;
+        });
+        const named = p.pasted.filter(r => r.text.includes(q.id) && !read.has(r.id)).length;
+        out.push(`  - 돌아온 것: ${[matched.length ? `지도에서 대조함 · ${kinds.join(', ')}` : '', named ? `이 요청문을 적은 기록 ${named}개(아직 대조하지 않음)` : ''].filter(Boolean).join(' · ') || '아직 없어요'}`);
+    }
+    out.push('');
+    return out;
 }
 /** The document for the whole project (scope null) or one part with everything inside it. */
 export function handoverText(p, opts) { return handoverDoc(p, opts).text; }
@@ -341,15 +426,23 @@ export function handoverDoc(p, opts) {
             open.push(`- 기록에서 알 수 없었음: ${one(g)}`);
     if (open.length)
         after.push('## 아직 정하지 않은 것', ...dedupeLines(open).slice(-12), '');
+    after.push(...requestLines(p, opts.requests ?? [], scoped ? scopeIds : null));
     if (asks.length) {
         after.push('## 최근 흐름 (사용자가 세션에서 한 요청, 오래된 것부터)');
+        // The requests before these are said to be left out, so the first one here is not read as where the work began.
+        if (listed.length > asks.length)
+            after.push(`(그 앞의 요청 ${listed.length - asks.length}개는 이 문서에 넣지 않았어요. 필요하면 사용자에게 물어보세요.)`);
         // Each request names its own files, as many as FILES_PER_ASK and one line hold.
-        const each = asks.map(t => [...new Set(t.files)]), list = (f) => f.slice(0, FILES_PER_ASK).join(', ');
+        // A file outside the working folders is counted, not named: a scratch file of the tool reads as the project's otherwise.
+        const each = asks.map(t => [...new Set(t.files)].filter(f => !outside(f))), list = (f) => f.slice(0, FILES_PER_ASK).join(', ');
+        const away = asks.map(t => new Set(t.files.filter(outside)).size);
+        const homes = partSessions(p, null).map(s => s.cwd ?? '');
         // What the map has not read yet is marked so where the map has parts (they do not hold it), with how its answer ended.
         asks.forEach((t, i) => {
-            after.push(`- ${t.late && parts.length ? '(지도에 아직 없음) ' : ''}${one(quoteReceived(t.text), 300)}${each[i].length ? ` → 바꾼 파일: ${one(list(each[i]), 300)}` : ''}`);
+            const elsewhere = away[i] ? `작업 폴더 밖 파일 ${away[i]}개` : '';
+            after.push(`- ${t.late && parts.length ? '(지도에 아직 없음) ' : ''}${one(quoteReceived(t.text), 300)}${each[i].length ? ` → 바꾼 파일: ${one(list(each[i]), 300)}${elsewhere ? ` (그 밖에 ${elsewhere})` : ''}` : elsewhere ? ` → 바꾼 파일: ${elsewhere}` : ''}`);
             if (t.answer)
-                after.push(`  - 답변: ${tail(t.answer, 200)}`);
+                after.push(`  - 답변: ${ending(awayPaths(t.answer, homes), 200)}`);
         });
         // All of them once, written only when it names a file the lines above leave out (a request's list was cut short): otherwise it
         // would only repeat them, even when a file was changed more than once.

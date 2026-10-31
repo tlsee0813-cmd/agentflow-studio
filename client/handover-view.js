@@ -1,12 +1,12 @@
 import { studioView } from '../shared/studio.js';
 import { handoverDoc, handoverCode, WEB_RECORD_ASK } from '../shared/handover.js';
-import { h } from './plan-dom.js';
+import { h, svg } from './plan-dom.js';
 export function createHandoverView(host) {
     let dialog = null, from = null;
     let state = null;
     function make(project, scope, code, at) {
         try {
-            return handoverDoc(project, { scope, code, at });
+            return handoverDoc(project, { scope, code, at, requests: host.requests?.() ?? [] });
         }
         catch {
             return null;
@@ -40,13 +40,46 @@ export function createHandoverView(host) {
         text.value = st.text;
         // Drawn again (another range, a message): the control that had focus keeps it.
         const had = dialog.contains(document.activeElement) ? document.activeElement.dataset.act ?? null : null;
-        dialog.replaceChildren(h('header', { class: 'handover-head' }, h('h2', { id: 'handover-title' }, '인수인계 문서'), h('button', { type: 'button', class: 'close', 'data-act': 'close', 'aria-label': '닫기', title: '닫기 (Esc)', onclick: close }, '×')), h('p', { class: 'handover-lead' }, '새 세션의 첫 메시지에 이 문서를 그대로 붙여 넣고, 그 아래에 이어서 할 일을 적으세요. 지도와 기록에 있는 내용만 옮겼어요(만들 때 AI를 부르지 않아요). 그 세션의 기록이 들어오면 지도에 ‘인수인계로 이어받음’으로 표시돼요.'), 
-        // A web chat keeps no session file: its record comes back only through the request text, pasted by hand.
-        h('p', { class: 'handover-web' }, '웹 AI 대화에서 이어 가면 기록이 저절로 들어오지 않아요. 일을 마친 뒤 ', h('button', { type: 'button', class: 'link-button', 'data-act': 'web', onclick: copyWebAsk }, '기록 요청 문구 복사'), '를 눌러 그 대화에 붙여 넣고, 나온 답을 ‘돌아와 읽기 › 기록 붙여넣기’에 넣어 저장하세요.'), h('label', { class: 'handover-scope', for: 'handover-scope' }, h('span', {}, '범위'), pick), text, h('div', { class: 'handover-acts' }, h('button', { type: 'button', class: 'primary', 'data-act': 'copy', onclick: copy }, '복사'), h('button', { type: 'button', class: 'secondary', 'data-act': 'save', onclick: save }, '.md로 저장'), 
+        const cloud = cloudBlock(o.key);
+        const glyph = svg('svg', { viewBox: '0 0 20 20' });
+        glyph.append(svg('path', { d: 'M6 2.75h5.5L15 6.25v10a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-12.5a1 1 0 0 1 1-1z' }), svg('path', { d: 'M11.25 2.75v3.75H15M7.75 10.5h4.5M7.75 13.25h3' }));
+        const icon = h('span', { class: 'handover-icon', 'aria-hidden': 'true' }, glyph);
+        dialog.replaceChildren(h('header', { class: 'handover-head' }, icon, h('div', { class: 'handover-titles' }, h('h2', { id: 'handover-title' }, '인수인계 문서'), h('p', { class: 'handover-lead' }, h('span', { class: 'hl-do' }, '새 세션의 첫 메시지에 이 문서를 그대로 붙여 넣고, 그 아래에 이어서 할 일을 적으세요.'), ' ', h('span', { class: 'hl-note' }, '지도와 기록에 있는 내용만 옮겼어요(만들 때 AI를 부르지 않아요). 그 세션의 기록이 들어오면 지도에 ‘인수인계로 이어받음’으로 표시돼요.'))), h('button', { type: 'button', class: 'close', 'data-act': 'close', 'aria-label': '닫기', title: '닫기 (Esc)', onclick: close }, '×')), 
+        // The web AI connector, where this site has one: its own card above the document.
+        ...(cloud ? [cloud] : []), h('div', { class: 'handover-bar' }, h('label', { class: 'handover-scope', for: 'handover-scope' }, h('span', {}, '범위'), pick), 
         // A document cut down to fit one prompt says so here too, not only inside the text.
-        h('span', { class: 'handover-msg', role: 'status' }, st.msg ?? `${st.text.length.toLocaleString()}자${st.trimmed ? ` · 길어서 부분 ${st.trimmed}개는 줄여 적었어요` : ''}`)));
+        h('span', { class: 'handover-msg', role: 'status' }, st.msg ?? `${st.text.length.toLocaleString()}자${st.trimmed ? ` · 길어서 부분 ${st.trimmed}개는 줄여 적었어요` : ''}`)), text, h('footer', { class: 'handover-foot' }, 
+        // A web chat keeps no session file: without the connector its record comes back only through the request text, pasted by hand.
+        cloud ? null : h('p', { class: 'handover-web' }, '웹 AI 대화에서 이어 가면 기록이 저절로 들어오지 않아요. 일을 마친 뒤 ', h('button', { type: 'button', class: 'link-button', 'data-act': 'web', onclick: copyWebAsk }, '기록 요청 문구 복사'), '를 눌러 그 대화에 붙여 넣고, 나온 답을 ‘돌아와 읽기 › 기록 붙여넣기’에 넣어 저장하세요.'), h('div', { class: 'handover-acts' }, h('button', { type: 'button', class: 'secondary', 'data-act': 'save', onclick: save }, '.md로 저장'), h('button', { type: 'button', class: 'primary', 'data-act': 'copy', onclick: copy }, '복사'))));
         if (had)
             dialog.querySelector(`[data-act="${had}"]`)?.focus();
+    }
+    /** The web AI connector's part of the dialog: sign in, link this project, then the address to add in claude.ai. */
+    function cloudBlock(key) {
+        const c = host.cloud?.(), st = c?.state();
+        if (!c || !st || st.kind === 'off' || !state || state.key !== key)
+            return null;
+        if (st.kind === 'out')
+            return h('div', { class: 'handover-web handover-cloud' }, h('p', {}, h('strong', {}, '웹 AI 커넥터'), ' · claude.ai에 AgentFlow를 커넥터로 추가하면, 웹 대화가 이 인수인계를 직접 받아 가고 한 일을 기록으로 남겨요.'), h('a', { class: 'secondary small', href: c.loginHref(), 'data-act': 'cloud-login' }, 'GitHub로 로그인'));
+        if (!c.linked(key))
+            return h('div', { class: 'handover-web handover-cloud' }, h('p', {}, h('strong', {}, '웹 AI 커넥터'), ` · ${st.user} 계정으로 로그인했어요. 이 프로젝트를 이으면, 웹 대화가 이 인수인계를 받아 가고 남긴 기록이 이 프로젝트로 들어와요.`), h('button', { type: 'button', class: 'secondary small', 'data-act': 'cloud-link', onclick: () => { void c.link(key).then(render); } }, '이 프로젝트를 웹 AI 커넥터에 잇기'));
+        return h('div', { class: 'handover-web handover-cloud' }, h('p', {}, h('strong', {}, '웹 AI 커넥터에 이어져 있어요'), ` (${st.user}). claude.ai › 설정 › 커넥터 › 사용자 지정 커넥터 추가에 이 주소를 넣고 GitHub로 로그인하세요. 웹 대화에서 "AgentFlow 인수인계 받아 줘"라고 하면 돼요.`), h('p', {}, h('code', { class: 'handover-mcp' }, st.mcp), ' ', h('button', { type: 'button', class: 'link-button', 'data-act': 'cloud-copy', onclick: () => void copyText(st.mcp, '커넥터 주소를 복사했어요.') }, '주소 복사')), h('p', { class: 'fine' }, c.error() ?? '이 프로젝트가 열려 있는 동안 1분마다 웹 대화의 기록을 가져오고, 바뀐 인수인계를 올려 둬요. ', h('a', { href: st.pc, target: '_blank', rel: 'noopener' }, 'PC Studio에서도 받기'), ' · ', h('button', { type: 'button', class: 'link-button', 'data-act': 'cloud-unlink', onclick: () => { void c.unlink(key).then(render); } }, '잇기 끊기')));
+    }
+    async function copyText(text, done) {
+        const st = state;
+        if (!st)
+            return;
+        let ok = true;
+        try {
+            await navigator.clipboard.writeText(text);
+        }
+        catch {
+            ok = false;
+        }
+        if (state !== st)
+            return;
+        st.msg = ok ? done : '자동 복사가 막혀 있어요. 주소를 선택해 직접 복사하세요.';
+        render();
     }
     async function copy() {
         const st = state;
@@ -122,5 +155,5 @@ export function createHandoverView(host) {
         document.getElementById('handover-text')?.scrollTo(0, 0);
     }
     function close() { dialog?.close(); }
-    return { open, close, isOpen: () => !!dialog?.open };
+    return { open, close, isOpen: () => !!dialog?.open, refresh: () => render() };
 }
