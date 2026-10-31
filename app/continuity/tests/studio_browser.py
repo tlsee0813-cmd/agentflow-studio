@@ -2793,7 +2793,21 @@ def sessions_flow(browser, base):
     expect(page.locator("#sync-panel h3")).to_have_text("작업 폴더 추가")
     expect(page.locator("#sync-panel h3")).to_be_focused()
     expect(page.locator("#sync-panel .sync-folder-pick")).to_have_count(0)  # the one folder with sessions is linked already
-    page.locator("#sync-panel .sync-path").fill("/work/salon-api")
+    # A look redraws the panel as it starts and as it ends: a Korean folder name composed meanwhile comes out as typed.
+    pill, path, look = page.locator("#sync-pill"), page.locator("#sync-panel .sync-path"), "() => document.dispatchEvent(new Event('visibilitychange'))"
+    expect(pill).to_have_attribute("data-state", "on", timeout=15000)  # the look '지금 확인' started has ended
+    path.fill("/work/")
+    cdp = page.context.new_cdp_session(page)
+    ime(cdp, "ㅇ", "예")
+    page.evaluate(look)
+    expect(pill).to_have_attribute("data-state", "busy")
+    ime(cdp, "옝", "예|", "야", "약")
+    expect(pill).to_have_attribute("data-state", "on", timeout=15000)
+    ime(cdp, "약|")
+    expect(path).to_have_value("/work/예약")
+    expect(path).to_be_focused()
+    path.fill("/work/salon-api")
+    page.evaluate(look)  # '연결' is pressed while this look runs
     page.locator("#sync-panel").get_by_role("button", name="연결", exact=True).click()
     expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon 외 1")
     expect(page.locator("#sync-pill")).to_have_attribute("data-state", "busy")

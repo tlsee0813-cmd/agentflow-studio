@@ -262,9 +262,13 @@ export function createAutoSync(host: AutoSyncHost) {
     pill.title = `자동 연결${more}`; pill.setAttribute('aria-label', pill.title);
     pill.replaceChildren(h('i', { 'aria-hidden': 'true' }), h('span', {}, '자동 연결', h('span', {}, more)));
     panel.hidden = !panelOpen; if (!panelOpen) return;
+    // A folder name being composed (a Korean syllable) is not drawn over: a new field would end the composition and split the
+    // syllable. The redraw follows once it is committed (draw).
+    const typing = panel.querySelector<HTMLInputElement>('.sync-path');
+    if (typing?.dataset.composing && document.activeElement === typing) { typing.dataset.redraw = '1'; return; }
     // A redraw (a look starting or ending, the folders found) keeps a path being typed in focus, caret and all, and a control pressed
     // in the panel in focus; when that control is gone, focus stays in the panel at its heading.
-    const typing = panel.querySelector<HTMLInputElement>('.sync-path'), caret = typing && document.activeElement === typing ? [typing.selectionStart, typing.selectionEnd] as const : null;
+    const caret = typing && document.activeElement === typing ? [typing.selectionStart, typing.selectionEnd] as const : null;
     const had = !caret && panel.contains(document.activeElement) ? (document.activeElement as HTMLElement).dataset.act ?? '' : null;
     panel.replaceChildren(); draw(panel, b, error, waiting);
     const input = caret && panel.querySelector<HTMLInputElement>('.sync-path');
@@ -312,6 +316,9 @@ export function createAutoSync(host: AutoSyncHost) {
     // '연결' waits for a path: pressed with none it would do nothing and say nothing.
     const go = h('button', { type: 'button', class: 'secondary small', disabled: !typed.trim(), onclick: () => connect(typed) }, '연결');
     input.addEventListener('input', () => { typed = input.value; go.disabled = !typed.trim(); });
+    // A redraw held while a syllable was composed (render) follows its commit, after the keystroke that may start the next one.
+    input.addEventListener('compositionstart', () => { input.dataset.composing = '1'; });
+    input.addEventListener('compositionend', () => { delete input.dataset.composing; if (input.dataset.redraw) setTimeout(() => { if (input.isConnected) render(); }); });
     put(panel, h('h3', { tabindex: '-1' }, b ? '작업 폴더 추가' : '작업 폴더 자동 연결'),
       b ? h('p', { class: 'fine' }, '저장소가 나뉜 프로젝트라면 다른 작업 폴더도 함께 묶어요. 그 폴더의 세션도 같은 방식으로 들어오고, 지도에서 부분마다 어느 세션이 다뤘는지 보여요.')
         : h('p', { class: 'sync-lead' }, '이 프로젝트를 작업 폴더에 묶으면, 그 폴더의 Claude Code·Codex 대화가 저절로 기록으로 들어오고 지도가 갱신돼요.'),
