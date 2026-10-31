@@ -248,7 +248,7 @@ export function readPlanFile(text, projectId) {
     const formats = { [FILE_FORMAT]: 4, 'agentflow.change-plan-file.3': 3, 'agentflow.change-plan-file.2': 2, 'agentflow.change-plan-file.1': 1 };
     const from = isObj(v) && typeof v.format === 'string' && Object.hasOwn(formats, v.format) ? formats[v.format] : undefined;
     if (!isObj(v) || !from || !isObj(v.project))
-        return '변경안 파일이 아니에요. 프로젝트 백업 파일은 홈의 ‘백업 파일 가져오기’를 쓰세요.';
+        return '변경안 파일이 아니에요. 프로젝트 백업 파일은 홈의 ‘백업 가져오기’를 쓰세요.';
     if (v.project.id !== projectId)
         return `다른 프로젝트(‘${String(v.project.name ?? '').slice(0, 60)}’)의 변경안이에요. 가져오지 않았어요.`;
     // .1/.2 files were written before authoring contexts, .3 before request readings: one that claims either is not what that

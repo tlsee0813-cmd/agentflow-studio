@@ -5,7 +5,7 @@
  * the person is elsewhere (another project, home, or a later visit of the same one) is kept ready for its entry in this page only
  * (not across a reload) and applied when they come back and ask for it, without asking again. */
 import { isMapReading } from '../shared/types.js';
-import { buildMapAsk, applyReading, validateMapReply, MAP5_SCHEMA, MAP6_SCHEMA, MAP7_SCHEMA } from '../shared/map-reading.js';
+import { buildMapAsk, applyReading, validateMapReply, setAside, MAP5_SCHEMA, MAP6_SCHEMA, MAP7_SCHEMA } from '../shared/map-reading.js';
 import { askMap, AskError, ERROR_TEXT, RELEASE_TEXT } from './studio-api.js';
 import { encodeMapInput, decodeMapInput, jobHash, MAP_JOB_VERSION } from '../shared/map-job.js';
 import { SPAN_INDEX, textDigest } from '../shared/evidence-span.js';
@@ -27,6 +27,10 @@ const MAP_ERROR = {
     LIFECYCLE: '이 프로젝트가 보관되었다가 다시 열려 이번 정리 결과는 반영하지 않았어요. 원문과 지도는 그대로예요. 다시 정리해 주세요.',
     HASH: '요청을 준비하지 못해 보내지 않았어요. 기록은 그대로예요.'
 };
+/** A finished reply whose shape was not the one asked for (map.7's contract guard): its evidence was never weighed. */
+/** A quote whose first piece alone runs past the evidence bound: said as too long, not as a quote that is not in the records. */
+const LENGTH_REFUSED = 'AI가 근거로 든 인용이 너무 길어(600자 넘음) 반영하지 않았어요. 기록과 지도는 그대로예요. 다시 정리할 수 있어요.';
+const CONTRACT_REFUSED = 'AI 응답의 모양(항목 이름이나 형식)이 요청한 것과 달라 반영하지 않았어요. 기록과 지도는 그대로예요. 다시 정리할 수 있어요.';
 /* AF100: a job the local server keeps. Said in what the person can do (continue, see the result, stopped, cancel), not how. */
 const JOB_ERROR = {
     RESERVE: '정리 작업을 이 브라우저에 기록하지 못해 보내지 않았어요. 기록과 지도는 그대로예요.',
@@ -261,6 +265,9 @@ export function createMapRun(host) {
             return;
         }
         slot.attempt = null;
+        // map.7: what the reading set aside (an item breaking a rule of its own) is said by count; the rest is what was applied.
+        const left = setAside(a.reply).length;
+        slot.notice = left ? `AI 답 가운데 ${left}개 항목은 근거나 형식이 규칙에 맞지 않아 빼고 반영했어요.` : null;
         // Saved: the job is told so. Two stores, no shared transaction: a lost acknowledgement is settled later by the reading id.
         if (a.op)
             void settle(a, 'applied');
@@ -305,7 +312,10 @@ export function createMapRun(host) {
         const r = p?.readings.find(x => isMapReading(x) && x.id === a.meta?.id);
         return !r ? null : isMapReading(r) && r.hash === a.hash ? 'applied' : 'conflict';
     };
-    const errorText = (code) => JOB_ERROR[code] ?? MAP_ERROR[code] ?? ERROR_TEXT[code] ?? '지도를 정리하지 못했어요. 기록은 그대로예요.';
+    // A reply refused for its shape (map.7's contract: a missing or extra key, a wrong type) is said so, not as an evidence rule.
+    const errorText = (code, detail) => code === 'INVALID_RESPONSE' && detail?.rule === 'contract' ? CONTRACT_REFUSED
+        : code === 'INVALID_RESPONSE' && detail?.rule === 'length' ? LENGTH_REFUSED
+            : JOB_ERROR[code] ?? MAP_ERROR[code] ?? ERROR_TEXT[code] ?? '지도를 정리하지 못했어요. 기록은 그대로예요.';
     /** Reserve (or reuse the entry's reservation), then send. Nothing goes when the reservation cannot be written. */
     async function runJob(a, inp, model, seq) {
         const slot = of(a.key), live = () => slot.attempt === a, jobs = store();
@@ -419,7 +429,7 @@ export function createMapRun(host) {
             await forget(a, op.cancelling ? null : '정리가 취소됐어요. 결과는 없고 기록과 지도는 그대로예요.', 'seen', op.cancelling ? JOB_NOTE.cancelled : null);
             return;
         }
-        await forget(a, v.state === 'interrupted' ? JOB_ERROR.INTERRUPTED : errorText(v.error?.code ?? 'AI_UNAVAILABLE'), 'seen');
+        await forget(a, v.state === 'interrupted' ? JOB_ERROR.INTERRUPTED : errorText(v.error?.code ?? 'AI_UNAVAILABLE', v.error?.detail), 'seen');
     }
     /** The kept result, checked again here against the input reserved for it before it can be applied. */
     async function load(a, v) {

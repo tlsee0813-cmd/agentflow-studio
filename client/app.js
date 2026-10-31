@@ -14,7 +14,7 @@ import { correctRequestMatch, unlinkReplacement, requestComparison } from '../sh
 import { studioView, subtreeRecords, partPath, buildAsk, draftAfterAnswer, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
 import { layoutScope, edgePath, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, ROOT, HEAD } from './map-layout.js';
-import { aiStatus, askStudio, AskError, ERROR_TEXT, RELEASE_TEXT, PUBLIC_EDITION } from './studio-api.js';
+import { aiStatus, askStudio, AskError, ERROR_TEXT, RELEASE_TEXT, PUBLIC_EDITION, connectorRecords, publishHandover } from './studio-api.js';
 import { runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
@@ -23,7 +23,8 @@ import { AUTO_SENDS, createReturnView } from './return-view.js';
 import { createAutoSync } from './auto-sync.js';
 import { createSessionSources } from './session-source.js';
 import { createHandoverView } from './handover-view.js';
-import { partSessions, originLabel } from '../shared/handover.js';
+import { createCloudLink } from './cloud-link.js';
+import { partSessions, originLabel, handoverDoc, handoverCode } from '../shared/handover.js';
 import { UI62_KEY, buildUi62Project, ui62Keys } from '../shared/return-material.js';
 import { REL_LABEL, relationGroups, dirMark, dirTitle, insideEnds } from '../shared/relation-groups.js';
 /* ---------- small DOM helpers (shared with the change-plan view) ---------- */
@@ -848,6 +849,14 @@ function rememberPlace() {
 let openPlanOnArrive = false;
 /** A package-like name ('@node-red/runtime') may break after its slashes rather than inside a word. */
 const slashBreaks = (name) => name.split('/').flatMap((x, i, all) => (i < all.length - 1 ? [`${x}/`, document.createElement('wbr')] : [x]));
+/** A quiet monogram for a project card: its first letter on one of six tints, chosen from the name so it stays the same. */
+function programAvatar(name) {
+    const first = [...name.trim().replace(/^[^\p{L}\p{N}]+/u, '')][0] ?? '·';
+    let n = 0;
+    for (const c of name)
+        n = (n * 31 + c.codePointAt(0)) >>> 0;
+    return h('span', { class: 'program-avatar', 'data-tone': String(n % 6), 'aria-hidden': 'true' }, first.toUpperCase());
+}
 function programCard(key, p, example, keyOf) {
     const v = studioView(p), pasted = p.pasted.at(-1)?.at ?? null, lastAt = [v.records[0]?.at ?? null, pasted].filter((x) => !!x).sort().at(-1) ?? null;
     const changed = v.parts.filter(x => recentAt(x.lastAt)).length;
@@ -866,13 +875,13 @@ function programCard(key, p, example, keyOf) {
     const section = roots.length ? h('ol', { class: 'program-section', 'aria-label': '최상위 구성' }, ...roots.slice(0, MAX).map(r => {
         const kids = r.childIds.map(id => v.parts.find(x => x.id === id)?.name).filter(Boolean);
         return h('li', {}, h('a', { href: `${base}/${encodeURIComponent(keyOf(r.id))}`, title: `‘${r.name}’ 선택해서 열기` }, h('strong', {}, ...slashBreaks(r.name)), kids.length ? h('span', {}, kids.slice(0, 3).join(' · '), kids.length > 3 ? h('small', {}, ` +${kids.length - 3}`) : null) : (mapLead(v, r.id) ? h('span', { class: 'quiet' }, mapLead(v, r.id)) : null)));
-    }), roots.length > MAX ? h('li', { class: 'more' }, h('a', { href: base }, `+${roots.length - MAX}개 묶음`)) : null) : h('p', { class: 'program-empty' }, '아직 부분이 없어요 · 열어서 첫 부분을 적어요');
+    }), roots.length > MAX ? h('li', { class: 'more' }, h('a', { href: base }, `+${roots.length - MAX}개 묶음`)) : null) : h('p', { class: 'program-empty' }, '아직 지도가 비어 있어요 · 열어서 기록을 연결해 보세요');
     const tryReturn = key === UI62_KEY ? h('a', { class: 'program-try', href: base }, h('strong', {}, '돌아와 읽기'), h('span', {}, '공개 개발 자료 10개 · 3단계로 늘려 읽기 · 사후 편집')) : null;
     const tryPlan = key === CONVERTER_KEY ? h('a', { class: 'program-try', href: base, onclick: () => { openPlanOnArrive = true; } }, h('strong', {}, '변경 구상 시험해 보기'), h('span', {}, '폴더째 변환 · 지금과 구상을 같은 자리에서 비교')) : null;
-    return h('li', {}, h('article', { class: `program${example ? ' is-example' : ''}` }, h('a', { class: 'program-head', href: base }, h('strong', { class: 'program-name' }, p.name), h('span', { class: 'program-brief' }, p.space.brief?.text ?? '목적이 아직 적혀 있지 않아요.'), h('span', { class: 'program-meta' }, ...meta), !example && key !== 'legacy' ? runBadgeFor(key) : null), h('div', { class: 'program-body' }, section, cont, tryPlan, tryReturn, !example && key !== 'legacy' ? h('button', { type: 'button', class: 'link-button quiet program-backup', title: '붙여넣은 원문 기록과 옮긴 위치를 함께 담은 백업 파일을 내려받아요', onclick: () => saveBackup(key, p) }, '백업 저장') : null)));
+    return h('li', {}, h('article', { class: `program${example ? ' is-example' : ''}` }, h('a', { class: 'program-head', href: base }, h('span', { class: 'program-title' }, programAvatar(p.name), h('strong', { class: 'program-name' }, p.name)), h('span', { class: 'program-brief' }, p.space.brief?.text ?? '아직 설명이 없어요.'), h('span', { class: 'program-meta' }, ...meta), !example && key !== 'legacy' ? runBadgeFor(key) : null), h('div', { class: 'program-body' }, section, cont, tryPlan, tryReturn, !example && key !== 'legacy' ? h('button', { type: 'button', class: 'link-button quiet program-backup', title: '붙여넣은 원문 기록과 옮긴 위치를 함께 담은 백업 파일을 내려받아요', onclick: () => saveBackup(key, p) }, '백업 저장') : null)));
 }
 /** A backup file of a saved entry: the project as kept (pasted records included) and this entry's own manual places, in the
- * existing backup format; ‘백업 파일 가져오기’ reads it back as a new copy. Readings and drafts are not part of it. */
+ * existing backup format; ‘백업 가져오기’ reads it back as a new copy. Readings and drafts are not part of it. */
 function saveBackup(entryId, p) {
     const msg = $('home-message');
     let raw;
@@ -994,8 +1003,9 @@ function renderHome() {
         msg.hidden = true;
 }
 /** Names measured in the page's own font (whatever the system falls back to), so card widths match what is drawn. */
+const measureCache = new Map();
 const measureName = (() => {
-    const cache = new Map();
+    const cache = measureCache;
     let ctx = null, family = '';
     return (text, kind) => {
         const key = `${kind}|${text}`, hit = cache.get(key);
@@ -2653,7 +2663,7 @@ const mapRun = createMapRun({
 });
 let jobReservations = null;
 /* ---------- automatic connection to a working folder's Claude Code / Codex sessions (auto-sync.ts) ---------- */
-const handover = createHandoverView({ current: () => opened });
+const handover = createHandoverView({ current: () => opened, cloud: () => cloudLink, requests: () => opened ? frozenRequests(opened.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : [])) : [] });
 const utf8 = (t) => new TextEncoder().encode(t).length;
 /** Why these records cannot be added to the project (a project keeps at most PASTED_LIMIT of them and FILE_LIMIT bytes in all), or
  * null. With none, whether even a small one still fits. */
@@ -2665,47 +2675,90 @@ function recordRoom(p, texts) {
     const adds = texts.length ? texts.reduce((n, t) => n + utf8(JSON.stringify(t)) + 120, 0) : 4096;
     return utf8(serializeProject(p)) + adds > FILE_LIMIT ? `이 프로젝트에 담을 수 있는 기록의 양(${FILE_LIMIT / 1e6}MB)이 다 찼어요.${more}` : null;
 }
+/** Keeps texts (one session's, or a web AI session's through the connector) as pasted records of the entry open now. */
+async function saveRecords(key, texts) {
+    // Only the entry the sessions were looked at for: after a switch nothing is written to the project open now.
+    const o = opened;
+    if (!o || o.kind !== 'saved' || o.key !== key)
+        return { error: '다른 프로젝트가 열려 있어 저장하지 않았어요.', refused: false };
+    const full = recordRoom(o.project, texts);
+    if (full)
+        return { error: full, refused: false };
+    let next = o.project;
+    try {
+        for (const t of texts)
+            next = pasteRecord(next, t, null).project;
+    }
+    catch {
+        return { error: '세션 기록 하나를 저장하지 못했어요(쓸 수 없는 문자나 키처럼 보이는 글). 다른 세션은 계속 들어와요.', refused: true };
+    }
+    if (next === o.project)
+        return null;
+    const failed = await commit(o, next);
+    if (!failed) {
+        renderMapEntry();
+        refreshUnderstood();
+        if (!planView.isOpen()) {
+            if (!selected)
+                returnView.render();
+            else
+                refreshSessions();
+        }
+        return null;
+    }
+    // Nothing more is tried until the person asks: said so, and for a full browser storage, why.
+    return { error: saveFailure === 'QUOTA' ? '이 브라우저의 저장 공간이 가득 차서 세션 기록을 저장하지 못했어요. 자동으로 다시 하지 않아요.' : `${failed} 자동으로 다시 하지 않아요.`, refused: false };
+}
+/** The AgentFlow connector (an MCP server an AI session runs beside it, connector/agentflow-mcp.mjs) through the local server: the
+ * records sessions leave come in with the automatic connection, and the open project's handover document is left for a session
+ * that asks for it, made again only when the project changed (one code per project while this page is open). */
+const handoverLeft = new Map();
+/** The whole project's handover document with this code, with the change requests made for it. */
+function handoverFor(p, code) {
+    try {
+        return handoverDoc(p, { scope: null, code, at: new Date().toISOString(), requests: frozenRequests(p, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : [])) }).text;
+    }
+    catch {
+        return null;
+    }
+}
+/** The web AI connector of this site, when it has one (cloud-link.ts): records of web chats come in for a linked project. */
+const cloudCodes = new Map();
+const cloudLink = createCloudLink({
+    current: () => opened, kv,
+    save: async (key, texts) => { const no = await saveRecords(key, texts); return no ? { error: no.error } : null; },
+    handover: () => { const o = opened; if (!o)
+        return null; const code = cloudCodes.get(o.key) ?? handoverCode(); cloudCodes.set(o.key, code); return handoverFor(o.project, code); },
+    changed: () => { if (handover.isOpen())
+        handover.refresh(); }
+});
+const connectorHost = {
+    records: (after, folders, project) => connectorRecords(sessionCode(), after, folders, project),
+    publish: async (key, folders) => {
+        const o = opened;
+        if (!o || o.kind !== 'saved' || o.key !== key || !folders.length)
+            return;
+        const was = handoverLeft.get(key), joined = folders.join('\n');
+        if (was && was.revision === o.project.revision && was.folders === joined)
+            return;
+        const code = was?.code ?? handoverCode();
+        const text = handoverFor(o.project, code);
+        if (!text)
+            return;
+        await publishHandover(sessionCode(), { key, code, name: o.project.name, folders, text });
+        handoverLeft.set(key, { revision: o.project.revision, folders: joined, code });
+    }
+};
 const autoSync = createAutoSync({
     current: () => opened,
     sources: sessionSources,
     kv,
-    save: async (key, texts) => {
-        // Only the entry the sessions were looked at for: after a switch nothing is written to the project open now.
-        const o = opened;
-        if (!o || o.kind !== 'saved' || o.key !== key)
-            return { error: '다른 프로젝트가 열려 있어 저장하지 않았어요.', refused: false };
-        const full = recordRoom(o.project, texts);
-        if (full)
-            return { error: full, refused: false };
-        let next = o.project;
-        try {
-            for (const t of texts)
-                next = pasteRecord(next, t, null).project;
-        }
-        catch {
-            return { error: '세션 기록 하나를 저장하지 못했어요(쓸 수 없는 문자나 키처럼 보이는 글). 다른 세션은 계속 들어와요.', refused: true };
-        }
-        if (next === o.project)
-            return null;
-        const failed = await commit(o, next);
-        if (!failed) {
-            renderMapEntry();
-            refreshUnderstood();
-            if (!planView.isOpen()) {
-                if (!selected)
-                    returnView.render();
-                else
-                    refreshSessions();
-            }
-            return null;
-        }
-        // Nothing more is tried until the person asks: said so, and for a full browser storage, why.
-        return { error: saveFailure === 'QUOTA' ? '이 브라우저의 저장 공간이 가득 차서 세션 기록을 저장하지 못했어요. 자동으로 다시 하지 않아요.' : `${failed} 자동으로 다시 하지 않아요.`, refused: false };
-    },
+    save: saveRecords,
     full: () => { const o = opened; return o && o.kind === 'saved' ? recordRoom(o.project, []) : null; },
     canRead: () => { const inp = mapRun.input(), st = mapRun.state(); return !!inp && !inp.problem && mapRun.can() && !st.pending && !st.ready && !st.committing; },
     read: () => void mapRun.run(),
     bound: () => renderMapEntry(),
+    connector: () => (status.connector && status.sessions ? connectorHost : null),
     readBlocked: () => (status.release === 'existing-map' ? RELEASE_TEXT.limit : mapRun.can() ? null : mapRun.blocked() ?? '지도 정리에 쓸 AI가 이 서버에 연결되어 있지 않아요.')
 });
 /** AF100: while a reading runs as a job, the person is told it goes on without this window but not without the PC's Studio. */
@@ -2883,8 +2936,8 @@ function renderMapEntry() {
         put(acts, paste(true), file());
     const note = st.pending || waiting ? null : fresh && can && !inp.problem ? sendLine(inp) : fresh && !can ? mapRun.blocked() ?? `기록 ${fresh}개가 있어요. AI 서버가 연결된 주소에서 지도로 정리할 수 있어요.` : fresh && inp.problem ? '보낼 수 없는 기록이 있어요(너무 크거나 키처럼 보이는 글).' : linked && can ? AUTO_SENDS : '붙여 넣어 저장만 해서는 AI에 보내지 않아요. 지도로 정리할 때 보내요.';
     box.replaceChildren();
-    put(box, h('h2', {}, '기록으로 첫 지도를 만들어요'), h('p', { class: 'se-lead' }, offerSync ? 'Claude Code·Codex 대화는 자동 연결로 저절로 가져오고, 다른 AI와 나눈 요구나 보고는 그대로 붙여 넣으면 돼요. 원문에 근거가 있는 부분과 연결만 지도로 정리하고, 만들어진 부분의 이름과 위치는 바로 고칠 수 있어요.'
-        : '작업 AI와 나눈 요구나 보고를 그대로 붙여 넣으면, 원문에 근거가 있는 부분과 연결만 지도로 정리해요. 만들어진 부분의 이름과 위치는 바로 고칠 수 있어요.'), last && !last.parts.length ? h('p', { class: 'se-gap' }, last.gaps.length ? last.gaps.join(' ') : '앞서 읽은 기록에서는 프로그램의 부분을 찾지 못했어요.') : null, acts, note ? h('p', { class: 'fine' }, note) : null, st.error ? h('p', { class: 'pp-error', role: 'alert' }, st.error) : null, runNotice(), h('button', { type: 'button', class: 'link-button se-direct', onclick: () => openPartForm(null) }, '부분 직접 추가'));
+    put(box, h('h2', {}, '기록으로 첫 지도를 만들어요'), h('p', { class: 'se-lead' }, offerSync ? 'Claude Code·Codex 대화는 자동 연결로 저절로 가져오고, 다른 AI와 나눈 기록은 붙여 넣으면 돼요. 원문에 근거가 있는 부분과 연결만 지도에 그리고, 이름과 위치는 바로 고칠 수 있어요.'
+        : '작업 AI와 나눈 요구나 보고를 붙여 넣으면, 원문에 근거가 있는 부분과 연결만 지도에 그려요. 이름과 위치는 바로 고칠 수 있어요.'), last && !last.parts.length ? h('p', { class: 'se-gap' }, last.gaps.length ? last.gaps.join(' ') : '앞서 읽은 기록에서는 프로그램의 부분을 찾지 못했어요.') : null, acts, note ? h('p', { class: 'fine' }, note) : null, st.error ? h('p', { class: 'pp-error', role: 'alert' }, st.error) : null, runNotice(), h('button', { type: 'button', class: 'link-button se-direct', onclick: () => openPartForm(null) }, '부분 직접 추가'));
     box.hidden = false;
 }
 /** The map row in the reading pane: records to read into the map, and what the last map reading understood, its candidates and gaps. */
@@ -3559,6 +3612,8 @@ function bindNewProject() {
     else
         openBtn.focus(); };
     openBtn.addEventListener('click', () => show(form.hidden));
+    $('empty-new').addEventListener('click', () => show(true));
+    $('empty-examples').addEventListener('click', () => showExamples());
     $('new-cancel').addEventListener('click', () => { name.value = ''; show(false); });
     name.addEventListener('keydown', e => { if (e.key === 'Escape') {
         e.stopPropagation();
@@ -3678,6 +3733,7 @@ async function main() {
         mapRun.resume();
         autoSync.opened();
         autoSync.start();
+        cloudLink.start();
         void sessionSources.load().then(() => { autoSync.sourcesChanged(); statusArrived(); if (opened && autoSync.bindingOf(opened.key))
             void autoSync.tick(); if (!selected && !planView.isOpen())
             returnView.render(); });
@@ -3692,6 +3748,19 @@ async function main() {
         flushView(); });
     window.addEventListener('popstate', () => { if (location.hash === renderedHash)
         void render(); });
+    // The bundled UI font: the map measures its names in it, so the first layout waits for it briefly (it is on this origin,
+    // so normally at once). If it comes later, names are measured again and the open map is laid out once more.
+    const fontFace = '600 13.5px "Pretendard Variable"';
+    try {
+        if (!document.fonts.check(fontFace)) {
+            let late = false;
+            await Promise.race([document.fonts.load(fontFace), new Promise(r => setTimeout(() => { late = true; r(null); }, 2500))]);
+            if (late)
+                void document.fonts.load(fontFace).then(() => { measureCache.clear(); if (opened && !$('space').hidden)
+                    renderSpace('keep'); });
+        }
+    }
+    catch { /* the system font stays */ }
     await render();
     await statusReady;
 }

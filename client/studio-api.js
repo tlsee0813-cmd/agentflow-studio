@@ -40,7 +40,8 @@ export async function aiStatus() {
         const jobs = j && j.version === 'map-job.1' ? { durable: j.durable === true, problem: typeof j.problem === 'string' ? j.problem : null, ...(executor ? { executor } : {}) } : null;
         const release = v.release === 'existing-map' ? 'existing-map' : null;
         const sv = v.sessions, sessions = sv && sv.version === 'sessions.1' && Array.isArray(sv.tools) ? { tools: sv.tools.filter((t) => t === 'claude' || t === 'codex') } : null;
-        return { ai: v.ai, model: typeof v.model === 'string' ? v.model : null, access: v.access === 'code' ? 'code' : 'open', digest, map: release ? null : map, jobs: release ? null : jobs, release, sessions };
+        const connector = !release && v.connector?.version === 'connector.1' ? { version: 'connector.1' } : null;
+        return { ai: v.ai, model: typeof v.model === 'string' ? v.model : null, access: v.access === 'code' ? 'code' : 'open', digest, map: release ? null : map, jobs: release ? null : jobs, release, sessions, connector };
     }
     catch {
         return { ai: 'none', model: null, access: 'open' };
@@ -170,6 +171,42 @@ export async function readSession(id, accessCode, since = null) {
     if (!d)
         throw new AskError('INVALID_RESPONSE');
     return d;
+}
+async function connectorCall(path, accessCode, body = null) {
+    if (RUNTIME.apiBase === null)
+        throw new AskError('NO_SERVER');
+    const headers = { 'X-AgentFlow-Request': '1', ...(body ? { 'Content-Type': 'application/json' } : {}) };
+    if (accessCode)
+        headers['X-Studio-Access'] = accessCode;
+    let res;
+    try {
+        res = await fetch(url(path), { method: body ? 'POST' : 'GET', headers, credentials: 'same-origin', ...(body ? { body: JSON.stringify(body) } : {}) });
+    }
+    catch {
+        throw new AskError('NETWORK');
+    }
+    let data = null;
+    try {
+        data = await res.json();
+    }
+    catch { /* handled below */ }
+    if (!res.ok)
+        throw new AskError(typeof data?.error?.code === 'string' ? data.error.code : 'REQUEST_FAILED');
+    return data;
+}
+/** Connector records after `after` (the last one taken) made in these folders (or inside one); last: the newest record's number. */
+export async function connectorRecords(accessCode, after, folders, project = null) {
+    const q = [`after=${after}`, ...folders.map(f => `folder=${encodeURIComponent(f)}`), ...(project ? [`project=${encodeURIComponent(project)}`, 'unplaced=1'] : [])].join('&');
+    const d = await connectorCall(`/api/studio/connector/records?${q}`, accessCode);
+    if (!d || !Array.isArray(d.records) || !Number.isSafeInteger(d.last))
+        throw new AskError('INVALID_RESPONSE');
+    const records = d.records.filter((r) => !!r && typeof r.seq === 'number' && typeof r.at === 'string' && typeof r.text === 'string' && r.text.length > 0)
+        .map(r => ({ seq: r.seq, at: r.at, folder: typeof r.folder === 'string' ? r.folder : null, project: typeof r.project === 'string' ? r.project : null, text: r.text }));
+    return { records, last: d.last, more: d.more === true };
+}
+/** Leaves the open project's handover document for the connector to hand a new session (it replaces the one left before). */
+export async function publishHandover(accessCode, doc) {
+    await connectorCall('/api/studio/connector/handover', accessCode, doc);
 }
 export const ERROR_TEXT = {
     AI_NOT_CONFIGURED: '서버에 AI 키가 설정되지 않았어요.',
