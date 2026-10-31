@@ -300,7 +300,9 @@ export function createAutoSync(host: AutoSyncHost) {
     // Looking the folders up draws the panel itself (its loading state, then the list).
     if (!folders && !foldersLoading && !foldersError) { void loadFolders(); return; }
     const input = h('input', { type: 'text', class: 'sync-path', placeholder: '작업 폴더 경로 (예: C:\\work\\salon)', 'aria-label': '작업 폴더 경로', value: typed }) as HTMLInputElement;
-    input.addEventListener('input', () => { typed = input.value; });
+    // '연결' waits for a path: pressed with none it would do nothing and say nothing.
+    const go = h('button', { type: 'button', class: 'secondary small', disabled: !typed.trim(), onclick: () => connect(typed) }, '연결');
+    input.addEventListener('input', () => { typed = input.value; go.disabled = !typed.trim(); });
     put(panel, h('h3', { tabindex: '-1' }, b ? '작업 폴더 추가' : '작업 폴더 자동 연결'),
       b ? h('p', { class: 'fine' }, '저장소가 나뉜 프로젝트라면 다른 작업 폴더도 함께 묶어요. 그 폴더의 세션도 같은 방식으로 들어오고, 지도에서 부분마다 어느 세션이 다뤘는지 보여요.')
         : h('p', { class: 'sync-lead' }, '이 프로젝트를 작업 폴더에 묶으면, 그 폴더의 Claude Code·Codex 대화가 저절로 기록으로 들어오고 지도가 갱신돼요.'),
@@ -314,9 +316,8 @@ export function createAutoSync(host: AutoSyncHost) {
       picks && !picks.length ? h('p', { class: 'fine' }, b ? '세션이 있는 다른 작업 폴더를 찾지 못했어요. 폴더 경로를 직접 적을 수도 있어요.' : '이 PC에서 Claude Code·Codex 세션을 찾지 못했어요. 폴더 경로를 직접 적을 수도 있어요.') : null,
       picks?.length ? h('ul', { class: 'sync-folders' }, ...picks.slice(0, 12).map(f => h('li', {}, h('button', { type: 'button', class: 'sync-folder-pick', 'data-act': `folder:${f.folder}`, onclick: () => connect(f.folder) },
         h('strong', {}, f.folder), h('small', { title: stamp(f.latest, true) }, `${[...f.tools].join('·')} 세션 ${f.count}개 · 최근 대화 ${ago(f.latest)}`))))) : null,
-      h('div', { class: 'pp-row sync-manual' }, input, h('button', { type: 'button', class: 'secondary small', onclick: () => connect(typed) }, '연결')),
-      setup,
-      b ? h('button', { type: 'button', class: 'link-button quiet', onclick: back }, '취소') : null);
+      h('div', { class: 'pp-row sync-manual' }, input, go, b ? h('button', { type: 'button', class: 'link-button quiet', onclick: back }, '취소') : null),
+      setup);
   }
   /** Asks the browser again to read the picked folders (from a click), then looks at once. */
   async function grant() { await host.sources.grant(); folders = null; foldersError = null; render(); void tick(true); }

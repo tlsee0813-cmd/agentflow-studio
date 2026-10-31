@@ -1537,8 +1537,12 @@ button:disabled { opacity: .5; cursor: default; }
 .sync-folder-pick strong { font: 600 12.5px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; }
 .sync-folder-pick small { color: var(--text-3); font-size: 12px; }
 .sync-manual { display: flex; gap: 6px; }
-.sync-path { flex: 1; min-width: 0; height: 30px; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: var(--r-sm); font: inherit; font-size: 12.5px; }
-.sync-panel .pp-row { display: flex; align-items: center; gap: 10px; }
+.sync-path { flex: 1; min-width: 0; height: 32px; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: var(--r-sm); background: var(--surface); color: var(--text); font: inherit; font-size: 12.5px; }
+.sync-path:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(43,89,195,.12); }
+.sync-manual .link-button { flex: none; }
+.sync-panel .pp-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+/* '연결 끊기' ends the connection at once: kept apart from '폴더 추가' at the row's far end. */
+.sync-off { margin-left: auto; }
 /* '지금 확인' while a look runs: shown as unavailable but kept focusable (a disabled button would drop focus). */
 .sync-panel .secondary[aria-disabled="true"], .sync-panel .secondary[aria-disabled="true"]:hover { opacity: .5; cursor: default; background: var(--surface); border-color: var(--line-strong); }
 
