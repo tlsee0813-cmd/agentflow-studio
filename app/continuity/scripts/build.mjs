@@ -10,6 +10,9 @@ const built=compile(['-p','tsconfig.json'],{cwd,stdio:'inherit',shell:process.pl
 if(built.status!==0)process.exit(built.status??1);
 await mkdir(new URL('../dist/public',import.meta.url),{recursive:true});
 for(const f of ['index.html','styles.css'])await copyFile(new URL(`../public/${f}`,import.meta.url),new URL(`../dist/public/${f}`,import.meta.url));
+// The bundled UI font (Pretendard, OFL-1.1) and its licence: served from this origin only, never fetched from elsewhere.
+await mkdir(new URL('../dist/public/fonts',import.meta.url),{recursive:true});
+for(const f of ['PretendardVariable.woff2','LICENSE-Pretendard.txt'])await copyFile(new URL(`../public/fonts/${f}`,import.meta.url),new URL(`../dist/public/fonts/${f}`,import.meta.url));
 console.log('IDEA015 built separately; existing app/dist and historic gates unchanged.');
 
 console.log(compilerSource);

@@ -3348,7 +3348,7 @@ def final_paste_flow(browser, base):
     expect(said).to_have_text("기록을 저장했어요. 키·토큰처럼 보이는 3곳은 가려서 저장했어요.")
     # Saved is said as done, in the quiet green the app uses for success, not in the red box of a refusal.
     expect(said).to_have_class("pp-ok")
-    assert said.evaluate("e => getComputedStyle(e).color") == "rgb(45, 110, 77)"
+    assert said.evaluate("e => getComputedStyle(e).color") == "rgb(6, 118, 71)"  # --ok-text
     kept = page.evaluate(ENTRY, entry)["pasted"]
     assert len(kept) == 1 and kept[0]["text"].count("[가려진 비밀값]") == 3, kept
     assert "postgresql://admin:[가려진 비밀값]@db.example.com" in kept[0]["text"] and "요구: 결제 화면에 스트라이프 붙여줘" in kept[0]["text"], kept

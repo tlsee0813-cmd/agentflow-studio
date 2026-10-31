@@ -45,14 +45,14 @@ for (const script of ['build.mjs', 'build-static.mjs']) {
 const assetDir = join(app, 'continuity/static-dist');
 await writeFile(join(assetDir, 'BUILD.txt'), `AgentFlow Studio\nsource=${sha}\nhost=Cloudflare Workers\n${policy ? `release=${policy}\n` : ''}`);
 const files = async dir => (await Promise.all((await readdir(dir, { withFileTypes: true })).map(e => e.isDirectory() ? files(join(dir, e.name)) : [join(dir, e.name)]))).flat();
-const mime = f => f.endsWith('.html') ? 'text/html; charset=utf-8' : f.endsWith('.css') ? 'text/css; charset=utf-8' : f.endsWith('.js') ? 'application/javascript; charset=utf-8' : 'text/plain; charset=utf-8';
+const mime = f => f.endsWith('.html') ? 'text/html; charset=utf-8' : f.endsWith('.css') ? 'text/css; charset=utf-8' : f.endsWith('.js') ? 'application/javascript; charset=utf-8' : f.endsWith('.woff2') ? 'font/woff2' : 'text/plain; charset=utf-8';
 const secrets = [...secretNames, 'CLOUDFLARE_API_TOKEN', 'GITHUB_CLIENT_SECRET'].map(k => process.env[k]).filter(Boolean);
 const assertNoSecret = (bytes, label) => { for (const value of secrets) if (bytes.includes(Buffer.from(value))) throw new Error(`Secret found in ${label}; stopped before upload.`); };
 const manifest = {}, assets = new Map(), assetList = [];
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 for (const file of await files(assetDir)) {
   const path = '/' + relative(assetDir, file).replaceAll('\\', '/');
-  if (!/^(\/index\.html|\/styles\.css|\/BUILD\.txt|\/\.nojekyll|\/(client|shared)\/[\w-]+\.js)$/.test(path)) throw new Error(`Unexpected public asset: ${path}`);
+  if (!/^(\/index\.html|\/styles\.css|\/BUILD\.txt|\/\.nojekyll|\/(client|shared)\/[\w-]+\.js|\/fonts\/[\w-]+\.(woff2|txt))$/.test(path)) throw new Error(`Unexpected public asset: ${path}`);
   const bytes = await readFile(file); assertNoSecret(bytes, path);
   const hash = createHash('sha256').update(bytes).update(mime(file)).digest('hex').slice(0, 32);
   manifest[path] = { hash, size: bytes.length }; assets.set(hash, { bytes, type: mime(file) }); assetList.push({ path, bytes: bytes.length, sha256: sha256(bytes) });
