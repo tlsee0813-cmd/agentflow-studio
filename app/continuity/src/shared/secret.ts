@@ -149,9 +149,15 @@ const WEIGHED: Weighed[] = [
   { re: AUTH, where: () => ({ secret: true, env: false, literal: false }) },
   // A bearer or basic credential anywhere: the scheme as written, a value with a digit (not prose), not a file path.
   { re: /(?<keep>\b(?:Bearer|Basic) )(?<uv>(?=[A-Za-z0-9._~+/-]*\d)[A-Za-z0-9._~+/-]{16,2000}=*)/g, where: () => ({ secret: true, env: false, literal: false }) },
-  { re: /(?<keep>--password[= ]["']?)(?<uv>[^\s"']{1,500})/g, where: () => ({ secret: true, env: false, literal: true }) },
-  // Other command lines that take a password as an argument, and an XML element that holds one (Maven's settings.xml, NuGet).
+  // A flag that names a credential, its value after '=' or a space, or as the next element of an args array (an MCP server's
+  // config: "--api-key", "…"). --max-tokens, --token-file and --password-stdin hold none.
+  { re: /(?<keep>(?<![\w-])--(?<name>[\w-]{0,40}?(?:password|passwd|secret|token|api[-_]?key|access[-_]?key))(?:[= ][ \t]*["']?|\\?["'][ \t]*,[ \t]*\\?["']))(?<uv>[^\s"'\\]{1,500})/gi,
+    where: () => ({ secret: true, env: false, literal: true }) },
+  // Other command lines that take a password as an argument, Windows' setx NAME value, and an XML element that holds one (Maven's
+  // settings.xml, NuGet).
   { re: /(?<keep>\b(?:sshpass\b[^\n]{0,100}?\s-p|redis-cli\b[^\n]{0,200}?\s-a|docker[ \t]+login\b[^\n]{0,200}?\s-p)[ \t]*["']?)(?<uv>[^\s"']{1,500})/g,
+    where: () => ({ secret: true, env: false, literal: true }) },
+  { re: /(?<keep>\bsetx[ \t]+(?<name>[A-Za-z0-9_]{0,40}?(?:password|passwd|pass|pwd|secret|token|key))[ \t]+["']?)(?<uv>[^\s"']{1,500})/gi,
     where: () => ({ secret: true, env: false, literal: true }) },
   { re: /(?<keep><(?<name>[\w:.-]{0,40}?(?:password|passwd|passphrase|secret|token|apikey|api_key|api-key))>)(?<uv>[^<\n]{1,500})(?=<\/)/gi,
     where: () => ({ secret: true, env: false, literal: true }) },

@@ -205,6 +205,26 @@ test('SESSIONS-RD5 a password, token or key named in Korean, or by an English na
     assert.deepEqual(redactSecrets(text), { text, count: 0 }, text);
 });
 
+test('SESSIONS-RD6 a key given to a flag after a space, as the next element of an args array or with setx is hidden; flags that hold none stay', () => {
+  const FAKE = f('FAKEctx7', 'FAKEfake', '0123456789');
+  const hide = [
+    [`claude mcp add context7 -- npx -y @upstash/context7-mcp --api-key ${FAKE}`, '--api-key [가려진 비밀값]'],
+    [`.mcp.json에 {"mcpServers":{"brave":{"command":"npx","args":["-y","brave-mcp","--api-key","${FAKE}"]}}} 넣었어`, '"--api-key","[가려진 비밀값]"'],
+    [`{\\"args\\":[\\"--api-key\\", \\"${FAKE}\\"]}`, '\\"--api-key\\", \\"[가려진 비밀값]\\"'],
+    [`setx GROQ_API_KEY "${FAKE}"`, 'setx GROQ_API_KEY "[가려진 비밀값]"'], [`python bot.py --token ${FAKE}`, '--token [가려진 비밀값]'],
+    [`--access-key ${FAKE}`, '--access-key [가려진 비밀값]'], ['--password=hunter22', '--password=[가려진 비밀값]']
+  ];
+  for (const [text, want] of hide) {
+    const r = redactSecrets(text);
+    assert.ok(r.text.includes(want) && !r.text.includes(FAKE) && r.count === 1, `${text} -> ${r.text}`);
+    assert.deepEqual(redactSecrets(r.text), { text: r.text, count: 0 }, 'hidden once, never again');
+  }
+  for (const text of ['--max-tokens 4096', '--token $GITHUB_TOKEN', '--api-key YOUR_API_KEY', '--api-key <your-key>', '--token-file ./t.txt', '--secret-name app-secret',
+    'docker login --password-stdin', '"args": ["--api-key", "${BRAVE_API_KEY}"]', 'setx PATH "%PATH%;C:\\tools"', 'setx OPENAI_API_KEY %OPENAI_API_KEY%', 'use --token flag to pass it',
+    '--api-key 옵션으로 넘겨'])
+    assert.deepEqual(redactSecrets(text), { text, count: 0 }, text);
+});
+
 test('SESSIONS-RT1 the whole record is hidden and cleaned, its header too, so it can always be kept', () => {
   const d = session([{ role: 'user', at: T(0), text: '색 출력 \u001b[31m빨강\u001b[0m 그리고 제목\u000b부제목\u0007' }, { role: 'assistant', at: T(1), text: '고쳤어요', files: ['src/a.ts'] }],
     { cwd: 'C:\\work\\sk-telecom-portal-renewal', branch: 'feature/sk-1234-fix-login-redirect', title: `키 ${f('sk-', 'proj-', 'FAKE'.repeat(6))} 넣고 테스트` });
