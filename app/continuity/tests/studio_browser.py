@@ -2807,6 +2807,15 @@ def sessions_flow(browser, base):
     expect(path).to_have_value("/work/예약")
     expect(path).to_be_focused()
     path.fill("/work/salon-api")
+    # A control in focus keeps it through the look's redraws too, as it starts ('연결') and as it ends ('취소').
+    go, cancel = page.locator("#sync-panel").get_by_role("button", name="연결", exact=True), page.locator("#sync-panel").get_by_role("button", name="취소")
+    go.focus()
+    page.evaluate(look)
+    expect(pill).to_have_attribute("data-state", "busy")
+    expect(go).to_be_focused()
+    cancel.focus()
+    expect(pill).to_have_attribute("data-state", "on", timeout=15000)
+    expect(cancel).to_be_focused()
     page.evaluate(look)  # '연결' is pressed while this look runs
     page.locator("#sync-panel").get_by_role("button", name="연결", exact=True).click()
     expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon 외 1")

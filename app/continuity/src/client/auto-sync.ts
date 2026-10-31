@@ -267,7 +267,7 @@ export function createAutoSync(host: AutoSyncHost) {
     const typing = panel.querySelector<HTMLInputElement>('.sync-path');
     if (typing?.dataset.composing && document.activeElement === typing) { typing.dataset.redraw = '1'; return; }
     // A redraw (a look starting or ending, the folders found) keeps a path being typed in focus, caret and all, and a control pressed
-    // in the panel in focus; when that control is gone, focus stays in the panel at its heading.
+    // in the panel in focus (each control has a data-act to be found by); when that control is gone, focus stays at its heading.
     const caret = typing && document.activeElement === typing ? [typing.selectionStart, typing.selectionEnd] as const : null;
     const had = !caret && panel.contains(document.activeElement) ? (document.activeElement as HTMLElement).dataset.act ?? '' : null;
     panel.replaceChildren(); draw(panel, b, error, waiting);
@@ -307,14 +307,14 @@ export function createAutoSync(host: AutoSyncHost) {
     // No source yet: the session folders are picked (or allowed again) first.
     if (!host.sources.current()) {
       put(panel, h('h3', { tabindex: '-1' }, '내 AI 세션 연결'), setup,
-        b ? h('button', { type: 'button', class: 'link-button quiet', onclick: back }, '취소') : null);
+        b ? h('button', { type: 'button', class: 'link-button quiet', 'data-act': 'back', onclick: back }, '취소') : null);
       return;
     }
     // Looking the folders up draws the panel itself (its loading state, then the list).
     if (!folders && !foldersLoading && !foldersError) { void loadFolders(); return; }
     const input = h('input', { type: 'text', class: 'sync-path', placeholder: '작업 폴더 경로 (예: C:\\work\\salon)', 'aria-label': '작업 폴더 경로', value: typed }) as HTMLInputElement;
     // '연결' waits for a path: pressed with none it would do nothing and say nothing.
-    const go = h('button', { type: 'button', class: 'secondary small', disabled: !typed.trim(), onclick: () => connect(typed) }, '연결');
+    const go = h('button', { type: 'button', class: 'secondary small', 'data-act': 'go', disabled: !typed.trim(), onclick: () => connect(typed) }, '연결');
     input.addEventListener('input', () => { typed = input.value; go.disabled = !typed.trim(); });
     // A redraw held while a syllable was composed (render) follows its commit, after the keystroke that may start the next one.
     input.addEventListener('compositionstart', () => { input.dataset.composing = '1'; });
@@ -334,7 +334,7 @@ export function createAutoSync(host: AutoSyncHost) {
         h('strong', {}, f.folder), h('small', { title: stamp(f.latest, true) }, `${[...f.tools].join('·')} 세션 ${f.count}개 · 최근 대화 ${ago(f.latest)}`),
         // What a press does, as the typed path's own '연결' says it (left out of the card's name, which stays the folder).
         h('span', { class: 'sync-folder-go', 'aria-hidden': 'true' }, '연결 ›'))))) : null,
-      h('div', { class: 'pp-row sync-manual' }, input, go, b ? h('button', { type: 'button', class: 'link-button quiet', onclick: back }, '취소') : null),
+      h('div', { class: 'pp-row sync-manual' }, input, go, b ? h('button', { type: 'button', class: 'link-button quiet', 'data-act': 'back', onclick: back }, '취소') : null),
       setup);
   }
   /** Asks the browser again to read the picked folders (from a click), then looks at once. */
