@@ -322,7 +322,7 @@ export function createReturnView(host: ReturnHost) {
       h('small', {}, [x.title ? clip(x.preview, 70) : null, x.cwd, stamp(x.updatedAt, true)].filter(Boolean).join(' · ')),
       p.reading === x.id ? h('small', { class: 'rr-session-busy' }, '읽는 중…') : null)));
     return h('div', { class: 'rr-sessions open' },
-      h('div', { class: 'pp-row' }, h('strong', {}, '내 AI 세션'), h('span', { class: 'fine' }, '사람이 쓴 요청과 AI의 답변·바꾼 파일만 원문 그대로 넣어요. 도구 출력과 추론은 빼요.'),
+      h('div', { class: 'pp-row' }, h('strong', {}, '내 AI 세션'), h('span', { class: 'fine' }, '내가 쓴 요청과 AI의 답변·바꾼 파일만 그대로 넣어요. AI가 실행한 명령의 출력과 생각 과정은 빼요.'),
         h('button', { type: 'button', class: 'link-button quiet', onclick: () => { p.open = false; render(); } }, '접기')),
       p.loading ? h('p', { class: 'fine' }, '세션을 찾는 중…') : null,
       p.error ? h('p', { class: 'pp-error', role: 'alert' }, p.error) : null,

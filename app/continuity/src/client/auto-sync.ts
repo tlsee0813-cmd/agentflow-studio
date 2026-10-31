@@ -11,7 +11,7 @@ import type { Project } from '../shared/types.js';
 import { ERROR_TEXT } from './studio-api.js';
 import type { SessionSources } from './session-source.js';
 import { newTurns, markAfter, leftSince, sessionText, sessionChunks, stamp, TOOL_NAME, SETTLE_MS, AUTO_RUN_GAP_MS, AUTO_RUNS_PER_DAY, BACKFILL_MS, BACKFILL_SESSIONS, type SessionDetail, type SessionMark, type SessionSummary } from '../shared/session-import.js';
-import { h, put } from './plan-dom.js';
+import { h, put, ago } from './plan-dom.js';
 
 export const AUTOSYNC_KEY = 'agentflow.studio.autosync.1';
 /** One working folder of a project. since: its sessions updated before it are not taken; backfilled: its first look (recent
@@ -274,7 +274,7 @@ export function createAutoSync(host: AutoSyncHost) {
         h('ul', { class: 'sync-linked' }, ...b.folders.map(f => h('li', {}, h('span', { class: 'sync-folder' }, f.path),
           b.folders.length > 1 ? h('button', { type: 'button', class: 'link-button quiet sync-remove', 'aria-label': `${f.path} 연결 빼기`, 'data-act': `leave:${f.path}`, onclick: () => removeFolder(f.path) }, '빼기') : null))),
         h('p', { class: 'fine' }, `${b.folders.length > 1 ? '이 폴더들' : '이 폴더'}의 Claude Code·Codex 대화가 잠잠해지면(약 ${SETTLE_MS / 60000}분) 기록으로 들어오고 지도가 자동으로 갱신돼요(그때 기록을 AI에게 보내요). 이 탭이 열려 있을 때만 확인하고, 닫혀 있던 동안의 대화는 다시 열면 들어와요.`),
-        h('dl', { class: 'sync-facts' }, h('dt', {}, '가져온 기록'), h('dd', {}, `${b.taken}개`), h('dt', {}, '마지막 확인'), h('dd', {}, b.lastCheck ? stamp(b.lastCheck, true) : busy ? '확인 중…' : '아직'),
+        h('dl', { class: 'sync-facts' }, h('dt', {}, '가져온 기록'), h('dd', {}, `${b.taken}개`), h('dt', {}, '마지막 확인'), h('dd', b.lastCheck ? { title: stamp(b.lastCheck, true) } : {}, b.lastCheck ? ago(b.lastCheck) : busy ? '확인 중…' : '아직'),
           h('dt', {}, '오늘 자동 지도 갱신'), h('dd', {}, `${runs} / ${AUTO_RUNS_PER_DAY}회`)),
         host.readBlocked() ? h('p', { class: 'fine sync-blocked' }, `기록은 들어오지만 지도는 갱신하지 않아요: ${host.readBlocked()}`) : null,
         error ? h('p', { class: 'pp-error', role: 'alert' }, error) : null,
@@ -297,13 +297,18 @@ export function createAutoSync(host: AutoSyncHost) {
     const input = h('input', { type: 'text', class: 'sync-path', placeholder: '작업 폴더 경로 (예: C:\\work\\salon)', 'aria-label': '작업 폴더 경로', value: typed }) as HTMLInputElement;
     input.addEventListener('input', () => { typed = input.value; });
     put(panel, h('h3', { tabindex: '-1' }, b ? '작업 폴더 추가' : '작업 폴더 자동 연결'),
-      h('p', { class: 'fine' }, b ? '저장소가 나뉜 프로젝트라면 다른 작업 폴더도 함께 묶어요. 그 폴더의 세션도 같은 방식으로 들어오고, 지도에서 부분마다 어느 세션이 다뤘는지 보여요.'
-        : `이 프로젝트를 작업 폴더에 묶어요. 그 폴더의 최근 대화(${BACKFILL_MS / 86400000}일, 세션 ${BACKFILL_SESSIONS}개까지)로 첫 지도를 만들고, 이후 대화도 저절로 들어와요. 사람이 쓴 요청과 AI의 답변·바꾼 파일만 원문 그대로 가져오고, 키·토큰처럼 보이는 부분은 가려요. 지도를 갱신할 때 이 기록을 AI에게 보내요. 저장소가 여러 개라면 연결한 뒤 폴더를 더할 수 있어요.`),
+      b ? h('p', { class: 'fine' }, '저장소가 나뉜 프로젝트라면 다른 작업 폴더도 함께 묶어요. 그 폴더의 세션도 같은 방식으로 들어오고, 지도에서 부분마다 어느 세션이 다뤘는지 보여요.')
+        : h('p', { class: 'sync-lead' }, '이 프로젝트를 작업 폴더에 묶으면, 그 폴더의 Claude Code·Codex 대화가 저절로 기록으로 들어오고 지도가 갱신돼요.'),
+      // Before connecting: what comes in first, what is kept of it, and that it goes to the AI.
+      b ? null : h('ul', { class: 'sync-points' },
+        h('li', {}, `처음엔 최근 ${BACKFILL_MS / 86400000}일의 대화(세션 ${BACKFILL_SESSIONS}개까지)로 첫 지도를 만들어요.`),
+        h('li', {}, '내가 쓴 요청과 AI의 답변·바꾼 파일만 그대로 가져오고, 키·토큰처럼 보이는 글은 가려요.'),
+        h('li', {}, '지도를 갱신할 때 이 기록을 AI에게 보내요.')),
       foldersLoading ? h('p', { class: 'fine' }, '이 PC의 세션에서 작업 폴더를 찾는 중…') : null,
       foldersError ? h('p', { class: 'pp-error', role: 'alert' }, foldersError) : null,
       picks && !picks.length ? h('p', { class: 'fine' }, b ? '세션이 있는 다른 작업 폴더를 찾지 못했어요. 폴더 경로를 직접 적을 수도 있어요.' : '이 PC에서 Claude Code·Codex 세션을 찾지 못했어요. 폴더 경로를 직접 적을 수도 있어요.') : null,
       picks?.length ? h('ul', { class: 'sync-folders' }, ...picks.slice(0, 12).map(f => h('li', {}, h('button', { type: 'button', class: 'sync-folder-pick', 'data-act': `folder:${f.folder}`, onclick: () => connect(f.folder) },
-        h('strong', {}, f.folder), h('small', {}, `${[...f.tools].join('·')} 세션 ${f.count}개 · 최근 ${stamp(f.latest, true)}`))))) : null,
+        h('strong', {}, f.folder), h('small', { title: stamp(f.latest, true) }, `${[...f.tools].join('·')} 세션 ${f.count}개 · 최근 대화 ${ago(f.latest)}`))))) : null,
       h('div', { class: 'pp-row sync-manual' }, input, h('button', { type: 'button', class: 'secondary small', onclick: () => connect(typed) }, '연결')),
       setup,
       b ? h('button', { type: 'button', class: 'link-button quiet', onclick: back }, '취소') : null);
@@ -320,7 +325,7 @@ export function createAutoSync(host: AutoSyncHost) {
     const pick = async () => { if (await src.pick()) { folders = null; foldersError = null; render(); void tick(true); } else render(); };
     if (state === 'unsupported') return null;
     if (state === 'none') return h('div', { class: 'sync-source' },
-      h('p', { class: 'fine' }, '설치 없이 이 브라우저가 AI 대화 기록을 직접 읽어요. 내 사용자 폴더 안의 .claude 폴더(Claude Code)나 .codex 폴더(Codex)를 골라 주세요. 둘 다 쓰면 하나씩 두 번 고르면 돼요.'),
+      h('p', { class: 'sync-lead' }, '설치 없이 이 브라우저가 AI 대화 기록을 직접 읽어요. 내 사용자 폴더 안의 .claude 폴더(Claude Code)나 .codex 폴더(Codex)를 골라 주세요. 둘 다 쓰면 하나씩 두 번 고르면 돼요.'),
       // Where those folders are: a Mac's picker hides folders whose name starts with a dot until asked.
       h('p', { class: 'fine' }, 'Windows는 C:\\Users\\(내 이름) 폴더 안에 있어요. Mac은 고르는 창에서 ', h('kbd', {}, '⌘+Shift+H'), ' 키로 내 폴더로 간 뒤, ',
         h('kbd', {}, '⌘+Shift+.'), ' 키로 숨은 폴더를 보이게 하세요.'),

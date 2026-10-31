@@ -1490,7 +1490,7 @@ button:disabled { opacity: .5; cursor: default; }
 .space.sheet-read .viewport { opacity: .55; }
 .space.sheet-read .controls { opacity: .5; }
 /* A session kept on this PC, picked into the paste box (local server only). */
-.rr-sessions { margin: 0 0 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.rr-sessions { margin: 0 0 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; word-break: keep-all; }
 .rr-sessions .fine { margin: 0; }
 .rr-sessions.open { display: block; padding: 10px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface-2); }
 .rr-sessions.open > .pp-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-bottom: 8px; }
@@ -1515,8 +1515,11 @@ button:disabled { opacity: .5; cursor: default; }
 .sync-pill[data-state="error"] i { background: var(--warn); }
 /* On a phone the pill is a round 28px button with its state dot: the words would push the bar past the screen. */
 @media (max-width: 720px) { .sync-pill { width: 28px; height: 28px; margin-right: 0; padding: 0; justify-content: center; } .sync-pill > span { display: none; } .sync-pill i { width: 8px; height: 8px; } }
-.sync-panel { position: fixed; top: 52px; right: 12px; z-index: 40; box-sizing: border-box; width: min(420px, calc(100vw - 24px)); max-height: calc(100vh - 72px); overflow: auto; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-lg); }
+.sync-panel { position: fixed; top: 52px; right: 12px; z-index: 40; box-sizing: border-box; width: min(420px, calc(100vw - 24px)); max-height: calc(100vh - 72px); overflow: auto; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-lg); word-break: keep-all; }
 .sync-panel h3 { margin: 0 0 6px; font-size: 14px; }
+/* Before connecting: one plain sentence, then the few points that matter, above the fine print. */
+.sync-lead { margin: 0 0 6px; font-size: 13px; line-height: 1.55; color: var(--text-2); }
+.sync-points { margin: 0 0 12px; padding-left: 16px; font-size: 12px; line-height: 1.6; color: var(--text-3); }
 .sync-panel .fine { margin: 0 0 10px; }
 .sync-folder { margin: 0 0 8px; font: 12.5px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; }
 .sync-facts { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; margin: 0 0 10px; font-size: 12.5px; }
