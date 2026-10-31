@@ -599,14 +599,14 @@ test('SESSIONS-AC1 a connection ended, or a folder left, while a look runs takes
   t.sync.connect('/w'); await settle();
   assert.equal(t.texts().length, 2); assert.equal(t.reads, 1);
   // Ended and connected again meanwhile: the look that connecting queued takes them, once.
-  const src3 = source([A, B]), go3 = held(src3), r = readingTab(src3);
-  r.sync.connect('/w'); await settle(); r.sync.disconnect(); r.sync.connect('/w'); go3(); await settle();
+  const src2 = source([A, B]), go2 = held(src2), r = readingTab(src2);
+  r.sync.connect('/w'); await settle(); r.sync.disconnect(); r.sync.connect('/w'); go2(); await settle();
   assert.equal(r.texts().length, 2); assert.equal(r.binding().folders.length, 1);
   // One of two folders left meanwhile: the other one's sessions still come in and are read into the map.
-  const V = { id: 'claude-fedcba9876543210fedcba98', cwd: '/v', updatedAt: ago(28), turns: pair(37, 'V-ONE', 'v') }, src2 = source([A, V]), go2 = held(src2), u = readingTab(src2);
+  const V = { id: 'claude-fedcba9876543210fedcba98', cwd: '/v', updatedAt: ago(28), turns: pair(37, 'V-ONE', 'v') }, src3 = source([A, V]), go3 = held(src3), u = readingTab(src3);
   u.kv.setItem(AUTOSYNC_KEY, JSON.stringify({ E1: { folders: [folderLink('/w'), folderLink('/v')], marks: {}, runs: { day: 'x', n: 0, last: null }, taken: 0, lastCheck: null, error: null } }));
   void u.sync.tick(true); await settle();
-  u.sync.removeFolder('/v'); go2(); await settle();
+  u.sync.removeFolder('/v'); go3(); await settle();
   assert.ok(u.texts().some(x => x.includes('W-ONE')) && !u.texts().some(x => x.includes('V-ONE')), u.texts().join('\n'));
   assert.deepEqual(Object.keys(u.binding().marks), [ID]); assert.equal(u.reads, 1);
 });
