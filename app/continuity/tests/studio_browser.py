@@ -2707,6 +2707,10 @@ def ime(cdp, *keys):
         else: cdp.send("Input.imeSetComposition", {"text": k, "selectionStart": len(k), "selectionEnd": len(k)})
 
 
+# The words the pill shows: its parts are laid out side by side, so innerText would break the line between them.
+PILL_WORDS = "e => [...e.querySelectorAll(':scope > span > span')].filter(s => s.checkVisibility()).map(s => s.textContent).join('')"
+
+
 def sessions_flow(browser, base):
     """Local session records (synthetic home folder, stubbed model): a new project connected once to a working folder takes that
     folder's recent Claude Code / Codex sessions as records (credential-like text hidden) and reads its first map without a click;
@@ -2856,7 +2860,7 @@ def sessions_flow(browser, base):
     assert page.evaluate("() => [window.__alerts, window.__draws >= 2]") == [0, True], page.evaluate("() => [window.__alerts, window.__draws]")
     page.unroute(listing)
     # On a tablet a long folder name in the pill gives way before the project's name in the bar (left out, then cut short on a wider
-    # screen); the state words stay, and the pill's name keeps the whole line.
+    # screen so the path keeps its floor whatever the fonts measure); the state words stay, and the pill's name keeps the whole line.
     failing = re.compile(r"/api/studio/sessions\?folder=")
     page.route(failing, lambda route: route.fulfill(status=500, content_type="application/json", body="{}"))
     page.locator("#sync-panel").get_by_role("button", name="취소").click()
@@ -2865,11 +2869,15 @@ def sessions_flow(browser, base):
     page.locator("#sync-panel").get_by_role("button", name="연결", exact=True).click()
     expect(pill).to_have_attribute("data-state", "error", timeout=15000)
     expect(pill).to_have_accessible_name("자동 연결 · hair-salon-booking-system-v2 · 확인 필요")
-    for width in (744, 820, 901):
+    for width, wide in ((744, ""), (820, ""), (901, ""), (960, ""), (901, ".06em")):
         page.set_viewport_size({"width": width, "height": 720})
+        page.evaluate("w => document.querySelector('.bar').style.letterSpacing = w", wide)  # a wider font, as another machine's may be
         bar = page.evaluate("() => document.querySelector('.bar .context').getBoundingClientRect().width")
-        assert bar >= 100, (width, bar)
-        if width < 900: assert pill.inner_text() == "자동 연결 · 확인 필요", pill.inner_text()
+        assert bar >= (160 if width > 900 else 100), (width, wide, bar)
+        words = "자동 연결 · 확인 필요" if width < 900 else "자동 연결 · hair-salon-booking-system-v2 · 확인 필요"
+        assert pill.evaluate(PILL_WORDS) == words, (width, wide, pill.evaluate(PILL_WORDS))
+        assert page.evaluate("() => document.querySelector('.bar').scrollWidth <= document.querySelector('.bar').clientWidth"), (width, wide)
+    page.evaluate("() => document.querySelector('.bar').style.letterSpacing = ''")
     page.unroute(failing)
     page.set_viewport_size({"width": 1280, "height": 720})
     assert len(maps) == 1, maps

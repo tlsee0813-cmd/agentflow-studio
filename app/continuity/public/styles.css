@@ -1543,7 +1543,7 @@ button:disabled { opacity: .5; cursor: default; }
 .rr-session-tool { grid-column: 2; grid-row: 1; align-self: start; padding: 1px 6px; border-radius: 999px; background: var(--chip); color: var(--text-2); font: var(--label); }
 .rr-session-busy { color: var(--accent) !important; }
 /* Automatic connection to a working folder's sessions: a pill in the bar and its panel. */
-.sync-pill { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 24px; margin-right: 6px; padding: 0 10px 0 9px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font: 500 12px/1 var(--font); color: var(--text-3); white-space: nowrap; cursor: pointer; }
+.sync-pill { flex: 0 1 auto; min-width: 0; display: inline-flex; align-items: center; gap: 6px; height: 24px; margin-right: 6px; padding: 0 10px 0 9px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font: 500 12px/1 var(--font); color: var(--text-3); white-space: nowrap; cursor: pointer; }
 .sync-pill:hover { border-color: var(--accent-line); color: var(--accent); }
 .sync-pill i { width: 6px; height: 6px; border-radius: 50%; background: var(--plan); }
 .sync-pill[data-state="on"] i { background: var(--ok); }
@@ -1551,12 +1551,16 @@ button:disabled { opacity: .5; cursor: default; }
 /* A look running turns the dot into a small spinner (stopped with reduced motion); the open panel's pill reads as pressed. */
 .sync-pill[data-state="busy"] i { width: 8px; height: 8px; margin: -1px; border: 1.5px solid var(--accent-line); border-top-color: var(--accent); background: none; animation: spin .8s linear infinite; }
 .sync-pill[aria-expanded="true"] { border-color: var(--accent-line); background: var(--accent-soft); color: var(--accent); }
-/* The folder's name gives way before the project's name in the bar: cut short on a wide screen, left out on a tablet. The state
-   words after it stay; the whole line stays the pill's name and title. */
-.sync-pill-name { display: inline-block; max-width: 12em; overflow: hidden; text-overflow: ellipsis; white-space: pre; vertical-align: bottom; }
+/* The folder's name gives way before the project's name in the bar: at most 12em, cut shorter (to nothing if need be) before the
+   project's path gets less than its floor, and left out on a tablet. The state words after it stay; the whole line stays the
+   pill's name and title. */
+.sync-pill > span { display: flex; min-width: 0; }
+.sync-pill > span > span { flex: none; white-space: pre; }
+.sync-pill > span > .sync-pill-name { flex: 0 1 auto; min-width: 0; max-width: 12em; overflow: hidden; text-overflow: ellipsis; }
+@media (min-width: 901px) { .bar:has(.sync-pill:not([hidden]) .sync-pill-name) > .context { min-width: 160px; } }
 @media (max-width: 900px) { .sync-pill-name { display: none; } }
 /* On a phone the pill is a round 28px button with its state dot: the words would push the bar past the screen. */
-@media (max-width: 720px) { .sync-pill { width: 28px; height: 28px; margin-right: 0; padding: 0; justify-content: center; } .sync-pill > span { display: none; } .sync-pill i { width: 8px; height: 8px; } }
+@media (max-width: 720px) { .sync-pill { flex: none; width: 28px; height: 28px; margin-right: 0; padding: 0; justify-content: center; } .sync-pill > span { display: none; } .sync-pill i { width: 8px; height: 8px; } }
 .sync-panel { position: fixed; top: 52px; right: 12px; z-index: 40; box-sizing: border-box; width: min(420px, calc(100vw - 24px)); max-height: calc(100vh - 72px); overflow: auto; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-lg); word-break: keep-all; }
 .sync-panel h3 { margin: 0 0 6px; font-size: 14px; }
 /* Before connecting: one plain sentence, then the few points that matter, above the fine print. */
