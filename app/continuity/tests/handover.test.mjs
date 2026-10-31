@@ -55,7 +55,10 @@ test('HANDOVER-S1 one part: its path in the title, its scope rule, only it and w
   const { p, hours } = mapped();
   const t = handoverText(p, { scope: hours, code: 'ABC234', at: '2026-10-30T05:00:00.000Z' });
   assert.ok(t.startsWith(`──────── AgentFlow 인수인계 문서 · af-handover:ABC234:${hours} ────────\n# 인수인계: 나의 프로젝트 › 영업시간 설정\n`), t.slice(0, 200));
-  assert.ok(t.includes('범위는 "영업시간 설정"'));
+  assert.ok(t.includes('\n- 이 인수인계의 범위는 "영업시간 설정" 부분이에요. 범위 밖 부분을 바꿔야 하면 먼저 사용자에게 확인하세요.\n'), t);
+  // A name that ends in a vowel reads as well: the sentence ends on a fixed word, not on a particle after the name.
+  const pay = D.addArea(D.createProject(), '결제'), u = handoverText(pay, { scope: pay.space.areas[0].id, code: 'ABC234', at: '2026-10-30T05:00:00.000Z' });
+  assert.ok(u.includes('범위는 "결제" 부분이에요.') && !u.includes('"결제"이에요'), u);
   assert.ok(t.includes('### 영업시간 설정') && !t.includes('### 예약 화면'));
   assert.ok(t.includes('- 관련: 예약 화면 (이 부분을 필요로 함 · 휴무일)'), t);
   assert.throws(() => handoverText(p, { scope: 'A_missing', code: 'ABC234', at: '2026-10-30T05:00:00.000Z' }), /HANDOVER_SCOPE/);
@@ -85,8 +88,8 @@ test('HANDOVER-F1 a new session that starts from the document: the document fold
   const again = handoverText(D.pasteRecord(q, later, null).project, { scope: booking, code: 'ZXC234', at: '2026-10-30T07:00:00.000Z' });
   for (const s of ['\n- 이거 읽고 이어서 해 줘 (인수인계 문서로 시작 · 나의 프로젝트 › 예약 화면) 먼저 테스트부터 돌려 줘\n', '\n- 실패한 테스트 고쳐 줘 → 바꾼 파일: src/booking.ts\n'])
     assert.ok(again.includes(s), `missing: ${s}\n${again}`);
-  // Its part reads as the map last saw it, and the document says the map is behind.
-  assert.match(again, /\n## 이 범위의 현재 상태\n\(지도는 \d{4}-\d\d-\d\d \d\d:\d\d에 읽은 기록까지예요\. 아직 지도에 담기지 않은 기록이 2개 있어서, 아래 최근 흐름이 더 새로울 수 있어요\.\)\n\n### 예약 화면\n/);
+  // Its part reads as the map last saw it, and the document says the map is behind and where those records are.
+  assert.match(again, /\n## 이 범위의 현재 상태\n\(지도는 \d{4}-\d\d-\d\d \d\d:\d\d에 읽은 기록까지예요\. 아직 지도에 담기지 않은 기록이 2개 있어요\. 그 기록의 요청과 바꾼 파일은 아래 최근 흐름에 있어요\.\)\n\n### 예약 화면\n/);
   assert.ok(!handoverText(p, { scope: booking, code: 'ZXC234', at: '2026-10-30T07:00:00.000Z' }).includes('지도에 담기지 않은'), 'all read: no note');
 });
 
@@ -94,9 +97,9 @@ test('HANDOVER-O1 session origin: header fields read back; other records are not
   const text = sessionText(session(ID, TURNS, { title: '휴무일 · 연결' })).text;
   assert.deepEqual(sessionOrigin(text), { id: ID, tool: 'claude', title: '휴무일 · 연결', cwd: '/work/salon', branch: 'main' });
   assert.equal(sessionOrigin('요구: 예약 화면'), null);
-  // An empty project still gets a usable document.
+  // An empty project still gets a usable document, which points to nothing that is not in it.
   const t = handoverText(D.createProject(), { scope: null, code: 'EMPTY2', at: '2026-10-30T05:00:00.000Z' });
-  assert.ok(t.includes('아직 지도에 부분이 없어요. 아래 최근 흐름과 사용자의 설명에서 시작하세요.\n\n'), t);
+  assert.ok(t.includes('\n아직 지도에 부분이 없어요. 사용자의 설명에서 시작하세요.\n\n') && !t.includes('최근 흐름'), t);
 });
 
 test('HANDOVER-B1 a web chat writes its own record from the request text: the record reads as that session and its requests', async () => {
@@ -134,6 +137,10 @@ test('HANDOVER-B2 a web record pasted back keeps a handover document its request
   assert.equal(foldRecord(cut), cut);
   assert.deepEqual(receivedHandovers(cut), [{ code: 'QW3RTY', areaId: booking }]);
   assert.ok(handoverText(D.pasteRecord(p, cut, null).project, { scope: null, code: 'CUT234', at: '2026-10-30T05:00:00.000Z' }).includes('\n- (인수인계 문서로 시작 · 나의 프로젝트 › 예약 화면) → 바꾼 파일: src/cancel.ts\n'));
+  // Such a record an older page saved with the answer's head glued to the folded line is still read so, though it stays as stored.
+  const glued = '[웹 AI 세션 기록 · 취소 마감]\n\n── 사용자 요청 ──\n[AgentFlow 인수인계 문서를 받아 이어감 · af-handover:QW3RTY · 나의 프로젝트]── 웹 AI 답변 ──\n고쳤어요.\n(바꾼 파일: src/cancel.ts)';
+  const old = handoverText(D.pasteRecord(p, glued, null).project, { scope: null, code: 'CUT234', at: '2026-10-30T05:00:00.000Z' });
+  assert.ok(old.includes('\n- (인수인계 문서로 시작 · 나의 프로젝트) → 바꾼 파일: src/cancel.ts\n') && !old.includes('웹 AI 답변') && foldRecord(glued) === glued, old);
   // Text that is not a session record (the document kept on its own, a note) stays as written.
   assert.equal(foldRecord(doc), doc);
   assert.equal(foldRecord(`메모\n${doc}`), `메모\n${doc}`);
@@ -141,12 +148,13 @@ test('HANDOVER-B2 a web record pasted back keeps a handover document its request
 
 const AT = '2026-10-30T05:00:00.000Z';
 const ask = (id, text, reply = '네') => session(id, [{ role: 'user', at: '2026-10-30T06:00:00.000Z', text }, { role: 'assistant', at: '2026-10-30T06:01:00.000Z', text: reply }], { title: null });
-/** A map reading whose parts quote the records holding these words (each part: a name, the words its basis quotes, and claims of
- * it as [kind, the words they quote]). */
-function readAs(p, parts) {
+/** A map reading whose parts quote the records holding these words (each part: a name, or the alias P01… of a part already on the
+ * map, the words its basis quotes, and claims of it as [kind, the words they quote]), and relations between them as [from, to (parts
+ * by place), kind, note, the words quoted]. */
+function readAs(p, parts, relations = []) {
   const inp = M.buildMapAsk(p, studioView(p)), rec = q => inp.ask.records.find(r => (r.text ?? '').includes(q)).id;
-  const reply = { summary: '시험 프로젝트예요.', relations: [], candidates: [], gaps: [],
-    parts: parts.map(([name, quotes, claims = []], i) => ({ ref: `new:p${i}`, name, parent: null, role: `${name}을 맡아요.`, roleAbout: null, roleReplaces: null, basis: quotes.map(q => ({ record: rec(q), quote: q })),
+  const reply = { summary: '시험 프로젝트예요.', relations: relations.map(([from, to, kind, note, q]) => ({ from: `new:p${from}`, to: `new:p${to}`, kind, note, record: rec(q), quote: q })), candidates: [], gaps: [],
+    parts: parts.map(([name, quotes, claims = []], i, _, had = /^P\d\d$/.test(name)) => ({ ref: had ? name : `new:p${i}`, name: had ? null : name, parent: null, role: had ? null : `${name}을 맡아요.`, roleAbout: null, roleReplaces: null, basis: quotes.map(q => ({ record: rec(q), quote: q })),
       claims: claims.map(([kind, q]) => ({ kind, text: q, record: rec(q), quote: q, about: null, replaces: null })) })) };
   return M.applyReading(p, inp, M.validateMapReply(reply, inp.ask), meta()).project;
 }
@@ -226,10 +234,22 @@ test('HANDOVER-U1 what is left to ask stays: a part written briefly keeps its op
   const doc = handoverDoc(p, { scope: null, code: 'ASK234', at: AT }), block = doc.text.slice(doc.text.indexOf('### 문자\n')).split('\n\n')[0];
   assert.ok(doc.trimmed > 0 && block.includes('\n- (그 밖에 1개는 이 문서에 넣지 않았어요)'), block);
   assert.ok(block.includes('\n- 남은 선택: 문자 업체는 아직 못 정했어\n'), block);
+  // Written in full, a part with more claims than it has room for still keeps its open choice: what is left out is of the kinds
+  // asked about last (구상, 확인 보고), and what is kept is written in the full order. Three readings of one part, four claims each.
+  const kinds = ['want', 'want', 'want', 'want', 'reported', 'reported', 'reported', 'reported', 'want', 'idea', 'checked', 'open'];
+  let q = D.createProject();
+  for (let r = 0; r < 3; r++) {
+    const say = kinds.slice(r * 4, r * 4 + 4).map((_, i) => `말 ${r * 4 + i}번이에요`);
+    q = D.pasteRecord(q, sessionText(session(ID, [{ role: 'user', at: AT, text: say.join('. ') }, { role: 'assistant', at: AT, text: '네' }])).text, null).project;
+    q = readAs(q, [[r ? 'P01' : '문자', [say[0]], say.map((x, i) => [kinds[r * 4 + i], x])]]);
+  }
+  const full = handoverDoc(q, { scope: null, code: 'ASK234', at: AT }), part = full.text.slice(full.text.indexOf('### 문자\n')).split('\n\n')[0];
+  assert.ok(full.trimmed === 0 && part.includes('\n- 남은 선택: 말 11번이에요\n- (그 밖에 2개는 이 문서에 넣지 않았어요)\n'), part);
+  assert.ok(!part.includes('- 구상:') && !part.includes('- 확인 보고:') && part.indexOf('- 원함:') < part.indexOf('- 작업 보고:'), part);
   // A candidate is listed with its part's name until that part is put away; then it goes, as it does from the map's own list.
-  const { p: q, hours } = mapped([['휴무일을 매주 같은 요일로 둘지 정하지 않았어요.', ['new:p1']]]);
-  assert.ok(handoverText(q, { scope: null, code: 'ASK234', at: AT }).includes('\n- 휴무일을 매주 같은 요일로 둘지 정하지 않았어요. (영업시간 설정)\n'));
-  assert.ok(!handoverText(D.setAreaArchived(q, hours, true), { scope: null, code: 'ASK234', at: AT }).includes('매주 같은 요일'));
+  const { p: m, hours } = mapped([['휴무일을 매주 같은 요일로 둘지 정하지 않았어요.', ['new:p1']]]);
+  assert.ok(handoverText(m, { scope: null, code: 'ASK234', at: AT }).includes('\n- 휴무일을 매주 같은 요일로 둘지 정하지 않았어요. (영업시간 설정)\n'));
+  assert.ok(!handoverText(D.setAreaArchived(m, hours, true), { scope: null, code: 'ASK234', at: AT }).includes('매주 같은 요일'));
 });
 
 test('HANDOVER-P1 changed files whose names hold ")" (route groups) are read whole', () => {
@@ -238,6 +258,13 @@ test('HANDOVER-P1 changed files whose names hold ")" (route groups) are read who
   const t = handoverText(p, { scope: null, code: 'PAR234', at: AT });
   // One request's files are not listed again under it.
   assert.ok(t.includes('- 로그인 페이지 만들어 줘 → 바꾼 파일: app/(auth)/login/page.tsx, lib/auth.ts\n') && !t.includes('최근에 바뀐 파일'), t);
+  // The files of all requests are listed once only when that names a file their own lines leave out (one list was cut short), not
+  // when it would repeat them, a file changed twice included.
+  const ten = Array.from({ length: 10 }, (_, i) => `src/f${i}.ts`), files = (asks, ...lists) => handoverText(D.pasteRecord(D.createProject(), sessionText(session(ID,
+    asks.flatMap((text, i) => [{ role: 'user', at: AT, text }, { role: 'assistant', at: AT, text: '했어요', files: lists[i] }]))).text, null).project, { scope: null, code: 'PAR234', at: AT });
+  const cut = files(['파일 정리해 줘', '하나 더 고쳐 줘'], ten, ['src/f0.ts']);
+  assert.ok(cut.includes(`\n- 파일 정리해 줘 → 바꾼 파일: ${ten.slice(0, 8).join(', ')}\n`) && cut.includes(`\n최근에 바뀐 파일: ${ten.join(', ')}\n`), cut);
+  assert.ok(!files(['결제 고쳐 줘', '결제 다시 고쳐 줘'], ['src/pay.ts', 'src/a.ts'], ['src/pay.ts']).includes('최근에 바뀐 파일'));
 });
 
 test('HANDOVER-X1 an answer\'s files go to the request of its own session, even when another session\'s record came in between', () => {
@@ -250,7 +277,7 @@ test('HANDOVER-X1 an answer\'s files go to the request of its own session, even 
   for (const [s, mark] of [[y1, null], [x, null], [y2, { lastAt: T('01'), count: 1, updatedAt: T('01') }]]) for (const t of sessionChunks(s, newTurns(s, mark))) p = D.pasteRecord(p, t, null).project;
   const t = handoverText(p, { scope: null, code: 'XRS234', at: AT });
   assert.ok(t.includes('- 결제 모듈 리팩터링 → 바꾼 파일: src/pay.ts, src/pay.test.ts\n- 로그인 화면 문구만 바꿔 줘, 결제 버튼 글자도 → 바꾼 파일: src/login.tsx\n'), t);
-  assert.ok(t.includes('\n최근에 바뀐 파일: src/pay.ts, src/pay.test.ts, src/login.tsx\n'), 'the files of several requests, once each');
+  assert.ok(!t.includes('최근에 바뀐 파일'), 'each file is named above: not listed again');
   // A part's document leaves out the record holding the prompt: the reply's files go nowhere rather than to another request.
   const q = readAs(p, [['결제', ['결제 버튼 글자도', '리팩터링 끝']]]), pay = q.space.areas.find(a => a.name === '결제').id;
   const s = handoverText(q, { scope: pay, code: 'XRS234', at: AT });
@@ -266,4 +293,52 @@ test('HANDOVER-B3 a web record header is read by the shape of its fields, in any
   const answer = '[웹 AI 세션 기록 · 로그인 수정]\n\n── 사용자 요청 ──\n로그인 버튼 고쳐 줘\n\n── 웹 AI 답변 ──\n고쳤어요\n- (바꾼 파일: src/login.tsx, app/(auth)/page.tsx)';
   const p = D.pasteRecord(D.createProject(), answer, null).project;
   assert.ok(handoverText(p, { scope: null, code: 'WEB345', at: '2026-10-30T05:00:00.000Z' }).includes('- 로그인 버튼 고쳐 줘 → 바꾼 파일: src/login.tsx, app/(auth)/page.tsx'));
+});
+
+test('HANDOVER-K1 a shared relation has no direction: both parts read it the same way, with no arrow', () => {
+  const said = '결제 기록을 정산에서 같이 써요';
+  let p = D.pasteRecord(D.createProject(), sessionText(session(ID, [{ role: 'user', at: AT, text: said }, { role: 'assistant', at: AT, text: '네' }])).text, null).project;
+  p = readAs(p, [['결제', [said]], ['정산', [said]]], [[0, 1, 'shares', '결제 기록', said]]);
+  const t = handoverText(p, { scope: null, code: 'SHR234', at: AT });
+  assert.ok(t.includes('\n- 관련: 정산 (이 부분과 함께 씀 · 결제 기록)\n') && t.includes('\n- 관련: 결제 (이 부분과 함께 씀 · 결제 기록)\n') && !t.split('\n').some(l => l.startsWith('- 관련:') && /[←→]/.test(l)), t);
+});
+
+test('HANDOVER-N1 records the map has not read: a part shows those of its own sessions, and the note says truly where each one is', () => {
+  const PAY = 'codex-89abcdef0123456789abcdef', SETTLE = 'claude-222222222222222222222222', OTHER = 'claude-333333333333333333333333';
+  const rec = (id, asks, files) => sessionText(session(id, asks.flatMap(text => [{ role: 'user', at: AT, text }, { role: 'assistant', at: AT, text: '했어요.', files }]), { title: null })).text;
+  const add = (p, ...texts) => texts.reduce((q, t) => D.pasteRecord(q, t, null).project, p);
+  const p = readAs(add(D.createProject(), rec(PAY, ['결제 화면에서 토스 결제창을 열어 줘'], ['src/pay/checkout.ts']), rec(SETTLE, ['월말 정산표 만들어 줘'], ['src/settle.ts'])),
+    [['결제', ['토스 결제창을 열어 줘']], ['정산', ['월말 정산표 만들어 줘']]]);
+  const pay = p.space.areas.find(a => a.name === '결제').id, doc = (q, scope = null) => handoverText(q, { scope, code: 'NEW234', at: AT });
+  const note = t => /\n\(지도는 [^)]*\)\n/.exec(t)?.[0].trim() ?? null, AT_MAP = /^\(지도는 \d{4}-\d\d-\d\d \d\d:\d\d에 읽은 기록까지예요\. /;
+  // A document that sends the reader to the recent flow has one.
+  const sends = t => assert.ok(!t.includes('아래 최근 흐름') || t.includes('\n## 최근 흐름 '), t);
+  assert.equal(note(doc(p, pay)), null, 'all read: no note');
+  // The same session goes on after the reading: the part's document has its new request, and says that is where it is.
+  const q = add(p, rec(PAY, ['결제 실패하면 다시 시도 버튼을 보여 줘'], ['src/pay/retry.ts']));
+  const one = doc(q, pay);
+  assert.ok(one.includes('\n- 결제 화면에서 토스 결제창을 열어 줘 → 바꾼 파일: src/pay/checkout.ts\n- 결제 실패하면 다시 시도 버튼을 보여 줘 → 바꾼 파일: src/pay/retry.ts\n') && !one.includes('정산표'), one);
+  assert.ok(AT_MAP.test(note(one)) && note(one).endsWith(' 아직 지도에 담기지 않은 기록이 1개 있어요. 그 기록의 요청과 바꾼 파일은 아래 최근 흐름에 있어요.)'), note(one));
+  // Another session's record and a pasted note, not read either: counted, and said not to be in the part's document.
+  const r = add(q, rec(OTHER, ['예약 화면 취소 버튼 고쳐 줘'], ['src/booking/cancel.ts']), '결제는 현장 결제로 정했어요. 선결제는 하지 않아요.');
+  const part = doc(r, pay), whole = doc(r);
+  assert.ok(note(part).endsWith(' 아직 지도에 담기지 않은 기록이 3개 있어요. 그중 이 범위를 다룬 세션의 기록 1개는 요청과 바꾼 파일이 아래 최근 흐름에 있고, 나머지 2개는 이 문서에 없어요. 필요하면 사용자에게 물어보세요.)'), note(part));
+  assert.ok(part.includes('src/pay/retry.ts') && !part.includes('취소 버튼') && !part.includes('현장 결제'), part);
+  assert.ok(note(whole).endsWith(' 아직 지도에 담기지 않은 기록이 3개 있어요. 그중 2개는 요청과 바꾼 파일이 아래 최근 흐름에 있고, 나머지 1개는 이 문서에 없어요. 필요하면 사용자에게 물어보세요.)'), note(whole));
+  assert.ok(whole.includes('\n- 예약 화면 취소 버튼 고쳐 줘 → 바꾼 파일: src/booking/cancel.ts\n') && !whole.includes('현장 결제'), whole);
+  // Only a pasted note not read: nothing in the document holds it, and the note does not send the reader below for it.
+  const n = add(p, '결제는 현장 결제로 정했어요.');
+  for (const t of [doc(n), doc(n, pay)]) { assert.ok(note(t).endsWith(' 아직 지도에 담기지 않은 기록이 1개 있어요. 그 내용은 이 문서에 없으니, 필요하면 사용자에게 물어보세요.)'), note(t)); sends(t); }
+  // A record of more requests than the recent flow holds: the note says only its latest ones are below.
+  const many = doc(add(p, rec(PAY, Array.from({ length: 7 }, (_, i) => `결제 문구 ${i + 1}번 고쳐 줘`), ['src/pay/text.ts'])), pay);
+  assert.ok(note(many).endsWith(' 그 기록의 최근 요청과 바꾼 파일은 아래 최근 흐름에 있어요.)') && !many.includes('결제 문구 1번') && many.includes('결제 문구 7번'), many);
+  // Parts drawn by hand, nothing read yet: the note says so, and that the records are not in the document.
+  const hand = doc(add(D.addArea(D.createProject(), '결제'), '결제는 현장 결제로 정했어요.'));
+  assert.ok(hand.includes('\n(지도는 아직 기록을 읽지 않았어요. 아직 지도에 담기지 않은 기록이 1개 있어요. 그 내용은 이 문서에 없으니, 필요하면 사용자에게 물어보세요.)\n'), hand);
+  // No part yet: the document starts from the recent flow only when it has one, and says what it leaves out.
+  const none = doc(add(D.createProject(), '예약 화면에서 휴무일에는 예약을 막고 싶어요.'));
+  assert.ok(none.includes('\n아직 지도에 부분이 없어요. 기록이 1개 있지만 이 문서에는 없으니, 사용자에게 지금까지의 상황을 먼저 물어보세요.\n'), none);
+  const both = doc(add(D.createProject(), rec(PAY, ['결제창 열어 줘'], ['src/pay.ts']), '결제는 현장 결제로 정했어요.'));
+  assert.ok(both.includes('\n아직 지도에 부분이 없어요. 아래 최근 흐름과 사용자의 설명에서 시작하세요. 다른 기록 1개는 이 문서에 없으니, 필요하면 사용자에게 물어보세요.\n'), both);
+  for (const t of [one, part, whole, many, hand, none, both]) sends(t);
 });
