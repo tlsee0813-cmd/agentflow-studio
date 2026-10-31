@@ -11,6 +11,7 @@ import type { Project } from '../shared/types.js';
 import { ERROR_TEXT } from './studio-api.js';
 import type { SessionSources } from './session-source.js';
 import { newTurns, markAfter, leftSince, sessionText, sessionChunks, stamp, TOOL_NAME, SETTLE_MS, AUTO_RUN_GAP_MS, AUTO_RUNS_PER_DAY, BACKFILL_MS, BACKFILL_SESSIONS, type SessionDetail, type SessionMark, type SessionSummary } from '../shared/session-import.js';
+import { sameFolder } from '../shared/session-parse.js';
 import { h, put } from './plan-dom.js';
 
 export const AUTOSYNC_KEY = 'agentflow.studio.autosync.1';
@@ -72,12 +73,15 @@ export function createAutoSync(host: AutoSyncHost) {
   function stored(key: string): Binding | null { return readBinding(all()[key]); }
   /** A session's mark, also one kept under an id the session had before (made from its file's path). */
   const markOf = (b: Binding, s: SessionSummary): SessionMark | null => b.marks[s.id] ?? s.aliases?.map(a => b.marks[a]).find(m => !!m) ?? null;
-  /** One session's mark onto the binding as it is now, where it is further on (its old ids' marks give way to it). */
-  function keepMark(key: string, s: SessionSummary, m: SessionMark) {
+  /** Whether this folder is still linked as it was when a look began (the person may have left it, or ended the connection). */
+  const stillLinked = (key: string, f: FolderLink) => !!stored(key)?.folders.some(x => x.path === f.path && x.connectedAt === f.connectedAt);
+  /** One session's mark onto the binding as it is now, where it is further on (its old ids' marks give way to it), with the records
+   * it kept counted (a tab closed later in the look does not lose them from the count). */
+  function keepMark(key: string, s: SessionSummary, m: SessionMark, taken = 0) {
     const cur = stored(key); if (!cur) return;
     for (const id of s.aliases ?? []) delete cur.marks[id];
     if (further(m, cur.marks[s.id])) cur.marks[s.id] = m;
-    put_(key, cur);
+    cur.taken += taken; put_(key, cur);
   }
   /** Marks kept under an id a listed session had before move to its id now, whether or not it is read this time: once its file
    * moves (Codex archives a thread) the id its old path gave is no longer listed with it. */
@@ -108,9 +112,9 @@ export function createAutoSync(host: AutoSyncHost) {
     if (halted.has(key) && !force) return;
     halted.delete(key);
     busy = true; render();
-    // What this look did, and only that, goes onto the binding at its end: the marks of the sessions it kept, what it took.
+    // What this look did, and only that, goes onto the binding at its end: the marks of the sessions it kept.
     const marks: Record<string, SessionMark> = {}, moved: string[] = [], kept = new Set<string>(), whole = new Set<FolderLink>(), due: { s: SessionSummary; f: FolderLink; history: boolean }[] = [];
-    let taken = 0, ran: string | null = null, error: string | null | undefined;
+    let ran: string | null = null, error: string | null | undefined;
     try {
       // A project that can take no more is not read at all (its records can still be read into the map).
       const now = Date.now(), seen = new Set<string>(), full = host.full();
@@ -157,13 +161,14 @@ export function createAutoSync(host: AutoSyncHost) {
           if (upTo) turns = turns.filter(t => !t.at || t.at <= upTo);
           const texts = !turns.length ? [] : first ? [sessionText({ ...d, turns }).text] : sessionChunks(d, turns, undefined, leftSince(d, was));
           if (texts.length) {
-            // Kept only on the entry still open; otherwise nothing is marked and the next look takes the same turns again.
+            // Kept only on the entry still open; otherwise nothing is marked and the next look takes the same turns again. A folder the
+            // person left meanwhile (or the connection they ended) takes nothing more.
             if (open()?.key !== key) return;
+            if (!stillLinked(key, f)) continue sessions;
             const no = await host.save(key, texts);
             // A text refused leaves only its session to be taken again; anything else stops this look (and the next, until asked).
             if (no?.refused) { failed = no.error; continue sessions; }
             if (no) { error = no.error; halted.set(key, no.error); return; }
-            taken += texts.length;
           }
           // More to read when the reading left newer turns and moved on; until they are read the mark does not match the file's
           // time, so the next look comes back to this session even if it does not change.
@@ -171,15 +176,16 @@ export function createAutoSync(host: AutoSyncHost) {
           // there), or at the connection when the reading held none.
           const end = upTo ? (turns.length ? markAfter({ ...d, turns }, null, '') : { lastAt: upTo, count: 0, updatedAt: '' }) : markAfter(d, was, s.updatedAt, from);
           const more = !!upTo || (!first && !!d.rest && end.lastAt !== (was?.lastAt ?? null)), next = more ? { ...end, updatedAt: '' } : end;
-          // Marked as soon as it is kept: a tab closed later in this look does not take these turns again.
-          keepMark(key, s, next); marks[s.id] = next; moved.push(...s.aliases ?? []); kept.add(s.id);
+          // Marked and counted as soon as it is kept: a tab closed later in this look does not take these turns again, nor lose them.
+          keepMark(key, s, next, texts.length); marks[s.id] = next; moved.push(...s.aliases ?? []); kept.add(s.id);
           if (!more) break;
           was = next; first = false;
         }
       }
       error = failed;
       const runs = stored(key)?.runs ?? b.runs, today = day(), n = runs.day === today ? runs.n : 0;
-      if (open()?.key === key && host.canRead() && !host.readBlocked() && n < AUTO_RUNS_PER_DAY && (!runs.last || now - Date.parse(runs.last) >= AUTO_RUN_GAP_MS)) {
+      // A connection ended meanwhile starts no reading: what it kept before then is read by the person's own click.
+      if (open()?.key === key && bindingOf(key) && host.canRead() && !host.readBlocked() && n < AUTO_RUNS_PER_DAY && (!runs.last || now - Date.parse(runs.last) >= AUTO_RUN_GAP_MS)) {
         ran = new Date().toISOString(); host.read();
       }
     } finally {
@@ -190,7 +196,7 @@ export function createAutoSync(host: AutoSyncHost) {
         for (const id of moved) delete cur.marks[id];
         for (const [id, m] of Object.entries(marks)) if (further(m, cur.marks[id])) cur.marks[id] = m;
         for (const f of cur.folders) if ([...whole].some(x => x.path === f.path && x.connectedAt === f.connectedAt) && due.every(x => x.f.path !== f.path || kept.has(x.s.id))) f.backfilled = true;
-        cur.taken += taken; cur.lastCheck = new Date().toISOString(); if (error !== undefined) cur.error = error;
+        cur.lastCheck = new Date().toISOString(); if (error !== undefined) cur.error = error;
         if (ran) { const today = day(); cur.runs = { day: today, n: (cur.runs.day === today ? cur.runs.n : 0) + 1, last: ran }; }
         put_(key, cur);
       }
@@ -206,27 +212,30 @@ export function createAutoSync(host: AutoSyncHost) {
       const by = new Map<string, { folder: string; count: number; latest: string; tools: Set<string> }>();
       for (const s of await src.list()) {
         if (!s.cwd) continue;
-        const f = by.get(s.cwd) ?? { folder: s.cwd, count: 0, latest: s.updatedAt, tools: new Set<string>() };
-        f.count++; if (s.updatedAt > f.latest) f.latest = s.updatedAt; f.tools.add(TOOL_NAME[s.tool]); by.set(s.cwd, f);
+        // One folder written two ways (C:\work and c:\work, a trailing separator) is one row, named as its newest session has it.
+        const k = [...by.keys()].find(x => sameFolder(x, s.cwd!)) ?? s.cwd, f = by.get(k) ?? { folder: s.cwd, count: 0, latest: s.updatedAt, tools: new Set<string>() };
+        f.count++; if (s.updatedAt > f.latest) { f.latest = s.updatedAt; f.folder = s.cwd; } f.tools.add(TOOL_NAME[s.tool]); by.set(k, f);
       }
       folders = [...by.values()].sort((a, b) => b.latest.localeCompare(a.latest));
     } catch (e) { foldersError = failText(e, '세션 기록을 찾지 못했어요.'); }
     foldersLoading = false; render();
   }
-  /** Connects the open project to a folder: the first one makes the connection, another is added to it (once). */
+  /** Connects the open project to a folder: the first one makes the connection, another is added to it (once, however it is written). */
   function connect(folder: string) {
-    const o = open(), path = folder.trim(); if (!o || !path) return;
+    // A path copied from Windows Explorer ('경로로 복사', Ctrl+Shift+C) comes in quotes: the folder is what is inside them.
+    const o = open(), path = folder.trim().replace(/^(["'])(.+)\1$/, '$2').trim(); if (!o || !path) return;
     const now = new Date(), link: FolderLink = { path, connectedAt: now.toISOString(), since: new Date(now.getTime() - BACKFILL_MS).toISOString(), backfilled: false };
     // Connecting again after the connection ended goes on from the sessions' marks kept with it.
     const b = stored(o.key);
-    if (b) { if (!b.folders.some(f => f.path === path)) b.folders.push(link); if (b.folders.length === 1) b.error = null; put_(o.key, b); }
+    if (b) { if (!b.folders.some(f => sameFolder(f.path, path))) b.folders.push(link); if (b.folders.length === 1) b.error = null; put_(o.key, b); }
     else put_(o.key, { folders: [link], marks: {}, runs: { day: day(now), n: 0, last: null }, taken: 0, lastCheck: null, error: null });
     panelOpen = false; adding = false; typed = ''; render(); void tick(true);
   }
   /** Leaves one folder (its records stay); the last one leaving ends the connection (the marks stay with the project). */
   function removeFolder(path: string) {
     const o = open(), b = o ? bindingOf(o.key) : null; if (!o || !b) return;
-    b.folders = b.folders.filter(f => f.path !== path); if (!b.folders.length) { b.error = null; halted.delete(o.key); } put_(o.key, b); render();
+    // What the last look said may have been about this folder: the next look says what is still wrong.
+    b.folders = b.folders.filter(f => f.path !== path); b.error = null; if (!b.folders.length) halted.delete(o.key); put_(o.key, b); render(); if (b.folders.length) void tick();
   }
   function disconnect() {
     const o = open(), b = o ? stored(o.key) : null; if (!o) return;
@@ -267,7 +276,7 @@ export function createAutoSync(host: AutoSyncHost) {
           h('button', { type: 'button', class: 'link-button quiet sync-off', onclick: disconnect }, '연결 끊기')));
       return;
     }
-    const linked = new Set(b?.folders.map(f => f.path) ?? []), picks = folders?.filter(f => !linked.has(f.folder)) ?? null;
+    const picks = folders?.filter(f => !b?.folders.some(x => sameFolder(x.path, f.folder))) ?? null;
     // No source yet: the session folders are picked (or allowed again) first.
     if (!host.sources.current()) {
       put(panel, h('h3', {}, '내 AI 세션 연결'), setup,

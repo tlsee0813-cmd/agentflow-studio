@@ -347,7 +347,7 @@ function folderKey(path: string): string {
   const t = String(path).replace(/\\/g, '/').replace(/\/+$/, '');
   return windows(t) ? t.toLowerCase() : t;
 }
-const sameFolder = (a: string, b: string) => folderKey(a) === folderKey(b);
+export const sameFolder = (a: string, b: string) => folderKey(a) === folderKey(b);
 /** Whether a session's working folder (any of them, when it moved) is the folder asked for or inside it. */
 export function within(cwd: unknown, folder: string | null): boolean {
   if (!folder) return false;

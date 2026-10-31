@@ -309,7 +309,7 @@ export function createReturnView(host: ReturnHost) {
     const q = p.filter.trim().toLowerCase();
     const shown = (p.list ?? []).filter(x => !q || [x.title, x.preview, x.cwd, x.branch].some(v => v?.toLowerCase().includes(q)));
     const filter = h('input', { type: 'search', class: 'rr-sessions-filter', placeholder: '제목·내용·폴더로 찾기', 'aria-label': '세션 찾기', value: p.filter }) as HTMLInputElement;
-    filter.addEventListener('input', () => { p.filter = filter.value; const at = filter.selectionStart; render(); const f = document.querySelector<HTMLInputElement>('#lens .rr-sessions-filter'); if (f) { f.focus({ preventScroll: true }); f.setSelectionRange(at, at); } });
+    filter.addEventListener('input', () => { p.filter = filter.value; render(); });
     const rows = shown.map(x => h('li', {}, h('button', { type: 'button', class: 'rr-session', disabled: !!p.reading, onclick: () => void takeSession(x.id) },
       h('span', { class: 'rr-session-tool' }, TOOL_NAME[x.tool]),
       h('strong', {}, clip(x.title ?? x.preview, 90)),
@@ -755,10 +755,13 @@ export function createReturnView(host: ReturnHost) {
     if (s.view.kind === 'paste') {
       // Re-rendering keeps the caret where the person was typing (with the selection's direction) and where the box was scrolled.
       const area = document.querySelector<HTMLTextAreaElement>('#paste-text'), caret = area ? [area.selectionStart, area.selectionEnd, document.activeElement === area, area.selectionDirection, area.scrollTop, area.scrollLeft] as const : null;
+      // So does the session list's search, typed in while a record comes in (the automatic connection saves one).
+      const find = document.querySelector<HTMLInputElement>('#lens .rr-sessions-filter'), at = find && document.activeElement === find ? [find.selectionStart, find.selectionEnd] as const : null;
       put(body, back('정리로'), ...pasteBody(o));
       host.show([header(o), body, pasteFooter()]); host.mark(s.pasteContext ? [s.pasteContext] : []);
-      const next = document.querySelector<HTMLTextAreaElement>('#paste-text');
+      const next = document.querySelector<HTMLTextAreaElement>('#paste-text'), again = at && document.querySelector<HTMLInputElement>('#lens .rr-sessions-filter');
       if (next && caret) { next.setSelectionRange(caret[0], caret[1], caret[3]); if (caret[2]) next.focus({ preventScroll: true }); next.scrollTop = caret[4]; next.scrollLeft = caret[5]; }
+      if (again) { again.focus({ preventScroll: true }); again.setSelectionRange(at[0], at[1]); }
       return;
     }
     if (s.view.kind === 'file') {

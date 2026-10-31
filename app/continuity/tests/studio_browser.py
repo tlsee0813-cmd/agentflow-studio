@@ -3052,6 +3052,37 @@ def folder_sessions_flow(browser, base):
     page.locator("#sync-pill").click()
     panel.get_by_role("button", name=".claude (2) 세션 폴더 빼기").click()
     expect(panel).to_contain_text("읽는 세션 폴더: .claude, .codex, me")
+    # A record the connection keeps while the session search is being typed in leaves the search in focus, typing and all.
+    page.locator("#sync-pill").click()
+    page.locator("#lens").get_by_role("button", name="내 AI 세션에서 가져오기").click()
+    find = page.locator("#lens .rr-sessions-filter")
+    find.click()
+    page.keyboard.type("예약")
+    expect(page.locator("#sync-pill")).to_have_attribute("data-state", "on")
+    page.evaluate("""() => { window.__write('me/.claude/projects/-work-salon/typed.jsonl', JSON.stringify({ type: 'user', cwd: '/work/salon', sessionId: 's',
+      timestamp: new Date().toISOString(), message: { role: 'user', content: '검색 중에 들어온 요청' } }) + '\\n', Date.now() - 10 * 60000);
+      document.dispatchEvent(new Event('visibilitychange')); }""")
+    page.wait_for_function("() => Object.values(localStorage).join('\\n').includes('검색 중에 들어온 요청')")
+    page.keyboard.type("화면")
+    expect(find).to_be_focused()
+    expect(find).to_have_value("예약화면")
+    # One Windows folder its sessions write with two drive-letter cases (VS Code's terminal and PowerShell) is offered once, and no
+    # longer once it is linked.
+    page.evaluate("""() => { const row = (cwd, text) => JSON.stringify({ type: 'user', cwd, sessionId: 's', timestamp: new Date().toISOString(), message: { role: 'user', content: text } }) + '\\n';
+      window.__write('me/.claude/projects/C--work-shop/win1.jsonl', row('C:\\\\work\\\\shop', '가게 화면 고쳐 줘'));
+      window.__write('me/.claude/projects/c--work-shop/win2.jsonl', row('c:\\\\work\\\\shop', '가게 문구 고쳐 줘')); }""")
+    page.locator("#sync-pill").click()
+    panel.get_by_role("button", name="폴더 추가").click()
+    shop = panel.locator(".sync-folder-pick", has_text=re.compile(r"[Cc]:\\work\\shop"))
+    expect(panel.locator(".sync-folder-pick", has_text="/work/other")).to_have_count(1)
+    expect(shop).to_have_count(1)
+    shop.click()
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon 외 1")
+    expect(page.locator("#sync-pill")).to_have_attribute("data-state", "on", timeout=15000)
+    page.locator("#sync-pill").click()
+    panel.get_by_role("button", name="폴더 추가").click()
+    expect(panel.locator(".sync-folder-pick", has_text="/work/other")).to_have_count(1)
+    expect(shop).to_have_count(0)
     assert not errors, errors
     context.close()
 
