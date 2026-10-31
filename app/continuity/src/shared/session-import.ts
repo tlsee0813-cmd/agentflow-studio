@@ -133,15 +133,11 @@ function lastTaken(s: SessionDetail, mark: SessionMark): SessionTurn | undefined
 /** The files a reply names now that were not taken with it. A file outside the session's folders is named by its whole path until
  * the session works in a folder that holds it (a later line names that folder); from then on by the rest of that path, as the
  * reading names it (changedPath). So a whole name taken stands for the name it has now, and for no other file (another
- * repository's src/index.ts is not this folder's). Without the folders (an older server), it stands for one name that ends so,
- * the longest. */
-const whole = (f: string) => /^(?:[A-Za-z]:[\\/]|\\\\|\/)/.test(f), slashed = (f: string) => f.replace(/\\/g, '/');
+ * repository's src/index.ts is not this folder's). */
+const whole = (f: string) => /^(?:[A-Za-z]:[\\/]|\\\\|\/)/.test(f);
 function untaken(taken: string[], now: string[], s: Pick<SessionDetail, 'cwd' | 'cwds'>): string[] {
-  const moved = taken.filter(x => whole(x) && !now.includes(x)), same = new Set<string>();
-  if (s.cwds) for (const x of moved) { const n = changedPath(x, s); if (n !== x) same.add(n); }
-  else for (const f of now.filter(f => !whole(f) && !taken.includes(f)).sort((a, b) => b.length - a.length)) {
-    const i = moved.findIndex(x => slashed(x).endsWith(`/${slashed(f)}`)); if (i >= 0) { same.add(f); moved.splice(i, 1); }
-  }
+  const same = new Set<string>();
+  for (const x of taken.filter(x => whole(x) && !now.includes(x))) { const n = changedPath(x, s); if (n !== x) same.add(n); }
   return now.filter(f => !taken.includes(f) && !same.has(f));
 }
 /** The mark once every turn of this reading is taken: its last time, and how much of its last turn when that is a reply. since:
@@ -152,13 +148,11 @@ export function markAfter(s: SessionDetail, was: SessionMark | null, updatedAt: 
   return { lastAt, count: s.omitted + s.turns.length, updatedAt,
     ...(last.role === 'assistant' && (last.at ?? null) === lastAt ? { reply: { chars: last.text.length, sum: textSum(last.text), files: [...(last.files ?? [])] } } : {}) };
 }
-/** Turns after the mark that the reading left out (it sends the newest within its budget): the first record says how many. */
+/** Turns after the mark that the reading left out (it sends the newest within its budget): the first record says how many. A mark
+ * with a time is read from that time on, which leaves none out. */
 export function leftSince(s: SessionDetail, mark: SessionMark | null): number {
   if (!s.omitted || !mark) return s.omitted;
-  if (!mark.lastAt) return Math.max(0, s.omitted - mark.count);
-  // The turn taken last is the oldest one read from the mark on: when it was not sent, it is among the omitted.
-  const first = s.turns.find(t => t.at)?.at;
-  return first && first > mark.lastAt ? s.omitted - 1 : 0;
+  return mark.lastAt ? 0 : Math.max(0, s.omitted - mark.count);
 }
 /** Record texts for these turns of one session, in order, each within `limit` characters and each with the session's header line,
  * so a long stretch becomes several records and no turn is left out (one turn longer than a record is cut at its end). left: turns

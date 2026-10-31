@@ -2,8 +2,8 @@
  * records already hold. Nothing is asked of a model and nothing is added: reports stay reports, open choices stay open. The document
  * carries a marker (af-handover:CODE[:part]) so that a session which starts from it is known as the one that took it over, and the
  * document itself is not taken back in as a new record of work (foldHandover). */
-import { isMapReading, type ClaimKind, type MapReading, type Project } from './types.js';
-import { CLAIM_LABEL, candidateReading, unreadRecords } from './map-reading.js';
+import { isMapReading, type ClaimKind, type MapReading, type Project, type ReadingQuote } from './types.js';
+import { CLAIM_LABEL, unreadRecords } from './map-reading.js';
 import { studioView, type PartView, type StudioView } from './studio.js';
 import { relLabel } from './relation-groups.js';
 import { stamp, RECORD_HEAD, HEAD_FIELD } from './session-import.js';
@@ -12,7 +12,8 @@ import { HANDOVER_TAG, foldHandover, quoteReceived, receivedHandovers } from './
 export { HANDOVER_TAG, foldHandover, handoverCode, receivedHandovers } from './handover-mark.js';
 
 /* ---------- which session a record came from ---------- */
-export interface SessionOrigin { id: string | null; tool: SessionTool | 'web'; title: string | null; cwd: string | null; branch: string | null }
+/** start: when the session began, as its header writes it (YYYY-MM-DD HH:MM), when it does. */
+export interface SessionOrigin { id: string | null; tool: SessionTool | 'web'; title: string | null; cwd: string | null; branch: string | null; start?: string }
 const ORIGIN_NAME: Record<SessionOrigin['tool'], string> = { ...TOOL_NAME, web: '웹 AI' };
 const EMPTY_FIELD = /^(?:(?:작업 폴더|브랜치)\s*)?(?:\(?(?:없음|없어요|없습니다|해당 없음|모름|알 수 없음|n\/a|none|null|unknown|-+|—)\)?|\([^()]*(?:있으면|짧은 제목)[^()]*\))$/i;
 /** The session a record was taken from (its header line, session-import.ts), or null for any other record. */
@@ -37,7 +38,7 @@ export function sessionOrigin(text: string): SessionOrigin | null {
     const kind = (Object.keys(HEAD_FIELD) as (keyof typeof HEAD_FIELD)[]).find(k => !got[k] && HEAD_FIELD[k].test(f));
     if (kind) got[kind] = HEAD_FIELD[kind].exec(f)![1]!.trim(); else more.unshift(f);
   }
-  return { id: got.id ?? null, tool, title: [...title, ...more].join(' · ') || null, cwd: got.cwd ?? null, branch: got.branch ?? null };
+  return { id: got.id ?? null, tool, title: [...title, ...more].join(' · ') || null, cwd: got.cwd ?? null, branch: got.branch ?? null, ...(got.start ? { start: got.start } : {}) };
 }
 /** A session record pasted by hand (a web session's, written back with WEB_RECORD_ASK): each request folded as the import folds
  * it, so a handover document the session started from is not kept again as a record of work. Any other text stays as written. */
@@ -46,11 +47,34 @@ export function foldRecord(text: string): string {
   return text.split(/^(?=── )/m).map(b => (b.startsWith('── 사용자 요청') ? foldHandover(b) : b)).join('');
 }
 const originKey = (o: SessionOrigin) => o.id ?? `${o.tool}|${o.title ?? ''}|${o.cwd ?? ''}`;
-export const originLabel = (o: Pick<SessionOrigin, 'tool' | 'title'>) => `${ORIGIN_NAME[o.tool]}${o.title ? ` 「${o.title}」` : ' 세션'}`;
+/** A session by its title (partSessions gives one without a title its first request), else by when it started. */
+export const originLabel = (o: Pick<SessionOrigin, 'tool' | 'title' | 'start'>) => `${ORIGIN_NAME[o.tool]}${o.title ? ` 「${o.title}」` : ` 세션${o.start ? ` (${o.start.slice(5)} 시작)` : ''}`}`;
+/** The first words of a record's first request, as the paste box's list names a session; a handover it started from is not them. */
+function askName(text: string): string | null {
+  const ask = text.split(/^── /m).find(b => b.startsWith('사용자 요청'));
+  const line = ask?.split('\n').slice(1).map(l => l.trim()).find(l => l && !l.startsWith('[AgentFlow 인수인계 문서를 받아 이어감'));
+  return line ? one(line, 25) : null;
+}
+/** The first request each untitled session's records hold, in the order they were kept (by originKey). Made once for each list of
+ * records: a project changed is a copy, so its list is another (its length is checked too). */
+const ASKED = new WeakMap<Project['pasted'], { n: number; names: Map<string, string> }>();
+function askNames(p: Project): Map<string, string> {
+  const was = ASKED.get(p.pasted); if (was && was.n === p.pasted.length) return was.names;
+  const names = new Map<string, string>();
+  for (const rec of p.pasted) {
+    const o = sessionOrigin(rec.text); if (!o || o.title) continue;
+    const key = originKey(o), name = !names.has(key) && askName(rec.text); if (name) names.set(key, name);
+  }
+  ASKED.set(p.pasted, { n: p.pasted.length, names }); return names;
+}
+/** A session's name as the part summary and the handover document give it (partSessions), wherever else it is shown: one without a
+ * title is named by its first request. */
+export const sessionName = (p: Project, o: SessionOrigin) => originLabel(o.title ? o : { ...o, title: askNames(p).get(originKey(o)) ?? null });
 
 export interface PartSession extends SessionOrigin { key: string; lastAt: string; worked: boolean; tookOver: boolean }
 /** The sessions behind a part: those whose records the map quotes for it (it worked on it), and those that started from a handover
- * of it (it took it over), newest first. With no part, the sessions that took the whole project over and every session recorded. */
+ * of it (it took it over), newest first. With no part, the sessions that took the whole project over and every session recorded.
+ * One without a title (every Codex session) is named by the first request its records hold, the same in every part. */
 export function partSessions(p: Project, areaId: string | null): PartSession[] {
   const quoted = new Set<string>();
   if (areaId) for (const r of p.readings) {
@@ -59,27 +83,31 @@ export function partSessions(p: Project, areaId: string | null): PartSession[] {
     for (const q of part.basis) quoted.add(q.record);
     for (const c of part.claims) quoted.add(c.record);
   }
-  const out = new Map<string, PartSession>();
+  const out = new Map<string, PartSession>(), named = askNames(p);
   for (const rec of p.pasted) {
     const o = sessionOrigin(rec.text); if (!o) continue;
+    const key = originKey(o);
     const worked = areaId ? quoted.has(rec.id) : true, tookOver = receivedHandovers(rec.text).some(h => h.areaId === areaId);
     if (!worked && !tookOver) continue;
-    const key = originKey(o), was = out.get(key);
+    const was = out.get(key);
     out.set(key, { ...o, key, lastAt: was && was.lastAt > rec.at ? was.lastAt : rec.at, worked: worked || !!was?.worked, tookOver: tookOver || !!was?.tookOver });
   }
-  return [...out.values()].sort((a, b) => b.lastAt.localeCompare(a.lastAt));
+  return [...out.values()].map(s => (s.title ? s : { ...s, title: named.get(s.key) ?? null })).sort((a, b) => b.lastAt.localeCompare(a.lastAt));
 }
 
 /* ---------- the document ---------- */
 export interface HandoverOptions { scope: string | null; code: string; at: string }
 /** A document, and how many of its parts were written shorter (or by name only) to keep it within HANDOVER_CHARS. */
 export interface Handover { text: string; trimmed: number }
-/** The longest document made. It is pasted as a new session's first prompt, and a prompt is read whole only up to 20,000 characters
- * (session-parse.ts turnChars): past that its end line and the person's own words after it would be cut off. */
+/** The longest document made. It is pasted as a new session's first message (a web chat's too), so it stays short enough to copy
+ * and read whole. Its length costs nothing of the words the person writes after it: a session import folds it to one line before
+ * a prompt is clipped (session-parse.ts sessionDetail). */
 export const HANDOVER_CHARS = 15000;
 const CLAIM_ORDER: ClaimKind[] = ['want', 'idea', 'reported', 'checked', 'describes', 'open', 'differs'];
 const CLAIMS_PER_PART = 10, RECENT_REQUESTS = 6, FILES_PER_ASK = 8, RECENT_FILES = 24, LINE = 240, NAMES = 600;
 const one = (t: string, n = LINE) => { const s = t.replace(/\s+/g, ' ').trim(); return s.length > n ? `${s.slice(0, n - 1)}…` : s; };
+/** The end of a text on one line: an answer says last how the work ended. */
+const tail = (t: string, n: number) => { const s = t.replace(/\s+/g, ' ').trim(); return s.length > n ? `…${s.slice(1 - n)}` : s; };
 /** The claims a part keeps when it holds more than it has room for: what is left to ask first (an open choice is what the next
  * session must not decide alone), then what was wanted and reported. */
 const KEEP_FIRST: ClaimKind[] = ['open', 'differs', 'want', 'reported', 'checked', 'idea', 'describes'];
@@ -100,7 +128,12 @@ function partBlock(view: StudioView, part: PartView, sessions: PartSession[], to
   if (role) lines.push(`- 역할: ${one(role, k.text)}${u?.corrected ? ' (사용자가 고친 설명)' : ''}`);
   if (part.note) lines.push(`- 사용자 메모: ${one(part.note, k.text)}`);
   // Chosen by KEEP_FIRST in either mode (the newest of a kind first, as the map lists them), then written in the mode's order.
-  const all = u?.claims ?? [], keep = new Set(all.slice().sort((a, b) => KEEP_FIRST.indexOf(a.kind) - KEEP_FIRST.indexOf(b.kind)).slice(0, k.claims));
+  const all = u?.claims ?? [], kept = all.slice().sort((a, b) => KEEP_FIRST.indexOf(a.kind) - KEEP_FIRST.indexOf(b.kind)).slice(0, k.claims);
+  // Wants pile up over readings: the newest report or check takes the place of the last one kept that is not left to ask, so a
+  // part that was worked on does not read as only wanted.
+  const done = (c: { kind: ClaimKind }) => c.kind === 'reported' || c.kind === 'checked', last = kept.map(c => c.kind !== 'open' && c.kind !== 'differs').lastIndexOf(true);
+  if (all.some(done) && !kept.some(done) && last >= 0) kept[last] = all.find(done)!;
+  const keep = new Set(kept);
   const claims = all.filter(c => keep.has(c)).sort((a, b) => k.order.indexOf(a.kind) - k.order.indexOf(b.kind));
   for (const c of claims) lines.push(`- ${CLAIM_LABEL[c.kind]}: ${one(c.text, k.claim)}${c.about ? ` (${one(c.about, 80)})` : ''}`);
   // The next session cannot see the map: it is told what is left out, not where to look.
@@ -113,44 +146,70 @@ function partBlock(view: StudioView, part: PartView, sessions: PartSession[], to
     return other ? `${other.name} (${r.kind === 'shares' ? '이 부분과 함께 씀' : relLabel(r.kind, out)}${r.note ? ` · ${one(r.note, 80)}` : ''})` : null;
   }).filter(Boolean);
   if (rels.length) lines.push(`- 관련: ${rels.slice(0, k.rels).join(', ')}${rels.length > k.rels ? ` 외 ${rels.length - k.rels}개` : ''}`);
-  if (sessions.length) lines.push(`- 다룬 세션: ${sessions.slice(0, k.sessions).map(s => `${originLabel(s)}${s.tookOver ? ' (인수인계로 이어받음)' : ''}`).join(', ')}`);
+  if (sessions.length) lines.push(`- 다룬 세션: ${sessions.slice(0, k.sessions).map(s => `${originLabel(s)}${s.tookOver ? ' (인수인계로 이어받음)' : ''}`).join(', ')}${sessions.length > k.sessions ? ` 외 ${sessions.length - k.sessions}개` : ''}`);
   return lines;
 }
 
 // A web record saved by an older page, from a document copied without its end line, has the answer's head glued to the folded line
 // ('…]── 웹 AI 답변 ──'): read with that head on a line of its own, its answer stays the AI's. The stored text is not changed.
 const GLUED = /(\[AgentFlow 인수인계 문서를 받아 이어감 · [^\]\n]*\])(?=── (?:웹 AI|Claude Code|Codex) 답변)/g;
-/** A request, the files changed answering it, and the records both came from. */
-interface Ask { text: string; files: string[]; records: string[] }
+/** A request, the files changed answering it, the records both came from, when it was made (at: its session's start date with
+ * its own time, as YYYY-MM-DD HH:MM), whether it is in the scope (hit), and whether the map has not read it or an answer to it yet
+ * (late; answer: what those answers said, their files line left out). */
+interface Ask { text: string; files: string[]; records: string[]; at: string; hit: boolean; late: boolean; answer: string }
+/** What a part's document takes of the records: the requests its readings quote (in the request or an answer to it), by record;
+ * every one of the sessions that took it over, and those not read yet of the other sessions behind it (by the sessions' keys). */
+interface AskScope { quotes: Map<string, ReadingQuote[]>; took: Set<string>; behind: Set<string> }
 /** The person's requests in session records, oldest first, with the files the tool's next answer reported changing: all of them, or
- * those of the records in `only` and of the records `also` admits (by their session's key and the record's id). */
-function sessionAsks(p: Project, only: Set<string> | null, also: (key: string, id: string) => boolean): Ask[] {
+ * those of a part's scope. unread: how far each record not read to its end was read (a record is read from its start). */
+function sessionAsks(p: Project, unread: Map<string, number>, scope: AskScope | null): Ask[] {
   // An answer's files belong to the last request of its own session, which may sit in an earlier record (taken before the reply
-  // came), never to another session's request; when that request's record is outside the scope, they are not shown.
-  const out: Ask[] = [], asked = new Map<string, Ask | null>();
+  // came), never to another session's request; when that request is outside the scope, they are not shown.
+  const out: Ask[] = [], asked = new Map<string, Ask>();
+  let latest = '';
   for (const rec of p.pasted) {
     const origin = sessionOrigin(rec.text); if (!origin) continue;
-    const key = originKey(origin), shown = !only || only.has(rec.id) || also(key, rec.id);
-    for (const part of rec.text.replace(GLUED, '$1\n').split(/^── /m).slice(1)) {
+    // A record holds a session's turns on many parts: what a reading quoted is told by where it stands, or by its words when the
+    // text is read with a glued head moved (places then shift).
+    const key = originKey(origin), text = rec.text.replace(GLUED, '$1\n'), pieces = text.split(/^── /m), quotes = scope?.quotes.get(rec.id) ?? [];
+    let to = pieces[0]!.length;
+    for (const part of pieces.slice(1)) {
+      const from = to; to += 3 + part.length;
+      const late = (unread.get(rec.id) ?? Infinity) < to, quoted = quotes.some(q => q.from !== undefined && q.to !== undefined && text === rec.text ? q.from < to && q.to > from : text.slice(from, to).includes(q.quote));
       const nl = part.indexOf('\n'), head = part.slice(0, nl), body = part.slice(nl + 1).trim();
-      if (head.startsWith('사용자 요청')) { const t = shown ? { text: body, files: [], records: [rec.id] } : null; if (t) out.push(t); asked.set(key, t); continue; }
+      if (head.startsWith('사용자 요청')) {
+        // Put in order by when it was asked, not when it was taken in (a folder connected later brings its older sessions after the
+        // rest). Its head has the time, and the date when it is not the session's first day; one with neither (a web chat's) stays
+        // after what was taken in before it.
+        const m = /· (?:(\d\d-\d\d) )?(\d\d:\d\d) ──$/.exec(head), start = origin.start;
+        const at = m && start ? `${m[1] ? `${+start.slice(0, 4) + (m[1] < start.slice(5, 10) ? 1 : 0)}-${m[1]}` : start.slice(0, 10)} ${m[2]}` : latest;
+        if (at > latest) latest = at;
+        const t = { text: body, files: [], records: [rec.id], at, hit: !scope || quoted || scope.took.has(key) || late && scope.behind.has(key), late, answer: '' };
+        out.push(t); asked.set(key, t); continue;
+      }
       // The list is on the answer's last line (a web AI may put it after a bullet), read to its last ')' so a name like
       // app/(auth)/page.tsx stays whole.
       const f = /\(바꾼 파일: (.+)\)\s*$/.exec(body.slice(body.lastIndexOf('\n') + 1).trim()), last = asked.get(key);
+      if (!last) continue;
+      if (quoted) last.hit = true;
       // A web AI may write the line with nothing in it ('(바꾼 파일: 없음)'): no file is named so.
-      if (f && last) { last.files.push(...f[1]!.split(', ').filter(x => !(origin.tool === 'web' && EMPTY_FIELD.test(x.trim())))); last.records.push(rec.id); }
+      if (f) { last.files.push(...f[1]!.split(', ').filter(x => !(origin.tool === 'web' && EMPTY_FIELD.test(x.trim())))); last.records.push(rec.id); }
+      // An answer the map has not read is the only place the document tells how that work ended (blocked, not tested, done).
+      const said = (f ? body.slice(0, body.lastIndexOf('\n') + 1) : body).trim();
+      if (late && said) { last.answer = last.answer ? `${last.answer}\n\n${said}` : said; last.late = true; last.records.push(rec.id); }
     }
   }
-  return out;
+  return out.filter(a => a.hit).sort((a, b) => a.at.localeCompare(b.at));
 }
 /** What the note above the parts says of the records the map has not read: how many there are and where this document has them.
- * inFlow of them have their requests and changed files in the recent flow (some only their latest requests, when cut); in a part's
- * document those are the records of the sessions behind it. The rest are not in the document. */
+ * inFlow of them have their requests, changed files and answers in the recent flow, marked as not on the map (some only their
+ * latest requests, when cut); in a part's document those are the records of the sessions behind it. The rest are not in the
+ * document. */
 function unreadWhere(count: number, inFlow: number, scoped: boolean, cut: boolean): string {
-  const lead = `아직 지도에 담기지 않은 기록이 ${count}개 있어요.`, what = `${cut ? '최근 ' : ''}요청과 바꾼 파일`;
-  if (inFlow === count) return `${lead} 그 기록의 ${what}은 아래 최근 흐름에 있어요.`;
+  const lead = `아직 지도에 담기지 않은 기록이 ${count}개 있어요.`, what = `${cut ? '최근 ' : ''}요청과 바꾼 파일, 답변`, where = '아래 최근 흐름에 "지도에 아직 없음"으로 표시돼';
+  if (inFlow === count) return `${lead} 그 기록의 ${what}은 ${where} 있어요. 위 부분 상태에는 아직 반영되지 않은 내용이에요.`;
   if (!inFlow) return `${lead} 그 내용은 이 문서에 없으니, 필요하면 사용자에게 물어보세요.`;
-  return `${lead} 그중 ${scoped ? '이 범위를 다룬 세션의 기록 ' : ''}${inFlow}개는 ${what}이 아래 최근 흐름에 있고, 나머지 ${count - inFlow}개는 이 문서에 없어요. 필요하면 사용자에게 물어보세요.`;
+  return `${lead} 그중 ${scoped ? '이 범위를 다룬 세션의 기록 ' : ''}${inFlow}개는 ${what}이 ${where} 있고, 나머지 ${count - inFlow}개는 이 문서에 없어요. 표시된 내용은 위 부분 상태에 아직 반영되지 않았고, 나머지는 필요하면 사용자에게 물어보세요.`;
 }
 
 /** The document for the whole project (scope null) or one part with everything inside it. */
@@ -192,19 +251,24 @@ export function handoverDoc(p: Project, opts: HandoverOptions): Handover {
   const sessions = scoped ? dedupe(parts.flatMap(x => by.get(x.id)!)) : partSessions(p, null);
   if (sessions.length) {
     out.push('## 작업 장소와 세션');
-    for (const s of sessions.slice(0, 8)) out.push(one(`- ${originLabel(s)}${s.cwd ? ` · 작업 폴더 ${s.cwd}` : ''}${s.branch ? ` · 브랜치 ${s.branch}` : ''}${s.tookOver ? ' · 인수인계로 이어받은 세션' : ''}`, 320));
+    const place = (s: PartSession) => [s.cwd ? `작업 폴더 ${s.cwd}` : '', s.branch ? `브랜치 ${s.branch}` : ''].filter(Boolean).join(' · '), few = sessions.slice(0, 8);
+    for (const s of few) out.push(one(`- ${[originLabel(s), place(s), s.tookOver ? '인수인계로 이어받은 세션' : ''].filter(Boolean).join(' · ')}`, 320));
+    // The rest are counted, and a folder or branch only they worked in is named: the reader is told to look at those.
+    const more = [...new Set(sessions.slice(8).map(place))].filter(x => x && !few.some(s => place(s) === x));
+    if (sessions.length > 8) out.push(one(`- 그 밖에 세션 ${sessions.length - 8}개${more.length ? ` (${more.join(', ')})` : ''}`, 320));
     out.push('');
   }
-  // The latest requests the person made in the sessions, with the files changed answering them: in a part's document, those of the
-  // records the readings quoted for it, every record of a session that started from a handover of it (its work is the newest here,
-  // read or not), and the records not read yet of the other sessions behind it. A request that started from an earlier handover
-  // names it in words, so this document quoting it is not read as that takeover when it is pasted in turn.
-  const fresh = new Set(unreadRecords(p, view).map(r => r.id)), behind = new Set(sessions.map(s => s.key)), took = new Set(sessions.filter(s => s.tookOver).map(s => s.key));
-  const only = scoped ? new Set(maps.flatMap(r => r.parts.filter(x => scopeIds.has(x.areaId)).flatMap(x => [...x.basis.map(q => q.record), ...x.claims.map(c => c.record)]))) : null;
-  const listed = sessionAsks(p, only, (key, id) => took.has(key) || behind.has(key) && fresh.has(id)), asks = listed.slice(-RECENT_REQUESTS);
+  // The latest requests the person made in the sessions, with the files changed answering them: in a part's document, those the
+  // readings quoted for it, every one of a session that started from a handover of it (its work is the newest here, read or not),
+  // and those not read yet of the other sessions behind it. A request that started from an earlier handover names it in words, so
+  // this document quoting it is not read as that takeover when it is pasted in turn.
+  const unread = new Map(unreadRecords(p, view).map(r => [r.id, r.from])), fresh = new Set(unread.keys());
+  const behind = new Set(sessions.map(s => s.key)), took = new Set(sessions.filter(s => s.tookOver).map(s => s.key)), quotes = new Map<string, ReadingQuote[]>();
+  if (scoped) for (const r of maps) for (const x of r.parts) if (scopeIds.has(x.areaId)) for (const q of [...x.basis, ...x.claims]) quotes.set(q.record, [...(quotes.get(q.record) ?? []), q]);
+  const listed = sessionAsks(p, unread, scoped ? { quotes, took, behind } : null), asks = listed.slice(-RECENT_REQUESTS);
   // The records not read yet that the recent flow holds (cut: one of them has older requests it leaves out); the rest are not here.
-  const seen = new Set(asks.flatMap(a => a.records)), inFlow = [...fresh].filter(id => seen.has(id)).length;
-  const cut = listed.slice(0, -RECENT_REQUESTS).some(a => a.records.some(id => fresh.has(id) && seen.has(id))), absent = fresh.size - inFlow;
+  const seen = new Set(asks.filter(a => a.late).flatMap(a => a.records)), inFlow = [...fresh].filter(id => seen.has(id)).length;
+  const cut = listed.slice(0, -RECENT_REQUESTS).some(a => a.late && a.records.some(id => fresh.has(id) && seen.has(id))), absent = fresh.size - inFlow;
   out.push(scoped ? '## 이 범위의 현재 상태' : '## 부분별 현재 상태');
   // The parts are what the last reading saw: records it has not read (often the newest work) are not in them, and the document says
   // so and where they are. With no part yet, nothing is below but the recent flow, if any.
@@ -217,8 +281,12 @@ export function handoverDoc(p: Project, opts: HandoverOptions): Handover {
   for (const r of maps) for (const c of r.candidates) {
     // A candidate on a part since put away is not asked about, as the map leaves it out.
     if (scoped && !c.areaIds.some(a => scopeIds.has(a)) || c.areaIds.some(a => !view.parts.some(x => x.id === a))) continue;
-    const read = candidateReading(c), names = c.areaIds.map(a => view.parts.find(x => x.id === a)?.name).filter(Boolean);
-    open.push(`- ${read.label ? `${read.label}: ` : ''}${one(read.statement?.text ?? c.text)}${names.length ? ` (${one(names.join(', '), 80)})` : ''}`);
+    // Whether two parts are one, or one is inside another, is the map's own shape (so is the note a reading leaves on a part of a
+    // name already there): the next session cannot settle it, and the person settles it on the map.
+    if (c.target === 'identity' || c.target === 'parent' || !c.target && r.skipped.some(x => x.reason === 'same-name' && c.text.startsWith(`‘${x.name}’:`))) continue;
+    // Its own question, with the statement it leaves undecided as what it is: a report stays a report.
+    const names = c.areaIds.map(a => view.parts.find(x => x.id === a)?.name).filter(Boolean);
+    open.push(`- ${one(c.text)}${c.statement ? ` (${CLAIM_LABEL[c.statement.kind]}: ${one(c.statement.text, 120)})` : ''}${names.length ? ` (${one(names.join(', '), 80)})` : ''}`);
   }
   if (!scoped && latest) for (const g of latest.gaps) open.push(`- 기록에서 알 수 없었음: ${one(g)}`);
   if (open.length) after.push('## 아직 정하지 않은 것', ...dedupeLines(open).slice(-12), '');
@@ -226,7 +294,11 @@ export function handoverDoc(p: Project, opts: HandoverOptions): Handover {
     after.push('## 최근 흐름 (사용자가 세션에서 한 요청, 오래된 것부터)');
     // Each request names its own files, as many as FILES_PER_ASK and one line hold.
     const each = asks.map(t => [...new Set(t.files)]), list = (f: string[]) => f.slice(0, FILES_PER_ASK).join(', ');
-    asks.forEach((t, i) => after.push(`- ${one(quoteReceived(t.text), 300)}${each[i]!.length ? ` → 바꾼 파일: ${one(list(each[i]!), 300)}` : ''}`));
+    // What the map has not read yet is marked so where the map has parts (they do not hold it), with how its answer ended.
+    asks.forEach((t, i) => {
+      after.push(`- ${t.late && parts.length ? '(지도에 아직 없음) ' : ''}${one(quoteReceived(t.text), 300)}${each[i]!.length ? ` → 바꾼 파일: ${one(list(each[i]!), 300)}` : ''}`);
+      if (t.answer) after.push(`  - 답변: ${tail(t.answer, 200)}`);
+    });
     // All of them once, written only when it names a file the lines above leave out (a request's list was cut short): otherwise it
     // would only repeat them, even when a file was changed more than once.
     const files = [...new Set(each.flat())].slice(-RECENT_FILES);

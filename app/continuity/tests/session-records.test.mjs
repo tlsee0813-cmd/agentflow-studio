@@ -15,7 +15,10 @@ const { createAutoSync, AUTOSYNC_KEY } = await import('../dist/public/client/aut
 
 const ID = 'claude-0123456789abcdef01234567', OLD = 'claude-89abcdef0123456789abcdef';
 const T = m => new Date(Date.parse('2026-10-30T09:00:00.000Z') + m * 60000).toISOString();
-const session = (turns, extra = {}) => ({ id: ID, tool: 'claude', label: '', title: null, cwd: '/work/salon', branch: 'main', startedAt: null, turns, omitted: 0, ...extra });
+const session = (turns, extra = {}) => ({ id: ID, tool: 'claude', label: '', title: null, cwd: '/work/salon', cwds: ['/work/salon'], branch: 'main', startedAt: null, turns, omitted: 0, ...extra });
+// A session as the server and the page send it: read with its folders, its files named from the first that holds them.
+const parsed = (cwds, turns) => ({ meta: { cwd: cwds.at(-1), cwds, branch: null, startedAt: null, title: null, thread: null, parent: null }, turns, changes: [] });
+const sent = (cwds, turns) => readSessionDetail(JSON.parse(JSON.stringify(sessionDetail(ID, 'claude', parsed(cwds, turns)))));
 const hidden = '[가려진 비밀값]';
 // Fake credentials, put together at run time so no file holds one whole.
 const f = (...p) => p.join('');
@@ -178,6 +181,106 @@ test('SESSIONS-RD4 a password in a connection string, a value starting with $ { 
     assert.deepEqual(redactSecrets(text), { text, count: 0 }, text);
 });
 
+test('SESSIONS-RD5 a password, token or key named in Korean, or by an English name before a particle or a space, is hidden; the sentences about them stay', () => {
+  const FAKE = f('FAKEfake', 'FAKE0123', '456789fake');
+  const hide = [
+    ['DB 비밀번호는 FakePass123!이고', 'DB 비밀번호는 [가려진 비밀값]이고'], ['비밀번호: FakePass123', '비밀번호: [가려진 비밀값]'], ['비번 FakePass123', '비번 [가려진 비밀값]'],
+    ['암호: FakePass123', '암호: [가려진 비밀값]'], ['와이파이 비번은 hunter22', '와이파이 비번은 [가려진 비밀값]'], ['DB 비밀번호를 FakePass123으로 바꿔 줘', 'DB 비밀번호를 [가려진 비밀값]으로 바꿔 줘'],
+    ['비밀번호는 "Fake Pass 123"이야', '비밀번호는 "[가려진 비밀값]"이야'], ['패스워드：FakePass123', '패스워드：[가려진 비밀값]'],
+    [`관리자 토큰: ${FAKE} 야.`, '관리자 토큰: [가려진 비밀값] 야.'], [`API 키: ${FAKE}`, 'API 키: [가려진 비밀값]'], [`인증키 ${FAKE} 넣어`, '인증키 [가려진 비밀값] 넣어'],
+    ['pw: FakePass123', 'pw: [가려진 비밀값]'], ['PW=FakePass123', 'PW=[가려진 비밀값]'], [`token은 ${FAKE}`, 'token은 [가려진 비밀값]'],
+    [`api_key는 ${FAKE} 입니다`, 'api_key는 [가려진 비밀값] 입니다'], ['password FakePass123', 'password [가려진 비밀값]'], [`API key ${FAKE}`, 'API key [가려진 비밀값]']
+  ];
+  for (const [text, want] of hide) {
+    const r = redactSecrets(text);
+    assert.equal(r.text, want, text); assert.equal(r.count, 1, text);
+    assert.deepEqual(redactSecrets(r.text), { text: r.text, count: 0 }, 'hidden once, never again');
+  }
+  // Taken from a session, the record keeps none of them.
+  const d = session([{ role: 'user', at: T(0), text: `DB 비밀번호는 FakePass123!이고 관리자 토큰: ${FAKE} 야. 예약 화면 만들어줘` },
+    { role: 'assistant', at: T(1), text: '.env에 비밀번호: FakePass123! 를 넣었습니다.' }]);
+  const got = sessionText(d);
+  assert.ok(!got.text.includes('FakePass123') && !got.text.includes(FAKE) && got.redacted === 3, got.text);
+  for (const text of ['비밀번호 변경 화면 만들어 줘', '토큰 만료되면 다시 로그인하게 해 줘', 'API 키 넣는 칸 추가해 줘', '암호화는 나중에', '비밀번호는 bcrypt로 해시해 줘',
+    '비밀번호는 argon2id로 바꿔 줘', '암호는 AES-256-GCM으로 해 줘', '비밀번호는 최소 8자 이상', '토큰은 JWT로 만들어', '토큰은 localStorage에 저장하지 말고', '컨텍스트 토큰 200000개',
+    'API 키는 config.ts에 있어', 'API 키는 process.env.OPENAI_API_KEY에서 읽어', '비밀번호를 user.password와 비교해', '비밀번호: ${DB_PASSWORD}', 'max_token 100000',
+    'password VARCHAR(255) NOT NULL', 'Password []byte `json:"password"`', 'Token *oauth2.Token', 'access token expires in 3600 seconds', 'return token && token.length > 0'])
+    assert.deepEqual(redactSecrets(text), { text, count: 0 }, text);
+});
+
+test('SESSIONS-RD6 a key given to a flag after a space, as the next element of an args array or with setx is hidden; flags that hold none stay', () => {
+  const FAKE = f('FAKEctx7', 'FAKEfake', '0123456789');
+  const hide = [
+    [`claude mcp add context7 -- npx -y @upstash/context7-mcp --api-key ${FAKE}`, '--api-key [가려진 비밀값]'],
+    [`.mcp.json에 {"mcpServers":{"brave":{"command":"npx","args":["-y","brave-mcp","--api-key","${FAKE}"]}}} 넣었어`, '"--api-key","[가려진 비밀값]"'],
+    [`{\\"args\\":[\\"--api-key\\", \\"${FAKE}\\"]}`, '\\"--api-key\\", \\"[가려진 비밀값]\\"'],
+    [`setx GROQ_API_KEY "${FAKE}"`, 'setx GROQ_API_KEY "[가려진 비밀값]"'], [`python bot.py --token ${FAKE}`, '--token [가려진 비밀값]'],
+    [`--access-key ${FAKE}`, '--access-key [가려진 비밀값]'], ['--password=hunter22', '--password=[가려진 비밀값]']
+  ];
+  for (const [text, want] of hide) {
+    const r = redactSecrets(text);
+    assert.ok(r.text.includes(want) && !r.text.includes(FAKE) && r.count === 1, `${text} -> ${r.text}`);
+    assert.deepEqual(redactSecrets(r.text), { text: r.text, count: 0 }, 'hidden once, never again');
+  }
+  for (const text of ['--max-tokens 4096', '--token $GITHUB_TOKEN', '--api-key YOUR_API_KEY', '--api-key <your-key>', '--token-file ./t.txt', '--secret-name app-secret',
+    'docker login --password-stdin', '"args": ["--api-key", "${BRAVE_API_KEY}"]', 'setx PATH "%PATH%;C:\\tools"', 'setx OPENAI_API_KEY %OPENAI_API_KEY%', 'use --token flag to pass it',
+    '--api-key 옵션으로 넘겨'])
+    assert.deepEqual(redactSecrets(text), { text, count: 0 }, text);
+});
+
+test('SESSIONS-RD7 a URL password holding a slash or an unencoded @ is hidden whole; a port before a path and an @ in a path stay', () => {
+  for (const [text, secret, want] of [
+    ['REDIS_URL=redis://default:FAKEfake/FAKE+0123456789@fake-redis.example.com:6379 로 연결해줘', 'FAKEfake/', 'redis://default:[가려진 비밀값]@fake-redis.example.com:6379 로'],
+    ['DATABASE_URL="postgresql://postgres.fakeref:Fake/Pass+word123@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres"', 'Pass+word', 'postgres.fakeref:[가려진 비밀값]@aws-0-'],
+    ['DATABASE_URL=postgres://admin:Fake@Pass123@db.example.com/prod', 'Pass123', 'postgres://admin:[가려진 비밀값]@db.example.com/prod'],
+    ['mongodb+srv://u:FakePass1@c0.example.mongodb.net/?retryWrites=true', 'FakePass1', 'u:[가려진 비밀값]@c0.example.mongodb.net/?retryWrites=true']]) {
+    const r = redactSecrets(text);
+    assert.ok(!r.text.includes(secret) && r.text.includes(want) && r.count === 1, `${text} -> ${r.text}`);
+    assert.deepEqual(redactSecrets(r.text), { text: r.text, count: 0 }, 'hidden once, never again');
+  }
+  for (const text of ['http://localhost:3000/@me', 'https://medium.com:443/@alice', 'http://host:8080/users/x@example.com', 'ssh://git@host:22/x', 'postgres://u:@host/db',
+    'https://a.com:8443?x=a@b.com', "['http://api.example.com','https://evil.example','https://api.example.com@evil.example']"])
+    assert.deepEqual(redactSecrets(text), { text, count: 0 }, text);
+});
+
+test('SESSIONS-RD8 keys of a known shape are hidden with no name before them; a Discord webhook keeps its address, aws configure and kubeconfig their names', () => {
+  const FAKE = f('FAKEfake', 'FAKEfake', '0123456789'), HEX = '0123456789abcdef';
+  for (const [text, keep] of [
+    [f('이 키 써줘 ', 'gsk_', FAKE, 'FAKEfake01'), '이 키 써줘 '], [f('SG.', 'FAKEfakeFAKEfake012345', '.', FAKE, 'FAKEfake012345', ' 이게 sendgrid 키야'), ' 이게 sendgrid 키야'],
+    [f('디스코드 웹훅 https://discord.com/api/webhooks/', '123456789012345678/', FAKE, '-FAKE 로 알림 보내줘'), 'https://discord.com/api/webhooks/'],
+    [f('구글 로그인 client secret ', 'GOCSPX-', FAKE), '구글 로그인 client secret '], [f('shopify 토큰 ', 'shpat_', HEX, HEX), 'shopify 토큰 '],
+    [f('r8_', FAKE, 'FAKEfake'), ''], [f('pplx-', FAKE, FAKE), ''], [f('dop_v1_', HEX.repeat(4)), ''], [f('ATATT', '3xFfGF0', FAKE), ''],
+    [f('lin_api_', FAKE, 'FAKE'), ''], [f('ntn_', FAKE, 'FAKEfake'), ''], [f('xapp-', '1-A0FAKE0FAKE-1234567890123-', HEX), ''],
+    [f('AWS Secret Access Key [None]: ', 'FAKEfakeFAKE/fake+', FAKE), 'AWS Secret Access Key [None]: '],
+    [f('    client-key-data: ', 'LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpN', 'SUlFRkFLRQ=='), '    client-key-data: ']]) {
+    const r = redactSecrets(text);
+    assert.ok(!r.text.includes('FAKEfake') && !r.text.includes(HEX) && !r.text.includes('LS0tLS1') && r.text.includes(keep) && r.text.includes(hidden) && r.count === 1, `${text} -> ${r.text}`);
+    assert.deepEqual(redactSecrets(r.text), { text: r.text, count: 0 }, 'hidden once, never again');
+  }
+  for (const text of ['https://discord.com/developers/docs/resources/webhook', 'Groq 키 받는 곳 링크 걸어 줘', 'GOCSPX로 시작하는 값은 클라이언트 시크릿이야', 'the r8_ prefix'])
+    assert.deepEqual(redactSecrets(text), { text, count: 0 }, text);
+});
+
+test('SESSIONS-RD9 after a name said in a sentence, a file, a setting, a route or words joined by - _ + stay; a password and a machine-made token still go', () => {
+  const MACHINE = f('abcd1234', 'EFGH5678', 'ijkl'), HEX = f('9f86d081', '884c7d65', '9a2feaa0', 'c55ad015');
+  for (const [text, want] of [
+    ['비밀번호는 FakePass123!이고', '비밀번호는 [가려진 비밀값]이고'], ['DB 비밀번호: Fake#Pass2024', 'DB 비밀번호: [가려진 비밀값]'], ['비밀번호는 hunter-22야', '비밀번호는 [가려진 비밀값]야'],
+    [`토큰은 ${MACHINE} 이야`, '토큰은 [가려진 비밀값] 이야'], [`토큰 ${HEX} 넣어 줘`, '토큰 [가려진 비밀값] 넣어 줘'], ['토큰은 "gpt4omini2024"', '토큰은 "[가려진 비밀값]"'],
+    [f('API 키는 ', 'sk-', 'proj-', 'FAKE'.repeat(6)), 'API 키는 [가려진 비밀값]'], ['pw: FakePass123', 'pw: [가려진 비밀값]'], ['password FakePass123', 'password [가려진 비밀값]']]) {
+    const r = redactSecrets(text);
+    assert.equal(r.text, want, text); assert.equal(r.count, 1, text);
+  }
+  const keep = ['DB 비밀번호는 docker-compose.yml에 있어요', '비밀번호는 .env.local에 넣어 두었어', '관리자 비밀번호를 .env.production에서 읽도록 바꿔 줘', '비밀번호는 next-auth로 처리해 줘',
+    '비밀번호를 bcrypt-ts로 해시해 줘', '비밀번호 confirm-password 필드도 추가해 줘', '비밀번호를 type=password로 가려 줘', '비밀번호 /reset-password 페이지 디자인 바꿔 줘',
+    '비밀번호는 zod-schema.ts에서 검증', '비밀번호를 sha256+salt로', '비밀번호는 i18n-ko 문구로', '시크릿은 AWS-SecretsManager로 옮겨 줘', '토큰은 claude-sonnet-4-5 기준으로 계산해 줘',
+    '토큰 gpt-4o-mini-2024 기준 비용 표시', '토큰은 cl100k_base 기준으로 세 주세요', 'Added token refresh-v2 endpoint', 'password reset-flow-v2 is broken', '비밀번호 reset-flow 수정',
+    '비밀번호는 `docker-compose.yml`에 있어', 'Added token refresh2token endpoint'];
+  for (const text of keep) assert.deepEqual(redactSecrets(text), { text, count: 0 }, text);
+  // A session's title is weighed the same way: one about a password flow is kept as written.
+  const got = sessionText(session([{ role: 'user', at: T(0), text: '로그인 화면 고쳐 줘' }], { title: '비밀번호 reset-flow 수정' }));
+  assert.ok(got.text.includes('비밀번호 reset-flow 수정') && got.redacted === 0, got.text);
+});
+
 test('SESSIONS-RT1 the whole record is hidden and cleaned, its header too, so it can always be kept', () => {
   const d = session([{ role: 'user', at: T(0), text: '색 출력 \u001b[31m빨강\u001b[0m 그리고 제목\u000b부제목\u0007' }, { role: 'assistant', at: T(1), text: '고쳤어요', files: ['src/a.ts'] }],
     { cwd: 'C:\\work\\sk-telecom-portal-renewal', branch: 'feature/sk-1234-fix-login-redirect', title: `키 ${f('sk-', 'proj-', 'FAKE'.repeat(6))} 넣고 테스트` });
@@ -246,7 +349,6 @@ test('SESSIONS-RC2 turns after the mark that one reading cannot hold are read on
   for (let i = 0; i < 10; i++) assert.equal(got.filter(t => new RegExp(`요청 ${i}(?:\\n|$)`).test(t)).length, 1, `요청 ${i}`);
   // A reading with no time (the paste box) still sends the newest turns and says how many earlier ones were left.
   assert.ok(read({ turnChars: 20000, replyChars: 5000 }, null).omitted > 0);
-  assert.equal(leftSince({ ...session(turns.slice(0, 6)), omitted: 2 }, mark), 0, 'a reading from before the mark (no since) has no gap');
   assert.equal(leftSince({ ...session(turns), omitted: 3 }, null), 3, 'with no mark, every turn left out is said');
 });
 
@@ -426,13 +528,15 @@ test('SESSIONS-RC4 turns that share a time are never split between readings: eac
 });
 
 test('SESSIONS-RC5 a file taken under its whole path is the same file once the session works in its folder: no continuation for it', () => {
-  const was = session([{ role: 'assistant', at: T(1), text: PART1, files: ['src/a.ts', '/work/app/api/types.ts'] }]), mark = markAfter(was, null, T(2));
-  assert.deepEqual(newTurns(session([{ role: 'assistant', at: T(1), text: PART1, files: ['src/a.ts', 'api/types.ts'] }]), mark), []);
-  assert.deepEqual(newTurns(session([{ role: 'assistant', at: T(1), text: PART1, files: ['src/a.ts', 'api/types.ts', 'api/index.ts'] }]), mark).map(t => t.files), [['api/index.ts']]);
-  const win = markAfter(session([{ role: 'assistant', at: T(1), text: PART1, files: ['C:\\work\\api\\types.ts'] }]), null, T(2));
-  assert.deepEqual(newTurns(session([{ role: 'assistant', at: T(1), text: PART1, files: ['api/types.ts'] }]), win), []);
+  const reply = files => [{ role: 'assistant', at: T(1), text: PART1, files }], salon = ['/work/salon'], moved = ['/work/salon', '/work/app'];
+  const mark = markAfter(sent(salon, reply(['/work/salon/src/a.ts', '/work/app/api/types.ts'])), null, T(2));
+  assert.deepEqual(mark.reply.files, ['src/a.ts', '/work/app/api/types.ts']);
+  assert.deepEqual(newTurns(sent(moved, reply(['/work/salon/src/a.ts', '/work/app/api/types.ts'])), mark), []);
+  assert.deepEqual(newTurns(sent(moved, reply(['/work/salon/src/a.ts', '/work/app/api/types.ts', '/work/app/api/index.ts'])), mark).map(t => t.files), [['api/index.ts']]);
+  const win = markAfter(sent(['C:\\work\\salon'], reply(['C:\\work\\api\\types.ts'])), null, T(2));
+  assert.deepEqual(newTurns(sent(['C:\\work\\salon', 'C:\\work'], reply(['C:\\work\\api\\types.ts'])), win), []);
   // A file of another name stays new, whatever path it shares an end with.
-  assert.deepEqual(newTurns(session([{ role: 'assistant', at: T(1), text: PART1, files: ['src/a.ts', '/work/app/api/types.ts', 'lib/src/a.ts'] }]), mark).map(t => t.files), [['lib/src/a.ts']]);
+  assert.deepEqual(newTurns(sent(salon, reply(['/work/salon/src/a.ts', '/work/app/api/types.ts', '/work/salon/lib/src/a.ts'])), mark).map(t => t.files), [['lib/src/a.ts']]);
 });
 
 test('SESSIONS-RT4 a header reads back as written: a folder or branch with a middle dot, a title like a field, a web header without a branch', () => {
@@ -498,18 +602,16 @@ test('SESSIONS-RT6 a next-record line a turn holds behind a colour code or a sof
 });
 
 test('SESSIONS-RC6 a whole name taken stands for one name the reply lists now, and only once it no longer lists it: another repository\'s file of that name is new', () => {
-  const at = (files) => session([{ role: 'user', at: T(0), text: '고쳐 줘' }, { role: 'assistant', at: T(1), text: '했어요', files }]);
-  const fresh = (taken, now) => newTurns(at(now), markAfter(at(taken), null, T(1))).flatMap(t => t.files ?? []);
-  assert.deepEqual(fresh(['/other/repo/src/index.ts'], ['/other/repo/src/index.ts', 'src/index.ts']), ['src/index.ts']);
-  assert.deepEqual(fresh(['/work/salon/src/a.ts'], ['src/a.ts']), [], 'the same file, named from its folder now');
-  assert.deepEqual(fresh(['/w/a/src/x.ts'], ['src/x.ts', 'x.ts']), ['x.ts'], 'one name for one name: the longest');
-  assert.deepEqual(fresh(['C:\\w\\a\\src\\x.ts', 'b.ts'], ['b.ts', 'src\\x.ts', 'c.ts']), ['c.ts']);
-  // Read with its folders (as the server and the page send it), the name it has now is told exactly: the same file once moved into
-  // its folder's reach, and another file that ends the same way stays new.
-  const parsed = (cwds, files) => ({ meta: { cwd: cwds[0], cwds, branch: null, startedAt: null, title: null, thread: null, parent: null },
-    turns: [{ role: 'user', at: T(0), text: '고쳐 줘' }, { role: 'assistant', at: T(1), text: '했어요', files }], changes: [] });
-  const one = readSessionDetail(JSON.parse(JSON.stringify(sessionDetail(ID, 'claude', parsed(['/w/app'], ['/w/lib/index.ts'])))));
-  const two = readSessionDetail(JSON.parse(JSON.stringify(sessionDetail(ID, 'claude', parsed(['/w/app', '/w/lib'], ['/w/lib/index.ts', '/w/app/lib/index.ts'])))));
+  // Each reading as the server and the page send it: a whole name taken, then the folders the session works in now.
+  const at = (cwds, files) => sent(cwds, [{ role: 'user', at: T(0), text: '고쳐 줘' }, { role: 'assistant', at: T(1), text: '했어요', files }]);
+  const fresh = ([was, taken], [cwds, now]) => newTurns(at(cwds, now), markAfter(at(was, taken), null, T(1))).flatMap(t => t.files ?? []);
+  assert.deepEqual(fresh([['/work/salon'], ['/other/repo/src/index.ts']], [['/work/salon'], ['/other/repo/src/index.ts', '/work/salon/src/index.ts']]), ['src/index.ts']);
+  assert.deepEqual(fresh([['/tmp/x'], ['/work/salon/src/a.ts']], [['/tmp/x', '/work/salon'], ['/work/salon/src/a.ts']]), [], 'the same file, named from its folder now');
+  assert.deepEqual(fresh([['/w/b'], ['/w/a/src/x.ts']], [['/w/b', '/w/a'], ['/w/a/src/x.ts', '/w/a/x.ts']]), ['x.ts'], 'one name for one name');
+  assert.deepEqual(fresh([['C:\\w\\b'], ['C:\\w\\a\\src\\x.ts', 'C:\\w\\b\\b.ts']], [['C:\\w\\b', 'C:\\w\\a'], ['C:\\w\\b\\b.ts', 'C:\\w\\a\\src\\x.ts', 'C:\\w\\b\\c.ts']]), ['c.ts']);
+  // The first folder that holds a file names it: the same file once moved into its folder's reach, and another file that ends the
+  // same way stays new.
+  const one = at(['/w/app'], ['/w/lib/index.ts']), two = at(['/w/app', '/w/lib'], ['/w/lib/index.ts', '/w/app/lib/index.ts']);
   assert.deepEqual(two.turns[1].files, ['index.ts', 'lib/index.ts']);
   assert.deepEqual(newTurns(two, markAfter(one, null, T(1))).flatMap(t => t.files ?? []), ['lib/index.ts']);
 });

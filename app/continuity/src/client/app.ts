@@ -20,7 +20,7 @@ import { runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
 import { createPlanView } from './plan-view.js';
-import { createReturnView, type Scene, type ReadingContext } from './return-view.js';
+import { AUTO_SENDS, createReturnView, type Scene, type ReadingContext } from './return-view.js';
 import { createAutoSync } from './auto-sync.js';
 import { createSessionSources } from './session-source.js';
 import { createHandoverView } from './handover-view.js';
@@ -1408,7 +1408,24 @@ function renderLens() {
 function sessionsLine(project: Project, partId: string): HTMLElement | null {
   const list = partSessions(project, partId); if (!list.length) return null;
   return h('p', { class: 'lens-sessions', title: '이 부분의 근거가 된 기록을 남긴 세션, 또는 인수인계 문서로 이 부분을 이어받은 세션' },
-    h('span', { class: 'lens-sessions-label' }, '다룬 세션'), list.slice(0, 3).map(x => `${originLabel(x)}${x.tookOver ? ' · 이어받음' : ''}`).join(', '), list.length > 3 ? h('small', {}, ` 외 ${list.length - 3}`) : null);
+    h('span', { class: 'lens-sessions-label' }, '다룬 세션'), list.slice(0, 3).map(x => `${originLabel(x)}${x.tookOver ? ' · 인수인계로 이어받음' : ''}`).join(', '), list.length > 3 ? h('small', {}, ` 외 ${list.length - 3}`) : null);
+}
+/** The AI sessions behind a part in the full reading: the ones whose records the map quotes for it, and the ones that took it over
+ * by a handover. */
+function sessionsSection(project: Project, partId: string): HTMLElement | null {
+  const list = partSessions(project, partId); if (!list.length) return null;
+  return h('section', { class: 'sec sec-sessions' }, h('h3', {}, '다룬 세션 ', h('small', {}, `${list.length}`)),
+    h('ul', { class: 'part-sessions' }, ...list.slice(0, 6).map(x => h('li', {},
+      h('strong', {}, originLabel(x)), x.tookOver ? h('span', { class: 'chip plain' }, '인수인계로 이어받음') : null,
+      // No time: a record's is when it was taken in (a folder's past sessions all at once), not when its session ran.
+      h('small', {}, [x.cwd ? x.cwd.split(/[\\/]/).filter(Boolean).at(-1) : null, x.branch].filter(Boolean).join(' · '))))));
+}
+/** A session record kept while a part is read (the automatic connection): only its sessions are drawn again, so the scroll, the
+ * focus and a form open there stay. A part that had none yet is read again whole. */
+function refreshSessions() {
+  const o = opened; if (!o || !selected || planView.isOpen() || (!sheetOpen && lensRail)) return;
+  const cur = document.querySelector(sheetOpen ? '#panel .sec-sessions' : '#lens .lens-sessions'), next = sheetOpen ? sessionsSection(o.project, selected) : sessionsLine(o.project, selected);
+  if (cur && next) cur.replaceWith(next); else if (cur || next) refreshReading();
 }
 /** Selection on the map: the part, its lines and the parts at their other ends (drawn representative or side ghost). */
 function markSelection(partId: string | null) {
@@ -1566,12 +1583,7 @@ function renderPanel(scrollTop: boolean) {
     })));
     body.append(rel);
   }
-  // The AI sessions behind this part: the ones whose records the map quotes for it, and the ones that took it over by a handover.
-  const sessions = partSessions(o.project, part.id);
-  if (sessions.length) body.append(h('section', { class: 'sec sec-sessions' }, h('h3', {}, '다룬 세션 ', h('small', {}, `${sessions.length}`)),
-    h('ul', { class: 'part-sessions' }, ...sessions.slice(0, 6).map(x => h('li', {},
-      h('strong', {}, originLabel(x)), x.tookOver ? h('span', { class: 'chip plain' }, '인수인계로 이어받음') : null,
-      h('small', {}, [x.cwd ? x.cwd.split(/[\\/]/).filter(Boolean).at(-1) : null, x.branch, `기록 ${ago(x.lastAt)}`].filter(Boolean).join(' · ')))))));
+  const sessions = sessionsSection(o.project, part.id); if (sessions) body.append(sessions);
   // What to do next with this part: going inside is explicit, never a side effect of selecting.
   if (part.childIds.length && part.id !== scope) body.append(h('div', { class: 'sec-acts' },
     h('button', { type: 'button', class: 'secondary go-in', onclick: () => go(o.key, null, part.id) }, `안으로 들어가기 · ${part.childIds.length}`, h('span', { 'aria-hidden': 'true' }, ' ›'))));
@@ -1846,6 +1858,7 @@ const sessionSources = createSessionSources({ status: () => status, accessCode: 
 const returnView = createReturnView({
   current: () => opened,
   kv,
+  autoConnected: () => autoSync.connected(),
   sources: sessionSources,
   status: () => status,
   accessCode: () => sessionCode(), keepAccessCode,
@@ -1961,13 +1974,14 @@ const autoSync = createAutoSync({
     try { for (const t of texts) next = pasteRecord(next, t, null).project; } catch { return { error: '세션 기록 하나를 저장하지 못했어요(쓸 수 없는 문자나 키처럼 보이는 글). 다른 세션은 계속 들어와요.', refused: true }; }
     if (next === o.project) return null;
     const failed = await commit(o, next);
-    if (!failed) { renderMapEntry(); refreshUnderstood(); if (!selected && !planView.isOpen()) returnView.render(); return null; }
+    if (!failed) { renderMapEntry(); refreshUnderstood(); if (!planView.isOpen()) { if (!selected) returnView.render(); else refreshSessions(); } return null; }
     // Nothing more is tried until the person asks: said so, and for a full browser storage, why.
     return { error: saveFailure === 'QUOTA' ? '이 브라우저의 저장 공간이 가득 차서 세션 기록을 저장하지 못했어요. 자동으로 다시 하지 않아요.' : `${failed} 자동으로 다시 하지 않아요.`, refused: false };
   },
   full: () => { const o = opened; return o && o.kind === 'saved' ? recordRoom(o.project, []) : null; },
   canRead: () => { const inp = mapRun.input(), st = mapRun.state(); return !!inp && !inp.problem && mapRun.can() && !st.pending && !st.ready && !st.committing; },
   read: () => void mapRun.run(),
+  bound: () => renderMapEntry(),
   readBlocked: () => (status.release === 'existing-map' ? RELEASE_TEXT.limit : mapRun.can() ? null : mapRun.blocked() ?? '지도 정리에 쓸 AI가 이 서버에 연결되어 있지 않아요.')
 });
 /** AF100: while a reading runs as a job, the person is told it goes on without this window but not without the PC's Studio. */
@@ -2049,8 +2063,8 @@ function refreshUnderstood() {
   titleH = o.view.parts.length ? t.offsetHeight : 0;
   if (titleH !== hBefore) { lay.bounds = { ...core }; withTitle(); positionWorld(); }
 }
-/** The server's status came after the open project was drawn: its empty map's entry and the title's line say now what a reading
- * can do (the same mapRun.can/input/blocked as a click; nothing starts or moves). Only the project open now, in place: a focus
+/** The server's status (or the session folders this browser can read) came after the open project was drawn: its empty map's entry
+ * and the title's line say now what a reading can do and whether sessions can be connected (the same mapRun.can/input/blocked as a click; nothing starts or moves). Only the project open now, in place: a focus
  * inside them stays on the same action, and its selection, panes and camera are not touched. */
 function statusArrived() {
   const a = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -2080,13 +2094,17 @@ function renderMapEntry() {
   const paste = (primary: boolean) => h('button', { type: 'button', class: primary ? 'primary small' : 'secondary small', onclick: () => openPaste(null) }, '기록 붙여넣기');
   const file = () => h('button', { type: 'button', class: 'secondary small se-file', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요', onclick: () => openFile(null) }, '코드·검사 자료 추가');
   const acts = h('div', { class: 'se-acts' }), waiting = st.committing || st.ready;
+  // Sessions this page can read, in a project not connected yet: the automatic connection is the first way in, pasting the other.
+  const linked = !!autoSync.bindingOf(o.key), offerSync = !linked && sessionSources.offered();
   if (st.pending) put(acts, ...pendingLine('se-durable', '기록을 읽고 지도를 정리하는 중…', 'link-button'));
   else if (waiting) put(acts, ...runReady(st, 'primary small', 'link-button'));
   else if (fresh && can && !inp!.problem) put(acts, h('button', { type: 'button', class: 'primary small se-run', onclick: () => void mapRun.run() }, '기록으로 지도 정리'), paste(false), file());
+  else if (offerSync) put(acts, h('button', { type: 'button', class: 'primary small se-sync', onclick: () => autoSync.toggle() }, '내 AI 세션 자동 연결'), paste(false), file());
   else put(acts, paste(true), file());
-  const note = st.pending || waiting ? null : fresh && can && !inp!.problem ? sendLine(inp!) : fresh && !can ? mapRun.blocked() ?? `기록 ${fresh}개가 있어요. AI 서버가 연결된 주소에서 지도로 정리할 수 있어요.` : fresh && inp!.problem ? '보낼 수 없는 기록이 있어요(너무 크거나 키처럼 보이는 글).' : '붙여 넣어 저장만 해서는 AI에 보내지 않아요. 지도로 정리할 때 보내요.';
+  const note = st.pending || waiting ? null : fresh && can && !inp!.problem ? sendLine(inp!) : fresh && !can ? mapRun.blocked() ?? `기록 ${fresh}개가 있어요. AI 서버가 연결된 주소에서 지도로 정리할 수 있어요.` : fresh && inp!.problem ? '보낼 수 없는 기록이 있어요(너무 크거나 키처럼 보이는 글).' : linked && can ? AUTO_SENDS : '붙여 넣어 저장만 해서는 AI에 보내지 않아요. 지도로 정리할 때 보내요.';
   box.replaceChildren(); put(box, h('h2', {}, '기록으로 첫 지도를 만들어요'),
-    h('p', { class: 'se-lead' }, '작업 AI와 나눈 요구나 보고를 그대로 붙여 넣으면, 원문에 근거가 있는 부분과 연결만 지도로 정리해요. 만들어진 부분의 이름과 위치는 바로 고칠 수 있어요.'),
+    h('p', { class: 'se-lead' }, offerSync ? 'Claude Code·Codex 대화는 자동 연결로 저절로 가져오고, 다른 AI와 나눈 요구나 보고는 그대로 붙여 넣으면 돼요. 원문에 근거가 있는 부분과 연결만 지도로 정리하고, 만들어진 부분의 이름과 위치는 바로 고칠 수 있어요.'
+      : '작업 AI와 나눈 요구나 보고를 그대로 붙여 넣으면, 원문에 근거가 있는 부분과 연결만 지도로 정리해요. 만들어진 부분의 이름과 위치는 바로 고칠 수 있어요.'),
     last && !last.parts.length ? h('p', { class: 'se-gap' }, last.gaps.length ? last.gaps.join(' ') : '앞서 읽은 기록에서는 프로그램의 부분을 찾지 못했어요.') : null,
     acts, note ? h('p', { class: 'fine' }, note) : null,
     st.error ? h('p', { class: 'pp-error', role: 'alert' }, st.error) : null, runNotice(),
@@ -2561,7 +2579,7 @@ async function main() {
   $('handover-open').addEventListener('click', e => handover.open(scope, e.currentTarget as HTMLElement));
   $('return-entry').addEventListener('click', () => { if (returnView.isOpen() && !planView.isOpen()) returnView.close(); else openReturn(); });
   statusReady = aiStatus().then(s => { status = s; renderStatus(); renderRelease(); planView.statusChanged(); refreshReading(); statusArrived(); if (!selected && !planView.isOpen()) returnView.render(); mapRun.resume(); autoSync.opened(); autoSync.start();
-    void sessionSources.load().then(() => { autoSync.sourcesChanged(); if (opened && autoSync.bindingOf(opened.key)) void autoSync.tick(); if (!selected && !planView.isOpen()) returnView.render(); }); });
+    void sessionSources.load().then(() => { autoSync.sourcesChanged(); statusArrived(); if (opened && autoSync.bindingOf(opened.key)) void autoSync.tick(); if (!selected && !planView.isOpen()) returnView.render(); }); });
   $('sync-pill').addEventListener('click', () => autoSync.toggle());
   // AF100: a reservation another tab of this address made (or ended) is looked at now, not at this page's next click.
   window.addEventListener('storage', e => { if (e.key?.endsWith(JOBS_KEY)) void statusReady?.then(() => mapRun.resume()); });

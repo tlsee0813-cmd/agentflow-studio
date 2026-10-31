@@ -2,6 +2,7 @@
 import { isMapReading, type Project } from '../shared/types.js';
 import { requestMatches, matchLedger, itemReading, recordTexts, matchGroup, sameTarget, MATCH_LABEL, ITEM_STATE_LABEL, type FrozenRequest, type FrozenItem, type EffectiveMatch, type RequestTarget, type StoredRequestMatch } from '../shared/request-return.js';
 import { EVIDENCE_KIND_LABEL, NOT_EXECUTED, NOT_RECORDED } from '../shared/record-source.js';
+import { sessionOrigin, originLabel } from '../shared/handover.js';
 import { h, fullTime, quotedText } from './plan-dom.js';
 
 /** A passage's label: what kind of material it is, and for a change report what it says of the change (stored before stances:
@@ -456,11 +457,12 @@ export function createWideReading(host: WideHost) {
     if (s.focus && !focusKey(s.focus)) s.focus = null;
   }
   function sourceView(x: EffectiveMatch, record: (id: string) => { kept: Project['pasted'][number] | null; e: Project['pasted'][number]['evidence'] | null; name: string }, text: string | null, from: string): Node[] {
-    const r = record(x.match.record), e = r.e;
+    // A record taken from a session is named as that session's, as the record view names it.
+    const r = record(x.match.record), e = r.e, o = r.kept && !e ? sessionOrigin(r.kept.text) : null;
     return [h('div', { class: 'rw-backbar' }, h('button', { type: 'button', class: 'rw-src-back', 'data-rw-part': 'src-back', title: '읽던 구절로 돌아가기 (Esc)', onclick: back }, h('span', { 'aria-hidden': 'true' }, '← '), from)),
       h('article', { class: 'rr-source rw-source' },
-        h('p', { class: 'rr-source-kind' }, h('span', { class: `rr-kind k-record${e ? ' k-provided' : ''}` }, e ? `사용자 제공 ${EVIDENCE_KIND_LABEL[e.kind]}` : r.kept ? '붙여넣은 기록' : '프로젝트 기록'),
-          r.kept ? h('span', {}, `${e ? '가져옴' : '붙여넣음'} ${fullTime(r.kept.at)}`) : null),
+        h('p', { class: 'rr-source-kind' }, h('span', { class: `rr-kind k-record${e ? ' k-provided' : ''}` }, e ? `사용자 제공 ${EVIDENCE_KIND_LABEL[e.kind]}` : o ? `${originLabel({ tool: o.tool, title: null })} 기록` : r.kept ? '붙여넣은 기록' : '프로젝트 기록'),
+          r.kept ? h('span', {}, `${e || (o && o.tool !== 'web') ? '가져옴' : '붙여넣음'} ${fullTime(r.kept.at)}`) : null),
         h('h3', {}, e ? e.name : r.name),
         e ? h('p', { class: 'rr-provided-note', role: 'note' }, `${NOT_EXECUTED}. 자료 종류·판본·출처는 사용자가 적은 것이에요.`) : null,
         e ? h('dl', { class: 'rr-meta rw-meta' }, h('dt', {}, '판본'), h('dd', {}, e.version ?? NOT_RECORDED, e.version ? ' (사용자 기재)' : null),

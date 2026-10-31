@@ -12,7 +12,7 @@ import { open, readdir, realpath, stat } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
 import { ApiError } from '../../server/errors.mjs';
-import { SESSION_VERSION, SESSION_LIMITS, SESSION_ID, parseClaude, parseCodex, parseSession, sessionParser, pushLine, jsonLines, withSubagents, tailFolders, hasPrompt, atFolder, within, sessionSummary, sessionDetail, sessionKey, sessionId } from '../dist/public/shared/session-parse.js';
+import { SESSION_VERSION, SESSION_LIMITS, SESSION_ID, parseClaude, parseCodex, parseSession, sessionParser, pushLine, jsonLines, withSubagents, tailFolders, hasPrompt, atFolder, within, worktreeSteps, worktreeFolder, sessionSummary, sessionDetail, sessionKey, sessionId } from '../dist/public/shared/session-parse.js';
 
 export { SESSION_LIMITS, SESSION_ID, parseClaude, parseCodex };
 
@@ -22,28 +22,32 @@ async function readRange(path, bytes, from = 0) {
   try { const buf = Buffer.alloc(bytes); const { bytesRead } = await h.read(buf, 0, bytes, from); return buf.subarray(0, bytesRead).toString('utf8'); }
   finally { await h.close(); }
 }
-/** What a listing knows of a file: its head (read further while no prompt is in it, but for a Codex subagent's rollout, which never
- * holds one), with the folders named at its end. */
+/** What a listing knows of a file: its head (read further while no prompt is in it, but for a Codex subagent's rollout, which is
+ * never a session of its own), with the folders named at its end. A fork starts with a copy of the session it came from, which
+ * can run past any head: when the head ends inside it, the file is read on line by line (up to fileBytes) to the fork's first
+ * prompt of its own. */
 async function readListed(tool, path, size, limits) {
-  const { headBytes: head, promptBytes: more, tailBytes: tail } = limits;
-  let parsed = parseSession(tool, jsonLines(await readRange(path, head), size > head));
-  if (!hasPrompt(parsed) && size > head && !parsed.meta.parent) parsed = parseSession(tool, jsonLines(await readRange(path, more), size > more));
+  const { headBytes: head, promptBytes: more, tailBytes: tail, fileBytes } = limits;
+  let parsed = parseSession(tool, jsonLines(await readRange(path, head), size > head)), read = head;
+  if (!hasPrompt(parsed) && size > head && !parsed.meta.parent && !parsed.copy) { parsed = parseSession(tool, jsonLines(await readRange(path, more), size > more)); read = more; }
+  if (!hasPrompt(parsed) && size > read && !parsed.meta.parent && parsed.copy) parsed = await readParsed(tool, path, limits.lineBytes, { bytes: size > fileBytes ? fileBytes : Infinity, until: p => p.prompted() });
   if (size > head) for (const c of tailFolders(await readRange(path, tail, Math.max(0, size - tail)))) atFolder(parsed.meta, c);
   return parsed;
 }
 /** A whole session read in chunks, line by line, into the tool's parser: a file of hundreds of MB is never held whole. A line over
  * `cap` bytes (a damaged file, a huge paste) is skipped rather than built into a string past what Node can hold, and a failed read
- * fails this read only. Lines are split on the newline byte, which never occurs inside a UTF-8 character. */
-async function readParsed(tool, path, cap = SESSION_LIMITS.lineBytes) {
+ * fails this read only. Lines are split on the newline byte, which never occurs inside a UTF-8 character.
+ * bytes: only the file's first bytes (its last, cut line left out); until: the reading stops at the first line after which it holds. */
+async function readParsed(tool, path, cap = SESSION_LIMITS.lineBytes, { bytes = Infinity, until = null } = {}) {
   const parser = sessionParser(tool); let parts = [], size = 0;
   const add = b => { size += b.length; if (size > cap) parts = []; else if (b.length) parts.push(b); };
   const line = () => { if (size <= cap && parts.length) pushLine(parser, (parts.length === 1 ? parts[0] : Buffer.concat(parts)).toString('utf8')); parts = []; size = 0; };
-  for await (const chunk of createReadStream(path)) {
+  for await (const chunk of createReadStream(path, Number.isFinite(bytes) ? { end: bytes - 1 } : {})) {
     let from = 0;
-    for (let nl = chunk.indexOf(10); nl >= 0; from = nl + 1, nl = chunk.indexOf(10, from)) { add(chunk.subarray(from, nl)); line(); }
+    for (let nl = chunk.indexOf(10); nl >= 0; from = nl + 1, nl = chunk.indexOf(10, from)) { add(chunk.subarray(from, nl)); line(); if (until?.(parser)) return parser.done(); }
     add(chunk.subarray(from));
   }
-  line();
+  if (!Number.isFinite(bytes)) line();
   return parser.done();
 }
 async function dirs(path) { try { return (await readdir(path, { withFileTypes: true })).filter(d => d.isDirectory()).map(d => join(path, d.name)); } catch { return []; } }
@@ -78,6 +82,20 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
   // every minute, and a file is read again only when its size or time changed (a prompt-less subagent file is not read each time).
   const heads = new Map();
 
+  /** A Codex app thread run in Worktree mode works in a checkout of its own under the Codex folder: it is also in the folder of the
+   * repository the checkout came from (its .git file names it), so the project connected to that folder finds it. Only that file is
+   * read, from the first folder under worktrees/ that holds one (<id>/<name> as the app makes them). */
+  async function inRepository(meta) {
+    for (const cwd of [...meta.cwds]) {
+      const steps = worktreeSteps(cwd, where.codex) ?? [];
+      for (let i = 1; i <= Math.min(steps.length, 3); i++) {
+        let text; try { text = await readRange(join(where.codex, 'worktrees', ...steps.slice(0, i), '.git'), 4096); } catch { continue; }
+        const repo = worktreeFolder(text, steps.slice(i), cwd); if (repo) atFolder(meta, repo);
+        break;
+      }
+    }
+  }
+
   /** Newest first. folder: only sessions whose working folder is it or inside it (the files are read to know). */
   async function list(folder = null) {
     const found = [];
@@ -89,19 +107,21 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
     const next = new Map(), out = [], scan = limits.scan; let sessions = 0, quiet = 0;
     // At most `scan` session files are opened, so a folder with no session left does not read a whole history. Files with no session
     // in them (Codex subagents' rollouts, Claude Code's agent-*.jsonl, one that cannot be read) do not use it up, as in the page: ten
-    // times as many of them.
+    // times as many of them. A Codex subagent's rollout is read through the session that started it, even when it holds a prompt
+    // (the task the AI gave it, or a copy of that session's history).
     for (const f of found) {
       if (out.length >= limits.list || sessions >= scan || quiet >= scan * 10) break;
       let h = heads.get(f.path);
       if (h?.size !== f.size || h.mtime !== f.mtime) {
         let real; try { real = await realpath(f.path); } catch { quiet++; continue; }
         let parsed; try { parsed = await readListed(f.tool, real, f.size, limits); } catch { quiet++; continue; }
+        if (f.tool === 'codex' && where.codex) await inRepository(parsed.meta);
         // An id is made from the session itself (sessionKey), as the page makes it; the one made from the file's path before is its alias.
         const id = await sessionId(f.tool, sessionKey(f.tool, parsed.meta, real)), base = sessionSummary(id, f.tool, parsed, new Date(f.mtime).toISOString(), f.size, limits);
         // An archived Codex thread lay in sessions/YYYY/MM/DD/ under the same name (its date is in it): that path's id is its alias too.
         const day = f.tool === 'codex' && basename(dirname(real)) === 'archived_sessions' ? /^rollout-(\d{4})-(\d{2})-(\d{2})T/.exec(basename(real)) : null;
         const aliases = [await sessionId(f.tool, real), ...(day ? [await sessionId(f.tool, join(dirname(dirname(real)), 'sessions', day[1], day[2], day[3], basename(real)))] : [])];
-        h = { size: f.size, mtime: f.mtime, real, id, row: base && { ...base, aliases }, cwds: parsed.meta.cwds }; heads.set(f.path, h);
+        h = { size: f.size, mtime: f.mtime, real, id, row: base && !parsed.meta.parent ? { ...base, aliases } : null, cwds: parsed.meta.cwds }; heads.set(f.path, h);
       }
       if (!h.row) { quiet++; continue; }
       // Two files of one session (a copy left behind): the newest one is the session, and only it counts against the scan.

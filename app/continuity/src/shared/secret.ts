@@ -16,6 +16,8 @@ const REF = /^(?:\[가려진|process\.|os\.environ|import\.meta|env[.(\[]|secret
 /* ---------- what a value after a name is: told in code, not in one pattern (a pattern that weighs a value's shape backtracks) ---------- */
 // Words a value can be without holding a secret: types, empty values, placeholders, fetch's credentials modes and words of prose.
 const PLAIN = /^(?:string|str|number|int|integer|float|bool|boolean|bytes|any|unknown|object|none|null|nil|undefined|true|false|required|optional|empty|hidden|password|passwd|secret|token|key|value|option|flag|argument|arg|parameter|param|prompt|field|input|text|here|yes|no|include|same-origin|omit)$/i;
+// A hash, cipher or encoding named where a value could be (비밀번호는 argon2로 해시, password: sha256).
+const SCHEME = /^(?:sha-?\d{1,3}|sha3-\d{3}|md5|s?crypt|bcrypt|argon2(?:id|i|d)?|pbkdf2(?:-sha\d{3})?|aes-?\d{3}(?:-[a-z]{2,3})?|[hre]s\d{3}|ed25519|base64(?:url)?|utf-?8)$/i;
 // A type written where a value could be (password: SecretStr, password: Annotated[str, Form()]).
 const TYPE = /^(?:SecretStr|SecretBytes|Optional|Annotated|Union|Literal|List|Dict|Field|Mapped|Column|Option|Record|Partial|Readonly|Array|Promise|Buffer|Uint8Array)\b/;
 // One name in code: camelCase, PascalCase or UPPER_SNAKE (createdAt, hashedPassword, DATABASE_PASSWORD), and lower_snake
@@ -45,8 +47,9 @@ const SECRET_NAME = /pass|pwd|secret|credential|salt|sess(?:ion)?[_-]?id$|(?:api
  * literal: written as it is, not code (a .env or YAML line, a query string, a command-line flag, a cookie); lineStart: a setting's
  * name starts the line (an INI or Python assignment too); colon: set with ':' (YAML, or a property in code); keyQuoted: the name
  * is quoted (JSON, a Python dict: a value written as it is there is quoted too); name: the setting's own name; next: the
- * characters after it; dotenv: an environment name set with '=' alone on its line (a .env or shell line, never code). */
-interface Where { secret: boolean; env: boolean; quoted: boolean; literal: boolean; lineStart: boolean; colon: boolean; keyQuoted: boolean; dotenv: boolean; name: string; next: string }
+ * characters after it; dotenv: an environment name set with '=' alone on its line (a .env or shell line, never code); said: the
+ * name is said in a sentence (비밀번호는 …, token은 …, password …). */
+interface Where { secret: boolean; env: boolean; quoted: boolean; literal: boolean; lineStart: boolean; colon: boolean; keyQuoted: boolean; dotenv: boolean; name: string; next: string; said?: boolean }
 const PAIR: Record<string, string> = { ')': '(', ']': '[', '}': '{' };
 /** The part of a value that is a secret and what follows it, or null when it holds none. raw: as written after the name (quoted:
  * between its quotes). */
@@ -65,7 +68,7 @@ function secretPart(raw: string, w: Where): [string, string] | null {
   // A value followed by ',' or ';' on a line of its own is code (a property, a statement), not a setting; so is one left unquoted
   // under a quoted name.
   const literal = w.quoted || (w.literal && !rest), code = !(w.secret && literal) || (w.keyQuoted && !w.quoted);
-  if (!v || REF.test(v) || !/[A-Za-z0-9]/.test(v) || PLAIN.test(v) || TYPE.test(v) || /^![A-Za-z][\w:-]*$/.test(v)) return null;
+  if (!v || REF.test(v) || !/[A-Za-z0-9]/.test(v) || PLAIN.test(v) || SCHEME.test(v) || TYPE.test(v) || /^![A-Za-z][\w:-]*$/.test(v)) return null;
   // Under a quoted name (JSON, a dict) a value as written is quoted: a bare name is a variable ("password": user_password). A type
   // followed by its default (api_key: APIKey = Security(…)) is no value either.
   if ((w.keyQuoted && !w.quoted && /^[A-Za-z_$][\w$]*$/.test(v)) || (w.colon && /^[ \t]*=(?!=)/.test(w.next))) return null;
@@ -81,6 +84,13 @@ function secretPart(raw: string, w: Where): [string, string] | null {
   if (!w.quoted && ((!w.dotenv && ((MEMBER.test(v) && !v.split(MEMBER_PART).some(machine)) || CALL.test(v))) || (OPEN_CALL.test(v) && /^["'`]/.test(w.next)))) return null;
   if (pathLike(v) || /^[a-z][a-z0-9+.-]*:\/\//i.test(v)) return null;
   const strong = w.secret || w.env;
+  // In a sentence what follows a name is as often what the request is about: a file (docker-compose.yml, .env.local), a setting
+  // or a route (type=password, /reset-password), or words joined by '-', '_' or '+' (next-auth, confirm-password, cl100k_base,
+  // sha256+salt; after a token's name claude-sonnet-4-5 too, while a password's name keeps hunter-22 a password).
+  if (w.said && (/^[./]|=|\.[a-z]{1,5}$/.test(v) || (/^[a-z][a-z0-9]*(?:[-_+][a-z0-9]+)+$/i.test(v) && !machine(v) && !(strong && /[-_+]\d+(?![a-z])/i.test(v))))) return null;
+  // After a token's or key's name, or an English name and a space, a value unquoted is one only when it looks made by a machine
+  // (abcd1234EFGH5678ijkl, a hex digest; FakePass123 mixes case and digits), not a word holding a number (refresh2token).
+  if (w.said && !strong && !w.quoted && !machine(v) && !(v.length >= 10 && /\d/.test(v) && /[a-z]/.test(v) && /[A-Z]/.test(v)) && !/^(?=.*\d)(?=.*[a-f])[a-f\d]{16,}$/i.test(v)) return null;
   if (/^\d+$/.test(v)) return v.length >= (strong ? 6 : 10) ? [v, rest] : null;
   const digit = /\d/.test(v), letter = /[A-Za-z]/.test(v), symbol = /[^A-Za-z0-9]/.test(v), mixed = /[a-z]/.test(v) && /[A-Z]/.test(v);
   // Said to be a credential: a value written as it is (keyboardcat, changeme, an INI line) is one from 6 characters, or 4 with a
@@ -90,10 +100,17 @@ function secretPart(raw: string, w: Where): [string, string] | null {
   return v.length >= 8 && !wordy(v) && ((digit && letter) || (v.length >= 16 && mixed)) ? [v, rest] : null;
 }
 const QUOTED = `(?<q>\\\\?["'\`])(?<qv>(?:(?!\\k<q>)[^\\n]){1,500}?)\\k<q>`;
-// A name ending in what it holds (apiKey, DB_PASSWORD, x-api-key, client_secret, "token", EMAIL_PASS, os.environ["X_API_KEY"]),
-// then ':', '=', ':=' or '=>' (not '==' or '::'), maybe quoted (JSON escaped too): .env, shell, YAML, JSON, code, PHP, Go, headers.
-// MAX_TOKENS does not end so.
-const SETTING = new RegExp(`(?<keep>\\b(?<name>[A-Za-z0-9_.-]{0,40}?(?:password|passwd|passphrase|pwd|pass|secret|token|key|key_base|credentials?|sess(?:ion)?_?id))\\\\?["']?\\]?[ \\t]*(?::=|=>|[:=](?![=:]))[ \\t]*)(?:${QUOTED}|(?<uv>[^\\s"'\`]{1,2000}))`, 'gi');
+// A name ending in what it holds (apiKey, DB_PASSWORD, x-api-key, client_secret, "token", EMAIL_PASS, client-key-data,
+// os.environ["X_API_KEY"]), then ':', '=', ':=' or '=>' (not '==' or '::'), maybe quoted (JSON escaped too): .env, shell, YAML,
+// JSON, code, PHP, Go, headers, kubeconfig. MAX_TOKENS does not end so.
+const SETTING = new RegExp(`(?<keep>\\b(?<name>[A-Za-z0-9_.-]{0,40}?(?:password|passwd|passphrase|pwd|pw|pass|secret|token|key|key_base|key-data|credentials?|sess(?:ion)?_?id))\\\\?["']?\\]?[ \\t]*(?::=|=>|[:=](?![=:]))[ \\t]*)(?:${QUOTED}|(?<uv>[^\\s"'\`]{1,2000}))`, 'gi');
+// A value given in a sentence. Unquoted it is ASCII only, so the Korean after it ends it (FakePass123!이고), and it never runs into
+// a value hidden already. The name may take a Korean topic, subject or object particle (비밀번호는, token은).
+const SAID = `(?:${QUOTED}|(?<uv>[!-~]{1,500})(?![!-~]|가려진 비밀값\\]))`, PARTICLE = '(?:은|는|이|가|을|를)';
+// A name said in Korean (비밀번호는 …, 토큰: …, API 키 …); 암호화 (encryption) is no name.
+const KOREAN_NAME = new RegExp(`(?<keep>(?<name>비밀\\s?번호|비번|패스워드|암호(?!화)|토큰|시크릿|인증\\s?키|비밀\\s?키|액세스\\s?키|API\\s?키)값?${PARTICLE}?[ \\t]*(?:[:=：][ \\t]*)?)${SAID}`, 'gi');
+// An English name followed by a Korean particle (token은 …), or by a space as in a sentence (password …).
+const SAID_NAME = new RegExp(`(?<keep>\\b(?<name>[A-Za-z0-9_.-]{0,40}?(?:password|passwd|pwd|pw|secret|token|(?:api|access)[ _-]?key))(?<then>${PARTICLE}[ \\t]*(?:[:=：][ \\t]*)?|[ \\t]+))${SAID}`, 'gi');
 // PHP's define('DB_PASSWORD', '…') (wp-config.php): a quoted value is one as written; an unquoted one is code (getenv('…'), a
 // constant).
 const DEFINE = new RegExp(`(?<keep>\\bdefine\\(\\s*["'](?<name>[A-Za-z0-9_]{0,40}?(?:password|passwd|pass|secret|key|token|salt))["']\\s*,\\s*)(?:${QUOTED}|(?<uv>[^\\s,)"']{1,500}))`, 'gi');
@@ -115,17 +132,23 @@ const HIDE: RegExp[] = [
   // A PuTTY key file's private lines.
   /(?<keep>Private-Lines: *\d+[ \t]*\r?\n)(?:[A-Za-z0-9+/=]+[ \t]*(?:\r?\n|$))+/g,
   new RegExp(SECRET.source, 'g'),
-  // Tokens with a known shape: JWTs, Stripe, npm, GitLab, Hugging Face, Google OAuth, Slack webhooks, Telegram and Discord bots.
+  // Tokens with a known shape: JWTs, Stripe, npm, GitLab, Hugging Face, Google OAuth, Groq, SendGrid, Shopify, DigitalOcean,
+  // Replicate, Perplexity, Atlassian, Linear, Notion, Slack apps and webhooks, Discord webhooks, Telegram and Discord bots.
   /\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/g,
   /\b(?:[sr]k_(?:live|test)|whsec)_[A-Za-z0-9]{10,}/g,
-  /\bnpm_[A-Za-z0-9]{20,}/g, /\bglpat-[A-Za-z0-9_-]{16,}/g, /\bhf_[A-Za-z0-9]{20,}/g, /\bya29\.[A-Za-z0-9_-]{20,}/g,
+  /\bnpm_[A-Za-z0-9]{20,}/g, /\bglpat-[A-Za-z0-9_-]{16,}/g, /\bhf_[A-Za-z0-9]{20,}/g, /\bya29\.[A-Za-z0-9_-]{20,}/g, /\bGOCSPX-[\w-]{20,}/g,
+  /\bgsk_[A-Za-z0-9]{20,}/g, /\bSG\.[\w-]{16,}\.[\w-]{16,}/g, /\bshp(?:at|ss|ca|pa)_[A-Fa-f0-9]{32}/g, /\bdop_v1_[a-f0-9]{64}/g, /\br8_[A-Za-z0-9]{30,}/g,
+  /\bpplx-[A-Za-z0-9]{40,}/g, /\bATATT[\w=-]{20,}/g, /\blin_api_[A-Za-z0-9]{30,}/g, /\bntn_[A-Za-z0-9]{30,}/g, /\bxapp-\d-[A-Z0-9]+-\d+-[a-z0-9]+/g,
   /(?<keep>https:\/\/hooks\.slack\.com\/)(?:services|workflows|triggers)\/[A-Za-z0-9_/-]+/g,
+  /(?<keep>https:\/\/(?:ptb\.|canary\.)?discord(?:app)?\.com\/api\/webhooks\/)\d+\/[\w-]+/g,
   /\b\d{6,12}:AA[A-Za-z0-9_-]{30,}/g,
   /\b[MNO][A-Za-z\d_-]{17,27}\.[A-Za-z\d_-]{6}\.[A-Za-z\d_-]{27,}/g,
   // An Authorization header's value after a known scheme: anything token-like.
   new RegExp(`(?<keep>${AUTH_HEAD}\\\\?["']?(?:${AUTH_KNOWN})[ \\t]+)${NOT_REF}[^\\s"'\\\\,;]{8,}`, 'gi'),
   // A password in a URL (scheme://user:password@host, the user may be empty), and on a command line (mysql -pPASSWORD, curl -u).
-  /(?<keep>\b[a-z][a-z0-9+.-]{0,20}:\/\/[^\s:@/]{0,200}:)(?!\[가려진 비밀값\])[^\s@/]+(?=@)/gi,
+  // In a URL it runs to the last '@' followed by a host, so a '/' or '@' in it (an unencoded one) is hidden too; a port followed
+  // by a path (http://localhost:3000/@me) is no password.
+  /(?<keep>\b[a-z][a-z0-9+.-]{0,20}:\/\/[^\s:@/"'`,]{0,200}:)(?!\[가려진 비밀값\])(?!\d{1,5}(?:[/?#]|$))[^\s"'`]{1,500}(?=@[A-Za-z0-9.-]+(?::\d{1,5})?(?:[/?#"'`\s,;)]|$))/gi,
   /(?<keep>\bmysql(?:dump|admin)?\b[^\n]{0,500}?\s-p)(?!\[가려진 비밀값\])(?=\S*[A-Za-z])(?=\S*\d)\S{6,}/g,
   /(?<keep>\bcurl\b[^\n]{0,500}?\s(?:-u|--user)[ =]?["']?[^\s:"'@]{1,100}:)(?!\[가려진 비밀값\])[^\s"'@]{4,}/g
 ];
@@ -133,21 +156,33 @@ const HIDE: RegExp[] = [
 // name alone on its line makes its value written as it is (a header name alone on its line is as often a property in code:
 // Authorization: this.auth.getToken()).
 type Groups = Record<string, string | undefined>;
-interface Weighed { re: RegExp; where(g: Groups): { secret: boolean; env: boolean; literal: boolean }; setting?: boolean; min?: number }
+interface Weighed { re: RegExp; where(g: Groups): { secret: boolean; env: boolean; literal: boolean }; setting?: boolean; said?: boolean; min?: number }
 const WEIGHED: Weighed[] = [
   // After a scheme of its own a credential is long (an API key, a Kerberos ticket); a short word is prose (Authorization: via OAuth2).
   { re: AUTH_SCHEME, min: 16, where: () => ({ secret: true, env: false, literal: false }) },
   { re: AUTH, where: () => ({ secret: true, env: false, literal: false }) },
   // A bearer or basic credential anywhere: the scheme as written, a value with a digit (not prose), not a file path.
   { re: /(?<keep>\b(?:Bearer|Basic) )(?<uv>(?=[A-Za-z0-9._~+/-]*\d)[A-Za-z0-9._~+/-]{16,2000}=*)/g, where: () => ({ secret: true, env: false, literal: false }) },
-  { re: /(?<keep>--password[= ]["']?)(?<uv>[^\s"']{1,500})/g, where: () => ({ secret: true, env: false, literal: true }) },
-  // Other command lines that take a password as an argument, and an XML element that holds one (Maven's settings.xml, NuGet).
+  // A flag that names a credential, its value after '=' or a space, or as the next element of an args array (an MCP server's
+  // config: "--api-key", "…"). --max-tokens, --token-file and --password-stdin hold none.
+  { re: /(?<keep>(?<![\w-])--(?<name>[\w-]{0,40}?(?:password|passwd|secret|token|api[-_]?key|access[-_]?key))(?:[= ][ \t]*["']?|\\?["'][ \t]*,[ \t]*\\?["']))(?<uv>[^\s"'\\]{1,500})/gi,
+    where: () => ({ secret: true, env: false, literal: true }) },
+  // Other command lines that take a password as an argument, aws configure's prompt, Windows' setx NAME value, and an XML element
+  // that holds one (Maven's settings.xml, NuGet).
   { re: /(?<keep>\b(?:sshpass\b[^\n]{0,100}?\s-p|redis-cli\b[^\n]{0,200}?\s-a|docker[ \t]+login\b[^\n]{0,200}?\s-p)[ \t]*["']?)(?<uv>[^\s"']{1,500})/g,
+    where: () => ({ secret: true, env: false, literal: true }) },
+  { re: /(?<keep>\bAWS Secret Access Key \[[^\]\n]{0,40}\]:[ \t]*)(?<uv>\S{1,500})/g, where: () => ({ secret: true, env: false, literal: true }) },
+  { re: /(?<keep>\bsetx[ \t]+(?<name>[A-Za-z0-9_]{0,40}?(?:password|passwd|pass|pwd|secret|token|key))[ \t]+["']?)(?<uv>[^\s"']{1,500})/gi,
     where: () => ({ secret: true, env: false, literal: true }) },
   { re: /(?<keep><(?<name>[\w:.-]{0,40}?(?:password|passwd|passphrase|secret|token|apikey|api_key|api-key))>)(?<uv>[^<\n]{1,500})(?=<\/)/gi,
     where: () => ({ secret: true, env: false, literal: true }) },
   { re: DEFINE, where: g => ({ secret: true, env: false, literal: g.qv !== undefined }) },
-  { re: SETTING, setting: true, where: g => { const secret = SECRET_NAME.test(g.name ?? ''); return { secret, env: !secret && /^[A-Z][A-Z0-9_]*$/.test(g.name ?? ''), literal: false }; } }
+  { re: SETTING, setting: true, where: g => { const secret = SECRET_NAME.test(g.name ?? ''); return { secret, env: !secret && /^[A-Z][A-Z0-9_]*$/.test(g.name ?? ''), literal: false }; } },
+  // In a sentence a password is said to be one (비밀번호는 bcrypt로 해시 stays); a token or key named so is hidden only when it
+  // looks made by a machine (컨텍스트 토큰 200000개 stays), and so is a value after an English name and a space (Go's
+  // Password []byte, SQL's token TEXT); a file, a route or words joined by '-' stay (said).
+  { re: KOREAN_NAME, said: true, where: g => ({ secret: /비밀\s?번호|비번|패스워드|암호/.test(g.name ?? ''), env: false, literal: false }) },
+  { re: SAID_NAME, said: true, where: g => ({ secret: /\S/.test(g.then ?? '') && (SECRET_NAME.test(g.name ?? '') || /pw$/i.test(g.name ?? '')), env: false, literal: false }) }
 ];
 /** One weighed pattern over a text; count is told of each part hidden. */
 function weigh(rule: Weighed, text: string, hid: () => void): string {
@@ -162,9 +197,9 @@ function weigh(rule: Weighed, text: string, hid: () => void): string {
     const value = cut >= 0 ? raw.slice(0, cut) : raw, tail = cut >= 0 ? weigh(rule, raw.slice(cut), hid) : '';
     // A setting on a line of its own (.env, YAML, also after a diff's or a quote's mark) or an environment name set without spaces is
     // written as it is; 'name = value' is as often code.
-    const setting = !!rule.setting, spaced = /[ \t](?::=|=>|=)[ \t]/.test(keep), kind = rule.where(g), upper = /^[A-Z][A-Z0-9_]*$/.test(name);
+    const setting = !!rule.setting, said = !!rule.said, spaced = /[ \t](?::=|=>|=)[ \t]/.test(keep), kind = rule.where(g), upper = /^[A-Z][A-Z0-9_]*$/.test(name);
     const lineStart = setting && /^[ \t]*(?:[-+>][ \t]*)*(?:export[ \t]+|set[ \t]+)?["']?$/.test(line);
-    const part = value.length < (rule.min ?? 0) ? null : secretPart(value, { ...kind, quoted, name, next: src.slice(at + all.length, at + all.length + 4), lineStart,
+    const part = value.length < (rule.min ?? 0) ? null : secretPart(value, { ...kind, quoted, name, next: src.slice(at + all.length, at + all.length + 4), lineStart, said,
       colon: /:[ \t]*$/.test(keep), keyQuoted: setting && /["']\]?[ \t]*(?::=|=>|[:=])[ \t]*$/.test(keep), dotenv: lineStart && upper && !spaced && /(?<![:=!<>])=$/.test(keep),
       literal: kind.literal || query || (setting && !spaced && (lineStart || upper)) });
     if (!part && cut < 0) return all;

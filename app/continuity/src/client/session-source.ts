@@ -6,10 +6,10 @@
  * click, before the page can read them on a later visit. A single file chosen by hand works in every browser. */
 import { listSessions, readSession, type AiStatus } from './studio-api.js';
 import { readSessionList, readSessionDetail, type SessionDetail, type SessionSummary } from '../shared/session-import.js';
-import { SESSION_LIMITS, jsonLines, parseSession, sessionParser, pushLine, withSubagents, tailFolders, hasPrompt, atFolder, sniffTool, sessionSummary, sessionDetail, sessionId, sessionKey, within, type ParsedSession, type SessionTool } from '../shared/session-parse.js';
+import { SESSION_LIMITS, jsonLines, parseSession, sessionParser, pushLine, withSubagents, tailFolders, hasPrompt, atFolder, sniffTool, sessionSummary, sessionDetail, sessionId, sessionKey, within, worktreeSteps, worktreeFolder, type ParsedSession, type SessionMeta, type SessionParser, type SessionTool } from '../shared/session-parse.js';
 
-/** read(id, since): only turns from that time on (a turn with no time is kept), as the server does. */
-/** partial: after a listing, why it holds only some of the picked folders' sessions (a folder could not be read), or null. */
+/** read(id, since): only turns from that time on (a turn with no time is kept), as the server does. partial: after a listing, why it
+ * holds only some of the picked folders' sessions (a folder could not be read), or null. */
 export interface SessionSource { kind: 'server' | 'folder'; list(folder?: string | null): Promise<SessionSummary[]>; read(id: string, since?: string | null): Promise<SessionDetail>; partial?(): string | null }
 export type FolderState = 'unsupported' | 'none' | 'prompt' | 'granted';
 
@@ -45,15 +45,20 @@ async function saveRoots(roots: DirHandle[]): Promise<void> {
  * looked through once (a line is joined only when its end comes), and a line longer than the server's cap on one line
  * (SESSION_LIMITS.lineBytes, counted here in characters) is skipped, as on the server.
  * With its handle, a file an agent is still writing is read on through a fresh look when the first goes stale (Chrome cannot read
- * a File once the file on disk changed), up to the size it had: a session file only ever has lines added at its end. */
+ * a File once the file on disk changed), up to the size it had: a session file only ever has lines added at its end.
+ * partial: the file is the start of a longer one (its last, cut line left out); until: the reading stops at the first line after
+ * which it holds. */
 const LINE_CHARS = SESSION_LIMITS.lineBytes, READ_TRIES = 20;
-async function readParsed(tool: SessionTool, file: File, handle: FileHandle | null = null): Promise<ParsedSession> {
+async function readParsed(tool: SessionTool, file: Blob, handle: FileHandle | null = null, { partial = false, until = null }: { partial?: boolean; until?: ((p: SessionParser) => boolean) | null } = {}): Promise<ParsedSession> {
   const parser = sessionParser(tool), decoder = new TextDecoder(), end = file.size;
-  let reader = file.stream().getReader(), at = 0, tries = 0, line: string[] = [], len = 0;
+  let reader = file.stream().getReader(), at = 0, tries = 0, line: string[] = [], len = 0, stopped = false;
   const take = (s: string) => { len += s.length; if (len > LINE_CHARS) line = []; else line.push(s); };
   const feed = (text: string) => {
     let from = 0;
-    for (let nl = text.indexOf('\n'); nl >= 0; from = nl + 1, nl = text.indexOf('\n', from)) { take(text.slice(from, nl)); if (len <= LINE_CHARS) pushLine(parser, line.join('')); line = []; len = 0; }
+    for (let nl = text.indexOf('\n'); nl >= 0; from = nl + 1, nl = text.indexOf('\n', from)) {
+      take(text.slice(from, nl)); if (len <= LINE_CHARS) pushLine(parser, line.join('')); line = []; len = 0;
+      if (until?.(parser)) { stopped = true; return; }
+    }
     take(text.slice(from));
   };
   for (;;) {
@@ -64,8 +69,9 @@ async function readParsed(tool: SessionTool, file: File, handle: FileHandle | nu
     });
     if (!r) continue; if (r.done) break;
     at += r.value.length; feed(decoder.decode(r.value, { stream: true }));
+    if (stopped) { reader.cancel().catch(() => { /* done with it */ }); return parser.done(); }
   }
-  feed(decoder.decode()); if (len <= LINE_CHARS) pushLine(parser, line.join(''));
+  feed(decoder.decode()); if (!stopped && !partial && len <= LINE_CHARS) pushLine(parser, line.join(''));
   return parser.done();
 }
 /** A whole session file, through a fresh look at it. */
@@ -152,18 +158,40 @@ async function walk(root: DirHandle, rootKey: string): Promise<{ found: Found[];
  * under a folder, and a session found through both is listed once by its id). */
 async function same(d: DirHandle, r: DirHandle): Promise<boolean> { try { return !!(await d.isSameEntry?.(r)); } catch { return false; } }
 
-/** What a listing knows of one session file: its row (null when it holds no prompt: not a session, or a Codex subagent's), the
- * folders it worked in, and for a Codex subagent's the session that started it. key: the size and time it was read at. */
+/** What a listing knows of one session file: its row (null when it holds no prompt, or is a Codex subagent's: read through the
+ * session that started it), the folders it worked in, and for a Codex subagent's that session. key: the size and time it was read at. */
 interface Head { key: string; tool: SessionTool | null; row: SessionSummary | null; cwds: string[]; parent: string | null }
-async function readHead(f: Found, file: File): Promise<Head> {
+/** A Codex app thread run in Worktree mode works in a checkout of its own under the Codex folder: it is also in the folder of the
+ * repository the checkout came from, as the server reads it (its .git file), through the picked .codex folder. */
+async function inRepository(meta: SessionMeta, codex: DirHandle) {
+  for (const cwd of [...meta.cwds]) {
+    const steps = worktreeSteps(cwd, codex.name); if (!steps) continue;
+    let dir = named(await entries(codex), 'worktrees');
+    for (let i = 0; dir && i < Math.min(steps.length, 3); i++) {
+      dir = named(await entries(dir), steps[i]!); if (!dir) break;
+      const git = (await entries(dir)).find((e): e is FileHandle => e.kind === 'file' && e.name === '.git'); if (!git) continue;
+      try { const repo = worktreeFolder(await (await git.getFile()).text(), steps.slice(i + 1), cwd); if (repo) atFolder(meta, repo); } catch { /* gone meanwhile */ }
+      break;
+    }
+  }
+}
+/** codex: the picked .codex folder the file lies in, when one was picked (a Codex app worktree's checkout is in it too). */
+async function readHead(f: Found, file: File, codex: DirHandle | null = null): Promise<Head> {
   const key = `${file.size}:${file.lastModified}`, partial = file.size > SESSION_LIMITS.headBytes, lines = jsonLines(await file.slice(0, SESSION_LIMITS.headBytes).text(), partial);
   const tool = f.tool ?? sniffTool(lines); if (!tool) return { key, tool, row: null, cwds: [], parent: null };
-  let parsed = parseSession(tool, lines);
-  // Read further while the head holds no prompt yet (a Codex subagent's never does: what it was asked is in the session that started it).
-  if (!hasPrompt(parsed) && partial && !parsed.meta.parent) parsed = parseSession(tool, jsonLines(await file.slice(0, SESSION_LIMITS.promptBytes).text(), file.size > SESSION_LIMITS.promptBytes));
-  const parent = tool === 'codex' ? parsed.meta.parent : null; if (!hasPrompt(parsed)) return { key, tool, row: null, cwds: [], parent };
+  let parsed = parseSession(tool, lines), read = SESSION_LIMITS.headBytes;
+  // Read further while the head holds no prompt yet (a Codex subagent's is never a session of its own, whatever it holds: what it was
+  // asked, a copy of its parent's history, is read through the session that started it). A fork whose head ends inside its copy of
+  // the session it came from is read on line by line (up to the file limit) to its first prompt of its own, as on the server.
+  if (!hasPrompt(parsed) && partial && !parsed.meta.parent && !parsed.copy) { parsed = parseSession(tool, jsonLines(await file.slice(0, SESSION_LIMITS.promptBytes).text(), file.size > SESSION_LIMITS.promptBytes)); read = SESSION_LIMITS.promptBytes; }
+  if (!hasPrompt(parsed) && file.size > read && !parsed.meta.parent && parsed.copy) {
+    const cut = file.size > SESSION_LIMITS.fileBytes;
+    parsed = await readParsed(tool, cut ? file.slice(0, SESSION_LIMITS.fileBytes) : file, null, { partial: cut, until: p => p.prompted() });
+  }
+  const parent = tool === 'codex' ? parsed.meta.parent : null; if (!hasPrompt(parsed) || parent) return { key, tool, row: null, cwds: [], parent };
   // The end of the file, for a folder the session moved to late.
   if (partial) for (const c of tailFolders(await file.slice(Math.max(0, file.size - SESSION_LIMITS.tailBytes)).text())) atFolder(parsed.meta, c);
+  if (tool === 'codex' && codex) await inRepository(parsed.meta, codex);
   const base = sessionSummary(await sessionId(tool, sessionKey(tool, parsed.meta, f.path)), tool, parsed, new Date(file.lastModified).toISOString(), file.size);
   // The id made from the file's path before ids were made from the session itself.
   // An archived Codex thread lay in sessions/YYYY/MM/DD/ under the same name (its date is in it): that path's id is its alias too.
@@ -185,6 +213,11 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
   // Each picked folder's own key for those (two picked folders may share a name).
   const rootKeys = new WeakMap<DirHandle, string>(); let rootCount = 0;
   const rootKey = (r: DirHandle) => { let k = rootKeys.get(r); if (!k) rootKeys.set(r, (k = `${++rootCount}`)); return k; };
+  // The picked .codex folder a Codex file was found in: the picked folder itself, or the .codex folder in a picked home folder.
+  const codexOf = async (f: Found): Promise<DirHandle | null> => {
+    const r = f.tool === 'codex' ? roots.find(x => f.key.startsWith(`${rootKey(x)}/`)) : undefined, path = r ? f.key.slice(rootKey(r).length + 1) : '';
+    return !r ? null : path.startsWith('.codex/') ? named(await entries(r), '.codex') ?? null : /^(sessions|archived_sessions)\//.test(path) ? r : null;
+  };
   // What to say beside the picked folders: why a pick added nothing, and how the last look went (a folder not read, a walk cut short).
   let lastFound: Found[] = [], picked: string | null = null, looked: string | null = null, missed: string | null = null;
   /** The picked folders as named on the page: two of one name (a Windows and a WSL .claude) are told apart by number, and one whose
@@ -245,7 +278,8 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
       }
       // A folder this browser no longer lets the page read (its permission withdrawn while the page was open) is asked for again.
       if (bad.length) await check();
-      const unreadable = bad.length ? `${bad.join(', ')} 폴더를 읽지 못했어요.` : null; missed = unreadable;
+      // Said the same whether some or all of them failed (the panel shows it once, as its error).
+      const unreadable = bad.length ? `${bad.join(', ')} 폴더를 읽지 못했어요. 옮겼거나 지웠다면 빼고 다시 골라 주세요.` : null; missed = unreadable;
       if (roots.length && bad.length === roots.length) { looked = unreadable; throw Object.assign(new Error('SESSION_FOLDER_UNREADABLE'), { code: 'SESSION_FOLDER_UNREADABLE', cause }); }
       // A file found through two picked folders (one inside the other) is looked at once.
       const once = new Set<string>();
@@ -258,7 +292,7 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
         // A changed file is read through a fresh look at it; one that cannot be read now (an agent writing it) keeps what it said
         // before, or waits for the next look.
         let h = heads.get(f.key);
-        if (h?.key !== `${f.size}:${f.at}`) h = await fresh(f.handle, file => readHead(f, file)).then(x => { heads.set(f.key, x); return x; }, () => h);
+        if (h?.key !== `${f.size}:${f.at}`) h = await fresh(f.handle, async file => readHead(f, file, await codexOf(f))).then(x => { heads.set(f.key, x); return x; }, () => h);
         if (!h) continue;
         if (h.tool === 'codex') parents.set(f.key, { key: h.key, parent: h.parent });
         if (!h.row) { quiet++; continue; }
@@ -296,6 +330,8 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
     folderState: () => state,
     /** The picked folders' names as shown, each one forget() takes. */
     folders: labels,
+    /** The tools whose sessions are read: the server's, or those the last look found in the picked folders (none before one). */
+    tools: (): SessionTool[] => host.status().sessions?.tools.length ? host.status().sessions!.tools : (['claude', 'codex'] as const).filter(t => lastFound.some(f => f.tool === t)),
     /** A short line to show beside the picked folders, or null: why a pick added nothing, a folder that could not be read, or a
      * look that read only part of the folders. */
     notice: (): string | null => [picked, looked].filter(Boolean).join(' ') || null,

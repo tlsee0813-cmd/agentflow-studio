@@ -4,11 +4,13 @@
  *   Claude Code: <~/.claude>/projects/<folder>/<session>.jsonl
  *   Codex:       <~/.codex>/sessions/YYYY/MM/DD/rollout-*.jsonl */
 import type { SessionDetail, SessionSummary, SessionTurn } from './session-import.js';
-import { foldHandover } from './handover-mark.js';
+import { foldHandover, quoteReceived } from './handover-mark.js';
+import { redactSecrets } from './secret.js';
 
 export const SESSION_VERSION = 'sessions.1';
 // fileBytes: a long agent session runs to hundreds of MB (tool output it never shows); it is read line by line, never held whole.
-// headBytes is read to list a file; promptBytes when the head holds no prompt yet (a first prompt can carry pasted images);
+// headBytes is read to list a file; promptBytes when the head holds no prompt yet (a first prompt can carry pasted images), or
+// for a fork whose head ends inside the copy of the session it came from, the file line by line up to its first own prompt;
 // tailBytes from the end, for a working folder a long session moved to late. lineBytes: a longer line (a damaged file, a huge
 // paste) is skipped whole rather than built into a string past what the runtime can hold; a turn is clipped far below it anyway.
 export const SESSION_LIMITS = Object.freeze({ list: 60, scan: 400, headBytes: 256 * 1024, promptBytes: 8 * 1024 * 1024, tailBytes: 64 * 1024, fileBytes: 2 * 1024 * 1024 * 1024, lineBytes: 64 * 1024 * 1024, turnChars: 20000, replyChars: 300000, preview: 160 });
@@ -25,8 +27,9 @@ export function atFolder(meta: SessionMeta, cwd: unknown) {
   if (typeof cwd !== 'string' || !cwd) return;
   meta.cwd = cwd; if (!meta.cwds.some(c => sameFolder(c, cwd))) meta.cwds.push(cwd);
 }
-/** changes: each time files were changed, with when (a subagent's are added to the session that started it). */
-export interface ParsedSession { meta: SessionMeta; turns: SessionTurn[]; changes: FileChange[] }
+/** changes: each time files were changed, with when (a subagent's are added to the session that started it). copy: the lines
+ * read ended inside a fork's copy of the session it came from (a head read of a fork may hold none of its own prompts yet). */
+export interface ParsedSession { meta: SessionMeta; turns: SessionTurn[]; changes: FileChange[]; copy?: true }
 interface FileChange { at: string | null; files: string[] }
 type Row = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
@@ -143,6 +146,8 @@ function collector() {
   const turns: SessionTurn[] = []; let reply: (SessionTurn & { files: string[] }) | null = null;
   return {
     user(t: string | null, at: string | null) { if (!t) return; reply = null; turns.push({ role: 'user', at: at ?? null, text: t }); },
+    /** Takes out the turns from `from` to `to`, a stretch the session went back over. */
+    cut(from: number, to: number) { turns.splice(from, to - from); reply = null; },
     reply(text: unknown, at: string | null, files: string[] = []) {
       const t = String(text ?? '').trim(); if (!t && !files.length) return;
       if (!reply) { reply = { role: 'assistant', at: at ?? null, text: '', files: [] }; turns.push(reply); }
@@ -160,19 +165,24 @@ export function parseClaude(lines: unknown[]): ParsedSession {
   const p = claudeParser(); for (const o of lines) p.push(o); return p.done();
 }
 const EDIT_TOOLS = ['Edit', 'Write', 'MultiEdit', 'NotebookEdit'];
-const ISO_TIME = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/, DAY_MS = 24 * 60 * 60 * 1000;
+const ISO_TIME = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/, DAY_MS = 24 * 60 * 60 * 1000, INTERRUPTED = /^\[Request interrupted by user[^\]]*\]$/;
 /** The Claude Code reading, one line at a time (a long file is never held whole). */
 export function claudeParser(): SessionParser {
   const c = collector(), meta = newMeta(), changes: FileChange[] = [], edits = new Map<string, FileChange>();
   const changed = (e: FileChange) => { changes.push(e); c.reply('', e.at, e.files); };
   let latest = ''; // the latest time a line was written with, in Claude Code's own form (so times compare as strings)
+  let copying = false; // the last conversation row read was copied from the session branched from
   const push = (o: Row) => {
     if (!o || typeof o !== 'object') return;
     const was = latest; if (typeof o.timestamp === 'string' && ISO_TIME.test(o.timestamp) && o.timestamp > latest) latest = o.timestamp;
     if (o.type === 'ai-title' && typeof o.aiTitle === 'string') meta.title = o.aiTitle;
     if (o.type === 'summary' && typeof o.summary === 'string' && !meta.title) meta.title = o.summary;
     if (o.type === 'relocated') atFolder(meta, o.relocatedCwd);
+    // A branch (/branch, --fork-session, /fork) starts with a copy of the session it came from, each row naming where it came from:
+    // what that session said is its own, not this one's.
+    if (o.forkedFrom && typeof o.forkedFrom === 'object') { copying = true; return; }
     if (o.type !== 'user' && o.type !== 'assistant' && !(o.type === 'attachment' && o.attachment?.type === 'queued_command')) return;
+    copying = false;
     const at = typeof o.timestamp === 'string' ? o.timestamp : null, content = o.message?.content, blocks: Row[] = Array.isArray(content) ? content.filter(b => b && typeof b === 'object') : [];
     // An edit counts once its result came back without an error: one the person refused, or that failed, changed nothing. A
     // subagent's edits count too (its own messages do not).
@@ -200,10 +210,50 @@ export function claudeParser(): SessionParser {
     } else if (o.type === 'user') {
       if (o.isMeta === true || o.promptSource === 'system' || o.isCompactSummary === true) return;
       if (blocks.some(b => b.type === 'tool_result')) return;
-      c.user(typed(textOf(content, ['text'])), at);
+      // Pressing Esc leaves a row of Claude Code's own ('[Request interrupted by user]', '… for tool use'): not a request.
+      const t = typed(textOf(content, ['text'])); if (t && INTERRUPTED.test(t)) return;
+      c.user(t, at);
     } else c.reply(textOf(content, ['text']), at);
   };
-  return { push: o => push(o as Row), done: () => ({ meta, turns: c.turns, changes }) };
+  // A rewind (Esc Esc, /rewind) leaves the rows it went back over in the file: the prompt sent again hangs off the row before them
+  // (none, after a rewind to the very first message), and Claude Code names the row it cut from. So each row of the conversation is
+  // known by its uuid, with how many turns and changes were read before and after it, and what was gone back over is taken out
+  // again. Rows without uuids are read as written.
+  const rows = new Map<string, { before: number[]; after: number[] }>(); let prev: string | null = null, cutFrom: string | null = null;
+  const back = (to: number[], end = [c.turns.length, changes.length]) => { c.cut(to[0]!, end[0]!); changes.splice(to[1]!, end[1]! - to[1]!); };
+  /** The rows after `key` are forgotten (and it too unless kept; all of them when null), so no later row is read against them. */
+  const forget = (key: string | null, keep = false) => {
+    let gone = key === null; for (const k of rows.keys()) { if (gone) rows.delete(k); else if (k === key) { gone = true; if (!keep) rows.delete(k); } }
+  };
+  const read = (o: Row) => {
+    if (!o || typeof o !== 'object') return;
+    // The row a rewind cut from, used when no row of the conversation follows it (no prompt sent again yet). A later checkpoint
+    // that is no rewind takes it back: that rewind did not go through.
+    if (o.type === 'last-prompt' && o.explicit === true) cutFrom = o.rewound === true && rows.has(o.cutUuid) ? o.cutUuid : null;
+    const id = typeof o.uuid === 'string' && o.isSidechain !== true && o.type !== 'progress' ? o.uuid : null;
+    let before = [c.turns.length, changes.length]; push(o);
+    if (!id) return;
+    const prompt = o.type === 'user' && c.turns.length > before[0]! && c.turns.at(-1)!.role === 'user';
+    // A prompt that hangs off an earlier row than the one before it: the turns read since that row were gone back over (they are
+    // forgotten too, so no later row is read against them).
+    const from = typeof o.parentUuid === 'string' && o.parentUuid !== prev ? rows.get(o.parentUuid) : undefined;
+    const parent = typeof o.parentUuid === 'string' ? rows.get(o.parentUuid) : undefined, cut = cutFrom ? rows.get(cutFrom)! : undefined;
+    if (prompt && from && from.after[0]! < before[0]!) {
+      back(from.after, before); before = from.after; forget(o.parentUuid, true);
+    } else if (prompt && o.parentUuid === null && before[0]! > 0) {
+      // A prompt that hangs off no row after turns were read (only a session's first row does; a compaction's boundary is a row of
+      // its own) was sent again after a rewind to the very first message: everything before it was gone back over.
+      back([0, 0], before); before = [0, 0]; forget(null);
+    } else if (prompt && cut && !(parent && parent.after[0]! > cut.before[0]!)) {
+      // A rewind Claude Code named, the prompt sent again hanging off a row not read here: what it cut from is taken out first (a
+      // prompt hanging off a row inside that stretch goes on from it instead: the rewind did not go through).
+      back(cut.before, before); before = cut.before; forget(cutFrom);
+    }
+    cutFrom = null; prev = id;
+    if (!rows.has(id)) rows.set(id, { before, after: [c.turns.length, changes.length] });
+  };
+  return { push: o => read(o as Row), prompted: () => c.turns.some(t => t.role === 'user'),
+    done: () => { if (cutFrom) { back(rows.get(cutFrom)!.before); cutFrom = null; } return { meta, turns: c.turns, changes, ...(copying ? { copy: true as const } : {}) }; } };
 }
 
 /** What the person typed in a Codex user message. Codex Desktop tags each part of it (user.text, user.heartbeat,
@@ -230,14 +280,15 @@ export function parseCodex(lines: unknown[]): ParsedSession {
   const p = codexParser(); for (const o of lines) p.push(o); return p.done();
 }
 /** One prompt of a Codex file (null before the first) and what came after it: reply pieces from either stream, files changed. */
-interface Stretch { user: SessionTurn | null; item: boolean; event: boolean; pieces: { from: 'item' | 'event' | 'file'; text: string; at: string | null; files: string[] }[] }
+interface Piece { from: 'item' | 'event' | 'file'; text: string; at: string | null; files: string[] }
+interface Stretch { user: SessionTurn | null; item: boolean; event: boolean; pieces: Piece[] }
 const flat = (t: string) => t.replace(/\s+/g, ' ').trim();
 /** The Codex reading, one line at a time. */
 export function codexParser(): SessionParser {
   const meta = newMeta(), stretches: Stretch[] = [], changes: FileChange[] = [];
-  const piece = (from: Stretch['pieces'][number]['from'], text: string, at: string | null, files: string[] = []) => {
+  const piece = (from: Piece['from'], text: string, at: string | null, files: string[] = []) => {
     if (!stretches.length) stretches.push({ user: null, item: false, event: false, pieces: [] });
-    stretches.at(-1)!.pieces.push({ from, text, at, files });
+    const x = { from, text, at, files }; stretches.at(-1)!.pieces.push(x); return x;
   };
   // The CLI writes a prompt as a response item and as an event, one right after the other: one prompt, in the event's words.
   const prompt = (text: string | null, at: string | null, event: boolean) => {
@@ -249,32 +300,56 @@ export function codexParser(): SessionParser {
     }
     stretches.push({ user: { role: 'user', at, text }, item: !event, event, pieces: [] });
   };
-  const changed = (at: string | null, files: string[]) => { if (!files.length) return; changes.push({ at, files }); piece('file', '', at, files); };
+  const changed = (at: string | null, files: string[]) => { if (!files.length) return null; const change = { at, files }; changes.push(change); return { change, piece: piece('file', '', at, files) }; };
+  // A patch's files are held by its call until Codex says how it went: one the person declined, or that failed, changed nothing.
+  const calls = new Map<string, { change: FileChange; piece: Piece }>();
+  const outcome = (id: unknown, done: boolean) => {
+    const c = typeof id === 'string' ? calls.get(id) : undefined; if (!c) return;
+    calls.delete(id as string); if (done) return;
+    c.piece.files = []; changes.splice(changes.indexOf(c.change), 1);
+  };
+  // A fork (and a subagent started with its parent's history) begins with a copy of the conversation it came from, from that one's
+  // first line on, each line stamped when it was copied: none of it is this session's own. The copy ends at the fork's own settings
+  // line, or in files from before Codex wrote one at the first pause (a copy is written at once). A fork made before the first
+  // request copies nothing. A paginated subagent names the first line of its own.
+  let copy = false, copiedAt = NaN, ownFrom = -1;
   const push = (raw: Row) => {
     if (!raw || typeof raw !== 'object') return;
     const wrapped = typeof raw.type === 'string' && raw.payload && typeof raw.payload === 'object';
     const kind = wrapped ? raw.type : 'response_item', p: Row = wrapped ? raw.payload : raw, at = typeof raw.timestamp === 'string' ? raw.timestamp : null;
+    if (copy) {
+      const t = at ? Date.parse(at) : NaN;
+      if (kind === 'event_msg' && p.type === 'thread_settings_applied' && p.thread_id === meta.thread) { copy = false; return; }
+      if (Number.isFinite(t) && !(t - copiedAt > 1000)) { copiedAt = t; return; }
+      copy = false;
+    }
     if (kind === 'session_meta' || (!wrapped && typeof raw.id === 'string' && typeof raw.instructions !== 'undefined')) {
+      // The first line of the session the copy came from (it names another thread) starts the copy, and says nothing of this one.
+      if (meta.thread && typeof p.id === 'string' && p.id !== meta.thread) { copy = true; copiedAt = at ? Date.parse(at) : NaN; return; }
       atFolder(meta, p.cwd); meta.startedAt = typeof p.timestamp === 'string' ? p.timestamp : meta.startedAt;
       if (typeof p.git?.branch === 'string') meta.branch = p.git.branch;
       if (typeof p.id === 'string' && !meta.thread) meta.thread = p.id;
       const parent = p.parent_thread_id ?? p.source?.subagent?.thread_spawn?.parent_thread_id;
       if (typeof parent === 'string' && parent && !meta.parent) meta.parent = parent;
+      if (typeof p.subagent_history_start_ordinal === 'number') ownFrom = p.subagent_history_start_ordinal;
       return;
     }
+    if (typeof raw.ordinal === 'number' && raw.ordinal < ownFrom) return;
     if (at && !meta.startedAt) meta.startedAt = at;
     if (kind === 'turn_context') atFolder(meta, p.cwd);
     if (kind === 'event_msg') {
       if (p.type === 'user_message' && typeof p.message === 'string') prompt(typed(p.message), at, true);
       else if (p.type === 'agent_message' && typeof p.message === 'string') piece('event', p.message, at);
-      else if (p.type === 'item_completed' && p.item?.type === 'FileChange') changed(at, changedFiles(p.item));
+      else if (p.type === 'patch_apply_end') outcome(p.call_id, p.success !== false && (!p.status || p.status === 'completed'));
+      else if (p.type === 'item_completed' && p.item?.type === 'FileChange') { outcome(p.item.id, !p.item.status || p.item.status === 'completed'); changed(at, changedFiles(p.item)); }
       return;
     }
     if (kind !== 'response_item') return;
     if (p.type === 'message' && p.role === 'user') prompt(codexUserText(p), at, false);
     else if (p.type === 'message' && p.role === 'assistant') piece('item', textOf(p.content, ['output_text', 'text']), at);
     else if (p.type === 'custom_tool_call' || p.type === 'function_call' || p.type === 'local_shell_call') {
-      const patch = patchText(p); changed(at, patch === null ? [] : patchFiles(patch));
+      const patch = patchText(p), held = changed(at, patch === null ? [] : patchFiles(patch));
+      if (held && typeof p.call_id === 'string') calls.set(p.call_id, held);
     }
   };
   const done = (): ParsedSession => {
@@ -286,11 +361,13 @@ export function codexParser(): SessionParser {
       const from = s.event || !s.pieces.some(x => x.from === 'item' && x.text.trim()) ? 'event' : 'item';
       for (const x of s.pieces) if (x.from === from || x.from === 'file') c.reply(x.text, x.at, x.files);
     }
-    return { meta, turns: c.turns, changes };
+    return { meta, turns: c.turns, changes, ...(copy ? { copy: true as const } : {}) };
   };
-  return { push: o => push(o as Row), done };
+  return { push: o => push(o as Row), prompted: () => stretches.some(s => s.user), done };
 }
-export interface SessionParser { push(line: unknown): void; done(): ParsedSession }
+/** prompted: whether a prompt of the session's own has been read yet (cheap, at any line: a listing reads a fork's copy through
+ * until one comes). */
+export interface SessionParser { push(line: unknown): void; prompted(): boolean; done(): ParsedSession }
 export const parseSession = (tool: SessionTool, lines: unknown[]): ParsedSession => (tool === 'claude' ? parseClaude : parseCodex)(lines);
 export const sessionParser = (tool: SessionTool): SessionParser => (tool === 'claude' ? claudeParser : codexParser)();
 /** One JSON line into a parser (blank or damaged lines are skipped). */
@@ -311,7 +388,9 @@ export const hasPrompt = (s: ParsedSession) => s.turns.some(t => t.role === 'use
  * first piece, a subagent's change among them, so it stays the same turn whichever was written first. */
 export function withSubagents(s: ParsedSession, subagents: ParsedSession[]): ParsedSession {
   const turns = s.turns.map(t => (t.role === 'assistant' ? { ...t, files: [...(t.files ?? [])] } : t));
-  for (const c of subagents.flatMap(x => x.changes)) {
+  // In the order they were made, whatever order the folder listed the subagents' files in (Windows lists by name).
+  const theirs = subagents.flatMap(x => x.changes).sort((a, b) => ((a.at ?? '\uffff') < (b.at ?? '\uffff') ? -1 : (a.at ?? '\uffff') > (b.at ?? '\uffff') ? 1 : 0));
+  for (const c of theirs) {
     let u = -1;
     for (let i = 0; i < turns.length; i++) if (turns[i]!.role === 'user' && (!c.at || !turns[i]!.at || turns[i]!.at! <= c.at)) u = i;
     if (u < 0) continue;
@@ -321,7 +400,7 @@ export function withSubagents(s: ParsedSession, subagents: ParsedSession[]): Par
     else if (c.at && !r.at) r.at = c.at;
     for (const f of c.files) if (!r.files!.includes(f)) r.files!.push(f);
   }
-  return { ...s, turns, changes: [...s.changes, ...subagents.flatMap(x => x.changes)] };
+  return { ...s, turns, changes: [...s.changes, ...theirs] };
 }
 
 /** JSON lines of a file's text; a damaged line is skipped, and the last one too when the text was cut there (a head read). */
@@ -354,6 +433,25 @@ export function within(cwd: unknown, folder: string | null): boolean {
   const list = Array.isArray(cwd) ? cwd : [cwd], b = folderKey(folder);
   return list.some(c => typeof c === 'string' && (folderKey(c) === b || folderKey(c).startsWith(`${b}/`)));
 }
+const ABSOLUTE = /^(?:[A-Za-z]:[\\/]|\\\\|\/)/;
+/** A Codex app thread run in Worktree mode works in a checkout of its own under the Codex folder (<codex>/worktrees/…). The folders
+ * from there down to its working folder, or null when it is not in one. codex: the Codex folder's whole path (the server), or only
+ * its name (a folder picked in the page, whose path is not known). */
+export function worktreeSteps(cwd: string, codex: string): string[] | null {
+  const t = String(cwd).replace(/\\/g, '/'), win = windows(t), key = win ? t.toLowerCase() : t, base = `${folderKey(codex)}/worktrees/`;
+  const i = key.indexOf(win ? base.toLowerCase() : base);
+  if (i < 0 || (i > 0 && (ABSOLUTE.test(codex) || key[i - 1] !== '/'))) return null;
+  const steps = t.slice(i + base.length).split('/').filter(Boolean);
+  return steps.length && !steps.some(x => x === '.' || x === '..') ? steps : null;
+}
+/** The folder of the repository a worktree checkout came from, from the checkout's .git file (gitdir: <repo>/.git/worktrees/<name>),
+ * with the folders below the checkout (under) after it, written as the session wrote its folder. Null when the file names none. */
+export function worktreeFolder(gitFile: string, under: string[], cwd: string): string | null {
+  const repo = /^gitdir:[ \t]*(.+?)[\\/]\.git[\\/]worktrees[\\/][^\\/\r\n]+[\\/]?[ \t]*\r?$/m.exec(gitFile)?.[1];
+  if (!repo || !ABSOLUTE.test(repo)) return null;
+  const path = [repo, ...under].join('/');
+  return String(cwd).includes('\\') ? path.replace(/\//g, '\\') : path;
+}
 /** A changed file named relative to the session's working folder when it lies inside it (as the tool would show it). A relative
  * name a Windows session wrote with backslashes (a patch) is shown with '/', as the files made relative here are. */
 export function shortPath(file: string, cwd: string | null): string {
@@ -372,10 +470,13 @@ export function sessionKey(tool: SessionTool, meta: Pick<SessionMeta, 'thread'>,
   return `${tool}:${tool === 'codex' && meta.thread ? meta.thread : base}`;
 }
 
-/** A listing row of one parsed session head, or null when it holds no prompt. */
+/** A listing row of one parsed session head, or null when it holds no prompt. The first prompt is shown as a record shows it: a
+ * handover document it starts with named in words (so the person's own words follow), credential-like parts hidden. */
 export function sessionSummary(id: string, tool: SessionTool, head: ParsedSession, updatedAt: string, bytes: number, limits: Pick<SessionLimits, 'preview'> = SESSION_LIMITS): SessionSummary | null {
   const first = head.turns.find(t => t.role === 'user'); if (!first) return null;
-  return { id, tool, title: head.meta.title ?? null, preview: first.text.replace(/\s+/g, ' ').slice(0, limits.preview), cwd: head.meta.cwd, branch: head.meta.branch,
+  // Only the start is shown: a huge first prompt is not weighed whole at each look.
+  const preview = redactSecrets(quoteReceived(first.text).slice(0, 4000)).text.replace(/\s+/g, ' ').trim().slice(0, limits.preview);
+  return { id, tool, title: head.meta.title ? redactSecrets(head.meta.title).text : null, preview, cwd: head.meta.cwd, branch: head.meta.branch,
     startedAt: head.meta.startedAt, updatedAt, bytes };
 }
 /** A whole parsed session as sent to the page: newest turns within the reply budget (the earlier ones counted as omitted), each
