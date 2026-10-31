@@ -2994,6 +2994,16 @@ def folder_sessions_flow(browser, base):
     # A web chat keeps no file here: it is given the request text to write its own record.
     page.locator("#lens").get_by_role("button", name="웹 대화용 기록 요청 문구 복사").click()
     expect(page.locator("#lens .rr-sessions")).to_contain_text(re.compile("기록 요청 문구를 복사했어요|\\[웹 AI 세션 기록"))
+    # Copying blocked (a page opened by its network address is no secure context): the text is shown whole, line breaks and all,
+    # and selected to copy by hand, with a quiet line saying so (not an error).
+    page.evaluate("() => { navigator.clipboard.writeText = () => Promise.reject(new DOMException('blocked', 'NotAllowedError')); }")
+    page.locator("#lens").get_by_role("button", name="웹 대화용 기록 요청 문구 복사").click()
+    ask = page.locator("#lens .rr-web-ask")
+    expect(ask).to_be_focused()
+    expect(ask).to_have_value(re.compile("^\\[AgentFlow 기록 요청\\][\\s\\S]*\\n── 사용자 요청 ──\\n[\\s\\S]*\\n── 웹 AI 답변 ──\\n"))
+    assert ask.evaluate("t => [t.selectionStart, t.selectionEnd === t.value.length]") == [0, True]
+    expect(page.locator("#lens .rr-sessions-note")).to_have_text("자동 복사가 막혀 있어요. 아래 칸의 문구를 직접 복사하세요(선택해 두었어요).")
+    expect(page.locator("#lens .rr-sessions [role=alert]")).to_have_count(0)
     # Its answer pasted under what is in the box is kept as a record of its own: the box puts the next-record line between them.
     web = "[웹 AI 세션 기록 · 결제 문구 · 작업 폴더 /work/salon]\n\n── 사용자 요청 ──\n결제 버튼 문구 바꿔 줘\n\n── 웹 AI 답변 ──\n바꿨어요\n(바꾼 파일: src/pay.ts)"
     paste = """(el, [t, at]) => { el.focus(); const i = at === null ? el.value.length : el.value.indexOf(at); el.setSelectionRange(i, i);
