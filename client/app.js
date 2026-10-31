@@ -1,23 +1,29 @@
 /* AgentFlow Studio client: entry → map → focused part. Reads project.7 data (saved projects and built examples) and never
  * rewrites records; the only project write is the user's own part name/note through the domain's editArea. */
 import { isMapReading } from '../shared/types.js';
-import { FILE_LIMIT } from '../shared/types.js';
-import { WorkspaceStore, storageErrorCode, readViewState, readEntryView, writeViewState, readEntryPositions, writeEntryPositions, importCopy, serializeBackup } from '../shared/storage.js';
+import { FILE_LIMIT, PASTED_LIMIT } from '../shared/types.js';
+import { WorkspaceStore, storageErrorCode, serializeProject, readViewState, readEntryView, writeViewState, readEntryPositions, writeEntryPositions, importCopy, serializeBackup } from '../shared/storage.js';
 import { parseBackup, cleanPositions } from '../shared/validation.js';
-import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, secretPasted, correctReadingRole } from '../shared/domain.js';
-import { CLAIM_LABEL, stateLabel, revisedRelations } from '../shared/map-reading.js';
-import { createMapRun, sendLine } from './map-run.js';
-import { requestResults, frozenRequests, displayAbout, captureRequestReading, restoreRequestReading } from './request-results.js';
+import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, provideRecord, secretPasted, correctReadingRole } from '../shared/domain.js';
+import { CLAIM_LABEL, stateLabel, revisedRelations, candidateReading } from '../shared/map-reading.js';
+import { roleEvidence } from './role-evidence.js';
+import { createMapRun, sendLine, JOB_NOTE } from './map-run.js';
+import { JobReservations, JOBS_KEY } from './map-jobs.js';
+import { requestResults, frozenRequests, displayAbout, captureRequestReading, restoreRequestReading, createWideReading } from './request-results.js';
 import { correctRequestMatch, unlinkReplacement, requestComparison } from '../shared/request-return.js';
-import { studioView, subtreeRecords, partPath, buildAsk, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL } from '../shared/studio.js';
+import { studioView, subtreeRecords, partPath, buildAsk, draftAfterAnswer, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
 import { layoutScope, edgePath, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, ROOT, HEAD } from './map-layout.js';
-import { aiStatus, askStudio, AskError, ERROR_TEXT } from './studio-api.js';
+import { aiStatus, askStudio, AskError, ERROR_TEXT, RELEASE_TEXT, PUBLIC_EDITION } from './studio-api.js';
 import { runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
 import { createPlanView } from './plan-view.js';
-import { createReturnView } from './return-view.js';
+import { AUTO_SENDS, createReturnView } from './return-view.js';
+import { createAutoSync } from './auto-sync.js';
+import { createSessionSources } from './session-source.js';
+import { createHandoverView } from './handover-view.js';
+import { partSessions, originLabel } from '../shared/handover.js';
 import { UI62_KEY, buildUi62Project, ui62Keys } from '../shared/return-material.js';
 import { REL_LABEL, relationGroups, dirMark, dirTitle, insideEnds } from '../shared/relation-groups.js';
 /* ---------- small DOM helpers (shared with the change-plan view) ---------- */
@@ -407,6 +413,8 @@ function projectFor(key) {
 let renderedHash = '';
 async function render() {
     renderedHash = location.hash;
+    // The wide reading belongs to the place it was opened from: another address closes it, restoring nothing.
+    wide.drop();
     const r = route();
     if (!r.key) {
         quoteBack = null;
@@ -421,6 +429,7 @@ async function render() {
         selected = null;
         scope = null;
         renderHome();
+        autoSync.render();
         return;
     }
     const next = projectFor(r.key);
@@ -475,6 +484,7 @@ async function render() {
             readMarks = [];
             readingCamera = null;
             loadView(next);
+            autoSync.opened();
         }
         // A new project starts with the map alone: the previous project's reading pane must not narrow its first view.
         if (fresh) {
@@ -639,7 +649,9 @@ function herePlace() {
         return null;
     const surface = selected ? (sheetOpen ? 'sheet' : 'lens') : scopeReading ? 'scope' : 'none';
     const body = surface === 'sheet' ? $('panel').querySelector('.panel-body') : surface === 'none' ? null : $('lens').querySelector('.lens-body');
-    return { key: o.key, scope, selected, camera: { ...camera }, surface, sheetReturn, scroll: body?.scrollTop ?? 0, requests: body ? captureRequestReading(body) : null };
+    const active = body?.contains(document.activeElement) ? document.activeElement : null;
+    return { key: o.key, scope, selected, camera: { ...camera }, surface, sheetReturn, scroll: body?.scrollTop ?? 0,
+        requests: body ? captureRequestReading(body) : null, claimFocus: active?.dataset.claimFocus ?? null };
 }
 function readingScene() {
     const p = selected ? herePlace() : null;
@@ -683,6 +695,9 @@ function returnFromVisit() {
 function restoreReading(f) {
     if (f.key !== opened?.key || f.selected !== selected || f.scope !== scope)
         return false;
+    // AF140: while the change plan is open it owns the pane, as select() has it: a part's lens or sheet is never laid back over it.
+    if (planView.isOpen())
+        return false;
     if (f.surface === 'sheet' && selected === f.selected) {
         sheetOpen = true;
         showReading(false, false);
@@ -699,8 +714,15 @@ function restoreReading(f) {
     }
     sheetReturn = f.surface === 'sheet' ? f.sheetReturn : null;
     const body = f.surface === 'sheet' ? $('panel').querySelector('.panel-body') : f.surface === 'none' ? null : $('lens').querySelector('.lens-body');
-    if (body && (!f.requests || restoreRequestReading(body, f.requests)))
-        body.scrollTop = f.scroll;
+    if (body) {
+        const requests = !f.requests || restoreRequestReading(body, f.requests);
+        // The same still-current claim in fresh data, never another citation with the same words or list position. Request folds
+        // keep their own identities; a changed request does not prevent returning to an unchanged part claim beside it.
+        const claim = f.claimFocus ? [...body.querySelectorAll('button[data-claim-focus]')].find(b => b.dataset.claimFocus === f.claimFocus) : null;
+        if (requests || claim)
+            body.scrollTop = f.scroll;
+        claim?.focus({ preventScroll: true });
+    }
     return true;
 }
 function restoreSurface(v) {
@@ -847,7 +869,7 @@ function programCard(key, p, example, keyOf) {
     }), roots.length > MAX ? h('li', { class: 'more' }, h('a', { href: base }, `+${roots.length - MAX}개 묶음`)) : null) : h('p', { class: 'program-empty' }, '아직 부분이 없어요 · 열어서 첫 부분을 적어요');
     const tryReturn = key === UI62_KEY ? h('a', { class: 'program-try', href: base }, h('strong', {}, '돌아와 읽기'), h('span', {}, '공개 개발 자료 10개 · 3단계로 늘려 읽기 · 사후 편집')) : null;
     const tryPlan = key === CONVERTER_KEY ? h('a', { class: 'program-try', href: base, onclick: () => { openPlanOnArrive = true; } }, h('strong', {}, '변경 구상 시험해 보기'), h('span', {}, '폴더째 변환 · 지금과 구상을 같은 자리에서 비교')) : null;
-    return h('li', {}, h('article', { class: `program${example ? ' is-example' : ''}` }, h('a', { class: 'program-head', href: base }, h('strong', { class: 'program-name' }, p.name), h('span', { class: 'program-brief' }, p.space.brief?.text ?? '목적이 아직 적혀 있지 않아요.'), h('span', { class: 'program-meta' }, ...meta)), h('div', { class: 'program-body' }, section, cont, tryPlan, tryReturn, !example && key !== 'legacy' ? h('button', { type: 'button', class: 'link-button quiet program-backup', title: '붙여넣은 원문 기록과 옮긴 위치를 함께 담은 백업 파일을 내려받아요', onclick: () => saveBackup(key, p) }, '백업 저장') : null)));
+    return h('li', {}, h('article', { class: `program${example ? ' is-example' : ''}` }, h('a', { class: 'program-head', href: base }, h('strong', { class: 'program-name' }, p.name), h('span', { class: 'program-brief' }, p.space.brief?.text ?? '목적이 아직 적혀 있지 않아요.'), h('span', { class: 'program-meta' }, ...meta), !example && key !== 'legacy' ? runBadgeFor(key) : null), h('div', { class: 'program-body' }, section, cont, tryPlan, tryReturn, !example && key !== 'legacy' ? h('button', { type: 'button', class: 'link-button quiet program-backup', title: '붙여넣은 원문 기록과 옮긴 위치를 함께 담은 백업 파일을 내려받아요', onclick: () => saveBackup(key, p) }, '백업 저장') : null)));
 }
 /** A backup file of a saved entry: the project as kept (pasted records included) and this entry's own manual places, in the
  * existing backup format; ‘백업 파일 가져오기’ reads it back as a new copy. Readings and drafts are not part of it. */
@@ -871,6 +893,39 @@ function saveBackup(entryId, p) {
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+/* AF124: a limited release (status.release) says what this version is for and the three ways in, each only on the person's own
+ * action: the examples here, a backup file they choose, or the earlier public site at its own address (nothing is sent there or
+ * synchronised with it). Drawn in place when the status comes, so a draft or the focus on the home page stays. */
+let examplesWanted = false;
+function showExamples() {
+    if (route().key) {
+        examplesWanted = true;
+        go(null);
+        return;
+    }
+    $('examples-title').scrollIntoView({ block: 'start' });
+    $('project-list').querySelector('a[href]')?.focus({ preventScroll: true });
+}
+function chooseBackup() { if (route().key)
+    go(null); $('import-file').click(); }
+function releaseActions(first) {
+    return [h('button', { type: 'button', class: first, onclick: () => showExamples() }, '예제로 살펴보기'),
+        h('button', { type: 'button', class: 'secondary small', title: '이 브라우저에 새 사본으로 가져와요. 원래 파일은 바뀌지 않아요.', onclick: () => chooseBackup() }, '지도 백업 가져오기'),
+        h('a', { class: 'link-button rn-public', href: PUBLIC_EDITION, target: '_blank', rel: 'noopener noreferrer' }, '기존 공개판 열기')];
+}
+function renderRelease() {
+    const box = $('release-note');
+    if (!box)
+        return;
+    if (status.release !== 'existing-map') {
+        box.hidden = true;
+        box.replaceChildren();
+        return;
+    }
+    box.replaceChildren(h('p', { class: 'rn-intro' }, RELEASE_TEXT.intro), h('p', {}, RELEASE_TEXT.limit), h('div', { class: 'rn-acts' }, ...releaseActions('primary small')), h('p', { class: 'fine' }, RELEASE_TEXT.move), h('p', { class: 'fine' }, RELEASE_TEXT.apart));
+    box.hidden = false;
+}
+const runBadgeFor = (key) => { const el = h('span', { class: 'program-run', 'data-run-entry': key, role: 'status' }); runBadge(el); return el; };
 /** My programs lead; the examples show their real composition on a first visit and step back once there is work of one's own. */
 function renderHome() {
     setBar(null);
@@ -925,6 +980,10 @@ function renderHome() {
     $('saved-list').replaceChildren(...cards);
     $('saved-empty').hidden = !!cards.length;
     $('home').classList.toggle('has-mine', !!cards.length);
+    if (examplesWanted) {
+        examplesWanted = false;
+        showExamples();
+    }
     const msg = $('home-message');
     const problem = store.readError ? '이 브라우저의 저장 공간을 읽지 못해 저장된 프로젝트를 보여 드릴 수 없어요. 저장된 내용은 바꾸지 않았어요.' : null;
     if (problem) {
@@ -948,7 +1007,7 @@ const measureName = (() => {
         }
         if (!ctx)
             return text.length * 9;
-        ctx.font = kind === 'node' ? `600 13.5px ${family}` : kind === 'item' ? `550 13px ${family}` : kind === 'head' ? `650 15px ${family}` : kind === 'sub' ? `650 13px ${family}` : kind === 'plan' ? `600 12px ${family}` : `400 12.5px ${family}`;
+        ctx.font = kind === 'node' ? `600 13.5px ${family}` : kind === 'item' ? `550 13px ${family}` : kind === 'head' ? `650 15px ${family}` : kind === 'sub' ? `650 13px ${family}` : kind === 'plan' ? `600 12px ${family}` : kind === 'where' ? `600 11px ${family}` : `400 12.5px ${family}`;
         const w = ctx.measureText(text).width;
         cache.set(key, w);
         return w;
@@ -1069,6 +1128,13 @@ function renderSpace(cameraMode = 'fit', planOverlay = true) {
         if (b.kind === 'ghost') {
             const id = b.id.slice(6), p = partOf(o, id), path = partPath(view, id).map(x => x.name);
             // Its whole name (the layout sized the card for it); where it belongs reads once over its run (.ghost-head).
+            // The scope itself, as the end of its relations with its own parts, is this scope's boundary: it selects the scope part in
+            // place (its reading as any part's: description, claims, their sources), never a move out of the scope. Any other id (the
+            // same name included) is a part outside.
+            if (id === scope) {
+                world.append(h('button', { type: 'button', class: 'ghost self', 'data-box': b.id, 'data-part-ref': id, title: `이 범위 · ${path.join(' › ')} · 이 부분 읽기`, 'aria-label': `이 범위 ${p.name} 읽기`, onclick: () => go(o.key, id) }, h('span', { class: 'ghost-name' }, p.name)));
+                continue;
+            }
             world.append(h('button', { type: 'button', class: 'ghost', 'data-box': b.id, 'data-part-ref': id, title: `이 범위 밖 · ${path.join(' › ')}`, onclick: () => go(o.key, id, p.parentId) }, h('span', { class: 'ghost-name' }, p.name)));
             continue;
         }
@@ -1246,7 +1312,8 @@ function placeEdgeLabels() {
         seenEnd.add(k);
         return true;
     });
-    const blocks = [...lay.boxes.values()].map(b => (b.kind === 'frame' ? { x: b.x, y: b.y, w: b.w, h: b.head } : b));
+    // Where outside partners belong (their heads) is text on the map as well: a verb never covers it.
+    const blocks = [...lay.boxes.values()].map(b => (b.kind === 'frame' ? { x: b.x, y: b.y, w: b.w, h: b.head } : b)).concat(lay.heads);
     if (titleH)
         blocks.push(titleRect());
     const clear = (r) => !blocks.some(b => r.x < b.x + b.w + 3 && b.x < r.x + r.w + 3 && r.y < b.y + b.h + 3 && b.y < r.y + r.h + 3);
@@ -1570,6 +1637,9 @@ function select(partId) {
 /** scrollTop: a new selection starts its sheet at the top. move: bring the part into view (a new selection or a new surface). */
 function showReading(scrollTop, move) {
     const panel = $('panel');
+    // AF140: the explicit full reading is the reading surface over the map (its own width, a paragraph's column); the lens stays as it
+    // was. The map's area (paneWidth) is the same either way, so opening it moves the camera exactly as before and no more.
+    panel.classList.toggle('reading', sheetOpen);
     if (sheetOpen) {
         hideLens();
         panel.hidden = false;
@@ -1628,6 +1698,26 @@ const mapBottom = () => $('viewport').offsetTop + $('viewport').clientHeight;
  * relative to the space, so neither moves anything already drawn. */
 function syncMapArea() {
     const vp = $('viewport'), world = $('world'), pane = paneWidth();
+    // AF140: behind the full reading the map is shown, not used: no pan, zoom, selection, drag or focus reaches it until it closes.
+    // Only the lock this reading set is its to lift (marked); one already there (the change plan's wide comparison covers the same
+    // map: plan-view cover) is never taken over or released here, nor one the comparison took while the reading's mark was on (the
+    // mark goes, the lock stays while the comparison is open: the very state cover(workOpen()) locks under).
+    const reading = !$('panel').hidden && $('panel').classList.contains('reading');
+    const planCover = !$('plan-panel').hidden && $('plan-panel').classList.contains('work');
+    for (const el of [vp, document.querySelector('#space > .controls')]) {
+        if (!el)
+            continue;
+        if (reading && !el.inert) {
+            el.inert = true;
+            el.dataset.readingInert = '1';
+        }
+        else if (!reading && el.dataset.readingInert) {
+            delete el.dataset.readingInert;
+            if (!planCover)
+                el.inert = false;
+        }
+    }
+    $('space').classList.toggle('sheet-read', reading);
     $('space').style.setProperty('--plan-w', `${pane}px`);
     vp.style.right = pane + 'px';
     const top = $('plan-strip').hidden ? 0 : topInset();
@@ -1773,24 +1863,27 @@ function renderLens() {
         put(desc, h('p', { class: 'lens-text' }, u.role), src(u.corrected ? '직접 바로잡은 설명' : `기록에서 읽은 설명${u.roleAbout ? ` · ${displayAbout(u.roleAbout)} 기준` : ''}${u.roleBasisRevised ? REVISED_BASIS : ''}`));
         if (u.roleAbout)
             desc.lastElementChild?.setAttribute('title', u.roleAbout);
+        const basis = roleBasisBlock(o, part.id, u, 'lens');
+        if (basis)
+            desc.append(basis);
     }
     else
         put(desc, src(part.status === 'plan' ? (records.length ? `설명 없음 · 요청 기록 없음 · ${recs}` : part.reading ? '기록에서 읽은 주장만 있어요' : '아직 설명도 기록도 없어요') : `${STATUS_LABEL[part.status]} · ${recs} · 받은 정리 없음`));
     if (part.changes.length)
         desc.append(h('ul', { class: 'lens-changes' }, ...part.changes.slice(0, 2).map(c => h('li', {}, c))));
-    if (part.reading?.claims.length)
-        desc.append(claimList(part.reading.claims, 3));
+    // Read the current statements together: a later limitation may qualify an earlier description.
+    const claims = part.reading?.claims.length ? lensClaims(part.id, part.reading.claims) : null;
     const requested = currentRequestResults(o, part.id);
-    if (requested)
-        desc.append(requested);
     // Lines: real ends, read by what they mean. One group per verb and direction ("이 부분이 필요로 함"), each row the real other
-    // end; a line drawn from a folded part summarises its inside, so its row also names the inner end.
+    // end and its stored note (the reason of that relation, read right under the description); a line drawn from a folded part
+    // summarises its inside, so its row also names the inner end. A row and its line on the map light each other.
     const ends = relationEnds(o, part.id), entry = visitEntry(o), cameFrom = entry ? visits.at(-1).from.selected : null;
     const port = (x) => {
         const far = partOf(o, x.far), near = x.near !== part.id ? partOf(o, x.near)?.name : null, farRep = drawnRep(o, x.far);
-        const where = farRep === x.far ? null : farRep ? `${partOf(o, farRep).name} 안` : partPath(o.view, x.far).slice(0, -1).map(q => q.name).join(' › ') || o.project.name;
+        // The scope itself is this scope's boundary, not a place outside it.
+        const where = farRep === x.far ? null : x.far === scope ? '이 범위' : farRep ? `${partOf(o, farRep).name} 안` : partPath(o.view, x.far).slice(0, -1).map(q => q.name).join(' › ') || o.project.name;
         const came = x.far === cameFrom;
-        return h('li', {}, h('button', { type: 'button', class: `port${came ? ' came' : ''}`, 'data-far': x.far, title: `${far.name}${toParticle(far.name)} 가기${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e) => { follow(x.far, x.r, e); go(o.key, x.far); } }, h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, dirMark(x.r.kind, x.out)), h('strong', {}, far.name), came ? h('span', { class: 'port-came' }, '출발') : null), near || where ? h('span', { class: 'port-where' }, [near ? `안쪽 ‘${near}’에서` : '', where ? `${where}` : ''].filter(Boolean).join(' · ')) : null, x.r.note || revisedLine(o, x.r.id) ? h('span', { class: 'port-note' }, `${x.r.note}${revisedLine(o, x.r.id) ? REVISED_BASIS : ''}`.replace(/^ · /, '')) : null));
+        return h('li', {}, h('button', { type: 'button', class: `port${came ? ' came' : ''}`, 'data-far': x.far, 'data-rel': x.r.id, title: `${far.name}${toParticle(far.name)} 가기${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e) => { follow(x.far, x.r, e); go(o.key, x.far); }, ...lightOn([x.r.id], x.far) }, h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, dirMark(x.r.kind, x.out)), h('strong', {}, far.name), came ? h('span', { class: 'port-came' }, '출발') : null), near || where ? h('span', { class: 'port-where' }, [near ? `안쪽 ‘${near}’에서` : '', where ? `${where}` : ''].filter(Boolean).join(' · ')) : null, x.r.note || revisedLine(o, x.r.id) ? h('span', { class: 'port-note', 'data-rel-note': x.r.id }, `${x.r.note}${revisedLine(o, x.r.id) ? REVISED_BASIS : ''}`.replace(/^ · /, '')) : null));
     };
     const ports = relationGroups(ends).map(g => h('section', { class: 'lens-ports' }, h('h3', {}, g.label, h('small', {}, String(g.list.length))), h('ul', {}, ...g.list.slice(0, 8).map(port)), g.list.length > 8 ? h('button', { type: 'button', class: 'link-button', onclick: () => openSheet() }, `${g.list.length - 8}개 더 · 전체 읽기`) : null));
     // A group drawn open: the lines that touch its frame belong to its inner parts. They read here from those parts, by verb and
@@ -1802,12 +1895,12 @@ function renderLens() {
         if (!near || !far)
             return null;
         const where = partPath(o.view, x.far).slice(0, -1).map(q => q.name).join(' › ') || o.project.name, came = x.far === cameFrom;
-        return h('li', {}, h('button', { type: 'button', class: `port fr-port${came ? ' came' : ''}`, 'data-far': x.far, title: `${far.name}${toParticle(far.name)} 가기 · ${REL_LABEL[x.r.kind] ?? x.r.kind}${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e) => { follow(x.far, x.r, e); go(o.key, x.far); } }, h('span', { class: 'port-top' }, h('span', { class: 'fr-near' }, near.name), h('span', { class: 'port-dir', 'aria-hidden': 'true' }, dirMark(x.r.kind, x.out)), h('strong', {}, far.name), came ? h('span', { class: 'port-came' }, '출발') : null), h('span', { class: 'port-where' }, `${where} 안`), x.r.note ? h('span', { class: 'port-note' }, x.r.note) : null));
+        return h('li', {}, h('button', { type: 'button', class: `port fr-port${came ? ' came' : ''}`, 'data-far': x.far, 'data-rel': x.r.id, title: `${far.name}${toParticle(far.name)} 가기 · ${REL_LABEL[x.r.kind] ?? x.r.kind}${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e) => { follow(x.far, x.r, e); go(o.key, x.far); }, ...lightOn([x.r.id], x.far) }, h('span', { class: 'port-top' }, h('span', { class: 'fr-near' }, near.name), h('span', { class: 'port-dir', 'aria-hidden': 'true' }, dirMark(x.r.kind, x.out)), h('strong', {}, far.name), came ? h('span', { class: 'port-came' }, '출발') : null), h('span', { class: 'port-where' }, `${where} 안`), x.r.note ? h('span', { class: 'port-note', 'data-rel-note': x.r.id }, x.r.note) : null));
     };
     const innerSection = inner && (inner.outside.length || inner.within) ? h('section', { class: 'lens-ports frame-rels', 'aria-label': '안쪽 부분의 바깥 연결' }, inner.outside.length ? h('h3', {}, '안쪽 부분의 바깥 연결', h('small', {}, String(inner.outside.length))) : null, ...relationGroups(inner.outside, '안쪽').flatMap(g => {
         const list = h('ul', {}, ...g.list.slice(0, 8).map(innerRow));
         return [h('h4', { class: 'fr-verb' }, g.label, h('small', {}, String(g.list.length))), list,
-            g.list.length > 8 ? h('button', { type: 'button', class: 'link-button', onclick: (e) => { list.replaceChildren(...g.list.map(innerRow).filter((x) => !!x)); e.currentTarget.remove(); } }, `${g.list.length - 8}개 더 보기`) : null];
+            g.list.length > 8 ? h('button', { type: 'button', class: 'link-button', onclick: (e) => { list.replaceChildren(...g.list.map(innerRow).filter((x) => !!x)); e.currentTarget.remove(); clampNotes(list, o, part.id); } }, `${g.list.length - 8}개 더 보기`) : null];
     }), inner.within ? h('p', { class: 'fr-within' }, `안에서 서로 ${inner.within}`) : null) : null;
     // Inside: on the map already when the part is an open frame; else its names, and the explicit way in.
     const kids = part.childIds.map(id => partOf(o, id).name);
@@ -1816,21 +1909,57 @@ function renderLens() {
     const menuItems = [
         o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', onclick: () => { editing = true; openSheet(() => document.getElementById('edit-name')?.focus()); } }, '이름·설명 고치기') : null,
         o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null,
-        o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '이 부분을 보던 맥락으로 원문을 붙여 넣어요', onclick: () => openPaste(part.id) }, '기록 붙여넣기') : null
+        o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '이 부분을 보던 맥락으로 원문을 붙여 넣어요', onclick: () => openPaste(part.id) }, '기록 붙여넣기') : null,
+        o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요 (이 부분은 읽기 맥락일 뿐이에요)', onclick: () => openFile(part.id) }, '코드·검사 자료 추가') : null,
+        o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', title: '이 부분을 새 세션에 넘길 문서를 만들어요', onclick: () => handover.open(part.id, document.querySelector('#lens details.more summary')) }, '이 부분 인수인계 문서') : null
     ].filter((x) => !!x);
     l.classList.remove('compare', 'scope-read');
     readingFor = [];
     l.replaceChildren();
-    put(l, entry, h('header', { class: 'lens-head' }, path.length ? h('div', { class: 'lens-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope) }, x.name)])) : null, h('h2', { id: 'lens-title' }, part.name), aliasOf(o.view, part.id) ? h('p', { class: 'lens-alias' }, aliasOf(o.view, part.id)) : null, h('div', { class: 'head-tools' }, menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e) => { e.currentTarget.parentElement.open = false; } }, ...menuItems)) : null, h('button', { type: 'button', class: 'rail-toggle', 'aria-label': '읽기면 접기', 'aria-expanded': 'true', title: '읽기면 접기 · 지도를 넓게 봐요', onclick: () => setRail(true) }, railIcon(true)), h('button', { type: 'button', class: 'close', 'aria-label': '선택 해제', title: '닫기 (Esc)', onclick: () => go(o.key) }, '×'))), h('div', { class: 'lens-body' }, desc, ...ports, innerSection, inside), h('footer', { class: 'lens-foot' }, h('button', { type: 'button', class: 'lens-more', onclick: () => openSheet() }, records.length ? `근거·기록 ${records.length}` : '전체 읽기', thread ? ` · 정리 ${thread}` : '', h('span', { 'aria-hidden': 'true' }, ' ›')), status.ai === 'deepseek' ? h('button', { type: 'button', class: 'link-button', onclick: () => { composerOpen = true; openSheet(() => document.getElementById(status.access === 'code' && !sessionCode() ? 'access-code' : 'ask-input')?.focus()); } }, '질문하기') : null));
+    put(l, entry, h('header', { class: 'lens-head' }, path.length ? h('div', { class: 'lens-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope) }, x.name)])) : null, h('h2', { id: 'lens-title' }, part.name), aliasOf(o.view, part.id) ? h('p', { class: 'lens-alias' }, aliasOf(o.view, part.id)) : null, h('div', { class: 'head-tools' }, menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e) => { e.currentTarget.parentElement.open = false; } }, ...menuItems)) : null, h('button', { type: 'button', class: 'rail-toggle', 'aria-label': '읽기면 접기', 'aria-expanded': 'true', title: '읽기면 접기 · 지도를 넓게 봐요', onclick: () => setRail(true) }, railIcon(true)), h('button', { type: 'button', class: 'close', 'aria-label': '선택 해제', title: '닫기 (Esc)', onclick: () => go(o.key) }, '×'))), 
+    // The current statements read right after the description they may qualify; the lines to other parts follow them.
+    h('div', { class: 'lens-body' }, desc, claims, sessionsLine(o.project, part.id), ...ports, requested, innerSection, inside), h('footer', { class: 'lens-foot' }, h('button', { type: 'button', class: 'lens-more', onclick: () => openSheet() }, records.length ? `근거·기록 ${records.length}` : '전체 읽기', thread ? ` · 정리 ${thread}` : '', h('span', { 'aria-hidden': 'true' }, ' ›')), status.ai === 'deepseek' ? h('button', { type: 'button', class: 'link-button', onclick: () => { composerOpen = true; openSheet(() => document.getElementById(status.access === 'code' && !sessionCode() ? 'access-code' : 'ask-input')?.focus()); } }, '질문하기') : null));
     l.hidden = false;
+    clampNotes(l, o, part.id);
+}
+/** The AI sessions behind a part, in one line under what was read (the full reading lists them with their folder and branch). */
+function sessionsLine(project, partId) {
+    const list = partSessions(project, partId);
+    if (!list.length)
+        return null;
+    return h('p', { class: 'lens-sessions', title: '이 부분의 근거가 된 기록을 남긴 세션, 또는 인수인계 문서로 이 부분을 이어받은 세션' }, h('span', { class: 'lens-sessions-label' }, '다룬 세션'), list.slice(0, 3).map(x => `${originLabel(x)}${x.tookOver ? ' · 인수인계로 이어받음' : ''}`).join(', '), list.length > 3 ? h('small', {}, ` 외 ${list.length - 3}`) : null);
+}
+/** The AI sessions behind a part in the full reading: the ones whose records the map quotes for it, and the ones that took it over
+ * by a handover. */
+function sessionsSection(project, partId) {
+    const list = partSessions(project, partId);
+    if (!list.length)
+        return null;
+    return h('section', { class: 'sec sec-sessions' }, h('h3', {}, '다룬 세션 ', h('small', {}, `${list.length}`)), h('ul', { class: 'part-sessions' }, ...list.slice(0, 6).map(x => h('li', {}, h('strong', {}, originLabel(x)), x.tookOver ? h('span', { class: 'chip plain' }, '인수인계로 이어받음') : null, 
+    // No time: a record's is when it was taken in (a folder's past sessions all at once), not when its session ran.
+    h('small', {}, [x.cwd ? x.cwd.split(/[\\/]/).filter(Boolean).at(-1) : null, x.branch].filter(Boolean).join(' · '))))));
+}
+/** A session record kept while a part is read (the automatic connection): only its sessions are drawn again, so the scroll, the
+ * focus and a form open there stay. A part that had none yet is read again whole. */
+function refreshSessions() {
+    const o = opened;
+    if (!o || !selected || planView.isOpen() || (!sheetOpen && lensRail))
+        return;
+    const cur = document.querySelector(sheetOpen ? '#panel .sec-sessions' : '#lens .lens-sessions'), next = sheetOpen ? sessionsSection(o.project, selected) : sessionsLine(o.project, selected);
+    if (cur && next)
+        cur.replaceWith(next);
+    else if (cur || next)
+        refreshReading();
 }
 /** Selection on the map: the part, its lines and the parts at their other ends (drawn representative or side ghost). */
 function markSelection(partId) {
+    // The scope itself, selected in place, is drawn as its own boundary card (the '이 범위' end of its lines).
+    const me = partId && partId === scope ? `ghost:${partId}` : partId;
     const related = new Set();
     document.querySelectorAll('.edge').forEach(el => {
         if (el.classList.contains('sum'))
             return; // summary lines read only at rest, never as a selection's own lines
-        const on = !!partId && (el.dataset.from === partId || el.dataset.to === partId);
+        const on = !!me && (el.dataset.from === me || el.dataset.to === me);
         // A line the change plan reads as context of its change (.ctx) stays above the groups as well.
         el.classList.toggle('on', on);
         layerEdge(el);
@@ -1838,18 +1967,67 @@ function markSelection(partId) {
         line.setAttribute('marker-end', plain ? (on ? 'url(#dot-on)' : 'url(#dot)') : on ? 'url(#arrow-on)' : 'url(#arrow)');
         line.setAttribute('marker-start', on ? 'url(#dot-on)' : 'url(#dot)');
         if (on)
-            related.add(el.dataset.from === partId ? el.dataset.to : el.dataset.from);
+            related.add(el.dataset.from === me ? el.dataset.to : el.dataset.from);
     });
     // The summary beside a selection holds every other relation: a line that held some of the selection's relations keeps the
     // rest (its count drops by those, which are drawn one by one), and gives way (.hit, hidden by .sel-sum) only when none is left.
-    sums = partId ? restSummary(lay.boxes, lay.edges, e => e.from === partId || e.to === partId) : restSums;
+    sums = me ? restSummary(lay.boxes, lay.edges, e => e.from === me || e.to === me) : restSums;
     document.querySelectorAll('.edge.sum').forEach(el => { const e = edgeOf(el.dataset.key); el.classList.toggle('hit', !e); el.classList.toggle('agg', !!e?.agg); });
     syncLineMode();
     placeEdgeLabels();
     document.querySelectorAll('.node[data-part],.frame,.ghost').forEach(el => {
-        el.classList.toggle('selected', !!partId && el.dataset.part === partId);
+        el.classList.toggle('selected', !!partId && (el.dataset.part === partId || (me !== partId && el.dataset.box === me)));
         el.classList.toggle('related', related.has(el.dataset.box));
     });
+    endNotes(partId);
+}
+/** The selection's own relations, read where they end: a card at the other end of one of them says that relation's stored note
+ * on its state line (one line; the whole note reads in the pane, on the same row). Only a relation whose two ends are the two
+ * drawn cards: an end drawn as a group, outside the scope, or standing for an inner part (a summarised line) says nothing here,
+ * so no note ever reads as another part's. Cards keep their size and place; the state line comes back when the selection goes. */
+function endNotes(partId) {
+    const world = $('world'), o = opened;
+    world.querySelectorAll('.node-rel').forEach(el => el.remove());
+    world.querySelectorAll('.node.has-rel').forEach(el => el.classList.remove('has-rel'));
+    if (!o || !partId || planView.isOpen())
+        return;
+    const sel = partOf(o, partId), byFar = new Map();
+    for (const x of relationEnds(o, partId))
+        if (x.near === partId && x.r.note && lay.boxes.get(x.far)?.kind === 'node')
+            byFar.set(x.far, [...(byFar.get(x.far) ?? []), x]);
+    for (const [far, list] of byFar) {
+        const card = world.querySelector(`.node[data-box="${CSS.escape(far)}"]`), meta = card?.querySelector('.node-meta');
+        // Only in the room the card already gives its state line: never a line it does not have.
+        if (!card || !meta)
+            continue;
+        const x = list[0], name = partOf(o, far)?.name ?? '';
+        meta.after(h('span', { class: `node-rel k-${x.r.kind}`, title: list.map(y => `${y.r.kind === 'related' ? `${sel?.name} — ${name}` : y.out ? `${sel?.name} → ${name}` : `${name} → ${sel?.name}`} · ${REL_LABEL[y.r.kind] ?? y.r.kind}\n${y.r.note}`).join('\n\n') }, h('i', { class: 'rel-dot', 'aria-hidden': 'true' }), h('span', { class: 'rel-text' }, x.r.note), list.length > 1 ? h('small', {}, ` 외 ${list.length - 1}`) : null));
+        card.classList.add('has-rel');
+    }
+}
+/** A relation row in the pane and its line and other end on the map light together while one of them is pointed at or
+ * focused; the map's own hover lights the rows of the same relations. Nothing moves and nothing is selected. */
+function lightOn(ids, far) {
+    const on = () => lightRelations(ids, far), off = () => lightRelations([], null);
+    return { onpointerenter: on, onpointerleave: off, onfocus: on, onblur: off };
+}
+function lightRelations(ids, far) {
+    const o = opened, world = $('world'), set = new Set(ids);
+    world.querySelectorAll('.lit').forEach(el => el.classList.remove('lit'));
+    if (!o || !set.size)
+        return;
+    world.querySelectorAll('.edge:not(.sum)').forEach(g => { if (edgeOf(g.dataset.key)?.ids.some(id => set.has(id))) {
+        g.classList.add('lit');
+        layerEdge(g);
+    } });
+    const box = far ? drawnRep(o, far) ?? (lay.boxes.has(`ghost:${far}`) ? `ghost:${far}` : null) : null;
+    if (box)
+        world.querySelector(`[data-box="${CSS.escape(box)}"]`)?.classList.add('lit');
+}
+/** The map's hover, read back in the pane: rows of these relations light (none when nothing is hovered). */
+function lightRows(ids) {
+    const set = new Set(ids);
+    document.querySelectorAll('#lens .port[data-rel]').forEach(el => el.classList.toggle('lit', set.has(el.dataset.rel)));
 }
 function clearHighlight() { document.querySelectorAll('.node.cited,.frame.cited').forEach(el => el.classList.remove('cited')); }
 function highlightParts(ids) {
@@ -1884,14 +2062,24 @@ function openRecord(id) {
 function renderPanel(scrollTop) {
     const o = opened, part = o.view.parts.find(p => p.id === selected), panel = $('panel');
     const prevBody = panel.querySelector('.panel-body'), keep = scrollTop ? 0 : prevBody?.scrollTop ?? 0;
+    // The same part read again (an answer, a status, a save): the control that had focus keeps it, a field its caret and selection.
+    const same = panel.dataset.read === `${o.key}|${part.id}` && !scrollTop, had = same && panel.contains(document.activeElement) ? document.activeElement : null;
+    const field = had instanceof HTMLTextAreaElement || had instanceof HTMLInputElement ? had : null;
+    const caret = field && field.id ? { id: field.id, start: field.selectionStart, end: field.selectionEnd, dir: field.selectionDirection, top: field.scrollTop } : null;
+    const mark = had && !caret ? ['claimFocus', 'requestFocus', 'far'].map(k => [k, had.dataset[k]]).find(([, v]) => v !== undefined) ?? null : null;
+    // What is written in a form whose words live nowhere else until saved (name/description, the description correction: rebuilt from
+    // the saved part). The question box is not among them: its draft is kept apart (getDraft/setDraft) and is the authority, e.g.
+    // emptied once the question is answered.
+    const typed = same ? ['edit-name', 'edit-note', 'fix-role'].map(id => document.getElementById(id)).filter((f) => (f instanceof HTMLInputElement || f instanceof HTMLTextAreaElement) && panel.contains(f)).map(f => [f.id, f.value]) : [];
     const path = partPath(o.view, part.id).slice(0, -1), records = subtreeRecords(o.view, part.id);
     const state = part.status === 'plan' ? (part.reading?.state ? stateLabel(part.reading) ?? '기록에서 읽음' : records.length ? '요청 기록 없음' : part.note ? '계획 설명만 있음 · 기록 없음' : '기록 없음') : STATUS_LABEL[part.status];
     const menuItems = [
         o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', onclick: () => { editing = !editing; renderPanel(false); } }, editing ? '고치기 닫기' : '이름·설명 고치기') : null,
         o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null,
-        o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '이 부분을 보던 맥락으로 원문을 붙여 넣어요', onclick: () => openPaste(part.id) }, '기록 붙여넣기') : null
+        o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '이 부분을 보던 맥락으로 원문을 붙여 넣어요', onclick: () => openPaste(part.id) }, '기록 붙여넣기') : null,
+        o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요 (이 부분은 읽기 맥락일 뿐이에요)', onclick: () => openFile(part.id) }, '코드·검사 자료 추가') : null
     ].filter((x) => !!x);
-    const head = h('header', { class: 'panel-head' }, h('div', { class: 'panel-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope) }, x.name)]), path.length ? null : h('span', {}, o.project.name)), h('h2', { id: 'panel-title', tabindex: '-1' }, part.name), h('div', { class: 'panel-chips' }, h('span', { class: `state s-${part.status}` }, h('i', { class: 'dot', 'aria-hidden': 'true' }), state), records.length ? h('span', { class: 'chip plain' }, `기록 ${records.length}${records[0] ? ` · ${ago(records[0].at)}` : ''}`) : null), h('div', { class: 'head-tools' }, menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e) => { e.currentTarget.parentElement.open = false; } }, ...menuItems)) : null, h('button', { type: 'button', class: 'close', 'aria-label': '요약으로 돌아가기', title: '요약으로 (Esc)', onclick: closeSheet }, '×')));
+    const head = h('header', { class: 'panel-head' }, h('div', { class: 'panel-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope) }, x.name)]), path.length ? null : h('span', {}, o.project.name)), h('h2', { id: 'panel-title', tabindex: '-1' }, part.name), h('div', { class: 'panel-chips' }, h('span', { class: `state s-${part.status}` }, h('i', { class: 'dot', 'aria-hidden': 'true' }), state), records.length ? h('span', { class: 'chip plain' }, `기록 ${records.length}${records[0] ? ` · ${ago(records[0].at)}` : ''}`) : null), h('div', { class: 'head-tools' }, menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e) => { e.currentTarget.parentElement.open = false; } }, ...menuItems)) : null, h('button', { type: 'button', class: 'link-button sheet-back', title: '전체 읽기를 닫고 지도와 요약으로 (Esc)', onclick: closeSheet }, '요약으로'), h('button', { type: 'button', class: 'close', 'aria-label': '요약으로 돌아가기', title: '요약으로 (Esc)', onclick: closeSheet }, '×')));
     const body = h('div', { class: 'panel-body' });
     if (editing)
         body.append(editForm(o, part));
@@ -1936,6 +2124,9 @@ function renderPanel(scrollTop) {
             })));
         body.append(rel);
     }
+    const sessions = sessionsSection(o.project, part.id);
+    if (sessions)
+        body.append(sessions);
     // What to do next with this part: going inside is explicit, never a side effect of selecting.
     if (part.childIds.length && part.id !== scope)
         body.append(h('div', { class: 'sec-acts' }, h('button', { type: 'button', class: 'secondary go-in', onclick: () => go(o.key, null, part.id) }, `안으로 들어가기 · ${part.childIds.length}`, h('span', { 'aria-hidden': 'true' }, ' ›'))));
@@ -1958,19 +2149,45 @@ function renderPanel(scrollTop) {
         body.append(sec);
     }
     panel.replaceChildren(...[visitEntry(o), head, body, composer(o, part)].filter((x) => !!x));
+    panel.dataset.read = `${o.key}|${part.id}`;
+    for (const [id, v] of typed) {
+        const f = document.getElementById(id);
+        if ((f instanceof HTMLTextAreaElement || f instanceof HTMLInputElement) && panel.contains(f) && f.value !== v)
+            f.value = v;
+    }
     if (scrollTop)
         body.scrollTop = 0;
     else
         body.scrollTop = keep;
+    if (caret) {
+        const f = document.getElementById(caret.id);
+        if ((f instanceof HTMLTextAreaElement || f instanceof HTMLInputElement) && panel.contains(f) && !f.disabled) {
+            f.focus({ preventScroll: true });
+            try {
+                f.setSelectionRange(caret.start, caret.end, caret.dir ?? 'none');
+            }
+            catch { /* not a text field */ }
+            f.scrollTop = caret.top;
+        }
+    }
+    else if (mark)
+        [...panel.querySelectorAll(`[data-${mark[0].replace(/[A-Z]/g, c => `-${c.toLowerCase()}`)}]`)].find(x => x.dataset[mark[0]] === mark[1])?.focus({ preventScroll: true });
 }
+/** AF100: the saves this page made itself (entry and the save number each made), so a job's result is applied on top of this
+ * page's own edits only, never on a save another tab made meanwhile. */
+const ownSaves = new Set();
+/** Why the last save was refused (storageErrorCode), for a caller that says more than commit's own text. */
+let saveFailure = null;
 /** The one write path for structure edits: saved projects through the workspace store, examples in memory only. */
 async function commit(o, next) {
     if (o.kind === 'saved' && o.ref) {
         try {
             o.ref = await store.save(o.ref, next);
+            ownSaves.add(`${o.ref.entryId}:${o.ref.seq}`);
         }
         catch (err) {
-            return storageErrorCode(err) === 'STORAGE_CONFLICT' ? '다른 탭에서 이 프로젝트가 바뀌어 저장하지 않았어요. 새로고침한 뒤 다시 해 주세요.' : '저장하지 못했어요. 바뀐 내용은 적용하지 않았어요.';
+            saveFailure = storageErrorCode(err);
+            return saveFailure === 'STORAGE_CONFLICT' ? '다른 탭에서 이 프로젝트가 바뀌어 저장하지 않았어요. 새로고침한 뒤 다시 해 주세요.' : '저장하지 못했어요. 바뀐 내용은 적용하지 않았어요.';
         }
     }
     else if (o.kind === 'example')
@@ -1979,6 +2196,8 @@ async function commit(o, next) {
         return '이 프로젝트는 읽기 전용이에요.';
     o.project = next;
     o.view = studioView(next);
+    // A wide reading open over this project reads the saved data again (said there), keeping its place.
+    wide.render();
     return null;
 }
 /* Adding a part: the first part of a new project, another top part, or a part inside the selected one. */
@@ -2039,6 +2258,13 @@ function editForm(o, part) {
             const failed = await commit(o, next);
             if (failed) {
                 msg.textContent = failed;
+                return;
+            }
+            // Saved; read again only where it was asked (another project or part since keeps its own reading).
+            if (opened !== o)
+                return;
+            if (selected !== part.id) {
+                renderSpace('keep');
                 return;
             }
             editing = false;
@@ -2121,6 +2347,8 @@ function keepAccessCode(value) { try {
 }
 catch { /* memory only */ } accessCodeMemory = value; renderStatus(); syncCodeGates(!!value); }
 /* ---------- change plan (plan-view.ts) on this map ---------- */
+/** The returned results of one exact request, read over the whole window (opened from the map's return pane, a part or the plan). */
+const wide = createWideReading({ current: () => (opened ? { key: opened.key, project: opened.project } : null) });
 const planView = createPlanView({
     current: () => opened,
     kv,
@@ -2174,7 +2402,9 @@ const planView = createPlanView({
     },
     area: () => syncMapArea(),
     readReturn: () => { planView.close(); openReturn(); },
+    readWide: (at, opener) => wide.open(at, opener),
     pasteReturn: () => { planView.close(); openPaste(selected); },
+    fileReturn: () => { planView.close(); openFile(selected); },
     readRequest: id => { planView.close(); void mapRun.run(id); },
     commitProject: next => { const o = opened; return o ? commit(o, next) : Promise.resolve('프로젝트가 열려 있지 않아요.'); },
     frame: (all, fallback) => {
@@ -2262,9 +2492,22 @@ function openPaste(partId) {
     openReturn();
     returnView.openPaste(partId, scene);
 }
+/** The provided-file form from the map, a part or a request: the same scene discipline as the paste box. */
+function openFile(partId) {
+    const o = opened;
+    if (!o || o.kind !== 'saved')
+        return;
+    const scene = readingScene();
+    openReturn();
+    returnView.openFile(partId, scene);
+}
+/** Where AI session records come from: the local server when it reads this PC's sessions, else folders picked in this browser. */
+const sessionSources = createSessionSources({ status: () => status, accessCode: () => sessionCode() });
 const returnView = createReturnView({
     current: () => opened,
     kv,
+    autoConnected: () => autoSync.connected(),
+    sources: sessionSources,
     status: () => status,
     accessCode: () => sessionCode(), keepAccessCode,
     bundle: () => planView.bundleOf(),
@@ -2298,22 +2541,48 @@ const returnView = createReturnView({
     compare: ids => { planView.focusParts(ids); },
     chrome: () => { const o = opened; if (o)
         setBar(o); },
-    paste: async (text, context) => {
+    paste: async (texts, context) => {
         const o = opened;
         if (!o || o.kind !== 'saved')
             return '이 프로젝트에는 기록을 저장할 수 없어요.';
-        let r;
+        let next = o.project, id = '', fresh = false;
         try {
-            r = pasteRecord(o.project, text, context && partOf(o, context) ? context : null);
+            for (const t of texts) {
+                const r = pasteRecord(next, t, context && partOf(o, context) ? context : null);
+                next = r.project;
+                id = r.record.id;
+                fresh ||= !r.duplicate;
+            }
         }
         catch {
             return '이 글은 저장할 수 없어요(너무 길거나 쓸 수 없는 문자).';
         }
+        if (!fresh)
+            return { id, duplicate: true };
+        const failed = await commit(o, next);
+        // A saved record is now a record to read into the map (nothing was sent): the map's own entries say so.
+        if (!failed) {
+            renderMapEntry();
+            refreshUnderstood();
+        }
+        return failed ?? { id, duplicate: false };
+    },
+    provide: async (key, text, evidence, context) => {
+        // Only the entry the file was chosen in: after a switch nothing is written to the project open now.
+        const o = opened;
+        if (!o || o.kind !== 'saved' || o.key !== key)
+            return '다른 프로젝트가 열려 있어 저장하지 않았어요. 고른 파일은 원래 프로젝트의 양식에 남아 있어요.';
+        let r;
+        try {
+            r = provideRecord(o.project, text, evidence, context && partOf(o, context) ? context : null);
+        }
+        catch {
+            return '이 자료는 저장할 수 없어요(너무 길거나 쓸 수 없는 문자, 또는 이름·판본·출처의 길이나 문자).';
+        }
         if (r.duplicate)
             return { id: r.record.id, duplicate: true };
         const failed = await commit(o, r.project);
-        // A saved record is now a record to read into the map (nothing was sent): the map's own entries say so.
-        if (!failed) {
+        if (!failed && opened === o) {
             renderMapEntry();
             refreshUnderstood();
         }
@@ -2334,6 +2603,13 @@ const returnView = createReturnView({
         go(o.key, scene.selected && partOf(o, scene.selected) ? scene.selected : null, scene.scope && partOf(o, scene.scope) ? scene.scope : null);
     },
     mapBlock: () => mapBlock(),
+    mapRead: () => {
+        const o = opened;
+        if (!o || o.kind !== 'saved')
+            return null;
+        const maps = o.project.readings.filter(isMapReading);
+        return maps.length ? { records: new Set(maps.flatMap(r => r.records.map(x => x.id))).size } : null;
+    },
     mapMarks: () => { const o = opened; return o && justRead?.key === o.key ? justRead.parts : []; },
     readIntoMap: id => !!opened?.project.readings.some(r => isMapReading(r) && r.records.some(x => x.id === id)),
     mapPrimary: () => { const inp = mapRun.input(); return !!inp && !inp.problem && mapRun.can(); }
@@ -2343,21 +2619,132 @@ const returnView = createReturnView({
 let justRead = null;
 const mapRun = createMapRun({
     current: () => opened,
+    // Each opening of a project is its own visit (projectFor keeps the object while the same project stays open).
+    visit: () => opened,
     status: () => status,
     accessCode: () => sessionCode(),
     requests: () => opened ? frozenRequests(opened.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : [])) : [],
-    commit: next => { const o = opened; return o ? commit(o, next) : Promise.resolve('프로젝트가 열려 있지 않아요.'); },
+    commit: async (next) => {
+        const o = opened;
+        if (!o)
+            return '프로젝트가 열려 있지 않아요.';
+        const base = o.ref ? { ...o.ref } : null, failed = await commit(o, next), now = opened;
+        // Left and came back while it was saved: this visit may have read the entry just before the save landed. It takes the saved
+        // project only when it read the very state this save replaced (same lifecycle and save number), so it is not left stale.
+        if (!failed && now && now !== o && now.key === o.key && base && now.ref && now.ref.lifecycle === base.lifecycle && now.ref.seq === base.seq) {
+            now.ref = o.ref;
+            now.project = o.project;
+            now.view = o.view;
+            renderSpace('keep');
+            if (selected)
+                refreshReading();
+            wide.render();
+        }
+        return failed;
+    },
     done: applied => mapApplied(applied),
-    changed: () => mapChanged()
+    changed: key => mapChanged(key),
+    // AF100: reservations of durable jobs, apart from projects and backups (under their own lock); used when the server keeps jobs.
+    jobs: () => jobReservations,
+    ownSave: (key, seq) => ownSaves.has(`${key}:${seq}`),
+    stored: key => { const fresh = new WorkspaceStore(kv, null); fresh.read(); const e = fresh.entries().find(x => x.entryId === key); return e ? { project: e.project, lifecycle: e.lifecycle } : null; }
 });
-function mapChanged() {
+let jobReservations = null;
+/* ---------- automatic connection to a working folder's Claude Code / Codex sessions (auto-sync.ts) ---------- */
+const handover = createHandoverView({ current: () => opened });
+const utf8 = (t) => new TextEncoder().encode(t).length;
+/** Why these records cannot be added to the project (a project keeps at most PASTED_LIMIT of them and FILE_LIMIT bytes in all), or
+ * null. With none, whether even a small one still fits. */
+function recordRoom(p, texts) {
+    const more = ' 새 대화는 더 들어오지 않아요. 새 프로젝트를 만들어 연결해 주세요.';
+    if (p.pasted.length + Math.max(1, texts.length) > PASTED_LIMIT)
+        return `이 프로젝트에 기록이 가득 찼어요(${PASTED_LIMIT}개까지).${more}`;
+    // Each record is also its id, time and part in the saved file.
+    const adds = texts.length ? texts.reduce((n, t) => n + utf8(JSON.stringify(t)) + 120, 0) : 4096;
+    return utf8(serializeProject(p)) + adds > FILE_LIMIT ? `이 프로젝트에 담을 수 있는 기록의 양(${FILE_LIMIT / 1e6}MB)이 다 찼어요.${more}` : null;
+}
+const autoSync = createAutoSync({
+    current: () => opened,
+    sources: sessionSources,
+    kv,
+    save: async (key, texts) => {
+        // Only the entry the sessions were looked at for: after a switch nothing is written to the project open now.
+        const o = opened;
+        if (!o || o.kind !== 'saved' || o.key !== key)
+            return { error: '다른 프로젝트가 열려 있어 저장하지 않았어요.', refused: false };
+        const full = recordRoom(o.project, texts);
+        if (full)
+            return { error: full, refused: false };
+        let next = o.project;
+        try {
+            for (const t of texts)
+                next = pasteRecord(next, t, null).project;
+        }
+        catch {
+            return { error: '세션 기록 하나를 저장하지 못했어요(쓸 수 없는 문자나 키처럼 보이는 글). 다른 세션은 계속 들어와요.', refused: true };
+        }
+        if (next === o.project)
+            return null;
+        const failed = await commit(o, next);
+        if (!failed) {
+            renderMapEntry();
+            refreshUnderstood();
+            if (!planView.isOpen()) {
+                if (!selected)
+                    returnView.render();
+                else
+                    refreshSessions();
+            }
+            return null;
+        }
+        // Nothing more is tried until the person asks: said so, and for a full browser storage, why.
+        return { error: saveFailure === 'QUOTA' ? '이 브라우저의 저장 공간이 가득 차서 세션 기록을 저장하지 못했어요. 자동으로 다시 하지 않아요.' : `${failed} 자동으로 다시 하지 않아요.`, refused: false };
+    },
+    full: () => { const o = opened; return o && o.kind === 'saved' ? recordRoom(o.project, []) : null; },
+    canRead: () => { const inp = mapRun.input(), st = mapRun.state(); return !!inp && !inp.problem && mapRun.can() && !st.pending && !st.ready && !st.committing; },
+    read: () => void mapRun.run(),
+    bound: () => renderMapEntry(),
+    readBlocked: () => (status.release === 'existing-map' ? RELEASE_TEXT.limit : mapRun.can() ? null : mapRun.blocked() ?? '지도 정리에 쓸 AI가 이 서버에 연결되어 있지 않아요.')
+});
+/** AF100: while a reading runs as a job, the person is told it goes on without this window but not without the PC's Studio. */
+function pendingLine(cls, text, cancelClass) {
+    const d = mapRun.detail();
+    return [h('span', { class: 'mu-pending' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), d.cancelling ? '취소하는 중…' : text),
+        d.cancelling ? null : h('button', { type: 'button', class: cancelClass, onclick: () => mapRun.cancel() }, '취소'),
+        d.durable ? h('span', { class: `fine mu-durable ${cls}` }, JOB_NOTE.durable) : null].filter((x) => !!x);
+}
+/** A short notice beside a reading's state (a cancel and what it cannot promise, a job not reachable). */
+function runNotice() { const n = mapRun.detail().notice; return n ? h('span', { class: 'fine mu-notice', role: 'status' }, n) : null; }
+/** Only what belongs to the entry whose reading changed: its home card, or its own map and panes while it is the one open. Another
+ * project open now (its paste, selection, scroll and focus) is never redrawn by it. */
+function mapChanged(key) {
     const o = opened;
-    if (!o)
+    if (!o) {
+        document.querySelectorAll('#saved-list [data-run-entry]').forEach(el => { if (el.dataset.runEntry === key)
+            runBadge(el); });
+        return;
+    }
+    if (o.key !== key)
         return;
     renderMapEntry();
     refreshUnderstood();
     if (returnView.isOpen() && !selected)
         returnView.render();
+    wide.render();
+}
+/** A project's map reading on its home card, said in place: the home page is not drawn again, so a draft or the focus there stays. */
+function runBadge(el) {
+    const st = mapRun.stateOf(el.dataset.runEntry);
+    el.textContent = st.committing ? '지도에 반영하는 중…' : st.ready ? '지도 정리 결과 도착 · 열어서 보기' : st.pending ? (mapRun.detail(el.dataset.runEntry).durable ? '지도 정리 중… · 창을 닫아도 PC에서 계속' : '지도 정리 중…') : st.error ? '지도 정리 안 됨 · 열어서 확인' : '';
+    el.hidden = !el.textContent;
+}
+/** A reading being saved (no longer cancellable), or a reply waiting for this project: in place of the way to start a reading. */
+function runReady(st, primary, link) {
+    if (st.committing)
+        return [h('span', { class: 'mu-pending mu-committing', role: 'status' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), '지도에 반영하는 중…')];
+    return [h('span', { class: 'mu-ready', role: 'status' }, st.error ? '정리 결과가 아직 지도에 저장되지 않았어요.' : '지도 정리 결과가 도착했어요. 아직 지도에 반영하지 않았어요.'),
+        h('button', { type: 'button', class: `${primary} mu-apply`, title: '다시 요청하지 않고 도착한 결과를 지금 지도와 대조해 반영해요', onclick: () => void mapRun.applyReady() }, st.error ? '다시 반영' : '정리 결과 보기'),
+        h('button', { type: 'button', class: `${link} mu-discard`, onclick: () => mapRun.discard() }, '버리기')];
 }
 /** Applied and saved: the map shows what came in where it is (a first map fits the view), and the pane says what was understood. */
 function mapApplied(a) {
@@ -2378,13 +2765,16 @@ function mapApplied(a) {
     applyReadMarks();
     if (selected)
         refreshReading();
+    // The pane it may have been opened from has just closed: the wide reading says so and closes to the map.
+    wide.render();
 }
 /** The map title's line: what the records made understandable (the last reading's sentence), new records to read, the way to it. */
 function understoodLine(o) {
     if (o.kind !== 'saved' || !o.view.parts.length)
         return null;
     const last = mapRun.last(), inp = mapRun.input(), st = mapRun.state(), fresh = inp && inp.problem !== 'NOTHING_NEW' ? inp.coverage.fresh : 0;
-    if (!last && !fresh && !st.pending && !st.error)
+    const waiting = st.committing || st.ready;
+    if (!last && !fresh && !st.pending && !st.error && !waiting && !mapRun.detail().notice)
         return null;
     const line = h('p', { class: 'map-understood' });
     if (last?.summary)
@@ -2393,23 +2783,30 @@ function understoodLine(o) {
     if (comparison)
         line.append(h('button', { type: 'button', class: 'map-more mu-comparison', onclick: () => openReturn() }, comparison));
     if (st.pending)
-        line.append(h('span', { class: 'mu-pending' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), '기록을 읽고 지도를 갱신하는 중…'), h('button', { type: 'button', class: 'map-more', onclick: () => mapRun.cancel() }, '취소'));
+        line.append(...pendingLine('mu-durable-line', '기록을 읽고 지도를 갱신하는 중…', 'map-more'));
+    else if (waiting)
+        line.append(...runReady(st, 'map-more', 'map-more'));
     else if (fresh && mapRun.can() && !inp.problem)
         line.append(h('button', { type: 'button', class: 'map-more mu-run', title: sendLine(inp), onclick: () => void mapRun.run() }, `새 기록 ${fresh}개 읽고 지도 갱신`));
     else if (fresh)
-        line.append(h('span', { class: 'mu-fresh' }, `아직 지도에 읽지 않은 기록 ${fresh}개`));
-    if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE')
+        line.append(h('span', { class: 'mu-fresh' }, `아직 지도에 읽지 않은 기록 ${fresh}개`), ...(mapRun.blocked() ? [h('span', { class: 'fine mu-blocked' }, mapRun.blocked())] : []));
+    // AF124: a limited release reads no report against a request, so it offers no request to choose for one (stored comparisons stay).
+    const limited = status.release === 'existing-map';
+    if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && !limited)
         line.append(h('button', { type: 'button', class: 'map-more', title: sendLine(inp), onclick: () => { if (returnView.isOpen())
                 returnView.close(); planView.openResults(); } }, '요청문을 골라 대조'));
-    if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && mapRun.can() && !st.pending)
+    if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && mapRun.can() && !st.pending && !waiting)
         line.append(h('button', { type: 'button', class: 'map-more mu-map-only', title: '요청과 대조하지 않고 지도만 정리해요. 원문은 보존되며 나중에 요청문을 골라 대조할 수 있어요.', onclick: () => void mapRun.runMapOnly() }, '요청 대조 없이 지도만 정리'));
-    if (last?.version === 'map-reading.1' && frozenRequests(o.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : [])).length)
+    if (last?.version === 'map-reading.1' && !limited && frozenRequests(o.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : [])).length)
         line.append(h('button', { type: 'button', class: 'map-more', title: '지도에 읽힌 원문도 고른 요청과 나중에 대조할 수 있어요', onclick: () => { if (returnView.isOpen())
                 returnView.close(); planView.openResults(); } }, '나중에 요청문을 골라 대조'));
     if (last)
         line.append(h('button', { type: 'button', class: 'map-more', title: '이번 정리의 근거와 확인할 것', onclick: () => openReturn() }, '근거'));
     if (st.error)
         line.append(h('span', { class: 'mu-error', role: 'alert' }, st.error));
+    const note = runNotice();
+    if (note)
+        line.append(note);
     return line;
 }
 function refreshUnderstood() {
@@ -2431,6 +2828,17 @@ function refreshUnderstood() {
         positionWorld();
     }
 }
+/** The server's status (or the session folders this browser can read) came after the open project was drawn: its empty map's entry
+ * and the title's line say now what a reading can do and whether sessions can be connected (the same mapRun.can/input/blocked as a click; nothing starts or moves). Only the project open now, in place: a focus
+ * inside them stays on the same action, and its selection, panes and camera are not touched. */
+function statusArrived() {
+    const a = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const near = a?.closest('#space-empty, #world .map-title') ?? null, text = a?.textContent ?? '';
+    renderMapEntry();
+    refreshUnderstood();
+    if (near?.isConnected && a && !a.isConnected)
+        [...near.querySelectorAll('button')].find(x => x.textContent === text)?.focus();
+}
 /** An empty saved map: records are the first way in (pasting saves only; reading sends, and says so), adding a part by hand is
  * the other. A project with records already can start from them without pasting again. */
 function renderMapEntry() {
@@ -2449,17 +2857,32 @@ function renderMapEntry() {
     }
     const inp = mapRun.input(), st = mapRun.state(), last = mapRun.last(), can = mapRun.can();
     const fresh = inp && inp.problem !== 'NOTHING_NEW' ? inp.coverage.fresh : 0;
+    if (status.release === 'existing-map') {
+        // AF124: no first map here. Records can still be kept and parts added by hand; the ways in are the release's own.
+        box.replaceChildren();
+        put(box, h('h2', {}, '기존 지도 작업용 버전이에요'), h('p', { class: 'se-lead' }, RELEASE_TEXT.limit), h('div', { class: 'se-acts' }, ...releaseActions('primary small')), h('p', { class: 'fine' }, fresh ? `기록 ${fresh}개는 이 프로젝트에 보관돼 있어요. 기록은 붙여 넣어 보관하고, 부분은 직접 추가할 수 있어요.` : '기록은 붙여 넣어 보관하고, 부분은 직접 추가할 수 있어요.'), h('div', { class: 'se-acts' }, h('button', { type: 'button', class: 'secondary small', onclick: () => openPaste(null) }, '기록 붙여넣기'), h('button', { type: 'button', class: 'secondary small se-file', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요', onclick: () => openFile(null) }, '코드·검사 자료 추가')), st.error ? h('p', { class: 'pp-error', role: 'alert' }, st.error) : null, h('button', { type: 'button', class: 'link-button se-direct', onclick: () => openPartForm(null) }, '부분 직접 추가'));
+        box.hidden = false;
+        return;
+    }
     const paste = (primary) => h('button', { type: 'button', class: primary ? 'primary small' : 'secondary small', onclick: () => openPaste(null) }, '기록 붙여넣기');
-    const acts = h('div', { class: 'se-acts' });
+    const file = () => h('button', { type: 'button', class: 'secondary small se-file', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요', onclick: () => openFile(null) }, '코드·검사 자료 추가');
+    const acts = h('div', { class: 'se-acts' }), waiting = st.committing || st.ready;
+    // Sessions this page can read, in a project not connected yet: the automatic connection is the first way in, pasting the other.
+    const linked = !!autoSync.bindingOf(o.key), offerSync = !linked && sessionSources.offered();
     if (st.pending)
-        put(acts, h('span', { class: 'mu-pending' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), '기록을 읽고 지도를 정리하는 중…'), h('button', { type: 'button', class: 'link-button', onclick: () => mapRun.cancel() }, '취소'));
+        put(acts, ...pendingLine('se-durable', '기록을 읽고 지도를 정리하는 중…', 'link-button'));
+    else if (waiting)
+        put(acts, ...runReady(st, 'primary small', 'link-button'));
     else if (fresh && can && !inp.problem)
-        put(acts, h('button', { type: 'button', class: 'primary small se-run', onclick: () => void mapRun.run() }, '기록으로 지도 정리'), paste(false));
+        put(acts, h('button', { type: 'button', class: 'primary small se-run', onclick: () => void mapRun.run() }, '기록으로 지도 정리'), paste(false), file());
+    else if (offerSync)
+        put(acts, h('button', { type: 'button', class: 'primary small se-sync', onclick: () => autoSync.toggle() }, '내 AI 세션 자동 연결'), paste(false), file());
     else
-        put(acts, paste(true));
-    const note = st.pending ? null : fresh && can && !inp.problem ? sendLine(inp) : fresh && !can ? `기록 ${fresh}개가 있어요. AI 서버가 연결된 주소에서 지도로 정리할 수 있어요.` : fresh && inp.problem ? '보낼 수 없는 기록이 있어요(너무 크거나 키처럼 보이는 글).' : '붙여 넣어 저장만 해서는 AI에 보내지 않아요. 지도로 정리할 때 보내요.';
+        put(acts, paste(true), file());
+    const note = st.pending || waiting ? null : fresh && can && !inp.problem ? sendLine(inp) : fresh && !can ? mapRun.blocked() ?? `기록 ${fresh}개가 있어요. AI 서버가 연결된 주소에서 지도로 정리할 수 있어요.` : fresh && inp.problem ? '보낼 수 없는 기록이 있어요(너무 크거나 키처럼 보이는 글).' : linked && can ? AUTO_SENDS : '붙여 넣어 저장만 해서는 AI에 보내지 않아요. 지도로 정리할 때 보내요.';
     box.replaceChildren();
-    put(box, h('h2', {}, '기록으로 첫 지도를 만들어요'), h('p', { class: 'se-lead' }, '작업 AI와 나눈 요구나 보고를 그대로 붙여 넣으면, 원문에 근거가 있는 부분과 연결만 지도로 정리해요. 만들어진 부분의 이름과 위치는 바로 고칠 수 있어요.'), last && !last.parts.length ? h('p', { class: 'se-gap' }, last.gaps.length ? last.gaps.join(' ') : '앞서 읽은 기록에서는 프로그램의 부분을 찾지 못했어요.') : null, acts, note ? h('p', { class: 'fine' }, note) : null, st.error ? h('p', { class: 'pp-error', role: 'alert' }, st.error) : null, h('button', { type: 'button', class: 'link-button se-direct', onclick: () => openPartForm(null) }, '부분 직접 추가'));
+    put(box, h('h2', {}, '기록으로 첫 지도를 만들어요'), h('p', { class: 'se-lead' }, offerSync ? 'Claude Code·Codex 대화는 자동 연결로 저절로 가져오고, 다른 AI와 나눈 요구나 보고는 그대로 붙여 넣으면 돼요. 원문에 근거가 있는 부분과 연결만 지도로 정리하고, 만들어진 부분의 이름과 위치는 바로 고칠 수 있어요.'
+        : '작업 AI와 나눈 요구나 보고를 그대로 붙여 넣으면, 원문에 근거가 있는 부분과 연결만 지도로 정리해요. 만들어진 부분의 이름과 위치는 바로 고칠 수 있어요.'), last && !last.parts.length ? h('p', { class: 'se-gap' }, last.gaps.length ? last.gaps.join(' ') : '앞서 읽은 기록에서는 프로그램의 부분을 찾지 못했어요.') : null, acts, note ? h('p', { class: 'fine' }, note) : null, st.error ? h('p', { class: 'pp-error', role: 'alert' }, st.error) : null, runNotice(), h('button', { type: 'button', class: 'link-button se-direct', onclick: () => openPartForm(null) }, '부분 직접 추가'));
     box.hidden = false;
 }
 /** The map row in the reading pane: records to read into the map, and what the last map reading understood, its candidates and gaps. */
@@ -2469,21 +2892,30 @@ function mapBlock() {
         return null;
     const last = mapRun.last(), inp = mapRun.input(), st = mapRun.state(), can = mapRun.can();
     const fresh = inp && inp.problem !== 'NOTHING_NEW' ? inp.coverage.fresh : 0;
-    if (!last && !fresh && !st.pending && !st.error)
+    const waiting = st.committing || st.ready;
+    if (!last && !fresh && !st.pending && !st.error && !waiting && !mapRun.detail().notice)
         return null;
     const sec = h('section', { class: 'rr-sec rr-map' }, h('h3', {}, '지도 정리', last ? h('small', {}, fullTime(last.at)) : null));
     if (st.pending)
-        sec.append(h('div', { class: 'pending' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), h('span', {}, '기록을 읽고 지도를 정리하는 중…'), h('button', { type: 'button', class: 'link-button', onclick: () => mapRun.cancel() }, '취소')));
+        sec.append(h('div', { class: 'pending' }, ...pendingLine('rm-durable', '기록을 읽고 지도를 정리하는 중…', 'link-button')));
+    else if (waiting)
+        sec.append(h('div', { class: 'pp-row rm-ready' }, ...runReady(st, 'primary small', 'link-button')));
     else if (fresh)
-        sec.append(h('div', { class: 'pp-row' }, can && !inp.problem ? h('button', { type: 'button', class: 'primary small', onclick: () => void mapRun.run() }, o.view.parts.length ? '기록 읽고 지도 갱신' : '기록으로 지도 정리') : null, h('span', { class: 'fine' }, can && !inp.problem ? `읽지 않은 기록 ${fresh}개 · ${sendLine(inp)}` : !can ? `읽지 않은 기록 ${fresh}개 · AI 서버가 연결된 주소에서 정리할 수 있어요` : '보낼 수 없는 기록이 있어요(너무 크거나 키처럼 보이는 글).')));
+        sec.append(h('div', { class: 'pp-row' }, can && !inp.problem ? h('button', { type: 'button', class: 'primary small', onclick: () => void mapRun.run() }, o.view.parts.length ? '기록 읽고 지도 갱신' : '기록으로 지도 정리') : null, h('span', { class: 'fine' }, can && !inp.problem ? `읽지 않은 기록 ${fresh}개 · ${sendLine(inp)}` : !can ? `읽지 않은 기록 ${fresh}개 · ${mapRun.blocked() ?? 'AI 서버가 연결된 주소에서 정리할 수 있어요'}` : '보낼 수 없는 기록이 있어요(너무 크거나 키처럼 보이는 글).')));
     if (st.error)
         sec.append(h('p', { class: 'pp-error', role: 'alert' }, st.error));
-    if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE')
+    {
+        const note = runNotice();
+        if (note)
+            sec.append(note);
+    }
+    const limited = status.release === 'existing-map';
+    if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && !limited)
         sec.append(h('p', { class: 'fine' }, sendLine(inp)), h('button', { type: 'button', class: 'link-button', onclick: () => { returnView.close(); planView.openResults(); } }, '요청문을 골라 대조'));
-    if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && can && !st.pending)
+    if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && can && !st.pending && !waiting)
         sec.append(h('button', { type: 'button', class: 'link-button rm-map-only', onclick: () => void mapRun.runMapOnly() }, '요청 대조 없이 지도만 정리'), h('p', { class: 'fine' }, '원문을 보존하며 나중에 요청문을 골라 대조할 수 있어요.'));
     if (last?.version === 'map-reading.1' && frozenRequests(o.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : [])).length)
-        sec.append(h('p', { class: 'fine' }, '이 읽기는 요청 대조 없이 지도에 정리했어요. 원문은 나중에 요청문을 골라 대조할 수 있어요.'));
+        sec.append(h('p', { class: 'fine' }, limited ? '이 읽기는 요청 대조 없이 지도에 정리했어요.' : '이 읽기는 요청 대조 없이 지도에 정리했어요. 원문은 나중에 요청문을 골라 대조할 수 있어요.'));
     if (last) {
         const name = (id) => partOf(o, id)?.name ?? null;
         if (last.summary)
@@ -2494,9 +2926,18 @@ function mapBlock() {
             sec.append(h('div', { class: 'rr-chips' }, h('span', { class: 'rr-cand-label' }, '새 부분'), ...made.slice(0, 12).map(chip)));
         if (said.length)
             sec.append(h('div', { class: 'rr-chips' }, h('span', { class: 'rr-cand-label' }, '이해가 갱신된 부분'), ...said.slice(0, 12).map(chip)));
-        const cands = last.candidates.filter(c => c.areaIds.every(id => name(id)));
+        const cands = last.candidates.map((c, i) => [c, i]).filter(([c]) => c.areaIds.every(id => name(id)));
+        // A candidate reads with what it leaves undecided and, for a statement whose part or truth is open, that statement itself
+        // (kind, words, version) beside the open label, never as a settled claim; each of its passages opens exactly, and the way
+        // back comes to this same passage button (kept by its identity, with the pane's scroll and request folds).
+        const cite = (q, which, i) => h('button', { type: 'button', class: 'rr-ref rr-cite', 'data-request-focus': JSON.stringify(['candidate', last.id, i, which]),
+            title: which === 'statement' ? '미정 진술의 원문에서 보기' : '원문에서 보기', onclick: () => { if (returnView.isOpen())
+                returnView.keepReading(); returnView.openQuote(q.record, q.quote, null, q.from); } }, `“${q.quote.slice(0, 40)}${q.quote.length > 40 ? '…' : ''}”`);
         if (cands.length)
-            sec.append(h('div', { class: 'rm-cands' }, h('h4', {}, '확인할 것', h('small', {}, String(cands.length))), h('ul', {}, ...cands.map(c => h('li', {}, h('span', {}, c.text), h('span', { class: 'rr-chips' }, ...c.areaIds.map(chip), c.quote ? h('button', { type: 'button', class: 'rr-ref rr-cite', title: '원문에서 보기', onclick: () => returnView.openQuote(c.quote.record, c.quote.quote, null) }, `“${c.quote.quote.slice(0, 40)}${c.quote.quote.length > 40 ? '…' : ''}”`) : null))))));
+            sec.append(h('div', { class: 'rm-cands' }, h('h4', {}, '확인할 것', h('small', {}, String(cands.length))), h('ul', {}, ...cands.map(([c, i]) => {
+                const v = candidateReading(c);
+                return h('li', {}, h('span', {}, v.label ? `${v.label} · ` : '', c.text), v.statement ? h('p', { class: 'fine' }, `${v.label ?? '미정'} 진술 · ${v.statement.kind} · ${v.statement.text}${v.statement.about ? ` · ${displayAbout(v.statement.about)}` : ''}`) : null, h('span', { class: 'rr-chips' }, ...c.areaIds.map(chip), ...v.quotes.map(x => cite(x.quote, x.which, i))));
+            }))));
         if (last.gaps.length)
             sec.append(h('ul', { class: 'rm-gaps' }, ...last.gaps.map(g => h('li', {}, g))));
         const cut = last.records.filter(r => r.to < r.total || r.from > 0).length;
@@ -2508,8 +2949,10 @@ function mapBlock() {
     return sec;
 }
 function currentRequestResults(o, partId) {
-    return requestResults(o.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : []), {
+    const scopes = (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : []);
+    return requestResults(o.project, scopes, {
         ...(partId ? { partId } : {}), compact: true, quote: showQuote,
+        wide: (at, opener) => wide.open({ ...at, scopes, label: partId ? partOf(o, partId)?.name ?? '부분' : '돌아와 읽기' }, opener),
         correct: async (reading, index, target) => {
             try {
                 const error = await commit(o, correctRequestMatch(o.project, reading, index, target));
@@ -2547,15 +2990,64 @@ function currentRequestResults(o, partId) {
 const CLAIM_ORDER = ['open', 'differs', 'want', 'reported', 'checked', 'idea', 'describes'];
 /** Said once, where a description or a line rests only on a report a later record took back (it stays; it is not current evidence). */
 const REVISED_BASIS = ' · 근거였던 보고는 이후 정정됨';
-/** Claims of a part as short lines, a report correcting an earlier one first, then most decision-relevant, each with its quote. */
-function claimList(claims, max) {
-    const sorted = [...claims].sort((a, b) => Number(!!b.replaces) - Number(!!a.replaces) || CLAIM_ORDER.indexOf(a.kind) - CLAIM_ORDER.indexOf(b.kind)).slice(0, max);
+/** Claims of a part as short lines, a report correcting an earlier one first, then most decision-relevant, each with its quote.
+ * Claims of one kind keep their reading's own order (newest reading first; within a reading, as it said them), so a sequence
+ * a reading wrote (parse, compile, run) is never read backwards. */
+function claimList(part, claims, max) {
+    const fresh = new Map();
+    for (const c of claims)
+        if (!fresh.has(c.reading))
+            fresh.set(c.reading, fresh.size);
+    const sorted = [...claims].sort((a, b) => Number(!!b.replaces) - Number(!!a.replaces) || CLAIM_ORDER.indexOf(a.kind) - CLAIM_ORDER.indexOf(b.kind)
+        || fresh.get(a.reading) - fresh.get(b.reading) || a.index - b.index).slice(0, max);
     return h('ul', { class: 'claims' }, ...sorted.map(c => h('li', { class: `claim k-${c.kind}${c.replaces ? ' replaces' : ''}` }, 
     // The kind column keeps its usual width; that this one corrects an earlier claim reads on its own line above the text.
-    h('span', { class: 'cl-kind' }, CLAIM_LABEL[c.kind]), h('span', { class: 'cl-text' }, c.replaces ? h('span', { class: 'cl-revises' }, '앞 주장을 대체한 정정') : null, c.text, c.about ? h('small', { class: 'cl-about', title: c.about }, ` · ${displayAbout(c.about)}`) : null), h('button', { type: 'button', class: 'cl-cite', title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote) }, '근거'))));
+    h('span', { class: 'cl-kind' }, CLAIM_LABEL[c.kind]), h('span', { class: 'cl-text' }, c.replaces ? h('span', { class: 'cl-revises' }, '앞 주장을 대체한 정정') : null, c.text, c.about ? h('small', { class: 'cl-about', title: c.about }, ` · ${displayAbout(c.about)}`) : null), h('button', { type: 'button', class: 'cl-cite', 'data-claim-focus': JSON.stringify([part, c.reading, c.index, c.record, c.from ?? null, c.to ?? null]), title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote, c.from) }, '근거'))));
 }
-/** A quote from the selection: the record in the pane, marked; closing the pane comes back to this part. */
-function showQuote(record, quote) {
+/** What the person unfolded in the lens, per part (memory, this tab): long relation notes.
+ * Reading a quote or following a relation and coming back keeps them as they were, like the scroll and the focused citation. */
+const lensOpen = new Set();
+/** Under the description as read: the passages it rests on (its own basis only; none for the person's correction), folded to a
+ * count. Each opens its passage exactly; the way back comes to the same part, the same button and the fold as it was left. */
+function roleBasisBlock(o, part, u, surface) {
+    const ev = roleEvidence(part, u);
+    if (!ev)
+        return null;
+    const key = `${o.key}|${part}|role-basis|${surface}`;
+    const fold = h('details', { class: 'role-basis', open: lensOpen.has(key) }, h('summary', {}, `설명 근거 ${ev.count}`), h('ul', {}, ...ev.items.map(x => h('li', {}, h('button', { type: 'button', class: 'cl-cite', 'data-claim-focus': x.key, title: `원문에서 보기 · “${x.quote.quote}”`,
+        onclick: () => showQuote(x.quote.record, x.quote.quote, x.quote.from) }, x.label)))));
+    fold.addEventListener('toggle', () => { if (fold.open)
+        lensOpen.add(key);
+    else
+        lensOpen.delete(key); });
+    return fold;
+}
+/** Current statements stay in one continuous reading, including qualifications late in the source. The pane scrolls normally;
+ * position alone cannot make a statement optional. Evidence history still reads in the sheet. */
+function lensClaims(part, claims) {
+    const list = claimList(part, claims, claims.length);
+    list.id = 'lens-claims';
+    return h('section', { class: 'lens-claims', 'aria-label': `현재 주장 ${claims.length}개` }, h('h3', {}, '현재 주장', h('small', {}, String(claims.length))), list);
+}
+/** A relation note longer than its three lines reads whole on request, in place (the row itself goes to the other end). Safe to
+ * run again over the same pane (rows shown later, e.g. after '더 보기'): a row that has its control keeps it. */
+function clampNotes(root, o, part) {
+    root.querySelectorAll('.port-note[data-rel-note]').forEach(note => {
+        const key = `${o.key}|${part}|note|${note.dataset.relNote}`, li = note.closest('li');
+        if (!li || li.querySelector(':scope > .note-more') || note.classList.contains('whole') || note.scrollHeight <= note.clientHeight + 1)
+            return;
+        const sync = () => { const open = lensOpen.has(key); note.classList.toggle('whole', open); more.textContent = open ? '접기' : '전체'; more.setAttribute('aria-expanded', String(open)); };
+        const more = h('button', { type: 'button', class: 'link-button note-more', 'aria-label': '관계 설명 전체', onclick: () => { if (lensOpen.has(key))
+                lensOpen.delete(key);
+            else
+                lensOpen.add(key); sync(); } });
+        li.append(more);
+        sync();
+    });
+}
+/** A quote from the selection: the record in the pane, marked where it was read (from, when the reading kept it; else where the
+ * words stand); closing the pane comes back to this part. */
+function showQuote(record, quote, from) {
     const o = opened;
     if (!o || o.kind !== 'saved')
         return;
@@ -2564,17 +3056,19 @@ function showQuote(record, quote) {
     if (!scene && returnView.isOpen())
         returnView.keepReading();
     openReturn();
-    returnView.openQuote(record, quote, scene);
+    returnView.openQuote(record, quote, scene, from);
 }
 /** In the sheet: the part as read from records (the description and the person's correction of it, the current claims), then the
  * evidence history apart, folded. Correcting the description never touches the name, the note or the claims. */
+/** The description being corrected: this entry's part (an imported copy shares part ids, so the entry is part of it). Each opening
+ * of the form is its own session (its own object): a save ends only the session it was submitted from. */
 let fixingRole = null;
 function understoodSection(o, part) {
     const u = part.reading;
     if (!u)
         return null;
     const sec = h('section', { class: 'sec sec-understood' }, h('h3', {}, '기록에서 읽은 이해'));
-    if (fixingRole === part.id && o.kind === 'saved') {
+    if (fixingRole?.key === o.key && fixingRole.part === part.id && o.kind === 'saved') {
         const area = h('textarea', { id: 'fix-role', rows: '3', maxlength: '300' });
         area.value = u.role ?? '';
         const msg = h('p', { class: 'form-msg', role: 'status' });
@@ -2588,28 +3082,46 @@ function understoodSection(o, part) {
                     msg.textContent = '설명은 1~300자로 적어 주세요.';
                     return;
                 }
+                const session = fixingRole;
                 const failed = await commit(o, next);
                 if (failed) {
                     msg.textContent = failed;
                     return;
                 }
-                fixingRole = null;
+                // This session is done; one begun meanwhile (on another part or entry, or this part's form closed and opened again) is its
+                // own and stays open with what is written in it.
+                if (fixingRole === session)
+                    fixingRole = null;
+                if (opened !== o)
+                    return;
                 renderSpace('keep');
-                select(part.id);
+                if (selected === part.id)
+                    select(part.id);
             } }, h('label', { for: 'fix-role' }, '설명 바로잡기 ', h('small', {}, '이름·내 설명·기록의 주장은 그대로예요')), area, msg, h('div', { class: 'row' }, h('button', { type: 'submit', class: 'primary small' }, '저장'), h('button', { type: 'button', class: 'link-button', onclick: () => { fixingRole = null; renderPanel(false); } }, '취소'))));
     }
     else if (u.role) {
-        sec.append(h('p', { class: 'und-role' }, u.role), h('p', { class: 'src', title: u.roleAbout ?? '' }, u.corrected ? `직접 바로잡은 설명 · ${fullTime(u.corrected.at)}` : `기록에서 읽은 설명${u.roleAbout ? ` · ${displayAbout(u.roleAbout)} 기준` : ''}${u.roleBasisRevised ? REVISED_BASIS : ''}`, o.kind === 'saved' ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { fixingRole = part.id; renderPanel(false); requestAnimationFrame(() => document.getElementById('fix-role')?.focus()); } }, ' 설명 바로잡기') : null));
+        sec.append(h('p', { class: 'und-role' }, u.role), h('p', { class: 'src', title: u.roleAbout ?? '' }, u.corrected ? `직접 바로잡은 설명 · ${fullTime(u.corrected.at)}` : `기록에서 읽은 설명${u.roleAbout ? ` · ${displayAbout(u.roleAbout)} 기준` : ''}${u.roleBasisRevised ? REVISED_BASIS : ''}`, o.kind === 'saved' ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { fixingRole = { key: o.key, part: part.id }; renderPanel(false); requestAnimationFrame(() => document.getElementById('fix-role')?.focus()); } }, ' 설명 바로잡기') : null));
+        const basis = roleBasisBlock(o, part.id, u, 'sheet');
+        if (basis)
+            sec.append(basis);
         // Descriptions read later that did not replace this one (no record said it supersedes it) read apart, with their version.
         for (const x of u.others.slice(0, 2))
             sec.append(h('p', { class: 'und-later' }, h('span', { title: x.about ?? '' }, `다른 기록의 설명${x.about ? ` · ${displayAbout(x.about)}` : ''} · 현재 설명을 대체한다는 근거 없음`), x.text));
     }
+    // The full reading reads every current claim, as the lens does (claimList takes them all).
     if (u.claims.length)
-        sec.append(claimList(u.claims, 12));
+        sec.append(claimList(part.id, u.claims, u.claims.length));
     const requested = currentRequestResults(o, part.id);
     if (requested)
         sec.append(requested);
-    const hist = h('details', { class: 'und-history' }, h('summary', {}, `근거 이력 · 정리 ${u.history.length}회`), h('ol', {}, ...[...u.history].reverse().map(x => h('li', {}, h('span', { class: 'uh-at' }, fullTime(x.at)), x.role ? h('span', { class: 'uh-role' }, x.role) : null, ...x.claims.map(c => h('span', { class: 'uh-claim' }, h('span', { class: 'cl-kind' }, CLAIM_LABEL[c.kind]), c.text, ' ', h('button', { type: 'button', class: 'cl-cite', title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote) }, '근거')))))));
+    // The history fold and its quotes keep their identity (this entry and part; each quote by its stored reading, index and place):
+    // back from an original the fold is open again and the same quote has focus, also between two readings with the same time.
+    const histKey = `${o.key}|${part.id}|history`;
+    const hist = h('details', { class: 'und-history', open: lensOpen.has(histKey) }, h('summary', {}, `근거 이력 · 정리 ${u.history.length}회`), h('ol', {}, ...[...u.history].reverse().map(x => h('li', {}, h('span', { class: 'uh-at' }, fullTime(x.at)), x.role ? h('span', { class: 'uh-role' }, x.role) : null, ...x.claims.map((c, j) => h('span', { class: 'uh-claim' }, h('span', { class: 'cl-kind' }, CLAIM_LABEL[c.kind]), c.text, ' ', h('button', { type: 'button', class: 'cl-cite', 'data-claim-focus': JSON.stringify([part.id, 'history', x.reading, j, c.record, c.from ?? null]), title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote, c.from) }, '근거')))))));
+    hist.addEventListener('toggle', () => { if (hist.open)
+        lensOpen.add(histKey);
+    else
+        lensOpen.delete(histKey); });
     sec.append(hist);
     return sec;
 }
@@ -2639,8 +3151,9 @@ async function send(intent, question) {
         const res = await askStudio(payload, controller.signal, sessionCode());
         addAnswer(o, partId, { at: new Date().toISOString(), intent, question, model: res.model, reply: res.reply, refs: Object.fromEntries(refs), coverage });
         ask = null;
-        if (intent === 'question')
-            setDraft(o, partId, '');
+        // A retried question can succeed after the person has typed another one: only the question that went out leaves the box.
+        if (intent === 'question' && question !== null)
+            setDraft(o, partId, draftAfterAnswer(getDraft(o, partId), question));
     }
     catch (e) {
         const code = e instanceof AskError ? e.code : 'REQUEST_FAILED';
@@ -2667,9 +3180,13 @@ function renderStatus() {
     const pill = $('ai-pill'), text = $('ai-text');
     // A server that asks for an access code is not ready to ask until the person has given one in this tab.
     const needsCode = status.ai === 'deepseek' && status.access === 'code' && !sessionCode();
-    pill.dataset.state = needsCode ? 'code' : status.ai;
-    text.textContent = status.ai === 'deepseek' ? (needsCode ? 'AI · 접속 코드 필요' : 'AI 정리 가능') : status.ai === 'off' ? 'AI 키 없음' : 'AI 서버 미연결';
-    pill.title = status.ai === 'deepseek' ? `서버가 ${status.model ?? 'DeepSeek'}에 정리를 요청해요. 키는 서버에만 있어요.${needsCode ? ' 이 서버는 접속 코드를 받아요. 정리를 요청할 때 입력해 주세요.' : ''}` : status.ai === 'off' ? '서버는 연결됐지만 AI 키가 설정되지 않았어요.' : '이 페이지에는 AI 서버가 연결되어 있지 않아요.';
+    // AF102: a server whose map readings are made only by its own map executor (a local preview) says so; the rest stays as ai says.
+    const mapOnly = status.ai !== 'deepseek' && status.map?.via === 'jobs';
+    const later = status.jobs?.executor?.scope === 'map6-later' || status.jobs?.executor?.scope === 'map7-later';
+    const mapNote = status.release === 'existing-map' ? ` ${RELEASE_TEXT.limit}` : status.map?.via === 'jobs' ? ` 지도 정리는 이 PC의 지도 실행기(${status.map.model}, 미리보기)가 ${later ? '첫 지도와 이후 기록·요청 대조까지' : '첫 지도만'} 해요.` : '';
+    pill.dataset.state = needsCode ? 'code' : mapOnly ? 'map' : status.ai;
+    text.textContent = status.ai === 'deepseek' ? (needsCode ? 'AI · 접속 코드 필요' : 'AI 정리 가능') : mapOnly ? '지도 정리만 가능' : status.ai === 'off' ? 'AI 키 없음' : 'AI 서버 미연결';
+    pill.title = (status.ai === 'deepseek' ? `서버가 ${status.model ?? 'DeepSeek'}에 정리를 요청해요. 키는 서버에만 있어요.${needsCode ? ' 이 서버는 접속 코드를 받아요. 정리를 요청할 때 입력해 주세요.' : ''}` : mapOnly ? '질문·계획·결과 정리는 서버에 AI 키가 없어 꺼져 있어요.' : status.ai === 'off' ? '서버는 연결됐지만 AI 키가 설정되지 않았어요.' : '이 페이지에는 AI 서버가 연결되어 있지 않아요.') + mapNote;
 }
 /* ---------- canvas interaction ----------
  * Empty space: drag pans. A node or frame head: click selects, drag moves (frames carry their children; a child moves
@@ -2798,7 +3315,7 @@ function bindFind() {
         }
     });
     button.addEventListener('click', () => show(!findOpen));
-    document.addEventListener('keydown', e => { if (e.key === '/' && opened && !$('space').hidden && !e.target.closest('textarea,input,select')) {
+    document.addEventListener('keydown', e => { if (e.key === '/' && opened && !$('space').hidden && !wide.isOpen() && !$('space').classList.contains('sheet-read') && !e.target.closest('textarea,input,select')) {
         e.preventDefault();
         show(true);
     } });
@@ -2918,6 +3435,18 @@ function bindCanvas() {
     document.addEventListener('keydown', e => {
         if (e.target.closest('textarea,select,input:not([type=checkbox]):not([type=radio])'))
             return; // Esc still works from a checkbox
+        if (handover.isOpen())
+            return; // the handover document is modal: its own Esc closes it and nothing under it
+        if (e.key === 'Escape' && autoSync.isOpen()) {
+            autoSync.close();
+            return;
+        } // the sync panel is a popover over everything below
+        // The wide reading is over everything (its own keys handle Esc inside it; this is focus left on the page).
+        if (wide.isOpen()) {
+            if (e.key === 'Escape')
+                wide.escape();
+            return;
+        }
         // Innermost first: an open ⋯ menu closes before anything else, and focus goes back to its button.
         const menu = document.querySelector('details.more[open]');
         if (e.key === 'Escape' && menu) {
@@ -2994,6 +3523,8 @@ function bindEdgeHints() {
             tip.replaceChildren(h('strong', {}, `${nameOf(edge.from)} ${edge.kind === 'related' ? '—' : '→'} ${nameOf(edge.to)}`), h('span', { class: 'tip-kind' }, `${REL_LABEL[edge.kind] ?? edge.kind}${restOf(edge) ? ` · 선택한 부분의 관계를 뺀 나머지 ${edge.ids.length}개` : edge.agg ? ` · 안쪽 관계 ${edge.ids.length}개의 요약 · 선택하면 실제 끝점` : edge.ids.length > 1 ? ` · 관계 ${edge.ids.length}개를 한 선으로 묶음` : ''}`), ...edge.notes.slice(0, 3).map(n => h('span', {}, n)), ...(edgeRevised(edge) ? [h('span', { class: 'tip-revised' }, REVISED_BASIS.replace(/^ · /, ''))] : []));
             tip.hidden = false;
             place(e);
+            if (g.classList.contains('on'))
+                lightRows(edge.ids);
             return;
         }
         const part = t.closest('.node[data-box], .frame-head[data-part], .ghost[data-box]');
@@ -3001,6 +3532,8 @@ function bindEdgeHints() {
             // A summary line also lights for a part inside one of its ends whose own relations it holds.
             const id = part.dataset.box ?? part.dataset.part, mine = new Set(lay.edges.filter(x => x.from === id || x.to === id).flatMap(x => x.ids));
             world.querySelectorAll('.edge').forEach(x => x.classList.toggle('near', x.dataset.from === id || x.dataset.to === id || (x.classList.contains('sum') && !!edgeOf(x.dataset.key)?.ids.some(r => mine.has(r)))));
+            // An end of the selection's lines: the pane's rows of those relations light too.
+            lightRows(selected && id !== selected ? lay.edges.filter(x => (x.from === id && x.to === selected) || (x.to === id && x.from === selected)).flatMap(x => x.ids) : []);
         }
     });
     world.addEventListener('pointermove', e => { if (!tip.hidden)
@@ -3010,8 +3543,10 @@ function bindEdgeHints() {
         if (t.classList.contains('edge-hit'))
             tip.hidden = true;
         const to = e.relatedTarget;
-        if (!to || !to.closest?.('.node, .frame-head, .ghost, .edge'))
+        if (!to || !to.closest?.('.node, .frame-head, .ghost, .edge')) {
             world.querySelectorAll('.edge.near').forEach(x => x.classList.remove('near'));
+            lightRows([]);
+        }
     });
 }
 /* ---------- import (backup file → new saved copy; the file's bytes are validated as project data) ---------- */
@@ -3106,7 +3641,12 @@ function bindImport() {
     });
 }
 async function main() {
-    store = new WorkspaceStore(kv, navigator.locks ?? null);
+    const locks = navigator.locks ?? null;
+    store = new WorkspaceStore(kv, locks);
+    // AF100: reservations only in the real persistent storage, with its failures as they are (the memory fallback and the
+    // read-as-empty of kv above are for the rest of the page, never for a job that must outlive it).
+    const durableStore = storage;
+    jobReservations = new JobReservations(runtimeStorage({ getItem: k => durableStore.getItem(k), setItem: (k, v) => durableStore.setItem(k, v) }), locks, !!durableStore);
     try {
         await store.init();
     }
@@ -3119,12 +3659,31 @@ async function main() {
     bindNewProject();
     $('add-part').addEventListener('click', () => openPartForm(scope));
     $('plan-entry').addEventListener('click', () => planView.toggle());
+    $('handover-open').addEventListener('click', e => handover.open(scope, e.currentTarget));
     $('return-entry').addEventListener('click', () => { if (returnView.isOpen() && !planView.isOpen())
         returnView.close();
     else
         openReturn(); });
-    statusReady = aiStatus().then(s => { status = s; renderStatus(); planView.statusChanged(); refreshReading(); if (!selected && !planView.isOpen())
-        returnView.render(); });
+    statusReady = aiStatus().then(s => {
+        status = s;
+        renderStatus();
+        renderRelease();
+        planView.statusChanged();
+        refreshReading();
+        statusArrived();
+        if (!selected && !planView.isOpen())
+            returnView.render();
+        mapRun.resume();
+        autoSync.opened();
+        autoSync.start();
+        void sessionSources.load().then(() => { autoSync.sourcesChanged(); statusArrived(); if (opened && autoSync.bindingOf(opened.key))
+            void autoSync.tick(); if (!selected && !planView.isOpen())
+            returnView.render(); });
+    });
+    $('sync-pill').addEventListener('click', () => autoSync.toggle());
+    // AF100: a reservation another tab of this address made (or ended) is looked at now, not at this page's next click.
+    window.addEventListener('storage', e => { if (e.key?.endsWith(JOBS_KEY))
+        void statusReady?.then(() => mapRun.resume()); });
     window.addEventListener('hashchange', () => void render());
     window.addEventListener('pagehide', flushView);
     document.addEventListener('visibilitychange', () => { if (document.hidden)

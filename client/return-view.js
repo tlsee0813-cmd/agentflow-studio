@@ -13,23 +13,53 @@ import { clip } from '../shared/studio.js';
 import { ui62Reading, savedReading, readingInput, partLabel } from './digest-source.js';
 import { digestStore, askHash, makeReading } from './digest-store.js';
 import { askDigest, AskError, ERROR_TEXT } from './studio-api.js';
+import { sessionText, recordParts, quoteNext, NEXT_RECORD, NEXT_LINE, RECORD_HEAD, stamp, TOOL_NAME } from '../shared/session-import.js';
+import { readSessionFile } from './session-source.js';
+import { WEB_RECORD_ASK, foldRecord, sessionOrigin, originLabel, sessionName } from '../shared/handover.js';
+import { PASTED_TEXT_LIMIT } from '../shared/types.js';
 import { secretLike } from './plan-source.js';
+import { redactSecrets } from '../shared/secret.js';
 import { h, put, fullTime, codeGate, codeNote, quotedText as quoted } from './plan-dom.js';
 import { captureRequestReading, restoreRequestReading } from './request-results.js';
+import { EVIDENCE_KIND_LABEL, NOT_EXECUTED, NOT_RECORDED, EVIDENCE_NAME_MAX, EVIDENCE_VERSION_MAX, EVIDENCE_ORIGIN_MAX, PROVIDED_FILE_BYTES, decodeProvided, evidenceProblem } from '../shared/record-source.js';
+/** Said where a record or file is saved while the project is connected, and on the empty map's card in the same words. */
+export const AUTO_SENDS = '자동 연결 중이라, 저장하면 다음 자동 지도 갱신 때 AI에 보내요.';
+const FILE_PROBLEM = {
+    TOO_LARGE: `파일이 ${Math.floor(PROVIDED_FILE_BYTES / 1000)}KB를 넘어 읽지 않았어요.`, NOT_UTF8: 'UTF-8 텍스트 파일이 아니라서(잘못된 바이트가 있어요) 받지 않았어요.',
+    EMPTY: '파일이 비어 있거나 공백뿐이에요.', TOO_LONG: '파일이 기록 한도(60,000자)를 넘어요. 잘라서 저장하지 않아요.',
+    CHARACTERS: '탭·줄바꿈 외의 제어 문자가 있어 받지 않았어요.', SECRET: '키나 토큰처럼 보이는 글이 있어 받지 않았어요. 그 부분을 지운 파일로 다시 골라 주세요.',
+    UNREADABLE: '파일을 읽지 못했어요.'
+};
+const FIELD_PROBLEM = { name: `파일 이름은 한 줄 ${EVIDENCE_NAME_MAX}자 이내여야 해요(앞뒤 공백·줄바꿈·키처럼 보이는 글 없이).`,
+    version: `판본은 한 줄 ${EVIDENCE_VERSION_MAX}자 이내로 적어 주세요(줄바꿈·키처럼 보이는 글 없이).`, origin: `출처는 한 줄 ${EVIDENCE_ORIGIN_MAX}자 이내로 적어 주세요(줄바꿈·키처럼 보이는 글 없이).` };
+/** Line ends and a byte order mark, as the file has them (said, never changed). */
+const shape = (t) => {
+    const crlf = (t.match(/\r\n/g) ?? []).length, lf = (t.match(/\n/g) ?? []).length - crlf, cr = (t.match(/\r(?!\n)/g) ?? []).length;
+    return [t.startsWith('\ufeff') ? 'BOM 있음' : '', crlf && !lf && !cr ? '줄끝 CRLF' : lf && !crlf && !cr ? '줄끝 LF' : crlf || lf || cr ? '줄끝 섞임' : '한 줄'].filter(Boolean).join(' · ');
+};
 /** Paste drafts, per workspace entry (an imported copy has its own), in this browser apart from the project. A draft that looks
- * like it holds a key stays in this tab only. */
+ * like it holds a key, or holds a value saving hides, stays in this tab only. */
 const PASTE_DRAFT_KEY = 'agentflow.studio.paste-draft.1';
+// A text that ends with a next-record line, or starts with one.
+const SEP_END = new RegExp(`(?:^|\\n)[ \\t]*${NEXT_RECORD}[ \\t]*$`), SEP_START = new RegExp(`^[ \\t]*${NEXT_RECORD}[ \\t]*(?:\\n|$)`);
 /** A note (what the record explains as it stands) carries no tag: it is neither a change nor a check. */
 const READING_KIND = { change: '변화', check: '확인 범위', open: '남은 판단', note: null };
 const STAGE_MEMORY = new Map();
 const short = (text, n) => { const t = text.replace(/\s+/g, ' ').trim(); return t.length > n ? `${t.slice(0, n)}…` : t; };
 /** A version named in a source's basis (a commit), else nothing. */
 const versionOf = (basis) => /\b[0-9a-f]{7}\b/.exec(basis)?.[0] ?? null;
+/** A record taken from a session reads as that session's (its tool, title and work folder), not as pasted under its header line.
+ * Display only: the AI is sent the record named as before (recordLabel, the source's title). */
+const sessionOf = (src) => (src.kind === 'record' && !src.evidence ? sessionOrigin(src.text) : null);
+const kindOf = (src) => { const o = sessionOf(src); return o ? `${originLabel({ tool: o.tool, title: null })} 기록` : DIGEST_KIND_LABEL[src.kind]; };
 export function createReturnView(host) {
     const saved = digestStore(host.kv), memory = digestStore(null);
     let s = null, seq = 0;
     const storeFor = () => (host.current()?.kind === 'saved' ? saved : memory);
     const memoryDrafts = new Map();
+    /** How many values saving a draft hides (redactSecrets), for the text last weighed: the box weighs it at each input, once. */
+    let weighed = ['', 0];
+    const hides = (text) => (weighed[0] === text ? weighed[1] : (weighed = [text, redactSecrets(text).count])[1]);
     function draftOf(key) {
         if (memoryDrafts.has(key))
             return memoryDrafts.get(key);
@@ -45,7 +75,7 @@ export function createReturnView(host) {
         memoryDrafts.set(key, text);
         try {
             const all = JSON.parse(host.kv.getItem(PASTE_DRAFT_KEY) ?? '{}');
-            if (text.trim() && !secretLike(text))
+            if (text.trim() && !secretLike(text) && !hides(text))
                 all[key] = text;
             else
                 delete all[key];
@@ -58,6 +88,14 @@ export function createReturnView(host) {
         catch { /* this tab keeps it */ }
     }
     const partName = (id) => { const v = host.current()?.view; return v ? partLabel(v, id) : '부분'; };
+    /** A session's record by the session's name as the part summary and the handover document give it (an untitled one by its first
+     * request), and its work folder. */
+    const nameOf = (src) => {
+        const o = sessionOf(src), p = host.current()?.project;
+        return o ? [p ? sessionName(p, o) : originLabel(o), o.cwd?.split(/[\\/]/).filter(Boolean).at(-1)].filter(Boolean).join(' · ') : src.title;
+    };
+    /** Beside a save button: whether saving sends anything. */
+    const sends = () => (host.autoConnected() ? '저장하면 다음 자동 지도 갱신 때 AI에 보내요' : '저장해도 AI에 보내지 않아요');
     /* ---------- material and the reading of it ---------- */
     function sources() {
         const o = host.current();
@@ -106,7 +144,7 @@ export function createReturnView(host) {
             const reading = makeReading(input, hash, res.model, prompt, res.reply), msg = store.keep(key, legacy, reading);
             if (s && s.key === key && s.hash === hash) {
                 s.reading = reading;
-                s.storeMsg = msg;
+                s.storeMsg = msg ? { text: msg, ok: false } : null;
                 s.focus = null;
                 s.view = { kind: 'reading' };
             }
@@ -173,21 +211,25 @@ export function createReturnView(host) {
             return;
         const key = s.key, text = draftOf(key);
         if (!text.trim()) {
-            s.pasteMsg = '붙여 넣을 글이 아직 없어요.';
+            s.pasteMsg = { text: '붙여 넣을 글이 아직 없어요.', ok: false };
             render();
             return;
         }
         if (secretLike(text)) {
-            s.pasteMsg = '키나 토큰처럼 보이는 글이 있어 저장하지 않았어요. 그 부분을 지우고 다시 저장하세요.';
+            s.pasteMsg = { text: '키나 토큰처럼 보이는 글이 있어 저장하지 않았어요. 그 부분을 지우고 다시 저장하세요.', ok: false };
             render();
             return;
         }
         // The box stays editable while saving: only the text that was saved leaves the draft. Whatever was written meanwhile stays,
         // and the box stays open with it. A pane closed or reopened meanwhile is another state: it is only told by the draft.
-        const st = s;
+        // A session put after other text is kept as its own record (the box put a NEXT_RECORD line before it): a session is told by its
+        // header line at a record's start. A handover document a pasted session started from is kept as one line, as the import keeps it.
+        // What looks like a credential is hidden as the import hides it (a web AI's record copies the requests as written): hidden, not
+        // refused.
+        const st = s, hid = recordParts(text).map(t => redactSecrets(foldRecord(t))), parts = hid.map(r => r.text), n = hid.reduce((a, r) => a + r.count, 0);
         st.saving = true;
         render();
-        const done = await host.paste(text, st.pasteContext);
+        const done = await host.paste(parts, st.pasteContext);
         st.saving = false;
         const kept = typeof done !== 'string', untouched = draftOf(key) === text;
         if (kept && untouched)
@@ -195,26 +237,313 @@ export function createReturnView(host) {
         if (s !== st)
             return;
         if (!kept) {
-            st.pasteMsg = done;
+            st.pasteMsg = { text: done, ok: false };
             render();
             return;
         }
         const r = host.current()?.project.pasted.find(x => x.id === done.id);
-        const said = done.duplicate ? `같은 글을 ${r ? fullTime(r.at) : '앞서'}에 붙여 넣었어요. 새로 저장하지 않았어요.` : '기록을 저장했어요. AI에는 아직 보내지 않았어요.';
+        const said = done.duplicate ? `같은 기록이 ${r ? `${fullTime(r.at)}부터 ` : '이미 '}이 프로젝트에 있어요. 새로 저장하지 않았어요.`
+            : `${parts.length > 1 ? '세션마다 기록을 하나씩 나눠 저장했어요.' : '기록을 저장했어요.'}${n ? ` 키·토큰처럼 보이는 ${n}곳은 가려서 저장했어요.` : ''}`;
         if (!untouched) {
-            st.pasteMsg = `${said} 저장하는 동안 쓴 글은 초안으로 남겨 두었어요.`;
+            st.pasteMsg = { text: `${said} 저장하는 동안 쓴 글은 초안으로 남겨 두었어요.`, ok: true };
             render();
             void refresh();
             return;
         }
         st.pasteContext = null;
         st.pasteMsg = null;
-        st.storeMsg = said;
+        st.storeMsg = { text: said, ok: true };
         await refresh();
         const src = s === st ? sources().find(x => x.recordId === done.id) : null;
         if (s === st && src) {
             st.view = { kind: 'source', source: structuredClone(src), from: 'material', quote: null };
             render();
+        }
+    }
+    const picks = new Map();
+    const pickOf = (key) => {
+        let p = picks.get(key);
+        if (!p) {
+            p = { open: false, loading: false, list: null, filter: '', reading: null, error: null, note: null, manual: false };
+            picks.set(key, p);
+        }
+        return p;
+    };
+    async function loadSessions() {
+        if (!s)
+            return;
+        const key = s.key, p = pickOf(key);
+        if (p.loading)
+            return;
+        p.open = true;
+        p.loading = true;
+        p.error = null;
+        p.manual = false;
+        render();
+        const src = host.sources.current();
+        try {
+            if (!src)
+                throw new Error('NO_SOURCE');
+            p.list = await src.list();
+        }
+        // Picked folders this browser asks about again (their permission withdrawn) close the list, beside '세션 폴더 다시 허용'.
+        catch (e) {
+            if (host.sources.current())
+                p.error = ERROR_TEXT[e?.code ?? ''] ?? '세션 목록을 불러오지 못했어요.';
+            else
+                p.open = false;
+        }
+        p.loading = false;
+        if (s?.key === key)
+            render();
+    }
+    async function takeSession(id) {
+        if (!s)
+            return;
+        const key = s.key, p = pickOf(key), src = host.sources.current();
+        if (p.reading || !src)
+            return;
+        p.reading = id;
+        p.error = null;
+        p.note = null;
+        p.manual = false;
+        render();
+        try {
+            fill(key, p, await src.read(id));
+        }
+        catch (e) {
+            p.error = ERROR_TEXT[e?.code ?? ''] ?? '세션 기록을 읽지 못했어요.';
+        }
+        p.reading = null;
+        if (s?.key === key)
+            render();
+    }
+    /** One session file chosen by hand (.jsonl of Claude Code or Codex), read in this page. */
+    async function takeFile(file) {
+        if (!s)
+            return;
+        const key = s.key, p = pickOf(key);
+        if (p.reading)
+            return;
+        p.reading = file.name;
+        p.error = null;
+        p.note = null;
+        p.manual = false;
+        render();
+        try {
+            const d = await readSessionFile(file);
+            if (d)
+                fill(key, p, d);
+            else
+                p.error = 'Claude Code·Codex 세션 기록 파일(.jsonl)이 아니거나, 가져올 대화가 없어요.';
+        }
+        catch (e) {
+            p.error = ERROR_TEXT[e?.code ?? ''] ?? '세션 파일을 읽지 못했어요.';
+        }
+        p.reading = null;
+        if (s?.key === key)
+            render();
+    }
+    /** Whatever is in the box stays: the session comes after it, under a NEXT_RECORD line, within what one record can hold, and is
+     * saved as a record of its own (recordParts), so it is still told by its header. */
+    function fill(key, p, detail) {
+        const before = draftOf(key).replace(/\s+$/, ''), room = PASTED_TEXT_LIMIT - (before ? before.length + NEXT_RECORD.length + 4 : 0);
+        if (room < 2000) {
+            p.error = '초안칸에 이미 글이 많아요. 지금 글을 저장하거나 비운 뒤 가져오세요.';
+            return;
+        }
+        const got = sessionText(detail, room);
+        if (!got.turns) {
+            p.error = '이 세션에는 가져올 대화가 없어요.';
+            return;
+        }
+        keepDraft(key, before ? `${before}\n\n${NEXT_RECORD}\n\n${got.text}` : got.text);
+        p.open = false;
+        // A session in the project already (the connection took it, or it was picked before) is saved whole again: what came in before
+        // can come in twice.
+        const taken = !!host.current()?.project.pasted.some(r => sessionOrigin(r.text)?.id === detail.id);
+        p.note = [`${TOOL_NAME[detail.tool]} 세션에서 대화 ${got.turns}개를 넣었어요.`, got.left ? `앞의 ${got.left}개는 길이 제한으로 뺐어요.` : '',
+            got.redacted ? `키·토큰처럼 보이는 ${got.redacted}곳은 가렸어요.` : '', before ? '앞에 있던 글과는 따로 저장돼요.' : '',
+            taken ? '이미 가져온 세션이에요. 저장하면 앞서 들어온 대화가 한 번 더 들어갈 수 있어요.' : '', '읽어 보고 ‘기록 저장’을 누르세요.'].filter(Boolean).join(' ');
+    }
+    /** Copies the web chat's request text; when copying is blocked it is shown whole and selected, to copy by hand. */
+    async function copyWebAsk(p) {
+        let ok = true;
+        try {
+            await navigator.clipboard.writeText(WEB_RECORD_ASK);
+        }
+        catch {
+            ok = false;
+        }
+        // Said as the handover document says it: a quiet line, not an error (the text is right there to copy). Pressed under the
+        // open list, the list folds so the line shows.
+        p.error = null;
+        p.manual = !ok;
+        p.open = false;
+        p.note = ok ? '기록 요청 문구를 복사했어요. 웹 AI 대화에 붙여 넣고, 나온 답을 이 칸에 그대로 붙여 넣어 저장하세요.' : '자동 복사가 막혀 있어요. 아래 칸의 문구를 직접 복사하세요(선택해 두었어요).';
+        render();
+        if (!ok) {
+            const t = document.querySelector('#lens .rr-web-ask');
+            t?.focus();
+            t?.select();
+            t?.scrollTo(0, 0);
+        }
+    }
+    function sessionBox(key) {
+        const p = pickOf(key), src = host.sources, current = src.current(), state = src.folderState();
+        const where = current?.kind === 'server' ? `이 PC의 ${(host.status().sessions?.tools ?? []).map(t => TOOL_NAME[t]).join('·')} 대화 기록` : `고른 세션 폴더(${src.folders().join(', ')})의 대화 기록`;
+        const file = h('input', { type: 'file', class: 'rr-session-file', accept: '.jsonl,application/x-ndjson,application/json', 'aria-label': '세션 기록 파일 올리기', hidden: true });
+        file.addEventListener('change', () => { const f = file.files?.[0]; file.value = ''; if (f)
+            void takeFile(f); });
+        const others = h('div', { class: 'pp-row rr-session-ways' }, !current && state === 'none' ? h('button', { type: 'button', class: 'link-button rr-session-pick', title: '.claude 또는 .codex 폴더를 한 번 골라 두면 목록에서 바로 가져와요 (크롬·엣지)', onclick: async () => { if (await src.pick())
+                void loadSessions();
+            else
+                render(); } }, '세션 폴더 고르기') : null, !current && state === 'prompt' ? h('button', { type: 'button', class: 'link-button rr-session-grant', onclick: async () => { await src.grant(); if (src.current())
+                void loadSessions();
+            else
+                render(); } }, '세션 폴더 다시 허용') : null, h('button', { type: 'button', class: 'link-button', title: 'Claude Code나 Codex의 .jsonl 세션 파일 하나를 골라 넣어요', disabled: !!p.reading, onclick: () => file.click() }, '세션 파일 올리기'), file, h('button', { type: 'button', class: 'link-button', title: '웹 AI 대화에 붙여 넣으면, 그 대화가 기록을 이 칸에 맞는 형식으로 써 줘요', onclick: () => void copyWebAsk(p) }, '웹 대화용 기록 요청 문구 복사'));
+        if (!p.open)
+            return h('div', { class: 'rr-sessions' }, current ? h('button', { type: 'button', class: 'secondary small', onclick: () => void loadSessions() }, '내 AI 세션에서 가져오기') : null, current ? h('span', { class: 'fine' }, `${where}을 골라 넣어요`) : h('span', { class: 'fine' }, 'AI 세션 기록을 원문 그대로 넣을 수 있어요'), others, p.reading && !current ? h('p', { class: 'fine' }, '읽는 중…') : null, p.note ? h('p', { class: 'fine rr-sessions-note', role: 'status' }, p.note) : null, p.error ? h('p', { class: 'pp-error', role: 'alert' }, p.error) : null, 
+            // The request text to copy by hand, line breaks and all (the web AI writes its record in that shape).
+            p.manual ? h('textarea', { class: 'rr-web-ask', readonly: true, rows: '6', spellcheck: 'false', 'aria-label': '웹 대화용 기록 요청 문구' }, WEB_RECORD_ASK) : null);
+        const tools = where;
+        // The sessions the search finds (a hidden stand-in when there is nothing to say), drawn again on their own as it is typed in:
+        // the search itself stays, so a syllable being composed in it (Korean) is not cut.
+        const results = () => {
+            const q = p.filter.trim().toLowerCase();
+            const shown = (p.list ?? []).filter(x => !q || [x.title, x.preview, x.cwd, x.branch].some(v => v?.toLowerCase().includes(q)));
+            // A session this project holds a record of already says so on its row (taking it again may bring its talk in twice).
+            const had = new Set(host.current()?.project.pasted.map(r => sessionOrigin(r.text)?.id).filter(Boolean));
+            const rows = shown.map(x => h('li', {}, h('button', { type: 'button', class: 'rr-session', disabled: !!p.reading, onclick: () => void takeSession(x.id) }, h('span', { class: 'rr-session-tool' }, TOOL_NAME[x.tool]), h('strong', {}, clip(x.title ?? x.preview, 90)), h('small', {}, [had.has(x.id) || x.aliases?.some(a => had.has(a)) ? '이미 가져옴' : null, x.title ? clip(x.preview, 70) : null, x.cwd, stamp(x.updatedAt, true)].filter(Boolean).join(' · ')), p.reading === x.id ? h('small', { class: 'rr-session-busy' }, '읽는 중…') : null)));
+            return rows.length ? h('ul', { class: 'rr-session-list' }, ...rows) : p.list?.length ? h('p', { class: 'fine' }, '찾는 말과 맞는 세션이 없어요.') : h('span', { hidden: true });
+        };
+        const filter = h('input', { type: 'search', class: 'rr-sessions-filter', placeholder: '제목·내용·폴더로 찾기', 'aria-label': '세션 찾기', value: p.filter });
+        let list = results();
+        filter.addEventListener('input', () => { p.filter = filter.value; const next = results(); list.replaceWith(next); list = next; });
+        return h('div', { class: 'rr-sessions open' }, h('div', { class: 'pp-row' }, h('strong', {}, '내 AI 세션'), h('span', { class: 'fine' }, '내가 쓴 요청과 AI의 답변·바꾼 파일만 그대로 넣어요. AI가 실행한 명령의 출력과 생각 과정은 빼요.'), h('button', { type: 'button', class: 'link-button quiet', onclick: () => { p.open = false; render(); } }, '접기')), p.loading ? h('p', { class: 'fine' }, '세션을 찾는 중…') : null, p.error ? h('p', { class: 'pp-error', role: 'alert' }, p.error) : null, 
+        // What the last look at the picked folders could not read (a folder gone, a walk cut short).
+        current?.kind === 'folder' && src.notice() ? h('p', { class: 'fine rr-sessions-notice' }, src.notice()) : null, p.list && !p.list.length ? h('p', { class: 'fine' }, `${tools}에서 세션을 찾지 못했어요.`) : null, p.list?.length ? filter : null, list, 
+        // A session kept nowhere here (a web chat, a file) is still one press away while the list is open.
+        others);
+    }
+    /* ---------- a provided code or check file (project.14) ---------- */
+    const fileDrafts = new Map();
+    /** The next render opens a new view at its top: a provided source opened without a quote (from a list or after saving) and the
+     * file form. The pane otherwise keeps its scroll across renders, which would carry a long list's place into it. Used once. */
+    let fromTop = false;
+    const toTop = () => { if (!fromTop)
+        return; fromTop = false; const b = document.querySelector('#lens .lens-body'); if (b)
+        b.scrollTop = 0; };
+    const fileOf = (key) => {
+        let d = fileDrafts.get(key);
+        if (!d) {
+            d = { kind: null, name: null, text: null, size: 0, version: '', origin: '', context: null, msg: null, reading: false, saving: false, token: 0 };
+            fileDrafts.set(key, d);
+        }
+        return d;
+    };
+    /** The provided-file form, in this pane (beside the paste box, which stays one textarea for mixed reports). */
+    function openFile(context, scene) {
+        const o = host.current();
+        if (!o || o.kind !== 'saved')
+            return;
+        open();
+        if (!s)
+            return;
+        keep();
+        const d = fileOf(s.key);
+        d.context = context;
+        s.quoteFrom = null;
+        if (scene)
+            s.back = scene;
+        s.view = { kind: 'file' };
+        fromTop = true;
+        render();
+        requestAnimationFrame(() => document.querySelector('#lens input[name="file-kind"]:checked, #lens #file-kind-code')?.focus({ preventScroll: true }));
+    }
+    async function readFile(file) {
+        if (!s)
+            return;
+        const key = s.key, d = fileOf(key), token = ++d.token;
+        if (d.saving)
+            return;
+        // The file chosen last is the one being read: an earlier read still pending is ignored when it ends, so it no longer holds
+        // the form as reading. Bounded before anything is read: a larger file is never read, and the file chosen before stays.
+        d.reading = false;
+        if (file.size > PROVIDED_FILE_BYTES) {
+            d.msg = `‘${clip(file.name, 80)}’: ${FILE_PROBLEM.TOO_LARGE}${d.text ? ' 앞서 고른 파일은 그대로예요.' : ''}`;
+            render();
+            return;
+        }
+        d.reading = true;
+        d.msg = null;
+        render();
+        let bytes = null;
+        try {
+            bytes = new Uint8Array(await file.arrayBuffer());
+        }
+        catch { /* below */ }
+        // A file chosen after this one counts instead; an entry switched away from keeps this result in its own form only.
+        if (fileDrafts.get(key) !== d || d.token !== token)
+            return;
+        d.reading = false;
+        const got = bytes ? decodeProvided(bytes) : { problem: 'UNREADABLE' };
+        if ('problem' in got)
+            d.msg = `‘${clip(file.name, 80)}’: ${FILE_PROBLEM[got.problem]}${d.text ? ' 앞서 고른 파일은 그대로예요.' : ''}`;
+        else {
+            d.text = got.text;
+            d.name = file.name;
+            d.size = bytes.length;
+        }
+        if (s && s.key === key && s.view.kind === 'file' && host.current()?.key === key)
+            render();
+    }
+    async function saveFile() {
+        const o = host.current();
+        if (!s || !o || o.kind !== 'saved')
+            return;
+        const st = s, key = st.key, d = fileOf(key);
+        if (d.saving || d.reading)
+            return;
+        const say = (m) => { d.msg = m; render(); };
+        if (!d.text || d.name === null)
+            return say('저장할 파일을 아직 고르지 않았어요.');
+        if (!d.kind)
+            return say('코드 자료인지 검사 자료인지 골라 주세요. 앱이 파일 이름이나 내용으로 정하지 않아요.');
+        const evidence = { kind: d.kind, name: d.name, version: d.version.trim() || null, origin: d.origin.trim() || null };
+        const bad = evidenceProblem(evidence);
+        if (bad)
+            return say(FIELD_PROBLEM[bad]);
+        // The form is locked while it is saved; and only a draft still exactly as saved (file, kind, version, origin, context) leaves.
+        d.saving = true;
+        d.msg = null;
+        render();
+        const snap = JSON.stringify([d.token, d.text, d.name, d.kind, d.version, d.origin, d.context]), text = d.text;
+        const done = await host.provide(key, text, evidence, d.context);
+        d.saving = false;
+        const kept = typeof done !== 'string', same = fileDrafts.get(key) === d && JSON.stringify([d.token, d.text, d.name, d.kind, d.version, d.origin, d.context]) === snap;
+        if (kept && same)
+            fileDrafts.delete(key);
+        if (s !== st)
+            return;
+        if (!kept)
+            return say(done);
+        const r = host.current()?.project.pasted.find(x => x.id === done.id);
+        const said = done.duplicate ? `같은 원문을 같은 종류·이름·판본·출처로 ${r ? fullTime(r.at) : '앞서'}에 저장했어요. 새로 저장하지 않았어요.` : `자료를 저장했어요. ${host.autoConnected() ? '다음 자동 지도 갱신 때 AI에 보내요.' : 'AI에는 보내지 않았어요.'}`;
+        if (!same) {
+            d.msg = `${said} 저장하는 동안 바뀐 양식은 그대로 남겨 두었어요.`;
+            render();
+            void refresh();
+            return;
+        }
+        st.storeMsg = { text: said, ok: true };
+        await refresh();
+        const src = s === st ? sources().find(x => x.recordId === done.id) : null;
+        if (s === st && src) {
+            st.view = { kind: 'source', source: structuredClone(src), from: 'material', quote: null };
+            fromTop = true;
+            render();
+            requestAnimationFrame(() => document.querySelector('#lens .rr-back')?.focus({ preventScroll: true }));
         }
     }
     function setStage(id) {
@@ -302,7 +631,7 @@ export function createReturnView(host) {
             return null;
         const titles = [...new Set(all.map(({ x }) => x.source?.recordId))];
         const head = !only && titles.length === 1 && all[0].x.source
-            ? h('button', { type: 'button', class: 'rr-rec-src', title: '붙여넣은 원문 보기', onclick: () => openSource(all[0].x.source, from, null) }, all[0].x.source.title) : null;
+            ? h('button', { type: 'button', class: 'rr-rec-src', title: '원문 보기', onclick: () => openSource(all[0].x.source, from, null) }, nameOf(all[0].x.source)) : null;
         return h('section', { class: 'rr-sec rr-records' }, h('h3', {}, only ? '이 기록에서 읽은 것' : '붙여넣은 기록에서'), head, ...all.map(({ x, n }) => recordItem(x, n, from)));
     }
     function chipFor(id, r, from) {
@@ -310,8 +639,8 @@ export function createReturnView(host) {
         if (!src)
             return null;
         const v = versionOf(src.basis);
-        const label = `${src.title} · ${DIGEST_KIND_LABEL[src.kind]} · ${src.basis}`;
-        return h('button', { type: 'button', class: `rr-ref k-${src.kind}`, title: label, 'aria-label': label, onclick: (e) => { e.stopPropagation(); openSource(src, from); } }, h('span', { class: 'rr-ref-kind' }, DIGEST_KIND_LABEL[src.kind]), h('span', { class: 'rr-ref-title' }, src.title), v ? h('code', {}, v) : null);
+        const label = `${nameOf(src)} · ${kindOf(src)} · ${src.basis}`;
+        return h('button', { type: 'button', class: `rr-ref k-${src.kind}`, title: label, 'aria-label': label, onclick: (e) => { e.stopPropagation(); openSource(src, from); } }, h('span', { class: 'rr-ref-kind' }, kindOf(src)), h('span', { class: 'rr-ref-title' }, nameOf(src)), v ? h('code', {}, v) : null);
     }
     function partChip(id) {
         return h('button', { type: 'button', class: 'rr-part', title: `지도에서 ‘${partName(id)}’ 보기`, onclick: (e) => { e.stopPropagation(); host.mark([id]); host.reveal([id]); } }, h('i', { 'aria-hidden': 'true' }), partName(id));
@@ -356,7 +685,9 @@ export function createReturnView(host) {
     }
     function header(o) {
         const ex = o.key === UI62_KEY;
-        return h('header', { class: 'lens-head rr-head' }, h('h2', { id: 'lens-title' }, '돌아와 읽기', ex ? h('span', { class: 'tag', title: '공개 commit과 결과 문서에서 사후 편집한 자료예요. 당시 실시간으로 받은 기록이 아니에요.' }, '공개 자료 · 사후 편집') : null), ex ? stageSwitch() : null, h('div', { class: 'head-tools' }, o.kind === 'saved' && s.view.kind !== 'paste' ? h('button', { type: 'button', class: 'rr-paste-open', title: '작업 AI가 돌려준 글을 그대로 붙여 넣어요', onclick: () => openPaste(null, null) }, '기록 붙여넣기') : null, h('button', { type: 'button', class: 'close', 'aria-label': '돌아와 읽기 닫기', title: '닫기 (Esc)', onclick: close }, '×')));
+        return h('header', { class: 'lens-head rr-head' }, h('h2', { id: 'lens-title' }, '돌아와 읽기', ex ? h('span', { class: 'tag', title: '공개 commit과 결과 문서에서 사후 편집한 자료예요. 당시 실시간으로 받은 기록이 아니에요.' }, '공개 자료 · 사후 편집') : null), ex ? stageSwitch() : null, 
+        // The provided-file entry under the title, beside the paste action (the head keeps its title room at any pane width).
+        o.kind === 'saved' && s.view.kind !== 'file' ? h('p', { class: 'rr-head-more' }, h('button', { type: 'button', class: 'link-button rr-file-open', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요', onclick: () => openFile(null, null) }, '코드·검사 자료 추가')) : null, h('div', { class: 'head-tools' }, o.kind === 'saved' && s.view.kind !== 'paste' ? h('button', { type: 'button', class: 'rr-paste-open', title: '작업 AI가 돌려준 글을 그대로 붙여 넣어요', onclick: () => openPaste(null, null) }, '기록 붙여넣기') : null, h('button', { type: 'button', class: 'close', 'aria-label': '돌아와 읽기 닫기', title: '닫기 (Esc)', onclick: close }, '×')));
     }
     function stageSwitch() {
         const st = s, cur = UI62_STAGES.find(x => x.id === st.stage);
@@ -398,16 +729,29 @@ export function createReturnView(host) {
                 out.push(h('div', { class: 'rr-acts' }, trialButton(f, use, from, '이 변화에 이어 바꿀 모습 시험')));
         }
         else if (!st.pending) {
-            out.push(h('p', { class: 'rr-lead' }, st.error ? '정리를 만들지 못했어요. 아래 원자료로 읽을 수 있어요.' : '아직 이 자료를 정리하지 않았어요.'));
+            // A stored map reading is a reading of these records: what is missing here is only the separate summary (the digest).
+            const read = o.kind === 'saved' ? host.mapRead() : null;
+            out.push(h('p', { class: 'rr-lead' }, st.error ? '정리를 만들지 못했어요. 아래 원자료로 읽을 수 있어요.'
+                : read ? `지도 정리는 기록 ${read.records}개를 읽은 그대로 위에 있어요. 이 자료 전체를 따로 요약한 정리는 아직 만들지 않았어요.` : '아직 이 자료를 정리하지 않았어요.'));
             out.push(materialList(o, 5));
         }
         return out;
+    }
+    /** A source's row: its kind, title and version; a provided source's declared kind, version and origin, as declared. */
+    function srcLabel(x) {
+        const e = x.evidence;
+        return [h('span', { class: `rr-kind k-${x.kind}${e ? ' k-provided' : ''}` }, e ? `사용자 제공 ${EVIDENCE_KIND_LABEL[e.kind]}` : kindOf(x)), h('strong', {}, e ? e.name : nameOf(x)),
+            e ? h('small', {}, `판본 ${e.version ?? NOT_RECORDED} · 출처 ${e.origin ?? NOT_RECORDED} (사용자 기재) · 앱 미실행·미검증`) : srcWhere(versionOf(x.basis), x.partIds.map(partName).join(' · '))];
+    }
+    /** The version (a commit id) reads in the code face; the part names after it stay in the text face. */
+    function srcWhere(version, parts) {
+        return h('small', {}, version ? h('code', {}, version) : null, version && parts ? ' · ' : '', parts);
     }
     /** The material itself: kind, title and version per source; the quote one click away. */
     function materialList(o, max) {
         const all = sources();
         const list = all.slice(0, max);
-        return h('section', { class: 'rr-sec rr-material' }, h('h3', {}, '원자료', h('small', {}, `${all.length}`)), h('ol', {}, ...list.map(x => h('li', {}, h('button', { type: 'button', class: 'rr-src', onclick: () => openSource(x, 'material') }, h('span', { class: `rr-kind k-${x.kind}` }, DIGEST_KIND_LABEL[x.kind]), h('strong', {}, x.title), h('small', {}, [versionOf(x.basis), x.partIds.map(partName).join(' · ')].filter(Boolean).join(' · ')))))), all.length > max ? h('button', { type: 'button', class: 'link-button', onclick: () => { s.view = { kind: 'material' }; render(); } }, `${all.length}개 모두 보기`) : null, !all.length ? h('p', { class: 'fine' }, '읽을 기록이나 붙인 자료가 아직 없어요.') : null);
+        return h('section', { class: 'rr-sec rr-material' }, h('h3', {}, '원자료', h('small', {}, `${all.length}`)), h('ol', {}, ...list.map(x => h('li', {}, h('button', { type: 'button', class: 'rr-src', onclick: () => openSource(x, 'material') }, ...srcLabel(x))))), all.length > max ? h('button', { type: 'button', class: 'link-button', onclick: () => { s.view = { kind: 'material' }; render(); } }, `${all.length}개 모두 보기`) : null, !all.length ? h('p', { class: 'fine' }, '읽을 기록이나 붙인 자료가 아직 없어요.') : null);
     }
     function footer(o) {
         const state = s, status = host.status(), r = state.reading, out = h('footer', { class: 'lens-foot rr-foot' });
@@ -418,7 +762,7 @@ export function createReturnView(host) {
         if (state.error)
             out.append(h('p', { class: 'pp-error', role: 'alert' }, state.error));
         if (state.storeMsg)
-            out.append(h('p', { class: 'pp-error', role: 'status' }, state.storeMsg));
+            out.append(h('p', { class: state.storeMsg.ok ? 'pp-ok' : 'pp-error', role: 'status' }, state.storeMsg.text));
         const can = status.ai === 'deepseek' && !!status.digest && !!state.input?.ask.sources.length;
         if (r) {
             const cov = r.coverage.sent < r.coverage.total ? `자료 ${r.coverage.total}개 중 ${r.coverage.sent}개` : `자료 ${r.coverage.sent}개`;
@@ -442,24 +786,28 @@ export function createReturnView(host) {
         out.append(h('div', { class: 'pp-row' }, go, codeNote(gated, !!host.accessCode()), h('span', { class: 'fine' }, can ? `자료 ${sent < total ? `${total}개 중 ${sent}개` : `${sent}개`}를 보내요${range ? ` · ${range}` : ''}` : status.ai === 'off' ? '서버에 AI 키가 없어요 · 원자료로 읽어요' : status.ai === 'none' ? '이 주소에는 AI 서버가 없어요 · 원자료로 읽어요' : ''), state.view.kind === 'reading' ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { state.view = { kind: 'material' }; render(); } }, '원자료') : null));
         return out;
     }
-    function sourceBody(src, from, quote) {
+    function sourceBody(src, from, quote, at) {
         const v = versionOf(src.basis);
         if (src.kind === 'record')
-            return recordBody(src, quote);
-        return [h('article', { class: 'rr-source' }, h('p', { class: 'rr-source-kind' }, h('span', { class: `rr-kind k-${src.kind}` }, DIGEST_KIND_LABEL[src.kind]), v ? h('code', {}, v) : null, h('span', {}, src.id)), h('h3', {}, src.title), h('blockquote', { class: `rr-quote${src.kind === 'code' ? ' code' : ''}` }, ...quoted(src.text, quote)), from !== 'material' ? h('p', { class: 'fine' }, '이 정리를 만들 때 함께 보관한 자료예요.') : null, h('dl', { class: 'rr-meta' }, h('dt', {}, '판본·출처'), h('dd', {}, src.basis, src.url ? h('a', { href: src.url, target: '_blank', rel: 'noopener noreferrer' }, ' 공개 원문 ↗') : null), src.note ? h('dt', {}, '편집 설명') : null, src.note ? h('dd', {}, src.note) : null, src.partIds.length ? h('dt', {}, '다루는 부분') : null, src.partIds.length ? h('dd', { class: 'rr-chips' }, ...src.partIds.map(partChip)) : null))];
+            return recordBody(src, quote, at);
+        return [h('article', { class: 'rr-source' }, h('p', { class: 'rr-source-kind' }, h('span', { class: `rr-kind k-${src.kind}` }, DIGEST_KIND_LABEL[src.kind]), v ? h('code', {}, v) : null, h('span', {}, src.id)), h('h3', {}, src.title), h('blockquote', { class: `rr-quote${src.kind === 'code' ? ' code' : ''}` }, ...quoted(src.text, quote, quote && at !== undefined ? { at, length: quote.length } : undefined)), from !== 'material' ? h('p', { class: 'fine' }, '이 정리를 만들 때 함께 보관한 자료예요.') : null, h('dl', { class: 'rr-meta' }, h('dt', {}, '판본·출처'), h('dd', {}, src.basis, src.url ? h('a', { href: src.url, target: '_blank', rel: 'noopener noreferrer' }, ' 공개 원문 ↗') : null), src.note ? h('dt', {}, '편집 설명') : null, src.note ? h('dd', {}, src.note) : null, src.partIds.length ? h('dt', {}, '다루는 부분') : null, src.partIds.length ? h('dd', { class: 'rr-chips' }, ...src.partIds.map(partChip)) : null))];
     }
     /** A pasted record: what was read from it (when a reading covers it), then the text as pasted with the quote marked. The
      * time is when it was added here; the part is where the person was looking, shown as such. */
-    function recordBody(src, quote) {
+    function recordBody(src, quote, at) {
         const kept = host.current()?.project.pasted.find(x => x.id === src.recordId) ?? null;
         const use = shown(), from = s?.reading ? 'now' : 'previous';
         const read = use && src.recordId ? recordSection(use, from, src.recordId) : null;
         const sentTo = s?.input?.sources.get(src.id)?.sent;
         const ctx = kept?.context && host.current()?.view.parts.some(p => p.id === kept.context) ? kept.context : null;
         const map = quote ? null : host.mapBlock();
-        return [...(map ? [map] : []), h('article', { class: 'rr-source rr-record' }, h('p', { class: 'rr-source-kind' }, h('span', { class: 'rr-kind k-record' }, DIGEST_KIND_LABEL.record), kept ? h('span', {}, `붙여넣음 ${fullTime(kept.at)}`) : null), h('h3', { title: '원문의 첫 줄이에요' }, src.title), ctx ? h('p', { class: 'rr-context' }, h('span', {}, '붙일 때 보던 부분'), partChip(ctx)) : null, 
+        // A provided source: what the person declared it is (kind, name, version, origin), apart from its text and from when it came.
+        const e = kept?.evidence ?? null, o = sessionOf(src);
+        // A provided source opens on itself (file, declaration, text); the map's row follows it rather than leading.
+        const lead = e ? [] : map ? [map] : [], after = e && map ? [map] : [];
+        return [...lead, h('article', { class: `rr-source rr-record${e ? ' rr-provided' : ''}` }, h('p', { class: 'rr-source-kind' }, h('span', { class: `rr-kind k-record${e ? ' k-provided' : ''}` }, e ? `사용자 제공 ${EVIDENCE_KIND_LABEL[e.kind]}` : kindOf(src)), kept ? h('span', {}, `${e || (o && o.tool !== 'web') ? '가져옴' : '붙여넣음'} ${fullTime(kept.at)}`) : null), h('h3', { title: e ? '자료를 고를 때의 파일 이름이에요' : o ? '이 기록이 나온 세션이에요' : '원문의 첫 줄이에요' }, e ? e.name : nameOf(src)), e ? h('p', { class: 'rr-provided-note', role: 'note' }, `${NOT_EXECUTED}. 자료 종류·판본·출처는 사용자가 적은 것이에요.`) : null, e ? h('dl', { class: 'rr-meta' }, h('dt', {}, '자료 종류'), h('dd', {}, `${EVIDENCE_KIND_LABEL[e.kind]} (사용자 분류)`), h('dt', {}, '판본'), h('dd', {}, e.version ?? `${NOT_RECORDED}`, e.version ? ' (사용자 기재)' : null), h('dt', {}, '출처'), h('dd', { class: 'rr-origin' }, e.origin ?? `${NOT_RECORDED}`, e.origin ? ' (사용자 기재 · 앱이 열거나 가져오지 않음)' : null)) : null, ctx ? h('p', { class: 'rr-context' }, h('span', {}, '붙일 때 보던 부분'), partChip(ctx)) : null, 
             // Arrived by a quote: the original, with the quote marked, is what this view is for (the readings are one step back).
-            quote ? null : read ?? h('p', { class: 'rr-lead' }, s?.pending ? '읽는 중이에요…' : src.recordId && host.readIntoMap(src.recordId) ? '지도 정리에 읽힌 기록이에요. 이 기록의 따로 요약은 아직 없어요.' : '아직 이 기록을 읽지 않았어요.'), h('blockquote', { class: 'rr-quote rr-raw' }, ...quoted(kept?.text ?? src.text, quote)), sentTo !== undefined && sentTo < (kept?.text ?? src.text).length ? h('p', { class: 'fine' }, `읽을 때 앞 ${sentTo.toLocaleString()}자만 보내요 · 전체 ${(kept?.text ?? src.text).length.toLocaleString()}자`) : null)];
+            quote ? null : read ?? h('p', { class: 'rr-lead' }, s?.pending ? '읽는 중이에요…' : src.recordId && host.readIntoMap(src.recordId) ? '지도 정리에 읽힌 기록이에요. 이 기록의 따로 요약은 아직 없어요.' : '아직 이 기록을 읽지 않았어요.'), h('blockquote', { class: `rr-quote rr-raw${e?.kind === 'code' ? ' code' : ''}` }, ...quoted(kept?.text ?? src.text, quote, quote && at !== undefined ? { at, length: quote.length } : undefined)), sentTo !== undefined && sentTo < (kept?.text ?? src.text).length ? h('p', { class: 'fine' }, `읽을 때 앞 ${sentTo.toLocaleString()}자만 보내요 · 전체 ${(kept?.text ?? src.text).length.toLocaleString()}자`) : null), ...after];
     }
     function pasteBody(o) {
         const st = s, text = draftOf(st.key), ctx = st.pasteContext && o.view.parts.some(p => p.id === st.pasteContext) ? st.pasteContext : null;
@@ -468,6 +816,8 @@ export function createReturnView(host) {
         area.value = text;
         const count = h('span', { class: 'fine rr-count' }, text ? `${text.length.toLocaleString()}자` : '');
         const warn = h('p', { class: 'pp-error', role: 'status', hidden: !secretLike(text) }, '키나 토큰처럼 보이는 글이 있어요. 이 탭에만 두고 저장·전송하지 않아요.');
+        // What saving would hide is said before, quietly: it is no reason not to save.
+        const hiding = h('p', { class: 'fine rr-paste-hides', role: 'status', hidden: secretLike(text) || !hides(text) }, '키·토큰처럼 보이는 글이 있어요. 저장할 때 그 부분은 가려요.');
         area.addEventListener('keydown', e => { if (e.key === 'Escape') {
             e.stopPropagation();
             backToReading();
@@ -476,48 +826,156 @@ export function createReturnView(host) {
             keepDraft(st.key, area.value);
             count.textContent = area.value ? `${area.value.length.toLocaleString()}자` : '';
             warn.hidden = !secretLike(area.value);
+            hiding.hidden = !warn.hidden || !hides(area.value);
         });
-        return [h('section', { class: 'rr-sec rr-paste-box' }, h('h3', {}, '기록 붙여넣기'), h('p', { class: 'fine' }, '나누거나 종류·부분을 고르지 않아도 돼요. 저장한 뒤 지도 정리나 요약을 누를 때만 AI에 보내요.'), ctx ? h('p', { class: 'rr-context' }, h('span', {}, '보던 부분'), partChip(ctx), h('button', { type: 'button', class: 'link-button quiet', title: '읽기 맥락에서 빼요', onclick: () => { st.pasteContext = null; render(); } }, '빼기')) : null, area, warn, count, st.pasteMsg ? h('p', { class: 'pp-error', role: 'alert' }, st.pasteMsg) : null)];
+        // A session record pasted beside other text (a web AI's answer written with WEB_RECORD_ASK, another record) is kept as a record of
+        // its own: the box puts the NEXT_RECORD line between them, as it does for a session it brings in. It goes after the record the
+        // caret is in (a record is never cut in two), before the first one with the caret at the start, and at a next-record line the
+        // caret is on or a selection takes in (that line is never written over). A next-record line the record quotes is written a dash
+        // shorter, as the import writes it, so it does not cut the record.
+        area.addEventListener('paste', e => {
+            const got = quoteNext((e.clipboardData?.getData('text/plain') ?? '').replace(/\r\n?/g, '\n').trim());
+            if (!RECORD_HEAD.test(got))
+                return;
+            e.preventDefault();
+            const was = area.value, s0 = area.selectionStart, s1 = area.selectionEnd, line = `\n\n${NEXT_RECORD}\n\n`;
+            const lines = [...was.matchAll(NEXT_LINE)].map(m => [m.index, m.index + m[0].length]);
+            // Everything selected (or an empty box) is replaced, as any paste does.
+            const every = !was.slice(0, s0).trim() && !was.slice(s1).trim();
+            const on = every ? undefined : lines.find(([a, b]) => s0 < b && Math.max(s1, s0 + 1) > a)?.[1];
+            const pre = every ? '' : was.slice(0, on ?? s0), post = every ? '' : was.slice(on ?? s1), next = post.search(NEXT_LINE);
+            const head = pre.trimEnd(), atStart = !head || SEP_END.test(head);
+            // [kept before, the pasted record, kept after]: the record the caret is in stays whole before it, a next record after.
+            const [a, b] = atStart ? [head, post.trimStart()] : next < 0 ? [`${pre}${post}`.trimEnd(), ''] : [`${pre}${post.slice(0, next)}`.trimEnd(), post.slice(next).trimStart()];
+            const sep = (x, end) => !x ? '' : (end ? SEP_END : SEP_START).test(x) ? '\n\n' : line;
+            const upTo = `${a}${sep(a, true)}${got}`, value = `${upTo}${sep(b, false)}${b}`, at = upTo.length;
+            // Only what changed is written, as typing would (one undo takes the paste back); where that cannot be, the value is set.
+            let from = 0;
+            while (from < was.length && from < value.length && was[from] === value[from])
+                from++;
+            let tail = 0;
+            while (tail < was.length - from && tail < value.length - from && was.at(-1 - tail) === value.at(-1 - tail))
+                tail++;
+            area.focus();
+            area.setSelectionRange(from, was.length - tail);
+            if (!document.execCommand('insertText', false, value.slice(from, value.length - tail)) || area.value !== value) {
+                area.value = value;
+                area.dispatchEvent(new Event('input'));
+            }
+            area.setSelectionRange(at, at);
+        });
+        return [h('section', { class: 'rr-sec rr-paste-box' }, h('h3', {}, '기록 붙여넣기'), h('p', { class: 'fine' }, `나누거나 종류·부분을 고르지 않아도 돼요. ${host.autoConnected() ? AUTO_SENDS : '저장한 뒤 지도 정리나 요약을 누를 때만 AI에 보내요.'}`), ctx ? h('p', { class: 'rr-context' }, h('span', {}, '보던 부분'), partChip(ctx), h('button', { type: 'button', class: 'link-button quiet', title: '읽기 맥락에서 빼요', onclick: () => { st.pasteContext = null; render(); } }, '빼기')) : null, sessionBox(st.key), area, warn, count, hiding, st.pasteMsg ? h('p', { class: st.pasteMsg.ok ? 'pp-ok' : 'pp-error', role: st.pasteMsg.ok ? 'status' : 'alert' }, st.pasteMsg.text) : null)];
     }
     function pasteFooter() {
         const st = s;
-        return h('footer', { class: 'lens-foot rr-foot' }, h('div', { class: 'pp-row' }, h('button', { type: 'button', class: 'primary small', disabled: st.saving, onclick: () => void savePaste() }, st.saving ? '저장 중…' : '기록 저장'), h('span', { class: 'fine' }, '저장해도 AI에 보내지 않아요'), h('button', { type: 'button', class: 'link-button quiet', onclick: backToReading }, '닫기')));
+        return h('footer', { class: 'lens-foot rr-foot' }, h('div', { class: 'pp-row' }, h('button', { type: 'button', class: 'primary small', disabled: st.saving, onclick: () => void savePaste() }, st.saving ? '저장 중…' : '기록 저장'), h('span', { class: 'fine' }, sends()), h('button', { type: 'button', class: 'link-button quiet', onclick: backToReading }, '닫기')));
     }
+    function fileBody(o) {
+        const st = s, d = fileOf(st.key), ctx = d.context && o.view.parts.some(p => p.id === d.context) ? d.context : null;
+        const kinds = ['code', 'test'].map(k => {
+            const r = h('input', { type: 'radio', name: 'file-kind', id: `file-kind-${k}`, value: k });
+            r.checked = d.kind === k;
+            r.disabled = d.saving;
+            r.addEventListener('change', () => { if (r.checked)
+                d.kind = k; });
+            return h('label', { class: 'rr-file-choice', for: `file-kind-${k}` }, r, h('span', {}, EVIDENCE_KIND_LABEL[k]), h('small', {}, k === 'code' ? '소스 코드 파일' : '검사 정의나 실행 기록(로그)'));
+        });
+        const pick = h('input', { type: 'file', id: 'file-pick', class: 'rr-file-pick', 'aria-describedby': 'file-rule' });
+        pick.disabled = d.saving;
+        pick.addEventListener('change', () => { const f = pick.files?.[0]; pick.value = ''; if (f)
+            void readFile(f); });
+        const field = (id, label, max, value, set, hint) => {
+            // No maxlength: the whole value stays in the draft and an over-long one is refused at save (evidenceProblem), never cut.
+            const i = h('input', { id, type: 'text', autocomplete: 'off', spellcheck: 'false', placeholder: hint });
+            i.value = value;
+            i.disabled = d.saving;
+            i.addEventListener('input', () => set(i.value));
+            return h('div', { class: 'rr-file-field' }, h('label', { for: id }, label, h('small', {}, ` 선택 · ${max}자 이내`)), i);
+        };
+        return [h('section', { class: 'rr-sec rr-paste-box rr-file-box' }, h('h3', {}, '코드·검사 자료 추가'), h('p', { class: 'fine', id: 'file-rule' }, `UTF-8 텍스트 파일 하나(${Math.floor(PROVIDED_FILE_BYTES / 1000)}KB·60,000자 이내)를 원문 그대로 보관해요. 자료 종류·판본·출처는 사용자가 적는 것이고 앱은 파일을 실행·검증하거나 출처를 열지 않아요. ${host.autoConnected() ? AUTO_SENDS : '저장해도 AI에 보내지 않아요.'} 섞인 보고는 ‘기록 붙여넣기’로 붙여요.`), ctx ? h('p', { class: 'rr-context' }, h('span', {}, '보던 부분'), partChip(ctx), h('button', { type: 'button', class: 'link-button quiet', title: '읽기 맥락에서 빼요', disabled: d.saving, onclick: () => { d.context = null; render(); } }, '빼기')) : null, h('fieldset', { class: 'rr-file-kind' }, h('legend', {}, '자료 종류 (직접 고르기)'), ...kinds), h('div', { class: 'rr-file-row' }, pick, h('label', { class: 'rr-file-label', for: 'file-pick' }, d.text ? '다른 파일 고르기' : '파일 고르기'), h('span', { class: 'rr-file-name', title: '고른 파일 이름', role: 'status' }, d.reading ? '읽는 중…' : d.name ?? '아직 고른 파일이 없어요')), field('file-version', '판본', EVIDENCE_VERSION_MAX, d.version, v => { d.version = v; }, '예: commit 3f2a1c9 또는 v1.4.0'), field('file-origin', '출처', EVIDENCE_ORIGIN_MAX, d.origin, v => { d.origin = v; }, '예: 저장소 경로나 URL (열지 않고 글로만 보관)'), d.text !== null ? h('div', { class: 'rr-file-preview-box' }, h('p', { class: 'fine' }, `미리보기 (읽기 전용) · ${d.text.length.toLocaleString()}자 · ${d.size.toLocaleString()}바이트 · ${shape(d.text)} · 앞뒤 공백 포함 그대로 보관`), h('pre', { class: 'rr-quote rr-raw code rr-file-preview', tabindex: '0', 'aria-label': '파일 원문 미리보기 (읽기 전용)' }, d.text)) : null)];
+    }
+    function fileFooter() {
+        const d = fileOf(s.key);
+        // Why a file or a field was refused reads here, in the fixed footer beside 저장: never below a long preview, out of sight.
+        return h('footer', { class: 'lens-foot rr-foot' }, d.msg ? h('p', { class: 'pp-error rr-file-alert', role: 'alert' }, d.msg) : null, h('div', { class: 'pp-row' }, h('button', { type: 'button', class: 'primary small', disabled: d.saving || d.reading, onclick: () => void saveFile() }, d.saving ? '저장 중…' : '자료 저장'), h('span', { class: 'fine' }, sends()), h('button', { type: 'button', class: 'link-button quiet', onclick: backToReading }, '닫기')));
+    }
+    /** A field of the pane a syllable is being composed in (Korean, Japanese): drawing the pane again under it would end the
+     * composition and split the syllable, so a redraw asked for meanwhile (a record the automatic connection keeps) waits until it is
+     * committed. Its end comes in the same keystroke as the next syllable's start: the redraw follows that keystroke. */
+    let composing = null, deferred = false;
+    document.addEventListener('compositionstart', e => { const t = e.target; composing = t.closest?.('#lens') ? t : null; });
+    document.addEventListener('compositionend', () => { composing = null; if (deferred)
+        setTimeout(() => { if (deferred) {
+            deferred = false;
+            render();
+        } }); });
     function render() {
         const o = host.current();
-        if (!s || !o || o.key !== s.key)
+        if (!s || !o || o.key !== s.key) {
+            fromTop = false;
             return;
+        }
+        if (composing?.isConnected && document.activeElement === composing) {
+            deferred = true;
+            return;
+        }
         // The way back stays at the top of the pane while a long original scrolls under it.
         const back = (label) => h('div', { class: 'rr-backbar' }, h('button', { type: 'button', class: 'rr-back', onclick: backToReading }, h('span', { 'aria-hidden': 'true' }, '←'), label));
         const body = h('div', { class: 'lens-body rr-body' });
         if (s.view.kind === 'paste') {
-            // Re-rendering keeps the caret where the person was typing.
-            const area = document.querySelector('#paste-text'), caret = area ? [area.selectionStart, area.selectionEnd, document.activeElement === area] : null;
+            // Re-rendering keeps the caret where the person was typing (with the selection's direction) and where the box was scrolled.
+            const area = document.querySelector('#paste-text'), caret = area ? [area.selectionStart, area.selectionEnd, document.activeElement === area, area.selectionDirection, area.scrollTop, area.scrollLeft] : null;
+            // So does the session list's search, typed in while a record comes in (the automatic connection saves one).
+            const find = document.querySelector('#lens .rr-sessions-filter'), at = find && document.activeElement === find ? [find.selectionStart, find.selectionEnd] : null;
             put(body, back('정리로'), ...pasteBody(o));
             host.show([header(o), body, pasteFooter()]);
             host.mark(s.pasteContext ? [s.pasteContext] : []);
-            const next = document.querySelector('#paste-text');
+            const next = document.querySelector('#paste-text'), again = at && document.querySelector('#lens .rr-sessions-filter');
             if (next && caret) {
-                next.setSelectionRange(caret[0], caret[1]);
+                next.setSelectionRange(caret[0], caret[1], caret[3]);
                 if (caret[2])
                     next.focus({ preventScroll: true });
+                next.scrollTop = caret[4];
+                next.scrollLeft = caret[5];
+            }
+            if (again) {
+                again.focus({ preventScroll: true });
+                again.setSelectionRange(at[0], at[1]);
+            }
+            return;
+        }
+        if (s.view.kind === 'file') {
+            // Re-rendering keeps the field the person was in (and where in it).
+            const was = document.activeElement instanceof HTMLElement && document.activeElement.closest('#lens') ? document.activeElement : null;
+            const id = was?.id ?? null, caret = was instanceof HTMLInputElement && was.type === 'text' ? [was.selectionStart, was.selectionEnd] : null;
+            put(body, back('정리로'), ...fileBody(o));
+            host.show([header(o), body, fileFooter()]);
+            toTop();
+            const d = fileOf(s.key);
+            host.mark(d.context ? [d.context] : []);
+            const next = id ? document.getElementById(id) : null;
+            if (next) {
+                next.focus({ preventScroll: true });
+                if (caret && next instanceof HTMLInputElement)
+                    next.setSelectionRange(caret[0], caret[1]);
             }
             return;
         }
         if (s.view.kind === 'source' && s.quoteFrom) {
             const name = partName(s.quoteFrom);
-            put(body, h('div', { class: 'rr-backbar' }, h('button', { type: 'button', class: 'rr-back', title: `‘${name}’ 선택으로 돌아가기 (Esc)`, onclick: close }, h('span', { 'aria-hidden': 'true' }, '←'), name)), ...sourceBody(s.view.source, s.view.from, s.view.quote));
+            put(body, h('div', { class: 'rr-backbar' }, h('button', { type: 'button', class: 'rr-back', title: `‘${name}’ 선택으로 돌아가기 (Esc)`, onclick: close }, h('span', { 'aria-hidden': 'true' }, '←'), name)), ...sourceBody(s.view.source, s.view.from, s.view.quote, s.view.at));
         }
         else if (s.view.kind === 'source')
-            put(body, back('정리로'), ...sourceBody(s.view.source, s.view.from, s.view.quote));
+            put(body, back('정리로'), ...sourceBody(s.view.source, s.view.from, s.view.quote, s.view.at));
         else if (s.view.kind === 'material') {
             const all = sources();
-            put(body, back('정리로'), h('section', { class: 'rr-sec rr-material' }, h('h3', {}, '원자료', h('small', {}, `${all.length}`)), h('ol', {}, ...all.map(x => h('li', {}, h('button', { type: 'button', class: 'rr-src', onclick: () => openSource(x, 'material') }, h('span', { class: `rr-kind k-${x.kind}` }, DIGEST_KIND_LABEL[x.kind]), h('strong', {}, x.title), h('small', {}, [versionOf(x.basis), x.partIds.map(partName).join(' · ')].filter(Boolean).join(' · '))))))));
+            put(body, back('정리로'), h('section', { class: 'rr-sec rr-material' }, h('h3', {}, '원자료', h('small', {}, `${all.length}`)), h('ol', {}, ...all.map(x => h('li', {}, h('button', { type: 'button', class: 'rr-src', onclick: () => openSource(x, 'material') }, ...srcLabel(x)))))));
         }
         else
             put(body, ...readingBody(o));
         // A quote opened from a part is read and left: no reading action under it.
         host.show(s.view.kind === 'source' && s.quoteFrom ? [header(o), body] : [header(o), body, footer(o)]);
+        toTop();
         const v = s.view;
         host.open(s.focus?.list === 'records' && s.focus.part ? s.focus.part : null);
         const marks = v.kind === 'source' ? (v.source.kind === 'record' ? focusParts() : v.source.partIds) : focusParts();
@@ -535,13 +993,16 @@ export function createReturnView(host) {
         s.scroll = body?.scrollTop ?? 0;
         s.requests = body ? captureRequestReading(body) : null;
     }
-    function openSource(source, from, quote = null, kept = false) {
+    function openSource(source, from, quote = null, kept = false, at) {
         if (!s)
             return;
         if (!kept)
             keep();
         held = false;
-        s.view = { kind: 'source', source: structuredClone(source), from, quote };
+        s.view = { kind: 'source', source: structuredClone(source), from, quote, ...(at !== undefined ? { at } : {}) };
+        // A quote is centred where it stands (in render); a provided source opened as itself starts at its own head.
+        if (!quote && source.evidence)
+            fromTop = true;
         render();
         requestAnimationFrame(() => document.querySelector('#lens .rr-back')?.focus({ preventScroll: true }));
     }
@@ -557,8 +1018,9 @@ export function createReturnView(host) {
         if (body && (!saved || restoreRequestReading(body, saved)))
             body.scrollTop = s.scroll;
     }
-    /** A quote of a record a map reading rests on, in the pane, marked; closing comes back to the scene it was opened from. */
-    function openQuote(record, quote, scene) {
+    /** A quote of a record a map reading rests on, in the pane, marked (at from, where the reading kept its place); closing comes
+     * back to the scene it was opened from. */
+    function openQuote(record, quote, scene, from) {
         const o = host.current();
         if (!o || o.kind !== 'saved')
             return;
@@ -578,11 +1040,11 @@ export function createReturnView(host) {
                 return;
             src = { id: r.id, kind: r.kind === 'report' ? 'report' : r.kind === 'evidence' ? 'test' : 'user', title: `프로젝트 기록 · ${r.text.split('\n').find(l => l.trim())?.trim().slice(0, 80) ?? ''}`, text: r.text, note: '', basis: `프로젝트 기록 · ${fullTime(r.at)}`, partIds: r.partId ? [r.partId] : [], url: null };
         }
-        openSource(src, 'material', quote, kept);
+        openSource(src, 'material', quote, kept, from);
     }
     return {
         isOpen: () => !!s,
-        open, close, toggle: () => (s ? close() : open()), openPaste, openQuote,
+        open, close, toggle: () => (s ? close() : open()), openPaste, openFile, openQuote,
         /** Keep where this pane's reading is (its request items, history folds, focus, scroll) before a quote from it re-renders the pane. */
         keepReading: () => { held = false; if (s && s.view.kind === 'reading') {
             keep();

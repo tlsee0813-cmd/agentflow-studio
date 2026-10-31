@@ -1,3 +1,5 @@
+import { sourceText } from './validation.js';
+import { ANCHOR_QUOTE_MAX } from './evidence-span.js';
 export function requestContext(r) {
     const { items, ...head } = r;
     return structuredClone({ ...head, version: 'request-context.1', items: items.map(({ sources: _sources, ...item }) => item) });
@@ -56,11 +58,14 @@ const object = (v, keys) => !!v && typeof v === 'object' && !Array.isArray(v) &&
 const text = (v, max) => typeof v === 'string' && !!v.trim() && v.length <= max && !/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(v);
 const id = (v) => typeof v === 'string' && ID.test(v);
 function fail() { throw new Error('INVALID_REQUEST_SCOPE'); }
+/** An origin quote is carried as the reading stored it: a map reading's anchored passage may be up to ANCHOR_QUOTE_MAX (the same limit
+ * the reading itself was checked against), so a plan, its sources and a frozen request keep it whole. Longer is refused, never cut.
+ * A copied RequestMatch quote keeps its own 300 (validateRequestMatch / validateStoredMatch, unchanged). */
 export function validateOrigins(v) {
     if (!Array.isArray(v) || v.length > 16)
         fail();
     for (const x of v)
-        if (!object(x, ['record', 'reading', 'quote']) || (x.record !== null && !id(x.record)) || (x.reading !== null && !id(x.reading)) || (x.quote !== null && (!text(x.quote, 300) || x.record === null)))
+        if (!object(x, ['record', 'reading', 'quote']) || (x.record !== null && !id(x.record)) || (x.reading !== null && !id(x.reading)) || (x.quote !== null && (!text(x.quote, ANCHOR_QUOTE_MAX) || x.record === null)))
             fail();
 }
 export function validateFrozenRequest(v) {
@@ -91,8 +96,9 @@ export function validateRequestContext(v) {
 }
 export const sameTarget = (a, b) => a.requestId === b.requestId && a.itemId === b.itemId;
 export function hasTarget(requests, t) { return requests.some(r => r.id === t.requestId && r.items.some(i => i.id === t.itemId)); }
-export function validateRequestMatch(v, requests, three = false) {
-    if (!object(v, ['record', 'quote', 'text', 'kind', 'about', 'targets', 'why', ...(three ? ['stance', 'replaces'] : [])]) || !id(v.record) || !text(v.quote, 300) || !text(v.text, 240) || !['reported', 'checked', 'code', 'test', 'open'].includes(v.kind) || (v.about !== null && !text(v.about, 200)) || !text(v.why, 240) || !Array.isArray(v.targets) || v.targets.length > 8)
+/** quoteMax: an anchored quote (map-reading.4) is an exact passage of up to ANCHOR_QUOTE_MAX; a copied one stays within 300. */
+export function validateRequestMatch(v, requests, three = false, quoteMax = 300) {
+    if (!object(v, ['record', 'quote', 'text', 'kind', 'about', 'targets', 'why', ...(three ? ['stance', 'replaces'] : [])]) || !id(v.record) || !text(v.quote, quoteMax) || !text(v.text, 240) || !['reported', 'checked', 'code', 'test', 'open'].includes(v.kind) || (v.about !== null && !text(v.about, 200)) || !text(v.why, 240) || !Array.isArray(v.targets) || v.targets.length > 8)
         fail();
     // Something left open never says the change was made.
     if (three && (!MATCH_STANCES.includes(v.stance) || (v.kind === 'open' && v.stance === 'made')))
@@ -128,8 +134,14 @@ export function matchLedger(readings, texts) {
     const out = [];
     let invalid = false;
     const at = (ref) => out.find(x => x.reading === ref.reading && x.index === ref.index);
-    // What the reading was sent of the match's record: the interval holding the match, as the reply was judged on it.
-    const sentText = (r, x) => { const i = r.records.find(i => i.id === x.record && x.from >= i.from && x.to <= i.to), t = texts.get(x.record); return i && t !== undefined ? t.slice(i.from, i.to) : null; };
+    // What the reading was sent of the match's record: the interval holding the match, as the reply was judged on it (in the
+    // coordinates it was stored in).
+    const sentText = (r, x) => { const i = r.records.find(i => i.id === x.record && x.from >= i.from && x.to <= i.to), t = texts.get(x.record); return i && t ? storedText(r, i.total, t).slice(i.from, i.to) : null; };
+    // Every match reads in the record's read coordinates: an earlier reading's stored ones are shifted here, never rewritten.
+    const asRead = (r, x) => {
+        const i = r.records.find(i => i.id === x.record && x.from >= i.from && x.to <= i.to), t = texts.get(x.record), s = i && t ? labelShift(r, i.total, t) : 0;
+        return s && x.from >= s ? { ...x, from: x.from - s, to: x.to - s } : x;
+    };
     for (const r of readings) {
         if (r.version === 'request-correction.1') {
             const x = at(r);
@@ -153,8 +165,9 @@ export function matchLedger(readings, texts) {
                     y.replacedBy = null;
             x.replaces = null;
         }
-        else if (r.version === 'map-reading.2' || r.version === 'map-reading.3')
-            r.matches.forEach((match, index) => {
+        else if (r.version === 'map-reading.2' || r.version === 'map-reading.3' || r.version === 'map-reading.4' || r.version === 'map-reading.5')
+            r.matches.forEach((stored, index) => {
+                const match = asRead(r, stored);
                 // An explicit earlier correction of the same quote survives reading that passage again.
                 const same = (x) => x.match.record === match.record && x.match.from === match.from && x.match.to === match.to;
                 const previous = [...out].reverse().find(x => x.corrected && same(x));
@@ -169,7 +182,7 @@ export function matchLedger(readings, texts) {
                     ...(conflict?.target ? { prior: { reading: conflict.reading, index: conflict.index, target: conflict.target } } : {}) };
                 if (match.replaces) {
                     const prior = at(match.replaces);
-                    if (!prior || prior.reading === r.id || overlap(prior.match, match) || !canReplace({ ...prior, replaced: !!prior.replacedBy, kind: prior.match.kind, quote: prior.match.quote, about: prior.match.about }, match, sentText(r, match)))
+                    if (!prior || prior.reading === r.id || overlap(prior.match, match) || !canReplace({ ...prior, replaced: !!prior.replacedBy, kind: prior.match.kind, quote: prior.match.quote, about: prior.match.about }, match, sentText(r, stored)))
                         invalid = true;
                     else {
                         prior.replacedBy = { reading: r.id, index, match };
@@ -181,7 +194,29 @@ export function matchLedger(readings, texts) {
     }
     return { all: out, invalid };
 }
-export const recordTexts = (p) => new Map([...p.pasted.map(r => [r.id, r.text]), ...p.sources.map(r => [r.id, r.text])]);
+export function recordTextMap(pasted, sources, tasks) {
+    const out = new Map();
+    for (const r of pasted)
+        out.set(r.id, { raw: r.text, read: r.text, shift: 0 });
+    for (const s of sources) {
+        const read = sourceText(tasks, s);
+        out.set(s.id, { raw: s.text, read, shift: read !== s.text && s.text.endsWith(read) ? s.text.length - read.length : 0 });
+    }
+    return out;
+}
+export const recordTexts = (p) => recordTextMap(p.pasted, p.sources, p.tasks);
+/** The text a reading's interval of a record is stored against. map-reading.4: the text as read. map-reading.1–3: the record as it
+ * was stored then, the labelled Source.text, when the interval's total is that length; else the text as read (both kept as is). */
+export const storedText = (r, total, t) => r.version !== 'map-reading.4' && r.version !== 'map-reading.5' && total === t.raw.length ? t.raw : t.read;
+/** How far a reading's stored positions of a record stand from the text as read: the label's length for an earlier reading stored
+ * against the labelled text, else 0. */
+export const labelShift = (r, total, t) => storedText(r, total, t) === t.raw && t.raw !== t.read ? t.shift : 0;
+/** A reading's interval of a record where it stands in the text as read (an earlier one stored against the labelled text is shifted
+ * here; the stored interval is never rewritten). */
+export function readInterval(r, x, texts) {
+    const t = texts.get(x.id), s = t ? labelShift(r, x.total, t) : 0;
+    return s ? { id: x.id, from: Math.max(0, x.from - s), to: Math.max(0, x.to - s), total: t.read.length } : x;
+}
 export function requestMatches(p) {
     const out = matchLedger(p.readings, recordTexts(p)).all;
     // A replay of the same passage and scope is one correspondence, with the correction kept above.
@@ -221,7 +256,7 @@ export function requestComparison(p, reading) {
     return [`원한 항목 ${q.items.length}개`, `변경 보고 ${n('made')}개`, n('mixed') ? `보고 엇갈림 ${n('mixed')}개` : '', n('not-made') ? `미구현 보고 ${n('not-made')}개` : '',
         n('unclassified') ? `미분류 보고 ${n('unclassified')}개` : '', n('none') ? `변경 근거 아직 없는 항목 ${n('none')}개` : '', pending ? `대응 미정 ${pending}구절` : ''].filter(Boolean).join(' · ');
 }
-const correctable = (r) => r.version === 'map-reading.2' || r.version === 'map-reading.3';
+const correctable = (r) => r.version === 'map-reading.2' || r.version === 'map-reading.3' || r.version === 'map-reading.4' || r.version === 'map-reading.5';
 export function correctRequestMatch(p, reading, index, target) {
     const r = p.readings.find((r) => correctable(r) && r.id === reading), m = r?.matches?.[index];
     if (!r || !m || (target && !hasTarget(r.requests, target)) || p.readings.length >= 500)
@@ -238,13 +273,13 @@ export function unlinkReplacement(p, reading, index) {
     return { ...p, revision: p.revision + 1, readings: [...p.readings, entry] };
 }
 /** Stored origins are checked against the exact received interval, including offsets into a long record. */
-export function validateStoredMatch(v, requests, intervals, texts, materialIds, three = false) {
+export function validateStoredMatch(v, requests, intervals, texts, materialIds, three = false, quoteMax = 300) {
     if (!v || typeof v !== 'object')
         fail();
     const { from, to, replaces, ...base } = v;
     if (three !== Object.hasOwn(v, 'replaces'))
         fail();
-    const m = validateRequestMatch(three ? { ...base, replaces: null } : base, requests, three), source = texts.get(m.record);
+    const m = validateRequestMatch(three ? { ...base, replaces: null } : base, requests, three, quoteMax), source = texts.get(m.record);
     if (!Number.isSafeInteger(from) || !Number.isSafeInteger(to) || from < 0 || to <= from || !source || source.slice(from, to) !== m.quote || !intervals.some(r => r.id === m.record && from >= r.from && to <= r.to))
         fail();
     if (m.about !== null && !intervals.some(r => r.id === m.record && source.slice(r.from, r.to).includes(m.about)))

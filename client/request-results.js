@@ -1,6 +1,8 @@
 /* The same small request/return reading in the plan and beside a current part. No second status model. */
 import { isMapReading } from '../shared/types.js';
-import { requestMatches, itemReading, MATCH_LABEL, ITEM_STATE_LABEL } from '../shared/request-return.js';
+import { requestMatches, matchLedger, itemReading, recordTexts, matchGroup, sameTarget, MATCH_LABEL, ITEM_STATE_LABEL } from '../shared/request-return.js';
+import { EVIDENCE_KIND_LABEL, NOT_EXECUTED, NOT_RECORDED } from '../shared/record-source.js';
+import { sessionOrigin, originLabel } from '../shared/handover.js';
 import { h, fullTime, quotedText } from './plan-dom.js';
 /** A passage's label: what kind of material it is, and for a change report what it says of the change (stored before stances:
  * the kind alone, never read as made). */
@@ -9,6 +11,16 @@ export function matchLabel(m) {
         return m.stance === 'made' ? `${MATCH_LABEL[m.kind]} · 변경` : m.stance === 'not-made' ? `${MATCH_LABEL[m.kind]} · 미구현` : MATCH_LABEL[m.kind];
     return MATCH_LABEL[m.kind];
 }
+export function withdrawalTarget(x, ledger) {
+    const ref = x.replaces, then = x.match.targets.length === 1 ? x.match.targets[0] : null;
+    const prior = ref ? ledger.find(y => y.reading === ref.reading && y.index === ref.index) : undefined;
+    if (!prior || !then)
+        return null;
+    const request = x.requests.find(q => q.id === then.requestId) ?? null, item = request?.items.find(i => i.id === then.itemId) ?? null;
+    return { prior, then, request, item, now: x.excluded ? 'excluded' : !x.target ? 'open' : sameTarget(x.target, then) ? 'same' : 'other' };
+}
+/** The full ledger of a project's correspondences, every reading's own entry (requestMatches folds repeated readings of a passage). */
+export const fullLedger = (p) => matchLedger(p.readings, recordTexts(p)).all;
 /** Shorten only a pure full SHA, for display. The stored wording and title stay exact. */
 export const displayAbout = (about) => /^[a-f0-9]{40}$/i.test(about) ? about.slice(0, 8) : about;
 export function captureRequestReading(body) {
@@ -16,6 +28,7 @@ export function captureRequestReading(body) {
     return {
         items: [...body.querySelectorAll('details[data-request-item]')].map(d => ({ key: d.dataset.requestItem, open: d.open })),
         histories: [...body.querySelectorAll('details[data-request-history]')].map(d => ({ key: d.dataset.requestHistory, open: d.open })),
+        folds: [...body.querySelectorAll('details[data-request-fold]')].map(d => ({ key: d.dataset.requestFold, open: d.open })),
         item: active?.closest('[data-request-item]')?.dataset.requestItem ?? null,
         focus: active?.dataset.requestFocus ?? null
     };
@@ -41,6 +54,13 @@ export function restoreRequestReading(body, saved) {
         if (current)
             current.open = d.open;
     }
+    // The excluded and unrelated folds hold passages outside any item: their quote buttons are focused inside them too.
+    const folds = new Map([...body.querySelectorAll('details[data-request-fold]')].map(d => [d.dataset.requestFold, d]));
+    for (const d of saved.folds ?? []) {
+        const current = folds.get(d.key);
+        if (current)
+            current.open = d.open;
+    }
     const focus = saved.focus && [...body.querySelectorAll('[data-request-focus]')].find(e => e.dataset.requestFocus === saved.focus);
     (focus || (saved.item ? by.get(saved.item)?.querySelector('summary') : null))?.focus({ preventScroll: true });
     return true;
@@ -59,13 +79,16 @@ export function requestResults(project, scopes, options) {
     const all = frozenRequests(project, scopes), requests = all.filter(q => (!options.requestId || q.id === options.requestId) && (!options.partId || q.items.some(i => i.partIds.includes(options.partId))));
     if (!requests.length)
         return null;
-    const matches = requestMatches(project), sec = h('section', { class: 'sec request-results', 'aria-label': '원한 것과 돌아온 범위' }, h('h3', {}, '원한 것과 돌아온 범위'));
-    const caption = (q) => `요청 ${all.findIndex(r => r.id === q.id) + 1} · ${fullTime(q.createdAt)} · 판 ${q.planRevision}`;
-    const source = (m, itemKey) => {
+    const matches = requestMatches(project), ledger = fullLedger(project), sec = h('section', { class: 'sec request-results', 'aria-label': '원한 것과 돌아온 범위' }, h('h3', {}, '원한 것과 돌아온 범위'));
+    const caption = (q) => requestCaption(all, q);
+    // Every quote button has its exact place: the item's identity, or the fold a passage outside any item reads in (ambiguous,
+    // excluded, unrelated), then the stored reading, index and interval.
+    const source = (m, scope, label = '근거', key = JSON.stringify([scope, m.reading, m.index, m.match.record, m.match.from, m.match.to])) => {
         if (options.quote)
-            return h('button', { type: 'button', class: 'cl-cite', ...(itemKey ? { 'data-request-focus': JSON.stringify([itemKey, m.reading, m.index, m.match.record, m.match.from, m.match.to]) } : {}), title: m.match.quote, onclick: () => options.quote(m.match.record, m.match.quote) }, '근거');
-        const text = project.pasted.find(r => r.id === m.match.record)?.text ?? project.sources.find(r => r.id === m.match.record)?.text ?? '';
-        const details = h('details', { class: 'request-quote' }, h('summary', {}, '근거 원문'), h('pre', {}, ...quotedText(text, m.match.quote, { at: m.match.from, length: m.match.to - m.match.from })));
+            return h('button', { type: 'button', class: 'cl-cite', 'data-request-focus': key, title: m.match.quote, onclick: () => options.quote(m.match.record, m.match.quote, m.match.from) }, label);
+        // The record as read, where every match stands (an earlier reading's places against the labelled text are read shifted).
+        const text = recordTexts(project).get(m.match.record)?.read ?? '';
+        const details = h('details', { class: 'request-quote' }, h('summary', {}, label === '근거' ? '근거 원문' : label), h('pre', {}, ...quotedText(text, m.match.quote, { at: m.match.from, length: m.match.to - m.match.from })));
         details.addEventListener('toggle', () => { if (details.open)
             requestAnimationFrame(() => details.querySelector('mark')?.scrollIntoView({ block: 'nearest' })); });
         return details;
@@ -91,7 +114,19 @@ export function requestResults(project, scopes, options) {
         box.append(select, button, msg);
         return box;
     };
-    const passage = (x, itemKey) => h('div', { class: 'request-passage' }, h('p', {}, h('span', { class: 'cl-kind' }, matchLabel(x.match)), x.match.text, x.match.about ? h('small', { class: 'cl-about', title: x.match.about }, ` · ${displayAbout(x.match.about)}`) : null, x.replaces ? h('small', { class: 'cl-replaces' }, ' · 앞 보고를 철회·정정') : null), source(x, itemKey), correction(x));
+    /** Under a withdrawing passage, one short line: which earlier report (its kind, words and scope as stored) for which request item
+     * and revision, with that report's own original; and where the passage answers now when a person changed it since. */
+    const withdrawal = (x, scope) => {
+        const w = withdrawalTarget(x, ledger);
+        if (!w)
+            return null;
+        const p = w.prior.match, at = w.request ? `${caption(w.request)} · ‘${w.item?.title ?? w.then.itemId}’` : `‘${w.item?.title ?? w.then.itemId}’`;
+        const now = w.now === 'same' ? null : w.now === 'excluded' ? '지금은 이 구절을 요청 대응에서 제외했어요. 철회 연결은 그대로예요.'
+            : w.now === 'open' ? '지금 이 구절의 요청 대응은 미정이에요. 철회 연결은 그대로예요.'
+                : (() => { const r = all.find(q => q.id === x.target.requestId), i = r?.items.find(i => i.id === x.target.itemId); return `지금은 이 구절을 ${r ? caption(r) : '다른 요청'} · ‘${i?.title ?? x.target.itemId}’ 대응으로 고쳤어요. 철회 연결은 그대로예요.`; })();
+        return h('div', { class: 'request-target' }, h('p', {}, h('span', { class: 'cl-kind' }, '철회 대상'), `${matchLabel(p)} · ${p.text}`, p.about ? h('small', { class: 'cl-about', title: p.about }, ` · ${displayAbout(p.about)}`) : null, h('small', { class: 'request-target-at' }, ` — ${at}`)), source(w.prior, scope, '철회한 보고 원문', JSON.stringify([scope, 'withdrew', x.reading, x.index, w.prior.reading, w.prior.index])), now ? h('p', { class: 'fine' }, now) : null);
+    };
+    const passage = (x, scope) => h('div', { class: 'request-passage' }, h('p', {}, h('span', { class: 'cl-kind' }, matchLabel(x.match)), x.match.text, x.match.about ? h('small', { class: 'cl-about', title: x.match.about }, ` · ${displayAbout(x.match.about)}`) : null, x.replaces && !withdrawalTarget(x, ledger) ? h('small', { class: 'cl-replaces' }, ' · 앞 보고를 철회·정정') : null), source(x, scope), withdrawal(x, scope), correction(x));
     // An earlier report a later record took back: its words and source stay, with the passage that took it back and the one way
     // to undo that link. Excluding or retargeting either passage never brings it back.
     const withdrawn = (x, itemKey) => {
@@ -112,17 +147,21 @@ export function requestResults(project, scopes, options) {
     const belongs = (target, scopes = all) => requests.some(q => q.id === target.requestId) && (!options.partId || !!scopes.find(q => q.id === target.requestId)?.items.some(i => i.id === target.itemId && i.partIds.includes(options.partId)));
     const hasReport = (q) => matches.some(x => !x.excluded && !x.replacedBy && x.target?.requestId === q.id && belongs(x.target, x.requests) && x.match.kind !== 'open');
     const ordered = requests.slice().reverse().sort((a, b) => Number(hasReport(b)) - Number(hasReport(a)));
+    // The wide reading of this very request (its id, plan and revision), at its item or at its first; its key brings focus back.
+    const wide = (q, itemId, label) => options.wide ? h('button', { type: 'button', class: `request-wide${itemId ? ' item' : ''}`,
+        'data-request-focus': JSON.stringify(['wide', q.id, q.planId, q.planRevision, itemId]), title: '원한 것과 돌아온 근거를 넓은 화면에서 읽어요. 원문도 그 안에서 열어요.',
+        onclick: (e) => options.wide({ requestId: q.id, planId: q.planId, planRevision: q.planRevision, itemId }, e.currentTarget) }, label) : null;
     for (const q of ordered) {
-        const group = h('div', { class: 'request-group' }, h('p', { class: 'request-at', title: `${q.id} · ${q.planId} / ${q.planRevision}` }, caption(q)));
+        const group = h('div', { class: 'request-group' }, h('p', { class: 'request-at', title: `${q.id} · ${q.planId} / ${q.planRevision}` }, h('span', {}, caption(q)), wide(q, null, '넓게 읽기')));
         for (const item of q.items.filter(i => !options.partId || i.partIds.includes(options.partId))) {
             // The same reading the map title counts (itemReading): the current lead, then the passages that stand, then history apart.
             const { state, lead, current, history } = itemReading(matches, { requestId: q.id, itemId: item.id });
             const itemKey = JSON.stringify([q.id, q.planId, q.planRevision, item.id]);
-            const detail = h('details', { class: `request-item${current.length ? ' has' : ''} st-${state}`, 'data-request-item': itemKey, open: !options.compact }, h('summary', { 'data-request-focus': itemKey }, item.title, h('small', {}, lead ? ` · ${ITEM_STATE_LABEL[state]} · ${lead.match.text.slice(0, 90)}` : history.length ? ` · ${ITEM_STATE_LABEL[state]}` : ' · 아직 받은 내용 없음')), h('p', { class: 'request-want' }, h('span', { class: 'cl-kind' }, '원함'), item.description));
+            const detail = h('details', { class: `request-item${current.length ? ' has' : ''} st-${state}`, 'data-request-item': itemKey, open: !options.compact }, h('summary', { 'data-request-focus': itemKey }, item.title, h('small', {}, lead ? ` · ${ITEM_STATE_LABEL[state]} · ${lead.match.text.slice(0, 90)}` : history.length ? ` · ${ITEM_STATE_LABEL[state]}` : ' · 연결된 원문 구절 없음')), h('p', { class: 'request-want' }, h('span', { class: 'cl-kind' }, '원함'), item.description), options.wide ? h('p', { class: 'request-wide-row' }, wide(q, item.id, '이 항목 넓게 읽기')) : null);
             if (current.length)
                 [...(lead ? [lead] : []), ...current.filter(x => x !== lead)].forEach(x => detail.append(passage(x, itemKey)));
             else
-                detail.append(h('p', { class: 'request-remains' }, history.length ? '지금 서 있는 대응은 없어요. 앞 보고는 이후 원문이 철회했어요.' : '이 요청에 대응하는 내용은 아직 받지 못했어요.'));
+                detail.append(h('p', { class: 'request-remains' }, history.length ? '지금 서 있는 대응은 없어요. 앞 보고는 이후 원문이 철회했어요.' : '이 요청 항목에 연결된 프로젝트 원문 구절이 아직 없어요.'));
             if (history.length)
                 detail.append(h('details', { class: 'request-history', 'data-request-history': itemKey }, h('summary', {}, `철회·정정된 앞 보고 ${history.length}개`), ...history.map(x => withdrawn(x, itemKey))));
             group.append(detail);
@@ -131,7 +170,7 @@ export function requestResults(project, scopes, options) {
     }
     const ids = new Set(requests.map(q => q.id));
     for (const x of matches.filter(x => !x.excluded && !x.replacedBy && !x.target && x.match.targets.length > 0 && x.match.targets.some(t => belongs(t, x.requests)))) {
-        const pending = h('div', { class: 'request-ambiguous' }, h('p', {}, x.match.targets.length > 1 ? '어느 요청의 결과인지 남아 있어요' : '요청과의 대응이 아직 분명하지 않아요'), h('p', {}, x.match.text), h('p', { class: 'fine' }, x.match.why), source(x));
+        const pending = h('div', { class: 'request-ambiguous' }, h('p', {}, x.match.targets.length > 1 ? '어느 요청의 결과인지 남아 있어요' : '요청과의 대응이 아직 분명하지 않아요'), h('p', {}, x.match.text), h('p', { class: 'fine' }, x.match.why), source(x, 'ambiguous'));
         if (x.prior) {
             const original = all.find(q => q.id === x.prior.target.requestId), item = original?.items.find(i => i.id === x.prior.target.itemId);
             pending.append(h('p', { class: 'fine' }, `이 구절은 앞서 ${original ? caption(original) : '다른 요청'}의 ‘${item?.title ?? '항목'}’으로 바로잡았어요. 원래 대응은 유지하고 이번 대조는 미정으로 남겼어요.`));
@@ -154,11 +193,336 @@ export function requestResults(project, scopes, options) {
     }
     const excluded = matches.filter(x => x.excluded && x.match.targets.some(t => belongs(t, x.requests)));
     if (excluded.length)
-        sec.append(h('details', { class: 'request-excluded' }, h('summary', {}, `제외한 대응 ${excluded.length}개`), ...excluded.map(x => passage(x))));
+        sec.append(h('details', { class: 'request-excluded', 'data-request-fold': 'excluded' }, h('summary', {}, `제외한 대응 ${excluded.length}개`), ...excluded.map(x => passage(x, 'excluded'))));
     if (!options.partId) {
         const unrelated = matches.filter(x => !x.excluded && !x.replacedBy && !x.target && !x.match.targets.length && x.requests.some(q => ids.has(q.id)));
         if (unrelated.length)
-            sec.append(h('details', { class: 'request-unrelated' }, h('summary', {}, `요청에 대응하지 않은 구절 ${unrelated.length}개`), ...unrelated.map(x => h('div', { class: 'request-passage' }, h('p', {}, x.match.text), source(x)))));
+            sec.append(h('details', { class: 'request-unrelated', 'data-request-fold': 'unrelated' }, h('summary', {}, `요청에 대응하지 않은 구절 ${unrelated.length}개`), ...unrelated.map(x => h('div', { class: 'request-passage' }, h('p', {}, x.match.text), source(x, 'unrelated')))));
     }
     return sec;
+}
+/** A request as the reading names it: its place among the project's frozen requests, when it was made and the plan revision. */
+export const requestCaption = (all, q) => `요청 ${all.findIndex(r => r.id === q.id) + 1} · ${fullTime(q.createdAt)} · 판 ${q.planRevision}`;
+/** The pane holding an opener: its id, the kind of reading it shows and its title. */
+const surfaceOf = (pane) => !pane ? '' : JSON.stringify([pane.id, ['return-read', 'compare', 'scope-read', 'work'].filter(c => pane.classList.contains(c)), pane.dataset.rail ?? '',
+    pane.querySelector('#lens-title, #panel-title, #plan-title')?.textContent ?? '']);
+const SCROLLERS = ['lens-body', 'panel-body', 'pw-rail-body', 'pp-body'];
+const GROUP_TITLE = { ambiguous: '대응이 정해지지 않은 구절', excluded: '대응에서 제외한 구절', unrelated: '요청에 대응하지 않은 구절' };
+export function createWideReading(host) {
+    let st = null;
+    const el = () => {
+        let d = document.getElementById('request-wide');
+        if (!d) {
+            d = h('div', { id: 'request-wide', class: 'rw', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'rw-title', tabindex: '-1', hidden: true });
+            d.addEventListener('keydown', keys);
+            document.body.append(d);
+            d.addEventListener('focusin', e => { const t = e.target; if (st)
+                st.focus = t.dataset.rwFocus ? `f:${t.dataset.rwFocus}` : t.dataset.rwSection ? `s:${t.dataset.rwSection}` : t.dataset.rwPart ? `p:${t.dataset.rwPart}` : st.focus; });
+        }
+        return d;
+    };
+    function keys(e) {
+        if (!st)
+            return;
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            escape();
+            return;
+        }
+        if (e.key !== 'Tab')
+            return;
+        // A modal reading: Tab stays inside it.
+        const d = el(), all = [...d.querySelectorAll('button:not([disabled]), select, summary, [tabindex="0"]')].filter(x => x.offsetParent !== null);
+        if (!all.length)
+            return;
+        const first = all[0], last = all.at(-1);
+        if (e.shiftKey && (document.activeElement === first || document.activeElement === d)) {
+            e.preventDefault();
+            last.focus();
+        }
+        else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+        }
+    }
+    function open(at, opener) {
+        const o = host.current();
+        if (!o)
+            return;
+        const all = frozenRequests(o.project, at.scopes), q = all.find(r => r.id === at.requestId && r.planId === at.planId && r.planRevision === at.planRevision);
+        if (!q)
+            return;
+        // Where the opener reads: its scrolling body, by the pane that holds it (found again after a re-render).
+        const box = opener.closest(SCROLLERS.map(c => `.${c}`).join(',')), pane = box?.closest('[id]');
+        const cls = box ? SCROLLERS.find(c => box.classList.contains(c)) : null;
+        const origin = { entry: o.key, label: at.label, opener, selector: box && pane && cls ? `#${CSS.escape(pane.id)} .${cls}` : null, surface: surfaceOf(pane ?? null), scroll: box?.scrollTop ?? 0,
+            reading: box ? { ...captureRequestReading(box), focus: opener.dataset.requestFocus ?? null } : null, focus: opener.dataset.requestFocus ?? null };
+        const item = at.itemId && q.items.some(i => i.id === at.itemId) ? at.itemId : firstItem(o.project, q);
+        st = { entry: o.key, scopes: at.scopes, request: { id: q.id, planId: q.planId, planRevision: q.planRevision }, section: item ? `item:${item}` : 'ambiguous', source: null, back: null, open: new Set(), origin, focus: null, sig: null, notice: null };
+        render();
+        el().querySelector('.rw-pick[aria-current="true"]')?.focus({ preventScroll: true });
+    }
+    /** The first item with a passage standing (as the narrow list reads them), else the first. */
+    function firstItem(p, q) {
+        const m = requestMatches(p);
+        return (q.items.find(i => itemReading(m, { requestId: q.id, itemId: i.id }).current.length) ?? q.items[0])?.id ?? null;
+    }
+    /** The place it was opened from, as it is now: the opener itself, or the same pane showing the same reading (re-rendered); null
+     * when that reading is gone (the pane closed or shows another one). */
+    function originNow(o) {
+        if (host.current()?.key !== o.entry)
+            return null;
+        if (o.opener.isConnected && o.opener.offsetParent !== null)
+            return { opener: o.opener };
+        const box = o.selector ? document.querySelector(o.selector) : null, pane = box?.closest('[id]') ?? null;
+        return box && pane && !pane.hidden && surfaceOf(pane) === o.surface ? { box } : null;
+    }
+    /** Close and go back to where it was opened from; when that place is gone, to the map (nothing restored into another reading). */
+    function close() {
+        if (!st)
+            return;
+        const o = st.origin, at = originNow(o);
+        st = null;
+        const d = el();
+        d.hidden = true;
+        d.replaceChildren();
+        if (host.current()?.key !== o.entry)
+            return;
+        if (!at) {
+            document.getElementById('viewport')?.focus({ preventScroll: true });
+            return;
+        }
+        if ('opener' in at) {
+            at.opener.focus({ preventScroll: true });
+            return;
+        }
+        // The place re-rendered meanwhile (fresh data): the same request items, folds, scroll and button by their identities.
+        const box = at.box;
+        if (!o.reading || restoreRequestReading(box, o.reading))
+            box.scrollTop = o.scroll;
+        [...box.querySelectorAll('[data-request-focus]')].find(x => x.dataset.requestFocus === o.focus)?.focus({ preventScroll: true });
+    }
+    /** Another address or project: close without restoring anything into what is read now. */
+    function drop() { if (!st)
+        return; st = null; const d = el(); d.hidden = true; d.replaceChildren(); }
+    function escape() { if (!st)
+        return; if (st.source)
+        back();
+    else
+        close(); }
+    function back() {
+        if (!st || !st.source)
+            return;
+        const b = st.back;
+        st.source = null;
+        st.back = null;
+        render();
+        const main = el().querySelector('.rw-main');
+        if (main && b)
+            main.scrollTop = b.scroll;
+        if (!b?.focus || !focusKey(`f:${b.focus}`) || !main)
+            return;
+        // The place read from stays as it was, unless the passage moved meanwhile (withdrawn into the history below): then its button
+        // is brought into the column, at a third, instead of being focused out of sight.
+        const x = document.activeElement, r = x.getBoundingClientRect(), c = main.getBoundingClientRect();
+        if (r.top < c.top || r.bottom > c.bottom)
+            main.scrollTop += r.top - c.top - main.clientHeight / 3;
+    }
+    /** Focus a control by its identity; one inside a fold closed meanwhile (a passage withdrawn while it was read) opens the fold. */
+    function focusKey(key) {
+        const at = key.indexOf(':'), kind = key.slice(0, at), id = key.slice(at + 1);
+        const [attr, data] = kind === 'f' ? ['data-rw-focus', 'rwFocus'] : kind === 's' ? ['data-rw-section', 'rwSection'] : ['data-rw-part', 'rwPart'];
+        const x = [...el().querySelectorAll(`[${attr}]`)].find(e => e.dataset[data] === id);
+        if (!x)
+            return false;
+        const fold = x.closest('details');
+        if (fold && !fold.open && x.tagName !== 'SUMMARY')
+            fold.open = true;
+        x.focus({ preventScroll: true });
+        if (st)
+            st.focus = key;
+        return true;
+    }
+    function pick(section) {
+        if (!st)
+            return;
+        st.section = section;
+        st.source = null;
+        st.back = null;
+        render();
+        const main = el().querySelector('.rw-main');
+        if (main)
+            main.scrollTop = 0;
+        [...el().querySelectorAll('.rw-pick')].find(x => x.dataset.rwSection === section)?.focus({ preventScroll: true });
+    }
+    function render() {
+        if (!st)
+            return;
+        const o = host.current();
+        if (!o || o.key !== st.entry) {
+            drop();
+            return;
+        }
+        const all = frozenRequests(o.project, st.scopes), q = all.find(r => r.id === st.request.id && r.planId === st.request.planId && r.planRevision === st.request.planRevision);
+        if (!q) {
+            close();
+            return;
+        }
+        const s = st, d = el(), matches = requestMatches(o.project), ledger = fullLedger(o.project), texts = recordTexts(o.project);
+        // Saved while it was open (a later map reading of this visit, a correction being saved): read again from the data as it is now,
+        // and said so. The same section, fold, button and scroll are kept by identity.
+        const reqKey = JSON.stringify([q.id, q.planId, q.planRevision]);
+        const sig = JSON.stringify(matches.filter(x => x.requests.some(r => r.id === q.id) || x.match.targets.some(t => t.requestId === q.id)).map(x => [x.reading, x.index, x.excluded,
+            x.replacedBy ? [x.replacedBy.reading, x.replacedBy.index] : null, x.target ? [x.target.requestId, x.target.itemId] : null]));
+        if (s.sig && s.sig.request === reqKey && s.sig.value !== sig)
+            s.notice = '읽는 동안 이 프로젝트에 새 읽기나 대응 정정이 저장되어 지금 저장된 내용으로 다시 읽었어요. 앞에 읽던 구절이 철회되었거나 다른 자리로 옮겨졌을 수 있어요.';
+        s.sig = { request: reqKey, value: sig };
+        const alive = !!originNow(s.origin);
+        const items = q.items.map((item, n) => ({ item, n, key: `item:${item.id}`, r: itemReading(matches, { requestId: q.id, itemId: item.id }) }));
+        const groups = [
+            { key: 'ambiguous', list: matches.filter(x => !x.excluded && !x.replacedBy && !x.target && x.match.targets.some(t => t.requestId === q.id)) },
+            { key: 'excluded', list: matches.filter(x => x.excluded && x.match.targets.some(t => t.requestId === q.id)) },
+            { key: 'unrelated', list: matches.filter(x => !x.excluded && !x.replacedBy && !x.target && !x.match.targets.length && x.requests.some(r => r.id === q.id)) }
+        ].filter(g => g.list.length);
+        if (!items.some(x => x.key === s.section) && !groups.some(g => g.key === s.section)) {
+            s.section = items[0]?.key ?? groups[0]?.key ?? '';
+            s.source = null;
+        }
+        const record = (id) => {
+            const kept = o.project.pasted.find(x => x.id === id) ?? null, e = kept?.evidence ?? null;
+            const first = (texts.get(id)?.read ?? '').split('\n').find(l => l.trim())?.trim() ?? '';
+            return { kept, e, name: e ? `${EVIDENCE_KIND_LABEL[e.kind]} · ${e.name}` : kept ? `붙인 기록 · ${first.slice(0, 60)}${first.length > 60 ? '…' : ''}` : `프로젝트 기록 · ${first.slice(0, 60)}` };
+        };
+        const target = (t, x) => {
+            const r = x.requests.find(r => r.id === t.requestId) ?? all.find(r => r.id === t.requestId), i = r?.items.find(i => i.id === t.itemId);
+            return `${i?.title ?? t.itemId} · ${r ? requestCaption(all, r) : '다른 요청'}`;
+        };
+        const keyOf = (scope, x) => JSON.stringify([scope, x.reading, x.index, x.match.record, x.match.from, x.match.to]);
+        /** A withdrawing passage names what it took back (the stored link only): the earlier report and the request item and revision it
+         * was withdrawn for, that report's original one step away (back to this very button), and today's correspondence when changed. */
+        const withdrew = (x, scope) => {
+            const w = withdrawalTarget(x, ledger);
+            if (!w)
+                return null;
+            const p = w.prior.match, key = JSON.stringify([scope, 'withdrew', x.reading, x.index, w.prior.reading, w.prior.index]);
+            const now = w.now === 'same' ? null : w.now === 'excluded' ? '요청 대응에서 제외함 (철회 연결은 그대로)' : w.now === 'open' ? '요청 대응 미정 (철회 연결은 그대로)' : `${target(x.target, x)} (철회 연결은 그대로)`;
+            return h('div', { class: 'rw-target' }, h('p', { class: 'rw-by' }, h('span', {}, '철회 대상'), h('span', {}, h('span', { class: 'rw-kind' }, matchLabel(p)), ` ${p.text}`, p.about ? h('span', { class: 'rw-target-about' }, ` · ${p.about}`) : null)), h('p', { class: 'rw-by' }, h('span', {}, '철회한 항목'), `${w.item?.title ?? w.then.itemId} · ${w.request ? requestCaption(all, w.request) : '다른 요청'}`), now ? h('p', { class: 'rw-by' }, h('span', {}, '지금 대응'), now) : null, h('p', { class: 'rw-card-foot' }, h('button', { type: 'button', class: 'rw-src rw-src-prior', 'data-rw-focus': key, onclick: () => openSource(w.prior, key) }, '철회한 보고 원문'), h('span', { class: 'rw-where', title: record(p.record).name }, record(p.record).name)));
+        };
+        const tag = (t, c = '') => h('span', { class: `rw-tag${c ? ` ${c}` : ''}` }, t);
+        /** One passage, whole: what kind of material and what it says of the change, its words, its condition as stored, its quote. */
+        const card = (x, scope, lead = false, ...extra) => {
+            const key = keyOf(scope, x), r = record(x.match.record);
+            return h('article', { class: `rw-card g-${matchGroup(x.match.kind)}${lead ? ' lead' : ''}${x.replacedBy ? ' withdrawn' : ''}` }, h('p', { class: 'rw-card-k' }, h('span', { class: 'rw-kind' }, matchLabel(x.match)), x.replaces ? tag(withdrawalTarget(x, ledger) ? '철회·정정' : '앞 보고를 철회·정정') : null, x.corrected ? tag('직접 고친 대응') : null, x.excluded ? tag('대응에서 제외함') : null, x.replacedBy ? tag('이후 철회·정정됨', 'off') : null), h('p', { class: 'rw-card-text' }, x.match.text), x.match.about ? h('p', { class: 'rw-cond' }, h('span', {}, '범위·조건'), h('span', {}, x.match.about)) : null, h('blockquote', { class: 'rw-q' }, x.match.quote), ...extra, h('p', { class: 'rw-card-foot' }, h('button', { type: 'button', class: 'rw-src', 'data-rw-focus': key, onclick: () => openSource(x, key) }, '근거 원문 열기'), h('span', { class: 'rw-where', title: r.name }, r.name)), withdrew(x, scope));
+        };
+        // The sentence the request was made from, whole on request (the request's own words; never summarised here).
+        const said = h('details', { class: 'rw-said', open: s.open.has('said') }, h('summary', { 'data-rw-part': 'said' }, '요청할 때 적은 문장'), h('p', {}, q.intent));
+        said.addEventListener('toggle', () => { if (said.open)
+            s.open.add('said');
+        else
+            s.open.delete('said'); });
+        const nav = h('nav', { class: 'rw-nav', 'aria-label': '원한 항목과 구절 묶음' }, q.intent ? said : null, h('h3', {}, `원한 항목 ${items.length}`), h('ul', {}, ...items.map(({ item, key, r }) => {
+            const kinds = new Map();
+            for (const x of r.current)
+                kinds.set(matchLabel(x.match), (kinds.get(matchLabel(x.match)) ?? 0) + 1);
+            const counts = [...kinds].map(([k, n]) => `${k} ${n}`).concat(r.history.length ? [`철회·정정 ${r.history.length}`] : []).join(' · ');
+            return h('li', {}, h('button', { type: 'button', class: `rw-pick st-${r.state}`, 'data-rw-section': key, 'aria-current': String(key === s.section), onclick: () => pick(key) }, h('span', { class: 'rw-pick-title' }, item.title), h('span', { class: 'rw-pick-state' }, r.lead || r.history.length ? ITEM_STATE_LABEL[r.state] : '연결된 원문 구절 없음'), counts ? h('span', { class: 'rw-pick-counts' }, counts) : null));
+        })), groups.length ? h('h3', {}, '항목 밖의 구절') : null, groups.length ? h('ul', {}, ...groups.map(g => h('li', {}, h('button', { type: 'button', class: 'rw-pick', 'data-rw-section': g.key, 'aria-current': String(g.key === s.section), onclick: () => pick(g.key) }, h('span', { class: 'rw-pick-title' }, GROUP_TITLE[g.key]), h('span', { class: 'rw-pick-counts' }, `${g.list.length}개`))))) : null);
+        const main = h('div', { class: 'rw-main', tabindex: '-1' });
+        const it = items.find(x => x.key === s.section), group = groups.find(g => g.key === s.section);
+        // The original by its exact stored entry (the full ledger: a withdrawn report folded into a later reading is still itself).
+        const found = s.source ? ledger.find(x => x.reading === s.source.reading && x.index === s.source.index) : null;
+        if (s.source && !found) {
+            s.source = null;
+            s.back = null;
+        }
+        if (s.source && found)
+            main.append(...sourceView(found, record, texts.get(found.match.record)?.read ?? null, it ? it.item.title : GROUP_TITLE[s.section] ?? '목록'));
+        else if (it) {
+            const { item, n, r } = it, itemKey = JSON.stringify([q.id, q.planId, q.planRevision, item.id]);
+            const rest = r.current.filter(x => x !== r.lead), fold = `history:${itemKey}`;
+            const hist = r.history.length ? h('details', { class: 'rw-history', open: s.open.has(fold) }, h('summary', { 'data-rw-part': `history:${item.id}` }, `철회·정정된 앞 보고 ${r.history.length}개`), h('p', { class: 'fine' }, '이후 원문이 거둬들인 보고예요. 원래 말과 근거는 그대로 남아요.'), ...r.history.map(x => card(x, itemKey, false, h('p', { class: 'rw-by' }, h('span', {}, '철회·정정한 구절'), x.replacedBy.match.text)))) : null;
+            hist?.addEventListener('toggle', () => { if (hist.open)
+                s.open.add(fold);
+            else
+                s.open.delete(fold); });
+            main.append(h('article', { class: 'rw-item', 'aria-labelledby': 'rw-item-title' }, h('p', { class: 'rw-kick' }, `원한 항목 ${n + 1}/${items.length}`, r.lead || r.history.length ? h('span', { class: `rw-state st-${r.state}` }, ITEM_STATE_LABEL[r.state]) : null), h('h3', { id: 'rw-item-title' }, item.title), h('section', { class: 'rw-want' }, h('h4', {}, '원한 것'), h('p', {}, item.description)), r.lead ? h('section', { class: 'rw-sec' }, h('h4', {}, '지금 앞에 읽는 구절', h('small', {}, '이 항목의 현재 대표 · 완료 표시 아님')), card(r.lead, itemKey, true)) : null, rest.length ? h('section', { class: 'rw-sec' }, h('h4', {}, `함께 서 있는 구절 ${rest.length}`), ...rest.map(x => card(x, itemKey))) : null, !r.current.length ? h('p', { class: 'rw-none' }, r.history.length ? '지금 서 있는 대응은 없어요. 앞 보고는 이후 원문이 철회했어요.' : '이 요청 항목에 연결된 프로젝트 원문 구절이 아직 없어요. 미구현이나 실패라는 뜻은 아니에요.') : null, hist));
+        }
+        else if (group) {
+            main.append(h('article', { class: 'rw-item' }, h('p', { class: 'rw-kick' }, '항목 밖의 구절'), h('h3', { id: 'rw-item-title' }, GROUP_TITLE[group.key]), h('p', { class: 'fine' }, group.key === 'ambiguous' ? '저장된 대조가 한 항목으로 정하지 않은 구절이에요. 후보는 대조가 남긴 그대로예요.'
+                : group.key === 'excluded' ? '사람이 요청 대응에서 뺀 구절이에요. 원문과 원래 대조는 그대로 남아요.' : '대조가 이 요청의 어느 항목에도 대응하지 않는다고 남긴 구절이에요.'), ...group.list.map(x => {
+                const prior = x.prior ? (() => {
+                    const r = all.find(q => q.id === x.prior.target.requestId), i = r?.items.find(i => i.id === x.prior.target.itemId);
+                    return h('p', { class: 'fine' }, `이 구절은 앞서 ${r ? requestCaption(all, r) : '다른 요청'}의 ‘${i?.title ?? '항목'}’으로 바로잡았어요. 원래 대응은 유지하고 이번 대조는 미정으로 남겼어요.`);
+                })() : null;
+                return card(x, group.key, false, group.key === 'ambiguous' ? h('p', { class: 'rw-by' }, h('span', {}, x.match.targets.length > 1 ? '어느 요청의 결과인지 남음' : '대응이 아직 분명하지 않음'), x.match.targets.map(t => target(t, x)).join(' / ')) : null, group.key === 'excluded' && x.match.targets.length ? h('p', { class: 'rw-by' }, h('span', {}, '원래 대조'), x.match.targets.map(t => target(t, x)).join(' / ')) : null, x.match.why ? h('p', { class: 'rw-why' }, x.match.why) : null, prior);
+            })));
+        }
+        // Writing stays where it was read: the narrow list keeps the correction and the unlink.
+        if (!s.source)
+            main.append(h('p', { class: 'rw-foot fine' }, `저장된 대응을 읽기만 해요. 대응 고치기·철회 연결 풀기는 ${alive ? `‘${s.origin.label}’의 ` : '원래 '}목록에서 할 수 있어요. 보고는 앱이 실행·확인한 결과가 아니에요.`));
+        const multi = all.length > 1 ? (() => {
+            const sel = h('select', { class: 'rw-request', 'aria-label': '읽을 요청', 'data-rw-part': 'request' });
+            all.forEach((r, i) => sel.append(h('option', { value: String(i), selected: r === q }, `${requestCaption(all, r)} · ${r.items.length}항목`)));
+            sel.addEventListener('change', () => {
+                const r = all[Number(sel.value)];
+                if (!r || !st)
+                    return;
+                st.request = { id: r.id, planId: r.planId, planRevision: r.planRevision };
+                const f = firstItem(o.project, r);
+                st.section = f ? `item:${f}` : 'ambiguous';
+                st.source = null;
+                st.back = null;
+                st.notice = null;
+                render();
+                el().querySelector('.rw-request')?.focus();
+            });
+            return sel;
+        })() : null;
+        // The way back names where it goes now: the reading it was opened from, or the map when that reading closed meanwhile.
+        const backTo = alive ? s.origin.label : '지도';
+        const head = h('header', { class: 'rw-head' }, h('button', { type: 'button', class: 'rw-back', 'data-rw-part': 'back', title: `‘${backTo}’(으)로 돌아가기 (Esc)`, onclick: close }, h('span', { 'aria-hidden': 'true' }, '‹ '), backTo), h('div', { class: 'rw-titles' }, h('h2', { id: 'rw-title' }, '돌아온 결과 넓게 읽기'), h('p', { class: 'rw-req', title: `${q.id} · ${q.planId} / ${q.planRevision}` }, multi ?? requestCaption(all, q), h('span', {}, `원한 항목 ${q.items.length}개 · 요청 전체`))), h('button', { type: 'button', class: 'close', 'data-rw-part': 'close', 'aria-label': '넓게 읽기 닫기', title: '닫기 (Esc)', onclick: close }, '×'), s.notice || !alive ? h('p', { class: 'rw-notice', role: 'status' }, [s.notice, alive ? null : `원래 읽던 ‘${s.origin.label}’ 화면은 그 사이 닫혔어요. 닫으면 지도로 돌아가요.`].filter(Boolean).join(' ')) : null);
+        // Re-rendering the same view keeps where it was read (the column, and the list for the same request); another request,
+        // section or original starts at its top. The control that had focus keeps it.
+        const view = JSON.stringify([reqKey, s.section, s.source?.key ?? null]), was = d.hidden ? null : d;
+        const keepMain = was && was.dataset.view === view ? was.querySelector('.rw-main')?.scrollTop ?? 0 : 0;
+        const keepNav = was && was.dataset.request === reqKey ? was.querySelector('.rw-nav')?.scrollTop ?? 0 : 0;
+        d.replaceChildren(head, h('div', { class: 'rw-body' }, nav, main));
+        d.hidden = false;
+        d.dataset.view = view;
+        d.dataset.request = reqKey;
+        main.scrollTop = keepMain;
+        nav.scrollTop = keepNav;
+        if (s.focus && !focusKey(s.focus))
+            s.focus = null;
+    }
+    function sourceView(x, record, text, from) {
+        // A record taken from a session is named as that session's, as the record view names it.
+        const r = record(x.match.record), e = r.e, o = r.kept && !e ? sessionOrigin(r.kept.text) : null;
+        return [h('div', { class: 'rw-backbar' }, h('button', { type: 'button', class: 'rw-src-back', 'data-rw-part': 'src-back', title: '읽던 구절로 돌아가기 (Esc)', onclick: back }, h('span', { 'aria-hidden': 'true' }, '← '), from)),
+            h('article', { class: 'rr-source rw-source' }, h('p', { class: 'rr-source-kind' }, h('span', { class: `rr-kind k-record${e ? ' k-provided' : ''}` }, e ? `사용자 제공 ${EVIDENCE_KIND_LABEL[e.kind]}` : o ? `${originLabel({ tool: o.tool, title: null })} 기록` : r.kept ? '붙여넣은 기록' : '프로젝트 기록'), r.kept ? h('span', {}, `${e || (o && o.tool !== 'web') ? '가져옴' : '붙여넣음'} ${fullTime(r.kept.at)}`) : null), h('h3', {}, e ? e.name : r.name), e ? h('p', { class: 'rr-provided-note', role: 'note' }, `${NOT_EXECUTED}. 자료 종류·판본·출처는 사용자가 적은 것이에요.`) : null, e ? h('dl', { class: 'rr-meta rw-meta' }, h('dt', {}, '판본'), h('dd', {}, e.version ?? NOT_RECORDED, e.version ? ' (사용자 기재)' : null), h('dt', {}, '출처'), h('dd', {}, e.origin ?? NOT_RECORDED, e.origin ? ' (사용자 기재 · 앱이 열거나 가져오지 않음)' : null)) : null, h('p', { class: 'rw-reading' }, h('span', { class: 'rw-kind' }, matchLabel(x.match)), x.replacedBy ? h('span', { class: 'rw-tag off' }, '이후 철회·정정됨') : null, x.excluded ? h('span', { class: 'rw-tag' }, '대응에서 제외함') : null, x.match.text, x.match.about ? h('span', { class: 'rw-cond-inline' }, ` · ${x.match.about}`) : null), text !== null ? h('blockquote', { class: `rr-quote rr-raw rw-raw${e?.kind === 'code' ? ' code' : ''}`, tabindex: '0', 'aria-label': '근거 원문' }, ...quotedText(text, x.match.quote, { at: x.match.from, length: x.match.to - x.match.from }))
+                : h('p', { class: 'rw-none' }, '이 구절의 원문을 지금 프로젝트에서 찾지 못했어요. 원문이 없다는 것이 미구현이라는 뜻은 아니에요.'))];
+    }
+    function openSource(x, key) {
+        if (!st)
+            return;
+        st.back = { scroll: el().querySelector('.rw-main')?.scrollTop ?? 0, focus: key };
+        st.source = { key, reading: x.reading, index: x.index };
+        render();
+        const main = el().querySelector('.rw-main');
+        if (main)
+            main.scrollTop = 0;
+        el().querySelector('.rw-src-back')?.focus({ preventScroll: true });
+        // The original opens at its head (kind, name, declared version and origin); only a mark out of sight is brought to a third.
+        requestAnimationFrame(() => {
+            const m = el().querySelector('.rw-main .rr-mark'), box = el().querySelector('.rw-main');
+            if (!m || !box)
+                return;
+            const r = m.getBoundingClientRect(), b = box.getBoundingClientRect();
+            if (r.top < b.top + 48 || r.bottom > b.bottom)
+                box.scrollTop += r.top - b.top - box.clientHeight / 3;
+        });
+    }
+    return { open, close, drop, escape, isOpen: () => !!st, render: () => { if (st)
+            render(); } };
 }

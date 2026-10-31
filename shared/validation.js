@@ -1,6 +1,8 @@
 import { API_SCHEMA, SCHEMA, V5_SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, GUIDE_SCHEMA } from './types.js';
-import { V6_SCHEMA, V7_SCHEMA, V8_SCHEMA, V9_SCHEMA, V10_SCHEMA, CLAIM_KINDS, READINGS_LIMIT, PASTED_TEXT_LIMIT, PASTED_LIMIT } from './types.js';
-import { validateFrozenRequest, validateStoredMatch, hasTarget, matchLedger } from './request-return.js';
+import { V6_SCHEMA, V7_SCHEMA, V8_SCHEMA, V9_SCHEMA, V10_SCHEMA, V11_SCHEMA, V12_SCHEMA, V13_SCHEMA, CLAIM_KINDS, READINGS_LIMIT, PASTED_TEXT_LIMIT, PASTED_LIMIT } from './types.js';
+import { validateFrozenRequest, validateStoredMatch, hasTarget, matchLedger, recordTextMap } from './request-return.js';
+import { ANCHOR_QUOTE_MAX, textDigest } from './evidence-span.js';
+import { validEvidence, recordIdentity } from './record-source.js';
 export class ContextError extends Error {
     constructor(code) { super(code); this.name = 'ContextError'; }
 }
@@ -18,6 +20,16 @@ function integer(v) { ensure(Number.isSafeInteger(v) && v >= 0); }
 function id(v) { text(v, 100); ensure(/^[A-Za-z0-9_-]+$/.test(v)); }
 function date(v) { text(v, 30); ensure(Number.isFinite(Date.parse(v)) && new Date(v).toISOString() === v); }
 function unique(items) { ensure(new Set(items.map(x => x.id)).size === items.length); }
+/** The text a source stands for as a record (what a map reading is sent, quotes, stores and marks): a returned report or evidence
+ * as received in its return file, without the app's own label prefix; any other source as it is. One choice for every reader. */
+export function sourceText(tasks, s) {
+    const t = tasks.find(x => x.id === s.taskId);
+    if (t?.resultFile && (s.kind === 'report' || s.kind === 'evidence')) {
+        const f = parseResultFile(t.resultFile.rawText);
+        return (s.kind === 'report' ? f.report : f.evidence) ?? s.text;
+    }
+    return s.text;
+}
 /** A file is untrusted data, not an authenticated execution receipt. Never repair/truncate it. */
 export function parseResultFile(raw) {
     ensure(typeof raw === 'string' && new TextEncoder().encode(raw).length <= RESULT_BYTES, 'RESULT_TOO_LARGE');
@@ -396,7 +408,6 @@ function assertProject(v) {
     const tasks = new Set(), returns = new Map();
     const areaIds = space(v.space);
     pasted(v.pasted, areaIds);
-    readings(v.readings, areaIds, new Map([...v.pasted.map(r => [r.id, r.text]), ...[...sources.values()].map(r => [r.id, r.text])]), v.id, new Set([...sources.values()].filter(s => s.kind === 'evidence').map(s => s.id)));
     for (const t of v.tasks) {
         const optional = ['intentEdit', 'areaId'].filter(k => t && typeof t === 'object' && Object.hasOwn(t, k));
         obj(t, ['id', 'sourceIds', 'parentTaskId', 'advice', 'adviceRevision', 'mode', 'manual', 'suggestions', 'handoffs', 'resultFile', 'background', ...optional]);
@@ -505,6 +516,11 @@ function assertProject(v) {
     }
     for (const s of sources.values())
         ensure(tasks.has(s.taskId));
+    // Readings are checked once the tasks are: map-reading.4 against each record as read (a returned report as received), earlier
+    // ones against the record as they stored it (Source.text), as before.
+    // A code/test match rests on evidence: a project evidence source, or a provided source the person classified (project.14).
+    const evidenceIds = new Set([...[...sources.values()].filter(s => s.kind === 'evidence').map(s => s.id), ...v.pasted.filter(r => r.evidence).map(r => r.id)]);
+    readings(v.readings, areaIds, recordTextMap(v.pasted, [...sources.values()], v.tasks), v.id, evidenceIds);
     understandingRefs(v.space, v.tasks, sources);
     // Imported reports or synthetic answers cannot masquerade as an authoritative decision.
     for (const b of v.bases) {
@@ -581,27 +597,53 @@ function space(v) {
     return ids;
 }
 /** Pasted records: text as pasted (any whitespace kept; control characters other than tab/newline refused, as everywhere),
- * unique ids and texts, and a context that names an existing part or nothing. */
+ * unique ids, and a context that names an existing part or nothing. project.14: a provided source also has its exact declaration
+ * (evidence). Unique by the same identity the domain adds with: a pasted text once; a provided source once per exact text and
+ * declaration; the same bytes pasted and provided are two records. */
 function pasted(v, areaIds) {
     list(v, PASTED_LIMIT);
-    const texts = new Set();
+    const seen = new Set();
     for (const r of v) {
-        obj(r, ['id', 'text', 'at', 'context']);
+        const typed = !!r && typeof r === 'object' && Object.hasOwn(r, 'evidence');
+        obj(r, ['id', 'text', 'at', 'context', ...(typed ? ['evidence'] : [])]);
         id(r.id);
         text(r.text, PASTED_TEXT_LIMIT);
         date(r.at);
         ensure(r.context === null || (typeof r.context === 'string' && areaIds.has(r.context)));
-        ensure(!texts.has(r.text));
-        texts.add(r.text);
+        if (typed)
+            ensure(validEvidence(r.evidence));
+        const key = recordIdentity(r);
+        ensure(!seen.has(key));
+        seen.add(key);
     }
     unique(v);
 }
+/** Before project.14 a normal record had exactly its four keys and a text of its own. Every older input is held to that before it
+ * is migrated, so no older-labelled file brings in a provided-source declaration (the final check alone would accept one). */
+function legacyPasted(v) {
+    const p = v;
+    if (!p || typeof p !== 'object' || !Object.hasOwn(p, 'pasted'))
+        return;
+    list(p.pasted, PASTED_LIMIT);
+    const texts = new Set();
+    for (const r of p.pasted) {
+        obj(r, ['id', 'text', 'at', 'context']);
+        ensure(typeof r.text === 'string' && !texts.has(r.text));
+        texts.add(r.text);
+    }
+}
 /** Map readings: every part a known area, every quote of a known record (a pasted record or a source), every claim a known
  * kind, and a claim replaced only by a later one of the same area. Relation ids may be gone (the person removed the line). */
-function readings(v, areaIds, records, projectId, materialIds) {
+function readings(v, areaIds, texts, projectId, materialIds) {
     list(v, READINGS_LIMIT);
     const seen = new Map(), hashes = new Set();
-    const quote = (q) => { obj(q, ['record', 'quote']); ensure(records.has(q.record)); text(q.quote, 300); };
+    const raw = new Map([...texts].map(([k, t]) => [k, t.raw])), asRead = new Map([...texts].map(([k, t]) => [k, t.read]));
+    let records = raw;
+    // map-reading.4: a quote is exactly the slice [from, to) of its record, inside an interval that reading was sent.
+    let four = false, read = [];
+    const at = (record, quote, from, to) => { integer(from); integer(to); ensure(from < to && records.get(record).slice(from, to) === quote && read.some(x => x.id === record && x.from <= from && to <= x.to)); };
+    const quote = (q) => { obj(q, ['record', 'quote', ...(four ? ['from', 'to'] : [])]); ensure(records.has(q.record)); text(q.quote, four ? ANCHOR_QUOTE_MAX : 300); if (four)
+        at(q.record, q.quote, q.from, q.to); };
     const entries = new Set();
     const requestReadings = new Map();
     for (const r of v) {
@@ -642,8 +684,12 @@ function readings(v, areaIds, records, projectId, materialIds) {
             ensure(r.corrects === null || seen.has(r.corrects));
             continue;
         }
-        const three = !!r && typeof r === 'object' && r.version === 'map-reading.3', two = three || (!!r && typeof r === 'object' && r.version === 'map-reading.2');
-        obj(r, ['version', 'id', 'at', 'model', 'prompt', 'hash', 'records', 'summary', 'parts', 'relations', 'candidates', 'gaps', 'skipped', ...(two ? ['requests', 'matches'] : [])]);
+        const version = !!r && typeof r === 'object' ? r.version : null;
+        const five = version === 'map-reading.5';
+        four = five || version === 'map-reading.4';
+        const three = four || version === 'map-reading.3', two = three || version === 'map-reading.2';
+        records = four ? asRead : raw;
+        obj(r, ['version', 'id', 'at', 'model', 'prompt', 'hash', 'records', 'summary', 'parts', 'relations', 'candidates', 'gaps', 'skipped', ...(two ? ['requests', 'matches'] : []), ...(four ? ['material'] : [])]);
         ensure(r.version === 'map-reading.1' || two);
         id(r.id);
         ensure(!entries.has(r.id));
@@ -656,13 +702,17 @@ function readings(v, areaIds, records, projectId, materialIds) {
         list(r.records, 16);
         ensure(r.records.length > 0);
         for (const x of r.records) {
-            obj(x, ['id', 'from', 'to', 'total']);
+            obj(x, ['id', 'from', 'to', 'total', ...(four ? ['digest'] : [])]);
             ensure(records.has(x.id));
             integer(x.from);
             integer(x.to);
             integer(x.total);
             ensure(x.from < x.to && x.to <= x.total);
+            // The digest names exactly the text read: the record is the one this reading was made of, its whole length too.
+            if (four)
+                ensure(records.get(x.id).length === x.total && x.digest === textDigest(records.get(x.id).slice(x.from, x.to)));
         }
+        read = r.records;
         text(r.summary, 200, true);
         list(r.parts, 64);
         const claims = new Map(), parts = new Set();
@@ -691,10 +741,10 @@ function readings(v, areaIds, records, projectId, materialIds) {
             ensure(p.created === null || p.basis.length > 0);
             list(p.claims, 8);
             p.claims.forEach((c, i) => {
-                obj(c, ['kind', 'text', 'record', 'quote', 'about', 'replaces']);
+                obj(c, ['kind', 'text', 'record', 'quote', ...(four ? ['from', 'to'] : []), 'about', 'replaces']);
                 ensure(CLAIM_KINDS.includes(c.kind));
                 text(c.text, 240);
-                quote({ record: c.record, quote: c.quote });
+                quote({ record: c.record, quote: c.quote, ...(four ? { from: c.from, to: c.to } : {}) });
                 if (c.about !== null)
                     text(c.about, 80);
                 if (c.replaces !== null) {
@@ -714,9 +764,29 @@ function readings(v, areaIds, records, projectId, materialIds) {
             ensure(['flow', 'needs', 'shares', 'related'].includes(x.kind));
             quote(x.quote);
         }
+        // map-reading.5: each candidate says what it leaves undecided; an undecided statement is kept in it, exact where it stands.
+        if (five) {
+            list(r.candidates, 16);
+        }
+        if (five)
+            for (const c of r.candidates) {
+                obj(c, ['text', 'areaIds', 'quote', 'target', 'statement']);
+                ensure(['attribution', 'identity', 'parent', 'holds'].includes(c.target));
+                const held = c.target === 'attribution' || c.target === 'holds';
+                ensure(held ? c.statement !== null : c.statement === null);
+                list(c.areaIds, c.target === 'holds' ? 1 : 2);
+                if (c.statement !== null) {
+                    obj(c.statement, ['kind', 'text', 'about', 'quote']);
+                    ensure(CLAIM_KINDS.includes(c.statement.kind));
+                    text(c.statement.text, 240);
+                    if (c.statement.about !== null)
+                        text(c.statement.about, 80);
+                    quote(c.statement.quote);
+                }
+            }
         list(r.candidates, 16);
         for (const c of r.candidates) {
-            obj(c, ['text', 'areaIds', 'quote']);
+            obj(c, ['text', 'areaIds', 'quote', ...(five ? ['target', 'statement'] : [])]);
             text(c.text, 240);
             list(c.areaIds, 2);
             for (const a of c.areaIds)
@@ -732,20 +802,31 @@ function readings(v, areaIds, records, projectId, materialIds) {
             obj(x, ['what', 'name', 'reason']);
             ensure(['part', 'relation'].includes(x.what));
             text(x.name, 200);
-            ensure(['same-name', 'archived', 'removed', 'exists', 'parent-skipped'].includes(x.reason));
+            ensure(['same-name', 'archived', 'removed', 'exists', 'parent-skipped', ...(four ? ['material'] : [])].includes(x.reason));
+        }
+        if (four) {
+            list(r.material, 8);
+            for (const x of r.material) {
+                obj(x, ['record', 'from', 'to', 'what']);
+                ensure(records.has(x.record));
+                text(x.what, 120);
+                integer(x.from);
+                integer(x.to);
+                ensure(x.from < x.to && read.some(y => y.id === x.record && y.from <= x.from && x.to <= y.to));
+            }
         }
         if (two) {
             list(r.requests, 8);
             const requests = r.requests.map(validateFrozenRequest);
             ensure(requests.every(q => q.projectId === projectId) && new Set(requests.map(q => q.id)).size === requests.length);
             list(r.matches, 24);
-            const matches = r.matches.map(m => validateStoredMatch(m, requests, r.records, records, materialIds, three));
+            const matches = r.matches.map(m => validateStoredMatch(m, requests, r.records, records, materialIds, three, four ? ANCHOR_QUOTE_MAX : 300));
             requestReadings.set(r.id, { requests, matches });
         }
         seen.set(r.id, claims);
     }
     // Every withdrawal names an earlier match that, where it stands, answers the very same frozen item; nothing is taken back twice.
-    ensure(!matchLedger(v, records).invalid);
+    ensure(!matchLedger(v, texts).invalid);
 }
 export const POSITION_LIMIT = 200000;
 function planStamp(v) {
@@ -1084,6 +1165,24 @@ function migrateV9(v) {
         ensure(!!r && typeof r === 'object' && ['map-reading.1', 'map-correction.1'].includes(r.version));
     return { ...p, schemaVersion: SCHEMA };
 }
+/** project.12 has map readings up to map-reading.4 (candidates without a stated target): they stay as stored. */
+function migrateV12(v) {
+    const p = v;
+    ensure(p && p.schemaVersion === V12_SCHEMA);
+    list(p.readings, READINGS_LIMIT);
+    for (const r of p.readings)
+        ensure(!!r && typeof r === 'object' && ['map-reading.1', 'map-reading.2', 'map-reading.3', 'map-reading.4', 'map-correction.1', 'request-correction.1', 'replace-correction.1'].includes(r.version));
+    return { ...p, schemaVersion: SCHEMA };
+}
+/** project.11 has map readings without positions (map-reading.1–3): they stay as stored, and no position is derived for them. */
+function migrateV11(v) {
+    const p = v;
+    ensure(p && p.schemaVersion === V11_SCHEMA);
+    list(p.readings, READINGS_LIMIT);
+    for (const r of p.readings)
+        ensure(!!r && typeof r === 'object' && ['map-reading.1', 'map-reading.2', 'map-reading.3', 'map-correction.1', 'request-correction.1', 'replace-correction.1'].includes(r.version));
+    return { ...p, schemaVersion: SCHEMA };
+}
 /** project.10 has request matches without stances and no withdrawal links: they stay as stored and read as unclassified. */
 function migrateV10(v) {
     const p = v;
@@ -1091,6 +1190,12 @@ function migrateV10(v) {
     list(p.readings, READINGS_LIMIT);
     for (const r of p.readings)
         ensure(!!r && typeof r === 'object' && ['map-reading.1', 'map-reading.2', 'map-correction.1', 'request-correction.1'].includes(r.version));
+    return { ...p, schemaVersion: SCHEMA };
+}
+/** project.13 has normal records of four keys only (checked before every migration): they stay as stored. */
+function migrateV13(v) {
+    const p = v;
+    ensure(!!p && typeof p === 'object' && !Array.isArray(p) && p.schemaVersion === V13_SCHEMA);
     return { ...p, schemaVersion: SCHEMA };
 }
 /** The single acceptance test for persisted bytes: autosave, recovery-file download and import all use it. */
@@ -1116,7 +1221,9 @@ export function parseProject(raw) {
     ensure(new TextEncoder().encode(raw).length <= FILE_LIMIT, 'FILE_TOO_LARGE');
     const v = JSON.parse(raw);
     const schema = v?.schemaVersion;
-    const project = schema === LEGACY_SCHEMA ? migrateLegacy(v) : schema === PREVIOUS_SCHEMA ? migrateV2(v) : schema === V3_SCHEMA ? migrateV3(v) : schema === V4_SCHEMA ? migrateV4(v) : schema === V5_SCHEMA ? migrateV5(v) : schema === V6_SCHEMA ? migrateV6(v) : schema === V7_SCHEMA ? migrateV7(v) : schema === V8_SCHEMA ? migrateV8(v) : schema === V9_SCHEMA ? migrateV9(v) : schema === V10_SCHEMA ? migrateV10(v) : v;
+    if ([LEGACY_SCHEMA, PREVIOUS_SCHEMA, V3_SCHEMA, V4_SCHEMA, V5_SCHEMA, V6_SCHEMA, V7_SCHEMA, V8_SCHEMA, V9_SCHEMA, V10_SCHEMA, V11_SCHEMA, V12_SCHEMA, V13_SCHEMA].includes(schema))
+        legacyPasted(v);
+    const project = schema === LEGACY_SCHEMA ? migrateLegacy(v) : schema === PREVIOUS_SCHEMA ? migrateV2(v) : schema === V3_SCHEMA ? migrateV3(v) : schema === V4_SCHEMA ? migrateV4(v) : schema === V5_SCHEMA ? migrateV5(v) : schema === V6_SCHEMA ? migrateV6(v) : schema === V7_SCHEMA ? migrateV7(v) : schema === V8_SCHEMA ? migrateV8(v) : schema === V9_SCHEMA ? migrateV9(v) : schema === V10_SCHEMA ? migrateV10(v) : schema === V11_SCHEMA ? migrateV11(v) : schema === V12_SCHEMA ? migrateV12(v) : schema === V13_SCHEMA ? migrateV13(v) : v;
     assertProject(project);
     return convertIntentEdits(project); // Freshly parsed, not shared: no defensive copy needed.
 }

@@ -1,4 +1,10 @@
-export const SCHEMA = 'idea015.project.11';
+export const SCHEMA = 'idea015.project.14';
+/** project.13 had normal records of exactly four keys (no provided-source declaration): they stay as stored, nothing is derived. */
+export const V13_SCHEMA = 'idea015.project.13';
+/** project.12 had map readings up to map-reading.4 (candidates without a stated target): they stay as stored. */
+export const V12_SCHEMA = 'idea015.project.12';
+/** project.11 had map readings whose quotes carry no position (map-reading.1–3): they stay as stored; no position is derived. */
+export const V11_SCHEMA = 'idea015.project.11';
 /** project.10 had request matches without a stance and no withdrawal links: they read as unclassified reports (no backfill). */
 export const V10_SCHEMA = 'idea015.project.10';
 export const V9_SCHEMA = 'idea015.project.9';
@@ -34,7 +40,7 @@ export const REQUEST_BYTES = 131072;
 export const EXCERPT_CHARS = 200;
 export const PASTED_TEXT_LIMIT = 60000;
 export const CLAIM_KINDS = ['want', 'idea', 'reported', 'checked', 'describes', 'open', 'differs'];
-export const isMapReading = (e) => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3';
+export const isMapReading = (e) => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3' || e.version === 'map-reading.4' || e.version === 'map-reading.5';
 export const READINGS_LIMIT = 500;
 export const PASTED_LIMIT = 500;
 export const SOURCE_LABEL = {

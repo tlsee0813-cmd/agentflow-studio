@@ -4,6 +4,7 @@ import { planFacts, planFactsText } from './plan-facts.js';
 import { areaPath, childrenOf } from './hierarchy.js';
 import { outcomeOf, contextLinks } from './outcome.js';
 import { secretLike } from './secret.js';
+import { validEvidence, canonicalEvidence, recordIdentity } from './record-source.js';
 export { planFacts, planFactsText } from './plan-facts.js';
 const uid = (prefix) => `${prefix}_${crypto.randomUUID()}`;
 const now = () => new Date().toISOString();
@@ -693,15 +694,33 @@ export function markHandoff(p, id, text, method, exportRevision = p.revision, re
 /** project.8: keeps a pasted record exactly as given (no trimming or merging) with the time it was added here and, optionally, the
  * part being looked at. The very same text already kept is that record again: nothing is added and the revision stays. */
 /** A backup's pasted records that look like they hold a key: such a file is not taken in (nothing is stored). */
-export function secretPasted(p) { return p.pasted.filter(r => secretLike(r.text)); }
+export function secretPasted(p) { return p.pasted.filter(r => secretLike(r.text) || (!!r.evidence && secretLike(`${r.evidence.name}\n${r.evidence.version ?? ''}\n${r.evidence.origin ?? ''}`))); }
 export function pasteRecord(p, value, context) {
-    const same = p.pasted.find(r => r.text === value);
+    // Only a record pasted as it came is that record again: a provided source with the same bytes is another record.
+    const same = p.pasted.find(r => !r.evidence && r.text === value);
     if (same)
         return { project: p, record: same, duplicate: true };
     text(value, PASTED_TEXT_LIMIT);
     ensure(!secretLike(value), 'SECRET_LIKE');
     ensure(context === null || p.space.areas.some(a => a.id === context));
     const n = change(p), record = { id: uid('N'), text: value, at: now(), context };
+    n.pasted.push(record);
+    return { project: n, record: copy(record), duplicate: false };
+}
+/** project.14: keeps a provided code or check file as a new normal record: the decoded text exactly (no trimming, header or
+ * normalisation) with the person's declaration of what it is and where it came from. The very same text with the very same
+ * declaration is that record again (nothing is added); anything else, a pasted record of the same bytes included, is a new record
+ * with its own id. Nothing existing is retagged, edited or copied, and no reading is moved onto it. */
+export function provideRecord(p, value, evidence, context) {
+    ensure(validEvidence(evidence), 'INVALID_EVIDENCE');
+    const e = canonicalEvidence(evidence), key = recordIdentity({ text: value, evidence: e });
+    const same = p.pasted.find(r => recordIdentity(r) === key);
+    if (same)
+        return { project: p, record: copy(same), duplicate: true };
+    text(value, PASTED_TEXT_LIMIT);
+    ensure(!secretLike(value), 'SECRET_LIKE');
+    ensure(context === null || p.space.areas.some(a => a.id === context));
+    const n = change(p), record = { id: uid('N'), text: value, at: now(), context, evidence: e };
     n.pasted.push(record);
     return { project: n, record: copy(record), duplicate: false };
 }

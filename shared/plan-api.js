@@ -1,4 +1,5 @@
 import { parsePlanAnalysis, EVIDENCE_KINDS } from './change-plan.js';
+import { validAuthoringAsk } from './authoring-context.js';
 export const PLAN_BYTES = 65536;
 const size = (v) => new TextEncoder().encode(JSON.stringify(v)).length;
 function check(ok) { if (!ok)
@@ -14,8 +15,10 @@ function text(v, max, empty = false) {
 function id(v) { text(v, 100); check(/^[A-Za-z0-9_-]+$/.test(v)); }
 /** Byte limit applies to the complete serialized request, including Korean source material. No silent truncation. */
 export function validatePlanAsk(value) {
-    obj(value, ['schemaVersion', 'intent', 'parts', 'evidence']);
-    check(value.schemaVersion === 'studio.plan.1');
+    check(value && typeof value === 'object' && !Array.isArray(value));
+    const v2 = ['studio.plan.2', 'studio.plan.3'].includes(value.schemaVersion);
+    obj(value, ['schemaVersion', 'intent', 'parts', 'evidence', ...(v2 ? ['authoring'] : [])]);
+    check(value.schemaVersion === 'studio.plan.1' || v2);
     text(value.intent, 6000);
     if (size(value) > PLAN_BYTES)
         throw new Error('INPUT_TOO_LARGE');
@@ -52,10 +55,15 @@ export function validatePlanAsk(value) {
         check(!refs.has(source.id));
         refs.add(source.id);
     }
+    if (v2)
+        check(validAuthoringAsk(value.authoring, value.parts));
     return structuredClone(value);
 }
+/** Only a studio.plan.3 request may be answered with no proposed change. */
+export const allowsNoChange = (ask) => ask.schemaVersion === 'studio.plan.3';
 export function validatePlanReply(value, ask) {
     const reply = parsePlanAnalysis(value, ask.parts.map(p => p.id), ask.evidence.map(e => e.id));
+    check(reply.items.length > 0 || allowsNoChange(ask));
     // AI overview suggestions do not establish a global mandatory-dependency graph.
     // Actual selected scope is evaluated separately; authored examples may still use explicit dependencies.
     check(reply.items.every(item => item.dependsOn.length === 0));

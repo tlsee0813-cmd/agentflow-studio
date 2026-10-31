@@ -1,5 +1,5 @@
 import { areaOf, isReturnTask, areaDescription } from './domain.js';
-import { parseResultFile } from './validation.js';
+import { parseResultFile, sourceText } from './validation.js';
 import { partUnderstanding } from './map-reading.js';
 /** Observations only: 'active' means a request is recorded and no report came back, not that work is running. */
 export const STATUS_LABEL = { plan: '구상', active: '요청 있음 · 보고 없음', reported: '보고 받음', check: '확인 필요' };
@@ -9,13 +9,6 @@ export const RECORD_LABEL = { request: '요청', report: '작업 보고', eviden
 const KIND = {
     request: 'request', report: 'report', evidence: 'evidence', answer: 'answer', manual_decision: 'decision', test_answer: null
 };
-function recordText(t, s) {
-    if (t.resultFile && (s.kind === 'report' || s.kind === 'evidence')) {
-        const f = parseResultFile(t.resultFile.rawText);
-        return (s.kind === 'report' ? f.report : f.evidence) ?? s.text;
-    }
-    return s.text;
-}
 export function studioView(p) {
     const active = p.space.areas.filter(a => !a.archived), ids = new Set(active.map(a => a.id));
     const parentOf = (id) => { const parent = p.space.containment.parents[id]; return parent && ids.has(parent) ? parent : null; };
@@ -26,7 +19,7 @@ export function studioView(p) {
         if (!kind || !t)
             continue;
         const area = areaOf(p, t), u = t.resultFile ? parseResultFile(t.resultFile.rawText).understanding : null;
-        records.push({ id: s.id, kind, at: s.at, partId: area && ids.has(area) ? area : null, taskId: t.id, text: recordText(t, s), origin: kind === 'report' ? u?.origin ?? null : null });
+        records.push({ id: s.id, kind, at: s.at, partId: area && ids.has(area) ? area : null, taskId: t.id, text: sourceText([t], s), origin: kind === 'report' ? u?.origin ?? null : null });
     }
     records.sort((a, b) => b.at.localeCompare(a.at));
     const parts = active.map(a => {
@@ -81,6 +74,9 @@ export const STUDIO_SCHEMA = 'studio.1';
 export const ASK_BYTES = 65536;
 export const ASK_RECORDS = 14;
 export const RECORD_CHARS = 2400;
+/** The question box after an answer to `sent` arrived: emptied only when it still holds that question (spaces aside). Text
+ * written since, e.g. a new question typed while an earlier one failed and was then retried, stays unsent and in place. */
+export const draftAfterAnswer = (draft, sent) => (draft.trim() === sent.trim() ? '' : draft);
 const encoder = new TextEncoder();
 export const askBytes = (v) => encoder.encode(JSON.stringify(v)).length;
 /** Cut to at most n UTF-16 units without leaving half of a surrogate pair. */

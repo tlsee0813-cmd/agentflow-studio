@@ -1,6 +1,17 @@
 import { validateDigestReply } from '../shared/digest-api.js';
-import { validateMapReply } from '../shared/map-reading.js';
+import { validateMapReply, MAP4_SCHEMA, MAP5_SCHEMA, MAP6_SCHEMA, MAP7_SCHEMA } from '../shared/map-reading.js';
+import { SPAN_INDEX, textDigest } from '../shared/evidence-span.js';
 import { RUNTIME } from './runtime.js';
+import { readSessionList, readSessionDetail } from '../shared/session-import.js';
+/** The earlier public site, at its own address (opened only by the person; nothing is sent or synchronised between the two). */
+export const PUBLIC_EDITION = 'https://agentflow-studio.tlsee0813.workers.dev/';
+export const RELEASE_TEXT = {
+    intro: '기존 지도 작업용 버전이에요. 저장된 지도를 읽고 고치며, 변경안과 요청문을 이어 가요.',
+    limit: '원자료로 첫 지도를 만들거나 새 기록으로 지도를 갱신하는 기능은 이 버전에서 제공하지 않아요.',
+    move: '기존 공개판의 자료는 자동으로 옮겨지지 않아요. 지도 백업을 가져오고, 변경안·요청·반환 자료가 있으면 그 지도의 ‘변경 구상’에서 변경안 파일도 따로 가져오세요.',
+    apart: '기존 공개판은 그 주소에서 그대로 쓸 수 있어요. 두 주소의 저장 내용은 자동으로 맞춰지지 않아요.'
+};
+const SCOPES = ['first', 'map6-later', 'map7-later'];
 export class AskError extends Error {
     code;
     constructor(code) {
@@ -21,8 +32,15 @@ export async function aiStatus() {
             return { ai: 'none', model: null, access: 'open' };
         const d = v.digest, digest = d && typeof d.model === 'string' && typeof d.prompt === 'string' && /^[\w.-]{1,80}$/.test(d.model) && /^d1-[0-9a-f]{12}$/.test(d.prompt)
             ? { model: d.model, prompt: d.prompt, record: typeof d.record === 'string' && /^d2-[0-9a-f]{12}$/.test(d.record) ? d.record : null } : null;
-        const m = v.map, map = m && typeof m.model === 'string' && /^[\w.-]{1,80}$/.test(m.model) && typeof m.prompt === 'string' && /^m[123]-[0-9a-f]{12}$/.test(m.prompt) ? { model: m.model, prompt: m.prompt } : null;
-        return { ai: v.ai, model: typeof v.model === 'string' ? v.model : null, access: v.access === 'code' ? 'code' : 'open', digest, map };
+        const m = v.map, map = m && typeof m.model === 'string' && /^[\w.-]{1,80}$/.test(m.model) && typeof m.prompt === 'string' && /^m[1-6]-[0-9a-f]{12}$/.test(m.prompt) ? { model: m.model, prompt: m.prompt, ...(m.via === 'jobs' ? { via: 'jobs' } : {}),
+            // A later recipe is read only beside a current m6 one, and only as an exact m7 id.
+            ...(/^m6-/.test(m.prompt) && typeof m.laterPrompt === 'string' && /^m7-[0-9a-f]{12}$/.test(m.laterPrompt) ? { laterPrompt: m.laterPrompt } : {}) } : null;
+        // AF112 scope: which map readings the executor takes (first maps only, later map.6 readings too, or AF116 later map.7 readings).
+        const j = v.jobs, x = j?.executor, executor = x && typeof x.state === 'string' ? { state: x.state, problem: typeof x.problem === 'string' ? x.problem : null, ...(SCOPES.includes(x.scope) ? { scope: x.scope } : {}) } : null;
+        const jobs = j && j.version === 'map-job.1' ? { durable: j.durable === true, problem: typeof j.problem === 'string' ? j.problem : null, ...(executor ? { executor } : {}) } : null;
+        const release = v.release === 'existing-map' ? 'existing-map' : null;
+        const sv = v.sessions, sessions = sv && sv.version === 'sessions.1' && Array.isArray(sv.tools) ? { tools: sv.tools.filter((t) => t === 'claude' || t === 'codex') } : null;
+        return { ai: v.ai, model: typeof v.model === 'string' ? v.model : null, access: v.access === 'code' ? 'code' : 'open', digest, map: release ? null : map, jobs: release ? null : jobs, release, sessions };
     }
     catch {
         return { ai: 'none', model: null, access: 'open' };
@@ -82,16 +100,18 @@ export async function askDigest(ask, signal, accessCode) {
         throw new AskError('INVALID_RESPONSE');
     }
 }
-/** A map reading. The reply is checked again here against the request that was sent. */
+/** A map reading. The reply is checked again here against the request that was sent. studio.map.4: the reply comes as references,
+ * decoded here against this very request (the server says which request body it read), so each passage keeps where it stands. */
 export async function askMap(ask, signal, accessCode) {
     if (RUNTIME.apiBase === null)
         throw new AskError('NO_SERVER');
     const headers = { 'Content-Type': 'application/json', 'X-AgentFlow-Request': '1' };
     if (accessCode)
         headers['X-Studio-Access'] = accessCode;
+    const body = JSON.stringify(ask);
     let res;
     try {
-        res = await fetch(url('/api/studio/map'), { method: 'POST', headers, body: JSON.stringify(ask), signal, credentials: 'same-origin' });
+        res = await fetch(url('/api/studio/map'), { method: 'POST', headers, body, signal, credentials: 'same-origin' });
     }
     catch {
         throw new AskError(signal.aborted ? 'CANCELLED' : 'NETWORK');
@@ -101,9 +121,14 @@ export async function askMap(ask, signal, accessCode) {
         data = await res.json();
     }
     catch { /* handled below */ }
+    // Cancelled while the body was still coming: said as cancelled, never read as a broken reply.
+    if (signal.aborted)
+        throw new AskError('CANCELLED');
     if (!res.ok)
         throw new AskError(typeof data?.error?.code === 'string' ? data.error.code : 'REQUEST_FAILED');
     if (typeof data?.model !== 'string')
+        throw new AskError('INVALID_RESPONSE');
+    if ((ask.schemaVersion === MAP4_SCHEMA || ask.schemaVersion === MAP5_SCHEMA || ask.schemaVersion === MAP6_SCHEMA || ask.schemaVersion === MAP7_SCHEMA) && (data.evidence?.index !== SPAN_INDEX || data.evidence.ask !== textDigest(body)))
         throw new AskError('INVALID_RESPONSE');
     try {
         return { model: data.model, reply: validateMapReply(data.reply, ask) };
@@ -111,6 +136,40 @@ export async function askMap(ask, signal, accessCode) {
     catch {
         throw new AskError('INVALID_RESPONSE');
     }
+}
+/** The sessions this PC's tools keep (newest first), or one of them; only from a local server that offers them. */
+async function getSessions(path, accessCode) {
+    if (RUNTIME.apiBase === null)
+        throw new AskError('NO_SERVER');
+    const headers = { 'X-AgentFlow-Request': '1' };
+    if (accessCode)
+        headers['X-Studio-Access'] = accessCode;
+    let res;
+    try {
+        res = await fetch(url(path), { headers, credentials: 'same-origin' });
+    }
+    catch {
+        throw new AskError('NETWORK');
+    }
+    let data = null;
+    try {
+        data = await res.json();
+    }
+    catch { /* handled below */ }
+    if (!res.ok)
+        throw new AskError(typeof data?.error?.code === 'string' ? data.error.code : 'REQUEST_FAILED');
+    return data;
+}
+/** folder: only sessions whose working folder is it or inside it. */
+export async function listSessions(accessCode, folder = null) {
+    return readSessionList(await getSessions(`/api/studio/sessions${folder ? `?folder=${encodeURIComponent(folder)}` : ''}`, accessCode));
+}
+/** since: only turns from that time on (the server then spends its reply budget on what was not taken yet). */
+export async function readSession(id, accessCode, since = null) {
+    const d = readSessionDetail(await getSessions(`/api/studio/sessions/${encodeURIComponent(id)}${since ? `?since=${encodeURIComponent(since)}` : ''}`, accessCode));
+    if (!d)
+        throw new AskError('INVALID_RESPONSE');
+    return d;
 }
 export const ERROR_TEXT = {
     AI_NOT_CONFIGURED: '서버에 AI 키가 설정되지 않았어요.',
@@ -125,9 +184,18 @@ export const ERROR_TEXT = {
     AI_TIMEOUT: '응답이 너무 오래 걸려 멈췄어요.',
     AI_NETWORK_ERROR: '서버가 AI 서비스에 연결하지 못했어요.',
     INVALID_RESPONSE: 'AI 응답이 약속한 형식이 아니어서 보여 드리지 않았어요.',
+    AI_RESPONSE_INCOMPLETE: 'AI가 응답을 끝내지 못해 보여 드리지 않았어요.',
+    AI_RESPONSE_UNFINISHED: 'AI 응답이 정상적으로 끝나지 않아 보여 드리지 않았어요.',
     ACCESS_CODE_REQUIRED: '접속 코드가 맞지 않아요.',
     FORBIDDEN_ORIGIN: '이 주소에서는 AI 서버에 요청할 수 없어요.',
     INPUT_TOO_LARGE: '보낼 기록이 너무 커요.',
+    MAP_WITHHELD: '이 버전에서는 지도를 새로 만들거나 갱신하지 않아요. 기록과 지도는 그대로예요.',
     NETWORK: 'AI 서버에 연결하지 못했어요.',
-    NO_SERVER: '이 페이지에는 연결된 AI 서버가 없어요.'
+    SESSION_NOT_FOUND: '그 세션 기록을 찾지 못했어요. 목록을 새로 불러오세요.',
+    SESSION_TOO_LARGE: '세션 기록 파일이 너무 커서 읽지 않았어요.',
+    SESSION_FOLDER_UNREADABLE: '고른 세션 폴더를 읽지 못했어요. 폴더를 옮겼거나 지웠다면 빼고 다시 골라 주세요.',
+    NO_SERVER: '이 페이지에는 연결된 AI 서버가 없어요.',
+    UNSUPPORTED_VERSION: '서버가 이 페이지보다 새 버전이에요. 페이지를 새로 고친 뒤 다시 시도하세요.',
+    INVALID_INPUT: '서버가 보낸 내용을 받아들이지 않았어요. 페이지를 새로 고친 뒤 다시 시도하세요.',
+    INTERNAL_ERROR: '서버에서 예상하지 못한 문제가 생겼어요. 잠시 뒤에 다시 시도하세요.'
 };

@@ -1,3 +1,4 @@
 AgentFlow Studio auxiliary static build
-source=26b24b935567a95d101720cbf0e06d188d8765d9
-primary=https://agentflow-studio.tlsee0813.workers.dev/
+source=b218453fbd597830ab2a33d203a59ab4464ef12c
+branch=work/experience142-reading-delivery
+note=static demo only; the local session connector and AI digest need the local server (see README)

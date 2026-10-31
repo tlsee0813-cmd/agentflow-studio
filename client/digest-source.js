@@ -1,3 +1,4 @@
+import { EVIDENCE_KIND_LABEL, NOT_EXECUTED, provenanceLine } from '../shared/record-source.js';
 import { RECORD_LABEL, clip } from '../shared/studio.js';
 import { DIGEST_SCHEMA, DIGEST2_SCHEMA, DIGEST_BYTES, RECORD_SENT_MAX, digestBytes } from '../shared/digest-api.js';
 import { ui62Sources, ui62Keys } from '../shared/return-material.js';
@@ -38,8 +39,15 @@ export function partLabel(view, id) {
 /** A pasted record as material: the text as pasted, never located (its context part is a note only). */
 function pastedSource(r, alias, view) {
     const at = r.context && view.parts.some(p => p.id === r.context) ? partLabel(view, r.context) : null;
+    const where = at ? `붙일 때 보던 부분: ${at} (읽기 맥락일 뿐 본문 전체가 이 부분에 관한 근거는 아님)` : '';
+    // A provided source reads as a record too (its kind is the person's declaration, not a check the app made); its name, version and
+    // origin go beside the text, never into it.
+    if (r.evidence)
+        return { id: alias, kind: 'record', title: clip(`${EVIDENCE_KIND_LABEL[r.evidence.kind]} · ${r.evidence.name}`, 200), text: clean(r.text),
+            note: [`${NOT_EXECUTED} · ${provenanceLine(r.evidence)}`, where].filter(Boolean).join(' · '),
+            basis: `가져온 시각 ${fullTime(r.at)} (원문 작성·판본 시각 아님)`, partIds: [], url: null, recordId: r.id, evidence: { ...r.evidence } };
     return { id: alias, kind: 'record', title: clip(recordTitle(clean(r.text)) || '붙여넣은 기록', 200), text: clean(r.text),
-        note: ['사용자가 붙여넣은 원문 그대로', at ? `붙일 때 보던 부분: ${at} (읽기 맥락일 뿐 본문 전체가 이 부분에 관한 근거는 아님)` : ''].filter(Boolean).join(' · '),
+        note: ['사용자가 붙여넣은 원문 그대로', where].filter(Boolean).join(' · '),
         basis: `붙여넣은 시각 ${fullTime(r.at)} (원문 작성·판본 시각 아님)`, partIds: [], url: null, recordId: r.id };
 }
 /** A saved project: the newest pasted records first (so a large project's other material never pushes a new one out), then the
