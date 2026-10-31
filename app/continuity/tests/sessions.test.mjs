@@ -503,6 +503,28 @@ test('SESSIONS-FK1 a forked Codex thread and a branched Claude Code session give
   assert.equal(b.meta.startedAt, at(20)); assert.deepEqual(b.changes, []);
 });
 
+test('SESSIONS-C5 after a Claude Code rewind only the conversation that goes on is read: the request gone back over and its files are not', () => {
+  const row = (r, uuid, parentUuid) => ({ ...r, uuid, parentUuid });
+  const said = rows => { const s = parseClaude(rows); return [s.turns.map(t => [t.role, t.text, t.files ?? null]), s.changes.flatMap(c => c.files)]; };
+  const before = [row(cu(0, '문자 알림을 보내 줘'), 'u1', null), row(ca(1, '문자로 보내게 했어요.'), 'a1', 'u1'), row(cu(2, '카카오톡으로도 보내게 해 줘'), 'u2', 'a1'),
+    row(ca(3, [{ type: 'tool_use', id: 't1', name: 'Write', input: { file_path: '/w/src/notify/kakao.ts', content: 'x' } }]), 'a2', 'u2'),
+    row(cu(4, [{ type: 'tool_result', tool_use_id: 't1', content: 'ok' }]), 'r2', 'a2'), row(ca(5, '카카오톡도 보내요.'), 'a3', 'r2')];
+  const rewind = { type: 'last-prompt', lastPrompt: '카카오톡으로도 보내게 해 줘', leafUuid: 'a1', explicit: true, rewound: true, cutUuid: 'u2', sessionId: 'x' };
+  const again = [row(cu(8, '카카오톡은 빼고 문자 실패 시 재시도만 넣어 줘'), 'u3', 'a1'), row(ca(9, '재시도를 넣었어요.'), 'a4', 'u3')];
+  const kept = [['user', '문자 알림을 보내 줘', null], ['assistant', '문자로 보내게 했어요.', []]], more = [['user', '카카오톡은 빼고 문자 실패 시 재시도만 넣어 줘', null], ['assistant', '재시도를 넣었어요.', []]];
+  assert.deepEqual(said([...before, rewind]), [kept, []], 'rewound, nothing sent again yet');
+  assert.deepEqual(said([...before, rewind, ...again]), [[...kept, ...more], []]);
+  assert.deepEqual(said([...before, ...again]), [[...kept, ...more], []], 'a version that wrote no rewind mark');
+  // A rewind that did not go through (Claude Code put the end back) and an ordinary session leave every turn.
+  const all = said(before);
+  assert.equal(all[0].length, 4); assert.deepEqual(all[1], ['/w/src/notify/kakao.ts']);
+  assert.deepEqual(said([...before, rewind, { type: 'last-prompt', leafUuid: 'a3', explicit: true, sessionId: 'x' }]), all);
+  // A compacted session goes on from its boundary, whose link to the rows before it may name none of them: all its turns stay.
+  const compacted = [...before, { type: 'system', subtype: 'compact_boundary', uuid: 'b1', parentUuid: null, logicalParentUuid: 'gone', timestamp: at(6) },
+    row(cu(6, '요약', { isCompactSummary: true }), 's1', 'b1'), row(cu(7, '이어서 문자 실패 시 재시도도'), 'u4', 's1'), row(ca(8, '넣었어요.'), 'a5', 'u4')];
+  assert.equal(said(compacted)[0].length, 6);
+});
+
 test('SESSIONS-X4 Codex patches name their files in any form: raw Windows paths, JSON arguments, heredocs, string commands', async () => {
   const P = await import('../dist/public/shared/session-parse.js');
   const patch = f => `*** Begin Patch\n*** Update File: ${f}\n@@\n-a\n+b\n*** End Patch\n`, fn = (name, args) => ({ type: 'function_call', name, call_id: 'c', arguments: JSON.stringify(args) });

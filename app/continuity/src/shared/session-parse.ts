@@ -144,6 +144,8 @@ function collector() {
   const turns: SessionTurn[] = []; let reply: (SessionTurn & { files: string[] }) | null = null;
   return {
     user(t: string | null, at: string | null) { if (!t) return; reply = null; turns.push({ role: 'user', at: at ?? null, text: t }); },
+    /** Takes out the turns from `from` to `to`, a stretch the session went back over. */
+    cut(from: number, to: number) { turns.splice(from, to - from); reply = null; },
     reply(text: unknown, at: string | null, files: string[] = []) {
       const t = String(text ?? '').trim(); if (!t && !files.length) return;
       if (!reply) { reply = { role: 'assistant', at: at ?? null, text: '', files: [] }; turns.push(reply); }
@@ -209,7 +211,30 @@ export function claudeParser(): SessionParser {
       c.user(t, at);
     } else c.reply(textOf(content, ['text']), at);
   };
-  return { push: o => push(o as Row), done: () => ({ meta, turns: c.turns, changes }) };
+  // A rewind (Esc Esc, /rewind) leaves the rows it went back over in the file: the prompt sent again hangs off the row before them,
+  // and Claude Code names the row it cut from. So each row of the conversation is known by its uuid, with how many turns and changes
+  // were read before and after it, and what was gone back over is taken out again. Rows without uuids are read as written.
+  const rows = new Map<string, { before: number[]; after: number[] }>(); let prev: string | null = null, cutFrom: string | null = null;
+  const back = (to: number[], end = [c.turns.length, changes.length]) => { c.cut(to[0]!, end[0]!); changes.splice(to[1]!, end[1]! - to[1]!); };
+  const read = (o: Row) => {
+    if (!o || typeof o !== 'object') return;
+    // The row a rewind cut from, used when no row of the conversation follows it (no prompt sent again yet). A later checkpoint
+    // that is no rewind takes it back: that rewind did not go through.
+    if (o.type === 'last-prompt' && o.explicit === true) cutFrom = o.rewound === true && rows.has(o.cutUuid) ? o.cutUuid : null;
+    const id = typeof o.uuid === 'string' && o.isSidechain !== true && o.type !== 'progress' ? o.uuid : null;
+    let before = [c.turns.length, changes.length]; push(o);
+    if (!id) return;
+    // A prompt that hangs off an earlier row than the one before it: the turns read since that row were gone back over (they are
+    // forgotten too, so no later row is read against them).
+    const from = typeof o.parentUuid === 'string' && o.parentUuid !== prev ? rows.get(o.parentUuid) : undefined;
+    if (from && o.type === 'user' && c.turns.length > before[0]! && c.turns.at(-1)!.role === 'user' && from.after[0]! < before[0]!) {
+      back(from.after, before); before = from.after;
+      let gone = false; for (const k of rows.keys()) { if (gone) rows.delete(k); else gone = k === o.parentUuid; }
+    }
+    cutFrom = null; prev = id;
+    if (!rows.has(id)) rows.set(id, { before, after: [c.turns.length, changes.length] });
+  };
+  return { push: o => read(o as Row), done: () => { if (cutFrom) { back(rows.get(cutFrom)!.before); cutFrom = null; } return { meta, turns: c.turns, changes }; } };
 }
 
 /** What the person typed in a Codex user message. Codex Desktop tags each part of it (user.text, user.heartbeat,
