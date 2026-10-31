@@ -259,7 +259,9 @@ const READ_ROUTES = Object.freeze({
   '/api/studio/ask': validateAsk, '/api/studio/plan': validatePlanAsk, '/api/studio/scope': validateScopeAsk,
   '/api/studio/digest': validateDigestAsk, '/api/studio/map': validateMapAsk
 });
-const JOBS = '/api/studio/jobs', SESSIONS = '/api/studio/sessions';
+const JOBS = '/api/studio/jobs', SESSIONS = '/api/studio/sessions', CONNECTOR = '/api/studio/connector';
+/** A connector record or a handover document: Korean text runs three bytes a character. */
+export const CONNECTOR_BYTES = 196608;
 /** The path segments below prefix when path is prefix itself or under it; null when it is elsewhere. */
 export const segmentsUnder = (path, prefix) => path === prefix ? [] : path.startsWith(`${prefix}/`) ? path.slice(prefix.length + 1).split('/').filter(Boolean) : null;
 /** A validator's refusal as the code the browser reads: size and version are their own codes, everything else is INVALID_INPUT. */
@@ -277,9 +279,9 @@ function inputError(e) {
 export const RELEASE_POLICIES = Object.freeze(['existing-map']);
 const WITHHELD = path => path === '/api/studio/map' || segmentsUnder(path, JOBS) !== null;
 
-export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, config = readStudioConfig(env), jobs = null, mapExecutor = null, policy = null, sessions = null, refused = null } = {}) {
+export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, config = readStudioConfig(env), jobs = null, mapExecutor = null, policy = null, sessions = null, refused = null, connector = null } = {}) {
   if (policy !== null && !RELEASE_POLICIES.includes(policy)) throw new Error('Unknown release policy.');
-  if (policy && (jobs || mapExecutor || sessions)) throw new Error('A limited release takes no map jobs, map executor or local sessions.');
+  if (policy && (jobs || mapExecutor || sessions || connector)) throw new Error('A limited release takes no map jobs, map executor, local sessions or connector.');
   if (policy && refused) throw new Error('A limited release keeps no refused replies.');
   const limiter = createLimiter(config);
   // Every reading except /ask (plan, scope, digest, map and map jobs) is made with the plan model.
@@ -316,7 +318,9 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
     // Said whatever the key: a result already kept can be fetched without one.
     ...(jobs ? { jobs: { ...jobs.describe(), ...(executor ? { executor: executor.describe() } : {}) } } : {}),
     // Local session records (server/sessions.mjs): offered only by a host that gives the service (the local Node server).
-    ...(sessions ? { sessions: sessions.describe() } : {})
+    ...(sessions ? { sessions: sessions.describe() } : {}),
+    // The AgentFlow connector's mailbox (server/connector.mjs): offered only by the local Node server.
+    ...(connector ? { connector: connector.describe() } : {})
   });
   /** The other origin a request comes from when STUDIO_ALLOWED_ORIGINS lists it (it gets CORS headers); otherwise null. */
   const corsOrigin = request => {
@@ -375,6 +379,23 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
         if (!sessionPath.length) return reply(200, await sessions.list(folder), cors);
         let id; try { id = decodeURIComponent(sessionPath[0]); } catch { throw new ApiError('SESSION_NOT_FOUND', 404); }
         return reply(200, await sessions.read(id, { since }), cors);
+      }
+      const connectorPath = connector ? segmentsUnder(url.pathname, CONNECTOR) : null;
+      if (connectorPath) {
+        // This PC's AI sessions (the MCP connector) and this PC's page only: same origin, never a listed other origin.
+        admit(request, { methods: ['GET', 'POST'], maxBytes: CONNECTOR_BYTES, sameOriginOnly: true });
+        const [what, ...rest] = connectorPath; if (rest.length || !['records', 'handover'].includes(what)) throw new ApiError('NOT_FOUND', 404);
+        let body = null;
+        if (request.method === 'POST') { try { body = JSON.parse(await readRequestText(request, CONNECTOR_BYTES)); } catch (e) { throw inputError(e); } }
+        const q = url.searchParams, folders = q.getAll('folder'), projects = q.getAll('project');
+        if (folders.length > 20 || projects.length > 20 || folders.some(f => !f || f.length > 1024) || projects.some(p => !/^[A-Z2-9]{6}$/.test(p))) throw new ApiError('INVALID_INPUT', 400);
+        if (what === 'records') {
+          if (body) return reply(200, await connector.add(body), cors);
+          const after = Number(q.get('after') ?? 0); if (!Number.isSafeInteger(after) || after < 0) throw new ApiError('INVALID_INPUT', 400);
+          return reply(200, connector.since(after, { folders, projects }), cors);
+        }
+        if (body) return reply(200, await connector.publish(body), cors);
+        return reply(200, connector.handover({ folder: folders[0] ?? null, project: projects[0] ?? null }), cors);
       }
       if (!Object.hasOwn(READ_ROUTES, url.pathname)) throw new ApiError('NOT_FOUND', 404);
       admit(request, { methods: ['POST'], maxBytes: ASK_BYTES });

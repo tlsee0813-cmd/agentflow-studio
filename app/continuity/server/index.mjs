@@ -4,6 +4,7 @@ import { createContinuityApp } from './app.mjs';
 import { createStudioHandler, studioConfigProblems } from './studio.mjs';
 import { openMapJobs } from './map-jobs.mjs';
 import { openSessions } from './sessions.mjs';
+import { openConnector } from './connector.mjs';
 
 // A start that cannot go ahead says why in one line and exits non-zero; it never prints a stack, a setting's value or the key.
 function stop(reason) { console.error(`AgentFlow Studio did not start: ${reason}`); process.exit(1); }
@@ -21,6 +22,10 @@ const dir=env.STUDIO_JOBS==='off'?null:env.STUDIO_JOBS_DIR||(config.port?fileURL
 const jobs=dir?await openMapJobs({dir,log:m=>console.log(m)}):null;
 // Local session records (Claude Code / Codex on this PC), read only on request; STUDIO_SESSIONS=off turns them off.
 const sessions=openSessions({env});
+// The AgentFlow connector's mailbox (records an AI session leaves through the MCP connector, the page's latest handover for it):
+// STUDIO_CONNECTOR_DIR, else app/continuity/.studio-data/connector-<port>; STUDIO_CONNECTOR=off turns it off.
+const connectorDir=env.STUDIO_CONNECTOR==='off'?null:env.STUDIO_CONNECTOR_DIR||(config.port?fileURLToPath(new URL(`../.studio-data/connector-${config.port}`,import.meta.url)):null);
+const connector=connectorDir?await openConnector({dir:connectorDir}):null;
 // A reply the server set aside (cut at its length, unfinished, or refused by the checks) is kept on this PC only when asked:
 // STUDIO_KEEP_REFUSED=on keeps it under app/continuity/.studio-data/refused-<port>, or a folder named there. Each file holds the
 // request this page sent (its records as already masked), how the reply ended and its text with key-like strings hidden; never
@@ -33,7 +38,7 @@ const refused=keep?async(what,ask)=>{
   await writeFile(join(keep,name),JSON.stringify({at,...what,ask},null,1));
   console.log(`AgentFlow Studio: a reply that was set aside (${what.error.code}${what.error.detail?` ${what.error.detail.path}`:''}) is kept in ${join(keep,name)}`);
 }:null;
-const studio=createStudioHandler({env,jobs,sessions,refused});
+const studio=createStudioHandler({env,jobs,sessions,refused,connector});
 const server=createContinuityApp({config,studio});
 server.once('error',async e=>{
   await jobs?.close();
@@ -41,7 +46,7 @@ server.once('error',async e=>{
 });
 server.listen(config.port,config.host,function(){
   const j=jobs?.describe();
-  console.log(`AgentFlow Studio: http://127.0.0.1:${this.address().port}  ·  AI ${env.AI_MODE!=='mock'&&env.DEEPSEEK_API_KEY?'DeepSeek (server key)':'off (no DEEPSEEK_API_KEY or --mock)'}  ·  map jobs ${!j?'off':j.durable?'kept on this PC':`not available (${j.problem})`}  ·  sessions ${sessions?'readable from this PC':'off'}`);
+  console.log(`AgentFlow Studio: http://127.0.0.1:${this.address().port}  ·  AI ${env.AI_MODE!=='mock'&&env.DEEPSEEK_API_KEY?'DeepSeek (server key)':'off (no DEEPSEEK_API_KEY or --mock)'}  ·  map jobs ${!j?'off':j.durable?'kept on this PC':`not available (${j.problem})`}  ·  sessions ${sessions?'readable from this PC':'off'}  ·  connector ${connector?'on':'off'}`);
 });
 // Ctrl+C or a service stop: no new connections, then the job store is closed in order before the process lets go of it. A call
 // still running is called off; the next start records it as interrupted, as after any restart.

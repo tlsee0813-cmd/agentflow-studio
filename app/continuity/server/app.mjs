@@ -10,12 +10,12 @@ import { validateRequest, validateAdvice, validateGuideRequest, validateGuideRep
 import { REQUEST_BYTES } from '../dist/public/shared/types.js';
 import { mockAdvice, mockGuidance } from './mock.mjs';
 import { callContinuity, callGuidance } from './provider.mjs';
-import { JOB_BYTES } from './studio.mjs';
+import { JOB_BYTES, CONNECTOR_BYTES } from './studio.mjs';
 const root=fileURLToPath(new URL('../dist/public/',import.meta.url));
 // Outer limits for /api/studio/*: a little above the handler's own ASK_BYTES (65536), so the handler answers an oversize ask
 // itself; a job submission carries the whole input and reads up to JOB_BYTES.
 const STUDIO_BODY=70000;
-const studioBodyLimit=path=>path==='/api/studio/jobs'?JOB_BYTES:STUDIO_BODY;
+const studioBodyLimit=path=>path==='/api/studio/jobs'?JOB_BYTES:path.startsWith('/api/studio/connector/')?CONNECTOR_BYTES:STUDIO_BODY;
 // Context errors (the advice contract) are a provider reply that broke the contract; everything else maps as usual.
 const continuityError=e=>e?.name==='ContextError'?new ApiError('INVALID_RESPONSE',502):safeError(e);
 async function readValid(req,validate) {

@@ -18,7 +18,9 @@ export interface AiStatus { ai: 'deepseek' | 'off' | 'none'; model: string | nul
   /** AF124: the server is a limited release that names why it offers no map reading (never read into an older server's silence). */
   release?: ReleasePolicy | null;
   /** The local server can read the Claude Code / Codex sessions kept on this PC (server/sessions.mjs); absent elsewhere. */
-  sessions?: { tools: ('claude' | 'codex')[] } | null }
+  sessions?: { tools: ('claude' | 'codex')[] } | null;
+  /** The local server keeps a mailbox for the AgentFlow MCP connector (server/connector.mjs); absent elsewhere. */
+  connector?: { version: 'connector.1' } | null }
 /** AF124: work on maps one already has. Map readings (a first map, a later one, a return read against the map) are not offered. */
 export type ReleasePolicy = 'existing-map';
 /** The earlier public site, at its own address (opened only by the person; nothing is sent or synchronised between the two). */
@@ -54,7 +56,8 @@ export async function aiStatus(): Promise<AiStatus> {
     const jobs = j && j.version === 'map-job.1' ? { durable: j.durable === true, problem: typeof j.problem === 'string' ? j.problem : null, ...(executor ? { executor } : {}) } : null;
     const release = v.release === 'existing-map' ? 'existing-map' as const : null;
     const sv = v.sessions, sessions = sv && sv.version === 'sessions.1' && Array.isArray(sv.tools) ? { tools: sv.tools.filter((t: unknown): t is 'claude' | 'codex' => t === 'claude' || t === 'codex') } : null;
-    return { ai: v.ai, model: typeof v.model === 'string' ? v.model : null, access: v.access === 'code' ? 'code' : 'open', digest, map: release ? null : map, jobs: release ? null : jobs, release, sessions };
+    const connector = !release && v.connector?.version === 'connector.1' ? { version: 'connector.1' as const } : null;
+    return { ai: v.ai, model: typeof v.model === 'string' ? v.model : null, access: v.access === 'code' ? 'code' : 'open', digest, map: release ? null : map, jobs: release ? null : jobs, release, sessions, connector };
   } catch { return { ai: 'none', model: null, access: 'open' }; }
 }
 
@@ -128,6 +131,33 @@ export async function readSession(id: string, accessCode: string, since: string 
   const d = readSessionDetail(await getSessions(`/api/studio/sessions/${encodeURIComponent(id)}${since ? `?since=${encodeURIComponent(since)}` : ''}`, accessCode));
   if (!d) throw new AskError('INVALID_RESPONSE');
   return d;
+}
+
+/** A record an AI session left through the AgentFlow connector, as the local server keeps it (its text made there). */
+export interface ConnectorRecord { seq: number; at: string; folder: string | null; text: string }
+async function connectorCall(path: string, accessCode: string, body: unknown = null): Promise<unknown> {
+  if (RUNTIME.apiBase === null) throw new AskError('NO_SERVER');
+  const headers: Record<string, string> = { 'X-AgentFlow-Request': '1', ...(body ? { 'Content-Type': 'application/json' } : {}) };
+  if (accessCode) headers['X-Studio-Access'] = accessCode;
+  let res: Response;
+  try { res = await fetch(url(path), { method: body ? 'POST' : 'GET', headers, credentials: 'same-origin', ...(body ? { body: JSON.stringify(body) } : {}) }); } catch { throw new AskError('NETWORK'); }
+  let data: { error?: { code?: unknown } } | null = null;
+  try { data = await res.json(); } catch { /* handled below */ }
+  if (!res.ok) throw new AskError(typeof data?.error?.code === 'string' ? data.error.code : 'REQUEST_FAILED');
+  return data;
+}
+/** Connector records after `after` (the last one taken) made in these folders (or inside one); last: the newest record's number. */
+export async function connectorRecords(accessCode: string, after: number, folders: string[]): Promise<{ records: ConnectorRecord[]; last: number; more: boolean }> {
+  const q = [`after=${after}`, ...folders.map(f => `folder=${encodeURIComponent(f)}`)].join('&');
+  const d = await connectorCall(`/api/studio/connector/records?${q}`, accessCode) as { records?: unknown; last?: unknown; more?: unknown } | null;
+  if (!d || !Array.isArray(d.records) || !Number.isSafeInteger(d.last)) throw new AskError('INVALID_RESPONSE');
+  const records = d.records.filter((r): r is ConnectorRecord => !!r && typeof r.seq === 'number' && typeof r.at === 'string' && typeof r.text === 'string' && r.text.length > 0)
+    .map(r => ({ seq: r.seq, at: r.at, folder: typeof r.folder === 'string' ? r.folder : null, text: r.text }));
+  return { records, last: d.last as number, more: d.more === true };
+}
+/** Leaves the open project's handover document for the connector to hand a new session (it replaces the one left before). */
+export async function publishHandover(accessCode: string, doc: { key: string; code: string; name: string; folders: string[]; text: string }): Promise<void> {
+  await connectorCall('/api/studio/connector/handover', accessCode, doc);
 }
 
 export const ERROR_TEXT: Record<string, string> = {

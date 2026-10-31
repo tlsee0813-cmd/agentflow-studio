@@ -3019,6 +3019,52 @@ def folder_files():
     return files
 
 
+def connector_flow(browser, base):
+    """AgentFlow connector (an MCP server beside an AI session, here its HTTP calls made by hand): a record it leaves for the
+    connected folder comes into the open project as a session record (key hidden) on the next look, once; the project's handover
+    document is left for the connector to hand a new session."""
+    import urllib.parse, urllib.request
+    def call(path, body=None):
+        req = urllib.request.Request(base + path, data=json.dumps(body).encode() if body else None, method="POST" if body else "GET",
+                                     headers={"X-AgentFlow-Request": "1", **({"Content-Type": "application/json"} if body else {})})
+        return json.load(urllib.request.urlopen(req))
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    errors = []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.goto(base + "/")
+    page.locator("#new-open").click()
+    page.locator("#new-name").fill("커넥터 예약")
+    page.locator("#new-form").get_by_role("button", name="만들기").click()
+    page.locator("#sync-pill").click()
+    page.locator("#sync-panel .sync-folder-pick").first.click()
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon")
+    # The connected project's handover is left for the connector (the AI session asks with a folder inside the project's).
+    handover = None
+    for _ in range(50):
+        handover = call("/api/studio/connector/handover?folder=" + urllib.parse.quote("/work/salon/app"))
+        if handover.get("text"): break
+        time.sleep(0.2)
+    assert handover["name"] == "커넥터 예약" and "# 인수인계: 커넥터 예약" in handover["text"], handover
+    count = lambda: page.evaluate("Object.values(localStorage).join('\\n')").count("예약 문자를 붙였어요")
+    assert count() == 0
+    call("/api/studio/connector/records", {"client": "claude-code", "folder": "/work/salon/app", "title": "예약 문자", "request": "예약 확정 문자 보내 줘",
+                                            "answer": "예약 문자를 붙였어요. 키 sk-abcdefghijklmnopqrstuvwxyz0123 는 지웠어요.", "files": ["src/sms.ts"]})
+    page.locator("#sync-pill").click() if not page.locator("#sync-panel").is_visible() else None
+    page.locator("#sync-panel").get_by_role("button", name="지금 확인").click()
+    for _ in range(50):
+        if count() == 1: break
+        time.sleep(0.2)
+    stored = page.evaluate("Object.values(localStorage).join('\\n')")
+    assert count() == 1 and "[Claude Code 세션 기록 · 예약 문자 · 작업 폴더 /work/salon/app" in stored, "the connector record came in as a session record"
+    assert "sk-abcdefghijklmnopqrstuvwxyz0123" not in stored
+    page.locator("#sync-panel").get_by_role("button", name="지금 확인").click()
+    time.sleep(1.5)
+    assert count() == 1, "a record is taken once"
+    assert errors == [], errors
+    context.close()
+
+
 def folder_sessions_flow(browser, base):
     """Without a local session reader (a hosted or plain local server), the person picks their .claude and .codex folders once in the
     browser: the same automatic connection runs on them (folders found, sessions taken, first map without a click), the paste box
@@ -4680,7 +4726,7 @@ def map100_flow(browser, size, shots=None):
         pathlib.Path(gate, f"release-{n}").write_text("")
 
     def server_state(op):
-        import urllib.request
+        import urllib.parse, urllib.request
         req = urllib.request.Request(f"{base}/api/studio/jobs/{op['id']}", headers={"X-AgentFlow-Request": "1", "X-Studio-Operation": op["cap"]})
         with urllib.request.urlopen(req) as r: return json.loads(r.read())
 
@@ -4854,6 +4900,7 @@ def main():
             proc, base = start("fail"); procs.append(proc); question_retry_flow(browser, base); print("ok  failed question retried after another was typed: the retry answers the first, the new one stays in the box")
             proc, base = start("fail"); procs.append(proc); return_failure_flow(browser, base); print("ok  return reading failure -> short error and the material -> asking again")
             proc, base = start("ok", STUDIO_SESSIONS_FIXTURE="1"); procs.append(proc); sessions_flow(browser, base); print("ok  local sessions: connect a folder once -> its sessions become records -> first map without a click; nothing taken twice; one session by hand, key hidden")
+            proc, base = start("ok", STUDIO_SESSIONS_FIXTURE="1", STUDIO_CONNECTOR_FIXTURE="1"); procs.append(proc); connector_flow(browser, base); print("ok  AgentFlow connector: a record an AI session leaves comes into the connected project once, key hidden; the handover is left for it")
             proc, base = start("ok"); procs.append(proc); folder_sessions_flow(browser, base); print("ok  session folders picked in the browser (no local reader): automatic connection, paste-box list, one file by hand, web request text")
             proc, base = start("ok"); procs.append(proc); handover_flow(browser, base); print("ok  handover document: a part's sessions, its document and the whole project's, copied and saved, nothing sent")
             proc, base = start("ok"); procs.append(proc); final_paste_flow(browser, base); print("ok  paste box: a web AI's record saved with keys hidden, said before and after, never kept as a draft")
