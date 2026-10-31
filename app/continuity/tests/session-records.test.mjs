@@ -239,7 +239,7 @@ test('SESSIONS-RD7 a URL password holding a slash or an unencoded @ is hidden wh
     assert.deepEqual(redactSecrets(r.text), { text: r.text, count: 0 }, 'hidden once, never again');
   }
   for (const text of ['http://localhost:3000/@me', 'https://medium.com:443/@alice', 'http://host:8080/users/x@example.com', 'ssh://git@host:22/x', 'postgres://u:@host/db',
-    'https://a.com:8443?x=a@b.com'])
+    'https://a.com:8443?x=a@b.com', "['http://api.example.com','https://evil.example','https://api.example.com@evil.example']"])
     assert.deepEqual(redactSecrets(text), { text, count: 0 }, text);
 });
 
