@@ -21,13 +21,13 @@ export function corpus(mods) {
   const R7 = K.aliases(a7.ask, a7.records).report;
   add7('lawful');
   add7('root array', () => [], ['reply', 'contract', 'shape']);
-  add7('root extra key', w => ({ ...w, EXTRA_KEY_137: 'SECRET_MARKER_137' }), ['reply', 'contract', 'keys']);
+  add7('root missing key', w => { delete w.summary; w.EXTRA_KEY_137 = 'SECRET_MARKER_137'; }, ['reply', 'contract', 'keys']);
   add7('summary number', w => { w.summary = 137; }, ['summary', 'contract', 'shape']);
   add7('summary over 200', w => { w.summary = `SECRET_MARKER_137 ${'x'.repeat(200)}`; }, ['summary', 'contract', 'text']);
   add7('summary secret-like', w => { w.summary = `키 ${SECRETISH}`; }, ['summary', 'contract', 'secret-like']);
   add7('parts object', w => { w.parts = { SECRET_MARKER_137: 1 }; }, ['parts', 'contract', 'shape']);
   add7('parts 25', w => { w.parts = Array.from({ length: 25 }, () => w.parts[1]); }, ['parts', 'contract', 'count']);
-  add7('part extra key', w => { w.parts[1].EXTRA_KEY_137 = 'SECRET_MARKER_137'; }, ['parts[1]', 'contract', 'keys']);
+  add7('part missing key', w => { delete w.parts[1].claims; w.parts[1].EXTRA_KEY_137 = 'SECRET_MARKER_137'; }, ['parts[1]', 'contract', 'keys']);
   add7('new part parent unknown', w => { w.parts[0].parent = 'P99'; }, ['parts[0].parent', 'contract', 'parent']);
   add7('existing part named', w => { w.parts[1].name = 'SECRET_MARKER_137'; }, ['parts[1]', 'contract', 'existing-name-parent']);
   add7('new part name blank', w => { w.parts[0].name = '   '; }, ['parts[0].name', 'contract', 'text']);
@@ -36,14 +36,14 @@ export function corpus(mods) {
   add7('claim kind', w => { w.parts[1].claims[2].kind = 'SECRET_MARKER_137'; }, ['parts[1].claims[2].kind', 'contract', 'kind']);
   add7('claim text control', w => { w.parts[1].claims[1].text = 'SECRET_MARKER_137\u0007'; }, ['parts[1].claims[1].text', 'contract', 'text']);
   add7('claim replaces unknown', w => { w.parts[1].claims[0].replaces = 'SECRET_MARKER_137'; }, ['parts[1].claims[0].replaces', 'contract', 'replaces']);
-  add7('claim extra key', w => { w.parts[1].claims[3].EXTRA_KEY_137 = 1; }, ['parts[1].claims[3]', 'contract', 'keys']);
+  add7('claim missing key', w => { delete w.parts[1].claims[3].replaces; w.parts[1].claims[3].EXTRA_KEY_137 = 1; }, ['parts[1].claims[3]', 'contract', 'keys']);
   add7('new parts cycle', w => { w.parts.unshift(K.part7('new:loop', { name: '고리', parent: 'new:webp', basis: w.parts[0].basis })); w.parts[1].parent = 'new:loop'; }, ['parts[0].parent', 'contract', 'parent-cycle']);
   add7('relation kind', w => { w.relations[0].kind = 'SECRET_MARKER_137'; }, ['relations[0].kind', 'contract', 'kind']);
   add7('relation end unknown', w => { w.relations[0].to = 'P77'; }, ['relations[0]', 'contract', 'ends']);
   add7('relation note number', w => { w.relations[0].note = 7; }, ['relations[0].note', 'contract', 'shape']);
   add7('candidate text over 240', w => { w.candidates[0].text = 'y'.repeat(241); }, ['candidates[0].text', 'contract', 'text']);
   add7('candidate statement kind', w => { w.candidates[0].statement.kind = 'SECRET_MARKER_137'; }, ['candidates[0].statement.kind', 'contract', 'kind']);
-  add7('candidate statement extra key', w => { w.candidates[0].statement.EXTRA_KEY_137 = null; }, ['candidates[0].statement', 'contract', 'keys']);
+  add7('candidate statement missing key', w => { delete w.candidates[0].statement.kind; w.candidates[0].statement.EXTRA_KEY_137 = null; }, ['candidates[0].statement', 'contract', 'keys']);
   add7('gaps 3', w => { w.gaps = ['a', 'b', 'c']; }, ['gaps', 'contract', 'count']);
   add7('gap over 160', w => { w.gaps = [`SECRET_MARKER_137${'g'.repeat(160)}`]; }, ['gaps[0]', 'contract', 'text']);
   add7('material what blank', w => { w.material[0].what = ''; }, ['material[0].what', 'contract', 'text']);
@@ -62,7 +62,7 @@ export function corpus(mods) {
   add7('kept: claim key', w => { w.parts[1].claims[0].key = 'SECRET_MARKER_137'; });
   // map.6: the same faults (as far as its shape goes) must refuse exactly as before.
   add6('lawful');
-  add6('root extra key', w => ({ ...w, EXTRA_KEY_137: 'SECRET_MARKER_137' }));
+  add6('root missing key', w => { delete w.summary; w.EXTRA_KEY_137 = 'SECRET_MARKER_137'; });
   add6('summary over 200', w => { w.summary = `SECRET_MARKER_137 ${'x'.repeat(200)}`; });
   add6('claim kind', w => { w.parts[0].claims[0].kind = 'SECRET_MARKER_137'; });
   add6('existing part named', w => { w.parts[0].name = 'SECRET_MARKER_137'; });

@@ -66,7 +66,7 @@ test('120-2 map.7 refusals at parts[i].ref: one fixed category each, never the r
   // Order: the old about form, then the exact keys, then the ref (each refusal is the one it was).
   const both = withIds(ask, inp.records, ['new:x']); both.parts[2].ref = 'new:Bad'; both.parts[2].roleAbout = null; delete both.parts[2].roleAboutAt;
   assert.deepEqual([refusal(() => M.validateMapReply(both, ask)).rule, refusal(() => M.validateMapReply(both, ask)).path], ['condition-form', 'parts[2].roleAbout']);
-  const extra = withIds(ask, inp.records, ['new:x']); extra.parts[2].ref = 'new:Bad'; extra.parts[2].extra = 1;
+  const extra = withIds(ask, inp.records, ['new:x']); extra.parts[2].ref = 'new:Bad'; delete extra.parts[2].claims;
   const ek = refusal(() => M.validateMapReply(extra, ask));
   assert.deepEqual([ek.path, ek.rule, ek.target], ['parts[2]', 'contract', 'keys'], 'the exact-key check comes first (AF137: now said with its path and category)');
 });

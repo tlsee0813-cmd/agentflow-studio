@@ -240,10 +240,14 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
   // AF137: map.7's generic guards say where (a static path) and which (a fixed category) through MapReplyError, rule 'contract'.
   // Each is the same condition at the same place; map.1–6 go through check/obj/str/arr unchanged (a plain INVALID_RESPONSE).
   function need(ok: unknown, path: string, what: ContractGuard): asserts ok { if (!ok) throw seven ? new MapReplyError(path, 'contract', what) : new Error(code); }
+  // map.6–7: every key asked for must be there; a key not asked for is passed over (nothing is read from it, and the reply is
+  // rebuilt from the asked keys alone, so it is never kept). A real reading on a PC was refused whole for one claim carrying a
+  // misspelled extra key beside the right one. map.1–5 stay exact.
   function object(v: unknown, keys: string[], path: string): asserts v is Record<string, unknown> {
-    if (!seven) return obj(v, keys, code);
-    need(!!v && typeof v === 'object' && !Array.isArray(v), path, 'shape');
-    need(Object.keys(v as object).length === keys.length && keys.every(k => Object.hasOwn(v as object, k)), path, 'keys');
+    if (!six) return obj(v, keys, code);
+    const shaped = !!v && typeof v === 'object' && !Array.isArray(v), all = shaped && keys.every(k => Object.hasOwn(v as object, k));
+    if (!seven) return check(all, code);
+    need(shaped, path, 'shape'); need(all, path, 'keys');
   }
   function field(v: unknown, max: number, empty: boolean, path: string): asserts v is string {
     if (!seven) return str(v, max, empty, code);
@@ -260,8 +264,10 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
   };
   // map.4 keeps its two-piece/paragraph contract; map.5 allows any exact contiguous range within the evidence length bound.
   // map.6: a reference that resolves to nothing in this request is refused with where it stands (path) and what it said.
-  // map.6–7: a range of pieces that are there but run past ANCHOR_QUOTE_MAX is refused as too long ('length'), not as a reference
-  // to nothing; a claim, or one of several basis quotes, resting on one is left out instead (below).
+  // map.6–7: a range of pieces that are there but run past ANCHOR_QUOTE_MAX is kept from its first piece up to the last piece that
+  // still fits (the passage the reading pointed at, from where it starts): a real reading on a PC was refused whole for three
+  // quotes of 757–781 letters. Only a range whose first piece alone runs past the bound is too long ('length'); a claim, or one
+  // of several basis quotes, resting on one is left out instead (below).
   const cite = (v: unknown, path = ''): MapReplyQuote => {
     const bad = () => { throw six ? new MapReplyError(path, 'reference', typeof v === 'string' ? v.slice(0, 40) : String(v)) : new Error(code); };
     if (typeof v !== 'string') bad();
@@ -270,7 +276,13 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
     if (six) {
       const range = resolveRange(v as string, rec!, got!.text, got!.spans!);
       if (!range) bad();
-      if (range!.to - range!.from > ANCHOR_QUOTE_MAX) throw new MapReplyError(path, 'length', (v as string).slice(0, 40));
+      if (range!.to - range!.from > ANCHOR_QUOTE_MAX) {
+        const spans = got!.spans!, first = spans.findIndex(x => x.from === range!.from);
+        let last = first; while (last + 1 < spans.length && spans[last + 1]!.to <= range!.to && spans[last + 1]!.to - range!.from <= ANCHOR_QUOTE_MAX) last++;
+        if (first < 0 || spans[last]!.to - range!.from > ANCHOR_QUOTE_MAX) throw new MapReplyError(path, 'length', (v as string).slice(0, 40));
+        const to = spans[last]!.to;
+        return { record: rec!, quote: got!.text.slice(range!.from, to), from: range!.from, to };
+      }
     }
     const at = (five ? resolveEvidenceRange : resolveRef)(v as string, rec!, got!.text, got!.spans!);
     if (!at || at.quote.length > ANCHOR_QUOTE_MAX) bad();
