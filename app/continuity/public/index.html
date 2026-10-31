@@ -4,12 +4,14 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AgentFlow Studio</title>
   <meta name="description" content="Codex·Claude에서 온 개발 기록을 프로젝트의 부분별 지도로 정리해 보여 줍니다.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%232e90fa'/%3E%3Cstop offset='1' stop-color='%23444ce7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='2.2'%3E%3Crect x='7' y='8' width='7.5' height='6' rx='1.8'/%3E%3Crect x='17.5' y='8' width='7.5' height='6' rx='1.8'/%3E%3Crect x='12.25' y='18' width='7.5' height='6' rx='1.8'/%3E%3C/g%3E%3C/svg%3E">
+  <link rel="preload" href="./fonts/PretendardVariable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="./styles.css"><script type="module" src="./client/app.js"></script>
 </head>
 <body>
   <div class="app">
     <header class="bar">
-      <a class="brand" href="#/" aria-label="AgentFlow Studio 프로젝트 목록"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="7.5" height="6" rx="1.8"/><rect x="13.5" y="4.5" width="7.5" height="6" rx="1.8"/><rect x="8.25" y="14" width="7.5" height="6" rx="1.8"/></svg><span>AgentFlow Studio</span></a>
+      <a class="brand" href="#/" aria-label="AgentFlow Studio 프로젝트 목록"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="7.5" height="6" rx="1.8"/><rect x="13.5" y="4.5" width="7.5" height="6" rx="1.8"/><rect x="8.25" y="14" width="7.5" height="6" rx="1.8"/></svg></span><span class="brand-name">AgentFlow Studio</span></a>
       <div class="context">
         <nav id="crumbs" class="crumbs" aria-label="구성 경로"><a href="#/">프로젝트</a></nav>
         <div id="scope-bar" class="scope-bar" hidden></div>
@@ -28,11 +30,11 @@
       <div class="home-inner">
         <header class="home-head">
           <div>
-            <h1 class="home-title">내 프로그램</h1>
-            <p class="home-lede">만들고 있는 프로그램의 부분과 묶음을 그대로 열어, 이해하고 바꿀 모습을 시험해요.</p>
+            <h1 class="home-title">프로젝트</h1>
+            <p class="home-lede">AI와 나눈 개발 기록을 프로젝트 지도로 정리하고, 다음 세션에 그대로 이어 줘요.</p>
           </div>
           <div class="home-actions">
-            <button type="button" id="import" class="secondary">백업 파일 가져오기</button>
+            <button type="button" id="import" class="secondary"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 10V2.75M5 5.5 8 2.5l3 3M3 10.5v2.25h10V10.5"/></svg>백업 가져오기</button>
             <button type="button" id="new-open" class="primary" aria-expanded="false" aria-controls="new-form"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.5v9M3.5 8h9"/></svg>새 프로젝트</button><input id="import-file" type="file" accept="application/json,.json" hidden>
           </div>
         </header>
@@ -41,14 +43,26 @@
         <div id="home-message" class="message" role="status" hidden></div>
         <section class="home-mine" aria-label="내 프로젝트">
           <ul id="saved-list" class="program-list mine"></ul>
-          <p id="saved-empty" class="home-empty" hidden>아직 이 브라우저에 만든 프로젝트가 없어요. 아래 예제의 실제 구성으로 둘러보거나, 변경 구상을 시험해 보세요.</p>
+          <div id="saved-empty" class="home-empty" hidden>
+            <div class="he-text">
+              <h2 class="he-title">첫 프로젝트를 만들어 보세요</h2>
+              <p class="he-lede">작업 폴더 하나만 연결하면 나머지는 저절로 이어져요. 먼저 예제로 둘러봐도 좋아요.</p>
+              <div class="he-acts"><button type="button" id="empty-new" class="primary small"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.5v9M3.5 8h9"/></svg>새 프로젝트</button><button type="button" id="empty-examples" class="secondary small">예제 둘러보기</button></div>
+            </div>
+            <ol class="he-steps">
+              <li><span class="he-icon" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h3.2l1.6 1.6h6.2A1.5 1.5 0 0 1 17 8.1v6.4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 3 14.5z"/><path d="M8 11.25h4M10 9.25v4"/></svg></span><strong>작업 폴더 연결</strong><span>Claude Code·Codex 대화가 기록으로 저절로 들어와요.</span></li>
+              <li><span class="he-icon" aria-hidden="true"><svg viewBox="0 0 20 20"><rect x="2.75" y="3.5" width="6" height="4.5" rx="1.3"/><rect x="11.25" y="3.5" width="6" height="4.5" rx="1.3"/><rect x="7" y="12" width="6" height="4.5" rx="1.3"/><path d="M5.75 8v1.75h8.5V8M10 9.75V12"/></svg></span><strong>지도로 정리</strong><span>기록에 근거가 있는 부분과 연결만 지도에 그려요.</span></li>
+              <li><span class="he-icon" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M6 2.75h5.5L15 6.25v10a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-12.5a1 1 0 0 1 1-1z"/><path d="M11.25 2.75v3.75H15M7.75 10.5h4.5M7.75 13.25h3"/></svg></span><strong>다음 세션에 인계</strong><span>인수인계 문서 한 장으로 새 세션이 이어받아요.</span></li>
+            </ol>
+          </div>
         </section>
         <section class="home-examples" aria-labelledby="examples-title">
           <h2 id="examples-title" class="home-sub">예제로 둘러보기</h2>
           <ul id="project-list" class="program-list examples"></ul>
         </section>
         <footer class="home-foot">
-          <p>예제는 저장되지 않아요. ‘AgentFlow UI62 개발 자료’는 공개 commit과 결과 문서를 사후 편집한 자료이고, 다른 예제의 기록은 전달받았다고 가정하고 쓴 합성 기록이에요. 내 프로젝트를 만들면 이 PC의 Claude Code·Codex 대화를 작업 폴더 단위로 자동 연결해 기록으로 가져올 수 있어요(PC용 Studio, 또는 Chrome·Edge에서 세션 폴더 고르기). 기록으로 지도를 정리하는 AI는 AI가 연결된 Studio에서만 돼요.</p>
+          <p>예제는 저장되지 않아요. ‘AgentFlow UI62 개발 자료’는 공개 커밋과 결과 문서를 사후 편집한 자료이고, 다른 예제는 합성 기록이에요.</p>
+          <p>작업 폴더 자동 연결은 PC용 Studio나 Chrome·Edge에서, 기록으로 지도를 정리하는 AI는 AI가 연결된 Studio에서만 동작해요.</p>
         </footer>
       </div>
     </main>

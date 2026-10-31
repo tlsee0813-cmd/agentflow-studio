@@ -1,6 +1,7 @@
 import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
 import { extname } from 'node:path';
+import { readFile } from 'node:fs/promises';
 import { readConfig } from '../../server/config.mjs';
 import { ApiError, safeError } from '../../server/errors.mjs';
 import { abortOnClose, assertLocalHost, assertLocalPost, readBody, readJson, sendError, sendJson, setLocalTimeouts, setSecurityHeaders, STATIC_TYPES } from './http.mjs';
@@ -12,6 +13,7 @@ import { mockAdvice, mockGuidance } from './mock.mjs';
 import { callContinuity, callGuidance } from './provider.mjs';
 import { JOB_BYTES, CONNECTOR_BYTES } from './studio.mjs';
 const root=fileURLToPath(new URL('../dist/public/',import.meta.url));
+const FONT_FILES=new Set(['/fonts/PretendardVariable.woff2','/fonts/LICENSE-Pretendard.txt']);
 // Outer limits for /api/studio/*: a little above the handler's own ASK_BYTES (65536), so the handler answers an oversize ask
 // itself; a job submission carries the whole input and reads up to JOB_BYTES.
 const STUDIO_BODY=70000;
@@ -66,7 +68,8 @@ export function createContinuityApp({config=readConfig(),fetchImpl=globalThis.fe
         } finally {release();detach();}return;
       }
       if(req.method!=='GET'&&req.method!=='HEAD')throw new ApiError('METHOD_NOT_ALLOWED',405);
-      const {file,data}=await readPublicFile(root,path);
+      // The bundled UI font and its licence: two fixed names, read from this build only (the shared static reader keeps its own list).
+      const {file,data}=FONT_FILES.has(path)?{file:`${root}${path.slice(1)}`,data:await readFile(new URL(`../dist/public${path}`,import.meta.url)).catch(()=>{throw new ApiError('NOT_FOUND',404);})}:await readPublicFile(root,path);
       res.writeHead(200,{'Content-Type':STATIC_TYPES[extname(file)],'Content-Length':data.length});res.end(req.method==='HEAD'?undefined:data);
     } catch(e) { sendError(res,e,continuityError); }
   });

@@ -570,6 +570,12 @@ function rememberPlace() {
 let openPlanOnArrive = false;
 /** A package-like name ('@node-red/runtime') may break after its slashes rather than inside a word. */
 const slashBreaks = (name: string): (string | HTMLElement)[] => name.split('/').flatMap((x, i, all) => (i < all.length - 1 ? [`${x}/`, document.createElement('wbr')] : [x]));
+/** A quiet monogram for a project card: its first letter on one of six tints, chosen from the name so it stays the same. */
+function programAvatar(name: string): HTMLElement {
+  const first = [...name.trim().replace(/^[^\p{L}\p{N}]+/u, '')][0] ?? '·';
+  let n = 0; for (const c of name) n = (n * 31 + c.codePointAt(0)!) >>> 0;
+  return h('span', { class: 'program-avatar', 'data-tone': String(n % 6), 'aria-hidden': 'true' }, first.toUpperCase());
+}
 function programCard(key: string, p: Project, example: boolean, keyOf: (id: string) => string): HTMLElement {
   const v = studioView(p), pasted = p.pasted.at(-1)?.at ?? null, lastAt = [v.records[0]?.at ?? null, pasted].filter((x): x is string => !!x).sort().at(-1) ?? null;
   const changed = v.parts.filter(x => recentAt(x.lastAt)).length;
@@ -593,18 +599,18 @@ function programCard(key: string, p: Project, example: boolean, keyOf: (id: stri
         h('strong', {}, ...slashBreaks(r.name)),
         kids.length ? h('span', {}, kids.slice(0, 3).join(' · '), kids.length > 3 ? h('small', {}, ` +${kids.length - 3}`) : null) : (mapLead(v, r.id) ? h('span', { class: 'quiet' }, mapLead(v, r.id)) : null)));
     }),
-    roots.length > MAX ? h('li', { class: 'more' }, h('a', { href: base }, `+${roots.length - MAX}개 묶음`)) : null) : h('p', { class: 'program-empty' }, '아직 부분이 없어요 · 열어서 첫 부분을 적어요');
+    roots.length > MAX ? h('li', { class: 'more' }, h('a', { href: base }, `+${roots.length - MAX}개 묶음`)) : null) : h('p', { class: 'program-empty' }, '아직 지도가 비어 있어요 · 열어서 기록을 연결해 보세요');
   const tryReturn = key === UI62_KEY ? h('a', { class: 'program-try', href: base }, h('strong', {}, '돌아와 읽기'), h('span', {}, '공개 개발 자료 10개 · 3단계로 늘려 읽기 · 사후 편집')) : null;
   const tryPlan = key === CONVERTER_KEY ? h('a', { class: 'program-try', href: base, onclick: () => { openPlanOnArrive = true; } }, h('strong', {}, '변경 구상 시험해 보기'), h('span', {}, '폴더째 변환 · 지금과 구상을 같은 자리에서 비교')) : null;
   return h('li', {}, h('article', { class: `program${example ? ' is-example' : ''}` },
     h('a', { class: 'program-head', href: base },
-      h('strong', { class: 'program-name' }, p.name), h('span', { class: 'program-brief' }, p.space.brief?.text ?? '목적이 아직 적혀 있지 않아요.'), h('span', { class: 'program-meta' }, ...meta),
+      h('span', { class: 'program-title' }, programAvatar(p.name), h('strong', { class: 'program-name' }, p.name)), h('span', { class: 'program-brief' }, p.space.brief?.text ?? '아직 설명이 없어요.'), h('span', { class: 'program-meta' }, ...meta),
       !example && key !== 'legacy' ? runBadgeFor(key) : null),
     h('div', { class: 'program-body' }, section, cont, tryPlan, tryReturn,
       !example && key !== 'legacy' ? h('button', { type: 'button', class: 'link-button quiet program-backup', title: '붙여넣은 원문 기록과 옮긴 위치를 함께 담은 백업 파일을 내려받아요', onclick: () => saveBackup(key, p) }, '백업 저장') : null)));
 }
 /** A backup file of a saved entry: the project as kept (pasted records included) and this entry's own manual places, in the
- * existing backup format; ‘백업 파일 가져오기’ reads it back as a new copy. Readings and drafts are not part of it. */
+ * existing backup format; ‘백업 가져오기’ reads it back as a new copy. Readings and drafts are not part of it. */
 function saveBackup(entryId: string, p: Project) {
   const msg = $('home-message');
   let raw: string;
@@ -669,8 +675,9 @@ function renderHome() {
 }
 
 /** Names measured in the page's own font (whatever the system falls back to), so card widths match what is drawn. */
+const measureCache = new Map<string, number>();
 const measureName: TextMeasure = (() => {
-  const cache = new Map<string, number>(); let ctx: CanvasRenderingContext2D | null = null, family = '';
+  const cache = measureCache; let ctx: CanvasRenderingContext2D | null = null, family = '';
   return (text, kind) => {
     const key = `${kind}|${text}`, hit = cache.get(key); if (hit !== undefined) return hit;
     if (!ctx) { ctx = document.createElement('canvas').getContext('2d'); family = getComputedStyle(document.body).fontFamily; }
@@ -2137,8 +2144,8 @@ function renderMapEntry() {
   else put(acts, paste(true), file());
   const note = st.pending || waiting ? null : fresh && can && !inp!.problem ? sendLine(inp!) : fresh && !can ? mapRun.blocked() ?? `기록 ${fresh}개가 있어요. AI 서버가 연결된 주소에서 지도로 정리할 수 있어요.` : fresh && inp!.problem ? '보낼 수 없는 기록이 있어요(너무 크거나 키처럼 보이는 글).' : linked && can ? AUTO_SENDS : '붙여 넣어 저장만 해서는 AI에 보내지 않아요. 지도로 정리할 때 보내요.';
   box.replaceChildren(); put(box, h('h2', {}, '기록으로 첫 지도를 만들어요'),
-    h('p', { class: 'se-lead' }, offerSync ? 'Claude Code·Codex 대화는 자동 연결로 저절로 가져오고, 다른 AI와 나눈 요구나 보고는 그대로 붙여 넣으면 돼요. 원문에 근거가 있는 부분과 연결만 지도로 정리하고, 만들어진 부분의 이름과 위치는 바로 고칠 수 있어요.'
-      : '작업 AI와 나눈 요구나 보고를 그대로 붙여 넣으면, 원문에 근거가 있는 부분과 연결만 지도로 정리해요. 만들어진 부분의 이름과 위치는 바로 고칠 수 있어요.'),
+    h('p', { class: 'se-lead' }, offerSync ? 'Claude Code·Codex 대화는 자동 연결로 저절로 가져오고, 다른 AI와 나눈 기록은 붙여 넣으면 돼요. 원문에 근거가 있는 부분과 연결만 지도에 그리고, 이름과 위치는 바로 고칠 수 있어요.'
+      : '작업 AI와 나눈 요구나 보고를 붙여 넣으면, 원문에 근거가 있는 부분과 연결만 지도에 그려요. 이름과 위치는 바로 고칠 수 있어요.'),
     last && !last.parts.length ? h('p', { class: 'se-gap' }, last.gaps.length ? last.gaps.join(' ') : '앞서 읽은 기록에서는 프로그램의 부분을 찾지 못했어요.') : null,
     acts, note ? h('p', { class: 'fine' }, note) : null,
     st.error ? h('p', { class: 'pp-error', role: 'alert' }, st.error) : null, runNotice(),
@@ -2564,6 +2571,8 @@ function bindNewProject() {
   const name = $<HTMLInputElement>('new-name'), msg = $('home-message'), form = $('new-form'), openBtn = $('new-open');
   const show = (on: boolean) => { form.hidden = !on; openBtn.setAttribute('aria-expanded', String(on)); if (on) name.focus(); else openBtn.focus(); };
   openBtn.addEventListener('click', () => show(form.hidden));
+  $('empty-new').addEventListener('click', () => show(true));
+  $('empty-examples').addEventListener('click', () => showExamples());
   $('new-cancel').addEventListener('click', () => { name.value = ''; show(false); });
   name.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); name.value = ''; show(false); } });
   $('new-form').addEventListener('submit', async e => {
@@ -2621,6 +2630,16 @@ async function main() {
   window.addEventListener('pagehide', flushView);
   document.addEventListener('visibilitychange', () => { if (document.hidden) flushView(); });
   window.addEventListener('popstate', () => { if (location.hash === renderedHash) void render(); });
+  // The bundled UI font: the map measures its names in it, so the first layout waits for it briefly (it is on this origin,
+  // so normally at once). If it comes later, names are measured again and the open map is laid out once more.
+  const fontFace = '600 13.5px "Pretendard Variable"';
+  try {
+    if (!document.fonts.check(fontFace)) {
+      let late = false;
+      await Promise.race([document.fonts.load(fontFace), new Promise(r => setTimeout(() => { late = true; r(null); }, 2500))]);
+      if (late) void document.fonts.load(fontFace).then(() => { measureCache.clear(); if (opened && !$('space').hidden) renderSpace('keep'); });
+    }
+  } catch { /* the system font stays */ }
   await render();
   await statusReady;
 }

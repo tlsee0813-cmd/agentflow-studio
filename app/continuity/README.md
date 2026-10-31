@@ -181,6 +181,12 @@ node continuity/scripts/build-static.mjs --preview  # 기존 공개 Pages 갱신
 `https://origin`을 주면 그 서버로 요청하고, CSP도 그에 맞춥니다. 출력에 키 이름이나 공급자
 주소가 있으면 빌드가 실패합니다.
 
+## 화면 글꼴
+
+화면은 Pretendard 1.3.9 가변 글꼴(SIL OFL 1.1, Copyright (c) 2021 Kil Hyung-jin, Reserved Font Name "Pretendard")을 수정 없이 함께 배포합니다.
+파일은 `public/fonts/PretendardVariable.woff2`(npm `pretendard@1.3.9`의 `dist/web/variable/woff2/`, sha256 `9599f12f…2d900b4`)와 라이선스 전문 `public/fonts/LICENSE-Pretendard.txt`입니다.
+글꼴은 Studio와 같은 주소에서만 받고 외부 글꼴 서비스에 요청하지 않습니다. 로컬 서버는 이 두 파일 이름만 따로 읽고, 정적 빌드와 Cloudflare 배포는 `fonts/`를 함께 올립니다.
+
 ## 검사
 
 - `node --test continuity/tests/*.test.mjs`: 기존 도메인·수신·저장 검사와 `studio.test.mjs`(투영, 계약, 키·origin·오류 경계,

@@ -41,6 +41,7 @@ try {
   if (!html.includes('connect-src')) throw new Error('Static CSP missing.');
   await writeFile(new URL('index.html', output), html);
   await copyFile(new URL('../public/styles.css', import.meta.url), new URL('styles.css', output));
+  await cp(new URL('../public/fonts/', import.meta.url), new URL('fonts/', output), { recursive: true });
   await writeFile(new URL('.nojekyll', output), '');
   const files = async (dir, base = '') => (await Promise.all((await readdir(dir, { withFileTypes: true })).map(f => f.isDirectory() ? files(join(dir, f.name), `${base}${f.name}/`) : [`${base}${f.name}`]))).flat();
   const root = fileURLToPath(output);
