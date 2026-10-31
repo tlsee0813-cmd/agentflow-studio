@@ -1943,6 +1943,8 @@ const mapRun = createMapRun({
   },
   done: applied => mapApplied(applied),
   changed: key => mapChanged(key),
+  // A reading the person called off is not started again by the automatic connection until a new record comes in.
+  withdrawn: key => autoSync.hold(key),
   // AF100: reservations of durable jobs, apart from projects and backups (under their own lock); used when the server keeps jobs.
   jobs: () => jobReservations,
   ownSave: (key, seq) => ownSaves.has(`${key}:${seq}`),

@@ -9,7 +9,7 @@ import { relLabel } from './relation-groups.js';
 import { stamp, RECORD_HEAD, HEAD_FIELD } from './session-import.js';
 import { TOOL_NAME, type SessionTool } from './session-parse.js';
 import { HANDOVER_TAG, foldHandover, quoteReceived, receivedHandovers } from './handover-mark.js';
-export { HANDOVER_TAG, foldHandover, handoverCode, receivedHandovers } from './handover-mark.js';
+export { HANDOVER_TAG, HANDOVER_SECTIONS, foldHandover, handoverCode, receivedHandovers } from './handover-mark.js';
 
 /* ---------- which session a record came from ---------- */
 /** start: when the session began, as its header writes it (YYYY-MM-DD HH:MM), when it does. */

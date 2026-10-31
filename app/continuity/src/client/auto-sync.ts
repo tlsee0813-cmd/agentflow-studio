@@ -21,7 +21,10 @@ export interface FolderLink { path: string; connectedAt: string; since: string; 
 /** One project's connection: its folders, how far each session was taken (by session, whichever folder it came through). With no
  * folders it is not connected, but its marks stay: connecting again goes on from them instead of taking every session again. */
 export interface Binding { folders: FolderLink[]; marks: Record<string, SessionMark>;
-  runs: { day: string; n: number; last: string | null }; taken: number; lastCheck: string | null; error: string | null }
+  runs: { day: string; n: number; last: string | null }; taken: number; lastCheck: string | null; error: string | null;
+  /** The person called off a map reading (cancelled it, or let its result go) when this many records had been taken: no automatic
+   * reading starts again until one more comes in. Their own click still reads. */
+  held?: number | null }
 const folderName = (path: string) => path.split(/[\\/]/).filter(Boolean).pop() ?? path;
 /** A session begun at or after its folder was connected. */
 const begunSince = (s: SessionSummary, f: FolderLink) => !!s.startedAt && Date.parse(s.startedAt) >= Date.parse(f.connectedAt);
@@ -34,8 +37,14 @@ function readBinding(v: unknown): Binding | null {
   const { folder, connectedAt, since, backfilled, ...rest } = b;
   return { ...rest, folders: [{ path: folder, connectedAt: String(connectedAt), since: String(since), backfilled: !!backfilled }] } as Binding;
 }
-/** Which of two marks of one session is further on (the later one wins, so an older copy never takes a session back). */
-const further = (m: SessionMark, was: SessionMark | undefined) => !was || (m.lastAt ?? '') > (was.lastAt ?? '') || ((m.lastAt ?? '') === (was.lastAt ?? '') && m.updatedAt >= was.updatedAt);
+/** Which of two marks of one session is further on (the later one wins, so an older copy never takes a session back): by time, then
+ * by how many turns at that time were taken, then by when it was marked. */
+function further(m: SessionMark, was: SessionMark | undefined): boolean {
+  if (!was) return true;
+  const a = m.lastAt ?? '', b = was.lastAt ?? ''; if (a !== b) return a > b;
+  const x = m.same ?? 0, y = was.same ?? 0; if (x !== y) return x > y;
+  return m.updatedAt >= was.updatedAt;
+}
 
 export interface AutoSyncHost {
   current(): { key: string; kind: string; project: Project } | null;
@@ -101,6 +110,10 @@ export function createAutoSync(host: AutoSyncHost) {
     const v = all(); if (b) v[key] = b; else delete v[key];
     try { host.kv.setItem(AUTOSYNC_KEY, JSON.stringify(v)); } catch { /* the binding holds for this page only */ }
   }
+  /** A reading the person called off, with no record taken since (held). */
+  const withheld = (b: Binding | null) => !!b && typeof b.held === 'number' && b.taken <= b.held;
+  /** The person called off a map reading of this project: the automatic connection starts none again until a new record comes in. */
+  function hold(key: string) { const b = stored(key); if (!b) return; b.held = b.taken; put_(key, b); render(); }
   const offered = () => host.sources.offered();
   /** The tools whose conversations come in, as the panel names them (both until the picked folders were looked at). */
   const toolNames = () => host.sources.tools().map(t => TOOL_NAME[t]).join('·') || 'Claude Code·Codex';
@@ -195,8 +208,9 @@ export function createAutoSync(host: AutoSyncHost) {
       }
       error = failed;
       const runs = stored(key)?.runs ?? b.runs, today = day(), n = runs.day === today ? runs.n : 0;
-      // A connection ended meanwhile starts no reading: what it kept before then is read by the person's own click.
-      if (open()?.key === key && bindingOf(key) && host.canRead() && !host.readBlocked() && n < AUTO_RUNS_PER_DAY && (!runs.last || now - Date.parse(runs.last) >= AUTO_RUN_GAP_MS)) {
+      // A connection ended meanwhile starts no reading: what it kept before then is read by the person's own click. Nor does a
+      // reading the person called off with nothing new since: what they cancelled is not asked again behind their back.
+      if (open()?.key === key && bindingOf(key) && !withheld(stored(key)) && host.canRead() && !host.readBlocked() && n < AUTO_RUNS_PER_DAY && (!runs.last || now - Date.parse(runs.last) >= AUTO_RUN_GAP_MS)) {
         ran = new Date().toISOString(); host.read();
       }
     } finally {
@@ -307,6 +321,8 @@ export function createAutoSync(host: AutoSyncHost) {
           h('dt', {}, '오늘 자동 지도 갱신'), h('dd', {}, `${runs} / ${AUTO_RUNS_PER_DAY}회`)),
         // Why the map does not follow (no AI for maps, today's automatic readings used up, not yet), or a connection that found nothing yet.
         host.readBlocked() ? h('p', { class: 'fine sync-blocked' }, `기록은 들어오지만 지도는 갱신하지 않아요: ${host.readBlocked()}`)
+          // A reading called off: said, with the way to read now, until a new record lifts it.
+          : withheld(b) && host.canRead() && !busy ? h('p', { class: 'fine sync-blocked' }, `지도 갱신을 취소해서, 새 기록이 들어올 때까지 자동으로 다시 하지 않아요. 지금 하려면 지도의 ‘${host.current()?.project.space.areas.some(a => !a.archived) ? '새 기록 읽고 지도 갱신' : '기록으로 지도 정리'}’ 버튼을 누르세요.`)
           : runs >= AUTO_RUNS_PER_DAY ? h('p', { class: 'fine sync-blocked' }, `오늘 자동 지도 갱신 ${AUTO_RUNS_PER_DAY}회를 다 썼어요. 기록은 계속 들어와요. 지도는 ‘돌아와 읽기’의 ‘기록 읽고 지도 갱신’으로 직접 갱신할 수 있고, 내일 다시 자동으로 갱신해요.`)
           // New records in, but the last automatic reading was a moment ago: when the map follows, and the way to it now.
           : host.canRead() && !busy && b.runs.last && Date.now() - Date.parse(b.runs.last) < AUTO_RUN_GAP_MS ? h('p', { class: 'fine sync-next' },
@@ -405,6 +421,6 @@ export function createAutoSync(host: AutoSyncHost) {
     isOpen: () => panelOpen,
     /** The open project is connected: what is saved into it goes to the AI with its next automatic map reading. */
     connected: () => { const o = open(); return !!o && !!bindingOf(o.key); },
-    toggle, close, render, tick, bindingOf, connect, removeFolder, disconnect
+    toggle, close, render, tick, bindingOf, connect, removeFolder, disconnect, hold
   };
 }

@@ -103,8 +103,10 @@ export function readSessionDetail(v: unknown): SessionDetail | null {
  * the next look comes back to it).
  * reply: when that last turn was a reply, how much of it was taken (its length, a checksum of it, the files it named), so a reply
  * that was still being written gives only what it gained when it is read again. A file joins a reply in no fixed place (a subagent's
- * changes come after the reply's own), so files are told by name; a mark kept before that holds their count. */
-export interface SessionMark { lastAt: string | null; count: number; updatedAt: string; reply?: { chars: number; sum: string; files: string[] | number } }
+ * changes come after the reply's own), so files are told by name; a mark kept before that holds their count.
+ * same: how many turns at lastAt were taken (turns can share a time to the millisecond, and a reply can come at the very time of the
+ * request taken before it): one more at that time is new. A mark kept before it was counted took every turn at its time. */
+export interface SessionMark { lastAt: string | null; count: number; updatedAt: string; reply?: { chars: number; sum: string; files: string[] | number }; same?: number }
 /** A short checksum of a text (FNV-1a): whether a reply still starts with what was taken of it. */
 export function textSum(t: string): string { let h = 0x811c9dc5; for (let i = 0; i < t.length; i++) h = Math.imul(h ^ t.charCodeAt(i), 0x01000193); return (h >>> 0).toString(16); }
 /** The turns of a session not taken yet: after the mark's time, or past its count when the turns have no times. Without a mark,
@@ -112,7 +114,8 @@ export function textSum(t: string): string { let h = 0x811c9dc5; for (let i = 0;
  * The reply taken last, when it went on since, comes first with only what it gained (cont). */
 export function newTurns(s: SessionDetail, mark: SessionMark | null, since: string | null = null): TakenTurn[] {
   if (!mark) return since ? s.turns.filter(t => !t.at || t.at >= since) : s.turns;
-  const lastAt = mark.lastAt, after = lastAt ? s.turns.filter(t => !!t.at && t.at > lastAt) : s.turns.slice(Math.max(0, mark.count - s.omitted));
+  const lastAt = mark.lastAt, at = lastAt && mark.same !== undefined ? s.turns.filter(t => t.at === lastAt).slice(mark.same) : [];
+  const after = lastAt ? s.turns.filter(t => !!t.at && (t.at > lastAt || at.includes(t))) : s.turns.slice(Math.max(0, mark.count - s.omitted));
   const last = lastTaken(s, mark), reply = mark.reply;
   if (!last || last.role !== 'assistant' || !reply) return after;
   // That reply is the first turn read from the mark on: at the mark's time, or later when its time moved with it (then only while
@@ -127,6 +130,8 @@ export function newTurns(s: SessionDetail, mark: SessionMark | null, since: stri
  * time to the millisecond), or the first after it when that turn's time moved on with it. */
 function lastTaken(s: SessionDetail, mark: SessionMark): SessionTurn | undefined {
   const lastAt = mark.lastAt; if (!lastAt) return s.turns[mark.count - 1 - s.omitted];
+  // Counted: the last of those taken at that time (one written since at the same time is not it).
+  const at = s.turns.filter(t => t.at === lastAt); if (mark.same !== undefined && at.length) return at[Math.max(0, Math.min(mark.same, at.length) - 1)];
   const i = s.turns.map(t => t.at).lastIndexOf(lastAt);
   return i >= 0 ? s.turns[i] : s.turns.find(t => !!t.at && t.at > lastAt);
 }
@@ -145,7 +150,11 @@ function untaken(taken: string[], now: string[], s: Pick<SessionDetail, 'cwd' | 
 export function markAfter(s: SessionDetail, was: SessionMark | null, updatedAt: string, since: string | null = null): SessionMark {
   const last = s.turns.at(-1); if (!last) return was ? { ...was, updatedAt } : { lastAt: since, count: s.omitted, updatedAt };
   const lastAt = [...s.turns].reverse().find(t => t.at)?.at ?? was?.lastAt ?? null;
-  return { lastAt, count: s.omitted + s.turns.length, updatedAt,
+  // The turns at that time this reading holds (a reading from a mark holds every turn from its time on, and never ends between
+  // turns of one time): all of them are taken now.
+  const same = lastAt ? s.turns.filter(t => t.at === lastAt).length : 0;
+  const counted = same ? { same } : lastAt && was?.lastAt === lastAt && was.same !== undefined ? { same: was.same } : {};
+  return { lastAt, count: s.omitted + s.turns.length, updatedAt, ...counted,
     ...(last.role === 'assistant' && (last.at ?? null) === lastAt ? { reply: { chars: last.text.length, sum: textSum(last.text), files: [...(last.files ?? [])] } } : {}) };
 }
 /** Turns after the mark that the reading left out (it sends the newest within its budget): the first record says how many. A mark
