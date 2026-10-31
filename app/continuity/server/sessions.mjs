@@ -110,8 +110,9 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
       if (folder && !within(h.cwds, folder)) continue;
       out.push({ ...h.row });
     }
-    // A folder listing adds to what is known (a session listed before stays readable); a whole listing replaces it.
-    if (!folder) known = next;
+    // A folder listing adds to what is known (a session listed before stays readable); a whole listing replaces it, keeping a session
+    // whose file is still there (a folder's look may read it after another tab's listing stopped short of it).
+    if (!folder) { const alive = new Set([...heads.values()].map(x => x.real)); known = new Map([...[...known].filter(([id, k]) => !next.has(id) && alive.has(k.path)), ...next]); }
     return { version: SESSION_VERSION, sessions: out };
   }
 

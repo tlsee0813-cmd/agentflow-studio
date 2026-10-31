@@ -613,3 +613,22 @@ test('SESSIONS-Q1 files with no session in them (Codex subagents\' rollouts) do 
     assert.deepEqual(await salon(1), [], 'the tenth quiet file ends a look with a scan of one');
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
+
+test('SESSIONS-K2 a whole listing that stops short of a folder\'s older session (another tab) leaves it readable while its file is there', async () => {
+  const dir = home();
+  try {
+    const roots = { claude: join(dir, '.claude') };
+    const put = (folder, cwd, prompt, minutesAgo) => {
+      const d = join(roots.claude, 'projects', folder), f = join(d, `${folder.slice(1)}.jsonl`), t = new Date(Date.now() - minutesAgo * 60000); mkdirSync(d, { recursive: true });
+      writeFileSync(f, jl([cu(0, prompt, { cwd }), ca(1, '했어요', { cwd })])); utimesSync(f, t, t); return f;
+    };
+    const file = put('-work-salon', '/work/salon', '오래된 살롱 작업', 60); put('-work-other', '/work/other', '다른 작업', 1);
+    const sessions = openSessions({ env: {}, roots, limits: { ...SESSION_LIMITS, list: 1 } });
+    const [old] = (await sessions.list('/work/salon')).sessions;
+    assert.equal(old.preview, '오래된 살롱 작업');
+    assert.deepEqual((await sessions.list()).sessions.map(x => x.preview), ['다른 작업'], 'the whole listing stops before it');
+    assert.equal((await sessions.read(old.id)).turns[0].text, '오래된 살롱 작업', 'the folder\'s look still reads it');
+    rmSync(file); await sessions.list();
+    await assert.rejects(sessions.read(old.id), e => e.code === 'SESSION_NOT_FOUND', 'a session whose file is gone is not kept');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
