@@ -61,7 +61,8 @@ const day = (d = new Date()) => `${d.getFullYear()}-${d.getMonth() + 1}-${d.getD
 export function createAutoSync(host: AutoSyncHost) {
   let busy = false, again = false, timer: ReturnType<typeof setInterval> | null = null, panelOpen = false;
   let folders: { folder: string; count: number; latest: string; tools: Set<string> }[] | null = null, foldersError: string | null = null, foldersLoading = false;
-  let typed = '', adding = false;
+  // said: the error the open panel last drew, which it does not read out again when it is drawn again.
+  let typed = '', adding = false, said: string | null = null;
   // Projects whose last look in this tab could not save: no look runs for them until the person asks ('지금 확인', connecting).
   const halted = new Map<string, string>();
 
@@ -263,7 +264,7 @@ export function createAutoSync(host: AutoSyncHost) {
     const more = b ? ` · ${name}${waiting ? ' · 허용 필요' : error ? ' · 확인 필요' : ''}` : ' 안 됨';
     pill.title = `자동 연결${more}`; pill.setAttribute('aria-label', pill.title);
     pill.replaceChildren(h('i', { 'aria-hidden': 'true' }), h('span', {}, '자동 연결', h('span', {}, more)));
-    panel.hidden = !panelOpen; if (!panelOpen) return;
+    panel.hidden = !panelOpen; if (!panelOpen) { said = null; return; }
     // A folder name being composed (a Korean syllable) is not drawn over: a new field would end the composition and split the
     // syllable. The redraw follows once it is committed (draw).
     const typing = panel.querySelector<HTMLInputElement>('.sync-path');
@@ -277,6 +278,9 @@ export function createAutoSync(host: AutoSyncHost) {
     if (input) { input.focus({ preventScroll: true }); input.setSelectionRange(caret[0], caret[1]); }
     else if (had !== null && !panel.contains(document.activeElement)) (panel.querySelector<HTMLElement>(`[data-act="${CSS.escape(had)}"]`) ?? panel.querySelector('h3'))?.focus({ preventScroll: true });
   }
+  /** An error of the panel, an alert only when it first shows (or the panel opens): the panel is drawn again as each look starts and
+   * ends, and a screen reader would read the same error out each time. */
+  function errorLine(text: string | null) { const fresh = text !== said; said = text; return text ? h('p', { class: 'pp-error', ...(fresh ? { role: 'alert' } : {}) }, text) : null; }
   /** '취소' of adding a folder: back to the connection, with focus on '폴더 추가', which opened it. */
   const back = () => { adding = false; render(); document.querySelector<HTMLElement>('#sync-panel [data-act="add"]')?.focus(); };
   /** The panel's content: the connection (its folders, what it took, what to do), or a working folder to connect or add. */
@@ -297,7 +301,7 @@ export function createAutoSync(host: AutoSyncHost) {
         host.readBlocked() ? h('p', { class: 'fine sync-blocked' }, `기록은 들어오지만 지도는 갱신하지 않아요: ${host.readBlocked()}`)
           : runs >= AUTO_RUNS_PER_DAY ? h('p', { class: 'fine sync-blocked' }, `오늘 자동 갱신 ${AUTO_RUNS_PER_DAY}회를 다 썼어요. 기록은 계속 들어오고, 지도는 직접 갱신할 수 있어요. 내일 다시 자동으로 갱신해요.`)
           : !b.taken && b.lastCheck && !busy && !error && !waiting ? h('p', { class: 'fine' }, `${b.folders.length > 1 ? '이 폴더들' : '이 폴더'}에서 최근 ${BACKFILL_MS / 86400000}일 안의 대화를 아직 찾지 못했어요. 새로 대화하면 들어와요. 경로를 직접 적었다면 맞는지 확인해 주세요.`) : null,
-        error ? h('p', { class: 'pp-error', role: 'alert' }, error) : null,
+        errorLine(error),
         // '지금 확인' is only marked unavailable while it cannot run, so focus can stay on it through the look it started.
         h('div', { class: 'pp-row' }, h('button', { type: 'button', class: 'secondary small', 'data-act': 'check', 'aria-disabled': String(busy || waiting), onclick: () => { if (!busy && !waiting) void tick(true); } }, busy ? '확인 중…' : '지금 확인'),
           h('button', { type: 'button', class: 'link-button sync-add', 'data-act': 'add', onclick: () => { adding = true; folders = null; foldersError = null; render(); } }, '폴더 추가'),
@@ -330,7 +334,7 @@ export function createAutoSync(host: AutoSyncHost) {
         h('li', {}, '내가 쓴 요청과 AI의 답변·바꾼 파일만 그대로 가져오고, 키·토큰처럼 보이는 글은 가려요.'),
         h('li', {}, '지도를 갱신할 때 이 기록을 AI에게 보내요.')),
       foldersLoading ? h('p', { class: 'fine' }, '이 PC의 세션에서 작업 폴더를 찾는 중…') : null,
-      foldersError ? h('p', { class: 'pp-error', role: 'alert' }, foldersError) : null,
+      errorLine(foldersError),
       picks && !picks.length ? h('p', { class: 'fine' }, b ? '세션이 있는 다른 작업 폴더를 찾지 못했어요. 폴더 경로를 직접 적을 수도 있어요.' : '이 PC에서 Claude Code·Codex 세션을 찾지 못했어요. 폴더 경로를 직접 적을 수도 있어요.') : null,
       picks?.length ? h('ul', { class: 'sync-folders' }, ...picks.slice(0, 12).map(f => h('li', {}, h('button', { type: 'button', class: 'sync-folder-pick', 'data-act': `folder:${f.folder}`, onclick: () => connect(f.folder) },
         h('strong', {}, f.folder), h('small', { title: stamp(f.latest, true) }, `${[...f.tools].join('·')} 세션 ${f.count}개 · 최근 대화 ${ago(f.latest)}`),
