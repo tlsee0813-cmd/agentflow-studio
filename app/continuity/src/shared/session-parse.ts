@@ -54,9 +54,10 @@ const unxml = (t: string) => t.replace(/&(?:(lt|gt|amp|quot|apos)|#(\d{1,7})|#x(
 /** A session a Claude project drives (one of its threads, or Remote Control on the person's computer) gets each message in a wake
  * envelope, after the project's <session-context nonce="…"> (closed by the same nonce) and before another Claude's <relay>:
  * <wake reason="…"><project …><thread …><message trigger="true" from="human" …>what they wrote</message></thread></project>
- * <system-note>…</system-note></wake>, the words escaped as XML. Only a message that shape is unwrapped: a prompt that merely
+ * <system-note>…</system-note></wake> (Remote Control: <project …><message …>…</message></project>), the words escaped as XML. Only a message that shape is unwrapped: a prompt that merely
  * starts with a wake tag or a session-context, or goes on after one, is kept as typed. The end of the wake, or -1. */
-const WAKE = /^<wake reason="[^"<>]*"[^<>]*>\s*<project\s[^<>]*>\s*<thread\s[^<>]*>/;
+// Remote Control on the person's computer puts the message right in the project, with no thread around it.
+const WAKE = /^<wake reason="[^"<>]*"[^<>]*>\s*<project\s[^<>]*>\s*<(?:thread|message)\s[^<>]*>/;
 function wakeEnd(t: string): number {
   if (!WAKE.test(t)) return -1;
   // A relay after it can quote a wake tag of its own: the wake ends where the relay starts.
@@ -95,6 +96,18 @@ function answered(t: string): string | null {
   const said = (items as Row[]).map(i => (i && typeof i.answer === 'string' && i.answer.trim()
     ? `${i.answer.trim()}${typeof i.question === 'string' && i.question.trim() ? ` (AI의 질문 「${i.question.trim().replace(/\s+/g, ' ')}」에 대한 답)` : ''}` : null));
   return said.every(Boolean) ? [...said, t.slice(m[0].length).trim()].filter(Boolean).join('\n') : null;
+}
+/** A turn another Claude of the project started (the coordinator handing the session its task, or more of it): a line of its own,
+ * <relay from="…" …>[a fixed line]<cited author="user" …>the person's words</cited><note>its words</note></relay>, sometimes in
+ * <coordinator-relay>. Read as a request, so the work done for it is not joined to the reply before it (and dated by it): the
+ * person's words it carries as they wrote them, its own words marked as another Claude's. Null for anything else. */
+const RELAY = /^(?:<coordinator-relay>\s*)?<relay\s[^<>]*\bfrom="[^"<>]*"[^<>]*>([\s\S]*)<\/relay>(?:\s*<\/coordinator-relay>)?$/;
+export const RELAYED = '(다른 Claude가 전달한 지시)';
+function relayed(text: string): string | null {
+  const m = RELAY.exec(String(text).trim()); if (!m) return null;
+  const body = m[1]!, said = [...body.matchAll(/<cited\s[^<>]*\bauthor="user"[^<>]*>([\s\S]*?)<\/cited>/g)].map(c => unxml(c[1]!).trim()).filter(Boolean);
+  const note = /<note>([\s\S]*?)<\/note>/.exec(body)?.[1], own = note ? unxml(note).trim() : '';
+  return [...said, own ? `${RELAYED} ${own}` : ''].filter(Boolean).join('\n\n') || null;
 }
 const REMINDER_END = '</system-reminder>';
 /** What the person typed, without context a tool injects into the same message. Null when nothing typed is left. */
@@ -213,13 +226,16 @@ export function claudeParser(): SessionParser {
       // row keeps the time it was sent but is written when the tool reads it, after the work done meanwhile: it is timed just
       // after that work (each one read together a millisecond after the one before), so it stays in order and is not taken as
       // older than a mark set during the work. A time far from the line before (a clock set wrong) is left as it is.
-      const q = o.attachment;
-      if ((q.commandMode ?? 'prompt') !== 'prompt' || q.isMeta === true || (q.origin && q.origin.kind !== 'human')) return;
+      const q = o.attachment, relay = q.origin?.subkind === 'projects-relay' ? relayed(textOf(q.prompt, ['text'])) : null;
+      if (!relay && ((q.commandMode ?? 'prompt') !== 'prompt' || q.isMeta === true || (q.origin && q.origin.kind !== 'human'))) return;
       const late = was && (!at || (ISO_TIME.test(at) && at <= was && Date.parse(was) - Date.parse(at) < DAY_MS));
       const when = late ? new Date(Date.parse(was) + 1).toISOString() : at;
       if (late && when! > latest) latest = when!;
-      c.user(typed(textOf(q.prompt, ['text'])), when);
+      c.user(relay ?? typed(textOf(q.prompt, ['text'])), when);
     } else if (o.type === 'user') {
+      // Only a line the tool marks as from the system or another session: a relay the person pasted stays as typed.
+      const relay = (o.promptSource === 'system' || o.turnOrigin === 'peer' || o.turnOrigin === 'system') && !blocks.some(b => b.type === 'tool_result') ? relayed(textOf(content, ['text'])) : null;
+      if (relay) { c.user(relay, at); return; }
       if (o.isMeta === true || o.promptSource === 'system' || o.isCompactSummary === true) return;
       if (blocks.some(b => b.type === 'tool_result')) return;
       // Pressing Esc leaves a row of Claude Code's own ('[Request interrupted by user]', '… for tool use'): not a request.

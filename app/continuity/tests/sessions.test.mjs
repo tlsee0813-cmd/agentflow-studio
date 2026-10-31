@@ -441,7 +441,9 @@ test('SESSIONS-W1 a session a Claude project drives (a thread, Remote Control): 
     queued(8, '[Subagent hand-back] report', { commandMode: 'prompt', origin: { kind: 'peer' }, isMeta: true }),
     ca(9, '다 됐어요.')];
   assert.deepEqual(parseClaude(busy).turns.map(t => [t.role, t.text, t.at]), [['user', '테스트 돌려 줘', at(0)], ['assistant', '돌리는 중이에요.', at(1)],
-    ['user', '실패하면 로그도 보여 줘', at(2)], ['user', '이 화면도 봐 줘', at(3)], ['user', '됐음?', at(4)], ['assistant', '다 됐어요.', at(9)]]);
+    ['user', '실패하면 로그도 보여 줘', at(2)], ['user', '이 화면도 봐 줘', at(3)], ['user', '됐음?', at(4)],
+    // Another Claude of the project handing on work (a relay) is a request too: the person's words it cites, then its own, marked.
+    ['user', 'x\n\n(다른 Claude가 전달한 지시) y', at(6)], ['assistant', '다 됐어요.', at(9)]]);
   assert.deepEqual(parseClaude([{ ...queued(0, '하위 작업'), isSidechain: true }]).turns, [], 'a subagent\'s queue is its own');
   // A queued row keeps the time it was sent but is written when the tool reads it, after the work done meanwhile. It is timed just
   // after that work, so a mark set during the work (a quiet long command) does not leave it behind.
