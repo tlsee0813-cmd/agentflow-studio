@@ -1532,10 +1532,13 @@ button:disabled { opacity: .5; cursor: default; }
 .sync-facts dt { color: var(--text-3); }
 .sync-facts dd { margin: 0; }
 .sync-folders { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 4px; }
-.sync-folder-pick { display: grid; width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); color: var(--text); text-align: left; font: inherit; cursor: pointer; }
+.sync-folder-pick { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 8px; width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); color: var(--text); text-align: left; font: inherit; cursor: pointer; }
 .sync-folder-pick:hover { border-color: var(--accent-line); }
 .sync-folder-pick strong { font: 600 12.5px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; }
 .sync-folder-pick small { color: var(--text-3); font-size: 12px; }
+.sync-folder-pick strong, .sync-folder-pick small { grid-column: 1; }
+.sync-folder-go { grid-column: 2; grid-row: 1 / span 2; align-self: center; color: var(--accent); font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.sync-folder-pick:hover .sync-folder-go { text-decoration: underline; text-underline-offset: 3px; }
 .sync-manual { display: flex; gap: 6px; }
 .sync-path { flex: 1; min-width: 0; height: 32px; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: var(--r-sm); background: var(--surface); color: var(--text); font: inherit; font-size: 12.5px; }
 .sync-path:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(43,89,195,.12); }

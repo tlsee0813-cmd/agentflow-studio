@@ -315,7 +315,9 @@ export function createAutoSync(host: AutoSyncHost) {
       foldersError ? h('p', { class: 'pp-error', role: 'alert' }, foldersError) : null,
       picks && !picks.length ? h('p', { class: 'fine' }, b ? '세션이 있는 다른 작업 폴더를 찾지 못했어요. 폴더 경로를 직접 적을 수도 있어요.' : '이 PC에서 Claude Code·Codex 세션을 찾지 못했어요. 폴더 경로를 직접 적을 수도 있어요.') : null,
       picks?.length ? h('ul', { class: 'sync-folders' }, ...picks.slice(0, 12).map(f => h('li', {}, h('button', { type: 'button', class: 'sync-folder-pick', 'data-act': `folder:${f.folder}`, onclick: () => connect(f.folder) },
-        h('strong', {}, f.folder), h('small', { title: stamp(f.latest, true) }, `${[...f.tools].join('·')} 세션 ${f.count}개 · 최근 대화 ${ago(f.latest)}`))))) : null,
+        h('strong', {}, f.folder), h('small', { title: stamp(f.latest, true) }, `${[...f.tools].join('·')} 세션 ${f.count}개 · 최근 대화 ${ago(f.latest)}`),
+        // What a press does, as the typed path's own '연결' says it (left out of the card's name, which stays the folder).
+        h('span', { class: 'sync-folder-go', 'aria-hidden': 'true' }, '연결 ›'))))) : null,
       h('div', { class: 'pp-row sync-manual' }, input, go, b ? h('button', { type: 'button', class: 'link-button quiet', onclick: back }, '취소') : null),
       setup);
   }
