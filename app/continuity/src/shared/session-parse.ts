@@ -15,7 +15,8 @@ export const SESSION_LIMITS = Object.freeze({ list: 60, scan: 400, headBytes: 25
 export type SessionLimits = typeof SESSION_LIMITS;
 export const SESSION_ID = /^(claude|codex)-[0-9a-f]{24}$/;
 export type SessionTool = 'claude' | 'codex';
-const TOOL_LABEL: Record<SessionTool, string> = { claude: 'Claude Code', codex: 'Codex' };
+/** Each tool's name as the person knows it: in record headers, the session list and a reading's label (sessionDetail). */
+export const TOOL_NAME: Record<SessionTool, string> = { claude: 'Claude Code', codex: 'Codex' };
 /** cwd: the working folder the session was last in; cwds: every one it worked in (a session can move to another folder).
  * thread / parent: Codex's own id of the session and, for a subagent it started, the id of the session that started it. */
 export interface SessionMeta { cwd: string | null; cwds: string[]; branch: string | null; startedAt: string | null; title: string | null; thread: string | null; parent: string | null }
@@ -398,7 +399,7 @@ export function sessionDetail(id: string, tool: SessionTool, s: ParsedSession, l
     const turn = { role: t.role, at: t.at, text, ...(t.role === 'assistant' ? { files } : {}) };
     if (forward) kept.push(turn); else kept.unshift(turn);
   }
-  return { version: SESSION_VERSION, id, tool, label: TOOL_LABEL[tool], title: s.meta.title, cwd: s.meta.cwd, cwds: s.meta.cwds, branch: s.meta.branch, startedAt: s.meta.startedAt,
+  return { version: SESSION_VERSION, id, tool, label: TOOL_NAME[tool], title: s.meta.title, cwd: s.meta.cwd, cwds: s.meta.cwds, branch: s.meta.branch, startedAt: s.meta.startedAt,
     turns: kept, omitted: forward ? 0 : turns.length - kept.length, ...(forward ? { rest: turns.length - kept.length } : {}) };
 }
 /** An opaque session id from a stable name: the session's own key (sessionKey), or for an alias its file's path (a real path on the

@@ -6,17 +6,18 @@
 import { PASTED_TEXT_LIMIT } from './types.js';
 import { redactSecrets, secretLike } from './secret.js';
 import { foldHandover } from './handover-mark.js';
-import { changedPath, SESSION_ID, SESSION_VERSION, type SessionTool } from './session-parse.js';
+import { changedPath, SESSION_ID, SESSION_VERSION, TOOL_NAME, type SessionTool } from './session-parse.js';
+// The tools' names live with the reading (the server's label comes from there too); the page's modules take them from here.
+export { TOOL_NAME } from './session-parse.js';
 
 export interface SessionTurn { role: 'user' | 'assistant'; at: string | null; text: string; files?: string[] }
 /** aliases: ids the same session had before ids were made from the session itself (from its file's path): marks kept under one
  * of them still hold. */
-export interface SessionSummary { id: string; tool: 'claude' | 'codex'; title: string | null; preview: string; cwd: string | null; branch: string | null; startedAt: string | null; updatedAt: string; bytes: number; aliases?: string[] }
+export interface SessionSummary { id: string; tool: SessionTool; title: string | null; preview: string; cwd: string | null; branch: string | null; startedAt: string | null; updatedAt: string; bytes: number; aliases?: string[] }
 /** omitted: earlier turns left out; rest (a reading from a time on): newer turns not sent yet, read from the new mark. cwds: every
  * folder the session worked in, files named from the first that holds them (the server's own folder order). label: the tool's
  * name, part of sessions.1; the page names the tool from TOOL_NAME itself. */
-export interface SessionDetail { id: string; tool: 'claude' | 'codex'; label: string; title: string | null; cwd: string | null; cwds?: string[]; branch: string | null; startedAt: string | null; turns: SessionTurn[]; omitted: number; rest?: number }
-export const TOOL_NAME: Record<SessionDetail['tool'], string> = { claude: 'Claude Code', codex: 'Codex' };
+export interface SessionDetail { id: string; tool: SessionTool; label: string; title: string | null; cwd: string | null; cwds?: string[]; branch: string | null; startedAt: string | null; turns: SessionTurn[]; omitted: number; rest?: number }
 
 const pad = (n: number) => String(n).padStart(2, '0');
 /** Local date and time (the person's own clock), or '' when the record has none. */
