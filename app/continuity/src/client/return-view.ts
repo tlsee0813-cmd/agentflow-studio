@@ -22,6 +22,7 @@ import { PASTED_TEXT_LIMIT } from '../shared/types.js';
 import type { PlanOpened } from './plan-view.js';
 import type { PlanBundle } from './plan-store.js';
 import { secretLike } from './plan-source.js';
+import { redactSecrets } from '../shared/secret.js';
 import { h, put, fullTime, codeGate, codeNote, quotedText as quoted } from './plan-dom.js';
 import { captureRequestReading, restoreRequestReading, type RequestReading } from './request-results.js';
 import type { RecordEvidence } from '../shared/types.js';
@@ -115,7 +116,7 @@ interface State {
   quoteFrom: string | null;
 }
 /** Paste drafts, per workspace entry (an imported copy has its own), in this browser apart from the project. A draft that looks
- * like it holds a key stays in this tab only. */
+ * like it holds a key, or holds a value saving hides, stays in this tab only. */
 const PASTE_DRAFT_KEY = 'agentflow.studio.paste-draft.1';
 // A text that ends with a next-record line, or starts with one.
 const SEP_END = new RegExp(`(?:^|\\n)[ \\t]*${NEXT_RECORD}[ \\t]*$`), SEP_START = new RegExp(`^[ \\t]*${NEXT_RECORD}[ \\t]*(?:\\n|$)`);
@@ -131,6 +132,9 @@ export function createReturnView(host: ReturnHost) {
   let s: State | null = null, seq = 0;
   const storeFor = () => (host.current()?.kind === 'saved' ? saved : memory);
   const memoryDrafts = new Map<string, string>();
+  /** How many values saving a draft hides (redactSecrets), for the text last weighed: the box weighs it at each input, once. */
+  let weighed: [string, number] = ['', 0];
+  const hides = (text: string) => (weighed[0] === text ? weighed[1] : (weighed = [text, redactSecrets(text).count])[1]);
   function draftOf(key: string): string {
     if (memoryDrafts.has(key)) return memoryDrafts.get(key)!;
     try { const v = (JSON.parse(host.kv.getItem(PASTE_DRAFT_KEY) ?? '{}') as Record<string, unknown>)[key]; return typeof v === 'string' ? v : ''; } catch { return ''; }
@@ -139,7 +143,7 @@ export function createReturnView(host: ReturnHost) {
     memoryDrafts.set(key, text);
     try {
       const all = JSON.parse(host.kv.getItem(PASTE_DRAFT_KEY) ?? '{}') as Record<string, string>;
-      if (text.trim() && !secretLike(text)) all[key] = text; else delete all[key];
+      if (text.trim() && !secretLike(text) && !hides(text)) all[key] = text; else delete all[key];
       const keys = Object.keys(all); for (const k of keys.slice(0, Math.max(0, keys.length - 30))) if (k !== key) delete all[k];
       host.kv.setItem(PASTE_DRAFT_KEY, JSON.stringify(all));
     } catch { /* this tab keeps it */ }
@@ -220,7 +224,10 @@ export function createReturnView(host: ReturnHost) {
     // and the box stays open with it. A pane closed or reopened meanwhile is another state: it is only told by the draft.
     // A session put after other text is kept as its own record (the box put a NEXT_RECORD line before it): a session is told by its
     // header line at a record's start. A handover document a pasted session started from is kept as one line, as the import keeps it.
-    const st = s, parts = recordParts(text).map(foldRecord); st.saving = true; render();
+    // What looks like a credential is hidden as the import hides it (a web AI's record copies the requests as written): hidden, not
+    // refused.
+    const st = s, hid = recordParts(text).map(t => redactSecrets(foldRecord(t))), parts = hid.map(r => r.text), n = hid.reduce((a, r) => a + r.count, 0);
+    st.saving = true; render();
     const done = await host.paste(parts, st.pasteContext);
     st.saving = false;
     const kept = typeof done !== 'string', untouched = draftOf(key) === text;
@@ -228,7 +235,8 @@ export function createReturnView(host: ReturnHost) {
     if (s !== st) return;
     if (!kept) { st.pasteMsg = done; render(); return; }
     const r = host.current()?.project.pasted.find(x => x.id === done.id);
-    const said = done.duplicate ? `같은 글을 ${r ? fullTime(r.at) : '앞서'}에 붙여 넣었어요. 새로 저장하지 않았어요.` : parts.length > 1 ? '세션마다 기록을 하나씩 나눠 저장했어요.' : '기록을 저장했어요.';
+    const said = done.duplicate ? `같은 글을 ${r ? fullTime(r.at) : '앞서'}에 붙여 넣었어요. 새로 저장하지 않았어요.`
+      : `${parts.length > 1 ? '세션마다 기록을 하나씩 나눠 저장했어요.' : '기록을 저장했어요.'}${n ? ` 키·토큰처럼 보이는 ${n}곳은 가려서 저장했어요.` : ''}`;
     if (!untouched) { st.pasteMsg = `${said} 저장하는 동안 쓴 글은 초안으로 남겨 두었어요.`; render(); void refresh(); return; }
     st.pasteContext = null; st.pasteMsg = null; st.storeMsg = said;
     await refresh();
@@ -679,9 +687,12 @@ export function createReturnView(host: ReturnHost) {
     area.value = text;
     const count = h('span', { class: 'fine rr-count' }, text ? `${text.length.toLocaleString()}자` : '');
     const warn = h('p', { class: 'pp-error', role: 'status', hidden: !secretLike(text) }, '키나 토큰처럼 보이는 글이 있어요. 이 탭에만 두고 저장·전송하지 않아요.');
+    // What saving would hide is said before, quietly: it is no reason not to save.
+    const hiding = h('p', { class: 'fine rr-paste-hides', role: 'status', hidden: secretLike(text) || !hides(text) }, '키·토큰처럼 보이는 글이 있어요. 저장할 때 그 부분은 가려요.');
     area.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); backToReading(); } });
     area.addEventListener('input', () => {
       keepDraft(st.key, area.value); count.textContent = area.value ? `${area.value.length.toLocaleString()}자` : ''; warn.hidden = !secretLike(area.value);
+      hiding.hidden = !warn.hidden || !hides(area.value);
     });
     // A session record pasted beside other text (a web AI's answer written with WEB_RECORD_ASK, another record) is kept as a record of
     // its own: the box puts the NEXT_RECORD line between them, as it does for a session it brings in. It goes after the record the
@@ -716,7 +727,7 @@ export function createReturnView(host: ReturnHost) {
       h('p', { class: 'fine' }, '나누거나 종류·부분을 고르지 않아도 돼요. 저장한 뒤 지도 정리나 요약을 누를 때만 AI에 보내요.'),
       ctx ? h('p', { class: 'rr-context' }, h('span', {}, '보던 부분'), partChip(ctx),
         h('button', { type: 'button', class: 'link-button quiet', title: '읽기 맥락에서 빼요', onclick: () => { st.pasteContext = null; render(); } }, '빼기')) : null,
-      sessionBox(st.key), area, warn, count, st.pasteMsg ? h('p', { class: 'pp-error', role: 'alert' }, st.pasteMsg) : null)];
+      sessionBox(st.key), area, warn, count, hiding, st.pasteMsg ? h('p', { class: 'pp-error', role: 'alert' }, st.pasteMsg) : null)];
   }
   function pasteFooter(): Node {
     const st = s!;

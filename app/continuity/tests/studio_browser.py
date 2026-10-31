@@ -3249,6 +3249,45 @@ def folder_sessions_flow(browser, base):
     context.close()
 
 
+# A web AI's record written back with the request text, holding what a person pastes into a chat (all values fake).
+WEB_RECORD = ("[웹 AI 세션 기록 · 결제 연결 · 작업 폴더 C:\\Users\\leek\\projects\\salon-booking · 브랜치 main]\n\n── 사용자 요청 ──\n.env 이렇게 했어\n"
+    "DATABASE_URL=postgresql://admin:FakePass123@db.example.com:5432/prod\nSTRIPE_SECRET_KEY=sk_live_" + "FAKEfake" * 3 + "\n"
+    "JWT=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJGQUtFIn0." + "FAKEfake" * 3 + "\n요구: 결제 화면에 스트라이프 붙여줘\n\n── 웹 AI 답변 ──\n결제 화면에 Stripe Checkout을 연결하는 코드를 드렸어요.")
+WEB_VALUES = ("FakePass123", "sk_live_", "eyJzdWIi")
+
+
+def final_paste_flow(browser, base):
+    """The paste box keeps no credential: a web AI's record pasted back is saved with what looks like a key hidden (said before
+    and after saving) and is never kept as a draft in this browser."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    errors = []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.goto(base + "/")
+    page.locator("#new-open").click()
+    page.locator("#new-name").fill("미용실 결제")
+    page.locator("#new-form").get_by_role("button", name="만들기").click()
+    page.wait_for_url(re.compile(r"#/p/E_"))
+    entry = re.search(r"#/p/(E_[^/]+)", page.url).group(1)
+    page.locator("#space-empty").get_by_role("button", name="기록 붙여넣기").click()
+    draft = page.locator("#paste-text")
+    # Said before saving, quietly (it is no refusal); the draft stays in this tab only.
+    draft.fill(WEB_RECORD)
+    expect(page.locator("#lens .rr-paste-hides")).to_have_text("키·토큰처럼 보이는 글이 있어요. 저장할 때 그 부분은 가려요.")
+    expect(page.locator("#lens .rr-paste-box .pp-error")).to_be_hidden()
+    stored = page.evaluate("Object.values(localStorage).join('\\n')")
+    assert not any(v in stored for v in WEB_VALUES), "a draft that holds keys is not kept in this browser"
+    page.locator("#lens").get_by_role("button", name="기록 저장").click()
+    expect(page.locator("#lens .rr-foot p[role=status]")).to_have_text("기록을 저장했어요. 키·토큰처럼 보이는 3곳은 가려서 저장했어요.")
+    kept = page.evaluate(ENTRY, entry)["pasted"]
+    assert len(kept) == 1 and kept[0]["text"].count("[가려진 비밀값]") == 3, kept
+    assert "postgresql://admin:[가려진 비밀값]@db.example.com" in kept[0]["text"] and "요구: 결제 화면에 스트라이프 붙여줘" in kept[0]["text"], kept
+    stored = page.evaluate("Object.values(localStorage).join('\\n')")
+    assert not any(v in stored for v in WEB_VALUES), "nothing in this browser holds them"
+    assert not errors, errors
+    context.close()
+
+
 def off_flow(browser, base, expected_pill):
     page = browser.new_page(viewport={"width": 1280, "height": 720})
     page.goto(base)
@@ -4662,6 +4701,7 @@ def main():
             proc, base = start("ok", STUDIO_SESSIONS_FIXTURE="1"); procs.append(proc); sessions_flow(browser, base); print("ok  local sessions: connect a folder once -> its sessions become records -> first map without a click; nothing taken twice; one session by hand, key hidden")
             proc, base = start("ok"); procs.append(proc); folder_sessions_flow(browser, base); print("ok  session folders picked in the browser (no local reader): automatic connection, paste-box list, one file by hand, web request text")
             proc, base = start("ok"); procs.append(proc); handover_flow(browser, base); print("ok  handover document: a part's sessions, its document and the whole project's, copied and saved, nothing sent")
+            proc, base = start("ok"); procs.append(proc); final_paste_flow(browser, base); print("ok  paste box: a web AI's record saved with keys hidden, said before and after, never kept as a draft")
             proc, base = start("nokey"); procs.append(proc); off_flow(browser, base + "/", "AI 키 없음"); print("ok  server without key -> honest off state")
             if (ROOT / "static-dist/index.html").exists():
                 server = serve_static()
