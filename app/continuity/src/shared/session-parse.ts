@@ -85,6 +85,17 @@ function woken(t: string, end: number): string | null {
   }
   return said.filter(Boolean).join('\n\n') || null;
 }
+/** Codex Desktop's answer to a question its agent asked (request_user_input): the block holds JSON, [{questionItemId, question,
+ * answer}]. Read as what the person answered, with the question it answers; one that does not read so is kept as typed. */
+const QUESTION_REPLY = /^<send_user_message_question_reply>\s*([\s\S]*?)\s*<\/send_user_message_question_reply>\s*/;
+function answered(t: string): string | null {
+  const m = QUESTION_REPLY.exec(t); if (!m) return null;
+  let items: unknown; try { items = JSON.parse(m[1]!); } catch { return null; }
+  if (!Array.isArray(items) || !items.length) return null;
+  const said = (items as Row[]).map(i => (i && typeof i.answer === 'string' && i.answer.trim()
+    ? `${i.answer.trim()}${typeof i.question === 'string' && i.question.trim() ? ` (AI의 질문 「${i.question.trim().replace(/\s+/g, ' ')}」에 대한 답)` : ''}` : null));
+  return said.every(Boolean) ? [...said, t.slice(m[0].length).trim()].filter(Boolean).join('\n') : null;
+}
 const REMINDER_END = '</system-reminder>';
 /** What the person typed, without context a tool injects into the same message. Null when nothing typed is left. */
 function typed(text: string): string | null {
@@ -103,6 +114,7 @@ function typed(text: string): string | null {
   for (let guard = 0; guard < 20; guard++) {
     const m = /^<([a-z_][\w-]*)(\s[^>]*)?>[\s\S]*?<\/\1(\s[^<>]*)?>\s*/i.exec(t); if (!m || !INJECTED.test(m[1]!)) break; t = t.slice(m[0].length);
   }
+  const reply = answered(t); if (reply) return reply;
   const inWake = afterContext(t) ?? t, end = wakeEnd(inWake);
   if (end >= 0) return woken(inWake, end);
   // Context a tool puts in a user message of its own (Codex environment_context, user_instructions, AGENTS.md…) is not a prompt,
