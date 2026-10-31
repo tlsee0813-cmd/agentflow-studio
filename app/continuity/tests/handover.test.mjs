@@ -7,7 +7,7 @@ import * as D from '../dist/public/shared/domain.js';
 import * as M from '../dist/public/shared/map-reading.js';
 import { studioView } from '../dist/public/shared/studio.js';
 import { sessionText, sessionChunks, newTurns, stamp } from '../dist/public/shared/session-import.js';
-import { handoverText, handoverDoc, handoverCode, foldHandover, foldRecord, receivedHandovers, sessionOrigin, partSessions, originLabel, HANDOVER_CHARS } from '../dist/public/shared/handover.js';
+import { handoverText, handoverDoc, handoverCode, foldHandover, foldRecord, receivedHandovers, sessionOrigin, partSessions, originLabel, sessionName, HANDOVER_CHARS } from '../dist/public/shared/handover.js';
 
 const ID = 'claude-0123456789abcdef01234567', NEXT = 'codex-89abcdef0123456789abcdef';
 const session = (id, turns, extra = {}) => ({ id, tool: id.startsWith('codex') ? 'codex' : 'claude', label: '', title: '휴무일 연결', cwd: '/work/salon', branch: 'main', startedAt: '2026-10-28T09:00:00.000Z', turns, omitted: 0, ...extra });
@@ -171,6 +171,8 @@ test('HANDOVER-T1 a session without a title is named by its first request, else 
   p = add(p, sessionText(session(C, [{ role: 'user', at: '2026-10-30T07:00:00.000Z', text: doc }, { role: 'assistant', at: '2026-10-30T07:01:00.000Z', text: '읽었어요.' }], { title: null, startedAt: '2026-10-30T07:00:00.000Z' })).text);
   const a = 'Codex 「예약이 확정되면 손님에게 문자를 보내 줘」', b = 'Codex 「예약 확정 문자에 가게 주소도 넣어 줘. 지…」', c = `Codex 세션 (${stamp('2026-10-30T07:00:00.000Z', true).slice(5)} 시작)`;
   assert.deepEqual(partSessions(p, sms).map(originLabel).sort(), [a, b, c].sort());
+  // Each record of a session is named so wherever it is shown (돌아와 읽기's list, chips and record view): A's later one too.
+  assert.deepEqual(p.pasted.map(r => sessionName(p, sessionOrigin(r.text))), [a, b, a, c]);
   const t = handoverText(p, { scope: sms, code: 'NAM235', at: AT });
   for (const s of [`\n- ${a} · 작업 폴더 /work/salon · 브랜치 main\n`, `\n- ${b} · 작업 폴더 /work/salon · 브랜치 main\n`, `\n- ${c} · 작업 폴더 /work/salon · 브랜치 main · 인수인계로 이어받은 세션\n`, `${c} (인수인계로 이어받음)`])
     assert.ok(t.includes(s), `missing: ${s}\n${t}`);

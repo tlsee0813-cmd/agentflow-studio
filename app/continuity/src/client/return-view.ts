@@ -17,7 +17,7 @@ import { digestStore, askHash, makeReading, type Reading } from './digest-store.
 import { askDigest, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js';
 import { sessionText, recordParts, quoteNext, NEXT_RECORD, NEXT_LINE, RECORD_HEAD, stamp, TOOL_NAME, type SessionSummary, type SessionDetail } from '../shared/session-import.js';
 import { readSessionFile, type SessionSources } from './session-source.js';
-import { WEB_RECORD_ASK, foldRecord, sessionOrigin, originLabel } from '../shared/handover.js';
+import { WEB_RECORD_ASK, foldRecord, sessionOrigin, originLabel, sessionName } from '../shared/handover.js';
 import { PASTED_TEXT_LIMIT } from '../shared/types.js';
 import type { PlanOpened } from './plan-view.js';
 import type { PlanBundle } from './plan-store.js';
@@ -136,7 +136,6 @@ const versionOf = (basis: string) => /\b[0-9a-f]{7}\b/.exec(basis)?.[0] ?? null;
  * Display only: the AI is sent the record named as before (recordLabel, the source's title). */
 const sessionOf = (src: ReadingSource) => (src.kind === 'record' && !src.evidence ? sessionOrigin(src.text) : null);
 const kindOf = (src: ReadingSource) => { const o = sessionOf(src); return o ? `${originLabel({ tool: o.tool, title: null })} 기록` : DIGEST_KIND_LABEL[src.kind]; };
-const nameOf = (src: ReadingSource) => { const o = sessionOf(src); return o ? [originLabel(o), o.cwd?.split(/[\\/]/).filter(Boolean).at(-1)].filter(Boolean).join(' · ') : src.title; };
 
 export function createReturnView(host: ReturnHost) {
   const saved = digestStore(host.kv), memory = digestStore(null);
@@ -160,6 +159,12 @@ export function createReturnView(host: ReturnHost) {
     } catch { /* this tab keeps it */ }
   }
   const partName = (id: string) => { const v = host.current()?.view; return v ? partLabel(v, id) : '부분'; };
+  /** A session's record by the session's name as the part summary and the handover document give it (an untitled one by its first
+   * request), and its work folder. */
+  const nameOf = (src: ReadingSource) => {
+    const o = sessionOf(src), p = host.current()?.project;
+    return o ? [p ? sessionName(p, o) : originLabel(o), o.cwd?.split(/[\\/]/).filter(Boolean).at(-1)].filter(Boolean).join(' · ') : src.title;
+  };
   /** Beside a save button: whether saving sends anything. */
   const sends = () => (host.autoConnected() ? '저장하면 다음 자동 지도 갱신 때 AI에 보내요' : '저장해도 AI에 보내지 않아요');
 

@@ -55,6 +55,21 @@ function askName(text: string): string | null {
   const line = ask?.split('\n').slice(1).map(l => l.trim()).find(l => l && !l.startsWith('[AgentFlow 인수인계 문서를 받아 이어감'));
   return line ? one(line, 25) : null;
 }
+/** The first request each untitled session's records hold, in the order they were kept (by originKey). Made once for each list of
+ * records: a project changed is a copy, so its list is another (its length is checked too). */
+const ASKED = new WeakMap<Project['pasted'], { n: number; names: Map<string, string> }>();
+function askNames(p: Project): Map<string, string> {
+  const was = ASKED.get(p.pasted); if (was && was.n === p.pasted.length) return was.names;
+  const names = new Map<string, string>();
+  for (const rec of p.pasted) {
+    const o = sessionOrigin(rec.text); if (!o || o.title) continue;
+    const key = originKey(o), name = !names.has(key) && askName(rec.text); if (name) names.set(key, name);
+  }
+  ASKED.set(p.pasted, { n: p.pasted.length, names }); return names;
+}
+/** A session's name as the part summary and the handover document give it (partSessions), wherever else it is shown: one without a
+ * title is named by its first request. */
+export const sessionName = (p: Project, o: SessionOrigin) => originLabel(o.title ? o : { ...o, title: askNames(p).get(originKey(o)) ?? null });
 
 export interface PartSession extends SessionOrigin { key: string; lastAt: string; worked: boolean; tookOver: boolean }
 /** The sessions behind a part: those whose records the map quotes for it (it worked on it), and those that started from a handover
@@ -68,10 +83,10 @@ export function partSessions(p: Project, areaId: string | null): PartSession[] {
     for (const q of part.basis) quoted.add(q.record);
     for (const c of part.claims) quoted.add(c.record);
   }
-  const out = new Map<string, PartSession>(), named = new Map<string, string>();
+  const out = new Map<string, PartSession>(), named = askNames(p);
   for (const rec of p.pasted) {
     const o = sessionOrigin(rec.text); if (!o) continue;
-    const key = originKey(o), name = !o.title && !named.has(key) && askName(rec.text); if (name) named.set(key, name);
+    const key = originKey(o);
     const worked = areaId ? quoted.has(rec.id) : true, tookOver = receivedHandovers(rec.text).some(h => h.areaId === areaId);
     if (!worked && !tookOver) continue;
     const was = out.get(key);
