@@ -9,6 +9,7 @@ import { relLabel } from './relation-groups.js';
 import { stamp, RECORD_HEAD, HEAD_FIELD } from './session-import.js';
 import { TOOL_NAME, RELAYED, type SessionTool } from './session-parse.js';
 import { HANDOVER_TAG, foldHandover, quoteReceived, receivedHandovers } from './handover-mark.js';
+import { MATCH_LABEL, type FrozenRequest } from './request-return.js';
 export { HANDOVER_TAG, HANDOVER_SECTIONS, foldHandover, handoverCode, receivedHandovers } from './handover-mark.js';
 
 /* ---------- which session a record came from ---------- */
@@ -106,7 +107,9 @@ export function partSessions(p: Project, areaId: string | null): PartSession[] {
 }
 
 /* ---------- the document ---------- */
-export interface HandoverOptions { scope: string | null; code: string; at: string }
+/** requests: the change requests made for this project (those kept with the plan as well as those a reading stored): what was
+ * handed to a coding session, so the next one knows what it was asked and what came back. */
+export interface HandoverOptions { scope: string | null; code: string; at: string; requests?: FrozenRequest[] }
 /** A document, and how many of its parts were written shorter (or by name only) to keep it within HANDOVER_CHARS. */
 export interface Handover { text: string; trimmed: number }
 /** The longest document made. It is pasted as a new session's first message (a web chat's too), so it stays short enough to copy
@@ -234,6 +237,30 @@ function unreadWhere(count: number, inFlow: number, scoped: boolean, cut: boolea
   return `${lead} 그중 ${scoped ? '이 범위를 다룬 세션의 기록 ' : ''}${inFlow}개는 ${what}이 ${where} 있고, 나머지 ${count - inFlow}개는 이 문서에 없어요. 표시된 내용은 위 부분 상태에 아직 반영되지 않았고, 나머지는 필요하면 사용자에게 물어보세요.`;
 }
 
+/** The change requests made (newest last, the latest REQUESTS_SHOWN), each with what it asked and what came back for it: the
+ * report passages a reading matched to it, by kind, and records that name it but no reading has matched yet. In a part's document,
+ * those with an item on a part in it. What came back is what was said, not what was checked. */
+const REQUESTS_SHOWN = 5;
+function requestLines(p: Project, all: FrozenRequest[], scope: Set<string> | null): string[] {
+  const asked = [...new Map(all.map(q => [q.id, q])).values()].filter(q => !scope || q.items.some(i => i.partIds.some(x => scope.has(x))))
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  if (!asked.length) return [];
+  const maps = p.readings.filter(isMapReading) as MapReading[], read = new Set(maps.flatMap(r => r.records.map(x => x.id)));
+  const out = ['## 맡긴 변경 요청 (요청문을 만든 것, 오래된 것부터)'];
+  if (asked.length > REQUESTS_SHOWN) out.push(`(그 앞의 요청문 ${asked.length - REQUESTS_SHOWN}개는 이 문서에 넣지 않았어요.)`);
+  for (const q of asked.slice(-REQUESTS_SHOWN)) {
+    const items = q.items.filter(i => !scope || i.partIds.some(x => scope.has(x)));
+    out.push(one(`- ${q.id} · ${stamp(q.createdAt, true)} · ${q.intent}`, 300));
+    if (items.length) out.push(`  - 항목: ${one(items.map(i => i.title).join('; '), 290)}`);
+    const matched = maps.flatMap(r => r.matches ?? []).filter(m => m.targets.some(t => t.requestId === q.id));
+    const kinds = [...new Set(matched.map(m => m.kind))].map(k => `${MATCH_LABEL[k]} ${matched.filter(m => m.kind === k).length}개`);
+    const named = p.pasted.filter(r => r.text.includes(q.id) && !read.has(r.id)).length;
+    out.push(`  - 돌아온 것: ${[matched.length ? `지도에서 대조한 보고 ${kinds.join(', ')}` : '', named ? `이 요청문을 적은 기록 ${named}개(아직 대조하지 않음)` : ''].filter(Boolean).join(' · ') || '아직 없어요'}`);
+  }
+  out.push('');
+  return out;
+}
+
 /** The document for the whole project (scope null) or one part with everything inside it. */
 export function handoverText(p: Project, opts: HandoverOptions): string { return handoverDoc(p, opts).text; }
 /** The document and how much of it was shortened: past HANDOVER_CHARS its parts are written briefly from the last one back, and
@@ -312,6 +339,7 @@ export function handoverDoc(p: Project, opts: HandoverOptions): Handover {
   }
   if (!scoped && latest) for (const g of latest.gaps) open.push(`- 기록에서 알 수 없었음: ${one(g)}`);
   if (open.length) after.push('## 아직 정하지 않은 것', ...dedupeLines(open).slice(-12), '');
+  after.push(...requestLines(p, opts.requests ?? [], scoped ? scopeIds : null));
   if (asks.length) {
     after.push('## 최근 흐름 (사용자가 세션에서 한 요청, 오래된 것부터)');
     // The requests before these are said to be left out, so the first one here is not read as where the work began.

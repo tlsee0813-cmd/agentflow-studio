@@ -1382,7 +1382,7 @@ def record_flow(browser, base, backup):
     assert calls == [], "saving never calls"
 
     # Read on request: one call, digest.2, the record whole and unlocated, its context only in the note.
-    page.get_by_role("button", name="붙인 기록 요약").click()
+    page.get_by_role("button", name="붙인 기록 AI로 요약").click()
     expect(page.locator("#lens .rr-records")).to_be_visible()
     assert len(calls) == 1
     ask = calls[0]
@@ -1520,7 +1520,7 @@ def record_fold_flow(browser, base, cases):
     page.get_by_role("menuitem", name="기록 붙여넣기").click()
     page.locator("#paste-text").fill(text)
     page.get_by_role("button", name="기록 저장").click()
-    page.get_by_role("button", name="붙인 기록 요약").click()
+    page.get_by_role("button", name="붙인 기록 AI로 요약").click()
     try:
         expect(page.locator("#lens .rr-records")).to_be_visible()
     except AssertionError as failure:
@@ -1594,7 +1594,7 @@ def map70_flow(browser, base):
     # The one action that sends says what it sends, then the map is there; the pane says what was understood.
     expect(entry.locator(".fine")).to_contain_text("기록 1개를 AI에 보내요")
     # One main action while records wait for the map; the separate summary steps back.
-    expect(page.locator("#lens").get_by_role("button", name="붙인 기록 요약")).to_have_class(re.compile("secondary"))
+    expect(page.locator("#lens").get_by_role("button", name="붙인 기록 AI로 요약")).to_have_class(re.compile("secondary"))
     entry.get_by_role("button", name="기록으로 지도 정리").click()
     expect(page.locator("#world .node")).to_have_count(3)
     assert len(sent) == 1, sent

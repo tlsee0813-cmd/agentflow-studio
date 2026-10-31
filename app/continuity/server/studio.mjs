@@ -13,6 +13,7 @@ import { PLAN_PROMPT, PLAN2_PROMPT, PLAN3_PROMPT, SCOPE_PROMPT } from './plan-pr
 import { DIGEST_PROMPT, DIGEST2_PROMPT } from './digest-prompt.mjs';
 import { validateMapAsk, validateMapReply } from '../dist/public/shared/map-reading.js';
 import { SPAN_INDEX, textDigest } from '../dist/public/shared/evidence-span.js';
+import { redactSecrets } from '../dist/public/shared/secret.js';
 import { MAP_PROMPT, MAP2_PROMPT, MAP3_PROMPT, MAP6_PROMPT, MAP6_FIRST_PROMPT, MAP6_RECIPE, MAP7_PROMPT, MAP7_RECIPE, MAP7_GUIDANCE_FRAME, MAP7_VOCABULARY, map4Prompt, map5Prompt, map6Prompt, map7Prompt } from './map-prompt.mjs';
 
 const ENDPOINT = 'https://api.deepseek.com/chat/completions';
@@ -190,7 +191,16 @@ function deadlineMs(kind, config) {
   return config.planTimeoutMs ?? config.timeoutMs;
 }
 
-export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetch, signal } = {}) {
+/** What a finished call the server would not use was (refused: kept by a local host that asked for it, never sent anywhere): the
+ * request's schema, the refusal, how the provider ended it and what it counted, and the reply's text with key-like strings hidden.
+ * Never the key, the prompt or a header. */
+function refusal(ask, error, body, choice, key) {
+  const content = typeof choice?.message?.content === 'string' && !(key && choice.message.content.includes(key)) ? redactSecrets(choice.message.content).text : null;
+  return { schema: ask?.schemaVersion ?? null, error: { code: error.code, ...(error.detail ? { detail: error.detail } : {}) }, finish: choice?.finish_reason ?? null,
+    usage: body?.usage && typeof body.usage === 'object' ? body.usage : null, content };
+}
+
+export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetch, signal, refused = null } = {}) {
   const schema = schemaOf(ask);
   if (!config.apiKey) throw new ApiError('AI_NOT_CONFIGURED', 503);
   if (signal?.aborted) throw new ApiError('CANCELLED', 499);
@@ -209,9 +219,10 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
       await response.body?.cancel().catch(() => {});
       throw providerHttpError(response.status, 30);
     }
+    let body = null, choice = null;
     try {
       const raw = await readLimited(response.body, REPLY_BYTES, controller.signal);
-      const choice = JSON.parse(raw ?? '')?.choices?.[0];
+      body = JSON.parse(raw ?? ''); choice = body?.choices?.[0];
       // How the provider ended the reply comes first: only a finished one (stop) is read. One cut by the length limit is
       // incomplete, and one ended any other way (or without saying) is unfinished; neither is parsed, judged or applied, so
       // neither reads as a reply that broke the evidence rules (INVALID_RESPONSE is that, for a finished reply only).
@@ -221,10 +232,13 @@ export async function callStudioModel(ask, config, { fetchImpl = globalThis.fetc
       if (choice.message.content.includes(config.apiKey)) throw new Error();
       return schema.read(JSON.parse(choice.message.content), ask);
     } catch (e) {
-      if (controller.signal.aborted || e instanceof ApiError) throw e;
+      if (controller.signal.aborted) throw e;
       // studio.map.6: a contradiction or a wrong reference says where (path), which rule and what it names; never record text.
-      const error = new ApiError('INVALID_RESPONSE', 502);
-      if (e?.name === 'MapReplyError') error.detail = { path: e.path, rule: e.rule, target: e.target };
+      const error = e instanceof ApiError ? e : new ApiError('INVALID_RESPONSE', 502);
+      if (!(e instanceof ApiError) && e?.name === 'MapReplyError') error.detail = { path: e.path, rule: e.rule, target: e.target };
+      // A reply that came back and was set aside (cut, unfinished or refused by the checks) is kept for the host that asked, so why
+      // can be seen on that PC; keeping it never changes what the call answers.
+      if (refused && body) { try { await refused(refusal(ask, error, body, choice, config.apiKey), ask); } catch { /* a keeping failure is not the call's */ } }
       throw error;
     }
   } catch (e) {
@@ -257,9 +271,10 @@ function inputError(e) {
 export const RELEASE_POLICIES = Object.freeze(['existing-map']);
 const WITHHELD = path => path === '/api/studio/map' || segmentsUnder(path, JOBS) !== null;
 
-export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, config = readStudioConfig(env), jobs = null, mapExecutor = null, policy = null, sessions = null } = {}) {
+export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, config = readStudioConfig(env), jobs = null, mapExecutor = null, policy = null, sessions = null, refused = null } = {}) {
   if (policy !== null && !RELEASE_POLICIES.includes(policy)) throw new Error('Unknown release policy.');
   if (policy && (jobs || mapExecutor || sessions)) throw new Error('A limited release takes no map jobs, map executor or local sessions.');
+  if (policy && refused) throw new Error('A limited release keeps no refused replies.');
   const limiter = createLimiter(config);
   // Every reading except /ask (plan, scope, digest, map and map jobs) is made with the plan model.
   const planConfig = { ...config, model: config.planModel ?? config.model };
@@ -279,7 +294,7 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
     call: async (ask, signal, execution) => { const out = await executor.call(ask, signal, execution); return { model: executor.model, reply: out.wire, evidence: evidenceOf(ask), observed: out.observed }; }
   } : {
     configured: () => !!config.apiKey, prompt: promptFor, model: planConfig.model, acquire: id => limiter.acquire(id),
-    call: async (ask, signal) => ({ model: planConfig.model, reply: await callStudioModel(ask, planConfig, { fetchImpl, signal }), evidence: evidenceOf(ask) })
+    call: async (ask, signal) => ({ model: planConfig.model, reply: await callStudioModel(ask, planConfig, { fetchImpl, signal, refused }), evidence: evidenceOf(ask) })
   };
   /** What a map reading would be made with: the executor's model and recipe when one is given (map jobs only), else the key's. */
   const mapStatus = async () => {
@@ -363,7 +378,7 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
       const release = limiter.acquire(crypto.randomUUID());
       try {
         const requestConfig = url.pathname === '/api/studio/ask' ? config : planConfig;
-        const answer = await callStudioModel(ask, requestConfig, { fetchImpl, signal: request.signal });
+        const answer = await callStudioModel(ask, requestConfig, { fetchImpl, signal: request.signal, refused });
         // studio.map.4–7: the references in the reply name pieces of exactly this request; the browser checks it is its own.
         return reply(200, { model: requestConfig.model, reply: answer, ...(schemaOf(ask).anchored ? { evidence: { index: SPAN_INDEX, ask: textDigest(raw) } } : {}) }, cors);
       } finally { release(); }

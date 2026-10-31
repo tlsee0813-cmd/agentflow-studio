@@ -59,6 +59,8 @@ const MAP_ERROR: Record<string, string> = {
   LIFECYCLE: '이 프로젝트가 보관되었다가 다시 열려 이번 정리 결과는 반영하지 않았어요. 원문과 지도는 그대로예요. 다시 정리해 주세요.',
   HASH: '요청을 준비하지 못해 보내지 않았어요. 기록은 그대로예요.'
 };
+/** A finished reply whose shape was not the one asked for (map.7's contract guard): its evidence was never weighed. */
+const CONTRACT_REFUSED = 'AI 응답의 모양(항목 이름이나 형식)이 요청한 것과 달라 반영하지 않았어요. 기록과 지도는 그대로예요. 다시 정리할 수 있어요.';
 /* AF100: a job the local server keeps. Said in what the person can do (continue, see the result, stopped, cancel), not how. */
 const JOB_ERROR: Record<string, string> = {
   RESERVE: '정리 작업을 이 브라우저에 기록하지 못해 보내지 않았어요. 기록과 지도는 그대로예요.',
@@ -240,7 +242,9 @@ export function createMapRun(host: MapRunHost) {
   const appliedIn = (p: Project | null, a: Attempt): 'applied' | 'conflict' | null => {
     const r = p?.readings.find(x => isMapReading(x) && x.id === a.meta?.id); return !r ? null : isMapReading(r) && r.hash === a.hash ? 'applied' : 'conflict';
   };
-  const errorText = (code: string) => JOB_ERROR[code] ?? MAP_ERROR[code] ?? ERROR_TEXT[code] ?? '지도를 정리하지 못했어요. 기록은 그대로예요.';
+  // A reply refused for its shape (map.7's contract: a missing or extra key, a wrong type) is said so, not as an evidence rule.
+  const errorText = (code: string, detail?: { rule?: unknown } | null) => code === 'INVALID_RESPONSE' && detail?.rule === 'contract' ? CONTRACT_REFUSED
+    : JOB_ERROR[code] ?? MAP_ERROR[code] ?? ERROR_TEXT[code] ?? '지도를 정리하지 못했어요. 기록은 그대로예요.';
   /** Reserve (or reuse the entry's reservation), then send. Nothing goes when the reservation cannot be written. */
   async function runJob(a: Attempt, inp: MapInput, model: string, seq: number | null) {
     const slot = of(a.key), live = () => slot.attempt === a, jobs = store()!;
@@ -281,7 +285,7 @@ export function createMapRun(host: MapRunHost) {
     if (v.state === 'accepted' || v.state === 'running') { if (was !== v.state || of(a.key).notice === JOB_ERROR.UNREACHABLE) { of(a.key).notice = null; host.changed(a.key); } return; }
     if (v.state === 'ready') { if (a.phase === 'asking') await load(a, v); return; }
     if (v.state === 'cancelled') { await forget(a, op.cancelling ? null : '정리가 취소됐어요. 결과는 없고 기록과 지도는 그대로예요.', 'seen', op.cancelling ? JOB_NOTE.cancelled : null); return; }
-    await forget(a, v.state === 'interrupted' ? JOB_ERROR.INTERRUPTED! : errorText(v.error?.code ?? 'AI_UNAVAILABLE'), 'seen');
+    await forget(a, v.state === 'interrupted' ? JOB_ERROR.INTERRUPTED! : errorText(v.error?.code ?? 'AI_UNAVAILABLE', v.error?.detail), 'seen');
   }
   /** The kept result, checked again here against the input reserved for it before it can be applied. */
   async function load(a: Attempt, v: JobView) {
