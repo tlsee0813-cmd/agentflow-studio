@@ -27,6 +27,7 @@ AI 개발 도구(Codex·Claude 등)와 주고받은 **개발 기록을 프로그
 
 [기존 지도 작업용 공개판(142)](https://agentflow-studio-existing-map-124.tlsee0813.workers.dev/)을 엽니다.
 예제 프로젝트로 지도 읽기·근거 왕복·변경 구상을 볼 수 있습니다. 첫 지도 생성과 지도 갱신은 이 판에서 막혀 있고, AI 정리는 접속 코드가 필요합니다.
+최신 화면을 서버 없이 둘러보려면 [정적 체험판(GitHub Pages)](https://tlsee0813-cmd.github.io/agentflow-studio/)을 엽니다. AI 정리와 PC 세션 연결기는 동작하지 않고, 예제·지도·기록 화면만 볼 수 있습니다.
 다른 공개 주소와 각각의 차이는 [웹사이트 안내](docs/review/2026-10-30/WEBSITES.md)에 정리돼 있습니다.
 
 ### 내 PC에서
