@@ -74,6 +74,12 @@ test('HANDOVER-F1 a new session that starts from the document: the document fold
   assert.deepEqual(s.map(x => [x.id, x.worked, x.tookOver]), [[NEXT, false, true], [ID, true, false]]);
   assert.deepEqual(partSessions(q, null).map(x => x.id).sort(), [ID, NEXT].sort());
   assert.ok(handoverText(q, { scope: booking, code: 'ZXC234', at: '2026-10-30T07:00:00.000Z' }).includes('Codex 세션 (인수인계로 이어받음)'));
+  // The part's next document shows what that session did, though no reading has quoted it yet: the request it started with, and
+  // those of a later record of it, which does not repeat the marker.
+  const later = sessionText(session(NEXT, [{ role: 'user', at: '2026-10-30T06:10:00.000Z', text: '실패한 테스트 고쳐 줘' }, { role: 'assistant', at: '2026-10-30T06:20:00.000Z', text: '고쳤어요.', files: ['src/booking.ts'] }], { title: null })).text;
+  const again = handoverText(D.pasteRecord(q, later, null).project, { scope: booking, code: 'ZXC234', at: '2026-10-30T07:00:00.000Z' });
+  for (const s of ['\n- 이거 읽고 이어서 해 줘 (인수인계 문서로 시작 · 나의 프로젝트 › 예약 화면) 먼저 테스트부터 돌려 줘\n', '\n- 실패한 테스트 고쳐 줘 → 바꾼 파일: src/booking.ts\n'])
+    assert.ok(again.includes(s), `missing: ${s}\n${again}`);
 });
 
 test('HANDOVER-O1 session origin: header fields read back; other records are not sessions', () => {
