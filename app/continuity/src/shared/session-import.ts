@@ -6,7 +6,7 @@
 import { PASTED_TEXT_LIMIT } from './types.js';
 import { redactSecrets, secretLike } from './secret.js';
 import { foldHandover } from './handover-mark.js';
-import { changedPath } from './session-parse.js';
+import { changedPath, SESSION_ID, SESSION_VERSION, type SessionTool } from './session-parse.js';
 
 export interface SessionTurn { role: 'user' | 'assistant'; at: string | null; text: string; files?: string[] }
 /** aliases: ids the same session had before ids were made from the session itself (from its file's path): marks kept under one
@@ -71,27 +71,26 @@ export function sessionText(s: SessionDetail & { turns: TakenTurn[] }, limit = P
   return { text, turns: kept.length, left, redacted: top.count + cut + kept.reduce((n, b) => n + b.redacted, 0) };
 }
 
+// A field the server sent as text, else null; and its tool, named as the parser names it (an unknown one reads as Claude Code).
+const str = (x: unknown) => (typeof x === 'string' ? x : null), toolOf = (x: unknown): SessionTool => (x === 'codex' ? 'codex' : 'claude');
 /** A sessions.1 listing as sent by the server, checked; anything malformed is left out. */
 export function readSessionList(v: unknown): SessionSummary[] {
-  const list = (v as { version?: unknown; sessions?: unknown })?.version === 'sessions.1' ? (v as { sessions: unknown }).sessions : null;
+  const list = (v as { version?: unknown; sessions?: unknown })?.version === SESSION_VERSION ? (v as { sessions: unknown }).sessions : null;
   if (!Array.isArray(list)) return [];
-  const str = (x: unknown) => (typeof x === 'string' ? x : null);
-  const ID = /^(claude|codex)-[0-9a-f]{24}$/;
-  return list.filter(x => x && typeof x === 'object' && typeof x.id === 'string' && ID.test(x.id) && typeof x.preview === 'string' && typeof x.updatedAt === 'string')
-    .map(x => ({ id: x.id, tool: x.tool === 'codex' ? 'codex' : 'claude', title: str(x.title), preview: x.preview, cwd: str(x.cwd), branch: str(x.branch), startedAt: str(x.startedAt), updatedAt: x.updatedAt, bytes: Number(x.bytes) || 0,
-      ...(Array.isArray(x.aliases) ? { aliases: x.aliases.filter((a: unknown): a is string => typeof a === 'string' && ID.test(a) && a !== x.id) } : {}) }));
+  return list.filter(x => x && typeof x === 'object' && typeof x.id === 'string' && SESSION_ID.test(x.id) && typeof x.preview === 'string' && typeof x.updatedAt === 'string')
+    .map(x => ({ id: x.id, tool: toolOf(x.tool), title: str(x.title), preview: x.preview, cwd: str(x.cwd), branch: str(x.branch), startedAt: str(x.startedAt), updatedAt: x.updatedAt, bytes: Number(x.bytes) || 0,
+      ...(Array.isArray(x.aliases) ? { aliases: x.aliases.filter((a: unknown): a is string => typeof a === 'string' && SESSION_ID.test(a) && a !== x.id) } : {}) }));
 }
 /** One session as sent by the server, checked; null when it is not one. */
 export function readSessionDetail(v: unknown): SessionDetail | null {
   const x = v as Record<string, unknown> | null;
-  if (!x || x.version !== 'sessions.1' || typeof x.id !== 'string' || !Array.isArray(x.turns)) return null;
-  const str = (y: unknown) => (typeof y === 'string' ? y : null);
+  if (!x || x.version !== SESSION_VERSION || typeof x.id !== 'string' || !Array.isArray(x.turns)) return null;
   const turns: SessionTurn[] = [];
   for (const t of x.turns as Record<string, unknown>[]) {
     if (!t || (t.role !== 'user' && t.role !== 'assistant') || typeof t.text !== 'string') return null;
     turns.push({ role: t.role, at: str(t.at), text: t.text, ...(Array.isArray(t.files) ? { files: t.files.filter((f): f is string => typeof f === 'string') } : {}) });
   }
-  return { id: x.id, tool: x.tool === 'codex' ? 'codex' : 'claude', label: str(x.label) ?? '', title: str(x.title), cwd: str(x.cwd),
+  return { id: x.id, tool: toolOf(x.tool), label: str(x.label) ?? '', title: str(x.title), cwd: str(x.cwd),
     ...(Array.isArray(x.cwds) ? { cwds: x.cwds.filter((c: unknown): c is string => typeof c === 'string').slice(0, 200) } : {}), branch: str(x.branch), startedAt: str(x.startedAt), turns, omitted: Number(x.omitted) || 0, ...(Number(x.rest) > 0 ? { rest: Number(x.rest) } : {}) };
 }
 
