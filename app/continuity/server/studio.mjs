@@ -388,11 +388,11 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
         let body = null;
         if (request.method === 'POST') { try { body = JSON.parse(await readRequestText(request, CONNECTOR_BYTES)); } catch (e) { throw inputError(e); } }
         const q = url.searchParams, folders = q.getAll('folder'), projects = q.getAll('project');
-        if (folders.length > 20 || projects.length > 20 || folders.some(f => !f || f.length > 1024) || projects.some(p => !/^[A-Z2-9]{6}$/.test(p))) throw new ApiError('INVALID_INPUT', 400);
+        if (folders.length > 20 || projects.length > 20 || folders.some(f => !f || f.length > 1024) || projects.some(p => !/^[\w.:-]{1,120}$/.test(p))) throw new ApiError('INVALID_INPUT', 400);
         if (what === 'records') {
           if (body) return reply(200, await connector.add(body), cors);
           const after = Number(q.get('after') ?? 0); if (!Number.isSafeInteger(after) || after < 0) throw new ApiError('INVALID_INPUT', 400);
-          return reply(200, connector.since(after, { folders, projects }), cors);
+          return reply(200, connector.since(after, { folders, projects, unplaced: q.get('unplaced') === '1' }), cors);
         }
         if (body) return reply(200, await connector.publish(body), cors);
         return reply(200, connector.handover({ folder: folders[0] ?? null, project: projects[0] ?? null }), cors);

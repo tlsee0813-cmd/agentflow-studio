@@ -24,6 +24,7 @@ import { AUTO_SENDS, createReturnView, type Scene, type ReadingContext } from '.
 import { createAutoSync } from './auto-sync.js';
 import { createSessionSources } from './session-source.js';
 import { createHandoverView } from './handover-view.js';
+import { createCloudLink } from './cloud-link.js';
 import { partSessions, originLabel, handoverDoc, handoverCode } from '../shared/handover.js';
 import { UI62_KEY, buildUi62Project, ui62Keys } from '../shared/return-material.js';
 import { REL_LABEL, relationGroups, dirMark, dirTitle, insideEnds } from '../shared/relation-groups.js';
@@ -1953,7 +1954,7 @@ const mapRun = createMapRun({
 let jobReservations: JobReservations | null = null;
 
 /* ---------- automatic connection to a working folder's Claude Code / Codex sessions (auto-sync.ts) ---------- */
-const handover = createHandoverView({ current: () => opened, requests: () => opened ? frozenRequests(opened.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : [])) : [] });
+const handover = createHandoverView({ current: () => opened, cloud: () => cloudLink, requests: () => opened ? frozenRequests(opened.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : [])) : [] });
 const utf8 = (t: string) => new TextEncoder().encode(t).length;
 /** Why these records cannot be added to the project (a project keeps at most PASTED_LIMIT of them and FILE_LIMIT bytes in all), or
  * null. With none, whether even a small one still fits. */
@@ -1964,27 +1965,8 @@ function recordRoom(p: Project, texts: string[]): string | null {
   const adds = texts.length ? texts.reduce((n, t) => n + utf8(JSON.stringify(t)) + 120, 0) : 4096;
   return utf8(serializeProject(p)) + adds > FILE_LIMIT ? `이 프로젝트에 담을 수 있는 기록의 양(${FILE_LIMIT / 1e6}MB)이 다 찼어요.${more}` : null;
 }
-/** The AgentFlow connector (an MCP server an AI session runs beside it, connector/agentflow-mcp.mjs) through the local server: the
- * records sessions leave come in with the automatic connection, and the open project's handover document is left for a session
- * that asks for it, made again only when the project changed (one code per project while this page is open). */
-const handoverLeft = new Map<string, { revision: number; folders: string; code: string }>();
-const connectorHost = {
-  records: (after: number, folders: string[]) => connectorRecords(sessionCode(), after, folders),
-  publish: async (key: string, folders: string[]) => {
-    const o = opened; if (!o || o.kind !== 'saved' || o.key !== key || !folders.length) return;
-    const was = handoverLeft.get(key), joined = folders.join('\n');
-    if (was && was.revision === o.project.revision && was.folders === joined) return;
-    const code = was?.code ?? handoverCode();
-    let text: string; try { text = handoverDoc(o.project, { scope: null, code, at: new Date().toISOString(), requests: frozenRequests(o.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : [])) }).text; } catch { return; }
-    await publishHandover(sessionCode(), { key, code, name: o.project.name, folders, text });
-    handoverLeft.set(key, { revision: o.project.revision, folders: joined, code });
-  }
-};
-const autoSync = createAutoSync({
-  current: () => opened,
-  sources: sessionSources,
-  kv,
-  save: async (key, texts) => {
+/** Keeps texts (one session's, or a web AI session's through the connector) as pasted records of the entry open now. */
+async function saveRecords(key: string, texts: string[]): Promise<{ error: string; refused: boolean } | null> {
     // Only the entry the sessions were looked at for: after a switch nothing is written to the project open now.
     const o = opened; if (!o || o.kind !== 'saved' || o.key !== key) return { error: '다른 프로젝트가 열려 있어 저장하지 않았어요.', refused: false };
     const full = recordRoom(o.project, texts); if (full) return { error: full, refused: false };
@@ -1995,7 +1977,40 @@ const autoSync = createAutoSync({
     if (!failed) { renderMapEntry(); refreshUnderstood(); if (!planView.isOpen()) { if (!selected) returnView.render(); else refreshSessions(); } return null; }
     // Nothing more is tried until the person asks: said so, and for a full browser storage, why.
     return { error: saveFailure === 'QUOTA' ? '이 브라우저의 저장 공간이 가득 차서 세션 기록을 저장하지 못했어요. 자동으로 다시 하지 않아요.' : `${failed} 자동으로 다시 하지 않아요.`, refused: false };
-  },
+  }
+/** The AgentFlow connector (an MCP server an AI session runs beside it, connector/agentflow-mcp.mjs) through the local server: the
+ * records sessions leave come in with the automatic connection, and the open project's handover document is left for a session
+ * that asks for it, made again only when the project changed (one code per project while this page is open). */
+const handoverLeft = new Map<string, { revision: number; folders: string; code: string }>();
+/** The whole project's handover document with this code, with the change requests made for it. */
+function handoverFor(p: Project, code: string): string | null {
+  try { return handoverDoc(p, { scope: null, code, at: new Date().toISOString(), requests: frozenRequests(p, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : [])) }).text; } catch { return null; }
+}
+/** The web AI connector of this site, when it has one (cloud-link.ts): records of web chats come in for a linked project. */
+const cloudCodes = new Map<string, string>();
+const cloudLink = createCloudLink({
+  current: () => opened, kv,
+  save: async (key, texts) => { const no = await saveRecords(key, texts); return no ? { error: no.error } : null; },
+  handover: () => { const o = opened; if (!o) return null; const code = cloudCodes.get(o.key) ?? handoverCode(); cloudCodes.set(o.key, code); return handoverFor(o.project, code); },
+  changed: () => { if (handover.isOpen()) handover.refresh(); }
+});
+const connectorHost = {
+  records: (after: number, folders: string[], project: string) => connectorRecords(sessionCode(), after, folders, project),
+  publish: async (key: string, folders: string[]) => {
+    const o = opened; if (!o || o.kind !== 'saved' || o.key !== key || !folders.length) return;
+    const was = handoverLeft.get(key), joined = folders.join('\n');
+    if (was && was.revision === o.project.revision && was.folders === joined) return;
+    const code = was?.code ?? handoverCode();
+    const text = handoverFor(o.project, code); if (!text) return;
+    await publishHandover(sessionCode(), { key, code, name: o.project.name, folders, text });
+    handoverLeft.set(key, { revision: o.project.revision, folders: joined, code });
+  }
+};
+const autoSync = createAutoSync({
+  current: () => opened,
+  sources: sessionSources,
+  kv,
+  save: saveRecords,
   full: () => { const o = opened; return o && o.kind === 'saved' ? recordRoom(o.project, []) : null; },
   canRead: () => { const inp = mapRun.input(), st = mapRun.state(); return !!inp && !inp.problem && mapRun.can() && !st.pending && !st.ready && !st.committing; },
   read: () => void mapRun.run(),
@@ -2597,7 +2612,7 @@ async function main() {
   $('plan-entry').addEventListener('click', () => planView.toggle());
   $('handover-open').addEventListener('click', e => handover.open(scope, e.currentTarget as HTMLElement));
   $('return-entry').addEventListener('click', () => { if (returnView.isOpen() && !planView.isOpen()) returnView.close(); else openReturn(); });
-  statusReady = aiStatus().then(s => { status = s; renderStatus(); renderRelease(); planView.statusChanged(); refreshReading(); statusArrived(); if (!selected && !planView.isOpen()) returnView.render(); mapRun.resume(); autoSync.opened(); autoSync.start();
+  statusReady = aiStatus().then(s => { status = s; renderStatus(); renderRelease(); planView.statusChanged(); refreshReading(); statusArrived(); if (!selected && !planView.isOpen()) returnView.render(); mapRun.resume(); autoSync.opened(); autoSync.start(); cloudLink.start();
     void sessionSources.load().then(() => { autoSync.sourcesChanged(); statusArrived(); if (opened && autoSync.bindingOf(opened.key)) void autoSync.tick(); if (!selected && !planView.isOpen()) returnView.render(); }); });
   $('sync-pill').addEventListener('click', () => autoSync.toggle());
   // AF100: a reservation another tab of this address made (or ended) is looked at now, not at this page's next click.

@@ -52,7 +52,9 @@ claude mcp add agentflow -- node "<저장소>/app/continuity/connector/agentflow
 
 Codex는 `~/.codex/config.toml`에 `[mcp_servers.agentflow]`(`command = "node"`, `args = ["<저장소>/app/continuity/connector/agentflow-mcp.mjs"]`)를 둡니다. 다른 포트면 `AGENTFLOW_URL`, 작업 폴더를 정하려면 `AGENTFLOW_FOLDER`, 접속 코드를 걸었다면 `AGENTFLOW_ACCESS_CODE`를 줍니다.
 Studio는 받은 기록(최근 14일, 500개)과 프로젝트별 최신 인수인계를 `continuity/.studio-data/connector-<port>/`에 두고(`STUDIO_CONNECTOR_DIR`, `STUDIO_CONNECTOR=off`), 비밀값처럼 보이는 곳은 쓰기 전에 가립니다. 같은 origin만 받으며 Worker·정적 빌드에는 없습니다.
-Claude Code·Codex에서 자동 읽기와 기록 도구를 함께 쓰면 같은 요청이 원문과 AI 요약으로 두 번 들어갈 수 있습니다. 설계와 웹 claude.ai용 원격 커넥터 계획은 [커넥터 설계](../../docs/CONNECTOR_KO.md)에 있습니다.
+Claude Code·Codex에서 자동 읽기와 기록 도구를 함께 쓰면 같은 요청이 원문과 AI 요약으로 두 번 들어갈 수 있습니다. 설계는 [커넥터 설계](../../docs/CONNECTOR_KO.md)에 있습니다.
+
+**웹 AI 커넥터(claude.ai)**: Cloudflare 배포판은 GitHub 로그인으로 쓰는 원격 MCP 서버(`/mcp`, `server/cloud-connector.mjs`)를 함께 올릴 수 있습니다. 인수인계 창에서 GitHub로 로그인하고 프로젝트를 이은 뒤, 나온 주소를 claude.ai의 사용자 지정 커넥터에 넣습니다. 웹 대화가 남긴 기록은 그 프로젝트가 열려 있을 때 1분 안에 들어옵니다. PC Studio에서도 받으려면 `<사이트>/auth/pc`에서 만든 키를 `app/.env`에 `AGENTFLOW_CLOUD_URL`·`AGENTFLOW_CLOUD_KEY`로 둡니다.
 
 ## 인수인계 문서
 
@@ -153,7 +155,7 @@ node --env-file=/private/cloudflare.env --env-file=/private/studio.env continuit
 ```
 
 - `cloudflare.env`: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`. Workers 편집 권한을 사용할 계정 하나에 한정합니다.
-- `studio.env`: `DEEPSEEK_API_KEY`, `STUDIO_ACCESS_CODE`, 선택 `DEEPSEEK_MODEL`.
+- `studio.env`: `DEEPSEEK_API_KEY`, `STUDIO_ACCESS_CODE`, 선택 `DEEPSEEK_MODEL`. 웹 AI 커넥터를 켜려면 GitHub OAuth 앱의 `GITHUB_CLIENT_ID`·`GITHUB_CLIENT_SECRET`(선택 `ALLOWED_GITHUB_LOGINS`)도 둡니다. 그러면 KV 네임스페이스 `agentflow-connector`를 찾거나 만들어 묶습니다(API 토큰에 Workers KV Storage: Edit 필요).
   AI 이용 코드는 사용자만 보관합니다. 공개 AI 배포에서는 빈 코드를 허용하지 않습니다.
 - 기본 Worker 이름은 `agentflow-studio`이며 `CLOUDFLARE_WORKER_NAME`으로 바꿀 수 있습니다.
   계정의 `workers.dev` 하위 도메인이 먼저 설정되어 있어야 합니다.

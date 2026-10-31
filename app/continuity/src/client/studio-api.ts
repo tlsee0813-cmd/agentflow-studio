@@ -134,7 +134,7 @@ export async function readSession(id: string, accessCode: string, since: string 
 }
 
 /** A record an AI session left through the AgentFlow connector, as the local server keeps it (its text made there). */
-export interface ConnectorRecord { seq: number; at: string; folder: string | null; text: string }
+export interface ConnectorRecord { seq: number; at: string; folder: string | null; project: string | null; text: string }
 async function connectorCall(path: string, accessCode: string, body: unknown = null): Promise<unknown> {
   if (RUNTIME.apiBase === null) throw new AskError('NO_SERVER');
   const headers: Record<string, string> = { 'X-AgentFlow-Request': '1', ...(body ? { 'Content-Type': 'application/json' } : {}) };
@@ -147,12 +147,12 @@ async function connectorCall(path: string, accessCode: string, body: unknown = n
   return data;
 }
 /** Connector records after `after` (the last one taken) made in these folders (or inside one); last: the newest record's number. */
-export async function connectorRecords(accessCode: string, after: number, folders: string[]): Promise<{ records: ConnectorRecord[]; last: number; more: boolean }> {
-  const q = [`after=${after}`, ...folders.map(f => `folder=${encodeURIComponent(f)}`)].join('&');
+export async function connectorRecords(accessCode: string, after: number, folders: string[], project: string | null = null): Promise<{ records: ConnectorRecord[]; last: number; more: boolean }> {
+  const q = [`after=${after}`, ...folders.map(f => `folder=${encodeURIComponent(f)}`), ...(project ? [`project=${encodeURIComponent(project)}`, 'unplaced=1'] : [])].join('&');
   const d = await connectorCall(`/api/studio/connector/records?${q}`, accessCode) as { records?: unknown; last?: unknown; more?: unknown } | null;
   if (!d || !Array.isArray(d.records) || !Number.isSafeInteger(d.last)) throw new AskError('INVALID_RESPONSE');
   const records = d.records.filter((r): r is ConnectorRecord => !!r && typeof r.seq === 'number' && typeof r.at === 'string' && typeof r.text === 'string' && r.text.length > 0)
-    .map(r => ({ seq: r.seq, at: r.at, folder: typeof r.folder === 'string' ? r.folder : null, text: r.text }));
+    .map(r => ({ seq: r.seq, at: r.at, folder: typeof r.folder === 'string' ? r.folder : null, project: typeof r.project === 'string' ? r.project : null, text: r.text }));
   return { records, last: d.last as number, more: d.more === true };
 }
 /** Leaves the open project's handover document for the connector to hand a new session (it replaces the one left before). */

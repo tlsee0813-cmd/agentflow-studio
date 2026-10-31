@@ -27,6 +27,11 @@ if (policy && !name && !dry) throw new Error(`Name the Worker of the ${policy} r
 if (name !== null && !/^[a-z][a-z0-9-]{2,62}$/.test(name)) throw new Error('Invalid Worker name.');
 const account = process.env.CLOUDFLARE_ACCOUNT_ID, token = process.env.CLOUDFLARE_API_TOKEN;
 const secretNames = ['DEEPSEEK_API_KEY', 'STUDIO_ACCESS_CODE'];
+// The web AI connector (server/cloud-connector.mjs) goes along when its GitHub OAuth app is given: a KV namespace of its own
+// (made once, found by name after that), the app's id and secret, and an optional allow-list of GitHub logins (empty: everyone).
+const connector = !!(process.env.GITHUB_CLIENT_ID?.trim() && process.env.GITHUB_CLIENT_SECRET?.trim());
+const CONNECTOR_KV_TITLE = process.env.CONNECTOR_KV_TITLE || 'agentflow-connector';
+const CLOUD_PATHS = ['/mcp', '/.well-known/*', '/oauth/*', '/auth/*'];
 if (!dry) {
   if (!/^[a-f0-9]{32}$/i.test(account || '') || !token) throw new Error('Cloudflare account ID and API token required.');
   for (const key of secretNames) if (!process.env[key]?.trim()) throw new Error(`${key} required for public AI deployment.`);
@@ -41,7 +46,7 @@ const assetDir = join(app, 'continuity/static-dist');
 await writeFile(join(assetDir, 'BUILD.txt'), `AgentFlow Studio\nsource=${sha}\nhost=Cloudflare Workers\n${policy ? `release=${policy}\n` : ''}`);
 const files = async dir => (await Promise.all((await readdir(dir, { withFileTypes: true })).map(e => e.isDirectory() ? files(join(dir, e.name)) : [join(dir, e.name)]))).flat();
 const mime = f => f.endsWith('.html') ? 'text/html; charset=utf-8' : f.endsWith('.css') ? 'text/css; charset=utf-8' : f.endsWith('.js') ? 'application/javascript; charset=utf-8' : 'text/plain; charset=utf-8';
-const secrets = [...secretNames, 'CLOUDFLARE_API_TOKEN'].map(k => process.env[k]).filter(Boolean);
+const secrets = [...secretNames, 'CLOUDFLARE_API_TOKEN', 'GITHUB_CLIENT_SECRET'].map(k => process.env[k]).filter(Boolean);
 const assertNoSecret = (bytes, label) => { for (const value of secrets) if (bytes.includes(Buffer.from(value))) throw new Error(`Secret found in ${label}; stopped before upload.`); };
 const manifest = {}, assets = new Map(), assetList = [];
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -80,7 +85,8 @@ const release = { version: 'agentflow.release-manifest.1', source: sha, appTree,
   api: { base: 'same-origin', connectSrc: "'self'", paths: '/api/*' }, storagePrefix: prefix,
   assets: { count: assetList.length, bytes: assetList.reduce((n, x) => n + x.bytes, 0), sha256: closure(assetList), files: assetList },
   modules: { count: moduleList.length, bytes: moduleList.reduce((n, x) => n + x.bytes, 0), sha256: closure(moduleList), files: moduleList },
-  bindings: ['ASSETS', ...secretNames, 'AI_MODE', 'DEEPSEEK_MODEL'] };
+  bindings: ['ASSETS', ...secretNames, 'AI_MODE', 'DEEPSEEK_MODEL', ...(connector ? ['CONNECTOR_KV', 'GITHUB_CLIENT_ID', 'GITHUB_CLIENT_SECRET', ...(process.env.ALLOWED_GITHUB_LOGINS ? ['ALLOWED_GITHUB_LOGINS'] : [])] : [])],
+  connector: connector ? { kv: CONNECTOR_KV_TITLE, workerFirst: CLOUD_PATHS } : null };
 if (manifestOut) await mkdir(dirname(resolve(process.cwd(), manifestOut)), { recursive: true }), await writeFile(resolve(process.cwd(), manifestOut), `${JSON.stringify(release, null, 2)}\n`);
 console.log(JSON.stringify({ phase: 'prepared', source: sha, worker: name, policy, assets: assets.size, modules: modules.size, bytes: [...assets.values()].reduce((n, x) => n + x.bytes.length, 0), dryRun: dry }));
 console.log(JSON.stringify({ phase: 'manifest', ...release }));
@@ -107,13 +113,22 @@ for (const bucket of session.buckets) {
   if (uploaded?.jwt) completion = uploaded.jwt;
 }
 if (!completion) throw new Error('Cloudflare asset upload did not return a completion token.');
-const bindings = [{ name: 'ASSETS', type: 'assets' }, ...secretNames.map(name => ({ name, type: 'secret_text', text: process.env[name] })),
+/** The connector's KV namespace id: the one named CONNECTOR_KV_TITLE, made when there is none. */
+async function connectorNamespace() {
+  const kvBase = `https://api.cloudflare.com/client/v4/accounts/${account}/storage/kv/namespaces`;
+  const call = async (url, init = {}) => { const res = await fetch(url, { redirect: 'error', signal: AbortSignal.timeout(60000), ...init, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } }); const r = await res.json().catch(() => null); if (!res.ok || !r?.success) throw new Error(`Cloudflare KV HTTP ${res.status}; error codes ${(r?.errors || []).map(e => e.code).join(',')} (the API token needs Workers KV Storage: Edit)`); return r.result; };
+  for (let page = 1; page < 20; page++) { const list = await call(`${kvBase}?per_page=100&page=${page}`); const hit = list.find(n => n.title === CONNECTOR_KV_TITLE); if (hit) return hit.id; if (list.length < 100) break; }
+  return (await call(kvBase, { method: 'POST', body: JSON.stringify({ title: CONNECTOR_KV_TITLE }) })).id;
+}
+const connectorBindings = connector ? [{ name: 'CONNECTOR_KV', type: 'kv_namespace', namespace_id: await connectorNamespace() }, { name: 'GITHUB_CLIENT_ID', type: 'plain_text', text: process.env.GITHUB_CLIENT_ID.trim() },
+  { name: 'GITHUB_CLIENT_SECRET', type: 'secret_text', text: process.env.GITHUB_CLIENT_SECRET.trim() }, ...(process.env.ALLOWED_GITHUB_LOGINS ? [{ name: 'ALLOWED_GITHUB_LOGINS', type: 'plain_text', text: process.env.ALLOWED_GITHUB_LOGINS }] : [])] : [];
+const bindings = [{ name: 'ASSETS', type: 'assets' }, ...connectorBindings, ...secretNames.map(name => ({ name, type: 'secret_text', text: process.env[name] })),
   { name: 'AI_MODE', type: 'plain_text', text: 'deepseek' }, { name: 'DEEPSEEK_MODEL', type: 'plain_text', text: process.env.DEEPSEEK_MODEL || 'deepseek-flash' }];
 const metadata = { main_module: main, compatibility_date: '2026-10-24', bindings,
-  assets: { jwt: completion, config: { run_worker_first: ['/api/*'], html_handling: 'auto-trailing-slash', not_found_handling: '404-page' } },
+  assets: { jwt: completion, config: { run_worker_first: ['/api/*', ...(connector ? CLOUD_PATHS : [])], html_handling: 'auto-trailing-slash', not_found_handling: '404-page' } },
   annotations: { 'workers/message': `AgentFlow Studio ${sha}${policy ? ` ${policy}` : ''}`, 'workers/tag': sha.slice(0, 12) } };
 const form = new FormData(); form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
 for (const [path, bytes] of modules) form.append(path, new Blob([bytes], { type: 'application/javascript+module' }), path);
 const uploaded = await api(`/scripts/${name}`, { method: 'PUT', body: form });
 await api(`/scripts/${name}/subdomain`, { method: 'POST', body: { enabled: true, previews_enabled: false } });
-console.log(JSON.stringify({ phase: 'deployed', source: sha, version: uploaded.version_id ?? uploaded.id, url: `https://${name}.${sub.subdomain}.workers.dev` }));
+console.log(JSON.stringify({ phase: 'deployed', source: sha, version: uploaded.version_id ?? uploaded.id, url: `https://${name}.${sub.subdomain}.workers.dev`, connector: connector ? `https://${name}.${sub.subdomain}.workers.dev/mcp` : 'off (no GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET)' }));

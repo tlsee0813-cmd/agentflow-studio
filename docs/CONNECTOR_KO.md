@@ -10,7 +10,7 @@
 | --- | --- | --- | --- |
 | **자동 읽기** | 이 PC에서 Claude Code·Codex를 쓰는 사람 (기본) | Studio가 이 PC의 세션 파일을 읽는다. 설치할 것 없음 | 있음 |
 | **AgentFlow 커넥터** | 같은 사람인데, 새 세션이 인수인계를 **스스로** 받고 일을 마치면 **스스로** 기록하게 하고 싶을 때 | AI 도구에 MCP 서버를 하나 추가 (명령 한 줄) | **이번 PR (로컬)** |
-| **웹 AI 커넥터** | claude.ai 웹·모바일, Claude 데스크톱 채팅에서 일하는 사람 | claude.ai 설정의 사용자 지정 커넥터에 주소 하나 추가 | 설계만. 공개 배포는 확인 후 |
+| **웹 AI 커넥터** | claude.ai 웹·모바일, Claude 데스크톱 채팅에서 일하는 사람 | 사이트에서 GitHub로 로그인해 프로젝트를 잇고, claude.ai 사용자 지정 커넥터에 주소 하나 추가 | **구현 (PR #103)**. Cloudflare Worker |
 
 hooks(도구를 부르지 않아도 자동으로 남기는 방법)는 따로 고르는 칸으로 두지 않고, 다음 단계에서 **AgentFlow 커넥터 설치에 함께 묶는다**(아래 "다음 단계"). 사용자 입장에서는 "커넥터를 켰다" 하나로 보이게 한다.
 
@@ -39,7 +39,7 @@ hooks(도구를 부르지 않아도 자동으로 남기는 방법)는 따로 고
 
 **추천**: 기록은 빠지지 않는 쪽(자동 읽기)을 기본으로 두고, 커넥터는 ① 인수인계를 받아 가는 통로, ② 세션 파일이 없는 곳(웹)의 기록 통로로 쓴다. Claude Code에서 자동 읽기와 커넥터 기록을 둘 다 켜면 같은 요청이 두 번(원문 한 번, AI 요약 한 번) 들어갈 수 있다. 지금은 그대로 두고, 다음 단계에서 "자동 읽기 중인 폴더의 Claude Code·Codex 커넥터 기록은 원문 기록에 붙여 보고로만 쓴다" 같은 규칙으로 정리한다.
 
-## 이번 PR: 로컬 AgentFlow 커넥터
+## 로컬 AgentFlow 커넥터 (PR #101)
 
 ```
 AI 세션 (Claude Code·Codex)
@@ -82,23 +82,44 @@ args = ["<저장소>/app/continuity/connector/agentflow-mcp.mjs"]
 - 테스트 `continuity/tests/connector143.test.mjs`: 기록 머리줄·비밀값·폴더 범위·재시작 유지, 입력 검사, 인수인계 교체, 라우트 경계, 실제 stdio로 initialize→도구 목록→기록→인수인계, Studio가 꺼졌거나 거절할 때의 안내.
 - 아직 안 한 것: leek PC(Windows)의 실제 Claude Code·Codex 앱에서 확인.
 
-## 웹 AI 커넥터 (claude.ai용) 설계
+## 웹 AI 커넥터 (claude.ai용)
 
-공개 배포는 leek 확인 뒤에 한다. 결정이 필요한 것은 아래 "정할 것".
+leek 결정(2026-10-31): 정식 로그인(OAuth), 서버는 Cloudflare, **누구나 GitHub로 가입**하고 데이터는 사용자별로 나눈다(허용 목록은 설정으로만).
 
-- **서버**: 이미 있는 Cloudflare Worker에 `/mcp`(Streamable HTTP)를 더한다. 도구는 로컬과 같은 두 개.
-- **저장**: 프로젝트는 계속 브라우저에 둔다. Worker에는 **받은 기록함**만 둔다(사용자별, Durable Object 또는 KV). Studio 탭(공개 주소든 로컬이든)이 열리면 받아 가고, 받아 간 기록은 지운다. 14일이 지나면 지운다.
-- **인수인계 받기**: 웹 AI가 인수인계를 받으려면 브라우저가 그 문서를 Worker에 올려 둬야 한다. 즉 **프로젝트 요약이 클라우드에 저장된다.** 그래서 이것은 프로젝트마다 켜는 선택으로 둔다.
-- **인증과 비밀값**:
-  - 최소안: Studio가 사용자마다 긴 무작위 **연결 주소**(`https://…/mcp/<비밀값>`)를 만들어 주고, 사용자는 그 주소를 claude.ai 커넥터에 붙인다. 쉽지만 주소가 새면 누구나 기록을 넣을 수 있으므로, Studio에서 언제든 폐기·재발급할 수 있게 한다.
-  - 정석: OAuth 2.1(claude.ai는 동적 클라이언트 등록을 지원). 공개 디렉터리에 올리거나 여러 사람이 쓰면 이쪽.
-  - Worker의 서명 키 같은 비밀값은 지금 DeepSeek 키처럼 `secret_text` 바인딩에만 넣고, 화면 번들·응답·로그에는 넣지 않는다. 받은 기록은 저장 전에 가린다.
-- **로컬 Studio와 잇기**: 로컬 Studio도 같은 받은 기록함을 가져올 수 있게 하면, 웹에서 한 일이 PC 지도에도 들어온다(브라우저가 Worker에 연결 주소의 비밀값을 들고 요청).
+```
+claude.ai (웹·데스크톱·모바일) / Claude Code
+  └─ 원격 MCP (Streamable HTTP) ─ https://<사이트>/mcp            ← AI 공개판 Worker에 함께 올라감
+        └─ OAuth 2.1: /.well-known/*, /oauth/register(DCR), /oauth/authorize(동의 화면 → GitHub 로그인), /oauth/token(PKCE, 갱신 토큰 교체)
+Studio 사이트 (같은 주소)
+  └─ 인수인계 창: GitHub로 로그인 → "이 프로젝트를 웹 AI 커넥터에 잇기" → 커넥터 주소 복사
+  └─ 이은 프로젝트가 열려 있으면 1분마다: 웹 AI 기록 가져오기(가져간 것은 지움), 바뀐 인수인계 올리기
+PC Studio (선택)
+  └─ <사이트>/auth/pc 에서 만든 PC 연결 키를 app/.env에 두면, 웹 기록이 PC 프로젝트로도 들어오고 PC의 인수인계가 올라감
+```
 
-### 정할 것 (leek)
+- **서버**: `server/cloud-connector.mjs`(node: 없음). 기존 `worker.mjs`가 커넥터 경로를 먼저 받고 나머지는 Studio API와 화면으로 넘긴다. KV 바인딩과 GitHub 앱 키가 없으면 꺼진다.
+- **로그인**: GitHub OAuth 앱으로 계정 이름과 번호만 받는다(저장소 권한 없음, GitHub 토큰은 한 번 쓰고 버림). claude.ai가 요구하는 대로 401 + `resource_metadata`, DCR, S256 PKCE, `offline_access`, form 방식 토큰 요청, 갱신 토큰 교체, Claude Code의 loopback(포트 무관)을 지원한다. 돌아갈 주소는 Claude 콜백·loopback·운영자가 더한 것만 받는다. 허용 전에 앱 이름과 돌아갈 주소를 보여 주는 동의 화면이 있다.
+- **도구**: 로컬과 같은 `agentflow_handover`, `agentflow_record`. 폴더 대신 `project`(프로젝트 이름)를 받는다. 이은 프로젝트가 하나면 생략 가능, 여러 개면 이름을 물어본다. 아직 이은 프로젝트가 없을 때 남긴 기록은 다음에 잇는 프로젝트로 들어간다.
+- **클라우드에 두는 것** (Cloudflare KV `agentflow-connector`, 모두 GitHub 사용자 번호별):
+  - 아직 가져가지 않은 웹 AI 기록 (사용자당 500개, 30일 뒤 지움, 가져가면 바로 지움)
+  - 이은 프로젝트마다 최신 인수인계 문서 하나 (사용자당 40개, 30일 안 열면 지움)
+  - 로그인 상태: 토큰의 해시만(토큰 자체는 저장 안 함). 접근 1시간, 갱신 30일, 사이트 로그인 30일, PC 연결 키(새로 만들면 이전 것 폐기)
+  - 비밀값처럼 보이는 곳은 저장 전에 가린다. 프로젝트 자체(지도·전체 기록)는 지금처럼 브라우저에만 있다.
+- **비밀값**: `GITHUB_CLIENT_SECRET`은 Worker의 `secret_text` 바인딩에만 넣고 화면 번들·응답·로그에는 넣지 않는다(배포 스크립트가 올리기 전에 검사). 남용이 걱정되면 `ALLOWED_GITHUB_LOGINS`로 막을 수 있지만 기본은 전체 허용.
 
-1. 웹 커넥터 인증: 연결 주소(빠름) / OAuth(정석)
-2. 인수인계를 클라우드에 올리는 것을 허용할지(프로젝트마다 켜기)
+### 배포 (PC에서)
+
+GitHub OAuth 앱(콜백 `https://agentflow-studio.tlsee0813.workers.dev/oauth/github/callback`)의 `GITHUB_CLIENT_ID`·`GITHUB_CLIENT_SECRET`을 키 파일에 두고 기존 배포 명령을 그대로 쓴다. 두 값이 있으면 배포 스크립트가 KV 네임스페이스를 찾거나 만들고(API 토큰에 Workers KV Storage: Edit 권한 필요) 커넥터를 켠다. 배포 결과 줄에 커넥터 주소가 나온다.
+
+```sh
+node --env-file=<cloudflare.env> --env-file=.env continuity/scripts/deploy-cloudflare.mjs
+```
+
+### 써 보기
+
+1. 사이트에서 프로젝트를 열고 **인수인계 문서** → **GitHub로 로그인** → **이 프로젝트를 웹 AI 커넥터에 잇기** → **주소 복사**
+2. claude.ai › 설정 › 커넥터 › **사용자 지정 커넥터 추가**에 주소를 넣고 GitHub로 로그인
+3. 웹 대화에서 "AgentFlow 인수인계 받아 줘", 일을 마치면 "AgentFlow에 기록해 줘"
 
 ## 다음 단계
 
@@ -108,7 +129,7 @@ args = ["<저장소>/app/continuity/connector/agentflow-mcp.mjs"]
    - Codex도 같은 hooks가 있어 같은 방식으로 붙는다.
 2. **중복 정리**: 자동 읽기 중인 폴더의 Claude Code·Codex 커넥터 기록은 원문 기록과 합친다.
 3. **설정 화면**: 자동 연결 패널에 "연결 방법" 세 가지(자동 읽기 / AgentFlow 커넥터 / 웹 AI 커넥터)를 보여 주고, 커넥터는 복사할 설치 명령을 띄운다.
-4. **웹 AI 커넥터**: 위 "정할 것"이 정해지면 Worker에 구현하고, 확인 뒤 배포.
+4. **웹 AI 커넥터 다듬기**: 이은 프로젝트의 기록이 들어오면 자동 지도 갱신, 사이트 첫 화면에서도 로그인·잇기, 대화창 안 지도 카드(MCP Apps).
 5. **더 붙일 것** (유사 도구 조사, `docs/research/integration-landscape-2026-10-31.md` 7절): 기록 도구의 보고를 요청 id와 함께 `agentflow.return.2` 후보로 받아 사용자가 확인한 뒤 반영하기, 부분·관계만 돌려주는 지도 조회 도구, 대화창 안에 지도 카드를 띄우는 MCP Apps, Claude 데스크톱용 MCPB 패키지와 MCP Registry 등록.
 
 ## 참고
