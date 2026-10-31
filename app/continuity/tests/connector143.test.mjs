@@ -46,7 +46,7 @@ test('CONN-2 what a client sends is checked; the header cannot be shaped by it',
   assert.equal(toolOfClient('claude-code'), 'claude'); assert.equal(toolOfClient('codex-mcp-client'), 'codex'); assert.equal(toolOfClient('claude-ai'), 'web'); assert.equal(toolOfClient(undefined), 'web');
   const ok = { folder: ROOT, request: 'r', answer: 'a' };
   assert.doesNotThrow(() => readRecordInput(ok));
-  for (const bad of [null, [], { ...ok, folder: 'relative/path' }, { request: 'r', answer: 'a' }, { ...ok, request: '  ' }, { ...ok, answer: 3 }, { ...ok, files: 'x' }, { ...ok, project: 'abc' }])
+  for (const bad of [null, [], { ...ok, folder: 'relative/path' }, { request: 'r', answer: 'a' }, { ...ok, request: '  ' }, { ...ok, answer: 3 }, { ...ok, files: 'x' }, { ...ok, project: 'a b' }])
     assert.throws(() => readRecordInput(bad), e => e.code === 'INVALID_INPUT', JSON.stringify(bad));
   assert.throws(() => readRecordInput({ ...ok, answer: 'x'.repeat(CONNECTOR_LIMITS.answer + 1) }), e => e.code === 'INPUT_TOO_LARGE');
   // A title with a line break or a fake header stays one header line.

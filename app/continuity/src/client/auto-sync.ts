@@ -71,7 +71,7 @@ export interface AutoSyncHost {
 /** What the automatic connection does with the connector: takes the records AI sessions left for the project's folders, and leaves
  * the project's handover document for a session that asks for it (the host makes it, and only when the project changed). */
 export interface ConnectorHost {
-  records(after: number, folders: string[]): Promise<{ records: { seq: number; at: string; folder: string | null; text: string }[]; last: number; more: boolean }>;
+  records(after: number, folders: string[], project: string): Promise<{ records: { seq: number; at: string; folder: string | null; project: string | null; text: string }[]; last: number; more: boolean }>;
   publish(key: string, folders: string[]): Promise<void>;
 }
 
@@ -224,8 +224,9 @@ export function createAutoSync(host: AutoSyncHost) {
         try {
           for (let page = 0; page < 4; page++) {
             const cur = stored(key); if (!cur?.folders.length || open()?.key !== key) break;
-            const got = await cx.records(cur.connector ?? 0, cur.folders.map(f => f.path));
-            const texts = got.records.filter(r => cur.folders.some(f => within([r.folder], f.path) && r.at >= f.since)).map(r => foldRecord(r.text));
+            // Made in one of its folders since it was linked, or (a web AI session through the cloud) named for this project, or for none yet.
+            const got = await cx.records(cur.connector ?? 0, cur.folders.map(f => f.path), key);
+            const texts = got.records.filter(r => r.folder ? cur.folders.some(f => within([r.folder], f.path) && r.at >= f.since) : !r.project || r.project === key).map(r => foldRecord(r.text));
             const upTo = got.more ? Math.max(cur.connector ?? 0, ...got.records.map(r => r.seq)) : got.last;
             if (texts.length) {
               if (open()?.key !== key) return;

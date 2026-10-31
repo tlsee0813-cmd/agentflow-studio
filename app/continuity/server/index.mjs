@@ -5,6 +5,7 @@ import { createStudioHandler, studioConfigProblems } from './studio.mjs';
 import { openMapJobs } from './map-jobs.mjs';
 import { openSessions } from './sessions.mjs';
 import { openConnector } from './connector.mjs';
+import { cloudPull } from './cloud-pull.mjs';
 
 // A start that cannot go ahead says why in one line and exits non-zero; it never prints a stack, a setting's value or the key.
 function stop(reason) { console.error(`AgentFlow Studio did not start: ${reason}`); process.exit(1); }
@@ -25,7 +26,11 @@ const sessions=openSessions({env});
 // The AgentFlow connector's mailbox (records an AI session leaves through the MCP connector, the page's latest handover for it):
 // STUDIO_CONNECTOR_DIR, else app/continuity/.studio-data/connector-<port>; STUDIO_CONNECTOR=off turns it off.
 const connectorDir=env.STUDIO_CONNECTOR==='off'?null:env.STUDIO_CONNECTOR_DIR||(config.port?fileURLToPath(new URL(`../.studio-data/connector-${config.port}`,import.meta.url)):null);
-const connector=connectorDir?await openConnector({dir:connectorDir}):null;
+// Linked to the web AI connector (AGENTFLOW_CLOUD_URL / AGENTFLOW_CLOUD_KEY): web sessions' records come down, handovers go up.
+let pull=null;
+const connector=connectorDir?await openConnector({dir:connectorDir,onPublish:h=>pull?.push(h)}):null;
+pull=cloudPull({env,connector,log:m=>console.log(m)});
+pull?.start();
 // A reply the server set aside (cut at its length, unfinished, or refused by the checks) is kept on this PC only when asked:
 // STUDIO_KEEP_REFUSED=on keeps it under app/continuity/.studio-data/refused-<port>, or a folder named there. Each file holds the
 // request this page sent (its records as already masked), how the reply ended and its text with key-like strings hidden; never
@@ -46,7 +51,7 @@ server.once('error',async e=>{
 });
 server.listen(config.port,config.host,function(){
   const j=jobs?.describe();
-  console.log(`AgentFlow Studio: http://127.0.0.1:${this.address().port}  ·  AI ${env.AI_MODE!=='mock'&&env.DEEPSEEK_API_KEY?'DeepSeek (server key)':'off (no DEEPSEEK_API_KEY or --mock)'}  ·  map jobs ${!j?'off':j.durable?'kept on this PC':`not available (${j.problem})`}  ·  sessions ${sessions?'readable from this PC':'off'}  ·  connector ${connector?'on':'off'}`);
+  console.log(`AgentFlow Studio: http://127.0.0.1:${this.address().port}  ·  AI ${env.AI_MODE!=='mock'&&env.DEEPSEEK_API_KEY?'DeepSeek (server key)':'off (no DEEPSEEK_API_KEY or --mock)'}  ·  map jobs ${!j?'off':j.durable?'kept on this PC':`not available (${j.problem})`}  ·  sessions ${sessions?'readable from this PC':'off'}  ·  connector ${connector?(pull?`on, linked to ${pull.base}`:'on'):'off'}`);
 });
 // Ctrl+C or a service stop: no new connections, then the job store is closed in order before the process lets go of it. A call
 // still running is called off; the next start records it as interrupted, as after any restart.
