@@ -21,7 +21,19 @@ const dir=env.STUDIO_JOBS==='off'?null:env.STUDIO_JOBS_DIR||(config.port?fileURL
 const jobs=dir?await openMapJobs({dir,log:m=>console.log(m)}):null;
 // Local session records (Claude Code / Codex on this PC), read only on request; STUDIO_SESSIONS=off turns them off.
 const sessions=openSessions({env});
-const studio=createStudioHandler({env,jobs,sessions});
+// A reply the server set aside (cut at its length, unfinished, or refused by the checks) is kept on this PC only when asked:
+// STUDIO_KEEP_REFUSED=on keeps it under app/continuity/.studio-data/refused-<port>, or a folder named there. Each file holds the
+// request this page sent (its records as already masked), how the reply ended and its text with key-like strings hidden; never
+// the key. It is for seeing why a reading did not land, and nothing reads it back.
+const keep=env.STUDIO_KEEP_REFUSED&&env.STUDIO_KEEP_REFUSED!=='off'?(env.STUDIO_KEEP_REFUSED==='on'?(config.port?fileURLToPath(new URL(`../.studio-data/refused-${config.port}`,import.meta.url)):null):env.STUDIO_KEEP_REFUSED):null;
+const refused=keep?async(what,ask)=>{
+  const {mkdir,writeFile}=await import('node:fs/promises'),{join}=await import('node:path');
+  await mkdir(keep,{recursive:true});
+  const at=new Date().toISOString(),name=`${at.replace(/[:.]/g,'-')}-${what.error.code}.json`;
+  await writeFile(join(keep,name),JSON.stringify({at,...what,ask},null,1));
+  console.log(`AgentFlow Studio: a reply that was set aside (${what.error.code}${what.error.detail?` ${what.error.detail.path}`:''}) is kept in ${join(keep,name)}`);
+}:null;
+const studio=createStudioHandler({env,jobs,sessions,refused});
 const server=createContinuityApp({config,studio});
 server.once('error',async e=>{
   await jobs?.close();

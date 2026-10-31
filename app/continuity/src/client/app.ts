@@ -1953,7 +1953,7 @@ const mapRun = createMapRun({
 let jobReservations: JobReservations | null = null;
 
 /* ---------- automatic connection to a working folder's Claude Code / Codex sessions (auto-sync.ts) ---------- */
-const handover = createHandoverView({ current: () => opened });
+const handover = createHandoverView({ current: () => opened, requests: () => opened ? frozenRequests(opened.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : [])) : [] });
 const utf8 = (t: string) => new TextEncoder().encode(t).length;
 /** Why these records cannot be added to the project (a project keeps at most PASTED_LIMIT of them and FILE_LIMIT bytes in all), or
  * null. With none, whether even a small one still fits. */

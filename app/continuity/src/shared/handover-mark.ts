@@ -10,7 +10,7 @@ const RECEIVED = `\\[AgentFlow 인수인계 문서를 받아 이어감 · ${HAND
 const received = (code: string, area: string | undefined, title: string | undefined) => `[AgentFlow 인수인계 문서를 받아 이어감 · ${HANDOVER_TAG}:${code}${area ? `:${area}` : ''}${title ? ` · ${title.replace(/[\]\n]/g, ' ')}` : ''}]`;
 
 /** The headings of a document's sections, as handover.ts writes them (a part's own heading is ### or deeper). */
-export const HANDOVER_SECTIONS = ['## 이어받는 방법', '## 프로젝트 한눈에', '## 작업 장소와 세션', '## 부분별 현재 상태', '## 이 범위의 현재 상태', '## 아직 정하지 않은 것', '## 최근 흐름'];
+export const HANDOVER_SECTIONS = ['## 이어받는 방법', '## 프로젝트 한눈에', '## 작업 장소와 세션', '## 부분별 현재 상태', '## 이 범위의 현재 상태', '## 아직 정하지 않은 것', '## 맡긴 변경 요청', '## 최근 흐름'];
 /** The other lines a document starts a paragraph with (after a blank line, or under a heading). */
 const OPENERS = ['이 문서는 AgentFlow Studio가', '아직 지도에 부분이 없어요', '최근에 바뀐 파일: ', '그 밖의 부분 ', '(지도는 ', '(문서가 길어서 '];
 /** Where a document whose end line was not copied ends: after its last line of a document's shape. Each of its lines is a heading,

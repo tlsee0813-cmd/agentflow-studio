@@ -26,7 +26,7 @@ export interface Reservation {
 }
 export type JobState = 'accepted' | 'running' | 'ready' | 'failed' | 'cancelled' | 'interrupted';
 export interface JobResult { model: string; prompt: string; askHash: string; wire: unknown; evidence: { index: string; ask: string }; reading: { id: string; at: string } }
-export interface JobView { id: string; state: JobState; acked: 'applied' | 'discarded' | 'seen' | null; binding: MapJobBinding | null; bindingHash: string | null; error: { code: string } | null; remote: string | null; input?: unknown; result?: JobResult }
+export interface JobView { id: string; state: JobState; acked: 'applied' | 'discarded' | 'seen' | null; binding: MapJobBinding | null; bindingHash: string | null; error: { code: string; detail?: { path?: unknown; rule?: unknown; target?: unknown } } | null; remote: string | null; input?: unknown; result?: JobResult }
 const BINDING_KEYS: (keyof MapJobBinding)[] = ['entryId', 'projectId', 'lifecycle', 'seq', 'after', 'schemaVersion', 'prompt', 'model', 'askHash', 'inputHash'];
 /** The server's answer is about this very job: its id, and the binding it keeps (whole, and by the hash it was accepted under).
  * A pre-acceptance cancel has no binding: only that end is accepted without one. */

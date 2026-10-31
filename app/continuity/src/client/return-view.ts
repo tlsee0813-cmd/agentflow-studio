@@ -660,10 +660,11 @@ export function createReturnView(host: ReturnHost) {
     const recs = [...(state.input?.sources.values() ?? [])].filter(x => x.kind === 'record'), kept = host.current()?.project.pasted.length ?? 0;
     const cut = recs.filter(x => (x.sent ?? 0) < x.text.length).length, left = Math.max(0, kept - recs.length);
     const range = [cut ? `기록 ${cut}개는 앞부분만` : '', left ? `붙여넣은 기록 ${left}개는 이번에 안 보냄` : ''].filter(Boolean).join(' · ');
-    const label = recs.length ? '붙인 기록 요약' : state.previous ? '지금 자료로 정리하기' : 'AI로 정리하기';
-    const gated = status.access === 'code' && can, go = codeGate(h('button', { type: 'button', class: host.mapPrimary() ? 'secondary small' : 'primary small', title: recs.length ? '붙인 기록을 따로 요약해 읽어요. 지도는 바꾸지 않아요.' : '', onclick: () => void analyze() }, label), gated, !!host.accessCode(), !can);
+    // Each of these asks the AI at once: the label says so, as the map's own button does.
+    const label = recs.length ? '붙인 기록 AI로 요약' : state.previous ? '지금 자료로 AI 정리' : 'AI로 정리하기';
+    const gated = status.access === 'code' && can, go = codeGate(h('button', { type: 'button', class: host.mapPrimary() ? 'secondary small' : 'primary small', title: recs.length ? '붙인 기록을 AI가 따로 요약해 읽어요. 지도는 바꾸지 않아요.' : '', onclick: () => void analyze() }, label), gated, !!host.accessCode(), !can);
     out.append(h('div', { class: 'pp-row' }, go, codeNote(gated, !!host.accessCode()),
-      h('span', { class: 'fine' }, can ? `자료 ${sent < total ? `${total}개 중 ${sent}개` : `${sent}개`}를 보내요${range ? ` · ${range}` : ''}` : status.ai === 'off' ? '서버에 AI 키가 없어요 · 원자료로 읽어요' : status.ai === 'none' ? '이 주소에는 AI 서버가 없어요 · 원자료로 읽어요' : ''),
+      h('span', { class: 'fine' }, can ? `AI에 자료 ${sent < total ? `${total}개 중 ${sent}개` : `${sent}개`}를 보내요${range ? ` · ${range}` : ''}` : status.ai === 'off' ? '서버에 AI 키가 없어요 · 원자료로 읽어요' : status.ai === 'none' ? '이 주소에는 AI 서버가 없어요 · 원자료로 읽어요' : ''),
       state.view.kind === 'reading' ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { state.view = { kind: 'material' }; render(); } }, '원자료') : null));
     return out;
   }

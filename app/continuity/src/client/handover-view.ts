@@ -4,18 +4,20 @@
  * range makes the document again with the same code, so one opening is one handover however it is narrowed. Nothing is stored:
  * the code inside the document is how a session that starts from it is known later (it comes back in that session's records). */
 import type { Project } from '../shared/types.js';
+import type { FrozenRequest } from '../shared/request-return.js';
 import { studioView } from '../shared/studio.js';
 import { handoverDoc, handoverCode, WEB_RECORD_ASK, type Handover } from '../shared/handover.js';
 import { h } from './plan-dom.js';
 
-export interface HandoverHost { current(): { key: string; kind: string; project: Project } | null }
+/** requests: the change requests made for the open project (with the plan's), named in the document with what came back. */
+export interface HandoverHost { current(): { key: string; kind: string; project: Project } | null; requests?(): FrozenRequest[] }
 
 export function createHandoverView(host: HandoverHost) {
   let dialog: HTMLDialogElement | null = null, from: HTMLElement | null = null;
   let state: { key: string; scope: string | null; code: string; at: string; text: string; trimmed: number; msg: string | null } | null = null;
 
   function make(project: Project, scope: string | null, code: string, at: string): Handover | null {
-    try { return handoverDoc(project, { scope, code, at }); } catch { return null; }
+    try { return handoverDoc(project, { scope, code, at, requests: host.requests?.() ?? [] }); } catch { return null; }
   }
   function render() {
     const o = host.current(); if (!dialog || !state || !o || o.key !== state.key) return;
