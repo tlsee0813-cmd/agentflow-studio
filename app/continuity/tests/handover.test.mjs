@@ -55,7 +55,10 @@ test('HANDOVER-S1 one part: its path in the title, its scope rule, only it and w
   const { p, hours } = mapped();
   const t = handoverText(p, { scope: hours, code: 'ABC234', at: '2026-10-30T05:00:00.000Z' });
   assert.ok(t.startsWith(`──────── AgentFlow 인수인계 문서 · af-handover:ABC234:${hours} ────────\n# 인수인계: 나의 프로젝트 › 영업시간 설정\n`), t.slice(0, 200));
-  assert.ok(t.includes('범위는 "영업시간 설정"'));
+  assert.ok(t.includes('\n- 이 인수인계의 범위는 "영업시간 설정" 부분이에요. 범위 밖 부분을 바꿔야 하면 먼저 사용자에게 확인하세요.\n'), t);
+  // A name that ends in a vowel reads as well: the sentence ends on a fixed word, not on a particle after the name.
+  const pay = D.addArea(D.createProject(), '결제'), u = handoverText(pay, { scope: pay.space.areas[0].id, code: 'ABC234', at: '2026-10-30T05:00:00.000Z' });
+  assert.ok(u.includes('범위는 "결제" 부분이에요.') && !u.includes('"결제"이에요'), u);
   assert.ok(t.includes('### 영업시간 설정') && !t.includes('### 예약 화면'));
   assert.ok(t.includes('- 관련: 예약 화면 (이 부분을 필요로 함 · 휴무일)'), t);
   assert.throws(() => handoverText(p, { scope: 'A_missing', code: 'ABC234', at: '2026-10-30T05:00:00.000Z' }), /HANDOVER_SCOPE/);
