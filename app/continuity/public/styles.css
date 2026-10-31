@@ -1531,12 +1531,10 @@ button:disabled { opacity: .5; cursor: default; }
 .handover-open { height: 32px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text-2); font-size: 13px; font-weight: 600; white-space: nowrap; }
 .handover-open:hover { border-color: var(--line-strong); color: var(--text); background: var(--surface-2); }
 .handover-sheet { box-sizing: border-box; width: min(760px, calc(100vw - 32px)); max-height: calc(100vh - 48px); padding: 0; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); color: var(--text); box-shadow: var(--shadow-lg); }
-.handover-sheet[open] { display: flex; flex-direction: column; }
+.handover-sheet[open] { display: flex; flex-direction: column; animation: pop-in .16s ease; }
 .handover-sheet::backdrop { background: rgba(16,24,40,.32); }
 .handover-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px 8px; }
 .handover-head h2 { margin: 0; font-size: 16px; }
-.handover-head .close { width: 30px; height: 30px; border: 0; border-radius: var(--r-md); background: none; color: var(--text-3); font-size: 20px; line-height: 1; }
-.handover-head .close:hover { background: var(--surface-2); color: var(--text); }
 .handover-lead { margin: 0 18px 10px; color: var(--text-2); font-size: 13px; line-height: 1.6; word-break: keep-all; }
 .handover-scope { display: flex; align-items: center; gap: 8px; margin: 0 18px 10px; font-size: 13px; font-weight: 600; color: var(--text-2); }
 .handover-scope select { min-width: 0; max-width: 100%; height: 32px; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--surface); color: var(--text); font: inherit; font-weight: 500; }

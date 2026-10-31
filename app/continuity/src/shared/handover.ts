@@ -3,9 +3,9 @@
  * carries a marker (af-handover:CODE[:part]) so that a session which starts from it is known as the one that took it over, and the
  * document itself is not taken back in as a new record of work (foldHandover). */
 import { isMapReading, type ClaimKind, type MapReading, type Project } from './types.js';
-import { CLAIM_LABEL, candidateReading } from './map-reading.js';
+import { CLAIM_LABEL, candidateReading, unreadRecords } from './map-reading.js';
 import { studioView, type PartView, type StudioView } from './studio.js';
-import { REL_LABEL } from './relation-groups.js';
+import { relLabel } from './relation-groups.js';
 import { stamp, RECORD_HEAD, HEAD_FIELD } from './session-import.js';
 import { TOOL_NAME, type SessionTool } from './session-parse.js';
 import { HANDOVER_TAG, foldHandover, quoteReceived, receivedHandovers } from './handover-mark.js';
@@ -78,10 +78,12 @@ export interface Handover { text: string; trimmed: number }
  * (session-parse.ts turnChars): past that its end line and the person's own words after it would be cut off. */
 export const HANDOVER_CHARS = 15000;
 const CLAIM_ORDER: ClaimKind[] = ['want', 'idea', 'reported', 'checked', 'describes', 'open', 'differs'];
-const CLAIMS_PER_PART = 10, RECENT_REQUESTS = 6, RECENT_FILES = 24, LINE = 240, NAMES = 600;
+const CLAIMS_PER_PART = 10, RECENT_REQUESTS = 6, FILES_PER_ASK = 8, RECENT_FILES = 24, LINE = 240, NAMES = 600;
 const one = (t: string, n = LINE) => { const s = t.replace(/\s+/g, ' ').trim(); return s.length > n ? `${s.slice(0, n - 1)}…` : s; };
-/** How much of a part is written: in full, or briefly when the whole document would be too long. */
-const FULL = { text: 400, claims: CLAIMS_PER_PART, claim: LINE, rels: 10, sessions: 4 }, BRIEF = { text: 160, claims: 3, claim: 120, rels: 3, sessions: 2 };
+/** How much of a part is written: in full, or briefly when the whole document would be too long (then what is left to ask comes
+ * first: an open choice is what the next session must not decide alone). */
+const FULL = { text: 400, claims: CLAIMS_PER_PART, claim: LINE, rels: 10, sessions: 4, order: CLAIM_ORDER };
+const BRIEF = { text: 160, claims: 3, claim: 120, rels: 3, sessions: 2, order: ['open', 'differs', 'want', 'reported', 'checked', 'idea', 'describes'] as ClaimKind[] };
 
 function subtree(view: StudioView, id: string): PartView[] {
   const out: PartView[] = [], walk = (x: string) => { const part = view.parts.find(q => q.id === x); if (!part) return; out.push(part); part.childIds.forEach(walk); };
@@ -91,37 +93,41 @@ function partBlock(view: StudioView, part: PartView, sessions: PartSession[], to
   const lines = [`${'#'.repeat(Math.min(6, 3 + part.depth - top))} ${part.name}`];
   const u = part.reading;
   const role = u?.role ?? part.summary ?? null;
-  if (role) lines.push(`역할: ${one(role, k.text)}${u?.corrected ? ' (사용자가 고친 설명)' : ''}`);
-  if (part.note) lines.push(`사용자 메모: ${one(part.note, k.text)}`);
-  const claims = (u?.claims ?? []).slice().sort((a, b) => CLAIM_ORDER.indexOf(a.kind) - CLAIM_ORDER.indexOf(b.kind));
+  // Every line a list item: in a Markdown viewer a plain line after a list runs into its last item.
+  if (role) lines.push(`- 역할: ${one(role, k.text)}${u?.corrected ? ' (사용자가 고친 설명)' : ''}`);
+  if (part.note) lines.push(`- 사용자 메모: ${one(part.note, k.text)}`);
+  const claims = (u?.claims ?? []).slice().sort((a, b) => k.order.indexOf(a.kind) - k.order.indexOf(b.kind));
   for (const c of claims.slice(0, k.claims)) lines.push(`- ${CLAIM_LABEL[c.kind]}: ${one(c.text, k.claim)}${c.about ? ` (${one(c.about, 80)})` : ''}`);
-  if (claims.length > k.claims) lines.push(`- (그 밖에 ${claims.length - k.claims}개는 지도에서 볼 수 있어요)`);
+  // The next session cannot see the map: it is told what is left out, not where to look.
+  if (claims.length > k.claims) lines.push(`- (그 밖에 ${claims.length - k.claims}개는 이 문서에 넣지 않았어요)`);
   if (!role && !part.note && !claims.length) lines.push('- 아직 이 부분에 대해 읽힌 내용이 없어요.');
   const rels = view.relations.filter(r => r.from === part.id || r.to === part.id).map(r => {
     const out = r.from === part.id, other = view.parts.find(x => x.id === (out ? r.to : r.from));
-    return other ? `${out ? '→' : '←'} ${other.name} (${REL_LABEL[r.kind] ?? r.kind}${r.note ? ` · ${one(r.note, 80)}` : ''})` : null;
+    // Read from this part, as its panel reads it: '이 부분이 필요로 함' or '이 부분을 필요로 함', never an arrow to decode.
+    return other ? `${other.name} (${relLabel(r.kind, out)}${r.note ? ` · ${one(r.note, 80)}` : ''})` : null;
   }).filter(Boolean);
-  if (rels.length) lines.push(`관련: ${rels.slice(0, k.rels).join(', ')}${rels.length > k.rels ? ` 외 ${rels.length - k.rels}개` : ''}`);
-  if (sessions.length) lines.push(`다룬 세션: ${sessions.slice(0, k.sessions).map(s => `${originLabel(s)}${s.tookOver ? ' (인수인계로 이어받음)' : ''}`).join(', ')}`);
+  if (rels.length) lines.push(`- 관련: ${rels.slice(0, k.rels).join(', ')}${rels.length > k.rels ? ` 외 ${rels.length - k.rels}개` : ''}`);
+  if (sessions.length) lines.push(`- 다룬 세션: ${sessions.slice(0, k.sessions).map(s => `${originLabel(s)}${s.tookOver ? ' (인수인계로 이어받음)' : ''}`).join(', ')}`);
   return lines;
 }
 
-interface Turn { at: string; text: string; files: string[]; origin: SessionOrigin }
+interface Ask { text: string; files: string[] }
 /** The person's requests in session records, oldest first, with the files the tool's next answer reported changing. */
-function sessionTurns(p: Project, only: Set<string> | null): Turn[] {
+function sessionAsks(p: Project, only: Set<string> | null, took: Set<string>): Ask[] {
   // An answer's files belong to the last request of its own session, which may sit in an earlier record (taken before the reply
   // came), never to another session's request; when that request's record is outside the scope, they are not shown.
-  const out: Turn[] = [], asked = new Map<string, Turn | null>();
+  const out: Ask[] = [], asked = new Map<string, Ask | null>();
   for (const rec of p.pasted) {
     const origin = sessionOrigin(rec.text); if (!origin) continue;
-    const key = originKey(origin), shown = !only || only.has(rec.id);
+    const key = originKey(origin), shown = !only || only.has(rec.id) || took.has(key);
     for (const part of rec.text.split(/^── /m).slice(1)) {
       const nl = part.indexOf('\n'), head = part.slice(0, nl), body = part.slice(nl + 1).trim();
-      if (head.startsWith('사용자 요청')) { const t = shown ? { at: `${rec.at}|${out.length}`, text: body, files: [], origin } : null; if (t) out.push(t); asked.set(key, t); continue; }
+      if (head.startsWith('사용자 요청')) { const t = shown ? { text: body, files: [] } : null; if (t) out.push(t); asked.set(key, t); continue; }
       // The list is on the answer's last line (a web AI may put it after a bullet), read to its last ')' so a name like
       // app/(auth)/page.tsx stays whole.
       const f = /\(바꾼 파일: (.+)\)\s*$/.exec(body.slice(body.lastIndexOf('\n') + 1).trim()), last = asked.get(key);
-      if (f && last) last.files.push(...f[1]!.split(', '));
+      // A web AI may write the line with nothing in it ('(바꾼 파일: 없음)'): no file is named so.
+      if (f && last) last.files.push(...f[1]!.split(', ').filter(x => !(origin.tool === 'web' && EMPTY_FIELD.test(x.trim()))));
     }
   }
   return out;
@@ -147,31 +153,38 @@ export function handoverDoc(p: Project, opts: HandoverOptions): Handover {
     '이 문서는 AgentFlow Studio가 지금까지의 작업 기록과 그 기록으로 그린 프로젝트 지도에서 만든 인수인계예요. 이전 세션이 하던 작업을 이 세션이 이어받아요.',
     '',
     '## 이어받는 방법',
-    '- 먼저 아래 내용을 끝까지 읽고, 작업 폴더의 코드와 git 상태를 직접 보고 시작하세요.',
-    '- "작업 보고"와 "확인 보고"는 이전 세션이 그렇게 말했다는 기록일 뿐 검증된 사실이 아니에요. 코드에서 확인한 뒤 믿으세요.',
-    '- "남은 선택"과 "아직 정하지 않은 것"은 혼자 정하지 말고 사용자에게 물어보세요.',
-    '- 이 문서와 코드 어디에도 없는 사실은 추측하지 말고 모른다고 하세요.',
+    // The person usually writes what to do next under the document: that is the task, not something to confirm first.
+    '- 이 문서 앞이나 뒤에 사용자가 할 일을 적었다면 그것이 첫 할 일이에요. 없으면 이해한 현재 상태와 첫 할 일을 짧게 말하고 확인을 받은 뒤 시작하세요.',
+    '- 시작하기 전에 작업 폴더의 코드와 git 상태(브랜치, 커밋하지 않은 변경)를 직접 보세요. 폴더를 볼 수 없는 대화라면 그렇다고 먼저 말하세요.',
+    '- "작업 보고"와 "확인 보고"는 이전 세션이 그렇게 말했다는 기록일 뿐이에요. 코드나 테스트로 확인한 뒤에 사실로 다루세요.',
+    '- "원함"은 사용자가 바란 것이고, "구상"은 아직 하기로 정하지 않은 생각이에요. "다른 근거"는 기록이 사용자의 설명과 다르게 말하는 곳이에요.',
+    '- "남은 선택", "다른 근거"와 "아직 정하지 않은 것"은 혼자 정하지 말고 사용자에게 물어보세요.',
     ...(scoped ? [`- 이 인수인계의 범위는 "${scoped.name}"이에요. 범위 밖 부분을 바꿔야 하면 먼저 사용자에게 확인하세요.`] : []),
-    '- 시작할 때 이해한 현재 상태와 첫 할 일을 짧게 말하고, 사용자의 확인을 받은 뒤 진행하세요.',
+    '- 이 문서와 코드 어디에도 없는 사실은 추측하지 말고 모른다고 하세요.',
     ''
   ];
   const summary = [...maps].reverse().find(r => r.summary)?.summary;
   if (summary) out.push('## 프로젝트 한눈에', one(summary, 1200), '');
-  // Where the work happens: the sessions behind this scope (their folder and branch), newest first.
+  // Where the work happens: the sessions behind this scope (their folder and branch), newest first. No time is written: a record's
+  // is when AgentFlow took it in (a folder's past sessions all at once), not when its session ran.
   const scopeIds = new Set(parts.map(x => x.id)), by = new Map(parts.map(x => [x.id, partSessions(p, x.id)]));
   const sessions = scoped ? dedupe(parts.flatMap(x => by.get(x.id)!)) : partSessions(p, null);
   if (sessions.length) {
     out.push('## 작업 장소와 세션');
-    for (const s of sessions.slice(0, 8)) out.push(one(`- ${originLabel(s)}${s.cwd ? ` · 작업 폴더 ${s.cwd}` : ''}${s.branch ? ` · 브랜치 ${s.branch}` : ''} · 마지막 기록 ${stamp(s.lastAt, true)}${s.tookOver ? ' · 인수인계로 이어받은 세션' : ''}`, 320));
+    for (const s of sessions.slice(0, 8)) out.push(one(`- ${originLabel(s)}${s.cwd ? ` · 작업 폴더 ${s.cwd}` : ''}${s.branch ? ` · 브랜치 ${s.branch}` : ''}${s.tookOver ? ' · 인수인계로 이어받은 세션' : ''}`, 320));
     out.push('');
   }
   out.push(scoped ? '## 이 범위의 현재 상태' : '## 부분별 현재 상태');
-  if (!parts.length) out.push('아직 지도에 부분이 없어요. 아래 최근 흐름과 사용자의 설명에서 시작하세요.');
+  // The parts are what the last reading saw: records it has not read (often the newest work) are not in them, and the document says so.
+  const unread = latest && parts.length ? unreadRecords(p, view).length : 0;
+  if (unread) out.push(`(지도는 ${stamp(latest!.at, true)}에 읽은 기록까지예요. 아직 지도에 담기지 않은 기록이 ${unread}개 있어서, 아래 최근 흐름이 더 새로울 수 있어요.)`, '');
+  if (!parts.length) out.push('아직 지도에 부분이 없어요. 아래 최근 흐름과 사용자의 설명에서 시작하세요.', '');
   const after: string[] = [];
   // What is undecided: candidates the readings left open and what the latest reading could not tell, for this scope.
   const open: string[] = [];
   for (const r of maps) for (const c of r.candidates) {
-    if (scoped && !c.areaIds.some(a => scopeIds.has(a))) continue;
+    // A candidate on a part since put away is not asked about, as the map leaves it out.
+    if (scoped && !c.areaIds.some(a => scopeIds.has(a)) || c.areaIds.some(a => !view.parts.some(x => x.id === a))) continue;
     const read = candidateReading(c), names = c.areaIds.map(a => view.parts.find(x => x.id === a)?.name).filter(Boolean);
     open.push(`- ${read.label ? `${read.label}: ` : ''}${one(read.statement?.text ?? c.text)}${names.length ? ` (${one(names.join(', '), 80)})` : ''}`);
   }
@@ -180,12 +193,14 @@ export function handoverDoc(p: Project, opts: HandoverOptions): Handover {
   // The latest requests the person made in the sessions, with the files changed answering them. A request that started from an
   // earlier handover names it in words, so this document quoting it is not read as that takeover when it is pasted in turn.
   const only = scoped ? new Set(maps.flatMap(r => r.parts.filter(x => scopeIds.has(x.areaId)).flatMap(x => [...x.basis.map(q => q.record), ...x.claims.map(c => c.record)]))) : null;
-  const turns = sessionTurns(p, only).slice(-RECENT_REQUESTS);
-  if (turns.length) {
+  // A session that started from a handover of this scope counts with all its records: its work is the newest here, read or not.
+  const asks = sessionAsks(p, only, new Set(sessions.filter(s => s.tookOver).map(s => s.key))).slice(-RECENT_REQUESTS);
+  if (asks.length) {
     after.push('## 최근 흐름 (사용자가 세션에서 한 요청, 오래된 것부터)');
-    for (const t of turns) after.push(`- ${one(quoteReceived(t.text), 300)}${t.files.length ? ` → 바꾼 파일: ${one([...new Set(t.files)].slice(0, 8).join(', '), 300)}` : ''}`);
-    const files = [...new Set(turns.flatMap(t => t.files))].slice(-RECENT_FILES);
-    if (files.length) after.push('', `최근에 바뀐 파일: ${one(files.join(', '), NAMES)}`);
+    for (const t of asks) after.push(`- ${one(quoteReceived(t.text), 300)}${t.files.length ? ` → 바꾼 파일: ${one([...new Set(t.files)].slice(0, FILES_PER_ASK).join(', '), 300)}` : ''}`);
+    const files = [...new Set(asks.flatMap(t => t.files))].slice(-RECENT_FILES);
+    // Written when it says more than the lines above: the files of several requests, or more than one request's line names.
+    if (asks.filter(t => t.files.length).length > 1 || files.length > FILES_PER_ASK) after.push('', `최근에 바뀐 파일: ${one(files.join(', '), NAMES)}`);
     after.push('');
   }
   after.push(`──────── 인수인계 문서 끝 · ${tag} ────────`);
@@ -204,7 +219,7 @@ export function handoverDoc(p: Project, opts: HandoverOptions): Handover {
   }
   const left = parts.slice(shown.length), trimmed = left.length + shown.filter((b, i) => b.join('\n') !== full[i]!.join('\n')).length;
   const names = left.length ? [[one(`그 밖의 부분 ${left.length}개 (이름만): ${left.map(x => x.name).join(', ')}`, NAMES)]] : [];
-  return { text: compose([...shown, ...names], trimmed ? [`(문서가 길어서 부분 ${trimmed}개는 줄여 적었어요. 빠진 내용은 AgentFlow 지도에 있어요.)`, ''] : []), trimmed };
+  return { text: compose([...shown, ...names], trimmed ? [`(문서가 길어서 부분 ${trimmed}개는 줄여 적었어요. 어느 부분을 더 알아야 하면, 그 부분만 담은 인수인계 문서를 사용자에게 따로 부탁하세요.)`, ''] : []), trimmed };
 }
 function pathOf(view: StudioView, id: string): PartView[] {
   const out: PartView[] = []; for (let x = view.parts.find(q => q.id === id), g = 0; x && g < 64; x = x.parentId ? view.parts.find(q => q.id === x!.parentId) : undefined, g++) out.unshift(x);
@@ -221,7 +236,7 @@ const dedupeLines = (l: string[]) => [...new Set(l)];
 /** What to paste into a session that keeps no file on this PC (a web chat): it asks that session to write its own record in the
  * shape a session import has, so pasting its answer back gives a record that reads (and is attributed) like an imported one. */
 export const WEB_RECORD_ASK = [
-  '[AgentFlow 기록 요청] 이 대화에서 지금까지 내가 한 요청과 네가 한 작업을 아래 형식 그대로 적어 줘. 요약하지 말고 내가 쓴 요청은 원문 그대로 옮기고, 네 답변은 실제로 한 일·바꾼 파일·확인한 것·남은 일을 중심으로 적어 줘. 키·토큰·비밀번호는 [가려진 비밀값]으로 바꿔 줘. 형식 밖의 말은 쓰지 마.',
+  '[AgentFlow 기록 요청] 이 대화에서 지금까지 내가 한 요청과 네가 한 작업을 아래 형식 그대로 적어 줘. 내 요청은 요약하지 말고 원문 그대로 옮기고, 네 답변은 실제로 한 일·바꾼 파일·확인한 것·남은 일만 적어 줘. 이 기록 요청은 넣지 마. 내 요청에 AgentFlow 인수인계 문서가 들어 있었다면 문서 본문은 옮기지 말고 af-handover가 적힌 첫 줄과 끝 줄만 그대로 적어 줘. 바꾼 파일이 없으면 (바꾼 파일: …) 줄은 빼 줘. 키·토큰·비밀번호는 [가려진 비밀값]으로 바꿔 줘. 형식 밖의 말은 쓰지 마.',
   '',
   '[웹 AI 세션 기록 · (이 대화의 짧은 제목) · 작업 폴더 (있으면 경로, 없으면 이 칸을 빼) · 브랜치 (있으면 이름, 없으면 이 칸을 빼)]',
   '',
