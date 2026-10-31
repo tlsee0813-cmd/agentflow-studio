@@ -524,6 +524,19 @@ test('SESSIONS-X4 Codex patches name their files in any form: raw Windows paths,
   assert.deepEqual(files({ type: 'custom_tool_call', name: 'exec', call_id: 'c', input: `await apply_patch(\`${patch('src/y.ts')}\`)` }), []);
 });
 
+test('SESSIONS-X5 a Codex patch the person declined, or that failed, changed nothing; one that went through, or says nothing of how it went, did', () => {
+  const call = (m, id, f) => ({ timestamp: at(m), type: 'response_item', payload: { type: 'custom_tool_call', name: 'apply_patch', call_id: id, input: `*** Begin Patch\n*** Update File: ${f}\n@@\n-a\n+b\n*** End Patch` } });
+  // Older rollouts say how it went in a patch_apply_end event (early ones with success only), paginated ones in a FileChange item.
+  const end = (m, id, success, status) => ({ timestamp: at(m), type: 'event_msg', payload: { type: 'patch_apply_end', call_id: id, stdout: '', stderr: '', success, ...(status ? { status } : {}) } });
+  const item = (m, id, status) => ({ timestamp: at(m), type: 'event_msg', payload: { type: 'item_completed', item: { type: 'FileChange', id, status, changes: { 'config/prod.json': { type: 'update' } } } } });
+  const files = rows => { const s = parseCodex([desktopMeta('t'), { timestamp: at(0), type: 'event_msg', payload: { type: 'user_message', message: '운영 설정 파일도 같이 고쳐 줘' } }, ...rows,
+    { timestamp: at(9), type: 'event_msg', payload: { type: 'agent_message', message: '말씀대로 운영 설정은 건드리지 않았어요.' } }]); return [s.turns[1].files, s.changes.flatMap(c => c.files)]; };
+  for (const outcome of [end(2, 'p2', false, 'declined'), end(2, 'p2', false, 'failed'), end(2, 'p2', false), item(2, 'p2', 'declined'), item(2, 'p2', 'failed')])
+    assert.deepEqual(files([call(1, 'p2', 'config/prod.json'), outcome]), [[], []], JSON.stringify(outcome.payload));
+  assert.deepEqual(files([call(1, 'p1', 'src/a.ts'), end(2, 'p1', true, 'completed'), call(3, 'p2', 'config/prod.json'), end(4, 'p2', false, 'declined'), call(5, 'p3', 'src/b.ts')]), [['src/a.ts', 'src/b.ts'], ['src/a.ts', 'src/b.ts']]);
+  assert.deepEqual(files([call(1, 'p2', 'config/prod.json'), item(2, 'p2', 'completed')])[0], ['config/prod.json']);
+});
+
 test('SESSIONS-C3 Claude Code subagents: the files they changed join the reply they worked for (not their words), in the file or beside it', async () => {
   const side = { isSidechain: true }, task = (m, id) => ca(m, [{ type: 'tool_use', id, name: 'Task', input: { prompt: '고쳐' } }]);
   const done = (m, id, extra = {}) => cu(m, [{ type: 'tool_result', tool_use_id: id, content: 'TOOL OUTPUT SHOULD NOT APPEAR' }], extra);

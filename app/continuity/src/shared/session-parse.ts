@@ -236,14 +236,15 @@ export function parseCodex(lines: unknown[]): ParsedSession {
   const p = codexParser(); for (const o of lines) p.push(o); return p.done();
 }
 /** One prompt of a Codex file (null before the first) and what came after it: reply pieces from either stream, files changed. */
-interface Stretch { user: SessionTurn | null; item: boolean; event: boolean; pieces: { from: 'item' | 'event' | 'file'; text: string; at: string | null; files: string[] }[] }
+interface Piece { from: 'item' | 'event' | 'file'; text: string; at: string | null; files: string[] }
+interface Stretch { user: SessionTurn | null; item: boolean; event: boolean; pieces: Piece[] }
 const flat = (t: string) => t.replace(/\s+/g, ' ').trim();
 /** The Codex reading, one line at a time. */
 export function codexParser(): SessionParser {
   const meta = newMeta(), stretches: Stretch[] = [], changes: FileChange[] = [];
-  const piece = (from: Stretch['pieces'][number]['from'], text: string, at: string | null, files: string[] = []) => {
+  const piece = (from: Piece['from'], text: string, at: string | null, files: string[] = []) => {
     if (!stretches.length) stretches.push({ user: null, item: false, event: false, pieces: [] });
-    stretches.at(-1)!.pieces.push({ from, text, at, files });
+    const x = { from, text, at, files }; stretches.at(-1)!.pieces.push(x); return x;
   };
   // The CLI writes a prompt as a response item and as an event, one right after the other: one prompt, in the event's words.
   const prompt = (text: string | null, at: string | null, event: boolean) => {
@@ -255,7 +256,14 @@ export function codexParser(): SessionParser {
     }
     stretches.push({ user: { role: 'user', at, text }, item: !event, event, pieces: [] });
   };
-  const changed = (at: string | null, files: string[]) => { if (!files.length) return; changes.push({ at, files }); piece('file', '', at, files); };
+  const changed = (at: string | null, files: string[]) => { if (!files.length) return null; const change = { at, files }; changes.push(change); return { change, piece: piece('file', '', at, files) }; };
+  // A patch's files are held by its call until Codex says how it went: one the person declined, or that failed, changed nothing.
+  const calls = new Map<string, { change: FileChange; piece: Piece }>();
+  const outcome = (id: unknown, done: boolean) => {
+    const c = typeof id === 'string' ? calls.get(id) : undefined; if (!c) return;
+    calls.delete(id as string); if (done) return;
+    c.piece.files = []; changes.splice(changes.indexOf(c.change), 1);
+  };
   // A fork (and a subagent started with its parent's history) begins with a copy of the conversation it came from, each line
   // stamped when it was copied: none of it is this session's own. The copy ends at the fork's own settings line, or in files from
   // before Codex wrote one at the first pause (a copy is written at once). A paginated subagent names the first line of its own.
@@ -288,14 +296,16 @@ export function codexParser(): SessionParser {
     if (kind === 'event_msg') {
       if (p.type === 'user_message' && typeof p.message === 'string') prompt(typed(p.message), at, true);
       else if (p.type === 'agent_message' && typeof p.message === 'string') piece('event', p.message, at);
-      else if (p.type === 'item_completed' && p.item?.type === 'FileChange') changed(at, changedFiles(p.item));
+      else if (p.type === 'patch_apply_end') outcome(p.call_id, p.success !== false && (!p.status || p.status === 'completed'));
+      else if (p.type === 'item_completed' && p.item?.type === 'FileChange') { outcome(p.item.id, !p.item.status || p.item.status === 'completed'); changed(at, changedFiles(p.item)); }
       return;
     }
     if (kind !== 'response_item') return;
     if (p.type === 'message' && p.role === 'user') prompt(codexUserText(p), at, false);
     else if (p.type === 'message' && p.role === 'assistant') piece('item', textOf(p.content, ['output_text', 'text']), at);
     else if (p.type === 'custom_tool_call' || p.type === 'function_call' || p.type === 'local_shell_call') {
-      const patch = patchText(p); changed(at, patch === null ? [] : patchFiles(patch));
+      const patch = patchText(p), held = changed(at, patch === null ? [] : patchFiles(patch));
+      if (held && typeof p.call_id === 'string') calls.set(p.call_id, held);
     }
   };
   const done = (): ParsedSession => {
