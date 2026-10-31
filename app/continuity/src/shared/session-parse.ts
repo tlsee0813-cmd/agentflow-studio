@@ -173,6 +173,9 @@ export function claudeParser(): SessionParser {
     if (o.type === 'ai-title' && typeof o.aiTitle === 'string') meta.title = o.aiTitle;
     if (o.type === 'summary' && typeof o.summary === 'string' && !meta.title) meta.title = o.summary;
     if (o.type === 'relocated') atFolder(meta, o.relocatedCwd);
+    // A branch (/branch, --fork-session, /fork) starts with a copy of the session it came from, each row naming where it came from:
+    // what that session said is its own, not this one's.
+    if (o.forkedFrom && typeof o.forkedFrom === 'object') return;
     if (o.type !== 'user' && o.type !== 'assistant' && !(o.type === 'attachment' && o.attachment?.type === 'queued_command')) return;
     const at = typeof o.timestamp === 'string' ? o.timestamp : null, content = o.message?.content, blocks: Row[] = Array.isArray(content) ? content.filter(b => b && typeof b === 'object') : [];
     // An edit counts once its result came back without an error: one the person refused, or that failed, changed nothing. A
@@ -253,16 +256,29 @@ export function codexParser(): SessionParser {
     stretches.push({ user: { role: 'user', at, text }, item: !event, event, pieces: [] });
   };
   const changed = (at: string | null, files: string[]) => { if (!files.length) return; changes.push({ at, files }); piece('file', '', at, files); };
+  // A fork (and a subagent started with its parent's history) begins with a copy of the conversation it came from, each line
+  // stamped when it was copied: none of it is this session's own. The copy ends at the fork's own settings line, or in files from
+  // before Codex wrote one at the first pause (a copy is written at once).
+  let copy = false, copiedAt = NaN;
   const push = (raw: Row) => {
     if (!raw || typeof raw !== 'object') return;
     const wrapped = typeof raw.type === 'string' && raw.payload && typeof raw.payload === 'object';
     const kind = wrapped ? raw.type : 'response_item', p: Row = wrapped ? raw.payload : raw, at = typeof raw.timestamp === 'string' ? raw.timestamp : null;
+    if (copy) {
+      const t = at ? Date.parse(at) : NaN;
+      if (kind === 'event_msg' && p.type === 'thread_settings_applied' && p.thread_id === meta.thread) { copy = false; return; }
+      if (Number.isFinite(t) && !(t - copiedAt > 1000)) { copiedAt = t; return; }
+      copy = false;
+    }
     if (kind === 'session_meta' || (!wrapped && typeof raw.id === 'string' && typeof raw.instructions !== 'undefined')) {
+      // The first line of the session the copy came from (it names another thread) says nothing of this one.
+      if (meta.thread && typeof p.id === 'string' && p.id !== meta.thread) { copy = true; copiedAt = at ? Date.parse(at) : NaN; return; }
       atFolder(meta, p.cwd); meta.startedAt = typeof p.timestamp === 'string' ? p.timestamp : meta.startedAt;
       if (typeof p.git?.branch === 'string') meta.branch = p.git.branch;
       if (typeof p.id === 'string' && !meta.thread) meta.thread = p.id;
       const parent = p.parent_thread_id ?? p.source?.subagent?.thread_spawn?.parent_thread_id;
       if (typeof parent === 'string' && parent && !meta.parent) meta.parent = parent;
+      if (typeof p.forked_from_id === 'string' && p.forked_from_id) copy = true;
       return;
     }
     if (at && !meta.startedAt) meta.startedAt = at;

@@ -438,6 +438,35 @@ test('SESSIONS-C4 Claude Code\'s row for a press of Esc is not a request; a prom
   assert.deepEqual(parseClaude([cu(0, '[Request interrupted by user] 이 문구는 어디서 나와?')]).turns.map(t => t.text), ['[Request interrupted by user] 이 문구는 어디서 나와?']);
 });
 
+test('SESSIONS-FK1 a forked Codex thread and a branched Claude Code session give only their own turns, from their own start', () => {
+  // Codex copies the thread forked into the fork's file (its first line too), every line stamped when copied, then the fork's own
+  // settings line; files from before that line end the copy at the first pause.
+  const forkAt = '2026-10-31T10:00:00.005Z', copied = rows => rows.map(r => ({ ...r, timestamp: forkAt }));
+  const parent = [{ type: 'session_meta', payload: { id: 'P', timestamp: at(0), cwd: '/w', git: { branch: 'old-branch' } } },
+    { type: 'event_msg', payload: { type: 'user_message', message: '예약 화면에 휴무일을 회색으로 표시해 줘' } },
+    { type: 'response_item', payload: { type: 'custom_tool_call', name: 'apply_patch', call_id: 'c1', input: '*** Begin Patch\n*** Update File: src/booking/calendar.ts\n*** End Patch' } },
+    { type: 'event_msg', payload: { type: 'agent_message', message: '회색으로 바꿨어요.' } },
+    { type: 'event_msg', payload: { type: 'thread_settings_applied', thread_id: 'P', thread_settings: {} } }];
+  const meta = { timestamp: forkAt, type: 'session_meta', payload: { id: 'F', forked_from_id: 'P', timestamp: forkAt, cwd: '/w', git: { branch: 'try-red' } } };
+  const own = [{ timestamp: '2026-10-31T10:02:00.000Z', type: 'event_msg', payload: { type: 'user_message', message: '휴무일은 빨간색으로 해 볼래' } },
+    { timestamp: '2026-10-31T10:02:30.000Z', type: 'event_msg', payload: { type: 'agent_message', message: '빨간색으로 바꿨어요.' } }];
+  const settings = { timestamp: forkAt, type: 'event_msg', payload: { type: 'thread_settings_applied', thread_id: 'F', thread_settings: {} } };
+  const want = [['user', '휴무일은 빨간색으로 해 볼래'], ['assistant', '빨간색으로 바꿨어요.']];
+  for (const [name, rows] of [['with its settings line', [meta, ...copied(parent), settings, ...own]], ['before it', [meta, ...copied(parent), ...own]],
+    ['before forks were named', [{ ...meta, payload: { ...meta.payload, forked_from_id: undefined } }, ...copied(parent), ...own]]]) {
+    const s = parseCodex(rows);
+    assert.deepEqual(s.turns.map(t => [t.role, t.text]), want, name); assert.deepEqual(s.changes, [], name);
+    assert.deepEqual([s.meta.thread, s.meta.startedAt, s.meta.branch], ['F', forkAt, 'try-red'], name);
+  }
+  // Claude Code: each copied row names where it came from (its time and id kept); the branch's own rows do not.
+  const from = (row, uuid) => ({ ...row, sessionId: 'B', uuid, forkedFrom: { sessionId: 'A', messageUuid: uuid } });
+  const b = parseClaude([from(cu(0, '결제 화면에 현장 결제 안내 문구 넣어 줘'), 'u1'), from(ca(1, [{ type: 'tool_use', id: 't1', name: 'Edit', input: { file_path: '/w/src/pay/notice.tsx', old_string: 'a', new_string: 'b' } }]), 'a1'),
+    from(cu(2, [{ type: 'tool_result', tool_use_id: 't1', content: 'ok' }]), 'r1'), from(ca(3, '안내 문구를 넣었어요.'), 'a2'),
+    cu(20, '문구를 한 줄로 줄여 줘', { sessionId: 'B', uuid: 'u2', parentUuid: 'a2' }), ca(21, '한 줄로 줄였어요.', { sessionId: 'B', uuid: 'a3', parentUuid: 'u2' })]);
+  assert.deepEqual(b.turns.map(t => [t.role, t.text, t.files ?? null]), [['user', '문구를 한 줄로 줄여 줘', null], ['assistant', '한 줄로 줄였어요.', []]]);
+  assert.equal(b.meta.startedAt, at(20)); assert.deepEqual(b.changes, []);
+});
+
 test('SESSIONS-X4 Codex patches name their files in any form: raw Windows paths, JSON arguments, heredocs, string commands', async () => {
   const P = await import('../dist/public/shared/session-parse.js');
   const patch = f => `*** Begin Patch\n*** Update File: ${f}\n@@\n-a\n+b\n*** End Patch\n`, fn = (name, args) => ({ type: 'function_call', name, call_id: 'c', arguments: JSON.stringify(args) });
