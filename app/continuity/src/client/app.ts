@@ -1979,6 +1979,7 @@ const autoSync = createAutoSync({
   full: () => { const o = opened; return o && o.kind === 'saved' ? recordRoom(o.project, []) : null; },
   canRead: () => { const inp = mapRun.input(), st = mapRun.state(); return !!inp && !inp.problem && mapRun.can() && !st.pending && !st.ready && !st.committing; },
   read: () => void mapRun.run(),
+  bound: () => renderMapEntry(),
   readBlocked: () => (status.release === 'existing-map' ? RELEASE_TEXT.limit : mapRun.can() ? null : mapRun.blocked() ?? '지도 정리에 쓸 AI가 이 서버에 연결되어 있지 않아요.')
 });
 /** AF100: while a reading runs as a job, the person is told it goes on without this window but not without the PC's Studio. */
@@ -2060,8 +2061,8 @@ function refreshUnderstood() {
   titleH = o.view.parts.length ? t.offsetHeight : 0;
   if (titleH !== hBefore) { lay.bounds = { ...core }; withTitle(); positionWorld(); }
 }
-/** The server's status came after the open project was drawn: its empty map's entry and the title's line say now what a reading
- * can do (the same mapRun.can/input/blocked as a click; nothing starts or moves). Only the project open now, in place: a focus
+/** The server's status (or the session folders this browser can read) came after the open project was drawn: its empty map's entry
+ * and the title's line say now what a reading can do and whether sessions can be connected (the same mapRun.can/input/blocked as a click; nothing starts or moves). Only the project open now, in place: a focus
  * inside them stays on the same action, and its selection, panes and camera are not touched. */
 function statusArrived() {
   const a = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -2069,6 +2070,9 @@ function statusArrived() {
   renderMapEntry(); refreshUnderstood();
   if (near?.isConnected && a && !a.isConnected) [...near.querySelectorAll<HTMLElement>('button')].find(x => x.textContent === text)?.focus();
 }
+/** On a connected project's empty map, in place of 'saving alone sends nothing': the next automatic map update sends what is saved.
+ * The paste box says the same once it shares one sentence for it. */
+const AUTO_SENDS = '자동 연결되어 있어서, 저장한 기록은 다음 자동 지도 갱신 때 AI에게 보내요.';
 /** An empty saved map: records are the first way in (pasting saves only; reading sends, and says so), adding a part by hand is
  * the other. A project with records already can start from them without pasting again. */
 function renderMapEntry() {
@@ -2091,13 +2095,17 @@ function renderMapEntry() {
   const paste = (primary: boolean) => h('button', { type: 'button', class: primary ? 'primary small' : 'secondary small', onclick: () => openPaste(null) }, '기록 붙여넣기');
   const file = () => h('button', { type: 'button', class: 'secondary small se-file', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요', onclick: () => openFile(null) }, '코드·검사 자료 추가');
   const acts = h('div', { class: 'se-acts' }), waiting = st.committing || st.ready;
+  // Sessions this page can read, in a project not connected yet: the automatic connection is the first way in, pasting the other.
+  const linked = !!autoSync.bindingOf(o.key), offerSync = !linked && sessionSources.offered();
   if (st.pending) put(acts, ...pendingLine('se-durable', '기록을 읽고 지도를 정리하는 중…', 'link-button'));
   else if (waiting) put(acts, ...runReady(st, 'primary small', 'link-button'));
   else if (fresh && can && !inp!.problem) put(acts, h('button', { type: 'button', class: 'primary small se-run', onclick: () => void mapRun.run() }, '기록으로 지도 정리'), paste(false), file());
+  else if (offerSync) put(acts, h('button', { type: 'button', class: 'primary small se-sync', onclick: () => autoSync.toggle() }, '내 AI 세션 자동 연결'), paste(false), file());
   else put(acts, paste(true), file());
-  const note = st.pending || waiting ? null : fresh && can && !inp!.problem ? sendLine(inp!) : fresh && !can ? mapRun.blocked() ?? `기록 ${fresh}개가 있어요. AI 서버가 연결된 주소에서 지도로 정리할 수 있어요.` : fresh && inp!.problem ? '보낼 수 없는 기록이 있어요(너무 크거나 키처럼 보이는 글).' : '붙여 넣어 저장만 해서는 AI에 보내지 않아요. 지도로 정리할 때 보내요.';
+  const note = st.pending || waiting ? null : fresh && can && !inp!.problem ? sendLine(inp!) : fresh && !can ? mapRun.blocked() ?? `기록 ${fresh}개가 있어요. AI 서버가 연결된 주소에서 지도로 정리할 수 있어요.` : fresh && inp!.problem ? '보낼 수 없는 기록이 있어요(너무 크거나 키처럼 보이는 글).' : linked && can ? AUTO_SENDS : '붙여 넣어 저장만 해서는 AI에 보내지 않아요. 지도로 정리할 때 보내요.';
   box.replaceChildren(); put(box, h('h2', {}, '기록으로 첫 지도를 만들어요'),
-    h('p', { class: 'se-lead' }, '작업 AI와 나눈 요구나 보고를 그대로 붙여 넣으면, 원문에 근거가 있는 부분과 연결만 지도로 정리해요. 만들어진 부분의 이름과 위치는 바로 고칠 수 있어요.'),
+    h('p', { class: 'se-lead' }, offerSync ? 'Claude Code·Codex 대화는 자동 연결로 저절로 가져오고, 다른 AI와 나눈 요구나 보고는 그대로 붙여 넣으면 돼요. 원문에 근거가 있는 부분과 연결만 지도로 정리하고, 만들어진 부분의 이름과 위치는 바로 고칠 수 있어요.'
+      : '작업 AI와 나눈 요구나 보고를 그대로 붙여 넣으면, 원문에 근거가 있는 부분과 연결만 지도로 정리해요. 만들어진 부분의 이름과 위치는 바로 고칠 수 있어요.'),
     last && !last.parts.length ? h('p', { class: 'se-gap' }, last.gaps.length ? last.gaps.join(' ') : '앞서 읽은 기록에서는 프로그램의 부분을 찾지 못했어요.') : null,
     acts, note ? h('p', { class: 'fine' }, note) : null,
     st.error ? h('p', { class: 'pp-error', role: 'alert' }, st.error) : null, runNotice(),
@@ -2572,7 +2580,7 @@ async function main() {
   $('handover-open').addEventListener('click', e => handover.open(scope, e.currentTarget as HTMLElement));
   $('return-entry').addEventListener('click', () => { if (returnView.isOpen() && !planView.isOpen()) returnView.close(); else openReturn(); });
   statusReady = aiStatus().then(s => { status = s; renderStatus(); renderRelease(); planView.statusChanged(); refreshReading(); statusArrived(); if (!selected && !planView.isOpen()) returnView.render(); mapRun.resume(); autoSync.opened(); autoSync.start();
-    void sessionSources.load().then(() => { autoSync.sourcesChanged(); if (opened && autoSync.bindingOf(opened.key)) void autoSync.tick(); if (!selected && !planView.isOpen()) returnView.render(); }); });
+    void sessionSources.load().then(() => { autoSync.sourcesChanged(); statusArrived(); if (opened && autoSync.bindingOf(opened.key)) void autoSync.tick(); if (!selected && !planView.isOpen()) returnView.render(); }); });
   $('sync-pill').addEventListener('click', () => autoSync.toggle());
   // AF100: a reservation another tab of this address made (or ended) is looked at now, not at this page's next click.
   window.addEventListener('storage', e => { if (e.key?.endsWith(JOBS_KEY)) void statusReady?.then(() => mapRun.resume()); });

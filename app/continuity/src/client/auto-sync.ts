@@ -51,6 +51,8 @@ export interface AutoSyncHost {
   read(): void;
   /** Why a map reading cannot be made here (no AI for maps, a limited release), or null. */
   readBlocked(): string | null;
+  /** The open project was connected or its connection ended (its empty map offers the connection, or says it is on). */
+  bound?(): void;
 }
 
 const TICK_MS = 60 * 1000;
@@ -235,18 +237,18 @@ export function createAutoSync(host: AutoSyncHost) {
     const b = stored(o.key);
     if (b) { if (!b.folders.some(f => sameFolder(f.path, path))) b.folders.push(link); if (b.folders.length === 1) b.error = null; put_(o.key, b); }
     else put_(o.key, { folders: [link], marks: {}, runs: { day: day(now), n: 0, last: null }, taken: 0, lastCheck: null, error: null });
-    panelOpen = false; adding = false; typed = ''; render(); document.getElementById('sync-pill')?.focus(); void tick(true);
+    panelOpen = false; adding = false; typed = ''; render(); host.bound?.(); document.getElementById('sync-pill')?.focus(); void tick(true);
   }
   /** Leaves one folder (its records stay); the last one leaving ends the connection (the marks stay with the project). */
   function removeFolder(path: string) {
     const o = open(), b = o ? bindingOf(o.key) : null; if (!o || !b) return;
     // What the last look said may have been about this folder: the next look says what is still wrong.
-    b.folders = b.folders.filter(f => f.path !== path); b.error = null; if (!b.folders.length) halted.delete(o.key); put_(o.key, b); render(); if (b.folders.length) void tick();
+    b.folders = b.folders.filter(f => f.path !== path); b.error = null; if (!b.folders.length) halted.delete(o.key); put_(o.key, b); render(); if (b.folders.length) void tick(); else host.bound?.();
   }
   function disconnect() {
     const o = open(), b = o ? stored(o.key) : null; if (!o) return;
     if (b) { b.folders = []; b.error = null; put_(o.key, b); }
-    halted.delete(o.key); adding = false; render();
+    halted.delete(o.key); adding = false; render(); host.bound?.();
   }
 
   /* ---------- the bar's pill and its panel ---------- */

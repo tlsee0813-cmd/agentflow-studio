@@ -3255,7 +3255,7 @@ def folder_sessions_flow(browser, base):
 
 
 def final_client_flow(browser, base):
-    """Picked session folders, one tool only (.claude): the panel says only Claude Code comes in and how to add Codex; a session started from a part's handover document and taken by '지금 확인'
+    """A new project's empty map offers the automatic connection first. Picked session folders, one tool only (.claude): the panel says only Claude Code comes in and how to add Codex; a session started from a part's handover document and taken by '지금 확인'
     shows on that part's summary at once, marked as the handover sheet says, with no reading in between."""
     jl = lambda *rows: "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows)
     when = lambda minutes: time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime(time.time() - minutes * 60))
@@ -3273,13 +3273,28 @@ def final_client_flow(browser, base):
     page.locator("#new-open").click()
     page.locator("#new-name").fill("미용실 예약 앱")
     page.locator("#new-form").get_by_role("button", name="만들기").click()
-    panel, pill = page.locator("#sync-panel"), page.locator("#sync-pill")
-    pill.click()
+    panel, pill, entry = page.locator("#sync-panel"), page.locator("#sync-pill"), page.locator("#space-empty")
+    # A new project offers the automatic connection first on its empty map (pasting stays beside it), and opens the same panel.
+    expect(entry.locator(".se-acts button")).to_have_text(["내 AI 세션 자동 연결", "기록 붙여넣기", "코드·검사 자료 추가"])
+    expect(entry.get_by_role("button", name="내 AI 세션 자동 연결")).to_have_class(re.compile("primary"))
+    expect(entry.locator(".se-lead")).to_contain_text("Claude Code·Codex 대화는 자동 연결로 저절로 가져오고")
+    entry.get_by_role("button", name="내 AI 세션 자동 연결").click()
+    expect(panel.locator("h3")).to_have_text("내 AI 세션 연결")
     panel.get_by_role("button", name="세션 폴더 고르기").click()
     # Only .claude picked: the panel names the one tool it reads, and how to add the other's folder, before and after connecting.
     one = "지금은 Claude Code 대화만 읽어요. Codex도 쓴다면 ‘세션 폴더 더 고르기’로 .codex 폴더도 골라 주세요."
     expect(panel.locator(".sync-lead").first).to_have_text("이 프로젝트를 작업 폴더에 묶으면, 그 폴더의 Claude Code 대화가 저절로 기록으로 들어오고 지도가 갱신돼요.")
     expect(panel.locator(".sync-one-tool")).to_have_text(one)
+    # Connected to a folder with nothing yet: the card no longer offers the connection and says saving sends at the next update.
+    panel.locator(".sync-path").fill("/work/empty")
+    panel.get_by_role("button", name="연결", exact=True).click()
+    expect(pill).to_have_attribute("data-state", "on", timeout=15000)
+    expect(entry.locator(".se-acts button")).to_have_text(["기록 붙여넣기", "코드·검사 자료 추가"])
+    expect(entry.get_by_role("button", name="기록 붙여넣기")).to_have_class(re.compile("primary"))
+    expect(entry.locator(".fine")).to_have_text("자동 연결되어 있어서, 저장한 기록은 다음 자동 지도 갱신 때 AI에게 보내요.")
+    pill.click()
+    panel.get_by_role("button", name="연결 끊기").click()
+    expect(entry.get_by_role("button", name="내 AI 세션 자동 연결")).to_be_visible()
     panel.locator(".sync-folder-pick", has_text="/work/salon").click()
     expect(page.locator("#world .node")).to_have_count(2, timeout=15000)
     pill.click()
