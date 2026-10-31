@@ -61,3 +61,25 @@ test('PCRUN100-3 the whole reply is still refused for its shape, a contradiction
   reply.parts[0].basis = ['N99.01']; reply.relations = []; reply.candidates = []; reply.matches = []; reply.material = [];
   assert.throws(() => M.validateMapReply(reply, ask), e => e.message === 'INVALID_RESPONSE' && e.path.startsWith('parts['));
 });
+
+test('PCRUN100-4 a material range the reply also quotes as evidence is set aside, and a candidate leaving open what a claim says', () => {
+  const { ask, reply, al } = lawful(), whole = M.validateMapReply(structuredClone(reply), ask);
+  // The PC's map reading marked a whole record as material and quoted it 28 times: the marking goes, the quotes stay.
+  reply.material.push({ at: reply.parts[1].claims[0].at, what: '예시' });
+  reply.candidates[0].statement.key = 's1';
+  const got = M.validateMapReply(reply, ask);
+  assert.deepEqual(said(got), [['candidates[0].statement.key', 'settled-and-open', 's1'], ['material[1]', 'material-evidence', al.report]]);
+  assert.deepEqual([got.material.length, got.candidates.length, got.parts[1].claims.length], [whole.material.length, 0, whole.parts[1].claims.length]);
+  // Two claims under one key still refuse the reply whole.
+  const two = lawful(); two.reply.parts[1].claims[1].key = 's1';
+  assert.throws(() => M.validateMapReply(two.reply, two.ask), e => e.rule === 'duplicate-key');
+});
+
+test('PCRUN100-5 the handover says what each matched report said of the request (made, not made, unclear)', async () => {
+  const { handoverText } = await import('../dist/public/shared/handover.js');
+  const c = K.conditionProject(mods), p = parseProject(JSON.stringify(c.project)), inp = M.buildMapAsk(p, studioView(p), [c.rq], c.rq.id, M.MAP7_SCHEMA);
+  const applied = M.applyReading(p, inp, M.validateMapReply(K.replyFor7(inp.ask, inp.records), inp.ask), { id: 'R_pcrun100', at: new Date().toISOString(), model: 'stub', prompt: 'm7-000000000100', hash: 'a'.repeat(64) }).project;
+  const doc = handoverText(applied, { scope: null, code: 'PCR100', at: new Date().toISOString(), requests: [c.rq] });
+  const line = doc.split('\n').find(l => l.startsWith('  - 돌아온 것: '));
+  assert.ok(line.startsWith('  - 돌아온 것: 지도에서 대조함 · ') && line.includes('바꿨다고 함') && line.includes('분명하지 않음') && !line.includes('보고 작업 보고'), line);
+});

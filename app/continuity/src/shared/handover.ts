@@ -9,7 +9,7 @@ import { relLabel } from './relation-groups.js';
 import { stamp, RECORD_HEAD, HEAD_FIELD } from './session-import.js';
 import { TOOL_NAME, RELAYED, type SessionTool } from './session-parse.js';
 import { HANDOVER_TAG, foldHandover, quoteReceived, receivedHandovers } from './handover-mark.js';
-import { MATCH_LABEL, type FrozenRequest } from './request-return.js';
+import { MATCH_LABEL, type FrozenRequest, type MatchStance } from './request-return.js';
 export { HANDOVER_TAG, HANDOVER_SECTIONS, foldHandover, handoverCode, receivedHandovers } from './handover-mark.js';
 
 /* ---------- which session a record came from ---------- */
@@ -251,6 +251,8 @@ function unreadWhere(count: number, inFlow: number, scoped: boolean, cut: boolea
  * report passages a reading matched to it, by kind, and records that name it but no reading has matched yet. In a part's document,
  * those with an item on a part in it. What came back is what was said, not what was checked. */
 const REQUESTS_SHOWN = 5;
+/** What a matched report said of the item it answers, as the handover writes it. */
+const STANCE_SAID: Record<MatchStance, string> = { made: '바꿨다고 함', 'not-made': '미구현', unclear: '분명하지 않음' };
 function requestLines(p: Project, all: FrozenRequest[], scope: Set<string> | null): string[] {
   const asked = [...new Map(all.map(q => [q.id, q])).values()].filter(q => !scope || q.items.some(i => i.partIds.some(x => scope.has(x))))
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
@@ -263,9 +265,13 @@ function requestLines(p: Project, all: FrozenRequest[], scope: Set<string> | nul
     out.push(one(`- ${q.id} · ${stamp(q.createdAt, true)} · ${q.intent}`, 300));
     if (items.length) out.push(`  - 항목: ${one(items.map(i => i.title).join('; '), 290)}`);
     const matched = maps.flatMap(r => r.matches ?? []).filter(m => m.targets.some(t => t.requestId === q.id));
-    const kinds = [...new Set(matched.map(m => m.kind))].map(k => `${MATCH_LABEL[k]} ${matched.filter(m => m.kind === k).length}개`);
+    // Each kind with what it said of the item (made, not made, unclear): the next session reads what came back, not only that it did.
+    const kinds = [...new Set(matched.map(m => m.kind))].map(k => {
+      const of = matched.filter(m => m.kind === k), said = [...new Set(of.map(m => m.stance))].map(s => [STANCE_SAID[s ?? 'unclear'], of.filter(m => m.stance === s).length] as const);
+      return `${MATCH_LABEL[k]} ${of.length}개(${said.length === 1 ? said[0]![0] : said.map(([w, n]) => `${w} ${n}`).join(', ')})`;
+    });
     const named = p.pasted.filter(r => r.text.includes(q.id) && !read.has(r.id)).length;
-    out.push(`  - 돌아온 것: ${[matched.length ? `지도에서 대조한 보고 ${kinds.join(', ')}` : '', named ? `이 요청문을 적은 기록 ${named}개(아직 대조하지 않음)` : ''].filter(Boolean).join(' · ') || '아직 없어요'}`);
+    out.push(`  - 돌아온 것: ${[matched.length ? `지도에서 대조함 · ${kinds.join(', ')}` : '', named ? `이 요청문을 적은 기록 ${named}개(아직 대조하지 않음)` : ''].filter(Boolean).join(' · ') || '아직 없어요'}`);
   }
   out.push('');
   return out;
