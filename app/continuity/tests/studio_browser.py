@@ -3122,7 +3122,7 @@ def folder_sessions_flow(browser, base):
     expect(panel.locator("[role=alert]")).to_have_count(0)
     # A record the connection keeps while the session search is being typed in leaves the search in focus, typing and all.
     page.locator("#sync-pill").click()
-    page.locator("#lens").get_by_role("button", name="내 AI 세션에서 가져오기").click()
+    expect(page.locator("#lens .rr-session", has_text="휴무일 연결")).to_have_count(1)  # still listed from the permission step above
     find = page.locator("#lens .rr-sessions-filter")
     find.click()
     page.keyboard.type("예약")
