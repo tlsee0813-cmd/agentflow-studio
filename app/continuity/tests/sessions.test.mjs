@@ -225,6 +225,79 @@ test('SESSIONS-D2 Codex subagents: their files join the reply to the prompt that
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
+test('SESSIONS-D5 a Codex subagent that holds a prompt (its task, a copy of its parent\'s history) is never a session of its own; only what it changed itself joins its parent', async () => {
+  const { readdirSync } = await import('node:fs'), { basename } = await import('node:path'), { createSessionSources } = await import('../dist/public/client/session-source.js');
+  const file = path => ({ kind: 'file', name: basename(path), getFile: async () => new File([readFileSync(path)], basename(path), { lastModified: statSync(path).mtimeMs }) });
+  const folder = path => ({ kind: 'directory', name: basename(path), queryPermission: async () => 'granted',
+    async *values() { for (const d of readdirSync(path, { withFileTypes: true })) yield d.isDirectory() ? folder(join(path, d.name)) : file(join(path, d.name)); } });
+  const spawned = { parent_thread_id: PARENT, source: { subagent: { thread_spawn: { parent_thread_id: PARENT, depth: 1 } } } };
+  const patch = (m, f) => ({ timestamp: at(m), type: 'response_item', payload: { type: 'custom_tool_call', name: 'apply_patch', call_id: `p${m}`, input: `*** Begin Patch\n*** Add File: ${f}\n+x\n*** End Patch` } });
+  // Multi-agent V1: the task the parent's model wrote comes in as user input.
+  const v1 = [desktopMeta('c-v1', spawned), desktopUser(20, [['user.text', 'src/notify 아래 문자 발송 코드를 정리하고 테스트를 추가하라']]), patch(21, 'src/notify/sms.ts')];
+  // fork_context: the parent's history copied in at the spawn, then the child's own settings line, task and change.
+  const forked = [desktopMeta('c-fork', { ...spawned, forked_from_id: PARENT }), ...desktopParent().map(r => ({ ...r, timestamp: at(22) })),
+    { timestamp: at(22), type: 'event_msg', payload: { type: 'thread_settings_applied', thread_id: 'c-fork', thread_settings: {} } }, desktopUser(23, [['user.text', '테스트만 맡아라']]),
+    fileChange(24, { [`${W}\\tests\\notify.test.ts`]: { type: 'add', content: 'x' } })];
+  // Paginated: the records before subagent_history_start_ordinal are its parent's.
+  const paged = [{ ...desktopMeta('c-page', { ...spawned, subagent_history_start_ordinal: 3 }), ordinal: 0 }, { ...fileChange(25, { [`${W}\\src\\hours.ts`]: { type: 'update' } }), ordinal: 1 },
+    { ...desktopUser(25, [['user.text', '예전 요청']]), ordinal: 2 }, { ...patch(26, 'src/notify/kakao.ts'), ordinal: 3 }];
+  const dir = home(), had = globalThis.window;
+  try {
+    const roots = writeSessionHome(dir), day = join(roots.codex, 'sessions', '2026', '10', '29'); mkdirSync(day, { recursive: true });
+    const write = (name, rows) => writeFileSync(join(day, name), jl(rows));
+    write('rollout-2026-10-29T10-00-00-parent.jsonl', desktopParent()); write('rollout-2026-10-29T10-20-00-v1.jsonl', v1);
+    write('rollout-2026-10-29T10-22-00-fork.jsonl', forked); write('rollout-2026-10-29T10-25-00-page.jsonl', paged);
+    const server = openSessions({ env: {}, roots }), listed = (await server.list(W)).sessions;
+    assert.deepEqual(listed.map(x => x.preview), ['휴무일을 예약 화면에 반영해 줘 ## 확인할 것 - 테스트']);
+    const got = await server.read(listed[0].id);
+    assert.deepEqual(got.turns[1].files, ['src/hours.ts', 'src/old.ts', 'src/new.ts']);
+    assert.deepEqual(got.turns[3].files, ['src/notify/sms.ts', 'tests/notify.test.ts', 'src/notify/kakao.ts'], 'no file of the copied history comes in again');
+    // A folder picked in the page reads them the same way.
+    globalThis.window = { showDirectoryPicker: async () => folder(roots.codex) };
+    const sources = createSessionSources({ status: () => ({ ai: 'none' }), accessCode: () => '' });
+    await sources.load(); assert.equal(await sources.pick(), true);
+    assert.deepEqual((await sources.current().list(W)).map(x => x.id), [listed[0].id]);
+    assert.deepEqual((await sources.current().read(listed[0].id)).turns, readSessionDetail(got).turns);
+  } finally { globalThis.window = had; rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('SESSIONS-D6 a Codex app thread run in its own worktree is found under the repository it was checked out from, on the server and in a picked folder', async () => {
+  const P = await import('../dist/public/shared/session-parse.js'), { createSessionSources } = await import('../dist/public/client/session-source.js');
+  const { readdirSync } = await import('node:fs'), { basename } = await import('node:path');
+  const file = path => ({ kind: 'file', name: basename(path), getFile: async () => new File([readFileSync(path)], basename(path), { lastModified: statSync(path).mtimeMs }) });
+  const folder = path => ({ kind: 'directory', name: basename(path), queryPermission: async () => 'granted',
+    async *values() { for (const d of readdirSync(path, { withFileTypes: true })) yield d.isDirectory() ? folder(join(path, d.name)) : file(join(path, d.name)); } });
+  const dir = home(), had = globalThis.window;
+  try {
+    const roots = writeSessionHome(dir), repo = join(dir, 'salon'), day = join(roots.codex, 'sessions', '2026', '10', '29'); mkdirSync(day, { recursive: true });
+    const tree = (id, git) => { const t = join(roots.codex, 'worktrees', id, 'salon'); mkdirSync(join(t, 'app'), { recursive: true }); if (git) writeFileSync(join(t, '.git'), git); return t; };
+    let n = 0; const thread = (name, cwd, ask) => { const f = join(day, name), t = new Date(Date.now() - 60000 + ++n * 1000);
+      writeFileSync(f, jl([{ ...desktopMeta(name), payload: { ...desktopMeta(name).payload, cwd, git: { branch: 'codex/cancel' } } }, { timestamp: at(1), type: 'turn_context', payload: { cwd } }, desktopUser(2, [['user.text', ask]])]));
+      utimesSync(f, t, t); };
+    thread('rollout-2026-10-29T10-00-00-wt.jsonl', tree('4f2a', `gitdir: ${repo}/.git/worktrees/salon\n`), '예약 취소 버튼 추가해 줘');
+    thread('rollout-2026-10-29T10-01-00-sub.jsonl', join(tree('9c1d', `gitdir: ${repo}/.git/worktrees/salon1\r\n`), 'app'), '앱 폴더만 고쳐 줘');
+    thread('rollout-2026-10-29T10-02-00-gone.jsonl', tree('77aa', null), '지워진 작업 트리');
+    const server = openSessions({ env: {}, roots });
+    assert.deepEqual((await server.list(repo)).sessions.map(x => [x.preview, x.cwd]), [['앱 폴더만 고쳐 줘', join(repo, 'app')], ['예약 취소 버튼 추가해 줘', repo]]);
+    assert.deepEqual((await server.list(join(repo, 'app'))).sessions.map(x => x.preview), ['앱 폴더만 고쳐 줘']);
+    assert.ok((await server.list()).sessions.some(x => x.preview === '지워진 작업 트리' && x.cwd.includes('worktrees')), 'a checkout whose .git is gone stays where it worked');
+    // The same through a picked .codex folder, or a home folder holding it.
+    for (const picked of [roots.codex, dir]) {
+      globalThis.window = { showDirectoryPicker: async () => folder(picked) };
+      const sources = createSessionSources({ status: () => ({ ai: 'none' }), accessCode: () => '' });
+      await sources.load(); assert.equal(await sources.pick(), true);
+      assert.deepEqual((await sources.current().list(repo)).map(x => x.preview), ['앱 폴더만 고쳐 줘', '예약 취소 버튼 추가해 줘'], picked);
+    }
+    // Only a checkout under the Codex folder's worktrees/ is looked at, and never above it.
+    assert.deepEqual(P.worktreeSteps('C:\\Users\\Me\\.codex\\worktrees\\4f2a\\Salon\\app', 'c:/users/me/.codex'), ['4f2a', 'Salon', 'app']);
+    assert.deepEqual(P.worktreeSteps('/home/me/.codex/worktrees/4f2a/salon', '.codex'), ['4f2a', 'salon']);
+    for (const [cwd, codex] of [['/home/me/.codex/worktrees/../../etc', '/home/me/.codex'], ['/srv/x/home/me/.codex/worktrees/a', '/home/me/.codex'], ['/home/me/my.codex/worktrees/a', '.codex'], ['/home/me/salon', '/home/me/.codex']])
+      assert.equal(P.worktreeSteps(cwd, codex), null, cwd);
+    assert.equal(P.worktreeFolder('gitdir: C:/Users/Me/salon/.git/worktrees/salon', ['app'], 'C:\\Users\\Me\\.codex\\worktrees\\4f2a\\salon\\app'), 'C:\\Users\\Me\\salon\\app');
+    assert.equal(P.worktreeFolder('gitdir: ../../salon/.git/worktrees/salon', [], '/x'), null, 'a relative link is not followed');
+  } finally { globalThis.window = had; rmSync(dir, { recursive: true, force: true }); }
+});
+
 test('SESSIONS-D3 a Claude Code session that moved folders is found under each; within() compares Windows folders as Windows does', async () => {
   const P = await import('../dist/public/shared/session-parse.js');
   const rows = [{ type: 'user', cwd: '/tmp/scratch', timestamp: at(1), message: { role: 'user', content: '시작' } },
@@ -427,6 +500,71 @@ test('SESSIONS-C2 Claude Code: an edit counts once its result came back without 
   assert.deepEqual(parseClaude([...rows, result(9, 'e4')]).turns[1].files, ['/w/config/dev.json', '/w/src/pending.ts']);
 });
 
+test('SESSIONS-C4 Claude Code\'s row for a press of Esc is not a request; a prompt that only mentions it is', async () => {
+  const P = await import('../dist/public/shared/session-parse.js');
+  const stop = (m, text) => cu(m, [{ type: 'text', text }]);
+  const rows = [cu(0, '예약 목록을 날짜순으로 정렬해 줘'), ca(1, '정렬 코드를 볼게요.'), stop(2, '[Request interrupted by user]'), cu(3, '아니, 최신순으로'),
+    ca(4, [{ type: 'tool_use', id: 'e1', name: 'Edit', input: { file_path: '/w/src/list.ts', old_string: 'a', new_string: 'b' } }]), stop(5, '[Request interrupted by user for tool use]')];
+  assert.deepEqual(parseClaude(rows).turns.filter(t => t.role === 'user').map(t => t.text), ['예약 목록을 날짜순으로 정렬해 줘', '아니, 최신순으로']);
+  // Listed by the first request typed after it.
+  assert.equal(P.sessionSummary('claude-' + 'a'.repeat(24), 'claude', parseClaude(rows.slice(2)), at(9), 1).preview, '아니, 최신순으로');
+  assert.deepEqual(parseClaude([cu(0, '[Request interrupted by user] 이 문구는 어디서 나와?')]).turns.map(t => t.text), ['[Request interrupted by user] 이 문구는 어디서 나와?']);
+});
+
+test('SESSIONS-FK1 a forked Codex thread and a branched Claude Code session give only their own turns, from their own start', () => {
+  // Codex copies the thread forked into the fork's file (its first line too), every line stamped when copied, then the fork's own
+  // settings line; files from before that line end the copy at the first pause.
+  const forkAt = '2026-10-31T10:00:00.005Z', copied = rows => rows.map(r => ({ ...r, timestamp: forkAt }));
+  const parent = [{ type: 'session_meta', payload: { id: 'P', timestamp: at(0), cwd: '/w', git: { branch: 'old-branch' } } },
+    { type: 'event_msg', payload: { type: 'user_message', message: '예약 화면에 휴무일을 회색으로 표시해 줘' } },
+    { type: 'response_item', payload: { type: 'custom_tool_call', name: 'apply_patch', call_id: 'c1', input: '*** Begin Patch\n*** Update File: src/booking/calendar.ts\n*** End Patch' } },
+    { type: 'event_msg', payload: { type: 'agent_message', message: '회색으로 바꿨어요.' } },
+    { type: 'event_msg', payload: { type: 'thread_settings_applied', thread_id: 'P', thread_settings: {} } }];
+  const meta = { timestamp: forkAt, type: 'session_meta', payload: { id: 'F', forked_from_id: 'P', timestamp: forkAt, cwd: '/w', git: { branch: 'try-red' } } };
+  const own = [{ timestamp: '2026-10-31T10:02:00.000Z', type: 'event_msg', payload: { type: 'user_message', message: '휴무일은 빨간색으로 해 볼래' } },
+    { timestamp: '2026-10-31T10:02:30.000Z', type: 'event_msg', payload: { type: 'agent_message', message: '빨간색으로 바꿨어요.' } }];
+  const settings = { timestamp: forkAt, type: 'event_msg', payload: { type: 'thread_settings_applied', thread_id: 'F', thread_settings: {} } };
+  const want = [['user', '휴무일은 빨간색으로 해 볼래'], ['assistant', '빨간색으로 바꿨어요.']];
+  for (const [name, rows] of [['with its settings line', [meta, ...copied(parent), settings, ...own]], ['before it', [meta, ...copied(parent), ...own]],
+    ['before forks were named', [{ ...meta, payload: { ...meta.payload, forked_from_id: undefined } }, ...copied(parent), ...own]]]) {
+    const s = parseCodex(rows);
+    assert.deepEqual(s.turns.map(t => [t.role, t.text]), want, name); assert.deepEqual(s.changes, [], name);
+    assert.deepEqual([s.meta.thread, s.meta.startedAt, s.meta.branch], ['F', forkAt, 'try-red'], name);
+  }
+  // A fork made before the first request (its first request edited) copies nothing: what follows at once is its own.
+  const first = [meta, { timestamp: forkAt, type: 'turn_context', payload: { cwd: '/w' } }, { ...own[0], timestamp: forkAt }, own[1]];
+  assert.deepEqual(parseCodex(first).turns.map(t => [t.role, t.text]), want);
+  // Claude Code: each copied row names where it came from (its time and id kept); the branch's own rows do not.
+  const from = (row, uuid) => ({ ...row, sessionId: 'B', uuid, forkedFrom: { sessionId: 'A', messageUuid: uuid } });
+  const b = parseClaude([from(cu(0, '결제 화면에 현장 결제 안내 문구 넣어 줘'), 'u1'), from(ca(1, [{ type: 'tool_use', id: 't1', name: 'Edit', input: { file_path: '/w/src/pay/notice.tsx', old_string: 'a', new_string: 'b' } }]), 'a1'),
+    from(cu(2, [{ type: 'tool_result', tool_use_id: 't1', content: 'ok' }]), 'r1'), from(ca(3, '안내 문구를 넣었어요.'), 'a2'),
+    cu(20, '문구를 한 줄로 줄여 줘', { sessionId: 'B', uuid: 'u2', parentUuid: 'a2' }), ca(21, '한 줄로 줄였어요.', { sessionId: 'B', uuid: 'a3', parentUuid: 'u2' })]);
+  assert.deepEqual(b.turns.map(t => [t.role, t.text, t.files ?? null]), [['user', '문구를 한 줄로 줄여 줘', null], ['assistant', '한 줄로 줄였어요.', []]]);
+  assert.equal(b.meta.startedAt, at(20)); assert.deepEqual(b.changes, []);
+});
+
+test('SESSIONS-C5 after a Claude Code rewind only the conversation that goes on is read: the request gone back over and its files are not', () => {
+  const row = (r, uuid, parentUuid) => ({ ...r, uuid, parentUuid });
+  const said = rows => { const s = parseClaude(rows); return [s.turns.map(t => [t.role, t.text, t.files ?? null]), s.changes.flatMap(c => c.files)]; };
+  const before = [row(cu(0, '문자 알림을 보내 줘'), 'u1', null), row(ca(1, '문자로 보내게 했어요.'), 'a1', 'u1'), row(cu(2, '카카오톡으로도 보내게 해 줘'), 'u2', 'a1'),
+    row(ca(3, [{ type: 'tool_use', id: 't1', name: 'Write', input: { file_path: '/w/src/notify/kakao.ts', content: 'x' } }]), 'a2', 'u2'),
+    row(cu(4, [{ type: 'tool_result', tool_use_id: 't1', content: 'ok' }]), 'r2', 'a2'), row(ca(5, '카카오톡도 보내요.'), 'a3', 'r2')];
+  const rewind = { type: 'last-prompt', lastPrompt: '카카오톡으로도 보내게 해 줘', leafUuid: 'a1', explicit: true, rewound: true, cutUuid: 'u2', sessionId: 'x' };
+  const again = [row(cu(8, '카카오톡은 빼고 문자 실패 시 재시도만 넣어 줘'), 'u3', 'a1'), row(ca(9, '재시도를 넣었어요.'), 'a4', 'u3')];
+  const kept = [['user', '문자 알림을 보내 줘', null], ['assistant', '문자로 보내게 했어요.', []]], more = [['user', '카카오톡은 빼고 문자 실패 시 재시도만 넣어 줘', null], ['assistant', '재시도를 넣었어요.', []]];
+  assert.deepEqual(said([...before, rewind]), [kept, []], 'rewound, nothing sent again yet');
+  assert.deepEqual(said([...before, rewind, ...again]), [[...kept, ...more], []]);
+  assert.deepEqual(said([...before, ...again]), [[...kept, ...more], []], 'a version that wrote no rewind mark');
+  // A rewind that did not go through (Claude Code put the end back) and an ordinary session leave every turn.
+  const all = said(before);
+  assert.equal(all[0].length, 4); assert.deepEqual(all[1], ['/w/src/notify/kakao.ts']);
+  assert.deepEqual(said([...before, rewind, { type: 'last-prompt', leafUuid: 'a3', explicit: true, sessionId: 'x' }]), all);
+  // A compacted session goes on from its boundary, whose link to the rows before it may name none of them: all its turns stay.
+  const compacted = [...before, { type: 'system', subtype: 'compact_boundary', uuid: 'b1', parentUuid: null, logicalParentUuid: 'gone', timestamp: at(6) },
+    row(cu(6, '요약', { isCompactSummary: true }), 's1', 'b1'), row(cu(7, '이어서 문자 실패 시 재시도도'), 'u4', 's1'), row(ca(8, '넣었어요.'), 'a5', 'u4')];
+  assert.equal(said(compacted)[0].length, 6);
+});
+
 test('SESSIONS-X4 Codex patches name their files in any form: raw Windows paths, JSON arguments, heredocs, string commands', async () => {
   const P = await import('../dist/public/shared/session-parse.js');
   const patch = f => `*** Begin Patch\n*** Update File: ${f}\n@@\n-a\n+b\n*** End Patch\n`, fn = (name, args) => ({ type: 'function_call', name, call_id: 'c', arguments: JSON.stringify(args) });
@@ -446,6 +584,19 @@ test('SESSIONS-X4 Codex patches name their files in any form: raw Windows paths,
   // Patch text a command only writes somewhere, or a Desktop script (its FileChange item names the files), changes nothing here.
   assert.deepEqual(files(fn('shell', { command: ['bash', '-lc', `cat > notes.md <<'EOF'\n${patch('src/x.ts')}EOF\n`] })), []);
   assert.deepEqual(files({ type: 'custom_tool_call', name: 'exec', call_id: 'c', input: `await apply_patch(\`${patch('src/y.ts')}\`)` }), []);
+});
+
+test('SESSIONS-X5 a Codex patch the person declined, or that failed, changed nothing; one that went through, or says nothing of how it went, did', () => {
+  const call = (m, id, f) => ({ timestamp: at(m), type: 'response_item', payload: { type: 'custom_tool_call', name: 'apply_patch', call_id: id, input: `*** Begin Patch\n*** Update File: ${f}\n@@\n-a\n+b\n*** End Patch` } });
+  // Older rollouts say how it went in a patch_apply_end event (early ones with success only), paginated ones in a FileChange item.
+  const end = (m, id, success, status) => ({ timestamp: at(m), type: 'event_msg', payload: { type: 'patch_apply_end', call_id: id, stdout: '', stderr: '', success, ...(status ? { status } : {}) } });
+  const item = (m, id, status) => ({ timestamp: at(m), type: 'event_msg', payload: { type: 'item_completed', item: { type: 'FileChange', id, status, changes: { 'config/prod.json': { type: 'update' } } } } });
+  const files = rows => { const s = parseCodex([desktopMeta('t'), { timestamp: at(0), type: 'event_msg', payload: { type: 'user_message', message: '운영 설정 파일도 같이 고쳐 줘' } }, ...rows,
+    { timestamp: at(9), type: 'event_msg', payload: { type: 'agent_message', message: '말씀대로 운영 설정은 건드리지 않았어요.' } }]); return [s.turns[1].files, s.changes.flatMap(c => c.files)]; };
+  for (const outcome of [end(2, 'p2', false, 'declined'), end(2, 'p2', false, 'failed'), end(2, 'p2', false), item(2, 'p2', 'declined'), item(2, 'p2', 'failed')])
+    assert.deepEqual(files([call(1, 'p2', 'config/prod.json'), outcome]), [[], []], JSON.stringify(outcome.payload));
+  assert.deepEqual(files([call(1, 'p1', 'src/a.ts'), end(2, 'p1', true, 'completed'), call(3, 'p2', 'config/prod.json'), end(4, 'p2', false, 'declined'), call(5, 'p3', 'src/b.ts')]), [['src/a.ts', 'src/b.ts'], ['src/a.ts', 'src/b.ts']]);
+  assert.deepEqual(files([call(1, 'p2', 'config/prod.json'), item(2, 'p2', 'completed')])[0], ['config/prod.json']);
 });
 
 test('SESSIONS-C3 Claude Code subagents: the files they changed join the reply they worked for (not their words), in the file or beside it', async () => {
@@ -507,6 +658,23 @@ test('SESSIONS-F1 a handover document longer than a turn is folded before the pr
   const d = P.sessionDetail('claude-' + 'a'.repeat(24), 'claude', parseClaude([cu(1, `${doc}\n\n결제 화면부터 이어서 해 줘`), ca(2, '이어서 할게요.')]));
   assert.equal(d.turns[0].text, '[AgentFlow 인수인계 문서를 받아 이어감 · af-handover:QW3RTY · 나의 프로젝트]\n\n결제 화면부터 이어서 해 줘');
   assert.ok(sessionText(readSessionDetail(d)).text.includes('결제 화면부터 이어서 해 줘'));
+});
+
+test('SESSIONS-F2 a session listed by its first prompt as a record shows it: a handover it started from named in words, a key hidden', async () => {
+  const doc = code => [`──────── AgentFlow 인수인계 문서 · af-handover:${code}:A_f00834f4-0562-4208-b103-9e5e94acddcc ────────`, '# 인수인계: 미용실 예약 › 결제', '- 부분 설명',
+    `──────── 인수인계 문서 끝 · af-handover:${code}:A_f00834f4-0562-4208-b103-9e5e94acddcc ────────`].join('\n');
+  const key = 'sk-ant-' + 'FAKE'.repeat(5) + '0000', dir = home();
+  try {
+    const roots = writeSessionHome(dir), day = join(roots.codex, 'sessions', '2026', '10', '29'), p = join(roots.claude, 'projects', '-w'); mkdirSync(day, { recursive: true }); mkdirSync(p, { recursive: true });
+    const codex = (name, text) => writeFileSync(join(day, name), jl([desktopMeta(name), desktopUser(1, [['user.text', text]])]));
+    codex('rollout-2026-10-29T10-00-00-a.jsonl', `${doc('ZXC234')}\n\n취소 마감 시간부터 고쳐 줘`); codex('rollout-2026-10-29T10-00-01-b.jsonl', `${doc('QW3RTY')}\n\n카드 결제 실패 문구를 바꿔 줘`);
+    writeFileSync(join(p, 'k.jsonl'), jl([cu(0, `ANTHROPIC_API_KEY=${key} 로 문자 발송 서버 연결해 줘`), { type: 'ai-title', aiTitle: `${key} 연결` }]));
+    const list = (await openSessions({ env: {}, roots }).list()).sessions, of = text => list.find(s => s.preview.includes(text));
+    assert.equal(of('취소 마감').preview, '(인수인계 문서로 시작 · 미용실 예약 › 결제) 취소 마감 시간부터 고쳐 줘');
+    assert.ok(of('결제 실패') && !list.some(s => s.preview.includes('af-handover')), 'two sessions told apart by what was asked');
+    const k = of('문자 발송');
+    assert.equal(k.preview, 'ANTHROPIC_API_KEY=[가려진 비밀값] 로 문자 발송 서버 연결해 줘'); assert.equal(k.title, '[가려진 비밀값] 연결');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
 test('SESSIONS-L1 a line too long to be a session line is skipped, the lines around it still read, the read itself never fails for it', async () => {
