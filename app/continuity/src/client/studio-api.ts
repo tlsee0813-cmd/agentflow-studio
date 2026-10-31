@@ -153,5 +153,8 @@ export const ERROR_TEXT: Record<string, string> = {
   SESSION_NOT_FOUND: '그 세션 기록을 찾지 못했어요. 목록을 새로 불러오세요.',
   SESSION_TOO_LARGE: '세션 기록 파일이 너무 커서 읽지 않았어요.',
   SESSION_FOLDER_UNREADABLE: '고른 세션 폴더를 읽지 못했어요. 폴더를 옮겼거나 지웠다면 빼고 다시 골라 주세요.',
-  NO_SERVER: '이 페이지에는 연결된 AI 서버가 없어요.'
+  NO_SERVER: '이 페이지에는 연결된 AI 서버가 없어요.',
+  UNSUPPORTED_VERSION: '서버가 이 페이지보다 새 버전이에요. 페이지를 새로 고친 뒤 다시 시도하세요.',
+  INVALID_INPUT: '서버가 보낸 내용을 받아들이지 않았어요. 페이지를 새로 고친 뒤 다시 시도하세요.',
+  INTERNAL_ERROR: '서버에서 예상하지 못한 문제가 생겼어요. 잠시 뒤에 다시 시도하세요.'
 };

@@ -1,12 +1,15 @@
 # AgentFlow Studio (continuity)
 
+> 저장소 전체 안내는 [README](../../README.md), 코드 구조는 [구조 개요](../../docs/ARCHITECTURE_KO.md)에 있습니다. 이 문서는 Studio 앱의 실행·API·배포 세부를 다룹니다.
+
 Codex·Claude에서 평소처럼 개발한 기록(요청·작업 보고·확인 자료)을 프로젝트의 부분에 연결해서 보여 줍니다.
-보이는 것은 구조, 최근 변화, 진행 상태, 다음에 판단할 것입니다. 기록 연결기는 아직 없습니다. 예제는 전달받았다고
-가정하고 쓴 기록이며, 실제 수신 모델(`agentflow.return.2`)로 만들어집니다.
+보이는 것은 구조, 최근 변화, 진행 상태, 다음에 판단할 것입니다. 프로젝트를 작업 폴더에 연결하면 이 PC의 Claude Code·Codex
+세션이 기록으로 자동으로 들어옵니다(로컬 서버가 읽거나, 서버가 없으면 브라우저에서 `.claude`·`.codex` 폴더를 골라 읽음).
+예제는 전달받았다고 가정하고 쓴 기록이며, 실제 수신 모델(`agentflow.return.2`)로 만들어집니다.
 
 ## 화면
 
-1. **프로젝트**: 예제 2개와 이 브라우저에 저장된 프로젝트(`idea015.project.7`, 기존 저장 그대로)가 보입니다.
+1. **프로젝트**: 공통 예제와 이 브라우저에 저장된 프로젝트가 보입니다. 예전 판으로 저장한 프로젝트도 그대로 읽습니다.
 2. **지도**: 창에 고정된 캔버스입니다. 노드는 고정 크기이고 이름과 상태만 표시합니다. 그룹은 저장된 포함 관계(containment)
    그대로 그리고, 선은 저장된 관계(relations)를 그립니다. 왼쪽에는 최근 변화가 있습니다. 드래그로 이동하고,
    Ctrl/⌘+휠이나 버튼으로 확대·축소합니다.
@@ -15,6 +18,24 @@ Codex·Claude에서 평소처럼 개발한 기록(요청·작업 보고·확인 
    응답에서 근거 기록과 지도 위 관련 부분으로 이동할 수 있습니다. Esc나 지도 클릭으로 닫습니다.
 
 홈에서 내 프로젝트를 만들고, 지도에서 부분과 하위 부분을 추가하거나 이름·설명을 고칠 수 있습니다. 기존 도메인 함수를 사용하며 원래 기록을 고쳐 쓰지 않습니다. 정리 결과와 질문 초안은 프로젝트와 분리된 키에 둡니다. 예제의 정리 결과와 초안은 메모리에만 둡니다.
+
+## 내 AI 세션 연결하기
+
+저장한 프로젝트를 열면 지도 위에 **자동 연결 안 됨** 표시가 있습니다. 눌러서 작업 폴더를 고르면 연결됩니다.
+
+1. **세션을 어디서 읽을지.** 로컬 서버로 열었다면 서버가 이 PC의 `~/.claude`·`~/.codex`를 읽으므로 고를 것이 없습니다.
+   서버 없이 열었다면 **세션 폴더 고르기**로 `.claude`나 `.codex` 폴더를 직접 고릅니다(Chrome·Edge의 폴더 접근). 다음 방문 때 브라우저가 한 번 더 허용을 물을 수 있습니다.
+2. **어느 작업 폴더인지.** 세션이 있는 작업 폴더 목록에서 하나를 누르거나 경로를 직접 적습니다. 그 폴더의 최근 14일, 세션 10개까지로 첫 지도를 만듭니다.
+3. **그다음부터는 자동입니다.** 이 프로젝트가 탭에 열려 있는 동안, 대화가 약 2분간 잠잠해진 세션의 새 내용이 기록으로 들어오고 지도가 갱신됩니다.
+   지도 갱신은 AI 호출이라 5분 간격, 하루 30회까지만 합니다. 탭을 닫아 둔 동안 쌓인 대화는 다시 열 때 가져옵니다.
+
+가져오는 것은 사람이 쓴 요청과 도구의 최종 답, 바뀐 파일 이름뿐입니다. 도구 출력·추론·주입된 문맥은 빼고, 키나 토큰처럼 보이는 부분은 가린 뒤 저장합니다.
+저장소가 나뉜 프로젝트는 **폴더 추가**로 여러 작업 폴더를 묶을 수 있고, 지도에서 부분마다 어느 세션이 다뤘는지 보입니다.
+
+## 인수인계 문서
+
+세션을 바꿀 때는 지도 위 **인수인계 문서**(프로젝트 전체) 또는 부분의 ⋯ 메뉴(그 부분만)에서 문서를 만들어 새 세션에 그대로 붙여 넣습니다.
+지도와 기록에 있는 내용만 담고 AI를 부르지 않습니다. 문서에는 `af-handover:코드` 표시가 들어 있어, 자동 연결된 폴더에서 이 문서로 시작한 세션은 지도에 **인수인계로 이어받음**으로 표시되고 문서 자체는 새 작업 기록으로 다시 들어오지 않습니다.
 
 ## 로컬 실행 (`app/` 디렉터리)
 
@@ -34,7 +55,20 @@ node --env-file-if-exists=.env continuity/server/index.mjs
 키 없이 실행하거나 `--mock`을 붙이면 `AI 키 없음`이 표시되고 정리 요청은 `AI_NOT_CONFIGURED`로 실패합니다.
 대체 응답은 만들지 않습니다. 포트는 `PORT=3100`처럼 바꿀 수 있습니다.
 
-Windows에서 빌드가 이미 있다면 PowerShell로 `./continuity/scripts/start-local.ps1`을 실행할 수 있습니다. `app/.env`를 읽고 백그라운드에서 실행한 뒤 `http://127.0.0.1:4317`을 엽니다. 키 파일을 다른 비공개 위치에 보관했다면 `-EnvFile 'C:\private\studio.env'`를 지정합니다. 기존 Node 또는 Codex에 설치된 Node를 재사용하며 패키지를 설치하지 않습니다. 이미 같은 포트의 Studio가 실행 중이면 다시 띄우지 않습니다. 브라우저 저장은 주소별이므로 같은 포트를 계속 사용하세요.
+Windows에서 빌드가 이미 있다면 PowerShell로 `./continuity/scripts/start-local.ps1`을 실행할 수 있습니다. `app/.env`가 있으면 읽고(없으면 AI만 꺼짐) 백그라운드에서 실행한 뒤 `http://127.0.0.1:4317`을 엽니다. 키 파일을 다른 비공개 위치에 보관했다면 `-EnvFile 'C:\private\studio.env'`를 지정합니다. 기존 Node 또는 Codex에 설치된 Node를 재사용하며 패키지를 설치하지 않습니다. 이미 같은 포트의 Studio가 실행 중이면 다시 띄우지 않습니다. 브라우저 저장은 주소별이므로 같은 포트를 계속 사용하세요.
+
+### 시작이 안 될 때
+
+서버는 시작하지 못하면 `AgentFlow Studio did not start: …` 한 줄을 남기고 종료 코드 1로 끝납니다. 스택이나 키 값은 출력하지 않습니다.
+
+| 안내 | 할 일 |
+|---|---|
+| `only --mock is supported` | `--mock` 말고는 인자를 받지 않습니다. 키·주소는 `app/.env`에 둡니다 |
+| `port … is already in use` | 이미 같은 포트에서 무언가 돌고 있습니다. `PORT=3100`처럼 다른 포트를 줍니다 |
+| `INVALID_SERVER_CONFIG` 등 | `PORT`, `AI_MODE`, `AI_*` 한도, `DEEPSEEK_BASE_URL` 값을 확인합니다 |
+| `… is not a usable value and was ignored` | 시작은 됩니다. 이름이 나온 `STUDIO_*`·`DEEPSEEK_*` 설정을 쓸 수 없어 기본값을 썼다는 경고입니다 |
+
+Ctrl+C나 서비스 종료(SIGTERM)를 받으면 지도 작업 보관소를 정리해 닫고 종료 코드 0으로 끝납니다. 그때 돌던 지도 정리는 다음 시작 때 "중단됨"으로 남습니다.
 
 ### PC에서 설치된 Codex로 지도 정리하기 (선택)
 
@@ -63,8 +97,10 @@ Windows에서 빌드가 이미 있다면 PowerShell로 `./continuity/scripts/sta
 
 | 경로 | 내용 |
 |---|---|
-| `GET /api/studio/status` | `{ ai: 'deepseek' \| 'off', model, access: 'open' \| 'code' }` |
+| `GET /api/studio/status` | `{ ai: 'deepseek' \| 'off', model, access: 'open' \| 'code' }`와, 해당할 때 `digest`·`map`·`release`·`jobs` 상태 |
 | `POST /api/studio/ask` | `studio.1` 요청(부분과 기록 최대 14개) → 검증된 `{ headline, situation[], changes[], next[], answer, refs[] }` |
+| `POST /api/studio/map`, `/plan`, `/scope`, `/digest` | 기록으로 지도 정리, 변경 구상, 고른 범위의 전제 검토, 여러 부분 자료 읽기. 요청·응답 계약은 `src/shared/map-reading.ts`, `plan-api.ts`, `scope-api.ts`, `digest-api.ts`. 제한 공개판(`worker-existing-map.mjs`)은 `map`과 `jobs`를 `MAP_WITHHELD`로 거절 |
+| `GET /api/studio/sessions?folder=…`, `GET /api/studio/sessions/<id>?since=…` | 로컬 Node 서버만(`server/sessions.mjs`, `STUDIO_SESSIONS=off`로 끔): 이 PC의 Claude Code(`CLAUDE_CONFIG_DIR` 또는 `~/.claude`)·Codex(`CODEX_HOME` 또는 `~/.codex`) 세션 목록과 한 세션의 대화. 읽기만 하며 경로가 아니라 목록의 ID로만 요청. 같은 origin만 허용 |
 | `POST /api/studio/jobs`, `GET /api/studio/jobs/<id>`, `POST …/<id>/cancel`, `POST …/<id>/ack` | AF100, 로컬 Node 서버만: 지도 정리를 이 PC의 작업으로 보관(`server/map-jobs.mjs`, 기본 `continuity/.studio-data/map-jobs-<port>`, `STUDIO_JOBS_DIR`/`STUDIO_JOBS=off`). 회수 권한은 `X-Studio-Operation` 헤더로만. 창을 닫아도 실행기가 켜져 있으면 계속되고, 실행기가 꺼지면 중단으로 남는다. Worker·정적 빌드는 광고하지 않는다. |
 
 - 키: `env.DEEPSEEK_API_KEY`에서만 읽습니다. 공급자 Authorization 헤더로만 쓰고, 응답·로그·번들에는 넣지 않습니다.
