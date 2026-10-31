@@ -301,9 +301,12 @@ export function createAutoSync(host: AutoSyncHost) {
         h('p', { class: 'fine' }, `${b.folders.length > 1 ? '이 폴더들' : '이 폴더'}의 ${toolNames()} 대화가 잠잠해지면(약 ${SETTLE_MS / 60000}분) 기록으로 들어오고 지도가 자동으로 갱신돼요(그때 기록을 AI에게 보내요). 이 탭이 열려 있을 때만 확인하고, 닫혀 있던 동안의 대화는 다시 열면 들어와요.`),
         h('dl', { class: 'sync-facts' }, h('dt', {}, '가져온 기록'), h('dd', {}, `${b.taken}개`), h('dt', {}, '마지막 확인'), h('dd', b.lastCheck ? { title: stamp(b.lastCheck, true) } : {}, b.lastCheck ? ago(b.lastCheck) : busy ? '확인 중…' : '아직'),
           h('dt', {}, '오늘 자동 지도 갱신'), h('dd', {}, `${runs} / ${AUTO_RUNS_PER_DAY}회`)),
-        // Why the map does not follow (no AI for maps, today's automatic readings used up), or a connection that found nothing yet.
+        // Why the map does not follow (no AI for maps, today's automatic readings used up, not yet), or a connection that found nothing yet.
         host.readBlocked() ? h('p', { class: 'fine sync-blocked' }, `기록은 들어오지만 지도는 갱신하지 않아요: ${host.readBlocked()}`)
           : runs >= AUTO_RUNS_PER_DAY ? h('p', { class: 'fine sync-blocked' }, `오늘 자동 지도 갱신 ${AUTO_RUNS_PER_DAY}회를 다 썼어요. 기록은 계속 들어와요. 지도는 ‘돌아와 읽기’의 ‘기록 읽고 지도 갱신’으로 직접 갱신할 수 있고, 내일 다시 자동으로 갱신해요.`)
+          // New records in, but the last automatic reading was a moment ago: when the map follows, and the way to it now.
+          : host.canRead() && !busy && b.runs.last && Date.now() - Date.parse(b.runs.last) < AUTO_RUN_GAP_MS ? h('p', { class: 'fine sync-next' },
+            `새 기록이 들어왔어요. 지도는 ${stamp(new Date(Date.parse(b.runs.last) + AUTO_RUN_GAP_MS).toISOString())}쯤 자동으로 갱신돼요. 지금 하려면 지도의 ‘${host.current()?.project.space.areas.some(a => !a.archived) ? '새 기록 읽고 지도 갱신' : '기록으로 지도 정리'}’ 버튼을 누르세요.`)
           : !b.taken && b.lastCheck && !busy && !error && !waiting ? h('p', { class: 'fine' }, `${b.folders.length > 1 ? '이 폴더들' : '이 폴더'}에서 최근 ${BACKFILL_MS / 86400000}일 안의 대화를 아직 찾지 못했어요. 새로 대화하면 들어와요. 경로를 직접 적었다면 맞는지 확인해 주세요.`) : null,
         errorLine(error),
         // '지금 확인' is only marked unavailable while it cannot run, so focus can stay on it through the look it started.

@@ -3256,7 +3256,8 @@ def folder_sessions_flow(browser, base):
 
 def final_client_flow(browser, base):
     """A new project's empty map offers the automatic connection first. Picked session folders, one tool only (.claude): the panel says only Claude Code comes in and how to add Codex; a session started from a part's handover document and taken by '지금 확인'
-    shows on that part's summary at once, marked as the handover sheet says, with no reading in between."""
+    shows on that part's summary at once, marked as the handover sheet says, with no reading in between (the panel says when the map
+    follows)."""
     jl = lambda *rows: "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows)
     when = lambda minutes: time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime(time.time() - minutes * 60))
     row = lambda kind, text, minutes: {"type": kind, "cwd": "/work/salon", "sessionId": "a1", "timestamp": when(minutes),
@@ -3318,6 +3319,8 @@ def final_client_flow(browser, base):
     pill.click()
     panel.get_by_role("button", name="지금 확인").click()
     expect(panel).to_contain_text("가져온 기록2개", timeout=15000)
+    # No reading follows yet (the last was just now): the panel says when the map follows, and the way to it now.
+    expect(panel.locator(".sync-next")).to_have_text(re.compile(r"^새 기록이 들어왔어요\. 지도는 \d\d:\d\d쯤 자동으로 갱신돼요\. 지금 하려면 지도의 ‘새 기록 읽고 지도 갱신’ 버튼을 누르세요\.$"))
     page.keyboard.press("Escape")
     expect(lens).to_have_text("다룬 세션Claude Code 「휴무일 이어서」 · 인수인계로 이어받음, Claude Code 「휴무일 막기」")
     assert len(maps) == 1, maps
