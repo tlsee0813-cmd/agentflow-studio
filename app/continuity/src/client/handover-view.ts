@@ -7,7 +7,7 @@ import type { Project } from '../shared/types.js';
 import type { FrozenRequest } from '../shared/request-return.js';
 import { studioView } from '../shared/studio.js';
 import { handoverDoc, handoverCode, WEB_RECORD_ASK, type Handover } from '../shared/handover.js';
-import { h } from './plan-dom.js';
+import { h, svg } from './plan-dom.js';
 import type { CloudLink } from './cloud-link.js';
 
 /** requests: the change requests made for the open project (with the plan's), named in the document with what came back. */
@@ -40,22 +40,31 @@ export function createHandoverView(host: HandoverHost) {
     text.value = st.text;
     // Drawn again (another range, a message): the control that had focus keeps it.
     const had = dialog.contains(document.activeElement) ? (document.activeElement as HTMLElement).dataset.act ?? null : null;
+    const cloud = cloudBlock(o.key);
+    const glyph = svg('svg', { viewBox: '0 0 20 20' });
+    glyph.append(svg('path', { d: 'M6 2.75h5.5L15 6.25v10a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-12.5a1 1 0 0 1 1-1z' }), svg('path', { d: 'M11.25 2.75v3.75H15M7.75 10.5h4.5M7.75 13.25h3' }));
+    const icon = h('span', { class: 'handover-icon', 'aria-hidden': 'true' }, glyph);
     dialog.replaceChildren(
-      h('header', { class: 'handover-head' }, h('h2', { id: 'handover-title' }, '인수인계 문서'),
+      h('header', { class: 'handover-head' }, icon,
+        h('div', { class: 'handover-titles' }, h('h2', { id: 'handover-title' }, '인수인계 문서'),
+          h('p', { class: 'handover-lead' }, h('span', { class: 'hl-do' }, '새 세션의 첫 메시지에 이 문서를 그대로 붙여 넣고, 그 아래에 이어서 할 일을 적으세요.'), ' ',
+            h('span', { class: 'hl-note' }, '지도와 기록에 있는 내용만 옮겼어요(만들 때 AI를 부르지 않아요). 그 세션의 기록이 들어오면 지도에 ‘인수인계로 이어받음’으로 표시돼요.'))),
         h('button', { type: 'button', class: 'close', 'data-act': 'close', 'aria-label': '닫기', title: '닫기 (Esc)', onclick: close }, '×')),
-      h('p', { class: 'handover-lead' }, '새 세션의 첫 메시지에 이 문서를 그대로 붙여 넣고, 그 아래에 이어서 할 일을 적으세요. 지도와 기록에 있는 내용만 옮겼어요(만들 때 AI를 부르지 않아요). 그 세션의 기록이 들어오면 지도에 ‘인수인계로 이어받음’으로 표시돼요.'),
-      // A web chat keeps no session file: its record comes back through the web AI connector where the site has one, else only
-      // through the request text, pasted by hand.
-      cloudBlock(o.key) ?? h('p', { class: 'handover-web' }, '웹 AI 대화에서 이어 가면 기록이 저절로 들어오지 않아요. 일을 마친 뒤 ',
-        h('button', { type: 'button', class: 'link-button', 'data-act': 'web', onclick: copyWebAsk }, '기록 요청 문구 복사'),
-        '를 눌러 그 대화에 붙여 넣고, 나온 답을 ‘돌아와 읽기 › 기록 붙여넣기’에 넣어 저장하세요.'),
-      h('label', { class: 'handover-scope', for: 'handover-scope' }, h('span', {}, '범위'), pick),
-      text,
-      h('div', { class: 'handover-acts' },
-        h('button', { type: 'button', class: 'primary', 'data-act': 'copy', onclick: copy }, '복사'),
-        h('button', { type: 'button', class: 'secondary', 'data-act': 'save', onclick: save }, '.md로 저장'),
+      // The web AI connector, where this site has one: its own card above the document.
+      ...(cloud ? [cloud] : []),
+      h('div', { class: 'handover-bar' },
+        h('label', { class: 'handover-scope', for: 'handover-scope' }, h('span', {}, '범위'), pick),
         // A document cut down to fit one prompt says so here too, not only inside the text.
-        h('span', { class: 'handover-msg', role: 'status' }, st.msg ?? `${st.text.length.toLocaleString()}자${st.trimmed ? ` · 길어서 부분 ${st.trimmed}개는 줄여 적었어요` : ''}`)));
+        h('span', { class: 'handover-msg', role: 'status' }, st.msg ?? `${st.text.length.toLocaleString()}자${st.trimmed ? ` · 길어서 부분 ${st.trimmed}개는 줄여 적었어요` : ''}`)),
+      text,
+      h('footer', { class: 'handover-foot' },
+        // A web chat keeps no session file: without the connector its record comes back only through the request text, pasted by hand.
+        cloud ? null : h('p', { class: 'handover-web' }, '웹 AI 대화에서 이어 가면 기록이 저절로 들어오지 않아요. 일을 마친 뒤 ',
+          h('button', { type: 'button', class: 'link-button', 'data-act': 'web', onclick: copyWebAsk }, '기록 요청 문구 복사'),
+          '를 눌러 그 대화에 붙여 넣고, 나온 답을 ‘돌아와 읽기 › 기록 붙여넣기’에 넣어 저장하세요.'),
+        h('div', { class: 'handover-acts' },
+          h('button', { type: 'button', class: 'secondary', 'data-act': 'save', onclick: save }, '.md로 저장'),
+          h('button', { type: 'button', class: 'primary', 'data-act': 'copy', onclick: copy }, '복사'))));
     if (had) dialog.querySelector<HTMLElement>(`[data-act="${had}"]`)?.focus();
   }
   /** The web AI connector's part of the dialog: sign in, link this project, then the address to add in claude.ai. */
