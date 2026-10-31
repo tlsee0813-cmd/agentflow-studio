@@ -3278,12 +3278,23 @@ def final_paste_flow(browser, base):
     stored = page.evaluate("Object.values(localStorage).join('\\n')")
     assert not any(v in stored for v in WEB_VALUES), "a draft that holds keys is not kept in this browser"
     page.locator("#lens").get_by_role("button", name="기록 저장").click()
-    expect(page.locator("#lens .rr-foot p[role=status]")).to_have_text("기록을 저장했어요. 키·토큰처럼 보이는 3곳은 가려서 저장했어요.")
+    said = page.locator("#lens .rr-foot p[role=status]")
+    expect(said).to_have_text("기록을 저장했어요. 키·토큰처럼 보이는 3곳은 가려서 저장했어요.")
+    # Saved is said as done, in the quiet green the app uses for success, not in the red box of a refusal.
+    expect(said).to_have_class("pp-ok")
+    assert said.evaluate("e => getComputedStyle(e).color") == "rgb(45, 110, 77)"
     kept = page.evaluate(ENTRY, entry)["pasted"]
     assert len(kept) == 1 and kept[0]["text"].count("[가려진 비밀값]") == 3, kept
     assert "postgresql://admin:[가려진 비밀값]@db.example.com" in kept[0]["text"] and "요구: 결제 화면에 스트라이프 붙여줘" in kept[0]["text"], kept
     stored = page.evaluate("Object.values(localStorage).join('\\n')")
     assert not any(v in stored for v in WEB_VALUES), "nothing in this browser holds them"
+    # The same record again is not saved twice: said as such, as nothing went wrong.
+    page.locator("#lens .rr-paste-open").click()
+    draft.fill(WEB_RECORD)
+    page.locator("#lens").get_by_role("button", name="기록 저장").click()
+    expect(said).to_contain_text("새로 저장하지 않았어요")
+    expect(said).to_have_class("pp-ok")
+    assert len(page.evaluate(ENTRY, entry)["pasted"]) == 1
     assert not errors, errors
     context.close()
 

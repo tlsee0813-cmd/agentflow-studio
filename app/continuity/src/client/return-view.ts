@@ -103,15 +103,17 @@ const FIELD_PROBLEM = { name: `파일 이름은 한 줄 ${EVIDENCE_NAME_MAX}자 
 /** Line ends and a byte order mark, as the file has them (said, never changed). */
 const shape = (t: string) => { const crlf = (t.match(/\r\n/g) ?? []).length, lf = (t.match(/\n/g) ?? []).length - crlf, cr = (t.match(/\r(?!\n)/g) ?? []).length;
   return [t.startsWith('\ufeff') ? 'BOM 있음' : '', crlf && !lf && !cr ? '줄끝 CRLF' : lf && !crlf && !cr ? '줄끝 LF' : crlf || lf || cr ? '줄끝 섞임' : '한 줄'].filter(Boolean).join(' · '); };
+/** What the pane says after an action: ok when it was done (a record kept), else what went wrong. */
+type Said = { text: string; ok: boolean };
 interface State {
   /** The sentence chosen; for a record reading, also the related candidate chosen in it (its reason reads under it). */
   key: string; stage: string; view: View; focus: { list: 'changes' | 'open' | 'records'; n: number; part?: string } | null;
   input: ReadingInput | null; hash: string | null; reading: Reading | null; previous: Reading | null;
-  pending: AbortController | null; error: string | null; storeMsg: string | null; scroll: number;
+  pending: AbortController | null; error: string | null; storeMsg: Said | null; scroll: number;
   /** The reading's request results as left (items, history folds, focused quote), restored by identity on fresh data. */
   requests: RequestReading | null;
   /** The paste being written: the part looked at when it began (context only), and the scene to come back to on close. */
-  pasteContext: string | null; back: Scene | null; pasteMsg: string | null; saving: boolean;
+  pasteContext: string | null; back: Scene | null; pasteMsg: Said | null; saving: boolean;
   /** A quote opened from a selected part: the way back at the top goes to that part's scene, not to this pane's reading. */
   quoteFrom: string | null;
 }
@@ -182,7 +184,7 @@ export function createReturnView(host: ReturnHost) {
     try {
       const res = await askDigest(input.ask, controller.signal, host.accessCode());
       const reading = makeReading(input, hash, res.model, prompt, res.reply), msg = store.keep(key, legacy, reading);
-      if (s && s.key === key && s.hash === hash) { s.reading = reading; s.storeMsg = msg; s.focus = null; s.view = { kind: 'reading' }; }
+      if (s && s.key === key && s.hash === hash) { s.reading = reading; s.storeMsg = msg ? { text: msg, ok: false } : null; s.focus = null; s.view = { kind: 'reading' }; }
     } catch (e) {
       const code = e instanceof AskError ? e.code : 'NETWORK';
       if (s && s.key === key && code !== 'CANCELLED') s.error = ERROR_TEXT[code] ?? '정리하지 못했어요. 원자료는 그대로 읽을 수 있어요.';
@@ -218,8 +220,8 @@ export function createReturnView(host: ReturnHost) {
   async function savePaste() {
     const o = host.current(); if (!s || !o || s.saving) return;
     const key = s.key, text = draftOf(key);
-    if (!text.trim()) { s.pasteMsg = '붙여 넣을 글이 아직 없어요.'; render(); return; }
-    if (secretLike(text)) { s.pasteMsg = '키나 토큰처럼 보이는 글이 있어 저장하지 않았어요. 그 부분을 지우고 다시 저장하세요.'; render(); return; }
+    if (!text.trim()) { s.pasteMsg = { text: '붙여 넣을 글이 아직 없어요.', ok: false }; render(); return; }
+    if (secretLike(text)) { s.pasteMsg = { text: '키나 토큰처럼 보이는 글이 있어 저장하지 않았어요. 그 부분을 지우고 다시 저장하세요.', ok: false }; render(); return; }
     // The box stays editable while saving: only the text that was saved leaves the draft. Whatever was written meanwhile stays,
     // and the box stays open with it. A pane closed or reopened meanwhile is another state: it is only told by the draft.
     // A session put after other text is kept as its own record (the box put a NEXT_RECORD line before it): a session is told by its
@@ -233,12 +235,12 @@ export function createReturnView(host: ReturnHost) {
     const kept = typeof done !== 'string', untouched = draftOf(key) === text;
     if (kept && untouched) keepDraft(key, '');
     if (s !== st) return;
-    if (!kept) { st.pasteMsg = done; render(); return; }
+    if (!kept) { st.pasteMsg = { text: done, ok: false }; render(); return; }
     const r = host.current()?.project.pasted.find(x => x.id === done.id);
     const said = done.duplicate ? `같은 글을 ${r ? fullTime(r.at) : '앞서'}에 붙여 넣었어요. 새로 저장하지 않았어요.`
       : `${parts.length > 1 ? '세션마다 기록을 하나씩 나눠 저장했어요.' : '기록을 저장했어요.'}${n ? ` 키·토큰처럼 보이는 ${n}곳은 가려서 저장했어요.` : ''}`;
-    if (!untouched) { st.pasteMsg = `${said} 저장하는 동안 쓴 글은 초안으로 남겨 두었어요.`; render(); void refresh(); return; }
-    st.pasteContext = null; st.pasteMsg = null; st.storeMsg = said;
+    if (!untouched) { st.pasteMsg = { text: `${said} 저장하는 동안 쓴 글은 초안으로 남겨 두었어요.`, ok: true }; render(); void refresh(); return; }
+    st.pasteContext = null; st.pasteMsg = null; st.storeMsg = { text: said, ok: true };
     await refresh();
     const src = s === st ? sources().find(x => x.recordId === done.id) : null;
     if (s === st && src) { st.view = { kind: 'source', source: structuredClone(src), from: 'material', quote: null }; render(); }
@@ -405,7 +407,7 @@ export function createReturnView(host: ReturnHost) {
     const r = host.current()?.project.pasted.find(x => x.id === done.id);
     const said = done.duplicate ? `같은 원문을 같은 종류·이름·판본·출처로 ${r ? fullTime(r.at) : '앞서'}에 저장했어요. 새로 저장하지 않았어요.` : '자료를 저장했어요. AI에는 보내지 않았어요.';
     if (!same) { d.msg = `${said} 저장하는 동안 바뀐 양식은 그대로 남겨 두었어요.`; render(); void refresh(); return; }
-    st.storeMsg = said;
+    st.storeMsg = { text: said, ok: true };
     await refresh();
     const src = s === st ? sources().find(x => x.recordId === done.id) : null;
     if (s === st && src) { st.view = { kind: 'source', source: structuredClone(src), from: 'material', quote: null }; fromTop = true; render(); requestAnimationFrame(() => document.querySelector<HTMLElement>('#lens .rr-back')?.focus({ preventScroll: true })); }
@@ -614,7 +616,7 @@ export function createReturnView(host: ReturnHost) {
       return out;
     }
     if (state.error) out.append(h('p', { class: 'pp-error', role: 'alert' }, state.error));
-    if (state.storeMsg) out.append(h('p', { class: 'pp-error', role: 'status' }, state.storeMsg));
+    if (state.storeMsg) out.append(h('p', { class: state.storeMsg.ok ? 'pp-ok' : 'pp-error', role: 'status' }, state.storeMsg.text));
     const can = status.ai === 'deepseek' && !!status.digest && !!state.input?.ask.sources.length;
     if (r) {
       const cov = r.coverage.sent < r.coverage.total ? `자료 ${r.coverage.total}개 중 ${r.coverage.sent}개` : `자료 ${r.coverage.sent}개`;
@@ -727,7 +729,7 @@ export function createReturnView(host: ReturnHost) {
       h('p', { class: 'fine' }, '나누거나 종류·부분을 고르지 않아도 돼요. 저장한 뒤 지도 정리나 요약을 누를 때만 AI에 보내요.'),
       ctx ? h('p', { class: 'rr-context' }, h('span', {}, '보던 부분'), partChip(ctx),
         h('button', { type: 'button', class: 'link-button quiet', title: '읽기 맥락에서 빼요', onclick: () => { st.pasteContext = null; render(); } }, '빼기')) : null,
-      sessionBox(st.key), area, warn, count, hiding, st.pasteMsg ? h('p', { class: 'pp-error', role: 'alert' }, st.pasteMsg) : null)];
+      sessionBox(st.key), area, warn, count, hiding, st.pasteMsg ? h('p', { class: st.pasteMsg.ok ? 'pp-ok' : 'pp-error', role: st.pasteMsg.ok ? 'status' : 'alert' }, st.pasteMsg.text) : null)];
   }
   function pasteFooter(): Node {
     const st = s!;
