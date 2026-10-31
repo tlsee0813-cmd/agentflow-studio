@@ -618,3 +618,12 @@ test('SESSIONS-AC2 a folder path pasted in quotes (Windows Explorer\'s "copy as 
     assert.equal(t.binding().folders[0].path, 'C:\\work\\salon', typed); assert.equal(t.texts().length, 1, typed);
   }
 });
+
+test('SESSIONS-AC3 one Windows folder written with another drive-letter case or a trailing separator is linked once; other paths keep their case', async () => {
+  const t = tab(source([{ id: ID, cwd: 'C:\\work\\salon', updatedAt: ago(30), turns: pair(40, 'WIN-PROMPT', 'ok') }]));
+  t.sync.connect('C:\\work\\salon'); await settle(); t.sync.connect('c:\\work\\salon\\'); await settle();
+  assert.deepEqual(t.binding().folders.map(f => f.path), ['C:\\work\\salon']); assert.equal(t.texts().length, 1);
+  const u = tab(source([]));
+  u.sync.connect('/work/Salon'); await settle(); u.sync.connect('/work/salon'); await settle();
+  assert.deepEqual(u.binding().folders.map(f => f.path), ['/work/Salon', '/work/salon']);
+});

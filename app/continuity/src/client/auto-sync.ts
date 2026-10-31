@@ -11,6 +11,7 @@ import type { Project } from '../shared/types.js';
 import { ERROR_TEXT } from './studio-api.js';
 import type { SessionSources } from './session-source.js';
 import { newTurns, markAfter, leftSince, sessionText, sessionChunks, stamp, TOOL_NAME, SETTLE_MS, AUTO_RUN_GAP_MS, AUTO_RUNS_PER_DAY, BACKFILL_MS, BACKFILL_SESSIONS, type SessionDetail, type SessionMark, type SessionSummary } from '../shared/session-import.js';
+import { sameFolder } from '../shared/session-parse.js';
 import { h, put } from './plan-dom.js';
 
 export const AUTOSYNC_KEY = 'agentflow.studio.autosync.1';
@@ -211,21 +212,22 @@ export function createAutoSync(host: AutoSyncHost) {
       const by = new Map<string, { folder: string; count: number; latest: string; tools: Set<string> }>();
       for (const s of await src.list()) {
         if (!s.cwd) continue;
-        const f = by.get(s.cwd) ?? { folder: s.cwd, count: 0, latest: s.updatedAt, tools: new Set<string>() };
-        f.count++; if (s.updatedAt > f.latest) f.latest = s.updatedAt; f.tools.add(TOOL_NAME[s.tool]); by.set(s.cwd, f);
+        // One folder written two ways (C:\work and c:\work, a trailing separator) is one row, named as its newest session has it.
+        const k = [...by.keys()].find(x => sameFolder(x, s.cwd!)) ?? s.cwd, f = by.get(k) ?? { folder: s.cwd, count: 0, latest: s.updatedAt, tools: new Set<string>() };
+        f.count++; if (s.updatedAt > f.latest) { f.latest = s.updatedAt; f.folder = s.cwd; } f.tools.add(TOOL_NAME[s.tool]); by.set(k, f);
       }
       folders = [...by.values()].sort((a, b) => b.latest.localeCompare(a.latest));
     } catch (e) { foldersError = failText(e, '세션 기록을 찾지 못했어요.'); }
     foldersLoading = false; render();
   }
-  /** Connects the open project to a folder: the first one makes the connection, another is added to it (once). */
+  /** Connects the open project to a folder: the first one makes the connection, another is added to it (once, however it is written). */
   function connect(folder: string) {
     // A path copied from Windows Explorer ('경로로 복사', Ctrl+Shift+C) comes in quotes: the folder is what is inside them.
     const o = open(), path = folder.trim().replace(/^(["'])(.+)\1$/, '$2').trim(); if (!o || !path) return;
     const now = new Date(), link: FolderLink = { path, connectedAt: now.toISOString(), since: new Date(now.getTime() - BACKFILL_MS).toISOString(), backfilled: false };
     // Connecting again after the connection ended goes on from the sessions' marks kept with it.
     const b = stored(o.key);
-    if (b) { if (!b.folders.some(f => f.path === path)) b.folders.push(link); if (b.folders.length === 1) b.error = null; put_(o.key, b); }
+    if (b) { if (!b.folders.some(f => sameFolder(f.path, path))) b.folders.push(link); if (b.folders.length === 1) b.error = null; put_(o.key, b); }
     else put_(o.key, { folders: [link], marks: {}, runs: { day: day(now), n: 0, last: null }, taken: 0, lastCheck: null, error: null });
     panelOpen = false; adding = false; typed = ''; render(); void tick(true);
   }
@@ -273,7 +275,7 @@ export function createAutoSync(host: AutoSyncHost) {
           h('button', { type: 'button', class: 'link-button quiet sync-off', onclick: disconnect }, '연결 끊기')));
       return;
     }
-    const linked = new Set(b?.folders.map(f => f.path) ?? []), picks = folders?.filter(f => !linked.has(f.folder)) ?? null;
+    const picks = folders?.filter(f => !b?.folders.some(x => sameFolder(x.path, f.folder))) ?? null;
     // No source yet: the session folders are picked (or allowed again) first.
     if (!host.sources.current()) {
       put(panel, h('h3', {}, '내 AI 세션 연결'), setup,
