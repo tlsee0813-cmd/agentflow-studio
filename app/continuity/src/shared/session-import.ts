@@ -6,7 +6,7 @@
 import { PASTED_TEXT_LIMIT } from './types.js';
 import { redactSecrets, secretLike } from './secret.js';
 import { foldHandover } from './handover-mark.js';
-import { shortPath } from './session-parse.js';
+import { changedPath } from './session-parse.js';
 
 export interface SessionTurn { role: 'user' | 'assistant'; at: string | null; text: string; files?: string[] }
 /** aliases: ids the same session had before ids were made from the session itself (from its file's path): marks kept under one
@@ -126,13 +126,13 @@ export function newTurns(s: SessionDetail, mark: SessionMark | null, from: strin
 }
 /** The files a reply names now that were not taken with it. A file outside the session's folders is named by its whole path until
  * the session works in a folder that holds it (a later line names that folder); from then on by the rest of that path, as the
- * reading names it (the first of its folders that holds it). So a whole name taken stands for the name it has now, and for no
- * other file (another repository's src/index.ts is not this folder's). Without the folders (an older server), it stands for one
- * name that ends so, the longest. */
+ * reading names it (changedPath). So a whole name taken stands for the name it has now, and for no other file (another
+ * repository's src/index.ts is not this folder's). Without the folders (an older server), it stands for one name that ends so,
+ * the longest. */
 const whole = (f: string) => /^(?:[A-Za-z]:[\\/]|\\\\|\/)/.test(f), slashed = (f: string) => f.replace(/\\/g, '/');
 function untaken(taken: string[], now: string[], s: Pick<SessionDetail, 'cwd' | 'cwds'>): string[] {
   const moved = taken.filter(x => whole(x) && !now.includes(x)), same = new Set<string>();
-  if (s.cwds) for (const x of moved) { const n = shortPath(x, s.cwds.find(c => shortPath(x, c) !== x) ?? s.cwd); if (n !== x) same.add(n); }
+  if (s.cwds) for (const x of moved) { const n = changedPath(x, s); if (n !== x) same.add(n); }
   else for (const f of now.filter(f => !whole(f) && !taken.includes(f)).sort((a, b) => b.length - a.length)) {
     const i = moved.findIndex(x => slashed(x).endsWith(`/${slashed(f)}`)); if (i >= 0) { same.add(f); moved.splice(i, 1); }
   }

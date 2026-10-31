@@ -360,6 +360,8 @@ export function shortPath(file: string, cwd: string | null): string {
   const f = file.replace(/\\/g, '/'), base = folderKey(cwd), key = folderKey(f);
   return key.startsWith(`${base}/`) ? f.slice(base.length + 1) : windows(base) && !/^([a-z]:|\/)/i.test(f) ? f : file;
 }
+/** A changed file as a session names it: from the first of its working folders that holds it, else from the one it was last in. */
+export const changedPath = (file: string, s: { cwd: string | null; cwds?: string[] }) => shortPath(file, (s.cwds ?? []).find(c => shortPath(file, c) !== file) ?? s.cwd);
 
 /** What names a session whatever folder its file was found through, or moved to (Codex archives old threads): Claude Code names
  * each file after its session id, Codex writes its thread id in the first line (an early file without one goes by its name). The
@@ -385,7 +387,7 @@ export function sessionDetail(id: string, tool: SessionTool, s: ParsedSession, l
   const turns = Number.isFinite(from) ? s.turns.filter(t => !t.at || !(Date.parse(t.at) < from)) : s.turns;
   const forward = Number.isFinite(from), kept: SessionTurn[] = []; let used = 0;
   for (let k = 0; k < turns.length; k++) {
-    const t = turns[forward ? k : turns.length - 1 - k]!, text = clip(t.role === 'user' ? foldHandover(t.text) : t.text, limits.turnChars), files = [...new Set((t.files ?? []).map(x => shortPath(x, s.meta.cwds.find(c => shortPath(x, c) !== x) ?? s.meta.cwd)))];
+    const t = turns[forward ? k : turns.length - 1 - k]!, text = clip(t.role === 'user' ? foldHandover(t.text) : t.text, limits.turnChars), files = [...new Set((t.files ?? []).map(x => changedPath(x, s.meta)))];
     used += text.length + files.join('').length;
     if (used > limits.replyChars && kept.length >= (forward ? 2 : 1)) {
       // A reading from a mark ends past the mark's own time and never between turns of one time: the next is read from the last time
