@@ -3259,6 +3259,8 @@ WEB_RECORD = ("[웹 AI 세션 기록 · 결제 연결 · 작업 폴더 C:\\Users
     "DATABASE_URL=postgresql://admin:FakePass123@db.example.com:5432/prod\nSTRIPE_SECRET_KEY=sk_live_" + "FAKEfake" * 3 + "\n"
     "JWT=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJGQUtFIn0." + "FAKEfake" * 3 + "\n요구: 결제 화면에 스트라이프 붙여줘\n\n── 웹 AI 답변 ──\n결제 화면에 Stripe Checkout을 연결하는 코드를 드렸어요.")
 WEB_VALUES = ("FakePass123", "sk_live_", "eyJzdWIi")
+CODEX_RECORD = ("[Codex 세션 기록 · 작업 폴더 /work/salon · 브랜치 main · 2026-10-29 08:00 시작 · 세션 codex-0123456789abcdef01234567]\n\n"
+    "── 사용자 요청 · 08:00 ──\n예약 확정 문자 보내 줘\n\n── Codex 답변 · 08:02 ──\n문자 발송을 붙였어요.\n(바꾼 파일: src/sms.ts)")
 
 
 def final_paste_flow(browser, base):
@@ -3342,6 +3344,15 @@ def final_paste_flow(browser, base):
     expect(page.locator("#lens #file-rule")).to_contain_text("자동 연결 중이라, 저장하면 다음 자동 지도 갱신 때 AI에 보내요.")
     expect(page.locator("#lens #file-rule")).not_to_contain_text("저장해도 AI에 보내지 않아요")
     expect(foot).to_have_text("저장하면 다음 자동 지도 갱신 때 AI에 보내요")
+    # A session with no title (every Codex session) is named by its first request, as the part summary and the handover document
+    # name it (partSessions), not by when it started.
+    page.locator("#space-empty").get_by_role("button", name="기록 붙여넣기").click()
+    draft.fill(CODEX_RECORD)
+    page.locator("#lens").get_by_role("button", name="기록 저장").click()
+    expect(page.locator("#lens .rr-record h3")).to_have_text("Codex 「예약 확정 문자 보내 줘」 · salon")
+    page.locator("#lens .rr-head .close").click()
+    page.locator("#return-entry").click()
+    expect(page.locator("#lens .rr-src", has_text="예약 확정 문자").locator("strong")).to_have_text("Codex 「예약 확정 문자 보내 줘」 · salon")
     assert not errors, errors
     context.close()
 
