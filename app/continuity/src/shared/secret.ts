@@ -92,10 +92,10 @@ function secretPart(raw: string, w: Where): [string, string] | null {
   return v.length >= 8 && !wordy(v) && ((digit && letter) || (v.length >= 16 && mixed)) ? [v, rest] : null;
 }
 const QUOTED = `(?<q>\\\\?["'\`])(?<qv>(?:(?!\\k<q>)[^\\n]){1,500}?)\\k<q>`;
-// A name ending in what it holds (apiKey, DB_PASSWORD, x-api-key, client_secret, "token", EMAIL_PASS, os.environ["X_API_KEY"]),
-// then ':', '=', ':=' or '=>' (not '==' or '::'), maybe quoted (JSON escaped too): .env, shell, YAML, JSON, code, PHP, Go, headers.
-// MAX_TOKENS does not end so.
-const SETTING = new RegExp(`(?<keep>\\b(?<name>[A-Za-z0-9_.-]{0,40}?(?:password|passwd|passphrase|pwd|pw|pass|secret|token|key|key_base|credentials?|sess(?:ion)?_?id))\\\\?["']?\\]?[ \\t]*(?::=|=>|[:=](?![=:]))[ \\t]*)(?:${QUOTED}|(?<uv>[^\\s"'\`]{1,2000}))`, 'gi');
+// A name ending in what it holds (apiKey, DB_PASSWORD, x-api-key, client_secret, "token", EMAIL_PASS, client-key-data,
+// os.environ["X_API_KEY"]), then ':', '=', ':=' or '=>' (not '==' or '::'), maybe quoted (JSON escaped too): .env, shell, YAML,
+// JSON, code, PHP, Go, headers, kubeconfig. MAX_TOKENS does not end so.
+const SETTING = new RegExp(`(?<keep>\\b(?<name>[A-Za-z0-9_.-]{0,40}?(?:password|passwd|passphrase|pwd|pw|pass|secret|token|key|key_base|key-data|credentials?|sess(?:ion)?_?id))\\\\?["']?\\]?[ \\t]*(?::=|=>|[:=](?![=:]))[ \\t]*)(?:${QUOTED}|(?<uv>[^\\s"'\`]{1,2000}))`, 'gi');
 // A value given in a sentence. Unquoted it is ASCII only, so the Korean after it ends it (FakePass123!이고), and it never runs into
 // a value hidden already. The name may take a Korean topic, subject or object particle (비밀번호는, token은).
 const SAID = `(?:${QUOTED}|(?<uv>[!-~]{1,500})(?![!-~]|가려진 비밀값\\]))`, PARTICLE = '(?:은|는|이|가|을|를)';
@@ -124,11 +124,15 @@ const HIDE: RegExp[] = [
   // A PuTTY key file's private lines.
   /(?<keep>Private-Lines: *\d+[ \t]*\r?\n)(?:[A-Za-z0-9+/=]+[ \t]*(?:\r?\n|$))+/g,
   new RegExp(SECRET.source, 'g'),
-  // Tokens with a known shape: JWTs, Stripe, npm, GitLab, Hugging Face, Google OAuth, Slack webhooks, Telegram and Discord bots.
+  // Tokens with a known shape: JWTs, Stripe, npm, GitLab, Hugging Face, Google OAuth, Groq, SendGrid, Shopify, DigitalOcean,
+  // Replicate, Perplexity, Atlassian, Linear, Notion, Slack apps and webhooks, Discord webhooks, Telegram and Discord bots.
   /\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/g,
   /\b(?:[sr]k_(?:live|test)|whsec)_[A-Za-z0-9]{10,}/g,
-  /\bnpm_[A-Za-z0-9]{20,}/g, /\bglpat-[A-Za-z0-9_-]{16,}/g, /\bhf_[A-Za-z0-9]{20,}/g, /\bya29\.[A-Za-z0-9_-]{20,}/g,
+  /\bnpm_[A-Za-z0-9]{20,}/g, /\bglpat-[A-Za-z0-9_-]{16,}/g, /\bhf_[A-Za-z0-9]{20,}/g, /\bya29\.[A-Za-z0-9_-]{20,}/g, /\bGOCSPX-[\w-]{20,}/g,
+  /\bgsk_[A-Za-z0-9]{20,}/g, /\bSG\.[\w-]{16,}\.[\w-]{16,}/g, /\bshp(?:at|ss|ca|pa)_[A-Fa-f0-9]{32}/g, /\bdop_v1_[a-f0-9]{64}/g, /\br8_[A-Za-z0-9]{30,}/g,
+  /\bpplx-[A-Za-z0-9]{40,}/g, /\bATATT[\w=-]{20,}/g, /\blin_api_[A-Za-z0-9]{30,}/g, /\bntn_[A-Za-z0-9]{30,}/g, /\bxapp-\d-[A-Z0-9]+-\d+-[a-z0-9]+/g,
   /(?<keep>https:\/\/hooks\.slack\.com\/)(?:services|workflows|triggers)\/[A-Za-z0-9_/-]+/g,
+  /(?<keep>https:\/\/(?:ptb\.|canary\.)?discord(?:app)?\.com\/api\/webhooks\/)\d+\/[\w-]+/g,
   /\b\d{6,12}:AA[A-Za-z0-9_-]{30,}/g,
   /\b[MNO][A-Za-z\d_-]{17,27}\.[A-Za-z\d_-]{6}\.[A-Za-z\d_-]{27,}/g,
   // An Authorization header's value after a known scheme: anything token-like.
@@ -155,10 +159,11 @@ const WEIGHED: Weighed[] = [
   // config: "--api-key", "…"). --max-tokens, --token-file and --password-stdin hold none.
   { re: /(?<keep>(?<![\w-])--(?<name>[\w-]{0,40}?(?:password|passwd|secret|token|api[-_]?key|access[-_]?key))(?:[= ][ \t]*["']?|\\?["'][ \t]*,[ \t]*\\?["']))(?<uv>[^\s"'\\]{1,500})/gi,
     where: () => ({ secret: true, env: false, literal: true }) },
-  // Other command lines that take a password as an argument, Windows' setx NAME value, and an XML element that holds one (Maven's
-  // settings.xml, NuGet).
+  // Other command lines that take a password as an argument, aws configure's prompt, Windows' setx NAME value, and an XML element
+  // that holds one (Maven's settings.xml, NuGet).
   { re: /(?<keep>\b(?:sshpass\b[^\n]{0,100}?\s-p|redis-cli\b[^\n]{0,200}?\s-a|docker[ \t]+login\b[^\n]{0,200}?\s-p)[ \t]*["']?)(?<uv>[^\s"']{1,500})/g,
     where: () => ({ secret: true, env: false, literal: true }) },
+  { re: /(?<keep>\bAWS Secret Access Key \[[^\]\n]{0,40}\]:[ \t]*)(?<uv>\S{1,500})/g, where: () => ({ secret: true, env: false, literal: true }) },
   { re: /(?<keep>\bsetx[ \t]+(?<name>[A-Za-z0-9_]{0,40}?(?:password|passwd|pass|pwd|secret|token|key))[ \t]+["']?)(?<uv>[^\s"']{1,500})/gi,
     where: () => ({ secret: true, env: false, literal: true }) },
   { re: /(?<keep><(?<name>[\w:.-]{0,40}?(?:password|passwd|passphrase|secret|token|apikey|api_key|api-key))>)(?<uv>[^<\n]{1,500})(?=<\/)/gi,

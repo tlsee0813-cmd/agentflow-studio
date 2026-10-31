@@ -240,6 +240,24 @@ test('SESSIONS-RD7 a URL password holding a slash or an unencoded @ is hidden wh
     assert.deepEqual(redactSecrets(text), { text, count: 0 }, text);
 });
 
+test('SESSIONS-RD8 keys of a known shape are hidden with no name before them; a Discord webhook keeps its address, aws configure and kubeconfig their names', () => {
+  const FAKE = f('FAKEfake', 'FAKEfake', '0123456789'), HEX = '0123456789abcdef';
+  for (const [text, keep] of [
+    [f('이 키 써줘 ', 'gsk_', FAKE, 'FAKEfake01'), '이 키 써줘 '], [f('SG.', 'FAKEfakeFAKEfake012345', '.', FAKE, 'FAKEfake012345', ' 이게 sendgrid 키야'), ' 이게 sendgrid 키야'],
+    [f('디스코드 웹훅 https://discord.com/api/webhooks/', '123456789012345678/', FAKE, '-FAKE 로 알림 보내줘'), 'https://discord.com/api/webhooks/'],
+    [f('구글 로그인 client secret ', 'GOCSPX-', FAKE), '구글 로그인 client secret '], [f('shopify 토큰 ', 'shpat_', HEX, HEX), 'shopify 토큰 '],
+    [f('r8_', FAKE, 'FAKEfake'), ''], [f('pplx-', FAKE, FAKE), ''], [f('dop_v1_', HEX.repeat(4)), ''], [f('ATATT', '3xFfGF0', FAKE), ''],
+    [f('lin_api_', FAKE, 'FAKE'), ''], [f('ntn_', FAKE, 'FAKEfake'), ''], [f('xapp-', '1-A0FAKE0FAKE-1234567890123-', HEX), ''],
+    [f('AWS Secret Access Key [None]: ', 'FAKEfakeFAKE/fake+', FAKE), 'AWS Secret Access Key [None]: '],
+    [f('    client-key-data: ', 'LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpN', 'SUlFRkFLRQ=='), '    client-key-data: ']]) {
+    const r = redactSecrets(text);
+    assert.ok(!r.text.includes('FAKEfake') && !r.text.includes(HEX) && !r.text.includes('LS0tLS1') && r.text.includes(keep) && r.text.includes(hidden) && r.count === 1, `${text} -> ${r.text}`);
+    assert.deepEqual(redactSecrets(r.text), { text: r.text, count: 0 }, 'hidden once, never again');
+  }
+  for (const text of ['https://discord.com/developers/docs/resources/webhook', 'Groq 키 받는 곳 링크 걸어 줘', 'GOCSPX로 시작하는 값은 클라이언트 시크릿이야', 'the r8_ prefix'])
+    assert.deepEqual(redactSecrets(text), { text, count: 0 }, text);
+});
+
 test('SESSIONS-RT1 the whole record is hidden and cleaned, its header too, so it can always be kept', () => {
   const d = session([{ role: 'user', at: T(0), text: '색 출력 \u001b[31m빨강\u001b[0m 그리고 제목\u000b부제목\u0007' }, { role: 'assistant', at: T(1), text: '고쳤어요', files: ['src/a.ts'] }],
     { cwd: 'C:\\work\\sk-telecom-portal-renewal', branch: 'feature/sk-1234-fix-login-redirect', title: `키 ${f('sk-', 'proj-', 'FAKE'.repeat(6))} 넣고 테스트` });
