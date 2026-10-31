@@ -6,8 +6,8 @@ import assert from 'node:assert/strict';
 import * as D from '../dist/public/shared/domain.js';
 import * as M from '../dist/public/shared/map-reading.js';
 import { studioView } from '../dist/public/shared/studio.js';
-import { sessionText, sessionChunks, newTurns } from '../dist/public/shared/session-import.js';
-import { handoverText, handoverDoc, handoverCode, foldHandover, foldRecord, receivedHandovers, sessionOrigin, partSessions, HANDOVER_CHARS } from '../dist/public/shared/handover.js';
+import { sessionText, sessionChunks, newTurns, stamp } from '../dist/public/shared/session-import.js';
+import { handoverText, handoverDoc, handoverCode, foldHandover, foldRecord, receivedHandovers, sessionOrigin, partSessions, originLabel, HANDOVER_CHARS } from '../dist/public/shared/handover.js';
 
 const ID = 'claude-0123456789abcdef01234567', NEXT = 'codex-89abcdef0123456789abcdef';
 const session = (id, turns, extra = {}) => ({ id, tool: id.startsWith('codex') ? 'codex' : 'claude', label: '', title: '휴무일 연결', cwd: '/work/salon', branch: 'main', startedAt: '2026-10-28T09:00:00.000Z', turns, omitted: 0, ...extra });
@@ -16,6 +16,7 @@ const TURNS = [
   { role: 'assistant', at: '2026-10-28T09:05:00.000Z', text: '휴무일이면 예약 버튼을 막았어요.', files: ['src/hours.ts', 'tests/hours.test.ts'] }
 ];
 let n = 0;
+const START = stamp('2026-10-28T09:00:00.000Z', true);
 const meta = () => ({ id: `R_h_${++n}`, at: new Date().toISOString(), model: 'stub', prompt: 'm-000000000000', hash: String(n).padStart(64, 'd') });
 
 /** The two-part map the tests share; candidates (their text and parts) are left open by the reading if given. */
@@ -75,12 +76,12 @@ test('HANDOVER-F1 a new session that starts from the document: the document fold
   // Taken in through the session import: the record is short, names the session, and the part lists it as having taken over.
   const next = sessionText(session(NEXT, [{ role: 'user', at: '2026-10-30T06:00:00.000Z', text: prompt }, { role: 'assistant', at: '2026-10-30T06:01:00.000Z', text: '테스트를 돌렸어요.' }], { title: null })).text;
   assert.ok(!next.includes('## 이어받는 방법') && next.includes('af-handover:QW3RTY'));
-  assert.deepEqual(sessionOrigin(next), { id: NEXT, tool: 'codex', title: null, cwd: '/work/salon', branch: 'main' });
+  assert.deepEqual(sessionOrigin(next), { id: NEXT, tool: 'codex', title: null, cwd: '/work/salon', branch: 'main', start: START });
   const q = D.pasteRecord(p, next, null).project;
   const s = partSessions(q, booking);
   assert.deepEqual(s.map(x => [x.id, x.worked, x.tookOver]), [[NEXT, false, true], [ID, true, false]]);
   assert.deepEqual(partSessions(q, null).map(x => x.id).sort(), [ID, NEXT].sort());
-  assert.ok(handoverText(q, { scope: booking, code: 'ZXC234', at: '2026-10-30T07:00:00.000Z' }).includes('Codex 세션 (인수인계로 이어받음)'));
+  assert.ok(handoverText(q, { scope: booking, code: 'ZXC234', at: '2026-10-30T07:00:00.000Z' }).includes('- 다룬 세션: Codex 「이거 읽고 이어서 해 줘」 (인수인계로 이어받음), Claude Code 「휴무일 연결」\n'));
   // The part's next document shows what that session did, though no reading has quoted it yet: the request it started with, and
   // those of a later record of it, which does not repeat the marker.
   const later = sessionText(session(NEXT, [{ role: 'user', at: '2026-10-30T06:10:00.000Z', text: '실패한 테스트 고쳐 줘' }, { role: 'assistant', at: '2026-10-30T06:20:00.000Z', text: '고쳤어요.', files: ['src/booking.ts'] }], { title: null })).text;
@@ -94,7 +95,7 @@ test('HANDOVER-F1 a new session that starts from the document: the document fold
 
 test('HANDOVER-O1 session origin: header fields read back; other records are not sessions', () => {
   const text = sessionText(session(ID, TURNS, { title: '휴무일 · 연결' })).text;
-  assert.deepEqual(sessionOrigin(text), { id: ID, tool: 'claude', title: '휴무일 · 연결', cwd: '/work/salon', branch: 'main' });
+  assert.deepEqual(sessionOrigin(text), { id: ID, tool: 'claude', title: '휴무일 · 연결', cwd: '/work/salon', branch: 'main', start: START });
   assert.equal(sessionOrigin('요구: 예약 화면'), null);
   // An empty project still gets a usable document, which points to nothing that is not in it.
   const t = handoverText(D.createProject(), { scope: null, code: 'EMPTY2', at: '2026-10-30T05:00:00.000Z' });
@@ -158,9 +159,27 @@ function readAs(p, parts, relations = []) {
   return M.applyReading(p, inp, M.validateMapReply(reply, inp.ask), meta()).project;
 }
 
+test('HANDOVER-T1 a session without a title is named by its first request, else by when it started: two Codex sessions of one folder read apart', () => {
+  const A = 'codex-aaaaaaaaaaaaaaaaaaaaaaaa', B = 'codex-bbbbbbbbbbbbbbbbbbbbbbbb', C = 'codex-cccccccccccccccccccccccc';
+  const add = (p, ...texts) => texts.reduce((q, t) => D.pasteRecord(q, t, null).project, p);
+  let p = add(D.createProject(), sessionText(ask(A, '예약이 확정되면 손님에게 문자를 보내 줘')).text, sessionText(ask(B, '예약 확정 문자에 가게 주소도 넣어 줘. 지도 링크도 같이')).text);
+  p = readAs(p, [['알림 문자', ['문자를 보내 줘', '가게 주소도 넣어 줘']]]);
+  // A later record of the same session keeps the name its first request gave it.
+  p = add(p, sessionText(ask(A, '문자 문구를 더 짧게 해 줘')).text);
+  // One that starts from the part's document with no words of its own is named by when it started.
+  const sms = p.space.areas[0].id, doc = handoverText(p, { scope: sms, code: 'NAM234', at: AT });
+  p = add(p, sessionText(session(C, [{ role: 'user', at: '2026-10-30T07:00:00.000Z', text: doc }, { role: 'assistant', at: '2026-10-30T07:01:00.000Z', text: '읽었어요.' }], { title: null, startedAt: '2026-10-30T07:00:00.000Z' })).text);
+  const a = 'Codex 「예약이 확정되면 손님에게 문자를 보내 줘」', b = 'Codex 「예약 확정 문자에 가게 주소도 넣어 줘. 지…」', c = `Codex 세션 (${stamp('2026-10-30T07:00:00.000Z', true).slice(5)} 시작)`;
+  assert.deepEqual(partSessions(p, sms).map(originLabel).sort(), [a, b, c].sort());
+  const t = handoverText(p, { scope: sms, code: 'NAM235', at: AT });
+  for (const s of [`\n- ${a} · 작업 폴더 /work/salon · 브랜치 main\n`, `\n- ${b} · 작업 폴더 /work/salon · 브랜치 main\n`, `\n- ${c} · 작업 폴더 /work/salon · 브랜치 main · 인수인계로 이어받은 세션\n`, `${c} (인수인계로 이어받음)`])
+    assert.ok(t.includes(s), `missing: ${s}\n${t}`);
+  assert.ok(!t.includes('Codex 세션 ·') && !t.includes('Codex 세션,'), t);
+});
+
 test('HANDOVER-O2 a title that starts like a header field or holds " · " stays the title: the fields are read back from the end', () => {
   for (const title of ['세션 만료 처리', '브랜치 정리하고 PR 만들기', '로그인 · 세션 유지 기능', '작업 폴더 정리', '2026-10-28 09:00 시작'])
-    assert.deepEqual(sessionOrigin(sessionText(session(ID, TURNS, { title, cwd: 'C:\\work\\salon' })).text), { id: ID, tool: 'claude', title, cwd: 'C:\\work\\salon', branch: 'main' }, title);
+    assert.deepEqual(sessionOrigin(sessionText(session(ID, TURNS, { title, cwd: 'C:\\work\\salon' })).text), { id: ID, tool: 'claude', title, cwd: 'C:\\work\\salon', branch: 'main', start: START }, title);
   // Fields that are not known are not written: what is there is still read in its place.
   assert.deepEqual(sessionOrigin(sessionText(session(ID, TURNS, { title: '브랜치 정리하고 PR 만들기', branch: null, startedAt: null })).text), { id: ID, tool: 'claude', title: '브랜치 정리하고 PR 만들기', cwd: '/work/salon', branch: null });
   assert.deepEqual(sessionOrigin(sessionText(session(ID, TURNS, { title: '세션 만료 처리', cwd: null, branch: null, startedAt: null })).text), { id: ID, tool: 'claude', title: '세션 만료 처리', cwd: null, branch: null });

@@ -12,7 +12,8 @@ import { HANDOVER_TAG, foldHandover, quoteReceived, receivedHandovers } from './
 export { HANDOVER_TAG, foldHandover, handoverCode, receivedHandovers } from './handover-mark.js';
 
 /* ---------- which session a record came from ---------- */
-export interface SessionOrigin { id: string | null; tool: SessionTool | 'web'; title: string | null; cwd: string | null; branch: string | null }
+/** start: when the session began, as its header writes it (YYYY-MM-DD HH:MM), when it does. */
+export interface SessionOrigin { id: string | null; tool: SessionTool | 'web'; title: string | null; cwd: string | null; branch: string | null; start?: string }
 const ORIGIN_NAME: Record<SessionOrigin['tool'], string> = { ...TOOL_NAME, web: '웹 AI' };
 const EMPTY_FIELD = /^(?:(?:작업 폴더|브랜치)\s*)?(?:\(?(?:없음|없어요|없습니다|해당 없음|모름|알 수 없음|n\/a|none|null|unknown|-+|—)\)?|\([^()]*(?:있으면|짧은 제목)[^()]*\))$/i;
 /** The session a record was taken from (its header line, session-import.ts), or null for any other record. */
@@ -37,7 +38,7 @@ export function sessionOrigin(text: string): SessionOrigin | null {
     const kind = (Object.keys(HEAD_FIELD) as (keyof typeof HEAD_FIELD)[]).find(k => !got[k] && HEAD_FIELD[k].test(f));
     if (kind) got[kind] = HEAD_FIELD[kind].exec(f)![1]!.trim(); else more.unshift(f);
   }
-  return { id: got.id ?? null, tool, title: [...title, ...more].join(' · ') || null, cwd: got.cwd ?? null, branch: got.branch ?? null };
+  return { id: got.id ?? null, tool, title: [...title, ...more].join(' · ') || null, cwd: got.cwd ?? null, branch: got.branch ?? null, ...(got.start ? { start: got.start } : {}) };
 }
 /** A session record pasted by hand (a web session's, written back with WEB_RECORD_ASK): each request folded as the import folds
  * it, so a handover document the session started from is not kept again as a record of work. Any other text stays as written. */
@@ -46,11 +47,19 @@ export function foldRecord(text: string): string {
   return text.split(/^(?=── )/m).map(b => (b.startsWith('── 사용자 요청') ? foldHandover(b) : b)).join('');
 }
 const originKey = (o: SessionOrigin) => o.id ?? `${o.tool}|${o.title ?? ''}|${o.cwd ?? ''}`;
-export const originLabel = (o: Pick<SessionOrigin, 'tool' | 'title'>) => `${ORIGIN_NAME[o.tool]}${o.title ? ` 「${o.title}」` : ' 세션'}`;
+/** A session by its title (partSessions gives one without a title its first request), else by when it started. */
+export const originLabel = (o: Pick<SessionOrigin, 'tool' | 'title' | 'start'>) => `${ORIGIN_NAME[o.tool]}${o.title ? ` 「${o.title}」` : ` 세션${o.start ? ` (${o.start.slice(5)} 시작)` : ''}`}`;
+/** The first words of a record's first request, as the paste box's list names a session; a handover it started from is not them. */
+function askName(text: string): string | null {
+  const ask = text.split(/^── /m).find(b => b.startsWith('사용자 요청'));
+  const line = ask?.split('\n').slice(1).map(l => l.trim()).find(l => l && !l.startsWith('[AgentFlow 인수인계 문서를 받아 이어감'));
+  return line ? one(line, 25) : null;
+}
 
 export interface PartSession extends SessionOrigin { key: string; lastAt: string; worked: boolean; tookOver: boolean }
 /** The sessions behind a part: those whose records the map quotes for it (it worked on it), and those that started from a handover
- * of it (it took it over), newest first. With no part, the sessions that took the whole project over and every session recorded. */
+ * of it (it took it over), newest first. With no part, the sessions that took the whole project over and every session recorded.
+ * One without a title (every Codex session) is named by the first request its records hold, the same in every part. */
 export function partSessions(p: Project, areaId: string | null): PartSession[] {
   const quoted = new Set<string>();
   if (areaId) for (const r of p.readings) {
@@ -59,15 +68,16 @@ export function partSessions(p: Project, areaId: string | null): PartSession[] {
     for (const q of part.basis) quoted.add(q.record);
     for (const c of part.claims) quoted.add(c.record);
   }
-  const out = new Map<string, PartSession>();
+  const out = new Map<string, PartSession>(), named = new Map<string, string>();
   for (const rec of p.pasted) {
     const o = sessionOrigin(rec.text); if (!o) continue;
+    const key = originKey(o), name = !o.title && !named.has(key) && askName(rec.text); if (name) named.set(key, name);
     const worked = areaId ? quoted.has(rec.id) : true, tookOver = receivedHandovers(rec.text).some(h => h.areaId === areaId);
     if (!worked && !tookOver) continue;
-    const key = originKey(o), was = out.get(key);
+    const was = out.get(key);
     out.set(key, { ...o, key, lastAt: was && was.lastAt > rec.at ? was.lastAt : rec.at, worked: worked || !!was?.worked, tookOver: tookOver || !!was?.tookOver });
   }
-  return [...out.values()].sort((a, b) => b.lastAt.localeCompare(a.lastAt));
+  return [...out.values()].map(s => (s.title ? s : { ...s, title: named.get(s.key) ?? null })).sort((a, b) => b.lastAt.localeCompare(a.lastAt));
 }
 
 /* ---------- the document ---------- */
