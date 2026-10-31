@@ -23,10 +23,10 @@ async function readHead(path, bytes, from = 0) {
 }
 /** What a listing knows of a file: its head (read further while no prompt is in it), with the folders named at its end. */
 async function readListed(tool, path, size, limits) {
-  let parsed = parseSession(tool, jsonLines(await readHead(path, limits.headBytes), size > limits.headBytes));
-  const more = limits.promptBytes ?? SESSION_LIMITS.promptBytes, tail = limits.tailBytes ?? SESSION_LIMITS.tailBytes;
-  if (!hasPrompt(parsed) && size > limits.headBytes) parsed = parseSession(tool, jsonLines(await readHead(path, more), size > more));
-  if (size > limits.headBytes) for (const c of tailFolders(await readHead(path, tail, Math.max(0, size - tail)))) atFolder(parsed.meta, c);
+  const { headBytes: head, promptBytes: more, tailBytes: tail } = limits;
+  let parsed = parseSession(tool, jsonLines(await readHead(path, head), size > head));
+  if (!hasPrompt(parsed) && size > head) parsed = parseSession(tool, jsonLines(await readHead(path, more), size > more));
+  if (size > head) for (const c of tailFolders(await readHead(path, tail, Math.max(0, size - tail)))) atFolder(parsed.meta, c);
   return parsed;
 }
 /** A whole session read in chunks, line by line, into the tool's parser: a file of hundreds of MB is never held whole. A line over
@@ -64,16 +64,17 @@ async function candidates(roots) {
 /**
  * The session service, or null when turned off (STUDIO_SESSIONS=off). roots default to the tools' own folders under the home
  * folder (CLAUDE_CONFIG_DIR / CODEX_HOME when set); a folder that does not exist simply lists nothing.
+ * limits: any left out are SESSION_LIMITS.
  */
-export function openSessions({ env = process.env, home = homedir(), roots = null, limits = SESSION_LIMITS } = {}) {
+export function openSessions({ env = process.env, home = homedir(), roots = null, limits: given = SESSION_LIMITS } = {}) {
   if (env.STUDIO_SESSIONS === 'off') return null;
+  const limits = { ...SESSION_LIMITS, ...given };
   const where = roots ?? { claude: env.CLAUDE_CONFIG_DIR || join(home, '.claude'), codex: env.CODEX_HOME || join(home, '.codex') };
   let known = new Map(); // id -> { tool, path }
   const threads = new Map(); // subagent file path -> { mtime, parent } (from its first lines)
   // Listed file path -> what its listing read gave ({ size, mtime, real, id, row, cwds }; row null with no prompt): auto-sync lists
   // every minute, and a file is read again only when its size or time changed (a prompt-less subagent file is not read each time).
   const heads = new Map();
-  const lineCap = limits.lineBytes ?? SESSION_LIMITS.lineBytes;
 
   /** Newest first. folder: only sessions whose working folder is it or inside it (the files are read to know). */
   async function list(folder = null) {
@@ -85,7 +86,7 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
     const there = new Set(found.map(f => f.path)); for (const p of heads.keys()) if (!there.has(p)) heads.delete(p);
     const next = new Map(), out = [];
     // At most `scan` newest files are opened, so a folder with no session left does not read a whole history.
-    for (const f of found.slice(0, limits.scan ?? 400)) {
+    for (const f of found.slice(0, limits.scan)) {
       if (out.length >= limits.list) break;
       let h = heads.get(f.path);
       if (h?.size !== f.size || h.mtime !== f.mtime) {
@@ -130,7 +131,7 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
       let st; try { st = await stat(p); } catch { continue; }
       if (st.mtimeMs < since || st.size > limits.fileBytes) continue;
       if (!own.includes(p) && (await parentOf(p, st, tool)) !== (tool === 'codex' ? parsed.meta.thread : base)) continue;
-      try { out.push(await readParsed(tool, p, lineCap)); } catch { /* gone meanwhile */ }
+      try { out.push(await readParsed(tool, p, limits.lineBytes)); } catch { /* gone meanwhile */ }
     }
     return out;
   }
@@ -142,7 +143,7 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
     const f = known.get(id); if (!f) throw new ApiError('SESSION_NOT_FOUND', 404);
     let size; try { size = (await stat(f.path)).size; } catch { throw new ApiError('SESSION_NOT_FOUND', 404); }
     if (size > limits.fileBytes) throw new ApiError('SESSION_TOO_LARGE', 413);
-    const parsed = await readParsed(f.tool, f.path, lineCap);
+    const parsed = await readParsed(f.tool, f.path, limits.lineBytes);
     return sessionDetail(id, f.tool, withSubagents(parsed, await subagents(f.tool, f.path, parsed)), limits, since);
   }
 
