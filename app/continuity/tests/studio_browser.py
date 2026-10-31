@@ -3094,6 +3094,7 @@ def folder_sessions_flow(browser, base):
     page.evaluate("() => { window.__broken = '.codex'; }")
     panel.get_by_role("button", name="지금 확인").click()
     expect(panel.locator("[role=alert]")).to_contain_text(".codex")
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon · 확인 필요")  # in words, not by the dot's colour alone
     assert panel.inner_text().count("폴더를 읽지 못했어요") == 1, panel.inner_text()
     page.evaluate("() => { window.__broken = null; }")
     # Permission withdrawn while the page is open (the browser asks again): the pill says so and the panel asks first, with '다시 허용',

@@ -247,8 +247,9 @@ export function createAutoSync(host: AutoSyncHost) {
     const waiting = !!b && !host.sources.current(), error = b ? halted.get(o.key) ?? b.error : null;
     pill.hidden = false; pill.dataset.state = !b ? 'off' : error || waiting ? 'error' : busy ? 'busy' : 'on';
     pill.setAttribute('aria-expanded', String(panelOpen));
-    // The state in words as well as the dot's colour; a phone keeps the dot only (the whole line stays its name and title).
-    const more = b ? ` · ${name}${waiting ? ' · 허용 필요' : ''}` : ' 안 됨';
+    // The state in words as well as the dot's colour (a look running only turns the dot, so the pill does not change width every
+    // minute); a phone keeps the dot only (the whole line stays its name and title).
+    const more = b ? ` · ${name}${waiting ? ' · 허용 필요' : error ? ' · 확인 필요' : ''}` : ' 안 됨';
     pill.title = `자동 연결${more}`; pill.setAttribute('aria-label', pill.title);
     pill.replaceChildren(h('i', { 'aria-hidden': 'true' }), h('span', {}, '자동 연결', h('span', {}, more)));
     panel.hidden = !panelOpen; if (!panelOpen) return;
