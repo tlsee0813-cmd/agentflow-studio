@@ -1494,17 +1494,20 @@ button:disabled { opacity: .5; cursor: default; }
 .rr-sessions .fine { margin: 0; }
 .rr-sessions.open { display: block; padding: 10px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface-2); }
 .rr-sessions.open > .pp-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-bottom: 8px; }
+/* The list's heading line: its name, then '접기' at the right; the note under them. */
+.rr-sessions.open > .pp-row:first-child > .fine { order: 1; flex-basis: 100%; }
+.rr-sessions.open > .pp-row:first-child > .link-button { margin-left: auto; }
 .rr-sessions-note { flex-basis: 100%; color: var(--text-2); }
 /* The web chat's request text, shown whole to copy by hand when the browser blocks copying. */
 .rr-web-ask { width: 100%; margin-top: 2px; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); color: var(--text); font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; resize: vertical; }
 .rr-sessions-filter { box-sizing: border-box; width: 100%; height: 32px; margin-bottom: 8px; padding: 0 10px; border: 1px solid var(--line-strong); border-radius: var(--r-sm); background: var(--surface); color: var(--text); font: inherit; }
 .rr-session-list { list-style: none; margin: 0; padding: 0; max-height: 280px; overflow: auto; display: grid; gap: 4px; }
-.rr-session { display: grid; grid-template-columns: auto 1fr; column-gap: 8px; width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); color: var(--text); text-align: left; font: inherit; cursor: pointer; }
+.rr-session { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 8px; width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); color: var(--text); text-align: left; font: inherit; cursor: pointer; }
 .rr-session:hover:not(:disabled) { border-color: var(--accent-line); }
 .rr-session:disabled { cursor: progress; opacity: .7; }
-.rr-session strong { font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
-.rr-session small { grid-column: 2; color: var(--text-3); font-size: 12px; overflow-wrap: anywhere; }
-.rr-session-tool { grid-row: span 2; align-self: start; padding: 1px 6px; border-radius: 999px; background: var(--chip); color: var(--text-2); font: var(--label); }
+.rr-session strong { grid-column: 1; grid-row: 1; font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
+.rr-session small { grid-column: 1 / -1; color: var(--text-3); font-size: 12px; overflow-wrap: anywhere; }
+.rr-session-tool { grid-column: 2; grid-row: 1; align-self: start; padding: 1px 6px; border-radius: 999px; background: var(--chip); color: var(--text-2); font: var(--label); }
 .rr-session-busy { color: var(--accent) !important; }
 /* Automatic connection to a working folder's sessions: a pill in the bar and its panel. */
 .sync-pill { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 24px; margin-right: 6px; padding: 0 10px 0 9px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font: 500 12px/1 var(--font); color: var(--text-3); white-space: nowrap; cursor: pointer; }
