@@ -8,8 +8,8 @@ import { listSessions, readSession, type AiStatus } from './studio-api.js';
 import { readSessionList, readSessionDetail, type SessionDetail, type SessionSummary } from '../shared/session-import.js';
 import { SESSION_LIMITS, jsonLines, parseSession, sessionParser, pushLine, withSubagents, tailFolders, hasPrompt, atFolder, sniffTool, sessionSummary, sessionDetail, sessionId, sessionKey, within, type ParsedSession, type SessionTool } from '../shared/session-parse.js';
 
-/** read(id, since): only turns from that time on (a turn with no time is kept), as the server does. */
-/** partial: after a listing, why it holds only some of the picked folders' sessions (a folder could not be read), or null. */
+/** read(id, since): only turns from that time on (a turn with no time is kept), as the server does. partial: after a listing, why it
+ * holds only some of the picked folders' sessions (a folder could not be read), or null. */
 export interface SessionSource { kind: 'server' | 'folder'; list(folder?: string | null): Promise<SessionSummary[]>; read(id: string, since?: string | null): Promise<SessionDetail>; partial?(): string | null }
 export type FolderState = 'unsupported' | 'none' | 'prompt' | 'granted';
 

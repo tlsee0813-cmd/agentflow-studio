@@ -1,4 +1,5 @@
-/* The handover document, opened from the bar above the map (the whole project) or from a part's ⋯ menu (that part): made at once
+/* The handover document, opened from the bar above the map (the project, or the part whose inside is open) or from a part's ⋯ menu
+ * (that part): made at once
  * from what the map and records hold (shared/handover.ts, no AI call), read in place, copied or saved as a .md file. Changing the
  * range makes the document again with the same code, so one opening is one handover however it is narrowed. Nothing is stored:
  * the code inside the document is how a session that starts from it is known later (it comes back in that session's records). */
