@@ -9,11 +9,10 @@
 // tool output, reasoning and injected context are left out (the reading itself is shared/session-parse.ts, also used by the page).
 import { createReadStream } from 'node:fs';
 import { open, readdir, realpath, stat } from 'node:fs/promises';
-import { createHash } from 'node:crypto';
 import { homedir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
 import { ApiError } from '../../server/errors.mjs';
-import { SESSION_VERSION, SESSION_LIMITS, SESSION_ID, parseClaude, parseCodex, parseSession, sessionParser, pushLine, jsonLines, withSubagents, tailFolders, hasPrompt, atFolder, within, sessionSummary, sessionDetail, sessionKey } from '../dist/public/shared/session-parse.js';
+import { SESSION_VERSION, SESSION_LIMITS, SESSION_ID, parseClaude, parseCodex, parseSession, sessionParser, pushLine, jsonLines, withSubagents, tailFolders, hasPrompt, atFolder, within, sessionSummary, sessionDetail, sessionKey, sessionId } from '../dist/public/shared/session-parse.js';
 
 export { SESSION_LIMITS, SESSION_ID, parseClaude, parseCodex };
 
@@ -75,8 +74,6 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
   // every minute, and a file is read again only when its size or time changed (a prompt-less subagent file is not read each time).
   const heads = new Map();
   const lineCap = limits.lineBytes ?? SESSION_LIMITS.lineBytes;
-  // An id is made from the session itself (sessionKey), as the page makes it; the one made from the file's path before is its alias.
-  const idOf = (tool, name) => `${tool}-${createHash('sha256').update(name).digest('hex').slice(0, 24)}`;
 
   /** Newest first. folder: only sessions whose working folder is it or inside it (the files are read to know). */
   async function list(folder = null) {
@@ -94,10 +91,11 @@ export function openSessions({ env = process.env, home = homedir(), roots = null
       if (h?.size !== f.size || h.mtime !== f.mtime) {
         let real; try { real = await realpath(f.path); } catch { continue; }
         let parsed; try { parsed = await readListed(f.tool, real, f.size, limits); } catch { continue; }
-        const id = idOf(f.tool, sessionKey(f.tool, parsed.meta, real)), base = sessionSummary(id, f.tool, parsed, new Date(f.mtime).toISOString(), f.size, limits);
+        // An id is made from the session itself (sessionKey), as the page makes it; the one made from the file's path before is its alias.
+        const id = await sessionId(f.tool, sessionKey(f.tool, parsed.meta, real)), base = sessionSummary(id, f.tool, parsed, new Date(f.mtime).toISOString(), f.size, limits);
         // An archived Codex thread lay in sessions/YYYY/MM/DD/ under the same name (its date is in it): that path's id is its alias too.
         const day = f.tool === 'codex' && basename(dirname(real)) === 'archived_sessions' ? /^rollout-(\d{4})-(\d{2})-(\d{2})T/.exec(basename(real)) : null;
-        const aliases = [idOf(f.tool, real), ...(day ? [idOf(f.tool, join(dirname(dirname(real)), 'sessions', day[1], day[2], day[3], basename(real)))] : [])];
+        const aliases = [await sessionId(f.tool, real), ...(day ? [await sessionId(f.tool, join(dirname(dirname(real)), 'sessions', day[1], day[2], day[3], basename(real)))] : [])];
         h = { size: f.size, mtime: f.mtime, real, id, row: base && { ...base, aliases }, cwds: parsed.meta.cwds }; heads.set(f.path, h);
       }
       // Two files of one session (a copy left behind): the newest one is the session.

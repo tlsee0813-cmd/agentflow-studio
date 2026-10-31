@@ -399,7 +399,8 @@ export function sessionDetail(id: string, tool: SessionTool, s: ParsedSession, l
   return { version: SESSION_VERSION, id, tool, label: TOOL_LABEL[tool], title: s.meta.title, cwd: s.meta.cwd, cwds: s.meta.cwds, branch: s.meta.branch, startedAt: s.meta.startedAt,
     turns: kept, omitted: forward ? 0 : turns.length - kept.length, ...(forward ? { rest: turns.length - kept.length } : {}) };
 }
-/** An opaque session id from a stable name of its file (a real path on the server, a path inside the picked folder in the page). */
+/** An opaque session id from a stable name: the session's own key (sessionKey), or for an alias its file's path (a real path on the
+ * server, a path inside the picked folder in the page). The server and the page both make it here, so marks hold for either. */
 export async function sessionId(tool: SessionTool, name: string): Promise<string> {
   const bytes = new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256', new TextEncoder().encode(name)));
   return `${tool}-${[...bytes.slice(0, 12)].map(b => b.toString(16).padStart(2, '0')).join('')}`;
