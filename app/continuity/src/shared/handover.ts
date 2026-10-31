@@ -92,8 +92,9 @@ function partBlock(view: StudioView, part: PartView, sessions: PartSession[], to
   const lines = [`${'#'.repeat(Math.min(6, 3 + part.depth - top))} ${part.name}`];
   const u = part.reading;
   const role = u?.role ?? part.summary ?? null;
-  if (role) lines.push(`역할: ${one(role, k.text)}${u?.corrected ? ' (사용자가 고친 설명)' : ''}`);
-  if (part.note) lines.push(`사용자 메모: ${one(part.note, k.text)}`);
+  // Every line a list item: in a Markdown viewer a plain line after a list runs into its last item.
+  if (role) lines.push(`- 역할: ${one(role, k.text)}${u?.corrected ? ' (사용자가 고친 설명)' : ''}`);
+  if (part.note) lines.push(`- 사용자 메모: ${one(part.note, k.text)}`);
   const claims = (u?.claims ?? []).slice().sort((a, b) => k.order.indexOf(a.kind) - k.order.indexOf(b.kind));
   for (const c of claims.slice(0, k.claims)) lines.push(`- ${CLAIM_LABEL[c.kind]}: ${one(c.text, k.claim)}${c.about ? ` (${one(c.about, 80)})` : ''}`);
   if (claims.length > k.claims) lines.push(`- (그 밖에 ${claims.length - k.claims}개는 지도에서 볼 수 있어요)`);
@@ -102,8 +103,8 @@ function partBlock(view: StudioView, part: PartView, sessions: PartSession[], to
     const out = r.from === part.id, other = view.parts.find(x => x.id === (out ? r.to : r.from));
     return other ? `${out ? '→' : '←'} ${other.name} (${REL_LABEL[r.kind] ?? r.kind}${r.note ? ` · ${one(r.note, 80)}` : ''})` : null;
   }).filter(Boolean);
-  if (rels.length) lines.push(`관련: ${rels.slice(0, k.rels).join(', ')}${rels.length > k.rels ? ` 외 ${rels.length - k.rels}개` : ''}`);
-  if (sessions.length) lines.push(`다룬 세션: ${sessions.slice(0, k.sessions).map(s => `${originLabel(s)}${s.tookOver ? ' (인수인계로 이어받음)' : ''}`).join(', ')}`);
+  if (rels.length) lines.push(`- 관련: ${rels.slice(0, k.rels).join(', ')}${rels.length > k.rels ? ` 외 ${rels.length - k.rels}개` : ''}`);
+  if (sessions.length) lines.push(`- 다룬 세션: ${sessions.slice(0, k.sessions).map(s => `${originLabel(s)}${s.tookOver ? ' (인수인계로 이어받음)' : ''}`).join(', ')}`);
   return lines;
 }
 
@@ -170,7 +171,7 @@ export function handoverDoc(p: Project, opts: HandoverOptions): Handover {
     out.push('');
   }
   out.push(scoped ? '## 이 범위의 현재 상태' : '## 부분별 현재 상태');
-  if (!parts.length) out.push('아직 지도에 부분이 없어요. 아래 최근 흐름과 사용자의 설명에서 시작하세요.');
+  if (!parts.length) out.push('아직 지도에 부분이 없어요. 아래 최근 흐름과 사용자의 설명에서 시작하세요.', '');
   const after: string[] = [];
   // What is undecided: candidates the readings left open and what the latest reading could not tell, for this scope.
   const open: string[] = [];

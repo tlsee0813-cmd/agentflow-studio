@@ -41,11 +41,14 @@ test('HANDOVER-W1 whole project: rules, summary, each part with its claims and r
   const t = handoverText(p, { scope: null, code, at: '2026-10-30T05:00:00.000Z' });
   assert.ok(t.startsWith(`──────── AgentFlow 인수인계 문서 · af-handover:${code} ────────\n# 인수인계: `), t.slice(0, 120));
   assert.ok(t.endsWith(`──────── 인수인계 문서 끝 · af-handover:${code} ────────`));
-  for (const s of ['## 이어받는 방법\n- 이 문서 앞이나 뒤에 사용자가 할 일을 적었다면 그것이 첫 할 일이에요.', '"구상"은 아직 하기로 정하지 않은 생각', '혼자 정하지 말고 사용자에게', '## 프로젝트 한눈에\n미용실 예약 프로그램이에요.', '### 예약 화면', '역할: 손님이 시간을 골라 예약해요.',
-    '- 원함: 휴무일과 영업시간 연결', '- 작업 보고: 휴무일 예약 막음', '관련: → 영업시간 설정 (필요로 함 · 휴무일)', '다룬 세션: Claude Code 「휴무일 연결」',
+  for (const s of ['## 이어받는 방법\n- 이 문서 앞이나 뒤에 사용자가 할 일을 적었다면 그것이 첫 할 일이에요.', '"구상"은 아직 하기로 정하지 않은 생각', '혼자 정하지 말고 사용자에게', '## 프로젝트 한눈에\n미용실 예약 프로그램이에요.', '### 예약 화면\n- 역할: 손님이 시간을 골라 예약해요.',
+    '- 원함: 휴무일과 영업시간 연결', '- 작업 보고: 휴무일 예약 막음', '- 관련: → 영업시간 설정 (필요로 함 · 휴무일)', '- 다룬 세션: Claude Code 「휴무일 연결」',
     '- Claude Code 「휴무일 연결」 · 작업 폴더 /work/salon · 브랜치 main', '- 기록에서 알 수 없었음: 결제 방식은 기록에 없어요.',
     '- 예약 화면에서 휴무일을 영업시간 설정과 연결해 줘 → 바꾼 파일: src/hours.ts, tests/hours.test.ts'])
     assert.ok(t.includes(s), `missing: ${s}\n${t}`);
+  // A part is one list under its heading, so a Markdown viewer keeps its lines apart.
+  const part = t.slice(t.indexOf('### 예약 화면\n')).split('\n\n')[0].split('\n').slice(1);
+  assert.ok(part.length === 5 && part.every(l => l.startsWith('- ')), part.join('\n'));
 });
 
 test('HANDOVER-S1 one part: its path in the title, its scope rule, only it and what is inside it', () => {
@@ -90,7 +93,7 @@ test('HANDOVER-O1 session origin: header fields read back; other records are not
   assert.equal(sessionOrigin('요구: 예약 화면'), null);
   // An empty project still gets a usable document.
   const t = handoverText(D.createProject(), { scope: null, code: 'EMPTY2', at: '2026-10-30T05:00:00.000Z' });
-  assert.ok(t.includes('아직 지도에 부분이 없어요.'));
+  assert.ok(t.includes('아직 지도에 부분이 없어요. 아래 최근 흐름과 사용자의 설명에서 시작하세요.\n\n'), t);
 });
 
 test('HANDOVER-B1 a web chat writes its own record from the request text: the record reads as that session and its requests', async () => {
@@ -198,7 +201,7 @@ test('HANDOVER-L1 a document for a large map stays within one prompt: parts are 
   const mid = big(60), lines = mid.text.split('\n');
   assert.ok(mid.text.length <= HANDOVER_CHARS && mid.trimmed > 0 && mid.trimmed < 60, `${mid.text.length} ${mid.trimmed}`);
   assert.ok(lines.includes(`(문서가 길어서 부분 ${mid.trimmed}개는 줄여 적었어요. 빠진 내용은 AgentFlow 지도에 있어요.)`));
-  assert.equal(lines[lines.indexOf('### 부분 0') + 1], `사용자 메모: ${note}`);
+  assert.equal(lines[lines.indexOf('### 부분 0') + 1], `- 사용자 메모: ${note}`);
   assert.ok(lines[lines.indexOf('### 부분 59') + 1].endsWith('…') && lines[lines.indexOf('### 부분 59') + 1].length < note.length);
   assert.ok(mid.text.endsWith('──────── 인수인계 문서 끝 · af-handover:BIG234 ────────'));
   // Far over: brief parts, then the rest by name only.
