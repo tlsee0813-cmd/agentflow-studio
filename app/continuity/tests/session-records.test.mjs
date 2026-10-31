@@ -610,3 +610,11 @@ test('SESSIONS-AC1 a connection ended, or a folder left, while a look runs takes
   assert.ok(u.texts().some(x => x.includes('W-ONE')) && !u.texts().some(x => x.includes('V-ONE')), u.texts().join('\n'));
   assert.deepEqual(Object.keys(u.binding().marks), [ID]); assert.equal(u.reads, 1);
 });
+
+test('SESSIONS-AC2 a folder path pasted in quotes (Windows Explorer\'s "copy as path") connects to the folder inside them', async () => {
+  for (const typed of ['"C:\\work\\salon"', "  'C:\\work\\salon' "]) {
+    const t = tab(source([{ id: ID, cwd: 'C:\\work\\salon', updatedAt: ago(30), turns: pair(40, 'WIN-PROMPT', 'ok') }]));
+    t.sync.connect(typed); await settle();
+    assert.equal(t.binding().folders[0].path, 'C:\\work\\salon', typed); assert.equal(t.texts().length, 1, typed);
+  }
+});

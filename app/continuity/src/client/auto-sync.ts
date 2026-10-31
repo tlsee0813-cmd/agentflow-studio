@@ -220,7 +220,8 @@ export function createAutoSync(host: AutoSyncHost) {
   }
   /** Connects the open project to a folder: the first one makes the connection, another is added to it (once). */
   function connect(folder: string) {
-    const o = open(), path = folder.trim(); if (!o || !path) return;
+    // A path copied from Windows Explorer ('경로로 복사', Ctrl+Shift+C) comes in quotes: the folder is what is inside them.
+    const o = open(), path = folder.trim().replace(/^(["'])(.+)\1$/, '$2').trim(); if (!o || !path) return;
     const now = new Date(), link: FolderLink = { path, connectedAt: now.toISOString(), since: new Date(now.getTime() - BACKFILL_MS).toISOString(), backfilled: false };
     // Connecting again after the connection ended goes on from the sessions' marks kept with it.
     const b = stored(o.key);
