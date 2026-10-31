@@ -1408,7 +1408,23 @@ function renderLens() {
 function sessionsLine(project: Project, partId: string): HTMLElement | null {
   const list = partSessions(project, partId); if (!list.length) return null;
   return h('p', { class: 'lens-sessions', title: '이 부분의 근거가 된 기록을 남긴 세션, 또는 인수인계 문서로 이 부분을 이어받은 세션' },
-    h('span', { class: 'lens-sessions-label' }, '다룬 세션'), list.slice(0, 3).map(x => `${originLabel(x)}${x.tookOver ? ' · 이어받음' : ''}`).join(', '), list.length > 3 ? h('small', {}, ` 외 ${list.length - 3}`) : null);
+    h('span', { class: 'lens-sessions-label' }, '다룬 세션'), list.slice(0, 3).map(x => `${originLabel(x)}${x.tookOver ? ' · 인수인계로 이어받음' : ''}`).join(', '), list.length > 3 ? h('small', {}, ` 외 ${list.length - 3}`) : null);
+}
+/** The AI sessions behind a part in the full reading: the ones whose records the map quotes for it, and the ones that took it over
+ * by a handover. */
+function sessionsSection(project: Project, partId: string): HTMLElement | null {
+  const list = partSessions(project, partId); if (!list.length) return null;
+  return h('section', { class: 'sec sec-sessions' }, h('h3', {}, '다룬 세션 ', h('small', {}, `${list.length}`)),
+    h('ul', { class: 'part-sessions' }, ...list.slice(0, 6).map(x => h('li', {},
+      h('strong', {}, originLabel(x)), x.tookOver ? h('span', { class: 'chip plain' }, '인수인계로 이어받음') : null,
+      h('small', {}, [x.cwd ? x.cwd.split(/[\\/]/).filter(Boolean).at(-1) : null, x.branch, `기록 ${ago(x.lastAt)}`].filter(Boolean).join(' · '))))));
+}
+/** A session record kept while a part is read (the automatic connection): only its sessions are drawn again, so the scroll, the
+ * focus and a form open there stay. A part that had none yet is read again whole. */
+function refreshSessions() {
+  const o = opened; if (!o || !selected || planView.isOpen() || (!sheetOpen && lensRail)) return;
+  const cur = document.querySelector(sheetOpen ? '#panel .sec-sessions' : '#lens .lens-sessions'), next = sheetOpen ? sessionsSection(o.project, selected) : sessionsLine(o.project, selected);
+  if (cur && next) cur.replaceWith(next); else if (cur || next) refreshReading();
 }
 /** Selection on the map: the part, its lines and the parts at their other ends (drawn representative or side ghost). */
 function markSelection(partId: string | null) {
@@ -1566,12 +1582,7 @@ function renderPanel(scrollTop: boolean) {
     })));
     body.append(rel);
   }
-  // The AI sessions behind this part: the ones whose records the map quotes for it, and the ones that took it over by a handover.
-  const sessions = partSessions(o.project, part.id);
-  if (sessions.length) body.append(h('section', { class: 'sec sec-sessions' }, h('h3', {}, '다룬 세션 ', h('small', {}, `${sessions.length}`)),
-    h('ul', { class: 'part-sessions' }, ...sessions.slice(0, 6).map(x => h('li', {},
-      h('strong', {}, originLabel(x)), x.tookOver ? h('span', { class: 'chip plain' }, '인수인계로 이어받음') : null,
-      h('small', {}, [x.cwd ? x.cwd.split(/[\\/]/).filter(Boolean).at(-1) : null, x.branch, `기록 ${ago(x.lastAt)}`].filter(Boolean).join(' · ')))))));
+  const sessions = sessionsSection(o.project, part.id); if (sessions) body.append(sessions);
   // What to do next with this part: going inside is explicit, never a side effect of selecting.
   if (part.childIds.length && part.id !== scope) body.append(h('div', { class: 'sec-acts' },
     h('button', { type: 'button', class: 'secondary go-in', onclick: () => go(o.key, null, part.id) }, `안으로 들어가기 · ${part.childIds.length}`, h('span', { 'aria-hidden': 'true' }, ' ›'))));
@@ -1961,7 +1972,7 @@ const autoSync = createAutoSync({
     try { for (const t of texts) next = pasteRecord(next, t, null).project; } catch { return { error: '세션 기록 하나를 저장하지 못했어요(쓸 수 없는 문자나 키처럼 보이는 글). 다른 세션은 계속 들어와요.', refused: true }; }
     if (next === o.project) return null;
     const failed = await commit(o, next);
-    if (!failed) { renderMapEntry(); refreshUnderstood(); if (!selected && !planView.isOpen()) returnView.render(); return null; }
+    if (!failed) { renderMapEntry(); refreshUnderstood(); if (!planView.isOpen()) { if (!selected) returnView.render(); else refreshSessions(); } return null; }
     // Nothing more is tried until the person asks: said so, and for a full browser storage, why.
     return { error: saveFailure === 'QUOTA' ? '이 브라우저의 저장 공간이 가득 차서 세션 기록을 저장하지 못했어요. 자동으로 다시 하지 않아요.' : `${failed} 자동으로 다시 하지 않아요.`, refused: false };
   },

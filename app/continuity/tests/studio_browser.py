@@ -4,7 +4,7 @@ entry -> map (no document scroll) -> part -> ask (summary, question) -> answer w
 provider failure shows a short error and a retry (never a substitute answer); a server without a key and the static
 build both show the honest not-connected state. Not a visual or usability audit.
 """
-import functools, hashlib, http.server, json, os, pathlib, re, subprocess, sys, tempfile, threading
+import functools, hashlib, http.server, json, os, pathlib, re, subprocess, sys, tempfile, threading, time
 from playwright.sync_api import sync_playwright, expect
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -3249,6 +3249,53 @@ def folder_sessions_flow(browser, base):
     context.close()
 
 
+def final_client_flow(browser, base):
+    """Picked session folders, one tool only (.claude): a session started from a part's handover document and taken by '지금 확인'
+    shows on that part's summary at once, marked as the handover sheet says, with no reading in between."""
+    jl = lambda *rows: "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows)
+    when = lambda minutes: time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime(time.time() - minutes * 60))
+    row = lambda kind, text, minutes: {"type": kind, "cwd": "/work/salon", "sessionId": "a1", "timestamp": when(minutes),
+        "message": {"role": kind, "content": text if kind == "user" else [{"type": "text", "text": text}]}}
+    files = [["me/.claude/projects/-work-salon/a1.jsonl", jl(row("user", "요구: 휴무일에는 예약을 막는다.", 40), row("assistant", "작업 보고: 휴무일 예약 버튼을 막았다.", 39),
+        {"type": "ai-title", "sessionId": "a1", "aiTitle": "휴무일 막기"}), int((time.time() - 39 * 60) * 1000)]]
+    context = browser.new_context(viewport={"width": 1280, "height": 800})
+    context.add_init_script(f"({FAKE_PICKER})({json.dumps(files)})")
+    page = context.new_page()
+    errors, maps = [], []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.on("request", lambda r: maps.append(r.url) if r.url.endswith("/api/studio/map") else None)
+    page.goto(base + "/")
+    page.locator("#new-open").click()
+    page.locator("#new-name").fill("미용실 예약 앱")
+    page.locator("#new-form").get_by_role("button", name="만들기").click()
+    panel, pill = page.locator("#sync-panel"), page.locator("#sync-pill")
+    pill.click()
+    panel.get_by_role("button", name="세션 폴더 고르기").click()
+    panel.locator(".sync-folder-pick", has_text="/work/salon").click()
+    expect(page.locator("#world .node")).to_have_count(2, timeout=15000)
+    assert len(maps) == 1, maps
+    # The next session starts from the part's handover document and comes back through '지금 확인', with no reading in between
+    # (the last one was just now): the part's summary says so at once, in the sheet's words.
+    page.locator("#world .node", has_text="스텁 부분 1").click()
+    lens = page.locator("#lens .lens-sessions")
+    expect(lens).to_have_text("다룬 세션Claude Code 「휴무일 막기」")
+    page.locator("#lens details.more summary").click()
+    page.locator("#lens").get_by_role("menuitem", name="이 부분 인수인계 문서").click()
+    doc = page.locator("#handover-text").input_value()
+    page.keyboard.press("Escape")
+    page.evaluate("""doc => { const at = new Date().toISOString(), row = (type, text) => JSON.stringify({ type, cwd: '/work/salon', sessionId: 'b2', timestamp: at,
+      message: { role: type, content: type === 'user' ? text : [{ type: 'text', text }] } }) + '\\n';
+      window.__write('me/.claude/projects/-work-salon/b2.jsonl', row('user', doc + '\\n\\n이어서 할 일: 휴무일 안내 문구') + row('assistant', '안내 문구를 넣었어요.')
+        + JSON.stringify({ type: 'ai-title', sessionId: 'b2', aiTitle: '휴무일 이어서' }) + '\\n'); }""", doc)
+    pill.click()
+    panel.get_by_role("button", name="지금 확인").click()
+    expect(panel).to_contain_text("가져온 기록2개", timeout=15000)
+    page.keyboard.press("Escape")
+    expect(lens).to_have_text("다룬 세션Claude Code 「휴무일 이어서」 · 인수인계로 이어받음, Claude Code 「휴무일 막기」")
+    assert len(maps) == 1, maps
+    assert not errors, errors
+    context.close()
+
 def off_flow(browser, base, expected_pill):
     page = browser.new_page(viewport={"width": 1280, "height": 720})
     page.goto(base)
@@ -4662,6 +4709,7 @@ def main():
             proc, base = start("ok", STUDIO_SESSIONS_FIXTURE="1"); procs.append(proc); sessions_flow(browser, base); print("ok  local sessions: connect a folder once -> its sessions become records -> first map without a click; nothing taken twice; one session by hand, key hidden")
             proc, base = start("ok"); procs.append(proc); folder_sessions_flow(browser, base); print("ok  session folders picked in the browser (no local reader): automatic connection, paste-box list, one file by hand, web request text")
             proc, base = start("ok"); procs.append(proc); handover_flow(browser, base); print("ok  handover document: a part's sessions, its document and the whole project's, copied and saved, nothing sent")
+            proc, base = start("ok"); procs.append(proc); final_client_flow(browser, base); print("ok  one picked session folder: a handover's next session on the part at once")
             proc, base = start("nokey"); procs.append(proc); off_flow(browser, base + "/", "AI 키 없음"); print("ok  server without key -> honest off state")
             if (ROOT / "static-dist/index.html").exists():
                 server = serve_static()
