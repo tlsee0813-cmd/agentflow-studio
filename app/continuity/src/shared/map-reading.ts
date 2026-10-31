@@ -440,7 +440,7 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
     field(r.note, 200, true, `relations[${i}].note`); const q = evidence(r, `relations[${i}].at`);
     return [{ from: r.from, to: r.to, kind: r.kind as RelationKind, note: r.note.trim(), record: q.record, quote: q.quote, ...(q.from !== undefined ? { span: { from: q.from, to: q.to! } } : {}) }];
   }) ?? []);
-  const candidates = many(value.candidates, 6, 'candidates').flatMap((c, i): MapReply['candidates'] => soft((): MapReply['candidates'] => {
+  let candidates = many(value.candidates, 6, 'candidates').flatMap((c, i): MapReply['candidates'] => soft((): MapReply['candidates'] => {
     object(c, ['text', 'parts', ...evidenceKeys, ...(six ? ['target', 'statement'] : [])], `candidates[${i}]`); field(c.text, 240, false, `candidates[${i}].text`);
     // A candidate names known parts or parts this same reply adds (new:...); nothing else.
     list(c.parts, 2, `candidates[${i}].parts`);
@@ -540,6 +540,28 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
       return [{ ...m, quote: quoted, about, targets, stance: m.stance!, replaces: holds ? prior!.key : null, ...where }];
     }) ?? []);
   }
+  if (seven) {
+    // map.7: what one reply cannot hold at once is settled by setting aside the item that is only a question or a marking: a
+    // candidate leaving open what a claim (or an earlier candidate) already says, and a material range the reply also quotes as
+    // evidence. A real reading on a PC marked a whole record as material and then quoted it 28 times. Two claims under one key
+    // still refuse the reply whole (below): which of them holds is not the validator's to choose.
+    const settled = new Set(outParts.flatMap(p => p.claims.flatMap(c => c.key ? [c.key] : []))), open = new Set<string>(), targets = new Set<string>();
+    candidates = candidates.filter((c, i) => soft(() => {
+      const path = `candidates[${i}].statement.key`;
+      if (c.statement && settled.has(c.statement.key)) throw new MapReplyError(path, 'settled-and-open', c.statement.key);
+      if (c.statement && open.has(c.statement.key)) throw new MapReplyError(path, 'duplicate-key', c.statement.key);
+      const id = candidateTarget(c);
+      if (targets.has(id)) throw new MapReplyError(`candidates[${i}]`, 'duplicate-target', id);
+      const k = c.target === 'parent' ? outParts.findIndex(p => p.ref === c.parts[0] && p.name !== null) : -1;
+      if (k >= 0 && outParts[k]!.parent === c.parts[1]) throw new MapReplyError(`candidates[${i}]`, 'settled-and-open', `${c.parts[0]}>${c.parts[1]}`);
+      if (c.statement) open.add(c.statement.key); targets.add(id); return true;
+    }) ?? false);
+    const used = evidenceOf(outParts, relations, matches, candidates, conditions);
+    material = material.filter((m, i) => soft(() => {
+      if (used.some(([, q]) => q.record === m.record && q.from !== undefined && q.to !== undefined && m.from < q.to && q.from < m.to)) throw new MapReplyError(`material[${i}]`, 'material-evidence', m.record);
+      return true;
+    }) ?? false);
+  }
   // map.7: a reply with every item set aside is the refusal of its first one (nothing of it would be read).
   if (aside.length && !outParts.length && !relations.length && !candidates.length && !matches.length && !material.length) throw aside[0];
   if (six) contradictions(outParts, relations, candidates, matches, material, conditions);
@@ -553,6 +575,19 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
   need(!leaked, leaked?.[0] ?? 'reply', 'secret-like');
   if (aside.length) ASIDE.set(reply, aside);
   return reply;
+}
+
+/** What one candidate leaves undecided, as one id: a reply leaves each open once. */
+const candidateTarget = (c: MapReply['candidates'][number]) => c.target === 'identity' ? `identity:${[...c.parts].sort().join('|')}` : c.target === 'parent' ? `parent:${c.parts[0]}>${c.parts[1]}` : `${c.target}:${c.statement?.key}`;
+/** Every place a reply quotes as evidence (a condition included), by where it stands in the reply. */
+function evidenceOf(parts: MapReplyPart[], relations: MapReply['relations'], matches: MapReplyMatch[], candidates: MapReply['candidates'], conditions: [string, MapReplyQuote][]): [string, { record: string; from?: number; to?: number }][] {
+  return [
+    ...parts.flatMap((p, i) => [...p.basis.map((q, j) => [`parts[${i}].basis[${j}]`, q] as [string, MapReplyQuote]), ...p.claims.map((q, j) => [`parts[${i}].claims[${j}].at`, q] as [string, MapReplyQuote]), ...(p.roleReplaces ? [[`parts[${i}].roleReplaces`, p.roleReplaces] as [string, MapReplyQuote]] : [])]),
+    ...relations.map((r, i) => [`relations[${i}].at`, { record: r.record, ...(r.span ?? {}) }] as [string, { record: string; from?: number; to?: number }]),
+    ...matches.map((m, i) => [`matches[${i}].at`, m] as [string, MapReplyMatch]),
+    ...candidates.flatMap((c, i) => c.statement ? [[`candidates[${i}].statement.at`, c.statement] as [string, MapReplyStatement]] : []),
+    // map.7: a condition is evidence too (its trimmed place in the record).
+    ...conditions];
 }
 
 /** map.6: what one reply cannot hold at once. A statement key is one statement: settled (a claim) or undecided (a candidate),
@@ -573,7 +608,7 @@ function contradictions(parts: MapReplyPart[], relations: MapReply['relations'],
       if (settled) throw new MapReplyError(path, 'duplicate-key', c.statement.key);
       keys.set(c.statement.key, path);
     }
-    const id = c.target === 'identity' ? `identity:${[...c.parts].sort().join('|')}` : c.target === 'parent' ? `parent:${c.parts[0]}>${c.parts[1]}` : `${c.target}:${c.statement?.key}`;
+    const id = candidateTarget(c);
     if (targets.has(id)) throw new MapReplyError(`candidates[${i}]`, 'duplicate-target', id); targets.add(id);
     if (c.target === 'parent') {
       const k = parts.findIndex(p => p.ref === c.parts[0] && p.name !== null);
@@ -581,13 +616,7 @@ function contradictions(parts: MapReplyPart[], relations: MapReply['relations'],
     }
   });
   const inside = (q: { record: string; from?: number; to?: number }) => q.from !== undefined && q.to !== undefined && material.some(m => m.record === q.record && m.from < q.to! && q.from! < m.to);
-  const evidence: [string, { record: string; from?: number; to?: number }][] = [
-    ...parts.flatMap((p, i) => [...p.basis.map((q, j) => [`parts[${i}].basis[${j}]`, q] as [string, MapReplyQuote]), ...p.claims.map((q, j) => [`parts[${i}].claims[${j}].at`, q] as [string, MapReplyQuote]), ...(p.roleReplaces ? [[`parts[${i}].roleReplaces`, p.roleReplaces] as [string, MapReplyQuote]] : [])]),
-    ...relations.map((r, i) => [`relations[${i}].at`, { record: r.record, ...(r.span ?? {}) }] as [string, { record: string; from?: number; to?: number }]),
-    ...matches.map((m, i) => [`matches[${i}].at`, m] as [string, MapReplyMatch]),
-    ...candidates.flatMap((c, i) => c.statement ? [[`candidates[${i}].statement.at`, c.statement] as [string, MapReplyStatement]] : []),
-    // map.7: a condition is evidence too (its trimmed place in the record).
-    ...conditions];
+  const evidence = evidenceOf(parts, relations, matches, candidates, conditions);
   for (const [path, q] of evidence) if (inside(q)) throw new MapReplyError(path, 'material-evidence', q.record);
 }
 
