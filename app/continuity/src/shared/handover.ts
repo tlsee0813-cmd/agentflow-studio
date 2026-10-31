@@ -109,18 +109,18 @@ function partBlock(view: StudioView, part: PartView, sessions: PartSession[], to
   return lines;
 }
 
-interface Turn { at: string; text: string; files: string[]; origin: SessionOrigin }
+interface Ask { text: string; files: string[] }
 /** The person's requests in session records, oldest first, with the files the tool's next answer reported changing. */
-function sessionTurns(p: Project, only: Set<string> | null, took: Set<string>): Turn[] {
+function sessionAsks(p: Project, only: Set<string> | null, took: Set<string>): Ask[] {
   // An answer's files belong to the last request of its own session, which may sit in an earlier record (taken before the reply
   // came), never to another session's request; when that request's record is outside the scope, they are not shown.
-  const out: Turn[] = [], asked = new Map<string, Turn | null>();
+  const out: Ask[] = [], asked = new Map<string, Ask | null>();
   for (const rec of p.pasted) {
     const origin = sessionOrigin(rec.text); if (!origin) continue;
     const key = originKey(origin), shown = !only || only.has(rec.id) || took.has(key);
     for (const part of rec.text.split(/^── /m).slice(1)) {
       const nl = part.indexOf('\n'), head = part.slice(0, nl), body = part.slice(nl + 1).trim();
-      if (head.startsWith('사용자 요청')) { const t = shown ? { at: `${rec.at}|${out.length}`, text: body, files: [], origin } : null; if (t) out.push(t); asked.set(key, t); continue; }
+      if (head.startsWith('사용자 요청')) { const t = shown ? { text: body, files: [] } : null; if (t) out.push(t); asked.set(key, t); continue; }
       // The list is on the answer's last line (a web AI may put it after a bullet), read to its last ')' so a name like
       // app/(auth)/page.tsx stays whole.
       const f = /\(바꾼 파일: (.+)\)\s*$/.exec(body.slice(body.lastIndexOf('\n') + 1).trim()), last = asked.get(key);
@@ -192,11 +192,11 @@ export function handoverDoc(p: Project, opts: HandoverOptions): Handover {
   // earlier handover names it in words, so this document quoting it is not read as that takeover when it is pasted in turn.
   const only = scoped ? new Set(maps.flatMap(r => r.parts.filter(x => scopeIds.has(x.areaId)).flatMap(x => [...x.basis.map(q => q.record), ...x.claims.map(c => c.record)]))) : null;
   // A session that started from a handover of this scope counts with all its records: its work is the newest here, read or not.
-  const turns = sessionTurns(p, only, new Set(sessions.filter(s => s.tookOver).map(s => s.key))).slice(-RECENT_REQUESTS);
-  if (turns.length) {
+  const asks = sessionAsks(p, only, new Set(sessions.filter(s => s.tookOver).map(s => s.key))).slice(-RECENT_REQUESTS);
+  if (asks.length) {
     after.push('## 최근 흐름 (사용자가 세션에서 한 요청, 오래된 것부터)');
-    for (const t of turns) after.push(`- ${one(quoteReceived(t.text), 300)}${t.files.length ? ` → 바꾼 파일: ${one([...new Set(t.files)].slice(0, 8).join(', '), 300)}` : ''}`);
-    const files = [...new Set(turns.flatMap(t => t.files))].slice(-RECENT_FILES);
+    for (const t of asks) after.push(`- ${one(quoteReceived(t.text), 300)}${t.files.length ? ` → 바꾼 파일: ${one([...new Set(t.files)].slice(0, 8).join(', '), 300)}` : ''}`);
+    const files = [...new Set(asks.flatMap(t => t.files))].slice(-RECENT_FILES);
     if (files.length) after.push('', `최근에 바뀐 파일: ${one(files.join(', '), NAMES)}`);
     after.push('');
   }
