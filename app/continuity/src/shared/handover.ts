@@ -3,7 +3,7 @@
  * carries a marker (af-handover:CODE[:part]) so that a session which starts from it is known as the one that took it over, and the
  * document itself is not taken back in as a new record of work (foldHandover). */
 import { isMapReading, type ClaimKind, type MapReading, type Project } from './types.js';
-import { CLAIM_LABEL, candidateReading, unreadRecords } from './map-reading.js';
+import { CLAIM_LABEL, unreadRecords } from './map-reading.js';
 import { studioView, type PartView, type StudioView } from './studio.js';
 import { relLabel } from './relation-groups.js';
 import { stamp, RECORD_HEAD, HEAD_FIELD } from './session-import.js';
@@ -237,8 +237,12 @@ export function handoverDoc(p: Project, opts: HandoverOptions): Handover {
   for (const r of maps) for (const c of r.candidates) {
     // A candidate on a part since put away is not asked about, as the map leaves it out.
     if (scoped && !c.areaIds.some(a => scopeIds.has(a)) || c.areaIds.some(a => !view.parts.some(x => x.id === a))) continue;
-    const read = candidateReading(c), names = c.areaIds.map(a => view.parts.find(x => x.id === a)?.name).filter(Boolean);
-    open.push(`- ${read.label ? `${read.label}: ` : ''}${one(read.statement?.text ?? c.text)}${names.length ? ` (${one(names.join(', '), 80)})` : ''}`);
+    // Whether two parts are one, or one is inside another, is the map's own shape (so is the note a reading leaves on a part of a
+    // name already there): the next session cannot settle it, and the person settles it on the map.
+    if (c.target === 'identity' || c.target === 'parent' || !c.target && r.skipped.some(x => x.reason === 'same-name' && c.text.startsWith(`‘${x.name}’:`))) continue;
+    // Its own question, with the statement it leaves undecided as what it is: a report stays a report.
+    const names = c.areaIds.map(a => view.parts.find(x => x.id === a)?.name).filter(Boolean);
+    open.push(`- ${one(c.text)}${c.statement ? ` (${CLAIM_LABEL[c.statement.kind]}: ${one(c.statement.text, 120)})` : ''}${names.length ? ` (${one(names.join(', '), 80)})` : ''}`);
   }
   if (!scoped && latest) for (const g of latest.gaps) open.push(`- 기록에서 알 수 없었음: ${one(g)}`);
   if (open.length) after.push('## 아직 정하지 않은 것', ...dedupeLines(open).slice(-12), '');

@@ -293,6 +293,21 @@ test('HANDOVER-U1 what is left to ask stays: a part written briefly keeps its op
   assert.ok(!handoverText(D.setAreaArchived(m, hours, true), { scope: null, code: 'ASK234', at: AT }).includes('매주 같은 요일'));
 });
 
+test('HANDOVER-H1 what is undecided about the map itself is not handed on to ask; a statement left undecided keeps its kind and its question', () => {
+  // Parts drawn by hand; the session's record also proposes one by a name already there.
+  let p = D.addArea(D.addArea(D.createProject(), '예약 화면'), '결제');
+  p = D.pasteRecord(p, sessionText(session(ID, [{ role: 'user', at: AT, text: '결제 화면을 만들어 줘. 휴무일에는 예약도 막아 줘' }, { role: 'assistant', at: AT, text: '결제 화면을 만들고 휴무일 예약을 막았어요.' }])).text, null).project;
+  const open = q => { const t = handoverText(q, { scope: null, code: 'OPN234', at: AT }), i = t.indexOf('## 아직 정하지 않은 것\n'); return i < 0 ? '' : t.slice(i).split('\n\n')[0]; };
+  assert.equal(open(readAs(p, [['결제', ['결제 화면을 만들어 줘']]])), '', 'an earlier reading: its note on the part of the same name is not asked');
+  // map.6: the same note (target identity) and an attribution, whose statement is a report of work.
+  const inp = M.buildMapAsk(p, studioView(p), [], undefined, M.MAP6_SCHEMA), spans = inp.ask.records[0].spans, at = w => spans.find(s => s.t.includes(w)).s;
+  const reply = { summary: '', relations: [], gaps: [], matches: [], material: [], parts: [{ ref: 'new:p0', name: '결제', parent: null, role: '결제를 맡아요.', roleAbout: null, roleReplaces: null, basis: [at('결제 화면을 만들어')], claims: [] }],
+    candidates: [{ text: '휴무일에 예약을 막는 일이 예약 화면의 일인지 결제의 일인지 기록만으로는 알 수 없어요.', target: 'attribution', parts: ['P01', 'P02'], at: null, statement: { key: 's1', kind: 'reported', text: '휴무일 예약을 막음', at: at('휴무일 예약을 막았어요'), about: null } }] };
+  const six = M.applyReading(p, inp, M.validateMapReply(reply, inp.ask), meta()).project;
+  assert.ok(six.readings.at(-1).candidates.some(c => c.target === 'identity'), 'the note is stored');
+  assert.equal(open(six), '## 아직 정하지 않은 것\n- 휴무일에 예약을 막는 일이 예약 화면의 일인지 결제의 일인지 기록만으로는 알 수 없어요. (작업 보고: 휴무일 예약을 막음) (예약 화면, 결제)');
+});
+
 test('HANDOVER-P1 changed files whose names hold ")" (route groups) are read whole', () => {
   const p = D.pasteRecord(D.createProject(), sessionText(session(ID, [
     { role: 'user', at: '2026-10-29T09:01:00.000Z', text: '로그인 페이지 만들어 줘' }, { role: 'assistant', at: '2026-10-29T09:02:00.000Z', text: '만들었어요 (테스트는 아직)', files: ['app/(auth)/login/page.tsx', 'lib/auth.ts'] }])).text, null).project;
