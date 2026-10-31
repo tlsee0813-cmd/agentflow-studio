@@ -3096,6 +3096,18 @@ def folder_sessions_flow(browser, base):
     expect(panel.locator("[role=alert]")).to_contain_text(".codex")
     assert panel.inner_text().count("폴더를 읽지 못했어요") == 1, panel.inner_text()
     page.evaluate("() => { window.__broken = null; }")
+    # Permission withdrawn while the page is open (the browser asks again): the pill says so and the panel asks first, with '다시 허용',
+    # instead of telling the person to leave the folders and pick them again; allowing them gives the connection back.
+    page.evaluate("() => { window.__perm = 'prompt'; }")
+    panel.get_by_role("button", name="지금 확인").click()
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon · 허용 필요")
+    expect(panel.locator(".sync-ask")).to_contain_text("다시 읽어도 되는지")
+    expect(panel.locator(".sync-grant")).to_have_count(1)
+    expect(panel.locator("[role=alert]")).to_have_count(0)
+    panel.locator(".sync-ask").get_by_role("button", name="다시 허용").click()
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon")
+    expect(page.locator("#sync-pill")).to_have_attribute("data-state", "on", timeout=15000)
+    expect(panel.locator("[role=alert]")).to_have_count(0)
     assert not errors, errors
     context.close()
 
