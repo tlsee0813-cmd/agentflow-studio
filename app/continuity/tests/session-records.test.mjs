@@ -225,6 +225,21 @@ test('SESSIONS-RD6 a key given to a flag after a space, as the next element of a
     assert.deepEqual(redactSecrets(text), { text, count: 0 }, text);
 });
 
+test('SESSIONS-RD7 a URL password holding a slash or an unencoded @ is hidden whole; a port before a path and an @ in a path stay', () => {
+  for (const [text, secret, want] of [
+    ['REDIS_URL=redis://default:FAKEfake/FAKE+0123456789@fake-redis.example.com:6379 로 연결해줘', 'FAKEfake/', 'redis://default:[가려진 비밀값]@fake-redis.example.com:6379 로'],
+    ['DATABASE_URL="postgresql://postgres.fakeref:Fake/Pass+word123@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres"', 'Pass+word', 'postgres.fakeref:[가려진 비밀값]@aws-0-'],
+    ['DATABASE_URL=postgres://admin:Fake@Pass123@db.example.com/prod', 'Pass123', 'postgres://admin:[가려진 비밀값]@db.example.com/prod'],
+    ['mongodb+srv://u:FakePass1@c0.example.mongodb.net/?retryWrites=true', 'FakePass1', 'u:[가려진 비밀값]@c0.example.mongodb.net/?retryWrites=true']]) {
+    const r = redactSecrets(text);
+    assert.ok(!r.text.includes(secret) && r.text.includes(want) && r.count === 1, `${text} -> ${r.text}`);
+    assert.deepEqual(redactSecrets(r.text), { text: r.text, count: 0 }, 'hidden once, never again');
+  }
+  for (const text of ['http://localhost:3000/@me', 'https://medium.com:443/@alice', 'http://host:8080/users/x@example.com', 'ssh://git@host:22/x', 'postgres://u:@host/db',
+    'https://a.com:8443?x=a@b.com'])
+    assert.deepEqual(redactSecrets(text), { text, count: 0 }, text);
+});
+
 test('SESSIONS-RT1 the whole record is hidden and cleaned, its header too, so it can always be kept', () => {
   const d = session([{ role: 'user', at: T(0), text: '색 출력 \u001b[31m빨강\u001b[0m 그리고 제목\u000b부제목\u0007' }, { role: 'assistant', at: T(1), text: '고쳤어요', files: ['src/a.ts'] }],
     { cwd: 'C:\\work\\sk-telecom-portal-renewal', branch: 'feature/sk-1234-fix-login-redirect', title: `키 ${f('sk-', 'proj-', 'FAKE'.repeat(6))} 넣고 테스트` });

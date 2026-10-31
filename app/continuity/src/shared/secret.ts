@@ -134,7 +134,9 @@ const HIDE: RegExp[] = [
   // An Authorization header's value after a known scheme: anything token-like.
   new RegExp(`(?<keep>${AUTH_HEAD}\\\\?["']?(?:${AUTH_KNOWN})[ \\t]+)${NOT_REF}[^\\s"'\\\\,;]{8,}`, 'gi'),
   // A password in a URL (scheme://user:password@host, the user may be empty), and on a command line (mysql -pPASSWORD, curl -u).
-  /(?<keep>\b[a-z][a-z0-9+.-]{0,20}:\/\/[^\s:@/]{0,200}:)(?!\[가려진 비밀값\])[^\s@/]+(?=@)/gi,
+  // In a URL it runs to the last '@' followed by a host, so a '/' or '@' in it (an unencoded one) is hidden too; a port followed
+  // by a path (http://localhost:3000/@me) is no password.
+  /(?<keep>\b[a-z][a-z0-9+.-]{0,20}:\/\/[^\s:@/]{0,200}:)(?!\[가려진 비밀값\])(?!\d{1,5}(?:[/?#]|$))[^\s"'`]{1,500}(?=@[A-Za-z0-9.-]+(?::\d{1,5})?(?:[/?#"'`\s,;)]|$))/gi,
   /(?<keep>\bmysql(?:dump|admin)?\b[^\n]{0,500}?\s-p)(?!\[가려진 비밀값\])(?=\S*[A-Za-z])(?=\S*\d)\S{6,}/g,
   /(?<keep>\bcurl\b[^\n]{0,500}?\s(?:-u|--user)[ =]?["']?[^\s:"'@]{1,100}:)(?!\[가려진 비밀값\])[^\s"'@]{4,}/g
 ];
