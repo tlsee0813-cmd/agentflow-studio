@@ -3097,9 +3097,19 @@ def folder_sessions_flow(browser, base):
     expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon · 확인 필요")  # in words, not by the dot's colour alone
     assert panel.inner_text().count("폴더를 읽지 못했어요") == 1, panel.inner_text()
     page.evaluate("() => { window.__broken = null; }")
-    # Permission withdrawn while the page is open (the browser asks again): the pill says so and the panel asks first, with '다시 허용',
-    # instead of telling the person to leave the folders and pick them again; allowing them gives the connection back.
+    # Permission withdrawn while the page is open (the browser asks again): listing the paste box's sessions asks again there, with
+    # no error that says to leave the folders and pick them again.
     page.evaluate("() => { window.__perm = 'prompt'; }")
+    page.keyboard.press("Escape")  # the panel covers the paste box beside it
+    expect(panel).to_be_hidden()
+    page.locator("#lens").get_by_role("button", name="내 AI 세션에서 가져오기").click()
+    expect(box.get_by_role("button", name="세션 폴더 다시 허용")).to_be_visible()
+    expect(box.locator("[role=alert]")).to_have_count(0)
+    box.get_by_role("button", name="세션 폴더 다시 허용").click()
+    expect(page.locator("#lens .rr-session", has_text="휴무일 연결")).to_have_count(1)
+    # So does the panel: the pill says so and the panel asks first, with '다시 허용'; allowing them gives the connection back.
+    page.evaluate("() => { window.__perm = 'prompt'; }")
+    page.locator("#sync-pill").click()
     panel.get_by_role("button", name="지금 확인").click()
     expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon · 허용 필요")
     expect(panel.locator(".sync-ask")).to_contain_text("다시 읽어도 되는지")

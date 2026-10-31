@@ -252,7 +252,8 @@ export function createReturnView(host: ReturnHost) {
     p.open = true; p.loading = true; p.error = null; p.manual = false; render();
     const src = host.sources.current();
     try { if (!src) throw new Error('NO_SOURCE'); p.list = await src.list(); }
-    catch (e) { p.error = ERROR_TEXT[(e as { code?: string } | null)?.code ?? ''] ?? '세션 목록을 불러오지 못했어요.'; }
+    // Picked folders this browser asks about again (their permission withdrawn) close the list, beside '세션 폴더 다시 허용'.
+    catch (e) { if (host.sources.current()) p.error = ERROR_TEXT[(e as { code?: string } | null)?.code ?? ''] ?? '세션 목록을 불러오지 못했어요.'; else p.open = false; }
     p.loading = false; if (s?.key === key) render();
   }
   async function takeSession(id: string) {
