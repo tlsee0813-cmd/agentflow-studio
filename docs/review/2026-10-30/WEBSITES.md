@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | [기존 지도 작업용 공개판](https://agentflow-studio-existing-map-124.tlsee0813.workers.dev/) | source76e3dc8a2939a4055ab1b99526b5cc1c98fd75e7, release=existing-map. 최신 전달142. 135 기반에140 읽기 수리를 좁게 조합 | 최신 전체 개발본이 아니다. 첫 지도/새 기록 지도 갱신은 보류. 보호된 AI 정리는 접속 코드 필요 |
 | [기존 전체 공개판73](https://agentflow-studio.tlsee0813.workers.dev/) | source26b24b935567a95d101720cbf0e06d188d8765d9 | 75 이후 개선을 모두 포함하지 않는다. 오래된 공개 비교 기준 |
-| [보조 정적 Pages](https://tlsee0813-cmd.github.io/agentflow-studio/) | 같은73 source26b24b9355. BUILD에 auxiliary static build와 primary 주소 명시 | 서버 AI가 없는 정적 보조 체험.142나 최신 로컬판이 아니다 |
+| [보조 정적 Pages](https://tlsee0813-cmd.github.io/agentflow-studio/) | 2026-10-31부터 최신 개발 계열의 정적 빌드(BUILD.txt에 source 명시). 작성 당시에는 73 source26b24b9355였다 | 서버 AI가 없는 정적 보조 체험. 최신 화면은 볼 수 있지만 AI 지도 정리·질문과 로컬 서버 기반 연결기는 쓸 수 없다 |
 | 로컬 PC http://127.0.0.1:4327/ | 기존 로컬 서버의 HTTP200 확인. 기존142 인수인계상 전체 개발계열140 app93be1c55 환경이며 이번 정리에서 로컬 화면 재검증은 하지 않음 | 이 사용자 PC에서만 접근 가능. 다른 Claude 세션/클라우드에서는 이 주소로 사용자 PC를 열 수 없다. BUILD.txt는404이며 공개 BUILD처럼 판본을 증명하지 않는다 |
 
 ## 새 브라우저에서도 볼 수 있는 화면
