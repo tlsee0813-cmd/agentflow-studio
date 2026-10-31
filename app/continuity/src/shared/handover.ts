@@ -79,8 +79,10 @@ export const HANDOVER_CHARS = 15000;
 const CLAIM_ORDER: ClaimKind[] = ['want', 'idea', 'reported', 'checked', 'describes', 'open', 'differs'];
 const CLAIMS_PER_PART = 10, RECENT_REQUESTS = 6, RECENT_FILES = 24, LINE = 240, NAMES = 600;
 const one = (t: string, n = LINE) => { const s = t.replace(/\s+/g, ' ').trim(); return s.length > n ? `${s.slice(0, n - 1)}…` : s; };
-/** How much of a part is written: in full, or briefly when the whole document would be too long. */
-const FULL = { text: 400, claims: CLAIMS_PER_PART, claim: LINE, rels: 10, sessions: 4 }, BRIEF = { text: 160, claims: 3, claim: 120, rels: 3, sessions: 2 };
+/** How much of a part is written: in full, or briefly when the whole document would be too long (then what is left to ask comes
+ * first: an open choice is what the next session must not decide alone). */
+const FULL = { text: 400, claims: CLAIMS_PER_PART, claim: LINE, rels: 10, sessions: 4, order: CLAIM_ORDER };
+const BRIEF = { text: 160, claims: 3, claim: 120, rels: 3, sessions: 2, order: ['open', 'differs', 'want', 'reported', 'checked', 'idea', 'describes'] as ClaimKind[] };
 
 function subtree(view: StudioView, id: string): PartView[] {
   const out: PartView[] = [], walk = (x: string) => { const part = view.parts.find(q => q.id === x); if (!part) return; out.push(part); part.childIds.forEach(walk); };
@@ -92,7 +94,7 @@ function partBlock(view: StudioView, part: PartView, sessions: PartSession[], to
   const role = u?.role ?? part.summary ?? null;
   if (role) lines.push(`역할: ${one(role, k.text)}${u?.corrected ? ' (사용자가 고친 설명)' : ''}`);
   if (part.note) lines.push(`사용자 메모: ${one(part.note, k.text)}`);
-  const claims = (u?.claims ?? []).slice().sort((a, b) => CLAIM_ORDER.indexOf(a.kind) - CLAIM_ORDER.indexOf(b.kind));
+  const claims = (u?.claims ?? []).slice().sort((a, b) => k.order.indexOf(a.kind) - k.order.indexOf(b.kind));
   for (const c of claims.slice(0, k.claims)) lines.push(`- ${CLAIM_LABEL[c.kind]}: ${one(c.text, k.claim)}${c.about ? ` (${one(c.about, 80)})` : ''}`);
   if (claims.length > k.claims) lines.push(`- (그 밖에 ${claims.length - k.claims}개는 지도에서 볼 수 있어요)`);
   if (!role && !part.note && !claims.length) lines.push('- 아직 이 부분에 대해 읽힌 내용이 없어요.');
@@ -173,7 +175,8 @@ export function handoverDoc(p: Project, opts: HandoverOptions): Handover {
   // What is undecided: candidates the readings left open and what the latest reading could not tell, for this scope.
   const open: string[] = [];
   for (const r of maps) for (const c of r.candidates) {
-    if (scoped && !c.areaIds.some(a => scopeIds.has(a))) continue;
+    // A candidate on a part since put away is not asked about, as the map leaves it out.
+    if (scoped && !c.areaIds.some(a => scopeIds.has(a)) || c.areaIds.some(a => !view.parts.some(x => x.id === a))) continue;
     const read = candidateReading(c), names = c.areaIds.map(a => view.parts.find(x => x.id === a)?.name).filter(Boolean);
     open.push(`- ${read.label ? `${read.label}: ` : ''}${one(read.statement?.text ?? c.text)}${names.length ? ` (${one(names.join(', '), 80)})` : ''}`);
   }

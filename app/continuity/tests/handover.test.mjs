@@ -19,11 +19,13 @@ const TURNS = [
 let n = 0;
 const meta = () => ({ id: `R_h_${++n}`, at: new Date().toISOString(), model: 'stub', prompt: 'm-000000000000', hash: String(n).padStart(64, 'd') });
 
-function mapped() {
+/** The two-part map the tests share; candidates (their text and parts) are left open by the reading if given. */
+function mapped(candidates = []) {
   let p = D.pasteRecord(D.createProject(), sessionText(session(ID, TURNS)).text, null).project;
   const inp = M.buildMapAsk(p, studioView(p)), rec = inp.ask.records[0].id;
   const q1 = '예약 화면에서 휴무일을 영업시간 설정과 연결해 줘', q2 = '휴무일이면 예약 버튼을 막았어요.';
-  const reply = { summary: '미용실 예약 프로그램이에요.', relations: [{ from: 'new:p0', to: 'new:p1', kind: 'needs', note: '휴무일', record: rec, quote: q1 }], candidates: [], gaps: ['결제 방식은 기록에 없어요.'],
+  const reply = { summary: '미용실 예약 프로그램이에요.', relations: [{ from: 'new:p0', to: 'new:p1', kind: 'needs', note: '휴무일', record: rec, quote: q1 }],
+    candidates: candidates.map(([text, parts]) => ({ text, parts, record: rec, quote: q1 })), gaps: ['결제 방식은 기록에 없어요.'],
     parts: [
       { ref: 'new:p0', name: '예약 화면', parent: null, role: '손님이 시간을 골라 예약해요.', roleAbout: null, roleReplaces: null, basis: [{ record: rec, quote: q1 }],
         claims: [{ kind: 'want', text: '휴무일과 영업시간 연결', record: rec, quote: q1, about: null, replaces: null }, { kind: 'reported', text: '휴무일 예약 막음', record: rec, quote: q2, about: null, replaces: null }] },
@@ -133,11 +135,13 @@ test('HANDOVER-B2 a web record pasted back keeps a handover document its request
 
 const AT = '2026-10-30T05:00:00.000Z';
 const ask = (id, text, reply = '네') => session(id, [{ role: 'user', at: '2026-10-30T06:00:00.000Z', text }, { role: 'assistant', at: '2026-10-30T06:01:00.000Z', text: reply }], { title: null });
-/** A map reading whose parts quote the records holding these words (each part: a name and the words its basis quotes). */
+/** A map reading whose parts quote the records holding these words (each part: a name, the words its basis quotes, and claims of
+ * it as [kind, the words they quote]). */
 function readAs(p, parts) {
   const inp = M.buildMapAsk(p, studioView(p)), rec = q => inp.ask.records.find(r => (r.text ?? '').includes(q)).id;
   const reply = { summary: '시험 프로젝트예요.', relations: [], candidates: [], gaps: [],
-    parts: parts.map(([name, quotes], i) => ({ ref: `new:p${i}`, name, parent: null, role: `${name}을 맡아요.`, roleAbout: null, roleReplaces: null, basis: quotes.map(q => ({ record: rec(q), quote: q })), claims: [] })) };
+    parts: parts.map(([name, quotes, claims = []], i) => ({ ref: `new:p${i}`, name, parent: null, role: `${name}을 맡아요.`, roleAbout: null, roleReplaces: null, basis: quotes.map(q => ({ record: rec(q), quote: q })),
+      claims: claims.map(([kind, q]) => ({ kind, text: q, record: rec(q), quote: q, about: null, replaces: null })) })) };
   return M.applyReading(p, inp, M.validateMapReply(reply, inp.ask), meta()).project;
 }
 
@@ -205,6 +209,21 @@ test('HANDOVER-L1 a document for a large map stays within one prompt: parts are 
   const prompt = `${far.text}\n\n결제 화면부터 이어서 해 줘`;
   assert.ok(prompt.length <= SESSION_LIMITS.turnChars);
   assert.ok(sessionText(ask(NEXT, prompt)).text.includes('[AgentFlow 인수인계 문서를 받아 이어감 · af-handover:BIG234 · 나의 프로젝트]\n\n결제 화면부터 이어서 해 줘'));
+});
+
+test('HANDOVER-U1 what is left to ask stays: a part written briefly keeps its open choice first; a part put away takes its candidates along', () => {
+  const note = '손님이 예약 시간을 고르고 휴무일과 영업시간을 확인한 뒤 결제까지 마치는 흐름을 맡아요. '.repeat(5).trim();
+  const said = ['예약 확인 문자를 보내 줘', '문자 업체는 아직 못 정했어', '나중에 알림톡도 생각 중', '문자 보내는 자리만 만들었어요'];
+  let p = D.pasteRecord(D.createProject(), sessionText(session(ID, [{ role: 'user', at: AT, text: `${said[0]}. ${said[1]}. ${said[2]}.` }, { role: 'assistant', at: AT, text: `${said[3]}.` }])).text, null).project;
+  p = readAs(p, [['문자', [said[0]], [['want', said[0]], ['idea', said[2]], ['reported', said[3]], ['open', said[1]]]]]);
+  for (let i = 0; i < 99; i++) p = D.addArea(p, `부분 ${i}`, note); // so many that every part is written briefly
+  const doc = handoverDoc(p, { scope: null, code: 'ASK234', at: AT }), block = doc.text.slice(doc.text.indexOf('### 문자\n')).split('\n\n')[0];
+  assert.ok(doc.trimmed > 0 && block.includes('(그 밖에 1개는'), block);
+  assert.ok(block.includes('\n- 남은 선택: 문자 업체는 아직 못 정했어\n'), block);
+  // A candidate is listed with its part's name until that part is put away; then it goes, as it does from the map's own list.
+  const { p: q, hours } = mapped([['휴무일을 매주 같은 요일로 둘지 정하지 않았어요.', ['new:p1']]]);
+  assert.ok(handoverText(q, { scope: null, code: 'ASK234', at: AT }).includes('\n- 휴무일을 매주 같은 요일로 둘지 정하지 않았어요. (영업시간 설정)\n'));
+  assert.ok(!handoverText(D.setAreaArchived(q, hours, true), { scope: null, code: 'ASK234', at: AT }).includes('매주 같은 요일'));
 });
 
 test('HANDOVER-P1 changed files whose names hold ")" (route groups) are read whole', () => {
