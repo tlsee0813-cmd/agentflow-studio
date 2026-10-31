@@ -23,27 +23,31 @@ async function readRange(path, bytes, from = 0) {
   finally { await h.close(); }
 }
 /** What a listing knows of a file: its head (read further while no prompt is in it, but for a Codex subagent's rollout, which is
- * never a session of its own), with the folders named at its end. */
+ * never a session of its own), with the folders named at its end. A fork starts with a copy of the session it came from, which
+ * can run past any head: when the head ends inside it, the file is read on line by line (up to fileBytes) to the fork's first
+ * prompt of its own. */
 async function readListed(tool, path, size, limits) {
-  const { headBytes: head, promptBytes: more, tailBytes: tail } = limits;
-  let parsed = parseSession(tool, jsonLines(await readRange(path, head), size > head));
-  if (!hasPrompt(parsed) && size > head && !parsed.meta.parent) parsed = parseSession(tool, jsonLines(await readRange(path, more), size > more));
+  const { headBytes: head, promptBytes: more, tailBytes: tail, fileBytes } = limits;
+  let parsed = parseSession(tool, jsonLines(await readRange(path, head), size > head)), read = head;
+  if (!hasPrompt(parsed) && size > head && !parsed.meta.parent && !parsed.copy) { parsed = parseSession(tool, jsonLines(await readRange(path, more), size > more)); read = more; }
+  if (!hasPrompt(parsed) && size > read && !parsed.meta.parent && parsed.copy) parsed = await readParsed(tool, path, limits.lineBytes, { bytes: size > fileBytes ? fileBytes : Infinity, until: p => p.prompted() });
   if (size > head) for (const c of tailFolders(await readRange(path, tail, Math.max(0, size - tail)))) atFolder(parsed.meta, c);
   return parsed;
 }
 /** A whole session read in chunks, line by line, into the tool's parser: a file of hundreds of MB is never held whole. A line over
  * `cap` bytes (a damaged file, a huge paste) is skipped rather than built into a string past what Node can hold, and a failed read
- * fails this read only. Lines are split on the newline byte, which never occurs inside a UTF-8 character. */
-async function readParsed(tool, path, cap = SESSION_LIMITS.lineBytes) {
+ * fails this read only. Lines are split on the newline byte, which never occurs inside a UTF-8 character.
+ * bytes: only the file's first bytes (its last, cut line left out); until: the reading stops at the first line after which it holds. */
+async function readParsed(tool, path, cap = SESSION_LIMITS.lineBytes, { bytes = Infinity, until = null } = {}) {
   const parser = sessionParser(tool); let parts = [], size = 0;
   const add = b => { size += b.length; if (size > cap) parts = []; else if (b.length) parts.push(b); };
   const line = () => { if (size <= cap && parts.length) pushLine(parser, (parts.length === 1 ? parts[0] : Buffer.concat(parts)).toString('utf8')); parts = []; size = 0; };
-  for await (const chunk of createReadStream(path)) {
+  for await (const chunk of createReadStream(path, Number.isFinite(bytes) ? { end: bytes - 1 } : {})) {
     let from = 0;
-    for (let nl = chunk.indexOf(10); nl >= 0; from = nl + 1, nl = chunk.indexOf(10, from)) { add(chunk.subarray(from, nl)); line(); }
+    for (let nl = chunk.indexOf(10); nl >= 0; from = nl + 1, nl = chunk.indexOf(10, from)) { add(chunk.subarray(from, nl)); line(); if (until?.(parser)) return parser.done(); }
     add(chunk.subarray(from));
   }
-  line();
+  if (!Number.isFinite(bytes)) line();
   return parser.done();
 }
 async function dirs(path) { try { return (await readdir(path, { withFileTypes: true })).filter(d => d.isDirectory()).map(d => join(path, d.name)); } catch { return []; } }

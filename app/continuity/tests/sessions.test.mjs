@@ -543,6 +543,55 @@ test('SESSIONS-FK1 a forked Codex thread and a branched Claude Code session give
   assert.equal(b.meta.startedAt, at(20)); assert.deepEqual(b.changes, []);
 });
 
+test('SESSIONS-FK2 a fork whose copy of the session it came from runs past what a listing reads first is still listed by its own request, on the server and in the page', async () => {
+  // A long Codex thread forked late: its copy (every line stamped when copied, each request with a long tool output) runs past the
+  // head and past promptBytes; the fork's own request comes after its settings line. A Claude Code /branch the same, its copied rows
+  // naming where they came from.
+  const forkAt = '2026-10-31T10:00:00.005Z', ev = (type, extra, timestamp = forkAt) => ({ timestamp, type: 'event_msg', payload: { type, ...extra } });
+  const codexFork = n => [{ timestamp: forkAt, type: 'session_meta', payload: { id: 'F', forked_from_id: 'P', timestamp: forkAt, cwd: '/w' } },
+    { timestamp: forkAt, type: 'session_meta', payload: { id: 'P', timestamp: at(0), cwd: '/w' } },
+    ...Array.from({ length: n }, (_, i) => [ev('user_message', { message: `예약 화면 ${i}번째 수정` }),
+      { timestamp: forkAt, type: 'response_item', payload: { type: 'function_call_output', call_id: `c${i}`, output: 'o'.repeat(4096) } }, ev('agent_message', { message: `${i}번째 수정했어요.` })]).flat(),
+    ev('thread_settings_applied', { thread_id: 'F', thread_settings: {} }),
+    ev('user_message', { message: '포크에서 새로 한 요청: 휴무일은 빨간색' }, '2026-10-31T10:02:00.000Z'), ev('agent_message', { message: '빨간색으로 바꿨어요.' }, '2026-10-31T10:02:30.000Z')];
+  const from = (row, uuid, parentUuid) => ({ ...row, sessionId: 'B', uuid, parentUuid, forkedFrom: { sessionId: 'A', messageUuid: uuid } });
+  const claudeBranch = n => [...Array.from({ length: n }, (_, i) => [from(cu(1, `알림 ${i}번째 수정`), `u${i}`, i ? `a${i - 1}` : null),
+    from(ca(2, `${i}번째 수정했어요. ${'설명 '.repeat(800)}`), `a${i}`, `u${i}`)]).flat(),
+    cu(20, '브랜치에서 새로 한 요청: 알림은 문자로', { sessionId: 'B', uuid: 'b1', parentUuid: `a${n - 1}` }), ca(21, '문자로 보내요.', { sessionId: 'B', uuid: 'b2', parentUuid: 'b1' })];
+  const write = (roots, n) => {
+    const day = join(roots.codex, 'sessions', '2026', '10', '31'), p = join(roots.claude, 'projects', '-w'); mkdirSync(day, { recursive: true }); mkdirSync(p, { recursive: true });
+    writeFileSync(join(day, 'rollout-2026-10-31T10-00-00-F.jsonl'), jl(codexFork(n))); writeFileSync(join(p, 'B.jsonl'), jl(claudeBranch(n)));
+    return [statSync(join(day, 'rollout-2026-10-31T10-00-00-F.jsonl')).size, statSync(join(p, 'B.jsonl')).size];
+  };
+  const own = ['브랜치에서 새로 한 요청: 알림은 문자로', '포크에서 새로 한 요청: 휴무일은 빨간색'];
+  let dir = home();
+  try {
+    const roots = writeSessionHome(dir), limits = { ...SESSION_LIMITS, headBytes: 4096, promptBytes: 64 * 1024, tailBytes: 2048 };
+    for (const size of write(roots, 40)) assert.ok(size > 2 * limits.promptBytes, String(size));
+    const sessions = openSessions({ env: {}, roots, limits }), list = (await sessions.list('/w')).sessions;
+    assert.deepEqual(list.map(s => s.preview).sort(), own);
+    for (const s of list) assert.deepEqual((await sessions.read(s.id)).turns.map(t => t.role), ['user', 'assistant'], s.preview);
+    // Never read on past the file limit (such a file cannot be read whole either).
+    assert.deepEqual((await openSessions({ env: {}, roots, limits: { ...limits, fileBytes: limits.promptBytes } }).list('/w')).sessions, []);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+  // The page reads a picked folder with its own limits: a copy past them.
+  const { readdirSync } = await import('node:fs'), { basename } = await import('node:path'), { createSessionSources } = await import('../dist/public/client/session-source.js');
+  const file = path => ({ kind: 'file', name: basename(path), getFile: async () => new File([readFileSync(path)], basename(path), { lastModified: statSync(path).mtimeMs }) });
+  const folder = path => ({ kind: 'directory', name: basename(path), queryPermission: async () => 'granted',
+    async *values() { for (const d of readdirSync(path, { withFileTypes: true })) yield d.isDirectory() ? folder(join(path, d.name)) : file(join(path, d.name)); } });
+  dir = home(); const had = globalThis.window;
+  try {
+    const roots = writeSessionHome(dir);
+    for (const size of write(roots, Math.ceil(SESSION_LIMITS.promptBytes / 4096) + 50)) assert.ok(size > SESSION_LIMITS.promptBytes, String(size));
+    const sources = createSessionSources({ status: () => ({ ai: 'none' }), accessCode: () => '' });
+    let pick = roots.codex; globalThis.window = { showDirectoryPicker: async () => folder(pick) };
+    await sources.load(); assert.equal(await sources.pick(), true); pick = roots.claude; assert.equal(await sources.pick(), true);
+    const list = await sources.current().list('/w');
+    assert.deepEqual(list.map(s => s.preview).sort(), own);
+    for (const s of list) assert.deepEqual((await sources.current().read(s.id)).turns.map(t => t.text), [s.preview, s.tool === 'codex' ? '빨간색으로 바꿨어요.' : '문자로 보내요.']);
+  } finally { globalThis.window = had; rmSync(dir, { recursive: true, force: true }); }
+});
+
 test('SESSIONS-C5 after a Claude Code rewind only the conversation that goes on is read: the request gone back over and its files are not', () => {
   const row = (r, uuid, parentUuid) => ({ ...r, uuid, parentUuid });
   const said = rows => { const s = parseClaude(rows); return [s.turns.map(t => [t.role, t.text, t.files ?? null]), s.changes.flatMap(c => c.files)]; };

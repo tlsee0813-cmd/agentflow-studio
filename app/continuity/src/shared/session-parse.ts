@@ -9,7 +9,8 @@ import { redactSecrets } from './secret.js';
 
 export const SESSION_VERSION = 'sessions.1';
 // fileBytes: a long agent session runs to hundreds of MB (tool output it never shows); it is read line by line, never held whole.
-// headBytes is read to list a file; promptBytes when the head holds no prompt yet (a first prompt can carry pasted images);
+// headBytes is read to list a file; promptBytes when the head holds no prompt yet (a first prompt can carry pasted images), or
+// for a fork whose head ends inside the copy of the session it came from, the file line by line up to its first own prompt;
 // tailBytes from the end, for a working folder a long session moved to late. lineBytes: a longer line (a damaged file, a huge
 // paste) is skipped whole rather than built into a string past what the runtime can hold; a turn is clipped far below it anyway.
 export const SESSION_LIMITS = Object.freeze({ list: 60, scan: 400, headBytes: 256 * 1024, promptBytes: 8 * 1024 * 1024, tailBytes: 64 * 1024, fileBytes: 2 * 1024 * 1024 * 1024, lineBytes: 64 * 1024 * 1024, turnChars: 20000, replyChars: 300000, preview: 160 });
@@ -26,8 +27,9 @@ export function atFolder(meta: SessionMeta, cwd: unknown) {
   if (typeof cwd !== 'string' || !cwd) return;
   meta.cwd = cwd; if (!meta.cwds.some(c => sameFolder(c, cwd))) meta.cwds.push(cwd);
 }
-/** changes: each time files were changed, with when (a subagent's are added to the session that started it). */
-export interface ParsedSession { meta: SessionMeta; turns: SessionTurn[]; changes: FileChange[] }
+/** changes: each time files were changed, with when (a subagent's are added to the session that started it). copy: the lines
+ * read ended inside a fork's copy of the session it came from (a head read of a fork may hold none of its own prompts yet). */
+export interface ParsedSession { meta: SessionMeta; turns: SessionTurn[]; changes: FileChange[]; copy?: true }
 interface FileChange { at: string | null; files: string[] }
 type Row = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
@@ -169,6 +171,7 @@ export function claudeParser(): SessionParser {
   const c = collector(), meta = newMeta(), changes: FileChange[] = [], edits = new Map<string, FileChange>();
   const changed = (e: FileChange) => { changes.push(e); c.reply('', e.at, e.files); };
   let latest = ''; // the latest time a line was written with, in Claude Code's own form (so times compare as strings)
+  let copying = false; // the last conversation row read was copied from the session branched from
   const push = (o: Row) => {
     if (!o || typeof o !== 'object') return;
     const was = latest; if (typeof o.timestamp === 'string' && ISO_TIME.test(o.timestamp) && o.timestamp > latest) latest = o.timestamp;
@@ -177,8 +180,9 @@ export function claudeParser(): SessionParser {
     if (o.type === 'relocated') atFolder(meta, o.relocatedCwd);
     // A branch (/branch, --fork-session, /fork) starts with a copy of the session it came from, each row naming where it came from:
     // what that session said is its own, not this one's.
-    if (o.forkedFrom && typeof o.forkedFrom === 'object') return;
+    if (o.forkedFrom && typeof o.forkedFrom === 'object') { copying = true; return; }
     if (o.type !== 'user' && o.type !== 'assistant' && !(o.type === 'attachment' && o.attachment?.type === 'queued_command')) return;
+    copying = false;
     const at = typeof o.timestamp === 'string' ? o.timestamp : null, content = o.message?.content, blocks: Row[] = Array.isArray(content) ? content.filter(b => b && typeof b === 'object') : [];
     // An edit counts once its result came back without an error: one the person refused, or that failed, changed nothing. A
     // subagent's edits count too (its own messages do not).
@@ -234,7 +238,8 @@ export function claudeParser(): SessionParser {
     cutFrom = null; prev = id;
     if (!rows.has(id)) rows.set(id, { before, after: [c.turns.length, changes.length] });
   };
-  return { push: o => read(o as Row), done: () => { if (cutFrom) { back(rows.get(cutFrom)!.before); cutFrom = null; } return { meta, turns: c.turns, changes }; } };
+  return { push: o => read(o as Row), prompted: () => c.turns.some(t => t.role === 'user'),
+    done: () => { if (cutFrom) { back(rows.get(cutFrom)!.before); cutFrom = null; } return { meta, turns: c.turns, changes, ...(copying ? { copy: true as const } : {}) }; } };
 }
 
 /** What the person typed in a Codex user message. Codex Desktop tags each part of it (user.text, user.heartbeat,
@@ -342,11 +347,13 @@ export function codexParser(): SessionParser {
       const from = s.event || !s.pieces.some(x => x.from === 'item' && x.text.trim()) ? 'event' : 'item';
       for (const x of s.pieces) if (x.from === from || x.from === 'file') c.reply(x.text, x.at, x.files);
     }
-    return { meta, turns: c.turns, changes };
+    return { meta, turns: c.turns, changes, ...(copy ? { copy: true as const } : {}) };
   };
-  return { push: o => push(o as Row), done };
+  return { push: o => push(o as Row), prompted: () => stretches.some(s => s.user), done };
 }
-export interface SessionParser { push(line: unknown): void; done(): ParsedSession }
+/** prompted: whether a prompt of the session's own has been read yet (cheap, at any line: a listing reads a fork's copy through
+ * until one comes). */
+export interface SessionParser { push(line: unknown): void; prompted(): boolean; done(): ParsedSession }
 export const parseSession = (tool: SessionTool, lines: unknown[]): ParsedSession => (tool === 'claude' ? parseClaude : parseCodex)(lines);
 export const sessionParser = (tool: SessionTool): SessionParser => (tool === 'claude' ? claudeParser : codexParser)();
 /** One JSON line into a parser (blank or damaged lines are skipped). */
