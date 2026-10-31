@@ -8,8 +8,8 @@ import { listSessions, readSession, type AiStatus } from './studio-api.js';
 import { readSessionList, readSessionDetail, type SessionDetail, type SessionSummary } from '../shared/session-import.js';
 import { SESSION_LIMITS, jsonLines, parseSession, sessionParser, pushLine, withSubagents, tailFolders, hasPrompt, atFolder, sniffTool, sessionSummary, sessionDetail, sessionId, sessionKey, within, worktreeSteps, worktreeFolder, type ParsedSession, type SessionMeta, type SessionTool } from '../shared/session-parse.js';
 
-/** read(id, since): only turns from that time on (a turn with no time is kept), as the server does. */
-/** partial: after a listing, why it holds only some of the picked folders' sessions (a folder could not be read), or null. */
+/** read(id, since): only turns from that time on (a turn with no time is kept), as the server does. partial: after a listing, why it
+ * holds only some of the picked folders' sessions (a folder could not be read), or null. */
 export interface SessionSource { kind: 'server' | 'folder'; list(folder?: string | null): Promise<SessionSummary[]>; read(id: string, since?: string | null): Promise<SessionDetail>; partial?(): string | null }
 export type FolderState = 'unsupported' | 'none' | 'prompt' | 'granted';
 
@@ -267,7 +267,8 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
       }
       // A folder this browser no longer lets the page read (its permission withdrawn while the page was open) is asked for again.
       if (bad.length) await check();
-      const unreadable = bad.length ? `${bad.join(', ')} 폴더를 읽지 못했어요.` : null; missed = unreadable;
+      // Said the same whether some or all of them failed (the panel shows it once, as its error).
+      const unreadable = bad.length ? `${bad.join(', ')} 폴더를 읽지 못했어요. 옮겼거나 지웠다면 빼고 다시 골라 주세요.` : null; missed = unreadable;
       if (roots.length && bad.length === roots.length) { looked = unreadable; throw Object.assign(new Error('SESSION_FOLDER_UNREADABLE'), { code: 'SESSION_FOLDER_UNREADABLE', cause }); }
       // A file found through two picked folders (one inside the other) is looked at once.
       const once = new Set<string>();
@@ -318,6 +319,8 @@ export function createSessionSources(host: { status(): AiStatus; accessCode(): s
     folderState: () => state,
     /** The picked folders' names as shown, each one forget() takes. */
     folders: labels,
+    /** The tools whose sessions are read: the server's, or those the last look found in the picked folders (none before one). */
+    tools: (): SessionTool[] => host.status().sessions?.tools.length ? host.status().sessions!.tools : (['claude', 'codex'] as const).filter(t => lastFound.some(f => f.tool === t)),
     /** A short line to show beside the picked folders, or null: why a pick added nothing, a folder that could not be read, or a
      * look that read only part of the folders. */
     notice: (): string | null => [picked, looked].filter(Boolean).join(' ') || null,

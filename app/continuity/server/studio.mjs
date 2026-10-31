@@ -250,13 +250,6 @@ function inputError(e) {
   return new ApiError('INVALID_INPUT', 400);
 }
 
-/**
- * Origin boundary (separate from the localhost-only development API):
- * - same-origin requests (Origin equals the request's own origin) are allowed;
- * - other origins only when listed in STUDIO_ALLOWED_ORIGINS (exact origins), with CORS headers for them alone;
- * - POST needs Content-Type application/json and X-AgentFlow-Request: 1 (forces a preflight cross-origin);
- * - when STUDIO_ACCESS_CODE is set, X-Studio-Access must equal it (typed by the person using the site, never bundled).
- */
 /** AF124: release policies a trusted host assembly names in code (never from env or a request). 'existing-map' is a limited release
  * for work on maps one already has: /ask, /plan, /scope and /digest stay as they are; no map reading of any schema (first or later,
  * map.1–7) and no map jobs. Their routes are refused before the body, a provider, the limiter or an executor is touched, and status
@@ -309,9 +302,12 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
     const origin = request.headers.get('origin');
     return origin && origin !== new URL(request.url).origin && config.origins.includes(origin) ? origin : null;
   };
-  /** The request rules every route past status shares, in this order: an allowed method, the custom header (a cross-site page
-   * cannot send it without a preflight; a sameOriginOnly route also refuses an allowed other origin here), a JSON body on POST,
-   * the access code when one is set, and the declared body size. */
+  /** Origin boundary (separate from the localhost-only development API). handle() lets through the request's own origin and the
+   * other origins listed in STUDIO_ALLOWED_ORIGINS (exact origins, CORS headers for them alone). Past status, every route then
+   * shares these rules, in this order: an allowed method; X-AgentFlow-Request: 1 on every method (a cross-site page cannot send it
+   * without a preflight), with a sameOriginOnly route (sessions) refusing even a listed other origin here; Content-Type
+   * application/json on POST; X-Studio-Access equal to STUDIO_ACCESS_CODE when one is set (typed by the person using the site,
+   * never bundled); and the declared body size. */
   const admit = (request, { methods, maxBytes = null, sameOriginOnly = false }) => {
     if (!methods.includes(request.method)) throw new ApiError('METHOD_NOT_ALLOWED', 405);
     if ((sameOriginOnly && corsOrigin(request)) || request.headers.get('x-agentflow-request') !== '1') throw new ApiError('FORBIDDEN_ORIGIN', 403);
