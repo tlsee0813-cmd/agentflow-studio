@@ -3237,12 +3237,17 @@ def folder_sessions_flow(browser, base):
     # longer once it is linked.
     page.evaluate("""() => { const row = (cwd, text) => JSON.stringify({ type: 'user', cwd, sessionId: 's', timestamp: new Date().toISOString(), message: { role: 'user', content: text } }) + '\\n';
       window.__write('me/.claude/projects/C--work-shop/win1.jsonl', row('C:\\\\work\\\\shop', '가게 화면 고쳐 줘'));
-      window.__write('me/.claude/projects/c--work-shop/win2.jsonl', row('c:\\\\work\\\\shop', '가게 문구 고쳐 줘')); }""")
+      window.__write('me/.claude/projects/c--work-shop/win2.jsonl', row('c:\\\\work\\\\shop', '가게 문구 고쳐 줘'));
+      window.__write('me/.claude/projects/C--work-shop-app/win3.jsonl', row('C:\\\\work\\\\shop\\\\app', '가게 앱 빌드해 줘')); }""")
     page.locator("#sync-pill").click()
     panel.get_by_role("button", name="폴더 추가").click()
-    shop = panel.locator(".sync-folder-pick", has_text=re.compile(r"[Cc]:\\work\\shop"))
+    named = lambda pattern: panel.locator(".sync-folder-pick").filter(has=page.locator("strong", has_text=re.compile(pattern)))
+    shop, inner = named(r"^[Cc]:\\work\\shop$"), named(r"^C:\\work\\shop\\app$")
     expect(panel.locator(".sync-folder-pick", has_text="/work/other")).to_have_count(1)
     expect(shop).to_have_count(1)
+    # The repository's row counts the sessions run in a folder inside it (connecting it takes them too), so it is not the one with fewer.
+    expect(shop.locator("small")).to_contain_text("세션 3개 (안쪽 폴더의 1개 포함)")
+    expect(inner.locator("small")).to_contain_text("세션 1개 · ")
     shop.click()
     expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon 외 1")
     expect(page.locator("#sync-pill")).to_have_attribute("data-state", "on", timeout=15000)
@@ -3250,6 +3255,7 @@ def folder_sessions_flow(browser, base):
     panel.get_by_role("button", name="폴더 추가").click()
     expect(panel.locator(".sync-folder-pick", has_text="/work/other")).to_have_count(1)
     expect(shop).to_have_count(0)
+    expect(inner).to_have_count(0)  # inside the linked folder, it comes in through it
     assert not errors, errors
     context.close()
 

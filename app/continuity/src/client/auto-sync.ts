@@ -11,7 +11,7 @@ import type { Project } from '../shared/types.js';
 import { ERROR_TEXT } from './studio-api.js';
 import type { SessionSources } from './session-source.js';
 import { newTurns, markAfter, leftSince, sessionText, sessionChunks, stamp, TOOL_NAME, SETTLE_MS, AUTO_RUN_GAP_MS, AUTO_RUNS_PER_DAY, BACKFILL_MS, BACKFILL_SESSIONS, type SessionDetail, type SessionMark, type SessionSummary } from '../shared/session-import.js';
-import { sameFolder } from '../shared/session-parse.js';
+import { sameFolder, within } from '../shared/session-parse.js';
 import { h, put, ago } from './plan-dom.js';
 
 export const AUTOSYNC_KEY = 'agentflow.studio.autosync.1';
@@ -71,7 +71,7 @@ const day = (d = new Date()) => `${d.getFullYear()}-${d.getMonth() + 1}-${d.getD
 
 export function createAutoSync(host: AutoSyncHost) {
   let busy = false, again = false, timer: ReturnType<typeof setInterval> | null = null, panelOpen = false;
-  let folders: { folder: string; count: number; latest: string; tools: Set<string> }[] | null = null, foldersError: string | null = null, foldersLoading = false;
+  let folders: { folder: string; count: number; latest: string; tools: Set<string>; inner: number }[] | null = null, foldersError: string | null = null, foldersLoading = false;
   // said: the error the open panel last drew, which it does not read out again when it is drawn again.
   let typed = '', adding = false, said: string | null = null;
   // Projects whose last look in this tab could not save: no look runs for them until the person asks ('지금 확인', connecting).
@@ -242,7 +242,12 @@ export function createAutoSync(host: AutoSyncHost) {
         const k = [...by.keys()].find(x => sameFolder(x, s.cwd!)) ?? s.cwd, f = by.get(k) ?? { folder: s.cwd, count: 0, latest: s.updatedAt, tools: new Set<string>() };
         f.count++; if (s.updatedAt > f.latest) { f.latest = s.updatedAt; f.folder = s.cwd; } f.tools.add(TOOL_NAME[s.tool]); by.set(k, f);
       }
-      folders = [...by.values()].sort((a, b) => b.latest.localeCompare(a.latest));
+      // A folder takes the sessions of the folders inside it too (within): its row counts them, so a repository whose sessions
+      // mostly ran in a subfolder (app/) does not read as the row with fewer. It keeps its own place and time, so a folder that holds
+      // everything (the home folder) is not put first for it.
+      const own = [...by.values()], rows = own.map(f => ({ ...f, tools: new Set(f.tools), inner: 0 }));
+      rows.forEach((f, i) => own.forEach((g, j) => { if (i !== j && within(g.folder, f.folder)) { f.count += g.count; f.inner += g.count; for (const t of g.tools) f.tools.add(t); } }));
+      folders = rows.sort((a, b) => b.latest.localeCompare(a.latest));
     } catch (e) { foldersError = failText(e, '세션 기록을 찾지 못했어요.'); }
     foldersLoading = false; render();
   }
@@ -336,7 +341,8 @@ export function createAutoSync(host: AutoSyncHost) {
         setup);
       return;
     }
-    const picks = folders?.filter(f => !b?.folders.some(x => sameFolder(x.path, f.folder))) ?? null;
+    // A folder inside one linked already comes in through it, so it is not offered again.
+    const picks = folders?.filter(f => !b?.folders.some(x => within(f.folder, x.path))) ?? null;
     // No source yet: the session folders are picked (or allowed again) first.
     if (!host.sources.current()) {
       put(panel, h('h3', { tabindex: '-1' }, '내 AI 세션 연결'), setup,
@@ -364,7 +370,7 @@ export function createAutoSync(host: AutoSyncHost) {
       errorLine(foldersError),
       picks && !picks.length ? h('p', { class: 'fine' }, b ? '세션이 있는 다른 작업 폴더를 찾지 못했어요. 폴더 경로를 직접 적을 수도 있어요.' : '이 PC에서 Claude Code·Codex 세션을 찾지 못했어요. 폴더 경로를 직접 적을 수도 있어요.') : null,
       picks?.length ? h('ul', { class: 'sync-folders' }, ...picks.slice(0, 12).map(f => h('li', {}, h('button', { type: 'button', class: 'sync-folder-pick', 'data-act': `folder:${f.folder}`, onclick: () => connect(f.folder) },
-        h('strong', {}, f.folder), h('small', { title: stamp(f.latest, true) }, `${[...f.tools].join('·')} 세션 ${f.count}개 · 최근 대화 ${ago(f.latest)}`),
+        h('strong', {}, f.folder), h('small', { title: stamp(f.latest, true) }, `${[...f.tools].join('·')} 세션 ${f.count}개${f.inner ? ` (안쪽 폴더의 ${f.inner}개 포함)` : ''} · 최근 대화 ${ago(f.latest)}`),
         // What a press does, as the typed path's own '연결' says it (left out of the card's name, which stays the folder).
         h('span', { class: 'sync-folder-go', 'aria-hidden': 'true' }, '연결 ›'))))) : null,
       h('div', { class: 'pp-row sync-manual' }, input, go, b ? h('button', { type: 'button', class: 'link-button quiet', 'data-act': 'back', onclick: back }, '취소') : null),
