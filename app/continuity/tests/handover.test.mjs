@@ -145,10 +145,10 @@ test('HANDOVER-B2 a web record pasted back keeps a handover document its request
 const AT = '2026-10-30T05:00:00.000Z';
 const ask = (id, text, reply = '네') => session(id, [{ role: 'user', at: '2026-10-30T06:00:00.000Z', text }, { role: 'assistant', at: '2026-10-30T06:01:00.000Z', text: reply }], { title: null });
 /** A map reading whose parts quote the records holding these words (each part: a name, the words its basis quotes, and claims of
- * it as [kind, the words they quote]). */
-function readAs(p, parts) {
+ * it as [kind, the words they quote]), and relations between them as [from, to (parts by place), kind, note, the words quoted]. */
+function readAs(p, parts, relations = []) {
   const inp = M.buildMapAsk(p, studioView(p)), rec = q => inp.ask.records.find(r => (r.text ?? '').includes(q)).id;
-  const reply = { summary: '시험 프로젝트예요.', relations: [], candidates: [], gaps: [],
+  const reply = { summary: '시험 프로젝트예요.', relations: relations.map(([from, to, kind, note, q]) => ({ from: `new:p${from}`, to: `new:p${to}`, kind, note, record: rec(q), quote: q })), candidates: [], gaps: [],
     parts: parts.map(([name, quotes, claims = []], i) => ({ ref: `new:p${i}`, name, parent: null, role: `${name}을 맡아요.`, roleAbout: null, roleReplaces: null, basis: quotes.map(q => ({ record: rec(q), quote: q })),
       claims: claims.map(([kind, q]) => ({ kind, text: q, record: rec(q), quote: q, about: null, replaces: null })) })) };
   return M.applyReading(p, inp, M.validateMapReply(reply, inp.ask), meta()).project;
@@ -269,4 +269,12 @@ test('HANDOVER-B3 a web record header is read by the shape of its fields, in any
   const answer = '[웹 AI 세션 기록 · 로그인 수정]\n\n── 사용자 요청 ──\n로그인 버튼 고쳐 줘\n\n── 웹 AI 답변 ──\n고쳤어요\n- (바꾼 파일: src/login.tsx, app/(auth)/page.tsx)';
   const p = D.pasteRecord(D.createProject(), answer, null).project;
   assert.ok(handoverText(p, { scope: null, code: 'WEB345', at: '2026-10-30T05:00:00.000Z' }).includes('- 로그인 버튼 고쳐 줘 → 바꾼 파일: src/login.tsx, app/(auth)/page.tsx'));
+});
+
+test('HANDOVER-K1 a shared relation has no direction: both parts read it the same way, with no arrow', () => {
+  const said = '결제 기록을 정산에서 같이 써요';
+  let p = D.pasteRecord(D.createProject(), sessionText(session(ID, [{ role: 'user', at: AT, text: said }, { role: 'assistant', at: AT, text: '네' }])).text, null).project;
+  p = readAs(p, [['결제', [said]], ['정산', [said]]], [[0, 1, 'shares', '결제 기록', said]]);
+  const t = handoverText(p, { scope: null, code: 'SHR234', at: AT });
+  assert.ok(t.includes('\n- 관련: 정산 (이 부분과 함께 씀 · 결제 기록)\n') && t.includes('\n- 관련: 결제 (이 부분과 함께 씀 · 결제 기록)\n') && !t.split('\n').some(l => l.startsWith('- 관련:') && /[←→]/.test(l)), t);
 });

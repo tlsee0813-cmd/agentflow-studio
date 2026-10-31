@@ -103,8 +103,9 @@ function partBlock(view: StudioView, part: PartView, sessions: PartSession[], to
   if (!role && !part.note && !claims.length) lines.push('- 아직 이 부분에 대해 읽힌 내용이 없어요.');
   const rels = view.relations.filter(r => r.from === part.id || r.to === part.id).map(r => {
     const out = r.from === part.id, other = view.parts.find(x => x.id === (out ? r.to : r.from));
-    // Read from this part, as its panel reads it: '이 부분이 필요로 함' or '이 부분을 필요로 함', never an arrow to decode.
-    return other ? `${other.name} (${relLabel(r.kind, out)}${r.note ? ` · ${one(r.note, 80)}` : ''})` : null;
+    // Read from this part, as its panel reads it: '이 부분이 필요로 함' or '이 부분을 필요로 함', never an arrow to decode. Sharing has
+    // no direction (the panel's arrow only says which end was recorded first), so it reads the same from both ends.
+    return other ? `${other.name} (${r.kind === 'shares' ? '이 부분과 함께 씀' : relLabel(r.kind, out)}${r.note ? ` · ${one(r.note, 80)}` : ''})` : null;
   }).filter(Boolean);
   if (rels.length) lines.push(`- 관련: ${rels.slice(0, k.rels).join(', ')}${rels.length > k.rels ? ` 외 ${rels.length - k.rels}개` : ''}`);
   if (sessions.length) lines.push(`- 다룬 세션: ${sessions.slice(0, k.sessions).map(s => `${originLabel(s)}${s.tookOver ? ' (인수인계로 이어받음)' : ''}`).join(', ')}`);
