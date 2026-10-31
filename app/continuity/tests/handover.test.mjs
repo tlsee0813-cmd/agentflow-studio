@@ -85,6 +85,9 @@ test('HANDOVER-F1 a new session that starts from the document: the document fold
   const again = handoverText(D.pasteRecord(q, later, null).project, { scope: booking, code: 'ZXC234', at: '2026-10-30T07:00:00.000Z' });
   for (const s of ['\n- 이거 읽고 이어서 해 줘 (인수인계 문서로 시작 · 나의 프로젝트 › 예약 화면) 먼저 테스트부터 돌려 줘\n', '\n- 실패한 테스트 고쳐 줘 → 바꾼 파일: src/booking.ts\n'])
     assert.ok(again.includes(s), `missing: ${s}\n${again}`);
+  // Its part reads as the map last saw it, and the document says the map is behind.
+  assert.match(again, /\n## 이 범위의 현재 상태\n\(지도는 \d{4}-\d\d-\d\d \d\d:\d\d에 읽은 기록까지예요\. 아직 지도에 담기지 않은 기록이 2개 있어서, 아래 최근 흐름이 더 새로울 수 있어요\.\)\n\n### 예약 화면\n/);
+  assert.ok(!handoverText(p, { scope: booking, code: 'ZXC234', at: '2026-10-30T07:00:00.000Z' }).includes('지도에 담기지 않은'), 'all read: no note');
 });
 
 test('HANDOVER-O1 session origin: header fields read back; other records are not sessions', () => {
