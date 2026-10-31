@@ -27,8 +27,10 @@ test('PCRUN99-1 map.7: a key not asked for is passed over and not kept; a key as
   assert.ok(got.ok, JSON.stringify(got)); assert.deepEqual(got.value, want.value);
   assert.ok(!JSON.stringify(got.value).includes('SECRET_MARKER_99') && !JSON.stringify(got.value).includes('aboutAtAt'));
   const missing = structuredClone(lawful.reply); delete missing.parts[1].claims[0].replaces;
-  const no = outcome(M.validateMapReply, { ...lawful, reply: missing });
-  assert.deepEqual([no.path, no.rule, no.target], ['parts[1].claims[0]', 'contract', 'keys']);
+  // PCRUN100: that claim alone is set aside, said as the refusal it was.
+  const no = M.validateMapReply(missing, lawful.ask);
+  assert.deepEqual(M.setAside(no).map(e => [e.path, e.rule, e.target]), [['parts[1].claims[0]', 'contract', 'keys']]);
+  assert.equal(no.parts[1].claims.length, want.value.parts[1].claims.length - 1);
 });
 
 test('PCRUN99-2 the handover says a path outside the working folders as such, and keeps one inside them', () => {
