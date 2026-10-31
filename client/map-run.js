@@ -753,6 +753,7 @@ export function createMapRun(host) {
             const s = openSlot(), a = s?.attempt;
             if (!s || !a || (a.phase !== 'hashing' && a.phase !== 'reserving' && a.phase !== 'asking'))
                 return;
+            host.withdrawn?.(a.key);
             // A job: its cancel is recorded by the server first; only then is it called off (a reply ready before that is kept).
             if (a.op) {
                 void cancelJob(a);
@@ -764,7 +765,7 @@ export function createMapRun(host) {
         },
         /** Lets a ready reply go unapplied (nothing is saved). A job's result is let go on the server too. */
         discard: () => { const s = openSlot(), a = s?.attempt; if (!s || !a || a.phase !== 'ready')
-            return; if (a.op) {
+            return; host.withdrawn?.(a.key); if (a.op) {
             void discardJob(a);
             return;
         } s.attempt = null; s.error = null; s.notice = null; host.changed(openKey()); },

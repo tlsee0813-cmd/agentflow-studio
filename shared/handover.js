@@ -9,7 +9,7 @@ import { relLabel } from './relation-groups.js';
 import { stamp, RECORD_HEAD, HEAD_FIELD } from './session-import.js';
 import { TOOL_NAME } from './session-parse.js';
 import { HANDOVER_TAG, foldHandover, quoteReceived, receivedHandovers } from './handover-mark.js';
-export { HANDOVER_TAG, foldHandover, handoverCode, receivedHandovers } from './handover-mark.js';
+export { HANDOVER_TAG, HANDOVER_SECTIONS, foldHandover, handoverCode, receivedHandovers } from './handover-mark.js';
 const ORIGIN_NAME = { ...TOOL_NAME, web: '웹 AI' };
 const EMPTY_FIELD = /^(?:(?:작업 폴더|브랜치)\s*)?(?:\(?(?:없음|없어요|없습니다|해당 없음|모름|알 수 없음|n\/a|none|null|unknown|-+|—)\)?|\([^()]*(?:있으면|짧은 제목)[^()]*\))$/i;
 /** The session a record was taken from (its header line, session-import.ts), or null for any other record. */

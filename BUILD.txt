@@ -1,4 +1,4 @@
 AgentFlow Studio auxiliary static build
-source=b218453fbd597830ab2a33d203a59ab4464ef12c
+source=9a0b84fc2acba2b143c1fd810b115fb93be41363
 branch=work/experience142-reading-delivery
-note=static demo only; the local session connector and AI digest need the local server (see README)
+note=static demo only; no AI server (map reading and questions are off). The local session connector needs the PC Studio, or a session folder picked in Chrome/Edge (see README)
