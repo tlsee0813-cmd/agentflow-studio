@@ -133,6 +133,13 @@ const ending = (t: string, n: number) => {
   const win = (paras.at(-1) ?? '').slice(2 - n), at = /[.!?。] +\S/.exec(win);
   return at && at.index < win.length / 2 ? `… ${win.slice(at.index + at[0].length - 1)}` : `…${win}`;
 };
+/** A whole path an answer names outside the sessions' working folders (a scratch folder under the person's profile, another
+ * checkout) is said as such: the next session would read it as a place of the project. A path inside a working folder stays. */
+const ABSOLUTE = /(?<![\w.:/\\])(?:[A-Za-z]:\\[^\s`'"<>|*?]+|\/(?:home|Users|tmp|root|var|private|mnt)\/[^\s`'"<>]+)/g;
+const awayPaths = (t: string, homes: string[]) => {
+  const norm = (x: string) => x.replace(/\\/g, '/').replace(/\/+$/, '').toLowerCase(), roots = homes.map(norm).filter(Boolean);
+  return t.replace(ABSOLUTE, f => { const n = norm(f); return roots.some(r => n === r || n.startsWith(`${r}/`)) ? f : '(작업 폴더 밖 경로)'; });
+};
 /** A changed file named by its whole path: outside every working folder of its session (a scratch file, another checkout). */
 const outside = (f: string) => /^(?:[A-Za-z]:[\\/]|\\\\|\/)/.test(f);
 /** The claims a part keeps when it holds more than it has room for: what is left to ask first (an open choice is what the next
@@ -351,11 +358,12 @@ export function handoverDoc(p: Project, opts: HandoverOptions): Handover {
     // A file outside the working folders is counted, not named: a scratch file of the tool reads as the project's otherwise.
     const each = asks.map(t => [...new Set(t.files)].filter(f => !outside(f))), list = (f: string[]) => f.slice(0, FILES_PER_ASK).join(', ');
     const away = asks.map(t => new Set(t.files.filter(outside)).size);
+    const homes = partSessions(p, null).map(s => s.cwd ?? '');
     // What the map has not read yet is marked so where the map has parts (they do not hold it), with how its answer ended.
     asks.forEach((t, i) => {
       const elsewhere = away[i] ? `작업 폴더 밖 파일 ${away[i]}개` : '';
       after.push(`- ${t.late && parts.length ? '(지도에 아직 없음) ' : ''}${one(quoteReceived(t.text), 300)}${each[i]!.length ? ` → 바꾼 파일: ${one(list(each[i]!), 300)}${elsewhere ? ` (그 밖에 ${elsewhere})` : ''}` : elsewhere ? ` → 바꾼 파일: ${elsewhere}` : ''}`);
-      if (t.answer) after.push(`  - 답변: ${ending(t.answer, 200)}`);
+      if (t.answer) after.push(`  - 답변: ${ending(awayPaths(t.answer, homes), 200)}`);
     });
     // All of them once, written only when it names a file the lines above leave out (a request's list was cut short): otherwise it
     // would only repeat them, even when a file was changed more than once.

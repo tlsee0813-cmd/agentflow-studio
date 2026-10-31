@@ -60,6 +60,8 @@ const MAP_ERROR: Record<string, string> = {
   HASH: '요청을 준비하지 못해 보내지 않았어요. 기록은 그대로예요.'
 };
 /** A finished reply whose shape was not the one asked for (map.7's contract guard): its evidence was never weighed. */
+/** A quote whose first piece alone runs past the evidence bound: said as too long, not as a quote that is not in the records. */
+const LENGTH_REFUSED = 'AI가 근거로 든 인용이 너무 길어(600자 넘음) 반영하지 않았어요. 기록과 지도는 그대로예요. 다시 정리할 수 있어요.';
 const CONTRACT_REFUSED = 'AI 응답의 모양(항목 이름이나 형식)이 요청한 것과 달라 반영하지 않았어요. 기록과 지도는 그대로예요. 다시 정리할 수 있어요.';
 /* AF100: a job the local server keeps. Said in what the person can do (continue, see the result, stopped, cancel), not how. */
 const JOB_ERROR: Record<string, string> = {
@@ -244,6 +246,7 @@ export function createMapRun(host: MapRunHost) {
   };
   // A reply refused for its shape (map.7's contract: a missing or extra key, a wrong type) is said so, not as an evidence rule.
   const errorText = (code: string, detail?: { rule?: unknown } | null) => code === 'INVALID_RESPONSE' && detail?.rule === 'contract' ? CONTRACT_REFUSED
+    : code === 'INVALID_RESPONSE' && detail?.rule === 'length' ? LENGTH_REFUSED
     : JOB_ERROR[code] ?? MAP_ERROR[code] ?? ERROR_TEXT[code] ?? '지도를 정리하지 못했어요. 기록은 그대로예요.';
   /** Reserve (or reuse the entry's reservation), then send. Nothing goes when the reservation cannot be written. */
   async function runJob(a: Attempt, inp: MapInput, model: string, seq: number | null) {

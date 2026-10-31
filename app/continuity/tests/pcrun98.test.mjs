@@ -93,16 +93,17 @@ function longAsk() {
 const part = (basis, claims) => ({ ref: 'new:p0', name: '세션 파싱', parent: null, role: '세션 파일을 읽어 요청과 답으로 나눠요.', roleAbout: null, roleReplaces: null, basis, claims });
 const claim = (at, key) => ({ kind: 'describes', text: '하위 에이전트 파일도 읽어요.', at, about: null, replaces: null, key });
 
-test('PCRUN98-3 a claim resting on a range past the quote bound is left out; the rest of the reading stands', () => {
+test('PCRUN98-3 a quote past the bound is kept from its first piece to the last that fits; the rest of the reading stands', () => {
   const { inp, first, second, whole } = longAsk();
-  const wire = { summary: '연결기', parts: [part([first], [claim(second, 's1'), claim(whole, 's2')])], relations: [], candidates: [], gaps: [], matches: [], material: [] };
-  const got = M.validateMapReply(wire, inp.ask);
-  assert.equal(got.parts.length, 1); assert.deepEqual(got.parts[0].claims.map(c => c.key), ['s1']);
-  // A basis quote too long is left out when another stands; with none left, the part (and the reading) is refused as too long.
-  assert.equal(M.validateMapReply({ ...wire, parts: [part([whole, first], [])] }, inp.ask).parts[0].basis.length, 1);
-  assert.throws(() => M.validateMapReply({ ...wire, parts: [part([whole], [])] }, inp.ask), e => e.rule === 'length' && e.path === 'parts[0].basis[0]');
+  const text = inp.ask.records[0], got = M.validateMapReply({ summary: '연결기', parts: [part([whole, first], [claim(second, 's1'), claim(whole, 's2')])], relations: [], candidates: [], gaps: [], matches: [], material: [] }, inp.ask);
+  // PCRUN99: the PC's report reading was refused whole for three quotes of 757–781 letters; now each is the passage cut short.
+  assert.deepEqual(got.parts[0].claims.map(c => c.key), ['s1', 's2']);
+  const [long, one] = got.parts[0].basis, cut = got.parts[0].claims[1];
+  assert.ok(long.quote.length <= 600 && long.quote.length > one.quote.length && long.quote.startsWith(one.quote), long.quote);
+  assert.deepEqual([cut.from, cut.to, cut.quote], [long.from, long.to, long.quote]);
+  assert.ok(text.spans.map(s => s.t).join('').includes(long.quote.trimEnd()), 'the quote is the record\'s own words');
   // A reference to pieces that are not there is still refused as a reference.
-  assert.throws(() => M.validateMapReply({ ...wire, parts: [part([first], [claim('N01.900', 's1')])] }, inp.ask), e => e.rule === 'reference');
+  assert.throws(() => M.validateMapReply({ summary: '연결기', parts: [part([first], [claim('N01.900', 's1')])], relations: [], candidates: [], gaps: [], matches: [], material: [] }, inp.ask), e => e.rule === 'reference');
 });
 
 test('PCRUN98-4 an empty list the reply left out (material, gaps, …) is read as empty; summary and parts are still required', () => {
@@ -112,7 +113,9 @@ test('PCRUN98-4 an empty list the reply left out (material, gaps, …) is read a
   assert.deepEqual(M.validateMapReply(without, inp.ask), M.validateMapReply(full, inp.ask));
   const { parts: _p, ...noParts } = full;
   assert.throws(() => M.validateMapReply(noParts, inp.ask));
-  assert.throws(() => M.validateMapReply({ ...full, extra: [] }, inp.ask), 'a key it was not asked for is still refused');
+  // PCRUN99: a key it was not asked for (the PC's reply had a claim with "aboutAtAt" beside "aboutAt") is passed over, not kept.
+  const extra = M.validateMapReply({ ...full, extra: ['SECRET'], parts: [{ ...part([first], [claim(first, 's1')]), note: 1 }] }, inp.ask);
+  assert.ok(!JSON.stringify(extra).includes('SECRET') && !('note' in extra.parts[0]), JSON.stringify(extra));
 });
 
 test('PCRUN98-5 a session is not named by a reply of a few letters when a longer request follows', async () => {
