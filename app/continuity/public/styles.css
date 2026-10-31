@@ -1563,6 +1563,7 @@ button:disabled { opacity: .5; cursor: default; }
 .sync-source { margin-top: var(--s-3); padding-top: var(--s-3); border-top: 1px solid var(--hair); }
 .sync-panel h3 + .sync-source { margin-top: 0; padding-top: 0; border-top: 0; }
 .sync-source h4 { margin: 0 0 6px; font: var(--label); letter-spacing: var(--label-track); color: var(--text-3); }
+.sync-source kbd { display: inline-block; padding: 0 4px; border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: 4px; background: var(--surface-2); font: 600 11px/15px var(--font); color: var(--text-2); white-space: nowrap; }
 /* Permission to ask for again, and why the map does not follow: the warning palette of .pp-warn. */
 .sync-ask { display: flex; align-items: center; gap: var(--s-3); margin: 0 0 var(--s-3); padding: 8px 10px; border-radius: var(--r-md); background: var(--change-soft); color: #7a3f07; font-size: 12.5px; line-height: 1.5; }
 .sync-ask p { flex: 1; margin: 0; }

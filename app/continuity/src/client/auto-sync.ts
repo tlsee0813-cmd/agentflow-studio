@@ -320,7 +320,11 @@ export function createAutoSync(host: AutoSyncHost) {
     const pick = async () => { if (await src.pick()) { folders = null; foldersError = null; render(); void tick(true); } else render(); };
     if (state === 'unsupported') return null;
     if (state === 'none') return h('div', { class: 'sync-source' },
-      h('p', { class: 'fine' }, '설치 없이 이 브라우저가 AI 세션 기록을 직접 읽어요. Claude Code 앱·CLI는 사용자 폴더의 .claude, Codex 앱·CLI는 .codex 폴더를 골라 주세요. 둘 다 쓰면 하나씩 두 번 고르면 돼요. 폴더는 이 브라우저 안에서만 읽어요. 거기서 가져온 대화는 이 프로젝트의 기록이 되고, 지도를 갱신할 때(자동 갱신도) AI에게 보내요.'),
+      h('p', { class: 'fine' }, '설치 없이 이 브라우저가 AI 대화 기록을 직접 읽어요. 내 사용자 폴더 안의 .claude 폴더(Claude Code)나 .codex 폴더(Codex)를 골라 주세요. 둘 다 쓰면 하나씩 두 번 고르면 돼요.'),
+      // Where those folders are: a Mac's picker hides folders whose name starts with a dot until asked.
+      h('p', { class: 'fine' }, 'Windows는 C:\\Users\\(내 이름) 폴더 안에 있어요. Mac은 고르는 창에서 ', h('kbd', {}, '⌘+Shift+H'), ' 키로 내 폴더로 간 뒤, ',
+        h('kbd', {}, '⌘+Shift+.'), ' 키로 숨은 폴더를 보이게 하세요.'),
+      h('p', { class: 'fine' }, '폴더는 이 브라우저 안에서만 읽어요. 가져온 대화는 이 프로젝트의 기록이 되고, 지도를 갱신할 때(자동 갱신도) AI에게 보내요.'),
       h('button', { type: 'button', class: 'primary small sync-pick-root', 'data-act': 'pick', onclick: () => void pick() }, '세션 폴더 고르기'));
     const ask = state === 'prompt' && !asked, notice = src.notice();
     return h('div', { class: 'sync-source' },
