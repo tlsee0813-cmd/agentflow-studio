@@ -66,7 +66,7 @@ node --env-file-if-exists=.env continuity/server/index.mjs
 키 없이 실행하거나 `--mock`을 붙이면 `AI 키 없음`이 표시되고 정리 요청은 `AI_NOT_CONFIGURED`로 실패합니다.
 대체 응답은 만들지 않습니다. 포트는 `PORT=3100`처럼 바꿀 수 있습니다.
 
-Windows에서 빌드가 이미 있다면 PowerShell로 `./continuity/scripts/start-local.ps1`을 실행할 수 있습니다. `app/.env`가 있으면 읽고(없으면 AI만 꺼짐) 백그라운드에서 실행한 뒤 `http://127.0.0.1:4317`을 엽니다. 키 파일을 다른 비공개 위치에 보관했다면 `-EnvFile 'C:\private\studio.env'`를 지정합니다. 기존 Node 또는 Codex에 설치된 Node를 재사용하며 패키지를 설치하지 않습니다. 이미 같은 포트의 Studio가 실행 중이면 다시 띄우지 않습니다. 브라우저 저장은 주소별이므로 같은 포트를 계속 사용하세요.
+Windows에서 빌드가 이미 있다면 PowerShell로 `./continuity/scripts/start-local.ps1`을 실행할 수 있습니다. `app/.env`가 있으면 읽고(없으면 AI만 꺼짐) 백그라운드에서 실행한 뒤 `http://127.0.0.1:4317`을 엽니다. 키 파일을 다른 비공개 위치에 보관했다면 `-EnvFile 'C:\private\studio.env'`를 지정합니다. 기존 Node 또는 Codex에 설치된 Node를 재사용하며 패키지를 설치하지 않습니다. 이미 같은 포트의 Studio가 실행 중이면 다시 띄우지 않으므로, 키를 새로 넣었다면 먼저 그 Studio를 끄고 실행합니다. 브라우저 저장은 주소별이므로 같은 포트를 계속 사용하세요. "이 시스템에서 스크립트를 실행할 수 없으므로"(UnauthorizedAccess)가 나오면 Windows 실행 정책 때문이니, 정책을 바꾸지 않고 이번 실행에만 허용합니다: `powershell -ExecutionPolicy Bypass -File .\continuity\scripts\start-local.ps1 -EnvFile '<키 파일 경로>'`.
 
 ### 시작이 안 될 때
 
