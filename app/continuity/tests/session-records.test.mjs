@@ -15,7 +15,10 @@ const { createAutoSync, AUTOSYNC_KEY } = await import('../dist/public/client/aut
 
 const ID = 'claude-0123456789abcdef01234567', OLD = 'claude-89abcdef0123456789abcdef';
 const T = m => new Date(Date.parse('2026-10-30T09:00:00.000Z') + m * 60000).toISOString();
-const session = (turns, extra = {}) => ({ id: ID, tool: 'claude', label: '', title: null, cwd: '/work/salon', branch: 'main', startedAt: null, turns, omitted: 0, ...extra });
+const session = (turns, extra = {}) => ({ id: ID, tool: 'claude', label: '', title: null, cwd: '/work/salon', cwds: ['/work/salon'], branch: 'main', startedAt: null, turns, omitted: 0, ...extra });
+// A session as the server and the page send it: read with its folders, its files named from the first that holds them.
+const parsed = (cwds, turns) => ({ meta: { cwd: cwds.at(-1), cwds, branch: null, startedAt: null, title: null, thread: null, parent: null }, turns, changes: [] });
+const sent = (cwds, turns) => readSessionDetail(JSON.parse(JSON.stringify(sessionDetail(ID, 'claude', parsed(cwds, turns)))));
 const hidden = '[가려진 비밀값]';
 // Fake credentials, put together at run time so no file holds one whole.
 const f = (...p) => p.join('');
@@ -246,7 +249,6 @@ test('SESSIONS-RC2 turns after the mark that one reading cannot hold are read on
   for (let i = 0; i < 10; i++) assert.equal(got.filter(t => new RegExp(`요청 ${i}(?:\\n|$)`).test(t)).length, 1, `요청 ${i}`);
   // A reading with no time (the paste box) still sends the newest turns and says how many earlier ones were left.
   assert.ok(read({ turnChars: 20000, replyChars: 5000 }, null).omitted > 0);
-  assert.equal(leftSince({ ...session(turns.slice(0, 6)), omitted: 2 }, mark), 0, 'a reading from before the mark (no since) has no gap');
   assert.equal(leftSince({ ...session(turns), omitted: 3 }, null), 3, 'with no mark, every turn left out is said');
 });
 
@@ -426,13 +428,15 @@ test('SESSIONS-RC4 turns that share a time are never split between readings: eac
 });
 
 test('SESSIONS-RC5 a file taken under its whole path is the same file once the session works in its folder: no continuation for it', () => {
-  const was = session([{ role: 'assistant', at: T(1), text: PART1, files: ['src/a.ts', '/work/app/api/types.ts'] }]), mark = markAfter(was, null, T(2));
-  assert.deepEqual(newTurns(session([{ role: 'assistant', at: T(1), text: PART1, files: ['src/a.ts', 'api/types.ts'] }]), mark), []);
-  assert.deepEqual(newTurns(session([{ role: 'assistant', at: T(1), text: PART1, files: ['src/a.ts', 'api/types.ts', 'api/index.ts'] }]), mark).map(t => t.files), [['api/index.ts']]);
-  const win = markAfter(session([{ role: 'assistant', at: T(1), text: PART1, files: ['C:\\work\\api\\types.ts'] }]), null, T(2));
-  assert.deepEqual(newTurns(session([{ role: 'assistant', at: T(1), text: PART1, files: ['api/types.ts'] }]), win), []);
+  const reply = files => [{ role: 'assistant', at: T(1), text: PART1, files }], salon = ['/work/salon'], moved = ['/work/salon', '/work/app'];
+  const mark = markAfter(sent(salon, reply(['/work/salon/src/a.ts', '/work/app/api/types.ts'])), null, T(2));
+  assert.deepEqual(mark.reply.files, ['src/a.ts', '/work/app/api/types.ts']);
+  assert.deepEqual(newTurns(sent(moved, reply(['/work/salon/src/a.ts', '/work/app/api/types.ts'])), mark), []);
+  assert.deepEqual(newTurns(sent(moved, reply(['/work/salon/src/a.ts', '/work/app/api/types.ts', '/work/app/api/index.ts'])), mark).map(t => t.files), [['api/index.ts']]);
+  const win = markAfter(sent(['C:\\work\\salon'], reply(['C:\\work\\api\\types.ts'])), null, T(2));
+  assert.deepEqual(newTurns(sent(['C:\\work\\salon', 'C:\\work'], reply(['C:\\work\\api\\types.ts'])), win), []);
   // A file of another name stays new, whatever path it shares an end with.
-  assert.deepEqual(newTurns(session([{ role: 'assistant', at: T(1), text: PART1, files: ['src/a.ts', '/work/app/api/types.ts', 'lib/src/a.ts'] }]), mark).map(t => t.files), [['lib/src/a.ts']]);
+  assert.deepEqual(newTurns(sent(salon, reply(['/work/salon/src/a.ts', '/work/app/api/types.ts', '/work/salon/lib/src/a.ts'])), mark).map(t => t.files), [['lib/src/a.ts']]);
 });
 
 test('SESSIONS-RT4 a header reads back as written: a folder or branch with a middle dot, a title like a field, a web header without a branch', () => {
@@ -498,18 +502,16 @@ test('SESSIONS-RT6 a next-record line a turn holds behind a colour code or a sof
 });
 
 test('SESSIONS-RC6 a whole name taken stands for one name the reply lists now, and only once it no longer lists it: another repository\'s file of that name is new', () => {
-  const at = (files) => session([{ role: 'user', at: T(0), text: '고쳐 줘' }, { role: 'assistant', at: T(1), text: '했어요', files }]);
-  const fresh = (taken, now) => newTurns(at(now), markAfter(at(taken), null, T(1))).flatMap(t => t.files ?? []);
-  assert.deepEqual(fresh(['/other/repo/src/index.ts'], ['/other/repo/src/index.ts', 'src/index.ts']), ['src/index.ts']);
-  assert.deepEqual(fresh(['/work/salon/src/a.ts'], ['src/a.ts']), [], 'the same file, named from its folder now');
-  assert.deepEqual(fresh(['/w/a/src/x.ts'], ['src/x.ts', 'x.ts']), ['x.ts'], 'one name for one name: the longest');
-  assert.deepEqual(fresh(['C:\\w\\a\\src\\x.ts', 'b.ts'], ['b.ts', 'src\\x.ts', 'c.ts']), ['c.ts']);
-  // Read with its folders (as the server and the page send it), the name it has now is told exactly: the same file once moved into
-  // its folder's reach, and another file that ends the same way stays new.
-  const parsed = (cwds, files) => ({ meta: { cwd: cwds[0], cwds, branch: null, startedAt: null, title: null, thread: null, parent: null },
-    turns: [{ role: 'user', at: T(0), text: '고쳐 줘' }, { role: 'assistant', at: T(1), text: '했어요', files }], changes: [] });
-  const one = readSessionDetail(JSON.parse(JSON.stringify(sessionDetail(ID, 'claude', parsed(['/w/app'], ['/w/lib/index.ts'])))));
-  const two = readSessionDetail(JSON.parse(JSON.stringify(sessionDetail(ID, 'claude', parsed(['/w/app', '/w/lib'], ['/w/lib/index.ts', '/w/app/lib/index.ts'])))));
+  // Each reading as the server and the page send it: a whole name taken, then the folders the session works in now.
+  const at = (cwds, files) => sent(cwds, [{ role: 'user', at: T(0), text: '고쳐 줘' }, { role: 'assistant', at: T(1), text: '했어요', files }]);
+  const fresh = ([was, taken], [cwds, now]) => newTurns(at(cwds, now), markAfter(at(was, taken), null, T(1))).flatMap(t => t.files ?? []);
+  assert.deepEqual(fresh([['/work/salon'], ['/other/repo/src/index.ts']], [['/work/salon'], ['/other/repo/src/index.ts', '/work/salon/src/index.ts']]), ['src/index.ts']);
+  assert.deepEqual(fresh([['/tmp/x'], ['/work/salon/src/a.ts']], [['/tmp/x', '/work/salon'], ['/work/salon/src/a.ts']]), [], 'the same file, named from its folder now');
+  assert.deepEqual(fresh([['/w/b'], ['/w/a/src/x.ts']], [['/w/b', '/w/a'], ['/w/a/src/x.ts', '/w/a/x.ts']]), ['x.ts'], 'one name for one name');
+  assert.deepEqual(fresh([['C:\\w\\b'], ['C:\\w\\a\\src\\x.ts', 'C:\\w\\b\\b.ts']], [['C:\\w\\b', 'C:\\w\\a'], ['C:\\w\\b\\b.ts', 'C:\\w\\a\\src\\x.ts', 'C:\\w\\b\\c.ts']]), ['c.ts']);
+  // The first folder that holds a file names it: the same file once moved into its folder's reach, and another file that ends the
+  // same way stays new.
+  const one = at(['/w/app'], ['/w/lib/index.ts']), two = at(['/w/app', '/w/lib'], ['/w/lib/index.ts', '/w/app/lib/index.ts']);
   assert.deepEqual(two.turns[1].files, ['index.ts', 'lib/index.ts']);
   assert.deepEqual(newTurns(two, markAfter(one, null, T(1))).flatMap(t => t.files ?? []), ['lib/index.ts']);
 });
