@@ -8,7 +8,7 @@ import { studioView, type PartView, type StudioView } from './studio.js';
 import { relLabel } from './relation-groups.js';
 import { stamp, RECORD_HEAD, HEAD_FIELD } from './session-import.js';
 import { TOOL_NAME, RELAYED, type SessionTool } from './session-parse.js';
-import { HANDOVER_TAG, foldHandover, quoteReceived, receivedHandovers } from './handover-mark.js';
+import { HANDOVER_TAG, foldHandover, hasIncompleteHandover, quoteReceived, receivedHandovers } from './handover-mark.js';
 import { MATCH_LABEL, type FrozenRequest, type MatchStance } from './request-return.js';
 export { HANDOVER_TAG, HANDOVER_SECTIONS, foldHandover, handoverCode, receivedHandovers } from './handover-mark.js';
 
@@ -122,6 +122,14 @@ export const HANDOVER_CHARS = 15000;
 const CLAIM_ORDER: ClaimKind[] = ['want', 'idea', 'reported', 'checked', 'describes', 'open', 'differs'];
 const CLAIMS_PER_PART = 10, RECENT_REQUESTS = 6, FILES_PER_ASK = 8, RECENT_FILES = 24, LINE = 240, NAMES = 600;
 const one = (t: string, n = LINE) => { const s = t.replace(/\s+/g, ' ').trim(); return s.length > n ? `${s.slice(0, n - 1)}…` : s; };
+/** An uncertain document boundary is not a new-task boundary. Show an explicitly labelled tail of the held request, so copied
+ * boilerplate cannot fill its whole next-handover excerpt; the full source record remains unchanged. */
+function requestExcerpt(text: string): string {
+  const quoted = quoteReceived(text);
+  if (!hasIncompleteHandover(quoted)) return one(quoted, 300);
+  const flat = quoted.replace(/\s+/g, ' ').trim();
+  return `(인수인계 끝 표시 없음 · 문서 경계 미확인${flat.length > 300 ? ' · 앞부분 생략, 요청 끝부분만 발췌' : ''} · 전체 원문은 Studio 기록에 보관) ${flat.slice(-300)}`;
+}
 /** The end of a text on one line: an answer says last how the work ended. */
 /** How an answer ended, where a tool's reply says what came of the work (done, blocked, not tested): its last paragraphs as fit in
  * n, else its last paragraph from the first sentence that starts in the last n characters (cut in the middle only when none does). */
@@ -341,6 +349,11 @@ export function handoverDoc(p: Project, opts: HandoverOptions): Handover {
   if (!parts.length) out.push(`아직 지도에 부분이 없어요. ${asks.length ? `아래 최근 흐름과 사용자의 설명에서 시작하세요.${absent ? ` 다른 기록 ${absent}개는 이 문서에 없으니, 필요하면 사용자에게 물어보세요.` : ''}`
     : absent ? `기록이 ${absent}개 있지만 이 문서에는 없으니, 사용자에게 지금까지의 상황을 먼저 물어보세요.` : '사용자의 설명에서 시작하세요.'}`, '');
   const after: string[] = [];
+  const exclusions = maps.flatMap(r => r.exclusions ?? []);
+  if (exclusions.length) after.push('## 지도 정리에서 제외한 이력',
+    `이 프로젝트의 지도 정리 이력에 제외 사유 ${exclusions.length}건이 있어요. 이 수는 현재 누락된 사실의 수가 아니며, 해당 내용의 구현 여부를 뜻하지 않아요.`,
+    'Studio의 제외 이력에서 이유와 원문을 확인하세요. 다음 세션이 지도만 보고 해당 기록을 모두 반영했다고 가정하지 마세요.',
+    ...dedupeLines(exclusions.map(x => `- ${one(x.explanation, 160)}`)).slice(0, 5), '');
   // What is undecided: candidates the readings left open and what the latest reading could not tell, for this scope.
   const open: string[] = [];
   for (const r of maps) for (const c of r.candidates) {
@@ -368,7 +381,7 @@ export function handoverDoc(p: Project, opts: HandoverOptions): Handover {
     // What the map has not read yet is marked so where the map has parts (they do not hold it), with how its answer ended.
     asks.forEach((t, i) => {
       const elsewhere = away[i] ? `작업 폴더 밖 파일 ${away[i]}개` : '';
-      after.push(`- ${t.late && parts.length ? '(지도에 아직 없음) ' : ''}${one(quoteReceived(t.text), 300)}${each[i]!.length ? ` → 바꾼 파일: ${one(list(each[i]!), 300)}${elsewhere ? ` (그 밖에 ${elsewhere})` : ''}` : elsewhere ? ` → 바꾼 파일: ${elsewhere}` : ''}`);
+      after.push(`- ${t.late && parts.length ? '(지도에 아직 없음) ' : ''}${requestExcerpt(t.text)}${each[i]!.length ? ` → 바꾼 파일: ${one(list(each[i]!), 300)}${elsewhere ? ` (그 밖에 ${elsewhere})` : ''}` : elsewhere ? ` → 바꾼 파일: ${elsewhere}` : ''}`);
       if (t.answer) after.push(`  - 답변: ${ending(awayPaths(t.answer, homes), 200)}`);
     });
     // All of them once, written only when it names a file the lines above leave out (a request's list was cut short): otherwise it

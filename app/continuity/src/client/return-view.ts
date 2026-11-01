@@ -18,7 +18,8 @@ import { askDigest, AskError, ERROR_TEXT, type AiStatus } from './studio-api.js'
 import { sessionText, recordParts, quoteNext, NEXT_RECORD, NEXT_LINE, RECORD_HEAD, stamp, TOOL_NAME, type SessionSummary, type SessionDetail } from '../shared/session-import.js';
 import { readSessionFile, type SessionSources } from './session-source.js';
 import { WEB_RECORD_ASK, foldRecord, sessionOrigin, originLabel, sessionName } from '../shared/handover.js';
-import { PASTED_TEXT_LIMIT } from '../shared/types.js';
+import { PASTED_TEXT_LIMIT, isMapReading, type Project } from '../shared/types.js';
+import { recordTexts } from '../shared/request-return.js';
 import type { PlanOpened } from './plan-view.js';
 import type { PlanBundle } from './plan-store.js';
 import { secretLike } from './plan-source.js';
@@ -27,6 +28,23 @@ import { h, put, fullTime, codeGate, codeNote, quotedText as quoted } from './pl
 import { captureRequestReading, restoreRequestReading, type RequestReading } from './request-results.js';
 import type { RecordEvidence } from '../shared/types.js';
 import { EVIDENCE_KIND_LABEL, NOT_EXECUTED, NOT_RECORDED, EVIDENCE_NAME_MAX, EVIDENCE_VERSION_MAX, EVIDENCE_ORIGIN_MAX, PROVIDED_FILE_BYTES, decodeProvided, evidenceProblem, type DecodeProblem } from '../shared/record-source.js';
+
+/** Every saved reading's exclusions, including older readings after another succeeds. Positions refer to the held source;
+ * neither rejected text nor a second copy of a long quote is stored. A missing source never produces an invented quote. */
+export function mapExclusionHistory(project: Project, openQuote: (record: string, quote: string, from: number) => void): HTMLElement | null {
+  const readings = project.readings.filter(isMapReading).filter(r => r.exclusions?.length);
+  if (!readings.length) return null;
+  const texts = recordTexts(project), count = readings.reduce((n, r) => n + r.exclusions!.length, 0);
+  return h('details', { class: 'rm-exclusions' }, h('summary', {}, `지도 정리에서 제외한 내용 · 사유 ${count}건`),
+    h('p', { class: 'fine' }, '제외된 내용은 지도에 반영하지 않았고 원문은 보관돼 있어요. 같은 기록이 자동으로 다시 읽히지는 않아요.'),
+    ...[...readings].reverse().map(r => h('section', {}, h('h4', {}, fullTime(r.at)), h('ol', {}, ...r.exclusions!.map((x, i) => {
+      const source = x.record ? texts.get(x.record)?.read : null;
+      const place = source !== null && source !== undefined && x.from !== null && x.to !== null && x.from >= 0 && x.to <= source.length && x.from < x.to;
+      return h('li', {}, h('p', {}, x.explanation), h('small', {}, `${x.path} · ${x.rule}${x.category ? ` / ${x.category}` : ''}`),
+        place ? h('button', { type: 'button', class: 'rr-ref rr-cite', 'data-request-focus': JSON.stringify(['exclusion', r.id, i]),
+          onclick: () => openQuote(x.record!, source!.slice(x.from!, x.to!), x.from!) }, `원문 구간 보기 · ${x.from! + 1}–${x.to}자`) : h('small', {}, ' · 확인 가능한 원문 구간 없음'));
+    })))));
+}
 
 export interface ReturnHost {
   current(): PlanOpened | null;

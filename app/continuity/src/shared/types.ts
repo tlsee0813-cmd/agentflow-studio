@@ -1,4 +1,5 @@
 import type { FrozenRequest, StoredRequestMatch, RequestCorrection, ReplaceCorrection } from './request-return.js';
+import { CONNECTOR_TEXT_LIMIT } from './connector-limits.js';
 export const SCHEMA = 'idea015.project.14' as const;
 /** project.13 had normal records of exactly four keys (no provided-source declaration): they stay as stored, nothing is derived. */
 export const V13_SCHEMA = 'idea015.project.13' as const;
@@ -185,7 +186,7 @@ export interface PastedRecord { id: string; text: string; at: string; context: s
    * declared (null = not recorded). Absent = a record pasted as it came. The person's declaration, never an execution receipt. */
   evidence?: RecordEvidence }
 export interface RecordEvidence { kind: 'code' | 'test'; name: string; version: string | null; origin: string | null }
-export const PASTED_TEXT_LIMIT = 60000;
+export const PASTED_TEXT_LIMIT = CONNECTOR_TEXT_LIMIT;
 /** What a reading says about a part, by its nature: what is wanted, what is only an idea, what an author reports was built,
  * what an author reports was checked, how something is described as it stands, a product decision left open, and evidence that
  * differs from the person's own description of the part. Never a status the app verified. */
@@ -231,8 +232,11 @@ export interface ReadingSkip { what: 'part' | 'relation'; name: string; reason: 
 /** map-reading.4: a passage the reading took as material inside the record (an example, a sample under test, another program's
  * words), not as this project's own: [from, to) of the record, with what it is. Nothing of the map rests on it alone. */
 export interface ReadingMaterial { record: string; from: number; to: number; what: string }
+/** A validator exclusion, not model text. The optional place names the original, unshortened source range. */
+export const READING_EXCLUSION_RULES = ['settled-and-open', 'duplicate-target', 'duplicate-key', 'material-evidence', 'reference', 'length', 'source-kind', 'condition-form', 'condition-source', 'condition-length', 'contract'] as const;
+export interface ReadingExclusion { path: string; rule: typeof READING_EXCLUSION_RULES[number]; category: string | null; explanation: string; record: string | null; from: number | null; to: number | null }
 export interface MapReading {
-  version: 'map-reading.1' | 'map-reading.2' | 'map-reading.3' | 'map-reading.4' | 'map-reading.5'; id: string; at: string; model: string; prompt: string;
+  version: 'map-reading.1' | 'map-reading.2' | 'map-reading.3' | 'map-reading.4' | 'map-reading.5' | 'map-reading.6'; id: string; at: string; model: string; prompt: string;
   /** SHA-256 of the request: the very same request is never sent or applied again. */
   hash: string;
   /** Records read, and which part of each went: characters [from, to) of total. A record's unsent tail is read by a later reading. */
@@ -243,12 +247,14 @@ export interface MapReading {
   requests?: FrozenRequest[]; matches?: StoredRequestMatch[];
   /** map-reading.4 only: each record's digest (textDigest of exactly [from, to) read) is in records; and what was read as material. */
   material?: ReadingMaterial[];
+  /** map-reading.6 only: durable exclusions; previous reading versions keep their exact original shape. */
+  exclusions?: ReadingExclusion[];
 }
 /** The person's own correction of a part's description as read (never Area.note, never a return.2 description): it names the
  * reading whose description it corrects. It holds that description only; later claims of later readings still come in. */
 export interface ReadingCorrection { version: 'map-correction.1'; id: string; at: string; areaId: string; text: string; corrects: string | null }
 export type ReadingEntry = MapReading | ReadingCorrection | RequestCorrection | ReplaceCorrection;
-export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3' || e.version === 'map-reading.4' || e.version === 'map-reading.5';
+export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3' || e.version === 'map-reading.4' || e.version === 'map-reading.5' || e.version === 'map-reading.6';
 export const READINGS_LIMIT = 500;
 export const PASTED_LIMIT = 500;
 export interface ContextBasis {

@@ -125,13 +125,15 @@ button:disabled { opacity: .5; cursor: default; }
 .home-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-5); margin-bottom: var(--s-6); }
 .home-title { margin: 0; font-size: 28px; line-height: 36px; font-weight: 700; letter-spacing: -.03em; color: var(--text); }
 .home-lede { margin: 6px 0 0; max-width: 600px; color: var(--text-3); font-size: 15px; line-height: 1.6; word-break: keep-all; }
-.home-actions { flex: none; display: flex; align-items: center; gap: var(--s-2); }
+.home-lede .link-button { font-size: inherit; }
+.home-actions { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
 .home-sub { margin: 40px 0 var(--s-3); font-size: 13px; line-height: 20px; font-weight: 650; letter-spacing: -.005em; color: var(--text-2); }
 /* First visit: what this is for in three steps, with the two ways in. */
 .home-empty { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: var(--s-6); align-items: center; padding: 28px var(--s-6); background: var(--surface); border: 1px solid var(--region-line); border-radius: 16px; box-shadow: var(--shadow); word-break: keep-all; }
 .he-title { margin: 0; font-size: 18px; line-height: 26px; font-weight: 700; letter-spacing: -.02em; color: var(--text); }
 .he-lede { margin: 6px 0 0; font-size: 13.5px; line-height: 1.6; color: var(--text-3); }
 .he-acts { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-4); }
+.he-acts > a { display: inline-flex; align-items: center; }
 .he-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-3); counter-reset: he; }
 .he-steps li { position: relative; display: flex; flex-direction: column; gap: 4px; padding: var(--s-4); border: 1px solid var(--hair); border-radius: var(--r-lg); background: var(--surface-2); counter-increment: he; }
 .he-steps li::after { content: counter(he); position: absolute; top: 14px; right: 14px; font-size: 11.5px; font-weight: 650; color: var(--text-4); font-variant-numeric: tabular-nums; }

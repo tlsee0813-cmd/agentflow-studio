@@ -53,7 +53,7 @@ export const mapNoteHead = (e: RecordEvidence): string => `${NOT_EXECUTED} · �
 export const provenanceLine = (e: RecordEvidence): string =>
   `${EVIDENCE_KIND_LABEL[e.kind]} · ${e.name} · 판본 ${e.version ?? NOT_RECORDED} · 출처 ${e.origin ?? NOT_RECORDED} (사용자 기재)`;
 
-/** A provided file is bounded by its bytes before it is read: no text within the record limit (60000 UTF-16 units) needs more than
+/** A provided file is bounded by its bytes before it is read: no text within the shared record limit needs more than
  * three UTF-8 bytes per unit, plus a byte order mark. */
 export const PROVIDED_FILE_BYTES = PASTED_TEXT_LIMIT * 3 + 3;
 const CONTROL = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;

@@ -6,7 +6,9 @@ import assert from 'node:assert/strict';
 import * as D from '../dist/public/shared/domain.js';
 import * as M from '../dist/public/shared/map-reading.js';
 import { studioView } from '../dist/public/shared/studio.js';
-import { sessionText, sessionChunks, newTurns, stamp } from '../dist/public/shared/session-import.js';
+import { sessionText, sessionChunks, newTurns, stamp, readSessionDetail } from '../dist/public/shared/session-import.js';
+import { parseClaude, sessionDetail } from '../dist/public/shared/session-parse.js';
+import { parseProject } from '../dist/public/shared/validation.js';
 import { handoverText, handoverDoc, handoverCode, foldHandover, foldRecord, receivedHandovers, sessionOrigin, partSessions, originLabel, sessionName, HANDOVER_CHARS } from '../dist/public/shared/handover.js';
 
 const ID = 'claude-0123456789abcdef01234567', NEXT = 'codex-89abcdef0123456789abcdef';
@@ -18,6 +20,29 @@ const TURNS = [
 let n = 0;
 const START = stamp('2026-10-28T09:00:00.000Z', true);
 const meta = () => ({ id: `R_h_${++n}`, at: new Date().toISOString(), model: 'stub', prompt: 'm-000000000000', hash: String(n).padStart(64, 'd') });
+
+test('handover carries earlier exclusion history without treating it as a current implementation failure', () => {
+  const original = mapped(), hours = original.hours;
+  const read = (project, rejected) => {
+    const inp = M.buildMapAsk(project, studioView(project), [], undefined, M.MAP7_SCHEMA), at = inp.ask.records[0].spans[0].s;
+    const claim = { kind: 'reported', text: '예약 버튼을 표시했어요.', at, aboutAt: null, replaces: null, key: 's1' };
+    const wire = { summary: '예약 프로그램', parts: [{ ref: 'P01', name: null, parent: null, role: null, roleAboutAt: null, roleReplaces: null, basis: [],
+      claims: [claim, ...(rejected ? [{ ...claim, key: 's2', replaces: 'C99' }] : [])] }], relations: [], candidates: [], gaps: [], matches: [], material: [] };
+    return M.applyReading(project, inp, M.validateMapReply(wire, inp.ask), meta()).project;
+  };
+  let p = read(D.pasteRecord(original.p, '예약 버튼을 표시했어요.', null).project, true);
+  const excluded = p.readings.at(-1).exclusions[0];
+  assert.equal(p.readings.at(-1).version, 'map-reading.6'); assert.equal(excluded.rule, 'contract');
+  p = read(D.pasteRecord(p, '예약 버튼에 도움말도 표시했어요.', null).project, false);
+  p = parseProject(JSON.stringify(p));
+  assert.deepEqual(p.readings.at(-1).exclusions, []);
+  for (const scope of [null, hours]) {
+    const text = handoverText(p, { scope, code: 'EXC234', at: '2026-11-01T00:00:00.000Z' });
+    assert.ok(text.includes('제외 사유 1건') && text.includes('현재 누락된 사실의 수가 아니며'));
+    assert.ok(text.includes(excluded.explanation));
+    assert.ok(!text.includes(excluded.path));
+  }
+});
 
 /** The two-part map the tests share; candidates (their text and parts) are left open by the reading if given. */
 function mapped(candidates = []) {
@@ -71,8 +96,10 @@ test('HANDOVER-F1 a new session that starts from the document: the document fold
   const folded = foldHandover(prompt);
   assert.equal(folded, `이거 읽고 이어서 해 줘\n\n[AgentFlow 인수인계 문서를 받아 이어감 · af-handover:QW3RTY:${booking} · 나의 프로젝트 › 예약 화면]\n\n먼저 테스트부터 돌려 줘`);
   assert.deepEqual(receivedHandovers(`[Codex 세션 기록]\n\n── 사용자 요청 ──\n${folded}`), [{ code: 'QW3RTY', areaId: booking }]);
-  // The document without its end line (cut when pasted) still folds, to the end of the message.
-  assert.ok(!foldHandover(doc.split('\n').slice(0, -1).join('\n')).includes('## 이어받는 방법'));
+  // Without its end line the boundary is unknown: keep the source, but still recognise which handover it names.
+  const incomplete = doc.split('\n').slice(0, -1).join('\n');
+  assert.equal(foldHandover(incomplete), incomplete);
+  assert.deepEqual(receivedHandovers(`[Codex 세션 기록]\n\n── 사용자 요청 ──\n${incomplete}`), [{ code: 'QW3RTY', areaId: booking }]);
   // Taken in through the session import: the record is short, names the session, and the part lists it as having taken over.
   const next = sessionText(session(NEXT, [{ role: 'user', at: '2026-10-30T06:00:00.000Z', text: prompt }, { role: 'assistant', at: '2026-10-30T06:01:00.000Z', text: '테스트를 돌렸어요.' }], { title: null })).text;
   assert.ok(!next.includes('## 이어받는 방법') && next.includes('af-handover:QW3RTY'));
@@ -91,6 +118,56 @@ test('HANDOVER-F1 a new session that starts from the document: the document fold
   // Its part reads as the map last saw it, and the document says the map is behind and where those records are.
   assert.match(again, /\n## 이 범위의 현재 상태\n\(지도는 \d{4}-\d\d-\d\d \d\d:\d\d에 읽은 기록까지예요\. 아직 지도에 담기지 않은 기록이 2개 있어요\. 그 기록의 요청과 바꾼 파일, 답변은 아래 최근 흐름에 "지도에 아직 없음"으로 표시돼 있어요\. 위 부분 상태에는 아직 반영되지 않은 내용이에요\.\)\n\n### 예약 화면\n/);
   assert.ok(!handoverText(p, { scope: booking, code: 'ZXC234', at: '2026-10-30T07:00:00.000Z' }).includes('지도에 담기지 않은'), 'all read: no note');
+});
+
+test('HANDOVER-F2 a missing end keeps a following Markdown task through parsing, import and stored takeover lineage', () => {
+  const { p, booking } = mapped(), id = 'claude-89abcdef0123456789abcdef';
+  const doc = handoverText(p, { scope: booking, code: 'QW3RTY', at: '2026-10-30T05:00:00.000Z' });
+  const task = '\n\n### 다음 작업\n결제 버튼을 붙여 줘\n- 테스트도 돌려 줘';
+  for (const complete of [false, true]) {
+    const prompt = `이 문서에서 이어서\n\n${complete ? doc : doc.split('\n').slice(0, -1).join('\n')}${task}`;
+    const parsed = parseClaude([
+      { type: 'user', cwd: '/work/salon', timestamp: '2026-10-30T06:00:00.000Z', message: { role: 'user', content: prompt } },
+      { type: 'assistant', timestamp: '2026-10-30T06:01:00.000Z', message: { role: 'assistant', content: [{ type: 'text', text: '결제 버튼을 붙였어요.' }] } }
+    ]);
+    const detail = readSessionDetail(JSON.parse(JSON.stringify(sessionDetail(id, 'claude', parsed))));
+    assert.equal(detail.turns[0].text, complete ? foldHandover(prompt) : prompt);
+    const record = sessionText(detail).text;
+    assert.ok(record.includes(task), record);
+    assert.equal(record.includes('## 이어받는 방법'), !complete, 'complete documents still fold; incomplete source remains');
+    assert.deepEqual(receivedHandovers(record), [{ code: 'QW3RTY', areaId: booking }]);
+    const stored = D.pasteRecord(p, record, null).project;
+    assert.ok(stored.pasted.at(-1).text.includes(task));
+    assert.deepEqual(partSessions(stored, booking).find(s => s.id === id)?.tookOver, true);
+    assert.equal(foldRecord(record), record, 'reimport preserves the request');
+    const next = handoverText(stored, { scope: booking, code: 'ZXC234', at: '2026-10-30T07:00:00.000Z' });
+    assert.ok(next.includes('### 다음 작업 결제 버튼을 붙여 줘 - 테스트도 돌려 줘'), next);
+    if (!complete) {
+      assert.ok(next.includes('인수인계 끝 표시 없음 · 문서 경계 미확인'));
+      assert.ok(next.includes('앞부분 생략, 요청 끝부분만 발췌'));
+      assert.ok(next.includes('전체 원문은 Studio 기록에 보관'));
+    } else assert.ok(!next.includes('인수인계 끝 표시 없음'));
+    assert.equal(stored.pasted.at(-1).text, record, 'display does not rewrite the stored source');
+  }
+});
+
+test('HANDOVER-F3 a complete document before an incomplete one stays folded before the existing import cap', () => {
+  let p = D.createProject();
+  const note = '손님이 예약 시간을 고르고 휴무일과 영업시간을 확인한 뒤 결제까지 마치는 흐름을 맡아요. '.repeat(5).trim();
+  for (let i = 0; i < 60; i++) p = D.addArea(p, `부분 ${i}`, note);
+  const opts = { scope: null, at: '2026-11-01T00:00:00.000Z' }, task = '\n\n### 다음 작업\n결제 버튼을 붙여 줘';
+  const first = handoverText(p, { ...opts, code: 'BIG234' }), second = handoverText(p, { ...opts, code: 'CUT234' }).split('\n').slice(0, -1).join('\n');
+  const prompt = `${first}\n\n${second}${task}`, folded = foldHandover(prompt);
+  assert.ok(prompt.length > 20000 && folded.length < 20000, 'exercise two real documents crossing the existing cap');
+  assert.equal(folded, `${foldHandover(first)}\n\n${second}${task}`);
+  const parsed = parseClaude([{ type: 'user', cwd: '/work/project', timestamp: opts.at, message: { role: 'user', content: prompt } }]);
+  const detail = sessionDetail(ID, 'claude', parsed), record = sessionText(detail).text;
+  assert.equal(detail.turns[0].text, folded);
+  assert.ok(record.includes(`${second}${task}`), 'the uncertain document and following task stay unchanged');
+  assert.deepEqual(receivedHandovers(record), [{ code: 'BIG234', areaId: null }, { code: 'CUT234', areaId: null }]);
+  const stored = D.pasteRecord(p, record, null).project, next = handoverText(stored, { ...opts, code: 'NXT234' });
+  assert.ok(next.includes('### 다음 작업 결제 버튼을 붙여 줘') && next.includes('앞부분 생략, 요청 끝부분만 발췌'));
+  assert.equal(stored.pasted.at(-1).text, record);
 });
 
 test('HANDOVER-O1 session origin: header fields read back; other records are not sessions', () => {
@@ -130,13 +207,13 @@ test('HANDOVER-B2 a web record pasted back keeps a handover document its request
   assert.equal(kept, `[웹 AI 세션 기록 · 결제 연결]\n\n── 사용자 요청 ──\n${line}\n\n결제 버튼을 붙여 줘\n\n── 웹 AI 답변 ──\n문서의 ${doc.split('\n')[0]} 줄을 보고 이어서 붙였어요.\n(바꾼 파일: src/pay.ts)`);
   assert.equal(foldRecord(kept), kept, 'folding again changes nothing');
   assert.deepEqual(receivedHandovers(kept), [{ code: 'QW3RTY', areaId: booking }]);
-  // Copied without its end line, the document folds to the end of the request: the answer's head still starts its own line, so the
-  // answer stays the AI's and its files stay its files.
-  const cut = foldRecord(`[웹 AI 세션 기록 · 취소 마감]\n\n── 사용자 요청 ──\n${doc.split('\n').slice(0, -1).join('\n').trimEnd()}\n\n── 웹 AI 답변 ──\n고쳤어요.\n(바꾼 파일: src/cancel.ts)`);
-  assert.equal(cut, `[웹 AI 세션 기록 · 취소 마감]\n\n── 사용자 요청 ──\n${line}\n\n── 웹 AI 답변 ──\n고쳤어요.\n(바꾼 파일: src/cancel.ts)`);
+  // Missing its end, the original request remains intact and the answer still starts its own block.
+  const original = `[웹 AI 세션 기록 · 취소 마감]\n\n── 사용자 요청 ──\n${doc.split('\n').slice(0, -1).join('\n').trimEnd()}\n\n── 웹 AI 답변 ──\n고쳤어요.\n(바꾼 파일: src/cancel.ts)`;
+  const cut = foldRecord(original);
+  assert.equal(cut, original);
   assert.equal(foldRecord(cut), cut);
   assert.deepEqual(receivedHandovers(cut), [{ code: 'QW3RTY', areaId: booking }]);
-  assert.ok(handoverText(D.pasteRecord(p, cut, null).project, { scope: null, code: 'CUT234', at: '2026-10-30T05:00:00.000Z' }).includes('\n- (지도에 아직 없음) (인수인계 문서로 시작 · 나의 프로젝트 › 예약 화면) → 바꾼 파일: src/cancel.ts\n  - 답변: 고쳤어요.\n'));
+  assert.ok(cut.includes('\n\n── 웹 AI 답변 ──\n고쳤어요.\n(바꾼 파일: src/cancel.ts)'));
   // Such a record an older page saved with the answer's head glued to the folded line is still read so, though it stays as stored.
   const glued = '[웹 AI 세션 기록 · 취소 마감]\n\n── 사용자 요청 ──\n[AgentFlow 인수인계 문서를 받아 이어감 · af-handover:QW3RTY · 나의 프로젝트]── 웹 AI 답변 ──\n고쳤어요.\n(바꾼 파일: src/cancel.ts)';
   const old = handoverText(D.pasteRecord(p, glued, null).project, { scope: null, code: 'CUT234', at: '2026-10-30T05:00:00.000Z' });

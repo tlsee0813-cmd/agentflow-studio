@@ -75,9 +75,10 @@ test('PCRUN98-2 the handover names the change requests made and what came back f
     '  - 돌아온 것: 이 요청문을 적은 기록 1개(아직 대조하지 않음)']);
   // None made: no section. A part's document: only the requests with an item on a part in it.
   assert.ok(!handoverText(p, { scope: null, code: 'RQS234', at: AT }).includes('## 맡긴 변경 요청'));
-  // Pasted into a new session without its end line, the section stays the document's (the request under it is the person's).
-  const folded = foldHandover(`${doc.split('\n').slice(0, -1).join('\n')}\n\n이어서 해 줘`);
-  assert.ok(folded.endsWith('\n\n이어서 해 줘') && !folded.includes('맡긴 변경 요청'), folded);
+  // Without an explicit end, no heading can safely distinguish handover text from a new request: keep both.
+  const incomplete = `${doc.split('\n').slice(0, -1).join('\n')}\n\n이어서 해 줘`;
+  assert.equal(foldHandover(incomplete), incomplete);
+  assert.ok(!foldHandover(`${doc}\n\n이어서 해 줘`).includes('맡긴 변경 요청'));
 });
 
 /* ---------- 3. a reading refused whole for one quote too long, or one empty list left out (the PC's own replies) ---------- */
@@ -93,15 +94,13 @@ function longAsk() {
 const part = (basis, claims) => ({ ref: 'new:p0', name: '세션 파싱', parent: null, role: '세션 파일을 읽어 요청과 답으로 나눠요.', roleAbout: null, roleReplaces: null, basis, claims });
 const claim = (at, key) => ({ kind: 'describes', text: '하위 에이전트 파일도 읽어요.', at, about: null, replaces: null, key });
 
-test('PCRUN98-3 a quote past the bound is kept from its first piece to the last that fits; the rest of the reading stands', () => {
+test('PCRUN98-3 an overlong quote is excluded without changing its range; the rest of the reading stands', () => {
   const { inp, first, second, whole } = longAsk();
   const text = inp.ask.records[0], got = M.validateMapReply({ summary: '연결기', parts: [part([whole, first], [claim(second, 's1'), claim(whole, 's2')])], relations: [], candidates: [], gaps: [], matches: [], material: [] }, inp.ask);
-  // PCRUN99: the PC's report reading was refused whole for three quotes of 757–781 letters; now each is the passage cut short.
-  assert.deepEqual(got.parts[0].claims.map(c => c.key), ['s1', 's2']);
-  const [long, one] = got.parts[0].basis, cut = got.parts[0].claims[1];
-  assert.ok(long.quote.length <= 600 && long.quote.length > one.quote.length && long.quote.startsWith(one.quote), long.quote);
-  assert.deepEqual([cut.from, cut.to, cut.quote], [long.from, long.to, long.quote]);
-  assert.ok(text.spans.map(s => s.t).join('').includes(long.quote.trimEnd()), 'the quote is the record\'s own words');
+  assert.deepEqual(got.parts[0].claims.map(c => c.key), ['s1']);
+  assert.equal(got.parts[0].basis.length, 1);
+  assert.ok(text.spans.map(s => s.t).join('').includes(got.parts[0].basis[0].quote.trimEnd()), 'the retained quote is the record\'s own words');
+  assert.deepEqual(M.setAside(got).map(e => [e.path, e.rule]), [['parts[0].basis[0]', 'length'], ['parts[0].claims[1].at', 'length']]);
   // A reference to pieces that are not there is still refused as a reference.
   assert.throws(() => M.validateMapReply({ summary: '연결기', parts: [part([first], [claim('N01.900', 's1')])], relations: [], candidates: [], gaps: [], matches: [], material: [] }, inp.ask), e => e.rule === 'reference');
 });

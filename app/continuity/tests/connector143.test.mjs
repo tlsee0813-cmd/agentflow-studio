@@ -145,3 +145,11 @@ test('CONN-6 a Studio that is not running, or refuses, is said as a tool error t
   assert.equal(await coded.handle({ jsonrpc: '2.0', method: 'notifications/initialized' }), null);
   assert.ok(TOOLS.every(x => x.inputSchema.type === 'object' && x.description.length > 40));
 });
+
+test('CONN-7 the local HTTP body budget accepts all allowed Korean fields and file paths', async t => {
+  const { url, connector } = await studio(t);
+  const body = { client: 'claude-code', folder: ROOT, title: '제'.repeat(120), request: '가'.repeat(20000), answer: '나'.repeat(40000), files: Array.from({ length: 60 }, (_, i) => `src/${i}/${'다'.repeat(1010)}.ts`.padEnd(1024, '라')) };
+  const res = await fetch(`${url}/api/studio/connector/records`, { method: 'POST', headers: { 'x-agentflow-request': '1', 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  assert.equal(res.status, 200); const [kept] = connector.since(0, { folders: [ROOT] }).records;
+  assert.ok(kept.text.includes(body.request) && kept.text.includes(body.answer) && body.files.every(f => kept.text.includes(f)));
+});

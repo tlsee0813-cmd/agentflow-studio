@@ -14,6 +14,7 @@ import { DIGEST_PROMPT, DIGEST2_PROMPT } from './digest-prompt.mjs';
 import { validateMapAsk, validateMapReply } from '../dist/public/shared/map-reading.js';
 import { SPAN_INDEX, textDigest } from '../dist/public/shared/evidence-span.js';
 import { redactSecrets } from '../dist/public/shared/secret.js';
+import { CONNECTOR_BODY_BYTES } from '../dist/public/shared/connector-limits.js';
 import { MAP_PROMPT, MAP2_PROMPT, MAP3_PROMPT, MAP6_PROMPT, MAP6_FIRST_PROMPT, MAP6_RECIPE, MAP7_PROMPT, MAP7_RECIPE, MAP7_GUIDANCE_FRAME, MAP7_VOCABULARY, map4Prompt, map5Prompt, map6Prompt, map7Prompt } from './map-prompt.mjs';
 
 const ENDPOINT = 'https://api.deepseek.com/chat/completions';
@@ -260,8 +261,8 @@ const READ_ROUTES = Object.freeze({
   '/api/studio/digest': validateDigestAsk, '/api/studio/map': validateMapAsk
 });
 const JOBS = '/api/studio/jobs', SESSIONS = '/api/studio/sessions', CONNECTOR = '/api/studio/connector';
-/** A connector record or a handover document: Korean text runs three bytes a character. */
-export const CONNECTOR_BYTES = 196608;
+/** Full connector fields, including all file paths and worst-case JSON escaping, share one transport budget. */
+export const CONNECTOR_BYTES = CONNECTOR_BODY_BYTES;
 /** The path segments below prefix when path is prefix itself or under it; null when it is elsewhere. */
 export const segmentsUnder = (path, prefix) => path === prefix ? [] : path.startsWith(`${prefix}/`) ? path.slice(prefix.length + 1).split('/').filter(Boolean) : null;
 /** A validator's refusal as the code the browser reads: size and version are their own codes, everything else is INVALID_INPUT. */

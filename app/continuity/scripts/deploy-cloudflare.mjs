@@ -5,6 +5,7 @@ import { createHash } from 'node:crypto';
 import { spawnSync, execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { join, relative, resolve, posix, dirname } from 'node:path';
+import { OAUTH_CONSUME_BINDING, OAUTH_CONSUME_CLASS, OAUTH_CONSUME_MIGRATION, oauthMigration, assertConnectorStorage } from '../server/oauth-consume.mjs';
 
 const app = fileURLToPath(new URL('../../', import.meta.url));
 // AF124: --release=existing-map packages the limited existing-map release (its own Worker main, no map reading or jobs);
@@ -27,9 +28,11 @@ if (policy && !name && !dry) throw new Error(`Name the Worker of the ${policy} r
 if (name !== null && !/^[a-z][a-z0-9-]{2,62}$/.test(name)) throw new Error('Invalid Worker name.');
 const account = process.env.CLOUDFLARE_ACCOUNT_ID, token = process.env.CLOUDFLARE_API_TOKEN;
 const secretNames = ['DEEPSEEK_API_KEY', 'STUDIO_ACCESS_CODE'];
-// The web AI connector (server/cloud-connector.mjs) goes along when its GitHub OAuth app is given: a KV namespace of its own
-// (made once, found by name after that), the app's id and secret, and an optional allow-list of GitHub logins (empty: everyone).
+// The web AI connector goes along when its GitHub OAuth app is given. New deployments use SQLite Durable Objects through the
+// Worker binding; CONNECTOR_STORAGE=kv preserves an existing Workers KV deployment. Neither mode silently switches data stores.
 const connector = !!(process.env.GITHUB_CLIENT_ID?.trim() && process.env.GITHUB_CLIENT_SECRET?.trim());
+const connectorStorage = process.env.CONNECTOR_STORAGE || 'durable';
+assertConnectorStorage(connectorStorage);
 const CONNECTOR_KV_TITLE = process.env.CONNECTOR_KV_TITLE || 'agentflow-connector';
 const CLOUD_PATHS = ['/mcp', '/.well-known/*', '/oauth/*', '/auth/*'];
 if (!dry) {
@@ -85,8 +88,8 @@ const release = { version: 'agentflow.release-manifest.1', source: sha, appTree,
   api: { base: 'same-origin', connectSrc: "'self'", paths: '/api/*' }, storagePrefix: prefix,
   assets: { count: assetList.length, bytes: assetList.reduce((n, x) => n + x.bytes, 0), sha256: closure(assetList), files: assetList },
   modules: { count: moduleList.length, bytes: moduleList.reduce((n, x) => n + x.bytes, 0), sha256: closure(moduleList), files: moduleList },
-  bindings: ['ASSETS', ...secretNames, 'AI_MODE', 'DEEPSEEK_MODEL', ...(connector ? ['CONNECTOR_KV', 'GITHUB_CLIENT_ID', 'GITHUB_CLIENT_SECRET', ...(process.env.ALLOWED_GITHUB_LOGINS ? ['ALLOWED_GITHUB_LOGINS'] : [])] : [])],
-  connector: connector ? { kv: CONNECTOR_KV_TITLE, workerFirst: CLOUD_PATHS } : null };
+  bindings: ['ASSETS', ...secretNames, 'AI_MODE', 'DEEPSEEK_MODEL', ...(connector ? [...(connectorStorage === 'kv' ? ['CONNECTOR_KV'] : []), OAUTH_CONSUME_BINDING, 'GITHUB_CLIENT_ID', 'GITHUB_CLIENT_SECRET', ...(process.env.ALLOWED_GITHUB_LOGINS ? ['ALLOWED_GITHUB_LOGINS'] : []), ...(process.env.CONNECTOR_REDIRECTS ? ['CONNECTOR_REDIRECTS'] : [])] : [])],
+  connector: connector ? { storage: connectorStorage, kv: connectorStorage === 'kv' ? CONNECTOR_KV_TITLE : null, workerFirst: CLOUD_PATHS, oauth: { binding: OAUTH_CONSUME_BINDING, class: OAUTH_CONSUME_CLASS, migrationTag: OAUTH_CONSUME_MIGRATION, storage: 'sqlite' } } : null };
 if (manifestOut) await mkdir(dirname(resolve(process.cwd(), manifestOut)), { recursive: true }), await writeFile(resolve(process.cwd(), manifestOut), `${JSON.stringify(release, null, 2)}\n`);
 console.log(JSON.stringify({ phase: 'prepared', source: sha, worker: name, policy, assets: assets.size, modules: modules.size, bytes: [...assets.values()].reduce((n, x) => n + x.bytes.length, 0), dryRun: dry }));
 console.log(JSON.stringify({ phase: 'manifest', ...release }));
@@ -99,6 +102,11 @@ async function api(path, { method = 'GET', body, bearer = token } = {}) {
   if (!res.ok || !result.success) throw new Error(`Cloudflare HTTP ${res.status}; error codes ${(result.errors || []).map(e => e.code).join(',')}`);
   return result.result;
 }
+// Read the deployed tag before doing uploads. Repeated deployments keep the namespace and apply zero migration steps;
+// an unrelated migration tag is a stop, never an implicit reset of OAuth's spent-token ledger.
+const previousWorker = connector ? (await api('/scripts')).find(s => s.id === name) : null;
+const connectorMigration = connector ? oauthMigration(previousWorker?.migration_tag ?? null) : null;
+if (connector && previousWorker) assertConnectorStorage(connectorStorage, (await api(`/scripts/${name}/settings`)).bindings ?? []);
 const sub = await api('/subdomain');
 if (!sub.subdomain) throw new Error('Choose a workers.dev subdomain in Cloudflare first.');
 const session = await api(`/scripts/${name}/assets-upload-session`, { method: 'POST', body: { manifest } });
@@ -120,11 +128,14 @@ async function connectorNamespace() {
   for (let page = 1; page < 20; page++) { const list = await call(`${kvBase}?per_page=100&page=${page}`); const hit = list.find(n => n.title === CONNECTOR_KV_TITLE); if (hit) return hit.id; if (list.length < 100) break; }
   return (await call(kvBase, { method: 'POST', body: JSON.stringify({ title: CONNECTOR_KV_TITLE }) })).id;
 }
-const connectorBindings = connector ? [{ name: 'CONNECTOR_KV', type: 'kv_namespace', namespace_id: await connectorNamespace() }, { name: 'GITHUB_CLIENT_ID', type: 'plain_text', text: process.env.GITHUB_CLIENT_ID.trim() },
-  { name: 'GITHUB_CLIENT_SECRET', type: 'secret_text', text: process.env.GITHUB_CLIENT_SECRET.trim() }, ...(process.env.ALLOWED_GITHUB_LOGINS ? [{ name: 'ALLOWED_GITHUB_LOGINS', type: 'plain_text', text: process.env.ALLOWED_GITHUB_LOGINS }] : [])] : [];
+const connectorBindings = connector ? [...(connectorStorage === 'kv' ? [{ name: 'CONNECTOR_KV', type: 'kv_namespace', namespace_id: await connectorNamespace() }] : []), { name: 'GITHUB_CLIENT_ID', type: 'plain_text', text: process.env.GITHUB_CLIENT_ID.trim() },
+  { name: OAUTH_CONSUME_BINDING, type: 'durable_object_namespace', class_name: OAUTH_CONSUME_CLASS },
+  { name: 'GITHUB_CLIENT_SECRET', type: 'secret_text', text: process.env.GITHUB_CLIENT_SECRET.trim() }, ...(process.env.ALLOWED_GITHUB_LOGINS ? [{ name: 'ALLOWED_GITHUB_LOGINS', type: 'plain_text', text: process.env.ALLOWED_GITHUB_LOGINS }] : []),
+  ...(process.env.CONNECTOR_REDIRECTS ? [{ name: 'CONNECTOR_REDIRECTS', type: 'plain_text', text: process.env.CONNECTOR_REDIRECTS }] : [])] : [];
 const bindings = [{ name: 'ASSETS', type: 'assets' }, ...connectorBindings, ...secretNames.map(name => ({ name, type: 'secret_text', text: process.env[name] })),
   { name: 'AI_MODE', type: 'plain_text', text: 'deepseek' }, { name: 'DEEPSEEK_MODEL', type: 'plain_text', text: process.env.DEEPSEEK_MODEL || 'deepseek-flash' }];
 const metadata = { main_module: main, compatibility_date: '2026-10-24', bindings,
+  ...(connectorMigration ? { migrations: connectorMigration } : {}),
   assets: { jwt: completion, config: { run_worker_first: ['/api/*', ...(connector ? CLOUD_PATHS : [])], html_handling: 'auto-trailing-slash', not_found_handling: '404-page' } },
   annotations: { 'workers/message': `AgentFlow Studio ${sha}${policy ? ` ${policy}` : ''}`, 'workers/tag': sha.slice(0, 12) } };
 const form = new FormData(); form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
