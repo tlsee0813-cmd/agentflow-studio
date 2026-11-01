@@ -1,5 +1,5 @@
 import { API_SCHEMA, SCHEMA, V5_SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, GUIDE_SCHEMA } from './types.js';
-import { V6_SCHEMA, V7_SCHEMA, V8_SCHEMA, V9_SCHEMA, V10_SCHEMA, V11_SCHEMA, V12_SCHEMA, V13_SCHEMA, CLAIM_KINDS, READINGS_LIMIT, PASTED_TEXT_LIMIT, PASTED_LIMIT } from './types.js';
+import { V6_SCHEMA, V7_SCHEMA, V8_SCHEMA, V9_SCHEMA, V10_SCHEMA, V11_SCHEMA, V12_SCHEMA, V13_SCHEMA, READING_EXCLUSION_RULES, CLAIM_KINDS, READINGS_LIMIT, PASTED_TEXT_LIMIT, PASTED_LIMIT } from './types.js';
 import { validateFrozenRequest, validateStoredMatch, hasTarget, matchLedger, recordTextMap } from './request-return.js';
 import { ANCHOR_QUOTE_MAX, textDigest } from './evidence-span.js';
 import { validEvidence, recordIdentity } from './record-source.js';
@@ -685,11 +685,11 @@ function readings(v, areaIds, texts, projectId, materialIds) {
             continue;
         }
         const version = !!r && typeof r === 'object' ? r.version : null;
-        const five = version === 'map-reading.5';
+        const six = version === 'map-reading.6', five = six || version === 'map-reading.5';
         four = five || version === 'map-reading.4';
         const three = four || version === 'map-reading.3', two = three || version === 'map-reading.2';
         records = four ? asRead : raw;
-        obj(r, ['version', 'id', 'at', 'model', 'prompt', 'hash', 'records', 'summary', 'parts', 'relations', 'candidates', 'gaps', 'skipped', ...(two ? ['requests', 'matches'] : []), ...(four ? ['material'] : [])]);
+        obj(r, ['version', 'id', 'at', 'model', 'prompt', 'hash', 'records', 'summary', 'parts', 'relations', 'candidates', 'gaps', 'skipped', ...(two ? ['requests', 'matches'] : []), ...(four ? ['material'] : []), ...(six ? ['exclusions'] : [])]);
         ensure(r.version === 'map-reading.1' || two);
         id(r.id);
         ensure(!entries.has(r.id));
@@ -813,6 +813,25 @@ function readings(v, areaIds, texts, projectId, materialIds) {
                 integer(x.from);
                 integer(x.to);
                 ensure(x.from < x.to && read.some(y => y.id === x.record && y.from <= x.from && x.to <= y.to));
+            }
+        }
+        if (six) {
+            list(r.exclusions, 512);
+            for (const x of r.exclusions) {
+                obj(x, ['path', 'rule', 'category', 'explanation', 'record', 'from', 'to']);
+                text(x.path, 160);
+                ensure(/^(parts|relations|candidates|gaps|matches|material)(\[\d+\])?(\.(claims|basis|statement)(\[\d+\])?)?(\.[A-Za-z]+)?$/.test(x.path));
+                text(x.explanation, 160);
+                ensure(READING_EXCLUSION_RULES.includes(x.rule));
+                ensure(x.category === null || typeof x.category === 'string' && /^[a-z][a-z-]{0,39}$/.test(x.category));
+                if (x.record === null)
+                    ensure(x.from === null && x.to === null);
+                else {
+                    ensure(records.has(x.record));
+                    integer(x.from);
+                    integer(x.to);
+                    ensure(x.from < x.to && read.some(y => y.id === x.record && y.from <= x.from && x.to <= y.to));
+                }
             }
         }
         if (two) {

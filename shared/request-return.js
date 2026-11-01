@@ -165,7 +165,7 @@ export function matchLedger(readings, texts) {
                     y.replacedBy = null;
             x.replaces = null;
         }
-        else if (r.version === 'map-reading.2' || r.version === 'map-reading.3' || r.version === 'map-reading.4' || r.version === 'map-reading.5')
+        else if (r.version === 'map-reading.2' || r.version === 'map-reading.3' || r.version === 'map-reading.4' || (r.version === 'map-reading.5' || r.version === 'map-reading.6'))
             r.matches.forEach((stored, index) => {
                 const match = asRead(r, stored);
                 // An explicit earlier correction of the same quote survives reading that passage again.
@@ -207,7 +207,7 @@ export function recordTextMap(pasted, sources, tasks) {
 export const recordTexts = (p) => recordTextMap(p.pasted, p.sources, p.tasks);
 /** The text a reading's interval of a record is stored against. map-reading.4: the text as read. map-reading.1–3: the record as it
  * was stored then, the labelled Source.text, when the interval's total is that length; else the text as read (both kept as is). */
-export const storedText = (r, total, t) => r.version !== 'map-reading.4' && r.version !== 'map-reading.5' && total === t.raw.length ? t.raw : t.read;
+export const storedText = (r, total, t) => r.version !== 'map-reading.4' && r.version !== 'map-reading.5' && r.version !== 'map-reading.6' && total === t.raw.length ? t.raw : t.read;
 /** How far a reading's stored positions of a record stand from the text as read: the label's length for an earlier reading stored
  * against the labelled text, else 0. */
 export const labelShift = (r, total, t) => storedText(r, total, t) === t.raw && t.raw !== t.read ? t.shift : 0;
@@ -256,7 +256,7 @@ export function requestComparison(p, reading) {
     return [`원한 항목 ${q.items.length}개`, `변경 보고 ${n('made')}개`, n('mixed') ? `보고 엇갈림 ${n('mixed')}개` : '', n('not-made') ? `미구현 보고 ${n('not-made')}개` : '',
         n('unclassified') ? `미분류 보고 ${n('unclassified')}개` : '', n('none') ? `변경 근거 아직 없는 항목 ${n('none')}개` : '', pending ? `대응 미정 ${pending}구절` : ''].filter(Boolean).join(' · ');
 }
-const correctable = (r) => r.version === 'map-reading.2' || r.version === 'map-reading.3' || r.version === 'map-reading.4' || r.version === 'map-reading.5';
+const correctable = (r) => r.version === 'map-reading.2' || r.version === 'map-reading.3' || r.version === 'map-reading.4' || (r.version === 'map-reading.5' || r.version === 'map-reading.6');
 export function correctRequestMatch(p, reading, index, target) {
     const r = p.readings.find((r) => correctable(r) && r.id === reading), m = r?.matches?.[index];
     if (!r || !m || (target && !hasTarget(r.requests, target)) || p.readings.length >= 500)
