@@ -6,6 +6,8 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { createCloudConnector, CLOUD_TOOLS } from '../server/cloud-connector.mjs';
 import { studioWorker } from '../server/worker.mjs';
+import { durableConnectorKv, consumeOAuth, oauthMigration, assertConnectorStorage, OAUTH_CONSUME_MIGRATION } from '../server/oauth-consume.mjs';
+import { memoryDurableNamespace } from './helpers/durable-storage.mjs';
 
 const O = 'https://studio.example.dev';
 function memoryKv() {
@@ -14,7 +16,7 @@ function memoryKv() {
     async get(k, type) { const v = m.get(k); if (!v || (v.exp && v.exp < Date.now())) return null; return type === 'json' ? JSON.parse(v.value) : v.value; },
     async put(k, value, o) { m.set(k, { value, exp: o?.expirationTtl ? Date.now() + o.expirationTtl * 1000 : 0 }); },
     async delete(k) { m.delete(k); },
-    async list({ prefix = '', limit = 1000 } = {}) { const keys = [...m.keys()].filter(k => k.startsWith(prefix)).sort().slice(0, limit).map(name => ({ name })); return { keys, list_complete: true }; } };
+    async list({ prefix = '', cursor = '', limit = 1000 } = {}) { const all = [...m.keys()].filter(k => k.startsWith(prefix) && k > cursor).sort(); const keys = all.slice(0, limit).map(name => ({ name })); return { keys, list_complete: all.length <= limit, cursor: keys.at(-1)?.name }; } };
 }
 /** A fake GitHub: each sign-in code names a user. */
 function fakeGitHub(users) {
@@ -26,7 +28,7 @@ function fakeGitHub(users) {
     throw new Error(`unexpected fetch ${url}`);
   } };
 }
-const env = (kv, extra = {}) => ({ CONNECTOR_KV: kv, GITHUB_CLIENT_ID: 'gh-id', GITHUB_CLIENT_SECRET: 'gh-secret', ...extra });
+const env = (kv, extra = {}) => ({ CONNECTOR_KV: kv, CONNECTOR_OAUTH: memoryDurableNamespace(), GITHUB_CLIENT_ID: 'gh-id', GITHUB_CLIENT_SECRET: 'gh-secret', ...extra });
 const b64 = b => b.toString('base64url');
 const pkce = () => { const verifier = b64(Buffer.from('v'.repeat(48))); return { verifier, challenge: b64(createHash('sha256').update(verifier).digest()) }; };
 const cookieOf = (res, name) => res.headers.getSetCookie().map(c => c.split(';')[0]).find(c => c.startsWith(`${name}=`))?.slice(name.length + 1);
@@ -206,4 +208,136 @@ test('CLOUD-7 a PC Studio with a PC key takes its owner\'s web records into the 
   assert.match((await call(c, leek.access_token, 'agentflow_handover', {})).content[0].text, /# 인수인계: PC 프로젝트/);
   assert.equal(cloudPull({ env: { AGENTFLOW_CLOUD_URL: 'http://example.com', AGENTFLOW_CLOUD_KEY: key }, connector: local }), null, 'https only');
   assert.equal(cloudPull({ env: { AGENTFLOW_CLOUD_URL: O, AGENTFLOW_CLOUD_KEY: 'nope' }, connector: local }), null);
+});
+
+test('CLOUD-8 failed local commits never ACK a cloud record, including retry and overlapping polls', async t => {
+  const { mkdtemp, rm, writeFile, readFile } = await import('node:fs/promises'), { tmpdir } = await import('node:os'), { join } = await import('node:path');
+  const { openConnector } = await import('../server/connector.mjs'), { cloudPull } = await import('../server/cloud-pull.mjs');
+  const root = await mkdtemp(join(tmpdir(), 'af-failed-pull-')); t.after(() => rm(root, { recursive: true, force: true }));
+  const blocker = join(root, 'blocked'); await writeFile(blocker, 'synthetic file');
+  const dir = join(blocker, 'mailbox'), local = await openConnector({ dir });
+  const valid = { id: '1793484000000-abcdefgh', at: '2026-10-01T00:00:00Z', project: null, text: 'durable synthetic record' };
+  const rejected = { ...valid, id: '1793484000001-abcdefgh', project: 'bad project' };
+  const acked = []; let gets = 0;
+  const pull = cloudPull({ env: { AGENTFLOW_CLOUD_URL: O, AGENTFLOW_CLOUD_KEY: `afk_${'k'.repeat(43)}` }, connector: local, log: () => {},
+    fetchImpl: async (url, init) => {
+      if (url.includes('/ack')) { acked.push(JSON.parse(init.body).ids); return new Response('{}'); }
+      gets++; return Response.json({ records: [valid, rejected] });
+    } });
+  await pull.once(); await pull.once();
+  assert.equal(acked.length, 0); assert.equal(local.since(0, { unplaced: true }).records.length, 0);
+  await rm(blocker); // Repair the synthetic filesystem failure, then retry the original cloud record.
+  const before = gets;
+  const outcomes = await Promise.all([pull.once(), pull.once(), pull.once()]);
+  assert.deepEqual(outcomes, [{ added: 1 }, { added: 1 }, { added: 1 }]); assert.equal(gets - before, 1);
+  assert.deepEqual(acked, [[valid.id]], 'invalid records are never acknowledged');
+  const disk = JSON.parse(await readFile(join(dir, 'connector.json'), 'utf8'));
+  assert.equal(disk.records.length, 1); assert.deepEqual(disk.cloud, [valid.id]);
+  assert.equal((await openConnector({ dir })).since(0, { unplaced: true }).records.length, 1, 'old cloud timestamps remain visible from receipt time');
+  assert.deepEqual(await pull.once(), { added: 0 }); assert.deepEqual(acked.at(-1), [valid.id]);
+});
+
+test('CLOUD-9 code and refresh races across handlers grant once even when legacy KV keeps stale values', async () => {
+  const kv = memoryKv(), e = env(kv), a = createCloudConnector({ env: e }), b = createCloudConnector({ env: e });
+  const { verifier, challenge } = pkce(), hash = value => createHash('sha256').update(value).digest('base64url');
+  await kv.put('client:synthetic', JSON.stringify({ method: 'none' }));
+  await kv.put(`code:${hash('synthetic-code')}`, JSON.stringify({ client_id: 'synthetic', challenge, redirect_uri: 'http://localhost/cb', uid: '101', scope: 'agentflow' }));
+  await kv.put(`rt:${hash('synthetic-refresh')}`, JSON.stringify({ client_id: 'synthetic', uid: '101', scope: 'agentflow' }));
+  kv.delete = async () => {}; // Model indefinitely stale grant values after deletion; DO remains authoritative.
+  for (const grant of [
+    { grant_type: 'authorization_code', code: 'synthetic-code', code_verifier: verifier, redirect_uri: 'http://localhost/cb' },
+    { grant_type: 'refresh_token', refresh_token: 'synthetic-refresh' }
+  ]) {
+    const exchange = handler => handler.handle(new Request(`${O}/oauth/token`, { method: 'POST', body: new URLSearchParams({ client_id: 'synthetic', ...grant }) }));
+    const responses = await Promise.all(Array.from({ length: 16 }, (_, i) => exchange(i % 2 ? a : b)));
+    assert.equal(responses.filter(r => r.status === 200).length, 1);
+    assert.equal(responses.filter(r => r.status === 400).length, 15);
+    assert.equal((await exchange(createCloudConnector({ env: e }))).status, 400, 'a new handler cannot replay a stale grant');
+  }
+  const unavailable = createCloudConnector({ env: { ...e, CONNECTOR_OAUTH: undefined } });
+  assert.equal((await unavailable.handle(new Request(`${O}/oauth/token`, { method: 'POST', body: '' }))).status, 503);
+  const broken = { idFromName: x => x, get: () => ({ fetch: async () => { throw new Error('unavailable'); } }) };
+  await assert.rejects(consumeOAuth(broken, 'code', hash('grant')));
+});
+
+test('CLOUD-10 project listing scans the bounded mailbox before applying its 100 matching-record limit', async () => {
+  const kv = memoryKv(), c = createCloudConnector({ env: env(kv), fetchImpl: fakeGitHub({ site: { id: 101, login: 'a' } }).fetch });
+  const session = await siteSession(c, 'site');
+  for (let i = 0; i < 500; i++) {
+    const id = `${1793484000000 + i}-abcdefgh`;
+    await kv.put(`in:101:${id}`, JSON.stringify({ id, project: i < 390 ? 'saved:Other' : 'saved:Wanted', text: `record ${i}` }));
+  }
+  const rows = (await (await site(c, session, '/api/connector/records?project=saved:Wanted')).json()).records;
+  assert.equal(rows.length, 100); assert.equal(rows[0].text, 'record 390'); assert.equal(rows.at(-1).text, 'record 489');
+});
+
+test('CLOUD-11 SQLite namespace alone supports sign-in, records and per-user handovers; TTL and cursor survive handlers', async () => {
+  const namespace = memoryDurableNamespace(), kv = durableConnectorKv(namespace);
+  const e = env(undefined, { CONNECTOR_OAUTH: namespace }), gh = fakeGitHub({ ai: { id: 101, login: 'a' }, site: { id: 101, login: 'a' }, other: { id: 202, login: 'b' } });
+  const c = createCloudConnector({ env: e, fetchImpl: gh.fetch });
+  const ai = await signIn(c, 'ai'), session = await siteSession(c, 'site'), other = await siteSession(c, 'other');
+  await site(c, session, '/api/connector/handover', { key: 'saved:P1', name: 'Project', text: '# preserved handover' });
+  await call(c, ai.access_token, 'agentflow_record', { request: 'do work', answer: 'work done' });
+  const fresh = createCloudConnector({ env: e, fetchImpl: gh.fetch });
+  assert.equal((await (await site(fresh, session, '/api/connector/records?project=saved:P1')).json()).records.length, 1);
+  assert.equal((await (await site(fresh, other, '/api/connector/records?project=saved:P1')).json()).records.length, 0);
+  assert.match((await call(fresh, ai.access_token, 'agentflow_handover', {})).content[0].text, /preserved handover/);
+  for (let i = 0; i < 5; i++) await kv.put(`in:303:${i}`, JSON.stringify({ i }));
+  const first = await kv.list({ prefix: 'in:303:', limit: 2 }), second = await kv.list({ prefix: 'in:303:', limit: 2, cursor: first.cursor });
+  assert.equal(first.list_complete, false); assert.deepEqual(second.keys.map(k => k.name), ['in:303:2', 'in:303:3']);
+  const expired = namespace.get('data:in:303:');
+  await expired.storage.put('i:in:303:0', { expiresAt: Date.now() - 1 });
+  assert.equal(await kv.get('in:303:0', 'json'), null);
+  await expired.storage.put('i:in:303:1', { expiresAt: Date.now() - 1 });
+  await expired.object.alarm(); assert.equal(await kv.get('in:303:1'), null); assert.deepEqual(await kv.get('in:303:2', 'json'), { i: 2 });
+  await kv.delete('in:303:2'); assert.equal(await kv.get('in:303:2'), null);
+});
+
+test('CLOUD-12 migrations are repeatable and storage compatibility never silently abandons existing data', () => {
+  assert.deepEqual(oauthMigration().steps, [{ new_sqlite_classes: ['OAuthConsume'] }]);
+  assert.deepEqual(oauthMigration(OAUTH_CONSUME_MIGRATION).steps, []);
+  assert.throws(() => oauthMigration('another-migration'));
+  assert.doesNotThrow(() => assertConnectorStorage('durable', []));
+  assert.throws(() => assertConnectorStorage('durable', [{ name: 'CONNECTOR_KV' }]));
+  assert.doesNotThrow(() => assertConnectorStorage('kv', [{ name: 'CONNECTOR_KV' }]));
+  assert.throws(() => assertConnectorStorage('kv', [{ name: 'CONNECTOR_OAUTH' }]));
+});
+
+test('CLOUD-13 full allowed MCP fields survive cloud, PC persistence and browser project save/load without clipping', async t => {
+  const { mkdtemp, rm } = await import('node:fs/promises'), { tmpdir } = await import('node:os'), { join } = await import('node:path');
+  const { openConnector } = await import('../server/connector.mjs'), { cloudPull } = await import('../server/cloud-pull.mjs');
+  const D = await import('../dist/public/shared/domain.js'), { parseProject } = await import('../dist/public/shared/validation.js');
+  const { serializeProject } = await import('../dist/public/shared/storage.js'), { CONNECTOR_TEXT_LIMIT } = await import('../dist/public/shared/connector-limits.js');
+  const namespace = memoryDurableNamespace(), kv = durableConnectorKv(namespace), c = createCloudConnector({ env: env(undefined, { CONNECTOR_OAUTH: namespace }), fetchImpl: fakeGitHub({ ai: { id: 101, login: 'a' } }).fetch });
+  const ai = await signIn(c, 'ai');
+  const args = { title: '제'.repeat(120), request: '가'.repeat(20000), answer: '나'.repeat(40000), files: Array.from({ length: 60 }, (_, i) => `src/${i}/${'다'.repeat(1010)}.ts`.padEnd(1024, '라')) };
+  assert.ok(args.files.every(f => f.length === 1024));
+  const result = await call(c, ai.access_token, 'agentflow_record', args); assert.equal(result.isError, undefined);
+  const key = `afk_${'p'.repeat(43)}`, hash = createHash('sha256').update(key).digest('base64url');
+  await kv.put(`pck:${hash}`, JSON.stringify({ uid: '101', login: 'a', pc: true }));
+  const dir = await mkdtemp(join(tmpdir(), 'af-max-record-')); t.after(() => rm(dir, { recursive: true, force: true }));
+  const local = await openConnector({ dir }), pull = cloudPull({ env: { AGENTFLOW_CLOUD_URL: O, AGENTFLOW_CLOUD_KEY: key }, connector: local, fetchImpl: (url, init) => c.handle(new Request(url, init)) });
+  assert.deepEqual(await pull.once(), { added: 1 });
+  const [kept] = (await openConnector({ dir })).since(0, { unplaced: true }).records;
+  assert.ok(kept.text.length > 120000 && kept.text.length <= CONNECTOR_TEXT_LIMIT);
+  assert.ok(kept.text.includes(args.request) && kept.text.includes(args.answer) && args.files.every(f => kept.text.includes(f)));
+  const p = D.pasteRecord(D.createProject(), kept.text, null).project;
+  assert.equal(parseProject(serializeProject(p)).pasted[0].text, kept.text);
+  assert.deepEqual(await pull.once(), { added: 0 }, 'ACK follows the complete durable record');
+  const expanded = await call(c, ai.access_token, 'agentflow_record', { ...args, request: 'pwd=Super7\n'.repeat(1818).trim(), answer: 'pwd=Super7\n'.repeat(3636).trim() });
+  assert.equal(expanded.isError, true, 'mask expansion beyond the shared cap refuses before reporting success');
+  assert.equal((await kv.list({ prefix: 'in:101:' })).keys.length, 0);
+  assert.throws(() => D.pasteRecord(D.createProject(), 'x'.repeat(CONNECTOR_TEXT_LIMIT + 1), null));
+});
+
+test('CLOUD-14 concurrent SQLite mailbox admission cannot exceed500 and legacy overflow remains retrievable', async () => {
+  const namespace = memoryDurableNamespace(), kv = durableConnectorKv(namespace), e = env(undefined, { CONNECTOR_OAUTH: namespace });
+  const a = createCloudConnector({ env: e, now: () => 1793484001000, fetchImpl: fakeGitHub({ ai: { id: 101, login: 'a' } }).fetch });
+  const ai = await signIn(a, 'ai'), b = createCloudConnector({ env: e, now: () => 1793484002000 });
+  for (let i = 0; i < 499; i++) await kv.put(`in:101:${1793484000000 + i}-abcdefgh`, JSON.stringify({ project: 'saved:Other', text: 'prior' }));
+  const results = await Promise.all(Array.from({ length: 16 }, (_, i) => call(i % 2 ? a : b, ai.access_token, 'agentflow_record', { request: 'r', answer: 'a' })));
+  assert.equal(results.filter(r => !r.isError).length, 1); assert.equal((await kv.list({ prefix: 'in:101:' })).keys.length, 500);
+  const legacy = memoryKv(), c = createCloudConnector({ env: env(legacy), fetchImpl: fakeGitHub({ site: { id: 101, login: 'a' } }).fetch }), session = await siteSession(c, 'site');
+  for (let i = 0; i < 501; i++) await legacy.put(`in:101:${1793484000000 + i}-abcdefgh`, JSON.stringify({ project: i === 500 ? 'saved:Wanted' : 'saved:Other', text: `record ${i}` }));
+  for (let i = 0; i < 2; i++) assert.deepEqual((await (await site(c, session, '/api/connector/records?project=saved:Wanted')).json()).records.map(r => r.text), ['record 500']);
 });

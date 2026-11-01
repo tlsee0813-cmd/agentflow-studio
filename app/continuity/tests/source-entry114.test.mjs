@@ -17,6 +17,7 @@ import * as S from '../dist/public/shared/storage.js';
 import * as J from '../dist/public/shared/map-job.js';
 import * as R from '../dist/public/shared/request-return.js';
 import * as E from '../dist/public/shared/record-source.js';
+import { PASTED_TEXT_LIMIT } from '../dist/public/shared/types.js';
 import { parseProject, parseBackup } from '../dist/public/shared/validation.js';
 import { studioView } from '../dist/public/shared/studio.js';
 import { emptyBundle } from '../dist/public/client/plan-store.js';
@@ -72,7 +73,7 @@ test('114-2 declarations: exact keys, a known kind, single-line bounded non-secr
   const q = D.provideRecord(p, 'const big = 1;\n', big, null).project; assert.deepEqual(parseProject(S.serializeProject(q)).pasted.at(-1).evidence, big);
   const before = S.serializeProject(p);
   for (const bad of [{ ...big, origin: big.origin + 'x' }, { ...CODE_META, kind: 'source' }, { ...CODE_META, name: 'a\tb' }]) assert.throws(() => D.provideRecord(p, 'x = 1\n', bad, null));
-  assert.throws(() => D.provideRecord(p, `key = "sk-${'B'.repeat(24)}"\n`, CODE_META, null)); assert.throws(() => D.provideRecord(p, 'x'.repeat(60001), CODE_META, null));
+  assert.throws(() => D.provideRecord(p, `key = "sk-${'B'.repeat(24)}"\n`, CODE_META, null)); assert.throws(() => D.provideRecord(p, 'x'.repeat(PASTED_TEXT_LIMIT + 1), CODE_META, null));
   assert.equal(S.serializeProject(p), before, 'a refused file leaves the project as it was');
   // A backup whose declaration looks like a key is not taken in (the same check as its text).
   assert.equal(D.secretPasted({ ...p, pasted: [...p.pasted, { ...p.pasted.at(-1), id: 'N_x', text: 'y', evidence: { ...TEST_META, origin: `ghp_${'C'.repeat(30)}` } }] }).length, 1);
@@ -120,8 +121,15 @@ test('114-5 file bytes: strict UTF-8 with the byte order mark kept; bounded firs
   assert.deepEqual(E.decodeProvided(new Uint8Array([0xef, 0xbb, 0xbf, 0x20, 0x0a])), { problem: 'EMPTY' });
   assert.deepEqual(E.decodeProvided(bytes('a\u0007b')), { problem: 'CHARACTERS' });
   assert.deepEqual(E.decodeProvided(bytes(`x = "sk-${'D'.repeat(24)}"`)), { problem: 'SECRET' });
-  assert.deepEqual(E.decodeProvided(bytes('가'.repeat(60001))), { problem: 'TOO_LONG' }, 'UTF-16 length, not bytes');
-  assert.equal(E.decodeProvided(bytes('가'.repeat(60000))).text.length, 60000, 'the largest text fits the byte bound');
+  assert.deepEqual(E.decodeProvided(bytes('가'.repeat(PASTED_TEXT_LIMIT + 1))), { problem: 'TOO_LONG' }, 'UTF-16 length, not bytes');
+  const largest = '가'.repeat(PASTED_TEXT_LIMIT);
+  assert.equal(E.decodeProvided(bytes(largest)).text, largest, 'the largest text fits the byte bound exactly');
+  const p = D.provideRecord(D.createProject(), largest, CODE_META, null).project;
+  assert.equal(parseProject(S.serializeProject(p)).pasted[0].text, largest, 'the actual limit survives save/load without clipping');
+  const input = M.buildMapAsk(p, studioView(p), [], undefined, M.MAP6_SCHEMA);
+  assert.equal(input.problem, null);
+  assert.ok([...input.records.values()].every(r => r.text.length <= M.MAP_RECORD_CHARS), 'larger stored records keep the same map excerpt budget');
+  assert.ok(bytes(JSON.stringify(input.ask)).length <= M.MAP_BYTES, 'map request byte budget is unchanged');
   assert.deepEqual(E.decodeProvided(new Uint8Array(E.PROVIDED_FILE_BYTES + 1).fill(0x61)), { problem: 'TOO_LARGE' });
 });
 

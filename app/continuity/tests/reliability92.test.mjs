@@ -148,25 +148,32 @@ function mapped() {
   p = D.pasteRecord(p, '[Codex 세션 기록 · 세션 codex-111111111111111111111111]\n\n── 사용자 요청 ──\n예약 화면에 휴무일 반영\n\n── Codex 답변 ──\n반영했어요.\n(바꾼 파일: src/a.ts)', null).project;
   return { p, booking };
 }
-test('REL92-3 a handover copied without its end line folds the document only: the request written under it stays the person\'s', () => {
+test('REL92-3 a handover copied without its end line keeps its uncertain boundary and every following request, with its lineage', () => {
   const { p, booking } = mapped();
   for (const scope of [null, booking]) {
     const doc = handoverText(p, { scope, code: 'QW3RTY', at: '2026-10-30T05:00:00.000Z' });
     // Every section a document can have is one the fold knows.
     for (const h of doc.match(/^## .+$/gm)) assert.ok(HANDOVER_SECTIONS.some(s => h.startsWith(s)), h);
-    // Cut where the end line was: the blank line before it stays, as the blank lines after a folded document always do.
+    // Without the end line, document-shaped headings or lists may be a new human request: do not guess where to cut.
     const cut = doc.split('\n').slice(0, -1).join('\n'), line = foldHandover(doc), gap = cut.slice(cut.trimEnd().length);
     assert.equal(gap, '\n');
     assert.ok(!line.includes('\n') && line.startsWith('[AgentFlow 인수인계 문서를 받아 이어감 · af-handover:QW3RTY'), line);
-    for (const [under, kept] of [[`${cut}\n결제 버튼을 붙여 줘`, '\n\n결제 버튼을 붙여 줘'], [`${cut.trimEnd()}\n결제 버튼을 붙여 줘\n- 테스트도`, '\n결제 버튼을 붙여 줘\n- 테스트도'],
-      [`${cut}\n- 결제 버튼을 붙여 줘\n- 테스트도`, '\n\n- 결제 버튼을 붙여 줘\n- 테스트도'], [`${cut}\n## 할 일\n결제 버튼`, '\n\n## 할 일\n결제 버튼'], [cut, gap]]) {
-      assert.equal(foldHandover(under), `${line}${kept}`, under.slice(-60));
+    for (const under of [`${cut}\n결제 버튼을 붙여 줘`, `${cut.trimEnd()}\n결제 버튼을 붙여 줘\n- 테스트도`,
+      `${cut}\n- 결제 버튼을 붙여 줘\n- 테스트도`, `${cut}\n## 할 일\n결제 버튼`, `${cut}\n### 다음 작업\n결제 버튼을 붙여 줘`,
+      `${cut}\n## 아직 정하지 않은 것\n- 새 결제 수단`, `${cut.trimEnd()}\n- 결제 버튼을 붙여 줘\n- 테스트도`, cut]) {
+      assert.equal(foldHandover(under), under, under.slice(-60));
+      assert.deepEqual(receivedHandovers(`[Codex 세션 기록]\n\n── 사용자 요청 ──\n${under}`), [{ code: 'QW3RTY', areaId: scope }]);
     }
     // Before it, the person's words stay too, and the takeover is still known.
-    assert.equal(foldHandover(`이거 보고 이어서\n\n${cut}\n결제 버튼을 붙여 줘`), `이거 보고 이어서\n\n${line}\n\n결제 버튼을 붙여 줘`);
+    assert.equal(foldHandover(`이거 보고 이어서\n\n${cut}\n결제 버튼을 붙여 줘`), `이거 보고 이어서\n\n${cut}\n결제 버튼을 붙여 줘`);
     const rec = foldRecord(`[웹 AI 세션 기록 · 결제]\n\n── 사용자 요청 ──\n${cut}\n결제 버튼을 붙여 줘\n\n── 웹 AI 답변 ──\n붙였어요.`);
-    assert.ok(rec.includes(`${line}\n\n결제 버튼을 붙여 줘\n\n── 웹 AI 답변 ──`), rec);
+    assert.ok(rec.includes(`${cut}\n결제 버튼을 붙여 줘\n\n── 웹 AI 답변 ──`), rec);
     assert.deepEqual(receivedHandovers(rec), [{ code: 'QW3RTY', areaId: scope }]);
+    // An incomplete boundary keeps its original text, while an earlier complete document stays safely folded.
+    const before = handoverText(p, { scope, code: 'ABC234', at: '2026-10-30T04:00:00.000Z' });
+    const mixed = `${before}\n\n${cut}\n### 다음 작업\n결제 버튼을 붙여 줘`;
+    assert.equal(foldHandover(mixed), `${foldHandover(before)}\n\n${cut}\n### 다음 작업\n결제 버튼을 붙여 줘`);
+    assert.deepEqual(receivedHandovers(`[Codex 세션 기록]\n\n── 사용자 요청 ──\n${mixed}`), [{ code: 'ABC234', areaId: scope }, { code: 'QW3RTY', areaId: scope }]);
   }
 });
 

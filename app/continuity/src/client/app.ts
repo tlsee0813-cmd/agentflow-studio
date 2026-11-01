@@ -16,11 +16,11 @@ import { studioView, subtreeRecords, partPath, buildAsk, draftAfterAnswer, STATU
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
 import { layoutScope, edgePath, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, ROOT, HEAD, type Box, type Edge, type LabelSpot, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
 import { aiStatus, askStudio, AskError, ERROR_TEXT, RELEASE_TEXT, PUBLIC_EDITION, connectorRecords, publishHandover, type AiStatus } from './studio-api.js';
-import { runtimeStorage } from './runtime.js';
+import { RUNTIME, runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
 import { createPlanView } from './plan-view.js';
-import { AUTO_SENDS, createReturnView, type Scene, type ReadingContext } from './return-view.js';
+import { AUTO_SENDS, createReturnView, mapExclusionHistory, type Scene, type ReadingContext } from './return-view.js';
 import { createAutoSync } from './auto-sync.js';
 import { createSessionSources } from './session-source.js';
 import { createHandoverView } from './handover-view.js';
@@ -645,9 +645,39 @@ function renderRelease() {
 }
 
 const runBadgeFor = (key: string) => { const el = h('span', { class: 'program-run', 'data-run-entry': key, role: 'status' }); runBadge(el); return el; };
+const PC_GUIDE = 'https://github.com/tlsee0813-cmd/agentflow-studio/blob/work/experience142-reading-delivery/docs/USE_STUDIO_KO.md';
+const pcGuide = (style = 'link-button') => h('a', { class: style, href: PC_GUIDE, target: '_blank', rel: 'noopener noreferrer' }, 'PC에서 사용하는 방법');
+/** The serverless static build is known before status arrives. Its first screen offers a reading example, without promising an
+ * AI map from a folder connection. Builds explicitly connected to a Studio API retain their normal entry. */
+function renderStaticHome() {
+  if (RUNTIME.apiBase !== null) return;
+  document.querySelector<HTMLElement>('#home .home-title')!.textContent = '프로젝트 · 정적 체험판';
+  document.querySelector<HTMLElement>('#home .home-lede')!.replaceChildren('예제 지도와 근거를 둘러보는 체험판이에요. 이 주소에는 AI가 연결되지 않아 기록을 AI로 정리하지 않아요. 내 세션과 AI를 연결하려면 ', pcGuide(), '을 확인하세요.');
+  $('new-open').className = 'secondary';
+  const actions = document.querySelector<HTMLElement>('#home .home-actions')!;
+  if (!document.getElementById('static-examples')) actions.prepend(h('button', { id: 'static-examples', type: 'button', class: 'primary', onclick: () => showExamples() }, '예제로 살펴보기'));
+  document.querySelector<HTMLElement>('#saved-empty .he-title')!.textContent = '예제에서 먼저 살펴보세요';
+  document.querySelector<HTMLElement>('#saved-empty .he-lede')!.textContent = '작성된 지도에서 부분·관계·원문 근거를 읽을 수 있어요. 내 기록을 AI로 정리하려면 PC용 Studio를 사용하세요.';
+  const example = $('empty-examples'), create = $('empty-new'), acts = document.querySelector<HTMLElement>('#saved-empty .he-acts')!;
+  example.className = 'primary small'; create.className = 'secondary small';
+  if (!acts.querySelector('a')) acts.append(pcGuide('link-button small'));
+  if (acts.firstElementChild !== example) acts.prepend(example);
+  const steps = document.querySelectorAll<HTMLElement>('#saved-empty .he-steps li');
+  const staticSteps: [string, string][] = [
+    ['예제 지도 읽기', '미리 작성된 지도에서 부분과 연결을 둘러봐요.'],
+    ['근거와 요청 살펴보기', '부분의 설명에서 원문과 요청문을 오가며 읽어요.'],
+    ['내 PC에서 이어가기', 'PC용 Studio에서 내 세션과 AI를 연결해 사용해요.']
+  ];
+  for (const [i, [title, body]] of staticSteps.entries()) {
+    steps[i]!.querySelector('strong')!.textContent = title;
+    steps[i]!.querySelector('span:last-child')!.textContent = body;
+  }
+  document.querySelector<HTMLElement>('#home .home-foot p:last-child')!.replaceChildren('이 정적 체험판은 AI 요청을 보내지 않아요. 내 기록으로 사용하려면 ', pcGuide(), '을 확인하세요. 프로젝트는 이 브라우저·주소에만 저장돼요.');
+}
 /** My programs lead; the examples show their real composition on a first visit and step back once there is work of one's own. */
 function renderHome() {
   setBar(null);
+  renderStaticHome();
   $('home').hidden = false; $('space').hidden = true; $('ai-pill').hidden = true;
   const invert = (m: Map<string, string>) => { const r = new Map([...m].map(([k, id]) => [id, k])); return (id: string) => r.get(id) ?? id; };
   let converter: HTMLElement;
@@ -2132,6 +2162,14 @@ function renderMapEntry() {
       h('button', { type: 'button', class: 'link-button se-direct', onclick: () => openPartForm(null) }, '부분 직접 추가'));
     box.hidden = false; return;
   }
+  if (RUNTIME.apiBase === null) {
+    box.replaceChildren(h('h2', {}, 'AI가 연결되지 않은 정적 체험판이에요'),
+      h('p', { class: 'se-lead' }, '예제나 가져온 지도를 읽고 직접 고칠 수 있어요. 기록을 보관할 수 있지만, 이 주소에서는 AI로 첫 지도를 만들거나 갱신하지 않아요.'),
+      h('div', { class: 'se-acts' }, h('button', { type: 'button', class: 'primary small', onclick: () => showExamples() }, '예제로 살펴보기'), pcGuide('secondary small')),
+      h('div', { class: 'se-acts' }, h('button', { type: 'button', class: 'link-button', onclick: () => openPaste(null) }, '기록만 보관하기'),
+        h('button', { type: 'button', class: 'link-button se-direct', onclick: () => openPartForm(null) }, '부분 직접 추가')));
+    box.hidden = false; return;
+  }
   const paste = (primary: boolean) => h('button', { type: 'button', class: primary ? 'primary small' : 'secondary small', onclick: () => openPaste(null) }, '기록 붙여넣기');
   const file = () => h('button', { type: 'button', class: 'secondary small se-file', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요', onclick: () => openFile(null) }, '코드·검사 자료 추가');
   const acts = h('div', { class: 'se-acts' }), waiting = st.committing || st.ready;
@@ -2194,6 +2232,11 @@ function mapBlock(): HTMLElement | null {
     const cut = last.records.filter(r => r.to < r.total || r.from > 0).length;
     sec.append(h('p', { class: 'rr-prov' }, h('span', { class: 'tag ai' }, `AI 정리 · ${last.model}`), h('span', {}, `기록 ${last.records.length}개${cut ? ` (${cut}개는 일부 구간만)` : ''} · 인용 원문에 근거 · 앱이 확인한 사실 아님`)));
   }
+  const excluded = mapExclusionHistory(o.project, (record, quote, from) => {
+    if (returnView.isOpen()) returnView.keepReading();
+    returnView.openQuote(record, quote, null, from);
+  });
+  if (excluded) sec.append(excluded);
   const requested = currentRequestResults(o); if (requested) sec.append(requested);
   return sec;
 }

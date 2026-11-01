@@ -2,9 +2,11 @@
 // checks on what an AI session sends, and the record text made from it in the shape a session import writes. No node: imports, so
 // the Worker can carry it.
 import { ApiError } from '../../server/errors.mjs';
+import { CONNECTOR_INPUT_LIMITS, CONNECTOR_TEXT_LIMIT } from '../dist/public/shared/connector-limits.js';
+export { CONNECTOR_TEXT_LIMIT } from '../dist/public/shared/connector-limits.js';
 
 export const CONNECTOR_VERSION = 'connector.1';
-export const CONNECTOR_LIMITS = Object.freeze({ records: 500, keepDays: 14, title: 120, request: 20000, answer: 40000, files: 60, path: 1024, handovers: 40, handoverChars: 40000, page: 50 });
+export const CONNECTOR_LIMITS = Object.freeze({ records: 500, keepDays: 14, ...CONNECTOR_INPUT_LIMITS, text: CONNECTOR_TEXT_LIMIT, handovers: 40, handoverChars: 40000, page: 50 });
 /** Which tool a record is attributed to, from the name the MCP client gives itself (an unknown client is a web AI session). */
 const TOOL_HEAD = { claude: 'Claude Code', codex: 'Codex', web: '웹 AI' };
 export function toolOfClient(name) {
@@ -49,7 +51,7 @@ export function readRecordInput(v, { unplaced = false } = {}) {
   const requestId = v.request_id === undefined || v.request_id === null || v.request_id === '' ? null : typeof v.request_id === 'string' && /^RQ_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v.request_id.trim()) ? v.request_id.trim() : (() => { throw new ApiError('INVALID_INPUT', 400); })();
   return {
     folder, project, files, requestId,
-    tool: toolOfClient(v.client), title: str(v.title, L.title, { optional: true, line: true }), branch: str(v.branch, 200, { optional: true, line: true })?.replace(/\s+/g, '') ?? null,
+    tool: toolOfClient(v.client), title: str(v.title, L.title, { optional: true, line: true }), branch: str(v.branch, L.branch, { optional: true, line: true })?.replace(/\s+/g, '') ?? null,
     request: str(v.request, L.request), answer: str(v.answer, L.answer)
   };
 }

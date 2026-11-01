@@ -1,5 +1,7 @@
 # AgentFlow Studio (continuity)
 
+> 처음 사용할 때는 [PC 사용 안내](../../docs/USE_STUDIO_KO.md)부터 읽으세요.
+
 > 저장소 전체 안내는 [README](../../README.md), 코드 구조는 [구조 개요](../../docs/ARCHITECTURE_KO.md)에 있습니다. 이 문서는 Studio 앱의 실행·API·배포 세부를 다룹니다.
 
 Codex·Claude에서 평소처럼 개발한 기록(요청·작업 보고·확인 자료)을 프로젝트의 부분에 연결해서 보여 줍니다.
@@ -137,7 +139,7 @@ Ctrl+C나 서비스 종료(SIGTERM)를 받으면 지도 작업 보관소를 정�
   코드(`X-Studio-Access`)를 요구합니다.
 - 한도(선택): `STUDIO_TIMEOUT_MS`, `STUDIO_MAX_TOKENS`, `STUDIO_REQUESTS_PER_MINUTE`, `STUDIO_MAX_CONCURRENT`, `STUDIO_CALL_CAP`.
 - 지도 생각(추론): `STUDIO_MAP_THINKING`을 정하지 않으면, 보내는 자료가 24,000바이트 이하일 때만 생각을 켜고 그보다 크면 끕니다. 실제 저장소 기록(약 64KB)에서는 생각을 켜면 시간 초과나 출력 한도에 걸렸고, 끄면 20초 안팎에 끝났습니다. `enabled`·`disabled`로 정하면 크기와 상관없이 그대로 따릅니다.
-- 지도 답 검사: 600자를 넘는 구간을 근거로 들면, 그 구간의 첫 조각부터 600자 안에 드는 조각까지만 근거로 받습니다(첫 조각 하나만으로 넘을 때만 그 근거나 주장을 빼고, 남는 근거가 없으면 길이 초과로 탈락하며 화면에도 그렇게 씁니다). 답에서 빠진 빈 목록(관계·후보·모르는 것·대조·자료 구간)은 빈 것으로 읽고, 요청하지 않은 항목 이름은 읽지도 저장하지도 않고 넘깁니다. 요청한 항목이 빠지면 여전히 탈락합니다.
+- 지도 답 검사: 허용 길이(600자)를 넘는 근거 인용은 앞부분만 잘라 채택하지 않습니다. 해당 항목을 제외하고 유효한 나머지를 검증합니다. 제외 이유·응답 내 위치·확인 가능한 원문 위치는 지도 읽기 이력에 저장해 새로고침·백업 후에도 확인할 수 있습니다. 유효한 근거가 남지 않으면 읽기 전체가 거절됩니다. 답에서 빠진 빈 목록은 기존 규칙대로 빈 것으로 읽고, 요청한 필수 항목이 빠지면 여전히 거절합니다.
 - 지도 답(map.7)에서 항목 하나가 규칙을 어기면(다른 기록에서 가져온 조건, 없는 구간, 틀린 종류, 새 부분 12개 초과 등) 그 항목과 그것에 기대는 것(그 아래 새 부분, 그 부분과의 관계)만 빼고 나머지를 반영합니다. 화면에 "AI 답 가운데 N개 항목은 … 빼고 반영했어요"라고 알립니다. 서로 부딪히는 항목은 질문이나 표시 쪽을 뺍니다(주장이 이미 말한 것을 미정으로 남긴 후보, 근거로도 인용한 구간을 자료로 표시한 것). 답 전체의 모양(요약·목록 자체), 같은 키를 쓴 두 주장, 키처럼 보이는 글자, 남는 항목이 하나도 없을 때는 지금처럼 답 전체를 반영하지 않습니다. map.1–6은 그대로입니다.
 - 인수인계의 "맡긴 변경 요청"에서 지도가 대조한 보고는 종류별로 무엇이라 했는지(바꿨다고 함·미구현·분명하지 않음) 함께 씁니다.
 - 인수인계의 답변 인용에서 작업 폴더 밖의 전체 경로(임시 폴더 등)는 `(작업 폴더 밖 경로)`로 씁니다.
@@ -157,7 +159,7 @@ node --env-file=/private/cloudflare.env --env-file=/private/studio.env continuit
 ```
 
 - `cloudflare.env`: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`. Workers 편집 권한을 사용할 계정 하나에 한정합니다.
-- `studio.env`: `DEEPSEEK_API_KEY`, `STUDIO_ACCESS_CODE`, 선택 `DEEPSEEK_MODEL`. 웹 AI 커넥터를 켜려면 GitHub OAuth 앱의 `GITHUB_CLIENT_ID`·`GITHUB_CLIENT_SECRET`(선택 `ALLOWED_GITHUB_LOGINS`)도 둡니다. 그러면 KV 네임스페이스 `agentflow-connector`를 찾거나 만들어 묶습니다(API 토큰에 Workers KV Storage: Edit 필요).
+- `studio.env`: `DEEPSEEK_API_KEY`, `STUDIO_ACCESS_CODE`, 선택 `DEEPSEEK_MODEL`. 웹 AI 커넥터를 켜려면 GitHub OAuth 앱의 `GITHUB_CLIENT_ID`·`GITHUB_CLIENT_SECRET`(선택 `ALLOWED_GITHUB_LOGINS`)도 둡니다. 새 연결기는 SQLite Durable Object에 기록과 인증 소모 이력을 보관합니다. Workers KV 권한은 필요하지 않습니다. 기존 KV 배포는 `CONNECTOR_STORAGE=kv`로 명시해 원래 저장소를 유지하며, 저장 방식이 다른 기존 배포를 덮어쓰는 작업은 거절합니다. OAuth 코드는 트랜잭션으로 한 번만 사용됩니다.
   AI 이용 코드는 사용자만 보관합니다. 공개 AI 배포에서는 빈 코드를 허용하지 않습니다.
 - 기본 Worker 이름은 `agentflow-studio`이며 `CLOUDFLARE_WORKER_NAME`으로 바꿀 수 있습니다.
   계정의 `workers.dev` 하위 도메인이 먼저 설정되어 있어야 합니다.

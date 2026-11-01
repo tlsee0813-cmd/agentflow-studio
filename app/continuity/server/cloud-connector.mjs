@@ -9,13 +9,14 @@
 //   /api/connector/*: the Studio page of the same site (a sign-in cookie) or a PC's Studio (a PC key) takes the records web AI
 //   sessions left and leaves its projects' handover documents.
 //
-// Kept in the CONNECTOR_KV namespace, all per user and all with credential-like parts hidden first: records not yet taken (30 days),
+// Kept in the CONNECTOR_OAUTH SQLite namespace (or an existing CONNECTOR_KV binding), per user with credential-like parts hidden: records not yet taken (30 days),
 // one latest handover document per project the person linked, and hashes of the sign-in tokens (never a token itself).
 // Settings: GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET (secret), optional ALLOWED_GITHUB_LOGINS (comma list; empty lets everyone in),
 // optional CONNECTOR_REDIRECTS (more allowed OAuth redirect URIs, comma list).
 import { readRecordInput, recordText, str, projectKeyOk, CONNECTOR_LIMITS } from './connector-record.mjs';
 import { redactSecrets } from '../dist/public/shared/secret.js';
 import { createMcpHandler, connectorTools } from '../connector/mcp-core.mjs';
+import { consumeOAuth, durableConnectorKv } from './oauth-consume.mjs';
 
 export const CLOUD_PATHS = ['/mcp', '/.well-known/*', '/oauth/*', '/auth/*', '/api/connector/*'];
 const TTL = { pending: 600, code: 300, access: 3600, refresh: 30 * 86400, client: 180 * 86400, session: 30 * 86400, record: 30 * 86400, handover: 30 * 86400 };
@@ -60,7 +61,7 @@ function redirectMatches(asked, registered) {
 }
 
 export function createCloudConnector({ env = {}, fetchImpl = globalThis.fetch, now = () => Date.now() } = {}) {
-  const kv = env.CONNECTOR_KV;
+  const kv = env.CONNECTOR_KV ?? durableConnectorKv(env.CONNECTOR_OAUTH);
   const configured = !!(kv && env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET);
   const allowed = String(env.ALLOWED_GITHUB_LOGINS ?? '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
   const extraRedirects = String(env.CONNECTOR_REDIRECTS ?? '').split(',').map(s => s.trim()).filter(Boolean);
@@ -153,7 +154,7 @@ export function createCloudConnector({ env = {}, fetchImpl = globalThis.fetch, n
     if (allowed.length && !allowed.includes(user.login.toLowerCase())) return page(403, '아직 열리지 않았어요', `<p><code>${esc(user.login)}</code> 계정은 아직 이 AgentFlow를 쓸 수 없어요.</p>`, clear);
     if (pending.kind === 'mcp') {
       const code = random(32);
-      await put(`code:${await sha(code)}`, { ...pending, uid: user.uid, login: user.login }, TTL.code);
+      await put(`code:${await sha(code)}`, { ...pending, uid: user.uid, login: user.login, expiresAt: now() + TTL.code * 1000 }, TTL.code);
       const u = new URL(pending.redirect_uri); u.searchParams.set('code', code); if (pending.state) u.searchParams.set('state', pending.state); u.searchParams.set('iss', origin);
       return new Response(null, { status: 302, headers: { ...NO_STORE, Location: u.href, ...clear } });
     }
@@ -170,6 +171,7 @@ export function createCloudConnector({ env = {}, fetchImpl = globalThis.fetch, n
 <pre>AGENTFLOW_CLOUD_URL=${esc(origin)}\nAGENTFLOW_CLOUD_KEY=${esc(key)}</pre><p class="fine">이 키는 지금 한 번만 보여요. 새로 만들면 이전 키는 더 쓸 수 없어요. 다른 사람에게 보이지 마세요.</p>`, clear);
   }
   async function token(request, origin) {
+    if (!env.CONNECTOR_OAUTH) return oauthError(503, 'temporarily_unavailable', 'Atomic OAuth storage is not configured');
     const form = new URLSearchParams(await request.text());
     let clientId = form.get('client_id'), secret = form.get('client_secret');
     const basic = /^Basic (.+)$/.exec(request.headers.get('authorization') ?? '');
@@ -180,21 +182,23 @@ export function createCloudConnector({ env = {}, fetchImpl = globalThis.fetch, n
     let grant;
     if (form.get('grant_type') === 'authorization_code') {
       const code = form.get('code') ?? '', key = `code:${await sha(code)}`, c = code ? await get(key) : null;
-      if (c) await del(key); // once only
-      if (!c || c.client_id !== clientId) return oauthError(400, 'invalid_grant');
+      if (!c || c.client_id !== clientId || (c.expiresAt !== undefined && c.expiresAt <= now())) return oauthError(400, 'invalid_grant');
       if ((form.get('redirect_uri') ?? c.redirect_uri) !== c.redirect_uri) return oauthError(400, 'invalid_grant', 'redirect_uri mismatch');
       const verifier = form.get('code_verifier') ?? '';
       if (!/^[\w.~-]{43,128}$/.test(verifier) || (await sha(verifier)) !== c.challenge) return oauthError(400, 'invalid_grant', 'PKCE verification failed');
+      if (!(await consumeOAuth(env.CONNECTOR_OAUTH, 'code', await sha(code)))) return oauthError(400, 'invalid_grant');
+      await del(key); // KV may show a stale value later; the Durable Object's spent marker remains authoritative.
       grant = { uid: c.uid, login: c.login, client_id: clientId, scope: c.scope };
     } else if (form.get('grant_type') === 'refresh_token') {
       const rt = form.get('refresh_token') ?? '', key = `rt:${await sha(rt)}`, r = rt ? await get(key) : null;
-      if (!r || r.client_id !== clientId) return oauthError(400, 'invalid_grant');
-      await del(key); // rotated: the old one is spent
-      grant = r;
+      if (!r || r.client_id !== clientId || (r.expiresAt !== undefined && r.expiresAt <= now())) return oauthError(400, 'invalid_grant');
+      if (!(await consumeOAuth(env.CONNECTOR_OAUTH, 'rt', await sha(rt)))) return oauthError(400, 'invalid_grant');
+      await del(key);
+      const { expiresAt: _, ...kept } = r; grant = kept;
     } else return oauthError(400, 'unsupported_grant_type');
     const access = random(32), refresh = random(32);
     await put(`at:${await sha(access)}`, { ...grant, exp: now() + TTL.access * 1000 }, TTL.access);
-    await put(`rt:${await sha(refresh)}`, grant, TTL.refresh);
+    await put(`rt:${await sha(refresh)}`, { ...grant, expiresAt: now() + TTL.refresh * 1000 }, TTL.refresh);
     return json(200, { access_token: access, token_type: 'Bearer', expires_in: TTL.access, refresh_token: refresh, scope: grant.scope });
   }
 
@@ -229,9 +233,14 @@ export function createCloudConnector({ env = {}, fetchImpl = globalThis.fetch, n
     catch (e) { throw new Error(e?.code === 'INPUT_TOO_LARGE' ? '기록이 너무 길어요. 답변을 줄여서 다시 남기세요.' : '기록을 받지 않았어요(빈 요청이나 답변, 잘못된 RQ_ id).'); }
     if ((await keys(`in:${user.uid}:`, LIMITS.inbox)).length >= LIMITS.inbox) throw new Error('아직 가져가지 않은 기록이 너무 많아요. AgentFlow Studio에서 프로젝트를 열어 기록을 가져간 뒤 다시 남기세요.');
     const made = redactSecrets(recordText({ ...r, folder: null, branch: null, at: null }));
+    // Masking may expand very short secret values. Refuse before reporting success if the complete result cannot be kept by the browser.
+    if (made.text.length > CONNECTOR_LIMITS.text) throw new Error('기록이 너무 길어요. 답변이나 바꾼 파일 목록을 줄여서 다시 남기세요.');
     lastId = Math.max(now(), lastId + 1);
     const at = new Date(now()).toISOString(), id = `${String(lastId).padStart(13, '0')}-${random(6)}`;
-    await put(`in:${user.uid}:${id}`, { id, at, project: got.hit?.key ?? null, title: r.title, text: made.text }, TTL.record);
+    const key = `in:${user.uid}:${id}`, record = { id, at, project: got.hit?.key ?? null, title: r.title, text: made.text };
+    if (kv.putIfBelow) {
+      if (!(await kv.putIfBelow(key, JSON.stringify(record), { expirationTtl: TTL.record }, { prefix: `in:${user.uid}:`, limit: LIMITS.inbox }))) throw new Error('아직 가져가지 않은 기록이 너무 많아요. AgentFlow Studio에서 기록을 가져간 뒤 다시 남기세요.');
+    } else await put(key, record, TTL.record);
     return `AgentFlow에 기록을 남겼어요${got.hit ? ` (「${got.hit.name}」)` : ' (아직 이어 둔 프로젝트가 없어서, 다음에 잇는 프로젝트로 들어가요)'}${made.count ? `. 비밀값처럼 보이는 곳 ${made.count}개는 가렸어요` : ''}. Studio에서 그 프로젝트를 열면 들어가요.`;
   }
   async function mcp(request, origin) {
@@ -255,10 +264,20 @@ export function createCloudConnector({ env = {}, fetchImpl = globalThis.fetch, n
       const q = new URL(request.url).searchParams, project = q.get('project'), unplaced = q.get('unplaced') === '1', all = q.get('all') === '1' && user.pc;
       if (project !== null && !projectKeyOk(project)) return json(400, { error: { code: 'INVALID_INPUT' } });
       const out = [];
-      for (const k of await keys(`in:${user.uid}:`, LIMITS.page)) {
-        const r = await get(k); if (!r) continue;
-        if (all || (project && r.project === project) || (unplaced && !r.project)) out.push(r);
-      }
+      // SQLite admission caps its mailbox atomically at 500. Legacy KV admission can race past that cap: keep following its
+      // bounded pages rather than permanently hiding an already accepted record beyond key 500.
+      let cursor;
+      do {
+        const page = await kv.list({ prefix: `in:${user.uid}:`, cursor, limit: LIMITS.page });
+        for (const k of page.keys) {
+          const r = await get(k.name); if (!r) continue;
+          if (all || (project && r.project === project) || (unplaced && !r.project)) out.push(r);
+          if (out.length === LIMITS.page) break;
+        }
+        const next = page.list_complete ? null : page.cursor;
+        if (!page.list_complete && (!next || next === cursor)) throw new Error('Incomplete connector storage page');
+        cursor = next;
+      } while (cursor && out.length < LIMITS.page);
       return json(200, { records: out });
     }
     if (request.method !== 'POST' || request.headers.get('content-type')?.split(';')[0].trim() !== 'application/json') return json(405, { error: { code: 'METHOD_NOT_ALLOWED' } });
