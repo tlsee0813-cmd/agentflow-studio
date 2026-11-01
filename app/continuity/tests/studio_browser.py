@@ -1324,6 +1324,12 @@ def record_fixtures():
 ENTRY = "key => JSON.parse(localStorage.getItem('agentflow.idea015.workspace')).entries.find(e => e.entryId === key).project"
 
 
+def assert_current_map_reading(reading):
+    """New map.6/map.7 writes use .6 and always store diagnostics, empty for these lawful stub replies."""
+    assert reading["version"] == "map-reading.6", reading["version"]
+    assert reading["exclusions"] == [], "the lawful stub must be read whole, with explicit durable diagnostics"
+
+
 def record_flow(browser, base, backup):
     """EXPERIENCE69: one record pasted as it came, from a selected part, read on request, beside the same map. The draft survives
     leaving the box and a reload; the saved text is exact and the canonical structure (parts, notes, relations, containment,
@@ -1599,6 +1605,8 @@ def map70_flow(browser, base):
     expect(page.locator("#world .node")).to_have_count(3)
     assert len(sent) == 1, sent
     assert sent[0]["schemaVersion"] == "studio.map.6" and sent[0]["parts"] == [] and sent[0]["requests"] == [] and sent[0]["priors"] == [], "FIRST6 stays unchanged"
+    entry_id = re.search(r"#/p/(E_[^/]+)", page.url).group(1)
+    assert_current_map_reading(page.evaluate(ENTRY, entry_id)["readings"][-1])
     expect(entry).to_be_hidden()
     # The map is what one reads now: the pane closes, the title line says what was understood, the new parts are marked.
     expect(page.locator("#lens")).to_be_hidden()
@@ -1645,6 +1653,7 @@ def map70_flow(browser, base):
     expect(page.locator("#world .map-understood")).to_contain_text("첫 부분")
     assert len(sent) == 2, sent
     assert sent[1]["schemaVersion"] == "studio.map.7" and sent[1]["parts"], "the advertised later recipe reads the existing map as map.7"
+    assert_current_map_reading(page.evaluate(ENTRY, entry_id)["readings"][-1])
     expect(page.locator("#world .node")).to_have_count(3)
     expect(page.locator("#world .node", has_text="변환기")).to_have_count(1)
     assert page.locator("#world .node", has_text="스텁 부분 2").evaluate("e => e.style.left + ',' + e.style.top") == placed
@@ -1668,6 +1677,10 @@ def map70_flow(browser, base):
     page.reload()
     expect(page.locator("#world .node")).to_have_count(3)
     expect(page.locator("#world .map-understood")).to_contain_text("[스텁]")
+    readings = page.evaluate(ENTRY, entry_id)["readings"]
+    assert len(readings) == 2, "both current-wire readings survive reload"
+    for reading in readings:
+        assert_current_map_reading(reading)
     assert not errors, errors
     context.close()
 
@@ -1750,7 +1763,9 @@ def request71_flow(browser, base):
     assert len(maps) == 1
     reading = page.evaluate(ENTRY, entry_id)["readings"][-1]
     raw_condition = next(x["t"].strip() for r in maps[0]["records"] for x in r["spans"] if x["t"].strip().startswith("작업 보고: feature/folder"))
-    assert reading["version"] == "map-reading.5" and [m["about"] for m in reading["matches"]] == [raw_condition, raw_condition], "map.7 resolves the owning record's condition into the unchanged stored about strings"
+    assert_current_map_reading(reading)
+    assert [m["about"] for m in reading["matches"]] == [raw_condition, raw_condition], "map.7 resolves the owning record's condition into the unchanged stored about strings"
+    assert [m["kind"] for m in reading["matches"]] == ["reported", "checked"], "both the change report and the separate check report survive storage"
     assert page.evaluate("() => JSON.parse(localStorage.getItem('agentflow.studio.plans.1'))") == frozen_before, "return reading never writes the plan sidecar"
     page.locator(f'#world .node[data-part="{area}"]').click()
     expect(page.locator("#lens .request-item")).to_have_count(3)
@@ -1856,6 +1871,8 @@ def uncertainty76_flow(browser, base):
     page.route("**/api/studio/map", returned)
     page.locator("#space-empty").get_by_role("button", name="기록으로 지도 정리").click()
     expect(page.locator("#world .node")).to_have_count(1)
+    entry_id = re.search(r"#/p/(E_[^/]+)", page.url).group(1)
+    assert_current_map_reading(page.evaluate(ENTRY, entry_id)["readings"][-1])
     page.locator("#world .map-understood").get_by_role("button", name="근거").click()
     item = page.locator("#lens .rm-cands li").first
     expect(item).to_contain_text("귀속 미정 · 이 보고의 귀속은 미정입니다.")
@@ -4605,6 +4622,7 @@ def map97_flow(browser, base, size, shots=None):
     def apply_on_a(n):
         go(MAP97_A); page.locator(".mu-apply").get_by_text("정리 결과 보기").wait_for(); page.locator(".mu-apply").click()
         page.wait_for_function("([w, k, n]) => JSON.parse(localStorage.getItem(w)).entries.find(e => e.entryId === k).project.readings.length === n", arg=[MAP97_W, MAP97_A, n])
+        assert_current_map_reading(stored(MAP97_A)["project"]["readings"][-1])
         assert len(held) == n, ("applied without another request", len(held), n)
 
     page.goto(base + "/"); page.evaluate(MAP97_SEED, [MAP97_W, MAP97_A, MAP97_B]); fresh()
@@ -4667,6 +4685,8 @@ def map97_flow(browser, base, size, shots=None):
     page.wait_for_function("([w, k]) => JSON.parse(localStorage.getItem(w)).entries.find(e => e.entryId === k).project.space.areas.some(a => a.name === '직접 추가한 부분')", arg=[MAP97_W, MAP97_A])
     last = stored(MAP97_A)
     assert len(last["project"]["readings"]) == 4 and last["seq"] == 9 and len(held) == 4, (len(last["project"]["readings"]), last["seq"], len(held))
+    for reading in last["project"]["readings"]:
+        assert_current_map_reading(reading)
     shot("a-edited")
     assert not errors, errors
     context.close()
@@ -4769,6 +4789,7 @@ def map100_flow(browser, size, shots=None):
         page.wait_for_function("([w, k]) => JSON.parse(localStorage.getItem(w)).entries.find(e => e.entryId === k).project.readings.length === 1", arg=[MAP97_W, MAP97_A])
         reading = stored(MAP97_A)["project"]["readings"][0]
         assert reading["id"].startswith("R_") and calls() == 1
+        assert_current_map_reading(reading)
         wait(lambda: reservations() == [], "acknowledged"); assert server_state(op)["acked"] == "applied"
         page.locator("#world .node").first.wait_for()
 
@@ -4782,6 +4803,8 @@ def map100_flow(browser, size, shots=None):
         page.unroute("**/api/studio/jobs/*/ack"); fresh()
         wait(lambda: reservations() == [], "settled after the reload"); assert server_state(op2)["acked"] == "applied"
         assert len(stored(MAP97_A)["project"]["readings"]) == 2 and calls() == 2
+        for reading in stored(MAP97_A)["project"]["readings"]:
+            assert_current_map_reading(reading)
 
         # 5. Cancel: said with what it cannot promise; the provider call is stopped; nothing applied.
         page.evaluate(MAP97_ADD, [MAP97_W, MAP97_A, "작업 보고: 결과 파일은 한 폴더에 모은다."]); fresh()
