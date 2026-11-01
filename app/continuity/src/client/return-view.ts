@@ -40,9 +40,10 @@ export function mapExclusionHistory(project: Project, openQuote: (record: string
     ...[...readings].reverse().map(r => h('section', {}, h('h4', {}, fullTime(r.at)), h('ol', {}, ...r.exclusions!.map((x, i) => {
       const source = x.record ? texts.get(x.record)?.read : null;
       const place = source !== null && source !== undefined && x.from !== null && x.to !== null && x.from >= 0 && x.to <= source.length && x.from < x.to;
-      return h('li', {}, h('p', {}, x.explanation), h('small', {}, `${x.path} · ${x.rule}${x.category ? ` / ${x.category}` : ''}`),
+      return h('li', {}, h('p', {}, x.explanation),
         place ? h('button', { type: 'button', class: 'rr-ref rr-cite', 'data-request-focus': JSON.stringify(['exclusion', r.id, i]),
-          onclick: () => openQuote(x.record!, source!.slice(x.from!, x.to!), x.from!) }, `원문 구간 보기 · ${x.from! + 1}–${x.to}자`) : h('small', {}, ' · 확인 가능한 원문 구간 없음'));
+          onclick: () => openQuote(x.record!, source!.slice(x.from!, x.to!), x.from!) }, `원문 구간 보기 · ${x.from! + 1}–${x.to}자`) : h('small', {}, '확인 가능한 원문 구간 없음'),
+        h('details', { class: 'rm-exclusion-debug' }, h('summary', {}, '검사 정보'), h('small', {}, `${x.path} · ${x.rule}${x.category ? ` / ${x.category}` : ''}`)));
     })))));
 }
 
