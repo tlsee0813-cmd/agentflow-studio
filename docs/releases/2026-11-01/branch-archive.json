@@ -1,0 +1,92 @@
+[
+  {
+    "branch": "claude/project-thread-0m4a38",
+    "sha": "b218453fbd597830ab2a33d203a59ab4464ef12c",
+    "openPr": [],
+    "containedIn": [
+      "development"
+    ],
+    "tag": "archive/2026-11-01/claude/project-thread-0m4a38"
+  },
+  {
+    "branch": "claude/project-thread-6p80a4",
+    "sha": "d7e6a740b078fa3d4ee92e52bf992ba25d3375b1",
+    "openPr": [],
+    "containedIn": [
+      "gh-pages"
+    ],
+    "tag": "archive/2026-11-01/claude/project-thread-6p80a4"
+  },
+  {
+    "branch": "claude/project-thread-bwyau0",
+    "sha": "80ac762b0209403020a7f415ef09f6b0d600cacb",
+    "openPr": [],
+    "containedIn": [
+      "development"
+    ],
+    "tag": "archive/2026-11-01/claude/project-thread-bwyau0"
+  },
+  {
+    "branch": "claude/project-thread-dzde09",
+    "sha": "f6e0f34c84ab64214bfbc24240fcb670644a5722",
+    "openPr": [],
+    "containedIn": [
+      "development"
+    ],
+    "tag": "archive/2026-11-01/claude/project-thread-dzde09"
+  },
+  {
+    "branch": "claude/project-thread-f6k6fj",
+    "sha": "32f12e623642979cfd11237b37c5df5163d64d8c",
+    "openPr": [],
+    "containedIn": [
+      "development"
+    ],
+    "tag": "archive/2026-11-01/claude/project-thread-f6k6fj"
+  },
+  {
+    "branch": "claude/project-thread-pkkmd9",
+    "sha": "a967fd251773be4f4ee84c042d73a338edafbe12",
+    "openPr": [],
+    "containedIn": [
+      "development"
+    ],
+    "tag": "archive/2026-11-01/claude/project-thread-pkkmd9"
+  },
+  {
+    "branch": "claude/project-thread-pkkmd9-main",
+    "sha": "6a9b5bc2c51450e045a3a2cbec3140ec2e6c12ff",
+    "openPr": [],
+    "containedIn": [
+      "main"
+    ],
+    "tag": "archive/2026-11-01/claude/project-thread-pkkmd9-main"
+  },
+  {
+    "branch": "claude/project-thread-q5m2c1",
+    "sha": "e1333222490137d82ce38d5a57017e60d6022ad9",
+    "openPr": [],
+    "containedIn": [
+      "development"
+    ],
+    "tag": "archive/2026-11-01/claude/project-thread-q5m2c1"
+  },
+  {
+    "branch": "work/2026-11-01-release-completion",
+    "sha": "4f7e0196c8549a50550d07a6ab17e296c3cd6dfd",
+    "tag": "archive/2026-11-01/work/2026-11-01-release-completion",
+    "containedIn": [
+      "development"
+    ],
+    "openPr": []
+  },
+  {
+    "branch": "work/2026-11-01-oauth-return",
+    "sha": "dc74b5439842d53567ff11b8ea89def5b4424d11",
+    "tag": "archive/2026-11-01/work/2026-11-01-oauth-return",
+    "containedIn": [
+      "development"
+    ],
+    "openPr": []
+  }
+]

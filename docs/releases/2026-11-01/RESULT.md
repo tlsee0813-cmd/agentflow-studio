@@ -2,7 +2,7 @@
 
 기준 개발본은 `d0c37584bb89c6ff7ee7dea19ccb4714acd66e37`(PR107)이다. PR93–105의 기록 연결·결과 대조 수리와 PR106–107의 화면 개선을 유지하고, 총괄 검토에서 재현한 누락·근거·인수인계 문제를 수리한다. PR 번호와 과거 사이클 번호는 별개다.
 
-**현재 단계: 구현과 독립 검토 완료 후 정확 커밋 CI·시험 배포·PC 사용 확인 진행. 아직 공개 전달 완료 판정은 아니다.** 최종 배포 영수증과 실제 사용 결과는 이 문서에 이어 기록한다.
+**판정: 사용자가 직접 써 볼 수 있는 전달본의 수리·병합·배포·실제 연결 확인을 완료했다. 전체 의미 정확성이나 모든 복잡한 사례의 완성을 뜻하지 않는다.** 최종 확인 상태는 아래 전달 영수증을 따른다.
 
 ## 수리와 증거
 
@@ -29,7 +29,7 @@
 
 공식 근거: [SQLite 저장 API](https://developers.cloudflare.com/durable-objects/api/sqlite-storage-api/), [저장 제한](https://developers.cloudflare.com/durable-objects/platform/limits/), [무료·유료 지원 범위](https://developers.cloudflare.com/durable-objects/platform/pricing/). SQLite의 키+값 2MB 제한 안에서 기록을 보관한다. 환경 재설치·계정 전환·KV 권한 확대는 하지 않는다.
 
-공개 전체 Worker와 예제 Pages를 최신 검증본으로 전달할 예정이다. 별도 제한 공개142와 과거73 소스·결과, UI75 `693d0c7`, 미수용74의 판정은 보존한다. 새 연결기는 저장소 소유자의 GitHub 로그인에 한정한다. 예제 Pages는 AI 서버 없는 체험판임을 첫 화면에 표시한다.
+공개 전체 Worker와 예제 Pages에 검증본을 전달했다. 별도 제한 공개142와 과거73 소스·결과, UI75 `693d0c7`, 미수용74의 판정은 보존한다. 새 연결기는 저장소 소유자의 GitHub 로그인에 한정한다. 예제 Pages는 AI 서버 없는 체험판임을 첫 화면에 표시한다.
 
 ## 검증을 읽는 기준
 
@@ -39,3 +39,40 @@
 - 사용자 PC의 기존 키 파일·작업 트리·25개 저장 파일을 먼저 보존했다. 브라우저의 기존 프로젝트는 같은 주소에서 유지한다.
 
 처음 사용할 경로는 [PC 사용 안내](../../USE_STUDIO_KO.md), 현재 전체 상태는 [ACTIVE](../../cycles/ACTIVE.md)에 모은다.
+
+## 실제 자료와 의미 판정
+
+현재 수리 기록(사용자 요청·작업 보고·공개 commit/diff, 답변12,141자)을 정상 stdio MCP로 남겼다. PC 자동 연결에서 DeepSeek 1회가 약78.626초 뒤 도착했고, 부분 선택→원문→복귀·새로고침·정상 백업·MCP 인수인계를 확인했다. 원문12,629자는 보존하고11,914자를 읽었다. 끝715자는 미전송이며 화면에 일부 구간 읽기와 미확인 사항을 알렸다.
+
+독립 의미 검토: 근거 인용28개는 원문과 정확히 일치했다. 사용자 마무리 요구, ACK/폴링, 불완전 인수인계 보존과 당시의 “정식 배포·PC 전달 미완료” 보고를 구분했다. 다만 지도 제외 이력을 인수인계로 넘긴다는 관계1건은 절 이름 상수만 근거로 실제 동작을 강하게 해석했고, 인수인계에도 그대로 남았다. **부분읽기·전달은 제한 수용, 전체 의미 정확성은 미수용**이다. 같은 결과를 재생성해서 실패를 덮지 않았다.
+
+이 백업을 최종PC에서 폴더에 연결할 때 미전송 구간 때문에 자동 지도 갱신이 추가로 시작되어9초 안에 취소했다. 상태 cancelled/seen, 새 결과 적용0을 확인하고 원래 결과를 보존했다. 따라서 이번 완료 생성은1회이고, 추가 자동 접수·취소1회를 별도 기록한다. 이를 두 번째 의미 성공으로 세지 않는다. 이전 실제 요청·반환 대조는 [PR105 작성자 결과](https://github.com/tlsee0813-cmd/agentflow-studio/pull/105)를 회수했으며, 이번에 같은 모델 실험을 재실행하지 않았다.
+
+![실제 수리 기록에서 생성한 지도와 원문 근거](actual-map-reading.png)
+
+## 실제 Claude 인증에서 발견한 추가 수리
+
+사용자 승인 뒤 GitHub 인증·PC 연결키 발급과 저장은 성공했지만, Claude OAuth의 동의 폼에서 GitHub→Worker callback→Claude 복귀가 브라우저 CSP에 막혔다. 네트워크의 ERR_ABORTED와 form-action 차단 로그를 직접 확인했다. [PR110](https://github.com/tlsee0813-cmd/agentflow-studio/pull/110)은 **현재 클라이언트에 등록되어 대조·검증된 콜백 origin 하나만** 동의 화면의 form-action에 추가한다. 와일드카드·다른 클라이언트 origin·동의/PKCE/계정 제한 완화는 없다. CLOUD-15는 수정 전 실패를 확인한 뒤 통과했고 독립 검토에서 P1/P2가 없었다.
+
+## 전달 영수증
+
+| 전달 대상 | 확인한 판본·결과 |
+| --- | --- |
+| 코드 | [PR109](https://github.com/tlsee0813-cmd/agentflow-studio/pull/109)·[PR110](https://github.com/tlsee0813-cmd/agentflow-studio/pull/110) 병합. 최종 코드  dc74b5439842d53567ff11b8ea89def5b4424d11, 병합 72447c4, [고정 태그](https://github.com/tlsee0813-cmd/agentflow-studio/tree/release/2026-11-01-studio) |
+| 최종 CI | [41265216496](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/41265216496) Windows·Linux 모두 성공. 기존 앱 각각 279개, continuity Linux 837개 / Windows 833개 통과·4개 건너뜀, 기존 브라우저 검사 18개 및 Studio 전체 화면 검사 통과. 유료 AI 호출 없음 |
+| 정식 Worker | [웹 Studio](https://agentflow-studio.tlsee0813.workers.dev/) source dc74b54. 공개 파일 65개 SHA256 일치. 배포 d971a7e1-9fcc-4214-9f8b-0f8811ed9ec2, 버전 042a49f1-a50b-4f5f-8179-b0ed16d7e155 100% |
+| 정적 Pages | [공개 예제](https://tlsee0813-cmd.github.io/agentflow-studio/) f903d3d/source4f7e019 실제 BUILD 확인. OAuth 후속 수리는 서버만 바뀌어 클라이언트는 동일. AI 서버 없음·저장 prefix 보존 |
+| 실제 인증 | GitHub 공개 프로필 승인 → PC 키 발급·기존 환경 파일에 추가 → Claude OAuth 성공. 수정 전 CSP 실패와 수정 후 실제 복귀를 구분. 기존 PC 키는 Worker 재배포 후에도 유효 |
+| 실제 웹↔PC | Claude에서 같은 프로젝트 인수인계 읽기 1회·기록 쓰기 1회 성공(각 한 번 허용, 항상 허용으로 변경하지 않음). 02:40:28.160Z 웹기록→02:40:45.725Z PC 디스크 저장, 약17.565초. 요청·답변 일치·cloud ID 커밋·원격 ACK 확인. 새 웹 기록의 추가 지도 생성은 하지 않음 |
+| PC | 기본 4317 정상 시작(AI·세션·내구 작업·연결기 켜짐). 기존 키 값 보존, 승인한 클라우드 URL/키만 추가. 바탕화면 AgentFlow Studio 바로가기와 같은 실행 경로를 확인 |
+
+정확한 기계 판독 요약은 [DELIVERY.json](DELIVERY.json), 수정 전 OAuth 브라우저 증거는 [oauth-csp-before.json](oauth-csp-before.json)에 있다. 원문·인증값·개인 대화 링크는 공개하지 않는다.
+
+![실제 Claude 연결과 두 도구의 기본 승인 설정](claude-connected.png)
+
+
+## 저장소와 보존
+
+현재 README·사용 안내·ACTIVE·QUESTIONS·검토 시작점을 같은 판본으로 맞추고, 긴 과거 이력은 원문을 지우지 않고 접어 두었다. 기본 main은 안내만 업데이트하며 제품 계보를 억지로 합치지 않는다. [브랜치 정리와 복구](REPOSITORY.md)에 원 tip과 원격 태그를 남긴다. 진행 중 PR과 미수용·독자 계보는 유지한다.
+
+사용자 PC의 기존키 값과 원래 기록을 보존했다. 연결 승인 전까지25개 저장파일 및 env hash가 같았고, 이후에는 승인한 AGENTFLOW_CLOUD_URL/KEY 설정과 검증 기록만 추가했다. 기존 환경 원문과 저장파일 백업은 PC 비공개 위치에 둔다. 현재 포트4317의 작업이 없는 것을 확인하고 연결 설정을 반영해 다시 켰다. 바탕화면 바로가기는 이미 동작하는 PowerShell7과 확인한 Node22.16을 사용하며 PATH·시스템 보호 설정을 변경하지 않았다.

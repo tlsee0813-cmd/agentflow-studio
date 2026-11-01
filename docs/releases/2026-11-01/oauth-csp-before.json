@@ -1,0 +1,33 @@
+{
+  "source": "4f7e0196c8549a50550d07a6ab17e296c3cd6dfd",
+  "events": [
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "https://agentflow-studio.tlsee0813.workers.dev/oauth/consent",
+      "text": ""
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "https://github.com/login/oauth/authorize",
+      "redirectStatus": 302,
+      "text": ""
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "https://agentflow-studio.tlsee0813.workers.dev/oauth/github/callback",
+      "redirectStatus": 302,
+      "text": ""
+    },
+    {
+      "method": "Network.loadingFailed",
+      "url": "",
+      "errorText": "net::ERR_ABORTED",
+      "text": ""
+    },
+    {
+      "method": "Log.entryAdded",
+      "url": "",
+      "text": "Sending form data to 'https://agentflow-studio.tlsee0813.workers.dev/oauth/consent' violates the following Content Security Policy directive: \"form-action 'self' https://github.com\". The request has been blocked.\n"
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "source": "dc74b5439842d53567ff11b8ea89def5b4424d11",
+  "merge": "72447c4c52c5b713426085cd0e93a5bb2ce19926",
+  "ci": {
+    "run": 41265216496,
+    "linux": {
+      "original": 279,
+      "continuity": 837,
+      "failed": 0
+    },
+    "windows": {
+      "original": 279,
+      "continuity": 833,
+      "skipped": 4,
+      "failed": 0
+    },
+    "browser": "Both full suites passed with simulated providers"
+  },
+  "worker": {
+    "url": "https://agentflow-studio.tlsee0813.workers.dev",
+    "source": "dc74b5439842d53567ff11b8ea89def5b4424d11",
+    "assetsMatched": 65,
+    "deployment": "d971a7e1-9fcc-4214-9f8b-0f8811ed9ec2",
+    "versions": [
+      {
+        "version_id": "042a49f1-a50b-4f5f-8179-b0ed16d7e155",
+        "percentage": 100
+      }
+    ]
+  },
+  "pages": {
+    "url": "https://tlsee0813-cmd.github.io/agentflow-studio/",
+    "commit": "f903d3db26e2ffbead874d92deb5f4a913389560",
+    "source": "4f7e0196c8549a50550d07a6ab17e296c3cd6dfd",
+    "runtimeUnchangedByOAuthFix": true,
+    "aiServer": false
+  },
+  "pc": {
+    "url": "http://127.0.0.1:4317",
+    "shortcut": true,
+    "oldEnvironmentValuesPreserved": true,
+    "onlyAddedEnvironmentNames": [
+      "AGENTFLOW_CLOUD_URL",
+      "AGENTFLOW_CLOUD_KEY"
+    ]
+  },
+  "web": {
+    "githubAuthenticated": true,
+    "claudeConnected": true,
+    "toolsApprovedOnceOnly": true,
+    "handoverRead": true,
+    "recordWrite": true,
+    "pcReceipt": {
+      "at": "2026-11-01T02:41:11.242Z",
+      "found": true,
+      "seq": 1,
+      "tool": "web",
+      "project": "E_81dfe013-aa6b-4d8c-b6f3-0f5cd298fb96",
+      "originalAt": "2026-11-01T02:40:28.160Z",
+      "receivedAt": "2026-11-01T02:40:45.725Z",
+      "exactRequest": true,
+      "exactAnswer": true,
+      "cloudIdCommitted": true
+    },
+    "cloudRecordAcked": true
+  },
+  "actual": {
+    "newModelCalls": 1,
+    "provider": "deepseek-flash",
+    "durationSeconds": 78.626,
+    "inputAnswerCharacters": 12141,
+    "storedRecordCharacters": 12629,
+    "readCharacters": 11914,
+    "unreadTailCharacters": 715,
+    "backupSha256": "595f34ff9544401fe00ff9d858d446df11063d9eb5e3df2711f50fcf797ba2fd",
+    "exactQuotes": 28,
+    "scope": "Partial-record transport/map/source/reload/export/MCP handover only",
+    "meaningLimit": "One flow relation inferred more strongly than the quoted section-name constant warrants; same relation appears in handover. Not full semantic acceptance."
+  },
+  "extraAutoRefresh": {
+    "state": "cancelled",
+    "applied": 0,
+    "reason": "Imported partial reading automatically queued on binding; cancelled and preserved."
+  },
+  "at": "2026-11-01T02:41:47.064Z"
+}
