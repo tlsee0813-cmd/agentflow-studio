@@ -341,3 +341,24 @@ test('CLOUD-14 concurrent SQLite mailbox admission cannot exceed500 and legacy o
   for (let i = 0; i < 501; i++) await legacy.put(`in:101:${1793484000000 + i}-abcdefgh`, JSON.stringify({ project: i === 500 ? 'saved:Wanted' : 'saved:Other', text: `record ${i}` }));
   for (let i = 0; i < 2; i++) assert.deepEqual((await (await site(c, session, '/api/connector/records?project=saved:Wanted')).json()).records.map(r => r.text), ['record 500']);
 });
+
+test('CLOUD-15 consent CSP permits only the validated callback origin across the GitHub redirect chain', async () => {
+  const redirects = ['https://claude.ai/api/mcp/auth_callback', 'https://claude.com/api/mcp/auth_callback', 'http://localhost:51234/callback', 'http://127.0.0.1:29876/callback', 'https://approved.example/callback'];
+  const c = createCloudConnector({ env: env(memoryKv(), { CONNECTOR_REDIRECTS: redirects.at(-1) }) });
+  const reg = await c.handle(new Request(`${O}/oauth/register`, { method: 'POST', body: JSON.stringify({ redirect_uris: redirects }) }));
+  const { client_id } = await reg.json(), { challenge } = pkce();
+  const authorize = (redirect_uri, extra = {}) => c.handle(new Request(`${O}/oauth/authorize?${new URLSearchParams({ response_type: 'code', client_id, redirect_uri, code_challenge: challenge, code_challenge_method: 'S256', ...extra })}`));
+  const actions = response => response.headers.get('content-security-policy').split(';').map(s => s.trim()).find(s => s.startsWith('form-action ')).split(/\s+/).slice(1);
+  for (const redirect of redirects) {
+    const consent = await authorize(redirect); assert.equal(consent.status, 200);
+    assert.deepEqual(actions(consent), ["'self'", 'https://github.com', new URL(redirect).origin]);
+    assert.ok(!actions(consent).some(a => a.includes('*')), 'no wildcard or unrelated client origin');
+    assert.match(consent.headers.get('content-security-policy'), /default-src 'none'; style-src 'unsafe-inline';/);
+    assert.match(consent.headers.get('content-security-policy'), /frame-ancestors 'none'/);
+  }
+  const badRedirect = await authorize('https://evil.example/callback'); assert.equal(badRedirect.status, 400);
+  assert.deepEqual(actions(badRedirect), ["'self'", 'https://github.com'], 'unregistered callback never enters the policy');
+  const unknown = await authorize(redirects[0], { client_id: 'unknown' }); assert.equal(unknown.status, 400);
+  assert.deepEqual(actions(unknown), ["'self'", 'https://github.com']);
+  assert.equal((await authorize(redirects[0], { code_challenge: '', code_challenge_method: 'plain' })).status, 302, 'PKCE still refuses before consent');
+});

@@ -34,12 +34,15 @@ const esc = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
 const NO_STORE = { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' };
 const json = (status, value, headers = {}) => new Response(status === 204 ? null : JSON.stringify(value), { status, headers: { ...NO_STORE, 'Content-Type': 'application/json; charset=utf-8', ...headers } });
 const oauthError = (status, error, description) => json(status, { error, ...(description ? { error_description: description } : {}) });
-function page(status, title, body, headers = {}) {
+function page(status, title, body, headers = {}, callbackOrigin = null) {
+  // Chromium also checks form-action on redirects. Only the consent page adds its already validated client's exact origin;
+  // other pages keep the fixed policy. An opaque origin or CSP delimiter/wildcard is never a source expression.
+  const callbackAction = callbackOrigin && /^https?:\/\/[^\s;*]+$/.test(callbackOrigin) ? ` ${callbackOrigin}` : '';
   const html = `<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title>
 <style>body{font:16px/1.6 system-ui,sans-serif;margin:0;background:#f6f7f9;color:#1d2330}main{max-width:480px;margin:12vh auto;padding:28px;background:#fff;border-radius:14px;box-shadow:0 1px 3px #0002}h1{font-size:20px;margin:0 0 12px}code,pre{background:#eef1f5;border-radius:6px;padding:2px 6px;word-break:break-all}pre{padding:12px;white-space:pre-wrap}button{font:inherit;padding:10px 16px;border:0;border-radius:8px;background:#2554c7;color:#fff;cursor:pointer}.fine{color:#5b6475;font-size:14px}
 @media (prefers-color-scheme:dark){body{background:#14171c;color:#e6e9ef}main{background:#1d2128}code,pre{background:#2a2f38}.fine{color:#9aa3b2}}</style>
 <main><h1>${esc(title)}</h1>${body}</main></html>`;
-  return new Response(html, { status, headers: { ...NO_STORE, 'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; form-action 'self' https://github.com; frame-ancestors 'none'", ...headers } });
+  return new Response(html, { status, headers: { ...NO_STORE, 'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': `default-src 'none'; style-src 'unsafe-inline'; form-action 'self' https://github.com${callbackAction}; frame-ancestors 'none'`, ...headers } });
 }
 const cookie = (name, value, maxAge) => `${name}=${value}; Path=/; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Lax`;
 const readCookie = (request, name) => (request.headers.get('cookie') ?? '').split(/;\s*/).map(p => p.split('=')).find(([k]) => k === name)?.[1] ?? null;
@@ -124,7 +127,7 @@ export function createCloudConnector({ env = {}, fetchImpl = globalThis.fetch, n
     return page(200, 'AgentFlow에 연결할까요?', `<p><strong>${esc(client.name ?? '이름 없는 앱')}</strong>이(가) 내 AgentFlow 기록을 남기고 인수인계를 읽으려고 해요.</p>
 <p class="fine">허용하면 <code>${esc(host)}</code>(으)로 돌아가요.${local ? ' 이 컴퓨터에서 도는 프로그램(Claude Code 등)이에요. 직접 시작한 연결이 아니면 허용하지 마세요.' : ''}</p>
 <form method="post" action="/oauth/consent"><input type="hidden" name="ask" value="${nonce}"><button type="submit">GitHub로 로그인하고 허용</button></form>
-<p class="fine">AgentFlow는 GitHub에서 계정 이름과 번호만 받아요. 저장소나 코드에는 접근하지 않아요.</p>`);
+<p class="fine">AgentFlow는 GitHub에서 계정 이름과 번호만 받아요. 저장소나 코드에는 접근하지 않아요.</p>`, {}, new URL(redirect).origin);
   }
   async function consent(request, origin) {
     const form = new URLSearchParams(await request.text()), nonce = form.get('ask') ?? '';
