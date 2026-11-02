@@ -884,11 +884,19 @@ test('a refused extraction receipt says extract, its partition and a coarse reas
   assert.equal(calls.some(call => call.input.correction), false, 'extraction is never corrected');
   assert.deepEqual(rejected.map(kept => kept.stage), ['extract-1']);
   assert.equal(store.lastFailure(progress[0].key).reason, 'coverage');
-  for (const [mutate, reason] of [[() => ({ covered: [] }), 'shape'], [input => ({ ...receipt(input), candidates: [{ kind: 'part', text: '단서', at: ['N99.001'] }] }), 'anchor'],
-    [input => ({ ...receipt(input), candidates: [{ kind: 'fact', text: '단서', at: [input.partition.records[0].core[0]] }] }), 'candidate']]) {
+  {
     const { make: again } = await setup(t);
-    await assert.rejects(again({ callProvider: fakeProvider(ask, [], call => call.stage === 'extract' ? mutate(call.input) : undefined) }).call(ask),
-      error => error.detail?.phase === 'extract' && error.detail.reason === reason && !('rule' in error.detail));
+    await assert.rejects(again({ callProvider: fakeProvider(ask, [], call => call.stage === 'extract' ? { covered: [] } : undefined) }).call(ask),
+      error => error.detail?.phase === 'extract' && error.detail.reason === 'shape' && !('rule' in error.detail));
+  }
+  // first-map-divided.7: a candidate outside the partition or of an unknown kind is advisory only: it is left out of the receipt
+  // the later stages get, and the reading goes on. The planner then sees the acknowledged core and no such candidate.
+  for (const mutate of [input => ({ ...receipt(input), candidates: [{ kind: 'part', text: '단서', at: ['N99.001'] }] }),
+    input => ({ ...receipt(input), candidates: [{ kind: 'fact', text: '단서', at: [input.partition.records[0].core[0]] }] })]) {
+    const { make: again } = await setup(t), seen = [];
+    validateMapReply(await again({ callProvider: fakeProvider(ask, seen, call => call.stage === 'extract' ? mutate(call.input) : undefined) }).call(ask), ask);
+    const plan = seen.find(call => call.stage === 'plan');
+    assert.ok(plan.input.extraction.every(x => x.candidates.length === 0), 'set-aside candidates never reach the planner');
   }
 });
 
@@ -1003,8 +1011,8 @@ function browserApply(f, wire, exclusions, n = 7) {
 }
 
 test('recipe identities are bumped for the changed prompts and validation semantics', () => {
-  assert.equal(PIPELINE_RECIPE, 'first-map-divided.6');
-  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.6');
+  assert.equal(PIPELINE_RECIPE, 'first-map-divided.7');
+  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.7');
 });
 
 test('a render fragment with one unresolvable claim alias is applied with only that claim set aside and a durable diagnostic', async t => {

@@ -55,11 +55,36 @@ export function planMapPartitions(ask, { targetChars = 3500, maxPartitions = 12 
  * Candidates are sparse advisory pointers; they neither become final facts nor advance the original input's read coverage.
  * A refusal keeps its INVALID_EXTRACTION message and says one coarse reason (error.reason): 'shape' (the reply or the partition),
  * 'coverage' (covered is not exactly the core aliases) or 'candidate' (too many, or one malformed or pointing outside). */
+/** One alias as the model may have written it, read back to the original span name when that is unambiguous: 'N1.7' or 'N01.7'
+ * is 'N01.07'; an adjacent range 'N01.07-09' is the three aliases in between. Anything else (another record, a quote, a made-up
+ * name) is null. The partition's own aliases are the only ones that count: nothing is re-indexed or invented here. */
+const ALIAS = /^\s*([NR])0*(\d{1,3})\.0*(\d{1,3})(?:\s*-\s*(?:[NR]0*\d{1,3}\.)?0*(\d{1,3}))?\s*$/;
+function readAliases(value, allowed) {
+  const names = Array.isArray(value) ? value : typeof value === 'string' ? [value] : [];
+  const out = [];
+  for (const raw of names) {
+    if (typeof raw !== 'string') continue;
+    if (allowed.has(raw)) { out.push(raw); continue; }
+    const m = ALIAS.exec(raw); if (!m) continue;
+    const record = n => `${m[1]}${n.length > 2 ? n : n.padStart(2, '0')}`, index = n => n.padStart(2, '0');
+    const from = Number(m[3]), to = m[4] === undefined ? from : Number(m[4]);
+    if (!(from >= 1 && to >= from && to - from <= 24)) continue;
+    const ids = [record(m[2]), ...(m[2].length === 2 ? [`${m[1]}0${m[2]}`] : [])];
+    for (let i = from; i <= to; i++) { const alias = ids.map(id => `${id}.${index(String(i))}`).find(a => allowed.has(a)); if (alias) out.push(alias); }
+  }
+  return [...new Set(out)];
+}
+
+/** Structural receipt, not a semantic completeness certificate. The receipt (covered) must name every core alias; duplicates and
+ * context aliases in it are passed over. Candidates are sparse advisory pointers (never final facts, never evidence): one that is
+ * malformed, points outside the partition or has no core alias is set aside on its own, and the receipt keeps the rest (at most
+ * EXTRACTION_CANDIDATES_MAX). Only a reply of the wrong shape or one that does not acknowledge its core refuses the stage.
+ * The value returned is the receipt as read (canonical aliases, set-aside candidates left out): that is what later stages get. */
 export function validateExtraction(value, partition) {
   // The message stays INVALID_EXTRACTION; reason is one fixed category for a local diagnostic, never a value.
   const invalid = reason => { const error = new Error('INVALID_EXTRACTION'); error.reason = reason; throw error; };
   if (!partition || !Array.isArray(partition.records)) invalid('input');
-  if (!shape(value, ['covered', 'candidates'])) invalid('shape');
+  if (!shape(value, ['covered', 'candidates']) || !Array.isArray(value.covered) || !Array.isArray(value.candidates)) invalid('shape');
   const core = new Set(), allowed = new Set();
   for (const record of partition.records) {
     if (!record || !Array.isArray(record.core) || !Array.isArray(record.context) || !Array.isArray(record.spans)) invalid('input');
@@ -70,17 +95,18 @@ export function validateExtraction(value, partition) {
       || declared.length !== record.spans.length) invalid('input');
   }
   if (!core.size) invalid('input');
-  if (!Array.isArray(value.covered) || value.covered.length !== core.size
-    || new Set(value.covered).size !== core.size || value.covered.some(alias => !core.has(alias))) invalid('coverage');
-  if (!Array.isArray(value.candidates)) invalid('shape');
-  if (value.candidates.length > EXTRACTION_CANDIDATES_MAX) invalid('count');
+  const acknowledged = new Set(readAliases(value.covered, allowed));
+  if ([...core].some(alias => !acknowledged.has(alias))) invalid('coverage');
+  const candidates = [];
   for (const candidate of value.candidates) {
-    if (!shape(candidate, ['kind', 'text', 'at']) || !EXTRACTION_KINDS.includes(candidate.kind)
-      || typeof candidate.text !== 'string' || !candidate.text.trim() || candidate.text.length > 240 || CONTROL.test(candidate.text)) invalid('candidate');
-    if (!Array.isArray(candidate.at) || !candidate.at.length || new Set(candidate.at).size !== candidate.at.length
-      || candidate.at.some(alias => !allowed.has(alias)) || !candidate.at.some(alias => core.has(alias))) invalid('anchor');
+    if (candidates.length >= EXTRACTION_CANDIDATES_MAX) break;
+    if (!candidate || typeof candidate !== 'object' || Array.isArray(candidate) || !EXTRACTION_KINDS.includes(candidate.kind)
+      || typeof candidate.text !== 'string' || !candidate.text.trim() || candidate.text.length > 240 || CONTROL.test(candidate.text)) continue;
+    const at = readAliases(candidate.at, allowed);
+    if (!at.length || !at.some(alias => core.has(alias))) continue;
+    candidates.push({ kind: candidate.kind, text: candidate.text, at });
   }
-  return structuredClone(value);
+  return { covered: [...core], candidates };
 }
 
 /** Safe feedback for the one bounded extraction correction: fixed paths (covered, candidates[i].at, ...), fixed rules and counts.

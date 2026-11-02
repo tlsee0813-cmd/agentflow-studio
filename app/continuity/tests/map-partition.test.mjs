@@ -74,39 +74,57 @@ test('indivisible oversized spans and partition count overflow fail explicitly, 
   for (const targetChars of [0, -1, 1.1, Infinity]) assert.throws(() => planMapPartitions(input, { targetChars }), /INVALID_PARTITION_INPUT/);
 });
 
-test('receipt requires every core alias once; sparse empty candidates acknowledge reading but do not assert facts', () => {
+test('receipt must acknowledge every core alias; duplicates and context in it are passed over; the shape stays exact', () => {
   const p = planMapPartitions(ask(record('N01', '하나다.\n둘이다.\n셋이다.')), { targetChars: 11 })[0], good = receipt(p);
   assert.ok(good.covered.length > 1);
-  assert.deepEqual(validateExtraction({ ...good, covered: [...good.covered].reverse() }, p).candidates, []);
+  assert.deepEqual(validateExtraction({ ...good, covered: [...good.covered].reverse() }, p), good, 'read back in core order');
   invalid({ ...good, covered: good.covered.slice(1) }, p);
   invalid({ ...good, covered: [...good.covered.slice(1), good.covered[1]] }, p);
-  invalid({ ...good, covered: [...good.covered, 'N99.99'] }, p);
+  // first-map-divided.7: a repeated core alias, a context alias or an unknown name beside the whole core is passed over, not refused.
+  assert.deepEqual(validateExtraction({ ...good, covered: [...good.covered, good.covered[0]] }, p), good);
+  assert.deepEqual(validateExtraction({ ...good, covered: [...good.covered, 'N99.99'] }, p), good);
+  assert.deepEqual(validateExtraction({ ...good, covered: [p.records[0].context[0], ...good.covered] }, p), good);
   invalid({ ...good, covered: [p.records[0].context[0], ...good.covered.slice(1)] }, p);
-  invalid({ ...good, complete: true }, p); invalid({ covered: good.covered }, p);
+  // An alias the model wrote without its zero padding, or as a range over the core, still acknowledges it.
+  assert.deepEqual(validateExtraction({ ...good, covered: good.covered.map(a => a.replace(/\.0+(\d)/, '.$1')) }, p), good);
+  const first = good.covered[0], last = good.covered.at(-1);
+  assert.deepEqual(validateExtraction({ ...good, covered: [`${first}-${last.slice(last.indexOf('.') + 1)}`] }, p), good);
+  invalid({ ...good, complete: true }, p); invalid({ covered: good.covered }, p); invalid({ ...good, candidates: 'x' }, p);
 });
 
-test('candidate kinds and references are strict, context is advisory, ranges/quotes/unknown aliases cannot replace original aliases', () => {
+test('candidates are advisory: a malformed one or one outside the core is set aside alone; aliases are read back to their span names', () => {
   const partitions = planMapPartitions(ask(record('N01', '# 범위\n요구한다.\n예문이다.\n정정한다.\n조건이다.')), { targetChars: 8 });
   const p = partitions[1], good = receipt(p), core = good.covered[0], context = p.records[0].context[0];
   const candidate = { kind: 'condition', text: '원문의 조건을 보존한다.', at: [core, context] };
   for (const kind of EXTRACTION_KINDS) assert.equal(validateExtraction({ ...good, candidates: [{ ...candidate, kind }] }, p).candidates[0].kind, kind);
+  // first-map-divided.7 (changed on purpose): each of these used to refuse the whole receipt; now that candidate alone is left out.
   for (const patch of [{ kind: 'checked' }, { text: '' }, { text: ' '.repeat(240) }, { text: '가'.repeat(241) }, { text: 'x\u0000y' },
-    { at: [] }, { at: [context] }, { at: ['N99.99'] }, { at: [core, core] }, { at: [`${core}-99`] }, { quote: 'invented' }]) {
-    invalid({ ...good, candidates: [{ ...candidate, ...patch }] }, p);
+    { at: [] }, { at: [context] }, { at: ['N99.99'] }, { at: 'quoted words' }]) {
+    assert.deepEqual(validateExtraction({ ...good, candidates: [{ ...candidate, ...patch }, candidate] }, p).candidates, [candidate], JSON.stringify(patch));
   }
+  // Read back, never invented: a repeated alias once, an unpadded alias as its span name, an extra key dropped, a range only over
+  // spans this partition holds (a range running past them is cut to those; one over nothing is set aside).
+  const bare = core.replace(/\.0+(\d)/, '.$1');
+  assert.deepEqual(validateExtraction({ ...good, candidates: [{ ...candidate, at: [core, core] }] }, p).candidates[0].at, [core]);
+  assert.deepEqual(validateExtraction({ ...good, candidates: [{ ...candidate, at: bare }] }, p).candidates[0].at, [core]);
+  assert.deepEqual(validateExtraction({ ...good, candidates: [{ ...candidate, quote: 'invented' }] }, p).candidates, [candidate]);
+  const index = Number(core.slice(core.indexOf('.') + 1));
+  assert.deepEqual(validateExtraction({ ...good, candidates: [{ ...candidate, at: [`${core}-${String(index + 1).padStart(2, '0')}`] }] }, p).candidates[0].at,
+    [core, ...(p.records[0].spans.some(s => s.s === `N01.${String(index + 1).padStart(2, '0')}`) ? [`N01.${String(index + 1).padStart(2, '0')}`] : [])]);
+  assert.deepEqual(validateExtraction({ ...good, candidates: [{ ...candidate, at: ['N01.90-95'] }] }, p).candidates, []);
   const copy = validateExtraction({ ...good, candidates: [candidate] }, p); copy.candidates[0].at.push('changed'); assert.equal(candidate.at.length, 2);
 });
 
-test('24 advisory candidates retain every condition/correction unchanged; 25 refuse without truncating or weakening anchor guards', () => {
+test('24 advisory candidates are kept unchanged; past 24 the rest are left out rather than refusing the receipt', () => {
   assert.equal(EXTRACTION_CANDIDATES_MAX, 24);
   const p = planMapPartitions(ask(record('N01', '조건이다.\n정정한다.')))[0], good = receipt(p);
   const candidates = Array.from({ length: 24 }, (_, i) => ({ kind: i % 2 ? 'condition' : 'correction', text: `보존할 단서 ${i + 1}`, at: [good.covered[i % good.covered.length]] }));
   const input = { ...good, candidates }, before = structuredClone(input), kept = validateExtraction(input, p);
   assert.deepEqual(kept, before); assert.equal(kept.candidates.length, 24);
   assert.deepEqual(kept.candidates.at(-1), candidates.at(-1));
-  invalid({ ...input, candidates: [...candidates, { kind: 'condition', text: '25번째 조건', at: [good.covered[0]] }] }, p);
-  invalid({ ...input, candidates: candidates.map((c, i) => i === 23 ? { ...c, at: ['N99.99'] } : c) }, p);
-  invalid({ ...input, candidates: candidates.map((c, i) => i === 23 ? { ...c, text: '가'.repeat(241) } : c) }, p);
+  assert.deepEqual(validateExtraction({ ...input, candidates: [...candidates, { kind: 'condition', text: '25번째 조건', at: [good.covered[0]] }] }, p), before);
+  assert.deepEqual(validateExtraction({ ...input, candidates: candidates.map((c, i) => i === 23 ? { ...c, at: ['N99.99'] } : c) }, p).candidates, candidates.slice(0, 23));
+  assert.deepEqual(validateExtraction({ ...input, candidates: candidates.map((c, i) => i === 23 ? { ...c, text: '가'.repeat(241) } : c) }, p).candidates, candidates.slice(0, 23));
   assert.deepEqual(input, before);
 });
 
@@ -117,11 +135,9 @@ test('an extraction refusal keeps its code and says one coarse reason; correctio
   const good = { covered: [...core], candidates: [{ kind: 'condition', text: '개발 판본만', at: [core[1]] }] };
   assert.equal(reason(good), null);
   assert.equal(reason([]), 'shape'); assert.equal(reason({ covered: core }), 'shape');
-  assert.equal(reason({ ...good, covered: core.slice(1) }), 'coverage'); assert.equal(reason({ ...good, covered: [...core, 'N09.01'] }), 'coverage');
-  // A count overflow and an alias outside the partition are their own fixed reasons (the stage diagnostic names them so).
-  assert.equal(reason({ ...good, candidates: Array(EXTRACTION_CANDIDATES_MAX + 1).fill(good.candidates[0]) }), 'count');
-  assert.equal(reason({ ...good, candidates: [{ ...good.candidates[0], at: ['N09.01'] }] }), 'anchor');
-  assert.equal(reason({ ...good, candidates: [{ ...good.candidates[0], kind: 'checked' }] }), 'candidate');
+  assert.equal(reason({ ...good, covered: core.slice(1) }), 'coverage'); assert.equal(reason({ ...good, covered: [...core, 'N09.01'] }), null, 'an extra name beside the whole core is passed over');
+  // first-map-divided.7: too many, outside-the-partition or malformed candidates are set aside, never a refusal of the receipt.
+  for (const candidates of [Array(EXTRACTION_CANDIDATES_MAX + 1).fill(good.candidates[0]), [{ ...good.candidates[0], at: ['N09.01'] }], [{ ...good.candidates[0], kind: 'checked' }]]) assert.equal(reason({ ...good, candidates }), null);
   const bad = { covered: [core[0], core[0], 'N09.01'], candidates: [{ kind: 'checked', text: '가'.repeat(241), at: ['N09.01'] }, { kind: 'part' }] };
   const issues = extractionStageIssues(bad, partition);
   assert.deepEqual(issues, [

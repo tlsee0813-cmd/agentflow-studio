@@ -107,7 +107,7 @@ export function mapErrorText(code: string, detail?: MapErrorDetail | null): stri
       const kept = '원문과 기존 지도는 그대로예요.';
       if (reason === 'transport') return `${where}${corrected ? `${object} 한 번 바로잡은` : '의'} AI 응답을 JSON으로 읽을 수 없어 반영하지 않았어요. ${kept}`;
       const phrase = rule === 'contract' ? (typeof detail.category === 'string' && COUNT_GUARDS.has(detail.category) ? '항목 수' : RULE_PHRASE.contract)
-        : rule ? RULE_PHRASE[rule] : reason === 'anchor' ? (detail.phase === 'extract' ? '단서의 원문 위치' : '설계의 원문 위치')
+        : rule ? RULE_PHRASE[rule] : reason === 'anchor' ? (typeof detail.stage === 'string' && detail.stage.startsWith('extract') ? '단서의 원문 위치' : '설계의 원문 위치')
         : reason && Object.hasOwn(REASON_PHRASE, reason) ? REASON_PHRASE[reason] : null;
       const kind = (rule ?? reason) && EVIDENCE_RULES.has((rule ?? reason)!) ? '근거 규칙' : phrase ? '형식 규칙' : '근거 규칙';
       return `${where}${corrected ? `${object} 한 번 바로잡은 AI 응답도` : '의 AI 응답이'} ${kind}${phrase ? `(${phrase})` : ''}에 맞지 않아 반영하지 않았어요. ${kept}`;
