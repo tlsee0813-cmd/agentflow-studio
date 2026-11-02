@@ -1070,8 +1070,8 @@ function browserApply(f, wire, exclusions, n = 7) {
 }
 
 test('recipe identities are bumped for the changed prompts and validation semantics', () => {
-  assert.equal(PIPELINE_RECIPE, 'first-map-divided.19');
-  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.19');
+  assert.equal(PIPELINE_RECIPE, 'first-map-divided.20');
+  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.20');
 });
 
 test('a render fragment with one unresolvable claim alias is applied with only that claim set aside and a durable diagnostic', async t => {

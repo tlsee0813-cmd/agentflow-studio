@@ -796,6 +796,8 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   $('home').hidden = true; $('space').hidden = false; $('ai-pill').hidden = false;
   relayout(o);
   const world = $('world'), view = o.view;
+  // Same view, new structure (a fold, a new part, 자동 배치): where every box and line was, so each slides to its new place.
+  const was = cameraMode === 'keep' && !world.hidden ? beforeRedraw(world) : null;
   world.replaceChildren();
   const edges = svg('svg', { class: 'edges', width: '1', height: '1', 'aria-hidden': 'true' });
   const defs = svg('defs', {});
@@ -908,7 +910,10 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   const top = svg('svg', { class: 'edges edges-top', width: '1', height: '1', 'aria-hidden': 'true' });
   world.insertBefore(top, world.querySelector('.node, .ghost'));
   world.querySelectorAll('.edge.inner').forEach(g => top.append(g));
+  if (was) morphFrom = was.lines;
   positionWorld();
+  morphFrom = null;
+  if (was) afterRedraw(world, was);
   $('space').classList.toggle('in-scope', !!scope);
   // Many lines on one view: those that go round other parts share the same gaps and would read as extra outlines of the
   // groups they pass; they step back until selected, hovered or read as a change's context (kind, direction and hover meaning
@@ -944,6 +949,32 @@ function moveLoneHead() {
   const bs = loneIds.map(id => lay.boxes.get(id)).filter((b): b is Box => !!b); if (!bs.length) { el.remove(); return; }
   const x = Math.min(...bs.map(b => b.x)), y = Math.min(...bs.map(b => b.y));
   el.style.left = `${x}px`; el.style.top = `${y - 20}px`;
+}
+/** Before a redraw that keeps the view: each box's place and size and each line's shape, and the focused toggle's part. */
+type Redraw = { boxes: Map<string, { l: string; t: string; w: string; h: string }>; lines: Map<string, string>; focus: string | null };
+function beforeRedraw(world: HTMLElement): Redraw {
+  const boxes = new Map<string, { l: string; t: string; w: string; h: string }>();
+  world.querySelectorAll<HTMLElement>('[data-box]').forEach(el => boxes.set(el.dataset.box!, { l: el.style.left, t: el.style.top, w: el.style.width, h: el.style.height }));
+  const lines = new Map([...world.querySelectorAll<SVGGElement>('.edge')].map(g => [g.dataset.key!, g.querySelector('.edge-line')?.getAttribute('d') ?? '']));
+  const focus = document.activeElement?.closest<HTMLElement>('[data-box] .toggle, .frame-head .toggle')?.closest<HTMLElement>('[data-part]')?.dataset.part ?? null;
+  return { boxes, lines, focus };
+}
+/** After it: a box that was drawn before starts from its old place and slides (.arranging: left/top/width/height transition);
+ * the lines morph from their old shapes (positionWorld, morphFrom). The toggle that had focus gets it back on its new element. */
+function afterRedraw(world: HTMLElement, was: Redraw) {
+  const moved: [HTMLElement, { l: string; t: string; w: string; h: string }][] = [];
+  world.querySelectorAll<HTMLElement>('[data-box]').forEach(el => {
+    const b = was.boxes.get(el.dataset.box!); if (!b || (b.l === el.style.left && b.t === el.style.top && b.w === el.style.width && b.h === el.style.height)) return;
+    moved.push([el, { l: el.style.left, t: el.style.top, w: el.style.width, h: el.style.height }]);
+    el.style.left = b.l; el.style.top = b.t; el.style.width = b.w; el.style.height = b.h;
+  });
+  if (moved.length) {
+    void world.offsetWidth; // the old places take hold before the transition starts
+    world.classList.add('arranging');
+    for (const [el, to] of moved) { el.style.left = to.l; el.style.top = to.t; el.style.width = to.w; el.style.height = to.h; }
+    window.setTimeout(() => world.classList.remove('arranging'), 320);
+  }
+  if (was.focus) world.querySelector<HTMLElement>(`[data-part="${CSS.escape(was.focus)}"] .toggle`)?.focus({ preventScroll: true });
 }
 /** Geometry only (also during a drag): boxes and edge paths from the current layout. */
 function positionWorld() {

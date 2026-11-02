@@ -41,7 +41,7 @@ blueprint.parts의 focus·at로 보아 다른 부분이 맡은 사실은 이 부
 각 claim의 모든 절은 그 claim.at가 가리키는 원문으로 뒷받침되어야 한다. 서로 떨어진 원문 두 곳의 내용을 합쳐 한 곳만 인용하지 않는다. 조건을 다른 일반 설명에 붙이느라 근거가 어긋나면 별도 주장으로 분리한다.
 무엇을 거부·금지하는지 열거한 핵심 조건은 이름을 짧게 보존한다. ‘거부 몇 개’ 같은 개수만으로 축약하지 않는다. 전역 설계에 보존된 철회·미채택·폐기 중 이 부분의 책임에 해당하는 항목을 먼저 claims에 반영한다.
 role은 이 부분이 받는 것과 내는 것을 원문 이름으로 포함한다. 설계 일정(시각·주기)은 role에 한 번만 쓰고, claims에는 실제 상태 보고(첫 행 OK, 라벨 미관측 같은)를 먼저 쓴다. 「다음 ~ 묶음」「~ 전」「예정」은 보고 문장 안에 있어도 계획(want)이다. 작성자가 직접 실행하지 않았다고 밝힌 통과·OK·rc 0은 checked가 아니라 reported로 쓴다. 원문이 [실행: 명령] 꼬리표를 붙인 검사 결과는 작성자가 직접 돌린 것이므로 checked이고, [보고]·[대화] 꼬리표는 reported, [추정]은 describes(추정임을 남김), [모름]은 확인하지 못했다는 reported다. [모름]·「미확인」 줄은 그 대상 부분 하나에만 「확인하지 못했다」로 남기고 그 일이 일어났다는 문장으로 바꾸지 않으며, 근거로 쓴 파일의 존재가 미확인이면 그 사실도 함께 쓴다. 원문의 부정(없음·아님·못함·금지)은 그대로 보존한다. [보고]가 붙은 관측 결과 줄(「아직 한 번도 보지 못함」 같은 부정 관측을 포함)은 그 결과를 낸 부분의 reported 주장으로 옮기고 일정·계획보다 앞에 둔다. 원문의 「앞으로 할 일」 첫 줄과 「모르는 것」의 각 줄은 맡은 부분의 claims에 남긴다. claim.at이 가리키는 원문 안의 시각·sha·순번·코드 이름은 주장 문장에서 지우지 말고 그대로 옮긴다. 같은 원문 줄의 같은 사실은 한 부분에만 싣는다. blueprint.global 항목의 끝에 「→」로 다른 부분 ref가 적혀 있으면 그 항목은 이 부분에 쓰지 않는다.
-돌고 있는 부분의 claims 첫째는 그 부분의 최신 상태 보고(판본·기동 시각·관문 결과·충족된 조건·만료 시각)이고, 그 부분을 제약하는 요구사항 목록은 그 뒤에 자리가 남을 때만 쓴다. 두 부분 사이에서 관측된 흐름(「A의 행을 B가 읽음」)은 받는 쪽 부분의 reported 주장으로 둔다. 「요청 | 실제로 바뀐 것 | 근거」 표의 한 줄은 바뀐 것을 맡은 부분의 주장으로 두고(근거 꼬리표대로 reported/checked) 문장에 「소유자의 「…」 요청에 따라」를 붙이며, 사람 부분에는 다른 부분이 맡지 않은 요청만 want로 둔다. claim.at 원문 안의 검사 개수·통과 수·파일 경로와 절·상한과 문턱 값도 주장 문장에 그대로 남기고, 철회 주장은 원문이 대신 유효하다고 밝힌 값을 함께 적는다. 한 주장에는 같은 꼬리표의 원문 줄만 담는다. 계획 문장 안에 이미 나온 결과 값은 want가 아니라 그 결과를 낸 부분의 reported로 쓴다. checked 주장의 about은 그 증거 꼬리표 안에 적힌 판본만 쓰고 같은 표 줄의 다른 칸에 적힌 판본을 옮겨 붙이지 않는다.
+돌고 있는 부분의 claims 첫째는 그 부분의 최신 상태 보고(판본·기동 시각·관문 결과·충족된 조건·만료 시각)이고, 그 부분을 제약하는 요구사항 목록은 그 뒤에 자리가 남을 때만 쓴다. 각 claim.text는 240자 이내이며 넘으면 그 주장은 통째로 제외되므로, 상태 보고가 길면 두 주장으로 나눈다(판본·기동 시각·PID·만료 시각은 첫째, 관문 결과·기준선 충족은 둘째). 판본(sha)·기동 시각은 text보다 about에 둔다. 두 부분 사이에서 관측된 흐름(「A의 행을 B가 읽음」)은 받는 쪽 부분의 reported 주장으로 둔다. 「요청 | 실제로 바뀐 것 | 근거」 표의 한 줄은 바뀐 것을 맡은 부분의 주장으로 두고(근거 꼬리표대로 reported/checked) 문장에 「소유자의 「…」 요청에 따라」를 붙이며, 사람 부분에는 다른 부분이 맡지 않은 요청만 want로 둔다. claim.at 원문 안의 검사 개수·통과 수·파일 경로와 절·상한과 문턱 값도 주장 문장에 그대로 남기고, 철회 주장은 원문이 대신 유효하다고 밝힌 값을 함께 적는다. 한 주장에는 같은 꼬리표의 원문 줄만 담는다. 계획 문장 안에 이미 나온 결과 값은 want가 아니라 그 결과를 낸 부분의 reported로 쓴다. checked 주장의 about은 그 증거 꼬리표 안에 적힌 판본만 쓰고 같은 표 줄의 다른 칸에 적힌 판본을 옮겨 붙이지 않는다.
 relations/candidates/gaps/matches/material은 모두 빈 배열로 둔다. summary는 빈 문자열로 둔다. 조건을 역할/주장에 함께 보존하며 계획·보고·검사·철회를 원문보다 강하게 만들지 않는다.
 다른 assignment 부분도 parent로 참조할 수 있으나 blueprint/원래 INPUT에 있는 ref만 허용된다. 지정한 부분을 작성할 근거가 부족하면 사실을 만들지 말고 원래 계약의 want/describes/reported와 불확실한 범위를 지킨다.`;
 export const GLOBAL_RULES = `
@@ -78,7 +78,7 @@ export const EXTRACTION_CORRECTION_REASON = 'issues가 가리키는 규칙 위�
  * condition left out: every part holds at most four claims, so a condition-dense record cannot hold them all, and such a condition
  * belongs in gaps. A later map keeps its code-enforced correction obligations and the rules above. */
 export const FIRST_GLOBAL_RULES = `
-첫 지도(INPUT.parts가 비어 있음)에서 reviseParts는 renderedParts의 어떤 주장이 원문이 나중에 명시적으로 철회·대체·금지한 것을 아직 유효한 것처럼 말할 때만 보낸다. 조건·요구·수치·상한이 빠졌다는 이유만으로는 보내지 않는다. 부분마다 주장은 최대4개라 조건이 많은 기록을 모두 담을 수 없다. gaps(최대2개, 각 160자 이내)의 첫 항목은 원문이 밝힌 다음 관문의 결과가 기록 시점 뒤라 아직 없다는 것을 관문 이름·시각과 함께 쓴다(예: 「14:07Z U카드의 TX 라벨 확인 결과는 기록에 없다」). 지도에 담지 못한 중요한 조건을 gaps에 쓸 때는 「~에서 확인할 수 있다」로만 쓰지 말고 그 값 자체를 짧게 적고(예: 「청산 = 익절 지정가 + S1 지정가 + S2 시장가 스탑」), 한 항목에 한 대상만 쓴다. 성립이 미확인인 것만 holds 후보로 둔다. 빠진 조건을 이유로 지도 전체를 미루지 않는다.`;
+첫 지도(INPUT.parts가 비어 있음)에서 reviseParts는 renderedParts의 어떤 주장이 원문이 나중에 명시적으로 철회·대체·금지한 것을 아직 유효한 것처럼 말할 때만 보낸다. 조건·요구·수치·상한이 빠졌다는 이유만으로는 보내지 않는다. 부분마다 주장은 최대4개라 조건이 많은 기록을 모두 담을 수 없다. gaps(최대2개, 각 160자 이내)의 첫 항목은 원문이 밝힌 다음 관문의 결과가 기록 시점 뒤라 아직 없다는 것을 관문 이름·시각과 함께 쓴다(예: 「14:07Z U카드의 TX 라벨 확인 결과는 기록에 없다」). 둘째 항목도 또 다른 다음 관문의 공백(예: 만료 시각 뒤의 처리, 첫 성적표의 결과)이 있으면 그것을 먼저 쓰고, 없을 때만 지도에 담지 못한 중요한 조건을 「~에서 확인할 수 있다」가 아니라 그 값 자체로 짧게 적는다(예: 「청산 = 익절 지정가 + S1 지정가 + S2 시장가 스탑」). 한 항목에 한 대상만 쓴다. 성립이 미확인인 것만 holds 후보로 둔다. 빠진 조건을 이유로 지도 전체를 미루지 않는다.`;
 export const FIRST_FINAL_GLOBAL_RULES = `
 첫 지도의 이번 응답은 지도 JSON 하나여야 한다. 재작성 뒤에도 빠진 조건이 남으면 reviseParts를 보내지 말고 위 gaps 규칙대로 적는다. reviseParts는 재작성 뒤에도 어떤 주장이 명시적으로 철회된 것을 유효한 것처럼 말할 때만 보내며, 그러면 지도 전체가 버려지고 사용자는 아무것도 받지 못한다.`;
 export const SEMANTIC_REVISION_LIMIT = 1;
@@ -123,8 +123,10 @@ export const FINAL_GLOBAL_RULES = `
 // .19: relations chosen in the flow's order under the cap; a running part's state first and observed flows on the receiver; the
 // owner's requirements and the request table's changes on the parts they constrain; values kept; one tag per claim; gaps name
 // the next gate's missing result; traps on the part they hit; members over the part cap kept in the parent's focus.
-export const PIPELINE_RECIPE = 'first-map-divided.19';
-export const LATER_PIPELINE_RECIPE = 'later-map-divided.19';
+// .20: a claim's 240-character bound is said and a long state report splits in two (sha and start time in about); the second gap
+// prefers another next-gate blank.
+export const PIPELINE_RECIPE = 'first-map-divided.20';
+export const LATER_PIPELINE_RECIPE = 'later-map-divided.20';
 const MODELS = new Set(['gpt-6.1-sol', 'gpt-6-astra', 'gpt-6.1-terra']);
 // The route rule is shared with the browser and studio.mjs (shared/map-route.ts): a first map.6 or a later map.7.
 export { isFirstMap };

@@ -207,6 +207,8 @@ button:disabled { opacity: .5; cursor: default; }
 .viewport.grabbing { cursor: grabbing; }
 .world { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
 .world.animate { transition: transform .22s ease; }
+/* A redraw that keeps the view: boxes slide to their new places (the lines morph with them, see positionWorld). */
+.world.arranging [data-box] { transition: left .28s cubic-bezier(.2,.7,.2,1), top .28s cubic-bezier(.2,.7,.2,1), width .28s ease, height .28s ease; }
 /* going inside / back out: one short move from the part one came from */
 .world.travel { transition: transform .34s cubic-bezier(.2,.7,.2,1), opacity .34s ease; }
 .world.travel-in, .world.travel-out { opacity: .35; }
