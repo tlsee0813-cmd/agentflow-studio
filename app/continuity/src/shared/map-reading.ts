@@ -3,7 +3,7 @@
  * an exact quote of what was sent. applyReading is the only write: it adds parts and relations and keeps one MapReading with the
  * derived understanding. It never renames, moves, archives or re-describes an existing part, never writes Area.note and never
  * touches space.understanding (return.2 and its anchors). What is unclear stays a candidate; nothing asks for approval per part. */
-import { CLAIM_KINDS, READINGS_LIMIT, isMapReading, type PastedRecord, type RecordEvidence, type CandidateTarget, type ClaimKind, type MapReading, type Project, type ReadingCandidate, type ReadingClaim, type ReadingPart, type ReadingQuote, type ReadingRelation, type ReadingSkip, type ReadingExclusion, type RelationKind } from './types.js';
+import { CLAIM_KINDS, READINGS_LIMIT, READING_EXCLUSION_RULES, isMapReading, type PastedRecord, type RecordEvidence, type CandidateTarget, type ClaimKind, type MapReading, type Project, type ReadingCandidate, type ReadingClaim, type ReadingPart, type ReadingQuote, type ReadingRelation, type ReadingSkip, type ReadingExclusion, type RelationKind } from './types.js';
 import { indexSpans, encodeSpans, decodeSpans, resolveRef, resolveRange, resolveEvidenceRange, textDigest, ANCHOR_QUOTE_MAX, SPANS_PER_RECORD, type Span, type SpanWire } from './evidence-span.js';
 import type { StudioView, RecordView } from './studio.js';
 import { addArea, addChildArea, addRelation, addReading } from './domain.js';
@@ -251,9 +251,21 @@ const exclusionExplanation = (e: MapReplyError): string => {
   return e.rule === 'contract' && e.target === 'count' ? '허용 개수를 넘는 뒤쪽 항목들을 제외했어요.'
     : e.rule === 'contract' && e.target === 'parent-skipped' ? '참조한 새 부분이 제외되어 이 항목도 제외했어요.' : rules[e.rule];
 };
-export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
+/** Options of validateMapReply. setAside (studio.map.6 only; ignored for every other schema): the divided first-map pipeline on
+ * the PC server reads one isolated bad item the way map.7 does (see below) instead of refusing the whole reply. Without it map.6
+ * reads exactly as before; the browser and the single-call Worker path never pass it. */
+export interface MapReplyOptions { setAside?: boolean }
+/** At most this many set-aside reasons travel with a divided first map (a reply with more is refused whole on the server). */
+export const DIVIDED_EXCLUSIONS_MAX = 64;
+export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyOptions = {}): MapReply {
   const code = 'INVALID_RESPONSE', aside: MapReplyError[] = [];
-  const seven = ask.schemaVersion === MAP7_SCHEMA, six = seven || ask.schemaVersion === MAP6_SCHEMA, five = six || ask.schemaVersion === MAP5_SCHEMA, four = five || ask.schemaVersion === MAP4_SCHEMA, three = four || ask.schemaVersion === MAP3_SCHEMA, two = three || ask.schemaVersion === MAP2_SCHEMA;
+  // divided (map.6 + setAside): an item of its own (a basis quote, a claim, a relation, a candidate, a gap, a material range, and
+  // what runs past a count bound) that breaks a rule is set aside with its diagnostic, as in map.7. Unlike map.7 a part is never
+  // set aside: a part breaking a rule of its own, a new part left without any basis quote, and a part whose every claim was set
+  // aside still refuse the whole reply; so do contradictions (a candidate settling or repeating what is stated or left open),
+  // a key-like word, the reply's shape and a reply with nothing left. Material the reply also quotes as evidence is set aside.
+  const seven = ask.schemaVersion === MAP7_SCHEMA, divided = ask.schemaVersion === MAP6_SCHEMA && options?.setAside === true, lenient = seven || divided;
+  const six = seven || ask.schemaVersion === MAP6_SCHEMA, five = six || ask.schemaVersion === MAP5_SCHEMA, four = five || ask.schemaVersion === MAP4_SCHEMA, three = four || ask.schemaVersion === MAP3_SCHEMA, two = three || ask.schemaVersion === MAP2_SCHEMA;
   // map.6–7: a list the reply left out names nothing (no relation, candidate, gap, match or material), as an empty one does. A real
   // reading on a PC left out material it had none of, and the whole map was refused for that alone. Every other key stays exact.
   if (six && value && typeof value === 'object' && !Array.isArray(value)) {
@@ -262,21 +274,21 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
   }
   // AF137: map.7's generic guards say where (a static path) and which (a fixed category) through MapReplyError, rule 'contract'.
   // Each is the same condition at the same place; map.1–6 go through check/obj/str/arr unchanged (a plain INVALID_RESPONSE).
-  function need(ok: unknown, path: string, what: ContractGuard): asserts ok { if (!ok) throw seven ? new MapReplyError(path, 'contract', what) : new Error(code); }
+  function need(ok: unknown, path: string, what: ContractGuard): asserts ok { if (!ok) throw lenient ? new MapReplyError(path, 'contract', what) : new Error(code); }
   // map.6–7: every key asked for must be there; a key not asked for is passed over (nothing is read from it, and the reply is
   // rebuilt from the asked keys alone, so it is never kept). A real reading on a PC was refused whole for one claim carrying a
   // misspelled extra key beside the right one. map.1–5 stay exact.
   function object(v: unknown, keys: string[], path: string): asserts v is Record<string, unknown> {
     if (!six) return obj(v, keys, code);
     const shaped = !!v && typeof v === 'object' && !Array.isArray(v), all = shaped && keys.every(k => Object.hasOwn(v as object, k));
-    if (!seven) return check(all, code);
+    if (!lenient) return check(all, code);
     need(shaped, path, 'shape'); need(all, path, 'keys');
   }
   function field(v: unknown, max: number, empty: boolean, path: string): asserts v is string {
-    if (!seven) return str(v, max, empty, code);
+    if (!lenient) return str(v, max, empty, code);
     need(typeof v === 'string', path, 'shape'); need((v as string).length <= max && (empty || !!(v as string).trim()) && !CONTROL.test(v as string), path, 'text');
   }
-  function list(v: unknown, max: number, path: string): asserts v is unknown[] { if (!seven) return arr(v, max, code); need(Array.isArray(v), path, 'shape'); need((v as unknown[]).length <= max, path, 'count'); }
+  function list(v: unknown, max: number, path: string): asserts v is unknown[] { if (!lenient) return arr(v, max, code); need(Array.isArray(v), path, 'shape'); need((v as unknown[]).length <= max, path, 'count'); }
   object(value, ['summary', 'parts', 'relations', 'candidates', 'gaps', ...(two ? ['matches'] : []), ...(four ? ['material'] : [])], 'reply');
   const parts = new Map(ask.parts.map(p => [p.id, p])), records = new Map(ask.records.map(r => [r.id, r])), texts = askRecords(ask);
   const quote = (rec: unknown, q: unknown): MapReplyQuote => {
@@ -349,20 +361,24 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
       return result;
     } catch (e) {
       conditions.length = start;
-      if (e instanceof MapReplyError && (seven || tooLong(e) || six && e.rule === 'contract' && e.target === 'parent-skipped')) { if (!aside.includes(e)) aside.push(e); return null; }
+      if (e instanceof MapReplyError && (lenient || tooLong(e) || six && e.rule === 'contract' && e.target === 'parent-skipped')) { if (!aside.includes(e)) aside.push(e); return null; }
       throw e;
     }
   };
+  // divided: a part (and everything it holds as a whole) is read or the reply is refused; never set aside.
+  const whole = <T>(fn: () => T): T | null => divided ? fn() : soft(fn);
   const many = (v: unknown, max: number, path: string): unknown[] => {
-    if (!seven) { list(v, max, path); return v as unknown[]; }
+    if (!lenient) { list(v, max, path); return v as unknown[]; }
     need(Array.isArray(v), path, 'shape');
     if ((v as unknown[]).length > max) aside.push(new MapReplyError(path, 'contract', 'count'));
     return (v as unknown[]).slice(0, max);
   };
-  const partList = many(value.parts, 24, 'parts') as Record<string, unknown>[];
+  let partList: Record<string, unknown>[];
+  if (divided) { list(value.parts, 24, 'parts'); partList = value.parts as Record<string, unknown>[]; }
+  else partList = many(value.parts, 24, 'parts') as Record<string, unknown>[];
   const refs = new Set<string>(), news = new Map<string, string | null>(), entries: [number, Record<string, unknown>][] = [];
   for (const [pi, p] of partList.entries()) {
-    const ok = soft(() => {
+    const ok = whole(() => {
       form(p, `parts[${pi}]`, 'roleAbout'); object(p, ['ref', 'name', 'parent', 'role', seven ? 'roleAboutAt' : 'roleAbout', 'roleReplaces', 'basis', 'claims'], `parts[${pi}]`);
       if (!(typeof p.ref === 'string' && (parts.has(p.ref) || NEW.test(p.ref)) && !refs.has(p.ref))) {
         // AF120 (map.7): the same refusal, said with where and a fixed category, never the ref itself.
@@ -413,12 +429,14 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
     const basis = basisList.flatMap((b, j) => {
       if (!four) { obj(b, ['record', 'quote'], code); return [quote(b.record, b.quote)]; }
       if (seven) { const q = soft(() => cite(b, `parts[${pi}].basis[${j}]`)); return q ? [q] : []; }
-      try { return [cite(b, `parts[${pi}].basis[${j}]`)]; } catch (e) { if (!tooLong(e)) throw e; long ??= e; aside.push(e as MapReplyError); return []; }
+      // divided: any basis quote that resolves to nothing in this request or runs past the bound is set aside on its own.
+      try { return [cite(b, `parts[${pi}].basis[${j}]`)]; } catch (e) { if (!tooLong(e) && !(divided && e instanceof MapReplyError)) throw e; long ??= e; aside.push(e as MapReplyError); return []; }
     });
     // A part keeps the basis quotes within bounds; one whose every quote was too long is refused as before (it would rest on none).
+    // divided: a part left with no basis quote is refused with its first set-aside quote (the whole reply, as the part is whole).
     if (long && !basis.length) throw long;
     if (seven) need(!fresh || basis.length > 0, `parts[${pi}].basis`, 'basis-required');
-    const claimList = many(p.claims, 4, `parts[${pi}].claims`);
+    const claimList = many(p.claims, 4, `parts[${pi}].claims`), claimsAside = aside.length;
     const own = new Set(parts.get(ref)?.current.map(c => c.key) ?? []);
     const claims = claimList.map((c, j): MapReplyClaim | null => soft(() => {
       form(c, `parts[${pi}].claims[${j}]`, 'about');
@@ -427,7 +445,7 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
       // A claim whose quote runs past the bound is left out (its condition with it); the rest of the reply is read as it is.
       let q: MapReplyQuote;
       try { q = evidence(c, `parts[${pi}].claims[${j}].at`); } catch (e) { if (tooLong(e) && !seven) { aside.push(e as MapReplyError); return null; } throw e; }
-      if (!seven && c.about !== null) str(c.about, 80, false, code);
+      if (!seven && c.about !== null) field(c.about, 80, false, `parts[${pi}].claims[${j}].about`);
       const about = seven ? condition(c.aboutAt, `parts[${pi}].claims[${j}].aboutAt`, 80, new Set([q.record]))?.quote ?? null : c.about === null ? null : (c.about as string).trim();
       need(c.replaces === null || (typeof c.replaces === 'string' && own.has(c.replaces)), `parts[${pi}].claims[${j}].replaces`, 'replaces');
       // map.6: every claim names its statement with a key unique in the reply (a statement settled under one key and left open
@@ -435,13 +453,15 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
       if (six && !(typeof c.key === 'string' && KEY.test(c.key))) throw new MapReplyError(`parts[${pi}].claims[${j}].key`, 'reference', String(c.key));
       return { kind: c.kind as ClaimKind, text: c.text.trim(), ...q, about, replaces: c.replaces as string | null, ...(six ? { key: c.key as string | null } : {}) };
     })).filter((x): x is MapReplyClaim => x !== null);
+    // divided: a part whose every claim was set aside ends up empty of what it said; refused with the first of them.
+    if (divided && claimList.length && !claims.length) throw aside[claimsAside] ?? new MapReplyError(`parts[${pi}].claims`, 'contract', 'empty-part');
     const role = seven ? soft(() => describe(basis)) ?? { roleReplaces: null, role: null, roleAbout: null } : describe(basis);
     // A description, new or changed, rests on its own quote: an existing part's role never comes in without one.
     need(fresh || role.role !== null || claims.length > 0, `parts[${pi}]`, 'empty-part');
     return { ref, name: fresh ? (p.name as string).trim() : null, parent: fresh ? p.parent as string | null : null, role: role.role ?? null,
       roleAbout: role.roleAbout ?? null, roleReplaces: (early ?? role).roleReplaces, basis, claims };
   };
-  const built = entries.flatMap(([pi, p]): [number, MapReplyPart][] => { const b = soft(() => part(p, pi)); return b ? [[pi, b]] : []; });
+  const built = entries.flatMap(([pi, p]): [number, MapReplyPart][] => { const b = whole(() => part(p, pi)); return b ? [[pi, b]] : []; });
   // New parts form a forest under known parts: no cycle among them.
   let placed = new Set(news.keys());
   if (!seven) for (const ref of news.keys()) { const seen = new Set<string>(); for (let x: string | null | undefined = ref; x && news.has(x); x = news.get(x)) { need(!seen.has(x), `parts[${partList.findIndex(p => p.ref === ref)}].parent`, 'parent-cycle'); seen.add(x); } }
@@ -455,7 +475,10 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
     for (const [ref, x] of fresh) if (!placed.has(ref)) {
       const seen = new Set([ref]); let cycle = false;
       for (let y = x.parent; y !== null && fresh.has(y); y = fresh.get(y)!.parent) { if (seen.has(y)) { cycle = true; break; } seen.add(y); }
-      aside.push(new MapReplyError(`parts[${x.pi}].parent`, 'contract', cycle ? 'parent-cycle' : 'parent'));
+      const unplaced = new MapReplyError(`parts[${x.pi}].parent`, 'contract', cycle ? 'parent-cycle' : 'parent');
+      // divided: unreachable (map.6 refuses an unknown parent or a cycle above and never sets a part aside); kept closed.
+      if (divided) throw unplaced;
+      aside.push(unplaced);
     }
   }
   const outParts = built.filter(([, b]) => !news.has(b.ref) || placed.has(b.ref)).map(([, b]) => b);
@@ -485,7 +508,7 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
       if (target === 'attribution' || target === 'holds') {
         const st = c.statement; form(st, `candidates[${i}].statement`, 'about'); object(st, ['key', 'kind', 'text', 'at', seven ? 'aboutAt' : 'about'], `candidates[${i}].statement`);
         if (typeof st.key !== 'string' || !KEY.test(st.key)) throw new MapReplyError(`candidates[${i}].statement.key`, 'reference', String(st.key));
-        need(CLAIM_KINDS.includes(st.kind as ClaimKind), `candidates[${i}].statement.kind`, 'kind'); field(st.text, 240, false, `candidates[${i}].statement.text`); if (!seven && st.about !== null) str(st.about, 80, false, code);
+        need(CLAIM_KINDS.includes(st.kind as ClaimKind), `candidates[${i}].statement.kind`, 'kind'); field(st.text, 240, false, `candidates[${i}].statement.text`); if (!seven && st.about !== null) field(st.about, 80, false, `candidates[${i}].statement.about`);
         const q = cite(st.at, `candidates[${i}].statement.at`);
         // map.7: the statement's own record, whatever the candidate's optional at cites.
         const about = seven ? condition(st.aboutAt, `candidates[${i}].statement.aboutAt`, 80, new Set([q.record]))?.quote ?? null : st.about === null ? null : (st.about as string).trim();
@@ -587,6 +610,9 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
     }) ?? false);
     // Only final surviving items own conditions. A later parent/candidate rejection leaves no ghost evidence.
     conditions.splice(0, conditions.length, ...[...outParts, ...matches, ...candidates].flatMap(x => conditionOwners.get(x) ?? []));
+  }
+  // divided: only the material marking is set aside here; every contradiction among statements still refuses (below).
+  if (seven || divided) {
     const used = evidenceOf(outParts, relations, matches, candidates, conditions);
     material = material.filter((m, i) => soft(() => {
       if (used.some(([, q]) => q.record === m.record && q.from !== undefined && q.to !== undefined && m.from < q.to && q.from < m.to)) throw new MapReplyError(origins.get(m) ?? `material[${i}]`, 'material-evidence', m.record);
@@ -619,6 +645,36 @@ export function validateMapReply(value: unknown, ask: MapAsk): MapReply {
     }));
   }
   return reply;
+}
+
+/** The durable diagnostics of a checked reply's set-aside items (map.6–7): fixed categories and source positions only. */
+export const readingExclusions = (reply: MapReply): readonly ReadingExclusion[] => EXCLUSIONS.get(reply) ?? [];
+/** Where a saved exclusion may say it stood (the same grammar storage accepts). */
+const EXCLUSION_PATH = /^(parts|relations|candidates|gaps|matches|material)(\[\d+\])?(\.(claims|basis|statement)(\[\d+\])?)?(\.[A-Za-z]+)?$/;
+/** A divided first map (studio.map.6) arrives as the wire with every set-aside item already left out (it reads whole under plain
+ * map.6), and the reasons they were set aside travel beside it. Those reasons are checked here before they join the reply's own
+ * diagnostics: fixed rules and categories only, the explanation this module itself gives for them (no other words are taken), and
+ * a source position inside a record of this very ask (or none). Anything else refuses (the caller discards the whole result). */
+export function attachExclusions(reply: MapReply, value: unknown, ask: MapAsk): void {
+  const code = 'INVALID_RESPONSE';
+  check(ask.schemaVersion === MAP6_SCHEMA && firstAsk(ask) && Array.isArray(value) && value.length <= DIVIDED_EXCLUSIONS_MAX, code);
+  const texts = askRecords(ask), out: ReadingExclusion[] = [];
+  for (const x of value as unknown[]) {
+    obj(x, ['path', 'rule', 'category', 'explanation', 'record', 'from', 'to'], code);
+    check(typeof x.path === 'string' && x.path.length <= 160 && EXCLUSION_PATH.test(x.path), code);
+    check(READING_EXCLUSION_RULES.includes(x.rule as ReadingExclusion['rule']), code);
+    check(x.rule === 'contract' ? typeof x.category === 'string' && /^[a-z][a-z-]{0,39}$/.test(x.category) : x.category === null, code);
+    const rule = x.rule as ReadingExclusion['rule'], category = x.category as string | null;
+    const explanation = exclusionExplanation(new MapReplyError(x.path as string, rule, category ?? ''));
+    check(x.explanation === explanation, code);
+    if (x.record === null) check(x.from === null && x.to === null, code);
+    else {
+      const source = typeof x.record === 'string' ? texts.get(x.record) : undefined;
+      check(!!source && Number.isSafeInteger(x.from) && Number.isSafeInteger(x.to) && 0 <= (x.from as number) && (x.from as number) < (x.to as number) && (x.to as number) <= source!.text.length, code);
+    }
+    out.push({ path: x.path as string, rule, category, explanation, record: x.record as string | null, from: x.from as number | null, to: x.to as number | null });
+  }
+  if (out.length) EXCLUSIONS.set(reply, [...out, ...(EXCLUSIONS.get(reply) ?? [])]);
 }
 
 /** What one candidate leaves undecided, as one id: a reply leaves each open once. */

@@ -6,7 +6,7 @@
  * (not across a reload) and applied when they come back and ask for it, without asking again. */
 import { isMapReading, type MapReading, type Project } from '../shared/types.js';
 import type { StudioView } from '../shared/studio.js';
-import { buildMapAsk, applyReading, validateMapReply, MAP5_SCHEMA, MAP6_SCHEMA, MAP7_SCHEMA, type MapInput, type MapReply, type Applied } from '../shared/map-reading.js';
+import { buildMapAsk, applyReading, validateMapReply, attachExclusions, MAP5_SCHEMA, MAP6_SCHEMA, MAP7_SCHEMA, type MapInput, type MapReply, type Applied } from '../shared/map-reading.js';
 import { askMap, AskError, ERROR_TEXT, RELEASE_TEXT, type AiStatus } from './studio-api.js';
 import { encodeMapInput, decodeMapInput, jobHash, MAP_JOB_VERSION, type MapJobBinding } from '../shared/map-job.js';
 import { SPAN_INDEX, textDigest } from '../shared/evidence-span.js';
@@ -320,7 +320,10 @@ export function createMapRun(host: MapRunHost) {
       if (await jobHash(v.input) !== op.binding.inputHash || await jobHash(inp.ask) !== op.binding.askHash || r.askHash !== op.binding.askHash || r.prompt !== op.binding.prompt) throw new Error();
       if (r.evidence?.index !== SPAN_INDEX || r.evidence.ask !== textDigest(JSON.stringify(inp.ask)) || typeof r.model !== 'string' || r.model !== op.binding.model) throw new Error();
       if (!/^R_[0-9a-f-]{36}$/.test(r.reading?.id ?? '') || typeof r.reading.at !== 'string' || new Date(r.reading.at).toISOString() !== r.reading.at) throw new Error();
+      // The wire is read exactly as any map.6 reply (no set-aside option): a divided first map's server left its set-aside items
+      // out and sends their checked reasons beside it, which the saved reading keeps as its diagnostics.
       reply = validateMapReply(r.wire, inp.ask);
+      if (r.exclusions !== undefined) attachExclusions(reply, r.exclusions, inp.ask);
     } catch { if (liveOp(a)) await forget(a, JOB_ERROR.MISMATCH!, 'discarded'); return; }
     if (!liveOp(a) || a.phase !== 'asking') return;
     Object.assign(a, { inp, reply, model: r.model, prompt: op.binding.prompt, hash: op.binding.askHash, meta: { id: r.reading.id, at: r.reading.at }, phase: 'ready' });

@@ -248,7 +248,7 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
         const ran = body.execution && outcome.observed ? { ...body, execution: { ...body.execution, observed: outcome.observed } } : body;
         const failed = error => ({ ...strip(ran), state: 'failed', error, updatedAt: now() });
         const next = outcome.ok
-          ? { ...ran, state: 'ready', updatedAt: now(), result: { model: outcome.out.model, prompt: body.binding.prompt, askHash: body.binding.askHash, wire: outcome.out.reply, evidence: outcome.out.evidence, reading: { id: `R_${randomUUID()}`, at: now() } } }
+          ? { ...ran, state: 'ready', updatedAt: now(), result: { model: outcome.out.model, prompt: body.binding.prompt, askHash: body.binding.askHash, wire: outcome.out.reply, ...(Array.isArray(outcome.out.exclusions) && outcome.out.exclusions.length ? { exclusions: outcome.out.exclusions } : {}), evidence: outcome.out.evidence, reading: { id: `R_${randomUUID()}`, at: now() } } }
           : failed(outcome.error);
         try { await write(id, next); }
         catch (e) {
