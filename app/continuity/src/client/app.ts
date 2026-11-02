@@ -19,8 +19,10 @@ import { layoutScope, lead, mapLead, isListGroup, boundaryCounts, budgetFold, su
 import { aiStatus, askStudio, AskError, ERROR_TEXT, RELEASE_TEXT, PUBLIC_EDITION, connectorRecords, publishHandover, type AiStatus } from './studio-api.js';
 import { RUNTIME, runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
-import { routeEdges, samplePath, mixPath } from './map-route.js';
+import { routeEdges, samplePath, mixPath, type Routed } from './map-route.js';
+import { labelSpots, polylineHitsRect } from './map-labels.js';
 import { PROJECT_REPORT_ASK, CHAT_REPORT_ASK, REPORT_ASK_EXPLAIN, deltaReportAsk, reflectAsk, plannedNote } from '../shared/report-ask.js';
+import { modelLabel } from '../shared/model-label.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
 import { createPlanView } from './plan-view.js';
 import { AUTO_SENDS, createReturnView, mapExclusionHistory, type Scene, type ReadingContext } from './return-view.js';
@@ -751,10 +753,14 @@ function aliasOf(v: StudioView, id: string): string | null {
 /** The ladder a part's records climb, lit as far as they go: a request recorded, a report of work, a check (a test or an
  * inspection, or a reading that found the thing checked). Read over the part and everything under it. "Reported" is not
  * "checked": the two rungs differ in colour. */
-function ladder(view: StudioView, p: PartView): HTMLElement {
+function ladderOf(view: StudioView, p: PartView): { ask: boolean; report: boolean; check: boolean } {
   const recs = subtreeRecords(view, p.id), claims = p.reading?.claims ?? [];
   const ask = recs.some(r => r.kind === 'request') || claims.some(c => c.kind === 'want'), report = recs.some(r => r.kind === 'report' || r.kind === 'answer') || claims.some(c => c.kind === 'reported');
   const check = recs.some(r => r.kind === 'evidence') || claims.some(c => c.kind === 'checked');
+  return { ask, report, check };
+}
+function ladder(view: StudioView, p: PartView): HTMLElement {
+  const { ask, report, check } = ladderOf(view, p);
   const steps: [string, string, boolean][] = [['요청', 'ask', ask], ['보고', 'report', report], ['확인', 'check', check]];
   const said = steps.map(([n, , on]) => `${n} ${on ? '있음' : '없음'}`).join(' · ');
   return h('span', { class: 'ladder', role: 'img', 'aria-label': said, title: said }, ...steps.map(([, k, on]) => h('i', { class: `rung r-${k}${on ? ' on' : ''}` })));
@@ -812,9 +818,9 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   const linksChip = (id: string) => {
     const c = crossing.get(id); if (!c?.all) return null;
     const how = [c.in ? `들어옴 ${c.in}` : '', c.out ? `나감 ${c.out}` : '', c.plain ? `방향 없음 ${c.plain}` : ''].filter(Boolean).join(' · ');
-    return h('span', { class: 'frame-links', title: `바깥과 이어진 관계 ${c.all}개${how ? ` · ${how}` : ''}` }, h('span', { 'aria-hidden': 'true' }, `↔ ${c.all}`), h('span', { class: 'sr-only' }, `바깥 관계 ${c.all}`));
+    return h('span', { class: 'frame-links', title: `바깥과 이어진 관계 ${c.all}개${how ? ` · ${how}` : ''}` }, h('span', { 'aria-hidden': 'true' }, `연결 ${c.all}`), h('span', { class: 'sr-only' }, `바깥 관계 ${c.all}`));
   };
-  const enterButton = (p: PartView) => h('button', { type: 'button', class: 'enter', title: `‘${p.name}’ 안으로 들어가기 · 부분 ${p.childIds.length}`, 'aria-label': `${p.name} 안으로 들어가기`, onclick: () => go(o.key, null, p.id) }, `${p.childIds.length}`, h('span', { 'aria-hidden': 'true' }, '›'));
+  const enterButton = (p: PartView) => h('button', { type: 'button', class: 'enter', title: `‘${p.name}’ 안으로 들어가기 · 부분 ${p.childIds.length}`, 'aria-label': `${p.name} 안으로 들어가기`, onclick: () => go(o.key, null, p.id) }, `안쪽 ${p.childIds.length}`, h('span', { 'aria-hidden': 'true' }, '›'));
   const toggleButton = (p: PartView, open: boolean) => h('button', { type: 'button', class: 'toggle', title: open ? '접기' : '여기서 펼치기', 'aria-label': `${p.name} ${open ? '접기' : '펼치기'}`, 'aria-expanded': String(open),
     onclick: () => { const k = `${o.key}|${p.id}`; expandState.set(k, !open); tempExpand.delete(k); previewExpand.delete(k); renderSpace('keep'); if (selected) select(selected); } }, chevron(open));
   const keySelect = (id: string) => (e: Event) => { const k = (e as KeyboardEvent).key; if ((k === 'Enter' || k === ' ') && e.target === e.currentTarget) { e.preventDefault(); go(o.key, id); } };
@@ -865,7 +871,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
         b.kids ? toggleButton(p, false) : null,
         h('span', { class: 'node-text' }, h('span', { class: 'node-name' }, p.name),
           note ? h('span', { class: 'node-note' }, note) : null,
-          meta ? h('span', { class: 'node-meta' }, ladder(view, p), meta) : alias ? h('span', { class: 'node-meta owner alias' }, alias) : of ? h('span', { class: 'node-meta owner' }, `${of} 안`) : null,
+          meta ? h('span', { class: 'node-meta' }, ladder(view, p), h('span', { class: 'meta-text' }, meta)) : alias ? h('span', { class: 'node-meta owner alias' }, h('span', { class: 'meta-text' }, alias)) : of ? h('span', { class: 'node-meta owner' }, h('span', { class: 'meta-text' }, `${of} 안`)) : null,
           h('span', { class: 'plan-note' })),
         b.kids ? linksChip(p.id) : null, b.kids ? enterButton(p) : null));
     }
@@ -878,6 +884,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   const title = h('header', { class: 'map-title' }, h('h1', { class: 'map-name' }, sp ? sp.name : o.project.name),
     first ? h('p', { class: 'map-purpose' }, h('span', {}, first), more ? h('button', { type: 'button', class: 'map-more', title: '설명 전체와 출처', onclick: () => openScopeReading() }, '범위 설명') : null) : null,
     sp ? null : understoodLine(o),
+    flowStrip(o), stateStrip(o),
     outside.length ? h('div', { class: 'scope-rels', role: 'list', 'aria-label': '이 범위의 바깥 관계' }, ...relationGroups(outside, '범위').map(g => h('p', { class: 'scope-rel', role: 'listitem' },
       h('span', { class: 'sr-verb' }, g.label), ...g.list.map(x => h('button', { type: 'button', class: 'sr-part', title: `${partPath(o.view, x.far).map(q => q.name).join(' › ')}${x.r.note ? `\n${x.r.note}` : ''}`, 'data-far': x.far, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far, null); } }, partOf(o, x.far)?.name ?? '부분'))))) : null);
   world.append(title);
@@ -930,6 +937,7 @@ function positionWorld() {
   // The lines of each drawn set routed together (ports and nudging among themselves); while a part is dragged, their plain
   // shapes, so they follow the hand continuously; after the drop, the full routes, each morphing from the shape it had.
   const routed = new Map([...routeEdges(lay.boxes, lay.edges, { quick: dragQuick }), ...routeEdges(lay.boxes, sums, { quick: dragQuick })]);
+  lastRouted = routed;
   world.querySelectorAll<SVGGElement>('.edge').forEach(g => {
     const r = routed.get(g.dataset.key!); if (!r) return;
     const from = morphFrom?.get(g.dataset.key!) ?? null;
@@ -982,6 +990,25 @@ function layerEdge(el: Element) {
   const layer = ['on', 'ctx', 'inner', 'clear'].some(c => el.classList.contains(c)) ? top : base;
   if (layer && el.parentNode !== layer) layer.append(el);
 }
+/** The routes drawn last (positionWorld): the polylines the verbs and counts are placed on. */
+let lastRouted = new Map<string, Routed>();
+const edgePts = (key: string, path: SVGPathElement) => lastRouted.get(key)?.pts ?? samplePath(path, 24);
+/** Keys of the lines drawn now (the space's line mode hides the single lines under a summary, or the summary's). */
+function shownLines(): Set<string> {
+  return new Set([...$('world').querySelectorAll<SVGGElement>('.edge')].filter(g => getComputedStyle(g).display !== 'none').map(g => g.dataset.key!));
+}
+/** Whether another drawn line passes under a chip's rectangle. */
+function lineUnder(r: Rect, key: string, shown: Set<string>): boolean {
+  for (const o of lastRouted.values()) if (o.key !== key && shown.has(o.key) && polylineHitsRect(o.pts, r, 2)) return true;
+  return false;
+}
+/** Chips keep a readable size at low zoom: scaled up by --inv (applyCamera), so their measured size is scaled here too. */
+const labelInv = () => parseFloat($('space').style.getPropertyValue('--inv')) || 1;
+/** The head of a relation's note for the line it is drawn on: its first clause, at most 30 characters. */
+function noteHead(n: string): string {
+  const t = n.replace(/\s+/g, ' ').trim(), m = /^(.{8,40}?)(?:[,.;](?=\s|$)|$)/.exec(t), c = (m ? m[1]! : t).trim();
+  return c.length > 30 ? `${c.slice(0, 29)}…` : c;
+}
 /** Verbs on the map: on the lines of the selection, and on every line of a map that has only a few. Each sits at a free spot
  * along its own line; a verb that would cover a part, a group's head, the title or another verb is left off the map (the pane
  * lists every relation by its verb). Nothing is drawn for a relation the project does not hold. */
@@ -1019,19 +1046,22 @@ function placeEdgeLabels() {
   const clear = (r: Rect) => !blocks.some(b => r.x < b.x + b.w + 3 && b.x < r.x + r.w + 3 && r.y < b.y + b.h + 3 && b.y < r.y + r.h + 3);
   if ($('space').classList.contains('rest-sum')) { placeCounts(box, clear, blocks); return; }
   if (!selected) { if (lines.length) placeRestLabels(box, lines, clear); return; }
+  const shown = shownLines();
   for (const g of lines) {
     const e = lay.edges.find(x => x.key === g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'); if (!e || !path) continue;
     const on = g.classList.contains('on'), fan = on && (fans.get(selKey(e)) ?? 0) > 1;
     if (on && seenSel.has(selKey(e))) continue;
-    const label = h('span', { class: `edge-label k-${e.kind}${on ? ' on' : ''}${edgeRevised(e) ? ' revised' : ''}` }, `${REL_LABEL[e.kind] ?? e.kind}${!fan && e.ids.length > 1 ? ` ${e.ids.length}` : ''}${edgeRevised(e) ? REVISED_EDGE : ''}`);
+    const verb = `${REL_LABEL[e.kind] ?? e.kind}${!fan && e.ids.length > 1 ? ` ${e.ids.length}` : ''}${edgeRevised(e) ? REVISED_EDGE : ''}`;
+    // The selection's line says what it hands over (the head of its note) where its runs have room; the verb alone otherwise.
+    const said = on && !fan && e.notes.length === 1 && !plannedNote(e.notes[0]!) ? noteHead(e.notes[0]!) : '';
+    const label = h('span', { class: `edge-label k-${e.kind}${on ? ' on' : ''}${edgeRevised(e) ? ' revised' : ''}` }, verb);
     box.append(label);
-    const w = label.offsetWidth, hh = label.offsetHeight, len = path.getTotalLength();
+    const inv = labelInv(), pts = edgePts(e.key, path), len = path.getTotalLength(), prefer = fan ? (e.to === selected ? 'end' : 'start') : 'long';
     let spot: Rect | null = null;
-    const near = e.to === selected ? [0.86, 0.8, 0.74, 0.68, 0.6, 0.5] : [0.14, 0.2, 0.26, 0.32, 0.4, 0.5];
-    for (const t of fan ? near : [0.5, 0.4, 0.6, 0.3, 0.7, 0.22, 0.78]) {
-      const q = path.getPointAtLength(len * t), r = { x: q.x - w / 2, y: q.y - hh / 2, w, h: hh };
-      if (clear(r)) { spot = r; break; }
-    }
+    const tryAt = (text: string) => { label.textContent = text; const tw = label.offsetWidth * inv, th = label.offsetHeight * inv; return labelSpots(pts, tw, th, prefer).find(r => clear(r) && !lineUnder(r, e.key, shown)) ?? null; };
+    if (said) { label.classList.add('said'); spot = tryAt(`${verb} · ${said}`); if (!spot) label.classList.remove('said'); }
+    if (!spot) spot = tryAt(verb);
+    const w = label.offsetWidth * inv, hh = label.offsetHeight * inv;
     // A selected corrected line keeps its meaning on the map: more room along its line (beside it too), then only the short
     // mark, along the line, then beside the selected card or the other end. Never over a part, a head, the title or a verb.
     if (!spot && on && edgeRevised(e)) {
@@ -1044,7 +1074,7 @@ function placeEdgeLabels() {
       spot = along(w, hh).find(clear) ?? null;
       if (!spot) {
         label.textContent = REVISED_SHORT; label.classList.add('short');
-        const sw = label.offsetWidth, sh = label.offsetHeight;
+        const sw = label.offsetWidth * inv, sh = label.offsetHeight * inv;
         spot = along(sw, sh).find(clear) ?? beside(sw, sh).find(clear) ?? null;
       }
     }
@@ -1060,14 +1090,15 @@ function placeEdgeLabels() {
 function placeCounts(box: HTMLElement, clear: (r: Rect) => boolean, blocks: Rect[], beside = false) {
   // Beside a selection a count also keeps off the selection's own lines, where it would read as theirs.
   const onPts = beside ? [...$('world').querySelectorAll<SVGPathElement>('.edge.on .edge-line')].flatMap(p => { const n = p.getTotalLength(); return Array.from({ length: Math.ceil(n / 6) + 1 }, (_, i) => p.getPointAtLength(Math.min(n, i * 6))); }) : [];
+  const shown = shownLines();
   const off = (r: Rect) => clear(r) && !onPts.some(q => q.x > r.x - 4 && q.x < r.x + r.w + 4 && q.y > r.y - 4 && q.y < r.y + r.h + 4);
   for (const g of $('world').querySelectorAll<SVGGElement>('.edge.sum:not(.hit)')) {
     const e = edgeOf(g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'); if (!e || !path || e.ids.length < 2) continue;
     // The verb with the count ('넘겨줌 3'): a bare number on a line reads as nothing in particular.
     const chip = h('span', { class: `edge-count k-${e.kind}${beside ? ' beside' : ''}` }, `${REL_LABEL[e.kind] ?? e.kind} ${e.ids.length}`); box.append(chip);
-    const w = chip.offsetWidth, hh = chip.offsetHeight, len = path.getTotalLength();
-    const at = (t: number) => { const q = path.getPointAtLength(len * t); return { x: q.x - w / 2, y: q.y - hh / 2, w, h: hh }; };
-    const spot = [0.5, 0.42, 0.58, 0.34, 0.66, 0.26, 0.74].map(at).find(off) ?? (beside ? null : at(0.5));
+    const inv = labelInv(), w = chip.offsetWidth * inv, hh = chip.offsetHeight * inv;
+    // On a straight run of its own line, clear of corners, parts and other lines; a count with no such place is left off.
+    const spot = labelSpots(edgePts(e.key, path), w, hh, 'long').find(r => off(r) && !lineUnder(r, e.key, shown)) ?? null;
     if (!spot) { chip.remove(); continue; }
     chip.style.left = `${spot.x}px`; chip.style.top = `${spot.y}px`; blocks.push(spot);
   }
@@ -1076,26 +1107,14 @@ function placeCounts(box: HTMLElement, clear: (r: Rect) => boolean, blocks: Rect
  * that box), never at the middle where lines cross. Two that would touch keep the one nearer its end; the other relation's line
  * says so (.label-hidden, still hovered for its meaning) and is counted in the map's data-labels-hidden. */
 function placeRestLabels(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect) => boolean) {
-  const spots: (LabelSpot & { el: HTMLElement })[] = [], hidden: SVGGElement[] = [];
+  const spots: (LabelSpot & { el: HTMLElement })[] = [], hidden: SVGGElement[] = [], shown = shownLines(), inv = labelInv();
   for (const g of lines) {
     const e = edgeOf(g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'), end = e && lay.boxes.get(e.to); if (!e || !path || !end) continue;
     const label = h('span', { class: `edge-label k-${e.kind}${edgeRevised(e) ? ' revised' : ''}` }, `${REL_LABEL[e.kind] ?? e.kind}${e.ids.length > 1 ? ` ${e.ids.length}` : ''}${edgeRevised(e) ? REVISED_EDGE : ''}`);
     box.append(label);
-    const w = label.offsetWidth, hh = label.offsetHeight, len = path.getTotalLength(), tip = path.getPointAtLength(len);
-    const mine: Rect[] = [];
-    for (const t of [0.82, 0.78, 0.85, 0.74, 0.88, 0.7]) {
-      const q = path.getPointAtLength(len * t), q2 = path.getPointAtLength(Math.min(len, len * t + 1)), q1 = path.getPointAtLength(Math.max(0, len * t - 1));
-      // On the line, then beside it (lines meeting one end stack their verbs there).
-      const tx = q2.x - q1.x, ty = q2.y - q1.y, tl = Math.hypot(tx, ty) || 1, nx = -ty / tl, ny = tx / tl;
-      for (const [cx, cy] of [0, 1, -1, 2, -2].map(s => [q.x + nx * s * (hh / 2 + 4), q.y + ny * s * (hh / 2 + 4)] as const)) {
-        const r = { x: cx - w / 2, y: cy - hh / 2, w, h: hh };
-        // Off the box it points to, on the side the line comes from.
-        if (r.x < end.x + end.w + 4 && end.x - 4 < r.x + r.w && r.y < end.y + end.h + 4 && end.y - 4 < r.y + r.h) {
-          if (q.x < end.x) r.x = end.x - 4 - w; else if (q.x > end.x + end.w) r.x = end.x + end.w + 4; else if (q.y < end.y) r.y = end.y - 4 - hh; else r.y = end.y + end.h + 4;
-        }
-        if (clear(r)) mine.push(r);
-      }
-    }
+    const w = label.offsetWidth * inv, hh = label.offsetHeight * inv, len = path.getTotalLength(), tip = path.getPointAtLength(len);
+    // On the runs nearest the part its line points to, clear of corners, parts and other lines.
+    const mine: Rect[] = labelSpots(edgePts(e.key, path), w, hh, 'end').filter(r => clear(r) && !lineUnder(r, e.key, shown)).slice(0, 6);
     if (!mine.length) { label.remove(); hidden.push(g); continue; }
     // Nearest to its end first; a later place only when a nearer verb takes this one's.
     for (const r of mine) spots.push({ key: e.key, ...r, dist: Math.hypot(r.x + w / 2 - tip.x, r.y + hh / 2 - tip.y), el: label });
@@ -1129,6 +1148,8 @@ function renderRecent() {
 
 /* ---------- camera ---------- */
 const ZOOM_MIN = 0.4, ZOOM_MAX = 1.6, OPEN_MIN = 0.6;
+/** The chip scale the verbs were last placed at, and the frame that re-places them after a zoom. */
+let placedInv = 1, relabel = 0;
 /** The reading pane is a column of its own on the right: the map's viewport ends where the pane begins (syncMapArea), so nothing
  * the person reads is ever drawn under it and the geometry below needs no inset for it.
  * Width of the reading pane while anything reads there (a part, its sheet, a comparison or the whole plan); 0 otherwise. */
@@ -1150,6 +1171,11 @@ function applyCamera(animate = false) {
   const sp = $('space');
   sp.classList.toggle('z-mid', camera.k < 0.705); sp.classList.toggle('z-low', camera.k < 0.6); // z-mid: 70% as shown and below
   sp.style.setProperty('--grow', String(Math.min(1.25, Math.max(1, 0.85 / camera.k))));
+  // Chips on the lines (verbs, counts) grow as the map shrinks, up to 1.5×, so they stay readable; their places are found
+  // again when the scale changed enough to matter.
+  const inv = Math.min(1.5, Math.max(1, 0.8 / camera.k));
+  sp.style.setProperty('--inv', inv.toFixed(3));
+  if (Math.abs(inv - placedInv) > 0.1 && opened && !relabel) { relabel = requestAnimationFrame(() => { relabel = 0; placedInv = inv; placeEdgeLabels(); }); }
   updateSticky();
   saveViewSoon();
 }
@@ -1164,9 +1190,11 @@ function fitView(explicit: boolean, animate = false) {
   const w = Math.max(200, vp.width - left - right), hgt = Math.max(160, mapBottom() - top - bottom), B = lay.bounds;
   const fit = Math.min(1, w / Math.max(1, B.w + 40), hgt / Math.max(1, B.h + 40));
   const k = explicit ? Math.max(ZOOM_MIN, fit) : Math.max(OPEN_MIN, fit);
-  const mw = B.w * k, mh = B.h * k, free = w - mw, room = paneWidth() ? 0 : inspW();
-  const xoff = free <= 0 ? 12 : free >= room + 96 ? Math.max(40, (free - room) / 2) : free / 2;
-  const yoff = mh <= hgt ? Math.min((hgt - mh) / 2, 48) : 12;
+  // The whole view sits in the middle of the free area, both ways: the title and the parts together. A reading pane opened
+  // later pans the map by the least amount that keeps the selected part in view (reveal), so no room is kept for it here.
+  const mw = B.w * k, mh = B.h * k, free = w - mw;
+  const xoff = free <= 0 ? 12 : free / 2;
+  const yoff = mh <= hgt ? (hgt - mh) / 2 : 12;
   camera = { k, x: left + xoff - B.x * k, y: top + yoff - B.y * k };
   applyCamera(animate);
 }
@@ -1541,6 +1569,8 @@ function markSelection(partId: string | null) {
     el.classList.toggle('selected', !!partId && (el.dataset.part === partId || (me !== partId && el.dataset.box === me)));
     el.classList.toggle('related', related.has(el.dataset.box!));
   });
+  // The step of the main flow that is selected reads as such in the title's flow line.
+  document.querySelectorAll<HTMLElement>('#world .mf-step').forEach(el => el.classList.toggle('on', !!partId && el.dataset.part === partId));
   endNotes(partId);
 }
 /** The selection's own relations, read where they end: a card at the other end of one of them says that relation's stored note
@@ -1782,7 +1812,7 @@ function answerCard(o: Opened, a: Answer): HTMLElement {
   const records = cited.map(id => o.view.records.find(r => r.id === id)).filter((r): r is RecordView => !!r);
   const partsCited = new Set(records.map(r => r.partId).filter((x): x is string => !!x));
   return h('article', { class: 'answer' },
-    h('p', { class: 'ans-ask' }, h('span', {}, label), h('small', {}, `${ago(a.at)} · ${a.model}`)),
+    h('p', { class: 'ans-ask' }, h('span', {}, label), h('small', { title: a.model }, `${ago(a.at)} · ${modelLabel(a.model)}`)),
     coverageText(a.coverage) ? h('p', { class: 'ans-scope' }, coverageText(a.coverage)!) : null,
     lead,
     records.length ? h('div', { class: 'ans-refs' }, h('span', {}, '근거'), ...records.map(r => {
@@ -2165,6 +2195,47 @@ function mapApplied(a: Applied) {
   // The pane it may have been opened from has just closed: the wide reading says so and closes to the map.
   wide.render();
 }
+/** The scope's main flow under the title: its spine (the longest chain of flows and needs among its parts, map-layout) as
+ * steps the reader can follow and select. It says what the map is about before any line is read; pointing at a step lights
+ * that part and its spine lines on the map, and the map draws the same chain darker. Only a chain of three steps or more. */
+function flowStrip(o: Opened): HTMLElement | null {
+  const ids = lay.spine; if (ids.length < 3) return null;
+  const spineEdges = lay.edges.filter(e => e.spine), edgeIds = (id: string) => spineEdges.filter(e => e.from === id || e.to === id).flatMap(e => e.ids);
+  const el = h('p', { class: 'map-flow', 'aria-label': '주 흐름' }, h('span', { class: 'mf-verb' }, '주 흐름'));
+  ids.forEach((id, i) => {
+    const p = partOf(o, id); if (!p) return;
+    if (i) el.append(h('span', { class: 'mf-arrow', 'aria-hidden': 'true' }, '→'));
+    el.append(h('button', { type: 'button', class: 'mf-step', 'data-part': id, title: `${p.name} · 흐름의 ${i + 1}번째 · 선택해 읽기`, onclick: () => go(o.key, id), ...lightOn(edgeIds(id), id) }, p.name));
+  });
+  return el;
+}
+/** The scope's parts counted by how far their records go (checked · reported but not checked · asked only · nothing yet): the
+ * state of the whole map in one line over its structure. Pointing at a count lights those parts; the others step back. A click
+ * holds that until the next click or Escape. */
+let stateHold: string | null = null;
+function stateStrip(o: Opened): HTMLElement | null {
+  const cards = [...lay.boxes.values()].filter(b => b.kind === 'node').map(b => partOf(o, b.id)).filter((p): p is PartView => !!p);
+  if (cards.length < 2) return null;
+  const stage = (p: PartView) => { const l = ladderOf(o.view, p); return l.check ? 'check' : l.report ? 'report' : l.ask ? 'ask' : 'none'; };
+  const groups = new Map<string, string[]>(); for (const p of cards) { const k = stage(p); groups.set(k, [...(groups.get(k) ?? []), p.id]); }
+  const WORDS: Record<string, [string, string]> = { check: ['확인됨', '검사나 자료로 확인한 기록이 있는 부분'], report: ['보고됨', '했다는 보고만 있고 아직 확인되지 않은 부분'], ask: ['요청만', '요청만 있고 보고가 없는 부분'], none: ['기록 없음', '요청·보고·확인 기록이 아직 없는 부분'] };
+  const el = h('p', { class: 'map-states', 'aria-label': '부분의 상태' });
+  const show = (k: string | null) => {
+    const ids = new Set(k ? groups.get(k) ?? [] : []), sp = $('space');
+    sp.classList.toggle('state-peek', ids.size > 0);
+    document.querySelectorAll<HTMLElement>('#world .node[data-part]').forEach(n => n.classList.toggle('state-on', ids.has(n.dataset.part!)));
+    el.querySelectorAll('.ms').forEach(b => b.classList.toggle('on', !!k && b.classList.contains(`ms-${k}`)));
+  };
+  stateHold = null;
+  for (const k of ['check', 'report', 'ask', 'none']) {
+    const ids = groups.get(k); if (!ids?.length) continue;
+    el.append(h('button', { type: 'button', class: `ms ms-${k}`, title: WORDS[k]![1], 'aria-pressed': 'false',
+      onpointerenter: () => { if (!stateHold) show(k); }, onpointerleave: () => { if (!stateHold) show(null); }, onfocus: () => { if (!stateHold) show(k); }, onblur: () => { if (!stateHold) show(null); },
+      onclick: (e: Event) => { stateHold = stateHold === k ? null : k; show(stateHold); el.querySelectorAll('.ms').forEach(b => b.setAttribute('aria-pressed', String(b.classList.contains('on')))); (e.currentTarget as HTMLElement).blur(); } },
+      h('i', { class: `rung r-${k}`, 'aria-hidden': 'true' }), `${WORDS[k]![0]} ${ids.length}`));
+  }
+  return el;
+}
 /** The map title's line: what the records made understandable (the last reading's sentence), new records to read, the way to it. */
 function understoodLine(o: Opened): HTMLElement | null {
   if (o.kind !== 'saved' || !o.view.parts.length) return null;
@@ -2187,8 +2258,8 @@ function understoodLine(o: Opened): HTMLElement | null {
   // What this reading left open reads beside its summary: the gaps (conditions the records do not answer) and the unsettled
   // statements, counted, opening the reading of the return where each is listed.
   if (last) {
-    const open = [last.gaps.length ? `빈틈 ${last.gaps.length}` : '', last.candidates.length ? `미정 ${last.candidates.length}` : ''].filter(Boolean);
-    line.append(h('button', { type: 'button', class: `map-more${open.length ? ' mu-open' : ''}`, title: [`이번 정리가 무엇을 읽었고 무엇이 비었는지`, ...last.gaps.map(g => `빈틈: ${g}`)].join(String.fromCharCode(10)), onclick: () => openReturn() }, open.length ? `정리 근거 · ${open.join(' · ')}` : '정리 근거'));
+    const open = [last.gaps.length ? `답 없는 조건 ${last.gaps.length}` : '', last.candidates.length ? `미정 ${last.candidates.length}` : ''].filter(Boolean);
+    line.append(h('button', { type: 'button', class: `map-more${open.length ? ' mu-open' : ''}`, title: [`이번 정리가 무엇을 읽었고 어떤 조건에 기록이 답하지 않는지`, ...last.gaps.map(g => `답 없는 조건: ${g}`)].join(String.fromCharCode(10)), onclick: () => openReturn() }, open.length ? `AI가 읽은 것 · ${open.join(' · ')}` : 'AI가 읽은 것'));
   }
   if (st.error) line.append(h('span', { class: 'mu-error', role: 'alert' }, st.error));
   const note = runNotice(); if (note) line.append(note);
@@ -2309,7 +2380,7 @@ function mapBlock(): HTMLElement | null {
           h('span', { class: 'rr-chips' }, ...c.areaIds.map(chip), ...v.quotes.map(x => cite(x.quote, x.which, i)))); }))));
     if (last.gaps.length) sec.append(h('ul', { class: 'rm-gaps' }, ...last.gaps.map(g => h('li', {}, g))));
     const cut = last.records.filter(r => r.to < r.total || r.from > 0).length;
-    sec.append(h('p', { class: 'rr-prov' }, h('span', { class: 'tag ai' }, `AI 정리 · ${last.model}`), h('span', {}, `기록 ${last.records.length}개${cut ? ` (${cut}개는 일부 구간만)` : ''} · 인용 원문에 근거 · 앱이 확인한 사실 아님`)));
+    sec.append(h('p', { class: 'rr-prov' }, h('span', { class: 'tag ai', title: last.model }, `AI 정리 · ${modelLabel(last.model)}`), h('span', {}, `기록 ${last.records.length}개${cut ? ` (${cut}개는 일부 구간만)` : ''} · 인용 원문에 근거 · 앱이 확인한 사실 아님`)));
   }
   const excluded = mapExclusionHistory(o.project, (record, quote, from) => {
     if (returnView.isOpen()) returnView.keepReading();
@@ -2650,8 +2721,9 @@ function bindCanvas() {
     mapMoved = true; zoomAt(camera.k * Math.exp(-delta * (e.ctrlKey ? 0.01 : 0.0015)), e.clientX - r.left, e.clientY - r.top + vp.offsetTop);
   }, { passive: false });
   const center = () => { const r = vp.getBoundingClientRect(); return [r.width / 2, vp.offsetTop + r.height / 2] as const; };
-  $('zoom-in').addEventListener('click', () => { mapMoved = true; const [x, y] = center(); zoomAt(camera.k + 0.15, x, y, true); });
-  $('zoom-out').addEventListener('click', () => { mapMoved = true; const [x, y] = center(); zoomAt(camera.k - 0.15, x, y, true); });
+  $('zoom-in').addEventListener('click', () => { mapMoved = true; const [x, y] = center(); zoomAt(camera.k * 1.2, x, y, true); });
+  $('zoom-out').addEventListener('click', () => { mapMoved = true; const [x, y] = center(); zoomAt(camera.k / 1.2, x, y, true); });
+  $('zoom-level').addEventListener('click', () => { mapMoved = true; const [x, y] = center(); zoomAt(1, x, y, true); });
   $('zoom-fit').addEventListener('click', () => { mapMoved = true; fitView(true, true); });
   $('arrange').addEventListener('click', arrange);
   const help = $('help'), helpButton = $('help-toggle');
@@ -2676,6 +2748,7 @@ function bindCanvas() {
     if (e.key === 'Escape' && opened && recentShown() && !$('recent').classList.contains('collapsed')) { if (selected || planView.isOpen()) recentPeek = false; else recentOpen = false; renderRecent(); return; }
     if (e.key === 'Escape' && planView.isOpen()) { const part = selected; planView.escape(); if (part && !selected) requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-drag="${CSS.escape(part)}"]`)?.focus()); return; }
     if (e.key === 'Escape' && partForm && opened?.view.parts.length) { partForm = null; renderPartForm(); return; }
+    if (e.key === 'Escape' && opened && stateHold) { stateHold = null; $('space').classList.remove('state-peek'); document.querySelectorAll('#world .state-on, .map-states .ms.on').forEach(el => { el.classList.remove('state-on', 'on'); el.setAttribute('aria-pressed', 'false'); }); return; }
     if (e.key === 'Escape' && opened && selected && sheetOpen) { closeSheet(); return; }
     if (e.key === 'Escape' && opened && selected) { const key = opened.key, part = selected; go(key); requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-drag="${CSS.escape(part)}"]`)?.focus()); return; }
     if (e.key === 'Escape' && opened && scopeReading && !selected) { closeScopeReading(); return; }
@@ -2683,7 +2756,7 @@ function bindCanvas() {
     if (e.key === 'Escape' && opened && scope) { const o = opened, from = scope; go(o.key, null, partOf(o, from)?.parentId ?? null); requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-drag="${CSS.escape(from)}"]`)?.focus()); }
   });
   let resize = 0;
-  window.addEventListener('resize', () => { cancelAnimationFrame(resize); resize = requestAnimationFrame(() => { syncMapArea(); if (opened && !selected && !planView.isOpen() && $('lens').hidden) fitView(false); }); });
+  window.addEventListener('resize', () => { cancelAnimationFrame(resize); resize = requestAnimationFrame(() => { syncMapArea(); if (opened && !selected && !planView.isOpen() && $('lens').hidden && !mapMoved) fitView(false); }); });
 }
 
 /** Hover: a line shows what it means (ends, kind, recorded note) without selecting; a part lights its own lines. */
@@ -2691,6 +2764,24 @@ function bindEdgeHints() {
   const world = $('world'), tip = $('edge-tip'), space = $('space');
   const nameOf = (boxId: string) => { const o = opened; if (!o) return ''; return partOf(o, boxId.startsWith('ghost:') ? boxId.slice(6) : boxId)?.name ?? ''; };
   const place = (e: PointerEvent) => { const r = space.getBoundingClientRect(); tip.style.left = `${Math.min(e.clientX - r.left + 14, r.width - 300)}px`; tip.style.top = `${e.clientY - r.top + 14}px`; };
+  /** Pointing at (or focusing) a part: its lines light, the parts at their other ends with them, and the rest of the map
+   * steps back (.peek), so a part's neighbourhood reads without a click. Nothing moves and nothing is selected. */
+  const nearPart = (id: string) => {
+    // A summary line also lights for a part inside one of its ends whose own relations it holds.
+    const mine = new Set(lay.edges.filter(x => x.from === id || x.to === id).flatMap(x => x.ids)), ends = new Set<string>();
+    world.querySelectorAll<SVGGElement>('.edge').forEach(x => {
+      const near = x.dataset.from === id || x.dataset.to === id || (x.classList.contains('sum') && !!edgeOf(x.dataset.key)?.ids.some(r => mine.has(r)));
+      x.classList.toggle('near', near);
+      if (near && getComputedStyle(x).display !== 'none') ends.add(x.dataset.from === id ? x.dataset.to! : x.dataset.from!);
+    });
+    world.querySelectorAll('.near-end, .near-self').forEach(el => el.classList.remove('near-end', 'near-self'));
+    for (const far of ends) world.querySelector(`[data-box="${CSS.escape(far)}"]`)?.classList.add('near-end');
+    world.querySelector(`[data-box="${CSS.escape(id)}"]`)?.classList.add('near-self');
+    space.classList.toggle('peek', ends.size > 0);
+    // An end of the selection's lines: the pane's rows of those relations light too.
+    lightRows(selected && id !== selected ? lay.edges.filter(x => (x.from === id && x.to === selected) || (x.to === id && x.from === selected)).flatMap(x => x.ids) : []);
+  };
+  const clearNear = () => { world.querySelectorAll('.edge.near').forEach(x => x.classList.remove('near')); world.querySelectorAll('.near-end, .near-self').forEach(el => el.classList.remove('near-end', 'near-self')); space.classList.remove('peek'); lightRows([]); };
   world.addEventListener('pointerover', e => {
     const t = e.target as Element, g = t.closest<SVGGElement>('.edge');
     if (g && t.classList.contains('edge-hit')) {
@@ -2703,20 +2794,16 @@ function bindEdgeHints() {
       return;
     }
     const part = t.closest<HTMLElement>('.node[data-box], .frame-head[data-part], .ghost[data-box]');
-    if (part) {
-      // A summary line also lights for a part inside one of its ends whose own relations it holds.
-      const id = part.dataset.box ?? part.dataset.part!, mine = new Set(lay.edges.filter(x => x.from === id || x.to === id).flatMap(x => x.ids));
-      world.querySelectorAll<SVGGElement>('.edge').forEach(x => x.classList.toggle('near', x.dataset.from === id || x.dataset.to === id || (x.classList.contains('sum') && !!edgeOf(x.dataset.key)?.ids.some(r => mine.has(r)))));
-      // An end of the selection's lines: the pane's rows of those relations light too.
-      lightRows(selected && id !== selected ? lay.edges.filter(x => (x.from === id && x.to === selected) || (x.to === id && x.from === selected)).flatMap(x => x.ids) : []);
-    }
+    if (part) nearPart(part.dataset.box ?? part.dataset.part!);
   });
+  world.addEventListener('focusin', e => { const part = (e.target as Element).closest<HTMLElement>('.node[data-box], .frame-head[data-part], .ghost[data-box]'); if (part) nearPart(part.dataset.box ?? part.dataset.part!); });
+  world.addEventListener('focusout', e => { if (!(e.relatedTarget as Element | null)?.closest?.('.node, .frame-head, .ghost')) clearNear(); });
   world.addEventListener('pointermove', e => { if (!tip.hidden) place(e); });
   world.addEventListener('pointerout', e => {
     const t = e.target as Element;
     if (t.classList.contains('edge-hit')) tip.hidden = true;
     const to = e.relatedTarget as Element | null;
-    if (!to || !to.closest?.('.node, .frame-head, .ghost, .edge')) { world.querySelectorAll('.edge.near').forEach(x => x.classList.remove('near')); lightRows([]); }
+    if (!to || !to.closest?.('.node, .frame-head, .ghost, .edge')) clearNear();
   });
 }
 

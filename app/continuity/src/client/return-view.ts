@@ -29,6 +29,7 @@ import { redactSecrets } from '../shared/secret.js';
 import { h, put, fullTime, codeGate, codeNote, quotedText as quoted } from './plan-dom.js';
 import { captureRequestReading, restoreRequestReading, type RequestReading } from './request-results.js';
 import type { RecordEvidence } from '../shared/types.js';
+import { modelLabel } from '../shared/model-label.js';
 import { EVIDENCE_KIND_LABEL, NOT_EXECUTED, NOT_RECORDED, EVIDENCE_NAME_MAX, EVIDENCE_VERSION_MAX, EVIDENCE_ORIGIN_MAX, PROVIDED_FILE_BYTES, decodeProvided, evidenceProblem, type DecodeProblem } from '../shared/record-source.js';
 
 /** Every saved reading's exclusions, including older readings after another succeeds. Positions refer to the held source;
@@ -674,7 +675,7 @@ export function createReturnView(host: ReturnHost) {
     const state = s!, status = host.status(), r = state.reading, out = h('footer', { class: 'lens-foot rr-foot' });
     if (state.pending) {
       out.append(h('div', { class: 'pending' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }),
-        h('span', {}, `${status.digest?.model ?? 'AI'}가 자료 ${state.input?.coverage.sent ?? 0}개를 읽고 있어요…`),
+        h('span', {}, `${modelLabel(status.digest?.model)}가 자료 ${state.input?.coverage.sent ?? 0}개를 읽고 있어요…`),
         h('button', { type: 'button', class: 'link-button', onclick: () => state.pending?.abort() }, '취소')));
       return out;
     }
@@ -684,7 +685,7 @@ export function createReturnView(host: ReturnHost) {
     if (r) {
       const cov = r.coverage.sent < r.coverage.total ? `자료 ${r.coverage.total}개 중 ${r.coverage.sent}개` : `자료 ${r.coverage.sent}개`;
       out.append(h('p', { class: 'rr-prov', title: `같은 자료는 다시 보내지 않아요. 정리는 지도 부분의 상태나 설명을 바꾸지 않아요. 정리 지시 ${r.prompt}` },
-        h('span', { class: 'tag ai' }, `AI 정리 · ${r.model}`), h('span', {}, `${cov} · ${fullTime(r.at)}`),
+        h('span', { class: 'tag ai', title: r.model }, `AI 정리 · ${modelLabel(r.model)}`), h('span', {}, `${cov} · ${fullTime(r.at)}`),
         state.view.kind === 'reading' ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { state.view = { kind: 'material' }; render(); } }, '원자료') : null));
       return out;
     }

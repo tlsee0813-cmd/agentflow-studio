@@ -561,7 +561,7 @@ test('a first map alone carries the first-map review rules in its global and fin
   validateMapReply(await pipeline.call(ask), ask);
   const global = calls.find(c => c.stage === 'global');
   assert.ok(global.options.system.endsWith(GLOBAL_RULES + FIRST_GLOBAL_RULES));
-  assert.match(FIRST_GLOBAL_RULES, /빠진 중요한 조건은 gaps/); assert.match(FIRST_FINAL_GLOBAL_RULES, /reviseParts를 보내지 말고/);
+  assert.match(FIRST_GLOBAL_RULES, /다음 관문의 결과가 기록 시점 뒤라 아직 없다는 것/); assert.match(FIRST_FINAL_GLOBAL_RULES, /reviseParts를 보내지 말고/);
   const inp = laterFor(), laterCalls = [];
   const later = make({ targetChars: 1000, maxPartitions: 24, callProvider: fakeProvider(inp.ask, laterCalls, () => {}, K.replyFor7(inp.ask, inp.records)) });
   await later.call(inp.ask);
@@ -1070,8 +1070,8 @@ function browserApply(f, wire, exclusions, n = 7) {
 }
 
 test('recipe identities are bumped for the changed prompts and validation semantics', () => {
-  assert.equal(PIPELINE_RECIPE, 'first-map-divided.18');
-  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.18');
+  assert.equal(PIPELINE_RECIPE, 'first-map-divided.19');
+  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.19');
 });
 
 test('a render fragment with one unresolvable claim alias is applied with only that claim set aside and a durable diagnostic', async t => {

@@ -18,6 +18,8 @@ export const HEAD = 34, HEAD_2 = 52;
 export const PLAN_LINE = 15;
 /** Between wrapped columns of one layer (no relation runs between them, so they sit closer than relation layers). */
 export const WRAP_GAP = 36;
+/** The lane between the wrapped columns of one layer inside a group: room for two routed tracks (map-route's TRACK_GAP). */
+export const WRAP_LANE = 24;
 /** Between relation layers inside a group: room for converging lines to stay apart. */
 export const FLOW_GAP = 44;
 /** A list: columns of short rows. */
@@ -129,7 +131,7 @@ export function mapLead(v: StudioView, id: string): string {
 export const NODE_MAX_W = 320;
 /** A list item's horizontal padding and border without an inside (styles.css .node.item). */
 const ITEM_SIDES = 10 + 8 + 2;
-const nodeChrome = (kids: boolean, extra = 0) => (kids ? 5 + 22 + 4 + 4 + 40 + 8 + 2 + extra : 13 + 8 + 2);
+const nodeChrome = (kids: boolean, extra = 0) => (kids ? 5 + 22 + 4 + 4 + 58 + 8 + 2 + extra : 13 + 8 + 2);
 /** extra: room a part with an inside gives its boundary count beside the name (linkChipW). */
 export function nodeWidth(name: string, kids: boolean, measure: TextMeasure = estimate, extra = 0): number {
   // Lines break at word ends, not mid-word: leave a share of each line unused.
@@ -156,7 +158,7 @@ export function boundaryCounts(v: StudioView): Map<string, Crossing> {
   return m;
 }
 /** The boundary count beside a head's name ('↔ 12', 11px with its border and padding) and the gap before it; 0 when none. */
-export const linkChipW = (n: number) => (n > 0 ? 4 + 30 + 6 * String(n).length : 0);
+export const linkChipW = (n: number) => (n > 0 ? 4 + 46 + 6 * String(n).length : 0);
 /** A first view over its count budget folds every group with an inside alike (the person's own fold or unfold excepted), so
  * no group reads as singled out by its size; each folded head still says how many relations cross it. */
 export function budgetFold(groups: { id: string; size: number }[], own: (id: string) => boolean, budget: number): Set<string> {
@@ -298,7 +300,9 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
       if (bi === 0 && fromOut.length) flow.unshift(fromOut);
       // Inside a group a plain chain (one part per layer) runs top to bottom, as a list of steps.
       if (inFrame && flow.every(l => l.length === 1)) cols.push(...wrap(flow.map(l => l[0]!)).map(c => ({ ids: c, gap: GAP, centre: false, block: bi })));
-      else flow.forEach(l => { const w = wrap(l); w.forEach((c, k) => cols.push({ ids: c, gap: k < w.length - 1 ? (inFrame ? GAP : WRAP_GAP) : inFrame ? FLOW_GAP : COL_GAP, centre: w.length === 1, block: bi })); });
+      // A layer wrapped into columns keeps a lane between them wide enough for two routed tracks (lines that pass between
+      // the columns would otherwise share one gap).
+      else flow.forEach(l => { const w = wrap(l); w.forEach((c, k) => cols.push({ ids: c, gap: k < w.length - 1 ? (inFrame ? WRAP_LANE : WRAP_GAP) : inFrame ? FLOW_GAP : COL_GAP, centre: w.length === 1, block: bi })); });
     });
     if (!comps.length && fromOut.length) cols.push({ ids: fromOut, gap: inFrame ? FLOW_GAP : COL_GAP, centre: false, block: 0 });
     if (container === scope || container === null) spines.set(container ?? ROOT, spineAt.get(0) ?? []);
@@ -337,8 +341,11 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
     // Levelling within a block: each part is pulled to the median height of its neighbours in the other columns, the spine's
     // parts to the block's one spine line, and the parts of a column then keep their order and their gaps (pushed apart from
     // a spine part, or down then up). A few sweeps, left to right and back, settle it.
-    const level = (cs: Col[], spineY: number, sp: Set<string>) => {
+    const level = (cs: Col[], spineY: number, spine: Set<string>) => {
       const colIdx = new Map<string, number>(); cs.forEach((c, k) => c.ids.forEach(i => colIdx.set(i, k)));
+      // The spine line only levels a chain that runs across columns: a chain stacked in one column (a group's list of steps)
+      // has no line to share, and pulling its every part to one height would push the whole column down, leaving a gap.
+      const sp = new Set([...colIdx.entries()].filter(([i]) => spine.has(i)).map(([, k]) => k)).size >= 2 ? spine : new Set<string>();
       const nbrs = (i: string) => partners(i).filter(x => colIdx.has(x) && colIdx.get(x) !== colIdx.get(i));
       const median = (xs: number[]) => { const a = [...xs].sort((p, q) => p - q), m = a.length >> 1; return a.length % 2 ? a[m]! : (a[m - 1]! + a[m]!) / 2; };
       for (let pass = 0; pass < 6; pass++) {
@@ -373,8 +380,9 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
       // Stored places are not levelled (the person's own); the automatic arrangement is.
       level(cs, yBlock + tallest / 2, new Set(spineAt.get(bi) ?? []));
       const all = cs.flatMap(c => c.ids), lo = Math.min(...all.map(top)), hi = Math.max(...all.map(i => top(i) + sizes.get(i)!.h));
-      // The block starts where it was stacked: a levelled column that rose above it moves the whole block down.
-      if (lo < yBlock) for (const i of all) setTop(i, top(i) + (yBlock - lo));
+      // The block starts where it was stacked: a levelled block that rose above it or sank below it moves back as a whole, so
+      // the gap between blocks is the block gap and nothing more.
+      if (Math.abs(lo - yBlock) > 0.5) for (const i of all) setTop(i, top(i) + (yBlock - lo));
       yBlock = Math.max(...all.map(i => top(i) + sizes.get(i)!.h)) + blockGap; void hi;
     });
     const tallest = blocks.length ? yBlock - blockGap : 0;
@@ -424,7 +432,7 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
   /** Region head: the name (one or two lines; a longer name widens the region rather than being cut) and the first sentence of
    * the note under it. Head row: toggle 28, go-inside ~44, paddings ~12, and the latest-record time ~52 when there is one. */
   const regionHead = (id: string, w: number): { w: number; head: number } => {
-    const p = byId.get(id)!, room = (x: number) => x - 84 - (hasRecords(id) ? 52 : 0) - chip(id), chrome = w - room(w);
+    const p = byId.get(id)!, room = (x: number) => x - 102 - (hasRecords(id) ? 52 : 0) - chip(id), chrome = w - room(w);
     // A region keeps its name on one line when it can (up to 320px), and on two lines otherwise (up to 380px).
     const need = measureText(p.name, 'head') * 1.08 + 4;
     if (need > room(w)) w = Math.max(w, Math.min(320, Math.ceil(need) + chrome));
@@ -651,7 +659,7 @@ export function edgePath(a: Box, b: Box, others: Iterable<Box> = [], ports: Port
   const room = (x: number, y: number, d: number) => Math.min(28, ...blocks.filter(o => y >= o.y && y <= o.y + o.h && (d > 0 ? o.x >= x : o.x + o.w <= x)).map(o => (d > 0 ? o.x - x : x - (o.x + o.w)))) / 2;
   const xa = x1 + dir * room(x1, acy, dir), xb = x2 - dir * room(x2, bcy, -dir);
   // Past the one-corridor routes, the line goes through the gaps with more turns, or into a part from above or below.
-  const around = (): Route => { const r = gapRoute(a, b, dir, blocks, segFree); return r ? { d: rounded(r.pts), pts: r.pts, mx: r.mid.x, my: r.mid.y, detour: true, clear: true } : plain; };
+  const around = (): Route => { const r = gapRoute(a, b, dir, blocks, segFree, ports); return r ? { d: rounded(r.pts), pts: r.pts, mx: r.mid.x, my: r.mid.y, detour: true, clear: true } : plain; };
   if ((xb - xa) * dir <= 0) return around();
   const lo = Math.min(xa, xb), hi = Math.max(xa, xb);
   const ys = [acy, bcy, ...blocks.filter(o => o.x < hi && lo < o.x + o.w).flatMap(o => [o.y - 6, o.y + o.h + 6])]
@@ -668,15 +676,20 @@ export function edgePath(a: Box, b: Box, others: Iterable<Box> = [], ports: Port
  * shortest), kept LANE_CLEAR from every obstacle. It leaves a by the side facing b (or, failing that, its top or bottom) and
  * meets b on the side facing a, or on its top or bottom when that side is shut in; a group end only at its head row, as
  * everywhere. Only boxes near the two ends are searched; null when no such path is found, and the crossing curve stays. */
-function gapRoute(a: Box, b: Box, dir: number, blocks: { x: number; y: number; w: number; h: number }[], segFree: (x1: number, y1: number, x2: number, y2: number) => boolean): { pts: Point[]; mid: Point } | null {
-  const LEAD = 12, SIDE = 0, END = 34;
-  const ports = (x: Box, face: number): Port[] => {
-    const cy = x.kind === 'frame' ? x.y + x.head / 2 : x.y + x.h / 2, cx = x.x + x.w / 2, sx = face > 0 ? x.x + x.w : x.x;
+function gapRoute(a: Box, b: Box, dir: number, blocks: { x: number; y: number; w: number; h: number }[], segFree: (x1: number, y1: number, x2: number, y2: number) => boolean, given: Ports = {}): { pts: Point[]; mid: Point } | null {
+  const LEAD = 12, SIDE = 0, END = 34, END_FAR = 600;
+  // A part's top or bottom is a cheap way in only from an end that really lies above or below it; from an end beside it, a
+  // line into the top reads as coming from nowhere, so that way costs more than a turn (600 > a 400 turn).
+  const above = (x: Box, o: Box) => o.y + o.h < x.y - 8 || o.y > x.y + x.h + 8;
+  const ports = (x: Box, face: number, other: Box, port?: number): Port[] => {
+    const cy = port ?? (x.kind === 'frame' ? x.y + x.head / 2 : x.y + x.h / 2), cx = x.x + x.w / 2, sx = face > 0 ? x.x + x.w : x.x, end = above(x, other) ? END : END_FAR;
     const out: Port[] = [{ at: { x: sx, y: cy }, lead: { x: sx + face * LEAD, y: cy }, cost: SIDE }];
-    if (x.kind !== 'frame') out.push({ at: { x: cx, y: x.y + x.h }, lead: { x: cx, y: x.y + x.h + LEAD }, cost: END }, { at: { x: cx, y: x.y }, lead: { x: cx, y: x.y - LEAD }, cost: END });
+    if (x.kind !== 'frame') out.push({ at: { x: cx, y: x.y + x.h }, lead: { x: cx, y: x.y + x.h + LEAD }, cost: end }, { at: { x: cx, y: x.y }, lead: { x: cx, y: x.y - LEAD }, cost: end });
     return out.filter(p => segFree(p.at.x + (p.lead.x - p.at.x) / LEAD, p.at.y + (p.lead.y - p.at.y) / LEAD, p.lead.x, p.lead.y));
   };
-  const from = ports(a, dir), to = ports(b, -dir);
+  // The side ports the router assigned (lines meeting one side spread along it) hold for the search too, so a line that goes
+  // round other parts still leaves and arrives where its neighbours expect it.
+  const from = ports(a, dir, b, given.a), to = ports(b, -dir, a, given.b);
   if (!from.length || !to.length) return null;
   const x0 = Math.min(a.x, b.x) - 160, x1 = Math.max(a.x + a.w, b.x + b.w) + 160, y0 = Math.min(a.y, b.y) - 160, y1 = Math.max(a.y + a.h, b.y + b.h) + 160;
   return searchRoute(from, to, blocks, segFree, { x0, x1, y0, y1 });
