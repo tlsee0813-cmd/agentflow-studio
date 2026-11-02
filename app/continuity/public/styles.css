@@ -257,6 +257,7 @@ button:disabled { opacity: .5; cursor: default; }
    hand when the clipboard is blocked. */
 .se-ask, .rm-ask { word-break: keep-all; }
 .se-ask .link-button, .rm-ask .link-button { display: inline; padding: 0; font-size: inherit; font-weight: 600; }
+.rr-report-check { margin: 4px 0 0; } .rr-report-check .link-button { margin-left: 6px; font-size: 12px; } .rr-check-said { color: var(--text-4); }
 .ask-manual { display: block; width: 100%; margin-top: 6px; padding: 8px; border: 1px solid var(--line); border-radius: var(--r-md); font: 12px/1.5 var(--font); color: var(--text-2); resize: vertical; }
 /* The scope's own relations to the outside: the scope's, never lines from one of its children. */
 .scope-rels { margin-top: var(--s-3); display: flex; flex-direction: column; gap: 6px; }

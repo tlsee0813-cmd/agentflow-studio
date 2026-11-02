@@ -40,7 +40,7 @@ checked는 실제 실행한 검사의 결과를 보고한 원문에만 쓴다. �
 blueprint.parts의 focus·at로 보아 다른 부분이 맡은 사실은 이 부분에 반복하지 않는다. 같은 원문 구간의 같은 사실은 그 책임에 가장 가까운 부분 하나에만 둔다.
 각 claim의 모든 절은 그 claim.at가 가리키는 원문으로 뒷받침되어야 한다. 서로 떨어진 원문 두 곳의 내용을 합쳐 한 곳만 인용하지 않는다. 조건을 다른 일반 설명에 붙이느라 근거가 어긋나면 별도 주장으로 분리한다.
 무엇을 거부·금지하는지 열거한 핵심 조건은 이름을 짧게 보존한다. ‘거부 몇 개’ 같은 개수만으로 축약하지 않는다. 전역 설계에 보존된 철회·미채택·폐기 중 이 부분의 책임에 해당하는 항목을 먼저 claims에 반영한다.
-role은 이 부분이 받는 것과 내는 것을 원문 이름으로 포함한다. 설계 일정(시각·주기)은 role에 한 번만 쓰고, claims에는 실제 상태 보고(첫 행 OK, 라벨 미관측 같은)를 먼저 쓴다. 「다음 ~ 묶음」「~ 전」「예정」은 보고 문장 안에 있어도 계획(want)이다. 작성자가 직접 실행하지 않았다고 밝힌 통과·OK·rc 0은 checked가 아니라 reported로 쓴다. [모름]·「미확인」 줄은 그 대상 부분 하나에만 「확인하지 못했다」로 남기고 그 일이 일어났다는 문장으로 바꾸지 않으며, 근거로 쓴 파일의 존재가 미확인이면 그 사실도 함께 쓴다. 원문의 부정(없음·아님·못함·금지)은 그대로 보존한다. [보고]가 붙은 관측 결과 줄(「아직 한 번도 보지 못함」 같은 부정 관측을 포함)은 그 결과를 낸 부분의 reported 주장으로 옮기고 일정·계획보다 앞에 둔다. 원문의 「앞으로 할 일」 첫 줄과 「모르는 것」의 각 줄은 맡은 부분의 claims에 남긴다. claim.at이 가리키는 원문 안의 시각·sha·순번·코드 이름은 주장 문장에서 지우지 말고 그대로 옮긴다. 같은 원문 줄의 같은 사실은 한 부분에만 싣는다. blueprint.global 항목의 끝에 「→」로 다른 부분 ref가 적혀 있으면 그 항목은 이 부분에 쓰지 않는다.
+role은 이 부분이 받는 것과 내는 것을 원문 이름으로 포함한다. 설계 일정(시각·주기)은 role에 한 번만 쓰고, claims에는 실제 상태 보고(첫 행 OK, 라벨 미관측 같은)를 먼저 쓴다. 「다음 ~ 묶음」「~ 전」「예정」은 보고 문장 안에 있어도 계획(want)이다. 작성자가 직접 실행하지 않았다고 밝힌 통과·OK·rc 0은 checked가 아니라 reported로 쓴다. 원문이 [실행: 명령] 꼬리표를 붙인 검사 결과는 작성자가 직접 돌린 것이므로 checked이고, [보고]·[대화] 꼬리표는 reported, [추정]은 describes(추정임을 남김), [모름]은 확인하지 못했다는 reported다. [모름]·「미확인」 줄은 그 대상 부분 하나에만 「확인하지 못했다」로 남기고 그 일이 일어났다는 문장으로 바꾸지 않으며, 근거로 쓴 파일의 존재가 미확인이면 그 사실도 함께 쓴다. 원문의 부정(없음·아님·못함·금지)은 그대로 보존한다. [보고]가 붙은 관측 결과 줄(「아직 한 번도 보지 못함」 같은 부정 관측을 포함)은 그 결과를 낸 부분의 reported 주장으로 옮기고 일정·계획보다 앞에 둔다. 원문의 「앞으로 할 일」 첫 줄과 「모르는 것」의 각 줄은 맡은 부분의 claims에 남긴다. claim.at이 가리키는 원문 안의 시각·sha·순번·코드 이름은 주장 문장에서 지우지 말고 그대로 옮긴다. 같은 원문 줄의 같은 사실은 한 부분에만 싣는다. blueprint.global 항목의 끝에 「→」로 다른 부분 ref가 적혀 있으면 그 항목은 이 부분에 쓰지 않는다.
 relations/candidates/gaps/matches/material은 모두 빈 배열로 둔다. summary는 빈 문자열로 둔다. 조건을 역할/주장에 함께 보존하며 계획·보고·검사·철회를 원문보다 강하게 만들지 않는다.
 다른 assignment 부분도 parent로 참조할 수 있으나 blueprint/원래 INPUT에 있는 ref만 허용된다. 지정한 부분을 작성할 근거가 부족하면 사실을 만들지 말고 원래 계약의 want/describes/reported와 불확실한 범위를 지킨다.`;
 export const GLOBAL_RULES = `
@@ -118,8 +118,9 @@ export const FINAL_GLOBAL_RULES = `
 // produced it, before schedules and plans (the .14 map lost the record's observed flow).
 // .16: the times, shas, sequence numbers and code names inside a claim's own passage stay in the claim's sentence.
 // .17: a plan's focus may run to 400 characters and its global list to 32 items (a real .16 plan was refused twice at 240).
-export const PIPELINE_RECIPE = 'first-map-divided.17';
-export const LATER_PIPELINE_RECIPE = 'later-map-divided.17';
+// .18: the evidence tags of a report written to the app's request ([실행]/[보고]/[대화]/[추정]/[모름]) map to claim kinds.
+export const PIPELINE_RECIPE = 'first-map-divided.18';
+export const LATER_PIPELINE_RECIPE = 'later-map-divided.18';
 const MODELS = new Set(['gpt-6.1-sol', 'gpt-6-astra', 'gpt-6.1-terra']);
 // The route rule is shared with the browser and studio.mjs (shared/map-route.ts): a first map.6 or a later map.7.
 export { isFirstMap };

@@ -82,3 +82,42 @@ ${open.join('\n')}
 - 새 기준: 날짜·sha
 비밀값은 [가림]. 지난 보고를 다시 쓰지 마.`;
 }
+
+/** The first reading takes this many characters of a record; a report longer than that is read in later passes. */
+export const REPORT_FIRST_CHARS = 12000;
+const TAG = /\[(파일|보고|실행|추정|모름|대화|붙임)(:[^\]]*)?\]/g;
+/** An arrow line is marked [설계] or [관찰] in place of an evidence tag: it counts as tagged. */
+const LINE_TAG = /\[(파일|보고|실행|추정|모름|대화|붙임|설계|관찰)(:[^\]]*)?\]/;
+const PASS = /통과|\bOK\b|rc 0|완료|성공/;
+const SECTIONS: [string, RegExp][] = [['부분', /부분/], ['연결', /연결|→/], ['철회·변경', /철회|변경/], ['다음 관문', /다음 관문/], ['모르는 것', /모르는 것|\[모름\]/]];
+export interface ReportCheck {
+  chars: number;
+  /** Lines of content with at least one evidence tag, and without one (headings, table rules and short lines are not counted). */
+  tagged: number; untagged: number;
+  /** Lines that say a pass (통과·OK·rc 0·완료·성공) with no [실행] and no [보고] tag: a pass nobody vouches for. */
+  passesUnrun: number;
+  /** Sections the request asked for that the text does not seem to have. */
+  missing: string[];
+  /** Sections that begin past the first reading's cut. */
+  cut: string[];
+}
+/** What a pasted report looks like against the request, or null when the text does not read as one (fewer than five tags): a
+ * transcript or a plain note is checked by nothing here. */
+export function checkReport(text: string): ReportCheck | null {
+  const tags = text.match(TAG); if (!tags || tags.length < 5) return null;
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length >= 12 && !/^[|\-:\s]+$/.test(l) && !/^(#+\s|\d+\.\s)/.test(l));
+  let tagged = 0, untagged = 0, passesUnrun = 0;
+  for (const l of lines) {
+    if (LINE_TAG.test(l)) tagged++; else untagged++;
+    if (PASS.test(l) && !/\[실행/.test(l) && !/\[보고/.test(l) && !/\[대화/.test(l)) passesUnrun++;
+  }
+  const missing = SECTIONS.filter(([, re]) => !re.test(text)).map(([n]) => n);
+  const cut = text.length > REPORT_FIRST_CHARS ? SECTIONS.filter(([, re]) => { const m = re.exec(text); return !!m && m.index >= REPORT_FIRST_CHARS; }).map(([n]) => n) : [];
+  return { chars: text.length, tagged, untagged, passesUnrun, missing, cut };
+}
+/** The check in one quiet line, and the line to paste back into the AI chat when something should be written again. */
+export function reportCheckLine(c: ReportCheck): { text: string; again: string | null } {
+  const parts = [`꼬리표 있는 줄 ${c.tagged}`, c.untagged ? `없는 줄 ${c.untagged}` : '', c.passesUnrun ? `[실행]·[보고] 없는 통과 ${c.passesUnrun}` : '', c.missing.length ? `빠진 절: ${c.missing.join('·')}` : '', c.cut.length ? `${REPORT_FIRST_CHARS.toLocaleString()}자 넘음: ${c.cut.join('·')}은 첫 읽기 밖` : ''].filter(Boolean);
+  const again = [c.untagged > c.tagged / 4 ? '꼬리표 없는 문장마다 [파일]/[보고]/[실행]/[추정]/[모름] 하나를 붙여 다시 써 줘.' : '', c.passesUnrun ? '네가 직접 돌리지 않은 통과·OK·완료는 [보고: 출처]로 표시해 줘.' : '', c.missing.length ? `${c.missing.join('·')} 절을 채워 줘(없으면 없다고).` : '', c.cut.length ? `${REPORT_FIRST_CHARS.toLocaleString()}자 안에 들도록 줄이되 ${c.cut.join('·')}은 남겨 줘.` : ''].filter(Boolean).join(' ');
+  return { text: `보고서 점검 · ${parts.join(' · ')}`, again: again || null };
+}

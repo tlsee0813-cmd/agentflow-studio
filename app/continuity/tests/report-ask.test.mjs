@@ -2,7 +2,7 @@
 // bounds, and the delta request built from a map's own names.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { PROJECT_REPORT_ASK, CHAT_REPORT_ASK, REPORT_ASK_EXPLAIN, REPORT_TAGS, deltaReportAsk } from '../dist/public/shared/report-ask.js';
+import { PROJECT_REPORT_ASK, CHAT_REPORT_ASK, REPORT_ASK_EXPLAIN, REPORT_TAGS, deltaReportAsk, checkReport, reportCheckLine, REPORT_FIRST_CHARS } from '../dist/public/shared/report-ask.js';
 import { buildExample, EXAMPLES } from '../dist/public/shared/studio-examples.js';
 import { studioView } from '../dist/public/shared/studio.js';
 
@@ -32,4 +32,18 @@ test('ASK-3 the delta request carries the map\'s own part names and states, the 
   const later = deltaReportAsk(v, [reading]);
   assert.ok(later.includes('- 엔진의 6시간 기준선')); assert.ok(later.includes('- 감시 조건이 바뀌었는지')); assert.ok(later.includes('지난 기준: 2026-11-01'));
   assert.ok(later.length <= 3000, String(later.length));
+});
+
+test('ASK-4 the report check counts tagged and untagged lines, passes nobody vouches for, missing sections and what the cut leaves out; a plain note is not checked', () => {
+  assert.equal(checkReport('그냥 메모입니다. 통과했어요.'), null);
+  const report = ['2. 부분(표)', '엔진 | 행을 합성한다 | code/engine.py | 돌고 있음 | [파일: code/engine.py]', '카드 러너 | 카드를 쓴다 | runner.py | 작업 중 [보고: ops 11-02]',
+    '3. 연결', '카드 러너 → 엔진: review 행을 카드 박자마다 [설계]', '테스트가 모두 통과했다.', '검사 rc 0 [실행: npm test]', '5. 철회·변경', '옛 결정 → 지금 → 근거 [파일: STATE.md]',
+    '8. 다음 관문', 'TX 라벨이 찍히면 → e=1 ON [추정]', '9. 모르는 것', '미니PC의 지금 상태 [모름]', '사이드카가 돌고 있는지 [모름]', '이 줄에는 꼬리표가 없습니다 정말로'].join('\n');
+  const c = checkReport(report);
+  assert.ok(c); assert.equal(c.untagged, 2); assert.equal(c.passesUnrun, 1); assert.deepEqual(c.missing, []); assert.deepEqual(c.cut, []);
+  assert.ok(c.tagged >= 8);
+  const line = reportCheckLine(c);
+  assert.ok(line.text.startsWith('보고서 점검 ·')); assert.ok(line.again && line.again.includes('[보고: 출처]'));
+  const long = `${'가'.repeat(REPORT_FIRST_CHARS + 10)}\n9. 모르는 것 [모름] [모름] [모름] [모름] [모름]\n`;
+  const lc = checkReport(long); assert.ok(lc); assert.ok(lc.cut.includes('모르는 것')); assert.ok(lc.missing.includes('다음 관문'));
 });
