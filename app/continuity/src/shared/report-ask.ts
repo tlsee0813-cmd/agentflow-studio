@@ -121,3 +121,12 @@ export function reportCheckLine(c: ReportCheck): { text: string; again: string |
   const again = [c.untagged > c.tagged / 4 ? '꼬리표 없는 문장마다 [파일]/[보고]/[실행]/[추정]/[모름] 하나를 붙여 다시 써 줘.' : '', c.passesUnrun ? '네가 직접 돌리지 않은 통과·OK·완료는 [보고: 출처]로 표시해 줘.' : '', c.missing.length ? `${c.missing.join('·')} 절을 채워 줘(없으면 없다고).` : '', c.cut.length ? `${REPORT_FIRST_CHARS.toLocaleString()}자 안에 들도록 줄이되 ${c.cut.join('·')}은 남겨 줘.` : ''].filter(Boolean).join(' ');
   return { text: `보고서 점검 · ${parts.join(' · ')}`, again: again || null };
 }
+
+/** The three lines only the person can write (no AI knows them): what they want next, which report they do not trust, which
+ * decision they themselves reversed. Saved as a record of its own, marked as the person's own words, so a reading gives them
+ * the authority of a request. */
+export const OWN_LINES = ['다음에 원하는 것', '믿지 못하는 보고', '직접 뒤집은 결정'] as const;
+export function ownLinesTemplate(at: Date = new Date()): string {
+  const when = `${at.getFullYear()}-${String(at.getMonth() + 1).padStart(2, '0')}-${String(at.getDate()).padStart(2, '0')}`;
+  return [`[프로젝트 소유자가 직접 적음 · ${when}]`, ...OWN_LINES.map(l => `${l}: `)].join('\n');
+}

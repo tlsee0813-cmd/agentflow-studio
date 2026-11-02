@@ -19,7 +19,7 @@ import { sessionText, recordParts, quoteNext, NEXT_RECORD, NEXT_LINE, RECORD_HEA
 import { readSessionFile, type SessionSources } from './session-source.js';
 import { WEB_RECORD_ASK, foldRecord, sessionOrigin, originLabel, sessionName } from '../shared/handover.js';
 import { PASTED_TEXT_LIMIT, isMapReading, type Project } from '../shared/types.js';
-import { PROJECT_REPORT_ASK, REPORT_ASK_EXPLAIN, checkReport, reportCheckLine } from '../shared/report-ask.js';
+import { PROJECT_REPORT_ASK, REPORT_ASK_EXPLAIN, checkReport, reportCheckLine, ownLinesTemplate } from '../shared/report-ask.js';
 import { nearSameRecord } from '../shared/domain.js';
 import { recordTexts } from '../shared/request-return.js';
 import type { PlanOpened } from './plan-view.js';
@@ -783,6 +783,17 @@ export function createReturnView(host: ReturnHost) {
       check.replaceChildren(...[line.text, line.again ? h('button', { type: 'button', class: 'link-button quiet', title: line.again, onclick: async () => { try { await navigator.clipboard.writeText(line.again!); check.append(h('span', { class: 'rr-check-said' }, ' 복사했어요.')); } catch { check.append(h('span', { class: 'rr-check-said' }, ` ${line.again}`)); } } }, '다시 써 달라는 문구 복사') : null].filter((x): x is string | HTMLButtonElement => x !== null));
     };
     syncCheck(text);
+    // What no AI can report: the person's own three lines, put into the box as a record of their own (after any text already
+    // there, as a next record) with the caret ready at the first line.
+    const own = h('button', { type: 'button', class: 'link-button rr-own', title: '다음에 원하는 것, 믿지 못하는 보고, 직접 뒤집은 결정: AI는 모르는 것이라 지도가 요청의 권위로 읽어요', onclick: () => {
+      const tpl = ownLinesTemplate(), was = area.value.trim() ? `${area.value.trimEnd()}
+
+${NEXT_RECORD}
+
+` : '';
+      area.value = `${was}${tpl}`; area.dispatchEvent(new Event('input'));
+      const at = was.length + tpl.indexOf(': ') + 2; area.focus(); area.setSelectionRange(at, at);
+    } }, '내가 아는 것 세 줄 적기');
     area.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); backToReading(); } });
     area.addEventListener('input', () => {
       keepDraft(st.key, area.value); count.textContent = area.value ? `${area.value.length.toLocaleString()}자` : ''; warn.hidden = !secretLike(area.value);
@@ -821,7 +832,7 @@ export function createReturnView(host: ReturnHost) {
       h('p', { class: 'fine' }, `나누거나 종류·부분을 고르지 않아도 돼요. ${host.autoConnected() ? AUTO_SENDS : '저장한 뒤 지도 정리나 요약을 누를 때만 AI에 보내요.'}`),
       ctx ? h('p', { class: 'rr-context' }, h('span', {}, '보던 부분'), partChip(ctx),
         h('button', { type: 'button', class: 'link-button quiet', title: '읽기 맥락에서 빼요', onclick: () => { st.pasteContext = null; render(); } }, '빼기')) : null,
-      sessionBox(st.key), area, warn, count, hiding, check, st.pasteMsg ? h('p', { class: st.pasteMsg.ok ? 'pp-ok' : 'pp-error', role: st.pasteMsg.ok ? 'status' : 'alert' }, st.pasteMsg.text) : null)];
+      sessionBox(st.key), area, h('p', { class: 'fine rr-own-line' }, own, ' — 다음에 원하는 것 · 믿지 못하는 보고 · 직접 뒤집은 결정. AI는 모르는 것이라 지도가 요청의 권위로 읽어요.'), warn, count, hiding, check, st.pasteMsg ? h('p', { class: st.pasteMsg.ok ? 'pp-ok' : 'pp-error', role: st.pasteMsg.ok ? 'status' : 'alert' }, st.pasteMsg.text) : null)];
   }
   function pasteFooter(): Node {
     const st = s!;

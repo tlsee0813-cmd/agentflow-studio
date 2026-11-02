@@ -2,7 +2,7 @@
 // bounds, and the delta request built from a map's own names.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { PROJECT_REPORT_ASK, CHAT_REPORT_ASK, REPORT_ASK_EXPLAIN, REPORT_TAGS, deltaReportAsk, checkReport, reportCheckLine, REPORT_FIRST_CHARS } from '../dist/public/shared/report-ask.js';
+import { PROJECT_REPORT_ASK, CHAT_REPORT_ASK, REPORT_ASK_EXPLAIN, REPORT_TAGS, deltaReportAsk, checkReport, reportCheckLine, REPORT_FIRST_CHARS, ownLinesTemplate, OWN_LINES } from '../dist/public/shared/report-ask.js';
 import { buildExample, EXAMPLES } from '../dist/public/shared/studio-examples.js';
 import { studioView } from '../dist/public/shared/studio.js';
 
@@ -46,4 +46,10 @@ test('ASK-4 the report check counts tagged and untagged lines, passes nobody vou
   assert.ok(line.text.startsWith('보고서 점검 ·')); assert.ok(line.again && line.again.includes('[보고: 출처]'));
   const long = `${'가'.repeat(REPORT_FIRST_CHARS + 10)}\n9. 모르는 것 [모름] [모름] [모름] [모름] [모름]\n`;
   const lc = checkReport(long); assert.ok(lc); assert.ok(lc.cut.includes('모르는 것')); assert.ok(lc.missing.includes('다음 관문'));
+});
+
+test('ASK-5 the person\'s own three lines come as a dated record of their own words', () => {
+  const t = ownLinesTemplate(new Date('2026-11-03T12:00:00Z'));
+  assert.ok(t.startsWith('[프로젝트 소유자가 직접 적음 · 2026-11-03]'));
+  for (const l of OWN_LINES) assert.ok(t.includes(`${l}: `), l);
 });
