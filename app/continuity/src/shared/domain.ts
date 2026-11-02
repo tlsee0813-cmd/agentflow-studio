@@ -575,6 +575,30 @@ export function secretPasted(p: Project): PastedRecord[] { return p.pasted.filte
  * is another record, never merged. The text itself is never changed: the stored one stays. */
 const outerText=(t:string)=>t.replace(/\r\n?/g,'\n').trim();
 const sameRecordText=(a:string,b:string)=>a===b||outerText(a)===outerText(b);
+/** A text nearly the same as a record already kept (a second copy with a stray character at its end, a word changed): how many
+ * characters (code points) differ once the outer white space is set aside, when that is at most NEAR_RECORD_CHARS and the rest
+ * of the text is the same (0: only white space inside differs); null when the texts are the same record (sameRecordText), differ
+ * by more, or share no real common text (two short unrelated notes). A hint for the person: nothing is merged here. */
+export const NEAR_RECORD_CHARS=8;
+export function nearSameRecordText(a:string,b:string):number|null{
+  if(sameRecordText(a,b))return null;
+  const x=Array.from(outerText(a)),y=Array.from(outerText(b));
+  if(x.join('').replace(/\s+/g,'')===y.join('').replace(/\s+/g,''))return 0;
+  const n=Math.min(x.length,y.length);let p=0;while(p<n&&x[p]===y[p])p++;
+  let q=0;while(q<n-p&&x[x.length-1-q]===y[y.length-1-q])q++;
+  // The common head and tail must be (nearly) all of the shorter text: a difference is a small patch, never most of the text.
+  if(p+q<Math.max(1,n-NEAR_RECORD_CHARS))return null;
+  const d=Math.max(x.length,y.length)-p-q;return d<=NEAR_RECORD_CHARS?d:null;
+}
+/** The kept pasted record (never a provided source) this text is nearly the same as, the closest one; null when none, and null
+ * when the very same record is kept (pasteRecord then says so itself). */
+export function nearSameRecord(p:Project,value:string):{record:PastedRecord;differs:number}|null{
+  const kept=p.pasted.filter(r=>!r.evidence);
+  if(kept.some(r=>sameRecordText(r.text,value)))return null;
+  let best:{record:PastedRecord;differs:number}|null=null;
+  for(const r of kept){const d=nearSameRecordText(r.text,value);if(d!==null&&(!best||d<best.differs))best={record:copy(r),differs:d};}
+  return best;
+}
 export function pasteRecord(p: Project, value: string, context: string|null): {project:Project;record:PastedRecord;duplicate:boolean} {
   // Only a record pasted as it came is that record again: a provided source with the same bytes is another record.
   const same=p.pasted.find(r=>!r.evidence&&sameRecordText(r.text,value)); if(same) return {project:p,record:same,duplicate:true};

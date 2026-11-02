@@ -56,3 +56,28 @@ test('a record a map reading has read stays: the reading quotes it', () => {
   assert.equal(D.recordReadIntoMap(extra.project, extra.record.id), false);
   parseProject(serializeProject(D.removePastedRecord(extra.project, extra.record.id)));
 });
+
+test('a text nearly the same as a kept record (a stray character at its end, white space inside) is said with how much differs; more is another record', () => {
+  const p = D.pasteRecord(D.createProject(), TEXT, null).project;
+  assert.equal(D.nearSameRecordText(TEXT, TEXT), null, 'the same record is not "nearly" the same');
+  assert.equal(D.nearSameRecordText(TEXT, `${TEXT}.`), 1);
+  assert.equal(D.nearSameRecordText(`${TEXT}.`, TEXT), 1);
+  assert.equal(D.nearSameRecordText(TEXT, TEXT.replace('전달합니다.', '전달합니다.   ')), 0, 'white space inside only');
+  assert.equal(D.nearSameRecordText(TEXT, TEXT.replace('작업 큐', '작업큐')), 0);
+  assert.equal(D.nearSameRecordText(TEXT, TEXT.replace('문서를', '파일을')), 3);
+  assert.equal(D.nearSameRecordText(TEXT, `${TEXT}\n추가 조건: 개발 판본만.`), null, 'a real addition is another record');
+  assert.equal(D.nearSameRecordText(TEXT, '전혀 다른 기록'), null);
+  // Two short unrelated notes share no real text: not "nearly the same" however short; a small patch in a short note still is.
+  assert.equal(D.nearSameRecordText('네', '아니요 다름'), null); assert.equal(D.nearSameRecordText('작업 완료', '다른 메모'), null);
+  assert.equal(D.nearSameRecordText('', 'abc'), null); assert.equal(D.nearSameRecordText('abc', 'abd'), 1);
+  assert.equal(D.nearSameRecordText(TEXT, `${TEXT}😀`), 1, 'counted in code points, not UTF-16 units');
+  const near = D.nearSameRecord(p, `  ${TEXT}.\n`);
+  assert.equal(near.record.id, p.pasted[0].id); assert.equal(near.differs, 1);
+  assert.equal(D.nearSameRecord(p, TEXT), null, 'the same record is left to pasteRecord');
+  const both = D.pasteRecord(p, `${TEXT}.`, null).project;
+  assert.equal(D.nearSameRecord(both, TEXT), null, 'the very same record is kept beside a near one: no question');
+  assert.equal(D.nearSameRecord(both, `${TEXT}.`), null); assert.equal(D.nearSameRecord(both, `${TEXT}..`).differs, 1);
+  assert.equal(D.nearSameRecord(p, '전혀 다른 기록'), null);
+  // The domain rule is unchanged: such a text is still kept as a record of its own when the person says so.
+  assert.equal(D.pasteRecord(p, `${TEXT}.`, null).duplicate, false);
+});

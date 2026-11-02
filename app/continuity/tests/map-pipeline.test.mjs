@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { ApiError } from '../../server/errors.mjs';
 import { encodeSpans } from '../dist/public/shared/evidence-span.js';
 import { validateMapAsk, validateMapReply } from '../dist/public/shared/map-reading.js';
-import { createFirstMapPipeline, PIPELINE_RECIPE, LATER_PIPELINE_RECIPE , PLAN_TIMEOUT_MS } from '../server/map-pipeline.mjs';
+import { createFirstMapPipeline, PIPELINE_RECIPE, LATER_PIPELINE_RECIPE , PLAN_TIMEOUT_MS, GLOBAL_RULES, FIRST_GLOBAL_RULES, FIRST_FINAL_GLOBAL_RULES, FINAL_GLOBAL_RULES } from '../server/map-pipeline.mjs';
 import { openFirstMapPipeline } from '../server/map-pipeline-host.mjs';
 import { parseProject } from '../dist/public/shared/validation.js';
 import { openMapPipelineStore } from '../server/map-pipeline-store.mjs';
@@ -553,6 +553,32 @@ test('render model options preserve the DeepSeek default and distinguish provide
   for (const pipeline of [defaults, terra, sol]) assert.notEqual(pipeline.identity, pipeline.laterIdentity);
 });
 
+// first-map-divided.10: a first map's global review may ask a rewrite only for a withdrawn thing stated as current; a missing
+// condition goes to gaps, and the final review is told so too. A later map's reviews keep their rules (its obligations are code).
+test('a first map alone carries the first-map review rules in its global and final-global prompts', async t => {
+  const { make } = await setup(t), ask = askFor(), calls = [];
+  const pipeline = make({ renderModel: 'gpt-6.1-terra', callProvider: fakeProvider(ask, calls) });
+  validateMapReply(await pipeline.call(ask), ask);
+  const global = calls.find(c => c.stage === 'global');
+  assert.ok(global.options.system.endsWith(GLOBAL_RULES + FIRST_GLOBAL_RULES));
+  assert.match(FIRST_GLOBAL_RULES, /빠진 중요한 조건은 gaps/); assert.match(FIRST_FINAL_GLOBAL_RULES, /reviseParts를 보내지 말고/);
+  const inp = laterFor(), laterCalls = [];
+  const later = make({ targetChars: 1000, maxPartitions: 24, callProvider: fakeProvider(inp.ask, laterCalls, () => {}, K.replyFor7(inp.ask, inp.records)) });
+  await later.call(inp.ask);
+  const laterGlobal = laterCalls.find(c => c.stage === 'global');
+  assert.ok(laterGlobal.options.system.endsWith(GLOBAL_RULES)); assert.equal(laterGlobal.options.system.includes(FIRST_GLOBAL_RULES), false);
+  assert.notEqual(pipeline.identity, pipeline.laterIdentity);
+  // After the one rewrite, a first map's final review carries both first-map rules, in that order after the shared ones.
+  // A store of its own: the first run above would otherwise be replayed and no stage sent.
+  const wire = manyPartsWire(ask), revisedCalls = [], fresh = await setup(t);
+  const revised = fresh.make({ renderModel: 'gpt-6.1-terra', callProvider: fakeProvider(ask, revisedCalls, call => {
+    if (call.stage === 'global' && !call.input.semanticReview) return revisionFor(ask, 'new:flow3');
+  }, wire) });
+  validateMapReply(await revised.call(ask), ask);
+  const final = revisedCalls.filter(c => c.stage === 'global').at(-1);
+  assert.ok(final.input.semanticReview); assert.ok(final.options.system.endsWith(GLOBAL_RULES + FIRST_GLOBAL_RULES + FINAL_GLOBAL_RULES + FIRST_FINAL_GLOBAL_RULES));
+});
+
 // first-map-divided.9: the plan may write 16,384 output tokens within 300 s; renders and global stages keep 8,192 within 180 s.
 test('the plan stage alone gets the larger output budget and the longer time limit', async t => {
   const { make } = await setup(t), ask = askFor(), calls = [];
@@ -1044,8 +1070,8 @@ function browserApply(f, wire, exclusions, n = 7) {
 }
 
 test('recipe identities are bumped for the changed prompts and validation semantics', () => {
-  assert.equal(PIPELINE_RECIPE, 'first-map-divided.9');
-  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.9');
+  assert.equal(PIPELINE_RECIPE, 'first-map-divided.10');
+  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.10');
 });
 
 test('a render fragment with one unresolvable claim alias is applied with only that claim set aside and a durable diagnostic', async t => {

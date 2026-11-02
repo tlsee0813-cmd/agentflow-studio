@@ -19,6 +19,7 @@ import { sessionText, recordParts, quoteNext, NEXT_RECORD, NEXT_LINE, RECORD_HEA
 import { readSessionFile, type SessionSources } from './session-source.js';
 import { WEB_RECORD_ASK, foldRecord, sessionOrigin, originLabel, sessionName } from '../shared/handover.js';
 import { PASTED_TEXT_LIMIT, isMapReading, type Project } from '../shared/types.js';
+import { nearSameRecord } from '../shared/domain.js';
 import { recordTexts } from '../shared/request-return.js';
 import type { PlanOpened } from './plan-view.js';
 import type { PlanBundle } from './plan-store.js';
@@ -266,6 +267,16 @@ export function createReturnView(host: ReturnHost) {
     // What looks like a credential is hidden as the import hides it (a web AI's record copies the requests as written): hidden, not
     // refused.
     const st = s, hid = recordParts(text).map(t => redactSecrets(foldRecord(t))), parts = hid.map(r => r.text), n = hid.reduce((a, r) => a + r.count, 0);
+    // A text nearly the same as a record already kept (a second copy with a stray character at its end): asked about, never merged.
+    const cur = host.current();
+    if (cur?.kind === 'saved') for (const part of parts) {
+      const near = nearSameRecord(cur.project, part);
+      if (!near) continue;
+      const how = near.differs ? `${near.differs}글자만` : '띄어쓰기만';
+      if (!confirm(`${fullTime(near.record.at)}에 저장한 기록과 ${how} 달라요. 같은 글을 다시 붙인 것이면 저장하지 않는 게 맞아요. 그래도 새 기록으로 저장할까요?`)) {
+        st.pasteMsg = { text: `저장하지 않았어요. ${fullTime(near.record.at)}에 저장한 기록과 ${how} 달라요. 다른 글이면 고쳐서 다시 저장하세요.`, ok: false }; render(); return;
+      }
+    }
     st.saving = true; render();
     const done = await host.paste(parts, st.pasteContext);
     st.saving = false;
@@ -648,8 +659,9 @@ export function createReturnView(host: ReturnHost) {
     const all = sources();
     const list = all.slice(0, max);
     return h('section', { class: 'rr-sec rr-material' }, h('h3', {}, '원자료', h('small', {}, `${all.length}`)),
+      // Each row opens the source; an unread pasted record can be taken out right here (a copy pasted twice).
       h('ol', {}, ...list.map(x => h('li', {}, h('button', { type: 'button', class: 'rr-src', onclick: () => openSource(x, 'material') },
-        ...srcLabel(x))))),
+        ...srcLabel(x)), removeButton(x.recordId, () => { void refresh(); }, x.title)))),
       all.length > max ? h('button', { type: 'button', class: 'link-button', onclick: () => { s!.view = { kind: 'material' }; render(); } }, `${all.length}개 모두 보기`) : null,
       !all.length ? h('p', { class: 'fine' }, '읽을 기록이나 붙인 자료가 아직 없어요.') : null);
   }
@@ -727,17 +739,25 @@ export function createReturnView(host: ReturnHost) {
       // Arrived by a quote: the original, with the quote marked, is what this view is for (the readings are one step back).
       quote ? null : read ?? h('p', { class: 'rr-lead' }, s?.pending ? '읽는 중이에요…' : src.recordId && host.readIntoMap(src.recordId) ? '지도 정리에 읽힌 기록이에요. 이 기록의 따로 요약은 아직 없어요.' : '아직 이 기록을 읽지 않았어요.'),
       // A record not read into any map yet can be taken out again (a copy pasted twice, the wrong text): one click, said back.
-      !quote && kept && !host.readIntoMap(kept.id) ? h('p', { class: 'rr-acts rr-record-acts' }, h('button', { type: 'button', class: 'link-button quiet rr-record-remove',
-        title: '지도 정리에 아직 읽히지 않은 기록만 지울 수 있어요. 되돌릴 수 없어요.', onclick: async (e: Event) => {
-          const button = e.currentTarget as HTMLButtonElement;
-          if (!confirm('이 기록을 지울까요? 지도 정리에 아직 읽히지 않은 기록이라 지울 수 있고, 되돌릴 수 없어요.')) return;
-          button.disabled = true;
-          const failed = await host.removeRecord(kept.id);
-          if (failed) { button.disabled = false; button.insertAdjacentElement('afterend', h('span', { class: 'fine pp-error', role: 'status' }, ` ${failed}`)); return; }
-          backToReading();
-        } }, '이 기록 지우기')) : null,
+      !quote && kept && !host.readIntoMap(kept.id) ? h('p', { class: 'rr-acts rr-record-acts' }, removeButton(kept.id, backToReading)) : null,
       h('blockquote', { class: `rr-quote rr-raw${e?.kind === 'code' ? ' code' : ''}` }, ...quoted(kept?.text ?? src.text, quote, quote && at !== undefined ? { at, length: quote.length } : undefined)),
       sentTo !== undefined && sentTo < (kept?.text ?? src.text).length ? h('p', { class: 'fine' }, `읽을 때 앞 ${sentTo.toLocaleString()}자만 보내요 · 전체 ${(kept?.text ?? src.text).length.toLocaleString()}자`) : null), ...after];
+  }
+  /** The one-click removal of a pasted record no map reading has read yet (a copy pasted twice, the wrong text), said back; null
+   * for a record a reading rests on. after: what to show once it is gone. */
+  function removeButton(recordId: string | undefined, after: () => void, name: string | null = null): Node | null {
+    const kept = recordId ? host.current()?.project.pasted.find(x => x.id === recordId) ?? null : null;
+    if (!kept || host.readIntoMap(kept.id)) return null;
+    return h('button', { type: 'button', class: 'link-button quiet rr-record-remove', ...(name ? { 'aria-label': `이 기록 지우기: ${name}` } : {}),
+      title: '지도 정리에 아직 읽히지 않은 기록만 지울 수 있어요. 되돌릴 수 없어요.', onclick: async (e: Event) => {
+        e.stopPropagation();
+        const button = e.currentTarget as HTMLButtonElement;
+        if (!confirm('이 기록을 지울까요? 지도 정리에 아직 읽히지 않은 기록이라 지울 수 있고, 되돌릴 수 없어요.')) return;
+        button.disabled = true;
+        const failed = await host.removeRecord(kept.id);
+        if (failed) { button.disabled = false; button.insertAdjacentElement('afterend', h('span', { class: 'fine pp-error', role: 'status' }, ` ${failed}`)); return; }
+        after();
+      } }, '이 기록 지우기');
   }
   function pasteBody(o: PlanOpened): Node[] {
     const st = s!, text = draftOf(st.key), ctx = st.pasteContext && o.view.parts.some(p => p.id === st.pasteContext) ? st.pasteContext : null;
