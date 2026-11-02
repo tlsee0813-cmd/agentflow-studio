@@ -724,8 +724,12 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
   for (const c of all.reverse()) {
     // The same words about another version are another claim: never merged across versions.
     const key = `${c.kind}|${norm(c.text)}|${c.about ?? ''}`;
-    if (replaced.has(`${c.reading}:${c.index}`) || seen.has(key)) continue;
-    seen.add(key); claims.push(c);
+    if (seen.has(key)) continue;
+    // A withdrawn latest copy still occupies its semantic key: older duplicates stay history, never revive as current.
+    // A new assertion after that withdrawal is visited first and remains current on its own evidence.
+    seen.add(key);
+    if (replaced.has(`${c.reading}:${c.index}`)) continue;
+    claims.push(c);
   }
   const state = STATE_ORDER.find(k => claims.some(c => c.kind === k)) ?? null;
   const revised = claims.some(c => !!c.replaces && (c.kind === 'reported' || c.kind === 'checked'));

@@ -10,7 +10,7 @@ import { buildMapAsk, applyReading, validateMapReply, MAP5_SCHEMA, MAP6_SCHEMA, 
 import { askMap, AskError, ERROR_TEXT, RELEASE_TEXT, type AiStatus } from './studio-api.js';
 import { encodeMapInput, decodeMapInput, jobHash, MAP_JOB_VERSION, type MapJobBinding } from '../shared/map-job.js';
 import { SPAN_INDEX, textDigest } from '../shared/evidence-span.js';
-import { jobApi, JobError, sameJob, type JobReservations, type JobView, type Reservation } from './map-jobs.js';
+import { jobApi, JobError, sameJob, readJobProgress, type JobProgress, type JobReservations, type JobView, type Reservation } from './map-jobs.js';
 import type { FrozenRequest } from '../shared/request-return.js';
 /** SHA-256 of the request's JSON: the very same request is never sent or applied twice. */
 async function askHash(ask: unknown): Promise<string> {
@@ -48,6 +48,13 @@ export interface MapRunHost {
  * the very request sent, kept for this entry in this page until the person applies or discards it (never said to be saved). */
 export interface MapRunState { pending: AbortController | null; committing: boolean; ready: boolean; error: string | null }
 const MAP_ERROR: Record<string, string> = {
+  MAP_PIPELINE_NOT_CONFIGURED: '지도 통합 AI 연결이 준비되지 않았어요. 원문은 보존되어 있어요.',
+  MAP_BUDGET_EXCEEDED: '설정한 AI 비용 상한에 도달해 다음 단계를 보내지 않았어요. 끝난 구간과 원문은 보존되어 있어요.',
+  MAP_STAGE_UNCERTAIN: '이전 AI 요청이 끝났는지 확인되지 않아 같은 구간을 다시 보내지 않았어요. 완료된 구간과 원문은 보존되어 있어요.',
+  MAP_PIPELINE_BUSY: '같은 기록을 이미 나눠 읽고 있어요. 진행 중인 결과를 기다려 주세요.',
+  MAP_PIPELINE_STORE_UNAVAILABLE: '구간별 처리 결과를 안전하게 보관할 수 없어 시작하지 않았어요. 원문은 그대로예요.',
+  MAP_PARTITION_LIMIT: '이번 자료가 한 번에 나눠 읽을 수 있는 범위를 넘었어요. 일부만 읽은 결과를 적용하지 않았어요.',
+  MAP_PARTITION_TOO_LARGE: '하나의 원문 구간이 너무 길어 안전하게 나누지 못했어요. 원문은 그대로예요.',
   MAP_CHANGED: '정리하는 동안 지도가 바뀌어(다른 정리가 반영되었거나 부분이 보관됨) 이번 결과는 반영하지 않았어요. 다시 정리해 주세요.',
   ALREADY_APPLIED: '같은 기록은 이미 지도에 정리했어요.',
   READINGS_FULL: '이 프로젝트에 더 정리할 수 없어요(정리 기록 한도).',
@@ -103,7 +110,7 @@ export const JOB_NOTE = {
  * result is fetched: it is then applied only when the person asks, from its own entry. */
 /** owned: asked from this page (found again otherwise: a reload, another tab). Either way a result is applied only on the save it
  * was asked from (binding.seq) or on saves this page made itself since (onItsSave). release: this page's hold while it sends. */
-interface Op { id: string; cap: string; binding: MapJobBinding; payload: string | null; receipt: boolean; state: string; cancelling: boolean; misses: number; tick: number; owned: boolean; release: (() => void) | null }
+interface Op { id: string; cap: string; binding: MapJobBinding; payload: string | null; receipt: boolean; state: string; cancelling: boolean; misses: number; tick: number; owned: boolean; release: (() => void) | null; progress?: JobProgress | null }
 interface Attempt {
   key: string; project: string; lifecycle: number | null; visit: unknown;
   phase: 'hashing' | 'reserving' | 'asking' | 'ready' | 'committing' | 'closing';
@@ -126,7 +133,10 @@ export function createMapRun(host: MapRunHost) {
     return /^m6-[0-9a-f]{12}$/.test(prompt) ? (/^m7-[0-9a-f]{12}$/.test(map?.laterPrompt ?? '') ? MAP7_SCHEMA : MAP6_SCHEMA) : /^m5-[0-9a-f]{12}$/.test(prompt) ? MAP5_SCHEMA : /^m4-[0-9a-f]{12}$/.test(prompt);
   };
   /** The recipe an ask is asked and bound with: the later m7 one for map.7, else the advertised one. */
-  const promptOf = (inp: MapInput, map: NonNullable<AiStatus['map']>): string => inp.ask.schemaVersion === MAP7_SCHEMA ? map.laterPrompt! : map.prompt;
+  const dividedFirst = (inp: MapInput): boolean => inp.ask.schemaVersion === MAP6_SCHEMA && !inp.ask.parts.length && !(inp.ask.requests ?? []).length && !(inp.ask.priors ?? []).length;
+  const dividedOf = (inp: MapInput, map: NonNullable<AiStatus['map']>) => dividedFirst(inp) ? map.first : inp.ask.schemaVersion === MAP7_SCHEMA ? map.later : undefined;
+  const promptOf = (inp: MapInput, map: NonNullable<AiStatus['map']>): string => dividedOf(inp, map)?.prompt ?? (inp.ask.schemaVersion === MAP7_SCHEMA ? map.laterPrompt! : map.prompt);
+  const modelOf = (inp: MapInput, map: NonNullable<AiStatus['map']>): string => dividedOf(inp, map)?.model ?? map.model;
   /** What a reading would send now (nothing is sent). */
   function input(requestId?: string): MapInput | null { const o = host.current(); return o && o.kind === 'saved' ? buildMapAsk(o.project, o.view, host.requests?.() ?? [], requestId, anchored()) : null; }
   /** AF100: the server keeps map readings as durable jobs, and this page can reserve them. */
@@ -149,6 +159,8 @@ export function createMapRun(host: MapRunHost) {
     const key = o.key, slot = of(key); if (slot.attempt) return;
     const st = host.status(); if (!st.map || !mapAi(st)) return;
     const inp = buildMapAsk(o.project, o.view, mapOnly ? [] : host.requests?.() ?? [], requestId, anchored());
+    const divided = dividedOf(inp, st.map);
+    if (divided && !divided.ready) { slot.error = MAP_ERROR.MAP_PIPELINE_NOT_CONFIGURED!; host.changed(key); return; }
     if (inp.problem) { slot.error = inp.problem === 'NOTHING_NEW' ? '이 범위에서 새로 읽을 기록이 없어요.' : inp.problem === 'REQUEST_CONTEXT_TOO_LARGE' ? '요청 문맥을 한 번에 대조하기 어려워 보고를 읽지 않았어요. 비교할 요청문을 골라 주세요.' : inp.problem === 'TOO_LARGE' ? '지도가 커서 한 번에 보낼 수 없어요.' : '키나 토큰처럼 보이는 글이 있는 기록이 있어 보내지 않았어요.'; host.changed(key); return; }
     if (blocked()) return;
     const a: Attempt = { key, project: o.project.id, lifecycle: o.ref?.lifecycle ?? null, visit: visitOf(), phase: 'hashing', controller: new AbortController(), inp, prompt: promptOf(inp, st.map), hash: '', reply: null, model: '', meta: null, op: null };
@@ -161,7 +173,8 @@ export function createMapRun(host: MapRunHost) {
     const now = host.current();
     if (!same(a, now) || visitOf() !== a.visit) { slot.attempt = null; host.changed(key); return; }
     if (now!.project.readings.some(r => isMapReading(r) && r.hash === a.hash)) { slot.attempt = null; slot.error = MAP_ERROR.ALREADY_APPLIED!; host.changed(key); return; }
-    if (durable()) return runJob(a, inp, st.map.model, now!.ref?.seq ?? null);
+    if (divided && !durable()) { slot.attempt = null; slot.error = MAP_ERROR.MAP_PIPELINE_STORE_UNAVAILABLE!; host.changed(key); return; }
+    if (durable()) return runJob(a, inp, modelOf(inp, st.map), now!.ref?.seq ?? null);
     if (st.map.via === 'jobs') { slot.attempt = null; slot.error = blocked() ?? JOB_ERROR.JOB_STORE_UNAVAILABLE!; host.changed(key); return; } // never asked directly
     a.phase = 'asking';
     let res: { model: string; reply: MapReply };
@@ -288,8 +301,11 @@ export function createMapRun(host: MapRunHost) {
     if (!await sameJob(v, a.op!)) { if (liveOp(a)) await forget(a, JOB_ERROR.MISMATCH!, null); return; }
     if (!liveOp(a)) return;
     const op = a.op!, was = op.state; op.state = v.state; op.misses = 0;
+    const previous = op.progress, progress = v.state === 'accepted' || v.state === 'running' ? readJobProgress(v.progress) : null;
+    op.progress = progress;
+    const progressChanged = previous?.phase !== progress?.phase || previous?.done !== progress?.done || previous?.total !== progress?.total;
     if (v.acked) { await forget(a, null, null); return; } // applied, discarded or seen elsewhere
-    if (v.state === 'accepted' || v.state === 'running') { if (was !== v.state || of(a.key).notice === JOB_ERROR.UNREACHABLE) { of(a.key).notice = null; host.changed(a.key); } return; }
+    if (v.state === 'accepted' || v.state === 'running') { if (was !== v.state || progressChanged || of(a.key).notice === JOB_ERROR.UNREACHABLE) { of(a.key).notice = null; host.changed(a.key); } return; }
     if (v.state === 'ready') { if (a.phase === 'asking') await load(a, v); return; }
     if (v.state === 'cancelled') { await forget(a, op.cancelling ? null : '정리가 취소됐어요. 결과는 없고 기록과 지도는 그대로예요.', 'seen', op.cancelling ? JOB_NOTE.cancelled : null); return; }
     await forget(a, v.state === 'interrupted' ? JOB_ERROR.INTERRUPTED! : errorText(v.error?.code ?? 'AI_UNAVAILABLE', v.error?.detail), 'seen');
@@ -302,7 +318,7 @@ export function createMapRun(host: MapRunHost) {
       if (!r || !v.input) throw new Error();
       inp = decodeMapInput(v.input);
       if (await jobHash(v.input) !== op.binding.inputHash || await jobHash(inp.ask) !== op.binding.askHash || r.askHash !== op.binding.askHash || r.prompt !== op.binding.prompt) throw new Error();
-      if (r.evidence?.index !== SPAN_INDEX || r.evidence.ask !== textDigest(JSON.stringify(inp.ask)) || typeof r.model !== 'string') throw new Error();
+      if (r.evidence?.index !== SPAN_INDEX || r.evidence.ask !== textDigest(JSON.stringify(inp.ask)) || typeof r.model !== 'string' || r.model !== op.binding.model) throw new Error();
       if (!/^R_[0-9a-f-]{36}$/.test(r.reading?.id ?? '') || typeof r.reading.at !== 'string' || new Date(r.reading.at).toISOString() !== r.reading.at) throw new Error();
       reply = validateMapReply(r.wire, inp.ask);
     } catch { if (liveOp(a)) await forget(a, JOB_ERROR.MISMATCH!, 'discarded'); return; }
@@ -447,9 +463,12 @@ export function createMapRun(host: MapRunHost) {
     /** The page is going: nothing more is looked at or sent from it (its jobs stay with the server and the reservations). */
     dispose: () => { disposed = true; if (timer !== null) clearTimeout(timer); timer = null; for (const slot of slots.values()) { slot.attempt?.op?.release?.(); slot.attempt = null; } },
     /** AF100: what the person is told beside the state: the reading continues without this window, cancelling, a notice. */
-    detail: (key?: string): { durable: boolean; cancelling: boolean; notice: string | null } => {
+    detail: (key?: string): { durable: boolean; cancelling: boolean; notice: string | null; progress: string | null } => {
       const k = key ?? host.current()?.key; const slot = k ? of(k) : null, a = slot?.attempt;
-      return { durable: !!a?.op || (!!a && a.phase !== 'ready' && a.phase !== 'committing' && durable()), cancelling: !!a?.op?.cancelling, notice: slot?.notice ?? null };
+      const p = a?.phase === 'asking' && !a.op?.cancelling ? a.op?.progress : null;
+      const progress = p ? p.phase === 'extract' ? `근거 읽기 ${p.done}/${p.total}` : p.phase === 'plan' ? '전체 조건 대조 중…'
+        : p.phase === 'render' ? `부분 정리 ${p.done}/${p.total}` : p.phase === 'global' ? '관계·조건 마지막 확인 중…' : '정리 결과를 바로잡는 중…' : null;
+      return { durable: !!a?.op || (!!a && a.phase !== 'ready' && a.phase !== 'committing' && durable()), cancelling: !!a?.op?.cancelling, notice: slot?.notice ?? null, progress };
     },
     /** The ready reply of the entry open now, applied (a second click while it is applied does nothing). */
     applyReady: (): Promise<void> => { const a = openSlot()?.attempt; return a ? apply(a) : Promise.resolve(); },

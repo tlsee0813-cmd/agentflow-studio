@@ -280,13 +280,19 @@ function inputError(e) {
 export const RELEASE_POLICIES = Object.freeze(['existing-map']);
 const WITHHELD = path => path === '/api/studio/map' || segmentsUnder(path, JOBS) !== null;
 
-export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, config = readStudioConfig(env), jobs = null, mapExecutor = null, policy = null, sessions = null, refused = null, connector = null } = {}) {
+export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, config = readStudioConfig(env), jobs = null, mapExecutor = null, firstMapPipeline = null, policy = null, sessions = null, refused = null, connector = null } = {}) {
   if (policy !== null && !RELEASE_POLICIES.includes(policy)) throw new Error('Unknown release policy.');
   if (policy && (jobs || mapExecutor || sessions || connector)) throw new Error('A limited release takes no map jobs, map executor, local sessions or connector.');
   if (policy && refused) throw new Error('A limited release keeps no refused replies.');
+  if (firstMapPipeline && (!jobs || policy || mapExecutor)) throw new Error('Divided maps require the ordinary local job host.');
   const limiter = createLimiter(config);
   // Every reading except /ask (plan, scope, digest, map and map jobs) is made with the plan model.
   const planConfig = { ...config, model: config.planModel ?? config.model };
+  const divided = ask => !!firstMapPipeline?.eligible(ask);
+  const firstPrompt = () => `m6-${firstMapPipeline.identity.slice(0, 12)}`;
+  const dividedLaterPrompt = () => `m7-${firstMapPipeline.laterIdentity.slice(0, 12)}`;
+  const jobPrompt = (schema, ask) => divided(ask) ? (schema === 'studio.map.7' ? dividedLaterPrompt() : firstPrompt()) : promptFor(schema);
+  const jobModel = ask => divided(ask) ? firstMapPipeline.model : planConfig.model;
   // AF102: a local preview host may give map jobs an executor of its own (a Node-only module it imports itself; never from env or
   // the browser, never in the Worker). It runs map jobs only; /ask, /plan, /scope, /digest and /map keep the DeepSeek key as they
   // are. It answers with a checked wire for the very ask, or fails; there is no fallback to another provider.
@@ -302,14 +308,18 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
     acquire: id => { const own = executor.acquire(id); try { const shared = limiter.acquire(id); return () => { shared(); own(); }; } catch (e) { own(); throw e; } },
     call: async (ask, signal, execution) => { const out = await executor.call(ask, signal, execution); return { model: executor.model, reply: out.wire, evidence: evidenceOf(ask), observed: out.observed }; }
   } : {
-    configured: () => !!config.apiKey, prompt: promptFor, model: planConfig.model, acquire: id => limiter.acquire(id),
-    call: async (ask, signal) => ({ model: planConfig.model, reply: await callStudioModel(ask, planConfig, { fetchImpl, signal, refused }), evidence: evidenceOf(ask) })
+    configured: () => !!config.apiKey, prompt: jobPrompt, model: jobModel, acquire: id => limiter.acquire(id),
+    call: async (ask, signal, _execution, reportProgress) => ({ model: jobModel(ask), reply: divided(ask) ? await firstMapPipeline.call(ask, signal, reportProgress) : await callStudioModel(ask, planConfig, { fetchImpl, signal, refused }), evidence: evidenceOf(ask) })
   };
   /** What a map reading would be made with: the executor's model and recipe when one is given (map jobs only), else the key's. */
   const mapStatus = async () => {
     const later = later7() ? { laterPrompt: await map7PromptId() } : {};
     if (executor) return executor.ready() && jobs.describe().durable ? { map: { model: executor.model, prompt: await mapPromptId(), ...later, via: 'jobs' } } : {};
-    return config.apiKey ? { map: { model: planConfig.model, prompt: await mapPromptId(), ...later } } : {};
+    return config.apiKey ? { map: { model: planConfig.model, prompt: await mapPromptId(), ...later,
+      ...(firstMapPipeline ? {
+        first: { model: firstMapPipeline.model, prompt: firstPrompt(), ready: firstMapPipeline.ready(), method: 'divided', monthlyUsd: firstMapPipeline.describe().monthlyUsd, runUsd: firstMapPipeline.describe().runUsd, deepseekMaxCalls: firstMapPipeline.describe().deepseekMaxCalls ?? 48 },
+        later: { model: firstMapPipeline.model, prompt: dividedLaterPrompt(), ready: firstMapPipeline.ready(), method: 'divided', monthlyUsd: firstMapPipeline.describe().monthlyUsd, runUsd: firstMapPipeline.describe().runUsd, deepseekMaxCalls: firstMapPipeline.describe().deepseekMaxCalls ?? 48 }
+      } : {}) } } : {};
   };
   const statusBody = async () => ({
     ai: config.apiKey ? 'deepseek' : 'off', model: config.apiKey ? config.model : null, access: config.accessCode ? 'code' : 'open',
@@ -402,6 +412,7 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
       admit(request, { methods: ['POST'], maxBytes: ASK_BYTES });
       let ask, raw;
       try { raw = await readRequestText(request, ASK_BYTES); ask = READ_ROUTES[url.pathname](JSON.parse(raw)); } catch (e) { throw inputError(e); }
+      if (divided(ask)) throw new ApiError('MAP_PIPELINE_JOBS_REQUIRED', 409);
       if (!config.apiKey) throw new ApiError('AI_NOT_CONFIGURED', 503);
       const release = limiter.acquire(crypto.randomUUID());
       try {

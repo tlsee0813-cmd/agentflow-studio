@@ -141,7 +141,7 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
     const prev = chains.get(id) ?? Promise.resolve(), next = prev.then(fn, fn);
     chains.set(id, next.catch(() => {})); return next;
   }
-  const running = new Map(); // id -> { controller, release, failed }: from acceptance until its call has ended
+  const running = new Map(); // id -> { controller, release, reporting, progress }: progress is volatile, never journaled
   const failedHere = new Map(); // id -> error: finished but not kept (the store refused); said until seen, interrupted after a restart
   const executing = new Set(); // the calls in progress, owned so close() can wait for them
   const pending = new Set(); // `${id}:${capHash}` being accepted now: a read with that same capability is told so, any other gets 'not found'
@@ -151,6 +151,9 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
     const state = lost ? 'failed' : body.state === 'accepted' && running.has(id) ? 'running' : body.state;
     const out = { version: MAP_JOB_VERSION, id, state, acked: body.acked?.outcome ?? null, binding: body.binding ?? null, bindingHash: body.bindingHash ?? null, createdAt: body.createdAt, updatedAt: body.updatedAt,
       error: lost ?? body.error ?? null, remote: body.remote ?? null, ...(body.execution ? { execution: body.execution } : {}) };
+    const live = running.get(id);
+    // Only a capability-authenticated GET uses full=true. Receipts, terminal results and durable records carry no progress.
+    if (full && ACTIVE.has(state) && live?.reporting && !live.controller.signal.aborted && live.progress) out.progress = { ...live.progress };
     if (full && state === 'ready' && !body.acked && body.result && body.input) Object.assign(out, { input: body.input, result: body.result });
     return out;
   }
@@ -194,9 +197,10 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
           return { status: 200, value: view(id, j.body) };
         }
         if (Buffer.byteLength(JSON.stringify(s.input)) > limits.inputBytes) throw new ApiError('INPUT_TOO_LARGE', 413);
-        const prompt = await run.prompt(s.binding.schemaVersion); // AF116: the recipe of the job's own schema
+        const prompt = await run.prompt(s.binding.schemaVersion, checked.input.ask); // Bound to the exact first/later recipe.
         if (!run.configured()) throw new ApiError('AI_NOT_CONFIGURED', 503);
-        if (s.binding.prompt !== prompt || s.binding.model !== run.model) throw new ApiError('PROMPT_CHANGED', 409);
+        const model = typeof run.model === 'function' ? run.model(checked.input.ask) : run.model;
+        if (s.binding.prompt !== prompt || s.binding.model !== model) throw new ApiError('PROMPT_CHANGED', 409);
         // AF102: an injected executor fixes what it will run (its identity, binary, permissions and deadline policy) now; the job
         // keeps that, never the settings of a later read or restart. Without one (DeepSeek) the job is as it was.
         const execution = run.prepare ? await run.prepare(checked.input.ask) : null;
@@ -209,7 +213,7 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
           const release = run.acquire(id);
           const body = { id, capHash, bindingHash, binding: s.binding, ...(execution ? { execution } : {}), state: 'accepted', createdAt: now(), updatedAt: now(), input: s.input };
           try { await write(id, body); } catch (e) { release(); throw e instanceof ApiError && e.code !== 'JOB_STORE_UNAVAILABLE' ? e : new ApiError('JOB_STORE_FAILED', 507); }
-          const controller = new AbortController(); running.set(id, { controller, release });
+          const controller = new AbortController(); running.set(id, { controller, release, reporting: true, progress: null });
           const done = execute(id, checked.input.ask, controller, run, execution).finally(() => executing.delete(done)); executing.add(done);
           return { status: 202, value: view(id, body) };
         });
@@ -219,9 +223,21 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
 
   async function execute(id, ask, controller, run, execution) {
     await Promise.resolve(); // the receipt is answered first; the call never waits on the connection that brought it
+    const reportProgress = value => {
+      try {
+        const live = running.get(id), body = jobs.get(id)?.body;
+        if (closed || !live?.reporting || live.controller !== controller || controller.signal.aborted || body?.state !== 'accepted') return;
+        if (!value || typeof value !== 'object' || Array.isArray(value)) return;
+        const phase = value?.phase, done = value?.done, total = value?.total;
+        if (!['extract', 'plan', 'render', 'global', 'correction'].includes(phase) || !Number.isInteger(done) || done < 0 || done > 24
+          || !Number.isInteger(total) || total < 1 || total > 24 || done > total) return;
+        live.progress = { phase, done, total };
+      } catch { /* Progress is optional and can never change a job's outcome. */ }
+    };
     let outcome;
-    try { const out = await (execution ? run.call(ask, controller.signal, execution) : run.call(ask, controller.signal)); outcome = { ok: true, out, observed: out.observed }; }
+    try { const out = await run.call(ask, controller.signal, execution ?? undefined, reportProgress); outcome = { ok: true, out, observed: out.observed }; }
     catch (e) { outcome = { ok: false, observed: e?.observed, error: e instanceof ApiError ? { code: e.code, ...(e.detail ? { detail: e.detail } : {}) } : { code: 'INTERNAL_ERROR' } }; }
+    finally { const live = running.get(id); if (live?.controller === controller) { live.reporting = false; live.progress = null; } }
     const live = running.get(id);
     try {
       await serial(id, async () => {
@@ -292,7 +308,7 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
   return {
     dir, owner: owner?.kind ?? null,
     describe: () => problem ? { version: MAP_JOB_VERSION, durable: false, problem } : { version: MAP_JOB_VERSION, durable: true },
-    /** One job route. run: { configured(), prompt(schemaVersion), model, acquire(id), call(ask, signal, execution?), prepare?(ask) } from
+    /** One job route. run: { configured(), prompt(schemaVersion), model, acquire(id), call(ask, signal, execution?, reportProgress?), prepare?(ask) } from
      * the studio handler (prepare only with an injected executor). */
     async handle({ method, rest, cap, body }, run) {
       if (problem || closed) throw new ApiError('JOB_STORE_UNAVAILABLE', 503);

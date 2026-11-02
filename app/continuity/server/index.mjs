@@ -6,13 +6,16 @@ import { openMapJobs } from './map-jobs.mjs';
 import { openSessions } from './sessions.mjs';
 import { openConnector } from './connector.mjs';
 import { cloudPull } from './cloud-pull.mjs';
+import { loadMapPipelineEnv, openFirstMapPipeline } from './map-pipeline-host.mjs';
 
 // A start that cannot go ahead says why in one line and exits non-zero; it never prints a stack, a setting's value or the key.
 function stop(reason) { console.error(`AgentFlow Studio did not start: ${reason}`); process.exit(1); }
 
 const args=process.argv.slice(2);
 if(args.some(a=>a!=='--mock'))stop('only --mock is supported (no key or endpoint arguments).');
-const env={...process.env,...(args.includes('--mock')?{AI_MODE:'mock'}:{})};
+let env;
+try { env=await loadMapPipelineEnv({...process.env,...(args.includes('--mock')?{AI_MODE:'mock'}:{})}); }
+catch { stop('the private OpenAI settings file could not be read.'); }
 let config;
 try{config=readConfig(env);}catch(e){stop(`${e?.code??'INVALID_SERVER_CONFIG'} (check PORT, AI_MODE, AI_* limits and DEEPSEEK_BASE_URL).`);}
 // Settings that were given but set aside fall back to their defaults; say which, so a typo does not pass silently.
@@ -21,6 +24,9 @@ for(const key of studioConfigProblems(env))console.warn(`AgentFlow Studio: ${key
 // turns them off). Browser storage is per address, so the store is per port; a random port (0) gets none unless a folder is named.
 const dir=env.STUDIO_JOBS==='off'?null:env.STUDIO_JOBS_DIR||(config.port?fileURLToPath(new URL(`../.studio-data/map-jobs-${config.port}`,import.meta.url)):null);
 const jobs=dir?await openMapJobs({dir,log:m=>console.log(m)}):null;
+let firstMapPipeline;
+try { firstMapPipeline=await openFirstMapPipeline({env,dir}); }
+catch { await jobs?.close(); stop('the divided first-map settings or store could not be opened.'); }
 // Local session records (Claude Code / Codex on this PC), read only on request; STUDIO_SESSIONS=off turns them off.
 const sessions=openSessions({env});
 // The AgentFlow connector's mailbox (records an AI session leaves through the MCP connector, the page's latest handover for it):
@@ -43,10 +49,11 @@ const refused=keep?async(what,ask)=>{
   await writeFile(join(keep,name),JSON.stringify({at,...what,ask},null,1));
   console.log(`AgentFlow Studio: a reply that was set aside (${what.error.code}${what.error.detail?` ${what.error.detail.path}`:''}) is kept in ${join(keep,name)}`);
 }:null;
-const studio=createStudioHandler({env,jobs,sessions,refused,connector});
+const studio=createStudioHandler({env,jobs,sessions,refused,connector,firstMapPipeline});
 const server=createContinuityApp({config,studio});
 server.once('error',async e=>{
   await jobs?.close();
+  await firstMapPipeline?.close();
   stop(e?.code==='EADDRINUSE'?`port ${config.port} is already in use (set PORT to another port).`:`the server could not listen (${e?.code??'error'}).`);
 });
 server.listen(config.port,config.host,function(){
@@ -60,5 +67,6 @@ for(const signal of ['SIGINT','SIGTERM'])process.once(signal,async()=>{
   if(stopping)return;stopping=true;
   server.close();server.closeAllConnections?.();
   await jobs?.close();
+  await firstMapPipeline?.close();
   process.exit(0);
 });
