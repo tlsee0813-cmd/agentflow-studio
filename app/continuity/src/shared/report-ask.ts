@@ -130,3 +130,22 @@ export function ownLinesTemplate(at: Date = new Date()): string {
   const when = `${at.getFullYear()}-${String(at.getMonth() + 1).padStart(2, '0')}-${String(at.getDate()).padStart(2, '0')}`;
   return [`[프로젝트 소유자가 직접 적음 · ${when}]`, ...OWN_LINES.map(l => `${l}: `)].join('\n');
 }
+
+/** A relation the record states as a plan (its note says so): drawn as planned, never as a flow that runs. */
+export const plannedNote = (note: string) => /계획|예정|할 것이다|지시할/.test(note);
+
+/** The map's understanding, numbered, for the AI that knows the project to correct line by line: the summary, each part with
+ * its description, each relation with what it hands over, the gaps. Only wrong lines come back, with the record behind the
+ * correction; nothing new is asked for, so nothing new is invented. */
+export function reflectAsk(view: StudioView, readings: readonly ReadingEntry[]): string {
+  const last = [...readings].filter(isMapReading).at(-1) ?? null, name = (id: string) => view.parts.find(p => p.id === id)?.name ?? id;
+  const lines: string[] = [];
+  if (last?.summary) lines.push(`요약: ${last.summary}`);
+  for (const p of view.parts) { const role = p.reading?.role ?? p.summary ?? p.note; lines.push(`부분 ${name(p.id)}${p.parentId ? ` (${name(p.parentId)} 안)` : ''}: ${role ? role.replace(/\s+/g, ' ').slice(0, 160) : '설명 없음'}`); }
+  for (const rel of view.relations) lines.push(`연결 ${name(rel.from)} → ${name(rel.to)}: ${rel.note || rel.kind}`);
+  for (const g of last?.gaps ?? []) lines.push(`빈틈: ${g}`);
+  const body = lines.slice(0, 60).map((l, i) => `${i + 1}. ${l}`).join('\n');
+  return `[AgentFlow 이해 확인 요청 ${REPORT_ASK_VERSION}]
+아래는 지도가 기록에서 읽은 것이다. 틀린 줄만 「번호: 맞는 내용 (근거: [파일]/[보고]/[실행]/[모름])」로 고쳐 답하고, 맞는 줄은 쓰지 마. 모르면 「번호: 확인 못 함」. 새로 지어내거나 없는 줄을 더하지 마. 비밀값은 [가림].
+${body}`;
+}

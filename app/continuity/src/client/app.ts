@@ -20,7 +20,7 @@ import { aiStatus, askStudio, AskError, ERROR_TEXT, RELEASE_TEXT, PUBLIC_EDITION
 import { RUNTIME, runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
 import { routeEdges, samplePath, mixPath } from './map-route.js';
-import { PROJECT_REPORT_ASK, CHAT_REPORT_ASK, REPORT_ASK_EXPLAIN, deltaReportAsk } from '../shared/report-ask.js';
+import { PROJECT_REPORT_ASK, CHAT_REPORT_ASK, REPORT_ASK_EXPLAIN, deltaReportAsk, reflectAsk, plannedNote } from '../shared/report-ask.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
 import { createPlanView } from './plan-view.js';
 import { AUTO_SENDS, createReturnView, mapExclusionHistory, type Scene, type ReadingContext } from './return-view.js';
@@ -799,7 +799,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   restSums = sums = lay.edges.length > 6 ? summaryEdges(lay.boxes, lay.edges) : [];
   for (const e of [...lay.edges, ...sums]) {
     const fa = frames(e.from), inner = [...frames(e.to)].some(f => fa.has(f)), sum = e.key.startsWith('sum:');
-    const g = svg('g', { class: `edge${sum ? ' sum' : ''} k-${e.kind}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}${!sum && edgeRevised(e) ? ' revised' : ''}${e.spine ? ' spine' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
+    const g = svg('g', { class: `edge${sum ? ' sum' : ''} k-${e.kind}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}${!sum && edgeRevised(e) ? ' revised' : ''}${e.spine ? ' spine' : ''}${!sum && e.notes.length && e.notes.every(plannedNote) ? ' planned' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
     // No text on the map: the meaning shows on hover (tip) and in the selected part's 관련 부분.
     // A plain relation ends in the same dot at both ends: it is drawn, not directed.
     g.append(svg('path', { class: 'edge-line', 'marker-end': e.kind === 'related' ? 'url(#dot)' : 'url(#arrow)', 'marker-start': 'url(#dot)' }), svg('path', { class: 'edge-hit' }));
@@ -2282,7 +2282,8 @@ function mapBlock(): HTMLElement | null {
   { const note = runNotice(); if (note) sec.append(note); }
   // A map that exists: the next report asks only for what changed, by the names this map holds.
   if (o.view.parts.length && !st.pending) sec.append(h('p', { class: 'fine rm-ask' }, askCopy('변경 보고 요청 문구 복사', deltaReportAsk(o.view, o.project.readings), 'link-button'),
-    ' — 지도의 부분 이름을 넣은 문구예요. 프로젝트를 보고 있는 AI 대화에 붙여 넣고, 나온 답을 기록으로 붙여 넣으세요.'));
+    ' — 지도의 부분 이름을 넣은 문구예요. 프로젝트를 보고 있는 AI 대화에 붙여 넣고, 나온 답을 기록으로 붙여 넣으세요. ',
+    askCopy('이렇게 이해했다 확인 문구 복사', reflectAsk(o.view, o.project.readings), 'link-button'), ' — 지도가 읽은 것을 번호 줄로 보내 틀린 줄만 고쳐 받아요.'));
   const limited = status.release === 'existing-map';
   if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && !limited) sec.append(h('p', { class: 'fine' }, sendLine(inp)), h('button', { type: 'button', class: 'link-button', onclick: () => { returnView.close(); planView.openResults(); } }, '요청문을 골라 대조'));
   if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && can && !st.pending && !waiting) sec.append(h('button', { type: 'button', class: 'link-button rm-map-only', onclick: () => void mapRun.runMapOnly() }, '요청 대조 없이 지도만 정리'), h('p', { class: 'fine' }, '원문을 보존하며 나중에 요청문을 골라 대조할 수 있어요.'));
@@ -2696,7 +2697,7 @@ function bindEdgeHints() {
       const edge = edgeOf(g.dataset.key); if (!edge) return;
       g.classList.add('near');
       tip.replaceChildren(h('strong', {}, `${nameOf(edge.from)} ${edge.kind === 'related' ? '—' : '→'} ${nameOf(edge.to)}`), h('span', { class: 'tip-kind' }, `${REL_LABEL[edge.kind] ?? edge.kind}${restOf(edge) ? ` · 선택한 부분의 관계를 뺀 나머지 ${edge.ids.length}개` : edge.agg ? ` · 안쪽 관계 ${edge.ids.length}개의 요약 · 선택하면 실제 끝점` : edge.ids.length > 1 ? ` · 관계 ${edge.ids.length}개를 한 선으로 묶음` : ''}`),
-        ...edge.notes.slice(0, 3).map(n => h('span', {}, n)), ...(edgeRevised(edge) ? [h('span', { class: 'tip-revised' }, REVISED_BASIS.replace(/^ · /, ''))] : []));
+        ...edge.notes.slice(0, 3).map(n => h('span', {}, n)), ...(edge.notes.length && edge.notes.every(plannedNote) ? [h('span', { class: 'tip-kind' }, '계획된 연결 · 아직 돌지 않음')] : []), ...(edgeRevised(edge) ? [h('span', { class: 'tip-revised' }, REVISED_BASIS.replace(/^ · /, ''))] : []));
       tip.hidden = false; place(e as PointerEvent);
       if (g.classList.contains('on')) lightRows(edge.ids);
       return;

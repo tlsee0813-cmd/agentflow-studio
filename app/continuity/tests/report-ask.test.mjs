@@ -2,7 +2,7 @@
 // bounds, and the delta request built from a map's own names.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { PROJECT_REPORT_ASK, CHAT_REPORT_ASK, REPORT_ASK_EXPLAIN, REPORT_TAGS, deltaReportAsk, checkReport, reportCheckLine, REPORT_FIRST_CHARS, ownLinesTemplate, OWN_LINES } from '../dist/public/shared/report-ask.js';
+import { PROJECT_REPORT_ASK, CHAT_REPORT_ASK, REPORT_ASK_EXPLAIN, REPORT_TAGS, deltaReportAsk, checkReport, reportCheckLine, REPORT_FIRST_CHARS, ownLinesTemplate, OWN_LINES, reflectAsk, plannedNote } from '../dist/public/shared/report-ask.js';
 import { buildExample, EXAMPLES } from '../dist/public/shared/studio-examples.js';
 import { studioView } from '../dist/public/shared/studio.js';
 
@@ -52,4 +52,14 @@ test('ASK-5 the person\'s own three lines come as a dated record of their own wo
   const t = ownLinesTemplate(new Date('2026-11-03T12:00:00Z'));
   assert.ok(t.startsWith('[프로젝트 소유자가 직접 적음 · 2026-11-03]'));
   for (const l of OWN_LINES) assert.ok(t.includes(`${l}: `), l);
+});
+
+test('ASK-6 the understanding check lists the map\'s summary, parts, relations and gaps as numbered lines and asks only for corrections', () => {
+  const v = studioView(buildExample(EXAMPLES.find(e => e.id === 'salon')));
+  const text = reflectAsk(v, []);
+  assert.ok(text.startsWith('[AgentFlow 이해 확인 요청'));
+  for (const id of v.roots) assert.ok(text.includes(`부분 ${v.parts.find(p => p.id === id).name}`), id);
+  assert.ok(/\n1\. /.test(text)); assert.ok(text.includes('틀린 줄만')); assert.ok(text.includes('확인 못 함'));
+  assert.ok(text.length <= 12000, String(text.length));
+  assert.equal(plannedNote('TX 라벨 확인 뒤 e=1 ON을 지시할 계획이다.'), true); assert.equal(plannedNote('review.jsonl 행을 카드 박자마다 넘긴다.'), false);
 });
