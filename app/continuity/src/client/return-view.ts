@@ -90,6 +90,8 @@ export interface ReturnHost {
   mapMarks(): string[];
   /** Whether a map reading has read (some of) this record. */
   readIntoMap(recordId: string): boolean;
+  /** Take a record out again (one no map reading has read, while no reading is under way). Text when it stays. */
+  removeRecord(recordId: string): Promise<string | null>;
   /** Records wait to be read into the map: that is the pane's one main action, and this reading's summary steps back. */
   mapPrimary(): boolean;
   /** The project is connected (자동 연결): its next automatic map reading sends every record not read yet, those added here too. */
@@ -724,6 +726,16 @@ export function createReturnView(host: ReturnHost) {
       ctx ? h('p', { class: 'rr-context' }, h('span', {}, '붙일 때 보던 부분'), partChip(ctx)) : null,
       // Arrived by a quote: the original, with the quote marked, is what this view is for (the readings are one step back).
       quote ? null : read ?? h('p', { class: 'rr-lead' }, s?.pending ? '읽는 중이에요…' : src.recordId && host.readIntoMap(src.recordId) ? '지도 정리에 읽힌 기록이에요. 이 기록의 따로 요약은 아직 없어요.' : '아직 이 기록을 읽지 않았어요.'),
+      // A record not read into any map yet can be taken out again (a copy pasted twice, the wrong text): one click, said back.
+      !quote && kept && !host.readIntoMap(kept.id) ? h('p', { class: 'rr-acts rr-record-acts' }, h('button', { type: 'button', class: 'link-button quiet rr-record-remove',
+        title: '지도 정리에 아직 읽히지 않은 기록만 지울 수 있어요. 되돌릴 수 없어요.', onclick: async (e: Event) => {
+          const button = e.currentTarget as HTMLButtonElement;
+          if (!confirm('이 기록을 지울까요? 지도 정리에 아직 읽히지 않은 기록이라 지울 수 있고, 되돌릴 수 없어요.')) return;
+          button.disabled = true;
+          const failed = await host.removeRecord(kept.id);
+          if (failed) { button.disabled = false; button.insertAdjacentElement('afterend', h('span', { class: 'fine pp-error', role: 'status' }, ` ${failed}`)); return; }
+          backToReading();
+        } }, '이 기록 지우기')) : null,
       h('blockquote', { class: `rr-quote rr-raw${e?.kind === 'code' ? ' code' : ''}` }, ...quoted(kept?.text ?? src.text, quote, quote && at !== undefined ? { at, length: quote.length } : undefined)),
       sentTo !== undefined && sentTo < (kept?.text ?? src.text).length ? h('p', { class: 'fine' }, `읽을 때 앞 ${sentTo.toLocaleString()}자만 보내요 · 전체 ${(kept?.text ?? src.text).length.toLocaleString()}자`) : null), ...after];
   }

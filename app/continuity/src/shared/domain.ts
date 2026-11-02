@@ -570,9 +570,14 @@ export function markHandoff(p:Project,id:string,text:string,method:'clipboard'|'
  * part being looked at. The very same text already kept is that record again: nothing is added and the revision stays. */
 /** A backup's pasted records that look like they hold a key: such a file is not taken in (nothing is stored). */
 export function secretPasted(p: Project): PastedRecord[] { return p.pasted.filter(r=>secretLike(r.text)||(!!r.evidence&&secretLike(`${r.evidence.name}\n${r.evidence.version??''}\n${r.evidence.origin??''}`))); }
+/** The same record pasted again with only its line endings or the white space around the whole text different (a second copy
+ * from the same chat, a box that adds a final newline) is the same record. Any other white space (inside a line, between lines)
+ * is another record, never merged. The text itself is never changed: the stored one stays. */
+const outerText=(t:string)=>t.replace(/\r\n?/g,'\n').trim();
+const sameRecordText=(a:string,b:string)=>a===b||outerText(a)===outerText(b);
 export function pasteRecord(p: Project, value: string, context: string|null): {project:Project;record:PastedRecord;duplicate:boolean} {
   // Only a record pasted as it came is that record again: a provided source with the same bytes is another record.
-  const same=p.pasted.find(r=>!r.evidence&&r.text===value); if(same) return {project:p,record:same,duplicate:true};
+  const same=p.pasted.find(r=>!r.evidence&&sameRecordText(r.text,value)); if(same) return {project:p,record:same,duplicate:true};
   text(value,PASTED_TEXT_LIMIT); ensure(!secretLike(value),'SECRET_LIKE'); ensure(context===null||p.space.areas.some(a=>a.id===context));
   const n=change(p), record:PastedRecord={id:uid('N'),text:value,at:now(),context};
   n.pasted.push(record); return {project:n,record:copy(record),duplicate:false};
@@ -581,6 +586,14 @@ export function pasteRecord(p: Project, value: string, context: string|null): {p
  * normalisation) with the person's declaration of what it is and where it came from. The very same text with the very same
  * declaration is that record again (nothing is added); anything else, a pasted record of the same bytes included, is a new record
  * with its own id. Nothing existing is retagged, edited or copied, and no reading is moved onto it. */
+/** Whether a map reading has read (some of) this record: its quotes rest on it, so it cannot be taken out again. */
+export function recordReadIntoMap(p: Project, id: string): boolean { return p.readings.some(r=>isMapReading(r)&&r.records.some(x=>x.id===id)); }
+/** Takes a pasted or provided record out again, only while no map reading has read it (RECORD_READ otherwise): nothing of the
+ * map rests on it yet, so nothing else changes. The record is gone from this project; a backup made before still has it. */
+export function removePastedRecord(p: Project, id: string): Project {
+  ensure(p.pasted.some(r=>r.id===id),'RECORD_MISSING'); ensure(!recordReadIntoMap(p,id),'RECORD_READ');
+  const n=change(p); n.pasted=n.pasted.filter(r=>r.id!==id); return n;
+}
 export function provideRecord(p: Project, value: string, evidence: RecordEvidence, context: string|null): {project:Project;record:PastedRecord;duplicate:boolean} {
   ensure(validEvidence(evidence),'INVALID_EVIDENCE');
   const e=canonicalEvidence(evidence),key=recordIdentity({text:value,evidence:e});

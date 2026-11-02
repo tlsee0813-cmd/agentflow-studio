@@ -36,10 +36,14 @@ test('R69 project.8: a pasted record is kept exactly, once; project.7 reads as n
   const first = D.pasteRecord(p, text, area);
   assert.equal(first.duplicate, false); assert.equal(first.project.revision, p.revision + 1);
   assert.deepEqual(first.project.pasted.map(r => [r.text, r.context]), [[text, area]]); assert.match(first.record.id, /^N_/);
-  // The same text again is that record: nothing added, revision kept. Another whitespace is another record, never merged.
+  // The same text again is that record: nothing added, revision kept. Only the white space around the whole text and the line
+  // endings are read past (a second copy of one chat pasted twice showed up as two records); white space inside is another
+  // record, never merged.
   const again = D.pasteRecord(first.project, text, null);
   assert.equal(again.duplicate, true); assert.equal(again.project, first.project); assert.equal(again.record.id, first.record.id);
-  const other = D.pasteRecord(first.project, text.trim(), null);
+  const outer = D.pasteRecord(first.project, text.trim(), null);
+  assert.equal(outer.duplicate, true); assert.equal(outer.record.id, first.record.id); assert.equal(outer.project, first.project);
+  const other = D.pasteRecord(first.project, text.replace('\t', ' '), null);
   assert.equal(other.duplicate, false); assert.equal(other.project.pasted.length, 2);
   assert.throws(() => D.pasteRecord(p, 'x', 'A_missing')); assert.throws(() => D.pasteRecord(p, '벨\u0007', null)); assert.throws(() => D.pasteRecord(p, '   ', null));
   // Persisted bytes round-trip; ids, times and contexts survive.

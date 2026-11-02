@@ -4,7 +4,7 @@ import { isMapReading, type Project } from '../shared/types.js';
 import { FILE_LIMIT, PASTED_LIMIT } from '../shared/types.js';
 import { WorkspaceStore, type EntryRef, storageErrorCode, serializeProject, readViewState, readEntryView, writeViewState, readEntryPositions, writeEntryPositions, importCopy, serializeBackup } from '../shared/storage.js';
 import { parseBackup, cleanPositions } from '../shared/validation.js';
-import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, provideRecord, secretPasted, correctReadingRole } from '../shared/domain.js';
+import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, removePastedRecord, provideRecord, secretPasted, correctReadingRole } from '../shared/domain.js';
 import { CLAIM_LABEL, stateLabel, revisedRelations, candidateReading, type Applied, type CurrentClaim, type PartUnderstanding } from '../shared/map-reading.js';
 import { roleEvidence } from './role-evidence.js';
 import type { ClaimKind, ReadingQuote } from '../shared/types.js';
@@ -1957,6 +1957,17 @@ const returnView = createReturnView({
   },
   mapMarks: () => { const o = opened; return o && justRead?.key === o.key ? justRead.parts : []; },
   readIntoMap: id => !!opened?.project.readings.some(r => isMapReading(r) && r.records.some(x => x.id === id)),
+  removeRecord: async id => {
+    const o = opened; if (!o || o.kind !== 'saved') return '이 프로젝트에서는 기록을 지울 수 없어요.';
+    // A reading under way (or one waiting to be applied) may hold this record: nothing is taken out from under it.
+    const st = mapRun.state(); if (st.pending || st.ready || st.committing) return '지도 정리가 진행 중이라 지금은 지울 수 없어요. 끝나거나 취소한 뒤 다시 해 주세요.';
+    let next: Project;
+    try { next = removePastedRecord(o.project, id); }
+    catch (err) { return (err as Error)?.message === 'RECORD_READ' ? '지도 정리에 이미 읽힌 기록이라 지울 수 없어요. 지도의 근거가 이 기록을 가리켜요.' : '이 기록을 찾지 못했어요.'; }
+    const failed = await commit(o, next);
+    if (!failed && opened === o) { renderMapEntry(); refreshUnderstood(); }
+    return failed;
+  },
   mapPrimary: () => { const inp = mapRun.input(); return !!inp && !inp.problem && mapRun.can(); }
 });
 
