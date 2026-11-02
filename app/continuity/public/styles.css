@@ -251,6 +251,8 @@ button:disabled { opacity: .5; cursor: default; }
 .map-title button { pointer-events: auto; }
 .map-more { margin-left: 0; padding: 0; border: 0; background: none; color: var(--accent); font-size: 13px; font-weight: 600; white-space: nowrap; }
 .map-more:hover { text-decoration: underline; text-underline-offset: 3px; }
+/* A reading that left gaps or unsettled statements says so in amber beside its summary. */
+.map-more.mu-open { color: var(--change-text); }
 /* The scope's own relations to the outside: the scope's, never lines from one of its children. */
 .scope-rels { margin-top: var(--s-3); display: flex; flex-direction: column; gap: 6px; }
 .scope-rel { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; font-size: 12.5px; }

@@ -1417,7 +1417,7 @@ function renderLens() {
     put(desc, h('p', { class: 'lens-text' }, u.role), src(u.corrected ? '직접 바로잡은 설명' : `기록에서 읽은 설명${u.roleAbout ? ` · ${displayAbout(u.roleAbout)} 기준` : ''}${u.roleBasisRevised ? REVISED_BASIS : ''}`));
     if (u.roleAbout) desc.lastElementChild?.setAttribute('title', u.roleAbout);
     const basis = roleBasisBlock(o, part.id, u, 'lens'); if (basis) desc.append(basis);
-  } else put(desc, src(part.status === 'plan' ? (records.length ? `설명 없음 · 요청 기록 없음 · ${recs}` : part.reading ? '기록에서 읽은 주장만 있어요' : '아직 설명도 기록도 없어요') : `${STATUS_LABEL[part.status]} · ${recs} · 받은 정리 없음`));
+  } else put(desc, src(part.status === 'plan' ? (records.length ? `설명 없음 · 요청 기록 없음 · ${recs}` : part.reading ? '기록에서 읽은 말만 있어요' : '아직 설명도 기록도 없어요') : `${STATUS_LABEL[part.status]} · ${recs} · 받은 정리 없음`));
   if (part.changes.length) desc.append(h('ul', { class: 'lens-changes' }, ...part.changes.slice(0, 2).map(c => h('li', {}, c))));
   // Read the current statements together: a later limitation may qualify an earlier description.
   const claims = part.reading?.claims.length ? lensClaims(part.id, part.reading.claims) : null;
@@ -2182,7 +2182,12 @@ function understoodLine(o: Opened): HTMLElement | null {
   if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && !limited) line.append(h('button', { type: 'button', class: 'map-more', title: sendLine(inp), onclick: () => { if (returnView.isOpen()) returnView.close(); planView.openResults(); } }, '요청문을 골라 대조'));
   if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && mapRun.can() && !st.pending && !waiting) line.append(h('button', { type: 'button', class: 'map-more mu-map-only', title: '요청과 대조하지 않고 지도만 정리해요. 원문은 보존되며 나중에 요청문을 골라 대조할 수 있어요.', onclick: () => void mapRun.runMapOnly() }, '요청 대조 없이 지도만 정리'));
   if (last?.version === 'map-reading.1' && !limited && frozenRequests(o.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : [])).length) line.append(h('button', { type: 'button', class: 'map-more', title: '지도에 읽힌 원문도 고른 요청과 나중에 대조할 수 있어요', onclick: () => { if (returnView.isOpen()) returnView.close(); planView.openResults(); } }, '나중에 요청문을 골라 대조'));
-  if (last) line.append(h('button', { type: 'button', class: 'map-more', title: '이번 정리가 무엇을 읽었고 무엇이 비었는지', onclick: () => openReturn() }, '정리 근거 · 빈틈'));
+  // What this reading left open reads beside its summary: the gaps (conditions the records do not answer) and the unsettled
+  // statements, counted, opening the reading of the return where each is listed.
+  if (last) {
+    const open = [last.gaps.length ? `빈틈 ${last.gaps.length}` : '', last.candidates.length ? `미정 ${last.candidates.length}` : ''].filter(Boolean);
+    line.append(h('button', { type: 'button', class: `map-more${open.length ? ' mu-open' : ''}`, title: [`이번 정리가 무엇을 읽었고 무엇이 비었는지`, ...last.gaps.map(g => `빈틈: ${g}`)].join(String.fromCharCode(10)), onclick: () => openReturn() }, open.length ? `정리 근거 · ${open.join(' · ')}` : '정리 근거'));
+  }
   if (st.error) line.append(h('span', { class: 'mu-error', role: 'alert' }, st.error));
   const note = runNotice(); if (note) line.append(note);
   return line;
@@ -2447,7 +2452,7 @@ function understoodSection(o: Opened, part: PartView): HTMLElement | null {
 function revisedLine(o: Opened, relationId: string): boolean { return revisedRelations(o.project).has(relationId); }
 /** A drawn line all of whose relations rest on withdrawn reports: its own dash and a short title, selected or not. */
 function edgeRevised(e: Edge): boolean { return !!opened && !e.agg && e.ids.length > 0 && e.ids.every(id => revisedLine(opened!, id)); }
-const REVISED_EDGE = ' · 근거 정정', REVISED_SHORT = '근거 정정';
+const REVISED_EDGE = ' · 보고 정정됨', REVISED_SHORT = '보고 정정됨';
 
 function sessionCode(): string { try { return sessionStorage.getItem('agentflow.studio.access') ?? accessCodeMemory; } catch { return accessCodeMemory; } }
 
