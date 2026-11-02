@@ -128,6 +128,16 @@ function positionsOf(o: Opened): Positions {
   if (!p) { p = o.kind === 'saved' ? readEntryPositions(kv, o.key, o.project.id) : cleanPositions(null); memoryPositions.set(o.key, p); }
   return p;
 }
+/** Before a part is dragged: every automatically placed box in its container, and in each container above, keeps the place it
+ * has now as a stored place of its own. Otherwise the layout, run again for each move with the container's new size, would
+ * shift the dragged part's siblings and the regions beside them while the hand moves. 자동 배치 clears these as any other. */
+function holdPlaces(o: Opened, container: string) {
+  const pos = positionsOf(o);
+  for (let c: string | undefined = container, g = 0; c && g < 64; c = lay.boxes.get(c)?.container, g++) {
+    const held = (pos[c] ??= {});
+    for (const b of lay.boxes.values()) if (b.container === c && b.kind !== 'ghost' && !held[b.id]) held[b.id] = { x: Math.round(b.rel.x), y: Math.round(b.rel.y) };
+  }
+}
 function savePositions(o: Opened) { if (o.kind === 'saved') writeEntryPositions(kv, o.key, positionsOf(o)); } // a refused write: the in-memory places still hold for this tab
 
 /* Scope = the part whose inside is shown (null = whole project). Each scope keeps its own camera for the way back. */
@@ -530,7 +540,7 @@ function setBar(o: Opened | null) {
   bar.hidden = !sp;
   if (o && sp) {
     const up = sp.parentId ? partOf(o, sp.parentId) : null, upName = up?.name ?? o.project.name;
-    bar.replaceChildren(h('button', { type: 'button', class: 'scope-up', onclick: () => go(o.key, null, sp.parentId), title: `구성 위로 · ${upName}`, 'aria-label': `${upName}(으)로 올라가기` },
+    bar.replaceChildren(h('button', { type: 'button', class: 'scope-up', onclick: () => go(o.key, null, sp.parentId), title: `구성 위로 · ${upName}`, 'aria-label': `${upName}${toParticle(upName)} 올라가기` },
         h('span', { 'aria-hidden': 'true' }, '↑'), h('span', { class: 'scope-up-name' }, upName)));
   } else bar.replaceChildren();
   // Back: only when the previous scene is not simply the parent.
@@ -694,11 +704,11 @@ function renderHome() {
   $('project-list').replaceChildren(converter, ...EXAMPLES.map(spec => {
     const key = `ex-${spec.id}`;
     try { if (!examples.has(key)) examples.set(key, buildExample(spec)); const ex = examples.get(key)!; return programCard(key, ex, true, invert(exampleKeys(spec.id, ex))); }
-    catch { return h('li', { class: 'message' }, `예제 ‘${spec.name}’을 만들지 못했어요.`); }
+    catch { return h('li', { class: 'message' }, `‘${spec.name}’ 예제를 만들지 못했어요.`); }
   }), material);
   const saved = store.entries().filter(e => e.state === 'active');
   const cards: HTMLElement[] = [];
-  for (const e of saved) { try { cards.push(programCard(e.entryId, e.project, false, id => id)); } catch { cards.push(h('li', { class: 'message' }, `‘${e.project.name}’을 읽지 못했어요.`)); } }
+  for (const e of saved) { try { cards.push(programCard(e.entryId, e.project, false, id => id)); } catch { cards.push(h('li', { class: 'message' }, `‘${e.project.name}’ 프로젝트를 읽지 못했어요.`)); } }
   if (store.legacy?.project) cards.push(programCard('legacy', store.legacy.project, false, id => id));
   $('saved-list').replaceChildren(...cards);
   $('saved-empty').hidden = !!cards.length;
@@ -842,11 +852,11 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
       // place (its reading as any part's: description, claims, their sources), never a move out of the scope. Any other id (the
       // same name included) is a part outside.
       if (id === scope) {
-        world.append(h('button', { type: 'button', class: 'ghost self', 'data-box': b.id, 'data-part-ref': id, title: `이 범위 · ${path.join(' › ')} · 이 부분 읽기`, 'aria-label': `이 범위 ${p.name} 읽기`, onclick: () => go(o.key, id) },
+        world.append(h('button', { type: 'button', class: 'ghost self', 'data-box': b.id, 'data-part-ref': id, title: `지금 들어와 있는 부분 · ${path.join(' › ')} · 읽기`, 'aria-label': `지금 들어와 있는 부분 ${p.name} 읽기`, onclick: () => go(o.key, id) },
           h('span', { class: 'ghost-name' }, p.name)));
         continue;
       }
-      world.append(h('button', { type: 'button', class: 'ghost', 'data-box': b.id, 'data-part-ref': id, title: `이 범위 밖 · ${path.join(' › ')}`, onclick: () => go(o.key, id, p.parentId) },
+      world.append(h('button', { type: 'button', class: 'ghost', 'data-box': b.id, 'data-part-ref': id, title: `다른 곳의 부분 · ${path.join(' › ')} · 그곳으로 가기`, onclick: () => go(o.key, id, p.parentId) },
         h('span', { class: 'ghost-name' }, p.name)));
       continue;
     }
@@ -882,12 +892,13 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   const sp = partOf(o, scope), purpose = (sp ? sp.note : o.project.space.brief?.text ?? '').trim(), first = lead(purpose);
   const outside = scopeEnds(o), more = purpose.replace(/\s+/g, ' ').length > first.length + 1;
   const title = h('header', { class: 'map-title' }, h('h1', { class: 'map-name' }, sp ? sp.name : o.project.name),
-    first ? h('p', { class: 'map-purpose' }, h('span', {}, first), more ? h('button', { type: 'button', class: 'map-more', title: '설명 전체와 출처', onclick: () => openScopeReading() }, '범위 설명') : null) : null,
+    first ? h('p', { class: 'map-purpose' }, h('span', {}, first), more ? h('button', { type: 'button', class: 'map-more', title: '설명 전체와 출처', onclick: () => openScopeReading() }, '설명 전체') : null) : null,
     sp ? null : understoodLine(o),
     flowStrip(o), stateStrip(o),
     outside.length ? h('div', { class: 'scope-rels', role: 'list', 'aria-label': '이 범위의 바깥 관계' }, ...relationGroups(outside, '범위').map(g => h('p', { class: 'scope-rel', role: 'listitem' },
       h('span', { class: 'sr-verb' }, g.label), ...g.list.map(x => h('button', { type: 'button', class: 'sr-part', title: `${partPath(o.view, x.far).map(q => q.name).join(' › ')}${x.r.note ? `\n${x.r.note}` : ''}`, 'data-far': x.far, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far, null); } }, partOf(o, x.far)?.name ?? '부분'))))) : null);
   world.append(title);
+  placeLoneHead(crossing);
   title.style.width = `${titleRect().w}px`;
   titleH = view.parts.length ? title.offsetHeight : 0; title.hidden = !titleH;
   $('scope-sticky').replaceChildren(h('strong', {}, sp ? sp.name : o.project.name), first ? h('span', {}, first) : '');
@@ -916,9 +927,28 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   applyReadMarks();
 }
 
+/** The scope's own parts that no line touches, under one caption: not a flow that lost its lines, just parts apart. Drawn
+ * when the scope has such parts beside linked ones; placed above the topmost-leftmost of them and moved with them. */
+let loneIds: string[] = [];
+function placeLoneHead(crossing?: Map<string, { all: number }>) {
+  const world = $('world'), here = scope ?? ROOT, touched = new Set(lay.edges.flatMap(e => [e.from, e.to]));
+  const own = [...lay.boxes.values()].filter(b => b.container === here && b.kind !== 'ghost');
+  loneIds = crossing ? own.filter(b => !touched.has(b.id) && !(crossing.get(b.id)?.all)).map(b => b.id) : loneIds;
+  world.querySelector('.lone-head')?.remove();
+  if (!loneIds.length || loneIds.length === own.length) return;
+  const el = h('div', { class: 'lone-head', 'aria-hidden': 'true' }, `연결 없음 · ${loneIds.length}`);
+  world.append(el); moveLoneHead();
+}
+function moveLoneHead() {
+  const el = $('world').querySelector<HTMLElement>('.lone-head'); if (!el) return;
+  const bs = loneIds.map(id => lay.boxes.get(id)).filter((b): b is Box => !!b); if (!bs.length) { el.remove(); return; }
+  const x = Math.min(...bs.map(b => b.x)), y = Math.min(...bs.map(b => b.y));
+  el.style.left = `${x}px`; el.style.top = `${y - 20}px`;
+}
 /** Geometry only (also during a drag): boxes and edge paths from the current layout. */
 function positionWorld() {
   const world = $('world');
+  moveLoneHead();
   // Heads of the outside partners' runs follow their layout (it can change while a part is dragged).
   const heads = new Map(lay.heads.map(x => [x.key, x]));
   world.querySelectorAll<HTMLElement>('.ghost-head').forEach(el => {
@@ -1384,7 +1414,7 @@ function renderScopeLens() {
   l.classList.remove('compare', 'railed'); l.classList.add('scope-read'); readingFor = [];
   l.replaceChildren(
     h('header', { class: 'lens-head' },
-      h('div', { class: 'lens-path' }, h('span', {}, sp ? '이 범위' : '프로젝트'), ...path.flatMap(x => [h('span', { 'aria-hidden': 'true' }, '›'), h('a', { href: hashFor(o.key, null, x.id) }, x.name)])),
+      h('div', { class: 'lens-path' }, h('span', {}, sp ? '들어와 있는 곳' : '프로젝트'), ...path.flatMap(x => [h('span', { 'aria-hidden': 'true' }, '›'), h('a', { href: hashFor(o.key, null, x.id), title: x.name }, x.name)])),
       h('h2', { id: 'lens-title' }, sp ? sp.name : o.project.name),
       h('div', { class: 'head-tools' }, h('button', { type: 'button', class: 'close', 'aria-label': '범위 설명 닫기', title: '닫기 (Esc)', onclick: closeScopeReading }, '×'))),
     h('div', { class: 'lens-body' },
@@ -1504,7 +1534,7 @@ function renderLens() {
   l.classList.remove('compare', 'scope-read'); readingFor = [];
   l.replaceChildren(); put(l, entry,
     h('header', { class: 'lens-head' },
-      path.length ? h('div', { class: 'lens-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope) }, x.name)])) : null,
+      path.length ? h('div', { class: 'lens-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope), title: x.name }, x.name)])) : null,
       h('h2', { id: 'lens-title' }, part.name),
       aliasOf(o.view, part.id) ? h('p', { class: 'lens-alias' }, aliasOf(o.view, part.id)) : null,
       ladderLine(o.view, part),
@@ -2149,9 +2179,22 @@ const autoSync = createAutoSync({
 });
 /** AF100: while a reading runs as a job, the person is told it goes on without this window but not without the PC's Studio.
  * Until the server reports a stage, the text says how the reading goes (its route); the map title's short line may say less. */
+/** When the reading now pending was first seen, and the ticker that writes how long it has run (a reading takes minutes; a
+ * spinner alone says nothing about whether it is still going). Cleared when no reading is pending. */
+let runSeen = 0, runTick = 0;
+function elapsedText(): string {
+  const s = Math.max(0, Math.round((Date.now() - runSeen) / 1000)), m = Math.floor(s / 60);
+  return `${m ? `${m}분 ` : ''}${s % 60}초째 · 보통 3–5분`;
+}
+function tickElapsed() {
+  if (!mapRun.state().pending && !mapRun.state().committing) { clearInterval(runTick); runTick = 0; runSeen = 0; return; }
+  document.querySelectorAll<HTMLElement>('.mu-elapsed').forEach(el => { el.textContent = elapsedText(); });
+}
 function pendingLine(cls: string, cancelClass: string, short?: string): HTMLElement[] {
   const d = mapRun.detail();
-  return [h('span', { class: 'mu-pending' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), d.cancelling ? '취소하는 중…' : d.progress ?? short ?? mapPendingText(d.route)),
+  if (!runSeen) runSeen = Date.now();
+  if (!runTick) runTick = window.setInterval(tickElapsed, 1000);
+  return [h('span', { class: 'mu-pending' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), d.cancelling ? '취소하는 중…' : d.progress ?? short ?? mapPendingText(d.route), d.cancelling ? null : h('span', { class: 'mu-elapsed' }, elapsedText())),
     d.cancelling ? null : h('button', { type: 'button', class: cancelClass, onclick: () => mapRun.cancel() }, '취소'),
     d.durable ? h('span', { class: `fine mu-durable ${cls}` }, JOB_NOTE.durable) : null].filter((x): x is HTMLElement => !!x);
 }
@@ -2330,7 +2373,8 @@ function renderMapEntry() {
     fresh ? null : h('p', { class: 'fine se-ask' }, '진행 중인 AI 대화가 있다면 ', askCopy('현황 보고 요청 문구 복사', PROJECT_REPORT_ASK, 'link-button'), ' 또는 ',
       askCopy('파일을 못 보는 대화용', CHAT_REPORT_ASK, 'link-button'), '을 그 대화에 붙여 넣으세요. 나온 보고서를 ‘기록 붙여넣기’에 넣으면 부분·연결·상태·철회·모르는 것이 지도가 돼요.'),
     // How this reading is batched and bounded: the route the very next reading takes (shared/map-route.ts), not a guess from status.
-    ...mapBatchLines(next?.route ?? null).map(t => h('p', { class: 'fine se-batch' }, t)),
+    // How the reading is batched and bounded (shared/map-route.ts): folded, for the first time a person reads this card.
+    mapBatchLines(next?.route ?? null).length ? h('details', { class: 'se-more' }, h('summary', {}, '어떻게 읽는지 · 비용 상한'), ...mapBatchLines(next?.route ?? null).map(t => h('p', { class: 'fine se-batch' }, t))) : null,
     st.error ? h('p', { class: 'pp-error', role: 'alert' }, st.error) : null, runNotice(),
     h('button', { type: 'button', class: 'link-button se-direct', onclick: () => openPartForm(null) }, '부분 직접 추가'));
   box.hidden = false;
@@ -2599,7 +2643,8 @@ function askCopy(label: string, text: string, cls: string): HTMLElement {
 }
 function toast(text: string, action?: { label: string; run: () => void }) {
   const t = $('toast'), key = opened?.key ?? null; clearTimeout(toastTimer); t.replaceChildren(); toastKey = key;
-  put(t, h('span', {}, text), action ? h('button', { type: 'button', class: 'link-button', onclick: () => { t.hidden = true; if (opened?.key === key) action.run(); } }, action.label) : null);
+  put(t, h('span', {}, text), action ? h('button', { type: 'button', class: 'link-button', onclick: () => { t.hidden = true; if (opened?.key === key) action.run(); } }, action.label) : null,
+    h('button', { type: 'button', class: 'toast-close', 'aria-label': '닫기', onclick: () => dropToast() }, '×'));
   t.hidden = false; toastTimer = window.setTimeout(() => { t.hidden = true; }, 8000);
 }
 function dropToast() { clearTimeout(toastTimer); $('toast').hidden = true; toastKey = null; }
@@ -2686,7 +2731,10 @@ function bindCanvas() {
     if (!drag || drag.pointer !== e.pointerId) return;
     const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
     if (!drag.moved && Math.abs(dx) + Math.abs(dy) < 4) return;
-    if (!drag.moved) { drag.moved = true; vp.classList.add(drag.mode === 'pan' ? 'grabbing' : 'moving'); if (drag.mode === 'part') document.querySelector(`[data-box="${CSS.escape(drag.id)}"]`)?.classList.add('dragging'); }
+    if (!drag.moved) {
+      drag.moved = true; vp.classList.add(drag.mode === 'pan' ? 'grabbing' : 'moving');
+      if (drag.mode === 'part') { document.querySelector(`[data-box="${CSS.escape(drag.id)}"]`)?.classList.add('dragging'); holdPlaces(opened!, drag.container); }
+    }
     if (drag.mode === 'pan') { mapMoved = true; camera = { ...camera, x: drag.cx + dx, y: drag.cy + dy }; applyCamera(); return; }
     const o = opened!; const pos = positionsOf(o);
     (pos[drag.container] ??= {})[drag.id] = { x: Math.round(drag.start.x + dx / camera.k), y: Math.round(drag.start.y + dy / camera.k) };
@@ -2710,7 +2758,8 @@ function bindCanvas() {
       if (twice && part?.childIds.length) { lastClick.id = ''; go(o.key, null, d.id); return; }
       go(o.key, d.id); return;
     }
-    if (!d.moved && selected) go(o.key);
+    // A click on a line (no move) selects the part the line leaves (bindEdgeHints); on empty canvas it clears the selection.
+    if (!d.moved && selected && !(e.target as Element).classList?.contains('edge-hit')) go(o.key);
   };
   vp.addEventListener('pointerup', end); vp.addEventListener('pointercancel', end);
   vp.addEventListener('wheel', e => {
@@ -2763,7 +2812,16 @@ function bindCanvas() {
 function bindEdgeHints() {
   const world = $('world'), tip = $('edge-tip'), space = $('space');
   const nameOf = (boxId: string) => { const o = opened; if (!o) return ''; return partOf(o, boxId.startsWith('ghost:') ? boxId.slice(6) : boxId)?.name ?? ''; };
-  const place = (e: PointerEvent) => { const r = space.getBoundingClientRect(); tip.style.left = `${Math.min(e.clientX - r.left + 14, r.width - 300)}px`; tip.style.top = `${e.clientY - r.top + 14}px`; };
+  const place = (e: PointerEvent) => { const r = space.getBoundingClientRect(), y = e.clientY - r.top; tip.style.left = `${Math.max(8, Math.min(e.clientX - r.left + 14, r.width - 300))}px`; tip.style.top = `${y + 14 + tip.offsetHeight > r.height - 8 ? Math.max(8, y - tip.offsetHeight - 10) : y + 14}px`; };
+  // A click on a line selects the part it leaves: the line's meaning then reads in the pane, with its other end lit.
+  world.addEventListener('click', e => {
+    const t = e.target as Element; if (!t.classList.contains('edge-hit')) return;
+    const o = opened, g = t.closest<SVGGElement>('.edge'), edge = g && edgeOf(g.dataset.key); if (!o || !edge) return;
+    e.stopPropagation();
+    const from = edge.from.startsWith('ghost:') ? edge.from.slice(6) : edge.from;
+    if (from === selected) return;
+    go(o.key, from, edge.from.startsWith('ghost:') ? partOf(o, from)?.parentId ?? null : scope);
+  });
   /** Pointing at (or focusing) a part: its lines light, the parts at their other ends with them, and the rest of the map
    * steps back (.peek), so a part's neighbourhood reads without a click. Nothing moves and nothing is selected. */
   const nearPart = (id: string) => {
@@ -2786,6 +2844,8 @@ function bindEdgeHints() {
     const t = e.target as Element, g = t.closest<SVGGElement>('.edge');
     if (g && t.classList.contains('edge-hit')) {
       const edge = edgeOf(g.dataset.key); if (!edge) return;
+      // While the map or a part is dragged, no tooltip: it would chase the hand.
+      if ($('viewport').classList.contains('grabbing') || $('viewport').classList.contains('moving')) return;
       g.classList.add('near');
       tip.replaceChildren(h('strong', {}, `${nameOf(edge.from)} ${edge.kind === 'related' ? '—' : '→'} ${nameOf(edge.to)}`), h('span', { class: 'tip-kind' }, `${REL_LABEL[edge.kind] ?? edge.kind}${restOf(edge) ? ` · 선택한 부분의 관계를 뺀 나머지 ${edge.ids.length}개` : edge.agg ? ` · 안쪽 관계 ${edge.ids.length}개의 요약 · 선택하면 실제 끝점` : edge.ids.length > 1 ? ` · 관계 ${edge.ids.length}개를 한 선으로 묶음` : ''}`),
         ...edge.notes.slice(0, 3).map(n => h('span', {}, n)), ...(edge.notes.length && edge.notes.every(plannedNote) ? [h('span', { class: 'tip-kind' }, '계획된 연결 · 아직 돌지 않음')] : []), ...(edgeRevised(edge) ? [h('span', { class: 'tip-revised' }, REVISED_BASIS.replace(/^ · /, ''))] : []));
