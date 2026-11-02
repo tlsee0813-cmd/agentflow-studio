@@ -10,8 +10,8 @@ export interface AiStatus { ai: 'deepseek' | 'off' | 'none'; model: string | nul
   /** The model and prompt id a map reading would be made with (null when the server does not offer it). AF102 via 'jobs': made only
    * as a durable job by the server's own map executor (a local preview), whatever ai says; the other AI features keep ai. */
   map?: { model: string; prompt: string; via?: 'jobs';
-    first?: { model: string; prompt: string; ready: boolean; method: 'divided'; monthlyUsd: number; runUsd: number };
-    later?: { model: string; prompt: string; ready: boolean; method: 'divided'; monthlyUsd: number; runUsd: number };
+    first?: { model: string; prompt: string; ready: boolean; method: 'divided'; monthlyUsd: number; runUsd: number; deepseekMaxCalls?: number };
+    later?: { model: string; prompt: string; ready: boolean; method: 'divided'; monthlyUsd: number; runUsd: number; deepseekMaxCalls?: number };
     /** AF116: the m7 recipe for later readings (studio.map.7), beside prompt (m6, still every first map); absent on older servers. */
     laterPrompt?: string } | null;
   /** AF100: the server keeps map readings as durable jobs on this PC (durable), or has a job store it cannot use (problem).
@@ -52,10 +52,10 @@ export async function aiStatus(): Promise<AiStatus> {
       ? { model: d.model, prompt: d.prompt, record: typeof d.record === 'string' && /^d2-[0-9a-f]{12}$/.test(d.record) ? d.record : null } : null;
     const f = v.map?.first;
     const first = f && f.method === 'divided' && typeof f.model === 'string' && /^[\w.-]{1,80}$/.test(f.model) && typeof f.prompt === 'string' && /^m6-[0-9a-f]{12}$/.test(f.prompt) && Number.isFinite(f.monthlyUsd) && Number.isFinite(f.runUsd)
-      ? { model: f.model, prompt: f.prompt, ready: f.ready === true, method: 'divided' as const, monthlyUsd: f.monthlyUsd, runUsd: f.runUsd } : null;
+      ? { model: f.model, prompt: f.prompt, ready: f.ready === true, method: 'divided' as const, monthlyUsd: f.monthlyUsd, runUsd: f.runUsd, deepseekMaxCalls: Number.isInteger(f.deepseekMaxCalls) && f.deepseekMaxCalls >= 1 && f.deepseekMaxCalls <= 48 ? f.deepseekMaxCalls : 48 } : null;
     const l = v.map?.later;
     const later = l && l.method === 'divided' && typeof l.model === 'string' && /^[\w.-]{1,80}$/.test(l.model) && typeof l.prompt === 'string' && /^m7-[0-9a-f]{12}$/.test(l.prompt) && Number.isFinite(l.monthlyUsd) && Number.isFinite(l.runUsd)
-      ? { model: l.model, prompt: l.prompt, ready: l.ready === true, method: 'divided' as const, monthlyUsd: l.monthlyUsd, runUsd: l.runUsd } : null;
+      ? { model: l.model, prompt: l.prompt, ready: l.ready === true, method: 'divided' as const, monthlyUsd: l.monthlyUsd, runUsd: l.runUsd, deepseekMaxCalls: Number.isInteger(l.deepseekMaxCalls) && l.deepseekMaxCalls >= 1 && l.deepseekMaxCalls <= 48 ? l.deepseekMaxCalls : 48 } : null;
     const m = v.map, map = m && typeof m.model === 'string' && /^[\w.-]{1,80}$/.test(m.model) && typeof m.prompt === 'string' && /^m[1-6]-[0-9a-f]{12}$/.test(m.prompt) ? { model: m.model, prompt: m.prompt, ...(first ? { first } : {}), ...(later ? { later } : {}), ...(m.via === 'jobs' ? { via: 'jobs' as const } : {}),
       // A later recipe is read only beside a current m6 one, and only as an exact m7 id.
       ...(/^m6-/.test(m.prompt) && typeof m.laterPrompt === 'string' && /^m7-[0-9a-f]{12}$/.test(m.laterPrompt) ? { laterPrompt: m.laterPrompt } : {}) } : null;

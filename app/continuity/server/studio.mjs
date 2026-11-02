@@ -309,7 +309,7 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
     call: async (ask, signal, execution) => { const out = await executor.call(ask, signal, execution); return { model: executor.model, reply: out.wire, evidence: evidenceOf(ask), observed: out.observed }; }
   } : {
     configured: () => !!config.apiKey, prompt: jobPrompt, model: jobModel, acquire: id => limiter.acquire(id),
-    call: async (ask, signal) => ({ model: jobModel(ask), reply: divided(ask) ? await firstMapPipeline.call(ask, signal) : await callStudioModel(ask, planConfig, { fetchImpl, signal, refused }), evidence: evidenceOf(ask) })
+    call: async (ask, signal, _execution, reportProgress) => ({ model: jobModel(ask), reply: divided(ask) ? await firstMapPipeline.call(ask, signal, reportProgress) : await callStudioModel(ask, planConfig, { fetchImpl, signal, refused }), evidence: evidenceOf(ask) })
   };
   /** What a map reading would be made with: the executor's model and recipe when one is given (map jobs only), else the key's. */
   const mapStatus = async () => {
@@ -317,8 +317,8 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
     if (executor) return executor.ready() && jobs.describe().durable ? { map: { model: executor.model, prompt: await mapPromptId(), ...later, via: 'jobs' } } : {};
     return config.apiKey ? { map: { model: planConfig.model, prompt: await mapPromptId(), ...later,
       ...(firstMapPipeline ? {
-        first: { model: firstMapPipeline.model, prompt: firstPrompt(), ready: firstMapPipeline.ready(), method: 'divided', monthlyUsd: firstMapPipeline.describe().monthlyUsd, runUsd: firstMapPipeline.describe().runUsd },
-        later: { model: firstMapPipeline.model, prompt: dividedLaterPrompt(), ready: firstMapPipeline.ready(), method: 'divided', monthlyUsd: firstMapPipeline.describe().monthlyUsd, runUsd: firstMapPipeline.describe().runUsd }
+        first: { model: firstMapPipeline.model, prompt: firstPrompt(), ready: firstMapPipeline.ready(), method: 'divided', monthlyUsd: firstMapPipeline.describe().monthlyUsd, runUsd: firstMapPipeline.describe().runUsd, deepseekMaxCalls: firstMapPipeline.describe().deepseekMaxCalls ?? 48 },
+        later: { model: firstMapPipeline.model, prompt: dividedLaterPrompt(), ready: firstMapPipeline.ready(), method: 'divided', monthlyUsd: firstMapPipeline.describe().monthlyUsd, runUsd: firstMapPipeline.describe().runUsd, deepseekMaxCalls: firstMapPipeline.describe().deepseekMaxCalls ?? 48 }
       } : {}) } } : {};
   };
   const statusBody = async () => ({

@@ -73,6 +73,7 @@ const blueprintFor = (wire, ask) => ({
     parent: part.parent ?? ask.parts.find(p => p.id === part.ref)?.parentId ?? null,
     at: [part.basis[0] ?? part.claims[0]?.at ?? ask.records[0].spans[0].s], focus: part.role ?? '기존 부분의 원문 변화' })),
   global: [{ kind: 'correction', text: '끝부분의 조건과 철회, 모름을 원문으로 재대조한다.', at: [ask.records.at(-1).spans[0].s] }],
+  ...(ask.schemaVersion === 'studio.map.7' ? { corrections: [] } : {}),
 });
 function payloadFor(input, ask, wire) {
   const stage = stageOf(input);
@@ -571,4 +572,246 @@ test('a Terra render reservation exceeding the run ceiling prevents dispatch aft
   const count = calls.length;
   await assert.rejects(pipeline.call(ask), matchesCode('MAP_BUDGET_EXCEEDED'));
   assert.equal(calls.length, count, 'the accepted completed plan is kept when the next paid reservation is refused');
+});
+
+const revisionFor = (ask, ref = 'new:flow') => ({ reviseParts: [ref], reason: '명시적 철회가 해당 부분의 구조화된 주장에 빠졌다.', at: [ask.records.at(-1).spans[0].s] });
+
+test('a valid global revision re-renders only the affected original group and final review uses those new parts', async t => {
+  const { make } = await setup(t), ask = askFor(), original = structuredClone(ask), wire = manyPartsWire(ask), calls = [], progress = [], phases = [];
+  const revision = revisionFor(ask, 'new:flow3');
+  const pipeline = make({ onProgress: event => progress.push(event), callProvider: fakeProvider(ask, calls, call => {
+    if (call.stage === 'global' && !call.input.semanticReview) return revision;
+    if (call.stage === 'render' && call.input.semanticReview) {
+      const fragment = payloadFor(call.input, ask, wire);
+      fragment.parts[0].claims[0] = { ...fragment.parts[0].claims[0], kind: 'reported', text: '앞 영구 저장 설명을 철회했다고 보고합니다.', at: ask.records[1].spans[0].s };
+      return fragment;
+    }
+  }, wire) });
+  const result = await pipeline.call(ask, undefined, phase => phases.push(phase));
+  const renders = calls.filter(call => call.stage === 'render'), globals = calls.filter(call => call.stage === 'global');
+  assert.equal(renders.length, 3); assert.equal(globals.length, 2);
+  const semantic = renders.find(call => call.input.semanticReview);
+  assert.equal(semantic.input.assignment.id, 'parts-2'); assert.equal(semantic.input.assignment.keyStart, 101);
+  assert.deepEqual(semantic.input.assignment.parts.map(part => part.ref), ['new:flow3']);
+  assert.deepEqual(semantic.input.semanticReview, revision);
+  assert.deepEqual(semantic.input.previousParts, globals[0].input.renderedParts.slice(3));
+  assert.deepEqual(globals[1].input.renderedParts.slice(0, 3), globals[0].input.renderedParts.slice(0, 3), 'unaffected siblings remain untouched');
+  assert.match(globals[1].input.renderedParts[3].claims[0].text, /철회/);
+  assert.deepEqual(globals[1].input.semanticReview, revision);
+  for (const call of calls.filter(call => call.stage !== 'extract')) assert.deepEqual(call.input.INPUT, original);
+  validateMapReply(result, ask); assert.deepEqual(ask, original);
+  assert.ok(progress.some(event => event.stage === 'render-2-semantic' && event.state === 'complete'));
+  assert.ok(progress.some(event => event.stage === 'global-final' && event.state === 'complete'));
+  for (const phase of phases) {
+    assert.ok(['extract', 'plan', 'render', 'global', 'correction'].includes(phase.phase));
+    assert.ok(Number.isInteger(phase.done) && phase.done >= 0 && phase.done <= phase.total);
+  }
+  assert.ok(phases.some(phase => phase.phase === 'render' && phase.total === 1 && phase.done === 0));
+  const count = calls.length;
+  assert.deepEqual(await pipeline.call(ask), result);
+  assert.equal(calls.length, count, 'the sentinel, semantic group, and final review all resume from distinct checkpoints');
+  assert.ok(progress.some(event => event.stage === 'render-2-semantic' && event.state === 'cached'));
+  assert.ok(progress.some(event => event.stage === 'global-final' && event.state === 'cached'));
+});
+
+test('a second semantic sentinel fails closed without another render or format-correction call', async t => {
+  const { make } = await setup(t), ask = askFor(), calls = [], stages = [];
+  const pipeline = make({ onStageOutput: output => stages.push(output.stage), callProvider: fakeProvider(ask, calls,
+    call => call.stage === 'global' ? revisionFor(ask) : undefined) });
+  await assert.rejects(pipeline.call(ask), matchesCode('INVALID_RESPONSE'));
+  assert.equal(calls.filter(call => call.stage === 'global').length, 2);
+  assert.equal(calls.filter(call => call.stage === 'render').length, 2);
+  assert.equal(stages.includes('global-final-correction'), false);
+  assert.equal(stages.some(id => id.includes('semantic-semantic')), false);
+});
+
+test('malformed global sentinels never trigger semantic re-rendering', async t => {
+  const { make } = await setup(t), ask = askFor(), calls = [];
+  const pipeline = make({ callProvider: fakeProvider(ask, calls, call => call.stage === 'global'
+    ? { ...revisionFor(ask), reviseParts: ['new:unplanned'] } : undefined) });
+  await assert.rejects(pipeline.call(ask), matchesCode('INVALID_RESPONSE'));
+  assert.equal(calls.filter(call => call.stage === 'global').length, 2, 'only the original and its single format correction are dispatched');
+  assert.equal(calls.some(call => call.input.semanticReview), false);
+});
+
+test('semantic groups and final review each allow one bounded format correction with original assignment keys', async t => {
+  const { make } = await setup(t), ask = askFor(), calls = [], stages = [];
+  const pipeline = make({ onStageOutput: output => stages.push(output.stage), callProvider: fakeProvider(ask, calls, call => {
+    if (call.stage === 'global' && !call.input.semanticReview) return revisionFor(ask);
+    if (call.stage === 'render' && call.input.semanticReview && !call.input.correction)
+      return { ...payloadFor(call.input, ask, originalWire(ask)), summary: '유효하지 않은 부분 요약' };
+    if (call.stage === 'global' && call.input.semanticReview && !call.input.correction) return { parts: [] };
+  }) });
+  validateMapReply(await pipeline.call(ask), ask);
+  assert.ok(stages.includes('render-1-semantic-correction')); assert.ok(stages.includes('global-final-correction'));
+  assert.equal(calls.filter(call => call.stage === 'render' && call.input.semanticReview).length, 2);
+  assert.equal(calls.filter(call => call.stage === 'global' && call.input.semanticReview).length, 2);
+  for (const call of calls.filter(call => call.stage === 'render' && call.input.semanticReview)) assert.equal(call.input.assignment.keyStart, 1);
+  const count = calls.length; await pipeline.call(ask); assert.equal(calls.length, count);
+});
+
+for (const blockedStage of ['render', 'global']) test('uncertain semantic ' + blockedStage + ' is not replayed and cannot return a partial result', async t => {
+  const { make } = await setup(t), ask = askFor(), calls = [];
+  const pipeline = make({ callProvider: fakeProvider(ask, calls, call => {
+    if (call.stage === 'global' && !call.input.semanticReview) return revisionFor(ask);
+    if (call.stage === blockedStage && call.input.semanticReview) throw new ApiError('AI_NETWORK_ERROR', 503);
+  }) });
+  await assert.rejects(pipeline.call(ask), matchesCode('AI_NETWORK_ERROR'));
+  const count = calls.length;
+  await assert.rejects(pipeline.call(ask), matchesCode('MAP_STAGE_UNCERTAIN'));
+  assert.equal(calls.length, count);
+  assert.equal(calls.some(call => call.input.correction), false);
+});
+
+for (const blockedStage of ['render', 'global']) test('cancelling semantic ' + blockedStage + ' preserves checkpoints without applying or replaying', async t => {
+  const { make } = await setup(t), ask = askFor(), calls = [], controller = new AbortController();
+  let ready; const started = new Promise(resolve => { ready = resolve; });
+  const pipeline = make({ callProvider: fakeProvider(ask, calls, call => {
+    if (call.stage === 'global' && !call.input.semanticReview) return revisionFor(ask);
+    if (call.stage !== blockedStage || !call.input.semanticReview) return;
+    ready();
+    return new Promise((_, reject) => {
+      const abort = () => reject(new ApiError('CANCELLED', 499));
+      if (call.options.signal.aborted) abort(); else call.options.signal.addEventListener('abort', abort, { once: true });
+    });
+  }) });
+  const pending = pipeline.call(ask, controller.signal); await started; controller.abort();
+  await assert.rejects(pending, matchesCode('CANCELLED'));
+  const count = calls.length;
+  await assert.rejects(pipeline.call(ask), matchesCode('MAP_STAGE_UNCERTAIN'));
+  assert.equal(calls.length, count);
+});
+
+test('semantic pass metadata bounds DeepSeek to 48 calls while OpenAI rendering retains twelve extraction calls', async t => {
+  const { make } = await setup(t);
+  assert.equal(make({}).describe().deepseekMaxCalls, 48);
+  assert.equal(make({ renderModel: 'gpt-6.1-terra' }).describe().deepseekMaxCalls, 12);
+  assert.equal(make({ maxPartitions: 5 }).describe().deepseekMaxCalls, 41);
+});
+
+test('a declared later withdrawal automatically repairs summary-only normal output before its record is consumed', async t => {
+  const empty = () => ({ summary: '', parts: [], relations: [], candidates: [], gaps: [], matches: [], material: [] });
+  const meta = n => ({ id: 'R_' + crypto.randomUUID(), at: '2026-11-02T00:00:00.000Z', model: 'stub', prompt: 'm6-000000000001', hash: String(n).repeat(64) });
+  let project = D.pasteRecord(D.createProject(), '작업 보고: 파일 저장을 구현했다고 보고합니다.', null).project;
+  const initial = M.buildMapAsk(project, studioView(project), [], undefined, M.MAP6_SCHEMA), initialAt = initial.ask.records[0].spans[0].s;
+  project = M.applyReading(project, initial, M.validateMapReply({ ...empty(), parts: [{ ref: 'new:save', name: '파일 저장', parent: null,
+    role: '파일 저장을 맡는다.', roleAbout: null, roleReplaces: null, basis: [initialAt], claims: [{ key: 's1', kind: 'reported',
+      text: '파일 저장을 구현했다고 보고함', at: initialAt, about: null, replaces: null }] }] }, initial.ask), meta(1)).project;
+  const area = project.space.areas[0].id;
+  project = D.pasteRecord(project, '정정: 앞 보고의 파일 저장 구현 주장을 철회합니다. 실제로는 아직 파일 저장을 구현하지 않았습니다.\n저장 위치 설정은 계속 파일 경로를 받습니다.', null).project;
+  const input = M.buildMapAsk(project, studioView(project), [], undefined, M.MAP7_SCHEMA), ask = input.ask, part = ask.parts[0], spans = ask.records[0].spans;
+  const correctionAt = spans[0].s, notMadeAt = spans.find(span => span.t.includes('실제로는')).s, otherAt = spans.find(span => span.t.includes('저장 위치 설정')).s;
+  const wire = { ...empty(), summary: '앞선 파일 저장 구현 보고가 철회되었고 아직 구현하지 않았다.', parts: [{ ref: part.id, name: null, parent: null,
+    role: null, roleAboutAt: null, roleReplaces: null, basis: [], claims: [{ key: 's1', kind: 'describes',
+      text: '저장 위치 설정은 파일 경로를 받는다.', at: otherAt, aboutAt: null, replaces: null }] }] };
+  const { make } = await setup(t), calls = [];
+  const pipeline = make({ targetChars: 1000, callProvider: fakeProvider(ask, calls, call => {
+    if (call.stage === 'plan') return { ...blueprintFor(wire, ask), corrections: [{ part: part.id, claim: part.current[0].key, at: [correctionAt, notMadeAt] }] };
+    if (call.stage === 'render' && call.input.semanticReview) {
+      const fragment = payloadFor(call.input, ask, wire);
+      fragment.parts[0].claims.push({ key: 's2', kind: 'reported', text: '앞 구현 보고를 철회했으며 파일 저장은 아직 구현하지 않았다고 보고함',
+        at: correctionAt + '-' + notMadeAt.split('.')[1], aboutAt: null, replaces: part.current[0].key });
+      return fragment;
+    }
+  }, wire) });
+  const result = await pipeline.call(ask), next = M.applyReading(project, input, M.validateMapReply(result, ask), meta(2)).project;
+  assert.equal(M.unreadRecords(next, studioView(next)).length, 0);
+  assert.equal(M.partUnderstanding(next, area).claims.some(claim => claim.text === '파일 저장을 구현했다고 보고함'), false);
+  assert.ok(M.partUnderstanding(next, area).claims.some(claim => claim.replaces));
+  assert.equal(calls.filter(call => call.stage === 'global').length, 1, 'known missing replacements skip the ordinary paid global review');
+  assert.equal(calls.find(call => call.stage === 'global').input.semanticReview.reviseParts[0], part.id);
+});
+
+function conditionalLater() {
+  const ask = structuredClone(askFor()); ask.schemaVersion = 'studio.map.7';
+  ask.parts = [{ id: 'P01', name: '저장', note: '', parentId: null, readAs: null, role: '사람이 정한 저장 책임', roleBy: 'person', roleAbout: null,
+    current: [{ key: 'C01', kind: 'reported', text: '저장을 구현했다고 보고함', about: 'alpha 판본' },
+      { key: 'C02', kind: 'reported', text: '저장을 구현했다고 보고함', about: 'beta 판본' }] }];
+  validateMapAsk(ask);
+  const wire = { summary: 'alpha 보고는 철회되었고 beta 판본과 혼동하지 않습니다.', parts: [{ ref: 'P01', name: null, parent: null, role: null,
+    roleAboutAt: null, roleReplaces: null, basis: [], claims: [{ key: 's1', kind: 'reported', text: 'beta 판본의 별도 보고',
+      at: ask.records[0].spans[0].s, aboutAt: null, replaces: 'C02' }] }], relations: [], candidates: [], gaps: [], matches: [], material: [] };
+  const obligation = { part: 'P01', claim: 'C01', at: [ask.records[1].spans[0].s] };
+  return { ask, wire, obligation };
+}
+
+test('a replacement of a different conditional current key cannot satisfy a declared obligation or reach global-final', async t => {
+  const { make } = await setup(t), { ask, wire, obligation } = conditionalLater(), before = structuredClone(ask), calls = [];
+  const pipeline = make({ callProvider: fakeProvider(ask, calls, call => call.stage === 'plan'
+    ? { ...blueprintFor(wire, ask), corrections: [obligation] } : undefined, wire) });
+  await assert.rejects(pipeline.call(ask), matchesCode('INVALID_RESPONSE'));
+  assert.equal(calls.filter(call => call.stage === 'render').length, 2, 'the declared missing key gets exactly one semantic pass');
+  assert.equal(calls.filter(call => call.stage === 'global').length, 0, 'a summary cannot remove the still-current claim');
+  const semantic = calls.find(call => call.stage === 'render' && call.input.semanticReview);
+  assert.deepEqual(semantic.input.blueprint.corrections, [obligation]);
+  assert.deepEqual(ask, before);
+  const count = calls.length;
+  await assert.rejects(pipeline.call(ask), matchesCode('INVALID_RESPONSE'));
+  assert.equal(calls.length, count, 'the cached unsuccessful semantic pass cannot silently start another round');
+});
+
+test('raw replaces on a map7 soft-excluded claim does not satisfy the ledger and triggers original-key repair', async t => {
+  const { make } = await setup(t), { ask, wire, obligation } = conditionalLater(), calls = [];
+  const pipeline = make({ callProvider: fakeProvider(ask, calls, call => {
+    if (call.stage === 'plan') return { ...blueprintFor(wire, ask), corrections: [obligation] };
+    if (call.stage !== 'render') return;
+    const fragment = payloadFor(call.input, ask, wire);
+    fragment.parts[0].claims.push({ key: 's2', kind: 'reported', text: 'alpha 구현 보고를 철회함',
+      at: call.input.semanticReview ? obligation.at[0] : 'N99.001', aboutAt: null, replaces: obligation.claim });
+    return fragment;
+  }, wire) });
+  const checked = validateMapReply(await pipeline.call(ask), ask);
+  assert.equal(calls.filter(call => call.stage === 'render').length, 2);
+  assert.equal(calls.filter(call => call.stage === 'global').length, 1);
+  assert.ok(checked.parts[0].claims.some(claim => claim.replaces === 'C01'));
+  assert.ok(checked.parts[0].claims.some(claim => claim.replaces === 'C02'));
+});
+
+test('an empty later obligation ledger preserves ordinary global review and the original first blueprint shape', async t => {
+  const { make } = await setup(t), { ask, wire } = conditionalLater(), calls = [], plans = [];
+  const later = make({ onStageOutput: output => { if (output.stage === 'plan') plans.push(output.value); }, callProvider: fakeProvider(ask, calls, () => {}, wire) });
+  validateMapReply(await later.call(ask), ask);
+  assert.deepEqual(plans[0].corrections, []);
+  assert.equal(calls.filter(call => call.stage === 'global').length, 1);
+  assert.equal(calls.some(call => call.input.semanticReview), false);
+  const first = askFor(), firstPlans = [];
+  await make({ onStageOutput: output => { if (output.stage === 'plan') firstPlans.push(output.value); }, callProvider: fakeProvider(first, []) }).call(first);
+  assert.deepEqual(Object.keys(firstPlans[0]).sort(), ['global', 'parts']);
+});
+
+test('an obligation already covered by a surviving current-key replacement does not add a semantic pass', async t => {
+  const { make } = await setup(t), { ask, wire, obligation } = conditionalLater(), calls = [];
+  const covered = { ...obligation, claim: 'C02' };
+  const pipeline = make({ callProvider: fakeProvider(ask, calls, call => call.stage === 'plan'
+    ? { ...blueprintFor(wire, ask), corrections: [covered] } : undefined, wire) });
+  const checked = validateMapReply(await pipeline.call(ask), ask);
+  assert.ok(checked.parts[0].claims.some(claim => claim.replaces === 'C02'));
+  assert.equal(calls.some(call => call.input.semanticReview), false);
+  assert.equal(calls.filter(call => call.stage === 'global').length, 1);
+});
+
+test('a cached valid global sentinel is combined with machine obligations in the same single semantic round', async t => {
+  const { store, make } = await setup(t), { ask, wire, obligation } = conditionalLater(), calls = [];
+  wire.parts.push(...manyPartsWire(ask).parts.slice(0, 3));
+  const reviewed = revisionFor(ask, 'new:flow2'), before = structuredClone(reviewed);
+  let key;
+  const pipeline = make({ onProgress: event => { key = event.key; }, onStageOutput: async output => {
+    if (output.stage !== 'plan') return;
+    // Represents a durable prior review of this exact immutable ask/blueprint; no provider is contacted.
+    await store.begin(key, 'global', { provider: 'deepseek', model: 'deepseek-flash', inputBytes: 100, maxOutputTokens: 100 });
+    await store.complete(key, 'global', { value: reviewed, usage });
+  }, callProvider: fakeProvider(ask, calls, call => {
+    if (call.stage === 'plan') return { ...blueprintFor(wire, ask), corrections: [obligation] };
+    if (call.stage === 'render' && call.input.semanticReview && call.input.assignment.parts.some(part => part.ref === 'P01')) {
+      const fragment = payloadFor(call.input, ask, wire), part = fragment.parts.find(part => part.ref === 'P01');
+      part.claims.push({ key: 's99', kind: 'reported', text: 'alpha 보고의 철회', at: obligation.at[0], aboutAt: null, replaces: obligation.claim });
+      return fragment;
+    }
+  }, wire) });
+  validateMapReply(await pipeline.call(ask), ask);
+  const semantic = calls.filter(call => call.stage === 'render' && call.input.semanticReview);
+  assert.deepEqual(semantic.map(call => call.input.assignment.id), ['parts-1', 'parts-2']);
+  assert.deepEqual(semantic[0].input.semanticReview.reviseParts, ['P01', 'new:flow2']);
+  assert.equal(calls.filter(call => call.stage === 'global').length, 1, 'only the new final review is sent');
+  assert.deepEqual(store.get(key, 'global'), before, 'combining review pointers must not mutate the cached sentinel');
 });

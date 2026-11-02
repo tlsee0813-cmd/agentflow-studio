@@ -10,7 +10,7 @@ import { buildMapAsk, applyReading, validateMapReply, MAP5_SCHEMA, MAP6_SCHEMA, 
 import { askMap, AskError, ERROR_TEXT, RELEASE_TEXT, type AiStatus } from './studio-api.js';
 import { encodeMapInput, decodeMapInput, jobHash, MAP_JOB_VERSION, type MapJobBinding } from '../shared/map-job.js';
 import { SPAN_INDEX, textDigest } from '../shared/evidence-span.js';
-import { jobApi, JobError, sameJob, type JobReservations, type JobView, type Reservation } from './map-jobs.js';
+import { jobApi, JobError, sameJob, readJobProgress, type JobProgress, type JobReservations, type JobView, type Reservation } from './map-jobs.js';
 import type { FrozenRequest } from '../shared/request-return.js';
 /** SHA-256 of the request's JSON: the very same request is never sent or applied twice. */
 async function askHash(ask: unknown): Promise<string> {
@@ -110,7 +110,7 @@ export const JOB_NOTE = {
  * result is fetched: it is then applied only when the person asks, from its own entry. */
 /** owned: asked from this page (found again otherwise: a reload, another tab). Either way a result is applied only on the save it
  * was asked from (binding.seq) or on saves this page made itself since (onItsSave). release: this page's hold while it sends. */
-interface Op { id: string; cap: string; binding: MapJobBinding; payload: string | null; receipt: boolean; state: string; cancelling: boolean; misses: number; tick: number; owned: boolean; release: (() => void) | null }
+interface Op { id: string; cap: string; binding: MapJobBinding; payload: string | null; receipt: boolean; state: string; cancelling: boolean; misses: number; tick: number; owned: boolean; release: (() => void) | null; progress?: JobProgress | null }
 interface Attempt {
   key: string; project: string; lifecycle: number | null; visit: unknown;
   phase: 'hashing' | 'reserving' | 'asking' | 'ready' | 'committing' | 'closing';
@@ -301,8 +301,11 @@ export function createMapRun(host: MapRunHost) {
     if (!await sameJob(v, a.op!)) { if (liveOp(a)) await forget(a, JOB_ERROR.MISMATCH!, null); return; }
     if (!liveOp(a)) return;
     const op = a.op!, was = op.state; op.state = v.state; op.misses = 0;
+    const previous = op.progress, progress = v.state === 'accepted' || v.state === 'running' ? readJobProgress(v.progress) : null;
+    op.progress = progress;
+    const progressChanged = previous?.phase !== progress?.phase || previous?.done !== progress?.done || previous?.total !== progress?.total;
     if (v.acked) { await forget(a, null, null); return; } // applied, discarded or seen elsewhere
-    if (v.state === 'accepted' || v.state === 'running') { if (was !== v.state || of(a.key).notice === JOB_ERROR.UNREACHABLE) { of(a.key).notice = null; host.changed(a.key); } return; }
+    if (v.state === 'accepted' || v.state === 'running') { if (was !== v.state || progressChanged || of(a.key).notice === JOB_ERROR.UNREACHABLE) { of(a.key).notice = null; host.changed(a.key); } return; }
     if (v.state === 'ready') { if (a.phase === 'asking') await load(a, v); return; }
     if (v.state === 'cancelled') { await forget(a, op.cancelling ? null : '정리가 취소됐어요. 결과는 없고 기록과 지도는 그대로예요.', 'seen', op.cancelling ? JOB_NOTE.cancelled : null); return; }
     await forget(a, v.state === 'interrupted' ? JOB_ERROR.INTERRUPTED! : errorText(v.error?.code ?? 'AI_UNAVAILABLE', v.error?.detail), 'seen');
@@ -460,9 +463,12 @@ export function createMapRun(host: MapRunHost) {
     /** The page is going: nothing more is looked at or sent from it (its jobs stay with the server and the reservations). */
     dispose: () => { disposed = true; if (timer !== null) clearTimeout(timer); timer = null; for (const slot of slots.values()) { slot.attempt?.op?.release?.(); slot.attempt = null; } },
     /** AF100: what the person is told beside the state: the reading continues without this window, cancelling, a notice. */
-    detail: (key?: string): { durable: boolean; cancelling: boolean; notice: string | null } => {
+    detail: (key?: string): { durable: boolean; cancelling: boolean; notice: string | null; progress: string | null } => {
       const k = key ?? host.current()?.key; const slot = k ? of(k) : null, a = slot?.attempt;
-      return { durable: !!a?.op || (!!a && a.phase !== 'ready' && a.phase !== 'committing' && durable()), cancelling: !!a?.op?.cancelling, notice: slot?.notice ?? null };
+      const p = a?.phase === 'asking' && !a.op?.cancelling ? a.op?.progress : null;
+      const progress = p ? p.phase === 'extract' ? `근거 읽기 ${p.done}/${p.total}` : p.phase === 'plan' ? '전체 조건 대조 중…'
+        : p.phase === 'render' ? `부분 정리 ${p.done}/${p.total}` : p.phase === 'global' ? '관계·조건 마지막 확인 중…' : '정리 결과를 바로잡는 중…' : null;
+      return { durable: !!a?.op || (!!a && a.phase !== 'ready' && a.phase !== 'committing' && durable()), cancelling: !!a?.op?.cancelling, notice: slot?.notice ?? null, progress };
     },
     /** The ready reply of the entry open now, applied (a second click while it is applied does nothing). */
     applyReady: (): Promise<void> => { const a = openSlot()?.attempt; return a ? apply(a) : Promise.resolve(); },

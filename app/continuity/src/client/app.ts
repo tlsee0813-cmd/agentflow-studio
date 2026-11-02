@@ -2058,7 +2058,7 @@ const autoSync = createAutoSync({
 /** AF100: while a reading runs as a job, the person is told it goes on without this window but not without the PC's Studio. */
 function pendingLine(cls: string, text: string, cancelClass: string): HTMLElement[] {
   const d = mapRun.detail();
-  return [h('span', { class: 'mu-pending' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), d.cancelling ? '취소하는 중…' : text),
+  return [h('span', { class: 'mu-pending' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), d.cancelling ? '취소하는 중…' : d.progress ?? text),
     d.cancelling ? null : h('button', { type: 'button', class: cancelClass, onclick: () => mapRun.cancel() }, '취소'),
     d.durable ? h('span', { class: `fine mu-durable ${cls}` }, JOB_NOTE.durable) : null].filter((x): x is HTMLElement => !!x);
 }
@@ -2182,12 +2182,12 @@ function renderMapEntry() {
   else put(acts, paste(true), file());
   const note = st.pending || waiting ? null : fresh && can && !inp!.problem ? sendLine(inp!) : fresh && !can ? mapRun.blocked() ?? `기록 ${fresh}개가 있어요. AI 서버가 연결된 주소에서 지도로 정리할 수 있어요.` : fresh && inp!.problem ? '보낼 수 없는 기록이 있어요(너무 크거나 키처럼 보이는 글).' : linked && can ? AUTO_SENDS : '붙여 넣어 저장만 해서는 AI에 보내지 않아요. 지도로 정리할 때 보내요.';
   box.replaceChildren(); put(box, h('h2', {}, '기록으로 첫 지도를 만들어요'),
-    h('p', { class: 'se-lead' }, offerSync ? 'Claude Code·Codex 대화는 자동 연결로 저절로 가져오고, 다른 AI와 나눈 기록은 붙여 넣으면 돼요. 원문에 근거가 있는 부분과 연결만 지도에 그리고, 이름과 위치는 바로 고칠 수 있어요.'
-      : '작업 AI와 나눈 요구나 보고를 붙여 넣으면, 원문에 근거가 있는 부분과 연결만 지도에 그려요. 이름과 위치는 바로 고칠 수 있어요.'),
+    h('p', { class: 'se-lead' }, offerSync ? '이미 진행한 프로젝트는 이전 대화나 현황 기록으로 시작하세요. 이 PC의 Claude Code·Codex 작업 폴더를 연결하면 새 기록도 이어서 가져와요. 다른 PC의 기록은 파일로 가져오거나 붙여 넣을 수 있어요.'
+      : '이미 진행한 프로젝트는 이전 대화나 현황 기록을, 새 프로젝트는 처음 나눈 요구부터 넣으세요. 원문을 근거로 지도를 만들고 이후 기록을 이어서 읽어요.'),
     last && !last.parts.length ? h('p', { class: 'se-gap' }, last.gaps.length ? last.gaps.join(' ') : '앞서 읽은 기록에서는 프로그램의 부분을 찾지 못했어요.') : null,
     acts, note ? h('p', { class: 'fine' }, note) : null,
     status.map?.first ? h('p', { class: 'fine' }, '근거 찾기, 전체 조건 대조, 부분별 정리를 나눠 진행해요. 기존 지도와 직접 고친 내용도 함께 확인하며, 끝난 단계는 PC에 보관해 같은 작업에서 다시 처리하지 않아요.') : null,
-    status.map?.first ? h('p', { class: 'fine' }, `OpenAI 사용 상한: 정리당 $${status.map.first.runUsd}, 월 $${status.map.first.monthlyUsd}. DeepSeek 요금은 별도이며 교정을 포함해 정리당 최대 30회로 제한돼요.`) : null,
+    status.map?.first ? h('p', { class: 'fine' }, `OpenAI 사용 상한: 정리당 $${status.map.first.runUsd}, 월 $${status.map.first.monthlyUsd}. DeepSeek 요금은 별도이며 교정을 포함해 정리당 최대 ${status.map.first.deepseekMaxCalls ?? 48}회로 제한돼요.`) : null,
     st.error ? h('p', { class: 'pp-error', role: 'alert' }, st.error) : null, runNotice(),
     h('button', { type: 'button', class: 'link-button se-direct', onclick: () => openPartForm(null) }, '부분 직접 추가'));
   box.hidden = false;

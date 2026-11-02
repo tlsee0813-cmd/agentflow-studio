@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { openMapPipelineStore } from './map-pipeline-store.mjs';
 import { createFirstMapPipeline } from './map-pipeline.mjs';
 
-const ALLOWED = ['OPENAI_API_KEY', 'STUDIO_MAP_MERGE_MODEL', 'STUDIO_MAP_MONTHLY_USD', 'STUDIO_MAP_RUN_USD'];
+const ALLOWED = ['OPENAI_API_KEY', 'STUDIO_MAP_MERGE_MODEL', 'STUDIO_MAP_RENDER_MODEL', 'STUDIO_MAP_MONTHLY_USD', 'STUDIO_MAP_RUN_USD'];
 /** This is a server-only local file, never a browser setting, bundle asset, or shell command. Existing env wins. */
 export async function loadMapPipelineEnv(env, read = readFile) {
   const out = { ...env };
@@ -24,7 +24,8 @@ export async function openFirstMapPipeline({ env, dir, fetchImpl, onProgress } =
   const store = await openMapPipelineStore({ dir: join(dir, 'first-map'), monthlyUsd: limit('STUDIO_MAP_MONTHLY_USD', 20), runUsd: limit('STUDIO_MAP_RUN_USD', 1) });
   try {
     const pipeline = createFirstMapPipeline({ store, deepseekKey: env.DEEPSEEK_API_KEY, openaiKey: env.OPENAI_API_KEY,
-      deepseekModel: env.DEEPSEEK_PLAN_MODEL || env.DEEPSEEK_MODEL || 'deepseek-flash', mergeModel: env.STUDIO_MAP_MERGE_MODEL || 'gpt-6.1-sol', fetchImpl, onProgress });
+      deepseekModel: env.DEEPSEEK_PLAN_MODEL || env.DEEPSEEK_MODEL || 'deepseek-flash', mergeModel: env.STUDIO_MAP_MERGE_MODEL || 'gpt-6.1-sol',
+      renderModel: env.STUDIO_MAP_RENDER_MODEL || 'gpt-6.1-terra', fetchImpl, onProgress });
     return { ...pipeline, close: () => store.close() };
   } catch (error) { await store.close(); throw error; }
 }

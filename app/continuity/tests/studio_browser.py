@@ -3450,7 +3450,8 @@ def final_client_flow(browser, base):
     # A new project offers the automatic connection first on its empty map (pasting stays beside it), and opens the same panel.
     expect(entry.locator(".se-acts button")).to_have_text(["내 AI 세션 자동 연결", "기록 붙여넣기", "코드·검사 자료 추가"])
     expect(entry.get_by_role("button", name="내 AI 세션 자동 연결")).to_have_class(re.compile("primary"))
-    expect(entry.locator(".se-lead")).to_contain_text("Claude Code·Codex 대화는 자동 연결로 저절로 가져오고")
+    expect(entry.locator(".se-lead")).to_contain_text("이 PC의 Claude Code·Codex 작업 폴더를 연결하면")
+    expect(entry.locator(".se-lead")).to_contain_text("다른 PC의 기록은 파일로 가져오거나 붙여 넣을 수 있어요")
     entry.get_by_role("button", name="내 AI 세션 자동 연결").click()
     expect(panel.locator("h3")).to_have_text("내 AI 세션 연결")
     panel.get_by_role("button", name="세션 폴더 고르기").click()

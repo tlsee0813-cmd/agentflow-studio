@@ -28,7 +28,7 @@ const mapInput = (p, schema = M.MAP7_SCHEMA) => M.buildMapAsk(p, studioView(p), 
 const pipeline = () => {
   const calls = [];
   return { calls, identity: 'a'.repeat(64), laterIdentity: 'b'.repeat(64), model: dividedModel,
-    ready: () => true, describe: () => ({ monthlyUsd: 20, runUsd: 1 }),
+    ready: () => true, describe: () => ({ monthlyUsd: 20, runUsd: 1, deepseekMaxCalls: 30 }),
     eligible: ask => !!ask && (ask.schemaVersion === M.MAP7_SCHEMA || ask.schemaVersion === M.MAP6_SCHEMA && M.firstAsk(ask)),
     call: async ask => { calls.push(structuredClone(ask)); return wire(); } };
 };
@@ -90,7 +90,7 @@ test('HTTP status and client parser preserve separate first m6/later m7 capabili
   try {
     const st = await invoke(s.handle, 'status');
     assert.deepEqual([st.map.model, st.map.prompt, st.map.laterPrompt], [baseModel, await mapPromptId(), await map7PromptId()]);
-    assert.deepEqual(st.map.first, { model: dividedModel, prompt: firstPrompt, ready: true, method: 'divided', monthlyUsd: 20, runUsd: 1 });
+    assert.deepEqual(st.map.first, { model: dividedModel, prompt: firstPrompt, ready: true, method: 'divided', monthlyUsd: 20, runUsd: 1, deepseekMaxCalls: 30 });
     assert.deepEqual(st.map.later, { ...st.map.first, prompt: laterPrompt });
     globalThis.fetch = async () => json(st);
     const parsed = await aiStatus(); assert.deepEqual(parsed.map, st.map);
@@ -112,6 +112,26 @@ test('direct first map.6 and later map.7 cannot bypass durable pipeline receipts
     }
     assert.equal(s.divided.calls.length + s.providerCalls.length, 0);
   } finally { await s.jobs.close(); }
+});
+
+test('HTTP job polling carries sanitized pipeline progress through both callbacks and drops it on ready', async () => {
+  const s = await service(); let finish, started = false;
+  const gate = new Promise(resolve => { finish = resolve; });
+  s.divided.call = async (ask, _signal, reportProgress) => {
+    assert.equal(typeof reportProgress, 'function'); started = true; s.divided.calls.push(ask);
+    reportProgress({ phase: 'extract', done: 2, total: 4, text: 'PRIVATE_SOURCE', model: 'PRIVATE_MODEL' });
+    await gate; return wire();
+  };
+  try {
+    const job = await submission(project(false), firstPrompt, dividedModel);
+    const receipt = await invoke(s.handle, 'jobs', job.body, job.cap); assert.equal(receipt.status, 202); assert.equal(receipt.progress, undefined);
+    for (let i = 0; !started && i < 100; i++) await new Promise(resolve => setTimeout(resolve, 2));
+    assert.equal(started, true);
+    const active = await invoke(s.handle, `jobs/${job.id}`, undefined, job.cap);
+    assert.deepEqual(active.progress, { phase: 'extract', done: 2, total: 4 }); assert.ok(!JSON.stringify(active).includes('PRIVATE'));
+    finish(); const ready = await ended(s.handle, job); assert.equal(ready.state, 'ready'); assert.equal(ready.progress, undefined);
+    assert.equal(s.divided.calls.length, 1); assert.equal(s.providerCalls.length, 0);
+  } finally { finish(); await s.jobs.close(); }
 });
 
 test('durable admission chooses model and recipe from the actual ask; stale tabs and crossed bindings dispatch nothing', async () => {
@@ -226,4 +246,115 @@ test('client rejects a ready result whose model differs from its durable binding
   });
   try { assert.equal(out.commits(), 0); assert.ok(out.run.state().error); assert.ok(out.sent.some(x => x.url.endsWith('/ack') && x.body.outcome === 'discarded')); }
   finally { out.run.dispose(); }
+});
+
+test('the private env whitelist imports render-model choice and preserves process overrides without reading any real file', async () => {
+  const fileText = 'STUDIO_MAP_RENDER_MODEL=gpt-6.1-terra\nDEEPSEEK_API_KEY=ignored\nSTUDIO_ACCESS_CODE=ignored';
+  const fromFile = await loadMapPipelineEnv({ STUDIO_OPENAI_ENV: 'inert-render-test.env' }, async () => fileText);
+  assert.deepEqual(fromFile, { STUDIO_OPENAI_ENV: 'inert-render-test.env', STUDIO_MAP_RENDER_MODEL: 'gpt-6.1-terra' });
+  for (const renderModel of ['deepseek-flash', 'gpt-6.1-sol', '']) {
+    const env = { STUDIO_OPENAI_ENV: 'inert-render-test.env', STUDIO_MAP_RENDER_MODEL: renderModel };
+    assert.deepEqual(await loadMapPipelineEnv(env, async () => fileText), env);
+  }
+});
+
+async function hostFixture(t) {
+  const dir = mkdtempSync(join(tmpdir(), 'af-render-host-')), opened = [];
+  t.after(async () => {
+    for (const pipeline of opened) await pipeline.close();
+    const { rm } = await import('node:fs/promises');
+    await rm(dir, { recursive: true, force: true });
+  });
+  return {
+    dir,
+    async open(extra = {}) {
+      const pipeline = await openFirstMapPipeline({ dir, env: { DEEPSEEK_API_KEY: inert, OPENAI_API_KEY: inert, ...extra },
+        fetchImpl: async () => assert.fail('host configuration must never invoke a provider') });
+      opened.push(pipeline); return pipeline;
+    },
+  };
+}
+
+test('Node host defaults rendering to Terra and reports the fixed-host twelve-call DeepSeek bound', async t => {
+  const host = await hostFixture(t), pipeline = await host.open(), info = pipeline.describe();
+  assert.equal(info.renderModel, 'gpt-6.1-terra');
+  assert.equal(info.renderProvider, 'openai');
+  assert.equal(info.maxPartitions, 12);
+  assert.equal(info.deepseekMaxCalls, 12);
+  assert.equal(pipeline.model, 'deepseek-flash_gpt-6.1-sol_gpt-6.1-terra');
+  assert.equal(pipeline.ready(), true);
+  assert.equal(info.durable, true);
+});
+
+test('explicit supported host render models select their provider and actual DeepSeek call allowance', async t => {
+  const host = await hostFixture(t);
+  for (const [renderModel, provider, maxCalls] of [
+    ['deepseek-flash', 'deepseek', 48], ['gpt-6.1-sol', 'openai', 12], ['gpt-6-astra', 'openai', 12], ['gpt-6.1-terra', 'openai', 12],
+  ]) {
+    const pipeline = await host.open({ STUDIO_MAP_RENDER_MODEL: renderModel });
+    const info = pipeline.describe();
+    assert.deepEqual([info.renderModel, info.renderProvider, info.deepseekMaxCalls], [renderModel, provider, maxCalls]);
+    assert.equal(info.durable, true);
+    await pipeline.close();
+  }
+});
+
+test('unsupported host render configuration releases its exclusive store owner before a valid restart', async t => {
+  const host = await hostFixture(t);
+  for (const renderModel of ['gpt-unknown', 'deepseek-other']) {
+    await assert.rejects(host.open({ STUDIO_MAP_RENDER_MODEL: renderModel }), /^Error: Invalid map render model configuration$/);
+    const pipeline = await host.open();
+    assert.equal(pipeline.ready(), true, 'invalid configuration must close the store owner instead of leaving STORE_BUSY');
+    assert.equal(pipeline.describe().durable, true);
+    await pipeline.close();
+  }
+});
+
+test('render-model host choices bind separate first/later recipes and inherit private-file selection', async t => {
+  const host = await hostFixture(t);
+  const env = await loadMapPipelineEnv({ STUDIO_OPENAI_ENV: 'inert-render-test.env' }, async () => 'STUDIO_MAP_RENDER_MODEL=gpt-6.1-terra');
+  const terra = await host.open(env), terraIds = [terra.identity, terra.laterIdentity];
+  await terra.close();
+  const deepseek = await host.open({ STUDIO_MAP_RENDER_MODEL: 'deepseek-flash' });
+  assert.notEqual(deepseek.identity, terraIds[0]);
+  assert.notEqual(deepseek.laterIdentity, terraIds[1]);
+  assert.notEqual(terraIds[0], terraIds[1]);
+});
+
+test('actual host HTTP metadata and the client parser preserve the selected DeepSeek bound for first and later maps', async t => {
+  const host = await hostFixture(t);
+  const jobsDir = mkdtempSync(join(tmpdir(), 'af-render-status-'));
+  const jobs = await openMapJobs({ dir: jobsDir });
+  t.after(async () => { await jobs.close(); const { rm } = await import('node:fs/promises'); await rm(jobsDir, { recursive: true, force: true }); });
+  for (const [renderModel, bound] of [['gpt-6.1-terra', 12], ['deepseek-flash', 48]]) {
+    const pipeline = await host.open({ STUDIO_MAP_RENDER_MODEL: renderModel });
+    const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: inert }, jobs, firstMapPipeline: pipeline,
+      fetchImpl: async () => assert.fail('reading status must not call a provider') });
+    const status = await invoke(handle, 'status');
+    assert.equal(status.map.first.deepseekMaxCalls, bound);
+    assert.equal(status.map.later.deepseekMaxCalls, bound);
+    globalThis.fetch = async () => json(status);
+    const parsed = await aiStatus();
+    assert.equal(parsed.map.first.deepseekMaxCalls, bound);
+    assert.equal(parsed.map.later.deepseekMaxCalls, bound);
+    await pipeline.close();
+  }
+});
+
+test('a missing or invalid optional DeepSeek bound keeps a safe legacy allowance', async () => {
+  const s = await service();
+  try {
+    const original = await invoke(s.handle, 'status');
+    for (const bound of [undefined, null, '12', -1, 0, 12.5, Infinity, 1000000]) {
+      const status = structuredClone(original);
+      for (const capability of ['first', 'later']) {
+        delete status.map[capability].deepseekMaxCalls;
+        if (bound !== undefined) status.map[capability].deepseekMaxCalls = bound;
+      }
+      globalThis.fetch = async () => json(status);
+      const parsed = await aiStatus();
+      assert.equal(parsed.map.first.deepseekMaxCalls, 48);
+      assert.equal(parsed.map.later.deepseekMaxCalls, 48);
+    }
+  } finally { await s.jobs.close(); }
 });

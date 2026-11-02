@@ -25,8 +25,19 @@ export interface Reservation {
   reservedAt: string;
 }
 export type JobState = 'accepted' | 'running' | 'ready' | 'failed' | 'cancelled' | 'interrupted';
+export interface JobProgress { phase: 'extract' | 'plan' | 'render' | 'global' | 'correction'; done: number; total: number }
+/** Only fixed stage names and small counts cross into progress UI; extra upstream text is discarded. */
+export function readJobProgress(value: unknown): JobProgress | null {
+  try {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+    const { phase, done, total } = value as Record<string, unknown>;
+    if (!['extract', 'plan', 'render', 'global', 'correction'].includes(phase as string) || !Number.isInteger(done) || (done as number) < 0 || (done as number) > 24
+      || !Number.isInteger(total) || (total as number) < 1 || (total as number) > 24 || (done as number) > (total as number)) return null;
+    return { phase: phase as JobProgress['phase'], done: done as number, total: total as number };
+  } catch { return null; }
+}
 export interface JobResult { model: string; prompt: string; askHash: string; wire: unknown; evidence: { index: string; ask: string }; reading: { id: string; at: string } }
-export interface JobView { id: string; state: JobState; acked: 'applied' | 'discarded' | 'seen' | null; binding: MapJobBinding | null; bindingHash: string | null; error: { code: string; detail?: { path?: unknown; rule?: unknown; target?: unknown } } | null; remote: string | null; input?: unknown; result?: JobResult }
+export interface JobView { id: string; state: JobState; acked: 'applied' | 'discarded' | 'seen' | null; binding: MapJobBinding | null; bindingHash: string | null; error: { code: string; detail?: { path?: unknown; rule?: unknown; target?: unknown } } | null; remote: string | null; input?: unknown; result?: JobResult; progress?: JobProgress }
 const BINDING_KEYS: (keyof MapJobBinding)[] = ['entryId', 'projectId', 'lifecycle', 'seq', 'after', 'schemaVersion', 'prompt', 'model', 'askHash', 'inputHash'];
 /** The server's answer is about this very job: its id, and the binding it keeps (whole, and by the hash it was accepted under).
  * A pre-acceptance cancel has no binding: only that end is accepted without one. */
@@ -52,7 +63,9 @@ async function call(method: 'GET' | 'POST', path: string, cap: string, access: s
   try { data = await res.json(); } catch { /* below */ }
   if (!res.ok) { const code = typeof data?.error?.code === 'string' ? data.error.code : null; throw new JobError(code ?? 'NETWORK', !!code && code !== 'INTERNAL_ERROR'); }
   if (!data || typeof data.id !== 'string' || !STATES.includes(data.state as JobState)) throw new JobError('NETWORK', false);
-  return data as JobView;
+  const { progress: rawProgress, ...rest } = data;
+  const progress = data.state === 'accepted' || data.state === 'running' ? readJobProgress(rawProgress) : null;
+  return { ...rest, ...(progress ? { progress } : {}) } as JobView;
 }
 export const jobApi = {
   submit: (payload: string, cap: string, access: string, signal?: AbortSignal) => call('POST', '', cap, access, payload, signal),

@@ -6,6 +6,8 @@ import * as M from '../dist/public/shared/map-reading.js';
 import { studioView } from '../dist/public/shared/studio.js';
 import { ApiError } from '../../server/errors.mjs';
 import { validateMapBlueprint, splitBlueprintParts, validateRenderedFragment, combineRenderedMaps, mapStageIssues,
+  isMapRevision, validateMapRevision, revisionGroups,
+  missingMapCorrections, mapCorrectionRevision, MAP_BLUEPRINT_PROMPT, LATER_BLUEPRINT_PROMPT,
   BLUEPRINT_PARTS_MAX, BLUEPRINT_NEW_PARTS_MAX, BLUEPRINT_GLOBAL_MAX, BLUEPRINT_ANCHORS_MAX } from '../server/map-blueprint.mjs';
 
 function fixture(existing = 0) {
@@ -16,7 +18,8 @@ function fixture(existing = 0) {
   return { project, input, ask: input.ask, at: input.ask.records[0].spans.map(span => span.s) };
 }
 const planned = (f, count = 1) => ({ parts: Array.from({ length: count }, (_, i) => ({ ref: `new:p${i + 1}`, name: `책임 ${i + 1}`,
-  parent: null, focus: '원문의 책임과 조건을 보존한다.', at: [f.at[i % f.at.length]] })), global: [] });
+  parent: null, focus: '원문의 책임과 조건을 보존한다.', at: [f.at[i % f.at.length]] })), global: [],
+  ...(f.ask.schemaVersion === M.MAP7_SCHEMA ? { corrections: [] } : {}) });
 const empty = () => ({ summary: '', parts: [], relations: [], candidates: [], gaps: [], matches: [], material: [] });
 const refused = fn => assert.throws(fn, error => error instanceof ApiError && error.code === 'INVALID_RESPONSE' && error.status === 502);
 function rendered(f, blueprint) {
@@ -70,7 +73,7 @@ test('parent choices reject unknown parents/self/cycles and preserve existing co
   const cycle = structuredClone(blueprint); cycle.parts[0].parent = cycle.parts[2].ref; refused(() => validateMapBlueprint(cycle, f.ask));
   let p = D.addChildArea(f.project, f.project.space.areas[0].id, '사용자 하위 부분', '직접 쓴 하위 설명');
   const input = M.buildMapAsk(p, studioView(p), [], undefined, M.MAP7_SCHEMA), child = input.ask.parts.find(part => part.parentId !== null);
-  const old = { parts: [{ ref: child.id, name: child.name, parent: child.parentId, at: [input.ask.records[0].spans[0].s], focus: '기존 하위 책임' }], global: [] };
+  const old = { parts: [{ ref: child.id, name: child.name, parent: child.parentId, at: [input.ask.records[0].spans[0].s], focus: '기존 하위 책임' }], global: [], corrections: [] };
   validateMapBlueprint(old, input.ask); old.parts[0].parent = null; refused(() => validateMapBlueprint(old, input.ask));
 });
 
@@ -121,7 +124,7 @@ test('fragments cannot take another group, rename/reparent, omit/duplicate a ref
 });
 
 test('existing fragment names and parent stay null on map wire while original blueprint names stay exact', () => {
-  const f = fixture(1), part = f.ask.parts[0], blueprint = { parts: [{ ref: part.id, name: part.name, parent: part.parentId, focus: '기존 책임', at: [f.at[0]] }], global: [] };
+  const f = fixture(1), part = f.ask.parts[0], blueprint = { parts: [{ ref: part.id, name: part.name, parent: part.parentId, focus: '기존 책임', at: [f.at[0]] }], global: [], corrections: [] };
   const fragments = rendered(f, blueprint), group = splitBlueprintParts(blueprint)[0];
   validateRenderedFragment(fragments[0], group, f.ask, blueprint);
   const bad = structuredClone(fragments[0]); bad.parts[0].name = part.name; refused(() => validateRenderedFragment(bad, group, f.ask, blueprint));
@@ -216,4 +219,143 @@ test('unsafe paths/rules and failing diagnostic accessors never leak or alter th
   refused(() => validateRenderedFragment(invalidFragment, splitBlueprintParts(blueprint)[0], f.ask, blueprint));
   mapStageIssues(valueTrap, errorTrap);
   refused(() => validateRenderedFragment(invalidFragment, splitBlueprintParts(blueprint)[0], f.ask, blueprint));
+});
+
+test('semantic revision sentinel is separate from normal map wire and preserves exact raw-source pointers as untrusted review data', () => {
+  const f = fixture(1), blueprint = planned(f, 4), revision = { reviseParts: ['new:p4', 'new:p1'],
+    reason: '현재 구현 보고의 명시적 철회가 부분 주장에 빠져 원문으로 다시 대조해야 한다.', at: [f.at[0], f.at[3]] };
+  const before = structuredClone(revision), checked = validateMapRevision(revision, f.ask, blueprint);
+  assert.equal(isMapRevision(revision), true); assert.equal(isMapRevision(empty()), false); assert.equal(isMapRevision(null), false);
+  assert.equal(isMapRevision({ reviseParts: null }), true, 'malformed sentinel must reach its own validator');
+  assert.deepEqual(checked, before); checked.at.push(f.at[4]); checked.reason = 'changed'; assert.deepEqual(revision, before);
+  const groups = revisionGroups(revision, blueprint);
+  assert.deepEqual(groups.map(group => group.id), ['parts-1', 'parts-2']);
+  assert.deepEqual(groups.flatMap(group => group.parts.map(part => part.ref)), ['new:p1', 'new:p2', 'new:p3', 'new:p4']);
+  groups[0].parts[0].name = 'changed'; assert.equal(blueprint.parts[0].name, '책임 1');
+  refused(() => combineRenderedMaps(rendered(f, blueprint), revision, f.ask, blueprint));
+});
+
+test('revision validation requires unique planned refs and actual sent aliases; metadata, copied quotes and invented basis cannot stand in', () => {
+  const f = fixture(1), blueprint = planned(f, 4), revision = { reviseParts: ['new:p4'], reason: '원문의 철회 범위를 다시 대조한다.', at: [f.at[0]] };
+  for (const mutate of [v => { v.reviseParts = []; }, v => { v.reviseParts = ['new:p4', 'new:p4']; },
+    v => { v.reviseParts = ['new:unplanned']; }, v => { v.reviseParts = [f.ask.parts[0].id]; },
+    v => { v.reviseParts = ['P99']; }, v => { v.reviseParts = [null]; }, v => { v.reason = ''; },
+    v => { v.reason = ' '; }, v => { v.reason = '가'.repeat(241); }, v => { v.reason = '원문\u0000명령'; },
+    v => { v.at = []; }, v => { v.at = ['N99.99']; }, v => { v.at = [`${f.at[0]}-02`]; },
+    v => { v.at = [f.at[0], f.at[0]]; }, v => { v.at = ['basis:사용자 기재']; }, v => { v.at = ['원문 인용 그대로']; },
+    v => { v.at = f.at.slice(0, 9); }, v => { v.basis = [f.at[0]]; }, v => { delete v.at; }, v => { v.parts = []; }]) {
+    const bad = structuredClone(revision); mutate(bad); refused(() => validateMapRevision(bad, f.ask, blueprint));
+  }
+  const boundary = { ...revision, reason: '가'.repeat(240), at: f.at.slice(0, 8) };
+  assert.deepEqual(validateMapRevision(boundary, f.ask, blueprint), boundary);
+  const onlySecond = revisionGroups(revision, blueprint); assert.deepEqual(onlySecond.map(group => group.id), ['parts-2']);
+  for (const reviseParts of [[], ['new:p4', 'new:p4'], ['new:unplanned']]) refused(() => revisionGroups({ reviseParts }, blueprint));
+});
+
+test('revision sentinel accepts all 24 planned refs and selects at most the original eight groups', () => {
+  const f = fixture(12), blueprint = planned(f, 12);
+  blueprint.parts.unshift(...f.ask.parts.map(part => ({ ref: part.id, name: part.name, parent: part.parentId, at: [f.at[0]], focus: '기존 책임' })));
+  const revision = { reviseParts: blueprint.parts.map(part => part.ref), reason: '현재 주장과 명시적 철회를 부분별로 대조한다.', at: [f.at[0]] };
+  validateMapRevision(revision, f.ask, blueprint); assert.equal(revisionGroups(revision, blueprint).length, 8);
+  refused(() => validateMapRevision({ ...revision, reviseParts: [...revision.reviseParts, 'new:extra'] }, f.ask, blueprint));
+});
+
+test('a later explicit withdrawal must be rendered with replaces to retire the current report; summary-only does not change it', () => {
+  let p = D.pasteRecord(D.createProject(), '작업 보고: 파일 저장을 구현했다고 보고합니다.', null).project;
+  const initial = M.buildMapAsk(p, studioView(p), [], undefined, M.MAP6_SCHEMA), at = initial.ask.records[0].spans[0].s;
+  const meta = n => ({ id: `R_${crypto.randomUUID()}`, at: '2026-11-02T00:00:00.000Z', model: 'stub', prompt: 'm6-000000000001', hash: String(n).repeat(64) });
+  p = M.applyReading(p, initial, M.validateMapReply({ ...empty(), parts: [{ ref: 'new:save', name: '파일 저장', parent: null,
+    role: '파일 저장을 맡는다.', roleAbout: null, roleReplaces: null, basis: [at],
+    claims: [{ key: 's1', kind: 'reported', text: '파일 저장을 구현했다고 보고함', at, about: null, replaces: null }] }] }, initial.ask), meta(1)).project;
+  const area = p.space.areas[0].id;
+  p = D.pasteRecord(p, '정정: 앞 보고의 파일 저장 구현 주장을 철회합니다. 실제로는 아직 파일 저장을 구현하지 않았습니다.\n저장 위치 설정은 계속 파일 경로를 받습니다.', null).project;
+  const input = M.buildMapAsk(p, studioView(p), [], undefined, M.MAP7_SCHEMA), part = input.ask.parts[0], spans = input.ask.records[0].spans;
+  const correctionAt = spans[0].s, notMadeAt = spans.find(span => span.t.includes('실제로는')).s, otherAt = spans.find(span => span.t.includes('저장 위치 설정')).s;
+  const blueprint = { parts: [{ ref: part.id, name: part.name, parent: part.parentId, focus: '저장 책임과 명시적 철회', at: [correctionAt, otherAt] }],
+    global: [{ kind: 'correction', text: '앞 구현 보고를 철회했다.', at: [correctionAt] }], corrections: [] };
+  const fragment = { ...empty(), parts: [{ ref: part.id, name: null, parent: null, role: null, roleAboutAt: null, roleReplaces: null, basis: [],
+    claims: [{ key: 's1', kind: 'describes', text: '저장 위치 설정은 파일 경로를 받는다.', at: otherAt, aboutAt: null, replaces: null }] }] };
+  const global = { ...empty(), summary: '앞선 파일 저장 구현 보고가 철회되었고 아직 구현하지 않았다.' };
+  const summaryOnly = combineRenderedMaps([fragment], global, input.ask, blueprint);
+  const stale = M.applyReading(p, input, M.validateMapReply(summaryOnly, input.ask), meta(2)).project;
+  assert.ok(M.partUnderstanding(stale, area).claims.some(claim => claim.text === '파일 저장을 구현했다고 보고함'));
+  assert.equal(M.unreadRecords(stale, studioView(stale)).length, 0, 'the summary-only failure consumes the source');
+  blueprint.corrections = [{ part: part.id, claim: part.current[0].key, at: [correctionAt, notMadeAt] }];
+  refused(() => combineRenderedMaps([fragment], global, input.ask, blueprint));
+  assert.deepEqual(missingMapCorrections({ ...empty(), parts: fragment.parts }, input.ask, blueprint), blueprint.corrections);
+  const revision = validateMapRevision({ reviseParts: [part.id], reason: '현재 구현 주장을 철회하는 구조화된 정정이 빠졌다.', at: [correctionAt, notMadeAt] }, input.ask, blueprint);
+  assert.deepEqual(revisionGroups(revision, blueprint).map(group => group.id), ['parts-1']);
+  const fixed = structuredClone(fragment);
+  fixed.parts[0].claims.push({ key: 's2', kind: 'reported', text: '앞 구현 보고를 철회했으며 파일 저장은 아직 구현하지 않았다고 보고함',
+    at: `${correctionAt}-${notMadeAt.split('.')[1]}`, aboutAt: null, replaces: part.current[0].key });
+  const goodWire = combineRenderedMaps([fixed], global, input.ask, blueprint);
+  const next = M.applyReading(p, input, M.validateMapReply(goodWire, input.ask), meta(3)).project;
+  assert.ok(!M.partUnderstanding(next, area).claims.some(claim => claim.text === '파일 저장을 구현했다고 보고함'));
+  assert.ok(M.partUnderstanding(next, area).claims.some(claim => claim.replaces));
+});
+
+function correctionFixture(parts = 1, claimsPerPart = 2) {
+  const f = fixture(parts); let index = 0;
+  for (const part of f.ask.parts) part.current = Array.from({ length: claimsPerPart }, () => ({ key: `C${String(++index).padStart(2, '0')}`,
+    kind: 'reported', text: '이 부분을 구현했다고 보고함', about: null }));
+  const blueprint = { parts: f.ask.parts.map(part => ({ ref: part.id, name: part.name, parent: part.parentId, at: [f.at[0]], focus: '기존 현재 주장의 명시적 정정' })),
+    global: [], corrections: f.ask.parts.flatMap(part => part.current.map((claim, i) => ({ part: part.id, claim: claim.key, at: [f.at[i]] }))) };
+  return { ...f, blueprint };
+}
+
+test('later blueprints require corrections while first-map shape/prompt remain unchanged; empty current permits only an empty ledger', () => {
+  const first = fixture(), firstPlan = planned(first);
+  assert.deepEqual(Object.keys(firstPlan), ['parts', 'global']); validateMapBlueprint(firstPlan, first.ask);
+  refused(() => validateMapBlueprint({ ...firstPlan, corrections: [] }, first.ask));
+  assert.ok(LATER_BLUEPRINT_PROMPT.startsWith(MAP_BLUEPRINT_PROMPT)); assert.ok(!MAP_BLUEPRINT_PROMPT.includes('corrections'));
+  assert.ok(LATER_BLUEPRINT_PROMPT.includes('같은 대상·범위'));
+  assert.ok(LATER_BLUEPRINT_PROMPT.includes('다른 판본·브랜치') && LATER_BLUEPRINT_PROMPT.includes('roleBy=person'));
+  const later = fixture(1), part = later.ask.parts[0], plan = { parts: [{ ref: part.id, name: part.name, parent: part.parentId,
+    at: [later.at[0]], focus: '사용자 부분' }], global: [], corrections: [] };
+  validateMapBlueprint(plan, later.ask);
+  const missing = structuredClone(plan); delete missing.corrections; refused(() => validateMapBlueprint(missing, later.ask));
+  refused(() => validateMapBlueprint({ ...plan, corrections: [{ part: part.id, claim: 'C01', at: [later.at[0]] }] }, later.ask));
+});
+
+test('correction obligations have exact bounds, unique own current targets, planned existing refs, and only actual original aliases', () => {
+  const f = correctionFixture(6, 4); assert.equal(f.blueprint.corrections.length, 24); validateMapBlueprint(f.blueprint, f.ask);
+  const valid = structuredClone(f.blueprint); valid.corrections[0].at = f.at.slice(0, 8); validateMapBlueprint(valid, f.ask);
+  const copy = validateMapBlueprint(valid, f.ask); copy.corrections[0].at.push(f.at[8]); assert.equal(valid.corrections[0].at.length, 8);
+  const tooManyForPart = correctionFixture(1, 5); refused(() => validateMapBlueprint(tooManyForPart.blueprint, tooManyForPart.ask));
+  for (const mutate of [p => p.corrections.push(p.corrections[0]), p => { p.corrections[1] = { ...p.corrections[0], at: [f.at[1]] }; },
+    p => { p.corrections[0].claim = f.ask.parts[1].current[0].key; }, p => { p.corrections[0].claim = 'C99'; },
+    p => { p.corrections[0].part = 'new:invented'; }, p => { p.parts.shift(); }, p => { p.corrections[0].at = ['N99.01']; },
+    p => { p.corrections[0].at = [`${f.at[0]}-02`]; }, p => { p.corrections[0].at = ['원문 복사']; },
+    p => { p.corrections[0].at = f.at.slice(0, 9); }, p => { p.corrections[0].at = [f.at[0], f.at[0]]; },
+    p => { p.corrections[0].basis = [f.at[0]]; }, p => { p.corrections = null; }]) {
+    const bad = structuredClone(f.blueprint); mutate(bad); refused(() => validateMapBlueprint(bad, f.ask));
+  }
+});
+
+test('only surviving normalized claim replacements satisfy registered obligations; summaries/candidates and soft-dropped raw claims cannot', () => {
+  const f = correctionFixture(), fragments = rendered(f, f.blueprint), raw = { ...empty(), summary: '앞선 구현 주장을 모두 철회했다고 요약함', parts: fragments.flatMap(fragment => fragment.parts),
+    candidates: [{ text: '이 보고의 성립은 미정이다.', target: 'holds', parts: [f.ask.parts[0].id], at: f.at[0],
+      statement: { key: 's801', kind: 'reported', text: '앞선 구현 보고를 철회했다고 보고함', at: f.at[0], aboutAt: null } }] };
+  raw.parts[0].claims.push({ key: 's2', kind: 'reported', text: '앞선 구현 보고를 철회했다고 보고함', at: f.at[0], aboutAt: 'N99.99', replaces: f.ask.parts[0].current[0].key });
+  const before = structuredClone(raw), missing = missingMapCorrections(raw, f.ask, f.blueprint);
+  assert.deepEqual(missing, f.blueprint.corrections); assert.deepEqual(raw, before);
+  missing[0].at.push(f.at[8]); assert.equal(f.blueprint.corrections[0].at.length, 1);
+  refused(() => combineRenderedMaps([{ ...empty(), parts: raw.parts }], empty(), f.ask, f.blueprint));
+  raw.parts[0].claims.at(-1).aboutAt = null;
+  assert.deepEqual(missingMapCorrections(raw, f.ask, f.blueprint), [f.blueprint.corrections[1]]);
+  raw.parts[0].claims.push({ key: 's3', kind: 'reported', text: '다른 현재 구현 보고도 철회했다고 보고함', at: f.at[1], aboutAt: null, replaces: f.ask.parts[0].current[1].key });
+  assert.deepEqual(missingMapCorrections(raw, f.ask, f.blueprint), []); assert.equal(mapCorrectionRevision(raw, f.ask, f.blueprint), null);
+  const result = combineRenderedMaps([{ ...empty(), parts: raw.parts }], empty(), f.ask, f.blueprint);
+  assert.equal(result.parts[0].claims.length, 3, 'the combiner does not edit original claims');
+});
+
+test('machine correction revision covers every affected planned ref with at most eight original pointers while retaining the full ledger', () => {
+  const f = correctionFixture(6, 4);
+  f.blueprint.corrections.forEach((obligation, i) => { obligation.at = [f.at[i % f.at.length]]; });
+  const raw = { ...empty(), parts: rendered(f, f.blueprint).flatMap(fragment => fragment.parts) }, before = structuredClone(f.blueprint);
+  const revision = mapCorrectionRevision(raw, f.ask, f.blueprint);
+  assert.deepEqual(revision.reviseParts, f.ask.parts.map(part => part.id)); assert.deepEqual(revision.at, f.at.slice(0, 8));
+  assert.equal(revision.at.length, 8); validateMapRevision(revision, f.ask, f.blueprint);
+  assert.deepEqual(f.blueprint, before); assert.equal(f.blueprint.corrections.length, 24);
+  assert.deepEqual(raw.parts, rendered(f, f.blueprint).flatMap(fragment => fragment.parts));
 });
