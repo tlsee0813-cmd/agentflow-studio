@@ -2739,6 +2739,38 @@ function bindFind() {
   document.addEventListener('keydown', e => { if (e.key === '/' && opened && !$('space').hidden && !wide.isOpen() && !$('space').classList.contains('sheet-read') && !(e.target as HTMLElement).closest('textarea,input,select')) { e.preventDefault(); show(true); } });
   $('viewport').addEventListener('pointerdown', () => { if (findOpen) show(false); });
   window.addEventListener('hashchange', () => { if (findOpen && !location.hash.startsWith('#/p/')) show(false); });
+  // Zoom from the keyboard (not in a field): + / = in, - out, 0 the whole map, 1 100%; arrows walk the parts (focus moves to
+  // the nearest part in that direction).
+  document.addEventListener('keydown', e => {
+    if (!opened || $('space').hidden || wide.isOpen() || e.ctrlKey || e.metaKey || e.altKey || (e.target as HTMLElement).closest('textarea,input,select,[contenteditable]')) return;
+    const vp = $('viewport'), r = vp.getBoundingClientRect(), cx = r.width / 2, cy = vp.offsetTop + r.height / 2;
+    if (e.key === '+' || e.key === '=') { e.preventDefault(); mapMoved = true; zoomAt(camera.k * 1.2, cx, cy, true); }
+    else if (e.key === '-') { e.preventDefault(); mapMoved = true; zoomAt(camera.k / 1.2, cx, cy, true); }
+    else if (e.key === '0') { e.preventDefault(); mapMoved = true; fitView(true, true); }
+    else if (e.key === '1') { e.preventDefault(); mapMoved = true; zoomAt(1, cx, cy, true); }
+    else if (e.key.startsWith('Arrow')) {
+      const from = (e.target as HTMLElement).closest<HTMLElement>('#world [data-box]'); if (!from) return;
+      const next = nearestBox(from.dataset.box!, e.key.slice(5) as 'Up' | 'Down' | 'Left' | 'Right'); if (!next) return;
+      e.preventDefault();
+      const el = document.querySelector<HTMLElement>(`#world [data-box="${CSS.escape(next)}"]`), head = el?.classList.contains('frame') ? el.querySelector<HTMLElement>('.frame-head') : el;
+      head?.focus({ preventScroll: true }); if (el) revealRect(lay.boxes.get(next)!);
+    }
+  });
+}
+/** The nearest drawn box in a direction from a box (centre to centre, the sideways offset weighted double): the arrow keys walk
+ * the map the way the eye does. A part's own children and a child's parent are skipped (Enter and Escape go in and out). */
+function nearestBox(id: string, dir: 'Up' | 'Down' | 'Left' | 'Right'): string | null {
+  const me = lay.boxes.get(id); if (!me) return null;
+  const c = (b: Box) => ({ x: b.x + b.w / 2, y: b.y + (b.kind === 'frame' ? b.head / 2 : b.h / 2) }), m = c(me);
+  let best: string | null = null, score = Infinity;
+  for (const b of lay.boxes.values()) {
+    if (b.id === id || b.kind === 'ghost' || b.container === id || me.container === b.id) continue;
+    const q = c(b), dx = q.x - m.x, dy = q.y - m.y;
+    const ahead = dir === 'Right' ? dx : dir === 'Left' ? -dx : dir === 'Down' ? dy : -dy, side = dir === 'Right' || dir === 'Left' ? Math.abs(dy) : Math.abs(dx);
+    if (ahead < 8) continue;
+    const s = ahead + side * 2; if (s < score) { score = s; best = b.id; }
+  }
+  return best;
 }
 function bindCanvas() {
   const vp = $('viewport');
