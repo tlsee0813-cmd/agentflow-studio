@@ -45,7 +45,7 @@ relations/candidates/gaps/matches/material은 모두 빈 배열로 둔다. summa
 다른 assignment 부분도 parent로 참조할 수 있으나 blueprint/원래 INPUT에 있는 ref만 허용된다. 지정한 부분을 작성할 근거가 부족하면 사실을 만들지 말고 원래 계약의 want/describes/reported와 불확실한 범위를 지킨다.`;
 export const GLOBAL_RULES = `
 부분별 작성은 renderedParts에 이미 들어 있다. parts는 빈 배열로 유지하고 부분이나 주장을 다시 출력하지 않는다.
-summary는 한국어 짧은 두 문장, 약100자를 목표로 하고 200자를 절대 넘기지 않는다. 200자를 채우려 하지 않는다. 현재 상태·미구현·주요 철회와 정정을 먼저 읽게 쓰고 부분 설명에 없는 중요한 정정도 원문으로 확인하여 보존한다. 수치나 구조 소개를 반복하느라 정정을 밀어내지 않는다.
+summary는 한국어 짧은 두 문장, 약100자를 목표로 하고 200자를 절대 넘기지 않는다. 200자를 채우려 하지 않는다. 지금 돌고 있는 것의 상태와 다음 관문(무엇이 확인되면 무엇을 하는지)을 먼저 쓰고, 주요 철회와 정정이 그다음이며, 미구현 설계 목록은 그 뒤다. 부분 설명에 없는 중요한 정정도 원문으로 확인하여 보존한다. 수치나 구조 소개를 반복하느라 정정을 밀어내지 않는다.
 INPUT 전체와 blueprint의 전역 조건·철회를 대조하여 summary/relations/candidates/gaps/matches/material만 원래 계약대로 작성한다.
 관계와 후보는 INPUT.parts 또는 renderedParts의 ref만 사용한다. 후보가 지칭하는 주장 키는 renderedParts의 실제 키만 사용하고, 새로운 후보 statement.key만 s801~s899로 지정한다.
 candidates.target은 attribution|identity|parent|holds 중 하나만 사용한다. open이나 checked를 target으로 쓰지 않는다. attribution은 parts 1~2개와 statement, holds는 parts 정확히1개와 statement, identity·parent는 parts 정확히2개와 statement=null이다. relations 최대12개, candidates 최대6개, gaps 최대2개, material 최대6개이며 at는 원래 구간 별칭 하나 또는 이어진 범위 하나(600자 이내)다. gaps는 160자 이내의 문장이다. 원문 끝의 요청·지시에 대한 답이나 결과가 제공된 기록에 없으면 그 사실을 gaps에 적는다. 그런 요청은 이 프로젝트의 기록이므로 material로 표시하지 않는다. candidate.statement가 필요한 경우 statement.kind는 원래 계약의 want|idea|reported|checked|describes|open|differs 중 하나로 구별한다. target과 kind는 서로 다른 항목이다. 미정인 원문을 kind=open이란 이유로 삭제하거나 단정으로 바꾸지 않는다.
@@ -108,8 +108,14 @@ export const FINAL_GLOBAL_RULES = `
 // the record lists the members inside the group, reading and control the record states are arrows too; a pass another session
 // reported is reported, an unknown stays "could not confirm" (no candidate makes it a fact), negations are kept, the record's
 // next step and each unknown stay as claims, one record line in one part.
-export const PIPELINE_RECIPE = 'first-map-divided.12';
-export const LATER_PIPELINE_RECIPE = 'later-map-divided.12';
+// .13 (from the blind judging of the .12 map, 17/20): the plan follows a flow chart to its end (a part's outgoing arrows), never
+// draws a future instruction as a relation (a want of its part instead), and gives each unknown line to the part it points at.
+// .14 (from the judging of .13, 13/20 against .12's 17): parts are only the units the record's tables and lists name (an
+// intermediate record such as journal·outcomes stays in its producer's focus, its arrow a relation between units); two producers
+// the record keeps apart are never one part; the owner and the sessions stay apart; the summary leads with what runs now and
+// the next gate, then withdrawals, then the unbuilt design.
+export const PIPELINE_RECIPE = 'first-map-divided.14';
+export const LATER_PIPELINE_RECIPE = 'later-map-divided.14';
 const MODELS = new Set(['gpt-6.1-sol', 'gpt-6-astra', 'gpt-6.1-terra']);
 // The route rule is shared with the browser and studio.mjs (shared/map-route.ts): a first map.6 or a later map.7.
 export { isFirstMap };

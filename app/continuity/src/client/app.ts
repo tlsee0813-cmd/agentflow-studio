@@ -1062,7 +1062,8 @@ function placeCounts(box: HTMLElement, clear: (r: Rect) => boolean, blocks: Rect
   const off = (r: Rect) => clear(r) && !onPts.some(q => q.x > r.x - 4 && q.x < r.x + r.w + 4 && q.y > r.y - 4 && q.y < r.y + r.h + 4);
   for (const g of $('world').querySelectorAll<SVGGElement>('.edge.sum:not(.hit)')) {
     const e = edgeOf(g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'); if (!e || !path || e.ids.length < 2) continue;
-    const chip = h('span', { class: `edge-count k-${e.kind}${beside ? ' beside' : ''}` }, String(e.ids.length)); box.append(chip);
+    // The verb with the count ('넘겨줌 3'): a bare number on a line reads as nothing in particular.
+    const chip = h('span', { class: `edge-count k-${e.kind}${beside ? ' beside' : ''}` }, `${REL_LABEL[e.kind] ?? e.kind} ${e.ids.length}`); box.append(chip);
     const w = chip.offsetWidth, hh = chip.offsetHeight, len = path.getTotalLength();
     const at = (t: number) => { const q = path.getPointAtLength(len * t); return { x: q.x - w / 2, y: q.y - hh / 2, w, h: hh }; };
     const spot = [0.5, 0.42, 0.58, 0.34, 0.66, 0.26, 0.74].map(at).find(off) ?? (beside ? null : at(0.5));

@@ -1293,7 +1293,7 @@ button:disabled { opacity: .5; cursor: default; }
    holding only the relations not drawn on their own (a summary left with none gives way, .hit). */
 .space.sel-sum .edge:not(.sum):not(.on):not(.near):not(.ctx) { display: none; }
 .space.sel-sum .edge.sum:not(.hit) { display: block; }
-.edge-count { position: absolute; min-width: 24px; height: 20px; padding: 0 7px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); box-shadow: 0 1px 2px rgba(16,24,40,.05); color: var(--text-2); font-size: 11.5px; line-height: 18px; font-weight: 650; text-align: center; font-variant-numeric: tabular-nums; }
+.edge-count { position: absolute; min-width: 24px; height: 20px; padding: 0 7px; white-space: nowrap; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); box-shadow: 0 1px 2px rgba(16,24,40,.05); color: var(--text-2); font-size: 11.5px; line-height: 18px; font-weight: 650; text-align: center; font-variant-numeric: tabular-nums; }
 .edge-count.beside { color: var(--text-3); border-color: var(--hair-2); box-shadow: none; }
 /* Names wrap to three lines before they are cut (the layout gives them the room). */
 .node-name { -webkit-line-clamp: 3; }
