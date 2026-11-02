@@ -174,3 +174,33 @@ test('DeepSeek is excluded from the OpenAI USD meter; unknown priced models are 
   assert.equal(store.describe().spentUsd, 0);
   await assert.rejects(store.begin(key(18), 'unknown', { ...spec, model: 'unknown-priced-model' }), code('MAP_BUDGET_MODEL_UNSUPPORTED'));
 });
+
+test('a refused stage keeps only a fixed diagnostic beside its failed attempt; a retry clears it and the ledger stays valid', async t => {
+  const { dir, store, open } = await fixture(t, { now: () => new Date('2026-11-02T10:00:00Z') });
+  await store.begin(key(19), 'render-2', spec);
+  await store.failed(key(19), 'render-2', { uncertain: false, usage, diagnostic: { stage: 'render-2', phase: 'render', total: 3, rule: 'reference',
+    path: 'parts[0].basis[1]', category: 'PRIVATE category text', reason: 'shape', target: 'PRIVATE_TARGET', text: 'PRIVATE_SOURCE' } });
+  const expected = { stage: 'render-2', phase: 'render', rule: 'reference', reason: 'shape', path: 'parts[0].basis[1]', total: 3, at: '2026-11-02T10:00:00.000Z' };
+  assert.deepEqual(store.lastFailure(key(19)), expected);
+  assert.deepEqual(store.describe().lastFailure, expected);
+  assert.equal(store.lastFailure(key(20)), null);
+  assert.equal(store.describe().spentUsd, 0.00022, 'cost accounting is unchanged');
+  assert.equal(store.get(key(19), 'render-2'), null);
+  const raw = await readFile(join(dir, 'pipeline.json'), 'utf8');
+  assert.ok(!raw.includes('PRIVATE'));
+  // An unusable diagnostic is left out; the failure itself is still recorded as before.
+  await store.begin(key(19), 'plan', spec);
+  await store.failed(key(19), 'plan', { uncertain: false, usage, diagnostic: { stage: 'plan\nPRIVATE', phase: 'plan' } });
+  await store.close();
+  const reopened = await open();
+  assert.deepEqual(reopened.lastFailure(key(19)), expected, 'the diagnostic survives a restart');
+  await reopened.begin(key(19), 'render-2', spec);
+  assert.equal(reopened.lastFailure(key(19)), null, 'a new attempt is no longer the refused one');
+  await reopened.close();
+  const file = JSON.parse(await readFile(join(dir, 'pipeline.json'), 'utf8'));
+  file.body.jobs[key(19)].stages.plan.diagnostic = { stage: 'plan', phase: 'plan', at: '2026-11-02T10:00:00.000Z', text: 'PRIVATE_SOURCE' };
+  const { createHash } = await import('node:crypto');
+  file.sha256 = createHash('sha256').update(JSON.stringify(file.body)).digest('hex');
+  await writeFile(join(dir, 'pipeline.json'), JSON.stringify(file));
+  assert.equal((await open()).describe().durable, false, 'a ledger diagnostic holding anything else reads as damaged');
+});

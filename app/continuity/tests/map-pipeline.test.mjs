@@ -1,12 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, readdir, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { ApiError } from '../../server/errors.mjs';
 import { encodeSpans } from '../dist/public/shared/evidence-span.js';
 import { validateMapAsk, validateMapReply } from '../dist/public/shared/map-reading.js';
 import { createFirstMapPipeline } from '../server/map-pipeline.mjs';
+import { openFirstMapPipeline } from '../server/map-pipeline-host.mjs';
 import { openMapPipelineStore } from '../server/map-pipeline-store.mjs';
 import { callMapProvider } from '../server/map-provider.mjs';
 import { map7Prompt } from '../server/map-prompt.mjs';
@@ -428,7 +429,9 @@ test('a completed invalid render is recorded failed before one correction, prese
   const failedIndex = events.findIndex(event => event.event === 'failed' && event.id === 'render-1');
   const correctionIndex = events.findIndex(event => event.event === 'begin' && event.id === 'render-1-correction');
   assert.ok(failedIndex >= 0 && correctionIndex > failedIndex);
-  assert.deepEqual(events[failedIndex].details, { usage, uncertain: false });
+  const { diagnostic, ...details } = events[failedIndex].details;
+  assert.deepEqual(details, { usage, uncertain: false });
+  assert.deepEqual([diagnostic.stage, diagnostic.phase, diagnostic.total], ['render-1', 'render', 1], 'the refusal is kept with where it happened');
   assert.deepEqual(diagnostics.find(output => output.stage === 'render-1').value, rejected);
   assert.ok(diagnostics.some(output => output.stage === 'render-1-correction'));
   assert.deepEqual(ask, original);
@@ -814,4 +817,149 @@ test('a cached valid global sentinel is combined with machine obligations in the
   assert.deepEqual(semantic[0].input.semanticReview.reviseParts, ['P01', 'new:flow2']);
   assert.equal(calls.filter(call => call.stage === 'global').length, 1, 'only the new final review is sent');
   assert.deepEqual(store.get(key, 'global'), before, 'combining review pointers must not mutate the cached sentinel');
+});
+
+// Task A: a refused stage says where (stage, phase, total) and which fixed rule, never text; the refused value is kept only when asked.
+const refusedAt = expected => error => {
+  assert.ok(error instanceof ApiError); assert.equal(error.code, 'INVALID_RESPONSE');
+  assert.deepEqual(error.detail, expected); return true;
+};
+const PRIVATE = 'sk-PRIVATEsecretVALUE0123456789abcd';
+
+test('a refused render and its one refused correction name the correction stage, phase, total and safe rule/path', async t => {
+  const { store, make } = await setup(t), ask = askFor(), calls = [], rejected = [], progress = [];
+  const pipeline = make({ onProgress: event => progress.push(event), onRejected: kept => rejected.push(kept), callProvider: fakeProvider(ask, calls, call => {
+    if (call.stage !== 'render') return;
+    const fragment = payloadFor(call.input, ask, originalWire(ask)); fragment.parts[0].basis[0] = 'N99.001'; return fragment;
+  }) });
+  await assert.rejects(pipeline.call(ask), refusedAt({ stage: 'render-1-correction', phase: 'correction', total: 1, rule: 'reference', path: 'parts[0].basis[0]' }));
+  assert.equal(calls.filter(call => call.stage === 'render').length, 2, 'still exactly one correction round');
+  assert.deepEqual(rejected.map(kept => kept.stage), ['render-1', 'render-1-correction']);
+  assert.deepEqual(rejected[0].diagnostic, { stage: 'render-1', phase: 'render', total: 1, rule: 'reference', path: 'parts[0].basis[0]' });
+  assert.deepEqual(rejected[0].validation, { path: 'parts[0].basis[0]', rule: 'reference' });
+  assert.equal(rejected[0].value.parts[0].basis[0], 'N99.001', 'the kept value is the refused output, not a repaired one');
+  assert.equal(rejected[0].input.assignment.id, 'parts-1');
+  assert.deepEqual(rejected[0].usage, usage);
+  const key = progress[0].key, last = store.lastFailure(key);
+  assert.equal(typeof last.at, 'string'); delete last.at;
+  assert.deepEqual(last, { stage: 'render-1-correction', phase: 'correction', total: 1, rule: 'reference', path: 'parts[0].basis[0]' });
+  assert.equal(store.describe().lastFailure.stage, 'render-1-correction');
+});
+
+test('a refused render without a validator path still names its stage and a coarse reason', async t => {
+  const { make } = await setup(t), ask = askFor(), calls = [];
+  const pipeline = make({ callProvider: fakeProvider(ask, calls, call => {
+    if (call.stage === 'render') return { ...payloadFor(call.input, ask, originalWire(ask)), summary: '렌더가 쓴 요약' };
+  }) });
+  await assert.rejects(pipeline.call(ask), refusedAt({ stage: 'render-1-correction', phase: 'correction', total: 1, reason: 'shape' }));
+});
+
+test('a refused extraction receipt says extract, its partition and a coarse reason, without any correction', async t => {
+  const { store, make } = await setup(t), ask = askFor(), calls = [], rejected = [], progress = [];
+  const pipeline = make({ onProgress: event => progress.push(event), onRejected: kept => rejected.push(kept), callProvider: fakeProvider(ask, calls, call => {
+    if (call.stage === 'extract' && call.input.partition.id === 'extract-01') return { covered: [], candidates: [] };
+  }) });
+  let detail;
+  await assert.rejects(pipeline.call(ask), error => { detail = error.detail; return error instanceof ApiError && error.code === 'INVALID_RESPONSE'; });
+  const partitions = calls.filter(call => call.stage === 'extract')[0].input.partition;
+  assert.ok(partitions);
+  assert.ok(detail.total > 2);
+  assert.deepEqual(detail, { stage: 'extract-1', phase: 'extract', total: detail.total, reason: 'coverage' });
+  assert.equal(calls.some(call => call.input.correction), false, 'extraction is never corrected');
+  assert.deepEqual(rejected.map(kept => kept.stage), ['extract-1']);
+  assert.equal(store.lastFailure(progress[0].key).reason, 'coverage');
+  for (const [mutate, reason] of [[() => ({ covered: [] }), 'shape'], [input => ({ ...receipt(input), candidates: [{ kind: 'part', text: '단서', at: ['N99.001'] }] }), 'anchor'],
+    [input => ({ ...receipt(input), candidates: [{ kind: 'fact', text: '단서', at: [input.partition.records[0].core[0]] }] }), 'candidate']]) {
+    const { make: again } = await setup(t);
+    await assert.rejects(again({ callProvider: fakeProvider(ask, [], call => call.stage === 'extract' ? mutate(call.input) : undefined) }).call(ask),
+      error => error.detail?.phase === 'extract' && error.detail.reason === reason && !('rule' in error.detail));
+  }
+});
+
+test('a refused plan says plan and a coarse blueprint reason; no correction is sent', async t => {
+  const cases = [
+    [plan => { plan.parts[0].at = ['N99.001']; }, 'anchor'],
+    [plan => { plan.extra = []; }, 'shape'],
+    [plan => { plan.parts[0].ref = 'flow'; }, 'ref'],
+    [plan => { plan.parts[0].parent = 'new:missing'; }, 'parent'],
+    [plan => { plan.global[0].kind = 'fact'; }, 'kind'],
+    [plan => { plan.parts = Array.from({ length: 25 }, (_, i) => ({ ...plan.parts[0], ref: 'new:p' + i })); }, 'count'],
+  ];
+  for (const [mutate, reason] of cases) {
+    const { make } = await setup(t), ask = askFor(), calls = [];
+    const pipeline = make({ callProvider: fakeProvider(ask, calls, call => {
+      if (call.stage !== 'plan') return;
+      const plan = blueprintFor(originalWire(ask), ask); mutate(plan); return plan;
+    }) });
+    await assert.rejects(pipeline.call(ask), refusedAt({ stage: 'plan', phase: 'plan', reason }));
+    assert.equal(calls.filter(call => call.stage === 'plan').length, 1, reason);
+    assert.equal(calls.some(call => call.stage === 'render'), false);
+  }
+});
+
+test('a transport INVALID_RESPONSE is said by stage with the fixed transport reason and is never corrected or kept', async t => {
+  const { make } = await setup(t), ask = askFor(), calls = [], rejected = [];
+  const pipeline = make({ onRejected: kept => rejected.push(kept), callProvider: fakeProvider(ask, calls, call => {
+    if (call.stage === 'global') { call.options.onUsage(usage); throw new ApiError('INVALID_RESPONSE', 502); }
+  }) });
+  await assert.rejects(pipeline.call(ask), refusedAt({ stage: 'global', phase: 'global', reason: 'transport' }));
+  assert.equal(calls.some(call => call.input.correction), false);
+  assert.equal(rejected.length, 0, 'nothing readable came back to keep');
+});
+
+test('the kept refusal hides key-like text and the configured keys; detail and ledger never hold model text', async t => {
+  const { dir, store, make } = await setup(t), ask = askFor(), rejected = [], progress = [];
+  const pipeline = make({ onProgress: event => progress.push(event), onRejected: kept => rejected.push(kept), callProvider: fakeProvider(ask, [], call => {
+    if (call.stage !== 'global') return;
+    const global = payloadFor(call.input, ask, originalWire(ask));
+    global.summary = `요약 ${PRIVATE} fake-openai fake-deepseek`;
+    global.relations = [{ from: 'new:flow', to: 'new:flow', kind: 'flow', note: PRIVATE, at: 'N99.001' }];
+    return global;
+  }) });
+  let detail;
+  await assert.rejects(pipeline.call(ask), error => { detail = error.detail; return error.code === 'INVALID_RESPONSE'; });
+  assert.equal(detail.stage, 'global-correction');
+  assert.equal(rejected.length, 2);
+  const text = JSON.stringify(rejected);
+  for (const secret of [PRIVATE, 'fake-openai', 'fake-deepseek']) assert.ok(!text.includes(secret), secret);
+  assert.ok(text.includes('[가려진 비밀값]'));
+  assert.equal(rejected[0].value.relations[0].at, 'N99.001', 'only secrets are hidden; the refused value is otherwise untouched');
+  const ledger = await readFile(join(dir, 'pipeline.json'), 'utf8');
+  const visible = JSON.stringify([detail, store.lastFailure(progress[0].key), store.describe()]) + ledger;
+  for (const leak of ['PRIVATE', 'fake-openai', '요약 ', 'N99.001']) assert.ok(!visible.includes(leak), leak);
+});
+
+test('the host keeps refused stages only when STUDIO_KEEP_REFUSED gives it a folder, and logs the file it wrote', async t => {
+  const ask = askFor(), root = await mkdtemp(join(tmpdir(), 'map-keep-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const fetchImpl = async (_url, init) => {
+    const body = JSON.parse(init.body), isDeepseek = !!body.messages;
+    const input = JSON.parse(isDeepseek ? body.messages[1].content : body.input.slice('Return JSON for this input:\n'.length));
+    const value = payloadFor(input, ask, originalWire(ask));
+    if (input.assignment) value.summary = `render ${PRIVATE}`;
+    return new Response(JSON.stringify(isDeepseek
+      ? { choices: [{ finish_reason: 'stop', message: { role: 'assistant', content: JSON.stringify(value) } }], usage: { prompt_tokens: 10, completion_tokens: 10 } }
+      : { status: 'completed', output: [{ type: 'message', role: 'assistant', status: 'completed', content: [{ type: 'output_text', text: JSON.stringify(value) }] }], usage: { input_tokens: 10, output_tokens: 10 } }));
+  };
+  const env = { DEEPSEEK_API_KEY: 'host-test-deepseek-inert', OPENAI_API_KEY: 'host-test-openai-inert' };
+  const keep = join(root, 'refused'), logs = [];
+  const kept = await openFirstMapPipeline({ env, dir: join(root, 'jobs-a'), fetchImpl, keep, log: line => logs.push(line) });
+  try { await assert.rejects(kept.call(ask), error => error.code === 'INVALID_RESPONSE' && error.detail.stage === 'render-1-correction'); }
+  finally { await kept.close(); }
+  const files = (await readdir(keep)).sort();
+  assert.equal(files.length, 2);
+  assert.ok(files.some(file => file.endsWith('-render-1-INVALID_RESPONSE.json')) && files.some(file => file.endsWith('-render-1-correction-INVALID_RESPONSE.json')));
+  for (const file of files) {
+    const text = await readFile(join(keep, file), 'utf8'), saved = JSON.parse(text);
+    for (const secret of [PRIVATE, env.DEEPSEEK_API_KEY, env.OPENAI_API_KEY]) assert.ok(!text.includes(secret), secret);
+    assert.equal(saved.kind, 'map-stage'); assert.ok(['render-1', 'render-1-correction'].includes(saved.stage));
+    assert.equal(saved.diagnostic.reason, 'shape'); assert.equal(saved.value.summary, 'render [가려진 비밀값]');
+    assert.ok(logs.some(line => line.includes(join(keep, file)) && line.includes(`(${saved.stage} shape)`)));
+  }
+  const off = await openFirstMapPipeline({ env, dir: join(root, 'jobs-b'), fetchImpl, log: line => logs.push(line) });
+  const before = logs.length;
+  try { await assert.rejects(off.call(ask), error => error.code === 'INVALID_RESPONSE' && error.detail.stage === 'render-1-correction'); }
+  finally { await off.close(); }
+  assert.equal(logs.length, before, 'no keeper runs when the option is off');
+  assert.deepEqual((await readdir(root)).sort(), ['jobs-a', 'jobs-b', 'refused']);
 });

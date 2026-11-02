@@ -70,6 +70,53 @@ const MAP_ERROR: Record<string, string> = {
 /** A quote whose first piece alone runs past the evidence bound: said as too long, not as a quote that is not in the records. */
 const LENGTH_REFUSED = 'AI가 근거로 든 인용이 너무 길어(600자 넘음) 반영하지 않았어요. 기록과 지도는 그대로예요. 다시 정리할 수 있어요.';
 const CONTRACT_REFUSED = 'AI 응답의 모양(항목 이름이나 형식)이 요청한 것과 달라 반영하지 않았어요. 기록과 지도는 그대로예요. 다시 정리할 수 있어요.';
+/** A divided reading's refused step, said in the progress labels' words; a fixed rule or reason in a short phrase. */
+const RULE_PHRASE: Record<string, string> = {
+  reference: '원문 구간 참조', length: '인용 길이', 'material-evidence': '예제 표시와 근거의 겹침', 'source-kind': '자료 종류',
+  'condition-form': '조건 표기', 'condition-source': '조건의 원문 위치', 'condition-length': '조건 길이', 'duplicate-key': '주장 키 중복',
+  'duplicate-target': '같은 대상의 중복 확인', 'settled-and-open': '확정과 미정의 충돌', contract: '응답 모양'
+};
+const REASON_PHRASE: Record<string, string> = {
+  coverage: '읽은 구간 영수증', candidate: '단서 항목', shape: '응답 모양', count: '항목 수', text: '항목 글', duplicate: '중복 항목',
+  ref: '부분 식별자', 'existing-part': '기존 부분의 이름·부모', parent: '부모 연결', 'parent-cycle': '부모 연결의 순환', kind: '항목 종류',
+  correction: '기존 주장의 정정 표시', revision: '다시 정리 요청', assignment: '맡은 부분 목록', key: '주장 키 범위', input: '구간 나누기'
+};
+const EVIDENCE_RULES = new Set(['reference', 'length', 'material-evidence', 'source-kind', 'condition-form', 'condition-source', 'condition-length', 'coverage', 'anchor', 'correction']);
+const COUNT_GUARDS = new Set(['count', 'new-count', 'target-count']);
+const STAGE_ID = /^(extract|render)-([1-9]\d?)(-semantic)?(-correction)?$|^(plan|global|global-final|render-semantic)(-correction)?$/;
+/** Where a divided reading stopped ('부분 정리 2/3 단계'), from the fixed stage id the server names; null when it names none. */
+function stepName(stage: unknown, total: unknown): string | null {
+  const m = typeof stage === 'string' ? STAGE_ID.exec(stage) : null;
+  if (!m) return null;
+  if (m[1]) {
+    const n = Number(m[2]), of = typeof total === 'number' && Number.isSafeInteger(total) && total >= n && total <= 99 ? `${n}/${total}` : `${n}번째`;
+    return m[1] === 'extract' ? `근거 읽기 ${of} 구간` : `${m[3] ? '부분 다시 정리' : '부분 정리'} ${of} 단계`;
+  }
+  return m[5] === 'plan' ? '전체 조건 대조 단계' : m[5] === 'render-semantic' ? '부분 다시 정리 단계' : '관계·조건 마지막 확인 단계';
+}
+export interface MapErrorDetail { stage?: unknown; phase?: unknown; total?: unknown; rule?: unknown; path?: unknown; category?: unknown; reason?: unknown; target?: unknown }
+/** The person's words for a refused or failed reading. An INVALID_RESPONSE that names a divided step says which step and which rule. */
+export function mapErrorText(code: string, detail?: MapErrorDetail | null): string {
+  if (code === 'INVALID_RESPONSE' && detail && typeof detail.phase === 'string') {
+    const where = stepName(detail.stage, detail.total);
+    if (where) {
+      const rule = typeof detail.rule === 'string' && Object.hasOwn(RULE_PHRASE, detail.rule) ? detail.rule : null;
+      const reason = !rule && typeof detail.reason === 'string' ? detail.reason : null;
+      const corrected = detail.phase === 'correction', object = where.endsWith('구간') ? '을' : '를';
+      const kept = '원문과 기존 지도는 그대로예요.';
+      if (reason === 'transport') return `${where}${corrected ? `${object} 한 번 바로잡은` : '의'} AI 응답을 JSON으로 읽을 수 없어 반영하지 않았어요. ${kept}`;
+      const phrase = rule === 'contract' ? (typeof detail.category === 'string' && COUNT_GUARDS.has(detail.category) ? '항목 수' : RULE_PHRASE.contract)
+        : rule ? RULE_PHRASE[rule] : reason === 'anchor' ? (detail.phase === 'extract' ? '단서의 원문 위치' : '설계의 원문 위치')
+        : reason && Object.hasOwn(REASON_PHRASE, reason) ? REASON_PHRASE[reason] : null;
+      const kind = (rule ?? reason) && EVIDENCE_RULES.has((rule ?? reason)!) ? '근거 규칙' : phrase ? '형식 규칙' : '근거 규칙';
+      return `${where}${corrected ? `${object} 한 번 바로잡은 AI 응답도` : '의 AI 응답이'} ${kind}${phrase ? `(${phrase})` : ''}에 맞지 않아 반영하지 않았어요. ${kept}`;
+    }
+  }
+  // A reply refused for its shape (map.7's contract: a missing or extra key, a wrong type) is said so, not as an evidence rule.
+  return code === 'INVALID_RESPONSE' && detail?.rule === 'contract' ? CONTRACT_REFUSED
+    : code === 'INVALID_RESPONSE' && detail?.rule === 'length' ? LENGTH_REFUSED
+    : JOB_ERROR[code] ?? MAP_ERROR[code] ?? ERROR_TEXT[code] ?? '지도를 정리하지 못했어요. 기록은 그대로예요.';
+}
 /* AF100: a job the local server keeps. Said in what the person can do (continue, see the result, stopped, cancel), not how. */
 const JOB_ERROR: Record<string, string> = {
   RESERVE: '정리 작업을 이 브라우저에 기록하지 못해 보내지 않았어요. 기록과 지도는 그대로예요.',
@@ -261,10 +308,7 @@ export function createMapRun(host: MapRunHost) {
   const appliedIn = (p: Project | null, a: Attempt): 'applied' | 'conflict' | null => {
     const r = p?.readings.find(x => isMapReading(x) && x.id === a.meta?.id); return !r ? null : isMapReading(r) && r.hash === a.hash ? 'applied' : 'conflict';
   };
-  // A reply refused for its shape (map.7's contract: a missing or extra key, a wrong type) is said so, not as an evidence rule.
-  const errorText = (code: string, detail?: { rule?: unknown } | null) => code === 'INVALID_RESPONSE' && detail?.rule === 'contract' ? CONTRACT_REFUSED
-    : code === 'INVALID_RESPONSE' && detail?.rule === 'length' ? LENGTH_REFUSED
-    : JOB_ERROR[code] ?? MAP_ERROR[code] ?? ERROR_TEXT[code] ?? '지도를 정리하지 못했어요. 기록은 그대로예요.';
+  const errorText = mapErrorText;
   /** Reserve (or reuse the entry's reservation), then send. Nothing goes when the reservation cannot be written. */
   async function runJob(a: Attempt, inp: MapInput, model: string, seq: number | null) {
     const slot = of(a.key), live = () => slot.attempt === a, jobs = store()!;

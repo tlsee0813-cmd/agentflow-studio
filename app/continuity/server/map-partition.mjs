@@ -56,25 +56,29 @@ export function planMapPartitions(ask, { targetChars = 3500, maxPartitions = 12 
 /** Structural receipt, not a semantic completeness certificate. Every core alias must be acknowledged exactly once.
  * Candidates are sparse advisory pointers; they neither become final facts nor advance the original input's read coverage. */
 export function validateExtraction(value, partition) {
-  const invalid = () => fail('INVALID_EXTRACTION');
-  if (!partition || !Array.isArray(partition.records) || !shape(value, ['covered', 'candidates'])) invalid();
+  // The message stays INVALID_EXTRACTION; reason is one fixed category for a local diagnostic, never a value.
+  const invalid = reason => { const error = new Error('INVALID_EXTRACTION'); error.reason = reason; throw error; };
+  if (!partition || !Array.isArray(partition.records)) invalid('input');
+  if (!shape(value, ['covered', 'candidates'])) invalid('shape');
   const core = new Set(), allowed = new Set();
   for (const record of partition.records) {
-    if (!record || !Array.isArray(record.core) || !Array.isArray(record.context) || !Array.isArray(record.spans)) invalid();
-    for (const alias of record.core) { if (typeof alias !== 'string' || core.has(alias)) invalid(); core.add(alias); }
-    for (const span of record.spans) { if (typeof span?.s !== 'string' || allowed.has(span.s)) invalid(); allowed.add(span.s); }
+    if (!record || !Array.isArray(record.core) || !Array.isArray(record.context) || !Array.isArray(record.spans)) invalid('input');
+    for (const alias of record.core) { if (typeof alias !== 'string' || core.has(alias)) invalid('input'); core.add(alias); }
+    for (const span of record.spans) { if (typeof span?.s !== 'string' || allowed.has(span.s)) invalid('input'); allowed.add(span.s); }
     const declared = [...record.core, ...record.context];
     if (new Set(declared).size !== declared.length || declared.some(alias => !record.spans.some(span => span.s === alias))
-      || declared.length !== record.spans.length) invalid();
+      || declared.length !== record.spans.length) invalid('input');
   }
-  if (!core.size || !Array.isArray(value.covered) || value.covered.length !== core.size
-    || new Set(value.covered).size !== core.size || value.covered.some(alias => !core.has(alias))
-    || !Array.isArray(value.candidates) || value.candidates.length > EXTRACTION_CANDIDATES_MAX) invalid();
+  if (!core.size) invalid('input');
+  if (!Array.isArray(value.covered) || value.covered.length !== core.size
+    || new Set(value.covered).size !== core.size || value.covered.some(alias => !core.has(alias))) invalid('coverage');
+  if (!Array.isArray(value.candidates)) invalid('shape');
+  if (value.candidates.length > EXTRACTION_CANDIDATES_MAX) invalid('count');
   for (const candidate of value.candidates) {
     if (!shape(candidate, ['kind', 'text', 'at']) || !EXTRACTION_KINDS.includes(candidate.kind)
-      || typeof candidate.text !== 'string' || !candidate.text.trim() || candidate.text.length > 240 || CONTROL.test(candidate.text)
-      || !Array.isArray(candidate.at) || !candidate.at.length || new Set(candidate.at).size !== candidate.at.length
-      || candidate.at.some(alias => !allowed.has(alias)) || !candidate.at.some(alias => core.has(alias))) invalid();
+      || typeof candidate.text !== 'string' || !candidate.text.trim() || candidate.text.length > 240 || CONTROL.test(candidate.text)) invalid('candidate');
+    if (!Array.isArray(candidate.at) || !candidate.at.length || new Set(candidate.at).size !== candidate.at.length
+      || candidate.at.some(alias => !allowed.has(alias)) || !candidate.at.some(alias => core.has(alias))) invalid('anchor');
   }
   return structuredClone(value);
 }
