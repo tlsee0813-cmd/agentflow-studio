@@ -194,9 +194,10 @@ export async function openMapJobs({ dir, io = fileIo, limits = JOB_LIMITS, log =
           return { status: 200, value: view(id, j.body) };
         }
         if (Buffer.byteLength(JSON.stringify(s.input)) > limits.inputBytes) throw new ApiError('INPUT_TOO_LARGE', 413);
-        const prompt = await run.prompt(s.binding.schemaVersion); // AF116: the recipe of the job's own schema
+        const prompt = await run.prompt(s.binding.schemaVersion, checked.input.ask); // Bound to the exact first/later recipe.
         if (!run.configured()) throw new ApiError('AI_NOT_CONFIGURED', 503);
-        if (s.binding.prompt !== prompt || s.binding.model !== run.model) throw new ApiError('PROMPT_CHANGED', 409);
+        const model = typeof run.model === 'function' ? run.model(checked.input.ask) : run.model;
+        if (s.binding.prompt !== prompt || s.binding.model !== model) throw new ApiError('PROMPT_CHANGED', 409);
         // AF102: an injected executor fixes what it will run (its identity, binary, permissions and deadline policy) now; the job
         // keeps that, never the settings of a later read or restart. Without one (DeepSeek) the job is as it was.
         const execution = run.prepare ? await run.prepare(checked.input.ask) : null;

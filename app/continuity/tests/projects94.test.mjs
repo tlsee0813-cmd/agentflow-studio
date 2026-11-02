@@ -44,5 +44,12 @@ test('PROJECTS-2 work another Claude handed on is a request of its own: its repl
   assert.deepEqual(parseClaude([human(0, pasted)]).turns.map(t => t.text), [pasted]);
   // And the record says so.
   const text = sessionText(readSessionDetail(JSON.parse(JSON.stringify(sessionDetail('claude-' + 'a'.repeat(24), 'claude', parseClaude(rows)))))).text;
-  assert.ok(text.includes('── 사용자 요청 · 11:40 ──\n(다른 Claude가 전달한 지시) PC에서 확인해 줘 & 고쳐 줘'), text);
+  // Records display the person's local clock; the ISO times above check their exact stored instants independently.
+  const local = minute => new Date(at(minute)).toTimeString().slice(0, 5);
+  assert.ok(text.includes([
+    `── 사용자 요청 · ${local(40)} ──\n(다른 Claude가 전달한 지시) PC에서 확인해 줘 & 고쳐 줘`,
+    `── Claude Code 답변 · ${local(41)} ──\n확인했어요.\n\n고쳤어요.`,
+    `── 사용자 요청 · ${local(50)} ──\n그래 확인해봐\n\n(다른 Claude가 전달한 지시) 이어서`,
+    `── Claude Code 답변 · ${local(51)} ──\n이어서 했어요.`
+  ].join('\n\n')), text);
 });

@@ -10,6 +10,8 @@ export interface AiStatus { ai: 'deepseek' | 'off' | 'none'; model: string | nul
   /** The model and prompt id a map reading would be made with (null when the server does not offer it). AF102 via 'jobs': made only
    * as a durable job by the server's own map executor (a local preview), whatever ai says; the other AI features keep ai. */
   map?: { model: string; prompt: string; via?: 'jobs';
+    first?: { model: string; prompt: string; ready: boolean; method: 'divided'; monthlyUsd: number; runUsd: number };
+    later?: { model: string; prompt: string; ready: boolean; method: 'divided'; monthlyUsd: number; runUsd: number };
     /** AF116: the m7 recipe for later readings (studio.map.7), beside prompt (m6, still every first map); absent on older servers. */
     laterPrompt?: string } | null;
   /** AF100: the server keeps map readings as durable jobs on this PC (durable), or has a job store it cannot use (problem).
@@ -48,7 +50,13 @@ export async function aiStatus(): Promise<AiStatus> {
     if (!res.ok || !['deepseek', 'off'].includes(v?.ai)) return { ai: 'none', model: null, access: 'open' };
     const d = v.digest, digest = d && typeof d.model === 'string' && typeof d.prompt === 'string' && /^[\w.-]{1,80}$/.test(d.model) && /^d1-[0-9a-f]{12}$/.test(d.prompt)
       ? { model: d.model, prompt: d.prompt, record: typeof d.record === 'string' && /^d2-[0-9a-f]{12}$/.test(d.record) ? d.record : null } : null;
-    const m = v.map, map = m && typeof m.model === 'string' && /^[\w.-]{1,80}$/.test(m.model) && typeof m.prompt === 'string' && /^m[1-6]-[0-9a-f]{12}$/.test(m.prompt) ? { model: m.model, prompt: m.prompt, ...(m.via === 'jobs' ? { via: 'jobs' as const } : {}),
+    const f = v.map?.first;
+    const first = f && f.method === 'divided' && typeof f.model === 'string' && /^[\w.-]{1,80}$/.test(f.model) && typeof f.prompt === 'string' && /^m6-[0-9a-f]{12}$/.test(f.prompt) && Number.isFinite(f.monthlyUsd) && Number.isFinite(f.runUsd)
+      ? { model: f.model, prompt: f.prompt, ready: f.ready === true, method: 'divided' as const, monthlyUsd: f.monthlyUsd, runUsd: f.runUsd } : null;
+    const l = v.map?.later;
+    const later = l && l.method === 'divided' && typeof l.model === 'string' && /^[\w.-]{1,80}$/.test(l.model) && typeof l.prompt === 'string' && /^m7-[0-9a-f]{12}$/.test(l.prompt) && Number.isFinite(l.monthlyUsd) && Number.isFinite(l.runUsd)
+      ? { model: l.model, prompt: l.prompt, ready: l.ready === true, method: 'divided' as const, monthlyUsd: l.monthlyUsd, runUsd: l.runUsd } : null;
+    const m = v.map, map = m && typeof m.model === 'string' && /^[\w.-]{1,80}$/.test(m.model) && typeof m.prompt === 'string' && /^m[1-6]-[0-9a-f]{12}$/.test(m.prompt) ? { model: m.model, prompt: m.prompt, ...(first ? { first } : {}), ...(later ? { later } : {}), ...(m.via === 'jobs' ? { via: 'jobs' as const } : {}),
       // A later recipe is read only beside a current m6 one, and only as an exact m7 id.
       ...(/^m6-/.test(m.prompt) && typeof m.laterPrompt === 'string' && /^m7-[0-9a-f]{12}$/.test(m.laterPrompt) ? { laterPrompt: m.laterPrompt } : {}) } : null;
     // AF112 scope: which map readings the executor takes (first maps only, later map.6 readings too, or AF116 later map.7 readings).
@@ -161,6 +169,7 @@ export async function publishHandover(accessCode: string, doc: { key: string; co
 }
 
 export const ERROR_TEXT: Record<string, string> = {
+  MAP_PIPELINE_JOBS_REQUIRED: '새 지도 정리는 PC에 보관하는 작업으로만 시작할 수 있어요. 화면을 새로 고친 뒤 다시 정리해 주세요.',
   AI_NOT_CONFIGURED: '서버에 AI 키가 설정되지 않았어요.',
   AI_AUTH_FAILED: 'AI 서비스가 서버의 키를 받아들이지 않았어요.',
   AI_BALANCE_REQUIRED: 'AI 서비스 잔액이 부족해요.',

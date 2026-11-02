@@ -2175,7 +2175,7 @@ function renderMapEntry() {
   const acts = h('div', { class: 'se-acts' }), waiting = st.committing || st.ready;
   // Sessions this page can read, in a project not connected yet: the automatic connection is the first way in, pasting the other.
   const linked = !!autoSync.bindingOf(o.key), offerSync = !linked && sessionSources.offered();
-  if (st.pending) put(acts, ...pendingLine('se-durable', '기록을 읽고 지도를 정리하는 중…', 'link-button'));
+  if (st.pending) put(acts, ...pendingLine('se-durable', status.map?.first ? '구간별 근거를 읽고 전체 조건을 대조해 지도를 합치는 중…' : '기록을 읽고 지도를 정리하는 중…', 'link-button'));
   else if (waiting) put(acts, ...runReady(st, 'primary small', 'link-button'));
   else if (fresh && can && !inp!.problem) put(acts, h('button', { type: 'button', class: 'primary small se-run', onclick: () => void mapRun.run() }, '기록으로 지도 정리'), paste(false), file());
   else if (offerSync) put(acts, h('button', { type: 'button', class: 'primary small se-sync', onclick: () => autoSync.toggle() }, '내 AI 세션 자동 연결'), paste(false), file());
@@ -2186,6 +2186,8 @@ function renderMapEntry() {
       : '작업 AI와 나눈 요구나 보고를 붙여 넣으면, 원문에 근거가 있는 부분과 연결만 지도에 그려요. 이름과 위치는 바로 고칠 수 있어요.'),
     last && !last.parts.length ? h('p', { class: 'se-gap' }, last.gaps.length ? last.gaps.join(' ') : '앞서 읽은 기록에서는 프로그램의 부분을 찾지 못했어요.') : null,
     acts, note ? h('p', { class: 'fine' }, note) : null,
+    status.map?.first ? h('p', { class: 'fine' }, '근거 찾기, 전체 조건 대조, 부분별 정리를 나눠 진행해요. 기존 지도와 직접 고친 내용도 함께 확인하며, 끝난 단계는 PC에 보관해 같은 작업에서 다시 처리하지 않아요.') : null,
+    status.map?.first ? h('p', { class: 'fine' }, `OpenAI 사용 상한: 정리당 $${status.map.first.runUsd}, 월 $${status.map.first.monthlyUsd}. DeepSeek 요금은 별도이며 교정을 포함해 정리당 최대 30회로 제한돼요.`) : null,
     st.error ? h('p', { class: 'pp-error', role: 'alert' }, st.error) : null, runNotice(),
     h('button', { type: 'button', class: 'link-button se-direct', onclick: () => openPartForm(null) }, '부분 직접 추가'));
   box.hidden = false;
