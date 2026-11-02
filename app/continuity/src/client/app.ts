@@ -129,14 +129,16 @@ function positionsOf(o: Opened): Positions {
   return p;
 }
 /** Before a part is dragged: every automatically placed box in its container, and in each container above, keeps the place it
- * has now as a stored place of its own. Otherwise the layout, run again for each move with the container's new size, would
- * shift the dragged part's siblings and the regions beside them while the hand moves. 자동 배치 clears these as any other. */
+ * has now (held, not stored). Otherwise the layout, run again for each move with the container's new size, would shift the
+ * dragged part's siblings and the regions beside them while the hand moves and once more on the drop. The hold lasts until
+ * the next redraw of the structure (a fold, a new part, 자동 배치), when the automatic arrangement takes over again. */
 function holdPlaces(o: Opened, container: string) {
-  const pos = positionsOf(o);
+  const pos = positionsOf(o), out: Positions = held ?? {};
   for (let c: string | undefined = container, g = 0; c && g < 64; c = lay.boxes.get(c)?.container, g++) {
-    const held = (pos[c] ??= {});
-    for (const b of lay.boxes.values()) if (b.container === c && b.kind !== 'ghost' && !held[b.id]) held[b.id] = { x: Math.round(b.rel.x), y: Math.round(b.rel.y) };
+    const here = (out[c] ??= {});
+    for (const b of lay.boxes.values()) if (b.container === c && b.kind !== 'ghost' && !pos[c]?.[b.id] && !here[b.id]) here[b.id] = { x: Math.round(b.rel.x), y: Math.round(b.rel.y) };
   }
+  held = out;
 }
 function savePositions(o: Opened) { if (o.kind === 'saved') writeEntryPositions(kv, o.key, positionsOf(o)); } // a refused write: the in-memory places still hold for this tab
 
@@ -747,7 +749,16 @@ let planRows: Map<string, string[]> | null = null, planRowsKey = '';
 /** The shape of the room a first view has for its parts (the window's map without the header, the title above the parts and
  * the margins; never the reading pane): what an unlinked block of parts is balanced against. */
 const mapAspect = () => Math.max(1, Math.min(3, (window.innerWidth - 48) / Math.max(240, window.innerHeight - 252)));
-const relayout = (o: Opened) => { lay = layoutScope(o.view, scope, isExpanded(o), positionsOf(o), measureName, planRows ?? undefined, mapAspect()); core = { ...lay.bounds }; withTitle(); };
+/** Places held for the view at hand (holdPlaces): the automatically placed boxes keep where they are while a part is dragged
+ * and until the next redraw, over the stored places but never written to them. */
+let held: Positions | null = null;
+const heldPositions = (o: Opened): Positions => {
+  const pos = positionsOf(o); if (!held) return pos;
+  const out: Positions = {};
+  for (const c of new Set([...Object.keys(held), ...Object.keys(pos)])) out[c] = { ...(held[c] ?? {}), ...(pos[c] ?? {}) };
+  return out;
+};
+const relayout = (o: Opened) => { lay = layoutScope(o.view, scope, isExpanded(o), heldPositions(o), measureName, planRows ?? undefined, mapAspect()); core = { ...lay.bounds }; withTitle(); };
 
 /** Two real parts with one name under one parent ('Types' and 'Types'): told apart by the first clause of their own note, as
  * written ('원명 extHostTypes.ts'), only where the name is really ambiguous. Never merged, renamed or guessed: null when the name
@@ -794,6 +805,8 @@ function metaLine(p: PartView, last: string | null): string | null {
 function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay = true) {
   const o = opened!; setBar(o);
   $('home').hidden = true; $('space').hidden = false; $('ai-pill').hidden = false;
+  // A redraw of the structure ends the places held for a drag (holdPlaces) and the hover's peek.
+  held = null; $('space').classList.remove('peek', 'state-peek');
   relayout(o);
   const world = $('world'), view = o.view;
   // Same view, new structure (a fold, a new part, 자동 배치): where every box and line was, so each slides to its new place.
@@ -952,9 +965,11 @@ function moveLoneHead() {
 }
 /** Before a redraw that keeps the view: each box's place and size and each line's shape, and the focused toggle's part. */
 type Redraw = { boxes: Map<string, { l: string; t: string; w: string; h: string }>; lines: Map<string, string>; focus: string | null };
+let arrangeTimer = 0;
 function beforeRedraw(world: HTMLElement): Redraw {
-  const boxes = new Map<string, { l: string; t: string; w: string; h: string }>();
-  world.querySelectorAll<HTMLElement>('[data-box]').forEach(el => boxes.set(el.dataset.box!, { l: el.style.left, t: el.style.top, w: el.style.width, h: el.style.height }));
+  const boxes = new Map<string, { l: string; t: string; w: string; h: string }>(), moving = world.classList.contains('arranging');
+  // While an earlier slide still runs, where a box is drawn now (computed), not where it was heading.
+  world.querySelectorAll<HTMLElement>('[data-box]').forEach(el => { const cs = moving ? getComputedStyle(el) : el.style; boxes.set(el.dataset.box!, { l: cs.left, t: cs.top, w: cs.width, h: cs.height }); });
   const lines = new Map([...world.querySelectorAll<SVGGElement>('.edge')].map(g => [g.dataset.key!, g.querySelector('.edge-line')?.getAttribute('d') ?? '']));
   const focus = document.activeElement?.closest<HTMLElement>('[data-box] .toggle, .frame-head .toggle')?.closest<HTMLElement>('[data-part]')?.dataset.part ?? null;
   return { boxes, lines, focus };
@@ -972,7 +987,7 @@ function afterRedraw(world: HTMLElement, was: Redraw) {
     void world.offsetWidth; // the old places take hold before the transition starts
     world.classList.add('arranging');
     for (const [el, to] of moved) { el.style.left = to.l; el.style.top = to.t; el.style.width = to.w; el.style.height = to.h; }
-    window.setTimeout(() => world.classList.remove('arranging'), 320);
+    clearTimeout(arrangeTimer); arrangeTimer = window.setTimeout(() => world.classList.remove('arranging'), 320);
   }
   if (was.focus) world.querySelector<HTMLElement>(`[data-part="${CSS.escape(was.focus)}"] .toggle`)?.focus({ preventScroll: true });
 }
@@ -1078,6 +1093,7 @@ function placeEdgeLabels() {
   let box = world.querySelector<HTMLElement>('.edge-labels');
   if (!box) { box = h('div', { class: 'edge-labels', 'aria-hidden': 'true' }); world.append(box); }
   box.replaceChildren();
+  placedInv = labelInv();
   syncLineMode();
   world.querySelectorAll('.edge.label-hidden').forEach(g => g.classList.remove('label-hidden'));
   world.dataset.labelsHidden = '0';
@@ -1144,14 +1160,13 @@ function placeEdgeLabels() {
     if (on) seenSel.add(selKey(e));
   }
   // The dimmed summary beside the selection keeps its counts (what each line still holds), after the selection's verbs.
-  if ($('space').classList.contains('sel-sum')) placeCounts(box, clear, blocks, true);
+  if ($('space').classList.contains('sel-sum')) placeCounts(box, clear, blocks, true, shown);
 }
 /** How many relations a summary line holds, on the line where it reads clear of parts (a line of one relation has none).
  * Beside a selection (dimmed, .beside) a count that finds no clear place is left off rather than set over a part or a verb. */
-function placeCounts(box: HTMLElement, clear: (r: Rect) => boolean, blocks: Rect[], beside = false) {
+function placeCounts(box: HTMLElement, clear: (r: Rect) => boolean, blocks: Rect[], beside = false, shown = shownLines()) {
   // Beside a selection a count also keeps off the selection's own lines, where it would read as theirs.
   const onPts = beside ? [...$('world').querySelectorAll<SVGPathElement>('.edge.on .edge-line')].flatMap(p => { const n = p.getTotalLength(); return Array.from({ length: Math.ceil(n / 6) + 1 }, (_, i) => p.getPointAtLength(Math.min(n, i * 6))); }) : [];
-  const shown = shownLines();
   const off = (r: Rect) => clear(r) && !onPts.some(q => q.x > r.x - 4 && q.x < r.x + r.w + 4 && q.y > r.y - 4 && q.y < r.y + r.h + 4);
   for (const g of $('world').querySelectorAll<SVGGElement>('.edge.sum:not(.hit)')) {
     const e = edgeOf(g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'); if (!e || !path || e.ids.length < 2) continue;
@@ -1665,7 +1680,7 @@ function lightRelations(ids: string[], far: string | null) {
   const o = opened, world = $('world'), set = new Set(ids);
   world.querySelectorAll('.lit').forEach(el => el.classList.remove('lit'));
   if (!o || !set.size) return;
-  world.querySelectorAll<SVGGElement>('.edge:not(.sum)').forEach(g => { if (edgeOf(g.dataset.key)?.ids.some(id => set.has(id))) { g.classList.add('lit'); layerEdge(g); } });
+  world.querySelectorAll<SVGGElement>('.edge').forEach(g => { if (edgeOf(g.dataset.key)?.ids.some(id => set.has(id))) { g.classList.add('lit'); layerEdge(g); } });
   const box = far ? drawnRep(o, far) ?? (lay.boxes.has(`ghost:${far}`) ? `ghost:${far}` : null) : null;
   if (box) world.querySelector(`[data-box="${CSS.escape(box)}"]`)?.classList.add('lit');
 }
@@ -2300,7 +2315,7 @@ function stateStrip(o: Opened): HTMLElement | null {
     document.querySelectorAll<HTMLElement>('#world .node[data-part]').forEach(n => n.classList.toggle('state-on', ids.has(n.dataset.part!)));
     el.querySelectorAll('.ms').forEach(b => b.classList.toggle('on', !!k && b.classList.contains(`ms-${k}`)));
   };
-  stateHold = null;
+  stateHold = null; $('space').classList.remove('state-peek');
   for (const k of ['check', 'report', 'ask', 'none']) {
     const ids = groups.get(k); if (!ids?.length) continue;
     el.append(h('button', { type: 'button', class: `ms ms-${k}`, title: WORDS[k]![1], 'aria-pressed': 'false',
@@ -2761,10 +2776,11 @@ function bindFind() {
  * the map the way the eye does. A part's own children and a child's parent are skipped (Enter and Escape go in and out). */
 function nearestBox(id: string, dir: 'Up' | 'Down' | 'Left' | 'Right'): string | null {
   const me = lay.boxes.get(id); if (!me) return null;
+  const within = (box: string, holder: string) => { for (let c = lay.boxes.get(box)?.container, g = 0; c && g < 64; c = lay.boxes.get(c)?.container, g++) if (c === holder) return true; return false; };
   const c = (b: Box) => ({ x: b.x + b.w / 2, y: b.y + (b.kind === 'frame' ? b.head / 2 : b.h / 2) }), m = c(me);
   let best: string | null = null, score = Infinity;
   for (const b of lay.boxes.values()) {
-    if (b.id === id || b.kind === 'ghost' || b.container === id || me.container === b.id) continue;
+    if (b.id === id || b.kind === 'ghost' || within(b.id, id) || within(id, b.id)) continue;
     const q = c(b), dx = q.x - m.x, dy = q.y - m.y;
     const ahead = dir === 'Right' ? dx : dir === 'Left' ? -dx : dir === 'Down' ? dy : -dy, side = dir === 'Right' || dir === 'Left' ? Math.abs(dy) : Math.abs(dx);
     if (ahead < 8) continue;
@@ -2774,7 +2790,7 @@ function nearestBox(id: string, dir: 'Up' | 'Down' | 'Left' | 'Right'): string |
 }
 function bindCanvas() {
   const vp = $('viewport');
-  type Drag = { pointer: number; x: number; y: number; moved: boolean; mode: 'pan'; cx: number; cy: number }
+  type Drag = { pointer: number; x: number; y: number; moved: boolean; mode: 'pan'; cx: number; cy: number; edge?: string }
     | { pointer: number; x: number; y: number; moved: boolean; mode: 'part'; id: string; container: string; start: Point };
   let drag: Drag | null = null;
   vp.addEventListener('pointerdown', e => {
@@ -2787,7 +2803,7 @@ function bindCanvas() {
     if (handle && o) {
       const id = handle.dataset.drag!, b = lay.boxes.get(id); if (!b) return;
       drag = { pointer: e.pointerId, x: e.clientX, y: e.clientY, moved: false, mode: 'part', id, container: b.container, start: { ...b.rel } };
-    } else drag = { pointer: e.pointerId, x: e.clientX, y: e.clientY, moved: false, mode: 'pan', cx: camera.x, cy: camera.y };
+    } else drag = { pointer: e.pointerId, x: e.clientX, y: e.clientY, moved: false, mode: 'pan', cx: camera.x, cy: camera.y, ...(target.classList.contains('edge-hit') ? { edge: target.closest<SVGGElement>('.edge')?.dataset.key ?? '' } : {}) };
     vp.setPointerCapture(e.pointerId);
   });
   vp.addEventListener('pointermove', e => {
@@ -2821,8 +2837,13 @@ function bindCanvas() {
       if (twice && part?.childIds.length) { lastClick.id = ''; go(o.key, null, d.id); return; }
       go(o.key, d.id); return;
     }
-    // A click on a line (no move) selects the part the line leaves (bindEdgeHints); on empty canvas it clears the selection.
-    if (!d.moved && selected && !(e.target as Element).classList?.contains('edge-hit')) go(o.key);
+    // A click on a line (no move) selects the part the line leaves; on empty canvas it clears the selection.
+    if (!d.moved && d.mode === 'pan' && d.edge) {
+      const edge = edgeOf(d.edge), from = edge && (edge.from.startsWith('ghost:') ? edge.from.slice(6) : edge.from);
+      if (edge && from && from !== selected) go(o.key, from, edge.from.startsWith('ghost:') ? partOf(o, from)?.parentId ?? null : scope);
+      return;
+    }
+    if (!d.moved && selected) go(o.key);
   };
   vp.addEventListener('pointerup', end); vp.addEventListener('pointercancel', end);
   vp.addEventListener('wheel', e => {
@@ -2876,15 +2897,7 @@ function bindEdgeHints() {
   const world = $('world'), tip = $('edge-tip'), space = $('space');
   const nameOf = (boxId: string) => { const o = opened; if (!o) return ''; return partOf(o, boxId.startsWith('ghost:') ? boxId.slice(6) : boxId)?.name ?? ''; };
   const place = (e: PointerEvent) => { const r = space.getBoundingClientRect(), y = e.clientY - r.top; tip.style.left = `${Math.max(8, Math.min(e.clientX - r.left + 14, r.width - 300))}px`; tip.style.top = `${y + 14 + tip.offsetHeight > r.height - 8 ? Math.max(8, y - tip.offsetHeight - 10) : y + 14}px`; };
-  // A click on a line selects the part it leaves: the line's meaning then reads in the pane, with its other end lit.
-  world.addEventListener('click', e => {
-    const t = e.target as Element; if (!t.classList.contains('edge-hit')) return;
-    const o = opened, g = t.closest<SVGGElement>('.edge'), edge = g && edgeOf(g.dataset.key); if (!o || !edge) return;
-    e.stopPropagation();
-    const from = edge.from.startsWith('ghost:') ? edge.from.slice(6) : edge.from;
-    if (from === selected) return;
-    go(o.key, from, edge.from.startsWith('ghost:') ? partOf(o, from)?.parentId ?? null : scope);
-  });
+  const boxInside = (box: string, holder: string) => { for (let c = lay.boxes.get(box)?.container, g = 0; c && g < 64; c = lay.boxes.get(c)?.container, g++) if (c === holder) return true; return false; };
   /** Pointing at (or focusing) a part: its lines light, the parts at their other ends with them, and the rest of the map
    * steps back (.peek), so a part's neighbourhood reads without a click. Nothing moves and nothing is selected. */
   const nearPart = (id: string) => {
@@ -2893,7 +2906,7 @@ function bindEdgeHints() {
     world.querySelectorAll<SVGGElement>('.edge').forEach(x => {
       const near = x.dataset.from === id || x.dataset.to === id || (x.classList.contains('sum') && !!edgeOf(x.dataset.key)?.ids.some(r => mine.has(r)));
       x.classList.toggle('near', near);
-      if (near && getComputedStyle(x).display !== 'none') ends.add(x.dataset.from === id ? x.dataset.to! : x.dataset.from!);
+      if (near && getComputedStyle(x).display !== 'none') ends.add(x.dataset.from === id || boxInside(id, x.dataset.from!) ? x.dataset.to! : x.dataset.from!);
     });
     world.querySelectorAll('.near-end, .near-self').forEach(el => el.classList.remove('near-end', 'near-self'));
     for (const far of ends) world.querySelector(`[data-box="${CSS.escape(far)}"]`)?.classList.add('near-end');

@@ -8,6 +8,12 @@ test('ML-1 joined pipeline ids read as families and names; an unknown id stays a
   assert.equal(modelLabel('deepseek-chat'), 'DeepSeek Chat');
   assert.equal(modelLabel('gpt-6-astra'), 'GPT Astra');
   assert.equal(modelLabel('my-local-model'), 'my-local-model');
+  assert.equal(modelLabel('my_local_model'), 'my_local_model');
+  assert.equal(modelLabel('gpt-5'), 'GPT 5');
+  assert.equal(modelLabel('gpt-4.1'), 'GPT 4.1');
+  assert.equal(modelLabel('o3-mini'), 'O3 Mini');
+  assert.equal(modelLabel('claudette'), 'claudette');
+  assert.equal(modelLabel('deepseek-flash_my-local'), 'deepseek-flash_my-local');
   assert.equal(modelLabel(''), 'AI');
   assert.equal(modelLabel(undefined), 'AI');
 });

@@ -29,9 +29,11 @@ export function labelSpots(pts: Point[], w: number, h: number, prefer: 'long' | 
   const out: Rect[] = [];
   for (const s of ok) {
     // Along the run: its middle, then towards the preferred end, kept clear of the corners.
-    const span = s.horiz ? w : h, lo = (s.idx > 1 ? CORNER : 0) + 2 + span / 2, hi = s.len - (s.idx < n ? CORNER : 0) - 2 - span / 2;
-    const ts = prefer === 'end' ? [0.5, 0.65, 0.8, 0.35, 0.2] : prefer === 'start' ? [0.5, 0.35, 0.2, 0.65, 0.8] : [0.5, 0.35, 0.65, 0.2, 0.8];
     const forward = s.horiz ? s.b.x > s.a.x : s.b.y > s.a.y;
+    // Clearance at the run's low end and high end (in x or y): the corner at a or at b, whichever lies there.
+    const cA = s.idx > 1 ? CORNER : 0, cB = s.idx < n ? CORNER : 0, cLo = forward ? cA : cB, cHi = forward ? cB : cA;
+    const span = s.horiz ? w : h, lo = cLo + 2 + span / 2, hi = s.len - cHi - 2 - span / 2;
+    const ts = prefer === 'end' ? [0.5, 0.65, 0.8, 0.35, 0.2] : prefer === 'start' ? [0.5, 0.35, 0.2, 0.65, 0.8] : [0.5, 0.35, 0.65, 0.2, 0.8];
     for (const t of ts) {
       // Distance from a to the chip's centre, along the run, in the run's own direction.
       const d = Math.round(lo + (hi - lo) * (forward ? t : 1 - t));
