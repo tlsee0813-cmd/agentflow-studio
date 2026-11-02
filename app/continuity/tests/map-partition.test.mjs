@@ -1,7 +1,7 @@
 // Model-free: ownership and advisory receipts never create map facts or consume original read coverage.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { planMapPartitions, validateExtraction, EXTRACTION_KINDS, EXTRACTION_CANDIDATES_MAX } from '../server/map-partition.mjs';
+import { planMapPartitions, validateExtraction, extractionStageIssues, EXTRACTION_KINDS, EXTRACTION_CANDIDATES_MAX } from '../server/map-partition.mjs';
 import { encodeSpans, indexSpans, resolveEvidenceRange } from '../dist/public/shared/evidence-span.js';
 
 const record = (id, text, extra = {}) => ({ id, kind: 'pasted', basis: '사용자 기재 source/main', note: '발췌 표시', ...encodeSpans(id, text), ...extra });
@@ -108,4 +108,28 @@ test('24 advisory candidates retain every condition/correction unchanged; 25 ref
   invalid({ ...input, candidates: candidates.map((c, i) => i === 23 ? { ...c, at: ['N99.99'] } : c) }, p);
   invalid({ ...input, candidates: candidates.map((c, i) => i === 23 ? { ...c, text: '가'.repeat(241) } : c) }, p);
   assert.deepEqual(input, before);
+});
+
+test('an extraction refusal keeps its code and says one coarse reason; correction feedback copies no alias or text', () => {
+  const input = ask(record('N01', '요구: 파일을 읽는다.\n조건: 개발 판본만.\n철회: 앞 설명을 취소한다.\n모름: 배포 여부.'));
+  const [partition] = planMapPartitions(input, { targetChars: 4000 }), core = partition.records[0].core;
+  const reason = value => { try { validateExtraction(value, partition); } catch (error) { assert.equal(error.message, 'INVALID_EXTRACTION'); return error.reason; } return null; };
+  const good = { covered: [...core], candidates: [{ kind: 'condition', text: '개발 판본만', at: [core[1]] }] };
+  assert.equal(reason(good), null);
+  assert.equal(reason([]), 'shape'); assert.equal(reason({ covered: core }), 'shape');
+  assert.equal(reason({ ...good, covered: core.slice(1) }), 'coverage'); assert.equal(reason({ ...good, covered: [...core, 'N09.01'] }), 'coverage');
+  // A count overflow and an alias outside the partition are their own fixed reasons (the stage diagnostic names them so).
+  assert.equal(reason({ ...good, candidates: Array(EXTRACTION_CANDIDATES_MAX + 1).fill(good.candidates[0]) }), 'count');
+  assert.equal(reason({ ...good, candidates: [{ ...good.candidates[0], at: ['N09.01'] }] }), 'anchor');
+  assert.equal(reason({ ...good, candidates: [{ ...good.candidates[0], kind: 'checked' }] }), 'candidate');
+  const bad = { covered: [core[0], core[0], 'N09.01'], candidates: [{ kind: 'checked', text: '가'.repeat(241), at: ['N09.01'] }, { kind: 'part' }] };
+  const issues = extractionStageIssues(bad, partition);
+  assert.deepEqual(issues, [
+    { path: 'covered', rule: 'coverage', expected: core.length, actual: 1 }, { path: 'covered', rule: 'reference', expected: null, actual: null },
+    { path: 'covered', rule: 'duplicate', expected: null, actual: null }, { path: 'candidates[0].kind', rule: 'kind', expected: null, actual: null },
+    { path: 'candidates[0].text', rule: 'length', expected: 240, actual: 241 }, { path: 'candidates[0].at', rule: 'reference', expected: null, actual: null },
+    { path: 'candidates[1]', rule: 'keys', expected: null, actual: null }]);
+  assert.ok(!JSON.stringify(issues).includes('N0')); assert.ok(!JSON.stringify(issues).includes('가가'));
+  assert.deepEqual(extractionStageIssues(good, partition), []);
+  assert.deepEqual(extractionStageIssues('x', partition), [{ path: 'reply', rule: 'shape', expected: null, actual: null }]);
 });

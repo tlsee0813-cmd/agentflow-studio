@@ -203,10 +203,10 @@ async function clientRequest(p, status, respond) {
     sent.push({ url, init, body: init.body ? JSON.parse(init.body) : null });
     return respond ? respond(sent.at(-1)) : new Response(JSON.stringify({ error: { code: 'PROMPT_CHANGED' } }), { status: 409 });
   };
-  let commits = 0;
+  let commits = 0; const committed = [];
   const run = createMapRun({ current: () => current, status: () => status, jobs: () => jobs, accessCode: () => '',
-    commit: async () => { commits++; return null; }, done: () => {}, changed: () => {}, pollMs: 2 });
-  await run.run(); return { sent, run, current, commits: () => commits };
+    commit: async next => { commits++; committed.push(next); return null; }, done: () => {}, changed: () => {}, pollMs: 2 });
+  await run.run(); return { sent, run, current, commits: () => commits, committed };
 }
 
 test('client reservations bind first/later models independently; old status stays old and unready capabilities send nothing', async () => {
@@ -275,12 +275,13 @@ async function hostFixture(t) {
   };
 }
 
-test('Node host defaults rendering to Terra and reports the fixed-host twelve-call DeepSeek bound', async t => {
+// first-map-divided.6: with OpenAI rendering each extraction may be corrected once, so the bound is 2 x 12 = 24 DeepSeek calls.
+test('Node host defaults rendering to Terra and reports the fixed-host 24-call DeepSeek bound', async t => {
   const host = await hostFixture(t), pipeline = await host.open(), info = pipeline.describe();
   assert.equal(info.renderModel, 'gpt-6.1-terra');
   assert.equal(info.renderProvider, 'openai');
   assert.equal(info.maxPartitions, 12);
-  assert.equal(info.deepseekMaxCalls, 12);
+  assert.equal(info.deepseekMaxCalls, 24);
   assert.equal(pipeline.model, 'deepseek-flash_gpt-6.1-sol_gpt-6.1-terra');
   assert.equal(pipeline.ready(), true);
   assert.equal(info.durable, true);
@@ -289,7 +290,7 @@ test('Node host defaults rendering to Terra and reports the fixed-host twelve-ca
 test('explicit supported host render models select their provider and actual DeepSeek call allowance', async t => {
   const host = await hostFixture(t);
   for (const [renderModel, provider, maxCalls] of [
-    ['deepseek-flash', 'deepseek', 48], ['gpt-6.1-sol', 'openai', 12], ['gpt-6-astra', 'openai', 12], ['gpt-6.1-terra', 'openai', 12],
+    ['deepseek-flash', 'deepseek', 48], ['gpt-6.1-sol', 'openai', 24], ['gpt-6-astra', 'openai', 24], ['gpt-6.1-terra', 'openai', 24],
   ]) {
     const pipeline = await host.open({ STUDIO_MAP_RENDER_MODEL: renderModel });
     const info = pipeline.describe();
@@ -326,7 +327,7 @@ test('actual host HTTP metadata and the client parser preserve the selected Deep
   const jobsDir = mkdtempSync(join(tmpdir(), 'af-render-status-'));
   const jobs = await openMapJobs({ dir: jobsDir });
   t.after(async () => { await jobs.close(); const { rm } = await import('node:fs/promises'); await rm(jobsDir, { recursive: true, force: true }); });
-  for (const [renderModel, bound] of [['gpt-6.1-terra', 12], ['deepseek-flash', 48]]) {
+  for (const [renderModel, bound] of [['gpt-6.1-terra', 24], ['deepseek-flash', 48]]) {
     const pipeline = await host.open({ STUDIO_MAP_RENDER_MODEL: renderModel });
     const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: inert }, jobs, firstMapPipeline: pipeline,
       fetchImpl: async () => assert.fail('reading status must not call a provider') });
@@ -357,4 +358,51 @@ test('a missing or invalid optional DeepSeek bound keeps a safe legacy allowance
       assert.equal(parsed.map.later.deepseekMaxCalls, 48);
     }
   } finally { await s.jobs.close(); }
+});
+
+// ---- first-map-divided.6: set-aside reasons travel beside the applicable wire, from the pipeline to the saved reading ----
+function dividedResult(ask) {
+  const at = ask.records[0].spans.map(span => span.s);
+  const raw = { ...wire(), summary: '저장 요구와 미구현을 읽었다.', parts: [{ ref: 'new:save', name: '저장', parent: null, role: '결과를 파일로 저장한다.', roleAbout: null, roleReplaces: null,
+    basis: [at[0]], claims: [{ key: 's1', kind: 'want', text: '결과를 파일로 저장하기를 원함', at: at[0], about: null, replaces: null },
+      { key: 's2', kind: 'describes', text: '없는 구간의 주장', at: 'N01.99', about: null, replaces: null }] }] };
+  const exclusions = structuredClone(M.readingExclusions(M.validateMapReply(structuredClone(raw), ask, { setAside: true })));
+  const clean = structuredClone(raw); clean.parts[0].claims.splice(1, 1);
+  return { wire: clean, exclusions };
+}
+
+test('a divided first-map job keeps its set-aside reasons beside the wire in the ready result', async () => {
+  const s = await service(); s.divided.read = async ask => { s.divided.calls.push(ask); return dividedResult(ask); };
+  try {
+    const job = await submission(project(false), firstPrompt, dividedModel, M.MAP6_SCHEMA);
+    assert.equal((await invoke(s.handle, 'jobs', job.body, job.cap)).status, 202);
+    const done = await ended(s.handle, job);
+    assert.equal(done.state, 'ready'); assert.equal(s.divided.calls.length, 1);
+    assert.deepEqual(done.result.exclusions.map(x => [x.path, x.rule]), [['parts[0].claims[1].at', 'reference']]);
+    assert.equal(M.validateMapReply(done.result.wire, J.decodeMapInput(job.body.input).ask).parts[0].claims.length, 1);
+  } finally { await s.jobs.close(); }
+});
+
+test('the browser applies a divided result under plain map.6, saves its checked reasons, and discards altered ones', async () => {
+  const status = { ai: 'deepseek', model: baseModel, access: 'open', jobs: { durable: true, problem: null },
+    map: { model: baseModel, prompt: await mapPromptId(), first: { model: dividedModel, prompt: firstPrompt, ready: true, method: 'divided', monthlyUsd: 20, runUsd: 1 } } };
+  for (const tamper of [false, true]) {
+    const out = await clientRequest(project(false), status, async ({ body, url }) => {
+      if (url.endsWith('/ack')) return json({ version: 'map-job.1', id: 'unused', state: 'ready' });
+      const ask = J.decodeMapInput(body.input).ask, result = dividedResult(ask);
+      if (tamper) result.exclusions[0].explanation = '모델이 쓴 다른 설명';
+      return json({ version: 'map-job.1', id: body.id, binding: body.binding, bindingHash: await J.jobHash(body.binding), state: 'ready', input: body.input, acked: null,
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), error: null, remote: null,
+        result: { model: dividedModel, prompt: body.binding.prompt, askHash: body.binding.askHash, ...result,
+          evidence: { index: SPAN_INDEX, ask: textDigest(JSON.stringify(ask)) }, reading: { id: `R_${crypto.randomUUID()}`, at: new Date().toISOString() } } });
+    });
+    try {
+      if (tamper) { assert.equal(out.commits(), 0); assert.ok(out.sent.some(x => x.url.endsWith('/ack') && x.body.outcome === 'discarded')); continue; }
+      assert.equal(out.commits(), 1);
+      const reading = out.committed[0].readings.at(-1);
+      assert.equal(reading.parts[0].claims.length, 1);
+      assert.deepEqual(reading.exclusions.map(x => [x.path, x.rule, x.explanation]), [['parts[0].claims[1].at', 'reference', '이번에 보낸 부분이나 원문 구간을 찾을 수 없어 제외했어요.']]);
+      assert.match(out.run.detail().notice ?? '', /제외 사유 1건/);
+    } finally { out.run.dispose(); }
+  }
 });

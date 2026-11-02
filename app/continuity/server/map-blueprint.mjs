@@ -1,7 +1,7 @@
 // A compact advisory blueprint separates global identity choices from bounded map-wire rendering.
 // Neither the blueprint nor extraction notes are source evidence. The final map still cites the original ask.
 import { ApiError } from '../../server/errors.mjs';
-import { askRecords, validateMapAsk, validateMapReply } from '../dist/public/shared/map-reading.js';
+import { askRecords, validateMapAsk, validateMapReply, setAside, readingExclusions, attachExclusions, DIVIDED_EXCLUSIONS_MAX } from '../dist/public/shared/map-reading.js';
 import { resolveRange } from '../dist/public/shared/evidence-span.js';
 
 export const BLUEPRINT_PARTS_MAX = 24;
@@ -26,7 +26,8 @@ export function safeValidation(error) {
   try {
     const source = error?.validation ?? (error?.name === 'MapReplyError' ? error : null);
     if (!source) return null;
-    const path = source.path, rule = source.rule;
+    // A settled-and-open refusal names both places ('candidates[0].statement.key = parts[0].claims[0].key'): the first is kept.
+    const rule = source.rule, path = typeof source.path === 'string' && rule === 'settled-and-open' ? source.path.split(' = ')[0] : source.path;
     if (typeof path !== 'string' || path.length > 240 || !SAFE_VALIDATION_PATH.test(path) || !SAFE_VALIDATION_RULES.has(rule)) return null;
     if (rule !== 'contract') return { path, rule };
     const category = error?.validation ? source.category : source.target;
@@ -106,6 +107,87 @@ export function validateMapBlueprint(value, ask) {
     }
     return structuredClone(value);
   } catch (error) { invalid(error); }
+}
+
+/** Safe structural feedback for the one bounded plan correction: fixed paths (parts[i].at, global[i].text, ...), fixed rules
+ * (shape, keys, text, length, count, new-count, reference, kind, duplicate, name-mismatch, parent-mismatch, parent-cycle) and
+ * numeric bounds only. No alias, name, focus or text of the rejected plan or of the records is copied. Best effort: it never
+ * throws and never changes validation. */
+export function blueprintStageIssues(value, ask) {
+  const issues = [];
+  const add = (path, rule, expected = null, actual = null) => {
+    if (issues.length < 12 && !issues.some(issue => issue.path === path && issue.rule === rule)) issues.push({ path, rule, expected, actual });
+  };
+  try {
+    const checked = validateMapAsk(ask), later = checked.schemaVersion === 'studio.map.7';
+    if (!value || typeof value !== 'object' || Array.isArray(value)) { add('reply', 'shape'); return issues; }
+    if (!exact(value, later ? ['parts', 'global', 'corrections'] : ['parts', 'global'])) add('reply', 'keys');
+    const anchors = originalAnchors(checked), existing = new Map(checked.parts.map(part => [part.id, part]));
+    const at = (refs, path) => {
+      if (!Array.isArray(refs) || !refs.length) add(path, 'shape');
+      else if (refs.length > BLUEPRINT_ANCHORS_MAX) add(path, 'count', BLUEPRINT_ANCHORS_MAX, refs.length);
+      else if (new Set(refs).size !== refs.length) add(path, 'duplicate');
+      else if (!anchors(refs)) add(path, 'reference');
+    };
+    const text = (v, max, path) => {
+      if (typeof v !== 'string' || !v.trim() || CONTROL.test(v)) add(path, 'text');
+      else if (v.length > max) add(path, 'length', max, v.length);
+    };
+    const parts = Array.isArray(value.parts) ? value.parts : null, refs = new Set();
+    if (!parts) add('parts', 'shape');
+    else {
+      if (parts.length > BLUEPRINT_PARTS_MAX) add('parts', 'count', BLUEPRINT_PARTS_MAX, parts.length);
+      const fresh = parts.filter(part => typeof part?.ref === 'string' && NEW.test(part.ref) && !existing.has(part.ref)).length;
+      if (fresh > BLUEPRINT_NEW_PARTS_MAX) add('parts', 'new-count', BLUEPRINT_NEW_PARTS_MAX, fresh);
+      for (const part of parts) if (typeof part?.ref === 'string') refs.add(part.ref);
+      const seen = new Set(), parents = new Map(checked.parts.map(part => [part.id, part.parentId]));
+      parts.slice(0, BLUEPRINT_PARTS_MAX).forEach((part, i) => {
+        const path = `parts[${i}]`;
+        if (!exact(part, ['ref', 'name', 'parent', 'at', 'focus'])) { add(path, 'keys'); return; }
+        if (typeof part.ref !== 'string' || seen.has(part.ref) || !(existing.has(part.ref) || NEW.test(part.ref))) add(`${path}.ref`, seen.has(part.ref) ? 'duplicate' : 'reference');
+        seen.add(part.ref);
+        text(part.name, 60, `${path}.name`); text(part.focus, 240, `${path}.focus`); at(part.at, `${path}.at`);
+        const own = existing.get(part.ref);
+        if (own && part.name !== own.name) add(`${path}.name`, 'name-mismatch');
+        if (own && part.parent !== own.parentId) add(`${path}.parent`, 'parent-mismatch');
+        else if (part.parent !== null && (typeof part.parent !== 'string' || part.parent === part.ref || (!existing.has(part.parent) && !refs.has(part.parent)))) add(`${path}.parent`, 'reference');
+        if (typeof part.ref === 'string') parents.set(part.ref, typeof part.parent === 'string' ? part.parent : null);
+      });
+      parts.slice(0, BLUEPRINT_PARTS_MAX).forEach((part, i) => {
+        const trail = new Set();
+        for (let ref = part?.ref; typeof ref === 'string'; ref = parents.get(ref) ?? null) { if (trail.has(ref)) { add(`parts[${i}].parent`, 'parent-cycle'); break; } trail.add(ref); }
+      });
+    }
+    if (!Array.isArray(value.global)) add('global', 'shape');
+    else {
+      if (value.global.length > BLUEPRINT_GLOBAL_MAX) add('global', 'count', BLUEPRINT_GLOBAL_MAX, value.global.length);
+      value.global.slice(0, BLUEPRINT_GLOBAL_MAX).forEach((item, i) => {
+        const path = `global[${i}]`;
+        if (!exact(item, ['kind', 'text', 'at'])) { add(path, 'keys'); return; }
+        if (!BLUEPRINT_GLOBAL_KINDS.includes(item.kind)) add(`${path}.kind`, 'kind');
+        text(item.text, 240, `${path}.text`); at(item.at, `${path}.at`);
+      });
+    }
+    if (later) {
+      if (!Array.isArray(value.corrections)) add('corrections', 'shape');
+      else {
+        if (value.corrections.length > BLUEPRINT_CORRECTIONS_MAX) add('corrections', 'count', BLUEPRINT_CORRECTIONS_MAX, value.corrections.length);
+        const seen = new Set(), counts = new Map();
+        value.corrections.slice(0, BLUEPRINT_CORRECTIONS_MAX).forEach((item, i) => {
+          const path = `corrections[${i}]`;
+          if (!exact(item, ['part', 'claim', 'at'])) { add(path, 'keys'); return; }
+          const own = typeof item.part === 'string' ? existing.get(item.part) : null;
+          if (!own || !refs.has(item.part)) add(`${path}.part`, 'reference');
+          else if (typeof item.claim !== 'string' || !own.current.some(claim => claim.key === item.claim)) add(`${path}.claim`, 'reference');
+          const id = `${item.part}:${item.claim}`, count = (counts.get(item.part) ?? 0) + 1;
+          if (seen.has(id)) add(path, 'duplicate'); if (count > BLUEPRINT_CORRECTIONS_PER_PART_MAX) add(path, 'count', BLUEPRINT_CORRECTIONS_PER_PART_MAX, count);
+          seen.add(id); counts.set(item.part, count);
+          at(item.at, `${path}.at`);
+        });
+      }
+    }
+  } catch { /* A diagnostic read failure cannot replace the original stage outcome. */ }
+  return issues;
 }
 
 /** Deterministic groups of at most three planned parts; each renderer receives exactly one group. */
@@ -192,24 +274,74 @@ export function validateRenderedFragment(value, group, ask, blueprint) {
   }
   const projected = structuredClone(value);
   for (const part of projected.parts) if (NEW.test(part.ref)) part.parent = null;
-  try { validateMapReply(projected, ask); } catch (error) { invalid(error); }
+  // A first map (map.6) sets an isolated bad item aside (DIVIDED_SET_ASIDE); a part, its key range and its assignment stay whole.
+  // The raw fragment is cached and returned untouched: what is left out is decided again, once, on the combined wire.
+  try { validateMapReply(projected, ask, DIVIDED_SET_ASIDE); } catch (error) { invalid(error); }
   return structuredClone(value);
+}
+
+/** validateMapReply's divided option: honoured for studio.map.6 only; map.7 keeps its own soft policy and returns the raw wire. */
+export const DIVIDED_SET_ASIDE = Object.freeze({ setAside: true });
+const LIST_LIMITS = Object.freeze({ relations: 12, candidates: 6, gaps: 2, matches: 24, material: 6 });
+const PART_LIST_LIMIT = 4;
+/** The wire with exactly the set-aside items left out: an item index of a top-level list or of a part's basis/claims, and what ran
+ * past a count bound (the validator reads the first ones). Nothing else changes: no quote is clipped, no key or ref is renamed,
+ * nothing is reordered, no field is rewritten. An exclusion this cannot place refuses the whole wire. */
+function withoutSetAside(raw, exclusions) {
+  const drop = new Map(), limit = new Map();
+  const mark = (list, index) => { if (!drop.has(list)) drop.set(list, new Set()); drop.get(list).add(index); };
+  for (const x of exclusions) {
+    const count = x.rule === 'contract' && x.category === 'count';
+    let m;
+    if ((m = /^(relations|candidates|gaps|matches|material)\[(\d{1,4})\](?:\.|$)/.exec(x.path))) mark(m[1], Number(m[2]));
+    else if (count && (m = /^(relations|candidates|gaps|matches|material)$/.exec(x.path))) limit.set(m[1], LIST_LIMITS[m[1]]);
+    else if ((m = /^parts\[(\d{1,3})\]\.(basis|claims)\[(\d{1,4})\](?:\.|$)/.exec(x.path))) mark(`parts.${m[1]}.${m[2]}`, Number(m[3]));
+    else if (count && (m = /^parts\[(\d{1,3})\]\.(basis|claims)$/.exec(x.path))) limit.set(`parts.${m[1]}.${m[2]}`, PART_LIST_LIMIT);
+    else invalid({ validation: { path: 'reply', rule: 'contract' } });
+  }
+  const keep = (list, items) => items.filter((_, i) => !drop.get(list)?.has(i) && i < (limit.get(list) ?? Infinity));
+  const clean = structuredClone(raw);
+  for (const key of Object.keys(LIST_LIMITS)) if (Array.isArray(clean[key])) clean[key] = keep(key, clean[key]);
+  clean.parts.forEach((part, i) => { for (const key of ['basis', 'claims']) if (Array.isArray(part?.[key])) part[key] = keep(`parts.${i}.${key}`, part[key]); });
+  return clean;
 }
 
 /** Mechanically combine original renderer wires, then validate once against the original ask. No semantic merging,
  * re-keying, deduplication, truncation, dropped evidence, or repairs occur here. The existing validator's own map.7
- * item-exclusion policy is unchanged: callers receive the raw wire and existing readers retain their diagnostics. */
-export function combineRenderedMaps(fragments, global, ask, blueprint) {
+ * item-exclusion policy is unchanged: callers receive the raw wire and existing readers retain their diagnostics.
+ * A first map (map.6) is read with the divided set-aside option instead: the result is the combined wire with exactly the
+ * set-aside items left out (see withoutSetAside), proven to read whole under plain map.6 into the very same reply, plus the
+ * durable reasons (fixed path/rule/category/position, never the rejected text) for the browser's saved reading. */
+export function combineRenderedReading(fragments, global, ask, blueprint) {
   const planned = validateMapBlueprint(blueprint, ask), groups = splitBlueprintParts(planned);
   if (!Array.isArray(fragments) || fragments.length !== groups.length || !wireShape(global) || global.parts.length) invalid();
   for (const [index, fragment] of fragments.entries()) validateRenderedFragment(fragment, groups[index], ask, planned);
   const combined = structuredClone({ summary: global.summary, parts: fragments.flatMap(fragment => fragment.parts),
     relations: global.relations, candidates: global.candidates, gaps: global.gaps, matches: global.matches, material: global.material });
+  if (ask.schemaVersion !== 'studio.map.6') {
+    try {
+      const normalized = validateMapReply(combined, ask);
+      if (absentCorrections(normalized, planned).length) invalid({ validation: { path: 'parts', rule: 'contract' } });
+    } catch (error) { invalid(error); }
+    return { wire: combined, exclusions: [] };
+  }
+  let soft;
+  try { soft = validateMapReply(combined, ask, DIVIDED_SET_ASIDE); } catch (error) { invalid(error); }
+  const exclusions = structuredClone(readingExclusions(soft));
+  if (exclusions.length > DIVIDED_EXCLUSIONS_MAX) invalid({ validation: { path: 'reply', rule: 'contract' } });
+  const wire = withoutSetAside(combined, exclusions);
   try {
-    const normalized = validateMapReply(combined, ask);
-    if (absentCorrections(normalized, planned).length) invalid({ validation: { path: 'parts', rule: 'contract' } });
+    // The browser reads this wire with plain map.6 rules: it must hold nothing set aside and read into the very same reply.
+    const strict = validateMapReply(wire, ask);
+    if (setAside(strict).length || JSON.stringify(strict) !== JSON.stringify(soft)) invalid({ validation: { path: 'reply', rule: 'contract' } });
+    attachExclusions(strict, exclusions, ask);
   } catch (error) { invalid(error); }
-  return combined;
+  return { wire, exclusions };
+}
+
+/** The applicable wire only (see combineRenderedReading). */
+export function combineRenderedMaps(fragments, global, ask, blueprint) {
+  return combineRenderedReading(fragments, global, ask, blueprint).wire;
 }
 
 /** Safe structural feedback for one bounded correction. Only fixed paths/rules and numeric counts/UTF-16 lengths

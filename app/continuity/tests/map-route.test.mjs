@@ -82,7 +82,7 @@ test('the pipeline scope is the shared rule: a first map.6 and every map.7, neve
   assert.deepEqual([pipeline.eligible(first), pipeline.eligible(later), pipeline.eligible(legacy)], [true, true, false]);
   await assert.rejects(pipeline.call(legacy), error => error.code === 'MAP_PIPELINE_SCOPE');
   const info = pipeline.describe();
-  assert.deepEqual([info.maxPartitions, info.targetChars, info.deepseekMaxCalls, info.parallel], [R.DIVIDED_PARTITIONS, R.DIVIDED_PARTITION_CHARS, 12, R.DIVIDED_PARALLEL]);
+  assert.deepEqual([info.maxPartitions, info.targetChars, info.deepseekMaxCalls, info.parallel], [R.DIVIDED_PARTITIONS, R.DIVIDED_PARTITION_CHARS, 24, R.DIVIDED_PARALLEL]);
 });
 
 const json = value => new Response(JSON.stringify(value), { headers: { 'content-type': 'application/json' } });
@@ -100,18 +100,20 @@ test('the PC host advertises its real partition limits; the browser binds jobs t
   const pipeline = await openFirstMapPipeline({ dir, env: { DEEPSEEK_API_KEY: inert, OPENAI_API_KEY: inert }, fetchImpl: async () => assert.fail('no provider call') });
   t.after(async () => { await pipeline.close(); await jobs.close(); await rm(dir, { recursive: true, force: true }); await rm(jobsDir, { recursive: true, force: true }); });
   const ran = [];
-  pipeline.call = async a => { ran.push(a.schemaVersion); return { summary: '', parts: [], relations: [], candidates: [], gaps: [], matches: [], material: [] }; };
+  // The server reads through read() (the wire with its set-aside reasons); call() stays for callers that take the wire alone.
+  pipeline.read = async a => { ran.push(a.schemaVersion); return { wire: { summary: '', parts: [], relations: [], candidates: [], gaps: [], matches: [], material: [] }, exclusions: [] }; };
+  pipeline.call = async (...args) => (await pipeline.read(...args)).wire;
   const providerCalls = [];
   const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: inert, STUDIO_REQUESTS_PER_MINUTE: '120' }, jobs, firstMapPipeline: pipeline,
     fetchImpl: async (_url, init) => { providerCalls.push(JSON.parse(init.body).model); return json({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify({ summary: '', parts: [], relations: [], candidates: [], gaps: [], matches: [], material: [] }) } }] }); } });
   const status = await invoke(handle, 'status');
-  for (const family of ['first', 'later']) assert.deepEqual([status.map[family].partitions, status.map[family].partitionChars, status.map[family].deepseekMaxCalls], [12, 3500, 12]);
+  for (const family of ['first', 'later']) assert.deepEqual([status.map[family].partitions, status.map[family].partitionChars, status.map[family].deepseekMaxCalls], [12, 3500, 24]); // 12 extractions, each with one correction under OpenAI rendering
   globalThis.fetch = async () => json(status);
   const parsed = await aiStatus();
   assert.deepEqual(parsed.map.first, status.map.first); assert.deepEqual(parsed.map.later, status.map.later);
   const lines = R.mapBatchLines(R.mapRoute(ask(fresh(), M.MAP7_SCHEMA), parsed.map));
   assert.match(lines[0], /최대 4개를 최대 12구간\(구간당 3,500자 안팎\)으로 나눠 동시에 2개씩/);
-  assert.match(lines[1], /정리당 \$1, 월 \$20\. .*최대 12회/);
+  assert.match(lines[1], /정리당 \$1, 월 \$20\. .*최대 24회/);
   assert.doesNotMatch(lines[0], /기존 지도/, 'a first map has no existing map to check');
   assert.match(R.mapBatchLines(R.mapRoute(ask(handPart(), M.MAP7_SCHEMA), parsed.map))[0], /기존 지도와 직접 고친 내용/);
   for (const [p, anchored, way] of [[fresh(), M.MAP7_SCHEMA, 'divided-first'], [handPart(), M.MAP7_SCHEMA, 'divided-later'], [handPart(), M.MAP6_SCHEMA, 'single']]) {

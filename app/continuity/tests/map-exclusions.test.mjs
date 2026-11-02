@@ -167,3 +167,62 @@ test('reload history keeps older exclusions after another reading and opens the 
     assert.equal(flatten(missingHistory).filter(el => el.tag === 'button').length, 0);
   } finally { if (oldDocument === undefined) delete globalThis.document; else globalThis.document = oldDocument; }
 });
+
+// ---- first-map-divided.6: the setAside option is opt-in, map.6 only; plain map.6 (browser, single-call Worker) is unchanged ----
+function firstMap() {
+  const p = D.pasteRecord(D.createProject(), '실제 기능은 파일을 저장합니다.\n예제 조건: sample/demo\n다른 기능은 파일을 읽습니다.', null).project;
+  const inp = M.buildMapAsk(p, studioView(p), [], undefined, M.MAP6_SCHEMA), at = inp.ask.records[0].spans.map(s => s.s);
+  assert.ok(M.firstAsk(inp.ask));
+  const claim = (key, a, extra = {}) => ({ kind: 'describes', text: '파일을 저장합니다.', at: a, about: null, replaces: null, key, ...extra });
+  const reply = { summary: '파일 기능', relations: [], candidates: [], gaps: [], matches: [], material: [], parts: [{ ref: 'new:save', name: '저장', parent: null,
+    role: '파일 저장', roleAbout: null, roleReplaces: null, basis: [at[0]], claims: [claim('s1', at[0]), claim('s2', 'N01.99')] }] };
+  return { p, inp, ask: inp.ask, at, claim, reply };
+}
+
+test('divided set-aside: plain map.6 still refuses one bad claim whole; the option sets only that claim aside', () => {
+  const f = firstMap();
+  assert.throws(() => M.validateMapReply(structuredClone(f.reply), f.ask), e => e instanceof M.MapReplyError && e.path === 'parts[0].claims[1].at' && e.rule === 'reference');
+  const got = M.validateMapReply(structuredClone(f.reply), f.ask, { setAside: true });
+  assert.deepEqual(got.parts[0].claims.map(c => c.key), ['s1']);
+  assert.deepEqual(errors(got), [['parts[0].claims[1].at', 'reference']]);
+  // A count overflow is refused whole by plain map.6 (a plain INVALID_RESPONSE, as before) and read in part with the option.
+  const many = structuredClone(f.reply); many.parts[0].claims = ['s1', 's2', 's3', 's4', 's5'].map(k => f.claim(k, f.at[0]));
+  assert.throws(() => M.validateMapReply(structuredClone(many), f.ask), e => !(e instanceof M.MapReplyError) && e.message === 'INVALID_RESPONSE');
+  assert.deepEqual(M.validateMapReply(many, f.ask, { setAside: true }).parts[0].claims.length, 4);
+  // map.7 ignores the option (it has its own soft policy); an earlier schema ignores it too.
+  const later = fixture(), seven = M.validateMapReply(structuredClone(later.reply), later.inp.ask), opted = M.validateMapReply(structuredClone(later.reply), later.inp.ask, { setAside: true });
+  assert.deepEqual(opted, seven); assert.deepEqual(M.readingExclusions(opted), M.readingExclusions(seven));
+});
+
+test('divided set-aside still refuses whole: an empty part, a part without basis, contradictions, secret-like text, nothing left', () => {
+  const f = firstMap(), soft = v => M.validateMapReply(v, f.ask, { setAside: true });
+  const cases = [
+    r => { r.parts[0].claims = [f.claim('s1', 'N01.99')]; },
+    r => { r.parts[0].basis = ['N01.99']; },
+    r => { r.parts[0].claims[1] = f.claim('s1', f.at[2]); },
+    r => { r.candidates = [{ target: 'holds', text: '미정', parts: ['new:save'], at: null, statement: { key: 's1', kind: 'idea', text: '미정 진술', at: f.at[2], about: null } }]; },
+    r => { r.parts[0].role = 'sk-' + 'a'.repeat(40); },
+    r => { r.parts[0].ref = 'P99'; },
+    r => { delete r.summary; },
+  ];
+  for (const mutate of cases) { const r = structuredClone(f.reply); mutate(r); assert.throws(() => soft(r)); }
+});
+
+test('attachExclusions takes only checked fixed reasons for a first map.6 and keeps them through applyReading and reload', () => {
+  const f = firstMap(), soft = M.validateMapReply(structuredClone(f.reply), f.ask, { setAside: true }), reasons = structuredClone(M.readingExclusions(soft));
+  const clean = structuredClone(f.reply); clean.parts[0].claims.splice(1, 1);
+  const reply = M.validateMapReply(clean, f.ask); assert.equal(M.readingExclusions(reply).length, 0);
+  M.attachExclusions(reply, reasons, f.ask);
+  const applied = M.applyReading(f.p, f.inp, reply, meta('R_divided-attach'));
+  assert.deepEqual(applied.reading.exclusions, reasons);
+  assert.deepEqual(parseProject(S.serializeProject(applied.project)).readings.at(-1).exclusions, reasons);
+  const located = { path: 'material[0]', rule: 'material-evidence', category: null, explanation: '채택한 근거와 겹치는 예제·자료 표시를 제외했어요.', record: 'N01', from: 0, to: 5 };
+  for (const bad of [
+    [{ ...reasons[0], explanation: '다른 설명 sk-secret' }], [{ ...reasons[0], path: 'summary' }], [{ ...reasons[0], rule: 'unknown' }],
+    [{ ...reasons[0], category: 'count' }], [{ ...reasons[0], extra: 1 }], [{ ...located, record: 'N09' }], [{ ...located, to: 10000 }],
+    [{ ...located, from: 5, to: 5 }], [{ ...located, from: null }], Array(M.DIVIDED_EXCLUSIONS_MAX + 1).fill(reasons[0]), {}, null,
+  ]) assert.throws(() => M.attachExclusions(M.validateMapReply(clean, f.ask), bad, f.ask));
+  M.attachExclusions(M.validateMapReply(clean, f.ask), [located], f.ask);
+  const later = fixture();
+  assert.throws(() => M.attachExclusions(M.validateMapReply(structuredClone(later.reply), later.inp.ask), reasons, later.inp.ask), 'never for map.7');
+});

@@ -6,8 +6,9 @@ import { join } from 'node:path';
 import { ApiError } from '../../server/errors.mjs';
 import { encodeSpans } from '../dist/public/shared/evidence-span.js';
 import { validateMapAsk, validateMapReply } from '../dist/public/shared/map-reading.js';
-import { createFirstMapPipeline } from '../server/map-pipeline.mjs';
+import { createFirstMapPipeline, PIPELINE_RECIPE, LATER_PIPELINE_RECIPE } from '../server/map-pipeline.mjs';
 import { openFirstMapPipeline } from '../server/map-pipeline-host.mjs';
+import { parseProject } from '../dist/public/shared/validation.js';
 import { openMapPipelineStore } from '../server/map-pipeline-store.mjs';
 import { callMapProvider } from '../server/map-provider.mjs';
 import { map7Prompt } from '../server/map-prompt.mjs';
@@ -263,18 +264,22 @@ test('a definite HTTP planning rejection releases its reservation instead of per
   assert.deepEqual(stages.slice(count), ['plan', 'render', 'global']);
 });
 
-test('cross-group relation endpoints are checked against final original map and unknown endpoints cannot become ready', async t => {
-  const { make } = await setup(t), ask = askFor(), wire = manyPartsWire(ask), calls = []; let bad = true;
+// first-map-divided.6 (changed on purpose): an unknown end no longer refuses the whole first map. That one relation is left out of
+// the applied wire with its fixed reason; the endpoint is still checked against the final original map and never becomes ready.
+test('cross-group relation endpoints are checked against final original map and an unknown endpoint is set aside alone', async t => {
+  const { make } = await setup(t), ask = askFor(), wire = manyPartsWire(ask), calls = [];
   const pipeline = make({ callProvider: fakeProvider(ask, calls, call => {
-    if (call.stage === 'global' && bad) { const global = payloadFor(call.input, ask, wire); global.relations[0].to = 'new:missing'; return global; }
+    if (call.stage === 'global') { const global = payloadFor(call.input, ask, wire); global.relations.unshift({ ...global.relations[0], to: 'new:missing' }); return global; }
   }, wire) });
-  await assert.rejects(pipeline.call(ask), matchesCode('INVALID_RESPONSE'));
+  const { wire: applied, exclusions } = await pipeline.read(ask);
   assert.equal(calls.filter(c => c.stage === 'render').length, 2, 'four planned parts require separate groups');
-  const count = calls.length; bad = false;
-  const checked = validateMapReply(await pipeline.call(ask), ask);
-  assert.deepEqual(calls.slice(count).map(c => c.stage), ['global']);
-  assert.equal(checked.relations.length, 1);
-  assert.equal(checked.relations[0].to, 'new:flow3');
+  assert.equal(calls.filter(c => c.stage === 'global').length, 1, 'no correction is spent on one isolated item');
+  const checked = validateMapReply(applied, ask);
+  assert.equal(M.setAside(checked).length, 0, 'the browser reads the applied wire whole under plain map.6');
+  assert.deepEqual(checked.relations.map(r => r.to), ['new:flow3']);
+  assert.deepEqual(exclusions.map(x => [x.path, x.rule, x.category, x.record]), [['relations[0]', 'contract', 'ends', 'N01']]);
+  assert.ok(!JSON.stringify(exclusions).includes('new:missing'));
+  assert.deepEqual(await pipeline.call(ask), applied, 'call() returns the very same applicable wire from the checkpoints');
 });
 
 test('cross-group parent assignment survives fragment validation and renderers cannot silently reparent it', async t => {
@@ -416,7 +421,9 @@ test('a completed invalid render is recorded failed before one correction, prese
     callProvider: fakeProvider(ask, calls, call => {
       if (call.stage !== 'render' || call.input.correction) return;
       const fragment = payloadFor(call.input, ask, originalWire(ask));
-      fragment.parts[0].basis = ask.records.flatMap(record => record.spans.map(span => span.s)).slice(0, 5);
+      // first-map-divided.6: five resolvable quotes would keep the first four; five unknown aliases leave the new part with no basis,
+      // which still refuses the fragment whole and spends its one correction.
+      fragment.parts[0].basis = ['N99.01', 'N99.02', 'N99.03', 'N99.04', 'N99.05'];
       rejected = structuredClone(fragment); return fragment;
     }) });
   validateMapReply(await pipeline.call(ask), ask);
@@ -481,15 +488,21 @@ test('a completed invalid global can be corrected once against the same original
   const { make } = await setup(t), ask = askFor(), wire = manyPartsWire(ask), calls = [];
   const pipeline = make({ callProvider: fakeProvider(ask, calls, call => {
     if (call.stage === 'global' && !call.input.correction) {
-      const output = payloadFor(call.input, ask, wire); output.material = [{ at: ask.records[0].spans[0].s, what: '잘못 제외한 실제 근거' }]; return output;
+      // first-map-divided.6: material over evidence is now set aside alone (see below); a contradiction still refuses the global
+      // wire whole: a candidate leaving open the statement s1 that the first rendered part already states.
+      const output = payloadFor(call.input, ask, wire);
+      output.candidates = [{ target: 'holds', text: '성립 여부가 미정이다.', parts: ['new:flow0'], at: null,
+        statement: { key: 's1', kind: 'describes', text: '입력기는 문서를 작업 큐에 전달합니다.', at: ask.records[0].spans[0].s, about: null } }];
+      return output;
     }
   }, wire) });
   const result = await pipeline.call(ask); validateMapReply(result, ask);
   const globals = calls.filter(call => call.stage === 'global');
   assert.equal(globals.length, 2);
   assert.deepEqual(globals[1].input.renderedParts, globals[0].input.renderedParts);
-  assert.equal(globals[1].input.correction.rejected.material.length, 1);
-  assert.equal(result.material.length, 0);
+  assert.equal(globals[1].input.correction.rejected.candidates.length, 1);
+  assert.deepEqual(globals[1].input.correction.issues, [{ path: 'candidates[0].statement.key', rule: 'settled-and-open', expected: null, actual: null }]);
+  assert.equal(result.candidates.length, 0);
 });
 
 test('transport errors never trigger correction even when their code is INVALID_RESPONSE or billing usage is known', async t => {
@@ -685,10 +698,12 @@ for (const blockedStage of ['render', 'global']) test('cancelling semantic ' + b
   assert.equal(calls.length, count);
 });
 
-test('semantic pass metadata bounds DeepSeek to 48 calls while OpenAI rendering retains twelve extraction calls', async t => {
+// first-map-divided.6: OpenAI rendering leaves room for one extraction correction each (2 x 12); DeepSeek rendering has none (48).
+test('semantic pass metadata bounds DeepSeek to 48 calls while OpenAI rendering allows twelve extractions with one correction each', async t => {
   const { make } = await setup(t);
   assert.equal(make({}).describe().deepseekMaxCalls, 48);
-  assert.equal(make({ renderModel: 'gpt-6.1-terra' }).describe().deepseekMaxCalls, 12);
+  assert.equal(make({ renderModel: 'gpt-6.1-terra' }).describe().deepseekMaxCalls, 24);
+  assert.equal(make({ renderModel: 'gpt-6.1-terra', maxPartitions: 5 }).describe().deepseekMaxCalls, 10);
   assert.equal(make({ maxPartitions: 5 }).describe().deepseekMaxCalls, 41);
 });
 
@@ -830,7 +845,8 @@ test('a refused render and its one refused correction name the correction stage,
   const { store, make } = await setup(t), ask = askFor(), calls = [], rejected = [], progress = [];
   const pipeline = make({ onProgress: event => progress.push(event), onRejected: kept => rejected.push(kept), callProvider: fakeProvider(ask, calls, call => {
     if (call.stage !== 'render') return;
-    const fragment = payloadFor(call.input, ask, originalWire(ask)); fragment.parts[0].basis[0] = 'N99.001'; return fragment;
+    // A new part whose every basis quote fails to resolve has nothing to rest on: still a whole refusal (one bad quote among others is set aside).
+    const fragment = payloadFor(call.input, ask, originalWire(ask)); fragment.parts[0].basis = ['N99.001']; return fragment;
   }) });
   await assert.rejects(pipeline.call(ask), refusedAt({ stage: 'render-1-correction', phase: 'correction', total: 1, rule: 'reference', path: 'parts[0].basis[0]' }));
   assert.equal(calls.filter(call => call.stage === 'render').length, 2, 'still exactly one correction round');
@@ -876,7 +892,7 @@ test('a refused extraction receipt says extract, its partition and a coarse reas
   }
 });
 
-test('a refused plan says plan and a coarse blueprint reason; no correction is sent', async t => {
+test('a refused plan and its one refused correction say plan-correction and a coarse blueprint reason; no third plan is sent', async t => {
   const cases = [
     [plan => { plan.parts[0].at = ['N99.001']; }, 'anchor'],
     [plan => { plan.extra = []; }, 'shape'],
@@ -891,8 +907,8 @@ test('a refused plan says plan and a coarse blueprint reason; no correction is s
       if (call.stage !== 'plan') return;
       const plan = blueprintFor(originalWire(ask), ask); mutate(plan); return plan;
     }) });
-    await assert.rejects(pipeline.call(ask), refusedAt({ stage: 'plan', phase: 'plan', reason }));
-    assert.equal(calls.filter(call => call.stage === 'plan').length, 1, reason);
+    await assert.rejects(pipeline.call(ask), refusedAt({ stage: 'plan-correction', phase: 'correction', reason }));
+    assert.equal(calls.filter(call => call.stage === 'plan').length, 2, reason);
     assert.equal(calls.some(call => call.stage === 'render'), false);
   }
 });
@@ -962,4 +978,139 @@ test('the host keeps refused stages only when STUDIO_KEEP_REFUSED gives it a fol
   finally { await off.close(); }
   assert.equal(logs.length, before, 'no keeper runs when the option is off');
   assert.deepEqual((await readdir(root)).sort(), ['jobs-a', 'jobs-b', 'refused']);
+});
+
+// ---- first-map-divided.6: item set-aside, plan and extraction corrections (fake providers only; no model quality is claimed) ----
+const projectFor = () => {
+  let p = D.pasteRecord(D.createProject(), '입력기는 프로젝트 문서를 받아 작업 큐에 전달합니다.\n처음에는 모든 자료를 영구 저장한다고 설명했습니다.\n중간 조건: 개발용 판본에만 적용합니다.\n원문 기록은 변경 없이 보존합니다.', null).project;
+  p = D.pasteRecord(p, '정정: 모든 자료를 영구 저장한다는 앞 설명을 철회합니다.\n통합기는 입력기의 작업 큐를 읽어 전체 조건을 대조합니다.\n배포 성공 여부는 제공된 자료로 확인되지 않습니다.\n다른 프로젝트의 예제 코드는 실행 증거가 아닙니다.', null).project;
+  // Two pastes in one millisecond tie on `at` and keep paste order; distinct times read newest first. Fix the times so the
+  // ask's record order is the same on every run (the correction first, as a real paste a moment later would be).
+  p = { ...p, pasted: p.pasted.map((r, i) => ({ ...r, at: i === 0 ? '2026-11-02T00:00:00.000Z' : '2026-11-02T00:00:01.000Z' })) };
+  const input = M.buildMapAsk(p, studioView(p), [], undefined, M.MAP6_SCHEMA);
+  assert.equal(input.problem, null); assert.equal(input.ask.schemaVersion, M.MAP6_SCHEMA);
+  return { p, input, ask: input.ask };
+};
+const readingMeta = n => ({ id: 'R_' + crypto.randomUUID(), at: '2026-11-02T00:00:00.000Z', model: 'stub', prompt: 'm6-000000000001', hash: String(n).repeat(64) });
+/** The browser's load() and apply: plain map.6 validation, the checked reasons attached, one saved reading that survives a reload. */
+function browserApply(f, wire, exclusions, n = 7) {
+  const reply = validateMapReply(wire, f.ask);
+  assert.equal(M.setAside(reply).length, 0, 'the applicable wire reads whole under plain map.6, exactly as the browser re-validates it');
+  M.attachExclusions(reply, exclusions, f.ask);
+  const applied = M.applyReading(f.p, f.input, reply, readingMeta(n));
+  assert.deepEqual(parseProject(S.serializeProject(applied.project)).readings.at(-1), applied.reading);
+  return applied;
+}
+
+test('recipe identities are bumped for the changed prompts and validation semantics', () => {
+  assert.equal(PIPELINE_RECIPE, 'first-map-divided.6');
+  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.6');
+});
+
+test('a render fragment with one unresolvable claim alias is applied with only that claim set aside and a durable diagnostic', async t => {
+  const { make } = await setup(t), f = projectFor(), calls = [];
+  const pipeline = make({ callProvider: fakeProvider(f.ask, calls, call => {
+    if (call.stage !== 'render') return;
+    const fragment = payloadFor(call.input, f.ask, originalWire(f.ask));
+    fragment.parts[0].claims.splice(1, 0, { ...fragment.parts[0].claims[0], key: 's9', text: '없는 구간을 가리키는 주장', at: 'N01.99' });
+    return fragment;
+  }) });
+  const { wire, exclusions } = await pipeline.read(f.ask);
+  assert.equal(calls.filter(c => c.stage === 'render').length, 1); assert.equal(calls.some(c => c.input.correction), false, 'no paid correction');
+  assert.deepEqual(wire.parts[0].claims.map(c => c.key), ['s1', 's2'], 'only the offending claim is omitted; others keep their keys and order');
+  assert.deepEqual(exclusions, [{ path: 'parts[0].claims[1].at', rule: 'reference', category: null,
+    explanation: '이번에 보낸 부분이나 원문 구간을 찾을 수 없어 제외했어요.', record: null, from: null, to: null }]);
+  assert.ok(!JSON.stringify(exclusions).includes('없는 구간'), 'the rejected text never enters diagnostics');
+  const applied = browserApply(f, wire, exclusions);
+  assert.equal(applied.created.length, 1); assert.equal(applied.reading.parts[0].claims.length, 2);
+  assert.deepEqual(applied.reading.exclusions, exclusions);
+  for (const q of [...applied.reading.parts[0].basis, ...applied.reading.parts[0].claims])
+    assert.equal(f.p.pasted.find(r => r.id === q.record).text.slice(q.from, q.to), q.quote, 'every surviving item rests on its exact original passage');
+});
+
+test('a basis of five keeps the first four representative quotes and records the count reason', async t => {
+  const { make } = await setup(t), f = projectFor(), calls = [], five = ['N01.01', 'N01.02', 'N01.03', 'N01.04', 'N02.01'];
+  const pipeline = make({ callProvider: fakeProvider(f.ask, calls, call => {
+    if (call.stage !== 'render') return;
+    const fragment = payloadFor(call.input, f.ask, originalWire(f.ask)); fragment.parts[0].basis = five; return fragment;
+  }) });
+  const { wire, exclusions } = await pipeline.read(f.ask);
+  assert.equal(calls.some(c => c.input.correction), false);
+  assert.deepEqual(wire.parts[0].basis, five.slice(0, 4));
+  assert.deepEqual(exclusions.map(x => [x.path, x.rule, x.category, x.explanation]), [['parts[0].basis', 'contract', 'count', '허용 개수를 넘는 뒤쪽 항목들을 제외했어요.']]);
+  assert.equal(browserApply(f, wire, exclusions).reading.parts[0].basis.length, 4);
+});
+
+test('global with one material range over adopted evidence drops only that material; a real embedded example stays', async t => {
+  const { make } = await setup(t), f = projectFor(), calls = [];
+  const example = f.ask.records.flatMap(record => record.spans).find(span => span.t.includes('예제 코드')).s;
+  const pipeline = make({ callProvider: fakeProvider(f.ask, calls, call => {
+    if (call.stage !== 'global') return;
+    const global = payloadFor(call.input, f.ask, originalWire(f.ask));
+    global.material = [{ at: f.ask.records[0].spans[0].s, what: '보고서 머리말' }, { at: example, what: '다른 프로젝트 예제' }]; return global;
+  }) });
+  const { wire, exclusions } = await pipeline.read(f.ask);
+  assert.equal(calls.filter(c => c.stage === 'global').length, 1);
+  assert.deepEqual(wire.material, [{ at: example, what: '다른 프로젝트 예제' }]);
+  const first = f.ask.records[0].spans[0].t.replace(/\n$/, ''); // the piece's range, without its line break
+  assert.deepEqual(exclusions.map(x => [x.path, x.rule, x.record, x.from, x.to]), [['material[0]', 'material-evidence', 'N01', 0, first.length]]);
+  const applied = browserApply(f, wire, exclusions);
+  assert.equal(applied.reading.material.length, 1); assert.equal(applied.reading.exclusions[0].record, f.p.pasted.find(r => r.text.startsWith(f.ask.records[0].spans[0].t.trim().slice(0, 8))).id);
+});
+
+test('a part whose every claim is set aside still refuses its fragment and spends the one correction', async t => {
+  const { make } = await setup(t), f = projectFor(), calls = [];
+  const pipeline = make({ callProvider: fakeProvider(f.ask, calls, call => {
+    if (call.stage !== 'render' || call.input.correction) return;
+    const fragment = payloadFor(call.input, f.ask, originalWire(f.ask));
+    for (const claim of fragment.parts[0].claims) claim.at = 'N01.99';
+    return fragment;
+  }) });
+  const { wire, exclusions } = await pipeline.read(f.ask);
+  const renders = calls.filter(c => c.stage === 'render');
+  assert.equal(renders.length, 2);
+  assert.deepEqual(renders[1].input.correction.issues, [{ path: 'parts[0].claims[0].at', rule: 'reference', expected: null, actual: null }]);
+  assert.deepEqual(exclusions, []); assert.equal(wire.parts[0].claims.length, 2);
+});
+
+test('an invalid plan is corrected once with safe path/rule feedback and never sends a third plan', async t => {
+  for (const persistent of [false, true]) {
+    const { make } = await setup(t), ask = askFor(), calls = [];
+    const pipeline = make({ callProvider: fakeProvider(ask, calls, call => {
+      if (call.stage !== 'plan' || (!persistent && call.input.correction)) return;
+      const plan = blueprintFor(originalWire(ask), ask); plan.parts[0].at = ['N99.001']; plan.global[0].text = '가'.repeat(241); return plan;
+    }) });
+    if (persistent) await assert.rejects(pipeline.call(ask), matchesCode('INVALID_RESPONSE'));
+    else validateMapReply(await pipeline.call(ask), ask);
+    const plans = calls.filter(c => c.stage === 'plan');
+    assert.equal(plans.length, 2);
+    assert.equal(plans[0].input.correction, undefined);
+    assert.deepEqual(plans[1].input.correction.issues, [{ path: 'parts[0].at', rule: 'reference', expected: null, actual: null },
+      { path: 'global[0].text', rule: 'length', expected: 240, actual: 241 }]);
+    assert.ok(!JSON.stringify(plans[1].input.correction.issues).includes('N99'), 'feedback never copies an alias');
+    assert.equal(plans[1].input.correction.rejected.parts[0].at[0], 'N99.001', 'the rejected plan is passed back untouched');
+    assert.deepEqual(plans[1].input.INPUT, ask);
+    assert.equal(calls.some(c => c.stage === 'render'), !persistent);
+  }
+});
+
+test('with OpenAI rendering an extraction receipt is corrected once with coarse coverage feedback; DeepSeek rendering never corrects it', async t => {
+  for (const renderModel of ['gpt-6.1-terra', 'deepseek-flash']) {
+    const { make } = await setup(t), ask = askFor(), calls = []; let bad = true;
+    const pipeline = make({ renderModel, callProvider: fakeProvider(ask, calls, call => {
+      if (bad && call.stage === 'extract' && call.input.partition.id === 'extract-01') { bad = false; return { covered: [], candidates: [] }; }
+    }) });
+    if (renderModel === 'deepseek-flash') {
+      await assert.rejects(pipeline.call(ask), matchesCode('INVALID_RESPONSE'));
+      assert.equal(calls.some(c => c.input.correction), false); assert.equal(calls.some(c => c.stage === 'plan'), false);
+      continue;
+    }
+    validateMapReply(await pipeline.call(ask), ask);
+    const attempts = calls.filter(c => c.stage === 'extract' && c.input.partition.id === 'extract-01');
+    assert.equal(attempts.length, 2);
+    const core = attempts[0].input.partition.records.flatMap(r => r.core).length;
+    assert.deepEqual(attempts[1].input.correction.issues, [{ path: 'covered', rule: 'coverage', expected: core, actual: 0 }]);
+    assert.equal(attempts[1].provider, 'deepseek');
+    assert.equal(calls.filter(c => c.stage === 'plan').length, 1);
+  }
 });

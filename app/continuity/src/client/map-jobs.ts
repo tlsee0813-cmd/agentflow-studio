@@ -36,7 +36,8 @@ export function readJobProgress(value: unknown): JobProgress | null {
     return { phase: phase as JobProgress['phase'], done: done as number, total: total as number };
   } catch { return null; }
 }
-export interface JobResult { model: string; prompt: string; askHash: string; wire: unknown; evidence: { index: string; ask: string }; reading: { id: string; at: string } }
+/** exclusions: a divided first map's set-aside reasons (the wire already leaves those items out); checked by attachExclusions. */
+export interface JobResult { model: string; prompt: string; askHash: string; wire: unknown; exclusions?: unknown; evidence: { index: string; ask: string }; reading: { id: string; at: string } }
 export interface JobView { id: string; state: JobState; acked: 'applied' | 'discarded' | 'seen' | null; binding: MapJobBinding | null; bindingHash: string | null; error: { code: string; detail?: { path?: unknown; rule?: unknown; target?: unknown; stage?: unknown; phase?: unknown; total?: unknown; category?: unknown; reason?: unknown } } | null; remote: string | null; input?: unknown; result?: JobResult; progress?: JobProgress }
 const BINDING_KEYS: (keyof MapJobBinding)[] = ['entryId', 'projectId', 'lifecycle', 'seq', 'after', 'schemaVersion', 'prompt', 'model', 'askHash', 'inputHash'];
 /** The server's answer is about this very job: its id, and the binding it keeps (whole, and by the hash it was accepted under).

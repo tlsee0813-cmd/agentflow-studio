@@ -1598,7 +1598,7 @@ def map70_flow(browser, base):
     expect(page.locator("#lens .rr-map")).to_be_visible()
     assert sent == [], sent
     # The one action that sends says what it sends, then the map is there; the pane says what was understood.
-    expect(entry.locator(".fine")).to_contain_text("기록 1개를 AI에 보내요")
+    expect(entry.locator(".fine:not(.se-batch)")).to_contain_text("기록 1개를 AI에 보내요")  # the route's batch line (.se-batch) sits beside the send line
     # One main action while records wait for the map; the separate summary steps back.
     expect(page.locator("#lens").get_by_role("button", name="붙인 기록 AI로 요약")).to_have_class(re.compile("secondary"))
     entry.get_by_role("button", name="기록으로 지도 정리").click()
@@ -3465,7 +3465,7 @@ def final_client_flow(browser, base):
     expect(pill).to_have_attribute("data-state", "on", timeout=15000)
     expect(entry.locator(".se-acts button")).to_have_text(["기록 붙여넣기", "코드·검사 자료 추가"])
     expect(entry.get_by_role("button", name="기록 붙여넣기")).to_have_class(re.compile("primary"))
-    expect(entry.locator(".fine")).to_have_text("자동 연결 중이라, 저장하면 다음 자동 지도 갱신 때 AI에 보내요.")
+    expect(entry.locator(".fine:not(.se-batch)")).to_have_text("자동 연결 중이라, 저장하면 다음 자동 지도 갱신 때 AI에 보내요.")
     pill.click()
     panel.get_by_role("button", name="연결 끊기").click()
     expect(entry.get_by_role("button", name="내 AI 세션 자동 연결")).to_be_visible()

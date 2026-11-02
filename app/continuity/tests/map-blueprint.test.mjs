@@ -5,7 +5,7 @@ import * as D from '../dist/public/shared/domain.js';
 import * as M from '../dist/public/shared/map-reading.js';
 import { studioView } from '../dist/public/shared/studio.js';
 import { ApiError } from '../../server/errors.mjs';
-import { validateMapBlueprint, splitBlueprintParts, validateRenderedFragment, combineRenderedMaps, mapStageIssues,
+import { validateMapBlueprint, splitBlueprintParts, validateRenderedFragment, combineRenderedMaps, combineRenderedReading, mapStageIssues, blueprintStageIssues,
   isMapRevision, validateMapRevision, revisionGroups,
   missingMapCorrections, mapCorrectionRevision, MAP_BLUEPRINT_PROMPT, LATER_BLUEPRINT_PROMPT,
   BLUEPRINT_PARTS_MAX, BLUEPRINT_NEW_PARTS_MAX, BLUEPRINT_GLOBAL_MAX, BLUEPRINT_ANCHORS_MAX } from '../server/map-blueprint.mjs';
@@ -138,10 +138,19 @@ test('global owns summary/gaps and cross-group facts; whole-map contradictions a
   assert.deepEqual(result.gaps, global.gaps); assert.deepEqual(result.candidates, global.candidates);
   const badGlobal = structuredClone(global); badGlobal.parts = fragments[0].parts; refused(() => combineRenderedMaps(fragments, badGlobal, f.ask, blueprint));
   refused(() => combineRenderedMaps(fragments.slice(1), global, f.ask, blueprint));
+  // first-map-divided.6 (changed on purpose): a material range over adopted evidence and a relation with an unknown end are single
+  // items. Each is left out of the applicable wire with its fixed reason instead of refusing the whole map; nothing else changes.
   const conflict = structuredClone(global); conflict.material = [{ at: f.at[0], what: '내포 예문' }];
-  refused(() => combineRenderedMaps(fragments, conflict, f.ask, blueprint));
+  const dropped = combineRenderedReading(fragments, conflict, f.ask, blueprint);
+  assert.deepEqual(dropped.wire, result); assert.deepEqual(dropped.exclusions.map(x => [x.path, x.rule, x.category]), [['material[0]', 'material-evidence', null]]);
   const unknown = structuredClone(global); unknown.relations = [{ from: 'new:p1', to: 'new:missing', kind: 'needs', note: '', at: f.at[0] }];
-  refused(() => combineRenderedMaps(fragments, unknown, f.ask, blueprint));
+  const kept = combineRenderedReading(fragments, unknown, f.ask, blueprint);
+  assert.deepEqual(kept.wire.relations, []); assert.deepEqual(kept.exclusions.map(x => [x.path, x.rule, x.category]), [['relations[0]', 'contract', 'ends']]);
+  // A contradiction between statements still refuses the whole wire: a candidate leaving open what a claim already states.
+  const settled = structuredClone(global); settled.candidates[0].statement.key = 's1';
+  refused(() => combineRenderedMaps(fragments, settled, f.ask, blueprint));
+  const twice = structuredClone(global); twice.candidates.push(structuredClone(twice.candidates[0]));
+  refused(() => combineRenderedMaps(fragments, twice, f.ask, blueprint));
 });
 
 test('map.7 keeps original anchored-condition and soft-exclusion policy; combiner returns raw wire without silently deleting items', () => {
@@ -159,6 +168,10 @@ test('map.7 keeps original anchored-condition and soft-exclusion policy; combine
 test('correction feedback identifies all three five-basis parts without copying source, aliases, target, or error message', () => {
   const f = fixture(), blueprint = planned(f, 3), fragment = rendered(f, blueprint)[0];
   fragment.parts.forEach(part => { part.basis = f.at.slice(0, 5); });
+  // first-map-divided.6: five basis quotes alone no longer refuse a fragment (the fifth is set aside); a fragment that also
+  // breaks a whole-fragment rule (here its summary) still fails and its feedback still names every over-count basis.
+  validateRenderedFragment(fragment, splitBlueprintParts(blueprint)[0], f.ask, blueprint);
+  fragment.summary = '조각 요약';
   const before = structuredClone(fragment); let failure;
   try { validateRenderedFragment(fragment, splitBlueprintParts(blueprint)[0], f.ask, blueprint); } catch (error) { failure = error; }
   assert.equal(failure.code, 'INVALID_RESPONSE');
@@ -190,14 +203,18 @@ test('feedback limits mirror the validator, use UTF-16 length, and are capped at
 
 test('final validation preserves only safe internal MapReplyError path/rule and keeps the existing public error code', () => {
   const f = fixture(), blueprint = planned(f), fragments = rendered(f, blueprint), global = { ...empty(),
-    relations: [{ from: 'new:p1', to: 'new:p1', kind: 'needs', note: '', at: f.at[0] }] };
-  // Use two real endpoints so the final check reaches the bad evidence anchor rather than the endpoint guard.
+    relations: [{ from: 'new:p1', to: 'new:p2', kind: 'needs', note: '', at: 'N99.99' }] };
   const plan2 = planned(f, 2), rendered2 = rendered(f, plan2);
-  global.relations[0].to = 'new:p2'; global.relations[0].at = 'N99.99'; let failure;
+  // first-map-divided.6 (changed on purpose): one relation citing an unknown alias is set aside with its fixed reason.
+  const aside = combineRenderedReading(rendered2, global, f.ask, plan2);
+  assert.deepEqual(aside.wire.relations, []); assert.deepEqual(aside.exclusions.map(x => [x.path, x.rule]), [['relations[0].at', 'reference']]);
+  // A contradiction still refuses the whole wire and keeps its safe path/rule: the same target left open twice.
+  const identity = { text: '같은 대상인지 미정이다.', parts: ['new:p1', 'new:p2'], at: null, target: 'identity', statement: null };
+  global.candidates = [identity, structuredClone(identity)]; let failure;
   try { combineRenderedMaps(rendered2, global, f.ask, plan2); } catch (error) { failure = error; }
   assert.deepEqual([failure.code, failure.status, failure.detail], ['INVALID_RESPONSE', 502, undefined]);
-  assert.deepEqual(failure.validation, { path: 'relations[0].at', rule: 'reference' });
-  assert.deepEqual(mapStageIssues(global, failure), [{ path: 'relations[0].at', rule: 'reference', expected: null, actual: null }]);
+  assert.deepEqual(failure.validation, { path: 'candidates[1]', rule: 'duplicate-target' });
+  assert.deepEqual(mapStageIssues(global, failure), [{ path: 'candidates[1]', rule: 'duplicate-target', expected: null, actual: null }]);
   const badFragment = structuredClone(fragments[0]); badFragment.parts[0].basis = ['N99.99']; let fragmentFailure;
   try { validateRenderedFragment(badFragment, splitBlueprintParts(blueprint)[0], f.ask, blueprint); } catch (error) { fragmentFailure = error; }
   assert.deepEqual(fragmentFailure.validation, { path: 'parts[0].basis[0]', rule: 'reference' });
@@ -215,7 +232,8 @@ test('unsafe paths/rules and failing diagnostic accessors never leak or alter th
   const errorTrap = new Proxy({}, { get() { throw new Error('PRIVATE_ERROR_TRAP'); } });
   assert.deepEqual(mapStageIssues(valueTrap, errorTrap), []);
   const f = fixture(), blueprint = planned(f), invalidFragment = rendered(f, blueprint)[0];
-  invalidFragment.parts[0].basis = Array(5).fill(f.at[0]);
+  // A new part left without any resolvable basis quote is refused whole (five repeated valid quotes would now keep the first four).
+  invalidFragment.parts[0].basis = Array(5).fill('N99.99');
   refused(() => validateRenderedFragment(invalidFragment, splitBlueprintParts(blueprint)[0], f.ask, blueprint));
   mapStageIssues(valueTrap, errorTrap);
   refused(() => validateRenderedFragment(invalidFragment, splitBlueprintParts(blueprint)[0], f.ask, blueprint));
@@ -358,4 +376,71 @@ test('machine correction revision covers every affected planned ref with at most
   assert.equal(revision.at.length, 8); validateMapRevision(revision, f.ask, f.blueprint);
   assert.deepEqual(f.blueprint, before); assert.equal(f.blueprint.corrections.length, 24);
   assert.deepEqual(raw.parts, rendered(f, f.blueprint).flatMap(fragment => fragment.parts));
+});
+
+// ---- first-map-divided.6: isolated items are set aside; parts, assignment, key ranges and contradictions stay whole ----
+test('first-map fragments set aside isolated bad items but still refuse parts left empty, duplicate keys and foreign key ranges', () => {
+  const f = fixture(), blueprint = planned(f, 3), group = splitBlueprintParts(blueprint)[0], base = rendered(f, blueprint)[0];
+  assert.equal(f.ask.schemaVersion, M.MAP6_SCHEMA);
+  const soft = structuredClone(base);
+  soft.parts[0].claims.push({ ...soft.parts[0].claims[0], key: 's9', at: 'N01.99' });
+  soft.parts[1].claims.push({ ...soft.parts[1].claims[0], key: 's8', text: '가'.repeat(241) });
+  soft.parts[2].basis = [...soft.parts[2].basis, 'N99.01'];
+  assert.deepEqual(validateRenderedFragment(soft, group, f.ask, blueprint), soft, 'the raw fragment is cached untouched');
+  for (const mutate of [
+    x => { x.parts[0].basis = ['N99.01', 'N99.02']; },                       // a new part without any surviving basis
+    x => { x.parts[0].claims = [{ ...x.parts[0].claims[0], at: 'N99.01' }]; }, // a part whose every claim is set aside
+    x => { x.parts[1].claims[0].key = 's1'; },                                // a duplicate statement key (contradiction)
+    x => { x.parts[0].claims.push({ ...x.parts[0].claims[0], key: 's150', at: 'N99.01' }); }, // a key outside the range, even on a bad claim
+    x => { x.parts[0].name = '이름 변경'; }, x => { x.parts[0].role = '가'.repeat(301); }, x => { x.parts.pop(); },
+  ]) { const bad = structuredClone(base); mutate(bad); refused(() => validateRenderedFragment(bad, group, f.ask, blueprint)); }
+  let failure; const lost = structuredClone(base); lost.parts[0].basis = ['N99.01', 'N99.02'];
+  try { validateRenderedFragment(lost, group, f.ask, blueprint); } catch (error) { failure = error; }
+  assert.deepEqual(failure.validation, { path: 'parts[0].basis[0]', rule: 'reference' }, 'refused with the first set-aside quote');
+});
+
+test('the combined first-map wire only omits set-aside items: no quote clipped, key renamed, item reordered or field rewritten', () => {
+  const f = fixture(), blueprint = planned(f, 4), fragments = rendered(f, blueprint);
+  fragments[0].parts[0].claims.unshift({ ...fragments[0].parts[0].claims[0], key: 's50', at: 'N01.99' });
+  fragments[0].parts[0].claims.push({ ...fragments[0].parts[0].claims[1], key: 's51', text: '두 번째 유지 주장' });
+  fragments[1].parts[0].basis = [f.at[3], f.at[4], f.at[5], f.at[6], f.at[7], f.at[8]];
+  const statement = key => ({ key, kind: 'idea', text: '다른 출력을 구상한다.', at: f.at[4], about: null });
+  const global = { ...empty(), summary: '원문의 설명이다.', gaps: ['하나', '둘', '셋'],
+    relations: [{ from: 'new:p1', to: 'new:p9', kind: 'needs', note: '', at: f.at[0] }, { from: 'new:p1', to: 'new:p4', kind: 'needs', note: '사용', at: f.at[0] }],
+    candidates: [{ target: 'checked', text: '잘못된 대상', parts: ['new:p4'], at: null, statement: statement('s801') },
+      { target: 'holds', text: '이 책임의 선택은 미정이다.', parts: ['new:p4'], at: f.at[4], statement: statement('s802') }],
+    material: [{ at: f.at[0], what: '보고서 머리말' }, { at: f.at[11], what: '내포 예문' }] };
+  const before = structuredClone({ fragments, global }), { wire, exclusions } = combineRenderedReading(fragments, global, f.ask, blueprint);
+  assert.deepEqual({ fragments, global }, before, 'inputs are never changed');
+  const raw = { ...global, parts: fragments.flatMap(x => x.parts) }, expected = structuredClone(raw);
+  expected.parts[0].claims.splice(0, 1); expected.parts[3].basis = expected.parts[3].basis.slice(0, 4);
+  expected.relations.splice(0, 1); expected.candidates.splice(0, 1); expected.gaps = expected.gaps.slice(0, 2); expected.material.splice(0, 1);
+  assert.deepEqual(wire, expected);
+  assert.deepEqual(exclusions.map(x => [x.path, x.rule, x.category]), [
+    ['parts[0].claims[0].at', 'reference', null], ['parts[3].basis', 'contract', 'count'], ['relations[0]', 'contract', 'ends'],
+    ['candidates[0].target', 'reference', null], ['gaps', 'contract', 'count'], ['material[0]', 'material-evidence', null]]);
+  const plain = M.validateMapReply(wire, f.ask);
+  assert.equal(M.setAside(plain).length, 0);
+  assert.deepEqual(plain.parts[0].claims.map(c => c.key), ['s1', 's51']);
+  assert.throws(() => M.validateMapReply(raw, f.ask), 'the single-call map.6 path still refuses the raw wire whole');
+});
+
+test('plan feedback names fixed paths, rules and counts only, for anchors, bounds, existing names and parents', () => {
+  const f = fixture(1), blueprint = planned(f, 2), own = f.ask.parts[0];
+  blueprint.parts.push({ ref: own.id, name: `${own.name} 변경`, parent: 'new:p1', at: [f.at[0]], focus: '기존 책임' });
+  blueprint.parts[0].at = ['N99.01']; blueprint.parts[1].at = f.at.slice(0, 9); blueprint.parts[1].focus = '가'.repeat(241);
+  blueprint.global = [{ kind: 'checked', text: '원문', at: [`${f.at[0]}-02`] }];
+  refused(() => validateMapBlueprint(blueprint, f.ask));
+  const issues = blueprintStageIssues(blueprint, f.ask);
+  assert.deepEqual(issues, [
+    { path: 'parts[0].at', rule: 'reference', expected: null, actual: null },
+    { path: 'parts[1].focus', rule: 'length', expected: 240, actual: 241 }, { path: 'parts[1].at', rule: 'count', expected: 8, actual: 9 },
+    { path: 'parts[2].name', rule: 'name-mismatch', expected: null, actual: null }, { path: 'parts[2].parent', rule: 'parent-mismatch', expected: null, actual: null },
+    { path: 'global[0].kind', rule: 'kind', expected: null, actual: null }, { path: 'global[0].at', rule: 'reference', expected: null, actual: null }]);
+  const encoded = JSON.stringify(issues);
+  for (const leak of ['N0', 'N99', own.name, '가가']) assert.ok(!encoded.includes(leak));
+  assert.deepEqual(blueprintStageIssues(planned(f, 2), f.ask), []);
+  assert.deepEqual(blueprintStageIssues(null, f.ask), [{ path: 'reply', rule: 'shape', expected: null, actual: null }]);
+  const trap = new Proxy({}, { get() { throw new Error('PRIVATE_TRAP'); } });
+  assert.deepEqual(blueprintStageIssues(trap, f.ask), [{ path: 'reply', rule: 'keys', expected: null, actual: null }], 'a failing accessor ends the feedback quietly');
 });
