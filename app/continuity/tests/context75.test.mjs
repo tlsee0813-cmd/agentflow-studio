@@ -60,7 +60,12 @@ const crosses = ([p, q], r) => Math.max(p.x, q.x) > r.x + 0.5 && Math.min(p.x, q
 
 test('E75-4 a group\'s line to a part in a later column or deep inside a sibling goes round the parts between, never over a head', () => {
   for (const deep of [false, true]) {
-    const { view, pid, target, holders } = nested(deep), L = layoutScope(view, null, () => true, {}), all = [...L.boxes.values()];
+    const { view, pid, target, holders } = nested(deep);
+    // The counter-example is the person's own arrangement: A moved level with the target (the automatic one keeps A level
+    // with its spine, B), so the margin route down the group's left side would have to cross A.
+    const first = layoutScope(view, null, () => true, {}), A0 = first.boxes.get(pid('A')), T0 = first.boxes.get(pid(target));
+    const pos = { [pid('outer')]: { [pid('A')]: { x: A0.rel.x, y: A0.rel.y + (T0.y + T0.h / 2) - (A0.y + A0.h / 2) } } };
+    const L = layoutScope(view, null, () => true, pos), all = [...L.boxes.values()];
     const outer = L.boxes.get(pid('outer')), inner = L.boxes.get(pid(target)), A = L.boxes.get(pid('A')), hold = holders.map(n => L.boxes.get(pid(n)));
     const iy = inner.y + inner.h / 2, lane = [{ x: outer.x + PAD / 2, y: outer.y + outer.head }, { x: outer.x + PAD / 2, y: iy }, { x: inner.x, y: iy }];
     assert.ok(runs(`M${lane.map(q => `${q.x},${q.y}`).join(' L')}`).some(s => crosses(s, A)), `${target}: the margin route would cross A (the counter-example holds)`);

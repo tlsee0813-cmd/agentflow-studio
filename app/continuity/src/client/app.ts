@@ -15,10 +15,11 @@ import { requestResults, frozenRequests, displayAbout, captureRequestReading, re
 import { correctRequestMatch, unlinkReplacement, requestComparison } from '../shared/request-return.js';
 import { studioView, subtreeRecords, partPath, buildAsk, draftAfterAnswer, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
-import { layoutScope, edgePath, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, ROOT, HEAD, type Box, type Edge, type LabelSpot, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
+import { layoutScope, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, ROOT, HEAD, type Box, type Edge, type LabelSpot, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
 import { aiStatus, askStudio, AskError, ERROR_TEXT, RELEASE_TEXT, PUBLIC_EDITION, connectorRecords, publishHandover, type AiStatus } from './studio-api.js';
 import { RUNTIME, runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
+import { routeEdges, samplePath, mixPath } from './map-route.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
 import { createPlanView } from './plan-view.js';
 import { AUTO_SENDS, createReturnView, mapExclusionHistory, type Scene, type ReadingContext } from './return-view.js';
@@ -128,7 +129,7 @@ function savePositions(o: Opened) { if (o.kind === 'saved') writeEntryPositions(
 
 /* Scope = the part whose inside is shown (null = whole project). Each scope keeps its own camera for the way back. */
 let scope: string | null = null;
-let lay: ScopeLayout = { boxes: new Map(), edges: [], heads: [], bounds: { x: 0, y: 0, w: 0, h: 0 } };
+let lay: ScopeLayout = { boxes: new Map(), edges: [], heads: [], bounds: { x: 0, y: 0, w: 0, h: 0 }, spine: [] };
 const cameras = new Map<string, { x: number; y: number; k: number }>();
 const expandState = new Map<string, boolean>();
 const camKey = (o: Opened, s: string | null) => `${o.key}|${s ?? ''}`;
@@ -746,6 +747,24 @@ function aliasOf(v: StudioView, id: string): string | null {
   const mine = clause(p.note);
   return mine && !sibs.some(x => clause(v.parts.find(y => y.id === x)?.note ?? '') === mine) ? mine : null;
 }
+/** The ladder a part's records climb, lit as far as they go: a request recorded, a report of work, a check (a test or an
+ * inspection, or a reading that found the thing checked). Read over the part and everything under it. "Reported" is not
+ * "checked": the two rungs differ in colour. */
+function ladder(view: StudioView, p: PartView): HTMLElement {
+  const recs = subtreeRecords(view, p.id), claims = p.reading?.claims ?? [];
+  const ask = recs.some(r => r.kind === 'request') || claims.some(c => c.kind === 'want'), report = recs.some(r => r.kind === 'report' || r.kind === 'answer') || claims.some(c => c.kind === 'reported');
+  const check = recs.some(r => r.kind === 'evidence') || claims.some(c => c.kind === 'checked');
+  const steps: [string, string, boolean][] = [['요청', 'ask', ask], ['보고', 'report', report], ['확인', 'check', check]];
+  const said = steps.map(([n, , on]) => `${n} ${on ? '있음' : '없음'}`).join(' · ');
+  return h('span', { class: 'ladder', role: 'img', 'aria-label': said, title: said }, ...steps.map(([, k, on]) => h('i', { class: `rung r-${k}${on ? ' on' : ''}` })));
+}
+/** The ladder read in words beside the rungs (the lens head): how far the records of this part go. */
+function ladderLine(view: StudioView, p: PartView): HTMLElement {
+  const el = ladder(view, p), lit = [...el.querySelectorAll('.rung.on')].map(r => r.className);
+  const check = lit.some(c => c.includes('r-check')), report = lit.some(c => c.includes('r-report')), ask = lit.some(c => c.includes('r-ask'));
+  const words = check ? (report ? '요청 · 보고 · 확인까지 있음' : '확인한 기록이 있음') : report ? (ask ? '요청과 보고가 있음 · 아직 확인 전' : '했다는 보고가 있음 · 아직 확인 전') : ask ? '요청만 있음 · 보고 전' : '요청·보고·확인 기록이 아직 없음';
+  return h('p', { class: 'lens-ladder' }, el, h('span', {}, words));
+}
 /** A part's line on the map: the state only when it says something. 'plan' (no request yet) stays quiet here; the inspector
  * still tells "no records" apart from "a planned note only". */
 function metaLine(p: PartView, last: string | null): string | null {
@@ -765,7 +784,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   const defs = svg('defs', {});
   for (const id of ['arrow', 'arrow-on', 'arrow-near']) {
     const m = svg('marker', { id, viewBox: '0 0 10 10', refX: '9', refY: '5', markerWidth: '6', markerHeight: '6', orient: 'auto-start-reverse' });
-    m.append(svg('path', { d: 'M0,1.5 L9,5 L0,8.5 z' })); defs.append(m);
+    m.append(svg('path', { d: 'M0,1 L9,5 L0,9 L2.2,5 z' })); defs.append(m);
   }
   // A selected line also marks where it starts, so both of its ends read on the map.
   // Every line marks the part it leaves from with a small dot, so the starting row reads without a label.
@@ -779,7 +798,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   restSums = sums = lay.edges.length > 6 ? summaryEdges(lay.boxes, lay.edges) : [];
   for (const e of [...lay.edges, ...sums]) {
     const fa = frames(e.from), inner = [...frames(e.to)].some(f => fa.has(f)), sum = e.key.startsWith('sum:');
-    const g = svg('g', { class: `edge${sum ? ' sum' : ''} k-${e.kind}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}${!sum && edgeRevised(e) ? ' revised' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
+    const g = svg('g', { class: `edge${sum ? ' sum' : ''} k-${e.kind}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}${!sum && edgeRevised(e) ? ' revised' : ''}${e.spine ? ' spine' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
     // No text on the map: the meaning shows on hover (tip) and in the selected part's 관련 부분.
     // A plain relation ends in the same dot at both ends: it is drawn, not directed.
     g.append(svg('path', { class: 'edge-line', 'marker-end': e.kind === 'related' ? 'url(#dot)' : 'url(#arrow)', 'marker-start': 'url(#dot)' }), svg('path', { class: 'edge-hit' }));
@@ -799,6 +818,9 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
     onclick: () => { const k = `${o.key}|${p.id}`; expandState.set(k, !open); tempExpand.delete(k); previewExpand.delete(k); renderSpace('keep'); if (selected) select(selected); } }, chevron(open));
   const keySelect = (id: string) => (e: Event) => { const k = (e as KeyboardEvent).key; if ((k === 'Enter' || k === ' ') && e.target === e.currentTarget) { e.preventDefault(); go(o.key, id); } };
   const boxes = [...lay.boxes.values()].sort((a, b) => (a.kind === 'frame' ? 0 : 1) - (b.kind === 'frame' ? 0 : 1) || a.depth - b.depth);
+  // Each region (an open group directly in the scope) takes a hue of its own, by its place in the scope's order.
+  const HUES = [214, 158, 32, 268, 345, 96]; // blue, teal, amber, violet, rose, green: told apart at a faint wash
+  const hueOf = new Map<string, number>(); (scope ? partOf(o, scope)?.childIds ?? [] : view.roots).forEach((id, i) => hueOf.set(id, HUES[i % HUES.length]!));
   // Same names under different parents read with their parent beside them (only where a name repeats in this view).
   const seen = new Map<string, number>();
   for (const b of boxes) if (b.kind !== 'ghost') { const n = partOf(o, b.id)!.name; seen.set(n, (seen.get(n) ?? 0) + 1); }
@@ -824,7 +846,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
     const p = partOf(o, b.id)!, of = owner(p);
     if (b.kind === 'frame') {
       const latest = subtreeRecords(view, p.id)[0]?.at ?? null, region = b.depth === 0, note = region ? mapLead(view, p.id) : '';
-      world.append(h('div', { class: `frame ${region ? 'region' : 'group'} depth-${Math.min(b.depth, 2)}${b.depth % 2 ? ' tint' : ''}${b.list ? ' list' : ''}`, 'data-part': p.id, 'data-box': p.id },
+      world.append(h('div', { class: `frame ${region ? 'region' : 'group'} depth-${Math.min(b.depth, 2)}${b.depth % 2 ? ' tint' : ''}${b.list ? ' list' : ''}`, 'data-part': p.id, 'data-box': p.id, ...(region && hueOf.has(p.id) ? { style: `--hue:${hueOf.get(p.id)}` } : {}) },
         h('div', { class: `frame-head s-${p.status}${b.head > HEAD ? ' tall' : ''}`, style: `height:${b.head}px`, 'data-part': p.id, 'data-drag': p.id, role: 'button', tabindex: '0', title: of ? `${of} › ${p.name}` : p.name, onkeydown: keySelect(p.id) },
           toggleButton(p, true),
           // A change line reads under the name (in the preview only), never beside it: the name keeps the whole head width.
@@ -842,7 +864,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
         b.kids ? toggleButton(p, false) : null,
         h('span', { class: 'node-text' }, h('span', { class: 'node-name' }, p.name),
           note ? h('span', { class: 'node-note' }, note) : null,
-          meta ? h('span', { class: 'node-meta' }, h('i', { class: 'dot', 'aria-hidden': 'true' }), meta) : alias ? h('span', { class: 'node-meta owner alias' }, alias) : of ? h('span', { class: 'node-meta owner' }, `${of} 안`) : null,
+          meta ? h('span', { class: 'node-meta' }, ladder(view, p), meta) : alias ? h('span', { class: 'node-meta owner alias' }, alias) : of ? h('span', { class: 'node-meta owner' }, `${of} 안`) : null,
           h('span', { class: 'plan-note' })),
         b.kids ? linksChip(p.id) : null, b.kids ? enterButton(p) : null));
     }
@@ -904,15 +926,40 @@ function positionWorld() {
   });
   const title = world.querySelector<HTMLElement>('.map-title');
   if (title) { const t = titleRect(); title.style.left = `${t.x}px`; title.style.top = `${t.y}px`; title.style.width = `${t.w}px`; }
+  // The lines of each drawn set routed together (ports and nudging among themselves); while a part is dragged, their plain
+  // shapes, so they follow the hand continuously; after the drop, the full routes, each morphing from the shape it had.
+  const routed = new Map([...routeEdges(lay.boxes, lay.edges, { quick: dragQuick }), ...routeEdges(lay.boxes, sums, { quick: dragQuick })]);
   world.querySelectorAll<SVGGElement>('.edge').forEach(g => {
-    const a = lay.boxes.get(g.dataset.from!), b = lay.boxes.get(g.dataset.to!); if (!a || !b) return;
-    const r = edgePath(a, b, lay.boxes.values()); g.querySelectorAll('path').forEach(x => x.setAttribute('d', r.d));
+    const r = routed.get(g.dataset.key!); if (!r) return;
+    const from = morphFrom?.get(g.dataset.key!) ?? null;
+    g.querySelectorAll('path').forEach(x => x.setAttribute('d', r.d));
+    if (from && from !== r.d) morphEdge(g, from, r.d);
     g.classList.toggle('detour', !!r.detour);
     // A line that crosses nothing it does not belong to reads above the group surfaces, so its run inside the groups of its own
     // ends is seen up to its part; one that has to cross another box stays under them.
     g.classList.toggle('clear', r.clear); layerEdge(g);
   });
   placeEdgeLabels();
+}
+/** While a part is dragged: lines keep their plain shape (map-route quick). morphFrom: the shapes the lines had before a drop,
+ * for the morph into their full routes. */
+let dragQuick = false, morphFrom: Map<string, string> | null = null;
+const MORPH_MS = 200;
+const morphing = new Map<SVGGElement, number>();
+/** A line's path from the shape it had to its new route: both sampled at even steps and mixed, ease-out, then the exact route. */
+function morphEdge(g: SVGGElement, fromD: string, toD: string) {
+  const probe = (d: string) => { const p = svg('path', { d }) as SVGPathElement; return samplePath(p, 48); };
+  let a: Point[], b: Point[];
+  try { a = probe(fromD); b = probe(toD); } catch { return; }
+  const paths = [...g.querySelectorAll('path')], started = performance.now();
+  const prior = morphing.get(g); if (prior) cancelAnimationFrame(prior);
+  const step = (now: number) => {
+    const t = Math.min(1, (now - started) / MORPH_MS), e = 1 - (1 - t) * (1 - t) * (1 - t);
+    if (t >= 1) { paths.forEach(p => p.setAttribute('d', toD)); morphing.delete(g); return; }
+    const d = mixPath(a, b, e); paths.forEach(p => p.setAttribute('d', d));
+    morphing.set(g, requestAnimationFrame(step));
+  };
+  morphing.set(g, requestAnimationFrame(step));
 }
 /** Map lines at rest on a busy map: the summary lines (see renderSpace). With a selection, sums holds what each of them still
  * holds beside the selection's own lines (restSummary, set by markSelection); the drawn lines are restSums'. */
@@ -1430,6 +1477,7 @@ function renderLens() {
       path.length ? h('div', { class: 'lens-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope) }, x.name)])) : null,
       h('h2', { id: 'lens-title' }, part.name),
       aliasOf(o.view, part.id) ? h('p', { class: 'lens-alias' }, aliasOf(o.view, part.id)) : null,
+      ladderLine(o.view, part),
       h('div', { class: 'head-tools' },
         menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e: Event) => { ((e.currentTarget as HTMLElement).parentElement as HTMLDetailsElement).open = false; } }, ...menuItems)) : null,
         h('button', { type: 'button', class: 'rail-toggle', 'aria-label': '읽기면 접기', 'aria-expanded': 'true', title: '읽기면 접기 · 지도를 넓게 봐요', onclick: () => setRail(true) }, railIcon(true)),
@@ -1437,8 +1485,8 @@ function renderLens() {
     // The current statements read right after the description they may qualify; the lines to other parts follow them.
     h('div', { class: 'lens-body' }, desc, claims, sessionsLine(o.project, part.id), ...ports, requested, innerSection, inside),
     h('footer', { class: 'lens-foot' },
-      h('button', { type: 'button', class: 'lens-more', onclick: () => openSheet() }, records.length ? `근거·기록 ${records.length}` : '전체 읽기', thread ? ` · 정리 ${thread}` : '', h('span', { 'aria-hidden': 'true' }, ' ›')),
-      status.ai === 'deepseek' ? h('button', { type: 'button', class: 'link-button', onclick: () => { composerOpen = true; openSheet(() => document.getElementById(status.access === 'code' && !sessionCode() ? 'access-code' : 'ask-input')?.focus()); } }, '질문하기') : null));
+      h('button', { type: 'button', class: 'lens-more', onclick: () => openSheet() }, records.length ? `기록 전체 읽기 · ${records.length}` : '전체 읽기', thread ? ` · 정리 ${thread}` : '', h('span', { 'aria-hidden': 'true' }, ' ›')),
+      status.ai === 'deepseek' ? h('button', { type: 'button', class: 'link-button', onclick: () => { composerOpen = true; openSheet(() => document.getElementById(status.access === 'code' && !sessionCode() ? 'access-code' : 'ask-input')?.focus()); } }, '이 부분에 대해 묻기') : null));
   l.hidden = false;
   clampNotes(l, o, part.id);
 }
@@ -1628,7 +1676,7 @@ function renderPanel(scrollTop: boolean) {
     h('button', { type: 'button', class: 'secondary go-in', onclick: () => go(o.key, null, part.id) }, `안으로 들어가기 · ${part.childIds.length}`, h('span', { 'aria-hidden': 'true' }, ' ›'))));
   if (records.length) {
     const showAll = records.length <= 5, list = h('ol', { class: 'records' }, ...records.slice(0, showAll ? records.length : 4).map(r => recordItem(o, r, r.partId !== part.id)));
-    const sec = h('section', { class: 'sec' }, h('h3', {}, '근거 원문 ', h('small', {}, `개발 도구에서 받은 기록 ${records.length}`)), list);
+    const sec = h('section', { class: 'sec' }, h('h3', {}, '기록 원문 ', h('small', {}, `개발 도구에서 받은 기록 ${records.length}`)), list);
     if (!showAll) sec.append(h('button', { type: 'button', class: 'records-more link-button', onclick: (e: Event) => { list.replaceChildren(...records.map(r => recordItem(o, r, r.partId !== part.id))); (e.target as HTMLElement).remove(); } }, `기록 ${records.length - 4}개 더 보기`));
     body.append(sec);
   }
@@ -2134,7 +2182,7 @@ function understoodLine(o: Opened): HTMLElement | null {
   if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && !limited) line.append(h('button', { type: 'button', class: 'map-more', title: sendLine(inp), onclick: () => { if (returnView.isOpen()) returnView.close(); planView.openResults(); } }, '요청문을 골라 대조'));
   if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && mapRun.can() && !st.pending && !waiting) line.append(h('button', { type: 'button', class: 'map-more mu-map-only', title: '요청과 대조하지 않고 지도만 정리해요. 원문은 보존되며 나중에 요청문을 골라 대조할 수 있어요.', onclick: () => void mapRun.runMapOnly() }, '요청 대조 없이 지도만 정리'));
   if (last?.version === 'map-reading.1' && !limited && frozenRequests(o.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : [])).length) line.append(h('button', { type: 'button', class: 'map-more', title: '지도에 읽힌 원문도 고른 요청과 나중에 대조할 수 있어요', onclick: () => { if (returnView.isOpen()) returnView.close(); planView.openResults(); } }, '나중에 요청문을 골라 대조'));
-  if (last) line.append(h('button', { type: 'button', class: 'map-more', title: '이번 정리의 근거와 확인할 것', onclick: () => openReturn() }, '근거'));
+  if (last) line.append(h('button', { type: 'button', class: 'map-more', title: '이번 정리가 무엇을 읽었고 무엇이 비었는지', onclick: () => openReturn() }, '정리 근거 · 빈틈'));
   if (st.error) line.append(h('span', { class: 'mu-error', role: 'alert' }, st.error));
   const note = runNotice(); if (note) line.append(note);
   return line;
@@ -2278,6 +2326,12 @@ function currentRequestResults(o: Opened, partId?: string): HTMLElement | null {
   });
 }
 const CLAIM_ORDER: ClaimKind[] = ['open', 'differs', 'want', 'reported', 'checked', 'idea', 'describes'];
+/** The headings the pane reads the claims under, in plain words, and what each means (its hint). A report is not a check. */
+const CLAIM_HEADING: Record<ClaimKind, string> = { open: '아직 정하지 않은 것', differs: '기록끼리 다른 것', want: '요청한 것', reported: '했다고 보고됨', checked: '확인됨', idea: '구상', describes: '작동 방식' };
+const CLAIM_HINT: Record<ClaimKind, string> = { open: '기록이 선택을 남겨 둔 것', differs: '기록마다 다르게 적힌 것', want: '사람이 바라거나 요구한 것', reported: 'AI나 담당이 했다고 적은 것 · 확인된 것은 아님', checked: '검사·자료·직접 읽기로 확인된 것', idea: '해 보자고 적은 생각', describes: '어떻게 돌아가는지 적힌 설명' };
+/** A passage as the pane shows it under its line: its first stretch, whole when short. */
+const QUOTE_SHOW = 120;
+const quoteLine = (q: string) => { const t = q.replace(/\s+/g, ' ').trim(); return t.length > QUOTE_SHOW ? `${t.slice(0, QUOTE_SHOW - 1)}…` : t; };
 /** Said once, where a description or a line rests only on a report a later record took back (it stays; it is not current evidence). */
 const REVISED_BASIS = ' · 근거였던 보고는 이후 정정됨';
 /** Claims of a part as short lines, a report correcting an earlier one first, then most decision-relevant, each with its quote.
@@ -2287,10 +2341,19 @@ function claimList(part: string, claims: CurrentClaim[], max: number): HTMLEleme
   const fresh = new Map<string, number>(); for (const c of claims) if (!fresh.has(c.reading)) fresh.set(c.reading, fresh.size);
   const sorted = [...claims].sort((a, b) => Number(!!b.replaces) - Number(!!a.replaces) || CLAIM_ORDER.indexOf(a.kind) - CLAIM_ORDER.indexOf(b.kind)
     || fresh.get(a.reading)! - fresh.get(b.reading)! || a.index - b.index).slice(0, max);
-  return h('ul', { class: 'claims' }, ...sorted.map(c => h('li', { class: `claim k-${c.kind}${c.replaces ? ' replaces' : ''}` },
-    // The kind column keeps its usual width; that this one corrects an earlier claim reads on its own line above the text.
-    h('span', { class: 'cl-kind' }, CLAIM_LABEL[c.kind]), h('span', { class: 'cl-text' }, c.replaces ? h('span', { class: 'cl-revises' }, '앞 주장을 대체한 정정') : null, c.text, c.about ? h('small', { class: 'cl-about', title: c.about }, ` · ${displayAbout(c.about)}`) : null),
-    h('button', { type: 'button', class: 'cl-cite', 'data-claim-focus': JSON.stringify([part, c.reading, c.index, c.record, c.from ?? null, c.to ?? null]), title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote, c.from) }, '근거'))));
+  // Read under headings in plain words, one per kind present; a line that corrects an earlier one says so above its text, and
+  // every line shows the passage it rests on (its first stretch) with the way to the record.
+  const box = h('div', { class: 'claim-groups' });
+  for (const kind of CLAIM_ORDER) {
+    const mine = sorted.filter(c => c.kind === kind); if (!mine.length) continue;
+    box.append(h('section', { class: `cg k-${kind}` },
+      h('h4', { title: CLAIM_HINT[kind] }, CLAIM_HEADING[kind], h('small', {}, String(mine.length)), kind === 'reported' ? h('span', { class: 'cg-note' }, '확인 전') : null),
+      h('ul', { class: 'claims' }, ...mine.map(c => h('li', { class: `claim k-${c.kind}${c.replaces ? ' replaces' : ''}` },
+        h('span', { class: 'cl-text' }, c.replaces ? h('span', { class: 'cl-revises' }, '앞의 말을 대체한 정정') : null, c.text, c.about ? h('small', { class: 'cl-about', title: c.about }, ` · ${displayAbout(c.about)}`) : null),
+        h('span', { class: 'cl-from' }, h('q', { class: 'cl-quote', title: c.quote }, quoteLine(c.quote)),
+          h('button', { type: 'button', class: 'cl-cite', 'data-claim-focus': JSON.stringify([part, c.reading, c.index, c.record, c.from ?? null, c.to ?? null]), title: '이 말의 원문을 기록에서 보기', onclick: () => showQuote(c.record, c.quote, c.from) }, '원문 보기')))))));
+  }
+  return box;
 }
 /** What the person unfolded in the lens, per part (memory, this tab): long relation notes.
  * Reading a quote or following a relation and coming back keeps them as they were, like the scroll and the focused citation. */
@@ -2300,7 +2363,7 @@ const lensOpen = new Set<string>();
 function roleBasisBlock(o: Opened, part: string, u: PartUnderstanding, surface: 'lens' | 'sheet'): HTMLElement | null {
   const ev = roleEvidence(part, u); if (!ev) return null;
   const key = `${o.key}|${part}|role-basis|${surface}`;
-  const fold = h('details', { class: 'role-basis', open: lensOpen.has(key) }, h('summary', {}, `설명 근거 ${ev.count}`),
+  const fold = h('details', { class: 'role-basis', open: lensOpen.has(key) }, h('summary', {}, `이 설명의 원문 ${ev.count}`),
     h('ul', {}, ...ev.items.map(x => h('li', {}, h('button', { type: 'button', class: 'cl-cite', 'data-claim-focus': x.key, title: `원문에서 보기 · “${x.quote.quote}”`,
       onclick: () => showQuote(x.quote.record, x.quote.quote, x.quote.from) }, x.label)))));
   fold.addEventListener('toggle', () => { if (fold.open) lensOpen.add(key); else lensOpen.delete(key); });
@@ -2311,7 +2374,7 @@ function roleBasisBlock(o: Opened, part: string, u: PartUnderstanding, surface: 
 function lensClaims(part: string, claims: CurrentClaim[]): HTMLElement {
   const list = claimList(part, claims, claims.length);
   list.id = 'lens-claims';
-  return h('section', { class: 'lens-claims', 'aria-label': `현재 주장 ${claims.length}개` }, h('h3', {}, '현재 주장', h('small', {}, String(claims.length))), list);
+  return h('section', { class: 'lens-claims', 'aria-label': `기록이 말하는 것 ${claims.length}개` }, h('h3', {}, '기록이 말하는 것', h('small', {}, String(claims.length))), list);
 }
 /** A relation note longer than its three lines reads whole on request, in place (the row itself goes to the other end). Safe to
  * run again over the same pane (rows shown later, e.g. after '더 보기'): a row that has its control keeps it. */
@@ -2340,7 +2403,7 @@ function showQuote(record: string, quote: string, from?: number) {
 let fixingRole: { key: string; part: string } | null = null;
 function understoodSection(o: Opened, part: PartView): HTMLElement | null {
   const u = part.reading; if (!u) return null;
-  const sec = h('section', { class: 'sec sec-understood' }, h('h3', {}, '기록에서 읽은 이해'));
+  const sec = h('section', { class: 'sec sec-understood' }, h('h3', {}, '기록에서 읽은 것'));
   if (fixingRole?.key === o.key && fixingRole.part === part.id && o.kind === 'saved') {
     const area = h('textarea', { id: 'fix-role', rows: '3', maxlength: '300' }) as HTMLTextAreaElement; area.value = u.role ?? '';
     const msg = h('p', { class: 'form-msg', role: 'status' });
@@ -2370,7 +2433,7 @@ function understoodSection(o: Opened, part: PartView): HTMLElement | null {
   // The history fold and its quotes keep their identity (this entry and part; each quote by its stored reading, index and place):
   // back from an original the fold is open again and the same quote has focus, also between two readings with the same time.
   const histKey = `${o.key}|${part.id}|history`;
-  const hist = h('details', { class: 'und-history', open: lensOpen.has(histKey) }, h('summary', {}, `근거 이력 · 정리 ${u.history.length}회`),
+  const hist = h('details', { class: 'und-history', open: lensOpen.has(histKey) }, h('summary', {}, `읽은 이력 · 정리 ${u.history.length}회`),
     h('ol', {}, ...[...u.history].reverse().map(x => h('li', {}, h('span', { class: 'uh-at' }, fullTime(x.at)),
       x.role ? h('span', { class: 'uh-role' }, x.role) : null,
       ...x.claims.map((c, j) => h('span', { class: 'uh-claim' }, h('span', { class: 'cl-kind' }, CLAIM_LABEL[c.kind]), c.text, ' ',
@@ -2529,14 +2592,19 @@ function bindCanvas() {
     if (drag.mode === 'pan') { mapMoved = true; camera = { ...camera, x: drag.cx + dx, y: drag.cy + dy }; applyCamera(); return; }
     const o = opened!; const pos = positionsOf(o);
     (pos[drag.container] ??= {})[drag.id] = { x: Math.round(drag.start.x + dx / camera.k), y: Math.round(drag.start.y + dy / camera.k) };
-    relayout(o); positionWorld();
+    dragQuick = true; relayout(o); positionWorld();
   });
   const end = (e: PointerEvent) => {
     if (!drag || drag.pointer !== e.pointerId) return;
     const d = drag; drag = null; vp.classList.remove('grabbing', 'moving');
     document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
-    const o = opened; if (!o || e.type === 'pointercancel') return;
-    if (d.mode === 'part' && d.moved) { savePositions(o); return; }
+    const o = opened; if (!o || e.type === 'pointercancel') { dragQuick = false; return; }
+    if (d.mode === 'part' && d.moved) {
+      // The drop: lines take their full routes, each from the plain shape it followed the hand with.
+      morphFrom = new Map([...$('world').querySelectorAll<SVGGElement>('.edge')].map(g => [g.dataset.key!, g.querySelector('.edge-line')?.getAttribute('d') ?? '']));
+      dragQuick = false; relayout(o); positionWorld(); morphFrom = null;
+      savePositions(o); return;
+    }
     if (d.mode === 'part') {
       const now = Date.now(), part = partOf(o, d.id);
       const twice = lastClick.id === d.id && lastClick.scope === scope && now - lastClick.at < 380 && Math.abs(lastClick.x - e.clientX) + Math.abs(lastClick.y - e.clientY) < 8;

@@ -12,7 +12,9 @@
   --change: #a55a0b; --change-soft: #fdf4e8; --change-line: #edc48d;
   --ok: #17b26a; --busy: #f79009; --plan: #98a2b3; --warn: #f04438;
   --frame-0: #eceef2; --frame-1: #e4e7ec; --frame-2: #dde1e7;
-  --edge: #9ea7b4; --tint: #f3f4f7; --hair-2: #e5e8ec; --region-line: #e0e3e8;
+  --edge: #98a2b3; --edge-spine: #5b6678; --edge-soft: #c9d0da; --tint: #f3f4f7; --hair-2: #e5e8ec; --region-line: #e0e3e8;
+  /* The ladder a part's records climb: a request, a report of work, a check. Reported is not checked: amber, then green. */
+  --rung-off: #e4e7ec; --rung-ask: #667085; --rung-report: #f79009; --rung-check: #12b76a;
   /* Status tints: a soft fill and a darker text of the same hue, for chips and short messages (text on its own soft at 4.5:1+). */
   --line-hover: #c4cad4; --accent-hover: #e0eaff; --focus-halo: rgba(21,94,239,.16);
   --ok-soft: #ecfdf3; --ok-text: #067647; --warn-soft: #fef3f2; --warn-text: #b42318; --change-text: #7a3f07;
@@ -201,7 +203,7 @@ button:disabled { opacity: .5; cursor: default; }
    a list. Text never shrinks; heights come from the layout (map-layout measures names in the weights used here). */
 .space { position: relative; overflow: hidden; min-height: 0; --plan-w: 0px; }
 .viewport { position: absolute; inset: 0; overflow: hidden; cursor: grab; touch-action: none; user-select: none;
-  background-color: var(--bg); background-image: radial-gradient(circle, var(--canvas-dot) 1px, transparent 1.3px); background-size: 24px 24px; }
+  background-color: var(--bg); background-image: radial-gradient(circle, var(--canvas-dot) .9px, transparent 1.2px); background-size: 24px 24px; }
 .viewport.grabbing { cursor: grabbing; }
 .world { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
 .world.animate { transition: transform .22s ease; }
@@ -223,13 +225,15 @@ button:disabled { opacity: .5; cursor: default; }
    with a dot at both ends). Hover and selection add width as well as colour; the end marks follow the line's colour. */
 .edges { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
 .edge-line { fill: none; stroke: var(--edge); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; transition: stroke .12s, opacity .12s, stroke-width .12s; }
+/* The spine: the longest chain of flows through the scope, read first; its lines are darker and a little wider. */
+.edge.spine .edge-line { stroke: var(--edge-spine); stroke-width: 2; }
 .edge-hit { fill: none; stroke: transparent; stroke-width: 14; pointer-events: stroke; cursor: help; }
 .edge.k-needs .edge-line { stroke-dasharray: 6 4; }
 .edge.k-shares .edge-line { stroke-dasharray: 1.5 4.5; stroke-width: 1.8; }
 .edge.k-related .edge-line { stroke-dasharray: 1 6; stroke-width: 1.8; }
 /* A line drawn from a folded part summarises relations of its inside: a soft band (wider, translucent, no kind dashes), not a
    crisp relation of that part. Its ends stay small: a band's dot would read as a part. */
-.edge.agg .edge-line { stroke: #ccd2da; stroke-width: 3; stroke-dasharray: none; marker-start: none; }
+.edge.agg .edge-line { stroke: var(--edge-soft); stroke-width: 3; stroke-dasharray: none; marker-start: none; }
 .edge.near .edge-line { stroke: var(--text-3); stroke-width: 2.1; stroke-opacity: 1; }
 .edge.near:not(.on):not(.k-related) .edge-line { marker-end: url(#arrow-near); }
 .edge.on .edge-line { stroke: var(--accent); stroke-width: 2.25; stroke-opacity: 1; }
@@ -241,7 +245,7 @@ button:disabled { opacity: .5; cursor: default; }
 #arrow path, #dot circle { fill: var(--edge); } #arrow-on path, #dot-on circle { fill: var(--accent); } #arrow-near path { fill: var(--text-3); }
 /* Where supported, every end mark takes its own line's paint (hover, selection, a folded band, a change's context). */
 #arrow path, #dot circle, #arrow-on path, #dot-on circle, #arrow-near path { fill: context-stroke; }
-.space.dim .edge:not(.on):not(.near) .edge-line { opacity: .3; }
+.space.dim .edge:not(.on):not(.near) .edge-line { opacity: .22; }
 
 .map-title { position: absolute; pointer-events: none; transition: opacity .12s; }
 .map-title button { pointer-events: auto; }
@@ -265,6 +269,10 @@ button:disabled { opacity: .5; cursor: default; }
 
 .frame { position: absolute; border-radius: var(--r-lg); border: 1px solid transparent; transition: border-color .12s, box-shadow .12s; }
 .frame.region { background: #fafbfc; border-color: var(--region-line); border-radius: var(--r-lg); box-shadow: var(--shadow-region); }
+/* Each region of the scope has a hue of its own (set on the element): a faint wash and a border of that hue, so the regions
+   read apart at a glance; names stay in the text greys. */
+.frame.region[style*="--hue"] { background: hsl(var(--hue) 38% 97.4%); border-color: hsl(var(--hue) 26% 86%); }
+.frame.region[style*="--hue"] > .frame-head .frame-name { color: hsl(var(--hue) 40% 24%); }
 .frame.group { background: transparent; border-color: var(--hair-2); border-radius: var(--r-pop); }
 .frame.group.tint { background: rgba(16,24,40,.022); border-color: var(--hair-2); }
 .frame:has(> .frame-head:hover):not(.selected):not(.related) { border-color: var(--line-strong); }
@@ -312,6 +320,11 @@ button:disabled { opacity: .5; cursor: default; }
 .node.item .node-name { font-size: 13px; line-height: 17px; font-weight: 550; color: var(--text); }
 .node-note { word-break: keep-all; font-size: 12.5px; line-height: 17px; color: var(--text-3); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 .node-meta { display: flex; align-items: center; gap: 6px; color: var(--text-3); font-size: 12px; line-height: 17px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; }
+/* The ladder: three short rungs (요청 · 보고 · 확인), lit as far as the part's records go. A folded part reads its inside's. */
+.ladder { display: inline-flex; align-items: center; gap: 2px; flex: none; }
+.ladder .rung { display: block; width: 11px; height: 3px; border-radius: 2px; background: var(--rung-off); }
+.ladder .rung.on.r-ask { background: var(--rung-ask); } .ladder .rung.on.r-report { background: var(--rung-report); } .ladder .rung.on.r-check { background: var(--rung-check); }
+.node.item .ladder .rung { width: 8px; }
 .node.unit .node-meta { margin-top: 2px; }
 .node-meta.owner { color: var(--text-4); }
 .node-meta.alias { color: var(--text-3); text-overflow: ellipsis; }
@@ -322,7 +335,7 @@ button:disabled { opacity: .5; cursor: default; }
 .space.dim .node.has-kids:not(.item):not(.selected):not(.related):not(.cited) { box-shadow: 0 3px 0 -1px var(--surface), 0 3px 0 0 var(--hair-2); }
 .space.dim .node:not(.selected):not(.related):not(.cited) .node-name { color: var(--text-3); }
 .space.dim .node:not(.selected):not(.related):not(.cited) :is(.node-note, .node-meta) { color: var(--text-4); }
-.space.dim .node:not(.selected):not(.related):not(.cited) .dot { opacity: .55; }
+.space.dim .node:not(.selected):not(.related):not(.cited) :is(.dot, .ladder) { opacity: .55; }
 .space.dim .node:not(.selected):not(.related):not(.cited):hover { border-color: var(--line-hover); }
 .space.dim .node:not(.selected):not(.related):not(.cited):hover .node-name { color: var(--text); }
 .toggle { flex: none; width: 22px; height: 22px; border: 0; border-radius: var(--r-sm); background: none; color: var(--text-4); display: grid; place-items: center; }
@@ -1363,8 +1376,26 @@ button:disabled { opacity: .5; cursor: default; }
 .cl-kind { flex: none; min-width: 52px; font-size: 11px; font-weight: 650; color: var(--text-3); }
 .claim.k-open .cl-kind, .claim.k-differs .cl-kind { color: var(--warn-text); }
 .claim.k-want .cl-kind { color: var(--accent); }
-.claim.k-reported .cl-kind, .claim.k-checked .cl-kind { color: var(--ok-text); }
+.claim.k-reported .cl-kind { color: var(--change-text); } .claim.k-checked .cl-kind { color: var(--ok-text); }
 .cl-text { flex: 1; min-width: 0; word-break: keep-all; }
+/* The claims under their headings: one group per kind present, a coloured mark before the heading (a report amber, a check
+   green, an open choice red), each line over the passage it rests on. */
+.claim-groups { display: flex; flex-direction: column; gap: var(--s-3); margin-top: 6px; }
+.cg h4 { margin: 0; display: flex; align-items: baseline; gap: 6px; font-size: 12px; line-height: 16px; font-weight: 650; color: var(--text-2); }
+.cg h4::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 2px; background: var(--rung-ask); transform: translateY(-.5px); }
+.cg.k-reported h4::before { background: var(--rung-report); } .cg.k-checked h4::before { background: var(--rung-check); }
+.cg.k-open h4::before, .cg.k-differs h4::before { background: var(--warn); } .cg.k-describes h4::before, .cg.k-idea h4::before { background: var(--line-strong); }
+.cg h4 small { font-weight: 500; color: var(--text-4); font-variant-numeric: tabular-nums; }
+.cg-note { margin-left: 2px; font-size: 11px; font-weight: 600; color: var(--change-text); background: var(--change-soft); border-radius: var(--r-sm); padding: 0 5px; line-height: 16px; }
+.cg .claims { margin-top: 6px; gap: 8px; }
+.cg .claim { flex-direction: column; align-items: stretch; gap: 3px; padding-left: 14px; border-left: 2px solid var(--hair-2); }
+.cg.k-reported .claim { border-left-color: #fde3b6; } .cg.k-checked .claim { border-left-color: #c6efd9; } .cg.k-open .claim, .cg.k-differs .claim { border-left-color: #fdd2cc; }
+.cl-from { display: flex; align-items: baseline; gap: 8px; min-width: 0; font-size: 12px; line-height: 17px; color: var(--text-3); }
+.cl-quote { flex: 1; min-width: 0; quotes: "“" "”"; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: keep-all; overflow-wrap: anywhere; }
+.cl-from .cl-cite { height: 18px; padding: 0 5px; font-size: 11px; white-space: nowrap; }
+/* The lens head: the ladder and what it says. */
+.lens-ladder { margin: 6px 0 0; display: flex; align-items: center; gap: 8px; font-size: 12px; line-height: 16px; color: var(--text-3); }
+.lens-ladder .ladder .rung { width: 14px; height: 4px; }
 .cl-revises { display: block; font-size: 11px; font-weight: 650; color: var(--text-2); }
 .cl-about { color: var(--text-3); }
 .cl-cite { flex: none; padding: 0 6px; height: 20px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); font-size: 11.5px; color: var(--text-2); }

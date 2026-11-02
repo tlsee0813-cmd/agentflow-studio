@@ -31,8 +31,9 @@ test('UI62-L2 relation layers centre against each other only; unlinked parts nev
   const input = l.boxes.get(byName(v, '입력과 분할').id), named = l.boxes.get(byName(v, '이름으로 열 선택').id), shared = l.boxes.get(byName(v, '공용 전처리 정의').id);
   // The unlinked input group is beside the linked block or under it, never in a column between relation layers.
   assert.ok(input.x >= shared.x + shared.w || input.y >= Math.max(named.y + named.h, shared.y + shared.h), JSON.stringify({ input, shared }));
-  // The first relation layer starts at the top: a block of unlinked parts does not push it down.
-  assert.equal(named.y, Math.min(...[...l.boxes.values()].filter(b => b.depth === 0).map(b => b.y)));
+  // The linked block starts at the top: a block of unlinked parts does not push it down (the spine runs through the block's
+  // middle, so the topmost box is one of the linked ones, not necessarily the first layer's).
+  assert.equal(Math.min(named.y, shared.y, l.boxes.get(byName(v, '자료형으로 열 선택').id).y), Math.min(...[...l.boxes.values()].filter(b => b.depth === 0).map(b => b.y)));
 });
 
 test('UI62-L3 stored places still win over the balanced arrangement', () => {
