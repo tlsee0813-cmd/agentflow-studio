@@ -300,6 +300,21 @@ test('explicit supported host render models select their provider and actual Dee
   }
 });
 
+test('a host global model names the model of the global stages alone and is read from the private file too', async t => {
+  const host = await hostFixture(t);
+  const split = await host.open({ STUDIO_MAP_RENDER_MODEL: 'deepseek-flash', STUDIO_MAP_GLOBAL_MODEL: 'gpt-6.1-terra' }), info = split.describe();
+  assert.deepEqual([info.renderModel, info.renderProvider, info.globalModel, info.globalProvider, info.deepseekMaxCalls], ['deepseek-flash', 'deepseek', 'gpt-6.1-terra', 'openai', 44]);
+  assert.equal(split.model, 'deepseek-flash_gpt-6.1-sol_gpt-6.1-terra');
+  await split.close();
+  const env = await loadMapPipelineEnv({ STUDIO_OPENAI_ENV: 'inert-render-test.env' }, async () => 'STUDIO_MAP_RENDER_MODEL=deepseek-flash\nSTUDIO_MAP_GLOBAL_MODEL=gpt-6.1-sol');
+  assert.deepEqual(env, { STUDIO_OPENAI_ENV: 'inert-render-test.env', STUDIO_MAP_RENDER_MODEL: 'deepseek-flash', STUDIO_MAP_GLOBAL_MODEL: 'gpt-6.1-sol' });
+  const fromFile = await host.open(env);
+  assert.deepEqual([fromFile.describe().globalModel, fromFile.describe().globalProvider], ['gpt-6.1-sol', 'openai']);
+  await fromFile.close();
+  await assert.rejects(host.open({ STUDIO_MAP_GLOBAL_MODEL: 'gpt-unknown' }), /^Error: Invalid map global model configuration$/);
+  const again = await host.open(); assert.equal(again.ready(), true); await again.close();
+});
+
 test('unsupported host render configuration releases its exclusive store owner before a valid restart', async t => {
   const host = await hostFixture(t);
   for (const renderModel of ['gpt-unknown', 'deepseek-other']) {

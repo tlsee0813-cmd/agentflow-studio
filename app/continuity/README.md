@@ -15,7 +15,7 @@ Codex·Claude에서 평소처럼 개발한 기록(요청·작업 보고·확인 
 
 이 브랜치의 일반 PC 실행기는 DeepSeek와 OpenAI 키가 함께 있으면 기록을 구간 추출 → 전역 설계 → 부분 작성 → 관계·조건 대조로 나눕니다. 기존 프로젝트의 첫 기록과 후속 기록에 모두 적용하며, 직접 고친 이름·설명과 고정된 요청 판본을 함께 전달합니다. 키는 서버에서만 읽습니다. 공개 Worker에는 이 경로를 아직 배포하지 않았습니다.
 
-Windows에서는 `%LOCALAPPDATA%/AgentFlowStudio/openai.env`의 `OPENAI_API_KEY`를 읽습니다. 다른 위치는 `STUDIO_OPENAI_ENV`로 지정합니다. 기존 서버 환경변수가 우선하며 기본 설계 모델은 `gpt-6.1-sol`, 부분·전역 작성 모델은 `gpt-6.1-terra`이고 모두 High입니다. 필요하면 같은 개인 파일의 `STUDIO_MAP_MERGE_MODEL`·`STUDIO_MAP_RENDER_MODEL`로 바꿀 수 있습니다. 지원 OpenAI 값은 `gpt-6.1-sol`, `gpt-6.1-terra`, `gpt-6-astra`입니다. 모델 가용 여부는 계정마다 다를 수 있습니다.
+Windows에서는 `%LOCALAPPDATA%/AgentFlowStudio/openai.env`의 `OPENAI_API_KEY`를 읽습니다. 다른 위치는 `STUDIO_OPENAI_ENV`로 지정합니다. 기존 서버 환경변수가 우선하며 기본 설계 모델은 `gpt-6.1-sol`, 부분·전역 작성 모델은 `gpt-6.1-terra`이고 모두 High입니다. 필요하면 같은 개인 파일의 `STUDIO_MAP_MERGE_MODEL`(설계)·`STUDIO_MAP_RENDER_MODEL`(부분 작성)·`STUDIO_MAP_GLOBAL_MODEL`(관계·조건 대조, 정하지 않으면 작성 모델)로 바꿀 수 있습니다. 지원 OpenAI 값은 `gpt-6.1-sol`, `gpt-6.1-terra`, `gpt-6-astra`입니다. 모델 가용 여부는 계정마다 다를 수 있습니다.
 
 OpenAI 기본 상한은 정리당 $1·월 $20이며 `STUDIO_MAP_RUN_USD`·`STUDIO_MAP_MONTHLY_USD`로 설정합니다. DeepSeek 비용은 별도입니다. DeepSeek 호출은 정리당 최대 24회(구간 12 + 구간별 교정 1회)이며, DeepSeek 작성 배치를 고르면 48회입니다. 첫 지도에서 항목 하나가 근거 규칙에 어긋나면 그 항목만 제외하고 사유를 읽기 진단에 남깁니다. 단계가 거절되면 화면이 어느 단계·어떤 규칙인지 말하고, `STUDIO_KEEP_REFUSED=on`이면 가려진 원응답을 `.studio-data/refused-<port>`에 보관합니다. 완료 단계와 비용 예약을 PC에 보관하므로 창을 닫아도 실행기가 켜져 있으면 계속합니다. 전송 결과가 불명인 호출은 자동 재전송하지 않습니다. 설정 오류, 비용 상한, 취소, 미완성 응답은 기존 지도에 부분 적용하지 않습니다. 전체 수용 범위와 남은 검증은 [후보 결과](../../docs/releases/2026-11-02/RESULT.md)를 확인하세요.
 

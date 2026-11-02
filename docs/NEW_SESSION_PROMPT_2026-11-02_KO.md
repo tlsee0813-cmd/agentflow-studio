@@ -20,7 +20,7 @@ AgentFlow Studio를 이어받아, 이 PC에서 "기록으로 첫 지도 만들�
 
 ## 지금 상태
 - 분할 파이프라인: DeepSeek 추출 → gpt-6.1-sol 설계 → gpt-6.1-terra 부분 작성 → 전역. 코드는 `app/continuity/server/map-pipeline.mjs`, 검증은 `map-partition.mjs`·`map-blueprint.mjs`·`src/shared/map-reading.ts`.
-- 2026-11-02 저녁, 실제 모델로 첫 지도 한 건이 끝까지 성공했다(`docs/cycles/ACTIVE.md` 맨 위 절). 추출 영수증의 불필요한 키를 지나치는 `.8`은 모의 검사로만 확인했다. 후속 지도(map.7, 기록의 뒷부분 읽기)는 실제 모델로 아직 확인하지 않았다. 거절되면 화면과 작업 오류 `detail`에 단계·규칙이 나오고, 보관 파일에 원응답이 남는다.
+- 2026-11-02 저녁, 실제 모델로 첫 지도 두 건(`.7`, `.9`)과 후속 지도 한 건(`.8`)이 끝까지 성공했다(`docs/cycles/ACTIVE.md` 맨 위 절). 배치 비교(A~E2) 결과 기본 배치(DeepSeek 추출 → Sol 설계 → Terra 작성·전역)를 유지했고, `.9`에 전역 모델 설정·설계 예산·규칙 세 문장이 들어갔다. 거절되면 화면과 작업 오류 `detail`에 단계·규칙이 나오고, 보관 파일에 원응답이 남는다.
 - 모의 검사 1,025건은 통과 상태다(이 PC: 1,021 통과·4 skip). `npm`은 이 PC에 없으므로 `npm run check` 대신 `& $node node_modules/typescript/bin/tsc --noEmit`과 `& $node scripts/check.mjs`를 app 폴더에서 돌린다.
 
 ## 규칙

@@ -64,10 +64,10 @@
 | 단계 | 모델(기본) | 수 | 동시 | 시간 제한 | 교정 |
 | --- | --- | --- | --- | --- | --- |
 | 구간 추출 `extract-n` | DeepSeek(`DEEPSEEK_PLAN_MODEL`) | 구간 수(최대 12) | 2 | 60초 | 형식·영수증 거절 시 1회(OpenAI 작성 배치에서만) |
-| 설계 `plan` | gpt-6.1-sol, reasoning high | 1 | — | 180초 | 형식·원문 위치 거절 시 1회 |
+| 설계 `plan` | gpt-6.1-sol, reasoning high | 1 | — | 300초, 출력 16,384토큰(추론 포함) | 형식·원문 위치 거절 시 1회 |
 | 부분 작성 `render-n` | gpt-6.1-terra(`STUDIO_MAP_RENDER_MODEL`) | 설계 부분 3개씩, 최대 24부분 = 8그룹 | 2 | 180초(DeepSeek 작성이면 60초) | 근거·형식 거절 시 1회 |
-| 전역 대조 `global` | 작성 모델 | 1 | — | 위와 같음 | 1회 |
-| 의미 재작성 `render-n-semantic` → `global-final` | 작성 모델 | 지정 그룹 + 1 | 2 | 위와 같음 | 각 1회, 재작성 자체는 최대 1회 |
+| 전역 대조 `global` | 전역 모델(`STUDIO_MAP_GLOBAL_MODEL`, 정하지 않으면 작성 모델) | 1 | — | 위와 같음 | 1회 |
+| 의미 재작성 `render-n-semantic` → `global-final` | 작성 모델 → 전역 모델 | 지정 그룹 + 1 | 2 | 위와 같음 | 각 1회, 재작성 자체는 최대 1회 |
 
 - 구간은 원문 span을 자르지 않고 순서대로 묶는다. 구간 핵심 글자 3,500자 안팎, 최대 12구간. 브라우저와 서버가 같은 묶음 함수(`partitionGroups`)를 쓴다.
 - 추출 메모와 설계는 근거가 아니다. 최종 지도는 원래 요청 전체에 대해 기존 map.6/map.7 검증(`validateMapReply`)을 통과해야 적용된다.

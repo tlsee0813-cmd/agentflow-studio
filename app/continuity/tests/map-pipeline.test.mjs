@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { ApiError } from '../../server/errors.mjs';
 import { encodeSpans } from '../dist/public/shared/evidence-span.js';
 import { validateMapAsk, validateMapReply } from '../dist/public/shared/map-reading.js';
-import { createFirstMapPipeline, PIPELINE_RECIPE, LATER_PIPELINE_RECIPE } from '../server/map-pipeline.mjs';
+import { createFirstMapPipeline, PIPELINE_RECIPE, LATER_PIPELINE_RECIPE , PLAN_TIMEOUT_MS } from '../server/map-pipeline.mjs';
 import { openFirstMapPipeline } from '../server/map-pipeline-host.mjs';
 import { parseProject } from '../dist/public/shared/validation.js';
 import { openMapPipelineStore } from '../server/map-pipeline-store.mjs';
@@ -553,6 +553,39 @@ test('render model options preserve the DeepSeek default and distinguish provide
   for (const pipeline of [defaults, terra, sol]) assert.notEqual(pipeline.identity, pipeline.laterIdentity);
 });
 
+// first-map-divided.9: the plan may write 16,384 output tokens within 300 s; renders and global stages keep 8,192 within 180 s.
+test('the plan stage alone gets the larger output budget and the longer time limit', async t => {
+  const { make } = await setup(t), ask = askFor(), calls = [];
+  const pipeline = make({ renderModel: 'gpt-6.1-terra', callProvider: fakeProvider(ask, calls) });
+  validateMapReply(await pipeline.call(ask), ask);
+  const budget = stage => [...new Set(calls.filter(c => c.stage === stage).map(c => `${c.options.maxOutputTokens}/${c.options.timeoutMs}`))];
+  assert.deepEqual(budget('plan'), ['16384/300000']);
+  assert.deepEqual(budget('render'), ['8192/180000']); assert.deepEqual(budget('global'), ['8192/180000']);
+  assert.deepEqual(budget('extract'), ['4096/60000']);
+  assert.equal(PLAN_TIMEOUT_MS, 300000);
+});
+
+// first-map-divided.9: the global stages may run on a model of their own; unnamed, they run on the render model as before.
+test('a global model of its own sends only the global stages to it, names the batch once per model and counts DeepSeek calls', async t => {
+  const { make } = await setup(t), ask = askFor();
+  const same = make({ renderModel: 'gpt-6.1-terra' }), split = make({ renderModel: 'deepseek-flash', globalModel: 'gpt-6.1-terra' });
+  assert.equal(same.describe().globalModel, 'gpt-6.1-terra'); assert.equal(same.describe().globalProvider, 'openai');
+  assert.equal(same.model, 'deepseek-flash_gpt-6.1-sol_gpt-6.1-terra');
+  assert.equal(split.model, 'deepseek-flash_gpt-6.1-sol_gpt-6.1-terra', 'each distinct model once, in stage order');
+  assert.equal(make({ renderModel: 'gpt-6.1-terra', globalModel: 'gpt-6.1-sol' }).model, 'deepseek-flash_gpt-6.1-sol_gpt-6.1-terra');
+  assert.notEqual(split.identity, same.identity); assert.notEqual(split.laterIdentity, same.laterIdentity);
+  assert.notEqual(make({ renderModel: 'gpt-6.1-terra', globalModel: 'gpt-6.1-sol' }).identity, same.identity);
+  // DeepSeek rendering with OpenAI global stages: 12 extractions (no correction) + 8 groups x (1 + semantic) x (1 + correction).
+  assert.deepEqual([split.describe().renderProvider, split.describe().deepseekMaxCalls], ['deepseek', 44]);
+  assert.equal(make({ renderModel: 'gpt-6.1-terra', globalModel: 'deepseek-flash' }).describe().deepseekMaxCalls, 28);
+  for (const globalModel of ['gpt-unknown', 'deepseek-other', '', null]) assert.throws(() => make({ renderModel: 'gpt-6.1-terra', globalModel }), /Invalid map global model configuration/);
+  const calls = [], pipeline = make({ renderModel: 'deepseek-flash', globalModel: 'gpt-6.1-terra', callProvider: fakeProvider(ask, calls) });
+  validateMapReply(await pipeline.call(ask), ask);
+  assert.deepEqual([...new Set(calls.filter(c => c.stage === 'render').map(c => `${c.provider}:${c.options.model}`))], ['deepseek:deepseek-flash']);
+  assert.deepEqual(calls.filter(c => c.stage === 'global').map(c => `${c.provider}:${c.options.model}`), ['openai:gpt-6.1-terra']);
+  assert.equal(calls.some(c => c.input.correction), false);
+});
+
 test('unsupported render models are rejected rather than substituted or dispatched', async t => {
   const { make } = await setup(t); let calls = 0;
   for (const renderModel of ['gpt-unknown', 'deepseek-other', '', null]) {
@@ -1011,8 +1044,8 @@ function browserApply(f, wire, exclusions, n = 7) {
 }
 
 test('recipe identities are bumped for the changed prompts and validation semantics', () => {
-  assert.equal(PIPELINE_RECIPE, 'first-map-divided.8');
-  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.8');
+  assert.equal(PIPELINE_RECIPE, 'first-map-divided.9');
+  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.9');
 });
 
 test('a render fragment with one unresolvable claim alias is applied with only that claim set aside and a durable diagnostic', async t => {
