@@ -258,7 +258,10 @@ export function mapCorrectionRevision(wire, ask, blueprint) {
 
 /** Check one renderer before caching it. A private validation projection removes only new-parent links that can point
  * into another group; original parent choices are independently checked against the blueprint and never changed on return. */
-export function validateRenderedFragment(value, group, ask, blueprint) {
+/** The contract's bound on a claim's text (map-reading.ts). A fragment's first pass is refused for a claim over it, so the
+ * stage's one correction rewrites that claim; the correction's reply is read leniently (the item is set aside, as before). */
+export const CLAIM_TEXT_MAX = 240;
+export function validateRenderedFragment(value, group, ask, blueprint, strict = false) {
   const planned = validateMapBlueprint(blueprint, ask), groups = splitBlueprintParts(planned), index = groups.findIndex(candidate => candidate.id === group?.id);
   if (index < 0 || !Array.isArray(group.parts) || group.parts.length !== groups[index].parts.length
     || group.parts.some((part, i) => part?.ref !== groups[index].parts[i].ref)
@@ -275,6 +278,9 @@ export function validateRenderedFragment(value, group, ask, blueprint) {
       if (!(n >= index * 100 + 1 && n <= index * 100 + 99)) invalid();
     }
     seen.add(part.ref);
+  }
+  if (strict) for (const [i, part] of value.parts.entries()) for (const [j, claim] of part.claims.entries()) {
+    if (typeof claim?.text === 'string' && claim.text.length > CLAIM_TEXT_MAX) invalid(Object.assign(new Error('claim text over the bound'), { validation: { path: `parts[${i}].claims[${j}].text`, rule: 'length' } }));
   }
   const projected = structuredClone(value);
   for (const part of projected.parts) if (NEW.test(part.ref)) part.parent = null;
@@ -365,6 +371,7 @@ export function mapStageIssues(value, error) {
         const part = value.parts[i]; if (!part || typeof part !== 'object') continue;
         count(part.basis, 4, `parts[${i}].basis`); count(part.claims, 4, `parts[${i}].claims`);
         length(part.name, 60, `parts[${i}].name`); length(part.role, 300, `parts[${i}].role`);
+        if (Array.isArray(part.claims)) for (let j = 0; j < Math.min(part.claims.length, 8); j++) length(part.claims[j]?.text, CLAIM_TEXT_MAX, `parts[${i}].claims[${j}].text`);
       }
       for (const [field, maximum] of [['relations', 12], ['candidates', 6], ['gaps', 2], ['matches', 24], ['material', 6]]) count(value[field], maximum, field);
     }

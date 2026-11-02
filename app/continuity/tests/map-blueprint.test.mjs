@@ -121,6 +121,14 @@ test('fragments cannot take another group, rename/reparent, omit/duplicate a ref
     const bad = structuredClone(fragments[1]); bad.parts[0].claims[0].key = key;
     refused(() => validateRenderedFragment(bad, splitBlueprintParts(blueprint)[1], f.ask, blueprint));
   }
+  // .21: a claim over 240 characters refuses the first pass (so the correction rewrites it) and names its path and length (the
+  // correction's reply is read as before: a first map sets the item aside, a later map refuses it as its contract says).
+  const f0 = fixture(), b0 = planned(f0, 4), fr0 = rendered(f0, b0), g0 = splitBlueprintParts(b0)[0];
+  const long = structuredClone(fr0[0]); long.parts[0].claims[0].text = '상태'.repeat(121);
+  assert.ok(long.parts[0].claims[0].text.length > 240);
+  const error = refused(() => validateRenderedFragment(long, g0, f0.ask, b0, true));
+  assert.deepEqual(mapStageIssues(long, error).find(x => x.rule === 'length' && x.path === 'parts[0].claims[0].text'), { path: 'parts[0].claims[0].text', rule: 'length', expected: 240, actual: long.parts[0].claims[0].text.length });
+  refused(() => validateRenderedFragment(long, g0, f0.ask, b0, false));
 });
 
 test('existing fragment names and parent stay null on map wire while original blueprint names stay exact', () => {

@@ -125,8 +125,10 @@ export const FINAL_GLOBAL_RULES = `
 // the next gate's missing result; traps on the part they hit; members over the part cap kept in the parent's focus.
 // .20: a claim's 240-character bound is said and a long state report splits in two (sha and start time in about); the second gap
 // prefers another next-gate blank.
-export const PIPELINE_RECIPE = 'first-map-divided.20';
-export const LATER_PIPELINE_RECIPE = 'later-map-divided.20';
+// .21: a claim over 240 characters refuses the fragment's first pass, so the one correction rewrites it (the correction's reply
+// is read leniently as before); the issue names the path and the length.
+export const PIPELINE_RECIPE = 'first-map-divided.21';
+export const LATER_PIPELINE_RECIPE = 'later-map-divided.21';
 const MODELS = new Set(['gpt-6.1-sol', 'gpt-6-astra', 'gpt-6.1-terra']);
 // The route rule is shared with the browser and studio.mjs (shared/map-route.ts): a first map.6 or a later map.7.
 export { isFirstMap };
@@ -198,7 +200,7 @@ export function createFirstMapPipeline({ store, deepseekKey, openaiKey, deepseek
         return refusal;
       };
       const checked = (id, value, check, explain) => {
-        try { check(value); } catch (error) { throw refusedAt(id, error, explain(value, error)); }
+        try { check(value, id.endsWith('-correction')); } catch (error) { throw refusedAt(id, error, explain(value, error)); }
       };
       // correction: the stage's own one bounded correction ({ rules, reason, issues? }); a correction stage itself has none.
       async function stage(id, { provider, model: stageModel, system, input, maxOutputTokens, check, total, reason: reasonOf = () => null, correction = null, timeout = null }, allowCorrection = true) {
@@ -227,7 +229,7 @@ export function createFirstMapPipeline({ store, deepseekKey, openaiKey, deepseek
           // A check may hand back the value as read (an extraction receipt with its set-aside candidates left out): that is what is
           // kept and what later stages get. A check that returns nothing keeps the reply exactly as it came.
           let kept = output.value;
-          try { const read = check(output.value); if (read && typeof read === 'object' && !Array.isArray(read)) kept = read; }
+          try { const read = check(output.value, id.endsWith('-correction')); if (read && typeof read === 'object' && !Array.isArray(read)) kept = read; }
           catch (error) {
             checkFailed = error?.code !== 'MAP_SEMANTIC_REVISION_EXHAUSTED'; rejected = output.value; issues = (correction?.issues ?? mapStageIssues)(output.value, error);
             refusal = refusedAt(id, error, error?.code === 'MAP_SEMANTIC_REVISION_EXHAUSTED' ? { total, reason: 'revision' } : explain(output.value, error));
@@ -299,7 +301,7 @@ export function createFirstMapPipeline({ store, deepseekKey, openaiKey, deepseek
                   system: mergeSystem + RENDER_RULES + (semanticReview ? SEMANTIC_RENDER_RULES : ''),
                   input: { INPUT: ask, blueprint, assignment: { ...group, keyStart: i * 100 + 1 },
                     ...(semanticReview ? { semanticReview, previousParts: fragments[i].parts } : {}) },
-                  maxOutputTokens: renderTokens, check: value => { validateRenderedFragment(value, group, ask, blueprint); },
+                  maxOutputTokens: renderTokens, check: (value, corrected) => { validateRenderedFragment(value, group, ask, blueprint, !corrected); },
                   total: groups.length, reason: value => fragmentReason(value, { ...group, keyStart: i * 100 + 1 }), correction: mapCorrection });
               } catch (error) { renderFailure ??= error; }
             }
