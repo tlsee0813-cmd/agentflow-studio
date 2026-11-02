@@ -1,5 +1,7 @@
 // Advisory extraction only. These are not MapAsk records: their original span.2 aliases must never be re-indexed.
 // The final merger and validateMapReply still receive the complete, original, validated MapAsk.
+import { partitionGroups } from '../dist/public/shared/map-route.js';
+
 export const EXTRACTION_KINDS = Object.freeze(['part', 'relation', 'condition', 'correction', 'material', 'uncertain']);
 // A finite advisory list, not accepted map claims. Dense source conditions/corrections must not be clipped to a target of 12.
 // Increasing this capacity does not change evidence/coverage guards or the original-ask final map validator.
@@ -27,12 +29,8 @@ export function planMapPartitions(ask, { targetChars = 3500, maxPartitions = 12 
       flat.push({ ri, si, size: span.t.length });
     }
   }
-  const groups = []; let group = [], size = 0;
-  for (const entry of flat) {
-    if (group.length && size + entry.size > targetChars) { groups.push(group); group = []; size = 0; }
-    group.push(entry); size += entry.size;
-  }
-  if (group.length) groups.push(group);
+  // The same grouping the browser counts with before it sends (shared/map-route.ts fitMapInput).
+  const groups = partitionGroups(flat.map(entry => entry.size), targetChars).map(indices => indices.map(i => flat[i]));
   if (groups.length > maxPartitions) fail('MAP_PARTITION_LIMIT');
   return groups.map((entries, pi) => {
     const owned = new Map();

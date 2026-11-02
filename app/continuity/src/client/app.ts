@@ -9,6 +9,7 @@ import { CLAIM_LABEL, stateLabel, revisedRelations, candidateReading, type Appli
 import { roleEvidence } from './role-evidence.js';
 import type { ClaimKind, ReadingQuote } from '../shared/types.js';
 import { createMapRun, sendLine, JOB_NOTE, type MapRunState } from './map-run.js';
+import { mapBatchLines, mapPendingText } from '../shared/map-route.js';
 import { JobReservations, JOBS_KEY, type JobLocks } from './map-jobs.js';
 import { requestResults, frozenRequests, displayAbout, captureRequestReading, restoreRequestReading, createWideReading } from './request-results.js';
 import { correctRequestMatch, unlinkReplacement, requestComparison } from '../shared/request-return.js';
@@ -2055,10 +2056,11 @@ const autoSync = createAutoSync({
   connector: () => (status.connector && status.sessions ? connectorHost : null),
   readBlocked: () => (status.release === 'existing-map' ? RELEASE_TEXT.limit : mapRun.can() ? null : mapRun.blocked() ?? '지도 정리에 쓸 AI가 이 서버에 연결되어 있지 않아요.')
 });
-/** AF100: while a reading runs as a job, the person is told it goes on without this window but not without the PC's Studio. */
-function pendingLine(cls: string, text: string, cancelClass: string): HTMLElement[] {
+/** AF100: while a reading runs as a job, the person is told it goes on without this window but not without the PC's Studio.
+ * Until the server reports a stage, the text says how the reading goes (its route); the map title's short line may say less. */
+function pendingLine(cls: string, cancelClass: string, short?: string): HTMLElement[] {
   const d = mapRun.detail();
-  return [h('span', { class: 'mu-pending' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), d.cancelling ? '취소하는 중…' : d.progress ?? text),
+  return [h('span', { class: 'mu-pending' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), d.cancelling ? '취소하는 중…' : d.progress ?? short ?? mapPendingText(d.route)),
     d.cancelling ? null : h('button', { type: 'button', class: cancelClass, onclick: () => mapRun.cancel() }, '취소'),
     d.durable ? h('span', { class: `fine mu-durable ${cls}` }, JOB_NOTE.durable) : null].filter((x): x is HTMLElement => !!x);
 }
@@ -2112,7 +2114,7 @@ function understoodLine(o: Opened): HTMLElement | null {
   if (last?.summary) line.append(h('span', { class: 'mu-text' }, last.summary));
   const comparison = last ? requestComparison(o.project, last) : null;
   if (comparison) line.append(h('button', { type: 'button', class: 'map-more mu-comparison', onclick: () => openReturn() }, comparison));
-  if (st.pending) line.append(...pendingLine('mu-durable-line', '기록을 읽고 지도를 갱신하는 중…', 'map-more'));
+  if (st.pending) line.append(...pendingLine('mu-durable-line', 'map-more', '기록을 읽고 지도를 갱신하는 중…'));
   else if (waiting) line.append(...runReady(st, 'map-more', 'map-more'));
   else if (fresh && mapRun.can() && !inp!.problem) line.append(h('button', { type: 'button', class: 'map-more mu-run', title: sendLine(inp!), onclick: () => void mapRun.run() }, `새 기록 ${fresh}개 읽고 지도 갱신`));
   else if (fresh) line.append(h('span', { class: 'mu-fresh' }, `아직 지도에 읽지 않은 기록 ${fresh}개`), ...(mapRun.blocked() ? [h('span', { class: 'fine mu-blocked' }, mapRun.blocked()!)] : []));
@@ -2149,7 +2151,7 @@ function renderMapEntry() {
   const o = opened, box = $('space-empty'); if (!o) return;
   if (o.view.parts.length || partForm) { box.hidden = true; box.replaceChildren(); return; }
   if (o.kind !== 'saved') { box.replaceChildren(h('p', {}, o.view.records.length ? `아직 부분으로 나뉘지 않은 프로젝트예요. 기록 ${o.view.records.length}개는 ‘최근 기록’에서 볼 수 있어요.` : '아직 부분도 기록도 없는 프로젝트예요.')); box.hidden = false; return; }
-  const inp = mapRun.input(), st = mapRun.state(), last = mapRun.last(), can = mapRun.can();
+  const next = mapRun.preview(), inp = next?.inp ?? null, st = mapRun.state(), last = mapRun.last(), can = mapRun.can();
   const fresh = inp && inp.problem !== 'NOTHING_NEW' ? inp.coverage.fresh : 0;
   if (status.release === 'existing-map') {
     // AF124: no first map here. Records can still be kept and parts added by hand; the ways in are the release's own.
@@ -2175,7 +2177,7 @@ function renderMapEntry() {
   const acts = h('div', { class: 'se-acts' }), waiting = st.committing || st.ready;
   // Sessions this page can read, in a project not connected yet: the automatic connection is the first way in, pasting the other.
   const linked = !!autoSync.bindingOf(o.key), offerSync = !linked && sessionSources.offered();
-  if (st.pending) put(acts, ...pendingLine('se-durable', status.map?.first ? '구간별 근거를 읽고 전체 조건을 대조해 지도를 합치는 중…' : '기록을 읽고 지도를 정리하는 중…', 'link-button'));
+  if (st.pending) put(acts, ...pendingLine('se-durable', 'link-button'));
   else if (waiting) put(acts, ...runReady(st, 'primary small', 'link-button'));
   else if (fresh && can && !inp!.problem) put(acts, h('button', { type: 'button', class: 'primary small se-run', onclick: () => void mapRun.run() }, '기록으로 지도 정리'), paste(false), file());
   else if (offerSync) put(acts, h('button', { type: 'button', class: 'primary small se-sync', onclick: () => autoSync.toggle() }, '내 AI 세션 자동 연결'), paste(false), file());
@@ -2186,8 +2188,8 @@ function renderMapEntry() {
       : '이미 진행한 프로젝트는 이전 대화나 현황 기록을, 새 프로젝트는 처음 나눈 요구부터 넣으세요. 원문을 근거로 지도를 만들고 이후 기록을 이어서 읽어요.'),
     last && !last.parts.length ? h('p', { class: 'se-gap' }, last.gaps.length ? last.gaps.join(' ') : '앞서 읽은 기록에서는 프로그램의 부분을 찾지 못했어요.') : null,
     acts, note ? h('p', { class: 'fine' }, note) : null,
-    status.map?.first ? h('p', { class: 'fine' }, '근거 찾기, 전체 조건 대조, 부분별 정리를 나눠 진행해요. 기존 지도와 직접 고친 내용도 함께 확인하며, 끝난 단계는 PC에 보관해 같은 작업에서 다시 처리하지 않아요.') : null,
-    status.map?.first ? h('p', { class: 'fine' }, `OpenAI 사용 상한: 정리당 $${status.map.first.runUsd}, 월 $${status.map.first.monthlyUsd}. DeepSeek 요금은 별도이며 교정을 포함해 정리당 최대 ${status.map.first.deepseekMaxCalls ?? 48}회로 제한돼요.`) : null,
+    // How this reading is batched and bounded: the route the very next reading takes (shared/map-route.ts), not a guess from status.
+    ...mapBatchLines(next?.route ?? null).map(t => h('p', { class: 'fine se-batch' }, t)),
     st.error ? h('p', { class: 'pp-error', role: 'alert' }, st.error) : null, runNotice(),
     h('button', { type: 'button', class: 'link-button se-direct', onclick: () => openPartForm(null) }, '부분 직접 추가'));
   box.hidden = false;
@@ -2195,16 +2197,17 @@ function renderMapEntry() {
 /** The map row in the reading pane: records to read into the map, and what the last map reading understood, its candidates and gaps. */
 function mapBlock(): HTMLElement | null {
   const o = opened; if (!o || o.kind !== 'saved') return null;
-  const last = mapRun.last(), inp = mapRun.input(), st = mapRun.state(), can = mapRun.can();
+  const last = mapRun.last(), next = mapRun.preview(), inp = next?.inp ?? null, st = mapRun.state(), can = mapRun.can();
   const fresh = inp && inp.problem !== 'NOTHING_NEW' ? inp.coverage.fresh : 0;
   const waiting = st.committing || st.ready;
   if (!last && !fresh && !st.pending && !st.error && !waiting && !mapRun.detail().notice) return null;
   const sec = h('section', { class: 'rr-sec rr-map' }, h('h3', {}, '지도 정리', last ? h('small', {}, fullTime(last.at)) : null));
-  if (st.pending) sec.append(h('div', { class: 'pending' }, ...pendingLine('rm-durable', '기록을 읽고 지도를 정리하는 중…', 'link-button')));
+  if (st.pending) sec.append(h('div', { class: 'pending' }, ...pendingLine('rm-durable', 'link-button')));
   else if (waiting) sec.append(h('div', { class: 'pp-row rm-ready' }, ...runReady(st, 'primary small', 'link-button')));
   else if (fresh) sec.append(h('div', { class: 'pp-row' },
     can && !inp!.problem ? h('button', { type: 'button', class: 'primary small', onclick: () => void mapRun.run() }, o.view.parts.length ? '기록 읽고 지도 갱신' : '기록으로 지도 정리') : null,
-    h('span', { class: 'fine' }, can && !inp!.problem ? `읽지 않은 기록 ${fresh}개 · ${sendLine(inp!)}` : !can ? `읽지 않은 기록 ${fresh}개 · ${mapRun.blocked() ?? 'AI 서버가 연결된 주소에서 정리할 수 있어요'}` : '보낼 수 없는 기록이 있어요(너무 크거나 키처럼 보이는 글).')));
+    h('span', { class: 'fine' }, can && !inp!.problem ? `읽지 않은 기록 ${fresh}개 · ${sendLine(inp!)}` : !can ? `읽지 않은 기록 ${fresh}개 · ${mapRun.blocked() ?? 'AI 서버가 연결된 주소에서 정리할 수 있어요'}` : '보낼 수 없는 기록이 있어요(너무 크거나 키처럼 보이는 글).')),
+    ...(can && !inp!.problem ? mapBatchLines(next?.route ?? null).map(t => h('p', { class: 'fine rm-batch' }, t)) : []));
   if (st.error) sec.append(h('p', { class: 'pp-error', role: 'alert' }, st.error));
   { const note = runNotice(); if (note) sec.append(note); }
   const limited = status.release === 'existing-map';

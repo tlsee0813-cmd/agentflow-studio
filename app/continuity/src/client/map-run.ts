@@ -12,6 +12,7 @@ import { encodeMapInput, decodeMapInput, jobHash, MAP_JOB_VERSION, type MapJobBi
 import { SPAN_INDEX, textDigest } from '../shared/evidence-span.js';
 import { jobApi, JobError, sameJob, readJobProgress, type JobProgress, type JobReservations, type JobView, type Reservation } from './map-jobs.js';
 import type { FrozenRequest } from '../shared/request-return.js';
+import { mapRoute, fitMapInput, routeOfPrompt, type MapRoute, type MapRouteName } from '../shared/map-route.js';
 /** SHA-256 of the request's JSON: the very same request is never sent or applied twice. */
 async function askHash(ask: unknown): Promise<string> {
   const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(ask)));
@@ -132,13 +133,19 @@ export function createMapRun(host: MapRunHost) {
     const map = host.status().map, prompt = map?.prompt ?? '';
     return /^m6-[0-9a-f]{12}$/.test(prompt) ? (/^m7-[0-9a-f]{12}$/.test(map?.laterPrompt ?? '') ? MAP7_SCHEMA : MAP6_SCHEMA) : /^m5-[0-9a-f]{12}$/.test(prompt) ? MAP5_SCHEMA : /^m4-[0-9a-f]{12}$/.test(prompt);
   };
-  /** The recipe an ask is asked and bound with: the later m7 one for map.7, else the advertised one. */
-  const dividedFirst = (inp: MapInput): boolean => inp.ask.schemaVersion === MAP6_SCHEMA && !inp.ask.parts.length && !(inp.ask.requests ?? []).length && !(inp.ask.priors ?? []).length;
-  const dividedOf = (inp: MapInput, map: NonNullable<AiStatus['map']>) => dividedFirst(inp) ? map.first : inp.ask.schemaVersion === MAP7_SCHEMA ? map.later : undefined;
-  const promptOf = (inp: MapInput, map: NonNullable<AiStatus['map']>): string => dividedOf(inp, map)?.prompt ?? (inp.ask.schemaVersion === MAP7_SCHEMA ? map.laterPrompt! : map.prompt);
-  const modelOf = (inp: MapInput, map: NonNullable<AiStatus['map']>): string => dividedOf(inp, map)?.model ?? map.model;
+  /** The ask the open entry would send and the route it would go (shared/map-route.ts, the server's own rule): the recipe and model
+   * it is bound with, and its limits. A divided route leaves for the next reading the records its partitions cannot hold. */
+  function prepared(o: NonNullable<ReturnType<MapRunHost['current']>>, requests: FrozenRequest[], requestId?: string): { inp: MapInput; route: MapRoute | null } {
+    const map = host.status().map, built = buildMapAsk(o.project, o.view, requests, requestId, anchored());
+    const route = map ? mapRoute(built.ask, map) : null;
+    return { inp: fitMapInput(built, route), route };
+  }
   /** What a reading would send now (nothing is sent). */
-  function input(requestId?: string): MapInput | null { const o = host.current(); return o && o.kind === 'saved' ? buildMapAsk(o.project, o.view, host.requests?.() ?? [], requestId, anchored()) : null; }
+  function input(requestId?: string): MapInput | null { const o = host.current(); return o && o.kind === 'saved' ? prepared(o, host.requests?.() ?? [], requestId).inp : null; }
+  /** The route the open entry's next reading would go, or null (no saved entry, no map reading offered). */
+  function route(): MapRoute | null { return preview()?.route ?? null; }
+  /** What the open entry's next reading would send and the route it would go, built once (nothing is sent). */
+  function preview(): { inp: MapInput; route: MapRoute | null } | null { const o = host.current(); return o && o.kind === 'saved' ? prepared(o, host.requests?.() ?? []) : null; }
   /** AF100: the server keeps map readings as durable jobs, and this page can reserve them. */
   const durable = (): boolean => host.status().jobs?.durable === true && !!host.jobs?.()?.usable;
   /** Why a reading cannot start although an AI server answered (a job store it cannot use), or null. */
@@ -158,12 +165,14 @@ export function createMapRun(host: MapRunHost) {
     const o = host.current(); if (!o || o.kind !== 'saved') return;
     const key = o.key, slot = of(key); if (slot.attempt) return;
     const st = host.status(); if (!st.map || !mapAi(st)) return;
-    const inp = buildMapAsk(o.project, o.view, mapOnly ? [] : host.requests?.() ?? [], requestId, anchored());
-    const divided = dividedOf(inp, st.map);
-    if (divided && !divided.ready) { slot.error = MAP_ERROR.MAP_PIPELINE_NOT_CONFIGURED!; host.changed(key); return; }
+    const { inp, route: way } = prepared(o, mapOnly ? [] : host.requests?.() ?? [], requestId);
+    // No recipe this server names for the ask (its status changed under the page): nothing can be bound, nothing is sent.
+    if (!way) { slot.error = JOB_ERROR.PROMPT_CHANGED!; host.changed(key); return; }
+    const divided = way.route !== 'single';
+    if (divided && !way.ready) { slot.error = MAP_ERROR.MAP_PIPELINE_NOT_CONFIGURED!; host.changed(key); return; }
     if (inp.problem) { slot.error = inp.problem === 'NOTHING_NEW' ? '이 범위에서 새로 읽을 기록이 없어요.' : inp.problem === 'REQUEST_CONTEXT_TOO_LARGE' ? '요청 문맥을 한 번에 대조하기 어려워 보고를 읽지 않았어요. 비교할 요청문을 골라 주세요.' : inp.problem === 'TOO_LARGE' ? '지도가 커서 한 번에 보낼 수 없어요.' : '키나 토큰처럼 보이는 글이 있는 기록이 있어 보내지 않았어요.'; host.changed(key); return; }
     if (blocked()) return;
-    const a: Attempt = { key, project: o.project.id, lifecycle: o.ref?.lifecycle ?? null, visit: visitOf(), phase: 'hashing', controller: new AbortController(), inp, prompt: promptOf(inp, st.map), hash: '', reply: null, model: '', meta: null, op: null };
+    const a: Attempt = { key, project: o.project.id, lifecycle: o.ref?.lifecycle ?? null, visit: visitOf(), phase: 'hashing', controller: new AbortController(), inp, prompt: way.promptId, hash: '', reply: null, model: '', meta: null, op: null };
     slot.attempt = a; slot.error = null; slot.notice = null; host.changed(key);
     const live = () => slot.attempt === a;
     try { a.hash = await askHash(inp.ask); }
@@ -174,7 +183,7 @@ export function createMapRun(host: MapRunHost) {
     if (!same(a, now) || visitOf() !== a.visit) { slot.attempt = null; host.changed(key); return; }
     if (now!.project.readings.some(r => isMapReading(r) && r.hash === a.hash)) { slot.attempt = null; slot.error = MAP_ERROR.ALREADY_APPLIED!; host.changed(key); return; }
     if (divided && !durable()) { slot.attempt = null; slot.error = MAP_ERROR.MAP_PIPELINE_STORE_UNAVAILABLE!; host.changed(key); return; }
-    if (durable()) return runJob(a, inp, modelOf(inp, st.map), now!.ref?.seq ?? null);
+    if (durable()) return runJob(a, inp, way.model, now!.ref?.seq ?? null);
     if (st.map.via === 'jobs') { slot.attempt = null; slot.error = blocked() ?? JOB_ERROR.JOB_STORE_UNAVAILABLE!; host.changed(key); return; } // never asked directly
     a.phase = 'asking';
     let res: { model: string; reply: MapReply };
@@ -459,16 +468,18 @@ export function createMapRun(host: MapRunHost) {
   const openSlot = () => { const o = host.current(); return o ? of(o.key) : null; };
   const openKey = () => host.current()?.key ?? '';
   return {
-    input, can, blocked, run, runMapOnly: () => run(undefined, true), resume,
+    input, route, preview, can, blocked, run, runMapOnly: () => run(undefined, true), resume,
     /** The page is going: nothing more is looked at or sent from it (its jobs stay with the server and the reservations). */
     dispose: () => { disposed = true; if (timer !== null) clearTimeout(timer); timer = null; for (const slot of slots.values()) { slot.attempt?.op?.release?.(); slot.attempt = null; } },
     /** AF100: what the person is told beside the state: the reading continues without this window, cancelling, a notice. */
-    detail: (key?: string): { durable: boolean; cancelling: boolean; notice: string | null; progress: string | null } => {
+    detail: (key?: string): { durable: boolean; cancelling: boolean; notice: string | null; progress: string | null; route: MapRouteName | null } => {
       const k = key ?? host.current()?.key; const slot = k ? of(k) : null, a = slot?.attempt;
       const p = a?.phase === 'asking' && !a.op?.cancelling ? a.op?.progress : null;
       const progress = p ? p.phase === 'extract' ? `근거 읽기 ${p.done}/${p.total}` : p.phase === 'plan' ? '전체 조건 대조 중…'
         : p.phase === 'render' ? `부분 정리 ${p.done}/${p.total}` : p.phase === 'global' ? '관계·조건 마지막 확인 중…' : '정리 결과를 바로잡는 중…' : null;
-      return { durable: !!a?.op || (!!a && a.phase !== 'ready' && a.phase !== 'committing' && durable()), cancelling: !!a?.op?.cancelling, notice: slot?.notice ?? null, progress };
+      // The route it went, from the recipe it is bound with (a job found again after a reload has no input until its result).
+      return { durable: !!a?.op || (!!a && a.phase !== 'ready' && a.phase !== 'committing' && durable()), cancelling: !!a?.op?.cancelling, notice: slot?.notice ?? null, progress,
+        route: a ? routeOfPrompt(a.prompt, host.status().map) : null };
     },
     /** The ready reply of the entry open now, applied (a second click while it is applied does nothing). */
     applyReady: (): Promise<void> => { const a = openSlot()?.attempt; return a ? apply(a) : Promise.resolve(); },
