@@ -89,7 +89,12 @@ test('receipt must acknowledge every core alias; duplicates and context in it ar
   assert.deepEqual(validateExtraction({ ...good, covered: good.covered.map(a => a.replace(/\.0+(\d)/, '.$1')) }, p), good);
   const first = good.covered[0], last = good.covered.at(-1);
   assert.deepEqual(validateExtraction({ ...good, covered: [`${first}-${last.slice(last.indexOf('.') + 1)}`] }, p), good);
-  invalid({ ...good, complete: true }, p); invalid({ covered: good.covered }, p); invalid({ ...good, candidates: 'x' }, p);
+  // first-map-divided.8 (changed on purpose): a key the receipt was not asked for is passed over (a PC reply echoed "type":
+  // "json_object" beside a whole receipt and was refused for that alone); a missing or non-list key still refuses.
+  assert.deepEqual(validateExtraction({ ...good, complete: true }, p), good);
+  assert.deepEqual(validateExtraction({ ...good, type: 'json_object' }, p), good);
+  assert.deepEqual(extractionStageIssues({ ...good, type: 'json_object' }, p), []);
+  invalid({ covered: good.covered }, p); invalid({ ...good, candidates: 'x' }, p); invalid({ ...good, covered: 'N01.01' }, p); invalid(null, p);
 });
 
 test('candidates are advisory: a malformed one or one outside the core is set aside alone; aliases are read back to their span names', () => {

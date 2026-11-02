@@ -7,7 +7,7 @@ PC의 로컬 Claude Code 세션(app 폴더 기준)에 그대로 붙여 넣는다
 AgentFlow Studio를 이어받아, 이 PC에서 "기록으로 첫 지도 만들기"가 실제 AI 모델로 끝까지 성공하게 만들어 줘. 내가 기록을 붙여 넣어 테스트하지 않을 거다. 테스트 기록은 네가 직접 마련하고(공개 문서나 이 PC의 Claude Code/Codex 세션 기록처럼 비밀값 없는 긴 글), 실패하면 원인을 고치고 다시 돌려서, 실제로 지도가 만들어졌을 때만 보고해. 중간 보고는 막혔을 때만 해.
 
 ## 저장소
-- `tlsee0813-cmd/agentflow-studio`. 작업 브랜치 `claude/compassionate-ritchie-or1h11`(최신 `e725dbc`). 이 브랜치에만 푸시한다. `main`·`work/experience142-reading-delivery`에는 푸시하지 않는다.
+- `tlsee0813-cmd/agentflow-studio`. 작업 브랜치 `claude/compassionate-ritchie-or1h11`(최신은 `git fetch` 뒤 원격 HEAD를 본다. 로컬이 뒤처져 있을 수 있다). 이 브랜치에만 푸시한다. `main`·`work/experience142-reading-delivery`에는 푸시하지 않는다.
 - 먼저 읽을 것: `docs/cycles/ACTIVE.md` 맨 위 절, `docs/design/START_FLOWS_AND_AI_BATCH_KO.md`, `app/continuity/README.md`의 "분할 지도 정리" 절. 원칙은 `docs/releases/2026-11-02/DESIGN.md`.
 
 ## 이 PC
@@ -20,8 +20,8 @@ AgentFlow Studio를 이어받아, 이 PC에서 "기록으로 첫 지도 만들�
 
 ## 지금 상태
 - 분할 파이프라인: DeepSeek 추출 → gpt-6.1-sol 설계 → gpt-6.1-terra 부분 작성 → 전역. 코드는 `app/continuity/server/map-pipeline.mjs`, 검증은 `map-partition.mjs`·`map-blueprint.mjs`·`src/shared/map-reading.ts`.
-- 실제 기록으로 마지막 실패는 추출 단계였고 `4f3256f`에서 완화했다. 그 뒤로 실제 모델 실행은 없다. 설계·부분 작성·전역 단계에서 새 거절이 나올 수 있다. 거절되면 화면과 작업 오류 `detail`에 단계·규칙이 나오고, 보관 파일에 원응답이 남는다.
-- 모의 검사 1,025건은 통과 상태다. PC에서 전체 검사를 한 번 돌려 확인한다.
+- 2026-11-02 저녁, 실제 모델로 첫 지도 한 건이 끝까지 성공했다(`docs/cycles/ACTIVE.md` 맨 위 절). 추출 영수증의 불필요한 키를 지나치는 `.8`은 모의 검사로만 확인했다. 후속 지도(map.7, 기록의 뒷부분 읽기)는 실제 모델로 아직 확인하지 않았다. 거절되면 화면과 작업 오류 `detail`에 단계·규칙이 나오고, 보관 파일에 원응답이 남는다.
+- 모의 검사 1,025건은 통과 상태다(이 PC: 1,021 통과·4 skip). `npm`은 이 PC에 없으므로 `npm run check` 대신 `& $node node_modules/typescript/bin/tsc --noEmit`과 `& $node scripts/check.mjs`를 app 폴더에서 돌린다.
 
 ## 규칙
 - 모델 응답을 고쳐서 통과시키지 않는다. 틀린 항목만 제외하고 진단을 남긴다. 자동 재시도·다른 모델 대체 없음.

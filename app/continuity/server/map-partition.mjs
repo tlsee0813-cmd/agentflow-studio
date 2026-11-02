@@ -79,12 +79,15 @@ function readAliases(value, allowed) {
  * context aliases in it are passed over. Candidates are sparse advisory pointers (never final facts, never evidence): one that is
  * malformed, points outside the partition or has no core alias is set aside on its own, and the receipt keeps the rest (at most
  * EXTRACTION_CANDIDATES_MAX). Only a reply of the wrong shape or one that does not acknowledge its core refuses the stage.
- * The value returned is the receipt as read (canonical aliases, set-aside candidates left out): that is what later stages get. */
+ * The value returned is the receipt as read (canonical aliases, set-aside candidates left out): that is what later stages get.
+ * first-map-divided.8: a key the receipt was not asked for is passed over, as the map.6 reader passes one over (a real PC run was
+ * refused at extract 7/7 for a reply that echoed its JSON-mode setting as a third key beside a whole receipt). Nothing is read from
+ * it: the receipt is rebuilt from covered and candidates alone. */
 export function validateExtraction(value, partition) {
   // The message stays INVALID_EXTRACTION; reason is one fixed category for a local diagnostic, never a value.
   const invalid = reason => { const error = new Error('INVALID_EXTRACTION'); error.reason = reason; throw error; };
   if (!partition || !Array.isArray(partition.records)) invalid('input');
-  if (!shape(value, ['covered', 'candidates']) || !Array.isArray(value.covered) || !Array.isArray(value.candidates)) invalid('shape');
+  if (!value || typeof value !== 'object' || Array.isArray(value) || !Array.isArray(value.covered) || !Array.isArray(value.candidates)) invalid('shape');
   const core = new Set(), allowed = new Set();
   for (const record of partition.records) {
     if (!record || !Array.isArray(record.core) || !Array.isArray(record.context) || !Array.isArray(record.spans)) invalid('input');
@@ -117,7 +120,7 @@ export function extractionStageIssues(value, partition) {
     if (issues.length < 12 && !issues.some(issue => issue.path === path && issue.rule === rule)) issues.push({ path, rule, expected, actual });
   };
   try {
-    if (!shape(value, ['covered', 'candidates'])) { add('reply', 'shape'); return issues; }
+    if (!value || typeof value !== 'object' || Array.isArray(value)) { add('reply', 'shape'); return issues; }
     const core = new Set(), allowed = new Set();
     for (const record of partition?.records ?? []) { for (const alias of record?.core ?? []) core.add(alias); for (const span of record?.spans ?? []) allowed.add(span?.s); }
     if (!Array.isArray(value.covered)) add('covered', 'shape');

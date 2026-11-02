@@ -78,9 +78,10 @@ assignment의 원래 ref/name/parent/keyStart와 전체 부분 목록은 그대�
 export const FINAL_GLOBAL_RULES = `
 이번은 semanticReview에 따른 한 번의 부분 재작성 이후 최종 검토다. 수정된 renderedParts를 원래 INPUT 전체와 다시 대조한다. 성공 응답은 원래 지도 JSON 계약 하나여야 한다. 명시적 철회·대체가 여전히 current에 제대로 반영되지 않았으면 성공으로 요약하지 말고 같은 reviseParts sentinel으로 실패를 알려라. 두 번째 sentinel은 안전한 거절 신호이며 추가 재작성은 실행하지 않는다. 파이프라인은 즉시 거절하고 아무 결과도 적용하지 않는다.`;
 // .6: first-map item set-aside (clean wire + diagnostics), one plan correction, one extraction correction with OpenAI rendering,
-// and the render/global/correction prompt additions. Any prompt or validation change binds a fresh recipe identity.
-export const PIPELINE_RECIPE = 'first-map-divided.7';
-export const LATER_PIPELINE_RECIPE = 'later-map-divided.7';
+// and the render/global/correction prompt additions. .7: advisory extraction candidates set aside alone, aliases read back.
+// .8: an unasked key on an extraction receipt is passed over. Any prompt or validation change binds a fresh recipe identity.
+export const PIPELINE_RECIPE = 'first-map-divided.8';
+export const LATER_PIPELINE_RECIPE = 'later-map-divided.8';
 const MODELS = new Set(['gpt-6.1-sol', 'gpt-6-astra', 'gpt-6.1-terra']);
 // The route rule is shared with the browser and studio.mjs (shared/map-route.ts): a first map.6 or a later map.7.
 export { isFirstMap };
