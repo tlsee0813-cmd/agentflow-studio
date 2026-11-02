@@ -2911,7 +2911,7 @@ function bindEdgeHints() {
       if ($('viewport').classList.contains('grabbing') || $('viewport').classList.contains('moving')) return;
       g.classList.add('near');
       tip.replaceChildren(h('strong', {}, `${nameOf(edge.from)} ${edge.kind === 'related' ? '—' : '→'} ${nameOf(edge.to)}`), h('span', { class: 'tip-kind' }, `${REL_LABEL[edge.kind] ?? edge.kind}${restOf(edge) ? ` · 선택한 부분의 관계를 뺀 나머지 ${edge.ids.length}개` : edge.agg ? ` · 안쪽 관계 ${edge.ids.length}개의 요약 · 선택하면 실제 끝점` : edge.ids.length > 1 ? ` · 관계 ${edge.ids.length}개를 한 선으로 묶음` : ''}`),
-        ...edge.notes.slice(0, 3).map(n => h('span', {}, n)), ...(edge.notes.length && edge.notes.every(plannedNote) ? [h('span', { class: 'tip-kind' }, '계획된 연결 · 아직 돌지 않음')] : []), ...(edgeRevised(edge) ? [h('span', { class: 'tip-revised' }, REVISED_BASIS.replace(/^ · /, ''))] : []));
+        ...edge.notes.slice(0, 3).map(n => h('span', {}, n)), ...(edge.notes.length > 3 ? [h('span', { class: 'tip-kind' }, `설명 ${edge.notes.length - 3}개 더 · 선택하면 모두 읽힘`)] : []), ...(edge.notes.length && edge.notes.every(plannedNote) ? [h('span', { class: 'tip-kind' }, '계획된 연결 · 아직 돌지 않음')] : []), ...(edgeRevised(edge) ? [h('span', { class: 'tip-revised' }, REVISED_BASIS.replace(/^ · /, ''))] : []));
       tip.hidden = false; place(e as PointerEvent);
       if (g.classList.contains('on')) lightRows(edge.ids);
       return;
