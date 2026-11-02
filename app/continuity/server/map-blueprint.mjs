@@ -17,13 +17,20 @@ const CONTROL = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
 const SAFE_VALIDATION_PATH = /^(?:reply|summary|parts|relations|candidates|gaps|matches|material)(?:\[\d{1,3}\])?(?:\.(?:ref|name|parent|role|roleAbout|roleAboutAt|roleReplaces|basis|claims|kind|text|at|about|aboutAt|replaces|key|from|to|note|target|targets|statement|parts|record|quote|what|stance|why|requestId|itemId)(?:\[\d{1,3}\])?)*$/;
 const SAFE_VALIDATION_RULES = new Set(['contract', 'reference', 'length', 'duplicate-key', 'duplicate-target', 'settled-and-open',
   'material-evidence', 'source-kind', 'condition-form', 'condition-source', 'condition-length']);
-function safeValidation(error) {
+// map-reading.ts ContractGuard: the fixed categories a rule 'contract' refusal names. Nothing else of error.target is ever read.
+const SAFE_CONTRACT_CATEGORIES = new Set(['shape', 'keys', 'text', 'count', 'new-count', 'parent', 'existing-name-parent', 'role-required',
+  'basis-required', 'kind', 'replaces', 'empty-part', 'role-basis', 'parent-cycle', 'ends', 'duplicate', 'match-contract', 'quote',
+  'explicit-request', 'about', 'secret-like', 'target-time', 'target-count', 'prior', 'prior-target', 'parent-skipped']);
+/** Fixed path/rule (and, for rule 'contract', its fixed guard category) of a refusal; null for anything else. */
+export function safeValidation(error) {
   try {
     const source = error?.validation ?? (error?.name === 'MapReplyError' ? error : null);
     if (!source) return null;
     const path = source.path, rule = source.rule;
     if (typeof path !== 'string' || path.length > 240 || !SAFE_VALIDATION_PATH.test(path) || !SAFE_VALIDATION_RULES.has(rule)) return null;
-    return { path, rule };
+    if (rule !== 'contract') return { path, rule };
+    const category = error?.validation ? source.category : source.target;
+    return SAFE_CONTRACT_CATEGORIES.has(category) ? { path, rule, category } : { path, rule };
   } catch { return null; }
 }
 const invalid = cause => {
@@ -35,7 +42,7 @@ const invalid = cause => {
 const exact = (value, keys) => !!value && typeof value === 'object' && !Array.isArray(value)
   && Object.keys(value).length === keys.length && keys.every(key => Object.hasOwn(value, key));
 const words = (value, max) => typeof value === 'string' && !!value.trim() && value.length <= max && !CONTROL.test(value);
-function originalAnchors(ask) {
+export function originalAnchors(ask) {
   const texts = askRecords(ask), aliases = new Set(ask.records.flatMap(record => record.spans?.map(span => span.s) ?? []));
   return refs => Array.isArray(refs) && refs.length >= 1 && refs.length <= BLUEPRINT_ANCHORS_MAX
     && new Set(refs).size === refs.length && refs.every(alias => {

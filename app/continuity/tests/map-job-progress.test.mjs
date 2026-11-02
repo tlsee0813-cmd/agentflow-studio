@@ -12,7 +12,7 @@ import * as J from '../dist/public/shared/map-job.js';
 import { studioView } from '../dist/public/shared/studio.js';
 import { SPAN_INDEX, textDigest } from '../dist/public/shared/evidence-span.js';
 import { JobReservations, readJobProgress } from '../dist/public/client/map-jobs.js';
-import { createMapRun } from '../dist/public/client/map-run.js';
+import { createMapRun, mapErrorText } from '../dist/public/client/map-run.js';
 
 const PROMPT = 'm6-000000000001', MODEL = 'stub-progress';
 const empty = () => ({ summary: '', parts: [], relations: [], candidates: [], gaps: [], matches: [], material: [] });
@@ -137,4 +137,49 @@ test('polling/reload restores only the bound entry progress; mismatch and cancel
     await until(() => !run.state().pending, 'cancelled'); assert.equal(run.detail().progress, null); assert.equal(commits, 0);
     assert.ok(changed.includes(a.key) && changed.includes(b.key));
   } finally { run.dispose(); }
+});
+
+test('a refused divided stage reaches the job record and its view with the same fixed detail, and the page names the step', async () => {
+  const s = await service(), job = await submission();
+  try {
+    await s.submit(job);
+    const detail = { stage: 'render-2-correction', phase: 'correction', total: 3, rule: 'reference', path: 'parts[0].basis[1]' };
+    const refused = new ApiError('INVALID_RESPONSE', 502); refused.detail = detail;
+    s.calls[0].gate.reject(refused); await until(async () => (await s.call(job)).value.state === 'failed', 'failed');
+    assert.deepEqual((await s.call(job)).value.error, { code: 'INVALID_RESPONSE', detail });
+    const saved = JSON.parse(readFileSync(join(s.dir, 'ops', `${job.id}.json`), 'utf8'));
+    assert.deepEqual(saved.body.error, { code: 'INVALID_RESPONSE', detail });
+    assert.equal(mapErrorText('INVALID_RESPONSE', (await s.call(job)).value.error.detail),
+      '부분 정리 2/3 단계를 한 번 바로잡은 AI 응답도 근거 규칙(원문 구간 참조)에 맞지 않아 반영하지 않았어요. 원문과 기존 지도는 그대로예요.');
+  } finally { s.calls.forEach(c => c.gate.resolve()); await s.jobs.close(); }
+});
+
+test('client wording names the divided step and rule; without a step the earlier wording is unchanged', () => {
+  const kept = ' 원문과 기존 지도는 그대로예요.';
+  const cases = [
+    [{ stage: 'render-2', phase: 'render', total: 3, rule: 'reference', path: 'parts[0].basis[0]' }, '부분 정리 2/3 단계의 AI 응답이 근거 규칙(원문 구간 참조)에 맞지 않아 반영하지 않았어요.'],
+    [{ stage: 'render-1', phase: 'render', total: 1, rule: 'length' }, '부분 정리 1/1 단계의 AI 응답이 근거 규칙(인용 길이)에 맞지 않아 반영하지 않았어요.'],
+    [{ stage: 'global', phase: 'global', rule: 'material-evidence' }, '관계·조건 마지막 확인 단계의 AI 응답이 근거 규칙(예제 표시와 근거의 겹침)에 맞지 않아 반영하지 않았어요.'],
+    [{ stage: 'global-correction', phase: 'correction', rule: 'contract', category: 'count' }, '관계·조건 마지막 확인 단계를 한 번 바로잡은 AI 응답도 형식 규칙(항목 수)에 맞지 않아 반영하지 않았어요.'],
+    [{ stage: 'global', phase: 'global', rule: 'contract', category: 'keys' }, '관계·조건 마지막 확인 단계의 AI 응답이 형식 규칙(응답 모양)에 맞지 않아 반영하지 않았어요.'],
+    [{ stage: 'extract-3', phase: 'extract', total: 4, reason: 'coverage' }, '근거 읽기 3/4 구간의 AI 응답이 근거 규칙(읽은 구간 영수증)에 맞지 않아 반영하지 않았어요.'],
+    [{ stage: 'extract-3', phase: 'extract', total: 4, reason: 'anchor' }, '근거 읽기 3/4 구간의 AI 응답이 근거 규칙(단서의 원문 위치)에 맞지 않아 반영하지 않았어요.'],
+    [{ stage: 'plan', phase: 'plan', reason: 'anchor' }, '전체 조건 대조 단계의 AI 응답이 근거 규칙(설계의 원문 위치)에 맞지 않아 반영하지 않았어요.'],
+    [{ stage: 'plan', phase: 'plan', reason: 'count' }, '전체 조건 대조 단계의 AI 응답이 형식 규칙(항목 수)에 맞지 않아 반영하지 않았어요.'],
+    [{ stage: 'render-2-semantic', phase: 'render', total: 3, reason: 'key' }, '부분 다시 정리 2/3 단계의 AI 응답이 형식 규칙(주장 키 범위)에 맞지 않아 반영하지 않았어요.'],
+    [{ stage: 'render-1', phase: 'render', total: 2 }, '부분 정리 1/2 단계의 AI 응답이 근거 규칙에 맞지 않아 반영하지 않았어요.'],
+    [{ stage: 'global', phase: 'global', reason: 'transport' }, '관계·조건 마지막 확인 단계의 AI 응답을 JSON으로 읽을 수 없어 반영하지 않았어요.'],
+  ];
+  for (const [detail, text] of cases) assert.equal(mapErrorText('INVALID_RESPONSE', detail), text + kept, JSON.stringify(detail));
+  const plain = mapErrorText('INVALID_RESPONSE');
+  assert.equal(plain, 'AI 응답이 근거 규칙(원문 인용·알려진 부분)에 맞지 않아 반영하지 않았어요.');
+  assert.match(mapErrorText('INVALID_RESPONSE', { rule: 'contract' }), /^AI 응답의 모양/);
+  assert.match(mapErrorText('INVALID_RESPONSE', { rule: 'length', path: 'parts[0].basis[0]' }), /600자/);
+  // Unknown or unsafe values never reach the text: a step that cannot be read falls back to the earlier wording.
+  for (const detail of [{ stage: 'PRIVATE_STAGE', phase: 'render' }, { stage: 'render-2', phase: 'render', total: 3, rule: 'PRIVATE_RULE', reason: 'PRIVATE_REASON' }, { stage: 'render-2' }]) {
+    const text = mapErrorText('INVALID_RESPONSE', detail);
+    assert.ok(!text.includes('PRIVATE'), text);
+  }
+  assert.equal(mapErrorText('INVALID_RESPONSE', { stage: 'render-2' }), plain, 'no phase: the earlier wording');
+  assert.equal(mapErrorText('AI_TIMEOUT', { stage: 'render-2', phase: 'render' }), mapErrorText('AI_TIMEOUT'), 'other codes keep their own wording');
 });

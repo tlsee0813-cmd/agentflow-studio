@@ -24,19 +24,6 @@ for(const key of studioConfigProblems(env))console.warn(`AgentFlow Studio: ${key
 // turns them off). Browser storage is per address, so the store is per port; a random port (0) gets none unless a folder is named.
 const dir=env.STUDIO_JOBS==='off'?null:env.STUDIO_JOBS_DIR||(config.port?fileURLToPath(new URL(`../.studio-data/map-jobs-${config.port}`,import.meta.url)):null);
 const jobs=dir?await openMapJobs({dir,log:m=>console.log(m)}):null;
-let firstMapPipeline;
-try { firstMapPipeline=await openFirstMapPipeline({env,dir}); }
-catch { await jobs?.close(); stop('the divided first-map settings or store could not be opened.'); }
-// Local session records (Claude Code / Codex on this PC), read only on request; STUDIO_SESSIONS=off turns them off.
-const sessions=openSessions({env});
-// The AgentFlow connector's mailbox (records an AI session leaves through the MCP connector, the page's latest handover for it):
-// STUDIO_CONNECTOR_DIR, else app/continuity/.studio-data/connector-<port>; STUDIO_CONNECTOR=off turns it off.
-const connectorDir=env.STUDIO_CONNECTOR==='off'?null:env.STUDIO_CONNECTOR_DIR||(config.port?fileURLToPath(new URL(`../.studio-data/connector-${config.port}`,import.meta.url)):null);
-// Linked to the web AI connector (AGENTFLOW_CLOUD_URL / AGENTFLOW_CLOUD_KEY): web sessions' records come down, handovers go up.
-let pull=null;
-const connector=connectorDir?await openConnector({dir:connectorDir,onPublish:h=>pull?.push(h)}):null;
-pull=cloudPull({env,connector,log:m=>console.log(m)});
-pull?.start();
 // A reply the server set aside (cut at its length, unfinished, or refused by the checks) is kept on this PC only when asked:
 // STUDIO_KEEP_REFUSED=on keeps it under app/continuity/.studio-data/refused-<port>, or a folder named there. Each file holds the
 // request this page sent (its records as already masked), how the reply ended and its text with key-like strings hidden; never
@@ -49,6 +36,20 @@ const refused=keep?async(what,ask)=>{
   await writeFile(join(keep,name),JSON.stringify({at,...what,ask},null,1));
   console.log(`AgentFlow Studio: a reply that was set aside (${what.error.code}${what.error.detail?` ${what.error.detail.path}`:''}) is kept in ${join(keep,name)}`);
 }:null;
+// The divided reading keeps a refused stage (its masked input and reply, with where and which rule) in the same folder.
+let firstMapPipeline;
+try { firstMapPipeline=await openFirstMapPipeline({env,dir,keep}); }
+catch { await jobs?.close(); stop('the divided first-map settings or store could not be opened.'); }
+// Local session records (Claude Code / Codex on this PC), read only on request; STUDIO_SESSIONS=off turns them off.
+const sessions=openSessions({env});
+// The AgentFlow connector's mailbox (records an AI session leaves through the MCP connector, the page's latest handover for it):
+// STUDIO_CONNECTOR_DIR, else app/continuity/.studio-data/connector-<port>; STUDIO_CONNECTOR=off turns it off.
+const connectorDir=env.STUDIO_CONNECTOR==='off'?null:env.STUDIO_CONNECTOR_DIR||(config.port?fileURLToPath(new URL(`../.studio-data/connector-${config.port}`,import.meta.url)):null);
+// Linked to the web AI connector (AGENTFLOW_CLOUD_URL / AGENTFLOW_CLOUD_KEY): web sessions' records come down, handovers go up.
+let pull=null;
+const connector=connectorDir?await openConnector({dir:connectorDir,onPublish:h=>pull?.push(h)}):null;
+pull=cloudPull({env,connector,log:m=>console.log(m)});
+pull?.start();
 const studio=createStudioHandler({env,jobs,sessions,refused,connector,firstMapPipeline});
 const server=createContinuityApp({config,studio});
 server.once('error',async e=>{

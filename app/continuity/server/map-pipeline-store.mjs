@@ -17,6 +17,19 @@ const natural = n => Number.isSafeInteger(n) && n >= 0;
 const plain = v => v !== null && typeof v === 'object' && !Array.isArray(v);
 const validKey = k => typeof k === 'string' && /^[a-f0-9]{64}$/.test(k);
 const validStage = s => typeof s === 'string' && /^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$/.test(s);
+// Where a stage was refused, kept beside its failed attempt: fixed categories only (no model, record or key text).
+const DIAGNOSTIC_PHASES = ['extract', 'plan', 'render', 'global', 'correction'];
+const WORD = /^[a-z][a-z-]{0,39}$/, DIAGNOSTIC_PATH = /^[A-Za-z][A-Za-z0-9_.[\]]{0,239}$/;
+function stageDiagnostic(d, at) {
+  if (!plain(d) || !validStage(d.stage) || !DIAGNOSTIC_PHASES.includes(d.phase)) return null;
+  const out = { stage: d.stage, phase: d.phase };
+  for (const name of ['rule', 'category', 'reason']) if (typeof d[name] === 'string' && WORD.test(d[name])) out[name] = d[name];
+  if (typeof d.path === 'string' && DIAGNOSTIC_PATH.test(d.path)) out.path = d.path;
+  if (Number.isSafeInteger(d.total) && d.total >= 1 && d.total <= 99) out.total = d.total;
+  out.at = at;
+  return out;
+}
+const validDiagnostic = d => plain(d) && typeof d.at === 'string' && JSON.stringify(stageDiagnostic(d, d.at)) === JSON.stringify(d);
 // Prices are USD per million tokens. No cached-input discount is assumed.
 export const MAP_OPENAI_RATES = Object.freeze({
   'gpt-6.1-sol': Object.freeze([2, 10]), 'gpt-6.1-terra': Object.freeze([1, 5]), 'gpt-6-astra': Object.freeze([10, 50])
@@ -81,6 +94,7 @@ function validate(body) {
     for (const [name, stage] of Object.entries(job.stages)) {
       if (!validStage(name) || !plain(stage) || !['running', 'complete', 'failed', 'uncertain'].includes(stage.state) || !Array.isArray(stage.attempts) || !stage.attempts.length) throw Error('damaged');
       if (stage.state === 'complete' && !own(stage, 'value')) throw Error('damaged');
+      if (own(stage, 'diagnostic') && !validDiagnostic(stage.diagnostic)) throw Error('damaged');
       for (const a of stage.attempts) {
         if (!plain(a) || !/^\d{4}-\d{2}$/.test(a.month) || !natural(a.inputBytes) || !natural(a.maxOutputTokens) || !natural(a.reserved) || !natural(a.charged) || a.charged > a.reserved || cost(a.provider, a.model, a.inputBytes, a.maxOutputTokens) !== a.reserved) throw Error('damaged');
       }
@@ -170,7 +184,11 @@ export async function openMapPipelineStore({ dir, monthlyUsd = 20, runUsd = 1, n
         if (!own(options, 'value') || options.value === undefined) throw new ApiError('MAP_PIPELINE_INVALID', 400);
         // JSON round trip prevents an in-memory success that cannot survive a restart.
         s.value = JSON.parse(JSON.stringify(options.value)); s.state = 'complete';
-      } else s.state = options.uncertain === false ? 'failed' : 'uncertain';
+      } else {
+        s.state = options.uncertain === false ? 'failed' : 'uncertain';
+        const diagnostic = stageDiagnostic(options.diagnostic, date().toISOString());
+        if (diagnostic) s.diagnostic = diagnostic;
+      }
       await persist(next);
       return complete ? clone(s.value) : undefined;
     });
@@ -183,11 +201,20 @@ export async function openMapPipelineStore({ dir, monthlyUsd = 20, runUsd = 1, n
     const task = Promise.resolve().then(fn).finally(() => { active.delete(key); running.delete(task); });
     running.add(task); return task;
   }
+  /** The most recent refusal kept for one key (or, without a key, for any): { stage, phase, rule?, path?, category?, reason?, total?, at }. */
+  function lastFailure(key = null) {
+    let last = null;
+    for (const [k, job] of Object.entries(body.jobs)) {
+      if (key !== null && k !== key) continue;
+      for (const s of Object.values(job.stages)) if (s.diagnostic && (!last || s.diagnostic.at >= last.at)) last = s.diagnostic;
+    }
+    return last ? clone(last) : null;
+  }
   return {
-    run, get, begin,
+    run, get, begin, lastFailure,
     complete: (key, stage, options = {}) => finish(key, stage, options, true),
     failed: (key, stage, options = {}) => finish(key, stage, options, false),
-    describe() { const month = date().toISOString().slice(0, 7); return { durable: !problem && !closed, problem, openaiOnly: true, monthlyUsd, runUsd, month, spentUsd: totals(null, month).monthly / NANO }; },
+    describe() { const month = date().toISOString().slice(0, 7); return { durable: !problem && !closed, problem, openaiOnly: true, monthlyUsd, runUsd, month, spentUsd: totals(null, month).monthly / NANO, lastFailure: lastFailure() }; },
     async close() { closing = true; await Promise.allSettled([...running]); await queue; closed = true; if (release) { const unlock = release; release = null; await unlock(); } }
   };
 }
