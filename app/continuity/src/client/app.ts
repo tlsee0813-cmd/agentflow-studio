@@ -20,6 +20,7 @@ import { aiStatus, askStudio, AskError, ERROR_TEXT, RELEASE_TEXT, PUBLIC_EDITION
 import { RUNTIME, runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
 import { routeEdges, samplePath, mixPath } from './map-route.js';
+import { PROJECT_REPORT_ASK, CHAT_REPORT_ASK, REPORT_ASK_EXPLAIN, deltaReportAsk } from '../shared/report-ask.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
 import { createPlanView } from './plan-view.js';
 import { AUTO_SENDS, createReturnView, mapExclusionHistory, type Scene, type ReadingContext } from './return-view.js';
@@ -2253,6 +2254,10 @@ function renderMapEntry() {
       : '이미 진행한 프로젝트는 이전 대화나 현황 기록을, 새 프로젝트는 처음 나눈 요구부터 넣으세요. 원문을 근거로 지도를 만들고 이후 기록을 이어서 읽어요.'),
     last && !last.parts.length ? h('p', { class: 'se-gap' }, last.gaps.length ? last.gaps.join(' ') : '앞서 읽은 기록에서는 프로그램의 부분을 찾지 못했어요.') : null,
     acts, note ? h('p', { class: 'fine' }, note) : null,
+    // A project an AI session already knows: that session writes the report the map reads best. The words are copied here and
+    // carried by the person; nothing is sent.
+    fresh ? null : h('p', { class: 'fine se-ask' }, '진행 중인 AI 대화가 있다면 ', askCopy('현황 보고 요청 문구 복사', PROJECT_REPORT_ASK, 'link-button'), ' 또는 ',
+      askCopy('파일을 못 보는 대화용', CHAT_REPORT_ASK, 'link-button'), '을 그 대화에 붙여 넣으세요. 나온 보고서를 ‘기록 붙여넣기’에 넣으면 부분·연결·상태·철회·모르는 것이 지도가 돼요.'),
     // How this reading is batched and bounded: the route the very next reading takes (shared/map-route.ts), not a guess from status.
     ...mapBatchLines(next?.route ?? null).map(t => h('p', { class: 'fine se-batch' }, t)),
     st.error ? h('p', { class: 'pp-error', role: 'alert' }, st.error) : null, runNotice(),
@@ -2275,6 +2280,9 @@ function mapBlock(): HTMLElement | null {
     ...(can && !inp!.problem ? mapBatchLines(next?.route ?? null).map(t => h('p', { class: 'fine rm-batch' }, t)) : []));
   if (st.error) sec.append(h('p', { class: 'pp-error', role: 'alert' }, st.error));
   { const note = runNotice(); if (note) sec.append(note); }
+  // A map that exists: the next report asks only for what changed, by the names this map holds.
+  if (o.view.parts.length && !st.pending) sec.append(h('p', { class: 'fine rm-ask' }, askCopy('변경 보고 요청 문구 복사', deltaReportAsk(o.view, o.project.readings), 'link-button'),
+    ' — 지도의 부분 이름을 넣은 문구예요. 프로젝트를 보고 있는 AI 대화에 붙여 넣고, 나온 답을 기록으로 붙여 넣으세요.'));
   const limited = status.release === 'existing-map';
   if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && !limited) sec.append(h('p', { class: 'fine' }, sendLine(inp)), h('button', { type: 'button', class: 'link-button', onclick: () => { returnView.close(); planView.openResults(); } }, '요청문을 골라 대조'));
   if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && can && !st.pending && !waiting) sec.append(h('button', { type: 'button', class: 'link-button rm-map-only', onclick: () => void mapRun.runMapOnly() }, '요청 대조 없이 지도만 정리'), h('p', { class: 'fine' }, '원문을 보존하며 나중에 요청문을 골라 대조할 수 있어요.'));
@@ -2505,6 +2513,18 @@ let toastTimer = 0;
 let lastClick = { id: '', at: 0, x: 0, y: 0, scope: null as string | null };
 /** A toast speaks for the project it was made in: its action runs only there, and leaving that project takes it away. */
 let toastKey: string | null = null;
+/** A request-text copy button: the words go to the clipboard (a toast says so), or, when copying is blocked, into a
+ * read-only box under the button to copy by hand. The title says what the person gets. */
+function askCopy(label: string, text: string, cls: string): HTMLElement {
+  const b = h('button', { type: 'button', class: cls, title: REPORT_ASK_EXPLAIN, onclick: async () => {
+    let ok = true; try { await navigator.clipboard.writeText(text); } catch { ok = false; }
+    if (ok) { toast('요청 문구를 복사했어요. 프로젝트를 보고 있는 AI 대화에 붙여 넣고, 나온 보고서를 기록 붙여넣기에 넣으세요.'); return; }
+    const old = b.parentElement?.querySelector('.ask-manual'); old?.remove();
+    const box = h('textarea', { class: 'ask-manual', readonly: true, rows: '6', spellcheck: 'false', 'aria-label': label }, text) as HTMLTextAreaElement;
+    b.parentElement?.append(box); box.focus(); box.select();
+  } }, label);
+  return b;
+}
 function toast(text: string, action?: { label: string; run: () => void }) {
   const t = $('toast'), key = opened?.key ?? null; clearTimeout(toastTimer); t.replaceChildren(); toastKey = key;
   put(t, h('span', {}, text), action ? h('button', { type: 'button', class: 'link-button', onclick: () => { t.hidden = true; if (opened?.key === key) action.run(); } }, action.label) : null);

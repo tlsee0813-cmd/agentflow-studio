@@ -47,12 +47,12 @@ test('blueprint preserves exact user names/parents and original aliases and retu
   }
 });
 
-test('blueprint bounds are exact: 24 total, 12 new, 24 global, 8 anchors, 60-unit name and 240-unit focus/text', () => {
-  assert.deepEqual([BLUEPRINT_PARTS_MAX, BLUEPRINT_NEW_PARTS_MAX, BLUEPRINT_GLOBAL_MAX, BLUEPRINT_ANCHORS_MAX], [24, 12, 24, 8]);
+test('blueprint bounds are exact: 24 total, 12 new, 32 global, 8 anchors, 60-unit name, 400-unit focus and 240-unit text', () => {
+  assert.deepEqual([BLUEPRINT_PARTS_MAX, BLUEPRINT_NEW_PARTS_MAX, BLUEPRINT_GLOBAL_MAX, BLUEPRINT_ANCHORS_MAX], [24, 12, 32, 8]);
   const f = fixture(12), blueprint = planned(f, 12);
   blueprint.parts.unshift(...f.ask.parts.map(part => ({ ref: part.id, name: part.name, parent: part.parentId, at: [f.at[0]], focus: '기존 책임' })));
-  blueprint.parts.at(-1).name = '가'.repeat(60); blueprint.parts.at(-1).focus = '가'.repeat(240); blueprint.parts.at(-1).at = f.at.slice(0, 8);
-  blueprint.global = Array.from({ length: 24 }, () => ({ kind: 'condition', text: '가'.repeat(240), at: f.at.slice(0, 8) }));
+  blueprint.parts.at(-1).name = '가'.repeat(60); blueprint.parts.at(-1).focus = '가'.repeat(400); blueprint.parts.at(-1).at = f.at.slice(0, 8);
+  blueprint.global = Array.from({ length: 32 }, () => ({ kind: 'condition', text: '가'.repeat(240), at: f.at.slice(0, 8) }));
   assert.deepEqual(validateMapBlueprint(blueprint, f.ask), blueprint);
   refused(() => validateMapBlueprint(planned(f, 13), f.ask));
   const f25 = fixture(25), old25 = { parts: f25.ask.parts.map(part => ({ ref: part.id, name: part.name, parent: part.parentId, at: [f25.at[0]], focus: '기존 책임' })), global: [] };
@@ -428,13 +428,13 @@ test('the combined first-map wire only omits set-aside items: no quote clipped, 
 test('plan feedback names fixed paths, rules and counts only, for anchors, bounds, existing names and parents', () => {
   const f = fixture(1), blueprint = planned(f, 2), own = f.ask.parts[0];
   blueprint.parts.push({ ref: own.id, name: `${own.name} 변경`, parent: 'new:p1', at: [f.at[0]], focus: '기존 책임' });
-  blueprint.parts[0].at = ['N99.01']; blueprint.parts[1].at = f.at.slice(0, 9); blueprint.parts[1].focus = '가'.repeat(241);
+  blueprint.parts[0].at = ['N99.01']; blueprint.parts[1].at = f.at.slice(0, 9); blueprint.parts[1].focus = '가'.repeat(401);
   blueprint.global = [{ kind: 'checked', text: '원문', at: [`${f.at[0]}-02`] }];
   refused(() => validateMapBlueprint(blueprint, f.ask));
   const issues = blueprintStageIssues(blueprint, f.ask);
   assert.deepEqual(issues, [
     { path: 'parts[0].at', rule: 'reference', expected: null, actual: null },
-    { path: 'parts[1].focus', rule: 'length', expected: 240, actual: 241 }, { path: 'parts[1].at', rule: 'count', expected: 8, actual: 9 },
+    { path: 'parts[1].focus', rule: 'length', expected: 400, actual: 401 }, { path: 'parts[1].at', rule: 'count', expected: 8, actual: 9 },
     { path: 'parts[2].name', rule: 'name-mismatch', expected: null, actual: null }, { path: 'parts[2].parent', rule: 'parent-mismatch', expected: null, actual: null },
     { path: 'global[0].kind', rule: 'kind', expected: null, actual: null }, { path: 'global[0].at', rule: 'reference', expected: null, actual: null }]);
   const encoded = JSON.stringify(issues);

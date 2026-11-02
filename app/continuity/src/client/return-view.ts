@@ -19,6 +19,7 @@ import { sessionText, recordParts, quoteNext, NEXT_RECORD, NEXT_LINE, RECORD_HEA
 import { readSessionFile, type SessionSources } from './session-source.js';
 import { WEB_RECORD_ASK, foldRecord, sessionOrigin, originLabel, sessionName } from '../shared/handover.js';
 import { PASTED_TEXT_LIMIT, isMapReading, type Project } from '../shared/types.js';
+import { PROJECT_REPORT_ASK, REPORT_ASK_EXPLAIN } from '../shared/report-ask.js';
 import { nearSameRecord } from '../shared/domain.js';
 import { recordTexts } from '../shared/request-return.js';
 import type { PlanOpened } from './plan-view.js';
@@ -298,7 +299,9 @@ export function createReturnView(host: ReturnHost) {
   /** The session list of the paste box (per entry): open or not, what was listed, a filter, which session is being read, and what
    * the last pick did (manual: the web chat's request text is shown to copy by hand). Nothing here is saved: a picked session only
    * fills the paste draft, which the person then reads and saves. */
-  interface SessionPick { open: boolean; loading: boolean; list: SessionSummary[] | null; filter: string; reading: string | null; error: string | null; note: string | null; manual: boolean }
+  interface SessionPick { open: boolean; loading: boolean; list: SessionSummary[] | null; filter: string; reading: string | null; error: string | null; note: string | null; manual: boolean;
+    /** The request text shown to copy by hand (the session-transcript request unless the status-report one was asked for). */
+    manualText?: string }
   const picks = new Map<string, SessionPick>();
   const pickOf = (key: string): SessionPick => {
     let p = picks.get(key); if (!p) { p = { open: false, loading: false, list: null, filter: '', reading: null, error: null, note: null, manual: false }; picks.set(key, p); }
@@ -348,12 +351,13 @@ export function createReturnView(host: ReturnHost) {
       taken ? '이미 가져온 세션이에요. 저장하면 앞서 들어온 대화가 한 번 더 들어갈 수 있어요.' : '', '읽어 보고 ‘기록 저장’을 누르세요.'].filter(Boolean).join(' ');
   }
   /** Copies the web chat's request text; when copying is blocked it is shown whole and selected, to copy by hand. */
-  async function copyWebAsk(p: SessionPick) {
-    let ok = true; try { await navigator.clipboard.writeText(WEB_RECORD_ASK); } catch { ok = false; }
+  async function copyWebAsk(p: SessionPick, text = WEB_RECORD_ASK) {
+    let ok = true; try { await navigator.clipboard.writeText(text); } catch { ok = false; }
+    p.manualText = text;
     // Said as the handover document says it: a quiet line, not an error (the text is right there to copy). Pressed under the
     // open list, the list folds so the line shows.
     p.error = null; p.manual = !ok; p.open = false;
-    p.note = ok ? '기록 요청 문구를 복사했어요. 웹 AI 대화에 붙여 넣고, 나온 답을 이 칸에 그대로 붙여 넣어 저장하세요.' : '자동 복사가 막혀 있어요. 아래 칸의 문구를 직접 복사하세요(선택해 두었어요).';
+    p.note = ok ? (text === WEB_RECORD_ASK ? '기록 요청 문구를 복사했어요. 웹 AI 대화에 붙여 넣고, 나온 답을 이 칸에 그대로 붙여 넣어 저장하세요.' : '현황 보고 요청 문구를 복사했어요. 프로젝트를 보고 있는 AI 대화에 붙여 넣고, 나온 보고서를 이 칸에 붙여 넣어 저장하세요.') : '자동 복사가 막혀 있어요. 아래 칸의 문구를 직접 복사하세요(선택해 두었어요).';
     render();
     if (!ok) { const t = document.querySelector<HTMLTextAreaElement>('#lens .rr-web-ask'); t?.focus(); t?.select(); t?.scrollTo(0, 0); }
   }
@@ -366,7 +370,8 @@ export function createReturnView(host: ReturnHost) {
       !current && state === 'none' ? h('button', { type: 'button', class: 'link-button rr-session-pick', title: '.claude 또는 .codex 폴더를 한 번 골라 두면 목록에서 바로 가져와요 (크롬·엣지)', onclick: async () => { if (await src.pick()) void loadSessions(); else render(); } }, '세션 폴더 고르기') : null,
       !current && state === 'prompt' ? h('button', { type: 'button', class: 'link-button rr-session-grant', onclick: async () => { await src.grant(); if (src.current()) void loadSessions(); else render(); } }, '세션 폴더 다시 허용') : null,
       h('button', { type: 'button', class: 'link-button', title: 'Claude Code나 Codex의 .jsonl 세션 파일 하나를 골라 넣어요', disabled: !!p.reading, onclick: () => file.click() }, '세션 파일 올리기'), file,
-      h('button', { type: 'button', class: 'link-button', title: '웹 AI 대화에 붙여 넣으면, 그 대화가 기록을 이 칸에 맞는 형식으로 써 줘요', onclick: () => void copyWebAsk(p) }, '웹 대화용 기록 요청 문구 복사'));
+      h('button', { type: 'button', class: 'link-button', title: '웹 AI 대화에 붙여 넣으면, 그 대화가 기록을 이 칸에 맞는 형식으로 써 줘요', onclick: () => void copyWebAsk(p) }, '웹 대화용 기록 요청 문구 복사'),
+      h('button', { type: 'button', class: 'link-button', title: REPORT_ASK_EXPLAIN, onclick: () => void copyWebAsk(p, PROJECT_REPORT_ASK) }, '현황 보고 요청 문구 복사'));
     if (!p.open) return h('div', { class: 'rr-sessions' },
       current ? h('button', { type: 'button', class: 'secondary small', onclick: () => void loadSessions() }, '내 AI 세션에서 가져오기') : null,
       current ? h('span', { class: 'fine' }, `${where}을 골라 넣어요`) : h('span', { class: 'fine' }, 'AI 세션 기록을 원문 그대로 넣을 수 있어요'),
@@ -374,7 +379,7 @@ export function createReturnView(host: ReturnHost) {
       p.note ? h('p', { class: 'fine rr-sessions-note', role: 'status' }, p.note) : null,
       p.error ? h('p', { class: 'pp-error', role: 'alert' }, p.error) : null,
       // The request text to copy by hand, line breaks and all (the web AI writes its record in that shape).
-      p.manual ? h('textarea', { class: 'rr-web-ask', readonly: true, rows: '6', spellcheck: 'false', 'aria-label': '웹 대화용 기록 요청 문구' }, WEB_RECORD_ASK) : null);
+      p.manual ? h('textarea', { class: 'rr-web-ask', readonly: true, rows: '6', spellcheck: 'false', 'aria-label': '요청 문구' }, p.manualText ?? WEB_RECORD_ASK) : null);
     const tools = where;
     // The sessions the search finds (a hidden stand-in when there is nothing to say), drawn again on their own as it is typed in:
     // the search itself stays, so a syllable being composed in it (Korean) is not cut.
