@@ -1,5 +1,6 @@
 import { ApiError } from '../../server/errors.mjs';
 import { validateMapAsk, validateMapReply } from '../dist/public/shared/map-reading.js';
+import { isFirstMap, dividedKind } from '../dist/public/shared/map-route.js';
 import { MAP6_FIRST_PROMPT, MAP7_PROMPT, MAP7_RECIPE, MAP7_GUIDANCE_FRAME, MAP7_VOCABULARY, map7Prompt } from './map-prompt.mjs';
 import { planMapPartitions, validateExtraction, EXTRACTION_CANDIDATES_MAX } from './map-partition.mjs';
 import { callMapProvider } from './map-provider.mjs';
@@ -65,8 +66,9 @@ export const FINAL_GLOBAL_RULES = `
 export const PIPELINE_RECIPE = 'first-map-divided.5';
 export const LATER_PIPELINE_RECIPE = 'later-map-divided.5';
 const MODELS = new Set(['gpt-6.1-sol', 'gpt-6-astra', 'gpt-6.1-terra']);
-export const isFirstMap = ask => ask?.schemaVersion === 'studio.map.6' && ask.parts.length === 0 && !(ask.requests ?? []).length && !(ask.priors ?? []).length;
-const eligible = ask => isFirstMap(ask) || ask?.schemaVersion === 'studio.map.7';
+// The route rule is shared with the browser and studio.mjs (shared/map-route.ts): a first map.6 or a later map.7.
+export { isFirstMap };
+const eligible = ask => dividedKind(ask) !== null;
 
 /** First map.6 and later map.7 share bounded stages, retaining each original schema's validation and prompt. */
 export function createFirstMapPipeline({ store, deepseekKey, openaiKey, deepseekModel = 'deepseek-flash', mergeModel = 'gpt-6.1-sol', renderModel = deepseekModel, fetchImpl = globalThis.fetch,
@@ -271,6 +273,6 @@ export function createFirstMapPipeline({ store, deepseekKey, openaiKey, deepseek
     });
   }
   return { model, identity, laterIdentity, eligible, ready, call,
-    describe: () => ({ version: PIPELINE_RECIPE, laterVersion: LATER_PIPELINE_RECIPE, model, extractionModel: deepseekModel, mergeModel, renderModel, renderProvider, maxPartitions,
+    describe: () => ({ version: PIPELINE_RECIPE, laterVersion: LATER_PIPELINE_RECIPE, model, extractionModel: deepseekModel, mergeModel, renderModel, renderProvider, maxPartitions, targetChars,
       deepseekMaxCalls: maxPartitions + (renderProvider === 'deepseek' ? (1 + SEMANTIC_REVISION_LIMIT) * (1 + CORRECTION_LIMIT) * (Math.ceil(BLUEPRINT_PARTS_MAX / BLUEPRINT_PARTS_PER_FRAGMENT) + 1) : 0), parallel: 2, ...store.describe() }) };
 }

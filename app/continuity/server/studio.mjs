@@ -12,6 +12,7 @@ import { validateDigestAsk, validateDigestReply } from '../dist/public/shared/di
 import { PLAN_PROMPT, PLAN2_PROMPT, PLAN3_PROMPT, SCOPE_PROMPT } from './plan-prompt.mjs';
 import { DIGEST_PROMPT, DIGEST2_PROMPT } from './digest-prompt.mjs';
 import { validateMapAsk, validateMapReply } from '../dist/public/shared/map-reading.js';
+import { mapRoute, dividedKind, dividedOfferOf, DEEPSEEK_CALLS_UNSTATED } from '../dist/public/shared/map-route.js';
 import { SPAN_INDEX, textDigest } from '../dist/public/shared/evidence-span.js';
 import { redactSecrets } from '../dist/public/shared/secret.js';
 import { CONNECTOR_BODY_BYTES } from '../dist/public/shared/connector-limits.js';
@@ -288,11 +289,22 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
   const limiter = createLimiter(config);
   // Every reading except /ask (plan, scope, digest, map and map jobs) is made with the plan model.
   const planConfig = { ...config, model: config.planModel ?? config.model };
-  const divided = ask => !!firstMapPipeline?.eligible(ask);
-  const firstPrompt = () => `m6-${firstMapPipeline.identity.slice(0, 12)}`;
-  const dividedLaterPrompt = () => `m7-${firstMapPipeline.laterIdentity.slice(0, 12)}`;
-  const jobPrompt = (schema, ask) => divided(ask) ? (schema === 'studio.map.7' ? dividedLaterPrompt() : firstPrompt()) : promptFor(schema);
-  const jobModel = ask => divided(ask) ? firstMapPipeline.model : planConfig.model;
+  // The divided families this host offers (status map.first / map.later), from the pipeline's own description. The same object
+  // decides a job's route (shared/map-route.ts), so what status advertises is what a job is bound to and run with.
+  const dividedOffer = prompt => {
+    const d = firstMapPipeline.describe(), whole = n => Number.isInteger(n) && n > 0;
+    return { model: firstMapPipeline.model, prompt, ready: firstMapPipeline.ready(), method: 'divided', monthlyUsd: d.monthlyUsd, runUsd: d.runUsd,
+      deepseekMaxCalls: d.deepseekMaxCalls ?? DEEPSEEK_CALLS_UNSTATED, ...(whole(d.maxPartitions) ? { partitions: d.maxPartitions } : {}), ...(whole(d.targetChars) ? { partitionChars: d.targetChars } : {}) };
+  };
+  const dividedOffers = () => firstMapPipeline ? { first: dividedOffer(`m6-${firstMapPipeline.identity.slice(0, 12)}`), later: dividedOffer(`m7-${firstMapPipeline.laterIdentity.slice(0, 12)}`) } : {};
+  /** The route offer of the key's own provider (never the executor's): single-call model and recipes, and the divided families. */
+  const routeOffer = async () => ({ model: planConfig.model, prompt: await mapPromptId(), laterPrompt: await map7PromptId(), ...dividedOffers() });
+  // Shape alone says whether an ask is divided here (this host offers both families whenever it has a pipeline), so the check
+  // every /map and /ask request makes reads no pipeline store.
+  const divided = ask => !!firstMapPipeline && dividedKind(ask) !== null;
+  // A job is bound to its route's recipe and model; the browser chooses them with the same mapRoute from status.
+  const jobPrompt = async (_schema, ask) => { const route = mapRoute(ask, await routeOffer()); if (!route) throw new ApiError('UNSUPPORTED_VERSION', 400); return route.promptId; };
+  const jobModel = ask => dividedOfferOf(ask, dividedOffers())?.model ?? planConfig.model;
   // AF102: a local preview host may give map jobs an executor of its own (a Node-only module it imports itself; never from env or
   // the browser, never in the Worker). It runs map jobs only; /ask, /plan, /scope, /digest and /map keep the DeepSeek key as they
   // are. It answers with a checked wire for the very ask, or fails; there is no fallback to another provider.
@@ -316,10 +328,7 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
     const later = later7() ? { laterPrompt: await map7PromptId() } : {};
     if (executor) return executor.ready() && jobs.describe().durable ? { map: { model: executor.model, prompt: await mapPromptId(), ...later, via: 'jobs' } } : {};
     return config.apiKey ? { map: { model: planConfig.model, prompt: await mapPromptId(), ...later,
-      ...(firstMapPipeline ? {
-        first: { model: firstMapPipeline.model, prompt: firstPrompt(), ready: firstMapPipeline.ready(), method: 'divided', monthlyUsd: firstMapPipeline.describe().monthlyUsd, runUsd: firstMapPipeline.describe().runUsd, deepseekMaxCalls: firstMapPipeline.describe().deepseekMaxCalls ?? 48 },
-        later: { model: firstMapPipeline.model, prompt: dividedLaterPrompt(), ready: firstMapPipeline.ready(), method: 'divided', monthlyUsd: firstMapPipeline.describe().monthlyUsd, runUsd: firstMapPipeline.describe().runUsd, deepseekMaxCalls: firstMapPipeline.describe().deepseekMaxCalls ?? 48 }
-      } : {}) } } : {};
+      ...dividedOffers() } } : {};
   };
   const statusBody = async () => ({
     ai: config.apiKey ? 'deepseek' : 'off', model: config.apiKey ? config.model : null, access: config.accessCode ? 'code' : 'open',

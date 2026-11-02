@@ -3,6 +3,7 @@ import { validateDigestReply, type DigestAsk, type DigestReply } from '../shared
 import { validateMapReply, MAP4_SCHEMA, MAP5_SCHEMA, MAP6_SCHEMA, MAP7_SCHEMA, type MapAsk, type MapReply } from '../shared/map-reading.js';
 import { SPAN_INDEX, textDigest } from '../shared/evidence-span.js';
 import { RUNTIME } from './runtime.js';
+import { DEEPSEEK_CALLS_UNSTATED, type DividedOffer } from '../shared/map-route.js';
 import { readSessionList, readSessionDetail, type SessionSummary, type SessionDetail } from '../shared/session-import.js';
 
 /** digest: the model and prompt id a return reading would be made with (null when the server does not say). */
@@ -10,8 +11,8 @@ export interface AiStatus { ai: 'deepseek' | 'off' | 'none'; model: string | nul
   /** The model and prompt id a map reading would be made with (null when the server does not offer it). AF102 via 'jobs': made only
    * as a durable job by the server's own map executor (a local preview), whatever ai says; the other AI features keep ai. */
   map?: { model: string; prompt: string; via?: 'jobs';
-    first?: { model: string; prompt: string; ready: boolean; method: 'divided'; monthlyUsd: number; runUsd: number; deepseekMaxCalls?: number };
-    later?: { model: string; prompt: string; ready: boolean; method: 'divided'; monthlyUsd: number; runUsd: number; deepseekMaxCalls?: number };
+    /** The PC's divided pipeline for a first map (m6 recipe) and for later readings (m7); which one an ask takes is mapRoute's. */
+    first?: DividedOffer; later?: DividedOffer;
     /** AF116: the m7 recipe for later readings (studio.map.7), beside prompt (m6, still every first map); absent on older servers. */
     laterPrompt?: string } | null;
   /** AF100: the server keeps map readings as durable jobs on this PC (durable), or has a job store it cannot use (problem).
@@ -42,6 +43,16 @@ export class AskError extends Error { constructor(readonly code: string) { super
 const url = (path: string) => `${RUNTIME.apiBase ?? ''}${path}`;
 
 /** none = this build has no server to ask; off = a server answered but has no AI key. */
+/** One divided family as a server advertises it (status map.first / map.later), or null. A DeepSeek bound that is missing or out of
+ * range reads as the largest one a PC host can have (DEEPSEEK_CALLS_UNSTATED); partition sizes are kept only as plain counts. */
+function dividedOfferIn(o: any, recipe: 'm6' | 'm7'): DividedOffer | null {
+  if (!o || o.method !== 'divided' || typeof o.model !== 'string' || !/^[\w.-]{1,80}$/.test(o.model) || typeof o.prompt !== 'string'
+    || !new RegExp(`^${recipe}-[0-9a-f]{12}$`).test(o.prompt) || !Number.isFinite(o.monthlyUsd) || !Number.isFinite(o.runUsd)) return null;
+  const whole = (n: unknown, max: number): n is number => Number.isInteger(n) && (n as number) >= 1 && (n as number) <= max;
+  return { model: o.model, prompt: o.prompt, ready: o.ready === true, method: 'divided', monthlyUsd: o.monthlyUsd, runUsd: o.runUsd,
+    deepseekMaxCalls: whole(o.deepseekMaxCalls, DEEPSEEK_CALLS_UNSTATED) ? o.deepseekMaxCalls : DEEPSEEK_CALLS_UNSTATED,
+    ...(whole(o.partitions, 64) ? { partitions: o.partitions } : {}), ...(whole(o.partitionChars, 100000) ? { partitionChars: o.partitionChars } : {}) };
+}
 export async function aiStatus(): Promise<AiStatus> {
   if (RUNTIME.apiBase === null) return { ai: 'none', model: null, access: 'open' };
   try {
@@ -50,12 +61,7 @@ export async function aiStatus(): Promise<AiStatus> {
     if (!res.ok || !['deepseek', 'off'].includes(v?.ai)) return { ai: 'none', model: null, access: 'open' };
     const d = v.digest, digest = d && typeof d.model === 'string' && typeof d.prompt === 'string' && /^[\w.-]{1,80}$/.test(d.model) && /^d1-[0-9a-f]{12}$/.test(d.prompt)
       ? { model: d.model, prompt: d.prompt, record: typeof d.record === 'string' && /^d2-[0-9a-f]{12}$/.test(d.record) ? d.record : null } : null;
-    const f = v.map?.first;
-    const first = f && f.method === 'divided' && typeof f.model === 'string' && /^[\w.-]{1,80}$/.test(f.model) && typeof f.prompt === 'string' && /^m6-[0-9a-f]{12}$/.test(f.prompt) && Number.isFinite(f.monthlyUsd) && Number.isFinite(f.runUsd)
-      ? { model: f.model, prompt: f.prompt, ready: f.ready === true, method: 'divided' as const, monthlyUsd: f.monthlyUsd, runUsd: f.runUsd, deepseekMaxCalls: Number.isInteger(f.deepseekMaxCalls) && f.deepseekMaxCalls >= 1 && f.deepseekMaxCalls <= 48 ? f.deepseekMaxCalls : 48 } : null;
-    const l = v.map?.later;
-    const later = l && l.method === 'divided' && typeof l.model === 'string' && /^[\w.-]{1,80}$/.test(l.model) && typeof l.prompt === 'string' && /^m7-[0-9a-f]{12}$/.test(l.prompt) && Number.isFinite(l.monthlyUsd) && Number.isFinite(l.runUsd)
-      ? { model: l.model, prompt: l.prompt, ready: l.ready === true, method: 'divided' as const, monthlyUsd: l.monthlyUsd, runUsd: l.runUsd, deepseekMaxCalls: Number.isInteger(l.deepseekMaxCalls) && l.deepseekMaxCalls >= 1 && l.deepseekMaxCalls <= 48 ? l.deepseekMaxCalls : 48 } : null;
+    const first = dividedOfferIn(v.map?.first, 'm6'), later = dividedOfferIn(v.map?.later, 'm7');
     const m = v.map, map = m && typeof m.model === 'string' && /^[\w.-]{1,80}$/.test(m.model) && typeof m.prompt === 'string' && /^m[1-6]-[0-9a-f]{12}$/.test(m.prompt) ? { model: m.model, prompt: m.prompt, ...(first ? { first } : {}), ...(later ? { later } : {}), ...(m.via === 'jobs' ? { via: 'jobs' as const } : {}),
       // A later recipe is read only beside a current m6 one, and only as an exact m7 id.
       ...(/^m6-/.test(m.prompt) && typeof m.laterPrompt === 'string' && /^m7-[0-9a-f]{12}$/.test(m.laterPrompt) ? { laterPrompt: m.laterPrompt } : {}) } : null;
