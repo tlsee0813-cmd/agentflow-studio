@@ -8,8 +8,10 @@ const CORNER = 8;
 
 /** Candidate rectangles for a chip of w×h along a polyline, best first. 'long': the longest horizontal run first (a verb reads
  * along the flow), then shorter runs, then beside a vertical run. 'end' / 'start': the runs nearest that end first (a verb at
- * rest sits by the part its line points to). A run too short to hold the chip clear of both corners gives no spot. */
-export function labelSpots(pts: Point[], w: number, h: number, prefer: 'long' | 'end' | 'start' = 'long'): Rect[] {
+ * rest sits by the part its line points to). A run too short to hold the chip clear of both corners gives no spot.
+ * pad: free line the chip keeps along its run on each side past the corners' clearance (a verb at rest keeps 8px), so it
+ * never reads squeezed between two bends. */
+export function labelSpots(pts: Point[], w: number, h: number, prefer: 'long' | 'end' | 'start' = 'long', pad = 0): Rect[] {
   type Seg = { a: Point; b: Point; horiz: boolean; len: number; idx: number };
   const segs: Seg[] = [];
   for (let i = 1; i < pts.length; i++) {
@@ -19,7 +21,7 @@ export function labelSpots(pts: Point[], w: number, h: number, prefer: 'long' | 
   const n = pts.length - 1;
   // Room a chip needs along the run: its own length that way plus the corners at both ends (a first or last run has a port
   // at one end instead of a corner, which needs no clearance).
-  const need = (s: Seg) => (s.horiz ? w : h) + (s.idx > 1 ? CORNER : 0) + (s.idx < n ? CORNER : 0) + 4;
+  const need = (s: Seg) => (s.horiz ? w : h) + (s.idx > 1 ? CORNER : 0) + (s.idx < n ? CORNER : 0) + 4 + pad * 2;
   const ok = segs.filter(s => s.len >= need(s));
   ok.sort((p, q) => {
     if (prefer === 'long') return Number(q.horiz) - Number(p.horiz) || q.len - p.len;
@@ -32,7 +34,7 @@ export function labelSpots(pts: Point[], w: number, h: number, prefer: 'long' | 
     const forward = s.horiz ? s.b.x > s.a.x : s.b.y > s.a.y;
     // Clearance at the run's low end and high end (in x or y): the corner at a or at b, whichever lies there.
     const cA = s.idx > 1 ? CORNER : 0, cB = s.idx < n ? CORNER : 0, cLo = forward ? cA : cB, cHi = forward ? cB : cA;
-    const span = s.horiz ? w : h, lo = cLo + 2 + span / 2, hi = s.len - cHi - 2 - span / 2;
+    const span = s.horiz ? w : h, lo = cLo + 2 + pad + span / 2, hi = s.len - cHi - 2 - pad - span / 2;
     const ts = prefer === 'end' ? [0.5, 0.65, 0.8, 0.35, 0.2] : prefer === 'start' ? [0.5, 0.35, 0.2, 0.65, 0.8] : [0.5, 0.35, 0.65, 0.2, 0.8];
     for (const t of ts) {
       // Distance from a to the chip's centre, along the run, in the run's own direction.
@@ -42,6 +44,19 @@ export function labelSpots(pts: Point[], w: number, h: number, prefer: 'long' | 
     }
   }
   return out;
+}
+/** Beside a line just short of the part it points to (its end port), when no run of it holds the chip: above and below a last
+ * run that arrives level, on either side of one that arrives upright, the chip's near edge gap from the tip (clear of the
+ * arrowhead). The caller keeps only places clear of parts, other lines and the line itself. */
+export function portSpots(pts: Point[], w: number, h: number, gap = 12): Rect[] {
+  const n = pts.length; if (n < 2) return [];
+  const tip = pts[n - 1]!, prev = pts[n - 2]!;
+  if (Math.abs(tip.y - prev.y) < 0.5) {
+    const x = tip.x > prev.x ? tip.x - gap - w : tip.x + gap;
+    return [{ x, y: tip.y - h - 3, w, h }, { x, y: tip.y + 3, w, h }];
+  }
+  const y = tip.y > prev.y ? tip.y - gap - h : tip.y + gap;
+  return [{ x: tip.x + 4, y, w, h }, { x: tip.x - w - 4, y, w, h }];
 }
 /** Whether a polyline passes through a rectangle grown by margin on every side. */
 export function polylineHitsRect(pts: Point[], r: Rect, margin = 2): boolean {

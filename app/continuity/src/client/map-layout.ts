@@ -27,6 +27,11 @@ export const LIST_GAP = 18, LIST_ROW_GAP = 2;
 /** Between an open group and a sibling: a lane wide enough for a line to pass between them. */
 export const FRAME_GUTTER = 40;
 export interface Point { x: number; y: number }
+/** layoutScope's extra for a unit the readings typed: room(nameLines, chipsLine) is the room its typed lines need past the
+ * name's lines (chipsLine: a card with an inside whose name does not keep one line beside its group chips carries them on a
+ * line of their own, its name then measured across the card). oneLine: the name is drawn on one line at this zoom (styles.css
+ * z-mid), so the card is as high as one name line. */
+export interface TypedCard { room: (nameLines: number, chipsLine: boolean) => number; oneLine?: boolean }
 export type Positions = Record<string, Record<string, Point>>;
 export const ROOT = 'root';
 export type Face = 'unit' | 'row' | 'item';
@@ -110,8 +115,8 @@ export function textWidth(text: string): number {
 /** Rendered width of text: 'node' (13.5px semibold row name), 'head' (15px region or unit name), 'sub' (13px group name),
  * 'note' (12.5px description) or 'where' (600 11px, where outside partners belong; tracking is added by headNeed). The browser
  * passes a canvas measurement in the page's own font; without one, the estimate. */
-export type TextMeasure = (text: string, kind: 'node' | 'item' | 'head' | 'sub' | 'note' | 'plan' | 'where') => number;
-const SCALE = { node: 13.5 / 13, item: 0.98, head: 15 / 13, sub: 1, note: 12.5 / 13 * 0.92, plan: 12 / 13 * 0.95, where: 11 / 13 } as const;
+export type TextMeasure = (text: string, kind: 'node' | 'item' | 'head' | 'sub' | 'note' | 'plan' | 'where' | 'meta') => number;
+const SCALE = { node: 13.5 / 13, item: 0.98, head: 15 / 13, sub: 1, note: 12.5 / 13 * 0.92, plan: 12 / 13 * 0.95, where: 11 / 13, meta: 12 / 13 * 0.95 } as const;
 const estimate: TextMeasure = (text, kind) => textWidth(text) * SCALE[kind];
 /** The first sentence of a note: what a region or unit says about itself on the map. The rest belongs to the selection. */
 export function lead(note: string): string {
@@ -185,8 +190,14 @@ export function isListGroup(v: StudioView, container: string | null): boolean {
 /** planned: only while a change preview reads on the map, the lines a part's own row will show under its name (each text it can
  * show; the longest, up to two lines, decides). Only these parts take that room; every other box keeps its current size.
  * aspect: width/height of the window's map (not of what a reading pane leaves of it): the scope's own unlinked parts are set in
- * as many columns as make their block closest to that shape, instead of one tall column. */
-export function layoutScope(v: StudioView, scope: string | null, expanded: (id: string, depth: number) => boolean, pos: Positions, measureText: TextMeasure = estimate, planned?: ReadonlyMap<string, readonly string[]>, aspect = 1.6): ScopeLayout {
+ * as many columns as make their block closest to that shape, instead of one tall column.
+ * extra: the pixels a unit or row card needs below its own lines for what the readings say of it (its type word, operations
+ * line and typed body, drawn by the client); list items never take it. Absent, every card keeps the height its lines give.
+ * A unit the readings typed may answer with a TypedCard instead: it is drawn at UNIT_W with its typed lines in place of its
+ * note (map spec 2.1: the note reads on selection), and its room is asked with the lines its name takes there. */
+export function layoutScope(v: StudioView, scope: string | null, expanded: (id: string, depth: number) => boolean, pos: Positions, measureText: TextMeasure = estimate, planned?: ReadonlyMap<string, readonly string[]>, aspect = 1.6, extra?: (id: string, face: Face) => number | TypedCard): ScopeLayout {
+  const more = (id: string, face: Face, nameLines = 1, chipsLine = false) => { const x = extra?.(id, face); return Math.max(0, typeof x === 'number' ? x : x ? x.room(nameLines, chipsLine) : 0); };
+  const typedCard = (id: string) => { const x = extra?.(id, 'unit'); return x && typeof x === 'object' ? x : null; };
   const byId = new Map(v.parts.map(p => [p.id, p]));
   const kidsOf = (id: string | null) => (id ? byId.get(id)?.childIds ?? [] : v.roots);
   const open = (id: string, depth: number) => depth < 12 && kidsOf(id).length > 0 && expanded(id, depth);
@@ -476,20 +487,28 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
       m = { w, h: Math.max(14 + (nl + extra) * 17, pl ? 14 + nl * 17 + 2 + pl * PLAN_LINE : 0), ox: 0, oy: 0, head: 0, face: 'item' };
     } else if (depth === 0) {
       // A folded group reads by its name and count; its note is the selection's. A part without an inside keeps its sentence.
-      const note = kids ? '' : mapLead(v, id), need = measureText(p.name, 'head') * 1.1 + 6;
-      let w = note ? UNIT_W : NODE_W;
+      const typed = typedCard(id), note = kids || typed ? '' : mapLead(v, id), need = measureText(p.name, 'head') * 1.1 + 6;
+      let w = note || typed ? UNIT_W : NODE_W;
       // A folded group's name keeps one line when a card up to NODE_MAX_W holds it beside its count and the way in.
       if (kids && need > w - chrome && need <= NODE_MAX_W - chrome) w = Math.ceil(need) + chrome;
       if (need > (w - chrome) * 2) w = Math.min(NODE_MAX_W + 40, Math.ceil(need / 2) + chrome);
       // Lines break between words: a name on two lines keeps its longest word whole ('JSContext.eval', never 'JSContext.eva|l').
       const word = Math.max(0, ...p.name.split(/\s+/).map(x => measureText(x, 'head') * 1.1));
       if (need > w - chrome && word > w - chrome) w = Math.min(NODE_MAX_W + 40, Math.max(w, Math.ceil(word) + chrome + 4));
-      const nl = need > w - chrome ? (need > (w - chrome) * 2 ? 3 : 2) : 1, ll = lines(note, 'note', w - chrome), pl = nodeLines(id, w - chrome);
-      m = { w, h: Math.max(NODE_H, 24 + nl * 20 + (ll ? 2 + ll * 17 : 0) + extra * 19, pl ? 24 + nl * 20 + 3 + pl * PLAN_LINE : 0), ox: 0, oy: 0, head: 0, face: 'unit' };
+      let nl = need > w - chrome ? (need > (w - chrome) * 2 ? 3 : 2) : 1, chipsLine = false;
+      const ll = lines(note, 'note', w - chrome), pl = nodeLines(id, w - chrome);
+      // A typed card with an inside whose name does not keep one line beside its group chips: the chips take a line of their own
+      // under the body and the name the card's width without them (the fold toggle stays). Drawn on one line, a name keeps them.
+      if (typed && kids && !typed.oneLine && nl > 1) {
+        const room = w - (chrome - 62 - extraW); chipsLine = true;
+        nl = need > room ? (need > room * 2 ? 3 : 2) : 1;
+      }
+      if (typed?.oneLine) nl = 1;
+      m = { w, h: Math.max(NODE_H, 24 + nl * 20 + (ll ? 2 + ll * 17 : 0) + extra * 19, pl ? 24 + nl * 20 + 3 + pl * PLAN_LINE : 0) + more(id, 'unit', nl, chipsLine), ox: 0, oy: 0, head: 0, face: 'unit' };
     } else {
       // Planned lines keep the row's own padding (10 above and below): this row only, for one line as for two.
       const w = nodeWidth(p.name, kids, measureText, extraW), nl = lines(p.name, 'node', w - chrome, 3), pl = nodeLines(id, w - chrome);
-      m = { w, h: Math.max(20 + (nl + extra) * 18, pl ? 20 + nl * 18 + 2 + pl * PLAN_LINE : 0), ox: 0, oy: 0, head: 0, face: 'row' };
+      m = { w, h: Math.max(20 + (nl + extra) * 18, pl ? 20 + nl * 18 + 2 + pl * PLAN_LINE : 0) + more(id, 'row', nl), ox: 0, oy: 0, head: 0, face: 'row' };
     }
     memo.set(id, m); return m;
   }

@@ -501,7 +501,9 @@ test('a completed invalid global can be corrected once against the same original
   assert.equal(globals.length, 2);
   assert.deepEqual(globals[1].input.renderedParts, globals[0].input.renderedParts);
   assert.equal(globals[1].input.correction.rejected.candidates.length, 1);
-  assert.deepEqual(globals[1].input.correction.issues, [{ path: 'candidates[0].statement.key', rule: 'settled-and-open', expected: null, actual: null }]);
+  // .29: the refusal's own issue first, then the diagnostics read against the ask and the rendered parts (no claim backs the summary).
+  assert.deepEqual(globals[1].input.correction.issues, [{ path: 'candidates[0].statement.key', rule: 'settled-and-open', expected: null, actual: null },
+    { path: 'summary', rule: 'unbacked', expected: 0, actual: 1 }]);
   assert.equal(result.candidates.length, 0);
 });
 
@@ -1070,8 +1072,8 @@ function browserApply(f, wire, exclusions, n = 7) {
 }
 
 test('recipe identities are bumped for the changed prompts and validation semantics', () => {
-  assert.equal(PIPELINE_RECIPE, 'first-map-divided.27');
-  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.27');
+  assert.equal(PIPELINE_RECIPE, 'first-map-divided.29');
+  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.29');
 });
 
 test('a render fragment with one unresolvable claim alias is applied with only that claim set aside and a durable diagnostic', async t => {
@@ -1180,4 +1182,56 @@ test('with OpenAI rendering an extraction receipt is corrected once with coarse 
     assert.equal(attempts[1].provider, 'deepseek');
     assert.equal(calls.filter(c => c.stage === 'plan').length, 1);
   }
+});
+
+// ---- first-map-divided.29: the rule sentences and the cost path of a 24-part first map (fake providers only). ----
+test('.29 rule sentences: stores are parts, every part-table row is covered, a row belongs to its first cell, one line per citation, versions out of config, the summary on claims', async () => {
+  const P = await import('../server/map-pipeline.mjs'), B = await import('../server/map-blueprint.mjs');
+  for (const rule of ['「있는 곳」이 파일·큐·경로인 행', '「저장소 ref → 읽는 쪽 ref: 행 이름」', '만드는 쪽 → 읽는 쪽 직통 항목을 쓰지 않는다', '미구현·폐기·모름 행도 그 상태의 부분으로 세우고',
+    '첫 지도는 새 부분도 24개까지', '그 행을 흡수한 부분의 focus에 원문 이름과 상태 그대로']) assert.ok(B.MAP_BLUEPRINT_PROMPT.includes(rule), rule);
+  assert.ok(B.LATER_BLUEPRINT_PROMPT.includes('새 부분은 12개 이하, global은 32개 이하'));
+  for (const rule of ['저장소 부분은 type=store이고 typeAt은 그 산출물 행', '「필드」 칸의 「·」마다 하나씩', '첫 칸이 blueprint.parts의 다른 부분 이름인 행은', '그 행·줄 한 줄의 구간 별칭 하나를 인용',
+    '판본(sha·「판본」·「명세 136feaf0」 같은 해시)은 설정이 아니므로', '「,」와 「·」로 나뉜 항목마다 하나씩', '설계 설명(topic=how) 주장보다 먼저',
+    // R10: a live-versus-checkout distinction of the record's basis stays a claim.
+    '그 구별을 그 판본이 가리키는 부분의 주장 하나(topic=how, where에 두 판본)로 남긴다']) assert.ok(P.RENDER_RULES.includes(rule), rule);
+  for (const rule of ['「만드는 쪽 → 저장소」(cadence는 쓰는 쪽 박자)와 「저장소 → 읽는 쪽」', '읽는 쪽의 루프 주기·타이머는 그 선이 아니라 읽는 부분의 config가 맡는다', '관계의 from은 그 at 줄이 보내는 쪽으로 적은 부분',
+    'mode=design인 설계 흐름에서만 from이 된다', '연결 표 행 한 줄의 구간 별칭 하나', 'summary의 각 문장은 renderedParts의 어떤 주장이 받치는 사실',
+    'relations는 첫 지도(INPUT.parts가 비어 있음)에서 최대32개, 그 밖에는 최대16개', 'relations 상한(첫 지도 32개, 그 밖 16개)을 넘으면']) assert.ok(GLOBAL_RULES.includes(rule), rule);
+  assert.ok(!GLOBAL_RULES.includes('relations 최대16개'), 'the old sixteen-only bound is gone');
+  for (const category of ['via-store', 'sender', 'wrong-part', 'config이면 판본을 config에서 빼']) assert.ok(P.CORRECTION_RULES.includes(category), category);
+});
+
+test('.29: a 24-part first map renders in eight fragments; a run ceiling that cannot hold them refuses a render before dispatch, applies nothing and never resends a finished stage', async t => {
+  const ask = askFor(), base = originalWire(ask).parts[0];
+  const wide = { ...originalWire(ask), parts: Array.from({ length: 24 }, (_, i) => ({ ...structuredClone(base), ref: `new:u${i}`, name: `단위 ${i}` })) };
+  const bytes = [];
+  const provider = calls => async options => {
+    await options.onDispatch();
+    await options.fetchImpl('https://fake.invalid/test-only');
+    const input = JSON.parse(options.input), stage = stageOf(input), size = new TextEncoder().encode(options.system + options.input).length;
+    calls.push({ stage, input });
+    if (stage === 'render') bytes.push(size);
+    // A render bills half of its input bound (Terra input at $1 per million tokens): the run total grows with every fragment.
+    const used = stage === 'render' ? { inputTokens: Math.floor(size / 2), outputTokens: 0 } : usage;
+    options.onUsage(used);
+    return { value: payloadFor(input, ask, wide), usage: used, provider: options.provider, model: options.model };
+  };
+  const options = { mergeTokens: 64, renderTokens: 512, renderModel: 'gpt-6.1-terra' };
+  const roomy = await setup(t), calls = [];
+  const wire = await roomy.make({ ...options, callProvider: provider(calls) }).call(ask);
+  assert.equal(calls.filter(c => c.stage === 'render').length, 8);
+  assert.deepEqual(calls.filter(c => c.stage === 'render').map(c => c.input.assignment.keyStart), [1, 101, 201, 301, 401, 501, 601, 701]);
+  assert.equal(validateMapReply(wire, ask).parts.length, 24);
+  // A ceiling of about three render reservations: two run at once, each bills half, so a later fragment cannot be reserved.
+  const bound = Math.max(...bytes) / 1e6;
+  const tight = await setup(t, {}, { runUsd: Number((3.2 * bound).toFixed(6)) }), sent = [];
+  const pipeline = tight.make({ ...options, callProvider: provider(sent) });
+  await assert.rejects(pipeline.call(ask), matchesCode('MAP_BUDGET_EXCEEDED'));
+  const renders = () => sent.filter(c => c.stage === 'render').map(c => c.input.assignment.id);
+  assert.ok(renders().length >= 2 && renders().length < 8, String(renders().length));
+  assert.equal(sent.some(c => c.stage === 'global'), false, 'no global stage is sent and no map is applied');
+  await assert.rejects(pipeline.call(ask), matchesCode('MAP_BUDGET_EXCEEDED'));
+  assert.equal(new Set(renders()).size, renders().length, 'a finished fragment is never sent again');
+  assert.equal(sent.filter(c => c.stage === 'plan').length, 1);
+  assert.equal(sent.some(c => c.stage === 'global'), false);
 });

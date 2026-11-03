@@ -2,7 +2,7 @@
 // category or a coarse reason). Never model text, record text, quoted aliases or error.target outside the fixed guard list.
 // This is best-effort reading of an already refused outcome: it never changes validation and never throws.
 import { redactSecrets } from '../dist/public/shared/secret.js';
-import { safeValidation, originalAnchors, BLUEPRINT_PARTS_MAX, BLUEPRINT_NEW_PARTS_MAX, BLUEPRINT_GLOBAL_MAX, BLUEPRINT_GLOBAL_KINDS,
+import { safeValidation, originalAnchors, BLUEPRINT_PARTS_MAX, blueprintNewPartsMax, blueprintGlobalMax, BLUEPRINT_GLOBAL_KINDS,
   BLUEPRINT_CORRECTIONS_MAX, BLUEPRINT_CORRECTIONS_PER_PART_MAX } from './map-blueprint.mjs';
 
 export const STAGE_PHASES = Object.freeze(['extract', 'plan', 'render', 'global', 'correction']);
@@ -50,7 +50,7 @@ export function blueprintReason(value, ask) {
     const later = ask?.schemaVersion === 'studio.map.7';
     if (!exact(value, later ? ['parts', 'global', 'corrections'] : ['parts', 'global']) || !Array.isArray(value.parts) || !Array.isArray(value.global)
       || (later && !Array.isArray(value.corrections))) return 'shape';
-    if (value.parts.length > BLUEPRINT_PARTS_MAX || value.global.length > BLUEPRINT_GLOBAL_MAX || (later && value.corrections.length > BLUEPRINT_CORRECTIONS_MAX)) return 'count';
+    if (value.parts.length > BLUEPRINT_PARTS_MAX || value.global.length > blueprintGlobalMax(ask) || (later && value.corrections.length > BLUEPRINT_CORRECTIONS_MAX)) return 'count';
     const anchors = originalAnchors(ask), existing = new Map(ask.parts.map(part => [part.id, part])), used = new Set(); let fresh = 0;
     for (const part of value.parts) {
       if (!exact(part, ['ref', 'name', 'parent', 'at', 'focus'])) return 'shape';
@@ -59,7 +59,7 @@ export function blueprintReason(value, ask) {
       if (!anchors(part.at)) return 'anchor';
       if (existing.has(part.ref)) { if (part.name !== existing.get(part.ref).name || part.parent !== existing.get(part.ref).parentId) return 'existing-part'; }
       else if (!NEW.test(part.ref)) return 'ref';
-      else if (++fresh > BLUEPRINT_NEW_PARTS_MAX) return 'count';
+      else if (++fresh > blueprintNewPartsMax(ask)) return 'count';
       used.add(part.ref);
     }
     const parents = new Map(ask.parts.map(part => [part.id, part.parentId]));

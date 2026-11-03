@@ -1,5 +1,5 @@
 // Cycle 67 polish: the visual system's contracts that a refactor of styles.css or index.html must keep. Contrast of the grey
-// tokens on white, line emphasis by width, the help legend (four line kinds with their real end marks, the keyboard keys),
+// tokens on white, line emphasis by width, the help legend (the line channels with their real end marks, the keyboard keys),
 // the reading modes as one group, the map tools' groups, and the room a region asks for when the change preview keeps its
 // current note above the change line. No browser.
 import test from 'node:test';
@@ -33,17 +33,21 @@ test('lines are stronger at rest than before and gain width, not only colour, on
   assert.notEqual(/stroke-dasharray:\s*([^;]+)/.exec(rule('.edge.k-shares .edge-line'))[1], /stroke-dasharray:\s*([^;]+)/.exec(rule('.edge.k-related .edge-line'))[1]);
 });
 
-test('the help is a legend: four line kinds with their end marks, and the keyboard keys', () => {
+// Map spec 2.3: the legend reads the three channels (data: filled head, solid; control: open V, solid; reference: open V,
+// broken), a plain relation (a dot at both ends) and the withdrawn and planned patterns.
+test('the help is a legend: the three channels with their end marks, the plain relation, withdrawn and planned lines, and the keyboard keys', () => {
   const help = html.slice(html.indexOf('<div id="help"'), html.indexOf('<div id="edge-tip"'));
   const rows = help.match(/<li><svg[\s\S]*?<\/li>/g) ?? [];
-  assert.equal(rows.length, 4);
-  const [flow, needs, shares, related] = rows;
-  for (const r of [flow, needs, shares]) { assert.match(r, /<circle class="m"/); assert.match(r, /<path class="m" d="M38\.5/); }
-  assert.match(needs, /d-needs/); assert.match(shares, /d-shares/);
+  assert.equal(rows.length, 6);
+  const [data, control, uses, related, revised, planned] = rows;
+  assert.match(data, /<path class="m" d="M38\.5[^"]*z"/, 'data: a filled head');
+  for (const r of [control, uses]) { assert.match(r, /<path class="v" d="M39\.5/); assert.doesNotMatch(r, /class="m"/); }
+  assert.doesNotMatch(data, /d-needs/); assert.doesNotMatch(control, /d-needs/); assert.match(uses, /d-needs/);
   assert.equal((related.match(/<circle class="m"/g) ?? []).length, 2, 'related: a dot at both ends, no arrow');
   assert.doesNotMatch(related, /<path class="m"/);
+  assert.match(revised, /d-revised/); assert.match(planned, /d-planned/);
   for (const k of ['/', 'Enter', 'Space', 'Esc']) assert.ok(help.includes(`<kbd>${k}</kbd>`), k);
-  for (const label of ['흐름 · 넘겨줌', '필요로 함', '함께 씀', '관련']) assert.ok(help.includes(label), label);
+  for (const label of ['데이터', '채운 삼각, 실선', '제어·기동', '열린 V, 실선', '참조', '열린 V, 점선', '관련', '철회', '계획된 연결', '함께 쓰는']) assert.ok(help.includes(label), label);
 });
 
 test('the reading modes are one segmented group and the home actions a primary and a secondary button', () => {

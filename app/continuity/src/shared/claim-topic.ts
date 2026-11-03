@@ -3,7 +3,7 @@
  * topic, its evidence grade and its time itself; an earlier claim has only its kind (who said it, how) and its words, so the
  * topic is derived from those here, once, in one place. Nothing here changes a claim: it only chooses where it is read and what
  * is written beside it. */
-import type { ClaimKind, ClaimTopic, EvidenceGrade, PartState, ReadingClaim, RelationMode } from './types.js';
+import type { Channel, ClaimKind, ClaimTopic, EvidenceGrade, PartState, PartType, ReadingClaim, RelationMode } from './types.js';
 
 /** The headings the pane reads the topics under, in the order it reads them. */
 export const TOPIC_ORDER: readonly ClaimTopic[] = ['status', 'change', 'defect', 'unknown', 'withdrawn', 'decision', 'rule', 'plan', 'how'];
@@ -18,6 +18,14 @@ export const EVIDENCE_LABEL: Record<EvidenceGrade, string> = { file: '파일', r
 export const EVIDENCE_HINT: Record<EvidenceGrade, string> = { file: '작성자가 파일을 직접 읽었다고 표시', run: '작성자가 직접 실행한 결과', report: '다른 세션·문서·사람의 말을 옮김', guess: '작성자의 판단', unknown: '작성자가 모른다고 남김' };
 export const STATE_WORD: Record<PartState, string> = { running: '돌고 있음', working: '작업 중', unbuilt: '미구현', stopped: '멈춤', retired: '폐기', unknown: '모름' };
 export const MODE_LABEL: Record<RelationMode, string> = { design: '설계', observed: '관찰' };
+/** map-reading.8: the type word a card shows (small, over the name) and what a line is said to carry. */
+export const TYPE_LABEL: Record<PartType, string> = { collector: '수집기', compute: '계산', ai: 'AI 판단', loop: '루프·엔진', timer: '타이머·일정', actor: '집행·외부 호출', store: '보관소', person: '사람', session: '세션', external: '외부 시스템' };
+/** The five silhouettes a card can have, from far away: a processing card (a collector, a computation, an AI judgement, an actor
+ * with its effect at the exit), a store (a ledger), a loop (a frame with an inside), a schedule, a participant outside the
+ * program (a person, a session, an external system). A part without a type word is a neutral processing card. */
+export type PartFamily = 'process' | 'store' | 'loop' | 'timer' | 'participant';
+export const FAMILY_OF: Record<PartType, PartFamily> = { collector: 'process', compute: 'process', ai: 'process', actor: 'process', loop: 'loop', timer: 'timer', store: 'store', person: 'participant', session: 'participant', external: 'participant' };
+export const CHANNEL_LABEL: Record<Channel, string> = { data: '데이터', control: '제어', uses: '참조' };
 
 const WITHDRAWN = /철회|폐기|채택하지 않|채택 안|취소했|거뒀|되돌렸|더는 .*않/;
 const UNKNOWN = /\[모름\]|확인하지 못|확인되지 않|보지 못했|읽지 못했|모른다|알 수 없|확인 못/;

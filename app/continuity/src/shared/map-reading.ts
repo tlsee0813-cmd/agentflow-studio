@@ -3,7 +3,7 @@
  * an exact quote of what was sent. applyReading is the only write: it adds parts and relations and keeps one MapReading with the
  * derived understanding. It never renames, moves, archives or re-describes an existing part, never writes Area.note and never
  * touches space.understanding (return.2 and its anchors). What is unclear stays a candidate; nothing asks for approval per part. */
-import { CLAIM_KINDS, CLAIM_TOPICS, EVIDENCE_GRADES, PART_STATES, RELATION_MODES, READINGS_LIMIT, READING_EXCLUSION_RULES, isMapReading, type PastedRecord, type RecordEvidence, type CandidateTarget, type ClaimKind, type ClaimTopic, type EvidenceGrade, type PartState, type RelationMode, type MapReading, type Project, type ReadingCandidate, type ReadingClaim, type ReadingPart, type ReadingQuote, type ReadingRelation, type ReadingSkip, type ReadingExclusion, type RelationKind } from './types.js';
+import { CLAIM_KINDS, CLAIM_TOPICS, EVIDENCE_GRADES, PART_STATES, PART_TYPES, CHANNELS, RELATION_MODES, READINGS_LIMIT, READING_EXCLUSION_RULES, isMapReading, type PastedRecord, type RecordEvidence, type CandidateTarget, type ClaimKind, type ClaimTopic, type EvidenceGrade, type PartState, type PartType, type Channel, type RelationMode, type MapReading, type Project, type ReadingCandidate, type ReadingClaim, type ReadingPart, type ReadingQuote, type ReadingRelation, type ReadingSkip, type ReadingExclusion, type RelationKind } from './types.js';
 import { indexSpans, encodeSpans, decodeSpans, resolveRef, resolveRange, resolveEvidenceRange, textDigest, ANCHOR_QUOTE_MAX, SPANS_PER_RECORD, type Span, type SpanWire } from './evidence-span.js';
 import type { StudioView, RecordView } from './studio.js';
 import { addArea, addChildArea, addRelation, addReading } from './domain.js';
@@ -48,7 +48,17 @@ export const MAP7_SCHEMA = 'studio.map.7' as const;
  * is designed or observed (RELATION_MODES). A wrong value is never changed into a right one: in the lenient readings (map.7, the
  * divided map.6) the claim or relation is set aside, and for a part only the state (with its stateAt and stateWhen) or the files
  * are left out, never the part; plain map.6 refuses. Every reply read under map.6 or map.7 is stored as map-reading.7, each of
- * these keys present (null, or [] for files, when not said). */
+ * these keys present (null, or [] for files, when not said).
+ * map-reading.8 (pipeline .28): the same reply may add to a part the record's own type word (PART_TYPES) with the span that says it
+ * (typeAt), what it receives (inputs, up to six of 60) and hands over (outputs, six of 60), the fields of its rows (fields, twelve
+ * of 40) and its settings (config, four of 80), each as written; to a relation what the line carries (channel, CHANNELS); and to
+ * the reply the records' own basis time (basisAt, 60) and the target version they explicitly describe (basisVersion, 60). The
+ * same lenient rule: a wrong part field is left out alone, a wrong relation sets the relation aside, a wrong reply field is left
+ * null; plain map.6 refuses. Stored as map-reading.8, every key present.
+ * Pipeline .29 (no storage change): map.6 takes 24 new parts; a config item that is a version is wrong (the list is left out); the
+ * divided first map (setAside) also sets aside a data relation naming a file whose store part is not one of its ends (via-store),
+ * a claim quoting another part's table row (wrong-part) and a relation whose sender the quoted line does not name, or an unbuilt
+ * or retired sender outside design (sender). */
 /** A first map: nothing of the map, no request and no prior is sent (map.7 is never one). */
 export const firstAsk = (ask: Pick<MapAsk, 'parts' | 'requests' | 'priors'>): boolean => ask.parts.length === 0 && (ask.requests ?? []).length === 0 && (ask.priors ?? []).length === 0;
 /** A reply refused for a contradiction or a wrong reference it holds: where (path), which rule and what it names (an alias,
@@ -61,9 +71,60 @@ export type ContractGuard = 'shape' | 'keys' | 'text' | 'count' | 'new-count' | 
   | 'empty-part' | 'role-basis' | 'parent-cycle' | 'ends' | 'duplicate' | 'match-contract' | 'quote' | 'explicit-request' | 'about' | 'secret-like' | 'target-time' | 'target-count'
   | 'prior' | 'prior-target' | 'parent-skipped'
   // map-reading.7: the optional fields, each named by its own category.
-  | 'topic' | 'evidence' | 'when' | 'where' | 'before' | 'state' | 'state-at' | 'state-when' | 'files' | 'payload' | 'cadence' | 'mode';
-/** map-reading.7: the categories that leave out a part's own optional fields only (the part stays). */
-const PART_FIELD_GUARDS: ReadonlySet<string> = new Set(['state', 'state-at', 'state-when', 'files']);
+  | 'topic' | 'evidence' | 'when' | 'where' | 'before' | 'state' | 'state-at' | 'state-when' | 'files' | 'payload' | 'cadence' | 'mode'
+  // map-reading.8: a part's type word and interface, a relation's channel, the reply's basis.
+  | 'type' | 'type-at' | 'inputs' | 'outputs' | 'fields' | 'config' | 'channel' | 'basis-at' | 'basis-version'
+  // pipeline .29 (the divided first map): a file line that skips its store, a claim on another part's table row, a sender the
+  // line does not name (or an unbuilt or retired part sending what was not designed).
+  | 'via-store' | 'wrong-part' | 'sender';
+/** map-reading.7–8: the categories that leave out a part's own optional fields only (the part stays). */
+const PART_FIELD_GUARDS: ReadonlySet<string> = new Set(['state', 'state-at', 'state-when', 'files', 'type', 'type-at', 'inputs', 'outputs', 'fields', 'config']);
+/** map-reading.8: the reply's own optional fields, left null alone when wrong. */
+const REPLY_FIELD_GUARDS: ReadonlySet<string> = new Set(['basis-at', 'basis-version']);
+/** Pipeline .29: the first map's contract (map.6) takes 24 new parts, every part a reply may hold: a design record's units and
+ * its stores did not fit twelve. map.7 keeps twelve. */
+export const MAP6_NEW_PARTS = 24;
+/** Pipeline .29: the first map's contract (map.6) takes 32 relations: a store is drawn as two lines (producer → store → reader), and
+ * the KORU records' 22 arrow rows with their stores did not fit sixteen. map.7 keeps twelve. Stored readings already hold 32. */
+export const MAP6_RELATIONS = 32;
+/* Pipeline .29 (the divided first map): the program's own reading of a quoted passage, never of the model's words. */
+/** A name as the record and the map write it, compared loosely (Unicode form, emphasis marks, spacing, case). */
+const plainName = (s: string): string => s.normalize('NFC').replace(/[*`]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+/** The cells of each markdown table row of a passage (header and rule rows too: they name no part). */
+const tableRows = (text: string): string[][] => text.split('\n').map(l => l.trim()).filter(l => l.startsWith('|'))
+  .map(l => l.replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim()));
+/** The names one cell lists ("엔진·종이 생산자"). */
+const cellNames = (cell: string): string[] => cell.split(/[·,/]/).map(plainName).filter(Boolean);
+const FILE_END = /\.(jsonl?|json|md|csv|gz)\b/i, STEM = /^[a-z0-9_]+(?:-[a-z0-9_]+)*/i;
+/** The files a text names, each as its stem and ending ("/var/…/review.jsonl" and "review.jsonl 행" → review.jsonl,
+ * "cards-{CX,CL,DS}.jsonl" → cards.jsonl, "SHEET-<날>.md" → sheet.md); an ending without a stem (".jsonl.active") names none. */
+export function fileKeys(text: string): string[] {
+  const keys: string[] = [];
+  for (const token of text.split(/[\s·()（）「」『』[\]]+/)) {
+    const end = FILE_END.exec(token); if (!end) continue;
+    const stem = token.slice(0, end.index).split('/').reverse().map(s => STEM.exec(s)?.[0]).find(Boolean);
+    const key = stem ? `${stem.toLowerCase()}.${end[1]!.toLowerCase()}` : null;
+    if (key && !keys.includes(key)) keys.push(key);
+  }
+  return keys;
+}
+/** A setting that is a version (a commit sha bare or inside the words, "sha …", 판본, 명세 <hex>): versions are claims, not config. */
+export const versionLike = (s: string): boolean => (/^[0-9a-f]{7,40}$/i.test(s.trim()) && /[a-f]/i.test(s))
+  || /(?:^|[^0-9a-z])(?=[0-9a-f]*\d)(?=[0-9a-f]*[a-f])[0-9a-f]{7,40}(?![0-9a-z])/i.test(s)
+  || /(?:^|[^a-z])sha(?:[^a-z]|$)/i.test(s) || s.includes('판본') || /명세\s*[0-9a-f]{7,}/i.test(s);
+/** The sender each line of a passage names: a table row's first cell (with the row's cells), or the words before an arrow line's
+ * first arrow (with the words before its last arrow, where every sending hop of the line stands). */
+const ARROW = /\s*(?:─+→|-+>|→|⟶)\s*/g;
+interface LineSender { name: string; row: string[] | null; head: string }
+const lineSenders = (text: string): LineSender[] => text.split('\n').flatMap((line): LineSender[] => {
+  const t = line.trim();
+  if (t.startsWith('|')) { const row = t.replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim()); return [{ name: plainName(row[0] ?? ''), row, head: '' }]; }
+  const arrows = [...t.matchAll(ARROW)];
+  if (!arrows.length || arrows[0]!.index! === 0) return [];
+  return [{ name: plainName(t.slice(0, arrows[0]!.index).replace(/^(?:[-*•]|\d{1,2}[.)])\s*/, '')), row: null, head: t.slice(0, arrows.at(-1)!.index) }];
+}).filter(x => !!x.name);
+/** The files a part holds by its own words: its name, its outputs and its files. */
+const storeKeys = (b: MapReplyPart): string[] => [b.name ?? '', ...(b.outputs ?? []), ...(b.files ?? [])].flatMap(fileKeys);
 /** At most this many earlier matches go as priors, within PRIOR_BYTES (records keep the rest of MAP_BYTES). */
 export const MAP_PRIORS = 24;
 const PRIOR_BYTES = 12000;
@@ -112,18 +173,24 @@ export type MapReplyMatch = (RequestMatch | RequestMatch3) & { from?: number; to
 export interface MapReplyMaterial { record: string; from: number; to: number; what: string }
 export interface MapReplyPart { ref: string; name: string | null; parent: string | null; role: string | null; roleAbout: string | null; roleReplaces: MapReplyQuote | null; basis: MapReplyQuote[]; claims: MapReplyClaim[];
   /** map.6–7 (map-reading.7): always present in a checked reply (null / [] when not said); stateQuote is where stateAt stands. */
-  state?: PartState | null; stateQuote?: MapReplyQuote | null; stateWhen?: string | null; files?: string[] }
+  state?: PartState | null; stateQuote?: MapReplyQuote | null; stateWhen?: string | null; files?: string[];
+  /** map.6–7 (map-reading.8): the record's type word with where typeAt stands, and the part's interface, settings and fields. */
+  type?: PartType | null; typeQuote?: MapReplyQuote | null; inputs?: string[]; outputs?: string[]; fields?: string[]; config?: string[] }
 export interface MapReply {
   summary: string;
   parts: MapReplyPart[];
   /** span (studio.map.4): where the quote stands in the excerpt (from/to here are the two parts). */
   relations: { from: string; to: string; kind: RelationKind; note: string; record: string; quote: string; span?: { from: number; to: number };
     /** map.6–7 (map-reading.7): always present in a checked reply (null when not said). */
-    payload?: string | null; cadence?: string | null; mode?: RelationMode | null }[];
+    payload?: string | null; cadence?: string | null; mode?: RelationMode | null;
+    /** map.6–7 (map-reading.8): what the line carries (null when not said). */
+    channel?: Channel | null }[];
   candidates: { text: string; parts: string[]; record: string | null; quote: string | null; at?: { from: number; to: number } | null; target?: CandidateTarget; statement?: MapReplyStatement | null }[];
   gaps: string[];
   matches?: MapReplyMatch[];
   material?: MapReplyMaterial[];
+  /** map.6–7 (map-reading.8): the records' own basis time and target version as written (null when not said). */
+  basisAt?: string | null; basisVersion?: string | null;
 }
 /** The excerpt each record of a request stands for: its text, and its span.2 pieces when it was sent as pieces. */
 const askTexts = new WeakMap<MapAsk, Map<string, { text: string; spans: Span[] | null }>>();
@@ -269,13 +336,21 @@ const exclusionExplanation = (e: MapReplyError): string => {
   };
   return e.rule === 'contract' && e.target === 'count' ? '허용 개수를 넘는 뒤쪽 항목들을 제외했어요.'
     : e.rule === 'contract' && e.target === 'parent-skipped' ? '참조한 새 부분이 제외되어 이 항목도 제외했어요.'
-    // map-reading.7: a part's state or files are left out, the part stays (any rule at that place: its stateAt may not resolve).
-    : PART_FIELD_GUARDS.has(e.rule === 'contract' ? e.target : '') || /^parts\[\d+\]\.(state|stateAt|stateWhen|files)$/.test(e.path) ? '부분의 상태·파일 칸이 규칙에 맞지 않아 그 칸만 비우고 부분은 남겼어요.' : rules[e.rule];
+    // pipeline .29: a relation or a claim set aside by the program's own reading of the line it quotes.
+    : e.rule === 'contract' && e.target === 'via-store' ? '파일을 넘기는 연결이 그 파일의 보관소 부분을 거치지 않아 제외했어요.'
+    : e.rule === 'contract' && e.target === 'wrong-part' ? '다른 부분의 표 행을 인용한 주장이어서 이 부분에서 제외했어요.'
+    : e.rule === 'contract' && e.target === 'sender' ? '원문 줄이 적은 보내는 쪽과 다르거나, 미구현·폐기된 부분이 설계에 없이 보내는 연결이어서 제외했어요.'
+    // map-reading.7–8: a part's state, files, type or interface are left out, the part stays (any rule at that place: its stateAt or
+    // typeAt may not resolve); the reply's basis time or version is left null alone.
+    : PART_FIELD_GUARDS.has(e.rule === 'contract' ? e.target : '') || /^parts\[\d+\]\.(state|stateAt|stateWhen|files|type|typeAt|inputs|outputs|fields|config)$/.test(e.path) ? '부분의 상태·파일·유형·입출력 칸이 규칙에 맞지 않아 그 칸만 비우고 부분은 남겼어요.'
+    : REPLY_FIELD_GUARDS.has(e.rule === 'contract' ? e.target : '') || /^basis(At|Version)$/.test(e.path) ? '정리의 기준 시각·판본 칸이 규칙에 맞지 않아 그 칸만 비웠어요.' : rules[e.rule];
 };
 /** Options of validateMapReply. setAside (studio.map.6 only; ignored for every other schema): the divided first-map pipeline on
  * the PC server reads one isolated bad item the way map.7 does (see below) instead of refusing the whole reply. Without it map.6
- * reads exactly as before; the browser and the single-call Worker path never pass it. */
-export interface MapReplyOptions { setAside?: boolean }
+ * reads exactly as before; the browser and the single-call Worker path never pass it. owners (with setAside, pipeline .29): the
+ * names of every part the divided reading planned, so a fragment read alone checks a quoted table row against the parts the other
+ * fragments write, as the combined reply does. */
+export interface MapReplyOptions { setAside?: boolean; owners?: readonly string[] }
 /** At most this many set-aside reasons travel with a divided first map (a reply with more is refused whole on the server). */
 export const DIVIDED_EXCLUSIONS_MAX = 64;
 export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyOptions = {}): MapReply {
@@ -424,7 +499,9 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
     refs.add(p.ref as string); if (NEW.test(p.ref as string)) news.set(p.ref as string, p.parent as string | null);
     entries.push([pi, p]);
   }
-  need(news.size <= 12, 'parts', 'new-count');
+  need(news.size <= (ask.schemaVersion === MAP6_SCHEMA ? MAP6_NEW_PARTS : 12), 'parts', 'new-count');
+  // pipeline .29 (divided): every part name of this reading (and of the plan, for a fragment), for the table-row owner check.
+  const partNames = new Set(divided ? [...(options.owners ?? []), ...entries.map(([, p]) => typeof p.name === 'string' ? p.name : '')].map(plainName).filter(Boolean) : []);
   const part = (p: Record<string, unknown>, pi: number): MapReplyPart => {
     const ref = p.ref as string, fresh = news.has(ref);
     if (fresh) {
@@ -467,7 +544,7 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
     // divided: a part left with no basis quote is refused with its first set-aside quote (the whole reply, as the part is whole).
     if (long && !basis.length) throw long;
     if (seven) need(!fresh || basis.length > 0, `parts[${pi}].basis`, 'basis-required');
-    // map.6 (the first map's divided route) takes six claims per part and sixteen relations: a record's flow list and its
+    // map.6 (the first map's divided route) takes six claims per part and (.29) 32 relations (sixteen before): a record's flow list and its
     // running part's state did not fit four and twelve (the caps pushed out its main receiver's outputs and live defects).
     const claimList = many(p.claims, ask.schemaVersion === MAP6_SCHEMA ? 6 : 4, `parts[${pi}].claims`), claimsAside = aside.length;
     const own = new Set(parts.get(ref)?.current.map(c => c.key) ?? []);
@@ -478,6 +555,13 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       // A claim whose quote runs past the bound is left out (its condition with it); the rest of the reply is read as it is.
       let q: MapReplyQuote;
       try { q = evidence(c, `parts[${pi}].claims[${j}].at`); } catch (e) { if (tooLong(e) && !seven) { aside.push(e as MapReplyError); return null; } throw e; }
+      // pipeline .29 (divided): a claim quoting a table row whose first cell names another part of this reading (no cell of that
+      // row naming this part, and no quoted row of its own) is set aside: the row is that part's.
+      if (divided && typeof p.name === 'string') {
+        const own = plainName(p.name), rows = tableRows(q.quote).filter(c => c.length > 1);
+        const other = rows.some(c => plainName(c[0]!) !== own && partNames.has(plainName(c[0]!)) && !c.slice(1).some(cell => cellNames(cell).includes(own)));
+        need(!other || rows.some(c => plainName(c[0]!) === own), `parts[${pi}].claims[${j}]`, 'wrong-part');
+      }
       if (!seven && c.about !== null) field(c.about, 80, false, `parts[${pi}].claims[${j}].about`);
       const about = seven ? condition(c.aboutAt, `parts[${pi}].claims[${j}].aboutAt`, 80, new Set([q.record]))?.quote ?? null : c.about === null ? null : (c.about as string).trim();
       need(c.replaces === null || (typeof c.replaces === 'string' && own.has(c.replaces)), `parts[${pi}].claims[${j}].replaces`, 'replaces');
@@ -496,6 +580,7 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
     // map-reading.7: the state the record gives the part (with the span saying it and when) and the part's files. A wrong one is
     // left out alone, the part stays: set aside in the lenient readings (and a quote too long, as for a claim), else refused.
     let state: PartState | null = null, stateQuote: MapReplyQuote | null = null, stateWhen: string | null = null, files: string[] = [];
+    let type: PartType | null = null, typeQuote: MapReplyQuote | null = null, inputs: string[] = [], outputs: string[] = [], fields: string[] = [], config: string[] = [];
     if (six) {
       const at = `parts[${pi}]`;
       const alone = <T>(fn: () => T, none: T): T => { try { return fn(); } catch (e) { if (e instanceof MapReplyError && (lenient || tooLong(e))) { aside.push(e); return none; } throw e; } };
@@ -506,19 +591,32 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       }, [null, null]);
       // A when of a state left out goes with it; one said without any state is refused on its own.
       stateWhen = said(p, 'state') && !state ? null : alone(() => { const w = phrase(p, 'stateWhen', 40, at, 'state-when'); need(w === null || state !== null, `${at}.stateWhen`, 'state-when'); return w; }, null);
-      files = alone(() => {
-        if (!said(p, 'files')) return [];
-        need(Array.isArray(p.files) && p.files.length <= 6, `${at}.files`, 'files');
+      // A list of the record's own names (map-reading.7 files; map-reading.8 inputs, outputs, fields, config): bounded, trimmed,
+      // each once in the order given; a wrong list is left out alone.
+      const names = (k: 'files' | 'inputs' | 'outputs' | 'fields' | 'config', max: number, len: number): string[] => alone(() => {
+        if (!said(p, k)) return [];
+        need(Array.isArray(p[k]) && (p[k] as unknown[]).length <= max, `${at}.${k}`, k);
         const out: string[] = [];
-        for (const f of p.files as unknown[]) { need(typeof f === 'string' && f.length <= 120 && !!f.trim() && !CONTROL.test(f), `${at}.files`, 'files'); if (!out.includes(f.trim())) out.push(f.trim()); }
+        for (const f of p[k] as unknown[]) { need(typeof f === 'string' && f.length <= len && !!f.trim() && !CONTROL.test(f), `${at}.${k}`, k); if (!out.includes(f.trim())) out.push(f.trim()); }
+        // pipeline .29: a version (sha, 판본, 명세 <hex>) is a claim's, never a setting; the list is left out as any wrong one is.
+        if (k === 'config') need(!out.some(versionLike), `${at}.config`, 'config');
         return out;
       }, []);
+      files = names('files', 6, 120);
+      // map-reading.8: the record's own type word with the span saying it (a type without its line, or a line without a type, is
+      // left out alone), and the part's interface, fields and settings.
+      [type, typeQuote] = alone((): [PartType | null, MapReplyQuote | null] => {
+        if (!said(p, 'type')) { need(!said(p, 'typeAt'), `${at}.typeAt`, 'type-at'); return [null, null]; }
+        const t = oneOf(p, 'type', PART_TYPES, at, 'type'); need(said(p, 'typeAt'), `${at}.typeAt`, 'type-at');
+        return [t, cite(p.typeAt, `${at}.typeAt`)];
+      }, [null, null]);
+      inputs = names('inputs', 6, 60); outputs = names('outputs', 6, 60); fields = names('fields', 12, 40); config = names('config', 4, 80);
     }
     const role = seven ? soft(() => describe(basis)) ?? { roleReplaces: null, role: null, roleAbout: null } : describe(basis);
     // A description, new or changed, rests on its own quote: an existing part's role never comes in without one.
     need(fresh || role.role !== null || claims.length > 0, `parts[${pi}]`, 'empty-part');
     return { ref, name: fresh ? (p.name as string).trim() : null, parent: fresh ? p.parent as string | null : null, role: role.role ?? null,
-      roleAbout: role.roleAbout ?? null, roleReplaces: (early ?? role).roleReplaces, basis, claims, ...(six ? { state, stateQuote, stateWhen, files } : {}) };
+      roleAbout: role.roleAbout ?? null, roleReplaces: (early ?? role).roleReplaces, basis, claims, ...(six ? { state, stateQuote, stateWhen, files, type, typeQuote, inputs, outputs, fields, config } : {}) };
   };
   const built = entries.flatMap(([pi, p]): [number, MapReplyPart][] => { const b = whole(() => part(p, pi)); return b ? [[pi, b]] : []; });
   // New parts form a forest under known parts: no cycle among them.
@@ -543,13 +641,34 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
   const outParts = built.filter(([, b]) => !news.has(b.ref) || placed.has(b.ref)).map(([, b]) => b);
   const droppedParents = new Set([...news.keys()].filter(ref => !placed.has(ref)));
   const ends = new Set([...parts.keys(), ...placed]);
-  const relations = many(value.relations, ask.schemaVersion === MAP6_SCHEMA ? 16 : 12, 'relations').flatMap((r, i) => soft(() => {
+  // pipeline .29 (divided): the parts as read (their state, type and lists after their own fields were checked), by ref and by name.
+  const byRef = new Map(outParts.map(b => [b.ref, b])), refByName = new Map(outParts.flatMap(b => b.name ? [[plainName(b.name), b.ref] as [string, string]] : []));
+  const relations = many(value.relations, ask.schemaVersion === MAP6_SCHEMA ? MAP6_RELATIONS : 12, 'relations').flatMap((r, i) => soft(() => {
     object(r, ['from', 'to', 'kind', 'note', ...evidenceKeys], `relations[${i}]`);
     if (six && !seven && [r.from, r.to].some(ref => typeof ref === 'string' && droppedParents.has(ref))) throw new MapReplyError(`relations[${i}]`, 'contract', 'parent-skipped');
     need(typeof r.from === 'string' && typeof r.to === 'string' && ends.has(r.from) && ends.has(r.to) && r.from !== r.to, `relations[${i}]`, 'ends'); need(RELS.includes(r.kind as RelationKind), `relations[${i}].kind`, 'kind');
     field(r.note, 200, true, `relations[${i}].note`); const q = evidence(r, `relations[${i}].at`);
-    // map-reading.7: what is handed over and how often, as written, and whether the record designed or saw it.
-    const said7 = six ? { payload: phrase(r, 'payload', 80, `relations[${i}]`, 'payload'), cadence: phrase(r, 'cadence', 40, `relations[${i}]`, 'cadence'), mode: oneOf(r, 'mode', RELATION_MODES, `relations[${i}]`, 'mode') } : {};
+    // map-reading.7: what is handed over and how often, as written, and whether the record designed or saw it. map-reading.8: what
+    // the line carries.
+    const said7 = six ? { payload: phrase(r, 'payload', 80, `relations[${i}]`, 'payload'), cadence: phrase(r, 'cadence', 40, `relations[${i}]`, 'cadence'), mode: oneOf(r, 'mode', RELATION_MODES, `relations[${i}]`, 'mode'), channel: oneOf(r, 'channel', CHANNELS, `relations[${i}]`, 'channel') } : {};
+    // pipeline .29 (divided): a data line naming a file runs through that file's store part (one of its two ends); an unbuilt or
+    // retired part sends only by design; when a quoted line names another part of this reading as its sender, the relation's
+    // sender is that part, except where the line itself places this sender: a store row naming it in another cell (its producer),
+    // a store's file on another part's row or before an arrow line's last arrow, or this sender's name before that last arrow.
+    if (divided) {
+      const s7 = said7 as { payload: string | null; mode: RelationMode | null; channel: Channel | null }, pair = [byRef.get(r.from as string), byRef.get(r.to as string)];
+      const files = s7.channel === 'data' && s7.payload ? fileKeys(s7.payload) : [];
+      need(files.every(k => pair.some(b => b?.type === 'store' && storeKeys(b).includes(k))), `relations[${i}]`, 'via-store');
+      const sender = pair[0];
+      need(!['unbuilt', 'retired'].includes(sender?.state ?? '') || s7.mode === 'design', `relations[${i}]`, 'sender');
+      const own = plainName(sender?.name ?? ''), holds = (text: string) => sender?.type === 'store' && fileKeys(text).some(k => storeKeys(sender).includes(k));
+      for (const line of lineSenders(q.quote)) {
+        const x = refByName.get(line.name); if (!x || x === r.from) continue;
+        const placed = line.row ? (byRef.get(x)?.type === 'store' ? !!own && line.row.slice(1).some(cell => cellNames(cell).includes(own)) : holds(line.row.slice(1).join(' | ')))
+          : holds(line.head) || (!!own && plainName(line.head).includes(own));
+        need(placed, `relations[${i}]`, 'sender');
+      }
+    }
     return [{ from: r.from, to: r.to, kind: r.kind as RelationKind, note: r.note.trim(), record: q.record, quote: q.quote, ...(q.from !== undefined ? { span: { from: q.from, to: q.to! } } : {}), ...said7 }];
   }) ?? []);
   let candidates = many(value.candidates, 6, 'candidates').flatMap((c, i): MapReply['candidates'] => soft((): MapReply['candidates'] => {
@@ -680,10 +799,21 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       return true;
     }) ?? false);
   }
+  // map-reading.8: the records' own basis time and target version as the reply read them; a wrong one is left null alone in the
+  // lenient readings, refused in plain map.6.
+  let basisAt: string | null = null, basisVersion: string | null = null;
+  if (six) {
+    const top = value as Record<string, unknown>;
+    const field8 = (k: 'basisAt' | 'basisVersion', what: ContractGuard): string | null => {
+      try { if (!said(top, k)) return null; const v = top[k]; need(typeof v === 'string' && v.length <= 60 && !!v.trim() && !CONTROL.test(v), k, what); return (v as string).trim(); }
+      catch (e) { if (e instanceof MapReplyError && lenient) { aside.push(e); return null; } throw e; }
+    };
+    basisAt = field8('basisAt', 'basis-at'); basisVersion = field8('basisVersion', 'basis-version');
+  }
   // map.7: a reply with every item set aside is the refusal of its first one (nothing of it would be read).
   if (aside.length && !outParts.length && !relations.length && !candidates.length && !matches.length && !material.length) throw aside[0];
   if (six) contradictions(outParts, relations, candidates, matches, material, conditions);
-  const reply: MapReply = { summary: value.summary.trim(), parts: outParts, relations, candidates, gaps, ...(two ? { matches } : {}), ...(four ? { material } : {}) };
+  const reply: MapReply = { summary: value.summary.trim(), parts: outParts, relations, candidates, gaps, ...(two ? { matches } : {}), ...(four ? { material } : {}), ...(six ? { basisAt, basisVersion } : {}) };
   // Words the model wrote (never the quotes, which are the person's own records) must not look like a key.
   // map.7 names the first such place (the same strings, the same rule).
   const written: [string, string][] = [['summary', reply.summary], ...gaps.map((g, k): [string, string] => [`gaps[${k}]`, g]),
@@ -692,7 +822,10 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
     // map-reading.7: the optional words a claim, a part or a relation adds are the model's own too.
     ...outParts.flatMap((p, i): [string, string][] => [[`parts[${i}].stateWhen`, p.stateWhen ?? ''], ...(p.files ?? []).map((f): [string, string] => [`parts[${i}].files`, f]),
       ...p.claims.flatMap((c, j): [string, string][] => [[`parts[${i}].claims[${j}].when`, c.when ?? ''], [`parts[${i}].claims[${j}].where`, c.where ?? ''], [`parts[${i}].claims[${j}].before`, c.before ?? '']])]),
-    ...relations.flatMap((r, i): [string, string][] => [[`relations[${i}].payload`, r.payload ?? ''], [`relations[${i}].cadence`, r.cadence ?? '']])];
+    ...relations.flatMap((r, i): [string, string][] => [[`relations[${i}].payload`, r.payload ?? ''], [`relations[${i}].cadence`, r.cadence ?? '']]),
+    // map-reading.8: a part's interface and settings, and the reply's basis, are the model's words too.
+    ...outParts.flatMap((p, i): [string, string][] => (['inputs', 'outputs', 'fields', 'config'] as const).flatMap(k => (p[k] ?? []).map((f): [string, string] => [`parts[${i}].${k}`, f]))),
+    ['basisAt', basisAt ?? ''], ['basisVersion', basisVersion ?? '']];
   const leaked = written.find(([, w]) => w && secretLike(w));
   need(!leaked, leaked?.[0] ?? 'reply', 'secret-like');
   if (aside.length) {
@@ -703,7 +836,7 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       let item: unknown = value, parent: unknown = null;
       for (const step of steps) { parent = item; item = item && typeof item === 'object' ? (item as Record<string, unknown>)[step] : null; }
       const holder = item && typeof item === 'object' ? item : parent, o = holder && typeof holder === 'object' ? holder as Record<string, unknown> : null;
-      const alias = typeof item === 'string' && ANCHOR.test(item) ? item : typeof o?.at === 'string' ? o.at : typeof o?.stateAt === 'string' && /\.state(When)?$/.test(e.path) ? o.stateAt : Array.isArray(o?.basis) ? o.basis.find(x => typeof x === 'string' && ANCHOR.test(x)) : null;
+      const alias = typeof item === 'string' && ANCHOR.test(item) ? item : typeof o?.at === 'string' ? o.at : typeof o?.stateAt === 'string' && /\.state(When)?$/.test(e.path) ? o.stateAt : typeof o?.typeAt === 'string' && /\.type$/.test(e.path) ? o.typeAt : Array.isArray(o?.basis) ? o.basis.find(x => typeof x === 'string' && ANCHOR.test(x)) : null;
       const record = typeof alias === 'string' ? alias.split('.')[0]! : null, source = record ? texts.get(record) : null;
       const range = source?.spans && typeof alias === 'string' ? resolveRange(alias, record!, source.text, source.spans) : null;
       return { path: e.path, rule: e.rule, category: e.rule === 'contract' ? e.target : null, explanation: exclusionExplanation(e), record: range ? record : null, from: range?.from ?? null, to: range?.to ?? null };
@@ -715,7 +848,7 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
 /** The durable diagnostics of a checked reply's set-aside items (map.6–7): fixed categories and source positions only. */
 export const readingExclusions = (reply: MapReply): readonly ReadingExclusion[] => EXCLUSIONS.get(reply) ?? [];
 /** Where a saved exclusion may say it stood (the same grammar storage accepts). */
-const EXCLUSION_PATH = /^(parts|relations|candidates|gaps|matches|material)(\[\d+\])?(\.(claims|basis|statement)(\[\d+\])?)?(\.[A-Za-z]+)?$/;
+const EXCLUSION_PATH = /^(parts|relations|candidates|gaps|matches|material|basisAt|basisVersion)(\[\d+\])?(\.(claims|basis|statement)(\[\d+\])?)?(\.[A-Za-z]+)?$/;
 /** A divided first map (studio.map.6) arrives as the wire with every set-aside item already left out (it reads whole under plain
  * map.6), and the reasons they were set aside travel beside it. Those reasons are checked here before they join the reply's own
  * diagnostics: fixed rules and categories only, the explanation this module itself gives for them (no other words are taken), and
@@ -748,7 +881,7 @@ const candidateTarget = (c: MapReply['candidates'][number]) => c.target === 'ide
 function evidenceOf(parts: MapReplyPart[], relations: MapReply['relations'], matches: MapReplyMatch[], candidates: MapReply['candidates'], conditions: [string, MapReplyQuote][]): [string, { record: string; from?: number; to?: number }][] {
   return [
     ...parts.flatMap((p, i) => [...p.basis.map((q, j) => [`parts[${i}].basis[${j}]`, q] as [string, MapReplyQuote]), ...p.claims.map((q, j) => [`parts[${i}].claims[${j}].at`, q] as [string, MapReplyQuote]), ...(p.roleReplaces ? [[`parts[${i}].roleReplaces`, p.roleReplaces] as [string, MapReplyQuote]] : []),
-      ...(p.stateQuote ? [[`parts[${i}].stateAt`, p.stateQuote] as [string, MapReplyQuote]] : [])]),
+      ...(p.stateQuote ? [[`parts[${i}].stateAt`, p.stateQuote] as [string, MapReplyQuote]] : []), ...(p.typeQuote ? [[`parts[${i}].typeAt`, p.typeQuote] as [string, MapReplyQuote]] : [])]),
     ...relations.map((r, i) => [`relations[${i}].at`, { record: r.record, ...(r.span ?? {}) }] as [string, { record: string; from?: number; to?: number }]),
     ...matches.map((m, i) => [`matches[${i}].at`, m] as [string, MapReplyMatch]),
     ...candidates.flatMap((c, i) => c.statement ? [[`candidates[${i}].statement.at`, c.statement] as [string, MapReplyStatement]] : []),
@@ -822,6 +955,11 @@ export interface PartUnderstanding {
   stateRead: { state: PartState; when: string | null; quote: ReadingQuote | null; at: string } | null;
   /** map-reading.7: the files, folders or units readings named as this part's, newest reading first, each once (up to eight). */
   files: string[];
+  /** map-reading.8: the type the newest reading that said one gives the part, in the record's own word, with the line that says it. */
+  typeRead: { type: PartType; quote: ReadingQuote | null; at: string } | null;
+  /** map-reading.8: what the part receives and hands over, the fields of its rows and its settings, as readings named them (newest
+   * reading first, each once; inputs and outputs up to eight, fields twelve, settings six). */
+  inputs: string[]; outputs: string[]; fields: string[]; config: string[];
   /** A current report or check here replaced an earlier one of this part (the record said so). */
   revised: boolean;
   /** Every quote the current description (as read, never the person's) rests on lies inside a report a later record took back:
@@ -834,15 +972,17 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
   const others: PartUnderstanding['others'] = []; let roleBasis: ReadingQuote[] = [];
   let corrected: PartUnderstanding['corrected'] = null;
   const all: CurrentClaim[] = [], replaced = new Set<string>();
-  let stateRead: PartUnderstanding['stateRead'] = null; const files: string[] = [];
+  let stateRead: PartUnderstanding['stateRead'] = null, typeRead: PartUnderstanding['typeRead'] = null; const files: string[] = [], inputs: string[] = [], outputs: string[] = [], fields: string[] = [], config: string[] = [];
+  // A later reading's names go first in its own order; one an earlier reading also named moves up with it.
+  const gather = (list: string[], own: readonly string[] | undefined) => { if (own?.length) list.splice(0, list.length, ...own, ...list.filter(f => !own.includes(f))); };
   for (const r of p.readings) {
     if (!isMapReading(r)) { if (r.version === 'map-correction.1' && r.areaId === areaId) { role = r.text; roleAbout = null; roleBasis = []; corrected = { id: r.id, at: r.at }; } continue; }
     const part = r.parts.find(x => x.areaId === areaId); if (!part) continue;
     if (part.created) createdName = part.created.name;
-    // The newest reading that gives a state wins (readings are oldest first); files gather, newest first, each once.
+    // The newest reading that gives a state (or a type) wins (readings are oldest first); the lists gather, newest first, each once.
     if (part.state) stateRead = { state: part.state, when: part.stateWhen ?? null, quote: part.stateQuote ?? null, at: r.at };
-    // A later reading's files go first in its own order; one an earlier reading also named moves up with it.
-    const own = part.files ?? []; if (own.length) files.splice(0, files.length, ...own, ...files.filter(f => !own.includes(f)));
+    if (part.type) typeRead = { type: part.type, quote: part.typeQuote ?? null, at: r.at };
+    gather(files, part.files); gather(inputs, part.inputs); gather(outputs, part.outputs); gather(fields, part.fields); gather(config, part.config);
     // A correction holds the description only: a later reading's description reads apart, its claims still come in.
     if (part.role) {
       if (!role || (!corrected && part.roleReplaces)) { if (role) others.unshift({ text: role, about: roleAbout, at: r.at }); role = part.role; roleAbout = part.roleAbout; roleBasis = part.basis; }
@@ -870,7 +1010,7 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
   claims.sort((a, b) => Number(!!b.replaces) - Number(!!a.replaces));
   // AF140: every claim that still stands, never a silent cut (a limitation read early is as current as a feature read late). A reader
   // that needs fewer takes its own (the map ask and the plan's source take the first 6 of this same order).
-  return { role, roleAbout, roleBasis, corrected, others: others.slice(0, 6), claims, history, createdName, state, stateRead, files: files.slice(0, 8), revised, roleBasisRevised };
+  return { role, roleAbout, roleBasis, corrected, others: others.slice(0, 6), claims, history, createdName, state, stateRead, files: files.slice(0, 8), typeRead, inputs: inputs.slice(0, 8), outputs: outputs.slice(0, 8), fields: fields.slice(0, 12), config: config.slice(0, 6), revised, roleBasisRevised };
 }
 
 /* ---------- evidence a later record took back ---------- */
@@ -1087,7 +1227,7 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   // And every passage of the reply is the excerpt's own text where it says it stands (a reply decoded for another request is not).
   if (four) {
     const at = (q: MapReplyQuote) => { const source = input.records.get(q.record); return !!source && q.from !== undefined && q.to !== undefined && source.text.slice(q.from, q.to) === q.quote; };
-    const all = [...reply.parts.flatMap(x => [...x.basis, ...x.claims, ...(x.roleReplaces ? [x.roleReplaces] : []), ...(x.stateQuote ? [x.stateQuote] : [])]), ...reply.relations.map(r => ({ record: r.record, quote: r.quote, ...(r.span ?? {}) })),
+    const all = [...reply.parts.flatMap(x => [...x.basis, ...x.claims, ...(x.roleReplaces ? [x.roleReplaces] : []), ...(x.stateQuote ? [x.stateQuote] : []), ...(x.typeQuote ? [x.typeQuote] : [])]), ...reply.relations.map(r => ({ record: r.record, quote: r.quote, ...(r.span ?? {}) })),
       ...reply.candidates.flatMap(c => c.record ? [{ record: c.record, quote: c.quote!, ...(c.at ?? {}) }] : []), ...(reply.matches ?? [])];
     if (!all.every(at) || (reply.material ?? []).some(m => { const s = input.records.get(m.record); return !s || m.to > s.text.length; })) throw new Error('INVALID_RESPONSE');
   }
@@ -1135,10 +1275,13 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   // stored shape is exact. A part's state stands on its own passage like a claim: one inside material or already read is not kept.
   const claimOf = (c: MapReplyClaim): ReadingClaim => ({ kind: c.kind, text: c.text, ...real(c), about: c.about, replaces: c.replaces ? input.claims.get(c.replaces)! : null,
     ...(six ? { topic: c.topic ?? null, evidence: c.evidence ?? null, when: c.when ?? null, where: c.where ?? null, before: c.before ?? null } : {}) });
-  const stateOf = (x: MapReplyPart): Pick<ReadingPart, 'state' | 'stateWhen' | 'stateQuote' | 'files'> => {
+  const stateOf = (x: MapReplyPart): Pick<ReadingPart, 'state' | 'stateWhen' | 'stateQuote' | 'files' | 'type' | 'typeQuote' | 'inputs' | 'outputs' | 'fields' | 'config'> => {
     if (!six) return {};
     const kept = !!x.state && !!x.stateQuote && usable(x.stateQuote);
-    return { state: kept ? x.state! : null, stateWhen: kept ? x.stateWhen ?? null : null, stateQuote: kept ? real(x.stateQuote!) : null, files: [...x.files ?? []] };
+    // map-reading.8: a type stands on its own passage like a state; the lists are the record's names as read.
+    const typed = !!x.type && !!x.typeQuote && usable(x.typeQuote);
+    return { state: kept ? x.state! : null, stateWhen: kept ? x.stateWhen ?? null : null, stateQuote: kept ? real(x.stateQuote!) : null, files: [...x.files ?? []],
+      type: typed ? x.type! : null, typeQuote: typed ? real(x.typeQuote!) : null, inputs: [...x.inputs ?? []], outputs: [...x.outputs ?? []], fields: [...x.fields ?? []], config: [...x.config ?? []] };
   };
   let p = project;
   const ids = new Map(input.parts), skipped: ReadingSkip[] = [...asMaterial], candidates: ReadingCandidate[] = [], parts: ReadingPart[] = [], created: string[] = [];
@@ -1186,11 +1329,11 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
     // map-reading.7: a line this very reading drew as designed and also read as observed (or the other way) is one line on the
     // map read twice: the second reading of it is kept beside the first, under the same relation, with its own passage.
     const twin = six && r.mode ? relations.find(x => x.from === from && x.to === to && x.kind === r.kind && x.mode && x.mode !== r.mode && !relations.some(y => y.relationId === x.relationId && y.mode === r.mode)) : undefined;
-    if (twin) { relations.push({ relationId: twin.relationId, from, to, kind: r.kind, quote: real(lineQuote(r)), payload: r.payload ?? null, cadence: r.cadence ?? null, mode: r.mode! }); continue; }
+    if (twin) { relations.push({ relationId: twin.relationId, from, to, kind: r.kind, quote: real(lineQuote(r)), payload: r.payload ?? null, cadence: r.cadence ?? null, mode: r.mode!, channel: r.channel ?? null }); continue; }
     if (p.space.relations.some(x => x.from === from && x.to === to && x.kind === r.kind)) { skipped.push({ what: 'relation', name, reason: 'exists' }); continue; }
     if (madeRelations.some(x => x.from === from && x.to === to && x.kind === r.kind && !p.space.relations.some(y => y.id === x.relationId))) { skipped.push({ what: 'relation', name, reason: 'removed' }); continue; }
     p = addRelation(p, from, to, r.kind, r.note);
-    relations.push({ relationId: p.space.relations.at(-1)!.id, from, to, kind: r.kind, quote: real(lineQuote(r)), ...(six ? { payload: r.payload ?? null, cadence: r.cadence ?? null, mode: r.mode ?? null } : {}) });
+    relations.push({ relationId: p.space.relations.at(-1)!.id, from, to, kind: r.kind, quote: real(lineQuote(r)), ...(six ? { payload: r.payload ?? null, cadence: r.cadence ?? null, mode: r.mode ?? null, channel: r.channel ?? null } : {}) });
   }
   // A candidate naming a part this reply wanted to add but that was not added keeps its words, without that part.
   // map.6: it keeps what it leaves undecided, and an undecided statement itself (content, kind, version, exact place).
@@ -1209,7 +1352,8 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
     const holds = !!cur && !cur.excluded && !cur.replacedBy && !!cur.target && sameTarget(cur.target, ref!.target) && cur.correction === ref!.correction;
     return { ...rest, replaces: holds ? { reading: ref!.reading, index: ref!.index } : null };
   });
-  const reading: MapReading = { version: six ? 'map-reading.7' : four ? 'map-reading.4' : three ? 'map-reading.3' : withRequests ? 'map-reading.2' : 'map-reading.1', id: meta.id, at: meta.at, model: meta.model, prompt: meta.prompt, hash: meta.hash,
+  const reading: MapReading = { version: six ? 'map-reading.8' : four ? 'map-reading.4' : three ? 'map-reading.3' : withRequests ? 'map-reading.2' : 'map-reading.1', id: meta.id, at: meta.at, model: meta.model, prompt: meta.prompt, hash: meta.hash,
+    ...(six ? { basisAt: reply.basisAt ?? null, basisVersion: reply.basisVersion ?? null } : {}),
     records: [...input.records.values()].map(r => { const shift = four ? 0 : texts.get(r.id)?.shift ?? 0;
       return shift ? { id: r.id, from: r.from + shift, to: r.to + shift, total: texts.get(r.id)!.raw.length } : { id: r.id, from: r.from, to: r.to, total: r.total, ...(four ? { digest: textDigest(r.text) } : {}) }; }),
     ...(six ? { exclusions: (EXCLUSIONS.get(reply) ?? []).map(x => { const source = x.record ? input.records.get(x.record) : null;

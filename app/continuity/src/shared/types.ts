@@ -212,6 +212,17 @@ export const PART_STATES: readonly PartState[] = ['running', 'working', 'unbuilt
 /** Whether a relation is the record's design ([설계]: code or documents say so) or something it saw run ([관찰]). */
 export type RelationMode = 'design' | 'observed';
 export const RELATION_MODES: readonly RelationMode[] = ['design', 'observed'];
+/** map-reading.8: the kind of thing a part is, in the record's own type word (its design record's type column): a collector of
+ * streams, a computation, an AI judgement, a loop or engine, a timer or schedule, an actor that makes an effect outside (an order,
+ * a call), a store (a row file, a queue), a person, an operating session, an external system. The record's word, never inferred
+ * from a name; null when the record gives none (a neutral card). */
+export type PartType = 'collector' | 'compute' | 'ai' | 'loop' | 'timer' | 'actor' | 'store' | 'person' | 'session' | 'external';
+export const PART_TYPES: readonly PartType[] = ['collector', 'compute', 'ai', 'loop', 'timer', 'actor', 'store', 'person', 'session', 'external'];
+/** map-reading.8: what a line carries: data (a row, a stream, a result handed over), control (an instruction, a wake-up, a
+ * schedule firing, a report that makes someone act) or uses (a reference, a dependency; nothing travels). The record's own
+ * wording decides; null when it does not say. */
+export type Channel = 'data' | 'control' | 'uses';
+export const CHANNELS: readonly Channel[] = ['data', 'control', 'uses'];
 /** A quote of a record as it was sent: a pasted record id or a project source id. map-reading.4: also where it stands, [from, to)
  * in UTF-16 code units of the record's own text (the quote is exactly that slice); earlier readings have no position. */
 export interface ReadingQuote { record: string; quote: string; from?: number; to?: number }
@@ -250,10 +261,17 @@ export interface ReadingPart {
   state?: PartState | null; stateWhen?: string | null; stateQuote?: ReadingQuote | null;
   /** map-reading.7: the files, folders or units the record names as this part's (as written, up to six). */
   files?: string[];
+  /** map-reading.8: the record's own type word for the part (PART_TYPES) and the line that says it; null when none. */
+  type?: PartType | null; typeQuote?: ReadingQuote | null;
+  /** map-reading.8: what the part receives and hands over, by the record's names of them (up to six each), the fields of its
+   * rows when it is a store (up to twelve) and the settings the record lists for it (up to four), each as written. */
+  inputs?: string[]; outputs?: string[]; fields?: string[]; config?: string[];
 }
 export interface ReadingRelation { relationId: string; from: string; to: string; kind: RelationKind; quote: ReadingQuote;
   /** map-reading.7: what is handed over (as the record names it), how often or when, and whether the record designed or saw it. */
-  payload?: string | null; cadence?: string | null; mode?: RelationMode | null }
+  payload?: string | null; cadence?: string | null; mode?: RelationMode | null;
+  /** map-reading.8: what the line carries (CHANNELS), as the record's wording says; null when it does not. */
+  channel?: Channel | null }
 /** What a candidate leaves undecided (map-reading.5): whose statement this is (attribution), whether two parts are one
  * (identity), whether a part is inside a parent (parent), or whether a statement holds (holds). An attribution or holds candidate
  * keeps the undecided statement itself (content, kind, version, exact quote): it is in no part's claims. areaIds name the
@@ -272,7 +290,7 @@ export interface ReadingMaterial { record: string; from: number; to: number; wha
 export const READING_EXCLUSION_RULES = ['settled-and-open', 'duplicate-target', 'duplicate-key', 'material-evidence', 'reference', 'length', 'source-kind', 'condition-form', 'condition-source', 'condition-length', 'contract'] as const;
 export interface ReadingExclusion { path: string; rule: typeof READING_EXCLUSION_RULES[number]; category: string | null; explanation: string; record: string | null; from: number | null; to: number | null }
 export interface MapReading {
-  version: 'map-reading.1' | 'map-reading.2' | 'map-reading.3' | 'map-reading.4' | 'map-reading.5' | 'map-reading.6' | 'map-reading.7'; id: string; at: string; model: string; prompt: string;
+  version: 'map-reading.1' | 'map-reading.2' | 'map-reading.3' | 'map-reading.4' | 'map-reading.5' | 'map-reading.6' | 'map-reading.7' | 'map-reading.8'; id: string; at: string; model: string; prompt: string;
   /** SHA-256 of the request: the very same request is never sent or applied again. */
   hash: string;
   /** Records read, and which part of each went: characters [from, to) of total. A record's unsent tail is read by a later reading. */
@@ -286,12 +304,17 @@ export interface MapReading {
   /** map-reading.6–7: durable exclusions; previous reading versions keep their exact original shape. map-reading.7: claims may
    * carry topic, evidence, when, where and before; parts state, stateWhen, stateQuote and files; relations payload, cadence and mode. */
   exclusions?: ReadingExclusion[];
+  /** map-reading.8: the time the records themselves name as their basis ("2026-11-03 09:0xZ 기준") and the target version they
+   * explicitly describe (a commit, a tag), each as written and only when a record says so; null otherwise (never the time the
+   * record arrived, never a hash that merely appears). Parts carry type, typeQuote, inputs, outputs, fields and config; relations
+   * carry channel. */
+  basisAt?: string | null; basisVersion?: string | null;
 }
 /** The person's own correction of a part's description as read (never Area.note, never a return.2 description): it names the
  * reading whose description it corrects. It holds that description only; later claims of later readings still come in. */
 export interface ReadingCorrection { version: 'map-correction.1'; id: string; at: string; areaId: string; text: string; corrects: string | null }
 export type ReadingEntry = MapReading | ReadingCorrection | RequestCorrection | ReplaceCorrection;
-export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3' || e.version === 'map-reading.4' || e.version === 'map-reading.5' || e.version === 'map-reading.6' || e.version === 'map-reading.7';
+export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3' || e.version === 'map-reading.4' || e.version === 'map-reading.5' || e.version === 'map-reading.6' || e.version === 'map-reading.7' || e.version === 'map-reading.8';
 export const READINGS_LIMIT = 500;
 export const PASTED_LIMIT = 500;
 export interface ContextBasis {

@@ -8,7 +8,8 @@ import { ApiError } from '../../server/errors.mjs';
 import { validateMapBlueprint, splitBlueprintParts, validateRenderedFragment, combineRenderedMaps, combineRenderedReading, mapStageIssues, blueprintStageIssues,
   isMapRevision, validateMapRevision, revisionGroups,
   missingMapCorrections, mapCorrectionRevision, MAP_BLUEPRINT_PROMPT, LATER_BLUEPRINT_PROMPT,
-  BLUEPRINT_PARTS_MAX, BLUEPRINT_NEW_PARTS_MAX, BLUEPRINT_GLOBAL_MAX, BLUEPRINT_ANCHORS_MAX } from '../server/map-blueprint.mjs';
+  BLUEPRINT_PARTS_MAX, BLUEPRINT_NEW_PARTS_MAX, BLUEPRINT_LATER_NEW_PARTS_MAX, BLUEPRINT_GLOBAL_MAX, BLUEPRINT_FIRST_GLOBAL_MAX, BLUEPRINT_RELATION_ITEMS_MAX,
+  BLUEPRINT_LATER_RELATION_ITEMS_MAX, BLUEPRINT_ANCHORS_MAX, blueprintCoverage, readingDiagnostics, sectionRows } from '../server/map-blueprint.mjs';
 
 function fixture(existing = 0) {
   let project = D.createProject(); for (let i = 0; i < existing; i++) project = D.addArea(project, `사용자 부분 ${i + 1}`, '직접 쓴 설명');
@@ -47,8 +48,9 @@ test('blueprint preserves exact user names/parents and original aliases and retu
   }
 });
 
-test('blueprint bounds are exact: 24 total, 12 new, 32 global, 8 anchors, 60-unit name, 480-unit focus and 240-unit text', () => {
-  assert.deepEqual([BLUEPRINT_PARTS_MAX, BLUEPRINT_NEW_PARTS_MAX, BLUEPRINT_GLOBAL_MAX, BLUEPRINT_ANCHORS_MAX], [24, 12, 32, 8]);
+test('blueprint bounds are exact: 24 total, 24 new for a first map and 12 for a later one, 32 global, 8 anchors, 60-unit name, 480-unit focus and 240-unit text', () => {
+  assert.deepEqual([BLUEPRINT_PARTS_MAX, BLUEPRINT_NEW_PARTS_MAX, BLUEPRINT_LATER_NEW_PARTS_MAX, BLUEPRINT_GLOBAL_MAX, BLUEPRINT_ANCHORS_MAX], [24, 24, 12, 32, 8]);
+  // This fixture is a later map (map.7, existing parts): twelve new parts are its bound.
   const f = fixture(12), blueprint = planned(f, 12);
   blueprint.parts.unshift(...f.ask.parts.map(part => ({ ref: part.id, name: part.name, parent: part.parentId, at: [f.at[0]], focus: '기존 책임' })));
   blueprint.parts.at(-1).name = '가'.repeat(60); blueprint.parts.at(-1).focus = '가'.repeat(480); blueprint.parts.at(-1).at = f.at.slice(0, 8);
@@ -198,7 +200,7 @@ test('correction feedback identifies all three five-basis parts without copying 
 
 test('feedback limits mirror the validator, use UTF-16 length, and are capped at twelve fixed diagnostics', () => {
   const value = { ...empty(), summary: '😀'.repeat(100), parts: [{ basis: Array(4).fill(null), claims: Array(6).fill(null), name: '가'.repeat(60), role: '가'.repeat(300) }],
-    relations: Array(16).fill(null), candidates: Array(6).fill(null), gaps: Array(2).fill(null), matches: Array(24).fill(null), material: Array(6).fill(null) };
+    relations: Array(32).fill(null), candidates: Array(6).fill(null), gaps: Array(2).fill(null), matches: Array(24).fill(null), material: Array(6).fill(null) };
   assert.deepEqual(mapStageIssues(value), []);
   value.summary += '가'; value.parts[0].basis.push(null); value.parts[0].claims.push(null); value.parts[0].name += '가'; value.parts[0].role += '가';
   for (const field of ['relations', 'candidates', 'gaps', 'matches', 'material']) value[field].push(null);
@@ -206,7 +208,7 @@ test('feedback limits mirror the validator, use UTF-16 length, and are capped at
     { path: 'summary', rule: 'length', expected: 200, actual: 201 },
     { path: 'parts[0].basis', rule: 'count', expected: 4, actual: 5 }, { path: 'parts[0].claims', rule: 'count', expected: 6, actual: 7 },
     { path: 'parts[0].name', rule: 'length', expected: 60, actual: 61 }, { path: 'parts[0].role', rule: 'length', expected: 300, actual: 301 },
-    { path: 'relations', rule: 'count', expected: 16, actual: 17 }, { path: 'candidates', rule: 'count', expected: 6, actual: 7 },
+    { path: 'relations', rule: 'count', expected: 32, actual: 33 }, { path: 'candidates', rule: 'count', expected: 6, actual: 7 },
     { path: 'gaps', rule: 'count', expected: 2, actual: 3 }, { path: 'matches', rule: 'count', expected: 24, actual: 25 },
     { path: 'material', rule: 'count', expected: 6, actual: 7 },
   ]);
@@ -465,6 +467,46 @@ test('.25: a wrong map-reading.7 field leaves out its claim or relation and only
     ['parts[1].claims[0].before', 'contract', 'before', null], ['parts[1].claims[1].topic', 'contract', 'topic', null]]);
 });
 
+test('.28: a wrong map-reading.8 field leaves out only that field of its part, its relation, or the basis; first passes are refused with the fixed path and category', () => {
+  const f = fixture(), blueprint = planned(f, 2), fragments = rendered(f, blueprint), group = splitBlueprintParts(blueprint)[0];
+  const io = { inputs: ['review 행'], outputs: ['e=1 행'], fields: ['watch', 'allowed_side'], config: ['24 h 만료'] };
+  Object.assign(fragments[0].parts[0], { type: 'store', typeAt: f.at[0], ...io });
+  Object.assign(fragments[0].parts[1], { type: 'engine', typeAt: f.at[1], inputs: Array(7).fill('a'), outputs: ['결과 행'] });
+  const global = { ...empty(), summary: '원문의 설명이다.', relations: [{ from: 'new:p1', to: 'new:p2', kind: 'flow', note: '', at: f.at[0], channel: 'wire' },
+    { from: 'new:p2', to: 'new:p1', kind: 'flow', note: '', at: f.at[1], channel: 'data' }], basisAt: '가'.repeat(61), basisVersion: '라이브 618df374' };
+  const before = structuredClone({ fragments, global }), { wire, exclusions } = combineRenderedReading(fragments, global, f.ask, blueprint);
+  assert.deepEqual({ fragments, global }, before, 'inputs are never changed');
+  assert.deepEqual(exclusions.map(x => [x.path, x.rule, x.category]), [['parts[1].type', 'contract', 'type'], ['parts[1].inputs', 'contract', 'inputs'],
+    ['relations[0].channel', 'contract', 'channel'], ['basisAt', 'contract', 'basis-at']]);
+  // Only the wrong fields are written not said; the good part, the other list and the version stand as they came.
+  assert.deepEqual([wire.parts[1].type, wire.parts[1].typeAt, wire.parts[1].inputs, wire.parts[1].outputs], [null, null, null, ['결과 행']]);
+  assert.deepEqual([wire.parts[0].type, wire.parts[0].typeAt, wire.parts[0].inputs, wire.parts[0].outputs, wire.parts[0].fields, wire.parts[0].config],
+    ['store', f.at[0], ...Object.values(io)]);
+  assert.deepEqual(wire.relations, [global.relations[1]]);
+  assert.deepEqual([wire.basisAt, wire.basisVersion], [null, '라이브 618df374']);
+  const plain = M.validateMapReply(wire, f.ask);
+  assert.equal(M.setAside(plain).length, 0);
+  assert.deepEqual([plain.parts[0].type, plain.parts[0].inputs, plain.parts[0].fields], ['store', ['review 행'], ['watch', 'allowed_side']]);
+  assert.deepEqual([plain.parts[1].type, plain.parts[1].inputs, plain.parts[1].outputs], [null, [], ['결과 행']]);
+  assert.deepEqual([plain.relations.map(x => x.channel), plain.basisAt, plain.basisVersion], [['data'], null, '라이브 618df374']);
+  // The first pass of a render or a global stage is refused instead, at the first exclusion in its own scope.
+  validateRenderedFragment(fragments[0], group, f.ask, blueprint);
+  let failure; try { validateRenderedFragment(fragments[0], group, f.ask, blueprint, true); } catch (error) { failure = error; }
+  assert.deepEqual(failure.validation, { path: 'parts[1].type', rule: 'contract', category: 'type' });
+  failure = null; try { combineRenderedMaps(fragments, global, f.ask, blueprint, true); } catch (error) { failure = error; }
+  assert.deepEqual(failure.validation, { path: 'relations[0].channel', rule: 'contract', category: 'channel' });
+  assert.deepEqual(mapStageIssues(global, failure), [{ path: 'relations[0].channel', rule: 'contract', category: 'channel', expected: null, actual: null },
+    { path: 'basisAt', rule: 'length', expected: 60, actual: 61 }]);
+  assert.deepEqual(mapStageIssues(fragments[0]), [{ path: 'parts[1].type', rule: 'contract', category: 'type', expected: null, actual: null },
+    { path: 'parts[1].inputs', rule: 'count', expected: 6, actual: 7 }]);
+  // A basis alone still refuses the strict global pass: the global stage owns it.
+  const basisOnly = { ...structuredClone(global), relations: [global.relations[1]] };
+  failure = null; try { combineRenderedMaps(fragments, basisOnly, f.ask, blueprint, true); } catch (error) { failure = error; }
+  assert.deepEqual(failure.validation, { path: 'basisAt', rule: 'contract', category: 'basis-at' });
+  // Beside the seven keys only the basis time and version are allowed on the global wire.
+  refused(() => combineRenderedReading(fragments, { ...global, foo: 1 }, f.ask, blueprint));
+});
+
 test('plan feedback names fixed paths, rules and counts only, for anchors, bounds, existing names and parents', () => {
   const f = fixture(1), blueprint = planned(f, 2), own = f.ask.parts[0];
   blueprint.parts.push({ ref: own.id, name: `${own.name} 변경`, parent: 'new:p1', at: [f.at[0]], focus: '기존 책임' });
@@ -483,4 +525,137 @@ test('plan feedback names fixed paths, rules and counts only, for anchors, bound
   assert.deepEqual(blueprintStageIssues(null, f.ask), [{ path: 'reply', rule: 'shape', expected: null, actual: null }]);
   const trap = new Proxy({}, { get() { throw new Error('PRIVATE_TRAP'); } });
   assert.deepEqual(blueprintStageIssues(trap, f.ask), [{ path: 'reply', rule: 'keys', expected: null, actual: null }], 'a failing accessor ends the feedback quietly');
+});
+
+// ---- first-map-divided.29 (from the blind judging of the .28 KORU map): stores are parts, a table row belongs to the part its
+// first cell names, a relation's sender is the one its line names, versions stay out of config, a first map plans 24 new parts.
+// Author-written wires on a small KORU-shaped record; no model quality is claimed. ----
+const KORU = ['1. 부분 유형', '| 이름 | 유형 | 한 줄 |', '|---|---|---|', '| 카드 러너 | AI 판단 | 세 팔 카드 |', '| 엔진 | 루프·엔진 | 행 셋 → 주문 |', '| 기분 층 | 계산 | 미구현 |',
+  '2. 산출물', '| 이름 | 필드 | 만드는 부분 | 읽는 부분 | 있는 곳 |', '|---|---|---|---|---|', '| review.jsonl 행 | watch·allowed_side | 카드 러너 | 엔진 | /var/lib/koru-desk/race/review.jsonl |',
+  '3. 연결', '| 보내는 부분 | 받는 부분 | 넘기는 것 |', '|---|---|---|', '| 카드 러너 | 엔진 | review.jsonl watch·allowed_side |', '| 기분 층 | 엔진 | 공포 z |',
+  '6. 철회·변경', '| 부분 이름 | 옛 결정 | 지금 | 근거·날짜 |', '|---|---|---|---|', '| 엔진 | 매일 FLAT 재시작 | 채택 안 함 | [보고] |', '| 카드 러너 | review 작성기 FIX3 | FIX1을 OVERRIDE로 | [보고] |',
+  '10. 모르는 것', '| 부분 이름 | 무엇을 | 어떻게 확인할 수 있나 |', '|---|---|---|', '| 엔진 | 08:49Z 뒤 실제 상태 | STATUS 첫 줄 |'].join('\n');
+function koru() {
+  const project = D.pasteRecord(D.createProject(), KORU, null).project;
+  const input = M.buildMapAsk(project, studioView(project), [], undefined, M.MAP6_SCHEMA), spans = input.ask.records[0].spans;
+  assert.ok(M.firstAsk(input.ask));
+  return { project, input, ask: input.ask, at: head => spans.find(span => span.t.startsWith(head)).s };
+}
+const koruPlan = f => ({ global: [], parts: [
+  { ref: 'new:card', name: '카드 러너', parent: null, at: [f.at('| 카드 러너 | AI')], focus: '세 팔 카드' },
+  { ref: 'new:review', name: 'review.jsonl 행', parent: null, at: [f.at('| review.jsonl 행')], focus: '저장소: watch·allowed_side' },
+  { ref: 'new:mood', name: '기분 층', parent: null, at: [f.at('| 기분 층 | 계산')], focus: '미구현' },
+  { ref: 'new:engine', name: '엔진', parent: null, at: [f.at('| 엔진 | 루프')], focus: '행 셋 → 주문' }] });
+function koruFragments(f) {
+  const claim = (key, head, extra = {}) => ({ key, kind: 'reported', text: '원문 행의 사실을 옮긴다.', at: f.at(head), about: null, replaces: null, ...extra });
+  const part = (ref, name, head, claims, extra = {}) => ({ ref, name, parent: null, role: `${name}의 책임`, roleAbout: null, roleReplaces: null, basis: [f.at(head)], claims, ...extra });
+  return [{ ...empty(), parts: [
+    // s2 quotes the engine's withdrawal row: the engine is planned in the other fragment.
+    part('new:card', '카드 러너', '| 카드 러너 | AI', [claim('s1', '| 카드 러너 | review', { topic: 'withdrawn', before: 'review 작성기 FIX3' }), claim('s2', '| 엔진 | 매일')]),
+    part('new:review', 'review.jsonl 행', '| review.jsonl 행', [claim('s3', '| review.jsonl 행')],
+      { type: 'store', typeAt: f.at('| review.jsonl 행'), outputs: ['review.jsonl 행'], fields: ['watch', 'allowed_side'], files: ['/var/lib/koru-desk/race/review.jsonl'] }),
+    part('new:mood', '기분 층', '| 기분 층 | 계산', [claim('s4', '| 기분 층 | 계산')], { state: 'unbuilt', stateAt: f.at('| 기분 층 | 계산') })] },
+  { ...empty(), parts: [
+    // s102 quotes a connection row whose second cell names the engine: the engine's own.
+    part('new:engine', '엔진', '| 엔진 | 루프', [claim('s101', '| 엔진 | 매일', { topic: 'withdrawn', before: '매일 FLAT 재시작' }), claim('s102', '| 카드 러너 | 엔진 |')],
+      { config: ['레버리지 20', '618df374'] })] }];
+}
+const koruGlobal = f => ({ ...empty(), summary: '엔진은 매일 FLAT 재시작을 채택하지 않았다.', relations: [
+  // 0: the file line drawn straight from producer to reader (no end is the file's store).
+  { from: 'new:card', to: 'new:engine', kind: 'flow', note: '', at: f.at('| 카드 러너 | 엔진 |'), payload: 'review.jsonl watch·allowed_side', channel: 'data', mode: 'observed' },
+  // 1-2: producer to store (the store's own row names the producer) and store to reader (the reader's row names the store's file).
+  { from: 'new:card', to: 'new:review', kind: 'flow', note: '', at: f.at('| review.jsonl 행'), payload: 'review.jsonl 행', channel: 'data' },
+  { from: 'new:review', to: 'new:engine', kind: 'flow', note: '', at: f.at('| 카드 러너 | 엔진 |'), payload: 'review.jsonl 행', channel: 'data' },
+  // 3: an unbuilt part sending what was observed; 4: the line's sender reversed; 5: the unbuilt part's designed flow stands.
+  { from: 'new:mood', to: 'new:engine', kind: 'flow', note: '', at: f.at('| 기분 층 | 엔진'), payload: '공포 z', channel: 'data', mode: 'observed' },
+  { from: 'new:engine', to: 'new:card', kind: 'flow', note: '', at: f.at('| 카드 러너 | 엔진 |'), channel: 'control' },
+  { from: 'new:mood', to: 'new:engine', kind: 'needs', note: '', at: f.at('| 기분 층 | 엔진'), payload: '공포 z', mode: 'design' }] });
+
+test('.29: a file line skipping its store, a claim on another part row, a sender its line does not name and a version in config are set aside alone', () => {
+  const f = koru(), plan = koruPlan(f), fragments = koruFragments(f), global = koruGlobal(f), groups = splitBlueprintParts(plan);
+  assert.equal(validateMapBlueprint(plan, f.ask).parts.length, 4);
+  const before = structuredClone({ fragments, global }), { wire, exclusions } = combineRenderedReading(fragments, global, f.ask, plan);
+  assert.deepEqual({ fragments, global }, before, 'inputs are never changed');
+  assert.deepEqual(exclusions.map(x => [x.path, x.rule, x.category]), [['parts[0].claims[1]', 'contract', 'wrong-part'], ['parts[3].config', 'contract', 'config'],
+    ['relations[0]', 'contract', 'via-store'], ['relations[3]', 'contract', 'sender'], ['relations[4]', 'contract', 'sender']]);
+  assert.match(exclusions[0].explanation, /다른 부분의 표 행/); assert.match(exclusions[2].explanation, /보관소 부분을 거치지 않아/); assert.match(exclusions[3].explanation, /보내는 쪽/);
+  assert.deepEqual(wire.parts.map(p => p.claims.map(c => c.key)), [['s1'], ['s3'], ['s4'], ['s101', 's102']]);
+  assert.equal(wire.parts[3].config, null);
+  assert.deepEqual(wire.relations, [global.relations[1], global.relations[2], global.relations[5]]);
+  // The browser reads what is left with plain map.6: nothing set aside, the store and its two lines in place.
+  const plain = M.validateMapReply(wire, f.ask);
+  assert.equal(M.setAside(plain).length, 0);
+  assert.deepEqual([plain.parts[1].type, plain.parts[1].fields, plain.parts[3].config], ['store', ['watch', 'allowed_side'], []]);
+  assert.deepEqual(plain.relations.map(r => [r.from, r.to]), [['new:card', 'new:review'], ['new:review', 'new:engine'], ['new:mood', 'new:engine']]);
+  // First passes refuse with the fixed path and category; a render sees the row owner planned in another fragment.
+  validateRenderedFragment(fragments[0], groups[0], f.ask, plan);
+  let failure; try { validateRenderedFragment(fragments[0], groups[0], f.ask, plan, true); } catch (error) { failure = error; }
+  assert.deepEqual(failure.validation, { path: 'parts[0].claims[1]', rule: 'contract', category: 'wrong-part' });
+  failure = null; try { validateRenderedFragment(fragments[1], groups[1], f.ask, plan, true); } catch (error) { failure = error; }
+  assert.deepEqual(failure.validation, { path: 'parts[0].config', rule: 'contract', category: 'config' });
+  assert.deepEqual(mapStageIssues(fragments[1]), [{ path: 'parts[0].config', rule: 'contract', category: 'config', expected: null, actual: null }]);
+  failure = null; try { combineRenderedMaps(fragments, global, f.ask, plan, true); } catch (error) { failure = error; }
+  assert.deepEqual(failure.validation, { path: 'relations[0]', rule: 'contract', category: 'via-store' });
+  assert.deepEqual(mapStageIssues(global, failure), [{ path: 'relations[0]', rule: 'contract', category: 'via-store', expected: null, actual: null }]);
+  // With the global stage context the diagnostics follow: no claim backs the summary; one unknown row, no unknown claim.
+  assert.deepEqual(mapStageIssues(global, failure, { ask: f.ask, parts: fragments.flatMap(x => x.parts) }), [
+    { path: 'relations[0]', rule: 'contract', category: 'via-store', expected: null, actual: null },
+    { path: 'summary', rule: 'unbacked', expected: 0, actual: 1 }, { path: 'parts', rule: 'unknown-count', expected: 1, actual: 0 }]);
+  // With no store part at all the file line is set aside the same way.
+  const bare = koruGlobal(f); bare.relations = [bare.relations[0]];
+  const noStore = koruFragments(f); noStore[0].parts[1].type = null; noStore[0].parts[1].typeAt = null;
+  assert.deepEqual(combineRenderedReading(noStore, bare, f.ask, plan).exclusions.filter(x => x.path.startsWith('relations')).map(x => [x.path, x.category]), [['relations[0]', 'via-store']]);
+  // Plain map.6 never runs the divided checks (the browser reads the wire the server left).
+  assert.equal(M.validateMapReply({ ...structuredClone(wire), relations: [global.relations[0], global.relations[4]] }, f.ask).relations.length, 2);
+});
+
+test('.29: a first map plans 24 new parts (a later map 12) in eight fragments; plan and global feedback count rows, unbacked sentences and unknowns', () => {
+  assert.deepEqual([BLUEPRINT_NEW_PARTS_MAX, BLUEPRINT_LATER_NEW_PARTS_MAX, M.MAP6_NEW_PARTS], [24, 12, 24]);
+  // A store is two lines: a first map takes 32 relations (plan relation items, a global list of 48); a later map keeps 32 and 16.
+  assert.deepEqual([M.MAP6_RELATIONS, BLUEPRINT_RELATION_ITEMS_MAX, BLUEPRINT_LATER_RELATION_ITEMS_MAX, BLUEPRINT_FIRST_GLOBAL_MAX, BLUEPRINT_GLOBAL_MAX], [32, 32, 16, 48, 32]);
+  assert.ok(MAP_BLUEPRINT_PROMPT.includes('global은48개 이하(그중 relation 항목 32개까지)') && MAP_BLUEPRINT_PROMPT.includes('relation 항목은 32개까지만 쓴다'));
+  assert.ok(LATER_BLUEPRINT_PROMPT.includes('global은 32개 이하, 그중 relation 항목은 16개까지다'));
+  const f = koru(), many = n => ({ global: [], parts: Array.from({ length: n }, (_, i) => ({ ref: `new:u${i + 1}`, name: `단위 ${i + 1}`, parent: null, at: [f.at('| 엔진 | 루프')], focus: '원문의 책임' })) });
+  assert.equal(validateMapBlueprint(many(24), f.ask).parts.length, 24);
+  assert.equal(splitBlueprintParts(many(24)).length, 8);
+  refused(() => validateMapBlueprint(many(25), f.ask));
+  const items = n => Array.from({ length: n }, (_, i) => ({ kind: 'relation', text: `new:u${i % 24 + 1} → new:u${(i + 1) % 24 + 1}: 행`, at: [f.at('| 카드 러너 | 엔진 |')] }));
+  assert.equal(validateMapBlueprint({ ...many(24), global: items(48) }, f.ask).global.length, 48);
+  refused(() => validateMapBlueprint({ ...many(24), global: items(49) }, f.ask));
+  assert.deepEqual(blueprintStageIssues({ ...many(24), global: items(49) }, f.ask).filter(x => x.path === 'global'), [{ path: 'global', rule: 'count', expected: 48, actual: 49 }]);
+  // The global stage of a first map reads 32 relations whole; the 33rd is set aside past the count (plain map.6 refuses it).
+  const fragments = koruFragments(f), line = koruGlobal(f).relations[1];
+  const wide = { ...koruGlobal(f), relations: Array.from({ length: 33 }, () => structuredClone(line)) };
+  const read = combineRenderedReading(fragments, { ...wide, relations: wide.relations.slice(0, 32) }, f.ask, koruPlan(f));
+  assert.equal(read.wire.relations.length, 32);
+  assert.ok(read.exclusions.every(x => !x.path.startsWith('relations')));
+  assert.equal(M.validateMapReply(read.wire, f.ask).relations.length, 32);
+  const over = combineRenderedReading(fragments, wide, f.ask, koruPlan(f));
+  assert.equal(over.wire.relations.length, 32);
+  assert.deepEqual(over.exclusions.filter(x => x.path === 'relations').map(x => [x.rule, x.category]), [['contract', 'count']]);
+  assert.throws(() => M.validateMapReply({ ...structuredClone(read.wire), relations: wide.relations }, f.ask));
+  assert.deepEqual(mapStageIssues(wide).filter(x => x.path === 'relations'), [{ path: 'relations', rule: 'count', expected: 32, actual: 33 }]);
+  const laterAsk = fixture(1).ask;
+  assert.deepEqual(mapStageIssues({ ...wide, relations: wide.relations.slice(0, 17) }, null, { ask: laterAsk, parts: [] }).filter(x => x.path === 'relations'),
+    [{ path: 'relations', rule: 'count', expected: 16, actual: 17 }], 'a later map keeps its feedback bound');
+  assert.deepEqual(blueprintStageIssues(many(13), f.ask).filter(x => x.rule === 'new-count'), []);
+  // Coverage of the records' part tables: a diagnostic only (the plan stays valid).
+  assert.deepEqual(sectionRows(f.ask, /^부분/).map(cells => cells[0]), ['카드 러너', '엔진', '기분 층']);
+  assert.deepEqual(blueprintCoverage(koruPlan(f), f.ask), { rows: 3, covered: 3 });
+  assert.deepEqual(blueprintStageIssues(koruPlan(f), f.ask), []);
+  const missing = koruPlan(f); missing.parts.splice(2, 1);
+  validateMapBlueprint(missing, f.ask);
+  assert.deepEqual(blueprintStageIssues(missing, f.ask), [{ path: 'parts', rule: 'coverage', expected: 3, actual: 2 }]);
+  missing.parts[0].focus = '세 팔 카드. 기분 층: 미구현';
+  assert.deepEqual(blueprintStageIssues(missing, f.ask), [], 'a unit named in a focus is absorbed');
+  const plain = fixture();
+  assert.equal(blueprintCoverage(planned(plain, 2), plain.ask), null, 'a record without a part table says nothing');
+  // Each summary sentence shares an 8-character run with some claim; withdrawal and unknown rows against their claims.
+  const parts = koruFragments(f).flatMap(x => x.parts);
+  parts[3].claims[0].text = '엔진은 매일 FLAT 재시작을 채택 안 함.';
+  assert.deepEqual(readingDiagnostics({ ask: f.ask, summary: '엔진은 매일 FLAT 재시작을 채택하지 않았다. 카드는 내일 다시 본다고 했다.', parts }),
+    [{ path: 'summary', rule: 'unbacked', expected: 0, actual: 1 }, { path: 'parts', rule: 'unknown-count', expected: 1, actual: 0 }]);
+  parts[0].claims[0].topic = 'status'; parts[3].claims[1].topic = 'unknown';
+  assert.deepEqual(readingDiagnostics({ ask: f.ask, summary: '엔진은 매일 FLAT 재시작을 채택하지 않았다.', parts }),
+    [{ path: 'parts', rule: 'withdrawn-count', expected: 2, actual: 1 }]);
 });

@@ -7,8 +7,8 @@ import { parseBackup, cleanPositions } from '../shared/validation.js';
 import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, removePastedRecord, provideRecord, secretPasted, correctReadingRole } from '../shared/domain.js';
 import { CLAIM_LABEL, stateLabel, revisedRelations, candidateReading, type Applied, type CurrentClaim, type PartUnderstanding } from '../shared/map-reading.js';
 import { roleEvidence } from './role-evidence.js';
-import type { ClaimTopic, ReadingQuote, ReadingRelation, SavedCamera } from '../shared/types.js';
-import { TOPIC_LABEL, TOPIC_HINT, EVIDENCE_LABEL, EVIDENCE_HINT, STATE_WORD, MODE_LABEL, claimEvidence, claimWhen, claimsByTopic } from '../shared/claim-topic.js';
+import type { Channel, ClaimTopic, ReadingQuote, ReadingRelation, SavedCamera } from '../shared/types.js';
+import { TOPIC_LABEL, TOPIC_HINT, EVIDENCE_LABEL, EVIDENCE_HINT, STATE_WORD, MODE_LABEL, TYPE_LABEL, FAMILY_OF, CHANNEL_LABEL, claimEvidence, claimWhen, claimsByTopic, type PartFamily } from '../shared/claim-topic.js';
 import { recordTitle } from './digest-source.js';
 import { createMapRun, sendLine, JOB_NOTE, type MapRunState } from './map-run.js';
 import { mapBatchLines, mapPendingText } from '../shared/map-route.js';
@@ -17,12 +17,14 @@ import { requestResults, frozenRequests, displayAbout, captureRequestReading, re
 import { correctRequestMatch, unlinkReplacement, requestComparison } from '../shared/request-return.js';
 import { studioView, subtreeRecords, partPath, buildAsk, draftAfterAnswer, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
-import { layoutScope, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, ROOT, HEAD, type Box, type Edge, type LabelSpot, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
+import { layoutScope, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, ROOT, HEAD, type Box, type Edge, type Face, type TypedCard, type LabelSpot, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
 import { aiStatus, askStudio, AskError, ERROR_TEXT, RELEASE_TEXT, PUBLIC_EDITION, connectorRecords, publishHandover, type AiStatus } from './studio-api.js';
 import { RUNTIME, runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
 import { routeEdges, samplePath, mixPath, type Routed } from './map-route.js';
-import { labelSpots, polylineHitsRect } from './map-labels.js';
+import { typedBudget, typedLines, typedPx, zoomLevel, TYPE_H, LINE_H, type CardBudget, type ChipsAt, type BodyKind, type ZoomLevel } from './card-budget.js';
+import { labelSpots, polylineHitsRect, portSpots } from './map-labels.js';
+import { opsLines } from './ops-line.js';
 import { PROJECT_REPORT_ASK, CHAT_REPORT_ASK, REPORT_ASK_EXPLAIN, deltaReportAsk, reflectAsk, plannedNote } from '../shared/report-ask.js';
 import { modelLabel } from '../shared/model-label.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
@@ -232,7 +234,7 @@ function budgetFolded(o: Opened): Set<string> {
       else { const parent = partOf(o, p.parentId); v = !!parent && depth <= 3 && parent.childIds.length === 1 && open(parent.id, depth - 1); }
       memo.set(id, v); return v;
     };
-    const L = layoutScope(o.view, scope, open, positionsOf(o), measureName, undefined, mapAspect()), titleRoom = 100 + (scope ? 34 * relationGroups(scopeEnds(o)).length : 0);
+    const L = layoutScope(o.view, scope, open, positionsOf(o), measureName, undefined, mapAspect(), typedRoom(o.view)), titleRoom = 100 + (scope ? 34 * relationGroups(scopeEnds(o)).length : 0);
     return { L, ok: (L.bounds.w + 40) * 0.85 <= window.innerWidth - 48 && (L.bounds.h + titleRoom + 40) * 0.85 <= window.innerHeight - 152 };
   };
   for (let g = 0; g < ids.length; g++) {
@@ -775,7 +777,7 @@ const measureName: TextMeasure = (() => {
     if (!ctx) return text.length * 9;
     // The weights of styles.css (--fw-name 590 for names, --fw-body 420 for notes). 'head' serves a region's name (680 14px) and
     // a card's name in a region (590 14.5px): measured at the wider of the two, so neither is given too little room.
-    ctx.font = kind === 'node' ? `590 13.5px ${family}` : kind === 'item' ? `590 13px ${family}` : kind === 'head' ? `680 14.5px ${family}` : kind === 'sub' ? `590 13px ${family}` : kind === 'plan' ? `590 12px ${family}` : kind === 'where' ? `590 11px ${family}` : `420 12.5px ${family}`;
+    ctx.font = kind === 'node' ? `590 13.5px ${family}` : kind === 'item' ? `590 13px ${family}` : kind === 'head' ? `680 14.5px ${family}` : kind === 'sub' ? `590 13px ${family}` : kind === 'plan' ? `590 12px ${family}` : kind === 'where' ? `590 11px ${family}` : kind === 'meta' ? `500 12px ${family}` : `420 12.5px ${family}`;
     const w = ctx.measureText(text).width; cache.set(key, w); return w;
   };
 })();
@@ -804,7 +806,7 @@ const heldPositions = (o: Opened): Positions => {
   for (const c of new Set([...Object.keys(held), ...Object.keys(pos)])) out[c] = { ...(held[c] ?? {}), ...(pos[c] ?? {}) };
   return out;
 };
-const relayout = (o: Opened) => { lay = layoutScope(o.view, scope, isExpanded(o), heldPositions(o), measureName, planRows ?? undefined, mapAspect()); core = { ...lay.bounds }; withTitle(); };
+const relayout = (o: Opened) => { const budgets = new Map<string, CardBudget>(); lay = layoutScope(o.view, scope, isExpanded(o), heldPositions(o), measureName, planRows ?? undefined, mapAspect(), typedRoom(o.view, budgets)); cardBudgets = budgets; core = { ...lay.bounds }; withTitle(); };
 
 /** Two real parts with one name under one parent ('Types' and 'Types'): told apart by the first clause of their own note, as
  * written ('원명 extHostTypes.ts'), only where the name is really ambiguous. Never merged, renamed or guessed: null when the name
@@ -857,22 +859,172 @@ function metaLine(p: PartView, last: string | null): string | null {
   return `${STATUS_SHORT[p.status]}${last ? ` · ${ago(last)}` : ''}`;
 }
 
+/* ---------- a card's typed body (map spec 2.1): the record's type word over the name, one operations line, what the part
+ * takes and hands over, one structural region by family and one setting. Only what readings said; a blank says so in place. */
+/** The operations line (ops-line): the newest reading's state for the part, as a report with the time the record gives, short
+ * where the day is the map's basis day ('가동 보고 · 08:49Z · 현재 미확인'), in plain text; its brief form for a narrow card
+ * and its tip (the time as written). Never a status the app saw, never made from "built" or "designed". */
+function opsOf(r: PartUnderstanding): { full: string; brief: string; tip: string } {
+  const s = r.stateRead;
+  return opsLines(s?.state ?? null, s?.when ?? null, opsRef);
+}
+/** The day an operations line's time is read against: the newest map reading's basis time, else today (UTC, as records write Z). */
+let opsRef: string | null = null;
+const opsDay = (o: Opened) => [...o.project.readings].reverse().find(isMapReading)?.basisAt ?? new Date().toISOString().slice(0, 10);
+/** Each drawn operations line's two forms: fitOps keeps the full one unless it overflows its card. */
+const opsFit = new WeakMap<HTMLElement, { full: string; brief: string }>();
+/** After the cards have their widths: an operations line that does not fit reads '현재 ?' (its tip keeps the whole line). */
+function fitOps(world: HTMLElement) {
+  const rows = [...world.querySelectorAll<HTMLElement>('.node .meta-text.ops')].map(el => {
+    const meta = el.parentElement!, lad = meta.querySelector<HTMLElement>('.ladder');
+    return { el, room: meta.clientWidth - (lad ? lad.offsetWidth + 6 : 0) };
+  });
+  for (const { el, room } of rows) { const f = opsFit.get(el); if (f && room > 0) el.textContent = measureName(f.full, 'meta') > room ? f.brief : f.full; }
+}
+/* The map's zoom levels (card-budget zoomLevel, spec 4): 개요 keeps a typed card's head and operations line, 중간 its port
+ * lines too, 상세 everything. Below Z_MID names read on one line (styles.css z-mid), so such a card is as high as one name
+ * line. The layout is made for the level at hand (relayout records it); a zoom that changes it draws the map again. */
+const Z_MID = 0.705;
+const levelKey = (k: number) => `${zoomLevel(k)}|${k < Z_MID ? 1 : 0}`;
+let cardLevel: ZoomLevel = 'detail', cardOneLine = false, laidKey = '', relevel = 0, lastFresh = 0;
+/** A setting that reads as a beat or an interval: a loop's frame names its unit only when the record wrote one. */
+const CADENCE = /\d\s*(ms|s|sec|m|min|h|d)\b|\d\s*(초|분|시간|일)|간격|주기|마다|매\s?\S|interval|every|cadence|tick|cron|poll|period/i;
+type BodyRegion = { kind: 'store'; fields: string[] } | { kind: 'loop' | 'timer' | 'actor'; mark: string | null; text: string };
+interface Typed { family: PartFamily | 'neutral'; body: BodyRegion | null; setting: string | null }
+function typedOf(r: PartUnderstanding): Typed {
+  const t = r.typeRead?.type ?? null, family = t ? FAMILY_OF[t] : 'neutral', cfg = r.config;
+  let body: BodyRegion | null = null, used: string | null = null;
+  if (family === 'store') body = { kind: 'store', fields: r.fields };
+  else if (family === 'loop') { used = cfg.find(c => CADENCE.test(c)) ?? null; body = { kind: 'loop', mark: null, text: used ? `반복 · ${used}` : '반복 단위 ?' }; }
+  else if (family === 'timer') { used = cfg[0] ?? null; body = { kind: 'timer', mark: '⏱︎', text: used ?? '일정 ?' }; }
+  else if (t === 'actor') body = { kind: 'actor', mark: null, text: r.outputs[0] ? `효과 ▸ ${r.outputs[0]}` : '효과 ?' };
+  // Other kinds draw no region of their own: their first setting reads on the setting line instead.
+  return { family, body, setting: cfg.find(c => c !== used) ?? null };
+}
+/** What a unit's typed lines are before the six-line budget (card-budget) decides which of them the card keeps, at the zoom
+ * level the layout is made for. The name is drawn on two lines at most (.node-name), so a longer measure counts as two. */
+const budgetOf = (t: Typed, r: PartUnderstanding, nameLines: number, chips: ChipsAt = 'none', level: ZoomLevel = cardLevel): CardBudget =>
+  typedBudget(Math.min(2, nameLines), !!t.setting, r.inputs.length > 0, r.outputs.length > 0, !!t.body, chips, level);
+const bodyKind = (t: Typed): BodyKind => t.body?.kind ?? null;
+/** The budgets of the units the last layout typed (relayout): such a card is drawn with the lines its budget kept and without
+ * its note (map spec 2.1: the note reads in the pane). A unit missing here draws as before. */
+let cardBudgets = new Map<string, CardBudget>();
+/** The room a card's typed lines need past what map-layout already counts (layoutScope's extra): the type word over the name,
+ * the operations line where the layout kept no state line, and on a unit the typed lines (each run after the card's own gap,
+ * 3px on a unit and 2px on a row). A unit with a type word or typed lines answers as a typed card: its lines are kept within
+ * the six-line budget for the lines its name takes (budgets records what each kept). A part no reading spoke of takes none; a
+ * list item keeps its one line. */
+function typedRoom(v: StudioView, budgets?: Map<string, CardBudget>): (id: string, face: Face) => number | TypedCard {
+  const byId = new Map(v.parts.map(p => [p.id, p])), names = new Map<string, number>();
+  for (const p of v.parts) names.set(p.name, (names.get(p.name) ?? 0) + 1);
+  return (id, face) => {
+    const p = byId.get(id), r = p?.reading; if (!p || !r || face === 'item') return 0;
+    const t = typedOf(r), gap = face === 'unit' ? 3 : 2;
+    let px = r.typeRead ? TYPE_H + gap : 0;
+    // map-layout keeps a state line only for a part with a status, a state or a repeated name (its measure's extra).
+    if (p.status === 'plan' && !r.state && (names.get(p.name) ?? 0) < 2) px += gap + (face === 'unit' ? 2 : 0) + LINE_H;
+    // Whether the card is typed does not change with the zoom level (its width stays UNIT_W); only its lines do.
+    if (face !== 'unit' || (!r.typeRead && !typedLines(budgetOf(t, r, 1, 'none', 'detail'), bodyKind(t)).length)) return px;
+    const kids = p.childIds.length > 0;
+    return { oneLine: cardOneLine, room: (nameLines, chipsLine) => {
+      const b = budgetOf(t, r, nameLines, kids ? (chipsLine ? 'line' : 'name') : 'none'); budgets?.set(id, b);
+      return px + typedPx(b, bodyKind(t), gap);
+    } };
+  };
+}
+/** Lists drawn on one line: as many names as the card's inner width holds (two, three on a ledger), then '+N'. Fitted once the
+ * card has its width (fitTyped), so a name is cut only when not even one fits. A folded port line (outs) carries 내는 것 after
+ * 받는 것 on the same line ('⇥ a · b  ⇤ c'); short of room it gives up 내는 것's names first ('⇤ +N'), then 받는 것's. */
+interface FitList { names: string[]; max: number; cells: boolean; outs?: string[] }
+const fitLists = new WeakMap<HTMLElement, FitList>();
+const listText = (names: string[], k: number) => { const rest = names.length - k; return [...names.slice(0, k), ...(rest > 0 ? [`+${rest}`] : [])].join(' · '); };
+const foldText = (ins: string[], k: number, outs: string[], ko: number) => `${listText(ins, k)}  ⇤ ${ko ? listText(outs, ko) : `+${outs.length}`}`;
+function fillNames(el: HTMLElement, names: string[], k: number, cells: boolean) {
+  const rest = names.length - k;
+  if (cells) el.replaceChildren(...names.slice(0, k).map(n => h('span', { class: 'ledger-cell' }, n)), ...(rest > 0 ? [h('span', { class: 'ledger-more' }, `+${rest}`)] : []));
+  else el.textContent = listText(names, k);
+}
+function fitList(el: HTMLElement, names: string[], max: number, cells: boolean): HTMLElement {
+  const k = Math.min(max, names.length); fitLists.set(el, { names, max: k, cells }); fillNames(el, names, k, cells); return el;
+}
+/** The arrow mark's column (.io-mark 14px + 4px gap) and a ledger cell's sides (6px padding a side + its 1px rule). */
+const MARK_W = 18, CELL_SIDES = 13;
+function namesWidth(f: { names: string[]; cells: boolean }, k: number): number {
+  const rest = f.names.length - k, more = rest > 0 ? `+${rest}` : '';
+  if (f.cells) return f.names.slice(0, k).reduce((a, n) => a + measureName(n, 'note') + CELL_SIDES, 0) + (more ? measureName(more, 'note') + CELL_SIDES : 0);
+  return measureName(listText(f.names, k), 'note');
+}
+/** After the cards have their widths: every card's inner width read first, then each list refilled (one layout pass). */
+function fitTyped(world: HTMLElement) {
+  const cards = [...world.querySelectorAll<HTMLElement>('.node-typed')].map(el => {
+    const b = lay.boxes.get(el.closest<HTMLElement>('.node')?.dataset.box ?? '');
+    return { el, w: el.closest<HTMLElement>('.node-text')?.clientWidth || (b ? b.w - 30 : 0) };
+  });
+  for (const { el, w } of cards) el.querySelectorAll<HTMLElement>('.io-text, .ledger').forEach(t => {
+    const f = fitLists.get(t); if (!f || !w) return;
+    const room = w - (f.cells ? 0 : MARK_W);
+    if (f.outs) {
+      const outs = f.outs; let k = f.max, ko = Math.min(2, outs.length);
+      while (measureName(foldText(f.names, k, outs, ko), 'note') > room) { if (ko > 0) ko--; else if (k > 1) k--; else break; }
+      t.textContent = foldText(f.names, k, outs, ko); return;
+    }
+    let k = f.max; while (k > 1 && namesWidth(f, k) > room) k--;
+    fillNames(t, f.names, k, f.cells);
+  });
+}
+const ioLine = (cls: string, mark: string, what: string, names: string[]) => h('span', { class: `node-io ${cls}`, title: `${what} · ${names.join(' · ')}` },
+  h('span', { class: 'io-mark', 'aria-hidden': 'true' }, mark), h('span', { class: 'sr-only' }, `${what} `), fitList(h('span', { class: 'io-text' }), names, 2, false));
+/** 받는 것 and 내는 것 on one line (a long name left room for one port line): ⇥ what it takes, then ⇤ what it hands over. */
+function foldLine(ins: string[], outs: string[]): HTMLElement {
+  const text = h('span', { class: 'io-text' }), k = Math.min(2, ins.length), ko = Math.min(2, outs.length);
+  fitLists.set(text, { names: ins, max: k, cells: false, outs }); text.textContent = foldText(ins, k, outs, ko);
+  return h('span', { class: 'node-io io-in io-fold', title: `받는 것 · ${ins.join(' · ')}\n내는 것 · ${outs.join(' · ')}` },
+    h('span', { class: 'io-mark', 'aria-hidden': 'true' }, '⇥'), h('span', { class: 'sr-only' }, `받는 것 ${ins.join(', ')} · 내는 것 ${outs.join(', ')} `), text);
+}
+/** A unit's typed lines under its operations line: 받는 것, 내는 것, the family's region, one setting; with a budget (the
+ * layout's six-line budget for this card), only the lines it kept. */
+function typedBlock(t: Typed, r: PartUnderstanding, budget?: CardBudget): HTMLElement | null {
+  const lines: HTMLElement[] = [], io = budget?.io ?? (r.inputs.length && r.outputs.length ? 'both' : r.inputs.length ? 'in' : r.outputs.length ? 'out' : 'none');
+  if (io === 'fold') lines.push(foldLine(r.inputs, r.outputs));
+  else if (io !== 'none') { // 'none': no port line recorded, or none kept at this zoom level (개요)
+    if (r.inputs.length && io !== 'out') lines.push(ioLine('io-in', '⇥', '받는 것', r.inputs));
+    if (r.outputs.length && io !== 'in') lines.push(ioLine('io-out', '⇤', '내는 것', r.outputs));
+  }
+  const b = budget && !budget.body ? null : t.body;
+  // A store reads as a ledger: a double rule over the names of its rows' fields (never a count of rows it does not know).
+  if (b?.kind === 'store') lines.push(h('span', { class: 'node-body b-store', ...(b.fields.length ? { title: `행의 필드 · ${b.fields.join(' · ')}` } : {}) },
+    b.fields.length ? fitList(h('span', { class: 'ledger' }), b.fields, 3, true) : h('span', { class: 'ledger blank' }, '행 형식 ?')));
+  else if (b) lines.push(h('span', { class: `node-body b-${b.kind}`, title: b.text }, b.mark ? h('span', { class: 'body-mark', 'aria-hidden': 'true' }, b.mark) : null, h('span', { class: 'body-text' }, b.text)));
+  if (t.setting && (budget?.set ?? true)) lines.push(h('span', { class: 'node-set', title: `설정 · ${t.setting}` }, `설정 · ${t.setting}`));
+  return lines.length ? h('span', { class: 'node-typed' }, ...lines) : null;
+}
+
 /** camera: 'fit' (new view), 'restore' (a scope's own last camera, else fit), 'keep' (same view, structure changed). */
 function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay = true) {
   const o = opened!; setBar(o);
   $('home').hidden = true; $('space').hidden = false; $('ai-pill').hidden = false;
   // A redraw of the structure ends the places held for a drag (holdPlaces) and the hover's peek.
   held = null; $('space').classList.remove('peek', 'state-peek');
+  // The zoom level the cards are drawn at: every relayout until the next redraw keeps it (a drag never changes their lines).
+  opsRef = opsDay(o); laidKey = levelKey(camera.k); cardLevel = zoomLevel(camera.k); cardOneLine = camera.k < Z_MID;
   relayout(o);
   const world = $('world'), view = o.view;
   // Same view, new structure (a fold, a new part, 자동 배치): where every box and line was, so each slides to its new place.
-  const was = cameraMode === 'keep' && !world.hidden ? beforeRedraw(world) : null;
+  // (Not when the zoom level a view just opened at redraws it: the cards then take their level's height in place.)
+  const was = cameraMode === 'keep' && !world.hidden && performance.now() - lastFresh > 600 ? beforeRedraw(world) : null;
+  if (cameraMode !== 'keep') lastFresh = performance.now();
   world.replaceChildren();
   const edges = svg('svg', { class: 'edges', width: '1', height: '1', 'aria-hidden': 'true' });
   const defs = svg('defs', {});
   for (const id of ['arrow', 'arrow-on', 'arrow-near']) {
     const m = svg('marker', { id, viewBox: '0 0 10 10', refX: '8', refY: '5', markerWidth: '7', markerHeight: '7', orient: 'auto-start-reverse' });
     m.append(svg('path', { d: 'M0,0 L10,5 L0,10 L3,5 z' })); defs.append(m);
+  }
+  // A control or reference line ends in an open V (no base, never filled, so it stays open on a selected line): ten pixels of
+  // the map whatever the line's width, its tip where the line ends.
+  for (const id of ['arrow-open', 'arrow-open-on', 'arrow-open-near']) {
+    const m = svg('marker', { id, viewBox: '0 0 10 10', refX: '8', refY: '5', markerWidth: '10', markerHeight: '10', markerUnits: 'userSpaceOnUse', orient: 'auto-start-reverse' });
+    m.append(svg('path', { d: 'M1,1 L8,5 L1,9' })); defs.append(m);
   }
   // A selected line also marks where it starts, so both of its ends read on the map.
   // Every line carries a start dot; styles.css shows it only on a line being read (hovered or selected) and on a plain relation.
@@ -884,15 +1036,21 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   // A busy map at rest reads as its summary (summaryEdges: one line per pair of groups and kind, with its count); a selection,
   // the change plan or a map of a few lines draws each line. Both sets are drawn; .rest-sum on the space shows one of them.
   restSums = sums = lay.edges.length > 6 ? summaryEdges(lay.boxes, lay.edges) : [];
+  const relInfo = relationLines(o.project), present = new Set<Channel>();
+  lineWords = new Map(); lineChans = new Map();
   for (const e of [...lay.edges, ...sums]) {
-    const fa = frames(e.from), inner = [...frames(e.to)].some(f => fa.has(f)), sum = e.key.startsWith('sum:');
-    const g = svg('g', { class: `edge${sum ? ' sum' : ''} k-${e.kind}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}${!sum && edgeRevised(e) ? ' revised' : ''}${e.spine ? ' spine' : ''}${!sum && e.notes.length && e.notes.every(plannedNote) ? ' planned' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
+    const fa = frames(e.from), inner = [...frames(e.to)].some(f => fa.has(f)), sum = e.key.startsWith('sum:'), ch = edgeChannel(e, relInfo);
+    if (ch) present.add(ch);
+    lineWords.set(e.key, lineWord(e, ch, relInfo)); lineChans.set(e.key, ch);
+    const g = svg('g', { class: `edge${sum ? ' sum' : ''} k-${e.kind}${ch ? ` c-${ch}` : ''}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}${!sum && edgeRevised(e) ? ' revised' : ''}${e.spine ? ' spine' : ''}${!sum && e.notes.length && e.notes.every(plannedNote) ? ' planned' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
     // No text on the map: the meaning shows on hover (tip) and in the selected part's 관련 부분.
-    // A plain relation ends in the same dot at both ends: it is drawn, not directed.
-    g.append(svg('path', { class: 'edge-line', 'marker-end': e.kind === 'related' ? 'url(#dot)' : 'url(#arrow)', 'marker-start': 'url(#dot)' }), svg('path', { class: 'edge-hit' }));
+    // A plain relation ends in the same dot at both ends: it is drawn, not directed. Data ends in a filled head, control and
+    // reference in an open V.
+    g.append(svg('path', { class: 'edge-line', 'marker-end': e.kind === 'related' ? 'url(#dot)' : ch === 'data' ? 'url(#arrow)' : 'url(#arrow-open)', 'marker-start': 'url(#dot)' }), svg('path', { class: 'edge-hit' }));
     edges.append(g);
   }
   world.append(edges);
+  renderLineKey(present);
   // Each group's head says how many relations cross its boundary (stored relations, any depth inside): where it connects, before
   // anything is selected. Part of the head, so clicking it selects the group and the head's own button role reads it.
   const crossing = boundaryCounts(view);
@@ -945,25 +1103,41 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
       const last = b.kids ? subtreeRecords(view, p.id)[0]?.at ?? null : p.lastAt, meta = metaLine(p, last), face = b.face ?? 'row';
       // A folded group reads by its name and its count (the way in); its note reads in the pane. A part without an inside keeps
       // its own first sentence.
-      const note = face === 'unit' && !b.kids ? mapLead(view, p.id) : '', box = lay.boxes.get(b.container), onTint = box?.kind === 'frame' && box.depth % 2 === 1, alias = aliasOf(view, p.id);
-      world.append(h('div', { class: `node ${face}${onTint ? ' on-tint' : ''} s-${p.status}${p.status === 'plan' && p.reading?.state ? ` rs-${p.reading.state}` : ''}${recentAt(last) ? ' fresh' : ''}${b.kids ? ' has-kids' : ''}${meta || of ? '' : ' bare'}`, 'data-part': p.id, 'data-box': p.id, 'data-drag': p.id, role: 'button', tabindex: '0',
+      const note = face === 'unit' && !b.kids && !cardBudgets.has(p.id) ? mapLead(view, p.id) : '', box = lay.boxes.get(b.container), onTint = box?.kind === 'frame' && box.depth % 2 === 1, alias = aliasOf(view, p.id);
+      // What readings said the part is (units and rows; a list item keeps its one line): the operations line takes the state
+      // line's place (the records' own status stays in its tip), the ladder beside it as before.
+      const r = face === 'item' ? null : p.reading, typed = r ? typedOf(r) : null, ops = r ? opsOf(r) : null, said = ops?.full ?? meta;
+      // A typed card with an inside carries its group chips at the end of its name line, or on a line of their own under the
+      // body (card-budget chips); never beside the operations line, which keeps the card's width.
+      const chipsAt: ChipsAt = b.kids && face === 'unit' ? cardBudgets.get(p.id)?.chips ?? 'none' : 'none';
+      const chips = (cls: string) => h('span', { class: `node-chips ${cls}` }, linksChip(p.id), enterButton(p)), nameEl = h('span', { class: 'node-name' }, p.name);
+      const opsEl = ops ? h('span', { class: 'meta-text ops', title: `${ops.tip}${meta ? `
+기록 · ${meta}` : ''}` }, ops.full) : null;
+      if (opsEl && ops) opsFit.set(opsEl, ops);
+      world.append(h('div', { class: `node ${face}${onTint ? ' on-tint' : ''} s-${p.status}${p.status === 'plan' && p.reading?.state ? ` rs-${p.reading.state}` : ''}${recentAt(last) ? ' fresh' : ''}${b.kids ? ' has-kids' : ''}${typed ? ` typed f-${typed.family}` : ''}${said || of ? '' : ' bare'}`, 'data-part': p.id, 'data-box': p.id, 'data-drag': p.id, role: 'button', tabindex: '0',
         title: `${of ? `${of} › ` : ''}${p.name}${alias ? ` · ${alias}` : ''}`, onkeydown: keySelect(p.id) },
         b.kids ? toggleButton(p, false) : null,
-        h('span', { class: 'node-text' }, h('span', { class: 'node-name' }, p.name),
+        h('span', { class: 'node-text' }, r?.typeRead ? h('span', { class: 'node-type' }, TYPE_LABEL[r.typeRead.type]) : null,
+          chipsAt === 'name' ? h('span', { class: 'node-headline' }, nameEl, chips('at-name')) : nameEl,
           note ? h('span', { class: 'node-note' }, note) : null,
-          meta ? h('span', { class: 'node-meta' }, ladder(view, p), h('span', { class: 'meta-text' }, meta)) : alias ? h('span', { class: 'node-meta owner alias' }, h('span', { class: 'meta-text' }, alias)) : of ? h('span', { class: 'node-meta owner' }, h('span', { class: 'meta-text' }, `${of} 안`)) : null,
+          said ? h('span', { class: 'node-meta' }, ladder(view, p), opsEl ?? h('span', { class: 'meta-text' }, said)) : alias ? h('span', { class: 'node-meta owner alias' }, h('span', { class: 'meta-text' }, alias)) : of ? h('span', { class: 'node-meta owner' }, h('span', { class: 'meta-text' }, `${of} 안`)) : null,
+          face === 'unit' && typed && r ? typedBlock(typed, r, cardBudgets.get(p.id)) : null,
+          chipsAt === 'line' ? chips('own-line') : null,
           h('span', { class: 'plan-note' })),
-        b.kids ? linksChip(p.id) : null, b.kids ? enterButton(p) : null));
+        b.kids && chipsAt === 'none' ? linksChip(p.id) : null, b.kids && chipsAt === 'none' ? enterButton(p) : null));
     }
   }
   // The title of this map: what the scope is for, in its own first sentence. The rest of that text (where it comes from, what
   // was checked) reads in full in the pane on request; nothing of it is cut or reworded. Inside a part, the scope's own
   // relations to the outside read under the title as the scope's, never drawn as lines from one of its children.
   const sp = partOf(o, scope), purpose = (sp ? sp.note : o.project.space.brief?.text ?? '').trim(), first = lead(purpose);
-  const outside = scopeEnds(o), more = purpose.replace(/\s+/g, ' ').length > first.length + 1;
+  const outside = scopeEnds(o), more = purpose.replace(/\s+/g, ' ').length > first.length + 1, basis = basisLine(o);
+  // The basis line reads under the purpose; with no purpose the reading's sentence stands in its place, and the basis under it.
   const title = h('header', { class: 'map-title' }, h('h1', { class: 'map-name' }, sp ? sp.name : o.project.name),
     first ? h('p', { class: 'map-purpose' }, h('span', {}, first), more ? h('button', { type: 'button', class: 'map-more', title: '설명 전체와 출처', onclick: () => openScopeReading() }, '설명 전체') : null) : null,
+    first ? basis : null,
     sp ? null : understoodLine(o),
+    first ? null : basis,
     flowStrip(o), stateStrip(o),
     outside.length ? h('div', { class: 'scope-rels', role: 'list', 'aria-label': '이 범위의 바깥 관계' }, ...relationGroups(outside, '범위').map(g => h('p', { class: 'scope-rel', role: 'listitem' },
       h('span', { class: 'sr-verb' }, g.label), ...g.list.map(x => h('button', { type: 'button', class: 'sr-part', title: `${partPath(o.view, x.far).map(q => q.name).join(' › ')}${x.r.note ? `\n${x.r.note}` : ''}`, 'data-far': x.far, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far, null); } }, partOf(o, x.far)?.name ?? '부분'))))) : null);
@@ -980,6 +1154,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   world.querySelectorAll('.edge.inner').forEach(g => top.append(g));
   if (was) morphFrom = was.lines;
   positionWorld();
+  fitTyped(world); fitOps(world);
   morphFrom = null;
   if (was) afterRedraw(world, was);
   $('space').classList.toggle('in-scope', !!scope);
@@ -1141,9 +1316,10 @@ function noteHead(n: string): string {
   const t = n.replace(/\s+/g, ' ').trim(), m = /^(.{8,40}?)(?:[,.;](?=\s|$)|$)/.exec(t), c = (m ? m[1]! : t).trim();
   return c.length > 30 ? `${c.slice(0, 29)}…` : c;
 }
-/** Verbs on the map: on the lines of the selection, and on every line of a map that has only a few. Each sits at a free spot
- * along its own line; a verb that would cover a part, a group's head, the title or another verb is left off the map (the pane
- * lists every relation by its verb). Nothing is drawn for a relation the project does not hold. */
+/** Labels on the map (spec 2.3): at rest every drawn line carries its one-line label (placeRestLabels); with a selection, the
+ * selection's lines carry theirs. Each sits at a free spot along its own line; a label that would cover a part, a group's
+ * head, the title or another label is left off the map (the pane lists every relation by its verb). Nothing is drawn for a
+ * relation the project does not hold. */
 function placeEdgeLabels() {
   const world = $('world'), o = opened; if (!o) return;
   let box = world.querySelector<HTMLElement>('.edge-labels');
@@ -1153,9 +1329,7 @@ function placeEdgeLabels() {
   syncLineMode();
   world.querySelectorAll('.edge.label-hidden').forEach(g => g.classList.remove('label-hidden'));
   world.dataset.labelsHidden = '0';
-  const few = !selected && !planView.isOpen() && lay.edges.length <= 6;
-  // At rest, lines of one kind meeting the same part share one verb (the first of them carries it).
-  const seenEnd = new Set<string>();
+
   // The selection's lines of one kind and one direction that leave it on one side share one verb, set where they leave it;
   // every line stays its own (its tip and the pane keep each relation and its reason). The verb of such a fan carries no number:
   // a number on a verb reads as the relations one line holds, and the pane already counts the fan.
@@ -1167,26 +1341,33 @@ function placeEdgeLabels() {
   world.querySelectorAll<SVGGElement>('.edge.on').forEach(g => { const e = lay.edges.find(x => x.key === g.dataset.key); if (e) fans.set(selKey(e), (fans.get(selKey(e)) ?? 0) + 1); });
   // The selection's corrected lines are placed first, so other verbs never take the room their mark needs.
   const firstRevised = (g: SVGGElement) => g.classList.contains('on') && g.classList.contains('revised') ? 0 : 1;
-  const lines = [...world.querySelectorAll<SVGGElement>('.edge')].sort((a, b) => firstRevised(a) - firstRevised(b)).filter(g => {
-    if (g.classList.contains('on')) return true;
-    if (!few) return false;
-    const e = lay.edges.find(x => x.key === g.dataset.key), k = e ? `${e.to}|${e.kind}` : ''; if (!e || seenEnd.has(k)) return false;
-    seenEnd.add(k); return true;
-  });
+  const lines = [...world.querySelectorAll<SVGGElement>('.edge')].sort((a, b) => firstRevised(a) - firstRevised(b)).filter(g => g.classList.contains('on'));
   // Where outside partners belong (their heads) is text on the map as well: a verb never covers it.
   const blocks: Rect[] = [...lay.boxes.values()].map(b => (b.kind === 'frame' ? { x: b.x, y: b.y, w: b.w, h: b.head } : b)).concat(lay.heads);
   if (titleH) blocks.push(titleRect());
   const clear = (r: Rect) => !blocks.some(b => r.x < b.x + b.w + 3 && b.x < r.x + r.w + 3 && r.y < b.y + b.h + 3 && b.y < r.y + r.h + 3);
-  if ($('space').classList.contains('rest-sum')) { placeCounts(box, clear, blocks); return; }
+  // At rest: every line drawn now (on a busy map its summary lines, each with its count) carries its label. Lines of one kind
+  // meeting the same part share one label only when theirs would read the same (the first of them carries it).
+  if (!selected && !planView.isOpen()) {
+    const drawn = shownLines(), seenEnd = new Set<string>();
+    const rest = [...world.querySelectorAll<SVGGElement>('.edge')].filter(g => drawn.has(g.dataset.key!) && !g.classList.contains('hit')).filter(g => {
+      const e = edgeOf(g.dataset.key); if (!e) return false;
+      const k = `${e.to}|${e.kind}|${lineChans.get(e.key) ?? ''}|${restWord(e)}`; if (seenEnd.has(k)) return false;
+      seenEnd.add(k); return true;
+    });
+    if (rest.length) placeRestLabels(box, rest, clear);
+    return;
+  }
   if (!selected) { if (lines.length) placeRestLabels(box, lines, clear); return; }
   const shown = shownLines();
   for (const g of lines) {
     const e = lay.edges.find(x => x.key === g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'); if (!e || !path) continue;
     const on = g.classList.contains('on'), fan = on && (fans.get(selKey(e)) ?? 0) > 1;
     if (on && seenSel.has(selKey(e))) continue;
-    const verb = `${REL_LABEL[e.kind] ?? e.kind}${!fan && e.ids.length > 1 ? ` ${e.ids.length}` : ''}${edgeRevised(e) ? REVISED_EDGE : ''}`;
+    const verb = `${wordOf(e)}${!fan && e.ids.length > 1 ? ` ${e.ids.length}` : ''}${edgeRevised(e) ? REVISED_EDGE : ''}`;
     // The selection's line says what it hands over (the head of its note) where its runs have room; the verb alone otherwise.
-    const said = on && !fan && e.notes.length === 1 && !plannedNote(e.notes[0]!) ? noteHead(e.notes[0]!) : '';
+    // (Not when the line's own label already says the same words, as a payload often does.)
+    const head = on && !fan && e.notes.length === 1 && !plannedNote(e.notes[0]!) ? noteHead(e.notes[0]!) : '', said = head === wordOf(e) ? '' : head;
     const label = h('span', { class: `edge-label k-${e.kind}${on ? ' on' : ''}${edgeRevised(e) ? ' revised' : ''}` }, verb);
     box.append(label);
     const inv = labelInv(), pts = edgePts(e.key, path), len = path.getTotalLength(), prefer = fan ? (e.to === selected ? 'end' : 'start') : 'long';
@@ -1194,6 +1375,9 @@ function placeEdgeLabels() {
     const tryAt = (text: string) => { label.textContent = text; const tw = label.offsetWidth * inv, th = label.offsetHeight * inv; return labelSpots(pts, tw, th, prefer).find(r => clear(r) && !lineUnder(r, e.key, shown)) ?? null; };
     if (said) { label.classList.add('said'); spot = tryAt(`${verb} · ${said}`); if (!spot) label.classList.remove('said'); }
     if (!spot) spot = tryAt(verb);
+    // A payload or a beat too long for its line gives way to the channel's short word ('제어', the verb), on the same places.
+    const brief = `${shortOf(e)}${!fan && e.ids.length > 1 ? ` ${e.ids.length}` : ''}${edgeRevised(e) ? REVISED_EDGE : ''}`;
+    if (!spot && brief !== verb) spot = tryAt(brief);
     const w = label.offsetWidth * inv, hh = label.offsetHeight * inv;
     // A selected corrected line keeps its meaning on the map: more room along its line (beside it too), then only the short
     // mark, along the line, then beside the selected card or the other end. Never over a part, a head, the title or a verb.
@@ -1235,21 +1419,33 @@ function placeCounts(box: HTMLElement, clear: (r: Rect) => boolean, blocks: Rect
     chip.style.left = `${spot.x}px`; chip.style.top = `${spot.y}px`; blocks.push(spot);
   }
 }
-/** Verbs at rest on a map of a few lines: each beside the box its line points to (about four fifths along the line, moved off
- * that box), never at the middle where lines cross. Two that would touch keep the one nearer its end; the other relation's line
- * says so (.label-hidden, still hovered for its meaning) and is counted in the map's data-labels-hidden. */
+/** A line's label at rest (spec 2.3): data says what it hands over (its payload, else the head of its one note), control what
+ * starts it ('기동 · …', else '제어'), a reference '참조'; a line holding several relations says how many. */
+function restWord(e: Edge): string {
+  let w = wordOf(e);
+  if (lineChans.get(e.key) === 'data' && w === (REL_LABEL[e.kind] ?? e.kind) && e.notes.length === 1 && !plannedNote(e.notes[0]!)) w = noteHead(e.notes[0]!) || w;
+  return `${w}${e.ids.length > 1 ? ` ${e.ids.length}` : ''}${edgeRevised(e) ? REVISED_EDGE : ''}`;
+}
+/** Labels at rest: each on a straight run of its own line with room for it and 8px of line on each side (the longest level
+ * run first), else beside the line just short of the part it points to; never on a corner, over another line (where lines
+ * cross), a part, a head or the title. Two that would touch keep the one with the better place (the first line on a tie),
+ * the other takes its next place; a label with none left is hidden until its line is selected (.label-hidden, still hovered
+ * for its meaning), counted in the map's data-labels-hidden. Fonts never shrink to make room. */
+const REST_PAD = 8;
 function placeRestLabels(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect) => boolean) {
   const spots: (LabelSpot & { el: HTMLElement })[] = [], hidden: SVGGElement[] = [], shown = shownLines(), inv = labelInv();
   for (const g of lines) {
-    const e = edgeOf(g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'), end = e && lay.boxes.get(e.to); if (!e || !path || !end) continue;
-    const label = h('span', { class: `edge-label k-${e.kind}${edgeRevised(e) ? ' revised' : ''}` }, `${REL_LABEL[e.kind] ?? e.kind}${e.ids.length > 1 ? ` ${e.ids.length}` : ''}${edgeRevised(e) ? REVISED_EDGE : ''}`);
+    const e = edgeOf(g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'); if (!e || !path) continue;
+    const label = h('span', { class: `edge-label k-${e.kind}${edgeRevised(e) ? ' revised' : ''}` }, restWord(e));
     box.append(label);
-    const w = label.offsetWidth * inv, hh = label.offsetHeight * inv, len = path.getTotalLength(), tip = path.getPointAtLength(len);
-    // On the runs nearest the part its line points to, clear of corners, parts and other lines.
-    const mine: Rect[] = labelSpots(edgePts(e.key, path), w, hh, 'end').filter(r => clear(r) && !lineUnder(r, e.key, shown)).slice(0, 6);
+    const w = label.offsetWidth * inv, hh = label.offsetHeight * inv, pts = edgePts(e.key, path);
+    const free = (r: Rect) => clear(r) && !lineUnder(r, e.key, shown);
+    const run = labelSpots(pts, w, hh, 'long', REST_PAD).filter(free).slice(0, 10);
+    const port = portSpots(pts, w, hh).filter(r => free(r) && !polylineHitsRect(pts, r, 1));
+    const mine = [...run, ...port];
     if (!mine.length) { label.remove(); hidden.push(g); continue; }
-    // Nearest to its end first; a later place only when a nearer verb takes this one's.
-    for (const r of mine) spots.push({ key: e.key, ...r, dist: Math.hypot(r.x + w / 2 - tip.x, r.y + hh / 2 - tip.y), el: label });
+    // Better places first, across all labels: every label's first place before any label's second.
+    mine.forEach((r, i) => spots.push({ key: e.key, ...r, dist: i, el: label }));
   }
   const { kept, dropped } = resolveLabels(spots, 6);
   for (const s of kept) { s.el.style.left = `${s.x}px`; s.el.style.top = `${s.y}px`; }
@@ -1301,7 +1497,16 @@ function applyCamera(animate = false) {
   // (never past 1.25×, so a name is cut only when it truly does not fit); below 60% that is all a box shows. Nothing is
   // removed from the page or its layout.
   const sp = $('space');
-  sp.classList.toggle('z-mid', camera.k < 0.705); sp.classList.toggle('z-low', camera.k < 0.6); // z-mid: 70% as shown and below
+  sp.classList.toggle('z-mid', camera.k < Z_MID); sp.classList.toggle('z-low', camera.k < 0.6); // z-mid: 70% as shown and below
+  // The zoom level (개요 · 중간 · 상세): what a typed card keeps. The cards take their level's height and the lines their new
+  // routes in one redraw, once the zoom has crossed a level's edge (never on every step of a wheel).
+  const lv = zoomLevel(camera.k);
+  sp.classList.toggle('lv-overview', lv === 'overview'); sp.classList.toggle('lv-mid', lv === 'mid'); sp.classList.toggle('lv-detail', lv === 'detail');
+  if (opened && laidKey && levelKey(camera.k) !== laidKey && !relevel) relevel = window.setTimeout(() => {
+    relevel = 0;
+    if (!opened || $('space').hidden || levelKey(camera.k) === laidKey) return;
+    renderSpace('keep'); if (selected) markSelection(selected);
+  }, 120); // a timer, not a frame: a wheel settles first, and a hidden page still redraws
   sp.style.setProperty('--grow', String(Math.min(1.25, Math.max(1, 0.85 / camera.k))));
   // Chips on the lines (verbs, counts) grow as the map shrinks, up to 1.5×, so they stay readable; their places are found
   // again when the scale changed enough to matter.
@@ -1647,6 +1852,7 @@ function renderLens() {
       h('h2', { id: 'lens-title' }, part.name),
       aliasOf(o.view, part.id) ? h('p', { class: 'lens-alias' }, aliasOf(o.view, part.id)) : null,
       stateLine(part) ?? ladderLine(o.view, part),
+      storeLine(o, part),
       h('div', { class: 'head-tools' },
         menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e: Event) => { ((e.currentTarget as HTMLElement).parentElement as HTMLDetailsElement).open = false; } }, ...menuItems)) : null,
         h('button', { type: 'button', class: 'rail-toggle', 'aria-label': '읽기면 접기', 'aria-expanded': 'true', title: '읽기면 접기 · 지도를 넓게 봐요', onclick: () => setRail(true) }, railIcon(true)),
@@ -1682,6 +1888,61 @@ function relationPayloads(project: Project): Map<string, ReadingRelation> {
   for (const r of project.readings) if (isMapReading(r)) for (const x of r.relations) if (x.payload) out.set(x.relationId, x);
   return out;
 }
+/** What each relation's line carries and says (map-reading.7–8): per relation, the channel, payload and cadence of the newest
+ * reading that names each (readings are oldest first); chAt orders the channels of different relations by their reading. */
+interface LineSaid { channel: Channel | null; chAt: number; payload: string | null; cadence: string | null }
+function relationLines(project: Project): Map<string, LineSaid> {
+  const out = new Map<string, LineSaid>();
+  project.readings.forEach((r, i) => {
+    if (isMapReading(r)) for (const x of r.relations) {
+      const cur = out.get(x.relationId) ?? { channel: null, chAt: -1, payload: null, cadence: null };
+      out.set(x.relationId, { channel: x.channel ?? cur.channel, chAt: x.channel ? i : cur.chAt, payload: x.payload ?? cur.payload, cadence: x.cadence ?? cur.cadence });
+    }
+  });
+  return out;
+}
+/** A line's channel: the newest reading's for any relation it draws; else by kind (a flow hands data over; a need or a shared
+ * use refers). A plain relation has no direction, so it keeps its dots and no channel. */
+function edgeChannel(e: Edge, said: Map<string, LineSaid>): Channel | null {
+  if (e.kind === 'related') return null;
+  let best: LineSaid | null = null;
+  for (const id of e.ids) { const s = said.get(id); if (s?.channel && (!best || s.chAt > best.chAt)) best = s; }
+  return best?.channel ?? (e.kind === 'flow' ? 'data' : 'uses');
+}
+/** The one-line label of a line: data says what it hands over, control what starts it, a reference only that it is one. A
+ * line drawing several relations says a payload or a beat only when all of them name the same. */
+function lineWord(e: Edge, ch: Channel | null, said: Map<string, LineSaid>): string {
+  const one = (k: 'payload' | 'cadence') => { const v = new Set(e.ids.map(id => said.get(id)?.[k] ?? null)); return v.size === 1 ? [...v][0] ?? null : null; };
+  const clip = (t: string) => (t.length > 30 ? `${t.slice(0, 29)}…` : t);
+  if (ch === 'data') { const p = one('payload'); return p ? clip(p) : REL_LABEL[e.kind] ?? e.kind; }
+  if (ch === 'control') { const c = one('cadence') ?? one('payload'); return c ? `기동 · ${clip(c)}` : '제어'; }
+  if (ch === 'uses') return '참조';
+  return REL_LABEL[e.kind] ?? e.kind;
+}
+/** The labels of the lines drawn now (renderSpace), by line key; a line drawn later (a summary beside a selection) says its verb. */
+let lineWords = new Map<string, string>();
+const wordOf = (e: Edge) => lineWords.get(e.key) ?? REL_LABEL[e.kind] ?? e.kind;
+/** The short word of a line's channel (its label without a payload or a beat). */
+let lineChans = new Map<string, Channel | null>();
+const shortOf = (e: Edge) => { const c = lineChans.get(e.key); return c === 'control' || c === 'uses' ? CHANNEL_LABEL[c] : REL_LABEL[e.kind] ?? e.kind; };
+/** The small fixed key in the map's lower left: one row for each kind of line this map draws, none when it draws no line. */
+function renderLineKey(present: Set<Channel>) {
+  let key = document.getElementById('line-key');
+  if (!key) { key = h('div', { id: 'line-key', class: 'line-key', role: 'list', 'aria-label': '선의 종류' }); $('space').append(key); }
+  const sample = (c: Channel) => {
+    const s = svg('svg', { viewBox: '0 0 28 10', width: '28', height: '10', 'aria-hidden': 'true' });
+    s.append(svg('path', { class: 'lk-line', d: c === 'data' ? 'M1 5H21' : 'M1 5H25' }), svg('path', { class: c === 'data' ? 'lk-head filled' : 'lk-head', d: c === 'data' ? 'M19 1.5L26 5L19 8.5z' : 'M20 1.5L26 5L20 8.5' }));
+    return s;
+  };
+  key.replaceChildren(...(['data', 'control', 'uses'] as const).filter(c => present.has(c)).map(c => h('span', { class: `lk-row lk-${c}`, role: 'listitem' }, sample(c), h('span', {}, CHANNEL_LABEL[c]))));
+  key.hidden = !present.size;
+}
+/** The map head's basis line (spec 6): what the newest reading's records give as their basis time and target version, as
+ * written, and that every state is a reported one; a blank says it is unknown, never the time a record arrived. */
+function basisLine(o: Opened): HTMLElement | null {
+  const last = [...o.project.readings].reverse().find(isMapReading); if (!last) return null;
+  return h('p', { class: 'map-basis' }, `설계 근거 · ${last.basisAt ?? '작성 시각 미상'} 작성 보고 · 대상 판본 ${last.basisVersion ?? '미상'} · 운영: 보고된 상태 (기록 없음은 제공된 자료 기준)`);
+}
 /** The AI sessions behind a part in the full reading: the ones whose records the map quotes for it, and the ones that took it over
  * by a handover. */
 function sessionsSection(project: Project, partId: string): HTMLElement | null {
@@ -1699,6 +1960,50 @@ function refreshSessions() {
   const cur = document.querySelector(sheetOpen ? '#panel .sec-sessions' : '#lens .lens-sessions'), next = sheetOpen ? sessionsSection(o.project, selected) : sessionsLine(o.project, selected);
   if (cur && next) cur.replaceWith(next); else if (cur || next) refreshReading();
 }
+/** A part the newest reading types as a store (its card reads as a ledger). */
+function isStorePart(o: Opened, id: string): boolean {
+  const p = partOf(o, id.startsWith('ghost:') ? id.slice(6) : id);
+  return !!p?.reading?.typeRead && FAMILY_OF[p.reading.typeRead.type] === 'store';
+}
+/** A store's path (map spec 2.3, "비동기 저장소는 세 관계로 그린다"), read on the lines already drawn: with the store selected,
+ * its own data lines are the selection's, and the control lines that start its readers join them (each reader consumes on
+ * its own trigger); with a part selected whose data line goes into or out of a store, the store's other data lines join, with
+ * the parts at their ends. Never a new line, never a line from writer to reader. */
+function storePath(me: string | null): { lines: Set<string>; ends: Set<string> } {
+  const out = { lines: new Set<string>(), ends: new Set<string>() }, o = opened;
+  if (!o || !me) return out;
+  const data = (e: Edge) => !e.key.startsWith('sum:') && lineChans.get(e.key) === 'data', other = (e: Edge, x: string) => (e.from === x ? e.to : e.from);
+  const mine = lay.edges.filter(e => e.from === me || e.to === me);
+  if (isStorePart(o, me)) {
+    const readers = new Set(mine.filter(e => data(e) && e.from === me).map(e => e.to));
+    for (const e of lay.edges) if (lineChans.get(e.key) === 'control' && readers.has(e.to) && e.from !== me) { out.lines.add(e.key); out.ends.add(e.from); }
+    return out;
+  }
+  for (const e of mine) {
+    if (!data(e)) continue;
+    const s = other(e, me); if (!isStorePart(o, s)) continue;
+    for (const x of lay.edges) if (x !== e && data(x) && (x.from === s || x.to === s) && x.from !== me && x.to !== me) { out.lines.add(x.key); out.ends.add(other(x, s)); }
+  }
+  return out;
+}
+/** A store's writers and readers, counted from the adopted relations (never stored as lists): the parts whose data relation
+ * ends at it, and the parts its data relations go to. A relation's channel is the newest reading's, else its kind's (a flow
+ * hands data over). */
+function storeCounts(o: Opened, id: string): { writers: number; readers: number } {
+  const said = relationLines(o.project), writers = new Set<string>(), readers = new Set<string>();
+  for (const r of o.project.space.relations) {
+    if (r.kind === 'related' || (said.get(r.id)?.channel ?? (r.kind === 'flow' ? 'data' : 'uses')) !== 'data') continue;
+    if (r.to === id && r.from !== id) writers.add(r.from);
+    if (r.from === id && r.to !== id) readers.add(r.to);
+  }
+  return { writers: writers.size, readers: readers.size };
+}
+/** The lens head's store line: '쓰기 N · 읽기 M', from storeCounts. null for any other part. */
+function storeLine(o: Opened, p: PartView): HTMLElement | null {
+  if (!isStorePart(o, p.id)) return null;
+  const { writers, readers } = storeCounts(o, p.id);
+  return h('p', { class: 'lens-store', title: '채택된 관계에서 센, 이 보관소에 쓰는 부분과 읽는 부분의 수' }, `쓰기 ${writers} · 읽기 ${readers}`);
+}
 /** Selection on the map: the part, its lines and the parts at their other ends (drawn representative or side ghost). */
 function markSelection(partId: string | null) {
   // The scope itself, selected in place, is drawn as its own boundary card (the '이 범위' end of its lines).
@@ -1709,14 +2014,20 @@ function markSelection(partId: string | null) {
     const on = !!me && (el.dataset.from === me || el.dataset.to === me);
     // A line the change plan reads as context of its change (.ctx) stays above the groups as well.
     el.classList.toggle('on', on); layerEdge(el);
-    const line = el.querySelector('.edge-line')!, plain = el.classList.contains('k-related');
-    line.setAttribute('marker-end', plain ? (on ? 'url(#dot-on)' : 'url(#dot)') : on ? 'url(#arrow-on)' : 'url(#arrow)');
+    const line = el.querySelector('.edge-line')!, plain = el.classList.contains('k-related'), head = el.classList.contains('c-data') ? 'arrow' : 'arrow-open';
+    line.setAttribute('marker-end', plain ? (on ? 'url(#dot-on)' : 'url(#dot)') : on ? `url(#${head}-on)` : `url(#${head})`);
     line.setAttribute('marker-start', on ? 'url(#dot-on)' : 'url(#dot)');
     if (on) related.add(el.dataset.from === me ? el.dataset.to! : el.dataset.from!);
   });
+  // The rest of a store's path reads with the selection (.path keeps .near while the pointer moves elsewhere); nothing moves and
+  // no line is added.
+  const path = storePath(me);
+  document.querySelectorAll<SVGGElement>('.edge.path').forEach(el => el.classList.remove('path', 'near'));
+  document.querySelectorAll<SVGGElement>('.edge').forEach(el => { if (path.lines.has(el.dataset.key!)) el.classList.add('path', 'near'); });
+  for (const end of path.ends) related.add(end);
   // The summary beside a selection holds every other relation: a line that held some of the selection's relations keeps the
   // rest (its count drops by those, which are drawn one by one), and gives way (.hit, hidden by .sel-sum) only when none is left.
-  sums = me ? restSummary(lay.boxes, lay.edges, e => e.from === me || e.to === me) : restSums;
+  sums = me ? restSummary(lay.boxes, lay.edges, e => e.from === me || e.to === me || path.lines.has(e.key)) : restSums;
   document.querySelectorAll<SVGGElement>('.edge.sum').forEach(el => { const e = edgeOf(el.dataset.key); el.classList.toggle('hit', !e); el.classList.toggle('agg', !!e?.agg); });
   syncLineMode();
   placeEdgeLabels();
@@ -3019,7 +3330,8 @@ function bindEdgeHints() {
     const mine = new Set(lay.edges.filter(x => x.from === id || x.to === id).flatMap(x => x.ids)), ends = new Set<string>();
     world.querySelectorAll<SVGGElement>('.edge').forEach(x => {
       const near = x.dataset.from === id || x.dataset.to === id || (x.classList.contains('sum') && !!edgeOf(x.dataset.key)?.ids.some(r => mine.has(r)));
-      x.classList.toggle('near', near);
+      // A store's path lines (markSelection's .path) stay near while another part is pointed at.
+      x.classList.toggle('near', near || x.classList.contains('path'));
       if (near && getComputedStyle(x).display !== 'none') ends.add(x.dataset.from === id || boxInside(id, x.dataset.from!) ? x.dataset.to! : x.dataset.from!);
     });
     world.querySelectorAll('.near-end, .near-self').forEach(el => el.classList.remove('near-end', 'near-self'));
@@ -3029,7 +3341,7 @@ function bindEdgeHints() {
     // An end of the selection's lines: the pane's rows of those relations light too.
     lightRows(selected && id !== selected ? lay.edges.filter(x => (x.from === id && x.to === selected) || (x.to === id && x.from === selected)).flatMap(x => x.ids) : []);
   };
-  const clearNear = () => { world.querySelectorAll('.edge.near').forEach(x => x.classList.remove('near')); world.querySelectorAll('.near-end, .near-self').forEach(el => el.classList.remove('near-end', 'near-self')); space.classList.remove('peek'); lightRows([]); };
+  const clearNear = () => { world.querySelectorAll('.edge.near:not(.path)').forEach(x => x.classList.remove('near')); world.querySelectorAll('.near-end, .near-self').forEach(el => el.classList.remove('near-end', 'near-self')); space.classList.remove('peek'); lightRows([]); };
   world.addEventListener('pointerover', e => {
     const t = e.target as Element, g = t.closest<SVGGElement>('.edge');
     if (g && t.classList.contains('edge-hit')) {
