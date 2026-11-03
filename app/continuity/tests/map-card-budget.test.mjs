@@ -144,6 +144,12 @@ test('entry words: totals of what the card does not name in full; 내부 미상 
   // What the card shows under its budget: a setting line given up (or 중간, which draws none) adds 설정 by its total.
   assert.deepEqual(entryParts(counts({ kids: 2, config: 1 }), { config: 0, fields: 0 }), ['구성 2', '설정 1']);
   assert.deepEqual(entryParts(counts({ inputs: 2, steps: 3 }), most), ['기록된 단계 3'], 'steps, once the contract carries them');
+  // spec 5.1 (전체 규칙 N · 배치 미정 N): rules placed at no step, port or field come last, and alone they open an entry line.
+  assert.deepEqual(entryParts(counts({ kids: 2, steps: 3, unplaced: 2 }), most), ['구성 2', '기록된 단계 3', '배치 미정 2']);
+  assert.equal(entryKind(counts({ inputs: 2, outputs: 2, config: 1, unplaced: 1 }), most), 'some');
+  assert.deepEqual(entryParts(counts({ inputs: 2, outputs: 2, config: 1, unplaced: 1 }), most), ['배치 미정 1']);
+  assert.deepEqual(entryParts(counts({ unplaced: 3 }), most), ['내부 미상', '배치 미정 3'], 'nothing inside said, three rules unplaced');
+  assert.deepEqual(entryParts(counts({ inputs: 2, outputs: 2, config: 1, unplaced: 0 }), most), []);
 });
 
 test('the entry line takes the setting\'s place when tight, gives way only after 내는 것 folded, and never past six lines', () => {

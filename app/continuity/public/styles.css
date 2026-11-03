@@ -2148,3 +2148,29 @@ button:disabled { opacity: .5; cursor: default; }
 .sg-list > li.since-hit, .cg .claim.since-hit { border-left-color: var(--accent); }
 .sg-list > li.since-off :is(.sg-text, .sg-col p, .sg-head), .claim.since-off .cl-text { color: var(--text-4); }
 .dv-port.fr-blank { border: 1px dashed var(--hair-2); border-radius: 4px; color: var(--text-3); font-size: 12px; }
+
+/* ---------- signs at their places (map spec 5.1/5.2, contract map-reading.10) ---------- */
+/* A run gate's tiny mark at the card's bottom-right (inside the bottom row the tabs share); a square flag, never a colour of its own. */
+.node-signs .gate-mark { flex: none; height: 15px; padding: 0 4px 0 3px; border: 1px solid var(--line); border-left: 3px solid var(--text-3); border-radius: 0 2px 2px 0; font-size: 10px; line-height: 13px; color: var(--text-3); white-space: nowrap; }
+.space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit) .node-signs .gate-mark { color: var(--text-4); border-color: var(--hair-2); }
+.node-entry .entry-unplaced { color: var(--text-3); }
+/* The rule section's fields: a key word, the chip (명시 / 해석), the value and its quote on one wrapped line. */
+.sg-fields li.sg-anchor, .sg-fields li.sg-enforce { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; }
+.sg-key { flex: none; font-size: 11.5px; color: var(--text-4); }
+.sg-chip, .sg-guess { flex: none; height: 16px; padding: 0 4px; border: 1px solid var(--hair-2); border-radius: 3px; font-size: 10.5px; line-height: 14px; color: var(--text-3); white-space: nowrap; }
+.sg-guess { margin-left: 4px; border-style: dashed; font-weight: 400; }
+.sg-val { min-width: 0; overflow-wrap: anywhere; }
+.sg-split { margin: 4px 0 0; font-size: 12px; line-height: 17px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.sg-list > li.sg-picked { border-left-color: var(--accent); background: var(--accent-soft); }
+/* A rule's chip on the place it acts on in the detail view: a step box's top edge, beside a port's name, inside a ledger cell. */
+.rule-sign { flex: none; height: 17px; padding: 0 5px; border: 1px solid var(--accent-line); border-radius: 3px; background: var(--surface); font-size: 11px; line-height: 15px; font-weight: var(--fw-name); color: var(--accent); white-space: nowrap; cursor: pointer; }
+.rule-sign:hover, .rule-sign:focus-visible { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-strong); outline: none; }
+.rule-sign.unplaced { border-style: dashed; border-color: var(--line); color: var(--text-3); }
+.dv-steps > li.has-sign { position: relative; }
+.dv-steps > li.has-sign > .rule-sign { position: absolute; top: -8px; right: 8px; z-index: 1; }
+.dv-port.has-sign .rule-sign { margin-left: 4px; }
+.dv-ports.p-out .dv-port.has-sign .rule-sign { margin-left: 0; margin-right: 4px; }
+.ledger-cell.has-sign { display: inline-flex; align-items: center; gap: 4px; padding-right: 3px; }
+.ledger-cell .rule-sign { height: 15px; line-height: 13px; font-size: 10.5px; padding: 0 4px; }
+.dv-scope-signs, .dv-view-signs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; font-size: 12px; line-height: 17px; }
+.dv-view-signs { margin-top: 4px; }

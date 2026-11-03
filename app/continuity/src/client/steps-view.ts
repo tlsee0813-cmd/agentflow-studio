@@ -4,6 +4,8 @@
  * joined to a step by guess, and steps are never joined to one another (their order is not read; the list keeps the record's row
  * order). Pure: no DOM, so the rule is tested on its own. */
 
+import { ruleSigns, type RuleClaim } from './signs-view.js';
+
 export const UNMAPPED_IN = '진입 단계 미상', UNMAPPED_OUT = '출구 단계 미상';
 export const unmappedMark = (direction: 'in' | 'out') => (direction === 'in' ? UNMAPPED_IN : UNMAPPED_OUT);
 
@@ -53,4 +55,24 @@ export function stepConsumers(step: string, portMap: readonly ChainMapRow[], out
     if (list.length) return { mapped: true, list };
   }
   return { mapped: false, list: out.map(o => ({ ...o, port: null })) };
+}
+
+/** The rule signs of the detail view (map spec 5.1, signs at the places they act): each rule on the step boxes, ports and ledger
+ * cells its scope's name or its anchors name (signs-view rulePlacement: by name only, never by guess), a part rule at the
+ * boundary head, a project rule at the view head, and a rule placed nowhere among the unplaced (배치 미정). steps: by the step's
+ * index in the chain; ports by name per side; cells by field name. A part rule an anchor places is at the head and at its places. */
+/** open: the boundary's rules that stand at no precise place as well (the head's '세부 접점 미정'). */
+export interface DetailSigns<T> { steps: Map<number, T[]>; ports: { in: Map<string, T[]>; out: Map<string, T[]> }; cells: Map<string, T[]>; boundary: T[]; open: T[]; project: T[]; unplaced: T[] }
+export function detailSigns<T extends RuleClaim>(chain: DetailChain, fields: readonly string[], rules: readonly T[]): DetailSigns<T> {
+  const places = { steps: chain.rows.map(r => r.name), inputs: chain.ports.in.map(p => p.port), outputs: chain.ports.out.map(p => p.port), fields };
+  const s = ruleSigns(rules, places), placed = new Set([...s.at.values()].flat());
+  const out: DetailSigns<T> = { steps: new Map(), ports: { in: new Map(), out: new Map() }, cells: new Map(), boundary: s.boundary, open: s.boundary.filter(r => !placed.has(r)), project: s.project, unplaced: s.unplaced };
+  for (const [id, list] of s.at) {
+    const bar = id.indexOf('|'), kind = id.slice(0, bar), name = id.slice(bar + 1);
+    if (kind === 'step') { const row = chain.rows.find(r => r.name === name); if (row) out.steps.set(row.index, list); }
+    else if (kind === 'in') out.ports.in.set(name, list);
+    else if (kind === 'out') out.ports.out.set(name, list);
+    else if (kind === 'field') out.cells.set(name, list);
+  }
+  return out;
 }

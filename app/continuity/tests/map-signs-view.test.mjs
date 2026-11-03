@@ -4,8 +4,9 @@
 // recovery blanks only at an actor's exit and a store's write ports.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { isGate, signKind, partSigns, hasSigns, signTabs, ruleSaid, changeNature, changeHead, changeRow, timeSpan, sinceMatch, sinceCount, sinceSummary,
-  readSince, writeSince, cleanSince, failureBlanks, RULE_BLANKS, BEFORE_BLANK, NATURE_UNKNOWN, SINCE_KEY, FAILURE_BLANK, RECOVERY_BLANK } from '../dist/public/client/signs-view.js';
+import { isGate, signKind, partSigns, hasSigns, signTabs, ruleSaid, changeNature, changeGuessed, changeHead, changeRow, timeSpan, sinceMatch, sinceCount, sinceSummary,
+  readSince, writeSince, cleanSince, failureBlanks, fromContract, gateKind, gateSplit, gateSplitLine, placeName, matchPlaces, rulePlacement, ruleSigns, unplacedCount, ruleView,
+  RULE_BLANKS, BEFORE_BLANK, NATURE_UNKNOWN, SINCE_KEY, FAILURE_BLANK, RECOVERY_BLANK } from '../dist/public/client/signs-view.js';
 
 const C = (x) => ({ kind: 'reported', text: '', quote: '', about: null, topic: null, evidence: null, when: null, where: null, before: null, ...x });
 const memory = () => { const m = new Map(); return { getItem: k => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), m }; };
@@ -40,7 +41,7 @@ test('a part\'s signs keep the claims\' order; the tabs read 규칙 N · 관문 
 test('a rule row: its time, place and tag as written, blanks said; the three contract fields are explicit blanks', () => {
   assert.deepEqual(ruleSaid(C({ when: '11-02 23:04Z', where: 'policy.md §3', quote: '[파일] 상한 20' })), { when: '11-02 23:04Z', where: 'policy.md §3', evidence: '파일' });
   assert.deepEqual(ruleSaid(C({})), { when: '시각 미기재', where: '자리 미기재', evidence: null });
-  assert.deepEqual(RULE_BLANKS, { anchors: '적용 위치 미해결', design: '설계 대응 미상', check: '확인 검사 미상' });
+  assert.deepEqual(RULE_BLANKS, { anchors: '적용 위치 미해결', design: '설계 대응 미상', check: '확인 검사 미상', enforce: '보장 위치 미확인', scope: '범위 미정', nowhere: '자리 없음' });
 });
 
 test('a change: its nature by the evidence tag (provisional), its version and time in the head, 이전 | 지금', () => {
@@ -54,8 +55,8 @@ test('a change: its nature by the evidence tag (provisional), its version and ti
   // A time that is also the 'about' is read once.
   assert.equal(changeHead(C({ quote: '[실행]', about: '11-03', when: '11-03' })), '구현 변화 · 11-03');
   assert.equal(changeHead(C({})), `${NATURE_UNKNOWN} · 판본·시각 미상`);
-  assert.deepEqual(changeRow(C({ text: 'J1 60 s', before: 'J1 30 s', quote: '[파일]' })), { head: '설계 변경 · 판본·시각 미상', before: 'J1 30 s', now: 'J1 60 s', beforeSaid: true });
-  assert.deepEqual(changeRow(C({ text: '폐기', before: '  ' })), { head: `${NATURE_UNKNOWN} · 판본·시각 미상`, before: BEFORE_BLANK, now: '폐기', beforeSaid: false });
+  assert.deepEqual(changeRow(C({ text: 'J1 60 s', before: 'J1 30 s', quote: '[파일]' })), { head: '설계 변경 · 판본·시각 미상', before: 'J1 30 s', now: 'J1 60 s', beforeSaid: true, guessed: true });
+  assert.deepEqual(changeRow(C({ text: '폐기', before: '  ' })), { head: `${NATURE_UNKNOWN} · 판본·시각 미상`, before: BEFORE_BLANK, now: '폐기', beforeSaid: false, guessed: false });
 });
 
 test('time spans: a minute, a second, a whole day; a clock time on the basis day; offsets; the basis year for a date alone', () => {
@@ -110,4 +111,103 @@ test('failure and recovery blanks: only at an actor\'s exit and a store\'s write
   assert.equal(failureBlanks('actor', ['실패하면 멈추고', '수동으로 복구']), null);
   for (const t of ['collector', 'compute', 'ai', 'loop', 'timer', 'person', 'session', 'external', null, undefined]) assert.equal(failureBlanks(t, []), null, String(t));
   assert.equal(FAILURE_BLANK, '실패 대응 미제공'); assert.equal(RECOVERY_BLANK, '복구 설명 미제공');
+});
+
+// map-reading.10: every claim of such a reading carries the contract's keys (null or [] when unsaid).
+const T = (x) => C({ scope: null, scopeName: null, anchors: [], enforcedBy: [], withdrawalKind: null, gate: null, ...x });
+const Q = (quote) => ({ record: 'P1', quote, from: 0, to: quote.length });
+
+test('contract first: a .10 plan is a gate only when its gate is said (run/dev); the words decide only for an earlier reading (추정)', () => {
+  assert.equal(fromContract(T({})), true); assert.equal(fromContract(C({})), false);
+  assert.equal(signKind(T({ topic: 'plan', text: '소유자 승인 후 실주문', gate: 'dev' })), 'gate');
+  assert.equal(signKind(T({ topic: 'plan', text: 'allowed_side ≠ NONE', gate: 'run' })), 'gate');
+  // The same words that made an earlier reading's plan a gate do not, once the contract says gate null.
+  assert.equal(signKind(T({ topic: 'plan', text: '다음 관문: 검증되면 넘어간다' })), null);
+  assert.equal(signKind(C({ topic: 'plan', text: '다음 관문: 검증되면 넘어간다' })), 'gate');
+  assert.deepEqual(gateKind(T({ topic: 'plan', text: 'x', gate: 'run' })), { kind: 'run', guessed: false });
+  assert.deepEqual(gateKind(C({ topic: 'plan', text: '검증되면' })), { kind: null, guessed: true });
+  const gates = [T({ topic: 'plan', text: 'a', gate: 'run' }), T({ topic: 'plan', text: 'b', gate: 'dev' }), T({ topic: 'plan', text: 'c', gate: 'run' }), C({ topic: 'plan', text: '관문 d' })];
+  const sp = gateSplit(gates);
+  assert.deepEqual([sp.run.map(g => g.text), sp.dev.map(g => g.text), sp.guessed.map(g => g.text)], [['a', 'c'], ['b'], ['관문 d']]);
+  assert.equal(gateSplitLine(sp), '실행 2 · 개발 1 · 종류 미상 1 (추정)');
+  assert.equal(gateSplitLine(gateSplit(gates.slice(0, 2))), '실행 1 · 개발 1');
+  assert.deepEqual(signTabs(partSigns(gates)).map(t => t.text), ['관문 4']);
+});
+
+test('contract first: a withdrawal\'s nature is its withdrawalKind; the evidence tag only when it is null (추정)', () => {
+  assert.equal(changeNature(T({ withdrawalKind: 'report', quote: '[파일] engine.py' })), 'report');
+  assert.equal(changeGuessed(T({ withdrawalKind: 'report', quote: '[파일]' })), false);
+  assert.equal(changeNature(T({ withdrawalKind: null, quote: '[실행] 재시작' })), 'implementation');
+  assert.equal(changeGuessed(T({ withdrawalKind: null, quote: '[실행] 재시작' })), true);
+  assert.equal(changeHead(T({ withdrawalKind: 'implementation', about: 'v4', when: '11-03 09:30Z', quote: '[보고]' })), '구현 변화 · 판본 v4 · 11-03 09:30Z');
+  assert.equal(changeRow(T({ topic: 'withdrawn', withdrawalKind: 'design', text: 'J1 60 s', before: 'J1 30 s' })).guessed, false);
+});
+
+const places = { steps: ['행 읽기', '판단', '주문 요청'], inputs: ['review 행', '정책 기동'], outputs: ['판단 행', '주문 요청'], fields: ['valid_until', 'rung', 'side'] };
+
+test('place names match by name only: quotes, spacing, case and one kind word aside; nothing else', () => {
+  assert.equal(placeName('  ‘판단’ 단계 '), '판단');
+  assert.equal(placeName('필드 valid_until'), 'valid_until');
+  assert.equal(placeName('Step  Review'), 'review');
+  assert.equal(placeName('단계'), '단계'); // a kind word alone stays itself
+  assert.deepEqual(matchPlaces('판단', places), [{ kind: 'step', name: '판단' }]);
+  assert.deepEqual(matchPlaces('“판단 결과”', places), []); // a longer name is another name, never a near match
+  assert.deepEqual(matchPlaces('주문 요청', places), [{ kind: 'step', name: '주문 요청' }, { kind: 'out', name: '주문 요청' }]);
+  assert.deepEqual(matchPlaces('주문 요청', places, ['in', 'out']), [{ kind: 'out', name: '주문 요청' }]);
+  assert.deepEqual(matchPlaces('engine/rung.py:120 조건 행', places), []);
+  assert.deepEqual(matchPlaces('', places), []);
+});
+
+test('a rule\'s place: a named scope found among its kind, anchors among all places; a part rule at the boundary, a project rule at the head', () => {
+  const step = rulePlacement(T({ topic: 'rule', scope: 'step', scopeName: '판단', anchors: [{ kind: 'stated', text: 'engine.py 조건 행', quote: Q('x') }] }), places);
+  assert.deepEqual(step.places, [{ kind: 'step', name: '판단' }]);
+  assert.equal(step.scopeFound, true); assert.equal(step.head, null); assert.equal(step.unplaced, false);
+  assert.deepEqual(step.anchors.map(a => a.places), [[]]); // that anchor names no place: 자리 없음
+  // A port scope looks at ports only (the step of the same name is not its place); a field scope at the fields.
+  assert.deepEqual(rulePlacement(T({ scope: 'port', scopeName: '주문 요청' }), places).places, [{ kind: 'out', name: '주문 요청' }]);
+  // Its anchor of the same name stays with the port too (a port rule never lands on the step called 주문 요청).
+  assert.deepEqual(rulePlacement(T({ scope: 'port', scopeName: '주문 요청', anchors: [{ kind: 'stated', text: '주문 요청', quote: Q('q') }] }), places).places, [{ kind: 'out', name: '주문 요청' }]);
+  assert.deepEqual(rulePlacement(T({ scope: 'field', scopeName: '‘valid_until’' }), places).places, [{ kind: 'field', name: 'valid_until' }]);
+  // Not found: drawn nowhere precise, never at a near name.
+  const lost = rulePlacement(T({ scope: 'step', scopeName: 'S04 review 읽기' }), places);
+  assert.deepEqual([lost.places, lost.scopeFound, lost.head, lost.unplaced], [[], false, 'unplaced', true]);
+  // A part rule: the boundary; an anchor naming a field adds that place too (and then it is placed).
+  const part = rulePlacement(T({ scope: 'part', anchors: [{ kind: 'inferred', text: 'rung 필드', quote: Q('y') }] }), places);
+  assert.deepEqual([part.places, part.head, part.unplaced], [[{ kind: 'field', name: 'rung' }], 'boundary', false]);
+  assert.deepEqual([rulePlacement(T({ scope: 'part' }), places).head, rulePlacement(T({ scope: 'part' }), places).unplaced], ['boundary', true]);
+  assert.deepEqual([rulePlacement(T({ scope: 'project' }), places).head, rulePlacement(T({ scope: 'project' }), places).unplaced], ['project', false]);
+  assert.deepEqual([rulePlacement(T({ scope: null }), places).head, rulePlacement(T({ scope: null }), places).unplaced], ['unplaced', true]);
+  // An earlier reading's rule: part-wide as before, placed nowhere precise.
+  const old = rulePlacement(C({ topic: 'rule' }), places);
+  assert.deepEqual([old.legacy, old.head, old.unplaced], [true, 'boundary', true]);
+  const rules = [T({ text: 'a', scope: 'step', scopeName: '판단' }), T({ text: 'b', scope: 'part' }), T({ text: 'c', scope: 'project' }), T({ text: 'd', scope: 'field', scopeName: 'rung' }), T({ text: 'e', scope: 'step', scopeName: '판단' }), T({ text: 'f', scope: 'step', scopeName: '없는 단계' })];
+  const sg = ruleSigns(rules, places);
+  assert.deepEqual([...sg.at].map(([k, l]) => [k, l.map(r => r.text)]), [['step|판단', ['a', 'e']], ['field|rung', ['d']]]);
+  assert.deepEqual([sg.boundary, sg.project, sg.unplaced].map(l => l.map(r => r.text)), [['b'], ['c'], ['f']]);
+  assert.equal(unplacedCount(rules, places), 2); // b (part, no anchor) and f (named nowhere); the project rule is placed at the head
+});
+
+test('a rule row: scope words, anchors with 명시/해석 and their quotes or 자리 없음, devices and the blanks they leave', () => {
+  const v = ruleView(T({ topic: 'rule', scope: 'step', scopeName: '판단', anchors: [{ kind: 'stated', text: '판단', quote: Q('조건 행') }, { kind: 'inferred', text: 'S09', quote: Q('S09') }],
+    enforcedBy: [{ kind: 'code', text: 'LINE_STALE에서 거절', quote: Q('LINE_STALE') }] }), places);
+  assert.deepEqual(v.scope, { text: '범위 · 단계 ‘판단’', blank: false, hint: '이 부분의 단계 ‘판단’에 미치는 규칙' });
+  assert.deepEqual(v.anchors.map(a => [a.text, a.label, a.nowhere, a.quote.quote]), [['판단', '명시', false, '조건 행'], ['S09', '해석', true, 'S09']]);
+  assert.equal(v.anchorsBlank, null);
+  assert.deepEqual(v.enforce.map(e => e.line), ['코드 · LINE_STALE에서 거절']);
+  assert.deepEqual([v.enforceBlank, v.design, v.check], [null, null, '확인 검사 미상']);
+  const scopes = [['part', null, '범위 · 부분 전체'], ['project', null, '범위 · 프로젝트 전체'], ['port', '정책 기동', '범위 · 포트 ‘정책 기동’'], ['field', 'rung', '범위 · 필드 ‘rung’'], ['step', '없음', '범위 · 단계 ‘없음’ · 자리 없음'], [null, null, '범위 미정']];
+  for (const [scope, scopeName, text] of scopes) assert.equal(ruleView(T({ scope, scopeName }), places).scope.text, text, String(scope));
+  // No anchor, no device: the explicit blanks.
+  const blank = ruleView(T({ scope: 'part' }), places);
+  assert.deepEqual([blank.anchorsBlank, blank.enforceBlank, blank.design, blank.check], ['적용 위치 미해결', '보장 위치 미확인', '설계 대응 미상', '확인 검사 미상']);
+  // A gate covers 확인 검사, 기록상 미설계 answers 설계 대응; 장치 미상 answers neither.
+  const gate = ruleView(T({ scope: 'part', enforcedBy: [{ kind: 'gate', text: '운영 관문 2', quote: Q('g') }, { kind: 'person', text: '소유자', quote: Q('p') }] }), places);
+  assert.deepEqual([gate.enforce.map(e => e.line), gate.design, gate.check], [['관문 · 운영 관문 2', '사람 · 소유자'], '설계 대응 미상', null]);
+  const none = ruleView(T({ scope: 'part', enforcedBy: [{ kind: 'none', text: '설계 없음', quote: Q('n') }] }), places);
+  assert.deepEqual([none.enforce.map(e => e.line), none.design, none.check], [['기록상 미설계'], null, '확인 검사 미상']);
+  const unknown = ruleView(T({ scope: 'part', enforcedBy: [{ kind: 'unknown', text: '장치 미상', quote: null }] }), places);
+  assert.deepEqual([unknown.enforce.map(e => [e.line, e.quote]), unknown.design, unknown.check], [[['장치 미상', null]], '설계 대응 미상', '확인 검사 미상']);
+  // An earlier reading's rule keeps its old part-wide line and the three blanks.
+  const old = ruleView(C({ topic: 'rule' }), places, '정책 엔진');
+  assert.deepEqual([old.legacy, old.scope.text, old.anchorsBlank, old.enforceBlank, old.design, old.check], [true, '범위 · ‘정책 엔진’ 전체 · 세부 접점 미정', '적용 위치 미해결', null, '설계 대응 미상', '확인 검사 미상']);
 });

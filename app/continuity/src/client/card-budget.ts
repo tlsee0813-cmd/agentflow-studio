@@ -33,23 +33,25 @@ export type SignsAt = 'none' | 'entry' | 'line' | 'chips';
 export type EntryKind = 'none' | 'unknown' | 'some';
 /** What a part holds inside, as its reading and its composition give it. read: a reading spoke of the part at all. steps: the
  * recorded steps (map-reading.9 steps[]). state: the state it keeps (stateVars), which no card line names. loop: the record says
- * how it repeats, stops or resumes (a part with only that is not '내부 미상'). Both optional for earlier callers. */
-export interface EntryCounts { read: boolean; kids: number; steps: number; inputs: number; outputs: number; fields: number; config: number; state?: number; loop?: boolean }
+ * how it repeats, stops or resumes (a part with only that is not '내부 미상'). unplaced: its rules that stand at no precise step,
+ * port or field (spec 5.1, 배치 미정: signs-view unplacedCount), which no card line places. All three optional for earlier callers. */
+export interface EntryCounts { read: boolean; kids: number; steps: number; inputs: number; outputs: number; fields: number; config: number; state?: number; loop?: boolean; unplaced?: number }
 /** How many settings and fields the collapsed card can name (a setting line and a loop's or timer's beat; a ledger's cells). */
 export interface EntryShown { config: number; fields: number }
 /** The entry line's kind for a part, against what its card names at most. */
 export function entryKind(c: EntryCounts, shown: EntryShown): EntryKind {
   if (!c.read) return 'none';
   if (!c.kids && !c.steps && !c.inputs && !c.outputs && !c.fields && !c.config && !c.state && !c.loop) return 'unknown';
-  return c.kids || c.steps || c.state || c.config > shown.config || c.fields > shown.fields ? 'some' : 'none';
+  return c.kids || c.steps || c.state || c.unplaced || c.config > shown.config || c.fields > shown.fields ? 'some' : 'none';
 }
 /** The entry line's words: '구성 N', '기록된 단계 M', '유지 상태 S', then each list the card does not name in full, by its total
- * ('설정 K', '필드 F'); '내부 미상' for a reading that names nothing inside; '' when there is no entry. */
+ * ('설정 K', '필드 F'), and last the rules placed nowhere precise ('배치 미정 U'); '내부 미상' for a reading that names nothing
+ * inside (with '배치 미정 U' after it); '' when there is no entry. */
 export function entryParts(c: EntryCounts, shown: EntryShown): string[] {
-  const kind = entryKind(c, shown);
-  if (kind === 'unknown') return ['내부 미상'];
+  const kind = entryKind(c, shown), unplaced = c.unplaced ? `배치 미정 ${c.unplaced}` : '';
+  if (kind === 'unknown') return ['내부 미상', unplaced].filter(Boolean);
   if (kind === 'none') return [];
-  return [c.kids ? `구성 ${c.kids}` : '', c.steps ? `기록된 단계 ${c.steps}` : '', c.state ? `유지 상태 ${c.state}` : '', c.config > shown.config ? `설정 ${c.config}` : '', c.fields > shown.fields ? `필드 ${c.fields}` : ''].filter(Boolean);
+  return [c.kids ? `구성 ${c.kids}` : '', c.steps ? `기록된 단계 ${c.steps}` : '', c.state ? `유지 상태 ${c.state}` : '', c.config > shown.config ? `설정 ${c.config}` : '', c.fields > shown.fields ? `필드 ${c.fields}` : '', unplaced].filter(Boolean);
 }
 
 /** A setting that reads as a beat or an interval: a loop's frame names one only when the record wrote it. */
