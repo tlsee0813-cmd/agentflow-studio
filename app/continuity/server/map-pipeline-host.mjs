@@ -11,7 +11,7 @@ export const STAGE_TOKENS_DEFAULT = 8192, STAGE_TOKENS_MIN = 4096, STAGE_TOKENS_
 
 const ALLOWED = ['OPENAI_API_KEY', 'STUDIO_MAP_MERGE_MODEL', 'STUDIO_MAP_RENDER_MODEL', 'STUDIO_MAP_GLOBAL_MODEL', 'STUDIO_MAP_MONTHLY_USD', 'STUDIO_MAP_RUN_USD',
   // The plan stage's reasoning effort and output-token cap (an astra plan on two KORU records ran past 16,384 with its reasoning).
-  'STUDIO_MAP_PLAN_REASONING', 'STUDIO_MAP_PLAN_TOKENS',
+  'STUDIO_MAP_PLAN_REASONING', 'STUDIO_MAP_PLAN_TOKENS', 'STUDIO_MAP_PLAN_TIMEOUT_S',
   // The render fragments' and the global stages' output-token caps (a terra render-3 of the .31 run ran into 8,192).
   'STUDIO_MAP_RENDER_TOKENS', 'STUDIO_MAP_GLOBAL_TOKENS'];
 /** This is a server-only local file, never a browser setting, bundle asset, or shell command. Existing env wins. */
@@ -47,13 +47,15 @@ export async function openFirstMapPipeline({ env, dir, fetchImpl, onProgress, ke
   if (!PLAN_REASONING.includes(planReasoning)) throw new Error('FIRST_MAP_PLAN_REASONING_INVALID');
   const tokens = (key, fallback, min, max, code) => { const n = env[key] ? Number(env[key]) : fallback; if (!Number.isSafeInteger(n) || n < min || n > max) throw new Error(code); return n; };
   const planTokens = tokens('STUDIO_MAP_PLAN_TOKENS', PLAN_TOKENS_DEFAULT, PLAN_TOKENS_MIN, PLAN_TOKENS_MAX, 'FIRST_MAP_PLAN_TOKENS_INVALID');
+  // The plan's time limit in seconds (300-1800, default 600): a background call survives a long wait, a timed-out one is cancelled.
+  const planTimeoutS = tokens('STUDIO_MAP_PLAN_TIMEOUT_S', 600, 300, 1800, 'FIRST_MAP_PLAN_TIMEOUT_INVALID');
   const renderTokens = tokens('STUDIO_MAP_RENDER_TOKENS', STAGE_TOKENS_DEFAULT, STAGE_TOKENS_MIN, STAGE_TOKENS_MAX, 'FIRST_MAP_RENDER_TOKENS_INVALID');
   const globalTokens = tokens('STUDIO_MAP_GLOBAL_TOKENS', STAGE_TOKENS_DEFAULT, STAGE_TOKENS_MIN, STAGE_TOKENS_MAX, 'FIRST_MAP_GLOBAL_TOKENS_INVALID');
   const store = await openMapPipelineStore({ dir: join(dir, 'first-map'), monthlyUsd: limit('STUDIO_MAP_MONTHLY_USD', 20), runUsd: limit('STUDIO_MAP_RUN_USD', 1) });
   try {
     const pipeline = createFirstMapPipeline({ store, deepseekKey: env.DEEPSEEK_API_KEY, openaiKey: env.OPENAI_API_KEY,
       deepseekModel: env.DEEPSEEK_PLAN_MODEL || env.DEEPSEEK_MODEL || 'deepseek-flash', mergeModel: env.STUDIO_MAP_MERGE_MODEL || 'gpt-6.1-sol',
-      renderModel: env.STUDIO_MAP_RENDER_MODEL || 'gpt-6.1-terra', mergeTokens: planTokens, planReasoning, renderTokens, globalTokens, ...(env.STUDIO_MAP_GLOBAL_MODEL ? { globalModel: env.STUDIO_MAP_GLOBAL_MODEL } : {}), fetchImpl, onProgress,
+      renderModel: env.STUDIO_MAP_RENDER_MODEL || 'gpt-6.1-terra', mergeTokens: planTokens, planReasoning, planTimeoutMs: planTimeoutS * 1000, renderTokens, globalTokens, ...(env.STUDIO_MAP_GLOBAL_MODEL ? { globalModel: env.STUDIO_MAP_GLOBAL_MODEL } : {}), fetchImpl, onProgress,
       onRejected: keep ? keepRejectedStage({ dir: keep, ...(log ? { log } : {}) }) : null });
     return { ...pipeline, close: () => store.close() };
   } catch (error) { await store.close(); throw error; }

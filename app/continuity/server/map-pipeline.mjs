@@ -92,7 +92,7 @@ export const SEMANTIC_REVISION_LIMIT = 1;
 export const PLAN_REASONING = Object.freeze(['none', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max']);
 /** The plan stage's own time limit: with 16,384 output tokens a long reasoning takes longer than a render, and a time-out leaves an
  * uncertain stage that blocks replay, which is worse than a finished reply that is refused. Renders and global stages keep 180 s. */
-export const PLAN_TIMEOUT_MS = 600000; // .30 on two records (24 parts, 64 global items) ran past 300 s
+export const PLAN_TIMEOUT_MS = 600000; // .30 on two records (24 parts, 64 global items) ran past 300 s; STUDIO_MAP_PLAN_TIMEOUT_S overrides (a .32 sol plan ran past 600 s)
 // Over MAP_BACKGROUND_AFTER_MS (180 s) the plan runs in background mode: per plan attempt one paid POST, then free GET polls every
 // MAP_POLL_MS (at most ~100 in 600 s) and, on a deadline or cancellation, one free cancel POST. Only the POST reserves and charges.
 export const SEMANTIC_RENDER_RULES = `
@@ -238,7 +238,7 @@ const eligible = ask => dividedKind(ask) !== null;
 
 /** First map.6 and later map.7 share bounded stages, retaining each original schema's validation and prompt. */
 export function createFirstMapPipeline({ store, deepseekKey, openaiKey, deepseekModel = 'deepseek-flash', mergeModel = 'gpt-6.1-sol', renderModel = deepseekModel, globalModel = renderModel, fetchImpl = globalThis.fetch,
-  targetChars = 3500, maxPartitions = 12, extractionTokens = 4096, mergeTokens = 16384, planReasoning = 'high', renderTokens = 8192, globalTokens = renderTokens, onProgress = () => {}, onStageOutput = null, onRejected = null, callProvider = callMapProvider } = {}) {
+  targetChars = 3500, maxPartitions = 12, extractionTokens = 4096, mergeTokens = 16384, planReasoning = 'high', planTimeoutMs = PLAN_TIMEOUT_MS, renderTokens = 8192, globalTokens = renderTokens, onProgress = () => {}, onStageOutput = null, onRejected = null, callProvider = callMapProvider } = {}) {
   if (!store || !MODELS.has(mergeModel)) throw new Error('Invalid first-map pipeline configuration');
   // The plan stage's own reasoning effort (STUDIO_MAP_PLAN_REASONING); render and global stages keep 'high'.
   if (!PLAN_REASONING.includes(planReasoning)) throw new Error('Invalid map plan reasoning configuration');
@@ -419,7 +419,7 @@ export function createFirstMapPipeline({ store, deepseekKey, openaiKey, deepseek
         if (controller.signal.aborted) throw new ApiError('CANCELLED', 499);
         if (results.some(x => !x) || next !== partitions.length) throw new ApiError('MAP_PIPELINE_INCOMPLETE', 502);
         const blueprint = await stage('plan', { provider: 'openai', model: mergeModel,
-          system: later ? LATER_BLUEPRINT_PROMPT : MAP_BLUEPRINT_PROMPT, input: { INPUT: ask, extraction: results }, maxOutputTokens: mergeTokens, timeout: PLAN_TIMEOUT_MS, reasoning: planReasoning,
+          system: later ? LATER_BLUEPRINT_PROMPT : MAP_BLUEPRINT_PROMPT, input: { INPUT: ask, extraction: results }, maxOutputTokens: mergeTokens, timeout: planTimeoutMs, reasoning: planReasoning,
           check: value => { validateMapBlueprint(value, ask); }, reason: value => blueprintReason(value, ask), correction: planCorrection });
         const groups = splitBlueprintParts(blueprint), fragments = new Array(groups.length);
         // .29: a global stage's correction feedback also carries the diagnostics read against the ask and the rendered parts.
@@ -502,7 +502,7 @@ export function createFirstMapPipeline({ store, deepseekKey, openaiKey, deepseek
   /** The wire alone (every existing caller); read() also returns the set-aside reasons for the job result. */
   const call = async (ask, signal, reportProgress = null) => (await read(ask, signal, reportProgress)).wire;
   return { model, identity, laterIdentity, eligible, ready, call, read,
-    describe: () => ({ version: PIPELINE_RECIPE, laterVersion: LATER_PIPELINE_RECIPE, model, extractionModel: deepseekModel, mergeModel, renderModel, renderProvider, globalModel, globalProvider, maxPartitions, targetChars, planReasoning, planTokens: mergeTokens, renderTokens, globalTokens,
+    describe: () => ({ version: PIPELINE_RECIPE, laterVersion: LATER_PIPELINE_RECIPE, model, extractionModel: deepseekModel, mergeModel, renderModel, renderProvider, globalModel, globalProvider, maxPartitions, targetChars, planReasoning, planTokens: mergeTokens, planTimeoutMs, renderTokens, globalTokens,
       // At most one extraction correction each (OpenAI rendering only) plus, on DeepSeek, every render call (groups, a semantic
       // rewrite and a correction each) and every global call (global and global-final, a correction each).
       deepseekMaxCalls: maxPartitions * (1 + extractionCorrections)

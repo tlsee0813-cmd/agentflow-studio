@@ -1439,11 +1439,11 @@ test('.31 host knobs: the plan takes STUDIO_MAP_PLAN_REASONING and STUDIO_MAP_PL
     try { validateMapReply(await pipeline.call(ask), ask); return { ...pipeline.describe(), identity: pipeline.identity }; } finally { await pipeline.close(); }
   };
   const plain = await run('defaults', {});
-  assert.deepEqual([plain.planReasoning, plain.planTokens, plain.renderTokens, plain.globalTokens], ['high', 16384, 8192, 8192]);
+  assert.deepEqual([plain.planReasoning, plain.planTokens, plain.renderTokens, plain.globalTokens, plain.planTimeoutMs], ['high', 16384, 8192, 8192, 600000]);
   assert.deepEqual(sent.find(x => x.stage === 'plan'), { stage: 'plan', effort: 'high', tokens: 16384, background: true });
   assert.deepEqual(['render', 'global'].map(stage => sent.find(x => x.stage === stage)), [{ stage: 'render', effort: 'high', tokens: 8192, background: false }, { stage: 'global', effort: 'high', tokens: 8192, background: false }]);
-  const tuned = await run('tuned', { STUDIO_MAP_PLAN_REASONING: 'medium', STUDIO_MAP_PLAN_TOKENS: '32768', STUDIO_MAP_RENDER_TOKENS: '12288', STUDIO_MAP_GLOBAL_TOKENS: '16384' });
-  assert.deepEqual([tuned.planReasoning, tuned.planTokens, tuned.renderTokens, tuned.globalTokens], ['medium', 32768, 12288, 16384]);
+  const tuned = await run('tuned', { STUDIO_MAP_PLAN_REASONING: 'medium', STUDIO_MAP_PLAN_TOKENS: '32768', STUDIO_MAP_RENDER_TOKENS: '12288', STUDIO_MAP_GLOBAL_TOKENS: '16384', STUDIO_MAP_PLAN_TIMEOUT_S: '1200' });
+  assert.deepEqual([tuned.planReasoning, tuned.planTokens, tuned.renderTokens, tuned.globalTokens, tuned.planTimeoutMs], ['medium', 32768, 12288, 16384, 1200000]);
   assert.notEqual(tuned.identity, plain.identity, 'the caps are part of the recipe identity');
   assert.deepEqual(sent.find(x => x.stage === 'plan'), { stage: 'plan', effort: 'medium', tokens: 32768, background: true });
   assert.ok(sent.filter(x => x.stage === 'render').length >= 1 && sent.filter(x => x.stage === 'render').every(x => x.effort === 'high' && x.tokens === 12288), 'every render request carries the render cap');
@@ -1458,7 +1458,7 @@ test('.31 host knobs: the plan takes STUDIO_MAP_PLAN_REASONING and STUDIO_MAP_PL
   assert.notEqual(plain.version, undefined);
   // Bounds: one of the transport's efforts; 8,192-65,536 whole tokens. A wrong value opens nothing.
   for (const [extra, code] of [[{ STUDIO_MAP_PLAN_REASONING: 'extreme' }, 'FIRST_MAP_PLAN_REASONING_INVALID'], [{ STUDIO_MAP_PLAN_TOKENS: '8191' }, 'FIRST_MAP_PLAN_TOKENS_INVALID'],
-    [{ STUDIO_MAP_PLAN_TOKENS: '65537' }, 'FIRST_MAP_PLAN_TOKENS_INVALID'], [{ STUDIO_MAP_PLAN_TOKENS: '16384.5' }, 'FIRST_MAP_PLAN_TOKENS_INVALID'], [{ STUDIO_MAP_PLAN_TOKENS: 'many' }, 'FIRST_MAP_PLAN_TOKENS_INVALID'],
+    [{ STUDIO_MAP_PLAN_TOKENS: '65537' }, 'FIRST_MAP_PLAN_TOKENS_INVALID'], [{ STUDIO_MAP_PLAN_TIMEOUT_S: '299' }, 'FIRST_MAP_PLAN_TIMEOUT_INVALID'], [{ STUDIO_MAP_PLAN_TIMEOUT_S: '1801' }, 'FIRST_MAP_PLAN_TIMEOUT_INVALID'], [{ STUDIO_MAP_PLAN_TOKENS: '16384.5' }, 'FIRST_MAP_PLAN_TOKENS_INVALID'], [{ STUDIO_MAP_PLAN_TOKENS: 'many' }, 'FIRST_MAP_PLAN_TOKENS_INVALID'],
     [{ STUDIO_MAP_RENDER_TOKENS: '4095' }, 'FIRST_MAP_RENDER_TOKENS_INVALID'], [{ STUDIO_MAP_RENDER_TOKENS: '32769' }, 'FIRST_MAP_RENDER_TOKENS_INVALID'],
     [{ STUDIO_MAP_GLOBAL_TOKENS: '4095' }, 'FIRST_MAP_GLOBAL_TOKENS_INVALID'], [{ STUDIO_MAP_GLOBAL_TOKENS: 'lots' }, 'FIRST_MAP_GLOBAL_TOKENS_INVALID']])
     await assert.rejects(openFirstMapPipeline({ env: { ...env, ...extra }, dir: join(root, 'bad'), fetchImpl }), new RegExp(`^Error: ${code}$`));
