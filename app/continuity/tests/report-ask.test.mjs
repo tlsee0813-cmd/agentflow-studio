@@ -7,6 +7,7 @@ import { PROJECT_REPORT_ASK, CHAT_REPORT_ASK, REPORT_ASK_EXPLAIN, REPORT_TAGS, d
   REPORT_ASK_VERSION, DESIGN_RECORD_ASK, DESIGN_RECORD_ASK_VERSION, SCENARIO_RECORD_ASK, SCENARIO_RECORD_ASK_VERSION, RECORD_ASK_EXPLAIN, scenarioLedger, scenarioAskWithLedger, LEDGER_MAX_CHARS } from '../dist/public/shared/report-ask.js';
 import { buildExample, EXAMPLES } from '../dist/public/shared/studio-examples.js';
 import { studioView } from '../dist/public/shared/studio.js';
+import { scenarioRecordLike } from '../dist/public/client/scenario-view.js';
 
 // The v3 status report's sections and header rows, as the KORU report of 2026-11-03 has them.
 const V3_SECTIONS = ['0. 기준', '1. 한 줄 요약', '2. 부분', '3. 묶음', '4. 연결', '5. 최근 소유자 요청과 실제 변화', '6. 철회·변경', '7. 지켜야 할 것과 하지 않기로 한 것', '8. 오류·미해결·할 일', '9. 다음 관문', '10. 모르는 것', '11. 가장 자신 없는 것'];
@@ -103,7 +104,7 @@ test('ASK-8 the scenario record request (시나리오 기록 v2) is the map desi
   assert.doesNotMatch(SCENARIO_RECORD_ASK, /\n15\. /);
   for (const g of ['**① 기준과 목적**', '**② 시작**', '**③ 방문**', '**④ 이어짐**', '**⑤ 끝**', '**⑥ 근거와 빈칸**']) assert.ok(SCENARIO_RECORD_ASK.includes(g), g);
   for (const cap of ['시나리오 1개', '방문 최대 16개', '이어짐 최대 20개', '전체 표 데이터 행은 최대 80개', '12,000자 이내', '100자 이내', '240자 이내']) assert.ok(SCENARIO_RECORD_ASK.includes(cap), cap);
-  assert.match(RECORD_ASK_EXPLAIN.scenario, /따로 붙여 넣어 보관/); assert.match(RECORD_ASK_EXPLAIN.scenario, /아직 길로 읽지는 않아요/);
+  assert.match(RECORD_ASK_EXPLAIN.scenario, /따로 붙여 넣어 보관/); assert.match(RECORD_ASK_EXPLAIN.scenario, /AI 없이 같은 대장과 맞춰 길로 읽어/); assert.doesNotMatch(RECORD_ASK_EXPLAIN.scenario, /아직 길로 읽지는/);
 });
 
 test('ASK-9 the ID ledger lists parts with their app ids, relations with what they hand over, stores and handed-over names, fields, ports, steps and rules, names the ledger version, and caps at 8,000 characters', () => {
@@ -146,3 +147,20 @@ test('ASK-10 the check reads a design record against its six tables, and skips h
   const c = checkReport(status); assert.ok(c);
   assert.equal(c.kind, 'status'); assert.equal(c.untagged, 0); assert.equal(c.tagged, 5); assert.deepEqual(c.missing, []);
 });
+
+test('ASK-11 on paste a scenario record (시나리오 기록 v2) is told apart by its tables: the paste box reads it as a path, while the report check leaves it alone', () => {
+  // The request's own groups written back as tables (the header rows the scenario reader knows), as an AI answers it.
+  const heads = SCENARIO_RECORD_ASK.split('\n').filter(l => /^\*\*[①②③④⑤]/.test(l)).map(l => l.split(' — ')[1]);
+  assert.equal(heads.length, 5);
+  const blocks = heads.map(h => [`| ${h} |`, `|${'---|'.repeat(h.split(' | ').length)}`, `| ${h.split(' | ').map(() => '모름').join(' | ')} |`].join('\n'));
+  const tables = blocks.join('\n\n');
+  assert.equal(scenarioRecordLike(tables), true);
+  // The visit and link tables alone, as the bold headings may be dropped.
+  assert.equal(scenarioRecordLike([blocks[2], blocks[3]].join('\n\n')), true);
+  // A status report, a design record and the request itself (its groups as prose lines, no table) are not scenario records.
+  assert.equal(scenarioRecordLike(SCENARIO_RECORD_ASK), false);
+  assert.equal(scenarioRecordLike(PROJECT_REPORT_ASK), false); assert.equal(scenarioRecordLike(DESIGN_RECORD_ASK), false);
+  assert.equal(scenarioRecordLike('| 이름 | 유형 | 한 줄 |\n|---|---|---|\n| 엔진 | 루프·엔진 | 집행 [파일: R] |'), false);
+  assert.equal(checkReport(tables), null, 'no evidence tags: not checked as a report');
+});
+

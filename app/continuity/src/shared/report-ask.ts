@@ -166,7 +166,7 @@ export const CHAT_REPORT_ASK = `[AgentFlow 대화 기록 요청 ${PROSE_ASK_VERS
 /** What the person gets, beside each copy button: one sentence per request (the button's title). */
 export const REPORT_ASK_EXPLAIN = '프로젝트를 보고 있는 AI 대화(감독 세션 등)에 붙여 넣으면 그 AI가 부분·상태·연결·철회·규칙·관문·모르는 것을 줄마다 [파일]·[보고]·[실행]·[추정]·[모름] 꼬리표가 붙은 표로 써 주니, 키·토큰이 [가림]으로 바뀌었는지 보고 기록 붙여넣기에 넣으세요.';
 export const DESIGN_RECORD_EXPLAIN = '같은 AI 대화에 붙여 넣으면 그 AI가 코드에서 읽은 부분 유형·산출물과 필드·받는 것과 내는 것·안의 단계·조건·파일 지도를 여섯 표로 써 주고, 지도는 그것으로 카드의 몸통·포트·장부·단계를 그려요.';
-export const SCENARIO_RECORD_EXPLAIN = '지금 지도의 ID 대장을 붙인 요청이라 그 AI가 동작 경로 하나(시작·방문·이어짐·끝·근거·빈칸)를 대장의 ID로 써 주는데, 이 시나리오 기록은 다른 기록처럼 따로 붙여 넣어 보관할 뿐 앱이 아직 길로 읽지는 않아요(다음 단계).';
+export const SCENARIO_RECORD_EXPLAIN = '지금 지도의 ID 대장을 붙인 요청이라 그 AI가 동작 경로 하나(시작·방문·이어짐·끝·근거·빈칸)를 대장의 ID로 써 주고, 그 시나리오 기록을 따로 붙여 넣어 보관하면 앱이 AI 없이 같은 대장과 맞춰 길로 읽어 지도 위에 방문 번호와 경로로 보여 줘요(맞지 않는 행은 제외해 따로 보여요).';
 /** The three requests' explanations in the order the screens offer them. */
 export const RECORD_ASK_EXPLAIN = { status: REPORT_ASK_EXPLAIN, design: DESIGN_RECORD_EXPLAIN, scenario: SCENARIO_RECORD_EXPLAIN } as const;
 

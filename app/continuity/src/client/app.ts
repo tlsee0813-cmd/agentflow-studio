@@ -1,10 +1,12 @@
 /* AgentFlow Studio client: entry → map → focused part. Reads project.7 data (saved projects and built examples) and never
  * rewrites records; the only project write is the user's own part name/note through the domain's editArea. */
-import { isMapReading, type Project } from '../shared/types.js';
+import { isMapReading, isScenarioReading, type Project, type ScenarioReading } from '../shared/types.js';
 import { FILE_LIMIT, PASTED_LIMIT } from '../shared/types.js';
 import { WorkspaceStore, type EntryRef, storageErrorCode, serializeProject, readViewState, readEntryView, writeViewState, readEntryPositions, writeEntryPositions, importCopy, serializeBackup } from '../shared/storage.js';
 import { parseBackup, cleanPositions } from '../shared/validation.js';
-import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, removePastedRecord, provideRecord, secretPasted, correctReadingRole } from '../shared/domain.js';
+import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, removePastedRecord, provideRecord, secretPasted, correctReadingRole, recordReadIntoMap } from '../shared/domain.js';
+import { parseScenarioRecord, applyScenario, scenarioUnderstanding, projectLedger, type ScenarioUnderstanding } from '../shared/scenario-record.js';
+import { scenarioRecordLike, badgePlaces, pathRelations, visitLinks, brokenPlace, headTexts, scenarioLabel, scenarioResultLine, saidText, visitNumber, linkTitle, LINK_WORD, LINK_GLYPH, KIND_WORD, type BrokenPlace } from './scenario-view.js';
 import { CLAIM_LABEL, stateLabel, revisedRelations, candidateReading, type Applied, type CurrentClaim, type PartUnderstanding } from '../shared/map-reading.js';
 import { roleEvidence } from './role-evidence.js';
 import type { Channel, ClaimTopic, ReadingQuote, ReadingRelation, SavedCamera } from '../shared/types.js';
@@ -353,7 +355,7 @@ async function render() {
     if (scenes.length > 12) scenes = scenes.slice(-12);
     opened = next; scope = nextScope; lastClick.id = '';
     if (fresh) { planView.projectChanged(); returnView.projectChanged(); readMarks = []; readingCamera = null; loadView(next); autoSync.opened(); }
-    if (fresh) { openState = null; backStack = []; pendingAction = null; hideDetail(); dropShort(); restoreOpen = storedOpen(next); }
+    if (fresh) { openState = null; backStack = []; pendingAction = null; hideDetail(); dropShort(); restoreOpen = storedOpen(next); scOn = null; scVisit = null; scView = null; }
     // A new project starts with the map alone: the previous project's reading pane must not narrow its first view.
     if (fresh) { selected = null; ask = null; editing = false; partForm = null; composerOpen = false; sheetOpen = false; scopeReading = false; $('panel').hidden = true; $('panel').replaceChildren(); hideLens(); }
     tempExpand.clear();
@@ -1487,7 +1489,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
     first ? basis : null,
     sp ? null : understoodLine(o),
     first ? null : basis,
-    flowStrip(o), stateStrip(o),
+    flowStrip(o), scenarioStrip(o), stateStrip(o),
     outside.length ? h('div', { class: 'scope-rels', role: 'list', 'aria-label': '이 범위의 바깥 관계' }, ...relationGroups(outside, '범위').map(g => h('p', { class: 'scope-rel', role: 'listitem' },
       h('span', { class: 'sr-verb' }, g.label), ...g.list.map(x => h('button', { type: 'button', class: 'sr-part', title: `${partPath(o.view, x.far).map(q => q.name).join(' › ')}${x.r.note ? `\n${x.r.note}` : ''}`, 'data-far': x.far, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far, null); } }, partOf(o, x.far)?.name ?? '부분'))))) : null);
   world.append(title);
@@ -1506,6 +1508,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   fitTyped(world); fitOps(world);
   morphFrom = null;
   if (was) afterRedraw(world, was);
+  drawScenario();
   $('space').classList.toggle('in-scope', !!scope);
   // Many lines on one view: those that go round other parts share the same gaps and would read as extra outlines of the
   // groups they pass; they step back until selected, hovered or read as a change's context (kind, direction and hover meaning
@@ -1605,6 +1608,7 @@ function positionWorld() {
     // ends is seen up to its part; one that has to cross another box stays under them.
     g.classList.toggle('clear', r.clear); layerEdge(g);
   });
+  placeScenarioHeads();
   placeEdgeLabels();
 }
 /** While a part is dragged: lines keep their plain shape (map-route quick). morphFrom: the shapes the lines had before a drop,
@@ -1634,17 +1638,17 @@ const edgeOf = (key: string | undefined) => (key?.startsWith('sum:') ? sums : la
 /** A summary line that, beside the selection, holds fewer relations than at rest. */
 const restOf = (e: Edge) => e.key.startsWith('sum:') && sums !== restSums && (restSums.find(x => x.key === e.key)?.ids.length ?? 0) > e.ids.length;
 function syncLineMode() {
-  const sp = $('space'), rest = !selected && !planView.isOpen() && restSums.length > 0;
+  const sp = $('space'), rest = !selected && !scView && !planView.isOpen() && restSums.length > 0;
   sp.classList.toggle('rest-sum', rest);
   // A selection on a busy map: its own lines one by one, the rest as the dimmed summary (see .sel-sum).
-  sp.classList.toggle('sel-sum', !!selected && !planView.isOpen() && restSums.length > 0);
+  sp.classList.toggle('sel-sum', (!!selected || !!scView) && !planView.isOpen() && restSums.length > 0);
   // Many lines on one view: those that go round other parts step back (see .dense-lines); a summary line never does.
   sp.classList.toggle('dense-lines', lay.edges.length >= 12);
 }
 /** Selected lines, a change's context lines, lines inside one group and lines that cross nothing else read above the groups. */
 function layerEdge(el: Element) {
   const top = document.querySelector('#world .edges-top'), base = document.querySelector('#world .edges:not(.edges-top)');
-  const layer = ['on', 'ctx', 'inner', 'clear'].some(c => el.classList.contains(c)) ? top : base;
+  const layer = ['on', 'ctx', 'inner', 'clear', 'sc-path'].some(c => el.classList.contains(c)) ? top : base;
   if (layer && el.parentNode !== layer) layer.append(el);
 }
 /** The routes drawn last (positionWorld): the polylines the verbs and counts are placed on. */
@@ -1933,11 +1937,14 @@ function select(partId: string | null) {
   selected = partId;
   if (opened) renderRecent();
   markSelection(partId);
-  $('space').classList.toggle('dim', !!partId);
+  $('space').classList.toggle('dim', !!partId || !!scView);
+  if (partId && scVisit) { scVisit = null; markVisit(); }
   const panel = $('panel');
   if (planView.isOpen()) { panel.hidden = true; panel.replaceChildren(); clearHighlight(); planView.selectionChanged(changed); return; }
   if (!partId) {
     panel.hidden = true; panel.replaceChildren(); clearHighlight();
+    if (scVisit && scView) { renderVisitLens(); return; }
+    if ($('lens').classList.contains('scenario-read')) hideLens();
     if (returnView.isOpen()) {
       // Back from a part read beside the return reading: the same reading, and the camera it had unless the map was moved.
       if (readingCamera && !mapMoved) { camera = readingCamera; applyCamera(true); }
@@ -1987,7 +1994,7 @@ const union = <T extends Rect>(rs: T[]): Rect => { const x = Math.min(...rs.map(
 const stripInset = () => { const strip = $('plan-strip'); return strip.hidden ? 16 : strip.offsetTop + strip.offsetHeight + 10; };
 const topInset = () => stripInset() + (!$('plan-strip').hidden && !$('scope-sticky').hidden ? $('scope-sticky').offsetHeight + 8 : 0);
 function mapArea(): Rect { const vp = $('viewport').getBoundingClientRect(), top = topInset(); return { x: 16, y: top, w: vp.width - 32, h: mapBottom() - top - mapBottomInset() }; }
-function hideLens() { const l = $('lens'); l.hidden = true; l.replaceChildren(); l.classList.remove('compare', 'scope-read', 'railed'); readingFor = []; syncMapArea(); }
+function hideLens() { const l = $('lens'); l.hidden = true; l.replaceChildren(); l.classList.remove('compare', 'scope-read', 'railed', 'scenario-read'); readingFor = []; syncMapArea(); }
 const mapBottomInset = () => BOTTOM;
 const mapBottom = () => $('viewport').offsetTop + $('viewport').clientHeight;
 /** The map's viewport: below the plan's strip when it is open, left of the pane when it is open. Camera coordinates stay
@@ -2089,6 +2096,209 @@ function renderScopeLens() {
   l.hidden = false; syncMapArea();
 }
 function closeScopeReading() { scopeReading = false; if ($('lens').classList.contains('scope-read')) hideLens(); }
+
+/* ---------- the scenario on the map (spec §3, cycle 3): one foreground scenario at a time ----------
+ * Entering it changes no selection and no camera: each visit's badge sits at its part's card (top-left, never moving a card),
+ * the links light the existing lines between the visits' parts, parts the path does not visit step back (the space's dim),
+ * the start head stands above the first visit and the end head below the last confirmed one. Escape leaves it. */
+/** The scenario reading shown (its id), the visit chosen on it, and the scenario as resolved against the project now. */
+let scOn: string | null = null, scVisit: string | null = null, scView: ScenarioUnderstanding | null = null, scBroken: BrokenPlace | null = null;
+const scenarioReadings = (o: Opened): ScenarioReading[] => o.project.readings.filter(isScenarioReading);
+const scenarioEntry = (o: Opened, id: string) => scenarioReadings(o).find(r => r.id === id) ?? null;
+/** The record a scenario reading read, as pasted (empty when it is not there). */
+const scenarioText = (o: Opened, e: ScenarioReading) => o.project.pasted.find(r => r.id === e.record)?.text ?? '';
+/** The title's scenario line: every stored scenario (name · kind · pathStatus); choosing one shows it on the map, again leaves it. */
+function scenarioStrip(o: Opened): HTMLElement | null {
+  const all = scenarioReadings(o); if (!all.length) return null;
+  const el = h('div', { class: 'map-flow map-scenarios', role: 'group', 'aria-label': '시나리오' }, h('span', { class: 'mf-verb' }, '시나리오'));
+  all.forEach(e => {
+    const c = e.scenario.scenario, on = scOn === e.id, label = scenarioLabel(c?.name, c?.kind, e.pathStatus);
+    el.append(h('button', { type: 'button', class: `mf-step sc-pick${on ? ' on' : ''}`, 'data-scenario': e.id, 'aria-pressed': String(on),
+      title: `${c?.id ?? '시나리오'} · ${label} · 방문 ${e.scenario.visits.length} · 이어짐 ${e.scenario.links.length}${e.diagnostics.length ? ` · 제외 ${e.diagnostics.length}` : ''}\n${on ? '다시 누르거나 Esc: 시나리오 보기 끝내기' : '지도에서 이 경로 보기'}`,
+      onclick: () => { if (scOn === e.id) leaveScenario(); else enterScenario(e.id); } }, label));
+  });
+  // What has no place on this map: visits whose part is gone (끊긴 자리), visits outside this view, a rejected path's statements.
+  const u = scOn ? scenarioUnderstanding(o.project, scOn) : null;
+  if (u) {
+    const lay0 = badgePlaces(u, id => drawnRep(o, id)), notes: HTMLElement[] = [];
+    if (u.pathStatus === 'rejected') notes.push(h('p', { class: 'sc-note sc-problem' }, h('strong', {}, '경로 거절'), ' · 시나리오의 기준이 맞지 않아 길을 그리지 않았어요.',
+      ...u.statements.map(s => h('span', { class: 'sc-statement' }, ` ${s.kind === 'produced' ? '설계가 내놓는 결과' : s.kind === 'desired' ? '바라는 결과' : '이탈 결과'}: ${s.text}`))));
+    if (lay0.gone.length) notes.push(h('p', { class: 'sc-note sc-problem' }, h('strong', {}, '끊긴 자리'), ` · 지도에 없는 부분의 방문 ${lay0.gone.length}: `,
+      lay0.gone.map(v => `${visitNumber(v.id)} ${v.partName}`).join(' · ')));
+    if (lay0.outside.length) notes.push(h('p', { class: 'sc-note' }, h('strong', {}, '이 범위 밖'), ` · 방문 ${lay0.outside.length}: `, lay0.outside.map(v => `${visitNumber(v.id)} ${v.partName}`).join(' · ')));
+    if (notes.length) el.append(h('div', { class: 'sc-notes' }, ...notes));
+  }
+  return el;
+}
+function enterScenario(id: string) {
+  const o = opened; if (!o || !scenarioEntry(o, id)) return;
+  scOn = id; scVisit = null; redrawScenario();
+  if ($('lens').classList.contains('scenario-read')) hideLens();
+  if (selected) refreshReading(); // the selected part's lens says whether the path visits it
+}
+function leaveScenario() {
+  const o = opened; if (!o || !scOn) return;
+  const focusPart = document.activeElement?.closest<HTMLElement>('.sc-badge')?.closest<HTMLElement>('[data-part]')?.dataset.part ?? null;
+  scOn = null; scVisit = null; redrawScenario();
+  if ($('lens').classList.contains('scenario-read')) hideLens();
+  if (selected) refreshReading();
+  if (focusPart) document.querySelector<HTMLElement>(`[data-drag="${CSS.escape(focusPart)}"]`)?.focus({ preventScroll: true });
+}
+/** The map again in place (the title's scenario line changes its height): same camera, same selection. */
+function redrawScenario() {
+  const o = opened; if (!o) return;
+  renderSpace('keep'); markSelection(selected);
+}
+/** The scenario's marks on the map drawn now (after every redraw): badges, path lines, dimmed parts, heads, the broken place. */
+function drawScenario() {
+  const o = opened, world = $('world'), sp = $('space');
+  world.querySelectorAll('.sc-badge, .sc-head').forEach(el => el.remove());
+  world.querySelectorAll('.sc-visit').forEach(el => el.classList.remove('sc-visit'));
+  world.querySelectorAll('.edge.sc-path').forEach(el => el.classList.remove('sc-path', 'sc-back'));
+  const entry = o && scOn ? scenarioEntry(o, scOn) : null;
+  scView = o && entry ? scenarioUnderstanding(o.project, entry.id) : null;
+  if (!scView) { scOn = null; scVisit = null; scBroken = null; }
+  scBroken = o && entry && scView ? brokenPlace(scView, entry.diagnostics, scenarioText(o, entry)) : null;
+  sp.classList.toggle('scenario', !!scView);
+  sp.classList.toggle('dim', !!selected || !!scView);
+  if (!o || !scView) return;
+  const u = scView, places = badgePlaces(u, id => drawnRep(o, id));
+  for (const p of places.places) {
+    const card = world.querySelector<HTMLElement>(`.node[data-box="${CSS.escape(p.box)}"], .frame[data-box="${CSS.escape(p.box)}"]`); if (!card) continue;
+    card.classList.add('sc-visit');
+    const badge = h('span', { class: 'sc-badge', role: 'group', 'aria-label': `방문 ${p.visits.map(v => v.n).join(', ')}` });
+    p.shown.forEach((v, i) => {
+      if (i) badge.append(h('span', { class: 'sc-sep', 'aria-hidden': 'true' }, '·'));
+      badge.append(h('button', { type: 'button', class: `sc-v${scVisit === v.id ? ' on' : ''}`, 'data-visit': v.id, 'aria-pressed': String(scVisit === v.id), title: v.title,
+        'aria-label': `${v.title.replace(/\n/g, ' · ')} · 방문 선택`, onclick: (e: Event) => { e.stopPropagation(); selectVisit(scVisit === v.id ? null : v.id); } },
+        h('span', { class: 'sc-n' }, v.n), ...v.glyphs.map(g => h('span', { class: `sc-glyph k-${g.kind}`, 'aria-hidden': 'true' }, g.glyph))));
+    });
+    // Past two: the rest by count, never as a range (03–07); the first of them is chosen from it, the pane lists all.
+    if (p.more) { const rest = p.visits.slice(2); badge.append(h('span', { class: 'sc-sep', 'aria-hidden': 'true' }, '·'), h('button', { type: 'button', class: `sc-v sc-more${rest.some(v => v.id === scVisit) ? ' on' : ''}`, 'data-visit': rest[0]!.id,
+      title: rest.map(v => v.title).join('\n\n'), 'aria-label': `방문 ${rest.map(v => v.n).join(', ')} 더 · 첫 방문 선택`, onclick: (e: Event) => { e.stopPropagation(); selectVisit(rest[0]!.id); } }, `+${p.more}`)); }
+    if (scBroken && scBroken.visit && p.visits.some(v => v.id === scBroken!.visit))
+      badge.append(h('span', { class: 'sc-broken', title: `${scBroken.kind === 'visit' ? `방문 ${scBroken.ref ?? `${(scBroken.row ?? 0) + 1}번째 행`} 제외` : scBroken.kind === 'link' ? `이어짐 ${scBroken.ref ?? `${(scBroken.row ?? 0) + 1}번째 행`} 제외` : '끝에 닿지 않음'} · ${scBroken.explanation}` }, '여기서 끊김'));
+    card.append(badge);
+  }
+  // The path: the existing lines the links cite, in the accent (with their heads); nothing new is drawn.
+  const rels = new Set(pathRelations(u));
+  world.querySelectorAll<SVGGElement>('.edge:not(.sum)').forEach(g => {
+    const e = edgeOf(g.dataset.key); if (!e || !e.ids.some(id => rels.has(id))) return;
+    g.classList.add('sc-path'); layerEdge(g);
+  });
+  markVisit();
+  placeScenarioHeads();
+}
+/** The heads above the first visit and below the last confirmed one, in map coordinates (they follow a drag, positionWorld). */
+function placeScenarioHeads() {
+  const o = opened, world = $('world'); world.querySelectorAll('.sc-head').forEach(el => el.remove());
+  if (!o || !scView) return;
+  const heads = headTexts(scView), boxOf = (id: string | null) => { const v = id ? scView!.visits.find(x => x.id === id) : null, rep = v ? drawnRep(o, v.areaId) : null; return rep ? lay.boxes.get(rep) ?? null : null; };
+  const line = (x: { label: string; text: string }) => h('p', { class: 'sc-head-line' }, h('span', { class: 'sc-head-label' }, x.label), h('span', { class: 'sc-head-text', title: x.text }, x.text));
+  const a = boxOf(heads.startVisit), z = boxOf(heads.endVisit);
+  if (a) {
+    const head = h('div', { class: 'sc-head sc-start', role: 'note', 'aria-label': '시나리오의 시작' }, ...heads.start.map(line),
+      scBroken && !scBroken.visit ? h('p', { class: 'sc-head-line sc-problem' }, h('span', { class: 'sc-head-label' }, '여기서 끊김'), h('span', { class: 'sc-head-text', title: scBroken.explanation }, scBroken.explanation)) : null);
+    head.style.left = `${a.x}px`; head.style.top = `${a.y - 14}px`; world.append(head);
+  }
+  if (z) {
+    const head = h('div', { class: 'sc-head sc-end', role: 'note', 'aria-label': '시나리오의 끝' }, ...heads.end.map(line), heads.short ? h('p', { class: 'sc-head-line sc-short' }, heads.short) : null);
+    head.style.left = `${z.x}px`; head.style.top = `${z.y + z.h + 10}px`; world.append(head);
+  }
+}
+/** The chosen visit on its badge, and its links in and out (the path's other lines step back to the accent's light tone). */
+function markVisit() {
+  const world = $('world'), u = scView;
+  world.querySelectorAll<HTMLElement>('.sc-v').forEach(b => { const on = !!scVisit && (b.dataset.visit === scVisit || (b.classList.contains('sc-more') && !!u && badgeHolds(b, scVisit))); b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+  const mine = new Set(u && scVisit ? [...visitLinks(u, scVisit).into, ...visitLinks(u, scVisit).out].filter(l => l.relation && l.relationOnMap).map(l => l.relation!.relationId) : []);
+  world.querySelectorAll<SVGGElement>('.edge.sc-path').forEach(g => { const e = edgeOf(g.dataset.key); g.classList.toggle('sc-back', !!scVisit && !e?.ids.some(id => mine.has(id))); });
+  markLines();
+}
+/** Whether a '+N' button stands for this visit. */
+function badgeHolds(b: HTMLElement, id: string): boolean { return (b.getAttribute('title') ?? '').includes(`(${id})`); }
+/** Each line's ends as it reads now: a selected line or a line of the scenario's path carries the accent's head and start dot. */
+function markLines() {
+  document.querySelectorAll<SVGGElement>('#world .edge').forEach(el => {
+    const lit = el.classList.contains('on') || el.classList.contains('sc-path'), line = el.querySelector('.edge-line'); if (!line) return;
+    const plain = el.classList.contains('k-related'), head = el.classList.contains('c-data') ? 'arrow' : 'arrow-open';
+    line.setAttribute('marker-end', plain ? (lit ? 'url(#dot-on)' : 'url(#dot)') : lit ? `url(#${head}-on)` : `url(#${head})`);
+    line.setAttribute('marker-start', lit ? 'url(#dot-on)' : 'url(#dot)');
+  });
+}
+/** A badge chosen: that visit in the pane (a part selected before steps back, as choosing another part would), the map unmoved. */
+function selectVisit(id: string | null) {
+  const o = opened; if (!o || !scView) return;
+  scVisit = id && scView.visits.some(v => v.id === id) ? id : null;
+  markVisit();
+  if (planView.isOpen()) return;
+  if (selected && scVisit) { go(o.key); return; } // select(null) shows the visit
+  if (scVisit) renderVisitLens(); else if ($('lens').classList.contains('scenario-read')) hideLens();
+}
+/** The chosen visit in the pane: its part, step, port, what it takes and hands over, its event, its evidence rows (their quotes as
+ * citation chips) and its links in and out with their kind and condition. */
+function renderVisitLens() {
+  const o = opened, u = scView, entry = o && scOn ? scenarioEntry(o, scOn) : null; if (!o || !u || !entry || !scVisit) return;
+  const v = u.visits.find(x => x.id === scVisit); if (!v) return;
+  const l = $('lens'), ev = new Map(entry.scenario.evidence.map(e => [e.id, e])), text = scenarioText(o, entry);
+  const MATERIAL: Record<string, string> = { file: '파일', run: '실행', report: '보고' }, STANCE: Record<string, string> = { stated: '명시적 내용', report: '보고', guess: '보고자 추정' };
+  const row = (label: string, value: Node | string | null) => value === null ? null : h('div', { class: 'sc-row' }, h('dt', {}, label), h('dd', {}, value));
+  const current = (now: boolean) => h('small', { class: now ? 'sc-now' : 'sc-gone' }, now ? ' · 지금 지도와 같음' : ' · 지금 지도에 없음');
+  const step = v.step === 'unknown' ? '모름' : v.step === null ? '없음' : h('span', {}, `${v.step.ref} ${v.step.name}`, current(v.step.current));
+  const port = v.port === 'unknown' ? '모름' : v.port === null ? '없음' : h('span', {}, `${v.port.ref} ${v.port.direction === 'in' ? '받음' : '냄'}: ${v.port.name}`, current(v.port.current));
+  const arts = (a: typeof v.in) => a === 'unknown' ? '모름' : a.length ? a.map(x => `${x.ref} ${x.name}`).join(' · ') : '없음';
+  const evidence = (ids: string[], word: string | null, key: string) => {
+    const items = ids.map(id => ev.get(id)).filter((x): x is NonNullable<typeof x> => !!x);
+    if (!items.length && !word) return h('p', { class: 'fine' }, '근거 E가 없어요');
+    return h('ul', { class: 'sc-evidence' }, ...items.map(e => {
+      const at = e.quote ? text.indexOf(e.quote) : -1;
+      return h('li', {}, h('span', { class: 'sc-ev-id' }, e.id), ` ${MATERIAL[e.material]} · ${saidText(e.source)} · 판본 ${saidText(e.versionOrRun)} · ${STANCE[e.stance]}`,
+        e.quote ? (at >= 0 ? h('span', {}, ' ', quoteCite(`${key}:${e.id}`, { record: entry.record, quote: e.quote, from: at }, `${e.id} 인용`)) : h('q', { class: 'sc-quote' }, e.quote)) : h('small', {}, ' · 원문 미제공'));
+    }), word ? h('li', { class: 'fine' }, word === 'report' ? 'E 대신 ‘보고’로 적음' : 'E 대신 ‘추정’으로 적음') : null);
+  };
+  const { into, out } = visitLinks(u, v.id);
+  const linkRow = (x: (typeof into)[number], far: string) => {
+    const fv = u.visits.find(y => y.id === far);
+    return h('li', {}, h('button', { type: 'button', class: 'port sc-link', 'data-visit': far, title: linkTitle(x), onclick: () => selectVisit(far) },
+      h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, x.to === v.id ? '←' : '→'), h('strong', {}, `${visitNumber(far)} ${fv?.partName ?? far}`),
+        h('span', { class: 'port-kind' }, `${LINK_WORD[x.kind]}${LINK_GLYPH[x.kind] ? ` ${LINK_GLYPH[x.kind]}` : ''}`)),
+      h('span', { class: 'port-note' }, [x.id, x.relation ? `${x.relation.ref}${x.relationOnMap ? '' : ' · 지금 지도에 없는 연결'}` : '투어 읽기 순서',
+        x.condition !== null ? `조건: ${saidText(x.condition)}` : '', x.policy !== null ? saidText(x.policy) : x.kind === 'wait' ? '재개 조건 미상' : ''].filter(Boolean).join(' · '))));
+  };
+  const links = (label: string, list: typeof into, far: (x: (typeof into)[number]) => string) => h('section', { class: 'lens-ports' }, h('h3', {}, label, h('small', {}, String(list.length))),
+    list.length ? h('ul', {}, ...list.map(x => linkRow(x, far(x)))) : h('p', { class: 'fine' }, label === '들어오는 이어짐' ? '기록된 이어짐이 없어요(여기서 시작하거나 앞이 끊김)' : '기록된 이어짐이 없어요(여기서 멈추거나 뒤가 끊김)'));
+  const broken = scBroken && scBroken.visit === v.id ? h('p', { class: 'sc-note sc-problem' }, h('strong', {}, '여기서 끊김'), ` · ${scBroken.explanation}`) : null;
+  const c = entry.scenario.scenario;
+  l.classList.remove('compare', 'railed', 'scope-read', 'return-read'); l.classList.add('scenario-read'); readingFor = [];
+  l.replaceChildren(
+    h('header', { class: 'lens-head' },
+      h('div', { class: 'lens-path' }, h('span', {}, `시나리오 ${c?.id ?? ''} · ${scenarioLabel(c?.name, c?.kind, entry.pathStatus)}`)),
+      h('h2', { id: 'lens-title' }, `방문 ${visitNumber(v.id)} · ${v.partName}`),
+      h('div', { class: 'head-tools' }, h('button', { type: 'button', class: 'close', 'aria-label': '방문 선택 해제', title: '닫기 (Esc: 시나리오 보기 끝내기)', onclick: () => selectVisit(null) }, '×'))),
+    h('div', { class: 'lens-body' },
+      broken,
+      h('dl', { class: 'sc-visit-facts' },
+        row('부분', v.partOnMap ? h('button', { type: 'button', class: 'link-button', title: '이 부분 선택', onclick: () => go(o.key, v.areaId) }, `${v.part.ref} ${v.partName}`) : h('span', { class: 'sc-gone' }, `${v.part.ref} ${v.part.name} · 지금 지도에 없는 부분`)),
+        row('단계', step), row('포트', port), row('필요한 입력', arts(v.in)), row('내놓는 출력', arts(v.out)), row('사건', saidText(v.event))),
+      h('section', { class: 'lens-ports' }, h('h3', {}, '근거', h('small', {}, String(v.evidence.length))), evidence(v.evidence, v.evidenceWord, v.id)),
+      links('들어오는 이어짐', into, x => x.from), links('나가는 이어짐', out, x => x.to),
+      h('p', { class: 'fine' }, `${KIND_WORD[c?.kind ?? 'designed'] ?? ''} · 방문 번호는 기록이 붙인 그대로예요. 이어짐은 기록에 근거가 있는 것만 지도의 기존 연결 위에 밝혀요.`)));
+  l.hidden = false; syncMapArea();
+}
+/** The paste result for a scenario record: 시나리오 C01 · 방문 N · 이어짐 M · pathStatus, with what was set aside in the
+ * exclusion list's form, and the way to see it on the map. null when the record was not read as a scenario. */
+function scenarioResult(recordId: string): HTMLElement | null {
+  const o = opened; if (!o) return null;
+  const e = [...scenarioReadings(o)].reverse().find(r => r.record === recordId); if (!e) return null;
+  const c = e.scenario.scenario;
+  return h('section', { class: 'rr-sec sc-result' },
+    h('p', { class: e.pathStatus === 'rejected' ? 'pp-error' : 'pp-ok', role: 'status' }, scenarioResultLine(c?.id, e.scenario.visits.length, e.scenario.links.length, e.pathStatus)),
+    h('p', { class: 'fine' }, `AI 없이 앱이 ID 대장 ${e.ledgerVersion ?? '(지도 읽기 없음)'}과 맞춰 읽었어요 · ${fullTime(e.at)}`),
+    e.pathStatus !== 'rejected' ? h('button', { type: 'button', class: 'link-button', onclick: () => enterScenario(e.id) }, '지도에서 이 경로 보기') : null,
+    e.diagnostics.length ? h('details', { class: 'rm-exclusions' }, h('summary', {}, `시나리오 읽기에서 제외한 내용 · 사유 ${e.diagnostics.length}건`),
+      h('p', { class: 'fine' }, '제외한 행·칸은 길에 넣지 않았고 원문은 붙인 그대로 보관돼요. 번호는 다시 매기지 않고, 빠진 방문 양쪽을 잇지 않아요.'),
+      h('ol', {}, ...e.diagnostics.map(d => h('li', {}, h('p', {}, d.explanation),
+        h('details', { class: 'rm-exclusion-debug' }, h('summary', {}, '검사 정보'), h('small', {}, `${d.path} · ${d.rule}${d.category ? ` / ${d.category}` : ''}`)))))) : null);
+}
 
 /* The lens folds to a narrow rail on request, for this tab (memory only): the map's area takes the window back (paneWidth), the
  * rail keeps the selection's name and the way to open the reading again. Selection, Esc and the sheet work as before. */
@@ -2197,14 +2407,19 @@ function renderLens() {
     o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요 (이 부분은 읽기 맥락일 뿐이에요)', onclick: () => openFile(part.id) }, '코드·검사 자료 추가') : null,
     o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', title: '이 부분을 새 세션에 넘길 문서를 만들어요', onclick: () => handover.open(part.id, document.querySelector<HTMLElement>('#lens details.more summary')) }, '이 부분 인수인계 문서') : null
   ].filter((x): x is HTMLButtonElement => !!x);
-  l.classList.remove('compare', 'scope-read'); readingFor = [];
+  l.classList.remove('compare', 'scope-read', 'scenario-read'); readingFor = [];
+  // In scenario mode a part the path does not visit is said to be outside it; the path is not extended to it.
+  const scHere = scView ? scView.visits.filter(v => drawnRep(o, v.areaId) === part.id || v.areaId === part.id) : null;
+  const scLine = scView && scHere ? h('p', { class: `sc-note${scHere.length ? '' : ' sc-out'}` }, ...(scHere.length
+    ? [h('strong', {}, '시나리오의 방문'), ' · ', ...scHere.flatMap((v, i) => [i ? ' · ' : '', h('button', { type: 'button', class: 'link-button', onclick: () => selectVisit(v.id) }, `방문 ${visitNumber(v.id)}`)])]
+    : [h('strong', {}, '현재 시나리오 밖의 요소'), ' · 이 경로는 이 부분을 지나지 않아요'])) : null;
   l.replaceChildren(); put(l, entry,
     h('header', { class: 'lens-head' },
       path.length ? h('div', { class: 'lens-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope), title: x.name }, x.name)])) : null,
       h('h2', { id: 'lens-title' }, part.name),
       aliasOf(o.view, part.id) ? h('p', { class: 'lens-alias' }, aliasOf(o.view, part.id)) : null,
       stateLine(part) ?? ladderLine(o.view, part),
-      storeLine(o, part),
+      storeLine(o, part), scLine,
       h('div', { class: 'head-tools' },
         menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e: Event) => { ((e.currentTarget as HTMLElement).parentElement as HTMLDetailsElement).open = false; } }, ...menuItems)) : null,
         h('button', { type: 'button', class: 'rail-toggle', 'aria-label': '읽기면 접기', 'aria-expanded': 'true', title: '읽기면 접기 · 지도를 넓게 봐요', onclick: () => setRail(true) }, railIcon(true)),
@@ -2418,9 +2633,6 @@ function markSelection(partId: string | null) {
     const on = !!me && (el.dataset.from === me || el.dataset.to === me);
     // A line the change plan reads as context of its change (.ctx) stays above the groups as well.
     el.classList.toggle('on', on); layerEdge(el);
-    const line = el.querySelector('.edge-line')!, plain = el.classList.contains('k-related'), head = el.classList.contains('c-data') ? 'arrow' : 'arrow-open';
-    line.setAttribute('marker-end', plain ? (on ? 'url(#dot-on)' : 'url(#dot)') : on ? `url(#${head}-on)` : `url(#${head})`);
-    line.setAttribute('marker-start', on ? 'url(#dot-on)' : 'url(#dot)');
     if (on) related.add(el.dataset.from === me ? el.dataset.to! : el.dataset.from!);
   });
   // The rest of a store's path reads with the selection (.path keeps .near while the pointer moves elsewhere); nothing moves and
@@ -2431,7 +2643,9 @@ function markSelection(partId: string | null) {
   for (const end of path.ends) related.add(end);
   // The summary beside a selection holds every other relation: a line that held some of the selection's relations keeps the
   // rest (its count drops by those, which are drawn one by one), and gives way (.hit, hidden by .sel-sum) only when none is left.
-  sums = me ? restSummary(lay.boxes, lay.edges, e => e.from === me || e.to === me || path.lines.has(e.key)) : restSums;
+  const scLines = new Set([...document.querySelectorAll<SVGGElement>('#world .edge.sc-path')].map(g => g.dataset.key!));
+  sums = me || scLines.size ? restSummary(lay.boxes, lay.edges, e => (!!me && (e.from === me || e.to === me)) || path.lines.has(e.key) || scLines.has(e.key)) : restSums;
+  markLines();
   document.querySelectorAll<SVGGElement>('.edge.sum').forEach(el => { const e = edgeOf(el.dataset.key); el.classList.toggle('hit', !e); el.classList.toggle('agg', !!e?.agg); });
   syncLineMode();
   placeEdgeLabels();
@@ -2870,14 +3084,19 @@ const returnView = createReturnView({
   chrome: () => { const o = opened; if (o) setBar(o); },
   paste: async (texts, context) => {
     const o = opened; if (!o || o.kind !== 'saved') return '이 프로젝트에는 기록을 저장할 수 없어요.';
-    let next = o.project, id = '', fresh = false;
-    try { for (const t of texts) { const r = pasteRecord(next, t, context && partOf(o, context) ? context : null); next = r.project; id = r.record.id; fresh ||= !r.duplicate; } }
+    let next = o.project, id = '', fresh = false, scenario: string | null = null, scenarioError = false;
+    try { for (const t of texts) { const r = pasteRecord(next, t, context && partOf(o, context) ? context : null); next = r.project; id = r.record.id; fresh ||= !r.duplicate;
+      // A scenario record (시나리오 기록 v2) is read by the app alone against the current map's ID ledger, once per record.
+      if (scenarioRecordLike(r.record.text) && !next.readings.some(x => isScenarioReading(x) && x.record === r.record.id)) {
+        try { next = applyScenario(next, r.record.id, parseScenarioRecord(r.record.text, projectLedger(next))); scenario = r.record.id; fresh = true; } catch { scenarioError = true; }
+      } } }
     catch { return '이 글은 저장할 수 없어요(너무 길거나 쓸 수 없는 문자).'; }
-    if (!fresh) return { id, duplicate: true };
+    if (!fresh) return { id, duplicate: true, scenarioError };
     const failed = await commit(o, next);
-    // A saved record is now a record to read into the map (nothing was sent): the map's own entries say so.
-    if (!failed) { renderMapEntry(); refreshUnderstood(); }
-    return failed ?? { id, duplicate: false };
+    // A saved record is now a record to read into the map (nothing was sent): the map's own entries say so. A scenario read from it
+    // joins the title's scenario line.
+    if (!failed) { renderMapEntry(); refreshUnderstood(); if (scenario && opened === o) redrawScenario(); }
+    return failed ?? { id, duplicate: false, scenario, scenarioError };
   },
   provide: async (key, text, evidence, context) => {
     // Only the entry the file was chosen in: after a switch nothing is written to the project open now.
@@ -2906,7 +3125,9 @@ const returnView = createReturnView({
     return maps.length ? { records: new Set(maps.flatMap(r => r.records.map(x => x.id))).size } : null;
   },
   mapMarks: () => { const o = opened; return o && justRead?.key === o.key ? justRead.parts : []; },
-  readIntoMap: id => !!opened?.project.readings.some(r => isMapReading(r) && r.records.some(x => x.id === id)),
+  readIntoMap: id => !!opened && recordReadIntoMap(opened.project, id),
+  scenarioResult: id => scenarioResult(id),
+  ledgerLine: () => { const o = opened; return o && o.view.parts.length ? projectLedger(o.project).versionLine : null; },
   removeRecord: async id => {
     const o = opened; if (!o || o.kind !== 'saved') return '이 프로젝트에서는 기록을 지울 수 없어요.';
     // A reading under way (or one waiting to be applied) may hold this record: nothing is taken out from under it.
@@ -3211,7 +3432,7 @@ function renderMapEntry() {
     // A project an AI session already knows: that session writes the report the map reads best. The words are copied here and
     // carried by the person; nothing is sent.
     // Three records the spec names (§8.1): the status report, the design record, and the scenario record with the map's ledger
-    // (only once a map exists; the app keeps it as a record and does not read it as a path yet).
+    // (only once a map exists; the app reads it as a path against that ledger when it is pasted back).
     fresh ? null : h('p', { class: 'fine se-ask' }, '진행 중인 AI 대화가 있다면 ', askCopy('현황 보고 요청', PROJECT_REPORT_ASK, 'link-button', RECORD_ASK_EXPLAIN.status), ' · ',
       askCopy('설계 기록 요청', DESIGN_RECORD_ASK, 'link-button', RECORD_ASK_EXPLAIN.design),
       ...(o.view.parts.length ? [' · ', askCopy('시나리오 기록 요청(대장 포함)', scenarioAskWithLedger(o.view, o.project.readings), 'link-button', RECORD_ASK_EXPLAIN.scenario)] : []),
@@ -3245,10 +3466,10 @@ function mapBlock(): HTMLElement | null {
     ' — 지도의 부분 이름을 넣은 문구예요. 프로젝트를 보고 있는 AI 대화에 붙여 넣고, 나온 답을 기록으로 붙여 넣으세요. ',
     askCopy('이렇게 이해했다 확인 문구 복사', reflectAsk(o.view, o.project.readings), 'link-button'), ' — 지도가 읽은 것을 번호 줄로 보내 틀린 줄만 고쳐 받아요.'),
     // The design record and the scenario record (with this map's ID ledger): pasted back like any other record; the scenario
-    // record is kept, not yet read as a path.
+    // record is read as a path by the app alone (scenario-record.ts) when it is pasted.
     h('p', { class: 'fine rm-ask rm-records' }, askCopy('설계 기록 요청', DESIGN_RECORD_ASK, 'link-button', RECORD_ASK_EXPLAIN.design), ' · ',
       askCopy('시나리오 기록 요청(대장 포함)', scenarioAskWithLedger(o.view, o.project.readings), 'link-button', RECORD_ASK_EXPLAIN.scenario),
-      ' — 설계 기록은 카드의 안쪽(산출물·단계·조건)을, 시나리오 기록은 동작 경로 하나를 써 받아요. 둘 다 다른 기록처럼 붙여 넣어요. 시나리오 기록은 보관만 하고 아직 지도에 길로 그리지 않아요.'));
+      ' — 설계 기록은 카드의 안쪽(산출물·단계·조건)을, 시나리오 기록은 동작 경로 하나를 써 받아요. 둘 다 다른 기록처럼 붙여 넣어요. 시나리오 기록은 붙이면 앱이 AI 없이 지금 지도의 ID 대장과 맞춰 길로 읽어, 제목 아래 ‘시나리오’ 줄에서 지도 위에 보여요.'));
   const limited = status.release === 'existing-map';
   if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && !limited) sec.append(h('p', { class: 'fine' }, sendLine(inp)), h('button', { type: 'button', class: 'link-button', onclick: () => { returnView.close(); planView.openResults(); } }, '요청문을 골라 대조'));
   if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && can && !st.pending && !waiting) sec.append(h('button', { type: 'button', class: 'link-button rm-map-only', onclick: () => void mapRun.runMapOnly() }, '요청 대조 없이 지도만 정리'), h('p', { class: 'fine' }, '원문을 보존하며 나중에 요청문을 골라 대조할 수 있어요.'));
@@ -3726,6 +3947,7 @@ function bindCanvas() {
     if (e.key === 'Escape' && planView.isOpen()) { const part = selected; planView.escape(); if (part && !selected) requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-drag="${CSS.escape(part)}"]`)?.focus()); return; }
     if (e.key === 'Escape' && partForm && opened?.view.parts.length) { partForm = null; renderPartForm(); return; }
     if (e.key === 'Escape' && opened && stateHold) { stateHold = null; $('space').classList.remove('state-peek'); document.querySelectorAll('#world .state-on, .map-states .ms.on').forEach(el => { el.classList.remove('state-on', 'on'); el.setAttribute('aria-pressed', 'false'); }); return; }
+    if (e.key === 'Escape' && opened && scOn) { e.preventDefault(); leaveScenario(); return; }
     if (e.key === 'Escape' && opened && selected && sheetOpen) { closeSheet(); return; }
     if (e.key === 'Escape' && opened && selected) { const key = opened.key, part = selected; go(key); requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-drag="${CSS.escape(part)}"]`)?.focus()); return; }
     if (e.key === 'Escape' && opened && scopeReading && !selected) { closeScopeReading(); return; }

@@ -20,6 +20,7 @@ import { readSessionFile, type SessionSources } from './session-source.js';
 import { WEB_RECORD_ASK, foldRecord, sessionOrigin, originLabel, sessionName } from '../shared/handover.js';
 import { PASTED_TEXT_LIMIT, isMapReading, type Project } from '../shared/types.js';
 import { PROJECT_REPORT_ASK, REPORT_ASK_EXPLAIN, checkReport, reportCheckLine, ownLinesTemplate } from '../shared/report-ask.js';
+import { scenarioRecordLike } from './scenario-view.js';
 import { nearSameRecord } from '../shared/domain.js';
 import { recordTexts } from '../shared/request-return.js';
 import type { PlanOpened } from './plan-view.js';
@@ -75,7 +76,7 @@ export interface ReturnHost {
   chrome(): void;
   /** Keep pasted records in the saved project, in order, in one save (the very same text already kept is that record again): the
    * last one's id, and whether every one was kept already. Text when not kept. */
-  paste(texts: string[], context: string | null): Promise<{ id: string; duplicate: boolean } | string>;
+  paste(texts: string[], context: string | null): Promise<{ id: string; duplicate: boolean; scenario?: string | null; scenarioError?: boolean } | string>;
   /** Keep a provided code or check file as a new record of entry `key`, only while that entry is the one open (the very same text
    * and declaration already kept is that record again). Text when not kept. */
   provide(key: string, text: string, evidence: RecordEvidence, context: string | null): Promise<{ id: string; duplicate: boolean } | string>;
@@ -93,6 +94,10 @@ export interface ReturnHost {
   mapMarks(): string[];
   /** Whether a map reading has read (some of) this record. */
   readIntoMap(recordId: string): boolean;
+  /** A scenario record as the app read it (시나리오 C01 · 방문 N · 이어짐 M · pathStatus, what was set aside); null for any other record. */
+  scenarioResult(recordId: string): Node | null;
+  /** The current map's ID ledger version, as the scenario request names it; null when there is no map to match against. */
+  ledgerLine(): string | null;
   /** Take a record out again (one no map reading has read, while no reading is under way). Text when it stays. */
   removeRecord(recordId: string): Promise<string | null>;
   /** Records wait to be read into the map: that is the pane's one main action, and this reading's summary steps back. */
@@ -287,8 +292,9 @@ export function createReturnView(host: ReturnHost) {
     if (s !== st) return;
     if (!kept) { st.pasteMsg = { text: done, ok: false }; render(); return; }
     const r = host.current()?.project.pasted.find(x => x.id === done.id);
-    const said = done.duplicate ? `같은 기록이 ${r ? `${fullTime(r.at)}부터 ` : '이미 '}이 프로젝트에 있어요. 새로 저장하지 않았어요.`
-      : `${parts.length > 1 ? '세션마다 기록을 하나씩 나눠 저장했어요.' : '기록을 저장했어요.'}${n ? ` 키·토큰처럼 보이는 ${n}곳은 가려서 저장했어요.` : ''}`;
+    const sc = done.scenario ? ' 시나리오 기록으로 읽었어요(AI 없이, 지금 지도의 ID 대장과 맞춰).' : done.scenarioError ? ' 시나리오 기록으로 읽지 못해 기록으로만 보관했어요.' : '';
+    const said = done.duplicate ? `같은 기록이 ${r ? `${fullTime(r.at)}부터 ` : '이미 '}이 프로젝트에 있어요. 새로 저장하지 않았어요.${sc}`
+      : `${parts.length > 1 ? '세션마다 기록을 하나씩 나눠 저장했어요.' : '기록을 저장했어요.'}${n ? ` 키·토큰처럼 보이는 ${n}곳은 가려서 저장했어요.` : ''}${sc}`;
     if (!untouched) { st.pasteMsg = { text: `${said} 저장하는 동안 쓴 글은 초안으로 남겨 두었어요.`, ok: true }; render(); void refresh(); return; }
     st.pasteContext = null; st.pasteMsg = null; st.storeMsg = { text: said, ok: true };
     await refresh();
@@ -743,7 +749,8 @@ export function createReturnView(host: ReturnHost) {
         h('dt', {}, '출처'), h('dd', { class: 'rr-origin' }, e.origin ?? `${NOT_RECORDED}`, e.origin ? ' (사용자 기재 · 앱이 열거나 가져오지 않음)' : null)) : null,
       ctx ? h('p', { class: 'rr-context' }, h('span', {}, '붙일 때 보던 부분'), partChip(ctx)) : null,
       // Arrived by a quote: the original, with the quote marked, is what this view is for (the readings are one step back).
-      quote ? null : read ?? h('p', { class: 'rr-lead' }, s?.pending ? '읽는 중이에요…' : src.recordId && host.readIntoMap(src.recordId) ? '지도 정리에 읽힌 기록이에요. 이 기록의 따로 요약은 아직 없어요.' : '아직 이 기록을 읽지 않았어요.'),
+      quote || !kept ? null : host.scenarioResult(kept.id),
+      quote || (kept && host.scenarioResult(kept.id)) ? null : read ?? h('p', { class: 'rr-lead' }, s?.pending ? '읽는 중이에요…' : src.recordId && host.readIntoMap(src.recordId) ? '지도 정리에 읽힌 기록이에요. 이 기록의 따로 요약은 아직 없어요.' : '아직 이 기록을 읽지 않았어요.'),
       // A record not read into any map yet can be taken out again (a copy pasted twice, the wrong text): one click, said back.
       !quote && kept && !host.readIntoMap(kept.id) ? h('p', { class: 'rr-acts rr-record-acts' }, removeButton(kept.id, backToReading)) : null,
       h('blockquote', { class: `rr-quote rr-raw${e?.kind === 'code' ? ' code' : ''}` }, ...quoted(kept?.text ?? src.text, quote, quote && at !== undefined ? { at, length: quote.length } : undefined)),
@@ -784,6 +791,15 @@ export function createReturnView(host: ReturnHost) {
       check.replaceChildren(...[line.text, line.again ? h('button', { type: 'button', class: 'link-button quiet', title: line.again, onclick: async () => { try { await navigator.clipboard.writeText(line.again!); check.append(h('span', { class: 'rr-check-said' }, ' 복사했어요.')); } catch { check.append(h('span', { class: 'rr-check-said' }, ` ${line.again}`)); } } }, '다시 써 달라는 문구 복사') : null].filter((x): x is string | HTMLButtonElement => x !== null));
     };
     syncCheck(text);
+    // A scenario record (its six tables) is read by the app itself on save, against the current map's ID ledger: said before saving.
+    const scen = h('p', { class: 'fine rr-scenario-check', role: 'status', hidden: true });
+    const syncScenario = (value: string) => {
+      const on = scenarioRecordLike(value); scen.hidden = !on; if (!on) return;
+      const ledger = host.ledgerLine();
+      scen.replaceChildren(h('strong', {}, '시나리오 기록'), ledger ? ` · 저장하면 앱이 AI 없이 지금 지도의 ID 대장(${ledger})과 맞춰 길로 읽어요. 맞지 않는 행은 따로 제외해 보여 줘요.`
+        : ' · 맞춰 볼 지도(ID 대장)가 아직 없어요. 기록으로 보관하고, 판본이 맞지 않으면 경로를 거절해요.');
+    };
+    syncScenario(text);
     // What no AI can report: the person's own three lines, put into the box as a record of their own (after any text already
     // there, as a next record) with the caret ready at the first line.
     const own = h('button', { type: 'button', class: 'link-button rr-own', title: '다음에 원하는 것, 믿지 못하는 보고, 직접 뒤집은 결정: AI는 모르는 것이라 지도가 요청의 권위로 읽어요', onclick: () => {
@@ -798,7 +814,7 @@ ${NEXT_RECORD}
     area.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); backToReading(); } });
     area.addEventListener('input', () => {
       keepDraft(st.key, area.value); count.textContent = area.value ? `${area.value.length.toLocaleString()}자` : ''; warn.hidden = !secretLike(area.value);
-      hiding.hidden = !warn.hidden || !hides(area.value); syncCheck(area.value);
+      hiding.hidden = !warn.hidden || !hides(area.value); syncCheck(area.value); syncScenario(area.value);
     });
     // A session record pasted beside other text (a web AI's answer written with WEB_RECORD_ASK, another record) is kept as a record of
     // its own: the box puts the NEXT_RECORD line between them, as it does for a session it brings in. It goes after the record the
@@ -833,7 +849,7 @@ ${NEXT_RECORD}
       h('p', { class: 'fine' }, `나누거나 종류·부분을 고르지 않아도 돼요. ${host.autoConnected() ? AUTO_SENDS : '저장한 뒤 지도 정리나 요약을 누를 때만 AI에 보내요.'}`),
       ctx ? h('p', { class: 'rr-context' }, h('span', {}, '보던 부분'), partChip(ctx),
         h('button', { type: 'button', class: 'link-button quiet', title: '읽기 맥락에서 빼요', onclick: () => { st.pasteContext = null; render(); } }, '빼기')) : null,
-      sessionBox(st.key), area, h('p', { class: 'fine rr-own-line' }, own, ' — 다음에 원하는 것 · 믿지 못하는 보고 · 직접 뒤집은 결정. AI는 모르는 것이라 지도가 요청의 권위로 읽어요.'), warn, count, hiding, check, st.pasteMsg ? h('p', { class: st.pasteMsg.ok ? 'pp-ok' : 'pp-error', role: st.pasteMsg.ok ? 'status' : 'alert' }, st.pasteMsg.text) : null)];
+      sessionBox(st.key), area, h('p', { class: 'fine rr-own-line' }, own, ' — 다음에 원하는 것 · 믿지 못하는 보고 · 직접 뒤집은 결정. AI는 모르는 것이라 지도가 요청의 권위로 읽어요.'), warn, count, hiding, check, scen, st.pasteMsg ? h('p', { class: st.pasteMsg.ok ? 'pp-ok' : 'pp-error', role: st.pasteMsg.ok ? 'status' : 'alert' }, st.pasteMsg.text) : null)];
   }
   function pasteFooter(): Node {
     const st = s!;

@@ -265,7 +265,7 @@ button:disabled { opacity: .5; cursor: default; }
 #arrow-open path, #arrow-open-on path, #arrow-open-near path { fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 #arrow-open path { stroke: var(--edge); } #arrow-open-on path { stroke: var(--accent); stroke-width: 2; } #arrow-open-near path { stroke: var(--text-3); stroke-width: 1.75; }
 #arrow-open path, #arrow-open-on path, #arrow-open-near path { stroke: context-stroke; }
-.space.dim .edge:not(.on):not(.near) .edge-line { opacity: .22; }
+.space.dim .edge:not(.on):not(.near):not(.sc-path) .edge-line { opacity: .22; }
 /* Pointing at a part (nothing selected): its lines and their other ends stay, the rest of the map steps back. */
 .space.peek:not(.dim) .edge:not(.near) .edge-line { opacity: .28; }
 .space.peek:not(.dim) .node:not(.near-end):not(.near-self):not(.dragging) { opacity: .45; }
@@ -326,6 +326,8 @@ button:disabled { opacity: .5; cursor: default; }
    flow it lines up with the flow's steps. */
 .map-states { margin: 6px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 4px; }
 .map-flow + .map-states { margin-top: 2px; padding-left: 52px; }
+.map-flow + .map-scenarios { margin-top: 2px; padding-top: 2px; border-top: 0; }
+.map-scenarios + .map-states { margin-top: 2px; padding-left: 52px; }
 .map-states .ms { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border: 1px solid transparent; border-radius: var(--r-sm); background: none; font-size: 12px; font-weight: var(--fw-meta); color: var(--text-3); white-space: nowrap; font-variant-numeric: tabular-nums; transition: background .12s, border-color .12s; }
 .map-states .ms:hover, .map-states .ms.on { background: var(--surface); border-color: var(--line); color: var(--text-2); }
 .map-states .ms .rung { display: block; flex: none; width: 6px; height: 6px; border-radius: 50%; background: none; box-shadow: inset 0 0 0 1.25px #cdd1d7; }
@@ -451,7 +453,7 @@ button:disabled { opacity: .5; cursor: default; }
 .node-entry .entry-kids:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
 .node-entry .entry-open { flex: none; margin-left: auto; padding: 0 5px; color: var(--accent); }
 .node-entry .entry-open:hover { background: var(--accent-soft); color: var(--accent-strong); }
-.space.dim .node:not(.selected):not(.related):not(.cited) .node-entry :is(.entry-text, .entry-kids) { color: var(--text-4); }
+.space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit) .node-entry :is(.entry-text, .entry-kids) { color: var(--text-4); }
 /* The short expansion (짧은 펼침): over the card and the empty space beside it, in the selection's accent; nothing under it moves. */
 .expansion { position: absolute; z-index: 6; display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; overflow: hidden; background: var(--surface); border: 1px solid var(--accent); border-radius: 12px; box-shadow: 0 0 0 3px rgba(51,88,255,.16), 0 14px 28px -14px rgba(16,24,40,.32); cursor: default; user-select: text; text-align: left; }
 .expansion:focus { outline: none; }
@@ -558,13 +560,13 @@ button:disabled { opacity: .5; cursor: default; }
 .dv-loop { margin: 0; font-size: 12.5px; line-height: 18px; color: var(--text-2); overflow-wrap: anywhere; }
 .dv-vars li { color: var(--text-3); }
 /* Parts outside the selection step back by colour, not by fading: names and second lines stay at 4.5:1 or more. */
-.space.dim .node:not(.selected):not(.related):not(.cited) { border-color: var(--hair-2); box-shadow: none; }
-.space.dim .node.has-kids:not(.item):not(.selected):not(.related):not(.cited) { box-shadow: 0 3px 0 -1px var(--surface), 0 3px 0 0 var(--hair-2); }
-.space.dim .node:not(.selected):not(.related):not(.cited) .node-name { color: var(--text-3); }
-.space.dim .node:not(.selected):not(.related):not(.cited) :is(.node-note, .node-meta, .node-meta .meta-text, .node-type, .node-io, .node-body, .node-set) { color: var(--text-4); }
-.space.dim .node:not(.selected):not(.related):not(.cited) :is(.dot, .ladder) { opacity: .55; }
-.space.dim .node:not(.selected):not(.related):not(.cited):hover { border-color: var(--line-hover); }
-.space.dim .node:not(.selected):not(.related):not(.cited):hover .node-name { color: var(--text); }
+.space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit) { border-color: var(--hair-2); box-shadow: none; }
+.space.dim .node.has-kids:not(.item):not(.selected):not(.related):not(.cited):not(.sc-visit) { box-shadow: 0 3px 0 -1px var(--surface), 0 3px 0 0 var(--hair-2); }
+.space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit) .node-name { color: var(--text-3); }
+.space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit) :is(.node-note, .node-meta, .node-meta .meta-text, .node-type, .node-io, .node-body, .node-set) { color: var(--text-4); }
+.space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit) :is(.dot, .ladder) { opacity: .55; }
+.space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit):hover { border-color: var(--line-hover); }
+.space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit):hover .node-name { color: var(--text); }
 .toggle { flex: none; width: 22px; height: 22px; border: 0; border-radius: var(--r-sm); background: none; color: var(--text-4); display: grid; place-items: center; }
 .toggle:hover { background: rgba(16,24,40,.06); color: var(--text); }
 .toggle svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: transform .12s; }
@@ -1533,7 +1535,7 @@ button:disabled { opacity: .5; cursor: default; }
 .space.rest-sum .edge:not(.sum), .space:not(.rest-sum) .edge.sum { display: none; }
 /* With a selection on a busy map: its own lines are drawn one by one; everything else stays the dimmed summary, each line
    holding only the relations not drawn on their own (a summary left with none gives way, .hit). */
-.space.sel-sum .edge:not(.sum):not(.on):not(.near):not(.ctx) { display: none; }
+.space.sel-sum .edge:not(.sum):not(.on):not(.near):not(.ctx):not(.sc-path) { display: none; }
 .space.sel-sum .edge.sum:not(.hit) { display: block; }
 .edge-count { position: absolute; min-width: 24px; height: 16px; padding: 0 5px; white-space: nowrap; border: 0; border-radius: 4px; background: var(--bg); box-shadow: none; color: var(--text-3); font-size: 11px; line-height: 16px; font-weight: var(--fw-name); text-align: center; font-variant-numeric: tabular-nums; }
 .edge-count.beside { color: var(--text-4); }
@@ -2053,3 +2055,49 @@ button:disabled { opacity: .5; cursor: default; }
 .sync-ask p { flex: 1; margin: 0; }
 .sync-ask .primary { flex: none; }
 .sync-panel .sync-blocked { padding: 6px 10px; border-radius: var(--r-md); background: var(--change-soft); color: #7a3f07; font-size: 12px; line-height: 1.5; }
+
+/* ---------- The scenario on the map (spec §3, cycle 3): one foreground scenario. Its badges sit at the cards' top-left corner (they
+   never move a card), its path is the existing lines in the accent at 3px, the parts it does not visit step back with the
+   selection's dim, its heads stand above the first visit and below the last confirmed one. One accent; the problem colour only
+   where the path is broken or a visit has no place. ---------- */
+.map-scenarios { align-items: flex-start; }
+.map-scenarios .sc-pick { max-width: 320px; }
+.map-scenarios .sc-pick.on { color: var(--accent-strong); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent-line); }
+.sc-notes { flex: 1 0 100%; display: flex; flex-direction: column; gap: 2px; padding-left: 52px; }
+.sc-note { margin: 0; font-size: 12px; line-height: 17px; color: var(--text-3); }
+.sc-note strong { font-weight: var(--fw-name); color: var(--text-2); }
+.sc-problem, .sc-problem strong { color: var(--warn-text); }
+.sc-statement { display: block; }
+.lens-head .sc-note { margin-top: 4px; }
+.lens-head .sc-note.sc-out strong { color: var(--text-3); }
+.edge.sc-path .edge-line { stroke: var(--accent); stroke-width: 3; stroke-opacity: 1; opacity: 1; stroke-dasharray: none; }
+.edge.sc-path.agg .edge-line { stroke: var(--accent); stroke-width: 3; }
+.edge.sc-path.sc-back:not(.on) .edge-line { stroke: var(--accent-line); }
+.sc-badge { position: absolute; z-index: 3; left: 10px; top: -10px; display: inline-flex; align-items: center; gap: 1px; height: 20px; padding: 0 2px; border-radius: 10px; background: var(--accent); color: #fff; box-shadow: 0 0 0 2px var(--surface); font-size: 11.5px; line-height: 20px; font-weight: var(--fw-name); font-variant-numeric: tabular-nums; white-space: nowrap; cursor: default; }
+.frame > .sc-badge { top: -10px; left: 12px; }
+.sc-v { display: inline-flex; align-items: center; gap: 2px; min-width: 16px; height: 16px; padding: 0 4px; border: 0; border-radius: 8px; background: none; color: inherit; font: inherit; line-height: 16px; justify-content: center; cursor: pointer; }
+.sc-v:hover { background: rgba(255,255,255,.2); }
+.sc-v.on { background: var(--surface); color: var(--accent-strong); }
+.sc-v:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 1px; }
+.sc-sep { opacity: .7; padding: 0 1px; }
+.sc-glyph { font-size: 11px; line-height: 16px; }
+.sc-more { font-size: 11px; }
+.sc-broken { margin-left: 6px; padding: 0 6px; height: 18px; line-height: 18px; border-radius: 9px; background: var(--warn-soft); color: var(--warn-text); box-shadow: inset 0 0 0 1px currentColor; font-size: 11px; font-weight: var(--fw-name); }
+.sc-head { position: absolute; z-index: 4; width: 240px; padding: 6px 10px; border: 1px solid var(--accent-line); border-radius: var(--r-md); background: var(--surface); box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 2px; pointer-events: auto; }
+.sc-head.sc-start { transform: translateY(-100%); }
+.sc-head-line { margin: 0; display: flex; gap: 6px; font-size: 12px; line-height: 17px; color: var(--text-2); min-width: 0; }
+.sc-head-label { flex: none; font-weight: var(--fw-name); color: var(--accent-strong); }
+.sc-head-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: keep-all; overflow-wrap: anywhere; }
+.sc-head-line.sc-problem .sc-head-label { color: var(--warn-text); }
+.sc-head-line.sc-short { color: var(--text-3); font-size: 11.5px; }
+.sc-visit-facts { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; font-size: 13px; line-height: 19px; }
+.sc-visit-facts .sc-row { display: contents; }
+.sc-visit-facts dt { color: var(--text-4); font-size: 12px; }
+.sc-visit-facts dd { margin: 0; color: var(--text-2); min-width: 0; overflow-wrap: anywhere; }
+.sc-now { color: var(--text-4); } .sc-gone { color: var(--warn-text); }
+.lens-ports ul.sc-evidence, .sc-evidence { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; line-height: 18px; color: var(--text-3); }
+.sc-ev-id { font-weight: var(--fw-name); color: var(--text-2); }
+.sc-quote { display: block; color: var(--text-2); }
+.rr-scenario-check strong { color: var(--accent-strong); font-weight: var(--fw-name); }
+.sc-result { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.sc-result > p { margin: 0; }
