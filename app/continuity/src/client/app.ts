@@ -27,7 +27,7 @@ import { placeExpansion, actionSections, pushPlace, readOpenState, writeOpenStat
 import { detailChain, stepConsumers, unmappedMark, type ChainLink, type OutLine } from './steps-view.js';
 import { labelSpots, polylineHitsRect, portSpots } from './map-labels.js';
 import { opsLines } from './ops-line.js';
-import { PROJECT_REPORT_ASK, CHAT_REPORT_ASK, REPORT_ASK_EXPLAIN, deltaReportAsk, reflectAsk, plannedNote } from '../shared/report-ask.js';
+import { PROJECT_REPORT_ASK, CHAT_REPORT_ASK, DESIGN_RECORD_ASK, RECORD_ASK_EXPLAIN, deltaReportAsk, reflectAsk, scenarioAskWithLedger, plannedNote } from '../shared/report-ask.js';
 import { modelLabel } from '../shared/model-label.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
 import { createPlanView } from './plan-view.js';
@@ -3210,8 +3210,13 @@ function renderMapEntry() {
     acts, note ? h('p', { class: 'fine' }, note) : null,
     // A project an AI session already knows: that session writes the report the map reads best. The words are copied here and
     // carried by the person; nothing is sent.
-    fresh ? null : h('p', { class: 'fine se-ask' }, '진행 중인 AI 대화가 있다면 ', askCopy('현황 보고 요청 문구 복사', PROJECT_REPORT_ASK, 'link-button'), ' 또는 ',
-      askCopy('파일을 못 보는 대화용', CHAT_REPORT_ASK, 'link-button'), '을 그 대화에 붙여 넣으세요. 나온 보고서를 ‘기록 붙여넣기’에 넣으면 부분·연결·상태·철회·모르는 것이 지도가 돼요.'),
+    // Three records the spec names (§8.1): the status report, the design record, and the scenario record with the map's ledger
+    // (only once a map exists; the app keeps it as a record and does not read it as a path yet).
+    fresh ? null : h('p', { class: 'fine se-ask' }, '진행 중인 AI 대화가 있다면 ', askCopy('현황 보고 요청', PROJECT_REPORT_ASK, 'link-button', RECORD_ASK_EXPLAIN.status), ' · ',
+      askCopy('설계 기록 요청', DESIGN_RECORD_ASK, 'link-button', RECORD_ASK_EXPLAIN.design),
+      ...(o.view.parts.length ? [' · ', askCopy('시나리오 기록 요청(대장 포함)', scenarioAskWithLedger(o.view, o.project.readings), 'link-button', RECORD_ASK_EXPLAIN.scenario)] : []),
+      ' 문구를 복사해 그 대화에 붙여 넣으세요(파일을 못 보는 대화면 ', askCopy('대화용 현황 요청', CHAT_REPORT_ASK, 'link-button', RECORD_ASK_EXPLAIN.status),
+      '). 나온 답을 하나씩 ‘기록 붙여넣기’에 넣으면 부분·연결·상태·안의 단계·모르는 것이 지도가 돼요.'),
     // How this reading is batched and bounded: the route the very next reading takes (shared/map-route.ts), not a guess from status.
     // How the reading is batched and bounded (shared/map-route.ts): folded, for the first time a person reads this card.
     mapBatchLines(next?.route ?? null).length ? h('details', { class: 'se-more' }, h('summary', {}, '어떻게 읽는지 · 비용 상한'), ...mapBatchLines(next?.route ?? null).map(t => h('p', { class: 'fine se-batch' }, t))) : null,
@@ -3238,7 +3243,12 @@ function mapBlock(): HTMLElement | null {
   // A map that exists: the next report asks only for what changed, by the names this map holds.
   if (o.view.parts.length && !st.pending) sec.append(h('p', { class: 'fine rm-ask' }, askCopy('변경 보고 요청 문구 복사', deltaReportAsk(o.view, o.project.readings), 'link-button'),
     ' — 지도의 부분 이름을 넣은 문구예요. 프로젝트를 보고 있는 AI 대화에 붙여 넣고, 나온 답을 기록으로 붙여 넣으세요. ',
-    askCopy('이렇게 이해했다 확인 문구 복사', reflectAsk(o.view, o.project.readings), 'link-button'), ' — 지도가 읽은 것을 번호 줄로 보내 틀린 줄만 고쳐 받아요.'));
+    askCopy('이렇게 이해했다 확인 문구 복사', reflectAsk(o.view, o.project.readings), 'link-button'), ' — 지도가 읽은 것을 번호 줄로 보내 틀린 줄만 고쳐 받아요.'),
+    // The design record and the scenario record (with this map's ID ledger): pasted back like any other record; the scenario
+    // record is kept, not yet read as a path.
+    h('p', { class: 'fine rm-ask rm-records' }, askCopy('설계 기록 요청', DESIGN_RECORD_ASK, 'link-button', RECORD_ASK_EXPLAIN.design), ' · ',
+      askCopy('시나리오 기록 요청(대장 포함)', scenarioAskWithLedger(o.view, o.project.readings), 'link-button', RECORD_ASK_EXPLAIN.scenario),
+      ' — 설계 기록은 카드의 안쪽(산출물·단계·조건)을, 시나리오 기록은 동작 경로 하나를 써 받아요. 둘 다 다른 기록처럼 붙여 넣어요. 시나리오 기록은 보관만 하고 아직 지도에 길로 그리지 않아요.'));
   const limited = status.release === 'existing-map';
   if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && !limited) sec.append(h('p', { class: 'fine' }, sendLine(inp)), h('button', { type: 'button', class: 'link-button', onclick: () => { returnView.close(); planView.openResults(); } }, '요청문을 골라 대조'));
   if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && can && !st.pending && !waiting) sec.append(h('button', { type: 'button', class: 'link-button rm-map-only', onclick: () => void mapRun.runMapOnly() }, '요청 대조 없이 지도만 정리'), h('p', { class: 'fine' }, '원문을 보존하며 나중에 요청문을 골라 대조할 수 있어요.'));
@@ -3506,8 +3516,8 @@ let lastClick = { id: '', at: 0, x: 0, y: 0, scope: null as string | null };
 let toastKey: string | null = null;
 /** A request-text copy button: the words go to the clipboard (a toast says so), or, when copying is blocked, into a
  * read-only box under the button to copy by hand. The title says what the person gets. */
-function askCopy(label: string, text: string, cls: string): HTMLElement {
-  const b = h('button', { type: 'button', class: cls, title: REPORT_ASK_EXPLAIN, onclick: async () => {
+function askCopy(label: string, text: string, cls: string, title: string = RECORD_ASK_EXPLAIN.status): HTMLElement {
+  const b = h('button', { type: 'button', class: cls, title, onclick: async () => {
     let ok = true; try { await navigator.clipboard.writeText(text); } catch { ok = false; }
     if (ok) { toast('요청 문구를 복사했어요. 프로젝트를 보고 있는 AI 대화에 붙여 넣고, 나온 보고서를 기록 붙여넣기에 넣으세요.'); return; }
     const old = b.parentElement?.querySelector('.ask-manual'); old?.remove();
