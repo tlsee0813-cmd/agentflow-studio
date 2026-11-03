@@ -571,8 +571,8 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
   const code = 'INVALID_RESPONSE', aside: MapReplyError[] = [];
   // divided (map.6 + setAside): an item of its own (a basis quote, a claim, a relation, a candidate, a gap, a material range, and
   // what runs past a count bound) that breaks a rule is set aside with its diagnostic, as in map.7. Unlike map.7 a part is never
-  // set aside: a part breaking a rule of its own, a new part left without any basis quote, and a part whose every claim was set
-  // aside still refuse the whole reply; so do contradictions (a candidate settling or repeating what is stated or left open),
+  // set aside: a part breaking a rule of its own and a new part left without any basis quote still refuse the whole reply (pipeline
+  // .34: a new part whose every claim was set aside stays, with no claim); so do contradictions (a candidate settling or repeating what is stated or left open),
   // a key-like word, the reply's shape and a reply with nothing left. Material the reply also quotes as evidence is set aside.
   const seven = ask.schemaVersion === MAP7_SCHEMA, divided = ask.schemaVersion === MAP6_SCHEMA && options?.setAside === true, lenient = seven || divided;
   const six = seven || ask.schemaVersion === MAP6_SCHEMA, five = six || ask.schemaVersion === MAP5_SCHEMA, four = five || ask.schemaVersion === MAP4_SCHEMA, three = four || ask.schemaVersion === MAP3_SCHEMA, two = three || ask.schemaVersion === MAP2_SCHEMA;
@@ -773,7 +773,7 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
     // flow list and its running part's state did not fit four and twelve (the caps pushed out its main receiver's outputs and live defects).
     // pipeline .32: sixteen (MAP6_CLAIMS): a running part's own change, defect, withdrawal, rule and unknown rows did not fit six.
     // pipeline .33: twenty.
-    const claimList = many(p.claims, ask.schemaVersion === MAP6_SCHEMA ? MAP6_CLAIMS : 4, `parts[${pi}].claims`), claimsAside = aside.length;
+    const claimList = many(p.claims, ask.schemaVersion === MAP6_SCHEMA ? MAP6_CLAIMS : 4, `parts[${pi}].claims`);
     const own = new Set(parts.get(ref)?.current.map(c => c.key) ?? []);
     const claimAt = new Map<MapReplyClaim, number>();
     let claims = claimList.map((c, j): MapReplyClaim | null => { const got = soft((): MapReplyClaim | null => {
@@ -894,8 +894,10 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       return { kind: c.kind as ClaimKind, text: c.text.trim(), ...q, about, replaces: c.replaces as string | null, key: c.key as string | null, topic, evidence: grade, when, where, before,
         scope, scopeName, anchors, enforcedBy, withdrawalKind, gate };
     }); if (got) claimAt.set(got, j); return got; }).filter((x): x is MapReplyClaim => x !== null);
-    // divided: a part whose every claim was set aside ends up empty of what it said; refused with the first of them.
-    if (divided && claimList.length && !claims.length) throw aside[claimsAside] ?? new MapReplyError(`parts[${pi}].claims`, 'contract', 'empty-part');
+    // divided (pipeline .34): a new part whose every claim was set aside stays on its basis with no claim (each claim's reason is
+    // kept); before .34 the reading was refused with the first of them, and a correction reply doing so ended the whole run (the
+    // first .34 KORU run: 소유자's one claim quoted ARM's rule row, wrong-part). A render's first pass still refuses such a part
+    // (validateRenderedFragment, strict) so its one correction may rewrite it; an existing part left with nothing still refuses.
     // map-reading.7: the state the record gives the part (with the span saying it and when) and the part's files. A wrong one is
     // left out alone, the part stays: set aside in the lenient readings (and a quote too long, as for a claim), else refused.
     let state: PartState | null = null, stateQuote: MapReplyQuote | null = null, stateWhen: string | null = null, files: string[] = [];

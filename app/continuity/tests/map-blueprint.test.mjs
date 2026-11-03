@@ -138,7 +138,8 @@ test('fragments cannot take another group, rename/reparent, omit/duplicate a ref
   validateRenderedFragment(mid, group, f.ask, blueprint, false);
   const error = refused(() => validateRenderedFragment(long, g0, f0.ask, b0, true));
   assert.deepEqual(mapStageIssues(long, error).find(x => x.rule === 'length' && x.path === 'parts[0].claims[0].text'), { path: 'parts[0].claims[0].text', rule: 'length', expected: 220, actual: long.parts[0].claims[0].text.length });
-  refused(() => validateRenderedFragment(long, g0, f0.ask, b0, false));
+  // .34: the correction's reply sets the overlong claim aside even where it leaves its part with no claim (the run goes on).
+  assert.deepEqual(validateRenderedFragment(long, g0, f0.ask, b0, false), long);
 });
 
 test('existing fragment names and parent stay null on map wire while original blueprint names stay exact', () => {
@@ -401,7 +402,7 @@ test('machine correction revision covers every affected planned ref with at most
 });
 
 // ---- first-map-divided.6: isolated items are set aside; parts, assignment, key ranges and contradictions stay whole ----
-test('first-map fragments set aside isolated bad items but still refuse parts left empty, duplicate keys and foreign key ranges', () => {
+test('first-map fragments set aside isolated bad items but still refuse a part without basis, duplicate keys and foreign key ranges (.34: a part emptied of claims only on the first pass)', () => {
   const f = fixture(), blueprint = planned(f, 3), group = splitBlueprintParts(blueprint)[0], base = rendered(f, blueprint)[0];
   assert.equal(f.ask.schemaVersion, M.MAP6_SCHEMA);
   const soft = structuredClone(base);
@@ -411,11 +412,16 @@ test('first-map fragments set aside isolated bad items but still refuse parts le
   assert.deepEqual(validateRenderedFragment(soft, group, f.ask, blueprint), soft, 'the raw fragment is cached untouched');
   for (const mutate of [
     x => { x.parts[0].basis = ['N99.01', 'N99.02']; },                       // a new part without any surviving basis
-    x => { x.parts[0].claims = [{ ...x.parts[0].claims[0], at: 'N99.01' }]; }, // a part whose every claim is set aside
     x => { x.parts[1].claims[0].key = 's1'; },                                // a duplicate statement key (contradiction)
     x => { x.parts[0].claims.push({ ...x.parts[0].claims[0], key: 's150', at: 'N99.01' }); }, // a key outside the range, even on a bad claim
     x => { x.parts[0].name = '이름 변경'; }, x => { x.parts[0].role = '가'.repeat(301); }, x => { x.parts.pop(); },
   ]) { const bad = structuredClone(base); mutate(bad); refused(() => validateRenderedFragment(bad, group, f.ask, blueprint)); }
+  // .34: a part whose every claim is set aside refuses the first pass only (with its first claim's reason); a correction's reply and
+  // the combined wire keep the part, with no claim.
+  const emptied = structuredClone(base); emptied.parts[0].claims = [{ ...emptied.parts[0].claims[0], at: 'N99.01' }];
+  assert.deepEqual(validateRenderedFragment(emptied, group, f.ask, blueprint), emptied);
+  let first; try { validateRenderedFragment(emptied, group, f.ask, blueprint, true); } catch (error) { first = error; }
+  assert.deepEqual(first?.validation, { path: 'parts[0].claims[0].at', rule: 'reference' });
   let failure; const lost = structuredClone(base); lost.parts[0].basis = ['N99.01', 'N99.02'];
   try { validateRenderedFragment(lost, group, f.ask, blueprint); } catch (error) { failure = error; }
   assert.deepEqual(failure.validation, { path: 'parts[0].basis[0]', rule: 'reference' }, 'refused with the first set-aside quote');

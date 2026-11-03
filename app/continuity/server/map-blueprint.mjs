@@ -597,6 +597,15 @@ export function validateRenderedFragment(value, group, ask, blueprint, strict = 
   // first .30 run spent its $1 on one correction per fragment (wrong-part, restate, fields) and could not reserve the last one.
   // The strict pass still refuses what is structural (the shape, refs, keys, key ranges, a part left empty) and a claim over 220.
   if (strict && ask.schemaVersion !== 'studio.map.6') refuseField(readingExclusions(read), PARTS_SCOPE);
+  // .34: a first map's reading keeps a new part whose every claim was set aside (with no claim; the reasons are kept), so a
+  // correction's reply or the combined wire never fails the run for it (the first .34 KORU run ended at render-1-correction for one
+  // wrong-part claim of 소유자). Only the first pass refuses such a part, with its first set-aside claim, so the one correction may
+  // rewrite it; the correction's reply is read as leniently as the combined wire.
+  if (strict && ask.schemaVersion === 'studio.map.6') for (const [i, part] of value.parts.entries()) {
+    if (!part.claims.length || read.parts.find(x => x.ref === part.ref)?.claims.length) continue;
+    const first = readingExclusions(read).find(x => x.path.startsWith(`parts[${i}].claims[`));
+    invalid(first ? { validation: { path: first.path, rule: first.rule, ...(first.rule === 'contract' ? { category: first.category } : {}) } } : undefined);
+  }
   // .34: a first map's first pass that leaves unquoted a plan item assigned to one of its parts while that part holds fewer claims
   // than the cap is refused for its one correction, whose feedback names the items (plan-claims); the correction's reply is taken as
   // it is. The .33 card runner held ten of twenty and lost four condition rows (and ARM its [모름] step) with no exclusion.

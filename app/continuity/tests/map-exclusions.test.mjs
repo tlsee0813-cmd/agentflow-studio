@@ -232,10 +232,14 @@ test('divided set-aside: plain map.6 still refuses one bad claim whole; the opti
   assert.deepEqual(opted, seven); assert.deepEqual(M.readingExclusions(opted), M.readingExclusions(seven));
 });
 
-test('divided set-aside still refuses whole: an empty part, a part without basis, contradictions, secret-like text, nothing left', () => {
+test('divided set-aside still refuses whole: a part without basis, contradictions, secret-like text, nothing left (.34: a new part emptied of claims stays)', () => {
   const f = firstMap(), soft = v => M.validateMapReply(v, f.ask, { setAside: true });
+  // .34: a new part whose every claim is set aside stays on its basis with no claim, the reason kept; plain map.6 still refuses it.
+  const emptied = structuredClone(f.reply); emptied.parts[0].claims = [f.claim('s1', 'N01.99')];
+  const kept = soft(structuredClone(emptied));
+  assert.deepEqual([kept.parts.map(p => [p.ref, p.claims.length]), M.readingExclusions(kept).map(x => [x.path, x.rule])], [[['new:save', 0]], [['parts[0].claims[0].at', 'reference']]]);
+  assert.throws(() => M.validateMapReply(structuredClone(emptied), f.ask));
   const cases = [
-    r => { r.parts[0].claims = [f.claim('s1', 'N01.99')]; },
     r => { r.parts[0].basis = ['N01.99']; },
     r => { r.parts[0].claims[1] = f.claim('s1', f.at[2]); },
     r => { r.candidates = [{ target: 'holds', text: '미정', parts: ['new:save'], at: null, statement: { key: 's1', kind: 'idea', text: '미정 진술', at: f.at[2], about: null } }]; },

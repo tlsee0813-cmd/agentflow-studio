@@ -1651,3 +1651,29 @@ test('.34: each render hears its parts\' 「조건·거부·분기」 rows (alia
   await again({ renderModel: 'gpt-6.1-terra', callProvider: fakeProvider(askFor(), plainCalls) }).call(askFor());
   assert.deepEqual(plainCalls.filter(c => c.stage === 'render').map(c => c.input.conditions), [{}]);
 });
+
+// ---- first-map-divided.34 (the first .34 KORU run ended at render-1-correction, $0.53, for one wrong-part claim that left 소유자
+// with none): a correction reply is read as leniently as the first pass; an item-level fault is set aside with its reason, and only
+// what is structural fails the run (fake providers only). ----
+test('.34: a render correction reply whose one claim is wrong-part (its part left with none) is accepted with that claim set aside; no further call', async t => {
+  const text = ['2. 부분', '| 이름 | 하는 일 |', '|---|---|', '| 입력기 | 프로젝트 문서를 작업 큐에 전달한다 |', '| 통합기 | 작업 큐를 읽어 전체 조건을 대조한다 |'].join('\n');
+  const ask = validateMapAsk({ ...askFor(), records: [{ id: 'N01', kind: 'pasted', note: '', basis: '부분 표', ...encodeSpans('N01', text) }, askFor().records[1]] });
+  const row = head => ask.records[0].spans.find(s => s.t.startsWith(head)).s;
+  const part = (ref, name, head, claimHead, key) => ({ ref, name, parent: null, role: `${name}의 책임`, roleAbout: null, roleReplaces: null, basis: [row(head)],
+    claims: [{ kind: 'describes', text: `${name}의 원문 행을 옮긴다.`, at: row(claimHead), about: null, replaces: null, key }] });
+  // 입력기's one claim quotes 통합기's row: wrong-part, and 입력기 is left with no claim.
+  const wire = { summary: '입력기와 통합기를 읽었다.', relations: [], candidates: [], gaps: [], matches: [], material: [],
+    parts: [part('new:in', '입력기', '| 입력기', '| 통합기', 's1'), part('new:merge', '통합기', '| 통합기', '| 통합기', 's2')] };
+  const { make } = await setup(t), calls = [];
+  const { wire: out, exclusions } = await make({ renderModel: 'gpt-6.1-terra', callProvider: fakeProvider(ask, calls, () => {}, wire) }).read(ask);
+  const renders = calls.filter(c => c.stage === 'render');
+  assert.deepEqual(renders.map(c => !!c.input.correction), [false, true], 'the first pass is refused for the emptied part; the one correction is read and never a third render');
+  assert.deepEqual(renders[1].input.correction.issues.filter(x => x.category === 'wrong-part').map(x => x.path), ['parts[0].claims[0]']);
+  assert.deepEqual(calls.filter(c => c.stage === 'global').length, 1, 'the run goes on to the global stage');
+  assert.deepEqual(exclusions.map(x => [x.path, x.rule, x.category]), [['parts[0].claims[0]', 'contract', 'wrong-part']]);
+  assert.deepEqual(out.parts.map(p => [p.ref, p.claims.map(c => c.key)]), [['new:in', []], ['new:merge', ['s2']]], 'the part stays on its basis with no claim');
+  const read = validateMapReply(out, ask);
+  assert.equal(M.setAside(read).length, 0);
+  M.attachExclusions(read, exclusions, ask);
+  assert.deepEqual(M.readingExclusions(read).map(x => x.category), ['wrong-part']);
+});
