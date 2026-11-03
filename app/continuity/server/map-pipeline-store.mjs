@@ -106,6 +106,21 @@ const validResponse = a => a.provider === 'openai' && typeof a.responseId === 's
   && typeof a.responseAt === 'string' && Number.isFinite(Date.parse(a.responseAt));
 /** A pending background response may be read again (GET only, never re-sent) for this long after its POST returned. */
 export const MAP_RESUME_MAX_AGE_MS = 60 * 60 * 1000;
+/** .35: a lost attempt (no usage came back) whose background response id was kept is read back once (a free GET) for this long after
+ * its POST returned, so the ledger can charge what the response reports instead of its whole reservation (reconcileLost). */
+export const MAP_RECONCILE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+const validAt = s => typeof s === 'string' && Number.isFinite(Date.parse(s));
+/** A lost attempt keeps its whole reservation (usage null); a reconciled one (lost false) holds the usage its response reported,
+ * within the reservation, its charge exactly that usage and when it was read back. */
+function validLost(a) {
+  if (own(a, 'reconciledAt') && a.lost !== false) return false;
+  if (!own(a, 'lost')) return true;
+  if (a.lost === true) return a.usage === null && a.charged === a.reserved;
+  if (a.lost !== false || !own(a, 'responseId') || !validAt(a.reconciledAt) || !plain(a.usage)) return false;
+  const { inputTokens, outputTokens } = a.usage;
+  return Object.keys(a.usage).length === 2 && natural(inputTokens) && natural(outputTokens) && inputTokens <= a.inputBytes && outputTokens <= a.maxOutputTokens
+    && cost(a.provider, a.model, inputTokens, outputTokens) === a.charged;
+}
 function validate(body) {
   if (!plain(body) || !plain(body.jobs) || Object.keys(body.jobs).length > 10000) throw Error('damaged');
   for (const [key, job] of Object.entries(body.jobs)) {
@@ -118,7 +133,7 @@ function validate(body) {
       if (own(stage, 'diagnostics') && (stage.state !== 'complete' || !validDiagnostics(stage.diagnostics))) throw Error('damaged');
       for (const a of stage.attempts) {
         if (!plain(a) || !/^\d{4}-\d{2}$/.test(a.month) || !natural(a.inputBytes) || !natural(a.maxOutputTokens) || !natural(a.reserved) || !natural(a.charged) || a.charged > a.reserved || cost(a.provider, a.model, a.inputBytes, a.maxOutputTokens) !== a.reserved) throw Error('damaged');
-        if ((own(a, 'responseId') && !validResponse(a)) || (own(a, 'resumedAt') && (!own(a, 'responseId') || typeof a.resumedAt !== 'string' || !Number.isFinite(Date.parse(a.resumedAt)))) || (own(a, 'lost') && (a.lost !== true || a.usage !== null || a.charged !== a.reserved))) throw Error('damaged');
+        if ((own(a, 'responseId') && !validResponse(a)) || (own(a, 'resumedAt') && (!own(a, 'responseId') || typeof a.resumedAt !== 'string' || !Number.isFinite(Date.parse(a.resumedAt)))) || !validLost(a)) throw Error('damaged');
       }
     }
   }
@@ -201,7 +216,7 @@ export async function openMapPipelineStore({ dir, monthlyUsd = 20, runUsd = 1, n
         // Usage outside the reservation is evidence that our upper bound was invalid: keep the ceiling, stop resending.
         if (tokens[0] > a.inputBytes || tokens[1] > a.maxOutputTokens) throw new ApiError('MAP_STAGE_UNCERTAIN', 409);
         a.charged = cost(a.provider, a.model, ...tokens);
-        delete a.lost; delete a.usage; // a resumed response that came back after all
+        delete a.lost; delete a.usage; delete a.reconciledAt; // a resumed response that came back after all
       }
       if (complete) {
         if (!own(options, 'value') || options.value === undefined) throw new ApiError('MAP_PIPELINE_INVALID', 400);
@@ -212,7 +227,8 @@ export async function openMapPipelineStore({ dir, monthlyUsd = 20, runUsd = 1, n
       } else {
         s.state = options.uncertain === false ? 'failed' : 'uncertain';
         // Nothing came back from a dispatched call: the reservation stays charged and the attempt says so (eval, cycle log).
-        if (!tokens && s.state === 'uncertain') { a.usage = null; a.lost = true; }
+        // .35: an attempt already reconciled keeps the usage its response reported.
+        if (!tokens && s.state === 'uncertain' && a.lost !== false) { a.usage = null; a.lost = true; }
         const diagnostic = stageDiagnostic(options.diagnostic, date().toISOString());
         if (diagnostic) s.diagnostic = diagnostic;
       }
@@ -251,6 +267,45 @@ export async function openMapPipelineStore({ dir, monthlyUsd = 20, runUsd = 1, n
       return { attempt: s.attempts.length, resumed: true };
     });
   }
+  /** .35: reads back once every lost attempt (lost: true) that kept a background response id younger than maxAgeMs (24 h) and whose
+   * stage is not running: readUsage(responseId) is the caller's one GET of that response (no key or request enters this module),
+   * resolving to its usage ({ inputTokens, outputTokens }) when the response reached its end and reports one, else null. A usage within
+   * the reservation replaces the charge (lost: false, usage, reconciledAt); a failed read, no usage or a usage past the reservation
+   * leaves the attempt as it was. Totals (monthly and per run) are sums of charges, so they follow. Never throws for one read. Returns
+   * [{ key, stage, attempt, responseId, reconciled, beforeUsd, chargedUsd }] for the attempts read. */
+  async function reconcileLost(readUsage, { maxAgeMs = MAP_RECONCILE_MAX_AGE_MS } = {}) {
+    available();
+    if (typeof readUsage !== 'function' || !Number.isSafeInteger(maxAgeMs) || maxAgeMs <= 0) throw new ApiError('MAP_PIPELINE_INVALID', 400);
+    const at = date().valueOf(), wanted = [];
+    for (const [key, job] of Object.entries(body.jobs)) for (const [stage, s] of Object.entries(job.stages)) {
+      if (s.state === 'running') continue;
+      s.attempts.forEach((a, i) => {
+        if (a.lost !== true || a.provider !== 'openai' || !own(a, 'responseId')) return;
+        const age = at - Date.parse(a.responseAt);
+        if (age >= 0 && age < maxAgeMs) wanted.push({ key, stage, i, responseId: a.responseId });
+      });
+    }
+    const read = [];
+    for (const w of wanted) { let usage = null; try { usage = await readUsage(w.responseId); } catch { usage = null; } read.push({ ...w, tokens: usageTokens(usage) }); }
+    if (!read.length) return [];
+    return serial(async () => {
+      available();
+      const next = clone(body), out = [];
+      for (const r of read) {
+        const s = next.jobs[r.key]?.stages[r.stage], a = s?.attempts[r.i];
+        // What changed while the response was read (a resume, another reconciliation) is left as it is.
+        if (!a || s.state === 'running' || a.lost !== true || a.responseId !== r.responseId) continue;
+        const before = a.charged, fits = !!r.tokens && r.tokens[0] <= a.inputBytes && r.tokens[1] <= a.maxOutputTokens;
+        if (fits) {
+          a.charged = cost(a.provider, a.model, ...r.tokens); a.usage = { inputTokens: r.tokens[0], outputTokens: r.tokens[1] };
+          a.lost = false; a.reconciledAt = date().toISOString();
+        }
+        out.push({ key: r.key, stage: r.stage, attempt: r.i + 1, responseId: r.responseId, reconciled: fits, beforeUsd: before / NANO, chargedUsd: a.charged / NANO });
+      }
+      if (out.some(x => x.reconciled)) await persist(next);
+      return out;
+    });
+  }
   function run(key, fn) {
     available(); if (!validKey(key) || typeof fn !== 'function') throw new ApiError('MAP_PIPELINE_INVALID', 400);
     if (closing) throw new ApiError('MAP_PIPELINE_STORE_UNAVAILABLE', 503);
@@ -269,10 +324,12 @@ export async function openMapPipelineStore({ dir, monthlyUsd = 20, runUsd = 1, n
     return last ? clone(last) : null;
   }
   return {
-    run, get, begin, lastFailure, noteResponse, pendingResponse, resume,
+    run, get, begin, lastFailure, noteResponse, pendingResponse, resume, reconcileLost,
     complete: (key, stage, options = {}) => finish(key, stage, options, true),
     failed: (key, stage, options = {}) => finish(key, stage, options, false),
     describe() { const month = date().toISOString().slice(0, 7); return { durable: !problem && !closed, problem, openaiOnly: true, monthlyUsd, runUsd, month, spentUsd: totals(null, month).monthly / NANO, lastFailure: lastFailure() }; },
+    /** .35: what one run (key) has charged in USD, the reconciled amounts included. */
+    spentByRun: key => { available(); if (!validKey(key)) throw new ApiError('MAP_PIPELINE_INVALID', 400); return totals(key, date().toISOString().slice(0, 7)).run / NANO; },
     async close() { closing = true; await Promise.allSettled([...running]); await queue; closed = true; if (release) { const unlock = release; release = null; await unlock(); } }
   };
 }

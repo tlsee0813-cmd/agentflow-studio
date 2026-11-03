@@ -919,10 +919,13 @@ test('map-reading.11: a rule with no place gets at most two condition rows of it
   const stop = engine.claims[0].anchors[0].quote;
   assert.deepEqual([stop.record, stop.quote], ['N01', '| 엔진 | not 1 <= stop <= 250 | STOP_NOT_RESIDENT | J1 답 | [파일: R] |']);
   assert.deepEqual([places(engine.claims[1]), places(engine.claims[2])], [[], []], 'the gate rule shares no word with a condition row; a project rule gets none');
-  assert.deepEqual(places(engine.claims[3]), [['stated', '엔진 · not 1 <= stop <= 250', false, 'not 1 <= stop <= 250']], 'the model\'s place stays alone and never carries program');
-  // 지출 shares nothing with the card runner's rows (calls.py is a file-map row, not a condition row); the second rule shares four words
-  // with REVIEW_EXPIRED_DIRECTION and with INVALID, two with CHECKPOINT_TIME: the two most, in the record's order.
-  assert.deepEqual(places(card.claims[0]), []);
+  // .35: the model's place stays alone and never carries program; said stated on a condition row its rule row does not write, it is
+  // read as inferred.
+  assert.deepEqual(places(engine.claims[3]), [['inferred', '엔진 · not 1 <= stop <= 250', false, 'not 1 <= stop <= 250']], 'the model\'s place stays alone and never carries program');
+  // 지출 shares no two words with the card runner's condition rows; .35: its file-map row C/calls.py (「모델 호출·지출 상한 …」) shares 지출
+  // and 상한 (cap), so the program places it there (the .34 run's s154). The second rule shares four words with REVIEW_EXPIRED_DIRECTION
+  // and with INVALID, two with CHECKPOINT_TIME: the two most, in the record's order (condition rows before file rows).
+  assert.deepEqual(places(card.claims[0]), [['inferred', 'C/calls.py', true, '카드 러너']]);
   assert.deepEqual(places(card.claims[1]).map(x => x[1]), ["expiry<=stamp and side!='NONE'", "watch=='OFF'이고 그 시각에 TRADING_RESTRICTION 사건 없음"]);
   assert.equal(M.PROGRAM_ANCHORS_MAX, 2);
   assert.deepEqual(places(watch.claims[0]), [], 'a part without condition rows gets none');
@@ -941,7 +944,8 @@ test('map-reading.11 storage: every anchor says program (true only on an inferre
   const f = koru34(), applied = M.applyReading(f.p, f.inp, M.validateMapReply(structuredClone(f.reply), f.ask), meta('R_eleven'));
   assert.equal(applied.reading.version, 'map-reading.11');
   const [engine, card] = applied.reading.parts;
-  assert.deepEqual(engine.claims.map(c => c.anchors.map(a => [a.kind, a.text, a.program])), [[['inferred', 'not 1 <= stop <= 250', true]], [], [], [['stated', '엔진 · not 1 <= stop <= 250', false]]]);
+  // .35: the model's stated place on a condition row its rule row does not write is stored as read: inferred, never program.
+  assert.deepEqual(engine.claims.map(c => c.anchors.map(a => [a.kind, a.text, a.program])), [[['inferred', 'not 1 <= stop <= 250', true]], [], [], [['inferred', '엔진 · not 1 <= stop <= 250', false]]]);
   assert.deepEqual(card.claims[1].anchors.map(a => a.program), [true, true]);
   const stop = engine.claims[0].anchors[0].quote;
   assert.equal(KORU34.slice(stop.from, stop.to), stop.quote, 'the program\'s place stands on the row where it stands in the record');

@@ -117,6 +117,22 @@ async function readBody(response, signal) {
   }
 }
 
+/** .35: one bounded GET of a kept background response (a free read, never a generation, never retried): its usage ({ inputTokens,
+ * outputTokens, … } as a call reports it) when the response has reached a terminal status and reports one; null for anything else
+ * (still running, no usage, an HTTP or network failure, a time-out, another id). The ledger's reconciliation of lost attempts. */
+export async function readResponseUsage({ apiKey, responseId, fetchImpl = globalThis.fetch, timeoutMs = CANCEL_TIMEOUT_MS, signal } = {}) {
+  if (typeof apiKey !== 'string' || !apiKey.trim() || typeof responseId !== 'string' || !RESPONSE_ID.test(responseId)
+    || !Number.isSafeInteger(timeoutMs) || timeoutMs <= 0 || signal?.aborted) return null;
+  const bound = signal ? AbortSignal.any([signal, AbortSignal.timeout(timeoutMs)]) : AbortSignal.timeout(timeoutMs);
+  try {
+    const response = await fetchImpl(`${ENDPOINTS.openai}/${responseId}`, { method: 'GET', redirect: 'manual', signal: bound, headers: { Authorization: `Bearer ${apiKey}` } });
+    if (!response.ok || response.redirected) { cancelBody(response.body); return null; }
+    const raw = JSON.parse(await readBody(response, bound));
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw) || (raw.id !== undefined && raw.id !== responseId) || !TERMINAL.includes(raw.status)) return null;
+    return usageOf(raw, 'openai');
+  } catch { return null; }
+}
+
 /** One bounded, credential-safe JSON call. Hooks run once; onDispatch can refuse before any paid request.
  * An OpenAI call whose timeout exceeds MAP_BACKGROUND_AFTER_MS (or that resumes a kept response id) runs in background mode:
  * POST (the one paid request) → onQueued({ id }) → GET polls → the same strict parse as a direct reply. Polls are free reads of

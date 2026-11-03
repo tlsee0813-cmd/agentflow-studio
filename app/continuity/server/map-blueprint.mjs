@@ -1,7 +1,7 @@
 // A compact advisory blueprint separates global identity choices from bounded map-wire rendering.
 // Neither the blueprint nor extraction notes are source evidence. The final map still cites the original ask.
 import { ApiError } from '../../server/errors.mjs';
-import { askRecords, validateMapAsk, validateMapReply, setAside, readingExclusions, attachExclusions, explainExclusion, versionLike, DIVIDED_EXCLUSIONS_MAX, MAP6_NEW_PARTS, MAP6_RELATIONS, MAP6_CLAIMS, PART_LIST_MAX, FIELD_ITEM_MAX, fileKeys } from '../dist/public/shared/map-reading.js';
+import { askRecords, validateMapAsk, validateMapReply, setAside, readingExclusions, anchorDowngrades, attachExclusions, explainExclusion, versionLike, DIVIDED_EXCLUSIONS_MAX, MAP6_NEW_PARTS, MAP6_RELATIONS, MAP6_CLAIMS, PART_LIST_MAX, FIELD_ITEM_MAX, fileKeys } from '../dist/public/shared/map-reading.js';
 import { resolveRange } from '../dist/public/shared/evidence-span.js';
 import { CLAIM_TOPICS, EVIDENCE_GRADES, PART_STATES, PART_TYPES, CHANNELS, RELATION_MODES, RULE_SCOPES, ANCHOR_KINDS, ENFORCER_KINDS, WITHDRAWAL_KINDS, GATE_KINDS } from '../dist/public/shared/types.js';
 
@@ -320,7 +320,7 @@ const FACT_TABLE = /실제\s*(?:로\s*)?(?:바뀐|변화)|오류|철회|가장\s
 function tableRowsUnder(ask, title) {
   const rows = [];
   for (const [record, { text }] of askRecords(ask)) {
-    let open = false, column = null, offset = 0;
+    let open = false, column = null, header = [], offset = 0;
     for (const raw of text.split('\n')) {
       const from = offset; offset += raw.length + 1;
       const line = raw.trim(), heading = line.startsWith('|') ? null : /^\d{1,2}\.\s*(.+)$/.exec(line);
@@ -328,9 +328,10 @@ function tableRowsUnder(ask, title) {
       if (!open) continue;
       if (!line.startsWith('|')) { if (column !== null && line) open = false; continue; }
       const cells = line.replace(/^\|/, '').replace(/\|$/, '').split('|').map(cell => cell.trim());
-      if (column === null) { column = Math.max(0, cells.findIndex(cell => /부분/.test(cell))); continue; }
+      // .35: the header cells travel with each row (the design table's 설정·상태 and 안의 단계 columns are read by name).
+      if (column === null) { column = Math.max(0, cells.findIndex(cell => /부분/.test(cell))); header = cells; continue; }
       if (cells.every(cell => !cell || /^:?-{2,}:?$/.test(cell))) continue;
-      rows.push({ record, from, to: from + raw.length, name: cells[column] || cells[0] || '', cells });
+      rows.push({ record, from, to: from + raw.length, name: cells[column] || cells[0] || '', cells, header });
     }
   }
   return rows;
@@ -354,12 +355,31 @@ export function uncitedFacts(ask, parts, own = null) {
  * unknown, hedge, next gate) and a part's own focus rows (the plan's at of the part on a change, defect, withdrawal or rule row). */
 const ITEM_ROWS = /실제\s*(?:로\s*)?(?:바뀐|변화)|오류|철회|지켜야\s*할|모르는\s*것|가장\s*자신\s*없는|다음\s*관문/;
 const FOCUS_ROWS = /실제\s*(?:로\s*)?(?:바뀐|변화)|오류|철회|지켜야\s*할/;
+/* .35: the rows a part owns by its own name (the cell under a header naming a part, else the first cell), each one claim of that part
+ * whatever the plan assigned: the status report's change, defect, withdrawal, rule, unknown and hedge rows (OWN_ROWS) and the design
+ * record's 「조건·거부·분기」 rows (CONDITION_ROWS; an anchor of a rule claim quoting the row lands it too); its 「안의 단계」 rows marked
+ * [모름] and its 「부분별 설계」 row whose 안의 단계 cell is [모름] (a step quoting the row lands it too); and each item of its 「부분별
+ * 설계」 row's 설정·상태 cell (split on 「,」 and 「·」 outside parentheses; a version is a claim's, never an item), which lands when the
+ * part's config or stateVars name it (the same words, loosely compared, one inside the other). The .34 card runner lost four
+ * condition rows and ARM its [모름] step row under the cap because only the plan's assigned items were counted. */
+const OWN_ROWS = /실제\s*(?:로\s*)?(?:바뀐|변화)|오류|철회|지켜야\s*할|모르는\s*것|가장\s*자신\s*없는/;
+const CONDITION_ROWS = /^조건\s*·\s*거부/, STEP_ROWS = /^안의\s*단계/, DESIGN_ROWS = /^부분별\s*설계/;
+const UNKNOWN_MARK = /\[모름\]/;
 const ASSIGNED_KINDS = new Set(['condition', 'correction', 'uncertain', 'request']);
 const ASSIGNED = /→\s*(new:[a-z0-9_-]{1,24}|P\d{2,3})/g;
 export const PLAN_CLAIMS_NAMES = 24;
 // .33: the whole row (or item) as written, up to 120 characters (.32 cut it at 40: 「…race_ru」).
 export const PLAN_CLAIM_TEXT = 120;
 const opening = text => text.replace(/\s+/g, ' ').trim().slice(0, PLAN_CLAIM_TEXT);
+/** .35: a design cell's items: split on 「,」 and 「·」 outside parentheses, each trimmed (empty ones and 「—」 left out). */
+const cellItems = text => {
+  const out = []; let depth = 0, word = '';
+  for (const ch of text) {
+    if ('([{（「'.includes(ch)) depth++; else if (')]}）」'.includes(ch)) depth = Math.max(0, depth - 1);
+    if (!depth && (ch === '·' || ch === ',')) { out.push(word); word = ''; } else word += ch;
+  }
+  return [...out, word].map(s => s.trim()).filter(s => s && !/^[—–-]+$/.test(s));
+};
 /** .32 (diagnostic only): the plan items assigned to a part of the given ones, in the plan's part order: each condition, correction,
  * uncertain or request item of blueprint.global whose text ends its last 「→ ref」 on that part, and each row of that part's own plan
  * at on a change, defect, withdrawal or rule table. An item landed when a claim of the given parts quotes (its at range overlaps)
@@ -367,8 +387,13 @@ const opening = text => text.replace(/\s+/g, ' ').trim().slice(0, PLAN_CLAIM_TEX
  * missing: ['ref: the item's first 40 characters' (the plan's text, or the record's row for a focus row)] }.
  * .33: each table row of an item is its own unit (an item combining rows landed only its first ones in .32, and the diagnostic could
  * not say which): a unit landed when a claim quotes that row; it is named by the row as written (its cells joined by 「 | 」, up to
- * 120 characters); an item pointing at no row stays one unit named by its own text (up to 120). */
-export function planClaims(ask, blueprint, parts) {
+ * 120 characters); an item pointing at no row stays one unit named by its own text (up to 120).
+ * .35: and the part's own rows by name (OWN_ROWS, CONDITION_ROWS, [모름] steps, design-cell items; see above), each once per part (a
+ * row the plan also assigned to that part is one unit). A unit lands too when one of the given exclusions ({ record, from, to }: a
+ * claim, step or anchor set aside on the way) stands on its row. missingUnits says, per missing unit, its ref and whether it may
+ * refuse a render's first pass (trigger): a plan item or focus row whose own part cell names another part of the plan only costs a
+ * wrong-part exclusion when written there, so it stays the diagnostic's alone. */
+export function planClaims(ask, blueprint, parts, exclusions = []) {
   const texts = askRecords(ask), list = (Array.isArray(parts) ? parts : []).filter(part => part && typeof part === 'object');
   const where = alias => {
     if (typeof alias !== 'string' || !alias.includes('.')) return null;
@@ -377,38 +402,85 @@ export function planClaims(ask, blueprint, parts) {
     return range ? { record, from: range.from, to: range.to } : null;
   };
   const meets = (a, b) => a.record === b.record && a.from < b.to && b.from < a.to;
-  const quoted = list.flatMap(part => Array.isArray(part.claims) ? part.claims : []).flatMap(claim => { const r = where(claim?.at); return r ? [r] : []; });
-  const said = row => quoted.some(r => meets(r, row));
+  const claimsOf = part => (Array.isArray(part?.claims) ? part.claims : []).filter(claim => claim && typeof claim === 'object');
+  const quoted = list.flatMap(claimsOf).flatMap(claim => { const r = where(claim.at); return r ? [r] : []; });
+  // .35: a set-aside item standing on the row (its saved position) lands it, with the exclusion on record.
+  const aside = (Array.isArray(exclusions) ? exclusions : []).filter(x => x && typeof x.record === 'string' && Number.isSafeInteger(x.from) && Number.isSafeInteger(x.to));
+  const said = row => quoted.some(r => meets(r, row)) || aside.some(r => meets(r, row));
   const itemRows = tableRowsUnder(ask, ITEM_ROWS), focusRows = tableRowsUnder(ask, FOCUS_ROWS);
-  const order = new Map((Array.isArray(blueprint?.parts) ? blueprint.parts : []).map((part, i) => [part?.ref, i]));
+  const planParts = Array.isArray(blueprint?.parts) ? blueprint.parts.filter(part => part && typeof part === 'object') : [];
+  const order = new Map(planParts.map((part, i) => [part.ref, i]));
   const refs = new Set(list.map(part => part.ref).filter(ref => typeof ref === 'string' && order.has(ref)));
+  // The plan's names by ref (an existing part by its own name), loosely compared.
+  const nameOf = new Map(planParts.flatMap(part => typeof part.ref === 'string'
+    ? [[part.ref, plainName(typeof part.name === 'string' ? part.name : (Array.isArray(ask?.parts) ? ask.parts.find(x => x.id === part.ref)?.name : '') ?? '')]] : []));
+  const planNames = new Set([...nameOf.values()].filter(Boolean));
+  // A row whose own part cell names another part of the plan is that part's: written here it is a wrong-part exclusion.
+  const elsewhere = (ref, row) => { const owner = plainName(row.name); return !!owner && owner !== nameOf.get(ref) && planNames.has(owner); };
   const items = [];
+  const has = (ref, row) => items.some(item => item.ref === ref && item.rows.some(r => r.record === row.record && r.from === row.from));
   for (const g of Array.isArray(blueprint?.global) ? blueprint.global : []) {
     if (!g || !ASSIGNED_KINDS.has(g.kind) || typeof g.text !== 'string' || !Array.isArray(g.at)) continue;
     const ref = [...g.text.matchAll(ASSIGNED)].at(-1)?.[1];
     if (!ref || !refs.has(ref)) continue;
     const spans = g.at.map(where).filter(Boolean), rows = itemRows.filter(row => spans.some(r => meets(r, row)));
-    if (!rows.length) { items.push({ ref, rows, name: `${ref}: ${opening(g.text)}`, landed: spans.some(r => quoted.some(q => meets(q, r))) }); continue; }
-    for (const row of rows) if (!items.some(item => item.ref === ref && item.rows.some(r => r.record === row.record && r.from === row.from)))
-      items.push({ ref, rows: [row], name: `${ref}: ${opening(row.cells.join(' | '))}`, landed: said(row) });
+    if (!rows.length) { items.push({ ref, rows, name: `${ref}: ${opening(g.text)}`, landed: spans.some(r => quoted.some(q => meets(q, r))), trigger: true }); continue; }
+    for (const row of rows) if (!has(ref, row))
+      items.push({ ref, rows: [row], name: `${ref}: ${opening(row.cells.join(' | '))}`, landed: said(row), trigger: !elsewhere(ref, row) });
   }
-  for (const part of Array.isArray(blueprint?.parts) ? blueprint.parts : []) {
-    if (!refs.has(part?.ref) || !Array.isArray(part.at)) continue;
+  for (const part of planParts) {
+    if (!refs.has(part.ref) || !Array.isArray(part.at)) continue;
     const spans = part.at.map(where).filter(Boolean);
     for (const row of focusRows.filter(row => spans.some(r => meets(r, row)))) {
-      if (items.some(item => item.ref === part.ref && item.rows.some(r => r.record === row.record && r.from === row.from))) continue;
-      items.push({ ref: part.ref, rows: [row], name: `${part.ref}: ${opening(row.cells.join(' | '))}`, landed: said(row) });
+      if (has(part.ref, row)) continue;
+      items.push({ ref: part.ref, rows: [row], name: `${part.ref}: ${opening(row.cells.join(' | '))}`, landed: said(row), trigger: !elsewhere(part.ref, row) });
     }
   }
-  const missing = items.filter(item => !item.landed).sort((a, b) => order.get(a.ref) - order.get(b.ref)).map(item => item.name);
-  return { items: items.length, missing };
+  // .35: the part's own rows by name, its [모름] steps and its design-cell items.
+  const given = new Map(list.flatMap(part => typeof part.ref === 'string' && refs.has(part.ref) ? [[part.ref, part]] : []));
+  const byName = new Map([...given.keys()].flatMap(ref => nameOf.get(ref) ? [[nameOf.get(ref), ref]] : []));
+  const column = (header, name, fallback = -1) => { const i = header.findIndex(c => name.test(c)); return i >= 0 ? i : fallback; };
+  const lands = (key, holder, row) => (Array.isArray(holder?.[key]) ? holder[key] : []).some(x => { const r = where(x?.at); return !!r && meets(r, row); });
+  const own = (rows, extra = () => false) => {
+    for (const row of rows) {
+      const ref = byName.get(plainName(row.name)); if (!ref || has(ref, row)) continue;
+      items.push({ ref, rows: [row], name: `${ref}: ${opening(row.cells.join(' | '))}`, landed: said(row) || extra(given.get(ref), row), trigger: true });
+    }
+  };
+  own(tableRowsUnder(ask, OWN_ROWS));
+  own(tableRowsUnder(ask, CONDITION_ROWS), (part, row) => claimsOf(part).some(claim => lands('anchors', claim, row)));
+  const stepped = (part, row) => lands('steps', part, row);
+  own(tableRowsUnder(ask, STEP_ROWS).filter(row => row.cells.some(cell => UNKNOWN_MARK.test(cell))), stepped);
+  const design = tableRowsUnder(ask, DESIGN_ROWS);
+  own(design.filter(row => UNKNOWN_MARK.test(row.cells[column(row.header, /단계/)] ?? '')), stepped);
+  const loosely = (a, b) => !!a && !!b && (a === b || a.includes(b) || b.includes(a));
+  for (const row of design) {
+    const named = row.cells[column(row.header, /이름/, 0)] ?? '', ref = byName.get(plainName(named)); if (!ref) continue;
+    const part = given.get(ref), held = [...(Array.isArray(part.config) ? part.config : []), ...(Array.isArray(part.stateVars) ? part.stateVars.map(s => s?.name) : [])]
+      .filter(x => typeof x === 'string').map(plainName);
+    row.header.forEach((head, i) => {
+      if (!/설정|상태/.test(head)) return;
+      for (const item of cellItems(row.cells[i] ?? '')) {
+        if (versionLike(item) || UNKNOWN_MARK.test(item)) continue;
+        const name = `${ref}: ${opening(`${named} | ${head} | ${item}`)}`;
+        if (items.some(x => x.name === name)) continue;
+        items.push({ ref, rows: [], name, landed: held.some(h => loosely(h, plainName(item))), trigger: true });
+      }
+    });
+  }
+  const missing = items.filter(item => !item.landed).sort((a, b) => order.get(a.ref) - order.get(b.ref));
+  return { items: items.length, missing: missing.map(item => item.name), missingUnits: missing.map(item => ({ ref: item.ref, name: item.name, trigger: item.trigger })) };
 }
 /** .34: the plan items (planClaims, named the same way) no claim of the given parts quotes whose part holds fewer claims than a
  * first map's cap (MAP6_CLAIMS) once read (read: the fragment's checked reply; a part it does not hold counts none). A render's
- * first pass leaving one is refused for its one correction; an item of a part at the cap is the diagnostic's alone. */
+ * first pass leaving one is refused for its one correction; an item of a part at the cap is the diagnostic's alone.
+ * .35: the part's own rows count too (planClaims), what the reading set aside on a row lands it (read's exclusions), and an item whose
+ * row names another plan part never refuses (its claim would only be set aside as wrong-part). */
 export function planShort(ask, blueprint, parts, read) {
   const held = new Map((Array.isArray(read?.parts) ? read.parts : []).map(part => [part.ref, Array.isArray(part.claims) ? part.claims.length : 0]));
-  return planClaims(ask, blueprint, parts).missing.filter(name => (held.get(name.slice(0, name.indexOf(': '))) ?? 0) < MAP6_CLAIMS);
+  let exclusions = [];
+  try { exclusions = read ? readingExclusions(read) : []; } catch { exclusions = []; }
+  return planClaims(ask, blueprint, parts, exclusions).missingUnits.filter(unit => unit.trigger && (held.get(unit.ref) ?? 0) < MAP6_CLAIMS).map(unit => unit.name);
 }
 /** .33 (diagnostic only): the 모르는 것 rows naming a part of the given ones (the cell under 「부분」, loosely compared), and those no
  * topic=unknown claim of that part quotes, as { rows, missing: ['the row's cells | joined', …] }. */
@@ -436,7 +508,24 @@ export function missingLines(fragments, global, ask, blueprint) {
   return finalDiagnostics(fragments, global, ask, blueprint).filter(x => (x.rule === 'connections' || x.rule === 'plan-relations') && x.names.length > 0);
 }
 const PLAN_LINE = /(new:[a-z0-9_-]{1,24}|P\d{2,3})\s*(?:─+→|-+>|→)\s*(?:to\s+)?(new:[a-z0-9_-]{1,24}|P\d{2,3})/;
-export function readingDiagnostics({ ask, summary, parts, relations, blueprint = null }) {
+/* .35 (R4): a part whose own 「부분별 설계」 or 「안의 단계」 rows say it repeats (분마다, 매분, 간격, 폴링, tick) while its loop is null. */
+const REPEATS = /분마다|매분|간격|폴링|tick/i, STRONG_REPEATS = /분마다|매분|폴링/;
+const LOOP_ROWS = /^(부분별\s*설계|안의\s*단계)/;
+/** .35 (diagnostic only): the parts of the given ones (by name, loosely compared) whose design or inner-step rows say they repeat while
+ * their loop is null, as { rows: parts with such rows, missing: ['name: the first such row as written'] }. */
+export function loopRows(ask, parts) {
+  const list = (Array.isArray(parts) ? parts : []).filter(part => part && typeof part === "object" && typeof part.name === "string");
+  const byName = new Map(list.map(part => [plainName(part.name), part])), seen = new Map();
+  // A row saying how often (분마다, 매분, 폴링) names the part before one saying only 간격 or tick.
+  const rows = tableRowsUnder(ask, LOOP_ROWS), strong = row => row.cells.slice(1).some(cell => STRONG_REPEATS.test(cell));
+  for (const row of [...rows.filter(strong), ...rows.filter(row => !strong(row))]) {
+    const part = byName.get(plainName(row.name));
+    if (part && !seen.has(part) && row.cells.slice(1).some(cell => REPEATS.test(cell))) seen.set(part, row);
+  }
+  const missing = [...seen].filter(([part]) => !part.loop || typeof part.loop !== "object").map(([part, row]) => `${part.name}: ${opening(row.cells.join(" | "))}`);
+  return { rows: seen.size, missing };
+}
+export function readingDiagnostics({ ask, summary, parts, relations, blueprint = null, exclusions = [], downgrades = [] }) {
   const issues = [];
   try {
     const claims = (Array.isArray(parts) ? parts : []).flatMap(part => Array.isArray(part?.claims) ? part.claims : []).filter(claim => claim && typeof claim === 'object');
@@ -451,9 +540,16 @@ export function readingDiagnostics({ ask, summary, parts, relations, blueprint =
     }
     // .32: the plan items assigned to a part (its rows) that no claim quotes, by the part's ref and the item's first 40 characters.
     if (claims.length && blueprint) {
-      const plan = planClaims(ask, blueprint, parts);
+      const plan = planClaims(ask, blueprint, parts, exclusions);
       if (plan.missing.length) issues.push({ path: 'parts', rule: 'plan-claims', expected: plan.items, actual: plan.items - plan.missing.length, names: plan.missing.slice(0, PLAN_CLAIMS_NAMES) });
     }
+    // .35 (R4): the parts whose own rows say they repeat while their loop is null (loop-missing).
+    const loops = loopRows(ask, parts);
+    if (loops.missing.length) issues.push({ path: 'parts', rule: 'loop-missing', expected: loops.rows, actual: loops.rows - loops.missing.length, names: loops.missing.slice(0, 12) });
+    // .35 (R1): the stated places the reading took as inferred (their line is not the rule's own row and that row names none of
+    // their cells), given by the caller as names (anchor-kind).
+    const lowered = (Array.isArray(downgrades) ? downgrades : []).filter(n => typeof n === "string");
+    if (lowered.length) issues.push({ path: 'parts', rule: 'anchor-kind', expected: null, actual: lowered.length, names: lowered.slice(0, 12) });
     const rows = sectionRows(ask, WITHDRAWN_TABLE).length, count = claims.filter(claim => claim.topic === 'withdrawn').length;
     if (rows && rows !== count) issues.push({ path: 'parts', rule: 'withdrawn-count', expected: rows, actual: count });
     // .33: the records' 모르는 것 rows that name a part of the reading, each against the topic=unknown claims of that part quoting it
@@ -820,12 +916,16 @@ function payloadExclusion(part, index, ask) {
 }
 
 /** .32: the diagnostics of the final wire a first map's global stage record keeps (fixed shapes, capped; never a refusal). */
-export const FINAL_DIAGNOSTICS = Object.freeze(['connections', 'plan-relations', 'coverage', 'uncited', 'plan-claims', 'unbacked', 'withdrawn-count', 'unknown-count']);
+// .35: and the parts that repeat with no loop (loop-missing) and the places read as inferred (anchor-kind).
+export const FINAL_DIAGNOSTICS = Object.freeze(['connections', 'plan-relations', 'coverage', 'uncited', 'loop-missing', 'plan-claims', 'anchor-kind', 'unbacked', 'withdrawn-count', 'unknown-count']);
 export const FINAL_DIAGNOSTICS_MAX = 16;
 export function finalDiagnostics(fragments, global, ask, blueprint) {
   try {
-    const { wire } = combineRenderedReading(fragments, global, ask, blueprint);
-    const found = readingDiagnostics({ ask, summary: wire.summary, parts: wire.parts, relations: wire.relations, blueprint });
+    const { wire, exclusions } = combineRenderedReading(fragments, global, ask, blueprint);
+    // .35: what was set aside on a row lands its plan unit; the places the reading took as inferred are named (anchor-kind).
+    let downgrades = [];
+    try { downgrades = anchorDowngrades(validateMapReply(wire, ask)).map(x => `${x.ref} ${x.key ?? "?"}: ${x.text}`); } catch { downgrades = []; }
+    const found = readingDiagnostics({ ask, summary: wire.summary, parts: wire.parts, relations: wire.relations, blueprint, exclusions, downgrades });
     const refs = new Set(wire.parts.map(part => part.ref)), coverage = blueprintCoverage({ parts: blueprint.parts.filter(part => refs.has(part.ref)) }, ask);
     if (coverage && coverage.covered < coverage.rows) found.push({ path: 'parts', rule: 'coverage', expected: coverage.rows, actual: coverage.covered, names: coverage.missing });
     const count = n => Number.isSafeInteger(n) && n >= 0 && n <= 9999 ? n : null;
@@ -981,6 +1081,9 @@ export function mapStageIssues(value, error, context = null) {
       const list = Array.isArray(value?.parts) ? value.parts : [];
       const facts = uncitedFacts(context.ask, list, new Set(list.flatMap(part => typeof part?.name === 'string' ? [plainName(part.name)] : [])));
       if (facts.uncited.length) add('parts', 'uncited', facts.rows, facts.rows - facts.uncited.length, null, facts.uncited.slice(0, 12));
+      // .35 (R4): its own parts that repeat by their rows while their loop is null.
+      const loops = loopRows(context.ask, list);
+      if (loops.missing.length) add('parts', 'loop-missing', loops.rows, loops.rows - loops.missing.length, null, loops.missing.slice(0, 12));
       // .32: and, given the plan ({ ask, fragment: true, blueprint }), its own parts' plan items no claim of it quotes.
       if (context.blueprint) {
         const plan = planClaims(context.ask, context.blueprint, list);

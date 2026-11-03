@@ -1072,8 +1072,8 @@ function browserApply(f, wire, exclusions, n = 7) {
 }
 
 test('recipe identities are bumped for the changed prompts and validation semantics', () => {
-  assert.equal(PIPELINE_RECIPE, 'first-map-divided.34');
-  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.34');
+  assert.equal(PIPELINE_RECIPE, 'first-map-divided.35');
+  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.35');
 });
 
 test('a render fragment with one unresolvable claim alias is applied with only that claim set aside and a durable diagnostic', async t => {
@@ -1239,7 +1239,7 @@ test('.29: a 24-part first map renders in eight fragments; a run ceiling that ca
 // ---- first-map-divided.30: map-reading.9 (steps, loop, kept state, port map) and the rules from the blind judging of the .29 map. ----
 test('.30 rule sentences: every connection row a line, absorption into the group parent only, row names verbatim, "·" outside parentheses, state facts first, steps, loop, kept state and the port map', async () => {
   const P = await import('../server/map-pipeline.mjs'), B = await import('../server/map-blueprint.mjs');
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.34', 'later-map-divided.34']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.35', 'later-map-divided.35']);
   for (const rule of ['흡수는 기록의 묶음 표(부모 이름 | 자식 이름들)가 그 행의 부모로 적은 부분에만 하고', '연결 표(보내는 부분 | 받는 부분)에 자기 행이 있는 단위는 부모가 있어도 흡수하지 않고 부분으로 세운다',
     '부분의 name은 그 표 행의 첫 칸 이름을 글자 그대로 쓰고', '「facts-refresh」 행을 「calendar.json」으로 부르지 않는다', '모든 행은 relation 항목 하나(저장소를 거치면 둘)로 빠짐없이 쓴다',
     'global은64개 이하(그중 relation 항목 48개까지)']) assert.ok(B.MAP_BLUEPRINT_PROMPT.includes(rule), rule);
@@ -1373,11 +1373,22 @@ test('a kept response id older than an hour, or already read back once, is not r
   clock -= 30 * 60 * 1000; const controller2 = new AbortController();
   const pending = make({ callProvider: fastPolls, fetchImpl: bg.fetchImpl, onProgress: e => { if (e.stage === 'plan' && e.resumed) setImmediate(() => controller2.abort()); } }).call(ask, controller2.signal);
   await assert.rejects(pending, matchesCode('CANCELLED'));
-  const plan = await planOf(dir);
+  let plan = await planOf(dir);
   assert.equal(plan.state, 'uncertain'); assert.equal(plan.attempts.length, 1); assert.equal(plan.attempts[0].lost, true);
+  // .35: the cancelled run does not read it back; the next run still sends nothing again and, at its end, reads the lost response
+  // once (a free GET) for the ledger: the stage still blocks, its charge becomes the usage the response reports.
+  bg.state.poll = 'complete';
   const count = bg.log.length;
   await assert.rejects(make({ callProvider: fastPolls, fetchImpl: bg.fetchImpl }).call(ask), matchesCode('MAP_STAGE_UNCERTAIN'));
-  assert.equal(bg.log.length, count);
+  assert.deepEqual(bg.log.slice(count), [`GET /${RESPONSE_ID}`]);
+  plan = await planOf(dir);
+  assert.equal(plan.state, 'uncertain');
+  assert.deepEqual([plan.attempts[0].lost, plan.attempts[0].usage, plan.attempts[0].charged], [false, { inputTokens: 10, outputTokens: 10 }, (10 * 2 + 10 * 10) * 1000]);
+  assert.ok(plan.attempts[0].reconciledAt);
+  // Reconciled once: a later run reads nothing again.
+  const again = bg.log.length;
+  await assert.rejects(make({ callProvider: fastPolls, fetchImpl: bg.fetchImpl }).call(ask), matchesCode('MAP_STAGE_UNCERTAIN'));
+  assert.equal(bg.log.length, again);
 });
 
 // ---- first-map-divided.31: 36 parts in twelve fragments, the named diagnostics in the correction feedback, the rule sentences,
@@ -1501,7 +1512,7 @@ test('.31: a render or global reply cut at its cap fails the run as MAP_STAGE_IN
 // the final wire's diagnostics on the global stage record, the row-level, payload and hedge rules (fake providers only). ----
 test('.32 rule sentences: sixteen claims a first-map part, a table row one claim, the summary money facts on the engine, withdrawals on their 부분 이름 part, one payload list, the record\'s own hedge', async () => {
   const P = await import('../server/map-pipeline.mjs'), B = await import('../server/map-blueprint.mjs');
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.34', 'later-map-divided.34']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.35', 'later-map-divided.35']);
   for (const rule of ['그 행의 「부분 이름」 칸(없으면 첫 칸)이 이름 붙인 부분에 맡긴다', '「엔진 | 매일 FLAT 재시작 | 채택 안 함」은 → 엔진이며', '한 부분에 맡기는 항목 수는 줄이지 않는다(첫 지도의 부분은 주장을 20개까지 쓴다)',
     '연결 행의 「넘기는 것」 칸은 산출물 이름 목록 하나이며 부분이 아니다', '산출물 표에 그 파일의 행이 있을 때만 그 저장소 부분을 거친다', '「new:facts_refresh → new:engine: fee_policy·calendar.json」']) assert.ok(B.MAP_BLUEPRINT_PROMPT.includes(rule), rule);
   for (const gone of ['돌고 있는 부분에 맡기는 정정·철회·모름은 둘까지로 한다', '넘치는 철회는 원문이 대신 둔 것을 맡은 부분', '기록의 화살표가 파일 이름(calendar.json 같은)을 넘기는 것으로 적은 흐름도 그 파일의 저장소 부분을 거친다'])
@@ -1560,16 +1571,16 @@ test('.32: a render correction hears its own parts\' plan items no claim quotes;
 // and correction rules, with the recipe identity bumped. ----
 test('.33 rule sentences: a rule\'s scope from its row, places only from lines that place it, devices from the condition row, a gate line, a person or 「기록상 미설계」, a withdrawal\'s kind from its content, a gate run or dev', async () => {
   const P = await import('../server/map-pipeline.mjs');
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.34', 'later-map-divided.34']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.35', 'later-map-divided.35']);
   for (const rule of ['topic이 rule인 주장(기록의 「지켜야 할 것」 표의 행 하나이며 claim.at은 그 행이다)에는 scope·scopeName·anchors·enforcedBy를 더한다',
     'part(그 행의 부분 이름 칸이 이름 붙인 부분 전체이며 기본값이다)', 'project(행의 부분 이름 칸이 「전체」일 때만)', '「돈 안전」 같은 말만으로 project로 올리지 않는다',
-    'anchors는 그 규칙이 적용되는 자리를 놓는 원문 줄에서만 최대 4개이며', '「조건·거부·분기」 표에서 이 규칙을 구현하는 조건 행', 'kind=stated이고 at은 그 행이다',
-    '기록의 문장이 둘을 잇는 근거를 줄 때만 inferred이며', '자리를 놓는 줄이 없으면 anchors는 []다', '이름이 비슷하다는 이유로 자리를 짐작하지 않는다',
+    'anchors는 그 규칙이 적용되는 자리를 놓는 원문 줄에서만 최대 4개이며', '「조건·거부·분기」 표에서 이 규칙을 구현하는 조건 행', '그 규칙을 직접 지키는 행)이 그 자리이며 at은 그 행이다',
+    '규칙을 적은 줄과 자리를 적은 줄이 따로 있으면 inferred다', '자리를 놓는 줄이 없으면 anchors는 []다', '이름이 비슷하다는 이유로 자리를 짐작하지 않는다',
     'text는 그 행의 「참이면」 결과', '관문 줄(「TESTS rc 0 + VERIFY GO 파일」 같은)이 지키면 gate', '사람의 승인·규칙(소유자·감독자 세션의 승인)이 지키면 person',
     '「기록상 미설계」처럼 지키는 장치가 없다고 명시하면 none', '[{"kind":"unknown","text":"장치 미상","at":null}] 하나다', '장치(code·gate·person)와 none·unknown을 함께 쓰지 않는다',
     'topic이 withdrawn인 주장(「철회·변경」 표의 행)에는 withdrawalKind를 더한다', '꼬리표만 보고 정하지 않고 그 행의 내용이 그렇게 말할 때만 쓰고 아니면 null이다',
     '「다음 관문」 표의 행으로 쓴 topic=plan 주장에는 gate를 더한다', '운영 조건)이면 run', '개발·배포 조건)이면 dev', 'rule이 아닌 주장의 scope는 null, anchors와 enforcedBy는 []이고',
-    '틀린 자리·장치는 그 항목 하나만', '"anchors":[{"kind":"stated","text":"엔진 · not 1 <= stop <= 250","at":"N02.40"}]', '"enforcedBy":[{"kind":"code","text":"STOP_NOT_RESIDENT","at":"N02.40"}]',
+    '틀린 자리·장치는 그 항목 하나만', '"anchors":[{"kind":"inferred","text":"엔진 · not 1 <= stop <= 250","at":"N02.40"}]', '"enforcedBy":[{"kind":"code","text":"STOP_NOT_RESIDENT","at":"N02.40"}]',
     '"withdrawalKind":"design"', '"gate":"run"']) assert.ok(P.RENDER_RULES.includes(rule), rule);
   for (const rule of ['claim의 topic·evidence·when·where·before와 scope·scopeName·anchors·enforcedBy·withdrawalKind·gate', 'category가 scope이면', 'anchor이면 그 자리를 그것을 놓는 원문 줄로 다시 고르거나 빼며',
     'enforced-by이면', 'withdrawal-kind나 gate이면', '어느 경우에도 주장 자체는 지우지 않는다']) assert.ok(P.CORRECTION_RULES.includes(rule), rule);
@@ -1612,7 +1623,7 @@ test('.33: a first map\'s global first pass that leaves a plan relation item und
 // plan item lost under the cap (fake providers only; no model quality is claimed). ----
 test('.34 rule sentences: anchors cite one of the program\'s condition rows or stay [], code only from a condition or file-map row, unknown where the record does not know the device, one kept state per 「·」 item, DROP an implementation', async () => {
   const P = await import('../server/map-pipeline.mjs');
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.34', 'later-map-divided.34']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.35', 'later-map-divided.35']);
   for (const rule of ['입력의 conditions는 프로그램이 원문에서 옮겨 둔 목록이다', '{"at":"그 행의 구간 별칭","condition":"조건 칸","then":"참이면 칸"}',
     'anchors는 규칙의 말이 conditions 한 행의 조건·결과와 맞을 때', '그 행을 at으로 인용하고, 그렇지 않으면 []다', '프로그램 후보로 따로 붙이고 모델의 답과 구별해 표시하므로',
     'code는 그 at이 「조건·거부·분기」 표의 행이거나 「파일 지도」 표의 행일 때만 쓴다', 'code이고 text는 그 행의 then이다',
@@ -1643,7 +1654,8 @@ test('.34: each render hears its parts\' 「조건·거부·분기」 rows (alia
   assert.deepEqual(renders.map(c => c.input.conditions), [{ 'new:flow': [{ at: row, condition: 'not queue_ready', then: 'QUEUE_EMPTY' }] }, { 'new:flow': [{ at: row, condition: 'not queue_ready', then: 'QUEUE_EMPTY' }] }],
     'only its own part\'s rows, the program\'s copy of the record');
   assert.deepEqual(renders.map(c => !!c.input.correction), [false, true], 'one paid correction for the lost plan item, never a second');
-  assert.deepEqual(renders[1].input.correction.issues.filter(x => x.rule === 'plan-claims').map(x => x.names), [['new:flow: 개발용 판본에만 적용 → new:flow']]);
+  // .35: the part's own 「조건·거부·분기」 row is a unit of its own too (the program reads the part's rows by its name).
+  assert.deepEqual(renders[1].input.correction.issues.filter(x => x.rule === 'plan-claims').map(x => x.names), [['new:flow: 개발용 판본에만 적용 → new:flow', 'new:flow: 자료 처리 | not queue_ready | QUEUE_EMPTY | 다음']]);
   assert.equal(wire.parts[0].claims.length, 2, 'the correction that still leaves it out is taken as it is');
   assert.equal(validateMapReply(wire, ask).parts.length, 1);
   // Without condition rows the key is there and empty.
@@ -1676,4 +1688,76 @@ test('.34: a render correction reply whose one claim is wrong-part (its part lef
   assert.equal(M.setAside(read).length, 0);
   M.attachExclusions(read, exclusions, ask);
   assert.deepEqual(M.readingExclusions(read).map(x => x.category), ['wrong-part']);
+});
+
+// ---- first-map-divided.35 (from the .34 run and its ledger): the final review hears an undrawn line as the global stage does, the
+// rule sentences of the .35 batch, and the run's end reading lost responses back for the ledger (fake providers only). ----
+test('.35: a first map\'s final review (global-final) that leaves a plan relation item undrawn pays one correction, which hears it by name; the correction is taken as it is', async t => {
+  const ask = askFor(), base = originalWire(ask).parts[0];
+  const two = { ...originalWire(ask), parts: [0, 1].map(i => ({ ...structuredClone(base), ref: `new:u${i}`, name: `단위 ${i}` })), relations: [] };
+  const { make } = await setup(t), calls = [], stages = [];
+  const pipeline = make({ renderModel: 'gpt-6.1-terra', onStageOutput: output => stages.push(output.stage), callProvider: fakeProvider(ask, calls, call => {
+    if (call.stage === 'plan') { const plan = blueprintFor(two, ask); plan.global.push({ kind: 'relation', text: 'new:u0 → new:u1: 작업 큐', at: [ask.records[0].spans[0].s] }); return plan; }
+    if (call.stage === 'global' && !call.input.semanticReview) return revisionFor(ask, 'new:u0');
+  }, two) });
+  const wire = await pipeline.call(ask);
+  const finals = calls.filter(c => c.stage === 'global' && c.input.semanticReview);
+  assert.deepEqual(finals.map(c => !!c.input.correction), [false, true], 'one paid correction of the final review, never a second');
+  assert.deepEqual(finals[1].input.correction.issues.filter(x => x.rule === 'plan-relations'), [{ path: 'relations', rule: 'plan-relations', expected: 1, actual: 0, names: ['new:u0 → new:u1'] }]);
+  assert.ok(stages.includes('global-final-correction'));
+  assert.deepEqual(wire.relations, [], 'the correction that still draws no line is taken as it is');
+  assert.equal(validateMapReply(wire, ask).parts.length, 2);
+  // A final review that draws every line pays nothing more.
+  const drawn = [], { make: again } = await setup(t);
+  await again({ renderModel: 'gpt-6.1-terra', callProvider: fakeProvider(ask, drawn, call => {
+    if (call.stage === 'plan') { const plan = blueprintFor(two, ask); plan.global.push({ kind: 'relation', text: 'new:u0 → new:u1: 작업 큐', at: [ask.records[0].spans[0].s] }); return plan; }
+    if (call.stage === 'global' && !call.input.semanticReview) return revisionFor(ask, 'new:u0');
+    if (call.stage === 'global') return { ...structuredClone({ ...two, parts: [] }), relations: [{ from: 'new:u0', to: 'new:u1', kind: 'flow', note: '작업 큐를 넘긴다.', at: ask.records[0].spans[0].s }] };
+  }, two) }).call(ask);
+  assert.deepEqual(drawn.filter(c => c.stage === 'global' && c.input.semanticReview).map(c => !!c.input.correction), [false]);
+});
+
+test('.35 rule sentences: a condition row is the rule\'s place and stated only on its own row or written in it, the program\'s places read file-map rows and settings, a shared noun on every 「·」 item, every 「·」 state item, no claim restating a connection row, loop-missing and settings in the correction', async () => {
+  const P = await import('../server/map-pipeline.mjs');
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.35', 'later-map-divided.35']);
+  for (const rule of ['kind=stated는 그 자리 줄이 규칙 주장 자신의 at과 같은 행이거나 규칙 행이 그 자리 행의 칸(조건이나 「STOP_NOT_RESIDENT」 같은 결과)을 글자 그대로 적을 때만 쓰고',
+    '그 밖의 stated는 지도가 inferred로 읽고 진단 anchor-kind에 남긴다', '같은 부분의 조건 행·「파일 지도」 행·「부분별 설계」 설정 칸 가운데 낱말이 겹치는 것을 프로그램 후보로',
+    '그 명사를 항목마다 붙인다(「review 행」·「policy 행」·「state 행」, 「journal 경주 행」·「outcomes 경주 행」)', '이 부분의 「부분별 설계」 칸 항목의 앞부분만 쓴 항목(「review 행」 자리의 「review」)은 지도에서 빠진다',
+    '칸의 「·」 항목 하나하나가 상태 변수 하나이며 하나도 빼지 않는다', '「팔당 16회/일 넘으면 DAILY_CAP」의 팔당 호출 수도 stateVars 하나다(scope 「하루」)',
+    '연결 표의 행(보내는 부분 | 받는 부분)은 관계가 맡으므로 그 행을 인용해 넘기는 것·박자만 다시 말하는 status·how 주장은 쓰지 않는다',
+    '"anchors":[{"kind":"inferred","text":"엔진 · not 1 <= stop <= 250","at":"N02.40"}]']) assert.ok(P.RENDER_RULES.includes(rule), rule);
+  assert.ok(!P.RENDER_RULES.includes('"anchors":[{"kind":"stated","text":"엔진 · not 1 <= stop <= 250"'), 'the old stated example is gone');
+  assert.ok(!P.RENDER_RULES.includes('kind=stated이고 at은 그 행이다'), 'the old sentence making a condition row stated is gone');
+  for (const rule of ['「부분별 설계」 칸의 설정·상태 항목(「이름 | 설정 | 항목」)은 그 부분의 config나 stateVars 항목 하나씩이다', 'loop-missing이면 names의 부분마다 기록이 그 부분이 반복한다고 적은 행(「매분 tick」 같은)을 at으로 loop를 쓴다'])
+    assert.ok(P.CORRECTION_RULES.includes(rule), rule);
+  for (const rule of ['anchor-kind', '공통 명사']) assert.ok(!P.GLOBAL_RULES.includes(rule), rule);
+});
+
+test('.35: a run ends by reading its store\'s lost responses back once for the ledger; the pipeline\'s reconcile does the same later, and a cancelled run does not', async t => {
+  let clock = Date.parse('2026-11-03T18:00:00Z');
+  const { store, make } = await setup(t, {}, { now: () => new Date(clock) }), ask = askFor(), seen = [];
+  // Another run's plan lost in background mode (its POST returned the id, nothing came back after).
+  const other = 'a'.repeat(64);
+  await store.run(other, async () => { await store.begin(other, 'plan', { provider: 'openai', model: 'gpt-6.1-sol', inputBytes: 1000, maxOutputTokens: 1000 }); await store.noteResponse(other, 'plan', 'resp_other'); await store.failed(other, 'plan', { uncertain: true }); });
+  const before = store.describe().spentUsd;
+  const fetchImpl = async (url, init) => {
+    seen.push(`${init?.method ?? 'GET'} ${url}`);
+    if (url === 'https://api.openai.com/v1/responses/resp_other') return new Response(JSON.stringify({ id: 'resp_other', status: 'cancelled', usage: { input_tokens: 900, output_tokens: 0 } }));
+    return new Response('{}');
+  };
+  // A cancelled run reads nothing back.
+  const controller = new AbortController(); controller.abort();
+  await assert.rejects(make({ fetchImpl, callProvider: fakeProvider(ask, []) }).call(ask, controller.signal), matchesCode('CANCELLED'));
+  assert.deepEqual(seen, []);
+  validateMapReply(await make({ fetchImpl, callProvider: fakeProvider(ask, []) }).call(ask), ask);
+  assert.deepEqual(seen.filter(s => s.includes('resp_other')), ['GET https://api.openai.com/v1/responses/resp_other'], 'one free GET at the run\'s end');
+  // The lost plan now costs what its response reports (900 input tokens at $2 per million); the month counts it so, beside this
+  // run's own plan (10 in, 10 out).
+  assert.equal(before, 0.012);
+  assert.equal(store.spentByRun(other), 0.0018);
+  assert.equal(Math.round(store.describe().spentUsd * 1e9), 900 * 2 * 1000 + (10 * 2 + 10 * 10) * 1000);
+  // Later, on its own: nothing lost is left, so nothing is read.
+  const pipeline = make({ fetchImpl, callProvider: fakeProvider(ask, []) });
+  assert.deepEqual(await pipeline.reconcile(), []);
+  assert.equal(seen.filter(s => s.includes('resp_other')).length, 1);
 });

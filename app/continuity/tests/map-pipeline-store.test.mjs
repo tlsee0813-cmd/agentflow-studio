@@ -204,3 +204,72 @@ test('a refused stage keeps only a fixed diagnostic beside its failed attempt; a
   await writeFile(join(dir, 'pipeline.json'), JSON.stringify(file));
   assert.equal((await open()).describe().durable, false, 'a ledger diagnostic holding anything else reads as damaged');
 });
+
+// ---- first-map-divided.35: a lost attempt (cancelled or lost, its whole reservation charged) that kept a background response id
+// under 24 h is read back once (the caller's free GET) and charged by the usage the response reports; anything else stays. The real
+// usage of three stalled .32 plans was 0-1,259 reasoning tokens against reservations of about $0.49 each. ----
+const lostAttempt = async (store, k, stage, responseId) => {
+  await store.begin(k, stage, spec);
+  await store.noteResponse(k, stage, responseId);
+  await store.failed(k, stage, { uncertain: true });
+};
+test('.35 reconcileLost: a lost attempt with a response id under 24 h is charged by the usage its response reports; totals follow and a reopened ledger reads it', async t => {
+  let clock = Date.parse('2026-11-03T18:00:00Z');
+  const { store, open } = await fixture(t, { now: () => new Date(clock) });
+  await store.run(key(1), async () => { await lostAttempt(store, key(1), 'plan', 'resp_lost1'); await lostAttempt(store, key(1), 'render-1', 'resp_lost2'); });
+  const reserved = 0.0012; // 100 bytes in at $2 and 100 tokens out at $10 per million: the whole reservation
+  assert.equal(store.describe().spentUsd, reserved * 2);
+  clock += 3 * 60 * 60 * 1000;
+  const asked = [];
+  const out = await store.reconcileLost(async id => { asked.push(id); return id === 'resp_lost1' ? { inputTokens: 40, outputTokens: 7 } : null; });
+  assert.deepEqual(asked, ['resp_lost1', 'resp_lost2'], 'each lost response is read once');
+  assert.deepEqual(out.map(x => [x.stage, x.reconciled, x.beforeUsd, x.chargedUsd]), [['plan', true, reserved, 0.00015], ['render-1', false, reserved, reserved]]);
+  assert.equal(store.describe().spentUsd, 0.00135, 'the monthly total is the sum of the charges, the reconciled one included');
+  assert.equal(store.spentByRun(key(1)), 0.00135, 'and so is the run total');
+  // The reconciled attempt says so; the stage still blocks (nothing came back to apply).
+  assert.throws(() => store.get(key(1), 'plan'), code('MAP_STAGE_UNCERTAIN'));
+  await store.close();
+  const reopened = await open({ now: () => new Date(clock) });
+  assert.equal(reopened.describe().durable, true, 'the reconciled attempt reads as a valid ledger');
+  assert.equal(reopened.describe().spentUsd, 0.00135);
+  // Read again: the reconciled one is not asked twice; the one with nothing to read still is.
+  const again = [];
+  assert.deepEqual((await reopened.reconcileLost(async id => { again.push(id); return null; })).map(x => x.stage), ['render-1']);
+  assert.deepEqual(again, ['resp_lost2']);
+});
+test('.35 reconcileLost: a failed read, a usage past the reservation and an attempt older than 24 h are left as they were', async t => {
+  let clock = Date.parse('2026-11-03T18:00:00Z');
+  const { dir, store, open } = await fixture(t, { now: () => new Date(clock) });
+  await store.run(key(2), async () => { await lostAttempt(store, key(2), 'plan', 'resp_old'); });
+  clock += 25 * 60 * 60 * 1000;
+  await store.run(key(3), async () => { await lostAttempt(store, key(3), 'plan', 'resp_over'); await lostAttempt(store, key(3), 'render-1', 'resp_throws'); });
+  // A lost attempt without a response id (its POST never returned) has nothing to read.
+  await store.run(key(4), async () => { await store.begin(key(4), 'plan', spec); await store.failed(key(4), 'plan', { uncertain: true }); });
+  const before = await readFile(join(dir, 'pipeline.json'), 'utf8'), asked = [];
+  const out = await store.reconcileLost(async id => {
+    asked.push(id);
+    if (id === 'resp_throws') throw new Error('network');
+    return { inputTokens: 101, outputTokens: 1 }; // more input than the reservation allows
+  });
+  assert.deepEqual(asked, ['resp_over', 'resp_throws'], 'the attempt older than 24 h and the one with no id are not read');
+  assert.deepEqual(out.map(x => x.reconciled), [false, false]);
+  assert.equal(await readFile(join(dir, 'pipeline.json'), 'utf8'), before, 'nothing reconciled, nothing written');
+  assert.equal(store.describe().spentUsd, 0.0012 * 4);
+  // A narrower window is the caller's to give (two minutes later, a one-minute window reads none); a bad reader or window is refused.
+  clock += 2 * 60 * 1000;
+  assert.deepEqual(await store.reconcileLost(async () => ({ inputTokens: 1, outputTokens: 1 }), { maxAgeMs: 60 * 1000 }), []);
+  await assert.rejects(store.reconcileLost(null), code('MAP_PIPELINE_INVALID'));
+  await assert.rejects(store.reconcileLost(async () => null, { maxAgeMs: 0 }), code('MAP_PIPELINE_INVALID'));
+  // A reconciled attempt whose usage does not price to its charge, or one reconciled without lost: false, reads as damaged.
+  await store.reconcileLost(async id => id === 'resp_over' ? { inputTokens: 50, outputTokens: 50 } : null);
+  await store.close();
+  const file = JSON.parse(await readFile(join(dir, 'pipeline.json'), 'utf8')), attempt = file.body.jobs[key(3)].stages.plan.attempts[0];
+  assert.deepEqual([attempt.lost, attempt.usage, attempt.charged, typeof attempt.reconciledAt], [false, { inputTokens: 50, outputTokens: 50 }, 600000, 'string']);
+  const { createHash } = await import('node:crypto');
+  for (const mutate of [a => { a.charged = 1; }, a => { delete a.reconciledAt; }, a => { a.lost = true; }, a => { a.usage = { inputTokens: 500, outputTokens: 50 }; }, a => { delete a.lost; }]) {
+    const bad = structuredClone(file); mutate(bad.body.jobs[key(3)].stages.plan.attempts[0]);
+    bad.sha256 = createHash('sha256').update(JSON.stringify(bad.body)).digest('hex');
+    await writeFile(join(dir, 'pipeline.json'), JSON.stringify(bad));
+    const s = await open(); assert.equal(s.describe().durable, false, String(mutate)); await s.close();
+  }
+});

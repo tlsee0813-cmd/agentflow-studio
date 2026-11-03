@@ -11,7 +11,7 @@ import { validateMapBlueprint, splitBlueprintParts, validateRenderedFragment, fr
   missingMapCorrections, mapCorrectionRevision, MAP_BLUEPRINT_PROMPT, LATER_BLUEPRINT_PROMPT,
   BLUEPRINT_PARTS_MAX, BLUEPRINT_NEW_PARTS_MAX, BLUEPRINT_LATER_NEW_PARTS_MAX, BLUEPRINT_GLOBAL_MAX, BLUEPRINT_FIRST_GLOBAL_MAX, BLUEPRINT_RELATION_ITEMS_MAX,
   BLUEPRINT_LATER_RELATION_ITEMS_MAX, BLUEPRINT_ANCHORS_MAX, blueprintCoverage, readingDiagnostics, sectionRows,
-  BLUEPRINT_LATER_PARTS_MAX, blueprintPartsMax, unknownRows, missingLines, fragmentKeys, factRows, uncitedFacts, planClaims, planShort, payloadParts, finalDiagnostics, FINAL_DIAGNOSTICS, FRAGMENT_KEYS } from '../server/map-blueprint.mjs';
+  BLUEPRINT_LATER_PARTS_MAX, blueprintPartsMax, unknownRows, missingLines, fragmentKeys, factRows, uncitedFacts, planClaims, planShort, loopRows, payloadParts, finalDiagnostics, FINAL_DIAGNOSTICS, FRAGMENT_KEYS } from '../server/map-blueprint.mjs';
 
 function fixture(existing = 0) {
   let project = D.createProject(); for (let i = 0; i < existing; i++) project = D.addArea(project, `사용자 부분 ${i + 1}`, '직접 쓴 설명');
@@ -574,6 +574,16 @@ function koruFragments(f) {
     part('new:engine', '엔진', '| 엔진 | 루프', [claim('s101', '| 엔진 | 매일', { topic: 'withdrawn', before: '매일 FLAT 재시작' }), claim('s102', '| 카드 러너 | 엔진 |')],
       { config: ['레버리지 20', '618df374'] })] }];
 }
+// .35: a part's own rows are plan-claims units (planClaims reads them by name): the engine's own 「모르는 것」 row unquoted under the cap
+// refuses a render's first pass for its one correction, so a strict first pass here quotes it too (s120, the second fragment's last key).
+const ownRows = (f, fragment) => {
+  const out = structuredClone(fragment), engine = out.parts.find(p => p.ref === 'new:engine');
+  const has = head => f.ask.records[0].spans.some(span => span.t.startsWith(head));
+  engine.claims.push({ key: 's120', kind: 'reported', text: '08:49Z 뒤 실제 상태는 모른다고 적혀 있다.', at: f.at('| 엔진 | 08:49Z'), about: null, replaces: null, topic: 'unknown' });
+  // KORU32 and KORU33 add the engine's own hedge row (가장 자신 없는 것).
+  if (has('| 엔진 | 「돌고')) engine.claims.push({ key: 's119', kind: 'reported', text: '08:49Z 뒤는 직접 보지 않았다고 적혀 있다.', at: f.at('| 엔진 | 「돌고'), about: null, replaces: null, topic: 'unknown' });
+  return out;
+};
 const koruGlobal = f => ({ ...empty(), summary: '엔진은 매일 FLAT 재시작을 채택하지 않았다.', relations: [
   // 0: the file line drawn straight from producer to reader (no end is the file's store).
   { from: 'new:card', to: 'new:engine', kind: 'flow', note: '', at: f.at('| 카드 러너 | 엔진 |'), payload: 'review.jsonl watch·allowed_side', channel: 'data', mode: 'observed' },
@@ -604,7 +614,9 @@ test('.29: a file line skipping its store, a claim on another part row, a sender
   // .30: a first map's first pass sets these items aside as its correction does (no refusal, no paid correction); the stage keeps which.
   // A render still sees the row owner planned in another fragment.
   assert.deepEqual(validateRenderedFragment(fragments[0], groups[0], f.ask, plan, true), fragments[0]);
-  assert.deepEqual(validateRenderedFragment(fragments[1], groups[1], f.ask, plan, true), fragments[1]);
+  const own1 = ownRows(f, fragments[1]);
+  assert.deepEqual(validateRenderedFragment(own1, groups[1], f.ask, plan, true), own1);
+  refused(() => validateRenderedFragment(fragments[1], groups[1], f.ask, plan, true)); // .35: its own 모르는 것 row unquoted under the cap
   assert.deepEqual([fragmentSetAside(fragments[0], groups[0], f.ask, plan), fragmentSetAside(fragments[1], groups[1], f.ask, plan)],
     [[{ path: 'parts[0].claims[1]', rule: 'contract', category: 'wrong-part' }], [{ path: 'parts[0].config', rule: 'contract', category: 'config' }]]);
   assert.deepEqual(mapStageIssues(fragments[1]), [{ path: 'parts[0].config', rule: 'contract', category: 'config', expected: null, actual: null }]);
@@ -729,7 +741,8 @@ test('.30: a wrong step, loop item, kept state or port-map row is set aside alon
   assert.deepEqual(M.partUnderstanding(applied.project, engineId).steps.map(s => s.name), ['review 읽기', '기하']);
   assert.deepEqual(validateProject(applied.project), applied.project);
   // .30: a first map's first pass sets these items aside as its correction does (no refusal, no paid correction); the stage keeps which.
-  assert.deepEqual(validateRenderedFragment(fragments[1], groups[1], f.ask, plan, true), fragments[1]);
+  const own1 = ownRows(f, fragments[1]);
+  assert.deepEqual(validateRenderedFragment(own1, groups[1], f.ask, plan, true), own1);
   assert.deepEqual(fragmentSetAside(fragments[1], groups[1], f.ask, plan).map(x => [x.path, x.category]), [['parts[0].steps[1]', 'step'], ['parts[0].loop.stop', 'loop'], ['parts[0].stateVars[1]', 'state-var']]);
   const rowsOnly = { ...structuredClone(global), relations: [global.relations[1], global.relations[2]], portMap: [{ ...global.portMap[0], relation: 1 }, { ...global.portMap[2], relation: 1 }] };
   assert.deepEqual(combineRenderedMaps(fragments, rowsOnly, f.ask, plan, true).portMap, [rowsOnly.portMap[0]]);
@@ -765,7 +778,8 @@ test('.30: a claim restating its state row is set aside where the part has a cha
   assert.deepEqual(wire.relations.map(r => [r.from, r.to]), [['new:card', 'new:review'], ['new:review', 'new:engine']]);
   assert.equal(M.setAside(M.validateMapReply(wire, f.ask)).length, 0);
   // .30: a first map's first pass sets these items aside as its correction does (no refusal, no paid correction); the stage keeps which.
-  assert.deepEqual(validateRenderedFragment(fragments[1], groups[1], f.ask, plan, true), fragments[1]);
+  const own1 = ownRows(f, fragments[1]);
+  assert.deepEqual(validateRenderedFragment(own1, groups[1], f.ask, plan, true), own1);
   assert.deepEqual(fragmentSetAside(fragments[1], groups[1], f.ask, plan), [{ path: 'parts[0].claims[2]', rule: 'contract', category: 'restate' }]);
   // A part whose only claim restates its row stands with none.
   const lone = structuredClone(fragments); lone[1].parts[0].claims = [lone[1].parts[0].claims[2]];
@@ -956,30 +970,38 @@ test('.32: the plan items assigned to a part that no claim quotes are named by r
   // .33: each row of an item is its own unit, named by the row as written (up to 120 characters, never cut at 40).
   const money = 'new:engine: 엔진 | 돈 안전 = 보유 중 스탑 상주 하나 | 소유자 10-22 [보고]', gate = 'new:engine: 엔진 | 게이트는 코드: TESTS rc 0 + VERIFY GO | 감독자 09-26 [보고]';
   const hedge = 'new:engine: 엔진 | 08:49Z 뒤 실제 상태 | STATUS 첫 줄';
-  // Six units: the condition's two rule rows, the correction's and the unknown's rows (the relation item is not one) and the two
+  // .35: and the engine's own 「가장 자신 없는 것」 row, a unit by the part's own name (no plan item assigns it).
+  const doubt = 'new:engine: 엔진 | 「돌고 있음」은 인용이고, 08:49Z 뒤는 직접 보지 않음 [추정]';
+  const named = x => ({ items: x.items, missing: x.missing });
+  // Six units (.35: seven, with the hedge row): the condition's two rule rows, the correction's and the unknown's rows (the relation item is not one) and the two
   // parts' own withdrawal rows; the rule rows and the unknown are not quoted (all the engine's, in the plan's part order); the
   // misassigned FLAT item is quoted by the engine's s101.
-  assert.deepEqual(planClaims(f.ask, plan, parts), { items: 6, missing: [money, gate, hedge] });
+  assert.deepEqual(named(planClaims(f.ask, plan, parts)), { items: 7, missing: [money, gate, hedge, doubt] });
   // An item pointing at two rule rows: each row lands on its own.
   const claim = (key, head) => ({ key, kind: 'reported', text: '원문 행의 규칙이다.', at: f.at(head), about: null, replaces: null, topic: 'rule' });
   parts[3].claims.push(claim('s103', '| 엔진 | 돈 안전'));
-  assert.deepEqual(planClaims(f.ask, plan, parts).missing, [gate, hedge], 'the quoted row lands, the other is named');
+  assert.deepEqual(planClaims(f.ask, plan, parts).missing, [gate, hedge, doubt], 'the quoted row lands, the other is named');
   parts[3].claims.push(claim('s104', '| 엔진 | 게이트는'));
-  assert.deepEqual(planClaims(f.ask, plan, parts).missing, [hedge]);
+  assert.deepEqual(planClaims(f.ask, plan, parts).missing, [hedge, doubt]);
   // A part's own focus row is an item of its own: the card runner's withdrawal row goes missing without s1.
   const bare = structuredClone(parts); bare[0].claims.splice(0, 1);
   assert.ok(planClaims(f.ask, plan, bare).missing.some(n => n.startsWith('new:card: 카드 러너 | review 작성기 FIX3')));
   // The global correction hears it with its names (readingDiagnostics given the plan); a render correction its own parts' items only.
   assert.deepEqual(readingDiagnostics({ ask: f.ask, summary: '', parts, blueprint: plan }).filter(x => x.rule === 'plan-claims'),
-    [{ path: 'parts', rule: 'plan-claims', expected: 6, actual: 5, names: [hedge] }]);
+    [{ path: 'parts', rule: 'plan-claims', expected: 7, actual: 5, names: [hedge, doubt] }]);
   assert.deepEqual(mapStageIssues(fragments[1], null, { ask: f.ask, fragment: true, blueprint: plan }).filter(x => x.rule === 'plan-claims'),
-    [{ path: 'parts', rule: 'plan-claims', expected: 4, actual: 1, names: [money, gate, hedge] }]);
+    [{ path: 'parts', rule: 'plan-claims', expected: 5, actual: 1, names: [money, gate, hedge, doubt] }]);
   assert.deepEqual(mapStageIssues(fragments[0], null, { ask: f.ask, fragment: true, blueprint: plan }).filter(x => x.rule === 'plan-claims'), [], 'the mood item is quoted in its fragment');
   assert.deepEqual(mapStageIssues(fragments[1], null, { ask: f.ask, fragment: true }).filter(x => x.rule === 'plan-claims'), [], 'no plan, no plan-claims');
   // .32: uncited also reads the 「가장 자신 없는 것」 rows (the record's own hedge about after its basis time).
   assert.deepEqual(factRows(f.ask).map(row => row.name), ['엔진', '카드 러너', '엔진']);
   assert.deepEqual(uncitedFacts(f.ask, parts), { rows: 3, uncited: ['엔진'] });
-  assert.deepEqual(planClaims(fixture().ask, plan32(koruText(KORU32)), []), { items: 0, missing: [] }, 'refs of no given part are not items');
+  assert.deepEqual(planClaims(fixture().ask, plan32(koruText(KORU32)), []), { items: 0, missing: [], missingUnits: [] }, 'refs of no given part are not items');
+  // .35: the FLAT row the plan gave the mood layer (its 부분 이름 cell is 엔진, another plan part) stays the diagnostic's: written on the
+  // mood layer it would only be set aside as wrong-part, so it never refuses a render; the engine's own unit of that row does.
+  const unquoted = structuredClone(parts); unquoted[0].claims = unquoted[0].claims.filter(c => c.key !== 's2'); unquoted[3].claims = unquoted[3].claims.filter(c => c.key !== 's101');
+  const flat = planClaims(f.ask, plan, unquoted).missingUnits.filter(u => u.name.includes('매일 FLAT')).map(u => [u.ref, u.trigger]);
+  assert.deepEqual(flat, [['new:mood', false], ['new:engine', true]]);
 });
 
 test('.32: a part made of a payload token (no table row, no type, no line) is left out whole as payload-part; a payload file no artifact row lists stays on its one line', () => {
@@ -1021,10 +1043,10 @@ test('.32: a part made of a payload token (no table row, no type, no line) is le
   assert.ok(combineRenderedReading(noStore, global, f.ask, plan).exclusions.some(x => x.path === 'relations[2]' && x.category === 'via-store'));
 });
 
-test('.32: the final wire\'s diagnostics come in fixed shapes for the global stage record (eight rules, at most sixteen)', () => {
+test('.32: the final wire\'s diagnostics come in fixed shapes for the global stage record (eight rules, .35 ten, at most sixteen)', () => {
   const f = koruText(KORU32), plan = plan32(f), fragments = koruFragments(f), global = { ...koruGlobal(f), summary: '어느 주장도 받치지 않는 요약 문장이다.' };
   const found = finalDiagnostics(fragments, global, f.ask, plan);
-  assert.deepEqual(FINAL_DIAGNOSTICS, ['connections', 'plan-relations', 'coverage', 'uncited', 'plan-claims', 'unbacked', 'withdrawn-count', 'unknown-count']);
+  assert.deepEqual(FINAL_DIAGNOSTICS, ['connections', 'plan-relations', 'coverage', 'uncited', 'loop-missing', 'plan-claims', 'anchor-kind', 'unbacked', 'withdrawn-count', 'unknown-count']);
   assert.ok(found.length >= 1 && found.length <= 16);
   for (const x of found) {
     assert.deepEqual(Object.keys(x), ['path', 'rule', 'expected', 'actual', 'names']);
@@ -1033,7 +1055,7 @@ test('.32: the final wire\'s diagnostics come in fixed shapes for the global sta
   const by = rule => found.find(x => x.rule === rule);
   assert.deepEqual(by('unbacked'), { path: 'summary', rule: 'unbacked', expected: 0, actual: 1, names: [] });
   assert.deepEqual(by('uncited'), { path: 'parts', rule: 'uncited', expected: 3, actual: 2, names: ['엔진'] });
-  assert.equal(by('plan-claims').names.length, 3);
+  assert.equal(by('plan-claims').names.length, 4); // .35: with the engine's own hedge row
   assert.deepEqual(by('unknown-count'), { path: 'parts', rule: 'unknown-count', expected: 1, actual: 0, names: ['엔진 | 08:49Z 뒤 실제 상태 | STATUS 첫 줄'] });
   // Read on the final wire: the engine's claim on the withdrawal row is kept there, the card runner's wrong-part claim is not.
   assert.equal(found.map(x => x.rule).join(','), FINAL_DIAGNOSTICS.filter(rule => found.some(x => x.rule === rule)).join(','), 'in the fixed order');
@@ -1079,7 +1101,11 @@ test('.33: a wrong scope, place, device or gate is set aside alone on the combin
   assert.deepEqual(engine.claims[0], { ...fragments[1].parts[0].claims[0] }, 'a claim with nothing set aside is untouched');
   const plain = M.validateMapReply(wire, f.ask);
   assert.equal(M.setAside(plain).length, 0);
-  assert.deepEqual(plain.parts[3].claims.map(signs33), engine.claims.map(signs33));
+  // .35: the wire keeps the reply's words; the reading takes the place as inferred (its line is the condition row, not the rule's own,
+  // and the rule row writes none of its cells) and says so.
+  const inferred = engine.claims.map(signs33); inferred[2][2] = [['inferred', '엔진 · not 1 <= stop <= 250']];
+  assert.deepEqual(plain.parts[3].claims.map(signs33), inferred);
+  assert.deepEqual(M.anchorDowngrades(plain), [{ ref: 'new:engine', key: 's103', text: '엔진 · not 1 <= stop <= 250' }]);
   M.attachExclusions(plain, exclusions, f.ask);
   const applied = M.applyReading(f.project, f.input, plain, meta30('R_koru33'));
   const engineId = applied.reading.parts[3].areaId, u = M.partUnderstanding(applied.project, engineId);
@@ -1088,7 +1114,8 @@ test('.33: a wrong scope, place, device or gate is set aside alone on the combin
     [[['part', 0, ['gate']], [null, 1, ['code']]], ['design'], ['run']]);
   assert.deepEqual(validateProject(applied.project), applied.project);
   // A first map's first pass sets them aside (no refusal); the stage keeps which.
-  assert.deepEqual(validateRenderedFragment(fragments[1], groups[1], f.ask, plan, true), fragments[1]);
+  const own1 = ownRows(f, fragments[1]);
+  assert.deepEqual(validateRenderedFragment(own1, groups[1], f.ask, plan, true), own1);
   assert.deepEqual(fragmentSetAside(fragments[1], groups[1], f.ask, plan).map(x => [x.path, x.category]), [['parts[0].claims[2].scope', 'scope'], ['parts[0].claims[2].anchors[1]', 'anchor'],
     ['parts[0].claims[2].enforcedBy[1]', 'enforced-by'], ['parts[0].claims[3].gate', 'gate']]);
   // A list left out whole, a field off its topic and a withdrawal kind outside its words are written null on the wire.
@@ -1167,7 +1194,9 @@ test('.34: a render first pass that leaves a plan item of a part under twenty cl
   const f = koruText(KORU32), plan = plan32(f), groups = splitBlueprintParts(plan), fragments = koruFragments(f);
   fragments[1].parts[0].config = ['레버리지 20'];
   const engine = fragments[1].parts[0], missing = ['new:engine: 엔진 | 돈 안전 = 보유 중 스탑 상주 하나 | 소유자 10-22 [보고]',
-    'new:engine: 엔진 | 게이트는 코드: TESTS rc 0 + VERIFY GO | 감독자 09-26 [보고]', 'new:engine: 엔진 | 08:49Z 뒤 실제 상태 | STATUS 첫 줄'];
+    'new:engine: 엔진 | 게이트는 코드: TESTS rc 0 + VERIFY GO | 감독자 09-26 [보고]', 'new:engine: 엔진 | 08:49Z 뒤 실제 상태 | STATUS 첫 줄',
+    // .35: and the engine's own hedge row, a unit by its name.
+    'new:engine: 엔진 | 「돌고 있음」은 인용이고, 08:49Z 뒤는 직접 보지 않음 [추정]'];
   const read = value => { const projected = structuredClone(value); for (const part of projected.parts) part.parent = null; return M.validateMapReply(projected, f.ask, { setAside: true, owners: plan.parts.map(p => p.name) }); };
   // The engine holds two claims of twenty and quotes none of its three plan rows: the first pass is refused, the correction is read.
   assert.deepEqual(planShort(f.ask, plan, fragments[1].parts, read(fragments[1])), missing);
@@ -1180,8 +1209,10 @@ test('.34: a render first pass that leaves a plan item of a part under twenty cl
   // Once a row is quoted it is no longer named; with every row quoted the first pass passes.
   const quoting = structuredClone(fragments[1]), claim = (key, head) => ({ key, kind: 'reported', text: `원문 행을 옮긴다(${key}).`, at: f.at(head), about: null, replaces: null });
   quoting.parts[0].claims.push(claim('s103', '| 엔진 | 돈 안전'), claim('s104', '| 엔진 | 게이트는'));
-  assert.deepEqual(planShort(f.ask, plan, quoting.parts, read(quoting)), [missing[2]]);
+  assert.deepEqual(planShort(f.ask, plan, quoting.parts, read(quoting)), [missing[2], missing[3]]);
   quoting.parts[0].claims.push({ ...claim('s105', '| 엔진 | 08:49Z'), topic: 'unknown' });
+  assert.deepEqual(planShort(f.ask, plan, quoting.parts, read(quoting)), [missing[3]]);
+  quoting.parts[0].claims.push({ ...claim('s106', '| 엔진 | 「돌고'), topic: 'unknown' });
   assert.deepEqual(validateRenderedFragment(quoting, groups[1], f.ask, plan, true), quoting);
   // At the cap (twenty claims read) the first pass passes and the diagnostic still names what is missing.
   const full = structuredClone(fragments[1]);
@@ -1194,4 +1225,197 @@ test('.34: a render first pass that leaves a plan item of a part under twenty cl
   const later = fixture(1), laterPlan = planned(later, 2), laterFragments = rendered(later, laterPlan);
   laterPlan.global.push({ kind: 'condition', text: '조건 → new:p1', at: [later.at[5]] });
   assert.deepEqual(validateRenderedFragment(laterFragments[0], splitBlueprintParts(laterPlan)[0], later.ask, laterPlan, true), laterFragments[0]);
+});
+
+// ---- first-map-divided.35 (from the .34 run and the .33/.34 judging): a part's own rows are plan-claims units by its name, the
+// render trigger leaves out a row another plan part owns, a stated place off the rule's own row is read inferred, the program's places
+// read the part's file-map rows and settings cell, a bare io prefix of a design-cell item or a line's payload name is set aside, a
+// status claim on a connection row a relation quotes is restate, and a part that repeats by its rows with no loop is named. The rows
+// below are the real KORU records' rows (koru-orch-design-v1 §3-§6 and koru-orch-v3 §2-§7), copied as written; no model quality is
+// claimed. ----
+const DESIGN35 = ['KORU 설계 기록 v1 (검토 세션, 2026-11-03 09:xxZ; 코드는 git show로 라이브 sha를 읽음)',
+  '3. 부분별 설계', '| 이름 | 받는 산출물 | 안의 단계 | 내는 산출물 | 설정 | 꼬리표 |', '|---|---|---|---|---|---|',
+  '| 엔진 | review·policy·state 행, 패킷 | 4절 | J1 답 → 주문 | 618df374, 레버리지 20, 동시 1, j1_cadence 60 s | [파일: R] |',
+  '| 카드 러너 | 패킷 원천·plan·facts·posture | 4절 | cards·counter·review 행·LEDGER | 타이머 tick :00·dispatch :05·gate 01/16/31/46분 :02 | [파일: C/systemd/*.timer] |',
+  '| ARM | precheck | [모름] | e=1.00 행 | 24 h 만료 | [보고: ops 세션 STATUS 11-03 07:27Z] |',
+  '4. 안의 단계', '| 부분 이름 | 순번 | 단계 이름 | 하는 일 한 줄 | 쓰는 파일·함수·모델 | 조건·분기 | 꼬리표 |', '|---|---|---|---|---|---|---|',
+  '| 엔진 | 10 | 집행 | 주문·HARD 상주 | engine.py(이번에 안 읽음) | [모름] | [모름] |',
+  '| 카드 러너 | 4 | 팔 반복 | CX·CL·DS 각각 | ARMS | 팔당 16회/일 넘으면 DAILY_CAP | [파일: C/card_runner.py] |',
+  '| 카드 러너 | 11 | tick | 매분 checkpoint·kill·만료·trigger·pull | tick·checkpoint·kill·pull_due | KILL/EXPIRED → review 갱신 | [파일: C/card_runner.py] |',
+  '5. 조건·거부·분기', '| 부분 이름 | 조건 | 참이면 | 거짓이면 | 꼬리표 |', '|---|---|---|---|---|',
+  '| 엔진 | not 1 <= stop <= 250 | STOP_NOT_RESIDENT | J1 답 | [파일: R] |',
+  "| 카드 러너 | arm!='CX' or review_writer is not True | 카드 행만 | review 행도 씀 | [파일: C/card_runner.py] |",
+  "| 카드 러너 | expiry<=stamp and side!='NONE' | REVIEW_EXPIRED_DIRECTION | NONE이면 30분 연장 | [파일: C/card_runner.py] |",
+  '| 카드 러너 | not stamp+900000<=cp<=stamp+5400000 | CHECKPOINT_TIME | 다음 | [파일: C/card_runner.py] |',
+  "| 카드 러너 | watch=='OFF'이고 그 시각에 TRADING_RESTRICTION 사건 없음 | INVALID | 다음 | [파일: C/card_runner.py] |",
+  '6. 파일 지도', '| 경로 | 속한 부분 | 역할 한 줄 | 꼬리표 |', '|---|---|---|---|',
+  '| C/calls.py | 카드 러너 | 모델 호출·지출 상한 CL 20·DS 5 USD | [파일: C/calls.py] |'].join('\n');
+const STATUS35 = ['KORU 프로젝트 현황 보고서 (v3 표 형식, 검토 세션 작성, 2026-11-03 09:0xZ 기준)',
+  '2. 부분', '| 이름 | 하는 일 한 줄 | 담당 파일·폴더 | 상태 단어 | 상태의 기준 시각 | 꼬리표 |', '|---|---|---|---|---|---|',
+  '| 소유자 | 지시 한 줄·잔고 입출금으로 노출 조절·전원 관리 | — | 돌고 있음 | 11-03 07:1xZ | [보고: 감독자 세션 SUPERVISOR-LOG 11-03 07:13Z] |',
+  '| 엔진 | 행 셋 합성 → J1 → 집행자 하나 → 주문·TP·HARD | koru-wt/d4/code/exec/live_direct/ (라이브 sha 618df374) | 돌고 있음 | 11-03 08:49Z | [보고: ops 세션 STATUS 11-03 08:49Z] |',
+  '| ARM | e=1.00 노출 행 서명·24 h 만료 | 미니PC desk-redeploy·arm-loop | 돌고 있음 | 11-03 07:27Z | [보고: ops 세션 STATUS 11-03 07:27Z] |',
+  '| 카드 러너 | 패킷 → 반대편 → 세 팔 카드 → review 행 | koru-hold/BUILD6/WORK/OPS/cardrunner/ (sha 2 5d31b880) | 돌고 있음 | 11-03 07:33Z | [보고: 감독자 세션 SUPERVISOR-LOG 11-03 07:33Z] |',
+  '| 성적표 | 하루 장(읽기용, 판정 아님) | koru-hold/BUILD6/WORK/OPS/scorecard/·daysheet/ | 돌고 있음 | 11-03 07:33Z | [보고: 감독자 세션 SUPERVISOR-LOG 11-03 07:33Z] |',
+  '4. 연결', '| 보내는 부분 | 받는 부분 | 넘기는 것 | 언제·얼마나 자주 | 설계/관찰 | 꼬리표 |', '|---|---|---|---|---|---|',
+  '| 카드 러너 | 엔진 | review.jsonl watch·allowed_side·valid_until | K 23:37Z·U 14:07Z·GAP 06:35Z/21:05Z·깨우기 | 관찰 | [보고: 감독자 세션 SUPERVISOR-LOG 11-02 14:14Z] |',
+  '| 엔진 | 성적표 | journal·outcomes 경주 행 | 매일 02:15Z | 관찰 | [보고: 감독자 세션 SUPERVISOR-LOG 11-03 00:13Z] |',
+  '6. 철회·변경', '| 부분 이름 | 옛 결정 | 지금 | 근거·날짜 |', '|---|---|---|---|',
+  '| 카드 러너 | 일일 가드 CL 1.50·DS 0.40 | 철회(코드 상한과 같음) | [보고: 감독자 세션 SUPERVISOR-LOG 10-31 23:04Z] |',
+  '7. 지켜야 할 것과 하지 않기로 한 것', '| 부분 이름 | 규칙 한 줄 | 누가 정했나·언제 |', '|---|---|---|',
+  '| 엔진 | 돈 안전 = 보유 중 스탑 상주 하나, 게이트는 스탑·크기·방향만 | 소유자 10-22 [보고: 메모리 색인] |',
+  '| ARM | 노출은 잔고로만, e=1.00 고정 | 소유자 10-18 [보고: 메모리 색인] |',
+  '| 카드 러너 | 지출은 상한 있게, 감독자 세션 승인 | 소유자 10-22 [보고: 메모리 색인] |'].join('\n');
+function koru35() {
+  let project = D.pasteRecord(D.createProject(), DESIGN35, null).project;
+  project = D.pasteRecord(project, STATUS35, null).project;
+  const input = M.buildMapAsk(project, studioView(project), [], undefined, M.MAP6_SCHEMA), spans = input.ask.records.flatMap(r => r.spans);
+  assert.ok(M.firstAsk(input.ask));
+  const at = head => { const hit = spans.filter(span => span.t.startsWith(head)); assert.equal(hit.length, 1, head); return hit[0].s; };
+  return { project, input, ask: input.ask, at };
+}
+const plan35 = f => ({ parts: [
+  { ref: 'new:owner', name: '소유자', parent: null, at: [f.at('| 소유자 | 지시')], focus: '지시·잔고·전원' },
+  { ref: 'new:arm', name: 'ARM', parent: null, at: [f.at('| ARM | e=1.00')], focus: 'e=1.00 노출 행' },
+  { ref: 'new:card', name: '카드 러너', parent: null, at: [f.at('| 카드 러너 | 패킷 →')], focus: '세 팔 카드' },
+  { ref: 'new:engine', name: '엔진', parent: null, at: [f.at('| 엔진 | 행 셋')], focus: '행 셋 → 주문' },
+  { ref: 'new:sheet', name: '성적표', parent: null, at: [f.at('| 성적표 | 하루')], focus: '하루 장' }],
+  // The .34 plan gave ARM's rule row to the owner (the first .34 run's wrong-part claim of 소유자).
+  global: [{ kind: 'condition', text: '노출은 잔고로만, e=1.00 고정 → new:owner', at: [f.at('| ARM | 노출은')] }] });
+function fragments35(f) {
+  const claim = (key, head, extra = {}) => ({ key, kind: 'reported', text: `원문 행을 옮긴다(${key}).`, at: f.at(head), about: null, replaces: null, ...extra });
+  const part = (ref, name, head, claims, extra = {}) => ({ ref, name, parent: null, role: `${name}의 책임`, roleAbout: null, roleReplaces: null, basis: [f.at(head)], claims, ...extra });
+  return [{ ...empty(), parts: [
+    part('new:owner', '소유자', '| 소유자 | 지시', [claim('s1', '| 소유자 | 지시', { topic: 'status' })]),
+    part('new:arm', 'ARM', '| ARM | e=1.00', [claim('s2', '| ARM | e=1.00', { topic: 'status' })], { config: ['24 h 만료'] }),
+    part('new:card', '카드 러너', '| 카드 러너 | 패킷 →', [claim('s3', '| 카드 러너 | 일일', { topic: 'withdrawn' }), claim('s4', '| 카드 러너 | 지출', { topic: 'rule' })],
+      { config: ['타이머 tick :00', 'dispatch :05', 'gate 01/16/31/46분 :02'] })] },
+  { ...empty(), parts: [
+    part('new:engine', '엔진', '| 엔진 | 행 셋', [claim('s61', '| 엔진 | 돈 안전', { topic: 'rule' }), claim('s62', '| 엔진 | 10 |', { topic: 'unknown' }), claim('s64', '| 엔진 | not 1', { topic: 'how' })],
+      { config: ['레버리지 20', '동시 1', 'j1_cadence 60 s'] }),
+    part('new:sheet', '성적표', '| 성적표 | 하루', [claim('s63', '| 성적표 | 하루', { topic: 'status' })])] }];
+}
+const read35 = (f, plan, value) => { const projected = structuredClone(value); for (const part of projected.parts) part.parent = null; return M.validateMapReply(projected, f.ask, { setAside: true, owners: plan.parts.map(p => p.name) }); };
+
+test('.35 plan-claims: a part\'s own rows count by its name (rules, withdrawals, condition rows, [모름] steps, settings items), each landing on a claim, an anchor, a step, a config item or an exclusion', () => {
+  const f = koru35(), plan = plan35(f), groups = splitBlueprintParts(validateMapBlueprint(plan, f.ask)), fragments = fragments35(f);
+  const card = ["new:card: 카드 러너 | arm!='CX' or review_writer is not True | 카드 행만 | review 행도 씀 | [파일: C/card_runner.py]",
+    "new:card: 카드 러너 | expiry<=stamp and side!='NONE' | REVIEW_EXPIRED_DIRECTION | NONE이면 30분 연장 | [파일: C/card_runner.py]",
+    'new:card: 카드 러너 | not stamp+900000<=cp<=stamp+5400000 | CHECKPOINT_TIME | 다음 | [파일: C/card_runner.py]',
+    "new:card: 카드 러너 | watch=='OFF'이고 그 시각에 TRADING_RESTRICTION 사건 없음 | INVALID | 다음 | [파일: C/card_runner.py]"];
+  const ownerArm = 'new:owner: ARM | 노출은 잔고로만, e=1.00 고정 | 소유자 10-18 [보고: 메모리 색인]';
+  const armRule = 'new:arm: ARM | 노출은 잔고로만, e=1.00 고정 | 소유자 10-18 [보고: 메모리 색인]';
+  const armStep = 'new:arm: ARM | precheck | [모름] | e=1.00 행 | 24 h 만료 | [보고: ops 세션 STATUS 11-03 07:27Z]';
+  const first = planClaims(f.ask, plan, fragments[0].parts);
+  // Units of the first fragment: the plan's item (ARM's rule row, given to the owner), ARM's own rule row, its [모름] design row and its
+  // one setting, the card runner's withdrawal and rule rows, its four condition rows and its three settings items (the 11 tick step row
+  // is no [모름] row and no unit). The card runner's 「팔당 16회/일」 is a step-table cell (not a 설정·상태 cell): no unit.
+  assert.equal(first.items, 1 + 3 + 2 + 4 + 3);
+  assert.deepEqual(first.missing, [ownerArm, armRule, armStep, ...card]);
+  assert.deepEqual(first.missingUnits.map(u => [u.ref, u.trigger]), [['new:owner', false], ['new:arm', true], ['new:arm', true], ...card.map(() => ['new:card', true])]);
+  // The render trigger: every missing unit of a part under the cap, but the owner's (its row names ARM, another plan part).
+  assert.deepEqual(planShort(f.ask, plan, fragments[0].parts, read35(f, plan, fragments[0])), [armRule, armStep, ...card]);
+  refused(() => validateRenderedFragment(fragments[0], groups[0], f.ask, plan, true));
+  assert.deepEqual(validateRenderedFragment(fragments[0], groups[0], f.ask, plan), fragments[0], 'the correction\'s reply is taken as it is');
+  assert.deepEqual(mapStageIssues(fragments[0], null, { ask: f.ask, fragment: true, blueprint: plan }).find(x => x.rule === 'plan-claims').names, first.missing);
+  // Each lands its own way: a rule anchor on a condition row, a step on the [모름] design row, a claim on the rule row, and a claim set
+  // aside on a row (here the owner's claim on a card condition row, wrong-part) by its exclusion.
+  const landed = structuredClone(fragments[0]), [owner, arm, cardRunner] = landed.parts;
+  cardRunner.claims[1].anchors = [{ kind: 'inferred', text: 'review_writer', at: f.at("| 카드 러너 | arm!='CX'") }];
+  arm.steps = [{ name: 'precheck', does: null, uses: [], at: f.at('| ARM | precheck') }];
+  arm.claims.push({ key: 's5', kind: 'want', text: '노출은 잔고로만 조절하고 e=1.00으로 고정한다.', at: f.at('| ARM | 노출은'), about: null, replaces: null, topic: 'rule' });
+  cardRunner.claims.push({ key: 's6', kind: 'describes', text: '만료 방향을 본다.', at: f.at("| 카드 러너 | expiry"), about: null, replaces: null, topic: 'how' },
+    { key: 's7', kind: 'describes', text: 'checkpoint 시각을 본다.', at: f.at('| 카드 러너 | not stamp'), about: null, replaces: null, topic: 'how' });
+  owner.claims.push({ key: 's8', kind: 'describes', text: 'watch OFF는 INVALID다.', at: f.at("| 카드 러너 | watch=="), about: null, replaces: null, topic: 'how' });
+  const read = read35(f, plan, landed);
+  assert.deepEqual(M.readingExclusions(read).map(x => [x.path, x.category]), [['parts[0].claims[1]', 'wrong-part']]);
+  assert.deepEqual(planClaims(f.ask, plan, landed.parts.map(p => p.ref === 'new:owner' ? { ...p, claims: [p.claims[0]] } : p), M.readingExclusions(read)).missing, [], 'the exclusion on the row lands it');
+  assert.deepEqual(planShort(f.ask, plan, landed.parts, read), []);
+  assert.deepEqual(validateRenderedFragment(landed, groups[0], f.ask, plan, true), landed);
+  // A missing setting item is a unit too; a version in the cell never is (the engine's 618df374).
+  const unset = structuredClone(fragments[1]); unset.parts[0].config = ['레버리지 20'];
+  assert.deepEqual(planClaims(f.ask, plan, unset.parts).missing, ['new:engine: 엔진 | 설정 | 동시 1', 'new:engine: 엔진 | 설정 | j1_cadence 60 s']);
+  // The engine's [모름] step row lands on its unknown claim; the 「돈 안전」 rule on its claim.
+  assert.deepEqual(planClaims(f.ask, plan, fragments[1].parts).missing, []);
+  // Read on the combined wire, the global stage's record names what is still missing (the first fragment as written).
+  assert.ok(readingDiagnostics({ ask: f.ask, summary: '', parts: fragments.flatMap(x => x.parts), blueprint: plan }).find(x => x.rule === 'plan-claims').names.includes(armStep));
+});
+
+test('.35 loop-missing: a part whose own design or step rows say it repeats (매분, 분마다, 폴링, 간격, tick) while its loop is null is named', () => {
+  const f = koru35(), plan = plan35(f), parts = structuredClone(fragments35(f).flatMap(x => x.parts));
+  // The step row that says how often (매분) names it before the design row's 「tick :00」, as written up to 120 characters.
+  const row = '카드 러너 | 11 | tick | 매분 checkpoint·kill·만료·trigger·pull | tick·checkpoint·kill·pull_due | KILL/EXPIRED → review 갱신 | [파일: C/card_runner.py]';
+  assert.deepEqual(loopRows(f.ask, parts), { rows: 1, missing: [`카드 러너: ${row.slice(0, 120)}`] });
+  assert.deepEqual(readingDiagnostics({ ask: f.ask, summary: '', parts, blueprint: plan }).find(x => x.rule === 'loop-missing'),
+    { path: 'parts', rule: 'loop-missing', expected: 1, actual: 0, names: loopRows(f.ask, parts).missing });
+  parts.find(p => p.ref === 'new:card').loop = { unit: '매분 tick', stop: null, resume: null, at: f.at('| 카드 러너 | 11') };
+  assert.deepEqual(loopRows(f.ask, parts), { rows: 1, missing: [] });
+  // A render correction hears it for its own parts.
+  const fragment = fragments35(f)[0];
+  assert.deepEqual(mapStageIssues(fragment, null, { ask: f.ask, fragment: true, blueprint: plan }).find(x => x.rule === 'loop-missing')?.actual, 0);
+});
+
+test('.35 places: a stated place stays stated on the rule\'s own row or where the rule row writes its cell, else it is read inferred and named; the program also reads the file-map row and the settings cell', () => {
+  const f = koru35(), plan = plan35(f), fragments = fragments35(f);
+  const engine = fragments[1].parts[0], cardRunner = fragments[0].parts[2];
+  // The .34 run's s129: the money rule placed stated on the STOP_NOT_RESIDENT row, which its own row does not write.
+  engine.claims[0].anchors = [{ kind: 'stated', text: '엔진 · not 1 <= stop <= 250', at: f.at('| 엔진 | not 1') }, { kind: 'stated', text: '돈 안전 행', at: f.at('| 엔진 | 돈 안전') }];
+  const global = { ...empty(), summary: '엔진은 돌고 있다.' };
+  const { wire } = combineRenderedReading(fragments, global, f.ask, plan), read = M.validateMapReply(wire, f.ask);
+  const places = c => (c.anchors ?? []).map(a => [a.kind, a.text, a.program === true]);
+  const engineRead = read.parts.find(p => p.ref === 'new:engine'), cardRead = read.parts.find(p => p.ref === 'new:card');
+  assert.deepEqual(places(engineRead.claims[0]), [['inferred', '엔진 · not 1 <= stop <= 250', false], ['stated', '돈 안전 행', false]]);
+  assert.deepEqual(M.anchorDowngrades(read), [{ ref: 'new:engine', key: 's61', text: '엔진 · not 1 <= stop <= 250' }]);
+  assert.deepEqual(wire.parts.find(p => p.ref === 'new:engine').claims[0].anchors[0].kind, 'stated', 'the wire keeps the reply\'s word');
+  assert.deepEqual(finalDiagnostics(fragments, global, f.ask, plan).find(x => x.rule === 'anchor-kind'), { path: 'parts', rule: 'anchor-kind', expected: null, actual: 1, names: ['new:engine s61: 엔진 · not 1 <= stop <= 250'] });
+  // The spending rule (the .34 run's s154, anchors 0): the program places it on the card runner's file-map row C/calls.py.
+  assert.deepEqual(places(cardRead.claims[1]), [['inferred', 'C/calls.py', true]]);
+  assert.equal(cardRead.claims[1].anchors[0].quote.quote, '| C/calls.py | 카드 러너 | 모델 호출·지출 상한 CL 20·DS 5 USD | [파일: C/calls.py] |');
+  // A rule sharing two words with the settings cell (dispatch, gate) is placed there too, after the file-map row (the record's order).
+  const beats = structuredClone(fragments);
+  beats[0].parts[2].claims.push({ key: 's11', kind: 'want', text: 'dispatch와 gate 박자를 지킨다.', at: f.at('| 카드 러너 | 지출'), about: null, replaces: null, topic: 'rule' });
+  const beatsRead = M.validateMapReply(combineRenderedReading(beats, global, f.ask, plan).wire, f.ask).parts.find(p => p.ref === 'new:card');
+  assert.deepEqual(places(beatsRead.claims.at(-1)), [['inferred', 'C/calls.py', true], ['inferred', '타이머 tick :00·dispatch :05·gate 01/16/31/46분 :02', true]]);
+});
+
+test('.35 places: a rule row that writes a cell of the place row word for word keeps the place stated', () => {
+  const f = koruText(['7. 지켜야 할 것과 하지 않기로 한 것', '| 부분 이름 | 규칙 한 줄 | 누가 정했나·언제 |', '|---|---|---|',
+    '| 엔진 | 스탑이 없으면 STOP_NOT_RESIDENT로 쉰다 | 소유자 10-22 [보고] |', '| 엔진 | 동시 1 | 소유자 10-22 [보고] |',
+    '5. 조건·거부·분기', '| 부분 이름 | 조건 | 참이면 | 거짓이면 | 꼬리표 |', '|---|---|---|---|---|', '| 엔진 | not 1 <= stop <= 250 | STOP_NOT_RESIDENT | J1 답 | [파일: R] |'].join('\n'));
+  const rule = (key, head) => ({ key, kind: 'want', text: '규칙을 옮긴다.', at: f.at(head), about: null, replaces: null, topic: 'rule', anchors: [{ kind: 'stated', text: 'not 1 <= stop <= 250', at: f.at('| 엔진 | not 1') }] });
+  const reply = { ...empty(), parts: [{ ref: 'new:engine', name: '엔진', parent: null, role: '엔진의 책임', roleAbout: null, roleReplaces: null, basis: [f.at('| 엔진 | 스탑이')],
+    claims: [rule('s1', '| 엔진 | 스탑이'), rule('s2', '| 엔진 | 동시 1')] }] };
+  const read = M.validateMapReply(reply, f.ask);
+  assert.deepEqual(read.parts[0].claims.map(c => c.anchors.map(a => a.kind)), [['stated'], ['inferred']]);
+  assert.deepEqual(M.anchorDowngrades(read), [{ ref: 'new:engine', key: 's2', text: 'not 1 <= stop <= 250' }]);
+});
+
+test('.35 io and restate: a bare prefix of an item of the part\'s own design cell (a shared noun on every 「·」 item) or of a line\'s payload name is set aside alone; a status claim on a connection row a relation quotes is restate', () => {
+  const f = koru35(), plan = plan35(f), fragments = fragments35(f), engine = fragments[1].parts[0], cardRunner = fragments[0].parts[2];
+  assert.deepEqual(M.sharedItems('review·policy·state 행, 패킷'), ['review 행', 'policy 행', 'state 행', '패킷']);
+  assert.deepEqual(M.sharedItems('journal·outcomes 경주 행'), ['journal 경주 행', 'outcomes 경주 행']);
+  assert.deepEqual(M.sharedItems('원자료·σ·runner cards'), ['원자료', 'σ', 'runner cards'], 'a Latin tail belongs to the last name');
+  assert.deepEqual(M.sharedItems('달력·지난 24 h LEDGER'), ['달력', '지난 24 h LEDGER']);
+  assert.deepEqual(M.sharedItems('cards·counter·review 행·LEDGER'), ['cards', 'counter', 'review 행', 'LEDGER']);
+  // The .34 engine: 「review」「policy」 of 「review·policy·state 행」 go; 「state 행」 and 「패킷」 stay. Its 「journal」 out to the scorecard
+  // is a bare prefix of the line's 「journal 경주 행」.
+  Object.assign(engine, { inputs: ['review', 'policy', 'state 행', '패킷'], outputs: ['J1 답 → 주문', 'journal'] });
+  // The card runner's own cell items stay, a payload name they begin notwithstanding (plan of 「plan.jsonl …」 would not refuse it).
+  Object.assign(cardRunner, { inputs: ['패킷 원천', 'plan', 'facts', 'posture'], outputs: ['cards', 'counter', 'review 행', 'LEDGER'] });
+  // The card runner's status claim on its 연결 row says the line again; a change claim on the same row stays.
+  cardRunner.claims.push({ key: 's9', kind: 'reported', text: 'review.jsonl의 watch·allowed_side·valid_until을 엔진에 넘긴다고 보고됐다.', at: f.at('| 카드 러너 | 엔진'), about: null, replaces: null, topic: 'status' },
+    { key: 's10', kind: 'reported', text: '깨우기 박자가 더해졌다고 보고됐다.', at: f.at('| 카드 러너 | 엔진'), about: null, replaces: null, topic: 'change' });
+  const global = { ...empty(), summary: '엔진은 돌고 있다.', relations: [
+    { from: 'new:card', to: 'new:engine', kind: 'flow', note: '', at: f.at('| 카드 러너 | 엔진'), payload: 'review.jsonl watch·allowed_side·valid_until', mode: 'observed' },
+    { from: 'new:engine', to: 'new:sheet', kind: 'flow', note: '', at: f.at('| 엔진 | 성적표'), payload: 'journal·outcomes 경주 행', mode: 'observed' }] };
+  const { wire, exclusions } = combineRenderedReading(fragments, global, f.ask, plan);
+  assert.deepEqual(exclusions.map(x => [x.path, x.category]).filter(([, c]) => ['inputs', 'outputs', 'restate'].includes(c)),
+    [['parts[3].inputs[0]', 'inputs'], ['parts[3].inputs[1]', 'inputs'], ['parts[3].outputs[1]', 'outputs'], ['parts[2].claims[2]', 'restate']]);
+  const engineOut = wire.parts.find(p => p.ref === 'new:engine'), cardOut = wire.parts.find(p => p.ref === 'new:card');
+  assert.deepEqual([engineOut.inputs, engineOut.outputs], [['state 행', '패킷'], ['J1 답 → 주문']]);
+  assert.deepEqual([cardOut.inputs, cardOut.outputs], [['패킷 원천', 'plan', 'facts', 'posture'], ['cards', 'counter', 'review 행', 'LEDGER']]);
+  assert.deepEqual(cardOut.claims.map(c => c.key), ['s3', 's4', 's10']);
+  assert.equal(M.setAside(M.validateMapReply(wire, f.ask)).length, 0);
+  // Without the relation quoting the row, the status claim stays (nothing else says the line).
+  assert.ok(combineRenderedReading(fragments, { ...global, relations: [global.relations[1]] }, f.ask, plan).wire.parts.find(p => p.ref === 'new:card').claims.some(c => c.key === 's9'));
 });

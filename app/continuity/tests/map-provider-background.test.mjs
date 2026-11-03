@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { callMapProvider, MAP_BACKGROUND_AFTER_MS } from '../server/map-provider.mjs';
+import { callMapProvider, readResponseUsage, MAP_BACKGROUND_AFTER_MS } from '../server/map-provider.mjs';
 import { ApiError } from '../../server/errors.mjs';
 
 // Background mode: a call allowed longer than MAP_BACKGROUND_AFTER_MS POSTs once (background: true, store: true), then polls
@@ -155,4 +155,30 @@ test('a background call settles within the cancel bound even when the transport 
   t.mock.timers.tick(16000); await flush();
   assert.ok(code('CANCELLED')(await outcome));
   assert.equal(requests.at(-1), `POST ${RESPONSES}/${id}/cancel`);
+});
+
+// .35: the ledger's read-back of a lost attempt: one GET of the kept id, never a POST, never retried; its usage only once the
+// response has ended (completed, failed, cancelled, incomplete) and reports one.
+test('.35 readResponseUsage: one GET of the kept id gives the usage of an ended response; anything else gives null', async () => {
+  const seen = [];
+  const answer = value => async (url, init) => { seen.push(`${init.method} ${url}`); assert.equal(init.headers.Authorization, `Bearer ${key}`); return typeof value === 'function' ? value() : json(value); };
+  const read = fetchImpl => readResponseUsage({ apiKey: key, responseId: id, fetchImpl });
+  assert.deepEqual(await read(answer(completed())), { inputTokens: 300, outputTokens: 1800, cachedInputTokens: 0, reasoningTokens: 1500 });
+  assert.deepEqual(seen, [`GET ${RESPONSES}/${id}`], 'one GET, nothing else');
+  // A cancelled response that reports what it spent (the .32 stalled plans: 0-1,259 reasoning tokens).
+  assert.deepEqual(await read(answer({ ...pending('cancelled'), usage: { input_tokens: 20000, output_tokens: 1259, output_tokens_details: { reasoning_tokens: 1259 } } })),
+    { inputTokens: 20000, outputTokens: 1259, reasoningTokens: 1259 });
+  for (const value of [pending('in_progress'), pending('queued'), { ...pending('cancelled'), usage: null }, { ...completed(), id: 'resp_other' }, { ...completed(), status: 'mystery' }]) assert.equal(await read(answer(value)), null);
+  assert.equal(await read(answer(() => new Response('gone', { status: 404 }))), null);
+  assert.equal(await read(answer(() => new Response('not json', { status: 200 }))), null);
+  assert.equal(await read(async () => { throw new TypeError('fetch failed'); }), null);
+  // No key, a malformed id or an aborted signal sends nothing.
+  const none = []; const never = async url => { none.push(url); return json(completed()); };
+  assert.equal(await readResponseUsage({ apiKey: '', responseId: id, fetchImpl: never }), null);
+  assert.equal(await readResponseUsage({ apiKey: key, responseId: '../x', fetchImpl: never }), null);
+  assert.equal(await readResponseUsage({ apiKey: key, responseId: id, fetchImpl: never, signal: AbortSignal.abort() }), null);
+  assert.deepEqual(none, []);
+  // A GET that never answers ends at its own bound.
+  const hang = (url, init) => new Promise((_, reject) => init.signal.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')), { once: true }));
+  assert.equal(await readResponseUsage({ apiKey: key, responseId: id, fetchImpl: hang, timeoutMs: 20 }), null);
 });
