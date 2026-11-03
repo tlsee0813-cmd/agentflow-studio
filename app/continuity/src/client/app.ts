@@ -29,6 +29,7 @@ import { placeExpansion, actionSections, pushPlace, readOpenState, writeOpenStat
 import { detailChain, stepConsumers, unmappedMark, type ChainLink, type OutLine } from './steps-view.js';
 import { labelSpots, polylineHitsRect, portSpots } from './map-labels.js';
 import { opsLines } from './ops-line.js';
+import { partSigns, hasSigns, signTabs, ruleSaid, changeRow, failureBlanks, sinceMatch, sinceSummary, timeSpan, readSince, writeSince, SIGN_LABEL, RULE_BLANKS, RULE_BLANK_HINT, GATE_BLANK, GATE_BLANK_HINT, NATURE_HINT, FAILURE_BLANK, RECOVERY_BLANK, SINCE_OFF, type PartSigns, type SignKind, type SinceState } from './signs-view.js';
 import { PROJECT_REPORT_ASK, CHAT_REPORT_ASK, DESIGN_RECORD_ASK, RECORD_ASK_EXPLAIN, deltaReportAsk, reflectAsk, scenarioAskWithLedger, plannedNote } from '../shared/report-ask.js';
 import { modelLabel } from '../shared/model-label.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
@@ -355,7 +356,7 @@ async function render() {
     if (scenes.length > 12) scenes = scenes.slice(-12);
     opened = next; scope = nextScope; lastClick.id = '';
     if (fresh) { planView.projectChanged(); returnView.projectChanged(); readMarks = []; readingCamera = null; loadView(next); autoSync.opened(); }
-    if (fresh) { openState = null; backStack = []; pendingAction = null; hideDetail(); dropShort(); restoreOpen = storedOpen(next); scOn = null; scVisit = null; scView = null; }
+    if (fresh) { openState = null; backStack = []; pendingAction = null; hideDetail(); dropShort(); restoreOpen = storedOpen(next); scOn = null; scVisit = null; scView = null; signOpen = null; signFocus = false; since = readSince(kv, viewKeyOf(next)); }
     // A new project starts with the map alone: the previous project's reading pane must not narrow its first view.
     if (fresh) { selected = null; ask = null; editing = false; partForm = null; composerOpen = false; sheetOpen = false; scopeReading = false; $('panel').hidden = true; $('panel').replaceChildren(); hideLens(); }
     tempExpand.clear();
@@ -910,7 +911,144 @@ function typedOf(r: PartUnderstanding): Typed {
 /** What a unit's typed lines are before the six-line budget (card-budget) decides which of them the card keeps, at the zoom
  * level the layout is made for. The name is drawn on two lines at most (.node-name), so a longer measure counts as two. */
 const budgetOf = (t: Typed, r: PartUnderstanding, nameLines: number, chips: ChipsAt = 'none', level: ZoomLevel = cardLevel, entry: EntryKind = 'none'): CardBudget =>
-  typedBudget(Math.min(2, nameLines), !!t.setting, r.inputs.length > 0, r.outputs.length > 0, !!t.body, chips, level, entry);
+  typedBudget(Math.min(2, nameLines), !!t.setting, r.inputs.length > 0, r.outputs.length > 0, !!t.body, chips, level, entry, hasSigns(signsOf(r)));
+/* ---------- signs (map spec 5): 규칙 · 관문 · 변경 tabs at a card's bottom edge, their pane sections, the since-time filter ----------
+ * signs-view.ts decides which claims are rules, gates and withdrawals (gates and a change's nature are provisional heuristics
+ * until the contract carries scopeRef · anchors · enforcedBy · the withdrawal kind). A tab opens its section in the pane; the
+ * map itself never changes for it (no neighbour moves). */
+const signMemo = new WeakMap<PartUnderstanding, PartSigns<CurrentClaim>>();
+/** In the order the pane reads claims (claimList): a correcting one first, then newest reading first, each reading as it said them. */
+function signsOf(r: PartUnderstanding): PartSigns<CurrentClaim> {
+  let v = signMemo.get(r); if (v) return v;
+  const fresh = new Map<string, number>(); for (const c of r.claims) if (!fresh.has(c.reading)) fresh.set(c.reading, fresh.size);
+  v = partSigns([...r.claims].sort((a, b) => Number(!!b.replaces) - Number(!!a.replaces) || fresh.get(a.reading)! - fresh.get(b.reading)! || a.index - b.index));
+  signMemo.set(r, v); return v;
+}
+/** The sign section open in the pane (its part and the tab it was opened from); focus goes to it once after it is drawn. */
+let signOpen: { part: string; kind: SignKind } | null = null, signFocus = false;
+/** The since-time filter of the opened map (signs-view readSince/writeSince, by the map's view key); at null: the basis time. */
+let since: SinceState = SINCE_OFF;
+/** The newest map reading's basis time (the filter's default and the day a time without a day is read on), or null. */
+const basisOf = (o: Opened) => [...o.project.readings].reverse().find(isMapReading)?.basisAt ?? null;
+/** The filter's time as a span when it is on and reads as a time; else null (nothing is emphasised or dimmed). */
+function sinceSpan(o: Opened | null): { span: { from: number; to: number }; ref: string | null } | null {
+  if (!o || !since.on) return null;
+  const ref = basisOf(o), span = timeSpan(since.at ?? ref, ref); return span ? { span, ref } : null;
+}
+const sinceHit = (c: { about: string | null; when?: string | null }, f: { span: { from: number; to: number }; ref: string | null }) => sinceMatch(claimWhen(c), f.span, f.ref) === 'after';
+function saveSince() { const o = opened; if (o) writeSince(kv, viewKeyOf(o), since); }
+/** The map dims everything not selected, visited or (with the filter on) written after its time. */
+const dimNow = () => !!selected || !!scView || !!sinceSpan(opened);
+/** A card's sign tabs: each a button ('규칙 2', '관문 1', '변경 1') that opens its section in the pane; with the since filter on,
+ * a tab citing a claim after its time carries the accent ring. */
+function signTabsEl(o: Opened, p: PartView, r: PartUnderstanding): HTMLElement | null {
+  const sg = signsOf(r), tabs = signTabs(sg); if (!tabs.length) return null;
+  const f = sinceSpan(o);
+  return h('span', { class: 'node-signs', role: 'group', 'aria-label': `${p.name}의 표지` }, ...tabs.map(t => {
+    const list = t.kind === 'rule' ? sg.rules : t.kind === 'gate' ? sg.gates : sg.changes, hit = !!f && list.some(c => sinceHit(c, f));
+    const tip = t.kind === 'rule' ? '이 부분의 규칙 · 범위·적용 위치·설계 대응·확인 검사를 읽기면에서 함께'
+      : t.kind === 'gate' ? `이 부분의 관문 · 읽기면에서\n${GATE_BLANK_HINT}` : `이 부분의 이전 → 지금 비교 · 읽기면에서 (지도는 바뀌지 않음)\n${NATURE_HINT}`;
+    return h('button', { type: 'button', class: `sign-tab k-${t.kind}${hit ? ' since-hit' : ''}${signOpen?.part === p.id && signOpen.kind === t.kind ? ' on' : ''}`, 'data-sign': t.kind,
+      'aria-pressed': String(signOpen?.part === p.id && signOpen.kind === t.kind), 'aria-label': `${p.name} ${SIGN_LABEL[t.kind]} ${t.count}개 읽기${hit ? ' · 기준 시각 이후 기록 있음' : ''}`,
+      title: `${tip}${hit ? '\n기준 시각 이후 작성된 기록이 있음' : ''}`, onclick: () => openSign(p.id, t.kind) }, t.text);
+  }));
+}
+function openSign(id: string, kind: SignKind) {
+  const o = opened; if (!o || !partOf(o, id)) return;
+  if (signOpen?.part === id && signOpen.kind === kind && selected === id && !sheetOpen) { closeSign(false); return; }
+  signOpen = { part: id, kind }; signFocus = true;
+  if (lensRail) lensRail = false;
+  if (selected !== id) { go(o.key, id); return; }
+  if (sheetOpen) { sheetOpen = false; editing = false; showReading(false, false); } else renderLens();
+  markSignTabs();
+}
+function closeSign(focus: boolean) {
+  const st = signOpen; signOpen = null; signFocus = false; if (!st) return;
+  if (selected && !sheetOpen && !planView.isOpen()) renderLens();
+  markSignTabs();
+  if (focus) document.querySelector<HTMLElement>(`#world [data-part="${CSS.escape(st.part)}"] .sign-tab[data-sign="${st.kind}"]`)?.focus({ preventScroll: true });
+}
+function markSignTabs() {
+  document.querySelectorAll<HTMLElement>('#world .sign-tab').forEach(t => {
+    const part = t.closest<HTMLElement>('[data-part]')?.dataset.part, on = !!signOpen && signOpen.part === part && signOpen.kind === t.dataset.sign;
+    t.classList.toggle('on', on); t.setAttribute('aria-pressed', String(on));
+  });
+}
+/** The since filter on the drawn map: a card with a claim written after the filter's time (a folded card: anywhere inside it)
+ * stays lit, every other card dims by the map's own dim; the tabs' rings were drawn with the cards. */
+function applySince() {
+  const o = opened, f = sinceSpan(o), sp = $('space');
+  sp.classList.toggle('since', !!f);
+  sp.classList.toggle('dim', dimNow());
+  const memo = new Map<string, boolean>();
+  const hit = (id: string, deep: boolean): boolean => {
+    const k = `${id}|${deep}`, m = memo.get(k); if (m !== undefined) return m;
+    const p = o ? partOf(o, id) : null;
+    const v = !!p && !!f && ((p.reading?.claims ?? []).some(c => sinceHit(c, f)) || (deep && p.childIds.some(c => hit(c, true))));
+    memo.set(k, v); return v;
+  };
+  document.querySelectorAll<HTMLElement>('#world .node[data-part]').forEach(el => el.classList.toggle('since-hit', !!f && hit(el.dataset.part!, el.classList.contains('has-kids'))));
+}
+/** The title's filter: '기준 시각 이후만' (a toggle) and its time (the reading's basis time by default), with what it found. */
+function sinceStrip(o: Opened): HTMLElement | null {
+  const ref = basisOf(o), claims = o.view.parts.flatMap(p => p.reading?.claims ?? []); if (!claims.length) return null;
+  const f = sinceSpan(o), value = since.at ?? ref ?? '';
+  let after = 0, unknown = 0;
+  if (f) for (const c of claims) { const m = sinceMatch(claimWhen(c), f.span, f.ref); if (m === 'after') after++; else if (m === 'unknown') unknown++; }
+  const input = h('input', { type: 'text', class: 'since-at', value, 'aria-label': '기준 시각 (예: 2026-11-03T09:01Z, 11-03 09:01Z)', placeholder: ref ?? 'MM-DD HH:MMZ', spellcheck: 'false', size: '18',
+    title: '이 시각보다 뒤에 작성된 주장·변경 표지만 강조 · 비우면 지도의 기준 시각' }) as HTMLInputElement;
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); input.blur(); } else if (e.key === 'Escape') { input.value = value; input.blur(); } });
+  input.addEventListener('change', () => { const v = input.value.trim(); since = { ...since, at: v && v !== ref ? v : null }; saveSince(); redrawSince(); });
+  const bad = since.on && !f;
+  return h('div', { class: `map-flow map-since${f ? ' on' : ''}`, role: 'group', 'aria-label': '기준 시각 이후 필터' },
+    h('button', { type: 'button', class: `mf-step since-toggle${since.on ? ' on' : ''}`, 'aria-pressed': String(since.on),
+      title: '기준 시각 이후 작성된 기록만 강조 (작성 시각 조건이지 두 스냅샷 비교가 아님)\n잠정: 주장의 시각(when)을 작성 시각으로 읽음 · 계약에 작성 시각이 따로 오기 전까지',
+      onclick: () => { since = { ...since, on: !since.on }; saveSince(); redrawSince(); } }, '기준 시각 이후만'),
+    input,
+    f ? h('span', { class: 'since-sum', role: 'status' }, sinceSummary(after, unknown)) : bad ? h('span', { class: 'since-sum bad', role: 'status' }, '시각을 읽지 못함 · 필터 꺼짐과 같음') : null);
+}
+/** The map again in place with the filter's marks (same camera, same selection); the time field keeps focus when it had it. */
+function redrawSince() {
+  const o = opened; if (!o) return;
+  const had = document.activeElement?.classList.contains('since-at') ?? false;
+  renderSpace('keep'); markSelection(selected);
+  if (selected) refreshReading();
+  if (had) document.querySelector<HTMLInputElement>('#world .since-at')?.focus({ preventScroll: true });
+}
+/** The pane's sign section for the selected part: the rules (or gates) with what each leaves blank, or the withdrawals as
+ * 이전 | 지금 with their head line and quote, nothing else. With the since filter on, rows after its time are emphasised. */
+function signSection(o: Opened, part: PartView): HTMLElement | null {
+  const st = signOpen, r = part.reading; if (!st || st.part !== part.id || !r) return null;
+  const sg = signsOf(r), f = sinceSpan(o);
+  const mark = (c: CurrentClaim) => (f ? (sinceHit(c, f) ? ' since-hit' : ' since-off') : '');
+  const cite = (c: CurrentClaim, kind: SignKind) => quoteCite(`sign|${kind}|${c.reading}|${c.index}`, { record: c.record, quote: c.quote, ...(c.from !== undefined ? { from: c.from } : {}), ...(c.to !== undefined ? { to: c.to } : {}) }, `${SIGN_LABEL[kind]} 근거`);
+  // Each field one line, the blank as its own explicit words ('적용 위치 미해결'), never an empty cell.
+  const field = (text: string, hint: string, blank = true) => h('li', { class: blank ? 'sg-blank' : '', title: hint }, text);
+  const said = (text: string, written: boolean, cls: string) => written ? h('span', { class: cls, title: text }, text) : h('span', { class: 'sg-blank' }, text);
+  const close = h('button', { type: 'button', class: 'link-button sg-close', title: '닫기 (Esc)', onclick: () => closeSign(true) }, '닫기');
+  const head = (kind: SignKind, n: number, extra?: HTMLElement | null) => h('h3', { tabindex: '-1', 'data-sign-focus': kind }, `${SIGN_LABEL[kind]}`, h('small', {}, String(n)), extra ?? null);
+  if (st.kind === 'change') {
+    const rows = sg.changes; if (!rows.length) return null;
+    return h('section', { id: 'lens-signs', class: 'lens-signs k-change', 'aria-label': `${part.name}의 변경 비교` }, h('div', { class: 'sg-top' }, head('change', rows.length), close),
+      h('ul', { class: 'sg-list' }, ...rows.map(c => { const x = changeRow(c);
+        return h('li', { class: `sg-change${mark(c)}` }, h('p', { class: 'sg-head', title: NATURE_HINT }, x.head),
+          h('div', { class: 'sg-compare' },
+            h('div', { class: 'sg-col sg-before' }, h('span', { class: 'sg-col-label' }, '이전'), h('p', { class: x.beforeSaid ? '' : 'sg-blank' }, x.before)),
+            h('div', { class: 'sg-col sg-now' }, h('span', { class: 'sg-col-label' }, '지금'), h('p', {}, x.now))),
+          h('p', { class: 'sg-cite' }, cite(c, 'change'))); })));
+  }
+  const ruleItem = (c: CurrentClaim, kind: SignKind) => { const rs = ruleSaid(c);
+    return h('li', { class: `sg-rule${mark(c)}` }, h('p', { class: 'sg-text' }, c.text),
+      h('p', { class: 'sg-said' }, said(rs.when, !!claimWhen(c), 'cl-when'), h('span', { 'aria-hidden': 'true' }, '·'), said(rs.where, !!c.where, 'cl-where'), rs.evidence ? h('span', { class: 'ev' }, rs.evidence) : null, cite(c, kind)),
+      h('ul', { class: 'sg-fields' },
+        field(`범위 · ‘${part.name}’ 전체 · 세부 접점 미정`, '기록이 이 부분에 대해 말한 규칙: 범위는 이 부분, 정확한 접점은 아직 정하지 않음', false),
+        ...(kind === 'gate' ? [field(GATE_BLANK, GATE_BLANK_HINT)] : []),
+        field(RULE_BLANKS.anchors, RULE_BLANK_HINT.anchors), field(RULE_BLANKS.design, RULE_BLANK_HINT.design), field(RULE_BLANKS.check, RULE_BLANK_HINT.check))); };
+  const groups: HTMLElement[] = [];
+  if (sg.rules.length) groups.push(h('div', { class: 'sg-group' }, head('rule', sg.rules.length, groups.length ? null : close), h('ul', { class: 'sg-list' }, ...sg.rules.map(c => ruleItem(c, 'rule')))));
+  if (sg.gates.length) groups.push(h('div', { class: 'sg-group' }, head('gate', sg.gates.length, groups.length ? null : close), h('ul', { class: 'sg-list' }, ...sg.gates.map(c => ruleItem(c, 'gate')))));
+  return groups.length ? h('section', { id: 'lens-signs', class: 'lens-signs k-rule', 'aria-label': `${part.name}의 규칙·관문` }, ...groups) : null;
+}
 const bodyKind = (t: Typed): BodyKind => t.body?.kind ?? null;
 /** The budgets of the units the last layout typed (relayout): such a card is drawn with the lines its budget kept and without
  * its note (map spec 2.1: the note reads in the pane). A unit missing here draws as before. */
@@ -1023,16 +1161,16 @@ const shownMost = (t: Typed, r: PartUnderstanding): EntryShown => ({ config: (t.
 const shownBy = (t: Typed, r: PartUnderstanding, b: CardBudget): EntryShown => ({ config: (b.set && t.setting ? 1 : 0) + (b.body && t.used ? 1 : 0), fields: b.body && t.body?.kind === 'store' ? Math.min(3, r.fields.length) : 0 });
 /** The entry line under a typed card's body: '구성 N' (the way into its composition, as the 안쪽 chip is), '기록된 단계 M', each
  * list the card does not name in full by its total, and 열기; '내부 미상' when its reading names nothing inside. */
-function entryLine(o: Opened, p: PartView, r: PartUnderstanding, t: Typed, b: CardBudget): HTMLElement | null {
+function entryLine(o: Opened, p: PartView, r: PartUnderstanding, t: Typed, b: CardBudget, signs: HTMLElement | null = null): HTMLElement | null {
   const c = entryCountsOf(p, r), words = entryParts(c, shownBy(t, r, b)); if (!words.length) return null;
-  if (words[0] === '내부 미상') return h('span', { class: 'node-entry unknown', title: '기록이 이 부분의 받는 것·내는 것·필드·설정·구성·단계를 하나도 말하지 않았다' }, '내부 미상');
+  if (words[0] === '내부 미상') return h('span', { class: 'node-entry unknown' }, h('span', { class: 'entry-text', title: '기록이 이 부분의 받는 것·내는 것·필드·설정·구성·단계를 하나도 말하지 않았다' }, '내부 미상'), signs);
   const parts: HTMLElement[] = [];
   words.forEach((w, i) => {
     if (i) parts.push(h('span', { class: 'entry-sep', 'aria-hidden': 'true' }, ' · '));
     parts.push(c.kids && i === 0 ? h('button', { type: 'button', class: 'entry-kids', title: `구성 열기 · ‘${p.name}’의 실제 하위 부분 ${c.kids}`, 'aria-label': `${p.name} 구성 열기 · 하위 부분 ${c.kids}`, onclick: () => go(o.key, null, p.id) }, w) : h('span', { class: 'entry-part' }, w));
   });
-  return h('span', { class: 'node-entry' }, h('span', { class: 'entry-text' }, ...parts),
-    h('button', { type: 'button', class: 'entry-open', title: '동작 열기 · 제자리에 들어가면 펼치고, 들어가지 않으면 내부 상세로 연다 (두 번 누르기 · 선택 후 Enter)', 'aria-label': `${p.name} 동작 열기`, onclick: () => openAction(p.id) }, '열기'));
+  return h('span', { class: `node-entry${signs ? ' with-signs' : ''}` }, h('span', { class: 'entry-text', ...(signs ? { title: words.join(' · ') } : {}) }, ...parts),
+    h('button', { type: 'button', class: 'entry-open', title: '동작 열기 · 제자리에 들어가면 펼치고, 들어가지 않으면 내부 상세로 연다 (두 번 누르기 · 선택 후 Enter)', 'aria-label': `${p.name} 동작 열기`, onclick: () => openAction(p.id) }, '열기'), signs);
 }
 /** Which part is open and how; the way back (이전 읽기 위치); an opening waiting for its selection; one read back after a reload. */
 let openState: OpenState | null = null, backStack: ReadPlace[] = [], pendingAction: string | null = null, restoreOpen: OpenState | null = null;
@@ -1209,6 +1347,11 @@ function renderDetail(id: string) {
     return list;
   };
   const ins = portList(false), outs = portList(true);
+  // spec 7: at an actor's effect exit and a store's write ports only, what the records leave unsaid about failure and recovery.
+  const fb = r ? failureBlanks(r.typeRead?.type, [...r.claims.flatMap(c => [c.text, c.before]), ...stepsOf(r).flatMap(s => [s.name, s.does]), r.loop?.stop, r.loop?.resume]) : null;
+  const blankEls = (where: 'exit' | 'write') => !fb || fb.at !== where ? [] : [
+    fb.failure ? h('li', { class: 'dv-port blank fr-blank', title: `${where === 'exit' ? '이 효과 출구' : '이 보관소의 쓰기 접점'}에서 실패했을 때의 대응을 기록이 말하지 않았다 (없다는 뜻이 아님)` }, FAILURE_BLANK) : null,
+    fb.recovery ? h('li', { class: 'dv-port blank fr-blank', title: `${where === 'exit' ? '이 효과 출구' : '이 보관소의 쓰기 접점'}이 멈춘 뒤 어떻게 복구·재개하는지 기록이 말하지 않았다 (없다는 뜻이 아님)` }, RECOVERY_BLANK) : null].filter((x): x is HTMLLIElement => !!x);
   // The inside (spec 4): the steps in the record's row order, each port with the steps the record maps it to, or its blank.
   const steps = r ? stepsOf(r) : [];
   const chain = detailChain(steps, r?.portMap ?? [], ins.filter(x => !x.unnamed).map(x => x.name), outs.filter(x => !x.unnamed).map(x => x.name));
@@ -1277,9 +1420,9 @@ function renderDetail(id: string) {
         svg('svg', { class: 'dv-lines dv-inlines', 'aria-hidden': 'true' }),
         h('div', { class: 'dv-bhead' }, r?.typeRead ? h('span', { class: 'node-type' }, TYPE_LABEL[r.typeRead.type]) : null, h('strong', { class: 'dv-bname' }, p.name), ops ? h('span', { class: 'xp-ops', title: ops.tip }, ops.full) : null),
         h('div', { class: `dv-inner${steps.length ? ' has-steps' : ''}` },
-          h('ul', { class: 'dv-ports p-in', 'aria-label': '받는 것' }, ...(ins.length ? ins.map(x => portEl(x, false)) : [h('li', { class: 'dv-port blank' }, '받는 것 미기재')])),
+          h('ul', { class: 'dv-ports p-in', 'aria-label': '받는 것' }, ...(ins.length ? ins.map(x => portEl(x, false)) : [h('li', { class: 'dv-port blank' }, '받는 것 미기재')]), ...blankEls('write')),
           inner,
-          h('ul', { class: 'dv-ports p-out', 'aria-label': '내는 것' }, ...(outs.length ? outs.map(x => portEl(x, true)) : [h('li', { class: 'dv-port blank' }, '내는 것 미기재')])))),
+          h('ul', { class: 'dv-ports p-out', 'aria-label': '내는 것' }, ...(outs.length ? outs.map(x => portEl(x, true)) : [h('li', { class: 'dv-port blank' }, '내는 것 미기재')]), ...blankEls('exit')))),
       h('div', { class: 'dv-side s-out', role: 'list', 'aria-label': '나가는 쪽의 바깥 부분' }, ...order(true).map(f => refCard(f, true))))));
   detailLinks = ends.map(e => ({ ref: `${e.out ? 'o' : 'i'}|${e.far}`, port: `${e.out ? 'o' : 'i'}|${e.port}`, out: e.out, ch: e.ch, plain: e.rel.kind === 'related' }));
   // Inside the boundary, only where the record maps a line to a port and a step: the port to the step (in), the step to the port
@@ -1460,8 +1603,11 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
       // body (card-budget chips); never beside the operations line, which keeps the card's width.
       const chipsAt: ChipsAt = b.kids && face === 'unit' ? cardBudgets.get(p.id)?.chips ?? 'none' : 'none';
       // The entry line (spec 4) under the body: a card with an inside reads its way in there ('구성 N'); its chips keep the rest.
-      const budget = cardBudgets.get(p.id), entryEl = face === 'unit' && typed && r && budget?.entry ? entryLine(o, p, r, typed, budget) : null, kidsIn = !!entryEl?.querySelector('.entry-kids');
-      const chips = (cls: string) => h('span', { class: `node-chips ${cls}` }, linksChip(p.id), kidsIn ? null : enterButton(p)), nameEl = h('span', { class: 'node-name' }, p.name);
+      const budget = cardBudgets.get(p.id), signsAt = face === 'unit' && r ? budget?.signs ?? 'none' : 'none', signsEl = signsAt !== 'none' && r ? signTabsEl(o, p, r) : null;
+      const entryEl = face === 'unit' && typed && r && budget?.entry ? entryLine(o, p, r, typed, budget, signsAt === 'entry' ? signsEl : null) : null, kidsIn = !!entryEl?.querySelector('.entry-kids');
+      // The tabs on a row of their own when there is no entry line (the card's bottom edge), else at the entry line's right.
+      const bottomEl = entryEl ?? (signsAt === 'line' && signsEl ? h('span', { class: 'node-entry signs-only' }, signsEl) : null);
+      const chips = (cls: string) => h('span', { class: `node-chips ${cls}` }, linksChip(p.id), kidsIn ? null : enterButton(p), cls === 'own-line' && signsAt === 'chips' ? signsEl : null), nameEl = h('span', { class: 'node-name' }, p.name);
       const opsEl = ops ? h('span', { class: 'meta-text ops', title: `${ops.tip}${meta ? `
 기록 · ${meta}` : ''}` }, ops.full) : null;
       if (opsEl && ops) opsFit.set(opsEl, ops);
@@ -1472,7 +1618,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
           chipsAt === 'name' ? h('span', { class: 'node-headline' }, nameEl, chips('at-name')) : nameEl,
           note ? h('span', { class: 'node-note' }, note) : null,
           said ? h('span', { class: 'node-meta' }, ladder(view, p), opsEl ?? h('span', { class: 'meta-text' }, said)) : alias ? h('span', { class: 'node-meta owner alias' }, h('span', { class: 'meta-text' }, alias)) : of ? h('span', { class: 'node-meta owner' }, h('span', { class: 'meta-text' }, `${of} 안`)) : null,
-          face === 'unit' && typed && r ? typedBlock(typed, r, budget, entryEl) : null,
+          face === 'unit' && typed && r ? typedBlock(typed, r, budget, bottomEl) : null,
           chipsAt === 'line' ? chips('own-line') : null,
           h('span', { class: 'plan-note' })),
         b.kids && chipsAt === 'none' ? linksChip(p.id) : null, b.kids && chipsAt === 'none' ? enterButton(p) : null));
@@ -1489,7 +1635,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
     first ? basis : null,
     sp ? null : understoodLine(o),
     first ? null : basis,
-    flowStrip(o), scenarioStrip(o), stateStrip(o),
+    flowStrip(o), scenarioStrip(o), sinceStrip(o), stateStrip(o),
     outside.length ? h('div', { class: 'scope-rels', role: 'list', 'aria-label': '이 범위의 바깥 관계' }, ...relationGroups(outside, '범위').map(g => h('p', { class: 'scope-rel', role: 'listitem' },
       h('span', { class: 'sr-verb' }, g.label), ...g.list.map(x => h('button', { type: 'button', class: 'sr-part', title: `${partPath(o.view, x.far).map(q => q.name).join(' › ')}${x.r.note ? `\n${x.r.note}` : ''}`, 'data-far': x.far, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far, null); } }, partOf(o, x.far)?.name ?? '부분'))))) : null);
   world.append(title);
@@ -1509,6 +1655,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   morphFrom = null;
   if (was) afterRedraw(world, was);
   drawScenario();
+  applySince();
   $('space').classList.toggle('in-scope', !!scope);
   // Many lines on one view: those that go round other parts share the same gaps and would read as extra outlines of the
   // groups they pass; they step back until selected, hovered or read as a change's context (kind, direction and hover meaning
@@ -1931,13 +2078,13 @@ let sheetOpen = false;
 function select(partId: string | null) {
   if (openState && openState.part !== partId) closeOpen(false); // an opening belongs to its part: another selection closes it
   const changed = selected !== partId;
-  if (changed) { editing = false; composerOpen = false; if (ask && !ask.controller) ask = null; sheetOpen = !!pendingRecord; pickedStep = null; }
+  if (changed) { editing = false; composerOpen = false; if (ask && !ask.controller) ask = null; sheetOpen = !!pendingRecord; pickedStep = null; if (signOpen && signOpen.part !== partId) { signOpen = null; signFocus = false; markSignTabs(); } }
   if (!!selected !== !!partId) recentPeek = false;
   if (partId) scopeReading = false;
   selected = partId;
   if (opened) renderRecent();
   markSelection(partId);
-  $('space').classList.toggle('dim', !!partId || !!scView);
+  $('space').classList.toggle('dim', dimNow());
   if (partId && scVisit) { scVisit = null; markVisit(); }
   const panel = $('panel');
   if (planView.isOpen()) { panel.hidden = true; panel.replaceChildren(); clearHighlight(); planView.selectionChanged(changed); return; }
@@ -2160,7 +2307,7 @@ function drawScenario() {
   if (!scView) { scOn = null; scVisit = null; scBroken = null; }
   scBroken = o && entry && scView ? brokenPlace(scView, entry.diagnostics, scenarioText(o, entry)) : null;
   sp.classList.toggle('scenario', !!scView);
-  sp.classList.toggle('dim', !!selected || !!scView);
+  sp.classList.toggle('dim', dimNow());
   if (!o || !scView) return;
   const u = scView, places = badgePlaces(u, id => drawnRep(o, id));
   for (const p of places.places) {
@@ -2425,12 +2572,16 @@ function renderLens() {
         h('button', { type: 'button', class: 'rail-toggle', 'aria-label': '읽기면 접기', 'aria-expanded': 'true', title: '읽기면 접기 · 지도를 넓게 봐요', onclick: () => setRail(true) }, railIcon(true)),
         h('button', { type: 'button', class: 'close', 'aria-label': '선택 해제', title: '닫기 (Esc)', onclick: () => go(o.key) }, '×'))),
     // What it does, what it takes in and hands on, what the records say about it (by topic), where it lives and who worked on it.
-    h('div', { class: 'lens-body' }, desc, ...ports, ...insideSections(o, part), claims, whereSection(o.project, part), requested, innerSection, inside),
+    h('div', { class: 'lens-body' }, signSection(o, part), desc, ...ports, ...insideSections(o, part), claims, whereSection(o.project, part), requested, innerSection, inside),
     h('footer', { class: 'lens-foot' },
       h('button', { type: 'button', class: 'lens-more', onclick: () => openSheet() }, records.length ? `기록 전체 읽기 · ${records.length}` : '전체 읽기', thread ? ` · 정리 ${thread}` : '', h('span', { 'aria-hidden': 'true' }, ' ›')),
       status.ai === 'deepseek' ? h('button', { type: 'button', class: 'link-button', onclick: () => { composerOpen = true; openSheet(() => document.getElementById(status.access === 'code' && !sessionCode() ? 'access-code' : 'ask-input')?.focus()); } }, '이 부분에 대해 묻기') : null));
   l.hidden = false;
   clampNotes(l, o, part.id);
+  if (signFocus && signOpen?.part === part.id) {
+    signFocus = false; const kind = signOpen.kind;
+    requestAnimationFrame(() => { const at = l.querySelector<HTMLElement>(`#lens-signs [data-sign-focus="${kind}"]`) ?? l.querySelector<HTMLElement>('#lens-signs h3'); at?.scrollIntoView({ block: 'nearest' }); at?.focus({ preventScroll: true }); });
+  }
 }
 
 /** The AI sessions behind a part, in one line under what was read (the full reading lists them with their folder and branch). */
@@ -3577,7 +3728,8 @@ function claimItem(part: string, c: CurrentClaim, topic: ClaimTopic, history: Pa
   const cite: HTMLElement = h('span', { class: 'cite', onmouseenter: () => placeCite(cite), onfocusin: () => placeCite(cite) },
     h('button', { type: 'button', class: 'cl-cite', 'data-claim-focus': JSON.stringify([part, c.reading, c.index, c.record, c.from ?? null, c.to ?? null]), 'aria-label': `근거 ${n} · 원문에서 보기`, title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote, c.from) }, String(n)),
     h('span', { class: 'cite-pop', role: 'tooltip' }, h('q', {}, popLine(c.quote)), h('span', { class: 'cite-src' }, recordName(c.record))));
-  return h('li', { class: `claim k-${c.kind}${c.replaces ? ' replaces' : ''}` },
+  const sf = sinceSpan(opened);
+  return h('li', { class: `claim k-${c.kind}${c.replaces ? ' replaces' : ''}${sf ? (sinceHit(c, sf) ? ' since-hit' : ' since-off') : ''}` },
     h('span', { class: 'cl-line' },
       c.replaces ? h('span', { class: 'cl-tag', title: '기록이 앞의 말을 대체한다고 적은 정정' }, '정정') : null,
       before ? h('s', { class: 'cl-before', title: `철회 전: ${before}` }, before) : null, before ? h('span', { class: 'cl-arrow', 'aria-hidden': 'true' }, ' → ') : null,
@@ -3943,6 +4095,7 @@ function bindCanvas() {
     if (e.key === 'Escape' && menu) { menu.open = false; menu.querySelector<HTMLElement>('summary')?.focus(); return; }
     if (e.key === 'Escape' && !help.hidden) { help.hidden = true; helpButton.setAttribute('aria-expanded', 'false'); return; }
     if (e.key === 'Escape' && opened && openState) { e.preventDefault(); closeOpen(true); return; } // 닫기: the opening only
+    if (e.key === 'Escape' && opened && signOpen && selected === signOpen.part && !sheetOpen) { e.preventDefault(); closeSign(true); return; } // the sign section only
     if (e.key === 'Escape' && opened && recentShown() && !$('recent').classList.contains('collapsed')) { if (selected || planView.isOpen()) recentPeek = false; else recentOpen = false; renderRecent(); return; }
     if (e.key === 'Escape' && planView.isOpen()) { const part = selected; planView.escape(); if (part && !selected) requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-drag="${CSS.escape(part)}"]`)?.focus()); return; }
     if (e.key === 'Escape' && partForm && opened?.view.parts.length) { partForm = null; renderPartForm(); return; }

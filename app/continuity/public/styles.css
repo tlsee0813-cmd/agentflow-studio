@@ -453,7 +453,7 @@ button:disabled { opacity: .5; cursor: default; }
 .node-entry .entry-kids:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
 .node-entry .entry-open { flex: none; margin-left: auto; padding: 0 5px; color: var(--accent); }
 .node-entry .entry-open:hover { background: var(--accent-soft); color: var(--accent-strong); }
-.space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit) .node-entry :is(.entry-text, .entry-kids) { color: var(--text-4); }
+.space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit) .node-entry :is(.entry-text, .entry-kids) { color: var(--text-4); }
 /* The short expansion (짧은 펼침): over the card and the empty space beside it, in the selection's accent; nothing under it moves. */
 .expansion { position: absolute; z-index: 6; display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; overflow: hidden; background: var(--surface); border: 1px solid var(--accent); border-radius: 12px; box-shadow: 0 0 0 3px rgba(51,88,255,.16), 0 14px 28px -14px rgba(16,24,40,.32); cursor: default; user-select: text; text-align: left; }
 .expansion:focus { outline: none; }
@@ -560,13 +560,13 @@ button:disabled { opacity: .5; cursor: default; }
 .dv-loop { margin: 0; font-size: 12.5px; line-height: 18px; color: var(--text-2); overflow-wrap: anywhere; }
 .dv-vars li { color: var(--text-3); }
 /* Parts outside the selection step back by colour, not by fading: names and second lines stay at 4.5:1 or more. */
-.space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit) { border-color: var(--hair-2); box-shadow: none; }
-.space.dim .node.has-kids:not(.item):not(.selected):not(.related):not(.cited):not(.sc-visit) { box-shadow: 0 3px 0 -1px var(--surface), 0 3px 0 0 var(--hair-2); }
-.space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit) .node-name { color: var(--text-3); }
-.space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit) :is(.node-note, .node-meta, .node-meta .meta-text, .node-type, .node-io, .node-body, .node-set) { color: var(--text-4); }
-.space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit) :is(.dot, .ladder) { opacity: .55; }
-.space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit):hover { border-color: var(--line-hover); }
-.space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit):hover .node-name { color: var(--text); }
+.space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit) { border-color: var(--hair-2); box-shadow: none; }
+.space.dim .node.has-kids:not(.item):not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit) { box-shadow: 0 3px 0 -1px var(--surface), 0 3px 0 0 var(--hair-2); }
+.space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit) .node-name { color: var(--text-3); }
+.space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit) :is(.node-note, .node-meta, .node-meta .meta-text, .node-type, .node-io, .node-body, .node-set) { color: var(--text-4); }
+.space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit) :is(.dot, .ladder) { opacity: .55; }
+.space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit):hover { border-color: var(--line-hover); }
+.space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit):hover .node-name { color: var(--text); }
 .toggle { flex: none; width: 22px; height: 22px; border: 0; border-radius: var(--r-sm); background: none; color: var(--text-4); display: grid; place-items: center; }
 .toggle:hover { background: rgba(16,24,40,.06); color: var(--text); }
 .toggle svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: transform .12s; }
@@ -2101,3 +2101,50 @@ button:disabled { opacity: .5; cursor: default; }
 .rr-scenario-check strong { color: var(--accent-strong); font-weight: var(--fw-name); }
 .sc-result { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
 .sc-result > p { margin: 0; }
+
+/* ---------- signs (map spec 5, cycle 4): 규칙 · 관문 · 변경 tabs at a card's bottom edge, their pane sections, the since filter ---------- */
+.node-signs { flex: none; display: inline-flex; align-items: center; gap: 3px; margin-left: auto; }
+.node-entry.with-signs .node-signs { margin-left: 2px; }
+.node-entry.signs-only { justify-content: flex-end; }
+.node-chips.own-line .node-signs { margin-left: auto; }
+.node-signs .sign-tab { flex: none; height: 17px; padding: 0 5px; border: 1px solid var(--line); border-radius: 3px; background: var(--surface); font-size: 11px; line-height: 15px; font-weight: var(--fw-name); color: var(--text-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.node-signs .sign-tab:hover { border-color: var(--accent-line); color: var(--accent); }
+.node-signs .sign-tab.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-strong); }
+/* The since filter's ring: a tab citing a claim written after the filter's time. */
+.node-signs .sign-tab.since-hit { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-line); color: var(--accent-strong); }
+.space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit) .node-signs .sign-tab:not(.on) { color: var(--text-4); border-color: var(--hair-2); box-shadow: none; }
+.map-flow + .map-since { margin-top: 2px; padding-top: 2px; border-top: 0; }
+.map-since { gap: 4px 6px; }
+.since-at { height: 26px; width: 22ch; padding: 0 8px; border: 1px solid var(--hair-2); border-radius: var(--r-sm); background: var(--surface); font: inherit; font-size: 12.5px; font-variant-numeric: tabular-nums; color: var(--text-2); }
+.since-at:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--focus-halo); }
+.since-sum { font-size: 12.5px; line-height: 17px; color: var(--text-3); }
+.since-sum.bad { color: var(--warn-text); }
+.lens-signs { margin: 0 0 var(--s-3, 12px); padding: 10px 12px 12px; border: 1px solid var(--accent-line); border-radius: var(--r-md); background: var(--surface); }
+.lens-signs .sg-top, .lens-signs .sg-group > h3 { display: flex; align-items: baseline; gap: 6px; }
+.lens-signs h3 { margin: 0; font-size: 13px; font-weight: var(--fw-name); color: var(--text); }
+.lens-signs h3 small { font-size: 12px; color: var(--text-4); font-variant-numeric: tabular-nums; }
+.lens-signs h3 .sg-close, .lens-signs .sg-top .sg-close { margin-left: auto; font-size: 12px; }
+.lens-signs .sg-top h3 { flex: 1; }
+.lens-signs h3:focus { outline: none; }
+.lens-signs h3:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+.sg-group + .sg-group { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--hair-2); }
+.sg-list { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.sg-list > li { padding-left: 10px; border-left: 2px solid var(--hair-2); }
+.sg-text { margin: 0; font-size: 13px; line-height: 1.5; color: var(--text); }
+.sg-said { margin: 2px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; font-size: 12px; line-height: 17px; color: var(--text-3); }
+.sg-said .ev { font-size: 11px; color: var(--text-3); }
+.sg-fields { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 1px; font-size: 12px; line-height: 17px; color: var(--text-2); }
+.sg-fields li { overflow-wrap: anywhere; }
+.sg-blank { color: var(--text-3); }
+.sg-head { margin: 0; font-size: 12px; line-height: 17px; font-weight: var(--fw-name); color: var(--text-2); }
+.sg-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+.sg-col { min-width: 0; padding: 6px 8px; border: 1px solid var(--hair-2); border-radius: var(--r-sm); }
+.sg-col-label { display: block; font-size: 11.5px; line-height: 15px; color: var(--text-4); }
+.sg-col p { margin: 2px 0 0; font-size: 13px; line-height: 1.45; color: var(--text); overflow-wrap: anywhere; }
+.sg-before p { color: var(--text-3); }
+.sg-col p.sg-blank { color: var(--text-4); }
+.sg-cite { margin: 4px 0 0; }
+/* With the since filter on: rows written after its time keep the accent edge, the others step back. */
+.sg-list > li.since-hit, .cg .claim.since-hit { border-left-color: var(--accent); }
+.sg-list > li.since-off :is(.sg-text, .sg-col p, .sg-head), .claim.since-off .cl-text { color: var(--text-4); }
+.dv-port.fr-blank { border: 1px dashed var(--hair-2); border-radius: 4px; color: var(--text-3); font-size: 12px; }

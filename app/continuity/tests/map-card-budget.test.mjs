@@ -199,3 +199,33 @@ test('loopBody: the record\'s repeat unit first, else the first beat-like settin
   assert.deepEqual(loopBody('', []), { text: '반복 단위 ?', used: null });
   assert.ok(CADENCE.test('60 s 폴링') && CADENCE.test('매 00:30Z') && !CADENCE.test('618df374'));
 });
+
+test('sign tabs (spec 5) share the entry line\'s row at its right, or take that row alone; they are never dropped for room', () => {
+  // With an entry line: the same row, no extra line.
+  const shared = typedBudget(1, true, true, true, true, 'none', 'detail', 'some', true);
+  assert.equal(shared.signs, 'entry'); assert.equal(shared.lines, typedBudget(1, true, true, true, true, 'none', 'detail', 'some').lines);
+  // Without one: a row of their own at the bottom edge, counted in the six lines (the setting gives way first).
+  assert.deepEqual(typedBudget(1, true, true, true, true, 'none', 'detail', 'none', true), { io: 'both', body: true, set: false, chips: 'none', entry: false, signs: 'line', lines: 6 });
+  assert.deepEqual(typedBudget(1, false, true, false, false, 'none', 'detail', 'none', true), { io: 'in', body: false, set: false, chips: 'none', entry: false, signs: 'line', lines: 4 });
+  // A two-line name: the setting goes, 내는 것 folds, and the row still holds the entry line with the tabs.
+  assert.deepEqual(typedBudget(2, true, true, true, true, 'none', 'detail', 'some', true), { io: 'fold', body: true, set: false, chips: 'none', entry: true, signs: 'entry', lines: 6 });
+  // With the chips on a line of their own and no room left, the entry line gives way and the tabs ride the chips' line.
+  assert.deepEqual(typedBudget(2, true, true, true, true, 'line', 'detail', 'some', true), { io: 'fold', body: true, set: false, chips: 'line', entry: false, signs: 'chips', lines: 6 });
+  // At 중간 they stay (with the port lines and the entry line); at 개요 none.
+  assert.equal(typedBudget(1, true, true, true, true, 'none', 'mid', 'none', true).signs, 'line');
+  assert.equal(typedBudget(1, true, true, true, true, 'none', 'overview', 'some', true).signs, 'none');
+  // A card without signs reads the same budget as before (no signs key).
+  assert.equal('signs' in typedBudget(1, true, true, true, true), false);
+  // The card draws its name on two lines at most: within that, the six lines hold with the tabs in every arrangement.
+  for (const n of [1, 2]) for (const chips of ['none', 'name', 'line']) for (const entry of ['none', 'some']) for (const level of ['mid', 'detail'])
+    assert.ok(typedBudget(n, true, true, true, true, chips, level, entry, true).lines <= CARD_LINES, `${n}/${chips}/${entry}/${level}`);
+});
+
+test('the tabs\' own row takes a line\'s height; on the entry row or the chips\' line they take none', () => {
+  const own = typedBudget(1, false, true, false, false, 'none', 'detail', 'none', true), shared = typedBudget(1, false, true, false, false, 'none', 'detail', 'some', true);
+  assert.deepEqual(typedLines(own, null), [LINE_H, LINE_H]);
+  assert.deepEqual(typedLines(shared, null), [LINE_H, LINE_H]);
+  const chips = typedBudget(2, true, true, true, true, 'line', 'detail', 'some', true);
+  assert.equal(typedLines(chips, 'loop').length, 2);
+  assert.equal(typedPx(own, null, 3), 3 + 2 * LINE_H + LINE_GAP);
+});

@@ -8,6 +8,8 @@
  * Under them the entry line (spec 4, 열기): what the part holds past what the card shows, in totals ('구성 4 · 기록된 단계 7 ·
  * 설정 3 · 필드 12'), or '내부 미상' when its reading names nothing inside. It is the way into 동작 열기, so when the lines are
  * tight it takes the setting's place; it gives way only after 내는 것 has folded.
+ * A part with rules, gates or withdrawals carries its sign tabs (spec 5: 규칙 N · 관문 M · 변경 K) at the card's bottom edge: at
+ * the right of the entry line, or on that row alone when there is no entry line; they are never dropped for room.
  * The map's three zoom levels (spec 4) keep less of the same card: 개요 the head and the operations line only, 중간 also the
  * port lines, 상세 everything. Pure: no DOM, so the rule is tested on its own. */
 
@@ -19,7 +21,12 @@ export type ChipsAt = 'none' | 'name' | 'line';
 /** io: the port lines kept: both on their own line ('both'), one of them alone ('in' / 'out', the other not recorded), 내는 것
  * folded into the 받는 것 line ('fold', one line), or none recorded. chips: where the group chips are drawn. lines: the text
  * lines the card then holds (the head's name lines, the operations line, the kept lines under them and a chips line). */
-export interface CardBudget { io: 'both' | 'in' | 'out' | 'fold' | 'none'; body: boolean; set: boolean; chips: ChipsAt; entry: boolean; lines: number }
+export interface CardBudget { io: 'both' | 'in' | 'out' | 'fold' | 'none'; body: boolean; set: boolean; chips: ChipsAt; entry: boolean; signs?: SignsAt; lines: number }
+/** Where a card's sign tabs (규칙 · 관문 · 변경, map spec 5) go: none (no signs, or 개요), at the right of the entry line ('entry'),
+ * on a row of their own at the card's bottom edge ('line', counted in the six lines), or at the right of the group chips' own
+ * line ('chips', when the bottom row gives way under a long name and the chips have a line of their own). A sign is never
+ * dropped for room (a rule is not hidden because its anchor is unknown): it shares a row before it takes one. */
+export type SignsAt = 'none' | 'entry' | 'line' | 'chips';
 
 /** A card's entry line (spec 4): none (no reading, so an empty card; or a reading whose every list the card shows in full),
  * unknown ('내부 미상': the reading names no input, output, field, setting, part or step), or some (counts of what is inside). */
@@ -69,17 +76,25 @@ export function zoomLevel(k: number): ZoomLevel {
 /** nameLines: the lines the name takes on the card (as the layout measured them; at least one). body: whether the card has
  * its one structural line. chips: where its group chips go (a chips line counts as one of the six). level: the zoom level the
  * card is drawn at; 개요 keeps no line under the operations line, 중간 only the port lines and the entry line. entry: the card's
- * entry line (entryKind), kept at 중간 and 상세 before the setting. */
-export function typedBudget(nameLines: number, hasSet: boolean, hasIn: boolean, hasOut: boolean, body: boolean, chips: ChipsAt = 'none', level: ZoomLevel = 'detail', entry: EntryKind = 'none'): CardBudget {
+ * entry line (entryKind), kept at 중간 and 상세 before the setting. signs: the card has sign tabs (규칙 · 관문 · 변경); they share
+ * the entry line's row at its right, or take that row when there is no entry line; when the row has to give way they ride the
+ * chips' own line. Never at 개요. The result names signs only for a card that has them (earlier callers read the same budget). */
+export function typedBudget(nameLines: number, hasSet: boolean, hasIn: boolean, hasOut: boolean, body: boolean, chips: ChipsAt = 'none', level: ZoomLevel = 'detail', entry: EntryKind = 'none', signs = false): CardBudget {
   const head = Math.max(1, Math.floor(nameLines) || 1), own = chips === 'line' ? 1 : 0, room = Math.max(0, CARD_LINES - head - 1 - own);
   let io: CardBudget['io'] = level === 'overview' ? 'none' : hasIn && hasOut ? 'both' : hasIn ? 'in' : hasOut ? 'out' : 'none', set = hasSet && level === 'detail';
   const keepBody = body && level === 'detail';
-  let ent = entry !== 'none' && level !== 'overview';
-  const count = () => (io === 'both' ? 2 : io === 'none' ? 0 : 1) + (keepBody ? 1 : 0) + (set ? 1 : 0) + (ent ? 1 : 0);
+  let ent = entry !== 'none' && level !== 'overview', sg = signs && level !== 'overview', onChips = false;
+  // The bottom row holds the entry line, the sign tabs at its right, or both: one line either way.
+  const count = () => (io === 'both' ? 2 : io === 'none' ? 0 : 1) + (keepBody ? 1 : 0) + (set ? 1 : 0) + (ent || sg ? 1 : 0);
   if (count() > room && set) set = false;
   if (count() > room && io === 'both') io = 'fold';
-  if (count() > room && ent) ent = false;
-  return { io, body: keepBody, set, chips, entry: ent, lines: head + 1 + count() + own };
+  if (count() > room && (ent || sg)) {
+    // The row gives way: the entry line goes and the signs ride the chips' own line; with no such line the signs keep the row
+    // (never dropped), and the entry line shares it as before.
+    if (sg && own) { sg = false; onChips = true; ent = false; } else if (!sg) ent = false;
+  }
+  const at: SignsAt = onChips ? 'chips' : !sg ? 'none' : ent ? 'entry' : 'line';
+  return { io, body: keepBody, set, chips, entry: ent, ...(signs ? { signs: at } : {}), lines: head + 1 + count() + own };
 }
 
 /** Heights as styles.css draws them: .node-type 15px; .node-io, .node-body and .node-set 17px each with 2px between; the
@@ -94,7 +109,7 @@ export function typedLines(b: CardBudget, body: BodyKind): number[] {
   if (b.io === 'both') out.push(LINE_H);
   if (b.body && body) out.push(LINE_H + (body === 'store' ? 5 : body === 'loop' ? 2 : 0));
   if (b.set) out.push(LINE_H);
-  if (b.entry) out.push(LINE_H);
+  if (b.entry || b.signs === 'line') out.push(LINE_H);
   return out;
 }
 /** The room a budget's lines take under the operations line: the typed block after the card's own gap (3px on a unit), its
