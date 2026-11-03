@@ -1284,3 +1284,98 @@ test('.30: a first map sets item-level problems aside on the first pass (no corr
   await strict.read(f.ask);
   assert.equal(calls2.filter(c => c.stage === 'render' && c.input.correction).length, 1, 'a wrong part ref is corrected once');
 });
+
+// Background plan (PLAN_TIMEOUT_MS > MAP_BACKGROUND_AFTER_MS): per plan attempt one paid POST, then free GET polls (and a free cancel
+// on a deadline or cancellation). The stage's one attempt keeps the response id; a lost reply is marked; a re-run reads it back.
+const RESPONSES_URL = 'https://api.openai.com/v1/responses', RESPONSE_ID = 'resp_plan1';
+function backgroundTransport(ask) {
+  const direct = transportFetch(ask), log = [], state = { planBody: null, poll: 'complete', post: 'queued' };
+  const json = value => new Response(JSON.stringify(value), { headers: { 'content-type': 'application/json' } });
+  const fetchImpl = async (url, init) => {
+    const background = url === RESPONSES_URL && init.method === 'POST' && JSON.parse(init.body).background === true;
+    if (url.startsWith(RESPONSES_URL)) log.push(`${init.method} ${url.slice(RESPONSES_URL.length) || '/'}`);
+    if (background) {
+      state.planBody = init.body;
+      if (state.post === 'network') throw new TypeError('fetch failed');
+      return json({ id: RESPONSE_ID, object: 'response', status: 'queued', background: true, output: [], usage: null });
+    }
+    if (url === `${RESPONSES_URL}/${RESPONSE_ID}/cancel`) return new Response('unavailable', { status: 500 });
+    if (url === `${RESPONSES_URL}/${RESPONSE_ID}` && init.method === 'GET') {
+      if (state.poll === 'hang') return new Promise((_, reject) => init.signal.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')), { once: true }));
+      const done = await (await direct(RESPONSES_URL, { body: state.planBody })).json();
+      return json({ ...done, id: RESPONSE_ID, object: 'response', background: true });
+    }
+    return direct(url, init);
+  };
+  return { log, state, fetchImpl };
+}
+const fastPolls = options => callMapProvider({ ...options, pollMs: 0 });
+const planOf = async dir => Object.values(JSON.parse(await readFile(join(dir, 'pipeline.json'), 'utf8')).body.jobs).at(-1).stages.plan;
+
+test('the plan stage runs in background mode: one paid POST, then GET polls, charged from usage, the response id kept', async t => {
+  const { dir, make } = await setup(t), ask = askFor(), bg = backgroundTransport(ask);
+  validateMapReply(await make({ callProvider: fastPolls, fetchImpl: bg.fetchImpl }).call(ask), ask);
+  assert.deepEqual(bg.log, ['POST /', `GET /${RESPONSE_ID}`]);
+  assert.equal(JSON.parse(bg.state.planBody).store, true);
+  const plan = await planOf(dir);
+  assert.equal(plan.state, 'complete'); assert.equal(plan.attempts.length, 1);
+  const [attempt] = plan.attempts;
+  assert.equal(attempt.responseId, RESPONSE_ID); assert.ok(Number.isFinite(Date.parse(attempt.responseAt)));
+  assert.equal(attempt.charged, (10 * 2 + 10 * 10) * 1000); // gpt-6.1-sol, 10 in / 10 out, from the reply's usage
+  assert.equal(attempt.lost, undefined);
+});
+
+test('a plan POST whose reply never came back keeps its reservation as charged and is marked usage: null, lost: true', async t => {
+  const { dir, make } = await setup(t), ask = askFor(), bg = backgroundTransport(ask);
+  bg.state.post = 'network';
+  await assert.rejects(make({ callProvider: fastPolls, fetchImpl: bg.fetchImpl }).call(ask), matchesCode('AI_NETWORK_ERROR'));
+  const plan = await planOf(dir), [attempt] = plan.attempts;
+  assert.equal(plan.state, 'uncertain');
+  assert.equal(attempt.lost, true); assert.equal(attempt.usage, null); assert.equal(attempt.charged, attempt.reserved);
+  assert.equal(attempt.responseId, undefined);
+  // Without a kept id nothing can be read back: the stage still blocks and nothing is sent again.
+  const count = bg.log.length;
+  await assert.rejects(make({ callProvider: fastPolls, fetchImpl: bg.fetchImpl }).call(ask), matchesCode('MAP_STAGE_UNCERTAIN'));
+  assert.equal(bg.log.length, count);
+});
+
+test('a re-run reads an interrupted plan back with one GET of its kept id (no new POST) and charges its usage once', async t => {
+  const { dir, store, make } = await setup(t), ask = askFor(), bg = backgroundTransport(ask), controller = new AbortController();
+  bg.state.poll = 'hang';
+  // The process "dies" before the attempt's outcome is written: the plan stays running with its response id.
+  const killed = { ...store, noteResponse: async (...args) => { await store.noteResponse(...args); setImmediate(() => controller.abort()); },
+    failed: async () => { throw new Error('process killed'); } };
+  await assert.rejects(make({ store: killed, callProvider: fastPolls, fetchImpl: bg.fetchImpl }).call(ask, controller.signal), /process killed/);
+  let plan = await planOf(dir);
+  assert.equal(plan.state, 'running'); assert.equal(plan.attempts[0].responseId, RESPONSE_ID);
+  bg.state.poll = 'complete'; const before = bg.log.length, progress = [];
+  validateMapReply(await make({ callProvider: fastPolls, fetchImpl: bg.fetchImpl, onProgress: e => progress.push(e) }).call(ask), ask);
+  assert.deepEqual(bg.log.slice(before), [`GET /${RESPONSE_ID}`]);
+  assert.ok(progress.some(e => e.stage === 'plan' && e.state === 'running' && e.resumed === true));
+  plan = await planOf(dir);
+  assert.equal(plan.state, 'complete'); assert.equal(plan.attempts.length, 1);
+  assert.equal(plan.attempts[0].charged, (10 * 2 + 10 * 10) * 1000); assert.ok(plan.attempts[0].resumedAt);
+});
+
+test('a kept response id older than an hour, or already read back once, is not read again and the stage still blocks', async t => {
+  let clock = Date.parse('2026-11-04T00:00:00Z');
+  const { dir, store, make } = await setup(t, {}, { now: () => new Date(clock) }), ask = askFor(), bg = backgroundTransport(ask);
+  const controller = new AbortController();
+  bg.state.poll = 'hang';
+  const killed = { ...store, noteResponse: async (...args) => { await store.noteResponse(...args); setImmediate(() => controller.abort()); },
+    failed: async () => { throw new Error('process killed'); } };
+  await assert.rejects(make({ store: killed, callProvider: fastPolls, fetchImpl: bg.fetchImpl }).call(ask, controller.signal), /process killed/);
+  clock += 61 * 60 * 1000;
+  const before = bg.log.length;
+  await assert.rejects(make({ callProvider: fastPolls, fetchImpl: bg.fetchImpl }).call(ask), matchesCode('MAP_STAGE_UNCERTAIN'));
+  assert.equal(bg.log.length, before);
+  // Within the hour a read-back that again comes back with nothing is lost once and for all.
+  clock -= 30 * 60 * 1000; const controller2 = new AbortController();
+  const pending = make({ callProvider: fastPolls, fetchImpl: bg.fetchImpl, onProgress: e => { if (e.stage === 'plan' && e.resumed) setImmediate(() => controller2.abort()); } }).call(ask, controller2.signal);
+  await assert.rejects(pending, matchesCode('CANCELLED'));
+  const plan = await planOf(dir);
+  assert.equal(plan.state, 'uncertain'); assert.equal(plan.attempts.length, 1); assert.equal(plan.attempts[0].lost, true);
+  const count = bg.log.length;
+  await assert.rejects(make({ callProvider: fastPolls, fetchImpl: bg.fetchImpl }).call(ask), matchesCode('MAP_STAGE_UNCERTAIN'));
+  assert.equal(bg.log.length, count);
+});

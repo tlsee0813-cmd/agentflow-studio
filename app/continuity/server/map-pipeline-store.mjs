@@ -1,5 +1,6 @@
 // Private, local stage results and an OpenAI-only USD ledger. A reservation is durable before dispatch.
-// An interrupted/unknown attempt keeps its whole reservation and can never be dispatched again.
+// An interrupted/unknown attempt keeps its whole reservation and can never be dispatched again; when it kept a background response
+// id (noteResponse) it may be read once more within an hour (pendingResponse/resume), a GET of the response already paid for.
 import { mkdir, open, readFile, realpath, rename, unlink } from 'node:fs/promises';
 import { createHash, randomUUID } from 'node:crypto';
 import { createServer } from 'node:net';
@@ -91,6 +92,12 @@ function usageTokens(usage) {
 const validSetAside = list => Array.isArray(list) && list.length >= 1 && list.length <= 64 && list.every(x => plain(x) && Object.keys(x).length === 3
   && typeof x.path === 'string' && x.path.length <= 160 && /^[A-Za-z]+(\[\d{1,4}\])?(\.[A-Za-z]+(\[\d{1,4}\])?)*$/.test(x.path)
   && typeof x.rule === 'string' && /^[a-z][a-z-]{0,39}$/.test(x.rule) && (x.category === null || typeof x.category === 'string' && /^[a-z][a-z-]{0,39}$/.test(x.category)));
+// A background OpenAI response's id, kept on its attempt as soon as the POST returned (never a key or record text).
+const RESPONSE_ID = /^[A-Za-z0-9_-]{1,200}$/;
+const validResponse = a => a.provider === 'openai' && typeof a.responseId === 'string' && RESPONSE_ID.test(a.responseId)
+  && typeof a.responseAt === 'string' && Number.isFinite(Date.parse(a.responseAt));
+/** A pending background response may be read again (GET only, never re-sent) for this long after its POST returned. */
+export const MAP_RESUME_MAX_AGE_MS = 60 * 60 * 1000;
 function validate(body) {
   if (!plain(body) || !plain(body.jobs) || Object.keys(body.jobs).length > 10000) throw Error('damaged');
   for (const [key, job] of Object.entries(body.jobs)) {
@@ -102,6 +109,7 @@ function validate(body) {
       if (own(stage, 'setAside') && (stage.state !== 'complete' || !validSetAside(stage.setAside))) throw Error('damaged');
       for (const a of stage.attempts) {
         if (!plain(a) || !/^\d{4}-\d{2}$/.test(a.month) || !natural(a.inputBytes) || !natural(a.maxOutputTokens) || !natural(a.reserved) || !natural(a.charged) || a.charged > a.reserved || cost(a.provider, a.model, a.inputBytes, a.maxOutputTokens) !== a.reserved) throw Error('damaged');
+        if ((own(a, 'responseId') && !validResponse(a)) || (own(a, 'resumedAt') && (!own(a, 'responseId') || typeof a.resumedAt !== 'string' || !Number.isFinite(Date.parse(a.resumedAt)))) || (own(a, 'lost') && (a.lost !== true || a.usage !== null || a.charged !== a.reserved))) throw Error('damaged');
       }
     }
   }
@@ -184,6 +192,7 @@ export async function openMapPipelineStore({ dir, monthlyUsd = 20, runUsd = 1, n
         // Usage outside the reservation is evidence that our upper bound was invalid: keep the ceiling, stop resending.
         if (tokens[0] > a.inputBytes || tokens[1] > a.maxOutputTokens) throw new ApiError('MAP_STAGE_UNCERTAIN', 409);
         a.charged = cost(a.provider, a.model, ...tokens);
+        delete a.lost; delete a.usage; // a resumed response that came back after all
       }
       if (complete) {
         if (!own(options, 'value') || options.value === undefined) throw new ApiError('MAP_PIPELINE_INVALID', 400);
@@ -192,11 +201,44 @@ export async function openMapPipelineStore({ dir, monthlyUsd = 20, runUsd = 1, n
         if (own(options, 'setAside')) { if (!validSetAside(options.setAside)) throw new ApiError('MAP_PIPELINE_INVALID', 400); s.setAside = JSON.parse(JSON.stringify(options.setAside)); }
       } else {
         s.state = options.uncertain === false ? 'failed' : 'uncertain';
+        // Nothing came back from a dispatched call: the reservation stays charged and the attempt says so (eval, cycle log).
+        if (!tokens && s.state === 'uncertain') { a.usage = null; a.lost = true; }
         const diagnostic = stageDiagnostic(options.diagnostic, date().toISOString());
         if (diagnostic) s.diagnostic = diagnostic;
       }
       await persist(next);
       return complete ? clone(s.value) : undefined;
+    });
+  }
+  /** Keeps a background response's id on the running attempt as soon as its POST returned. */
+  async function noteResponse(key, stage, responseId) {
+    return serial(async () => {
+      available(); identity(key, stage);
+      const prior = body.jobs[key]?.stages[stage];
+      if (!prior || prior.state !== 'running' || prior.attempts.at(-1).provider !== 'openai' || typeof responseId !== 'string' || !RESPONSE_ID.test(responseId)) throw new ApiError('MAP_PIPELINE_INVALID', 409);
+      const next = clone(body), a = next.jobs[key].stages[stage].attempts.at(-1);
+      a.responseId = responseId; a.responseAt = date().toISOString();
+      await persist(next);
+    });
+  }
+  /** The id of a stage's interrupted or lost background response that may still be read (younger than an hour), else null.
+   * Reading it is a GET of the response already paid for; it never re-sends the stage. */
+  function pendingResponse(key, stage) {
+    available(); identity(key, stage);
+    const s = body.jobs[key]?.stages[stage], a = s?.attempts.at(-1);
+    if (!s || !['running', 'uncertain'].includes(s.state) || !a || !own(a, 'responseId') || own(a, 'resumedAt')) return null;
+    const age = date().valueOf() - Date.parse(a.responseAt);
+    return age >= 0 && age < MAP_RESUME_MAX_AGE_MS ? a.responseId : null;
+  }
+  /** Re-opens that attempt (running again, same reservation, no new attempt) for one read; a stage is resumed at most once. */
+  async function resume(key, stage, responseId) {
+    return serial(async () => {
+      available(); identity(key, stage);
+      if (pendingResponse(key, stage) !== responseId) throw new ApiError('MAP_STAGE_UNCERTAIN', 409);
+      const next = clone(body), s = next.jobs[key].stages[stage], a = s.attempts.at(-1);
+      s.state = 'running'; a.resumedAt = date().toISOString();
+      await persist(next);
+      return { attempt: s.attempts.length, resumed: true };
     });
   }
   function run(key, fn) {
@@ -217,7 +259,7 @@ export async function openMapPipelineStore({ dir, monthlyUsd = 20, runUsd = 1, n
     return last ? clone(last) : null;
   }
   return {
-    run, get, begin, lastFailure,
+    run, get, begin, lastFailure, noteResponse, pendingResponse, resume,
     complete: (key, stage, options = {}) => finish(key, stage, options, true),
     failed: (key, stage, options = {}) => finish(key, stage, options, false),
     describe() { const month = date().toISOString().slice(0, 7); return { durable: !problem && !closed, problem, openaiOnly: true, monthlyUsd, runUsd, month, spentUsd: totals(null, month).monthly / NANO, lastFailure: lastFailure() }; },
