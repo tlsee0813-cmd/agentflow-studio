@@ -581,16 +581,16 @@ test('a first map alone carries the first-map review rules in its global and fin
   assert.ok(final.input.semanticReview); assert.ok(final.options.system.endsWith(GLOBAL_RULES + FIRST_GLOBAL_RULES + FINAL_GLOBAL_RULES + FIRST_FINAL_GLOBAL_RULES));
 });
 
-// first-map-divided.9: the plan may write 16,384 output tokens within 300 s; renders and global stages keep 8,192 within 180 s.
+// first-map-divided.9: the plan may write 16,384 output tokens within 300 s (600 s since the two-record .30 plan timed out); renders and global stages keep 8,192 within 180 s.
 test('the plan stage alone gets the larger output budget and the longer time limit', async t => {
   const { make } = await setup(t), ask = askFor(), calls = [];
   const pipeline = make({ renderModel: 'gpt-6.1-terra', callProvider: fakeProvider(ask, calls) });
   validateMapReply(await pipeline.call(ask), ask);
   const budget = stage => [...new Set(calls.filter(c => c.stage === stage).map(c => `${c.options.maxOutputTokens}/${c.options.timeoutMs}`))];
-  assert.deepEqual(budget('plan'), ['16384/300000']);
+  assert.deepEqual(budget('plan'), ['16384/600000']);
   assert.deepEqual(budget('render'), ['8192/180000']); assert.deepEqual(budget('global'), ['8192/180000']);
   assert.deepEqual(budget('extract'), ['4096/60000']);
-  assert.equal(PLAN_TIMEOUT_MS, 300000);
+  assert.equal(PLAN_TIMEOUT_MS, 600000);
 });
 
 // first-map-divided.9: the global stages may run on a model of their own; unnamed, they run on the render model as before.
