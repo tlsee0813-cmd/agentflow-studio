@@ -7,7 +7,7 @@ import { ApiError } from '../../server/errors.mjs';
 import { encodeSpans } from '../dist/public/shared/evidence-span.js';
 import { validateMapAsk, validateMapReply } from '../dist/public/shared/map-reading.js';
 import { createFirstMapPipeline, PIPELINE_RECIPE, LATER_PIPELINE_RECIPE , PLAN_TIMEOUT_MS, GLOBAL_RULES, FIRST_GLOBAL_RULES, FIRST_FINAL_GLOBAL_RULES, FINAL_GLOBAL_RULES } from '../server/map-pipeline.mjs';
-import { openFirstMapPipeline } from '../server/map-pipeline-host.mjs';
+import { openFirstMapPipeline, loadMapPipelineEnv } from '../server/map-pipeline-host.mjs';
 import { parseProject } from '../dist/public/shared/validation.js';
 import { openMapPipelineStore } from '../server/map-pipeline-store.mjs';
 import { callMapProvider } from '../server/map-provider.mjs';
@@ -603,8 +603,8 @@ test('a global model of its own sends only the global stages to it, names the ba
   assert.equal(make({ renderModel: 'gpt-6.1-terra', globalModel: 'gpt-6.1-sol' }).model, 'deepseek-flash_gpt-6.1-sol_gpt-6.1-terra');
   assert.notEqual(split.identity, same.identity); assert.notEqual(split.laterIdentity, same.laterIdentity);
   assert.notEqual(make({ renderModel: 'gpt-6.1-terra', globalModel: 'gpt-6.1-sol' }).identity, same.identity);
-  // DeepSeek rendering with OpenAI global stages: 12 extractions (no correction) + 8 groups x (1 + semantic) x (1 + correction).
-  assert.deepEqual([split.describe().renderProvider, split.describe().deepseekMaxCalls], ['deepseek', 44]);
+  // DeepSeek rendering with OpenAI global stages: 12 extractions (no correction) + (.31) 12 groups x (1 + semantic) x (1 + correction).
+  assert.deepEqual([split.describe().renderProvider, split.describe().deepseekMaxCalls], ['deepseek', 60]);
   assert.equal(make({ renderModel: 'gpt-6.1-terra', globalModel: 'deepseek-flash' }).describe().deepseekMaxCalls, 28);
   for (const globalModel of ['gpt-unknown', 'deepseek-other', '', null]) assert.throws(() => make({ renderModel: 'gpt-6.1-terra', globalModel }), /Invalid map global model configuration/);
   const calls = [], pipeline = make({ renderModel: 'deepseek-flash', globalModel: 'gpt-6.1-terra', callProvider: fakeProvider(ask, calls) });
@@ -760,12 +760,12 @@ for (const blockedStage of ['render', 'global']) test('cancelling semantic ' + b
 });
 
 // first-map-divided.6: OpenAI rendering leaves room for one extraction correction each (2 x 12); DeepSeek rendering has none (48).
-test('semantic pass metadata bounds DeepSeek to 48 calls while OpenAI rendering allows twelve extractions with one correction each', async t => {
+test('semantic pass metadata bounds DeepSeek to (.31) 64 calls while OpenAI rendering allows twelve extractions with one correction each', async t => {
   const { make } = await setup(t);
-  assert.equal(make({}).describe().deepseekMaxCalls, 48);
+  assert.equal(make({}).describe().deepseekMaxCalls, 64);
   assert.equal(make({ renderModel: 'gpt-6.1-terra' }).describe().deepseekMaxCalls, 24);
   assert.equal(make({ renderModel: 'gpt-6.1-terra', maxPartitions: 5 }).describe().deepseekMaxCalls, 10);
-  assert.equal(make({ maxPartitions: 5 }).describe().deepseekMaxCalls, 41);
+  assert.equal(make({ maxPartitions: 5 }).describe().deepseekMaxCalls, 57);
 });
 
 test('a declared later withdrawal automatically repairs summary-only normal output before its record is consumed', async t => {
@@ -968,7 +968,7 @@ test('a refused plan and its one refused correction say plan-correction and a co
     [plan => { plan.parts[0].ref = 'flow'; }, 'ref'],
     [plan => { plan.parts[0].parent = 'new:missing'; }, 'parent'],
     [plan => { plan.global[0].kind = 'fact'; }, 'kind'],
-    [plan => { plan.parts = Array.from({ length: 25 }, (_, i) => ({ ...plan.parts[0], ref: 'new:p' + i })); }, 'count'],
+    [plan => { plan.parts = Array.from({ length: 37 }, (_, i) => ({ ...plan.parts[0], ref: 'new:p' + i })); }, 'count'],
   ];
   for (const [mutate, reason] of cases) {
     const { make } = await setup(t), ask = askFor(), calls = [];
@@ -1072,8 +1072,8 @@ function browserApply(f, wire, exclusions, n = 7) {
 }
 
 test('recipe identities are bumped for the changed prompts and validation semantics', () => {
-  assert.equal(PIPELINE_RECIPE, 'first-map-divided.30');
-  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.30');
+  assert.equal(PIPELINE_RECIPE, 'first-map-divided.31');
+  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.31');
 });
 
 test('a render fragment with one unresolvable claim alias is applied with only that claim set aside and a durable diagnostic', async t => {
@@ -1188,7 +1188,7 @@ test('with OpenAI rendering an extraction receipt is corrected once with coarse 
 test('.29 rule sentences: stores are parts, every part-table row is covered, a row belongs to its first cell, one line per citation, versions out of config, the summary on claims', async () => {
   const P = await import('../server/map-pipeline.mjs'), B = await import('../server/map-blueprint.mjs');
   for (const rule of ['「있는 곳」이 파일·큐·경로인 행', '「저장소 ref → 읽는 쪽 ref: 행 이름」', '만드는 쪽 → 읽는 쪽 직통 항목을 쓰지 않는다', '미구현·폐기·모름 행도 그 상태의 부분으로 세우고',
-    '첫 지도는 새 부분도 24개까지', '그 행을 흡수한 부분의 focus에 원문 이름과 상태 그대로']) assert.ok(B.MAP_BLUEPRINT_PROMPT.includes(rule), rule);
+    '첫 지도는 새 부분도 36개까지', '그 행을 흡수한 부분의 focus에 원문 이름과 상태 그대로']) assert.ok(B.MAP_BLUEPRINT_PROMPT.includes(rule), rule);
   assert.ok(B.LATER_BLUEPRINT_PROMPT.includes('새 부분은 12개 이하, global은 32개 이하'));
   for (const rule of ['저장소 부분은 type=store이고 typeAt은 그 산출물 행', '「필드」 칸의 「·」마다 하나씩', '첫 칸이 blueprint.parts의 다른 부분 이름인 행은', '그 행·줄 한 줄의 구간 별칭 하나를 인용',
     '판본(sha·「판본」·「명세 136feaf0」 같은 해시)은 설정이 아니므로', '「,」와 「·」로 나뉜 항목마다 하나씩', '설계 설명(topic=how) 주장보다 먼저',
@@ -1239,12 +1239,12 @@ test('.29: a 24-part first map renders in eight fragments; a run ceiling that ca
 // ---- first-map-divided.30: map-reading.9 (steps, loop, kept state, port map) and the rules from the blind judging of the .29 map. ----
 test('.30 rule sentences: every connection row a line, absorption into the group parent only, row names verbatim, "·" outside parentheses, state facts first, steps, loop, kept state and the port map', async () => {
   const P = await import('../server/map-pipeline.mjs'), B = await import('../server/map-blueprint.mjs');
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.30', 'later-map-divided.30']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.31', 'later-map-divided.31']);
   for (const rule of ['흡수는 기록의 묶음 표(부모 이름 | 자식 이름들)가 그 행의 부모로 적은 부분에만 하고', '연결 표(보내는 부분 | 받는 부분)에 자기 행이 있는 단위는 부모가 있어도 흡수하지 않고 부분으로 세운다',
     '부분의 name은 그 표 행의 첫 칸 이름을 글자 그대로 쓰고', '「facts-refresh」 행을 「calendar.json」으로 부르지 않는다', '모든 행은 relation 항목 하나(저장소를 거치면 둘)로 빠짐없이 쓴다',
     'global은64개 이하(그중 relation 항목 48개까지)']) assert.ok(B.MAP_BLUEPRINT_PROMPT.includes(rule), rule);
   for (const rule of ['「·」는 괄호(…)·대괄호[…] 밖에서만 나눈다', '「entry_params(wait_max_s·opp_close_q)」는 필드 하나', '「event(CYCLE·ARM_CYCLE·…)」도 필드 하나다', '화살표가 든 구나', '저장소 부분(type=store)의 inputs·outputs는 []로 두고',
-    'outputs는 내는 것의 이름 최대 8개다', '적힌 그대로 최대 24개(각 40자 이내)', '적힌 그대로 최대 8개(각 80자 이내', '가장 중요한 항목을 앞에 두고 상한까지만 쓰며',
+    'outputs는 내는 것의 이름 최대 8개다', '적힌 그대로 최대 24개(각 60자 이내)', '적힌 그대로 최대 8개(각 80자 이내', '가장 중요한 항목을 앞에 두고 상한까지만 쓰며',
     '실제 변화(「최근 요청과 실제 변화」 표) → 오류(「오류·미해결」 표) → 철회(「철회·변경」 표) → 규칙(「지켜야 할 것」 표) → 설계 설명 순서다', '그 상태 단어만 다시 말하는 status 주장', '돈·손익·대기 상태',
     '「안의 단계」 표(부분 이름 | 순번 | 단계 이름 | 하는 일 | 쓰는 파일·함수·모델 | 조건·분기)에서 첫 칸이 이 부분인 행마다 하나씩', '한 행에 단계 하나이며', '단계 사이의 순서·분기·반복은 쓰지 않는다(이번 계약에 없다)',
     '세 칸은 각각 원문이 말할 때만 채우며', 'stateVars는 기록이 이 부분이 유지한다고 적은 상태', '"steps":[{"name":"봉투 검사"', '"loop":{"unit":"60 s 폴링"']) assert.ok(P.RENDER_RULES.includes(rule), rule);
@@ -1378,4 +1378,87 @@ test('a kept response id older than an hour, or already read back once, is not r
   const count = bg.log.length;
   await assert.rejects(make({ callProvider: fastPolls, fetchImpl: bg.fetchImpl }).call(ask), matchesCode('MAP_STAGE_UNCERTAIN'));
   assert.equal(bg.log.length, count);
+});
+
+// ---- first-map-divided.31: 36 parts in twelve fragments, the named diagnostics in the correction feedback, the rule sentences,
+// and the plan stage's own reasoning effort and output-token cap (host knobs; fake providers and an inert transport only). ----
+test('.31 rule sentences: 36 parts, the fragment key range, list items alone, the loop unit, kept state, fact rows before design, the summary state first', async () => {
+  const P = await import('../server/map-pipeline.mjs'), B = await import('../server/map-blueprint.mjs');
+  for (const rule of ['보통5~36개, 총36개 이하(첫 지도는 새 부분도 36개까지)', '부분 36개 안에서 고를 때는', '원문 표의 단위와 저장소가 부분 36개를 넘으면']) assert.ok(B.MAP_BLUEPRINT_PROMPT.includes(rule), rule);
+  assert.ok(B.LATER_BLUEPRINT_PROMPT.includes('parts는 총24개 이하(위의 36개가 아니다)'));
+  assert.ok(!B.MAP_BLUEPRINT_PROMPT.includes('총24개 이하'), 'the old 24 bound is gone from the first map');
+  for (const rule of ['assignment.keyStart부터 assignment.keyEnd까지(둘 다 포함)', '그 항목 하나만 지도에서 빠지고 나머지 항목은 남는다', '적힌 그대로 최대 24개(각 60자 이내)',
+    'loop.unit은 기록이 그 부분 자신이 되풀이해 돈다고 말한 문장', 'type이 timer인 부분의 하루 일정', '「설정」 칸의 값(「j1_cadence 60 s」)은 config이지 반복 단위가 아니다',
+    '루프 코드를 읽지 않았다고 적었으면([모름], 「이번에 안 읽음」) unit은 null이다', '부분이 스스로 쓰고 다시 읽는 자기 파일(posture.json, counter.jsonl',
+    'readBy·changedBy에는 그것을 읽고 바꾸는 이 부분의 단계 이름', '{"name":"posture.json","scope":null,"readBy":["게이트"],"changedBy":["게이트"]}',
+    '오류 행의 수치(「−147.6 bp', '그 부분의 설계 설명(topic=how) 주장은 그 행들을 모두 쓴 뒤 자리가 남을 때만 쓴다']) assert.ok(P.RENDER_RULES.includes(rule), rule);
+  assert.ok(!P.RENDER_RULES.includes('99개 범위'), 'the old hundred-key range is gone');
+  for (const rule of ['첫 문장은 기록의 기준 시각(basisAt)의 운영 상태다', '−0.433 USDT', '구조·설계 설명이나 가동 여부만으로 첫 문장을 쓰지 않는다', 'reviseParts는 고유한 blueprint ref 1~36개만']) assert.ok(P.GLOBAL_RULES.includes(rule), rule);
+  for (const rule of ['rule이 plan-relations이면 names의 「from → to」마다', 'connections이면 names의 연결 표 행마다 선을 그린다', 'uncited이면 names가 가리키는 부분의 실제 변화·오류·철회 행을']) assert.ok(P.CORRECTION_RULES.includes(rule), rule);
+});
+
+test('.31: a 36-part first map renders in twelve fragments on their own key ranges; the global correction hears which plan relation items no line draws', async t => {
+  const ask = askFor(), base = originalWire(ask).parts[0];
+  const wide = { ...originalWire(ask), parts: Array.from({ length: 36 }, (_, i) => ({ ...structuredClone(base), ref: `new:u${i}`, name: `단위 ${i}` })) };
+  const { make } = await setup(t), calls = [];
+  const pipeline = make({ renderModel: 'gpt-6.1-terra', callProvider: fakeProvider(ask, calls, call => {
+    if (call.stage === 'plan') { const plan = blueprintFor(wide, ask); plan.global.push({ kind: 'relation', text: 'new:u0 → new:u1: 작업 큐', at: [ask.records[0].spans[0].s] }); return plan; }
+    // The global stage's first pass is structurally wrong (it writes parts), so its one correction is paid.
+    if (call.stage === 'global' && !call.input.correction) return { ...payloadFor(call.input, ask, wide), parts: [structuredClone(base)] };
+  }, wide) });
+  const wire = await pipeline.call(ask);
+  const renders = calls.filter(c => c.stage === 'render');
+  assert.equal(renders.length, 12);
+  assert.deepEqual(renders.map(c => [c.input.assignment.keyStart, c.input.assignment.keyEnd]),
+    [[1, 99], [101, 199], [201, 299], [301, 399], [401, 499], [501, 599], [601, 699], [701, 799], [901, 924], [926, 949], [951, 974], [976, 999]]);
+  assert.equal(validateMapReply(wire, ask).parts.length, 36);
+  assert.deepEqual(wire.parts.at(-1).claims.map(c => c.key), ['s980', 's981'], 'the twelfth fragment keys its third part from s976');
+  const corrected = calls.filter(c => c.stage === 'global' && c.input.correction);
+  assert.equal(corrected.length, 1);
+  assert.deepEqual(corrected[0].input.correction.issues.filter(x => x.rule === 'plan-relations'), [{ path: 'relations', rule: 'plan-relations', expected: 1, actual: 0, names: ['new:u0 → new:u1'] }]);
+  assert.equal(pipeline.describe().deepseekMaxCalls, 24, 'OpenAI rendering: twelve extractions, one correction each');
+});
+
+test('.31 host knobs: the plan stage alone takes STUDIO_MAP_PLAN_REASONING and STUDIO_MAP_PLAN_TOKENS (defaults high and 16,384); its reservation counts the configured cap', async t => {
+  const ask = askFor(), root = await mkdtemp(join(tmpdir(), 'map-plan-knobs-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const sent = [], fetchImpl = async (_url, init) => {
+    const body = JSON.parse(init.body), isDeepseek = !!body.messages;
+    const input = JSON.parse(isDeepseek ? body.messages[1].content : body.input.slice('Return JSON for this input:\n'.length));
+    if (!isDeepseek) sent.push({ stage: stageOf(input), effort: body.reasoning?.effort, tokens: body.max_output_tokens, background: body.background === true });
+    const value = payloadFor(input, ask, originalWire(ask));
+    return new Response(JSON.stringify(isDeepseek
+      ? { choices: [{ finish_reason: 'stop', message: { role: 'assistant', content: JSON.stringify(value) } }], usage: { prompt_tokens: 10, completion_tokens: 10 } }
+      : { status: 'completed', output: [{ type: 'message', role: 'assistant', status: 'completed', content: [{ type: 'output_text', text: JSON.stringify(value) }] }], usage: { input_tokens: 10, output_tokens: 10 } }));
+  };
+  const env = { DEEPSEEK_API_KEY: 'host-test-deepseek-inert', OPENAI_API_KEY: 'host-test-openai-inert' };
+  const run = async (name, extra) => {
+    sent.length = 0;
+    const pipeline = await openFirstMapPipeline({ env: { ...env, ...extra }, dir: join(root, name), fetchImpl });
+    try { validateMapReply(await pipeline.call(ask), ask); return pipeline.describe(); } finally { await pipeline.close(); }
+  };
+  const plain = await run('defaults', {});
+  assert.deepEqual([plain.planReasoning, plain.planTokens], ['high', 16384]);
+  assert.deepEqual(sent.find(x => x.stage === 'plan'), { stage: 'plan', effort: 'high', tokens: 16384, background: true });
+  const tuned = await run('tuned', { STUDIO_MAP_PLAN_REASONING: 'medium', STUDIO_MAP_PLAN_TOKENS: '32768' });
+  assert.deepEqual([tuned.planReasoning, tuned.planTokens], ['medium', 32768]);
+  assert.deepEqual(sent.find(x => x.stage === 'plan'), { stage: 'plan', effort: 'medium', tokens: 32768, background: true });
+  assert.ok(sent.filter(x => x.stage !== 'plan').length >= 2 && sent.filter(x => x.stage !== 'plan').every(x => x.effort === 'high' && x.tokens === 8192), 'render and global keep high');
+  const saved = JSON.parse(await readFile(join(root, 'tuned', 'first-map', 'pipeline.json'), 'utf8'));
+  const [attempt] = Object.values(saved.body.jobs).at(-1).stages.plan.attempts;
+  assert.equal(attempt.maxOutputTokens, 32768);
+  assert.equal(attempt.reserved, (attempt.inputBytes * 2 + 32768 * 10) * 1000, 'gpt-6.1-sol, reserved from the configured cap');
+  assert.notEqual(plain.version, undefined);
+  // Bounds: one of the transport's efforts; 8,192-65,536 whole tokens. A wrong value opens nothing.
+  for (const [extra, code] of [[{ STUDIO_MAP_PLAN_REASONING: 'extreme' }, 'FIRST_MAP_PLAN_REASONING_INVALID'], [{ STUDIO_MAP_PLAN_TOKENS: '8191' }, 'FIRST_MAP_PLAN_TOKENS_INVALID'],
+    [{ STUDIO_MAP_PLAN_TOKENS: '65537' }, 'FIRST_MAP_PLAN_TOKENS_INVALID'], [{ STUDIO_MAP_PLAN_TOKENS: '16384.5' }, 'FIRST_MAP_PLAN_TOKENS_INVALID'], [{ STUDIO_MAP_PLAN_TOKENS: 'many' }, 'FIRST_MAP_PLAN_TOKENS_INVALID']])
+    await assert.rejects(openFirstMapPipeline({ env: { ...env, ...extra }, dir: join(root, 'bad'), fetchImpl }), new RegExp(`^Error: ${code}$`));
+  for (const [tokens, effort] of [['8192', 'none'], ['65536', 'max']]) {
+    const pipeline = await openFirstMapPipeline({ env: { ...env, STUDIO_MAP_PLAN_TOKENS: tokens, STUDIO_MAP_PLAN_REASONING: effort }, dir: join(root, `edge-${tokens}`), fetchImpl });
+    assert.deepEqual([pipeline.describe().planTokens, pipeline.describe().planReasoning], [Number(tokens), effort]); await pipeline.close();
+  }
+  assert.throws(() => createFirstMapPipeline({ store: {}, deepseekKey: 'x', openaiKey: 'y', planReasoning: 'extreme' }), /Invalid map plan reasoning configuration/);
+  // Read from the private file like the model names.
+  const read = await loadMapPipelineEnv({ STUDIO_OPENAI_ENV: 'inert-plan-test.env' }, async () => 'STUDIO_MAP_PLAN_REASONING=low\nSTUDIO_MAP_PLAN_TOKENS=24576\nSTUDIO_UNASKED=1');
+  assert.deepEqual(read, { STUDIO_OPENAI_ENV: 'inert-plan-test.env', STUDIO_MAP_PLAN_REASONING: 'low', STUDIO_MAP_PLAN_TOKENS: '24576' });
 });

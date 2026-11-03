@@ -14,8 +14,9 @@ export const DIVIDED_PARTITION_CHARS = 3500;
 export const DIVIDED_PARTITIONS = 12;
 export const DIVIDED_PARALLEL = 2;
 /** The DeepSeek calls a divided reading is assumed to make at most when a server does not say its own number: the largest batch a
- * PC host can be configured with (12 extractions, and rendering on DeepSeek with one semantic rewrite and one format correction). */
-export const DEEPSEEK_CALLS_UNSTATED = 48;
+ * PC host can be configured with (12 extractions, and rendering on DeepSeek with one semantic rewrite and one format correction).
+ * Pipeline .31: 64 (twelve render fragments of a 36-part first map: 12 + 12 x 2 x 2 + the global stages 2 x 2 on DeepSeek). */
+export const DEEPSEEK_CALLS_UNSTATED = 64;
 
 export type MapRouteName = 'divided-first' | 'divided-later' | 'single';
 /** Why a route was chosen: a first map or later reading of the divided pipeline; a host offering no divided pipeline for this kind;

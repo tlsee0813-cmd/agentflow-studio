@@ -290,7 +290,7 @@ test('Node host defaults rendering to Terra and reports the fixed-host 24-call D
 test('explicit supported host render models select their provider and actual DeepSeek call allowance', async t => {
   const host = await hostFixture(t);
   for (const [renderModel, provider, maxCalls] of [
-    ['deepseek-flash', 'deepseek', 48], ['gpt-6.1-sol', 'openai', 24], ['gpt-6-astra', 'openai', 24], ['gpt-6.1-terra', 'openai', 24],
+    ['deepseek-flash', 'deepseek', 64], ['gpt-6.1-sol', 'openai', 24], ['gpt-6-astra', 'openai', 24], ['gpt-6.1-terra', 'openai', 24],
   ]) {
     const pipeline = await host.open({ STUDIO_MAP_RENDER_MODEL: renderModel });
     const info = pipeline.describe();
@@ -303,7 +303,7 @@ test('explicit supported host render models select their provider and actual Dee
 test('a host global model names the model of the global stages alone and is read from the private file too', async t => {
   const host = await hostFixture(t);
   const split = await host.open({ STUDIO_MAP_RENDER_MODEL: 'deepseek-flash', STUDIO_MAP_GLOBAL_MODEL: 'gpt-6.1-terra' }), info = split.describe();
-  assert.deepEqual([info.renderModel, info.renderProvider, info.globalModel, info.globalProvider, info.deepseekMaxCalls], ['deepseek-flash', 'deepseek', 'gpt-6.1-terra', 'openai', 44]);
+  assert.deepEqual([info.renderModel, info.renderProvider, info.globalModel, info.globalProvider, info.deepseekMaxCalls], ['deepseek-flash', 'deepseek', 'gpt-6.1-terra', 'openai', 60]);
   assert.equal(split.model, 'deepseek-flash_gpt-6.1-sol_gpt-6.1-terra');
   await split.close();
   const env = await loadMapPipelineEnv({ STUDIO_OPENAI_ENV: 'inert-render-test.env' }, async () => 'STUDIO_MAP_RENDER_MODEL=deepseek-flash\nSTUDIO_MAP_GLOBAL_MODEL=gpt-6.1-sol');
@@ -342,7 +342,7 @@ test('actual host HTTP metadata and the client parser preserve the selected Deep
   const jobsDir = mkdtempSync(join(tmpdir(), 'af-render-status-'));
   const jobs = await openMapJobs({ dir: jobsDir });
   t.after(async () => { await jobs.close(); const { rm } = await import('node:fs/promises'); await rm(jobsDir, { recursive: true, force: true }); });
-  for (const [renderModel, bound] of [['gpt-6.1-terra', 24], ['deepseek-flash', 48]]) {
+  for (const [renderModel, bound] of [['gpt-6.1-terra', 24], ['deepseek-flash', 64]]) {
     const pipeline = await host.open({ STUDIO_MAP_RENDER_MODEL: renderModel });
     const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: inert }, jobs, firstMapPipeline: pipeline,
       fetchImpl: async () => assert.fail('reading status must not call a provider') });
@@ -369,8 +369,8 @@ test('a missing or invalid optional DeepSeek bound keeps a safe legacy allowance
       }
       globalThis.fetch = async () => json(status);
       const parsed = await aiStatus();
-      assert.equal(parsed.map.first.deepseekMaxCalls, 48);
-      assert.equal(parsed.map.later.deepseekMaxCalls, 48);
+      assert.equal(parsed.map.first.deepseekMaxCalls, 64);
+      assert.equal(parsed.map.later.deepseekMaxCalls, 64);
     }
   } finally { await s.jobs.close(); }
 });

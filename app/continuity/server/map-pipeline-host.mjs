@@ -2,9 +2,13 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { parseEnv } from 'node:util';
 import { join } from 'node:path';
 import { openMapPipelineStore } from './map-pipeline-store.mjs';
-import { createFirstMapPipeline } from './map-pipeline.mjs';
+import { createFirstMapPipeline, PLAN_REASONING } from './map-pipeline.mjs';
+/** The plan stage's output-token cap may be set from 8,192 to 65,536 (default 16,384); its reasoning effort is one of PLAN_REASONING (default high). */
+export const PLAN_TOKENS_DEFAULT = 16384, PLAN_TOKENS_MIN = 8192, PLAN_TOKENS_MAX = 65536;
 
-const ALLOWED = ['OPENAI_API_KEY', 'STUDIO_MAP_MERGE_MODEL', 'STUDIO_MAP_RENDER_MODEL', 'STUDIO_MAP_GLOBAL_MODEL', 'STUDIO_MAP_MONTHLY_USD', 'STUDIO_MAP_RUN_USD'];
+const ALLOWED = ['OPENAI_API_KEY', 'STUDIO_MAP_MERGE_MODEL', 'STUDIO_MAP_RENDER_MODEL', 'STUDIO_MAP_GLOBAL_MODEL', 'STUDIO_MAP_MONTHLY_USD', 'STUDIO_MAP_RUN_USD',
+  // The plan stage's reasoning effort and output-token cap (an astra plan on two KORU records ran past 16,384 with its reasoning).
+  'STUDIO_MAP_PLAN_REASONING', 'STUDIO_MAP_PLAN_TOKENS'];
 /** This is a server-only local file, never a browser setting, bundle asset, or shell command. Existing env wins. */
 export async function loadMapPipelineEnv(env, read = readFile) {
   const out = { ...env };
@@ -34,11 +38,15 @@ export async function openFirstMapPipeline({ env, dir, fetchImpl, onProgress, ke
   if (env.AI_MODE === 'mock' || !env.OPENAI_API_KEY || env.STUDIO_FIRST_MAP === 'single') return null;
   if (!dir) throw new Error('FIRST_MAP_NEEDS_DURABLE_JOBS');
   const limit = (key, fallback) => { const n = Number(env[key] || fallback); if (!Number.isFinite(n) || n <= 0 || n > 200) throw new Error('FIRST_MAP_BUDGET_INVALID'); return n; };
+  const planReasoning = env.STUDIO_MAP_PLAN_REASONING || 'high';
+  if (!PLAN_REASONING.includes(planReasoning)) throw new Error('FIRST_MAP_PLAN_REASONING_INVALID');
+  const planTokens = env.STUDIO_MAP_PLAN_TOKENS ? Number(env.STUDIO_MAP_PLAN_TOKENS) : PLAN_TOKENS_DEFAULT;
+  if (!Number.isSafeInteger(planTokens) || planTokens < PLAN_TOKENS_MIN || planTokens > PLAN_TOKENS_MAX) throw new Error('FIRST_MAP_PLAN_TOKENS_INVALID');
   const store = await openMapPipelineStore({ dir: join(dir, 'first-map'), monthlyUsd: limit('STUDIO_MAP_MONTHLY_USD', 20), runUsd: limit('STUDIO_MAP_RUN_USD', 1) });
   try {
     const pipeline = createFirstMapPipeline({ store, deepseekKey: env.DEEPSEEK_API_KEY, openaiKey: env.OPENAI_API_KEY,
       deepseekModel: env.DEEPSEEK_PLAN_MODEL || env.DEEPSEEK_MODEL || 'deepseek-flash', mergeModel: env.STUDIO_MAP_MERGE_MODEL || 'gpt-6.1-sol',
-      renderModel: env.STUDIO_MAP_RENDER_MODEL || 'gpt-6.1-terra', ...(env.STUDIO_MAP_GLOBAL_MODEL ? { globalModel: env.STUDIO_MAP_GLOBAL_MODEL } : {}), fetchImpl, onProgress,
+      renderModel: env.STUDIO_MAP_RENDER_MODEL || 'gpt-6.1-terra', mergeTokens: planTokens, planReasoning, ...(env.STUDIO_MAP_GLOBAL_MODEL ? { globalModel: env.STUDIO_MAP_GLOBAL_MODEL } : {}), fetchImpl, onProgress,
       onRejected: keep ? keepRejectedStage({ dir: keep, ...(log ? { log } : {}) }) : null });
     return { ...pipeline, close: () => store.close() };
   } catch (error) { await store.close(); throw error; }

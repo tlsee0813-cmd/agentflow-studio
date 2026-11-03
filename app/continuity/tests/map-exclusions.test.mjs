@@ -423,9 +423,9 @@ test('map-reading.8 lenient: a wrong field leaves out only that field of its par
   assert.deepEqual(got.relations, []);
   assert.deepEqual([got.basisAt, got.basisVersion], [null, null]);
   const reasons = M.readingExclusions(got);
-  assert.deepEqual(reasons.map(e => [e.path, e.rule, e.category]), [['parts[0].type', 'contract', 'type'], ['parts[0].inputs', 'contract', 'inputs'], ['parts[0].config', 'contract', 'config'],
+  assert.deepEqual(reasons.map(e => [e.path, e.rule, e.category]), [['parts[0].type', 'contract', 'type'], ['parts[0].inputs', 'contract', 'inputs'], ['parts[0].config[0]', 'contract', 'config'],
     ['parts[1].typeAt', 'contract', 'type-at'], ['relations[0].channel', 'contract', 'channel'], ['basisAt', 'contract', 'basis-at'], ['basisVersion', 'contract', 'basis-version']]);
-  assert.match(reasons[0].explanation, /그 칸만/); assert.match(reasons[5].explanation, /기준 시각/);
+  assert.match(reasons[0].explanation, /그 칸만/); assert.match(reasons[2].explanation, /항목 하나만/); assert.match(reasons[5].explanation, /기준 시각/);
   const applied = M.applyReading(f.p, f.inp, got, meta('R_eight_lenient'));
   assert.deepEqual(applied.reading.exclusions.map(e => e.path), reasons.map(e => e.path));
   assert.deepEqual([applied.reading.basisAt, applied.reading.basisVersion], [null, null]);
@@ -481,14 +481,15 @@ test('map-reading.8 storage is exact: unknown values, a missing key, and an .8 k
 
 // ---- first-map-divided.29: the first map's contract takes 24 new parts; a version is never a setting; the divided reading's
 // own checks of a quoted line (via-store, wrong-part, sender) explain themselves in the reading's saved reasons. ----
-test('.29: plain map.6 reads 24 new parts (map.7 still sets aside the thirteenth) and refuses a version in config; the lenient readings blank that config alone', () => {
+test('.29: plain map.6 reads (.31) 36 new parts (map.7 still sets aside the thirteenth) and refuses a version in config; the lenient readings blank that config alone', () => {
   const f = firstMap(), r = structuredClone(f.reply); r.parts[0].claims.splice(1, 1);
   const fresh = i => ({ ...structuredClone(r.parts[0]), ref: `new:u${i}`, name: `단위 ${i}`, claims: [f.claim(`s${i + 10}`, f.at[0])] });
-  const wide = { ...structuredClone(r), parts: [r.parts[0], ...Array.from({ length: 23 }, (_, i) => fresh(i))] };
-  assert.equal(M.validateMapReply(wide, f.ask).parts.length, 24);
-  assert.equal(M.MAP6_NEW_PARTS, 24);
+  const wide = { ...structuredClone(r), parts: [r.parts[0], ...Array.from({ length: 35 }, (_, i) => fresh(i))] };
+  assert.equal(M.validateMapReply(wide, f.ask).parts.length, 36);
+  assert.equal(M.MAP6_NEW_PARTS, 36);
+  assert.throws(() => M.validateMapReply({ ...wide, parts: [...wide.parts, fresh(40)] }, f.ask), undefined, 'a 37th part is past the bound');
   const applied = M.applyReading(f.p, f.inp, M.validateMapReply(wide, f.ask), meta('R_wide'));
-  assert.equal(applied.created.length, 24);
+  assert.equal(applied.created.length, 36);
   assert.deepEqual(validateProject(applied.project), applied.project);
   for (const version of ['618df374', '명세 136feaf0', 'sha 2 5d31b880', '라이브 618df374', '판본 v3', 'charter_sha 고정']) {
     const bad = structuredClone(r); bad.parts[0].config = ['레버리지 20', version];

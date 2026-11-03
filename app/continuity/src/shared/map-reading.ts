@@ -69,7 +69,10 @@ export const MAP7_SCHEMA = 'studio.map.7' as const;
  * Steps are never related to one another in this cycle (order, branches and loops inside a part come later). Parts take eight
  * inputs, eight outputs, 24 fields and eight settings; map.6 takes 48 relations. Stored as map-reading.9, every key present.
  * The divided first map also sets aside a status claim that only restates its part's state row while the records hold a change,
- * defect or withdrawal row of that part (restate), and a store whose reader's own row quotes it may send to that reader. */
+ * defect or withdrawal row of that part (restate), and a store whose reader's own row quotes it may send to that reader.
+ * Pipeline .31 (still map-reading.9; storage only widens): map.6 takes 36 new parts; a field item may run to 60; one list item (or
+ * one used name of a step) that is too long, empty or control-charactered is set aside alone at its own index; a timer's loop
+ * whose unit is a clock time is left out (loop) and a loop unit repeating one of the part's settings verbatim is left null. */
 /** A first map: nothing of the map, no request and no prior is sent (map.7 is never one). */
 export const firstAsk = (ask: Pick<MapAsk, 'parts' | 'requests' | 'priors'>): boolean => ask.parts.length === 0 && (ask.requests ?? []).length === 0 && (ask.priors ?? []).length === 0;
 /** A reply refused for a contradiction or a wrong reference it holds: where (path), which rule and what it names (an alias,
@@ -95,8 +98,11 @@ const PART_FIELD_GUARDS: ReadonlySet<string> = new Set(['state', 'state-at', 'st
 /** map-reading.8: the reply's own optional fields, left null alone when wrong. */
 const REPLY_FIELD_GUARDS: ReadonlySet<string> = new Set(['basis-at', 'basis-version']);
 /** Pipeline .29: the first map's contract (map.6) takes 24 new parts, every part a reply may hold: a design record's units and
- * its stores did not fit twelve. map.7 keeps twelve. */
-export const MAP6_NEW_PARTS = 24;
+ * its stores did not fit twelve. map.7 keeps twelve. Pipeline .31: 36 (the two KORU records need about 33: 24 table rows and nine
+ * stores; at 24 the plan lost three stores, six rows and the lines through them). map.7 keeps 24 parts, twelve of them new. */
+export const MAP6_NEW_PARTS = 36;
+/** Pipeline .31: a store's field item may run to 60 (the LEDGER row's 「event(CYCLE·ARM_CYCLE·…·PULL…)」 is 60 and lost the field list). */
+export const FIELD_ITEM_MAX = 60;
 /** Pipeline .29: the first map's contract (map.6) takes 32 relations: a store is drawn as two lines (producer → store → reader), and
  * the KORU records' 22 arrow rows with their stores did not fit sixteen. map.7 keeps twelve. Pipeline .30: 48 (the .29 run filled 32
  * and left seven connection rows without a line; a faithful KORU map needs about forty). map-reading.9 stores 48. */
@@ -161,6 +167,8 @@ export function factRowNames(texts: Iterable<string>): Set<string> {
   }
   return out;
 }
+/** Pipeline .31: a clock time in a loop unit (a timer's schedule, never its loop). */
+const CLOCK = /\d{1,2}:\d{2}Z?/;
 /** Pipeline .30: the words of each state as a record writes it, for a claim that only says its part's state again. */
 const STATE_SAID: Record<PartState, RegExp> = { running: /돌고\s*있|가동\s*중/, working: /작업\s*중|진행\s*중/, unbuilt: /미구현|설계만/, stopped: /멈|정지/, retired: /폐기|삭제/, unknown: /모름|모른다|확인하지\s*못|알\s*수\s*없|미확인/ };
 /** At most this many earlier matches go as priors, within PRIOR_BYTES (records keep the rest of MAP_BYTES). */
@@ -387,8 +395,11 @@ const exclusionExplanation = (e: MapReplyError): string => {
     : e.rule === 'contract' && e.target === 'via-store' ? '파일을 넘기는 연결이 그 파일의 보관소 부분을 거치지 않아 제외했어요.'
     : e.rule === 'contract' && e.target === 'wrong-part' ? '다른 부분의 표 행을 인용한 주장이어서 이 부분에서 제외했어요.'
     : e.rule === 'contract' && e.target === 'sender' ? '원문 줄이 적은 보내는 쪽과 다르거나, 미구현·폐기된 부분이 설계에 없이 보내는 연결이어서 제외했어요.'
+    // pipeline .31: one item of a part's list, or one used name of a step, is set aside alone (the list or the step stays).
+    : e.rule === 'contract' && /^parts\[\d+\]\.(files|inputs|outputs|fields|config)\[\d+\]$/.test(e.path) ? '부분의 목록 칸에서 길이·빈 값 규칙에 맞지 않는 항목 하나만 빼고 나머지 항목은 남겼어요.'
+    : e.rule === 'contract' && /^parts\[\d+\]\.steps\[\d+\]\.uses\[\d+\]$/.test(e.path) ? '단계가 쓰는 이름 중 길이·빈 값 규칙에 맞지 않는 하나만 빼고 단계는 남겼어요.'
     // map-reading.9: a step, a kept state or a port-map row is set aside alone; a loop item is left null; pipeline .30: a restating claim.
-    : e.rule === 'contract' && e.target === 'step' ? '부분 안의 단계가 규칙에 맞지 않거나 그 원문 행을 찾을 수 없어 그 단계만 제외했어요.'
+    : e.rule === 'contract' && e.target === 'step' ?'부분 안의 단계가 규칙에 맞지 않거나 그 원문 행을 찾을 수 없어 그 단계만 제외했어요.'
     : e.rule === 'contract' && e.target === 'loop' ? '부분의 반복 단위·정지·재개 칸이 규칙에 맞지 않거나 원문 줄을 찾을 수 없어 그 칸만 비웠어요.'
     : e.rule === 'contract' && e.target === 'state-var' ? '부분이 유지하는 상태 항목이 규칙에 맞지 않아 그 항목만 제외했어요.'
     : e.rule === 'contract' && e.target === 'port-map' ? '바깥 연결과 안쪽 단계의 대응이 없는 연결·포트·단계를 가리키거나 원문 줄을 찾을 수 없어 그 대응만 제외했어요.'
@@ -533,8 +544,10 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
     return (v as unknown[]).slice(0, max);
   };
   let partList: Record<string, unknown>[];
-  if (divided) { list(value.parts, 24, 'parts'); partList = value.parts as Record<string, unknown>[]; }
-  else partList = many(value.parts, 24, 'parts') as Record<string, unknown>[];
+  // pipeline .31: a first map (map.6) holds 36 parts; map.7 keeps 24.
+  const partsMax = ask.schemaVersion === MAP6_SCHEMA ? MAP6_NEW_PARTS : 24;
+  if (divided) { list(value.parts, partsMax, 'parts'); partList = value.parts as Record<string, unknown>[]; }
+  else partList = many(value.parts, partsMax, 'parts') as Record<string, unknown>[];
   const refs = new Set<string>(), news = new Map<string, string | null>(), entries: [number, Record<string, unknown>][] = [];
   for (const [pi, p] of partList.entries()) {
     const ok = whole(() => {
@@ -649,12 +662,19 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       // A when of a state left out goes with it; one said without any state is refused on its own.
       stateWhen = said(p, 'state') && !state ? null : alone(() => { const w = phrase(p, 'stateWhen', 40, at, 'state-when'); need(w === null || state !== null, `${at}.stateWhen`, 'state-when'); return w; }, null);
       // A list of the record's own names (map-reading.7 files; map-reading.8 inputs, outputs, fields, config): bounded, trimmed,
-      // each once in the order given; a wrong list is left out alone.
+      // each once in the order given; a wrong list is left out alone. Pipeline .31: an item too long, empty or with a control
+      // character is set aside alone at its own index (parts[i].fields[j], the list's category) and the rest of the list is kept;
+      // the list's own path stays for a list that is not one or runs past its bound (and, config, for a version in it).
       const names = (k: 'files' | 'inputs' | 'outputs' | 'fields' | 'config', max: number, len: number): string[] => alone(() => {
         if (!said(p, k)) return [];
         need(Array.isArray(p[k]) && (p[k] as unknown[]).length <= max, `${at}.${k}`, k);
         const out: string[] = [];
-        for (const f of p[k] as unknown[]) { need(typeof f === 'string' && f.length <= len && !!f.trim() && !CONTROL.test(f), `${at}.${k}`, k); if (!out.includes(f.trim())) out.push(f.trim()); }
+        for (const [j, f] of (p[k] as unknown[]).entries()) {
+          const ok = typeof f === 'string' && f.length <= len && !!f.trim() && !CONTROL.test(f);
+          if (!ok && lenient) { aside.push(new MapReplyError(`${at}.${k}[${j}]`, 'contract', k)); continue; }
+          need(ok, `${at}.${k}[${j}]`, k);
+          const s = (f as string).trim(); if (!out.includes(s)) out.push(s);
+        }
         // pipeline .29: a version (sha, 판본, 명세 <hex>) is a claim's, never a setting; the list is left out as any wrong one is.
         if (k === 'config') need(!out.some(versionLike), `${at}.config`, 'config');
         return out;
@@ -668,7 +688,8 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
         return [t, cite(p.typeAt, `${at}.typeAt`)];
       }, [null, null]);
       // map-reading.9: eight inputs and outputs, 24 fields and eight settings (map-reading.8 stored six, twelve and four).
-      inputs = names('inputs', PART_LIST_MAX.inputs, 60); outputs = names('outputs', PART_LIST_MAX.outputs, 60); fields = names('fields', PART_LIST_MAX.fields, 40); config = names('config', PART_LIST_MAX.config, 80);
+      // Pipeline .31: a field item of 60 (40 before).
+      inputs = names('inputs', PART_LIST_MAX.inputs, 60); outputs = names('outputs', PART_LIST_MAX.outputs, 60); fields = names('fields', PART_LIST_MAX.fields, FIELD_ITEM_MAX); config = names('config', PART_LIST_MAX.config, 80);
       // map-reading.9: a list of items each checked alone (steps, stateVars): a list that is not one or runs past its bound is left
       // out whole; an item that breaks a rule (or repeats a name) is set aside alone at its own index, with the list's category. A
       // step's row that does not resolve is the step's own fault (category step); one too long to keep is set aside as it is.
@@ -702,18 +723,38 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
         return out;
       };
       // A step is one row of the record's table of inner steps: its name, what it does, what it uses, and that row (at).
+      // Pipeline .31: a used name too long, empty or with a control character is set aside alone (parts[i].steps[j].uses[k], category
+      // step) once the step itself is read; the step keeps its other names. A uses that is not a list or runs past four still sets
+      // the step aside.
       steps = items('steps', 'step', (o, path) => {
-        const name = words(o, 'name', 40, path, 'step', true)!, does = words(o, 'does', 120, path, 'step'), uses = wordList(o, 'uses', 4, 60, path, 'step');
+        const name = words(o, 'name', 40, path, 'step', true)!, does = words(o, 'does', 120, path, 'step'), held: MapReplyError[] = [], uses: string[] = [];
+        if (said(o, 'uses')) {
+          need(Array.isArray(o.uses) && o.uses.length <= 4, path, 'step');
+          for (const [k, x] of (o.uses as unknown[]).entries()) {
+            const ok = typeof x === 'string' && x.length <= 60 && !!x.trim() && !CONTROL.test(x);
+            if (!ok && lenient) { held.push(new MapReplyError(`${path}.uses[${k}]`, 'contract', 'step')); continue; }
+            need(ok, path, 'step');
+            const s = (x as string).trim(); if (!uses.includes(s)) uses.push(s);
+          }
+        }
         need(said(o, 'at'), path, 'step');
-        return { name, does, uses, quote: cite(o.at, `${path}.at`) };
+        const quote = cite(o.at, `${path}.at`);
+        aside.push(...held);
+        return { name, does, uses, quote };
       });
       // The loop's unit, stop and resume are each the record's own claim: a wrong one is left null alone; with none said there is no
       // loop (its line is not read); a loop whose line does not resolve is left out whole.
       loop = alone((): MapReplyLoop | null => {
         if (!said(p, 'loop')) return null;
         const o = p.loop as Record<string, unknown>; need(!!o && typeof o === 'object' && !Array.isArray(o), `${at}.loop`, 'loop');
+        // Pipeline .31: a timer's clock time (「매일 00:15Z」) is its schedule, not a loop: that loop is left out whole.
+        need(!(type === 'timer' && typeof o.unit === 'string' && CLOCK.test(o.unit)), `${at}.loop`, 'loop');
         const one = (k: 'unit' | 'stop' | 'resume') => alone(() => phrase(o, k, 60, `${at}.loop`, 'loop'), null);
-        const unit = one('unit'), stop = one('stop'), resume = one('resume');
+        let unit = one('unit');
+        // Pipeline .31: a unit that repeats one of the part's own settings word for word (「j1_cadence 60 s」) is that setting, not
+        // the record saying the part repeats: the unit alone is left null.
+        if (unit !== null) { const u = unit; unit = alone(() => { need(!(Array.isArray(p.config) && p.config.some(c => typeof c === 'string' && c.trim() === u)), `${at}.loop.unit`, 'loop'); return u; }, null); }
+        const stop = one('stop'), resume = one('resume');
         if (unit === null && stop === null && resume === null) return null;
         need(said(o, 'at'), `${at}.loop`, 'loop');
         let quote: MapReplyQuote;
@@ -1010,7 +1051,8 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
 /** The durable diagnostics of a checked reply's set-aside items (map.6–7): fixed categories and source positions only. */
 export const readingExclusions = (reply: MapReply): readonly ReadingExclusion[] => EXCLUSIONS.get(reply) ?? [];
 /** Where a saved exclusion may say it stood (the same grammar storage accepts). */
-const EXCLUSION_PATH = /^(parts|relations|candidates|gaps|matches|material|basisAt|basisVersion|portMap)(\[\d+\])?(\.(claims|basis|statement|steps|stateVars|loop)(\[\d+\])?)?(\.[A-Za-z]+)?$/;
+// Pipeline .31: a list item of a part (parts[i].fields[j]) or a used name of a step (parts[i].steps[j].uses[k]) stands alone too.
+const EXCLUSION_PATH = /^(parts|relations|candidates|gaps|matches|material|basisAt|basisVersion|portMap)(\[\d+\])?(\.(claims|basis|statement|steps|stateVars|loop)(\[\d+\])?)?(\.[A-Za-z]+(\[\d+\])?)?$/;
 /** A divided first map (studio.map.6) arrives as the wire with every set-aside item already left out (it reads whole under plain
  * map.6), and the reasons they were set aside travel beside it. Those reasons are checked here before they join the reply's own
  * diagnostics: fixed rules and categories only, the explanation this module itself gives for them (no other words are taken), and

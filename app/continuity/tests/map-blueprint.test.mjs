@@ -10,7 +10,8 @@ import { validateMapBlueprint, splitBlueprintParts, validateRenderedFragment, fr
   isMapRevision, validateMapRevision, revisionGroups,
   missingMapCorrections, mapCorrectionRevision, MAP_BLUEPRINT_PROMPT, LATER_BLUEPRINT_PROMPT,
   BLUEPRINT_PARTS_MAX, BLUEPRINT_NEW_PARTS_MAX, BLUEPRINT_LATER_NEW_PARTS_MAX, BLUEPRINT_GLOBAL_MAX, BLUEPRINT_FIRST_GLOBAL_MAX, BLUEPRINT_RELATION_ITEMS_MAX,
-  BLUEPRINT_LATER_RELATION_ITEMS_MAX, BLUEPRINT_ANCHORS_MAX, blueprintCoverage, readingDiagnostics, sectionRows } from '../server/map-blueprint.mjs';
+  BLUEPRINT_LATER_RELATION_ITEMS_MAX, BLUEPRINT_ANCHORS_MAX, blueprintCoverage, readingDiagnostics, sectionRows,
+  BLUEPRINT_LATER_PARTS_MAX, blueprintPartsMax, fragmentKeys, factRows, uncitedFacts } from '../server/map-blueprint.mjs';
 
 function fixture(existing = 0) {
   let project = D.createProject(); for (let i = 0; i < existing; i++) project = D.addArea(project, `사용자 부분 ${i + 1}`, '직접 쓴 설명');
@@ -49,8 +50,8 @@ test('blueprint preserves exact user names/parents and original aliases and retu
   }
 });
 
-test('blueprint bounds are exact: 24 total, 24 new for a first map and 12 for a later one, 32 global, 8 anchors, 60-unit name, 480-unit focus and 240-unit text', () => {
-  assert.deepEqual([BLUEPRINT_PARTS_MAX, BLUEPRINT_NEW_PARTS_MAX, BLUEPRINT_LATER_NEW_PARTS_MAX, BLUEPRINT_GLOBAL_MAX, BLUEPRINT_ANCHORS_MAX], [24, 24, 12, 32, 8]);
+test('blueprint bounds are exact: 36 total and 36 new for a first map, 24 total and 12 new for a later one, 32 global, 8 anchors, 60-unit name, 480-unit focus and 240-unit text', () => {
+  assert.deepEqual([BLUEPRINT_PARTS_MAX, BLUEPRINT_NEW_PARTS_MAX, BLUEPRINT_LATER_NEW_PARTS_MAX, BLUEPRINT_GLOBAL_MAX, BLUEPRINT_ANCHORS_MAX], [36, 36, 12, 32, 8]);
   // This fixture is a later map (map.7, existing parts): twelve new parts are its bound.
   const f = fixture(12), blueprint = planned(f, 12);
   blueprint.parts.unshift(...f.ask.parts.map(part => ({ ref: part.id, name: part.name, parent: part.parentId, at: [f.at[0]], focus: '기존 책임' })));
@@ -612,16 +613,16 @@ test('.29: a file line skipping its store, a claim on another part row, a sender
   assert.equal(M.validateMapReply({ ...structuredClone(wire), relations: [global.relations[0], global.relations[4]] }, f.ask).relations.length, 2);
 });
 
-test('.29: a first map plans 24 new parts (a later map 12) in eight fragments; plan and global feedback count rows, unbacked sentences and unknowns', () => {
-  assert.deepEqual([BLUEPRINT_NEW_PARTS_MAX, BLUEPRINT_LATER_NEW_PARTS_MAX, M.MAP6_NEW_PARTS], [24, 12, 24]);
+test('.29: a first map plans (.31) 36 new parts (a later map 12) in twelve fragments; plan and global feedback count rows, unbacked sentences and unknowns', () => {
+  assert.deepEqual([BLUEPRINT_NEW_PARTS_MAX, BLUEPRINT_LATER_NEW_PARTS_MAX, M.MAP6_NEW_PARTS], [36, 12, 36]);
   // A store is two lines: a first map takes (.30) 48 relations (plan relation items, a global list of 64); a later map keeps 32 and 16.
   assert.deepEqual([M.MAP6_RELATIONS, BLUEPRINT_RELATION_ITEMS_MAX, BLUEPRINT_LATER_RELATION_ITEMS_MAX, BLUEPRINT_FIRST_GLOBAL_MAX, BLUEPRINT_GLOBAL_MAX], [48, 48, 16, 64, 32]);
   assert.ok(MAP_BLUEPRINT_PROMPT.includes('global은64개 이하(그중 relation 항목 48개까지)') && MAP_BLUEPRINT_PROMPT.includes('relation 항목은 48개까지만 쓴다'));
   assert.ok(LATER_BLUEPRINT_PROMPT.includes('global은 32개 이하, 그중 relation 항목은 16개까지다'));
   const f = koru(), many = n => ({ global: [], parts: Array.from({ length: n }, (_, i) => ({ ref: `new:u${i + 1}`, name: `단위 ${i + 1}`, parent: null, at: [f.at('| 엔진 | 루프')], focus: '원문의 책임' })) });
-  assert.equal(validateMapBlueprint(many(24), f.ask).parts.length, 24);
-  assert.equal(splitBlueprintParts(many(24)).length, 8);
-  refused(() => validateMapBlueprint(many(25), f.ask));
+  assert.equal(validateMapBlueprint(many(36), f.ask).parts.length, 36);
+  assert.equal(splitBlueprintParts(many(36)).length, 12);
+  refused(() => validateMapBlueprint(many(37), f.ask));
   const items = n => Array.from({ length: n }, (_, i) => ({ kind: 'relation', text: `new:u${i % 24 + 1} → new:u${(i + 1) % 24 + 1}: 행`, at: [f.at('| 카드 러너 | 엔진 |')] }));
   assert.equal(validateMapBlueprint({ ...many(24), global: items(64) }, f.ask).global.length, 64);
   refused(() => validateMapBlueprint({ ...many(24), global: items(65) }, f.ask));
@@ -760,16 +761,147 @@ test('.30 diagnostics: connection rows without a line, an absorbed unit with a c
   const lines = [{ from: 'new:card', to: 'new:review' }, { from: 'new:review', to: 'new:engine' }, { from: 'new:mood', to: 'new:engine' }];
   const own = list => list.filter(x => ['connections', 'name'].includes(x.rule));
   assert.deepEqual(own(readingDiagnostics({ ask: f.ask, summary: '', parts, relations: lines })), []);
-  assert.deepEqual(own(readingDiagnostics({ ask: f.ask, summary: '', parts, relations: lines.slice(0, 2) })), [{ path: 'relations', rule: 'connections', expected: 2, actual: 1 }]);
-  assert.deepEqual(own(readingDiagnostics({ ask: f.ask, summary: '', parts, relations: lines.slice(1) })), [{ path: 'relations', rule: 'connections', expected: 2, actual: 1 }], 'a store line alone does not draw its producer');
+  assert.deepEqual(own(readingDiagnostics({ ask: f.ask, summary: '', parts, relations: lines.slice(0, 2) })), [{ path: 'relations', rule: 'connections', expected: 2, actual: 1, names: ['기분 층 → 엔진'] }]);
+  assert.deepEqual(own(readingDiagnostics({ ask: f.ask, summary: '', parts, relations: lines.slice(1) })), [{ path: 'relations', rule: 'connections', expected: 2, actual: 1, names: ['카드 러너 → 엔진'] }], 'a store line alone does not draw its producer');
   const renamed = structuredClone(parts); renamed[2].name = 'calendar.json';
-  assert.deepEqual(own(readingDiagnostics({ ask: f.ask, summary: '', parts: renamed, relations: lines })), [{ path: 'relations', rule: 'connections', expected: 2, actual: 1 },
+  assert.deepEqual(own(readingDiagnostics({ ask: f.ask, summary: '', parts: renamed, relations: lines })), [{ path: 'relations', rule: 'connections', expected: 2, actual: 1, names: ['기분 층 → 엔진'] },
     { path: 'parts[2].name', rule: 'name', expected: null, actual: null }]);
-  assert.deepEqual(mapStageIssues({ ...koruGlobal(f), relations: lines.slice(0, 2) }, null, { ask: f.ask, parts }).filter(x => x.rule === 'connections'), [{ path: 'relations', rule: 'connections', expected: 2, actual: 1 }]);
+  assert.deepEqual(mapStageIssues({ ...koruGlobal(f), relations: lines.slice(0, 2) }, null, { ask: f.ask, parts }).filter(x => x.rule === 'connections'), [{ path: 'relations', rule: 'connections', expected: 2, actual: 1, names: ['기분 층 → 엔진'] }]);
   // The plan: a new part named after no part or artifact row (diagnostic only; the plan stays valid).
   const plan = koruPlan(f); plan.parts[2].name = 'calendar.json';
   validateMapBlueprint(plan, f.ask);
   assert.deepEqual(blueprintStageIssues(plan, f.ask), [{ path: 'parts', rule: 'coverage', expected: 3, actual: 2 }, { path: 'parts[2].name', rule: 'name', expected: null, actual: null }]);
   const plain = fixture();
   assert.deepEqual(readingDiagnostics({ ask: plain.ask, summary: '', parts: [{ ref: 'new:x', name: '아무 이름' }], relations: [] }), [], 'a record without tables says nothing');
+});
+
+// ---- first-map-divided.31 (from the .30 run and its blind judging): 36 parts in twelve fragments, the relations the global stage
+// wrote all accounted for, the plan's undrawn relation items and the uncited fact rows named, one list item set aside alone, and
+// the loop rules. Author-written wires on the small KORU-shaped record; no model quality is claimed. ----
+function koruText(text) {
+  const project = D.pasteRecord(D.createProject(), text, null).project;
+  const input = M.buildMapAsk(project, studioView(project), [], undefined, M.MAP6_SCHEMA), spans = input.ask.records[0].spans;
+  return { project, input, ask: input.ask, at: head => spans.find(span => span.t.startsWith(head)).s };
+}
+
+test('.31: a first map plans 36 parts in twelve fragments (keys s901-s999 past the eighth), a later map 24', () => {
+  const f = koru();
+  assert.deepEqual([BLUEPRINT_PARTS_MAX, BLUEPRINT_LATER_PARTS_MAX, blueprintPartsMax(f.ask), blueprintPartsMax(fixture(1).ask)], [36, 24, 36, 24]);
+  assert.deepEqual(Array.from({ length: 12 }, (_, i) => [fragmentKeys(i).keyStart, fragmentKeys(i).keyEnd]),
+    [[1, 99], [101, 199], [201, 299], [301, 399], [401, 499], [501, 599], [601, 699], [701, 799], [901, 924], [926, 949], [951, 974], [976, 999]]);
+  const big = { global: [], parts: Array.from({ length: 36 }, (_, i) => ({ ref: `new:u${i + 1}`, name: `단위 ${i + 1}`, parent: null, at: [f.at('| 엔진 | 루프')], focus: '원문의 책임' })) };
+  const groups = splitBlueprintParts(validateMapBlueprint(big, f.ask));
+  assert.equal(groups.length, 12);
+  const fragment = (index, key) => ({ ...empty(), parts: groups[index].parts.map((part, i) => ({ ref: part.ref, name: part.name, parent: null, role: '원문의 책임', roleAbout: null,
+    roleReplaces: null, basis: part.at, claims: [{ key: `s${key + i}`, kind: 'describes', text: '원문이 정의한 동작을 설명한다.', at: part.at[0], about: null, replaces: null }] })) });
+  validateRenderedFragment(fragment(7, 797), groups[7], f.ask, big);
+  validateRenderedFragment(fragment(8, 901), groups[8], f.ask, big);
+  validateRenderedFragment(fragment(11, 997), groups[11], f.ask, big);
+  refused(() => validateRenderedFragment(fragment(8, 801), groups[8], f.ask, big)); // the global stage's candidate keys
+  refused(() => validateRenderedFragment(fragment(8, 923), groups[8], f.ask, big)); // s925 is past the ninth fragment's range
+  refused(() => validateRenderedFragment(fragment(11, 998), groups[11], f.ask, big)); // s1000 is no key
+  const over = { ...big, parts: [...big.parts, { ...big.parts[0], ref: 'new:u37' }] };
+  refused(() => validateMapBlueprint(over, f.ask));
+  assert.deepEqual(blueprintStageIssues(over, f.ask).filter(x => x.rule === 'count'), [{ path: 'parts', rule: 'count', expected: 36, actual: 37 }]);
+  // A later map keeps 24 parts.
+  const later = fixture(13), wide = planned(later, 12);
+  wide.parts.unshift(...later.ask.parts.map(part => ({ ref: part.id, name: part.name, parent: part.parentId, at: [later.at[0]], focus: '기존 책임' })));
+  refused(() => validateMapBlueprint(wide, later.ask));
+  assert.equal(validateMapBlueprint({ ...wide, parts: wide.parts.slice(1) }, later.ask).parts.length, 24);
+  assert.deepEqual(blueprintStageIssues(wide, later.ask).filter(x => x.path === 'parts' && x.rule === 'count'), [{ path: 'parts', rule: 'count', expected: 24, actual: 25 }]);
+});
+
+test('.31: every relation the global stage wrote reaches the wire or leaves its exclusion; the plan relation items no line draws are named', () => {
+  const f = koru(), plan = koruPlan(f), fragments = koruFragments(f), global = koruGlobal(f);
+  const { wire, exclusions } = combineRenderedReading(fragments, global, f.ask, plan);
+  const out = new Set(exclusions.flatMap(x => { const m = /^relations\[(\d+)\]/.exec(x.path); return m ? [Number(m[1])] : []; }));
+  assert.ok(exclusions.filter(x => x.path.startsWith('relations')).every(x => x.category), 'each with its category');
+  assert.deepEqual(wire.relations, global.relations.filter((_, i) => !out.has(i)), 'nothing else is dropped');
+  // The .30 run: the plan listed 39 relation items and the global stage wrote 34; combine set none aside. The model left out five,
+  // each carrying a file whose store part the 24-part plan had no room for. The feedback now names such items by their refs.
+  const item = text => ({ kind: 'relation', text, at: [f.at('| 카드 러너 | 엔진 |')] });
+  const withItems = { ...plan, global: [item('new:card → new:review: review.jsonl 행'), item('from new:review → to new:engine: review.jsonl 행'),
+    item('new:card → new:engine: review.jsonl watch·allowed_side'), item('new:card → new:engine: cards-{CX,CL,DS}.jsonl'), item('new:mood → new:engine: 공포 z'),
+    item('new:engine → new:card: 지시'), item('new:card → new:gone: 행')] };
+  validateMapBlueprint(withItems, f.ask);
+  const parts = fragments.flatMap(x => x.parts), lines = [global.relations[1], global.relations[2]];
+  const named = context => mapStageIssues({ ...global, relations: lines }, null, context).filter(x => x.rule === 'plan-relations');
+  // review.jsonl reaches the engine through its store; cards-*.jsonl has no store between them; a part not rendered is passed over.
+  assert.deepEqual(named({ ask: f.ask, parts, blueprint: withItems }), [{ path: 'relations', rule: 'plan-relations', expected: 6, actual: 3,
+    names: ['new:card → new:engine', 'new:mood → new:engine', 'new:engine → new:card'] }]);
+  assert.deepEqual(named({ ask: f.ask, parts }), [], 'without the blueprint nothing is said');
+  assert.deepEqual(named({ ask: f.ask, parts, blueprint: { ...withItems, global: withItems.global.slice(0, 3) } }), []);
+});
+
+test('.31: the change, defect and withdrawal rows no claim quotes are named by their part (global: all; a render fragment: its own)', () => {
+  const f = koruText([KORU, '5. 최근 소유자 요청과 실제 변화', '| 날짜 | 원한 것 | 바뀐 부분 이름 | 실제로 바뀐 것 | 확인 방법 |', '|---|---|---|---|---|',
+    '| 11-03 | 「켰어」 | 엔진 | 역순 복원, 재ARM 07:25Z | [보고] |', '8. 오류·미해결·할 일', '| 부분 이름 | 무엇이 | 언제부터·근거 |', '|---|---|---|',
+    '| 카드 러너 | DS 팔 형식 위반 INVALID | 11-02 [보고] |'].join('\n'));
+  assert.deepEqual(factRows(f.ask).map(row => row.name), ['엔진', '카드 러너', '엔진', '카드 러너'], 'the change table names its part in 「바뀐 부분 이름」');
+  const fragments = koruFragments(f), parts = structuredClone(fragments.flatMap(x => x.parts));
+  assert.deepEqual(uncitedFacts(f.ask, parts), { rows: 4, uncited: ['엔진', '카드 러너'] });
+  assert.deepEqual(readingDiagnostics({ ask: f.ask, summary: '', parts }).filter(x => x.rule === 'uncited'), [{ path: 'parts', rule: 'uncited', expected: 4, actual: 2, names: ['엔진', '카드 러너'] }]);
+  parts[3].claims.push({ key: 's103', kind: 'reported', text: '「켰어」에 역순 복원했다.', at: f.at('| 11-03'), about: null, replaces: null });
+  assert.deepEqual(uncitedFacts(f.ask, parts).uncited, ['카드 러너'], 'a claim on the row cites it');
+  // The global correction's feedback carries it with the names; a render correction's names its own parts' rows only.
+  assert.deepEqual(mapStageIssues(koruGlobal(f), null, { ask: f.ask, parts }).filter(x => x.rule === 'uncited'), [{ path: 'parts', rule: 'uncited', expected: 4, actual: 3, names: ['카드 러너'] }]);
+  assert.deepEqual(mapStageIssues(fragments[1], null, { ask: f.ask, fragment: true }).filter(x => x.rule === 'uncited'), [{ path: 'parts', rule: 'uncited', expected: 2, actual: 1, names: ['엔진'] }]);
+  assert.deepEqual(mapStageIssues(fragments[0], null, { ask: f.ask, fragment: true }).filter(x => x.rule === 'uncited'), [{ path: 'parts', rule: 'uncited', expected: 2, actual: 1, names: ['카드 러너'] }]);
+  assert.deepEqual(uncitedFacts(koru().ask, []), { rows: 2, uncited: ['엔진', '카드 러너'] });
+  assert.deepEqual(readingDiagnostics({ ask: fixture().ask, summary: '', parts: [] }), [], 'a record without tables says nothing');
+});
+
+test('.31: one list item or one used name of a step that is too long or blank is set aside alone; a field item takes 60', () => {
+  const f = koru(), plan = koruPlan(f), groups = splitBlueprintParts(plan), fragments = koruFragments(f), global = { ...koruGlobal(f) };
+  const event = 'event(CYCLE·ARM_CYCLE·CALL·INVALID·REVIEW_ROW·TRIGGER·PULL…)';
+  assert.ok(event.length > 40 && event.length <= 60, String(event.length));
+  fragments[0].parts[0].claims.splice(1, 1); fragments[1].parts[0].config = ['레버리지 20'];
+  fragments[0].parts[1].fields = ['watch', event, '가'.repeat(61), ' '];
+  fragments[1].parts[0].steps = [{ name: 'review 읽기', does: null, uses: ['row_read', '가'.repeat(61)], at: f.at('| 엔진 | 루프') }];
+  global.relations = [global.relations[1], global.relations[2]];
+  const { wire, exclusions } = combineRenderedReading(fragments, global, f.ask, plan);
+  assert.deepEqual(exclusions.map(x => [x.path, x.rule, x.category]), [['parts[1].fields[2]', 'contract', 'fields'], ['parts[1].fields[3]', 'contract', 'fields'],
+    ['parts[3].steps[0].uses[1]', 'contract', 'step']]);
+  assert.match(exclusions[0].explanation, /항목 하나만/); assert.match(exclusions[2].explanation, /단계는 남겼어요/);
+  assert.deepEqual([wire.parts[1].fields, wire.parts[3].steps[0].uses], [['watch', event], ['row_read']]);
+  const plain = M.validateMapReply(wire, f.ask);
+  assert.equal(M.setAside(plain).length, 0);
+  assert.deepEqual([plain.parts[1].fields, plain.parts[3].steps[0].uses], [['watch', event], ['row_read']]);
+  M.attachExclusions(plain, exclusions, f.ask);
+  const applied = M.applyReading(f.project, f.input, plain, meta30('R_koru31'));
+  assert.deepEqual(applied.reading.exclusions.map(x => x.path), exclusions.map(x => x.path));
+  assert.deepEqual(validateProject(applied.project), applied.project, 'storage takes the item paths and a 60-character field');
+  // The first pass sets them aside (no refusal); the feedback names each item at its own index.
+  assert.deepEqual(validateRenderedFragment(fragments[0], groups[0], f.ask, plan, true), fragments[0]);
+  assert.deepEqual(fragmentSetAside(fragments[0], groups[0], f.ask, plan).map(x => x.path), ['parts[1].fields[2]', 'parts[1].fields[3]']);
+  assert.deepEqual(mapStageIssues(fragments[0]).map(x => [x.path, x.rule, x.expected, x.actual]), [['parts[1].fields[2]', 'length', 60, 61], ['parts[1].fields[3]', 'contract', null, null]]);
+  assert.deepEqual(mapStageIssues(fragments[1]).map(x => [x.path, x.category]), [['parts[0].steps[0].uses[1]', 'step']]);
+  // A list that is not one or runs past its bound is still left out whole; a version still leaves config out whole.
+  const whole = structuredClone(fragments); whole[0].parts[1].fields = Array(25).fill('f'); whole[1].parts[0].config = ['레버리지 20', '618df374'];
+  assert.deepEqual(combineRenderedReading(whole, global, f.ask, plan).exclusions.map(x => x.path).filter(p => /fields|config/.test(p)), ['parts[1].fields', 'parts[3].config']);
+  // Plain map.6 (the browser and the single call) refuses such an item as before.
+  const blank = structuredClone(wire); blank.parts[1].fields = ['watch', ' '];
+  assert.throws(() => M.validateMapReply(blank, f.ask));
+});
+
+test('.31: a timer loop at a clock time is left out, a loop unit repeating a setting is left null; another clock-like unit stays', () => {
+  const f = koru(), plan = koruPlan(f), groups = splitBlueprintParts(plan), fragments = koruFragments(f), global = { ...koruGlobal(f) };
+  fragments[0].parts[0].claims.splice(1, 1); global.relations = [global.relations[1], global.relations[2]];
+  fragments[0].parts[0].loop = { unit: '15:00Z 뒤 분마다', stop: null, resume: null, at: f.at('| 카드 러너 | AI') };
+  Object.assign(fragments[0].parts[2], { type: 'timer', typeAt: f.at('| 기분 층 | 계산'), loop: { unit: '매일 00:15Z', stop: null, resume: null, at: f.at('| 기분 층 | 계산') } });
+  Object.assign(fragments[1].parts[0], { config: ['레버리지 20', 'j1_cadence 60 s'], loop: { unit: ' j1_cadence 60 s ', stop: 'kill 파일', resume: null, at: f.at('| 엔진 | 루프') } });
+  const { wire, exclusions } = combineRenderedReading(fragments, global, f.ask, plan);
+  assert.deepEqual(exclusions.map(x => [x.path, x.category]), [['parts[2].loop', 'loop'], ['parts[3].loop.unit', 'loop']]);
+  assert.deepEqual([wire.parts[0].loop.unit, wire.parts[2].loop, wire.parts[3].loop.unit, wire.parts[3].loop.stop], ['15:00Z 뒤 분마다', null, null, 'kill 파일']);
+  const plain = M.validateMapReply(wire, f.ask);
+  assert.deepEqual([plain.parts[0].loop.unit, plain.parts[2].loop, plain.parts[3].loop.unit, plain.parts[3].loop.stop], ['15:00Z 뒤 분마다', null, null, 'kill 파일']);
+  assert.deepEqual(fragmentSetAside(fragments[0], groups[0], f.ask, plan).map(x => x.path), ['parts[2].loop']);
+  assert.deepEqual(mapStageIssues(fragments[0]).filter(x => x.category === 'loop').map(x => x.path), ['parts[2].loop']);
+  assert.deepEqual(mapStageIssues(fragments[1]).filter(x => x.category === 'loop').map(x => x.path), ['parts[0].loop.unit']);
+  // A loop whose only item was the setting is no loop at all.
+  const only = structuredClone(fragments); only[1].parts[0].loop.stop = null;
+  assert.equal(M.validateMapReply(combineRenderedReading(only, global, f.ask, plan).wire, f.ask).parts[3].loop, null);
+  // A timer whose unit holds no clock time keeps its loop.
+  const kept = structuredClone(fragments); kept[0].parts[2].loop.unit = '하루 한 번';
+  assert.equal(combineRenderedReading(kept, global, f.ask, plan).wire.parts[2].loop.unit, '하루 한 번');
 });
