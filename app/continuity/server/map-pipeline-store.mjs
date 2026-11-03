@@ -92,6 +92,14 @@ function usageTokens(usage) {
 const validSetAside = list => Array.isArray(list) && list.length >= 1 && list.length <= 64 && list.every(x => plain(x) && Object.keys(x).length === 3
   && typeof x.path === 'string' && x.path.length <= 160 && /^[A-Za-z]+(\[\d{1,4}\])?(\.[A-Za-z]+(\[\d{1,4}\])?)*$/.test(x.path)
   && typeof x.rule === 'string' && /^[a-z][a-z-]{0,39}$/.test(x.rule) && (x.category === null || typeof x.category === 'string' && /^[a-z][a-z-]{0,39}$/.test(x.category)));
+/** .32: the diagnostics a first map's completed global stage computed on its final wire: at most 16, each exactly { path, rule,
+ * expected, actual, names } (a fixed path and rule, counts or null, at most 24 names of 160 without control characters). */
+const CONTROL = /[\u0000-\u001f\u007f]/;
+const count = n => n === null || (Number.isSafeInteger(n) && n >= 0 && n <= 9999);
+const validDiagnostics = list => Array.isArray(list) && list.length >= 1 && list.length <= 16 && list.every(x => plain(x) && Object.keys(x).length === 5
+  && typeof x.path === 'string' && x.path.length <= 160 && /^[A-Za-z]+(\[\d{1,4}\])?(\.[A-Za-z]+(\[\d{1,4}\])?)*$/.test(x.path)
+  && typeof x.rule === 'string' && /^[a-z][a-z-]{0,39}$/.test(x.rule) && count(x.expected) && count(x.actual)
+  && Array.isArray(x.names) && x.names.length <= 24 && x.names.every(n => typeof n === 'string' && n.length >= 1 && n.length <= 160 && !CONTROL.test(n)));
 // A background OpenAI response's id, kept on its attempt as soon as the POST returned (never a key or record text).
 const RESPONSE_ID = /^[A-Za-z0-9_-]{1,200}$/;
 const validResponse = a => a.provider === 'openai' && typeof a.responseId === 'string' && RESPONSE_ID.test(a.responseId)
@@ -107,6 +115,7 @@ function validate(body) {
       if (stage.state === 'complete' && !own(stage, 'value')) throw Error('damaged');
       if (own(stage, 'diagnostic') && !validDiagnostic(stage.diagnostic)) throw Error('damaged');
       if (own(stage, 'setAside') && (stage.state !== 'complete' || !validSetAside(stage.setAside))) throw Error('damaged');
+      if (own(stage, 'diagnostics') && (stage.state !== 'complete' || !validDiagnostics(stage.diagnostics))) throw Error('damaged');
       for (const a of stage.attempts) {
         if (!plain(a) || !/^\d{4}-\d{2}$/.test(a.month) || !natural(a.inputBytes) || !natural(a.maxOutputTokens) || !natural(a.reserved) || !natural(a.charged) || a.charged > a.reserved || cost(a.provider, a.model, a.inputBytes, a.maxOutputTokens) !== a.reserved) throw Error('damaged');
         if ((own(a, 'responseId') && !validResponse(a)) || (own(a, 'resumedAt') && (!own(a, 'responseId') || typeof a.resumedAt !== 'string' || !Number.isFinite(Date.parse(a.resumedAt)))) || (own(a, 'lost') && (a.lost !== true || a.usage !== null || a.charged !== a.reserved))) throw Error('damaged');
@@ -199,6 +208,7 @@ export async function openMapPipelineStore({ dir, monthlyUsd = 20, runUsd = 1, n
         // JSON round trip prevents an in-memory success that cannot survive a restart.
         s.value = JSON.parse(JSON.stringify(options.value)); s.state = 'complete';
         if (own(options, 'setAside')) { if (!validSetAside(options.setAside)) throw new ApiError('MAP_PIPELINE_INVALID', 400); s.setAside = JSON.parse(JSON.stringify(options.setAside)); }
+        if (own(options, 'diagnostics')) { if (!validDiagnostics(options.diagnostics)) throw new ApiError('MAP_PIPELINE_INVALID', 400); s.diagnostics = JSON.parse(JSON.stringify(options.diagnostics)); }
       } else {
         s.state = options.uncertain === false ? 'failed' : 'uncertain';
         // Nothing came back from a dispatched call: the reservation stays charged and the attempt says so (eval, cycle log).

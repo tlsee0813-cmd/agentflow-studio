@@ -471,7 +471,8 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       // map-reading.7: the record's own state word for the part, with its passage and when (none: all null), and its files.
       if(seven){ensure(p.state===null||PART_STATES.includes(p.state as never));if(p.state===null)ensure(p.stateWhen===null&&p.stateQuote===null);else{quote(p.stateQuote);if(p.stateWhen!==null)text(p.stateWhen,40);}
         list(p.files,6);for(const f of p.files)text(f,120);ensure(new Set(p.files).size===(p.files as unknown[]).length);}
-      list(p.claims,8);(p.claims as unknown[]).forEach((c,i)=>{
+      // Pipeline .32: a map-reading.9 entry holds sixteen claims per part (the first map's contract, MAP6_CLAIMS); earlier ones eight.
+      list(p.claims,nine?16:8);(p.claims as unknown[]).forEach((c,i)=>{
         obj(c,['kind','text','record','quote',...(four?['from','to']:[]),'about','replaces',...(seven?['topic','evidence','when','where','before']:[])]);
         // map-reading.7: what the claim is about, its tag, when and where as written; the decision before for a withdrawal only.
         if(seven){ensure(c.topic===null||CLAIM_TOPICS.includes(c.topic as never));ensure(c.evidence===null||EVIDENCE_GRADES.includes(c.evidence as never));if(c.when!==null)text(c.when,40);if(c.where!==null)text(c.where,120);if(c.before!==null){text(c.before,120);ensure(c.topic==='withdrawn');}}ensure(CLAIM_KINDS.includes(c.kind as never));text(c.text,240);quote({record:c.record,quote:c.quote,...(four?{from:c.from,to:c.to}:{})});

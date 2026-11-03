@@ -11,7 +11,7 @@ import { validateMapBlueprint, splitBlueprintParts, validateRenderedFragment, fr
   missingMapCorrections, mapCorrectionRevision, MAP_BLUEPRINT_PROMPT, LATER_BLUEPRINT_PROMPT,
   BLUEPRINT_PARTS_MAX, BLUEPRINT_NEW_PARTS_MAX, BLUEPRINT_LATER_NEW_PARTS_MAX, BLUEPRINT_GLOBAL_MAX, BLUEPRINT_FIRST_GLOBAL_MAX, BLUEPRINT_RELATION_ITEMS_MAX,
   BLUEPRINT_LATER_RELATION_ITEMS_MAX, BLUEPRINT_ANCHORS_MAX, blueprintCoverage, readingDiagnostics, sectionRows,
-  BLUEPRINT_LATER_PARTS_MAX, blueprintPartsMax, fragmentKeys, factRows, uncitedFacts } from '../server/map-blueprint.mjs';
+  BLUEPRINT_LATER_PARTS_MAX, blueprintPartsMax, fragmentKeys, factRows, uncitedFacts, planClaims, payloadParts, finalDiagnostics, FINAL_DIAGNOSTICS, FRAGMENT_KEYS } from '../server/map-blueprint.mjs';
 
 function fixture(existing = 0) {
   let project = D.createProject(); for (let i = 0; i < existing; i++) project = D.addArea(project, `사용자 부분 ${i + 1}`, '직접 쓴 설명');
@@ -117,11 +117,12 @@ test('fragments cannot take another group, rename/reparent, omit/duplicate a ref
     x => { x.parts[0].claims[0].key = 's001'; }, x => { delete x.matches; }, x => { x.extra = true; }]) {
     const bad = structuredClone(fragments[0]); mutate(bad); refused(() => validateRenderedFragment(bad, group, f.ask, blueprint));
   }
-  for (const [index, key] of [[0, 's99'], [1, 's199']]) {
+  // .32: 48 keys a fragment (s1-s48, s101-s148 …).
+  for (const [index, key] of [[0, 's48'], [1, 's148']]) {
     const good = structuredClone(fragments[index]); good.parts[0].claims[0].key = key;
     validateRenderedFragment(good, splitBlueprintParts(blueprint)[index], f.ask, blueprint);
   }
-  for (const key of ['s100', 's200', 's801']) {
+  for (const key of ['s100', 's149', 's199', 's200', 's801']) {
     const bad = structuredClone(fragments[1]); bad.parts[0].claims[0].key = key;
     refused(() => validateRenderedFragment(bad, splitBlueprintParts(blueprint)[1], f.ask, blueprint));
   }
@@ -201,19 +202,23 @@ test('correction feedback identifies all three five-basis parts without copying 
 });
 
 test('feedback limits mirror the validator, use UTF-16 length, and are capped at twelve fixed diagnostics', () => {
-  const value = { ...empty(), summary: '😀'.repeat(100), parts: [{ basis: Array(4).fill(null), claims: Array(6).fill(null), name: '가'.repeat(60), role: '가'.repeat(300) }],
+  const value = { ...empty(), summary: '😀'.repeat(100), parts: [{ basis: Array(4).fill(null), claims: Array(16).fill(null), name: '가'.repeat(60), role: '가'.repeat(300) }],
     relations: Array(48).fill(null), candidates: Array(6).fill(null), gaps: Array(2).fill(null), matches: Array(24).fill(null), material: Array(6).fill(null) };
   assert.deepEqual(mapStageIssues(value), []);
   value.summary += '가'; value.parts[0].basis.push(null); value.parts[0].claims.push(null); value.parts[0].name += '가'; value.parts[0].role += '가';
   for (const field of ['relations', 'candidates', 'gaps', 'matches', 'material']) value[field].push(null);
   assert.deepEqual(mapStageIssues(value), [
     { path: 'summary', rule: 'length', expected: 200, actual: 201 },
-    { path: 'parts[0].basis', rule: 'count', expected: 4, actual: 5 }, { path: 'parts[0].claims', rule: 'count', expected: 6, actual: 7 },
+    { path: 'parts[0].basis', rule: 'count', expected: 4, actual: 5 }, { path: 'parts[0].claims', rule: 'count', expected: 16, actual: 17 },
     { path: 'parts[0].name', rule: 'length', expected: 60, actual: 61 }, { path: 'parts[0].role', rule: 'length', expected: 300, actual: 301 },
     { path: 'relations', rule: 'count', expected: 48, actual: 49 }, { path: 'candidates', rule: 'count', expected: 6, actual: 7 },
     { path: 'gaps', rule: 'count', expected: 2, actual: 3 }, { path: 'matches', rule: 'count', expected: 24, actual: 25 },
     { path: 'material', rule: 'count', expected: 6, actual: 7 },
   ]);
+  // .32: a later map's feedback keeps six claims per part (its render correction says later; its global one the map.7 ask).
+  const seven = { ...empty(), parts: [{ claims: Array(7).fill(null) }] };
+  assert.deepEqual(mapStageIssues(seven, null, { later: true }), [{ path: 'parts[0].claims', rule: 'count', expected: 6, actual: 7 }]);
+  assert.deepEqual(mapStageIssues(seven), []);
   const many = mapStageIssues({ ...empty(), parts: Array.from({ length: 24 }, () => ({ basis: Array(5).fill(null) })) });
   assert.equal(many.length, 12); assert.equal(many.at(-1).path, 'parts[11].basis');
 });
@@ -418,8 +423,8 @@ test('first-map fragments set aside isolated bad items but still refuse parts le
 
 test('the combined first-map wire only omits set-aside items: no quote clipped, key renamed, item reordered or field rewritten', () => {
   const f = fixture(), blueprint = planned(f, 4), fragments = rendered(f, blueprint);
-  fragments[0].parts[0].claims.unshift({ ...fragments[0].parts[0].claims[0], key: 's50', at: 'N01.99' });
-  fragments[0].parts[0].claims.push({ ...fragments[0].parts[0].claims[1], key: 's51', text: '두 번째 유지 주장' });
+  fragments[0].parts[0].claims.unshift({ ...fragments[0].parts[0].claims[0], key: 's40', at: 'N01.99' });
+  fragments[0].parts[0].claims.push({ ...fragments[0].parts[0].claims[1], key: 's41', text: '두 번째 유지 주장' });
   fragments[1].parts[0].basis = [f.at[3], f.at[4], f.at[5], f.at[6], f.at[7], f.at[8]];
   const statement = key => ({ key, kind: 'idea', text: '다른 출력을 구상한다.', at: f.at[4], about: null });
   const global = { ...empty(), summary: '원문의 설명이다.', gaps: ['하나', '둘', '셋'],
@@ -438,7 +443,7 @@ test('the combined first-map wire only omits set-aside items: no quote clipped, 
     ['candidates[0].target', 'reference', null], ['gaps', 'contract', 'count'], ['material[0]', 'material-evidence', null]]);
   const plain = M.validateMapReply(wire, f.ask);
   assert.equal(M.setAside(plain).length, 0);
-  assert.deepEqual(plain.parts[0].claims.map(c => c.key), ['s1', 's51']);
+  assert.deepEqual(plain.parts[0].claims.map(c => c.key), ['s1', 's41']);
   assert.throws(() => M.validateMapReply(raw, f.ask), 'the single-call map.6 path still refuses the raw wire whole');
 });
 
@@ -645,7 +650,7 @@ test('.29: a first map plans (.31) 36 new parts (a later map 12) in twelve fragm
   assert.deepEqual(blueprintStageIssues(many(13), f.ask).filter(x => x.rule === 'new-count'), []);
   // Coverage of the records' part tables: a diagnostic only (the plan stays valid).
   assert.deepEqual(sectionRows(f.ask, /^부분/).map(cells => cells[0]), ['카드 러너', '엔진', '기분 층']);
-  assert.deepEqual(blueprintCoverage(koruPlan(f), f.ask), { rows: 3, covered: 3, absorbed: [] });
+  assert.deepEqual(blueprintCoverage(koruPlan(f), f.ask), { rows: 3, covered: 3, absorbed: [], missing: [] });
   assert.deepEqual(blueprintStageIssues(koruPlan(f), f.ask), []);
   const missing = koruPlan(f); missing.parts.splice(2, 1);
   validateMapBlueprint(missing, f.ask);
@@ -784,22 +789,26 @@ function koruText(text) {
   return { project, input, ask: input.ask, at: head => spans.find(span => span.t.startsWith(head)).s };
 }
 
-test('.31: a first map plans 36 parts in twelve fragments (keys s901-s999 past the eighth), a later map 24', () => {
+test('.31: a first map plans 36 parts in twelve fragments (.32: 48 keys each, the last four in the upper halves), a later map 24', () => {
   const f = koru();
   assert.deepEqual([BLUEPRINT_PARTS_MAX, BLUEPRINT_LATER_PARTS_MAX, blueprintPartsMax(f.ask), blueprintPartsMax(fixture(1).ask)], [36, 24, 36, 24]);
   assert.deepEqual(Array.from({ length: 12 }, (_, i) => [fragmentKeys(i).keyStart, fragmentKeys(i).keyEnd]),
-    [[1, 99], [101, 199], [201, 299], [301, 399], [401, 499], [501, 599], [601, 699], [701, 799], [901, 924], [926, 949], [951, 974], [976, 999]]);
+    [[1, 48], [101, 148], [201, 248], [301, 348], [401, 448], [501, 548], [601, 648], [701, 748], [51, 98], [151, 198], [251, 298], [351, 398]]);
+  // .32: three parts of sixteen claims fit every range, no two ranges meet and none reaches the global stage's s801-s899.
+  const keys = Array.from({ length: 12 }, (_, i) => fragmentKeys(i)).flatMap(({ keyStart, keyEnd }) => Array.from({ length: keyEnd - keyStart + 1 }, (_, k) => keyStart + k));
+  assert.equal(keys.length, 12 * 3 * M.MAP6_CLAIMS); assert.equal(new Set(keys).size, keys.length); assert.ok(keys.every(k => k >= 1 && k < 801));
   const big = { global: [], parts: Array.from({ length: 36 }, (_, i) => ({ ref: `new:u${i + 1}`, name: `단위 ${i + 1}`, parent: null, at: [f.at('| 엔진 | 루프')], focus: '원문의 책임' })) };
   const groups = splitBlueprintParts(validateMapBlueprint(big, f.ask));
   assert.equal(groups.length, 12);
   const fragment = (index, key) => ({ ...empty(), parts: groups[index].parts.map((part, i) => ({ ref: part.ref, name: part.name, parent: null, role: '원문의 책임', roleAbout: null,
     roleReplaces: null, basis: part.at, claims: [{ key: `s${key + i}`, kind: 'describes', text: '원문이 정의한 동작을 설명한다.', at: part.at[0], about: null, replaces: null }] })) });
-  validateRenderedFragment(fragment(7, 797), groups[7], f.ask, big);
-  validateRenderedFragment(fragment(8, 901), groups[8], f.ask, big);
-  validateRenderedFragment(fragment(11, 997), groups[11], f.ask, big);
+  validateRenderedFragment(fragment(7, 746), groups[7], f.ask, big);
+  validateRenderedFragment(fragment(8, 51), groups[8], f.ask, big);
+  validateRenderedFragment(fragment(11, 396), groups[11], f.ask, big);
   refused(() => validateRenderedFragment(fragment(8, 801), groups[8], f.ask, big)); // the global stage's candidate keys
-  refused(() => validateRenderedFragment(fragment(8, 923), groups[8], f.ask, big)); // s925 is past the ninth fragment's range
-  refused(() => validateRenderedFragment(fragment(11, 998), groups[11], f.ask, big)); // s1000 is no key
+  refused(() => validateRenderedFragment(fragment(8, 97), groups[8], f.ask, big)); // s99 is past the ninth fragment's range
+  refused(() => validateRenderedFragment(fragment(7, 747), groups[7], f.ask, big)); // s749 is past the eighth fragment's range
+  refused(() => validateRenderedFragment(fragment(11, 901), groups[11], f.ask, big)); // the .31 range is gone
   const over = { ...big, parts: [...big.parts, { ...big.parts[0], ref: 'new:u37' }] };
   refused(() => validateMapBlueprint(over, f.ask));
   assert.deepEqual(blueprintStageIssues(over, f.ask).filter(x => x.rule === 'count'), [{ path: 'parts', rule: 'count', expected: 36, actual: 37 }]);
@@ -904,4 +913,112 @@ test('.31: a timer loop at a clock time is left out, a loop unit repeating a set
   // A timer whose unit holds no clock time keeps its loop.
   const kept = structuredClone(fragments); kept[0].parts[2].loop.unit = '하루 한 번';
   assert.equal(combineRenderedReading(kept, global, f.ask, plan).wire.parts[2].loop.unit, '하루 한 번');
+});
+
+// ---- first-map-divided.32 (from the blind judging of the .31 KORU maps): sixteen claims a part, the plan items assigned to a part
+// named when no claim quotes their rows (plan-claims), the hedge rows uncited reads, a payload part left out whole, a payload file
+// the artifact table does not list kept on its one line, and the final wire's diagnostics in fixed shapes. Author-written wires on
+// the small KORU-shaped record; no model quality is claimed. ----
+const KORU32 = [KORU, '7. 지켜야 할 것과 하지 않기로 한 것', '| 부분 이름 | 규칙 한 줄 | 누가 정했나·언제 |', '|---|---|---|',
+  '| 엔진 | 돈 안전 = 보유 중 스탑 상주 하나 | 소유자 10-22 [보고] |', '| 엔진 | 게이트는 코드: TESTS rc 0 + VERIFY GO | 감독자 09-26 [보고] |',
+  '11. 가장 자신 없는 것', '| 부분 이름 | 내용 |', '|---|---|', '| 엔진 | 「돌고 있음」은 인용이고, 08:49Z 뒤는 직접 보지 않음 [추정] |'].join('\n');
+const plan32 = f => {
+  const plan = koruPlan(f);
+  plan.parts[0].at.push(f.at('| 카드 러너 | review')); // the card runner's own withdrawal row
+  plan.parts[3].at.push(f.at('| 엔진 | 매일')); // the engine's own withdrawal row
+  plan.global.push(
+    { kind: 'condition', text: '소유자 요구: 보유 중 스탑 상주 하나, 게이트는 코드(TESTS rc 0 + VERIFY GO) → new:engine', at: [f.at('| 엔진 | 돈 안전'), f.at('| 엔진 | 게이트는')] },
+    // misassigned by the plan (the row's 부분 이름 is 엔진): a claim of any part quoting the row lands it.
+    { kind: 'correction', text: '매일 FLAT 재시작은 채택하지 않음 → new:mood', at: [f.at('| 엔진 | 매일')] },
+    { kind: 'uncertain', text: '08:49Z 뒤 엔진 실제 상태는 모름 → new:engine', at: [f.at('| 엔진 | 08:49Z')] },
+    { kind: 'relation', text: 'new:card → new:engine: review.jsonl 행 → new:engine', at: [f.at('| 카드 러너 | 엔진 |')] });
+  return plan;
+};
+
+test('.32: the plan items assigned to a part that no claim quotes are named by ref and their first 40 characters (plan-claims); uncited reads the hedge rows', () => {
+  const f = koruText(KORU32), plan = plan32(f), fragments = koruFragments(f), parts = structuredClone(fragments.flatMap(x => x.parts));
+  validateMapBlueprint(plan, f.ask);
+  const name = (ref, text) => `${ref}: ${text.slice(0, 40)}`;
+  // Five items: three global (the relation item is not one) and the two parts' own withdrawal rows; the condition and the unknown
+  // are not quoted (both the engine's, in the plan's part order); the misassigned FLAT item is quoted by the engine's s101.
+  assert.deepEqual(planClaims(f.ask, plan, parts), { items: 5, missing: [name('new:engine', plan.global[0].text), name('new:engine', plan.global[2].text)] });
+  // An item pointing at two rule rows lands only when both are quoted.
+  const claim = (key, head) => ({ key, kind: 'reported', text: '원문 행의 규칙이다.', at: f.at(head), about: null, replaces: null, topic: 'rule' });
+  parts[3].claims.push(claim('s103', '| 엔진 | 돈 안전'));
+  assert.equal(planClaims(f.ask, plan, parts).missing.length, 2, 'one of its two rows is not enough');
+  parts[3].claims.push(claim('s104', '| 엔진 | 게이트는'));
+  assert.deepEqual(planClaims(f.ask, plan, parts).missing, [name('new:engine', plan.global[2].text)]);
+  // A part's own focus row is an item of its own: the card runner's withdrawal row goes missing without s1.
+  const bare = structuredClone(parts); bare[0].claims.splice(0, 1);
+  assert.ok(planClaims(f.ask, plan, bare).missing.some(n => n.startsWith('new:card: 카드 러너 | review 작성기 FIX3')));
+  // The global correction hears it with its names (readingDiagnostics given the plan); a render correction its own parts' items only.
+  assert.deepEqual(readingDiagnostics({ ask: f.ask, summary: '', parts, blueprint: plan }).filter(x => x.rule === 'plan-claims'),
+    [{ path: 'parts', rule: 'plan-claims', expected: 5, actual: 4, names: [name('new:engine', plan.global[2].text)] }]);
+  assert.deepEqual(mapStageIssues(fragments[1], null, { ask: f.ask, fragment: true, blueprint: plan }).filter(x => x.rule === 'plan-claims'),
+    [{ path: 'parts', rule: 'plan-claims', expected: 3, actual: 1, names: [name('new:engine', plan.global[0].text), name('new:engine', plan.global[2].text)] }]);
+  assert.deepEqual(mapStageIssues(fragments[0], null, { ask: f.ask, fragment: true, blueprint: plan }).filter(x => x.rule === 'plan-claims'), [], 'the mood item is quoted in its fragment');
+  assert.deepEqual(mapStageIssues(fragments[1], null, { ask: f.ask, fragment: true }).filter(x => x.rule === 'plan-claims'), [], 'no plan, no plan-claims');
+  // .32: uncited also reads the 「가장 자신 없는 것」 rows (the record's own hedge about after its basis time).
+  assert.deepEqual(factRows(f.ask).map(row => row.name), ['엔진', '카드 러너', '엔진']);
+  assert.deepEqual(uncitedFacts(f.ask, parts), { rows: 3, uncited: ['엔진'] });
+  assert.deepEqual(planClaims(fixture().ask, plan32(koruText(KORU32)), []), { items: 0, missing: [] }, 'refs of no given part are not items');
+});
+
+test('.32: a part made of a payload token (no table row, no type, no line) is left out whole as payload-part; a payload file no artifact row lists stays on its one line', () => {
+  const text = KORU.replace('| 기분 층 | 계산 | 미구현 |', '| 기분 층 | 계산 | 미구현 |\n| facts-refresh | 타이머 | 매일 00:15Z |')
+    .replace('| 기분 층 | 엔진 | 공포 z |', '| 기분 층 | 엔진 | 공포 z |\n| facts-refresh | 엔진 | fee_policy·calendar.json |');
+  const f = koruText(text), plan = koruPlan(f);
+  plan.parts.splice(3, 0, { ref: 'new:calendar', name: 'calendar.json', parent: null, at: [f.at('| facts-refresh | 엔진')], focus: '넘기는 것' });
+  plan.parts.push({ ref: 'new:facts', name: 'facts-refresh', parent: null, at: [f.at('| facts-refresh | 타이머')], focus: '매일 00:15Z' });
+  const fragments = koruFragments(f), engine = fragments[1].parts[0];
+  const part = (ref, name, head, key) => ({ ref, name, parent: null, role: `${name}의 책임`, roleAbout: null, roleReplaces: null, basis: [f.at(head)],
+    claims: [{ key, kind: 'reported', text: '원문 행의 사실을 옮긴다.', at: f.at(head), about: null, replaces: null }] });
+  fragments[1].parts = [part('new:calendar', 'calendar.json', '| facts-refresh | 엔진', 's101'), { ...engine, claims: engine.claims.map((c, i) => ({ ...c, key: `s${102 + i}` })) },
+    part('new:facts', 'facts-refresh', '| facts-refresh | 타이머', 's104')];
+  const base = koruGlobal(f), line = { from: 'new:facts', to: 'new:engine', kind: 'flow', note: '', at: f.at('| facts-refresh | 엔진'), payload: 'fee_policy·calendar.json', channel: 'data', mode: 'design' };
+  const global = { ...base, relations: [base.relations[0], base.relations[1], base.relations[2], line] };
+  assert.deepEqual(payloadParts({ ...global, parts: fragments.flatMap(x => x.parts) }, f.ask), [3]);
+  const { wire, exclusions } = combineRenderedReading(fragments, global, f.ask, plan);
+  // The payload part is out whole at its combined index; every other reason keeps naming the combined wire (the engine is parts[4]).
+  assert.deepEqual(exclusions.map(x => [x.path, x.rule, x.category]), [['parts[3]', 'contract', 'payload-part'], ['parts[0].claims[1]', 'contract', 'wrong-part'],
+    ['parts[4].config', 'contract', 'config'], ['relations[0]', 'contract', 'via-store']]);
+  assert.equal(exclusions[0].explanation, M.explainExclusion('parts[3]', 'contract', 'payload-part'));
+  assert.match(exclusions[0].explanation, /넘기는 것의 이름을 떼어 만든 부분/);
+  assert.equal(exclusions[0].record, 'N01');
+  assert.deepEqual(wire.parts.map(p => p.ref), ['new:card', 'new:review', 'new:mood', 'new:engine', 'new:facts']);
+  assert.equal(wire.parts[3].config, null, 'the engine\'s config left out where the engine stands in the wire');
+  // calendar.json has no artifact row and no store: the line keeps its whole payload; review.jsonl has a row: its direct line is out.
+  assert.deepEqual(wire.relations.map(r => [r.from, r.to, r.payload]), [['new:card', 'new:review', 'review.jsonl 행'], ['new:review', 'new:engine', 'review.jsonl 행'], ['new:facts', 'new:engine', 'fee_policy·calendar.json']]);
+  const plain = M.validateMapReply(wire, f.ask);
+  assert.equal(M.setAside(plain).length, 0);
+  // Not a payload part: a store, a part with a line, or a part the tables name.
+  const typed = structuredClone(fragments); Object.assign(typed[1].parts[0], { type: 'store', typeAt: f.at('| facts-refresh | 엔진') });
+  assert.deepEqual(payloadParts({ ...global, parts: typed.flatMap(x => x.parts) }, f.ask), []);
+  assert.deepEqual(payloadParts({ ...global, relations: [...global.relations, { ...line, from: 'new:calendar' }], parts: fragments.flatMap(x => x.parts) }, f.ask), []);
+  const named = structuredClone(fragments); named[1].parts[0].name = 'facts-refresh';
+  assert.deepEqual(payloadParts({ ...global, parts: named.flatMap(x => x.parts) }, f.ask), []);
+  // A file the artifact table lists still asks its store: with review.jsonl's store untyped its line is out as before (.29), and a
+  // record with no artifact table keeps that rule for every file (map-exclusions' .29 reading).
+  const noStore = structuredClone(fragments); noStore[0].parts[1].type = null; noStore[0].parts[1].typeAt = null;
+  assert.ok(combineRenderedReading(noStore, global, f.ask, plan).exclusions.some(x => x.path === 'relations[2]' && x.category === 'via-store'));
+});
+
+test('.32: the final wire\'s diagnostics come in fixed shapes for the global stage record (eight rules, at most sixteen)', () => {
+  const f = koruText(KORU32), plan = plan32(f), fragments = koruFragments(f), global = { ...koruGlobal(f), summary: '어느 주장도 받치지 않는 요약 문장이다.' };
+  const found = finalDiagnostics(fragments, global, f.ask, plan);
+  assert.deepEqual(FINAL_DIAGNOSTICS, ['connections', 'plan-relations', 'coverage', 'uncited', 'plan-claims', 'unbacked', 'withdrawn-count', 'unknown-count']);
+  assert.ok(found.length >= 1 && found.length <= 16);
+  for (const x of found) {
+    assert.deepEqual(Object.keys(x), ['path', 'rule', 'expected', 'actual', 'names']);
+    assert.ok(FINAL_DIAGNOSTICS.includes(x.rule)); assert.ok(Array.isArray(x.names) && x.names.length <= 24);
+  }
+  const by = rule => found.find(x => x.rule === rule);
+  assert.deepEqual(by('unbacked'), { path: 'summary', rule: 'unbacked', expected: 0, actual: 1, names: [] });
+  assert.deepEqual(by('uncited'), { path: 'parts', rule: 'uncited', expected: 3, actual: 2, names: ['엔진'] });
+  assert.equal(by('plan-claims').names.length, 2);
+  assert.deepEqual(by('unknown-count'), { path: 'parts', rule: 'unknown-count', expected: 1, actual: 0, names: [] });
+  // Read on the final wire: the engine's claim on the withdrawal row is kept there, the card runner's wrong-part claim is not.
+  assert.equal(found.map(x => x.rule).join(','), FINAL_DIAGNOSTICS.filter(rule => found.some(x => x.rule === rule)).join(','), 'in the fixed order');
+  assert.deepEqual(finalDiagnostics(fragments, { nope: true }, f.ask, plan), [], 'a reply that does not combine says nothing');
+  assert.equal(FRAGMENT_KEYS, 3 * M.MAP6_CLAIMS);
 });

@@ -883,7 +883,7 @@ test('a cached valid global sentinel is combined with machine obligations in the
     if (call.stage === 'plan') return { ...blueprintFor(wire, ask), corrections: [obligation] };
     if (call.stage === 'render' && call.input.semanticReview && call.input.assignment.parts.some(part => part.ref === 'P01')) {
       const fragment = payloadFor(call.input, ask, wire), part = fragment.parts.find(part => part.ref === 'P01');
-      part.claims.push({ key: 's99', kind: 'reported', text: 'alpha 보고의 철회', at: obligation.at[0], aboutAt: null, replaces: obligation.claim });
+      part.claims.push({ key: 's48', kind: 'reported', text: 'alpha 보고의 철회', at: obligation.at[0], aboutAt: null, replaces: obligation.claim });
       return fragment;
     }
   }, wire) });
@@ -1072,8 +1072,8 @@ function browserApply(f, wire, exclusions, n = 7) {
 }
 
 test('recipe identities are bumped for the changed prompts and validation semantics', () => {
-  assert.equal(PIPELINE_RECIPE, 'first-map-divided.31');
-  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.31');
+  assert.equal(PIPELINE_RECIPE, 'first-map-divided.32');
+  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.32');
 });
 
 test('a render fragment with one unresolvable claim alias is applied with only that claim set aside and a durable diagnostic', async t => {
@@ -1239,7 +1239,7 @@ test('.29: a 24-part first map renders in eight fragments; a run ceiling that ca
 // ---- first-map-divided.30: map-reading.9 (steps, loop, kept state, port map) and the rules from the blind judging of the .29 map. ----
 test('.30 rule sentences: every connection row a line, absorption into the group parent only, row names verbatim, "·" outside parentheses, state facts first, steps, loop, kept state and the port map', async () => {
   const P = await import('../server/map-pipeline.mjs'), B = await import('../server/map-blueprint.mjs');
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.31', 'later-map-divided.31']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.32', 'later-map-divided.32']);
   for (const rule of ['흡수는 기록의 묶음 표(부모 이름 | 자식 이름들)가 그 행의 부모로 적은 부분에만 하고', '연결 표(보내는 부분 | 받는 부분)에 자기 행이 있는 단위는 부모가 있어도 흡수하지 않고 부분으로 세운다',
     '부분의 name은 그 표 행의 첫 칸 이름을 글자 그대로 쓰고', '「facts-refresh」 행을 「calendar.json」으로 부르지 않는다', '모든 행은 relation 항목 하나(저장소를 거치면 둘)로 빠짐없이 쓴다',
     'global은64개 이하(그중 relation 항목 48개까지)']) assert.ok(B.MAP_BLUEPRINT_PROMPT.includes(rule), rule);
@@ -1394,7 +1394,7 @@ test('.31 rule sentences: 36 parts, the fragment key range, list items alone, th
     '오류 행의 수치(「−147.6 bp', '그 부분의 설계 설명(topic=how) 주장은 그 행들을 모두 쓴 뒤 자리가 남을 때만 쓴다']) assert.ok(P.RENDER_RULES.includes(rule), rule);
   assert.ok(!P.RENDER_RULES.includes('99개 범위'), 'the old hundred-key range is gone');
   for (const rule of ['첫 문장은 기록의 기준 시각(basisAt)의 운영 상태다', '−0.433 USDT', '구조·설계 설명이나 가동 여부만으로 첫 문장을 쓰지 않는다', 'reviseParts는 고유한 blueprint ref 1~36개만']) assert.ok(P.GLOBAL_RULES.includes(rule), rule);
-  for (const rule of ['rule이 plan-relations이면 names의 「from → to」마다', 'connections이면 names의 연결 표 행마다 선을 그린다', 'uncited이면 names가 가리키는 부분의 실제 변화·오류·철회 행을']) assert.ok(P.CORRECTION_RULES.includes(rule), rule);
+  for (const rule of ['rule이 plan-relations이면 names의 「from → to」마다', 'connections이면 names의 연결 표 행마다 선을 그린다', 'uncited이면 names가 가리키는 부분의 실제 변화·오류·철회·가장 자신 없는 것 행을']) assert.ok(P.CORRECTION_RULES.includes(rule), rule);
 });
 
 test('.31: a 36-part first map renders in twelve fragments on their own key ranges; the global correction hears which plan relation items no line draws', async t => {
@@ -1410,9 +1410,9 @@ test('.31: a 36-part first map renders in twelve fragments on their own key rang
   const renders = calls.filter(c => c.stage === 'render');
   assert.equal(renders.length, 12);
   assert.deepEqual(renders.map(c => [c.input.assignment.keyStart, c.input.assignment.keyEnd]),
-    [[1, 99], [101, 199], [201, 299], [301, 399], [401, 499], [501, 599], [601, 699], [701, 799], [901, 924], [926, 949], [951, 974], [976, 999]]);
+    [[1, 48], [101, 148], [201, 248], [301, 348], [401, 448], [501, 548], [601, 648], [701, 748], [51, 98], [151, 198], [251, 298], [351, 398]]);
   assert.equal(validateMapReply(wire, ask).parts.length, 36);
-  assert.deepEqual(wire.parts.at(-1).claims.map(c => c.key), ['s980', 's981'], 'the twelfth fragment keys its third part from s976');
+  assert.deepEqual(wire.parts.at(-1).claims.map(c => c.key), ['s355', 's356'], 'the twelfth fragment keys its third part from s351');
   const corrected = calls.filter(c => c.stage === 'global' && c.input.correction);
   assert.equal(corrected.length, 1);
   assert.deepEqual(corrected[0].input.correction.issues.filter(x => x.rule === 'plan-relations'), [{ path: 'relations', rule: 'plan-relations', expected: 1, actual: 0, names: ['new:u0 → new:u1'] }]);
@@ -1495,4 +1495,63 @@ test('.31: a render or global reply cut at its cap fails the run as MAP_STAGE_IN
   // The plan stage's cut stays the provider's own code (its cap is STUDIO_MAP_PLAN_TOKENS).
   const s2 = await setup(t), planCalls = [];
   await assert.rejects(s2.make({ callProvider: fakeProvider(ask, planCalls, call => { if (call.stage === 'plan') { call.options.onUsage(usage); throw new ApiError('AI_RESPONSE_INCOMPLETE', 502); } }) }).call(ask), matchesCode('AI_RESPONSE_INCOMPLETE'));
+});
+
+// ---- first-map-divided.32: sixteen claims a part, the plan items that must land (plan-claims) in the render and global corrections,
+// the final wire's diagnostics on the global stage record, the row-level, payload and hedge rules (fake providers only). ----
+test('.32 rule sentences: sixteen claims a first-map part, a table row one claim, the summary money facts on the engine, withdrawals on their 부분 이름 part, one payload list, the record\'s own hedge', async () => {
+  const P = await import('../server/map-pipeline.mjs'), B = await import('../server/map-blueprint.mjs');
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.32', 'later-map-divided.32']);
+  for (const rule of ['그 행의 「부분 이름」 칸(없으면 첫 칸)이 이름 붙인 부분에 맡긴다', '「엔진 | 매일 FLAT 재시작 | 채택 안 함」은 → 엔진이며', '한 부분에 맡기는 항목 수는 줄이지 않는다(첫 지도의 부분은 주장을 16개까지 쓴다)',
+    '연결 행의 「넘기는 것」 칸은 산출물 이름 목록 하나이며 부분이 아니다', '산출물 표에 그 파일의 행이 있을 때만 그 저장소 부분을 거친다', '「new:facts_refresh → new:engine: fee_policy·calendar.json」']) assert.ok(B.MAP_BLUEPRINT_PROMPT.includes(rule), rule);
+  for (const gone of ['돌고 있는 부분에 맡기는 정정·철회·모름은 둘까지로 한다', '넘치는 철회는 원문이 대신 둔 것을 맡은 부분', '기록의 화살표가 파일 이름(calendar.json 같은)을 넘기는 것으로 적은 흐름도 그 파일의 저장소 부분을 거친다'])
+    assert.ok(!B.MAP_BLUEPRINT_PROMPT.includes(gone), gone);
+  for (const rule of ['첫 지도(INPUT.parts가 비어 있음)에서 16개까지, 그 밖에는 6개까지', '표 행 하나는 주장 하나다', '「쉼 사유의 96 %가 NONE_SIDE」)은 그 행의 부분 이름 칸이 이름 붙인 부분의 topic=defect',
+    '「끄기 줄 결판 또는 −8 USDT | 해당 칸을 끈다」)은 그 행의 부분의 kind=want·topic=plan 주장 하나다', '「e=1.00 실거래를 켜 첫 사이클 −0.433 USDT」', '그 상태 문장을 role이나 basis에만 두지 않는다',
+    '그것을 대신한 감시를 맡은 LIVE-WATCH의 것이 아니다', '표의 부분 이름 칸이 이 부분이면 이 부분이 쓴다', '「엔진 | 08:49Z 뒤 실제 상태」', '(「08:49Z 뒤 미확인」)을 붙여 지금도 확실히 도는 것처럼 쓰지 않는다',
+    '어느 주장도 인용하지 않은 항목은 진단(plan-claims)에 남는다', '단, 그 항목이 인용한 표 행의 부분 이름 칸(첫 칸)이 이 부분이면 표가 우선하여 이 부분이 쓴다']) assert.ok(P.RENDER_RULES.includes(rule), rule);
+  assert.ok(!P.RENDER_RULES.includes('이 분할 작성에서는 부분마다 claims를 6개까지 쓸 수 있다'), 'the old six is gone from the first map');
+  for (const rule of ['첫 문장에 그 기록 자신의 한정(「08:49Z 뒤 미확인」)을 반드시 붙이며', '보고된 가동을 지금도 확실히 도는 것처럼 쓰지 않는다', 'payload에 칸 그대로(「fee_policy·calendar.json」) 한 번에 쓰고',
+    '기록의 산출물 표에 행이 없는 파일(calendar.json)은 저장소 없이 그 한 선의 payload로 둔다']) assert.ok(P.GLOBAL_RULES.includes(rule), rule);
+  for (const rule of ['claims는 최대4개(분할 작성은 첫 지도 16개, 그 밖 6개)', 'plan-claims이면 names의 「ref: 항목 앞부분」마다', '실제 변화·오류·철회·가장 자신 없는 것 행을']) assert.ok(P.CORRECTION_RULES.includes(rule), rule);
+  assert.ok(P.FIRST_GLOBAL_RULES.includes('부분마다 주장 수에 상한(16개)이 있어'));
+});
+
+test('.32: a render correction hears its own parts\' plan items no claim quotes; the global stage record keeps the final wire\'s diagnostics, which a reopened store reads', async t => {
+  const { dir, make } = await setup(t), ask = askFor(), calls = [];
+  const item = { kind: 'condition', text: '중간 조건: 개발용 판본에만 적용한다 → new:flow', at: [ask.records[0].spans[2].s] };
+  const pipeline = make({ callProvider: fakeProvider(ask, calls, call => {
+    if (call.stage === 'plan') { const plan = blueprintFor(originalWire(ask), ask); plan.global.push(item); return plan; }
+    // A structural first pass (a claim key outside the fragment's range) pays the fragment's one correction.
+    if (call.stage === 'render' && !call.input.correction) { const fragment = payloadFor(call.input, ask, originalWire(ask)); fragment.parts[0].claims[0].key = 's801'; return fragment; }
+    if (call.stage === 'global') return { ...payloadFor(call.input, ask, originalWire(ask)), summary: '어느 주장도 받치지 않는 요약 문장입니다.' };
+  }) });
+  const { wire } = await pipeline.read(ask);
+  const name = `new:flow: ${item.text.slice(0, 40)}`;
+  const corrected = calls.filter(c => c.stage === 'render' && c.input.correction);
+  assert.equal(corrected.length, 1);
+  assert.deepEqual(corrected[0].input.correction.issues.filter(x => x.rule === 'plan-claims'), [{ path: 'parts', rule: 'plan-claims', expected: 1, actual: 0, names: [name] }]);
+  assert.equal(wire.parts[0].claims.length, 2);
+  const text = await readFile(join(dir, 'pipeline.json'), 'utf8'), stages = Object.values(JSON.parse(text).body.jobs).at(-1).stages;
+  assert.deepEqual(stages.global.diagnostics, [{ path: 'parts', rule: 'plan-claims', expected: 1, actual: 0, names: [name] },
+    { path: 'summary', rule: 'unbacked', expected: 0, actual: 1, names: [] }]);
+  assert.equal(Object.hasOwn(stages['render-1'], 'diagnostics'), false, 'a render stage keeps none');
+  // The kept record reads back; a diagnostic outside its fixed shape marks the store damaged.
+  const { writeFile } = await import('node:fs/promises');
+  const copy = await mkdtemp(join(tmpdir(), 'map-pipeline-test-')), bad = await mkdtemp(join(tmpdir(), 'map-pipeline-test-'));
+  t.after(async () => { await rm(copy, { recursive: true, force: true }); await rm(bad, { recursive: true, force: true }); });
+  await writeFile(join(copy, 'pipeline.json'), text);
+  const reopened = await openMapPipelineStore({ dir: copy, monthlyUsd: 20, runUsd: 1 });
+  assert.equal(reopened.describe().durable, true);
+  await reopened.close();
+  // Re-signed with the store's own digest, so only the shape of the diagnostic can make it damaged.
+  const { createHash } = await import('node:crypto');
+  const resigned = JSON.parse(text); resigned.sha256 = createHash('sha256').update(JSON.stringify(resigned.body)).digest('hex');
+  assert.equal(resigned.sha256, JSON.parse(text).sha256, 'the digest is the store\'s own');
+  const damaged = JSON.parse(text); Object.values(damaged.body.jobs).at(-1).stages.global.diagnostics[0].names = ['줄\n바꿈'];
+  damaged.sha256 = createHash('sha256').update(JSON.stringify(damaged.body)).digest('hex');
+  await writeFile(join(bad, 'pipeline.json'), JSON.stringify(damaged));
+  const refused = await openMapPipelineStore({ dir: bad, monthlyUsd: 20, runUsd: 1 });
+  assert.deepEqual([refused.describe().durable, refused.describe().problem], [false, 'STORE_UNAVAILABLE']);
+  await refused.close();
 });

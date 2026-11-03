@@ -72,7 +72,12 @@ export const MAP7_SCHEMA = 'studio.map.7' as const;
  * defect or withdrawal row of that part (restate), and a store whose reader's own row quotes it may send to that reader.
  * Pipeline .31 (still map-reading.9; storage only widens): map.6 takes 36 new parts; a field item may run to 60; one list item (or
  * one used name of a step) that is too long, empty or control-charactered is set aside alone at its own index; a timer's loop
- * whose unit is a clock time is left out (loop) and a loop unit repeating one of the part's settings verbatim is left null. */
+ * whose unit is a clock time is left out (loop) and a loop unit repeating one of the part's settings verbatim is left null.
+ * Pipeline .32 (still map-reading.9; storage only widens): map.6 takes sixteen claims per part (MAP6_CLAIMS; map.7 keeps four).
+ * The divided first map's via-store asks a store end only for a file the records' artifact table (「산출물」) gives a row, or one a
+ * store part of the reading holds, when a record draws such a table (a payload file no row lists, the calendar.json of 「fee_policy·
+ * calendar.json」, stays one line's payload); a new part made of a payload token with no table row, no type and no line is set aside
+ * whole by the server (payload-part, explained here). */
 /** A first map: nothing of the map, no request and no prior is sent (map.7 is never one). */
 export const firstAsk = (ask: Pick<MapAsk, 'parts' | 'requests' | 'priors'>): boolean => ask.parts.length === 0 && (ask.requests ?? []).length === 0 && (ask.priors ?? []).length === 0;
 /** A reply refused for a contradiction or a wrong reference it holds: where (path), which rule and what it names (an alias,
@@ -92,7 +97,9 @@ export type ContractGuard = 'shape' | 'keys' | 'text' | 'count' | 'new-count' | 
   // line does not name (or an unbuilt or retired part sending what was not designed).
   | 'via-store' | 'wrong-part' | 'sender'
   // map-reading.9: a part's steps, loop and kept state, the reply's port map; pipeline .30: a claim restating its part's state row.
-  | 'step' | 'loop' | 'state-var' | 'port-map' | 'restate';
+  | 'step' | 'loop' | 'state-var' | 'port-map' | 'restate'
+  // pipeline .32: a new part made of what a line hands over, with no table row, no type and no line (set aside by the server).
+  | 'payload-part';
 /** map-reading.7–8: the categories that leave out a part's own optional fields only (the part stays). */
 const PART_FIELD_GUARDS: ReadonlySet<string> = new Set(['state', 'state-at', 'state-when', 'files', 'type', 'type-at', 'inputs', 'outputs', 'fields', 'config']);
 /** map-reading.8: the reply's own optional fields, left null alone when wrong. */
@@ -101,6 +108,9 @@ const REPLY_FIELD_GUARDS: ReadonlySet<string> = new Set(['basis-at', 'basis-vers
  * its stores did not fit twelve. map.7 keeps twelve. Pipeline .31: 36 (the two KORU records need about 33: 24 table rows and nine
  * stores; at 24 the plan lost three stores, six rows and the lines through them). map.7 keeps 24 parts, twelve of them new. */
 export const MAP6_NEW_PARTS = 36;
+/** Pipeline .32: the first map's contract (map.6) takes sixteen claims per part (six before): the KORU engine has about fifteen rows
+ * of its own (change, defect, withdrawal, rule, unknown) and six held only its state report and design. map.7 keeps four. */
+export const MAP6_CLAIMS = 16;
 /** Pipeline .31: a store's field item may run to 60 (the LEDGER row's 「event(CYCLE·ARM_CYCLE·…·PULL…)」 is 60 and lost the field list). */
 export const FIELD_ITEM_MAX = 60;
 /** Pipeline .29: the first map's contract (map.6) takes 32 relations: a store is drawn as two lines (producer → store → reader), and
@@ -147,6 +157,25 @@ const lineSenders = (text: string): LineSender[] => text.split('\n').flatMap((li
 }).filter(x => !!x.name);
 /** The files a part holds by its own words: its name, its outputs and its files. */
 const storeKeys = (b: MapReplyPart): string[] => [b.name ?? '', ...(b.outputs ?? []), ...(b.files ?? [])].flatMap(fileKeys);
+/** Pipeline .32: the files the records' artifact tables (「2. 산출물」) give a row of their own (its first cell's file), or null when
+ * no record draws such a table (then every file a data line names asks its store, as before). */
+function artifactFiles(texts: Iterable<string>): Set<string> | null {
+  let out: Set<string> | null = null;
+  for (const text of texts) {
+    let open = false, header = false;
+    for (const raw of text.split('\n')) {
+      const line = raw.trim(), heading = line.startsWith('|') ? null : /^\d{1,2}\.\s*(.+)$/.exec(line);
+      if (heading) { open = /^산출물/.test(heading[1]!.trim()); header = false; continue; }
+      if (!open) continue;
+      if (!line.startsWith('|')) { if (header && line) open = false; continue; }
+      const cells = line.replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim());
+      if (!header) { header = true; out ??= new Set(); continue; }
+      if (cells.every(c => !c || /^:?-{2,}:?$/.test(c))) continue;
+      for (const k of fileKeys(cells[0] ?? '')) out!.add(k);
+    }
+  }
+  return out;
+}
 /* Pipeline .30 (the divided first map): the names a record's change, defect and withdrawal tables name ("5. 최근 소유자 요청과 실제
  * 변화", "8. 오류·미해결·할 일", "6. 철회·변경"): every cell of their data rows (the header and rule rows left out), compared loosely. */
 const FACT_SECTION = /실제\s*(?:로\s*)?(?:바뀐|변화)|오류|철회/;
@@ -404,6 +433,8 @@ const exclusionExplanation = (e: MapReplyError): string => {
     : e.rule === 'contract' && e.target === 'state-var' ? '부분이 유지하는 상태 항목이 규칙에 맞지 않아 그 항목만 제외했어요.'
     : e.rule === 'contract' && e.target === 'port-map' ? '바깥 연결과 안쪽 단계의 대응이 없는 연결·포트·단계를 가리키거나 원문 줄을 찾을 수 없어 그 대응만 제외했어요.'
     : e.rule === 'contract' && e.target === 'restate' ? '부분의 상태 칸을 되풀이한 주장이어서 제외했어요. 기록의 실제 변화·오류·철회 행이 그 자리를 먼저 써요.'
+    // pipeline .32: a part made of what a line hands over (no table row, no type, no line); the line keeps it as its payload.
+    : e.rule === 'contract' && e.target === 'payload-part' ? '연결이 넘기는 것의 이름을 떼어 만든 부분이어서 제외했어요. 기록의 표에 그 이름의 행이 없고 유형도 연결도 없었어요.'
     // map-reading.7–8: a part's state, files, type or interface are left out, the part stays (any rule at that place: its stateAt or
     // typeAt may not resolve); the reply's basis time or version is left null alone.
     : PART_FIELD_GUARDS.has(e.rule === 'contract' ? e.target : '') || /^parts\[\d+\]\.(state|stateAt|stateWhen|files|type|typeAt|inputs|outputs|fields|config)$/.test(e.path) ? '부분의 상태·파일·유형·입출력 칸이 규칙에 맞지 않아 그 칸만 비우고 부분은 남겼어요.'
@@ -614,7 +645,8 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
     if (seven) need(!fresh || basis.length > 0, `parts[${pi}].basis`, 'basis-required');
     // map.6 (the first map's divided route) takes six claims per part and (.29) 32 relations, (.30) 48 (sixteen before): a record's
     // flow list and its running part's state did not fit four and twelve (the caps pushed out its main receiver's outputs and live defects).
-    const claimList = many(p.claims, ask.schemaVersion === MAP6_SCHEMA ? 6 : 4, `parts[${pi}].claims`), claimsAside = aside.length;
+    // pipeline .32: sixteen (MAP6_CLAIMS): a running part's own change, defect, withdrawal, rule and unknown rows did not fit six.
+    const claimList = many(p.claims, ask.schemaVersion === MAP6_SCHEMA ? MAP6_CLAIMS : 4, `parts[${pi}].claims`), claimsAside = aside.length;
     const own = new Set(parts.get(ref)?.current.map(c => c.key) ?? []);
     const claimAt = new Map<MapReplyClaim, number>();
     let claims = claimList.map((c, j): MapReplyClaim | null => { const got = soft((): MapReplyClaim | null => {
@@ -809,6 +841,9 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
   const byRef = new Map(outParts.map(b => [b.ref, b])), refByName = new Map(outParts.flatMap(b => b.name ? [[plainName(b.name), b.ref] as [string, string]] : []));
   // map-reading.9: where each relation of the wire stands among the relations read (a port-map row names it by its wire index).
   const relationAt = new Map<number, number>(); let relationsRead = 0;
+  // pipeline .32 (divided): the files the records' artifact tables list, and those a store part of this reading holds.
+  const tableFiles = divided ? artifactFiles([...texts.values()].map(t => t.text)) : null;
+  const stored = new Set(divided ? outParts.filter(b => b.type === 'store').flatMap(storeKeys) : []);
   const relations = many(value.relations, ask.schemaVersion === MAP6_SCHEMA ? MAP6_RELATIONS : 12, 'relations').flatMap((r, i) => { const got = soft(() => {
     object(r, ['from', 'to', 'kind', 'note', ...evidenceKeys], `relations[${i}]`);
     if (six && !seven && [r.from, r.to].some(ref => typeof ref === 'string' && droppedParents.has(ref))) throw new MapReplyError(`relations[${i}]`, 'contract', 'parent-skipped');
@@ -823,7 +858,8 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
     // a store's file on another part's row or before an arrow line's last arrow, or this sender's name before that last arrow.
     if (divided) {
       const s7 = said7 as { payload: string | null; mode: RelationMode | null; channel: Channel | null }, pair = [byRef.get(r.from as string), byRef.get(r.to as string)];
-      const files = s7.channel === 'data' && s7.payload ? fileKeys(s7.payload) : [];
+      // pipeline .32: when a record draws an artifact table, only a file it gives a row (or a store of this reading holds) asks its store.
+      const files = (s7.channel === 'data' && s7.payload ? fileKeys(s7.payload) : []).filter(k => !tableFiles || tableFiles.has(k) || stored.has(k));
       need(files.every(k => pair.some(b => b?.type === 'store' && storeKeys(b).includes(k))), `relations[${i}]`, 'via-store');
       const sender = pair[0];
       need(!['unbuilt', 'retired'].includes(sender?.state ?? '') || s7.mode === 'design', `relations[${i}]`, 'sender');
@@ -1048,6 +1084,8 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
   return reply;
 }
 
+/** Pipeline .32: the fixed explanation this module gives a set-aside reason (for a reason the server reads itself: payload-part). */
+export const explainExclusion = (path: string, rule: MapReplyError['rule'], category: string | null): string => exclusionExplanation(new MapReplyError(path, rule, category ?? ''));
 /** The durable diagnostics of a checked reply's set-aside items (map.6–7): fixed categories and source positions only. */
 export const readingExclusions = (reply: MapReply): readonly ReadingExclusion[] => EXCLUSIONS.get(reply) ?? [];
 /** Where a saved exclusion may say it stood (the same grammar storage accepts). */
