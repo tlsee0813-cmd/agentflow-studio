@@ -439,7 +439,7 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       ensure(areaIds.has(r.areaId as string));text(r.text,300);ensure(r.corrects===null||seen.has(r.corrects as string));continue;
     }
     const version=!!r&&typeof r==='object'?(r as {version?:unknown}).version:null;
-    const ten=version==='map-reading.10',nine=ten||version==='map-reading.9',eight=nine||version==='map-reading.8',seven=eight||version==='map-reading.7',six=seven||version==='map-reading.6',five=six||version==='map-reading.5';four=five||version==='map-reading.4';const three=four||version==='map-reading.3',two=three||version==='map-reading.2';records=four?asRead:raw;
+    const eleven=version==='map-reading.11',ten=eleven||version==='map-reading.10',nine=ten||version==='map-reading.9',eight=nine||version==='map-reading.8',seven=eight||version==='map-reading.7',six=seven||version==='map-reading.6',five=six||version==='map-reading.5';four=five||version==='map-reading.4';const three=four||version==='map-reading.3',two=three||version==='map-reading.2';records=four?asRead:raw;
     obj(r,['version','id','at','model','prompt','hash','records','summary','parts','relations','candidates','gaps','skipped',...(two?['requests','matches']:[]),...(four?['material']:[]),...(six?['exclusions']:[]),...(eight?['basisAt','basisVersion']:[]),...(nine?['portMap']:[])]);ensure(r.version==='map-reading.1'||two);
     // map-reading.8: the records' own basis time and target version, as written, or null.
     if(eight){if(r.basisAt!==null)text(r.basisAt,60);if(r.basisVersion!==null)text(r.basisVersion,60);}
@@ -472,7 +472,7 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       if(seven){ensure(p.state===null||PART_STATES.includes(p.state as never));if(p.state===null)ensure(p.stateWhen===null&&p.stateQuote===null);else{quote(p.stateQuote);if(p.stateWhen!==null)text(p.stateWhen,40);}
         list(p.files,6);for(const f of p.files)text(f,120);ensure(new Set(p.files).size===(p.files as unknown[]).length);}
       // Pipeline .32: a map-reading.9 entry holds sixteen claims per part (the first map's contract, MAP6_CLAIMS); earlier ones eight.
-      // Pipeline .33: a map-reading.10 entry holds twenty.
+      // Pipeline .33: a map-reading.10 entry holds twenty (.11 too).
       list(p.claims,ten?20:nine?16:8);(p.claims as unknown[]).forEach((c,i)=>{
         obj(c,['kind','text','record','quote',...(four?['from','to']:[]),'about','replaces',...(seven?['topic','evidence','when','where','before']:[]),...(ten?['scope','scopeName','anchors','enforcedBy','withdrawalKind','gate']:[])]);
         // map-reading.10: a rule's scope (a step, port or field named, a part or the project not), places and devices, each once, on
@@ -481,7 +481,8 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
         if(ten){
           ensure(c.scope===null||RULE_SCOPES.includes(c.scope as never));const named=c.scope==='step'||c.scope==='port'||c.scope==='field';
           if(named)text(c.scopeName,40);else ensure(c.scopeName===null);
-          list(c.anchors,4);for(const a of c.anchors as unknown[]){obj(a,['kind','text','quote']);ensure(ANCHOR_KINDS.includes(a.kind as never));text(a.text,80);quote(a.quote);}
+          // map-reading.11: every place says whether the program put it there (a program candidate is always inferred).
+          list(c.anchors,4);for(const a of c.anchors as unknown[]){obj(a,['kind','text','quote',...(eleven?['program']:[])]);ensure(ANCHOR_KINDS.includes(a.kind as never));text(a.text,80);quote(a.quote);if(eleven)ensure(typeof a.program==='boolean'&&(!a.program||a.kind==='inferred'));}
           ensure(new Set((c.anchors as {text:string;quote:{record:string;from:number;to:number}}[]).map(a=>JSON.stringify([a.text,a.quote.record,a.quote.from,a.quote.to]))).size===(c.anchors as unknown[]).length);
           list(c.enforcedBy,4);for(const e of c.enforcedBy as unknown[]){obj(e,['kind','text','quote']);ensure(ENFORCER_KINDS.includes(e.kind as never));text(e.text,80);if(e.quote===null)ensure(e.kind==='unknown');else quote(e.quote);}
           const devices=c.enforcedBy as {kind:string;text:string}[],rank=(k:string)=>k==='none'?1:k==='unknown'?0:2,top=Math.max(-1,...devices.map(e=>rank(e.kind)));

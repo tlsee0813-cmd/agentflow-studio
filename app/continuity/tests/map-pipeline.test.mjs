@@ -1072,8 +1072,8 @@ function browserApply(f, wire, exclusions, n = 7) {
 }
 
 test('recipe identities are bumped for the changed prompts and validation semantics', () => {
-  assert.equal(PIPELINE_RECIPE, 'first-map-divided.33');
-  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.33');
+  assert.equal(PIPELINE_RECIPE, 'first-map-divided.34');
+  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.34');
 });
 
 test('a render fragment with one unresolvable claim alias is applied with only that claim set aside and a durable diagnostic', async t => {
@@ -1239,7 +1239,7 @@ test('.29: a 24-part first map renders in eight fragments; a run ceiling that ca
 // ---- first-map-divided.30: map-reading.9 (steps, loop, kept state, port map) and the rules from the blind judging of the .29 map. ----
 test('.30 rule sentences: every connection row a line, absorption into the group parent only, row names verbatim, "·" outside parentheses, state facts first, steps, loop, kept state and the port map', async () => {
   const P = await import('../server/map-pipeline.mjs'), B = await import('../server/map-blueprint.mjs');
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.33', 'later-map-divided.33']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.34', 'later-map-divided.34']);
   for (const rule of ['흡수는 기록의 묶음 표(부모 이름 | 자식 이름들)가 그 행의 부모로 적은 부분에만 하고', '연결 표(보내는 부분 | 받는 부분)에 자기 행이 있는 단위는 부모가 있어도 흡수하지 않고 부분으로 세운다',
     '부분의 name은 그 표 행의 첫 칸 이름을 글자 그대로 쓰고', '「facts-refresh」 행을 「calendar.json」으로 부르지 않는다', '모든 행은 relation 항목 하나(저장소를 거치면 둘)로 빠짐없이 쓴다',
     'global은64개 이하(그중 relation 항목 48개까지)']) assert.ok(B.MAP_BLUEPRINT_PROMPT.includes(rule), rule);
@@ -1501,7 +1501,7 @@ test('.31: a render or global reply cut at its cap fails the run as MAP_STAGE_IN
 // the final wire's diagnostics on the global stage record, the row-level, payload and hedge rules (fake providers only). ----
 test('.32 rule sentences: sixteen claims a first-map part, a table row one claim, the summary money facts on the engine, withdrawals on their 부분 이름 part, one payload list, the record\'s own hedge', async () => {
   const P = await import('../server/map-pipeline.mjs'), B = await import('../server/map-blueprint.mjs');
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.33', 'later-map-divided.33']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.34', 'later-map-divided.34']);
   for (const rule of ['그 행의 「부분 이름」 칸(없으면 첫 칸)이 이름 붙인 부분에 맡긴다', '「엔진 | 매일 FLAT 재시작 | 채택 안 함」은 → 엔진이며', '한 부분에 맡기는 항목 수는 줄이지 않는다(첫 지도의 부분은 주장을 20개까지 쓴다)',
     '연결 행의 「넘기는 것」 칸은 산출물 이름 목록 하나이며 부분이 아니다', '산출물 표에 그 파일의 행이 있을 때만 그 저장소 부분을 거친다', '「new:facts_refresh → new:engine: fee_policy·calendar.json」']) assert.ok(B.MAP_BLUEPRINT_PROMPT.includes(rule), rule);
   for (const gone of ['돌고 있는 부분에 맡기는 정정·철회·모름은 둘까지로 한다', '넘치는 철회는 원문이 대신 둔 것을 맡은 부분', '기록의 화살표가 파일 이름(calendar.json 같은)을 넘기는 것으로 적은 흐름도 그 파일의 저장소 부분을 거친다'])
@@ -1560,7 +1560,7 @@ test('.32: a render correction hears its own parts\' plan items no claim quotes;
 // and correction rules, with the recipe identity bumped. ----
 test('.33 rule sentences: a rule\'s scope from its row, places only from lines that place it, devices from the condition row, a gate line, a person or 「기록상 미설계」, a withdrawal\'s kind from its content, a gate run or dev', async () => {
   const P = await import('../server/map-pipeline.mjs');
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.33', 'later-map-divided.33']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.34', 'later-map-divided.34']);
   for (const rule of ['topic이 rule인 주장(기록의 「지켜야 할 것」 표의 행 하나이며 claim.at은 그 행이다)에는 scope·scopeName·anchors·enforcedBy를 더한다',
     'part(그 행의 부분 이름 칸이 이름 붙인 부분 전체이며 기본값이다)', 'project(행의 부분 이름 칸이 「전체」일 때만)', '「돈 안전」 같은 말만으로 project로 올리지 않는다',
     'anchors는 그 규칙이 적용되는 자리를 놓는 원문 줄에서만 최대 4개이며', '「조건·거부·분기」 표에서 이 규칙을 구현하는 조건 행', 'kind=stated이고 at은 그 행이다',
@@ -1605,4 +1605,49 @@ test('.33: a first map\'s global first pass that leaves a plan relation item und
   assert.deepEqual(globals[1].input.correction.issues.filter(x => x.rule === 'plan-relations'), [{ path: 'relations', rule: 'plan-relations', expected: 1, actual: 0, names: ['new:u0 → new:u1'] }]);
   assert.deepEqual(wire.relations, [], 'the correction that still draws no line is taken as it is');
   assert.equal(validateMapReply(wire, ask).parts.length, 2);
+});
+
+// ---- first-map-divided.34 (from the blind judging of the .33 KORU map, signs 8/10): the condition rows the render hears, the
+// devices it may say, one kept state per 「·」 item, a hand-over to the next sha an implementation, and one render correction for a
+// plan item lost under the cap (fake providers only; no model quality is claimed). ----
+test('.34 rule sentences: anchors cite one of the program\'s condition rows or stay [], code only from a condition or file-map row, unknown where the record does not know the device, one kept state per 「·」 item, DROP an implementation', async () => {
+  const P = await import('../server/map-pipeline.mjs');
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.34', 'later-map-divided.34']);
+  for (const rule of ['입력의 conditions는 프로그램이 원문에서 옮겨 둔 목록이다', '{"at":"그 행의 구간 별칭","condition":"조건 칸","then":"참이면 칸"}',
+    'anchors는 규칙의 말이 conditions 한 행의 조건·결과와 맞을 때', '그 행을 at으로 인용하고, 그렇지 않으면 []다', '프로그램 후보로 따로 붙이고 모델의 답과 구별해 표시하므로',
+    'code는 그 at이 「조건·거부·분기」 표의 행이거나 「파일 지도」 표의 행일 때만 쓴다', 'code이고 text는 그 행의 then이다',
+    '그 장치가 코드 조건인지 운영 판단인지 모른다고(모름·추정) 적으면 person·gate가 아니라', '규칙을 정한 사람(「누가 정했나」 칸의 소유자 같은)은 지키는 장치가 아니며',
+    '이 부분의 claims가 20개보다 적은 동안 빼지 않고 행마다 주장 하나로 쓴다', '한 칸 안에서 「·」로 나뉜 항목은 각각 다른 상태 하나다', 'extend·wake·recard 세 stateVars이고',
+    '그 칸이 「/일」이라고 적으면 그 항목마다 scope는 「하루」다', '「다음 sha로 넘김」·「DROP」한 행은 그 행이 설계가 바뀌었다고 말하지 않는 한 design이 아니라 implementation이다'])
+    assert.ok(P.RENDER_RULES.includes(rule), rule);
+  for (const rule of ['enforced-by의 code는 「조건·거부·분기」 행이나 「파일 지도」 행을 at으로 인용할 때만 쓰고', 'render의 plan-claims는 주장이 20개보다 적은 부분의 항목을 다시 쓰라는 뜻이며'])
+    assert.ok(P.CORRECTION_RULES.includes(rule), rule);
+  for (const rule of ['conditions', 'stateVars']) assert.ok(!P.GLOBAL_RULES.includes(rule), rule);
+});
+
+const conditionAsk = () => validateMapAsk({ schemaVersion: 'studio.map.6', project: { name: '자료 흐름', purpose: null }, parts: [], relations: [], requests: [], priors: [],
+  records: [
+    { id: 'N01', kind: 'pasted', note: '', basis: '앞쪽 기록', ...encodeSpans('N01', ['입력기는 프로젝트 문서를 받아 작업 큐에 전달합니다.', '처음에는 모든 자료를 영구 저장한다고 설명했습니다.', '중간 조건: 개발용 판본에만 적용합니다.', '원문 기록은 변경 없이 보존합니다.',
+      '5. 조건·거부·분기', '| 부분 이름 | 조건 | 참이면 | 거짓이면 |', '|---|---|---|---|', '| 자료 처리 | not queue_ready | QUEUE_EMPTY | 다음 |', '| 다른 부분 | x > 1 | X_OVER | 다음 |'].join('\n')) },
+    askFor().records[1]],
+});
+
+test('.34: each render hears its parts\' 「조건·거부·분기」 rows (alias, 조건, 참이면) under conditions; a first pass losing a plan item under the cap pays one correction that hears it', async t => {
+  const ask = conditionAsk(), spans = ask.records[0].spans, row = spans.find(s => s.t.startsWith('| 자료 처리')).s;
+  const { make } = await setup(t), calls = [];
+  const pipeline = make({ renderModel: 'gpt-6.1-terra', callProvider: fakeProvider(ask, calls, call => {
+    if (call.stage === 'plan') { const plan = blueprintFor(originalWire(ask), ask); plan.global.push({ kind: 'condition', text: '개발용 판본에만 적용 → new:flow', at: [spans[2].s] }); return plan; }
+  }) });
+  const wire = await pipeline.call(ask);
+  const renders = calls.filter(c => c.stage === 'render');
+  assert.deepEqual(renders.map(c => c.input.conditions), [{ 'new:flow': [{ at: row, condition: 'not queue_ready', then: 'QUEUE_EMPTY' }] }, { 'new:flow': [{ at: row, condition: 'not queue_ready', then: 'QUEUE_EMPTY' }] }],
+    'only its own part\'s rows, the program\'s copy of the record');
+  assert.deepEqual(renders.map(c => !!c.input.correction), [false, true], 'one paid correction for the lost plan item, never a second');
+  assert.deepEqual(renders[1].input.correction.issues.filter(x => x.rule === 'plan-claims').map(x => x.names), [['new:flow: 개발용 판본에만 적용 → new:flow']]);
+  assert.equal(wire.parts[0].claims.length, 2, 'the correction that still leaves it out is taken as it is');
+  assert.equal(validateMapReply(wire, ask).parts.length, 1);
+  // Without condition rows the key is there and empty.
+  const plainCalls = [], { make: again } = await setup(t);
+  await again({ renderModel: 'gpt-6.1-terra', callProvider: fakeProvider(askFor(), plainCalls) }).call(askFor());
+  assert.deepEqual(plainCalls.filter(c => c.stage === 'render').map(c => c.input.conditions), [{}]);
 });

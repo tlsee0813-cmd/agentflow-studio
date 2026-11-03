@@ -91,7 +91,21 @@ export const MAP7_SCHEMA = 'studio.map.7' as const;
  * Pipeline .33 also: map.6 takes twenty claims per part (MAP6_CLAIMS); the divided first map sets aside a claim whose words stand
  * inside one of its part's step does or its role sentence (restate), and an input or output of a part that is a field of one of
  * its store partners (a store at the other end of one of its lines) or a bare prefix of another item of the same list (that list's
- * category, at the item's own index). */
+ * category, at the item's own index).
+ * map-reading.11 (pipeline .34, from the blind judging of the .33 KORU map: every one of 78 claims had anchors [], and the money
+ * rule's place stood in the design record's 「조건·거부·분기」 row): after a reply is read, the program itself adds to a rule claim
+ * (topic rule, scope not project) whose places are none the condition rows of its own part's 「조건·거부·분기」 table that share at
+ * least two content words with the rule (the claim's words and its row's rule cells; Latin words of three letters or more, Hangul
+ * words of two or more with a trailing particle left off, a few fixed words read as one: 스탑/stop, 상주/resident, 동시/concurrent …),
+ * at most two (PROGRAM_ANCHORS_MAX), each { kind inferred, text: the row's 조건 (80), the row's line, program: true }; never beside a
+ * place the reply kept, never on material. A program place is the program's, never the model's: the model cannot write one (an
+ * unasked key is passed over) and the same reading of the same records adds the same ones (the browser reads them again). Stored as
+ * map-reading.11, every anchor with program (true or false); earlier entries keep their shape.
+ * Pipeline .34 also (the divided first map): a code device whose line is no row of a 「조건·거부·분기」 or 「파일 지도」 table (when
+ * the records draw one) is set aside (enforced-by), and so is a person or gate device of a rule whose own line, or a 「가장 자신 없는
+ * 것」 row of its part sharing two content words with it, says with 모름/추정 that it does not know whether the device is code or an
+ * operational judgement (enforced-by: then unknown is the record's word); an input or output that a store partner's field repeats is
+ * kept when it stands in that part's own 「부분별 설계」 cell (받는 산출물 for inputs, 내는 산출물 for outputs). */
 /** A first map: nothing of the map, no request and no prior is sent (map.7 is never one). */
 export const firstAsk = (ask: Pick<MapAsk, 'parts' | 'requests' | 'priors'>): boolean => ask.parts.length === 0 && (ask.requests ?? []).length === 0 && (ask.priors ?? []).length === 0;
 /** A reply refused for a contradiction or a wrong reference it holds: where (path), which rule and what it names (an alias,
@@ -213,6 +227,80 @@ export function factRowNames(texts: Iterable<string>): Set<string> {
   }
   return out;
 }
+/* Pipeline .34 (map-reading.11): the program's own reading of the records' numbered section tables, by their headings and header
+ * cells, for a rule's places and devices and a part's design cells. Never the model's words. */
+const CONDITION_TABLE = /^조건\s*·\s*거부/, FILE_TABLE = /^파일\s*지도/, HEDGE_TABLE = /가장\s*자신\s*없는/, DESIGN_TABLE = /^부분별\s*설계/;
+interface SectionRow { record: string; from: number; to: number; cells: string[]; header: string[] }
+/** The data rows of every table under a numbered heading matching title (header and rule rows left out), each with its cells, its
+ * table's header cells, its record and where its line stands ([from, to) of the record's text, the line's own white space left out). */
+function rowsUnder(texts: Map<string, { text: string; spans: Span[] | null }>, title: RegExp): SectionRow[] {
+  const out: SectionRow[] = [];
+  for (const [record, { text }] of texts) {
+    let open = false, header: string[] | null = null, offset = 0;
+    for (const raw of text.split('\n')) {
+      const start = offset; offset += raw.length + 1;
+      const line = raw.trim(), heading = line.startsWith('|') ? null : /^\d{1,2}\.\s*(.+)$/.exec(line);
+      if (heading) { open = title.test(heading[1]!.trim()); header = null; continue; }
+      if (!open) continue;
+      if (!line.startsWith('|')) { if (header && line) open = false; continue; }
+      const cells = line.replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim());
+      if (!header) { header = cells; continue; }
+      if (cells.every(c => !c || /^:?-{2,}:?$/.test(c))) continue;
+      const from = start + raw.indexOf(line);
+      out.push({ record, from, to: from + line.length, cells, header });
+    }
+  }
+  return out;
+}
+const column = (header: string[], name: RegExp, fallback = -1): number => { const i = header.findIndex(c => name.test(c)); return i >= 0 ? i : fallback; };
+/** The alias of the pieces a line stands on (one piece, or the run of pieces it spans), as a reply would cite it. */
+function lineAlias(record: string, spans: Span[] | null, from: number, to: number): string | null {
+  const hit = (spans ?? []).flatMap((s, i) => s.from < to && from < s.to ? [i] : []);
+  if (!hit.length) return null;
+  const n = (i: number) => String(i + 1).padStart(2, '0'), a = hit[0]!, b = hit.at(-1)!;
+  return a === b ? `${record}.${n(a)}` : `${record}.${n(a)}-${n(b)}`;
+}
+/** Pipeline .34: a condition row of a design record's 「조건·거부·분기」 table: the part its 부분 이름 cell names (as written), its 조건
+ * and 참이면 cells and the alias of its line (where it stands in its record). */
+export interface ConditionRow { part: string; at: string; condition: string; then: string; record: string; from: number; to: number }
+export function conditionRows(ask: MapAsk): ConditionRow[] {
+  const texts = askRecords(ask);
+  return rowsUnder(texts, CONDITION_TABLE).flatMap((r): ConditionRow[] => {
+    const part = column(r.header, /부분/, 0), condition = column(r.header, /^조건(\s|$)/), then = column(r.header, /참이면/);
+    if (condition < 0 || then < 0) return [];
+    const at = lineAlias(r.record, texts.get(r.record)?.spans ?? null, r.from, r.to), name = r.cells[part] ?? '', words = r.cells[condition] ?? '';
+    return at && name && words ? [{ part: name, at, condition: words, then: r.cells[then] ?? '', record: r.record, from: r.from, to: r.to }] : [];
+  });
+}
+/* Pipeline .34: content words, compared loosely: Latin runs of three letters or more and Hangul runs of two or more (a trailing
+ * particle left off, twice at most, while two letters stay), a few function words left out, and a few fixed words read as one (a
+ * Korean word as the Latin stem the records' code writes, a Latin word by the stem it starts with). */
+const PARTICLES = ['으로', '에서', '까지', '부터', '이면', '인지', '이고', '에게', '은', '는', '이', '가', '을', '를', '의', '에', '로', '와', '과', '도', '만', '면'];
+const STOP_WORDS = new Set(['not', 'and', 'the', 'for', 'with', 'true', 'false', 'none', 'null', 'then', 'else', 'from', 'into',
+  '하나', '모든', '같은', '때만', '없음', '있음', '다음', '그대로', '또는', '이고', '그리고', '않음', '안함']);
+const GLOSS: Readonly<Record<string, string>> = { 스탑: 'stop', 스톱: 'stop', 상주: 'resident', 크기: 'size', 방향: 'side', 동시: 'concurren', 상한: 'cap', 만료: 'expir',
+  연장: 'extend', 게이트: 'gate', 관문: 'gate', 신호: 'signal', 진입: 'entry', 거래: 'trad', 제한: 'restrict', 금지: 'forbid', 계획: 'plan', 검사: 'check' };
+const STEMS = [...new Set(Object.values(GLOSS))];
+const unparticled = (w: string): string => { for (let k = 0; k < 2; k++) { const p = PARTICLES.find(x => w.endsWith(x) && w.length - x.length >= 2); if (!p) break; w = w.slice(0, -p.length); } return w; };
+export function contentWords(text: string): Set<string> {
+  const out = new Set<string>();
+  for (const w of text.normalize('NFC').toLowerCase().match(/[a-z0-9]+|[가-힣]+/g) ?? []) {
+    if (/^[a-z0-9]+$/.test(w)) { if (w.length >= 3 && !STOP_WORDS.has(w)) out.add(STEMS.find(s => w.startsWith(s)) ?? w); continue; }
+    const h = unparticled(w); if (h.length >= 2 && !STOP_WORDS.has(h) && !STOP_WORDS.has(w)) out.add(GLOSS[h] ?? h);
+  }
+  return out;
+}
+const sharedWords = (a: Set<string>, b: Set<string>): number => [...a].filter(w => b.has(w)).length;
+/** A rule's own words: the claim's text and, when its line is a table row, that row's cells between its part cell and its last cell
+ * (「지켜야 할 것」: the rule line, not who set it). */
+const ruleWords = (text: string, quote: string): Set<string> => {
+  const row = tableRows(quote)[0] ?? [];
+  return contentWords([text, ...(row.length > 2 ? row.slice(1, -1) : row.slice(1))].join(' '));
+};
+/** Pipeline .34: at most this many program places on one rule. */
+export const PROGRAM_ANCHORS_MAX = 2;
+/** Pipeline .34: a line saying the record does not know whether a device is code or an operational judgement (모름/추정 about it). */
+const MECHANISM_UNKNOWN = (t: string): boolean => /모름|모른다|추정/.test(t) && ((/코드/.test(t) && /운영|판단|사람|수동/.test(t)) || /장치|집행/.test(t));
 /** Pipeline .31: a clock time in a loop unit (a timer's schedule, never its loop). */
 const CLOCK = /\d{1,2}:\d{2}Z?/;
 /** Pipeline .30: the words of each state as a record writes it, for a claim that only says its part's state again. */
@@ -261,8 +349,9 @@ export interface MapReplyClaim { kind: ClaimKind; text: string; record: string; 
   /** map.6–7 (map-reading.10): always present in a checked reply (null / [] when not said); each anchor and device with where its
    * line stands (a device's quote null only for unknown). */
   scope?: RuleScope | null; scopeName?: string | null; anchors?: MapReplyAnchor[]; enforcedBy?: MapReplyEnforcer[]; withdrawalKind?: WithdrawalKind | null; gate?: GateKind | null }
-/** map-reading.10: a place a rule applies with the quote of the line placing it; a device keeping it with the quote of its line. */
-export interface MapReplyAnchor { kind: AnchorKind; text: string; quote: MapReplyQuote }
+/** map-reading.10: a place a rule applies with the quote of the line placing it; a device keeping it with the quote of its line.
+ * map-reading.11: program is set by the validator's own pass only (a candidate it adds), never read from a reply. */
+export interface MapReplyAnchor { kind: AnchorKind; text: string; quote: MapReplyQuote; program?: true }
 export interface MapReplyEnforcer { kind: EnforcerKind; text: string; quote: MapReplyQuote | null }
 /** map.6: the undecided statement a candidate keeps (attribution, holds), exact where it stands in the excerpt. */
 export interface MapReplyStatement { key: string; kind: ClaimKind; text: string; about: string | null; record: string; quote: string; from: number; to: number }
@@ -631,6 +720,13 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
   const partNames = new Set(divided ? [...(options.owners ?? []), ...entries.map(([, p]) => typeof p.name === 'string' ? p.name : '')].map(plainName).filter(Boolean) : []);
   // pipeline .30 (divided): the names the records' change, defect and withdrawal rows name, read once when first needed.
   let facts: Set<string> | undefined;
+  // pipeline .34 (divided): the rows of the records' 「조건·거부·분기」 and 「파일 지도」 tables (null: no record draws one), and the
+  // 「가장 자신 없는 것」 rows, read once when first needed.
+  let codeRows: SectionRow[] | null | undefined, hedgeRows: SectionRow[] | undefined;
+  const codeLines = (): SectionRow[] | null => {
+    if (codeRows === undefined) { const rows = [...rowsUnder(texts, CONDITION_TABLE), ...rowsUnder(texts, FILE_TABLE)]; codeRows = rows.length ? rows : null; }
+    return codeRows;
+  };
   const part = (p: Record<string, unknown>, pi: number): MapReplyPart => {
     const ref = p.ref as string, fresh = news.has(ref);
     if (fresh) {
@@ -751,6 +847,14 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       // A device: code, a gate, a person (each on its line), none (기록상 미설계, on its line) or unknown (장치 미상, a line or none), each
       // kind and wording once. A none or unknown beside a device, or an unknown beside a none, says the opposite of it: left out.
       const rank = (k: EnforcerKind) => k === 'none' ? 1 : k === 'unknown' ? 0 : 2;
+      const mechanismUnknown = (): boolean => {
+        if (MECHANISM_UNKNOWN(q.quote)) return true;
+        const own = plainName(typeof p.name === 'string' ? p.name : parts.get(ref)?.name ?? ''), words = ruleWords(c.text as string, q.quote);
+        return !!own && (hedgeRows ??= rowsUnder(texts, HEDGE_TABLE)).some(r => {
+          const at = column(r.header, /부분/, 0), rest = r.cells.filter((_, i) => i !== at).join(' ');
+          return plainName(r.cells[at] ?? '') === own && MECHANISM_UNKNOWN(rest) && sharedWords(contentWords(rest), words) >= 2;
+        });
+      };
       const enforcedBy = alone10((): MapReplyEnforcer[] => {
         if (!said(c, 'enforcedBy')) return [];
         need(Array.isArray(c.enforcedBy) && c.enforcedBy.length <= 4 && (rule || !c.enforcedBy.length), `${at}.enforcedBy`, 'enforced-by');
@@ -763,6 +867,11 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
             const kind = x.kind as EnforcerKind, text = short(x.text, 80); need(text !== null && (said(x, 'at') || kind === 'unknown'), path, 'enforced-by');
             const quote = said(x, 'at') ? cite(x.at, `${path}.at`) : null;
             need(!out.some(([, e]) => e.kind === kind && e.text === text), path, 'enforced-by');
+            // pipeline .34 (divided): code stands on a condition row or a file-map row (when a record draws such a table); a person or
+            // a gate is not the record's word where the record says it does not know whether the device is code or an operational
+            // judgement (the rule's own line, or a hedge row of its part sharing two content words with it): unknown is.
+            if (divided && kind === 'code' && quote) { const rows = codeLines(); need(!rows || rows.some(r => r.record === quote.record && r.from < quote.to! && quote.from! < r.to), path, 'enforced-by'); }
+            if (divided && (kind === 'person' || kind === 'gate')) need(!mechanismUnknown(), path, 'enforced-by');
             return { kind, text: text!, quote };
           }, path, 'enforced-by', null);
           if (got) out.push([k, got]);
@@ -1000,14 +1109,21 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
   // index (every raw copy of it), with the list's category; the port map below reads the lists as left.
   if (divided) {
     const rawOf = new Map(entries.map(([pi, p]) => [p.ref as string, [pi, p] as const]));
+    // pipeline .34: a name standing in the part's own 「부분별 설계」 cell (받는 산출물 for inputs, 내는 산출물 for outputs) is the record's
+    // own item, kept even where a store partner's field repeats it (the .33 run set aside 카드 러너's 「counter」 of 「cards·counter·…」).
+    const design = rowsUnder(texts, DESIGN_TABLE);
+    const designCell = (name: string, cell: RegExp): string => {
+      const row = design.find(r => plainName(r.cells[column(r.header, /이름/, 0)] ?? '') === plainName(name)), at = row ? column(row.header, cell) : -1;
+      return row && at >= 0 ? plainName(row.cells[at] ?? '') : '';
+    };
     for (const b of outParts) {
       const raw = rawOf.get(b.ref); if (!raw || b.type === 'store') continue;
       const [pi, p] = raw;
       const partners = relations.flatMap(r => r.from === b.ref ? [r.to] : r.to === b.ref ? [r.from] : []).map(ref => byRef.get(ref)).filter(x => x?.type === 'store');
       const partnerFields = new Set(partners.flatMap(x => x!.fields ?? []).map(plainName));
       for (const k of ['inputs', 'outputs'] as const) {
-        const list = b[k] ?? [], names = list.map(plainName);
-        const odd = new Set(list.filter((_, j) => partnerFields.has(names[j]!) || names.some((y, i) => i !== j && y.length > names[j]!.length && y.startsWith(names[j]!))));
+        const list = b[k] ?? [], names = list.map(plainName), cell = designCell(b.name ?? parts.get(b.ref)?.name ?? '', k === 'inputs' ? /받는/ : /내는/);
+        const odd = new Set(list.filter((_, j) => (partnerFields.has(names[j]!) && !(cell && cell.includes(names[j]!))) || names.some((y, i) => i !== j && y.length > names[j]!.length && y.startsWith(names[j]!))));
         if (!odd.size || !Array.isArray(p[k])) continue;
         (p[k] as unknown[]).forEach((x, j) => { if (typeof x === 'string' && odd.has(x.trim())) aside.push(new MapReplyError(`parts[${pi}].${k}[${j}]`, 'contract', k)); });
         b[k] = list.filter(x => !odd.has(x));
@@ -1184,6 +1300,22 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
   // map.7: a reply with every item set aside is the refusal of its first one (nothing of it would be read).
   if (aside.length && !outParts.length && !relations.length && !candidates.length && !matches.length && !material.length) throw aside[0];
   if (six) contradictions(outParts, relations, candidates, matches, material, conditions, portMap);
+  // map-reading.11 (pipeline .34): the program's places. A rule (scope not project) with no place kept gets up to two condition rows
+  // of its own part's 「조건·거부·분기」 table sharing at least two content words with it (most first, then in the record's order),
+  // each inferred, its 조건 as text and its line as quote, marked program; none on material. The model's words are never changed.
+  if (six) {
+    let rows: ConditionRow[] | undefined;
+    for (const b of outParts) for (const c of b.claims) {
+      if (c.topic !== 'rule' || (c.anchors ?? []).length || c.scope === 'project') continue;
+      const own = plainName(b.name ?? parts.get(b.ref)?.name ?? ''), words = ruleWords(c.text, c.quote);
+      const fit = (rows ??= conditionRows(ask)).filter(r => plainName(r.part) === own && !material.some(m => m.record === r.record && m.from < r.to && r.from < m.to))
+        .map((r, i) => ({ r, i, n: sharedWords(words, contentWords(`${r.condition} ${r.then}`)) })).filter(x => x.n >= 2).sort((x, y) => y.n - x.n || x.i - y.i).slice(0, PROGRAM_ANCHORS_MAX);
+      const placed = fit.flatMap(({ r }): MapReplyAnchor[] => {
+        try { return [{ kind: 'inferred', text: r.condition.length <= 80 ? r.condition : `${r.condition.slice(0, 79)}…`, quote: cite(r.at), program: true }]; } catch { return []; }
+      });
+      if (placed.length) c.anchors = placed;
+    }
+  }
   const reply: MapReply = { summary: value.summary.trim(), parts: outParts, relations, candidates, gaps, ...(two ? { matches } : {}), ...(four ? { material } : {}), ...(six ? { basisAt, basisVersion, portMap } : {}) };
   // Words the model wrote (never the quotes, which are the person's own records) must not look like a key.
   // map.7 names the first such place (the same strings, the same rule).
@@ -1205,7 +1337,7 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
     ...portMap.flatMap((m, k): [string, string][] => [[`portMap[${k}]`, m.port], [`portMap[${k}]`, m.step]]),
     // map-reading.10: a rule's scope name, places and devices are the model's words too.
     ...outParts.flatMap((p, i): [string, string][] => p.claims.flatMap((c, j): [string, string][] => [[`parts[${i}].claims[${j}].scope`, c.scopeName ?? ''],
-      ...(c.anchors ?? []).map((a, k): [string, string] => [`parts[${i}].claims[${j}].anchors[${k}]`, a.text]),
+      ...(c.anchors ?? []).filter(a => !a.program).map((a, k): [string, string] => [`parts[${i}].claims[${j}].anchors[${k}]`, a.text]),
       ...(c.enforcedBy ?? []).map((x, k): [string, string] => [`parts[${i}].claims[${j}].enforcedBy[${k}]`, x.text])]))];
   const leaked = written.find(([, w]) => w && secretLike(w));
   need(!leaked, leaked?.[0] ?? 'reply', 'secret-like');
@@ -1690,12 +1822,12 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
     if (q.from === undefined || q.to === undefined) return { record: source.id, quote: q.quote };
     return { record: source.id, quote: q.quote, from: source.from + q.from, to: source.from + q.to };
   };
-  // map-reading.7 (every map.6–7 reply; stored as map-reading.10): each optional field is stored, null (files: []) when the reply did not say it, so the
+  // map-reading.7 (every map.6–7 reply; stored as map-reading.11): each optional field is stored, null (files: []) when the reply did not say it, so the
   // stored shape is exact. A part's state stands on its own passage like a claim: one inside material or already read is not kept.
   const claimOf = (c: MapReplyClaim): ReadingClaim => ({ kind: c.kind, text: c.text, ...real(c), about: c.about, replaces: c.replaces ? input.claims.get(c.replaces)! : null,
     ...(six ? { topic: c.topic ?? null, evidence: c.evidence ?? null, when: c.when ?? null, where: c.where ?? null, before: c.before ?? null,
       // map-reading.10: a place or a device stands on its own line like a step (one inside material or already read is not kept).
-      scope: c.scope ?? null, scopeName: c.scopeName ?? null, anchors: (c.anchors ?? []).filter(a => usable(a.quote)).map(a => ({ kind: a.kind, text: a.text, quote: real(a.quote) })),
+      scope: c.scope ?? null, scopeName: c.scopeName ?? null, anchors: (c.anchors ?? []).filter(a => usable(a.quote)).map(a => ({ kind: a.kind, text: a.text, quote: real(a.quote), program: a.program === true })),
       enforcedBy: (c.enforcedBy ?? []).filter(x => !x.quote || usable(x.quote)).map(x => ({ kind: x.kind, text: x.text, quote: x.quote ? real(x.quote) : null })),
       withdrawalKind: c.withdrawalKind ?? null, gate: c.gate ?? null } : {}) });
   const stateOf = (x: MapReplyPart): Pick<ReadingPart, 'state' | 'stateWhen' | 'stateQuote' | 'files' | 'type' | 'typeQuote' | 'inputs' | 'outputs' | 'fields' | 'config' | 'steps' | 'loop' | 'stateVars'> => {
@@ -1791,7 +1923,7 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
     const holds = !!cur && !cur.excluded && !cur.replacedBy && !!cur.target && sameTarget(cur.target, ref!.target) && cur.correction === ref!.correction;
     return { ...rest, replaces: holds ? { reading: ref!.reading, index: ref!.index } : null };
   });
-  const reading: MapReading = { version: six ? 'map-reading.10' : four ? 'map-reading.4' : three ? 'map-reading.3' : withRequests ? 'map-reading.2' : 'map-reading.1', id: meta.id, at: meta.at, model: meta.model, prompt: meta.prompt, hash: meta.hash,
+  const reading: MapReading = { version: six ? 'map-reading.11' : four ? 'map-reading.4' : three ? 'map-reading.3' : withRequests ? 'map-reading.2' : 'map-reading.1', id: meta.id, at: meta.at, model: meta.model, prompt: meta.prompt, hash: meta.hash,
     ...(six ? { basisAt: reply.basisAt ?? null, basisVersion: reply.basisVersion ?? null, portMap } : {}),
     records: [...input.records.values()].map(r => { const shift = four ? 0 : texts.get(r.id)?.shift ?? 0;
       return shift ? { id: r.id, from: r.from + shift, to: r.to + shift, total: texts.get(r.id)!.raw.length } : { id: r.id, from: r.from, to: r.to, total: r.total, ...(four ? { digest: textDigest(r.text) } : {}) }; }),

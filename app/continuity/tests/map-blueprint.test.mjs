@@ -11,7 +11,7 @@ import { validateMapBlueprint, splitBlueprintParts, validateRenderedFragment, fr
   missingMapCorrections, mapCorrectionRevision, MAP_BLUEPRINT_PROMPT, LATER_BLUEPRINT_PROMPT,
   BLUEPRINT_PARTS_MAX, BLUEPRINT_NEW_PARTS_MAX, BLUEPRINT_LATER_NEW_PARTS_MAX, BLUEPRINT_GLOBAL_MAX, BLUEPRINT_FIRST_GLOBAL_MAX, BLUEPRINT_RELATION_ITEMS_MAX,
   BLUEPRINT_LATER_RELATION_ITEMS_MAX, BLUEPRINT_ANCHORS_MAX, blueprintCoverage, readingDiagnostics, sectionRows,
-  BLUEPRINT_LATER_PARTS_MAX, blueprintPartsMax, unknownRows, missingLines, fragmentKeys, factRows, uncitedFacts, planClaims, payloadParts, finalDiagnostics, FINAL_DIAGNOSTICS, FRAGMENT_KEYS } from '../server/map-blueprint.mjs';
+  BLUEPRINT_LATER_PARTS_MAX, blueprintPartsMax, unknownRows, missingLines, fragmentKeys, factRows, uncitedFacts, planClaims, planShort, payloadParts, finalDiagnostics, FINAL_DIAGNOSTICS, FRAGMENT_KEYS } from '../server/map-blueprint.mjs';
 
 function fixture(existing = 0) {
   let project = D.createProject(); for (let i = 0; i < existing; i++) project = D.addArea(project, `사용자 부분 ${i + 1}`, '직접 쓴 설명');
@@ -1077,7 +1077,7 @@ test('.33: a wrong scope, place, device or gate is set aside alone on the combin
   M.attachExclusions(plain, exclusions, f.ask);
   const applied = M.applyReading(f.project, f.input, plain, meta30('R_koru33'));
   const engineId = applied.reading.parts[3].areaId, u = M.partUnderstanding(applied.project, engineId);
-  assert.deepEqual([applied.reading.version, applied.reading.exclusions.map(x => x.path)], ['map-reading.10', exclusions.map(x => x.path)]);
+  assert.deepEqual([applied.reading.version, applied.reading.exclusions.map(x => x.path)], ['map-reading.11', exclusions.map(x => x.path)]);
   assert.deepEqual([u.rules.map(c => [c.scope, c.anchors.length, c.enforcedBy.map(e => e.kind)]), u.withdrawals.map(c => c.withdrawalKind), u.gates.map(c => c.gate)],
     [[['part', 0, ['gate']], [null, 1, ['code']]], ['design'], ['run']]);
   assert.deepEqual(validateProject(applied.project), applied.project);
@@ -1152,4 +1152,40 @@ test('.33: an input or output that is a store partner\'s field or a bare prefix 
   // .33: the lines a global stage left out, as its first pass is refused for them (the connection row 기분 층 → 엔진, undrawn here).
   assert.deepEqual(missingLines(fragments, global, f.ask, plan), [{ path: 'relations', rule: 'connections', expected: 2, actual: 1, names: ['기분 층 → 엔진'] }]);
   assert.deepEqual(missingLines(fragments, { reviseParts: ['new:engine'], reason: 'x', at: [f.at('| 엔진 | 루프')] }, f.ask, plan), []);
+});
+
+// ---- first-map-divided.34 (from the blind judging of the .33 KORU map: 카드 러너 held ten claims of twenty and lost four condition
+// rows, ARM its [모름] step, with no exclusion and no diagnostic): a first map's render first pass leaving unquoted a plan item of a
+// part under its cap is refused for its one correction (plan-claims names it); at the cap the diagnostic stays alone. ----
+test('.34: a render first pass that leaves a plan item of a part under twenty claims unquoted is refused for its one correction; at the cap only the diagnostic names it', () => {
+  const f = koruText(KORU32), plan = plan32(f), groups = splitBlueprintParts(plan), fragments = koruFragments(f);
+  fragments[1].parts[0].config = ['레버리지 20'];
+  const engine = fragments[1].parts[0], missing = ['new:engine: 엔진 | 돈 안전 = 보유 중 스탑 상주 하나 | 소유자 10-22 [보고]',
+    'new:engine: 엔진 | 게이트는 코드: TESTS rc 0 + VERIFY GO | 감독자 09-26 [보고]', 'new:engine: 엔진 | 08:49Z 뒤 실제 상태 | STATUS 첫 줄'];
+  const read = value => { const projected = structuredClone(value); for (const part of projected.parts) part.parent = null; return M.validateMapReply(projected, f.ask, { setAside: true, owners: plan.parts.map(p => p.name) }); };
+  // The engine holds two claims of twenty and quotes none of its three plan rows: the first pass is refused, the correction is read.
+  assert.deepEqual(planShort(f.ask, plan, fragments[1].parts, read(fragments[1])), missing);
+  refused(() => validateRenderedFragment(fragments[1], groups[1], f.ask, plan, true));
+  assert.deepEqual(validateRenderedFragment(fragments[1], groups[1], f.ask, plan), fragments[1], 'the correction\'s reply is taken as it is');
+  const issues = mapStageIssues(fragments[1], null, { ask: f.ask, fragment: true, blueprint: plan }).filter(x => x.rule === 'plan-claims');
+  assert.deepEqual(issues.map(x => x.names), [missing], 'the correction hears the items by name');
+  // A fragment whose parts quote their plan rows passes its first pass (the card runner's fragment).
+  assert.deepEqual(validateRenderedFragment(fragments[0], groups[0], f.ask, plan, true), fragments[0]);
+  // Once a row is quoted it is no longer named; with every row quoted the first pass passes.
+  const quoting = structuredClone(fragments[1]), claim = (key, head) => ({ key, kind: 'reported', text: `원문 행을 옮긴다(${key}).`, at: f.at(head), about: null, replaces: null });
+  quoting.parts[0].claims.push(claim('s103', '| 엔진 | 돈 안전'), claim('s104', '| 엔진 | 게이트는'));
+  assert.deepEqual(planShort(f.ask, plan, quoting.parts, read(quoting)), [missing[2]]);
+  quoting.parts[0].claims.push({ ...claim('s105', '| 엔진 | 08:49Z'), topic: 'unknown' });
+  assert.deepEqual(validateRenderedFragment(quoting, groups[1], f.ask, plan, true), quoting);
+  // At the cap (twenty claims read) the first pass passes and the diagnostic still names what is missing.
+  const full = structuredClone(fragments[1]);
+  for (let k = full.parts[0].claims.length; k < M.MAP6_CLAIMS; k++) full.parts[0].claims.push(claim(`s${101 + k}`, '| 카드 러너 | 엔진 |'));
+  assert.equal(read(full).parts[0].claims.length, M.MAP6_CLAIMS);
+  assert.deepEqual(planShort(f.ask, plan, full.parts, read(full)), []);
+  assert.deepEqual(validateRenderedFragment(full, groups[1], f.ask, plan, true), full);
+  assert.deepEqual(mapStageIssues(full, null, { ask: f.ask, fragment: true, blueprint: plan }).find(x => x.rule === 'plan-claims')?.names, missing);
+  // A later map (map.7) keeps its own first pass: no plan-claims refusal.
+  const later = fixture(1), laterPlan = planned(later, 2), laterFragments = rendered(later, laterPlan);
+  laterPlan.global.push({ kind: 'condition', text: '조건 → new:p1', at: [later.at[5]] });
+  assert.deepEqual(validateRenderedFragment(laterFragments[0], splitBlueprintParts(laterPlan)[0], later.ask, laterPlan, true), laterFragments[0]);
 });

@@ -403,6 +403,13 @@ export function planClaims(ask, blueprint, parts) {
   const missing = items.filter(item => !item.landed).sort((a, b) => order.get(a.ref) - order.get(b.ref)).map(item => item.name);
   return { items: items.length, missing };
 }
+/** .34: the plan items (planClaims, named the same way) no claim of the given parts quotes whose part holds fewer claims than a
+ * first map's cap (MAP6_CLAIMS) once read (read: the fragment's checked reply; a part it does not hold counts none). A render's
+ * first pass leaving one is refused for its one correction; an item of a part at the cap is the diagnostic's alone. */
+export function planShort(ask, blueprint, parts, read) {
+  const held = new Map((Array.isArray(read?.parts) ? read.parts : []).map(part => [part.ref, Array.isArray(part.claims) ? part.claims.length : 0]));
+  return planClaims(ask, blueprint, parts).missing.filter(name => (held.get(name.slice(0, name.indexOf(': '))) ?? 0) < MAP6_CLAIMS);
+}
 /** .33 (diagnostic only): the 모르는 것 rows naming a part of the given ones (the cell under 「부분」, loosely compared), and those no
  * topic=unknown claim of that part quotes, as { rows, missing: ['the row's cells | joined', …] }. */
 export function unknownRows(ask, parts) {
@@ -590,6 +597,10 @@ export function validateRenderedFragment(value, group, ask, blueprint, strict = 
   // first .30 run spent its $1 on one correction per fragment (wrong-part, restate, fields) and could not reserve the last one.
   // The strict pass still refuses what is structural (the shape, refs, keys, key ranges, a part left empty) and a claim over 220.
   if (strict && ask.schemaVersion !== 'studio.map.6') refuseField(readingExclusions(read), PARTS_SCOPE);
+  // .34: a first map's first pass that leaves unquoted a plan item assigned to one of its parts while that part holds fewer claims
+  // than the cap is refused for its one correction, whose feedback names the items (plan-claims); the correction's reply is taken as
+  // it is. The .33 card runner held ten of twenty and lost four condition rows (and ARM its [모름] step) with no exclusion.
+  if (strict && ask.schemaVersion === 'studio.map.6' && planShort(ask, planned, value.parts, read).length) invalid();
   return structuredClone(value);
 }
 /** .30: what a first-map fragment's own reading sets aside (fixed path, rule and category only), for the stage's record. */

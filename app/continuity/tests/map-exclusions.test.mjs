@@ -96,7 +96,7 @@ test('F2 a 1087-character citation with the sole supporting sentence last is exc
     assert.deepEqual(got.parts[0].claims.map(c => c.key), ['s1']);
     assert.deepEqual(errors(got), [['parts[0].claims[1].at', 'length']]);
     const applied = M.applyReading(f.p, f.inp, got, meta()), x = applied.reading.exclusions[0];
-    assert.equal(applied.reading.version, 'map-reading.10');
+    assert.equal(applied.reading.version, 'map-reading.11');
     assert.deepEqual([x.path, x.rule, x.category, x.record, x.from, x.to], ['parts[0].claims[1].at', 'length', null, f.p.pasted[0].id, 0, 1087]);
     assert.match(x.explanation, /600/);
     assert.ok(!JSON.stringify(x).includes(support));
@@ -284,7 +284,7 @@ test('map-reading.7: a map.6 reply with every new field is read, applied, stored
   assert.deepEqual(got.parts[0].claims.map(sevenOf), [['withdrawn', 'file', '11-02 23:04Z', 'server/engine.mjs', '옛 결정 원문'], ['status', null, null, null, null]]);
   assert.deepEqual([got.parts[0].state, got.parts[0].stateWhen, got.parts[0].files], ['running', '11-02 22:10Z', ['server/engine.mjs', 'public/']]);
   const applied = M.applyReading(f.p, f.inp, got, meta('R_seven_full'));
-  assert.equal(applied.reading.version, 'map-reading.10');
+  assert.equal(applied.reading.version, 'map-reading.11');
   const [save, read] = applied.reading.parts, claim = save.claims[0];
   assert.deepEqual(save.stateQuote, { record: claim.record, quote: claim.quote, from: claim.from, to: claim.to }, 'anchored where it stands, like a claim');
   assert.deepEqual([save.state, save.stateWhen, save.files], ['running', '11-02 22:10Z', ['server/engine.mjs', 'public/']]);
@@ -337,7 +337,7 @@ test('map-reading.7 lenient: a wrong field sets aside its claim or relation, and
   assert.deepEqual(seven.parts[0].claims.map(c => c.key), ['s1']);
   assert.deepEqual([seven.parts[0].state, seven.parts[0].stateWhen, seven.parts[0].files], [null, null, ['x/']]);
   assert.deepEqual(errors(seven), [['parts[0].claims[1].topic', 'contract'], ['parts[0].state', 'contract']]);
-  assert.equal(M.applyReading(g.p, g.inp, seven, meta('R_seven_map7')).reading.version, 'map-reading.10');
+  assert.equal(M.applyReading(g.p, g.inp, seven, meta('R_seven_map7')).reading.version, 'map-reading.11');
 });
 
 test('map-reading.7 strict: plain map.6 refuses a reply with any wrong new field', () => {
@@ -361,7 +361,7 @@ test('map-reading.7: a reply without any new field still validates and stores ev
   r.parts.push({ ref: 'new:read', name: '읽기', parent: null, role: '파일 읽기', roleAbout: null, roleReplaces: null, basis: [f.at[2]], claims: [f.claim('s3', f.at[2])] });
   r.relations = [{ from: 'new:save', to: 'new:read', kind: 'flow', note: '', at: f.at[0] }];
   const applied = M.applyReading(f.p, f.inp, M.validateMapReply(r, f.ask), meta('R_seven_plain'));
-  assert.equal(applied.reading.version, 'map-reading.10');
+  assert.equal(applied.reading.version, 'map-reading.11');
   for (const p of applied.reading.parts) {
     assert.deepEqual([p.state, p.stateWhen, p.stateQuote, p.files], [null, null, null, []]);
     for (const c of p.claims) assert.deepEqual(sevenOf(c), [null, null, null, null, null]);
@@ -409,7 +409,7 @@ test('map-reading.8: a map.6 reply with every new field is read, applied, stored
   assert.deepEqual(eightOf(got.parts[1]), [null, [], [], [], []]);
   assert.deepEqual([got.relations[0].channel, got.basisAt, got.basisVersion], ['data', '2026-11-03T09:01:03Z', '라이브 618df374']);
   const applied = M.applyReading(f.p, f.inp, got, meta('R_eight_full'));
-  assert.equal(applied.reading.version, 'map-reading.10');
+  assert.equal(applied.reading.version, 'map-reading.11');
   const [save, read] = applied.reading.parts, claim = save.claims[0];
   assert.deepEqual(save.typeQuote, { record: claim.record, quote: claim.quote, from: claim.from, to: claim.to }, 'anchored where it stands, like a state');
   assert.deepEqual(eightOf(save), ['store', ['review 행', 'policy 행'], ['e=1 행'], ['watch', 'allowed_side'], ['24 h 만료']]);
@@ -470,7 +470,7 @@ test('map-reading.8 strict: plain map.6 refuses a reply with any wrong new field
 test('map-reading.8: a reply without any new field stores every key as not said', () => {
   const f = firstMap(), r = structuredClone(f.reply); r.parts[0].claims.splice(1, 1);
   const applied = M.applyReading(f.p, f.inp, M.validateMapReply(r, f.ask), meta('R_eight_plain'));
-  assert.equal(applied.reading.version, 'map-reading.10');
+  assert.equal(applied.reading.version, 'map-reading.11');
   assert.deepEqual([applied.reading.basisAt, applied.reading.basisVersion], [null, null]);
   for (const p of applied.reading.parts) assert.deepEqual([p.type, p.typeQuote, ...eightOf(p).slice(1)], [null, null, [], [], [], []]);
   const u = M.partUnderstanding(applied.project, applied.reading.parts[0].areaId);
@@ -581,7 +581,7 @@ test('map-reading.9: a map.6 reply with steps, a loop, kept state and a port map
   assert.deepEqual(nineOf(got.parts[1]), [[['읽기', '파일을 읽는다', []]], null, []]);
   assert.deepEqual(rowsOf(got.portMap), [[0, 'e=1 행', '저장', 'out'], [0, '저장 파일', '읽기', 'in']]);
   const applied = M.applyReading(f.p, f.inp, got, meta('R_nine_full'));
-  assert.equal(applied.reading.version, 'map-reading.10');
+  assert.equal(applied.reading.version, 'map-reading.11');
   const [stored, read] = applied.reading.parts, line = applied.reading.relations[0];
   assert.deepEqual(nineOf(stored), save);
   assert.deepEqual(stored.steps[0].quote, stored.typeQuote, 'a step stands on its own row, anchored where it stands');
@@ -660,7 +660,7 @@ test('map-reading.9 strict: plain map.6 refuses a reply with any wrong new field
 test('map-reading.9: a reply without any new field stores every key as not said', () => {
   const f = firstMap(), r = structuredClone(f.reply); r.parts[0].claims.splice(1, 1);
   const applied = M.applyReading(f.p, f.inp, M.validateMapReply(r, f.ask), meta('R_nine_plain'));
-  assert.equal(applied.reading.version, 'map-reading.10');
+  assert.equal(applied.reading.version, 'map-reading.11');
   assert.deepEqual(applied.reading.portMap, []);
   for (const p of applied.reading.parts) assert.deepEqual([p.steps, p.loop, p.stateVars], [[], null, []]);
   const u = M.partUnderstanding(applied.project, applied.reading.parts[0].areaId);
@@ -723,7 +723,7 @@ test('map-reading.10: a map.6 reply with a rule\'s scope, places and devices, a 
   assert.deepEqual(got.parts[0].claims.map(tenOf), [[null, null, [], [], 'design', null], UNSAID10, rule, [null, null, [], [], null, 'dev']]);
   assert.deepEqual(got.parts[1].claims.map(tenOf), [UNSAID10, project]);
   const applied = M.applyReading(f.p, f.inp, got, meta('R_ten_full'));
-  assert.equal(applied.reading.version, 'map-reading.10');
+  assert.equal(applied.reading.version, 'map-reading.11');
   const [stored, read] = applied.reading.parts;
   assert.deepEqual(stored.claims.map(tenOf), [[null, null, [], [], 'design', null], UNSAID10, rule, [null, null, [], [], null, 'dev']]);
   assert.deepEqual(read.claims.map(tenOf), [UNSAID10, project]);
@@ -813,7 +813,7 @@ test('map-reading.10 strict: plain map.6 refuses a reply with any wrong new clai
 test('map-reading.10: a reply without any new claim field stores every claim key as not said', () => {
   const f = firstMap(), r = structuredClone(f.reply); r.parts[0].claims.splice(1, 1);
   const applied = M.applyReading(f.p, f.inp, M.validateMapReply(r, f.ask), meta('R_ten_plain'));
-  assert.equal(applied.reading.version, 'map-reading.10');
+  assert.equal(applied.reading.version, 'map-reading.11');
   for (const p of applied.reading.parts) for (const c of p.claims) assert.deepEqual(tenOf(c), UNSAID10);
   const u = M.partUnderstanding(applied.project, applied.reading.parts[0].areaId);
   assert.deepEqual([u.rules, u.withdrawals, u.gates], [[], [], []]);
@@ -850,4 +850,137 @@ test('map-reading.10 storage is exact: unknown values, a missing key, a key off 
   const ok = JSON.parse(raw); ok.readings.at(-1).exclusions = [excluded('parts[0].claims[2].anchors[1]', 'anchor'), excluded('parts[0].claims[2].enforcedBy[0]', 'enforced-by'),
     excluded('parts[0].claims[2].scope', 'scope'), excluded('parts[0].claims[0].withdrawalKind', 'withdrawal-kind'), excluded('parts[0].claims[3].gate', 'gate')];
   assert.deepEqual(validateProject(ok), ok, 'a .10 reading may say where a place, a device, a scope, a kind or a gate stood');
+});
+
+// ---- map-reading.11 (first-map-divided.34, from the blind judging of the .33 KORU map: anchors [] on all 78 claims while the design
+// record's 「조건·거부·분기」 row placed the money rule): the program's places beside the model's, marked program; the devices the
+// record does not know; a design cell's io item kept. The record is built from the real KORU rows (design v1 §3, §5 and §6, status
+// v3 §7 and §11); no model quality is claimed. ----
+const KORU34 = ['3. 부분별 설계', '| 이름 | 받는 산출물 | 안의 단계 | 내는 산출물 | 설정 | 꼬리표 |', '|---|---|---|---|---|---|',
+  '| 엔진 | review·policy·state 행, 패킷 | 4절 | J1 답 → 주문 | 레버리지 20, 동시 1, j1_cadence 60 s | [파일: R] |',
+  '| 카드 러너 | 패킷 원천·plan·facts·posture | 4절 | cards·counter·review 행·LEDGER | 타이머 tick :00·dispatch :05 | [파일: C/systemd/*.timer] |',
+  '5. 조건·거부·분기', '| 부분 이름 | 조건 | 참이면 | 거짓이면 | 꼬리표 |', '|---|---|---|---|---|',
+  "| 엔진 | cfg.get('max_concurrent', 1) != 1 | CONCURRENCY_NOT_ONE 쉼 | 다음 | [파일: R] |",
+  '| 엔진 | not is_flat(packet) | POSITION_NOT_FLAT(J2로) | 다음 | [파일: R] |',
+  '| 엔진 | not watch | REVIEW_OFF 쉼 | 다음 | [파일: R] |',
+  '| 엔진 | not allowed | NONE_SIDE 쉼 | 다음 | [파일: R] |',
+  '| 엔진 | valid_s < 1 | SIGNAL_STALE 또는 LINE_STALE | 다음 | [파일: R] |',
+  '| 엔진 | max(ticks(up), ticks(down)) >= 26 | T를 20·(26/(m·σ))²로 줄임 | 그대로 | [파일: R] |',
+  '| 엔진 | not 1 <= stop <= 250 | STOP_NOT_RESIDENT | J1 답 | [파일: R] |',
+  "| 엔진 | entry_mode == 'JOIN_NEW_BID' | ENTRY_NOT_IMPLEMENTED | 다음 | [파일: R] |",
+  "| 엔진 | on_gate_loss == 'EXIT_MARKET'이고 gate 없음 | ROW_GATE_LOSS taker 청산 | 보유 | [파일: R row_hold] |",
+  "| 카드 러너 | arm!='CX' or review_writer is not True | 카드 행만 | review 행도 씀 | [파일: C/card_runner.py] |",
+  "| 카드 러너 | expiry<=stamp and side!='NONE' | REVIEW_EXPIRED_DIRECTION | NONE이면 30분 연장 | [파일: C/card_runner.py] |",
+  '| 카드 러너 | not stamp+900000<=cp<=stamp+5400000 | CHECKPOINT_TIME | 다음 | [파일: C/card_runner.py] |',
+  "| 카드 러너 | watch=='OFF'이고 그 시각에 TRADING_RESTRICTION 사건 없음 | INVALID | 다음 | [파일: C/card_runner.py] |",
+  '6. 파일 지도', '| 경로 | 속한 부분 | 역할 한 줄 | 꼬리표 |', '|---|---|---|---|',
+  '| C/calls.py | 카드 러너 | 모델 호출·지출 상한 CL 20·DS 5 USD | [파일: C/calls.py] |',
+  '7. 지켜야 할 것과 하지 않기로 한 것', '| 부분 이름 | 규칙 한 줄 | 누가 정했나·언제 |', '|---|---|---|',
+  '| 엔진 | 돈 안전 = 보유 중 스탑 상주 하나, 게이트는 스탑·크기·방향만 | 소유자 10-22 [보고: 메모리 색인] |',
+  '| 엔진 | 게이트는 코드: TESTS rc 0 + VERIFY GO 파일 | 감독자 세션 09-26 [보고: 메모리 색인] |',
+  '| 카드 러너 | 지출은 상한 있게, 감독자 세션 승인 | 소유자 10-22 [보고: 메모리 색인] |',
+  '| LIVE-WATCH | 외부 KILL 금지, 보고만. poll 지연이면 재시작 안 함 | 소유자 10-23·11-01 [보고: 메모리 색인] |',
+  '| 전체 | 노트북에서 바이낸스 메인넷 호출 금지(공인 IP 공유) | 소유자 10-17 [보고: 메모리 색인] |',
+  '11. 가장 자신 없는 것', '| 부분 이름 | 내용 |', '|---|---|',
+  '| 엔진 | 「돌고 있음」은 인용이고, 08:49Z 뒤는 직접 보지 않음 [추정] |',
+  '| LIVE-WATCH | 「poll 지연이면 보고만」이 코드 조건인지, 운영 판단인지 [추정] |'].join('\n');
+function koru34() {
+  const p = D.pasteRecord(D.createProject(), KORU34, null).project;
+  const inp = M.buildMapAsk(p, studioView(p), [], undefined, M.MAP6_SCHEMA), spans = inp.ask.records[0].spans;
+  assert.ok(M.firstAsk(inp.ask));
+  const at = head => spans.find(span => span.t.startsWith(head)).s;
+  const rule = (key, head, text, extra = {}) => ({ key, kind: 'reported', text, at: at(head), about: null, replaces: null, topic: 'rule', scope: 'part', ...extra });
+  const part = (ref, name, head, claims, extra = {}) => ({ ref, name, parent: null, role: `${name}의 책임`, roleAbout: null, roleReplaces: null, basis: [at(head)], claims, ...extra });
+  const reply = { summary: '', relations: [], candidates: [], gaps: [], matches: [], material: [], parts: [
+    part('new:engine', '엔진', '| 엔진 | review', [
+      rule('s1', '| 엔진 | 돈 안전', '돈 안전은 보유 중 스탑 상주 하나이며 게이트는 스탑·크기·방향만 본다.', { enforcedBy: [{ kind: 'unknown', text: '장치 미상', at: null }] }),
+      rule('s2', '| 엔진 | 게이트는', '게이트는 코드로 TESTS rc 0과 VERIFY GO 파일을 요구한다.'),
+      rule('s3', '| 전체 |', '노트북에서 바이낸스 메인넷 호출을 금지한다.', { scope: 'project' }),
+      // The model's own place: the program adds nothing beside it, and its words never carry the program's mark.
+      rule('s4', '| 엔진 | 돈 안전', '보유 중 스탑은 상주해야 한다.', { anchors: [{ kind: 'stated', text: '엔진 · not 1 <= stop <= 250', at: at('| 엔진 | not 1'), program: true }] })]),
+    part('new:card', '카드 러너', '| 카드 러너 | 패킷', [
+      rule('s5', '| 카드 러너 | 지출', '지출은 상한 있게 두고 감독자 세션이 승인한다.'),
+      rule('s6', '| 카드 러너 | 지출', 'review 행은 stamp 기준 만료 방향과 checkpoint 시각, watch OFF의 INVALID를 본다.')]),
+    part('new:watch', 'LIVE-WATCH', '| LIVE-WATCH | 외부', [rule('s7', '| LIVE-WATCH | 외부', '외부 KILL은 금지하고 보고만 하며 poll이 지연되면 재시작하지 않는다.')])] };
+  return { p, inp, ask: inp.ask, at, rule, part, reply };
+}
+const places = c => (c.anchors ?? []).map(a => [a.kind, a.text, a.program === true, a.quote.quote.split(' | ')[1] ?? null]);
+
+test('map-reading.11: a rule with no place gets at most two condition rows of its own part that share two content words with it, marked program; never beside the model\'s place, never on a project rule', () => {
+  const f = koru34(), got = M.validateMapReply(structuredClone(f.reply), f.ask);
+  assert.equal(M.setAside(got).length, 0);
+  const [engine, card, watch] = got.parts;
+  // 돈 안전 shares 스탑/stop and 상주/resident with 「not 1 <= stop <= 250 | STOP_NOT_RESIDENT」 only (NONE_SIDE shares one word).
+  assert.deepEqual(places(engine.claims[0]), [['inferred', 'not 1 <= stop <= 250', true, 'not 1 <= stop <= 250']]);
+  const stop = engine.claims[0].anchors[0].quote;
+  assert.deepEqual([stop.record, stop.quote], ['N01', '| 엔진 | not 1 <= stop <= 250 | STOP_NOT_RESIDENT | J1 답 | [파일: R] |']);
+  assert.deepEqual([places(engine.claims[1]), places(engine.claims[2])], [[], []], 'the gate rule shares no word with a condition row; a project rule gets none');
+  assert.deepEqual(places(engine.claims[3]), [['stated', '엔진 · not 1 <= stop <= 250', false, 'not 1 <= stop <= 250']], 'the model\'s place stays alone and never carries program');
+  // 지출 shares nothing with the card runner's rows (calls.py is a file-map row, not a condition row); the second rule shares four words
+  // with REVIEW_EXPIRED_DIRECTION and with INVALID, two with CHECKPOINT_TIME: the two most, in the record's order.
+  assert.deepEqual(places(card.claims[0]), []);
+  assert.deepEqual(places(card.claims[1]).map(x => x[1]), ["expiry<=stamp and side!='NONE'", "watch=='OFF'이고 그 시각에 TRADING_RESTRICTION 사건 없음"]);
+  assert.equal(M.PROGRAM_ANCHORS_MAX, 2);
+  assert.deepEqual(places(watch.claims[0]), [], 'a part without condition rows gets none');
+  const rows = M.conditionRows(f.ask);
+  assert.deepEqual([rows.length, rows.filter(r => r.part === '엔진').length, rows[6].condition, rows[6].then, rows[6].at], [13, 9, 'not 1 <= stop <= 250', 'STOP_NOT_RESIDENT', f.at('| 엔진 | not 1')]);
+  // The divided reading adds the very same places (the browser reads the combined wire again and gets them again).
+  const soft = M.validateMapReply(structuredClone(f.reply), f.ask, { setAside: true });
+  assert.deepEqual(soft.parts.map(p => p.claims.map(places)), got.parts.map(p => p.claims.map(places)));
+  // A condition row the reply read as material is no place.
+  const material = structuredClone(f.reply); material.material = [{ at: f.at('| 엔진 | not 1'), what: '예시 조건' }];
+  material.parts[0].claims.splice(3, 1);
+  assert.deepEqual(places(M.validateMapReply(material, f.ask).parts[0].claims[0]), []);
+});
+
+test('map-reading.11 storage: every anchor says program (true only on an inferred place); a .10 entry keeps its shape and refuses the key', () => {
+  const f = koru34(), applied = M.applyReading(f.p, f.inp, M.validateMapReply(structuredClone(f.reply), f.ask), meta('R_eleven'));
+  assert.equal(applied.reading.version, 'map-reading.11');
+  const [engine, card] = applied.reading.parts;
+  assert.deepEqual(engine.claims.map(c => c.anchors.map(a => [a.kind, a.text, a.program])), [[['inferred', 'not 1 <= stop <= 250', true]], [], [], [['stated', '엔진 · not 1 <= stop <= 250', false]]]);
+  assert.deepEqual(card.claims[1].anchors.map(a => a.program), [true, true]);
+  const stop = engine.claims[0].anchors[0].quote;
+  assert.equal(KORU34.slice(stop.from, stop.to), stop.quote, 'the program\'s place stands on the row where it stands in the record');
+  assert.deepEqual(validateProject(applied.project), applied.project);
+  assert.deepEqual(parseProject(S.serializeProject(applied.project)).readings.at(-1), applied.reading);
+  const u = M.partUnderstanding(applied.project, engine.areaId);
+  assert.deepEqual(u.rules.map(c => [c.text, c.anchors.map(a => a.program)]).sort(), [['게이트는 코드로 TESTS rc 0과 VERIFY GO 파일을 요구한다.', []],
+    ['노트북에서 바이낸스 메인넷 호출을 금지한다.', []], ['돈 안전은 보유 중 스탑 상주 하나이며 게이트는 스탑·크기·방향만 본다.', [true]], ['보유 중 스탑은 상주해야 한다.', [false]]]);
+  const raw = S.serializeProject(applied.project), first = r => r.parts[0].claims[0].anchors[0];
+  for (const mutate of [r => { delete first(r).program; }, r => { first(r).program = 'yes'; }, r => { first(r).program = null; }, r => { first(r).kind = 'stated'; },
+    r => { r.version = 'map-reading.10'; }]) {
+    const bad = JSON.parse(raw); mutate(bad.readings.at(-1));
+    assert.throws(() => parseProject(JSON.stringify(bad)), undefined, String(mutate));
+    assert.throws(() => validateProject(bad), undefined, String(mutate));
+  }
+  const old = JSON.parse(raw), ten = old.readings.at(-1); ten.version = 'map-reading.10';
+  for (const p of ten.parts) for (const c of p.claims) for (const a of c.anchors) delete a.program;
+  assert.deepEqual(validateProject(old), old, 'a map-reading.10 entry keeps its exact shape, with no program key');
+});
+
+test('.34 divided: code stands on a condition or file-map row, a person or gate the record says it does not know is set aside, a design cell\'s io item is kept', () => {
+  const f = koru34(), r = structuredClone(f.reply), [engine, card, watch] = r.parts;
+  Object.assign(engine.claims[0], { enforcedBy: [{ kind: 'code', text: 'STOP_NOT_RESIDENT', at: f.at('| 엔진 | not 1') }] });
+  Object.assign(engine.claims[1], { enforcedBy: [{ kind: 'code', text: 'TESTS rc 0', at: f.at('| 엔진 | 게이트는') }, { kind: 'gate', text: 'TESTS rc 0 + VERIFY GO 파일', at: f.at('| 엔진 | 게이트는') }] });
+  Object.assign(card.claims[0], { enforcedBy: [{ kind: 'code', text: '지출 상한 CL 20·DS 5 USD', at: f.at('| C/calls.py') }, { kind: 'person', text: '감독자 세션 승인', at: f.at('| 카드 러너 | 지출') }] });
+  Object.assign(watch.claims[0], { enforcedBy: [{ kind: 'person', text: '소유자의 운영 규칙', at: f.at('| LIVE-WATCH | 외부') }, { kind: 'gate', text: '보고만', at: f.at('| LIVE-WATCH | 외부') }] });
+  // 카드 러너's 「counter」 is a field of its store partner and an item of its own 「부분별 설계」 cell; LIVE-WATCH has no such row.
+  Object.assign(card, { outputs: ['cards', 'counter', 'review 행', 'LEDGER'] });
+  Object.assign(watch, { outputs: ['counter'] });
+  r.parts.push(f.part('new:cards', 'cards-{CX,CL,DS}.jsonl', '| C/calls.py', [{ key: 's8', kind: 'describes', text: '카드 행을 담는다.', at: f.at('| C/calls.py'), about: null, replaces: null }],
+    { type: 'store', typeAt: f.at('| C/calls.py'), fields: ['card_id', 'counter', 'arm'] }));
+  r.relations = [{ from: 'new:card', to: 'new:cards', kind: 'flow', note: '', at: f.at('| 카드 러너 | 패킷') }, { from: 'new:watch', to: 'new:cards', kind: 'flow', note: '', at: f.at('| LIVE-WATCH | 외부') }];
+  const plain = M.validateMapReply(structuredClone(r), f.ask);
+  assert.equal(M.setAside(plain).length, 0, 'plain map.6 never reads these checks');
+  const got = M.validateMapReply(structuredClone(r), f.ask, { setAside: true }), reasons = M.readingExclusions(got);
+  assert.deepEqual(reasons.map(x => [x.path, x.category]), [['parts[0].claims[1].enforcedBy[0]', 'enforced-by'], ['parts[2].claims[0].enforcedBy[0]', 'enforced-by'],
+    ['parts[2].claims[0].enforcedBy[1]', 'enforced-by'], ['parts[2].outputs[0]', 'outputs']]);
+  assert.match(reasons[0].explanation, /보장 위치는 미확인/);
+  const devices = c => c.enforcedBy.map(e => [e.kind, e.text]);
+  assert.deepEqual([devices(got.parts[0].claims[0]), devices(got.parts[0].claims[1]), devices(got.parts[1].claims[0]), devices(got.parts[2].claims[0])],
+    [[['code', 'STOP_NOT_RESIDENT']], [['gate', 'TESTS rc 0 + VERIFY GO 파일']], [['code', '지출 상한 CL 20·DS 5 USD'], ['person', '감독자 세션 승인']], []]);
+  assert.deepEqual([got.parts[1].outputs, got.parts[2].outputs], [['cards', 'counter', 'review 행', 'LEDGER'], []], 'counter stays where the design cell names it');
+  // The record's own word is unknown: kept.
+  watch.claims[0].enforcedBy = [{ kind: 'unknown', text: '장치 미상', at: null }];
+  assert.deepEqual(devices(M.validateMapReply(structuredClone(r), f.ask, { setAside: true }).parts[2].claims[0]), [['unknown', '장치 미상']]);
 });
