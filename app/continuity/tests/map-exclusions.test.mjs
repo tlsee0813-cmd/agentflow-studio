@@ -21,8 +21,14 @@ function fixture(text = '실제 기능은 파일을 저장합니다.\n예제 조
   return { p, inp, spans, claim, part, reply };
 }
 const errors = reply => M.setAside(reply).map(e => [e.path, e.rule]);
-/** A stored map-reading.9 entry in the exact shape of .8: the .9 keys of the reading and its parts removed. */
+/** A stored map-reading.10 entry in the exact shape of .9: the .10 keys of its claims removed. */
+function stripTen(r) {
+  for (const p of r.parts) for (const c of p.claims) for (const k of ['scope', 'scopeName', 'anchors', 'enforcedBy', 'withdrawalKind', 'gate']) delete c[k];
+  return r;
+}
+/** A stored map-reading.10 entry in the exact shape of .8: the .10 and .9 keys of the reading, its parts and its claims removed. */
 function stripNine(r) {
+  stripTen(r);
   delete r.portMap;
   for (const p of r.parts) for (const k of ['steps', 'loop', 'stateVars']) delete p[k];
   return r;
@@ -90,7 +96,7 @@ test('F2 a 1087-character citation with the sole supporting sentence last is exc
     assert.deepEqual(got.parts[0].claims.map(c => c.key), ['s1']);
     assert.deepEqual(errors(got), [['parts[0].claims[1].at', 'length']]);
     const applied = M.applyReading(f.p, f.inp, got, meta()), x = applied.reading.exclusions[0];
-    assert.equal(applied.reading.version, 'map-reading.9');
+    assert.equal(applied.reading.version, 'map-reading.10');
     assert.deepEqual([x.path, x.rule, x.category, x.record, x.from, x.to], ['parts[0].claims[1].at', 'length', null, f.p.pasted[0].id, 0, 1087]);
     assert.match(x.explanation, /600/);
     assert.ok(!JSON.stringify(x).includes(support));
@@ -207,17 +213,20 @@ test('divided set-aside: plain map.6 still refuses one bad claim whole; the opti
   assert.deepEqual(got.parts[0].claims.map(c => c.key), ['s1']);
   assert.deepEqual(errors(got), [['parts[0].claims[1].at', 'reference']]);
   // A count overflow is refused whole by plain map.6 (a plain INVALID_RESPONSE, as before) and read in part with the option.
-  // .24: the first map's contract takes six claims per part; .32: sixteen (MAP6_CLAIMS), the seventeenth is over the count.
-  assert.equal(M.MAP6_CLAIMS, 16);
-  const sixteen = structuredClone(f.reply); sixteen.parts[0].claims = Array.from({ length: 16 }, (_, i) => f.claim(`s${i + 1}`, f.at[0]));
-  assert.equal(M.validateMapReply(sixteen, f.ask).parts[0].claims.length, 16, 'plain map.6 reads sixteen claims of a part');
-  // Stored as map-reading.9 with all sixteen (the project validator takes sixteen there; earlier entries keep eight).
+  // .24: the first map's contract takes six claims per part; .32: sixteen; .33: twenty (MAP6_CLAIMS), the 21st is over the count.
+  assert.equal(M.MAP6_CLAIMS, 20);
+  const sixteen = structuredClone(f.reply); sixteen.parts[0].claims = Array.from({ length: 20 }, (_, i) => f.claim(`s${i + 1}`, f.at[0]));
+  assert.equal(M.validateMapReply(sixteen, f.ask).parts[0].claims.length, 20, 'plain map.6 reads twenty claims of a part');
+  // Stored as map-reading.10 with all twenty (the project validator takes twenty there, sixteen on a .9 entry, eight before).
   const kept = M.applyReading(f.p, f.inp, M.validateMapReply(structuredClone(sixteen), f.ask), meta('R_sixteen'));
   assert.deepEqual(validateProject(kept.project), kept.project);
-  assert.equal(kept.project.readings.at(-1).parts[0].claims.length, 16);
-  const many = structuredClone(f.reply); many.parts[0].claims = Array.from({ length: 17 }, (_, i) => f.claim(`s${i + 1}`, f.at[0]));
+  assert.equal(kept.project.readings.at(-1).parts[0].claims.length, 20);
+  // A map-reading.9 entry keeps its sixteen.
+  const nine = JSON.parse(S.serializeProject(kept.project)), r9 = nine.readings.at(-1); r9.version = 'map-reading.9'; stripTen(r9);
+  assert.throws(() => validateProject(nine)); r9.parts[0].claims.splice(16); assert.deepEqual(validateProject(nine), nine);
+  const many = structuredClone(f.reply); many.parts[0].claims = Array.from({ length: 21 }, (_, i) => f.claim(`s${i + 1}`, f.at[0]));
   assert.throws(() => M.validateMapReply(structuredClone(many), f.ask), e => !(e instanceof M.MapReplyError) && e.message === 'INVALID_RESPONSE');
-  assert.deepEqual(M.validateMapReply(many, f.ask, { setAside: true }).parts[0].claims.length, 16);
+  assert.deepEqual(M.validateMapReply(many, f.ask, { setAside: true }).parts[0].claims.length, 20);
   // map.7 ignores the option (it has its own soft policy); an earlier schema ignores it too.
   const later = fixture(), seven = M.validateMapReply(structuredClone(later.reply), later.inp.ask), opted = M.validateMapReply(structuredClone(later.reply), later.inp.ask, { setAside: true });
   assert.deepEqual(opted, seven); assert.deepEqual(M.readingExclusions(opted), M.readingExclusions(seven));
@@ -269,13 +278,13 @@ function sevenReply(f) {
 }
 const sevenOf = c => [c.topic, c.evidence, c.when, c.where, c.before];
 
-test('map-reading.7: a map.6 reply with every new field is read, applied, stored (as map-reading.9) and read back', () => {
+test('map-reading.7: a map.6 reply with every new field is read, applied, stored (as map-reading.10) and read back', () => {
   const f = firstMap(), got = M.validateMapReply(sevenReply(f), f.ask);
   assert.equal(M.setAside(got).length, 0);
   assert.deepEqual(got.parts[0].claims.map(sevenOf), [['withdrawn', 'file', '11-02 23:04Z', 'server/engine.mjs', '옛 결정 원문'], ['status', null, null, null, null]]);
   assert.deepEqual([got.parts[0].state, got.parts[0].stateWhen, got.parts[0].files], ['running', '11-02 22:10Z', ['server/engine.mjs', 'public/']]);
   const applied = M.applyReading(f.p, f.inp, got, meta('R_seven_full'));
-  assert.equal(applied.reading.version, 'map-reading.9');
+  assert.equal(applied.reading.version, 'map-reading.10');
   const [save, read] = applied.reading.parts, claim = save.claims[0];
   assert.deepEqual(save.stateQuote, { record: claim.record, quote: claim.quote, from: claim.from, to: claim.to }, 'anchored where it stands, like a claim');
   assert.deepEqual([save.state, save.stateWhen, save.files], ['running', '11-02 22:10Z', ['server/engine.mjs', 'public/']]);
@@ -328,7 +337,7 @@ test('map-reading.7 lenient: a wrong field sets aside its claim or relation, and
   assert.deepEqual(seven.parts[0].claims.map(c => c.key), ['s1']);
   assert.deepEqual([seven.parts[0].state, seven.parts[0].stateWhen, seven.parts[0].files], [null, null, ['x/']]);
   assert.deepEqual(errors(seven), [['parts[0].claims[1].topic', 'contract'], ['parts[0].state', 'contract']]);
-  assert.equal(M.applyReading(g.p, g.inp, seven, meta('R_seven_map7')).reading.version, 'map-reading.9');
+  assert.equal(M.applyReading(g.p, g.inp, seven, meta('R_seven_map7')).reading.version, 'map-reading.10');
 });
 
 test('map-reading.7 strict: plain map.6 refuses a reply with any wrong new field', () => {
@@ -352,7 +361,7 @@ test('map-reading.7: a reply without any new field still validates and stores ev
   r.parts.push({ ref: 'new:read', name: '읽기', parent: null, role: '파일 읽기', roleAbout: null, roleReplaces: null, basis: [f.at[2]], claims: [f.claim('s3', f.at[2])] });
   r.relations = [{ from: 'new:save', to: 'new:read', kind: 'flow', note: '', at: f.at[0] }];
   const applied = M.applyReading(f.p, f.inp, M.validateMapReply(r, f.ask), meta('R_seven_plain'));
-  assert.equal(applied.reading.version, 'map-reading.9');
+  assert.equal(applied.reading.version, 'map-reading.10');
   for (const p of applied.reading.parts) {
     assert.deepEqual([p.state, p.stateWhen, p.stateQuote, p.files], [null, null, null, []]);
     for (const c of p.claims) assert.deepEqual(sevenOf(c), [null, null, null, null, null]);
@@ -393,14 +402,14 @@ function eightReply(f) {
 }
 const eightOf = p => [p.type, p.inputs, p.outputs, p.fields, p.config];
 
-test('map-reading.8: a map.6 reply with every new field is read, applied, stored (as map-reading.9) and read back', () => {
+test('map-reading.8: a map.6 reply with every new field is read, applied, stored (as map-reading.10) and read back', () => {
   const f = firstMap(), got = M.validateMapReply(eightReply(f), f.ask);
   assert.equal(M.setAside(got).length, 0);
   assert.deepEqual(eightOf(got.parts[0]), ['store', ['review 행', 'policy 행'], ['e=1 행'], ['watch', 'allowed_side'], ['24 h 만료']]);
   assert.deepEqual(eightOf(got.parts[1]), [null, [], [], [], []]);
   assert.deepEqual([got.relations[0].channel, got.basisAt, got.basisVersion], ['data', '2026-11-03T09:01:03Z', '라이브 618df374']);
   const applied = M.applyReading(f.p, f.inp, got, meta('R_eight_full'));
-  assert.equal(applied.reading.version, 'map-reading.9');
+  assert.equal(applied.reading.version, 'map-reading.10');
   const [save, read] = applied.reading.parts, claim = save.claims[0];
   assert.deepEqual(save.typeQuote, { record: claim.record, quote: claim.quote, from: claim.from, to: claim.to }, 'anchored where it stands, like a state');
   assert.deepEqual(eightOf(save), ['store', ['review 행', 'policy 행'], ['e=1 행'], ['watch', 'allowed_side'], ['24 h 만료']]);
@@ -461,7 +470,7 @@ test('map-reading.8 strict: plain map.6 refuses a reply with any wrong new field
 test('map-reading.8: a reply without any new field stores every key as not said', () => {
   const f = firstMap(), r = structuredClone(f.reply); r.parts[0].claims.splice(1, 1);
   const applied = M.applyReading(f.p, f.inp, M.validateMapReply(r, f.ask), meta('R_eight_plain'));
-  assert.equal(applied.reading.version, 'map-reading.9');
+  assert.equal(applied.reading.version, 'map-reading.10');
   assert.deepEqual([applied.reading.basisAt, applied.reading.basisVersion], [null, null]);
   for (const p of applied.reading.parts) assert.deepEqual([p.type, p.typeQuote, ...eightOf(p).slice(1)], [null, null, [], [], [], []]);
   const u = M.partUnderstanding(applied.project, applied.reading.parts[0].areaId);
@@ -572,7 +581,7 @@ test('map-reading.9: a map.6 reply with steps, a loop, kept state and a port map
   assert.deepEqual(nineOf(got.parts[1]), [[['읽기', '파일을 읽는다', []]], null, []]);
   assert.deepEqual(rowsOf(got.portMap), [[0, 'e=1 행', '저장', 'out'], [0, '저장 파일', '읽기', 'in']]);
   const applied = M.applyReading(f.p, f.inp, got, meta('R_nine_full'));
-  assert.equal(applied.reading.version, 'map-reading.9');
+  assert.equal(applied.reading.version, 'map-reading.10');
   const [stored, read] = applied.reading.parts, line = applied.reading.relations[0];
   assert.deepEqual(nineOf(stored), save);
   assert.deepEqual(stored.steps[0].quote, stored.typeQuote, 'a step stands on its own row, anchored where it stands');
@@ -651,7 +660,7 @@ test('map-reading.9 strict: plain map.6 refuses a reply with any wrong new field
 test('map-reading.9: a reply without any new field stores every key as not said', () => {
   const f = firstMap(), r = structuredClone(f.reply); r.parts[0].claims.splice(1, 1);
   const applied = M.applyReading(f.p, f.inp, M.validateMapReply(r, f.ask), meta('R_nine_plain'));
-  assert.equal(applied.reading.version, 'map-reading.9');
+  assert.equal(applied.reading.version, 'map-reading.10');
   assert.deepEqual(applied.reading.portMap, []);
   for (const p of applied.reading.parts) assert.deepEqual([p.steps, p.loop, p.stateVars], [[], null, []]);
   const u = M.partUnderstanding(applied.project, applied.reading.parts[0].areaId);
@@ -688,4 +697,157 @@ test('map-reading.9 storage is exact: unknown values, a missing key, a .9 key on
   assert.deepEqual([u.steps, u.loop, u.stateVars, u.portMap, u.inputs], [[], null, [], [], ['review 행', 'policy 행']], 'an earlier reading has no steps, loop, state or port map');
   const ok = JSON.parse(raw); ok.readings.at(-1).exclusions = [excluded('portMap[0]', 'port-map'), excluded('parts[0].steps[1]', 'step'), excluded('parts[0].loop.unit', 'loop')];
   assert.deepEqual(validateProject(ok), ok, 'a .9 reading may say where a step, a loop item or a row stood');
+});
+
+// ---- map-reading.10 (first-map-divided.33, the map design spec's fourth cycle): a rule claim's scope, the places it applies
+// (anchors, stated or inferred, each on its line) and what keeps it (enforcedBy: code, gate, person, none, unknown); a withdrawal's
+// kind; a gate's kind. Optional on the wire, exact in storage. ----
+function tenReply(f) {
+  const r = nineReply(f);
+  r.parts[0].claims[0].withdrawalKind = 'design';
+  r.parts[0].claims.push(f.claim('s4', f.at[0], { text: '저장 전에 확인한다.', topic: 'rule', scope: 'step', scopeName: ' 저장 ',
+    anchors: [{ kind: 'stated', text: ' 저장 · 확인 행 ', at: f.at[0] }, { kind: 'inferred', text: '읽기 쪽', at: f.at[2] }],
+    enforcedBy: [{ kind: 'code', text: 'SAVE_REFUSED', at: f.at[0] }, { kind: 'person', text: '소유자 승인', at: f.at[2] }] }),
+  f.claim('s5', f.at[2], { kind: 'want', text: '다음 판본을 설치한다.', topic: 'plan', gate: 'dev' }));
+  r.parts[1].claims.push(f.claim('s6', f.at[2], { text: '전체에 적용한다.', topic: 'rule', scope: 'project', enforcedBy: [{ kind: 'unknown', text: '장치 미상', at: null }] }));
+  return r;
+}
+const tenOf = c => [c.scope, c.scopeName, (c.anchors ?? []).map(a => [a.kind, a.text]), (c.enforcedBy ?? []).map(e => [e.kind, e.text, !!e.quote]), c.withdrawalKind, c.gate];
+const UNSAID10 = [null, null, [], [], null, null];
+
+test('map-reading.10: a map.6 reply with a rule\'s scope, places and devices, a withdrawal\'s kind and a gate is read, applied, stored and read back', () => {
+  const f = firstMap(), got = M.validateMapReply(tenReply(f), f.ask);
+  assert.equal(M.setAside(got).length, 0);
+  const rule = ['step', '저장', [['stated', '저장 · 확인 행'], ['inferred', '읽기 쪽']], [['code', 'SAVE_REFUSED', true], ['person', '소유자 승인', true]], null, null];
+  const project = ['project', null, [], [['unknown', '장치 미상', false]], null, null];
+  assert.deepEqual(got.parts[0].claims.map(tenOf), [[null, null, [], [], 'design', null], UNSAID10, rule, [null, null, [], [], null, 'dev']]);
+  assert.deepEqual(got.parts[1].claims.map(tenOf), [UNSAID10, project]);
+  const applied = M.applyReading(f.p, f.inp, got, meta('R_ten_full'));
+  assert.equal(applied.reading.version, 'map-reading.10');
+  const [stored, read] = applied.reading.parts;
+  assert.deepEqual(stored.claims.map(tenOf), [[null, null, [], [], 'design', null], UNSAID10, rule, [null, null, [], [], null, 'dev']]);
+  assert.deepEqual(read.claims.map(tenOf), [UNSAID10, project]);
+  assert.deepEqual(stored.claims[2].anchors[0].quote, stored.typeQuote, 'a place stands on its own line, anchored where it stands');
+  assert.deepEqual(stored.claims[2].enforcedBy[0].quote, stored.typeQuote);
+  assert.equal(read.claims[1].enforcedBy[0].quote, null, 'an unknown device names no line');
+  for (const p of applied.reading.parts) for (const c of p.claims) for (const k of ['scope', 'scopeName', 'anchors', 'enforcedBy', 'withdrawalKind', 'gate']) assert.ok(Object.hasOwn(c, k), k);
+  const u = M.partUnderstanding(applied.project, stored.areaId), v = M.partUnderstanding(applied.project, read.areaId);
+  assert.deepEqual([u.rules.map(c => [c.text, c.scope, c.scopeName, c.anchors.length, c.enforcedBy.map(e => e.kind), c.at]), u.withdrawals.map(c => c.withdrawalKind), u.gates.map(c => [c.text, c.gate])],
+    [[['저장 전에 확인한다.', 'step', '저장', 2, ['code', 'person'], meta().at]], ['design'], [['다음 판본을 설치한다.', 'dev']]]);
+  assert.deepEqual([v.rules.map(c => c.scope), v.withdrawals, v.gates], [['project'], [], []]);
+  assert.deepEqual(validateProject(applied.project), applied.project);
+  assert.deepEqual(parseProject(S.serializeProject(applied.project)).readings.at(-1), applied.reading);
+});
+
+test('map-reading.10 lenient: a wrong scope, place, device, withdrawal kind or gate is set aside alone in validation order; the claim stays', () => {
+  const f = firstMap(), r = tenReply(f), [c0, c1, c2, c3] = r.parts[0].claims;
+  c0.withdrawalKind = 'policy';
+  Object.assign(c1, { enforcedBy: [{ kind: 'code', text: 'X', at: f.at[0] }], gate: 'run', anchors: [], scope: null });
+  c2.scope = 'phase';
+  c2.anchors.push({ kind: 'stated', text: '없는 줄', at: 'N01.99' }, { ...c2.anchors[0] });
+  c2.enforcedBy = [c2.enforcedBy[0], { kind: 'none', text: '기록상 미설계', at: f.at[2] }, { kind: 'gate', text: ' ', at: f.at[0] }, { kind: 'unknown', text: '장치 미상', at: null }];
+  c3.gate = 'ops';
+  r.parts[1].claims[1].scopeName = 'x';
+  assert.throws(() => M.validateMapReply(structuredClone(r), f.ask), undefined, 'plain map.6 refuses');
+  const got = M.validateMapReply(structuredClone(r), f.ask, { setAside: true }), reasons = M.readingExclusions(got);
+  assert.deepEqual(reasons.map(e => [e.path, e.rule, e.category]), [['parts[0].claims[0].withdrawalKind', 'contract', 'withdrawal-kind'],
+    ['parts[0].claims[1].enforcedBy', 'contract', 'enforced-by'], ['parts[0].claims[1].gate', 'contract', 'gate'],
+    ['parts[0].claims[2].scope', 'contract', 'scope'], ['parts[0].claims[2].anchors[2]', 'contract', 'anchor'], ['parts[0].claims[2].anchors[3]', 'contract', 'anchor'],
+    ['parts[0].claims[2].enforcedBy[2]', 'contract', 'enforced-by'], ['parts[0].claims[2].enforcedBy[1]', 'contract', 'enforced-by'], ['parts[0].claims[2].enforcedBy[3]', 'contract', 'enforced-by'],
+    ['parts[0].claims[3].gate', 'contract', 'gate'], ['parts[1].claims[1].scope', 'contract', 'scope']]);
+  for (const [i, words] of [[0, /철회는 남겼어요/], [2, /주장은 남겼어요/], [3, /범위와 그 이름 칸만/], [4, /적용 위치 미해결/], [6, /보장 위치는 미확인/]]) assert.match(reasons[i].explanation, words);
+  assert.deepEqual([reasons[4].record, !!reasons[5].record, !!reasons[7].record], [null, true, true], 'a set-aside place or device keeps where its line stands');
+  assert.deepEqual(got.parts[0].claims.map(c => c.key), ['s1', 's2', 's4', 's5'], 'every claim stays');
+  assert.deepEqual(got.parts[0].claims.map(tenOf), [UNSAID10, UNSAID10, [null, null, [['stated', '저장 · 확인 행'], ['inferred', '읽기 쪽']], [['code', 'SAVE_REFUSED', true]], null, null], UNSAID10]);
+  assert.deepEqual(tenOf(got.parts[1].claims[1]), [null, null, [], [['unknown', '장치 미상', false]], null, null]);
+  const applied = M.applyReading(f.p, f.inp, got, meta('R_ten_lenient'));
+  assert.deepEqual(applied.reading.exclusions.map(e => e.path), reasons.map(e => e.path));
+  assert.deepEqual(validateProject(applied.project), applied.project);
+  assert.deepEqual(parseProject(S.serializeProject(applied.project)).readings.at(-1), applied.reading);
+  // A list that is not one, runs past four, or holds an unknown beside a none is left out whole or in part as said.
+  const whole = tenReply(f); Object.assign(whole.parts[0].claims[2], { anchors: 'x', enforcedBy: Array(5).fill({ kind: 'code', text: 'A', at: f.at[0] }) });
+  whole.parts[1].claims[1].enforcedBy = [{ kind: 'unknown', text: '장치 미상', at: null }, { kind: 'none', text: '기록상 미설계', at: f.at[2] }];
+  const left = M.validateMapReply(whole, f.ask, { setAside: true });
+  assert.deepEqual([tenOf(left.parts[0].claims[2]).slice(2, 4), tenOf(left.parts[1].claims[1])[3], M.readingExclusions(left).map(e => [e.path, e.category])],
+    [[[], []], [['none', '기록상 미설계', true]], [['parts[0].claims[2].anchors', 'anchor'], ['parts[0].claims[2].enforcedBy', 'enforced-by'], ['parts[1].claims[1].enforcedBy[0]', 'enforced-by']]]);
+  // map.7 reads the same way.
+  const g = fixture();
+  Object.assign(g.reply.parts[0].claims[0], { topic: 'rule', anchors: [{ kind: 'stated', text: '저장', at: 'N01.99' }, { kind: 'stated', text: '읽기', at: g.spans[2].s }], gate: 'run' });
+  const seven = M.validateMapReply(g.reply, g.inp.ask);
+  assert.deepEqual([seven.parts[0].claims[0].anchors.map(a => a.text), seven.parts[0].claims[0].gate, errors(seven)],
+    [['읽기'], null, [['parts[0].claims[0].anchors[0]', 'contract'], ['parts[0].claims[0].gate', 'contract']]]);
+});
+
+test('map-reading.10 strict: plain map.6 refuses a reply with any wrong new claim field; four places and four devices are read whole', () => {
+  const f = firstMap();
+  for (const mutate of [
+    r => { r.parts[0].claims[2].scope = 'phase'; }, r => { r.parts[0].claims[2].scope = 'part'; }, r => { r.parts[0].claims[2].scopeName = null; },
+    r => { r.parts[0].claims[2].scopeName = '가'.repeat(41); }, r => { r.parts[0].claims[1].scope = 'part'; }, r => { delete r.parts[0].claims[2].scope; },
+    r => { r.parts[0].claims[2].anchors = 'x'; }, r => { r.parts[0].claims[2].anchors = Array(5).fill(r.parts[0].claims[2].anchors[0]); },
+    r => { r.parts[0].claims[2].anchors[0].kind = 'guess'; }, r => { r.parts[0].claims[2].anchors[0].at = 'N01.99'; }, r => { r.parts[0].claims[2].anchors[0].text = ''; },
+    r => { r.parts[0].claims[2].anchors[0].text = '가'.repeat(81); }, r => { delete r.parts[0].claims[2].anchors[0].at; }, r => { r.parts[0].claims[2].anchors.push({ ...r.parts[0].claims[2].anchors[0] }); },
+    r => { r.parts[0].claims[2].enforcedBy[0].kind = 'auto'; }, r => { r.parts[0].claims[2].enforcedBy[0].at = null; },
+    r => { r.parts[0].claims[2].enforcedBy.push({ kind: 'none', text: '기록상 미설계', at: f.at[2] }); },
+    r => { r.parts[1].claims[1].enforcedBy.push({ kind: 'none', text: '기록상 미설계', at: f.at[2] }); },
+    r => { r.parts[0].claims[2].enforcedBy.push({ ...r.parts[0].claims[2].enforcedBy[0] }); }, r => { r.parts[0].claims[1].enforcedBy = [{ kind: 'unknown', text: '장치 미상', at: null }]; },
+    r => { r.parts[0].claims[1].anchors = [{ kind: 'stated', text: '저장', at: f.at[0] }]; },
+    r => { r.parts[0].claims[0].withdrawalKind = 'policy'; }, r => { r.parts[0].claims[2].withdrawalKind = 'design'; },
+    r => { r.parts[0].claims[3].gate = 'ops'; }, r => { r.parts[0].claims[0].gate = 'run'; },
+    r => { r.parts[0].claims[2].scopeName = `sk-${'A'.repeat(25)}`; }, r => { r.parts[0].claims[2].anchors[0].text = `sk-${'A'.repeat(25)}`; },
+    r => { r.parts[0].claims[2].enforcedBy[0].text = `sk-${'A'.repeat(25)}`; },
+  ]) {
+    const r = tenReply(f); mutate(r);
+    assert.throws(() => M.validateMapReply(r, f.ask), undefined, String(mutate));
+  }
+  // Not said on a claim of another topic is null or [] and reads as such; four places and four devices are the bound.
+  const wide = tenReply(f);
+  Object.assign(wide.parts[0].claims[1], { scope: null, scopeName: null, anchors: [], enforcedBy: [], withdrawalKind: null, gate: null });
+  Object.assign(wide.parts[0].claims[2], { anchors: ['가', '나', '다', '라'].map(text => ({ kind: 'inferred', text, at: f.at[0] })),
+    enforcedBy: ['code', 'gate', 'person', 'code'].map((kind, i) => ({ kind, text: `장치 ${i}`, at: f.at[2] })) });
+  const got = M.validateMapReply(wide, f.ask);
+  assert.deepEqual([M.setAside(got).length, tenOf(got.parts[0].claims[1]), got.parts[0].claims[2].anchors.length, got.parts[0].claims[2].enforcedBy.length], [0, UNSAID10, 4, 4]);
+  const applied = M.applyReading(f.p, f.inp, got, meta('R_ten_wide'));
+  assert.deepEqual(validateProject(applied.project), applied.project);
+});
+
+test('map-reading.10: a reply without any new claim field stores every claim key as not said', () => {
+  const f = firstMap(), r = structuredClone(f.reply); r.parts[0].claims.splice(1, 1);
+  const applied = M.applyReading(f.p, f.inp, M.validateMapReply(r, f.ask), meta('R_ten_plain'));
+  assert.equal(applied.reading.version, 'map-reading.10');
+  for (const p of applied.reading.parts) for (const c of p.claims) assert.deepEqual(tenOf(c), UNSAID10);
+  const u = M.partUnderstanding(applied.project, applied.reading.parts[0].areaId);
+  assert.deepEqual([u.rules, u.withdrawals, u.gates], [[], [], []]);
+  assert.deepEqual(validateProject(applied.project), applied.project);
+});
+
+test('map-reading.10 storage is exact: unknown values, a missing key, a key off its topic and a .10 key on a .9 reading are refused', () => {
+  const f = firstMap(), applied = M.applyReading(f.p, f.inp, M.validateMapReply(tenReply(f), f.ask), meta('R_ten_store'));
+  const raw = S.serializeProject(applied.project);
+  const excluded = (path, category) => ({ path, rule: 'contract', category, explanation: '-', record: null, from: null, to: null });
+  const rule = r => r.parts[0].claims[2];
+  for (const mutate of [
+    r => { delete rule(r).scope; }, r => { rule(r).scope = 'phase'; }, r => { rule(r).scopeName = null; }, r => { r.parts[1].claims[1].scopeName = 'x'; }, r => { rule(r).scopeName = '가'.repeat(41); },
+    r => { rule(r).anchors = Array(5).fill(rule(r).anchors[0]); }, r => { rule(r).anchors[0].kind = 'guess'; }, r => { rule(r).anchors[0].text = '가'.repeat(81); },
+    r => { rule(r).anchors[0].quote = { ...rule(r).anchors[0].quote, quote: 'x' }; }, r => { rule(r).anchors[0].extra = 1; }, r => { rule(r).anchors.push({ ...rule(r).anchors[0] }); },
+    r => { rule(r).enforcedBy[0].quote = null; }, r => { rule(r).enforcedBy.push({ kind: 'none', text: '기록상 미설계', quote: rule(r).enforcedBy[0].quote }); },
+    r => { rule(r).enforcedBy.push({ ...rule(r).enforcedBy[0] }); }, r => { rule(r).enforcedBy[0].kind = 'auto'; }, r => { delete rule(r).enforcedBy; },
+    r => { r.parts[0].claims[1].scope = 'part'; }, r => { r.parts[0].claims[1].anchors = [rule(r).anchors[0]]; }, r => { r.parts[0].claims[1].enforcedBy = [rule(r).enforcedBy[0]]; },
+    r => { r.parts[0].claims[0].withdrawalKind = 'policy'; }, r => { r.parts[0].claims[1].withdrawalKind = 'design'; }, r => { r.parts[0].claims[0].gate = 'run'; }, r => { r.parts[0].claims[3].gate = 'ops'; },
+    r => { delete r.parts[0].claims[3].gate; },
+    r => { r.version = 'map-reading.9'; },
+    r => { r.version = 'map-reading.9'; stripTen(r); r.parts[0].claims[0].gate = null; },
+    r => { r.version = 'map-reading.9'; stripTen(r); r.parts[0].claims[2].anchors = []; },
+  ]) {
+    const bad = JSON.parse(raw); mutate(bad.readings.at(-1));
+    assert.throws(() => parseProject(JSON.stringify(bad)), undefined, String(mutate));
+    assert.throws(() => validateProject(bad), undefined, String(mutate));
+  }
+  const old = JSON.parse(raw); old.readings.at(-1).version = 'map-reading.9'; stripTen(old.readings.at(-1));
+  assert.deepEqual(validateProject(old), old, 'a map-reading.9 entry keeps its exact shape');
+  const u = M.partUnderstanding(parseProject(JSON.stringify(old)), old.readings.at(-1).parts[0].areaId);
+  assert.deepEqual(u.rules.map(c => [c.text, c.scope ?? null, c.anchors ?? [], c.enforcedBy ?? []]), [['저장 전에 확인한다.', null, [], []]], 'an earlier reading\'s rule has no scope, place or device');
+  assert.deepEqual([u.withdrawals.map(c => c.withdrawalKind ?? null), u.gates], [[null], []], 'nor a withdrawal kind or a gate');
+  const ok = JSON.parse(raw); ok.readings.at(-1).exclusions = [excluded('parts[0].claims[2].anchors[1]', 'anchor'), excluded('parts[0].claims[2].enforcedBy[0]', 'enforced-by'),
+    excluded('parts[0].claims[2].scope', 'scope'), excluded('parts[0].claims[0].withdrawalKind', 'withdrawal-kind'), excluded('parts[0].claims[3].gate', 'gate')];
+  assert.deepEqual(validateProject(ok), ok, 'a .10 reading may say where a place, a device, a scope, a kind or a gate stood');
 });

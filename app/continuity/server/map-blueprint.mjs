@@ -3,7 +3,7 @@
 import { ApiError } from '../../server/errors.mjs';
 import { askRecords, validateMapAsk, validateMapReply, setAside, readingExclusions, attachExclusions, explainExclusion, versionLike, DIVIDED_EXCLUSIONS_MAX, MAP6_NEW_PARTS, MAP6_RELATIONS, MAP6_CLAIMS, PART_LIST_MAX, FIELD_ITEM_MAX, fileKeys } from '../dist/public/shared/map-reading.js';
 import { resolveRange } from '../dist/public/shared/evidence-span.js';
-import { CLAIM_TOPICS, EVIDENCE_GRADES, PART_STATES, PART_TYPES, CHANNELS, RELATION_MODES } from '../dist/public/shared/types.js';
+import { CLAIM_TOPICS, EVIDENCE_GRADES, PART_STATES, PART_TYPES, CHANNELS, RELATION_MODES, RULE_SCOPES, ANCHOR_KINDS, ENFORCER_KINDS, WITHDRAWAL_KINDS, GATE_KINDS } from '../dist/public/shared/types.js';
 
 // .31: a first map plans up to 36 parts (twelve fragments of three; the two KORU records need about 33: 24 table rows and nine
 // stores); a later map keeps 24 (its reply reads 24 parts, twelve of them new).
@@ -34,15 +34,16 @@ export const BLUEPRINT_PARTS_PER_FRAGMENT = 3;
  * eight keep their hundreds' lower half (s1–s48, s101–s148 … s701–s748, the starts of .31), the ninth to twelfth take the upper half
  * of the first four hundreds (s51–s98, s151–s198, s251–s298, s351–s398); s801–s899 stay the global stage's candidate keys and a key
  * has at most three digits (.31 gave the last four 24 keys each in s901–s999, which sixteen claims per part outgrow). */
-export const FRAGMENT_KEYS = 48;
-export const fragmentKeys = index => index < 8 ? { keyStart: index * 100 + 1, keyEnd: index * 100 + FRAGMENT_KEYS }
-  : { keyStart: (index - 8) * 100 + 51, keyEnd: (index - 8) * 100 + 50 + FRAGMENT_KEYS };
+/* .33: sixty each (three parts of twenty claims), one run of sixty after another (s1–s60, s61–s120, … s661–s720 for the twelfth): the
+ * twelve fragments end at s720, under the global stage's s801–s899, and no key has more than three digits. */
+export const FRAGMENT_KEYS = 60;
+export const fragmentKeys = index => ({ keyStart: index * FRAGMENT_KEYS + 1, keyEnd: (index + 1) * FRAGMENT_KEYS });
 export const BLUEPRINT_CORRECTIONS_MAX = 24;
 export const BLUEPRINT_CORRECTIONS_PER_PART_MAX = 4;
 export const BLUEPRINT_GLOBAL_KINDS = Object.freeze(['condition', 'correction', 'uncertain', 'material', 'relation', 'request']);
 const NEW = /^new:[a-z0-9_-]{1,24}$/;
 const CONTROL = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
-const SAFE_VALIDATION_PATH = /^(?:reply|summary|parts|relations|candidates|gaps|matches|material|basisAt|basisVersion|portMap)(?:\[\d{1,3}\])?(?:\.(?:ref|name|parent|role|roleAbout|roleAboutAt|roleReplaces|basis|claims|kind|text|at|about|aboutAt|replaces|key|from|to|note|target|targets|statement|parts|record|quote|what|stance|why|requestId|itemId|topic|evidence|when|where|before|state|stateAt|stateWhen|files|payload|cadence|mode|type|typeAt|inputs|outputs|fields|config|channel|steps|loop|stateVars|unit|stop|resume|does|uses|scope|readBy|changedBy|port|step|direction|relation)(?:\[\d{1,3}\])?)*$/;
+const SAFE_VALIDATION_PATH = /^(?:reply|summary|parts|relations|candidates|gaps|matches|material|basisAt|basisVersion|portMap)(?:\[\d{1,3}\])?(?:\.(?:ref|name|parent|role|roleAbout|roleAboutAt|roleReplaces|basis|claims|kind|text|at|about|aboutAt|replaces|key|from|to|note|target|targets|statement|parts|record|quote|what|stance|why|requestId|itemId|topic|evidence|when|where|before|state|stateAt|stateWhen|files|payload|cadence|mode|type|typeAt|inputs|outputs|fields|config|channel|steps|loop|stateVars|unit|stop|resume|does|uses|scope|readBy|changedBy|port|step|direction|relation|scopeName|anchors|enforcedBy|withdrawalKind|gate)(?:\[\d{1,3}\])?)*$/;
 const SAFE_VALIDATION_RULES = new Set(['contract', 'reference', 'length', 'duplicate-key', 'duplicate-target', 'settled-and-open',
   'material-evidence', 'source-kind', 'condition-form', 'condition-source', 'condition-length']);
 // map-reading.ts ContractGuard: the fixed categories a rule 'contract' refusal names. Nothing else of error.target is ever read.
@@ -56,7 +57,9 @@ const SAFE_CONTRACT_CATEGORIES = new Set(['shape', 'keys', 'text', 'count', 'new
   // .29 (the divided first map): a file line skipping its store, a claim on another part's table row, a sender the line does not name.
   'via-store', 'wrong-part', 'sender',
   // map-reading.9 (.30): a part's steps, loop and kept state, the reply's port map; a claim restating its part's state row.
-  'step', 'loop', 'state-var', 'port-map', 'restate']);
+  'step', 'loop', 'state-var', 'port-map', 'restate',
+  // map-reading.10 (.33): a rule's scope, one of its places or devices, a withdrawal's kind, a gate's kind.
+  'scope', 'anchor', 'enforced-by', 'withdrawal-kind', 'gate']);
 /** Fixed path/rule (and, for rule 'contract', its fixed guard category) of a refusal; null for anything else. */
 export function safeValidation(error) {
   try {
@@ -79,6 +82,8 @@ const invalid = cause => {
 const exact = (value, keys) => !!value && typeof value === 'object' && !Array.isArray(value)
   && Object.keys(value).length === keys.length && keys.every(key => Object.hasOwn(value, key));
 const words = (value, max) => typeof value === 'string' && !!value.trim() && value.length <= max && !CONTROL.test(value);
+// .33: the same check under its own name (mapStageIssues' fields keeps a local words of its own).
+const phrase10 = words;
 export function originalAnchors(ask) {
   const texts = askRecords(ask), aliases = new Set(ask.records.flatMap(record => record.spans?.map(span => span.s) ?? []));
   return refs => Array.isArray(refs) && refs.length >= 1 && refs.length <= BLUEPRINT_ANCHORS_MAX
@@ -94,7 +99,7 @@ export const MAP_BLUEPRINT_PROMPT = `너는 프로젝트 지도의 전역 설계
 parts는 기록이 그린 흐름의 단계를 잃지 않을 만큼 보통5~36개, 총36개 이하(첫 지도는 새 부분도 36개까지). 첫 지도에서 기록의 부분 표 행과 산출물 표의 저장소 행을 모두 세울 자리가 있으면 모두 부분으로 세운다. 기능 책임으로 묶고 파일·함수·항목마다 펼치지 않는다.
 기록의 부분 표(현황 보고의 「부분」 표, 설계 기록의 「부분 유형」 표)의 모든 행은 부분으로 세우거나, 그 행을 흡수한 부분의 focus에 원문 이름과 상태 그대로(예: 「기분 층: 미구현」) 적는다. 흡수는 기록의 묶음 표(부모 이름 | 자식 이름들)가 그 행의 부모로 적은 부분에만 하고, 묶음 표에 부모가 없는 행은 다른 부분에 흡수하지 않고 부분으로 세운다. 연결 표(보내는 부분 | 받는 부분)에 자기 행이 있는 단위는 부모가 있어도 흡수하지 않고 부분으로 세운다(흡수하면 그 연결이 자기 고리가 되어 지도에서 사라진다). 부분의 name은 그 표 행의 첫 칸 이름을 글자 그대로 쓰고, 그 부분이 내는 파일·산출물 이름으로 바꾸지 않는다(「facts-refresh」 행을 「calendar.json」으로 부르지 않는다). 미구현·폐기·모름 행도 그 상태의 부분으로 세우고, 두 기록의 표가 같은 이름으로 부르는 단위는 한 부분이다. 기록의 산출물 표(이름 | 필드 | 만드는 부분 | 읽는 부분 | 있는 곳)에서 「있는 곳」이 파일·큐·경로인 행(review.jsonl, policy.jsonl, state.jsonl, texture-events.jsonl, cards-*.jsonl, plan.jsonl, LEDGER.jsonl 같은)은 모두 저장소 부분 후보이며 그 행의 이름 그대로 세우고 focus에 「저장소: 필드 …」를 적는다. 같은 파일의 이어진 행은 한 부분이다. 그 흐름은 「만드는 쪽 ref → 저장소 ref: 행 이름」과 「저장소 ref → 읽는 쪽 ref: 행 이름」 두 relation 항목으로 쓰고, 읽는 쪽이 그 파일을 자기 박자(루프·타이머)로 읽는다고 기록이 적으면 만드는 쪽 → 읽는 쪽 직통 항목을 쓰지 않는다. 연결 행·화살표가 넘기는 것으로 적은 파일 이름은 기록의 산출물 표에 그 파일의 행이 있을 때만 그 저장소 부분을 거친다. 연결 행의 「넘기는 것」 칸은 산출물 이름 목록 하나이며 부분이 아니다: 산출물 표에 행이 없는 이름(「fee_policy·calendar.json」의 calendar.json)은 부분으로 세우지 않고 그 연결의 relation 항목에 칸 그대로 둔다(「new:facts_refresh → new:engine: fee_policy·calendar.json」). 부분 36개 안에서 고를 때는 관계가 있는 단위·사람·저장소를 먼저 세우고, 만드는 부분과 읽는 부분이 같은 산출물은 그 부분의 focus에 두며, 관계가 없는 미구현·폐기·모름 단위부터 가장 가까운 부분의 focus로 보낸다.
 기록이 스스로 구성 목록(돌아가는 것의 표, 유닛 목록)·층 번호·「A → B」 흐름을 제시하면 그 단위로 부분을 나누고, 화살표의 양 끝이 서로 다른 부분이 되게 한다. 「A·B와 C」처럼 서로 다른 유닛을 한 이름에 묶어야 하면 나눈다. 기록이 묶음 이름과 구성원을 함께 밝히면(예: 「정보 층(달력·카드·질감)」, 1a·1b·1c 같은 번호) 그 묶음을 부모 부분으로 두고 구성원을 자식으로 둔다. 미구현·폐기된 구성원은 부분으로 세울 자리가 없을 때만 같은 묶음 부분의 focus에 적는다. 원문이 「X의 입력」이라 부른 것은 X의 자식으로 두지 말고 X 옆 부분으로 두어 X로 가는 관계로 잇는다. parent는 원문이 「A(B·C)」처럼 B를 A 안에 직접 열거할 때만 쓴다. 목적·설계 사상만 말하고 다른 부분과 주고받는 것이 없는 내용은 부분으로 만들지 않고 가장 가까운 부분의 focus로 보낸다. 기존 ref는 INPUT.parts에 있는 ID만, name은 사용자의 기존 이름과 글자 그대로 같아야 하고 parent도 원래 parentId와 같아야 한다. 새 ref는 ^new:[a-z0-9_-]{1,24}$이며 중복하지 않는다. parent는 실제 기존 부분 또는 이 계획의 부분 ref나 null이며 자기 자신·순환·없는 부모를 쓰지 않는다. 포함 근거가 없으면 null이다. name60자 이하. focus는 320자 안에 쓴다(480자를 넘으면 설계 전체가 거절된다). 긴 목록은 이름만 남기고 설명을 줄인다.
-global은64개 이하(그중 relation 항목 48개까지), text240자 이하. 뒤의 조건·정정·철회·미구현·모름, 내포 예제 범위, 관계 방향, 요청·prior 귀속을 누락하지 않는다. kind=relation 항목은 원문의 화살표·「A가 B를 읽는다」·보고와 지시의 전달마다 「from ref → to ref: 넘기는 것(원문 이름)」 형식으로 하나씩 쓰고 at에 그 줄을 둔다(흐름 뼈대이며 증거가 아니다). 원문이 「읽기만」「보고 읽기」「한 줄 지시」「잔고로 노출 조절」처럼 적은 읽기와 제어도 그 문장이 있을 때만 화살표로 잇는다(예: 성적표 → 사람, 엔진 → 감시, 사람 → 엔진). 흐름도의 끝까지 따라가 한 부분에서 나가는 화살표(예: 엔진 → journal·outcomes → 경주 행 → 성적표)도 relation 항목으로 세운다. 부분은 원문의 표·목록이 이름 붙인 단위(유닛·생산자·사람)로만 세우고, 흐름 그림의 중간 산출(journal·outcomes 같은 기록)은 부분이 아니라 그것을 내는 단위의 focus에 남기며 그 화살표는 단위 사이의 relation으로 쓴다. 원문이 서로 다른 생산자로 적은 둘(예: 라이브 엔진의 경주 행과 종이 재생의 경주 행)을 한 부분에 합치지 않는다. 사람(소유자)과 그 지시를 받는 세션·감독자가 원문에 따로 적혀 있으면 따로 둔다. 앞으로 하겠다는 지시·계획은 관계가 아니라 그 부분의 want로만 두고 relation 항목으로 쓰지 않는다. [모름]의 각 줄은 그것이 가리키는 부분에 하나씩 uncertain 항목으로 두고 「→ ref」로 맡긴다. 정정·철회·모름 항목과 condition·request 항목의 text 끝에는 그것을 맡을 부분 ref를 「→ new:x」로 하나만 적는다. 기록의 철회·변경, 실제 변화, 오류, 지켜야 할 것, 모르는 것, 가장 자신 없는 것 표의 행은 그 행의 「부분 이름」 칸(없으면 첫 칸)이 이름 붙인 부분에 맡긴다(「엔진 | 매일 FLAT 재시작 | 채택 안 함」은 → 엔진이며, 그것을 대신한 감시를 맡은 부분이 아니다). 「전체」 행만 원문이 그 규칙이 제약한다고 적은 부분에 둔다. 한 항목에는 철회·정정 하나만 쓰고, 같은 부분·같은 표의 규칙·모름 행 여럿은 한 항목에 묶고 at에 그 행들을 모두 둔다. 한 부분에 맡기는 항목 수는 줄이지 않는다(첫 지도의 부분은 주장을 16개까지 쓴다). 맡긴 항목의 표 행마다 그 부분의 주장 하나가 되며, 어느 주장도 인용하지 않은 행은 진단에 남는다. relation 항목은 48개까지만 쓴다. 기록의 연결 표(보내는 부분 | 받는 부분)의 모든 행은 relation 항목 하나(저장소를 거치면 둘)로 빠짐없이 쓴다. 소유자가 정한 요구사항은 규칙을 전달받는 세션이 아니라 그 규칙이 제약하는 부분(돈 경로 → 엔진, 지출 → 카드 러너, 노출 → 사람)에 둔다. 운영 함정·환경 사실(예: coreutils 차이, 거래소 지연 몰림)은 원문이 그 영향을 받는다고 이름 붙인 부분의 focus에 두고, 그것을 감시·보고하는 부분에 두지 않으며, 받는 부분이 원문에 없으면 아무 부분에나 붙이지 않는다. 원문 표의 단위와 저장소가 부분 36개를 넘으면 관계가 없는 자식부터 부모 부분의 focus에 원문 이름과 상태 그대로(예: 「변경 구상(plan-view): 돌고 있음 [추정]」) 넣고, 관계가 있는 단위와 사람은 부분으로 남긴다. 요구·구상·보고·검사 보고·제공 자료를 구별하고 작성자의 보고를 앱이 확인한 사실로 올리지 않는다. 같은 이름만으로 다른 대상·판본을 합치지 않는다. 사용자 이름·부모·직접 바로잡은 역할을 보존한다. 원문이 명시한 범위만 정정하고 도착 순서로 앞 주장을 철회하지 않는다.
+global은64개 이하(그중 relation 항목 48개까지), text240자 이하. 뒤의 조건·정정·철회·미구현·모름, 내포 예제 범위, 관계 방향, 요청·prior 귀속을 누락하지 않는다. kind=relation 항목은 원문의 화살표·「A가 B를 읽는다」·보고와 지시의 전달마다 「from ref → to ref: 넘기는 것(원문 이름)」 형식으로 하나씩 쓰고 at에 그 줄을 둔다(흐름 뼈대이며 증거가 아니다). 원문이 「읽기만」「보고 읽기」「한 줄 지시」「잔고로 노출 조절」처럼 적은 읽기와 제어도 그 문장이 있을 때만 화살표로 잇는다(예: 성적표 → 사람, 엔진 → 감시, 사람 → 엔진). 흐름도의 끝까지 따라가 한 부분에서 나가는 화살표(예: 엔진 → journal·outcomes → 경주 행 → 성적표)도 relation 항목으로 세운다. 부분은 원문의 표·목록이 이름 붙인 단위(유닛·생산자·사람)로만 세우고, 흐름 그림의 중간 산출(journal·outcomes 같은 기록)은 부분이 아니라 그것을 내는 단위의 focus에 남기며 그 화살표는 단위 사이의 relation으로 쓴다. 원문이 서로 다른 생산자로 적은 둘(예: 라이브 엔진의 경주 행과 종이 재생의 경주 행)을 한 부분에 합치지 않는다. 사람(소유자)과 그 지시를 받는 세션·감독자가 원문에 따로 적혀 있으면 따로 둔다. 앞으로 하겠다는 지시·계획은 관계가 아니라 그 부분의 want로만 두고 relation 항목으로 쓰지 않는다. [모름]의 각 줄은 그것이 가리키는 부분에 하나씩 uncertain 항목으로 두고 「→ ref」로 맡긴다. 정정·철회·모름 항목과 condition·request 항목의 text 끝에는 그것을 맡을 부분 ref를 「→ new:x」로 하나만 적는다. 기록의 철회·변경, 실제 변화, 오류, 지켜야 할 것, 모르는 것, 가장 자신 없는 것 표의 행은 그 행의 「부분 이름」 칸(없으면 첫 칸)이 이름 붙인 부분에 맡긴다(「엔진 | 매일 FLAT 재시작 | 채택 안 함」은 → 엔진이며, 그것을 대신한 감시를 맡은 부분이 아니다). 「전체」 행만 원문이 그 규칙이 제약한다고 적은 부분에 둔다. 한 항목은 원문 표 행 하나다: 철회·정정·규칙·모름·가장 자신 없는 것·다음 관문 표의 행마다 항목 하나를 쓰고 at에 그 행 하나를 둔다(그 행이 가리키는 다른 기록의 한 줄은 함께 둘 수 있다). 여러 행을 한 항목에 묶지 않는다(묶은 항목은 앞의 행만 주장이 되고 나머지 행이 사라진다). global 자리가 모자라면 그 행을 맡을 부분의 at에 그 행을 두어 맡긴다. 한 부분에 맡기는 항목 수는 줄이지 않는다(첫 지도의 부분은 주장을 20개까지 쓴다). 맡긴 항목의 표 행마다 그 부분의 주장 하나가 되며, 어느 주장도 인용하지 않은 행은 진단에 남는다. relation 항목은 48개까지만 쓴다. 기록의 연결 표(보내는 부분 | 받는 부분)의 모든 행은 relation 항목 하나(저장소를 거치면 둘)로 빠짐없이 쓴다. 소유자가 정한 요구사항은 규칙을 전달받는 세션이 아니라 그 규칙이 제약하는 부분(돈 경로 → 엔진, 지출 → 카드 러너, 노출 → 사람)에 둔다. 운영 함정·환경 사실(예: coreutils 차이, 거래소 지연 몰림)은 원문이 그 영향을 받는다고 이름 붙인 부분의 focus에 두고, 그것을 감시·보고하는 부분에 두지 않으며, 받는 부분이 원문에 없으면 아무 부분에나 붙이지 않는다. 원문 표의 단위와 저장소가 부분 36개를 넘으면 관계가 없는 자식부터 부모 부분의 focus에 원문 이름과 상태 그대로(예: 「변경 구상(plan-view): 돌고 있음 [추정]」) 넣고, 관계가 있는 단위와 사람은 부분으로 남긴다. 요구·구상·보고·검사 보고·제공 자료를 구별하고 작성자의 보고를 앱이 확인한 사실로 올리지 않는다. 같은 이름만으로 다른 대상·판본을 합치지 않는다. 사용자 이름·부모·직접 바로잡은 역할을 보존한다. 원문이 명시한 범위만 정정하고 도착 순서로 앞 주장을 철회하지 않는다.
 모든 at는 원래 INPUT.records에 실제 있는 구간 별칭1~8개다. 범위 문자열·인용 복사·새 별칭·현재 지도나 요청의 ID를 at로 쓰지 않는다. 서로 떨어진 별칭은 단서 위치 목록이며 이어 붙인 인용이 아니다. basis/note의 사용자 기재 정보를 원문 조건으로 만들지 않는다. 실제 부분이 없으면 parts=[]로 두며 빈 틀을 만들지 않는다. 설계 자체는 원문 증거도 구현 사실도 아니다.`;
 export const BLUEPRINT_PROMPT = MAP_BLUEPRINT_PROMPT;
 // Keep the first-map prompt and its cache identity unchanged. Only later map.7 planning registers current-claim obligations.
@@ -352,12 +357,17 @@ const FOCUS_ROWS = /실제\s*(?:로\s*)?(?:바뀐|변화)|오류|철회|지켜�
 const ASSIGNED_KINDS = new Set(['condition', 'correction', 'uncertain', 'request']);
 const ASSIGNED = /→\s*(new:[a-z0-9_-]{1,24}|P\d{2,3})/g;
 export const PLAN_CLAIMS_NAMES = 24;
-const opening = text => text.replace(/\s+/g, ' ').trim().slice(0, 40);
+// .33: the whole row (or item) as written, up to 120 characters (.32 cut it at 40: 「…race_ru」).
+export const PLAN_CLAIM_TEXT = 120;
+const opening = text => text.replace(/\s+/g, ' ').trim().slice(0, PLAN_CLAIM_TEXT);
 /** .32 (diagnostic only): the plan items assigned to a part of the given ones, in the plan's part order: each condition, correction,
  * uncertain or request item of blueprint.global whose text ends its last 「→ ref」 on that part, and each row of that part's own plan
  * at on a change, defect, withdrawal or rule table. An item landed when a claim of the given parts quotes (its at range overlaps)
  * every table row its at points at (any of its at when it points at none); a focus row when a claim quotes it. Returns { items,
- * missing: ['ref: the item's first 40 characters' (the plan's text, or the record's row for a focus row)] }. */
+ * missing: ['ref: the item's first 40 characters' (the plan's text, or the record's row for a focus row)] }.
+ * .33: each table row of an item is its own unit (an item combining rows landed only its first ones in .32, and the diagnostic could
+ * not say which): a unit landed when a claim quotes that row; it is named by the row as written (its cells joined by 「 | 」, up to
+ * 120 characters); an item pointing at no row stays one unit named by its own text (up to 120). */
 export function planClaims(ask, blueprint, parts) {
   const texts = askRecords(ask), list = (Array.isArray(parts) ? parts : []).filter(part => part && typeof part === 'object');
   const where = alias => {
@@ -378,7 +388,9 @@ export function planClaims(ask, blueprint, parts) {
     const ref = [...g.text.matchAll(ASSIGNED)].at(-1)?.[1];
     if (!ref || !refs.has(ref)) continue;
     const spans = g.at.map(where).filter(Boolean), rows = itemRows.filter(row => spans.some(r => meets(r, row)));
-    items.push({ ref, rows, name: `${ref}: ${opening(g.text)}`, landed: rows.length ? rows.every(said) : spans.some(r => quoted.some(q => meets(q, r))) });
+    if (!rows.length) { items.push({ ref, rows, name: `${ref}: ${opening(g.text)}`, landed: spans.some(r => quoted.some(q => meets(q, r))) }); continue; }
+    for (const row of rows) if (!items.some(item => item.ref === ref && item.rows.some(r => r.record === row.record && r.from === row.from)))
+      items.push({ ref, rows: [row], name: `${ref}: ${opening(row.cells.join(' | '))}`, landed: said(row) });
   }
   for (const part of Array.isArray(blueprint?.parts) ? blueprint.parts : []) {
     if (!refs.has(part?.ref) || !Array.isArray(part.at)) continue;
@@ -390,6 +402,31 @@ export function planClaims(ask, blueprint, parts) {
   }
   const missing = items.filter(item => !item.landed).sort((a, b) => order.get(a.ref) - order.get(b.ref)).map(item => item.name);
   return { items: items.length, missing };
+}
+/** .33 (diagnostic only): the 모르는 것 rows naming a part of the given ones (the cell under 「부분」, loosely compared), and those no
+ * topic=unknown claim of that part quotes, as { rows, missing: ['the row's cells | joined', …] }. */
+export function unknownRows(ask, parts) {
+  const texts = askRecords(ask), list = (Array.isArray(parts) ? parts : []).filter(part => part && typeof part === 'object' && typeof part.name === 'string');
+  const byName = new Map(list.map(part => [plainName(part.name), part]));
+  const where = alias => {
+    if (typeof alias !== 'string' || !alias.includes('.')) return null;
+    const record = alias.slice(0, alias.indexOf('.')), source = texts.get(record);
+    const range = source?.spans ? resolveRange(alias, record, source.text, source.spans) : null;
+    return range ? { record, from: range.from, to: range.to } : null;
+  };
+  const rows = tableRowsUnder(ask, UNKNOWN_TABLE).filter(row => byName.has(plainName(row.name)));
+  const missing = rows.filter(row => !(byName.get(plainName(row.name)).claims ?? []).some(claim => {
+    if (claim?.topic !== 'unknown') return false; const r = where(claim.at);
+    return !!r && r.record === row.record && r.from < row.to && row.from < r.to;
+  })).map(row => opening(row.cells.join(' | ')));
+  return { rows: rows.length, missing };
+}
+/** .33: what a first map's global stage left out that its one correction is for: the connection-table rows without a line
+ * (connections) and the plan's relation items no line draws (plan-relations), named as the final diagnostics name them; [] when
+ * every row and item is drawn (or the wire is a revision sentinel). Read on the combined wire, after its set-aside items. */
+export function missingLines(fragments, global, ask, blueprint) {
+  if (isMapRevision(global)) return [];
+  return finalDiagnostics(fragments, global, ask, blueprint).filter(x => (x.rule === 'connections' || x.rule === 'plan-relations') && x.names.length > 0);
 }
 const PLAN_LINE = /(new:[a-z0-9_-]{1,24}|P\d{2,3})\s*(?:─+→|-+>|→)\s*(?:to\s+)?(new:[a-z0-9_-]{1,24}|P\d{2,3})/;
 export function readingDiagnostics({ ask, summary, parts, relations, blueprint = null }) {
@@ -410,10 +447,13 @@ export function readingDiagnostics({ ask, summary, parts, relations, blueprint =
       const plan = planClaims(ask, blueprint, parts);
       if (plan.missing.length) issues.push({ path: 'parts', rule: 'plan-claims', expected: plan.items, actual: plan.items - plan.missing.length, names: plan.missing.slice(0, PLAN_CLAIMS_NAMES) });
     }
-    for (const [title, topic] of [[WITHDRAWN_TABLE, 'withdrawn'], [UNKNOWN_TABLE, 'unknown']]) {
-      const rows = sectionRows(ask, title).length, count = claims.filter(claim => claim.topic === topic).length;
-      if (rows && rows !== count) issues.push({ path: 'parts', rule: `${topic}-count`, expected: rows, actual: count });
-    }
+    const rows = sectionRows(ask, WITHDRAWN_TABLE).length, count = claims.filter(claim => claim.topic === 'withdrawn').length;
+    if (rows && rows !== count) issues.push({ path: 'parts', rule: 'withdrawn-count', expected: rows, actual: count });
+    // .33: the records' 모르는 것 rows that name a part of the reading, each against the topic=unknown claims of that part quoting it
+    // (a .32 count of every unknown claim against every row read 6 → 13 and hid the one row lost); the rows no such claim quotes are
+    // named by their cells (up to 120 characters). Diagnostic only.
+    const unknown = unknownRows(ask, parts);
+    if (unknown.missing.length) issues.push({ path: 'parts', rule: 'unknown-count', expected: unknown.rows, actual: unknown.rows - unknown.missing.length, names: unknown.missing.slice(0, 12) });
   } catch { /* A diagnostic read failure says nothing. */ }
   try {
     if (Array.isArray(relations)) {
@@ -563,13 +603,15 @@ export function fragmentSetAside(value, group, ask, blueprint) {
 /** .30: the fixed reasons of a stage's set-aside items as a stage record keeps them (never a position or an explanation). */
 export const stageSetAside = exclusions => exclusions.slice(0, DIVIDED_EXCLUSIONS_MAX).map(x => ({ path: x.path, rule: x.rule, category: x.category ?? null }));
 /** .25: the optional fields of map-reading.7 (map-reading.ts), by the place a set-aside names or by its contract category. */
-const FIELD_PATH = /(\.(topic|evidence|when|where|before|state|stateAt|stateWhen|files|payload|cadence|mode|type|typeAt|inputs|outputs|fields|config|channel|steps|loop|stateVars)|^basis(At|Version)|\.(steps|stateVars)\[\d+\](\.at)?|\.loop\.(unit|stop|resume|at)|^portMap(\[\d+\](\.at)?)?)$/;
+const FIELD_PATH = /(\.(topic|evidence|when|where|before|state|stateAt|stateWhen|files|payload|cadence|mode|type|typeAt|inputs|outputs|fields|config|channel|steps|loop|stateVars)|^basis(At|Version)|\.(steps|stateVars)\[\d+\](\.at)?|\.loop\.(unit|stop|resume|at)|^portMap(\[\d+\](\.at)?)?|\.claims\[\d+\]\.(scope|scopeName|anchors|enforcedBy|withdrawalKind|gate)|\.claims\[\d+\]\.(anchors|enforcedBy)\[\d+\](\.at)?)$/;
 const FIELD_CATEGORIES = new Set(['topic', 'evidence', 'when', 'where', 'before', 'state', 'state-at', 'state-when', 'files', 'payload', 'cadence', 'mode',
   'type', 'type-at', 'inputs', 'outputs', 'fields', 'config', 'channel', 'basis-at', 'basis-version',
   // .29: the program's own reading of a quoted line refuses a first pass the same way (render: wrong-part; global: via-store, sender).
   'via-store', 'wrong-part', 'sender',
   // .30: a step, a loop, a kept state (render), a port-map row (global) and a claim restating its part's state row (render).
-  'step', 'loop', 'state-var', 'port-map', 'restate']);
+  'step', 'loop', 'state-var', 'port-map', 'restate',
+  // .33 (map-reading.10): a rule's scope, places and devices, a withdrawal's kind and a gate's kind (render).
+  'scope', 'anchor', 'enforced-by', 'withdrawal-kind', 'gate']);
 // The global stage owns the relations, (.28) the reply's basis time and version, and (.30) the port map.
 const PARTS_SCOPE = /^parts\[/, RELATIONS_SCOPE = /^(relations\[|basis(At|Version)$|portMap(\[|$))/;
 /** Refuses with the first set-aside of an optional field inside scope: its fixed path, rule and (rule 'contract') category. */
@@ -593,13 +635,20 @@ const LATER_CLAIMS_FEEDBACK = 6;
  * changes: no quote is clipped, no key or ref is renamed, nothing is reordered, no other field is rewritten. An exclusion this
  * cannot place refuses the whole wire. */
 function withoutSetAside(raw, exclusions) {
-  const drop = new Map(), limit = new Map(), unsaid = new Map(), top = new Set();
+  const drop = new Map(), limit = new Map(), unsaid = new Map(), top = new Set(), claimUnsaid = new Map();
   const blank = (index, keys) => { if (!unsaid.has(index)) unsaid.set(index, new Set()); for (const key of keys) unsaid.get(index).add(key); };
   const mark = (list, index) => { if (!drop.has(list)) drop.set(list, new Set()); drop.get(list).add(index); };
   for (const x of exclusions) {
     const count = x.rule === 'contract' && x.category === 'count';
     let m;
     if ((m = /^(relations|candidates|gaps|matches|material)\[(\d{1,4})\](?:\.|$)/.exec(x.path))) mark(m[1], Number(m[2]));
+    // .33 (map-reading.10): one place or device of a claim is left out at its index, a claim's scope (with its name), its list of
+    // places or devices, its withdrawalKind or gate is written null there; the claim stays at its raw index (checked before claims).
+    else if ((m = /^parts\[(\d{1,3})\]\.claims\[(\d{1,4})\]\.(anchors|enforcedBy)\[(\d{1,4})\]$/.exec(x.path))) mark(`parts.${m[1]}.claims.${m[2]}.${m[3]}`, Number(m[4]));
+    else if ((m = /^parts\[(\d{1,3})\]\.claims\[(\d{1,4})\]\.(scope|anchors|enforcedBy|withdrawalKind|gate)$/.exec(x.path))) {
+      const key = `${m[1]}.${m[2]}`; if (!claimUnsaid.has(key)) claimUnsaid.set(key, new Set());
+      for (const k of m[3] === 'scope' ? ['scope', 'scopeName'] : [m[3]]) claimUnsaid.get(key).add(k);
+    }
     else if (count && (m = /^(relations|candidates|gaps|matches|material)$/.exec(x.path))) limit.set(m[1], LIST_LIMITS[m[1]]);
     else if ((m = /^parts\[(\d{1,3})\]\.(basis|claims)\[(\d{1,4})\](?:\.|$)/.exec(x.path))) mark(`parts.${m[1]}.${m[2]}`, Number(m[3]));
     else if (count && (m = /^parts\[(\d{1,3})\]\.(basis|claims)$/.exec(x.path))) limit.set(`parts.${m[1]}.${m[2]}`, PART_LIST_LIMITS[m[2]]);
@@ -630,6 +679,14 @@ function withoutSetAside(raw, exclusions) {
     ? { ...row, relation: row.relation - relationsOut.slice(0, row.relation).filter(Boolean).length } : row);
   clean.parts.forEach((part, i) => {
     // .31: a step's set-aside used names go first (the step is still at its raw index), then the lists' items.
+    // .33: a claim's set-aside places and devices and its fields written null go first (the claim is still at its raw index).
+    if (Array.isArray(part?.claims)) part.claims = part.claims.map((claim, j) => {
+      if (!claim || typeof claim !== 'object' || Array.isArray(claim)) return claim;
+      let out = claim;
+      for (const key of ['anchors', 'enforcedBy']) if (drop.has(`parts.${i}.claims.${j}.${key}`) && Array.isArray(out[key])) out = { ...out, [key]: keep(`parts.${i}.claims.${j}.${key}`, out[key]) };
+      for (const key of claimUnsaid.get(`${i}.${j}`) ?? []) if (Object.hasOwn(out, key)) out = { ...out, [key]: null };
+      return out;
+    });
     if (Array.isArray(part?.steps)) part.steps = part.steps.map((step, j) => drop.has(`parts.${i}.steps.${j}.uses`) && step && Array.isArray(step.uses) ? { ...step, uses: keep(`parts.${i}.steps.${j}.uses`, step.uses) } : step);
     for (const key of ['basis', 'claims', 'steps', 'stateVars', 'files', 'inputs', 'outputs', 'fields', 'config']) if (Array.isArray(part?.[key])) part[key] = keep(`parts.${i}.${key}`, part[key]);
     for (const key of unsaid.get(i) ?? []) {
@@ -798,6 +855,23 @@ export function mapStageIssues(value, error, context = null) {
       fixed(claim, 'topic', CLAIM_TOPICS, path, 'topic'); fixed(claim, 'evidence', EVIDENCE_GRADES, path, 'evidence');
       bounded(claim, 'when', 40, path, 'when'); bounded(claim, 'where', 120, path, 'where'); bounded(claim, 'before', 120, path, 'before');
       if (said(claim, 'before') && claim.topic !== 'withdrawn') add(`${path}.before`, 'contract', null, null, 'before');
+      // .33 (map-reading.10): a rule's scope (a step, port or field with its name of 40), its places and devices (four each, 80, on
+      // a line; an unknown device may have none), a withdrawal's kind and a gate's kind, each only on a claim of its topic.
+      if (said(claim, 'scope') || said(claim, 'scopeName')) {
+        const named = ['step', 'port', 'field'].includes(claim.scope);
+        if (!RULE_SCOPES.includes(claim.scope) || claim.topic !== 'rule' || (named ? !phrase10(claim.scopeName, 40) : said(claim, 'scopeName'))) add(`${path}.scope`, 'contract', null, null, 'scope');
+      }
+      for (const [key, category, ok] of [['anchors', 'anchor', a => ANCHOR_KINDS.includes(a.kind) && phrase10(a.text, 80) && typeof a.at === 'string'],
+        ['enforcedBy', 'enforced-by', e => ENFORCER_KINDS.includes(e.kind) && phrase10(e.text, 80) && (typeof e.at === 'string' || e.kind === 'unknown' && (e.at === null || e.at === undefined))]]) {
+        if (!said(claim, key)) continue;
+        if (!Array.isArray(claim[key]) || claim.topic !== 'rule' && claim[key].length) add(`${path}.${key}`, 'contract', null, null, category);
+        else if (claim[key].length > 4) add(`${path}.${key}`, 'count', 4, claim[key].length);
+        else claim[key].forEach((item, k) => { if (!item || typeof item !== 'object' || Array.isArray(item) || !ok(item)) add(`${path}.${key}[${k}]`, 'contract', null, null, category); });
+      }
+      fixed(claim, 'withdrawalKind', WITHDRAWAL_KINDS, path, 'withdrawal-kind');
+      if (said(claim, 'withdrawalKind') && claim.topic !== 'withdrawn') add(`${path}.withdrawalKind`, 'contract', null, null, 'withdrawal-kind');
+      fixed(claim, 'gate', GATE_KINDS, path, 'gate');
+      if (said(claim, 'gate') && claim.topic !== 'plan') add(`${path}.gate`, 'contract', null, null, 'gate');
     }
     // .28: the record's type word with its line, and the part's lists of names.
     fixed(part, 'type', PART_TYPES, at, 'type');

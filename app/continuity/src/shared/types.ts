@@ -223,6 +223,27 @@ export const PART_TYPES: readonly PartType[] = ['collector', 'compute', 'ai', 'l
  * wording decides; null when it does not say. */
 export type Channel = 'data' | 'control' | 'uses';
 export const CHANNELS: readonly Channel[] = ['data', 'control', 'uses'];
+/** map-reading.10 (the map design spec's fourth cycle, §5 and §8.3): how far a rule claim (topic 'rule') reaches: its part as a
+ * whole, one step, port or field of it (named in scopeName as the record writes it), or the whole project. The record's word. */
+export type RuleScope = 'part' | 'step' | 'port' | 'field' | 'project';
+export const RULE_SCOPES: readonly RuleScope[] = ['part', 'step', 'port', 'field', 'project'];
+/** map-reading.10: where a rule applies, on a line that places it: 'stated' when the record's own line names the place (a design
+ * record's condition row that implements the rule), 'inferred' when the record gives the rule and a separate line gives the place. */
+export type AnchorKind = 'stated' | 'inferred';
+export const ANCHOR_KINDS: readonly AnchorKind[] = ['stated', 'inferred'];
+/** map-reading.10: what keeps a rule: code (a condition row, its outcome as text), a gate line, a person's own rule; 'none' when the
+ * record explicitly says nothing was designed for it (기록상 미설계), 'unknown' when the record names no device (장치 미상). An empty
+ * list is the reading saying nothing about it (비어 있음). */
+export type EnforcerKind = 'code' | 'gate' | 'person' | 'none' | 'unknown';
+export const ENFORCER_KINDS: readonly EnforcerKind[] = ['code', 'gate', 'person', 'none', 'unknown'];
+/** map-reading.10: what a withdrawal (topic 'withdrawn') took back, as its row says: a design decision, an implementation (what runs),
+ * or a report (an earlier account corrected). */
+export type WithdrawalKind = 'design' | 'implementation' | 'report';
+export const WITHDRAWAL_KINDS: readonly WithdrawalKind[] = ['design', 'implementation', 'report'];
+/** map-reading.10: a gate of the next-gate table (a plan claim): 'run' a condition of operation on the path, 'dev' a condition of
+ * development or deployment beside it. */
+export type GateKind = 'run' | 'dev';
+export const GATE_KINDS: readonly GateKind[] = ['run', 'dev'];
 /** A quote of a record as it was sent: a pasted record id or a project source id. map-reading.4: also where it stands, [from, to)
  * in UTF-16 code units of the record's own text (the quote is exactly that slice); earlier readings have no position. */
 export interface ReadingQuote { record: string; quote: string; from?: number; to?: number }
@@ -244,7 +265,21 @@ export interface ReadingClaim {
   where?: string | null;
   /** map-reading.7, topic 'withdrawn' only: the decision as it stood before (as written); the text says what stands now. */
   before?: string | null;
+  /** map-reading.10, topic 'rule' only: how far the rule reaches and, for a step, port or field, its name as written (else null). */
+  scope?: RuleScope | null; scopeName?: string | null;
+  /** map-reading.10, topic 'rule' only: where it applies (up to four), each on the line that places it; [] when no line does. */
+  anchors?: ReadingAnchor[];
+  /** map-reading.10, topic 'rule' only: what keeps it (up to four); [] when the reading said nothing of it. */
+  enforcedBy?: ReadingEnforcer[];
+  /** map-reading.10, topic 'withdrawn' only: what the withdrawal took back (null: the row does not say). */
+  withdrawalKind?: WithdrawalKind | null;
+  /** map-reading.10, topic 'plan' only: a gate of operation or of development (null: not a gate, or not said). */
+  gate?: GateKind | null;
 }
+/** map-reading.10: a place a rule applies, as written (80), with the line that places it. */
+export interface ReadingAnchor { kind: AnchorKind; text: string; quote: ReadingQuote }
+/** map-reading.10: a device keeping a rule, as written (80), with the line that names it (null only for 'unknown'). */
+export interface ReadingEnforcer { kind: EnforcerKind; text: string; quote: ReadingQuote | null }
 export interface ReadingPart {
   areaId: string;
   /** This reading added the part; its name and parent as added (a later rename or move by the person is theirs). */
@@ -309,7 +344,7 @@ export interface ReadingMaterial { record: string; from: number; to: number; wha
 export const READING_EXCLUSION_RULES = ['settled-and-open', 'duplicate-target', 'duplicate-key', 'material-evidence', 'reference', 'length', 'source-kind', 'condition-form', 'condition-source', 'condition-length', 'contract'] as const;
 export interface ReadingExclusion { path: string; rule: typeof READING_EXCLUSION_RULES[number]; category: string | null; explanation: string; record: string | null; from: number | null; to: number | null }
 export interface MapReading {
-  version: 'map-reading.1' | 'map-reading.2' | 'map-reading.3' | 'map-reading.4' | 'map-reading.5' | 'map-reading.6' | 'map-reading.7' | 'map-reading.8' | 'map-reading.9'; id: string; at: string; model: string; prompt: string;
+  version: 'map-reading.1' | 'map-reading.2' | 'map-reading.3' | 'map-reading.4' | 'map-reading.5' | 'map-reading.6' | 'map-reading.7' | 'map-reading.8' | 'map-reading.9' | 'map-reading.10'; id: string; at: string; model: string; prompt: string;
   /** SHA-256 of the request: the very same request is never sent or applied again. */
   hash: string;
   /** Records read, and which part of each went: characters [from, to) of total. A record's unsent tail is read by a later reading. */
@@ -328,7 +363,8 @@ export interface MapReading {
    * record arrived, never a hash that merely appears). Parts carry type, typeQuote, inputs, outputs, fields and config; relations
    * carry channel. */
   basisAt?: string | null; basisVersion?: string | null;
-  /** map-reading.9: the record's explicit correspondences of a line to a port and a step (parts carry steps, loop and stateVars). */
+  /** map-reading.9: the record's explicit correspondences of a line to a port and a step (parts carry steps, loop and stateVars).
+   * map-reading.10: claims carry scope, scopeName, anchors, enforcedBy, withdrawalKind and gate. */
   portMap?: ReadingPortMap[];
 }
 /** The person's own correction of a part's description as read (never Area.note, never a return.2 description): it names the
@@ -389,7 +425,7 @@ export interface ScenarioReading { version: 'scenario-reading.1'; id: string; at
   /** The pasted record read, and the ledger version (the map reading id) the record was read against (null: no map reading). */
   record: string; ledgerVersion: string | null; pathStatus: ScenarioPathStatus; scenario: ScenarioRecord; diagnostics: ScenarioDiagnostic[] }
 export type ReadingEntry = MapReading | ReadingCorrection | RequestCorrection | ReplaceCorrection | ScenarioReading;
-export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3' || e.version === 'map-reading.4' || e.version === 'map-reading.5' || e.version === 'map-reading.6' || e.version === 'map-reading.7' || e.version === 'map-reading.8' || e.version === 'map-reading.9';
+export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3' || e.version === 'map-reading.4' || e.version === 'map-reading.5' || e.version === 'map-reading.6' || e.version === 'map-reading.7' || e.version === 'map-reading.8' || e.version === 'map-reading.9' || e.version === 'map-reading.10';
 export const isScenarioReading = (e: ReadingEntry): e is ScenarioReading => e.version === 'scenario-reading.1';
 export const READINGS_LIMIT = 500;
 export const PASTED_LIMIT = 500;

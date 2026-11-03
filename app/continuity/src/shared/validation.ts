@@ -1,5 +1,5 @@
 import { API_SCHEMA, SCHEMA, V5_SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Intent, type Background, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket, type Question, GUIDE_SCHEMA, type GuideRequest, type GuideReply, type GuideEnvelope, type GuideTicket, type UnderstandingInput } from './types.js';
-import {V6_SCHEMA,V7_SCHEMA,V8_SCHEMA,V9_SCHEMA,V10_SCHEMA,V11_SCHEMA,V12_SCHEMA,V13_SCHEMA,type ReadingEntry,type PastedRecord,READING_EXCLUSION_RULES,CLAIM_KINDS,CLAIM_TOPICS,EVIDENCE_GRADES,PART_STATES,PART_TYPES,CHANNELS,RELATION_MODES,SCENARIO_KINDS,SCENARIO_LINK_KINDS,SCENARIO_PATH_STATUSES,SCENARIO_GAP_REASONS,READINGS_LIMIT,PASTED_TEXT_LIMIT,PASTED_LIMIT,type Area,type PlanStamp,type Point,type ManualPositions,type Backup} from './types.js';
+import {V6_SCHEMA,V7_SCHEMA,V8_SCHEMA,V9_SCHEMA,V10_SCHEMA,V11_SCHEMA,V12_SCHEMA,V13_SCHEMA,type ReadingEntry,type PastedRecord,READING_EXCLUSION_RULES,CLAIM_KINDS,CLAIM_TOPICS,EVIDENCE_GRADES,RULE_SCOPES,ANCHOR_KINDS,ENFORCER_KINDS,WITHDRAWAL_KINDS,GATE_KINDS,PART_STATES,PART_TYPES,CHANNELS,RELATION_MODES,SCENARIO_KINDS,SCENARIO_LINK_KINDS,SCENARIO_PATH_STATUSES,SCENARIO_GAP_REASONS,READINGS_LIMIT,PASTED_TEXT_LIMIT,PASTED_LIMIT,type Area,type PlanStamp,type Point,type ManualPositions,type Backup} from './types.js';
 import { validateFrozenRequest, validateStoredMatch, hasTarget, matchLedger, recordTextMap, type FrozenRequest, type StoredRequestMatch, type RecordText } from './request-return.js';
 import { ANCHOR_QUOTE_MAX, textDigest } from './evidence-span.js';
 import { validEvidence, recordIdentity } from './record-source.js';
@@ -439,7 +439,7 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       ensure(areaIds.has(r.areaId as string));text(r.text,300);ensure(r.corrects===null||seen.has(r.corrects as string));continue;
     }
     const version=!!r&&typeof r==='object'?(r as {version?:unknown}).version:null;
-    const nine=version==='map-reading.9',eight=nine||version==='map-reading.8',seven=eight||version==='map-reading.7',six=seven||version==='map-reading.6',five=six||version==='map-reading.5';four=five||version==='map-reading.4';const three=four||version==='map-reading.3',two=three||version==='map-reading.2';records=four?asRead:raw;
+    const ten=version==='map-reading.10',nine=ten||version==='map-reading.9',eight=nine||version==='map-reading.8',seven=eight||version==='map-reading.7',six=seven||version==='map-reading.6',five=six||version==='map-reading.5';four=five||version==='map-reading.4';const three=four||version==='map-reading.3',two=three||version==='map-reading.2';records=four?asRead:raw;
     obj(r,['version','id','at','model','prompt','hash','records','summary','parts','relations','candidates','gaps','skipped',...(two?['requests','matches']:[]),...(four?['material']:[]),...(six?['exclusions']:[]),...(eight?['basisAt','basisVersion']:[]),...(nine?['portMap']:[])]);ensure(r.version==='map-reading.1'||two);
     // map-reading.8: the records' own basis time and target version, as written, or null.
     if(eight){if(r.basisAt!==null)text(r.basisAt,60);if(r.basisVersion!==null)text(r.basisVersion,60);}
@@ -472,8 +472,24 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       if(seven){ensure(p.state===null||PART_STATES.includes(p.state as never));if(p.state===null)ensure(p.stateWhen===null&&p.stateQuote===null);else{quote(p.stateQuote);if(p.stateWhen!==null)text(p.stateWhen,40);}
         list(p.files,6);for(const f of p.files)text(f,120);ensure(new Set(p.files).size===(p.files as unknown[]).length);}
       // Pipeline .32: a map-reading.9 entry holds sixteen claims per part (the first map's contract, MAP6_CLAIMS); earlier ones eight.
-      list(p.claims,nine?16:8);(p.claims as unknown[]).forEach((c,i)=>{
-        obj(c,['kind','text','record','quote',...(four?['from','to']:[]),'about','replaces',...(seven?['topic','evidence','when','where','before']:[])]);
+      // Pipeline .33: a map-reading.10 entry holds twenty.
+      list(p.claims,ten?20:nine?16:8);(p.claims as unknown[]).forEach((c,i)=>{
+        obj(c,['kind','text','record','quote',...(four?['from','to']:[]),'about','replaces',...(seven?['topic','evidence','when','where','before']:[]),...(ten?['scope','scopeName','anchors','enforcedBy','withdrawalKind','gate']:[])]);
+        // map-reading.10: a rule's scope (a step, port or field named, a part or the project not), places and devices, each once, on
+        // their passages (a device's passage null only for unknown; no none or unknown beside a device, no unknown beside a none); a
+        // withdrawal's kind; a gate's kind. Each only on a claim of its own topic.
+        if(ten){
+          ensure(c.scope===null||RULE_SCOPES.includes(c.scope as never));const named=c.scope==='step'||c.scope==='port'||c.scope==='field';
+          if(named)text(c.scopeName,40);else ensure(c.scopeName===null);
+          list(c.anchors,4);for(const a of c.anchors as unknown[]){obj(a,['kind','text','quote']);ensure(ANCHOR_KINDS.includes(a.kind as never));text(a.text,80);quote(a.quote);}
+          ensure(new Set((c.anchors as {text:string;quote:{record:string;from:number;to:number}}[]).map(a=>JSON.stringify([a.text,a.quote.record,a.quote.from,a.quote.to]))).size===(c.anchors as unknown[]).length);
+          list(c.enforcedBy,4);for(const e of c.enforcedBy as unknown[]){obj(e,['kind','text','quote']);ensure(ENFORCER_KINDS.includes(e.kind as never));text(e.text,80);if(e.quote===null)ensure(e.kind==='unknown');else quote(e.quote);}
+          const devices=c.enforcedBy as {kind:string;text:string}[],rank=(k:string)=>k==='none'?1:k==='unknown'?0:2,top=Math.max(-1,...devices.map(e=>rank(e.kind)));
+          ensure(new Set(devices.map(e=>JSON.stringify([e.kind,e.text]))).size===devices.length&&devices.every(e=>rank(e.kind)===2||rank(e.kind)===top));
+          ensure(c.topic==='rule'||c.scope===null&&(c.anchors as unknown[]).length===0&&devices.length===0);
+          ensure(c.withdrawalKind===null||WITHDRAWAL_KINDS.includes(c.withdrawalKind as never)&&c.topic==='withdrawn');
+          ensure(c.gate===null||GATE_KINDS.includes(c.gate as never)&&c.topic==='plan');
+        }
         // map-reading.7: what the claim is about, its tag, when and where as written; the decision before for a withdrawal only.
         if(seven){ensure(c.topic===null||CLAIM_TOPICS.includes(c.topic as never));ensure(c.evidence===null||EVIDENCE_GRADES.includes(c.evidence as never));if(c.when!==null)text(c.when,40);if(c.where!==null)text(c.where,120);if(c.before!==null){text(c.before,120);ensure(c.topic==='withdrawn');}}ensure(CLAIM_KINDS.includes(c.kind as never));text(c.text,240);quote({record:c.record,quote:c.quote,...(four?{from:c.from,to:c.to}:{})});
         if(c.about!==null)text(c.about,80);

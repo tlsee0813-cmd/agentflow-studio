@@ -3,7 +3,7 @@
  * an exact quote of what was sent. applyReading is the only write: it adds parts and relations and keeps one MapReading with the
  * derived understanding. It never renames, moves, archives or re-describes an existing part, never writes Area.note and never
  * touches space.understanding (return.2 and its anchors). What is unclear stays a candidate; nothing asks for approval per part. */
-import { CLAIM_KINDS, CLAIM_TOPICS, EVIDENCE_GRADES, PART_STATES, PART_TYPES, CHANNELS, RELATION_MODES, READINGS_LIMIT, READING_EXCLUSION_RULES, isMapReading, isScenarioReading, type PastedRecord, type RecordEvidence, type CandidateTarget, type ClaimKind, type ClaimTopic, type EvidenceGrade, type PartState, type PartType, type Channel, type RelationMode, type MapReading, type Project, type ReadingCandidate, type ReadingClaim, type ReadingPart, type ReadingQuote, type ReadingRelation, type ReadingSkip, type ReadingExclusion, type RelationKind, type ReadingStep, type ReadingLoop, type ReadingStateVar, type ReadingPortMap } from './types.js';
+import { CLAIM_KINDS, CLAIM_TOPICS, EVIDENCE_GRADES, PART_STATES, PART_TYPES, CHANNELS, RELATION_MODES, READINGS_LIMIT, READING_EXCLUSION_RULES, isMapReading, isScenarioReading, type PastedRecord, type RecordEvidence, type CandidateTarget, type ClaimKind, type ClaimTopic, type EvidenceGrade, type PartState, type PartType, type Channel, type RelationMode, type MapReading, type Project, type ReadingCandidate, type ReadingClaim, type ReadingPart, type ReadingQuote, type ReadingRelation, type ReadingSkip, type ReadingExclusion, type RelationKind, type ReadingStep, type ReadingLoop, type ReadingStateVar, type ReadingPortMap, RULE_SCOPES, ANCHOR_KINDS, ENFORCER_KINDS, WITHDRAWAL_KINDS, GATE_KINDS, type RuleScope, type AnchorKind, type EnforcerKind, type WithdrawalKind, type GateKind } from './types.js';
 import { indexSpans, encodeSpans, decodeSpans, resolveRef, resolveRange, resolveEvidenceRange, textDigest, ANCHOR_QUOTE_MAX, SPANS_PER_RECORD, type Span, type SpanWire } from './evidence-span.js';
 import type { StudioView, RecordView } from './studio.js';
 import { addArea, addChildArea, addRelation, addReading } from './domain.js';
@@ -77,7 +77,21 @@ export const MAP7_SCHEMA = 'studio.map.7' as const;
  * The divided first map's via-store asks a store end only for a file the records' artifact table (「산출물」) gives a row, or one a
  * store part of the reading holds, when a record draws such a table (a payload file no row lists, the calendar.json of 「fee_policy·
  * calendar.json」, stays one line's payload); a new part made of a payload token with no table row, no type and no line is set aside
- * whole by the server (payload-part, explained here). */
+ * whole by the server (payload-part, explained here).
+ * map-reading.10 (pipeline .33, the map design spec's fourth cycle, §5 and §8.3): the same reply may add to a rule claim (topic rule)
+ * its scope (RULE_SCOPES; scopeName, 40, the step, port or field it names, null for part and project), the places it applies
+ * (anchors, up to four: stated or inferred, the place as written in 80 and at, the line that places it) and what keeps it
+ * (enforcedBy, up to four: code, gate, person, none = 기록상 미설계 or unknown = 장치 미상, as written in 80, with at, the line naming
+ * it, null only for unknown); to a withdrawal (topic withdrawn) its withdrawalKind (design, implementation, report); to a plan claim
+ * its gate (run or dev). Each is the claim's own and left out alone, the claim stays: a wrong scope leaves scope and scopeName null
+ * (scope), an anchor or a device that breaks a rule (its at resolving to nothing included) is set aside at its own index (anchor,
+ * enforced-by), a list that is not one, runs past four or stands on a claim of another topic is left out whole, a none or unknown
+ * beside a device (or an unknown beside a none) is set aside, a wrong withdrawalKind or gate is left null (withdrawal-kind, gate);
+ * plain map.6 refuses. Stored as map-reading.10, every claim with all six keys (null, or [], when not said).
+ * Pipeline .33 also: map.6 takes twenty claims per part (MAP6_CLAIMS); the divided first map sets aside a claim whose words stand
+ * inside one of its part's step does or its role sentence (restate), and an input or output of a part that is a field of one of
+ * its store partners (a store at the other end of one of its lines) or a bare prefix of another item of the same list (that list's
+ * category, at the item's own index). */
 /** A first map: nothing of the map, no request and no prior is sent (map.7 is never one). */
 export const firstAsk = (ask: Pick<MapAsk, 'parts' | 'requests' | 'priors'>): boolean => ask.parts.length === 0 && (ask.requests ?? []).length === 0 && (ask.priors ?? []).length === 0;
 /** A reply refused for a contradiction or a wrong reference it holds: where (path), which rule and what it names (an alias,
@@ -99,7 +113,9 @@ export type ContractGuard = 'shape' | 'keys' | 'text' | 'count' | 'new-count' | 
   // map-reading.9: a part's steps, loop and kept state, the reply's port map; pipeline .30: a claim restating its part's state row.
   | 'step' | 'loop' | 'state-var' | 'port-map' | 'restate'
   // pipeline .32: a new part made of what a line hands over, with no table row, no type and no line (set aside by the server).
-  | 'payload-part';
+  | 'payload-part'
+  // map-reading.10: a rule's scope, one of its places or devices, a withdrawal's kind, a gate's kind (each left out alone).
+  | 'scope' | 'anchor' | 'enforced-by' | 'withdrawal-kind' | 'gate';
 /** map-reading.7–8: the categories that leave out a part's own optional fields only (the part stays). */
 const PART_FIELD_GUARDS: ReadonlySet<string> = new Set(['state', 'state-at', 'state-when', 'files', 'type', 'type-at', 'inputs', 'outputs', 'fields', 'config']);
 /** map-reading.8: the reply's own optional fields, left null alone when wrong. */
@@ -109,8 +125,9 @@ const REPLY_FIELD_GUARDS: ReadonlySet<string> = new Set(['basis-at', 'basis-vers
  * stores; at 24 the plan lost three stores, six rows and the lines through them). map.7 keeps 24 parts, twelve of them new. */
 export const MAP6_NEW_PARTS = 36;
 /** Pipeline .32: the first map's contract (map.6) takes sixteen claims per part (six before): the KORU engine has about fifteen rows
- * of its own (change, defect, withdrawal, rule, unknown) and six held only its state report and design. map.7 keeps four. */
-export const MAP6_CLAIMS = 16;
+ * of its own (change, defect, withdrawal, rule, unknown) and six held only its state report and design. map.7 keeps four.
+ * Pipeline .33: twenty (the .32 engine and card runner filled sixteen; stored map-reading.10 entries hold twenty, .9 sixteen). */
+export const MAP6_CLAIMS = 20;
 /** Pipeline .31: a store's field item may run to 60 (the LEDGER row's 「event(CYCLE·ARM_CYCLE·…·PULL…)」 is 60 and lost the field list). */
 export const FIELD_ITEM_MAX = 60;
 /** Pipeline .29: the first map's contract (map.6) takes 32 relations: a store is drawn as two lines (producer → store → reader), and
@@ -240,7 +257,13 @@ export interface MapReplyClaim { kind: ClaimKind; text: string; record: string; 
   /** map.6: the reply-local key of this statement ('s1'…), required and unique in the reply. */
   key?: string | null;
   /** map.6–7 (map-reading.7): always present in a checked reply (null when not said). */
-  topic?: ClaimTopic | null; evidence?: EvidenceGrade | null; when?: string | null; where?: string | null; before?: string | null }
+  topic?: ClaimTopic | null; evidence?: EvidenceGrade | null; when?: string | null; where?: string | null; before?: string | null;
+  /** map.6–7 (map-reading.10): always present in a checked reply (null / [] when not said); each anchor and device with where its
+   * line stands (a device's quote null only for unknown). */
+  scope?: RuleScope | null; scopeName?: string | null; anchors?: MapReplyAnchor[]; enforcedBy?: MapReplyEnforcer[]; withdrawalKind?: WithdrawalKind | null; gate?: GateKind | null }
+/** map-reading.10: a place a rule applies with the quote of the line placing it; a device keeping it with the quote of its line. */
+export interface MapReplyAnchor { kind: AnchorKind; text: string; quote: MapReplyQuote }
+export interface MapReplyEnforcer { kind: EnforcerKind; text: string; quote: MapReplyQuote | null }
 /** map.6: the undecided statement a candidate keeps (attribution, holds), exact where it stands in the excerpt. */
 export interface MapReplyStatement { key: string; kind: ClaimKind; text: string; about: string | null; record: string; quote: string; from: number; to: number }
 export type MapReplyMatch = (RequestMatch | RequestMatch3) & { from?: number; to?: number };
@@ -425,16 +448,23 @@ const exclusionExplanation = (e: MapReplyError): string => {
     : e.rule === 'contract' && e.target === 'wrong-part' ? '다른 부분의 표 행을 인용한 주장이어서 이 부분에서 제외했어요.'
     : e.rule === 'contract' && e.target === 'sender' ? '원문 줄이 적은 보내는 쪽과 다르거나, 미구현·폐기된 부분이 설계에 없이 보내는 연결이어서 제외했어요.'
     // pipeline .31: one item of a part's list, or one used name of a step, is set aside alone (the list or the step stays).
-    : e.rule === 'contract' && /^parts\[\d+\]\.(files|inputs|outputs|fields|config)\[\d+\]$/.test(e.path) ? '부분의 목록 칸에서 길이·빈 값 규칙에 맞지 않는 항목 하나만 빼고 나머지 항목은 남겼어요.'
+    // pipeline .33: or an input or output repeating a store partner's field or cut short of another item.
+    : e.rule === 'contract' && /^parts\[\d+\]\.(files|inputs|outputs|fields|config)\[\d+\]$/.test(e.path) ? '부분의 목록 칸에서 길이·빈 값 규칙에 맞지 않거나 짝 저장소의 필드·다른 항목의 앞부분을 되풀이한 항목 하나만 빼고 나머지 항목은 남겼어요.'
     : e.rule === 'contract' && /^parts\[\d+\]\.steps\[\d+\]\.uses\[\d+\]$/.test(e.path) ? '단계가 쓰는 이름 중 길이·빈 값 규칙에 맞지 않는 하나만 빼고 단계는 남겼어요.'
     // map-reading.9: a step, a kept state or a port-map row is set aside alone; a loop item is left null; pipeline .30: a restating claim.
     : e.rule === 'contract' && e.target === 'step' ?'부분 안의 단계가 규칙에 맞지 않거나 그 원문 행을 찾을 수 없어 그 단계만 제외했어요.'
     : e.rule === 'contract' && e.target === 'loop' ? '부분의 반복 단위·정지·재개 칸이 규칙에 맞지 않거나 원문 줄을 찾을 수 없어 그 칸만 비웠어요.'
     : e.rule === 'contract' && e.target === 'state-var' ? '부분이 유지하는 상태 항목이 규칙에 맞지 않아 그 항목만 제외했어요.'
     : e.rule === 'contract' && e.target === 'port-map' ? '바깥 연결과 안쪽 단계의 대응이 없는 연결·포트·단계를 가리키거나 원문 줄을 찾을 수 없어 그 대응만 제외했어요.'
-    : e.rule === 'contract' && e.target === 'restate' ? '부분의 상태 칸을 되풀이한 주장이어서 제외했어요. 기록의 실제 변화·오류·철회 행이 그 자리를 먼저 써요.'
+    : e.rule === 'contract' && e.target === 'restate' ? '부분의 상태 칸·단계·역할 문장을 되풀이한 주장이어서 제외했어요. 기록의 실제 변화·오류·철회 행이 그 자리를 먼저 써요.'
     // pipeline .32: a part made of what a line hands over (no table row, no type, no line); the line keeps it as its payload.
     : e.rule === 'contract' && e.target === 'payload-part' ? '연결이 넘기는 것의 이름을 떼어 만든 부분이어서 제외했어요. 기록의 표에 그 이름의 행이 없고 유형도 연결도 없었어요.'
+    // map-reading.10: a rule's scope, one place or one device, a withdrawal's kind and a gate's kind are left out alone, the claim stays.
+    : e.rule === 'contract' && e.target === 'scope' ? '규칙의 적용 범위 칸이 규칙에 맞지 않아 범위와 그 이름 칸만 비우고 규칙은 남겼어요.'
+    : e.rule === 'contract' && e.target === 'anchor' ? '규칙의 적용 위치 하나가 규칙에 맞지 않거나 원문 줄을 찾을 수 없어 그 위치만 빼고 규칙은 적용 위치 미해결로 남겼어요.'
+    : e.rule === 'contract' && e.target === 'enforced-by' ? '규칙의 보장 장치 하나가 규칙에 맞지 않거나 원문 줄을 찾을 수 없어 그 장치만 빼고 규칙과 적용 위치는 남겼어요. 보장 위치는 미확인이에요.'
+    : e.rule === 'contract' && e.target === 'withdrawal-kind' ? '철회의 성격(설계·구현·보고) 칸이 규칙에 맞지 않아 그 칸만 비우고 철회는 남겼어요.'
+    : e.rule === 'contract' && e.target === 'gate' ? '관문의 종류(실행·개발) 칸이 규칙에 맞지 않아 그 칸만 비우고 주장은 남겼어요.'
     // map-reading.7–8: a part's state, files, type or interface are left out, the part stays (any rule at that place: its stateAt or
     // typeAt may not resolve); the reply's basis time or version is left null alone.
     : PART_FIELD_GUARDS.has(e.rule === 'contract' ? e.target : '') || /^parts\[\d+\]\.(state|stateAt|stateWhen|files|type|typeAt|inputs|outputs|fields|config)$/.test(e.path) ? '부분의 상태·파일·유형·입출력 칸이 규칙에 맞지 않아 그 칸만 비우고 부분은 남겼어요.'
@@ -646,6 +676,7 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
     // map.6 (the first map's divided route) takes six claims per part and (.29) 32 relations, (.30) 48 (sixteen before): a record's
     // flow list and its running part's state did not fit four and twelve (the caps pushed out its main receiver's outputs and live defects).
     // pipeline .32: sixteen (MAP6_CLAIMS): a running part's own change, defect, withdrawal, rule and unknown rows did not fit six.
+    // pipeline .33: twenty.
     const claimList = many(p.claims, ask.schemaVersion === MAP6_SCHEMA ? MAP6_CLAIMS : 4, `parts[${pi}].claims`), claimsAside = aside.length;
     const own = new Set(parts.get(ref)?.current.map(c => c.key) ?? []);
     const claimAt = new Map<MapReplyClaim, number>();
@@ -674,7 +705,85 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       const at = `parts[${pi}].claims[${j}]`, topic = oneOf(c, 'topic', CLAIM_TOPICS, at, 'topic'), grade = oneOf(c, 'evidence', EVIDENCE_GRADES, at, 'evidence');
       const when = phrase(c, 'when', 40, at, 'when'), where = phrase(c, 'where', 120, at, 'where'), before = phrase(c, 'before', 120, at, 'before');
       need(before === null || topic === 'withdrawn', `${at}.before`, 'before');
-      return { kind: c.kind as ClaimKind, text: c.text.trim(), ...q, about, replaces: c.replaces as string | null, key: c.key as string | null, topic, evidence: grade, when, where, before };
+      // map-reading.10: a rule's scope, the places it applies and what keeps it; a withdrawal's kind; a gate's kind. Each is the
+      // claim's own and left out alone (the claim stays): in the lenient readings set aside with its fixed path and category (an
+      // anchor or a device at its own index, whatever rule it broke there), a quote too long to keep set aside as it is; plain map.6
+      // refuses. Their reasons join the reply's once the claim itself is read.
+      const held: MapReplyError[] = [];
+      const alone10 = <T>(fn: () => T, path: string, what: ContractGuard, none: T): T => {
+        try { return fn(); } catch (e) {
+          if (!(e instanceof MapReplyError)) throw e;
+          if (lenient) { held.push(e.rule === 'contract' && e.path === path ? e : new MapReplyError(path, 'contract', what)); return none; }
+          if (tooLong(e)) { held.push(e); return none; }
+          throw e;
+        }
+      };
+      const short = (v: unknown, max: number): string | null => typeof v === 'string' && v.length <= max && !!v.trim() && !CONTROL.test(v) ? v.trim() : null;
+      const rule = topic === 'rule';
+      // The scope is one of RULE_SCOPES on a rule; a step, port or field names itself (scopeName), a part or the project names none.
+      const [scope, scopeName] = alone10((): [RuleScope | null, string | null] => {
+        if (!said(c, 'scope')) { need(!said(c, 'scopeName'), `${at}.scope`, 'scope'); return [null, null]; }
+        const sc = oneOf(c, 'scope', RULE_SCOPES, at, 'scope'), named = sc === 'step' || sc === 'port' || sc === 'field';
+        need(rule, `${at}.scope`, 'scope');
+        const name = said(c, 'scopeName') ? short(c.scopeName, 40) : null;
+        need(named ? name !== null : !said(c, 'scopeName'), `${at}.scope`, 'scope');
+        return [sc, name];
+      }, `${at}.scope`, 'scope', [null, null]);
+      // A place: stated or inferred, as written, on the line that places it (each once).
+      const anchors = alone10((): MapReplyAnchor[] => {
+        if (!said(c, 'anchors')) return [];
+        need(Array.isArray(c.anchors) && c.anchors.length <= 4 && (rule || !c.anchors.length), `${at}.anchors`, 'anchor');
+        const out: MapReplyAnchor[] = [];
+        (c.anchors as unknown[]).forEach((o, k) => {
+          const path = `${at}.anchors[${k}]`;
+          const got = alone10((): MapReplyAnchor | null => {
+            const x = o as Record<string, unknown>;
+            need(!!x && typeof x === 'object' && !Array.isArray(x) && ANCHOR_KINDS.includes(x.kind as AnchorKind), path, 'anchor');
+            const text = short(x.text, 80); need(text !== null && said(x, 'at'), path, 'anchor');
+            const quote = cite(x.at, `${path}.at`);
+            need(!out.some(a => a.text === text && a.quote.record === quote.record && a.quote.from === quote.from && a.quote.to === quote.to), path, 'anchor');
+            return { kind: x.kind as AnchorKind, text: text!, quote };
+          }, path, 'anchor', null);
+          if (got) out.push(got);
+        });
+        return out;
+      }, `${at}.anchors`, 'anchor', []);
+      // A device: code, a gate, a person (each on its line), none (기록상 미설계, on its line) or unknown (장치 미상, a line or none), each
+      // kind and wording once. A none or unknown beside a device, or an unknown beside a none, says the opposite of it: left out.
+      const rank = (k: EnforcerKind) => k === 'none' ? 1 : k === 'unknown' ? 0 : 2;
+      const enforcedBy = alone10((): MapReplyEnforcer[] => {
+        if (!said(c, 'enforcedBy')) return [];
+        need(Array.isArray(c.enforcedBy) && c.enforcedBy.length <= 4 && (rule || !c.enforcedBy.length), `${at}.enforcedBy`, 'enforced-by');
+        const out: [number, MapReplyEnforcer][] = [];
+        (c.enforcedBy as unknown[]).forEach((o, k) => {
+          const path = `${at}.enforcedBy[${k}]`;
+          const got = alone10((): MapReplyEnforcer | null => {
+            const x = o as Record<string, unknown>;
+            need(!!x && typeof x === 'object' && !Array.isArray(x) && ENFORCER_KINDS.includes(x.kind as EnforcerKind), path, 'enforced-by');
+            const kind = x.kind as EnforcerKind, text = short(x.text, 80); need(text !== null && (said(x, 'at') || kind === 'unknown'), path, 'enforced-by');
+            const quote = said(x, 'at') ? cite(x.at, `${path}.at`) : null;
+            need(!out.some(([, e]) => e.kind === kind && e.text === text), path, 'enforced-by');
+            return { kind, text: text!, quote };
+          }, path, 'enforced-by', null);
+          if (got) out.push([k, got]);
+        });
+        const top = Math.max(-1, ...out.map(([, e]) => rank(e.kind)));
+        return out.filter(([k, e]) => {
+          if (rank(e.kind) === 2 || rank(e.kind) === top) return true;
+          const path = `${at}.enforcedBy[${k}]`; alone10(() => need(false, path, 'enforced-by'), path, 'enforced-by', null); return false;
+        }).map(([, e]) => e);
+      }, `${at}.enforcedBy`, 'enforced-by', []);
+      const withdrawalKind = alone10((): WithdrawalKind | null => {
+        if (!said(c, 'withdrawalKind')) return null;
+        const k = oneOf(c, 'withdrawalKind', WITHDRAWAL_KINDS, at, 'withdrawal-kind'); need(topic === 'withdrawn', `${at}.withdrawalKind`, 'withdrawal-kind'); return k;
+      }, `${at}.withdrawalKind`, 'withdrawal-kind', null);
+      const gate = alone10((): GateKind | null => {
+        if (!said(c, 'gate')) return null;
+        const g = oneOf(c, 'gate', GATE_KINDS, at, 'gate'); need(topic === 'plan', `${at}.gate`, 'gate'); return g;
+      }, `${at}.gate`, 'gate', null);
+      aside.push(...held);
+      return { kind: c.kind as ClaimKind, text: c.text.trim(), ...q, about, replaces: c.replaces as string | null, key: c.key as string | null, topic, evidence: grade, when, where, before,
+        scope, scopeName, anchors, enforcedBy, withdrawalKind, gate };
     }); if (got) claimAt.set(got, j); return got; }).filter((x): x is MapReplyClaim => x !== null);
     // divided: a part whose every claim was set aside ends up empty of what it said; refused with the first of them.
     if (divided && claimList.length && !claims.length) throw aside[claimsAside] ?? new MapReplyError(`parts[${pi}].claims`, 'contract', 'empty-part');
@@ -807,6 +916,16 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
           return !again;
         });
       }
+      // pipeline .33 (divided): a claim whose words stand inside one of this part's step does or its role sentence says again what
+      // those already say (the .32 map had seven such claims of 87): set aside (restate) at its own index.
+      if (divided) {
+        const said33 = [...steps.map(x => x.does ?? ''), typeof p.role === 'string' ? p.role : ''].map(plainName).filter(Boolean);
+        claims = claims.filter(c => {
+          const words = plainName(c.text).replace(/[.。]$/, ''), again = !!words && said33.some(w => w.includes(words));
+          if (again) aside.push(new MapReplyError(`parts[${pi}].claims[${claimAt.get(c)}]`, 'contract', 'restate'));
+          return !again;
+        });
+      }
     }
     const role = seven ? soft(() => describe(basis)) ?? { roleReplaces: null, role: null, roleAbout: null } : describe(basis);
     // A description, new or changed, rests on its own quote: an existing part's role never comes in without one.
@@ -876,6 +995,25 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
     }
     return [{ from: r.from, to: r.to, kind: r.kind as RelationKind, note: r.note.trim(), record: q.record, quote: q.quote, ...(q.from !== undefined ? { span: { from: q.from, to: q.to! } } : {}), ...said7 }];
   }); if (got) relationAt.set(i, relationsRead++); return got ?? []; });
+  // pipeline .33 (divided): an input or output of a part that is a field of one of its store partners (a store at the other end of one
+  // of the lines read) or a bare prefix of another item of the same list (「review」 beside 「review 행」) is set aside alone at its raw
+  // index (every raw copy of it), with the list's category; the port map below reads the lists as left.
+  if (divided) {
+    const rawOf = new Map(entries.map(([pi, p]) => [p.ref as string, [pi, p] as const]));
+    for (const b of outParts) {
+      const raw = rawOf.get(b.ref); if (!raw || b.type === 'store') continue;
+      const [pi, p] = raw;
+      const partners = relations.flatMap(r => r.from === b.ref ? [r.to] : r.to === b.ref ? [r.from] : []).map(ref => byRef.get(ref)).filter(x => x?.type === 'store');
+      const partnerFields = new Set(partners.flatMap(x => x!.fields ?? []).map(plainName));
+      for (const k of ['inputs', 'outputs'] as const) {
+        const list = b[k] ?? [], names = list.map(plainName);
+        const odd = new Set(list.filter((_, j) => partnerFields.has(names[j]!) || names.some((y, i) => i !== j && y.length > names[j]!.length && y.startsWith(names[j]!))));
+        if (!odd.size || !Array.isArray(p[k])) continue;
+        (p[k] as unknown[]).forEach((x, j) => { if (typeof x === 'string' && odd.has(x.trim())) aside.push(new MapReplyError(`parts[${pi}].${k}[${j}]`, 'contract', k)); });
+        b[k] = list.filter(x => !odd.has(x));
+      }
+    }
+  }
   // map-reading.9: the record's explicit correspondences of a line (its index among the wire's relations, one that was read) to a
   // port of the part at that end (in: the receiver's input, out: the sender's output) and a step of that part, on the line that says
   // so. A row naming no such relation, port or step, or repeating one, is set aside alone; a list that is not one or runs past
@@ -1064,7 +1202,11 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       ...(p.steps ?? []).flatMap((s, j): [string, string][] => [s.name, s.does ?? '', ...s.uses].map((w): [string, string] => [`parts[${i}].steps[${j}]`, w])),
       ...(p.loop ? [p.loop.unit, p.loop.stop, p.loop.resume].map((w): [string, string] => [`parts[${i}].loop`, w ?? '']) : []),
       ...(p.stateVars ?? []).flatMap((s, j): [string, string][] => [s.name, s.scope ?? '', ...s.readBy, ...s.changedBy].map((w): [string, string] => [`parts[${i}].stateVars[${j}]`, w]))]),
-    ...portMap.flatMap((m, k): [string, string][] => [[`portMap[${k}]`, m.port], [`portMap[${k}]`, m.step]])];
+    ...portMap.flatMap((m, k): [string, string][] => [[`portMap[${k}]`, m.port], [`portMap[${k}]`, m.step]]),
+    // map-reading.10: a rule's scope name, places and devices are the model's words too.
+    ...outParts.flatMap((p, i): [string, string][] => p.claims.flatMap((c, j): [string, string][] => [[`parts[${i}].claims[${j}].scope`, c.scopeName ?? ''],
+      ...(c.anchors ?? []).map((a, k): [string, string] => [`parts[${i}].claims[${j}].anchors[${k}]`, a.text]),
+      ...(c.enforcedBy ?? []).map((x, k): [string, string] => [`parts[${i}].claims[${j}].enforcedBy[${k}]`, x.text])]))];
   const leaked = written.find(([, w]) => w && secretLike(w));
   need(!leaked, leaked?.[0] ?? 'reply', 'secret-like');
   if (aside.length) {
@@ -1090,6 +1232,7 @@ export const explainExclusion = (path: string, rule: MapReplyError['rule'], cate
 export const readingExclusions = (reply: MapReply): readonly ReadingExclusion[] => EXCLUSIONS.get(reply) ?? [];
 /** Where a saved exclusion may say it stood (the same grammar storage accepts). */
 // Pipeline .31: a list item of a part (parts[i].fields[j]) or a used name of a step (parts[i].steps[j].uses[k]) stands alone too.
+// map-reading.10: and a claim's scope, one of its places or devices, its withdrawalKind or gate (parts[i].claims[j].anchors[k]).
 const EXCLUSION_PATH = /^(parts|relations|candidates|gaps|matches|material|basisAt|basisVersion|portMap)(\[\d+\])?(\.(claims|basis|statement|steps|stateVars|loop)(\[\d+\])?)?(\.[A-Za-z]+(\[\d+\])?)?$/;
 /** A divided first map (studio.map.6) arrives as the wire with every set-aside item already left out (it reads whole under plain
  * map.6), and the reasons they were set aside travel beside it. Those reasons are checked here before they join the reply's own
@@ -1125,7 +1268,10 @@ function evidenceOf(parts: MapReplyPart[], relations: MapReply['relations'], mat
     ...parts.flatMap((p, i) => [...p.basis.map((q, j) => [`parts[${i}].basis[${j}]`, q] as [string, MapReplyQuote]), ...p.claims.map((q, j) => [`parts[${i}].claims[${j}].at`, q] as [string, MapReplyQuote]), ...(p.roleReplaces ? [[`parts[${i}].roleReplaces`, p.roleReplaces] as [string, MapReplyQuote]] : []),
       ...(p.stateQuote ? [[`parts[${i}].stateAt`, p.stateQuote] as [string, MapReplyQuote]] : []), ...(p.typeQuote ? [[`parts[${i}].typeAt`, p.typeQuote] as [string, MapReplyQuote]] : []),
       // map-reading.9: a step's row and the loop's line are evidence too.
-      ...(p.steps ?? []).map((s, j) => [`parts[${i}].steps[${j}].at`, s.quote] as [string, MapReplyQuote]), ...(p.loop ? [[`parts[${i}].loop.at`, p.loop.quote] as [string, MapReplyQuote]] : [])]),
+      ...(p.steps ?? []).map((s, j) => [`parts[${i}].steps[${j}].at`, s.quote] as [string, MapReplyQuote]), ...(p.loop ? [[`parts[${i}].loop.at`, p.loop.quote] as [string, MapReplyQuote]] : []),
+      // map-reading.10: a rule's places and devices stand on their lines too.
+      ...p.claims.flatMap((c, j) => [...(c.anchors ?? []).map((a, k) => [`parts[${i}].claims[${j}].anchors[${k}].at`, a.quote] as [string, MapReplyQuote]),
+        ...(c.enforcedBy ?? []).flatMap((x, k) => x.quote ? [[`parts[${i}].claims[${j}].enforcedBy[${k}].at`, x.quote] as [string, MapReplyQuote]] : [])])]),
     ...portMap.map((m, k) => [`portMap[${k}].at`, m.quote] as [string, MapReplyQuote]),
     ...relations.map((r, i) => [`relations[${i}].at`, { record: r.record, ...(r.span ?? {}) }] as [string, { record: string; from?: number; to?: number }]),
     ...matches.map((m, i) => [`matches[${i}].at`, m] as [string, MapReplyMatch]),
@@ -1212,6 +1358,10 @@ export interface PartUnderstanding {
   loop: (ReadingLoop & { at: string }) | null;
   stateVars: ReadingStateVar[];
   portMap: (Omit<ReadingPortMap, 'areaId'> & { at: string })[];
+  /** map-reading.10: of the current claims (newest reading first), the rules (topic rule) with their scope, places and devices, the
+   * withdrawals (topic withdrawn) with their kind, and the gates (topic plan with a gate said). Earlier readings carry none of these
+   * keys: their rules read with scope, places and devices not said. */
+  rules: CurrentClaim[]; withdrawals: CurrentClaim[]; gates: CurrentClaim[];
   /** A current report or check here replaced an earlier one of this part (the record said so). */
   revised: boolean;
   /** Every quote the current description (as read, never the person's) rests on lies inside a report a later record took back:
@@ -1263,6 +1413,8 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
     if (replaced.has(`${c.reading}:${c.index}`)) continue;
     claims.push(c);
   }
+  // map-reading.10: newest reading first, before the replacing ones are moved ahead below.
+  const rules = claims.filter(c => c.topic === 'rule'), withdrawals = claims.filter(c => c.topic === 'withdrawn'), gates = claims.filter(c => c.topic === 'plan' && !!c.gate);
   const state = STATE_ORDER.find(k => claims.some(c => c.kind === k)) ?? null;
   const revised = claims.some(c => !!c.replaces && (c.kind === 'reported' || c.kind === 'checked'));
   const roleBasisRevised = !corrected && roleBasis.length > 0 && roleBasis.every(q => insideRevised(p, areaId, q));
@@ -1271,7 +1423,7 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
   // AF140: every claim that still stands, never a silent cut (a limitation read early is as current as a feature read late). A reader
   // that needs fewer takes its own (the map ask and the plan's source take the first 6 of this same order).
   return { role, roleAbout, roleBasis, corrected, others: others.slice(0, 6), claims, history, createdName, state, stateRead, files: files.slice(0, 8), typeRead, inputs: inputs.slice(0, 8), outputs: outputs.slice(0, 8), fields: fields.slice(0, 24), config: config.slice(0, 8),
-    steps: steps.slice(0, 12), loop, stateVars: stateVars.slice(0, 8), portMap: portMap.slice(0, 12), revised, roleBasisRevised };
+    steps: steps.slice(0, 12), loop, stateVars: stateVars.slice(0, 8), portMap: portMap.slice(0, 12), rules, withdrawals, gates, revised, roleBasisRevised };
 }
 
 /* ---------- evidence a later record took back ---------- */
@@ -1538,10 +1690,14 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
     if (q.from === undefined || q.to === undefined) return { record: source.id, quote: q.quote };
     return { record: source.id, quote: q.quote, from: source.from + q.from, to: source.from + q.to };
   };
-  // map-reading.7 (every map.6–7 reply): each optional field is stored, null (files: []) when the reply did not say it, so the
+  // map-reading.7 (every map.6–7 reply; stored as map-reading.10): each optional field is stored, null (files: []) when the reply did not say it, so the
   // stored shape is exact. A part's state stands on its own passage like a claim: one inside material or already read is not kept.
   const claimOf = (c: MapReplyClaim): ReadingClaim => ({ kind: c.kind, text: c.text, ...real(c), about: c.about, replaces: c.replaces ? input.claims.get(c.replaces)! : null,
-    ...(six ? { topic: c.topic ?? null, evidence: c.evidence ?? null, when: c.when ?? null, where: c.where ?? null, before: c.before ?? null } : {}) });
+    ...(six ? { topic: c.topic ?? null, evidence: c.evidence ?? null, when: c.when ?? null, where: c.where ?? null, before: c.before ?? null,
+      // map-reading.10: a place or a device stands on its own line like a step (one inside material or already read is not kept).
+      scope: c.scope ?? null, scopeName: c.scopeName ?? null, anchors: (c.anchors ?? []).filter(a => usable(a.quote)).map(a => ({ kind: a.kind, text: a.text, quote: real(a.quote) })),
+      enforcedBy: (c.enforcedBy ?? []).filter(x => !x.quote || usable(x.quote)).map(x => ({ kind: x.kind, text: x.text, quote: x.quote ? real(x.quote) : null })),
+      withdrawalKind: c.withdrawalKind ?? null, gate: c.gate ?? null } : {}) });
   const stateOf = (x: MapReplyPart): Pick<ReadingPart, 'state' | 'stateWhen' | 'stateQuote' | 'files' | 'type' | 'typeQuote' | 'inputs' | 'outputs' | 'fields' | 'config' | 'steps' | 'loop' | 'stateVars'> => {
     if (!six) return {};
     const kept = !!x.state && !!x.stateQuote && usable(x.stateQuote);
@@ -1635,7 +1791,7 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
     const holds = !!cur && !cur.excluded && !cur.replacedBy && !!cur.target && sameTarget(cur.target, ref!.target) && cur.correction === ref!.correction;
     return { ...rest, replaces: holds ? { reading: ref!.reading, index: ref!.index } : null };
   });
-  const reading: MapReading = { version: six ? 'map-reading.9' : four ? 'map-reading.4' : three ? 'map-reading.3' : withRequests ? 'map-reading.2' : 'map-reading.1', id: meta.id, at: meta.at, model: meta.model, prompt: meta.prompt, hash: meta.hash,
+  const reading: MapReading = { version: six ? 'map-reading.10' : four ? 'map-reading.4' : three ? 'map-reading.3' : withRequests ? 'map-reading.2' : 'map-reading.1', id: meta.id, at: meta.at, model: meta.model, prompt: meta.prompt, hash: meta.hash,
     ...(six ? { basisAt: reply.basisAt ?? null, basisVersion: reply.basisVersion ?? null, portMap } : {}),
     records: [...input.records.values()].map(r => { const shift = four ? 0 : texts.get(r.id)?.shift ?? 0;
       return shift ? { id: r.id, from: r.from + shift, to: r.to + shift, total: texts.get(r.id)!.raw.length } : { id: r.id, from: r.from, to: r.to, total: r.total, ...(four ? { digest: textDigest(r.text) } : {}) }; }),
