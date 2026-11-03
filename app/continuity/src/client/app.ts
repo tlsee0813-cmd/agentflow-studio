@@ -591,17 +591,52 @@ let openPlanOnArrive = false;
 /** A package-like name ('@node-red/runtime') may break after its slashes rather than inside a word. */
 const slashBreaks = (name: string): (string | HTMLElement)[] => name.split('/').flatMap((x, i, all) => (i < all.length - 1 ? [`${x}/`, document.createElement('wbr')] : [x]));
 /** A quiet monogram for a project card: its first letter on one of six tints, chosen from the name so it stays the same. */
-function programAvatar(name: string): HTMLElement {
-  const first = [...name.trim().replace(/^[^\p{L}\p{N}]+/u, '')][0] ?? '·';
-  let n = 0; for (const c of name) n = (n * 31 + c.codePointAt(0)!) >>> 0;
-  return h('span', { class: 'program-avatar', 'data-tone': String(n % 6), 'aria-hidden': 'true' }, first.toUpperCase());
+/** Region hues (the map and the home miniature): blue, teal, amber, violet, rose, green, told apart at a faint wash. */
+const HUES = [214, 158, 32, 268, 345, 96];
+/** A miniature of the project's map on its home card: the top-level parts and regions (one level open), their lines, the spine
+ * stronger, drawn as SVG from the very layout the map opens with, so the card shows the map's shape before it is opened. */
+function miniMap(v: StudioView): SVGSVGElement | null {
+  if (!v.parts.length) return null;
+  let L: ScopeLayout;
+  try { L = layoutScope(v, null, (_id, depth) => depth < 1, {}, measureName); } catch { return null; }
+  const boxes = [...L.boxes.values()].filter(b => b.kind !== 'ghost');
+  if (!boxes.length) return null;
+  const B = L.bounds, W = 300, H = 120, PAD = 12;
+  const k = Math.min((W - 2 * PAD) / Math.max(1, B.w), (H - 2 * PAD) / Math.max(1, B.h), 0.42);
+  const ox = PAD + (W - 2 * PAD - B.w * k) / 2 - B.x * k, oy = PAD + (H - 2 * PAD - B.h * k) / 2 - B.y * k;
+  const X = (x: number) => (ox + x * k).toFixed(1), Y = (y: number) => (oy + y * k).toFixed(1), S = (n: number) => Math.max(1.5, n * k).toFixed(1);
+  const el = (tag: string, attrs: Record<string, string>) => { const e = document.createElementNS('http://www.w3.org/2000/svg', tag); for (const [a, val] of Object.entries(attrs)) e.setAttribute(a, val); return e; };
+  const root = el('svg', { class: 'mini-map', viewBox: `0 0 ${W} ${H}`, 'aria-hidden': 'true', focusable: 'false' }) as SVGSVGElement;
+  const hues = new Map<string, number>(); v.roots.forEach((id, i) => hues.set(id, HUES[i % HUES.length]!));
+  const byId = new Map(v.parts.map(p => [p.id, p]));
+  // Regions under everything, lines over them, cards on top.
+  for (const b of boxes.filter(x => x.kind === 'frame').sort((p, q) => p.depth - q.depth)) {
+    const hue = hues.get(b.id);
+    root.append(el('rect', { class: 'mm-frame', x: X(b.x), y: Y(b.y), width: S(b.w), height: S(b.h), rx: '6', ...(hue !== undefined ? { style: `--hue: ${hue}` } : {}) }));
+  }
+  for (const e of L.edges) {
+    const a = L.boxes.get(e.from), b = L.boxes.get(e.to); if (!a || !b) continue;
+    const forward = b.x >= a.x + a.w;
+    const x1 = forward ? a.x + a.w : a.x, y1 = a.y + Math.min(a.h, 48) / 2, x2 = forward ? b.x : b.x + b.w, y2 = b.y + Math.min(b.h, 48) / 2;
+    const mid = (x1 + x2) / 2;
+    root.append(el('path', { class: `mm-edge${e.spine ? ' spine' : ''}`, d: `M${X(x1)} ${Y(y1)} H${X(mid)} V${Y(y2)} H${X(x2)}` }));
+  }
+  for (const b of boxes.filter(x => x.kind === 'node')) {
+    const p = byId.get(b.id), l = p ? ladderOf(v, p) : null, state = l?.check ? 'check' : l?.report ? 'report' : l?.ask ? 'ask' : 'none';
+    const g = el('g', { class: `mm-node st-${state}` });
+    const hh = Math.min(b.h, 48);
+    g.append(el('rect', { x: X(b.x), y: Y(b.y), width: S(b.w), height: S(hh), rx: '3' }));
+    g.append(el('rect', { class: 'mm-state', x: (ox + b.x * k + 1.5).toFixed(1), y: (oy + b.y * k + 2).toFixed(1), width: '2', height: Math.max(2, hh * k - 4).toFixed(1), rx: '1' }));
+    root.append(g);
+  }
+  return root;
 }
 /** The card's one line about the project: its written brief; without one, what the latest map reading said of the whole
  * (marked as the AI's reading, since nobody wrote it); without either, that nothing was written yet. */
 function briefLine(p: Project): HTMLElement {
   if (p.space.brief?.text) return h('span', { class: 'program-brief' }, p.space.brief.text);
   const last = [...p.readings].reverse().find(isMapReading);
-  if (last?.summary) return h('span', { class: 'program-brief ai', title: 'AI가 기록을 읽고 쓴 요약이에요. 설명은 지도 제목 옆에서 직접 쓸 수 있어요.' }, h('span', { class: 'program-brief-tag' }, 'AI 정리'), ' ', last.summary);
+  if (last?.summary) return h('span', { class: 'program-brief ai', title: 'AI가 기록을 읽고 쓴 요약이에요. 설명은 지도 제목 옆에서 직접 쓸 수 있어요.' }, h('span', { class: 'program-brief-tag' }, 'AI 정리 ·'), ' ', last.summary);
   return h('span', { class: 'program-brief' }, '아직 설명이 없어요.');
 }
 function programCard(key: string, p: Project, example: boolean, keyOf: (id: string) => string): HTMLElement {
@@ -619,23 +654,19 @@ function programCard(key: string, p: Project, example: boolean, keyOf: (id: stri
     ? h('a', { class: 'program-continue', href: `${base}${at.scope ? `/in/${encodeURIComponent(at.scope)}` : ''}${at.part ? `/${encodeURIComponent(at.part)}` : ''}` },
       h('span', {}, '이어서'), h('strong', {}, name(at.part) ?? name(at.scope)!), h('small', {}, at.part ? (at.scope ? `선택 · ${name(at.scope)} 안` : '선택') : '안쪽 보기'), h('span', { 'aria-hidden': 'true' }, '→')) : null;
   // Cross-section: the top groups in map order, each with the first parts inside; a part with no inside shows its own sentence.
-  const roots = v.roots.map(id => v.parts.find(x => x.id === id)!).filter(Boolean), MAX = 4;
-  const section = roots.length ? h('ol', { class: 'program-section', 'aria-label': '최상위 구성' },
-    ...roots.slice(0, MAX).map(r => {
-      const kids = r.childIds.map(id => v.parts.find(x => x.id === id)?.name).filter(Boolean) as string[];
-      return h('li', {}, h('a', { href: `${base}/${encodeURIComponent(keyOf(r.id))}`, title: `‘${r.name}’ 선택해서 열기` },
-        h('strong', {}, ...slashBreaks(r.name)),
-        kids.length ? h('span', {}, kids.slice(0, 3).join(' · '), kids.length > 3 ? h('small', {}, ` +${kids.length - 3}`) : null) : (mapLead(v, r.id) ? h('span', { class: 'quiet' }, mapLead(v, r.id)) : null)));
-    }),
-    roots.length > MAX ? h('li', { class: 'more' }, h('a', { href: base }, `+${roots.length - MAX}개 묶음`)) : null) : h('p', { class: 'program-empty' }, '아직 지도가 비어 있어요 · 열어서 기록을 연결해 보세요');
+  const roots = v.roots.map(id => v.parts.find(x => x.id === id)!).filter(Boolean);
   const tryReturn = key === UI62_KEY ? h('a', { class: 'program-try', href: base }, h('strong', {}, '돌아와 읽기'), h('span', {}, '공개 개발 자료 10개 · 3단계로 늘려 읽기 · 사후 편집')) : null;
   const tryPlan = key === CONVERTER_KEY ? h('a', { class: 'program-try', href: base, onclick: () => { openPlanOnArrive = true; } }, h('strong', {}, '변경 구상 시험해 보기'), h('span', {}, '폴더째 변환 · 지금과 구상을 같은 자리에서 비교')) : null;
+  // The top-level parts in one quiet line (the miniature has no text).
+  const rootLine = roots.length ? h('span', { class: 'program-roots', title: roots.map(r => r.name).join(' · ') }, roots.slice(0, 4).map(r => r.name).join(' · '), roots.length > 4 ? ` +${roots.length - 4}` : '') : null;
+  const mini = miniMap(v);
+  const backup = !example && key !== 'legacy' ? h('button', { type: 'button', class: 'link-button quiet program-backup', title: '붙여넣은 원문 기록과 옮긴 위치를 함께 담은 백업 파일을 내려받아요', onclick: () => saveBackup(key, p) }, '백업 저장') : null;
   return h('li', {}, h('article', { class: `program${example ? ' is-example' : ''}` },
-    h('a', { class: 'program-head', href: base },
-      h('span', { class: 'program-title' }, programAvatar(p.name), h('strong', { class: 'program-name' }, p.name)), briefLine(p), h('span', { class: 'program-meta' }, ...meta),
+    h('a', { class: 'program-head', href: base, 'aria-label': `‘${p.name}’ 열기` },
+      h('span', { class: 'program-mini' }, mini ?? h('span', { class: 'program-mini-empty' }, '아직 지도가 비어 있어요')),
+      h('span', { class: 'program-text' }, h('strong', { class: 'program-name' }, p.name), briefLine(p), rootLine, h('span', { class: 'program-meta' }, ...meta)),
       !example && key !== 'legacy' ? runBadgeFor(key) : null),
-    h('div', { class: 'program-body' }, section, cont, tryPlan, tryReturn,
-      !example && key !== 'legacy' ? h('button', { type: 'button', class: 'link-button quiet program-backup', title: '붙여넣은 원문 기록과 옮긴 위치를 함께 담은 백업 파일을 내려받아요', onclick: () => saveBackup(key, p) }, '백업 저장') : null)));
+    cont || tryPlan || tryReturn || backup ? h('div', { class: 'program-foot' }, cont, tryPlan, tryReturn, backup) : null));
 }
 /** A backup file of a saved entry: the project as kept (pasted records included) and this entry's own manual places, in the
  * existing backup format; ‘백업 가져오기’ reads it back as a new copy. Readings and drafts are not part of it. */
@@ -740,7 +771,9 @@ const measureName: TextMeasure = (() => {
     const key = `${kind}|${text}`, hit = cache.get(key); if (hit !== undefined) return hit;
     if (!ctx) { ctx = document.createElement('canvas').getContext('2d'); family = getComputedStyle(document.body).fontFamily; }
     if (!ctx) return text.length * 9;
-    ctx.font = kind === 'node' ? `600 13.5px ${family}` : kind === 'item' ? `550 13px ${family}` : kind === 'head' ? `650 15px ${family}` : kind === 'sub' ? `650 13px ${family}` : kind === 'plan' ? `600 12px ${family}` : kind === 'where' ? `600 11px ${family}` : `400 12.5px ${family}`;
+    // The weights of styles.css (--fw-name 590 for names, --fw-body 420 for notes). 'head' serves a region's name (680 14px) and
+    // a card's name in a region (590 14.5px): measured at the wider of the two, so neither is given too little room.
+    ctx.font = kind === 'node' ? `590 13.5px ${family}` : kind === 'item' ? `590 13px ${family}` : kind === 'head' ? `680 14.5px ${family}` : kind === 'sub' ? `590 13px ${family}` : kind === 'plan' ? `590 12px ${family}` : kind === 'where' ? `590 11px ${family}` : `420 12.5px ${family}`;
     const w = ctx.measureText(text).width; cache.set(key, w); return w;
   };
 })();
@@ -826,11 +859,11 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   const edges = svg('svg', { class: 'edges', width: '1', height: '1', 'aria-hidden': 'true' });
   const defs = svg('defs', {});
   for (const id of ['arrow', 'arrow-on', 'arrow-near']) {
-    const m = svg('marker', { id, viewBox: '0 0 10 10', refX: '9', refY: '5', markerWidth: '6', markerHeight: '6', orient: 'auto-start-reverse' });
-    m.append(svg('path', { d: 'M0,1 L9,5 L0,9 L2.2,5 z' })); defs.append(m);
+    const m = svg('marker', { id, viewBox: '0 0 10 10', refX: '8', refY: '5', markerWidth: '7', markerHeight: '7', orient: 'auto-start-reverse' });
+    m.append(svg('path', { d: 'M0,0 L10,5 L0,10 L3,5 z' })); defs.append(m);
   }
   // A selected line also marks where it starts, so both of its ends read on the map.
-  // Every line marks the part it leaves from with a small dot, so the starting row reads without a label.
+  // Every line carries a start dot; styles.css shows it only on a line being read (hovered or selected) and on a plain relation.
   for (const id of ['dot', 'dot-on']) { const d = svg('marker', { id, viewBox: '0 0 10 10', refX: '5', refY: '5', markerWidth: '6', markerHeight: '6' }); d.append(svg('circle', { cx: '5', cy: '5', r: id === 'dot' ? '2.6' : '3.6' })); defs.append(d); }
   edges.append(defs);
   // A line between two parts of the same group belongs to that group: it reads above the group's surface (a line between
@@ -862,7 +895,6 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   const keySelect = (id: string) => (e: Event) => { const k = (e as KeyboardEvent).key; if ((k === 'Enter' || k === ' ') && e.target === e.currentTarget) { e.preventDefault(); go(o.key, id); } };
   const boxes = [...lay.boxes.values()].sort((a, b) => (a.kind === 'frame' ? 0 : 1) - (b.kind === 'frame' ? 0 : 1) || a.depth - b.depth);
   // Each region (an open group directly in the scope) takes a hue of its own, by its place in the scope's order.
-  const HUES = [214, 158, 32, 268, 345, 96]; // blue, teal, amber, violet, rose, green: told apart at a faint wash
   const hueOf = new Map<string, number>(); (scope ? partOf(o, scope)?.childIds ?? [] : view.roots).forEach((id, i) => hueOf.set(id, HUES[i % HUES.length]!));
   // Same names under different parents read with their parent beside them (only where a name repeats in this view).
   const seen = new Map<string, number>();
