@@ -4,7 +4,7 @@
  * joined to a step by guess, and steps are never joined to one another (their order is not read; the list keeps the record's row
  * order). Pure: no DOM, so the rule is tested on its own. */
 
-import { ruleSigns, type RuleClaim } from './signs-view.js';
+import { ruleSigns, placeName, type RuleClaim } from './signs-view.js';
 
 export const UNMAPPED_IN = '진입 단계 미상', UNMAPPED_OUT = '출구 단계 미상';
 export const unmappedMark = (direction: 'in' | 'out') => (direction === 'in' ? UNMAPPED_IN : UNMAPPED_OUT);
@@ -75,4 +75,36 @@ export function detailSigns<T extends RuleClaim>(chain: DetailChain, fields: rea
     else if (kind === 'field') out.cells.set(name, list);
   }
   return out;
+}
+
+/* ---------- a run gate's decision step (spec 5.2: 실행 관문은 판정 단계와 실제 출구) ----------
+ * The step a run gate stands on: the step whose name the gate's own words name (an anchor naming it exactly first, then the
+ * longest step name its quote or its text holds; spacing, case and quote marks aside), else the first step, said so (matched
+ * 'first'). Its exits are only those the record wrote on that step: a 참이면 / 거짓이면 item among what it uses or in what it
+ * does; none written reads as one '출구 미상'. Nothing is joined by guess. */
+export interface GateLike { text: string; quote: string; anchors?: readonly { text: string }[] }
+export interface DecisionExit { when: '참이면' | '거짓이면'; text: string }
+export interface DecisionStep { index: number; name: string; matched: 'name' | 'first'; exits: DecisionExit[] }
+export const EXIT_BLANK = '출구 미상';
+export function decisionExits(step: Pick<ChainStep, 'does' | 'uses'>): DecisionExit[] {
+  const out: DecisionExit[] = [];
+  for (const src of [...step.uses, step.does ?? '']) for (const piece of src.split(/[,;/|]/)) {
+    const m = /(참이면|거짓이면)\s*[:：→]?\s*(.+)$/.exec(piece.trim()); if (!m) continue;
+    const text = m[2]!.trim(), when = m[1] as DecisionExit['when'];
+    if (text && !out.some(x => x.when === when && x.text === text)) out.push({ when, text });
+  }
+  return out;
+}
+export function decisionStep(gate: GateLike, steps: readonly Pick<ChainStep, 'name' | 'does' | 'uses'>[]): DecisionStep | null {
+  if (!steps.length) return null;
+  const names = steps.map(s => placeName(s.name));
+  let index = -1;
+  for (const a of gate.anchors ?? []) { const k = names.indexOf(placeName(a.text)); if (k >= 0) { index = k; break; } }
+  if (index < 0) {
+    const words = [placeName(gate.quote), placeName(gate.text)];
+    let best = 0;
+    names.forEach((n, k) => { if (n && n.length > best && words.some(w => w.includes(n))) { best = n.length; index = k; } });
+  }
+  const matched = index >= 0 ? 'name' : 'first', at = index >= 0 ? index : 0, s = steps[at]!;
+  return { index: at, name: s.name, matched, exits: decisionExits(s) };
 }

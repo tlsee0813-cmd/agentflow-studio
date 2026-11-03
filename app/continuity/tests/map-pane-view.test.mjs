@@ -125,3 +125,15 @@ test('dispute chip title and the handover section: each time and reason; the sec
   assert.equal(withDisputes(doc, []), doc);
   assert.equal(withDisputes('짧은 글', sec).split('\n')[2], DISPUTE_HEAD);
 });
+/* ---------- cycle 6: one order for the lens and the full reading ---------- */
+import { paneSections, structureOpen, PANE_ORDER, PANE_TITLE } from '../dist/public/client/pane-view.js';
+
+test('paneSections: the lens and the full reading lay their sections out in one order (원문 → 이유 → 이력 → 출처 묶음 → 어디에), absent ones left out; 구조 folded', () => {
+  assert.deepEqual(PANE_ORDER.map(k => PANE_TITLE[k]), ['원문', '이유', '이력', '출처 묶음', '어디에']);
+  assert.deepEqual(paneSections({ where: 'W', sources: 'S', why: 'Y', history: 'H', origin: 'O' }), ['O', 'Y', 'H', 'S', 'W']);
+  assert.deepEqual(paneSections({ where: 'W', origin: null, why: 'Y', history: undefined }), ['Y', 'W']);
+  assert.deepEqual(paneSections({}), []);
+  assert.equal(structureOpen(false, false), false);
+  assert.equal(structureOpen(true, false), true);
+  assert.equal(structureOpen(false, true), true);
+});

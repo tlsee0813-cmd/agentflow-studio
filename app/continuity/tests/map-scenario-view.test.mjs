@@ -178,3 +178,89 @@ test('SV-8 the words: visit numbers, the selector line, the paste result line, a
   assert.equal(linkTitle({ id: 'L02', from: 'V02', to: 'V03', kind: 'branch', condition: 'unknown', policy: null }), '분기 L02 (V02→V03) · 조건 미상');
   assert.equal(linkTitle({ id: 'L03', from: 'V03', to: 'V04', kind: 'wait', condition: null, policy: 'unknown' }), '대기 L03 (V03→V04) · 재개 조건 미상');
 });
+
+/* ---------- cycle 6: the grammar drawn on the path, 조건 선택, run gates on the badges ---------- */
+import { grammarMarks, linkDirection, fromSource, pointAlong, diamondMark, parallelBar, loopFrame, frameLabelSpots, waitDash, conditionChoice, conditionPath, gateVisits } from '../dist/public/client/scenario-view.js';
+
+/** A resolved scenario as the map reads it (only what the grammar reads): visits by id and area, links with kind, condition, policy. */
+function understood(kind = 'designed', links = null) {
+  const visits = ['V01', 'V02', 'V03', 'V04', 'V05', 'V06', 'V07'].map((id, i) => ({ id, areaId: `A${i % 5}`, partOnMap: id !== 'V07' }));
+  const L = (id, from, to, k, condition = null, policy = null, rel = `R_${id}`) => ({ id, from, to, kind: k, condition, policy, relation: rel ? { ref: 'R01', relationId: rel, along: true } : null, relationOnMap: !!rel, rules: [], evidence: [], evidenceWord: null });
+  return { scenario: { kind }, visits, byArea: {}, links: links ?? [
+    L('L01', 'V01', 'V02', 'wait', null, '재개 사건: 새 행'),
+    L('L02', 'V02', 'V03', 'branch', 'GO'), L('L03', 'V02', 'V04', 'branch', 'NO_GO'),
+    L('L04', 'V04', 'V02', 'loop', null, '0.2 s 틱마다'),
+    L('L05', 'V03', 'V05', 'parallel', null, 'unknown'), L('L06', 'V03', 'V06', 'parallel', null, '모두 기다림'),
+    L('L07', 'V05', 'V06', 'next'), L('L08', 'V06', 'V99', 'wait', null, null)] };
+}
+
+test('grammarMarks: a mark per branch, parallel, loop and wait link between two holding visits, each label as the record wrote it or its blank', () => {
+  const m = grammarMarks(understood());
+  assert.deepEqual(m.map(x => `${x.link}:${x.kind}:${x.label}:${x.blank}`), ['L01:wait:재개 사건: 새 행:false', 'L02:branch:GO:false', 'L03:branch:NO_GO:false',
+    'L04:loop:0.2 s 틱마다:false', 'L05:parallel:합류 정책 미상:true', 'L06:parallel:모두 기다림:false']);
+  // A loop spans the visits between its two ends by visit order, whichever way it runs (V04 → V02: V02, V03, V04).
+  assert.deepEqual(m.find(x => x.kind === 'loop').span, ['V02', 'V03', 'V04']);
+  assert.equal(m.find(x => x.link === 'L01').relation, 'R_L01');
+  // A branch never declares exclusivity; a wait with no resume says so; a branch with an unknown condition says 조건 미상.
+  assert.match(m.find(x => x.link === 'L02').title, /선택 방식 미상/);
+  const u = understood('designed', [{ id: 'L01', from: 'V01', to: 'V02', kind: 'wait', condition: null, policy: null, relation: null, relationOnMap: false, rules: [], evidence: [], evidenceWord: null },
+    { id: 'L02', from: 'V02', to: 'V03', kind: 'branch', condition: 'unknown', policy: null, relation: null, relationOnMap: false, rules: [], evidence: [], evidenceWord: null }]);
+  assert.deepEqual(grammarMarks(u).map(x => [x.label, x.blank, x.relation]), [['재개 조건 미상', true, null], ['조건 미상', true, null]]);
+});
+
+test('the marks\' geometry: read from the source end, a diamond 9px out of the exit, a double bar across the line, a padded loop frame, a dashed wait end', () => {
+  const line = [{ x: 0, y: 0 }, { x: 100, y: 0 }, { x: 100, y: 50 }];
+  assert.equal(linkDirection('a', 'b', 'a', 'b'), 'forward');
+  assert.equal(linkDirection('a', 'b', 'b', 'a'), 'reverse');
+  assert.equal(linkDirection('a', 'b', 'a', 'c'), null);
+  assert.equal(linkDirection('a', 'b', null, 'b'), null);
+  assert.deepEqual(fromSource(line, 'reverse')[0], { x: 100, y: 50 });
+  // Along the polyline, across its corner.
+  assert.deepEqual(pointAlong(line, 120), { x: 100, y: 20, dx: 0, dy: 1 });
+  assert.deepEqual(pointAlong(line, 999), { x: 100, y: 50, dx: 0, dy: 1 });
+  assert.equal(pointAlong([{ x: 0, y: 0 }], 5), null);
+  const d = diamondMark(line);
+  assert.deepEqual([d.cx, d.cy], [9, 0]);
+  assert.equal(d.d, 'M15,0 L9,6 L3,0 L9,-6 Z');
+  // From the other end (a line drawn destination → source), the diamond sits 9px up from (100, 50).
+  assert.deepEqual([diamondMark(fromSource(line, 'reverse')).cx, diamondMark(fromSource(line, 'reverse')).cy], [100, 41]);
+  // Two strokes across a level line, 14 and 18px from the exit, 7px each side of it.
+  assert.equal(parallelBar(line), 'M14,7 L14,-7 M18,7 L18,-7');
+  assert.deepEqual(loopFrame([{ x: 10, y: 20, w: 100, h: 50 }, { x: 200, y: 0, w: 40, h: 40 }]), { x: -4, y: -14, w: 258, h: 98 });
+  assert.equal(loopFrame([]), null);
+  assert.deepEqual(frameLabelSpots({ x: 0, y: 0, w: 300, h: 100 }, 60, 16).map(r => [r.x, r.y]), [[12, -8], [228, -8], [12, 92], [228, 92]]);
+  // A frame too narrow for a right-hand spot keeps the left ones only.
+  assert.equal(frameLabelSpots({ x: 0, y: 0, w: 60, h: 100 }, 60, 16).length, 2);
+  const sum = s => s.split(' ').map(Number).reduce((a, b) => a + b, 0);
+  assert.equal(waitDash(200), '174 3 3 3 3 3 3 3 3 3 3');
+  assert.equal(sum(waitDash(200)), 204); // the last gap runs past the end: the line ends on a dash
+  assert.equal(waitDash(200, 26, true).split(' ')[0], '3');
+  assert.equal(waitDash(200, 26, true).split(' ').at(-2), '174');
+  assert.equal(waitDash(40), '4 3');
+  assert.equal(waitDash(0), '');
+});
+
+test('조건 선택: a designed path offers its branch conditions; an observed run says it offers none; the path under a condition follows only its branch', () => {
+  assert.deepEqual(conditionChoice(understood()), { offer: true, conditions: ['GO', 'NO_GO'], note: null });
+  assert.deepEqual(conditionChoice(understood('observed')), { offer: false, conditions: ['GO', 'NO_GO'], note: '관측 실행 · 조건 선택 없음' });
+  assert.equal(conditionChoice(understood('tour')).offer, false);
+  assert.deepEqual(conditionChoice(understood('designed', [])), { offer: false, conditions: [], note: null });
+  const go = conditionPath(understood(), 'GO');
+  // GO: the wait, the GO branch, both parallel links and what follows them; NO_GO and the loop only it reaches are off.
+  assert.deepEqual([...go.links].sort(), ['L01', 'L02', 'L05', 'L06', 'L07', 'L08']);
+  assert.deepEqual([...go.off].sort(), ['L03', 'L04']);
+  assert.ok(!go.visits.has('V04'));
+  const no = conditionPath(understood(), 'NO_GO');
+  assert.deepEqual([...no.links].sort(), ['L01', 'L03', 'L04']);
+  assert.deepEqual([...no.visits].sort(), ['V01', 'V02', 'V04', 'V07']); // V07: a visit no link reaches stands as a start
+  // A branch with no condition stays on every condition's path; one whose condition is unknown is on none.
+  const L = (id, from, to, condition) => ({ id, from, to, kind: 'branch', condition, policy: null, relation: null, relationOnMap: false, rules: [], evidence: [], evidenceWord: null });
+  const p = conditionPath(understood('designed', [L('L01', 'V01', 'V02', null), L('L02', 'V01', 'V03', 'unknown'), L('L03', 'V01', 'V04', 'GO')]), 'GO');
+  assert.deepEqual([...p.links].sort(), ['L01', 'L03']);
+});
+
+test('gateVisits: the run gates of each visit\'s part, for the badge\'s 관문 mark; a visit whose part is gone from the map has none', () => {
+  const g = gateVisits(understood(), a => (a === 'A1' ? 2 : 0));
+  // V02 is on A1, and V07 (A1 too) is gone from the map.
+  assert.deepEqual([...g], [['V02', 2]]);
+});

@@ -182,3 +182,141 @@ export function scenarioLabel(name: ScenarioSaid | undefined, kind: ScenarioKind
 export function scenarioResultLine(id: string | null | undefined, visits: number, links: number, status: ScenarioPathStatus): string {
   return `시나리오 ${id ?? '?'} · 방문 ${visits} · 이어짐 ${links} · ${PATH_WORD[status]}(${status})`;
 }
+
+/* ---------- the grammar drawn on the path (spec §3.3, cycle 6): 분기 마름모 · 병렬 막대 · 반복 프레임 · 대기 제어 선 ----------
+ * Marks sit on the lines the path already lights, never move a card and never add a line: a branch draws a small diamond where
+ * its line leaves the source part, its condition 8–16px from that exit; a parallel link a short double bar across its line near
+ * the source; a loop a thin frame round the drawn cards of the visits it spans (by visit order), its repeat unit at the frame's
+ * head; a wait its line as a control line (open V head, dashed near the destination) with what resumes it. A label with no clear
+ * place reads on hover only. The glyphs on the badges stay. */
+type Pt = { x: number; y: number };
+export type MarkKind = 'branch' | 'parallel' | 'loop' | 'wait';
+export interface GrammarMark {
+  kind: MarkKind; link: string; from: string; to: string; relation: string | null;
+  /** The one-line label as the record said it (조건 · 합류 정책 · 반복 단위 · 재개 사건), or its explicit blank. */
+  label: string; blank: boolean;
+  /** The full words on hover. */
+  title: string;
+  /** For a loop: the visits it spans, from its earlier to its later end by visit order (both ends included). */
+  span: string[];
+}
+const said = (s: ScenarioSaid): string | null => (s === null || s === 'unknown' ? null : s.trim() || null);
+/** The marks of a scenario's links, in link order: every branch, parallel, loop and wait link between two visits that hold
+ * (a next link draws nothing). Each label as the record wrote it; a blank as its words (조건 미상, 재개 조건 미상, …). */
+export function grammarMarks(u: ScenarioUnderstanding): GrammarMark[] {
+  const order = new Map(u.visits.map((v, i) => [v.id, i]));
+  return u.links.flatMap((l): GrammarMark[] => {
+    if (l.kind === 'next' || !order.has(l.from) || !order.has(l.to)) return [];
+    const base = { kind: l.kind, link: l.id, from: l.from, to: l.to, relation: l.relation && l.relationOnMap ? l.relation.relationId : null, span: [] as string[] };
+    const head = `${LINK_WORD[l.kind]} ${l.id} (${l.from}→${l.to})`;
+    if (l.kind === 'branch') {
+      const c = said(l.condition), label = c ?? (l.condition === null ? '조건 없음' : '조건 미상');
+      return [{ ...base, label, blank: !c, title: `${head} · ${c ? `조건: ${c}` : label} · 선택 방식 미상(배타성은 기록에 없음)` }];
+    }
+    if (l.kind === 'parallel') {
+      const p = said(l.policy), label = p ?? '합류 정책 미상';
+      return [{ ...base, label, blank: !p, title: `${head} · 동시 (어느 쪽이 먼저라는 뜻 없음) · ${p ? `합류: ${p}` : label}` }];
+    }
+    if (l.kind === 'loop') {
+      const p = said(l.policy), label = p ?? '반복 단위 미상', a = order.get(l.from)!, b = order.get(l.to)!;
+      const span = u.visits.slice(Math.min(a, b), Math.max(a, b) + 1).map(v => v.id);
+      return [{ ...base, label, blank: !p, span, title: `${head} · ${p ? `반복 단위: ${p}` : label} · 방문 ${span.map(visitNumber).join(' · ')}` }];
+    }
+    const p = said(l.policy), label = p ?? '재개 조건 미상';
+    return [{ ...base, label, blank: !p, title: `${head} · ${p ? `재개: ${p}` : label}` }];
+  });
+}
+/** Which way a drawn line runs for a link: 'forward' when the line's start is the card of the link's source visit, 'reverse' when
+ * its end is, null when the line does not join the two cards (the mark has no place on it). */
+export function linkDirection(lineFrom: string, lineTo: string, repFrom: string | null, repTo: string | null): 'forward' | 'reverse' | null {
+  if (!repFrom || !repTo) return null;
+  if (lineFrom === repFrom && lineTo === repTo) return 'forward';
+  if (lineFrom === repTo && lineTo === repFrom) return 'reverse';
+  return null;
+}
+/** The polyline read from the link's source end (reversed when the line runs the other way). */
+export const fromSource = (pts: readonly Pt[], dir: 'forward' | 'reverse'): Pt[] => (dir === 'forward' ? [...pts] : [...pts].reverse());
+/** The point d px along a polyline from its start, with the unit direction of the run it lies on; past the end, its last point. */
+export function pointAlong(pts: readonly Pt[], d: number): { x: number; y: number; dx: number; dy: number } | null {
+  if (pts.length < 2) return null;
+  let left = Math.max(0, d);
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1]!, b = pts[i]!, len = Math.hypot(b.x - a.x, b.y - a.y); if (len < 0.01) continue;
+    const dx = (b.x - a.x) / len, dy = (b.y - a.y) / len;
+    if (left <= len || i === pts.length - 1) { const t = Math.min(left, len); return { x: a.x + dx * t, y: a.y + dy * t, dx, dy }; }
+    left -= len;
+  }
+  return null;
+}
+const r1 = (n: number) => Math.round(n * 10) / 10;
+/** The decision diamond of a branch: centred `at` px along the line from the source's exit, r its half-diagonal, two corners on
+ * the line's axis and two across it. */
+export function diamondMark(pts: readonly Pt[], at = 9, r = 6): { cx: number; cy: number; d: string } | null {
+  const p = pointAlong(pts, at); if (!p) return null;
+  const { x, y, dx, dy } = p, nx = -dy, ny = dx;
+  return { cx: r1(x), cy: r1(y), d: `M${r1(x + dx * r)},${r1(y + dy * r)} L${r1(x + nx * r)},${r1(y + ny * r)} L${r1(x - dx * r)},${r1(y - dy * r)} L${r1(x - nx * r)},${r1(y - ny * r)} Z` };
+}
+/** The parallel bar: two short strokes across the line, `at` and `at + gap` px from the source's exit, each 2·half long. */
+export function parallelBar(pts: readonly Pt[], at = 14, half = 7, gap = 4): string | null {
+  const a = pointAlong(pts, at), b = pointAlong(pts, at + gap); if (!a || !b) return null;
+  const seg = (p: { x: number; y: number; dx: number; dy: number }) => `M${r1(p.x - p.dy * half)},${r1(p.y + p.dx * half)} L${r1(p.x + p.dy * half)},${r1(p.y - p.dx * half)}`;
+  return `${seg(a)} ${seg(b)}`;
+}
+/** The loop frame: the rectangle round the cards the loop spans, pad px clear of each; null when none is drawn. */
+export function loopFrame(rects: readonly { x: number; y: number; w: number; h: number }[], pad = 14): { x: number; y: number; w: number; h: number } | null {
+  if (!rects.length) return null;
+  const x0 = Math.min(...rects.map(r => r.x)) - pad, y0 = Math.min(...rects.map(r => r.y)) - pad;
+  const x1 = Math.max(...rects.map(r => r.x + r.w)) + pad, y1 = Math.max(...rects.map(r => r.y + r.h)) + pad;
+  return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+}
+/** Where a loop frame's head label may sit, best first: on the frame's top edge at its left, then its right, then the bottom
+ * edge's left and right (a legend over the frame line, inset 12px from the corner). */
+export function frameLabelSpots(f: { x: number; y: number; w: number; h: number }, w: number, h: number): { x: number; y: number; w: number; h: number }[] {
+  const left = f.x + 12, right = f.x + f.w - 12 - w;
+  return [{ x: left, y: f.y - h / 2 }, { x: right, y: f.y - h / 2 }, { x: left, y: f.y + f.h - h / 2 }, { x: right, y: f.y + f.h - h / 2 }]
+    .filter((_, i) => i % 2 === 0 || right > left).map(r => ({ ...r, w, h }));
+}
+/** A wait's line as a control line: solid, then dashed over its last `tail` px (3 on, 3 off) up to the destination; the whole
+ * line dashed when it is shorter than twice the tail. */
+export function waitDash(len: number, tail = 26, reverse = false): string {
+  if (!(len > 0)) return '';
+  if (len < tail * 2) return '4 3';
+  const dashes: string[] = []; for (let left = tail; left > 0; left -= 6) dashes.push('3', '3');
+  // A line drawn from the destination to the source dashes its start instead (its last gap is 0 so the pattern sums to len).
+  return (reverse ? [...dashes, String(r1(len - tail)), '0'] : [String(r1(len - tail)), ...dashes]).join(' ');
+}
+
+/* ---------- 조건 선택 (spec §7: 그 조건일 때의 설계 경로, 관측 결과와 구별) ---------- */
+/** The conditions a designed path offers as chips: each branch link's condition as written, each once, in link order. An
+ * observed run offers none (it went one way; choosing a condition would read as a result it did not show): note says so. A tour
+ * offers none. */
+export function conditionChoice(u: ScenarioUnderstanding): { offer: boolean; conditions: string[]; note: string | null } {
+  const conditions = [...new Set(u.links.filter(l => l.kind === 'branch').map(l => said(l.condition)).filter((c): c is string => !!c))];
+  const kind = u.scenario?.kind ?? 'designed';
+  if (!conditions.length) return { offer: false, conditions, note: null };
+  if (kind === 'observed') return { offer: false, conditions, note: '관측 실행 · 조건 선택 없음' };
+  if (kind === 'tour') return { offer: false, conditions, note: null };
+  return { offer: true, conditions, note: null };
+}
+/** The design path under one condition: the links whose condition is that one, plus every link that carries none (a next, a
+ * parallel, a loop, a wait, a branch with no condition), followed from the path's start; a branch whose condition is another
+ * one (or unknown) is off, and so is what follows only from it. visits: the visits reached along the lit links (and the start). */
+export function conditionPath(u: ScenarioUnderstanding, condition: string): { links: Set<string>; visits: Set<string>; off: Set<string> } {
+  const allowed = (l: ScenarioUnderstanding['links'][number]) => l.kind !== 'branch' || l.condition === null || said(l.condition) === condition;
+  const into = new Set(u.links.map(l => l.to));
+  const starts = u.visits.filter(v => !into.has(v.id)).map(v => v.id);
+  const visits = new Set(starts.length ? starts : u.visits.slice(0, 1).map(v => v.id)), links = new Set<string>();
+  for (let grew = true; grew;) {
+    grew = false;
+    for (const l of u.links) if (!links.has(l.id) && allowed(l) && visits.has(l.from)) { links.add(l.id); visits.add(l.to); grew = true; }
+  }
+  return { links, visits, off: new Set(u.links.filter(l => !links.has(l.id)).map(l => l.id)) };
+}
+
+/* ---------- run gates on the path (spec §5.2) ---------- */
+/** How many run gates each visit's part carries (gates: by area id), for the badge's 관문 mark; visits with none are left out. */
+export function gateVisits(u: ScenarioUnderstanding, gates: (areaId: string) => number): Map<string, number> {
+  const out = new Map<string, number>();
+  for (const v of u.visits) { const n = v.partOnMap ? gates(v.areaId) : 0; if (n > 0) out.set(v.id, n); }
+  return out;
+}

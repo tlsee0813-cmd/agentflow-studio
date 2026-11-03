@@ -114,3 +114,24 @@ test('sign chips: on steps by index, on ports per side, on ledger cells; heads f
   assert.equal(bare.steps.size + bare.ports.in.size + bare.ports.out.size + bare.cells.size, 0);
   assert.deepEqual([bare.boundary.length, bare.project.length, bare.unplaced.length], [2, 1, 7]);
 });
+/* ---------- cycle 6: a run gate's decision step and its exits (spec 5.2) ---------- */
+import { decisionStep, decisionExits, EXIT_BLANK } from '../dist/public/client/steps-view.js';
+
+test('decisionStep: the step the gate\'s words name (an anchor first, then the longest name its quote or text holds), else the first, said so; exits only as written', () => {
+  const steps = [{ name: '행 읽기', does: 'review 행을 읽는다', uses: [] },
+    { name: '판단', does: 'rung을 고른다', uses: ['engine/rung.py', '참이면 주문 요청', '거짓이면: NONE_SIDE 쉼'] },
+    { name: '판단 기록', does: '참이면 policy 행, 거짓이면 쓰지 않음', uses: [] }];
+  const named = decisionStep({ text: 'CALM이면 진입', quote: '실행 관문: 판단 단계에서 CALM이면 진입' }, steps);
+  assert.deepEqual(named, { index: 1, name: '판단', matched: 'name', exits: [{ when: '참이면', text: '주문 요청' }, { when: '거짓이면', text: 'NONE_SIDE 쉼' }] });
+  // The longest name the words hold wins ('판단 기록' over '판단'); its exits read from what it does, split at commas.
+  const longer = decisionStep({ text: '판단 기록에서 거절', quote: '판단 기록에서 거절한다' }, steps);
+  assert.deepEqual([longer.index, longer.exits.map(e => `${e.when} ${e.text}`)], [2, ['참이면 policy 행', '거짓이면 쓰지 않음']]);
+  // An anchor naming a step exactly comes first, whatever the words.
+  assert.equal(decisionStep({ text: '판단 기록', quote: '판단 기록', anchors: [{ text: '행 읽기' }] }, steps).index, 0);
+  // Named nowhere: the first step, said so, with its exits as written (none: the view shows 출구 미상).
+  const first = decisionStep({ text: '모의 체결 7일', quote: '모의 체결 7일이 검증되면' }, steps);
+  assert.deepEqual([first.index, first.matched, first.exits], [0, 'first', []]);
+  assert.equal(decisionStep({ text: 'x', quote: 'x' }, []), null);
+  assert.equal(EXIT_BLANK, '출구 미상');
+  assert.deepEqual(decisionExits({ does: null, uses: ['참이면', '참이면 진입', '참이면 진입'] }), [{ when: '참이면', text: '진입' }]);
+});

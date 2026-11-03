@@ -211,3 +211,24 @@ test('a rule row: scope words, anchors with 명시/해석 and their quotes or �
   const old = ruleView(C({ topic: 'rule' }), places, '정책 엔진');
   assert.deepEqual([old.legacy, old.scope.text, old.anchorsBlank, old.enforceBlank, old.design, old.check], [true, '범위 · ‘정책 엔진’ 전체 · 세부 접점 미정', '적용 위치 미해결', null, '설계 대응 미상', '확인 검사 미상']);
 });
+/* ---------- cycle 6: the map title's 전체 규칙 N · 배치 미정 K and its list (spec 5.1) ---------- */
+import { projectRuleList, projectRuleEntry, RULE_ROW_LABEL } from '../dist/public/client/signs-view.js';
+
+test('projectRuleList: project rules and unplaced rules counted across parts, each part\'s head and unplaced rules listed by part in the map\'s order', () => {
+  const places = { steps: ['판단'], inputs: ['주문 요청'], outputs: [], fields: ['valid_until'] };
+  const R = x => ({ scope: null, scopeName: null, anchors: [], enforcedBy: [], ...x });
+  const parts = [
+    { id: 'A', name: '엔진', places, rules: [R({ text: 'p', scope: 'project' }), R({ text: 's', scope: 'step', scopeName: '판단' }), R({ text: 'w', scope: 'part' }), R({ text: 'n', scope: 'step', scopeName: '없는 단계' })] },
+    { id: 'B', name: '보관소', places, rules: [R({ text: 'f', scope: 'field', scopeName: 'valid_until' })] },
+    { id: 'C', name: '집행기', places, rules: [R({ text: 'a', scope: 'part', anchors: [{ kind: 'inferred', text: '주문 요청', quote: { record: 'r', quote: 'q' } }] }), { text: 'legacy' }] }];
+  const l = projectRuleList(parts);
+  // Unplaced: the part rule with no place, the step named nowhere, and the earlier reading's part-wide rule; the anchored part rule is placed.
+  assert.deepEqual([l.project, l.unplaced], [1, 3]);
+  assert.deepEqual(l.groups.map(g => [g.part, g.name, g.rows.map(r => `${r.claim.text}:${r.kind}`)]), [
+    ['A', '엔진', ['p:project', 'w:part', 'n:unplaced']],
+    ['C', '집행기', ['a:part', 'legacy:part']]]);
+  assert.equal(projectRuleEntry(l), '전체 규칙 1 · 배치 미정 3');
+  assert.equal(projectRuleEntry({ project: 2, unplaced: 0 }), '전체 규칙 2');
+  assert.deepEqual(RULE_ROW_LABEL, { project: '프로젝트 전체', part: '부분 전체', unplaced: '배치 미정' });
+  assert.deepEqual(projectRuleList([]), { project: 0, unplaced: 0, groups: [] });
+});

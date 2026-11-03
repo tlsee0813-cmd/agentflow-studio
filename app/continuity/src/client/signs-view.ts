@@ -317,3 +317,29 @@ export function failureBlanks(type: PartType | null | undefined, texts: readonly
   const failure = !said.some(t => FAILURE.test(t)), recovery = !said.some(t => RECOVERY.test(t));
   return failure || recovery ? { at, failure, recovery } : null;
 }
+
+/* ---------- the map title's '전체 규칙 N · 배치 미정 K' (spec 5.1: 지도 안 프로젝트 머리의 전체 규칙 · 고정된 배치 미정 입구) ----------
+ * N counts the project rules (scope project) of every part, K the rules of every part that stand at no precise place (unplaced,
+ * as each card's own count). The list it opens holds, part by part in the map's order, each part's rules whose sign is a head
+ * (project, part-wide, an earlier reading's part-wide reading) or unplaced; a rule placed at a step, port or field is read
+ * there. Each row names its kind; nothing is regrouped across parts. */
+export type RuleRowKind = 'project' | 'part' | 'unplaced';
+export const RULE_ROW_LABEL: Record<RuleRowKind, string> = { project: '프로젝트 전체', part: '부분 전체', unplaced: '배치 미정' };
+export interface ProjectRuleGroup<T> { part: string; name: string; rows: { claim: T; kind: RuleRowKind }[] }
+export function projectRuleList<T extends RuleClaim>(parts: readonly { id: string; name: string; rules: readonly T[]; places: PartPlaces }[]): { project: number; unplaced: number; groups: ProjectRuleGroup<T>[] } {
+  let project = 0, unplaced = 0; const groups: ProjectRuleGroup<T>[] = [];
+  for (const p of parts) {
+    const rows: { claim: T; kind: RuleRowKind }[] = [];
+    for (const c of p.rules) {
+      const pl = rulePlacement(c, p.places);
+      if (pl.head === 'project') project++;
+      if (pl.unplaced) unplaced++;
+      const kind: RuleRowKind | null = pl.head === 'project' ? 'project' : pl.head === 'boundary' ? 'part' : pl.unplaced ? 'unplaced' : null;
+      if (kind) rows.push({ claim: c, kind });
+    }
+    if (rows.length) groups.push({ part: p.id, name: p.name, rows });
+  }
+  return { project, unplaced, groups };
+}
+/** The title entry's words: '전체 규칙 N · 배치 미정 K' (K only when there is one). */
+export const projectRuleEntry = (n: { project: number; unplaced: number }): string => `전체 규칙 ${n.project}${n.unplaced ? ` · 배치 미정 ${n.unplaced}` : ''}`;

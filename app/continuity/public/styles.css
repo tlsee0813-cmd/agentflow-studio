@@ -2242,3 +2242,59 @@ button:disabled { opacity: .5; cursor: default; }
 .dispute-form { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 2px; }
 .dispute-form input { flex: 1 1 160px; min-width: 0; height: 26px; padding: 0 8px; border: 1px solid var(--line); border-radius: var(--r-sm); font-size: 12px; }
 .dispute-form .link-button { font-size: 12px; }
+
+/* ---------- cycle 6: the grammar drawn on the path, 조건 선택, run gates on the path, the title's 전체 규칙 ---------- */
+/* Marks on the path's own lines, in the one accent: a branch's diamond at its exit, a parallel link's double bar, a loop's thin
+ * frame, a wait's dashed end (inline dasharray) and open V head. Labels as the line labels (scaled by --inv), hover for the rest. */
+.sc-marks .sc-mark { pointer-events: none; }
+.sc-marks .sc-diamond { fill: var(--surface); stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; pointer-events: visiblePainted; cursor: help; }
+.sc-marks .sc-bar { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; }
+.sc-marks .sc-loop-frame { fill: none; stroke: var(--accent); stroke-width: 1.25; stroke-opacity: .85; }
+.sc-marks .sc-hit { fill: none; stroke: transparent; stroke-width: 10; pointer-events: stroke; cursor: help; }
+.sc-marks .sc-mark.off { opacity: .35; }
+.sc-mark-labels { position: absolute; left: 0; top: 0; pointer-events: none; }
+.sc-mark-label { position: absolute; z-index: 2; height: 16px; max-width: 150px; padding: 0 5px; border-radius: 4px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--accent-line); font-size: 11px; line-height: 16px; font-weight: var(--fw-name); color: var(--accent-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: auto; cursor: help; transform: scale(var(--inv, 1)); transform-origin: 0 0; }
+.sc-mark-label.blank { color: var(--text-3); font-weight: 500; box-shadow: inset 0 0 0 1px var(--line); }
+.sc-mark-label.off { opacity: .4; }
+.edge.sc-path.sc-cond-off:not(.on) .edge-line { stroke: var(--accent-line); }
+.sc-v.sc-off { opacity: .45; }
+.sc-badge.sc-off { opacity: .55; }
+/* A run gate on the path: the card's 관문 mark, on the visit's badge (opens the decision step in the detail view). */
+.sc-gate { margin-left: 4px; height: 15px; padding: 0 4px 0 3px; border: 1px solid var(--line); border-left: 3px solid var(--text-3); border-radius: 0 2px 2px 0; background: var(--surface); color: var(--text-2); font: inherit; font-size: 10px; line-height: 13px; cursor: pointer; }
+.sc-gate:hover { color: var(--text); border-color: var(--line-strong); }
+.sc-gate:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 1px; }
+/* 조건 선택: the design path under one condition (not an observed result). */
+.sc-conds { flex: 1 0 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding-left: 52px; }
+.sc-conds-label { font-size: 12px; line-height: 18px; color: var(--text-4); margin-right: 2px; }
+.sc-cond { height: 22px; max-width: 220px; padding: 0 8px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); font-size: 12px; line-height: 20px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.sc-cond:hover { border-color: var(--accent-line); color: var(--text); }
+.sc-cond.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-strong); }
+.sc-conds-none { flex: 1 0 100%; padding-left: 52px; }
+/* The decision step of a run gate in the detail view: a diamond by its name, the gate's words and its exits under it. */
+.dv-diamond { flex: none; align-self: center; width: 8px; height: 8px; margin-left: 4px; border: 1.5px solid var(--accent); background: var(--surface); transform: rotate(45deg); }
+.dv-step.decision { border-color: var(--accent-line); }
+.dv-gate { margin: 4px 0 0 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; font-size: 11.5px; line-height: 16px; }
+.dv-gate-chip { display: inline-flex; align-items: baseline; gap: 4px; max-width: 100%; padding: 0 6px 0 4px; border: 1px solid var(--line); border-left: 3px solid var(--text-3); border-radius: 0 3px 3px 0; background: var(--surface); color: var(--text-2); min-width: 0; }
+.dv-gate-k { flex: none; font-weight: var(--fw-name); color: var(--text-2); }
+.dv-gate-t { min-width: 0; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow-wrap: anywhere; }
+.dv-gate-guess { flex: none; color: var(--text-3); }
+.dv-exits { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.dv-exit { padding: 0 6px; border: 1px solid var(--accent-line); border-radius: 8px; color: var(--accent-strong); background: var(--surface); white-space: nowrap; }
+.dv-exit.blank { border-style: dashed; border-color: var(--line); color: var(--text-3); }
+/* The title's 전체 규칙 N · 배치 미정 K and the list it opens (by part). */
+.map-flow + .map-rules { margin-top: 2px; padding-top: 2px; border-top: 0; }
+.map-rules .rules-entry .entry-unplaced { color: var(--text-3); }
+.rules-list { flex: 1 0 100%; display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; padding: 4px 0 4px 52px; }
+.rules-head { margin: 0; display: flex; align-items: baseline; gap: 6px; font-size: 12px; }
+.rules-head .rules-part { font-weight: var(--fw-name); color: var(--text-2); }
+.rules-head small { color: var(--text-4); font-variant-numeric: tabular-nums; }
+.rules-rows { margin: 2px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; }
+.rules-row { display: flex; align-items: baseline; gap: 8px; width: 100%; padding: 2px 6px; border: 0; border-radius: 4px; background: none; text-align: left; font-size: 12.5px; line-height: 18px; color: var(--text-2); cursor: pointer; }
+.rules-row:hover { background: var(--chip); color: var(--text); }
+.rules-kind { flex: none; font-size: 11px; color: var(--text-4); }
+.rules-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The full reading in cycle 5's order (원문 → 이유 → 이력 → 출처 묶음 → 어디에). */
+.panel-body > :is(.lens-origin, .lens-why):first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.panel-body > :is(.lens-origin, .lens-why, .lens-history, .lens-sources, .lens-where) { margin-top: var(--s-4); }
+.lens-why .sec-related { margin: 0; padding: 0; border: 0; }
+.sheet-changes .changes { margin: 2px 0 0; }

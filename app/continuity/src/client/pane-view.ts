@@ -190,3 +190,17 @@ export function withDisputes(text: string, section: readonly string[]): string {
   if (end < 0) return [...lines, '', ...section].join('\n');
   return [...lines.slice(0, end), ...section, ...lines.slice(end)].join('\n');
 }
+
+/* ---------- one order for the lens and the full reading (cycle 5, PART_READING 9절) ---------- */
+/** The pane's sections in reading order: 원문 → 이유 → 이력 → 출처 묶음 → 어디에. The lens and the full reading (전체 읽기) both lay
+ * their sections out by this, so the two never drift apart. */
+export type PaneSection = 'origin' | 'why' | 'history' | 'sources' | 'where';
+export const PANE_ORDER: readonly PaneSection[] = ['origin', 'why', 'history', 'sources', 'where'];
+export const PANE_TITLE: Record<PaneSection, string> = { origin: '원문', why: '이유', history: '이력', sources: '출처 묶음', where: '어디에' };
+/** The given sections in PANE_ORDER, those absent (null) left out. */
+export function paneSections<T>(by: Partial<Record<PaneSection, T | null | undefined>>): T[] {
+  return PANE_ORDER.flatMap(k => { const v = by[k]; return v === null || v === undefined ? [] : [v]; });
+}
+/** 구조 (안의 단계 · 반복 · 유지 상태) under 이유 is folded: open only as the person left it for this part, or while one of its
+ * steps is picked (in the detail view or the pane). */
+export const structureOpen = (remembered: boolean, stepPicked: boolean): boolean => remembered || stepPicked;
