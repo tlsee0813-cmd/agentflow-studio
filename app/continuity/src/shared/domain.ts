@@ -611,7 +611,8 @@ export function pasteRecord(p: Project, value: string, context: string|null): {p
  * declaration is that record again (nothing is added); anything else, a pasted record of the same bytes included, is a new record
  * with its own id. Nothing existing is retagged, edited or copied, and no reading is moved onto it. */
 /** Whether a map reading has read (some of) this record: its quotes rest on it, so it cannot be taken out again. */
-export function recordReadIntoMap(p: Project, id: string): boolean { return p.readings.some(r=>isMapReading(r)&&r.records.some(x=>x.id===id)); }
+// A scenario reading (scenario-reading.1) rests on its record too.
+export function recordReadIntoMap(p: Project, id: string): boolean { return p.readings.some(r=>isMapReading(r)&&r.records.some(x=>x.id===id)||r.version==='scenario-reading.1'&&r.record===id); }
 /** Takes a pasted or provided record out again, only while no map reading has read it (RECORD_READ otherwise): nothing of the
  * map rests on it yet, so nothing else changes. The record is gone from this project; a backup made before still has it. */
 export function removePastedRecord(p: Project, id: string): Project {

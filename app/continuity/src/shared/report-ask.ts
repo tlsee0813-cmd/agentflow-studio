@@ -178,6 +178,30 @@ const one = (s: string, n: number) => { const t = s.replace(/\s+/g, ' ').trim();
  * one line per item, P and R first so a cap drops the finer items; a 대장 판본 line names the latest reading. The ids live only
  * in this text (P01 is the first part listed, not a stored id); the app id beside each part is the stable one. */
 export function scenarioLedger(view: StudioView, readings: readonly ReadingEntry[], max = LEDGER_MAX_CHARS): string {
+  const l = buildLedger(view, readings, max);
+  return [...l.head, ...l.items.slice(0, l.items.length - l.cut).map(x => x.line), ...(l.cut ? [`…대장 ${l.cut}개 생략`] : [])].join('\n');
+}
+/** One ledger item as the scenario request lists it: its ledger id (P01, R03, …) and its line. */
+export interface LedgerItem { id: string; line: string }
+/** The structured ID ledger the scenario request is built from (and the scenario record is read against): every item with the
+ * app's own target behind its ledger id, and which ids the text actually showed (an item past the cap was never sent, so a
+ * record that cites it cites nothing it was given). Names are kept whole here; the text shortens them. */
+export interface ScenarioLedger {
+  /** The newest map reading's id (the 대장 판본), null when there is none; versionLine is how the text says it. */
+  version: string | null; versionLine: string;
+  parts: { id: string; areaId: string; name: string; parent: string | null }[];
+  relations: { id: string; relationId: string; from: string; to: string; payload: string | null }[];
+  /** A store part (store = its area id) or a handed-over name (relations: the R ids that hand it over). */
+  artifacts: { id: string; name: string; store: string | null; relations: string[] }[];
+  fields: { id: string; artifact: string; name: string }[];
+  ports: { id: string; areaId: string; direction: 'in' | 'out'; name: string }[];
+  steps: { id: string; areaId: string; name: string; does: string | null }[];
+  rules: { id: string; areaId: string; text: string }[];
+  head: string[]; items: LedgerItem[];
+  /** Items left off the text by the cap (the last ones), and the ids the text did list. */
+  cut: number; shown: string[];
+}
+export function buildLedger(view: StudioView, readings: readonly ReadingEntry[], max = LEDGER_MAX_CHARS): ScenarioLedger {
   const maps = [...readings].filter(isMapReading), last = maps.at(-1) ?? null;
   const pad = (n: number) => String(n).padStart(2, '0');
   const pid = new Map(view.parts.map((p, i) => [p.id, `P${pad(i + 1)}`]));
@@ -185,36 +209,38 @@ export function scenarioLedger(view: StudioView, readings: readonly ReadingEntry
   // What each relation hands over: the newest reading that names it, else the relation's own note.
   const said = new Map<string, string>();
   for (const r of maps) for (const x of r.relations) if (x.payload) said.set(x.relationId, x.payload);
-  const items: string[] = [];
-  view.parts.forEach(p => items.push(`${pid.get(p.id)} ${one(p.name, 60)} (${p.id})${p.parentId && pid.has(p.parentId) ? ` · ${pid.get(p.parentId)} 안` : ''}`));
+  const l: ScenarioLedger = { version: last?.id ?? null, versionLine: last ? `${last.id} · ${last.at}` : '지도 읽기 없음', parts: [], relations: [], artifacts: [], fields: [], ports: [], steps: [], rules: [], head: [], items: [], cut: 0, shown: [] };
+  const items = l.items, push = (id: string, line: string) => items.push({ id, line });
+  view.parts.forEach(p => { const id = pid.get(p.id)!, parent = p.parentId && pid.has(p.parentId) ? pid.get(p.parentId)! : null;
+    l.parts.push({ id, areaId: p.id, name: p.name, parent }); push(id, `${id} ${one(p.name, 60)} (${p.id})${parent ? ` · ${parent} 안` : ''}`); });
   const pay = new Map<string, string[]>();
   view.relations.forEach((r, i) => {
     const named = said.get(r.id) ?? null, what = named ?? (r.note.trim() || null), rid = `R${pad(i + 1)}`;
-    items.push(`${rid} ${pn(r.from)} → ${pn(r.to)}: ${what ? one(what, 120) : '넘기는 것 미기재'}`);
+    l.relations.push({ id: rid, relationId: r.id, from: r.from, to: r.to, payload: what });
+    push(rid, `${rid} ${pn(r.from)} → ${pn(r.to)}: ${what ? one(what, 120) : '넘기는 것 미기재'}`);
     // A handed-over name is what a reading named as the payload; a relation's own note is a description, not a name.
     if (named) { const k = one(named, 80); pay.set(k, [...(pay.get(k) ?? []), rid]); }
   });
   const stores = view.parts.filter(p => p.reading?.typeRead?.type === 'store');
-  let a = 0; const aid = () => `A${pad(++a)}`, fields: string[] = [];
-  for (const p of stores) { const id = aid(); items.push(`${id} ${one(p.name, 60)} (${pid.get(p.id)} 저장소)`); for (const f of p.reading!.fields) fields.push(`${id} ${one(f, 40)}`); }
-  for (const [k, rids] of pay) items.push(`${aid()} ${k} (${rids.join('·')})`);
-  fields.forEach((f, i) => items.push(`F${pad(i + 1)} ${f}`));
+  let a = 0; const aid = () => `A${pad(++a)}`, fields: [string, string][] = [];
+  for (const p of stores) { const id = aid(); l.artifacts.push({ id, name: p.name, store: p.id, relations: [] }); push(id, `${id} ${one(p.name, 60)} (${pid.get(p.id)} 저장소)`); for (const f of p.reading!.fields) fields.push([id, f]); }
+  for (const [k, rids] of pay) { const id = aid(); l.artifacts.push({ id, name: k, store: null, relations: rids }); push(id, `${id} ${k} (${rids.join('·')})`); }
+  fields.forEach(([art, f], i) => { const id = `F${pad(i + 1)}`; l.fields.push({ id, artifact: art, name: f }); push(id, `${id} ${art} ${one(f, 40)}`); });
   let o = 0, s = 0, q = 0;
   for (const p of view.parts) { const u = p.reading; if (!u) continue;
-    for (const x of u.inputs) items.push(`O${pad(++o)} ${pid.get(p.id)} 받음: ${one(x, 60)}`);
-    for (const x of u.outputs) items.push(`O${pad(++o)} ${pid.get(p.id)} 냄: ${one(x, 60)}`); }
-  for (const p of view.parts) for (const x of p.reading?.steps ?? []) items.push(`S${pad(++s)} ${pid.get(p.id)} ${one(x.name, 40)}${x.does ? `: ${one(x.does, 80)}` : ''}`);
-  for (const p of view.parts) for (const c of p.reading?.claims ?? []) if (claimTopic(c) === 'rule') items.push(`Q${pad(++q)} ${pid.get(p.id)}: ${one(c.text, 140)}`);
-  const head = [`[ID 대장] 대장 판본: ${last ? `${last.id} · ${last.at}` : '지도 읽기 없음'}`,
+    for (const x of u.inputs) { const id = `O${pad(++o)}`; l.ports.push({ id, areaId: p.id, direction: 'in', name: x }); push(id, `${id} ${pid.get(p.id)} 받음: ${one(x, 60)}`); }
+    for (const x of u.outputs) { const id = `O${pad(++o)}`; l.ports.push({ id, areaId: p.id, direction: 'out', name: x }); push(id, `${id} ${pid.get(p.id)} 냄: ${one(x, 60)}`); } }
+  for (const p of view.parts) for (const x of p.reading?.steps ?? []) { const id = `S${pad(++s)}`; l.steps.push({ id, areaId: p.id, name: x.name, does: x.does }); push(id, `${id} ${pid.get(p.id)} ${one(x.name, 40)}${x.does ? `: ${one(x.does, 80)}` : ''}`); }
+  for (const p of view.parts) for (const c of p.reading?.claims ?? []) if (claimTopic(c) === 'rule') { const id = `Q${pad(++q)}`; l.rules.push({ id, areaId: p.id, text: c.text }); push(id, `${id} ${pid.get(p.id)}: ${one(c.text, 140)}`); }
+  l.head = [`[ID 대장] 대장 판본: ${l.versionLine}`,
     'P 부분 (앱 id) · R 연결 보내는 → 받는: 넘기는 것 · A 저장소·넘기는 것 (연결) · F 저장소 행 필드 · O 받음/냄 · S 단계 · Q 규칙'];
-  const out = [...head]; let len = head.join('\n').length, cut = 0;
+  let len = l.head.join('\n').length;
   for (let i = 0; i < items.length; i++) {
     const room = max - len - 1 - (i < items.length - 1 ? 24 : 0);
-    if (items[i]!.length > room) { cut = items.length - i; break; }
-    out.push(items[i]!); len += items[i]!.length + 1;
+    if (items[i]!.line.length > room) { l.cut = items.length - i; break; }
+    l.shown.push(items[i]!.id); len += items[i]!.line.length + 1;
   }
-  if (cut) out.push(`…대장 ${cut}개 생략`);
-  return out.join('\n');
+  return l;
 }
 /** The scenario request with the current map's ledger attached below it. */
 export function scenarioAskWithLedger(view: StudioView, readings: readonly ReadingEntry[]): string {

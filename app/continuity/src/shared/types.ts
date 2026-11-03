@@ -334,8 +334,63 @@ export interface MapReading {
 /** The person's own correction of a part's description as read (never Area.note, never a return.2 description): it names the
  * reading whose description it corrects. It holds that description only; later claims of later readings still come in. */
 export interface ReadingCorrection { version: 'map-correction.1'; id: string; at: string; areaId: string; text: string; corrects: string | null }
-export type ReadingEntry = MapReading | ReadingCorrection | RequestCorrection | ReplaceCorrection;
+/* ---------- The scenario record (시나리오 기록 v2, spec §8.2–8.3) as the app read it, without any AI: scenario-reading.1. ---------- */
+/** A cell as the record says it: its own words, '모름' (or an empty cell) as 'unknown', '없음' as null. */
+export type ScenarioSaid = string | 'unknown' | null;
+export type ScenarioKind = 'designed' | 'observed' | 'tour';
+export const SCENARIO_KINDS: readonly ScenarioKind[] = ['designed', 'observed', 'tour'];
+export type ScenarioLinkKind = 'next' | 'branch' | 'parallel' | 'loop' | 'wait';
+export const SCENARIO_LINK_KINDS: readonly ScenarioLinkKind[] = ['next', 'branch', 'parallel', 'loop', 'wait'];
+/** complete: no visit or link set aside and the last confirmed point is the visit the end reaches; partial: something set aside
+ * or the path stops short of the end; rejected: the scenario's identity failed or no visit holds (no path is drawn). */
+export type ScenarioPathStatus = 'complete' | 'partial' | 'rejected';
+export const SCENARIO_PATH_STATUSES: readonly ScenarioPathStatus[] = ['complete', 'partial', 'rejected'];
+/** Ledger references as resolved when the record was read: the ledger id the record wrote (P01, S03, …; it lives only in the
+ * request text) and the app's own target behind it at that time (the area id, the step's or port's name, the relation id). */
+export interface ScenarioPartRef { ref: string; areaId: string; name: string }
+export interface ScenarioStepRef { ref: string; name: string }
+export interface ScenarioPortRef { ref: string; name: string; direction: 'in' | 'out' }
+export interface ScenarioArtifactRef { ref: string; name: string }
+export interface ScenarioRuleRef { ref: string; areaId: string; text: string }
+export interface ScenarioRelationRef { ref: string; relationId: string; along: boolean }
+/** '보고' or '추정' written where an E id belongs (common rule 13). */
+export type ScenarioEvidenceWord = 'report' | 'guess';
+export interface ScenarioIdentity { id: string; name: ScenarioSaid; requestRef: ScenarioSaid; ledgerVersion: ScenarioSaid; designVersion: ScenarioSaid;
+  basisAt: ScenarioSaid; kind: ScenarioKind | null; runRef: ScenarioSaid; reason: ScenarioSaid; evidence: string[]; evidenceWord: ScenarioEvidenceWord | null }
+export interface ScenarioTarget { part: ScenarioPartRef; port: ScenarioPortRef | null; step: ScenarioStepRef | null }
+export interface ScenarioStart { id: string; trigger: ScenarioSaid; target: ScenarioTarget | 'unknown' | null; condition: ScenarioSaid; rules: ScenarioRuleRef[];
+  prior: ScenarioSaid; independent: ScenarioSaid; evidence: string[]; evidenceWord: ScenarioEvidenceWord | null }
+export interface ScenarioVisit { id: string; part: ScenarioPartRef; step: ScenarioStepRef | 'unknown' | null; port: ScenarioPortRef | 'unknown' | null;
+  in: ScenarioArtifactRef[] | 'unknown'; out: ScenarioArtifactRef[] | 'unknown'; event: ScenarioSaid; evidence: string[]; evidenceWord: ScenarioEvidenceWord | null }
+/** relation null: a tour's reading order (투어 읽기 순서), never an execution line. along: the relation runs from → to as the link does. */
+export interface ScenarioLink { id: string; from: string; to: string; relation: ScenarioRelationRef | null; kind: ScenarioLinkKind; condition: ScenarioSaid;
+  rules: ScenarioRuleRef[]; policy: ScenarioSaid; evidence: string[]; evidenceWord: ScenarioEvidenceWord | null }
+/** reached and lastConfirmedVisit: a visit of this record, or not known. lastConfirmed is the cell as written. */
+export interface ScenarioEnd { id: string; reached: string | 'unknown' | null; produced: ScenarioSaid; desired: ScenarioSaid; exits: string[] | 'unknown';
+  lastConfirmed: ScenarioSaid; lastConfirmedVisit: string | null; gap: ScenarioSaid; evidence: string[]; evidenceWord: ScenarioEvidenceWord | null }
+export type ScenarioMaterial = 'file' | 'run' | 'report';
+export type ScenarioStance = 'stated' | 'report' | 'guess';
+export interface ScenarioEvidence { id: string; supports: ScenarioSaid; material: ScenarioMaterial; source: ScenarioSaid; versionOrRun: ScenarioSaid;
+  /** The exact quote as written (≤240), null when the record says the original was not provided. */
+  quote: string | null; stance: ScenarioStance }
+export interface ScenarioPortMapRow { id: string; relation: ScenarioRelationRef; areaId: string; port: ScenarioPortRef; step: ScenarioStepRef; direction: 'in' | 'out'; evidence: string[] }
+export type ScenarioGapReason = 'unmentioned' | 'no-material' | 'not-in-ledger' | 'conflict' | 'cap';
+export const SCENARIO_GAP_REASONS: readonly ScenarioGapReason[] = ['unmentioned', 'no-material', 'not-in-ledger', 'conflict', 'cap'];
+/** refs: the ledger and visit ids of the related cell that resolved; related: that cell as written. */
+export interface ScenarioGap { id: string; refs: string[]; related: ScenarioSaid; what: ScenarioSaid; source: ScenarioSaid; reason: ScenarioGapReason; needed: ScenarioSaid }
+/** When the path is rejected, the end's sentences that stand on their own (what the design produces, what is wanted, the exits). */
+export interface ScenarioStatement { kind: 'produced' | 'desired' | 'exit'; text: string; evidence: string[] }
+export interface ScenarioRecord { scenario: ScenarioIdentity | null; start: ScenarioStart | null; visits: ScenarioVisit[]; links: ScenarioLink[]; end: ScenarioEnd | null;
+  evidence: ScenarioEvidence[]; portMaps: ScenarioPortMapRow[]; gaps: ScenarioGap[]; statements: ScenarioStatement[] }
+/** A row, a cell or a reference the app set aside (the record itself stays as pasted). path names the table row as written
+ * (visits[2] is the third row of the visit table), never a renumbered position. */
+export interface ScenarioDiagnostic { path: string; rule: 'contract'; category: string; explanation: string }
+export interface ScenarioReading { version: 'scenario-reading.1'; id: string; at: string;
+  /** The pasted record read, and the ledger version (the map reading id) the record was read against (null: no map reading). */
+  record: string; ledgerVersion: string | null; pathStatus: ScenarioPathStatus; scenario: ScenarioRecord; diagnostics: ScenarioDiagnostic[] }
+export type ReadingEntry = MapReading | ReadingCorrection | RequestCorrection | ReplaceCorrection | ScenarioReading;
 export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3' || e.version === 'map-reading.4' || e.version === 'map-reading.5' || e.version === 'map-reading.6' || e.version === 'map-reading.7' || e.version === 'map-reading.8' || e.version === 'map-reading.9';
+export const isScenarioReading = (e: ReadingEntry): e is ScenarioReading => e.version === 'scenario-reading.1';
 export const READINGS_LIMIT = 500;
 export const PASTED_LIMIT = 500;
 export interface ContextBasis {

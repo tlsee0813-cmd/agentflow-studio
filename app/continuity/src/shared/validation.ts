@@ -1,5 +1,5 @@
 import { API_SCHEMA, SCHEMA, V5_SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Intent, type Background, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket, type Question, GUIDE_SCHEMA, type GuideRequest, type GuideReply, type GuideEnvelope, type GuideTicket, type UnderstandingInput } from './types.js';
-import {V6_SCHEMA,V7_SCHEMA,V8_SCHEMA,V9_SCHEMA,V10_SCHEMA,V11_SCHEMA,V12_SCHEMA,V13_SCHEMA,type ReadingEntry,type PastedRecord,READING_EXCLUSION_RULES,CLAIM_KINDS,CLAIM_TOPICS,EVIDENCE_GRADES,PART_STATES,PART_TYPES,CHANNELS,RELATION_MODES,READINGS_LIMIT,PASTED_TEXT_LIMIT,PASTED_LIMIT,type Area,type PlanStamp,type Point,type ManualPositions,type Backup} from './types.js';
+import {V6_SCHEMA,V7_SCHEMA,V8_SCHEMA,V9_SCHEMA,V10_SCHEMA,V11_SCHEMA,V12_SCHEMA,V13_SCHEMA,type ReadingEntry,type PastedRecord,READING_EXCLUSION_RULES,CLAIM_KINDS,CLAIM_TOPICS,EVIDENCE_GRADES,PART_STATES,PART_TYPES,CHANNELS,RELATION_MODES,SCENARIO_KINDS,SCENARIO_LINK_KINDS,SCENARIO_PATH_STATUSES,SCENARIO_GAP_REASONS,READINGS_LIMIT,PASTED_TEXT_LIMIT,PASTED_LIMIT,type Area,type PlanStamp,type Point,type ManualPositions,type Backup} from './types.js';
 import { validateFrozenRequest, validateStoredMatch, hasTarget, matchLedger, recordTextMap, type FrozenRequest, type StoredRequestMatch, type RecordText } from './request-return.js';
 import { ANCHOR_QUOTE_MAX, textDigest } from './evidence-span.js';
 import { validEvidence, recordIdentity } from './record-source.js';
@@ -360,6 +360,53 @@ function legacyPasted(v:unknown) {
   list(p.pasted,PASTED_LIMIT);const texts=new Set<string>();
   for(const r of p.pasted){obj(r,['id','text','at','context']);ensure(typeof r.text==='string'&&!texts.has(r.text));texts.add(r.text as string);}
 }
+/** scenario-reading.1, exactly: every key, every enumeration, every reference inside the record (a link's visits, the end's
+ * visits, each E id) and every part an area of the project. Relation ids may be gone (the person removed the line). Ledger ids
+ * (P01, S03, …) are kept as written; the app's target behind each is what holds. */
+export const SCENARIO_LIMITS={visits:16,links:20,rows:80,chars:12000,cell:600,quote:240,exits:8,diagnostics:400} as const;
+export function validateScenarioReading(r:unknown,areaIds:Set<string>,recordIds:Set<string>,mapIds:Set<string>):void {
+  obj(r,['version','id','at','record','ledgerVersion','pathStatus','scenario','diagnostics']);ensure(r.version==='scenario-reading.1');id(r.id);date(r.at);
+  ensure(typeof r.record==='string'&&recordIds.has(r.record));ensure(r.ledgerVersion===null||typeof r.ledgerVersion==='string'&&mapIds.has(r.ledgerVersion));
+  ensure(SCENARIO_PATH_STATUSES.includes(r.pathStatus as never));
+  const said=(v:unknown)=>{if(v!==null)text(v,SCENARIO_LIMITS.cell);};
+  const ref=(v:unknown,letter:string)=>ensure(typeof v==='string'&&new RegExp(`^${letter}\\d{2,3}$`).test(v));
+  const own=(v:unknown)=>{text(v,40);};
+  const name=(v:unknown)=>text(v,300);
+  const word=(v:unknown)=>ensure(v===null||v==='report'||v==='guess');
+  const evidenceIds=new Set<string>();
+  const refs=(v:unknown)=>{list(v,16);for(const e of v as unknown[])ensure(typeof e==='string'&&evidenceIds.has(e));ensure(new Set(v as unknown[]).size===(v as unknown[]).length);};
+  const part=(v:unknown)=>{obj(v,['ref','areaId','name']);ref(v.ref,'P');ensure(areaIds.has(v.areaId as string));name(v.name);};
+  const step=(v:unknown)=>{obj(v,['ref','name']);ref(v.ref,'S');name(v.name);};
+  const port=(v:unknown)=>{obj(v,['ref','name','direction']);ref(v.ref,'O');name(v.name);ensure(v.direction==='in'||v.direction==='out');};
+  const rule=(v:unknown)=>{obj(v,['ref','areaId','text']);ref(v.ref,'Q');ensure(areaIds.has(v.areaId as string));text(v.text,300);};
+  const relation=(v:unknown)=>{obj(v,['ref','relationId','along']);ref(v.ref,'R');id(v.relationId);ensure(typeof v.along==='boolean');};
+  const arts=(v:unknown)=>{if(v==='unknown')return;list(v,16);for(const a of v as unknown[]){obj(a,['ref','name']);ref(a.ref,'A');name(a.name);}};
+  const s=r.scenario;obj(s,['scenario','start','visits','links','end','evidence','portMaps','gaps','statements']);
+  list(s.evidence,SCENARIO_LIMITS.rows);for(const e of s.evidence){obj(e,['id','supports','material','source','versionOrRun','quote','stance']);ref(e.id,'E');ensure(!evidenceIds.has(e.id as string));evidenceIds.add(e.id as string);
+    said(e.supports);ensure(['file','run','report'].includes(e.material as string));said(e.source);said(e.versionOrRun);if(e.quote!==null)text(e.quote,SCENARIO_LIMITS.quote);ensure(['stated','report','guess'].includes(e.stance as string));}
+  const c=s.scenario;if(c!==null){obj(c,['id','name','requestRef','ledgerVersion','designVersion','basisAt','kind','runRef','reason','evidence','evidenceWord']);own(c.id);
+    for(const k of ['name','requestRef','ledgerVersion','designVersion','basisAt','runRef','reason'] as const)said(c[k]);ensure(c.kind===null||SCENARIO_KINDS.includes(c.kind as never));refs(c.evidence);word(c.evidenceWord);}
+  if(s.start!==null){const t=s.start;obj(t,['id','trigger','target','condition','rules','prior','independent','evidence','evidenceWord']);own(t.id);said(t.trigger);said(t.condition);said(t.prior);said(t.independent);refs(t.evidence);word(t.evidenceWord);
+    if(t.target!==null&&t.target!=='unknown'){obj(t.target,['part','port','step']);part(t.target.part);if(t.target.port!==null)port(t.target.port);if(t.target.step!==null)step(t.target.step);}
+    list(t.rules,8);for(const q of t.rules)rule(q);}
+  list(s.visits,SCENARIO_LIMITS.visits);const visits=new Set<string>();
+  for(const x of s.visits){obj(x,['id','part','step','port','in','out','event','evidence','evidenceWord']);ref(x.id,'V');ensure(!visits.has(x.id as string));visits.add(x.id as string);
+    part(x.part);if(x.step!==null&&x.step!=='unknown')step(x.step);if(x.port!==null&&x.port!=='unknown')port(x.port);arts(x.in);arts(x.out);said(x.event);refs(x.evidence);word(x.evidenceWord);}
+  list(s.links,SCENARIO_LIMITS.links);const links=new Set<string>();
+  for(const l of s.links){obj(l,['id','from','to','relation','kind','condition','rules','policy','evidence','evidenceWord']);ref(l.id,'L');ensure(!links.has(l.id as string));links.add(l.id as string);
+    ensure(visits.has(l.from as string)&&visits.has(l.to as string));if(l.relation!==null)relation(l.relation);ensure(SCENARIO_LINK_KINDS.includes(l.kind as never));
+    said(l.condition);said(l.policy);list(l.rules,8);for(const q of l.rules)rule(q);refs(l.evidence);word(l.evidenceWord);}
+  if(s.end!==null){const e=s.end;obj(e,['id','reached','produced','desired','exits','lastConfirmed','lastConfirmedVisit','gap','evidence','evidenceWord']);own(e.id);
+    ensure(e.reached===null||e.reached==='unknown'||visits.has(e.reached as string));ensure(e.lastConfirmedVisit===null||visits.has(e.lastConfirmedVisit as string));
+    said(e.produced);said(e.desired);said(e.lastConfirmed);said(e.gap);if(e.exits!=='unknown'){list(e.exits,SCENARIO_LIMITS.exits);for(const x of e.exits)text(x,SCENARIO_LIMITS.cell);}refs(e.evidence);word(e.evidenceWord);}
+  list(s.portMaps,SCENARIO_LIMITS.rows);for(const m of s.portMaps){obj(m,['id','relation','areaId','port','step','direction','evidence']);own(m.id);relation(m.relation);ensure(areaIds.has(m.areaId as string));port(m.port);step(m.step);ensure(m.direction==='in'||m.direction==='out');refs(m.evidence);}
+  list(s.gaps,SCENARIO_LIMITS.rows);for(const g of s.gaps){obj(g,['id','refs','related','what','source','reason','needed']);ref(g.id,'G');list(g.refs,16);for(const x of g.refs)ensure(typeof x==='string'&&/^[POSRAFQV]\d{2,3}$/.test(x));
+    said(g.related);said(g.what);said(g.source);said(g.needed);ensure(SCENARIO_GAP_REASONS.includes(g.reason as never));}
+  list(s.statements,2+SCENARIO_LIMITS.exits);for(const x of s.statements){obj(x,['kind','text','evidence']);ensure(['produced','desired','exit'].includes(x.kind as string));text(x.text,SCENARIO_LIMITS.cell);refs(x.evidence);}
+  // A rejected path keeps its end sentences apart; a path with no visit is never complete or partial; only a rejected one has statements.
+  ensure(r.pathStatus==='rejected'||(s.visits as unknown[]).length>0&&c!==null&&c.kind!==null);ensure(r.pathStatus==='rejected'||(s.statements as unknown[]).length===0);
+  list(r.diagnostics,SCENARIO_LIMITS.diagnostics);for(const d of r.diagnostics){obj(d,['path','rule','category','explanation']);text(d.path,160);ensure(d.rule==='contract');ensure(typeof d.category==='string'&&/^[a-z][a-z-]{0,39}$/.test(d.category));text(d.explanation,200);}
+}
 /** Map readings: every part a known area, every quote of a known record (a pasted record or a source), every claim a known
  * kind, and a claim replaced only by a later one of the same area. Relation ids may be gone (the person removed the line). */
 function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,projectId:string,materialIds:Set<string>) {
@@ -382,6 +429,10 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       // Whether the link it undoes holds where it stands is the ledger's (below).
       obj(r,['version','id','at','reading','index']);id(r.id);date(r.at);ensure(!entries.has(r.id as string));entries.add(r.id as string);integer(r.index);
       ensure(!!requestReadings.get(r.reading as string)?.matches[r.index as number]?.replaces);continue;
+    }
+    if(!!r&&typeof r==='object'&&(r as {version?:unknown}).version==='scenario-reading.1'){
+      // A scenario record as read: a pasted record of this project, read against a ledger of an earlier map reading (or none).
+      validateScenarioReading(r,areaIds,new Set([...texts.keys()]),new Set(seen.keys()));ensure(!entries.has((r as {id:string}).id));entries.add((r as {id:string}).id);continue;
     }
     if(!!r&&typeof r==='object'&&(r as {version?:unknown}).version==='map-correction.1'){
       obj(r,['version','id','at','areaId','text','corrects']);id(r.id);ensure(!entries.has(r.id as string));entries.add(r.id as string);date(r.at);
