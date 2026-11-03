@@ -23,11 +23,13 @@ const WITHDRAWN = /철회|폐기|채택하지 않|채택 안|취소했|거뒀|�
 const UNKNOWN = /\[모름\]|확인하지 못|확인되지 않|보지 못했|읽지 못했|모른다|알 수 없|확인 못/;
 const DEFECT = /결함|오류|실패|깨짐|잘못|버그|어긋|INVALID|거짓 실패|반쪽|끊김|지연 몰림/;
 const CHANGE = /정정|바뀌었|바꿨|변경됐|변경했|설치했|고쳤|삭제했|추가했|옮겼|제거했|교체했/;
-const PLAN = /계획|예정|할 것이다|하기로 했|다음 .*묶음|이후에|나중에|앞으로/;
+const PLAN = /계획|예정|할 것이다|하기로 했|다음 .*묶음|이후에|나중에|앞으로|미구현/;
+// A report that states a bound or a prohibition is a rule the part must keep, not its present state ("지출 상한은 … 이하").
+const RULE = /상한|하한|이하여야|이하이다|이하다|금지|허가|해야 한다|해야 하며|않는다|않아야|지켜|원칙|조건이다/;
 /** The topic of a claim: its own when it says one; else from its kind and its words. open: left to the person, read as unknown;
  * differs: the record and the person disagree, read as a problem; idea: a plan; want: a plan when it says so, else a rule; a
- * description is a withdrawal, a change or how it is built; a report or a check is an unknown, a withdrawal, a defect, a change
- * or the state. Words decide only where no topic was read. */
+ * description is a withdrawal, a change or how it is built; a report or a check is an unknown, a withdrawal, a defect, a change, a rule
+ * (a bound or a prohibition it states), a plan or the state. Words decide only where no topic was read. */
 export function claimTopic(c: Pick<ReadingClaim, 'kind' | 'text'> & { topic?: ClaimTopic | null }): ClaimTopic {
   if (c.topic) return c.topic;
   const t = c.text, kind: ClaimKind = c.kind;
@@ -35,12 +37,14 @@ export function claimTopic(c: Pick<ReadingClaim, 'kind' | 'text'> & { topic?: Cl
   if (kind === 'differs') return 'defect';
   if (kind === 'idea') return 'plan';
   if (kind === 'want') return PLAN.test(t) ? 'plan' : 'rule';
-  if (kind === 'describes') return WITHDRAWN.test(t) ? 'withdrawn' : CHANGE.test(t) ? 'change' : 'how';
+  if (kind === 'describes') return WITHDRAWN.test(t) ? 'withdrawn' : PLAN.test(t) ? 'plan' : CHANGE.test(t) ? 'change' : RULE.test(t) ? 'rule' : 'how';
   if (UNKNOWN.test(t)) return 'unknown';
   // A decision the record took back reads as a withdrawal even when it names an error ("측정 오류로 판명돼 … 채택하지 않았다").
   if (WITHDRAWN.test(t)) return 'withdrawn';
   if (DEFECT.test(t)) return 'defect';
-  if (CHANGE.test(t)) return 'change';
+  if (CHANGE.test(t) && !RULE.test(t)) return 'change';
+  if (RULE.test(t)) return 'rule';
+  if (PLAN.test(t) && !/보고됐|보고됨|했다고/.test(t)) return 'plan';
   return 'status';
 }
 /** The evidence grade of a claim: its own when it says one; else the author's tag inside the very passage it rests on ([파일],
