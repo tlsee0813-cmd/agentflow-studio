@@ -9,6 +9,7 @@
  * is not at hand still reads in a rail of its own (its record named as not found), never without one. */
 import { TOPIC_ORDER, claimTopic, claimEvidence, claimWhen } from '../shared/claim-topic.js';
 import type { ClaimKind, ClaimTopic, EvidenceGrade, ReadingQuote } from '../shared/types.js';
+import { conditionPlacement, conditionLines, type ConditionLike, type ChainStep } from './steps-view.js';
 
 /** What the pane reads of a claim (a CurrentClaim or a history claim carries all of it). */
 export interface PaneClaim {
@@ -204,3 +205,17 @@ export function paneSections<T>(by: Partial<Record<PaneSection, T | null | undef
 /** 구조 (안의 단계 · 반복 · 유지 상태) under 이유 is folded: open only as the person left it for this part, or while one of its
  * steps is picked (in the detail view or the pane). */
 export const structureOpen = (remembered: boolean, stepPicked: boolean): boolean => remembered || stepPicked;
+/** 구조's summary under its fold: '단계 N · 조건 K · 반복 · 유지 상태 S', each only when the reading names one. */
+export function structureSummary(c: { steps: number; conditions: number; loop: boolean; vars: number }): string {
+  return [c.steps ? `단계 ${c.steps}` : '', c.conditions ? `조건 ${c.conditions}` : '', c.loop ? '반복' : '', c.vars ? `유지 상태 ${c.vars}` : ''].filter(Boolean).join(' · ');
+}
+/** 구조's 조건 rows (map-reading.12 conditions[]), in the part's order: each row's words ('조건 {when} → {then} · 아니면 → {else}'),
+ * the step it stands on by the detail view's rule (steps-view conditionPlacement) or null (단계 미상), and its index (the key a
+ * rule's 「조건」 chip and the detail view use). */
+export interface StructureCondition<T> { index: number; condition: T; text: string; step: string | null }
+export function structureConditions<T extends ConditionLike>(conditions: readonly T[], steps: readonly Pick<ChainStep, 'name' | 'uses'>[]): StructureCondition<T>[] {
+  const at = new Map<number, number>();
+  for (const [k, list] of conditionPlacement(conditions, steps).steps) for (const x of list) at.set(x.index, k);
+  return conditions.map((condition, index) => { const k = at.get(index);
+    return { index, condition, text: conditionLines(condition).join(' · '), step: k === undefined ? null : steps[k]!.name }; });
+}

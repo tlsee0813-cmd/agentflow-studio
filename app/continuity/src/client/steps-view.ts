@@ -80,11 +80,16 @@ export function detailSigns<T extends RuleClaim>(chain: DetailChain, fields: rea
 /* ---------- a run gate's decision step (spec 5.2: 실행 관문은 판정 단계와 실제 출구) ----------
  * The step a run gate stands on: the step whose name the gate's own words name (an anchor naming it exactly first, then the
  * longest step name its quote or its text holds; spacing, case and quote marks aside), else the first step, said so (matched
- * 'first'). Its exits are only those the record wrote on that step: a 참이면 / 거짓이면 item among what it uses or in what it
- * does; none written reads as one '출구 미상'. Nothing is joined by guess. */
+ * 'first'). Its exits are only those the record wrote for that step. From map-reading.12 on (conditions given, [] included) they
+ * are the part's condition rows placed on that step (conditionPlacement): '조건 {when} → {then}' and '아니면 → {else}' (source
+ * 'conditions'); for a reading older than .12 (conditions null or left out) a 참이면 / 거짓이면 item among what the step uses or in
+ * what it does. None written reads as one '출구 미상'. Nothing is joined by guess. */
 export interface GateLike { text: string; quote: string; anchors?: readonly { text: string }[] }
-export interface DecisionExit { when: '참이면' | '거짓이면'; text: string }
-export interface DecisionStep { index: number; name: string; matched: 'name' | 'first'; exits: DecisionExit[] }
+/** when: '참이면' / '거짓이면' as the step wrote it (before .12), or a condition's own words with '아니면' for its else (condition:
+ * the condition's index in the part's list, branch: which of its outcomes). */
+export interface DecisionExit { when: string; text: string; condition?: number; branch?: 'then' | 'else' }
+/** source: 'conditions' when the exits come from the condition rows (map-reading.12); absent for the step's own words. */
+export interface DecisionStep { index: number; name: string; matched: 'name' | 'first'; exits: DecisionExit[]; source?: 'conditions' }
 export const EXIT_BLANK = '출구 미상';
 export function decisionExits(step: Pick<ChainStep, 'does' | 'uses'>): DecisionExit[] {
   const out: DecisionExit[] = [];
@@ -95,7 +100,7 @@ export function decisionExits(step: Pick<ChainStep, 'does' | 'uses'>): DecisionE
   }
   return out;
 }
-export function decisionStep(gate: GateLike, steps: readonly Pick<ChainStep, 'name' | 'does' | 'uses'>[]): DecisionStep | null {
+export function decisionStep(gate: GateLike, steps: readonly Pick<ChainStep, 'name' | 'does' | 'uses'>[], conditions: readonly ConditionLike[] | null = null): DecisionStep | null {
   if (!steps.length) return null;
   const names = steps.map(s => placeName(s.name));
   let index = -1;
@@ -106,5 +111,62 @@ export function decisionStep(gate: GateLike, steps: readonly Pick<ChainStep, 'na
     names.forEach((n, k) => { if (n && n.length > best && words.some(w => w.includes(n))) { best = n.length; index = k; } });
   }
   const matched = index >= 0 ? 'name' : 'first', at = index >= 0 ? index : 0, s = steps[at]!;
-  return { index: at, name: s.name, matched, exits: decisionExits(s) };
+  if (!conditions) return { index: at, name: s.name, matched, exits: decisionExits(s) };
+  const placed = conditionPlacement(conditions, steps).steps.get(at) ?? [];
+  const exits = placed.flatMap(({ index, condition: c }): DecisionExit[] => [{ when: c.when, text: c.then, condition: index, branch: 'then' },
+    ...(c.else ? [{ when: '아니면', text: c.else, condition: index, branch: 'else' as const }] : [])]);
+  return { index: at, name: s.name, matched, exits, source: 'conditions' };
+}
+
+/* ---------- a part's condition rows (map-reading.12 conditions[]: 조건 · 거부 · 분기) ----------
+ * Each condition stands on the step its words name, by the rule chips' name rule (signs-view placeName: quote marks, spacing,
+ * case and one kind word aside): its when first, then its then; a step whose name, or one of whose uses, equals those words; else
+ * the longest step name or uses item (two characters or more) those words hold, the name before a uses item of the same length,
+ * the first step in the record's row order on a tie. A condition naming no step stands at the part's boundary (단계 미상) and is
+ * listed apart (자리 없는 조건): never placed by guess. On a step box a condition reads as a compact exit list: '조건 {when} →
+ * {then}', and '아니면 → {else}' only when the record wrote one. */
+export interface ConditionLike { when: string; then: string; else: string | null }
+/** How the condition reached its step: its when or its then, equal to the step's name or one of its uses, or holding it. */
+export interface ConditionPlace { step: number; by: 'when' | 'then'; key: 'name' | 'uses'; how: 'equal' | 'holds' }
+export const CONDITION_BLANK = '단계 미상', CONDITION_UNPLACED = '자리 없는 조건';
+export function conditionPlace(c: ConditionLike, steps: readonly Pick<ChainStep, 'name' | 'uses'>[]): ConditionPlace | null {
+  const keys = steps.map(s => ({ name: placeName(s.name), uses: s.uses.map(u => placeName(u)) }));
+  for (const by of ['when', 'then'] as const) {
+    const words = placeName(c[by]); if (!words) continue;
+    for (const key of ['name', 'uses'] as const) {
+      const k = keys.findIndex(x => (key === 'name' ? [x.name] : x.uses).includes(words));
+      if (k >= 0) return { step: k, by, key, how: 'equal' };
+    }
+    let step = -1, key: 'name' | 'uses' = 'name', len = 1;
+    for (let k = 0; k < keys.length; k++) {
+      const x = keys[k]!;
+      if (x.name.length > len && words.includes(x.name)) { len = x.name.length; step = k; key = 'name'; }
+      for (const u of x.uses) if (u.length > len && words.includes(u)) { len = u.length; step = k; key = 'uses'; }
+    }
+    if (step >= 0) return { step, by, key, how: 'holds' };
+  }
+  return null;
+}
+/** Every condition with its place: by step index (each keeping the conditions' own order) and the ones naming no step. index:
+ * the condition's place in the part's list (the key the views and the rule chips link it by). */
+export interface PlacedCondition<T> { index: number; condition: T; place: ConditionPlace | null }
+export interface ConditionPlacement<T> { steps: Map<number, PlacedCondition<T>[]>; unplaced: PlacedCondition<T>[] }
+export function conditionPlacement<T extends ConditionLike>(conditions: readonly T[], steps: readonly Pick<ChainStep, 'name' | 'uses'>[]): ConditionPlacement<T> {
+  const out: ConditionPlacement<T> = { steps: new Map(), unplaced: [] };
+  conditions.forEach((condition, index) => {
+    const place = conditionPlace(condition, steps), x = { index, condition, place };
+    if (!place) { out.unplaced.push(x); return; }
+    const l = out.steps.get(place.step); if (l) l.push(x); else out.steps.set(place.step, [x]);
+  });
+  return out;
+}
+/** A condition's exit lines on a step box: '조건 {when} → {then}', then '아니면 → {else}' when the record wrote it. */
+export const conditionLines = (c: ConditionLike): string[] => [`조건 ${c.when} → ${c.then}`, ...(c.else ? [`아니면 → ${c.else}`] : [])];
+/** The condition whose row is the given quote (a rule anchor's): the same record and words (spacing aside), and the same span
+ * when both carry one; -1 when none. */
+export interface QuoteLike { record: string; quote: string; from?: number; to?: number }
+export function conditionOfQuote(q: QuoteLike, conditions: readonly { quote: QuoteLike }[]): number {
+  const n = (s: string) => s.replace(/\s+/g, ' ').trim();
+  return conditions.findIndex(c => c.quote.record === q.record && n(c.quote.quote) === n(q.quote)
+    && (q.from === undefined || c.quote.from === undefined || (q.from === c.quote.from && q.to === c.quote.to)));
 }

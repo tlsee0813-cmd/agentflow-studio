@@ -135,3 +135,60 @@ test('decisionStep: the step the gate\'s words name (an anchor first, then the l
   assert.equal(EXIT_BLANK, '출구 미상');
   assert.deepEqual(decisionExits({ does: null, uses: ['참이면', '참이면 진입', '참이면 진입'] }), [{ when: '참이면', text: '진입' }]);
 });
+
+/* ---------- map-reading.12: a part's condition rows on its steps ---------- */
+import { conditionPlace, conditionPlacement, conditionLines, conditionOfQuote, CONDITION_BLANK, CONDITION_UNPLACED } from '../dist/public/client/steps-view.js';
+
+test('conditionPlacement: a condition stands on the step its when (else its then) names, by name or uses, equal before held; else apart', () => {
+  const st = [{ name: '행 읽기', uses: ['engine/read.py'] }, { name: '판단', uses: ['engine/rung.py', 'J1'] }, { name: '판단 기록', uses: [] }, { name: '주문 요청', uses: [] }];
+  const c = (when, then, e = null) => ({ when, then, else: e });
+  // Equal (the rule chips' placeName: quote marks, spacing, case, a kind word aside) on the when first.
+  assert.deepEqual(conditionPlace(c('‘판단’ 단계', '쉼'), st), { step: 1, by: 'when', key: 'name', how: 'equal' });
+  assert.deepEqual(conditionPlace(c('j1', '쉼'), st), { step: 1, by: 'when', key: 'uses', how: 'equal' });
+  // Held: the longest name or uses item the words hold ('판단 기록' over '판단'); the when before the then.
+  assert.deepEqual(conditionPlace(c('판단 기록이 비면', '주문 요청'), st), { step: 2, by: 'when', key: 'name', how: 'holds' });
+  assert.deepEqual(conditionPlace(c('engine/read.py가 실패하면', '쉼'), st), { step: 0, by: 'when', key: 'uses', how: 'holds' });
+  // The when names no step: the then does.
+  assert.deepEqual(conditionPlace(c('allowed_side = NONE', '주문 요청'), st), { step: 3, by: 'then', key: 'name', how: 'equal' });
+  // Named nowhere: no place (never by guess); a one-character name is never held inside other words.
+  assert.equal(conditionPlace(c('LINE_STALE이면', '거절'), st), null);
+  assert.equal(conditionPlace(c('a가 늦으면', '쉼'), [{ name: 'a', uses: [] }]), null);
+  assert.deepEqual(conditionPlace(c('a', '쉼'), [{ name: 'a', uses: [] }]), { step: 0, by: 'when', key: 'name', how: 'equal' }, 'equal still places it');
+  assert.equal(conditionPlace(c('판단', '쉼'), []), null);
+  const list = [c('판단 결과가 CALM', '주문 요청', 'NONE_SIDE 쉼'), c('LINE_STALE이면', '거절'), c('J1이 늦으면', '판단 기록'), c('경보 3회', '소유자 호출')];
+  const p = conditionPlacement(list, st);
+  assert.deepEqual([...p.steps.keys()], [1]);
+  assert.deepEqual(p.steps.get(1).map(x => x.index), [0, 2], 'each step keeps the conditions in their own order');
+  assert.deepEqual(p.unplaced.map(x => x.index), [1, 3]);
+  assert.equal(p.unplaced[0].place, null);
+  assert.deepEqual(conditionLines(list[0]), ['조건 판단 결과가 CALM → 주문 요청', '아니면 → NONE_SIDE 쉼']);
+  assert.deepEqual(conditionLines(list[1]), ['조건 LINE_STALE이면 → 거절'], 'no else written: no 아니면 line');
+  assert.equal(CONDITION_BLANK, '단계 미상'); assert.equal(CONDITION_UNPLACED, '자리 없는 조건');
+});
+
+test('decisionStep with conditions (map-reading.12): the exits are the condition rows on the decision step; before .12 the words of the step', () => {
+  const steps = [{ name: '행 읽기', does: null, uses: [] }, { name: '판단', does: '참이면 policy 행', uses: ['참이면 주문 요청', '거짓이면 NONE_SIDE 쉼'] }];
+  const gate = { text: 'CALM이면 진입', quote: '판단 단계에서 CALM이면 진입' };
+  const conds = [{ when: '판단 결과가 CALM', then: '주문 요청', else: 'NONE_SIDE 쉼' }, { when: '행 읽기 실패', then: '재시도', else: null }, { when: '판단 지연', then: '쉼', else: null }];
+  const d = decisionStep(gate, steps, conds);
+  assert.equal(d.source, 'conditions');
+  assert.deepEqual(d.exits, [{ when: '판단 결과가 CALM', text: '주문 요청', condition: 0, branch: 'then' }, { when: '아니면', text: 'NONE_SIDE 쉼', condition: 0, branch: 'else' },
+    { when: '판단 지연', text: '쉼', condition: 2, branch: 'then' }], 'only the conditions placed on 판단; its 참이면 words are not read');
+  // A .12 reading with no condition on that step: no exits (the view reads 출구 미상), never the words of the step.
+  assert.deepEqual(decisionStep(gate, steps, []).exits, []);
+  assert.deepEqual(decisionStep(gate, steps, [conds[1]]).exits, []);
+  // Older than .12 (no conditions): the fallback to what the step uses and does, the earlier shape unchanged.
+  const old = decisionStep(gate, steps);
+  assert.equal(old.source, undefined);
+  assert.deepEqual(old.exits, [{ when: '참이면', text: '주문 요청' }, { when: '거짓이면', text: 'NONE_SIDE 쉼' }, { when: '참이면', text: 'policy 행' }]);
+  assert.deepEqual(decisionStep(gate, steps, null), old);
+});
+
+test('conditionOfQuote: a rule anchor whose row is a condition row (same record and words, the same span when both carry one)', () => {
+  const conds = [{ quote: { record: 'P1', quote: '| A | B |', from: 10, to: 19 } }, { quote: { record: 'P1', quote: 'LINE_STALE이면 거절한다', from: 40, to: 58 } }];
+  assert.equal(conditionOfQuote({ record: 'P1', quote: 'LINE_STALE이면  거절한다', from: 40, to: 58 }, conds), 1);
+  assert.equal(conditionOfQuote({ record: 'P1', quote: 'LINE_STALE이면 거절한다' }, conds), 1, 'no span on the anchor: the words decide');
+  assert.equal(conditionOfQuote({ record: 'P1', quote: 'LINE_STALE이면 거절한다', from: 90, to: 108 }, conds), -1, 'the same words elsewhere in the record');
+  assert.equal(conditionOfQuote({ record: 'P2', quote: '| A | B |', from: 10, to: 19 }, conds), -1);
+  assert.equal(conditionOfQuote({ record: 'P1', quote: '| A |' }, conds), -1);
+});

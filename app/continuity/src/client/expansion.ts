@@ -77,16 +77,26 @@ export interface ActionStateVar { name: string; scope: string | null; readBy: st
 /** One section of an opened part, in reading order: the lists as the reading named them, each whole. cells: a ledger's fields
  * (one cell each); lines: one item per line (settings, the loop line, kept state); words: names in a row (ports); steps: a
  * numbered list, each step on one line (its name, then what it does in subs, the same index; null when the row says nothing). */
-export interface ActionSection { key: 'inputs' | 'outputs' | 'loop' | 'steps' | 'stateVars' | 'fields' | 'config' | 'state'; title: string; kind: 'words' | 'cells' | 'lines' | 'steps'; items: string[]; subs?: (string | null)[] }
-export interface ActionContent { inputs: string[]; outputs: string[]; fields: string[]; config: string[]; state: string | null; steps?: ActionStep[]; loop?: ActionLoop | null; stateVars?: ActionStateVar[] }
+/** total: how many the section stands for when its lines show fewer (분기 출구: the conditions behind a '+N' line). */
+export interface ActionSection { key: 'inputs' | 'outputs' | 'loop' | 'steps' | 'exits' | 'stateVars' | 'fields' | 'config' | 'state'; title: string; kind: 'words' | 'cells' | 'lines' | 'steps'; items: string[]; subs?: (string | null)[]; total?: number }
+/** A condition row of a part (map-reading.12 conditions[]): its condition, what follows when it holds and when not (null). */
+export interface ActionCondition { when: string; then: string; else: string | null }
+export interface ActionContent { inputs: string[]; outputs: string[]; fields: string[]; config: string[]; state: string | null; steps?: ActionStep[]; loop?: ActionLoop | null; stateVars?: ActionStateVar[]; conditions?: ActionCondition[] }
+/** The short expansion's 분기 출구 lines: the first EXITS_SHOWN conditions as '{when} → {then}', the rest as one '+N' line (the
+ * detail view lists them all, each with its else). */
+export const EXITS_SHOWN = 3;
+export function exitLines(conditions: readonly ActionCondition[]): string[] {
+  const shown = conditions.slice(0, EXITS_SHOWN).map(c => `${c.when} → ${c.then}`), rest = conditions.length - shown.length;
+  return rest > 0 ? [...shown, `+${rest}`] : shown;
+}
 /** What a blank of the loop line or of a kept state reads as: said nowhere in the record, never made up. */
 export const UNSAID = '미상';
 /** The loop line (spec 2.1, 반복 단위·종료·재개): '반복 {unit} · 정지 {stop} · 재개 {resume}', '미상' for each the record left out. */
 export const loopLine = (l: ActionLoop): string => `반복 ${l.unit ?? UNSAID} · 정지 ${l.stop ?? UNSAID} · 재개 ${l.resume ?? UNSAID}`;
 /** A kept state's line: '상태 {name} · 읽음 {readBy} · 바꿈 {changedBy}', each list joined by ', ', '미상' when empty. */
 export const stateVarLine = (s: ActionStateVar): string => `상태 ${s.name} · 읽음 ${s.readBy.length ? s.readBy.join(', ') : UNSAID} · 바꿈 ${s.changedBy.length ? s.changedBy.join(', ') : UNSAID}`;
-/** The sections an opened part shows, in this order: 받는 것, 내는 것, 반복 (the loop at its head), 기록된 단계, 유지 상태 (kept apart
- * from the steps), 행의 필드, 설정, 상태. Only what the reading named; an empty list has no section (the entry line already says
+/** The sections an opened part shows, in this order: 받는 것, 내는 것, 반복 (the loop at its head), 기록된 단계, 분기 출구 (the
+ * condition rows, exitLines), 유지 상태 (kept apart from the steps), 행의 필드, 설정, 상태. Only what the reading named; an empty list has no section (the entry line already says
  * '내부 미상' for a part with none). */
 export function actionSections(c: ActionContent): ActionSection[] {
   const out: ActionSection[] = [];
@@ -94,6 +104,7 @@ export function actionSections(c: ActionContent): ActionSection[] {
   if (c.outputs.length) out.push({ key: 'outputs', title: '내는 것', kind: 'words', items: [...c.outputs] });
   if (c.loop) out.push({ key: 'loop', title: '반복', kind: 'lines', items: [loopLine(c.loop)] });
   if (c.steps?.length) out.push({ key: 'steps', title: '기록된 단계', kind: 'steps', items: c.steps.map(s => s.name), subs: c.steps.map(s => s.does) });
+  if (c.conditions?.length) out.push({ key: 'exits', title: '분기 출구', kind: 'lines', items: exitLines(c.conditions), total: c.conditions.length });
   if (c.stateVars?.length) out.push({ key: 'stateVars', title: '유지 상태', kind: 'lines', items: c.stateVars.map(stateVarLine) });
   if (c.fields.length) out.push({ key: 'fields', title: '행의 필드', kind: 'cells', items: [...c.fields] });
   if (c.config.length) out.push({ key: 'config', title: '설정', kind: 'lines', items: [...c.config] });

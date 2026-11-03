@@ -134,3 +134,25 @@ test('the steps count in the 420×280 decision: twelve one-line steps under the 
   assert.equal(decideExpansion({ w: 330, h: height(3) }, card, [OPEN_MAP], []), 'short', 'three steps fit beside the ports');
   assert.equal(decideExpansion({ w: 420, h: height(12) }, card, [OPEN_MAP], []), 'detail', 'twelve steps take the detail view');
 });
+
+// map-reading.12: the short expansion's 분기 출구 after the steps: up to three conditions as 'when → then', the rest as '+N', and
+// the lines count in the 420×280 decision.
+import { exitLines, EXITS_SHOWN } from '../dist/public/client/expansion.js';
+test('actionSections with map-reading.12: 분기 출구 after the steps, three as when → then and +N, its total kept', () => {
+  const c = (when, then, e = null) => ({ when, then, else: e });
+  const conds = [c('점검 결과 지연 30 s 초과', '경보', '헬스 행'), c('clock.py 응답 없음', '경보'), c('요청 받기에서 형식 오류', '버림'), c('경보 3회 연속', '소유자 호출'), c('x', 'y')];
+  assert.equal(EXITS_SHOWN, 3);
+  assert.deepEqual(exitLines(conds), ['점검 결과 지연 30 s 초과 → 경보', 'clock.py 응답 없음 → 경보', '요청 받기에서 형식 오류 → 버림', '+2']);
+  assert.deepEqual(exitLines(conds.slice(0, 3)), ['점검 결과 지연 30 s 초과 → 경보', 'clock.py 응답 없음 → 경보', '요청 받기에서 형식 오류 → 버림'], 'three: no +N');
+  assert.deepEqual(exitLines([]), []);
+  const s = actionSections({ inputs: ['헬스 요청'], outputs: ['경보'], fields: [], config: ['주기 30 s'], state: null, steps: [{ name: '점검', does: null, uses: [] }],
+    stateVars: [{ name: 'n', scope: null, readBy: [], changedBy: [] }], conditions: conds });
+  assert.deepEqual(s.map(x => x.key), ['inputs', 'outputs', 'steps', 'exits', 'stateVars', 'config']);
+  assert.deepEqual(s.find(x => x.key === 'exits'), { key: 'exits', title: '분기 출구', kind: 'lines', items: exitLines(conds), total: 5 });
+  assert.equal(actionSections({ inputs: [], outputs: [], fields: [], config: [], state: null, conditions: [] }).length, 0, 'none: no section');
+  // As styles.css lays it out (the measure above): the exit lines add a title and one line each, and they decide.
+  const height = (steps, exits) => 24 + 46 + 8 + (16 + 18) + 8 + (16 + 18) + (steps ? 8 + 16 + steps * 19 : 0) + (exits ? 8 + 16 + exits * 18 : 0);
+  assert.equal(decideExpansion({ w: 330, h: height(2, 0) }, card, [OPEN_MAP], []), 'short');
+  assert.equal(decideExpansion({ w: 330, h: height(2, exitLines(conds.slice(0, 2)).length) }, card, [OPEN_MAP], []), 'short', 'two exits still fit');
+  assert.equal(decideExpansion({ w: 330, h: height(4, exitLines(conds).length) }, card, [OPEN_MAP], []), 'detail', 'four steps and four exit lines take the detail view');
+});

@@ -235,3 +235,21 @@ test('the tabs\' own row takes a line\'s height; on the entry row or the chips\'
   assert.equal(typedLines(chips, 'loop').length, 2);
   assert.equal(typedPx(own, null, 3), 3 + 2 * LINE_H + LINE_GAP);
 });
+
+// map-reading.12: a part's condition rows read on the entry line as '조건 K', after 기록된 단계 (before 유지 상태 and the totals);
+// alone they open an entry line (no card line names them) and a part with only them is not 내부 미상. The budget is unchanged.
+test('entry words with conditions: 조건 K after 기록된 단계; alone they make an entry; the budget is the same', () => {
+  const most = { config: 1, fields: 3 };
+  assert.deepEqual(entryParts(counts({ kids: 2, steps: 3, conditions: 4, state: 1, config: 3, unplaced: 1 }), most), ['구성 2', '기록된 단계 3', '조건 4', '유지 상태 1', '설정 3', '배치 미정 1']);
+  assert.equal(entryKind(counts({ inputs: 2, outputs: 2, config: 1, conditions: 2 }), most), 'some');
+  assert.deepEqual(entryParts(counts({ inputs: 2, outputs: 2, config: 1, conditions: 2 }), most), ['조건 2']);
+  assert.equal(entryKind(counts({ conditions: 1 }), most), 'some', 'only conditions: not 내부 미상');
+  assert.deepEqual(entryParts(counts({ conditions: 0, steps: 2 }), most), ['기록된 단계 2'], 'none: no word');
+  assert.deepEqual(entryParts(counts(), most), ['내부 미상']);
+  // The entry line is one line whatever it holds: the same budget with or without the conditions.
+  for (const level of ['mid', 'detail']) {
+    assert.deepEqual(typedBudget(1, true, true, true, true, 'none', level, entryKind(counts({ inputs: 1, conditions: 3 }), most)), typedBudget(1, true, true, true, true, 'none', level, 'some'));
+    assert.deepEqual(typedBudget(2, true, true, true, true, 'name', level, entryKind(counts({ conditions: 3 }), most), true), typedBudget(2, true, true, true, true, 'name', level, 'some', true));
+  }
+  assert.equal(typedBudget(1, true, true, true, true, 'none', 'overview', entryKind(counts({ conditions: 3 }), most)).entry, false, '개요 keeps no entry line');
+});

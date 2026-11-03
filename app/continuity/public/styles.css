@@ -2281,6 +2281,24 @@ button:disabled { opacity: .5; cursor: default; }
 .dv-exits { display: inline-flex; flex-wrap: wrap; gap: 4px; }
 .dv-exit { padding: 0 6px; border: 1px solid var(--accent-line); border-radius: 8px; color: var(--accent-strong); background: var(--surface); white-space: nowrap; }
 .dv-exit.blank { border-style: dashed; border-color: var(--line); color: var(--text-3); }
+/* map-reading.12: a part's condition rows. On a step box a compact exit list (조건 when → then, 아니면 → else); the ones naming no
+   step under the steps (자리 없는 조건, 단계 미상); one a rule's 「조건」 opened is marked in the accent. */
+.dv-conds { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding-left: 20px; padding-top: 3px; font-size: 11.5px; line-height: 16px; }
+.dv-cond { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px; max-width: 100%; padding: 0 6px; border-left: 2px solid var(--accent-line); color: var(--text-2); overflow-wrap: anywhere; }
+.dv-cond-else { color: var(--text-3); }
+.dv-cond-blank { color: var(--text-4); }
+.dv-cond.apart { border-left-style: dashed; border-left-color: var(--line-strong); }
+.dv-cond.picked, .dv-exit.picked { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: 3px; }
+.dv-conds-apart { margin-top: 10px; padding: 6px 10px; border: 1px dashed var(--line-strong); border-radius: var(--r-sm); }
+.dv-conds-apart .dv-conds { padding-left: 0; }
+.dv-apart-head { margin: 0 0 2px; display: flex; align-items: baseline; gap: 6px; font: var(--label); letter-spacing: var(--label-track); color: var(--text-3); }
+.dv-apart-head small { color: var(--text-4); font-variant-numeric: tabular-nums; }
+.stp-conds { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.stp-conds li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; font-size: 12.5px; line-height: 18px; }
+.stp-cond { min-width: 0; color: var(--text-2); overflow-wrap: anywhere; }
+.stp-cond-at { color: var(--text-3); font-size: 11.5px; }
+.sg-chip.sg-cond { cursor: pointer; background: var(--surface); }
+.sg-chip.sg-cond:hover, .sg-chip.sg-cond:focus-visible { border-color: var(--accent-line); color: var(--accent); }
 /* The title's 전체 규칙 N · 배치 미정 K and the list it opens (by part). */
 .map-flow + .map-rules { margin-top: 2px; padding-top: 2px; border-top: 0; }
 .map-rules .rules-entry .entry-unplaced { color: var(--text-3); }

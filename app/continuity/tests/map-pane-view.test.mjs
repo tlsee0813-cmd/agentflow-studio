@@ -137,3 +137,20 @@ test('paneSections: the lens and the full reading lay their sections out in one 
   assert.equal(structureOpen(true, false), true);
   assert.equal(structureOpen(false, true), true);
 });
+
+/* ---------- map-reading.12: 구조 lists the condition rows ---------- */
+import { structureSummary, structureConditions } from '../dist/public/client/pane-view.js';
+test('구조: the summary counts the conditions after the steps; each condition row with its words and the step it stands on, or 단계 미상', () => {
+  assert.equal(structureSummary({ steps: 4, conditions: 3, loop: true, vars: 2 }), '단계 4 · 조건 3 · 반복 · 유지 상태 2');
+  assert.equal(structureSummary({ steps: 0, conditions: 2, loop: false, vars: 0 }), '조건 2');
+  assert.equal(structureSummary({ steps: 2, conditions: 0, loop: false, vars: 0 }), '단계 2');
+  const steps = [{ name: '요청 받기', uses: [] }, { name: '점검', uses: ['clock.py'] }];
+  const q = t => ({ record: 'P1', quote: t, from: 0, to: t.length });
+  const conds = [{ when: '점검 결과 지연', then: '경보', else: '헬스 행', quote: q('a') }, { when: 'clock.py 응답 없음', then: '경보', else: null, quote: q('b') },
+    { when: '경보 3회 연속', then: '소유자 호출', else: null, quote: q('c') }];
+  const rows = structureConditions(conds, steps);
+  assert.deepEqual(rows.map(x => [x.index, x.text, x.step]), [[0, '조건 점검 결과 지연 → 경보 · 아니면 → 헬스 행', '점검'], [1, '조건 clock.py 응답 없음 → 경보', '점검'], [2, '조건 경보 3회 연속 → 소유자 호출', null]]);
+  assert.equal(rows[0].condition, conds[0], 'the row keeps its condition (its quote chip reads its row)');
+  assert.deepEqual(structureConditions([], steps), []);
+  assert.deepEqual(structureConditions(conds.slice(0, 1), []).map(x => x.step), [null], 'no steps: every condition 단계 미상');
+});
