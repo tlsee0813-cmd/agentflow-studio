@@ -6,7 +6,7 @@ import * as M from '../dist/public/shared/map-reading.js';
 import { studioView } from '../dist/public/shared/studio.js';
 import { validateProject } from '../dist/public/shared/validation.js';
 import { ApiError } from '../../server/errors.mjs';
-import { validateMapBlueprint, splitBlueprintParts, validateRenderedFragment, combineRenderedMaps, combineRenderedReading, mapStageIssues, blueprintStageIssues,
+import { validateMapBlueprint, splitBlueprintParts, validateRenderedFragment, fragmentSetAside, combineRenderedMaps, combineRenderedReading, mapStageIssues, blueprintStageIssues,
   isMapRevision, validateMapRevision, revisionGroups,
   missingMapCorrections, mapCorrectionRevision, MAP_BLUEPRINT_PROMPT, LATER_BLUEPRINT_PROMPT,
   BLUEPRINT_PARTS_MAX, BLUEPRINT_NEW_PARTS_MAX, BLUEPRINT_LATER_NEW_PARTS_MAX, BLUEPRINT_GLOBAL_MAX, BLUEPRINT_FIRST_GLOBAL_MAX, BLUEPRINT_RELATION_ITEMS_MAX,
@@ -455,13 +455,17 @@ test('.25: a wrong map-reading.7 field leaves out its claim or relation and only
   const plain = M.validateMapReply(wire, f.ask);
   assert.equal(M.setAside(plain).length, 0); assert.deepEqual(plain.parts[0].files, ['server/engine.mjs']);
   assert.deepEqual(plain.relations.map(x => [x.payload, x.cadence, x.mode]), [['행', '매 박자', 'observed']]);
-  // The first pass of a render or a global stage is refused instead, so its one correction rewrites the field.
-  validateRenderedFragment(fragments[0], group, f.ask, blueprint);
-  let failure; try { validateRenderedFragment(fragments[0], group, f.ask, blueprint, true); } catch (error) { failure = error; }
-  assert.deepEqual(failure.validation, { path: 'parts[0].stateAt', rule: 'reference' });
-  failure = null; try { combineRenderedMaps(fragments, global, f.ask, blueprint, true); } catch (error) { failure = error; }
-  assert.deepEqual(failure.validation, { path: 'relations[0].mode', rule: 'contract', category: 'mode' });
-  assert.deepEqual(mapStageIssues(global, failure), [{ path: 'relations[0].mode', rule: 'contract', category: 'mode', expected: null, actual: null }]);
+  // .30: a first map's first pass sets these items aside as its correction does (no refusal, no paid correction); the stage keeps which.
+  assert.deepEqual(validateRenderedFragment(fragments[0], group, f.ask, blueprint, true), fragments[0]);
+  assert.deepEqual(fragmentSetAside(fragments[0], group, f.ask, blueprint), [{ path: 'parts[0].stateAt', rule: 'reference', category: null }, { path: 'parts[1].claims[1].topic', rule: 'contract', category: 'topic' }]);
+  assert.deepEqual(combineRenderedMaps(fragments, global, f.ask, blueprint, true), wire);
+  assert.deepEqual(mapStageIssues(global), [{ path: 'relations[0].mode', rule: 'contract', category: 'mode', expected: null, actual: null }]);
+  // A later map (map.7) still refuses its first pass for the field, so its one correction rewrites it.
+  const later = fixture(1), laterPlan = planned(later, 2), laterFragments = rendered(later, laterPlan);
+  Object.assign(laterFragments[0].parts[0], { state: 'running', stateAt: 'N01.99' });
+  validateRenderedFragment(laterFragments[0], splitBlueprintParts(laterPlan)[0], later.ask, laterPlan);
+  let failure; try { validateRenderedFragment(laterFragments[0], splitBlueprintParts(laterPlan)[0], later.ask, laterPlan, true); } catch (error) { failure = error; }
+  assert.deepEqual(failure?.validation, { path: 'parts[0].stateAt', rule: 'reference' });
   assert.deepEqual(mapStageIssues(fragments[0]), [{ path: 'parts[1].claims[1].topic', rule: 'contract', category: 'topic', expected: null, actual: null }]);
   const long = structuredClone(fragments[0]); long.parts[0].stateAt = f.at[0]; long.parts[0].files = Array(7).fill('a'); long.parts[1].claims[0].before = '옛것';
   assert.deepEqual(mapStageIssues(long).map(x => [x.path, x.rule, x.category ?? null, x.expected]), [['parts[0].files', 'count', null, 6],
@@ -490,20 +494,17 @@ test('.28: a wrong map-reading.8 field leaves out only that field of its part, i
   assert.deepEqual([plain.parts[0].type, plain.parts[0].inputs, plain.parts[0].fields], ['store', ['review 행'], ['watch', 'allowed_side']]);
   assert.deepEqual([plain.parts[1].type, plain.parts[1].inputs, plain.parts[1].outputs], [null, [], ['결과 행']]);
   assert.deepEqual([plain.relations.map(x => x.channel), plain.basisAt, plain.basisVersion], [['data'], null, '라이브 618df374']);
-  // The first pass of a render or a global stage is refused instead, at the first exclusion in its own scope.
-  validateRenderedFragment(fragments[0], group, f.ask, blueprint);
-  let failure; try { validateRenderedFragment(fragments[0], group, f.ask, blueprint, true); } catch (error) { failure = error; }
-  assert.deepEqual(failure.validation, { path: 'parts[1].type', rule: 'contract', category: 'type' });
-  failure = null; try { combineRenderedMaps(fragments, global, f.ask, blueprint, true); } catch (error) { failure = error; }
-  assert.deepEqual(failure.validation, { path: 'relations[0].channel', rule: 'contract', category: 'channel' });
-  assert.deepEqual(mapStageIssues(global, failure), [{ path: 'relations[0].channel', rule: 'contract', category: 'channel', expected: null, actual: null },
+  // .30: a first map's first pass sets these items aside as its correction does (no refusal, no paid correction); the stage keeps which.
+  assert.deepEqual(validateRenderedFragment(fragments[0], group, f.ask, blueprint, true), fragments[0]);
+  assert.deepEqual(fragmentSetAside(fragments[0], group, f.ask, blueprint).map(x => x.category), ['type', 'inputs']);
+  assert.deepEqual(combineRenderedMaps(fragments, global, f.ask, blueprint, true), wire);
+  assert.deepEqual(mapStageIssues(global), [{ path: 'relations[0].channel', rule: 'contract', category: 'channel', expected: null, actual: null },
     { path: 'basisAt', rule: 'length', expected: 60, actual: 61 }]);
   assert.deepEqual(mapStageIssues(fragments[0]), [{ path: 'parts[1].type', rule: 'contract', category: 'type', expected: null, actual: null },
     { path: 'parts[1].inputs', rule: 'count', expected: 8, actual: 9 }]);
-  // A basis alone still refuses the strict global pass: the global stage owns it.
+  // A wrong basis alone is left null on the first pass too (one field, not the reply's structure).
   const basisOnly = { ...structuredClone(global), relations: [global.relations[1]] };
-  failure = null; try { combineRenderedMaps(fragments, basisOnly, f.ask, blueprint, true); } catch (error) { failure = error; }
-  assert.deepEqual(failure.validation, { path: 'basisAt', rule: 'contract', category: 'basis-at' });
+  assert.deepEqual([combineRenderedMaps(fragments, basisOnly, f.ask, blueprint, true).basisAt, combineRenderedReading(fragments, basisOnly, f.ask, blueprint).exclusions.map(x => x.path)], [null, ['parts[1].type', 'parts[1].inputs', 'basisAt']]);
   // Beside the seven keys only the basis time and version are allowed on the global wire.
   refused(() => combineRenderedReading(fragments, { ...global, foo: 1 }, f.ask, blueprint));
 });
@@ -588,15 +589,16 @@ test('.29: a file line skipping its store, a claim on another part row, a sender
   assert.equal(M.setAside(plain).length, 0);
   assert.deepEqual([plain.parts[1].type, plain.parts[1].fields, plain.parts[3].config], ['store', ['watch', 'allowed_side'], []]);
   assert.deepEqual(plain.relations.map(r => [r.from, r.to]), [['new:card', 'new:review'], ['new:review', 'new:engine'], ['new:mood', 'new:engine']]);
-  // First passes refuse with the fixed path and category; a render sees the row owner planned in another fragment.
-  validateRenderedFragment(fragments[0], groups[0], f.ask, plan);
-  let failure; try { validateRenderedFragment(fragments[0], groups[0], f.ask, plan, true); } catch (error) { failure = error; }
-  assert.deepEqual(failure.validation, { path: 'parts[0].claims[1]', rule: 'contract', category: 'wrong-part' });
-  failure = null; try { validateRenderedFragment(fragments[1], groups[1], f.ask, plan, true); } catch (error) { failure = error; }
-  assert.deepEqual(failure.validation, { path: 'parts[0].config', rule: 'contract', category: 'config' });
+  // .30: a first map's first pass sets these items aside as its correction does (no refusal, no paid correction); the stage keeps which.
+  // A render still sees the row owner planned in another fragment.
+  assert.deepEqual(validateRenderedFragment(fragments[0], groups[0], f.ask, plan, true), fragments[0]);
+  assert.deepEqual(validateRenderedFragment(fragments[1], groups[1], f.ask, plan, true), fragments[1]);
+  assert.deepEqual([fragmentSetAside(fragments[0], groups[0], f.ask, plan), fragmentSetAside(fragments[1], groups[1], f.ask, plan)],
+    [[{ path: 'parts[0].claims[1]', rule: 'contract', category: 'wrong-part' }], [{ path: 'parts[0].config', rule: 'contract', category: 'config' }]]);
   assert.deepEqual(mapStageIssues(fragments[1]), [{ path: 'parts[0].config', rule: 'contract', category: 'config', expected: null, actual: null }]);
-  failure = null; try { combineRenderedMaps(fragments, global, f.ask, plan, true); } catch (error) { failure = error; }
-  assert.deepEqual(failure.validation, { path: 'relations[0]', rule: 'contract', category: 'via-store' });
+  assert.deepEqual(combineRenderedMaps(fragments, global, f.ask, plan, true), wire);
+  // A refusal of the global stage for another reason still names its own path first, then the diagnostics of its context.
+  const failure = Object.assign(new Error('x'), { validation: { path: 'relations[0]', rule: 'contract', category: 'via-store' } });
   assert.deepEqual(mapStageIssues(global, failure), [{ path: 'relations[0]', rule: 'contract', category: 'via-store', expected: null, actual: null }]);
   // With the global stage context the diagnostics follow: no claim backs the summary; one unknown row, no unknown claim.
   assert.deepEqual(mapStageIssues(global, failure, { ask: f.ask, parts: fragments.flatMap(x => x.parts) }), [
@@ -707,13 +709,11 @@ test('.30: a wrong step, loop item, kept state or port-map row is set aside alon
   assert.deepEqual(applied.reading.exclusions.map(x => x.path), exclusions.map(x => x.path));
   assert.deepEqual(M.partUnderstanding(applied.project, engineId).steps.map(s => s.name), ['review 읽기', '기하']);
   assert.deepEqual(validateProject(applied.project), applied.project);
-  // First passes refuse with the fixed path and category: the render for its part's fields, the global stage for its rows.
-  validateRenderedFragment(fragments[1], groups[1], f.ask, plan);
-  let failure; try { validateRenderedFragment(fragments[1], groups[1], f.ask, plan, true); } catch (error) { failure = error; }
-  assert.deepEqual(failure.validation, { path: 'parts[0].steps[1]', rule: 'contract', category: 'step' });
+  // .30: a first map's first pass sets these items aside as its correction does (no refusal, no paid correction); the stage keeps which.
+  assert.deepEqual(validateRenderedFragment(fragments[1], groups[1], f.ask, plan, true), fragments[1]);
+  assert.deepEqual(fragmentSetAside(fragments[1], groups[1], f.ask, plan).map(x => [x.path, x.category]), [['parts[0].steps[1]', 'step'], ['parts[0].loop.stop', 'loop'], ['parts[0].stateVars[1]', 'state-var']]);
   const rowsOnly = { ...structuredClone(global), relations: [global.relations[1], global.relations[2]], portMap: [{ ...global.portMap[0], relation: 1 }, { ...global.portMap[2], relation: 1 }] };
-  failure = null; try { combineRenderedMaps(fragments, rowsOnly, f.ask, plan, true); } catch (error) { failure = error; }
-  assert.deepEqual(failure.validation, { path: 'portMap[1]', rule: 'contract', category: 'port-map' });
+  assert.deepEqual(combineRenderedMaps(fragments, rowsOnly, f.ask, plan, true).portMap, [rowsOnly.portMap[0]]);
   assert.deepEqual(combineRenderedReading(fragments, rowsOnly, f.ask, plan).wire.portMap, [rowsOnly.portMap[0]]);
   // A render fragment holds no port map; the global wire holds nothing else new.
   refused(() => validateRenderedFragment({ ...fragments[1], portMap: [global.portMap[0]] }, groups[1], f.ask, plan));
@@ -745,9 +745,9 @@ test('.30: a claim restating its state row is set aside where the part has a cha
   assert.deepEqual([wire.parts[3].claims.map(c => c.key), wire.parts[2].claims.map(c => c.key)], [['s101', 's102', 's104'], ['s4']]);
   assert.deepEqual(wire.relations.map(r => [r.from, r.to]), [['new:card', 'new:review'], ['new:review', 'new:engine']]);
   assert.equal(M.setAside(M.validateMapReply(wire, f.ask)).length, 0);
-  // Plain map.6 never runs the check; a render's first pass is refused for it, so the correction writes the engine's rows instead.
-  let failure; try { validateRenderedFragment(fragments[1], groups[1], f.ask, plan, true); } catch (error) { failure = error; }
-  assert.deepEqual(failure.validation, { path: 'parts[0].claims[2]', rule: 'contract', category: 'restate' });
+  // .30: a first map's first pass sets these items aside as its correction does (no refusal, no paid correction); the stage keeps which.
+  assert.deepEqual(validateRenderedFragment(fragments[1], groups[1], f.ask, plan, true), fragments[1]);
+  assert.deepEqual(fragmentSetAside(fragments[1], groups[1], f.ask, plan), [{ path: 'parts[0].claims[2]', rule: 'contract', category: 'restate' }]);
   // A part whose only claim restates its row stands with none.
   const lone = structuredClone(fragments); lone[1].parts[0].claims = [lone[1].parts[0].claims[2]];
   const read = combineRenderedReading(lone, { ...global, relations: global.relations.slice(0, 2) }, f.ask, plan);

@@ -477,6 +477,13 @@ button:disabled { opacity: .5; cursor: default; }
 .xp-cells .ledger-cell { padding: 0 6px; border: 1px solid var(--hair-2); border-radius: 3px; background: var(--surface-2); overflow-wrap: anywhere; }
 .xp-lines { margin: 0; padding: 0; list-style: none; font-size: 12.5px; line-height: 18px; color: var(--text-2); }
 .xp-lines li { overflow-wrap: anywhere; }
+/* The short expansion's steps (map-reading.9): numbered, one line each — the name, then what it does in the secondary colour,
+   cut with an ellipsis (the whole step in its title). No line between steps: their order is not read. */
+.xp-steps { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 1px; font-size: 12.5px; line-height: 18px; }
+.xp-steps li { display: flex; align-items: baseline; gap: 6px; min-width: 0; white-space: nowrap; overflow: hidden; }
+.xp-n { flex: none; min-width: 14px; font-size: 11px; color: var(--text-4); font-variant-numeric: tabular-nums; text-align: right; }
+.xp-step { flex: none; max-width: 60%; overflow: hidden; text-overflow: ellipsis; color: var(--text-2); font-weight: var(--fw-name); }
+.xp-does { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text-4); }
 /* The detail view (내부 상세): the part's boundary in the middle of the workspace, its ports on its edges, its outside partners as
    small reference cards beyond them. The rest of the map is not shown while it is open. */
 .space.detail-open #world, .space.detail-open > .controls, .space.detail-open #line-key { visibility: hidden; }
@@ -525,6 +532,31 @@ button:disabled { opacity: .5; cursor: default; }
 .dv-kids { display: flex; flex-wrap: wrap; gap: 6px; }
 .dv-kid { display: inline-flex; flex-direction: column; align-items: flex-start; padding: 4px 8px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); font-size: 12.5px; line-height: 17px; text-align: left; }
 .dv-kid:hover { border-color: var(--accent-line); color: var(--accent-strong); }
+/* The boundary's inside (spec 4): the steps stacked in the record's row order (no line between them), a port joined to a step only
+   where the record maps it, and a port mapped to none ending in its blank on the boundary. */
+.dv-inlines { z-index: 0; }
+/* With steps the boundary takes the room: narrower partner columns, ports kept to a column of their own (a long name wraps), and
+   a wider gap where a port's line curves to its step. */
+.dv-grid.has-steps { grid-template-columns: minmax(132px, 168px) minmax(420px, 760px) minmax(132px, 168px); column-gap: 48px; }
+.dv-inner.has-steps { grid-template-columns: minmax(84px, 132px) minmax(0, 1fr) minmax(84px, 132px); column-gap: 28px; }
+.dv-steps { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.dv-step { width: 100%; display: flex; flex-direction: column; align-items: stretch; gap: 2px; padding: 6px 10px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); text-align: left; font-size: 12.5px; line-height: 17px; }
+.dv-step:hover { border-color: var(--accent-line); }
+.dv-step.on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.dv-step-head { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+.dv-step-n { flex: none; min-width: 14px; font-size: 11px; color: var(--text-4); font-variant-numeric: tabular-nums; }
+.dv-step-name { min-width: 0; font-weight: var(--fw-name); color: var(--text); overflow-wrap: anywhere; }
+.dv-step.on .dv-step-name { color: var(--accent-strong); }
+.dv-step-does { padding-left: 20px; color: var(--text-3); overflow-wrap: anywhere; }
+.dv-uses { display: flex; flex-wrap: wrap; gap: 3px; padding-left: 20px; padding-top: 2px; }
+.dv-use { max-width: 100%; padding: 0 5px; border-radius: 4px; background: var(--code-soft); color: var(--code-text); font-size: 11px; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dv-port.unmapped { flex-wrap: wrap; }
+.dv-unmapped { flex-basis: 100%; font-size: 11px; line-height: 15px; color: var(--text-4); }
+.dv-ports.p-in .dv-unmapped { padding-left: 18px; }
+.dv-ports.p-out .dv-unmapped { padding-right: 18px; text-align: right; }
+.dv-keep { padding: 6px 10px; border: 1px dashed var(--line-strong); border-radius: var(--r-sm); }
+.dv-loop { margin: 0; font-size: 12.5px; line-height: 18px; color: var(--text-2); overflow-wrap: anywhere; }
+.dv-vars li { color: var(--text-3); }
 /* Parts outside the selection step back by colour, not by fading: names and second lines stay at 4.5:1 or more. */
 .space.dim .node:not(.selected):not(.related):not(.cited) { border-color: var(--hair-2); box-shadow: none; }
 .space.dim .node.has-kids:not(.item):not(.selected):not(.related):not(.cited) { box-shadow: 0 3px 0 -1px var(--surface), 0 3px 0 0 var(--hair-2); }
@@ -1978,6 +2010,33 @@ button:disabled { opacity: .5; cursor: default; }
 .lens-where h3 { margin: 0; font: var(--label); letter-spacing: var(--label-track); color: var(--text-3); }
 .where-chips { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
 .lens-where .lens-sessions { margin-top: 8px; }
+/* The pane's inside (map-reading.9): 안의 단계 M, 반복, 유지 상태, between the ports and the topics. */
+.stp-list { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.stp-step { display: flex; flex-direction: column; gap: 2px; padding: 2px 0 2px 10px; border-left: 2px solid var(--hair-2); }
+.stp-step.on { border-left-color: var(--accent); }
+.stp-top { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.stp-pick { min-width: 0; display: flex; align-items: baseline; gap: 6px; padding: 0; border: 0; background: none; text-align: left; font-size: 13px; line-height: 19px; color: var(--text); }
+.stp-pick:hover .stp-name, .stp-step.on .stp-name { color: var(--accent); }
+.stp-n { flex: none; font-size: 11px; color: var(--text-4); font-variant-numeric: tabular-nums; }
+.stp-name { min-width: 0; font-weight: var(--fw-name); overflow-wrap: anywhere; }
+.stp-does { margin: 0; padding-left: 14px; font-size: 12.5px; line-height: 1.5; color: var(--text-3); word-break: keep-all; overflow-wrap: anywhere; }
+.stp-uses { margin: 2px 0 0 14px; }
+.stp-more { margin: 4px 0 2px 14px; display: flex; flex-direction: column; gap: 2px; font-size: 12.5px; line-height: 18px; color: var(--text-2); }
+.stp-more p { margin: 0; }
+.stp-label { margin-top: 4px !important; font: var(--label); letter-spacing: var(--label-track); color: var(--text-4); }
+.stp-ports { color: var(--text-3); font-size: 12px; }
+.stp-cons { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 2px 10px; }
+.stp-cons .link-button { font-size: 12.5px; }
+.stp-cons small { color: var(--text-4); }
+.stp-blank { color: var(--text-4); }
+.stp-line { margin: 4px 0 0; display: flex; align-items: baseline; gap: 8px; font-size: 12.5px; line-height: 18px; color: var(--text-2); overflow-wrap: anywhere; }
+.stp-vars { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.stp-vars li { display: flex; flex-direction: column; font-size: 12.5px; line-height: 18px; }
+.stp-var { font-weight: var(--fw-name); color: var(--text); overflow-wrap: anywhere; }
+.stp-var small { font-weight: var(--fw-meta); color: var(--text-4); }
+.stp-var-rw { color: var(--text-3); overflow-wrap: anywhere; }
+.q-cite .cl-cite { height: 16px; padding: 0 4px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); font-size: 10.5px; line-height: 14px; font-weight: var(--fw-meta); color: var(--text-3); }
+.q-cite .cl-cite:hover, .q-cite .cl-cite:focus-visible { border-color: var(--accent-line); background: var(--accent-soft); color: var(--accent); }
 /* A row under 함께 says its verb at its right; the way-back mark follows it. */
 .port-kind + .port-came { margin-left: 6px; }
 .sync-linked { margin: 0 0 8px; padding: 0; list-style: none; display: grid; gap: 4px; }

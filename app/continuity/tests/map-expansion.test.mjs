@@ -4,7 +4,7 @@
 // back (이전 읽기 위치) keeps a bounded stack of reading positions.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { decideExpansion, placeExpansion, lineCovers, groupBody, actionSections, pushPlace, readOpenState, writeOpenState, cleanOpenState, OPEN_MAP, OPEN_KEY, SHORT_W, SHORT_H, BACK_MAX } from '../dist/public/client/expansion.js';
+import { decideExpansion, placeExpansion, lineCovers, groupBody, actionSections, loopLine, stateVarLine, pushPlace, readOpenState, writeOpenState, cleanOpenState, OPEN_MAP, OPEN_KEY, SHORT_W, SHORT_H, BACK_MAX } from '../dist/public/client/expansion.js';
 
 const card = { x: 100, y: 100, w: 240, h: 120 };
 const store = () => { const m = new Map(); return { getItem: k => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), m }; };
@@ -68,15 +68,15 @@ test('a group boundary: inside a group it stays within the group\'s body, past i
   assert.equal(decideExpansion({ w: 240, h: 220 }, { x: 96, y: 100, w: 240, h: 120 }, [body], []), 'detail', 'taller than the group');
 });
 
-test('actionSections: every list whole, in reading order; nothing for an empty list; steps once the contract carries them', () => {
+test('actionSections: every list whole, in reading order; nothing for an empty list; the steps as a numbered list', () => {
   const fields = Array.from({ length: 12 }, (_, i) => `f${i + 1}`);
   const s = actionSections({ inputs: ['a', 'b'], outputs: ['c'], fields, config: ['x 5 s', 'y'], state: '돌고 있음 · 07:46Z 기준' });
   assert.deepEqual(s.map(x => x.key), ['inputs', 'outputs', 'fields', 'config', 'state']);
   assert.deepEqual(s.find(x => x.key === 'fields').items, fields, 'all twelve fields, none cut');
   assert.equal(s.find(x => x.key === 'fields').kind, 'cells');
   assert.deepEqual(actionSections({ inputs: [], outputs: [], fields: [], config: [], state: null }), []);
-  const st = actionSections({ inputs: [], outputs: [], fields: [], config: [], state: null, steps: [{ id: 'S1', name: '행 읽기' }, { id: 'S2', name: '판단' }] });
-  assert.deepEqual(st, [{ key: 'steps', title: '기록된 단계', kind: 'lines', items: ['행 읽기', '판단'] }]);
+  const st = actionSections({ inputs: [], outputs: [], fields: [], config: [], state: null, steps: [{ name: '행 읽기', does: null, uses: [] }, { name: '판단', does: '정책을 고른다', uses: [] }] });
+  assert.deepEqual(st, [{ key: 'steps', title: '기록된 단계', kind: 'steps', items: ['행 읽기', '판단'], subs: [null, '정책을 고른다'] }]);
 });
 
 test('the open state round-trips per map and survives a reload; malformed values read as nothing open', () => {
@@ -110,4 +110,27 @@ test('the way back keeps the newest reading positions, each with its camera, sel
   assert.equal(st[0].selected, 'p3'); assert.equal(st.at(-1).selected, `p${BACK_MAX + 2}`);
   assert.equal(st.at(-1).open, null);
   assert.deepEqual(st.at(-2).open, { part: `p${BACK_MAX + 1}`, mode: 'short' });
+});
+
+// map-reading.9: what the short expansion shows of a part's inside, and in what order (the loop at its head, the kept state apart
+// from the steps); and the measurement takes them in, so the 420×280 decision stays honest.
+test('actionSections with map-reading.9: 반복 at the head, numbered steps with what each does, 유지 상태 apart', () => {
+  const steps = [{ name: '행 읽기', does: 'review.jsonl 새 행을 읽는다', uses: ['engine/read.py'] }, { name: '판단', does: null, uses: [] }];
+  const s = actionSections({ inputs: ['review 행'], outputs: ['판단 행'], fields: [], config: ['j1 60 s'], state: null, steps,
+    loop: { unit: '0.2 s 틱', stop: 'kill 파일', resume: null }, stateVars: [{ name: 'last_rung', scope: '메모리', readBy: ['판단'], changedBy: [] }] });
+  assert.deepEqual(s.map(x => x.key), ['inputs', 'outputs', 'loop', 'steps', 'stateVars', 'config']);
+  assert.deepEqual(s.find(x => x.key === 'loop'), { key: 'loop', title: '반복', kind: 'lines', items: ['반복 0.2 s 틱 · 정지 kill 파일 · 재개 미상'] });
+  assert.deepEqual(s.find(x => x.key === 'steps'), { key: 'steps', title: '기록된 단계', kind: 'steps', items: ['행 읽기', '판단'], subs: ['review.jsonl 새 행을 읽는다', null] });
+  assert.deepEqual(s.find(x => x.key === 'stateVars').items, ['상태 last_rung · 읽음 판단 · 바꿈 미상']);
+  assert.equal(loopLine({ unit: null, stop: null, resume: '다음 세션 시작' }), '반복 미상 · 정지 미상 · 재개 다음 세션 시작');
+  assert.equal(stateVarLine({ name: 'cursor', scope: null, readBy: ['행 읽기', '판단'], changedBy: ['행 읽기'] }), '상태 cursor · 읽음 행 읽기, 판단 · 바꿈 행 읽기');
+  // A loop of null, no steps, no kept state: no sections for them (earlier readings read as before).
+  assert.deepEqual(actionSections({ inputs: [], outputs: [], fields: [], config: [], state: null, steps: [], loop: null, stateVars: [] }), []);
+});
+
+test('the steps count in the 420×280 decision: twelve one-line steps under the ports no longer fit in place', () => {
+  // As styles.css lays it out: the head (≈46px), padding 24px, sections 8px apart, a title 16px, step and port lines 18px.
+  const height = (n, extra = 0) => 24 + 46 + 8 + (16 + 18) + 8 + (16 + 18) + (n ? 8 + 16 + n * 19 : 0) + extra;
+  assert.equal(decideExpansion({ w: 330, h: height(3) }, card, [OPEN_MAP], []), 'short', 'three steps fit beside the ports');
+  assert.equal(decideExpansion({ w: 420, h: height(12) }, card, [OPEN_MAP], []), 'detail', 'twelve steps take the detail view');
 });

@@ -5,7 +5,7 @@ import { MAP6_FIRST_PROMPT, MAP7_PROMPT, MAP7_RECIPE, MAP7_GUIDANCE_FRAME, MAP7_
 import { planMapPartitions, validateExtraction, extractionStageIssues, EXTRACTION_CANDIDATES_MAX } from './map-partition.mjs';
 import { callMapProvider } from './map-provider.mjs';
 import { mapPipelineKey } from './map-pipeline-store.mjs';
-import { MAP_BLUEPRINT_PROMPT, LATER_BLUEPRINT_PROMPT, validateMapBlueprint, splitBlueprintParts, validateRenderedFragment, combineRenderedMaps, combineRenderedReading, mapStageIssues, blueprintStageIssues,
+import { MAP_BLUEPRINT_PROMPT, LATER_BLUEPRINT_PROMPT, validateMapBlueprint, splitBlueprintParts, validateRenderedFragment, combineRenderedMaps, combineRenderedReading, mapStageIssues, blueprintStageIssues, fragmentSetAside, stageSetAside,
   isMapRevision, validateMapRevision, revisionGroups, mapCorrectionRevision, safeValidation, BLUEPRINT_PARTS_MAX, BLUEPRINT_PARTS_PER_FRAGMENT } from './map-blueprint.mjs';
 import { stageDiagnostic, blueprintReason, fragmentReason, globalReason, maskForKeeping } from './map-stage-diagnostic.mjs';
 
@@ -181,7 +181,10 @@ export const FINAL_GLOBAL_RULES = `
 // facts first (change → defect → withdrawal → rule → design) and a status claim restating its own state row is set aside where the
 // part has such rows (restate); a store may send to the reader whose own row quotes it. Diagnostics only: connection rows without a
 // line (connections), absorbed units with a connection row (absorbed-connection, by the record's own cell), parts named after no
-// table row (name).
+// table row (name). A first map's render and global first passes no longer refuse for an item-level problem (a claim, a list, a
+// step or row, a relation, a basis field): it is set aside at once with its diagnostic, as after a correction, and the stage keeps
+// which items (setAside); only what is structural refuses for the one correction (the first .30 run paid one correction per fragment
+// and ran out of its $1). A later map keeps its strict first passes.
 export const PIPELINE_RECIPE = 'first-map-divided.30';
 export const LATER_PIPELINE_RECIPE = 'later-map-divided.30';
 const MODELS = new Set(['gpt-6.1-sol', 'gpt-6-astra', 'gpt-6.1-terra']);
@@ -258,7 +261,8 @@ export function createFirstMapPipeline({ store, deepseekKey, openaiKey, deepseek
         try { check(value, id.endsWith('-correction')); } catch (error) { throw refusedAt(id, error, explain(value, error)); }
       };
       // correction: the stage's own one bounded correction ({ rules, reason, issues? }); a correction stage itself has none.
-      async function stage(id, { provider, model: stageModel, system, input, maxOutputTokens, check, total, reason: reasonOf = () => null, correction = null, timeout = null }, allowCorrection = true) {
+      // .30 aside: what the accepted reply had set aside on the way (fixed path, rule and category), kept beside the stage's value.
+      async function stage(id, { provider, model: stageModel, system, input, maxOutputTokens, check, total, reason: reasonOf = () => null, correction = null, timeout = null, aside = null }, allowCorrection = true) {
         if (controller.signal.aborted) throw new ApiError('CANCELLED', 499);
         const correctable = allowCorrection && !!correction;
         const correctionId = `${id}-correction`;
@@ -297,8 +301,11 @@ export function createFirstMapPipeline({ store, deepseekKey, openaiKey, deepseek
             }
             throw refusal;
           }
+          // .30: a first map's stage that set items aside on its first pass keeps which (the wire's exclusions say them again).
+          let setAside = [];
+          try { setAside = aside ? aside(kept) : []; } catch { setAside = []; }
           // A cancellation after provider completion may retain a valid checkpoint, never apply a partial map.
-          await store.complete(key, id, { value: kept, usage: output.usage });
+          await store.complete(key, id, { value: kept, usage: output.usage, ...(setAside.length ? { setAside } : {}) });
           progress({ stage: id, state: 'complete' });
           return kept;
         } catch (error) {
@@ -315,7 +322,7 @@ export function createFirstMapPipeline({ store, deepseekKey, openaiKey, deepseek
           if (correctable && checkFailed && usage && !controller.signal.aborted) {
             return stage(correctionId, { provider, model: stageModel, system: system + correction.rules,
               input: { ...input, correction: { rejected, issues, reason: correction.reason } },
-              maxOutputTokens, check, total, reason: reasonOf, correction, timeout }, false);
+              maxOutputTokens, check, total, reason: reasonOf, correction, timeout, aside }, false);
           }
           throw error;
         }
@@ -359,7 +366,8 @@ export function createFirstMapPipeline({ store, deepseekKey, openaiKey, deepseek
                   input: { INPUT: ask, blueprint, assignment: { ...group, keyStart: i * 100 + 1 },
                     ...(semanticReview ? { semanticReview, previousParts: fragments[i].parts } : {}) },
                   maxOutputTokens: renderTokens, check: (value, corrected) => { validateRenderedFragment(value, group, ask, blueprint, !corrected); },
-                  total: groups.length, reason: value => fragmentReason(value, { ...group, keyStart: i * 100 + 1 }), correction: mapCorrection });
+                  total: groups.length, reason: value => fragmentReason(value, { ...group, keyStart: i * 100 + 1 }), correction: mapCorrection,
+                  aside: later ? null : value => fragmentSetAside(value, group, ask, blueprint) });
               } catch (error) { renderFailure ??= error; }
             }
           };
@@ -387,7 +395,7 @@ export function createFirstMapPipeline({ store, deepseekKey, openaiKey, deepseek
             maxOutputTokens: renderTokens, check: (value, corrected) => {
               if (isMapRevision(value)) validateMapRevision(value, ask, blueprint);
               else combineRenderedMaps(fragments, value, ask, blueprint, !corrected);
-            }, reason: globalReason, correction: globalCorrection });
+            }, reason: globalReason, correction: globalCorrection, aside: later ? null : value => isMapRevision(value) ? [] : stageSetAside(combineRenderedReading(fragments, value, ask, blueprint).exclusions.filter(x => /^(relations|portMap|basis)/.test(x.path))) });
           if (isMapRevision(global)) revision = validateMapRevision(global, ask, blueprint);
         }
         if (revision) {
@@ -401,7 +409,7 @@ export function createFirstMapPipeline({ store, deepseekKey, openaiKey, deepseek
               // A second semantic request is a closed failure, not another format-repair opportunity.
               if (isMapRevision(value)) throw new ApiError('MAP_SEMANTIC_REVISION_EXHAUSTED', 502);
               combineRenderedMaps(fragments, value, ask, blueprint, !corrected);
-            }, reason: globalReason, correction: globalCorrection });
+            }, reason: globalReason, correction: globalCorrection, aside: later ? null : value => isMapRevision(value) ? [] : stageSetAside(combineRenderedReading(fragments, value, ask, blueprint).exclusions.filter(x => /^(relations|portMap|basis)/.test(x.path))) });
         }
         // A first map's wire leaves its set-aside items out; their reasons travel beside it (map.7 returns the raw wire, as before).
         const { wire, exclusions } = combineRenderedReading(fragments, global, ask, blueprint);

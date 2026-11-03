@@ -25,23 +25,35 @@ export interface CardBudget { io: 'both' | 'in' | 'out' | 'fold' | 'none'; body:
  * unknown ('내부 미상': the reading names no input, output, field, setting, part or step), or some (counts of what is inside). */
 export type EntryKind = 'none' | 'unknown' | 'some';
 /** What a part holds inside, as its reading and its composition give it. read: a reading spoke of the part at all. steps: the
- * recorded steps (none until the contract carries steps[]). */
-export interface EntryCounts { read: boolean; kids: number; steps: number; inputs: number; outputs: number; fields: number; config: number }
+ * recorded steps (map-reading.9 steps[]). state: the state it keeps (stateVars), which no card line names. loop: the record says
+ * how it repeats, stops or resumes (a part with only that is not '내부 미상'). Both optional for earlier callers. */
+export interface EntryCounts { read: boolean; kids: number; steps: number; inputs: number; outputs: number; fields: number; config: number; state?: number; loop?: boolean }
 /** How many settings and fields the collapsed card can name (a setting line and a loop's or timer's beat; a ledger's cells). */
 export interface EntryShown { config: number; fields: number }
 /** The entry line's kind for a part, against what its card names at most. */
 export function entryKind(c: EntryCounts, shown: EntryShown): EntryKind {
   if (!c.read) return 'none';
-  if (!c.kids && !c.steps && !c.inputs && !c.outputs && !c.fields && !c.config) return 'unknown';
-  return c.kids || c.steps || c.config > shown.config || c.fields > shown.fields ? 'some' : 'none';
+  if (!c.kids && !c.steps && !c.inputs && !c.outputs && !c.fields && !c.config && !c.state && !c.loop) return 'unknown';
+  return c.kids || c.steps || c.state || c.config > shown.config || c.fields > shown.fields ? 'some' : 'none';
 }
-/** The entry line's words: '구성 N', '기록된 단계 M', then each list the card does not name in full, by its total ('설정 K',
- * '필드 F'); '내부 미상' for a reading that names nothing inside; '' when there is no entry. */
+/** The entry line's words: '구성 N', '기록된 단계 M', '유지 상태 S', then each list the card does not name in full, by its total
+ * ('설정 K', '필드 F'); '내부 미상' for a reading that names nothing inside; '' when there is no entry. */
 export function entryParts(c: EntryCounts, shown: EntryShown): string[] {
   const kind = entryKind(c, shown);
   if (kind === 'unknown') return ['내부 미상'];
   if (kind === 'none') return [];
-  return [c.kids ? `구성 ${c.kids}` : '', c.steps ? `기록된 단계 ${c.steps}` : '', c.config > shown.config ? `설정 ${c.config}` : '', c.fields > shown.fields ? `필드 ${c.fields}` : ''].filter(Boolean);
+  return [c.kids ? `구성 ${c.kids}` : '', c.steps ? `기록된 단계 ${c.steps}` : '', c.state ? `유지 상태 ${c.state}` : '', c.config > shown.config ? `설정 ${c.config}` : '', c.fields > shown.fields ? `필드 ${c.fields}` : ''].filter(Boolean);
+}
+
+/** A setting that reads as a beat or an interval: a loop's frame names one only when the record wrote it. */
+export const CADENCE = /\d\s*(ms|s|sec|m|min|h|d)\b|\d\s*(초|분|시간|일)|간격|주기|마다|매\s?\S|interval|every|cadence|tick|cron|poll|period/i;
+/** A loop card's one structural line (spec 2.1, 반복 단위를 머리에): the unit the record gives for its repeat (map-reading.9
+ * loop.unit) first, else the first setting that reads as a beat ('반복 · 60 s'), else '반복 단위 ?'. used: the setting the line
+ * already names (the setting line then shows another); none while the unit stands. Never a beat made up from a name. */
+export function loopBody(unit: string | null | undefined, config: readonly string[]): { text: string; used: string | null } {
+  if (unit) return { text: `반복 · ${unit}`, used: null };
+  const used = config.find(c => CADENCE.test(c)) ?? null;
+  return { text: used ? `반복 · ${used}` : '반복 단위 ?', used };
 }
 
 /** The map's zoom levels (spec 4, 세 확대 단계): 개요 (overview), 중간 (mid) and 상세 (detail). */

@@ -423,9 +423,22 @@ export function validateRenderedFragment(value, group, ask, blueprint, strict = 
   try { read = validateMapReply(projected, ask, { ...DIVIDED_SET_ASIDE, owners: planned.parts.map(part => part.name) }); } catch (error) { invalid(error); }
   // .25: a first pass that would lose a claim, or a part's state or files, to a wrong optional field is refused instead, so the
   // one correction rewrites it with the fixed path and category (the correction's reply is read leniently, as before).
-  if (strict) refuseField(readingExclusions(read), PARTS_SCOPE);
+  // .30: a later map (map.7) only. A first map (map.6) sets every such item aside on its first pass too, with its diagnostic: the
+  // first .30 run spent its $1 on one correction per fragment (wrong-part, restate, fields) and could not reserve the last one.
+  // The strict pass still refuses what is structural (the shape, refs, keys, key ranges, a part left empty) and a claim over 220.
+  if (strict && ask.schemaVersion !== 'studio.map.6') refuseField(readingExclusions(read), PARTS_SCOPE);
   return structuredClone(value);
 }
+/** .30: what a first-map fragment's own reading sets aside (fixed path, rule and category only), for the stage's record. */
+export function fragmentSetAside(value, group, ask, blueprint) {
+  try {
+    const planned = validateMapBlueprint(blueprint, ask), projected = structuredClone(value);
+    for (const part of projected.parts) if (NEW.test(part.ref)) part.parent = null;
+    return stageSetAside(readingExclusions(validateMapReply(projected, ask, { ...DIVIDED_SET_ASIDE, owners: planned.parts.map(part => part.name) })));
+  } catch { return []; }
+}
+/** .30: the fixed reasons of a stage's set-aside items as a stage record keeps them (never a position or an explanation). */
+export const stageSetAside = exclusions => exclusions.slice(0, DIVIDED_EXCLUSIONS_MAX).map(x => ({ path: x.path, rule: x.rule, category: x.category ?? null }));
 /** .25: the optional fields of map-reading.7 (map-reading.ts), by the place a set-aside names or by its contract category. */
 const FIELD_PATH = /(\.(topic|evidence|when|where|before|state|stateAt|stateWhen|files|payload|cadence|mode|type|typeAt|inputs|outputs|fields|config|channel|steps|loop|stateVars)|^basis(At|Version)|\.(steps|stateVars)\[\d+\](\.at)?|\.loop\.(unit|stop|resume|at)|^portMap(\[\d+\](\.at)?)?)$/;
 const FIELD_CATEGORIES = new Set(['topic', 'evidence', 'when', 'where', 'before', 'state', 'state-at', 'state-when', 'files', 'payload', 'cadence', 'mode',
@@ -506,7 +519,8 @@ function withoutSetAside(raw, exclusions) {
  * set-aside items left out (see withoutSetAside), proven to read whole under plain map.6 into the very same reply, plus the
  * durable reasons (fixed path/rule/category/position, never the rejected text) for the browser's saved reading. */
 /* .25 strict (a global stage's first pass): a relation set aside for a wrong optional field refuses the stage instead, so its one
- * correction rewrites it; a fragment's own fields were the render stage's to correct and never refuse the global stage. */
+ * correction rewrites it; a fragment's own fields were the render stage's to correct and never refuse the global stage.
+ * .30: for a later map (map.7) only; a first map reads its first pass as leniently as its correction (strict is not used). */
 export function combineRenderedReading(fragments, global, ask, blueprint, strict = false) {
   const planned = validateMapBlueprint(blueprint, ask), groups = splitBlueprintParts(planned);
   if (!Array.isArray(fragments) || fragments.length !== groups.length || !wireShape(global) || global.parts.length) invalid();
@@ -526,7 +540,8 @@ export function combineRenderedReading(fragments, global, ask, blueprint, strict
   let soft;
   try { soft = validateMapReply(combined, ask, { ...DIVIDED_SET_ASIDE, owners: planned.parts.map(part => part.name) }); } catch (error) { invalid(error); }
   const exclusions = structuredClone(readingExclusions(soft));
-  if (strict) refuseField(exclusions, RELATIONS_SCOPE);
+  // .30: a first map's global first pass sets its relations, port-map rows and basis fields aside like its correction does (only a
+  // later map refuses them for its one correction); what is structural still refuses below and in validateMapReply.
   if (exclusions.length > DIVIDED_EXCLUSIONS_MAX) invalid({ validation: { path: 'reply', rule: 'contract' } });
   const wire = withoutSetAside(combined, exclusions);
   try {

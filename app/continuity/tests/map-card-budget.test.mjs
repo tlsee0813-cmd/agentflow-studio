@@ -4,7 +4,7 @@
 // the head are never dropped. And layoutScope's typed card: drawn at UNIT_W without its note, its room asked with its name's lines.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { typedBudget, typedPx, typedLines, zoomLevel, entryKind, entryParts, CARD_LINES, OVERVIEW_MAX, MID_MAX, LINE_H, LINE_GAP, CHIPS_H } from '../dist/public/client/card-budget.js';
+import { typedBudget, typedPx, typedLines, zoomLevel, entryKind, entryParts, loopBody, CADENCE, CARD_LINES, OVERVIEW_MAX, MID_MAX, LINE_H, LINE_GAP, CHIPS_H } from '../dist/public/client/card-budget.js';
 import { createProject, addArea, addChildArea } from '../dist/public/shared/domain.js';
 import { studioView } from '../dist/public/shared/studio.js';
 import { layoutScope, UNIT_W } from '../dist/public/client/map-layout.js';
@@ -174,4 +174,28 @@ test('the entry line by zoom level: kept at 중간 and 상세, not at 개요; it
   const gap = 3, with_ = typedBudget(1, false, true, true, false, 'none', 'detail', 'some'), without = typedBudget(1, false, true, true, false);
   assert.deepEqual(typedLines(with_, null), [LINE_H, LINE_H, LINE_H]);
   assert.equal(typedPx(with_, null, gap) - typedPx(without, null, gap), LINE_H + LINE_GAP);
+});
+
+// map-reading.9: the entry line counts the recorded steps ('기록된 단계 M') and the kept state ('유지 상태 S'); a part whose
+// reading names only a loop or only kept state is not '내부 미상'. A loop card's body names the record's repeat unit first.
+test('entry words with map-reading.9: 기록된 단계 M, 유지 상태 S, and a loop or kept state alone is not 내부 미상', () => {
+  const most = { config: 1, fields: 3 };
+  assert.deepEqual(entryParts(counts({ inputs: 1, outputs: 1, steps: 5 }), most), ['기록된 단계 5']);
+  assert.deepEqual(entryParts(counts({ steps: 4, state: 2 }), most), ['기록된 단계 4', '유지 상태 2'], 'steps, then the kept state');
+  assert.deepEqual(entryParts(counts({ kids: 3, steps: 12, state: 1, config: 4 }), most), ['구성 3', '기록된 단계 12', '유지 상태 1', '설정 4']);
+  assert.equal(entryKind(counts({ loop: true }), most), 'none', 'a loop alone: the card names it, nothing to count');
+  assert.notEqual(entryKind(counts({ loop: true }), most), 'unknown');
+  assert.deepEqual(entryParts(counts({ state: 3 }), most), ['유지 상태 3']);
+  // Earlier callers without the new counts read as before.
+  assert.deepEqual(entryParts(counts({ inputs: 2, steps: 3 }), most), ['기록된 단계 3']);
+  assert.deepEqual(entryParts(counts(), most), ['내부 미상']);
+});
+
+test('loopBody: the record\'s repeat unit first, else the first beat-like setting, 반복 단위 ? only when both are missing', () => {
+  assert.deepEqual(loopBody('호가 틱마다', ['j1_cadence 60 s', '618df374']), { text: '반복 · 호가 틱마다', used: null }, 'the unit stands; the beat stays for the setting line');
+  assert.deepEqual(loopBody(null, ['618df374', 'j1_cadence 60 s']), { text: '반복 · j1_cadence 60 s', used: 'j1_cadence 60 s' });
+  assert.deepEqual(loopBody(undefined, ['감시 주기 0.2 s']), { text: '반복 · 감시 주기 0.2 s', used: '감시 주기 0.2 s' });
+  assert.deepEqual(loopBody(null, ['618df374', '카드 폭 240']), { text: '반복 단위 ?', used: null }, 'no unit, no beat: the blank says so');
+  assert.deepEqual(loopBody('', []), { text: '반복 단위 ?', used: null });
+  assert.ok(CADENCE.test('60 s 폴링') && CADENCE.test('매 00:30Z') && !CADENCE.test('618df374'));
 });

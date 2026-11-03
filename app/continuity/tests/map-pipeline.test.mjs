@@ -1253,3 +1253,34 @@ test('.30 rule sentences: every connection row a line, absorption into the group
   for (const rule of ['부분의 steps·loop·stateVars, 응답의 basisAt·basisVersion·portMap', 'category가 step이면', 'loop이면', 'state-var이면', 'port-map이면', 'restate이면']) assert.ok(P.CORRECTION_RULES.includes(rule), rule);
   assert.ok(!P.RENDER_RULES.includes('4개를 넘으면 원문 순서대로 앞의 4개만 쓴다'), 'the old four-settings cut is gone');
 });
+
+test('.30: a first map sets item-level problems aside on the first pass (no correction is paid) and each stage keeps which items it set aside', async t => {
+  const { dir, make } = await setup(t), f = projectFor(), calls = [];
+  const pipeline = make({ callProvider: fakeProvider(f.ask, calls, call => {
+    if (call.stage === 'render') {
+      const fragment = payloadFor(call.input, f.ask, originalWire(f.ask)), part = fragment.parts[0];
+      Object.assign(part, { type: 'engine', typeAt: part.basis[0], fields: Array.from({ length: 25 }, (_, i) => `f${i}`), config: ['618df374'],
+        steps: [{ name: '없는 행', at: 'N01.99' }] });
+      return fragment;
+    }
+    if (call.stage === 'global') return { ...payloadFor(call.input, f.ask, originalWire(f.ask)), basisAt: '가'.repeat(61) };
+  }) });
+  const { wire, exclusions } = await pipeline.read(f.ask);
+  assert.equal(calls.some(c => c.input.correction), false, 'no paid correction for an item-level problem');
+  assert.deepEqual(exclusions.map(x => `${x.path} ${x.category}`).sort(), ["parts[0].fields fields", "parts[0].config config", "parts[0].type type", "parts[0].steps[0] step", "basisAt basis-at"].sort());
+  assert.deepEqual([wire.parts[0].type, wire.parts[0].fields, wire.parts[0].config, wire.parts[0].steps, wire.basisAt], [null, null, null, [], null]);
+  browserApply(f, wire, exclusions, 8);
+  const saved = JSON.parse(await readFile(join(dir, 'pipeline.json'), 'utf8')), stages = Object.values(saved.body.jobs).at(-1).stages;
+  const render = Object.entries(stages).find(([id]) => id.startsWith('render-'))[1], global = stages.global;
+  assert.deepEqual(render.setAside.map(x => x.category).sort(), ['config', 'fields', 'step', 'type']);
+  assert.deepEqual(global.setAside, [{ path: 'basisAt', rule: 'contract', category: 'basis-at' }]);
+  assert.ok(!JSON.stringify(render.setAside).includes('618df374'), 'only fixed paths, rules and categories are kept');
+  // A structural problem still refuses the first pass and pays its one correction.
+  const s2 = await setup(t), calls2 = [];
+  const strict = s2.make({ callProvider: fakeProvider(f.ask, calls2, call => {
+    if (call.stage !== 'render' || call.input.correction) return;
+    const fragment = payloadFor(call.input, f.ask, originalWire(f.ask)); fragment.parts[0].ref = 'new:other'; return fragment;
+  }) });
+  await strict.read(f.ask);
+  assert.equal(calls2.filter(c => c.stage === 'render' && c.input.correction).length, 1, 'a wrong part ref is corrected once');
+});

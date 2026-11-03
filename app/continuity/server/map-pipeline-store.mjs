@@ -87,6 +87,10 @@ function usageTokens(usage) {
   const output = usage.output_tokens ?? usage.outputTokens ?? usage.completion_tokens;
   return natural(input) && natural(output) ? [input, output] : null;
 }
+/** .30: what a completed first-map stage set aside on its first pass: fixed paths, rules and categories only (at most 64). */
+const validSetAside = list => Array.isArray(list) && list.length >= 1 && list.length <= 64 && list.every(x => plain(x) && Object.keys(x).length === 3
+  && typeof x.path === 'string' && x.path.length <= 160 && /^[A-Za-z]+(\[\d{1,4}\])?(\.[A-Za-z]+(\[\d{1,4}\])?)*$/.test(x.path)
+  && typeof x.rule === 'string' && /^[a-z][a-z-]{0,39}$/.test(x.rule) && (x.category === null || typeof x.category === 'string' && /^[a-z][a-z-]{0,39}$/.test(x.category)));
 function validate(body) {
   if (!plain(body) || !plain(body.jobs) || Object.keys(body.jobs).length > 10000) throw Error('damaged');
   for (const [key, job] of Object.entries(body.jobs)) {
@@ -95,6 +99,7 @@ function validate(body) {
       if (!validStage(name) || !plain(stage) || !['running', 'complete', 'failed', 'uncertain'].includes(stage.state) || !Array.isArray(stage.attempts) || !stage.attempts.length) throw Error('damaged');
       if (stage.state === 'complete' && !own(stage, 'value')) throw Error('damaged');
       if (own(stage, 'diagnostic') && !validDiagnostic(stage.diagnostic)) throw Error('damaged');
+      if (own(stage, 'setAside') && (stage.state !== 'complete' || !validSetAside(stage.setAside))) throw Error('damaged');
       for (const a of stage.attempts) {
         if (!plain(a) || !/^\d{4}-\d{2}$/.test(a.month) || !natural(a.inputBytes) || !natural(a.maxOutputTokens) || !natural(a.reserved) || !natural(a.charged) || a.charged > a.reserved || cost(a.provider, a.model, a.inputBytes, a.maxOutputTokens) !== a.reserved) throw Error('damaged');
       }
@@ -184,6 +189,7 @@ export async function openMapPipelineStore({ dir, monthlyUsd = 20, runUsd = 1, n
         if (!own(options, 'value') || options.value === undefined) throw new ApiError('MAP_PIPELINE_INVALID', 400);
         // JSON round trip prevents an in-memory success that cannot survive a restart.
         s.value = JSON.parse(JSON.stringify(options.value)); s.state = 'complete';
+        if (own(options, 'setAside')) { if (!validSetAside(options.setAside)) throw new ApiError('MAP_PIPELINE_INVALID', 400); s.setAside = JSON.parse(JSON.stringify(options.setAside)); }
       } else {
         s.state = options.uncertain === false ? 'failed' : 'uncertain';
         const diagnostic = stageDiagnostic(options.diagnostic, date().toISOString());
