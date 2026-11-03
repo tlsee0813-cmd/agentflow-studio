@@ -91,6 +91,10 @@ test('FIX68-1 an import is added only once its own places and empty view are kep
   await assert.rejects(store.create(p, 'import', ref.entryId));
 });
 
+test('FIX68-0 a saved camera keeps the window size it was saved in when it is sound, and nothing else', () => {
+  assert.deepEqual(cleanViewState({ folds: {}, cameras: { '': { x: 1, y: 2, scale: 1, win: [1440, 900] } } }).cameras[''], { x: 1, y: 2, scale: 1, win: [1440, 900] });
+  for (const win of [[1440], [0, 900], ['a', 900], [1e6, 900], null, 'x']) assert.deepEqual(cleanViewState({ folds: {}, cameras: { '': { x: 1, y: 2, scale: 1, win } } }).cameras[''], { x: 1, y: 2, scale: 1 }, JSON.stringify(win));
+});
 test('FIX68-1 views kept by project id (view.1 before entries) carry over to the entries that had them; an import starts empty', async () => {
   const kv = memory(), p = salon(), [a] = p.space.areas;
   const before = { folds: { [a.id]: false }, cameras: { '': { x: 12, y: -30, scale: 0.85 } } };

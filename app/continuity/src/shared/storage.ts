@@ -55,8 +55,11 @@ export function cleanViewState(v:unknown):ViewState {
   if(folds&&typeof folds==='object'&&!Array.isArray(folds))for(const [k,b] of Object.entries(folds))if(typeof b==='boolean'&&k&&!(k in Object.prototype))out.folds[k]=b;
   if(cameras&&typeof cameras==='object'&&!Array.isArray(cameras))for(const [k,c] of Object.entries(cameras)){
     if(k in Object.prototype)continue;
-    const {x,y,scale}=(c??{}) as {x?:unknown;y?:unknown;scale?:unknown};
-    if(typeof x==='number'&&typeof y==='number'&&typeof scale==='number'&&Number.isFinite(x)&&Number.isFinite(y)&&Math.abs(x)<1e7&&Math.abs(y)<1e7&&scale>=0.1&&scale<=4)out.cameras[k]={x,y,scale};
+    const {x,y,scale,win}=(c??{}) as {x?:unknown;y?:unknown;scale?:unknown;win?:unknown};
+    if(typeof x==='number'&&typeof y==='number'&&typeof scale==='number'&&Number.isFinite(x)&&Number.isFinite(y)&&Math.abs(x)<1e7&&Math.abs(y)<1e7&&scale>=0.1&&scale<=4){
+      const size=Array.isArray(win)&&win.length===2&&win.every(n=>typeof n==='number'&&Number.isFinite(n)&&n>0&&n<1e5)?[win[0],win[1]] as [number,number]:null;
+      out.cameras[k]=size?{x,y,scale,win:size}:{x,y,scale};
+    }
   }
   return out;
 }

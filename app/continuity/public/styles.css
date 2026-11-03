@@ -164,6 +164,8 @@ button:disabled { opacity: .5; cursor: default; }
 .program-name { min-width: 0; font-size: 17px; line-height: 24px; font-weight: 700; letter-spacing: -.02em; color: var(--text); word-break: keep-all; overflow-wrap: anywhere; }
 .program-head:hover .program-name { color: var(--accent); }
 .program-brief { font-size: 13.5px; line-height: 1.55; color: var(--text-2); word-break: keep-all; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.program-brief.ai { color: var(--text-3); }
+.program-brief-tag { display: inline-block; vertical-align: 1px; margin-right: 2px; padding: 0 5px; border-radius: 4px; font-size: 10.5px; line-height: 15px; font-weight: 600; letter-spacing: .01em; color: var(--accent); background: rgba(21,94,239,.08); }
 .program-meta { margin-top: 2px; font-size: 12px; line-height: 16px; color: var(--text-4); font-variant-numeric: tabular-nums; }
 /* When the meta line comes as separate items, the separator is drawn here, quieter than the words. */
 .program-meta > span + span::before { content: "·"; margin: 0 6px; color: var(--line-strong); }

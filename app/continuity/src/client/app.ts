@@ -7,7 +7,7 @@ import { parseBackup, cleanPositions } from '../shared/validation.js';
 import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, removePastedRecord, provideRecord, secretPasted, correctReadingRole } from '../shared/domain.js';
 import { CLAIM_LABEL, stateLabel, revisedRelations, candidateReading, type Applied, type CurrentClaim, type PartUnderstanding } from '../shared/map-reading.js';
 import { roleEvidence } from './role-evidence.js';
-import type { ClaimKind, ReadingQuote } from '../shared/types.js';
+import type { ClaimKind, ReadingQuote, SavedCamera } from '../shared/types.js';
 import { createMapRun, sendLine, JOB_NOTE, type MapRunState } from './map-run.js';
 import { mapBatchLines, mapPendingText } from '../shared/map-route.js';
 import { JobReservations, JOBS_KEY, type JobLocks } from './map-jobs.js';
@@ -145,7 +145,10 @@ function savePositions(o: Opened) { if (o.kind === 'saved') writeEntryPositions(
 /* Scope = the part whose inside is shown (null = whole project). Each scope keeps its own camera for the way back. */
 let scope: string | null = null;
 let lay: ScopeLayout = { boxes: new Map(), edges: [], heads: [], bounds: { x: 0, y: 0, w: 0, h: 0 }, spine: [] };
-const cameras = new Map<string, { x: number; y: number; k: number }>();
+const cameras = new Map<string, { x: number; y: number; k: number; win?: [number, number] }>();
+const winSize = (): [number, number] => [window.innerWidth, window.innerHeight];
+/** Whether a camera saved in a window of that size still fits this one: both sides within a quarter. An unknown size is taken. */
+const sameWindow = (win?: [number, number]) => !win || (Math.abs(win[0] - window.innerWidth) <= window.innerWidth / 4 && Math.abs(win[1] - window.innerHeight) <= window.innerHeight / 4);
 const expandState = new Map<string, boolean>();
 const camKey = (o: Opened, s: string | null) => `${o.key}|${s ?? ''}`;
 /* Folds and per-scope cameras outlive a reload: own record per opened map (a saved project by its workspace entry, like its
@@ -159,17 +162,17 @@ function loadView(o: Opened) {
   for (const [k, open] of Object.entries(v.folds)) { const id = liveId(o, k); if (partOf(o, id)) expandState.set(`${o.key}|${id}`, open); }
   for (const [k, c] of Object.entries(v.cameras)) {
     const id = k ? liveId(o, k) : null; if (id && !partOf(o, id)?.childIds.length) continue;
-    if (!cameras.has(camKey(o, id))) cameras.set(camKey(o, id), { x: c.x, y: c.y, k: Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, c.scale)) });
+    if (!cameras.has(camKey(o, id))) cameras.set(camKey(o, id), { x: c.x, y: c.y, k: Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, c.scale)), ...(c.win ? { win: c.win } : {}) });
   }
 }
 let viewTimer = 0, viewFor: Opened | null = null;
 function saveViewSoon() { const o = opened; if (!o) return; if (viewFor && viewFor !== o) flushView(); viewFor = o; clearTimeout(viewTimer); viewTimer = window.setTimeout(flushView, 400); }
 function flushView() {
   clearTimeout(viewTimer); const o = viewFor; viewFor = null; if (!o) return;
-  if (opened === o) cameras.set(camKey(o, scope), { ...camera });
-  const prefix = `${o.key}|`, folds: Record<string, boolean> = {}, cams: Record<string, { x: number; y: number; scale: number }> = {};
+  if (opened === o) cameras.set(camKey(o, scope), { ...camera, win: winSize() });
+  const prefix = `${o.key}|`, folds: Record<string, boolean> = {}, cams: Record<string, SavedCamera> = {};
   for (const [k, v] of expandState) if (k.startsWith(prefix)) folds[stableId(o, k.slice(prefix.length))] = v;
-  for (const [k, c] of cameras) if (k.startsWith(prefix)) { const sc = k.slice(prefix.length); cams[sc ? stableId(o, sc) : ''] = { x: c.x, y: c.y, scale: c.k }; }
+  for (const [k, c] of cameras) if (k.startsWith(prefix)) { const sc = k.slice(prefix.length); cams[sc ? stableId(o, sc) : ''] = { x: c.x, y: c.y, scale: c.k, ...(c.win ? { win: c.win } : {}) }; }
   writeViewState(kv, viewKeyOf(o), { folds, cameras: cams });
 }
 /** Direct children of the scope open as frames; deeper parts stay folded until opened. */
@@ -314,7 +317,7 @@ async function render() {
   // The wide reading belongs to the place it was opened from: another address closes it, restoring nothing.
   wide.drop();
   const r = route();
-  if (!r.key) { quoteBack = null; if (opened) cameras.set(camKey(opened, scope), { ...camera }); flushView(); planView.close(false); if (toastKey) dropToast(); forgetVisits(); opened = null; selected = null; scope = null; renderHome(); autoSync.render(); return; }
+  if (!r.key) { quoteBack = null; if (opened) cameras.set(camKey(opened, scope), { ...camera, win: winSize() }); flushView(); planView.close(false); if (toastKey) dropToast(); forgetVisits(); opened = null; selected = null; scope = null; renderHome(); autoSync.render(); return; }
   const next = projectFor(r.key);
   if (!next) { go(null); return; }
   const fresh = opened?.key !== next.key;
@@ -334,7 +337,7 @@ async function render() {
   const idOf = (x: string | null) => (x ? next.alias?.toId.get(x) ?? x : null), routeScope = idOf(r.scope), routePart = idOf(r.part);
   const nextScope = routeScope && next.view.parts.some(p => p.id === routeScope && p.childIds.length) ? routeScope : null;
   if (fresh || nextScope !== scope) {
-    if (opened) cameras.set(camKey(opened, scope), { ...camera });
+    if (opened) cameras.set(camKey(opened, scope), { ...camera, win: winSize() });
     if (fresh) { flushView(); scenes = []; }
     else if (backing || (back && scenes.at(-1)?.scope === back.from.scope)) scenes.pop();
     else scenes.push({ scope, selected });
@@ -593,6 +596,14 @@ function programAvatar(name: string): HTMLElement {
   let n = 0; for (const c of name) n = (n * 31 + c.codePointAt(0)!) >>> 0;
   return h('span', { class: 'program-avatar', 'data-tone': String(n % 6), 'aria-hidden': 'true' }, first.toUpperCase());
 }
+/** The card's one line about the project: its written brief; without one, what the latest map reading said of the whole
+ * (marked as the AI's reading, since nobody wrote it); without either, that nothing was written yet. */
+function briefLine(p: Project): HTMLElement {
+  if (p.space.brief?.text) return h('span', { class: 'program-brief' }, p.space.brief.text);
+  const last = [...p.readings].reverse().find(isMapReading);
+  if (last?.summary) return h('span', { class: 'program-brief ai', title: 'AI가 기록을 읽고 쓴 요약이에요. 설명은 지도 제목 옆에서 직접 쓸 수 있어요.' }, h('span', { class: 'program-brief-tag' }, 'AI 정리'), ' ', last.summary);
+  return h('span', { class: 'program-brief' }, '아직 설명이 없어요.');
+}
 function programCard(key: string, p: Project, example: boolean, keyOf: (id: string) => string): HTMLElement {
   const v = studioView(p), pasted = p.pasted.at(-1)?.at ?? null, lastAt = [v.records[0]?.at ?? null, pasted].filter((x): x is string => !!x).sort().at(-1) ?? null;
   const changed = v.parts.filter(x => recentAt(x.lastAt)).length;
@@ -621,7 +632,7 @@ function programCard(key: string, p: Project, example: boolean, keyOf: (id: stri
   const tryPlan = key === CONVERTER_KEY ? h('a', { class: 'program-try', href: base, onclick: () => { openPlanOnArrive = true; } }, h('strong', {}, '변경 구상 시험해 보기'), h('span', {}, '폴더째 변환 · 지금과 구상을 같은 자리에서 비교')) : null;
   return h('li', {}, h('article', { class: `program${example ? ' is-example' : ''}` },
     h('a', { class: 'program-head', href: base },
-      h('span', { class: 'program-title' }, programAvatar(p.name), h('strong', { class: 'program-name' }, p.name)), h('span', { class: 'program-brief' }, p.space.brief?.text ?? '아직 설명이 없어요.'), h('span', { class: 'program-meta' }, ...meta),
+      h('span', { class: 'program-title' }, programAvatar(p.name), h('strong', { class: 'program-name' }, p.name)), briefLine(p), h('span', { class: 'program-meta' }, ...meta),
       !example && key !== 'legacy' ? runBadgeFor(key) : null),
     h('div', { class: 'program-body' }, section, cont, tryPlan, tryReturn,
       !example && key !== 'legacy' ? h('button', { type: 'button', class: 'link-button quiet program-backup', title: '붙여넣은 원문 기록과 옮긴 위치를 함께 담은 백업 파일을 내려받아요', onclick: () => saveBackup(key, p) }, '백업 저장') : null)));
@@ -937,7 +948,8 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   renderPartForm();
   renderMapEntry();
   renderRecent();
-  const saved = cameraMode === 'restore' ? cameras.get(camKey(o, scope)) : undefined;
+  // A camera saved in a window of another size (a quarter or more each way) is not restored: the map is fitted here instead.
+  const kept = cameraMode === 'restore' ? cameras.get(camKey(o, scope)) : undefined, saved = kept && sameWindow(kept.win) ? kept : undefined;
   if (cameraMode === 'keep') applyCamera();
   else if (saved) { camera = { ...saved }; applyCamera(); }
   else fitView(false);
