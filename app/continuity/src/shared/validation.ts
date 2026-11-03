@@ -388,8 +388,8 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       ensure(areaIds.has(r.areaId as string));text(r.text,300);ensure(r.corrects===null||seen.has(r.corrects as string));continue;
     }
     const version=!!r&&typeof r==='object'?(r as {version?:unknown}).version:null;
-    const eight=version==='map-reading.8',seven=eight||version==='map-reading.7',six=seven||version==='map-reading.6',five=six||version==='map-reading.5';four=five||version==='map-reading.4';const three=four||version==='map-reading.3',two=three||version==='map-reading.2';records=four?asRead:raw;
-    obj(r,['version','id','at','model','prompt','hash','records','summary','parts','relations','candidates','gaps','skipped',...(two?['requests','matches']:[]),...(four?['material']:[]),...(six?['exclusions']:[]),...(eight?['basisAt','basisVersion']:[])]);ensure(r.version==='map-reading.1'||two);
+    const nine=version==='map-reading.9',eight=nine||version==='map-reading.8',seven=eight||version==='map-reading.7',six=seven||version==='map-reading.6',five=six||version==='map-reading.5';four=five||version==='map-reading.4';const three=four||version==='map-reading.3',two=three||version==='map-reading.2';records=four?asRead:raw;
+    obj(r,['version','id','at','model','prompt','hash','records','summary','parts','relations','candidates','gaps','skipped',...(two?['requests','matches']:[]),...(four?['material']:[]),...(six?['exclusions']:[]),...(eight?['basisAt','basisVersion']:[]),...(nine?['portMap']:[])]);ensure(r.version==='map-reading.1'||two);
     // map-reading.8: the records' own basis time and target version, as written, or null.
     if(eight){if(r.basisAt!==null)text(r.basisAt,60);if(r.basisVersion!==null)text(r.basisVersion,60);}
     id(r.id);ensure(!entries.has(r.id as string));entries.add(r.id as string);date(r.at);text(r.model,80);text(r.prompt,40);ensure(typeof r.hash==='string'&&/^[0-9a-f]{64}$/.test(r.hash)&&!hashes.has(r.hash));hashes.add(r.hash as string);
@@ -399,10 +399,20 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
     read=r.records as {id:string;from:number;to:number}[];
     text(r.summary,200,true);list(r.parts,64);const claims=new Map<string,number>(),parts=new Set<string>();
     for(const p of r.parts){
-      obj(p,['areaId','created','role','roleAbout','roleReplaces','basis','claims',...(seven?['state','stateWhen','stateQuote','files']:[]),...(eight?['type','typeQuote','inputs','outputs','fields','config']:[])]);if(p.roleAbout!==null){ensure(p.role!==null);text(p.roleAbout,80);}
+      obj(p,['areaId','created','role','roleAbout','roleReplaces','basis','claims',...(seven?['state','stateWhen','stateQuote','files']:[]),...(eight?['type','typeQuote','inputs','outputs','fields','config']:[]),...(nine?['steps','loop','stateVars']:[])]);if(p.roleAbout!==null){ensure(p.role!==null);text(p.roleAbout,80);}
       // map-reading.8: the record's own type word with its passage (none: both null), and the part's interface, fields and settings.
+      // map-reading.9 holds eight inputs and outputs, 24 fields and eight settings; a map-reading.8 entry keeps its six, twelve and four.
+      const unique=(v:unknown)=>ensure(new Set(v as unknown[]).size===(v as unknown[]).length);
       if(eight){ensure(p.type===null||PART_TYPES.includes(p.type as never));if(p.type===null)ensure(p.typeQuote===null);else quote(p.typeQuote);
-        for(const [k,n,len] of [['inputs',6,60],['outputs',6,60],['fields',12,40],['config',4,80]] as const){list(p[k],n);for(const f of p[k] as unknown[])text(f,len);ensure(new Set(p[k] as unknown[]).size===(p[k] as unknown[]).length);}}
+        for(const [k,n,len] of [['inputs',nine?8:6,60],['outputs',nine?8:6,60],['fields',nine?24:12,40],['config',nine?8:4,80]] as const){list(p[k],n);for(const f of p[k] as unknown[])text(f,len);unique(p[k]);}}
+      // map-reading.9: the part's steps (each on its row), its loop (at least one of unit, stop, resume, on its line) and kept state.
+      if(nine){
+        list(p.steps,12);for(const s of p.steps as unknown[]){obj(s,['name','does','uses','quote']);text(s.name,40);if(s.does!==null)text(s.does,120);list(s.uses,4);for(const u of s.uses as unknown[])text(u,60);unique(s.uses);quote(s.quote);}
+        unique((p.steps as {name:unknown}[]).map(s=>s.name));
+        if(p.loop!==null){obj(p.loop,['unit','stop','resume','quote']);for(const k of ['unit','stop','resume'] as const)if(p.loop[k]!==null)text(p.loop[k],60);ensure(p.loop.unit!==null||p.loop.stop!==null||p.loop.resume!==null);quote(p.loop.quote);}
+        list(p.stateVars,8);for(const s of p.stateVars as unknown[]){obj(s,['name','scope','readBy','changedBy']);text(s.name,40);if(s.scope!==null)text(s.scope,40);for(const k of ['readBy','changedBy'] as const){list(s[k],4);for(const u of s[k] as unknown[])text(u,40);unique(s[k]);}}
+        unique((p.stateVars as {name:unknown}[]).map(s=>s.name));
+      }
       if(p.roleReplaces!==null){ensure(p.role!==null&&p.created===null);quote(p.roleReplaces);}ensure(areaIds.has(p.areaId as string)&&!parts.has(p.areaId as string));parts.add(p.areaId as string);
       if(p.created!==null){obj(p.created,['name','parentId']);text(p.created.name,60);ensure(p.created.parentId===null||areaIds.has(p.created.parentId as string));}
       if(p.role!==null)text(p.role,300);list(p.basis,4);for(const q of p.basis)quote(q);ensure(p.created===null||(p.basis as unknown[]).length>0);
@@ -418,7 +428,16 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       });
       claims.set(p.areaId as string,(p.claims as unknown[]).length);
     }
-    list(r.relations,32);for(const x of r.relations){obj(x,['relationId','from','to','kind','quote',...(seven?['payload','cadence','mode']:[]),...(eight?['channel']:[])]);if(seven){if(x.payload!==null)text(x.payload,80);if(x.cadence!==null)text(x.cadence,40);ensure(x.mode===null||RELATION_MODES.includes(x.mode as never));}if(eight)ensure(x.channel===null||CHANNELS.includes(x.channel as never));id(x.relationId);ensure(areaIds.has(x.from as string)&&areaIds.has(x.to as string)&&x.from!==x.to);ensure(['flow','needs','shares','related'].includes(x.kind as string));quote(x.quote);}
+    // map-reading.9: a first map holds 48 relations (earlier readings 32).
+    list(r.relations,nine?48:32);for(const x of r.relations){obj(x,['relationId','from','to','kind','quote',...(seven?['payload','cadence','mode']:[]),...(eight?['channel']:[])]);if(seven){if(x.payload!==null)text(x.payload,80);if(x.cadence!==null)text(x.cadence,40);ensure(x.mode===null||RELATION_MODES.includes(x.mode as never));}if(eight)ensure(x.channel===null||CHANNELS.includes(x.channel as never));id(x.relationId);ensure(areaIds.has(x.from as string)&&areaIds.has(x.to as string)&&x.from!==x.to);ensure(['flow','needs','shares','related'].includes(x.kind as string));quote(x.quote);}
+    // map-reading.9: each port-map row names a relation of this reading, the part at its end by direction (in: the receiver, out: the
+    // sender) as this reading kept it, an input or output name and a step of that part, once each, on its own passage.
+    if(nine){list(r.portMap,12);const rows=new Set<string>();for(const m of r.portMap as unknown[]){obj(m,['relationId','areaId','port','step','direction','quote']);
+      ensure(m.direction==='in'||m.direction==='out');text(m.port,40);text(m.step,40);quote(m.quote);
+      const line=(r.relations as {relationId:unknown;from:unknown;to:unknown}[]).find(x=>x.relationId===m.relationId);ensure(!!line&&m.areaId===(m.direction==='in'?line!.to:line!.from));
+      const part=(r.parts as {areaId:unknown;steps:{name:unknown}[];inputs:unknown[];outputs:unknown[]}[]).find(x=>x.areaId===m.areaId);
+      ensure(!!part&&part!.steps.some(s=>s.name===m.step)&&(m.direction==='in'?part!.inputs:part!.outputs).includes(m.port));
+      const key=JSON.stringify([m.relationId,m.port,m.step,m.direction]);ensure(!rows.has(key));rows.add(key);}}
     // map-reading.5: each candidate says what it leaves undecided; an undecided statement is kept in it, exact where it stands.
     if(five){list(r.candidates,16);}if(five)for(const c of r.candidates as unknown[]){obj(c,['text','areaIds','quote','target','statement']);ensure(['attribution','identity','parent','holds'].includes(c.target as string));
       const held=c.target==='attribution'||c.target==='holds';ensure(held?c.statement!==null:c.statement===null);list(c.areaIds,c.target==='holds'?1:2);
@@ -428,7 +447,7 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
     list(r.skipped,64);for(const x of r.skipped){obj(x,['what','name','reason']);ensure(['part','relation'].includes(x.what as string));text(x.name,200);ensure(['same-name','archived','removed','exists','parent-skipped',...(four?['material']:[])].includes(x.reason as string));}
     if(four){list(r.material,8);for(const x of r.material){obj(x,['record','from','to','what']);ensure(records.has(x.record as string));text(x.what,120);integer(x.from);integer(x.to);ensure((x.from as number)<(x.to as number)&&read.some(y=>y.id===x.record&&y.from<=(x.from as number)&&(x.to as number)<=y.to));}}
     if(six){list(r.exclusions,512);for(const x of r.exclusions){
-      obj(x,['path','rule','category','explanation','record','from','to']);text(x.path,160);ensure(/^(parts|relations|candidates|gaps|matches|material|basisAt|basisVersion)(\[\d+\])?(\.(claims|basis|statement)(\[\d+\])?)?(\.[A-Za-z]+)?$/.test(x.path as string));text(x.explanation,160);
+      obj(x,['path','rule','category','explanation','record','from','to']);text(x.path,160);ensure((nine?/^(parts|relations|candidates|gaps|matches|material|basisAt|basisVersion|portMap)(\[\d+\])?(\.(claims|basis|statement|steps|stateVars|loop)(\[\d+\])?)?(\.[A-Za-z]+)?$/:/^(parts|relations|candidates|gaps|matches|material|basisAt|basisVersion)(\[\d+\])?(\.(claims|basis|statement)(\[\d+\])?)?(\.[A-Za-z]+)?$/).test(x.path as string));text(x.explanation,160);
       ensure(READING_EXCLUSION_RULES.includes(x.rule as never));ensure(x.category===null||typeof x.category==='string'&&/^[a-z][a-z-]{0,39}$/.test(x.category));
       if(x.record===null)ensure(x.from===null&&x.to===null);else{ensure(records.has(x.record as string));integer(x.from);integer(x.to);ensure((x.from as number)<(x.to as number)&&read.some(y=>y.id===x.record&&y.from<=(x.from as number)&&(x.to as number)<=y.to));}
     }}

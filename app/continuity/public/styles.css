@@ -442,6 +442,89 @@ button:disabled { opacity: .5; cursor: default; }
 .node-body.b-loop { height: 19px; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 4px; }
 /* A participant (a person, a session, an outside system): one common, rounder outline; the type word tells which. */
 .node.unit.f-participant { border-radius: 18px; }
+/* The entry line (map spec 4, 열기): what the part holds past what the card shows, in totals, and the one way to open it. The
+   accent only on 열기; '내부 미상' is a blank in the card's quiet grey (no fake inside: no grid, no stacked shadow). */
+.node-entry { display: flex; align-items: center; gap: 6px; min-width: 0; height: 17px; font-size: 11.5px; line-height: 17px; color: var(--text-4); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.node-entry .entry-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.node-entry button { height: 17px; padding: 0; border: 0; border-radius: 4px; background: none; font-size: 11.5px; line-height: 17px; font-weight: var(--fw-name); }
+.node-entry .entry-kids { color: var(--text-3); }
+.node-entry .entry-kids:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.node-entry .entry-open { flex: none; margin-left: auto; padding: 0 5px; color: var(--accent); }
+.node-entry .entry-open:hover { background: var(--accent-soft); color: var(--accent-strong); }
+.space.dim .node:not(.selected):not(.related):not(.cited) .node-entry :is(.entry-text, .entry-kids) { color: var(--text-4); }
+/* The short expansion (짧은 펼침): over the card and the empty space beside it, in the selection's accent; nothing under it moves. */
+.expansion { position: absolute; z-index: 6; display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; overflow: hidden; background: var(--surface); border: 1px solid var(--accent); border-radius: 12px; box-shadow: 0 0 0 3px rgba(51,88,255,.16), 0 14px 28px -14px rgba(16,24,40,.32); cursor: default; user-select: text; text-align: left; }
+.expansion:focus { outline: none; }
+.expansion:focus-visible { box-shadow: 0 0 0 3px rgba(51,88,255,.34), 0 14px 28px -14px rgba(16,24,40,.32); }
+.expansion.f-participant { border-radius: 18px; }
+.expansion.grow { transition: left .2s cubic-bezier(.2,.7,.2,1), top .2s cubic-bezier(.2,.7,.2,1), width .2s cubic-bezier(.2,.7,.2,1), height .2s cubic-bezier(.2,.7,.2,1); }
+.expansion.grow > * { animation: xp-in .2s ease both; }
+@keyframes xp-in { from { opacity: 0; } }
+.expansion.measuring { left: -100000px; top: 0; height: auto; visibility: hidden; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .expansion.grow, .expansion.grow > * { transition: none; animation: none; } }
+.xp-head { display: flex; flex-direction: column; gap: 2px; }
+.xp-headline { display: flex; align-items: flex-start; gap: 8px; }
+.xp-name { flex: 1; min-width: 0; font-size: 14.5px; line-height: 20px; font-weight: var(--fw-name); letter-spacing: -.012em; overflow-wrap: anywhere; }
+.xp-close { flex: none; width: 24px; height: 24px; margin: -3px -7px 0 0; padding: 0; border: 0; border-radius: var(--r-sm); background: none; color: var(--text-4); font-size: 18px; line-height: 22px; }
+.xp-close:hover { background: var(--chip); color: var(--text); }
+.xp-ops { font-size: 12px; line-height: 17px; color: var(--text-3); }
+.xp-sec { display: flex; flex-direction: column; gap: 3px; }
+.xp-title { margin: 0; font: var(--label); letter-spacing: var(--label-track); color: var(--text-4); }
+.xp-title small { margin-left: 5px; font-size: 11px; font-weight: var(--fw-meta); font-variant-numeric: tabular-nums; }
+.xp-words { margin: 0; font-size: 12.5px; line-height: 18px; color: var(--text-2); overflow-wrap: anywhere; }
+.xp-dot { color: var(--text-4); }
+.xp-cells { display: flex; flex-wrap: wrap; gap: 4px; padding-top: 4px; border-top: 3px double var(--line-strong); font-size: 12px; line-height: 18px; color: var(--text-2); }
+.xp-cells .ledger-cell { padding: 0 6px; border: 1px solid var(--hair-2); border-radius: 3px; background: var(--surface-2); overflow-wrap: anywhere; }
+.xp-lines { margin: 0; padding: 0; list-style: none; font-size: 12.5px; line-height: 18px; color: var(--text-2); }
+.xp-lines li { overflow-wrap: anywhere; }
+/* The detail view (내부 상세): the part's boundary in the middle of the workspace, its ports on its edges, its outside partners as
+   small reference cards beyond them. The rest of the map is not shown while it is open. */
+.space.detail-open #world, .space.detail-open > .controls, .space.detail-open #line-key { visibility: hidden; }
+.detail-view { position: absolute; top: 0; left: 0; bottom: 0; right: var(--plan-w, 0px); z-index: 2; display: flex; flex-direction: column; background: var(--bg); }
+.detail-view:focus { outline: none; }
+.dv-head { flex: none; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 16px 24px 12px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.dv-title { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.dv-kind { font: var(--label); letter-spacing: var(--label-track); color: var(--text-4); }
+.dv-where { font-size: 12px; line-height: 16px; color: var(--text-4); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dv-name { margin: 0; font-size: 18px; line-height: 24px; font-weight: var(--fw-title); letter-spacing: -.015em; overflow-wrap: anywhere; }
+.dv-moves { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.dv-move { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); color: var(--text-2); font-size: 13px; font-weight: var(--fw-name); white-space: nowrap; max-width: 280px; }
+.dv-move > span { overflow: hidden; text-overflow: ellipsis; }
+.dv-move kbd { font: 500 11px/16px var(--font); padding: 0 4px; border: 1px solid var(--hair-2); border-radius: 4px; background: var(--surface-2); color: var(--text-4); }
+.dv-move:hover:not(:disabled) { border-color: var(--accent-line); background: var(--accent-soft); color: var(--accent-strong); }
+.dv-move:disabled { cursor: default; color: var(--text-4); background: var(--surface-2); }
+.dv-stage { flex: 1; min-height: 0; overflow: auto; padding: 32px 24px 48px; }
+.dv-grid { position: relative; display: grid; grid-template-columns: minmax(132px, 200px) minmax(300px, 540px) minmax(132px, 200px); column-gap: 64px; justify-content: center; align-items: center; min-height: 100%; }
+.dv-lines { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.dv-line { fill: none; stroke: var(--edge); stroke-width: 1.5; }
+.dv-line.c-uses { stroke-dasharray: 2 4; }
+.dv-line.plain { stroke-dasharray: 1 6; }
+.dv-lines marker .fill { fill: var(--edge); }
+.dv-lines marker .open { fill: none; stroke: var(--edge); stroke-width: 1.5; }
+.dv-pin { fill: var(--surface); stroke: var(--text-3); stroke-width: 1.5; }
+.dv-side { display: flex; flex-direction: column; gap: 10px; }
+.dv-side:empty::before { content: ''; }
+.dv-ref { position: relative; display: flex; flex-direction: column; gap: 1px; padding: 8px 10px; border: 1px solid var(--region-line); border-radius: var(--r-md); background: var(--surface); text-align: left; box-shadow: var(--shadow-sm); }
+.dv-ref:hover { border-color: var(--accent-line); }
+.dv-ref-name { font-size: 13px; line-height: 18px; font-weight: var(--fw-name); color: var(--text); overflow-wrap: anywhere; }
+.dv-ref-rel { font-size: 11.5px; line-height: 16px; color: var(--text-4); overflow-wrap: anywhere; }
+.dv-bound { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 12px; padding: 16px 0 18px; border: 1.5px solid var(--text-3); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow); }
+.dv-bound.f-participant { border-radius: 22px; }
+.dv-bhead { display: flex; flex-direction: column; gap: 2px; padding: 0 20px; }
+.dv-bname { font-size: 15px; line-height: 21px; font-weight: var(--fw-name); overflow-wrap: anywhere; }
+.dv-inner { display: grid; grid-template-columns: minmax(84px, auto) minmax(0, 1fr) minmax(84px, auto); gap: 16px; align-items: start; }
+.dv-ports { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; line-height: 18px; }
+.dv-port { display: flex; align-items: center; gap: 4px; min-height: 24px; padding: 2px 8px; border: 1px solid var(--line); background: var(--surface-2); color: var(--text-2); overflow-wrap: anywhere; }
+.dv-ports.p-in .dv-port { border-left: 0; border-radius: 0 6px 6px 0; }
+.dv-ports.p-out .dv-port { flex-direction: row-reverse; text-align: right; border-right: 0; border-radius: 6px 0 0 6px; }
+.dv-port .io-mark { flex: none; color: var(--text-4); }
+.dv-port.unnamed { border-style: dashed; color: var(--text-3); }
+.dv-port.blank { border: 0; background: none; color: var(--text-4); padding: 0 8px; }
+.dv-body { min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+.dv-none { margin: 0; font-size: 12.5px; line-height: 18px; color: var(--text-4); }
+.dv-kids { display: flex; flex-wrap: wrap; gap: 6px; }
+.dv-kid { display: inline-flex; flex-direction: column; align-items: flex-start; padding: 4px 8px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); font-size: 12.5px; line-height: 17px; text-align: left; }
+.dv-kid:hover { border-color: var(--accent-line); color: var(--accent-strong); }
 /* Parts outside the selection step back by colour, not by fading: names and second lines stay at 4.5:1 or more. */
 .space.dim .node:not(.selected):not(.related):not(.cited) { border-color: var(--hair-2); box-shadow: none; }
 .space.dim .node.has-kids:not(.item):not(.selected):not(.related):not(.cited) { box-shadow: 0 3px 0 -1px var(--surface), 0 3px 0 0 var(--hair-2); }
@@ -1428,7 +1511,7 @@ button:disabled { opacity: .5; cursor: default; }
 .space.z-mid .node:not(.typed) :is(.node-note, .node-meta), .space.z-mid .frame-head .frame-note { display: none; }
 /* A typed card by zoom level (app.ts zoomLevel, spec 4): 개요 its type word, name and operations line; 중간 also what it takes
    and hands over; 상세 everything. The layout gives each level its height; these hold while a level's redraw is on its way. */
-.space.lv-overview .node.typed .node-typed, .space.lv-mid .node.typed .node-typed > :not(.node-io) { display: none; }
+.space.lv-overview .node.typed .node-typed, .space.lv-mid .node.typed .node-typed > :not(.node-io):not(.node-entry) { display: none; }
 .space.z-mid .node .node-text { justify-content: center; align-self: stretch; }
 .space.z-mid :is(.node .node-name, .frame-head .frame-name) { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
 .space.z-mid .node .node-name { font-size: calc(13.5px * var(--grow)); }

@@ -15,14 +15,15 @@ import { mapBatchLines, mapPendingText } from '../shared/map-route.js';
 import { JobReservations, JOBS_KEY, type JobLocks } from './map-jobs.js';
 import { requestResults, frozenRequests, displayAbout, captureRequestReading, restoreRequestReading, createWideReading } from './request-results.js';
 import { correctRequestMatch, unlinkReplacement, requestComparison } from '../shared/request-return.js';
-import { studioView, subtreeRecords, partPath, buildAsk, draftAfterAnswer, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type AskIntent, type StudioReply } from '../shared/studio.js';
+import { studioView, subtreeRecords, partPath, buildAsk, draftAfterAnswer, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type RelationView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
 import { layoutScope, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, ROOT, HEAD, type Box, type Edge, type Face, type TypedCard, type LabelSpot, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
 import { aiStatus, askStudio, AskError, ERROR_TEXT, RELEASE_TEXT, PUBLIC_EDITION, connectorRecords, publishHandover, type AiStatus } from './studio-api.js';
 import { RUNTIME, runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
 import { routeEdges, samplePath, mixPath, type Routed } from './map-route.js';
-import { typedBudget, typedLines, typedPx, zoomLevel, TYPE_H, LINE_H, type CardBudget, type ChipsAt, type BodyKind, type ZoomLevel } from './card-budget.js';
+import { typedBudget, typedLines, typedPx, zoomLevel, entryKind, entryParts, TYPE_H, LINE_H, type CardBudget, type ChipsAt, type BodyKind, type ZoomLevel, type EntryKind, type EntryCounts, type EntryShown } from './card-budget.js';
+import { placeExpansion, actionSections, pushPlace, readOpenState, writeOpenState, groupBody, OPEN_MAP, SHORT_W, type OpenState, type ReadPlace, type ActionStep } from './expansion.js';
 import { labelSpots, polylineHitsRect, portSpots } from './map-labels.js';
 import { opsLines } from './ops-line.js';
 import { PROJECT_REPORT_ASK, CHAT_REPORT_ASK, REPORT_ASK_EXPLAIN, deltaReportAsk, reflectAsk, plannedNote } from '../shared/report-ask.js';
@@ -321,7 +322,7 @@ async function render() {
   // The wide reading belongs to the place it was opened from: another address closes it, restoring nothing.
   wide.drop();
   const r = route();
-  if (!r.key) { quoteBack = null; if (opened) cameras.set(camKey(opened, scope), { ...camera, win: winSize() }); flushView(); planView.close(false); if (toastKey) dropToast(); forgetVisits(); opened = null; selected = null; scope = null; renderHome(); autoSync.render(); return; }
+  if (!r.key) { quoteBack = null; if (opened) cameras.set(camKey(opened, scope), { ...camera, win: winSize() }); flushView(); planView.close(false); if (toastKey) dropToast(); forgetVisits(); opened = null; selected = null; scope = null; openState = null; backStack = []; hideDetail(); renderHome(); autoSync.render(); return; }
   const next = projectFor(r.key);
   if (!next) { go(null); return; }
   const fresh = opened?.key !== next.key;
@@ -351,6 +352,7 @@ async function render() {
     if (scenes.length > 12) scenes = scenes.slice(-12);
     opened = next; scope = nextScope; lastClick.id = '';
     if (fresh) { planView.projectChanged(); returnView.projectChanged(); readMarks = []; readingCamera = null; loadView(next); autoSync.opened(); }
+    if (fresh) { openState = null; backStack = []; pendingAction = null; hideDetail(); dropShort(); restoreOpen = storedOpen(next); }
     // A new project starts with the map alone: the previous project's reading pane must not narrow its first view.
     if (fresh) { selected = null; ask = null; editing = false; partForm = null; composerOpen = false; sheetOpen = false; scopeReading = false; $('panel').hidden = true; $('panel').replaceChildren(); hideLens(); }
     tempExpand.clear();
@@ -385,6 +387,7 @@ async function render() {
   if (openPlanOnArrive) { openPlanOnArrive = false; if (!planView.isOpen() && o.kind !== 'legacy') planView.toggle(); }
   // The development-material example opens on its reading (the material or a reading already made; never a call by itself).
   if (fresh && o.key === UI62_KEY && !part && !planView.isOpen() && !returnView.isOpen()) returnView.open();
+  afterRenderOpen(o);
 }
 
 /* ---------- going inside and back out: a short move from where one came from ----------
@@ -890,7 +893,8 @@ let cardLevel: ZoomLevel = 'detail', cardOneLine = false, laidKey = '', relevel 
 /** A setting that reads as a beat or an interval: a loop's frame names its unit only when the record wrote one. */
 const CADENCE = /\d\s*(ms|s|sec|m|min|h|d)\b|\d\s*(초|분|시간|일)|간격|주기|마다|매\s?\S|interval|every|cadence|tick|cron|poll|period/i;
 type BodyRegion = { kind: 'store'; fields: string[] } | { kind: 'loop' | 'timer' | 'actor'; mark: string | null; text: string };
-interface Typed { family: PartFamily | 'neutral'; body: BodyRegion | null; setting: string | null }
+/** used: the setting the family's region already names (a loop's beat, a timer's schedule); the setting line shows another. */
+interface Typed { family: PartFamily | 'neutral'; body: BodyRegion | null; setting: string | null; used: string | null }
 function typedOf(r: PartUnderstanding): Typed {
   const t = r.typeRead?.type ?? null, family = t ? FAMILY_OF[t] : 'neutral', cfg = r.config;
   let body: BodyRegion | null = null, used: string | null = null;
@@ -899,12 +903,12 @@ function typedOf(r: PartUnderstanding): Typed {
   else if (family === 'timer') { used = cfg[0] ?? null; body = { kind: 'timer', mark: '⏱︎', text: used ?? '일정 ?' }; }
   else if (t === 'actor') body = { kind: 'actor', mark: null, text: r.outputs[0] ? `효과 ▸ ${r.outputs[0]}` : '효과 ?' };
   // Other kinds draw no region of their own: their first setting reads on the setting line instead.
-  return { family, body, setting: cfg.find(c => c !== used) ?? null };
+  return { family, body, setting: cfg.find(c => c !== used) ?? null, used };
 }
 /** What a unit's typed lines are before the six-line budget (card-budget) decides which of them the card keeps, at the zoom
  * level the layout is made for. The name is drawn on two lines at most (.node-name), so a longer measure counts as two. */
-const budgetOf = (t: Typed, r: PartUnderstanding, nameLines: number, chips: ChipsAt = 'none', level: ZoomLevel = cardLevel): CardBudget =>
-  typedBudget(Math.min(2, nameLines), !!t.setting, r.inputs.length > 0, r.outputs.length > 0, !!t.body, chips, level);
+const budgetOf = (t: Typed, r: PartUnderstanding, nameLines: number, chips: ChipsAt = 'none', level: ZoomLevel = cardLevel, entry: EntryKind = 'none'): CardBudget =>
+  typedBudget(Math.min(2, nameLines), !!t.setting, r.inputs.length > 0, r.outputs.length > 0, !!t.body, chips, level, entry);
 const bodyKind = (t: Typed): BodyKind => t.body?.kind ?? null;
 /** The budgets of the units the last layout typed (relayout): such a card is drawn with the lines its budget kept and without
  * its note (map spec 2.1: the note reads in the pane). A unit missing here draws as before. */
@@ -925,9 +929,9 @@ function typedRoom(v: StudioView, budgets?: Map<string, CardBudget>): (id: strin
     if (p.status === 'plan' && !r.state && (names.get(p.name) ?? 0) < 2) px += gap + (face === 'unit' ? 2 : 0) + LINE_H;
     // Whether the card is typed does not change with the zoom level (its width stays UNIT_W); only its lines do.
     if (face !== 'unit' || (!r.typeRead && !typedLines(budgetOf(t, r, 1, 'none', 'detail'), bodyKind(t)).length)) return px;
-    const kids = p.childIds.length > 0;
+    const kids = p.childIds.length > 0, entry = entryKind(entryCountsOf(p, r), shownMost(t, r));
     return { oneLine: cardOneLine, room: (nameLines, chipsLine) => {
-      const b = budgetOf(t, r, nameLines, kids ? (chipsLine ? 'line' : 'name') : 'none'); budgets?.set(id, b);
+      const b = budgetOf(t, r, nameLines, kids ? (chipsLine ? 'line' : 'name') : 'none', cardLevel, entry); budgets?.set(id, b);
       return px + typedPx(b, bodyKind(t), gap);
     } };
   };
@@ -983,7 +987,7 @@ function foldLine(ins: string[], outs: string[]): HTMLElement {
 }
 /** A unit's typed lines under its operations line: 받는 것, 내는 것, the family's region, one setting; with a budget (the
  * layout's six-line budget for this card), only the lines it kept. */
-function typedBlock(t: Typed, r: PartUnderstanding, budget?: CardBudget): HTMLElement | null {
+function typedBlock(t: Typed, r: PartUnderstanding, budget?: CardBudget, entry?: HTMLElement | null): HTMLElement | null {
   const lines: HTMLElement[] = [], io = budget?.io ?? (r.inputs.length && r.outputs.length ? 'both' : r.inputs.length ? 'in' : r.outputs.length ? 'out' : 'none');
   if (io === 'fold') lines.push(foldLine(r.inputs, r.outputs));
   else if (io !== 'none') { // 'none': no port line recorded, or none kept at this zoom level (개요)
@@ -996,7 +1000,276 @@ function typedBlock(t: Typed, r: PartUnderstanding, budget?: CardBudget): HTMLEl
     b.fields.length ? fitList(h('span', { class: 'ledger' }), b.fields, 3, true) : h('span', { class: 'ledger blank' }, '행 형식 ?')));
   else if (b) lines.push(h('span', { class: `node-body b-${b.kind}`, title: b.text }, b.mark ? h('span', { class: 'body-mark', 'aria-hidden': 'true' }, b.mark) : null, h('span', { class: 'body-text' }, b.text)));
   if (t.setting && (budget?.set ?? true)) lines.push(h('span', { class: 'node-set', title: `설정 · ${t.setting}` }, `설정 · ${t.setting}`));
+  if (entry) lines.push(entry);
   return lines.length ? h('span', { class: 'node-typed' }, ...lines) : null;
+}
+
+/* ---------- 동작 열기 (map spec 4): one action, a scale the app decides, three moves back ----------
+ * A double-click on a card a reading spoke of, Enter on the selected card or the entry line's 열기 opens what the part holds.
+ * The short expansion opens it over the card and the empty space beside it (expansion.ts placeExpansion: the whole content within
+ * 420×280 at the default size, covering no other part, label, drawn line or group boundary); no other box moves and the camera
+ * stays. Otherwise the detail view: the part's boundary in the middle of the workspace, what it takes on the left and hands over
+ * on the right, its outside partners as small reference cards (the same parts; opening one opens its own detail). Nothing is
+ * shrunk, left out, moved aside or rerouted to make the short expansion fit. */
+/** The steps a part records: the contract carries none yet (map-reading.8), so none. The one place that will read steps[]:
+ * the entry line ('기록된 단계 M'), the content both openings measure and show, and the detail view's 단계 follow from it. */
+const stepsOf = (_r: PartUnderstanding): ActionStep[] => [];
+const entryCountsOf = (p: PartView, r: PartUnderstanding): EntryCounts => ({ read: true, kids: p.childIds.length, steps: stepsOf(r).length, inputs: r.inputs.length, outputs: r.outputs.length, fields: r.fields.length, config: r.config.length });
+/** The most a collapsed card names of each list: its setting line and its region's beat or schedule; three ledger cells. */
+const shownMost = (t: Typed, r: PartUnderstanding): EntryShown => ({ config: (t.setting ? 1 : 0) + (t.used ? 1 : 0), fields: t.body?.kind === 'store' ? Math.min(3, r.fields.length) : 0 });
+/** What the card names under the budget it was drawn with (the setting and the region kept or not at this level). */
+const shownBy = (t: Typed, r: PartUnderstanding, b: CardBudget): EntryShown => ({ config: (b.set && t.setting ? 1 : 0) + (b.body && t.used ? 1 : 0), fields: b.body && t.body?.kind === 'store' ? Math.min(3, r.fields.length) : 0 });
+/** The entry line under a typed card's body: '구성 N' (the way into its composition, as the 안쪽 chip is), '기록된 단계 M', each
+ * list the card does not name in full by its total, and 열기; '내부 미상' when its reading names nothing inside. */
+function entryLine(o: Opened, p: PartView, r: PartUnderstanding, t: Typed, b: CardBudget): HTMLElement | null {
+  const c = entryCountsOf(p, r), words = entryParts(c, shownBy(t, r, b)); if (!words.length) return null;
+  if (words[0] === '내부 미상') return h('span', { class: 'node-entry unknown', title: '기록이 이 부분의 받는 것·내는 것·필드·설정·구성·단계를 하나도 말하지 않았다' }, '내부 미상');
+  const parts: HTMLElement[] = [];
+  words.forEach((w, i) => {
+    if (i) parts.push(h('span', { class: 'entry-sep', 'aria-hidden': 'true' }, ' · '));
+    parts.push(c.kids && i === 0 ? h('button', { type: 'button', class: 'entry-kids', title: `구성 열기 · ‘${p.name}’의 실제 하위 부분 ${c.kids}`, 'aria-label': `${p.name} 구성 열기 · 하위 부분 ${c.kids}`, onclick: () => go(o.key, null, p.id) }, w) : h('span', { class: 'entry-part' }, w));
+  });
+  return h('span', { class: 'node-entry' }, h('span', { class: 'entry-text' }, ...parts),
+    h('button', { type: 'button', class: 'entry-open', title: '동작 열기 · 제자리에 들어가면 펼치고, 들어가지 않으면 내부 상세로 연다 (두 번 누르기 · 선택 후 Enter)', 'aria-label': `${p.name} 동작 열기`, onclick: () => openAction(p.id) }, '열기'));
+}
+/** Which part is open and how; the way back (이전 읽기 위치); an opening waiting for its selection; one read back after a reload. */
+let openState: OpenState | null = null, backStack: ReadPlace[] = [], pendingAction: string | null = null, restoreOpen: OpenState | null = null;
+/** The short expansion's place on the map (labels keep off it), and what the detail view was last drawn for. */
+let shortRect: Rect | null = null, detailFor: { part: string; view: StudioView; back: number } | null = null, syncTimer = 0;
+const openable = (o: Opened, id: string) => { const b = lay.boxes.get(id); return !!b && b.kind === 'node' && !!partOf(o, id)?.reading; };
+function saveOpen() { const o = opened; if (o) writeOpenState(kv, viewKeyOf(o), openState ? { part: stableId(o, openState.part), mode: openState.mode } : null); }
+function storedOpen(o: Opened): OpenState | null { const s = readOpenState(kv, viewKeyOf(o)); return s ? { part: liveId(o, s.part), mode: s.mode } : null; }
+const herePlaceRead = (): ReadPlace => ({ camera: { x: camera.x, y: camera.y, k: camera.k }, scope, selected, level: zoomLevel(camera.k), open: openState ? { ...openState } : null });
+function openAction(id: string) {
+  const o = opened; if (!o || !openable(o, id)) return;
+  if (selected !== id) { pendingAction = id; go(o.key, id); return; }
+  if (openState?.part === id && openState.mode === 'short' && shortRect) return;
+  const at = shortFit(id);
+  if (at) { openState = { part: id, mode: 'short' }; saveOpen(); hideDetail(); drawShort(id, at, true); }
+  else { openDetail(id, true); const v = document.getElementById('detail'); if (v) v.dataset.measured = lastMeasured.map(x => `${x.w}x${x.h}`).join(' '); }
+}
+/** The words of one stored relation's line, as lineWord reads a drawn one: data what it hands over, control what starts it. */
+function relWord(r: RelationView, ch: Channel | null, s: LineSaid | undefined): string {
+  if (ch === 'data') return s?.payload ?? REL_LABEL[r.kind] ?? r.kind;
+  if (ch === 'control') { const c = s?.cadence ?? s?.payload; return c ? `기동 · ${c}` : '제어'; }
+  if (ch === 'uses') return '참조';
+  return REL_LABEL[r.kind] ?? r.kind;
+}
+const stateWords = (r: PartUnderstanding) => { const s = r.stateRead; return s ? [STATE_WORD[s.state], s.when ? `${s.when} 기준` : null].filter(Boolean).join(' · ') : null; };
+/** An opened part's sections (expansion actionSections), each list whole. In the detail view 받는 것 and 내는 것 are its ports. */
+function actionBody(p: PartView, detail: boolean): HTMLElement[] {
+  const r = p.reading; if (!r) return [];
+  return actionSections({ inputs: detail ? [] : r.inputs, outputs: detail ? [] : r.outputs, fields: r.fields, config: r.config, state: detail ? stateWords(r) : null, steps: stepsOf(r) }).map(sec =>
+    h('section', { class: `xp-sec x-${sec.key}` }, h('h4', { class: 'xp-title' }, sec.title, h('small', {}, String(sec.items.length))),
+      sec.kind === 'cells' ? h('div', { class: 'xp-cells' }, ...sec.items.map(x => h('span', { class: 'ledger-cell' }, x)))
+        : sec.kind === 'words' ? h('p', { class: 'xp-words' }, ...sec.items.flatMap((x, i) => [i ? h('span', { class: 'xp-dot', 'aria-hidden': 'true' }, ' · ') : null, h('span', { class: 'xp-word' }, x)]).filter((x): x is HTMLElement => !!x))
+          : h('ul', { class: 'xp-lines' }, ...sec.items.map(x => h('li', {}, x)))));
+}
+/** The short expansion's content: the type word and the name as on the card, its operations line, then every list whole. */
+function shortContent(p: PartView): HTMLElement[] {
+  const r = p.reading!, ops = opsOf(r);
+  return [h('div', { class: 'xp-head' }, r.typeRead ? h('span', { class: 'node-type' }, TYPE_LABEL[r.typeRead.type]) : null,
+    h('div', { class: 'xp-headline' }, h('strong', { class: 'xp-name' }, p.name), h('button', { type: 'button', class: 'xp-close', title: '닫기 (Esc)', 'aria-label': `${p.name} 펼침 닫기`, onclick: () => closeOpen(true) }, '×')),
+    h('span', { class: 'xp-ops', title: ops.tip }, ops.full)), ...actionBody(p, false)];
+}
+/** Where the short expansion of a drawn card goes, or null (the detail view instead). Its content is laid out beforehand at the
+ * default size, at the card's width and wider up to 420px; the obstacles are every other box, the ghosts' heads, the title, every
+ * placed label and the lone parts' caption; the lines are the drawn ones; it stays inside the group it sits in. */
+function shortFit(id: string): Rect | null {
+  const o = opened, b = lay.boxes.get(id), p = o ? partOf(o, id) : null; if (!o || !b || b.kind !== 'node' || !p?.reading) return null;
+  const world = $('world'), host = h('div', { class: 'expansion measuring', 'aria-hidden': 'true' }, ...shortContent(p));
+  world.append(host);
+  const sizes: { w: number; h: number }[] = [];
+  for (const w of [...new Set([Math.ceil(b.w), 330, SHORT_W])].filter(x => x >= b.w && x <= SHORT_W)) {
+    host.style.width = `${w}px`; if (host.scrollWidth <= w + 1) sizes.push({ w, h: host.offsetHeight });
+  }
+  host.remove();
+  lastMeasured = sizes;
+  const anc = new Set<string>(); for (let c: string | undefined = b.container, g = 0; c && g < 64; c = lay.boxes.get(c)?.container, g++) anc.add(c);
+  const obstacles: Rect[] = [...lay.boxes.values()].filter(x => x.id !== id && !anc.has(x.id)).map(x => ({ x: x.x, y: x.y, w: x.w, h: x.h }));
+  for (const x of lay.heads) obstacles.push({ x: x.x, y: x.y, w: x.w, h: x.h });
+  if (titleH) obstacles.push(titleRect());
+  const inv = labelInv();
+  world.querySelectorAll<HTMLElement>('.edge-labels > *, .lone-head').forEach(el => {
+    if (!el.offsetWidth) return; const k = el.classList.contains('lone-head') ? 1 : inv;
+    obstacles.push({ x: parseFloat(el.style.left) || 0, y: parseFloat(el.style.top) || 0, w: el.offsetWidth * k, h: el.offsetHeight * k });
+  });
+  const box = lay.boxes.get(b.container), free = [box?.kind === 'frame' ? groupBody(box) : OPEN_MAP];
+  const shown = shownLines(), lines = [...lastRouted.values()].filter(r => shown.has(r.key)).map(r => r.pts);
+  return placeExpansion(sizes, b, free, obstacles, lines);
+}
+/** The sizes the last opening measured (read in a browser check through the expansion's data-measured). */
+let lastMeasured: { w: number; h: number }[] = [];
+function dropShort() { document.querySelectorAll('#world .expansion').forEach(el => el.remove()); shortRect = null; }
+/** The short expansion over the card: from the card's own rectangle to its place in 200ms (none with reduced motion). */
+function drawShort(id: string, at: Rect, animate: boolean) {
+  const o = opened, p = o ? partOf(o, id) : null, b = lay.boxes.get(id); if (!o || !p || !b) return;
+  document.querySelectorAll('#world .expansion').forEach(el => el.remove());
+  const fam = p.reading?.typeRead ? FAMILY_OF[p.reading.typeRead.type] : 'neutral';
+  const el = h('div', { class: `expansion f-${fam}`, role: 'region', 'aria-label': `${p.name} 펼침`, tabindex: '-1', 'data-open': id, 'data-measured': lastMeasured.map(s => `${s.w}x${s.h}`).join(' ') }, ...shortContent(p));
+  const put = (r: Rect) => { el.style.left = `${r.x}px`; el.style.top = `${r.y}px`; el.style.width = `${r.w}px`; el.style.height = `${r.h}px`; };
+  // Reading it never pans the map, starts a drag or clears the selection.
+  el.addEventListener('pointerdown', e => e.stopPropagation());
+  const motion = animate && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  shortRect = at; put(motion ? b : at); $('world').append(el);
+  if (motion) { void el.offsetWidth; el.classList.add('grow'); put(at); window.setTimeout(() => el.classList.remove('grow'), 260); }
+  if (animate) el.focus({ preventScroll: true });
+}
+function openDetail(id: string, push: boolean) {
+  const o = opened; if (!o || !partOf(o, id)) return;
+  if (push) backStack = pushPlace(backStack, herePlaceRead());
+  openState = { part: id, mode: 'detail' }; saveOpen(); dropShort();
+  if (selected === id) { renderDetail(id); return; }
+  // The map under it selects the same part (the reading pane reads it), in this view when it is drawn or inside it.
+  go(o.key, id, id === scope || insideScope(o, id) ? scope : partOf(o, id)!.parentId);
+}
+/** 이전 읽기 위치: the camera, scope, selection, zoom level and open state before the last opening of a detail view. */
+function goBackPlace() {
+  const o = opened, pl = backStack.at(-1); if (!o || !pl) return;
+  backStack = backStack.slice(0, -1);
+  openState = pl.open ? { ...pl.open } : null; saveOpen(); detailFor = null;
+  if (!openState) hideDetail();
+  returnCamera = { ...pl.camera };
+  go(o.key, pl.selected, pl.scope);
+}
+/** 상위 구성: the detail view of the part that really holds this one (containment), when there is one. */
+function goUp() { const o = opened, p = o && openState ? partOf(o, openState.part) : null; if (p?.parentId) openDetail(p.parentId, true); }
+/** 닫기: the opening only (the short expansion or the detail view); the selection, the camera and the way back stay. */
+function closeOpen(focus = false) {
+  const st = openState; openState = null; saveOpen(); dropShort(); hideDetail();
+  if (focus && st) window.setTimeout(() => document.querySelector<HTMLElement>(`#world [data-drag="${CSS.escape(st.part)}"]`)?.focus({ preventScroll: true }), 0);
+}
+function hideDetail() {
+  const v = document.getElementById('detail'); detailFor = null;
+  if (v && !v.hidden) { v.hidden = true; v.replaceChildren(); }
+  $('space').classList.remove('detail-open');
+  const vp = $('viewport');
+  if (vp.dataset.detailInert) { delete vp.dataset.detailInert; if (!vp.dataset.readingInert && !($('plan-panel').classList.contains('work') && !$('plan-panel').hidden)) vp.inert = false; }
+}
+/** After a redraw or an arrival: the opening drawn again where it belongs (a timer, so the selection's lines and labels are
+ * placed first, and a hidden page still draws). A short expansion that no longer fits closes; it never becomes the detail view
+ * by itself, nor does a zoom open anything. */
+function syncOpenSoon() { clearTimeout(syncTimer); syncTimer = window.setTimeout(syncOpen, 0); }
+function syncOpen() {
+  const o = opened, st = openState;
+  if (!o || !st || !partOf(o, st.part)) { if (o && st) { openState = null; saveOpen(); } dropShort(); hideDetail(); return; }
+  if (st.mode === 'detail') { dropShort(); if (!detailFor || detailFor.part !== st.part || detailFor.view !== o.view || detailFor.back !== backStack.length) renderDetail(st.part); return; }
+  hideDetail();
+  if (selected !== st.part) { closeOpen(false); return; }
+  const had = shortRect; shortRect = null;
+  const at = shortFit(st.part); if (!at) { closeOpen(false); return; }
+  if (!had || had.x !== at.x || had.y !== at.y || had.w !== at.w || had.h !== at.h || !document.querySelector('#world .expansion')) drawShort(st.part, at, false); else shortRect = at;
+}
+/** At the end of an arrival: an open state read back after a reload, then an opening that waited for its selection. */
+function afterRenderOpen(o: Opened) {
+  const st = restoreOpen; restoreOpen = null;
+  if (st && !openState && partOf(o, st.part)) {
+    if (st.mode === 'detail') { openState = st; if (selected !== st.part) { go(o.key, st.part, st.part === scope || insideScope(o, st.part) ? scope : partOf(o, st.part)!.parentId); return; } }
+    else if (selected === st.part && openable(o, st.part)) openState = st;
+  }
+  const id = pendingAction; pendingAction = null;
+  if (id && id === selected) { openAction(id); return; }
+  if (openState) syncOpenSoon(); else { dropShort(); hideDetail(); }
+}
+function detailEl(): HTMLElement {
+  let v = document.getElementById('detail');
+  if (!v) { v = h('section', { id: 'detail', class: 'detail-view', tabindex: '-1', 'aria-label': '내부 상세', hidden: true }); $('space').append(v); }
+  return v;
+}
+/** The detail view (내부 상세): the part's boundary in the middle, its ports on its edges (받는 것 left, 내는 것 right; a relation
+ * the record gave no port name stays on the edge by its own words), its outside partners as reference cards beyond them, joined
+ * by lines in the map's own language. The rest of the map is not shown; the three moves are in its head. */
+function renderDetail(id: string) {
+  const o = opened, p = o ? partOf(o, id) : null; if (!o || !p) return;
+  const v = detailEl(), r = p.reading, said = relationLines(o.project), again = detailFor?.part === id && !v.hidden;
+  const holds = (x: string) => { for (let q = partOf(o, x), g = 0; q && g < 64; q = partOf(o, q.parentId), g++) if (q.id === id) return true; return false; };
+  const norm = (t: string) => t.replace(/\s+/g, ' ').trim().toLowerCase();
+  type DEnd = { rel: RelationView; out: boolean; far: string; near: string; ch: Channel | null; word: string; port: string };
+  const ends: DEnd[] = o.view.relations.flatMap(rel => {
+    const a = holds(rel.from), b = holds(rel.to); if (a === b) return [];
+    const s = said.get(rel.id), ch: Channel | null = rel.kind === 'related' ? null : s?.channel ?? (rel.kind === 'flow' ? 'data' : 'uses'), word = relWord(rel, ch, s);
+    const names = (a ? r?.outputs : r?.inputs) ?? [], keys = [s?.payload, rel.note].filter((x): x is string => !!x).map(norm);
+    const named = names.find(n => keys.includes(norm(n)));
+    return [{ rel, out: a, far: a ? rel.to : rel.from, near: a ? rel.from : rel.to, ch, word, port: named ? `n:${named}` : `w:${word}` }];
+  });
+  const portList = (out: boolean) => {
+    const names = (out ? r?.outputs : r?.inputs) ?? [], mine = ends.filter(e => e.out === out);
+    const list = names.map(n => ({ key: `n:${n}`, name: n, unnamed: false }));
+    for (const e of mine) if (!list.some(x => x.key === e.port)) list.push({ key: e.port, name: e.word, unnamed: true });
+    return list;
+  };
+  const ins = portList(false), outs = portList(true);
+  const portEl = (x: { key: string; name: string; unnamed: boolean }, out: boolean) => {
+    const via = ends.filter(e => e.out === out && e.port === x.key && e.near !== id).map(e => partOf(o, e.near)?.name).filter(Boolean);
+    return h('li', { class: `dv-port${x.unnamed ? ' unnamed' : ''}`, 'data-port': `${out ? 'o' : 'i'}|${x.key}`,
+      title: `${out ? '내는 것' : '받는 것'} · ${x.name}${x.unnamed ? '\n기록이 이 관계에 포트 이름을 주지 않았다 (관계의 말)' : ''}${via.length ? `\n안쪽 ‘${via.join('’, ‘')}’에서` : ''}` },
+      h('span', { class: 'io-mark', 'aria-hidden': 'true' }, out ? '⇤' : '⇥'), h('span', { class: 'dv-port-name' }, x.name));
+  };
+  const refCard = (far: string, out: boolean) => {
+    const q = partOf(o, far), qr = q?.reading, mine = ends.filter(e => e.far === far && e.out === out);
+    return h('button', { type: 'button', class: 'dv-ref', role: 'listitem', 'data-part-ref': far, 'data-ref': `${out ? 'o' : 'i'}|${far}`,
+      title: `${partPath(o.view, far).map(x => x.name).join(' › ')}\n이 부분의 상세 열기`, 'aria-label': `${q?.name ?? '부분'} 상세 열기 · ${mine.map(e => e.word).join(', ')}`, onclick: () => openDetail(far, true) },
+      qr?.typeRead ? h('span', { class: 'node-type' }, TYPE_LABEL[qr.typeRead.type]) : null, h('span', { class: 'dv-ref-name' }, q?.name ?? '부분'),
+      h('span', { class: 'dv-ref-rel' }, [...new Set(mine.map(e => e.word))].join(' · ')));
+  };
+  const order = (out: boolean) => { const ports = out ? outs : ins, seen: string[] = []; for (const pt of ports) for (const e of ends) if (e.out === out && e.port === pt.key && !seen.includes(e.far)) seen.push(e.far); return seen; };
+  const path = partPath(o.view, id).slice(0, -1).map(x => x.name), parent = partOf(o, p.parentId), ops = r ? opsOf(r) : null;
+  const move = (k: string, label: string, key: string, aria: string, on: boolean, title: string, run: () => void) =>
+    h('button', { type: 'button', class: `dv-move m-${k}`, title, 'aria-keyshortcuts': aria, disabled: !on, onclick: run }, h('span', {}, label), h('kbd', {}, key));
+  const kids = p.childIds.map(c => partOf(o, c)).filter((x): x is PartView => !!x);
+  const steps = r ? stepsOf(r) : [];
+  const inner = h('div', { class: 'dv-body' },
+    !r ? h('p', { class: 'dv-none' }, '이 부분을 말한 기록이 없다 · 빈 카드') : null,
+    r && !r.inputs.length && !r.outputs.length && !r.fields.length && !r.config.length && !kids.length && !steps.length ? h('p', { class: 'dv-none' }, '내부 미상 · 기록이 안쪽을 말하지 않았다') : null,
+    ...actionBody(p, true),
+    r && !steps.length ? h('section', { class: 'xp-sec x-steps' }, h('h4', { class: 'xp-title' }, '단계'), h('p', { class: 'dv-none', title: '받는 것에서 내는 것까지의 단계를 기록이 아직 말하지 않았다. 포트와 단계는 잇지 않는다.' }, '기록된 단계 없음 · 진입 단계 미상')) : null,
+    kids.length ? h('section', { class: 'xp-sec x-kids' }, h('h4', { class: 'xp-title' }, '구성', h('small', {}, String(kids.length))),
+      h('div', { class: 'dv-kids' }, ...kids.map(k => h('button', { type: 'button', class: 'dv-kid', 'data-part-ref': k.id, title: `‘${k.name}’ 상세 열기`, onclick: () => openDetail(k.id, true) }, k.reading?.typeRead ? h('span', { class: 'node-type' }, TYPE_LABEL[k.reading.typeRead.type]) : null, h('span', {}, k.name))))) : null);
+  const fam = r?.typeRead ? FAMILY_OF[r.typeRead.type] : 'neutral';
+  v.replaceChildren(
+    h('header', { class: 'dv-head' },
+      h('div', { class: 'dv-title' }, h('span', { class: 'dv-kind' }, '내부 상세'), path.length ? h('span', { class: 'dv-where' }, `${path.join(' › ')} ›`) : null, h('h2', { class: 'dv-name' }, p.name)),
+      h('div', { class: 'dv-moves', role: 'toolbar', 'aria-label': '내부 상세에서 나가기' },
+        move('close', '닫기', 'Esc', 'Escape', true, '닫기 · 이 상세만 닫고 지도의 같은 선택으로', () => closeOpen(true)),
+        move('back', '이전 읽기 위치', 'Alt ←', 'Alt+ArrowLeft', backStack.length > 0, backStack.length ? '이전 읽기 위치 · 이 상세를 열기 전의 카메라·선택·확대 단계·열림으로' : '이전 읽기 위치 없음', goBackPlace),
+        move('up', parent ? `상위 구성 · ${parent.name}` : '상위 구성', 'Alt ↑', 'Alt+ArrowUp', !!parent, parent ? `상위 구성 · 이 부분을 실제로 담은 ‘${parent.name}’의 상세` : '상위 구성 없음 · 맨 위의 부분', goUp))),
+    h('div', { class: 'dv-stage' }, h('div', { class: 'dv-grid' },
+      svg('svg', { class: 'dv-lines', 'aria-hidden': 'true' }),
+      h('div', { class: 'dv-side s-in', role: 'list', 'aria-label': '들어오는 쪽의 바깥 부분' }, ...order(false).map(f => refCard(f, false))),
+      h('div', { class: `dv-bound f-${fam}`, role: 'group', 'aria-label': `${p.name}의 경계` },
+        h('div', { class: 'dv-bhead' }, r?.typeRead ? h('span', { class: 'node-type' }, TYPE_LABEL[r.typeRead.type]) : null, h('strong', { class: 'dv-bname' }, p.name), ops ? h('span', { class: 'xp-ops', title: ops.tip }, ops.full) : null),
+        h('div', { class: 'dv-inner' },
+          h('ul', { class: 'dv-ports p-in', 'aria-label': '받는 것' }, ...(ins.length ? ins.map(x => portEl(x, false)) : [h('li', { class: 'dv-port blank' }, '받는 것 미기재')])),
+          inner,
+          h('ul', { class: 'dv-ports p-out', 'aria-label': '내는 것' }, ...(outs.length ? outs.map(x => portEl(x, true)) : [h('li', { class: 'dv-port blank' }, '내는 것 미기재')])))),
+      h('div', { class: 'dv-side s-out', role: 'list', 'aria-label': '나가는 쪽의 바깥 부분' }, ...order(true).map(f => refCard(f, true))))));
+  detailLinks = ends.map(e => ({ ref: `${e.out ? 'o' : 'i'}|${e.far}`, port: `${e.out ? 'o' : 'i'}|${e.port}`, out: e.out, ch: e.ch, plain: e.rel.kind === 'related' }));
+  v.hidden = false; $('space').classList.add('detail-open');
+  const vp = $('viewport'); if (!vp.inert) { vp.inert = true; vp.dataset.detailInert = '1'; }
+  detailFor = { part: id, view: o.view, back: backStack.length };
+  drawDetailLines();
+  if (!again) v.focus({ preventScroll: true });
+}
+/** The detail view's lines, from each reference card to its port on the boundary: data ends in a filled head, control and
+ * reference in an open V (reference dotted), a plain relation in dots; drawn again when the window changes. */
+let detailLinks: { ref: string; port: string; out: boolean; ch: Channel | null; plain: boolean }[] = [];
+function drawDetailLines() {
+  const v = document.getElementById('detail'); if (!v || v.hidden) return;
+  const grid = v.querySelector<HTMLElement>('.dv-grid'), lines = v.querySelector<SVGSVGElement>('.dv-lines'), bound = v.querySelector<HTMLElement>('.dv-bound'); if (!grid || !lines || !bound) return;
+  const G = grid.getBoundingClientRect(), B = bound.getBoundingClientRect();
+  lines.setAttribute('width', String(Math.ceil(G.width))); lines.setAttribute('height', String(Math.ceil(G.height)));
+  const defs = svg('defs', {});
+  const mk = (idm: string, d: string, filled: boolean) => { const m = svg('marker', { id: idm, viewBox: '0 0 10 10', refX: '8', refY: '5', markerWidth: '9', markerHeight: '9', orient: 'auto-start-reverse', markerUnits: 'userSpaceOnUse' }); m.append(svg('path', { d, class: filled ? 'fill' : 'open' })); defs.append(m); };
+  mk('dv-arrow', 'M0,0 L10,5 L0,10 L3,5 z', true); mk('dv-open', 'M1,1 L8,5 L1,9', false);
+  lines.replaceChildren(defs);
+  for (const l of detailLinks) {
+    const card = v.querySelector<HTMLElement>(`.dv-ref[data-ref="${CSS.escape(l.ref)}"]`), port = v.querySelector<HTMLElement>(`.dv-port[data-port="${CSS.escape(l.port)}"]`); if (!card || !port) continue;
+    const C = card.getBoundingClientRect(), P = port.getBoundingClientRect(), py = P.top + P.height / 2 - G.top, cy = C.top + C.height / 2 - G.top;
+    const [x1, y1, x2, y2] = l.out ? [B.right - G.left, py, C.left - G.left, cy] : [C.right - G.left, cy, B.left - G.left, py];
+    const mx = (x1 + x2) / 2;
+    lines.append(svg('path', { class: `dv-line${l.ch ? ` c-${l.ch}` : ''}${l.plain ? ' plain' : ''}`, d: `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`, ...(l.plain ? {} : { 'marker-end': l.ch === 'data' ? 'url(#dv-arrow)' : 'url(#dv-open)' }) }));
+    lines.append(svg('circle', { class: 'dv-pin', cx: String(l.out ? x1 : x2), cy: String(py), r: '3.5' }));
+  }
 }
 
 /** camera: 'fit' (new view), 'restore' (a scope's own last camera, else fit), 'keep' (same view, structure changed). */
@@ -1062,7 +1335,8 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   const enterButton = (p: PartView) => h('button', { type: 'button', class: 'enter', title: `‘${p.name}’ 안으로 들어가기 · 부분 ${p.childIds.length}`, 'aria-label': `${p.name} 안으로 들어가기`, onclick: () => go(o.key, null, p.id) }, `안쪽 ${p.childIds.length}`, h('span', { 'aria-hidden': 'true' }, '›'));
   const toggleButton = (p: PartView, open: boolean) => h('button', { type: 'button', class: 'toggle', title: open ? '접기' : '여기서 펼치기', 'aria-label': `${p.name} ${open ? '접기' : '펼치기'}`, 'aria-expanded': String(open),
     onclick: () => { const k = `${o.key}|${p.id}`; expandState.set(k, !open); tempExpand.delete(k); previewExpand.delete(k); renderSpace('keep'); if (selected) select(selected); } }, chevron(open));
-  const keySelect = (id: string) => (e: Event) => { const k = (e as KeyboardEvent).key; if ((k === 'Enter' || k === ' ') && e.target === e.currentTarget) { e.preventDefault(); go(o.key, id); } };
+  // Enter on the selected card opens it (동작 열기); otherwise Enter and Space select.
+  const keySelect = (id: string) => (e: Event) => { const k = (e as KeyboardEvent).key; if ((k === 'Enter' || k === ' ') && e.target === e.currentTarget) { e.preventDefault(); if (k === 'Enter' && selected === id && openable(o, id)) openAction(id); else go(o.key, id); } };
   const boxes = [...lay.boxes.values()].sort((a, b) => (a.kind === 'frame' ? 0 : 1) - (b.kind === 'frame' ? 0 : 1) || a.depth - b.depth);
   // Each region (an open group directly in the scope) takes a hue of its own, by its place in the scope's order.
   const hueOf = new Map<string, number>(); (scope ? partOf(o, scope)?.childIds ?? [] : view.roots).forEach((id, i) => hueOf.set(id, HUES[i % HUES.length]!));
@@ -1110,7 +1384,9 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
       // A typed card with an inside carries its group chips at the end of its name line, or on a line of their own under the
       // body (card-budget chips); never beside the operations line, which keeps the card's width.
       const chipsAt: ChipsAt = b.kids && face === 'unit' ? cardBudgets.get(p.id)?.chips ?? 'none' : 'none';
-      const chips = (cls: string) => h('span', { class: `node-chips ${cls}` }, linksChip(p.id), enterButton(p)), nameEl = h('span', { class: 'node-name' }, p.name);
+      // The entry line (spec 4) under the body: a card with an inside reads its way in there ('구성 N'); its chips keep the rest.
+      const budget = cardBudgets.get(p.id), entryEl = face === 'unit' && typed && r && budget?.entry ? entryLine(o, p, r, typed, budget) : null, kidsIn = !!entryEl?.querySelector('.entry-kids');
+      const chips = (cls: string) => h('span', { class: `node-chips ${cls}` }, linksChip(p.id), kidsIn ? null : enterButton(p)), nameEl = h('span', { class: 'node-name' }, p.name);
       const opsEl = ops ? h('span', { class: 'meta-text ops', title: `${ops.tip}${meta ? `
 기록 · ${meta}` : ''}` }, ops.full) : null;
       if (opsEl && ops) opsFit.set(opsEl, ops);
@@ -1121,7 +1397,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
           chipsAt === 'name' ? h('span', { class: 'node-headline' }, nameEl, chips('at-name')) : nameEl,
           note ? h('span', { class: 'node-note' }, note) : null,
           said ? h('span', { class: 'node-meta' }, ladder(view, p), opsEl ?? h('span', { class: 'meta-text' }, said)) : alias ? h('span', { class: 'node-meta owner alias' }, h('span', { class: 'meta-text' }, alias)) : of ? h('span', { class: 'node-meta owner' }, h('span', { class: 'meta-text' }, `${of} 안`)) : null,
-          face === 'unit' && typed && r ? typedBlock(typed, r, cardBudgets.get(p.id)) : null,
+          face === 'unit' && typed && r ? typedBlock(typed, r, budget, entryEl) : null,
           chipsAt === 'line' ? chips('own-line') : null,
           h('span', { class: 'plan-note' })),
         b.kids && chipsAt === 'none' ? linksChip(p.id) : null, b.kids && chipsAt === 'none' ? enterButton(p) : null));
@@ -1174,6 +1450,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   else fitView(false);
   if (planOverlay) planView.overlay();
   applyReadMarks();
+  if (openState) syncOpenSoon();
 }
 
 /** The scope's own parts that no line touches, under one caption: not a flow that lost its lines, just parts apart. Drawn
@@ -1345,6 +1622,7 @@ function placeEdgeLabels() {
   // Where outside partners belong (their heads) is text on the map as well: a verb never covers it.
   const blocks: Rect[] = [...lay.boxes.values()].map(b => (b.kind === 'frame' ? { x: b.x, y: b.y, w: b.w, h: b.head } : b)).concat(lay.heads);
   if (titleH) blocks.push(titleRect());
+  if (shortRect) blocks.push(shortRect); // an open short expansion reads where it is: no verb or count is set under it
   const clear = (r: Rect) => !blocks.some(b => r.x < b.x + b.w + 3 && b.x < r.x + r.w + 3 && r.y < b.y + b.h + 3 && b.y < r.y + r.h + 3);
   // At rest: every line drawn now (on a busy map its summary lines, each with its count) carries its label. Lines of one kind
   // meeting the same part share one label only when theirs would read the same (the first of them carries it).
@@ -1574,6 +1852,7 @@ let pendingRecord: string | null = null;
  * camera and drafts. */
 let sheetOpen = false;
 function select(partId: string | null) {
+  if (openState && openState.part !== partId) closeOpen(false); // an opening belongs to its part: another selection closes it
   const changed = selected !== partId;
   if (changed) { editing = false; composerOpen = false; if (ask && !ask.controller) ask = null; sheetOpen = !!pendingRecord; }
   if (!!selected !== !!partId) recentPeek = false;
@@ -3182,7 +3461,7 @@ function bindFind() {
   // Zoom from the keyboard (not in a field): + / = in, - out, 0 the whole map, 1 100%; arrows walk the parts (focus moves to
   // the nearest part in that direction).
   document.addEventListener('keydown', e => {
-    if (!opened || $('space').hidden || wide.isOpen() || e.ctrlKey || e.metaKey || e.altKey || (e.target as HTMLElement).closest('textarea,input,select,[contenteditable]')) return;
+    if (!opened || $('space').hidden || wide.isOpen() || openState?.mode === 'detail' || e.ctrlKey || e.metaKey || e.altKey || (e.target as HTMLElement).closest('textarea,input,select,[contenteditable]')) return;
     const vp = $('viewport'), r = vp.getBoundingClientRect(), cx = r.width / 2, cy = vp.offsetTop + r.height / 2;
     if (e.key === '+' || e.key === '=') { e.preventDefault(); mapMoved = true; zoomAt(camera.k * 1.2, cx, cy, true); }
     else if (e.key === '-') { e.preventDefault(); mapMoved = true; zoomAt(camera.k / 1.2, cx, cy, true); }
@@ -3237,7 +3516,7 @@ function bindCanvas() {
     if (!drag.moved && Math.abs(dx) + Math.abs(dy) < 4) return;
     if (!drag.moved) {
       drag.moved = true; vp.classList.add(drag.mode === 'pan' ? 'grabbing' : 'moving');
-      if (drag.mode === 'part') { document.querySelector(`[data-box="${CSS.escape(drag.id)}"]`)?.classList.add('dragging'); holdPlaces(opened!, drag.container); }
+      if (drag.mode === 'part') { if (openState?.mode === 'short') closeOpen(false); document.querySelector(`[data-box="${CSS.escape(drag.id)}"]`)?.classList.add('dragging'); holdPlaces(opened!, drag.container); }
     }
     if (drag.mode === 'pan') { mapMoved = true; camera = { ...camera, x: drag.cx + dx, y: drag.cy + dy }; applyCamera(); return; }
     const o = opened!; const pos = positionsOf(o);
@@ -3259,6 +3538,8 @@ function bindCanvas() {
       const now = Date.now(), part = partOf(o, d.id);
       const twice = lastClick.id === d.id && lastClick.scope === scope && now - lastClick.at < 380 && Math.abs(lastClick.x - e.clientX) + Math.abs(lastClick.y - e.clientY) < 8;
       lastClick = { id: d.id, at: now, x: e.clientX, y: e.clientY, scope };
+      // A double-click opens what a card a reading spoke of holds (동작 열기); on any other card with an inside it goes in.
+      if (twice && openable(o, d.id)) { lastClick.id = ''; openAction(d.id); return; }
       if (twice && part?.childIds.length) { lastClick.id = ''; go(o.key, null, d.id); return; }
       go(o.key, d.id); return;
     }
@@ -3299,10 +3580,13 @@ function bindCanvas() {
     if (e.key === 'Escape' && autoSync.isOpen()) { autoSync.close(); return; } // the sync panel is a popover over everything below
     // The wide reading is over everything (its own keys handle Esc inside it; this is focus left on the page).
     if (wide.isOpen()) { if (e.key === 'Escape') wide.escape(); return; }
+    // The detail view's other two moves: 이전 읽기 위치 (Alt+←) and 상위 구성 (Alt+↑); 닫기 is Escape, below.
+    if (e.altKey && openState?.mode === 'detail' && (e.key === 'ArrowLeft' || e.key === 'ArrowUp')) { e.preventDefault(); if (e.key === 'ArrowLeft') goBackPlace(); else goUp(); return; }
     // Innermost first: an open ⋯ menu closes before anything else, and focus goes back to its button.
     const menu = document.querySelector<HTMLDetailsElement>('details.more[open]');
     if (e.key === 'Escape' && menu) { menu.open = false; menu.querySelector<HTMLElement>('summary')?.focus(); return; }
     if (e.key === 'Escape' && !help.hidden) { help.hidden = true; helpButton.setAttribute('aria-expanded', 'false'); return; }
+    if (e.key === 'Escape' && opened && openState) { e.preventDefault(); closeOpen(true); return; } // 닫기: the opening only
     if (e.key === 'Escape' && opened && recentShown() && !$('recent').classList.contains('collapsed')) { if (selected || planView.isOpen()) recentPeek = false; else recentOpen = false; renderRecent(); return; }
     if (e.key === 'Escape' && planView.isOpen()) { const part = selected; planView.escape(); if (part && !selected) requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-drag="${CSS.escape(part)}"]`)?.focus()); return; }
     if (e.key === 'Escape' && partForm && opened?.view.parts.length) { partForm = null; renderPartForm(); return; }
@@ -3314,7 +3598,7 @@ function bindCanvas() {
     if (e.key === 'Escape' && opened && scope) { const o = opened, from = scope; go(o.key, null, partOf(o, from)?.parentId ?? null); requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-drag="${CSS.escape(from)}"]`)?.focus()); }
   });
   let resize = 0;
-  window.addEventListener('resize', () => { cancelAnimationFrame(resize); resize = requestAnimationFrame(() => { syncMapArea(); if (opened && !selected && !planView.isOpen() && $('lens').hidden && !mapMoved) fitView(false); }); });
+  window.addEventListener('resize', () => { cancelAnimationFrame(resize); resize = requestAnimationFrame(() => { syncMapArea(); if (openState?.mode === 'detail') drawDetailLines(); if (opened && !selected && !planView.isOpen() && $('lens').hidden && !mapMoved) fitView(false); }); });
 }
 
 /** Hover: a line shows what it means (ends, kind, recorded note) without selecting; a part lights its own lines. */

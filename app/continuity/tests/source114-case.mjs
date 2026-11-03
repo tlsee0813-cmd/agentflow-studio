@@ -26,10 +26,10 @@ export function mapWithRequest({ D, M, C, S, studioView, emptyBundle }) {
   const r0 = reply6({ summary: '폴더 변환기의 요구를 읽었어요.', parts: [part('new:convert', { name: '폴더 변환', role: '폴더 안 문서를 한 번에 PDF로 바꾸는 부분이다.', basis: [piece(a0.ask, 'N01', '요구:')],
     claims: [{ kind: 'want', text: '실패한 파일 뒤에도 계속 변환하기를 원함', at: piece(a0.ask, 'N01', '한 파일이'), about: null, replaces: null, key: 's1' }] })] });
   p = M.applyReading(p, a0, M.validateMapReply(r0, a0.ask), { id: 'R_114-first', at: new Date().toISOString(), model: 'stub-114', prompt: 'm6-000000000114', hash: '1'.repeat(64) }).project;
-  // This fixture represents a historical project.13 reading. Keep its original .5 shape as production writes .6 and now .8 (whose
+  // This fixture represents a historical project.13 reading. Keep its original .5 shape as production writes .6 and now .9 (whose
   // reading, claim, part and relation keys an earlier reading never has).
-  const five = ({ exclusions: _exclusions, basisAt: _ba, basisVersion: _bv, ...r }) => ({ ...r, version: 'map-reading.5',
-    parts: r.parts.map(({ state: _s, stateWhen: _w, stateQuote: _q, files: _f, type: _y, typeQuote: _yq, inputs: _i, outputs: _o, fields: _d, config: _g, ...x }) => ({ ...x, claims: x.claims.map(({ topic: _t, evidence: _e, when: _n, where: _h, before: _b, ...c }) => c) })),
+  const five = ({ exclusions: _exclusions, basisAt: _ba, basisVersion: _bv, portMap: _pm, ...r }) => ({ ...r, version: 'map-reading.5',
+    parts: r.parts.map(({ state: _s, stateWhen: _w, stateQuote: _q, files: _f, type: _y, typeQuote: _yq, inputs: _i, outputs: _o, fields: _d, config: _g, steps: _st, loop: _lp, stateVars: _sv, ...x }) => ({ ...x, claims: x.claims.map(({ topic: _t, evidence: _e, when: _n, where: _h, before: _b, ...c }) => c) })),
     relations: r.relations.map(({ payload: _p, cadence: _c, mode: _m, channel: _n, ...x }) => x) });
   p = { ...p, readings: p.readings.map(five) };
   const area = p.space.areas[0].id;

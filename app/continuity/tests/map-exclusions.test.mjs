@@ -21,8 +21,15 @@ function fixture(text = '실제 기능은 파일을 저장합니다.\n예제 조
   return { p, inp, spans, claim, part, reply };
 }
 const errors = reply => M.setAside(reply).map(e => [e.path, e.rule]);
-/** A stored map-reading.8 entry in the exact shape of .7: the .8 keys of the reading, its parts and its relations removed. */
+/** A stored map-reading.9 entry in the exact shape of .8: the .9 keys of the reading and its parts removed. */
+function stripNine(r) {
+  delete r.portMap;
+  for (const p of r.parts) for (const k of ['steps', 'loop', 'stateVars']) delete p[k];
+  return r;
+}
+/** A stored map-reading.9 entry in the exact shape of .7: the .9 and .8 keys of the reading, its parts and its relations removed. */
 function stripEight(r) {
+  stripNine(r);
   for (const k of ['basisAt', 'basisVersion']) delete r[k];
   for (const p of r.parts) for (const k of ['type', 'typeQuote', 'inputs', 'outputs', 'fields', 'config']) delete p[k];
   for (const x of r.relations) delete x.channel;
@@ -83,7 +90,7 @@ test('F2 a 1087-character citation with the sole supporting sentence last is exc
     assert.deepEqual(got.parts[0].claims.map(c => c.key), ['s1']);
     assert.deepEqual(errors(got), [['parts[0].claims[1].at', 'length']]);
     const applied = M.applyReading(f.p, f.inp, got, meta()), x = applied.reading.exclusions[0];
-    assert.equal(applied.reading.version, 'map-reading.8');
+    assert.equal(applied.reading.version, 'map-reading.9');
     assert.deepEqual([x.path, x.rule, x.category, x.record, x.from, x.to], ['parts[0].claims[1].at', 'length', null, f.p.pasted[0].id, 0, 1087]);
     assert.match(x.explanation, /600/);
     assert.ok(!JSON.stringify(x).includes(support));
@@ -255,13 +262,13 @@ function sevenReply(f) {
 }
 const sevenOf = c => [c.topic, c.evidence, c.when, c.where, c.before];
 
-test('map-reading.7: a map.6 reply with every new field is read, applied, stored (as map-reading.8) and read back', () => {
+test('map-reading.7: a map.6 reply with every new field is read, applied, stored (as map-reading.9) and read back', () => {
   const f = firstMap(), got = M.validateMapReply(sevenReply(f), f.ask);
   assert.equal(M.setAside(got).length, 0);
   assert.deepEqual(got.parts[0].claims.map(sevenOf), [['withdrawn', 'file', '11-02 23:04Z', 'server/engine.mjs', '옛 결정 원문'], ['status', null, null, null, null]]);
   assert.deepEqual([got.parts[0].state, got.parts[0].stateWhen, got.parts[0].files], ['running', '11-02 22:10Z', ['server/engine.mjs', 'public/']]);
   const applied = M.applyReading(f.p, f.inp, got, meta('R_seven_full'));
-  assert.equal(applied.reading.version, 'map-reading.8');
+  assert.equal(applied.reading.version, 'map-reading.9');
   const [save, read] = applied.reading.parts, claim = save.claims[0];
   assert.deepEqual(save.stateQuote, { record: claim.record, quote: claim.quote, from: claim.from, to: claim.to }, 'anchored where it stands, like a claim');
   assert.deepEqual([save.state, save.stateWhen, save.files], ['running', '11-02 22:10Z', ['server/engine.mjs', 'public/']]);
@@ -314,7 +321,7 @@ test('map-reading.7 lenient: a wrong field sets aside its claim or relation, and
   assert.deepEqual(seven.parts[0].claims.map(c => c.key), ['s1']);
   assert.deepEqual([seven.parts[0].state, seven.parts[0].stateWhen, seven.parts[0].files], [null, null, ['x/']]);
   assert.deepEqual(errors(seven), [['parts[0].claims[1].topic', 'contract'], ['parts[0].state', 'contract']]);
-  assert.equal(M.applyReading(g.p, g.inp, seven, meta('R_seven_map7')).reading.version, 'map-reading.8');
+  assert.equal(M.applyReading(g.p, g.inp, seven, meta('R_seven_map7')).reading.version, 'map-reading.9');
 });
 
 test('map-reading.7 strict: plain map.6 refuses a reply with any wrong new field', () => {
@@ -338,7 +345,7 @@ test('map-reading.7: a reply without any new field still validates and stores ev
   r.parts.push({ ref: 'new:read', name: '읽기', parent: null, role: '파일 읽기', roleAbout: null, roleReplaces: null, basis: [f.at[2]], claims: [f.claim('s3', f.at[2])] });
   r.relations = [{ from: 'new:save', to: 'new:read', kind: 'flow', note: '', at: f.at[0] }];
   const applied = M.applyReading(f.p, f.inp, M.validateMapReply(r, f.ask), meta('R_seven_plain'));
-  assert.equal(applied.reading.version, 'map-reading.8');
+  assert.equal(applied.reading.version, 'map-reading.9');
   for (const p of applied.reading.parts) {
     assert.deepEqual([p.state, p.stateWhen, p.stateQuote, p.files], [null, null, null, []]);
     for (const c of p.claims) assert.deepEqual(sevenOf(c), [null, null, null, null, null]);
@@ -379,14 +386,14 @@ function eightReply(f) {
 }
 const eightOf = p => [p.type, p.inputs, p.outputs, p.fields, p.config];
 
-test('map-reading.8: a map.6 reply with every new field is read, applied, stored as map-reading.8 and read back', () => {
+test('map-reading.8: a map.6 reply with every new field is read, applied, stored (as map-reading.9) and read back', () => {
   const f = firstMap(), got = M.validateMapReply(eightReply(f), f.ask);
   assert.equal(M.setAside(got).length, 0);
   assert.deepEqual(eightOf(got.parts[0]), ['store', ['review 행', 'policy 행'], ['e=1 행'], ['watch', 'allowed_side'], ['24 h 만료']]);
   assert.deepEqual(eightOf(got.parts[1]), [null, [], [], [], []]);
   assert.deepEqual([got.relations[0].channel, got.basisAt, got.basisVersion], ['data', '2026-11-03T09:01:03Z', '라이브 618df374']);
   const applied = M.applyReading(f.p, f.inp, got, meta('R_eight_full'));
-  assert.equal(applied.reading.version, 'map-reading.8');
+  assert.equal(applied.reading.version, 'map-reading.9');
   const [save, read] = applied.reading.parts, claim = save.claims[0];
   assert.deepEqual(save.typeQuote, { record: claim.record, quote: claim.quote, from: claim.from, to: claim.to }, 'anchored where it stands, like a state');
   assert.deepEqual(eightOf(save), ['store', ['review 행', 'policy 행'], ['e=1 행'], ['watch', 'allowed_side'], ['24 h 만료']]);
@@ -404,7 +411,7 @@ test('map-reading.8: a map.6 reply with every new field is read, applied, stored
 test('map-reading.8 lenient: a wrong field leaves out only that field of its part, sets aside its relation, or nulls the basis', () => {
   const f = firstMap(), r = eightReply(f);
   r.parts[0].type = 'engine';
-  r.parts[0].inputs = Array(7).fill('a');
+  r.parts[0].inputs = Array(9).fill('a');
   r.parts[0].config = ['가'.repeat(81)];
   r.parts[1].typeAt = f.at[2];
   r.relations[0].channel = 'wire';
@@ -436,7 +443,7 @@ test('map-reading.8 strict: plain map.6 refuses a reply with any wrong new field
   const f = firstMap();
   for (const mutate of [
     r => { r.parts[0].type = 'engine'; }, r => { delete r.parts[0].typeAt; }, r => { r.parts[0].typeAt = 'N01.99'; }, r => { r.parts[1].typeAt = f.at[2]; },
-    r => { r.parts[0].inputs = Array(7).fill('a'); }, r => { r.parts[0].outputs = ['가'.repeat(61)]; }, r => { r.parts[0].fields = 'watch'; }, r => { r.parts[0].config = ['']; }, r => { r.parts[0].fields = Array(13).fill('f'); },
+    r => { r.parts[0].inputs = Array(9).fill(0).map((_, i) => `i${i}`); }, r => { r.parts[0].outputs = ['가'.repeat(61)]; }, r => { r.parts[0].fields = 'watch'; }, r => { r.parts[0].config = ['']; }, r => { r.parts[0].fields = Array(25).fill(0).map((_, i) => `f${i}`); }, r => { r.parts[0].config = Array(9).fill(0).map((_, i) => `c ${i}`); },
     r => { r.relations[0].channel = 'wire'; }, r => { r.basisAt = '가'.repeat(61); }, r => { r.basisVersion = ''; }, r => { r.basisVersion = `sk-${'A'.repeat(25)}`; },
   ]) {
     const r = eightReply(f); mutate(r);
@@ -447,7 +454,7 @@ test('map-reading.8 strict: plain map.6 refuses a reply with any wrong new field
 test('map-reading.8: a reply without any new field stores every key as not said', () => {
   const f = firstMap(), r = structuredClone(f.reply); r.parts[0].claims.splice(1, 1);
   const applied = M.applyReading(f.p, f.inp, M.validateMapReply(r, f.ask), meta('R_eight_plain'));
-  assert.equal(applied.reading.version, 'map-reading.8');
+  assert.equal(applied.reading.version, 'map-reading.9');
   assert.deepEqual([applied.reading.basisAt, applied.reading.basisVersion], [null, null]);
   for (const p of applied.reading.parts) assert.deepEqual([p.type, p.typeQuote, ...eightOf(p).slice(1)], [null, null, [], [], [], []]);
   const u = M.partUnderstanding(applied.project, applied.reading.parts[0].areaId);
@@ -460,7 +467,7 @@ test('map-reading.8 storage is exact: unknown values, a missing key, and an .8 k
   const raw = S.serializeProject(applied.project);
   for (const mutate of [
     r => { r.parts[0].type = 'engine'; }, r => { r.parts[0].typeQuote = null; }, r => { r.parts[1].typeQuote = r.parts[0].typeQuote; }, r => { delete r.parts[0].inputs; }, r => { r.parts[0].inputs = ['a', 'a']; },
-    r => { r.parts[0].fields = Array(13).fill(0).map((_, i) => `f${i}`); }, r => { r.parts[0].config = ['가'.repeat(81)]; }, r => { r.relations[0].channel = 'wire'; }, r => { delete r.relations[0].channel; },
+    r => { r.parts[0].fields = Array(25).fill(0).map((_, i) => `f${i}`); }, r => { r.parts[0].config = ['가'.repeat(81)]; }, r => { r.relations[0].channel = 'wire'; }, r => { delete r.relations[0].channel; },
     r => { r.basisAt = '가'.repeat(61); }, r => { delete r.basisVersion; }, r => { r.version = 'map-reading.7'; },
     r => { r.version = 'map-reading.7'; stripEight(r); r.parts[0].inputs = []; },
   ]) {
@@ -531,4 +538,146 @@ test('.29: the divided checks set aside their item alone with a fixed reason tha
   assert.deepEqual(local(applied.reading.exclusions), local(reasons));
   assert.ok(applied.reading.exclusions.every(x => x.record === p.pasted[0].id), 'the alias is stored as the record it names');
   assert.deepEqual(parseProject(S.serializeProject(applied.project)).readings.at(-1), applied.reading);
+});
+
+// ---- map-reading.9 (first-map-divided.30): a part's steps (each on its row of the inner-step table), its loop (unit, stop and
+// resume, each its own claim) and the state it keeps; the reply's port map (a relation, a port of the part at that end, one of its
+// steps, in or out). Optional on the wire, exact in storage. ----
+function nineReply(f) {
+  const r = eightReply(f);
+  Object.assign(r.parts[0], { steps: [{ name: ' 저장 ', does: '파일을 쓴다', uses: ['save()', ' save() ', 'disk'], at: f.at[0] }, { name: '확인', does: null, at: f.at[2] }],
+    loop: { unit: '분마다', stop: null, resume: ' 새 행 도착 시 ', at: f.at[0] },
+    stateVars: [{ name: '저장 카운터', scope: '하루', readBy: ['확인'], changedBy: ['저장'] }] });
+  Object.assign(r.parts[1], { inputs: ['저장 파일'], steps: [{ name: '읽기', does: '파일을 읽는다', uses: [], at: f.at[2] }] });
+  r.portMap = [{ relation: 0, port: 'e=1 행', step: '저장', direction: 'out', at: f.at[0] }, { relation: 0, port: '저장 파일', step: '읽기', direction: 'in', at: f.at[2] }];
+  return r;
+}
+const nineOf = p => [p.steps.map(s => [s.name, s.does, s.uses]), p.loop && [p.loop.unit, p.loop.stop, p.loop.resume], p.stateVars];
+const rowsOf = list => list.map(m => [m.relation ?? m.relationId, m.port, m.step, m.direction]);
+const nameList = (n, head) => Array.from({ length: n }, (_, i) => `${head}${i}`);
+
+test('map-reading.9: a map.6 reply with steps, a loop, kept state and a port map is read, applied, stored and read back', () => {
+  const f = firstMap(), got = M.validateMapReply(nineReply(f), f.ask);
+  assert.equal(M.setAside(got).length, 0);
+  const save = [[['저장', '파일을 쓴다', ['save()', 'disk']], ['확인', null, []]], ['분마다', null, '새 행 도착 시'], [{ name: '저장 카운터', scope: '하루', readBy: ['확인'], changedBy: ['저장'] }]];
+  assert.deepEqual(nineOf(got.parts[0]), save);
+  assert.deepEqual(nineOf(got.parts[1]), [[['읽기', '파일을 읽는다', []]], null, []]);
+  assert.deepEqual(rowsOf(got.portMap), [[0, 'e=1 행', '저장', 'out'], [0, '저장 파일', '읽기', 'in']]);
+  const applied = M.applyReading(f.p, f.inp, got, meta('R_nine_full'));
+  assert.equal(applied.reading.version, 'map-reading.9');
+  const [stored, read] = applied.reading.parts, line = applied.reading.relations[0];
+  assert.deepEqual(nineOf(stored), save);
+  assert.deepEqual(stored.steps[0].quote, stored.typeQuote, 'a step stands on its own row, anchored where it stands');
+  assert.deepEqual(stored.loop.quote, stored.typeQuote);
+  assert.deepEqual(applied.reading.portMap.map(m => [m.relationId, m.areaId, m.port, m.step, m.direction]),
+    [[line.relationId, stored.areaId, 'e=1 행', '저장', 'out'], [line.relationId, read.areaId, '저장 파일', '읽기', 'in']]);
+  const u = M.partUnderstanding(applied.project, stored.areaId), v = M.partUnderstanding(applied.project, read.areaId);
+  assert.deepEqual([u.steps.map(s => [s.name, s.at]), u.loop && [u.loop.unit, u.loop.resume, u.loop.at], u.stateVars.map(s => s.name)],
+    [[['저장', meta().at], ['확인', meta().at]], ['분마다', '새 행 도착 시', meta().at], ['저장 카운터']]);
+  assert.deepEqual([rowsOf(u.portMap), rowsOf(v.portMap), v.loop], [[[line.relationId, 'e=1 행', '저장', 'out']], [[line.relationId, '저장 파일', '읽기', 'in']], null]);
+  assert.deepEqual(validateProject(applied.project), applied.project);
+  assert.deepEqual(parseProject(S.serializeProject(applied.project)).readings.at(-1), applied.reading);
+});
+
+test('map-reading.9 lenient: a wrong step, loop item, kept state or port-map row is set aside alone with a fixed reason', () => {
+  const f = firstMap(), r = nineReply(f);
+  r.parts[0].steps[1].at = 'N01.99';
+  r.parts[0].steps.push({ name: '저장', does: '다시', at: f.at[2] });
+  r.parts[0].loop.stop = '가'.repeat(61);
+  r.parts[0].stateVars = [{ name: '넘침', readBy: nameList(5, 'r') }, { name: '남음' }];
+  r.parts[1].loop = { unit: '매번', at: 'N01.99' };
+  r.portMap.push({ relation: 5, port: 'e=1 행', step: '저장', direction: 'out', at: f.at[0] }, { relation: 0, port: '없는 포트', step: '저장', direction: 'out', at: f.at[0] },
+    { relation: 0, port: '저장 파일', step: '확인', direction: 'in', at: f.at[2] }, { ...r.portMap[0] }, { relation: 0, port: '저장 파일', step: '읽기', direction: 'out', at: 'N01.99' });
+  assert.throws(() => M.validateMapReply(structuredClone(r), f.ask), undefined, 'plain map.6 refuses');
+  const got = M.validateMapReply(structuredClone(r), f.ask, { setAside: true }), reasons = M.readingExclusions(got);
+  assert.deepEqual(reasons.map(e => [e.path, e.rule, e.category]), [['parts[0].steps[1]', 'contract', 'step'], ['parts[0].steps[2]', 'contract', 'step'],
+    ['parts[0].loop.stop', 'contract', 'loop'], ['parts[0].stateVars[0]', 'contract', 'state-var'], ['parts[1].loop', 'contract', 'loop'],
+    ['portMap[2]', 'contract', 'port-map'], ['portMap[3]', 'contract', 'port-map'], ['portMap[4]', 'contract', 'port-map'], ['portMap[5]', 'contract', 'port-map'], ['portMap[6]', 'contract', 'port-map']]);
+  for (const [i, words] of [[0, /그 단계만/], [2, /그 칸만 비웠어요/], [3, /그 항목만/], [5, /그 대응만/]]) assert.match(reasons[i].explanation, words);
+  assert.ok(reasons[1].record && reasons[5].record, 'a set-aside step and row keep where their line stands');
+  assert.deepEqual(nineOf(got.parts[0]), [[['저장', '파일을 쓴다', ['save()', 'disk']]], ['분마다', null, '새 행 도착 시'], [{ name: '남음', scope: null, readBy: [], changedBy: [] }]]);
+  assert.equal(got.parts[1].loop, null);
+  assert.deepEqual(rowsOf(got.portMap), [[0, 'e=1 행', '저장', 'out'], [0, '저장 파일', '읽기', 'in']]);
+  const applied = M.applyReading(f.p, f.inp, got, meta('R_nine_lenient'));
+  assert.deepEqual(applied.reading.exclusions.map(e => e.path), reasons.map(e => e.path));
+  assert.deepEqual(parseProject(S.serializeProject(applied.project)).readings.at(-1), applied.reading);
+  // A wrong list is left out whole.
+  const whole = nineReply(f); whole.parts[0].steps = nameList(13, 's').map(name => ({ name, at: f.at[0] })); whole.portMap = { relation: 0 };
+  const left = M.validateMapReply(whole, f.ask, { setAside: true });
+  assert.deepEqual([left.parts[0].steps, left.portMap, M.readingExclusions(left).map(e => [e.path, e.category])], [[], [], [['parts[0].steps', 'step'], ['portMap', 'port-map']]]);
+  // map.7 reads the same way.
+  const g = fixture();
+  Object.assign(g.reply.parts[0], { steps: [{ name: '저장', at: 'N01.99' }, { name: '읽기', at: g.spans[2].s }], stateVars: [{ name: '' }] });
+  const seven = M.validateMapReply(g.reply, g.inp.ask);
+  assert.deepEqual([seven.parts[0].steps.map(s => s.name), seven.parts[0].stateVars, errors(seven)], [['읽기'], [], [['parts[0].steps[0]', 'contract'], ['parts[0].stateVars[0]', 'contract']]]);
+});
+
+test('map-reading.9 strict: plain map.6 refuses a reply with any wrong new field; the raised list bounds are read whole', () => {
+  const f = firstMap();
+  for (const mutate of [
+    r => { r.parts[0].steps[0].at = 'N01.99'; }, r => { r.parts[0].steps = 'x'; }, r => { r.parts[0].steps = nameList(13, 's').map(name => ({ name, at: f.at[0] })); },
+    r => { r.parts[0].steps[0].name = '가'.repeat(41); }, r => { delete r.parts[0].steps[0].at; }, r => { r.parts[0].steps[0].uses = nameList(5, 'u'); }, r => { r.parts[0].steps[1].name = '저장'; },
+    r => { r.parts[0].loop.unit = ''; }, r => { delete r.parts[0].loop.at; }, r => { r.parts[0].loop.at = 'N01.99'; }, r => { r.parts[0].loop = 'x'; },
+    r => { r.parts[0].stateVars[0].scope = '가'.repeat(41); }, r => { r.parts[0].stateVars = nameList(9, 'v').map(name => ({ name })); }, r => { r.parts[0].stateVars.push({ name: '저장 카운터' }); },
+    r => { r.portMap[0].relation = 9; }, r => { r.portMap[0].port = '없음'; }, r => { r.portMap[0].step = '읽기'; }, r => { r.portMap[0].direction = 'up'; }, r => { r.portMap = {}; },
+    r => { r.portMap = Array(13).fill(r.portMap[0]); }, r => { r.portMap.push({ ...r.portMap[0] }); }, r => { r.portMap[0].at = 'N01.99'; },
+    r => { r.parts[0].inputs = nameList(9, 'i'); }, r => { r.parts[0].fields = nameList(25, 'f'); }, r => { r.parts[0].config = nameList(9, '설정 '); },
+    r => { r.parts[0].steps[0].does = `sk-${'A'.repeat(25)}`; },
+  ]) {
+    const r = nineReply(f); mutate(r);
+    assert.throws(() => M.validateMapReply(r, f.ask), undefined, String(mutate));
+  }
+  const wide = nineReply(f);
+  Object.assign(wide.parts[0], { inputs: nameList(8, 'i'), outputs: ['e=1 행', ...nameList(7, 'o')], fields: nameList(24, 'f'), config: nameList(8, '설정 ') });
+  const got = M.validateMapReply(wide, f.ask);
+  assert.deepEqual([got.parts[0].inputs.length, got.parts[0].outputs.length, got.parts[0].fields.length, got.parts[0].config.length], [8, 8, 24, 8]);
+  const applied = M.applyReading(f.p, f.inp, got, meta('R_nine_wide'));
+  const u = M.partUnderstanding(applied.project, applied.reading.parts[0].areaId);
+  assert.deepEqual([u.inputs.length, u.fields.length, u.config.length], [8, 24, 8]);
+  assert.deepEqual(validateProject(applied.project), applied.project);
+  // A loop that says none of its three items is no loop (its line is not read).
+  const none = nineReply(f); none.parts[0].loop = { unit: null, stop: null, resume: null, at: 'N01.99' };
+  assert.equal(M.validateMapReply(none, f.ask).parts[0].loop, null);
+});
+
+test('map-reading.9: a reply without any new field stores every key as not said', () => {
+  const f = firstMap(), r = structuredClone(f.reply); r.parts[0].claims.splice(1, 1);
+  const applied = M.applyReading(f.p, f.inp, M.validateMapReply(r, f.ask), meta('R_nine_plain'));
+  assert.equal(applied.reading.version, 'map-reading.9');
+  assert.deepEqual(applied.reading.portMap, []);
+  for (const p of applied.reading.parts) assert.deepEqual([p.steps, p.loop, p.stateVars], [[], null, []]);
+  const u = M.partUnderstanding(applied.project, applied.reading.parts[0].areaId);
+  assert.deepEqual([u.steps, u.loop, u.stateVars, u.portMap], [[], null, [], []]);
+  assert.deepEqual(validateProject(applied.project), applied.project);
+});
+
+test('map-reading.9 storage is exact: unknown values, a missing key, a .9 key on a .8 reading and the .8 bounds are refused', () => {
+  const f = firstMap(), applied = M.applyReading(f.p, f.inp, M.validateMapReply(nineReply(f), f.ask), meta('R_nine_store'));
+  const raw = S.serializeProject(applied.project);
+  const excluded = (path, category) => ({ path, rule: 'contract', category, explanation: '-', record: null, from: null, to: null });
+  for (const mutate of [
+    r => { delete r.parts[0].steps; }, r => { r.parts[0].steps[0].name = ''; }, r => { r.parts[0].steps[0].uses = ['a', 'a']; }, r => { r.parts[0].steps[1].name = '저장'; },
+    r => { r.parts[0].steps = nameList(13, 's').map(name => ({ ...r.parts[0].steps[0], name })); }, r => { r.parts[0].steps[0].quote = { ...r.parts[0].steps[0].quote, quote: 'x' }; },
+    r => { r.parts[0].steps[0].extra = 1; }, r => { delete r.parts[1].loop; }, r => { r.parts[0].loop = { ...r.parts[0].loop, unit: null, resume: null }; }, r => { r.parts[0].loop.stop = '가'.repeat(61); },
+    r => { delete r.parts[0].loop.quote; }, r => { r.parts[0].stateVars[0].readBy = ['a', 'a']; }, r => { r.parts[0].stateVars.push({ ...r.parts[0].stateVars[0] }); }, r => { delete r.parts[0].stateVars[0].scope; },
+    r => { delete r.portMap; }, r => { r.portMap[0].areaId = r.parts[1].areaId; }, r => { r.portMap[0].step = '없음'; }, r => { r.portMap[0].port = '저장 파일'; }, r => { r.portMap[0].relationId = 'REL_none'; },
+    r => { r.portMap[0].direction = 'up'; }, r => { r.portMap.push({ ...r.portMap[0] }); }, r => { r.portMap[0].quote = { ...r.portMap[0].quote, quote: 'x' }; },
+    r => { r.parts[0].fields = nameList(25, 'f'); }, r => { r.parts[0].inputs = nameList(9, 'i'); },
+    r => { r.version = 'map-reading.8'; },
+    r => { r.version = 'map-reading.8'; stripNine(r); r.parts[0].steps = []; },
+    r => { r.version = 'map-reading.8'; stripNine(r); r.portMap = []; },
+    r => { r.version = 'map-reading.8'; stripNine(r); r.parts[0].fields = nameList(13, 'f'); },
+    r => { r.version = 'map-reading.8'; stripNine(r); r.parts[0].inputs = nameList(7, 'i'); },
+    r => { r.version = 'map-reading.8'; stripNine(r); r.exclusions = [excluded('portMap[0]', 'port-map')]; },
+  ]) {
+    const bad = JSON.parse(raw); mutate(bad.readings.at(-1));
+    assert.throws(() => parseProject(JSON.stringify(bad)), undefined, String(mutate));
+    assert.throws(() => validateProject(bad), undefined, String(mutate));
+  }
+  const old = JSON.parse(raw); old.readings.at(-1).version = 'map-reading.8'; stripNine(old.readings.at(-1));
+  assert.deepEqual(validateProject(old), old, 'a map-reading.8 entry keeps its exact shape');
+  const u = M.partUnderstanding(parseProject(JSON.stringify(old)), old.readings.at(-1).parts[0].areaId);
+  assert.deepEqual([u.steps, u.loop, u.stateVars, u.portMap, u.inputs], [[], null, [], [], ['review 행', 'policy 행']], 'an earlier reading has no steps, loop, state or port map');
+  const ok = JSON.parse(raw); ok.readings.at(-1).exclusions = [excluded('portMap[0]', 'port-map'), excluded('parts[0].steps[1]', 'step'), excluded('parts[0].loop.unit', 'loop')];
+  assert.deepEqual(validateProject(ok), ok, 'a .9 reading may say where a step, a loop item or a row stood');
 });

@@ -4,29 +4,29 @@
 // the head are never dropped. And layoutScope's typed card: drawn at UNIT_W without its note, its room asked with its name's lines.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { typedBudget, typedPx, zoomLevel, CARD_LINES, OVERVIEW_MAX, MID_MAX, LINE_H, LINE_GAP, CHIPS_H } from '../dist/public/client/card-budget.js';
+import { typedBudget, typedPx, typedLines, zoomLevel, entryKind, entryParts, CARD_LINES, OVERVIEW_MAX, MID_MAX, LINE_H, LINE_GAP, CHIPS_H } from '../dist/public/client/card-budget.js';
 import { createProject, addArea, addChildArea } from '../dist/public/shared/domain.js';
 import { studioView } from '../dist/public/shared/studio.js';
 import { layoutScope, UNIT_W } from '../dist/public/client/map-layout.js';
 
 test('a one-line name keeps every line: two port lines, the structure and the setting (six lines)', () => {
-  assert.deepEqual(typedBudget(1, true, true, true, true), { io: 'both', body: true, set: true, chips: 'none', lines: 6 });
-  assert.deepEqual(typedBudget(1, false, true, false, false), { io: 'in', body: false, set: false, chips: 'none', lines: 3 });
-  assert.deepEqual(typedBudget(1, true, false, true, true), { io: 'out', body: true, set: true, chips: 'none', lines: 5 });
-  assert.deepEqual(typedBudget(1, false, false, false, false), { io: 'none', body: false, set: false, chips: 'none', lines: 2 });
+  assert.deepEqual(typedBudget(1, true, true, true, true), { io: 'both', body: true, set: true, chips: 'none', entry: false, lines: 6 });
+  assert.deepEqual(typedBudget(1, false, true, false, false), { io: 'in', body: false, set: false, chips: 'none', entry: false, lines: 3 });
+  assert.deepEqual(typedBudget(1, true, false, true, true), { io: 'out', body: true, set: true, chips: 'none', entry: false, lines: 5 });
+  assert.deepEqual(typedBudget(1, false, false, false, false), { io: 'none', body: false, set: false, chips: 'none', entry: false, lines: 2 });
 });
 
 test('a two-line name drops the setting first, and only when the six lines are exceeded', () => {
-  assert.deepEqual(typedBudget(2, true, true, true, true), { io: 'both', body: true, set: false, chips: 'none', lines: 6 });
+  assert.deepEqual(typedBudget(2, true, true, true, true), { io: 'both', body: true, set: false, chips: 'none', entry: false, lines: 6 });
   // Without a setting the same card already fits: nothing is dropped.
-  assert.deepEqual(typedBudget(2, false, true, true, true), { io: 'both', body: true, set: false, chips: 'none', lines: 6 });
-  assert.deepEqual(typedBudget(2, true, true, true, false), { io: 'both', body: false, set: true, chips: 'none', lines: 6 });
-  assert.deepEqual(typedBudget(2, true, true, false, true), { io: 'in', body: true, set: true, chips: 'none', lines: 6 });
+  assert.deepEqual(typedBudget(2, false, true, true, true), { io: 'both', body: true, set: false, chips: 'none', entry: false, lines: 6 });
+  assert.deepEqual(typedBudget(2, true, true, true, false), { io: 'both', body: false, set: true, chips: 'none', entry: false, lines: 6 });
+  assert.deepEqual(typedBudget(2, true, true, false, true), { io: 'in', body: true, set: true, chips: 'none', entry: false, lines: 6 });
 });
 
 test('a longer name folds 내는 것 into the 받는 것 line after the setting; the structure and the operations line stay', () => {
-  assert.deepEqual(typedBudget(3, true, true, true, true), { io: 'fold', body: true, set: false, chips: 'none', lines: 6 });
-  assert.deepEqual(typedBudget(3, false, true, true, false), { io: 'both', body: false, set: false, chips: 'none', lines: 6 });
+  assert.deepEqual(typedBudget(3, true, true, true, true), { io: 'fold', body: true, set: false, chips: 'none', entry: false, lines: 6 });
+  assert.deepEqual(typedBudget(3, false, true, true, false), { io: 'both', body: false, set: false, chips: 'none', entry: false, lines: 6 });
   // Nothing more can go: the head, the operations line and the structural line are never dropped.
   const tight = typedBudget(4, true, true, true, true);
   assert.equal(tight.body, true); assert.equal(tight.io, 'fold'); assert.equal(tight.set, false);
@@ -66,10 +66,10 @@ test('layoutScope: a typed card is drawn at UNIT_W without its note, and its roo
 // Group chips (연결 N, 안쪽 N) on a typed card with an inside: at the end of a one-line name they take no line; on a line of
 // their own they count as one of the six, the setting and then 내는 것 giving way before them, and they are never dropped.
 test('chips at the name take no line; chips on their own line count in the six and push the setting, then 내는 것, out', () => {
-  assert.deepEqual(typedBudget(1, true, true, true, true, 'name'), { io: 'both', body: true, set: true, chips: 'name', lines: 6 });
-  assert.deepEqual(typedBudget(1, true, true, true, true, 'line'), { io: 'both', body: true, set: false, chips: 'line', lines: 6 });
-  assert.deepEqual(typedBudget(2, true, true, true, true, 'line'), { io: 'fold', body: true, set: false, chips: 'line', lines: 6 });
-  assert.deepEqual(typedBudget(2, false, true, false, false, 'line'), { io: 'in', body: false, set: false, chips: 'line', lines: 5 });
+  assert.deepEqual(typedBudget(1, true, true, true, true, 'name'), { io: 'both', body: true, set: true, chips: 'name', entry: false, lines: 6 });
+  assert.deepEqual(typedBudget(1, true, true, true, true, 'line'), { io: 'both', body: true, set: false, chips: 'line', entry: false, lines: 6 });
+  assert.deepEqual(typedBudget(2, true, true, true, true, 'line'), { io: 'fold', body: true, set: false, chips: 'line', entry: false, lines: 6 });
+  assert.deepEqual(typedBudget(2, false, true, false, false, 'line'), { io: 'in', body: false, set: false, chips: 'line', entry: false, lines: 5 });
   for (const nl of [1, 2]) for (const set of [false, true]) for (const i of [false, true]) for (const o of [false, true]) for (const b of [false, true]) {
     const r = typedBudget(nl, set, i, o, b, 'line');
     assert.ok(r.lines <= CARD_LINES, JSON.stringify({ nl, set, i, o, b, r }));
@@ -85,8 +85,8 @@ test('zoom levels: 개요 ≤ 55%, 중간 56–85%, 상세 > 85% (as the zoom to
 });
 
 test('a level keeps less of the same card: 개요 nothing under the operations line, 중간 the port lines, 상세 everything', () => {
-  assert.deepEqual(typedBudget(1, true, true, true, true, 'none', 'overview'), { io: 'none', body: false, set: false, chips: 'none', lines: 2 });
-  assert.deepEqual(typedBudget(1, true, true, true, true, 'none', 'mid'), { io: 'both', body: false, set: false, chips: 'none', lines: 4 });
+  assert.deepEqual(typedBudget(1, true, true, true, true, 'none', 'overview'), { io: 'none', body: false, set: false, chips: 'none', entry: false, lines: 2 });
+  assert.deepEqual(typedBudget(1, true, true, true, true, 'none', 'mid'), { io: 'both', body: false, set: false, chips: 'none', entry: false, lines: 4 });
   assert.deepEqual(typedBudget(1, true, true, true, true, 'none', 'detail'), typedBudget(1, true, true, true, true));
   // 중간 needs no fold where 상세 folds: the structure and the setting are not drawn there.
   assert.equal(typedBudget(2, true, true, true, true, 'line', 'mid').io, 'both');
@@ -123,4 +123,55 @@ test('layoutScope: a typed card with an inside asks without a chips line when it
   const one = (x, face) => (face === 'unit' ? { oneLine: true, room: (nl, chipsLine) => { asked.set(x, { nl, chipsLine }); return 0; } } : 0);
   layoutScope(v, null, folded, {}, undefined, undefined, 1.6, one);
   assert.deepEqual(asked.get(long), { nl: 1, chipsLine: false });
+});
+
+// The entry line (spec 4, 열기): '구성 N · 기록된 단계 M · 설정 K · 필드 F' in totals, or '내부 미상' when the reading names nothing
+// inside; an empty card (no reading) has none. It takes the setting's place when the six lines are tight, gives way only after
+// 내는 것 folded, and reads at 중간 and 상세.
+const counts = (x = {}) => ({ read: true, kids: 0, steps: 0, inputs: 0, outputs: 0, fields: 0, config: 0, ...x });
+test('entry words: totals of what the card does not name in full; 내부 미상 apart from an empty card', () => {
+  const most = { config: 1, fields: 3 };
+  assert.equal(entryKind({ ...counts(), read: false }, most), 'none', 'no reading: an empty card, no entry');
+  assert.deepEqual(entryParts({ ...counts(), read: false }, most), []);
+  assert.equal(entryKind(counts(), most), 'unknown');
+  assert.deepEqual(entryParts(counts(), most), ['내부 미상'], 'a reading that names nothing inside');
+  // Everything named on the card already: no entry (the card is still opened by a double-click or Enter).
+  assert.equal(entryKind(counts({ inputs: 2, outputs: 2, config: 1 }), most), 'none');
+  assert.deepEqual(entryParts(counts({ kids: 4 }), most), ['구성 4']);
+  assert.deepEqual(entryParts(counts({ kids: 4, steps: 7 }), most), ['구성 4', '기록된 단계 7'], 'the spec\'s own example');
+  assert.deepEqual(entryParts(counts({ inputs: 1, fields: 12 }), most), ['필드 12'], 'twelve fields, three cells on the ledger');
+  assert.deepEqual(entryParts(counts({ inputs: 1, config: 3, fields: 3 }), most), ['설정 3'], 'three cells name three fields in full');
+  // What the card shows under its budget: a setting line given up (or 중간, which draws none) adds 설정 by its total.
+  assert.deepEqual(entryParts(counts({ kids: 2, config: 1 }), { config: 0, fields: 0 }), ['구성 2', '설정 1']);
+  assert.deepEqual(entryParts(counts({ inputs: 2, steps: 3 }), most), ['기록된 단계 3'], 'steps, once the contract carries them');
+});
+
+test('the entry line takes the setting\'s place when tight, gives way only after 내는 것 folded, and never past six lines', () => {
+  // One name line: head, operations, both ports, the structure and the entry; the setting gives way to the entry.
+  assert.deepEqual(typedBudget(1, true, true, true, true, 'none', 'detail', 'some'), { io: 'both', body: true, set: false, chips: 'none', entry: true, lines: 6 });
+  // Room for both: no structure, so the setting and the entry both stay.
+  assert.deepEqual(typedBudget(1, true, true, true, false, 'none', 'detail', 'some'), { io: 'both', body: false, set: true, chips: 'none', entry: true, lines: 6 });
+  // Two name lines: 내는 것 folds before the entry goes.
+  assert.deepEqual(typedBudget(2, true, true, true, true, 'none', 'detail', 'some'), { io: 'fold', body: true, set: false, chips: 'none', entry: true, lines: 6 });
+  // A chips line on top of that: the entry is the last to go (the chips carry the way in).
+  assert.deepEqual(typedBudget(2, true, true, true, true, 'line', 'detail', 'some'), { io: 'fold', body: true, set: false, chips: 'line', entry: false, lines: 6 });
+  assert.equal(typedBudget(1, false, false, false, false, 'none', 'detail', 'unknown').entry, true, '내부 미상 reads on its own line');
+  assert.equal(typedBudget(1, false, false, false, false, 'none', 'detail', 'unknown').lines, 3);
+  for (const nl of [1, 2]) for (const set of [false, true]) for (const i of [false, true]) for (const o of [false, true]) for (const b of [false, true]) for (const chips of ['none', 'name', 'line']) for (const e of ['none', 'unknown', 'some']) {
+    const r = typedBudget(nl, set, i, o, b, chips, 'detail', e);
+    assert.ok(r.lines <= CARD_LINES, JSON.stringify({ nl, set, i, o, b, chips, e, r }));
+    assert.equal(r.body, b, 'the structural line is never given up for the entry');
+    if (e === 'none') assert.equal(r.entry, false);
+    // The setting never stays while the entry is given up.
+    if (e !== 'none' && r.set) assert.equal(r.entry, true);
+  }
+});
+
+test('the entry line by zoom level: kept at 중간 and 상세, not at 개요; it adds one line of LINE_H', () => {
+  assert.equal(typedBudget(1, true, true, true, true, 'none', 'overview', 'some').entry, false);
+  assert.deepEqual(typedBudget(1, true, true, true, true, 'none', 'mid', 'some'), { io: 'both', body: false, set: false, chips: 'none', entry: true, lines: 5 });
+  assert.equal(typedBudget(1, true, true, true, true, 'none', 'detail', 'none').entry, false);
+  const gap = 3, with_ = typedBudget(1, false, true, true, false, 'none', 'detail', 'some'), without = typedBudget(1, false, true, true, false);
+  assert.deepEqual(typedLines(with_, null), [LINE_H, LINE_H, LINE_H]);
+  assert.equal(typedPx(with_, null, gap) - typedPx(without, null, gap), LINE_H + LINE_GAP);
 });

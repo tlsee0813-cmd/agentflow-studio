@@ -1072,8 +1072,8 @@ function browserApply(f, wire, exclusions, n = 7) {
 }
 
 test('recipe identities are bumped for the changed prompts and validation semantics', () => {
-  assert.equal(PIPELINE_RECIPE, 'first-map-divided.29');
-  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.29');
+  assert.equal(PIPELINE_RECIPE, 'first-map-divided.30');
+  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.30');
 });
 
 test('a render fragment with one unresolvable claim alias is applied with only that claim set aside and a durable diagnostic', async t => {
@@ -1196,7 +1196,7 @@ test('.29 rule sentences: stores are parts, every part-table row is covered, a r
     '그 구별을 그 판본이 가리키는 부분의 주장 하나(topic=how, where에 두 판본)로 남긴다']) assert.ok(P.RENDER_RULES.includes(rule), rule);
   for (const rule of ['「만드는 쪽 → 저장소」(cadence는 쓰는 쪽 박자)와 「저장소 → 읽는 쪽」', '읽는 쪽의 루프 주기·타이머는 그 선이 아니라 읽는 부분의 config가 맡는다', '관계의 from은 그 at 줄이 보내는 쪽으로 적은 부분',
     'mode=design인 설계 흐름에서만 from이 된다', '연결 표 행 한 줄의 구간 별칭 하나', 'summary의 각 문장은 renderedParts의 어떤 주장이 받치는 사실',
-    'relations는 첫 지도(INPUT.parts가 비어 있음)에서 최대32개, 그 밖에는 최대16개', 'relations 상한(첫 지도 32개, 그 밖 16개)을 넘으면']) assert.ok(GLOBAL_RULES.includes(rule), rule);
+    'relations는 첫 지도(INPUT.parts가 비어 있음)에서 최대48개, 그 밖에는 최대16개', 'relations 상한(첫 지도 48개, 그 밖 16개)을 넘으면']) assert.ok(GLOBAL_RULES.includes(rule), rule);
   assert.ok(!GLOBAL_RULES.includes('relations 최대16개'), 'the old sixteen-only bound is gone');
   for (const category of ['via-store', 'sender', 'wrong-part', 'config이면 판본을 config에서 빼']) assert.ok(P.CORRECTION_RULES.includes(category), category);
 });
@@ -1234,4 +1234,22 @@ test('.29: a 24-part first map renders in eight fragments; a run ceiling that ca
   assert.equal(new Set(renders()).size, renders().length, 'a finished fragment is never sent again');
   assert.equal(sent.filter(c => c.stage === 'plan').length, 1);
   assert.equal(sent.some(c => c.stage === 'global'), false);
+});
+
+// ---- first-map-divided.30: map-reading.9 (steps, loop, kept state, port map) and the rules from the blind judging of the .29 map. ----
+test('.30 rule sentences: every connection row a line, absorption into the group parent only, row names verbatim, "·" outside parentheses, state facts first, steps, loop, kept state and the port map', async () => {
+  const P = await import('../server/map-pipeline.mjs'), B = await import('../server/map-blueprint.mjs');
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.30', 'later-map-divided.30']);
+  for (const rule of ['흡수는 기록의 묶음 표(부모 이름 | 자식 이름들)가 그 행의 부모로 적은 부분에만 하고', '연결 표(보내는 부분 | 받는 부분)에 자기 행이 있는 단위는 부모가 있어도 흡수하지 않고 부분으로 세운다',
+    '부분의 name은 그 표 행의 첫 칸 이름을 글자 그대로 쓰고', '「facts-refresh」 행을 「calendar.json」으로 부르지 않는다', '모든 행은 relation 항목 하나(저장소를 거치면 둘)로 빠짐없이 쓴다',
+    'global은64개 이하(그중 relation 항목 48개까지)']) assert.ok(B.MAP_BLUEPRINT_PROMPT.includes(rule), rule);
+  for (const rule of ['「·」는 괄호(…)·대괄호[…] 밖에서만 나눈다', '「entry_params(wait_max_s·opp_close_q)」는 필드 하나', '「event(CYCLE·ARM_CYCLE·…)」도 필드 하나다', '화살표가 든 구나', '저장소 부분(type=store)의 inputs·outputs는 []로 두고',
+    'outputs는 내는 것의 이름 최대 8개다', '적힌 그대로 최대 24개(각 40자 이내)', '적힌 그대로 최대 8개(각 80자 이내', '가장 중요한 항목을 앞에 두고 상한까지만 쓰며',
+    '실제 변화(「최근 요청과 실제 변화」 표) → 오류(「오류·미해결」 표) → 철회(「철회·변경」 표) → 규칙(「지켜야 할 것」 표) → 설계 설명 순서다', '그 상태 단어만 다시 말하는 status 주장', '돈·손익·대기 상태',
+    '「안의 단계」 표(부분 이름 | 순번 | 단계 이름 | 하는 일 | 쓰는 파일·함수·모델 | 조건·분기)에서 첫 칸이 이 부분인 행마다 하나씩', '한 행에 단계 하나이며', '단계 사이의 순서·분기·반복은 쓰지 않는다(이번 계약에 없다)',
+    '세 칸은 각각 원문이 말할 때만 채우며', 'stateVars는 기록이 이 부분이 유지한다고 적은 상태', '"steps":[{"name":"봉투 검사"', '"loop":{"unit":"60 s 폴링"']) assert.ok(P.RENDER_RULES.includes(rule), rule);
+  for (const rule of ['응답 맨 위에 portMap 배열을 더한다', '"relation":이 응답 relations 배열의 순번(0부터)', '명시가 없으면 []다', '읽는 부분 자신의 행(그 부분의 「받는 산출물」 칸)이어도 되며',
+    '연결 표(보내는 부분 | 받는 부분)의 모든 행은 선 하나(저장소를 거치면 둘)로 빠짐없이 그리고', '최대48개']) assert.ok(P.GLOBAL_RULES.includes(rule), rule);
+  for (const rule of ['부분의 steps·loop·stateVars, 응답의 basisAt·basisVersion·portMap', 'category가 step이면', 'loop이면', 'state-var이면', 'port-map이면', 'restate이면']) assert.ok(P.CORRECTION_RULES.includes(rule), rule);
+  assert.ok(!P.RENDER_RULES.includes('4개를 넘으면 원문 순서대로 앞의 4개만 쓴다'), 'the old four-settings cut is gone');
 });
