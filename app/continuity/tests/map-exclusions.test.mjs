@@ -21,8 +21,14 @@ function fixture(text = '실제 기능은 파일을 저장합니다.\n예제 조
   return { p, inp, spans, claim, part, reply };
 }
 const errors = reply => M.setAside(reply).map(e => [e.path, e.rule]);
-/** A stored map-reading.10 entry in the exact shape of .9: the .10 keys of its claims removed. */
+/** A stored map-reading.12 entry in the exact shape of .11: the .12 keys of its parts (conditions) removed. */
+function stripTwelve(r) {
+  for (const p of r.parts) delete p.conditions;
+  return r;
+}
+/** A stored map-reading.10 entry in the exact shape of .9: the .12 and .10 keys of its parts and claims removed. */
 function stripTen(r) {
+  stripTwelve(r);
   for (const p of r.parts) for (const c of p.claims) for (const k of ['scope', 'scopeName', 'anchors', 'enforcedBy', 'withdrawalKind', 'gate']) delete c[k];
   return r;
 }
@@ -96,7 +102,7 @@ test('F2 a 1087-character citation with the sole supporting sentence last is exc
     assert.deepEqual(got.parts[0].claims.map(c => c.key), ['s1']);
     assert.deepEqual(errors(got), [['parts[0].claims[1].at', 'length']]);
     const applied = M.applyReading(f.p, f.inp, got, meta()), x = applied.reading.exclusions[0];
-    assert.equal(applied.reading.version, 'map-reading.11');
+    assert.equal(applied.reading.version, 'map-reading.12');
     assert.deepEqual([x.path, x.rule, x.category, x.record, x.from, x.to], ['parts[0].claims[1].at', 'length', null, f.p.pasted[0].id, 0, 1087]);
     assert.match(x.explanation, /600/);
     assert.ok(!JSON.stringify(x).includes(support));
@@ -288,7 +294,7 @@ test('map-reading.7: a map.6 reply with every new field is read, applied, stored
   assert.deepEqual(got.parts[0].claims.map(sevenOf), [['withdrawn', 'file', '11-02 23:04Z', 'server/engine.mjs', '옛 결정 원문'], ['status', null, null, null, null]]);
   assert.deepEqual([got.parts[0].state, got.parts[0].stateWhen, got.parts[0].files], ['running', '11-02 22:10Z', ['server/engine.mjs', 'public/']]);
   const applied = M.applyReading(f.p, f.inp, got, meta('R_seven_full'));
-  assert.equal(applied.reading.version, 'map-reading.11');
+  assert.equal(applied.reading.version, 'map-reading.12');
   const [save, read] = applied.reading.parts, claim = save.claims[0];
   assert.deepEqual(save.stateQuote, { record: claim.record, quote: claim.quote, from: claim.from, to: claim.to }, 'anchored where it stands, like a claim');
   assert.deepEqual([save.state, save.stateWhen, save.files], ['running', '11-02 22:10Z', ['server/engine.mjs', 'public/']]);
@@ -341,7 +347,7 @@ test('map-reading.7 lenient: a wrong field sets aside its claim or relation, and
   assert.deepEqual(seven.parts[0].claims.map(c => c.key), ['s1']);
   assert.deepEqual([seven.parts[0].state, seven.parts[0].stateWhen, seven.parts[0].files], [null, null, ['x/']]);
   assert.deepEqual(errors(seven), [['parts[0].claims[1].topic', 'contract'], ['parts[0].state', 'contract']]);
-  assert.equal(M.applyReading(g.p, g.inp, seven, meta('R_seven_map7')).reading.version, 'map-reading.11');
+  assert.equal(M.applyReading(g.p, g.inp, seven, meta('R_seven_map7')).reading.version, 'map-reading.12');
 });
 
 test('map-reading.7 strict: plain map.6 refuses a reply with any wrong new field', () => {
@@ -365,7 +371,7 @@ test('map-reading.7: a reply without any new field still validates and stores ev
   r.parts.push({ ref: 'new:read', name: '읽기', parent: null, role: '파일 읽기', roleAbout: null, roleReplaces: null, basis: [f.at[2]], claims: [f.claim('s3', f.at[2])] });
   r.relations = [{ from: 'new:save', to: 'new:read', kind: 'flow', note: '', at: f.at[0] }];
   const applied = M.applyReading(f.p, f.inp, M.validateMapReply(r, f.ask), meta('R_seven_plain'));
-  assert.equal(applied.reading.version, 'map-reading.11');
+  assert.equal(applied.reading.version, 'map-reading.12');
   for (const p of applied.reading.parts) {
     assert.deepEqual([p.state, p.stateWhen, p.stateQuote, p.files], [null, null, null, []]);
     for (const c of p.claims) assert.deepEqual(sevenOf(c), [null, null, null, null, null]);
@@ -413,7 +419,7 @@ test('map-reading.8: a map.6 reply with every new field is read, applied, stored
   assert.deepEqual(eightOf(got.parts[1]), [null, [], [], [], []]);
   assert.deepEqual([got.relations[0].channel, got.basisAt, got.basisVersion], ['data', '2026-11-03T09:01:03Z', '라이브 618df374']);
   const applied = M.applyReading(f.p, f.inp, got, meta('R_eight_full'));
-  assert.equal(applied.reading.version, 'map-reading.11');
+  assert.equal(applied.reading.version, 'map-reading.12');
   const [save, read] = applied.reading.parts, claim = save.claims[0];
   assert.deepEqual(save.typeQuote, { record: claim.record, quote: claim.quote, from: claim.from, to: claim.to }, 'anchored where it stands, like a state');
   assert.deepEqual(eightOf(save), ['store', ['review 행', 'policy 행'], ['e=1 행'], ['watch', 'allowed_side'], ['24 h 만료']]);
@@ -474,7 +480,7 @@ test('map-reading.8 strict: plain map.6 refuses a reply with any wrong new field
 test('map-reading.8: a reply without any new field stores every key as not said', () => {
   const f = firstMap(), r = structuredClone(f.reply); r.parts[0].claims.splice(1, 1);
   const applied = M.applyReading(f.p, f.inp, M.validateMapReply(r, f.ask), meta('R_eight_plain'));
-  assert.equal(applied.reading.version, 'map-reading.11');
+  assert.equal(applied.reading.version, 'map-reading.12');
   assert.deepEqual([applied.reading.basisAt, applied.reading.basisVersion], [null, null]);
   for (const p of applied.reading.parts) assert.deepEqual([p.type, p.typeQuote, ...eightOf(p).slice(1)], [null, null, [], [], [], []]);
   const u = M.partUnderstanding(applied.project, applied.reading.parts[0].areaId);
@@ -585,7 +591,7 @@ test('map-reading.9: a map.6 reply with steps, a loop, kept state and a port map
   assert.deepEqual(nineOf(got.parts[1]), [[['읽기', '파일을 읽는다', []]], null, []]);
   assert.deepEqual(rowsOf(got.portMap), [[0, 'e=1 행', '저장', 'out'], [0, '저장 파일', '읽기', 'in']]);
   const applied = M.applyReading(f.p, f.inp, got, meta('R_nine_full'));
-  assert.equal(applied.reading.version, 'map-reading.11');
+  assert.equal(applied.reading.version, 'map-reading.12');
   const [stored, read] = applied.reading.parts, line = applied.reading.relations[0];
   assert.deepEqual(nineOf(stored), save);
   assert.deepEqual(stored.steps[0].quote, stored.typeQuote, 'a step stands on its own row, anchored where it stands');
@@ -606,7 +612,7 @@ test('map-reading.9 lenient: a wrong step, loop item, kept state or port-map row
   r.parts[0].steps.push({ name: '저장', does: '다시', at: f.at[2] });
   r.parts[0].loop.stop = '가'.repeat(61);
   r.parts[0].stateVars = [{ name: '넘침', readBy: nameList(5, 'r') }, { name: '남음' }];
-  r.parts[1].loop = { unit: '매번', at: 'N01.99' };
+  r.parts[1].loop = { unit: '매분', at: 'N01.99' };
   r.portMap.push({ relation: 5, port: 'e=1 행', step: '저장', direction: 'out', at: f.at[0] }, { relation: 0, port: '없는 포트', step: '저장', direction: 'out', at: f.at[0] },
     { relation: 0, port: '저장 파일', step: '확인', direction: 'in', at: f.at[2] }, { ...r.portMap[0] }, { relation: 0, port: '저장 파일', step: '읽기', direction: 'out', at: 'N01.99' });
   assert.throws(() => M.validateMapReply(structuredClone(r), f.ask), undefined, 'plain map.6 refuses');
@@ -664,7 +670,7 @@ test('map-reading.9 strict: plain map.6 refuses a reply with any wrong new field
 test('map-reading.9: a reply without any new field stores every key as not said', () => {
   const f = firstMap(), r = structuredClone(f.reply); r.parts[0].claims.splice(1, 1);
   const applied = M.applyReading(f.p, f.inp, M.validateMapReply(r, f.ask), meta('R_nine_plain'));
-  assert.equal(applied.reading.version, 'map-reading.11');
+  assert.equal(applied.reading.version, 'map-reading.12');
   assert.deepEqual(applied.reading.portMap, []);
   for (const p of applied.reading.parts) assert.deepEqual([p.steps, p.loop, p.stateVars], [[], null, []]);
   const u = M.partUnderstanding(applied.project, applied.reading.parts[0].areaId);
@@ -727,7 +733,7 @@ test('map-reading.10: a map.6 reply with a rule\'s scope, places and devices, a 
   assert.deepEqual(got.parts[0].claims.map(tenOf), [[null, null, [], [], 'design', null], UNSAID10, rule, [null, null, [], [], null, 'dev']]);
   assert.deepEqual(got.parts[1].claims.map(tenOf), [UNSAID10, project]);
   const applied = M.applyReading(f.p, f.inp, got, meta('R_ten_full'));
-  assert.equal(applied.reading.version, 'map-reading.11');
+  assert.equal(applied.reading.version, 'map-reading.12');
   const [stored, read] = applied.reading.parts;
   assert.deepEqual(stored.claims.map(tenOf), [[null, null, [], [], 'design', null], UNSAID10, rule, [null, null, [], [], null, 'dev']]);
   assert.deepEqual(read.claims.map(tenOf), [UNSAID10, project]);
@@ -817,7 +823,7 @@ test('map-reading.10 strict: plain map.6 refuses a reply with any wrong new clai
 test('map-reading.10: a reply without any new claim field stores every claim key as not said', () => {
   const f = firstMap(), r = structuredClone(f.reply); r.parts[0].claims.splice(1, 1);
   const applied = M.applyReading(f.p, f.inp, M.validateMapReply(r, f.ask), meta('R_ten_plain'));
-  assert.equal(applied.reading.version, 'map-reading.11');
+  assert.equal(applied.reading.version, 'map-reading.12');
   for (const p of applied.reading.parts) for (const c of p.claims) assert.deepEqual(tenOf(c), UNSAID10);
   const u = M.partUnderstanding(applied.project, applied.reading.parts[0].areaId);
   assert.deepEqual([u.rules, u.withdrawals, u.gates], [[], [], []]);
@@ -942,7 +948,7 @@ test('map-reading.11: a rule with no place gets at most two condition rows of it
 
 test('map-reading.11 storage: every anchor says program (true only on an inferred place); a .10 entry keeps its shape and refuses the key', () => {
   const f = koru34(), applied = M.applyReading(f.p, f.inp, M.validateMapReply(structuredClone(f.reply), f.ask), meta('R_eleven'));
-  assert.equal(applied.reading.version, 'map-reading.11');
+  assert.equal(applied.reading.version, 'map-reading.12');
   const [engine, card] = applied.reading.parts;
   // .35: the model's stated place on a condition row its rule row does not write is stored as read: inferred, never program.
   assert.deepEqual(engine.claims.map(c => c.anchors.map(a => [a.kind, a.text, a.program])), [[['inferred', 'not 1 <= stop <= 250', true]], [], [], [['inferred', '엔진 · not 1 <= stop <= 250', false]]]);
@@ -961,7 +967,7 @@ test('map-reading.11 storage: every anchor says program (true only on an inferre
     assert.throws(() => parseProject(JSON.stringify(bad)), undefined, String(mutate));
     assert.throws(() => validateProject(bad), undefined, String(mutate));
   }
-  const old = JSON.parse(raw), ten = old.readings.at(-1); ten.version = 'map-reading.10';
+  const old = JSON.parse(raw), ten = old.readings.at(-1); ten.version = 'map-reading.10'; stripTwelve(ten);
   for (const p of ten.parts) for (const c of p.claims) for (const a of c.anchors) delete a.program;
   assert.deepEqual(validateProject(old), old, 'a map-reading.10 entry keeps its exact shape, with no program key');
 });
@@ -991,4 +997,82 @@ test('.34 divided: code stands on a condition or file-map row, a person or gate 
   // The record's own word is unknown: kept.
   watch.claims[0].enforcedBy = [{ kind: 'unknown', text: '장치 미상', at: null }];
   assert.deepEqual(devices(M.validateMapReply(structuredClone(r), f.ask, { setAside: true }).parts[2].claims[0]), [['unknown', '장치 미상']]);
+});
+
+// ---- map-reading.12 (first-map-divided.36, from the blind judging of the .35 KORU map: the engine spent five of its twenty claims on
+// 「조건·거부·분기」 rows and lost two 모르는 것 rows and a change row): a part's condition rows outside the claim cap, each on its row.
+// Optional on the wire, exact in storage. ----
+function twelveReply(f) {
+  const r = tenReply(f);
+  r.parts[0].conditions = [{ when: ' 파일이 없으면 ', then: 'SAVE_REFUSED', else: null, at: f.at[0] }, { when: '읽기 실패', then: '다시 읽기', else: '다음', at: f.at[2] }];
+  return r;
+}
+const condOf = p => (p.conditions ?? []).map(c => [c.when, c.then, c.else]);
+const CONDITIONS12 = [['파일이 없으면', 'SAVE_REFUSED', null], ['읽기 실패', '다시 읽기', '다음']];
+
+test('map-reading.12: a map.6 reply with condition rows is read, applied, stored (every part with conditions) and read back; the claim cap counts claims only', () => {
+  const f = firstMap(), got = M.validateMapReply(twelveReply(f), f.ask);
+  assert.equal(M.setAside(got).length, 0);
+  assert.deepEqual([condOf(got.parts[0]), condOf(got.parts[1])], [CONDITIONS12, []]);
+  const applied = M.applyReading(f.p, f.inp, got, meta('R_twelve_full'));
+  assert.equal(applied.reading.version, 'map-reading.12');
+  const [stored, read] = applied.reading.parts;
+  assert.deepEqual([condOf(stored), read.conditions], [CONDITIONS12, []]);
+  assert.deepEqual(stored.conditions[0].quote, stored.typeQuote, 'a condition row stands on its own row, anchored where it stands');
+  for (const p of applied.reading.parts) assert.ok(Object.hasOwn(p, 'conditions'));
+  const u = M.partUnderstanding(applied.project, stored.areaId), v = M.partUnderstanding(applied.project, read.areaId);
+  assert.deepEqual([u.conditions.map(c => [c.when, c.then, c.else, c.at]), v.conditions], [CONDITIONS12.map(c => [...c, meta().at]), []]);
+  assert.deepEqual(validateProject(applied.project), applied.project);
+  assert.deepEqual(parseProject(S.serializeProject(applied.project)).readings.at(-1), applied.reading);
+  // Twenty claims and the condition rows read whole on one part: the cap is the claims'.
+  const full = twelveReply(f); full.parts[0].claims = Array.from({ length: 20 }, (_, i) => f.claim(`s${i + 21}`, f.at[0]));
+  assert.deepEqual([M.validateMapReply(full, f.ask).parts[0].claims.length, condOf(M.validateMapReply(full, f.ask).parts[0])], [20, CONDITIONS12]);
+  assert.equal(M.PART_LIST_MAX.conditions, 24);
+});
+
+test('map-reading.12 lenient: a wrong condition row is set aside alone at its index, a list that is not one or runs past 24 is left out whole; plain map.6 refuses; map.7 reads the same', () => {
+  const f = firstMap(), r = twelveReply(f);
+  r.parts[0].conditions.push({ when: '가'.repeat(81), then: 'X', else: null, at: f.at[2] }, { when: '빈 결과', then: ' ', else: null, at: f.at[2] }, { when: '없는 줄', then: 'X', else: null, at: 'N01.99' },
+    { ...r.parts[0].conditions[0] }, { when: 'x', then: 'y', else: '가'.repeat(61), at: f.at[2] }, 'x');
+  assert.throws(() => M.validateMapReply(structuredClone(r), f.ask), undefined, 'plain map.6 refuses');
+  const got = M.validateMapReply(structuredClone(r), f.ask, { setAside: true }), reasons = M.readingExclusions(got).filter(e => e.category === 'condition');
+  assert.deepEqual(reasons.map(e => [e.path, e.rule]), [2, 3, 4, 5, 6, 7].map(j => [`parts[0].conditions[${j}]`, 'contract']));
+  assert.match(reasons[0].explanation, /그 조건만 제외했어요/);
+  assert.ok(reasons[0].record && !reasons[2].record, 'a set-aside row keeps where its line stands when it resolves');
+  assert.deepEqual(condOf(got.parts[0]), CONDITIONS12);
+  // Divided: a claim on a kept condition's row says that row again (restate); the record draws no condition table, so no row check.
+  assert.deepEqual(M.readingExclusions(got).filter(e => e.category === 'restate').map(e => e.path).length > 0, true);
+  const applied = M.applyReading(f.p, f.inp, got, meta('R_twelve_lenient'));
+  assert.deepEqual(applied.reading.exclusions.map(e => e.path), M.readingExclusions(got).map(e => e.path));
+  assert.deepEqual(parseProject(S.serializeProject(applied.project)).readings.at(-1), applied.reading);
+  for (const [bad, path] of [['x', 'parts[0].conditions'], [Array.from({ length: 25 }, (_, i) => ({ when: `조건 ${i}`, then: '거부', else: null, at: f.at[0] })), 'parts[0].conditions']]) {
+    const whole = twelveReply(f); whole.parts[0].conditions = bad;
+    const left = M.validateMapReply(whole, f.ask, { setAside: true });
+    assert.deepEqual([left.parts[0].conditions, M.readingExclusions(left).filter(e => e.category === 'condition').map(e => e.path)], [[], [path]]);
+  }
+  const g = fixture();
+  Object.assign(g.reply.parts[0], { conditions: [{ when: '저장', then: '거부', else: null, at: 'N01.99' }, { when: '읽기', then: '다음', else: null, at: g.spans[2].s }] });
+  const seven = M.validateMapReply(g.reply, g.inp.ask);
+  assert.deepEqual([condOf(seven.parts[0]), errors(seven)], [[['읽기', '다음', null]], [['parts[0].conditions[0]', 'contract']]]);
+});
+
+test('map-reading.12 storage is exact: a .12 part without conditions, a wrong or repeated row and a .12 key on a .11 reading are refused; a .11 entry keeps its shape', () => {
+  const f = firstMap(), applied = M.applyReading(f.p, f.inp, M.validateMapReply(twelveReply(f), f.ask), meta('R_twelve_store'));
+  const raw = S.serializeProject(applied.project), first = r => r.parts[0].conditions[0];
+  const excluded = (path, category) => ({ path, rule: 'contract', category, explanation: '-', record: null, from: null, to: null });
+  for (const mutate of [r => { delete r.parts[0].conditions; }, r => { delete r.parts[1].conditions; }, r => { r.parts[0].conditions = 'x'; }, r => { r.parts[0].conditions = null; },
+    r => { first(r).when = '가'.repeat(81); }, r => { first(r).then = '가'.repeat(61); }, r => { first(r).else = ''; }, r => { delete first(r).else; }, r => { first(r).extra = 1; },
+    r => { first(r).quote = { ...first(r).quote, quote: 'x' }; }, r => { r.parts[0].conditions.push(structuredClone(first(r))); },
+    r => { r.parts[0].conditions = Array.from({ length: 25 }, (_, i) => ({ ...structuredClone(first(r)), when: `조건 ${i}` })); },
+    r => { r.version = 'map-reading.11'; }]) {
+    const bad = JSON.parse(raw); mutate(bad.readings.at(-1));
+    assert.throws(() => parseProject(JSON.stringify(bad)), undefined, String(mutate));
+    assert.throws(() => validateProject(bad), undefined, String(mutate));
+  }
+  const old = JSON.parse(raw); old.readings.at(-1).version = 'map-reading.11'; stripTwelve(old.readings.at(-1));
+  assert.deepEqual(validateProject(old), old, 'a map-reading.11 entry keeps its exact shape');
+  assert.deepEqual(M.partUnderstanding(parseProject(JSON.stringify(old)), old.readings.at(-1).parts[0].areaId).conditions, [], 'an earlier reading has no condition rows');
+  const ok = JSON.parse(raw); ok.readings.at(-1).exclusions = [excluded('parts[0].conditions[1]', 'condition'), excluded('parts[2]', 'store-dup'), excluded('relations[0]', 'unrecorded'), excluded('relations[1].channel', 'channel')];
+  assert.deepEqual(validateProject(ok), ok, 'a .12 reading may say where a condition row, a folded store, an unrecorded line or a channel stood');
+  assert.match(M.explainExclusion('parts[2]', 'contract', 'store-dup'), /다른 부분으로 다시 잇지 않았어요/);
 });
