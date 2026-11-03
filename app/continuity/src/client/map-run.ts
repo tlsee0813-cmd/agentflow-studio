@@ -48,6 +48,8 @@ export interface MapRunHost {
 /** pending: asked (or about to be) and still cancellable; committing: being saved, no longer cancellable; ready: a checked reply to
  * the very request sent, kept for this entry in this page until the person applies or discards it (never said to be saved). */
 export interface MapRunState { pending: AbortController | null; committing: boolean; ready: boolean; error: string | null }
+/** Where the stage output caps are set: the server's local env file, never a browser setting. */
+const STAGE_CAP_SETTING = (key: string): string => `한도는 PC의 서버 설정이에요(%LOCALAPPDATA%\\AgentFlowStudio\\openai.env의 ${key}, 최대 32,768).`;
 const MAP_ERROR: Record<string, string> = {
   MAP_PIPELINE_NOT_CONFIGURED: '지도 통합 AI 연결이 준비되지 않았어요. 원문은 보존되어 있어요.',
   MAP_BUDGET_EXCEEDED: '설정한 AI 비용 상한에 도달해 다음 단계를 보내지 않았어요. 끝난 구간과 원문은 보존되어 있어요.',
@@ -63,6 +65,8 @@ const MAP_ERROR: Record<string, string> = {
   // The reply did not end (the server read none of it): nothing about its evidence is said, and nothing was applied.
   AI_RESPONSE_INCOMPLETE: 'AI가 응답을 끝내지 못해 지도에 반영하지 않았어요. 원문과 기존 지도는 그대로예요.',
   AI_RESPONSE_UNFINISHED: 'AI 응답이 정상적으로 끝나지 않아 지도에 반영하지 않았어요. 원문과 기존 지도는 그대로예요.',
+  // A fragment or global stage's reply ran past its output cap (no stage or cap named: said without them).
+  MAP_STAGE_INCOMPLETE: `AI 응답이 길이 한도를 넘어 정리를 멈췄어요. 아무것도 반영하지 않았고 원문과 기존 지도는 그대로예요. ${STAGE_CAP_SETTING('STUDIO_MAP_RENDER_TOKENS·STUDIO_MAP_GLOBAL_TOKENS')}`,
   NOTHING_READ: '이번 응답에서 정리할 내용을 얻지 못했어요. 원문은 보존됐어요.',
   LIFECYCLE: '이 프로젝트가 보관되었다가 다시 열려 이번 정리 결과는 반영하지 않았어요. 원문과 지도는 그대로예요. 다시 정리해 주세요.',
   HASH: '요청을 준비하지 못해 보내지 않았어요. 기록은 그대로예요.'
@@ -95,9 +99,19 @@ function stepName(stage: unknown, total: unknown): string | null {
   }
   return m[5] === 'plan' ? '전체 조건 대조 단계' : m[5] === 'render-semantic' ? '부분 다시 정리 단계' : '관계·조건 마지막 확인 단계';
 }
-export interface MapErrorDetail { stage?: unknown; phase?: unknown; total?: unknown; rule?: unknown; path?: unknown; category?: unknown; reason?: unknown; target?: unknown }
+export interface MapErrorDetail { stage?: unknown; phase?: unknown; total?: unknown; rule?: unknown; path?: unknown; category?: unknown; reason?: unknown; target?: unknown; cap?: unknown }
+/** MAP_STAGE_INCOMPLETE: a render or global stage cut at its output-token cap ('부분 정리 3/12 단계의 AI 응답이 길이 한도(8,192
+ * 토큰)를…'), in the progress labels' words, with the setting that raises it; without a readable stage or cap the plain wording. */
+function stageCapText(detail: MapErrorDetail): string | null {
+  const where = stepName(detail.stage, detail.total);
+  const cap = typeof detail.cap === 'number' && Number.isSafeInteger(detail.cap) && detail.cap > 0 && detail.cap <= 1_000_000 ? detail.cap : null;
+  if (!where || cap === null || typeof detail.stage !== 'string' || !/^(render|global)/.test(detail.stage)) return null;
+  const key = detail.stage.startsWith('render') ? 'STUDIO_MAP_RENDER_TOKENS' : 'STUDIO_MAP_GLOBAL_TOKENS';
+  return `${where}의 AI 응답이 길이 한도(${String(cap).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} 토큰)를 넘어 이 단계에서 정리를 멈췄어요. 아무것도 반영하지 않았고 원문과 기존 지도는 그대로예요. ${STAGE_CAP_SETTING(key)}`;
+}
 /** The person's words for a refused or failed reading. An INVALID_RESPONSE that names a divided step says which step and which rule. */
 export function mapErrorText(code: string, detail?: MapErrorDetail | null): string {
+  if (code === 'MAP_STAGE_INCOMPLETE' && detail) { const text = stageCapText(detail); if (text) return text; }
   if (code === 'INVALID_RESPONSE' && detail && typeof detail.phase === 'string') {
     const where = stepName(detail.stage, detail.total);
     if (where) {

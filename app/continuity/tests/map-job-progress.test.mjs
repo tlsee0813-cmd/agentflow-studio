@@ -183,3 +183,17 @@ test('client wording names the divided step and rule; without a step the earlier
   assert.equal(mapErrorText('INVALID_RESPONSE', { stage: 'render-2' }), plain, 'no phase: the earlier wording');
   assert.equal(mapErrorText('AI_TIMEOUT', { stage: 'render-2', phase: 'render' }), mapErrorText('AI_TIMEOUT'), 'other codes keep their own wording');
 });
+
+test('.31: a stage cut at its output cap (MAP_STAGE_INCOMPLETE) is said with the step, the cap and the setting that raises it', () => {
+  const tail = ' 아무것도 반영하지 않았고 원문과 기존 지도는 그대로예요. 한도는 PC의 서버 설정이에요(%LOCALAPPDATA%\\AgentFlowStudio\\openai.env의 ';
+  assert.equal(mapErrorText('MAP_STAGE_INCOMPLETE', { stage: 'render-3', phase: 'render', total: 12, cap: 8192 }),
+    '부분 정리 3/12 단계의 AI 응답이 길이 한도(8,192 토큰)를 넘어 이 단계에서 정리를 멈췄어요.' + tail + 'STUDIO_MAP_RENDER_TOKENS, 최대 32,768).');
+  assert.equal(mapErrorText('MAP_STAGE_INCOMPLETE', { stage: 'global', phase: 'global', cap: 16384 }),
+    '관계·조건 마지막 확인 단계의 AI 응답이 길이 한도(16,384 토큰)를 넘어 이 단계에서 정리를 멈췄어요.' + tail + 'STUDIO_MAP_GLOBAL_TOKENS, 최대 32,768).');
+  assert.match(mapErrorText('MAP_STAGE_INCOMPLETE', { stage: 'render-2-correction', phase: 'correction', total: 3, cap: 4096 }), /^부분 정리 2\/3 단계의 .*길이 한도\(4,096 토큰\).*STUDIO_MAP_RENDER_TOKENS/);
+  const plain = 'AI 응답이 길이 한도를 넘어 정리를 멈췄어요.' + tail + 'STUDIO_MAP_RENDER_TOKENS·STUDIO_MAP_GLOBAL_TOKENS, 최대 32,768).';
+  // No readable stage or cap: the code's own wording, never the generic one and never a value from the detail.
+  for (const detail of [undefined, null, { stage: 'render-3', phase: 'render', total: 12 }, { stage: 'PRIVATE', cap: 8192 }, { stage: 'plan', phase: 'plan', cap: 8192 }, { stage: 'render-1', cap: 'PRIVATE' }])
+    assert.equal(mapErrorText('MAP_STAGE_INCOMPLETE', detail), plain, JSON.stringify(detail));
+  assert.notEqual(plain, mapErrorText('NO_SUCH_CODE'));
+});
