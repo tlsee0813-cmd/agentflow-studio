@@ -77,13 +77,12 @@ async function wide(browser, base) {
   const before = await stores(page);
   await selectPart(page, X.engine); await page.waitForTimeout(250);
   const lensW = await page.locator('#lens').evaluate(e => e.getBoundingClientRect().width), camera0 = await page.evaluate(CAMERA), url0 = page.url();
-  assert.equal(await page.locator('#lens .lens-claims .claim').count(), 13, 'the lens reads every current claim too');
-  // The lens reads the description, then the relations, then the claims under their topics, each cited by its number in the pane.
+  assert.equal(await page.locator('#lens .lens-origin .claim').count(), 13, 'the lens reads every current claim too');
+  // The lens reads (cycle 5) the claims by record under their topics first, each cited by its number in the pane, then 이유 (the description and the relations).
   const lensOrder = await page.evaluate(() => [...document.querySelectorAll('#lens .lens-body > *')].map(e => e.className));
-  assert.equal(lensOrder[0], 'lens-desc', `order ${lensOrder}`);
-  assert.ok(lensOrder.indexOf('lens-claims') > lensOrder.lastIndexOf('lens-ports'), `relations before the claims: ${lensOrder}`);
-  assert.deepEqual(await page.locator('#lens .lens-claims .cl-cite').allTextContents(), Array.from({ length: 13 }, (_, i) => String(i + 1)));
-  assert.match(await page.locator('#lens .lens-claims .cl-cite').first().getAttribute('title'), /^원문에서 보기 · “[\s\S]+”$/);
+  assert.deepEqual(lensOrder.slice(0, 2), ['lens-origin', 'lens-why'], `order ${lensOrder}`);
+  assert.deepEqual(await page.locator('#lens .lens-origin .cl-cite').allTextContents(), Array.from({ length: 13 }, (_, i) => String(i + 1)));
+  assert.match(await page.locator('#lens .lens-origin .cl-cite').first().getAttribute('title'), /^원문에서 보기 · “[\s\S]+”$/);
   await openSurface(page);
   const s = await page.evaluate(() => { const p = document.getElementById('panel'), r = p.getBoundingClientRect(), role = p.querySelector('.und-role'), claims = [...p.querySelectorAll('.sec-understood .claims .claim')];
     return { w: r.width, left: r.left, title: p.querySelector('#panel-title').textContent, path: p.querySelector('.panel-path').textContent, back: !!p.querySelector('.sheet-back'),

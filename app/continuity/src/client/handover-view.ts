@@ -2,25 +2,30 @@
  * (that part): made at once
  * from what the map and records hold (shared/handover.ts, no AI call), read in place, copied or saved as a .md file. Changing the
  * range makes the document again with the same code, so one opening is one handover however it is narrowed. Nothing is stored:
- * the code inside the document is how a session that starts from it is known later (it comes back in that session's records). */
+ * the code inside the document is how a session that starts from it is known later (it comes back in that session's records).
+ * The readings a person marked wrong in the pane (「이 해석이 틀림」, kept apart from the project) are listed before the document's
+ * end line, so the next session does not lean on them without the original (pane-view withDisputes). */
 import type { Project } from '../shared/types.js';
 import type { FrozenRequest } from '../shared/request-return.js';
 import { studioView } from '../shared/studio.js';
 import { handoverDoc, handoverCode, WEB_RECORD_ASK, type Handover } from '../shared/handover.js';
 import { h, svg } from './plan-dom.js';
+import { withDisputes } from './pane-view.js';
 import type { CloudLink } from './cloud-link.js';
 
 /** requests: the change requests made for the open project (with the plan's), named in the document with what came back. */
 export interface HandoverHost { current(): { key: string; kind: string; project: Project } | null; requests?(): FrozenRequest[];
   /** The web AI connector, where this site offers one: the web chat then takes the handover and leaves records itself. */
-  cloud?(): CloudLink }
+  cloud?(): CloudLink;
+  /** The handover's 「사람이 틀렸다고 표시한 해석」 lines for this range (none: []). */
+  disputes?(scope: string | null): string[] }
 
 export function createHandoverView(host: HandoverHost) {
   let dialog: HTMLDialogElement | null = null, from: HTMLElement | null = null;
   let state: { key: string; scope: string | null; code: string; at: string; text: string; trimmed: number; msg: string | null } | null = null;
 
   function make(project: Project, scope: string | null, code: string, at: string): Handover | null {
-    try { return handoverDoc(project, { scope, code, at, requests: host.requests?.() ?? [] }); } catch { return null; }
+    try { const doc = handoverDoc(project, { scope, code, at, requests: host.requests?.() ?? [] }); return { ...doc, text: withDisputes(doc.text, host.disputes?.(scope) ?? []) }; } catch { return null; }
   }
   function render() {
     const o = host.current(); if (!dialog || !state || !o || o.key !== state.key) return;
