@@ -7,8 +7,9 @@
 //      status says a reading can start (the same mapRun.can/input/blocked as the return pane); nothing starts, applies or moves.
 //      Arriving while another project is open, that project's paste draft, selection, focus and camera stay as they were.
 //   L. The record76 Zephyr reel board excerpt (public text), read by a written reply shaped like 122's Power/Display: the lens
-//      reads the description, then every current claim (the always-on limitation last, in full), then the relations with their
-//      direction and stored notes; a claim's quote and a followed relation come back to the same button, scroll and camera.
+//      reads the description, then the relations (what it takes in, what it hands on) with their direction and stored notes, then
+//      every current claim under its topic (the always-on limitation last, in full), then where it lives when the records say;
+//      a claim's numbered citation and a followed relation come back to the same button, scroll and camera.
 import { createRequire } from 'node:module';
 import { spawn } from 'node:child_process';
 import { mkdirSync, readFileSync } from 'node:fs';
@@ -175,7 +176,7 @@ async function lateElsewhere(browser, base, real, z) {
   await ctx.close();
 }
 
-/* ---------- L: the lens reads description → all current claims → relations ---------- */
+/* ---------- L: the lens reads description → relations (받는 것 · 내는 것 · 함께) → all current claims → where ---------- */
 async function lens(browser, base, z, size) {
   const { ctx, page, errors, sent } = await context(browser, base, size);
   await page.goto(`${base}/`);
@@ -183,16 +184,21 @@ async function lens(browser, base, z, size) {
   await reloadAt(page, `#/p/${Z}/${z.power}`);
   await page.locator('#lens-title').filter({ hasText: 'Power supply' }).waitFor(); await settled(page);
   const order = await page.evaluate(() => [...document.querySelectorAll('#lens .lens-body > *')].map(e => e.className));
-  assert.deepEqual(order.slice(0, 2), ['lens-desc', 'lens-claims'], `order ${order}`);
-  assert.ok(order.slice(2).length && order.slice(2).every(c => c === 'lens-ports'), `relations follow the claims: ${order}`);
+  assert.equal(order[0], 'lens-desc', `order ${order}`);
+  const at = order.indexOf('lens-claims');
+  assert.ok(at > 1 && order.slice(1, at).every(c => c === 'lens-ports'), `relations follow the description: ${order}`);
+  assert.ok(order.slice(at + 1).every(c => c === 'lens-where'), `only where it lives follows the claims: ${order}`);
   const claims = await page.locator('#lens .lens-claims .claim .cl-text').allTextContents();
   assert.deepEqual(claims, z.claims, 'every current claim, in its order, in its own words');
   assert.equal(await page.locator('#lens .lens-claims h3 small').textContent(), String(z.claims.length));
   assert.equal(await page.locator('#lens .lens-claims .claim:visible').count(), z.claims.length, 'none folded away');
   assert.equal(await page.locator('#lens .lens-claims .claims-more').count(), 0);
   const geo = await page.evaluate(() => { const r = s => document.querySelector(s).getBoundingClientRect(); const last = [...document.querySelectorAll('#lens .lens-claims .claim')].at(-1).getBoundingClientRect();
-    return { claimsTop: r('#lens .lens-claims').top, lastClaimBottom: last.bottom, portsTop: r('#lens .lens-ports').top, bodyBottom: r('#lens .lens-body').bottom }; });
-  assert.ok(geo.lastClaimBottom <= geo.portsTop, 'the always-on limitation reads before the first relation');
+    const ports = [...document.querySelectorAll('#lens .lens-ports')].map(e => e.getBoundingClientRect());
+    return { claimsTop: r('#lens .lens-claims').top, lastClaimBottom: last.bottom, portsTop: ports[0].top, portsBottom: ports.at(-1).bottom, bodyBottom: r('#lens .lens-body').bottom }; });
+  assert.ok(geo.portsBottom <= geo.claimsTop, 'the relations read before the claims');
+  // Every citation is the line's number in the pane, in reading order.
+  assert.deepEqual(await page.locator('#lens .lens-claims .cl-cite').allTextContents(), z.claims.map((_, i) => String(i + 1)));
   // Relations: verb group, direction, real other end and the stored note, each still there.
   const rows = await page.evaluate(() => [...document.querySelectorAll('#lens .lens-ports')].map(s => ({ head: s.querySelector('h3').textContent, rows: [...s.querySelectorAll('.port')].map(p => ({ dir: p.querySelector('.port-dir')?.textContent, far: p.querySelector('strong')?.textContent, note: p.querySelector('.port-note')?.textContent })) })));
   const all = rows.flatMap(g => g.rows);
@@ -240,7 +246,7 @@ async function lens(browser, base, z, size) {
   assert.equal(await page.locator('#lens .lens-ports li', { hasText: 'Display' }).locator('.note-more').getAttribute('aria-expanded'), 'true');
   await page.waitForTimeout(200);
   assert.deepEqual(sent, []); assert.deepEqual(errors, []);
-  ok(`L ${size.join('x')}: desc → ${z.claims.length} claims (limitation last) → relations; quote and visit return`, `claims y${geo.claimsTop.toFixed(1)}–${geo.lastClaimBottom.toFixed(1)}, relations y${geo.portsTop.toFixed(1)}, body bottom y${geo.bodyBottom.toFixed(1)}`);
+  ok(`L ${size.join('x')}: desc → relations → ${z.claims.length} claims (limitation last); quote and visit return`, `relations y${geo.portsTop.toFixed(1)}–${geo.portsBottom.toFixed(1)}, claims y${geo.claimsTop.toFixed(1)}–${geo.lastClaimBottom.toFixed(1)}, body bottom y${geo.bodyBottom.toFixed(1)}`);
   await ctx.close();
 }
 

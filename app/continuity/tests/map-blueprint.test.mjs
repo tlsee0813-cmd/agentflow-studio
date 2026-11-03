@@ -47,11 +47,11 @@ test('blueprint preserves exact user names/parents and original aliases and retu
   }
 });
 
-test('blueprint bounds are exact: 24 total, 12 new, 32 global, 8 anchors, 60-unit name, 400-unit focus and 240-unit text', () => {
+test('blueprint bounds are exact: 24 total, 12 new, 32 global, 8 anchors, 60-unit name, 480-unit focus and 240-unit text', () => {
   assert.deepEqual([BLUEPRINT_PARTS_MAX, BLUEPRINT_NEW_PARTS_MAX, BLUEPRINT_GLOBAL_MAX, BLUEPRINT_ANCHORS_MAX], [24, 12, 32, 8]);
   const f = fixture(12), blueprint = planned(f, 12);
   blueprint.parts.unshift(...f.ask.parts.map(part => ({ ref: part.id, name: part.name, parent: part.parentId, at: [f.at[0]], focus: '기존 책임' })));
-  blueprint.parts.at(-1).name = '가'.repeat(60); blueprint.parts.at(-1).focus = '가'.repeat(400); blueprint.parts.at(-1).at = f.at.slice(0, 8);
+  blueprint.parts.at(-1).name = '가'.repeat(60); blueprint.parts.at(-1).focus = '가'.repeat(480); blueprint.parts.at(-1).at = f.at.slice(0, 8);
   blueprint.global = Array.from({ length: 32 }, () => ({ kind: 'condition', text: '가'.repeat(240), at: f.at.slice(0, 8) }));
   assert.deepEqual(validateMapBlueprint(blueprint, f.ask), blueprint);
   refused(() => validateMapBlueprint(planned(f, 13), f.ask));
@@ -438,16 +438,43 @@ test('the combined first-map wire only omits set-aside items: no quote clipped, 
   assert.throws(() => M.validateMapReply(raw, f.ask), 'the single-call map.6 path still refuses the raw wire whole');
 });
 
+test('.25: a wrong map-reading.7 field leaves out its claim or relation and only a part\'s state; first passes are refused with the fixed path and category', () => {
+  const f = fixture(), blueprint = planned(f, 2), fragments = rendered(f, blueprint), group = splitBlueprintParts(blueprint)[0];
+  Object.assign(fragments[0].parts[0], { state: 'running', stateAt: 'N01.99', stateWhen: '11-02 22:10Z', files: ['server/engine.mjs'] });
+  fragments[0].parts[1].claims[0].topic = 'status';
+  fragments[0].parts[1].claims.push({ ...fragments[0].parts[1].claims[0], key: 's20', text: '두 번째 주장', topic: 'nope' });
+  const global = { ...empty(), summary: '원문의 설명이다.', relations: [{ from: 'new:p1', to: 'new:p2', kind: 'flow', note: '', at: f.at[0], mode: 'x' },
+    { from: 'new:p2', to: 'new:p1', kind: 'flow', note: '', at: f.at[1], payload: '행', cadence: '매 박자', mode: 'observed' }] };
+  const { wire, exclusions } = combineRenderedReading(fragments, global, f.ask, blueprint);
+  assert.deepEqual(exclusions.map(x => [x.path, x.rule, x.category]), [['parts[0].stateAt', 'reference', null], ['parts[1].claims[1].topic', 'contract', 'topic'], ['relations[0].mode', 'contract', 'mode']]);
+  assert.deepEqual([wire.parts[0].state, wire.parts[0].stateAt, wire.parts[0].stateWhen, wire.parts[0].files], [null, null, null, ['server/engine.mjs']]);
+  assert.deepEqual(wire.parts[1].claims.map(c => c.key), ['s2']); assert.deepEqual(wire.relations, [global.relations[1]]);
+  const plain = M.validateMapReply(wire, f.ask);
+  assert.equal(M.setAside(plain).length, 0); assert.deepEqual(plain.parts[0].files, ['server/engine.mjs']);
+  assert.deepEqual(plain.relations.map(x => [x.payload, x.cadence, x.mode]), [['행', '매 박자', 'observed']]);
+  // The first pass of a render or a global stage is refused instead, so its one correction rewrites the field.
+  validateRenderedFragment(fragments[0], group, f.ask, blueprint);
+  let failure; try { validateRenderedFragment(fragments[0], group, f.ask, blueprint, true); } catch (error) { failure = error; }
+  assert.deepEqual(failure.validation, { path: 'parts[0].stateAt', rule: 'reference' });
+  failure = null; try { combineRenderedMaps(fragments, global, f.ask, blueprint, true); } catch (error) { failure = error; }
+  assert.deepEqual(failure.validation, { path: 'relations[0].mode', rule: 'contract', category: 'mode' });
+  assert.deepEqual(mapStageIssues(global, failure), [{ path: 'relations[0].mode', rule: 'contract', category: 'mode', expected: null, actual: null }]);
+  assert.deepEqual(mapStageIssues(fragments[0]), [{ path: 'parts[1].claims[1].topic', rule: 'contract', category: 'topic', expected: null, actual: null }]);
+  const long = structuredClone(fragments[0]); long.parts[0].stateAt = f.at[0]; long.parts[0].files = Array(7).fill('a'); long.parts[1].claims[0].before = '옛것';
+  assert.deepEqual(mapStageIssues(long).map(x => [x.path, x.rule, x.category ?? null, x.expected]), [['parts[0].files', 'count', null, 6],
+    ['parts[1].claims[0].before', 'contract', 'before', null], ['parts[1].claims[1].topic', 'contract', 'topic', null]]);
+});
+
 test('plan feedback names fixed paths, rules and counts only, for anchors, bounds, existing names and parents', () => {
   const f = fixture(1), blueprint = planned(f, 2), own = f.ask.parts[0];
   blueprint.parts.push({ ref: own.id, name: `${own.name} 변경`, parent: 'new:p1', at: [f.at[0]], focus: '기존 책임' });
-  blueprint.parts[0].at = ['N99.01']; blueprint.parts[1].at = f.at.slice(0, 9); blueprint.parts[1].focus = '가'.repeat(401);
+  blueprint.parts[0].at = ['N99.01']; blueprint.parts[1].at = f.at.slice(0, 9); blueprint.parts[1].focus = '가'.repeat(481);
   blueprint.global = [{ kind: 'checked', text: '원문', at: [`${f.at[0]}-02`] }];
   refused(() => validateMapBlueprint(blueprint, f.ask));
   const issues = blueprintStageIssues(blueprint, f.ask);
   assert.deepEqual(issues, [
     { path: 'parts[0].at', rule: 'reference', expected: null, actual: null },
-    { path: 'parts[1].focus', rule: 'length', expected: 400, actual: 401 }, { path: 'parts[1].at', rule: 'count', expected: 8, actual: 9 },
+    { path: 'parts[1].focus', rule: 'length', expected: 480, actual: 481 }, { path: 'parts[1].at', rule: 'count', expected: 8, actual: 9 },
     { path: 'parts[2].name', rule: 'name-mismatch', expected: null, actual: null }, { path: 'parts[2].parent', rule: 'parent-mismatch', expected: null, actual: null },
     { path: 'global[0].kind', rule: 'kind', expected: null, actual: null }, { path: 'global[0].at', rule: 'reference', expected: null, actual: null }]);
   const encoded = JSON.stringify(issues);

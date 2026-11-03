@@ -5,7 +5,7 @@ import * as D from '../dist/public/shared/domain.js';
 import * as M from '../dist/public/shared/map-reading.js';
 import * as C from '../dist/public/shared/change-plan.js';
 import * as S from '../dist/public/shared/storage.js';
-import { parseProject, parseBackup } from '../dist/public/shared/validation.js';
+import { parseProject, parseBackup, validateProject } from '../dist/public/shared/validation.js';
 import { studioView } from '../dist/public/shared/studio.js';
 import { emptyBundle } from '../dist/public/client/plan-store.js';
 import * as K from './condition116-case.mjs';
@@ -21,6 +21,12 @@ function fixture(text = '실제 기능은 파일을 저장합니다.\n예제 조
   return { p, inp, spans, claim, part, reply };
 }
 const errors = reply => M.setAside(reply).map(e => [e.path, e.rule]);
+/** A stored map-reading.7 entry in the exact shape of .6 and earlier: the .7 keys of its claims, parts and relations removed. */
+function stripSeven(r) {
+  for (const p of r.parts) { for (const k of ['state', 'stateWhen', 'stateQuote', 'files']) delete p[k]; for (const c of p.claims) for (const k of ['topic', 'evidence', 'when', 'where', 'before']) delete c[k]; }
+  for (const x of r.relations) for (const k of ['payload', 'cadence', 'mode']) delete x[k];
+  return r;
+}
 
 test('F1 rejected claim rolls back a condition before material conflict checks', () => {
   const f = fixture(), baseline = M.validateMapReply(structuredClone(f.reply), f.inp.ask);
@@ -69,7 +75,7 @@ test('F2 a 1087-character citation with the sole supporting sentence last is exc
     assert.deepEqual(got.parts[0].claims.map(c => c.key), ['s1']);
     assert.deepEqual(errors(got), [['parts[0].claims[1].at', 'length']]);
     const applied = M.applyReading(f.p, f.inp, got, meta()), x = applied.reading.exclusions[0];
-    assert.equal(applied.reading.version, 'map-reading.6');
+    assert.equal(applied.reading.version, 'map-reading.7');
     assert.deepEqual([x.path, x.rule, x.category, x.record, x.from, x.to], ['parts[0].claims[1].at', 'length', null, f.p.pasted[0].id, 0, 1087]);
     assert.match(x.explanation, /600/);
     assert.ok(!JSON.stringify(x).includes(support));
@@ -127,7 +133,7 @@ test('map-reading.4 and .5 import/export keep their exact prior shape', () => {
   const f = fixture(), applied = M.applyReading(f.p, f.inp, M.validateMapReply(f.reply, f.inp.ask), meta());
   for (const version of ['map-reading.4', 'map-reading.5']) {
     const old = JSON.parse(S.serializeProject(applied.project)), r = old.readings.at(-1);
-    r.version = version; delete r.exclusions;
+    r.version = version; delete r.exclusions; stripSeven(r);
     assert.deepEqual(parseProject(JSON.stringify(old)), old);
     assert.deepEqual(parseBackup(S.serializeBackup(old, null)).project, old);
     assert.ok(!Object.hasOwn(parseProject(JSON.stringify(old)).readings.at(-1), 'exclusions'));
@@ -226,4 +232,130 @@ test('attachExclusions takes only checked fixed reasons for a first map.6 and ke
   M.attachExclusions(M.validateMapReply(clean, f.ask), [located], f.ask);
   const later = fixture();
   assert.throws(() => M.attachExclusions(M.validateMapReply(structuredClone(later.reply), later.inp.ask), reasons, later.inp.ask), 'never for map.7');
+});
+
+// ---- map-reading.7 (first-map-divided.25): a claim's topic, tag, time, place and the decision before; a part's own state word
+// with its line and its files; a relation's payload, cadence and mode. Optional on the wire, exact in storage. ----
+function sevenReply(f) {
+  const r = structuredClone(f.reply);
+  r.parts[0].claims = [f.claim('s1', f.at[0], { topic: 'withdrawn', evidence: 'file', when: ' 11-02 23:04Z ', where: 'server/engine.mjs', before: '옛 결정 원문' }),
+    f.claim('s2', f.at[0], { text: '지금 저장합니다.', topic: 'status', evidence: null, when: null })];
+  Object.assign(r.parts[0], { state: 'running', stateAt: f.at[0], stateWhen: '11-02 22:10Z', files: ['server/engine.mjs', ' server/engine.mjs ', 'public/'] });
+  r.parts.push({ ref: 'new:read', name: '읽기', parent: null, role: '파일 읽기', roleAbout: null, roleReplaces: null, basis: [f.at[2]], claims: [f.claim('s3', f.at[2], { text: '파일을 읽습니다.' })] });
+  r.relations = [{ from: 'new:save', to: 'new:read', kind: 'flow', note: '', at: f.at[0], payload: '저장 파일', cadence: '매 저장마다', mode: 'design' }];
+  return r;
+}
+const sevenOf = c => [c.topic, c.evidence, c.when, c.where, c.before];
+
+test('map-reading.7: a map.6 reply with every new field is read, applied, stored as map-reading.7 and read back', () => {
+  const f = firstMap(), got = M.validateMapReply(sevenReply(f), f.ask);
+  assert.equal(M.setAside(got).length, 0);
+  assert.deepEqual(got.parts[0].claims.map(sevenOf), [['withdrawn', 'file', '11-02 23:04Z', 'server/engine.mjs', '옛 결정 원문'], ['status', null, null, null, null]]);
+  assert.deepEqual([got.parts[0].state, got.parts[0].stateWhen, got.parts[0].files], ['running', '11-02 22:10Z', ['server/engine.mjs', 'public/']]);
+  const applied = M.applyReading(f.p, f.inp, got, meta('R_seven_full'));
+  assert.equal(applied.reading.version, 'map-reading.7');
+  const [save, read] = applied.reading.parts, claim = save.claims[0];
+  assert.deepEqual(save.stateQuote, { record: claim.record, quote: claim.quote, from: claim.from, to: claim.to }, 'anchored where it stands, like a claim');
+  assert.deepEqual([save.state, save.stateWhen, save.files], ['running', '11-02 22:10Z', ['server/engine.mjs', 'public/']]);
+  assert.deepEqual([read.state, read.stateWhen, read.stateQuote, read.files], [null, null, null, []]);
+  assert.deepEqual(save.claims.map(sevenOf), [['withdrawn', 'file', '11-02 23:04Z', 'server/engine.mjs', '옛 결정 원문'], ['status', null, null, null, null]]);
+  assert.deepEqual(read.claims.map(sevenOf), [[null, null, null, null, null]]);
+  assert.deepEqual(applied.reading.relations.map(x => [x.payload, x.cadence, x.mode]), [['저장 파일', '매 저장마다', 'design']]);
+  const u = M.partUnderstanding(applied.project, save.areaId);
+  assert.deepEqual(u.stateRead, { state: 'running', when: '11-02 22:10Z', quote: save.stateQuote, at: meta().at });
+  assert.deepEqual(u.files, ['server/engine.mjs', 'public/']);
+  assert.equal(M.partUnderstanding(applied.project, read.areaId).stateRead, null);
+  assert.deepEqual(validateProject(applied.project), applied.project);
+  assert.deepEqual(parseProject(S.serializeProject(applied.project)).readings.at(-1), applied.reading);
+});
+
+test('map-reading.7: a line both designed and observed is one map line read twice', () => {
+  const f = firstMap(), r = sevenReply(f);
+  r.relations.push({ ...r.relations[0], at: f.at[2], payload: null, cadence: null, mode: 'observed' });
+  const applied = M.applyReading(f.p, f.inp, M.validateMapReply(r, f.ask), meta('R_seven_twice'));
+  assert.equal(applied.project.space.relations.length, 1);
+  assert.deepEqual(applied.reading.relations.map(x => [x.relationId, x.mode]), [[applied.project.space.relations[0].id, 'design'], [applied.project.space.relations[0].id, 'observed']]);
+  assert.deepEqual(applied.reading.skipped, []);
+  assert.deepEqual(validateProject(applied.project), applied.project);
+});
+
+test('map-reading.7 lenient: a wrong field sets aside its claim or relation, and only the state or files of a part', () => {
+  const f = firstMap(), r = sevenReply(f);
+  r.parts[0].claims[1].topic = 'nope';
+  r.parts[0].claims.push(f.claim('s4', f.at[0], { text: '세 번째 주장', topic: 'status', before: '옛것' }));
+  delete r.parts[0].stateAt;
+  r.parts[0].files = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+  r.relations[0].mode = 'x';
+  const got = M.validateMapReply(structuredClone(r), f.ask, { setAside: true });
+  assert.deepEqual(got.parts.map(p => p.ref), ['new:save', 'new:read'], 'no part is set aside');
+  assert.deepEqual(got.parts[0].claims.map(c => c.key), ['s1']);
+  assert.deepEqual([got.parts[0].state, got.parts[0].stateQuote, got.parts[0].stateWhen, got.parts[0].files], [null, null, null, []]);
+  assert.deepEqual(got.relations, []);
+  const reasons = M.readingExclusions(got);
+  assert.deepEqual(reasons.map(e => [e.path, e.rule, e.category]), [['parts[0].claims[1].topic', 'contract', 'topic'], ['parts[0].claims[2].before', 'contract', 'before'],
+    ['parts[0].stateAt', 'contract', 'state-at'], ['parts[0].files', 'contract', 'files'], ['relations[0].mode', 'contract', 'mode']]);
+  assert.match(reasons[2].explanation, /그 칸만/); assert.match(reasons[0].explanation, /제외했어요/);
+  const applied = M.applyReading(f.p, f.inp, got, meta('R_seven_lenient'));
+  assert.deepEqual(applied.reading.exclusions.map(e => e.path), reasons.map(e => e.path));
+  assert.deepEqual(parseProject(S.serializeProject(applied.project)).readings.at(-1), applied.reading);
+  // map.7 reads the same way (its parts are soft, yet a bad state still leaves the part and only that field out).
+  const g = fixture();
+  g.reply.parts[0].claims.push(g.claim(g.spans[2].s, 's2', { topic: 'nope' }));
+  Object.assign(g.reply.parts[0], { state: 'gone', stateAt: g.spans[0].s, stateWhen: '11-02', files: ['x/'] });
+  const seven = M.validateMapReply(g.reply, g.inp.ask);
+  assert.deepEqual(seven.parts[0].claims.map(c => c.key), ['s1']);
+  assert.deepEqual([seven.parts[0].state, seven.parts[0].stateWhen, seven.parts[0].files], [null, null, ['x/']]);
+  assert.deepEqual(errors(seven), [['parts[0].claims[1].topic', 'contract'], ['parts[0].state', 'contract']]);
+  assert.equal(M.applyReading(g.p, g.inp, seven, meta('R_seven_map7')).reading.version, 'map-reading.7');
+});
+
+test('map-reading.7 strict: plain map.6 refuses a reply with any wrong new field', () => {
+  const f = firstMap();
+  for (const mutate of [
+    r => { r.parts[0].claims[1].topic = 'nope'; }, r => { r.parts[0].claims[1].evidence = 'paper'; }, r => { r.parts[0].claims[1].before = '옛것'; },
+    r => { r.parts[0].claims[1].when = '가'.repeat(41); }, r => { r.parts[0].claims[1].where = '가'.repeat(121); }, r => { r.parts[0].claims[0].before = '  '; },
+    r => { delete r.parts[0].stateAt; }, r => { r.parts[0].state = 'built'; }, r => { r.parts[0].stateAt = 'N01.99'; }, r => { r.parts[0].stateWhen = '가'.repeat(41); },
+    r => { r.parts[1].stateWhen = '11-02'; }, r => { r.parts[1].stateAt = f.at[2]; },
+    r => { r.parts[0].files = Array(7).fill('a'); }, r => { r.parts[0].files = ['가'.repeat(121)]; }, r => { r.parts[0].files = 'a'; }, r => { r.parts[0].files = ['a\u0001'] },
+    r => { r.relations[0].mode = 'x'; }, r => { r.relations[0].payload = ''; }, r => { r.relations[0].cadence = '가'.repeat(41); },
+    r => { r.relations[0].payload = `sk-${'A'.repeat(25)}`; },
+  ]) {
+    const r = sevenReply(f); mutate(r);
+    assert.throws(() => M.validateMapReply(r, f.ask), undefined, String(mutate));
+  }
+});
+
+test('map-reading.7: a reply without any new field still validates and stores every key as not said', () => {
+  const f = firstMap(), r = structuredClone(f.reply); r.parts[0].claims.splice(1, 1);
+  r.parts.push({ ref: 'new:read', name: '읽기', parent: null, role: '파일 읽기', roleAbout: null, roleReplaces: null, basis: [f.at[2]], claims: [f.claim('s3', f.at[2])] });
+  r.relations = [{ from: 'new:save', to: 'new:read', kind: 'flow', note: '', at: f.at[0] }];
+  const applied = M.applyReading(f.p, f.inp, M.validateMapReply(r, f.ask), meta('R_seven_plain'));
+  assert.equal(applied.reading.version, 'map-reading.7');
+  for (const p of applied.reading.parts) {
+    assert.deepEqual([p.state, p.stateWhen, p.stateQuote, p.files], [null, null, null, []]);
+    for (const c of p.claims) assert.deepEqual(sevenOf(c), [null, null, null, null, null]);
+  }
+  assert.deepEqual(applied.reading.relations.map(x => [x.payload, x.cadence, x.mode]), [[null, null, null]]);
+  assert.equal(M.partUnderstanding(applied.project, applied.reading.parts[0].areaId).stateRead, null);
+  assert.deepEqual(validateProject(applied.project), applied.project);
+});
+
+test('map-reading.7 storage is exact: unknown values, a missing key, and a .7 key on an earlier reading are refused', () => {
+  const f = firstMap(), applied = M.applyReading(f.p, f.inp, M.validateMapReply(sevenReply(f), f.ask), meta('R_seven_store'));
+  const raw = S.serializeProject(applied.project);
+  for (const mutate of [
+    r => { r.parts[0].claims[0].topic = 'nope'; }, r => { r.parts[0].claims[0].evidence = 'paper'; }, r => { r.parts[0].claims[1].before = '옛것'; },
+    r => { r.parts[0].claims[0].when = '가'.repeat(41); }, r => { delete r.parts[0].claims[0].where; }, r => { r.parts[0].state = 'built'; },
+    r => { r.parts[0].stateQuote = null; }, r => { r.parts[1].stateWhen = '11-02'; }, r => { r.parts[0].files = ['a', 'a']; }, r => { r.parts[0].files = Array(7).fill(0).map((_, i) => `f${i}`); },
+    r => { delete r.parts[1].files; }, r => { r.relations[0].mode = 'x'; }, r => { r.relations[0].payload = '가'.repeat(81); }, r => { delete r.relations[0].cadence; },
+    r => { r.parts[0].stateQuote = { ...r.parts[0].stateQuote, quote: 'x' }; },
+    r => { r.version = 'map-reading.6'; },
+    r => { r.version = 'map-reading.6'; stripSeven(r); r.parts[0].claims[0].topic = 'status'; },
+  ]) {
+    const bad = JSON.parse(raw); mutate(bad.readings.at(-1));
+    assert.throws(() => parseProject(JSON.stringify(bad)), undefined, String(mutate));
+    assert.throws(() => validateProject(bad), undefined, String(mutate));
+  }
+  const old = JSON.parse(raw); old.readings.at(-1).version = 'map-reading.6'; stripSeven(old.readings.at(-1));
+  assert.deepEqual(validateProject(old), old, 'an earlier reading keeps its exact old shape');
 });

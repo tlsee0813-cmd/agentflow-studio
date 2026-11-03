@@ -7,7 +7,9 @@ import { parseBackup, cleanPositions } from '../shared/validation.js';
 import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, removePastedRecord, provideRecord, secretPasted, correctReadingRole } from '../shared/domain.js';
 import { CLAIM_LABEL, stateLabel, revisedRelations, candidateReading, type Applied, type CurrentClaim, type PartUnderstanding } from '../shared/map-reading.js';
 import { roleEvidence } from './role-evidence.js';
-import type { ClaimKind, ReadingQuote, SavedCamera } from '../shared/types.js';
+import type { ClaimTopic, ReadingQuote, ReadingRelation, SavedCamera } from '../shared/types.js';
+import { TOPIC_LABEL, TOPIC_HINT, EVIDENCE_LABEL, EVIDENCE_HINT, STATE_WORD, MODE_LABEL, claimEvidence, claimWhen, claimsByTopic } from '../shared/claim-topic.js';
+import { recordTitle } from './digest-source.js';
 import { createMapRun, sendLine, JOB_NOTE, type MapRunState } from './map-run.js';
 import { mapBatchLines, mapPendingText } from '../shared/map-route.js';
 import { JobReservations, JOBS_KEY, type JobLocks } from './map-jobs.js';
@@ -32,7 +34,7 @@ import { createHandoverView } from './handover-view.js';
 import { createCloudLink } from './cloud-link.js';
 import { partSessions, originLabel, handoverDoc, handoverCode } from '../shared/handover.js';
 import { UI62_KEY, buildUi62Project, ui62Keys } from '../shared/return-material.js';
-import { REL_LABEL, relationGroups, dirMark, dirTitle, insideEnds } from '../shared/relation-groups.js';
+import { REL_LABEL, relationGroups, relLabel, dirMark, dirTitle, insideEnds } from '../shared/relation-groups.js';
 
 /* ---------- small DOM helpers (shared with the change-plan view) ---------- */
 const firstLine = (text: string, n = 90) => { const line = text.split('\n').find(l => l.trim())?.trim() ?? ''; return line.length > n ? `${line.slice(0, n)}…` : line; };
@@ -837,6 +839,16 @@ function ladderLine(view: StudioView, p: PartView): HTMLElement {
   const words = check ? (report ? '요청 · 보고 · 확인까지 있음' : '확인한 기록이 있음') : report ? (ask ? '요청과 보고가 있음 · 아직 확인 전' : '했다는 보고가 있음 · 아직 확인 전') : ask ? '요청만 있음 · 보고 전' : '요청·보고·확인 기록이 아직 없음';
   return h('p', { class: 'lens-ladder' }, el, h('span', {}, words));
 }
+/** The lens head's state line (map-reading.7): the state the newest reading that gave one reads for the part, in the record's own
+ * word, the grade of the line that says it (the author's tag in that line, when it has one) and when the record says so (else
+ * when the reading was made). Never a status the app verified; null when no reading gave one (the ladder line stands instead). */
+function stateLine(p: PartView): HTMLElement | null {
+  const s = p.reading?.stateRead; if (!s) return null;
+  const ev = claimEvidence({ quote: s.quote?.quote ?? '' });
+  const words = [STATE_WORD[s.state], ev ? EVIDENCE_LABEL[ev] : null, s.when ? `${s.when} 기준` : `정리 ${ago(s.at)}`].filter(Boolean).join(' · ');
+  return h('p', { class: `lens-state st-${s.state}`, ...(s.quote ? { title: `기록의 말 · “${s.quote.quote}”` } : {}) },
+    h('i', { class: 'dot', 'aria-hidden': 'true' }), h('span', {}, words));
+}
 /** A part's line on the map: the state only when it says something. 'plan' (no request yet) stays quiet here; the inspector
  * still tells "no records" apart from "a planned note only". */
 function metaLine(p: PartView, last: string | null): string | null {
@@ -1570,24 +1582,31 @@ function renderLens() {
   } else put(desc, src(part.status === 'plan' ? (records.length ? `설명 없음 · 요청 기록 없음 · ${recs}` : part.reading ? '기록에서 읽은 말만 있어요' : '아직 설명도 기록도 없어요') : `${STATUS_LABEL[part.status]} · ${recs} · 받은 정리 없음`));
   if (part.changes.length) desc.append(h('ul', { class: 'lens-changes' }, ...part.changes.slice(0, 2).map(c => h('li', {}, c))));
   // Read the current statements together: a later limitation may qualify an earlier description.
-  const claims = part.reading?.claims.length ? lensClaims(part.id, part.reading.claims) : null;
+  const claims = part.reading?.claims.length ? lensClaims(part.id, part.reading) : null;
   const requested = currentRequestResults(o, part.id);
-  // Lines: real ends, read by what they mean. One group per verb and direction ("이 부분이 필요로 함"), each row the real other
-  // end and its stored note (the reason of that relation, read right under the description); a line drawn from a folded part
-  // summarises its inside, so its row also names the inner end. A row and its line on the map light each other.
+  // Lines: real ends, read as what the part takes in and what it hands on (its flows, in then out), then what it is with (needs,
+  // shares, related; each row says its verb). Each row is the real other end and what goes along the line: what a reading said is
+  // handed over (its payload, how often, designed or seen), else the stored note (the reason of that relation); a line drawn from
+  // a folded part summarises its inside, so its row also names the inner end. A row and its line on the map light each other.
   const ends = relationEnds(o, part.id), entry = visitEntry(o), cameFrom = entry ? visits.at(-1)!.from.selected : null;
+  const handed = relationPayloads(o.project);
   const port = (x: End) => {
     const far = partOf(o, x.far)!, near = x.near !== part.id ? partOf(o, x.near)?.name : null, farRep = drawnRep(o, x.far);
     // The scope itself is this scope's boundary, not a place outside it.
     const where = farRep === x.far ? null : x.far === scope ? '이 범위' : farRep ? `${partOf(o, farRep)!.name} 안` : partPath(o.view, x.far).slice(0, -1).map(q => q.name).join(' › ') || o.project.name;
-    const came = x.far === cameFrom;
-    return h('li', {}, h('button', { type: 'button', class: `port${came ? ' came' : ''}`, 'data-far': x.far, 'data-rel': x.r.id, title: `${far.name}${toParticle(far.name)} 가기${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far); }, ...lightOn([x.r.id], x.far) },
-      h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, dirMark(x.r.kind, x.out)), h('strong', {}, far.name), came ? h('span', { class: 'port-came' }, '출발') : null),
+    const came = x.far === cameFrom, read = handed.get(x.r.id), revised = revisedLine(o, x.r.id), verb = x.r.kind === 'flow' ? null : relLabel(x.r.kind, x.out);
+    const line = read?.payload ? `${read.payload}${read.cadence ? ` (${read.cadence})` : ''}${read.mode ? ` · ${MODE_LABEL[read.mode]}` : ''}` : x.r.note;
+    return h('li', {}, h('button', { type: 'button', class: `port${came ? ' came' : ''}`, 'data-far': x.far, 'data-rel': x.r.id, title: `${far.name}${toParticle(far.name)} 가기${verb ? ` · ${verb}` : ''}${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far); }, ...lightOn([x.r.id], x.far) },
+      h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, dirMark(x.r.kind, x.out)), h('strong', {}, far.name),
+        verb ? h('span', { class: 'port-kind' }, REL_LABEL[x.r.kind] ?? x.r.kind) : null, came ? h('span', { class: 'port-came' }, '출발') : null),
       near || where ? h('span', { class: 'port-where' }, [near ? `안쪽 ‘${near}’에서` : '', where ? `${where}` : ''].filter(Boolean).join(' · ')) : null,
-      x.r.note || revisedLine(o, x.r.id) ? h('span', { class: 'port-note', 'data-rel-note': x.r.id }, `${x.r.note}${revisedLine(o, x.r.id) ? REVISED_BASIS : ''}`.replace(/^ · /, '')) : null));
+      line || revised ? h('span', { class: 'port-note', 'data-rel-note': x.r.id, ...(read?.payload && x.r.note ? { title: x.r.note } : {}) }, `${line}${revised ? REVISED_BASIS : ''}`.replace(/^ · /, '')) : null));
   };
-  const ports = relationGroups(ends).map(g => h('section', { class: 'lens-ports' }, h('h3', {}, g.label, h('small', {}, String(g.list.length))),
-    h('ul', {}, ...g.list.slice(0, 8).map(port)), g.list.length > 8 ? h('button', { type: 'button', class: 'link-button', onclick: () => openSheet() }, `${g.list.length - 8}개 더 · 전체 읽기`) : null));
+  const portGroup = (label: string, hint: string, list: End[]) => list.length ? h('section', { class: 'lens-ports' }, h('h3', { title: hint }, label, h('small', {}, String(list.length))),
+    h('ul', {}, ...list.slice(0, 8).map(port)), list.length > 8 ? h('button', { type: 'button', class: 'link-button', onclick: () => openSheet() }, `${list.length - 8}개 더 · 전체 읽기`) : null) : null;
+  const ports = [portGroup('받는 것', '다른 부분이 이 부분에 넘겨주는 것', ends.filter(x => x.r.kind === 'flow' && !x.out)),
+    portGroup('내는 것', '이 부분이 다른 부분에 넘겨주는 것', ends.filter(x => x.r.kind === 'flow' && x.out)),
+    portGroup('함께', '필요로 함 · 함께 씀 · 관련', relationGroups(ends.filter(x => x.r.kind !== 'flow')).flatMap(g => g.list))];
   // A group drawn open: the lines that touch its frame belong to its inner parts. They read here from those parts, by verb and
   // direction, each row naming the inner part, the outside part and where that one belongs; following one records a visit.
   // Relations between two of its inner parts are drawn inside it and only counted.
@@ -1627,13 +1646,13 @@ function renderLens() {
       path.length ? h('div', { class: 'lens-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope), title: x.name }, x.name)])) : null,
       h('h2', { id: 'lens-title' }, part.name),
       aliasOf(o.view, part.id) ? h('p', { class: 'lens-alias' }, aliasOf(o.view, part.id)) : null,
-      ladderLine(o.view, part),
+      stateLine(part) ?? ladderLine(o.view, part),
       h('div', { class: 'head-tools' },
         menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e: Event) => { ((e.currentTarget as HTMLElement).parentElement as HTMLDetailsElement).open = false; } }, ...menuItems)) : null,
         h('button', { type: 'button', class: 'rail-toggle', 'aria-label': '읽기면 접기', 'aria-expanded': 'true', title: '읽기면 접기 · 지도를 넓게 봐요', onclick: () => setRail(true) }, railIcon(true)),
         h('button', { type: 'button', class: 'close', 'aria-label': '선택 해제', title: '닫기 (Esc)', onclick: () => go(o.key) }, '×'))),
-    // The current statements read right after the description they may qualify; the lines to other parts follow them.
-    h('div', { class: 'lens-body' }, desc, claims, sessionsLine(o.project, part.id), ...ports, requested, innerSection, inside),
+    // What it does, what it takes in and hands on, what the records say about it (by topic), where it lives and who worked on it.
+    h('div', { class: 'lens-body' }, desc, ...ports, claims, whereSection(o.project, part), requested, innerSection, inside),
     h('footer', { class: 'lens-foot' },
       h('button', { type: 'button', class: 'lens-more', onclick: () => openSheet() }, records.length ? `기록 전체 읽기 · ${records.length}` : '전체 읽기', thread ? ` · 정리 ${thread}` : '', h('span', { 'aria-hidden': 'true' }, ' ›')),
       status.ai === 'deepseek' ? h('button', { type: 'button', class: 'link-button', onclick: () => { composerOpen = true; openSheet(() => document.getElementById(status.access === 'code' && !sessionCode() ? 'access-code' : 'ask-input')?.focus()); } }, '이 부분에 대해 묻기') : null));
@@ -1646,6 +1665,22 @@ function sessionsLine(project: Project, partId: string): HTMLElement | null {
   const list = partSessions(project, partId); if (!list.length) return null;
   return h('p', { class: 'lens-sessions', title: '이 부분의 근거가 된 기록을 남긴 세션, 또는 인수인계 문서로 이 부분을 이어받은 세션' },
     h('span', { class: 'lens-sessions-label' }, '다룬 세션'), list.slice(0, 3).map(x => `${originLabel(x)}${x.tookOver ? ' · 인수인계로 이어받음' : ''}`).join(', '), list.length > 3 ? h('small', {}, ` 외 ${list.length - 3}`) : null);
+}
+/** Where the part lives, as the records name it: the files, folders or units readings gave it and the places its current claims
+ * name (each once, up to eight, written as the record wrote them), then the sessions behind it. Left out when there is nothing. */
+function whereSection(project: Project, part: PartView): HTMLElement | null {
+  const places: string[] = [];
+  for (const f of [...(part.reading?.files ?? []), ...(part.reading?.claims ?? []).map(c => c.where)]) if (f && !places.includes(f)) places.push(f);
+  const sessions = sessionsLine(project, part.id);
+  if (!places.length && !sessions) return null;
+  return h('section', { class: 'lens-where' }, h('h3', {}, '어디에'),
+    places.length ? h('ul', { class: 'where-chips' }, ...places.slice(0, 8).map(f => h('li', { class: 'wh', title: f }, f))) : null, sessions);
+}
+/** What readings said each relation hands over (map-reading.7): per relation, the newest reading's line that names a payload. */
+function relationPayloads(project: Project): Map<string, ReadingRelation> {
+  const out = new Map<string, ReadingRelation>();
+  for (const r of project.readings) if (isMapReading(r)) for (const x of r.relations) if (x.payload) out.set(x.relationId, x);
+  return out;
 }
 /** The AI sessions behind a part in the full reading: the ones whose records the map quotes for it, and the ones that took it over
  * by a handover. */
@@ -2545,35 +2580,68 @@ function currentRequestResults(o: Opened, partId?: string): HTMLElement | null {
     }
   });
 }
-const CLAIM_ORDER: ClaimKind[] = ['open', 'differs', 'want', 'reported', 'checked', 'idea', 'describes'];
-/** The headings the pane reads the claims under, in plain words, and what each means (its hint). A report is not a check. */
-const CLAIM_HEADING: Record<ClaimKind, string> = { open: '아직 정하지 않은 것', differs: '기록끼리 다른 것', want: '요청한 것', reported: '했다고 보고됨', checked: '확인됨', idea: '구상', describes: '작동 방식' };
-const CLAIM_HINT: Record<ClaimKind, string> = { open: '기록이 선택을 남겨 둔 것', differs: '기록마다 다르게 적힌 것', want: '사람이 바라거나 요구한 것', reported: 'AI나 담당이 했다고 적은 것 · 확인된 것은 아님', checked: '검사·자료·직접 읽기로 확인된 것', idea: '해 보자고 적은 생각', describes: '어떻게 돌아가는지 적힌 설명' };
-/** A passage as the pane shows it under its line: its first stretch, whole when short. */
+/** A passage as the full reading shows it under its line: its first stretch, whole when short. */
 const QUOTE_SHOW = 120;
 const quoteLine = (q: string) => { const t = q.replace(/\s+/g, ' ').trim(); return t.length > QUOTE_SHOW ? `${t.slice(0, QUOTE_SHOW - 1)}…` : t; };
+/** A passage in a citation's preview: its first 160 characters. */
+const POP_SHOW = 160;
+const popLine = (q: string) => { const t = q.replace(/\s+/g, ' ').trim(); return t.length > POP_SHOW ? `${t.slice(0, POP_SHOW - 1)}…` : t; };
 /** Said once, where a description or a line rests only on a report a later record took back (it stays; it is not current evidence). */
 const REVISED_BASIS = ' · 근거였던 보고는 이후 정정됨';
-/** Claims of a part as short lines, a report correcting an earlier one first, then most decision-relevant, each with its quote.
- * Claims of one kind keep their reading's own order (newest reading first; within a reading, as it said them), so a sequence
- * a reading wrote (parse, compile, run) is never read backwards. */
-function claimList(part: string, claims: CurrentClaim[], max: number): HTMLElement {
+/** The record a quote comes from, in a citation's preview: a provided file by its declared name, a pasted record by its first
+ * line, a project source by its kind; with when it was taken in. */
+function recordName(id: string): string {
+  const o = opened; if (!o) return '기록';
+  const pasted = o.project.pasted.find(r => r.id === id);
+  if (pasted) return [pasted.evidence?.name || recordTitle(pasted.text, 40) || '붙여넣은 기록', ago(pasted.at)].filter(Boolean).join(' · ');
+  const r = o.view.records.find(x => x.id === id);
+  return r ? [RECORD_LABEL[r.kind], ago(r.at)].filter(Boolean).join(' · ') : '기록';
+}
+/** A citation's preview opens below its number, toward the pane's inside: from the number's right edge when it would cross the
+ * pane's right, above the number when it would cross the pane's bottom. */
+function placeCite(cite: HTMLElement) {
+  const pane = cite.closest('.lens-body, .panel-body') ?? document.body, box = pane.getBoundingClientRect(), at = cite.getBoundingClientRect();
+  cite.classList.toggle('pop-r', at.left + 300 > box.right - 8);
+  cite.classList.toggle('pop-up', at.bottom + 140 > box.bottom && at.top - 140 > box.top);
+}
+/** Claims of a part as short lines under what they are about (claim-topic.ts: the reading's own topic, else one read from the
+ * kind and the words), in the order a person asks about a part. A report correcting an earlier one reads first in its topic;
+ * otherwise claims keep their reading's own order (newest reading first; within a reading, as it said them), so a sequence a
+ * reading wrote (parse, compile, run) is never read backwards. Each line: its words, then when, the author's own evidence tag,
+ * the place it names and its numbered citation (the passage in a preview on hover or focus; a click opens it in the record).
+ * The full reading also shows the passage's first stretch under the line. */
+function claimList(part: string, claims: CurrentClaim[], history: PartUnderstanding['history'], surface: 'lens' | 'sheet'): HTMLElement {
   const fresh = new Map<string, number>(); for (const c of claims) if (!fresh.has(c.reading)) fresh.set(c.reading, fresh.size);
-  const sorted = [...claims].sort((a, b) => Number(!!b.replaces) - Number(!!a.replaces) || CLAIM_ORDER.indexOf(a.kind) - CLAIM_ORDER.indexOf(b.kind)
-    || fresh.get(a.reading)! - fresh.get(b.reading)! || a.index - b.index).slice(0, max);
-  // Read under headings in plain words, one per kind present; a line that corrects an earlier one says so above its text, and
-  // every line shows the passage it rests on (its first stretch) with the way to the record.
-  const box = h('div', { class: 'claim-groups' });
-  for (const kind of CLAIM_ORDER) {
-    const mine = sorted.filter(c => c.kind === kind); if (!mine.length) continue;
-    box.append(h('section', { class: `cg k-${kind}` },
-      h('h4', { title: CLAIM_HINT[kind] }, CLAIM_HEADING[kind], h('small', {}, String(mine.length)), kind === 'reported' ? h('span', { class: 'cg-note' }, '확인 전') : null),
-      h('ul', { class: 'claims' }, ...mine.map(c => h('li', { class: `claim k-${c.kind}${c.replaces ? ' replaces' : ''}` },
-        h('span', { class: 'cl-text' }, c.replaces ? h('span', { class: 'cl-revises' }, '앞의 말을 대체한 정정') : null, c.text, c.about ? h('small', { class: 'cl-about', title: c.about }, ` · ${displayAbout(c.about)}`) : null),
-        h('span', { class: 'cl-from' }, h('q', { class: 'cl-quote', title: c.quote }, quoteLine(c.quote)),
-          h('button', { type: 'button', class: 'cl-cite', 'data-claim-focus': JSON.stringify([part, c.reading, c.index, c.record, c.from ?? null, c.to ?? null]), title: '이 말의 원문을 기록에서 보기', onclick: () => showQuote(c.record, c.quote, c.from) }, '원문 보기')))))));
+  const sorted = [...claims].sort((a, b) => Number(!!b.replaces) - Number(!!a.replaces) || fresh.get(a.reading)! - fresh.get(b.reading)! || a.index - b.index);
+  const box = h('div', { class: 'claim-groups' }); let n = 0;
+  for (const { topic, list } of claimsByTopic(sorted)) {
+    box.append(h('section', { class: `cg t-${topic}` },
+      h('h4', { title: TOPIC_HINT[topic] }, TOPIC_LABEL[topic], h('small', {}, String(list.length))),
+      h('ul', { class: 'claims' }, ...list.map(c => claimItem(part, c, topic, history, ++n, surface)))));
   }
   return box;
+}
+function claimItem(part: string, c: CurrentClaim, topic: ClaimTopic, history: PartUnderstanding['history'], n: number, surface: 'lens' | 'sheet'): HTMLElement {
+  // A correction names the claim it replaces: its old words struck through, when that reading is still at hand.
+  const was = c.replaces ? history.find(x => x.reading === c.replaces!.reading)?.claims[c.replaces.index]?.text ?? null : null;
+  const before = topic === 'withdrawn' && c.before ? c.before : null;
+  const when = claimWhen(c), ev = claimEvidence(c), about = c.about && c.about !== when ? c.about : null;
+  const cite: HTMLElement = h('span', { class: 'cite', onmouseenter: () => placeCite(cite), onfocusin: () => placeCite(cite) },
+    h('button', { type: 'button', class: 'cl-cite', 'data-claim-focus': JSON.stringify([part, c.reading, c.index, c.record, c.from ?? null, c.to ?? null]), 'aria-label': `근거 ${n} · 원문에서 보기`, title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote, c.from) }, String(n)),
+    h('span', { class: 'cite-pop', role: 'tooltip' }, h('q', {}, popLine(c.quote)), h('span', { class: 'cite-src' }, recordName(c.record))));
+  return h('li', { class: `claim k-${c.kind}${c.replaces ? ' replaces' : ''}` },
+    h('span', { class: 'cl-line' },
+      c.replaces ? h('span', { class: 'cl-tag', title: '기록이 앞의 말을 대체한다고 적은 정정' }, '정정') : null,
+      before ? h('s', { class: 'cl-before', title: `철회 전: ${before}` }, before) : null, before ? h('span', { class: 'cl-arrow', 'aria-hidden': 'true' }, ' → ') : null,
+      h('span', { class: 'cl-text' }, c.text)),
+    was ? h('s', { class: 'cl-was', title: `정정 전: ${was}` }, was) : null,
+    h('span', { class: 'cl-meta' },
+      when ? h('span', { class: 'cl-when' }, when) : null,
+      ev ? h('span', { class: `ev ev-${ev}`, title: EVIDENCE_HINT[ev] }, EVIDENCE_LABEL[ev]) : null,
+      c.where ? h('span', { class: 'cl-where', title: c.where }, c.where) : null,
+      about ? h('small', { class: 'cl-about', title: about }, displayAbout(about)) : null,
+      cite),
+    surface === 'sheet' ? h('q', { class: 'cl-quote', title: c.quote }, quoteLine(c.quote)) : null);
 }
 /** What the person unfolded in the lens, per part (memory, this tab): long relation notes.
  * Reading a quote or following a relation and coming back keeps them as they were, like the scroll and the focused citation. */
@@ -2591,10 +2659,10 @@ function roleBasisBlock(o: Opened, part: string, u: PartUnderstanding, surface: 
 }
 /** Current statements stay in one continuous reading, including qualifications late in the source. The pane scrolls normally;
  * position alone cannot make a statement optional. Evidence history still reads in the sheet. */
-function lensClaims(part: string, claims: CurrentClaim[]): HTMLElement {
-  const list = claimList(part, claims, claims.length);
+function lensClaims(part: string, u: PartUnderstanding): HTMLElement {
+  const list = claimList(part, u.claims, u.history, 'lens');
   list.id = 'lens-claims';
-  return h('section', { class: 'lens-claims', 'aria-label': `기록이 말하는 것 ${claims.length}개` }, h('h3', {}, '기록이 말하는 것', h('small', {}, String(claims.length))), list);
+  return h('section', { class: 'lens-claims', 'aria-label': `기록이 말하는 것 ${u.claims.length}개` }, h('h3', {}, '기록에서 읽은 것', h('small', {}, String(u.claims.length))), list);
 }
 /** A relation note longer than its three lines reads whole on request, in place (the row itself goes to the other end). Safe to
  * run again over the same pane (rows shown later, e.g. after '더 보기'): a row that has its control keeps it. */
@@ -2648,7 +2716,7 @@ function understoodSection(o: Opened, part: PartView): HTMLElement | null {
     for (const x of u.others.slice(0, 2)) sec.append(h('p', { class: 'und-later' }, h('span', { title: x.about ?? '' }, `다른 기록의 설명${x.about ? ` · ${displayAbout(x.about)}` : ''} · 현재 설명을 대체한다는 근거 없음`), x.text));
   }
   // The full reading reads every current claim, as the lens does (claimList takes them all).
-  if (u.claims.length) sec.append(claimList(part.id, u.claims, u.claims.length));
+  if (u.claims.length) sec.append(claimList(part.id, u.claims, u.history, 'sheet'));
   const requested = currentRequestResults(o, part.id); if (requested) sec.append(requested);
   // The history fold and its quotes keep their identity (this entry and part; each quote by its stored reading, index and place):
   // back from an original the fold is open again and the same quote has focus, also between two readings with the same time.

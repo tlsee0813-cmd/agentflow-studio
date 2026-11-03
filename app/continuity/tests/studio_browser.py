@@ -878,7 +878,7 @@ def overview_flow(browser, base, cases):
     page.locator("#import-file").set_input_files(str(cases / "oss-joplin.json"))
     page.locator("#world .node", has_text="@joplin/renderer").click()
     pane_beside_map(page)
-    expect(page.locator("#lens .lens-ports h3").first).to_contain_text("이 부분을 필요로 함")
+    expect(page.locator("#lens .lens-ports h3").first).to_contain_text("받는 것")
     expect(page.locator("#world .edge-label.on")).not_to_have_count(0)
     page.keyboard.press("Escape")
     page.locator(".frame-head", has_text="@joplin/app-desktop").locator(".enter").click()

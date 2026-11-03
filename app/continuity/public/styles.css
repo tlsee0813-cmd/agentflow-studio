@@ -1465,25 +1465,62 @@ button:disabled { opacity: .5; cursor: default; }
 .claim.k-want .cl-kind { color: var(--accent); }
 .claim.k-reported .cl-kind { color: var(--change-text); } .claim.k-checked .cl-kind { color: var(--ok-text); }
 .cl-text { flex: 1; min-width: 0; word-break: keep-all; }
-/* The claims under their headings: one group per kind present, a coloured mark before the heading (a report amber, a check
-   green, an open choice red), each line over the passage it rests on. */
+/* The claims under what they are about (claim-topic.ts), in the order a person asks: a small square before each heading in the
+   topic's colour (the present state blue, a change info, a defect or an unknown red, a withdrawal amber, a decision or a rule
+   dark, a plan grey, how it is built a quiet line), each line with a 2px rule of the same tint. Under the words one quiet row:
+   when, the author's own evidence tag, the place it names and the numbered citation (the passage in a preview, never inline). */
 .claim-groups { display: flex; flex-direction: column; gap: var(--s-3); margin-top: 6px; }
-.cg h4 { margin: 0; display: flex; align-items: baseline; gap: 6px; font-size: 12px; line-height: 16px; font-weight: var(--fw-name); color: var(--text-2); }
-.cg h4::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 2px; background: var(--rung-ask); transform: translateY(-.5px); }
-.cg.k-reported h4::before { background: var(--rung-report); } .cg.k-checked h4::before { background: var(--rung-check); }
-.cg.k-open h4::before, .cg.k-differs h4::before { background: var(--warn); } .cg.k-describes h4::before, .cg.k-idea h4::before { background: var(--line-strong); }
-.cg h4 small { font-weight: 500; color: var(--text-4); font-variant-numeric: tabular-nums; }
-.cg-note { margin-left: 2px; font-size: 11px; font-weight: var(--fw-name); color: var(--change-text); background: var(--change-soft); border-radius: var(--r-sm); padding: 0 5px; line-height: 16px; }
-.cg .claims { margin-top: 6px; gap: 8px; }
-.cg .claim { flex-direction: column; align-items: stretch; gap: 3px; padding-left: 14px; border-left: 2px solid var(--hair-2); }
-.cg.k-reported .claim { border-left-color: #fde3b6; } .cg.k-checked .claim { border-left-color: #c6efd9; } .cg.k-open .claim, .cg.k-differs .claim { border-left-color: #fdd2cc; }
-.cl-from { display: flex; align-items: baseline; gap: 8px; min-width: 0; font-size: 12px; line-height: 17px; color: var(--text-3); }
-.cl-quote { flex: 1; min-width: 0; quotes: "“" "”"; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: keep-all; overflow-wrap: anywhere; }
-.cl-from .cl-cite { height: 18px; padding: 0 5px; font-size: 11px; white-space: nowrap; }
+.cg h4 { margin: 0; display: flex; align-items: baseline; gap: 6px; font-size: 12px; line-height: 16px; font-weight: var(--fw-name); color: var(--text-2); cursor: default; }
+.cg h4::before { content: ""; display: inline-block; flex: none; width: 8px; height: 8px; border-radius: 2px; background: var(--line-strong); transform: translateY(-.5px); }
+.cg.t-status h4::before { background: var(--accent); } .cg.t-change h4::before { background: var(--info); }
+.cg.t-defect h4::before, .cg.t-unknown h4::before { background: var(--warn); } .cg.t-withdrawn h4::before { background: var(--change); }
+.cg.t-decision h4::before, .cg.t-rule h4::before { background: var(--text-2); } .cg.t-plan h4::before { background: var(--plan); } .cg.t-how h4::before { background: var(--line-strong); }
+.cg h4 small { font-weight: var(--fw-meta); color: var(--text-4); font-variant-numeric: tabular-nums; }
+.cg .claims { margin-top: 6px; gap: 10px; }
+.cg .claim { flex-direction: column; align-items: stretch; gap: 3px; padding-left: 12px; border-left: 2px solid var(--hair-2); }
+.cg.t-status .claim { border-left-color: var(--accent-line); } .cg.t-change .claim { border-left-color: var(--info-line); }
+.cg.t-defect .claim, .cg.t-unknown .claim { border-left-color: #fdd2cc; } .cg.t-withdrawn .claim { border-left-color: var(--change-line); }
+.cg.t-decision .claim, .cg.t-rule .claim { border-left-color: var(--line-strong); } .cg.t-plan .claim { border-left-color: var(--line); }
+.cl-line { min-width: 0; word-break: keep-all; overflow-wrap: anywhere; }
+.cl-tag { display: inline-block; margin-right: 6px; padding: 0 5px; border-radius: 4px; background: var(--chip); font-size: 11px; line-height: 16px; font-weight: var(--fw-name); color: var(--text-2); vertical-align: 1px; }
+.cl-before { color: var(--text-4); text-decoration-color: var(--text-4); }
+.cl-arrow { color: var(--text-4); }
+.cl-was { display: block; min-width: 0; font-size: 12px; line-height: 17px; color: var(--text-4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cl-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; min-width: 0; font-size: 11.5px; line-height: 16px; color: var(--text-4); }
+.cl-when { font-weight: var(--fw-meta); color: var(--text-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cl-meta .cl-about { flex: 1 1 0; min-width: 60px; max-width: 100%; color: var(--text-4); font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ev, .cl-where, .where-chips .wh { flex: none; display: inline-block; padding: 0 5px; border: 1px solid transparent; border-radius: 4px; font-size: 11px; line-height: 16px; font-weight: var(--fw-meta); white-space: nowrap; }
+.ev { font-weight: var(--fw-name); }
+.ev-report { background: var(--change-soft); color: var(--change-text); }
+.ev-file { background: var(--ok-soft); color: var(--ok-text); }
+.ev-run { background: var(--ok-soft); color: var(--ok-text); border-color: var(--ok); font-weight: var(--fw-title); }
+.ev-guess { background: var(--chip); color: var(--text-3); }
+.ev-unknown { background: var(--warn-soft); color: var(--warn-text); }
+.cl-where, .where-chips .wh { max-width: 100%; overflow: hidden; text-overflow: ellipsis; background: var(--code-soft); color: var(--code-text); }
+.cl-where { flex: 0 1 auto; min-width: 0; max-width: 200px; }
+/* The citation: the line's number in the pane, a 16px chip; pointing at it or focusing it shows the passage it rests on (its first
+   160 characters) and the record's name, below the chip and inside the pane; a click opens the passage in its record. */
+.cite { position: relative; display: inline-flex; flex: none; margin-left: auto; }
+.claim .cl-cite { height: 16px; min-width: 16px; padding: 0 4px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); font-size: 10.5px; line-height: 14px; font-weight: var(--fw-meta); font-variant-numeric: tabular-nums; color: var(--text-3); text-align: center; }
+.claim .cl-cite:hover, .claim .cl-cite:focus-visible { border-color: var(--accent-line); background: var(--accent-soft); color: var(--accent); }
+.cite-pop { position: absolute; z-index: 40; top: calc(100% + 6px); left: 0; display: none; width: max-content; max-width: 300px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); box-shadow: var(--shadow-float); font-size: 12px; line-height: 17px; font-weight: var(--fw-body); color: var(--text-2); text-align: left; white-space: normal; word-break: keep-all; overflow-wrap: anywhere; pointer-events: none; }
+.cite:hover .cite-pop, .cite:focus-within .cite-pop { display: block; }
+.cite.pop-r .cite-pop { left: auto; right: 0; }
+.cite.pop-up .cite-pop { top: auto; bottom: calc(100% + 6px); }
+.cite-pop q { display: block; quotes: "“" "”"; color: var(--text-3); }
+.cite-src { display: block; margin-top: 4px; font-weight: var(--fw-meta); }
+/* The full reading keeps the passage's first stretch under each line. */
+.claim .cl-quote { min-width: 0; quotes: "“" "”"; font-size: 12px; line-height: 17px; color: var(--text-3); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: keep-all; overflow-wrap: anywhere; }
+/* The lens head: the record's state word (a dot in the state's colour, its grade and when it was said), else the ladder. */
+.lens-state { margin: 6px 0 0; display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; line-height: 18px; color: var(--text-2); }
+.lens-state .dot { margin-top: 6px; }
+.lens-state.st-running .dot { background: var(--ok); } .lens-state.st-working .dot { background: var(--busy); }
+.lens-state.st-unbuilt .dot { background: var(--text-4); } .lens-state.st-retired .dot { background: var(--warn); }
+.lens-state.st-stopped .dot { background: var(--text-4); box-shadow: 0 0 0 1.5px var(--surface), 0 0 0 2.75px var(--warn); }
+.lens-state.st-unknown .dot { background: none; border: 1px dashed var(--text-4); }
 /* The lens head: the ladder and what it says. */
 .lens-ladder { margin: 6px 0 0; display: flex; align-items: center; gap: 8px; font-size: 12px; line-height: 16px; color: var(--text-3); }
 .lens-ladder .ladder .rung { width: 6px; height: 6px; }
-.cl-revises { display: block; font-size: 11px; font-weight: var(--fw-name); color: var(--text-2); }
 .cl-about { color: var(--text-3); }
 .cl-cite { flex: none; padding: 0 6px; height: 20px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); font-size: 11.5px; color: var(--text-2); }
 .cl-cite:hover { border-color: var(--accent-line); color: var(--accent); }
@@ -1559,7 +1596,7 @@ button:disabled { opacity: .5; cursor: default; }
 .lens-claims .claim[hidden] { display: none; }
 .lens-claims .claims-more { margin-top: 6px; font-size: 12px; }
 /* The selection's lens reads as one column: connections and claims sit a little closer than other sections. */
-.lens-body > .lens-ports, .lens-body > .lens-claims { margin-top: var(--s-3); padding-top: var(--s-3); }
+.lens-body > .lens-ports, .lens-body > .lens-claims, .lens-body > .lens-where { margin-top: var(--s-3); padding-top: var(--s-3); }
 .lens-body > .lens-ports .port { padding-top: 6px; padding-bottom: 6px; }
 
 /* ---------- AF126: the returned results of one request, read wide ----------
@@ -1793,6 +1830,13 @@ button:disabled { opacity: .5; cursor: default; }
 @media (max-width: 720px) { .handover-open { padding: 0 8px; font-size: 12px; } .handover-word { display: none; } }
 .lens-sessions { margin: 10px 0 0; font-size: 12.5px; color: var(--text-2); line-height: 1.5; word-break: keep-all; }
 .lens-sessions-label { display: inline-block; margin-right: 6px; font-weight: var(--fw-name); color: var(--text-3); }
+/* Where the part lives: the files and places the records name, as chips (each whole in its title), then the sessions behind it. */
+.lens-where { margin-top: var(--s-4); padding-top: var(--s-4); border-top: 1px solid var(--hair); }
+.lens-where h3 { margin: 0; font: var(--label); letter-spacing: var(--label-track); color: var(--text-3); }
+.where-chips { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+.lens-where .lens-sessions { margin-top: 8px; }
+/* A row under 함께 says its verb at its right; the way-back mark follows it. */
+.port-kind + .port-came { margin-left: 6px; }
 .sync-linked { margin: 0 0 8px; padding: 0; list-style: none; display: grid; gap: 4px; }
 .sync-linked li { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 .sync-linked .sync-folder { margin: 0; }

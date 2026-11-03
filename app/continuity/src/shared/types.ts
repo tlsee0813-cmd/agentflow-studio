@@ -195,6 +195,23 @@ export const PASTED_TEXT_LIMIT = CONNECTOR_TEXT_LIMIT;
  * differs from the person's own description of the part. Never a status the app verified. */
 export type ClaimKind = 'want' | 'idea' | 'reported' | 'checked' | 'describes' | 'open' | 'differs';
 export const CLAIM_KINDS: readonly ClaimKind[] = ['want', 'idea', 'reported', 'checked', 'describes', 'open', 'differs'];
+/** What a claim is about, as the reading classified it (map-reading.7), apart from its kind (who said it and how): the part's
+ * present state, a change made to it, a rule it must keep (a requirement or a prohibition), a decision taken, a decision
+ * withdrawn (before → the claim's text), a defect, something the record could not confirm, a plan, or how the part is built.
+ * Earlier readings have none: the pane derives one from the kind and the words (claim-topic.ts). */
+export type ClaimTopic = 'status' | 'change' | 'rule' | 'decision' | 'withdrawn' | 'defect' | 'unknown' | 'plan' | 'how';
+export const CLAIM_TOPICS: readonly ClaimTopic[] = ['status', 'change', 'rule', 'decision', 'withdrawn', 'defect', 'unknown', 'plan', 'how'];
+/** How the record's author knew it: the tag on the line ([파일] read now, [실행] run now, [보고]·[대화] someone else's words,
+ * [추정] a guess, [모름] not known); null when the line carries none. The author's own grading, never the app's. */
+export type EvidenceGrade = 'file' | 'run' | 'report' | 'guess' | 'unknown';
+export const EVIDENCE_GRADES: readonly EvidenceGrade[] = ['file', 'run', 'report', 'guess', 'unknown'];
+/** The state a record gives a part in its own words (the report's state column): running, being worked on, not built, stopped,
+ * retired, not known. A record's word, never a status the app verified. */
+export type PartState = 'running' | 'working' | 'unbuilt' | 'stopped' | 'retired' | 'unknown';
+export const PART_STATES: readonly PartState[] = ['running', 'working', 'unbuilt', 'stopped', 'retired', 'unknown'];
+/** Whether a relation is the record's design ([설계]: code or documents say so) or something it saw run ([관찰]). */
+export type RelationMode = 'design' | 'observed';
+export const RELATION_MODES: readonly RelationMode[] = ['design', 'observed'];
 /** A quote of a record as it was sent: a pasted record id or a project source id. map-reading.4: also where it stands, [from, to)
  * in UTF-16 code units of the record's own text (the quote is exactly that slice); earlier readings have no position. */
 export interface ReadingQuote { record: string; quote: string; from?: number; to?: number }
@@ -206,6 +223,16 @@ export interface ReadingClaim {
   about: string | null;
   /** An earlier claim of the same part this one supersedes, because the record says so. */
   replaces: { reading: string; index: number } | null;
+  /** map-reading.7: what the claim is about (null: the reading did not say). */
+  topic?: ClaimTopic | null;
+  /** map-reading.7: the author's own evidence tag on the line (null: none). */
+  evidence?: EvidenceGrade | null;
+  /** map-reading.7: the time the record names for this (as written, e.g. "11-02 23:04Z"), else null. */
+  when?: string | null;
+  /** map-reading.7: the file, path, sha or place the record names for this (as written), else null. */
+  where?: string | null;
+  /** map-reading.7, topic 'withdrawn' only: the decision as it stood before (as written); the text says what stands now. */
+  before?: string | null;
 }
 export interface ReadingPart {
   areaId: string;
@@ -219,8 +246,14 @@ export interface ReadingPart {
    * replaces the current one, whatever version either names. */
   roleReplaces: ReadingQuote | null;
   basis: ReadingQuote[]; claims: ReadingClaim[];
+  /** map-reading.7: the state the record gives the part in its own words, with when it says so and the line that says it. */
+  state?: PartState | null; stateWhen?: string | null; stateQuote?: ReadingQuote | null;
+  /** map-reading.7: the files, folders or units the record names as this part's (as written, up to six). */
+  files?: string[];
 }
-export interface ReadingRelation { relationId: string; from: string; to: string; kind: RelationKind; quote: ReadingQuote }
+export interface ReadingRelation { relationId: string; from: string; to: string; kind: RelationKind; quote: ReadingQuote;
+  /** map-reading.7: what is handed over (as the record names it), how often or when, and whether the record designed or saw it. */
+  payload?: string | null; cadence?: string | null; mode?: RelationMode | null }
 /** What a candidate leaves undecided (map-reading.5): whose statement this is (attribution), whether two parts are one
  * (identity), whether a part is inside a parent (parent), or whether a statement holds (holds). An attribution or holds candidate
  * keeps the undecided statement itself (content, kind, version, exact quote): it is in no part's claims. areaIds name the
@@ -239,7 +272,7 @@ export interface ReadingMaterial { record: string; from: number; to: number; wha
 export const READING_EXCLUSION_RULES = ['settled-and-open', 'duplicate-target', 'duplicate-key', 'material-evidence', 'reference', 'length', 'source-kind', 'condition-form', 'condition-source', 'condition-length', 'contract'] as const;
 export interface ReadingExclusion { path: string; rule: typeof READING_EXCLUSION_RULES[number]; category: string | null; explanation: string; record: string | null; from: number | null; to: number | null }
 export interface MapReading {
-  version: 'map-reading.1' | 'map-reading.2' | 'map-reading.3' | 'map-reading.4' | 'map-reading.5' | 'map-reading.6'; id: string; at: string; model: string; prompt: string;
+  version: 'map-reading.1' | 'map-reading.2' | 'map-reading.3' | 'map-reading.4' | 'map-reading.5' | 'map-reading.6' | 'map-reading.7'; id: string; at: string; model: string; prompt: string;
   /** SHA-256 of the request: the very same request is never sent or applied again. */
   hash: string;
   /** Records read, and which part of each went: characters [from, to) of total. A record's unsent tail is read by a later reading. */
@@ -250,14 +283,15 @@ export interface MapReading {
   requests?: FrozenRequest[]; matches?: StoredRequestMatch[];
   /** map-reading.4 only: each record's digest (textDigest of exactly [from, to) read) is in records; and what was read as material. */
   material?: ReadingMaterial[];
-  /** map-reading.6 only: durable exclusions; previous reading versions keep their exact original shape. */
+  /** map-reading.6–7: durable exclusions; previous reading versions keep their exact original shape. map-reading.7: claims may
+   * carry topic, evidence, when, where and before; parts state, stateWhen, stateQuote and files; relations payload, cadence and mode. */
   exclusions?: ReadingExclusion[];
 }
 /** The person's own correction of a part's description as read (never Area.note, never a return.2 description): it names the
  * reading whose description it corrects. It holds that description only; later claims of later readings still come in. */
 export interface ReadingCorrection { version: 'map-correction.1'; id: string; at: string; areaId: string; text: string; corrects: string | null }
 export type ReadingEntry = MapReading | ReadingCorrection | RequestCorrection | ReplaceCorrection;
-export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3' || e.version === 'map-reading.4' || e.version === 'map-reading.5' || e.version === 'map-reading.6';
+export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3' || e.version === 'map-reading.4' || e.version === 'map-reading.5' || e.version === 'map-reading.6' || e.version === 'map-reading.7';
 export const READINGS_LIMIT = 500;
 export const PASTED_LIMIT = 500;
 export interface ContextBasis {
