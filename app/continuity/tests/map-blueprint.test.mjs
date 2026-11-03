@@ -197,16 +197,16 @@ test('correction feedback identifies all three five-basis parts without copying 
 });
 
 test('feedback limits mirror the validator, use UTF-16 length, and are capped at twelve fixed diagnostics', () => {
-  const value = { ...empty(), summary: '😀'.repeat(100), parts: [{ basis: Array(4).fill(null), claims: Array(4).fill(null), name: '가'.repeat(60), role: '가'.repeat(300) }],
-    relations: Array(12).fill(null), candidates: Array(6).fill(null), gaps: Array(2).fill(null), matches: Array(24).fill(null), material: Array(6).fill(null) };
+  const value = { ...empty(), summary: '😀'.repeat(100), parts: [{ basis: Array(4).fill(null), claims: Array(6).fill(null), name: '가'.repeat(60), role: '가'.repeat(300) }],
+    relations: Array(16).fill(null), candidates: Array(6).fill(null), gaps: Array(2).fill(null), matches: Array(24).fill(null), material: Array(6).fill(null) };
   assert.deepEqual(mapStageIssues(value), []);
   value.summary += '가'; value.parts[0].basis.push(null); value.parts[0].claims.push(null); value.parts[0].name += '가'; value.parts[0].role += '가';
   for (const field of ['relations', 'candidates', 'gaps', 'matches', 'material']) value[field].push(null);
   assert.deepEqual(mapStageIssues(value), [
     { path: 'summary', rule: 'length', expected: 200, actual: 201 },
-    { path: 'parts[0].basis', rule: 'count', expected: 4, actual: 5 }, { path: 'parts[0].claims', rule: 'count', expected: 4, actual: 5 },
+    { path: 'parts[0].basis', rule: 'count', expected: 4, actual: 5 }, { path: 'parts[0].claims', rule: 'count', expected: 6, actual: 7 },
     { path: 'parts[0].name', rule: 'length', expected: 60, actual: 61 }, { path: 'parts[0].role', rule: 'length', expected: 300, actual: 301 },
-    { path: 'relations', rule: 'count', expected: 12, actual: 13 }, { path: 'candidates', rule: 'count', expected: 6, actual: 7 },
+    { path: 'relations', rule: 'count', expected: 16, actual: 17 }, { path: 'candidates', rule: 'count', expected: 6, actual: 7 },
     { path: 'gaps', rule: 'count', expected: 2, actual: 3 }, { path: 'matches', rule: 'count', expected: 24, actual: 25 },
     { path: 'material', rule: 'count', expected: 6, actual: 7 },
   ]);

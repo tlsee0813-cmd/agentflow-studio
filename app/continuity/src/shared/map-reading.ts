@@ -436,7 +436,9 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
     // divided: a part left with no basis quote is refused with its first set-aside quote (the whole reply, as the part is whole).
     if (long && !basis.length) throw long;
     if (seven) need(!fresh || basis.length > 0, `parts[${pi}].basis`, 'basis-required');
-    const claimList = many(p.claims, 4, `parts[${pi}].claims`), claimsAside = aside.length;
+    // map.6 (the first map's divided route) takes six claims per part and sixteen relations: a record's flow list and its
+    // running part's state did not fit four and twelve (the caps pushed out its main receiver's outputs and live defects).
+    const claimList = many(p.claims, ask.schemaVersion === MAP6_SCHEMA ? 6 : 4, `parts[${pi}].claims`), claimsAside = aside.length;
     const own = new Set(parts.get(ref)?.current.map(c => c.key) ?? []);
     const claims = claimList.map((c, j): MapReplyClaim | null => soft(() => {
       form(c, `parts[${pi}].claims[${j}]`, 'about');
@@ -484,7 +486,7 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
   const outParts = built.filter(([, b]) => !news.has(b.ref) || placed.has(b.ref)).map(([, b]) => b);
   const droppedParents = new Set([...news.keys()].filter(ref => !placed.has(ref)));
   const ends = new Set([...parts.keys(), ...placed]);
-  const relations = many(value.relations, 12, 'relations').flatMap((r, i) => soft(() => {
+  const relations = many(value.relations, ask.schemaVersion === MAP6_SCHEMA ? 16 : 12, 'relations').flatMap((r, i) => soft(() => {
     object(r, ['from', 'to', 'kind', 'note', ...evidenceKeys], `relations[${i}]`);
     if (six && !seven && [r.from, r.to].some(ref => typeof ref === 'string' && droppedParents.has(ref))) throw new MapReplyError(`relations[${i}]`, 'contract', 'parent-skipped');
     need(typeof r.from === 'string' && typeof r.to === 'string' && ends.has(r.from) && ends.has(r.to) && r.from !== r.to, `relations[${i}]`, 'ends'); need(RELS.includes(r.kind as RelationKind), `relations[${i}].kind`, 'kind');

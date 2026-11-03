@@ -295,8 +295,9 @@ export function validateRenderedFragment(value, group, ask, blueprint, strict = 
 
 /** validateMapReply's divided option: honoured for studio.map.6 only; map.7 keeps its own soft policy and returns the raw wire. */
 export const DIVIDED_SET_ASIDE = Object.freeze({ setAside: true });
-const LIST_LIMITS = Object.freeze({ relations: 12, candidates: 6, gaps: 2, matches: 24, material: 6 });
-const PART_LIST_LIMIT = 4;
+// .24: six claims per part and sixteen relations (the first map's contract, map-reading.ts); basis stays at four.
+const LIST_LIMITS = Object.freeze({ relations: 16, candidates: 6, gaps: 2, matches: 24, material: 6 });
+const PART_LIST_LIMITS = Object.freeze({ basis: 4, claims: 6 });
 /** The wire with exactly the set-aside items left out: an item index of a top-level list or of a part's basis/claims, and what ran
  * past a count bound (the validator reads the first ones). Nothing else changes: no quote is clipped, no key or ref is renamed,
  * nothing is reordered, no field is rewritten. An exclusion this cannot place refuses the whole wire. */
@@ -309,7 +310,7 @@ function withoutSetAside(raw, exclusions) {
     if ((m = /^(relations|candidates|gaps|matches|material)\[(\d{1,4})\](?:\.|$)/.exec(x.path))) mark(m[1], Number(m[2]));
     else if (count && (m = /^(relations|candidates|gaps|matches|material)$/.exec(x.path))) limit.set(m[1], LIST_LIMITS[m[1]]);
     else if ((m = /^parts\[(\d{1,3})\]\.(basis|claims)\[(\d{1,4})\](?:\.|$)/.exec(x.path))) mark(`parts.${m[1]}.${m[2]}`, Number(m[3]));
-    else if (count && (m = /^parts\[(\d{1,3})\]\.(basis|claims)$/.exec(x.path))) limit.set(`parts.${m[1]}.${m[2]}`, PART_LIST_LIMIT);
+    else if (count && (m = /^parts\[(\d{1,3})\]\.(basis|claims)$/.exec(x.path))) limit.set(`parts.${m[1]}.${m[2]}`, PART_LIST_LIMITS[m[2]]);
     else invalid({ validation: { path: 'reply', rule: 'contract' } });
   }
   const keep = (list, items) => items.filter((_, i) => !drop.get(list)?.has(i) && i < (limit.get(list) ?? Infinity));
@@ -372,11 +373,11 @@ export function mapStageIssues(value, error) {
       count(value.parts, 24, 'parts');
       if (Array.isArray(value.parts)) for (let i = 0; i < Math.min(value.parts.length, 24) && issues.length < 12; i++) {
         const part = value.parts[i]; if (!part || typeof part !== 'object') continue;
-        count(part.basis, 4, `parts[${i}].basis`); count(part.claims, 4, `parts[${i}].claims`);
+        count(part.basis, PART_LIST_LIMITS.basis, `parts[${i}].basis`); count(part.claims, PART_LIST_LIMITS.claims, `parts[${i}].claims`);
         length(part.name, 60, `parts[${i}].name`); length(part.role, 300, `parts[${i}].role`);
         if (Array.isArray(part.claims)) for (let j = 0; j < Math.min(part.claims.length, 8); j++) length(part.claims[j]?.text, CLAIM_TEXT_STRICT, `parts[${i}].claims[${j}].text`);
       }
-      for (const [field, maximum] of [['relations', 12], ['candidates', 6], ['gaps', 2], ['matches', 24], ['material', 6]]) count(value[field], maximum, field);
+      for (const [field, maximum] of Object.entries(LIST_LIMITS)) count(value[field], maximum, field);
     }
   } catch { /* A diagnostic read failure cannot replace the original stage outcome. */ }
   const validation = safeValidation(error);

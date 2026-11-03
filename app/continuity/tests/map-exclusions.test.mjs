@@ -186,9 +186,10 @@ test('divided set-aside: plain map.6 still refuses one bad claim whole; the opti
   assert.deepEqual(got.parts[0].claims.map(c => c.key), ['s1']);
   assert.deepEqual(errors(got), [['parts[0].claims[1].at', 'reference']]);
   // A count overflow is refused whole by plain map.6 (a plain INVALID_RESPONSE, as before) and read in part with the option.
-  const many = structuredClone(f.reply); many.parts[0].claims = ['s1', 's2', 's3', 's4', 's5'].map(k => f.claim(k, f.at[0]));
+  // .24: the first map's contract takes six claims per part; the seventh is over the count.
+  const many = structuredClone(f.reply); many.parts[0].claims = ['s1', 's2', 's3', 's4', 's5', 's6', 's7'].map(k => f.claim(k, f.at[0]));
   assert.throws(() => M.validateMapReply(structuredClone(many), f.ask), e => !(e instanceof M.MapReplyError) && e.message === 'INVALID_RESPONSE');
-  assert.deepEqual(M.validateMapReply(many, f.ask, { setAside: true }).parts[0].claims.length, 4);
+  assert.deepEqual(M.validateMapReply(many, f.ask, { setAside: true }).parts[0].claims.length, 6);
   // map.7 ignores the option (it has its own soft policy); an earlier schema ignores it too.
   const later = fixture(), seven = M.validateMapReply(structuredClone(later.reply), later.inp.ask), opted = M.validateMapReply(structuredClone(later.reply), later.inp.ask, { setAside: true });
   assert.deepEqual(opted, seven); assert.deepEqual(M.readingExclusions(opted), M.readingExclusions(seven));
