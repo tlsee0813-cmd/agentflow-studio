@@ -217,14 +217,14 @@ test('invalid fragment is rejected before completion, so explicit retry can repa
   assert.deepEqual(calls.slice(count).map(c => c.stage), ['render', 'global']);
 });
 
-test('a known incomplete render keeps its successful sibling and resumes only the failed group', async t => {
+test('a known incomplete render keeps its successful sibling and resumes only the failed group (.31: said as MAP_STAGE_INCOMPLETE)', async t => {
   const { make } = await setup(t), ask = askFor(), wire = manyPartsWire(ask), calls = []; let fail = true;
   const pipeline = make({ callProvider: fakeProvider(ask, calls, call => {
     if (fail && call.stage === 'render' && call.input.assignment.id === 'parts-2') {
       fail = false; call.options.onUsage(usage); throw new ApiError('AI_RESPONSE_INCOMPLETE', 502);
     }
   }, wire) });
-  await assert.rejects(pipeline.call(ask), matchesCode('AI_RESPONSE_INCOMPLETE'));
+  await assert.rejects(pipeline.call(ask), error => error.code === 'MAP_STAGE_INCOMPLETE' && error.detail.stage === 'render-2' && error.detail.cap === 8192);
   assert.equal(calls.some(c => c.stage === 'global'), false);
   const count = calls.length;
   validateMapReply(await pipeline.call(ask), ask);
@@ -1419,13 +1419,14 @@ test('.31: a 36-part first map renders in twelve fragments on their own key rang
   assert.equal(pipeline.describe().deepseekMaxCalls, 24, 'OpenAI rendering: twelve extractions, one correction each');
 });
 
-test('.31 host knobs: the plan stage alone takes STUDIO_MAP_PLAN_REASONING and STUDIO_MAP_PLAN_TOKENS (defaults high and 16,384); its reservation counts the configured cap', async t => {
+test('.31 host knobs: the plan takes STUDIO_MAP_PLAN_REASONING and STUDIO_MAP_PLAN_TOKENS (high, 16,384), renders STUDIO_MAP_RENDER_TOKENS and the global stages STUDIO_MAP_GLOBAL_TOKENS (8,192 each); reservations count the configured caps', async t => {
   const ask = askFor(), root = await mkdtemp(join(tmpdir(), 'map-plan-knobs-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   const sent = [], fetchImpl = async (_url, init) => {
     const body = JSON.parse(init.body), isDeepseek = !!body.messages;
     const input = JSON.parse(isDeepseek ? body.messages[1].content : body.input.slice('Return JSON for this input:\n'.length));
     if (!isDeepseek) sent.push({ stage: stageOf(input), effort: body.reasoning?.effort, tokens: body.max_output_tokens, background: body.background === true });
+    else sent.push({ stage: stageOf(input), deepseek: true, tokens: body.max_tokens });
     const value = payloadFor(input, ask, originalWire(ask));
     return new Response(JSON.stringify(isDeepseek
       ? { choices: [{ finish_reason: 'stop', message: { role: 'assistant', content: JSON.stringify(value) } }], usage: { prompt_tokens: 10, completion_tokens: 10 } }
@@ -1435,30 +1436,63 @@ test('.31 host knobs: the plan stage alone takes STUDIO_MAP_PLAN_REASONING and S
   const run = async (name, extra) => {
     sent.length = 0;
     const pipeline = await openFirstMapPipeline({ env: { ...env, ...extra }, dir: join(root, name), fetchImpl });
-    try { validateMapReply(await pipeline.call(ask), ask); return pipeline.describe(); } finally { await pipeline.close(); }
+    try { validateMapReply(await pipeline.call(ask), ask); return { ...pipeline.describe(), identity: pipeline.identity }; } finally { await pipeline.close(); }
   };
   const plain = await run('defaults', {});
-  assert.deepEqual([plain.planReasoning, plain.planTokens], ['high', 16384]);
+  assert.deepEqual([plain.planReasoning, plain.planTokens, plain.renderTokens, plain.globalTokens], ['high', 16384, 8192, 8192]);
   assert.deepEqual(sent.find(x => x.stage === 'plan'), { stage: 'plan', effort: 'high', tokens: 16384, background: true });
-  const tuned = await run('tuned', { STUDIO_MAP_PLAN_REASONING: 'medium', STUDIO_MAP_PLAN_TOKENS: '32768' });
-  assert.deepEqual([tuned.planReasoning, tuned.planTokens], ['medium', 32768]);
+  assert.deepEqual(['render', 'global'].map(stage => sent.find(x => x.stage === stage)), [{ stage: 'render', effort: 'high', tokens: 8192, background: false }, { stage: 'global', effort: 'high', tokens: 8192, background: false }]);
+  const tuned = await run('tuned', { STUDIO_MAP_PLAN_REASONING: 'medium', STUDIO_MAP_PLAN_TOKENS: '32768', STUDIO_MAP_RENDER_TOKENS: '12288', STUDIO_MAP_GLOBAL_TOKENS: '16384' });
+  assert.deepEqual([tuned.planReasoning, tuned.planTokens, tuned.renderTokens, tuned.globalTokens], ['medium', 32768, 12288, 16384]);
+  assert.notEqual(tuned.identity, plain.identity, 'the caps are part of the recipe identity');
   assert.deepEqual(sent.find(x => x.stage === 'plan'), { stage: 'plan', effort: 'medium', tokens: 32768, background: true });
-  assert.ok(sent.filter(x => x.stage !== 'plan').length >= 2 && sent.filter(x => x.stage !== 'plan').every(x => x.effort === 'high' && x.tokens === 8192), 'render and global keep high');
+  assert.ok(sent.filter(x => x.stage === 'render').length >= 1 && sent.filter(x => x.stage === 'render').every(x => x.effort === 'high' && x.tokens === 12288), 'every render request carries the render cap');
+  assert.ok(sent.filter(x => x.stage === 'global').length === 1 && sent.filter(x => x.stage === 'global').every(x => x.effort === 'high' && x.tokens === 16384), 'the global request carries the global cap');
+  assert.ok(sent.filter(x => x.deepseek).length >= 1 && sent.filter(x => x.deepseek).every(x => x.tokens === 4096), 'extraction keeps its own cap');
   const saved = JSON.parse(await readFile(join(root, 'tuned', 'first-map', 'pipeline.json'), 'utf8'));
   const [attempt] = Object.values(saved.body.jobs).at(-1).stages.plan.attempts;
   assert.equal(attempt.maxOutputTokens, 32768);
   assert.equal(attempt.reserved, (attempt.inputBytes * 2 + 32768 * 10) * 1000, 'gpt-6.1-sol, reserved from the configured cap');
+  const stages = Object.values(saved.body.jobs).at(-1).stages, [render] = stages['render-1'].attempts, [global] = stages.global.attempts;
+  assert.deepEqual([render.maxOutputTokens, render.reserved, global.maxOutputTokens, global.reserved], [12288, (render.inputBytes + 12288 * 5) * 1000, 16384, (global.inputBytes + 16384 * 5) * 1000], 'gpt-6.1-terra');
   assert.notEqual(plain.version, undefined);
   // Bounds: one of the transport's efforts; 8,192-65,536 whole tokens. A wrong value opens nothing.
   for (const [extra, code] of [[{ STUDIO_MAP_PLAN_REASONING: 'extreme' }, 'FIRST_MAP_PLAN_REASONING_INVALID'], [{ STUDIO_MAP_PLAN_TOKENS: '8191' }, 'FIRST_MAP_PLAN_TOKENS_INVALID'],
-    [{ STUDIO_MAP_PLAN_TOKENS: '65537' }, 'FIRST_MAP_PLAN_TOKENS_INVALID'], [{ STUDIO_MAP_PLAN_TOKENS: '16384.5' }, 'FIRST_MAP_PLAN_TOKENS_INVALID'], [{ STUDIO_MAP_PLAN_TOKENS: 'many' }, 'FIRST_MAP_PLAN_TOKENS_INVALID']])
+    [{ STUDIO_MAP_PLAN_TOKENS: '65537' }, 'FIRST_MAP_PLAN_TOKENS_INVALID'], [{ STUDIO_MAP_PLAN_TOKENS: '16384.5' }, 'FIRST_MAP_PLAN_TOKENS_INVALID'], [{ STUDIO_MAP_PLAN_TOKENS: 'many' }, 'FIRST_MAP_PLAN_TOKENS_INVALID'],
+    [{ STUDIO_MAP_RENDER_TOKENS: '4095' }, 'FIRST_MAP_RENDER_TOKENS_INVALID'], [{ STUDIO_MAP_RENDER_TOKENS: '32769' }, 'FIRST_MAP_RENDER_TOKENS_INVALID'],
+    [{ STUDIO_MAP_GLOBAL_TOKENS: '4095' }, 'FIRST_MAP_GLOBAL_TOKENS_INVALID'], [{ STUDIO_MAP_GLOBAL_TOKENS: 'lots' }, 'FIRST_MAP_GLOBAL_TOKENS_INVALID']])
     await assert.rejects(openFirstMapPipeline({ env: { ...env, ...extra }, dir: join(root, 'bad'), fetchImpl }), new RegExp(`^Error: ${code}$`));
-  for (const [tokens, effort] of [['8192', 'none'], ['65536', 'max']]) {
-    const pipeline = await openFirstMapPipeline({ env: { ...env, STUDIO_MAP_PLAN_TOKENS: tokens, STUDIO_MAP_PLAN_REASONING: effort }, dir: join(root, `edge-${tokens}`), fetchImpl });
-    assert.deepEqual([pipeline.describe().planTokens, pipeline.describe().planReasoning], [Number(tokens), effort]); await pipeline.close();
+  for (const [tokens, effort, stage] of [['8192', 'none', '4096'], ['65536', 'max', '32768']]) {
+    const pipeline = await openFirstMapPipeline({ env: { ...env, STUDIO_MAP_PLAN_TOKENS: tokens, STUDIO_MAP_PLAN_REASONING: effort, STUDIO_MAP_RENDER_TOKENS: stage, STUDIO_MAP_GLOBAL_TOKENS: stage }, dir: join(root, `edge-${tokens}`), fetchImpl });
+    const d = pipeline.describe();
+    assert.deepEqual([d.planTokens, d.planReasoning, d.renderTokens, d.globalTokens], [Number(tokens), effort, Number(stage), Number(stage)]); await pipeline.close();
   }
   assert.throws(() => createFirstMapPipeline({ store: {}, deepseekKey: 'x', openaiKey: 'y', planReasoning: 'extreme' }), /Invalid map plan reasoning configuration/);
   // Read from the private file like the model names.
-  const read = await loadMapPipelineEnv({ STUDIO_OPENAI_ENV: 'inert-plan-test.env' }, async () => 'STUDIO_MAP_PLAN_REASONING=low\nSTUDIO_MAP_PLAN_TOKENS=24576\nSTUDIO_UNASKED=1');
-  assert.deepEqual(read, { STUDIO_OPENAI_ENV: 'inert-plan-test.env', STUDIO_MAP_PLAN_REASONING: 'low', STUDIO_MAP_PLAN_TOKENS: '24576' });
+  const read = await loadMapPipelineEnv({ STUDIO_OPENAI_ENV: 'inert-plan-test.env' }, async () => 'STUDIO_MAP_PLAN_REASONING=low\nSTUDIO_MAP_PLAN_TOKENS=24576\nSTUDIO_MAP_RENDER_TOKENS=16384\nSTUDIO_MAP_GLOBAL_TOKENS=24576\nSTUDIO_UNASKED=1');
+  assert.deepEqual(read, { STUDIO_OPENAI_ENV: 'inert-plan-test.env', STUDIO_MAP_PLAN_REASONING: 'low', STUDIO_MAP_PLAN_TOKENS: '24576', STUDIO_MAP_RENDER_TOKENS: '16384', STUDIO_MAP_GLOBAL_TOKENS: '24576' });
+});
+
+test('.31: a render or global reply cut at its cap fails the run as MAP_STAGE_INCOMPLETE with the stage and the cap; the stage stays failed and charged', async t => {
+  const { dir, make } = await setup(t), ask = askFor(), calls = []; let cut = 'render';
+  const pipeline = make({ renderModel: 'gpt-6.1-terra', renderTokens: 12000, globalTokens: 20000, callProvider: fakeProvider(ask, calls, call => {
+    if (call.stage === cut) { cut = null; call.options.onUsage(usage); throw new ApiError('AI_RESPONSE_INCOMPLETE', 502); }
+  }) });
+  await assert.rejects(pipeline.call(ask), error => error.code === 'MAP_STAGE_INCOMPLETE' && JSON.stringify(error.detail) === JSON.stringify({ stage: 'render-1', phase: 'render', total: 1, cap: 12000 }));
+  const stagesOf = async () => Object.values(JSON.parse(await readFile(join(dir, 'pipeline.json'), 'utf8')).body.jobs).at(-1).stages;
+  let stages = await stagesOf();
+  assert.equal(stages['render-1'].state, 'failed');
+  assert.deepEqual([stages['render-1'].attempts[0].maxOutputTokens, stages['render-1'].attempts[0].charged], [12000, (10 * 1 + 10 * 5) * 1000], 'charged from the usage, terra');
+  assert.equal(calls.some(c => c.stage === 'global' || c.input.correction), false, 'nothing is retried or corrected');
+  // The next run sends the render again; the global stage is cut at its own cap.
+  cut = 'global';
+  await assert.rejects(pipeline.call(ask), error => error.code === 'MAP_STAGE_INCOMPLETE' && JSON.stringify(error.detail) === JSON.stringify({ stage: 'global', phase: 'global', cap: 20000 }));
+  stages = await stagesOf();
+  assert.deepEqual([stages['render-1'].state, stages.global.state, stages.global.attempts[0].maxOutputTokens], ['complete', 'failed', 20000]);
+  assert.deepEqual(calls.filter(c => c.stage === 'render').map(c => c.options.maxOutputTokens), [12000, 12000]);
+  assert.deepEqual(calls.filter(c => c.stage === 'global').map(c => c.options.maxOutputTokens), [20000]);
+  validateMapReply(await pipeline.call(ask), ask);
+  // The plan stage's cut stays the provider's own code (its cap is STUDIO_MAP_PLAN_TOKENS).
+  const s2 = await setup(t), planCalls = [];
+  await assert.rejects(s2.make({ callProvider: fakeProvider(ask, planCalls, call => { if (call.stage === 'plan') { call.options.onUsage(usage); throw new ApiError('AI_RESPONSE_INCOMPLETE', 502); } }) }).call(ask), matchesCode('AI_RESPONSE_INCOMPLETE'));
 });
