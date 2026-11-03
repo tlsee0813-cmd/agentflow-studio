@@ -4,7 +4,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseScenarioRecord, applyScenario, scenarioUnderstanding, SCENARIO_LIMITS } from '../dist/public/shared/scenario-record.js';
 import { buildLedger, scenarioLedger, scenarioAskWithLedger, SCENARIO_RECORD_ASK } from '../dist/public/shared/report-ask.js';
-import { createProject, addArea, addRelation, pasteRecord, removePastedRecord } from '../dist/public/shared/domain.js';
+import { createProject, addArea, addRelation, pasteRecord, removePastedRecord, recordReadIntoMap } from '../dist/public/shared/domain.js';
+import { buildMapAsk, applyReading, validateMapReply, unreadRecords, scenarioReadRecords, MAP5_SCHEMA } from '../dist/public/shared/map-reading.js';
+import { handoverText } from '../dist/public/shared/handover.js';
+import { savedReading } from '../dist/public/client/digest-source.js';
 import { studioView } from '../dist/public/shared/studio.js';
 import { parseProject } from '../dist/public/shared/validation.js';
 import { serializeProject } from '../dist/public/shared/storage.js';
@@ -217,4 +220,41 @@ test('SCN-7 scenario-reading.1 is kept beside map readings, exactly: it round-tr
   const q2 = applyScenario(p2, r2.id, parseScenarioRecord(r2.text, plainLedger), { id: 'SC_2', at: '2026-11-04T01:01:00.000Z' });
   const u2 = scenarioUnderstanding(parseProject(serializeProject(q2)));
   assert.equal(u2.pathStatus, 'rejected'); assert.deepEqual(u2.visits, []); assert.deepEqual(u2.byArea, {}); assert.equal(u2.statements.length, 4);
+});
+
+test('SCN-8 a record a scenario reading has read is read for the map: the next map ask sends only the status record, then nothing; a later plain record is the only one unread', () => {
+  const { p: base, plainLedger } = fixture();
+  const { project: p1, record: scen } = pasteRecord(base, answer({ version: '지도 읽기 없음' }), null);
+  const p2 = applyScenario(p1, scen.id, parseScenarioRecord(scen.text, plainLedger), { id: 'SC_8', at: '2026-11-04T02:00:00.000Z' });
+  const { project: p3, record: status } = pasteRecord(p2, '현황 기록: 패킷 수집기는 매분 패킷을 모아 판정 엔진에 넘긴다. 판정 엔진은 GO일 때 review 행을 쓴다.', null);
+  // Before any map reading: only the status record is unread and sent; the scenario record is not.
+  assert.deepEqual(unreadRecords(p3, studioView(p3)).map(r => r.id), [status.id]);
+  const inp = buildMapAsk(p3, studioView(p3), [], undefined, MAP5_SCHEMA);
+  assert.equal(inp.problem, null); assert.equal(inp.coverage.fresh, 1);
+  assert.deepEqual([...inp.records.values()].map(r => r.id), [status.id]); assert.equal(inp.ask.records.length, 1);
+  assert.ok(!JSON.stringify(inp.ask).includes('시나리오 기록 v2'));
+  const empty = { summary: '', parts: [], relations: [], candidates: [], gaps: [], matches: [], material: [] };
+  const applied = applyReading(p3, inp, validateMapReply(empty, inp.ask), { id: 'R_scn8', at: '2026-11-04T02:01:00.000Z', model: 'stub', prompt: 'm5-000000000000', hash: 'a'.repeat(64) });
+  const q = applied.project;
+  // One status record read by a map reading, one scenario record read by a scenario reading: nothing unread, nothing new to ask.
+  assert.deepEqual(q.readings.filter(isMapReading).map(r => r.id), ['R_scn8']); assert.deepEqual(q.readings.filter(isScenarioReading).map(r => r.id), ['SC_8']);
+  assert.deepEqual(q.readings.filter(isMapReading).flatMap(r => r.records.map(x => x.id)), [status.id]);
+  assert.deepEqual([...scenarioReadRecords(q)], [scen.id]);
+  assert.deepEqual(unreadRecords(q, studioView(q)), []);
+  const again = buildMapAsk(q, studioView(q), [], undefined, MAP5_SCHEMA);
+  assert.equal(again.problem, 'NOTHING_NEW'); assert.equal(again.coverage.fresh, 0); assert.equal(again.after, 'R_scn8');
+  // Both records stay kept and protected; the scenario reading is never a map reading.
+  assert.ok(recordReadIntoMap(q, scen.id)); assert.ok(recordReadIntoMap(q, status.id));
+  assert.throws(() => removePastedRecord(q, scen.id), /RECORD_READ/); assert.throws(() => removePastedRecord(q, status.id), /RECORD_READ/);
+  assert.ok(!isMapReading(q.readings.find(r => r.id === 'SC_8')));
+  // The record list still lists the scenario record as a pasted record of its own, and the handover counts nothing unread.
+  const listed = savedReading(studioView(q), null, q.pasted);
+  assert.ok(listed.some(s => s.recordId === scen.id && s.kind === 'record')); assert.ok(listed.some(s => s.recordId === status.id));
+  assert.ok(!handoverText(q, { scope: null, code: 'SCN234', at: '2026-11-04T03:00:00.000Z' }).includes('아직 지도에 담기지 않은 기록'));
+  // A third plain record pasted later is the only one unread, and the only one the next map ask sends.
+  const { project: r, record: third } = pasteRecord(q, '현황 기록: 주문 실행기가 review 행을 읽어 주문 한 건을 보냈다.', null);
+  assert.deepEqual(unreadRecords(r, studioView(r)).map(x => x.id), [third.id]);
+  const next = buildMapAsk(r, studioView(r), [], undefined, MAP5_SCHEMA);
+  assert.equal(next.problem, null); assert.equal(next.coverage.fresh, 1); assert.deepEqual([...next.records.values()].map(x => x.id), [third.id]);
+  assert.match(handoverText(r, { scope: null, code: 'SCN234', at: '2026-11-04T03:00:00.000Z' }), /아직 지도에 담기지 않은 기록이 1개/);
 });

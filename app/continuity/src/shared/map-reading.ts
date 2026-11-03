@@ -3,7 +3,7 @@
  * an exact quote of what was sent. applyReading is the only write: it adds parts and relations and keeps one MapReading with the
  * derived understanding. It never renames, moves, archives or re-describes an existing part, never writes Area.note and never
  * touches space.understanding (return.2 and its anchors). What is unclear stays a candidate; nothing asks for approval per part. */
-import { CLAIM_KINDS, CLAIM_TOPICS, EVIDENCE_GRADES, PART_STATES, PART_TYPES, CHANNELS, RELATION_MODES, READINGS_LIMIT, READING_EXCLUSION_RULES, isMapReading, type PastedRecord, type RecordEvidence, type CandidateTarget, type ClaimKind, type ClaimTopic, type EvidenceGrade, type PartState, type PartType, type Channel, type RelationMode, type MapReading, type Project, type ReadingCandidate, type ReadingClaim, type ReadingPart, type ReadingQuote, type ReadingRelation, type ReadingSkip, type ReadingExclusion, type RelationKind, type ReadingStep, type ReadingLoop, type ReadingStateVar, type ReadingPortMap } from './types.js';
+import { CLAIM_KINDS, CLAIM_TOPICS, EVIDENCE_GRADES, PART_STATES, PART_TYPES, CHANNELS, RELATION_MODES, READINGS_LIMIT, READING_EXCLUSION_RULES, isMapReading, isScenarioReading, type PastedRecord, type RecordEvidence, type CandidateTarget, type ClaimKind, type ClaimTopic, type EvidenceGrade, type PartState, type PartType, type Channel, type RelationMode, type MapReading, type Project, type ReadingCandidate, type ReadingClaim, type ReadingPart, type ReadingQuote, type ReadingRelation, type ReadingSkip, type ReadingExclusion, type RelationKind, type ReadingStep, type ReadingLoop, type ReadingStateVar, type ReadingPortMap } from './types.js';
 import { indexSpans, encodeSpans, decodeSpans, resolveRef, resolveRange, resolveEvidenceRange, textDigest, ANCHOR_QUOTE_MAX, SPANS_PER_RECORD, type Span, type SpanWire } from './evidence-span.js';
 import type { StudioView, RecordView } from './studio.js';
 import { addArea, addChildArea, addRelation, addReading } from './domain.js';
@@ -1347,13 +1347,17 @@ export interface MapInput {
   /** prior alias → the stored match it stands for, its item and the person's last correction of it when this was asked. */
   priors?: Map<string, { reading: string; index: number; target: RequestTarget; correction: string | null }>;
 }
+/** Pasted records a scenario reading (scenario-reading.1) has read: the app read them alone, as a path on the map, so they are
+ * read for the map too and never go to a map reading as a status or design record. */
+export function scenarioReadRecords(p: Project): Set<string> { return new Set(p.readings.filter(isScenarioReading).map(r => r.record)); }
 /** Records of a project with text no map reading has read yet, newest first: pasted records as pasted, and the project's own
- * records. A record sent only in part comes back with its unread tail (from the end of what was read). */
+ * records. A record sent only in part comes back with its unread tail (from the end of what was read). A record a scenario
+ * reading has read is not here (scenarioReadRecords). */
 export function unreadRecords(p: Project, view: StudioView): MapRecordSource[] {
-  const readTo = new Map<string, number>();
+  const readTo = new Map<string, number>(), scenario = scenarioReadRecords(p);
   const texts = recordTexts(p);
   for (const r of p.readings) if (isMapReading(r)) for (const x of r.records) { const i = readInterval(r, x, texts); readTo.set(x.id, Math.max(readTo.get(x.id) ?? 0, i.to)); }
-  const pasted: MapRecordSource[] = p.pasted.map(r => normalSource(r, readTo.get(r.id) ?? 0));
+  const pasted: MapRecordSource[] = p.pasted.filter(r => !scenario.has(r.id)).map(r => normalSource(r, readTo.get(r.id) ?? 0));
   const own: MapRecordSource[] = view.records.map(r => ({ id: r.id, kind: r.kind, text: r.text, at: r.at, label: '프로젝트 기록', from: readTo.get(r.id) ?? 0 }));
   return [...pasted, ...own].filter(r => r.from < r.text.length).sort((a, b) => b.at.localeCompare(a.at));
 }
@@ -1388,7 +1392,8 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
     // compared prefix, so an earlier map-only read or a sent tail does not hide an uncompared head forever.
     const texts = recordTexts(p), compared = p.readings.filter(isMapReading).filter(r => r.requests?.some(q => q.id === selectedRequestId)).flatMap(r => r.records.map(x => readInterval(r, x, texts)));
     const prefix = (id: string) => { let end = 0; for (const r of compared.filter(r => r.id === id).sort((a, b) => a.from - b.from)) if (r.from <= end) end = Math.max(end, r.to); return end; };
-    unread = [...p.pasted.map(r => normalSource(r, prefix(r.id))),
+    const scenario = scenarioReadRecords(p);
+    unread = [...p.pasted.filter(r => !scenario.has(r.id)).map(r => normalSource(r, prefix(r.id))),
       ...view.records.map(r => ({ id: r.id, kind: r.kind, text: r.text, at: r.at, label: '프로젝트 기록', from: prefix(r.id) }))].filter(r => r.from < r.text.length).sort((a, b) => b.at.localeCompare(a.at));
   }
   const records = new Map<string, { id: string; from: number; to: number; total: number; text: string }>();

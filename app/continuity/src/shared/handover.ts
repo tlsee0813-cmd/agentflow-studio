@@ -3,7 +3,7 @@
  * carries a marker (af-handover:CODE[:part]) so that a session which starts from it is known as the one that took it over, and the
  * document itself is not taken back in as a new record of work (foldHandover). */
 import { isMapReading, type ClaimKind, type MapReading, type Project, type ReadingQuote } from './types.js';
-import { CLAIM_LABEL, unreadRecords } from './map-reading.js';
+import { CLAIM_LABEL, unreadRecords, scenarioReadRecords } from './map-reading.js';
 import { studioView, type PartView, type StudioView } from './studio.js';
 import { relLabel } from './relation-groups.js';
 import { stamp, RECORD_HEAD, HEAD_FIELD } from './session-import.js';
@@ -265,7 +265,8 @@ function requestLines(p: Project, all: FrozenRequest[], scope: Set<string> | nul
   const asked = [...new Map(all.map(q => [q.id, q])).values()].filter(q => !scope || q.items.some(i => i.partIds.some(x => scope.has(x))))
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   if (!asked.length) return [];
-  const maps = p.readings.filter(isMapReading) as MapReading[], read = new Set(maps.flatMap(r => r.records.map(x => x.id)));
+  // A record a scenario reading has read is never compared with a request: it is not counted as one still to compare.
+  const maps = p.readings.filter(isMapReading) as MapReading[], read = new Set([...maps.flatMap(r => r.records.map(x => x.id)), ...scenarioReadRecords(p)]);
   const out = ['## 맡긴 변경 요청 (요청문을 만든 것, 오래된 것부터)'];
   if (asked.length > REQUESTS_SHOWN) out.push(`(그 앞의 요청문 ${asked.length - REQUESTS_SHOWN}개는 이 문서에 넣지 않았어요.)`);
   for (const q of asked.slice(-REQUESTS_SHOWN)) {
