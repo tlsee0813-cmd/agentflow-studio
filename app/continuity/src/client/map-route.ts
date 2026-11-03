@@ -6,7 +6,7 @@
  *   moved line still touches no box it does not belong to.
  * - quick: while a part is dragged, every line is the plain shape from its ports (no search round other boxes), so lines follow
  *   the hand continuously; the full routing (and a morph from the quick shape) comes when the part is dropped. */
-import { edgePath, rounded, type Box, type Edge, type Point, type Route } from './map-layout.js';
+import { edgePath, rounded, offRims, LANE_CLEAR, type Box, type Edge, type Point, type Route } from './map-layout.js';
 
 export interface Routed extends Route { key: string }
 /** Space between lines that run side by side in one gap, and the least space between ports on one side. */
@@ -24,22 +24,57 @@ function sideOf(a: Box, b: Box, byId: Map<string, Box>): Side {
 const mid = (x: Box) => (x.kind === 'frame' ? x.y + x.head / 2 : x.y + x.h / 2);
 
 /** Ports for every line end: on each side of each box, the lines that leave there, spread along the side (a group's head row)
- * by their other end's height, centred on the side's middle. One line keeps the middle. */
+ * by their other end's height, centred on the side's middle. One line keeps the middle.
+ * Then a line whose two ends face each other is made straight where it can be: spreading the ports of a busy side moves its
+ * line off the middle while the other end keeps its own, and the line would step by a few pixels halfway (on the spine, every
+ * step a stair, and no straight run long enough for its verb). One end's port moves to the other's height when that height
+ * lies on its side, passes no other port of that side (the order that keeps lines from crossing at the part holds) and the
+ * straight run between them crosses no box. The spine's steps go first, then the smallest steps. */
 function assignPorts(boxes: Map<string, Box>, edges: Edge[]): Map<string, { a?: number; b?: number }> {
-  const out = new Map<string, { a?: number; b?: number }>(), at = new Map<string, { key: string; end: 'a' | 'b'; far: number }[]>();
+  type End = { key: string; end: 'a' | 'b'; far: number };
+  const out = new Map<string, { a?: number; b?: number }>(), at = new Map<string, End[]>(), sides = new Map<string, { a: string; b: string; e: Edge }>();
   for (const e of edges) {
     const a = boxes.get(e.from), b = boxes.get(e.to); if (!a || !b) continue;
     const side = sideOf(a, b, boxes); if (side !== 'l' && side !== 'r') continue;
-    const other = side === 'r' ? 'l' : 'r';
-    (at.get(`${a.id}|${side}`) ?? at.set(`${a.id}|${side}`, []).get(`${a.id}|${side}`)!).push({ key: e.key, end: 'a', far: mid(b) });
-    (at.get(`${b.id}|${other}`) ?? at.set(`${b.id}|${other}`, []).get(`${b.id}|${other}`)!).push({ key: e.key, end: 'b', far: mid(a) });
+    const other = side === 'r' ? 'l' : 'r', sa = `${a.id}|${side}`, sb = `${b.id}|${other}`;
+    (at.get(sa) ?? at.set(sa, []).get(sa)!).push({ key: e.key, end: 'a', far: mid(b) });
+    (at.get(sb) ?? at.set(sb, []).get(sb)!).push({ key: e.key, end: 'b', far: mid(a) });
+    sides.set(e.key, { a: sa, b: sb, e });
   }
+  const put = (key: string, end: 'a' | 'b', y: number) => { const port = out.get(key) ?? {}; port[end] = y; out.set(key, port); };
   for (const [k, list] of at) {
-    if (list.length < 2) continue;
     const box = boxes.get(k.split('|')[0]!)!, room = (box.kind === 'frame' ? box.head : box.h) - 14, n = list.length;
+    if (n < 2) { put(list[0]!.key, list[0]!.end, mid(box)); continue; }
     const gap = Math.max(PORT_MIN, Math.min(PORT_GAP, room / (n - 1)));
     list.sort((p, q) => p.far - q.far);
-    list.forEach((p, i) => { const port = out.get(p.key) ?? {}; port[p.end] = mid(box) + (i - (n - 1) / 2) * gap; out.set(p.key, port); });
+    list.forEach((p, i) => put(p.key, p.end, mid(box) + (i - (n - 1) / 2) * gap));
+  }
+  const within = (o: Box, f: Box) => { for (let c = o.container, g = 0; c && g < 64; c = boxes.get(c)?.container ?? '', g++) if (c === f.id) return true; return false; };
+  // The boxes a straight run between a and b must not cross (as edgePath reckons them): every box but the two ends, the groups
+  // around them and the inside of a group end; the heads of the groups around them do count.
+  const straightFree = (a: Box, b: Box, y: number) => {
+    const x1 = Math.min(a.x + a.w, b.x + b.w), x2 = Math.max(a.x, b.x);
+    return [...boxes.values()].every(o => {
+      if (o === a || o === b || (a.kind === 'frame' && within(o, a)) || (b.kind === 'frame' && within(o, b))) return true;
+      const h = o.kind === 'frame' && (within(a, o) || within(b, o)) ? o.head : o.h; if (h <= 0) return true;
+      return !(x2 > o.x - 1 && x1 < o.x + o.w + 1 && y > o.y - 1 && y < o.y + h + 1);
+    });
+  };
+  const onSide = (k: string, y: number) => { const box = boxes.get(k.split('|')[0]!)!, h = box.kind === 'frame' ? box.head : box.h; return y >= box.y + PORT_MIN && y <= box.y + h - PORT_MIN; };
+  // Moving one end from y to to keeps clear of the side's other ports: none between the two heights or within PORT_MIN of to.
+  const canMove = (k: string, key: string, from: number, to: number) => onSide(k, to) && at.get(k)!.every(p => {
+    if (p.key === key) return true;
+    const y = out.get(p.key)![p.end]!; return y < Math.min(from, to) - PORT_MIN + 0.01 || y > Math.max(from, to) + PORT_MIN - 0.01;
+  });
+  const order = [...sides.values()].sort((p, q) => Number(!!q.e.spine) - Number(!!p.e.spine) || Math.abs(out.get(p.e.key)!.a! - out.get(p.e.key)!.b!) - Math.abs(out.get(q.e.key)!.a! - out.get(q.e.key)!.b!));
+  for (const { a: sa, b: sb, e } of order) {
+    const port = out.get(e.key)!, ya = port.a!, yb = port.b!; if (Math.abs(ya - yb) < 0.5) continue;
+    const A = boxes.get(e.from)!, B = boxes.get(e.to)!;
+    // The end on the quieter side moves first (a lone line's port is free to move); else the line's target.
+    const tries: ['a' | 'b', string, number, number][] = [['b', sb, yb, ya], ['a', sa, ya, yb]];
+    if (at.get(sa)!.length < at.get(sb)!.length) tries.reverse();
+    const hit = tries.find(([, k, from, to]) => canMove(k, e.key, from, to) && straightFree(A, B, to));
+    if (hit) port[hit[0]] = hit[3];
   }
   return out;
 }
@@ -61,13 +96,14 @@ function quickRoute(a: Box, b: Box, pa: number | undefined, pb: number | undefin
 type Seg = { key: string; i: number; pts: Point[]; lo: number; hi: number; at: number; fixed: boolean };
 /** Runs of one direction (vertical: same x; horizontal: same y) that lie on one line and overlap or nearly touch, moved apart.
  * A run that starts or ends at a port (the first or last run) keeps its place: moving it would move the port. */
-function nudge(routes: Map<string, Routed>, blocks: (key: string) => Box[], vertical: boolean) {
+function nudge(routes: Map<string, Routed>, blocks: (key: string) => Box[], vertical: boolean, rims: (key: string) => Box[] = () => []) {
   const segs: Seg[] = [];
   for (const r of routes.values()) {
     const p = r.pts; if (p.length < 3) continue;
     for (let i = 0; i + 1 < p.length; i++) {
       const A = p[i]!, B = p[i + 1]!, same = vertical ? Math.abs(A.x - B.x) < 0.01 : Math.abs(A.y - B.y) < 0.01;
-      if (!same) continue;
+      // A run of no length (a repeated point) lies both ways: moving it as either would pull its neighbours off the grid.
+      if (!same || Math.abs(A.x - B.x) + Math.abs(A.y - B.y) < 0.5) continue;
       const u = vertical ? [A.y, B.y] : [A.x, B.x];
       segs.push({ key: r.key, i, pts: p, lo: Math.min(u[0]!, u[1]!), hi: Math.max(u[0]!, u[1]!), at: vertical ? A.x : A.y, fixed: i === 0 || i + 2 === p.length });
     }
@@ -90,20 +126,25 @@ function nudge(routes: Map<string, Routed>, blocks: (key: string) => Box[], vert
     c.forEach((s, i) => {
       if (s.fixed) return;
       const slot = centre + (i - (n - 1) / 2) * TRACK_GAP, tries = [slot]; for (let k = 2; k <= 48; k += 2) tries.push(slot + k, slot - k);
-      // A gap too narrow for the full spacing (a list's columns) still keeps its runs a hairline apart where it can.
-      const at = tries.find(x => fits(s, x, blocks(s.key), vertical) && apart(s, x, TRACK_GAP - 1)) ?? tries.find(x => fits(s, x, blocks(s.key), vertical) && apart(s, x, 3));
+      // A gap too narrow for the full spacing (a list's columns) still keeps its runs a hairline apart where it can. Off the
+      // edges of boxes first; a gap too narrow for that lets a run touch an edge rather than lie on another line.
+      const ok = (x: number, clear: number) => fits(s, x, blocks(s.key), vertical, rims(s.key), clear);
+      const at = tries.find(x => ok(x, LANE_CLEAR) && apart(s, x, TRACK_GAP - 1)) ?? tries.find(x => ok(x, LANE_CLEAR) && apart(s, x, 3))
+        ?? tries.find(x => ok(x, -1) && apart(s, x, TRACK_GAP - 1)) ?? tries.find(x => ok(x, -1) && apart(s, x, 3));
       if (at !== undefined) move(s, at, vertical);
       placed.push(s);
     });
   }
 }
-/** The moved run and the two runs it joins, tested against the boxes the line does not belong to (its own ends may be touched). */
-function fits(s: Seg, at: number, blocks: Box[], vertical: boolean): boolean {
+/** The moved run and the two runs it joins, tested against the boxes the line does not belong to (its own ends may be touched),
+ * kept m from them (LANE_CLEAR, as the routes themselves are: a run moved onto a card's edge reads as that card's border) and
+ * from the edges of the groups around its ends; m < 0 only keeps the run out of the boxes. */
+function fits(s: Seg, at: number, blocks: Box[], vertical: boolean, rims: Box[] = [], m = LANE_CLEAR): boolean {
   const p = s.pts, before = p[s.i - 1]!, after = p[s.i + 2]!;
   const runs: [number, number, number, number][] = vertical
     ? [[at, s.lo, at, s.hi], [before.x, before.y, at, before.y], [at, after.y, after.x, after.y]]
     : [[s.lo, at, s.hi, at], [before.x, before.y, before.x, at], [after.x, at, after.x, after.y]];
-  return runs.every(([x1, y1, x2, y2]) => !blocks.some(o => Math.max(x1, x2) > o.x + 1 && Math.min(x1, x2) < o.x + o.w - 1 && Math.max(y1, y2) > o.y + 1 && Math.min(y1, y2) < o.y + o.h - 1));
+  return runs.every(([x1, y1, x2, y2]) => !blocks.some(o => Math.max(x1, x2) > o.x - m && Math.min(x1, x2) < o.x + o.w + m && Math.max(y1, y2) > o.y - m && Math.min(y1, y2) < o.y + o.h + m) && (m < 0 || offRims(rims, x1, y1, x2, y2, m)));
 }
 function move(s: Seg, at: number, vertical: boolean) {
   const p = s.pts; if (vertical) { p[s.i]!.x = at; p[s.i + 1]!.x = at; } else { p[s.i]!.y = at; p[s.i + 1]!.y = at; }
@@ -138,7 +179,15 @@ export function routeEdges(boxes: Map<string, Box>, edges: Edge[], opts: { quick
     const list = opts.quick ? [] : [...boxes.values()].filter(o => o !== a && o !== b && !(o.kind === 'frame' && (within(a, o) || within(b, o))) && !(a.kind === 'frame' && within(o, a)) && !(b.kind === 'frame' && within(o, b)));
     blocksOf.set(key, list); return list;
   };
-  nudge(out, blocks, true); nudge(out, blocks, false);
+  // The groups around a line's ends are not in its way, but their edges are (edgePath keeps its corridors off them too).
+  const rimsOf = new Map<string, Box[]>();
+  const rims = (key: string) => {
+    const hit = rimsOf.get(key); if (hit) return hit;
+    const e = edges.find(x => x.key === key)!, a = boxes.get(e.from)!, b = boxes.get(e.to)!;
+    const list = opts.quick ? [] : [...boxes.values()].filter(o => o.kind === 'frame' && o !== a && o !== b && (within(a, o) || within(b, o)));
+    rimsOf.set(key, list); return list;
+  };
+  nudge(out, blocks, true, rims); nudge(out, blocks, false, rims);
   for (const r of out.values()) if (r.pts.length >= 3) { r.d = rounded(r.pts); const m = Math.floor((r.pts.length - 1) / 2); r.mx = (r.pts[m]!.x + r.pts[m + 1]!.x) / 2; r.my = (r.pts[m]!.y + r.pts[m + 1]!.y) / 2; }
   return out;
 }

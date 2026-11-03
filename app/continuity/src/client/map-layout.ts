@@ -609,7 +609,11 @@ export function edgePath(a: Box, b: Box, others: Iterable<Box> = [], ports: Port
   type Rect = { x: number; y: number; w: number; h: number };
   const blocks: Rect[] = all.filter(o => o !== a && o !== b && !(o.kind === 'frame' && (within(a, o) || within(b, o))) && !(a.kind === 'frame' && within(o, a)) && !(b.kind === 'frame' && within(o, b)));
   for (const o of all) if (o.kind === 'frame' && o !== a && o !== b && o.head > 0 && (within(a, o) || within(b, o))) blocks.push({ x: o.x, y: o.y, w: o.w, h: o.head });
-  const segFree = (x1: number, y1: number, x2: number, y2: number, m = LANE_CLEAR) => !blocks.some(o => Math.max(x1, x2) > o.x - m && Math.min(x1, x2) < o.x + o.w + m && Math.max(y1, y2) > o.y - m && Math.min(y1, y2) < o.y + o.h + m);
+  // The groups around either end are not in the way (the line reaches its part through them), but their edges are: a run laid
+  // along a group's border reads as that border, so a corridor keeps LANE_CLEAR off it (crossing it is fine). The plain line
+  // (m < 0) is not held to it: going round would read worse than a short run on the edge.
+  const rims: Rect[] = all.filter(o => o.kind === 'frame' && o !== a && o !== b && (within(a, o) || within(b, o)));
+  const segFree = (x1: number, y1: number, x2: number, y2: number, m = LANE_CLEAR) => !blocks.some(o => Math.max(x1, x2) > o.x - m && Math.min(x1, x2) < o.x + o.w + m && Math.max(y1, y2) > o.y - m && Math.min(y1, y2) < o.y + o.h + m) && (m < 0 || offRims(rims, x1, y1, x2, y2, m));
   const free = (pts: Point[]) => pts.every((p, i) => !i || segFree(pts[i - 1]!.x, pts[i - 1]!.y, p.x, p.y, -1));
   const portY = (x: Box, p?: number) => p ?? (x.kind === 'frame' ? x.y + x.head / 2 : x.y + x.h / 2);
   // One end holds the other (a group and a part or group inside it): the line leaves the group under its head and runs down the
@@ -659,24 +663,42 @@ export function edgePath(a: Box, b: Box, others: Iterable<Box> = [], ports: Port
   const room = (x: number, y: number, d: number) => Math.min(28, ...blocks.filter(o => y >= o.y && y <= o.y + o.h && (d > 0 ? o.x >= x : o.x + o.w <= x)).map(o => (d > 0 ? o.x - x : x - (o.x + o.w)))) / 2;
   const xa = x1 + dir * room(x1, acy, dir), xb = x2 - dir * room(x2, bcy, -dir);
   // Past the one-corridor routes, the line goes through the gaps with more turns, or into a part from above or below.
-  const around = (): Route => { const r = gapRoute(a, b, dir, blocks, segFree, ports); return r ? { d: rounded(r.pts), pts: r.pts, mx: r.mid.x, my: r.mid.y, detour: true, clear: true } : plain; };
+  const around = (): Route => { const r = gapRoute(a, b, dir, blocks, segFree, ports, rims); return r ? { d: rounded(r.pts), pts: r.pts, mx: r.mid.x, my: r.mid.y, detour: true, clear: true } : plain; };
   if ((xb - xa) * dir <= 0) return around();
   const lo = Math.min(xa, xb), hi = Math.max(xa, xb);
   const ys = [acy, bcy, ...blocks.filter(o => o.x < hi && lo < o.x + o.w).flatMap(o => [o.y - 6, o.y + o.h + 6])]
     .sort((p, q) => Math.abs(p - acy) + Math.abs(p - bcy) - (Math.abs(q - acy) + Math.abs(q - bcy)));
   for (const yc of ys) {
     if (!segFree(xa, acy, xa, yc) || !segFree(xa, yc, xb, yc) || !segFree(xb, yc, xb, bcy)) continue;
-    const pts = [{ x: x1, y: acy }, { x: xa, y: acy }, { x: xa, y: yc }, { x: xb, y: yc }, { x: xb, y: bcy }, { x: x2, y: bcy }];
+    // The corridor at an end's own height leaves a repeated point there: only the corners are kept, since the router moves
+    // runs by their points and a run of no length would be moved both ways (a slanted line).
+    const pts = corners([{ x: x1, y: acy }, { x: xa, y: acy }, { x: xa, y: yc }, { x: xb, y: yc }, { x: xb, y: bcy }, { x: x2, y: bcy }]);
     return { d: rounded(pts), pts, mx: (xa + xb) / 2, my: yc, detour: true, clear: true };
   }
   return around();
+}
+
+/** Whether a straight run keeps m off the edges of these groups where it runs along them (a run across an edge is fine, and a
+ * run of no length is a point, not a run along anything). */
+export function offRims(rims: { x: number; y: number; w: number; h: number }[], x1: number, y1: number, x2: number, y2: number, m: number): boolean {
+  if (Math.abs(x1 - x2) + Math.abs(y1 - y2) < 0.5) return true;
+  return rims.every(o => {
+    if (Math.abs(x1 - x2) < 0.01) return Math.max(y1, y2) <= o.y || Math.min(y1, y2) >= o.y + o.h || (Math.abs(x1 - o.x) >= m && Math.abs(x1 - o.x - o.w) >= m);
+    if (Math.abs(y1 - y2) < 0.01) return Math.max(x1, x2) <= o.x || Math.min(x1, x2) >= o.x + o.w || (Math.abs(y1 - o.y) >= m && Math.abs(y1 - o.y - o.h) >= m);
+    return true;
+  });
+}
+/** The corners of an orthogonal polyline: repeated points and points on a straight run between two others dropped. */
+function corners(raw: Point[]): Point[] {
+  const p = raw.filter((q, n) => n === 0 || Math.abs(q.x - raw[n - 1]!.x) + Math.abs(q.y - raw[n - 1]!.y) > 0.01);
+  return p.filter((q, n) => n === 0 || n === p.length - 1 || !((Math.abs(p[n - 1]!.x - q.x) < 0.01 && Math.abs(q.x - p[n + 1]!.x) < 0.01) || (Math.abs(p[n - 1]!.y - q.y) < 0.01 && Math.abs(q.y - p[n + 1]!.y) < 0.01)));
 }
 
 /** The last route before a curve that would cross: an orthogonal path through the gaps near both ends (fewest turns, then
  * shortest), kept LANE_CLEAR from every obstacle. It leaves a by the side facing b (or, failing that, its top or bottom) and
  * meets b on the side facing a, or on its top or bottom when that side is shut in; a group end only at its head row, as
  * everywhere. Only boxes near the two ends are searched; null when no such path is found, and the crossing curve stays. */
-function gapRoute(a: Box, b: Box, dir: number, blocks: { x: number; y: number; w: number; h: number }[], segFree: (x1: number, y1: number, x2: number, y2: number) => boolean, given: Ports = {}): { pts: Point[]; mid: Point } | null {
+function gapRoute(a: Box, b: Box, dir: number, blocks: { x: number; y: number; w: number; h: number }[], segFree: (x1: number, y1: number, x2: number, y2: number) => boolean, given: Ports = {}, rims: { x: number; y: number; w: number; h: number }[] = []): { pts: Point[]; mid: Point } | null {
   const LEAD = 12, SIDE = 0, END = 34, END_FAR = 600;
   // A part's top or bottom is a cheap way in only from an end that really lies above or below it; from an end beside it, a
   // line into the top reads as coming from nowhere, so that way costs more than a turn (600 > a 400 turn).
@@ -692,16 +714,17 @@ function gapRoute(a: Box, b: Box, dir: number, blocks: { x: number; y: number; w
   const from = ports(a, dir, b, given.a), to = ports(b, -dir, a, given.b);
   if (!from.length || !to.length) return null;
   const x0 = Math.min(a.x, b.x) - 160, x1 = Math.max(a.x + a.w, b.x + b.w) + 160, y0 = Math.min(a.y, b.y) - 160, y1 = Math.max(a.y + a.h, b.y + b.h) + 160;
-  return searchRoute(from, to, blocks, segFree, { x0, x1, y0, y1 });
+  return searchRoute(from, to, blocks, segFree, { x0, x1, y0, y1 }, false, rims);
 }
 type Port = { at: Point; lead: Point; cost: number };
 /** The search behind gapRoute: an orthogonal path from one of the from ports to one of the to ports through the lanes between
  * the blocks near the bounds (fewest turns, then shortest), every step tested with segFree. null when none is found. clip: no
  * lane past the bounds (a line kept inside its group); gapRoute's lanes are never clipped (a lane just past its search edge
  * may be the free way round). */
-function searchRoute(from: Port[], to: Port[], blocks: { x: number; y: number; w: number; h: number }[], segFree: (x1: number, y1: number, x2: number, y2: number) => boolean, bounds: { x0: number; x1: number; y0: number; y1: number }, clip = false): { pts: Point[]; mid: Point } | null {
+function searchRoute(from: Port[], to: Port[], blocks: { x: number; y: number; w: number; h: number }[], segFree: (x1: number, y1: number, x2: number, y2: number) => boolean, bounds: { x0: number; x1: number; y0: number; y1: number }, clip = false, rims: { x: number; y: number; w: number; h: number }[] = []): { pts: Point[]; mid: Point } | null {
   const { x0, x1, y0, y1 } = bounds;
-  const near = blocks.filter(o => o.x < x1 && x0 < o.x + o.w && o.y < y1 && y0 < o.y + o.h);
+  // The edges of the groups around the ends give lanes too (just inside and outside them), now that a run may not lie on them.
+  const near = [...blocks, ...rims].filter(o => o.x < x1 && x0 < o.x + o.w && o.y < y1 && y0 < o.y + o.h);
   // Lanes: just outside each nearby box, the middle of every gap between box edges, the ports' own lines and the search edge
   // (past the search edge only when not clipped).
   const lanes = (edges: number[], extra: number[], lo: number, hi: number) => {

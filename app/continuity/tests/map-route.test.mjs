@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { buildExample, EXAMPLES } from '../dist/public/shared/studio-examples.js';
 import { studioView } from '../dist/public/shared/studio.js';
-import { layoutScope, summaryEdges, NODE_W, NODE_H } from '../dist/public/client/map-layout.js';
+import { layoutScope, summaryEdges, NODE_W, NODE_H, LANE_CLEAR } from '../dist/public/client/map-layout.js';
 import { routeEdges, TRACK_GAP, PORT_MIN, mixPath } from '../dist/public/client/map-route.js';
 
 const data = JSON.parse(await readFile(new URL('../../../docs/cycles/2026-10-26-visual-experience-58/OSS_CASES.json', import.meta.url), 'utf8'));
@@ -107,4 +107,99 @@ test('ROUTE-5 every OSS case and example, routed together: no line passes under 
   assert.ok(lines > 100, String(lines));
   assert.deepEqual(bad, []);
   assert.deepEqual(shared, []);
+});
+
+// Maps of the shape a first map often has: a spine of five steps, relations that skip two columns, one that runs back, a region
+// with rows linked from outside, two regions a flow crosses between, and a few unlinked parts.
+const P = (key, name, note = '', parent) => ({ key, name, note, ...(parent ? { parent } : {}) });
+const SHAPES = [
+  { id: 'chain', name: '정산 흐름', brief: '시험용 지도', records: [],
+    parts: [P('s1', '접수 창구', '처음.'), P('s2', '심사', '본다.'), P('s3', '승인', '정한다.'), P('s4', '집행', '한다.'), P('s5', '정산', '끝.'),
+      P('mid', '공통 규칙', '규칙 묶음.'), P('r1', '한도 규칙', '', 'mid'), P('r2', '예외 규칙', '', 'mid'), P('r3', '감사 규칙', '', 'mid'),
+      P('hist', '이력'), P('cal', '달력'), P('people', '담당자'), P('fx', '환율')],
+    relations: [['s1', 's2', 'flow', ''], ['s2', 's3', 'flow', ''], ['s3', 's4', 'flow', ''], ['s4', 's5', 'flow', ''], ['s1', 's4', 'flow', ''], ['s2', 's5', 'needs', ''],
+      ['s5', 's1', 'flow', ''], ['s3', 'r1', 'needs', ''], ['s3', 'r2', 'needs', ''], ['s4', 'r3', 'needs', ''], ['s5', 'fx', 'needs', '']] },
+  { id: 'cross', name: '앱과 서버', brief: '시험용 지도', records: [],
+    parts: [P('client', '클라이언트', '앱.'), P('view', '보기', '', 'client'), P('ctrl', '조작', '', 'client'), P('sync', '동기화', '', 'client'),
+      P('server', '서버', '원격.'), P('gate', '관문', '', 'server'), P('logic', '논리', '', 'server'), P('save', '저장', '', 'server'), P('push', '푸시', '', 'server'), P('audit', '감사', '', 'server'),
+      P('ext', '외부 결제'), P('ops', '운영 도구'), P('docs', '문서'), P('test', '시험')],
+    relations: [['ctrl', 'sync', 'flow', ''], ['sync', 'gate', 'flow', ''], ['gate', 'logic', 'flow', ''], ['logic', 'save', 'flow', ''], ['save', 'push', 'flow', ''],
+      ['push', 'view', 'flow', ''], ['logic', 'ext', 'needs', ''], ['ctrl', 'logic', 'needs', ''], ['gate', 'audit', 'flow', ''], ['ops', 'server', 'needs', '']] },
+  { id: 'three', name: '세 영역', brief: '시험용 지도', records: [],
+    parts: [P('front', '프런트엔드', '브라우저 쪽.'), P('page', '페이지', '', 'front'), P('store', '상태 저장', '', 'front'),
+      P('back', '백엔드', '서버 쪽.'), P('ctl', '컨트롤러', '', 'back'), P('svc', '서비스', '', 'back'), P('repo', '저장 계층', '', 'back'),
+      P('data', '데이터', '보관.'), P('pg', 'Postgres', '', 'data'), P('s3', '파일 저장', '', 'data'),
+      P('queue', '작업 큐', '비동기 작업.'), P('worker', '작업자', '큐를 비운다.'), P('readme', '안내 문서'), P('env', '환경 변수')],
+    relations: [['page', 'store', 'flow', ''], ['store', 'ctl', 'flow', ''], ['ctl', 'svc', 'flow', ''], ['svc', 'repo', 'flow', ''], ['repo', 'pg', 'flow', ''],
+      ['svc', 'queue', 'flow', ''], ['queue', 'worker', 'flow', ''], ['worker', 's3', 'flow', ''], ['page', 'svc', 'needs', ''], ['pg', 'page', 'flow', '']] },
+];
+const shaped = () => SHAPES.map(spec => {
+  const p = buildExample(spec), v = studioView(p), key = new Map(v.parts.map(x => [x.id, spec.parts[p.space.areas.findIndex(a => a.id === x.id)].key]));
+  const l = layoutScope(v, null, (_id, d) => d === 0, {}, undefined, undefined, 1440 / 848);
+  const name = id => key.get(id) ?? id, label = e => `${spec.id} ${name(e.from)}→${name(e.to)}`;
+  return { spec, l, routed: routeEdges(l.boxes, l.edges), label };
+});
+const runsOf = pts => pts.slice(1).map((q, i) => ({ a: pts[i], b: q }));
+
+test('ROUTE-6 a line between two level parts is straight even where a busy side spreads its ports: the spine reads as one line, not a stair', () => {
+  // a → b on one row; a's right side also holds a line that skips b (to c) and one that comes back from c, so its ports spread.
+  const a = box('a', 0, 0), b = box('b', 300, 0), c = box('c', 600, 0), low = box('low', 300, 160);
+  const r = routeEdges(boxes([a, b, c, low]), [edge('a', 'b'), edge('a', 'c'), edge('c', 'a')]);
+  const ab = r.get('a|b|flow').pts;
+  assert.equal(ab.length, 2, `straight: ${JSON.stringify(ab)}`);
+  assert.equal(ab[0].y, ab[1].y);
+  // The ports on a's right side stay apart (the moved end is b's, whose side holds this one line).
+  const ys = ['a|b|flow', 'a|c|flow'].map(k => start(r.get(k)).y).concat(end(r.get('c|a|flow')).y);
+  assert.equal(new Set(ys).size, 3, `three ports: ${ys}`);
+  for (let i = 0; i < ys.length; i++) for (let j = i + 1; j < ys.length; j++) assert.ok(Math.abs(ys[i] - ys[j]) >= PORT_MIN - 0.01);
+  // A port never moves off its side: a line whose level lies outside the other side stays bent.
+  const tall = box('t', 300, -200, NODE_W, NODE_H), r2 = routeEdges(boxes([a, tall]), [edge('a', 't')]).get('a|t|flow');
+  assert.equal(r2.pts.length, 4);
+  // On first maps: every spine step between two level parts is one straight run.
+  let n = 0;
+  for (const { l, routed, label } of shaped()) for (const e of l.edges.filter(e => e.spine)) {
+    const A = l.boxes.get(e.from), B = l.boxes.get(e.to), pts = routed.get(e.key).pts;
+    if (A.kind !== 'node' || B.kind !== 'node' || Math.abs(A.y + A.h / 2 - (B.y + B.h / 2)) > 1) continue;
+    assert.equal(pts.length, 2, `${label(e)} ${JSON.stringify(pts)}`); n++;
+  }
+  assert.ok(n >= 4, String(n));
+});
+
+test('ROUTE-7 every routed line is orthogonal with no repeated points: a run of no length is never nudged into a slanted line', () => {
+  const views = [...data.cases.map(c => [c.spec.id, studioView(buildExample(c.spec))]), ...EXAMPLES.map(e => [e.id, studioView(buildExample(e))])];
+  const bad = [];
+  const check = (name, routed) => { for (const r of routed.values()) for (const { a, b } of runsOf(r.pts)) {
+    const dx = Math.abs(a.x - b.x), dy = Math.abs(a.y - b.y);
+    if ((dx > 0.01 && dy > 0.01) || dx + dy < 0.5) { bad.push(`${name} ${r.key} ${JSON.stringify(r.pts)}`); break; }
+  } };
+  for (const [name, v] of views) for (const open of [(_id, d) => d === 0, () => false]) {
+    const l = layoutScope(v, null, open, {}, undefined, undefined, 1440 / 848);
+    check(name, routeEdges(l.boxes, l.edges));
+  }
+  for (const { spec, routed } of shaped()) check(spec.id, routed);
+  assert.deepEqual(bad, []);
+});
+
+test('ROUTE-8 no run lies along the edge of a box it does not belong to, nor along the border of a region around its ends', () => {
+  const bad = [];
+  for (const { l, routed, label } of shaped()) {
+    const all = [...l.boxes.values()], byId = l.boxes;
+    const within = (o, f) => { for (let c = o.container, g = 0; c && g < 64; c = byId.get(c)?.container ?? '', g++) if (c === f.id) return true; return false; };
+    for (const e of l.edges) {
+      const a = byId.get(e.from), b = byId.get(e.to), runs = runsOf(routed.get(e.key).pts);
+      const others = all.filter(o => o !== a && o !== b && !(o.kind === 'frame' && (within(a, o) || within(b, o))) && !(a.kind === 'frame' && within(o, a)) && !(b.kind === 'frame' && within(o, b)));
+      const rims = all.filter(o => o.kind === 'frame' && o !== a && o !== b && (within(a, o) || within(b, o)));
+      for (const { a: p, b: q } of runs) {
+        const x0 = Math.min(p.x, q.x), x1 = Math.max(p.x, q.x), y0 = Math.min(p.y, q.y), y1 = Math.max(p.y, q.y), m = LANE_CLEAR - 0.5;
+        const near = others.find(o => x1 > o.x - m && x0 < o.x + o.w + m && y1 > o.y - m && y0 < o.y + o.h + m);
+        if (near) bad.push(`${label(e)} along ${near.id}`);
+        const horiz = y1 - y0 < 0.01;
+        const rim = rims.find(o => horiz
+          ? Math.min(x1, o.x + o.w) - Math.max(x0, o.x) > 10 && (Math.abs(p.y - o.y) < m || Math.abs(p.y - o.y - o.h) < m)
+          : Math.min(y1, o.y + o.h) - Math.max(y0, o.y) > 10 && (Math.abs(p.x - o.x) < m || Math.abs(p.x - o.x - o.w) < m));
+        if (rim) bad.push(`${label(e)} on the border of ${rim.id}`);
+      }
+    }
+  }
+  assert.deepEqual(bad, []);
 });
