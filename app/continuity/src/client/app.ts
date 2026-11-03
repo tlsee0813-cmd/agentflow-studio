@@ -2625,7 +2625,9 @@ function claimItem(part: string, c: CurrentClaim, topic: ClaimTopic, history: Pa
   // A correction names the claim it replaces: its old words struck through, when that reading is still at hand.
   const was = c.replaces ? history.find(x => x.reading === c.replaces!.reading)?.claims[c.replaces.index]?.text ?? null : null;
   const before = topic === 'withdrawn' && c.before ? c.before : null;
-  const when = claimWhen(c), ev = claimEvidence(c), about = c.about && c.about !== when ? c.about : null;
+  // The version line is read only for what the time and the place do not already say ("618df374, 10-31 16:03:59Z" beside both is noise).
+  const when = claimWhen(c), ev = claimEvidence(c), shown = new Set([when, c.where].filter(Boolean));
+  const about = c.about && !c.about.split(/s*[,·]s*/).every(piece => shown.has(piece)) ? c.about : null;
   const cite: HTMLElement = h('span', { class: 'cite', onmouseenter: () => placeCite(cite), onfocusin: () => placeCite(cite) },
     h('button', { type: 'button', class: 'cl-cite', 'data-claim-focus': JSON.stringify([part, c.reading, c.index, c.record, c.from ?? null, c.to ?? null]), 'aria-label': `근거 ${n} · 원문에서 보기`, title: `원문에서 보기 · “${c.quote}”`, onclick: () => showQuote(c.record, c.quote, c.from) }, String(n)),
     h('span', { class: 'cite-pop', role: 'tooltip' }, h('q', {}, popLine(c.quote)), h('span', { class: 'cite-src' }, recordName(c.record))));
