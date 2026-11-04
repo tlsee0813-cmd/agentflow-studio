@@ -62,7 +62,7 @@ test('137-2 the lawful reply is accepted the same way twice; map.6 refusals stay
 });
 
 test('137-3 the standard /map route and a CLI job carry the diagnosis to the client and the failed receipt (no model)', async () => {
-  const fault = corpus(mods).find(x => x.name === '7:summary over 200'), FAKE = fileURLToPath(new URL('./fake-cli102.mjs', import.meta.url));
+  const fault = corpus(mods).find(x => x.name === '7:summary over 360'), FAKE = fileURLToPath(new URL('./fake-cli102.mjs', import.meta.url));
   // /map: the provider's reply refused with its detail.
   const handle0 = createStudioHandler({ env: { DEEPSEEK_API_KEY: 'k-137', STUDIO_REQUESTS_PER_MINUTE: '60' }, fetchImpl: async () => new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(fault.reply) } }] }), { status: 200 }) });
   const r0 = await handle0(new Request('http://127.0.0.1/api/studio/map', { method: 'POST', headers: { 'content-type': 'application/json', 'x-agentflow-request': '1' }, body: JSON.stringify(fault.ask) }));
@@ -76,7 +76,7 @@ test('137-3 the standard /map route and a CLI job carry the diagnosis to the cli
   try {
     // A job carries its whole input (map-input.1), so the same fault is written for a freshly built ask of the same case.
     const K = await import('./condition116-case.mjs'), cp = K.conditionProject(mods), p = parseProject(JSON.stringify(cp.project)), inp = M.buildMapAsk(p, studioView(p), [cp.rq], cp.rq.id, M.MAP7_SCHEMA);
-    const reply = K.replyFor7(inp.ask, inp.records); reply.summary = `SECRET_MARKER_137 ${'x'.repeat(200)}`;
+    const reply = K.replyFor7(inp.ask, inp.records); reply.summary = `SECRET_MARKER_137 ${'x'.repeat(360)}`;
     writeFileSync(join(ctl, 'reply-1.json'), JSON.stringify(reply));
     const wire = J.encodeMapInput(inp), cap = Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toString('base64url'), id = `MJ_${crypto.randomUUID()}`;
     const binding = { entryId: 'E_diag00137-1', projectId: p.id, lifecycle: 1, seq: 1, after: inp.after, schemaVersion: 'studio.map.7', prompt: await map7PromptId(), model: 'fake-model-102', askHash: await J.jobHash(inp.ask), inputHash: await J.jobHash(wire) };

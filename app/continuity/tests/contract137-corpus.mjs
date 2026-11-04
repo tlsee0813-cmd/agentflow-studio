@@ -23,7 +23,7 @@ export function corpus(mods) {
   add7('root array', () => [], ['reply', 'contract', 'shape']);
   add7('root missing key', w => { delete w.summary; w.EXTRA_KEY_137 = 'SECRET_MARKER_137'; }, ['reply', 'contract', 'keys']);
   add7('summary number', w => { w.summary = 137; }, ['summary', 'contract', 'shape']);
-  add7('summary over 200', w => { w.summary = `SECRET_MARKER_137 ${'x'.repeat(200)}`; }, ['summary', 'contract', 'text']);
+  add7('summary over 360', w => { w.summary = `SECRET_MARKER_137 ${'x'.repeat(360)}`; }, ['summary', 'contract', 'text']);
   add7('summary secret-like', w => { w.summary = `키 ${SECRETISH}`; }, ['summary', 'contract', 'secret-like']);
   add7('parts object', w => { w.parts = { SECRET_MARKER_137: 1 }; }, ['parts', 'contract', 'shape']);
   add7('parts 25', w => { w.parts = Array.from({ length: 25 }, () => w.parts[1]); }, ['parts', 'contract', 'count']);
@@ -63,7 +63,7 @@ export function corpus(mods) {
   // map.6: the same faults (as far as its shape goes) must refuse exactly as before.
   add6('lawful');
   add6('root missing key', w => { delete w.summary; w.EXTRA_KEY_137 = 'SECRET_MARKER_137'; });
-  add6('summary over 200', w => { w.summary = `SECRET_MARKER_137 ${'x'.repeat(200)}`; });
+  add6('summary over 360', w => { w.summary = `SECRET_MARKER_137 ${'x'.repeat(360)}`; });
   add6('claim kind', w => { w.parts[0].claims[0].kind = 'SECRET_MARKER_137'; });
   add6('existing part named', w => { w.parts[0].name = 'SECRET_MARKER_137'; });
   add6('match stance', w => { w.matches[0].stance = 'SECRET_MARKER_137'; });

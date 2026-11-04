@@ -74,7 +74,8 @@ test('.41 R1 folder stores fold: a 있는 곳 under a part-table store\'s name i
 test('.41 R2 sixteen steps, the tail kept: a part reads its fourteen 4절 rows, steps-cut names the rows no step stands on; map-reading.16 stores sixteen, .15 twelve', () => {
   const f = cli(), steps = stepRows(f, 'ingest 명령');
   assert.deepEqual([steps.length, steps.at(-2).name, steps.at(-1).name], [14, '쓰기', '출력']);
-  assert.deepEqual([M.PART_LIST_MAX.steps, M.PART_LIST_MAX.config], [16, 12]);
+  // .42 (map-reading.17): 24 steps.
+  assert.deepEqual([M.PART_LIST_MAX.steps, M.PART_LIST_MAX.config], [24, 12]);
   const ingest = part(f, 'new:ingest', 'ingest 명령', '| ingest 명령 | 계산', { ...typed(f, 'compute', '| ingest 명령 | 계산'), steps });
   const read = M.validateMapReply(wire([ingest]), f.ask, { setAside: true });
   assert.deepEqual([read.parts[0].steps.length, M.readingExclusions(read).filter(x => x.category === 'step')], [14, []]);
@@ -84,16 +85,16 @@ test('.41 R2 sixteen steps, the tail kept: a part reads its fourteen 4절 rows, 
   assert.deepEqual(stepsCut(f.ask, [{ name: 'ingest 명령', steps: [] }]), { rows: 0, missing: [] }, 'a part with no step is not named');
   const found = readingDiagnostics({ ask: f.ask, summary: '', parts: [{ ref: 'new:ingest', name: 'ingest 명령', steps: steps.slice(0, 12), claims: [] }], relations: [] }).find(x => x.rule === 'steps-cut');
   assert.deepEqual([found.expected, found.actual, found.names], [14, 12, ['ingest 명령: 13 쓰기', 'ingest 명령: 14 출력']]);
-  // A seventeenth step is past the bound: the list is left out whole (step).
-  const over = structuredClone(ingest); over.steps = [...steps, ...steps.slice(0, 3).map(s => ({ ...s, name: `${s.name} 2` }))];
+  // A 25th step is past the bound: the list is left out whole (step).
+  const over = structuredClone(ingest); over.steps = [...steps, ...steps.slice(0, 11).map(s => ({ ...s, name: `${s.name} 2` }))];
   assert.deepEqual(M.readingExclusions(M.validateMapReply(wire([over]), f.ask, { setAside: true })).filter(x => x.category === 'step').map(x => x.path), ['parts[0].steps']);
   // Stored: map-reading.16 holds fourteen steps; the same entry as map-reading.15 is past its twelve.
   const applied = M.applyReading(f.project, f.input, read, meta('R_cli41_steps', 'a'));
-  assert.equal(applied.reading.version, 'map-reading.16');
+  assert.equal(applied.reading.version, 'map-reading.17');
   assert.deepEqual(validateProject(applied.project), applied.project);
   const old = JSON.parse(S.serializeProject(applied.project)); old.readings.at(-1).version = 'map-reading.15';
   assert.throws(() => validateProject(old), undefined, 'a map-reading.15 entry holds twelve steps');
-  const twelve = JSON.parse(S.serializeProject(applied.project)), r = twelve.readings.at(-1); r.version = 'map-reading.15'; r.parts[0].steps = r.parts[0].steps.slice(0, 12);
+  const twelve = JSON.parse(S.serializeProject(applied.project)), r = twelve.readings.at(-1); r.version = 'map-reading.15'; r.parts[0].steps = r.parts[0].steps.slice(0, 12).map(({ when, ...s }) => s);
   assert.deepEqual(validateProject(twelve), twelve, 'a map-reading.15 entry keeps its shape');
 });
 
@@ -263,10 +264,10 @@ test('.41 KORU (11) a restated claim carrying the only copy of a sha stays; once
 
 test('.41 prompts: recipe .41, the plan\'s folder and 「전체」 rules, the render\'s caps, bare lists, person devices, page loops, condition states, port direction, kept shas; the summary says what the project is first', async () => {
   const P = await import('../server/map-pipeline.mjs');
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.41', 'later-map-divided.41']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.42', 'later-map-divided.42']);
   for (const rule of ['「있는 곳」이 부분 표 저장소 행의 이름으로 시작하면(「inbox 폴더 pos/」', '파일 ref → 폴더 ref 「담김」 선은 쓰지 않는다', '「있는 곳」이 부분 표의 어느 저장소도 이름 대지 않는 폴더'])
     assert.ok(MAP_BLUEPRINT_PROMPT.includes(rule), rule);
-  for (const rule of ['순번 순서로 최대 16개다', '꼬리를 자르지 않는다', '진단 steps-cut', '적힌 그대로 최대 12개', '「종료 코드 0·3·4·5·6」)은 나누지 않고 한 항목으로 쓴다', '「설정 상한 12 밖」',
+  for (const rule of ['순번 순서로 최대 24개다', '꼬리를 자르지 않는다', '진단 steps-cut', '적힌 그대로 최대 12개', '「종료 코드 0·3·4·5·6」)은 나누지 않고 한 항목으로 쓴다', '「설정 상한 12 밖」',
     '{"kind":"person","text":"그 누가 정했나 칸 그대로(80자 이내)","at":"그 규칙 행"}', '「next_cursor면 다음 페이지」', "「line['attempt']」", '부분 표 저장소 이름으로 시작하는 산출물 행(「inbox 폴더 pos/」)도 그 저장소에 접힌 행이다',
     '그 안 이름을 fields에 함께 쓰지 않는다', '판본 낱말(sha)을 담은 주장은 그 판본을 다른 주장·config·files·fileRoles·role의 about이 담지 않으면'])
     assert.ok(P.RENDER_RULES.includes(rule), rule);

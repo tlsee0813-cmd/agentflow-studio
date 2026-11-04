@@ -203,13 +203,14 @@ test('correction feedback identifies all three five-basis parts without copying 
 });
 
 test('feedback limits mirror the validator, use UTF-16 length, and are capped at twelve fixed diagnostics', () => {
-  const value = { ...empty(), summary: '😀'.repeat(100), parts: [{ basis: Array(4).fill(null), claims: Array(20).fill(null), name: '가'.repeat(60), role: '가'.repeat(300) }],
+  // .42: a summary of 360 (map-reading.17).
+  const value = { ...empty(), summary: '😀'.repeat(180), parts: [{ basis: Array(4).fill(null), claims: Array(20).fill(null), name: '가'.repeat(60), role: '가'.repeat(300) }],
     relations: Array(48).fill(null), candidates: Array(6).fill(null), gaps: Array(2).fill(null), matches: Array(24).fill(null), material: Array(6).fill(null) };
   assert.deepEqual(mapStageIssues(value), []);
   value.summary += '가'; value.parts[0].basis.push(null); value.parts[0].claims.push(null); value.parts[0].name += '가'; value.parts[0].role += '가';
   for (const field of ['relations', 'candidates', 'gaps', 'matches', 'material']) value[field].push(null);
   assert.deepEqual(mapStageIssues(value), [
-    { path: 'summary', rule: 'length', expected: 200, actual: 201 },
+    { path: 'summary', rule: 'length', expected: 360, actual: 361 },
     { path: 'parts[0].basis', rule: 'count', expected: 4, actual: 5 }, { path: 'parts[0].claims', rule: 'count', expected: 20, actual: 21 },
     { path: 'parts[0].name', rule: 'length', expected: 60, actual: 61 }, { path: 'parts[0].role', rule: 'length', expected: 300, actual: 301 },
     { path: 'relations', rule: 'count', expected: 48, actual: 49 }, { path: 'candidates', rule: 'count', expected: 6, actual: 7 },
@@ -652,7 +653,8 @@ test('.29: a first map plans (.31) 36 new parts (a later map 12) in twelve fragm
   refused(() => validateMapBlueprint({ ...many(24), global: items(65) }, f.ask));
   assert.deepEqual(blueprintStageIssues({ ...many(24), global: items(65) }, f.ask).filter(x => x.path === 'global'), [{ path: 'global', rule: 'count', expected: 64, actual: 65 }]);
   // The global stage of a first map reads 48 relations whole; the 49th is set aside past the count (plain map.6 refuses it).
-  const fragments = koruFragments(f), line = koruGlobal(f).relations[1];
+  // .42: on the connection row (the artifact row's lines between the same two parts would merge into one, product-merge).
+  const fragments = koruFragments(f), line = koruGlobal(f).relations[2];
   // .37: 49 lines of their own (the same ends, channel and payload twice would be one line read again, dup-line).
   const wide = { ...koruGlobal(f), relations: Array.from({ length: 49 }, (_, i) => ({ ...structuredClone(line), payload: `review.jsonl 행 ${i + 1}` })) };
   const read = combineRenderedReading(fragments, { ...wide, relations: wide.relations.slice(0, 48) }, f.ask, koruPlan(f));
@@ -757,10 +759,10 @@ test('.30: a wrong step, loop item, kept state or port-map row is set aside alon
   assert.deepEqual(mapStageIssues(fragments[1]).map(x => [x.path, x.rule, x.category ?? null]), [['parts[0].stateVars[1]', 'contract', 'state-var'], ['parts[0].loop.stop', 'contract', 'loop']]);
   const wrongRows = { ...rowsOnly, portMap: [{ ...rowsOnly.portMap[0], relation: 9 }, { ...rowsOnly.portMap[0], direction: 'up' }, rowsOnly.portMap[0]] };
   assert.deepEqual(mapStageIssues(wrongRows).filter(x => x.path.startsWith('portMap')).map(x => [x.path, x.category]), [['portMap[0]', 'port-map'], ['portMap[1]', 'port-map']]);
-  const overSteps = structuredClone(fragments[1]); // .41 (map-reading.16): sixteen steps and twelve settings.
-  overSteps.parts[0].steps = Array.from({ length: 17 }, (_, i) => ({ name: `s${i}`, at: f.at('| 엔진 | 루프') }));
+  const overSteps = structuredClone(fragments[1]); // .41 (map-reading.16): twelve settings; .42 (map-reading.17): 24 steps.
+  overSteps.parts[0].steps = Array.from({ length: 25 }, (_, i) => ({ name: `s${i}`, at: f.at('| 엔진 | 루프') }));
   overSteps.parts[0].fields = Array(25).fill('f'); overSteps.parts[0].config = Array(13).fill('c');
-  assert.deepEqual(mapStageIssues(overSteps).filter(x => x.rule === 'count').map(x => [x.path, x.expected, x.actual]), [['parts[0].fields', 24, 25], ['parts[0].config', 12, 13], ['parts[0].steps', 16, 17]]);
+  assert.deepEqual(mapStageIssues(overSteps).filter(x => x.rule === 'count').map(x => [x.path, x.expected, x.actual]), [['parts[0].fields', 24, 25], ['parts[0].config', 12, 13], ['parts[0].steps', 24, 25]]);
   assert.deepEqual(mapStageIssues({ ...rowsOnly, portMap: Array(13).fill(rowsOnly.portMap[0]) }).filter(x => x.path === 'portMap'), [{ path: 'portMap', rule: 'count', expected: 12, actual: 13 }]);
 });
 
@@ -1057,7 +1059,7 @@ test('.32: the final wire\'s diagnostics come in fixed shapes for the global sta
   const found = finalDiagnostics(fragments, global, f.ask, plan);
   // .36: and store-dup, store-island after the lines. .37: and the lines the contract set aside (lines-set-aside), after the lines.
   // .38: and anchor-enforce and portmap-missing after anchor-kind. .40: and step-name after portmap-missing.
-  assert.deepEqual(FINAL_DIAGNOSTICS, ['connections', 'plan-relations', 'lines-set-aside', 'store-dup', 'store-island', 'coverage', 'uncited', 'loop-missing', 'plan-claims', 'anchor-kind', 'anchor-enforce', 'portmap-missing', 'step-name', 'steps-cut', 'unbacked', 'withdrawn-count', 'unknown-count']);
+  assert.deepEqual(FINAL_DIAGNOSTICS, ['connections', 'plan-relations', 'lines-set-aside', 'product-lines', 'store-dup', 'store-island', 'coverage', 'uncited', 'loop-missing', 'plan-claims', 'anchor-kind', 'anchor-enforce', 'portmap-missing', 'step-name', 'steps-cut', 'unbacked', 'withdrawn-count', 'unknown-count']);
   assert.ok(found.length >= 1 && found.length <= 16);
   for (const x of found) {
     assert.deepEqual(Object.keys(x), ['path', 'rule', 'expected', 'actual', 'names']);
@@ -1121,7 +1123,7 @@ test('.33: a wrong scope, place, device or gate is set aside alone on the combin
   M.attachExclusions(plain, exclusions, f.ask);
   const applied = M.applyReading(f.project, f.input, plain, meta30('R_koru33'));
   const engineId = applied.reading.parts[3].areaId, u = M.partUnderstanding(applied.project, engineId);
-  assert.deepEqual([applied.reading.version, applied.reading.exclusions.map(x => x.path)], ['map-reading.16', exclusions.map(x => x.path)]);
+  assert.deepEqual([applied.reading.version, applied.reading.exclusions.map(x => x.path)], ['map-reading.17', exclusions.map(x => x.path)]);
   assert.deepEqual([u.rules.map(c => [c.scope, c.anchors.length, c.enforcedBy.map(e => e.kind)]), u.withdrawals.map(c => c.withdrawalKind), u.gates.map(c => c.gate)],
     [[['part', 0, ['gate']], [null, 1, ['code']]], ['design'], ['run']]);
   assert.deepEqual(validateProject(applied.project), applied.project);
@@ -1676,7 +1678,7 @@ test('.36 conditions: a part\'s own 「조건·거부·분기」 rows stand outs
   assert.equal(M.setAside(plain).length, 0);
   M.attachExclusions(plain, exclusions, f.ask);
   const applied = M.applyReading(f.project, f.input, plain, { id: 'R_web36c', at: '2026-11-04T03:00:00.000Z', model: 'stub', prompt: 'm6-000000000036', hash: '7'.repeat(64) });
-  assert.equal(applied.reading.version, 'map-reading.16');
+  assert.equal(applied.reading.version, 'map-reading.17');
   assert.deepEqual(applied.reading.parts.map(p => p.conditions.length), [2, 1]);
   assert.equal(WEB36_DESIGN.slice(applied.reading.parts[1].conditions[0].quote.from, applied.reading.parts[1].conditions[0].quote.to), applied.reading.parts[1].conditions[0].quote.quote);
   assert.deepEqual(validateProject(applied.project), applied.project);
@@ -1828,7 +1830,7 @@ test('.37 program loop: a part with no loop whose cadence setting stands in its 
   M.attachExclusions(read, exclusions, k.ask);
   const applied = M.applyReading(k.project, k.input, read, meta37('R_loop37', '1'));
   const stored = ref => applied.reading.parts.find(p => p.areaId === applied.created[kPlan.parts.findIndex(x => x.ref === ref)]).loop;
-  assert.equal(applied.reading.version, 'map-reading.16');
+  assert.equal(applied.reading.version, 'map-reading.17');
   assert.deepEqual([stored('new:engine').unit, stored('new:engine').program, stored('new:card').program], ['j1_cadence 60 s', true, false]);
   assert.deepEqual(validateProject(applied.project), applied.project);
   // The web app (webapp-design-v1 §3, §5): the collector's own unit stays and takes its QUOTA_REACHED row as its stop; the worker's
@@ -1924,7 +1926,7 @@ test('.37 cadence and duplicate lines: a line on a connection row that says when
   const global = { ...empty(), summary: '', relations: [
     // webapp-status-v3 §4 「5 s 블록 읽기, 10개씩」: the .36 map left it null (the worker's loop unit said it too).
     webLine(f, 'new:events_queue', 'new:worker', '| events 큐 | 작업자', { payload: 'order.paid·shipment.updated(XREADGROUP workers)', mode: 'design' }),
-    webLine(f, 'new:webhook', 'new:events_queue', '| 결제 웹훅 수신기 | events 큐', { payload: 'order.paid 메시지(XADD)', cadence: '가'.repeat(41), mode: 'observed' }),
+    webLine(f, 'new:webhook', 'new:events_queue', '| 결제 웹훅 수신기 | events 큐', { payload: 'order.paid 메시지(XADD)', cadence: '가'.repeat(81), mode: 'observed' }),
     webLine(f, 'new:webhook', 'new:events_queue', '| 결제 웹훅 수신기 | events 큐', { payload: 'order.paid 메시지(XADD)', cadence: '결제 때', mode: 'observed' }),
     webLine(f, 'new:carrier', 'new:collector', '| 택배사 API | 택배 추적 수집기', { payload: '송장별 추적 단계', cadence: '10분마다', mode: 'observed' })] };
   const { wire, exclusions } = combineRenderedReading(fragments, global, f.ask, plan);
@@ -2095,7 +2097,7 @@ test('.38 io exclusions carry their value: stored exactly in map-reading.13 (onl
   const read = M.validateMapReply(wire, f.ask);
   M.attachExclusions(read, exclusions, f.ask);
   const applied = M.applyReading(f.project, f.input, read, meta37('R_value38', '8'));
-  assert.equal(applied.reading.version, 'map-reading.16');
+  assert.equal(applied.reading.version, 'map-reading.17');
   const stored = applied.reading.exclusions.find(x => x.path === 'parts[3].inputs[0]');
   assert.deepEqual([stored.value, stored.record !== null, Object.keys(stored).length], ['감독자 보고', true, 8]);
   assert.deepEqual(validateProject(applied.project), applied.project);
@@ -2275,7 +2277,7 @@ test('.39 program steps (R4): a part with no 4절 row and no step whose 3절 안
   assert.deepEqual(M.validateMapReply(own, k.f.ask).parts.find(p => p.ref === 'new:sheet').steps.map(s => [s.name, s.program]), [['race_rows', undefined]]);
   // Stored: every step says program; the reading reads back exactly.
   const applied = M.applyReading(k.f.project, k.f.input, read, meta39('R_steps39', '1'));
-  assert.equal(applied.reading.version, 'map-reading.16');
+  assert.equal(applied.reading.version, 'map-reading.17');
   assert.deepEqual([createdOf(applied, k.parts, 'new:sheet').steps.map(s => s.program), createdOf(applied, k.parts, 'new:engine').steps.map(s => s.program)], [[true, true, true, true], [false, false]]);
   assert.deepEqual(validateProject(applied.project), applied.project);
 });
@@ -2460,21 +2462,26 @@ test('.40 program code device (web R1): a rule with no code device whose place s
   // Stored: every device says program; the reading reads back exactly; a device without program, a program person or a program code
   // without its row is refused; a .14 entry keeps its shape.
   const applied = M.applyReading(k.f.project, k.f.input, read, meta40('R_code40', '1'));
-  assert.equal(applied.reading.version, 'map-reading.16');
+  assert.equal(applied.reading.version, 'map-reading.17');
   const stored = applied.reading.parts.find(p => p.areaId === applied.created[0]).claims[0];
   assert.deepEqual(stored.enforcedBy.map(e => [e.kind, e.text, e.program, e.quote?.quote.startsWith('| 주문 API | action')]), [['code', '403 ROLE_REQUIRED', true, true]]);
   assert.deepEqual(validateProject(applied.project), applied.project);
   const raw = JSON.stringify(applied.project), claimOf = p => p.readings.at(-1).parts.find(x => x.claims.length).claims[0];
-  for (const mutate of [c => { delete c.enforcedBy[0].program; }, c => { c.enforcedBy[0].program = 'yes'; }, c => { c.enforcedBy[0].kind = 'gate'; }, c => { c.enforcedBy[0].kind = 'unknown'; c.enforcedBy[0].quote = null; }]) {
+  for (const mutate of [c => { delete c.enforcedBy[0].program; }, c => { c.enforcedBy[0].program = 'yes'; }, c => { c.enforcedBy[0].kind = 'gate'; }, c => { c.enforcedBy[0].kind = 'unknown'; }]) {
     const bad = JSON.parse(raw); mutate(claimOf(bad));
     assert.throws(() => validateProject(bad), undefined, String(mutate));
   }
+  // map-reading.17 (pipeline .42): a program unknown with no passage stands (a rule whose decider was set aside); a .16 entry holds none.
+  const unknown = JSON.parse(raw); Object.assign(claimOf(unknown).enforcedBy[0], { kind: 'unknown', text: '장치 미상', quote: null });
+  assert.deepEqual(validateProject(unknown), unknown);
+  unknown.readings.at(-1).version = 'map-reading.16'; for (const p of unknown.readings.at(-1).parts) for (const s of p.steps) delete s.when;
+  assert.throws(() => validateProject(unknown), undefined, 'a map-reading.16 program device has its row');
   // map-reading.16 (pipeline .41): a program device may be a person on its row (a hand-kept rule); a .15 entry keeps code only.
   const person = JSON.parse(raw); claimOf(person).enforcedBy[0].kind = 'person';
   assert.deepEqual(validateProject(person), person);
   person.readings.at(-1).version = 'map-reading.15';
   assert.throws(() => validateProject(person), undefined, 'a map-reading.15 program device is code');
-  const old = JSON.parse(raw); old.readings.at(-1).version = 'map-reading.14'; delete claimOf(old).enforcedBy[0].program;
+  const old = JSON.parse(raw); old.readings.at(-1).version = 'map-reading.14'; delete claimOf(old).enforcedBy[0].program; for (const p of old.readings.at(-1).parts) for (const s of p.steps) delete s.when;
   assert.deepEqual(validateProject(old), old, 'a map-reading.14 entry keeps its exact shape');
   const keyed = JSON.parse(raw); keyed.readings.at(-1).version = 'map-reading.14';
   assert.throws(() => validateProject(keyed), undefined, 'a .15 key on a .14 reading');
@@ -2539,16 +2546,18 @@ test('.40 program portMap reads names, does and the store\'s rows (KORU R1·R3, 
     line('new:orders', 'new:webhook', '| processed_events 행', 'processed_events 행'), line('new:tracker', 'new:events', '| events 메시지', 'shipment.updated'),
     line('new:orders', 'new:batch', '| orders 행', '전날(KST) paid·refunded 주문'), line('new:fixer', 'new:orders', '| address_suggestions 행', 'address_suggestions 행')];
   const web = combineRenderedReading(webFragments(parts), { ...empty(), summary: '', relations: lines }, w.ask, webPlan(w, parts));
-  assert.deepEqual(web.exclusions, []);
+  // .42: the worker's second artifact line into the same store (orders 행 beside shipments 행) joins the first as a payload list.
+  assert.deepEqual(web.exclusions.map(x => [x.path, x.category]), [['relations[2]', 'product-merge']]);
+  assert.equal(web.wire.relations[1].payload, 'shipments 행 · orders 행');
   const got = M.validateMapReply(web.wire, w.ask);
   assert.deepEqual(got.portMap.map(m => [m.relation, m.direction, m.port, m.step, m.program]), [[0, 'in', 'orders 행', '주문 확인', true], [1, 'out', 'shipments 행', 'shipments 행', true],
-    [4, 'out', 'events 메시지', '바뀐 것만 shipment.updated', true], [5, 'in', 'orders 행', 'orders.cursor', true], [6, 'out', 'address_suggestions 행', 'address_suggestions 행', true]]);
-  // The worker writes no orders row (no row), the webhook's 「event_id 조회」 is the one reader but no input names the row (no port).
+    [3, 'out', 'events 메시지', '바뀐 것만 shipment.updated', true], [4, 'in', 'orders 행', 'orders.cursor', true], [5, 'out', 'address_suggestions 행', 'address_suggestions 행', true]]);
+  // The webhook's 「event_id 조회」 is the one reader but no input names the row (no port).
   const wsides = M.portSides(w.ask, got.parts, got.relations, ref => got.parts.find(p => p.ref === ref)?.name ?? '');
-  assert.deepEqual([2, 3].map(i => wsides.find(s => s.relation === i).hits), [[], [0]]);
-  // The diagnostic tells the three apart; 「원문이 단계를 대지 않음」 only where no step is tied.
+  assert.deepEqual([2].map(i => wsides.find(s => s.relation === i).hits), [[0]]);
+  // The diagnostic tells the kinds apart; 「원문이 단계를 대지 않음」 only where no step is tied.
   const found = finalDiagnostics(webFragments(parts), { ...empty(), summary: '', relations: lines }, w.ask, webPlan(w, parts)).find(x => x.rule === 'portmap-missing');
-  assert.deepEqual(found.names.filter(n => !n.startsWith('모델이 비움')), ['단계 후보 있음 · 모델이 비움: new:orders → new:webhook: processed_events 행 (후보: 중복 검사)', '원문이 단계를 대지 않음: new:worker → new:orders: orders 행']);
+  assert.deepEqual(found.names.filter(n => !n.startsWith('모델이 비움')), ['단계 후보 있음 · 모델이 비움: new:orders → new:webhook: processed_events 행 (후보: 중복 검사)']);
   assert.equal(found.names.filter(n => n.startsWith('모델이 비움 · 프로그램이 채움')).length, 5);
   // The bound: twelve model rows leave room for the program's (PORTMAP_MAX 24 in all).
   assert.deepEqual([M.PART_LIST_MAX.portMap, M.PORTMAP_MAX], [12, 24]);
