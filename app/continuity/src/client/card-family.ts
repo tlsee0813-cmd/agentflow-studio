@@ -18,6 +18,7 @@ import { LOOP_TYPES } from '../shared/map-reading.js';
 import { CADENCE, loopBody } from './card-budget.js';
 import type { GlyphKey } from './card-glyphs.js';
 import { CARD_W } from './map-layout.js';
+import { isContainer, containerBody, wellHeight, type Well } from './container-view.js';
 
 export type CardFamily = PartFamily | 'neutral';
 /** The family's word (the glyph tile's title). */
@@ -54,7 +55,12 @@ export interface CardFacts {
   loop: { unit: string | null; stop: string | null; resume: string | null } | null;
   /** Which loop items the program filled (line-view programLoopItems); each such row carries the 「프로그램」 chip. */
   loopProgram?: { unit: boolean; stop: boolean; resume: boolean };
-  steps: readonly { does: string | null; program?: boolean }[];
+  steps: readonly { name?: string; does: string | null; program?: boolean }[];
+  /** The steps a model-written portMap row ties to a line (always kept in a container's well, 4.3). */
+  portSteps?: readonly string[];
+  /** A container's well (4.5): expanded by the person (every step shown), and how deep it sits among the containers drawn
+   * around it on this map (1: none around it; past 2 the well reads as one nested row). */
+  wellOpen?: boolean; wellDepth?: number;
   conditions: readonly { then: string; else: string | null }[];
   stateVars?: number;
   /** The 파일 지도 rows (a session's 다루는 파일). */
@@ -86,6 +92,9 @@ export interface CardTemplate {
   rows: CardRow[]; contract: CardContract;
   /** The inner line for recorded steps ('단계 7 · 명령별'), with the program's cut steps apart; null without steps to show. */
   innerLine: { text: string; program: number } | null;
+  /** A loop container's well (container-view, 4.3): drawn at the near tier in place of the inner line, which the overview and
+   * middle tiers keep; null for any other card. */
+  well: Well | null;
   signs: boolean;
 }
 
@@ -193,7 +202,11 @@ export function cardTemplate(f: CardFacts): CardTemplate {
   const unit = f.loop?.unit ?? null;
   const innerLine = inner === 'steps' || inner === 'list' || inner === 'both'
     ? { text: `단계 ${recorded}${inner === 'list' ? ' · 기록의 행 순서' : unit ? ` · ${unit}` : ''}`, program } : null;
-  return { family: familyOf(f.type), inner, glyph: f.type ?? 'neutral', kind: kindWord(f.type), rows: kindRows(f), contract: contractOf(f), innerLine, signs: !!f.signs };
+  // A loop container (4.1, 4.3): only a recorded loop with recorded steps; never from the type word, a name or step names alone.
+  const ws = f.steps.map(s => ({ name: s.name ?? '', program: s.program === true }));
+  const well = f.loop && isContainer(ws, f.loop)
+    ? containerBody(ws, f.loop, { conditions: f.conditions, portSteps: f.portSteps ?? [], stateVars: f.stateVars ?? 0, open: !!f.wellOpen, depth: f.wellDepth ?? 1 }) : null;
+  return { family: familyOf(f.type), inner, glyph: f.type ?? 'neutral', kind: kindWord(f.type), rows: kindRows(f), contract: contractOf(f), innerLine, well, signs: !!f.signs };
 }
 
 /* ---------- heights (map design v3 3.8, 5.3, 9.5): as styles.css draws them at the near tier ---------- */
@@ -215,7 +228,8 @@ export function cardHeights(t: CardTemplate, nameLines: number, planned = 0): Ca
   const rows = t.rows.length ? t.rows.length * ROW_H + ROWS_GAP : 0;
   const c = t.contract;
   const contract = c.kind === 'pins' ? PIN_TITLE + Math.max(c.ins.length, c.outs.length) * PIN_H + PIN_GAP + (c.unmapped ? LINE_H16 : 0) : CONTRACT_PAD + c.lines.length * LINE_H16;
-  const inner = t.innerLine ? INNER_H : 0, signs = t.signs ? SIGNS_H : 0;
+  // A container's well is the near tier's content, so its height is the card's (the inner line reads in the same room further out).
+  const inner = t.well ? wellHeight(t.well) : t.innerLine ? INNER_H : 0, signs = t.signs ? SIGNS_H : 0;
   // The 1px border a side is not added: at worst it takes 2px of the bottom padding, which stays inside the card.
   const raw = PAD_Y + head + rows + contract + inner + signs + BOTTOM_H + PAD_Y, total = Math.ceil(raw / GRID) * GRID;
   const top = BORDER / 2 + PAD_Y + head + rows, pins: Record<string, number> = {};

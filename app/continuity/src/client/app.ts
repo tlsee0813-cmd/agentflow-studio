@@ -37,6 +37,7 @@ import { glyphSvg } from './card-glyphs.js';
 import { placeExpansion, actionSections, pushPlace, readOpenState, writeOpenState, groupBody, loopLine, stateVarLine, UNSAID, OPEN_MAP, SHORT_W, type OpenState, type ReadPlace, type ActionStep } from './expansion.js';
 import { detailChain, detailSigns, stepConsumers, unmappedMark, decisionStep, conditionPlacement, conditionLines, conditionOfQuote, stepFace, linkFace, stepPorts, stepCounts, EXIT_BLANK, CONDITION_BLANK, CONDITION_UNPLACED, PROGRAM_STEP_HINT, PROGRAM_PORT_LABEL, PROGRAM_PORT_HINT, type ChainLink, type OutLine, type DecisionStep, type DecisionExit, type PlacedCondition } from './steps-view.js';
 import { labelSpots, polylineHitsRect, portSpots } from './map-labels.js';
+import { isContainer, makeRoom, foldText, nestedText, branchText, stateText as wellStateText, type Well, type WellRow } from './container-view.js';
 import { lineStyle, lineBadge, labelRank, mergeByChannel, multiWord, portFaces, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
 import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensLook, lensClasses, legendItems, legendApply, legendHead, legendMarks, lensKey, readLensRecord, writeLensRecord, type LensId, type LensPart, type LensLine, type LegendItem, type LegendState, type LegendAction, type Sample } from './view-lens.js';
 import { PROGRAM_LABEL, PROGRAM_HINT, isProgram, ruleHasProgram, ruleHasProgramEnforce, programLoopItems, loopSegments, typeChipForms, chipText, edgeFields, contractList, lineFacts, type ChipForm } from './line-view.js';
@@ -824,9 +825,11 @@ const mapAspect = () => Math.max(1, Math.min(3, (window.innerWidth - 48) / Math.
  * and until the next redraw, over the stored places but never written to them. */
 let held: Positions | null = null;
 const heldPositions = (o: Opened): Positions => {
-  const pos = positionsOf(o); if (!held) return pos;
+  const pos = positionsOf(o), ov = wellOverlays(o); if (!held && !ov) return pos;
+  // An open well's held places stand under everything; the moves made for it over the stored places (map design v3 4.5).
   const out: Positions = {};
-  for (const c of new Set([...Object.keys(held), ...Object.keys(pos)])) out[c] = { ...(held[c] ?? {}), ...(pos[c] ?? {}) };
+  for (const c of new Set([...Object.keys(held ?? {}), ...Object.keys(pos), ...Object.keys(ov?.hold ?? {}), ...Object.keys(ov?.push ?? {})]))
+    out[c] = { ...(ov?.hold[c] ?? {}), ...(held?.[c] ?? {}), ...(pos[c] ?? {}), ...(ov?.push[c] ?? {}) };
   return out;
 };
 const relayout = (o: Opened) => { const tpls = new Map<string, CardTemplate>(); lay = layoutScope(o.view, scope, isExpanded(o), heldPositions(o), measureName, planRows ?? undefined, mapAspect(), typedRoom(o, tpls)); lay.edges = grammarEdges(o, lay.edges); cardTpls = tpls; core = { ...lay.bounds }; withTitle(); };
@@ -1150,7 +1153,75 @@ function cardFactsOf(o: Opened, p: PartView, r: PartUnderstanding, said: Map<str
     personRules: sg.rules.filter(x => (x.enforcedBy ?? []).some(e => e.kind === 'person')).length, children: p.childIds.length,
     controlIn: uniq(controlIn), controlOut: uniq(controlOut), dataIn: uniq(dataIn), dataInCadence: uniq(cadence), writers: writers.size, readers: readers.size,
     pins: { in: pm.filter(m => m.direction === 'in').map(m => m.port), out: pm.filter(m => m.direction === 'out').map(m => m.port) }, unmapped,
+    portSteps: [...new Set(pm.map(m => m.step))], wellOpen: wellOpen.has(`${o.key}|${p.id}`), wellDepth: wellDepthOf(o, p.id),
     signs: hasSigns(sg), failureSaid: !fb || !fb.failure };
+}
+/* ---------- loop containers (map design v3 4; container-view.ts) ----------
+ * A container's well opens to every step only when the person asks (its 펼치기, a fold row, a nested row); the view keeps that as a
+ * view record, never as a layout: the places held for it and the moves made for it are overlays, dropped on 접기. */
+const wellOpen = new Set<string>();
+const wells = new Map<string, { hold: Positions; push: Positions }>();
+/** Whether a part's reading makes it a container (a recorded loop and recorded steps; never its name or step names). */
+const isContainerPart = (o: Opened, id: string) => { const r = partOf(o, id)?.reading; return !!r && isContainer(stepsOf(r).map(s => ({ name: s.name, program: s.program === true })), r.loop ?? null); };
+/** How deep a part sits among the containers drawn around it here (1: none; its ancestors below the scope that are containers). */
+function wellDepthOf(o: Opened, id: string): number {
+  let d = 1;
+  for (let c = partOf(o, id)?.parentId ?? null, g = 0; c && c !== scope && g < 64; c = partOf(o, c)?.parentId ?? null, g++) if (isContainerPart(o, c)) d++;
+  return d;
+}
+/** The overlays of the wells open on this map: places held for each, then the moves made for it (4.5). */
+function wellOverlays(o: Opened): { hold: Positions; push: Positions } | null {
+  const mine = [...wells].filter(([k]) => k.startsWith(`${o.key}|`)); if (!mine.length) return null;
+  const hold: Positions = {}, push: Positions = {};
+  for (const [, w] of mine) { for (const [c, m] of Object.entries(w.hold)) hold[c] = { ...(hold[c] ?? {}), ...m }; for (const [c, m] of Object.entries(w.push)) push[c] = { ...(push[c] ?? {}), ...m }; }
+  return { hold, push };
+}
+/** 펼치기 / 접기 of a container's well (4.5): its top-left edge stays; every box of its container chain keeps its place while it
+ * grows; then, level by level up from the card, only the siblings the grown box overlaps (with 24px) move the least way right
+ * or down (container-view makeRoom). 접기 drops both, so every box is back where it was. */
+function toggleWell(id: string) {
+  const o = opened; if (!o) return;
+  const k = `${o.key}|${id}`, keepSel = selected;
+  if (wellOpen.has(k)) { wellOpen.delete(k); wells.delete(k); renderSpace('keep'); if (keepSel) select(keepSel); return; }
+  const hold: Positions = {};
+  for (let c = lay.boxes.get(id)?.container, g = 0; c && g < 64; c = lay.boxes.get(c)?.container, g++) {
+    const here = (hold[c] ??= {});
+    for (const b of lay.boxes.values()) if (b.container === c && b.kind !== 'ghost') here[b.id] = { x: Math.round(b.rel.x), y: Math.round(b.rel.y) };
+  }
+  const entry = { hold, push: {} as Positions }; wells.set(k, entry); wellOpen.add(k);
+  relayout(o);
+  for (let cur: string | undefined = id, g = 0; cur && g < 16; g++) {
+    const b = lay.boxes.get(cur); if (!b) break;
+    const c = b.container, moves = makeRoom(b, [...lay.boxes.values()].filter(x => x.container === c && x.kind !== 'ghost' && x.id !== cur));
+    if (moves.size) {
+      const here = (entry.push[c] ??= {});
+      for (const [sid, m] of moves) { const s = lay.boxes.get(sid)!; here[sid] = { x: Math.round(s.rel.x + m.dx), y: Math.round(s.rel.y + m.dy) }; }
+      relayout(o);
+    }
+    cur = lay.boxes.has(c) ? c : undefined;
+  }
+  renderSpace('keep'); if (keepSel) select(keepSel);
+}
+/** A container's well on its card (4.3): the loop's unit and stop as badges, the open rail beside the steps (a bracket, joined
+ * to nothing), the steps within the budget with their folds, and the state compartment. */
+function wellEl(o: Opened, p: PartView, r: PartUnderstanding, w: Well): HTMLElement {
+  const lp = programLoopItems(r.loop, r.config, conditionsOf(r) ?? []);
+  const why: Record<string, string> = { first: '기록의 첫 행', last: '기록의 마지막 행', stop: '반복의 정지가 부르는 단계', branch: '조건의 갈래가 부르는 단계', port: '포트 대응이 걸린 단계' };
+  const row = (x: WellRow) => {
+    if (x.kind === 'step') return h('li', { class: `w-step${x.keep.length ? ' kept' : ''}`, title: `${x.name}${x.keep.length ? `\n늘 남김 · ${x.keep.map(k => why[k]).join(' · ')}` : ''}\n기록의 행 순서 · 실행 순서 아님` },
+      h('span', { class: 'w-dash', 'aria-hidden': 'true' }, '-'), h('span', { class: 'w-name' }, x.name), x.program ? stepChip() : null);
+    if (x.kind === 'fold') return h('li', { class: 'w-fold' }, h('button', { type: 'button', class: 'w-open', title: `단계 ${x.from + 1}–${x.to + 1} · 접은 요약이며 앞뒤 단계를 잇지 않는다\n누르면 이 반복의 단계를 모두 펼친다 (주변의 겹치는 부분만 비킴, 접으면 그대로)`, onclick: (e: Event) => { e.stopPropagation(); toggleWell(p.id); } }, foldText(x.count)));
+    if (x.kind === 'branches') return h('li', { class: 'w-fold' }, h('span', {}, branchText(x.count)));
+    return h('li', { class: 'w-fold' }, h('button', { type: 'button', class: 'w-open', title: '지도 위 중첩은 두 겹까지 · 누르면 이 반복의 단계를 펼친다', onclick: (e: Event) => { e.stopPropagation(); toggleWell(p.id); } }, nestedText(x.count)));
+  };
+  return h('div', { class: `c-well${w.open ? ' open' : ''}`, role: 'group', 'aria-label': `${p.name} · 반복 · 단계 ${w.steps}` },
+    h('div', { class: 'w-head' },
+      h('span', { class: `w-badge${w.unit ? '' : ' blank'}`, title: w.unit ? `반복 단위 · 기록의 글자 그대로${lp.unit ? ' · 프로그램이 옮긴 값' : ''}` : '반복 단위 · 기록에 없음' }, w.unit ?? '반복 단위 ?', lp.unit ? progChip('반복 단위') : null),
+      h('span', { class: `w-badge stop${w.stop ? '' : ' blank'}`, title: w.stop ? `정지 · 기록의 글자 그대로${lp.stop ? ' · 프로그램이 옮긴 값' : ''}` : '정지 조건 · 기록에 없음 (반복의 정의 빈칸)' }, w.stop ? `정지 · ${w.stop}` : '정지 조건 ?', lp.stop ? progChip('정지') : null),
+      w.open || w.folded ? h('button', { type: 'button', class: 'w-toggle', 'aria-expanded': String(w.open), title: w.open ? '접기 · 펼치기 전 배치 그대로' : `펼치기 · 단계 ${w.steps} 모두 (주변의 겹치는 부분만 비킴)`, onclick: (e: Event) => { e.stopPropagation(); toggleWell(p.id); } }, w.open ? '접기' : '펼치기') : null),
+    h('div', { class: 'w-body' }, h('i', { class: 'w-rail', 'aria-hidden': 'true', title: '반복 범위 · 장식 괄호 (복귀 대상은 기록에 없음)' }),
+      h('ol', { class: 'w-steps', 'aria-label': `단계 ${w.steps} · 기록의 행 순서` }, ...w.rows.map(row))),
+    w.state ? h('div', { class: 'w-state', title: '유지 상태 · 기록이 항목마다 원문 줄을 저장하지 않아 칩으로 그리지 않는다 (이름은 패널 구조 탭에서)' }, wellStateText(w.state)) : null);
 }
 /** The templates of the cards the last layout typed (relayout), by part id: renderSpace draws each with the template its box was
  * measured for. A part missing here draws as an untyped card. */
@@ -1206,6 +1277,7 @@ function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, f
   const words = entryParts(entryCountsOf(p, r), { config: 0, fields: 0 });
   const inner = t.innerLine ? h('div', { class: 'c-inner', title: `${words.join(' · ')}\n지도에서는 기록의 행 순서 · 실행 순서나 반복 범위를 그리지 않는다` }, h('span', { class: 'c-inner-text' }, t.innerLine.text),
     t.innerLine.program ? h('span', { class: 'sg-chip prog-chip', title: PROGRAM_STEP_HINT }, `+${t.innerLine.program} ${PROGRAM_LABEL}`) : null) : null;
+  const well = t.well ? wellEl(o, p, r, t.well) : null;
   const signs = t.signs ? signTabsEl(o, p, r) : null;
   const open = !kids && words.length && words[0] !== '내부 미상'
     ? h('button', { type: 'button', class: 'entry-open', title: `동작 열기 · ${words.join(' · ')}\n제자리에 들어가면 펼치고, 들어가지 않으면 내부 상세로 연다 (두 번 누르기 · 선택 후 Enter)`, 'aria-label': `${p.name} 내부 보기`, onclick: () => openAction(p.id) }, '내부 보기') : null;
@@ -1214,7 +1286,7 @@ function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, f
     h('span', { class: 'c-entry' }, extra.links, extra.enter, open));
   return h('div', { class: `node ${face} card typed f-${t.family} k-${r.typeRead?.type ?? 'neutral'}${life ? ' life' : ''}${kids ? ' has-kids' : ''} ${extra.cls}`, style: `--nl:${nl}`, 'data-shape': `${nl},${t.rows.length},${hs.contract},${hs.inner},${hs.signs},${extra.boxH},${life ? 0 : 1}`,
     'data-part': p.id, 'data-box': p.id, 'data-drag': p.id, role: 'button', tabindex: '0', title: extra.title, onkeydown: extra.onkeydown },
-  head, rows, contract, inner, signs ? h('div', { class: 'c-signs' }, signs) : null, bottom);
+  head, rows, contract, inner, well, signs ? h('div', { class: 'c-signs' }, signs) : null, bottom);
 }
 
 /* ---------- 동작 열기 (map spec 4): one action, a scale the app decides, three moves back ----------
@@ -1723,6 +1795,9 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
           toggleButton(p, true),
           // A change line reads under the name (in the preview only), never beside it: the name keeps the whole head width.
           h('span', { class: 'frame-title' }, h('span', { class: 'frame-name' }, p.name), h('span', { class: 'plan-note' })),
+          // An open container keeps its own loop's badges on its head (4.1 'both', 4.3: each layer its own); its steps read in 동작.
+          isContainerPart(o, p.id) && p.reading?.loop ? h('span', { class: 'frame-loop', title: `반복 · 기록의 글자 그대로\n단위 ${p.reading.loop.unit ?? '미상'} · 정지 ${p.reading.loop.stop ?? '미상'}\n단계는 동작 열기에서 (구성과 동작은 다른 층)` },
+            h('span', { class: `w-badge${p.reading.loop.unit ? '' : ' blank'}` }, p.reading.loop.unit ?? '반복 단위 ?'), h('span', { class: `w-badge stop${p.reading.loop.stop ? '' : ' blank'}` }, p.reading.loop.stop ? `정지 · ${p.reading.loop.stop}` : '정지 조건 ?')) : null,
           h('span', { class: 'frame-meta' }, latest ? h('span', { class: recentAt(latest) ? 'fresh' : '' }, ago(latest)) : null),
           linksChip(p.id), enterButton(p), note ? h('span', { class: 'frame-note' }, note) : null)));
     } else {

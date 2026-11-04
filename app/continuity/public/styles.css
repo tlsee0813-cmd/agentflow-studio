@@ -501,6 +501,38 @@ button:disabled { opacity: .5; cursor: default; }
 /* The inner line (a part with recorded steps): their count in the record's row order, the loop's unit when it has one. */
 .c-inner { flex: none; display: flex; align-items: center; gap: 6px; min-width: 0; height: max(24px, calc(var(--t-row-lh, 20px) + 4px)); font-size: var(--t-kind, 12px); line-height: 16px; color: var(--text-3); white-space: nowrap; border-top: 1px solid var(--hair-2); }
 .c-inner-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+/* A loop container's well (map design v3 4.3; container-view.ts): at the near tier in place of the inner line, which the overview
+   and middle tiers keep. The loop's unit and stop as badges, the open rail (a bracket on the well's inner left: no head, no end, no
+   port), the steps in the record's order with a dash each (no number: a number reads as the order they run in), the folds, and
+   the state compartment under a solid divider. Heights as container-view wellHeight: 8 gap · 8 pad · 24 head · 20 a row · 26 state
+   · 8 pad, the border drawn inside (an inset shadow), so nothing adds to them. */
+.c-well { flex: none; display: none; margin-top: 8px; padding: 8px 10px 8px 8px; border-radius: 6px; background: var(--surface-2, #f7f8fa); box-shadow: inset 0 0 0 1px var(--hair-2); }
+.space.tier-near .node.card .c-well { display: block; }
+.space.tier-near .node.card:has(.c-well) .c-inner { display: none; }
+.w-head { display: flex; align-items: center; gap: 6px; height: 24px; min-width: 0; }
+.w-badge { flex: none; max-width: 104px; height: 18px; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 6px; background: var(--surface); font-size: 11.5px; line-height: 16px; font-weight: 500; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-flex; align-items: center; gap: 4px; }
+.w-badge.stop { flex: 1 1 auto; min-width: 0; max-width: none; }
+.w-badge.blank { border-style: solid; color: var(--text-4); background: none; }
+.w-toggle { flex: none; margin-left: auto; height: 20px; padding: 0 6px; border: 0; border-radius: 4px; background: none; font-size: 11.5px; font-weight: 500; color: var(--accent); }
+.w-toggle:hover { background: var(--accent-soft); }
+.w-body { position: relative; padding-left: 14px; }
+/* The rail: an open bracket (top tick, left side, no bottom tick, no arrowhead), joined to no step and no port. */
+.w-rail { position: absolute; left: 2px; top: 4px; bottom: 6px; width: 7px; border: 1.5px solid var(--line-strong); border-right: 0; border-bottom: 0; border-radius: 4px 0 0 0; pointer-events: none; }
+.w-steps { list-style: none; margin: 0; padding: 0; }
+.w-steps li { display: flex; align-items: center; gap: 6px; height: 20px; min-width: 0; font-size: 12px; line-height: 20px; color: var(--text-2); white-space: nowrap; }
+.w-dash { flex: none; color: var(--text-4); }
+.w-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.w-step.kept .w-name { color: var(--text); }
+/* A fold is a summary, not a step: no dash, no line through it, quieter. */
+.w-fold { color: var(--text-3); }
+.w-open { height: 18px; padding: 0 4px; margin-left: -4px; border: 0; border-radius: 4px; background: none; font-size: 11.5px; color: var(--text-3); }
+.w-open:hover { background: var(--chip); color: var(--text); }
+.w-state { height: 26px; margin-top: 0; padding-top: 6px; border-top: 1px solid var(--line-deco, var(--hair-2)); font-size: 11.5px; line-height: 19px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.space.lens-start .c-well .w-rail { border-color: var(--text-2); }
+/* An open container's head keeps its loop's badges (4.1 'both'): after the name, giving way before it. */
+.frame-loop { flex: 1 1 0; min-width: 0; display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; overflow: hidden; }
+.frame-head:has(.frame-loop) > .frame-title { flex: 0 0 auto; max-width: 62%; }
+.frame-loop .w-badge { max-width: 140px; } .frame-loop .w-badge.stop { flex: 0 1 auto; }
 .c-signs { flex: none; display: flex; align-items: center; height: max(24px, calc(var(--t-row-lh, 20px) + 4px)); min-width: 0; }
 .c-signs .node-signs { margin-left: 0; }
 .node.card .c-signs .sign-tab { height: auto; font-size: var(--t-kind, 12px); line-height: calc(var(--t-kind-lh, 16px) - 2px); }
@@ -734,7 +766,7 @@ button:disabled { opacity: .5; cursor: default; }
 .line-key .lk-related .lk-line { stroke-dasharray: 0 5; stroke-width: 2; } .line-key .lk-dot { fill: var(--text-3); stroke: none; }
 /* The legend (map design v3 7.2): the lens's name and question, then one row per item this map has (sample, name, count, ⋯).
    A click selects the item (a sustained outline on the map); the ⋯ menu dims, hides, solos or shows all. It takes the pointer. */
-.line-key.legend { pointer-events: auto; background: var(--surface); box-shadow: var(--shadow-lg); gap: 0; width: 248px; max-height: calc(100% - 160px); overflow: auto; padding: 8px 6px 6px; }
+.line-key.legend { pointer-events: auto; background: var(--surface); box-shadow: var(--shadow-lg); gap: 0; width: 264px; max-height: calc(100% - 160px); overflow: auto; padding: 8px 6px 6px; }
 .lg-head { display: flex; flex-direction: column; gap: 0; padding: 0 6px 6px; }
 .lg-head strong { font-size: 12.5px; line-height: 18px; font-weight: var(--fw-name); color: var(--text); }
 .lg-asks { font-size: 11.5px; line-height: 16px; color: var(--text-3); }
