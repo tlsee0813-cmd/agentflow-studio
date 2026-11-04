@@ -2450,3 +2450,103 @@ button:disabled { opacity: .5; cursor: default; }
 .ev-unlinked { margin: var(--s-3) 0 0; font-size: 12px; line-height: 1.5; color: var(--text-4); }
 .ev-none { margin: 0; font-size: 12.5px; }
 .lens-foot .lens-ask { height: 32px; }
+/* ---------- footnotes and 근거 items (map design v3 8.4–8.7, slice S2) ----------
+   A mark 〔보고·7〕 sits right after its sentence or row: 12/16 500 to see, a 24×24 target (WCAG 2.5.8) that does not open the line.
+   The author's tag reads as a word in the mark, never as a colour. */
+.fn-marks { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0 1px; margin-left: 2px; vertical-align: baseline; }
+.fn { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; margin: -4px 0; padding: 0 2px; border: 0; border-radius: var(--r-sm); background: none;
+  font: var(--fw-meta) 12px/16px var(--font); font-variant-numeric: tabular-nums; color: var(--text-3); white-space: nowrap; cursor: pointer; }
+.fn:hover, .fn:focus-visible { background: var(--accent-soft); color: var(--accent-strong); }
+.fn:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.fn-marks .dispute-chip { margin-left: 4px; text-decoration: none; }
+/* The row's ⋯: quiet until the row is hovered or holds the focus; still a 24×24 target, reachable by Tab. */
+.fn-more { display: inline-block; margin: -4px 0 -4px 1px; vertical-align: middle; }
+.fn-more > summary { width: 24px; height: 24px; opacity: .45; }
+.fn-more > summary::before { width: 14px; height: 14px; -webkit-mask-size: 14px; mask-size: 14px; }
+li:hover > .fn-marks .fn-more > summary, p:hover > .fn-marks .fn-more > summary, li:hover .fn-marks .fn-more > summary, .fn-more:focus-within > summary, .fn-more[open] > summary { opacity: 1; }
+.fn-more > .more-menu { top: 26px; min-width: 168px; z-index: 30; }
+.lb-cite-k { margin-right: 4px; font-size: 11.5px; color: var(--text-4); }
+/* The one preview: the passage's first lines, the record, where and when; it stays while the pointer is over it, Esc closes it. */
+.fn-pop { position: fixed; z-index: 90; max-width: 320px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r-pop); background: var(--surface); box-shadow: var(--shadow-float); color: var(--text-2); }
+.fn-pop[hidden] { display: none; }
+.fp-head { display: flex; align-items: baseline; gap: 6px; margin: 0 0 4px; font: 590 11.5px/16px var(--font); color: var(--text-3); }
+.fp-head .ev { padding: 0 5px; border: 1px solid var(--chip-line); border-radius: 4px; background: var(--chip); font-size: 11px; color: var(--text-2); }
+.fp-untagged { font-weight: var(--fw-meta); color: var(--text-4); }
+.fp-n { margin-left: auto; font-weight: var(--fw-meta); color: var(--text-4); font-variant-numeric: tabular-nums; }
+.fp-quote { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 6; overflow: hidden; margin: 0; padding-left: 8px; border-left: 2px solid var(--line-strong); quotes: "\201C" "\201D";
+  font-size: 13px; line-height: 20px; color: var(--text); word-break: keep-all; overflow-wrap: anywhere; }
+.fp-src { margin: 6px 0 0; font-size: 11.5px; line-height: 16px; color: var(--text-3); overflow-wrap: anywhere; }
+.fp-go { margin-top: 6px; font-size: 12px; }
+/* 근거: the strip back, the items. */
+.ev-return { position: sticky; top: 0; z-index: 3; margin: 0 0 var(--s-2); padding: 6px 10px; border: 1px solid var(--accent-line); border-radius: var(--r-md); background: var(--accent-soft); }
+.ev-back { font-size: 12.5px; font-weight: var(--fw-name); color: var(--accent-strong); text-align: left; }
+.ev-back-at { font-weight: var(--fw-meta); color: var(--text-2); }
+.ev-group > h3:focus { outline: none; }
+.ev-items { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.ev-item { border-radius: var(--r-md); scroll-margin-top: 48px; }
+.ev-item.open { padding-bottom: 8px; background: var(--surface-2); }
+.ev-head { display: flex; align-items: baseline; gap: 6px; width: 100%; min-height: 28px; padding: 4px 6px; border: 0; border-radius: var(--r-md); background: none; text-align: left;
+  font-size: 12.5px; line-height: 18px; color: var(--text-2); cursor: pointer; }
+.ev-head:hover { background: var(--surface-2); }
+.ev-head .ev-label { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ev-item.open .ev-head .ev-label { white-space: normal; overflow-wrap: anywhere; color: var(--text); }
+.fn-n { flex: none; font: var(--fw-meta) 12px/18px var(--font); font-variant-numeric: tabular-nums; color: var(--text-3); }
+.ev-uses-n { flex: none; color: var(--text-4); }
+.ev-head .dispute-chip { flex: none; }
+.ev-item.since-off .ev-head { color: var(--text-4); }
+.ev-item.since-hit .fn-n { color: var(--accent-strong); }
+.ev-body { display: flex; flex-direction: column; gap: 6px; padding: 2px 10px 0 12px; }
+/* The record's words, set apart from the reading's (AI) words: a ruled block of its own, the record's text as written. */
+.ev-quote { margin: 0; padding: 6px 10px; border-left: 3px solid var(--line-strong); border-radius: 0 var(--r-sm) var(--r-sm) 0; background: var(--surface); font-size: 13px; line-height: 20px; color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; word-break: keep-all; }
+.ev-quote-k { display: block; margin-bottom: 2px; font: 590 11px/16px var(--font); color: var(--text-4); white-space: normal; }
+.ev-src, .ev-grade { margin: 0; font-size: 11.5px; line-height: 16px; color: var(--text-3); overflow-wrap: anywhere; }
+.ev-grade { color: var(--text-2); }
+.ev-uses-head { margin: 0; font: 590 11.5px/16px var(--font); color: var(--text-3); }
+.ev-uses-head small { font-weight: 500; color: var(--text-4); }
+.ev-uses ul { list-style: none; margin: 2px 0 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.ev-use { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 6px; font-size: 12.5px; line-height: 18px; color: var(--text-2); }
+.ev-use-sec { flex: none; padding: 0 5px; border: 1px solid var(--hair-2); border-radius: 3px; font-size: 11px; line-height: 15px; color: var(--text-3); }
+.ev-use-label { min-width: 0; overflow-wrap: anywhere; }
+.ev-use .cl-when, .ev-use .cl-where { font-size: 11.5px; color: var(--text-4); }
+.ev-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; margin: 0; font-size: 12px; }
+.ev-acts .link-button.dispute { font-size: 12px; }
+.ev-quiet { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; padding: 2px 6px; font-size: 12.5px; line-height: 18px; color: var(--text-3); }
+.ev-ai { font-size: 11.5px; font-weight: var(--fw-name); color: var(--text-4); }
+.ev-other-hint { font-weight: var(--fw-meta); color: var(--text-4); }
+.ev-other .cg { margin-top: 8px; }
+.ev-diag-list { margin: 6px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; line-height: 18px; color: var(--text-2); }
+.ev-diag-list p { margin: 0; }
+.ev-diag-at { display: block; color: var(--text-4); overflow-wrap: anywhere; }
+/* Arrived by a footnote: the mark colour for 1.6 s, then a 2px outline until the next action (no colour alone: the focus moves too). */
+.ev-item.fn-flash, .ev-group.fn-flash { animation: fn-flash 1.6s ease-out; }
+@keyframes fn-flash { 0%, 70% { background: var(--mark); box-shadow: 0 0 0 1px var(--mark-line); } 100% { box-shadow: none; } }
+.ev-item.fn-ring, .ev-group.fn-ring { outline: 2px solid var(--accent); outline-offset: 1px; }
+@media (prefers-reduced-motion: reduce) { .ev-item.fn-flash, .ev-group.fn-flash { animation: none; background: var(--mark); } }
+/* 항목 근거 미연결: what is missing said once, values by field, a same-named line as a candidate only. */
+.pu-diag { margin: 0; font-size: 12px; line-height: 1.5; color: var(--text-3); }
+.pu-go { font-size: 12px; }
+.pu-fields { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.pu-field { margin: 0; font-size: 12px; }
+.pu-field small { color: var(--text-4); }
+.pu-vals-l { list-style: none; margin: 2px 0 0; padding: 0 0 0 10px; display: flex; flex-direction: column; gap: 1px; font-size: 12.5px; line-height: 18px; color: var(--text-2); }
+.pu-cand { color: var(--text-4); }
+/* 「이 해석이 틀림」's form: the four reasons, an optional line. */
+.dispute-form { flex-direction: column; align-items: stretch; gap: 6px; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); }
+.df-reasons { margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 2px; }
+.df-reasons legend { margin-bottom: 2px; padding: 0; font: 590 12px/16px var(--font); color: var(--text-2); }
+.df-reason { display: flex; align-items: center; gap: 6px; min-height: 24px; font-size: 12.5px; color: var(--text); cursor: pointer; }
+.dispute-form > input { flex: none; }
+.df-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 0; }
+.df-foot small { flex: 1 1 100%; font-size: 11px; color: var(--text-4); }
+.dispute-form .form-msg:empty { display: none; }
+.dispute-form .form-msg { margin: 0; font-size: 12px; color: var(--warn-text); }
+/* 이력: the three times apart, and how the numbers hold. */
+.hist-times { font-size: 11.5px; color: var(--text-4); overflow-wrap: anywhere; }
+.hist-note { margin: 4px 0 6px; font-size: 11.5px; color: var(--text-4); }
+/* A line's row with its footnote: the row, then its marks at the row's right end (8.9: the footnote after the row); what the row
+   unfolds (the picked line's block, the note's 전체) takes the whole width under it. */
+li:has(> .port + .fn-marks) { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; column-gap: 2px; }
+li:has(> .port + .fn-marks) > :not(.port):not(.fn-marks) { grid-column: 1 / -1; }
+li > .port + .fn-marks { margin: 0; padding-top: 6px; }
+.dispute-form .df-reason input { flex: none; width: 14px; height: 14px; margin: 0; padding: 0; border: 0; accent-color: var(--accent); }
+.dispute-form > input[type="text"] { flex: none; height: 28px; }

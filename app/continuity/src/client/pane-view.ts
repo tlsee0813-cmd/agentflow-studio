@@ -7,7 +7,7 @@
  *
  * Grouping uses only the record a claim's own quote names: a claim is never moved to a neighbour's record, and a claim whose record
  * is not at hand still reads in a rail of its own (its record named as not found), never without one. */
-import { TOPIC_ORDER, claimTopic, claimEvidence, claimWhen } from '../shared/claim-topic.js';
+import { TOPIC_ORDER, EVIDENCE_LABEL, claimTopic, claimEvidence, claimWhen } from '../shared/claim-topic.js';
 import type { ClaimKind, ClaimTopic, EvidenceGrade, ReadingQuote } from '../shared/types.js';
 import { conditionPlacement, conditionLines, conditionOfQuote, type ConditionLike, type ChainStep, type QuoteLike } from './steps-view.js';
 import { loopSegments, isProgram, type LoopLike, type ConditionLike as LineCondition } from './line-view.js';
@@ -109,7 +109,11 @@ export function sourceRows(current: readonly PaneClaim[], history: readonly Hist
 /* ---------- 「이 해석이 틀림」: the person's notes, apart from the project ---------- */
 /** One person's disagreement with a claim (or the description, claimKey 'role'): when it was marked, why when they said, and
  * the words they disagreed with as they read then (so the handover can name them even after the reading changes). */
-export interface DisputeNote { claimKey: string; at: string; text?: string; said?: string }
+export interface DisputeNote { claimKey: string; at: string; text?: string; said?: string; reason?: DisputeReason }
+/** Why the person says the reading is wrong (map design v3 8.6): one of four, optional (notes kept before S2 have none). */
+export type DisputeReason = 'meaning' | 'target' | 'time' | 'record';
+export const DISPUTE_REASONS: readonly DisputeReason[] = ['meaning', 'target', 'time', 'record'];
+export const DISPUTE_REASON_LABEL: Record<DisputeReason, string> = { meaning: '원문과 다른 뜻으로 해석함', target: '다른 대상·구간을 근거로 연결함', time: '시점·판본·조건을 잘못 적용함', record: '원문 기록 자체가 사실과 다름' };
 export const DISPUTE_KEY = 'agentflow.studio.disputes.1';
 export const ROLE_KEY = 'role';
 const DISPUTE_MAPS = 40, DISPUTE_NOTES = 200, NOTE_TEXT = 300, KEY_MAX = 200;
@@ -119,8 +123,8 @@ function cleanNote(v: unknown): DisputeNote | null {
   if (!v || typeof v !== 'object' || Array.isArray(v)) return null;
   const o = v as Record<string, unknown>, claimKey = str(o.claimKey, KEY_MAX), at = str(o.at, 40);
   if (!claimKey || !at) return null;
-  const text = str(o.text, NOTE_TEXT), said = str(o.said, NOTE_TEXT);
-  return { claimKey, at, ...(text ? { text } : {}), ...(said ? { said } : {}) };
+  const text = str(o.text, NOTE_TEXT), said = str(o.said, NOTE_TEXT), reason = DISPUTE_REASONS.find(r => r === o.reason) ?? null;
+  return { claimKey, at, ...(text ? { text } : {}), ...(said ? { said } : {}), ...(reason ? { reason } : {}) };
 }
 function disputesAll(storage: StorageLike): Record<string, unknown> {
   try { const v = JSON.parse(storage.getItem(DISPUTE_KEY) ?? '{}'); return v && typeof v === 'object' && !Array.isArray(v) ? v as Record<string, unknown> : {}; } catch { return {}; }
@@ -169,11 +173,11 @@ export const disputesOf = (all: Record<string, DisputeNote[]>, part: string, cla
 export const noteTime = (at: string) => (/^\d{4}-\d\d-\d\dT\d\d:\d\d/.test(at) ? `${at.slice(0, 10)} ${at.slice(11, 16)}Z` : at);
 /** The chip's tooltip: each time it was marked, with the person's reason when they gave one. */
 export function disputeTitle(notes: readonly DisputeNote[]): string {
-  return ['사람이 이 해석을 틀렸다고 표시함 · 원문과 주장은 그대로', ...notes.map(n => `${noteTime(n.at)}${n.text ? ` · ${n.text}` : ''}`)].join('\n');
+  return ['사람이 이 해석을 틀렸다고 표시함 · 원문과 주장은 그대로', ...notes.map(n => `${noteTime(n.at)}${n.reason ? ` · ${DISPUTE_REASON_LABEL[n.reason]}` : ''}${n.text ? ` · ${n.text}` : ''}`)].join('\n');
 }
 
 /* ---------- the handover lists them ---------- */
-export interface DisputedItem { part: string; said: string | null; at: string; text?: string; role: boolean }
+export interface DisputedItem { part: string; said: string | null; at: string; text?: string; role: boolean; reason?: DisputeReason }
 export const DISPUTE_HEAD = '## 사람이 틀렸다고 표시한 해석';
 /** The handover's section: each disputed reading of a part, the words as the person saw them, when, and why when said. None: []. */
 export function disputeSection(items: readonly DisputedItem[]): string[] {
@@ -181,7 +185,7 @@ export function disputeSection(items: readonly DisputedItem[]): string[] {
   const one = (t: string, n: number) => { const s = t.replace(/\s+/g, ' ').trim(); return s.length > n ? `${s.slice(0, n - 1)}…` : s; };
   return [DISPUTE_HEAD,
     '사용자가 Studio에서 아래 해석을 틀렸다고 표시했어요. 원문과 지도의 주장은 그대로이니, 이 해석에 기대기 전에 원문을 다시 확인하세요.',
-    ...items.map(x => `- ${one(x.part, 80)} · ${x.role ? '설명' : '주장'}: ${x.said ? `“${one(x.said, 200)}”` : '(지금 읽기에 없는 해석)'} · ${noteTime(x.at)} 표시${x.text ? ` · 이유: ${one(x.text, 200)}` : ''}`), ''];
+    ...items.map(x => `- ${one(x.part, 80)} · ${x.role ? '설명' : '주장'}: ${x.said ? `“${one(x.said, 200)}”` : '(지금 읽기에 없는 해석)'} · ${noteTime(x.at)} 표시${x.reason || x.text ? ` · 이유: ${[x.reason ? DISPUTE_REASON_LABEL[x.reason] : '', x.text ? one(x.text, 200) : ''].filter(Boolean).join(' · ')}` : ''}`), ''];
 }
 export const HANDOVER_END = '──────── 인수인계 문서 끝';
 /** The document with the section before its end line (at the end when it has none). */
@@ -349,6 +353,152 @@ const claimQuote = (c: PaneClaim): QuoteLike => ({ record: c.record, quote: c.qu
 export const spanKey = (q: QuoteLike): string => (q.from !== undefined && q.to !== undefined ? `${q.record}|${q.from}|${q.to}` : `${q.record}|${q.quote.replace(/\s+/g, ' ').trim()}`);
 /** The 근거 tab's count: the distinct quoted spans among the entries (the same span cited twice is one; an entry without a line none). */
 export const evidenceCount = (groups: readonly EvidenceGroup<unknown>[]): number => new Set(groups.flatMap(g => g.entries.flatMap(e => (e.quote ? [spanKey(e.quote)] : [])))).size;
+
+/* ---------- 근거 numbered (map design v3 8.4–8.5, slice S2) ----------
+ * One item per cited span, numbered once in 구조's reading order: the head (the kind word, the operations line) → 하는 일 (the
+ * description's passages) → the chain's 받는 것 (its first rows) → 동작 요약 (the loop, the first steps) → 내는 것 → 확인 필요 →
+ * 계약 (every line in, then out) → 동작 (the loop, steps, condition rows, port rows) → 규칙과 관문 (each rule's words, its places and
+ * what keeps it; gates; withdrawals) → 연결 → 어디에 (파일 지도 rows), then the current claims 구조 does not use (그 밖의 기록된 말, in
+ * topic order). The same span is one item and one number wherever it is cited (its uses: 「이 구간을 인용한 주장 N」); an item's
+ * section is where it is first cited. The numbers depend only on the reading (what it holds and in which order), never on the lens,
+ * the tab, the 근거 view, a fold or the picked line; storage keys (a dispute, a way back) use the span and the row, never n.
+ * A value with no line of its own (inputs · outputs · fields · config, state kept) is never an item: no number, no footnote. */
+export type ItemSection = StructureSection | 'other';
+export const ITEM_ORDER: readonly ItemSection[] = ['role', 'caution', 'contract', 'behaviour', 'rules', 'links', 'where', 'other'];
+export const ITEM_TITLE: Record<ItemSection, string> = { ...STRUCTURE_TITLE, other: '그 밖의 기록된 말' };
+/** One cited thing: a row, a sentence or a field of 구조 (thing: the row's key in this drawing, as 구조 looks it up), what it says
+ * (label), the claim when it is one, and ref: the stable key a person's 「이 해석이 틀림」 note is kept under (a claim's own key, the
+ * description's 'role', else the row's kind and identity). said: the words the note keeps. */
+export interface EvidenceUse<C> { thing: string; section: ItemSection; kind: EvidenceKind; label: string; claim: C | null; ref: string; said: string;
+  /** The time of the reading that read it, when the source says (a claim's own reading's). */
+  at: string | null }
+export interface EvidenceItem<C> {
+  /** The span (spanKey): the same record and place, or the same words where the reading kept no place. */
+  key: string; n: number; section: ItemSection; kind: EvidenceKind; label: string; quote: QuoteLike;
+  /** The author's tag on the line (a claim's own, else one written in the words), or null: never the app's check. */
+  grade: EvidenceGrade | null;
+  uses: EvidenceUse<C>[];
+}
+export interface EvidenceBook<C> {
+  items: EvidenceItem<C>[];
+  /** The items by the section they are first cited in, in ITEM_ORDER, each in number order. */
+  groups: { section: ItemSection; items: EvidenceItem<C>[] }[];
+  /** A thing's item (null-free: a thing without a line is in unquoted instead). */
+  thing: Map<string, EvidenceItem<C>>;
+  span: Map<string, EvidenceItem<C>>;
+  claim: Map<C, EvidenceItem<C>>;
+  /** Things 구조 reads that carry no line (a line a person drew, a kind word with no passage): never numbered. */
+  unquoted: EvidenceUse<C>[];
+}
+export interface ItemsSource<C> {
+  roleBasis: readonly QuoteLike[]; roleText?: string | null; roleAt?: (q: QuoteLike) => string | null;
+  state: { label: string; quote: QuoteLike | null; at?: string | null } | null; type: { label: string; quote: QuoteLike | null; at?: string | null } | null;
+  /** The lines, each direction in the pane's own order: in (to the part), out (from it), with (needs · shares · related). */
+  relations: readonly { id: string; label: string; quote: QuoteLike | null; dir: 'in' | 'out' | 'with'; at?: string | null }[];
+  loop: { quote: QuoteLike; at?: string | null } | null; steps: readonly { name: string; quote: QuoteLike; at?: string | null }[]; conditions: readonly { when: string; quote: QuoteLike; at?: string | null }[];
+  portMap: readonly { port: string; step: string; direction: 'in' | 'out'; quote: QuoteLike; at?: string | null }[];
+  /** In 어디에's order (whereRows roles). */
+  fileRoles: readonly { path: string; quote: QuoteLike; at?: string | null }[];
+  /** The current claims in the pane's order; the claims 확인 필요 reads (default: the unknown ones not under 규칙과 관문); the claims
+   * 규칙과 관문 reads (rules, gates, withdrawals) with each one's other passages (its places, what keeps it). */
+  claims: readonly C[]; cautions?: readonly C[]; rules: readonly C[];
+  ruleQuotes?: (c: C) => readonly { key: string; label: string; quote: QuoteLike }[];
+  claimRef?: (c: C) => string;
+  /** How many rows the first-screen chain shows (PANE_SHOWN.chain, .chainSteps). */
+  chain?: { ports: number; steps: number };
+}
+const REF_MAX = 200;
+const clipRef = (s: string) => (s.length > REF_MAX ? s.slice(0, REF_MAX) : s);
+export function evidenceItems<C extends PaneClaim>(s: ItemsSource<C>): EvidenceBook<C> {
+  const items: EvidenceItem<C>[] = [], span = new Map<string, EvidenceItem<C>>(), thing = new Map<string, EvidenceItem<C>>(), claim = new Map<C, EvidenceItem<C>>();
+  const unquoted: EvidenceUse<C>[] = [], seen = new Set<string>();
+  const ports = s.chain?.ports ?? PANE_SHOWN.chain, chainSteps = s.chain?.steps ?? PANE_SHOWN.chainSteps;
+  const refOf = (c: C) => clipRef(s.claimRef ? s.claimRef(c) : `claim:${c.record}|${c.from ?? ''}|${c.to ?? ''}|${c.text.slice(0, 80)}`);
+  const cite = (key: string, section: ItemSection, kind: EvidenceKind, label: string, quote: QuoteLike | null, ref: string, said: string, c: C | null = null, at: string | null = null) => {
+    if (seen.has(key)) return; seen.add(key);
+    const own = c && typeof (c as { at?: unknown }).at === 'string' ? (c as { at?: string }).at! : null;
+    const use: EvidenceUse<C> = { thing: key, section, kind, label, claim: c, ref: clipRef(ref), said, at: at ?? own };
+    if (!quote) { unquoted.push(use); return; }
+    const k = spanKey(quote), grade = c ? claimEvidence(c) : claimEvidence({ quote: quote.quote });
+    let it = span.get(k);
+    if (!it) { it = { key: k, n: items.length + 1, section, kind, label, quote, grade, uses: [] }; items.push(it); span.set(k, it); }
+    else if (!it.grade && grade) it.grade = grade;
+    it.uses.push(use); thing.set(key, it);
+    if (c && !claim.has(c)) claim.set(c, it);
+  };
+  const claimIndex = new Map<C, number>(); s.claims.forEach((c, i) => { if (!claimIndex.has(c)) claimIndex.set(c, i); });
+  const claimThing = (c: C, fallback: string) => { const i = claimIndex.get(c); return i === undefined ? fallback : `claim:${i}`; };
+  const quoteOf = (c: C): QuoteLike => ({ record: c.record, quote: c.quote, ...(c.from !== undefined ? { from: c.from } : {}), ...(c.to !== undefined ? { to: c.to } : {}) });
+  // The head: the kind word, then the operations line; then the description's passages.
+  if (s.type) cite('type', 'role', 'type', s.type.label, s.type.quote, 'type', s.type.label, null, s.type.at ?? null);
+  if (s.state) cite('state', 'role', 'state', s.state.label, s.state.quote, 'state', s.state.label, null, s.state.at ?? null);
+  s.roleBasis.forEach((q, i) => cite(`role:${i}`, 'role', 'role', s.roleBasis.length > 1 ? `설명의 원문 ${i + 1}` : '설명의 원문', q, ROLE_KEY, s.roleText ?? '', null, s.roleAt?.(q) ?? null));
+  const rel = (x: ItemsSource<C>['relations'][number], section: ItemSection) => cite(`relation:${x.id}`, section, 'relation', x.label, x.quote, `relation:${x.id}`, x.label, null, x.at ?? null);
+  const ins = s.relations.filter(x => x.dir === 'in'), outs = s.relations.filter(x => x.dir === 'out');
+  // The chain: 받는 것 → 동작 요약 → 내는 것 → 확인 필요 (its rows are 계약's and 동작's: they are filed there).
+  ins.slice(0, ports).forEach(x => rel(x, 'contract'));
+  const loop = () => { if (s.loop) cite('loop', 'behaviour', 'loop', '반복', s.loop.quote, 'loop', '반복', null, s.loop.at ?? null); };
+  const step = (x: ItemsSource<C>['steps'][number], i: number) => cite(`step:${i}`, 'behaviour', 'step', `단계 ${x.name}`, x.quote, `step:${x.name}`, `단계 ${x.name}`, null, x.at ?? null);
+  loop(); s.steps.slice(0, chainSteps).forEach(step);
+  outs.slice(0, ports).forEach(x => rel(x, 'contract'));
+  const ruled = new Set<C>(s.rules);
+  const cautions = s.cautions ?? s.claims.filter(c => !ruled.has(c) && claimTopic(c) === 'unknown');
+  for (const c of cautions) cite(claimThing(c, `caution:${refOf(c)}`), 'caution', 'claim', c.text, quoteOf(c), refOf(c), c.text, c);
+  // 계약, 동작, 규칙과 관문, 연결, 어디에.
+  ins.forEach(x => rel(x, 'contract')); outs.forEach(x => rel(x, 'contract'));
+  loop(); s.steps.forEach(step);
+  s.conditions.forEach((x, i) => cite(`condition:${i}`, 'behaviour', 'condition', `조건 ${x.when}`, x.quote, `condition:${x.when}`, `조건 ${x.when}`, null, x.at ?? null));
+  s.portMap.forEach((x, i) => { const label = x.direction === 'in' ? `포트 대응 ${x.port} ⇥ ${x.step}` : `포트 대응 ${x.step} ⇤ ${x.port}`;
+    cite(`portmap:${i}`, 'behaviour', 'portmap', label, x.quote, `portmap:${x.direction}:${x.port}:${x.step}`, label, null, x.at ?? null); });
+  s.rules.forEach((c, j) => {
+    const t = claimThing(c, `rule:${j}`), ref = refOf(c);
+    cite(t, 'rules', 'rule', c.text, quoteOf(c), ref, c.text, c);
+    const own = typeof (c as { at?: unknown }).at === 'string' ? (c as { at?: string }).at! : null;
+    for (const x of s.ruleQuotes?.(c) ?? []) cite(`${t}|${x.key}`, 'rules', 'rule', x.label, x.quote, `${ref}|${x.key}`, `${c.text} · ${x.label}`, null, own);
+  });
+  s.relations.filter(x => x.dir === 'with').forEach(x => rel(x, 'links'));
+  s.fileRoles.forEach(x => cite(`file:${pathKey(x.path)}`, 'where', 'fileRole', `파일 ${x.path}`, x.quote, `file:${pathKey(x.path)}`, `파일 ${x.path}`, null, x.at ?? null));
+  // The rest of the current claims, in topic order (as the pane reads claims).
+  const rest = s.claims.filter(c => !ruled.has(c) && !claim.has(c) && !cautions.includes(c));
+  const groupsByTopic = new Map<ClaimTopic, C[]>(); for (const c of rest) { const t = claimTopic(c), g = groupsByTopic.get(t); if (g) g.push(c); else groupsByTopic.set(t, [c]); }
+  for (const t of TOPIC_ORDER) for (const c of groupsByTopic.get(t) ?? []) cite(claimThing(c, `other:${refOf(c)}`), 'other', 'claim', c.text, quoteOf(c), refOf(c), c.text, c);
+  const groups = ITEM_ORDER.flatMap(section => { const l = items.filter(x => x.section === section); return l.length ? [{ section, items: l }] : []; });
+  return { items, groups, thing, span, claim, unquoted };
+}
+/** A footnote's words: the author's tag and the number ('〔보고·7〕'), the number alone when the line carries no tag ('〔7〕'). */
+export const footText = (it: { n: number; grade: EvidenceGrade | null }): string => (it.grade ? `〔${EVIDENCE_LABEL[it.grade]}·${it.n}〕` : `〔${it.n}〕`);
+/** The marks after one sentence or row: each item once in number order; two read side by side ('〔보고·3〕〔파일·4〕'), more fold to
+ * the first with how many more ('〔보고·3 +2〕', its preview and its click are the first's). */
+export function footMarks<T extends { n: number; grade: EvidenceGrade | null }>(list: readonly (T | null | undefined)[]): { text: string; item: T; more: number }[] {
+  const u = [...new Map(list.filter((x): x is T => !!x).map(x => [x.n, x] as const)).values()].sort((a, b) => a.n - b.n);
+  if (u.length <= 2) return u.map(item => ({ text: footText(item), item, more: 0 }));
+  const first = u[0]!, more = u.length - 1;
+  return [{ text: first.grade ? `〔${EVIDENCE_LABEL[first.grade]}·${first.n} +${more}〕` : `〔${first.n} +${more}〕`, item: first, more }];
+}
+/** 근거 분류 (8.5): the author's tag in words, kept apart from the app's own check (there is none: a tag is what the writing session
+ * marked, never verified here). */
+const GRADE_WORDS: Record<EvidenceGrade, string> = { file: '작성 세션이 파일을 읽었다고 표시', run: '작성 세션이 직접 실행했다고 표시', report: '작성 세션이 다른 세션·문서·사람의 말을 옮겼다고 표시', guess: '작성 세션의 판단이라고 표시', unknown: '작성 세션이 모른다고 남김' };
+export const gradeLine = (g: EvidenceGrade | null): string => (g ? `근거 분류: ${EVIDENCE_LABEL[g]} (${GRADE_WORDS[g]} · 앱 확인 없음)` : '근거 분류: 꼬리표 없음 (작성 세션이 분류를 달지 않음 · 앱 확인 없음)');
+/** Where a quote stands in its record, when the record says it: the nearest heading above it (a '#' line) and, when the quote's line
+ * is a table row ('| … |'), that row's first cell. The words must be at that place (from, else the first place they stand); else nothing. */
+export function quotePlace(text: string, q: QuoteLike): { heading: string | null; row: string | null } {
+  const none = { heading: null, row: null };
+  let at = q.from !== undefined && q.to !== undefined && text.slice(q.from, q.to) === q.quote ? q.from : -1;
+  if (at < 0) { const w = q.quote.trim(); at = w ? text.indexOf(w) : -1; }
+  if (at < 0) return none;
+  const lineStart = text.lastIndexOf('\n', at - 1) + 1, lineEnd = text.indexOf('\n', at), line = text.slice(lineStart, lineEnd < 0 ? undefined : lineEnd).trim();
+  let heading: string | null = null;
+  for (const l of text.slice(0, lineStart).split('\n').reverse()) { const m = /^\s{0,3}#{1,6}\s+(.+?)\s*#*\s*$/.exec(l); if (m) { heading = m[1]!.trim(); break; } }
+  const cell = line.startsWith('|') ? line.split('|').map(x => x.replace(/`/g, '').trim()).find(Boolean) ?? null : null;
+  const clip = (s: string | null, n: number) => (s && s.length > n ? `${s.slice(0, n - 1)}…` : s);
+  return { heading: clip(heading, 48), row: /^:?-{3,}:?$/.test(cell ?? '') ? null : clip(cell, 40) };
+}
+/** The way back from 근거 to where a footnote was opened (8.4-3): the first point is kept while the reader opens other passages,
+ * up to five are held (the strip always returns to the first); a new point past five is not kept. */
+export const RETURN_MAX = 5;
+export function pushReturn<T>(stack: readonly T[], point: T, max = RETURN_MAX): T[] { return stack.length >= max ? [...stack] : [...stack, point]; }
+/** Two names are the same name (case, backquotes and spacing aside): a candidate only, never a citation. */
+export const sameName = (a: string, b: string): boolean => nameKey(a) === nameKey(b);
 
 /* ---------- the panel's width (8.8) ---------- */
 /** clamp(384px, 29vw, 448px) by default (styles.css --insp-w); dragged by the left edge between 360 and 600, kept per browser. A

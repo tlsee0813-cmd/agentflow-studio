@@ -83,8 +83,10 @@ async function wide(browser, base) {
   assert.deepEqual(lensOrder.slice(0, 2), ['pn-jump', 'pn-chain'], `order ${lensOrder}`);
   await page.locator('#lens [role=tab][data-tab=evidence]').click(); await page.locator('#lens [data-ev-view=records]').click();
   assert.equal(await page.locator('#lens .lens-origin .claim').count(), 13, 'the lens reads every current claim too');
-  assert.deepEqual(await page.locator('#lens .lens-origin .cl-cite').allTextContents(), Array.from({ length: 13 }, (_, i) => String(i + 1)));
-  assert.match(await page.locator('#lens .lens-origin .cl-cite').first().getAttribute('title'), /^원문에서 보기 · “[\s\S]+”$/);
+  // map design v3 S2: each claim's footnote, its tag and its number (the same in 구조 and 주장 순), opening its item in 근거.
+  const marks = await page.locator('#lens .lens-origin .fn').allTextContents();
+  assert.equal(marks.length, 13); assert.ok(marks.every(t => /^〔(?:\S+·)?\d+〕$/.test(t)), `marks ${marks}`);
+  assert.match(await page.locator('#lens .lens-origin .fn').first().getAttribute('aria-label'), /^근거 \d+ · .+ · 근거 탭에서 보기$/);
   await openSurface(page);
   const s = await page.evaluate(() => { const p = document.getElementById('panel'), r = p.getBoundingClientRect(), role = p.querySelector('.und-role'), claims = [...p.querySelectorAll('.sec-understood .claims .claim')];
     return { w: r.width, left: r.left, title: p.querySelector('#panel-title').textContent, path: p.querySelector('.panel-path').textContent, back: !!p.querySelector('.sheet-back'),

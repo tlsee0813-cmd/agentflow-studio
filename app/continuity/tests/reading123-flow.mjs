@@ -208,22 +208,25 @@ async function lens(browser, base, z, size) {
   assert.match(await page.locator('#lens .lens-origin h3 small').textContent(), new RegExp(`말 ${z.claims.length}$`));
   assert.equal(await page.locator('#lens .lens-origin .claim:visible').count(), z.claims.length, 'none folded away');
   assert.equal(await page.locator('#lens .lens-origin .claims-more').count(), 0);
-  // Every citation is the line's number in the pane, in reading order.
-  assert.deepEqual(await page.locator('#lens .lens-origin .cl-cite').allTextContents(), z.claims.map((_, i) => String(i + 1)));
+  // Every claim carries its footnote (map design v3 S2: 〔tag·n〕, the same number as in 구조 and 주장 순).
+  const marks = await page.locator('#lens .lens-origin .fn').allTextContents();
+  assert.equal(marks.length, z.claims.length); assert.ok(marks.every(t => /^〔(?:\S+·)?\d+〕$/.test(t)), `marks ${marks}`);
   const body = page.locator('#lens .lens-body');
 
-  // A claim's quote and back: same URL, the same tab, citation button (focused), scroll and camera; the unfolded note stays unfolded.
-  const cite = page.locator('#lens .lens-origin .cl-cite').last();
+  // A claim's footnote opens its item under 주장 순; the item's 원문에서 보기 and back: same URL, the same tab, the same button
+  // (focused), scroll and camera; the unfolded note stays unfolded.
+  await page.locator('#lens .lens-origin .fn').last().click();
+  const cite = page.locator('#lens .ev-item.open .ev-open').last();
   await cite.scrollIntoViewIfNeeded(); await cite.focus();
   const scroll0 = await body.evaluate(e => e.scrollTop), url0 = page.url(), camera0 = await page.evaluate(CAMERA), key0 = await cite.getAttribute('data-claim-focus');
-  const quote = (await cite.getAttribute('title')).replace(/^원문에서 보기 · “|”$/g, '');
+  const quote = await page.locator('#lens .ev-item.open .ev-quote-t').last().textContent();
   await cite.click();
   await page.locator('#lens .rr-mark').first().waitFor();
   assert.ok((await page.locator('#lens .rr-mark').allTextContents()).join('').includes(quote.trim().slice(0, 30)), 'the exact passage is marked');
   await page.locator('#lens .rr-back').click();
-  await page.locator('#lens .lens-origin').waitFor();
+  await page.locator('#lens .ev-item.open').first().waitFor();
   assert.equal(page.url(), url0);
-  const back = page.locator('#lens .lens-origin .cl-cite').last();
+  const back = page.locator('#lens .ev-item.open .ev-open').last();
   assert.equal(await back.getAttribute('data-claim-focus'), key0);
   assert.ok(await back.evaluate(e => e === document.activeElement), 'the same citation has the focus');
   assert.equal(await page.locator('#lens [role=tab][aria-selected=true]').getAttribute('data-tab'), 'evidence', 'the same tab');
