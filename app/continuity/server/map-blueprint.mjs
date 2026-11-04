@@ -5,6 +5,7 @@ import { askRecords, validateMapAsk, validateMapReply, setAside, readingExclusio
   artifactRows, heldPlaces, carriesArtifact, LOOP_UNIT, programLoop, unrecordedAt, conditionRows, fileMapRows, programPortMap, carriesQuery, contentWords,
   portSides, stepRenames, REFUSAL_OUTCOME, LOOP_TYPES, listItems, sameSetting, VERSION_WORD, namesWord, fieldGroupHead, programLoopStep, programSteps, tableCells, MAP_SUMMARY_MAX, STEP_NAME_MAX, CADENCE_MAX, FILE_ROLE_MAX } from '../dist/public/shared/map-reading.js';
 import { resolveRange } from '../dist/public/shared/evidence-span.js';
+import { rowsOf, readRecordTables } from '../dist/public/shared/record-table.js';
 import { CLAIM_TOPICS, EVIDENCE_GRADES, PART_STATES, PART_TYPES, CHANNELS, RELATION_MODES, RULE_SCOPES, ANCHOR_KINDS, ENFORCER_KINDS, WITHDRAWAL_KINDS, GATE_KINDS } from '../dist/public/shared/types.js';
 
 // .31: a first map plans up to 36 parts (twelve fragments of three; the two KORU records need about 33: 24 table rows and nine
@@ -109,7 +110,8 @@ parts는 기록이 그린 흐름의 단계를 잃지 않을 만큼 보통5~36개
 설계 기록의 「조건·거부·분기」 행은 그 부분 이름 칸의 부분 at에 넣고, 현황 보고의 「지켜야 할 것」 규칙 행이 그 행의 조건 낱말(환불·역할·세션·만료 시간 같은)을 함께 쓰는 다른 부분이 있으면 그 규칙 행의 부분 at에도 넣는다(관리자 화면 「환불은 운영 담당자·소유자만, 관리자 세션은 8 h 만료」 ↔ 주문 API의 「403 ROLE_REQUIRED」·「401 SESSION_EXPIRED」 행): 그 부분의 규칙이 그 행을 자리와 장치로 읽는다.
 기록이 스스로 구성 목록(돌아가는 것의 표, 유닛 목록)·층 번호·「A → B」 흐름을 제시하면 그 단위로 부분을 나누고, 화살표의 양 끝이 서로 다른 부분이 되게 한다. 「A·B와 C」처럼 서로 다른 유닛을 한 이름에 묶어야 하면 나눈다. 기록이 묶음 이름과 구성원을 함께 밝히면(예: 「정보 층(달력·카드·질감)」, 1a·1b·1c 같은 번호) 그 묶음을 부모 부분으로 두고 구성원을 자식으로 둔다. 미구현·폐기된 구성원은 부분으로 세울 자리가 없을 때만 같은 묶음 부분의 focus에 적는다. 원문이 「X의 입력」이라 부른 것은 X의 자식으로 두지 말고 X 옆 부분으로 두어 X로 가는 관계로 잇는다. parent는 원문이 「A(B·C)」처럼 B를 A 안에 직접 열거할 때만 쓴다. 목적·설계 사상만 말하고 다른 부분과 주고받는 것이 없는 내용은 부분으로 만들지 않고 가장 가까운 부분의 focus로 보낸다. 기존 ref는 INPUT.parts에 있는 ID만, name은 사용자의 기존 이름과 글자 그대로 같아야 하고 parent도 원래 parentId와 같아야 한다. 새 ref는 ^new:[a-z0-9_-]{1,24}$이며 중복하지 않는다. parent는 실제 기존 부분 또는 이 계획의 부분 ref나 null이며 자기 자신·순환·없는 부모를 쓰지 않는다. 포함 근거가 없으면 null이다. name60자 이하. focus는 320자 안에 쓴다(480자를 넘으면 설계 전체가 거절된다). 긴 목록은 이름만 남기고 설명을 줄인다.
 global은64개 이하(그중 relation 항목 48개까지), text240자 이하. 뒤의 조건·정정·철회·미구현·모름, 내포 예제 범위, 관계 방향, 요청·prior 귀속을 누락하지 않는다. kind=relation 항목은 원문의 화살표·「A가 B를 읽는다」·보고와 지시의 전달마다 「from ref → to ref: 넘기는 것(원문 이름)」 형식으로 하나씩 쓰고 at에 그 줄을 둔다(흐름 뼈대이며 증거가 아니다). 원문이 「읽기만」「보고 읽기」「한 줄 지시」「잔고로 노출 조절」처럼 적은 읽기와 제어도 그 문장이 있을 때만 화살표로 잇는다(예: 성적표 → 사람, 엔진 → 감시, 사람 → 엔진). 흐름도의 끝까지 따라가 한 부분에서 나가는 화살표(예: 엔진 → journal·outcomes → 경주 행 → 성적표)도 relation 항목으로 세운다. 부분은 원문의 표·목록이 이름 붙인 단위(유닛·생산자·사람)로만 세우고, 흐름 그림의 중간 산출(journal·outcomes 같은 기록)은 부분이 아니라 그것을 내는 단위의 focus에 남기며 그 화살표는 단위 사이의 relation으로 쓴다. 원문이 서로 다른 생산자로 적은 둘(예: 라이브 엔진의 경주 행과 종이 재생의 경주 행)을 한 부분에 합치지 않는다. 사람(소유자)과 그 지시를 받는 세션·감독자가 원문에 따로 적혀 있으면 따로 둔다. 앞으로 하겠다는 지시·계획은 관계가 아니라 그 부분의 want로만 두고 relation 항목으로 쓰지 않는다. [모름]의 각 줄은 그것이 가리키는 부분에 하나씩 uncertain 항목으로 두고 「→ ref」로 맡긴다. 정정·철회·모름 항목과 condition·request 항목의 text 끝에는 그것을 맡을 부분 ref를 「→ new:x」로 하나만 적는다. 기록의 철회·변경, 실제 변화, 오류, 지켜야 할 것, 모르는 것, 가장 자신 없는 것 표의 행은 그 행의 「부분 이름」 칸(없으면 첫 칸)이 이름 붙인 부분에 맡긴다(「엔진 | 매일 FLAT 재시작 | 채택 안 함」은 → 엔진이며, 그것을 대신한 감시를 맡은 부분이 아니다). 「전체」 행만 원문이 그 규칙이 제약한다고 적은 부분에 둔다. 「전체」 행(부분 이름 칸이 「전체」)은 한 부분에만 맡긴다: 원문이 그 규칙이 제약한다고 적은 부분 하나(없으면 기록이 전체를 대표해 이름 대는 첫 부분)이며, 같은 「전체」 행을 둘 이상 부분의 at이나 항목에 나누어 넣지 않는다(나누어 맡기면 한 규칙이 두 번 선다). 한 항목은 원문 표 행 하나다: 철회·정정·규칙·모름·가장 자신 없는 것·다음 관문 표의 행마다 항목 하나를 쓰고 at에 그 행 하나를 둔다(그 행이 가리키는 다른 기록의 한 줄은 함께 둘 수 있다). 여러 행을 한 항목에 묶지 않는다(묶은 항목은 앞의 행만 주장이 되고 나머지 행이 사라진다). global 자리가 모자라면 그 행을 맡을 부분의 at에 그 행을 두어 맡긴다. 한 부분에 맡기는 항목 수는 줄이지 않는다(첫 지도의 부분은 주장을 20개까지 쓴다). 맡긴 항목의 표 행마다 그 부분의 주장 하나가 되며, 어느 주장도 인용하지 않은 행은 진단에 남는다. relation 항목은 48개까지만 쓴다. 기록의 연결 표(보내는 부분 | 받는 부분)의 모든 행은 relation 항목 하나(저장소를 거치면 둘)로 빠짐없이 쓴다. 소유자가 정한 요구사항은 규칙을 전달받는 세션이 아니라 그 규칙이 제약하는 부분(돈 경로 → 엔진, 지출 → 카드 러너, 노출 → 사람)에 둔다. 운영 함정·환경 사실(예: coreutils 차이, 거래소 지연 몰림)은 원문이 그 영향을 받는다고 이름 붙인 부분의 focus에 두고, 그것을 감시·보고하는 부분에 두지 않으며, 받는 부분이 원문에 없으면 아무 부분에나 붙이지 않는다. 원문 표의 단위와 저장소가 부분 36개를 넘으면 관계가 없는 자식부터 부모 부분의 focus에 원문 이름과 상태 그대로(예: 「변경 구상(plan-view): 돌고 있음 [추정]」) 넣고, 관계가 있는 단위와 사람은 부분으로 남긴다. 요구·구상·보고·검사 보고·제공 자료를 구별하고 작성자의 보고를 앱이 확인한 사실로 올리지 않는다. 같은 이름만으로 다른 대상·판본을 합치지 않는다. 사용자 이름·부모·직접 바로잡은 역할을 보존한다. 원문이 명시한 범위만 정정하고 도착 순서로 앞 주장을 철회하지 않는다. 「한 줄 요약」 문장은 material이 아니며, 꼬리표 밖에서 이름이 하나만 나오는 부분에 맡기고(꼬리표 안의 보고자가 아니다) 부분 이름이 둘 이상·없음이거나 프로젝트를 정의하는 문장은 어느 부분에도 맡기지 않는다.
-모든 at는 원래 INPUT.records에 실제 있는 구간 별칭1~8개다. 범위 문자열·인용 복사·새 별칭·현재 지도나 요청의 ID를 at로 쓰지 않는다. 서로 떨어진 별칭은 단서 위치 목록이며 이어 붙인 인용이 아니다. basis/note의 사용자 기재 정보를 원문 조건으로 만들지 않는다. 실제 부분이 없으면 parts=[]로 두며 빈 틀을 만들지 않는다. 설계 자체는 원문 증거도 구현 사실도 아니다.`;
+모든 at는 원래 INPUT.records에 실제 있는 구간 별칭1~8개다. 범위 문자열·인용 복사·새 별칭·현재 지도나 요청의 ID를 at로 쓰지 않는다. 서로 떨어진 별칭은 단서 위치 목록이며 이어 붙인 인용이 아니다. basis/note의 사용자 기재 정보를 원문 조건으로 만들지 않는다. 실제 부분이 없으면 parts=[]로 두며 빈 틀을 만들지 않는다. 설계 자체는 원문 증거도 구현 사실도 아니다.
+기록 v4(첫 줄 「기록 v4」 또는 덩이 머리 줄 「〔기록 … · 덩이 n · 기준 …〕」)는 표마다 「표 ID 제목」 줄이 있고, 한 답이 덩이 1(지금 상태)과 덩이 2(설계)로 나뉘어 두 기록으로 들어온다. 부분은 C-PART 행(행 ID B01…)이고 C-STEP 행 ID B03:S02의 B03은 C-PART 행 ID다. 표 이름은 ID로 대응한다: C-PART(v3: 부분·부분 유형), C-LINK(연결), C-CHANGE(최근 소유자 요청과 실제 변화), C-WITHDRAW(철회·변경), C-RULE(지켜야 할 것), C-ISSUE(오류·미해결), C-GATE(다음 관문), C-UNKNOWN(모르는 것), C-DOUBT(가장 자신 없는 것), C-DATA(산출물), C-DESIGN(부분별 설계), C-STEP(안의 단계), C-COND(조건·거부·분기), C-FILES(파일 지도), C-SUMMARY(한 줄 요약). v3 이름으로 말하는 규칙은 같은 ID의 표에도 적용한다. C-ENTRY의 진입점·C-VARIANT의 변형·C-CONTRACT의 외부 계약·자료형·오류 객체는 부분이 아니다(따로 맡은 일이 있는 C-PART 행만 부분이다). C-DATA 행은 종류가 「저장」일 때만 저장소 부분이 된다. C-PART의 「사용자 코드」 행은 부분이다. 보충 표(P1-01…P6-04), C-STATUS, C-DONE, 「이번 기록의 초점:」 줄은 계획 항목이나 부분의 at가 되지 않는다.`;
 export const BLUEPRINT_PROMPT = MAP_BLUEPRINT_PROMPT;
 // Keep the first-map prompt and its cache identity unchanged. Only later map.7 planning registers current-claim obligations.
 export const LATER_BLUEPRINT_PROMPT = MAP_BLUEPRINT_PROMPT + `
@@ -255,24 +257,20 @@ export function blueprintStageIssues(value, ask) {
 
 /* .29: the program's own reading of a record's numbered section tables ("2. 부분", "1. 부분 유형", "6. 철회·변경", "10. 모르는
  * 것"): the data rows (header and rule rows left out), each as its cells. A diagnostic reading of the record's layout only. */
-const PART_TABLE = /^부분(\s*유형)?(\s*\(표\))?$/, WITHDRAWN_TABLE = /^철회·변경/, UNKNOWN_TABLE = /^모르는 것/;
+// .43 (RECORD_ASKS_V4_KO.md 4.2, 4.7): every table by its fixed ID (a v4 「C-PART 부분」 title or a v3 heading the anchored title map of
+// record-table.ts names), read once there; a title pattern (the v3 readers' way) still reads the tables whose title it matches.
+const PART_TABLE = ['C-PART', 'C-PARTTYPE'], WITHDRAWN_TABLE = ['C-WITHDRAW'], UNKNOWN_TABLE = ['C-UNKNOWN'];
 const plainName = s => s.normalize('NFC').replace(/[*`]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+function tableRowsOf(ask, title) {
+  const texts = askRecords(ask);
+  if (Array.isArray(title)) return rowsOf(texts, title);
+  const out = [];
+  for (const [record, { text }] of texts) for (const table of readRecordTables(text).tables) if (title.test(table.title)) for (const row of table.rows)
+    out.push({ record, id: table.id, dialect: table.dialect, from: row.from, to: row.to, cells: row.cells.map(c => c.text), header: table.header, byColumn: row.byColumn, row, table });
+  return out;
+}
 export function sectionRows(ask, title) {
-  const rows = [];
-  for (const { text } of askRecords(ask).values()) {
-    let open = false, header = false;
-    for (const raw of text.split('\n')) {
-      const line = raw.trim(), heading = line.startsWith('|') ? null : /^\d{1,2}\.\s*(.+)$/.exec(line);
-      if (heading) { open = title.test(heading[1].trim()); header = false; continue; }
-      if (!open) continue;
-      if (!line.startsWith('|')) { if (header && line) open = false; continue; }
-      const cells = tableCells(line);
-      if (!header) { header = true; continue; }
-      if (cells.every(cell => !cell || /^:?-{2,}:?$/.test(cell))) continue;
-      rows.push(cells);
-    }
-  }
-  return rows;
+  return tableRowsOf(ask, title).map(row => row.cells);
 }
 /** .30: the data rows of every table of the records whose header names a sender and a receiver column (「보내는 부분 | 받는 부분」),
  * each as [sender, receiver] loosely compared, wherever the table stands. */
@@ -308,7 +306,7 @@ export function connectionPayloadRows(ask) {
   return rows.filter(([from, to]) => from && to);
 }
 /** .30: the first cells of the records' part tables and artifact table ("2. 산출물"): the names a part may carry. */
-const ARTIFACT_TABLE = /^산출물/;
+const ARTIFACT_TABLE = ['C-DATA'];
 const tableNames = ask => new Set([...sectionRows(ask, PART_TABLE), ...sectionRows(ask, ARTIFACT_TABLE)].map(cells => plainName(cells[0] ?? '')).filter(Boolean));
 /** .30 (diagnostic): the indexes of new parts whose name is no first cell of those tables (none when the records draw no part table). */
 export function renamedParts(parts, ask) {
@@ -370,27 +368,13 @@ export function blueprintCoverage(value, ask) {
  * 「실제 변화」, 「오류·미해결」, 「철회·변경」), each with its record, its place in that record's text and the part it names (the cell
  * under a header naming a part, 「부분 이름」 or 「바뀐 부분 이름」; else the first cell). The program's reading of INPUT only. */
 // .32: and the 「가장 자신 없는 것」 rows (the record's own hedge about what was not seen after its basis time).
-const FACT_TABLE = /실제\s*(?:로\s*)?(?:바뀐|변화)|오류|철회|가장\s*자신\s*없는/;
+const FACT_TABLE = ['C-CHANGE', 'C-ISSUE', 'C-WITHDRAW', 'C-DOUBT'];
 /** .32: the data rows of the records' tables under a numbered heading matching title, each with its record, its place in that
  * record's text, the part it names (the cell under a header naming a part, else the first cell) and its cells. */
 function tableRowsUnder(ask, title) {
-  const rows = [];
-  for (const [record, { text }] of askRecords(ask)) {
-    let open = false, column = null, header = [], offset = 0;
-    for (const raw of text.split('\n')) {
-      const from = offset; offset += raw.length + 1;
-      const line = raw.trim(), heading = line.startsWith('|') ? null : /^\d{1,2}\.\s*(.+)$/.exec(line);
-      if (heading) { open = title.test(heading[1].trim()); column = null; continue; }
-      if (!open) continue;
-      if (!line.startsWith('|')) { if (column !== null && line) open = false; continue; }
-      const cells = tableCells(line);
-      // .35: the header cells travel with each row (the design table's 설정·상태 and 안의 단계 columns are read by name).
-      if (column === null) { column = Math.max(0, cells.findIndex(cell => /부분/.test(cell))); header = cells; continue; }
-      if (cells.every(cell => !cell || /^:?-{2,}:?$/.test(cell))) continue;
-      rows.push({ record, from, to: from + raw.length, name: cells[column] || cells[0] || '', cells, header });
-    }
-  }
-  return rows;
+  // .35: the header cells travel with each row (the design table's 설정·상태 and 안의 단계 columns are read by name).
+  return tableRowsOf(ask, title).map(row => { const column = Math.max(0, row.header.findIndex(cell => /부분/.test(cell)));
+    return { record: row.record, from: row.from, to: row.to, name: row.cells[column] || row.cells[0] || '', cells: row.cells, header: row.header }; });
 }
 export const factRows = ask => tableRowsUnder(ask, FACT_TABLE).map(({ record, from, to, name }) => ({ record, from, to, name }));
 /* .38 (diagnostic only): the sentences of the records' 「한 줄 요약」 section (one span each), each with the part it names among the
@@ -402,7 +386,8 @@ export const factRows = ask => tableRowsUnder(ask, FACT_TABLE).map(({ record, fr
  * naming two parts or more outside its tags, or the project itself (the first word of its name), or none, defines the project: it is no
  * part's row (name null, project true) and the summary receives it (readingDiagnostics, unbacked). The .38 KORU N02.07 「바이낸스 … 엔진
  * 하나로 하는 단타 유기체다」 was counted as 바이낸스's row. */
-const SUMMARY_SECTION = /^한\s*줄\s*요약/;
+// .43: the summary is C-SUMMARY (v4 「C-SUMMARY 요약」, v3 「1. 한 줄 요약」): the lines under its title.
+const SUMMARY_SECTION = 'C-SUMMARY';
 export function summarySentences(ask, names) {
   const out = [], wanted = [...new Set((Array.isArray(names) ? names : []).filter(n => typeof n === 'string').map(plainName).filter(n => n.length >= 2))];
   // The project itself: its whole name, or its first word when that word is Latin (「KORU 구조 실험」 → koru; 「주문 배송 웹앱 시험」 whole).
@@ -415,13 +400,7 @@ export function summarySentences(ask, names) {
   };
   for (const [record, { text, spans }] of askRecords(ask)) {
     if (!spans) continue;
-    const body = []; let open = false, offset = 0;
-    for (const raw of text.split('\n')) {
-      const from = offset; offset += raw.length + 1;
-      const line = raw.trim(), heading = line.startsWith('|') ? null : /^\d{1,2}\.\s*(.+)$/.exec(line);
-      if (heading) { open = SUMMARY_SECTION.test(heading[1].trim()); continue; }
-      if (open && line) body.push({ from, to: from + raw.length });
-    }
+    const body = (readRecordTables(text).byId.get(SUMMARY_SECTION) ?? []).flatMap(t => t.body.map(b => ({ from: b.from, to: b.to })));
     if (!body.length) continue;
     for (const s of spans) {
       if (!body.some(b => s.from < b.to && b.from < s.to)) continue;
@@ -457,7 +436,7 @@ export function summaryStructure(ask, summary) {
  * the given ones (by the row's part cell), as { rows: how many, uncited: ['판본 token: part'] for those no claim (its text, about, when,
  * where, before), setting, file-map row (path or role), role's about or file of any given part carries. A token: 7 to 40 hex characters
  * with a digit and a letter, standing alone. */
-const VERSION_ROWS = /^부분별\s*설계|^부분(\s*유형)?(\s*\(표\))?$/, VERSION_TOKEN = /(?<![0-9a-z])(?=[0-9a-f]*\d)(?=[0-9a-f]*[a-f])[0-9a-f]{7,40}(?![0-9a-z])/gi;
+const VERSION_ROWS = ['C-DESIGN', 'C-PART', 'C-PARTTYPE'], VERSION_TOKEN = /(?<![0-9a-z])(?=[0-9a-f]*\d)(?=[0-9a-f]*[a-f])[0-9a-f]{7,40}(?![0-9a-z])/gi;
 /** .41 (KORU (10), from the blind judging of the .40 KORU map, whose 질감 v3 lost 065ce38b unseen: it stood only in the design record's
  * 경로 약속 line, 「T = git ops/texture-v3(065ce38b)…」): the version tokens of each 경로 약속 entry (「X = …」, entries joined by 「 · 」), by its
  * abbreviation (one Latin letter and up to three more letters or digits). */
@@ -467,6 +446,8 @@ export function pathVersions(ask) {
     const at = line.search(/경로\s*약속\s*[:：]/); if (at < 0) continue;
     const rest = line.slice(at).replace(/^경로\s*약속\s*[:：]/, '');
     for (const entry of rest.split(/\s+·\s+/)) {
+      // .43 (K20): the 「@sha」 entry of a v4 경로 약속 is the records' basis, kept under 「@」.
+      const sha = /^\s*@\s*([0-9A-Za-z._/-]{4,64})\s*$/.exec(entry); if (sha) { const tokens = sha[1].match(VERSION_TOKEN) ?? []; if (tokens.length) out.set('@', [...new Set([...(out.get('@') ?? []), ...tokens])]); continue; }
       const m = /^\s*([A-Za-z][A-Za-z0-9]{0,3})\s*=\s*(.+)$/.exec(entry); if (!m) continue;
       const tokens = m[2].match(VERSION_TOKEN) ?? []; if (tokens.length) out.set(m[1], [...new Set([...(out.get(m[1]) ?? []), ...tokens])]);
     }
@@ -515,8 +496,9 @@ export function uncitedFacts(ask, parts, own = null) {
 }
 /* .32: the tables whose rows are each a claim of the part they name: a plan item's own rows (change, defect, withdrawal, rule,
  * unknown, hedge, next gate) and a part's own focus rows (the plan's at of the part on a change, defect, withdrawal or rule row). */
-const ITEM_ROWS = /실제\s*(?:로\s*)?(?:바뀐|변화)|오류|철회|지켜야\s*할|모르는\s*것|가장\s*자신\s*없는|다음\s*관문/;
-const FOCUS_ROWS = /실제\s*(?:로\s*)?(?:바뀐|변화)|오류|철회|지켜야\s*할/;
+// .43: by table ID; a supplementary table (P1-03 …) is no fact row, plan item or own row.
+const ITEM_ROWS = ['C-CHANGE', 'C-ISSUE', 'C-WITHDRAW', 'C-RULE', 'C-UNKNOWN', 'C-DOUBT', 'C-GATE'];
+const FOCUS_ROWS = ['C-CHANGE', 'C-ISSUE', 'C-WITHDRAW', 'C-RULE'];
 /* .35: the rows a part owns by its own name (the cell under a header naming a part, else the first cell), each one claim of that part
  * whatever the plan assigned: the status report's change, defect, withdrawal, rule, unknown and hedge rows (OWN_ROWS) and the design
  * record's 「조건·거부·분기」 rows (CONDITION_ROWS; an anchor of a rule claim quoting the row lands it too); its 「안의 단계」 rows marked
@@ -524,8 +506,8 @@ const FOCUS_ROWS = /실제\s*(?:로\s*)?(?:바뀐|변화)|오류|철회|지켜�
  * 설계」 row's 설정·상태 cell (split on 「,」 and 「·」 outside parentheses; a version is a claim's, never an item), which lands when the
  * part's config or stateVars name it (the same words, loosely compared, one inside the other). The .34 card runner lost four
  * condition rows and ARM its [모름] step row under the cap because only the plan's assigned items were counted. */
-const OWN_ROWS = /실제\s*(?:로\s*)?(?:바뀐|변화)|오류|철회|지켜야\s*할|모르는\s*것|가장\s*자신\s*없는/;
-const CONDITION_ROWS = /^조건\s*·\s*거부/, STEP_ROWS = /^안의\s*단계/, DESIGN_ROWS = /^부분별\s*설계/;
+const OWN_ROWS = ['C-CHANGE', 'C-ISSUE', 'C-WITHDRAW', 'C-RULE', 'C-UNKNOWN', 'C-DOUBT'];
+const CONDITION_ROWS = ['C-COND'], STEP_ROWS = ['C-STEP'], DESIGN_ROWS = ['C-DESIGN'];
 const UNKNOWN_MARK = /\[모름\]/;
 const ASSIGNED_KINDS = new Set(['condition', 'correction', 'uncertain', 'request']);
 const ASSIGNED = /→\s*(new:[a-z0-9_-]{1,24}|P\d{2,3})/g;
@@ -700,7 +682,7 @@ const PLAN_LINE = /(new:[a-z0-9_-]{1,24}|P\d{2,3})\s*(?:─+→|-+>|→)\s*(?:to
  * (IP당 60 s, 300 s 허용) says nothing of repeating. STRONG says how often (every word but tick). */
 const STRONG_REPEATS = /분마다|매분|폴링|주기|[a-z_]*(?:interval|poll|cadence|period|block)_?(?:ms|s)\b|_cadence\b|\d+\s*(?:ms|s|초)\s*(?:마다|주기|폴링)/i;
 const REPEATS = new RegExp(`${STRONG_REPEATS.source}|tick`, 'i');
-const LOOP_ROWS = /^(부분별\s*설계|안의\s*단계)/;
+const LOOP_ROWS = ['C-DESIGN', 'C-STEP'];
 /** .35 (diagnostic only): the parts of the given ones (by name, loosely compared) whose design or inner-step rows say they repeat while
  * their loop is null, as { rows: parts with such rows, missing: ['name: the first such row as written'] }.
  * .36: a setting of the part's own design row saying how often (j1_cadence 60 s, POLL_MS 30000) names it first, as 「name: 설정 | the
@@ -728,6 +710,13 @@ export function loopRows(ask, parts) {
   // .42: nor a part one of whose steps names its loop (programLoopStep: the program fills it when the wire is read).
   const missing = [...seen].filter(([part]) => !looped(part.loop) && !programLoop(ask, { name: part.name, config: part.config, state: part.state, type: part.type })
     && !programLoopStep((Array.isArray(part.steps) ? part.steps : []).filter(s => s && typeof s.name === 'string'))).map(([, name]) => name);
+  // .43: a part with two loops its steps name keeps one as its loop; the other is named (「name: 둘째 루프 | step」), never dropped unseen.
+  for (const part of list) {
+    const named = (Array.isArray(part.steps) ? part.steps : []).filter(s => s && typeof s.name === 'string' && /루프|\bloop\b/i.test(s.name));
+    if (named.length < 2 || !looped(part.loop)) continue;
+    const unit = plainName(String(part.loop.unit ?? ''));
+    for (const s of named) if (!unit.includes(plainName(s.name))) missing.push(`${part.name}: 둘째 루프 | ${opening(s.name)}`);
+  }
   return { rows: seen.size, missing };
 }
 /** .41 (R2, diagnostic only): the 「안의 단계」 rows of the given parts that hold one step or more (by name, loosely compared) no step of

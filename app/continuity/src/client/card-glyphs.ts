@@ -20,6 +20,9 @@ export const GLYPH: Record<GlyphKey, string> = {
   compute: '<path d="M10.5 3h-1a2 2 0 0 0-2 2v6.5a2 2 0 0 1-2 2h-1M5 7.5h5"/>',
   collector: '<path d="M2.5 9.5h3l1 2h3l1-2h3M2.5 9.5 4 4h8l1.5 5.5v3.5a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1z"/>',
   actor: '<path d="M2.5 8h11M10.5 5l3 3-3 3M7 3.5v9"/>',
+  // map-reading.18 (pipeline .43): a screen (a display on a stand) and a build or deploy automation (a box on a conveyor arrow).
+  screen: '<rect x="2" y="3" width="12" height="8" rx="1.5"/><path d="M6 13.5h4M8 11v2.5"/>',
+  automation: '<rect x="5" y="2.5" width="6" height="5" rx="1"/><path d="M2.5 11h9M9.5 9l2 2-2 2M2.5 13.5h11"/>',
   neutral: '<rect x="3.5" y="3.5" width="9" height="9" rx="2"/>',
   composition: '<rect x="2.5" y="2.5" width="11" height="11" rx="2"/><rect x="5" y="5" width="3" height="3" rx=".6"/><rect x="8.5" y="8.5" width="2.5" height="2.5" rx=".6"/>'
 };

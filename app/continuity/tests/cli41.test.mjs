@@ -11,6 +11,7 @@ import * as S from '../dist/public/shared/storage.js';
 import { studioView } from '../dist/public/shared/studio.js';
 import { validateProject } from '../dist/public/shared/validation.js';
 import { planStoreFolds, storeDupParts, planClaims, planShort, readingDiagnostics, stepsCut, pathVersions, uncitedFacts, MAP_BLUEPRINT_PROMPT } from '../server/map-blueprint.mjs';
+import { stripEighteen } from './strip18.mjs';
 
 const fixture = name => readFileSync(new URL(`./fixtures/cli41/${name}`, import.meta.url), 'utf8');
 function ofTexts(texts) {
@@ -90,11 +91,11 @@ test('.41 R2 sixteen steps, the tail kept: a part reads its fourteen 4절 rows, 
   assert.deepEqual(M.readingExclusions(M.validateMapReply(wire([over]), f.ask, { setAside: true })).filter(x => x.category === 'step').map(x => x.path), ['parts[0].steps']);
   // Stored: map-reading.16 holds fourteen steps; the same entry as map-reading.15 is past its twelve.
   const applied = M.applyReading(f.project, f.input, read, meta('R_cli41_steps', 'a'));
-  assert.equal(applied.reading.version, 'map-reading.17');
+  assert.equal(applied.reading.version, 'map-reading.18');
   assert.deepEqual(validateProject(applied.project), applied.project);
   const old = JSON.parse(S.serializeProject(applied.project)); old.readings.at(-1).version = 'map-reading.15';
   assert.throws(() => validateProject(old), undefined, 'a map-reading.15 entry holds twelve steps');
-  const twelve = JSON.parse(S.serializeProject(applied.project)), r = twelve.readings.at(-1); r.version = 'map-reading.15'; r.parts[0].steps = r.parts[0].steps.slice(0, 12).map(({ when, ...s }) => s);
+  const twelve = JSON.parse(S.serializeProject(applied.project)), r = stripEighteen(twelve.readings.at(-1)); r.version = 'map-reading.15'; r.parts[0].steps = r.parts[0].steps.slice(0, 12).map(({ when, ...s }) => s);
   assert.deepEqual(validateProject(twelve), twelve, 'a map-reading.15 entry keeps its shape');
 });
 
@@ -264,7 +265,7 @@ test('.41 KORU (11) a restated claim carrying the only copy of a sha stays; once
 
 test('.41 prompts: recipe .41, the plan\'s folder and 「전체」 rules, the render\'s caps, bare lists, person devices, page loops, condition states, port direction, kept shas; the summary says what the project is first', async () => {
   const P = await import('../server/map-pipeline.mjs');
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.42', 'later-map-divided.42']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.43', 'later-map-divided.43']);
   for (const rule of ['「있는 곳」이 부분 표 저장소 행의 이름으로 시작하면(「inbox 폴더 pos/」', '파일 ref → 폴더 ref 「담김」 선은 쓰지 않는다', '「있는 곳」이 부분 표의 어느 저장소도 이름 대지 않는 폴더'])
     assert.ok(MAP_BLUEPRINT_PROMPT.includes(rule), rule);
   for (const rule of ['순번 순서로 최대 24개다', '꼬리를 자르지 않는다', '진단 steps-cut', '적힌 그대로 최대 12개', '「종료 코드 0·3·4·5·6」)은 나누지 않고 한 항목으로 쓴다', '「설정 상한 12 밖」',
