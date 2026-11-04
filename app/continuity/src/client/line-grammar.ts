@@ -98,31 +98,66 @@ export interface BadgeRead { cadence?: string | null; mode?: RelationMode | null
 export interface LineBadge {
   /** What it says: 'condition' (when), 'optional', or 'cadence' (the record's words). */
   kind: 'condition' | 'optional' | 'cadence';
-  /** At rest: the words as written (the badge ellipsises past 120 screen px), or 'X N' when the stroke holds several. */
+  /** At rest: the record's own words as written; a stroke whose relations wrote different words reads the first and how many other
+   * words ('명령마다 외 1'); one whose relations do not all write any reads the words and how many do ('명령마다 (1/2)'). Never the kind
+   * word alone ('박자', '박자 2'): what kind of words they are reads in the tip. */
   short: string;
-  /** Selected: the words in full with what kind of words they are, and the mode as read. */
+  /** Selected: the same words, longer (≤24 of the record's characters), with the mode as read ('호출마다 · 설계'). */
   full: string;
+  /** The tip: what kind of words they are, each distinct wording in full, and the mode. */
+  tip: string;
+  /** The distinct wordings as written, in the relations' order. */
+  words: string[];
   /** How many of the stroke's relations carry such words. */
-  n: number }
+  n: number;
+  /** The words are a reference the record left unresolved ('위 두 줄과 같음'): shown as written, muted, never resolved here. */
+  unresolved: boolean }
 /** Badge words at most this long whole on a selected line (6.2: ≤24 of the record's characters), then an ellipsis. */
 export const BADGE_FULL = 24;
+/** A badge with no room for its words reads this many of them, then an ellipsis (its whole words in the tip). */
+export const BADGE_CLIP = 7;
+/** The glyph a cadence badge falls back to when not even its clipped words fit (and at the overview): a small rhythm mark, its
+ * words in the tip. A condition falls back to the word 조건, an optional mark is the word 선택: those words say something. */
+export const BADGE_GLYPH = '◷';
 const cut = (t: string, n: number) => (t.length > n ? `${t.slice(0, n - 1)}…` : t);
+/** Words that point at another row of the record instead of saying a cadence ('위 두 줄과 같음', '위와 같음', '상동', '앞 행과 동일',
+ * 'same as above'): the reading kept the record's relative reference as it stood. Shown as written and muted; never resolved here. */
+export function isRelativeRef(t: string): boolean {
+  const s = t.replace(/\s+/g, ' ').trim();
+  return /^(상동|〃|동상|ditto|same as above|see above)\.?$/i.test(s) || /^(위|앞|윗|상기)\S*\s*.{0,14}?(와|과|에서)?\s*(같음|같다|같은|동일|동일함|마찬가지)\.?$/.test(s) || /^same as (the )?(row|line|rows|lines)? ?above/i.test(s);
+}
 /** The badge of a stroke from what its relations' readings say; null when none says anything of when it flows (no badge is
  * ever made from a name, a payload or a kind). A condition outranks an optional mark, which outranks cadence words. */
 export function lineBadge(rels: readonly BadgeRead[]): LineBadge | null {
   const pick = (k: LineBadge['kind']) => rels.map(r => (k === 'condition' ? r.when ?? null : k === 'optional' ? (r.optional ? '선택' : null) : r.cadence ?? null)).filter((x): x is string => !!x && !!x.trim());
   for (const kind of ['condition', 'optional', 'cadence'] as const) {
     const said = pick(kind); if (!said.length) continue;
-    const uniq = [...new Set(said.map(s => s.replace(/\s+/g, ' ').trim()))], word = kind === 'condition' ? '조건' : kind === 'optional' ? '선택' : '박자';
+    const words = [...new Set(said.map(s => s.replace(/\s+/g, ' ').trim()))], word = kind === 'condition' ? '조건' : kind === 'optional' ? '선택' : '박자';
     const modes = [...new Set(rels.map(r => r.mode).filter(Boolean))], mode = modes.length === 1 ? (modes[0] === 'design' ? ' · 설계' : ' · 관찰') : '';
-    if (uniq.length === 1 && rels.length === said.length)
-      return { kind, short: kind === 'optional' ? '선택' : uniq[0]!, full: `${word} · ${kind === 'optional' ? '선택' : cut(uniq[0]!, BADGE_FULL)}${mode}`, n: said.length };
-    // Several relations on one stroke whose words differ (or some of which say none): how many say any, never one of them as the
-    // stroke's.
-    return { kind, short: `${word} ${said.length}`, full: `${word} ${said.length} / ${rels.length}${mode} · 선택하면 관계마다`, n: said.length };
+    const unresolved = kind !== 'optional' && words.every(isRelativeRef);
+    const tip = `${word} · 기록의 글자 그대로${unresolved ? ' · 기록 안의 상대 참조 (풀지 않음)' : ''}\n${words.map(w => `“${w}”`).join('\n')}${rels.length > 1 ? `\n관계 ${rels.length}개 중 ${said.length}개가 적음` : ''}${mode ? `\n${mode.slice(3)}` : ''}`;
+    if (kind === 'optional') return { kind, short: '선택', full: `선택${mode}`, tip, words, n: said.length, unresolved: false };
+    const first = words[0]!, others = words.length - 1, part = said.length < rels.length;
+    const short = others ? `${first} 외 ${others}` : part ? `${first} (${said.length}/${rels.length})` : first;
+    const head = kind === 'condition' ? '조건 · ' : '';
+    const full = `${head}${cut(first, BADGE_FULL)}${others ? ` 외 ${others}` : part ? ` (${said.length}/${rels.length})` : ''}${mode}`;
+    return { kind, short, full, tip, words, n: said.length, unresolved };
   }
   return null;
 }
+/** The texts a badge tries, in order, where it is placed (the first with room wins): selected, its full words, then the rest
+ * form; then the words clipped to BADGE_CLIP; then the cadence glyph (or 조건 · 선택). At the overview and the dot map a cadence badge
+ * is its glyph alone (5.5: the overview keeps condition badges; a cadence reads on hover and nearer). Never the bare kind word 박자. */
+export function badgeForms(b: LineBadge, on: boolean, tier: ZoomTier | null = null): string[] {
+  const fallback = b.kind === 'cadence' ? BADGE_GLYPH : b.kind === 'condition' ? '조건' : '선택';
+  if (b.kind === 'optional') return ['선택'];
+  if (b.kind === 'cadence' && !on && (tier === 'far' || tier === 'dots')) return [BADGE_GLYPH];
+  const first = b.words[0] ?? '', others = b.words.length - 1;
+  const clipped = others ? `${cut(first, BADGE_CLIP - 1)} 외 ${others}` : cut(first, BADGE_CLIP);
+  return [...new Set([...(on ? [b.full] : []), b.short, clipped, fallback])];
+}
+/** Badges that found no place of their own on one part's side gather in one marker: '+N' (each line's words in its tip). */
+export const overflowMark = (n: number): string => `+${n}`;
 
 /* ---------- label priority (6.3) ---------- */
 /** The protected order of what a line carries, highest first (6.3 items 5–9; 1–4 are part and region names, which a label never
@@ -134,5 +169,24 @@ export function labelRank(x: { selected?: boolean; path?: boolean; spine?: boole
 }
 /** A label wider than this on screen ellipsises; selecting its line shows it whole (9.9-7). */
 export const LABEL_MAX = 120;
+
+/* ---------- labels by zoom tier (5.5) ---------- */
+/** What the lines carry at rest, by tier: at the overview and the dot map only how many relations a line holds and the condition
+ * badges ('counts'); at the middle tier short labels ('short': cut to LABEL_SHORT, the main flow and a scenario path placed first,
+ * 6.3); near, every label in full ('full'). The selection's own lines carry their labels at every tier. Labels only show or hide:
+ * their places never move. */
+export type RestLabels = 'counts' | 'short' | 'full';
+export const restLabels = (tier: ZoomTier | null): RestLabels => (tier === 'far' || tier === 'dots' ? 'counts' : tier === 'mid' ? 'short' : 'full');
+/** Whether a line's label reads at rest in a mode: none at 'counts' (the counts and condition badges stand for them), every one at
+ * 'short' (cut) and 'full'. The main flow and a path win a contested place by their rank (labelRank), not here. */
+export function restLabelShown(mode: RestLabels, _x: { spine?: boolean; path?: boolean } = {}): boolean {
+  return mode !== 'counts';
+}
+/** A middle-tier label keeps this many characters, then an ellipsis (its whole words on hover and nearer). */
+export const LABEL_SHORT = 14;
+export const shortLabel = (t: string, n = LABEL_SHORT): string => cut(t, n);
+/** A line label's size on screen at zoom k: it follows the zoom a little (12.5 × √k) between 11 and 14px, so it never outweighs a
+ * card's name (14px or more on screen, 5.2) far out and is not left tiny near in. */
+export const labelPx = (k: number): number => Math.min(14, Math.max(11, 12.5 * Math.sqrt(Math.max(0.01, k))));
 /** The badge's least height on screen at rest and selected (6.2, 9.6). */
 export const BADGE_H = 16, BADGE_H_ON = 20;

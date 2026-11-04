@@ -5,7 +5,7 @@
 // a route of few turns; a reference from its ear; first bends 16 from a port). No browser.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { lineStyle, lineWidth, lineBadge, mergeByChannel, multiWord, labelRank, portFaces, turnsOf, DASH, HEAD_PX, RANK, WIDTH_FLOOR, LABEL_MAX, BADGE_H, BADGE_H_ON, FACE_TURNS } from '../dist/public/client/line-grammar.js';
+import { lineStyle, lineWidth, lineBadge, mergeByChannel, multiWord, labelRank, portFaces, turnsOf, DASH, HEAD_PX, RANK, WIDTH_FLOOR, LABEL_MAX, BADGE_H, BADGE_H_ON, FACE_TURNS, badgeForms, overflowMark, isRelativeRef, restLabels, restLabelShown, shortLabel, labelPx, BADGE_GLYPH, BADGE_CLIP, LABEL_SHORT } from '../dist/public/client/line-grammar.js';
 import { resolveLabels, faceRoute, rounded } from '../dist/public/client/map-layout.js';
 import { routeEdges, earY } from '../dist/public/client/map-route.js';
 
@@ -41,21 +41,72 @@ test('LINE-3 the badge comes only from what the reading wrote of when the line f
   assert.equal(lineBadge([{ cadence: '   ' }]), null);
   // The record's words as written: a condition it put in the cadence column reads as it is.
   const b = lineBadge([{ cadence: "init_from='resume'", mode: 'design' }]);
-  assert.deepEqual(b, { kind: 'cadence', short: "init_from='resume'", full: "박자 · init_from='resume' · 설계", n: 1 });
+  assert.deepEqual(b, { kind: 'cadence', short: "init_from='resume'", full: "init_from='resume' · 설계", tip: "박자 · 기록의 글자 그대로\n“init_from='resume'”\n설계", words: ["init_from='resume'"], n: 1, unresolved: false });
   // Never parsed: '명령마다' stays the words, no beat kind is made of '마다'.
   assert.equal(lineBadge([{ cadence: '명령마다' }]).short, '명령마다');
   // A selected badge says at most 24 of the record's characters, then an ellipsis.
   const long = lineBadge([{ cadence: '가'.repeat(40) }]);
-  assert.equal(long.full, `박자 · ${'가'.repeat(23)}…`);
-  // A stroke of several relations whose words differ, or some of which say none: how many say any, none as the stroke's.
-  assert.deepEqual(lineBadge([{ cadence: '명령마다' }, { cadence: '끝에 1회' }]), { kind: 'cadence', short: '박자 2', full: '박자 2 / 2 · 선택하면 관계마다', n: 2 });
-  assert.equal(lineBadge([{ cadence: '명령마다' }, {}]).short, '박자 1');
+  assert.equal(long.full, `${'가'.repeat(23)}…`);
+  // S7: a stroke of several relations reads the record's own words: the first and how many other wordings, or how many say any.
+  assert.deepEqual(lineBadge([{ cadence: '명령마다' }, { cadence: '끝에 1회' }]), { kind: 'cadence', short: '명령마다 외 1', full: '명령마다 외 1', tip: '박자 · 기록의 글자 그대로\n“명령마다”\n“끝에 1회”\n관계 2개 중 2개가 적음', words: ['명령마다', '끝에 1회'], n: 2, unresolved: false });
+  assert.equal(lineBadge([{ cadence: '명령마다' }, {}]).short, '명령마다 (1/2)');
   assert.equal(lineBadge([{ cadence: '명령마다' }, { cadence: '명령마다' }]).short, '명령마다', 'the same words on every relation read once');
   // Once the contract carries them, a condition outranks an optional mark, which outranks cadence words.
   assert.equal(lineBadge([{ when: 'wandb_log면', cadence: 'eval_interval마다' }]).kind, 'condition');
   assert.equal(lineBadge([{ when: 'wandb_log면' }]).full, '조건 · wandb_log면');
-  assert.deepEqual(lineBadge([{ optional: true }]), { kind: 'optional', short: '선택', full: '선택 · 선택', n: 1 });
+  const opt = lineBadge([{ optional: true }]);
+  assert.deepEqual([opt.kind, opt.short, opt.full, opt.n], ['optional', '선택', '선택', 1]);
   assert.equal(BADGE_H, 16); assert.equal(BADGE_H_ON, 20);
+});
+
+test('LINE-3b S7: a badge never reads the bare kind word; it falls back from its words to clipped words to the rhythm glyph', () => {
+  const bare = /^박자( \d+)?$/;
+  const cases = [[{ cadence: '호출마다', mode: 'design' }], [{ cadence: '명령마다' }, { cadence: '끝에 1회' }], [{ cadence: '명령마다' }, {}], [{ cadence: 'eval_interval 스텝마다 한 번씩' }], [{ cadence: '위 두 줄과 같음' }]];
+  for (const rels of cases) {
+    const b = lineBadge(rels);
+    for (const on of [false, true]) for (const tier of [null, 'near', 'mid', 'far', 'dots']) for (const t of badgeForms(b, on, tier)) assert.ok(!bare.test(t), `${t} for ${JSON.stringify(rels)}`);
+    assert.ok(!bare.test(b.short) && !bare.test(b.full));
+  }
+  // Selecting keeps the record's words first ('호출마다', never '박자'): full, then the rest form, then clipped, then the glyph.
+  const call = lineBadge([{ cadence: '호출마다', mode: 'design' }]);
+  assert.deepEqual(badgeForms(call, true), ['호출마다 · 설계', '호출마다', BADGE_GLYPH]);
+  assert.deepEqual(badgeForms(call, false), ['호출마다', BADGE_GLYPH]);
+  const longer = lineBadge([{ cadence: 'eval_interval 스텝마다 한 번씩' }]);
+  assert.deepEqual(badgeForms(longer, false), ['eval_interval 스텝마다 한 번씩', 'eval_i…', BADGE_GLYPH]);
+  assert.equal(badgeForms(longer, false)[1].length, BADGE_CLIP);
+  assert.deepEqual(badgeForms(lineBadge([{ cadence: '명령마다' }, { cadence: '끝에 1회' }]), false), ['명령마다 외 1', BADGE_GLYPH]);
+  assert.deepEqual(badgeForms(lineBadge([{ cadence: 'log_interval 스텝마다' }, { cadence: '끝에 1회' }]), false), ['log_interval 스텝마다 외 1', 'log_i… 외 1', BADGE_GLYPH]);
+  // The overview keeps condition badges with their words; a cadence badge is its glyph there (its words in the tip and on selection).
+  assert.deepEqual(badgeForms(call, false, 'far'), [BADGE_GLYPH]);
+  assert.deepEqual(badgeForms(call, true, 'far'), ['호출마다 · 설계', '호출마다', BADGE_GLYPH]);
+  assert.deepEqual(badgeForms(lineBadge([{ when: 'wandb_log면' }]), false, 'far'), ['wandb_log면', 'wandb_…', '조건']);
+  assert.deepEqual(badgeForms(lineBadge([{ optional: true }]), true), ['선택']);
+  assert.equal(overflowMark(3), '+3');
+});
+
+test('LINE-3c S7: an unresolved reference of the record reads as written, marked unresolved; never resolved', () => {
+  for (const t of ['위 두 줄과 같음', '위와 같음', '상동', '앞 행과 동일', 'same as above', '위 행과 마찬가지']) assert.ok(isRelativeRef(t), t);
+  for (const t of ['명령마다', '호출마다', '위험할 때마다', '실행마다 1회', 'PR마다', '같은 배치마다 1회']) assert.ok(!isRelativeRef(t), t);
+  const b = lineBadge([{ cadence: '위 두 줄과 같음', mode: 'design' }]);
+  assert.equal(b.short, '위 두 줄과 같음', 'shown as written');
+  assert.equal(b.unresolved, true);
+  assert.match(b.tip, /상대 참조 \(풀지 않음\)/);
+  assert.equal(lineBadge([{ cadence: '위와 같음' }, { cadence: '명령마다' }]).unresolved, false, 'one stroke with a real cadence is not marked');
+});
+
+test('LINE-6 S7: labels by zoom tier (5.5): counts at the overview, short labels in the middle, full near; sizes under the names', () => {
+  assert.equal(restLabels('far'), 'counts'); assert.equal(restLabels('dots'), 'counts');
+  assert.equal(restLabels('mid'), 'short'); assert.equal(restLabels('near'), 'full'); assert.equal(restLabels(null), 'full');
+  assert.equal(restLabelShown('counts', { spine: true, path: true }), false);
+  assert.equal(restLabelShown('short', { spine: true }), true); assert.equal(restLabelShown('short', { path: true }), true);
+  assert.equal(restLabelShown('short', {}), true, 'the middle tier keeps every label, cut short');
+  assert.equal(restLabelShown('full', {}), true);
+  assert.equal(shortLabel('openwebtext 데이터셋 토큰 파일'), `${'openwebtext 데이터셋 토큰 파일'.slice(0, LABEL_SHORT - 1)}…`);
+  assert.equal(shortLabel('GPT-2 가중치'), 'GPT-2 가중치');
+  // On screen 11–14px, following the zoom a little; never over a card name's floor (14px) far out, never tiny near in.
+  assert.equal(labelPx(0.4), 11); assert.equal(labelPx(1.6), 14);
+  assert.ok(labelPx(1) > 12 && labelPx(1) < 13);
+  for (let k = 0.2; k <= 1.6; k += 0.05) { const p = labelPx(k); assert.ok(p >= 11 && p <= 14); assert.ok(p <= Math.max(14, 15 * k), `label ${p} under the name at ${k}`); }
 });
 
 test('LINE-4 one stroke per pair, direction and channel: a flow and a need of one channel share it, data and control never do', () => {

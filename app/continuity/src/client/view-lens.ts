@@ -103,36 +103,81 @@ export function legendItems(id: LensId, parts: readonly LensPart[], lines: reado
 }
 
 /* ---------- the legend as a filter ---------- */
-/** What the person did with the legend: one selected item (a sustained outline), and per item dim or hidden; solo is every other
- * item hidden. Kept per map as a view record (localStorage, wrapped by the caller), never as a layout. */
-export interface LegendState { picked: string | null; mode: Record<string, 'dim' | 'hide'> }
-export const NO_FILTER: LegendState = { picked: null, mode: {} };
+/** What the person did with the legend: one selected item (a sustained outline, the rest of the map stepping back), per item dim or
+ * hidden, and solo: that item alone (everything it does not stand for hidden, the parts its lines join kept for context). Kept per
+ * map as a view record (localStorage, wrapped by the caller), never as a layout. */
+export interface LegendState { picked: string | null; mode: Record<string, 'dim' | 'hide'>; solo?: string | null }
+export const NO_FILTER: LegendState = { picked: null, mode: {}, solo: null };
 export type LegendAction = { do: 'pick'; id: string } | { do: 'dim' | 'hide' | 'solo'; id: string } | { do: 'all' } | { do: 'clear' };
-export function legendApply(s: LegendState, a: LegendAction, items: readonly LegendItem[]): LegendState {
+export function legendApply(s: LegendState, a: LegendAction, _items: readonly LegendItem[] = []): LegendState {
+  const solo = s.solo ?? null;
   switch (a.do) {
-    case 'pick': return { ...s, picked: s.picked === a.id ? null : a.id };
-    case 'dim': case 'hide': { const mode = { ...s.mode }; if (mode[a.id] === a.do) delete mode[a.id]; else mode[a.id] = a.do; return { ...s, mode }; }
-    case 'solo': return { picked: a.id, mode: Object.fromEntries(items.filter(i => i.id !== a.id).map(i => [i.id, 'hide' as const])) };
-    case 'all': return { ...s, mode: {} };
+    case 'pick': return { ...s, solo, picked: s.picked === a.id ? null : a.id };
+    case 'dim': case 'hide': { const mode = { ...s.mode }; if (mode[a.id] === a.do) delete mode[a.id]; else mode[a.id] = a.do; return { ...s, solo: solo === a.id ? null : solo, mode }; }
+    // Solo again: everything back. The soloed item is the picked one too (its targets outlined), and its own dim or hide is lifted.
+    case 'solo': { if (solo === a.id) return { ...s, solo: null };
+      const mode = { ...s.mode }; delete mode[a.id]; return { picked: a.id, mode, solo: a.id }; }
+    case 'all': return { ...s, mode: {}, solo: null };
     case 'clear': return NO_FILTER;
   }
 }
-/** The legend's head: '숨김 3 · 흐림 2' (what is hidden and dimmed now), '' when nothing is. */
-export function legendHead(s: LegendState): string {
+/** The legend's head: '그것만 · 저장 · 숨김 3 · 흐림 2' (what is shown alone, hidden and dimmed now), '' when nothing is. */
+export function legendHead(s: LegendState, items: readonly LegendItem[] = []): string {
   const v = Object.values(s.mode), hid = v.filter(m => m === 'hide').length, dim = v.filter(m => m === 'dim').length;
-  return [hid ? `숨김 ${hid}` : '', dim ? `흐림 ${dim}` : ''].filter(Boolean).join(' · ');
+  const solo = s.solo ? `그것만 · ${items.find(i => i.id === s.solo)?.label ?? s.solo}` : '';
+  return [solo, hid ? `숨김 ${hid}` : '', dim ? `흐림 ${dim}` : ''].filter(Boolean).join(' · ');
 }
-/** The parts and lines each class goes on: the picked item's targets, and those of the dimmed and the hidden items (an element
- * both hidden by one item and shown by none other stays hidden; hiding never moves anything). */
-export function legendMarks(s: LegendState, items: readonly LegendItem[]): { picked: Set<string>; dim: Set<string>; hide: Set<string> } {
-  const picked = new Set<string>(), dim = new Set<string>(), hide = new Set<string>();
+/** Everything the map draws that the legend can mark: its parts (ids) and its lines (with their ends). Absent: what the items
+ * stand for, together. */
+export interface LegendWorld { parts: readonly string[]; lines: readonly { key: string; from: string; to: string }[] }
+/** The parts and lines each class goes on:
+ * - picked: the picked item's targets (an outline), and fade: everything else the map draws (stepping back, never hidden), so a
+ *   plain click reads at once; the ends of the picked lines stay out of the fade;
+ * - dim and hide: the dimmed and the hidden items' targets; an element a picked or soloed item stands for is never dimmed or hidden
+ *   by another item;
+ * - solo: everything the soloed item does not stand for is hidden (a part no item lists included); a soloed line keeps the two
+ *   parts it joins (as context, in dim), a soloed family keeps the lines between its own parts.
+ * Hiding never moves anything. */
+export function legendMarks(s: LegendState, items: readonly LegendItem[], world?: LegendWorld): { picked: Set<string>; dim: Set<string>; hide: Set<string>; fade: Set<string> } {
+  const picked = new Set<string>(), dim = new Set<string>(), hide = new Set<string>(), fade = new Set<string>();
   const of = (i: LegendItem) => [...i.parts, ...i.lines.map(k => `line:${k}`)];
+  const lineKeys = new Map<string, { from: string; to: string }>();
+  for (const l of world?.lines ?? []) lineKeys.set(l.key, l);
+  const allParts = new Set(world ? world.parts : items.flatMap(i => i.parts));
+  const allLines = new Set(world ? world.lines.map(l => l.key) : items.flatMap(i => i.lines));
+  const universe = [...allParts, ...[...allLines].map(k => `line:${k}`)];
+  // An item's targets with the parts its lines join (a line never floats without its ends).
+  const reach = (i: LegendItem) => { const own = new Set(of(i)), ends = new Set<string>();
+    for (const k of i.lines) { const l = lineKeys.get(k); if (l) for (const e of [l.from, l.to]) if (!own.has(e)) ends.add(e); }
+    if (i.parts.length) { const ps = new Set(i.parts); for (const [k, l] of lineKeys) if (ps.has(l.from) && ps.has(l.to)) own.add(`line:${k}`); }
+    return { own, ends }; };
+  const keep = new Set<string>();
   for (const i of items) {
-    if (i.id === s.picked) for (const x of of(i)) picked.add(x);
+    if (i.id === s.picked) { const r = reach(i); for (const x of of(i)) picked.add(x); for (const x of [...r.own, ...r.ends]) keep.add(x); }
     if (s.mode[i.id] === 'dim') for (const x of of(i)) dim.add(x);
     if (s.mode[i.id] === 'hide') for (const x of of(i)) hide.add(x);
   }
-  return { picked, dim, hide };
+  const soloItem = s.solo ? items.find(i => i.id === s.solo) : undefined;
+  if (soloItem) {
+    const r = reach(soloItem);
+    for (const x of universe) if (!r.own.has(x) && !r.ends.has(x)) hide.add(x);
+    for (const x of r.ends) dim.add(x);
+    for (const x of r.own) { hide.delete(x); dim.delete(x); keep.add(x); }
+    for (const x of r.ends) hide.delete(x);
+  } else if (picked.size) for (const x of universe) if (!keep.has(x)) fade.add(x);
+  for (const x of picked) { hide.delete(x); dim.delete(x); fade.delete(x); }
+  for (const x of hide) fade.delete(x);
+  return { picked, dim, hide, fade };
+}
+/** The legend folded to one chip (it starts so when it would cover cards): the lens's short name and its first items with their
+ * counts, then how many more ('구성 · 참여자 4 · 처리 1 · +2'). */
+export function legendChip(id: LensId, items: readonly LegendItem[], max = 2): string {
+  const shown = items.slice(0, max).map(i => `${i.label} ${i.count}`), more = items.length - shown.length;
+  return [lensDef(id).short, ...shown, ...(more > 0 ? [`+${more}`] : [])].join(' · ');
+}
+/** Whether a box (the legend opened) would cover any of the given boxes (the cards on screen), with a few pixels of margin. */
+export function covers(box: { x: number; y: number; w: number; h: number }, boxes: readonly { x: number; y: number; w: number; h: number }[], m = 4): boolean {
+  return boxes.some(b => box.x < b.x + b.w + m && b.x < box.x + box.w + m && box.y < b.y + b.h + m && b.y < box.y + box.h + m);
 }
 
 /* ---------- keys (7.3) ---------- */
@@ -153,7 +198,8 @@ export function readLensRecord(raw: string | null, map: string): LensRecord {
     const lens: LensId = LENSES.some(l => l.id === r?.lens) ? r.lens : DEFAULT_LENS;
     const mode: Record<string, 'dim' | 'hide'> = {};
     for (const [k, v] of Object.entries(r?.legend?.mode ?? {})) if (v === 'dim' || v === 'hide') mode[k] = v;
-    return { lens, legend: { picked: typeof r?.legend?.picked === 'string' ? r.legend.picked : null, mode } };
+    const solo = typeof r?.legend?.solo === 'string' ? r.legend.solo : null;
+    return { lens, legend: { picked: typeof r?.legend?.picked === 'string' ? r.legend.picked : null, mode, solo } };
   } catch { return { lens: DEFAULT_LENS, legend: NO_FILTER }; }
 }
 export function writeLensRecord(raw: string | null, map: string, rec: LensRecord): string {

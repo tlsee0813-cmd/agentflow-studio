@@ -611,12 +611,11 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
     const headH = new Map(runs.map(t => [t, headSize(t, colW, measureText)]));
     const colH = ids.reduce((a, id) => a + size.get(id)!.h + GHOST_GAP, 0) - GHOST_GAP + runs.reduce((a, t) => a + headH.get(t)!, 0) + RUN_GAP * (runs.length - 1);
     const cy = near.length ? (Math.min(...near.map(b => b.y)) + Math.max(...near.map(b => b.y + Math.min(b.h, 120)))) / 2 : minY + colH / 2;
-    const y = Math.max(minY, cy - colH / 2), all = [...boxes.values()];
-    const free = (x: number) => all.every(b => b.x > x + colW + 24 || b.x + b.w < x - 24 || b.y > y + colH + 12 || b.y + b.h < y - 12);
-    const right = near.length ? Math.max(...near.map(b => b.x + b.w)) + 90 : NaN, left = near.length ? Math.min(...near.map(b => b.x)) - 90 - colW : NaN;
-    const found = (out ? [right, left] : [left, right]).find(x => Number.isFinite(x) && free(x));
-    const x = found ?? fallbackX - (out ? 0 : colW), leftOf = near.length > 0 && x < near[0]!.x;
-    let at = found === undefined ? minY : y;
+    const y = Math.max(minY, cy - colH / 2);
+    // Every box placed so far (the other side's column of outside partners included) and the heads over those columns.
+    const col = endColumnX({ out, near, colW, y, colH, taken: [...boxes.values(), ...heads], fallbackX });
+    const x = col.x, leftOf = near.length > 0 && x < near[0]!.x;
+    let at = col.found ? y : minY;
     for (const t of runs) {
       heads.push({ key: `${out ? 'out' : 'in'}|${t}`, x, y: at, w: colW, h: headH.get(t)!, text: t }); at += headH.get(t)!;
       for (const id of ids.filter(i => where.get(i) === t)) {
@@ -635,6 +634,30 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
   const bands: Record<Band, string[]> = { outside: [], boundary: [], shelf: [] };
   for (const id of kidsOf(scope)) { const b = bandOf.get(id); if (b && boxes.has(id)) bands[b].push(id); }
   return { boxes, edges: [...edges.values()], heads, bounds: { x: bx, y: by, w: bx2 - bx, h: by2 - by }, spine, bands };
+}
+
+/** Where a column of outside partners goes (the parts it meets: near): beside them on the free side nearest to them (outgoing to
+ * the right first, incoming to the left first). Free: no box or head already placed (the other side's column included) within 24px
+ * across and 12px along. With neither side free, the column goes past everything placed on its own side (outgoing: 90px right of
+ * the rightmost thing placed, at least fallbackX; incoming: 90px left of the leftmost, at most fallbackX − its width), so two
+ * columns never share an x; found: false then (the column starts at the top). */
+export function endColumnX(c: { out: boolean; near: readonly { x: number; y: number; w: number; h: number }[]; colW: number; y: number; colH: number;
+  taken: readonly { x: number; y: number; w: number; h: number }[]; fallbackX: number }): { x: number; found: boolean } {
+  const { out, near, colW, y, colH, taken } = c;
+  const free = (x: number) => taken.every(b => b.x > x + colW + 24 || b.x + b.w < x - 24 || b.y > y + colH + 12 || b.y + b.h < y - 12);
+  const right = near.length ? Math.max(...near.map(b => b.x + b.w)) + 90 : NaN, left = near.length ? Math.min(...near.map(b => b.x)) - 90 - colW : NaN;
+  const found = (out ? [right, left] : [left, right]).find(x => Number.isFinite(x) && free(x));
+  if (found !== undefined) return { x: found, found: true };
+  if (!taken.length) return { x: c.fallbackX - (out ? 0 : colW), found: false };
+  return out ? { x: Math.max(c.fallbackX, Math.max(...taken.map(b => b.x + b.w)) + 90), found: false }
+    : { x: Math.min(c.fallbackX - colW, Math.min(...taken.map(b => b.x)) - 90 - colW), found: false };
+}
+/** The union of rectangles (null for none): what is drawn, measured, for 전체 보기. */
+export function unionRect(rs: readonly { x: number; y: number; w: number; h: number }[]): { x: number; y: number; w: number; h: number } | null {
+  const ok = rs.filter(r => [r.x, r.y, r.w, r.h].every(Number.isFinite) && r.w >= 0 && r.h >= 0);
+  if (!ok.length) return null;
+  const x = Math.min(...ok.map(r => r.x)), y = Math.min(...ok.map(r => r.y));
+  return { x, y, w: Math.max(...ok.map(r => r.x + r.w)) - x, h: Math.max(...ok.map(r => r.y + r.h)) - y };
 }
 
 /** Rounded orthogonal path through points (corners of radius up to r). */
