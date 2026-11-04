@@ -228,48 +228,53 @@ button:disabled { opacity: .5; cursor: default; }
 .space.z-low .frame.group > .frame-head .frame-name { font-size: calc(13px * var(--grow)); }
 .space.z-low .node .node-text { justify-content: center; align-self: stretch; }
 
-/* Lines: one hue for every kind, told apart by their stroke (solid flow, dashed needs, dotted shares, sparser dotted related
-   with a dot at both ends). Hover and selection add width as well as colour; the end marks follow the line's colour. */
+/* Lines (map design v3 6.1, principle 7): the stroke and the head say what the relation is, in one hue; colour never says it
+   alone. Data: solid with a filled head. Control: dashed 6 4 with an open head. A reference (uses, needs): dots 0 4 from a
+   port-less ear to a small open V. A shared use: dots with an ear at both ends. A plain relation: sparse dots 0 8 with a dot at
+   both ends. Widths, dashes and heads are screen pixels at every zoom (--u is one screen pixel in map units, app.ts applyCamera):
+   1.25 at rest far out, 1.5 nearer, 2 pointed at, 3 selected. A planned, corrected or summary line keeps its kind's dash. */
 .edges { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
-.edge-line { fill: none; stroke: var(--edge); stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; transition: stroke .12s, opacity .12s, stroke-width .12s; }
+.edge-line { --lw: 1.25; fill: none; stroke: var(--edge); stroke-width: calc(var(--lw) * var(--u, 1) * 1px); stroke-linecap: round; stroke-linejoin: round; transition: stroke .12s, opacity .12s; }
+.space:is(.tier-mid, .tier-near) .edge-line { --lw: 1.5; }
 /* The spine: the longest chain of flows through the scope, read first; its lines are darker and a little wider. */
-.edge.spine .edge-line { stroke: var(--edge-spine); stroke-width: 1.75; }
-.edge-hit { fill: none; stroke: transparent; stroke-width: 14; pointer-events: stroke; cursor: pointer; }
-.edge.k-needs .edge-line { stroke-dasharray: 6 4; }
-.edge.k-shares .edge-line { stroke-dasharray: 1.5 4.5; stroke-width: 1.5; }
-.edge.k-related .edge-line { stroke-dasharray: 1 6; stroke-width: 1.5; }
-/* What a line carries (map spec 2.3): data and control are solid (their heads tell them apart: filled, open V); a reference is
-   broken, with an open V (a need's dash; a shared use keeps its dots). A channel's pattern stands over the kind's; a folded
-   band, a withdrawn or a planned line keep theirs; a shared use keeps its dots whatever its channel. */
-.edge.c-data .edge-line, .edge.c-control .edge-line { stroke-dasharray: none; }
-.edge.k-shares:is(.c-data, .c-control):not(.agg):not(.revised):not(.planned) .edge-line { stroke-dasharray: 1.5 4.5; }
-.edge.c-uses:not(.k-shares):not(.agg):not(.revised):not(.planned) .edge-line { stroke-dasharray: 6 4; }
-/* A line's start dot only where the line is being read (hovered or selected); a plain relation keeps a dot at both ends. */
-.edge:not(.on):not(.near):not(.k-related) .edge-line { marker-start: none; }
-/* A line drawn from a folded part summarises relations of its inside: a soft band (wider, translucent, no kind dashes), not a
-   crisp relation of that part. Its ends stay small: a band's dot would read as a part. */
-.edge.agg .edge-line { stroke: var(--edge-soft); stroke-width: 3; stroke-dasharray: none; marker-start: none; }
-.edge.near .edge-line { stroke: var(--text-3); stroke-width: 1.75; stroke-opacity: 1; }
+.edge.spine .edge-line { stroke: var(--edge-spine); --lw: 1.75; }
+.edge-hit { fill: none; stroke: transparent; stroke-width: calc(16px * var(--u, 1)); pointer-events: stroke; cursor: pointer; }
+.edge.s-dashed .edge-line { stroke-linecap: butt; stroke-dasharray: calc(6px * var(--u, 1)) calc(4px * var(--u, 1)); }
+.edge.s-dotted .edge-line { stroke-dasharray: 0 calc(4px * var(--u, 1)); }
+.edge.s-sparse .edge-line { stroke-dasharray: 0 calc(8px * var(--u, 1)); --lw: 2; }
+/* A dotted line's dots are as wide as the line; at rest far out a reference keeps 1.5 so its dots stay visible. */
+.edge.s-dotted .edge-line { --lw: 1.5; }
+/* A data or control line's start dot only where the line is being read (hovered or selected); an ear and a plain relation's
+   dots are always drawn. */
+.edge[data-start="none"]:not(.on):not(.near) .edge-line { marker-start: none; }
+/* A line drawn from a folded part summarises relations of its inside: a soft band, wider, its kind's dash kept. */
+.edge.agg .edge-line { stroke: var(--edge-soft); --lw: 3; }
+.edge.near .edge-line { stroke: var(--text-3); --lw: 2; stroke-opacity: 1; }
 /* A spine line pointed at reads firmer than at rest, never lighter. */
-.edge.near.spine:not(.on) .edge-line { stroke: var(--text-2); stroke-width: 2; }
-.edge.near:not(.on):not(.k-related) .edge-line { marker-end: url(#arrow-near); }
-.edge.near:not(.on):is(.c-control, .c-uses) .edge-line { marker-end: url(#arrow-open-near); }
-.edge.on .edge-line { stroke: var(--accent); stroke-width: 2; stroke-opacity: 1; }
-.edge.agg.near .edge-line { stroke: #a9b1bd; stroke-width: 3; }
-/* A line resting only on a withdrawn report: its own dash-dot, selected or not (the selection colour stays readable). */
-.edge.revised .edge-line { stroke-dasharray: 8 3 2 3; }
-/* A relation the record states as a plan: a fine dash, lighter, so it never reads as a flow that runs. */
-.edge.planned .edge-line { stroke-dasharray: 2 5; stroke-opacity: .8; }
-.edge.planned.spine .edge-line { stroke-width: 1.5; }
+.edge.near.spine:not(.on) .edge-line { stroke: var(--text-2); --lw: 2.25; }
+.edge.near:not(.on)[data-head="filled"] .edge-line { marker-end: url(#m-filled-near); }
+.edge.near:not(.on)[data-head="open"] .edge-line { marker-end: url(#m-open-near); }
+.edge.near:not(.on)[data-head="ref"] .edge-line { marker-end: url(#m-ref-near); }
+/* A selected line: 3px in the accent (2.5 for a reference). */
+.edge.on .edge-line { stroke: var(--accent); --lw: 3; stroke-opacity: 1; }
+.edge.on.s-dotted .edge-line { --lw: 2.5; }
+.edge.agg.near .edge-line { stroke: #a9b1bd; --lw: 3; }
+/* A line resting only on a withdrawn report keeps its kind's dash; lighter at rest, its 「보고 정정됨」 mark on its label. */
 .edge.revised:not(.on):not(.near) .edge-line { stroke-opacity: .6; }
-.edge.agg.on .edge-line { stroke: #a9b8f5; stroke-width: 3; }
-#arrow path, #dot circle { fill: var(--edge); } #arrow-on path, #dot-on circle { fill: var(--accent); } #arrow-near path { fill: var(--text-3); }
-/* Where supported, every end mark takes its own line's paint (hover, selection, a folded band, a change's context). */
-#arrow path, #dot circle, #arrow-on path, #dot-on circle, #arrow-near path { fill: context-stroke; }
-/* The open V: a stroke only, never filled (it stays open on a selected 3px line), in its line's paint where supported. */
-#arrow-open path, #arrow-open-on path, #arrow-open-near path { fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-#arrow-open path { stroke: var(--edge); } #arrow-open-on path { stroke: var(--accent); stroke-width: 2; } #arrow-open-near path { stroke: var(--text-3); stroke-width: 1.75; }
-#arrow-open path, #arrow-open-on path, #arrow-open-near path { stroke: context-stroke; }
+/* A relation the record states as a plan keeps its kind's dash, lighter, so it never reads as a flow that runs. */
+.edge.planned .edge-line { stroke-opacity: .8; }
+.edge.planned.spine .edge-line { --lw: 1.5; }
+.edge.agg.on .edge-line { stroke: #a9b8f5; --lw: 3; }
+/* The end marks (app.ts endMarkDefs): a filled triangle, open Vs, the ear's ring (canvas inside) and a dot, in their line's
+   paint where supported. */
+.mk .mk-fill { fill: var(--edge); } .mk-on .mk-fill { fill: var(--accent); } .mk-near .mk-fill { fill: var(--text-3); }
+.mk .mk-fill { fill: context-stroke; }
+.mk .mk-open { fill: none; stroke: var(--edge); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.mk-ref .mk-open { stroke-width: 1.9; }
+.mk-on .mk-open { stroke: var(--accent); stroke-width: 2.2; } .mk-near .mk-open { stroke: var(--text-3); stroke-width: 2; }
+.mk .mk-open { stroke: context-stroke; }
+.mk .mk-ring { fill: var(--bg); stroke: var(--edge); stroke-width: 2.2; } .mk-on .mk-ring { stroke: var(--accent); stroke-width: 2.6; } .mk-near .mk-ring { stroke: var(--text-3); }
+.mk .mk-ring { stroke: context-stroke; }
 .space.dim .edge:not(.on):not(.near):not(.sc-path) .edge-line { opacity: .22; }
 /* Pointing at a part (nothing selected): its lines and their other ends stay, the rest of the map steps back. */
 .space.peek:not(.dim) .edge:not(.near) .edge-line { opacity: .28; }
@@ -302,11 +307,20 @@ button:disabled { opacity: .5; cursor: default; }
 /* verbs on the selection's lines (and on the few lines of a small map): a chip on the line, never loose text over it */
 .edge-labels { position: absolute; left: 0; top: 0; pointer-events: none; }
 /* A verb sits on its line as a cut in it: the canvas colour behind it, no outline. */
-.edge-label { position: absolute; height: 16px; padding: 0 5px; border: 0; border-radius: 4px; background: var(--bg); box-shadow: none; font-size: 11px; line-height: 16px; font-weight: var(--fw-name); color: var(--text-3); white-space: nowrap; }
-.edge-label.on { background: var(--accent-soft); color: var(--accent-strong); }
-/* Chips keep a readable size as the map shrinks (--inv, applyCamera); placed by their scaled size, from their top-left. */
-.edge-label, .edge-count { transform: scale(var(--inv, 1)); transform-origin: 0 0; }
+/* Line labels are 13/18 500 on screen (map design v3 5.2, 6.3); one wider than 120 screen px ellipsises, and reads whole while
+   its line is selected (9.9-7). */
+.edge-label { position: absolute; height: 18px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; padding: 0 5px; border: 0; border-radius: 4px; background: var(--bg); box-shadow: none; font-size: 13px; line-height: 18px; font-weight: 500; color: var(--text-3); white-space: nowrap; }
+.edge-label.on { max-width: none; background: var(--accent-soft); color: var(--accent-strong); }
+/* Chips keep their screen size whatever the zoom (--inv = 1/k, applyCamera); placed by their scaled size, from their top-left. */
+.edge-label, .edge-count, .edge-badge { transform: scale(var(--inv, 1)); transform-origin: 0 0; }
 .edge-label.said { font-weight: 500; max-width: 300px; overflow: hidden; text-overflow: ellipsis; }
+.edge-label.on.said { max-width: none; }
+/* A line's text badge (6.2): what the record wrote of when it flows, its words as written, 12px on a 16px chip (20px selected,
+   with its full words); outlined, so it never reads as a label or as a colour. Beside a selection it steps back; one that found
+   no free place is still drawn (.forced). */
+.edge-badge { position: absolute; display: inline-flex; align-items: center; height: 16px; max-width: 120px; padding: 0 5px; border: 1px solid var(--line-strong); border-radius: 6px; background: var(--surface); font-size: 12px; line-height: 14px; font-weight: 500; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.edge-badge.on { height: 20px; max-width: 260px; border-color: var(--accent); color: var(--accent-strong); background: var(--surface); }
+.edge-badge.beside { color: var(--text-4); border-color: var(--line); }
 .edge-label.revised { outline: 1px dashed var(--line-strong); outline-offset: -1px; }
 .map-title.pinned { opacity: 0; }
 .map-name { margin: 0; word-break: keep-all; font-size: 26px; line-height: 32px; font-weight: var(--fw-title); letter-spacing: -.025em; color: var(--text); overflow-wrap: anywhere; }
@@ -509,6 +523,39 @@ button:disabled { opacity: .5; cursor: default; }
 .c-inner { flex: none; display: flex; align-items: center; gap: 8px; min-width: 0; height: max(24px, calc(var(--t-row-lh, 20px) + 4px)); font-size: var(--t-row, 13px); line-height: 16px; color: var(--text-2); white-space: nowrap; }
 .c-inner-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .c-inner .c-more { margin-left: -2px; }
+/* A loop container's well (map design v3 4.3; container-view.ts): at the near tier in place of the inner line, which the overview
+   and middle tiers keep. The loop's unit and stop as badges, the open rail (a bracket on the well's inner left: no head, no end, no
+   port), the steps in the record's order with a dash each (no number: a number reads as the order they run in), the folds, and
+   the state compartment under a solid divider. Heights as container-view wellHeight: 8 gap · 8 pad · 24 head · 20 a row · 26 state
+   · 8 pad, the border drawn inside (an inset shadow), so nothing adds to them. */
+.c-well { flex: none; display: none; margin-top: 8px; padding: 8px 10px 8px 8px; border-radius: 6px; background: var(--surface-2, #f7f8fa); box-shadow: inset 0 0 0 1px var(--hair-2); }
+.space.tier-near .node.card .c-well { display: block; }
+.space.tier-near .node.card:has(.c-well) .c-inner { display: none; }
+.w-head { display: flex; align-items: center; gap: 6px; height: 24px; min-width: 0; }
+.w-badge { flex: none; max-width: 104px; height: 18px; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 6px; background: var(--surface); font-size: 11.5px; line-height: 16px; font-weight: 500; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-flex; align-items: center; gap: 4px; }
+.w-badge.stop { flex: 1 1 auto; min-width: 0; max-width: none; }
+.w-badge.blank { border-style: solid; color: var(--text-4); background: none; }
+.w-toggle { flex: none; margin-left: auto; height: 20px; padding: 0 6px; border: 0; border-radius: 4px; background: none; font-size: 11.5px; font-weight: 500; color: var(--accent); }
+.w-toggle:hover { background: var(--accent-soft); }
+.w-body { position: relative; padding-left: 14px; }
+/* The rail: an open bracket (top tick, left side, no bottom tick, no arrowhead), joined to no step and no port. */
+.w-rail { position: absolute; left: 2px; top: 4px; bottom: 6px; width: 7px; border: 1.5px solid var(--line-strong); border-right: 0; border-bottom: 0; border-radius: 4px 0 0 0; pointer-events: none; }
+.w-steps { list-style: none; margin: 0; padding: 0; }
+.w-steps li { display: flex; align-items: center; gap: 6px; height: 20px; min-width: 0; font-size: 12px; line-height: 20px; color: var(--text-2); white-space: nowrap; }
+.w-dash { flex: none; color: var(--text-4); }
+.w-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.w-step.kept .w-name { color: var(--text); }
+/* A fold is a summary, not a step: no dash, no line through it, quieter. */
+.w-fold { color: var(--text-3); }
+.w-open { height: 18px; padding: 0 4px; margin-left: -4px; border: 0; border-radius: 4px; background: none; font-size: 11.5px; color: var(--text-3); }
+.w-open:hover { background: var(--chip); color: var(--text); }
+.w-state { height: 26px; margin-top: 0; padding-top: 6px; border-top: 1px solid var(--line-deco, var(--hair-2)); font-size: 11.5px; line-height: 19px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.space.lens-start .c-well .w-rail { border-color: var(--text-2); }
+/* An open container's head keeps its loop's badges (4.1 'both'): after the name, giving way before it. */
+.frame-name-row { display: flex; align-items: center; min-width: 0; }
+.frame-name-row > .frame-name { flex: 0 0 auto; max-width: 100%; }
+.frame-loop { flex: 0 1 auto; min-width: 0; display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; overflow: hidden; }
+.frame-loop .w-badge { max-width: 140px; } .frame-loop .w-badge.stop { flex: 0 1 auto; }
 .c-signs { flex: none; display: flex; align-items: center; height: max(24px, calc(var(--t-row-lh, 20px) + 4px)); min-width: 0; }
 .c-signs .node-signs { margin-left: 0; }
 .node.card .c-signs .sign-tab { height: auto; font-size: var(--t-kind, 12px); line-height: calc(var(--t-kind-lh, 16px) - 2px); }
@@ -739,7 +786,66 @@ button:disabled { opacity: .5; cursor: default; }
 .line-key svg { flex: none; width: 28px; height: 10px; overflow: visible; }
 .line-key path { fill: none; stroke: var(--text-3); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
 .line-key .lk-head.filled { fill: var(--text-3); stroke: none; }
-.line-key .lk-uses .lk-line { stroke-dasharray: 4 3; stroke-linecap: butt; }
+.line-key .lk-control .lk-line { stroke-dasharray: 6 4; stroke-linecap: butt; }
+.line-key .lk-related .lk-line { stroke-dasharray: 0 5; stroke-width: 2; } .line-key .lk-dot { fill: var(--text-3); stroke: none; }
+/* The legend (map design v3 7.2): the lens's name and question, then one row per item this map has (sample, name, count, ⋯).
+   A click selects the item (a sustained outline on the map); the ⋯ menu dims, hides, solos or shows all. It takes the pointer. */
+.line-key.legend { pointer-events: auto; background: var(--surface); box-shadow: var(--shadow-lg); gap: 0; width: 264px; max-height: calc(100% - 160px); overflow: auto; padding: 8px 6px 6px; }
+.lg-head { display: flex; flex-direction: column; gap: 0; padding: 0 6px 6px; }
+.lg-head strong { font-size: 12.5px; line-height: 18px; font-weight: var(--fw-name); color: var(--text); }
+.lg-asks { font-size: 11.5px; line-height: 16px; color: var(--text-3); }
+.lg-state { display: flex; align-items: center; gap: 8px; padding: 0 6px 6px; font-size: 11.5px; color: var(--text-2); }
+.lg-state .lg-all { font-size: 11.5px; padding: 0; }
+.lg-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1px; }
+.lg-row { position: relative; display: flex; flex-wrap: wrap; align-items: center; }
+.lg-item { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 8px; height: 26px; padding: 0 6px; border: 1px solid transparent; border-radius: var(--r-sm); background: none; font-size: 12px; color: var(--text-2); text-align: left; }
+.lg-item:hover { background: var(--chip); }
+.lg-row.picked .lg-item { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-strong); }
+.lg-row.m-hide .lg-label { text-decoration: line-through; color: var(--text-4); } .lg-row.m-dim .lg-item { color: var(--text-4); }
+.lg-label { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lg-count { flex: none; font-variant-numeric: tabular-nums; color: var(--text-3); }
+.lg-mode { flex: none; font-size: 11px; color: var(--text-4); }
+.lg-more { flex: none; width: 24px; height: 24px; padding: 0; border: 0; border-radius: var(--r-sm); background: none; color: var(--text-3); font-size: 14px; line-height: 24px; }
+.lg-more:hover, .lg-more[aria-expanded="true"] { background: var(--chip); color: var(--text); }
+/* The item's menu opens under its row, inside the legend (the legend scrolls; nothing opens outside it). */
+.lg-menu { flex: 1 0 100%; display: flex; flex-direction: column; margin: 2px 0 4px 26px; padding: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--shadow-sm, 0 1px 2px rgb(15 23 42 / 6%)); }
+.lg-act { display: flex; align-items: center; justify-content: space-between; gap: 10px; height: 28px; padding: 0 8px; border: 0; border-radius: var(--r-sm); background: none; font-size: 12px; color: var(--text-2); text-align: left; }
+.lg-act:hover, .lg-act:focus-visible { background: var(--chip); color: var(--text); } .lg-act.on { color: var(--accent-strong); font-weight: var(--fw-name); }
+.lg-act kbd { font: 500 10.5px/16px var(--font); color: var(--text-4); }
+.lg-none { margin: 0; padding: 2px 6px 4px; font-size: 11.5px; color: var(--text-4); }
+.lg-tile { flex: none; width: 18px; height: 18px; display: grid; place-items: center; border-radius: 5px; }
+.lg-tile svg { width: 12px; height: 12px; }
+.lg-badge { flex: none; height: 14px; padding: 0 3px; border: 1px solid var(--line-strong); border-radius: 4px; font-size: 9.5px; line-height: 12px; color: var(--text-2); }
+.lg-mark { flex: none; width: 18px; text-align: center; font-weight: var(--fw-name); color: var(--text-3); }
+.lg-line { flex: none; overflow: visible; }
+/* The lens switch (7.3): five segments in the map's tools; a lens only changes emphasis, never places. */
+.lens-seg { display: inline-flex; align-items: center; gap: 2px; }
+.lens-seg button { height: 28px; padding: 0 8px; border: 0; border-radius: var(--r-sm); background: none; font-size: 12px; font-weight: 500; color: var(--text-3); white-space: nowrap; }
+.lens-seg button:hover:not(:disabled) { background: var(--chip); color: var(--text); }
+.lens-seg button.on { background: var(--accent-soft); color: var(--accent-strong); }
+.lens-seg button:disabled { color: var(--text-4); opacity: .6; }
+/* What a lens does to the map (view-lens lensLook): each channel's lines at its opacity, lifted families with a firmer edge.
+   Selection, hover, a scenario path and the legend's own marks stay over it. */
+.space .edge.c-data:not(.on):not(.near):not(.lg-pick):not(.sc-path) .edge-line { opacity: var(--lo-data, 1); }
+.space .edge.c-control:not(.on):not(.near):not(.lg-pick):not(.sc-path) .edge-line { opacity: var(--lo-control, 1); }
+.space .edge.c-uses:not(.on):not(.near):not(.lg-pick):not(.sc-path) .edge-line { opacity: var(--lo-uses, 1); }
+.space .edge.k-related:not(.on):not(.near):not(.lg-pick):not(.sc-path) .edge-line { opacity: var(--lo-related, 1); }
+.space.lens-start .edge.c-control .edge-line { --lw: 2; stroke: var(--text-2); }
+.space.lens-data .edge.c-data .edge-line { stroke: var(--text-3); }
+.space.lens-lift-store .node.f-store, .space.lens-lift-trigger .node.f-trigger { border-color: var(--text-3); box-shadow: 0 0 0 1px var(--text-3); }
+.space.lens-state .node .c-ops, .space.lens-state .node .c-short, .space.lens-state .node .c-life { color: var(--text); font-weight: var(--fw-name); }
+.space.lens-state .node .c-cline { color: var(--text-2); }
+/* The legend's marks: the picked item's targets keep an outer ring (not the selection's outline), a pointed item's a neutral one;
+   a dimmed item's step back, a hidden item's keep their room. */
+.space .node.lg-pick, .space .ghost.lg-pick { box-shadow: 0 0 0 3px var(--accent-line); }
+.space .frame.lg-pick { box-shadow: 0 0 0 3px var(--accent-line); }
+.space .edge.lg-pick .edge-line { stroke: var(--accent-strong); --lw: 2.5; opacity: 1; }
+.space .node.lg-hover, .space .ghost.lg-hover, .space .frame.lg-hover { box-shadow: 0 0 0 2px var(--text-3); }
+.space .edge.lg-hover .edge-line { stroke: var(--text-2); --lw: 2.25; opacity: 1; }
+.space .node.lg-dim, .space .ghost.lg-dim { opacity: .3; } .space .edge.lg-dim .edge-line { opacity: .15; } .edge-label.lg-dim, .edge-badge.lg-dim { opacity: .3; }
+.space .lg-hide, .edge-label.lg-hide, .edge-badge.lg-hide { visibility: hidden; }
+.line-key .lk-uses .lk-line { stroke-dasharray: 0 4; stroke-width: 1.8; }
+.line-key .lk-ear { fill: var(--surface); stroke: var(--text-3); stroke-width: 1.3; }
 /* Popovers above the tools (찾기, 최근 기록, 도움말): one radius, one shadow, one padding, the same distance from the pill. */
 .help, .recent, .find { position: absolute; left: var(--s-4); bottom: 66px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-lg); z-index: 3; animation: pop-in .14s ease; }
 .help { width: 352px; max-height: calc(100% - 82px); overflow: auto; padding: var(--s-2) var(--s-4) var(--s-4); font-size: 12.5px; color: var(--text-2); }
@@ -757,8 +863,10 @@ button:disabled { opacity: .5; cursor: default; }
 .line-legend svg { width: 48px; height: 10px; overflow: visible; }
 .line-legend path { stroke: var(--text-3); stroke-width: 1.6; stroke-linecap: round; fill: none; }
 .line-legend .m { fill: var(--text-3); stroke: none; }
-.line-legend .d-needs { stroke-dasharray: 6 4; stroke-linecap: butt; } .line-legend .d-shares { stroke-dasharray: 1.5 4.5; stroke-width: 1.9; }
-.line-legend .d-related { stroke-dasharray: 1 6; stroke-width: 1.9; }
+.line-legend .d-control { stroke-dasharray: 6 4; stroke-linecap: butt; } .line-legend .d-uses, .line-legend .d-shares { stroke-dasharray: 0 4; stroke-width: 1.9; }
+.line-legend .d-related { stroke-dasharray: 0 8; stroke-width: 2.2; }
+.line-legend .e { fill: var(--surface); stroke: var(--text-3); stroke-width: 1.4; }
+.line-legend .b { fill: var(--surface); stroke: var(--line-strong); stroke-width: 1; }
 /* The open V of a control or reference line, and the withdrawn (dash-dot) and planned (fine dash, lighter) patterns as the map
    draws them. */
 .line-legend .v { stroke-linejoin: round; }
@@ -956,7 +1064,7 @@ button:disabled { opacity: .5; cursor: default; }
 /* Existing relations read as context of the change being read: above the groups, in the map's own line colour (not the change
    colour: nothing here is new, required or verified), the same in the current view and the preview. Kind dashes and the
    hover meaning stay. */
-.space.planning .edge.ctx .edge-line { stroke: var(--text-3); stroke-width: 1.75; stroke-opacity: 1; opacity: 1; }
+.space.planning .edge.ctx .edge-line { stroke: var(--text-3); --lw: 1.75; stroke-opacity: 1; opacity: 1; }
 
 /* the plan's strip: what is being tried, its changes, the conditions without a part, and the way to the whole plan */
 .plan-strip { position: absolute; top: var(--s-3); left: var(--s-4); right: calc(var(--s-4) + var(--plan-w)); display: flex; align-items: center; flex-wrap: wrap; gap: var(--s-2) var(--s-3); padding: var(--s-2) var(--s-2) var(--s-2) var(--s-4); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-float); z-index: 3; }
@@ -1840,7 +1948,7 @@ button:disabled { opacity: .5; cursor: default; }
 .node.has-rel .node-meta { display: none; }
 .space.z-mid .node.has-rel:not(.selected):not(.related) .node-rel { display: none; }
 /* A pane row and its line and end light together (pointer or keyboard focus). */
-.edge.lit .edge-line { stroke: var(--accent-strong); stroke-width: 3; stroke-opacity: 1; opacity: 1; }
+.edge.lit .edge-line { stroke: var(--accent-strong); --lw: 3; stroke-opacity: 1; opacity: 1; }
 .node.lit, .node.lit:hover, .ghost.lit { border-color: var(--accent); outline: 2px dashed var(--accent-line); outline-offset: 2px; }
 .frame.lit { border-color: var(--accent); }
 .port.lit { background: var(--accent-soft); }
@@ -2157,8 +2265,8 @@ button:disabled { opacity: .5; cursor: default; }
 .sc-statement { display: block; }
 .lens-head .sc-note { margin-top: 4px; }
 .lens-head .sc-note.sc-out strong { color: var(--text-3); }
-.edge.sc-path .edge-line { stroke: var(--accent); stroke-width: 3; stroke-opacity: 1; opacity: 1; stroke-dasharray: none; }
-.edge.sc-path.agg .edge-line { stroke: var(--accent); stroke-width: 3; }
+.edge.sc-path .edge-line { stroke: var(--accent); --lw: 3; stroke-opacity: 1; opacity: 1; }
+.edge.sc-path.agg .edge-line { stroke: var(--accent); --lw: 3; }
 .edge.sc-path.sc-back:not(.on) .edge-line { stroke: var(--accent-line); }
 .sc-badge { position: absolute; z-index: 3; left: 10px; top: -10px; display: inline-flex; align-items: center; gap: 1px; height: 20px; padding: 0 2px; border-radius: 10px; background: var(--accent); color: #fff; box-shadow: 0 0 0 2px var(--surface); font-size: 11.5px; line-height: 20px; font-weight: var(--fw-name); font-variant-numeric: tabular-nums; white-space: nowrap; cursor: default; }
 .frame > .sc-badge { top: -10px; left: 12px; }

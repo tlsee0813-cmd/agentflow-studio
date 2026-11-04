@@ -21,6 +21,7 @@ import { LOOP_TYPES } from '../shared/map-reading.js';
 import { CADENCE, loopBody } from './card-budget.js';
 import type { GlyphKey } from './card-glyphs.js';
 import { CARD_W } from './map-layout.js';
+import { isContainer, containerBody, wellHeight, type Well } from './container-view.js';
 
 export type CardFamily = PartFamily | 'neutral';
 /** The family's word (the glyph tile's title). */
@@ -58,6 +59,11 @@ export interface CardFacts {
   /** Which loop items the program filled (line-view programLoopItems); each such row carries the 「프로그램」 chip. */
   loopProgram?: { unit: boolean; stop: boolean; resume: boolean };
   steps: readonly { name?: string; does: string | null; program?: boolean }[];
+  /** The steps a model-written portMap row ties to a line (always kept in a container's well, 4.3). */
+  portSteps?: readonly string[];
+  /** A container's well (4.5): expanded by the person (every step shown), and how deep it sits among the containers drawn
+   * around it on this map (1: none around it; past 2 the well reads as one nested row). */
+  wellOpen?: boolean; wellDepth?: number;
   conditions: readonly { then: string; else: string | null }[];
   stateVars?: number;
   /** The 파일 지도 rows (a session's 다루는 파일). */
@@ -94,6 +100,9 @@ export interface CardTemplate {
   /** The inner line for recorded steps: its label ('단계 7', '단계 7 · 명령별'), the first recorded steps' names (steps carry their
    * quotes) and how many more, with the program's cut steps apart; null without steps to show. */
   innerLine: { text: string; names: string[]; more: number; program: number } | null;
+  /** A loop container's well (container-view, 4.3): drawn at the near tier in place of the inner line, which the overview and
+   * middle tiers keep; null for any other card. */
+  well: Well | null;
   signs: boolean;
 }
 
@@ -208,7 +217,11 @@ export function cardTemplate(f: CardFacts): CardTemplate {
   const names = f.steps.filter(s => s.program !== true).map(s => s.name ?? '').filter(Boolean).slice(0, STEP_NAMES);
   const innerLine = inner === 'steps' || inner === 'list' || inner === 'both'
     ? { text: `단계 ${recorded}${inner !== 'list' && unit ? ` · ${unit}` : ''}`, names, more: Math.max(0, recorded - names.length), program } : null;
-  return { family: familyOf(f.type), inner, glyph: f.type ?? 'neutral', kind: kindWord(f.type), rows: kindRows(f), contract: contractOf(f), innerLine, signs: !!f.signs };
+  // A loop container (4.1, 4.3): only a recorded loop with recorded steps; never from the type word, a name or step names alone.
+  const ws = f.steps.map(s => ({ name: s.name ?? '', program: s.program === true }));
+  const well = f.loop && isContainer(ws, f.loop)
+    ? containerBody(ws, f.loop, { conditions: f.conditions, portSteps: f.portSteps ?? [], stateVars: f.stateVars ?? 0, open: !!f.wellOpen, depth: f.wellDepth ?? 1 }) : null;
+  return { family: familyOf(f.type), inner, glyph: f.type ?? 'neutral', kind: kindWord(f.type), rows: kindRows(f), contract: contractOf(f), innerLine, well, signs: !!f.signs };
 }
 
 /* ---------- heights (map design v3 3.8, 5.3, 9.5): as styles.css draws them at the near tier ---------- */
@@ -222,14 +235,17 @@ export const NAME_ROOM = CARD_W - 16 * 2 - 20 - 8, TOGGLE_W = 28;
 export const BORDER = 2, PAD_Y = 12, NAME_LH = 20, KIND_LH = 16, HEAD_GAP = 16, ROW_H = 20, ROWS_GAP = 12, PIN_TITLE = 16, PIN_H = 24, PIN_GAP = 8, LINE_H16 = 16, INNER_H = 24, SIGNS_H = 24, BOTTOM_H = 28, GRID = 8;
 export interface CardHeights { head: number; rows: number; contract: number; inner: number; signs: number; bottom: number; total: number;
   /** From the card's top: the card-level contact point (the contract area's middle) and each pin's centre ('in:결과', 'out:결과'). */
-  contact: number; pins: Record<string, number> }
+  contact: number; pins: Record<string, number>;
+  /** From the card's top: the first name line's middle, where a reference's port-less ear sits on a side (3.6). */
+  ear: number }
 export function cardHeights(t: CardTemplate, nameLines: number, planned = 0): CardHeights {
   const nl = Math.min(2, Math.max(1, Math.floor(nameLines) || 1));
   const head = nl * NAME_LH + KIND_LH + HEAD_GAP + planned;
   const rows = t.rows.length ? t.rows.length * ROW_H + ROWS_GAP : 0;
   const c = t.contract;
   const contract = c.kind === 'pins' ? PIN_TITLE + Math.max(c.ins.length, c.outs.length) * PIN_H + PIN_GAP + (c.unmapped ? LINE_H16 : 0) : c.rows.length ? c.rows.length * ROW_H + ROWS_GAP : 0;
-  const inner = t.innerLine ? INNER_H : 0, signs = t.signs ? SIGNS_H : 0;
+  // A container's well is the near tier's content, so its height is the card's (the inner line reads in the same room further out).
+  const inner = t.well ? wellHeight(t.well) : t.innerLine ? INNER_H : 0, signs = t.signs ? SIGNS_H : 0;
   // The 1px border a side is not added: at worst it takes 2px of the bottom padding, which stays inside the card.
   const raw = PAD_Y + head + rows + contract + inner + signs + BOTTOM_H + PAD_Y, total = Math.ceil(raw / GRID) * GRID;
   const top = BORDER / 2 + PAD_Y + head + rows, pins: Record<string, number> = {};
@@ -238,7 +254,7 @@ export function cardHeights(t: CardTemplate, nameLines: number, planned = 0): Ca
     c.outs.forEach((n, i) => { pins[`out:${n}`] = top + PIN_TITLE + i * PIN_H + PIN_H / 2; });
   }
   const pinRows = c.kind === 'pins' ? PIN_TITLE + Math.max(c.ins.length, c.outs.length) * PIN_H : contract;
-  return { head, rows, contract, inner, signs, bottom: BOTTOM_H, total, contact: top + pinRows / 2, pins };
+  return { head, rows, contract, inner, signs, bottom: BOTTOM_H, total, contact: top + pinRows / 2, pins, ear: BORDER / 2 + PAD_Y + NAME_LH / 2 };
 }
 /** The lines a name takes on the card: one, or two (the most drawn; a longer name is cut with an ellipsis, its whole in the tip). */
 export function nameLinesOf(need: number, kids: boolean): 1 | 2 {

@@ -16,7 +16,8 @@ const token = name => { const m = new RegExp(`--${name}:\\s*(#[0-9a-f]{6})`, 'i'
 const lum = hex => { const c = hex.slice(1).match(/../g).map(x => parseInt(x, 16) / 255).map(v => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
 const contrast = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
 const rule = sel => { const i = css.indexOf(`\n${sel} {`); assert.ok(i >= 0, sel); return css.slice(i, css.indexOf('}', i)); };
-const width = sel => Number(/stroke-width:\s*([\d.]+)/.exec(rule(sel))[1]);
+// Map design v3 6.1: a line's width is its --lw in screen pixels (styles.css multiplies it by --u, one screen pixel in map units).
+const width = sel => Number(/--lw:\s*([\d.]+)/.exec(rule(sel))[1]);
 
 test('every text grey reads at 4.5:1 or more on white and on the canvas, and the greys keep their order', () => {
   const greys = ['text', 'text-2', 'text-3', 'text-4'].map(token);
@@ -28,26 +29,34 @@ test('every text grey reads at 4.5:1 or more on white and on the canvas, and the
 test('lines are stronger at rest than before and gain width, not only colour, on hover and selection', () => {
   assert.ok(lum(token('edge')) < lum('#b4bcc7'));
   const rest = width('.edge-line');
+  assert.ok(rest >= 1.25, 'never under 1.25 on screen at rest');
   assert.ok(width('.edge.near .edge-line') > rest && width('.edge.on .edge-line') > rest);
-  // shares and related are told apart by their dots, not only by their end marks
-  assert.notEqual(/stroke-dasharray:\s*([^;]+)/.exec(rule('.edge.k-shares .edge-line'))[1], /stroke-dasharray:\s*([^;]+)/.exec(rule('.edge.k-related .edge-line'))[1]);
+  assert.equal(width('.edge.on .edge-line'), 3, 'selected 3px');
+  assert.match(rule('.edge-line'), /stroke-width:\s*calc\(var\(--lw\) \* var\(--u, 1\) \* 1px\)/, 'screen pixels at every zoom');
+  // a reference's dots and a plain relation's sparse dots are told apart by their dots, not only by their end marks
+  const dash = sel => /stroke-dasharray:\s*([^;]+)/.exec(rule(sel))[1];
+  assert.notEqual(dash('.edge.s-dotted .edge-line'), dash('.edge.s-sparse .edge-line'));
+  assert.match(dash('.edge.s-dashed .edge-line'), /calc\(6px \* var\(--u, 1\)\) calc\(4px \* var\(--u, 1\)\)/, 'control dashed 6 4 on screen');
+  assert.match(dash('.edge.s-dotted .edge-line'), /^0 calc\(4px/, 'a reference dotted 0 4');
 });
 
-// Map spec 2.3: the legend reads the three channels (data: filled head, solid; control: open V, solid; reference: open V,
-// broken), a plain relation (a dot at both ends) and the withdrawn and planned patterns.
-test('the help is a legend: the three channels with their end marks, the plain relation, withdrawn and planned lines, and the keyboard keys', () => {
+// Map design v3 6.1: the legend reads the line grammar (data: solid, filled head; control: dashed, open V; reference: dotted
+// from an ear to a small V; a shared use dotted with ears; a plain relation sparse dots with a dot at both ends) and the text badge.
+test('the help is a legend: the line grammar with its end marks, the plain relation, the text badge, and the keyboard keys', () => {
   const help = html.slice(html.indexOf('<div id="help"'), html.indexOf('<div id="edge-tip"'));
   const rows = help.match(/<li><svg[\s\S]*?<\/li>/g) ?? [];
   assert.equal(rows.length, 6);
-  const [data, control, uses, related, revised, planned] = rows;
+  const [data, control, uses, shares, related, badge] = rows;
   assert.match(data, /<path class="m" d="M38\.5[^"]*z"/, 'data: a filled head');
-  for (const r of [control, uses]) { assert.match(r, /<path class="v" d="M39\.5/); assert.doesNotMatch(r, /class="m"/); }
-  assert.doesNotMatch(data, /d-needs/); assert.doesNotMatch(control, /d-needs/); assert.match(uses, /d-needs/);
+  assert.doesNotMatch(data, /d-control|d-uses/);
+  assert.match(control, /d-control/); assert.match(control, /<path class="v" d="M39\.5/); assert.doesNotMatch(control, /class="m"/);
+  assert.match(uses, /d-uses/); assert.match(uses, /<circle class="e"/, 'a reference: its ear'); assert.match(uses, /<path class="v"/);
+  assert.equal((shares.match(/<circle class="e"/g) ?? []).length, 2, 'a shared use: an ear at both ends');
   assert.equal((related.match(/<circle class="m"/g) ?? []).length, 2, 'related: a dot at both ends, no arrow');
   assert.doesNotMatch(related, /<path class="m"/);
-  assert.match(revised, /d-revised/); assert.match(planned, /d-planned/);
+  assert.match(badge, /<rect class="b"/);
   for (const k of ['/', 'Enter', 'Space', 'Esc']) assert.ok(help.includes(`<kbd>${k}</kbd>`), k);
-  for (const label of ['데이터', '채운 삼각, 실선', '제어·기동', '열린 V, 실선', '참조', '열린 V, 점선', '관련', '철회', '계획된 연결', '함께 쓰는']) assert.ok(help.includes(label), label);
+  for (const label of ['데이터', '채운 삼각, 실선', '제어·기동', '열린 V, 파선', '참조', '점렬', '관련', '철회', '계획된 연결', '함께 쓰는', '글자 배지', '색만으로 뜻을 싣지 않아요']) assert.ok(help.includes(label), label);
 });
 
 test('the reading modes are one segmented group and the home actions a primary and a secondary button', () => {
@@ -61,7 +70,9 @@ test('map tools: icons on the zoom and help buttons, hairlines between groups, a
   for (const id of ['recent-toggle', 'zoom-out', 'zoom-in', 'zoom-fit', 'arrange', 'help-toggle']) assert.match(tools, new RegExp(`id="${id}"[^>]*>(?:(?!</button>)[\\s\\S])*<svg`), id);
   // app.ts inserts 찾기 before zoom-out's previous sibling: that sibling must be the first group's hairline
   assert.match(tools, /<span class="tool-sep" aria-hidden="true"><\/span>\s*<button type="button" id="zoom-out"/);
-  assert.equal((tools.match(/class="tool-sep/g) ?? []).length, 4);
+  // Map design v3 7.3: the lens switch is a group of its own (five segments), between the arrange and help groups.
+  assert.equal((tools.match(/class="tool-sep/g) ?? []).length, 5);
+  assert.match(tools, /<div class="lens-seg" role="radiogroup"[^>]*>(?:<button type="button" role="radio" data-lens="(compose|data|start|state|scenario)"[^>]*>[^<]+<\/button>){5}<\/div>/);
   assert.match(css, /\.tool-sep\.add-sep:has\(\+ \.add-part\[hidden\]\) \{ display: none; \}/);
 });
 
