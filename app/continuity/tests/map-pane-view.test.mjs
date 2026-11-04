@@ -159,11 +159,12 @@ test('S1 ARIA tabs keys: ← → wrap, Home and End go to the ends, other keys d
   assert.equal(tabKeyMove('evidence', 'ArrowRight', ['structure', 'evidence']), 'structure', 'the tab set is data: another set moves within itself');
 });
 
-test('S1 구조 reads 하는 일 → 확인 필요 → 계약 → 동작 → 규칙과 관문 → 연결 → 어디에; absent sections left out; jump chips only for what is there', () => {
-  assert.deepEqual(STRUCTURE_ORDER.map(k => STRUCTURE_TITLE[k]), ['하는 일', '확인 필요', '계약', '동작', '규칙과 관문', '연결', '어디에']);
-  assert.deepEqual(structureSections({ where: 'W', rules: 'R', contract: 'C', behaviour: 'B', links: 'L' }), ['C', 'B', 'R', 'L', 'W']);
+// S9: 받는 것 · 내는 것 (was 계약) right under 하는 일, 조건 its own section after 동작, 연결 read as 안쪽 · 연결.
+test('S1/S9 구조 reads 하는 일 → 확인 필요 → 받는 것 · 내는 것 → 동작 → 조건 → 규칙과 관문 → 안쪽 · 연결 → 어디에; absent sections left out; jump chips only for what is there', () => {
+  assert.deepEqual(STRUCTURE_ORDER.map(k => STRUCTURE_TITLE[k]), ['하는 일', '확인 필요', '받는 것 · 내는 것', '동작', '조건', '규칙과 관문', '안쪽 · 연결', '어디에']);
+  assert.deepEqual(structureSections({ where: 'W', rules: 'R', contract: 'C', behaviour: 'B', conditions: 'K', links: 'L' }), ['C', 'B', 'K', 'R', 'L', 'W']);
   assert.deepEqual(structureSections({ where: 'W', contract: null, behaviour: undefined }), ['W']);
-  assert.deepEqual(jumpChips({ where: true, role: true, behaviour: 7, contract: 8, caution: 2, rules: 2, links: true }).map(x => x.text), ['하는 일', '확인 2', '계약 8', '동작 7', '규칙 2', '연결', '어디에']);
+  assert.deepEqual(jumpChips({ where: true, role: true, behaviour: 7, contract: 8, caution: 2, conditions: 2, rules: 2, links: true }).map(x => x.text), ['하는 일', '확인 2', '받는·내는 8', '동작 7', '조건 2', '규칙 2', '연결', '어디에']);
   assert.deepEqual(jumpChips({ role: true, behaviour: 0, where: true }).map(x => [x.key, x.text]), [['role', '하는 일'], ['behaviour', '동작'], ['where', '어디에']], 'a zero count reads the word alone; a missing section has no chip');
 });
 
@@ -173,7 +174,8 @@ test('S1 a long list folds to its first rows; a kept row (the picked line or rul
   assert.deepEqual(foldRows(rows, 3, false, x => x === 9), { shown: [1, 2, 3, 9], hidden: 6 });
   assert.deepEqual(foldRows(rows, 3, true), { shown: rows, hidden: 0 });
   assert.deepEqual(foldRows([1, 2], 3, false), { shown: [1, 2], hidden: 0 });
-  assert.equal(PANE_SHOWN.chain, 3); assert.equal(PANE_SHOWN.caution, 3); assert.equal(PANE_SHOWN.steps, 8); assert.equal(PANE_SHOWN.where, 4);
+  // S9: 동작 shows the first five steps (「+N 단계」), each side of 받는 것 · 내는 것 its first five lines.
+  assert.equal(PANE_SHOWN.chain, 3); assert.equal(PANE_SHOWN.caution, 3); assert.equal(PANE_SHOWN.steps, 5); assert.equal(PANE_SHOWN.ports, 5); assert.equal(PANE_SHOWN.where, 4);
 });
 
 test('S1 동작 요약: the loop\'s unit and stop (with the program mark), four step names in row order with how many more, or 단계 기록 없음', () => {
@@ -200,7 +202,7 @@ test('S1 확인 필요: only what the reading holds — unknown claims, a descri
 });
 
 test('S1 항목 근거 미연결: list names a line\'s payload says the same way are that line\'s; the rest read apart, with the kind\'s own words', () => {
-  assert.equal(UNLINKED_HEAD, '항목 근거 미연결 추출값');
+  assert.equal(UNLINKED_HEAD, '목록으로만 적힌 값', 'S9: plain words (was 「항목 근거 미연결 추출값」)');
   assert.deepEqual(unlinkedNames(['calendar.json', '잔고 입출금', '`review` 행'], ['Calendar.JSON', 'review 행', null]), ['잔고 입출금']);
   assert.deepEqual(unlinkedNames(['a'], []), ['a']);
   assert.deepEqual(listLabels('ai'), { inputs: '맥락', outputs: '반환', fields: '필드', config: '기준' });

@@ -14,7 +14,7 @@ import { validateProject } from '../dist/public/shared/validation.js';
 import * as B from '../server/map-blueprint.mjs';
 import * as P from '../server/map-pipeline.mjs';
 import { planMapPartitions } from '../server/map-partition.mjs';
-import { familyOf, cardTemplate, undecidedChip } from '../dist/public/client/card-family.js';
+import { familyOf, cardTemplate, undecidedChip, paneFamily } from '../dist/public/client/card-family.js';
 import { goldenReadings, stripNew, stripFamily, normalizeIds } from './fixtures/koru43/golden.mjs';
 import { stripNineteen } from './strip18.mjs';
 
@@ -211,4 +211,12 @@ test('.45 recipe: first-map-divided.45 and later-map-divided.45; the prompts rea
   assert.ok(P.RENDER_RULES.includes('기록 v5(첫 줄이 「〔기록 … · 쪽 n · 기준 … · 앞 쪽 …〕」인 기록)') && B.MAP_BLUEPRINT_PROMPT.includes('INPUT 옆의 keys'));
   assert.ok(P.EXTRACTION_PROMPT.includes('input.keys'));
   assert.equal(T.recordVersion(page(1)), 'v5');
+});
+
+test('.45 with display slice S9: the pane head says the record family and role beside the kind word, 「미정: 이유」, or 「대응 불명확」 (the pane only, review N8)', () => {
+  assert.deepEqual(paneFamily({ family: 'process', role: '실행 조정', reason: null, unclear: false }, null), { text: '표현군 처리 · 실행 조정', kind: 'family' });
+  assert.deepEqual(paneFamily({ family: 'gate', role: '인증', reason: null, unclear: false }, '인증'), { text: '표현군 관문', kind: 'family' }, 'a role that repeats the kind word is left off');
+  assert.deepEqual(paneFamily({ family: null, role: null, reason: 'mixed', unclear: false }), { text: '미정: 서로 다른 역할 혼재', kind: 'undecided' });
+  assert.deepEqual(paneFamily({ family: null, role: '루프·엔진', reason: null, unclear: true }, '루프·엔진'), { text: '대응 불명확: 루프·엔진', kind: 'unclear' });
+  assert.equal(paneFamily(null), null);
 });

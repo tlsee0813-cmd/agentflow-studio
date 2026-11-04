@@ -49,6 +49,17 @@ export function undecidedChip(f: CardFamilyFacts | null | undefined): string | n
   if (f.unclear) return `대응 불명확: ${f.role ?? '유형 낱말'}`;
   return f.reason ? `미정: ${UNDECIDED_WORD[f.reason] ?? f.reason}` : '미정';
 }
+/** The record's own family words (C-PART 표현군), by family. */
+const RECORD_FAMILY_WORD: Readonly<Record<string, string>> = { participant: '참여', process: '처리', store: '저장', trigger: '촉발', gate: '관문' };
+/** The pane head's family line (recipe .45 merged with display slice S9): 「표현군 처리 · 실행 조정」 for a part the record gave a family (the
+ * role left off where it only repeats the kind word beside it), the 「미정: 이유」 chip, or 「대응 불명확: 루프·엔진」 for a v4 type word whose
+ * family is unclear (review N8: this one reads in the pane only, never on the card); null for a part with no family facts. */
+export function paneFamily(f: CardFamilyFacts | null | undefined, kindWord: string | null = null): { text: string; kind: 'family' | 'undecided' | 'unclear' } | null {
+  if (!f) return null;
+  if (!f.family) { const chip = undecidedChip(f); return chip ? { text: chip, kind: f.unclear ? 'unclear' : 'undecided' } : null; }
+  const word = RECORD_FAMILY_WORD[f.family] ?? f.family, role = f.role && f.role !== kindWord ? f.role : null;
+  return { text: `표현군 ${word}${role ? ` · ${role}` : ''}`, kind: 'family' };
+}
 /** A gate's own glyph in the trigger family's tint; any other family keeps its type's glyph. */
 export const gateGlyph = (f: CardFamilyFacts | null | undefined, type: PartType | null | undefined): GlyphKey | null => f?.family === 'gate' ? 'gate' : type ?? null;
 /** What a part holds inside, as a capability (4.1): its steps as an action well ('steps': a loop type with one recorded step, or a
