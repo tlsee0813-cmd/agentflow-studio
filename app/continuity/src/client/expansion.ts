@@ -114,6 +114,10 @@ export function actionSections(c: ActionContent): ActionSection[] {
   return out;
 }
 
+/** S9: what opening a card does. A group (parts inside) with no steps of its own enters the group, as its 「안으로 들어가기」 does: its
+ * short expansion would hold only its name and operations line (and cover the card). A part with steps opens as before. */
+export const opensInto = (kids: number, steps: number): boolean => kids > 0 && steps === 0;
+
 /* ---------- the open state and the way back ---------- */
 /** Which part is open, and how. */
 export interface OpenState { part: string; mode: 'short' | 'detail' }

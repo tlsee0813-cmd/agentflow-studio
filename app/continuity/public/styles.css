@@ -2898,3 +2898,52 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 /* A lens steps back the cards it is not about (view-lens lensOffTopic): faded, never hidden or moved; a selected card, its partners
    and a legend pick read at full strength. */
 .space .node.lens-off:not(.selected):not(.related):not(.lg-pick):not(:hover):not(:focus-visible) { opacity: .42; }
+/* ---------- S9 · the 구조 tab reads like an explanation: quiet evidence dots, plain words, one reading order ---------- */
+/* An evidence mark in 구조 (and the head) is a small dot: its words (〔파일·7〕) float over it on hover or keyboard focus, its preview
+   and its click unchanged; still a target reachable by Tab. 근거 and 이력 keep the words. */
+:is([data-tab="structure"], .pane-head) .fn { position: relative; min-width: 20px; width: 20px; padding: 0; }
+:is([data-tab="structure"], .pane-head) .fn::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: .5; }
+:is([data-tab="structure"], .pane-head) .fn:hover::before, :is([data-tab="structure"], .pane-head) .fn:focus-visible::before { opacity: 1; }
+:is([data-tab="structure"], .pane-head) .fn .fn-t { display: none; position: absolute; bottom: calc(100% + 2px); left: 50%; transform: translateX(-50%); z-index: 5; padding: 1px 5px;
+  border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); box-shadow: var(--shadow-float); color: var(--accent-strong); pointer-events: none; }
+:is([data-tab="structure"], .pane-head) .fn:hover .fn-t, :is([data-tab="structure"], .pane-head) .fn:focus-visible .fn-t { display: block; }
+:is([data-tab="structure"], .pane-head) .fn-marks { gap: 0; margin-left: 0; }
+/* The row's ⋯ in 구조: hidden until the row is hovered or holds the focus (Tab still reaches it and shows it). */
+[data-tab="structure"] .fn-more > summary { opacity: 0; }
+[data-tab="structure"] .fn-more:focus-within > summary, [data-tab="structure"] .fn-more[open] > summary { opacity: 1; }
+/* 「사용 중단 권고 → update」 on a card (pipeline .44): the policy word never gives way (the chip's least width is that word); on a
+   narrow card the successor gives way first, then the kind word, each with an ellipsis (their whole words in the tips). The pane's
+   head says it in words beside the kind word. */
+.c-kind .c-life-to { flex: 0 4 auto; min-width: 0; margin-left: -2px; overflow: hidden; text-overflow: ellipsis; color: var(--text-2); }
+.lens-maint { padding: 0 5px; border: 1px solid var(--line-essential); border-radius: 6px; color: var(--text-2); white-space: nowrap; }
+/* 받는 것 · 내는 것: a control line says it starts something. */
+.port-kind.port-start { padding: 0 5px; border-radius: 4px; background: var(--chip); color: var(--text-2); }
+/* 동작's steps (S9: shorter pane): what a step does and what it uses share one line under its name when they fit. */
+.pn-sec .lens-steps .stp-step { flex-direction: row; flex-wrap: wrap; align-items: baseline; column-gap: 8px; row-gap: 2px; }
+.pn-sec .lens-steps .stp-step > .stp-top, .pn-sec .lens-steps .stp-step > .stp-more { flex-basis: 100%; }
+.pn-sec .lens-steps .stp-step > .stp-does { flex: 0 1 auto; min-width: 0; }
+.pn-sec .lens-steps .stp-step > .stp-uses { margin: 0; flex: 0 1 auto; min-width: 0; }
+.pn-sec .lens-steps .stp-step > .stp-does + .stp-uses { margin-left: 0; }
+.pn-sec .lens-steps .stp-step > .stp-uses:first-of-type:not(.stp-does + .stp-uses) { margin-left: 14px; }
+/* 동작's loop line reads as one sentence: a small 「표에서」 right after each field the program filled, its dot after the words. */
+.lens-loop > .stp-line, .stp-more > .stp-line { display: block; }
+.prog-chip.lf-prog { padding: 0 4px; font-size: 11px; line-height: 15px; }
+/* 동작's loop table (every C-LOOP row), a nested row under the loop it runs in. */
+.pn-loops { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 2px; font-size: 12.5px; line-height: 18px; color: var(--text-2); overflow-wrap: anywhere; }
+.pn-loops li.d1 { padding-left: 14px; }
+.pn-loops li.d2 { padding-left: 28px; }
+.pn-loops li.d3 { padding-left: 42px; }
+.pn-loops .pl-nest { color: var(--text-4); }
+/* 변형 · 골라 쓰는 구현: the implementation, when it is chosen, whether it goes beside the others. */
+.lens-variants { margin-top: 10px; }
+.pn-variants { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; line-height: 18px; }
+.pn-variants li { display: flex; flex-wrap: wrap; column-gap: 8px; align-items: baseline; min-width: 0; }
+.pn-variants .pv-name { font-weight: 590; color: var(--text); overflow-wrap: anywhere; }
+.pn-variants .pv-when { color: var(--text-2); overflow-wrap: anywhere; }
+.pn-variants .pv-note { flex-basis: 100%; color: var(--text-3); font-size: 12px; }
+/* 「읽는 법」 at the end of 구조. */
+.pn-guide { margin: 14px 0 4px; font-size: 12px; line-height: 17px; color: var(--text-3); }
+.pn-guide > summary { cursor: pointer; width: max-content; color: var(--text-3); }
+.pn-guide dl { margin: 6px 0 0; }
+.pn-guide dt { font-weight: 590; color: var(--text-2); }
+.pn-guide dd { margin: 0 0 6px; overflow-wrap: anywhere; }

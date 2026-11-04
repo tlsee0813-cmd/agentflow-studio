@@ -230,10 +230,11 @@ export function tabKeyMove(current: PaneTab, key: string, tabs: readonly PaneTab
 
 /* ---------- 구조: its sections in order (8.3) ---------- */
 /** 하는 일 and 확인 필요 read in the first-screen chain (하는 일 → 받는 것 → 동작 요약 → 내는 것 → 확인 필요); the rest follow it. */
-export type StructureSection = 'role' | 'caution' | 'contract' | 'behaviour' | 'rules' | 'links' | 'where';
-export const STRUCTURE_ORDER: readonly StructureSection[] = ['role', 'caution', 'contract', 'behaviour', 'rules', 'links', 'where'];
-export const STRUCTURE_TITLE: Record<StructureSection, string> = { role: '하는 일', caution: '확인 필요', contract: '계약', behaviour: '동작', rules: '규칙과 관문', links: '연결', where: '어디에' };
-const CHIP_WORD: Record<StructureSection, string> = { role: '하는 일', caution: '확인', contract: '계약', behaviour: '동작', rules: '규칙', links: '연결', where: '어디에' };
+// S9: 하는 일 (확인 필요 under it) → 받는 것 · 내는 것 → 동작 (the loop and the first steps) → 조건 → 규칙과 관문 → 안쪽 · 연결 → 어디에.
+export type StructureSection = 'role' | 'caution' | 'contract' | 'behaviour' | 'conditions' | 'rules' | 'links' | 'where';
+export const STRUCTURE_ORDER: readonly StructureSection[] = ['role', 'caution', 'contract', 'behaviour', 'conditions', 'rules', 'links', 'where'];
+export const STRUCTURE_TITLE: Record<StructureSection, string> = { role: '하는 일', caution: '확인 필요', contract: '받는 것 · 내는 것', behaviour: '동작', conditions: '조건', rules: '규칙과 관문', links: '안쪽 · 연결', where: '어디에' };
+const CHIP_WORD: Record<StructureSection, string> = { role: '하는 일', caution: '확인', contract: '받는·내는', behaviour: '동작', conditions: '조건', rules: '규칙', links: '연결', where: '어디에' };
 /** The given sections in STRUCTURE_ORDER, those absent (null) left out. */
 export function structureSections<T>(by: Partial<Record<StructureSection, T | null | undefined>>): T[] {
   return STRUCTURE_ORDER.flatMap(k => { const v = by[k]; return v === null || v === undefined ? [] : [v]; });
@@ -246,7 +247,7 @@ export function jumpChips(present: Partial<Record<StructureSection, number | tru
 }
 /** How many rows a list shows before 「N개 더」: the chain's ports and checks, the contract's rows per direction, the steps and
  * the other behaviour lists, the rules, the files. */
-export const PANE_SHOWN = { chain: 3, chainSteps: 4, caution: 3, contract: 8, steps: 8, list: 8, rules: 3, where: 4 } as const;
+export const PANE_SHOWN = { chain: 3, chainSteps: 4, caution: 3, contract: 8, ports: 5, steps: 5, list: 8, rules: 3, where: 4 } as const;
 /** A list folded to max rows unless open; a row keep() holds (the picked line, the picked rule) is shown wherever it stands. */
 export function foldRows<T>(rows: readonly T[], max: number, open: boolean, keep: (x: T) => boolean = () => false): { shown: T[]; hidden: number } {
   if (open || rows.length <= max) return { shown: [...rows], hidden: 0 };
@@ -280,8 +281,8 @@ export function cautionRows<T extends PaneClaim>(u: { claims: readonly T[]; role
 /* ---------- 항목 근거 미연결 추출값: list values without a line of their own ---------- */
 /** inputs · outputs · fields · config are lists of names (types.ts), and stateVars carry no quote: a reading keeps no source line per
  * item (contract map-reading.16). They read under this quiet head in the section they belong to, never as a cited row. */
-export const UNLINKED_HEAD = '항목 근거 미연결 추출값';
-export const UNLINKED_HINT = '정리가 목록 칸으로 적은 값이에요 · 항목마다 원문 줄을 저장하지 않아 근거가 항목에 연결되지 않아요 (계약 map-reading.16) · 원문은 근거 탭의 기록에서';
+export const UNLINKED_HEAD = '목록으로만 적힌 값';
+export const UNLINKED_HINT = '정리가 목록 칸에만 적은 값이에요 · 값마다 원문 줄을 저장하지 않아 줄마다 근거를 짚을 수 없어요 (계약 map-reading.16 · 예전 이름 「항목 근거 미연결 추출값」) · 원문은 근거 탭의 기록에서';
 const nameKey = (s: string) => s.replace(/`/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
 /** The names no line carries: a name a line's payload says the same way (case, backquotes and spacing aside) is cited by that line. */
 export function unlinkedNames(names: readonly string[], payloads: readonly (string | null | undefined)[]): string[] {
@@ -316,10 +317,10 @@ export function kindLead(type: string | null, d: { exits: readonly string[]; man
 /** What each piece of the drawing rests on, grouped under 구조's section heads in 구조's order (하는 일 → 확인 필요 → 계약 → 동작 →
  * 규칙과 관문 → 어디에), then the current claims 구조 does not use (그 밖의 기록된 말, in the claims' own order). S2 numbers the
  * entries (〔등급·n〕, the same span one number) and links 구조's rows to them; this is the seam: one entry per cited thing. */
-export type EvidenceKind = 'role' | 'state' | 'type' | 'relation' | 'loop' | 'step' | 'condition' | 'portmap' | 'fileRole' | 'rule' | 'claim';
+export type EvidenceKind = 'role' | 'state' | 'type' | 'relation' | 'loop' | 'recordLoop' | 'step' | 'condition' | 'portmap' | 'variant' | 'fileRole' | 'rule' | 'claim';
 export type EvidenceSection = Exclude<StructureSection, 'links'> | 'other';
 export const EVIDENCE_ORDER: readonly EvidenceSection[] = ['role', 'caution', 'contract', 'behaviour', 'rules', 'where', 'other'];
-export const EVIDENCE_TITLE: Record<EvidenceSection, string> = { role: '하는 일', caution: '확인 필요', contract: '계약', behaviour: '동작', rules: '규칙과 관문', where: '어디에', other: '그 밖의 기록된 말' };
+export const EVIDENCE_TITLE: Record<EvidenceSection, string> = { role: '하는 일', caution: '확인 필요', contract: '받는 것 · 내는 것', behaviour: '동작', conditions: '조건', rules: '규칙과 관문', where: '어디에', other: '그 밖의 기록된 말' };
 export interface EvidenceEntry<C> { key: string; section: EvidenceSection; kind: EvidenceKind; label: string; quote: QuoteLike | null; claim: C | null }
 export interface EvidenceGroup<C> { section: EvidenceSection; entries: EvidenceEntry<C>[] }
 export interface EvidenceSource<C> {
@@ -397,6 +398,11 @@ export interface ItemsSource<C> {
   /** The lines, each direction in the pane's own order: in (to the part), out (from it), with (needs · shares · related). */
   relations: readonly { id: string; label: string; quote: QuoteLike | null; dir: 'in' | 'out' | 'with'; at?: string | null }[];
   loop: { quote: QuoteLike; at?: string | null } | null; steps: readonly { name: string; quote: QuoteLike; at?: string | null }[]; conditions: readonly { when: string; quote: QuoteLike; at?: string | null }[];
+  /** S9: the record's loop table (C-LOOP rows, cited after the loop line, before the steps) and the part's variants (C-VARIANT rows,
+   * cited in 안쪽 · 연결 after its lines), each in 구조's order; index: the row's place in the reading's own list (the thing
+   * 'recordLoop:i' · 'variant:i' 구조 looks it up by; default its place here); ref: the record's row ID (the note's stable key). */
+  recordLoops?: readonly { index?: number; ref: string; label: string; quote: QuoteLike; at?: string | null }[];
+  variants?: readonly { index?: number; ref: string; label: string; quote: QuoteLike; at?: string | null }[];
   portMap: readonly { port: string; step: string; direction: 'in' | 'out'; quote: QuoteLike; at?: string | null }[];
   /** In 어디에's order (whereRows roles). */
   fileRoles: readonly { path: string; quote: QuoteLike; at?: string | null }[];
@@ -440,14 +446,18 @@ export function evidenceItems<C extends PaneClaim>(s: ItemsSource<C>): EvidenceB
   ins.slice(0, ports).forEach(x => rel(x, 'contract'));
   const loop = () => { if (s.loop) cite('loop', 'behaviour', 'loop', '반복', s.loop.quote, 'loop', '반복', null, s.loop.at ?? null); };
   const step = (x: ItemsSource<C>['steps'][number], i: number) => cite(`step:${i}`, 'behaviour', 'step', `단계 ${x.name}`, x.quote, `step:${x.name}`, `단계 ${x.name}`, null, x.at ?? null);
-  loop(); s.steps.slice(0, chainSteps).forEach(step);
+  // S9: with no chain (steps 0) the loop is cited where 동작 reads it, after 받는 것 · 내는 것.
+  if (chainSteps > 0) loop();
+  s.steps.slice(0, chainSteps).forEach(step);
   outs.slice(0, ports).forEach(x => rel(x, 'contract'));
   const ruled = new Set<C>(s.rules);
   const cautions = s.cautions ?? s.claims.filter(c => !ruled.has(c) && claimTopic(c) === 'unknown');
   for (const c of cautions) cite(claimThing(c, `caution:${refOf(c)}`), 'caution', 'claim', c.text, quoteOf(c), refOf(c), c.text, c);
   // 계약, 동작, 규칙과 관문, 연결, 어디에.
   ins.forEach(x => rel(x, 'contract')); outs.forEach(x => rel(x, 'contract'));
-  loop(); s.steps.forEach(step);
+  loop();
+  (s.recordLoops ?? []).forEach((x, k) => { const i = x.index ?? k; cite(`recordLoop:${i}`, 'behaviour', 'recordLoop', x.label, x.quote, `recordLoop:${x.ref}`, x.label, null, x.at ?? null); });
+  s.steps.forEach(step);
   s.conditions.forEach((x, i) => cite(`condition:${i}`, 'behaviour', 'condition', `조건 ${x.when}`, x.quote, `condition:${x.when}`, `조건 ${x.when}`, null, x.at ?? null));
   s.portMap.forEach((x, i) => { const label = x.direction === 'in' ? `포트 대응 ${x.port} ⇥ ${x.step}` : `포트 대응 ${x.step} ⇤ ${x.port}`;
     cite(`portmap:${i}`, 'behaviour', 'portmap', label, x.quote, `portmap:${x.direction}:${x.port}:${x.step}`, label, null, x.at ?? null); });
@@ -458,6 +468,7 @@ export function evidenceItems<C extends PaneClaim>(s: ItemsSource<C>): EvidenceB
     for (const x of s.ruleQuotes?.(c) ?? []) cite(`${t}|${x.key}`, 'rules', 'rule', x.label, x.quote, `${ref}|${x.key}`, `${c.text} · ${x.label}`, null, own);
   });
   s.relations.filter(x => x.dir === 'with').forEach(x => rel(x, 'links'));
+  (s.variants ?? []).forEach((x, k) => { const i = x.index ?? k; cite(`variant:${i}`, 'links', 'variant', x.label, x.quote, `variant:${x.ref}`, x.label, null, x.at ?? null); });
   s.fileRoles.forEach(x => cite(`file:${pathKey(x.path)}`, 'where', 'fileRole', `파일 ${x.path}`, x.quote, `file:${pathKey(x.path)}`, `파일 ${x.path}`, null, x.at ?? null));
   // The rest of the current claims, in topic order (as the pane reads claims).
   const rest = s.claims.filter(c => !ruled.has(c) && !claim.has(c) && !cautions.includes(c));
