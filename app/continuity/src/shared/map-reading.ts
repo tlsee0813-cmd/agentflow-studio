@@ -4,7 +4,7 @@
  * derived understanding. It never renames, moves, archives or re-describes an existing part, never writes Area.note and never
  * touches space.understanding (return.2 and its anchors). What is unclear stays a candidate; nothing asks for approval per part. */
 import { CLAIM_KINDS, CLAIM_TOPICS, EVIDENCE_GRADES, PART_STATES, PART_TYPES, CHANNELS, RELATION_MODES, READINGS_LIMIT, READING_EXCLUSION_RULES, isMapReading, isScenarioReading, type PastedRecord, type RecordEvidence, type CandidateTarget, type ClaimKind, type ClaimTopic, type EvidenceGrade, type PartState, type PartType, type Channel, type RelationMode, type MapReading, type Project, type ReadingCandidate, type ReadingClaim, type ReadingPart, type ReadingQuote, type ReadingRelation, type ReadingSkip, type ReadingExclusion, type RelationKind, type ReadingStep, type ReadingLoop, type ReadingStateVar, type ReadingPortMap, type ReadingCondition, type ReadingFileRole, RULE_SCOPES, ANCHOR_KINDS, ENFORCER_KINDS, WITHDRAWAL_KINDS, GATE_KINDS, type RuleScope, type AnchorKind, type EnforcerKind, type WithdrawalKind, type GateKind,
-  type ReadingDecider, type ReadingActor, type ReadingContractChange, type ReadingShippedIn, type WithdrawalMethod, type ConditionPhase, type ReadingStepBranch, type CrossKind, type CadenceKind } from './types.js';
+  type ReadingRecordLoop, type ReadingVariant, type ReadingStatusClaim, type ReadingDecider, type ReadingActor, type ReadingContractChange, type ReadingShippedIn, type WithdrawalMethod, type ConditionPhase, type ReadingStepBranch, type CrossKind, type CadenceKind } from './types.js';
 import { indexSpans, encodeSpans, decodeSpans, resolveRef, resolveRange, resolveEvidenceRange, textDigest, ANCHOR_QUOTE_MAX, SPANS_PER_RECORD, type Span, type SpanWire } from './evidence-span.js';
 import type { StudioView, RecordView } from './studio.js';
 import { addArea, addChildArea, addRelation, addReading } from './domain.js';
@@ -14,7 +14,8 @@ import { secretLike } from './secret.js';
 import { recordKind, recordLabel, mapBasis, mapNoteHead } from './record-source.js';
 import { validateFrozenRequest, validateRequestContext, requestContext, validateRequestMatch, requestMatches, hasTarget, sameTarget, canReplace, MATCH_STANCES, recordTexts, readInterval, type RequestContext, type FrozenRequest, type RequestMatch, type RequestMatch3, type StoredRequestMatch, type MatchKind, type MatchStance, type RequestTarget } from './request-return.js';
 import { cellTexts, splitCells, rowsOf, rowsOfTexts, readRecordTables, PARTTYPE_TABLE, type TableRow } from './record-table.js';
-import { record43, type Reading43, type Part43, type Line43 } from './record-reading.js';
+import { record43, actorsOf, variantGloss, glossVariants, type Reading43, type Part43, type Line43 } from './record-reading.js';
+export { glossVariants };
 
 export const MAP_SCHEMA = 'studio.map.1' as const;
 export const MAP2_SCHEMA = 'studio.map.2' as const;
@@ -277,7 +278,9 @@ export type ContractGuard = 'shape' | 'keys' | 'text' | 'count' | 'new-count' | 
   // pipeline .42: a person device naming only who decided the rule (its 누가 정했나 cell) where no record says people keep it; a line made
   // of an artifact row's maker × reader that a line between the same two parts already carries (merged into it) or that a recorded path
   // through another part already draws (set aside by the server).
-  | 'decider' | 'product-merge' | 'product-shortcut';
+  | 'decider' | 'product-merge' | 'product-shortcut'
+  // pipeline .44: a claim on a change row naming a person another change row gives as its actor and its own row does not.
+  | 'actor';
 /** map-reading.7–8: the categories that leave out a part's own optional fields only (the part stays). */
 const PART_FIELD_GUARDS: ReadonlySet<string> = new Set(['state', 'state-at', 'state-when', 'files', 'type', 'type-at', 'inputs', 'outputs', 'fields', 'config']);
 /** map-reading.8: the reply's own optional fields, left null alone when wrong. */
@@ -1027,6 +1030,16 @@ export function contentWords(text: string): Set<string> {
   return out;
 }
 const sharedWords = (a: Set<string>, b: Set<string>): number => [...a].filter(w => b.has(w)).length;
+/** Pipeline .44: the words a rule shares with a row for the program's places, a code name written whole on both sides counting once (the
+ * .43 ML map pinned one part's rule to another part's condition row on one shared snake_case setting name, read as its two words); a code
+ * name only one side writes is read word by word as before (STOP_NOT_RESIDENT). */
+const CODE_NAME = /[a-z0-9]+(?:_[a-z0-9]+)+/g;
+export function sharedPlace(words: Set<string>, ruleText: string, rowText: string): number {
+  const row = contentWords(rowText), mine = new Set(ruleText.toLowerCase().match(CODE_NAME) ?? []);
+  let n = sharedWords(words, row);
+  for (const id of new Set(rowText.toLowerCase().match(CODE_NAME) ?? [])) if (mine.has(id)) { const k = [...contentWords(id.replace(/_/g, ' '))].filter(w => words.has(w) && row.has(w)).length; if (k > 1) n -= k - 1; }
+  return n;
+}
 /** A rule's own words: the claim's text and, when its line is a table row, that row's cells between its part cell and its last cell
  * (「지켜야 할 것」: the rule line, not who set it). */
 // Pipeline .43 (4.7): a v4 C-RULE row (its 지키는 장치 cell one of 코드·검사·사람·없음·모름, 「+」 joined) gives its 규칙 한 줄 cell only.
@@ -1064,6 +1077,26 @@ const looseTokens = (t: string): Set<string> => new Set((t.normalize('NFC').toLo
   .map(w => /^[가-힣0-9]/.test(w) ? unparticled(w) : w).filter(w => w.length >= 2 && !STOP_WORDS.has(w)));
 // Pipeline .42: and 사람이 (직접) 확인·검토·지킨다, 눈으로 확인 (a rule kept by people, said in so many words).
 const HAND_KEPT = /문서에만|손으로|수동|사람이\s*(?:직접\s*)?(?:확인|검토|지킨|지켜|챙)|눈으로\s*확인/, CHANGE_TABLE = ['C-CHANGE'];
+/** Pipeline .44: the v4 change or status row a claim quotes: its table, its own part column (C-CHANGE 바뀐 부분, C-STATUS 대상) and, on a
+ * change row, the named actors of its 관련 주체·역할 cell (null when one of them goes unnamed: who it is then is not the program's to say). */
+const PART_COLUMN44: Readonly<Record<string, string>> = { 'C-CHANGE': '바뀐 부분', 'C-STATUS': '대상' };
+const bare44 = (s: string) => s.replace(/\[[^\]]*\]/g, ' ').replace(/\s+/g, ' ').trim();
+function v4ClaimRow(texts: Map<string, { text: string; spans: Span[] | null }>, q: { record: string; from?: number; to?: number }): { id: string; part: string | undefined; actors: string[] } | null {
+  if (q.from === undefined || q.to === undefined) return null;
+  const r = rowsOf(texts, Object.keys(PART_COLUMN44)).find(x => x.dialect === 'v4' && x.record === q.record && x.from < q.to! && q.from! < x.to); if (!r) return null;
+  const actors = r.id === 'C-CHANGE' ? actorsOf(r.byColumn['관련 주체·역할'] ?? '') : [];
+  return { id: r.id, part: r.byColumn[PART_COLUMN44[r.id]!], actors: actors.some(a => !a.name) ? [] : actors.map(a => a.name!) };
+}
+/** Pipeline .44: whether a claim quotes a v4 C-RULE row. */
+const v4Rule = (texts: Map<string, { text: string; spans: Span[] | null }>, q: { record: string; from?: number; to?: number }): boolean =>
+  q.from !== undefined && q.to !== undefined && rowsOf(texts, ['C-RULE']).some(x => x.dialect === 'v4' && x.record === q.record && x.from < q.to! && q.from! < x.to);
+/** Pipeline .44: every actor name (four characters or more) the records' v4 change rows give, lower-cased, once each. */
+const actorNameCache = new WeakMap<object, string[]>();
+function changeActorNames(texts: Map<string, { text: string; spans: Span[] | null }>): string[] {
+  const hit = actorNameCache.get(texts); if (hit) return hit;
+  const out = [...new Set(rowsOf(texts, ['C-CHANGE']).filter(r => r.dialect === 'v4').flatMap(r => actorsOf(r.byColumn['관련 주체·역할'] ?? '')).flatMap(a => a.name && a.name.length >= 4 ? [a.name.toLowerCase()] : []))];
+  actorNameCache.set(texts, out); return out;
+}
 /** Pipeline .42: the 「지켜야 할 것」 row a claim quotes, with its 부분 and 누가 정했나 columns (who -1 when the table has none). */
 function ruleRowAt(texts: Map<string, { text: string; spans: Span[] | null }>, claim: { record: string; from?: number; to?: number }): { row: SectionRow; partAt: number; whoAt: number } | null {
   if (claim.from === undefined || claim.to === undefined) return null;
@@ -1463,6 +1496,7 @@ const exclusionExplanation = (e: MapReplyError): string => {
     // pipeline .29: a relation or a claim set aside by the program's own reading of the line it quotes.
     : e.rule === 'contract' && e.target === 'via-store' ? '파일을 넘기는 연결이 그 파일의 보관소 부분을 거치지 않아 제외했어요.'
     : e.rule === 'contract' && e.target === 'wrong-part' ? '다른 부분의 표 행을 인용한 주장이어서 이 부분에서 제외했어요.'
+    : e.rule === 'contract' && e.target === 'actor' ? '최근 변화 행이 적은 주체가 아닌, 다른 행의 주체를 이 변화의 주체로 쓴 주장이어서 제외했어요.'
     : e.rule === 'contract' && e.target === 'sender' ? '원문 줄이 적은 보내는 쪽과 다르거나, 미구현·폐기된 부분이 설계에 없이 보내는 연결이어서 제외했어요.'
     // pipeline .31: one item of a part's list, or one used name of a step, is set aside alone (the list or the step stays).
     // pipeline .33: or an input or output repeating a store partner's field or cut short of another item.
@@ -1772,6 +1806,19 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
         const own = plainName(p.name), rows = tableRows(q.quote).filter(c => c.length > 1);
         const other = rows.some(c => plainName(c[0]!) !== own && partNames.has(plainName(c[0]!)) && !c.slice(1).some(cell => cellNames(cell).includes(own)));
         need(!other || rows.some(c => plainName(c[0]!) === own), `parts[${pi}].claims[${j}]`, 'wrong-part');
+        // pipeline .44: a v4 change or status row names its part in its own column (바뀐 부분, 대상), not its first cell: one naming another
+        // part of this reading (「전체」 when the reading has that part) and not this one is that part's row.
+        const row44 = v4ClaimRow(texts, q);
+        if (row44?.part !== undefined) {
+          const named = cellNames(row44.part), whole = plainName(bare44(row44.part));
+          need(!(named.some(n => n !== own && partNames.has(n)) || (whole !== own && partNames.has(whole))) || named.includes(own) || whole === own, `parts[${pi}].claims[${j}]`, 'wrong-part');
+        }
+        // pipeline .44: a claim on a v4 change row names no person another change row gives as its actor and its own row does not
+        // (the .43 game map credited one contributor's commit to another); the row's own actors are kept on the claim (record43).
+        if (row44?.id === 'C-CHANGE' && row44.actors.length) {
+          const mine = new Set(row44.actors.map(n => n.toLowerCase())), text = (c.text as string).toLowerCase();
+          need(!changeActorNames(texts).some(n => !mine.has(n) && text.includes(n)), `parts[${pi}].claims[${j}]`, 'actor');
+        }
       }
       if (!seven && c.about !== null) field(c.about, 80, false, `parts[${pi}].claims[${j}].about`);
       const about = seven ? condition(c.aboutAt, `parts[${pi}].claims[${j}].aboutAt`, 80, new Set([q.record]))?.quote ?? null : c.about === null ? null : (c.about as string).trim();
@@ -2615,10 +2662,11 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
     let rows: PlaceRow[] | undefined;
     for (const b of outParts) for (const c of b.claims) {
       if (c.topic !== 'rule' || (c.anchors ?? []).length || c.scope === 'project') continue;
-      const own = plainName(b.name ?? parts.get(b.ref)?.name ?? ''), words = ruleWords(c.text, c.quote);
+      // pipeline .44: a code name both sides write whole counts as one shared word (sharedPlace).
+      const own = plainName(b.name ?? parts.get(b.ref)?.name ?? ''), words = ruleWords(c.text, c.quote), said44 = `${c.text} ${c.quote}`;
       rows ??= [...conditionRows(ask).map(r => ({ part: r.part, at: r.at, text: r.condition, words: `${r.condition} ${r.then}`, record: r.record, from: r.from, to: r.to })), ...placeRows(ask)];
       const fit = rows.filter(r => plainName(r.part) === own && !material.some(m => m.record === r.record && m.from < r.to && r.from < m.to))
-        .map((r, i) => ({ r, i, n: sharedWords(words, contentWords(r.words)) })).filter(x => x.n >= 2).sort((x, y) => y.n - x.n || x.i - y.i).slice(0, PROGRAM_ANCHORS_MAX);
+        .map((r, i) => ({ r, i, n: sharedPlace(words, said44, r.words) })).filter(x => x.n >= 2).sort((x, y) => y.n - x.n || x.i - y.i).slice(0, PROGRAM_ANCHORS_MAX);
       const placed = fit.flatMap(({ r }): MapReplyAnchor[] => {
         try { return [{ kind: 'inferred', text: r.text.length <= 80 ? r.text : `${r.text.slice(0, 79)}…`, quote: cite(r.at), program: true }]; } catch { return []; }
       });
@@ -2629,7 +2677,7 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       const known = new Set(fit.map(({ r }) => `${r.record}:${r.from}`));
       const near = [...new Set(reached)].flatMap(x => x.conditions ?? []).filter(k => k.quote.from !== undefined && !known.has(`${k.quote.record}:${k.quote.from}`)
         && !material.some(m => m.record === k.quote.record && m.from < k.quote.to! && k.quote.from! < m.to))
-        .map((k, i) => ({ k, i, n: sharedWords(words, contentWords(`${k.when} ${k.then}`)) })).filter(x => x.n >= 2).sort((x, y) => y.n - x.n || x.i - y.i).slice(0, PROGRAM_ANCHORS_MAX);
+        .map((k, i) => ({ k, i, n: sharedPlace(words, said44, `${k.when} ${k.then}`) })).filter(x => x.n >= 2).sort((x, y) => y.n - x.n || x.i - y.i).slice(0, PROGRAM_ANCHORS_MAX);
       if (near.length) c.anchors = near.map(({ k }): MapReplyAnchor => ({ kind: 'inferred', text: k.when, quote: k.quote, program: true }));
     }
     // map-reading.13 (pipeline .37): the program's loop, stop and resume, and the kept state its conditions name. A part with no loop
@@ -2723,11 +2771,17 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
               const cells = { cond: condCell(r), uses: k(/쓰는|사용/), does: k(/하는\s*일/), name: k(/단계\s*이름|이름/) };
               return [{ at: alias, text: keeper(cells, words), n: sharedWords(words, contentWords(Object.values(cells).join(' '))), place: null as ConditionRow | null }];
             });
-            const cands = [...conds.map(r => ({ at: r.at, text: condText(r), n: sharedWords(words, contentWords(`${r.condition} ${r.then}`)), place: r as ConditionRow | null })), ...stepCands];
+            // pipeline .44: the row is the rule's place only when it shares two words with the rule, a code name both write counting once
+            // (sharedPlace); the device it gives is read as before.
+            const said44 = `${c.text} ${c.quote}`;
+            const cands = [...conds.map(r => ({ at: r.at, text: condText(r), n: sharedWords(words, contentWords(`${r.condition} ${r.then}`)),
+              place: sharedPlace(words, said44, `${r.condition} ${r.then}`) >= 2 ? r as ConditionRow | null : null })), ...stepCands];
             const best = cands.filter(x => x.n >= 2).sort((x, y) => y.n - x.n)[0];
             const errors = conds.filter(r => ERROR_OUTCOME.test(r.then));
             const chosen = best ? [best] : at && REFUSING_RULE.test(at.row.cells.filter((_, i) => i !== at.partAt && i !== at.whoAt).join(' ')) && errors.length >= 1 && errors.length <= PROGRAM_ANCHORS_MAX
-              ? errors.map(r => ({ at: r.at, text: condText(r), n: 0, place: r as ConditionRow | null })) : [];
+              // pipeline .44: a refusal row sharing no words with a v4 rule (whose own row says where its device is) places nothing (the
+              // .43 analytics map pinned an input-refusal rule to an unrelated branch row of the same file).
+              ? errors.map(r => ({ at: r.at, text: condText(r), n: 0, place: v4Rule(texts, c) ? null : r as ConditionRow | null })) : [];
             for (const x of chosen) { try { const quote = cite(x.at); if (!onMaterial(quote)) found.push({ text: x.text, quote, place: x.place }); } catch { /* a row that does not resolve adds nothing */ } }
           }
         }
@@ -3002,6 +3056,9 @@ export interface PartUnderstanding {
   others: { text: string; about: string | null; at: string }[];
   /** Current claims, newest reading first: superseded ones and repeats of the same words are left out. */
   claims: CurrentClaim[];
+  /** Pipeline .44 (map-reading.18 fields, derived): the newest reading's v4 C-LOOP rows of the part (every loop, with its parent loop),
+   * its C-VARIANT rows and C-STATUS claims; [] when no reading gives them. */
+  recordLoops: ReadingRecordLoop[]; variants: ReadingVariant[]; statusClaims: ReadingStatusClaim[];
   /** Each reading that said something about this part, oldest first (the evidence history, apart from the current view). */
   history: { reading: string; at: string; role: string | null; claims: ReadingClaim[]; basis: ReadingQuote[] }[];
   /** The part was added by a reading: the name it was added with (the person may have renamed it since). */
@@ -3050,6 +3107,7 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
   // A later reading's names go first in its own order; one an earlier reading also named moves up with it.
   const steps: PartUnderstanding['steps'] = [], stateVars: ReadingStateVar[] = [], portMap: PartUnderstanding['portMap'] = []; let loop: PartUnderstanding['loop'] = null;
   const conditions: PartUnderstanding['conditions'] = [], fileRoles: ReadingFileRole[] = [];
+  let recordLoops: ReadingRecordLoop[] = [], variants: ReadingVariant[] = [], statusClaims: ReadingStatusClaim[] = [];
   const gather = (list: string[], own: readonly string[] | undefined) => { if (own?.length) list.splice(0, list.length, ...own, ...list.filter(f => !own.includes(f))); };
   for (const r of p.readings) {
     if (!isMapReading(r)) { if (r.version === 'map-correction.1' && r.areaId === areaId) { role = r.text; roleAbout = null; roleBasis = []; corrected = { id: r.id, at: r.at }; } continue; }
@@ -3069,6 +3127,8 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
       stateVars.splice(0, stateVars.length, ...own, ...stateVars.filter(s => !own.some(x => x.name === s.name)));
     }
     if (part.loop) loop = { ...part.loop, at: r.at };
+    // .44: the newest reading's v4 loop, variant and status rows.
+    if (part.loops?.length) recordLoops = part.loops; if (part.variants?.length) variants = part.variants; if (part.statusClaims?.length) statusClaims = part.statusClaims;
     // map-reading.12: the newest reading's condition rows go first, each condition and outcome once.
     if (part.conditions?.length) { const own = part.conditions.map(c => ({ ...c, at: r.at })), key = (c: ReadingCondition) => `${c.when}|${c.then}`; conditions.splice(0, conditions.length, ...own, ...conditions.filter(c => !own.some(x => key(x) === key(c)))); }
     // map-reading.14: the newest reading's file-map rows go first, each path once.
@@ -3105,8 +3165,17 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
   claims.sort((a, b) => Number(!!b.replaces) - Number(!!a.replaces));
   // AF140: every claim that still stands, never a silent cut (a limitation read early is as current as a feature read late). A reader
   // that needs fewer takes its own (the map ask and the plan's source take the first 6 of this same order).
-  return { role, roleAbout, roleBasis, corrected, others: others.slice(0, 6), claims, history, createdName, state, stateRead, files: files.slice(0, 8), typeRead, inputs: inputs.slice(0, 8), outputs: outputs.slice(0, 8), fields: fields.slice(0, 24), config: config.slice(0, 8),
+  return { role, roleAbout, roleBasis, corrected, others: others.slice(0, 6), claims, recordLoops, variants, statusClaims, history, createdName, state, stateRead, files: files.slice(0, 8), typeRead, inputs: inputs.slice(0, 8), outputs: outputs.slice(0, 8), fields: fields.slice(0, 24), config: config.slice(0, 8),
     steps: steps.slice(0, 12), loop, stateVars: stateVars.slice(0, 8), portMap: portMap.slice(0, 24), conditions: conditions.slice(0, 24), fileRoles: fileRoles.slice(0, 12), rules, withdrawals, gates, revised, roleBasisRevised };
+}
+
+/** Pipeline .44: what each variant ID the project's map readings read from a C-VARIANT row stands for (variantGloss: the implementing
+ * part and its choice condition), the newest reading's row first; display only (glossVariants), the stored words stay as written. */
+const glossCache = new WeakMap<Project, Map<string, string>>();
+export function projectVariantGloss(p: Project): Map<string, string> {
+  const hit = glossCache.get(p); if (hit) return hit;
+  const all = p.readings.filter(isMapReading).reverse().flatMap(r => r.parts.flatMap(x => x.variants ?? []));
+  const out = variantGloss(all); glossCache.set(p, out); return out;
 }
 
 /* ---------- evidence a later record took back ---------- */

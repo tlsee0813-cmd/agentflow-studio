@@ -60,6 +60,13 @@ export function lifecycleOf(state: PartState | null | undefined, quote = ''): st
   return null;
 }
 
+/** Pipeline .44: a part the record's C-STATUS rows say is deprecated or no longer maintained (유지 방침 사용 중단 권고 · 유지 종료), with
+ * its successor when the row names one ('사용 중단 권고 → pump2'); null otherwise. It is not 폐기: the part still exists as recorded. */
+export function maintenanceOf(claims: readonly { dimension: string; value: string; successor: string | null }[] | undefined): string | null {
+  const c = (claims ?? []).find(x => x.dimension === 'maintenance' && (x.value === 'deprecated' || x.value === 'ended'));
+  return c ? `${c.value === 'deprecated' ? '사용 중단 권고' : '유지 종료'}${c.successor ? ` → ${c.successor}` : ''}` : null;
+}
+
 /** What the card is made from: the part's reading and what its adopted relations say of it (names of the parts at the other ends,
  * counted by channel). Every list as the record has it. */
 export interface CardFacts {

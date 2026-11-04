@@ -54,6 +54,7 @@ export const GLOBAL_RULES = `
 부분별 작성은 renderedParts에 이미 들어 있다. parts는 빈 배열로 유지하고 부분이나 주장을 다시 출력하지 않는다.
 summary는 한국어 짧은 두세 문장, 약200자를 목표로 하고 360자를 절대 넘기지 않는다(넘으면 이 단계 전체가 거절된다). 360자를 채우려 하지 않는다. 추정([추정]·guess)과 계획(want)은 확인된 사실 뒤에, 추정·계획임을 밝혀 쓰고, 확인된 사실과 한 문장에 섞지 않으며, 자리가 없으면 뺀다. 첫 문장은 프로젝트가 무엇인지다: 기록의 한 줄 요약이 프로젝트를 정의한 문장(「salesrec는 … 1인 개발 Python CLI다」 같은 프로젝트 이름과 하는 일)을 줄여 쓴다(빠지면 진단 unbacked에 「한 줄 요약(프로젝트)」로 남는다). 그 정의 문장이 무엇이 무엇으로 이어지는지(「수집 → 계산 → 보고가 파일로 이어진다」 같은 화살표 사슬)를 말하면 그 구조 절을 화살표째 첫 문장에 남긴다(빠지면 진단 uncited에 「한 줄 요약(구조)」로 남는다). 둘째 문장은 기록의 기준 시각(basisAt)의 운영 상태다: 기록의 한 줄 요약(「1. 한 줄 요약」)과 실제 변화 행이 말하는 돈·노출·손익·대기·전원 상태를 원문의 값 그대로(예: 「e=1.00 실거래 첫 사이클 −0.433 USDT, 07:25Z 재ARM 뒤 대기」, 「POWEROFF-READY」) 쓰고 그것을 막는 관측(원문의 「아직 못 봄」·라이브에 영향 주는 결함)을 붙인다. 기록의 모르는 것·가장 자신 없는 것 표가 기준 시각 뒤를 보지 못했다고 적으면(「엔진 | 08:49Z 뒤 실제 상태」, 「「돌고 있음」은 인용이고, 08:49Z 뒤는 직접 보지 않음」) 첫 문장에 그 기록 자신의 한정(「08:49Z 뒤 미확인」)을 반드시 붙이며, 그 한정을 받치는 그 부분(이름 칸의 부분, 예: 엔진)의 상태·모름 주장이 renderedParts에 있다. 보고된 가동을 지금도 확실히 도는 것처럼 쓰지 않는다. 구조·설계 설명이나 가동 여부만으로 첫 문장을 쓰지 않는다. 셋째 문장(자리가 남을 때)은 다음 관문(무엇이 확인되면 무엇을 하는지)을 원문의 시각·대상 이름과 함께 쓴다. 주요 철회와 정정은 두 문장에 자리가 남을 때만 쓰고, 미구현 설계 목록은 그 뒤다. 부분 설명에 없는 중요한 정정도 원문으로 확인하여 보존한다. 수치나 구조 소개를 반복하느라 정정을 밀어내지 않는다. summary의 각 문장은 renderedParts의 어떤 주장이 받치는 사실(같은 시각·수치·이름)로만 쓰고, 받치는 주장이 없는 사실은 summary에 쓰지 않는다. 다만 기록의 「한 줄 요약」 문장 가운데 프로젝트 문장(꼬리표 밖에서 부분 이름을 둘 이상 적거나 프로젝트 자체를 정의하거나 부분 이름을 적지 않는 문장: 「동네 가게 14곳의 … 웹 서비스」, 「베타 3주째·누적 3,912건」)은 어느 부분의 주장도 아니며, 그 운영 규모·상태를 원문의 값 그대로 summary 첫 문장(프로젝트 정의)이나 둘째 문장에 쓴다(빠지면 진단 unbacked에 그 문장이 남는다). 그 문장의 꼬리표가 이름 대는 보고자(운영 담당자·개발 세션)는 그 문장의 자리가 아니다. 한 줄 요약 문장은 material이 아니다.
 기록 v4의 요약은 C-SUMMARY 두 문장(무엇이고 누가 어떻게 쓰나 / 핵심 흐름)이 1순위 원문이다. C-GATE·C-DOUBT·[추정] 줄과 「이번 기록의 초점:」 줄로 요약 문장을 만들지 않는다. 기록 v4의 C-LINK 행은 한 줄에 화살표 하나이며 「조건·선택」 칸이 —가 아니면 조건부 선이다(조건을 필수로 바꾸지 않는다). 결과 표·경고·출력처럼 내는 자료를 사람·사용자 코드에 돌려주는 선은 data다. INPUT 전체와 blueprint의 전역 조건·철회를 대조하여 summary/relations/candidates/gaps/matches/material만 원래 계약대로 작성한다.
+기록 v4의 C-LINK 행이 넘기는 D 행이 저장 산출물이고(C-DATA 종류 「저장」) 그 파일을 쥔 저장소 부분이 renderedParts에 있으면, 보내는 부분 → 그 저장소 부분과 그 저장소 부분 → 받는 부분 두 선을 모두 쓴다. 쓰는 쪽 반만 쓰고 읽는 쪽(받는 부분)을 빼지 않으며, C-DATA 행의 읽는 부분마다 저장소 부분 → 읽는 부분 선이 있게 한다.
 관계와 후보는 INPUT.parts 또는 renderedParts의 ref만 사용한다. 후보가 지칭하는 주장 키는 renderedParts의 실제 키만 사용하고, 새로운 후보 statement.key만 s801~s899로 지정한다.
 candidates.target은 attribution|identity|parent|holds 중 하나만 사용한다. open이나 checked를 target으로 쓰지 않는다. attribution은 parts 1~2개와 statement, holds는 parts 정확히1개와 statement, identity·parent는 parts 정확히2개와 statement=null이다. relations는 첫 지도(INPUT.parts가 비어 있음)에서 최대48개, 그 밖에는 최대16개(기본 계약 문구의 12개보다 넓다), candidates 최대6개, gaps 최대2개, material 최대6개이며 at는 원래 구간 별칭 하나 또는 이어진 범위 하나(600자 이내)다. gaps는 160자 이내의 문장이다. 원문 끝의 요청·지시에 대한 답이나 결과가 제공된 기록에 없으면 그 사실을 gaps에 적는다. 그런 요청은 이 프로젝트의 기록이므로 material로 표시하지 않는다. candidate.statement가 필요한 경우 statement.kind는 원래 계약의 want|idea|reported|checked|describes|open|differs 중 하나로 구별한다. target과 kind는 서로 다른 항목이다. 미정인 원문을 kind=open이란 이유로 삭제하거나 단정으로 바꾸지 않는다.
 부분 작성에 빠졌다는 이유만으로 원문에 명시된 조건이나 철회를 holds 미정 후보로 바꾸지 않는다. 특히 원문이 기존 current 주장을 명시적으로 철회·대체했는데 해당 부분 claims의 replaces/정정이 빠지면, summary에만 적고 성공시키지 않는다. 그 경우 지도 JSON 대신 {"reviseParts":["빠진 정정의 실제 blueprint ref"],"reason":"누락된 명시적 철회·대체와 범위, 240자 이하","at":["실제 원문 개별 구간 별칭 1~8개"]}만 반환한다. 중요한 명시적 조건이 해당 부분 책임에서 빠져도 이 계약으로 재검토를 요청할 수 있다. reviseParts는 고유한 blueprint ref 1~36개만 사용한다. 실제 성립 여부가 미확인인 진술만 holds에 두고 새로운 일반 미상·질문 때문에 재작성을 요청하지 않는다. 사용자에게 추가 작업을 시키기 위한 억지 질문은 만들지 않는다.
@@ -398,8 +399,18 @@ export const LINES_CORRECTION_USD = 0.07;
 // read them, a v4 rule's come from its 지키는 장치 column only); the reading's basis scope, focus, project status, coverage (C-DONE),
 // artifacts, supplementary tables kept as written and diagnostics. Prompts: the v4 table IDs beside the v3 names. The plan's reasoning
 // default is medium (STUDIO_MAP_PLAN_REASONING keeps the knob): at high the plan of two real inputs never finished.
-export const PIPELINE_RECIPE = 'first-map-divided.43';
-export const LATER_PIPELINE_RECIPE = 'later-map-divided.43';
+// .44 (map-reading.18 kept: no stored shape changes), from the blind judging of the .43 v4 maps of eight open-source projects: a v4 part's
+// type is its C-PART row's 유형 alone (모름 or a word outside the list gives none, never the model's); a part's C-LOOP rows decide its one
+// loop (a loop standing on none of them, such as a step of one branch that names a loop, gives way to the outermost row); the record's own lines
+// the reply left undrawn are the program's, each on its row: a C-LINK row naming both ends, a C-DATA row's maker → store part → reader for
+// a stored file a store part holds (the reader halves the ML map lost), maker → reader for one maker and one reader with no path through a
+// third part; a data line takes its D row's 필드·모양 fields; a claim on a v4 change or status row whose own part column (바뀐 부분, 대상)
+// names another part (「전체」) is wrong-part, one naming another change row's actor is set aside (actor); a code name is one word for the
+// program's places, and a refusal row sharing no words with a v4 rule places nothing. Derived for display: every C-LOOP row with its
+// nesting, the variants with what each ID stands for (glossVariants on conditions and lines), a 사용 중단 권고 chip. Prompt: the global
+// stage draws both halves of a stored file's C-LINK line.
+export const PIPELINE_RECIPE = 'first-map-divided.44';
+export const LATER_PIPELINE_RECIPE = 'later-map-divided.44';
 const MODELS = new Set(['gpt-6.1-sol', 'gpt-6-astra', 'gpt-6.1-terra']);
 // The route rule is shared with the browser and studio.mjs (shared/map-route.ts): a first map.6 or a later map.7.
 export { isFirstMap };
