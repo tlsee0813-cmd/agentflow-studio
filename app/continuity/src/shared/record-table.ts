@@ -346,14 +346,16 @@ export const rowsOfTexts = (texts: Iterable<string>, ids: readonly string[]): Ta
 
 /* ---------- The fixed values of the v4 columns (2.3, 3.1), for the parser and the paste check. ---------- */
 export const IMPLEMENTATION_WORDS: Readonly<Record<string, 'built' | 'partial' | 'unbuilt' | 'removed' | 'unknown' | null>> = Object.freeze({ 구현됨: 'built', '일부 구현': 'partial', 미구현: 'unbuilt', 제거됨: 'removed', 모름: 'unknown', '해당 없음': null });
-export const TYPE_WORDS: Readonly<Record<string, string | null>> = Object.freeze({ 사람: 'person', 세션: 'session', '루프·엔진': 'loop', '행 파일·저장소': 'store', 'AI 판단': 'ai', '타이머·일정': 'timer',
+// v4.1: 봇 (a dependency or review bot) is an outside system that acts on the repository.
+export const TYPE_WORDS: Readonly<Record<string, string | null>> = Object.freeze({ 사람: 'person', 봇: 'external', 세션: 'session', '루프·엔진': 'loop', '행 파일·저장소': 'store', 'AI 판단': 'ai', '타이머·일정': 'timer',
   계산: 'compute', 수집기: 'collector', '집행·외부 호출': 'actor', 화면: 'screen', '빌드·배포 자동화': 'automation', '외부 시스템': 'external', 모름: null });
 export const GROUP_WORDS: Readonly<Record<string, 'place' | 'composition' | 'participants' | 'boundary' | 'members' | null>> = Object.freeze({ '실행 위치': 'place', 구성: 'composition', 참여자: 'participants', 외부: 'boundary', 목록: 'members', 모름: null });
 export const CADENCE_WORDS: Readonly<Record<string, 'once' | 'call' | 'each' | 'periodic' | 'event' | 'end'>> = Object.freeze({ '한 번': 'once', 호출마다: 'call', 항목마다: 'each', 주기: 'periodic', '사건 때': 'event', '끝에 한 번': 'end' });
 export const CROSS_WORDS: Readonly<Record<string, 'same' | 'child' | 'process' | 'network' | 'person' | null>> = Object.freeze({ '같은 프로세스': 'same', '자식 프로세스': 'child', '프로세스 사이': 'process', 네트워크: 'network', 사람: 'person', 모름: null });
 export const STATUS_DIMENSIONS: Readonly<Record<string, 'release' | 'deploy' | 'activation' | 'maintenance' | 'operation'>> = Object.freeze({ 릴리스: 'release', 배포: 'deploy', '활성 방식': 'activation', '유지 방침': 'maintenance', '운영 상태': 'operation' });
 export const STATUS_VALUES: Readonly<Record<'release' | 'deploy' | 'activation' | 'maintenance' | 'operation', Readonly<Record<string, string>>>> = Object.freeze({
-  release: { 릴리스됨: 'released', 미릴리스: 'unreleased', 회수됨: 'recalled', 모름: 'unknown' },
+  // v4.1: 릴리스 없음 (never released, by a record saying so).
+  release: { 릴리스됨: 'released', 미릴리스: 'unreleased', 회수됨: 'recalled', '릴리스 없음': 'never', 모름: 'unknown' },
   deploy: { 배포됨: 'deployed', 미배포: 'undeployed', 철회됨: 'withdrawn', 모름: 'unknown' },
   activation: { '항상 적용': 'always', 조건부: 'conditional', 비활성: 'inactive', 모름: 'unknown' },
   maintenance: { '기능 개발': 'active', 수정만: 'fixes', '사용 중단 권고': 'deprecated', '유지 종료': 'ended', 모름: 'unknown' },

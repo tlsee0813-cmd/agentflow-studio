@@ -232,7 +232,7 @@ export const PART_IMPLEMENTATIONS: readonly PartImplementation[] = ['built', 'pa
 /** C-STATUS 상태 차원 and its fixed values (2.3). */
 export type StatusDimension = 'release' | 'deploy' | 'activation' | 'maintenance' | 'operation';
 export const STATUS_DIMENSION_KINDS: readonly StatusDimension[] = ['release', 'deploy', 'activation', 'maintenance', 'operation'];
-export const STATUS_VALUE_KINDS: Readonly<Record<StatusDimension, readonly string[]>> = { release: ['released', 'unreleased', 'recalled', 'unknown'], deploy: ['deployed', 'undeployed', 'withdrawn', 'unknown'],
+export const STATUS_VALUE_KINDS: Readonly<Record<StatusDimension, readonly string[]>> = { release: ['released', 'unreleased', 'recalled', 'never', 'unknown'], deploy: ['deployed', 'undeployed', 'withdrawn', 'unknown'],
   activation: ['always', 'conditional', 'inactive', 'unknown'], maintenance: ['active', 'fixes', 'deprecated', 'ended', 'unknown'], operation: ['running', 'idle', 'stopped', 'failed', 'unknown'] };
 /** A C-STATUS row of a part (or of the project, with the target it names): its dimension and value, the range or condition it holds in
  * (as written, null for —), the version, sha or time it stands on when not the record's basis (null for —), a successor written 「(후속: …)」

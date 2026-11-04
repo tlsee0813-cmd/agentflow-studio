@@ -915,14 +915,14 @@
    "portMap": [],
    "records": [
     {
-     "id": "N_364e2033-45d3-4d5f-8721-ae21d9dfa404",
+     "id": "N_933cb557-dc64-4eff-b8ce-1b892629ac23",
      "from": 0,
      "to": 1571,
      "total": 1571,
      "digest": "f1-efecb2c2e537287e"
     },
     {
-     "id": "N_a59a6ebc-1638-4bb4-8f3b-6ba04d134d09",
+     "id": "N_44951517-66da-4f26-b6b5-382632e57556",
      "from": 0,
      "to": 1553,
      "total": 1553,
@@ -933,7 +933,7 @@
    "summary": "엔진은 돌고 있다.",
    "parts": [
     {
-     "areaId": "A_7d1959eb-9532-41e7-8ce0-61ea5157d174",
+     "areaId": "A_4daaf2f9-8efa-4d41-a9a2-222f54200e40",
      "created": {
       "name": "소유자",
       "parentId": null
@@ -943,7 +943,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_364e2033-45d3-4d5f-8721-ae21d9dfa404",
+       "record": "N_933cb557-dc64-4eff-b8ce-1b892629ac23",
        "quote": "| 소유자 | 지시 한 줄·잔고 입출금으로 노출 조절·전원 관리 | — | 돌고 있음 | 11-03 07:1xZ | [보고: 감독자 세션 SUPERVISOR-LOG 11-03 07:13Z] |",
        "from": 146,
        "to": 253
@@ -953,7 +953,7 @@
       {
        "kind": "reported",
        "text": "원문 행을 옮긴다(s1).",
-       "record": "N_364e2033-45d3-4d5f-8721-ae21d9dfa404",
+       "record": "N_933cb557-dc64-4eff-b8ce-1b892629ac23",
        "quote": "| 소유자 | 지시 한 줄·잔고 입출금으로 노출 조절·전원 관리 | — | 돌고 있음 | 11-03 07:1xZ | [보고: 감독자 세션 SUPERVISOR-LOG 11-03 07:13Z] |",
        "from": 146,
        "to": 253,
@@ -989,7 +989,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_31ddceb3-dccc-4519-9c63-3ec522bcb12f",
+     "areaId": "A_46928c26-f403-4cc3-b66f-af2a31bc1908",
      "created": {
       "name": "ARM",
       "parentId": null
@@ -999,7 +999,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_364e2033-45d3-4d5f-8721-ae21d9dfa404",
+       "record": "N_933cb557-dc64-4eff-b8ce-1b892629ac23",
        "quote": "| ARM | e=1.00 노출 행 서명·24 h 만료 | 미니PC desk-redeploy·arm-loop | 돌고 있음 | 11-03 07:27Z | [보고: ops 세션 STATUS 11-03 07:27Z] |",
        "from": 410,
        "to": 530
@@ -1009,7 +1009,7 @@
       {
        "kind": "reported",
        "text": "원문 행을 옮긴다(s2).",
-       "record": "N_364e2033-45d3-4d5f-8721-ae21d9dfa404",
+       "record": "N_933cb557-dc64-4eff-b8ce-1b892629ac23",
        "quote": "| ARM | e=1.00 노출 행 서명·24 h 만료 | 미니PC desk-redeploy·arm-loop | 돌고 있음 | 11-03 07:27Z | [보고: ops 세션 STATUS 11-03 07:27Z] |",
        "from": 410,
        "to": 530,
@@ -1047,7 +1047,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_af183ed6-3405-43b3-9d9b-b584bc219c9b",
+     "areaId": "A_4a77db1e-554b-492d-b645-cf8a92972ca8",
      "created": {
       "name": "카드 러너",
       "parentId": null
@@ -1057,7 +1057,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_364e2033-45d3-4d5f-8721-ae21d9dfa404",
+       "record": "N_933cb557-dc64-4eff-b8ce-1b892629ac23",
        "quote": "| 카드 러너 | 패킷 → 반대편 → 세 팔 카드 → review 행 | koru-hold/BUILD6/WORK/OPS/cardrunner/ (sha 2 5d31b880) | 돌고 있음 | 11-03 07:33Z | [보고: 감독자 세션 SUPERVISOR-LOG 11-03 07:33Z] |",
        "from": 531,
        "to": 694
@@ -1067,7 +1067,7 @@
       {
        "kind": "reported",
        "text": "원문 행을 옮긴다(s3).",
-       "record": "N_364e2033-45d3-4d5f-8721-ae21d9dfa404",
+       "record": "N_933cb557-dc64-4eff-b8ce-1b892629ac23",
        "quote": "| 카드 러너 | 일일 가드 CL 1.50·DS 0.40 | 철회(코드 상한과 같음) | [보고: 감독자 세션 SUPERVISOR-LOG 10-31 23:04Z] |",
        "from": 1227,
        "to": 1319,
@@ -1088,7 +1088,7 @@
       {
        "kind": "reported",
        "text": "원문 행을 옮긴다(s4).",
-       "record": "N_364e2033-45d3-4d5f-8721-ae21d9dfa404",
+       "record": "N_933cb557-dc64-4eff-b8ce-1b892629ac23",
        "quote": "| 카드 러너 | 지출은 상한 있게, 감독자 세션 승인 | 소유자 10-22 [보고: 메모리 색인] |",
        "from": 1514,
        "to": 1571,
@@ -1106,7 +1106,7 @@
          "kind": "inferred",
          "text": "C/calls.py",
          "quote": {
-          "record": "N_a59a6ebc-1638-4bb4-8f3b-6ba04d134d09",
+          "record": "N_44951517-66da-4f26-b6b5-382632e57556",
           "quote": "| C/calls.py | 카드 러너 | 모델 호출·지출 상한 CL 20·DS 5 USD | [파일: C/calls.py] |",
           "from": 1483,
           "to": 1553
@@ -1147,7 +1147,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_887dcd58-6f79-491c-bf1c-1ef0633d8dd1",
+     "areaId": "A_b4c7143a-5e41-41da-99e3-b7469edb6d41",
      "created": {
       "name": "엔진",
       "parentId": null
@@ -1157,7 +1157,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_364e2033-45d3-4d5f-8721-ae21d9dfa404",
+       "record": "N_933cb557-dc64-4eff-b8ce-1b892629ac23",
        "quote": "| 엔진 | 행 셋 합성 → J1 → 집행자 하나 → 주문·TP·HARD | koru-wt/d4/code/exec/live_direct/ (라이브 sha 618df374) | 돌고 있음 | 11-03 08:49Z | [보고: ops 세션 STATUS 11-03 08:49Z] |",
        "from": 254,
        "to": 409
@@ -1167,7 +1167,7 @@
       {
        "kind": "reported",
        "text": "원문 행을 옮긴다(s61).",
-       "record": "N_364e2033-45d3-4d5f-8721-ae21d9dfa404",
+       "record": "N_933cb557-dc64-4eff-b8ce-1b892629ac23",
        "quote": "| 엔진 | 돈 안전 = 보유 중 스탑 상주 하나, 게이트는 스탑·크기·방향만 | 소유자 10-22 [보고: 메모리 색인] |",
        "from": 1388,
        "to": 1458,
@@ -1185,7 +1185,7 @@
          "kind": "inferred",
          "text": "not 1 <= stop <= 250",
          "quote": {
-          "record": "N_a59a6ebc-1638-4bb4-8f3b-6ba04d134d09",
+          "record": "N_44951517-66da-4f26-b6b5-382632e57556",
           "quote": "| 엔진 | not 1 <= stop <= 250 | STOP_NOT_RESIDENT | J1 답 | [파일: R] |",
           "from": 955,
           "to": 1021
@@ -1198,7 +1198,7 @@
          "kind": "code",
          "text": "STOP_NOT_RESIDENT",
          "quote": {
-          "record": "N_a59a6ebc-1638-4bb4-8f3b-6ba04d134d09",
+          "record": "N_44951517-66da-4f26-b6b5-382632e57556",
           "quote": "| 엔진 | not 1 <= stop <= 250 | STOP_NOT_RESIDENT | J1 답 | [파일: R] |",
           "from": 955,
           "to": 1021
@@ -1212,7 +1212,7 @@
       {
        "kind": "reported",
        "text": "원문 행을 옮긴다(s62).",
-       "record": "N_a59a6ebc-1638-4bb4-8f3b-6ba04d134d09",
+       "record": "N_44951517-66da-4f26-b6b5-382632e57556",
        "quote": "| 엔진 | 10 | 집행 | 주문·HARD 상주 | engine.py(이번에 안 읽음) | [모름] | [모름] |",
        "from": 586,
        "to": 651,
@@ -1233,7 +1233,7 @@
       {
        "kind": "reported",
        "text": "원문 행을 옮긴다(s64).",
-       "record": "N_a59a6ebc-1638-4bb4-8f3b-6ba04d134d09",
+       "record": "N_44951517-66da-4f26-b6b5-382632e57556",
        "quote": "| 엔진 | not 1 <= stop <= 250 | STOP_NOT_RESIDENT | J1 답 | [파일: R] |",
        "from": 955,
        "to": 1021,
@@ -1272,7 +1272,7 @@
       "stop": null,
       "resume": null,
       "quote": {
-       "record": "N_a59a6ebc-1638-4bb4-8f3b-6ba04d134d09",
+       "record": "N_44951517-66da-4f26-b6b5-382632e57556",
        "quote": "| 엔진 | review·policy·state 행, 패킷 | 4절 | J1 답 → 주문 | 618df374, 레버리지 20, 동시 1, j1_cadence 60 s | [파일: R] |",
        "from": 148,
        "to": 252
@@ -1284,7 +1284,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_b7fe3af8-7f47-4776-8585-b6dfa101f06d",
+     "areaId": "A_fdc41c1f-595d-479a-809a-d8d78481f5fd",
      "created": {
       "name": "성적표",
       "parentId": null
@@ -1294,7 +1294,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_364e2033-45d3-4d5f-8721-ae21d9dfa404",
+       "record": "N_933cb557-dc64-4eff-b8ce-1b892629ac23",
        "quote": "| 성적표 | 하루 장(읽기용, 판정 아님) | koru-hold/BUILD6/WORK/OPS/scorecard/·daysheet/ | 돌고 있음 | 11-03 07:33Z | [보고: 감독자 세션 SUPERVISOR-LOG 11-03 07:33Z] |",
        "from": 695,
        "to": 836
@@ -1304,7 +1304,7 @@
       {
        "kind": "reported",
        "text": "원문 행을 옮긴다(s63).",
-       "record": "N_364e2033-45d3-4d5f-8721-ae21d9dfa404",
+       "record": "N_933cb557-dc64-4eff-b8ce-1b892629ac23",
        "quote": "| 성적표 | 하루 장(읽기용, 판정 아님) | koru-hold/BUILD6/WORK/OPS/scorecard/·daysheet/ | 돌고 있음 | 11-03 07:33Z | [보고: 감독자 세션 SUPERVISOR-LOG 11-03 07:33Z] |",
        "from": 695,
        "to": 836,
@@ -1342,12 +1342,12 @@
    ],
    "relations": [
     {
-     "relationId": "L_9ef137fe-d92e-4fde-acaf-acad978f0318",
-     "from": "A_887dcd58-6f79-491c-bf1c-1ef0633d8dd1",
-     "to": "A_b7fe3af8-7f47-4776-8585-b6dfa101f06d",
+     "relationId": "L_59464447-eeac-4370-a1e6-66a1803baf76",
+     "from": "A_b4c7143a-5e41-41da-99e3-b7469edb6d41",
+     "to": "A_fdc41c1f-595d-479a-809a-d8d78481f5fd",
      "kind": "flow",
      "quote": {
-      "record": "N_364e2033-45d3-4d5f-8721-ae21d9dfa404",
+      "record": "N_933cb557-dc64-4eff-b8ce-1b892629ac23",
       "quote": "| 엔진 | 성적표 | journal·outcomes 경주 행 | 매일 02:15Z | 관찰 | [보고: 감독자 세션 SUPERVISOR-LOG 11-03 00:13Z] |",
       "from": 1073,
       "to": 1169
@@ -2237,7 +2237,7 @@
    "portMap": [],
    "records": [
     {
-     "id": "N_ca47f4d0-a46b-4091-a17a-238646d99d5b",
+     "id": "N_5d60c7d3-cd30-4335-a3d6-e63a59c336f6",
      "from": 0,
      "to": 1594,
      "total": 1594,
@@ -2248,7 +2248,7 @@
    "summary": "",
    "parts": [
     {
-     "areaId": "A_fede54b6-9273-41f4-bf7d-8cbca7f7c5cd",
+     "areaId": "A_13834496-988b-4a3d-8f52-61fd5901c3ba",
      "created": {
       "name": "소유자",
       "parentId": null
@@ -2258,7 +2258,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_ca47f4d0-a46b-4091-a17a-238646d99d5b",
+       "record": "N_5d60c7d3-cd30-4335-a3d6-e63a59c336f6",
        "quote": "| 소유자 | 지시 한 줄·잔고 입출금으로 노출 조절·전원 관리 | — | 돌고 있음 | 11-03 07:1xZ | [보고: 감독자 세션 SUPERVISOR-LOG 11-03 07:13Z] |",
        "from": 335,
        "to": 442
@@ -2289,7 +2289,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_84a86f71-412e-4e12-aaab-9ad6e258f2c3",
+     "areaId": "A_4f955cbc-3c9b-487b-a8ab-167195847020",
      "created": {
       "name": "감독자 세션",
       "parentId": null
@@ -2299,7 +2299,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_ca47f4d0-a46b-4091-a17a-238646d99d5b",
+       "record": "N_5d60c7d3-cd30-4335-a3d6-e63a59c336f6",
        "quote": "| 감독자 세션 | 세션 조율·결정·소유자 보고 | koru-hold/BUILD/SUPERVISOR-LOG.md | 돌고 있음 | 11-03 07:33Z | [파일: koru-hold/BUILD/SUPERVISOR-LOG.md] |",
        "from": 443,
        "to": 572
@@ -2330,7 +2330,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_85182399-270a-45da-bb97-c8341669c850",
+     "areaId": "A_b2bf1ab3-ff17-4401-bf65-b53a460dde2a",
      "created": {
       "name": "design 세션",
       "parentId": null
@@ -2340,7 +2340,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_ca47f4d0-a46b-4091-a17a-238646d99d5b",
+       "record": "N_5d60c7d3-cd30-4335-a3d6-e63a59c336f6",
        "quote": "| design 세션 | 매매 책임자, 명세·읽기 한 쪽 | koru-hold/NOW/KICKOFF/koru-design.md | 돌고 있음 | 11-03 00:58Z | [보고: 감독자 세션 SUPERVISOR-LOG 11-03 00:58Z] |",
        "from": 573,
        "to": 711
@@ -2368,7 +2368,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_b21759a4-da6e-4b53-8f05-92f1e0cbe396",
+     "areaId": "A_5c270f25-25ba-40ed-b41d-3b126db7a507",
      "created": {
       "name": "검토 세션",
       "parentId": null
@@ -2378,7 +2378,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_ca47f4d0-a46b-4091-a17a-238646d99d5b",
+       "record": "N_5d60c7d3-cd30-4335-a3d6-e63a59c336f6",
        "quote": "| 검토 세션 | 감독자 보고 평가 | — | 돌고 있음 | 11-03 09:0xZ | [추정] |",
        "from": 712,
        "to": 767
@@ -2402,7 +2402,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_09308733-6f19-473b-8f15-9c6eea22b63f",
+     "areaId": "A_1833df0d-81ae-4ac6-919d-97ead1e5816f",
      "created": {
       "name": "질감 v3",
       "parentId": null
@@ -2412,7 +2412,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_ca47f4d0-a46b-4091-a17a-238646d99d5b",
+       "record": "N_5d60c7d3-cd30-4335-a3d6-e63a59c336f6",
        "quote": "| 질감 v3 | σ·상태 행 | 미니PC koru-texture | 돌고 있음 | 11-03 07:23Z | [보고: ops 세션 STATUS 11-03 07:23Z] |",
        "from": 768,
        "to": 864
@@ -2436,7 +2436,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_859e0058-eebe-4852-b9f3-ddeb8003e452",
+     "areaId": "A_11e14507-e330-4f84-b25d-ab3cc41bc4c3",
      "created": {
       "name": "state.jsonl 행",
       "parentId": null
@@ -2446,7 +2446,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_ca47f4d0-a46b-4091-a17a-238646d99d5b",
+       "record": "N_5d60c7d3-cd30-4335-a3d6-e63a59c336f6",
        "quote": "| 질감 v3 | 엔진 | state.jsonl state_id·sigma_now_ticks | 분마다 | 관찰 | [파일: T ROW_KEYS] |",
        "from": 1329,
        "to": 1412
@@ -2459,7 +2459,7 @@
      "files": [],
      "type": "store",
      "typeQuote": {
-      "record": "N_ca47f4d0-a46b-4091-a17a-238646d99d5b",
+      "record": "N_5d60c7d3-cd30-4335-a3d6-e63a59c336f6",
       "quote": "| 질감 v3 | 엔진 | state.jsonl state_id·sigma_now_ticks | 분마다 | 관찰 | [파일: T ROW_KEYS] |",
       "from": 1329,
       "to": 1412
@@ -2475,7 +2475,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_56c11c14-a555-4756-882b-00a7658ff6a7",
+     "areaId": "A_86ac756a-cee4-4cfb-bb00-af5d792ccadc",
      "created": {
       "name": "엔진",
       "parentId": null
@@ -2485,7 +2485,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_ca47f4d0-a46b-4091-a17a-238646d99d5b",
+       "record": "N_5d60c7d3-cd30-4335-a3d6-e63a59c336f6",
        "quote": "| 엔진 | 행 셋 합성 → J1 → 집행자 하나 → 주문·TP·HARD | koru-wt/d4/code/exec/live_direct/ | 돌고 있음 | 11-03 08:49Z | [보고: ops 세션 STATUS 11-03 08:49Z] |",
        "from": 865,
        "to": 1001
@@ -2511,12 +2511,12 @@
    ],
    "relations": [
     {
-     "relationId": "L_82ee8a36-b2c9-48e2-bda0-3439f048c92b",
-     "from": "A_84a86f71-412e-4e12-aaab-9ad6e258f2c3",
-     "to": "A_fede54b6-9273-41f4-bf7d-8cbca7f7c5cd",
+     "relationId": "L_bc8403c5-1e54-4d9d-8871-f3a0a5a71bad",
+     "from": "A_4f955cbc-3c9b-487b-a8ab-167195847020",
+     "to": "A_13834496-988b-4a3d-8f52-61fd5901c3ba",
      "kind": "flow",
      "quote": {
-      "record": "N_ca47f4d0-a46b-4091-a17a-238646d99d5b",
+      "record": "N_5d60c7d3-cd30-4335-a3d6-e63a59c336f6",
       "quote": "| 감독자 세션 | 소유자 | 한 줄 보고·결정 필요 | 사건·결정 때 | 관찰 | [보고: 감독자 세션 SUPERVISOR-LOG 11-03 03:01Z] |",
       "from": 1087,
       "to": 1176
@@ -2528,12 +2528,12 @@
      "payloadFields": []
     },
     {
-     "relationId": "L_3e2601de-a53e-47c1-873f-53448cfce165",
-     "from": "A_fede54b6-9273-41f4-bf7d-8cbca7f7c5cd",
-     "to": "A_b21759a4-da6e-4b53-8f05-92f1e0cbe396",
+     "relationId": "L_a039d186-a5cb-422a-b370-668097bf22a0",
+     "from": "A_13834496-988b-4a3d-8f52-61fd5901c3ba",
+     "to": "A_5c270f25-25ba-40ed-b41d-3b126db7a507",
      "kind": "flow",
      "quote": {
-      "record": "N_ca47f4d0-a46b-4091-a17a-238646d99d5b",
+      "record": "N_5d60c7d3-cd30-4335-a3d6-e63a59c336f6",
       "quote": "| 소유자 | 검토 세션 | 감독자 보고 붙여 넣기·평가 요청 | 수시 | 관찰 | [추정] |",
       "from": 1177,
       "to": 1230
@@ -2545,12 +2545,12 @@
      "payloadFields": []
     },
     {
-     "relationId": "L_e9531dc1-7e49-4814-984c-7892afa5f0c9",
-     "from": "A_85182399-270a-45da-bb97-c8341669c850",
-     "to": "A_84a86f71-412e-4e12-aaab-9ad6e258f2c3",
+     "relationId": "L_fd717686-c467-4127-8e8d-cd648c97d199",
+     "from": "A_b2bf1ab3-ff17-4401-bf65-b53a460dde2a",
+     "to": "A_4f955cbc-3c9b-487b-a8ab-167195847020",
      "kind": "flow",
      "quote": {
-      "record": "N_ca47f4d0-a46b-4091-a17a-238646d99d5b",
+      "record": "N_5d60c7d3-cd30-4335-a3d6-e63a59c336f6",
       "quote": "| design 세션 | 감독자 세션 | 읽기 한 쪽·메모·사전 등록 | 하루 장 뒤 | 관찰 | [보고: 감독자 세션 SUPERVISOR-LOG 11-03 00:58Z] |",
       "from": 1231,
       "to": 1328
@@ -2562,12 +2562,12 @@
      "payloadFields": []
     },
     {
-     "relationId": "L_7c2391d9-00f7-4720-b31d-c25e1bb1cea5",
-     "from": "A_09308733-6f19-473b-8f15-9c6eea22b63f",
-     "to": "A_859e0058-eebe-4852-b9f3-ddeb8003e452",
+     "relationId": "L_d14e949d-8ed9-4423-ac62-e8c9f62e0e20",
+     "from": "A_1833df0d-81ae-4ac6-919d-97ead1e5816f",
+     "to": "A_11e14507-e330-4f84-b25d-ab3cc41bc4c3",
      "kind": "flow",
      "quote": {
-      "record": "N_ca47f4d0-a46b-4091-a17a-238646d99d5b",
+      "record": "N_5d60c7d3-cd30-4335-a3d6-e63a59c336f6",
       "quote": "| 질감 v3 | 엔진 | state.jsonl state_id·sigma_now_ticks | 분마다 | 관찰 | [파일: T ROW_KEYS] |",
       "from": 1329,
       "to": 1412
@@ -2579,12 +2579,12 @@
      "payloadFields": []
     },
     {
-     "relationId": "L_3ff66bde-a561-47bb-bd1c-2c55817476be",
-     "from": "A_859e0058-eebe-4852-b9f3-ddeb8003e452",
-     "to": "A_56c11c14-a555-4756-882b-00a7658ff6a7",
+     "relationId": "L_ce5c1a83-0391-4cbf-b8db-c9f0b994cf25",
+     "from": "A_11e14507-e330-4f84-b25d-ab3cc41bc4c3",
+     "to": "A_86ac756a-cee4-4cfb-bb00-af5d792ccadc",
      "kind": "flow",
      "quote": {
-      "record": "N_ca47f4d0-a46b-4091-a17a-238646d99d5b",
+      "record": "N_5d60c7d3-cd30-4335-a3d6-e63a59c336f6",
       "quote": "| 질감 v3 | 엔진 | state.jsonl state_id·sigma_now_ticks | 분마다 | 관찰 | [파일: T ROW_KEYS] |",
       "from": 1329,
       "to": 1412
@@ -4968,13 +4968,13 @@
    "basisVersion": null,
    "portMap": [
     {
-     "relationId": "L_a688618f-4127-45db-bd41-639f1caf6384",
-     "areaId": "A_b9b5d25a-b4d6-4633-bd4d-26537923b4a7",
+     "relationId": "L_eb655119-6a8f-455b-97dc-c0e93ca6a920",
+     "areaId": "A_8a894336-a332-4de1-9247-4141ec7b1773",
      "port": "state 행",
      "step": "policy·state",
      "direction": "in",
      "quote": {
-      "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+      "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
       "quote": "| 엔진 | 6 | policy·state | 상태별 정책 행과 신호 행 | row_policy·row_state | SIGNAL_STALE·ENTRY_NOT_IMPLEMENTED | [파일: R] |",
       "from": 3138,
       "to": 3250
@@ -4982,13 +4982,13 @@
      "program": true
     },
     {
-     "relationId": "L_29dad2ab-353d-477c-8030-c15443a7f1f3",
-     "areaId": "A_b9b5d25a-b4d6-4633-bd4d-26537923b4a7",
+     "relationId": "L_4138c8c2-83ba-44a0-8aea-778a2e35879d",
+     "areaId": "A_8a894336-a332-4de1-9247-4141ec7b1773",
      "port": "policy 행",
      "step": "policy·state",
      "direction": "in",
      "quote": {
-      "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+      "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
       "quote": "| 엔진 | 6 | policy·state | 상태별 정책 행과 신호 행 | row_policy·row_state | SIGNAL_STALE·ENTRY_NOT_IMPLEMENTED | [파일: R] |",
       "from": 3138,
       "to": 3250
@@ -4996,13 +4996,13 @@
      "program": true
     },
     {
-     "relationId": "L_6497abf5-daab-41a2-b6c0-020889eb4699",
-     "areaId": "A_b9b5d25a-b4d6-4633-bd4d-26537923b4a7",
+     "relationId": "L_81e66e6c-8879-45c8-bc29-5be481104006",
+     "areaId": "A_8a894336-a332-4de1-9247-4141ec7b1773",
      "port": "review 행",
      "step": "review 읽기",
      "direction": "in",
      "quote": {
-      "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+      "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
       "quote": "| 엔진 | 4 | review 읽기 | 마지막 행·나이 | row_read·row_live(1800 s)·row_review | REVIEW_OFF·NONE_SIDE·LINE_STALE | [파일: R] |",
       "from": 3021,
       "to": 3137
@@ -5010,13 +5010,13 @@
      "program": true
     },
     {
-     "relationId": "L_30fcff99-898f-45dc-8b94-16353969db77",
-     "areaId": "A_71e8e30c-76dd-4e70-b37a-b92febfc3cee",
+     "relationId": "L_292e958c-4287-4f38-91bb-2f66791eb945",
+     "areaId": "A_b7ed0715-35f9-4c91-a188-32511811ee2d",
      "port": "review 행",
      "step": "review 행",
      "direction": "out",
      "quote": {
-      "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+      "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
       "quote": "| 카드 러너 | 10 | review 행 | CX만 review로 | card_append·rung.row_append | review_writer true일 때만 | [파일: C/card_runner.py] |",
       "from": 3463,
       "to": 3582
@@ -5024,13 +5024,13 @@
      "program": true
     },
     {
-     "relationId": "L_bdd7ea69-4cfc-4a7c-9096-9717f8cd3053",
-     "areaId": "A_71e8e30c-76dd-4e70-b37a-b92febfc3cee",
+     "relationId": "L_db08c3ce-5919-4b09-a12f-ec2e27bfeeb4",
+     "areaId": "A_b7ed0715-35f9-4c91-a188-32511811ee2d",
      "port": "cards",
      "step": "카드 행",
      "direction": "out",
      "quote": {
-      "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+      "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
       "quote": "| 카드 러너 | 9 | 카드 행 | cards-<팔>.jsonl append | card_append | — | [파일: C/card_runner.py] |",
       "from": 3374,
       "to": 3462
@@ -5040,7 +5040,7 @@
    ],
    "records": [
     {
-     "id": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+     "id": "N_560df2ff-8d41-43cc-949f-ae782b297561",
      "from": 0,
      "to": 4480,
      "total": 4480,
@@ -5051,7 +5051,7 @@
    "summary": "",
    "parts": [
     {
-     "areaId": "A_c4482fc3-40a7-421f-9888-72b99f019255",
+     "areaId": "A_acdeb26f-bdae-47d7-be08-543059ecd3b7",
      "created": {
       "name": "감독자 세션",
       "parentId": null
@@ -5061,7 +5061,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+       "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
        "quote": "| 감독자 세션 | 세션 | 조율·결정·보고 [파일: koru-hold/BUILD/SUPERVISOR-LOG.md] |",
        "from": 379,
        "to": 445
@@ -5085,7 +5085,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_1dd50d3c-e637-4ea5-b7aa-0fff0daf6023",
+     "areaId": "A_f4a8589a-e8c6-4ac9-bf03-0aa1401aa910",
      "created": {
       "name": "검토 세션",
       "parentId": null
@@ -5095,7 +5095,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+       "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
        "quote": "| 검토 세션 | 세션 | 평가·자문 [추정] |",
        "from": 446,
        "to": 473
@@ -5119,7 +5119,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_b9b5d25a-b4d6-4633-bd4d-26537923b4a7",
+     "areaId": "A_8a894336-a332-4de1-9247-4141ec7b1773",
      "created": {
       "name": "엔진",
       "parentId": null
@@ -5129,7 +5129,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+       "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
        "quote": "| 엔진 | 루프·엔진 | 행 셋 → J1 → 집행 [파일: R] |",
        "from": 474,
        "to": 512
@@ -5139,7 +5139,7 @@
       {
        "kind": "want",
        "text": "스탑은 1~250 bp 안에 상주해야 한다.",
-       "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+       "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
        "quote": "| 엔진 | not 1 <= stop <= 250 | STOP_NOT_RESIDENT | J1 답 | [파일: R] |",
        "from": 3951,
        "to": 4017,
@@ -5157,7 +5157,7 @@
          "kind": "inferred",
          "text": "not 1 <= stop <= 250",
          "quote": {
-          "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+          "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
           "quote": "| 엔진 | not 1 <= stop <= 250 | STOP_NOT_RESIDENT | J1 답 | [파일: R] |",
           "from": 3951,
           "to": 4017
@@ -5170,7 +5170,7 @@
          "kind": "code",
          "text": "STOP_NOT_RESIDENT",
          "quote": {
-          "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+          "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
           "quote": "| 엔진 | not 1 <= stop <= 250 | STOP_NOT_RESIDENT | J1 답 | [파일: R] |",
           "from": 3951,
           "to": 4017
@@ -5207,7 +5207,7 @@
         "row_review"
        ],
        "quote": {
-        "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+        "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
         "quote": "| 엔진 | 4 | review 읽기 | 마지막 행·나이 | row_read·row_live(1800 s)·row_review | REVIEW_OFF·NONE_SIDE·LINE_STALE | [파일: R] |",
         "from": 3021,
         "to": 3137
@@ -5223,7 +5223,7 @@
         "row_state"
        ],
        "quote": {
-        "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+        "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
         "quote": "| 엔진 | 6 | policy·state | 상태별 정책 행과 신호 행 | row_policy·row_state | SIGNAL_STALE·ENTRY_NOT_IMPLEMENTED | [파일: R] |",
         "from": 3138,
         "to": 3250
@@ -5238,7 +5238,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_71e8e30c-76dd-4e70-b37a-b92febfc3cee",
+     "areaId": "A_b7ed0715-35f9-4c91-a188-32511811ee2d",
      "created": {
       "name": "카드 러너",
       "parentId": null
@@ -5248,7 +5248,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+       "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
        "quote": "| 카드 러너 | AI 판단 | tick·dispatch·gate 세 명령, 세 팔 카드 [파일: C/card_runner.py] |",
        "from": 513,
        "to": 587
@@ -5284,7 +5284,7 @@
         "build"
        ],
        "quote": {
-        "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+        "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
         "quote": "| 카드 러너 | 3 | 패킷 | 원천 스냅샷 → build | packet_sources.snapshot·build | 6,000자 넘으면 PACKET_OVER_6000 | [파일: C/card_runner.py] |",
         "from": 3251,
         "to": 3373
@@ -5299,7 +5299,7 @@
         "card_append"
        ],
        "quote": {
-        "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+        "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
         "quote": "| 카드 러너 | 9 | 카드 행 | cards-<팔>.jsonl append | card_append | — | [파일: C/card_runner.py] |",
         "from": 3374,
         "to": 3462
@@ -5315,7 +5315,7 @@
         "rung.row_append"
        ],
        "quote": {
-        "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+        "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
         "quote": "| 카드 러너 | 10 | review 행 | CX만 review로 | card_append·rung.row_append | review_writer true일 때만 | [파일: C/card_runner.py] |",
         "from": 3463,
         "to": 3582
@@ -5333,7 +5333,7 @@
         "pull_due"
        ],
        "quote": {
-        "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+        "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
         "quote": "| 카드 러너 | 11 | tick | 매분 checkpoint·kill·만료·trigger·pull | tick·checkpoint·kill·pull_due | KILL/EXPIRED → review 갱신 | [파일: C/card_runner.py] |",
         "from": 3583,
         "to": 3725
@@ -5348,7 +5348,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_34d240e2-b820-4c74-b5df-cd9d11538d9d",
+     "areaId": "A_594de494-841c-4871-801f-e88178687c11",
      "created": {
       "name": "편집장",
       "parentId": null
@@ -5358,7 +5358,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+       "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
        "quote": "| 편집장 | AI 판단 | 하루 계획 plan 행 [파일: C/card_runner.py] |",
        "from": 588,
        "to": 641
@@ -5381,7 +5381,7 @@
        "does": null,
        "uses": [],
        "quote": {
-        "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+        "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
         "quote": "| 편집장 | 달력·지난 24 h LEDGER | 날짜 확인 → 1회 호출 → PLAN_FORBIDDEN 검사 → plan 행(실패면 FALLBACK) | plan.jsonl | CARD_EDITOR on(11-03 01:21Z) | [파일: C/card_runner.py editor] |",
         "from": 2282,
         "to": 2444
@@ -5394,7 +5394,7 @@
        "does": null,
        "uses": [],
        "quote": {
-        "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+        "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
         "quote": "| 편집장 | 달력·지난 24 h LEDGER | 날짜 확인 → 1회 호출 → PLAN_FORBIDDEN 검사 → plan 행(실패면 FALLBACK) | plan.jsonl | CARD_EDITOR on(11-03 01:21Z) | [파일: C/card_runner.py editor] |",
         "from": 2282,
         "to": 2444
@@ -5407,7 +5407,7 @@
        "does": null,
        "uses": [],
        "quote": {
-        "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+        "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
         "quote": "| 편집장 | 달력·지난 24 h LEDGER | 날짜 확인 → 1회 호출 → PLAN_FORBIDDEN 검사 → plan 행(실패면 FALLBACK) | plan.jsonl | CARD_EDITOR on(11-03 01:21Z) | [파일: C/card_runner.py editor] |",
         "from": 2282,
         "to": 2444
@@ -5420,7 +5420,7 @@
        "does": "실패면 FALLBACK",
        "uses": [],
        "quote": {
-        "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+        "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
         "quote": "| 편집장 | 달력·지난 24 h LEDGER | 날짜 확인 → 1회 호출 → PLAN_FORBIDDEN 검사 → plan 행(실패면 FALLBACK) | plan.jsonl | CARD_EDITOR on(11-03 01:21Z) | [파일: C/card_runner.py editor] |",
         "from": 2282,
         "to": 2444
@@ -5435,7 +5435,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_db85c2e5-f8d0-4d1c-9cc6-a1933f186cfb",
+     "areaId": "A_75a3d231-3b36-4464-b916-9b305cc29a79",
      "created": {
       "name": "정책 행 작성기",
       "parentId": null
@@ -5445,7 +5445,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+       "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
        "quote": "| 정책 행 작성기 | 타이머·일정 | 00:30Z 정책 한 행 [파일: O/policy-daily/koru-policy-daily.timer] |",
        "from": 642,
        "to": 724
@@ -5468,7 +5468,7 @@
        "does": null,
        "uses": [],
        "quote": {
-        "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+        "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
         "quote": "| 정책 행 작성기 | — | 고정 값 JSON → row_append | policy.jsonl | 00:30Z, valid 24 h, TX:ACTIVE·MAKER_TOUCH 60·T 7200·u=d 1.0 | [파일: O/policy-daily/policy-daily.sh 4d27a6bc] |",
         "from": 2445,
         "to": 2611
@@ -5481,7 +5481,7 @@
        "does": null,
        "uses": [],
        "quote": {
-        "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+        "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
         "quote": "| 정책 행 작성기 | — | 고정 값 JSON → row_append | policy.jsonl | 00:30Z, valid 24 h, TX:ACTIVE·MAKER_TOUCH 60·T 7200·u=d 1.0 | [파일: O/policy-daily/policy-daily.sh 4d27a6bc] |",
         "from": 2445,
         "to": 2611
@@ -5496,7 +5496,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_f7df3236-270b-4525-936d-8a2ca45050ba",
+     "areaId": "A_2887a307-97f8-4960-aa5b-37c604092a0b",
      "created": {
       "name": "질감 v3",
       "parentId": null
@@ -5506,7 +5506,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+       "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
        "quote": "| 질감 v3 | 계산 | 분마다 TX 라벨 [파일: T] |",
        "from": 725,
        "to": 759
@@ -5531,7 +5531,7 @@
         "Minute 계산"
        ],
        "quote": {
-        "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+        "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
         "quote": "| 질감 v3 | 1 | bar 열 | σ20·fill15·slots15·spread·liq | Minute 계산 | — | [파일: T] |",
         "from": 3726,
         "to": 3805
@@ -5546,7 +5546,7 @@
         "classify"
        ],
        "quote": {
-        "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+        "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
         "quote": "| 질감 v3 | 2 | classify | BROKEN 사유 → CALM/ACTIVE | classify | 5절 | [파일: T] |",
         "from": 3806,
         "to": 3882
@@ -5561,7 +5561,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_30f26fb4-5f84-4ca6-85f8-b5203bb04388",
+     "areaId": "A_0ea85a9e-16db-41cb-b290-82e7e1a8e5b7",
      "created": {
       "name": "성적표",
       "parentId": null
@@ -5571,7 +5571,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+       "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
        "quote": "| 성적표 | 계산 | 하루 장 02:15Z [파일: O/daysheet/koru-daysheet.timer] |",
        "from": 760,
        "to": 823
@@ -5594,7 +5594,7 @@
        "does": null,
        "uses": [],
        "quote": {
-        "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+        "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
         "quote": "| 성적표 | 경주 행·종이 행·cards | race_rows → aggregate → boot_se → render | SHEET-<날>.md | 02:15Z, seed 20261101, B 2000 | [파일: git 8f9d3697:code/tools/paper/sheet.py] |",
         "from": 2757,
         "to": 2919
@@ -5607,7 +5607,7 @@
        "does": null,
        "uses": [],
        "quote": {
-        "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+        "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
         "quote": "| 성적표 | 경주 행·종이 행·cards | race_rows → aggregate → boot_se → render | SHEET-<날>.md | 02:15Z, seed 20261101, B 2000 | [파일: git 8f9d3697:code/tools/paper/sheet.py] |",
         "from": 2757,
         "to": 2919
@@ -5620,7 +5620,7 @@
        "does": null,
        "uses": [],
        "quote": {
-        "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+        "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
         "quote": "| 성적표 | 경주 행·종이 행·cards | race_rows → aggregate → boot_se → render | SHEET-<날>.md | 02:15Z, seed 20261101, B 2000 | [파일: git 8f9d3697:code/tools/paper/sheet.py] |",
         "from": 2757,
         "to": 2919
@@ -5633,7 +5633,7 @@
        "does": null,
        "uses": [],
        "quote": {
-        "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+        "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
         "quote": "| 성적표 | 경주 행·종이 행·cards | race_rows → aggregate → boot_se → render | SHEET-<날>.md | 02:15Z, seed 20261101, B 2000 | [파일: git 8f9d3697:code/tools/paper/sheet.py] |",
         "from": 2757,
         "to": 2919
@@ -5648,7 +5648,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_0e51d10d-698f-4b17-bc2b-5328faef2258",
+     "areaId": "A_a8a2a60a-3220-4d8d-98b6-5a92da284620",
      "created": {
       "name": "review.jsonl 행",
       "parentId": null
@@ -5658,7 +5658,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+       "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
        "quote": "| review.jsonl 행 | watch·allowed_side·reason·sources·ts_ms·valid_until·row_id·charter_sha·authors·seq | 카드 러너 | 엔진·종이 생산자 | /var/lib/koru-desk/race/review.jsonl | [파일: C/card_runner.py] |",
        "from": 899,
        "to": 1086
@@ -5673,7 +5673,7 @@
      ],
      "type": "store",
      "typeQuote": {
-      "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+      "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
       "quote": "| review.jsonl 행 | watch·allowed_side·reason·sources·ts_ms·valid_until·row_id·charter_sha·authors·seq | 카드 러너 | 엔진·종이 생산자 | /var/lib/koru-desk/race/review.jsonl | [파일: C/card_runner.py] |",
       "from": 899,
       "to": 1086
@@ -5691,7 +5691,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_c2377bca-2dc3-4550-9425-50d0f92207c7",
+     "areaId": "A_4f0b12df-6057-4925-9a37-f6e53cfaa303",
      "created": {
       "name": "policy.jsonl 행",
       "parentId": null
@@ -5701,7 +5701,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+       "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
        "quote": "| policy.jsonl 행 | row_id·valid_until·authors·reason·state_id·entry_mode | 정책 행 작성기 | 엔진 | /var/lib/koru-desk/race/policy.jsonl | [파일: O/policy-daily/policy-daily.sh] |",
        "from": 1087,
        "to": 1255
@@ -5716,7 +5716,7 @@
      ],
      "type": "store",
      "typeQuote": {
-      "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+      "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
       "quote": "| policy.jsonl 행 | row_id·valid_until·authors·reason·state_id·entry_mode | 정책 행 작성기 | 엔진 | /var/lib/koru-desk/race/policy.jsonl | [파일: O/policy-daily/policy-daily.sh] |",
       "from": 1087,
       "to": 1255
@@ -5734,7 +5734,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_923f3c70-9b2e-4bbe-a881-f4907d9e3c34",
+     "areaId": "A_ba549d14-368c-4460-bd85-195d8055cb16",
      "created": {
       "name": "state.jsonl 행",
       "parentId": null
@@ -5744,7 +5744,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+       "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
        "quote": "| state.jsonl 행 | row_id·ts_ms·seq·valid_until·charter_sha·state_id·side | 질감 v3 | 엔진 | /var/lib/koru-desk/race/state.jsonl | [파일: T ROW_KEYS] |",
        "from": 1256,
        "to": 1400
@@ -5759,7 +5759,7 @@
      ],
      "type": "store",
      "typeQuote": {
-      "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+      "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
       "quote": "| state.jsonl 행 | row_id·ts_ms·seq·valid_until·charter_sha·state_id·side | 질감 v3 | 엔진 | /var/lib/koru-desk/race/state.jsonl | [파일: T ROW_KEYS] |",
       "from": 1256,
       "to": 1400
@@ -5777,7 +5777,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_10c704ba-150b-4974-a9af-5a813751b556",
+     "areaId": "A_b1ee9200-8ed7-49f9-962b-072e3765cc74",
      "created": {
       "name": "texture-events.jsonl",
       "parentId": null
@@ -5787,7 +5787,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+       "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
        "quote": "| texture-events.jsonl | bar_close_ms·sigma_now_ticks·sigma_n·fill15 | 질감 v3 | 카드 러너·종이 생산자 | /var/lib/koru-desk/sidecar/texture-events.jsonl | [파일: T] |",
        "from": 1401,
        "to": 1554
@@ -5802,7 +5802,7 @@
      ],
      "type": "store",
      "typeQuote": {
-      "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+      "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
       "quote": "| texture-events.jsonl | bar_close_ms·sigma_now_ticks·sigma_n·fill15 | 질감 v3 | 카드 러너·종이 생산자 | /var/lib/koru-desk/sidecar/texture-events.jsonl | [파일: T] |",
       "from": 1401,
       "to": 1554
@@ -5820,7 +5820,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_d6d7a50c-a524-4a01-90ad-c443f8ef2b55",
+     "areaId": "A_f8e641df-be5c-4451-86c5-3495399da36f",
      "created": {
       "name": "cards-{CX,CL,DS}.jsonl",
       "parentId": null
@@ -5830,7 +5830,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+       "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
        "quote": "| cards-{CX,CL,DS}.jsonl | schema·card_id·arm·beat·packet_sha | 카드 러너 | 카드 러너·종이 생산자·성적표 | /var/lib/koru-desk/cards/ | [파일: C/card_runner.py] |",
        "from": 1555,
        "to": 1698
@@ -5845,7 +5845,7 @@
      ],
      "type": "store",
      "typeQuote": {
-      "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+      "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
       "quote": "| cards-{CX,CL,DS}.jsonl | schema·card_id·arm·beat·packet_sha | 카드 러너 | 카드 러너·종이 생산자·성적표 | /var/lib/koru-desk/cards/ | [파일: C/card_runner.py] |",
       "from": 1555,
       "to": 1698
@@ -5863,7 +5863,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_03fc690f-71b8-4a48-be0a-7b05e59174c7",
+     "areaId": "A_75224ade-06eb-47ac-9194-e5f8f5832393",
      "created": {
       "name": "plan.jsonl",
       "parentId": null
@@ -5873,7 +5873,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+       "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
        "quote": "| plan.jsonl | topics·pulls·wake_rules·card_questions·reason | 편집장 | 카드 러너 | /var/lib/koru-desk/cards/ | [파일: C/schemas.json] |",
        "from": 1699,
        "to": 1826
@@ -5888,7 +5888,7 @@
      ],
      "type": "store",
      "typeQuote": {
-      "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+      "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
       "quote": "| plan.jsonl | topics·pulls·wake_rules·card_questions·reason | 편집장 | 카드 러너 | /var/lib/koru-desk/cards/ | [파일: C/schemas.json] |",
       "from": 1699,
       "to": 1826
@@ -5906,7 +5906,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_b38c601a-62ca-4374-8a00-81ab3664ec48",
+     "areaId": "A_546a9956-978a-448b-98df-76d108e5f69d",
      "created": {
       "name": "facts.jsonl",
       "parentId": null
@@ -5916,7 +5916,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+       "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
        "quote": "| facts.jsonl | fact_id·value·observed_utc·source | 주문형 수집 | 카드 러너 | /var/lib/koru-desk/cards/ | [파일: C/schemas.json] |",
        "from": 1827,
        "to": 1946
@@ -5931,7 +5931,7 @@
      ],
      "type": "store",
      "typeQuote": {
-      "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+      "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
       "quote": "| facts.jsonl | fact_id·value·observed_utc·source | 주문형 수집 | 카드 러너 | /var/lib/koru-desk/cards/ | [파일: C/schemas.json] |",
       "from": 1827,
       "to": 1946
@@ -5951,12 +5951,12 @@
    ],
    "relations": [
     {
-     "relationId": "L_a688618f-4127-45db-bd41-639f1caf6384",
-     "from": "A_923f3c70-9b2e-4bbe-a881-f4907d9e3c34",
-     "to": "A_b9b5d25a-b4d6-4633-bd4d-26537923b4a7",
+     "relationId": "L_eb655119-6a8f-455b-97dc-c0e93ca6a920",
+     "from": "A_ba549d14-368c-4460-bd85-195d8055cb16",
+     "to": "A_8a894336-a332-4de1-9247-4141ec7b1773",
      "kind": "flow",
      "quote": {
-      "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+      "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
       "quote": "| state.jsonl 행 | row_id·ts_ms·seq·valid_until·charter_sha·state_id·side | 질감 v3 | 엔진 | /var/lib/koru-desk/race/state.jsonl | [파일: T ROW_KEYS] |",
       "from": 1256,
       "to": 1400
@@ -5968,12 +5968,12 @@
      "payloadFields": []
     },
     {
-     "relationId": "L_29dad2ab-353d-477c-8030-c15443a7f1f3",
-     "from": "A_c2377bca-2dc3-4550-9425-50d0f92207c7",
-     "to": "A_b9b5d25a-b4d6-4633-bd4d-26537923b4a7",
+     "relationId": "L_4138c8c2-83ba-44a0-8aea-778a2e35879d",
+     "from": "A_4f0b12df-6057-4925-9a37-f6e53cfaa303",
+     "to": "A_8a894336-a332-4de1-9247-4141ec7b1773",
      "kind": "flow",
      "quote": {
-      "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+      "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
       "quote": "| policy.jsonl 행 | row_id·valid_until·authors·reason·state_id·entry_mode | 정책 행 작성기 | 엔진 | /var/lib/koru-desk/race/policy.jsonl | [파일: O/policy-daily/policy-daily.sh] |",
       "from": 1087,
       "to": 1255
@@ -5985,12 +5985,12 @@
      "payloadFields": []
     },
     {
-     "relationId": "L_6497abf5-daab-41a2-b6c0-020889eb4699",
-     "from": "A_0e51d10d-698f-4b17-bc2b-5328faef2258",
-     "to": "A_b9b5d25a-b4d6-4633-bd4d-26537923b4a7",
+     "relationId": "L_81e66e6c-8879-45c8-bc29-5be481104006",
+     "from": "A_a8a2a60a-3220-4d8d-98b6-5a92da284620",
+     "to": "A_8a894336-a332-4de1-9247-4141ec7b1773",
      "kind": "flow",
      "quote": {
-      "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+      "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
       "quote": "| review.jsonl 행 | watch·allowed_side·reason·sources·ts_ms·valid_until·row_id·charter_sha·authors·seq | 카드 러너 | 엔진·종이 생산자 | /var/lib/koru-desk/race/review.jsonl | [파일: C/card_runner.py] |",
       "from": 899,
       "to": 1086
@@ -6002,12 +6002,12 @@
      "payloadFields": []
     },
     {
-     "relationId": "L_30fcff99-898f-45dc-8b94-16353969db77",
-     "from": "A_71e8e30c-76dd-4e70-b37a-b92febfc3cee",
-     "to": "A_0e51d10d-698f-4b17-bc2b-5328faef2258",
+     "relationId": "L_292e958c-4287-4f38-91bb-2f66791eb945",
+     "from": "A_b7ed0715-35f9-4c91-a188-32511811ee2d",
+     "to": "A_a8a2a60a-3220-4d8d-98b6-5a92da284620",
      "kind": "flow",
      "quote": {
-      "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+      "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
       "quote": "| review.jsonl 행 | watch·allowed_side·reason·sources·ts_ms·valid_until·row_id·charter_sha·authors·seq | 카드 러너 | 엔진·종이 생산자 | /var/lib/koru-desk/race/review.jsonl | [파일: C/card_runner.py] |",
       "from": 899,
       "to": 1086
@@ -6019,12 +6019,12 @@
      "payloadFields": []
     },
     {
-     "relationId": "L_bdd7ea69-4cfc-4a7c-9096-9717f8cd3053",
-     "from": "A_71e8e30c-76dd-4e70-b37a-b92febfc3cee",
-     "to": "A_d6d7a50c-a524-4a01-90ad-c443f8ef2b55",
+     "relationId": "L_db08c3ce-5919-4b09-a12f-ec2e27bfeeb4",
+     "from": "A_b7ed0715-35f9-4c91-a188-32511811ee2d",
+     "to": "A_f8e641df-be5c-4451-86c5-3495399da36f",
      "kind": "flow",
      "quote": {
-      "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+      "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
       "quote": "| cards-{CX,CL,DS}.jsonl | schema·card_id·arm·beat·packet_sha | 카드 러너 | 카드 러너·종이 생산자·성적표 | /var/lib/koru-desk/cards/ | [파일: C/card_runner.py] |",
       "from": 1555,
       "to": 1698
@@ -6036,12 +6036,12 @@
      "payloadFields": []
     },
     {
-     "relationId": "L_a4c675fa-5b47-4b0a-88db-787dccedb357",
-     "from": "A_03fc690f-71b8-4a48-be0a-7b05e59174c7",
-     "to": "A_71e8e30c-76dd-4e70-b37a-b92febfc3cee",
+     "relationId": "L_520b3d9b-cc64-4c43-8a0d-241b4e40d5c0",
+     "from": "A_75224ade-06eb-47ac-9194-e5f8f5832393",
+     "to": "A_b7ed0715-35f9-4c91-a188-32511811ee2d",
      "kind": "flow",
      "quote": {
-      "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+      "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
       "quote": "| plan.jsonl | topics·pulls·wake_rules·card_questions·reason | 편집장 | 카드 러너 | /var/lib/koru-desk/cards/ | [파일: C/schemas.json] |",
       "from": 1699,
       "to": 1826
@@ -6053,12 +6053,12 @@
      "payloadFields": []
     },
     {
-     "relationId": "L_9d3a9f06-ea12-4c94-8f4c-8e30980a72fb",
-     "from": "A_10c704ba-150b-4974-a9af-5a813751b556",
-     "to": "A_71e8e30c-76dd-4e70-b37a-b92febfc3cee",
+     "relationId": "L_05162b15-f8cc-490b-8594-df80c0602204",
+     "from": "A_b1ee9200-8ed7-49f9-962b-072e3765cc74",
+     "to": "A_b7ed0715-35f9-4c91-a188-32511811ee2d",
      "kind": "flow",
      "quote": {
-      "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+      "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
       "quote": "| texture-events.jsonl | bar_close_ms·sigma_now_ticks·sigma_n·fill15 | 질감 v3 | 카드 러너·종이 생산자 | /var/lib/koru-desk/sidecar/texture-events.jsonl | [파일: T] |",
       "from": 1401,
       "to": 1554
@@ -6070,12 +6070,12 @@
      "payloadFields": []
     },
     {
-     "relationId": "L_b15acc95-70e4-4bb1-a8c9-48ecfbe2c170",
-     "from": "A_d6d7a50c-a524-4a01-90ad-c443f8ef2b55",
-     "to": "A_71e8e30c-76dd-4e70-b37a-b92febfc3cee",
+     "relationId": "L_c1332278-954d-479b-adea-8ee9b20f2dc7",
+     "from": "A_f8e641df-be5c-4451-86c5-3495399da36f",
+     "to": "A_b7ed0715-35f9-4c91-a188-32511811ee2d",
      "kind": "flow",
      "quote": {
-      "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+      "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
       "quote": "| cards-{CX,CL,DS}.jsonl | schema·card_id·arm·beat·packet_sha | 카드 러너 | 카드 러너·종이 생산자·성적표 | /var/lib/koru-desk/cards/ | [파일: C/card_runner.py] |",
       "from": 1555,
       "to": 1698
@@ -6087,12 +6087,12 @@
      "payloadFields": []
     },
     {
-     "relationId": "L_e8acd76e-aba2-48af-8bc8-3b64d6ccbf0e",
-     "from": "A_b38c601a-62ca-4374-8a00-81ab3664ec48",
-     "to": "A_71e8e30c-76dd-4e70-b37a-b92febfc3cee",
+     "relationId": "L_9328d697-cb3b-4855-9063-c79d71d9fa1c",
+     "from": "A_546a9956-978a-448b-98df-76d108e5f69d",
+     "to": "A_b7ed0715-35f9-4c91-a188-32511811ee2d",
      "kind": "flow",
      "quote": {
-      "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+      "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
       "quote": "| facts.jsonl | fact_id·value·observed_utc·source | 주문형 수집 | 카드 러너 | /var/lib/koru-desk/cards/ | [파일: C/schemas.json] |",
       "from": 1827,
       "to": 1946
@@ -6104,12 +6104,12 @@
      "payloadFields": []
     },
     {
-     "relationId": "L_419ef093-2e90-4269-bd17-1710b44b716f",
-     "from": "A_f7df3236-270b-4525-936d-8a2ca45050ba",
-     "to": "A_923f3c70-9b2e-4bbe-a881-f4907d9e3c34",
+     "relationId": "L_c61448be-4614-4586-be27-9448db3016ff",
+     "from": "A_2887a307-97f8-4960-aa5b-37c604092a0b",
+     "to": "A_ba549d14-368c-4460-bd85-195d8055cb16",
      "kind": "flow",
      "quote": {
-      "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+      "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
       "quote": "| state.jsonl 행 | row_id·ts_ms·seq·valid_until·charter_sha·state_id·side | 질감 v3 | 엔진 | /var/lib/koru-desk/race/state.jsonl | [파일: T ROW_KEYS] |",
       "from": 1256,
       "to": 1400
@@ -6121,12 +6121,12 @@
      "payloadFields": []
     },
     {
-     "relationId": "L_f6bc3a60-8472-45c3-9531-c984174e6aca",
-     "from": "A_34d240e2-b820-4c74-b5df-cd9d11538d9d",
-     "to": "A_03fc690f-71b8-4a48-be0a-7b05e59174c7",
+     "relationId": "L_b26267f6-4423-4f0e-a36f-6fad3f9a81d4",
+     "from": "A_594de494-841c-4871-801f-e88178687c11",
+     "to": "A_75224ade-06eb-47ac-9194-e5f8f5832393",
      "kind": "flow",
      "quote": {
-      "record": "N_8432c69f-6e49-4b74-8d5c-619545881451",
+      "record": "N_560df2ff-8d41-43cc-949f-ae782b297561",
       "quote": "| plan.jsonl | topics·pulls·wake_rules·card_questions·reason | 편집장 | 카드 러너 | /var/lib/koru-desk/cards/ | [파일: C/schemas.json] |",
       "from": 1699,
       "to": 1826
@@ -6633,7 +6633,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N02",
+       "record": "N01",
        "quote": "| 소유자 | 사람 | 개발·설치 [파일: D/RUNBOOK.md] |",
        "from": 501,
        "to": 540
@@ -6643,7 +6643,7 @@
       {
        "kind": "want",
        "text": "매달 28일~다음 달 3일에는 사무실 PC에 새 판본을 설치하지 않는다.",
-       "record": "N01",
+       "record": "N02",
        "quote": "| 전체 | 매달 28일~다음 달 3일에는 사무실 PC에 새 판본을 설치하지 않는다 | 소유자 10-24 [파일: docs/RUNBOOK.md] |",
        "from": 8121,
        "to": 8203,
@@ -6663,7 +6663,7 @@
          "kind": "person",
          "text": "소유자 10-24 [파일: docs/RUNBOOK.md]",
          "quote": {
-          "record": "N01",
+          "record": "N02",
           "quote": "| 전체 | 매달 28일~다음 달 3일에는 사무실 PC에 새 판본을 설치하지 않는다 | 소유자 10-24 [파일: docs/RUNBOOK.md] |",
           "from": 8121,
           "to": 8203
@@ -6677,7 +6677,7 @@
       {
        "kind": "want",
        "text": "태그·설치는 릴리스 관문 통과 뒤에만 한다.",
-       "record": "N01",
+       "record": "N02",
        "quote": "| 전체 | 태그·설치는 릴리스 관문(pytest 전부 + smoke 사흘치) 통과 뒤에만 | 소유자 10-30 [파일: docs/DECISIONS.md D-11] |",
        "from": 8204,
        "to": 8297,
@@ -6705,7 +6705,7 @@
       {
        "kind": "want",
        "text": "고객 이름·전화번호는 ledger에 저장하지 않는다.",
-       "record": "N01",
+       "record": "N02",
        "quote": "| 전체 | 고객 이름·전화번호는 ledger에 저장하지 않는다 | 소유자 09-29 [파일: docs/DECISIONS.md D-03] |",
        "from": 8298,
        "to": 8376,
@@ -6737,7 +6737,7 @@
      "files": [],
      "type": "person",
      "typeQuote": {
-      "record": "N02",
+      "record": "N01",
       "quote": "| 소유자 | 사람 | 개발·설치 [파일: D/RUNBOOK.md] |",
       "from": 501,
       "to": 540
@@ -6761,7 +6761,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N02",
+       "record": "N01",
        "quote": "| 경리 담당자 | 사람 | 파일 넣기·보고서 확인 [파일: D/RUNBOOK.md] |",
        "from": 541,
        "to": 590
@@ -6771,7 +6771,7 @@
       {
        "kind": "want",
        "text": "은행 거래내역은 경리 담당자만 내려받고 인증서는 사무실 PC 밖으로 옮기지 않는다.",
-       "record": "N01",
+       "record": "N02",
        "quote": "| 경리 담당자 | 은행 거래내역은 경리 담당자만 내려받고 인증서는 사무실 PC 밖으로 옮기지 않는다 | 소유자 10-02 [파일: docs/RUNBOOK.md] |",
        "from": 8028,
        "to": 8120,
@@ -6791,7 +6791,7 @@
          "kind": "person",
          "text": "소유자 10-02 [파일: docs/RUNBOOK.md]",
          "quote": {
-          "record": "N01",
+          "record": "N02",
           "quote": "| 경리 담당자 | 은행 거래내역은 경리 담당자만 내려받고 인증서는 사무실 PC 밖으로 옮기지 않는다 | 소유자 10-02 [파일: docs/RUNBOOK.md] |",
           "from": 8028,
           "to": 8120
@@ -6809,7 +6809,7 @@
      "files": [],
      "type": "person",
      "typeQuote": {
-      "record": "N02",
+      "record": "N01",
       "quote": "| 경리 담당자 | 사람 | 파일 넣기·보고서 확인 [파일: D/RUNBOOK.md] |",
       "from": 541,
       "to": 590
@@ -6847,25 +6847,25 @@
    "portMap": [],
    "records": [
     {
-     "id": "N_a3b2f59a-0e2b-4b5c-8227-d1b2e7a74ec1",
-     "from": 0,
-     "to": 10967,
-     "total": 10967,
-     "digest": "f1-db2431ff9aa28cce"
-    },
-    {
-     "id": "N_4306d014-a344-4e07-9542-80ed8c8aa9fc",
+     "id": "N_d60afc69-7c00-4535-a4c1-2a3c6e9afdeb",
      "from": 0,
      "to": 11017,
      "total": 11017,
      "digest": "f1-99737ed31881cc79"
+    },
+    {
+     "id": "N_b67f8707-77ce-430a-a02a-d3fd504533b9",
+     "from": 0,
+     "to": 10967,
+     "total": 10967,
+     "digest": "f1-db2431ff9aa28cce"
     }
    ],
    "exclusions": [],
    "summary": "",
    "parts": [
     {
-     "areaId": "A_ac39db1f-9294-4c87-9c75-7a796a61b78f",
+     "areaId": "A_0f08ae48-1149-4b9a-b8d6-a57219836cd8",
      "created": {
       "name": "소유자",
       "parentId": null
@@ -6875,7 +6875,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_4306d014-a344-4e07-9542-80ed8c8aa9fc",
+       "record": "N_d60afc69-7c00-4535-a4c1-2a3c6e9afdeb",
        "quote": "| 소유자 | 사람 | 개발·설치 [파일: D/RUNBOOK.md] |",
        "from": 501,
        "to": 540
@@ -6885,7 +6885,7 @@
       {
        "kind": "want",
        "text": "매달 28일~다음 달 3일에는 사무실 PC에 새 판본을 설치하지 않는다.",
-       "record": "N_a3b2f59a-0e2b-4b5c-8227-d1b2e7a74ec1",
+       "record": "N_b67f8707-77ce-430a-a02a-d3fd504533b9",
        "quote": "| 전체 | 매달 28일~다음 달 3일에는 사무실 PC에 새 판본을 설치하지 않는다 | 소유자 10-24 [파일: docs/RUNBOOK.md] |",
        "from": 8121,
        "to": 8203,
@@ -6904,7 +6904,7 @@
          "kind": "person",
          "text": "소유자 10-24 [파일: docs/RUNBOOK.md]",
          "quote": {
-          "record": "N_a3b2f59a-0e2b-4b5c-8227-d1b2e7a74ec1",
+          "record": "N_b67f8707-77ce-430a-a02a-d3fd504533b9",
           "quote": "| 전체 | 매달 28일~다음 달 3일에는 사무실 PC에 새 판본을 설치하지 않는다 | 소유자 10-24 [파일: docs/RUNBOOK.md] |",
           "from": 8121,
           "to": 8203
@@ -6918,7 +6918,7 @@
       {
        "kind": "want",
        "text": "태그·설치는 릴리스 관문 통과 뒤에만 한다.",
-       "record": "N_a3b2f59a-0e2b-4b5c-8227-d1b2e7a74ec1",
+       "record": "N_b67f8707-77ce-430a-a02a-d3fd504533b9",
        "quote": "| 전체 | 태그·설치는 릴리스 관문(pytest 전부 + smoke 사흘치) 통과 뒤에만 | 소유자 10-30 [파일: docs/DECISIONS.md D-11] |",
        "from": 8204,
        "to": 8297,
@@ -6946,7 +6946,7 @@
       {
        "kind": "want",
        "text": "고객 이름·전화번호는 ledger에 저장하지 않는다.",
-       "record": "N_a3b2f59a-0e2b-4b5c-8227-d1b2e7a74ec1",
+       "record": "N_b67f8707-77ce-430a-a02a-d3fd504533b9",
        "quote": "| 전체 | 고객 이름·전화번호는 ledger에 저장하지 않는다 | 소유자 09-29 [파일: docs/DECISIONS.md D-03] |",
        "from": 8298,
        "to": 8376,
@@ -6978,7 +6978,7 @@
      "files": [],
      "type": "person",
      "typeQuote": {
-      "record": "N_4306d014-a344-4e07-9542-80ed8c8aa9fc",
+      "record": "N_d60afc69-7c00-4535-a4c1-2a3c6e9afdeb",
       "quote": "| 소유자 | 사람 | 개발·설치 [파일: D/RUNBOOK.md] |",
       "from": 501,
       "to": 540
@@ -6994,7 +6994,7 @@
      "fileRoles": []
     },
     {
-     "areaId": "A_b66792a9-71e1-4751-89f0-431a6746581c",
+     "areaId": "A_fcf00a08-c774-4671-9446-a5e5219c285e",
      "created": {
       "name": "경리 담당자",
       "parentId": null
@@ -7004,7 +7004,7 @@
      "roleReplaces": null,
      "basis": [
       {
-       "record": "N_4306d014-a344-4e07-9542-80ed8c8aa9fc",
+       "record": "N_d60afc69-7c00-4535-a4c1-2a3c6e9afdeb",
        "quote": "| 경리 담당자 | 사람 | 파일 넣기·보고서 확인 [파일: D/RUNBOOK.md] |",
        "from": 541,
        "to": 590
@@ -7014,7 +7014,7 @@
       {
        "kind": "want",
        "text": "은행 거래내역은 경리 담당자만 내려받고 인증서는 사무실 PC 밖으로 옮기지 않는다.",
-       "record": "N_a3b2f59a-0e2b-4b5c-8227-d1b2e7a74ec1",
+       "record": "N_b67f8707-77ce-430a-a02a-d3fd504533b9",
        "quote": "| 경리 담당자 | 은행 거래내역은 경리 담당자만 내려받고 인증서는 사무실 PC 밖으로 옮기지 않는다 | 소유자 10-02 [파일: docs/RUNBOOK.md] |",
        "from": 8028,
        "to": 8120,
@@ -7033,7 +7033,7 @@
          "kind": "person",
          "text": "소유자 10-02 [파일: docs/RUNBOOK.md]",
          "quote": {
-          "record": "N_a3b2f59a-0e2b-4b5c-8227-d1b2e7a74ec1",
+          "record": "N_b67f8707-77ce-430a-a02a-d3fd504533b9",
           "quote": "| 경리 담당자 | 은행 거래내역은 경리 담당자만 내려받고 인증서는 사무실 PC 밖으로 옮기지 않는다 | 소유자 10-02 [파일: docs/RUNBOOK.md] |",
           "from": 8028,
           "to": 8120
@@ -7051,7 +7051,7 @@
      "files": [],
      "type": "person",
      "typeQuote": {
-      "record": "N_4306d014-a344-4e07-9542-80ed8c8aa9fc",
+      "record": "N_d60afc69-7c00-4535-a4c1-2a3c6e9afdeb",
       "quote": "| 경리 담당자 | 사람 | 파일 넣기·보고서 확인 [파일: D/RUNBOOK.md] |",
       "from": 541,
       "to": 590
@@ -7079,161 +7079,161 @@
    "conditionRows": [
     {
      "part": "ingest 명령",
-     "at": "N02.93",
+     "at": "N01.93",
      "condition": "sha in seen_files and not args.reprocess",
      "then": "SKIP_DUPLICATE_FILE",
      "otherwise": "다음",
-     "record": "N02",
+     "record": "N01",
      "from": 8350,
      "to": 8443
     },
     {
      "part": "ingest 명령",
-     "at": "N02.94",
+     "at": "N01.94",
      "condition": "not ok(validate.row 결과)",
      "then": "rejects-YYYYMMDD.csv에 줄",
      "otherwise": "행 넣기",
-     "record": "N02",
+     "record": "N01",
      "from": 8444,
      "to": 8538
     },
     {
      "part": "ingest 명령",
-     "at": "N02.95",
+     "at": "N01.95",
      "condition": "bad / total > cfg.ingest.reject_ratio_abort",
      "then": "REJECT_RATIO_ABORT",
      "otherwise": "넣기",
-     "record": "N02",
+     "record": "N01",
      "from": 8539,
      "to": 8646
     },
     {
      "part": "ingest 명령",
-     "at": "N02.96",
+     "at": "N01.96",
      "condition": "args.dry_run",
      "then": "쓰지 않고 「DRY-RUN」 표만",
      "otherwise": "ledger.write_rows",
-     "record": "N02",
+     "record": "N01",
      "from": 8647,
      "to": 8726
     },
     {
      "part": "ingest 명령",
-     "at": "N02.97",
+     "at": "N01.97",
      "condition": "isinstance(e, sqlite3.OperationalError) and 'locked' in str(e)",
      "then": "LEDGER_LOCKED 종료 4",
      "otherwise": "다시 raise, 종료 1",
-     "record": "N02",
+     "record": "N01",
      "from": 8727,
      "to": 8863
     },
     {
      "part": "샵링크 플러그인",
-     "at": "N02.98",
+     "at": "N01.98",
      "condition": "not bucket.take()",
      "then": "1/rps 초 기다림",
      "otherwise": "요청",
-     "record": "N02",
+     "record": "N01",
      "from": 8864,
      "to": 8935
     },
     {
      "part": "샵링크 플러그인",
-     "at": "N02.99",
+     "at": "N01.99",
      "condition": "r.status_code == 429 or r.status_code >= 500",
      "then": "retry-queue.jsonl에 append(attempt 1)",
      "otherwise": "페이지 저장",
-     "record": "N02",
+     "record": "N01",
      "from": 8936,
      "to": 9063
     },
     {
      "part": "샵링크 플러그인",
-     "at": "N02.100",
+     "at": "N01.100",
      "condition": "body.get('next_cursor')",
      "then": "다음 페이지",
      "otherwise": "끝",
-     "record": "N02",
+     "record": "N01",
      "from": 9064,
      "to": 9135
     },
     {
      "part": "야간 배치",
-     "at": "N02.101",
+     "at": "N01.101",
      "condition": "prev and prev.complete and not args.force",
      "then": "ALREADY_COMPLETE 종료 0",
      "otherwise": "다음",
-     "record": "N02",
+     "record": "N01",
      "from": 9136,
      "to": 9228
     },
     {
      "part": "야간 배치",
-     "at": "N02.102",
+     "at": "N01.102",
      "condition": "line['attempt'] >= cfg.shoplink.max_attempts",
      "then": "GAVE_UP, 줄 남김",
      "otherwise": "다시 요청(실패면 attempt+1)",
-     "record": "N02",
+     "record": "N01",
      "from": 9229,
      "to": 9334
     },
     {
      "part": "야간 배치",
-     "at": "N02.103",
+     "at": "N01.103",
      "condition": "not ledger.has_bank(day)",
      "then": "BANK_MISSING 종료 3",
      "otherwise": "대조",
-     "record": "N02",
+     "record": "N01",
      "from": 9335,
      "to": 9406
     },
     {
      "part": "야간 배치",
-     "at": "N02.104",
+     "at": "N01.104",
      "condition": "abs(sale.net - tx.deposit) > cfg.match.tolerance_won",
      "then": "다음 후보",
      "otherwise": "MATCHED",
-     "record": "N02",
+     "record": "N01",
      "from": 9407,
      "to": 9499
     },
     {
      "part": "야간 배치",
-     "at": "N02.105",
+     "at": "N01.105",
      "condition": "len(combos) > 1",
      "then": "NEEDS_REVIEW",
      "otherwise": "하나면 MATCHED_BUNDLE, 없으면 UNMATCHED",
-     "record": "N02",
+     "record": "N01",
      "from": 9500,
      "to": 9588
     },
     {
      "part": "야간 배치",
-     "at": "N02.106",
+     "at": "N01.106",
      "condition": "queue_left > 0",
      "then": "complete=False, 슬랙 「[부분]」, 종료 5",
      "otherwise": "complete=True",
-     "record": "N02",
+     "record": "N01",
      "from": 9589,
      "to": 9675
     },
     {
      "part": "야간 배치",
-     "at": "N02.107",
+     "at": "N01.107",
      "condition": "path.exists()",
      "then": "report-YYYYMMDD-2.xlsx처럼 번호",
      "otherwise": "그 이름",
-     "record": "N02",
+     "record": "N01",
      "from": 9676,
      "to": 9758
     },
     {
      "part": "릴리스 관문",
-     "at": "N02.108",
+     "at": "N01.108",
      "condition": "Compare-Object $actual $expected",
      "then": "SMOKE_DIFF 중단",
      "otherwise": "git tag",
-     "record": "N02",
+     "record": "N01",
      "from": 9759,
      "to": 9852
     }
@@ -7243,8 +7243,8 @@
      "part": "ingest 명령",
      "path": "E/cli.py",
      "role": "ingest·nightly·reconcile·report·retry 서브커맨드",
-     "at": "N02.112",
-     "record": "N02",
+     "at": "N01.112",
+     "record": "N01",
      "from": 9911,
      "to": 9998
     },
@@ -7252,8 +7252,8 @@
      "part": "ingest 명령",
      "path": "I·E/inbox.py·readers.py·lock.py·normalize/map.py",
      "role": "파일 찾기·읽기·잠금·열 매핑",
-     "at": "N02.113",
-     "record": "N02",
+     "at": "N01.113",
+     "record": "N01",
      "from": 9999,
      "to": 10092
     },
@@ -7261,8 +7261,8 @@
      "part": "ingest 명령",
      "path": "E/normalize/pii.py",
      "role": "개인정보 열 제거(이번에 안 읽음)",
-     "at": "N02.114",
-     "record": "N02",
+     "at": "N01.114",
+     "record": "N01",
      "from": 10093,
      "to": 10156
     },
@@ -7270,8 +7270,8 @@
      "part": "ingest 명령",
      "path": "E/validate.py",
      "role": "행 검증·거부 비율",
-     "at": "N02.115",
-     "record": "N02",
+     "at": "N01.115",
+     "record": "N01",
      "from": 10157,
      "to": 10221
     },
@@ -7279,8 +7279,8 @@
      "part": "ledger.sqlite",
      "path": "E/ledger.py·schema.sql",
      "role": "표 다섯·쓰기·has_bank",
-     "at": "N02.116",
-     "record": "N02",
+     "at": "N01.116",
+     "record": "N01",
      "from": 10222,
      "to": 10304
     },
@@ -7288,8 +7288,8 @@
      "part": "샵링크 플러그인",
      "path": "P/client.py·bucket.py",
      "role": "호출·토큰 버킷·페이지 저장",
-     "at": "N02.117",
-     "record": "N02",
+     "at": "N01.117",
+     "record": "N01",
      "from": 10305,
      "to": 10379
     },
@@ -7297,8 +7297,8 @@
      "part": "retry-queue.jsonl",
      "path": "Q",
      "role": "append(플러그인)·drain·rewrite(야간 배치)",
-     "at": "N02.118",
-     "record": "N02",
+     "at": "N01.118",
+     "record": "N01",
      "from": 10380,
      "to": 10451
     },
@@ -7306,8 +7306,8 @@
      "part": "야간 배치",
      "path": "N·E/report.py·slack.py",
      "role": "단계 순서·runs·종료 코드·보고서·슬랙",
-     "at": "N02.119",
-     "record": "N02",
+     "at": "N01.119",
+     "record": "N01",
      "from": 10452,
      "to": 10522
     },
@@ -7315,8 +7315,8 @@
      "part": "야간 배치",
      "path": "R",
      "role": "대조(reconcile 서브커맨드도 이 파일)",
-     "at": "N02.120",
-     "record": "N02",
+     "at": "N01.120",
+     "record": "N01",
      "from": 10523,
      "to": 10574
     },
@@ -7324,8 +7324,8 @@
      "part": "작업 스케줄러 작업",
      "path": "O/SalesRecNightly.xml",
      "role": "내보낸 작업 정의",
-     "at": "N02.121",
-     "record": "N02",
+     "at": "N01.121",
+     "record": "N01",
      "from": 10575,
      "to": 10655
     },
@@ -7333,8 +7333,8 @@
      "part": "salesrec.toml",
      "path": "salesrec.example.toml",
      "role": "설정 예시(사무실 PC 실제 파일은 이번에 안 읽음)",
-     "at": "N02.122",
-     "record": "N02",
+     "at": "N01.122",
+     "record": "N01",
      "from": 10656,
      "to": 10759
     },
@@ -7342,8 +7342,8 @@
      "part": "릴리스 관문",
      "path": "S/release.ps1·tests/·samples/",
      "role": "관문 스크립트·시험·표본 사흘",
-     "at": "N02.123",
-     "record": "N02",
+     "at": "N01.123",
+     "record": "N01",
      "from": 10760,
      "to": 10843
     },
@@ -7351,8 +7351,8 @@
      "part": "시트 업로더",
      "path": "S/old/sheets_upload.py",
      "role": "폐기 사본",
-     "at": "N02.124",
-     "record": "N02",
+     "at": "N01.124",
+     "record": "N01",
      "from": 10844,
      "to": 10918
     },
@@ -7360,8 +7360,8 @@
      "part": "개발 세션",
      "path": "D/DECISIONS.md·RUNBOOK.md·INCIDENT-1102.md·STATUS.md",
      "role": "결정·절차·사건",
-     "at": "N02.125",
-     "record": "N02",
+     "at": "N01.125",
+     "record": "N01",
      "from": 10919,
      "to": 11005
     }
@@ -7378,7 +7378,7 @@
      "where": "inbox 폴더 pos/",
      "place": "pos-yyyymmdd.xlsx",
      "store": true,
-     "record": "N02",
+     "record": "N01",
      "from": 1728,
      "to": 1858,
      "makerCell": "매장 POS",
@@ -7407,7 +7407,7 @@
      "where": "inbox 폴더 market/",
      "place": "market-yyyymmdd.csv",
      "store": true,
-     "record": "N02",
+     "record": "N01",
      "from": 1859,
      "to": 1994,
      "makerCell": "경리 담당자",
@@ -7436,7 +7436,7 @@
      "where": "inbox 폴더 bank/",
      "place": "bank-yyyymmdd.csv",
      "store": true,
-     "record": "N02",
+     "record": "N01",
      "from": 1995,
      "to": 2107,
      "makerCell": "경리 담당자",
@@ -7462,7 +7462,7 @@
      "where": "HTTP",
      "place": "http",
      "store": false,
-     "record": "N02",
+     "record": "N01",
      "from": 2108,
      "to": 2260,
      "makerCell": "샵링크 API",
@@ -7485,7 +7485,7 @@
      "where": "inbox 폴더 shoplink/",
      "place": "shoplink-yyyymmdd-pnnn.json",
      "store": true,
-     "record": "N02",
+     "record": "N01",
      "from": 2261,
      "to": 2396,
      "makerCell": "샵링크 플러그인",
@@ -7510,7 +7510,7 @@
      "where": "retry-queue.jsonl",
      "place": "retry-queue.jsonl",
      "store": true,
-     "record": "N02",
+     "record": "N01",
      "from": 2397,
      "to": 2538,
      "makerCell": "샵링크 플러그인·야간 배치",
@@ -7537,7 +7537,7 @@
      "where": "ledger.sqlite",
      "place": "ledger.sqlite",
      "store": true,
-     "record": "N02",
+     "record": "N01",
      "from": 2539,
      "to": 2698,
      "makerCell": "ingest 명령",
@@ -7568,7 +7568,7 @@
      "where": "ledger.sqlite",
      "place": "ledger.sqlite",
      "store": true,
-     "record": "N02",
+     "record": "N01",
      "from": 2699,
      "to": 2829,
      "makerCell": "ingest 명령",
@@ -7595,7 +7595,7 @@
      "where": "ledger.sqlite",
      "place": "ledger.sqlite",
      "store": true,
-     "record": "N02",
+     "record": "N01",
      "from": 2830,
      "to": 2973,
      "makerCell": "ingest 명령",
@@ -7622,7 +7622,7 @@
      "where": "ledger.sqlite",
      "place": "ledger.sqlite",
      "store": true,
-     "record": "N02",
+     "record": "N01",
      "from": 2974,
      "to": 3101,
      "makerCell": "야간 배치",
@@ -7649,7 +7649,7 @@
      "where": "ledger.sqlite",
      "place": "ledger.sqlite",
      "store": true,
-     "record": "N02",
+     "record": "N01",
      "from": 3102,
      "to": 3244,
      "makerCell": "야간 배치",
@@ -7677,7 +7677,7 @@
      "where": "C:/salesrec/rejects/",
      "place": "rejects-yyyymmdd.csv",
      "store": true,
-     "record": "N02",
+     "record": "N01",
      "from": 3245,
      "to": 3364,
      "makerCell": "ingest 명령",
@@ -7702,7 +7702,7 @@
      "where": "OneDrive/회사공유/매출대조/",
      "place": "report-yyyymmdd.xlsx",
      "store": true,
-     "record": "N02",
+     "record": "N01",
      "from": 3365,
      "to": 3510,
      "makerCell": "야간 배치",
@@ -7730,7 +7730,7 @@
      "where": "HTTP",
      "place": "http",
      "store": false,
-     "record": "N02",
+     "record": "N01",
      "from": 3511,
      "to": 3649,
      "makerCell": "야간 배치",
@@ -7760,7 +7760,7 @@
      "where": "salesrec.toml",
      "place": "salesrec.toml",
      "store": true,
-     "record": "N02",
+     "record": "N01",
      "from": 3650,
      "to": 3904,
      "makerCell": "소유자",
@@ -7790,7 +7790,7 @@
      "where": "콘솔",
      "place": "콘솔",
      "store": false,
-     "record": "N02",
+     "record": "N01",
      "from": 3905,
      "to": 3997,
      "makerCell": "릴리스 관문",
@@ -7890,145 +7890,145 @@
    ],
    "factRows": [
     {
-     "record": "N01",
+     "record": "N02",
      "from": 5865,
      "to": 5984,
      "name": "ingest 명령"
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 5985,
      "to": 6101,
      "name": "salesrec.toml"
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 6102,
      "to": 6195,
      "name": "시트 업로더"
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 6196,
      "to": 6333,
      "name": "작업 스케줄러 작업"
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 6334,
      "to": 6441,
      "name": "야간 배치"
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 6442,
      "to": 6528,
      "name": "전체"
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 6529,
      "to": 6629,
      "name": "retry-queue.jsonl"
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 6688,
      "to": 6783,
      "name": "시트 업로더"
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 6784,
      "to": 6889,
      "name": "야간 배치"
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 6890,
      "to": 7005,
      "name": "샵링크 플러그인"
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 7006,
      "to": 7098,
      "name": "작업 스케줄러 작업"
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 7099,
      "to": 7186,
      "name": "salesrec.toml"
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 7187,
      "to": 7329,
      "name": "릴리스 관문"
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 8432,
      "to": 8840,
      "name": "야간 배치"
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 8841,
      "to": 9033,
      "name": "ingest 명령"
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 9034,
      "to": 9159,
      "name": "retry-queue.jsonl"
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 9160,
      "to": 9267,
      "name": "ledger.sqlite"
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 9268,
      "to": 9409,
      "name": "야간 배치"
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 9410,
      "to": 9521,
      "name": "야간 배치"
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 9522,
      "to": 9630,
      "name": "샵링크 플러그인"
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 9631,
      "to": 9731,
      "name": "릴리스 관문"
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 10722,
      "to": 10804,
      "name": "ledger.sqlite"
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 10805,
      "to": 10881,
      "name": "야간 배치"
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 10882,
      "to": 10966,
      "name": "retry-queue.jsonl"
@@ -8065,7 +8065,7 @@
    },
    "summarySentences": [
     {
-     "record": "N01",
+     "record": "N02",
      "from": 386,
      "to": 614,
      "text": "salesrec는 한결식품의 하루 매출 내보내기 세 원천(매장 POS XLSX·마켓원 정산 CSV·샵링크 자사몰 API)을 검증·정규화해 로컬 ledger.sqlite에 넣고, 사무실 PC 작업 스케줄러가 매일 17:30Z(KST 02:30)에 야간 배치를 돌려 은행 거래내역과 대조한 뒤 report-YYYYMMDD.xlsx와 슬랙 요약을 내는 1인 개발 Python CLI다 [파일: README.md].",
@@ -8073,7 +8073,7 @@
      "project": true
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 615,
      "to": 725,
      "text": "09-29 v0.5.0으로 쓰기 시작해 5주째이고, 사무실 PC에는 10-26에 설치한 v0.9.0(4c1e9a7b)이 돈다 [보고: 개발 세션 docs/STATUS.md 11-03 23:40Z].",
@@ -8081,7 +8081,7 @@
      "project": true
     },
     {
-     "record": "N01",
+     "record": "N02",
      "from": 726,
      "to": 882,
      "text": "11-02 밤 ledger 잠금 사건은 11-03 00:40Z에 손으로 마무리했고, 지금은 마켓원 날짜 형식 수정과 큐 잠금(e83f20d5)을 월말 설치 금지가 끝난 11-04에 릴리스 관문에 올리려 한다 [보고: 개발 세션 docs/STATUS.md 11-03 23:40Z].",

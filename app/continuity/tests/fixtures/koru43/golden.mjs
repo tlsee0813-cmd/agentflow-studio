@@ -9,10 +9,15 @@ const text = name => readFileSync(new URL(`./${name}`, import.meta.url), 'utf8')
 const cliText = name => readFileSync(new URL(`../cli41/${name}`, import.meta.url), 'utf8');
 const empty = () => ({ summary: '', parts: [], relations: [], candidates: [], gaps: [], matches: [], material: [] });
 
-export function goldenReadings({ D, M, studioView, B }) {
+let ORDER = true;
+export function goldenReadings({ D, M, studioView, B }, ordered = true) {
+  ORDER = ordered;
   const ofTexts = texts => {
     let project = D.createProject();
     for (const t of texts) project = D.pasteRecord(project, t, null).project;
+    // Pasted in one millisecond, two records would be ordered by their random ids: each is given its own time in paste order
+    // (the order golden42.json was read in).
+    if (ORDER) project = { ...project, pasted: project.pasted.map((r, i, all) => ({ ...r, at: new Date(Date.UTC(2026, 10, 3, 9, 0, i)).toISOString() })) };
     const input = M.buildMapAsk(project, studioView(project), [], undefined, M.MAP6_SCHEMA), spans = input.ask.records.flatMap(r => r.spans);
     const at = head => { const hit = spans.filter(s => s.t.startsWith(head)); if (hit.length !== 1) throw new Error(`span ${head}: ${hit.length}`); return hit[0].s; };
     return { project, input, ask: input.ask, at };
