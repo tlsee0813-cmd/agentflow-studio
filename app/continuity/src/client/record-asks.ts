@@ -6,7 +6,7 @@
  * copy makes one copy button (app.ts askCopy). */
 import { h } from './plan-dom.js';
 import { recordAskV4, newRecordId, continuationAsk, RECORD_V4_EXPLAIN, CONTINUATION_EXPLAIN, PROJECT_REPORT_ASK, DESIGN_RECORD_ASK, RECORD_ASK_EXPLAIN,
-  recordAskV5, newRecordIdV5, pageAsk, pageCapReached, supplementaryAsk, RECORD_V5_EXPLAIN, PAGE_ASK_EXPLAIN, SUPPLEMENT_ASK_EXPLAIN } from '../shared/report-ask.js';
+  recordAskV5, newRecordIdV5, pageAsk, pageCapReached, supplementaryAsk, obligationCount, RECORD_V5_EXPLAIN, PAGE_ASK_EXPLAIN, SUPPLEMENT_ASK_EXPLAIN } from '../shared/report-ask.js';
 import { latestFold, Q2_TABLES } from '../shared/record-table.js';
 
 export type AskCopy = (label: string, text: string, title: string) => HTMLElement;
@@ -29,7 +29,7 @@ export function pageNode(texts: readonly string[], copy: AskCopy): HTMLElement |
   const status = recordStatusLine(texts); if (!status) return null;
   const page = pageAsk(texts);
   if (page) return h('p', { class: 'fine rm-ask rm-continue' }, copy('쪽 요청 복사', page.text, PAGE_ASK_EXPLAIN),
-    ` — ${status} · 기록 ${page.recordId}의 남은 의무 ${page.obligations.length}개를 쪽 ${page.page}로 같은 대화에 청해요.`);
+    ` — ${status} · 기록 ${page.recordId}의 남은 의무 ${obligationCount(page.obligations)}를 쪽 ${page.page}로 같은 대화에 청해요.`);
   const more = supplementaryAsk(texts);
   if (more) return h('p', { class: 'fine rm-ask rm-continue' }, copy('보충 쪽 요청 복사', more.text, SUPPLEMENT_ASK_EXPLAIN),
     ` — ${status} · 기록의 공백이 부르는 보충 묶음 ${more.groups.join('·')}만 쪽 ${more.page}로 청해요.`);

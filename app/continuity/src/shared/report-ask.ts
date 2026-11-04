@@ -366,7 +366,7 @@ export const TABLE_NOTES_V5: Readonly<Record<string, string>> = Object.freeze({
   'C-STEP': '중심 부분부터 실행 순서대로(둘 중 하나만 도는 갈래 B03:S04a·b). 상한은 없고 넘치면 다음 쪽에 같은 부분을 이어 쓴다. 한 줄에 한 단계, 코드에 없는 단계를 지어내거나 합치지 마. 소속 반복은 가장 안쪽 반복 ID(둘이면 「+」), 밖이면 —. 조건·분기: 「→ B03:S06」, 거부 사유 코드 그대로, 「→ B03:S02, 최대 3번」. 모델이면 「모델:」. 순서 있는 목록이 20개를 넘으면 단계로 펼치지 말고 C-GROUP 목록으로.',
   'C-DATA': '부분 사이를 오가는 자료·파일·테이블·메시지마다. 종류: 외부 계약(K ID) / 내부 자료 / 저장 / 메시지·신호. 필드·모양은 코드의 이름 그대로(넓으면 키 몇 개와 「그 밖 N개」). 만드는·읽는 부분은 직접 만들고 읽는 B ID만(지나가게만 하는 부분은 빼), 방향 없이 함께 쓰고 읽으면 두 칸 모두 「공유: B05·B07」. 있는 곳은 경로(메모리·DB 이름), 쓰기 방식은 확인했을 때만 괄호로: 덧붙임 / 통째 교체 / 원자 교체.',
   'C-COND': '한 줄에 조건 하나, 식은 적힌 그대로. 참이면·거짓이면은 결과·사유 코드·가는 곳(다음 검사면 「다음」). 갈리는 때: 실행 시 / 설정 읽을 때 / 빌드·컴파일 시(둘이면 「+」). 첫 구조를 바꾸는 행(지도의 부분이나 연결을 가르는 모드 스위치)은 첫 구조 쪽에 쓴다(쪽의 차례).',
-  'C-CHANGE': '새것부터: 아래 검색에서 고른 큰 변화와 최근 6줄. 날짜는 작성과 병합이 다르면 「작성 / 병합」, 작성자와 커밋한 이가 다르면 「작성: A + 병합: B」(커밋한 이가 GitHub뿐이면 병합: 모름). 관련 주체·역할: 「역할: 주체」를 「+」로(요청 / 제안 / 작성 / 검토·승인 / 병합; 소유자 / 메인테이너(계정) / 기여자(계정) / 봇(이름) / 이슈 #번호(작성자) / 모름), 비면 C-HEAD 기본 행위자. 「요청:」은 따로 적힌 요청(대화·이슈)이 있을 때만이고, PR 작성자가 스스로 낸 변화는 「작성: 그 사람」뿐이다. 봇의 의존성 갱신 같은 잔수정은 한 줄에 묶고 개수를 쓴다. 원한 것은 적힌 요청 원문만 「」로, 없으면 —(본문을 못 읽었으면 「이슈 본문 미확인(#번호)」). 찾은 길: 검색 / 최근 / 변경 기록. 계약 변화는 C-WITHDRAW와 같고, 깨짐은 깨짐 표시·BREAKING 문구·메이저 판본·제거된 인자·이주 안내 같은 근거가 있을 때만. 실린 판본: 릴리스 / 미릴리스 / 모름(C-HEAD가 미확인이면 —).',
+  'C-CHANGE': '새것부터: 아래 검색에서 고른 큰 변화와 최근 6줄. 날짜는 작성과 병합이 다르면 「작성 / 병합」. 관련 주체·역할: 「역할: 주체」를 「+」로(요청 / 제안 / 작성 / 검토·승인 / 병합; 소유자 / 메인테이너(계정) / 기여자(계정) / 봇(이름) / 이슈 #번호(작성자) / 모름), 작성자와 커밋한 이가 다르면 「작성: A + 병합: B」(커밋한 이가 GitHub뿐이면 병합: 모름), 비면 C-HEAD 기본 행위자. 「요청:」은 따로 적힌 요청(대화·이슈)이 있을 때만이고, PR 작성자가 스스로 낸 변화는 「작성: 그 사람」뿐이다. 봇의 의존성 갱신 같은 잔수정은 한 줄에 묶고 개수를 쓴다. 원한 것은 적힌 요청 원문만 「」로, 없으면 —(본문을 못 읽었으면 「이슈 본문 미확인(#번호)」). 찾은 길: 검색 / 최근 / 변경 기록. 계약 변화는 C-WITHDRAW와 같고, 깨짐은 깨짐 표시·BREAKING 문구·메이저 판본·제거된 인자·이주 안내 같은 근거가 있을 때만. 실린 판본: 릴리스 / 미릴리스 / 모름(C-HEAD가 미확인이면 —).',
   'C-RULE': '정한 이는 정한 사람·문서(모르면 모름). 지키는 장치: 코드 / 검사 / 사람 / 없음 / 모름(「+」). 코드의 검사가 막으면 장치는 코드. 장치 위치는 파일·함수 또는 사람(없음·모름이면 —). 믿지 않는 입력·권한·비밀을 지키는 규칙도.',
   'C-ENTRY': '시작되거나 불리는 곳마다. 많으면 기능 묶음마다 한 줄에 정확히 센 개수. 소비자·호출 주체: B ID / 사람 / 사용자 코드 / 외부 시스템 / 일정. 호출 방식: 명령 / 함수·클래스 호출 / HTTP·WS 요청 / 메시지·사건 / 일정 / 상주 / 손으로 돌리는 스크립트(차례는 「1) 」). 계약 ID는 K ID 또는 —.',
   'C-VARIANT': '같은 계약·접점의 구현마다(어댑터·드라이버·실행 전략·플랫폼 구현·저장 백엔드·실행 모드). 접점은 K ID 또는 「B03: 자리 이름」, 사용자가 끼우는 자리면 구현 부분 「사용자 지정」. 선택 주체·시점: 누가(사용자 설정 / 코드 / 플랫폼·빌드)·어떻게(지정 / 우선순위로 첫 가능 항목 / 실패하면 다음)·언제(빌드 시 / 시작 시 / 호출마다). 함께 사용: 배타 / 병용 가능 / 자료마다(어떤 자료) / 모름, 범위는 괄호로. 첫 구조를 바꾸는 변형(실행 모드·저장 백엔드처럼 지도의 부분이나 연결이 갈리는 것)은 첫 구조 쪽에 쓴다(쪽의 차례).',
@@ -411,7 +411,7 @@ const COMMON_V5 = `공통 규칙
 - 키·토큰·비밀번호·접속 주소의 비밀 부분·경로 속 사용자 이름은 [가림]. .env 같은 비밀 파일은 열지 마. 이 요청문은 옮기지 말고 기록 밖의 말은 쓰지 마.`;
 /** A v5 table's section: its title line, its header row (none for C-SUMMARY) and its notes, recipe .46: led by the row-ID form its rows take. */
 const tableSection5 = (id: string): string => {
-  const t = V5_TABLE_DEFS.get(id)!, form = rowIdForm(t), note = [form ? `행 ID ${form}.` : '', TABLE_NOTES_V5[id] ?? (t.profile ? `(${t.rows}행) ${t.note}` : '')].filter(Boolean).join(' ');
+  const t = V5_TABLE_DEFS.get(id)!, form = rowIdForm(t), note = [form ? `${t.columns[0] === 'F ID' || t.columns[0] === 'E ID' ? t.columns[0] : '행 ID'} ${form}.` : '', TABLE_NOTES_V5[id] ?? (t.profile ? `(${t.rows}행) ${t.note}` : '')].filter(Boolean).join(' ');
   return [`${t.id} ${t.title}`, ...(t.columns.length ? [headerLine(t)] : []), ...(note ? [note] : [])].join('\n');
 };
 /** Recipe .46: every common table's row-ID form on one line (sessions invented G01, C01, W01 when the request named only some). */
@@ -426,7 +426,7 @@ export function recordAskV5(recordId: string = ID_SLOT): string {
 - 차례: 첫 구조(C-HEAD부터 C-CHECK까지)를 먼저 다 쓰고, 그다음 상세(C-STEP부터 C-DOUBT까지). 다음 행이 12,000자를 넘기면 그 행 앞에서 쪽을 끝내고 C-END에 이어짐, 다음 쪽 첫머리에서 잇는다. C-PART는 쪽 1에 통째로 쓰고, 첫 구조가 끝나면 그 쪽도 끝낸다. 다만 첫 구조를 바꾸는 C-COND·C-VARIANT 행은 첫 구조 쪽에 함께 쓰고, 그 쪽 C-END에서 그 표는 이어짐.
 - 쪽 머리 바로 뒤에 그 쪽이 처음 인용하는 C-SRC·C-EVID 행만 둔다(앞 쪽에 있으면 다시 쓰지 않고, 없으면 그 표도 없다).
 - 모든 행 첫 열은 행 ID다(C-HEAD는 항목, C-END는 표 ID). ${ROW_ID_FORMS}
-- ID는 표마다 번호를 늘리기만 하고, 한 번 쓴 ID는 지운 뒤에도 다시 쓰지 않는다. 앞 쪽 행을 고치려면 행 ID 칸에 「교체 B07」로 행 전체를 다시 쓰고, 지우려면 C-DROP, ID를 바꾸려면 새 ID로 쓰고 옛 ID를 C-DROP. 같은 쪽을 고쳐 다시 보내면 나중 글이 앞 글을 대신한다(같은 글이면 바뀌지 않는다).
+- ID는 표마다 번호를 늘리기만 하고, 한 번 쓴 ID는 지운 뒤에도 다시 쓰지 않는다. 앞 쪽 행을 고치려면 행 ID 칸에 「교체 B07」로 행 전체를 다시 쓰고, 지우려면 C-DROP, ID를 바꾸려면 새 ID로 쓰고 옛 ID를 C-DROP. 같은 쪽을 고쳐 다시 보낼 때는 그 쪽 전체를 다시 쓴다: 나중 글이 앞 글을 통째로 대신한다(같은 글이면 바뀌지 않는다).
 - 이 쪽 행이 아직 안 쓴 행을 가리키면(C-LINK가 D02를) C-END 예약 칸에 「D02 이름」.
 - 짧아도 된다. 빈 칸이 꾸민 칸보다 낫다. 읽을 수 있는 판본이 기준과 다르면 머리 줄 다음에 「기준 바뀜: sha」만 쓰고 멈춘다.
 
@@ -474,7 +474,7 @@ function idRanges(ids: readonly string[]): string {
 function nextIds(f: FoldedRecord): string {
   const pad = (n: number) => String(n).padStart(2, '0');
   const next = (table: string, p: string) => {
-    const used = [...(f.rows.get(table) ?? []).map(r => r.id), ...(f.dropped.get(table) ?? []), ...f.extras.filter(r => r.table === table).map(r => r.id)];
+    const used = [...(f.rows.get(table) ?? []).map(r => r.id), ...(f.dropped.get(table) ?? []), ...f.extras.filter(r => r.table === table).map(r => r.id), ...f.superseded.filter(r => r.table === table).map(r => r.id)];
     return `${table} ${p}${pad(Math.max(0, ...used.map(id => Number(new RegExp(`^${p}(\\d+)$`).exec(id)?.[1] ?? 0))) + 1)}`;
   };
   return ['C-SRC', 'C-EVID', 'C-PART', ...[...Q1_TABLES, ...Q2_TABLES].filter(t => t !== 'C-PART')].flatMap(t => { const p = V5_TABLE_DEFS.get(t)!.rowId; return p && /^[A-Z]{1,2}$/.test(p) && !['CK', 'S', 'L'].includes(p) ? [next(t, p)] : []; }).join(' · ')
@@ -506,12 +506,13 @@ function obligationLines(f: FoldedRecord, budget = 5200): string[] {
   sorted.forEach(([table, list], gi) => {
     const subs = new Map<string, { o: Obligation; refs: string[] }>();
     for (const o of list) { const k = `${o.kind}\u0000${o.kind.startsWith('table-') ? '' : o.text}\u0000${o.candidate}`; const s = subs.get(k) ?? { o, refs: [] }; if (o.ref) s.refs.push(o.ref); subs.set(k, s); }
+    let tail = false;
     const parts = [...subs.values()].map(({ o, refs }) => {
       // A ref 「LN04·F99」 is a row and what is wrong in it: rows of the same tail as ranges, the tail once (「LN10–LN59(=)」).
       const shown = refs.slice(0, 160), more = refs.length - shown.length, tails = new Map<string, string[]>();
       for (const r of shown) { const at = r.indexOf('·'), id = at > 0 ? r.slice(0, at) : r, tail = at > 0 ? r.slice(at + 1) : ''; tails.set(tail, [...tails.get(tail) ?? [], id]); }
       const ids = shown.length ? ` ${[...tails].map(([tail, list]) => `${idRanges(list)}${tail ? `(${tail})` : ''}`).join(', ')}${more ? ` 외 ${more}개` : ''}` : '';
-      return `${OBLIGATION_WORD[o.kind] ?? o.kind}${ids}: ${o.kind.startsWith('table-') ? openReason(f, o) : o.text}${o.candidate ? ' (후보: 확인하고 맞으면 쓰고, 아니면 C-END 남은 것에 이유)' : ''}`;
+      return `${OBLIGATION_WORD[o.kind] ?? o.kind}${ids}: ${o.kind.startsWith('table-') ? openReason(f, o) : o.text}${o.candidate ? (tail ? ' (후보)' : (tail = true, ' (후보: 확인하고 맞으면 쓰고, 아니면 C-END 남은 것에 이유)')) : ''}`;
     });
     const line = `- ${table} (${list.length}): ${parts.join(' · ')}`;
     if (used + line.length > budget) { const left = sorted.slice(gi).reduce((n, [, l]) => n + l.length, 0); if (!lines.at(-1)?.startsWith('- … ')) lines.push(`- … 길이 때문에 ${left}개를 줄였다(다음 쪽 요청에 다시 나온다)`); used = Infinity; return; }
@@ -521,6 +522,8 @@ function obligationLines(f: FoldedRecord, budget = 5200): string[] {
 }
 const OBLIGATION_WORD: Readonly<Record<string, string>> = { fix: '고칠 것', reservation: '예약 풀기', 'table-skipped': '건너뛴 표', 'table-open': '이어 쓸 표', 'table-next': '아직 안 쓴 표',
   'loop-body': '단계 미전개 반복', 'entry-unlinked': '연결 후보', 'folder-part': '폴더 부분 후보', 'page-gap': '빠진 쪽', 'page-conflict': '같은 쪽 다른 글' };
+/** Review N7: the count every screen says: the obligations that are no candidate, the candidates apart (「5개 · 후보 1개」). */
+export const obligationCount = (list: readonly Obligation[]): string => { const c = list.filter(o => o.candidate).length; return `${list.length - c}개${c ? ` · 후보 ${c}개` : ''}`; };
 export interface PageAskPlan { recordId: string; basis: string; project: string; page: number; level: 0 | 1 | 2; obligations: Obligation[]; tables: string[]; text: string }
 /** The page request (1.4 as 12.1 and 12.7 amend it) for the latest v5 record among the texts, below level 2: the fixes, the reservations
  * to resolve, the remaining obligations (candidates said as candidates), the rows written (never to write again), the next IDs and the
@@ -556,9 +559,9 @@ export function pageAsk(texts: readonly string[]): PageAskPlan | null {
   const needs = new Set(tables), rules = [needs.has('C-PART') ? FAMILY_RULES : '', needs.has('C-WITHDRAW') || needs.has('C-CHANGE') ? HISTORY_SEARCH : ''].filter(Boolean);
   const text = `[AgentFlow 기록 쪽 요청 ${RECORD_ASK_V5_VERSION} · 기록 ${f.recordId} · 쪽 ${page}]
 앞서 쓴 기록 ${f.recordId}(${project}, 기준 ${f.basis})를 쪽 ${page}부터 이어 써 줘. 같은 기준 판본만 읽는다(다르면 머리 줄 다음에 「기준 바뀜: sha」만 쓰고 멈춤). ${gap ? `쪽 ${gap}이 앱에 없다: 쪽 ${gap}을 다시 보내거나 쪽 ${gap}부터 다시 써.` : ''}
-첫 줄은 ${head}, 그다음 이 쪽이 처음 인용하는 C-SRC·C-EVID 행(없으면 안 쓴다), 끝은 C-END 표와 그 아래 두 줄. 쪽마다 12,000자 이하(글자 수), 한 답에 여러 쪽을 이어 써도 된다. 앞 쪽 행을 고치면 「교체 ID」로 행 전체를, 지우면 C-DROP(행 ID 칸에 쓴 ID 그대로), ID를 바꾸려면 새 ID로 쓰고 옛 ID를 C-DROP. 앞 쪽을 고쳐 다시 보내면 나중 글이 그 쪽을 대신한다. 쓴 ID는 다시 쓰지 마.
+첫 줄은 ${head}, 그다음 이 쪽이 처음 인용하는 C-SRC·C-EVID 행(없으면 안 쓴다), 끝은 C-END 표와 그 아래 두 줄. 쪽마다 12,000자 이하(글자 수), 한 답에 여러 쪽을 이어 써도 된다. 앞 쪽 행을 고치면 「교체 ID」로 행 전체를, 지우면 C-DROP(행 ID 칸에 쓴 ID 그대로), ID를 바꾸려면 새 ID로 쓰고 옛 ID를 C-DROP. 앞 쪽을 고쳐 다시 보낼 때는 그 쪽 전체를 다시 쓴다(나중 글이 그 쪽을 통째로 대신한다). 쓴 ID는 다시 쓰지 마.
 ${swapped.length ? `쪽 ${swapped.join('·')}은 나중에 온 글로 바꿔 읽었다(앞 글은 이력에 남김).\n` : ''}
-앱이 센 남은 의무 (${f.obligations.length}개, 첫 구조 ${f.level >= 1 ? '완료' : '미완료'})
+앱이 센 남은 의무 (${obligationCount(f.obligations)}, 첫 구조 ${f.level >= 1 ? '완료' : '미완료'})
 ${obligationLines(f).join('\n') || '- 없음'}
 
 쓴 행(다시 쓰지 마): ${written}

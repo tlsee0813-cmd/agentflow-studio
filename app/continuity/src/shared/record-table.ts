@@ -651,12 +651,15 @@ const ID_PATTERN: Readonly<Record<string, RegExp>> = { B: /^B\d{1,3}$/, S: /^B\d
 /** The row IDs a v5 table takes (C-PART B03, C-STEP B03:S02 or B03:S04a, C-LOOP B03:L01, C-LINK LN04, C-CHECK CK1, a supplementary P4-02.3). */
 export const rowIdPattern = (def: TableDef): RegExp => ID_PATTERN[def.rowId ?? ''] ?? new RegExp(`^${def.rowId ?? '\\0'}\\d{1,3}$`);
 /** Recipe .46: any row ID a v5 table takes besides its own form (sessions wrote G01 for C-GROUP, C01 for C-COND): one to three capitals and
- * one to three digits (a branch letter after), or the B03:S01 and B03:L01 forms. The ledgers (C-SRC F01, C-EVID E01) keep their own form:
- * their IDs are what every 근거 cites. */
+ * one to three digits (a branch letter after), or the B03:S01 and B03:L01 forms. */
 const ANY_ROW_ID = /^(?:[A-Z]{1,3}\d{1,3}[a-z]?|B\d{1,3}:[SL]\d{1,3}[a-z]?)$/;
-const LEDGERS: readonly string[] = ['C-SRC', 'C-EVID'];
-/** Whether a written ID is a row ID of the table: its own form, or (recipe .46) any ID of ANY_ROW_ID outside the ledgers. */
-export const rowIdTaken = (def: TableDef, id: string): boolean => rowIdPattern(def).test(id) || (!LEDGERS.includes(def.id) && ANY_ROW_ID.test(id));
+/** Review B1: the tables whose row IDs no other code reads as structure, the only ones that take a free prefix. Every other table keeps its
+ * own form only, as the ledgers do (C-SRC F01, C-EVID E01: what every 근거 cites): C-PART B03 (every 부분 cell), C-LOOP B03:L01 and C-STEP
+ * B03:S01 (the owner part and 소속 반복), C-CHECK CK1, C-DATA D, C-ENTRY N, C-VARIANT X, C-CONTRACT K (cross-references) and the P tables. */
+const FREE_PREFIX: readonly string[] = ['GR', 'LN', 'SM', 'WD', 'ST', 'CD', 'CH', 'RU', 'IS', 'GT', 'UN', 'DB'];
+export const rowIdStrict = (def: TableDef): boolean => !FREE_PREFIX.includes(def.rowId ?? '');
+/** Whether a written ID is a row ID of the table: its own form, or (recipe .46) any ID of ANY_ROW_ID in a table of FREE_PREFIX. */
+export const rowIdTaken = (def: TableDef, id: string): boolean => rowIdPattern(def).test(id) || (!rowIdStrict(def) && ANY_ROW_ID.test(id));
 /** Recipe .46: the row-ID form a v5 table's rows take, as the requests write it (「GR01」, 「B03:L01」, 「CK1」, 「P4-02.1」); null for C-HEAD,
  * C-SUMMARY, C-DROP and C-END. */
 export function rowIdForm(def: TableDef): string | null {
@@ -719,6 +722,8 @@ export interface FoldedRecord { recordId: string; basis: string; title: string; 
   /** The pages folded (1…k with no gap), those held after a gap, and other texts sent for a page already folded. Recipe .46: a later text
    * for a page replaces the earlier one (latest wins, in paste order); the earlier texts are kept in replaced, and conflicts stays empty. */
   pages: FoldPage[]; held: FoldPage[]; conflicts: FoldPage[]; replaced: FoldPage[];
+  /** Review N2: the rows those earlier texts held (their IDs are used: never offered as a next ID). */
+  superseded: FoldRow[];
   /** The current rows by table (first appearance order) and by ID; C-HEAD by its 항목. Recipe .46: a row ID is unique within its table;
    * byId holds one row per ID (the row of the table whose own form the ID is, else the first), rowKey(table, id) every row. */
   rows: Map<string, FoldRow[]>; byId: Map<string, FoldRow>; byKey: Map<string, FoldRow>; head: Map<string, FoldRow>; ledger: Ledger;
@@ -767,8 +772,9 @@ type Src = FoldPage & { t: RecordTables; index: number; headTo: number; seq: num
 /** A row's place, for the diagnostics a later drop or replacement settles. */
 const spanOf = (record: string, from: number) => `${record}\u0000${from}`;
 /** The row diagnostics a C-DROP or 교체 of the row's key settles (recipe .46): never asked again once the row is gone or replaced. */
-const SETTLED_BY_DROP: readonly FoldCategory[] = ['duplicate-id', 'row-id', 'id-reused', 'replace-unknown'];
-/** The v5 rows a page holds with an ID their table takes (rowIdTaken): the fold's rows before it puts them. */
+const SETTLED_BY_DROP: readonly FoldCategory[] = ['duplicate-id', 'row-id', 'id-reused', 'replace-unknown', 'drop-ambiguous'];
+/** The rows an earlier text of a page held (a later text replaced it): every row written with a row ID, its table's own form or not (a drop
+ * of one is never unknown). */
 function pageRows(s: Src, tables: readonly RecordTable[]): FoldRow[] {
   const out: FoldRow[] = [];
   for (const table of tables) {
@@ -776,14 +782,16 @@ function pageRows(s: Src, tables: readonly RecordTable[]): FoldRow[] {
     const def = V5_TABLE_DEFS.get(table.id)!, idCol = table.id === 'C-SRC' ? 'F ID' : table.id === 'C-EVID' ? 'E ID' : '행 ID';
     for (const r of table.rows) {
       const cell = (r.byColumn[idCol] ?? r.cells[0]?.text ?? '').trim(), mk = /^(교체|정정|추가)\s*[:：]?\s*(\S+)$/.exec(cell), id = (mk ? mk[2]! : cell).trim();
-      if (rowIdTaken(def, id)) out.push({ table: table.id, id, record: s.record, page: s.n, row: r, source: table, mark: mk ? (mk[1] === '추가' ? 'add' : 'replace') : null, cites: [] });
+      if (rowIdTaken(def, id) || ANY_ROW_ID.test(id)) out.push({ table: table.id, id, record: s.record, page: s.n, row: r, source: table, mark: mk ? (mk[1] === '추가' ? 'add' : 'replace') : null, cites: [] });
     }
   }
   return out;
 }
 function foldGroup(key: string, srcs: Src[]): FoldedRecord {
   const diagnostics: FoldDiagnostic[] = [];
-  const d = (category: FoldCategory, record: string, page: number | null, table: string | null, ref: string | null, from: number, to: number) => { if (diagnostics.length < 1024) diagnostics.push({ category, table, ref, record, page, from, to }); };
+  const d = (category: FoldCategory, record: string, page: number | null, table: string | null, ref: string | null, from: number, to: number) => {
+    // Review N3: a fix is never crowded out by the quiet categories (id-reused, row-id-prefix, end-mismatch…) said before it.
+    if (diagnostics.length < 1024 || (FIX_TEXT[category] && diagnostics.length < 2048)) diagnostics.push({ category, table, ref, record, page, from, to }); };
   // Recipe .46: a page's texts in paste order, one per distinct text: the same text again changes nothing (idempotent, even after another
   // text); a different later text replaces the page (latest wins), the earlier kept in replaced and history, page-replaced said once.
   const versions = new Map<number, Src[]>(), conflicts: FoldPage[] = [], replaced: FoldPage[] = [];
@@ -820,7 +828,7 @@ function foldGroup(key: string, srcs: Src[]): FoldedRecord {
       byKey.set(k, r); history.set(k, [...history.get(k) ?? [], r]); return;
     }
     // Recipe .46: the very same row again (a page re-sent whole, a row repeated on a later page) changes nothing and asks nothing.
-    const same = !!had && had.row.cells.length === r.row.cells.length && had.row.cells.every((c, i) => c.text === r.row.cells[i]!.text);
+    const same = !!had && sameRow(had, r);
     if (had) { if (!same) d('duplicate-id', r.record, r.page, r.table, r.id, r.row.from, r.row.to); extras.push(r); return; }
     if (r.mark === 'add') d('part-added', r.record, r.page, r.table, r.id, r.row.from, r.row.to);
     byKey.set(k, r); listOf(r.table).push(r); history.set(k, [r]);
@@ -828,6 +836,10 @@ function foldGroup(key: string, srcs: Src[]): FoldedRecord {
   /** Recipe .46: C-DROP takes away any row by its written ID: 「ST01」, 「C-STATE ST01」, a range 「G01–G16」. A bare ID two tables hold is
    * the one of the table its 이유 names, else the one written outside its table's own form (the misnamed row), else said (drop-ambiguous). A
    * row whose ID no table takes (an extra) is taken away by its cell as written. */
+  // Review N1: an ambiguous drop is a fix (drop-ambiguous); a later drop that takes the ID away, or names its table, settles it.
+  const ambiguousAt = new Map<string, string[]>();
+  const ambiguous = (id: string, r: RecordRow, s: Src) => { d('drop-ambiguous', s.record, s.n, 'C-DROP', id.slice(0, 20), r.from, r.to); ambiguousAt.set(id, [...ambiguousAt.get(id) ?? [], spanOf(s.record, r.from)]); };
+  const clearAmbiguous = (id: string) => { for (const x of ambiguousAt.get(id) ?? []) settledSpans.add(x); };
   const drop = (r: RecordRow, s: Src) => {
     const cell = (r.byColumn['행 ID'] ?? '').trim(), q = /^(C-[A-Z]{2,12}|P\d-\d{2})\s*[:：·]?\s*(\S.*)$/.exec(cell), only = q?.[1] ?? null, rest = (q ? q[2]! : cell).trim();
     const named = [...new Set((r.byColumn['이유'] ?? '').match(/C-[A-Z]{2,12}/g) ?? [])];
@@ -836,27 +848,32 @@ function foldGroup(key: string, srcs: Src[]): FoldedRecord {
       let cands = [...rows.entries()].flatMap(([t, l]) => only && t !== only ? [] : l.filter(x => x.id === id));
       // A drop meant for a row an earlier text of its page held (the corrected page left it out) never takes another table's row of that
       // ID: one its 이유 names, or one written outside its table's form, that is gone now.
+      // Review B2: a table-qualified drop (「C-STATUS ST01」) always means that table; a bare one meant the earlier row when its 이유 names that
+      // row's table, or when the drop page was pasted before the text that replaced the row's page; written after it, the drop is said.
       const ownForm = (x: { table: string; id: string }) => rowIdPattern(V5_TABLE_DEFS.get(x.table)!).test(x.id);
-      const gone = earlierRows.filter(x => x.id === id && !cands.some(c => c.table === x.table) && (named.includes(x.table) || !ownForm(x)));
-      if (gone.length && !cands.some(c => named.includes(c.table) || !ownForm(c))) continue;
+      const gone = only ? [] : earlierRows.filter(x => x.id === id && !cands.some(c => c.table === x.table) && (named.includes(x.table) || !ownForm(x)));
+      if (gone.length && !cands.some(c => named.includes(c.table) || !ownForm(c))) {
+        if (!cands.length || gone.some(x => named.includes(x.table) || s.seq < (byN.get(x.page)?.seq ?? Infinity))) continue;
+        ambiguous(id, r, s); continue;
+      }
       if (cands.length > 1) {
         const byReason = cands.filter(x => named.includes(x.table)), off = cands.filter(x => !rowIdPattern(V5_TABLE_DEFS.get(x.table)!).test(x.id));
         cands = byReason.length === 1 ? byReason : off.length === 1 ? off : cands;
-        if (cands.length > 1) { d('drop-ambiguous', s.record, s.n, 'C-DROP', id.slice(0, 20), r.from, r.to); continue; }
+        if (cands.length > 1) { ambiguous(id, r, s); continue; }
       }
       const had = cands[0];
       if (!had) {
         const stray = extras.filter(x => x.id === id && (!only || x.table === only));
         // The same drop sent again (a later page repeating it) changes nothing and says nothing.
-        if (!stray.length && (only ? dropped.get(only)?.has(id) : deleted.has(id))) continue;
+        if (!stray.length && (only ? dropped.get(only)?.has(id) : deleted.has(id))) { if (only) clearAmbiguous(id); continue; }
         // A row only an earlier text of a page held (the later text left it out) is gone already.
-        if (!stray.length && earlierIds.has(only ? rowKey(only, id) : id)) continue;
+        if (!stray.length && earlierIds.has(only ? rowKey(only, id) : id)) { if (only) clearAmbiguous(id); continue; }
         if (!stray.length) { d('drop-unknown', s.record, s.n, 'C-DROP', id.slice(0, 20) || null, r.from, r.to); continue; }
         for (const x of stray) settledSpans.add(spanOf(x.record, x.row.from));
         continue;
       }
       const k = rowKey(had.table, had.id), l = listOf(had.table); l.splice(l.indexOf(had), 1); byKey.delete(k); deletedKeys.add(k); deleted.add(had.id);
-      dropped.set(had.table, (dropped.get(had.table) ?? new Set()).add(had.id)); settle(k);
+      dropped.set(had.table, (dropped.get(had.table) ?? new Set()).add(had.id)); settle(k); clearAmbiguous(had.id);
     }
   };
   for (const s of folded) {
@@ -974,24 +991,32 @@ function foldGroup(key: string, srcs: Src[]): FoldedRecord {
     if (e.written.some(x => !there.has(x)) || [...there].some(x => !e.written.includes(x))) d('end-mismatch', e.record, e.page, e.table, null, e.from, e.to);
   }
   // Recipe .46: a replaced page's rows go first in their keys' history (a basis quoting the earlier text still names the row).
-  for (const s of earlier) for (const r of pageRows(s, s.t.tables.filter(x => x.page === s.index && x.dialect === 'v5' && x.known))) {
-    const k = rowKey(r.table, r.id), h = history.get(k); if (h) h.unshift(r);
-  }
+  // Review N2: only the same page's row of that key, or the very same row: a key a later page wrote again is another row.
+  for (const r of earlierRows) { const h = history.get(rowKey(r.table, r.id)); if (h && (h[0]!.page === r.page || sameRow(h[0]!, r))) h.unshift(r); }
   // Recipe .46: a row diagnostic its row's later drop or replacement settled is no longer said (nor asked).
-  const kept = diagnostics.filter(x => !(SETTLED_BY_DROP.includes(x.category) && settledSpans.has(spanOf(x.record, x.from)))).slice(0, 256);
+  const live = diagnostics.filter(x => !(SETTLED_BY_DROP.includes(x.category) && settledSpans.has(spanOf(x.record, x.from))));
+  const fixes = new Set(live.filter(x => FIX_TEXT[x.category]).slice(0, 256));
+  let room = 256 - fixes.size; const kept = live.filter(x => fixes.has(x) || (!FIX_TEXT[x.category] && room-- > 0));
   diagnostics.splice(0, diagnostics.length, ...kept);
   const record: FoldedRecord = { recordId: srcs[0]!.t.pages[srcs[0]!.index]!.recordId, basis: srcs[0]!.basis, title: srcs[0]!.title, key,
-    pages: folded.map(page), held: held.map(page), conflicts, replaced, rows, byId, byKey, history, dropped, head, ledger, summary, ends, declared, nexts, reservations, deleted, extras, states, diagnostics, level: 0, obligations: [] };
+    pages: folded.map(page), held: held.map(page), conflicts, replaced, superseded: earlierRows, rows, byId, byKey, history, dropped, head, ledger, summary, ends, declared, nexts, reservations, deleted, extras, states, diagnostics, level: 0, obligations: [] };
   const lv = recordLevel(record); record.level = lv.level; record.obligations = lv.obligations;
   const said = declared.at(-1)?.level;
   if (said !== undefined && said !== null && said !== lv.level && folded.length) { const s = folded.at(-1)!; d('level-mismatch', s.record, s.n, 'C-END', `${said}≠${lv.level}`, s.from, s.headTo); }
   return record;
 }
+const sameRow = (a: FoldRow, b: FoldRow): boolean => a.row.cells.length === b.row.cells.length && a.row.cells.every((c, i) => c.text === b.row.cells[i]!.text);
 function page(s: FoldPage): FoldPage { return { record: s.record, n: s.n, prev: s.prev, basis: s.basis, title: s.title, hash: s.hash, conflict: s.conflict, repeated: s.repeated, from: s.from, to: s.to }; }
 /** Review N3: a fix on a supplementary table's row (P4-02): the supplementary request asks it; it never holds the detail level back. */
 export const supplementFix = (o: Obligation): boolean => o.kind === 'fix' && /^P\d-\d{2}$/.test(o.table ?? '');
 const FIX_TEXT: Readonly<Partial<Record<FoldCategory, string>>> = { 'duplicate-id': '표시 없이 겹친 ID: 교체할지 새 ID로 쓸지', 'row-id': '행 ID가 없거나 형식 밖', 'cite-missing': '장부에 없는 F·E 인용',
-  'cite-equals': '「=」 인용(ID를 명시)', 'row-cells': '칸 수가 머리 줄과 다른 행' };
+  'cite-equals': '「=」 인용(ID를 명시)', 'row-cells': '칸 수가 머리 줄과 다른 행',
+  'drop-ambiguous': '어느 표의 행인지 모르는 C-DROP: 「C-STATE ST01」처럼 표 ID를 붙여 다시' };
+/** Review B1: a row ID outside the form of a table whose IDs other code reads, with the form it takes. */
+const rowIdFix = (table: string | null): string => {
+  const def = table ? V5_TABLE_DEFS.get(table) : undefined, form = def ? rowIdForm(def) : null;
+  return def && form && rowIdStrict(def) ? `행 ID가 형식 밖: 이 표는 ${form} 꼴만 받는다(다른 표가 이 ID를 구조로 읽는다). 그 꼴로 다시 쓰고 옛 ID는 C-DROP` : FIX_TEXT['row-id']!;
+};
 /** The record's level and remaining obligations (4.5 as 12.1 amends it), computed by the app: level 1 when every Q1 table is settled
  * (끝남, 해당 없음, 확인 못함, or written and not left 이어짐·아직), every C-PART row has a fixed family word and no Q1 row is mis-celled or
  * mis-numbered; level 2 when every Q2 table is settled too and no obligation that is no candidate is left (fixes, reservations, core loops
@@ -999,7 +1024,7 @@ const FIX_TEXT: Readonly<Partial<Record<FoldCategory, string>>> = { 'duplicate-i
 export function recordLevel(f: Pick<FoldedRecord, 'rows' | 'byId' | 'states' | 'diagnostics' | 'reservations' | 'held' | 'conflicts'>): { level: 0 | 1 | 2; obligations: Obligation[] } {
   const out: Obligation[] = [];
   for (const r of f.rows.get('C-PART') ?? []) { const fam = readFamily(r.row.byColumn['표현군·역할'] ?? ''); if (!fam.ok) out.push({ kind: 'fix', table: 'C-PART', ref: r.id, text: said5(r.row.byColumn['표현군·역할']) ? '표현군·역할이 고정 낱말 밖' : '표현군·역할 없음', candidate: false }); }
-  for (const x of f.diagnostics) { const text = FIX_TEXT[x.category]; if (text) out.push({ kind: 'fix', table: x.table, ref: x.ref, text, candidate: false }); }
+  for (const x of f.diagnostics) { const text = x.category === 'row-id' ? rowIdFix(x.table) : FIX_TEXT[x.category]; if (text) out.push({ kind: 'fix', table: x.table, ref: x.ref, text, candidate: false }); }
   const checks = f.rows.get('C-CHECK') ?? [];
   if (checks.length || f.states.get('C-CHECK')?.state === 'closed') for (const ck of Object.keys(CHECK_ROWS)) if (!f.byId.has(ck)) out.push({ kind: 'fix', table: 'C-CHECK', ref: ck, text: `${ck} ${CHECK_ROWS[ck]} 행 없음`, candidate: false });
   const last = Math.max(-1, ...ORDER5.map((id, i) => f.states.get(id) && f.states.get(id)!.state !== 'none' ? i : -1));
@@ -1033,7 +1058,7 @@ export function recordLevel(f: Pick<FoldedRecord, 'rows' | 'byId' | 'states' | '
   const q1Fix = out.some(o => o.kind === 'fix' && !!o.table && Q1_TABLES.includes(o.table) && (o.text.startsWith('표현군') || /칸 수|행 ID|행 없음/.test(o.text)));
   // Review N3: a supplementary table's fix (a P row's ID or cells) is the supplementary request's to ask (4.5: Q1 and Q2 decide the detail).
   const level1 = settled(Q1_TABLES) && !q1Fix, level2 = level1 && settled(Q2_TABLES) && !out.some(o => !o.candidate && !supplementFix(o));
-  return { level: level2 ? 2 : level1 ? 1 : 0, obligations: out.slice(0, 200) };
+  return { level: level2 ? 2 : level1 ? 1 : 0, obligations: out };
 }
 
 /* ---------- The key set a segment carries (12.4 (d)): only the B, F and E IDs its own text cites, as a closed set. ---------- */
