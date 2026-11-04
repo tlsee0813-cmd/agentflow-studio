@@ -212,3 +212,16 @@ test('review N10: an extraction segment is measured as sent (원문·열쇠 char
   assert.ok(text.includes('근거 읽기 2/3 구간') && text.includes('13,000자') && text.includes('65,536바이트') && text.includes('잘라서 보내지 않았고'), text);
   assert.ok(mapErrorText('MAP_SEGMENT_TOO_LARGE').includes('잘라서 보내지 않았고'));
 });
+
+test('recipe .47 review B1: a v5 line\'s cites are cut to the contract like every other row\'s (an evidence place past 80 characters)', () => {
+  const long = '물주기 서버의 시작 함수 안에서 매시 정각마다 틱을 깨우는 타이머를 등록하는 부분과 그 타이머를 멈추는 종료 훅까지 이어지는 긴 자리 설명이며 재시작 때 다시 등록하는 경로와 실패 시 다음 정각으로 미루는 분기까지 포함한다';
+  assert.ok(long.length > 80);
+  const p1 = page(1).replace('logs/sample.log|1–3행|', `logs/sample.log|${long}|`);
+  assert.ok(p1 !== page(1));
+  const f = ofPages([p1, page(2)]);
+  const { r } = read(f, { relations: [line(f, 'new:tick', 'new:calc', '|LN05|')] });
+  const l = r.relations.find(x => x.from === 'new:tick' && x.to === 'new:calc');
+  assert.ok(l, 'the line on its own row stands');
+  for (const c of l.cites ?? []) assert.ok((c.place ?? '').length <= 80, `place cut to 80: ${c.place}`);
+  assert.ok((l.cites ?? []).some(c => c.ref === 'E02'), 'the E02 cite (the row\'s own) is kept, cut');
+});
