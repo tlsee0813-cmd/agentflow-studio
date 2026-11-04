@@ -296,6 +296,7 @@ test('S10-18 the emphasis keeps the family edge and never thins a selected or su
   for (const r of cards) {
     assert.doesNotMatch(r.body, /border|box-shadow/, `the family border and a lens's lift stay: ${r.sel}`);
     assert.match(r.body, /outline:/); assert.match(r.body, /outline-offset:/, 'a halo apart from the edge');
+    for (const one of r.sel.split(',')) assert.ok(one.includes(':not(:focus-visible)'), `the keyboard focus ring wins over the halo: ${one.trim()}`);
   }
   for (const r of rules.filter(x => /--lw/.test(x.body))) for (const not of ['.on', '.agg', '.sum', '.s-dotted', '.s-sparse'])
     assert.ok(r.sel.includes(`:not(${not})`), `a firmer stroke never on ${not}: ${r.sel}`);

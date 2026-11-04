@@ -879,7 +879,7 @@ button:disabled { opacity: .5; cursor: default; }
 /* An emphasised card keeps its family edge (its border and a lens's lift are untouched): a neutral halo apart from the edge, 1.5px at
    3px out on screen at every zoom, a form of its own, never a lift or a colour. A mark of its own (.lit, .plan-impact, the selection)
    stays over it. */
-.space .node.fv-emph:not(.selected):not(.lit):not(.plan-impact), .space .frame.fv-emph:not(.selected):not(.plan-impact) {
+.space .node.fv-emph:not(.selected):not(.lit):not(.plan-impact):not(:focus-visible), .space .frame.fv-emph:not(.selected):not(.plan-impact):not(:focus-visible) {
   outline: calc(1.5px * var(--u, 1)) solid var(--text-3); outline-offset: calc(3px * var(--u, 1)); }
 /* A firmer stroke only where it is firmer: never on a selected, summary, picked or path line (each is wider already); a dotted or
    sparse line keeps its dots (its stroke darkens instead). */
