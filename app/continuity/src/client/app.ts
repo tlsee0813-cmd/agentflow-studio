@@ -44,7 +44,9 @@ import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensLook, lensClass
 import { PROGRAM_LABEL, PROGRAM_HINT, isProgram, ruleHasProgram, ruleHasProgramEnforce, programLoopItems, loopSegments, typeChipForms, chipText, edgeFields, contractList, lineFacts, type ChipForm } from './line-view.js';
 import { opsLines, opsHead, opsCard } from './ops-line.js';
 import { projectRuleList, projectRuleEntry, RULE_ROW_LABEL, partSigns, hasSigns, signTabs, ruleSaid, ruleView, unplacedCount, gateKind, gateSplit, gateSplitLine, changeRow, failureBlanks, sinceMatch, sinceSummary, timeSpan, readSince, writeSince, SIGN_LABEL, RULE_BLANKS, RULE_BLANK_HINT, RULE_DESIGN_PROGRAM_HINT, GATE_BLANK, GATE_BLANK_HINT, GATE_LABEL, GATE_HINT, ANCHOR_HINT, ENFORCER_HINT, PLACE_LABEL, NATURE_HINT, FAILURE_BLANK, RECOVERY_BLANK, SINCE_OFF, type PartSigns, type PartPlaces, type SignKind, type SinceState } from './signs-view.js';
-import { PROJECT_REPORT_ASK, CHAT_REPORT_ASK, DESIGN_RECORD_ASK, RECORD_ASK_EXPLAIN, deltaReportAsk, reflectAsk, scenarioAskWithLedger, plannedNote } from '../shared/report-ask.js';
+import { CHAT_REPORT_ASK, RECORD_ASK_EXPLAIN, deltaReportAsk, reflectAsk, scenarioAskWithLedger, plannedNote } from '../shared/report-ask.js';
+import { recordAskNodes, continuationNode } from './record-asks.js';
+import { splitRecordChunks } from '../shared/record-table.js';
 import { modelLabel } from '../shared/model-label.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
 import { createPlanView } from './plan-view.js';
@@ -4346,7 +4348,8 @@ const returnView = createReturnView({
   paste: async (texts, context) => {
     const o = opened; if (!o || o.kind !== 'saved') return '이 프로젝트에는 기록을 저장할 수 없어요.';
     let next = o.project, id = '', fresh = false, scenario: string | null = null, scenarioError = false;
-    try { for (const t of texts) { const r = pasteRecord(next, t, context && partOf(o, context) ? context : null); next = r.project; id = r.record.id; fresh ||= !r.duplicate;
+    // .43 (4.1): a 기록 v4 answer is kept as one record per chunk (split at its chunk heads).
+    try { for (const t of texts.flatMap(x => splitRecordChunks(x))) { const r = pasteRecord(next, t, context && partOf(o, context) ? context : null); next = r.project; id = r.record.id; fresh ||= !r.duplicate;
       // A scenario record (시나리오 기록 v2) is read by the app alone against the current map's ID ledger, once per record.
       if (scenarioRecordLike(r.record.text) && !next.readings.some(x => isScenarioReading(x) && x.record === r.record.id)) {
         try { next = applyScenario(next, r.record.id, parseScenarioRecord(r.record.text, projectLedger(next))); scenario = r.record.id; fresh = true; } catch { scenarioError = true; }
@@ -4697,11 +4700,11 @@ function renderMapEntry() {
     // carried by the person; nothing is sent.
     // Three records the spec names (§8.1): the status report, the design record, and the scenario record with the map's ledger
     // (only once a map exists; the app reads it as a path against that ledger when it is pasted back).
-    fresh ? null : h('p', { class: 'fine se-ask' }, '진행 중인 AI 대화가 있다면 ', askCopy('현황 보고 요청', PROJECT_REPORT_ASK, 'link-button', RECORD_ASK_EXPLAIN.status), ' · ',
-      askCopy('설계 기록 요청', DESIGN_RECORD_ASK, 'link-button', RECORD_ASK_EXPLAIN.design),
+    // .43: one record request (기록 요청 v4.1), the v3 status and v1 design requests behind 「이전 요청문」 (record-asks.ts).
+    fresh ? null : h('p', { class: 'fine se-ask' }, '진행 중인 AI 대화가 있다면 ', ...recordAskNodes((label, text, title) => askCopy(label, text, 'link-button', title)),
       ...(o.view.parts.length ? [' · ', askCopy('시나리오 기록 요청(대장 포함)', scenarioAskWithLedger(o.view, o.project.readings), 'link-button', RECORD_ASK_EXPLAIN.scenario)] : []),
       ' 문구를 복사해 그 대화에 붙여 넣으세요(파일을 못 보는 대화면 ', askCopy('대화용 현황 요청', CHAT_REPORT_ASK, 'link-button', RECORD_ASK_EXPLAIN.status),
-      '). 나온 답을 하나씩 ‘기록 붙여넣기’에 넣으면 부분·연결·상태·안의 단계·모르는 것이 지도가 돼요.'),
+      '). 나온 답을 통째로 ‘기록 붙여넣기’에 넣으면 앱이 덩이를 나눠 읽고 부분·연결·상태·안의 단계·모르는 것이 지도가 돼요.'),
     // How this reading is batched and bounded: the route the very next reading takes (shared/map-route.ts), not a guess from status.
     // How the reading is batched and bounded (shared/map-route.ts): folded, for the first time a person reads this card.
     mapBatchLines(next?.route ?? null).length ? h('details', { class: 'se-more' }, h('summary', {}, '어떻게 읽는지 · 비용 상한'), ...mapBatchLines(next?.route ?? null).map(t => h('p', { class: 'fine se-batch' }, t))) : null,
@@ -4731,9 +4734,11 @@ function mapBlock(): HTMLElement | null {
     askCopy('이렇게 이해했다 확인 문구 복사', reflectAsk(o.view, o.project.readings), 'link-button'), ' — 지도가 읽은 것을 번호 줄로 보내 틀린 줄만 고쳐 받아요.'),
     // The design record and the scenario record (with this map's ID ledger): pasted back like any other record; the scenario
     // record is read as a path by the app alone (scenario-record.ts) when it is pasted.
-    h('p', { class: 'fine rm-ask rm-records' }, askCopy('설계 기록 요청', DESIGN_RECORD_ASK, 'link-button', RECORD_ASK_EXPLAIN.design), ' · ',
+    // .43: a pasted 기록 v4 whose completion table leaves tables offers its continuation (record-asks.ts).
+    ...[continuationNode(o.project.pasted.map(r => r.text), (label, text, title) => askCopy(label, text, 'link-button', title))].filter((x): x is HTMLElement => !!x),
+    h('p', { class: 'fine rm-ask rm-records' }, ...recordAskNodes((label, text, title) => askCopy(label, text, 'link-button', title)), ' · ',
       askCopy('시나리오 기록 요청(대장 포함)', scenarioAskWithLedger(o.view, o.project.readings), 'link-button', RECORD_ASK_EXPLAIN.scenario),
-      ' — 설계 기록은 카드의 안쪽(산출물·단계·조건)을, 시나리오 기록은 동작 경로 하나를 써 받아요. 둘 다 다른 기록처럼 붙여 넣어요. 시나리오 기록은 붙이면 앱이 AI 없이 지금 지도의 ID 대장과 맞춰 길로 읽어, 제목 아래 ‘시나리오’ 줄에서 지도 위에 보여요.'));
+      ' — 기록 요청은 지금 상태와 카드의 안쪽(산출물·단계·조건)을, 시나리오 기록은 동작 경로 하나를 써 받아요. 둘 다 다른 기록처럼 붙여 넣어요. 시나리오 기록은 붙이면 앱이 AI 없이 지금 지도의 ID 대장과 맞춰 길로 읽어, 제목 아래 ‘시나리오’ 줄에서 지도 위에 보여요.'));
   const limited = status.release === 'existing-map';
   if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && !limited) sec.append(h('p', { class: 'fine' }, sendLine(inp)), h('button', { type: 'button', class: 'link-button', onclick: () => { returnView.close(); planView.openResults(); } }, '요청문을 골라 대조'));
   if (inp?.problem === 'REQUEST_CONTEXT_TOO_LARGE' && can && !st.pending && !waiting) sec.append(h('button', { type: 'button', class: 'link-button rm-map-only', onclick: () => void mapRun.runMapOnly() }, '요청 대조 없이 지도만 정리'), h('p', { class: 'fine' }, '원문을 보존하며 나중에 요청문을 골라 대조할 수 있어요.'));

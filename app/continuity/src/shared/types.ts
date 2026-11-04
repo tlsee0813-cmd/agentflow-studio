@@ -216,8 +216,106 @@ export const RELATION_MODES: readonly RelationMode[] = ['design', 'observed'];
  * streams, a computation, an AI judgement, a loop or engine, a timer or schedule, an actor that makes an effect outside (an order,
  * a call), a store (a row file, a queue), a person, an operating session, an external system. The record's word, never inferred
  * from a name; null when the record gives none (a neutral card). */
-export type PartType = 'collector' | 'compute' | 'ai' | 'loop' | 'timer' | 'actor' | 'store' | 'person' | 'session' | 'external';
-export const PART_TYPES: readonly PartType[] = ['collector', 'compute', 'ai', 'loop', 'timer', 'actor', 'store', 'person', 'session', 'external'];
+/** map-reading.18 (pipeline .43, RECORD_ASKS_V4_KO.md K12): and a screen (화면) and a build or deploy automation (빌드·배포 자동화); an
+ * entry point, an adapter, an extension point, a contract or a signal is no type (C-ENTRY, C-VARIANT, C-CONTRACT say them). Stored only
+ * in map-reading.18 entries. */
+export type PartType = 'collector' | 'compute' | 'ai' | 'loop' | 'timer' | 'actor' | 'store' | 'person' | 'session' | 'external' | 'screen' | 'automation';
+export const PART_TYPES: readonly PartType[] = ['collector', 'compute', 'ai', 'loop', 'timer', 'actor', 'store', 'person', 'session', 'external', 'screen', 'automation'];
+/** The types a map-reading.17 entry or earlier may hold. */
+export const PART_TYPES_17: readonly PartType[] = ['collector', 'compute', 'ai', 'loop', 'timer', 'actor', 'store', 'person', 'session', 'external'];
+/* ---------- map-reading.18 (pipeline .43, RECORD_ASKS_V4_KO.md 4.3): what the program reads from a 기록 v4 record's tables, never the
+ * model's words. Each is stored only in a map-reading.18 entry, every key present (null or [] where the records say nothing, as for
+ * every v3 record). ---------- */
+/** C-PART 구현 상태 (해당 없음 is null): whether the implementation is in the basis version; never that it works or passed. */
+export type PartImplementation = 'built' | 'partial' | 'unbuilt' | 'removed' | 'unknown';
+export const PART_IMPLEMENTATIONS: readonly PartImplementation[] = ['built', 'partial', 'unbuilt', 'removed', 'unknown'];
+/** C-STATUS 상태 차원 and its fixed values (2.3). */
+export type StatusDimension = 'release' | 'deploy' | 'activation' | 'maintenance' | 'operation';
+export const STATUS_DIMENSION_KINDS: readonly StatusDimension[] = ['release', 'deploy', 'activation', 'maintenance', 'operation'];
+export const STATUS_VALUE_KINDS: Readonly<Record<StatusDimension, readonly string[]>> = { release: ['released', 'unreleased', 'recalled', 'never', 'unknown'], deploy: ['deployed', 'undeployed', 'withdrawn', 'unknown'],
+  activation: ['always', 'conditional', 'inactive', 'unknown'], maintenance: ['active', 'fixes', 'deprecated', 'ended', 'unknown'], operation: ['running', 'idle', 'stopped', 'failed', 'unknown'] };
+/** A C-STATUS row of a part (or of the project, with the target it names): its dimension and value, the range or condition it holds in
+ * (as written, null for —), the version, sha or time it stands on when not the record's basis (null for —), a successor written 「(후속: …)」
+ * after the value, and the row. */
+export interface ReadingStatusClaim { dimension: StatusDimension; value: string; scope: string | null; basis: string | null; successor: string | null; quote: ReadingQuote }
+export interface ReadingProjectStatus extends ReadingStatusClaim { target: string }
+/** A C-LOOP row of the part owning it: its ID (B03:L01), the loop just outside it (another part's too: parentPart names that part as the
+ * record does), the body steps it runs (B03:S04…, a range spelled out), what it repeats over, its count or keep-going condition and its
+ * way out as written (null for —), and the row. */
+export interface ReadingRecordLoop { recordRef: string; parentRef: string | null; parentPart: string | null; body: string[]; unit: string | null; count: string | null; stop: string | null; quote: ReadingQuote }
+/** C-PART 「항목 N · 순서 있음/없음」: a list part's items (count null for 「항목 여럿」; the items its C-GROUP 목록 row lists). */
+export interface ReadingMembers { count: number | null; ordered: boolean | null; items: string[]; quote: ReadingQuote }
+/** C-GROUP 묶음 뜻 of a part that is a parent there (설계 v3 §2.3; members: a list). */
+export type GroupAxis = 'place' | 'composition' | 'participants' | 'boundary' | 'members';
+export const GROUP_AXES: readonly GroupAxis[] = ['place', 'composition', 'participants', 'boundary', 'members'];
+/** A C-VARIANT row on the part whose interface it implements: its ID (X01), the interface (a K ID, 「B03: 자리」 or a P2-02 row), the
+ * implementing part (as the record names it; 「사용자 지정」 is user), who chooses, how (지정 · 우선순위로 첫 가능 항목 · 실패하면 다음) and
+ * when, the choice condition, whether it may be used beside the others and in what range (「배타(호출마다)」), and the row. */
+export type VariantChoice = 'given' | 'first-available' | 'fallback';
+export const VARIANT_CHOICES: readonly VariantChoice[] = ['given', 'first-available', 'fallback'];
+export type VariantTogether = 'exclusive' | 'combined' | 'unknown';
+export const VARIANT_TOGETHER: readonly VariantTogether[] = ['exclusive', 'combined', 'unknown'];
+export interface ReadingVariant { recordRef: string; interfaceRef: string; implementer: string; selector: { who: string | null; how: VariantChoice | null; when: string | null };
+  condition: string | null; together: VariantTogether; togetherScope: string | null; quote: ReadingQuote }
+/** A C-ENTRY row on the part owning the entry: its ID (N01), the entry as written, how it is called, its order (「1) 」 of a script run by
+ * hand), who calls it (as written) and its contract (a K ID or null), with the row. A code part with no resident entry is called only. */
+export type EntryKind = 'command' | 'call' | 'request' | 'message' | 'schedule' | 'resident' | 'script';
+export const ENTRY_KINDS: readonly EntryKind[] = ['command', 'call', 'request', 'message', 'schedule', 'resident', 'script'];
+export interface ReadingEntryPoint { recordRef: string; name: string; kind: EntryKind | null; order: number | null; consumer: string | null; contractRef: string | null; quote: ReadingQuote }
+/** A C-CONTRACT row on the part providing it: its ID (K01), its outside consumer, its surface and direction, the data, response, exit or
+ * error it promises and the format version it holds for (each as written, null for —), with the row. */
+export interface ReadingContract { recordRef: string; consumer: string | null; surface: string | null; spec: string | null; version: string | null; quote: ReadingQuote }
+/** A step's C-STEP 조건·분기 clause: the condition (as written, null when the clause is only an outcome), the steps it goes to (B03:S06), a
+ * bound on going back (「최대 3번」) and the outcome or refusal code it names. */
+export interface ReadingStepBranch { when: string | null; to: string[]; max: string | null; outcome: string | null }
+/** C-LINK 박자 and 경계 (3.1). */
+export type CadenceKind = 'once' | 'call' | 'each' | 'periodic' | 'event' | 'end';
+export const CADENCE_KINDS: readonly CadenceKind[] = ['once', 'call', 'each', 'periodic', 'event', 'end'];
+export type CrossKind = 'same' | 'child' | 'process' | 'network' | 'person';
+export const CROSS_KINDS: readonly CrossKind[] = ['same', 'child', 'process', 'network', 'person'];
+/** C-CHANGE 관련 주체·역할: each 「역할: 주체」 (a contributor's or maintainer's account, a bot's name, an issue number). */
+export type ActorRole = 'request' | 'propose' | 'author' | 'review' | 'merge';
+export const ACTOR_ROLES: readonly ActorRole[] = ['request', 'propose', 'author', 'review', 'merge'];
+export type ActorKind = 'owner' | 'maintainer' | 'contributor' | 'bot' | 'issue' | 'unknown';
+export const ACTOR_KINDS: readonly ActorKind[] = ['owner', 'maintainer', 'contributor', 'bot', 'issue', 'unknown'];
+export interface ReadingActor { role: ActorRole; kind: ActorKind; name: string | null; ref: string | null }
+export type ContractChangeKind = 'breaking' | 'compatible' | 'none' | 'unknown';
+export const CONTRACT_CHANGE_KINDS: readonly ContractChangeKind[] = ['breaking', 'compatible', 'none', 'unknown'];
+export interface ReadingContractChange { kind: ContractChangeKind; ref: string | null }
+export type ShippedKind = 'released' | 'unreleased' | 'unknown';
+export const SHIPPED_KINDS: readonly ShippedKind[] = ['released', 'unreleased', 'unknown'];
+export interface ReadingShippedIn { kind: ShippedKind; version: string | null }
+export type WithdrawalMethod = 'revert' | 'remove' | 'deprecate' | 'move' | 'default' | 'rejected' | 'reintroduce';
+export const WITHDRAWAL_METHODS: readonly WithdrawalMethod[] = ['revert', 'remove', 'deprecate', 'move', 'default', 'rejected', 'reintroduce'];
+/** Who decided a rule and when (C-RULE 정한 이·언제; a v3 record's 누가 정했나·언제), as written: never what keeps it. */
+export interface ReadingDecider { text: string; when: string | null; quote: ReadingQuote }
+/** C-COND 갈리는 때. */
+export type ConditionPhase = 'run' | 'config' | 'build';
+export const CONDITION_PHASES: readonly ConditionPhase[] = ['run', 'config', 'build'];
+/** A C-DONE row of a chunk: the table, how far it was written (작성 완료 · 일부 작성 · 해당 없음 · 확인 못함 · 분량상 이월), what it holds and what
+ * is left (as written, null for —), with the chunk's record ID and number. */
+export type CoverageState = 'done' | 'partial' | 'na' | 'unchecked' | 'deferred';
+export const COVERAGE_STATES: readonly CoverageState[] = ['done', 'partial', 'na', 'unchecked', 'deferred'];
+export interface ReadingCoverage { recordId: string | null; chunk: number | null; table: string; state: CoverageState; included: string | null; remaining: string | null; quote: ReadingQuote }
+/** A C-DATA row: its ID (D01), name, kind (외부 계약 · 내부 자료 · 저장 · 메시지·신호) and contract (K ID), its shape as written when it is no
+ * field list, the 「그 밖 N개」 it leaves out, where it is and how it is written (덧붙임 · 통째 교체 · 원자 교체, with what changes at once). */
+export type ArtifactKind = 'contract' | 'internal' | 'store' | 'message';
+export const ARTIFACT_KINDS: readonly ArtifactKind[] = ['contract', 'internal', 'store', 'message'];
+export type WriteMode = 'append' | 'replace' | 'atomic';
+export const WRITE_MODES: readonly WriteMode[] = ['append', 'replace', 'atomic'];
+export interface ReadingArtifact { recordRef: string | null; name: string; kind: ArtifactKind | null; contractRef: string | null; shape: string | null; fieldsMore: number | null;
+  where: string | null; writeMode: WriteMode | null; atomicScope: string | null; quote: ReadingQuote }
+/** A supplementary table (P1-01…P6-04) kept as written: its header, its rows (cells, row ID) and its 「없음:」 line. Read into fields in .44. */
+export interface ReadingProfileTable { table: string; header: string[]; rows: { cells: string[]; recordRef: string | null; quote: ReadingQuote }[]; none: { text: string; quote: ReadingQuote } | null }
+/** A table whose ID the reader does not know, kept as written (never dropped). */
+export interface ReadingRecordExtra { table: string; header: string[]; rows: { cells: string[]; quote: ReadingQuote }[] }
+/** What the program noticed reading a record's tables (a row past its header's width, an unknown table or column, a left-out column, a
+ * v4 record with no chunk head, an entry whose consumer is no part, a loop body its steps do not belong to, a variant with no owner):
+ * fixed categories and places only, never the record's words. */
+export const RECORD_DIAGNOSTIC_CATEGORIES = ['row-cells', 'unknown-table', 'unknown-column', 'missing-column', 'chunk-head', 'entry-consumer', 'loop-body', 'variant-owner'] as const;
+export interface ReadingRecordDiagnostic { category: typeof RECORD_DIAGNOSTIC_CATEGORIES[number]; table: string | null; column: string | null; record: string; from: number; to: number }
+/** The record's focus line (K4): which question groups the record answered more of first; never a fact of the project. */
+export interface ReadingFocus { profiles: string[]; reason: string | null; tables: string[]; quote: ReadingQuote }
 /** map-reading.8: what a line carries: data (a row, a stream, a result handed over), control (an instruction, a wake-up, a
  * schedule firing, a report that makes someone act) or uses (a reference, a dependency; nothing travels). The record's own
  * wording decides; null when it does not say. */
@@ -275,6 +373,13 @@ export interface ReadingClaim {
   withdrawalKind?: WithdrawalKind | null;
   /** map-reading.10, topic 'plan' only: a gate of operation or of development (null: not a gate, or not said). */
   gate?: GateKind | null;
+  /** map-reading.18 (pipeline .43), topic 'rule' only: who decided the rule and when (its row's 정한 이·언제, a v3 row's 누가 정했나·언제); never a device. */
+  decidedBy?: ReadingDecider | null;
+  /** map-reading.18, a change claim on a v4 C-CHANGE row: who did what (요청 only when a request was written), the merge date of 「작성 / 병합」,
+   * the contract change (깨짐 · 호환 · — · 모름) and the release it shipped in. */
+  actors?: ReadingActor[]; mergedWhen?: string | null; contractChange?: ReadingContractChange | null; shippedIn?: ReadingShippedIn | null;
+  /** map-reading.18, a withdrawal on a v4 C-WITHDRAW row: how it was taken back (되돌림 · 제거 · 폐기 예정 · 옮김 · 기본값 바꿈 · 채택 안 함 · 다시 도입). */
+  withdrawalMethod?: WithdrawalMethod | null;
 }
 /** map-reading.10: a place a rule applies, as written (80), with the line that places it. map-reading.11 (pipeline .34): program,
  * on every anchor of such an entry: true when the program, not the model, put it there (a candidate by shared words between the rule
@@ -319,12 +424,22 @@ export interface ReadingPart {
   /** map-reading.14: the part's 「파일 지도」 rows (up to twelve): the row's path and 역할 한 줄 as written, each on its row; [] when the
    * reading said none. The files list (files) stays as it was. */
   fileRoles?: ReadingFileRole[];
+  /** map-reading.18 (pipeline .43): the part's C-PART row ID (B03; resolves the record's own references only), its 구현 상태 with the row, its
+   * list items, its C-GROUP 묶음 뜻 as a parent, its C-STATUS rows, C-LOOP rows, the C-VARIANT rows of its interfaces, its C-ENTRY rows and the
+   * C-CONTRACT rows it provides. A v4 part's state is the program's (4.6: running only from 운영 상태 「실행 중」). */
+  recordRef?: string | null; implementation?: PartImplementation | null; implementationQuote?: ReadingQuote | null; members?: ReadingMembers | null;
+  groupAxis?: GroupAxis | null; groupAxisQuote?: ReadingQuote | null; statusClaims?: ReadingStatusClaim[]; loops?: ReadingRecordLoop[]; variants?: ReadingVariant[];
+  entries?: ReadingEntryPoint[]; contracts?: ReadingContract[];
 }
 /** map-reading.14: a 「파일 지도」 row of a part: its path (120) and role (80) as written, with the row. */
-export interface ReadingFileRole { path: string; role: string; quote: ReadingQuote }
+export interface ReadingFileRole { path: string; role: string; quote: ReadingQuote;
+  /** map-reading.18: true when the row's path says 「(실행 시)」 (a layout made at run time). */
+  runtime?: boolean }
 /** map-reading.12: a condition row of a part as written: its condition (80), what follows when it holds (60) and when it does not
  * (60, null when not said), with the row. */
-export interface ReadingCondition { when: string; then: string; else: string | null; quote: ReadingQuote }
+export interface ReadingCondition { when: string; then: string; else: string | null; quote: ReadingQuote;
+  /** map-reading.18: when it branches (C-COND 갈리는 때: run, config read, build), null when not said. */
+  phase?: ConditionPhase | null }
 /** map-reading.9: one step inside a part, as one row of the record's table of inner steps names it: its name, what it does (null
  * when the row says nothing), the files, functions or models it uses (up to four) and that row. The order, branches and loops
  * between steps are not read in this cycle (no relation between steps). */
@@ -334,7 +449,10 @@ export interface ReadingStep { name: string; does: string | null; uses: string[]
   program?: boolean;
   /** map-reading.17 (pipeline .42): the 조건·분기 cell of the step's own 「안의 단계」 row as written (120; null where the row has none,
    * a dash, or no such row), read by the program from the record, never the model's words; absent before .17. */
-  when?: string | null }
+  when?: string | null;
+  /** map-reading.18 (pipeline .43): the step's C-STEP row ID (B03:S02), the loops it runs in (C-STEP 소속 반복 ID, 「+」 for two), the branch
+   * group it is one of (S04a: { group: 'S04', branch: 'a' }), its 조건·분기 cell read into clauses, and a model it uses (「모델: …」). */
+  recordRef?: string | null; loopIds?: string[]; alt?: { group: string; branch: string } | null; branch?: ReadingStepBranch[]; model?: string | null }
 /** map-reading.9: the unit a part repeats, what stops it and what resumes it, each as written and on its own (null: not said),
  * with the line that says so. */
 export interface ReadingLoop { unit: string | null; stop: string | null; resume: string | null; quote: ReadingQuote;
@@ -359,7 +477,10 @@ export interface ReadingRelation { relationId: string; from: string; to: string;
   channel?: Channel | null;
   /** map-reading.13: the fields of the format artifact the line carries (a 산출물 row at HTTP, 메모리 or a request), up to 24 of 60
    * as written; [] when not said. The UI shows them on the line's chip, never as a node. */
-  payloadFields?: string[] }
+  payloadFields?: string[];
+  /** map-reading.18 (pipeline .43), a line on a v4 C-LINK row: its 조건·선택 as written (when; optional unless —; the variant it flows for),
+   * its 경계, its 박자 word, the C-DATA row its 넘기는 것 names first (D03), the 통로 it goes by and the list item (「목록: 항목」) it stands for. */
+  when?: string | null; optional?: boolean; variantRef?: string | null; crosses?: CrossKind | null; cadenceKind?: CadenceKind | null; payloadRef?: string | null; via?: string | null; member?: string | null }
 /** What a candidate leaves undecided (map-reading.5): whose statement this is (attribution), whether two parts are one
  * (identity), whether a part is inside a parent (parent), or whether a statement holds (holds). An attribution or holds candidate
  * keeps the undecided statement itself (content, kind, version, exact quote): it is in no part's claims. areaIds name the
@@ -381,7 +502,7 @@ export interface ReadingExclusion { path: string; rule: typeof READING_EXCLUSION
    * record/from/to; only on parts[i].inputs[j] and parts[i].outputs[j]. Exclusions without it keep their exact shape. */
   value?: string }
 export interface MapReading {
-  version: 'map-reading.1' | 'map-reading.2' | 'map-reading.3' | 'map-reading.4' | 'map-reading.5' | 'map-reading.6' | 'map-reading.7' | 'map-reading.8' | 'map-reading.9' | 'map-reading.10' | 'map-reading.11' | 'map-reading.12' | 'map-reading.13' | 'map-reading.14' | 'map-reading.15' | 'map-reading.16' | 'map-reading.17'; id: string; at: string; model: string; prompt: string;
+  version: 'map-reading.1' | 'map-reading.2' | 'map-reading.3' | 'map-reading.4' | 'map-reading.5' | 'map-reading.6' | 'map-reading.7' | 'map-reading.8' | 'map-reading.9' | 'map-reading.10' | 'map-reading.11' | 'map-reading.12' | 'map-reading.13' | 'map-reading.14' | 'map-reading.15' | 'map-reading.16' | 'map-reading.17' | 'map-reading.18'; id: string; at: string; model: string; prompt: string;
   /** SHA-256 of the request: the very same request is never sent or applied again. */
   hash: string;
   /** Records read, and which part of each went: characters [from, to) of total. A record's unsent tail is read by a later reading. */
@@ -410,6 +531,11 @@ export interface MapReading {
    * and a program device may be
    * unknown with no passage (a rule whose decider device was set aside, nothing else found). */
   portMap?: ReadingPortMap[];
+  /** map-reading.18 (pipeline .43, a 기록 v4 record): what its C-BASIS says it read, its focus line, the C-STATUS rows of the project or of
+   * a unit no part is, the C-GATE 「없음:」 line (no gate, checked), the C-DONE rows, the C-DATA rows, the supplementary tables as written,
+   * the tables no reader knows and what the program noticed reading the tables. A v3 record leaves each null or []. */
+  basisScope?: { text: string; quote: ReadingQuote } | null; focus?: ReadingFocus | null; projectStatus?: ReadingProjectStatus[]; gatesNone?: { reason: string; quote: ReadingQuote } | null;
+  coverage?: ReadingCoverage[]; artifacts?: ReadingArtifact[]; profileTables?: ReadingProfileTable[]; recordExtras?: ReadingRecordExtra[]; recordDiagnostics?: ReadingRecordDiagnostic[];
 }
 /** The person's own correction of a part's description as read (never Area.note, never a return.2 description): it names the
  * reading whose description it corrects. It holds that description only; later claims of later readings still come in. */
@@ -469,7 +595,7 @@ export interface ScenarioReading { version: 'scenario-reading.1'; id: string; at
   /** The pasted record read, and the ledger version (the map reading id) the record was read against (null: no map reading). */
   record: string; ledgerVersion: string | null; pathStatus: ScenarioPathStatus; scenario: ScenarioRecord; diagnostics: ScenarioDiagnostic[] }
 export type ReadingEntry = MapReading | ReadingCorrection | RequestCorrection | ReplaceCorrection | ScenarioReading;
-export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3' || e.version === 'map-reading.4' || e.version === 'map-reading.5' || e.version === 'map-reading.6' || e.version === 'map-reading.7' || e.version === 'map-reading.8' || e.version === 'map-reading.9' || e.version === 'map-reading.10' || e.version === 'map-reading.11' || e.version === 'map-reading.12' || e.version === 'map-reading.13' || e.version === 'map-reading.14' || e.version === 'map-reading.15' || e.version === 'map-reading.16' || e.version === 'map-reading.17';
+export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3' || e.version === 'map-reading.4' || e.version === 'map-reading.5' || e.version === 'map-reading.6' || e.version === 'map-reading.7' || e.version === 'map-reading.8' || e.version === 'map-reading.9' || e.version === 'map-reading.10' || e.version === 'map-reading.11' || e.version === 'map-reading.12' || e.version === 'map-reading.13' || e.version === 'map-reading.14' || e.version === 'map-reading.15' || e.version === 'map-reading.16' || e.version === 'map-reading.17' || e.version === 'map-reading.18';
 export const isScenarioReading = (e: ReadingEntry): e is ScenarioReading => e.version === 'scenario-reading.1';
 export const READINGS_LIMIT = 500;
 export const PASTED_LIMIT = 500;

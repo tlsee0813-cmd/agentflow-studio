@@ -8,6 +8,7 @@
  * Grouping uses only the record a claim's own quote names: a claim is never moved to a neighbour's record, and a claim whose record
  * is not at hand still reads in a rail of its own (its record named as not found), never without one. */
 import { TOPIC_ORDER, EVIDENCE_LABEL, claimTopic, claimEvidence, claimWhen } from '../shared/claim-topic.js';
+import { cellTexts } from '../shared/record-table.js';
 import type { ClaimKind, ClaimTopic, EvidenceGrade, ReadingQuote } from '../shared/types.js';
 import { conditionPlacement, conditionLines, conditionOfQuote, type ConditionLike, type ChainStep, type QuoteLike } from './steps-view.js';
 import { loopSegments, isProgram, type LoopLike, type ConditionLike as LineCondition } from './line-view.js';
@@ -488,8 +489,10 @@ export function quotePlace(text: string, q: QuoteLike): { heading: string | null
   if (at < 0) return none;
   const lineStart = text.lastIndexOf('\n', at - 1) + 1, lineEnd = text.indexOf('\n', at), line = text.slice(lineStart, lineEnd < 0 ? undefined : lineEnd).trim();
   let heading: string | null = null;
-  for (const l of text.slice(0, lineStart).split('\n').reverse()) { const m = /^\s{0,3}#{1,6}\s+(.+?)\s*#*\s*$/.exec(l); if (m) { heading = m[1]!.trim(); break; } }
-  const cell = line.startsWith('|') ? line.split('|').map(x => x.replace(/`/g, '').trim()).find(Boolean) ?? null : null;
+  // Pipeline .43: a 기록 v4 table's title line (「C-PART 부분」) is its heading too.
+  for (const l of text.slice(0, lineStart).split('\n').reverse()) { const m = /^\s{0,3}#{1,6}\s+(.+?)\s*#*\s*$/.exec(l) ?? /^\s*(?:C-[A-Z]{2,12}|P\d-\d{2})\s+(\S.*?)\s*$/.exec(l); if (m) { heading = m[1]!.trim(); break; } }
+  // Pipeline .43: the one cell splitter (「&#124;」 and 「\|」 stay in their cell).
+  const cell = line.startsWith('|') ? cellTexts(line).map(x => x.replace(/`/g, '').trim()).find(Boolean) ?? null : null;
   const clip = (s: string | null, n: number) => (s && s.length > n ? `${s.slice(0, n - 1)}…` : s);
   return { heading: clip(heading, 48), row: /^:?-{3,}:?$/.test(cell ?? '') ? null : clip(cell, 40) };
 }

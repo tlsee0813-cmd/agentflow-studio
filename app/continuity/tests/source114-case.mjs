@@ -4,6 +4,7 @@
 // reply for the very ask it is given: reported/checked prose from the old pasted report, a describes claim on its code, and code
 // and test matches on the provided sources (or, with pastedCode, the old pasted occurrence of the same code, which must fail).
 // Not a model reply and not evidence of generation quality. Modules are passed in so a pre-114 build can write the project.13 copy.
+import { stripEighteen } from './strip18.mjs';
 export const REQUIREMENT = '요구: 폴더 안의 마크다운 문서를 한 번에 PDF로 변환한다.\n한 파일이 실패해도 나머지 파일은 계속 변환한다.';
 export const OLD_REPORT = ['작업 보고: feature/convert 브랜치에서 폴더 변환을 바꿨다고 보고합니다.', '', 'export function convert(dir) {', '  return listMarkdown(dir).map(toPdf);', '}', '',
   '검사: 폴더 변환 검사 2개를 실행했고 통과했다고 보고합니다.'].join('\n');
@@ -31,7 +32,8 @@ export function mapWithRequest({ D, M, C, S, studioView, emptyBundle }) {
   const five = ({ exclusions: _exclusions, basisAt: _ba, basisVersion: _bv, portMap: _pm, ...r }) => ({ ...r, version: 'map-reading.5',
     parts: r.parts.map(({ state: _s, stateWhen: _w, stateQuote: _q, files: _f, type: _y, typeQuote: _yq, inputs: _i, outputs: _o, fields: _d, config: _g, steps: _st, loop: _lp, stateVars: _sv, conditions: _cd, fileRoles: _fr, ...x }) => ({ ...x, claims: x.claims.map(({ topic: _t, evidence: _e, when: _n, where: _h, before: _b, scope: _sc, scopeName: _sn, anchors: _an, enforcedBy: _eb, withdrawalKind: _wk, gate: _ga, ...c }) => c) })),
     relations: r.relations.map(({ payload: _p, cadence: _c, mode: _m, channel: _n, ...x }) => x) });
-  p = { ...p, readings: p.readings.map(five) };
+  // .43: and the map-reading.18 keys (stripEighteen).
+  p = { ...p, readings: p.readings.map(r => five(stripEighteen(structuredClone(r)))) };
   const area = p.space.areas[0].id;
   const evidence = [{ id: 'INTENT', kind: 'user', title: '원함', text: ITEMS.map(x => x[0]).join(' / '), basis: '사용자 초안' }];
   const analysis = { summary: '폴더 변환', items: ITEMS.map(([title, description], i) => ({ id: `change_${i + 1}`, title, description, partIds: [area], refs: ['INTENT'], dependsOn: [] })), impacts: [], preserve: [], unknowns: [] };

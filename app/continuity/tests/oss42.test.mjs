@@ -80,7 +80,7 @@ test('.42 (1) who decided is not what keeps: a person device naming only the 누
     [[['code', 'run_batch(first_result)', false, 'sweeper|3']], ['parts[3].claims[0].enforcedBy[0]:enforced-by']]);
   // Stored as map-reading.17 (a program unknown has no passage); a map-reading.16 entry holds no program unknown.
   const applied = M.applyReading(f.project, f.input, read, meta('R_oss42_devices', 'a'));
-  assert.equal(applied.project.readings.at(-1).version, 'map-reading.17');
+  assert.equal(applied.project.readings.at(-1).version, 'map-reading.18');
   assert.deepEqual(validateProject(applied.project), applied.project);
   const old = JSON.parse(S.serializeProject(applied.project)); old.readings.at(-1).version = 'map-reading.16';
   assert.throws(() => validateProject(old));
@@ -302,7 +302,7 @@ test('.42 (H, I, K, L, M) code names take no Hangul noun, a removal piece is no 
 
 test('.42 prompts: recipe .42, the decider rule, named loops, the summary\'s structural first sentence, product lines, field groups and the new bounds', async () => {
   const P = await import('../server/map-pipeline.mjs');
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.42', 'later-map-divided.42']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.43', 'later-map-divided.43']);
   for (const rule of ['「누가 정했나」 칸의 사람은 그 규칙을 정한 사람이지 지키는 장치가 아니다', 'decider', '[파일: X] 꼬리표가 가리키는', '{"kind":"person","text":"그 누가 정했나 칸 그대로(80자 이내)","at":"그 규칙 행"}',
     '단계 이름이나 하는 일이 스스로 반복을 말하면', '빠져나가는 조건', '단계 이름(60자 이내)', '조각 그대로(60자 이내)'])
     assert.ok(P.RENDER_RULES.includes(rule), rule);

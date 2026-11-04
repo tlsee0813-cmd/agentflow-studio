@@ -3,7 +3,7 @@ import { parseEnv } from 'node:util';
 import { join } from 'node:path';
 import { openMapPipelineStore } from './map-pipeline-store.mjs';
 import { createFirstMapPipeline, PLAN_REASONING } from './map-pipeline.mjs';
-/** The plan stage's output-token cap may be set from 8,192 to 65,536 (default 16,384); its reasoning effort is one of PLAN_REASONING (default high). */
+/** The plan stage's output-token cap may be set from 8,192 to 65,536 (default 16,384); its reasoning effort is one of PLAN_REASONING (default medium since .43: at high the plan of two real inputs never finished). */
 export const PLAN_TOKENS_DEFAULT = 16384, PLAN_TOKENS_MIN = 8192, PLAN_TOKENS_MAX = 65536;
 /** The render fragments' (STUDIO_MAP_RENDER_TOKENS) and the global stages' (STUDIO_MAP_GLOBAL_TOKENS: global, global-final and their
  * corrections) output-token caps: 4,096 to 32,768 each, default 8,192. */
@@ -43,7 +43,7 @@ export async function openFirstMapPipeline({ env, dir, fetchImpl, onProgress, ke
   if (env.AI_MODE === 'mock' || !env.OPENAI_API_KEY || env.STUDIO_FIRST_MAP === 'single') return null;
   if (!dir) throw new Error('FIRST_MAP_NEEDS_DURABLE_JOBS');
   const limit = (key, fallback) => { const n = Number(env[key] || fallback); if (!Number.isFinite(n) || n <= 0 || n > 200) throw new Error('FIRST_MAP_BUDGET_INVALID'); return n; };
-  const planReasoning = env.STUDIO_MAP_PLAN_REASONING || 'high';
+  const planReasoning = env.STUDIO_MAP_PLAN_REASONING || 'medium';
   if (!PLAN_REASONING.includes(planReasoning)) throw new Error('FIRST_MAP_PLAN_REASONING_INVALID');
   const tokens = (key, fallback, min, max, code) => { const n = env[key] ? Number(env[key]) : fallback; if (!Number.isSafeInteger(n) || n < min || n > max) throw new Error(code); return n; };
   const planTokens = tokens('STUDIO_MAP_PLAN_TOKENS', PLAN_TOKENS_DEFAULT, PLAN_TOKENS_MIN, PLAN_TOKENS_MAX, 'FIRST_MAP_PLAN_TOKENS_INVALID');

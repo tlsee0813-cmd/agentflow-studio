@@ -11,6 +11,7 @@ import { stateLabel } from './map-reading.js';
 import type { ReadingEntry } from './types.js';
 import { isMapReading } from './types.js';
 import { claimTopic } from './claim-topic.js';
+import { TABLE_DEFS, COMMON_TABLES, PROFILE_TABLES, headerLine, splitRecordChunks, readRecordTables, recordVersion, fixedWord, DONE_WORDS, CHUNK_HEAD, type TableDef } from './record-table.js';
 
 /** The tags the report marks its sentences with; the map reads [실행] as checked and [보고] as reported. */
 export const REPORT_TAGS = ['[파일: 경로]', '[보고: 출처·날짜]', '[실행: 명령]', '[추정]', '[모름]'] as const;
@@ -170,6 +171,172 @@ export const SCENARIO_RECORD_EXPLAIN = '지금 지도의 ID 대장을 붙인 요
 /** The three requests' explanations in the order the screens offer them. */
 export const RECORD_ASK_EXPLAIN = { status: REPORT_ASK_EXPLAIN, design: DESIGN_RECORD_EXPLAIN, scenario: SCENARIO_RECORD_EXPLAIN } as const;
 
+/* ---------- 기록 요청 v4 (docs/design/RECORD_ASKS_V4_KO.md 3.1–3.4), as v4.1 from eight recording sessions on open-source clones:
+ * one request answered in two chunks (current state, design and the supplementary tables the session chooses), tables keyed by fixed
+ * IDs, and continuation requests the app builds from the chunks' C-DONE tables. The header rows come from record-table.ts (the parser's
+ * own table definitions), so the request, the continuation and the parser share one source. v4.1 over the spec's v4 text: no ~9,000
+ * target (12,000 stays the cap), shorter caps once C-PART holds more than 20 rows, 「[=]」 for evidence that is the part's own files,
+ * compact 「|」, several continuations as the normal case, a C-LOOP body with no step rows, 봇 among the types, 릴리스 없음 and a tagless
+ * clone's one C-STATUS line, 이슈 본문 미확인(#n), 「고른 보충 표 ID」 on the focus line, a child supplementary table without its parent,
+ * one chunk-head form, carried rows keeping their IDs, 정정 rows and a set order of carried tables. ---------- */
+export const RECORD_ASK_V4_VERSION = 'v4.1';
+const ID_SLOT = '{기록 ID}';
+/** A new record ID (「AF4-」 and 8 hex digits) for a copied request. */
+export function newRecordId(random: () => number = Math.random): string {
+  return `AF4-${Array.from({ length: 8 }, () => Math.floor(random() * 16).toString(16)).join('')}`;
+}
+/** Each common table's lines under its header row in the request (the continuation repeats them as written). */
+export const TABLE_NOTES: Readonly<Record<string, string>> = Object.freeze({
+  'C-BASIS': '한 줄, 칸마다 꼬리표. 읽은 범위는 무엇을 읽었고 무엇을 못 읽었나(클론 깊이, 빠진 폴더, 실행 여부. 대화가 요약된 세션이면 그것도).\n표 아래 한 줄: 「이번 기록의 초점: P?, P? / 선택 이유 / 고른 보충 표 ID」. 이 프로젝트를 이해하려면 아래 여섯 질문 묶음 가운데 무엇을 먼저 더 물어야 하는지다. 프로젝트의 분류가 아니다. 1~3개, 범위가 다르면 범위를 괄호로. 근거가 모자라면 「초점: 없음 / 이유」. 쓴 표는 C-DONE이 말한다.',
+  'C-SUMMARY': '두 문장, 문장마다 꼬리표: 무엇이고 누가 어떻게 쓰나 / 핵심 흐름 한 줄. 계획·추정은 C-GATE·C-DOUBT에.',
+  'C-PART': '이름은 프로젝트가 부르는 그대로. 파일 하나하나가 아니라 맡은 일 단위로 5~30개(목록 한 줄은 하나로 센다). 결정하거나 일하는 사람(소유자·메인테이너·기여자)·봇·CI·외부 시스템·설계만 있는 것·제거된 것도 넣어. 남의 코드가 부르는 라이브러리·SDK면 「사용자 코드」도 한 줄(구체 소비자를 확인 못했으면 하는 일에 「구체 대상 모름」).\n유형 하나: 사람 / 봇 / 세션 / 루프·엔진 / 행 파일·저장소 / AI 판단 / 타이머·일정 / 계산 / 수집기 / 집행·외부 호출 / 화면 / 빌드·배포 자동화 / 외부 시스템 / 모름. 이름이 아니라 하는 일로 고른다. 진입점·어댑터·확장 지점·계약·신호는 유형이 아니라 C-ENTRY·C-VARIANT·C-CONTRACT와 보충 표에 쓴다. 자료형·오류 객체·메시지는 부분이 아니라 C-DATA·C-CONTRACT에 둔다(따로 맡은 일이 있을 때만 부분).\n구현 상태 하나: 구현됨(이 판본에 구현이 있음. 작동·시험 통과의 뜻은 없음) / 일부 구현 / 미구현 / 제거됨 / 모름 / 해당 없음(사람·봇·외부). 릴리스·배포·활성·유지·운영은 C-STATUS에.\n같은 일을 하는 항목의 목록은 한 줄로 두고 하는 일 끝에 「항목 N · 순서 있음」 또는 「항목 N · 순서 없음」(정확히 셌을 때만 N, 아니면 「항목 여럿」). 항목 이름은 C-GROUP에 두고, 따로 연결을 가진 항목만 자기 행을 갖는다.',
+  'C-GROUP': '자식은 「·」로 잇는다. 묶음 뜻 하나: 실행 위치(어디서 도나) / 구성(무엇의 일부) / 참여자(밖에서 판단·입력을 주는 사람·봇) / 외부 / 목록(목록 줄의 항목. 순서 있는 목록은 순서대로) / 모름. 실행 위치 묶음의 부모는 C-PART에 없는 이름이어도 된다. 한 부분의 부모는 하나(목록은 빼고 센다): 실행 위치를 바깥에, 구성을 안쪽에 둔다.',
+  'C-LINK': '한 줄에 화살표 하나. 목록의 항목이 보내거나 받으면 「목록 이름: 항목」. 넘기는 것은 C-DATA에 행이 있으면 앞에 그 ID(「D03 …」), 통로가 있으면 그다음에 「통로: …」. 박자 하나에 글자를 붙일 수 있다: 한 번 / 호출마다 / 항목마다 / 주기 / 사건 때 / 끝에 한 번(「주기: 간격 그대로」). 조건·선택: 늘 흐르면 —, 조건이 있을 때만 흐르면 그 조건을 글자 그대로, 고른 변형일 때만 흐르면 「변형 X02」. 경계 하나: 같은 프로세스 / 자식 프로세스 / 프로세스 사이 / 네트워크 / 사람 / 모름. 설계는 코드·문서상의 흐름, 관찰은 실제로 돈 것을 본 경우이고 둘이 다르면 두 줄. 사람·사용자 코드가 부르거나 지시하는 화살표와, 결과가 그쪽으로 돌아가는 화살표도 넣어.',
+  'C-CHANGE': '새것부터 15줄까지. 봇의 의존성 갱신이나 같은 종류의 잔수정은 한 줄에 묶고 개수를 쓴다. 실은 기간은 C-DONE 수록 범위에. 날짜는 작성일과 병합일이 다르면 「작성 / 병합」.\n관련 주체·역할: 「역할: 주체」를 「+」로 잇는다. 역할은 요청 / 제안 / 작성 / 검토·승인 / 병합, 주체는 소유자 / 메인테이너(계정) / 기여자(계정) / 봇(이름) / 이슈 #번호(작성자, 모르면 「작성자 모름」) / 모름. 「요청:」은 따로 적힌 요청(대화·이슈)이 있을 때만. PR 작성자가 스스로 낸 변화는 「작성: 그 사람」뿐이다.\n원한 것: 요청 원문을 짧게 「」로. 따로 적힌 요청이 없으면 —(커밋·PR 제목을 옮기지 마). 이슈 번호는 아는데 본문을 못 읽었으면 「이슈 본문 미확인(#번호)」.\n계약 변화: —(외부 계약이 안 바뀜) / 깨짐: K ID 또는 무엇 / 호환: K ID 또는 무엇 / 모름. 깨짐은 깨짐 표시·BREAKING 문구·메이저 판본·제거된 인자·이주 안내 같은 근거가 있을 때만.\n실린 판본: 그 변화가 실린 릴리스 / 미릴리스(마지막 릴리스 뒤라는 근거가 있을 때) / 모름. C-STATUS에 「태그 없음·얕은 클론」 줄을 썼으면 —.',
+  'C-WITHDRAW': '철회·폐기·채택 안 함을 빠뜨리지 마. 방식 하나: 되돌림 / 제거 / 폐기 예정(경고 후 유지) / 옮김 / 기본값 바꿈 / 채택 안 함 / 다시 도입. 옛 동작을 지키는 장치(호환 스위치, 제거된 인자의 안내)가 있으면 지금 칸에. 계약 변화는 C-CHANGE와 같다.',
+  'C-RULE': '정한 이는 규칙을 정한 사람·문서(모르면 모름). 지키는 장치는 코드 / 검사(시험·CI) / 사람 / 없음 / 모름, 여럿이면 「+」로. 코드의 검사·assert가 막으면 정한 이가 사람이어도 장치는 코드다. 장치 위치는 파일·함수 또는 사람 이름(장치가 없음·모름이면 —). 믿지 않는 입력·권한·비밀을 지키는 규칙도 넣어.',
+  'C-STATUS': '할 말이 있는 대상만, 8줄까지(넘치면 C-DONE에). 대상은 부분 이름·배포 단위(패키지·서비스)·「전체」. 차원마다 값 하나:\n- 릴리스: 릴리스됨 / 미릴리스 / 회수됨 / 릴리스 없음 / 모름. 이용자에게 낸 판본·채널(적용 범위에 채널·판본). 릴리스 없음은 한 번도 내지 않았다는 근거가 있을 때만. 태그가 없거나 얕은 클론이라 판본을 못 가리면 「전체 | 릴리스 | 모름 | 태그 없음·얕은 클론 | — | 근거」 한 줄.\n- 배포: 배포됨 / 미배포 / 철회됨 / 모름. 특정 환경에 특정 판본이 반영됐나(적용 범위에 환경).\n- 활성 방식: 항상 적용 / 조건부 / 비활성 / 모름. 조건부·비활성이면 켜지는 조건이나 꺼진 위치를 적용 범위에 글자 그대로(기본 설정에서 켜지는지도).\n- 유지 방침: 기능 개발 / 수정만 / 사용 중단 권고 / 유지 종료 / 모름. 명시된 방침만(활동량으로 추정하지 마). 대체·후속이 있으면 값 뒤에 「(후속: 이름)」.\n- 운영 상태: 실행 중 / 유휴·대기 / 정지 / 실패 / 모름. 특정 실행·서비스 인스턴스를 보거나 보고받았을 때만.\n기준은 그 주장이 선 판본·sha·시각(C-BASIS와 같으면 —).\n근거 규칙: 매니페스트의 판본은 선언된 판본만, Git 태그는 태그가 있다는 것만 증명한다. 릴리스 기록·배포된 패키지는 그 판본·채널의 릴리스 근거다(저장소 안의 CHANGELOG·릴리스 노트는 [보고]). 배포됨에는 판본 + 대상 환경 + 반영을 보여 주는 기록이나 명시적 보고가 필요하다. 배포 설정·스크립트가 있다는 것은 배포 근거가 아니다. 보고만 있으면 [보고]로 두고 [실행]으로 올리지 마. 병합은 C-CHANGE에 쓰고, 미배포를 뜻하지 않는다.',
+  'C-ISSUE': '저장소에 평문 비밀이 있으면 위치만 쓴다(값은 [가림]).',
+  'C-GATE': '0~5줄. 열린 PR·판본 경계·막고 있는 외부 의존처럼 근거 있는 관문만. 없음을 확인했으면 「없음: 이유 [근거]」 한 줄.',
+  'C-UNKNOWN': '',
+  'C-DOUBT': '1~3줄.',
+  'C-DATA': '부분 사이를 오가는 자료·파일·테이블·메시지마다 한 줄. 종류 하나: 외부 계약(명세는 C-CONTRACT에 쓰고 여기는 이름과 K ID) / 내부 자료 / 저장(파일·테이블) / 메시지·신호. 필드·모양은 코드의 이름 그대로. 필드 없는 배열은 형식·모양·크기, 넓은 테이블은 키 필드 몇 개와 「그 밖 N개」. 만드는·읽는 부분은 직접 만들고 직접 읽는 부분만(지나가게만 하는 부분은 빼). 있는 곳은 경로(파일이 아니면 메모리·DB 이름). 쓰기 방식은 확인했을 때만 괄호로: 덧붙임 / 통째 교체 / 원자 교체(어디까지가 한 번에 바뀌나).',
+  'C-DESIGN': '받는·내는 산출물은 C-DATA의 이름 그대로. 안의 단계는 C-STEP에 있으면 「C-STEP」, 짧으면 「→」로 이은 한 줄, 못 읽었으면 모름. 설정은 동작을 바꾸는 것 6개까지 「키=값」을 「,」로(더 있으면 P6-01·P6-02에, 못 쓰면 C-DONE에). 커밋 sha·판본은 설정이 아니다.',
+  'C-STEP': '지도의 중심인 부분 3~8개를 골라 그 부분의 단계를 실행 순서대로 쓴다(부분당 16줄까지. 넘으면 하위 부분으로 나누거나 남은 단계를 C-DONE에). 한 줄에 한 단계. 코드에 없는 단계를 지어내거나 두 단계를 한 줄로 합치지 마.\n- 소속 반복 ID는 그 단계가 도는 가장 안쪽 반복(C-LOOP)이고 반복 밖이면 —. 두 반복이 같은 단계를 부르면 그 단계는 한 번만 쓰고 두 반복 ID를 「+」로.\n- 조건·분기: 갈리거나 멈추는 조건과 결과를 「→ S06」, 거부 사유 코드 그대로, 되돌아가면 「→ S02, 최대 3번」으로. 없으면 —.\n- 쓰는 파일·함수에 AI 모델이나 학습 대상 모델이 있으면 그 이름 앞에 「모델:」.\n- 순서 있는 목록이 20개를 넘으면 단계로 펼치지 말고 C-GROUP의 목록으로.',
+  'C-LOOP': '코드에 반복문·재귀·주기 실행이 있는 것만. 부모 반복 ID는 바로 바깥 반복(다른 부분의 반복이어도 된다), 없으면 —. 몸통 단계 ID는 반복마다 도는 단계(「B03:S04–S06」). 그 부분의 C-STEP 행이 없으면 「단계 미기록(함수 이름)」, 다른 부분의 단계를 부르면 「B11의 단계」. 한 번만 도는 준비·마무리는 몸통에 넣지 마. 반복 단위는 무엇마다 도나. 횟수·계속 조건은 확인한 식 그대로(값을 읽지 않았으면 숫자로 계산해 넣지 마).',
+  'C-COND': '한 줄에 조건 하나. 조건은 코드의 식을 적힌 그대로(길면 뜻이 바뀌지 않게 줄여). 참이면·거짓이면은 결과·사유 코드·가는 곳이고, 다음 검사로 넘어가면 「다음」. 갈래가 셋 이상이면 갈래마다 한 줄. 갈리는 때 하나: 실행 시 / 설정 읽을 때 / 빌드·컴파일 시. 프로그램 전체를 바꾸는 모드 스위치도 여기에.',
+  'C-VARIANT': '같은 계약·접점의 여러 구현(어댑터·드라이버·실행 전략·플랫폼 구현·저장 백엔드·실행 모드)마다 한 줄. 공통 계약·접점 ID는 K ID, 부분 안의 자리면 「B03: 자리 이름」(P2-02를 쓴 경우에만 그 행 ID). 사용자가 바꿔 끼우는 자리면 구현 부분이 「사용자 지정」인 줄. 선택 주체·시점은 누가(사용자 설정 / 코드 / 플랫폼·빌드), 어떻게(지정 / 우선순위로 첫 가능 항목 / 실패하면 다음), 언제(빌드 시 / 시작 시 / 호출마다). 함께 사용 가능 여부: 배타 / 병용 가능 / 모름, 범위를 괄호로(「배타(호출마다)」).',
+  'C-ENTRY': '프로그램이 시작되거나 불리는 곳마다 한 줄(많으면 기능 묶음마다 한 줄에 정확히 센 개수). 소비자·호출 주체: 사람 / 사용자 코드 / 외부 시스템 / 일정 / 다른 부분 이름. 호출 방식 하나: 명령 / 함수·클래스 호출 / HTTP·WS 요청 / 메시지·사건 / 일정 / 상주(시작 후 계속 돎) / 손으로 돌리는 스크립트. 사람이 차례로 돌리는 스크립트면 진입점 앞에 순서(「1) 」). 계약 ID는 C-CONTRACT 행, 없으면 —.',
+  'C-CONTRACT': '그 부분·패키지 경계 바깥(사용자 코드·사람·다른 프로그램)이 의존하는 약속만: 공개 함수·명령의 입출력, 파일·응답 형식, 종료 코드·오류 코드, 프로토콜. 바뀌면 소비자가 깨지는 것이다. 내부 구조체를 공개 계약으로 올리지 마. 구체 소비자를 확인 못했으면 「사용자 코드—구체 대상 모름」. 적용 판본은 형식·스키마 판본이 있을 때만, 없으면 —.',
+  'C-FILES': '폴더 단위로 써도 된다. 생성물·시험·문서·예제는 한 줄씩 묶는다. 실행 때 생기는 디스크 배치는 경로 끝에 「(실행 시)」. 읽지 않은 것은 역할 끝에 「(이번에 안 읽음)」과 [모름].',
+  'C-DONE': '덩이마다 끝에, 그 덩이에 속한 표마다 한 줄(덩이 2는 고른 보충 표도). 작성 상태 하나: 작성 완료 / 일부 작성 / 해당 없음 / 확인 못함 / 분량상 이월. 수록 범위는 실은 행의 범위(「최근 15건」, 「중심 부분 B03·B05」), 남은 범위는 남은 것과 그 위치(없으면 —). 표가 없다는 것만으로 해당 없음이 되지 않는다.'
+});
+/** The five sentences against invention (K14), in the request and in every continuation. */
+export const NO_INVENTION = ['- 확인하지 못한 값은 모름으로 적어라. 없음, 미구현, 미배포는 부재를 확인한 범위와 근거가 있을 때만 사용하라.',
+  '- 파일·함수·변수 이름은 동작의 증거가 아니다. 연결·실행 순서·조건은 실제 호출, 등록, 분기 또는 이를 명시한 기록으로 확인하라. 확인되지 않은 관계를 그럴듯하게 연결하지 마라.',
+  '- 소스에 구현이 있음, 시험을 통과함, 릴리스됨, 특정 환경에 배포됨, 현재 실행 중임을 별개의 주장으로 작성하라. 한 주장의 근거를 다른 주장에 재사용하려면 그 사실도 실제로 증명하는지 확인하라.',
+  '- 기본값·우선순위·반복 횟수·배타성·재시도·보안 보장을 관례로 채우지 마라. 확인한 식과 조건을 그대로 기록하고, 미확정 부분을 표시하라.',
+  '- 표를 채우기 위해 예시·권고·계획을 구현 사실로 바꾸지 마라. 분량 때문에 생략한 내용은 완료표에 남겨라. 해당 없음은 빈칸을 없애기 위한 값이 아니다.'] as const;
+/** A common table's section: its title line, its header row (none for C-SUMMARY) and its notes. */
+const tableSection = (id: string): string => { const t = TABLE_DEFS.get(id)!, note = TABLE_NOTES[id] ?? ''; return [`${t.id} ${t.title}`, ...(t.columns.length ? [headerLine(t)] : []), ...(note ? [note] : [])].join('\n'); };
+/** A supplementary table's line of the request: 「P4-02 상태 전이 (8행): 열 | … — 문장」. */
+const profileLine = (t: TableDef): string => `${t.id} ${t.title} (${t.rows}행): ${t.columns.slice(0, -2).join(' | ')} — ${t.note}`;
+const PROFILE_GROUPS: readonly [string, string][] = [['P1', '요청·명령 처리 — 무엇을 받아 어떤 순서로 처리하고 어떻게 끝나나'], ['P2', '계약·확장 — 소비자가 무엇에 의존하며 어디를 바꿔 끼울 수 있나'],
+  ['P3', '자료 변환·산출물 — 무엇이 어떤 형태로 바뀌고 어디에 남나'], ['P4', '상태·반응 — 무엇을 기억하며 어떤 사건에 어떻게 바뀌나'], ['P5', '작업 실행·조정 — 무엇이 언제 실행되며 겹침·실패·반복을 어떻게 다루나'],
+  ['P6', '자원·배치·변경 — 어떤 환경·설정·경계 아래에서 제공되고 유지되나']];
+const CHUNK1 = COMMON_TABLES.filter(t => t.chunk === 1).map(t => t.id), CHUNK2 = COMMON_TABLES.filter(t => t.chunk === 2).map(t => t.id);
+const PROFILE_HEAD = '보충 표 — 고른 것만\n공통 표만으로 설명이 모자란 곳의 표만 고른다. 초점 밖의 표도 고를 수 있고, 한 묶음의 표를 다 쓸 필요는 없다. 덩이 2의 C-FILES 다음에, 자리가 남는 만큼 중요한 표부터 쓰고 나머지는 C-DONE에 「분량상 이월」. 행 상한은 한 덩이에 싣는 상한이다. 머리 줄은 아래 열 목록 뒤에 「행 ID | 근거」를 붙인 것이다(「| 열 | … | 행 ID | 근거 |」). 첫 열이 그 표가 처음 정하는 것의 ID면 그 행의 행 ID를 그대로 쓰고, 다른 표의 것을 가리키면 그 ID를 쓴다(사슬 ID는 그 사슬 첫 행의 행 ID). 가리킬 부모 표를 고르지 않았으면(P6-01 없이 P6-02, P4-01 없이 P4-02) 그 칸에 원래 키나 상태 이름을 그대로 쓴다.\n정확히 센 목록만 「총 N개」라고 쓴다. 「개수 + 처음·끝」은 같은 모양의 반복 자료에만 쓰고, 중간의 분기·권한 검사·오류 처리·우선순위 예외를 감추는 압축에는 쓰지 마. 싣지 못한 목록은 총수·고른 기준·나머지 위치를 남긴다.\n흔히 놓치는 것도 해당 표에 쓴다: 앱 수명(전경·배경·복귀)·권한·오프라인, 실행 문맥 사이의 메시지, 인터럽트·시간 제한, 패키지 경계·릴리스 단위, 트랜잭션·격리·내구성 시점, 중간 표현·증분 무효화, 전달·순서 보장·역압력, 계획과 적용의 차이.';
+const profileBlock = (): string => [PROFILE_HEAD, ...PROFILE_GROUPS.flatMap(([g, title]) => [`${g} ${title}`, ...PROFILE_TABLES.filter(t => t.id.startsWith(`${g}-`)).map(profileLine)])].join('\n');
+/** The chunk head a session writes (one form for the request and every continuation). */
+const CHUNK_HEAD_FORM = '「〔기록 {기록 ID} · 덩이 {n} · 기준 {sha}〕 {프로젝트 이름} 기록 v4 (쓴 세션, 날짜·시각)」';
+/** 기본 기록 요청 v4.1: {기록 ID} filled with the given ID (left as the slot when none: the app gives one when the answer is pasted). */
+export function recordAskV4(recordId: string = ID_SLOT): string {
+  return `[AgentFlow 기록 요청 ${RECORD_ASK_V4_VERSION}]
+이 프로젝트를 처음 보는 사람이 이어서 일할 수 있게, 지금 상태와 설계를 코드·문서·기록에서 읽어 아래 표로 써 줘. 표는 마크다운이다(머리 줄 다음에 |---| 줄). 표마다 제목 줄 「표 ID 제목」(예: 「C-PART 부분」)을 쓰고 바로 아래에 머리 줄을 글자 그대로 쓴다. 표 ID가 앱이 표를 찾는 열쇠다. 바꾸거나 새로 만들지 마.
+
+덩이와 분량
+- 기본 기록은 두 덩이다. 덩이 1은 C-BASIS부터 C-DOUBT까지, 덩이 2는 C-DATA부터 C-FILES까지와 고른 보충 표. 덩이마다 첫 줄은 ${CHUNK_HEAD_FORM.replace('{기록 ID}', recordId)}({n}은 덩이 번호, {sha}는 기준 커밋), 둘째 줄은 「경로 약속:」 줄(두 덩이에 같게), 마지막은 C-DONE 완료표.
+- 덩이 1과 2를 한 답에 차례로 써. 한 답에 다 못 쓰면 덩이 1 끝에서 멈추고 마지막 줄에 「덩이 2는 「이어서」에」라고 써. 「이어서」를 받으면 덩이 2를 쓴다.
+- 덩이마다 12,000자를 넘기지 마. 바이트가 아니라 글자 수다(셀 수 있으면 LC_ALL=C.UTF-8 wc -m 파일, 또는 PowerShell (Get-Content -Raw -Encoding UTF8 파일).Length. 바이트밖에 못 세면 바이트÷1.3). 정확한 수는 앱이 센다.
+- 넘칠 것 같으면 덜 중요한 행부터 덜어 내되 말없이 빼지 마. 덜어 낸 표는 C-DONE에 「일부 작성」이나 「분량상 이월」로 적고 남은 범위를 쓴다. 앱이 그 범위로 이어쓰기 요청을 만든다(이어쓰기는 여러 번이어도 괜찮다). C-SUMMARY와 C-FILES는 끝까지 남겨.
+- C-PART가 20행을 넘으면 C-LINK는 30줄, C-CHANGE는 8줄, C-STATUS는 5줄까지만 중요한 것부터 싣고 나머지는 C-DONE에.
+- 칸을 줄이려면 표 줄의 「|」 양옆 공백을 빼도 된다(「|a|b|」). 근거가 그 부분의 담당 파일·폴더와 같으면 [=]로 써도 된다.
+- 짧아도 된다. 빈 칸이 꾸민 칸보다 낫다.
+
+공통 규칙
+- 근거: 표마다 마지막 열 「근거」에 하나, C-SUMMARY는 문장마다. [파일: 경로] 이번에 직접 읽은 파일 / [보고: 출처·날짜] 다른 세션·문서·사람·커밋·PR·이슈의 말 / [실행: 명령] 이 대화에서 직접 돌린 것과 결과 / [추정] 네 판단 / [모름]. ‘통과·OK·완료’는 [실행]이 아니면 인용이다. 여러 작업 세션을 감독하는 세션이면 각 세션의 말은 [보고: 세션 이름 문서 시각]. 이 기록을 쓰려고 코드를 고치거나 검사·프로그램을 새로 돌리지 마(읽기 명령만).
+- 칸 값의 모름은 대괄호 없이 「모름」이고 [모름]은 근거 꼬리표다. 「없음」은 찾아봤더니 없다는 뜻이고, 「해당 없음」은 그 질문이 그 대상에 성립하지 않는다는 뜻이다.
+- 행이 하나도 없는 표: 찾아봤더니 없으면 제목 아래 머리 줄 대신 「없음: 확인한 범위 [근거]」 한 줄. 질문이 이 프로젝트에 성립하지 않으면 표를 쓰지 말고 C-DONE에 「해당 없음」. 확인하지 못했으면 C-DONE에 「확인 못함」.
+- 칸 안의 | 글자는 &#124;로 쓴다(||는 &#124;&#124;). 코드 식은 그렇게 적힌 그대로 두고, 말로 풀 때만 「또는」「그리고」. 칸 안에 줄바꿈이나 긴 코드 전문을 넣지 마.
+- 이름: 열 이름이 「부분」으로 끝나는 칸에는 C-PART의 이름을 글자 그대로, 「ID」로 끝나는 칸에는 ID를 쓴다. 프로젝트 전체에 걸린 줄은 「전체」. 여러 값은 「·」로 잇는다(「+」로 잇게 한 칸만 「+」). 이름에 「·」가 들어 있으면 그 칸의 여러 값은 「, 」로 잇는다.
+- ID: 부분 B01…(C-PART 행 ID), 단계 B03:S01…(그 부분 안에서 실행 순서대로. 둘 중 하나만 도는 갈래는 B03:S04a·B03:S04b), 반복 B03:L01…, 산출물 D01…, 변형 X01…, 진입 N01…, 외부 계약 K01…, 보충 표의 행은 「표 ID.번호」(P4-01.2). ID는 이 기록 안에서만 뜻이 있고, 한 번 쓴 ID를 다른 것에 다시 쓰지 마.
+- 경로: 「경로 약속:」의 별칭으로 써도 된다([파일: 별칭], 별칭/하위 경로). 형식은 「경로 약속: @기준 sha · 별칭 = 경로 · 별칭 = 경로」, 별칭은 로마자 1~4자.
+- 키·토큰·비밀번호·접속 주소의 비밀 부분·경로 속 사용자 이름은 [가림]. .env 같은 비밀 파일은 열지 마. 이 요청문은 옮기지 말고 기록 밖의 말은 쓰지 마.
+
+지어내지 마
+${NO_INVENTION.join('\n')}
+
+덩이 1 — 지금 상태
+
+${CHUNK1.map(tableSection).join('\n\n')}
+
+덩이 2 — 설계
+
+${CHUNK2.map(tableSection).join('\n\n')}
+
+${profileBlock()}
+
+${tableSection('C-DONE')}
+
+기록 ID: ${recordId}`;
+}
+/** The continuation's own wording (3.2): the same chunk head, the same rules, the tables still to write, the next IDs. */
+export const CONTINUATION_CHARS = 8000;
+export interface ContinuationPlan { recordId: string; basis: string; project: string; chunk: number; tables: { id: string; state: string; included: string; remaining: string }[]; next: string; text: string }
+const DONE_LABEL: Readonly<Record<string, string>> = { done: '작성 완료', partial: '일부 작성', na: '해당 없음', unchecked: '확인 못함', deferred: '분량상 이월', missing: 'C-DONE에 없음' };
+/** The continuation request (3.2–3.4, v4.1) for the latest v4 record among the given texts: its chunks gathered by record ID, their C-DONE rows
+ * merged (the last chunk's state of a table wins), the tables to write: 일부 작성 and 분량상 이월 ones, 작성 완료 ones whose 남은 범위 says
+ * something is left, supplementary tables the focus line chose that no chunk holds, and a common table neither C-DONE nor any chunk holds
+ * (C-DONE에 없음); a missing chunk 2 asks for chunk 2 whole. In chunk then table order. The next IDs are one past the largest written. Null
+ * when nothing is left, when the record is past chunk 5, or when no v4 record is given. */
+export function continuationAsk(texts: readonly string[]): ContinuationPlan | null {
+  const chunks = texts.flatMap(t => splitRecordChunks(t)).map(text => ({ text, t: readRecordTables(text) })).filter(x => x.t.version === 'v4' && x.t.chunk);
+  if (!chunks.length) return null;
+  const recordId = chunks.at(-1)!.t.chunk!.recordId, own = chunks.filter(x => x.t.chunk!.recordId === recordId).sort((a, b) => a.t.chunk!.chunk - b.t.chunk!.chunk);
+  const last = own.at(-1)!, chunk = Math.max(...own.map(x => x.t.chunk!.chunk)) + 1;
+  if (chunk > 5) return null;
+  const basis = own[0]!.t.chunk!.basis, project = (own[0]!.t.chunk!.title.replace(/\s*기록\s*v4.*$/, '').trim()) || '이 프로젝트';
+  const done = new Map<string, { chunk: number; state: string; included: string; remaining: string }>();
+  for (const x of own) for (const table of x.t.byId.get('C-DONE') ?? []) for (const r of table.rows) {
+    const id = (r.byColumn['표 ID'] ?? '').trim(), state = fixedWord(r.byColumn['작성 상태'] ?? '', DONE_WORDS)?.value; if (!/^(?:C-[A-Z]{2,12}|P\d-\d{2})$/.test(id) || !state) continue;
+    done.set(id, { chunk: x.t.chunk!.chunk, state, included: (r.byColumn['수록 범위'] ?? '').trim() || '—', remaining: (r.byColumn['남은 범위'] ?? '').trim() || '—' });
+  }
+  const written = new Set(own.flatMap(x => x.t.tables.filter(t => t.header.length || t.none || t.body.length).map(t => t.id)));
+  const left = (s: string) => !!s && !/^[—–-]+$/.test(s.trim());
+  const want: { id: string; state: string; included: string; remaining: string; order: number }[] = [];
+  const order = (id: string, c: number) => c * 100 + Math.max(0, [...COMMON_TABLES, ...PROFILE_TABLES].findIndex(t => t.id === id));
+  for (const [id, d] of done) if ((d.state === 'partial' || d.state === 'deferred' || (d.state === 'done' && left(d.remaining))) && TABLE_DEFS.has(id))
+    want.push({ id, state: DONE_LABEL[d.state]!, included: d.included, remaining: left(d.remaining) ? d.remaining : '표 전체', order: order(id, d.chunk) });
+  const has2 = own.some(x => x.t.chunk!.chunk >= 2);
+  if (!has2) for (const id of CHUNK2) if (!want.some(w => w.id === id)) want.push({ id, state: '덩이 2 없음', included: '—', remaining: '표 전체', order: order(id, 2) });
+  for (const t of COMMON_TABLES) if ((t.chunk === 1 || has2 && t.chunk === 2) && t.id !== 'C-DONE' && !done.has(t.id) && !written.has(t.id) && !want.some(w => w.id === t.id))
+    want.push({ id: t.id, state: DONE_LABEL.missing!, included: '—', remaining: '표 전체', order: order(t.id, t.chunk) });
+  const focus = own.map(x => x.t.focus).find(Boolean);
+  for (const id of focus?.tables ?? []) if (!written.has(id) && !done.has(id) && !want.some(w => w.id === id)) want.push({ id, state: '초점 줄에 고름', included: '—', remaining: '표 전체', order: order(id, 2) });
+  if (!want.length) return null;
+  want.sort((a, b) => a.order - b.order);
+  // The next ID of each kind: one past the largest any chunk wrote.
+  const all = own.map(x => x.text).join('\n'), top = (re: RegExp) => Math.max(0, ...[...all.matchAll(re)].map(m => Number(m[1])));
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const next = `부분 B${pad(top(/\bB(\d{1,3})\b(?!:)/g) + 1)} · 산출물 D${pad(top(/\bD(\d{1,3})\b/g) + 1)} · 변형 X${pad(top(/\bX(\d{1,3})\b/g) + 1)} · 진입 N${pad(top(/\bN(\d{1,3})\b/g) + 1)} · 외부 계약 K${pad(top(/\bK(\d{1,3})\b/g) + 1)} · 단계·반복은 부분마다 그다음 번호 · 보충 표는 「표 ID.{다음}」`;
+  const section = (w: { id: string; state: string; included: string; remaining: string }) => {
+    const t = TABLE_DEFS.get(w.id)!, note = t.profile ? `${t.id} ${t.title} (${t.rows}행). ${t.note}` : TABLE_NOTES[w.id] ?? '';
+    return [`${t.id} ${t.title} — 앞 덩이: ${w.state} · 실은 범위: ${w.included} · 이번에 쓸 범위: ${w.remaining}`, ...(t.columns.length ? [headerLine(t)] : []), ...(note ? [note] : [])].join('\n');
+  };
+  const head = CHUNK_HEAD_FORM.replace('{기록 ID}', recordId).replace('{n}', String(chunk)).replace('{sha}', basis).replace('{프로젝트 이름}', project).replace('기록 v4 (', '기록 v4 이어서 (');
+  const text = `[AgentFlow 기록 이어쓰기 요청 ${RECORD_ASK_V4_VERSION} · 기록 ${recordId} · 덩이 ${chunk}]
+앞서 쓴 기록 ${recordId}(${project}, 기준 ${basis})를 이어 써 줘. 같은 기준 판본을 읽고 아래 「쓸 표」만 쓴다. 앞 덩이에 쓴 행은 다시 쓰지 마. 앞 덩이의 행이 틀렸으면 고치지 말고 같은 표에 행 ID 칸이 「정정 B03」처럼 「정정 」과 그 ID인 행을 새로 쓴다. 앞 덩이가 이미 정했거나 가리킨 ID는 그대로 쓰고, 새 행의 ID만 「다음 ID」부터 쓴다. 쓸 표는 아래 차례(덩이 순, 표 순)대로. 지금 읽을 수 있는 판본이 기준과 다르면 첫 줄 다음에 「기준 바뀜: 지금 sha」 한 줄만 쓰고 멈춰.
+첫 줄은 ${head}, 둘째 줄은 앞 덩이와 같은 「경로 약속:」 줄, 마지막은 C-DONE 완료표.
+${CONTINUATION_CHARS.toLocaleString('en-US')}자를 넘기지 마. 바이트가 아니라 글자 수이고 정확한 수는 앱이 센다. 다 못 쓰면 덜 중요한 행부터 덜어 내고, C-DONE에 「일부 작성」이나 「분량상 이월」과 남은 범위를 적어. 앱이 다음 이어쓰기를 만든다.
+규칙은 기록 요청 ${RECORD_ASK_V4_VERSION}와 같다. 표마다 제목 줄 「표 ID 제목」 다음에 아래 머리 줄을 글자 그대로. 마지막 열 근거에 [파일: 경로] / [보고: 출처·날짜] / [실행: 명령] / [추정] / [모름] 하나(그 부분의 담당 파일이면 [=]). 칸 값의 모름은 대괄호 없이 「모름」. 찾아봤더니 없으면 머리 줄 대신 「없음: 확인한 범위 [근거]」. 칸 안의 |는 &#124;. 비밀은 [가림]. 읽기 명령만 쓰고 코드를 고치거나 새로 돌리지 마.
+${NO_INVENTION.join('\n')}
+
+쓸 표 (${want.length}개, 앞 덩이의 C-DONE에서)
+${want.map(section).join('\n')}
+
+다음 ID: ${next}
+
+${TABLE_DEFS.get('C-DONE')!.id} ${TABLE_DEFS.get('C-DONE')!.title}
+${headerLine(TABLE_DEFS.get('C-DONE')!)}
+이번 덩이에 쓴 표마다 한 줄. 작성 상태 하나: 작성 완료 / 일부 작성 / 해당 없음 / 확인 못함 / 분량상 이월. 수록 범위는 이번 덩이에 실은 범위, 남은 범위는 남은 것과 그 위치(없으면 —).
+
+기록 ID: ${recordId}`;
+  return { recordId, basis, project, chunk, tables: want.map(({ order: _o, ...w }) => w), next, text };
+}
+/** What the record asks offer (the record-asks UI): one sentence for the v4 request and the continuation. */
+export const RECORD_V4_EXPLAIN = '지금 상태와 설계를 표로, 길면 두 덩이로 한 답에 써 줘요. 답을 통째로 붙여 넣으면 앱이 덩이를 나눠 읽고, 모자란 표는 이어쓰기 요청을 만들어 줘요.';
+export const CONTINUATION_EXPLAIN = '앞서 붙인 기록 v4의 완료표에서 남은 표만 모은 요청이에요. 같은 AI 대화에 붙여 넣고, 나온 답을 다시 기록 붙여넣기에 넣으세요.';
+
 /** The ID ledger's cap: past it the remaining items are counted on one line. */
 export const LEDGER_MAX_CHARS = 8000;
 const one = (s: string, n: number) => { const t = s.replace(/\s+/g, ' ').trim(); return t.length > n ? `${t.slice(0, n - 1)}…` : t; };
@@ -277,17 +444,25 @@ ${open.join('\n')}
 
 /** The first reading takes this many characters of a record; a report longer than that is read in later passes. */
 export const REPORT_FIRST_CHARS = 12000;
-const TAG = /\[(파일|보고|실행|추정|모름|대화|붙임)(:[^\]]*)?\]/g;
+// v4.1: 「[=]」 is the part's own files (the evidence of a row whose part's 담당 파일 it is).
+const TAG = /\[(파일|보고|실행|추정|모름|대화|붙임)(:[^\]]*)?\]|\[=\]/g;
 /** An arrow line is marked [설계] or [관찰] in place of an evidence tag: it counts as tagged. */
-const LINE_TAG = /\[(파일|보고|실행|추정|모름|대화|붙임|설계|관찰)(:[^\]]*)?\]/;
+const LINE_TAG = /\[(파일|보고|실행|추정|모름|대화|붙임|설계|관찰)(:[^\]]*)?\]|\[=\]/;
 const PASS = /통과|\bOK\b|rc 0|완료|성공/;
+/** v4 (4.8): the fixed value words that say 완료·성공 without saying a pass (a C-DONE state, a 완료 표시 field), never counted. */
+const PASS_WORDS = /작성\s*완료|완료\s*표시|완료\s*판정|시작·완료\s*판정|완료\s*상태/g;
 const SECTIONS: [string, RegExp][] = [['부분', /부분/], ['연결', /연결|→/], ['철회·변경', /철회|변경/], ['다음 관문', /다음 관문/], ['모르는 것', /모르는 것|\[모름\]/]];
 /** A design record (설계 기록 v1) is checked against its own six tables, not the status report's sections. */
 const DESIGN_SECTIONS: [string, RegExp][] = [['부분 유형', /부분 유형/], ['산출물', /산출물/], ['부분별 설계', /부분별 설계/], ['안의 단계', /안의 단계/], ['조건·거부·분기', /조건/], ['파일 지도', /파일 지도/]];
-const isDesignRecord = (text: string) => /^경로 약속\s*:/m.test(text) || /설계 기록/.test(text.trimStart().split(/\r?\n/, 1)[0] ?? '');
+// .43 (4.1): told apart by the first line only (every v4 chunk has a 「경로 약속:」 line); a v1 design record without the title but with the
+// path line still reads as one when no v3 status heading stands in it.
+const isDesignRecord = (text: string) => /설계 기록/.test(text.trimStart().split(/\r?\n/, 1)[0] ?? '') || (/^경로 약속\s*:/m.test(text) && !/^\s*\d{1,2}\.\s*부분\s*$/m.test(text) && !/현황\s*보고서/.test(text.slice(0, 200)));
 export interface ReportCheck {
-  /** Which record the text reads as: the status report, or the design record (checked against its six tables). */
-  kind: 'status' | 'design';
+  /** Which record the text reads as: a 기록 v4 answer (one or more chunks), the status report, or the design record (its six tables). */
+  kind: 'record-v4' | 'status' | 'design';
+  /** v4: each chunk as the app splits it: its record ID and number, its characters (not bytes) against its cap (12,000 for chunks 1 and 2,
+   * 8,000 for a continuation), whether it has a C-DONE table and its rows whose cells do not fit the header. */
+  chunks?: { recordId: string | null; chunk: number | null; chars: number; limit: number; done: boolean; badRows: number }[];
   chars: number;
   /** Lines of content with at least one evidence tag, and without one (headings, table rules and short lines are not counted). */
   tagged: number; untagged: number;
@@ -302,6 +477,7 @@ export interface ReportCheck {
  * transcript or a plain note is checked by nothing here. */
 export function checkReport(text: string): ReportCheck | null {
   const tags = text.match(TAG); if (!tags || tags.length < 5) return null;
+  if (recordVersion(text) === 'v4') return checkRecordV4(text);
   const kind = isDesignRecord(text) ? 'design' as const : 'status' as const, sections = kind === 'design' ? DESIGN_SECTIONS : SECTIONS;
   const raw = text.split(/\r?\n/).map(l => l.trim()), rule = (l: string) => /^[|\-:\s]+$/.test(l) && l.includes('-');
   let tagged = 0, untagged = 0, passesUnrun = 0, section = '', first = true;
@@ -321,8 +497,58 @@ export function checkReport(text: string): ReportCheck | null {
   const cut = text.length > REPORT_FIRST_CHARS ? sections.filter(([, re]) => { const m = re.exec(text); return !!m && m.index >= REPORT_FIRST_CHARS; }).map(([n]) => n) : [];
   return { kind, chars: text.length, tagged, untagged, passesUnrun, missing, cut };
 }
+/** v4 (4.8): the check of a 기록 v4 answer, chunk by chunk (split at the chunk heads): characters (a JS string's length, never bytes)
+ * against 12,000 (chunks 1–2) or 8,000 (a continuation); a missing chunk head, chunk 2 or C-DONE; a common table neither written nor in C-DONE;
+ * rows whose cells do not fit their header. Not counted as lines: chunk heads, title lines, the 경로 약속, focus and 「덩이 2는」 lines, header
+ * rows and the rows of C-DONE and C-UNKNOWN. A pass word on a C-DONE, C-STATUS or supplementary row, or a fixed value word (작성 완료,
+ * 완료 표시), is no pass. */
+function checkRecordV4(text: string): ReportCheck {
+  const pieces = splitRecordChunks(text), chunks: NonNullable<ReportCheck['chunks']> = [], missing: string[] = [], cut: string[] = [];
+  let tagged = 0, untagged = 0, passesUnrun = 0;
+  const seen = new Set<number>(), written = new Set<string>(), listed = new Set<string>();
+  for (const piece of pieces) {
+    const t = readRecordTables(piece), n = t.chunk?.chunk ?? null, limit = n !== null && n >= 3 ? CONTINUATION_CHARS : REPORT_FIRST_CHARS;
+    if (n !== null) seen.add(n);
+    for (const x of t.tables) if (x.header.length || x.none || x.body.length) written.add(x.id);
+    for (const x of t.byId.get('C-DONE') ?? []) for (const r of x.rows) listed.add((r.byColumn['표 ID'] ?? '').trim());
+    chunks.push({ recordId: t.chunk?.recordId ?? null, chunk: n, chars: piece.length, limit, done: (t.byId.get('C-DONE') ?? []).length > 0, badRows: t.diagnostics.filter(d => d.category === 'row-cells').length });
+    if (piece.length > limit) cut.push(`덩이 ${n ?? '?'} ${piece.length.toLocaleString('en-US')}자`);
+    // Which table each line stands in, for the lines not counted.
+    const owner = (at: number) => t.tables.find(x => x.from <= at && at <= x.to)?.id ?? null;
+    let offset = 0;
+    for (const raw of piece.split('\n')) {
+      const start = offset; offset += raw.length + 1;
+      const l = raw.trim(), at = start + raw.indexOf(l);
+      if (!l || l.length < 12 || CHUNK_HEAD.test(l) || /^(?:#{1,4}\s*)?(?:C-[A-Z]{2,12}|P\d-\d{2})\s+\S/.test(l) || /^(경로 약속|이번 기록의 초점|초점)\s*[:：]/.test(l) || /덩이\s*2는/.test(l)) continue;
+      if (l.startsWith('|') && /^[|\-:\s]+$/.test(l)) continue;
+      // A table line that is no data row (a header row, a row its header cannot fit) is not counted.
+      const table = owner(at);
+      if (l.startsWith('|') && !t.tables.some(x => x.rows.some(r => r.from === at))) continue;
+      if (l.startsWith('|') && (table === 'C-DONE' || table === 'C-UNKNOWN')) continue;
+      if (LINE_TAG.test(l)) tagged++; else untagged++;
+      const quiet = table === 'C-DONE' || table === 'C-STATUS' || /^P\d-\d{2}$/.test(table ?? '');
+      if (!quiet && PASS.test(l.replace(PASS_WORDS, ' ')) && !/\[실행/.test(l) && !/\[보고/.test(l) && !/\[대화/.test(l)) passesUnrun++;
+    }
+    if (!t.chunk) missing.push('덩이 머리 줄');
+    else if (!(t.byId.get('C-DONE') ?? []).length) missing.push(`덩이 ${n} C-DONE`);
+  }
+  const ids = new Set(chunks.map(c => c.recordId).filter(Boolean));
+  if (ids.size > 1) missing.push('같은 기록 ID');
+  if (seen.has(1) && !seen.has(2) && !pieces.some(p => readRecordTables(p).awaitsNext)) missing.push('덩이 2');
+  for (const def of COMMON_TABLES) if (def.id !== 'C-DONE' && (def.chunk === 1 ? seen.has(1) : def.chunk === 2 && seen.has(2)) && !written.has(def.id) && !listed.has(def.id)) missing.push(def.id);
+  return { kind: 'record-v4', chunks, chars: text.length, tagged, untagged, passesUnrun, missing, cut };
+}
 /** The check in one quiet line, and the line to paste back into the AI chat when something should be written again. */
 export function reportCheckLine(c: ReportCheck): { text: string; again: string | null } {
+  if (c.kind === 'record-v4') {
+    const bad = (c.chunks ?? []).reduce((n, x) => n + x.badRows, 0);
+    const parts = [`덩이 ${(c.chunks ?? []).length}개 · ${(c.chunks ?? []).map(x => `${x.chunk ?? '?'}: ${x.chars.toLocaleString('en-US')}자`).join(' · ')}`, `꼬리표 있는 줄 ${c.tagged}`, c.untagged ? `없는 줄 ${c.untagged}` : '',
+      c.passesUnrun ? `[실행]·[보고] 없는 통과 ${c.passesUnrun}` : '', bad ? `칸 수가 머리 줄과 다른 줄 ${bad}` : '', c.missing.length ? `빠진 것: ${c.missing.join('·')}` : '',
+      c.cut.length ? `넘음: ${c.cut.join('·')} — 앱은 처음 ${REPORT_FIRST_CHARS.toLocaleString('en-US')}자만 첫 정리에서 읽어요` : ''].filter(Boolean);
+    const again = [c.untagged > c.tagged / 4 ? '근거 칸이 빈 줄마다 [파일]/[보고]/[실행]/[추정]/[모름] 하나를 붙여 다시 써 줘.' : '', c.passesUnrun ? '네가 직접 돌리지 않은 통과·OK·완료는 [보고: 출처]로 표시해 줘.' : '',
+      bad ? '칸 안의 |를 &#124;로 바꿔 그 줄만 다시 써 줘.' : '', c.missing.includes('덩이 2') ? '「이어서」' : ''].filter(Boolean).join(' ');
+    return { text: `기록 v4 점검 · ${parts.join(' · ')}`, again: again || null };
+  }
   const parts = [`꼬리표 있는 줄 ${c.tagged}`, c.untagged ? `없는 줄 ${c.untagged}` : '', c.passesUnrun ? `[실행]·[보고] 없는 통과 ${c.passesUnrun}` : '', c.missing.length ? `빠진 절: ${c.missing.join('·')}` : '', c.cut.length ? `${REPORT_FIRST_CHARS.toLocaleString()}자 넘음: ${c.cut.join('·')}은 첫 읽기 밖` : ''].filter(Boolean);
   const again = [c.untagged > c.tagged / 4 ? '꼬리표 없는 문장마다 [파일]/[보고]/[실행]/[추정]/[모름] 하나를 붙여 다시 써 줘.' : '', c.passesUnrun ? '네가 직접 돌리지 않은 통과·OK·완료는 [보고: 출처]로 표시해 줘.' : '', c.missing.length ? `${c.missing.join('·')} 절을 채워 줘(없으면 없다고).` : '', c.cut.length ? `${REPORT_FIRST_CHARS.toLocaleString()}자 안에 들도록 줄이되 ${c.cut.join('·')}은 남겨 줘.` : ''].filter(Boolean).join(' ');
   return { text: `${c.kind === 'design' ? '설계 기록 점검' : '보고서 점검'} · ${parts.join(' · ')}`, again: again || null };

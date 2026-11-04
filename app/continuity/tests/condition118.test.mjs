@@ -177,7 +177,7 @@ test('118-5 standard provider: /map and the job send map7Prompt(ask); an old m7 
     let v; await until(async () => (v = await jcall(handle, 'GET', `/${x.id}`, x.cap)).state === 'ready', 'ready');
     assert.equal(prov.seen[1].system, P.map7Prompt(inp.ask)); assert.equal(sha(prov.seen[1].system), sha(prov.seen[0].system), 'one rendering for both');
     const back = J.decodeMapInput(v.input), applied = M.applyReading(p, back, M.validateMapReply(v.result.wire, back.ask), { id: 'R_118-job', at: new Date().toISOString(), model: 'm', prompt: v.result.prompt, hash: v.result.askHash });
-    assert.equal(parseProject(S.serializeProject(applied.project)).readings.at(-1).version, 'map-reading.17');
+    assert.equal(parseProject(S.serializeProject(applied.project)).readings.at(-1).version, 'map-reading.18');
     // A later map.6 (an old client) keeps the bare map.6 prompt.
     const six = M.buildMapAsk(p, studioView(p), [], undefined, M.MAP6_SCHEMA); assert.equal(six.problem, null);
     await handle(new Request('http://127.0.0.1/api/studio/map', { method: 'POST', headers: { 'content-type': 'application/json', 'x-agentflow-request': '1' }, body: JSON.stringify(six.ask) }));
@@ -258,7 +258,7 @@ test('118-7 a lawful ready7 written by the pre118 producer is recovered with its
       stored: () => ({ project: w.cur.project, lifecycle: 1 }), ownSave: () => false, commit: async next => { Object.assign(w.cur, { project: next, view: studioView(next), ref: { lifecycle: 1, seq: w.cur.ref.seq + 1 } }); return null; }, done: a => w.done.push(a), changed: () => {} });
     run.resume(); await until(() => run.state().ready, 'found ready'); await run.applyReady(); await until(() => w.done.length === 1, 'applied');
     const reading = w.done[0].reading;
-    assert.deepEqual([reading.version, reading.prompt, reading.hash], ['map-reading.17', 'm7-1a2625a62324', manifest.job.askHash], 'its own binding, never the current recipe');
+    assert.deepEqual([reading.version, reading.prompt, reading.hash], ['map-reading.18', 'm7-1a2625a62324', manifest.job.askHash], 'its own binding, never the current recipe');
     assert.equal(reading.parts.find(x => !x.created).claims[0].about, K.COND_CRLF);
     assert.equal(calls, 0, 'no call'); assert.deepEqual(parseProject(S.serializeProject(w.cur.project)), w.cur.project);
     await until(async () => (await jcall(handle, 'GET', `/${manifest.job.id}`, manifest.job.cap)).acked === 'applied', 'acknowledged');

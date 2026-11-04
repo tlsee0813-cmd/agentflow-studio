@@ -1,0 +1,25 @@
+KORU 설계 기록 v1 (검토 세션, 2026-11-03 09:xxZ; 코드는 git show로 라이브 sha를 읽음)
+3. 부분별 설계
+| 이름 | 받는 산출물 | 안의 단계 | 내는 산출물 | 설정 | 꼬리표 |
+|---|---|---|---|---|---|
+| 엔진 | review·policy·state 행, 패킷 | 4절 | J1 답 → 주문 | 618df374, 레버리지 20, 동시 1, j1_cadence 60 s | [파일: R] |
+| 카드 러너 | 패킷 원천·plan·facts·posture | 4절 | cards·counter·review 행·LEDGER | 타이머 tick :00·dispatch :05·gate 01/16/31/46분 :02 | [파일: C/systemd/*.timer] |
+| ARM | precheck | [모름] | e=1.00 행 | 24 h 만료 | [보고: ops 세션 STATUS 11-03 07:27Z] |
+4. 안의 단계
+| 부분 이름 | 순번 | 단계 이름 | 하는 일 한 줄 | 쓰는 파일·함수·모델 | 조건·분기 | 꼬리표 |
+|---|---|---|---|---|---|---|
+| 엔진 | 10 | 집행 | 주문·HARD 상주 | engine.py(이번에 안 읽음) | [모름] | [모름] |
+| 카드 러너 | 4 | 팔 반복 | CX·CL·DS 각각 | ARMS | 팔당 16회/일 넘으면 DAILY_CAP | [파일: C/card_runner.py] |
+| 카드 러너 | 11 | tick | 매분 checkpoint·kill·만료·trigger·pull | tick·checkpoint·kill·pull_due | KILL/EXPIRED → review 갱신 | [파일: C/card_runner.py] |
+5. 조건·거부·분기
+| 부분 이름 | 조건 | 참이면 | 거짓이면 | 꼬리표 |
+|---|---|---|---|---|
+| 엔진 | not 1 <= stop <= 250 | STOP_NOT_RESIDENT | J1 답 | [파일: R] |
+| 카드 러너 | arm!='CX' or review_writer is not True | 카드 행만 | review 행도 씀 | [파일: C/card_runner.py] |
+| 카드 러너 | expiry<=stamp and side!='NONE' | REVIEW_EXPIRED_DIRECTION | NONE이면 30분 연장 | [파일: C/card_runner.py] |
+| 카드 러너 | not stamp+900000<=cp<=stamp+5400000 | CHECKPOINT_TIME | 다음 | [파일: C/card_runner.py] |
+| 카드 러너 | watch=='OFF'이고 그 시각에 TRADING_RESTRICTION 사건 없음 | INVALID | 다음 | [파일: C/card_runner.py] |
+6. 파일 지도
+| 경로 | 속한 부분 | 역할 한 줄 | 꼬리표 |
+|---|---|---|---|
+| C/calls.py | 카드 러너 | 모델 호출·지출 상한 CL 20·DS 5 USD | [파일: C/calls.py] |
