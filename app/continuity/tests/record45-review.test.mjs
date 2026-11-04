@@ -105,11 +105,11 @@ test('review D1: 13.7a — a 1×1 D row is never a product; a reader the C-LINK 
 });
 
 test("review D2: a store reader's half keeps a condition its own C-STEP or C-COND rows write (code words); another stays the writer's", () => {
-  // A training-script-like hand-over: 화분 API writes a table file the 일정 계산기 reads (LN10, D04 in 급수 기록 DB), the row's condition an
+  // A planner-like hand-over: 화분 API writes a table file the 일정 계산기 reads (LN10, D04 in 급수 기록 DB), the row's condition an
   // existence check. The reader's half keeps it when the reader's own C-STEP row writes that check.
-  const p1 = page(1).replace('|LN09|B03|B02|등록 결과|호출마다|—|네트워크|정의된 관계|F02|', '|LN09|B03|B02|등록 결과|호출마다|—|네트워크|정의된 관계|F02|\n|LN10|B03|B05|D04 waterings.json|한 번|os.path.exists(meta_path)|프로세스 사이|정의된 관계|F02|');
+  const p1 = page(1).replace('|LN09|B03|B02|등록 결과|호출마다|—|네트워크|정의된 관계|F02|', '|LN09|B03|B02|등록 결과|호출마다|—|네트워크|정의된 관계|F02|\n|LN10|B03|B05|D04 waterings.json|한 번|os.path.exists(plan_path)|프로세스 사이|정의된 관계|F02|');
   const p2 = page(2).replace('|D03|급수 일정|', '|D04|급수 표|저장|plant_id, at|B03|B05|data/waterings.json (통째 교체)|F03|\n|D03|급수 일정|');
-  const own = p2.replace('|B05:S01|기록 읽기|화분의 마지막 급수 기록을 읽는다|loadHistory()|B05:L01|—|', '|B05:S01|기록 읽기|화분의 마지막 급수 기록을 읽는다|loadHistory()|B05:L01|os.path.exists(meta_path) 아니면 건너뜀|');
+  const own = p2.replace('|B05:S01|기록 읽기|화분의 마지막 급수 기록을 읽는다|loadHistory()|B05:L01|—|', '|B05:S01|기록 읽기|화분의 마지막 급수 기록을 읽는다|loadHistory()|B05:L01|os.path.exists(plan_path) 아니면 건너뜀|');
   assert.ok(p1 !== page(1) && p2 !== page(2) && own !== p2);
   const run = texts => {
     const f = ofPages(texts), db = part(f, 'new:db', '급수 기록 DB', '|B04|', { type: 'store', typeAt: f.at('|B04|'), outputs: ['waterings.json'] });
@@ -120,13 +120,13 @@ test("review D2: a store reader's half keeps a condition its own C-STEP or C-CON
   };
   let x = run([p1, own]);
   assert.deepEqual(x.out.filter(o => /^relations/.test(o)), [], 'both halves of a stored hand-over stand on its row (B1 leaves a store end unnamed)');
-  assert.equal(x.when('new:api', 'new:db'), 'os.path.exists(meta_path)');
-  assert.equal(x.when('new:db', 'new:calc'), 'os.path.exists(meta_path)', 'the reader checks it itself (its own step row)');
+  assert.equal(x.when('new:api', 'new:db'), 'os.path.exists(plan_path)');
+  assert.equal(x.when('new:db', 'new:calc'), 'os.path.exists(plan_path)', 'the reader checks it itself (its own step row)');
   x = run([p1, p2]);
-  assert.equal(x.when('new:api', 'new:db'), 'os.path.exists(meta_path)');
+  assert.equal(x.when('new:api', 'new:db'), 'os.path.exists(plan_path)');
   assert.equal(x.when('new:db', 'new:calc'), null, "no row of the reader writes it: the writer's");
-  assert.deepEqual(codeWords('os.path.exists(meta_path)'), ['os.path.exists', 'meta_path']);
-  assert.deepEqual(codeWords("(losses['val'] < best_val_loss or always_save_checkpoint) 그리고 iter_num > 0"), ['best_val_loss', 'always_save_checkpoint', 'iter_num']);
+  assert.deepEqual(codeWords('os.path.exists(plan_path)'), ['os.path.exists', 'plan_path']);
+  assert.deepEqual(codeWords("(scores['check'] < best_score or keep_every_save) 그리고 round_no > 0"), ['best_score', 'keep_every_save', 'round_no']);
   assert.deepEqual(codeWords('토큰이 유효할 때만'), []);
 });
 

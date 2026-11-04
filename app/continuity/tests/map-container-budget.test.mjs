@@ -39,7 +39,7 @@ test('CONT-2 the visible budget: five rows, the rest folded in the record\'s ord
 
 test('CONT-3 always kept: the last row, the step the loop\'s stop names, a failure branch\'s step, a port-mapped step; a sixth that ends the loop stays', () => {
   const s = steps(9);
-  const w = containerBody(s, { unit: '반복마다', stop: '단계7에서 iter_num > max_iters', resume: null });
+  const w = containerBody(s, { unit: '반복마다', stop: '단계7에서 round_no > max_rounds', resume: null });
   assert.ok(shown(w).includes('단계7'), 'the loop end is kept');
   assert.equal(w.rows.find(r => r.name === '단계7').keep.join(), 'stop');
   const b = containerBody(s, LOOP, { conditions: [{ then: '단계6 → 중단', else: null }] });

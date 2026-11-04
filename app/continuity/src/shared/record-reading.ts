@@ -291,8 +291,8 @@ export function record43(ctx: { texts: Texts; parts: Part43[]; relations: Line43
     const senders = partsInCell((r.byColumn['보내는 부분'] ?? '').replace(/\s*:\s*.+$/, ''), byName), receivers = partsInCell((r.byColumn['받는 부분'] ?? '').replace(/\s*:\s*.+$/, ''), byName);
     const from = parts.find(b => b.ref === l.from), self = senders.some(s => receivers.includes(s));
     const storeHalf = !!from && (from.type === 'store' || from.family === 'store') && !senders.includes(from) && !self;
-    // Review D2: the reader's own check stays on its half: a condition whose code words (os.path.exists, meta_path) the reader's own
-    // C-STEP or C-COND rows write is the reader's, not only the writer's (a training script's 「os.path.exists(meta_path)」 on its own step).
+    // Review D2: the reader's own check stays on its half: a condition whose code words (os.path.exists, plan_path) the reader's own
+    // C-STEP or C-COND rows write is the reader's, not only the writer's (a planner's 「os.path.exists(plan_path)」 on its own step).
     const readerOwn = storeHalf && choice !== null && !variant && readerChecks(parts.find(b => b.ref === l.to), choice);
     const writerHalf = storeHalf && !readerOwn;
     l.optional = choice !== null && !writerHalf; l.variantRef = variant && !writerHalf ? variant[1]! : null; l.when = choice && !variant && !writerHalf ? cut(choice, 120) : null;
@@ -780,7 +780,7 @@ function branchesOf(cell: string, own: string): ReadingStepBranch[] {
   });
 }
 /** Review D2: the code words of a condition as written: identifiers with 「_」 or 「.」 in them, camelCase ones, and calls (「exists(」), four
- * characters or more (os.path.exists, meta_path, GITHUB_REF, best_val_loss); plain words are none. */
+ * characters or more (os.path.exists, plan_path, GITHUB_REF, best_score); plain words are none. */
 export function codeWords(condition: string): string[] {
   const out: string[] = [];
   for (const m of condition.matchAll(/[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*/g)) {

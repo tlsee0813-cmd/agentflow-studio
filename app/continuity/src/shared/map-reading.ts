@@ -228,7 +228,7 @@ export const MAP7_SCHEMA = 'studio.map.7' as const;
  * condition row it is placed on, from its own part's step sharing two words (or the part's only checking step sharing one), or from the
  * rows its [파일: X] tag points at through the 경로 약속 (with their condition rows as places), and unknown (장치 미상) for a rule left
  * with no device whose row names who decided it; a part's loop from a step naming it (programLoopStep: 「측정 루프 count-1회 …」), and a loop's
- * stop from a step row's or a condition's way out (LOOP_EXIT: 「iter_num > max_iters → break」). 명령 reads as command. Stored as
+ * stop from a step row's or a condition's way out (LOOP_EXIT: 「round_no > max_rounds → break」). 명령 reads as command. Stored as
  * map-reading.17: those bounds, 24 steps each with its row's 조건·분기 cell (when, null where none; stepWhen), and a program device may be
  * unknown with no passage. Earlier entries keep their shape. */
 /* map-reading.18 (pipeline .43, docs/design/RECORD_ASKS_V4_KO.md, the 기록 요청 v4): every table is read by record-table.ts, keyed by its fixed ID (a
@@ -1218,7 +1218,7 @@ export function programLoopStep<Q>(steps: readonly { name: string; does?: string
   return { unit: unit.length <= 60 ? unit : `${unit.slice(0, 59)}…`, quote: pick.quote };
 }
 /** Pipeline .42 (from the blind judging of the .41 ML-script map, whose training loop kept stop null beside its 「종료 검사」 row's
- * 「iter_num > max_iters → break」): a way out of a loop (break, exit, 빠져나감, the loop ended). */
+ * 「round_no > max_rounds → break」): a way out of a loop (break, exit, 빠져나감, the loop ended). */
 export const LOOP_EXIT = /\bbreak\b|\bexit\b|빠져나|(?:루프|반복)\s*(?:을|를)?\s*(?:끝|종료)/i;
 /** Pipeline .41 (R9): the variables a condition reads, as written: a dotted name (conditionVariables), a subscript (「line['attempt']」, its
  * key the leaf), a get key (「body.get('next_cursor')」 → next_cursor) and a bare name of an attempt, retry, cursor or count; each with its
@@ -2937,7 +2937,7 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
         if (named?.quote && !onMaterial(named.quote)) b.loop = b.loop ? { ...b.loop, unit: named.unit, program: true } : { unit: named.unit, stop: null, resume: null, quote: named.quote, program: true };
       }
       // map-reading.17 (pipeline .42): a loop with no stop takes the way out a step row of its part (its 조건·분기 cell) or one of its
-      // condition rows states (LOOP_EXIT: 「iter_num > max_iters → break」; a condition as 「조건 → 참이면」), as written (60), marked program.
+      // condition rows states (LOOP_EXIT: 「round_no > max_rounds → break」; a condition as 「조건 → 참이면」), as written (60), marked program.
       if (b.loop && b.loop.stop === null && b.state !== 'retired' && b.state !== 'unbuilt') {
         const cut60 = (t: string) => t.length <= 60 ? t : `${t.slice(0, 59)}…`;
         const stepRows = rowsUnder(texts, STEP_TABLE), exit = (b.steps ?? []).flatMap(s => {
