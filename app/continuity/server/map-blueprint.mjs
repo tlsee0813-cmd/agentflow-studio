@@ -68,7 +68,9 @@ const SAFE_CONTRACT_CATEGORIES = new Set(['shape', 'keys', 'text', 'count', 'new
   // map-reading.13 (.37): a relation's format fields; .37: a line read twice.
   'payload-fields', 'dup-line',
   // map-reading.14 (.39): a part's file-map role row; .39: a claim quoting a range another part's claim quotes.
-  'file-role', 'dup-claim']);
+  'file-role', 'dup-claim',
+  // .44: a change claim naming another change row's actor.
+  'actor']);
 /** Fixed path/rule (and, for rule 'contract', its fixed guard category) of a refusal; null for anything else. */
 export function safeValidation(error) {
   try {

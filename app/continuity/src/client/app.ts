@@ -8,7 +8,7 @@ import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, re
 import { parseScenarioRecord, applyScenario, scenarioUnderstanding, projectLedger, type ScenarioUnderstanding } from '../shared/scenario-record.js';
 import { scenarioRecordLike, badgePlaces, pathRelations, visitLinks, brokenPlace, headTexts, scenarioLabel, scenarioResultLine, saidText, visitNumber, linkTitle, LINK_WORD, LINK_GLYPH, KIND_WORD, type BrokenPlace,
   grammarMarks, linkDirection, fromSource, pointAlong, diamondMark, parallelBar, loopFrame, frameLabelSpots, waitDash, conditionChoice, conditionPath, gateVisits, type GrammarMark } from './scenario-view.js';
-import { CLAIM_LABEL, stateLabel, revisedRelations, candidateReading, type Applied, type CurrentClaim, type PartUnderstanding } from '../shared/map-reading.js';
+import { CLAIM_LABEL, stateLabel, revisedRelations, candidateReading, projectVariantGloss, glossVariants, type Applied, type CurrentClaim, type PartUnderstanding } from '../shared/map-reading.js';
 import { recordRails, historyEntries, foldHistory, sourceRows, shortReading, readDisputes, addDispute, dropDispute, disputesOf, disputeTitle, disputeSection, withDisputes, ROLE_KEY, HISTORY_SHOWN, structureSummary, structureConditions, structureKeep, whereRows, fileRoleOf, enforcePlace, type DisputedItem, type HistoryEntry,
   PANE_TABS, tabLabel, entryTab, tabKeyMove, STRUCTURE_TITLE, structureSections, jumpChips, PANE_SHOWN, foldRows, behaviourSummary, cautionRows, unlinkedNames, listLabels, kindLead, UNLINKED_HEAD, UNLINKED_HINT,
   evidenceItems, footMarks, pathKey, footText, gradeLine, quotePlace, pushReturn, sameName, spanKey, ITEM_TITLE, DISPUTE_REASONS, DISPUTE_REASON_LABEL, type EvidenceBook, type EvidenceItem, type EvidenceUse, type DisputeReason,
@@ -33,7 +33,7 @@ import { RUNTIME, runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, setInspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
 import { routeEdges, samplePath, mixPath, type Routed } from './map-route.js';
 import { zoomLevel, zoomTier, tierText, tierFit, entryParts, type EntryCounts, type ZoomTier } from './card-budget.js';
-import { cardTemplate, cardHeights, groupTip, groupKind, lifecycleOf, kindLabel, structuralOf, nameBreaks, FAMILY_WORD, NAME_ROOM, TOGGLE_W, UNLINKED_TIP, type CardFacts, type CardTemplate } from './card-family.js';
+import { cardTemplate, cardHeights, groupTip, groupKind, lifecycleOf, maintenanceOf, kindLabel, structuralOf, nameBreaks, FAMILY_WORD, NAME_ROOM, TOGGLE_W, UNLINKED_TIP, type CardFacts, type CardTemplate } from './card-family.js';
 import { glyphSvg } from './card-glyphs.js';
 import { placeExpansion, actionSections, pushPlace, readOpenState, writeOpenState, groupBody, loopLine, stateVarLine, UNSAID, OPEN_MAP, SHORT_W, type OpenState, type ReadPlace, type ActionStep } from './expansion.js';
 import { detailChain, detailSigns, stepConsumers, unmappedMark, decisionStep, conditionPlacement, conditionLines, conditionOfQuote, stepFace, linkFace, stepPorts, stepCounts, EXIT_BLANK, CONDITION_BLANK, CONDITION_UNPLACED, PROGRAM_STEP_HINT, PROGRAM_PORT_LABEL, PROGRAM_PORT_HINT, type ChainLink, type OutLine, type DecisionStep, type DecisionExit, type PlacedCondition } from './steps-view.js';
@@ -1258,6 +1258,7 @@ const breakable = (name: string): (string | HTMLElement)[] => nameBreaks(name).f
  * overview, the short status), the kind rows, the contract area, the inner line, the sign row and the bottom line. */
 function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, face: Face, extra: { cls: string; title: string; onkeydown: (e: Event) => void; toggle: HTMLElement | null; links: HTMLElement | null; enter: HTMLElement | null; boxH: number; filed?: string | null }): HTMLElement {
   const s = r.stateRead, life = lifecycleOf(s?.state, s?.quote?.quote ?? ''), ops = opsCard(s?.state ?? null, s?.when ?? null, opsRef, life);
+  const maint = life ? null : maintenanceOf(r.statusClaims), maintQuote = maint ? r.statusClaims.find(x => x.dimension === 'maintenance')?.quote.quote ?? null : null;
   const ev = s ? claimEvidence({ quote: s.quote?.quote ?? '' }) : null, kids = p.childIds.length;
   // The shape the box was measured for (its near content), written on the card so the zoom's fit reads it without measuring.
   const nl = cardNameLines(p), hs = cardHeights(t, nl);
@@ -1274,6 +1275,7 @@ function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, f
     h('span', { class: 'c-title' }, h('span', { class: 'node-name c-name' }, ...breakable(p.name)),
       h('span', { class: 'c-kind' }, h('span', { class: `c-kind-word${t.family === 'neutral' && !grp ? ' unknown' : ''}${grp ? ' grp-word' : ''}`, ...(t.family === 'neutral' || grp ? { title: neutralTip } : {}) }, t.kind),
         life ? h('span', { class: 'c-life', title: `생애 · 기록의 상태 단어 (${s?.quote ? `“${s.quote.quote}”` : '원문 줄 없음'})` }, life) : null,
+        maint ? h('span', { class: 'c-life', title: `유지 방침 · 기록의 상태 표 (${maintQuote ? `“${maintQuote}”` : '원문 줄 없음'})` }, maint) : null,
         extra.filed ? h('span', { class: 'c-filed', title: `원문 분류 · 기록이 이 부분을 「${extra.filed}」 묶음 아래에만 두었다 (실행 위치의 근거가 아님)` }, `원문 분류: ${extra.filed}`) : null),
       // The short status (5.4) on a line of its own, read only at 개요 (the bottom line says it at 중간 and 가까이).
       life ? null : h('span', { class: 'c-short', title: ops.tip }, ops.short),
@@ -1327,7 +1329,13 @@ function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, f
 const stepsOf = (r: PartUnderstanding): ActionStep[] => r.steps ?? [];
 /** The condition rows a part records (map-reading.12 conditions[]: 조건 · 거부 · 분기, newest reading first; none before .12). The one
  * place that reads them: the entry line ('조건 K'), the short expansion's 분기 출구, the detail view's step exits and the pane. */
-const conditionsOf = (r: PartUnderstanding): PartUnderstanding['conditions'] => r.conditions ?? [];
+// Pipeline .44: a variant ID a condition names (「then=X01」) reads with what the variant is (its C-VARIANT row: the implementing part and
+// its choice condition); the stored words stay as written.
+const conditionsOf = (r: PartUnderstanding): PartUnderstanding['conditions'] => {
+  const list = r.conditions ?? [], g = opened ? projectVariantGloss(opened.project) : null;
+  if (!g?.size || !list.some(c => /\bX\d{1,3}\b/.test(`${c.when} ${c.then} ${c.else ?? ''}`))) return list;
+  return list.map(c => ({ ...c, when: glossVariants(c.when, g), then: glossVariants(c.then, g), else: c.else === null ? null : glossVariants(c.else, g) }));
+};
 /** Whether the part's gate exits come from its condition rows: the newest map reading that speaks of it carries them
  * (map-reading.12, [] when it said none); before .12 they come from the decision step's own words (참이면 / 거짓이면). */
 function conditionsContract(project: Project, id: string): boolean {
@@ -1601,9 +1609,23 @@ function renderDetail(id: string) {
       h('small', {}, counts.program ? `${counts.recorded} (+${counts.program} 프로그램)` : String(steps.length))),
     h('ol', { class: 'dv-steps' }, ...chain.rows.map(stepBox)), condsApart,
     chain.stray.length ? h('p', { class: 'dv-none', title: chain.stray.map(m => `${m.port} · ${m.step}`).join('\n') }, `포트·단계를 찾지 못한 대응 ${chain.stray.length}`) : null) : null;
-  const keepEl = loop || vars.length ? h('section', { class: 'xp-sec dv-keep' },
-    h('h4', { class: 'xp-title' }, loop && vars.length ? '반복 · 유지 상태' : loop ? '반복' : '유지 상태'),
-    loop ? h('p', { class: 'dv-loop', title: loopLine(loop) }, ...loopNodes(loopSegs(r!))) : null,
+  // Pipeline .44: every C-LOOP row of the part (the record's loop table), a nested one under the loop it runs in; the part's variants
+  // (C-VARIANT rows: the implementing part, its choice condition and whether it goes beside the others).
+  const recLoops = r?.recordLoops ?? [], variants = r?.variants ?? [];
+  const loopRow = (l: (typeof recLoops)[number]) => `${recLoops.some(x => x.recordRef === l.parentRef) ? '└ ' : ''}${l.recordRef} · ${l.unit ?? '단위 미상'}${l.count ? ` · ${l.count}` : ''}${l.stop ? ` · 끝: ${l.stop}` : ''}`
+    + (l.parentRef && !recLoops.some(x => x.recordRef === l.parentRef) ? ` · 안: ${l.parentRef}${l.parentPart ? ` ${l.parentPart}` : ''}` : '');
+  const ordered: typeof recLoops = [], visit = (l: (typeof recLoops)[number]): void => { if (ordered.includes(l)) return; ordered.push(l); for (const x of recLoops) if (x.parentRef === l.recordRef) visit(x); };
+  for (const l of recLoops) if (!recLoops.some(x => x.recordRef === l.parentRef)) visit(l);
+  for (const l of recLoops) visit(l);
+  const loopsEl = recLoops.length > 1 || (recLoops.length === 1 && !loop) ? h('ul', { class: 'xp-lines dv-loops', 'aria-label': '기록의 반복 표' },
+    ...ordered.map(l => h('li', { title: `반복 표 ${l.recordRef}${l.body.length ? ` · 몸통 ${l.body.join(', ')}` : ''}\n원문: “${l.quote.quote}”` }, loopRow(l)))) : null;
+  const TOGETHER: Record<string, string> = { exclusive: '배타', combined: '병용 가능', unknown: '병용 모름' };
+  const variantsEl = variants.length ? h('section', { class: 'xp-sec dv-variants' }, h('h4', { class: 'xp-title' }, '변형', h('small', {}, String(variants.length))),
+    h('ul', { class: 'xp-lines' }, ...variants.map(x => h('li', { title: `변형 표 ${x.recordRef} · 접점 ${x.interfaceRef}${x.selector.who ? ` · 고르는 이 ${x.selector.who}` : ''}${x.selector.when ? ` · ${x.selector.when}` : ''}\n원문: “${x.quote.quote}”` },
+      `${x.recordRef} ${x.implementer === 'user' ? '사용자 지정' : x.implementer}${x.condition ? ` · ${x.condition}` : ''} · ${TOGETHER[x.together] ?? x.together}${x.togetherScope ? `(${x.togetherScope})` : ''}`)))) : null;
+  const keepEl = loop || vars.length || recLoops.length ? h('section', { class: 'xp-sec dv-keep' },
+    h('h4', { class: 'xp-title' }, (loop || recLoops.length) && vars.length ? '반복 · 유지 상태' : loop || recLoops.length ? '반복' : '유지 상태'),
+    loop ? h('p', { class: 'dv-loop', title: loopLine(loop) }, ...loopNodes(loopSegs(r!))) : null, loopsEl,
     vars.length ? h('ul', { class: 'xp-lines dv-vars' }, ...vars.map(v => h('li', { ...(v.scope ? { title: `범위 · ${v.scope}` } : {}) }, stateVarLine(v), isProgram(v) ? ' ' : null, isProgram(v) ? progChip('유지 상태의 이름만') : null))) : null) : null;
   const refCard = (far: string, out: boolean) => {
     const q = partOf(o, far), qr = q?.reading, mine = ends.filter(e => e.far === far && e.out === out);
@@ -1623,7 +1645,7 @@ function renderDetail(id: string) {
     chainEl,
     r && !steps.length ? h('section', { class: 'xp-sec x-steps' }, h('h4', { class: 'xp-title' }, '단계'), h('p', { class: 'dv-none', title: '받는 것에서 내는 것까지의 단계를 기록이 아직 말하지 않았다. 포트와 단계는 잇지 않는다.' }, '기록된 단계 없음 · 진입 단계 미상'),
       runs.length ? h('p', { class: 'dv-none dv-gate-none', title: runs.map(g => `실행 관문 · ${g.text}`).join('\n') }, `실행 관문 ${runs.length} · 판정 단계 미상 · ${EXIT_BLANK}`) : null, condsApart) : null,
-    keepEl,
+    keepEl, variantsEl,
     ...actionBody(p, true, x => signChip(ds?.cells.get(x), `필드 ‘${x}’`)),
     kids.length ? h('section', { class: 'xp-sec x-kids' }, h('h4', { class: 'xp-title' }, '구성', h('small', {}, String(kids.length))),
       h('div', { class: 'dv-kids' }, ...kids.map(k => h('button', { type: 'button', class: 'dv-kid', 'data-part-ref': k.id, title: `‘${k.name}’ 상세 열기`, onclick: () => openDetail(k.id, true) }, k.reading?.typeRead ? h('span', { class: 'node-type' }, TYPE_LABEL[k.reading.typeRead.type]) : null, h('span', {}, k.name))))) : null);
@@ -3838,11 +3860,17 @@ function relationPayloads(project: Project): Map<string, ReadingRelation> {
  * any) and the line of the newest reading that read it (its quote). */
 interface LineSaid { channel: Channel | null; chAt: number; payload: string | null; cadence: string | null; mode: RelationMode | null; fields: string[]; quote: ReadingQuote | null; at: string | null }
 function relationLines(project: Project): Map<string, LineSaid> {
-  const out = new Map<string, LineSaid>();
+  const out = new Map<string, LineSaid>(), g = projectVariantGloss(project);
+  // Pipeline .44: a line flowing for a variant (its C-LINK 조건·선택 「변형 X03」) says which variant, by what it is; any variant ID in
+  // what it hands over reads the same way.
+  const payloadOf = (x: ReadingRelation): string | null => {
+    const own = x.payload ? glossVariants(x.payload, g) : null, v = x.variantRef ? `변형 ${glossVariants(x.variantRef, g)}` : null;
+    return own && v && !own.includes(x.variantRef!) ? `${own} · ${v}` : own ?? v;
+  };
   project.readings.forEach((r, i) => {
     if (isMapReading(r)) for (const x of r.relations) {
       const cur = out.get(x.relationId) ?? { channel: null, chAt: -1, payload: null, cadence: null, mode: null, fields: [], quote: null, at: null };
-      out.set(x.relationId, { channel: x.channel ?? cur.channel, chAt: x.channel ? i : cur.chAt, payload: x.payload ?? cur.payload, cadence: x.cadence ?? cur.cadence,
+      out.set(x.relationId, { channel: x.channel ?? cur.channel, chAt: x.channel ? i : cur.chAt, payload: payloadOf(x) ?? cur.payload, cadence: x.cadence ?? cur.cadence,
         mode: x.mode ?? cur.mode, fields: x.payloadFields?.length ? [...x.payloadFields] : cur.fields, quote: x.quote ?? cur.quote, at: r.at });
     }
   });

@@ -265,7 +265,7 @@ test('.41 KORU (11) a restated claim carrying the only copy of a sha stays; once
 
 test('.41 prompts: recipe .41, the plan\'s folder and 「전체」 rules, the render\'s caps, bare lists, person devices, page loops, condition states, port direction, kept shas; the summary says what the project is first', async () => {
   const P = await import('../server/map-pipeline.mjs');
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.43', 'later-map-divided.43']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.44', 'later-map-divided.44']);
   for (const rule of ['「있는 곳」이 부분 표 저장소 행의 이름으로 시작하면(「inbox 폴더 pos/」', '파일 ref → 폴더 ref 「담김」 선은 쓰지 않는다', '「있는 곳」이 부분 표의 어느 저장소도 이름 대지 않는 폴더'])
     assert.ok(MAP_BLUEPRINT_PROMPT.includes(rule), rule);
   for (const rule of ['순번 순서로 최대 24개다', '꼬리를 자르지 않는다', '진단 steps-cut', '적힌 그대로 최대 12개', '「종료 코드 0·3·4·5·6」)은 나누지 않고 한 항목으로 쓴다', '「설정 상한 12 밖」',
