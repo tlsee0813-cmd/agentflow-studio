@@ -56,6 +56,9 @@ const plain = (s: string): string => s.normalize('NFC').replace(/[*`]/g, '').rep
 const DASH = /^[—–-]+$/;
 const said = (s: string | undefined): string | null => { const t = (s ?? '').trim(); return !t || DASH.test(t) ? null : t; };
 const cut = (s: string, n: number): string => { const t = s.replace(/\s+/g, ' ').trim(); return t.length <= n ? t : `${t.slice(0, n - 1)}…`; };
+/** Recipe .47 review B1: every stored cite is cut to the contract (validation cites19), wherever a row's cites land: parts, loops,
+ * lines, steps, claims; a cite holding a secret-like word is left out. */
+const citesCut = (c: readonly Cite[]): Cite[] => c.filter(x => ![x.source, x.place, x.quote].some(w => w && secretLike(w))).slice(0, RECORD43_MAX.cites).map(x => ({ ...x, ref: cut(x.ref, 12), source: x.source ? cut(x.source, 120) : null, place: x.place ? cut(x.place, 80) : null, quote: x.quote ? cut(x.quote, 200) : null }));
 const bare = (s: string): string => s.replace(/\[[^\]]*\]/g, ' ').replace(/\s+/g, ' ').trim();
 const overlaps = (q: { record: string; from?: number; to?: number }, r: { record: string; from: number; to: number }): boolean => q.record === r.record && q.from !== undefined && q.to !== undefined && q.from < r.to && r.from < q.to;
 
@@ -137,7 +140,7 @@ export function record43(ctx: { texts: Texts; parts: Part43[]; relations: Line43
     // only (12.3: 루프·엔진, 봇, 외부 시스템 and 집행·외부 호출 keep their word, marked 대응 불명확).
     if (r.dialect === 'v5') familyOn(b, r.byColumn['표현군·역할'] ?? '', q, r.fold?.mark === 'add');
     else if (word && word.word in V4_TYPE_FAMILY) { const m = V4_TYPE_FAMILY[word.word]; b.family = m?.family ?? null; b.familyRole = m?.role ?? word.word; b.familyUnclear = !m; b.familyReason = null; b.familyQuote = q; }
-    if (r.dialect === 'v5') b.cites = r.fold?.cites ?? [];
+    if (r.dialect === 'v5') b.cites = citesCut(r.fold?.cites ?? []);
     const impl = fixedWord(r.byColumn['구현 상태'] ?? '', IMPLEMENTATION_WORDS);
     b.implementation = impl?.value ?? null; b.implementationQuote = impl?.value ? q : null;
     const m = /항목\s*(\d+|여럿)\s*·\s*순서\s*(있음|없음)/.exec(r.byColumn['하는 일 한 줄'] ?? '');
@@ -197,7 +200,7 @@ export function record43(ctx: { texts: Texts; parts: Part43[]; relations: Line43
     const loop: ReadingRecordLoop = { recordRef: id, parentRef, parentPart: parentPart ? cut(parentPart, 60) : null, body,
       unit: said(r.byColumn['반복 단위']) ? cut(r.byColumn['반복 단위']!, 80) : null, count: said(r.byColumn['횟수·계속 조건']) ? cut(r.byColumn['횟수·계속 조건']!, 120) : null,
       stop: said(r.byColumn['종료·탈출 조건']) ? cut(r.byColumn['종료·탈출 조건']!, 120) : null, quote: q,
-      bodyState: r.dialect === 'v5' ? (body.length ? 'linked' : 'unexpanded') : null, bodyText: r.dialect === 'v5' ? opt(r.byColumn['몸통 설명'], 120) : null, cites: r.fold?.cites ?? [] };
+      bodyState: r.dialect === 'v5' ? (body.length ? 'linked' : 'unexpanded') : null, bodyText: r.dialect === 'v5' ? opt(r.byColumn['몸통 설명'], 120) : null, cites: citesCut(r.fold?.cites ?? []) };
     if ((b.loops ??= []).length >= RECORD43_MAX.loops || b.loops.some(x => x.recordRef === id)) continue;
     b.loops.push(loop);
     for (const step of loop.body) {
@@ -301,7 +304,7 @@ export function record43(ctx: { texts: Texts; parts: Part43[]; relations: Line43
     l.optional = choice !== null && !writerHalf; l.variantRef = variant && !writerHalf ? variant[1]! : null; l.when = choice && !variant && !writerHalf ? cut(choice, 120) : null;
     // Recipe .45 (12.2): a v5 row's 주장 성격 and cites; its mode is observed only for 실행 관측 with a run-grade cite (the view's 설계/관찰).
     if (r.dialect === 'v5') {
-      l.claimNature = fixedWord(r.fold?.row.byColumn['주장 성격'] ?? '', NATURE_WORDS)?.value ?? null; l.cites = r.fold?.cites ?? [];
+      l.claimNature = fixedWord(r.fold?.row.byColumn['주장 성격'] ?? '', NATURE_WORDS)?.value ?? null; l.cites = citesCut(r.fold?.cites ?? []);
       l.mode = r.byColumn['설계/관찰'] === '관찰' ? 'observed' : r.byColumn['설계/관찰'] === '설계' ? 'design' : null;
     }
     l.crosses = fixedWord(r.byColumn['경계'] ?? '', CROSS_WORDS)?.value ?? null; l.cadenceKind = fixedWord(r.byColumn['박자'] ?? '', CADENCE_WORDS)?.value ?? null;
@@ -410,6 +413,16 @@ export function record45Parts(ctx: { texts: Texts; parts: Part43[]; onMaterial: 
   }
   return added;
 }
+/** A v5 record's level, pages and obligations as a reading keeps them (map-reading.19 bounds). Recipe .47: applyReading takes them from
+ * the fold of every pasted text of the record in the project, so a reading whose ask left rows out still says the whole record's. */
+export function foldLevel(f: FoldedRecord): Pick<Reading45, 'level' | 'pages' | 'obligations'> {
+  return { level: f.level, pages: f.pages.slice(0, RECORD43_MAX.pages).map(p => ({ recordId: f.recordId, n: p.n, prev: p.prev, hash: p.hash, conflict: p.conflict })),
+    obligations: f.obligations.slice(0, RECORD43_MAX.obligations).map(o => ({ kind: o.kind, table: o.table, ref: o.ref ? cut(o.ref, 40) : null, text: cut(o.text, 120), candidate: o.candidate })) };
+}
+/** Recipe .47: the fold's own diagnostics a reading may keep (row-cells is the table reader's too, and stays where record43 said it). */
+export const FOLD_DIAGNOSTICS: ReadonlySet<string> = new Set([...STORED_DIAGNOSTICS].filter(c => ['page-conflict', 'page-gap', 'page-prev', 'duplicate-id', 'replace-unknown', 'id-reused', 'row-id',
+  'out-of-order', 'reserve-unused', 'dangling-ref', 'ref-deleted', 'end-mismatch', 'level-mismatch', 'cite-missing', 'cite-equals', 'cite-unread', 'cite-word', 'grade-source', 'part-added', 'drop-unknown'].includes(c)));
+export const RECORD_DIAGNOSTICS_MAX = RECORD43_MAX.recordDiagnostics;
 /** The fold the newest of the texts belongs to: the v5 record that stands now. The ask lists its records newest first (N01 the newest,
  * buildMapAsk), so the fold with a page in the earliest-listed record. (Review N5: the .45 pass took the last-listed one, the oldest.) */
 function latestFold45(texts: Texts, folds: FoldedRecord[]): FoldedRecord | null {
@@ -440,7 +453,7 @@ export function record45(ctx: { texts: Texts; parts: Part43[]; relations: Line43
   const rowQ = (r: FoldRow) => quoteOf(r.record, r.row.from, r.row.to);
   const folds = foldPages([...texts].map(([record, { text }]) => ({ record, text })), 'newest-first');
   const latest = latestFold45(texts, folds);
-  const cites6 = (c: readonly Cite[]) => c.filter(x => ![x.source, x.place, x.quote].some(w => w && secretLike(w))).slice(0, RECORD43_MAX.cites).map(x => ({ ...x, ref: cut(x.ref, 12), source: x.source ? cut(x.source, 120) : null, place: x.place ? cut(x.place, 80) : null, quote: x.quote ? cut(x.quote, 200) : null }));
+  const cites6 = citesCut;
   for (const f of folds) {
     const nameOf = (id: string) => (f.byId.get(id)?.row.byColumn['이름'] ?? '').trim() || id;
     const byRef = (id: string) => parts.find(b => b.recordRef === id && f.byId.get(id)?.table === 'C-PART');
@@ -513,9 +526,7 @@ export function record45(ctx: { texts: Texts; parts: Part43[]; relations: Line43
         r43.recordDiagnostics.push({ category: d.category as ReadingRecordDiagnostic['category'], table: d.table, column: null, record: d.record, from: d.from, to: d.to });
     }
     if (f !== latest) continue;
-    out.level = f.level;
-    out.pages = f.pages.slice(0, RECORD43_MAX.pages).map(p => ({ recordId: f.recordId, n: p.n, prev: p.prev, hash: p.hash, conflict: p.conflict }));
-    out.obligations = f.obligations.slice(0, RECORD43_MAX.obligations).map(o => ({ kind: o.kind, table: o.table, ref: o.ref ? cut(o.ref, 40) : null, text: cut(o.text, 120), candidate: o.candidate }));
+    Object.assign(out, foldLevel(f));
     for (const e of f.ends) { const q = quoteOf(e.record, e.from, e.to); if (q && out.pageEnds.length < RECORD43_MAX.pageEnds && /^(?:C-[A-Z]{2,12}|P\d(?:-\d{2})?)$/.test(e.table))
       out.pageEnds.push({ recordId: f.recordId, page: e.page, table: e.table, state: e.state, written: e.written.slice(0, 64).map(x => cut(x, 16)), reserved: e.reserved.map(x => cut(x.id, 16)).slice(0, 16), remaining: e.remaining ? cut(e.remaining, 120) : null, quote: q }); }
     for (const r of f.rows.get('C-CHECK') ?? []) {

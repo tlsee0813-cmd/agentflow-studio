@@ -427,8 +427,15 @@ export const LINES_CORRECTION_USD = 0.07;
 // .46 (map-reading.19 kept): the v5 fold takes any row ID of one to three capitals and digits unique within its table (a prefix outside
 // the table's own form said quietly), C-DROP takes away a row by its written ID, a later text for a page replaces the earlier one (latest
 // wins, by paste order); the base and page requests name every table's row-ID form, list every obligation by table, and stop at page 20.
-export const PIPELINE_RECIPE = 'first-map-divided.46';
-export const LATER_PIPELINE_RECIPE = 'later-map-divided.46';
+// .47 (map-reading.19 kept): a v5 record goes as its fold, never its newest pastes cut at a length: one record per run of pages a pasted
+// text holds, in page order (Q1 first), each the current page lines as pasted (page heads, current rows, the ledger rows they cite, table
+// heads, 쪽 끝 rows), never a replaced page text, a dropped or replaced row, C-DROP or an uncited ledger row, one gap line where lines are
+// left out (an empty row 「| |」 inside a table, a blank line elsewhere; no anchored range of a v5 record crosses one); a first map takes up
+// to 16 records of 48,000 characters and 960 pieces, 160 KiB and 24 partitions (a later map 12); what does not fit leaves out Q3 rows,
+// then the least connected Q2 rows, each named in its record's note (under the shared bounds: page order, cut, read on next time); the
+// reading's level, pages, obligations and fold diagnostics are the whole record's (the project's pasted texts).
+export const PIPELINE_RECIPE = 'first-map-divided.47';
+export const LATER_PIPELINE_RECIPE = 'later-map-divided.47';
 /** .45 (RECORD_ASKS_V5_KO.md 12.4 (d)): the key sets beside a stage's INPUT: for each v5 record, the B, F and E IDs its own text cites
  * (each B with its name and one-line responsibility, F with its path, E with its grade and source), a closed set; nothing for an ask with
  * no v5 record (its stage inputs stay as .44 sent them). */
@@ -466,7 +473,7 @@ const eligible = ask => dividedKind(ask) !== null;
 
 /** First map.6 and later map.7 share bounded stages, retaining each original schema's validation and prompt. */
 export function createFirstMapPipeline({ store, deepseekKey, openaiKey, deepseekModel = 'deepseek-flash', mergeModel = 'gpt-6.1-sol', renderModel = deepseekModel, globalModel = renderModel, fetchImpl = globalThis.fetch,
-  targetChars = 3500, maxPartitions = 12, extractionTokens = 4096, mergeTokens = 16384, planReasoning = 'medium', planTimeoutMs = PLAN_TIMEOUT_MS, renderTokens = 8192, globalTokens = renderTokens, onProgress = () => {}, onStageOutput = null, onRejected = null, callProvider = callMapProvider } = {}) {
+  targetChars = 3500, maxPartitions = 12, firstMaxPartitions = 24, extractionTokens = 4096, mergeTokens = 16384, planReasoning = 'medium', planTimeoutMs = PLAN_TIMEOUT_MS, renderTokens = 8192, globalTokens = renderTokens, onProgress = () => {}, onStageOutput = null, onRejected = null, callProvider = callMapProvider } = {}) {
   if (!store || !MODELS.has(mergeModel)) throw new Error('Invalid first-map pipeline configuration');
   // The plan stage's own reasoning effort (STUDIO_MAP_PLAN_REASONING); render and global stages keep 'high'.
   if (!PLAN_REASONING.includes(planReasoning)) throw new Error('Invalid map plan reasoning configuration');
@@ -485,7 +492,7 @@ export function createFirstMapPipeline({ store, deepseekKey, openaiKey, deepseek
     extractionCorrection: extractionCorrections ? EXTRACTION_CORRECTION_RULES + EXTRACTION_CORRECTION_REASON : null, extractionCorrectionLimit: extractionCorrections,
     setAside: 'first-map-items.1',
     semanticRender: SEMANTIC_RENDER_RULES, finalGlobal: FINAL_GLOBAL_RULES, firstGlobal: FIRST_GLOBAL_RULES, firstFinalGlobal: FIRST_FINAL_GLOBAL_RULES, semanticRevisionLimit: SEMANTIC_REVISION_LIMIT,
-    deepseekModel, mergeModel, renderModel, renderProvider, globalModel, globalProvider, targetChars, maxPartitions, extractionTokens, mergeTokens, renderTokens, globalTokens, reasoning: 'high', planReasoning };
+    deepseekModel, mergeModel, renderModel, renderProvider, globalModel, globalProvider, targetChars, maxPartitions, firstMaxPartitions, extractionTokens, mergeTokens, renderTokens, globalTokens, reasoning: 'high', planReasoning };
   const identity = mapPipelineKey(recipe);
   const laterRecipe = { ...recipe, version: LATER_PIPELINE_RECIPE, blueprint: LATER_BLUEPRINT_PROMPT, merge: MAP7_PROMPT + MAP7_VOCABULARY + LATER_MERGE_RULES, firstGlobal: null, firstFinalGlobal: null,
     schemaRecipe: MAP7_RECIPE, guidance: MAP7_GUIDANCE_FRAME };
@@ -512,7 +519,8 @@ export function createFirstMapPipeline({ store, deepseekKey, openaiKey, deepseek
     const sources = ask.records.map(({ id, kind, note, basis, addedAt }) => ({ id, kind, note, basis, ...(addedAt === undefined ? {} : { addedAt }) }));
     const task = store.run(key, async () => {
       let partitions;
-      try { partitions = planMapPartitions(ask, { targetChars, maxPartitions }); }
+      // .47: a first map reads up to firstMaxPartitions (a whole folded v5 record), a later map maxPartitions.
+      try { partitions = planMapPartitions(ask, { targetChars, maxPartitions: later ? maxPartitions : firstMaxPartitions }); }
       catch (error) { throw new ApiError(['MAP_PARTITION_TOO_LARGE', 'MAP_PARTITION_LIMIT'].includes(error.message) ? error.message : 'INVALID_INPUT', 413); }
       const results = new Array(partitions.length);
       const controller = new AbortController();
@@ -761,13 +769,16 @@ export function createFirstMapPipeline({ store, deepseekKey, openaiKey, deepseek
     try { return await task; }
     finally { if (!signal?.aborted) { try { await reconcile(signal); } catch { /* the ledger keeps its reservation */ } } }
   }
+  // At most one extraction correction each (OpenAI rendering only) plus, on DeepSeek, every render call (groups, a semantic rewrite and a
+  // correction each) and every global call (global and global-final, a correction each), for a family reading at most `partitions`.
+  const deepseekCalls = partitions => partitions * (1 + extractionCorrections)
+    + (renderProvider === 'deepseek' ? (1 + SEMANTIC_REVISION_LIMIT) * (1 + CORRECTION_LIMIT) * Math.ceil(BLUEPRINT_PARTS_MAX / BLUEPRINT_PARTS_PER_FRAGMENT) : 0)
+    + (globalProvider === 'deepseek' ? (1 + SEMANTIC_REVISION_LIMIT) * (1 + CORRECTION_LIMIT) : 0);
   /** The wire alone (every existing caller); read() also returns the set-aside reasons for the job result. */
   const call = async (ask, signal, reportProgress = null) => (await read(ask, signal, reportProgress)).wire;
   return { model, identity, laterIdentity, eligible, ready, call, read, reconcile: () => reconcile(),
-    describe: () => ({ version: PIPELINE_RECIPE, laterVersion: LATER_PIPELINE_RECIPE, model, extractionModel: deepseekModel, mergeModel, renderModel, renderProvider, globalModel, globalProvider, maxPartitions, targetChars, planReasoning, planTokens: mergeTokens, planTimeoutMs, renderTokens, globalTokens,
+    describe: () => ({ version: PIPELINE_RECIPE, laterVersion: LATER_PIPELINE_RECIPE, model, extractionModel: deepseekModel, mergeModel, renderModel, renderProvider, globalModel, globalProvider, maxPartitions, firstMaxPartitions, targetChars, planReasoning, planTokens: mergeTokens, planTimeoutMs, renderTokens, globalTokens,
       // At most one extraction correction each (OpenAI rendering only) plus, on DeepSeek, every render call (groups, a semantic
       // rewrite and a correction each) and every global call (global and global-final, a correction each).
-      deepseekMaxCalls: maxPartitions * (1 + extractionCorrections)
-        + (renderProvider === 'deepseek' ? (1 + SEMANTIC_REVISION_LIMIT) * (1 + CORRECTION_LIMIT) * Math.ceil(BLUEPRINT_PARTS_MAX / BLUEPRINT_PARTS_PER_FRAGMENT) : 0)
-        + (globalProvider === 'deepseek' ? (1 + SEMANTIC_REVISION_LIMIT) * (1 + CORRECTION_LIMIT) : 0), parallel: 2, ...store.describe() }) };
+      deepseekMaxCalls: deepseekCalls(maxPartitions), firstDeepseekMaxCalls: deepseekCalls(firstMaxPartitions), parallel: 2, ...store.describe() }) };
 }

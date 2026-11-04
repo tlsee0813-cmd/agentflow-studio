@@ -12,7 +12,7 @@ import { validateDigestAsk, validateDigestReply } from '../dist/public/shared/di
 import { PLAN_PROMPT, PLAN2_PROMPT, PLAN3_PROMPT, SCOPE_PROMPT } from './plan-prompt.mjs';
 import { DIGEST_PROMPT, DIGEST2_PROMPT } from './digest-prompt.mjs';
 import { validateMapAsk, validateMapReply } from '../dist/public/shared/map-reading.js';
-import { mapRoute, dividedKind, dividedOfferOf, DEEPSEEK_CALLS_UNSTATED } from '../dist/public/shared/map-route.js';
+import { mapRoute, dividedKind, dividedOfferOf, withinRoute, DEEPSEEK_CALLS_UNSTATED } from '../dist/public/shared/map-route.js';
 import { SPAN_INDEX, textDigest } from '../dist/public/shared/evidence-span.js';
 import { redactSecrets } from '../dist/public/shared/secret.js';
 import { CONNECTOR_BODY_BYTES } from '../dist/public/shared/connector-limits.js';
@@ -291,19 +291,21 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
   const planConfig = { ...config, model: config.planModel ?? config.model };
   // The divided families this host offers (status map.first / map.later), from the pipeline's own description. The same object
   // decides a job's route (shared/map-route.ts), so what status advertises is what a job is bound to and run with.
-  const dividedOffer = prompt => {
-    const d = firstMapPipeline.describe(), whole = n => Number.isInteger(n) && n > 0;
+  // Recipe .47: a first map's own partition bound and DeepSeek call bound when the pipeline names them (a whole folded v5 record).
+  const dividedOffer = (prompt, first) => {
+    const d = firstMapPipeline.describe(), whole = n => Number.isInteger(n) && n > 0, partitions = first && whole(d.firstMaxPartitions) ? d.firstMaxPartitions : d.maxPartitions;
     return { model: firstMapPipeline.model, prompt, ready: firstMapPipeline.ready(), method: 'divided', monthlyUsd: d.monthlyUsd, runUsd: d.runUsd,
-      deepseekMaxCalls: d.deepseekMaxCalls ?? DEEPSEEK_CALLS_UNSTATED, ...(whole(d.maxPartitions) ? { partitions: d.maxPartitions } : {}), ...(whole(d.targetChars) ? { partitionChars: d.targetChars } : {}) };
+      deepseekMaxCalls: (first ? d.firstDeepseekMaxCalls : null) ?? d.deepseekMaxCalls ?? DEEPSEEK_CALLS_UNSTATED, ...(whole(partitions) ? { partitions } : {}), ...(whole(d.targetChars) ? { partitionChars: d.targetChars } : {}) };
   };
-  const dividedOffers = () => firstMapPipeline ? { first: dividedOffer(`m6-${firstMapPipeline.identity.slice(0, 12)}`), later: dividedOffer(`m7-${firstMapPipeline.laterIdentity.slice(0, 12)}`) } : {};
+  const dividedOffers = () => firstMapPipeline ? { first: dividedOffer(`m6-${firstMapPipeline.identity.slice(0, 12)}`, true), later: dividedOffer(`m7-${firstMapPipeline.laterIdentity.slice(0, 12)}`, false) } : {};
   /** The route offer of the key's own provider (never the executor's): single-call model and recipes, and the divided families. */
   const routeOffer = async () => ({ model: planConfig.model, prompt: await mapPromptId(), laterPrompt: await map7PromptId(), ...dividedOffers() });
   // Shape alone says whether an ask is divided here (this host offers both families whenever it has a pipeline), so the check
   // every /map and /ask request makes reads no pipeline store.
   const divided = ask => !!firstMapPipeline && dividedKind(ask) !== null;
   // A job is bound to its route's recipe and model; the browser chooses them with the same mapRoute from status.
-  const jobPrompt = async (_schema, ask) => { const route = mapRoute(ask, await routeOffer()); if (!route) throw new ApiError('UNSUPPORTED_VERSION', 400); return route.promptId; };
+  // Recipe .47: an ask past its route's bounds is refused before it is kept (a first-map-sized ask on a single route included).
+  const jobPrompt = async (_schema, ask) => { const route = mapRoute(ask, await routeOffer()); if (!route) throw new ApiError('UNSUPPORTED_VERSION', 400); if (!withinRoute(ask, route)) throw new ApiError('INPUT_TOO_LARGE', 413); return route.promptId; };
   const jobModel = ask => dividedOfferOf(ask, dividedOffers())?.model ?? planConfig.model;
   // AF102: a local preview host may give map jobs an executor of its own (a Node-only module it imports itself; never from env or
   // the browser, never in the Worker). It runs map jobs only; /ask, /plan, /scope, /digest and /map keep the DeepSeek key as they

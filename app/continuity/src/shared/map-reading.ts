@@ -14,7 +14,8 @@ import { secretLike } from './secret.js';
 import { recordKind, recordLabel, mapBasis, mapNoteHead } from './record-source.js';
 import { validateFrozenRequest, validateRequestContext, requestContext, validateRequestMatch, requestMatches, hasTarget, sameTarget, canReplace, MATCH_STANCES, recordTexts, readInterval, type RequestContext, type FrozenRequest, type RequestMatch, type RequestMatch3, type StoredRequestMatch, type MatchKind, type MatchStance, type RequestTarget } from './request-return.js';
 import { cellTexts, splitCells, rowsOf, rowsOfTexts, readRecordTables, PARTTYPE_TABLE, Q1_TABLES, Q2_TABLES, PROFILE_TABLES, type TableRow } from './record-table.js';
-import { record43, record45, record45Parts, actorsOf, variantGloss, glossVariants, type Reading43, type Reading45, type Part43, type Line43 } from './record-reading.js';
+import { record43, record45, record45Parts, actorsOf, variantGloss, glossVariants, foldLevel, FOLD_DIAGNOSTICS, RECORD_DIAGNOSTICS_MAX, type Reading43, type Reading45, type Part43, type Line43 } from './record-reading.js';
+import { v5Folds, pasteExcerpt, leftText, rangeOf, placeOf, piecesStand, type ExcerptPiece, type PasteExcerpt, type PageRun } from './record-excerpt.js';
 export { glossVariants };
 
 export const MAP_SCHEMA = 'studio.map.1' as const;
@@ -1277,6 +1278,20 @@ const PRIOR_BYTES = 12000;
 export const MAP_BYTES = 65536;
 export const MAP_RECORDS = 4;
 export const MAP_RECORD_CHARS = 12000;
+/** Recipe .47: a first map.6 ask (the divided first-map route) may carry a whole folded 기록 v5 record: up to 16 records (a reading stores
+ * at most 16), 48,000 characters and 960 pieces each, 160 KiB in all (the 8 measured v5 records folded: 2–6 texts, at most 40,228
+ * characters and 542 pieces in one, 128,183 bytes in all). Every other ask keeps the limits above. */
+export const MAP_FIRST_BYTES = 163840;
+export const MAP_FIRST_RECORDS = 16;
+export const MAP_FIRST_RECORD_CHARS = 48000;
+export const MAP_FIRST_SPANS = 960;
+/** The bounds an ask is built within: records, characters and pieces per record, bytes in all, and (divided) partitions. */
+export interface AskLimits { records: number; recordChars: number; bytes: number; spans?: number; partitions?: number; partitionChars?: number }
+/** The bounds of an ask by its shape alone: a first map.6 ask the first-map ones, every other ask the shared ones. */
+export const askLimits = (ask: { schemaVersion?: unknown; parts?: unknown; requests?: unknown; priors?: unknown }): Required<Pick<AskLimits, 'records' | 'recordChars' | 'bytes' | 'spans'>> =>
+  ask.schemaVersion === MAP6_SCHEMA && Array.isArray(ask.parts) && !ask.parts.length && (!Array.isArray(ask.requests) || !ask.requests.length) && (!Array.isArray(ask.priors) || !ask.priors.length)
+    ? { records: MAP_FIRST_RECORDS, recordChars: MAP_FIRST_RECORD_CHARS, bytes: MAP_FIRST_BYTES, spans: MAP_FIRST_SPANS }
+    : { records: MAP_RECORDS, recordChars: MAP_RECORD_CHARS, bytes: MAP_BYTES, spans: SPANS_PER_RECORD };
 const MIN_RECORD_CHARS = 1500, META_BYTES = 30000;
 export const CLAIM_LABEL: Record<ClaimKind, string> = {
   // A report of work says what it says: it may say something was not built. Neither label reads as built.
@@ -1422,6 +1437,10 @@ export function askRecords(ask: MapAsk): Map<string, { text: string; spans: Span
   askTexts.set(ask, out); return out;
 }
 
+/** Recipe .47: a range of a 기록 v5 record's text that holds a blank line or an empty row 「| |」. A v5 record goes as its fold
+ * (record-excerpt.ts): the pasted text's pieces joined by one such line where lines are not sent, so a range across one would join text
+ * that never stood together. No anchored range of a v5 record crosses either (a v5 row is one line; its own blank lines part its tables). */
+export const crossesGap = (text: string, from: number, to: number): boolean => /\n[ \t]*\r?\n|(?:^|\n)[ \t]*\|[ \t]*\|[ \t]*\r?(?:\n|$)/.test(text.slice(from, to)) && readRecordTables(text).version === 'v5';
 const KEY = /^s\d{1,3}$/, PART = /^P\d{2,3}$/, NEW = /^new:[a-z0-9_-]{1,24}$/, RECORD = /^[NR]\d{2,3}$/, CLAIM = /^C\d{2,3}$/, PRIOR = /^M\d{2}$/;
 const CONTROL = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
 const bytes = (v: unknown) => new TextEncoder().encode(JSON.stringify(v)).length;
@@ -1480,7 +1499,9 @@ export function validateMapAsk(value: unknown): MapAsk {
   const four = version === MAP4_SCHEMA || version === MAP5_SCHEMA || version === MAP6_SCHEMA || version === MAP7_SCHEMA, three = four || version === MAP3_SCHEMA, two = three || version === MAP2_SCHEMA;
   obj(value, ['schemaVersion', 'project', 'parts', 'relations', 'records', ...(two ? ['requests'] : []), ...(three ? ['priors'] : [])]);
   if (value.schemaVersion !== MAP_SCHEMA && !two) throw new Error('UNSUPPORTED_VERSION');
-  if (bytes(value) > MAP_BYTES) throw new Error('INPUT_TOO_LARGE');
+  // Recipe .47: a first map.6 ask is held to the first-map bounds (a whole folded v5 record), every other ask to the shared ones.
+  const bound = askLimits(value);
+  if (bytes(value) > bound.bytes) throw new Error('INPUT_TOO_LARGE');
   obj(value.project, ['name', 'purpose']); str(value.project.name, 120); if (value.project.purpose !== null) str(value.project.purpose, 2000);
   arr(value.parts, 200);
   const parts = new Set<string>(), claims = new Set<string>();
@@ -1494,7 +1515,7 @@ export function validateMapAsk(value: unknown): MapAsk {
   for (const p of value.parts as MapAskPart[]) check(p.parentId === null || (parts.has(p.parentId) && p.parentId !== p.id));
   arr(value.relations, 400);
   for (const r of value.relations) { obj(r, ['from', 'to', 'kind', 'note']); check(parts.has(r.from as string) && parts.has(r.to as string) && r.from !== r.to && RELS.includes(r.kind as RelationKind)); str(r.note, 200, true); }
-  arr(value.records, MAP_RECORDS); check(value.records.length > 0);
+  arr(value.records, bound.records); check(value.records.length > 0);
   const records = new Set<string>();
   for (const r of value.records) {
     const hasTime = !!r && typeof r === 'object' && Object.hasOwn(r, 'addedAt');
@@ -1503,14 +1524,14 @@ export function validateMapAsk(value: unknown): MapAsk {
     if (!four) str(r.text, MAP_RECORD_CHARS);
     else {
       // The pieces are exactly what span.2 makes of the text they join into: no other boundary, alias or mark.
-      str(r.lead, MAP_RECORD_CHARS, true); check(!(r.lead as string).trim()); arr(r.spans, SPANS_PER_RECORD); check(r.spans.length > 0);
+      str(r.lead, bound.recordChars, true); check(!(r.lead as string).trim()); arr(r.spans, bound.spans); check(r.spans.length > 0);
       for (const x of r.spans) {
         check(!!x && typeof x === 'object' && !Array.isArray(x)); const keys = Object.keys(x as object);
         check(keys.includes('s') && keys.includes('t') && keys.every(k => ['s', 't', 'k', 'q', 'more'].includes(k)));
-        str((x as SpanWire).t, MAP_RECORD_CHARS); check(typeof (x as SpanWire).s === 'string');
+        str((x as SpanWire).t, bound.recordChars); check(typeof (x as SpanWire).s === 'string');
       }
       const d = decodeSpans(r.id as string, { lead: r.lead as string, spans: r.spans as SpanWire[] });
-      check(!!d); str(d!.text, MAP_RECORD_CHARS);
+      check(!!d); str(d!.text, bound.recordChars);
     }
     if (hasTime) { str(r.addedAt, 30); check(Number.isFinite(Date.parse(r.addedAt)) && new Date(r.addedAt).toISOString() === r.addedAt); }
   }
@@ -1676,6 +1697,8 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
     }
     const at = (five ? resolveEvidenceRange : resolveRef)(v as string, rec!, got!.text, got!.spans!);
     if (!at || at.quote.length > ANCHOR_QUOTE_MAX) bad();
+    // Recipe .47: a v5 record's range never crosses a gap line (where lines of the pasted text are not sent: crossesGap).
+    if (crossesGap(got!.text, at!.from, at!.to)) bad();
     return { record: rec!, quote: at!.quote, from: at!.from, to: at!.to };
   };
   /** A quote too long to keep: what rests on it alone is left out of the reply rather than the reply refused. */
@@ -1691,6 +1714,7 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
     if (!alias) throw new MapReplyError(path, 'reference', 'not-anchor');
     const rec = alias.slice(0, alias.indexOf('.')), got = texts.get(rec), at = got?.spans ? resolveRange(alias, rec, got.text, got.spans) : null;
     if (!at) throw new MapReplyError(path, 'reference', alias);
+    if (crossesGap(got!.text, at.from, at.to)) throw new MapReplyError(path, 'reference', alias);
     if (!owners.has(rec)) throw new MapReplyError(path, 'condition-source', rec);
     const raw = got!.text.slice(at.from, at.to), words = raw.trim(), from = at.from + raw.indexOf(words);
     if (!words || words.length > max) throw new MapReplyError(path, 'condition-length', alias);
@@ -2642,7 +2666,7 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
     material = many(value.material, 6, 'material').flatMap((x, i) => soft(() => {
       object(x, ['at', 'what'], `material[${i}]`); field(x.what, 120, false, `material[${i}].what`); need(typeof x.at === 'string', `material[${i}].at`, 'shape');
       const rec = /^([NR]\d{2,3})\./.exec(x.at as string)?.[1], got = rec ? texts.get(rec) : undefined;
-      const at = got?.spans ? resolveRange(x.at as string, rec!, got.text, got.spans) : null;
+      const found = got?.spans ? resolveRange(x.at as string, rec!, got.text, got.spans) : null, at = found && !crossesGap(got!.text, found.from, found.to) ? found : null;
       if (!at && six) throw new MapReplyError(`material[${i}].at`, 'reference', (x.at as string).slice(0, 40)); check(!!at, code);
       return [origin({ record: rec!, from: at!.from, to: at!.to, what: (x.what as string).trim() }, `material[${i}]`)];
     }) ?? []);
@@ -3336,10 +3360,27 @@ export interface MapRecordSource { id: string; kind: MapAskRecord['kind']; text:
 /** A normal record as every map request reads it (unread or an explicit request comparison): pasted as it came, or a provided
  * source, kind evidence, with its declaration. Only the record's own text is sent as its text. */
 const normalSource = (r: PastedRecord, from: number): MapRecordSource => ({ id: r.id, kind: recordKind(r), text: r.text, at: r.at, label: recordLabel(r), from, ...(r.evidence ? { evidence: r.evidence } : {}) });
+/** What one sent record stands for: the record, the characters [from, to) of its total read by this reading, and the excerpt sent
+ * (text). Recipe .47: a 기록 v5 record goes as its fold (record-excerpt.ts), one record of the ask per run of its pages a pasted text
+ * holds: pieces of that text (each [from, to) of it at `at` of the excerpt, joined by one gap line where lines are not sent) and how many
+ * of its rows were left out for room or cut for next time (left); its [from, to) runs from its first piece to the run's end, or the
+ * text's end for the text's last run (what is not sent no longer stands), or to a cut. Several records may stand for one pasted text.
+ * Every other record has neither. */
+export interface MapRecordRef { id: string; from: number; to: number; total: number; text: string; pieces?: ExcerptPiece[]; left?: number }
+/** Sent only in part: a v5 fold with rows left out, any other excerpt that does not run over the whole record. */
+export const recordPartial = (x: MapRecordRef): boolean => x.pieces ? (x.left ?? 0) > 0 : x.to < x.total || x.from > 0;
+/** An excerpt's offset (or range) as the record's own: once shifted, or through the pieces of a v5 fold (null: it crosses a gap). */
+export const recordAt = (x: MapRecordRef, from: number, to: number): { from: number; to: number } | null => x.pieces ? rangeOf(x.pieces, from, to) : { from: x.from + from, to: x.from + to };
+/** How many partitions of at most `target` core characters the divided pipeline cuts these records into (map-route.ts partitionGroups). */
+function partitionsOf(records: readonly MapAskRecord[], target: number): number {
+  let groups = 0, size = 0, open = false;
+  for (const r of records) for (const s of r.spans ?? []) { const len = s.t.length; if (open && size + len > target) { groups++; size = 0; } open = true; size += len; }
+  return groups + (open ? 1 : 0);
+}
 export interface MapInput {
   ask: MapAsk;
   /** alias → area id, record id, earlier claim */
-  parts: Map<string, string>; records: Map<string, { id: string; from: number; to: number; total: number; text: string }>; claims: Map<string, { reading: string; index: number }>;
+  parts: Map<string, string>; records: Map<string, MapRecordRef>; claims: Map<string, { reading: string; index: number }>;
   /** Records not yet read, how many go now, and how many go only in part. */
   coverage: { fresh: number; sent: number; partial: number };
   /** The last reading when this request was made: an answer is applied only on top of it. */
@@ -3369,7 +3410,7 @@ export function unreadRecords(p: Project, view: StudioView): MapRecordSource[] {
  * where a piece ends (a cut excerpt never leaves its last sentence half sent), with requests and priors always present.
  * MAP7_SCHEMA (a server that also advertises the later m7 recipe): the ask is built as map.6 and, once complete, goes as map.7 when it
  * is a later reading (firstAsk false); a first map stays map.6. */
-export function buildMapAsk(p: Project, view: StudioView, requests: FrozenRequest[] = [], selectedRequestId?: string, anchored: boolean | typeof MAP5_SCHEMA | typeof MAP6_SCHEMA | typeof MAP7_SCHEMA = false): MapInput {
+export function buildMapAsk(p: Project, view: StudioView, requests: FrozenRequest[] = [], selectedRequestId?: string, anchored: boolean | typeof MAP5_SCHEMA | typeof MAP6_SCHEMA | typeof MAP7_SCHEMA = false, limits?: AskLimits): MapInput {
   const anchoredSchema = anchored === MAP6_SCHEMA || anchored === MAP7_SCHEMA ? MAP6_SCHEMA : anchored === MAP5_SCHEMA ? MAP5_SCHEMA : MAP4_SCHEMA;
   const parts = new Map<string, string>(), alias = new Map<string, string>(), claims = new Map<string, { reading: string; index: number }>();
   view.parts.slice(0, 200).forEach((x, i) => { const a = `P${String(i + 1).padStart(2, '0')}`; parts.set(a, x.id); alias.set(x.id, a); });
@@ -3400,9 +3441,16 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
     unread = [...p.pasted.filter(r => !scenario.has(r.id)).map(r => normalSource(r, prefix(r.id))),
       ...view.records.map(r => ({ id: r.id, kind: r.kind, text: r.text, at: r.at, label: '프로젝트 기록', from: prefix(r.id) }))].filter(r => r.from < r.text.length).sort((a, b) => b.at.localeCompare(a.at));
   }
-  const records = new Map<string, { id: string; from: number; to: number; total: number; text: string }>();
-  const input: MapInput = { ask, parts, records, claims, coverage: { fresh: unread.length, sent: 0, partial: 0 }, after: p.readings.filter(isMapReading).at(-1)?.id ?? null, problem: null };
-  if (!unread.length) return { ...input, problem: 'NOTHING_NEW' };
+  const records = new Map<string, MapRecordRef>();
+  // Recipe .47: an anchored ask sends a 기록 v5 record as its fold (record-excerpt.ts); a pasted text of one that holds no current page
+  // (every page of it replaced by a later text) has nothing to send and is no fresh record. Without a v5 record nothing changes.
+  const folds = anchored ? v5Folds(p.pasted.filter(r => !scenarioReadRecords(p).has(r.id))) : [];
+  const unreadFrom = new Map(unread.map(r => [r.id, r.from]));
+  // A text is fresh while one of its runs of current pages runs past what was read of it (a page waiting after a gap is not yet).
+  const v5Ids = new Set(folds.flatMap(f => [...f.pastes.map(x => x.id), ...f.stale])), v5Sendable = new Set(folds.flatMap(f => f.runs.filter(x => unreadFrom.has(x.paste.id) && x.to > unreadFrom.get(x.paste.id)!).map(x => x.paste.id)));
+  const fresh = folds.length ? unread.filter(r => !v5Ids.has(r.id) || v5Sendable.has(r.id)).length : unread.length;
+  const input: MapInput = { ask, parts, records, claims, coverage: { fresh, sent: 0, partial: 0 }, after: p.readings.filter(isMapReading).at(-1)?.id ?? null, problem: null };
+  if (!fresh) return { ...input, problem: 'NOTHING_NEW' };
   // All comparable contexts or a request the person explicitly chose. Full origins are never sent repeatedly per item.
   if (requests.length) {
     for (const r of requests) { validateFrozenRequest(r); if (r.projectId !== p.id) throw new Error('INVALID_REQUEST_SCOPE'); }
@@ -3445,8 +3493,93 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
     return t.slice(0, end);
   };
   const put = (rec: MapAskRecord, t: string) => { if (anchored) { const w = encodeSpans(rec.id, t); rec.lead = w.lead; rec.spans = w.spans; } else rec.text = t; };
+  const basisOf = (r: MapRecordSource) => r.evidence ? mapBasis(r.evidence, r.at) : `${r.label} · ${r.at} (가져온 시각이며 원문 작성·판본 시각이 아님)`;
+  const earlierOf = (r: MapRecordSource) => ask.requests?.filter(q => Date.parse(r.at) < Date.parse(q.createdAt)).map(q => q.id) ?? [];
+  // Recipe .47: the v5 folds first (the record standing now first), each as runs of its pages in page order (one record of the ask per
+  // run of pages one pasted text holds in a row), so the ask reads the record's pages in order: Q1 first, then Q2, then Q3. Within the
+  // first-map bounds of the divided route (limits with partitions) a fold goes whole when it fits; else Q3 rows are left out first, then
+  // the Q2 rows of the least connected parts, as few as fit, each named in its record's note (the record counts as partial); Q1 rows,
+  // page heads, 쪽 끝 rows and the cited ledger rows always go. Within any other bounds, and when even that does not fit, the runs go in
+  // page order as far as they fit, the last cut at a line: what is cut is read next time (its read interval ends where the cut begins),
+  // and no later page goes before it.
+  const bound: Required<Pick<AskLimits, 'records' | 'recordChars' | 'bytes' | 'spans'>> & AskLimits = { records: MAP_RECORDS, recordChars: MAP_RECORD_CHARS, bytes: MAP_BYTES, spans: SPANS_PER_RECORD, ...(limits ?? {}) } as Required<Pick<AskLimits, 'records' | 'recordChars' | 'bytes' | 'spans'>> & AskLimits;
+  const sources = new Map(unread.map(r => [r.id, r]));
+  const pastedOrder = new Map(p.pasted.map((r, i) => [r.id, i]));
+  const byNewest = folds.map(f => ({ f, at: Math.max(-1, ...f.pastes.filter(x => v5Sendable.has(x.id)).map(x => pastedOrder.get(x.id) ?? -1)) })).filter(x => x.at >= 0).sort((a, b) => b.at - a.at);
+  type Placed = { rec: MapAskRecord; ref: MapRecordRef; ex: PasteExcerpt; run: PageRun };
+  for (const { f } of byNewest) {
+    // A run an earlier reading read to its end is not sent again (only its page head and closing lines would go).
+    const runs = f.runs.filter(x => v5Sendable.has(x.paste.id) && x.to > (unreadFrom.get(x.paste.id) ?? 0)), sent = new Map(runs.map(x => [x.paste.id, unreadFrom.get(x.paste.id) ?? 0]));
+    const base = ask.records.length, startN = n.N, room = Math.max(0, bound.records - base);
+    const leaveOf = (k: number) => new Set(f.droppable.slice(0, k).map(d => d.key));
+    const record = (run: PageRun, ex: PasteExcerpt, at: number, last: boolean): Placed => {
+      const px = run.paste, r = sources.get(px.id)!, id = `N${String(startN + at + 1).padStart(2, '0')}`, i = runs.indexOf(run);
+      const rec: MapAskRecord = { id, kind: r.kind, note: '', basis: basisOf(r), ...(ask.requests ? { addedAt: r.at } : {}) }; put(rec, ex.text);
+      const left = ex.left.length ? ` · 분량상 빼고 보낸 행 ${ex.left.length}개: ${leftText(ex.left)}` : '';
+      const cutNote = ex.cut !== null ? ` · 분량상 이 원문 ${ex.cut + 1}자부터(행 ${ex.cutRows}개)는 다음 정리에서 읽음` : '';
+      const later = last && i < runs.length - 1 ? ` · 이번에 보내지 못한 쪽: ${runs.slice(i + 1).flatMap(x => x.pages).join('·')}` : '';
+      const held = last && f.held.length ? ` · 앞 쪽이 빠져 아직 접지 않은 쪽: ${f.held.join('·')}` : '';
+      const earlier = earlierOf(r), before = earlier.length ? ` · 다음 요청문 생성 전에 붙인 이전 자료이며 후속 반환 근거가 아님: ${earlier.join(', ')}` : '';
+      rec.note = cut(`기록 v5 ${f.recordId} 접은 판(쪽 ${run.pages.join('·')}): 지금 행만 원문 그대로 보냄. 뒤 판이 대신한 쪽·C-DROP으로 지운 행·교체된 행·인용 안 된 장부 행은 빼고 뺀 자리에 줄 하나(표 안은 빈 행 「| |」, 밖은 빈 줄)${left}${cutNote}${later}${held}${before}`, 600);
+      // The read interval: the run's pages (a later run of the same text is its own record), the last run of a text to the text's end
+      // (what is not sent no longer stands); a cut, or a page of the text waiting after a gap, ends it where that begins (that part is
+      // read by a later reading).
+      const end = ex.pieces.at(-1)!.to, waits = f.fold.held.filter(h => h.record === px.id).map(h => h.from), lastOfText = !runs.slice(i + 1).some(x => x.paste === px);
+      const to = ex.cut !== null ? Math.max(end, ex.cut) : !lastOfText ? Math.max(end, run.to) : waits.length ? Math.max(end, Math.min(...waits)) : px.text.length;
+      return { rec, ref: { id: px.id, from: ex.pieces[0]!.from, to, total: px.text.length, text: ex.text, pieces: ex.pieces, left: ex.left.length + ex.cutRows }, ex, run };
+    };
+    const within = (out: Placed[]) => {
+      if (!out.length || out.length > room || out.some(x => x.ex.text.length > bound.recordChars || (x.rec.spans?.length ?? 0) > bound.spans)) return false;
+      const all = [...ask.records, ...out.map(x => x.rec)];
+      return bytes({ ...ask, records: all }) <= bound.bytes - 256 && (!bound.partitions || !bound.partitionChars || partitionsOf(all, bound.partitionChars) <= bound.partitions);
+    };
+    // Every run, whole, with the k first rows of the leaving order left out.
+    const whole = (k: number): Placed[] | null => {
+      if (runs.length > room) return null;
+      const leave = leaveOf(k), out: Placed[] = [];
+      for (const run of runs) { const ex = pasteExcerpt(f, run.paste, leave, sent, Infinity, run.pages); if (ex) out.push(record(run, ex, out.length, run === runs.at(-1))); }
+      return out;
+    };
+    // The runs in page order as far as they fit, the last one cut at a line (cap shrinking by a tenth down to a readable excerpt).
+    const prefix = (k: number): Placed[] => {
+      const leave = leaveOf(k), out: Placed[] = [];
+      for (const run of runs) {
+        if (out.length >= room) break;
+        let cap = Infinity, got: Placed | null = null;
+        for (let g = 0; g < 40; g++) {
+          const ex = pasteExcerpt(f, run.paste, leave, sent, cap, run.pages); if (!ex) break;
+          const one = record(run, ex, out.length, true);
+          if (within([...out, one])) { got = one; break; }
+          const next = Math.floor(Math.min(cap, ex.text.length, bound.recordChars) * (cap === Infinity && ex.text.length > bound.recordChars ? 1 : 0.9));
+          if (next < MIN_RECORD_CHARS) break; cap = next;
+        }
+        if (!got) break;
+        out.push(got);
+        if (got.ex.cut !== null) break;
+      }
+      // Only the last record's note says what goes next time (the pages after it).
+      const final = out.map((x, i) => record(x.run, x.ex, i, i === out.length - 1));
+      while (final.length && !within(final)) final.pop();
+      return final;
+    };
+    let chosen: Placed[] | null = null;
+    if (bound.partitions) {
+      const all = whole(0);
+      if (all && within(all)) chosen = all;
+      else { const most = whole(f.droppable.length); if (most && within(most)) {
+        // As few rows left out as fit (the leaving order is fixed: Q3, then the least connected Q2 rows).
+        let lo = 1, hi = f.droppable.length;
+        while (lo < hi) { const mid = (lo + hi) >> 1; const t = whole(mid); if (t && within(t)) hi = mid; else lo = mid + 1; }
+        chosen = whole(lo);
+      } }
+      chosen ??= prefix(f.droppable.length);
+    } else chosen = prefix(0);
+    for (const x of chosen ?? []) { ask.records.push(x.rec); records.set(x.rec.id, x.ref); n.N++; }
+  }
+  const v5Placed = ask.records.length > 0;
   for (const r of unread) {
-    if (ask.records.length >= MAP_RECORDS) break;
+    if (v5Ids.has(r.id)) continue;
+    if (ask.records.length >= (v5Placed ? bound.records : MAP_RECORDS)) break;
     const letter = r.kind === 'pasted' ? 'N' : 'R', id = `${letter}${String(++n[letter]).padStart(2, '0')}`;
     // Only the unread part goes: what is quoted is checked against exactly this excerpt.
     const rest = r.text.slice(r.from);
@@ -3466,11 +3599,12 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
     };
     rec.note = note(); ask.records.push(rec);
     // A record takes the room that is left, down to a readable excerpt; one that cannot is left for the next reading.
-    for (let g = 0; bytes(ask) > MAP_BYTES - 256 && text.length > MIN_RECORD_CHARS && g < 40; g++) { const shorter = cut(text, Math.floor(text.length * 0.9)); text = anchored ? aligned(rest, shorter) : shorter; put(rec, text); rec.note = note(); }
-    if (bytes(ask) > MAP_BYTES - 256) { ask.records.pop(); n[letter]--; break; }
+    const room = v5Placed ? bound.bytes : MAP_BYTES;
+    for (let g = 0; bytes(ask) > room - 256 && text.length > MIN_RECORD_CHARS && g < 40; g++) { const shorter = cut(text, Math.floor(text.length * 0.9)); text = anchored ? aligned(rest, shorter) : shorter; put(rec, text); rec.note = note(); }
+    if (bytes(ask) > room - 256) { ask.records.pop(); n[letter]--; break; }
     records.set(id, { id: r.id, from: r.from, to: r.from + text.length, total: r.text.length, text });
   }
-  input.coverage = { fresh: unread.length, sent: ask.records.length, partial: [...records.values()].filter(x => x.to < x.total || x.from > 0).length };
+  input.coverage = { fresh, sent: ask.records.length, partial: [...records.values()].filter(recordPartial).length };
   if (!ask.records.length) return { ...input, problem: 'TOO_LARGE' };
   const leak = ask.records.find(x => secretLike(records.get(x.id)!.text));
   if (leak) return { ...input, problem: { secret: leak.id } };
@@ -3493,7 +3627,8 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   if (done.some(r => r.hash === meta.hash)) throw new Error('ALREADY_APPLIED');
   if (project.readings.length >= READINGS_LIMIT) throw new Error('READINGS_FULL');
   // Anchored: every excerpt is still exactly the record's text where it was read (the record, its length and the interval).
-  if (four) for (const r of input.records.values()) { const t = recordText(project, r.id); if (t === null || t.length !== r.total || t.slice(r.from, r.to) !== r.text) throw new Error('MAP_CHANGED'); }
+  // Recipe .47: a v5 fold's pieces each still stand where they were read (record-excerpt.ts piecesStand).
+  if (four) for (const r of input.records.values()) { const t = recordText(project, r.id); if (t === null || (r.pieces ? !piecesStand(t, r.total, r.text, r.pieces) : t.length !== r.total || t.slice(r.from, r.to) !== r.text)) throw new Error('MAP_CHANGED'); }
   // And every passage of the reply is the excerpt's own text where it says it stands (a reply decoded for another request is not).
   if (four) {
     const at = (q: MapReplyQuote) => { const source = input.records.get(q.record); return !!source && q.from !== undefined && q.to !== undefined && source.text.slice(q.from, q.to) === q.quote; };
@@ -3513,7 +3648,8 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   const freshQuote = (q: MapReplyQuote) => {
     const source = input.records.get(q.record), at = !source ? null : q.from !== undefined && q.to !== undefined ? { at: q.from, length: q.to - q.from } : quoteAt(source.text, q.quote);
     if (!source || !at) return false;
-    let end = source.from + at.at; const limit = end + at.length;
+    const place = recordAt(source, at.at, at.at + at.length); if (!place) return false;
+    let end = place.from; const limit = place.to;
     for (const r of covered.filter(r => r.id === source.id && r.to > end && r.from < limit).sort((a, b) => a.from - b.from)) {
       if (r.from > end) return true; end = Math.max(end, r.to); if (end >= limit) return false;
     }
@@ -3533,14 +3669,17 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   const lineQuote = (r: MapReply['relations'][number]): MapReplyQuote => ({ record: r.record, quote: r.quote, ...(r.span ?? {}) });
   for (const r of reply.relations) if (freshQuote(lineQuote(r)) && !own(lineQuote(r))) asMaterial.push({ what: 'relation', name: `${r.from}→${r.to}`, reason: 'material' });
   const mapRelations = reply.relations.filter(r => usable(lineQuote(r)));
-  const comparisonOnly = frozen.length > 0 && [...input.records].every(([record, source]) => !freshQuote({ record, quote: source.text }));
+  const freshRecord = (record: string, source: MapRecordRef) => source.pieces
+    ? source.pieces.some(x => freshQuote({ record, quote: source.text.slice(x.at, x.at + x.to - x.from), from: x.at, to: x.at + x.to - x.from })) : freshQuote({ record, quote: source.text });
+  const comparisonOnly = frozen.length > 0 && [...input.records].every(([record, source]) => !freshRecord(record, source));
   const active = (id: string) => project.space.areas.some(a => a.id === id && !a.archived);
   for (const id of input.parts.values()) if (!active(id)) throw new Error('MAP_CHANGED');
   // Anchored: the record's own passage where it was read, [from, to) of the record (the excerpt's offset added once).
   const real = (q: MapReplyQuote): ReadingQuote => {
     const source = input.records.get(q.record)!;
     if (q.from === undefined || q.to === undefined) return { record: source.id, quote: q.quote };
-    return { record: source.id, quote: q.quote, from: source.from + q.from, to: source.from + q.to };
+    const place = recordAt(source, q.from, q.to); if (!place) throw new Error('INVALID_RESPONSE');
+    return { record: source.id, quote: q.quote, from: place.from, to: place.to };
   };
   // map-reading.7 (every map.6–7 reply; stored as map-reading.16): each optional field is stored, null (files: []) when the reply did not say it, so the
   // stored shape is exact. A part's state stands on its own passage like a claim: one inside material or already read is not kept.
@@ -3599,10 +3738,29 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   const line43 = (r: MapReply['relations'][number]): Pick<ReadingRelation, 'when' | 'optional' | 'variantRef' | 'crosses' | 'cadenceKind' | 'payloadRef' | 'via' | 'member' | 'claimNature' | 'cites'> => ({
     when: r.when ?? null, optional: r.optional === true, variantRef: r.variantRef ?? null, crosses: r.crosses ?? null, cadenceKind: r.cadenceKind ?? null, payloadRef: r.payloadRef ?? null, via: r.via ?? null, member: r.member ?? null,
     claimNature: r.claimNature ?? null, cites: structuredClone(r.cites ?? []) });
+  // Recipe .47 (the program reads the whole folded record): a v5 record that went as its fold has the reading's level, pages and
+  // obligations, and its fold diagnostics, from the fold of every pasted text of it in this project, never from the ask's own fold (which
+  // lacks what was not sent: a replaced row's original, a dropped row, the rows left out for room). A diagnostic is kept where a read
+  // interval of this reading holds it.
+  const fullFold = (() => {
+    const first = [...input.records.values()].find(r => r.pieces), head = first ? readRecordTables(first.text).pages[0] : undefined; if (!head) return null;
+    const scenario = scenarioReadRecords(project), key = `${head.recordId}@${head.basis}`;
+    return v5Folds(project.pasted.filter(r => !scenario.has(r.id))).find(v => v.key === key)?.fold ?? null;
+  })();
+  const foldDiagnostics = (kept: NonNullable<MapReading['recordDiagnostics']>): NonNullable<MapReading['recordDiagnostics']> => {
+    if (!fullFold) return kept;
+    const out = [...kept], folded = [...input.records.values()].filter(r => r.pieces);
+    for (const d of fullFold.diagnostics) {
+      if (out.length >= RECORD_DIAGNOSTICS_MAX) break;
+      if (!FOLD_DIAGNOSTICS.has(d.category) || d.from >= d.to || !folded.some(r => r.id === d.record && r.from <= d.from && d.to <= r.to)) continue;
+      out.push({ category: d.category as NonNullable<MapReading['recordDiagnostics']>[number]['category'], table: d.table, column: null, record: d.record, from: d.from, to: d.to });
+    }
+    return out;
+  };
   // map-reading.19 (recipe .45): the v5 record's level, pages, obligations, C-END rows, C-CHECK rows, C-HEAD defaults and first lines.
   const reading45 = (): Pick<MapReading, 'level' | 'pages' | 'obligations' | 'pageEnds' | 'checks' | 'defaults' | 'firstLines'> => ({
     level: reply.level ?? null, pages: structuredClone(reply.pages ?? []), obligations: structuredClone(reply.obligations ?? []), pageEnds: fresh(reply.pageEnds), checks: fresh(reply.checks),
-    defaults: fresh(reply.defaults), firstLines: [...reply.firstLines ?? []] });
+    defaults: fresh(reply.defaults), firstLines: [...reply.firstLines ?? []], ...(fullFold ? foldLevel(fullFold) : {}) });
   const reading43 = (): Pick<MapReading, 'basisScope' | 'focus' | 'projectStatus' | 'gatesNone' | 'coverage' | 'artifacts' | 'profileTables' | 'recordExtras' | 'recordDiagnostics'> => ({
     basisScope: reply.basisScope && usable(reply.basisScope.quote) ? { text: reply.basisScope.text, quote: real(reply.basisScope.quote) } : null,
     focus: reply.focus && usable(reply.focus.quote) ? { ...structuredClone(reply.focus), quote: real(reply.focus.quote) } : null,
@@ -3610,7 +3768,8 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
     coverage: fresh(reply.coverage), artifacts: fresh(reply.artifacts),
     profileTables: (reply.profileTables ?? []).map(t => ({ table: t.table, header: [...t.header], rows: fresh(t.rows), none: t.none && usable(t.none.quote) ? { text: t.none.text, quote: real(t.none.quote) } : null })),
     recordExtras: (reply.recordExtras ?? []).map(t => ({ table: t.table, header: [...t.header], rows: fresh(t.rows) })),
-    recordDiagnostics: (reply.recordDiagnostics ?? []).flatMap(d => { const source = input.records.get(d.record); return source ? [{ ...d, record: source.id, from: source.from + d.from, to: source.from + d.to }] : []; }) });
+    recordDiagnostics: foldDiagnostics((reply.recordDiagnostics ?? []).flatMap(d => { const source = input.records.get(d.record), place = source ? recordAt(source, d.from, d.to) : null;
+      return source && place && !(source.pieces && FOLD_DIAGNOSTICS.has(d.category)) ? [{ ...d, record: source.id, from: place.from, to: place.to }] : []; })) });
   let p = project;
   const ids = new Map(input.parts), skipped: ReadingSkip[] = [...asMaterial], candidates: ReadingCandidate[] = [], parts: ReadingPart[] = [], created: string[] = [];
   const parentOf = (id: string) => p.space.containment.parents[id] ?? null;
@@ -3685,7 +3844,9 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   // Anchored: a passage of material is no report of this project's request, and none is kept as one.
   const matches: StoredRequestMatch[] = (reply.matches ?? []).filter(m => own(m)).map(({ from: rf, to: rt, ...m }) => {
     // An earlier version stores a returned report's place against its labelled Source.text (as such readings always were).
-    const source = input.records.get(m.record)!, at = rf !== undefined && rt !== undefined ? { at: rf, length: rt - rf } : quoteAt(source.text, m.quote)!, shift = four ? 0 : texts.get(source.id)?.shift ?? 0, stored = { ...m, record: source.id, from: shift + source.from + at.at, to: shift + source.from + at.at + at.length };
+    const source = input.records.get(m.record)!, at = rf !== undefined && rt !== undefined ? { at: rf, length: rt - rf } : quoteAt(source.text, m.quote)!, shift = four ? 0 : texts.get(source.id)?.shift ?? 0;
+    const place = recordAt(source, at.at, at.at + at.length); if (!place) throw new Error('INVALID_RESPONSE');
+    const stored = { ...m, record: source.id, from: shift + place.from, to: shift + place.to };
     if (!three) return stored;
     const { replaces: key, ...rest } = stored as typeof stored & { replaces: string | null };
     const ref = key === null ? undefined : input.priors?.get(key), cur = ref && now.find(x => x.reading === ref.reading && x.index === ref.index);
@@ -3695,12 +3856,13 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   const reading: MapReading = { version: six ? 'map-reading.19' : four ? 'map-reading.4' : three ? 'map-reading.3' : withRequests ? 'map-reading.2' : 'map-reading.1', id: meta.id, at: meta.at, model: meta.model, prompt: meta.prompt, hash: meta.hash,
     ...(six ? { basisAt: reply.basisAt ?? null, basisVersion: reply.basisVersion ?? null, portMap, ...reading43(), ...reading45() } : {}),
     records: [...input.records.values()].map(r => { const shift = four ? 0 : texts.get(r.id)?.shift ?? 0;
-      return shift ? { id: r.id, from: r.from + shift, to: r.to + shift, total: texts.get(r.id)!.raw.length } : { id: r.id, from: r.from, to: r.to, total: r.total, ...(four ? { digest: textDigest(r.text) } : {}) }; }),
+      return shift ? { id: r.id, from: r.from + shift, to: r.to + shift, total: texts.get(r.id)!.raw.length } : { id: r.id, from: r.from, to: r.to, total: r.total, ...(four ? { digest: textDigest(r.pieces ? recordText(project, r.id)!.slice(r.from, r.to) : r.text) } : {}) }; }),
     ...(six ? { exclusions: (EXCLUSIONS.get(reply) ?? []).map(x => { const source = x.record ? input.records.get(x.record) : null;
-      return { ...x, record: source?.id ?? null, from: source && x.from !== null ? source.from + x.from : null, to: source && x.to !== null ? source.from + x.to : null }; }) } : {}),
+      const at = source && x.from !== null && x.to !== null ? (source.pieces ? { from: placeOf(source.pieces, x.from), to: placeOf(source.pieces, x.to) } : { from: source.from + x.from, to: source.from + x.to }) : null;
+      return { ...x, record: source?.id ?? null, from: at ? at.from : null, to: at ? at.to : null }; }) } : {}),
     summary: comparisonOnly ? '이미 지도에 읽은 원문을 고른 요청과 다시 대조했어요.' : reply.summary, parts, relations, candidates: candidates.slice(0, 16), gaps: reply.gaps, skipped: skipped.slice(0, 64),
     ...(withRequests ? { requests: structuredClone(frozen), matches } : {}),
-    ...(four ? { material: material.map(m => { const source = input.records.get(m.record)!; return { record: source.id, from: source.from + m.from, to: source.from + m.to, what: m.what }; }) } : {}) };
+    ...(four ? { material: material.map(m => { const source = input.records.get(m.record)!, place = recordAt(source, m.from, m.to); if (!place) throw new Error('INVALID_RESPONSE'); return { record: source.id, from: place.from, to: place.to, what: m.what }; }) } : {}) };
   // Anchored: a reply that gets nothing out of the records (no part, claim, line, candidate or match) and says why with gaps
   // (material it found lacking) is not kept: the records stay unread for the person to ask again (NOTHING_READ). A reply with
   // nothing to change and no such reason (the records add nothing to the map as it is) is a reading, kept as before.

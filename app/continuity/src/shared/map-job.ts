@@ -5,10 +5,14 @@
  * requests (ask.requests holds only their request-context.1 projection, without sources) and the priors with the correction each
  * had when it was asked. Every alias the ask refers to must be in its Map with the value it stands for; a claim alias the ask no
  * longer shows (buildMapAsk maps claims before it trims ask.parts[].current) is kept as it was, never refused or dropped. */
-import { validateMapAsk, askRecords, MAP4_SCHEMA, MAP5_SCHEMA, MAP6_SCHEMA, MAP7_SCHEMA, type MapAsk, type MapInput } from './map-reading.js';
+import { validateMapAsk, askRecords, MAP4_SCHEMA, MAP5_SCHEMA, MAP6_SCHEMA, MAP7_SCHEMA, type MapAsk, type MapInput, type MapRecordRef } from './map-reading.js';
 import { validateFrozenRequest, requestContext, sameTarget, type FrozenRequest, type RequestTarget } from './request-return.js';
+import { GAPS } from './record-excerpt.js';
 
 export const MAP_INPUT_CODEC = 'map-input.1' as const;
+/** Recipe .47: an input sending a 기록 v5 record as its fold: its records may carry the fold's pieces and how many rows were left out
+ * (MapRecordRef pieces, left). An input with no such record stays map-input.1, byte for byte. */
+export const MAP_INPUT_CODEC2 = 'map-input.2' as const;
 export const MAP_JOB_VERSION = 'map-job.1' as const;
 /** Only the anchored wires go as jobs: their reply is a wire of references, checked again against the very request (map.7: later
  * readings only, bound to its own m7 recipe). */
@@ -19,10 +23,10 @@ export const JOB_CAPABILITY = /^[A-Za-z0-9_-]{43}$/;
 const ENTRY = /^E_[A-Za-z0-9-]{8,64}$/, HEX64 = /^[0-9a-f]{64}$/, SAFE_ID = /^[A-Za-z0-9_.:-]{1,120}$/;
 const PART = /^P\d{2,3}$/, RECORD = /^[NR]\d{2,3}$/, CLAIM = /^C\d{2,3}$/, PRIOR = /^M\d{2}$/;
 
-type RecordRef = { id: string; from: number; to: number; total: number; text: string };
+type RecordRef = MapRecordRef;
 type PriorRef = { reading: string; index: number; target: RequestTarget; correction: string | null };
 export interface MapInputWire {
-  version: typeof MAP_INPUT_CODEC;
+  version: typeof MAP_INPUT_CODEC | typeof MAP_INPUT_CODEC2;
   ask: MapAsk;
   parts: [string, string][];
   records: [string, RecordRef][];
@@ -56,7 +60,7 @@ export async function jobHash(value: unknown): Promise<string> {
 export function encodeMapInput(inp: MapInput): MapInputWire {
   if (inp.problem) throw new Error('INVALID_INPUT');
   return structuredClone({
-    version: MAP_INPUT_CODEC, ask: inp.ask, parts: [...inp.parts], records: [...inp.records], claims: [...inp.claims],
+    version: [...inp.records.values()].some(r => r.pieces) ? MAP_INPUT_CODEC2 : MAP_INPUT_CODEC, ask: inp.ask, parts: [...inp.parts], records: [...inp.records], claims: [...inp.claims],
     coverage: inp.coverage, after: inp.after, requestCoverage: inp.requestCoverage ?? null, fullRequests: inp.fullRequests ?? null,
     priors: inp.priors ? [...inp.priors] : null
   });
@@ -67,7 +71,8 @@ export function encodeMapInput(inp: MapInput): MapInputWire {
  * exactly onto ask.requests. Nothing is rebuilt; the Maps keep their order. */
 export function decodeMapInput(value: unknown): MapInput {
   keys(value, ['version', 'ask', 'parts', 'records', 'claims', 'coverage', 'after', 'requestCoverage', 'fullRequests', 'priors']);
-  check(value.version === MAP_INPUT_CODEC);
+  check(value.version === MAP_INPUT_CODEC || value.version === MAP_INPUT_CODEC2);
+  const two = value.version === MAP_INPUT_CODEC2;
   const ask = validateMapAsk(value.ask);
   check(JOB_SCHEMAS.includes(ask.schemaVersion) && JSON.stringify(ask) === JSON.stringify(value.ask));
   const pairs = <T>(v: unknown, alias: RegExp, item: (x: unknown) => x is T, max: number): Map<string, T> => {
@@ -79,9 +84,22 @@ export function decodeMapInput(value: unknown): MapInput {
   check(new Set(parts.values()).size === parts.size);
   check(parts.size === ask.parts.length && ask.parts.every((p, i) => [...parts.keys()][i] === p.id));
   const records = pairs(value.records, RECORD, (x): x is RecordRef => {
-    try { keys(x, ['id', 'from', 'to', 'total', 'text']); } catch { return false; }
-    return sid(x.id) && nat(x.from) && nat(x.to, 1) && nat(x.total, 1) && (x.from as number) < (x.to as number) && (x.to as number) <= (x.total as number) && typeof x.text === 'string' && x.text.length === (x.to as number) - (x.from as number);
-  }, 8);
+    const folded = two && isObj(x) && Object.hasOwn(x, 'pieces');
+    try { keys(x, ['id', 'from', 'to', 'total', 'text', ...(folded ? ['pieces', 'left'] : [])]); } catch { return false; }
+    if (!(sid(x.id) && nat(x.from) && nat(x.to, 1) && nat(x.total, 1) && (x.from as number) < (x.to as number) && (x.to as number) <= (x.total as number) && typeof x.text === 'string')) return false;
+    if (!folded) return x.text.length === (x.to as number) - (x.from as number);
+    // Recipe .47: a v5 fold's pieces: in order, each [from, to) of the record within the read interval, joined in the text by one blank
+    // line (the record itself is checked again where the input is applied: piecesStand).
+    const ps = x.pieces, text = x.text as string;
+    if (!Array.isArray(ps) || !ps.length || ps.length > 256 || !nat(x.left)) return false;
+    let at = 0, end = -1;
+    for (const [i, p] of ps.entries()) {
+      if (!isObj(p) || Object.keys(p).length !== 3 || !nat(p.at) || !nat(p.from) || !nat(p.to, 1) || (p.from as number) >= (p.to as number) || (p.from as number) < end) return false;
+      if (i) { if (!GAPS.includes(text.slice(at, p.at as number))) return false; } else if (p.at !== 0 || p.from !== x.from) return false;
+      at = (p.at as number) + (p.to as number) - (p.from as number); end = p.to as number;
+    }
+    return at === text.length && end <= (x.to as number);
+  }, 16);
   const sent = askRecords(ask);
   check(records.size === ask.records.length && ask.records.every((r, i) => [...records.keys()][i] === r.id && sent.get(r.id)?.text === records.get(r.id)!.text));
   const claims = pairs(value.claims, CLAIM, (x): x is { reading: string; index: number } => {

@@ -209,8 +209,12 @@ export function createMapRun(host: MapRunHost) {
   /** The ask the open entry would send and the route it would go (shared/map-route.ts, the server's own rule): the recipe and model
    * it is bound with, and its limits. A divided route leaves for the next reading the records its partitions cannot hold. */
   function prepared(o: NonNullable<ReturnType<MapRunHost['current']>>, requests: FrozenRequest[], requestId?: string): { inp: MapInput; route: MapRoute | null } {
-    const map = host.status().map, built = buildMapAsk(o.project, o.view, requests, requestId, anchored());
+    const map = host.status().map;
+    let built = buildMapAsk(o.project, o.view, requests, requestId, anchored());
     const route = map ? mapRoute(built.ask, map) : null;
+    // Recipe .47: a first map on the divided route takes a whole folded v5 record (its route's bounds); its shape, and so its route,
+    // stay the same (an ask with no v5 fold comes out of it exactly as before: those bounds are only the folds').
+    if (route?.route === 'divided-first' && built.problem !== 'NOTHING_NEW') built = buildMapAsk(o.project, o.view, requests, requestId, anchored(), route.limits);
     return { inp: fitMapInput(built, route), route };
   }
   /** What a reading would send now (nothing is sent). */
