@@ -282,6 +282,8 @@ test('Node host defaults rendering to Terra and reports the fixed-host 24-call D
   assert.equal(info.renderProvider, 'openai');
   assert.equal(info.maxPartitions, 12);
   assert.equal(info.deepseekMaxCalls, 24);
+  // Recipe .47: a first map's own bounds (a whole folded v5 record).
+  assert.deepEqual([info.firstMaxPartitions, info.firstDeepseekMaxCalls], [24, 48]);
   assert.equal(pipeline.model, 'deepseek-flash_gpt-6.1-sol_gpt-6.1-terra');
   assert.equal(pipeline.ready(), true);
   assert.equal(info.durable, true);
@@ -342,16 +344,18 @@ test('actual host HTTP metadata and the client parser preserve the selected Deep
   const jobsDir = mkdtempSync(join(tmpdir(), 'af-render-status-'));
   const jobs = await openMapJobs({ dir: jobsDir });
   t.after(async () => { await jobs.close(); const { rm } = await import('node:fs/promises'); await rm(jobsDir, { recursive: true, force: true }); });
-  for (const [renderModel, bound] of [['gpt-6.1-terra', 24], ['deepseek-flash', 64]]) {
+  // Recipe .47: a first map reads up to 24 partitions (a whole folded v5 record), a later map 12; each family says its own bound.
+  for (const [renderModel, bound, first] of [['gpt-6.1-terra', 24, 48], ['deepseek-flash', 64, 76]]) {
     const pipeline = await host.open({ STUDIO_MAP_RENDER_MODEL: renderModel });
     const handle = createStudioHandler({ env: { DEEPSEEK_API_KEY: inert }, jobs, firstMapPipeline: pipeline,
       fetchImpl: async () => assert.fail('reading status must not call a provider') });
     const status = await invoke(handle, 'status');
-    assert.equal(status.map.first.deepseekMaxCalls, bound);
+    assert.equal(status.map.first.deepseekMaxCalls, first);
     assert.equal(status.map.later.deepseekMaxCalls, bound);
+    assert.deepEqual([status.map.first.partitions, status.map.later.partitions], [24, 12]);
     globalThis.fetch = async () => json(status);
     const parsed = await aiStatus();
-    assert.equal(parsed.map.first.deepseekMaxCalls, bound);
+    assert.equal(parsed.map.first.deepseekMaxCalls, first);
     assert.equal(parsed.map.later.deepseekMaxCalls, bound);
     await pipeline.close();
   }
@@ -369,8 +373,8 @@ test('a missing or invalid optional DeepSeek bound keeps a safe legacy allowance
       }
       globalThis.fetch = async () => json(status);
       const parsed = await aiStatus();
-      assert.equal(parsed.map.first.deepseekMaxCalls, 64);
-      assert.equal(parsed.map.later.deepseekMaxCalls, 64);
+      assert.equal(parsed.map.first.deepseekMaxCalls, 76);
+      assert.equal(parsed.map.later.deepseekMaxCalls, 76);
     }
   } finally { await s.jobs.close(); }
 });

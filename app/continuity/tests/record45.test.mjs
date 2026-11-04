@@ -37,7 +37,7 @@ function wire45(f, extra = {}) {
     part('new:calc', '일정 계산기', '|B05|', { steps: !f.has('|B05:S01|') ? [] : [{ name: '기록 읽기', does: '마지막 급수 기록을 읽는다', uses: ['loadHistory()'], at: f.at('|B05:S01|') }, { name: '휴면 확인', does: '휴면이면 건너뜀', uses: ['isDormant()'], at: f.at('|B05:S02|') }] }),
     part('new:tick', '매시 틱', '|B06|'),
     part('new:push', '푸시 발송기', '|B07|푸시', { claims: [claim('s1', '|WD01|', { topic: 'withdrawn' }), ...(f.has('|CH02|') ? [claim('s2', '|CH02|', { topic: 'change' })] : [])] }),
-    part('new:login', '로그인 검사', '|B09|'), part('new:cfg', 'config 모음', '|B10|설정 모음|미정', { claims: [claim('s3', '|WD02|', { topic: 'withdrawn' })] }), ...(extra.parts ?? [])];
+    part('new:login', '로그인 검사', '|B09|'), part('new:cfg', 'config 모음', f.has('|B10|설정 모음|미정') ? '|B10|설정 모음|미정' : '|교체 B10|', { claims: [claim('s3', '|WD02|', { topic: 'withdrawn' })] }), ...(extra.parts ?? [])];
   const relations = [line('new:tick', 'new:calc', '|LN05|', { channel: 'control', payload: '깨우기' }), line('new:app', 'new:login', '|LN02|', { payload: 'D01 등록 요청' }), ...(extra.relations ?? [])];
   return { summary: '', parts, relations, candidates: [], gaps: [], matches: [], material: [] };
 }
@@ -207,7 +207,7 @@ test('.45 cards: the record family first (a gate in the trigger tint with its ow
 });
 
 test('.45 recipe: first-map-divided.45 and later-map-divided.45; the prompts read v5 records with their key sets', () => {
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.46', 'later-map-divided.46']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.47', 'later-map-divided.47']);
   assert.ok(P.RENDER_RULES.includes('기록 v5(첫 줄이 「〔기록 … · 쪽 n · 기준 … · 앞 쪽 …〕」인 기록)') && B.MAP_BLUEPRINT_PROMPT.includes('INPUT 옆의 keys'));
   assert.ok(P.EXTRACTION_PROMPT.includes('input.keys'));
   assert.equal(T.recordVersion(page(1)), 'v5');

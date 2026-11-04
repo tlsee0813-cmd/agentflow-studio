@@ -410,6 +410,16 @@ export function record45Parts(ctx: { texts: Texts; parts: Part43[]; onMaterial: 
   }
   return added;
 }
+/** A v5 record's level, pages and obligations as a reading keeps them (map-reading.19 bounds). Recipe .47: applyReading takes them from
+ * the fold of every pasted text of the record in the project, so a reading whose ask left rows out still says the whole record's. */
+export function foldLevel(f: FoldedRecord): Pick<Reading45, 'level' | 'pages' | 'obligations'> {
+  return { level: f.level, pages: f.pages.slice(0, RECORD43_MAX.pages).map(p => ({ recordId: f.recordId, n: p.n, prev: p.prev, hash: p.hash, conflict: p.conflict })),
+    obligations: f.obligations.slice(0, RECORD43_MAX.obligations).map(o => ({ kind: o.kind, table: o.table, ref: o.ref ? cut(o.ref, 40) : null, text: cut(o.text, 120), candidate: o.candidate })) };
+}
+/** Recipe .47: the fold's own diagnostics a reading may keep (row-cells is the table reader's too, and stays where record43 said it). */
+export const FOLD_DIAGNOSTICS: ReadonlySet<string> = new Set([...STORED_DIAGNOSTICS].filter(c => ['page-conflict', 'page-gap', 'page-prev', 'duplicate-id', 'replace-unknown', 'id-reused', 'row-id',
+  'out-of-order', 'reserve-unused', 'dangling-ref', 'ref-deleted', 'end-mismatch', 'level-mismatch', 'cite-missing', 'cite-equals', 'cite-unread', 'cite-word', 'grade-source', 'part-added', 'drop-unknown'].includes(c)));
+export const RECORD_DIAGNOSTICS_MAX = RECORD43_MAX.recordDiagnostics;
 /** The fold the newest of the texts belongs to: the v5 record that stands now. The ask lists its records newest first (N01 the newest,
  * buildMapAsk), so the fold with a page in the earliest-listed record. (Review N5: the .45 pass took the last-listed one, the oldest.) */
 function latestFold45(texts: Texts, folds: FoldedRecord[]): FoldedRecord | null {
@@ -513,9 +523,7 @@ export function record45(ctx: { texts: Texts; parts: Part43[]; relations: Line43
         r43.recordDiagnostics.push({ category: d.category as ReadingRecordDiagnostic['category'], table: d.table, column: null, record: d.record, from: d.from, to: d.to });
     }
     if (f !== latest) continue;
-    out.level = f.level;
-    out.pages = f.pages.slice(0, RECORD43_MAX.pages).map(p => ({ recordId: f.recordId, n: p.n, prev: p.prev, hash: p.hash, conflict: p.conflict }));
-    out.obligations = f.obligations.slice(0, RECORD43_MAX.obligations).map(o => ({ kind: o.kind, table: o.table, ref: o.ref ? cut(o.ref, 40) : null, text: cut(o.text, 120), candidate: o.candidate }));
+    Object.assign(out, foldLevel(f));
     for (const e of f.ends) { const q = quoteOf(e.record, e.from, e.to); if (q && out.pageEnds.length < RECORD43_MAX.pageEnds && /^(?:C-[A-Z]{2,12}|P\d(?:-\d{2})?)$/.test(e.table))
       out.pageEnds.push({ recordId: f.recordId, page: e.page, table: e.table, state: e.state, written: e.written.slice(0, 64).map(x => cut(x, 16)), reserved: e.reserved.map(x => cut(x.id, 16)).slice(0, 16), remaining: e.remaining ? cut(e.remaining, 120) : null, quote: q }); }
     for (const r of f.rows.get('C-CHECK') ?? []) {

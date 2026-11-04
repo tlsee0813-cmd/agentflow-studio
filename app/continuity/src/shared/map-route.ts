@@ -6,17 +6,21 @@
  *   single         everything else, and every ask on a host that offers no divided pipeline (the Worker, a PC without the
  *                  OpenAI settings, a preview executor): one DeepSeek call (or the executor's one run) under the schema's recipe
  * The shape rule alone (dividedKind) decides the divided family; whether the host offers it comes from its advertised status. */
-import { MAP6_SCHEMA, MAP7_SCHEMA, MAP_BYTES, MAP_RECORDS, MAP_RECORD_CHARS, firstAsk, type MapAsk, type MapInput } from './map-reading.js';
+import { MAP6_SCHEMA, MAP7_SCHEMA, MAP_BYTES, MAP_RECORDS, MAP_RECORD_CHARS, MAP_FIRST_BYTES, MAP_FIRST_RECORDS, MAP_FIRST_RECORD_CHARS, MAP_FIRST_SPANS, firstAsk, recordPartial, type MapAsk, type MapInput } from './map-reading.js';
+import { SPANS_PER_RECORD } from './evidence-span.js';
 
 /** Defaults of the PC's divided pipeline (createFirstMapPipeline): partition core text, partition count, workers per stage. A
  * server that advertises its own values (status map.first/later partitions, partitionChars) is read instead. */
 export const DIVIDED_PARTITION_CHARS = 3500;
 export const DIVIDED_PARTITIONS = 12;
+/** Recipe .47: a divided first map reads up to 24 partitions (a whole folded v5 record: the 8 measured ones cut into 14–22), a later map 12. */
+export const DIVIDED_FIRST_PARTITIONS = 24;
 export const DIVIDED_PARALLEL = 2;
 /** The DeepSeek calls a divided reading is assumed to make at most when a server does not say its own number: the largest batch a
  * PC host can be configured with (12 extractions, and rendering on DeepSeek with one semantic rewrite and one format correction).
- * Pipeline .31: 64 (twelve render fragments of a 36-part first map: 12 + 12 x 2 x 2 + the global stages 2 x 2 on DeepSeek). */
-export const DEEPSEEK_CALLS_UNSTATED = 64;
+ * Pipeline .31: 64 (twelve render fragments of a 36-part first map: 12 + 12 x 2 x 2 + the global stages 2 x 2 on DeepSeek).
+ * Recipe .47: 76 (a first map's 24 extractions + 12 x 2 x 2 + 2 x 2). */
+export const DEEPSEEK_CALLS_UNSTATED = 76;
 
 export type MapRouteName = 'divided-first' | 'divided-later' | 'single';
 /** Why a route was chosen: a first map or later reading of the divided pipeline; a host offering no divided pipeline for this kind;
@@ -28,8 +32,8 @@ export interface DividedOffer { model: string; prompt: string; ready: boolean; m
 /** What a server advertises for map readings (status map): the single-call model and recipes, and its divided families if any. */
 export interface MapRouteOffer { model: string; prompt: string; laterPrompt?: string; first?: DividedOffer; later?: DividedOffer }
 export interface MapRouteLimits {
-  /** Records per ask, characters per record excerpt, bytes of the whole ask (shared/map-reading.ts). */
-  records: number; recordChars: number; bytes: number;
+  /** Records per ask, characters per record excerpt, bytes of the whole ask (shared/map-reading.ts); recipe .47: pieces per record. */
+  records: number; recordChars: number; bytes: number; spans?: number;
   /** Divided only: partitions of at most partitionChars core characters, DeepSeek call bound, OpenAI USD caps, workers per stage. */
   partitions?: number; partitionChars?: number; deepseekMaxCalls?: number; runUsd?: number; monthlyUsd?: number; parallel?: number;
 }
@@ -57,6 +61,8 @@ export function dividedOfferOf(ask: unknown, offer: Pick<MapRouteOffer, 'first' 
 }
 
 const BASE: MapRouteLimits = { records: MAP_RECORDS, recordChars: MAP_RECORD_CHARS, bytes: MAP_BYTES };
+/** Recipe .47: the divided first-map route's ask bounds (a whole folded v5 record; shared/map-reading.ts askLimits). Every other route BASE. */
+const FIRST: MapRouteLimits = { records: MAP_FIRST_RECORDS, recordChars: MAP_FIRST_RECORD_CHARS, bytes: MAP_FIRST_BYTES, spans: MAP_FIRST_SPANS };
 const count = (n: unknown, max: number): n is number => Number.isInteger(n) && (n as number) >= 1 && (n as number) <= max;
 
 /** The route of one ask on a server advertising `offer`, or null when that server names no recipe for it (a map.7 ask to a server
@@ -65,7 +71,7 @@ export function mapRoute(ask: Pick<MapAsk, 'schemaVersion' | 'parts' | 'requests
   const kind = dividedKind(ask), divided = dividedOfferOf(ask, offer);
   if (kind && divided) return {
     route: kind === 'first' ? 'divided-first' : 'divided-later', schema: ask.schemaVersion, promptId: divided.prompt, model: divided.model, ready: divided.ready,
-    limits: { ...BASE, partitions: count(divided.partitions, 64) ? divided.partitions : DIVIDED_PARTITIONS,
+    limits: { ...(kind === 'first' ? FIRST : BASE), partitions: count(divided.partitions, 64) ? divided.partitions : kind === 'first' ? DIVIDED_FIRST_PARTITIONS : DIVIDED_PARTITIONS,
       partitionChars: count(divided.partitionChars, 100000) ? divided.partitionChars : DIVIDED_PARTITION_CHARS,
       deepseekMaxCalls: count(divided.deepseekMaxCalls, 1000) ? divided.deepseekMaxCalls : DEEPSEEK_CALLS_UNSTATED,
       runUsd: divided.runUsd, monthlyUsd: divided.monthlyUsd, parallel: DIVIDED_PARALLEL },
@@ -103,8 +109,14 @@ export function fitMapInput(inp: MapInput, route: MapRoute | null): MapInput {
   if (partitionCount(inp.ask, room) <= max || inp.ask.records.length <= 1) return inp;
   const ask: MapAsk = { ...inp.ask, records: [...inp.ask.records] }, records = new Map(inp.records);
   while (ask.records.length > 1 && partitionCount(ask, room) > max) records.delete(ask.records.pop()!.id);
-  const partial = [...records.values()].filter(x => x.to < x.total || x.from > 0).length;
+  const partial = [...records.values()].filter(recordPartial).length;
   return { ...inp, ask, records, coverage: { fresh: inp.coverage.fresh, sent: ask.records.length, partial } };
+}
+
+/** Recipe .47: an ask within its route's bounds (a single route never takes more than the shared bounds, whatever its shape). */
+export function withinRoute(ask: MapAsk, route: MapRoute): boolean {
+  const l = route.limits, b = new TextEncoder().encode(JSON.stringify(ask)).length;
+  return b <= l.bytes && ask.records.length <= l.records && ask.records.every(r => (r.spans?.length ?? 0) <= (l.spans ?? SPANS_PER_RECORD) && [r.lead ?? '', ...(r.spans ?? []).map(x => x.t)].join('').length <= l.recordChars);
 }
 
 /* ---------- what the person is told (Korean UI copy, derived from the route) ---------- */

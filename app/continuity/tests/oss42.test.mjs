@@ -302,7 +302,7 @@ test('.42 (H, I, K, L, M) code names take no Hangul noun, a removal piece is no 
 
 test('.42 prompts: recipe .42, the decider rule, named loops, the summary\'s structural first sentence, product lines, field groups and the new bounds', async () => {
   const P = await import('../server/map-pipeline.mjs');
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.46', 'later-map-divided.46']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.47', 'later-map-divided.47']);
   for (const rule of ['「누가 정했나」 칸의 사람은 그 규칙을 정한 사람이지 지키는 장치가 아니다', 'decider', '[파일: X] 꼬리표가 가리키는', '{"kind":"person","text":"그 누가 정했나 칸 그대로(80자 이내)","at":"그 규칙 행"}',
     '단계 이름이나 하는 일이 스스로 반복을 말하면', '빠져나가는 조건', '단계 이름(60자 이내)', '조각 그대로(60자 이내)'])
     assert.ok(P.RENDER_RULES.includes(rule), rule);
