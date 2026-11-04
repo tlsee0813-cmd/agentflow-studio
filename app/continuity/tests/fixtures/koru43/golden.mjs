@@ -152,7 +152,17 @@ export function normalizeIds(value) {
 export const GOLDEN_NEW_KEYS = ['decidedBy', 'implementation', 'implementationQuote', 'statusClaims', 'loops', 'variants', 'entries', 'contracts', 'recordRef',
   'loopIds', 'alt', 'branch', 'model', 'members', 'groupAxis', 'groupAxisQuote', 'when', 'optional', 'variantRef', 'crosses', 'cadenceKind', 'payloadRef', 'via', 'member',
   'actors', 'mergedWhen', 'contractChange', 'shippedIn', 'withdrawalMethod', 'phase', 'runtime', 'projectStatus', 'basisScope', 'focus', 'coverage', 'gatesNone',
-  'artifacts', 'profileTables', 'recordExtras', 'recordDiagnostics'];
+  'artifacts', 'profileTables', 'recordExtras', 'recordDiagnostics',
+  // Recipe .45 (map-reading.19): the keys a v3 record leaves empty (a family is the one thing .45 adds to a typed v3 part: GOLDEN45_KEYS).
+  'familyReason', 'familyUnclear', 'added', 'states', 'cites', 'foundBy', 'claimNature', 'scopeKind', 'bodyState', 'bodyText', 'sharedBy',
+  'level', 'pages', 'obligations', 'pageEnds', 'checks', 'defaults', 'firstLines'];
+/** Recipe .45: what .45 adds to a v3 record's typed part (its family read from its type word, on the type's row), set aside by stripFamily. */
+export const GOLDEN45_KEYS = ['family', 'familyRole', 'familyQuote', 'familyUnclear'];
+export function stripFamily(value) {
+  if (Array.isArray(value)) return value.map(stripFamily);
+  if (!value || typeof value !== 'object') return value;
+  return Object.fromEntries(Object.entries(value).filter(([k]) => !GOLDEN45_KEYS.includes(k)).map(([k, v]) => [k, stripFamily(v)]));
+}
 /** A .43 key left empty: null, [] or false (a line that is not optional, a file-map row of no run-time layout). A .42 key absent or null
  * reads the same (a claim's or step's when: null in both). */
 export function stripNew(value) {
@@ -162,7 +172,7 @@ export function stripNew(value) {
   for (const [k, v] of Object.entries(value)) {
     if (k === 'decidedBy') continue;
     if (GOLDEN_NEW_KEYS.includes(k) && (v === null || v === false || (Array.isArray(v) && !v.length))) continue;
-    if (k === 'version' && typeof v === 'string' && /^map-reading\.1[78]$/.test(v)) continue;
+    if (k === 'version' && typeof v === 'string' && /^map-reading\.1[789]$/.test(v)) continue;
     out[k] = stripNew(v);
   }
   return out;

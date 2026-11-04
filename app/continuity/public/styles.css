@@ -2916,6 +2916,9 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
    head says it in words beside the kind word. */
 .c-kind .c-life-to { flex: 0 4 auto; min-width: 0; margin-left: -2px; overflow: hidden; text-overflow: ellipsis; color: var(--text-2); }
 .lens-maint { padding: 0 5px; border: 1px solid var(--line-essential); border-radius: 6px; color: var(--text-2); white-space: nowrap; }
+/* Recipe .45 (merged with S9): the record family and role beside the kind word; 「미정: 이유」 and 「대응 불명확」 as a quiet chip (the pane only). */
+.lens-family { color: var(--text-2); white-space: nowrap; }
+.lens-family.lens-undecided { padding: 0 5px; border: 1px dashed var(--line-essential); border-radius: 6px; color: var(--text-3); }
 /* 받는 것 · 내는 것: a control line says it starts something. */
 .port-kind.port-start { padding: 0 5px; border-radius: 4px; background: var(--chip); color: var(--text-2); }
 /* 동작's steps (S9: shorter pane): what a step does and what it uses share one line under its name when they fit. */

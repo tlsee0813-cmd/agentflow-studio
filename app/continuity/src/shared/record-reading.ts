@@ -5,36 +5,49 @@
  * claims, conditions and file-map rows to the rows their own quotes stand on. */
 import { readRecordTables, recordRefs, rowsOf, fixedWord, STEP_REF, IMPLEMENTATION_WORDS, TYPE_WORDS, GROUP_WORDS, CADENCE_WORDS, CROSS_WORDS, STATUS_DIMENSIONS,
   STATUS_VALUES, DEVICE_WORDS, ENTRY_WORDS, TOGETHER_WORDS, SELECT_WORDS, DONE_WORDS, DATA_WORDS, WRITE_WORDS, WITHDRAW_WORDS, PHASE_WORDS, ROLE_WORDS,
-  type TableRow, type RecordTables } from './record-table.js';
+  WITHDRAW_WORDS_V5, TOGETHER_WORDS_V5, SCOPE_WORDS, FOUND_WORDS, NATURE_WORDS, CHECK_WORDS, V4_TYPE_FAMILY, readFamily, roleType, foldPages, partRefs, loopRefs,
+  type TableRow, type RecordTables, type FoldedRecord, type FoldRow, type Cite } from './record-table.js';
 import type { PartState, PartType, PartImplementation, ReadingStatusClaim, ReadingProjectStatus, ReadingRecordLoop, ReadingMembers, GroupAxis, ReadingVariant,
   ReadingEntryPoint, ReadingContract, ReadingStepBranch, ReadingActor, ActorKind, ReadingContractChange, ReadingShippedIn, WithdrawalMethod, ReadingDecider,
   ConditionPhase, ReadingCoverage, ReadingArtifact, ReadingProfileTable, ReadingRecordExtra, ReadingRecordDiagnostic, ReadingFocus, EnforcerKind, CadenceKind,
-  CrossKind, StatusDimension, ClaimTopic } from './types.js';
+  CrossKind, StatusDimension, ClaimTopic, RecordFamily, FamilyReason, ClaimNature, FoundBy, StatusScopeKind, VariantTogether, ReadingPage, ReadingObligation,
+  ReadingPageEnd, ReadingCheck, ReadingDefault, ReadingPartState } from './types.js';
 import { secretLike } from './secret.js';
 
 /** A quote of a row: where it stands in the excerpt sent ([from, to) of the ask's record text), cut at 600 (the stored bound). */
 export interface Record43Quote { record: string; quote: string; from: number; to: number }
 type Texts = Map<string, { text: string }>;
 /** The fields .43 adds, on the reply's own items (the checked reply's parts, claims, steps, conditions, file-map rows and lines). */
-interface Step43 { quote: Record43Quote | { record: string; quote: string; from?: number; to?: number }; recordRef?: string | null; loopIds?: string[]; alt?: { group: string; branch: string } | null; branch?: ReadingStepBranch[]; model?: string | null }
+interface Step43 { name?: string; does?: string | null; uses?: string[]; program?: true; quote: Record43Quote | { record: string; quote: string; from?: number; to?: number }; recordRef?: string | null; loopIds?: string[]; alt?: { group: string; branch: string } | null; branch?: ReadingStepBranch[]; model?: string | null; cites?: Cite[] }
 interface Claim43 { topic?: ClaimTopic | null; record: string; from?: number; to?: number; enforcedBy?: { kind: EnforcerKind; text: string; quote: Record43Quote | null; program?: true }[];
-  decidedBy?: ReadingDecider | null; actors?: ReadingActor[]; mergedWhen?: string | null; contractChange?: ReadingContractChange | null; shippedIn?: ReadingShippedIn | null; withdrawalMethod?: WithdrawalMethod | null }
+  decidedBy?: ReadingDecider | null; actors?: ReadingActor[]; mergedWhen?: string | null; contractChange?: ReadingContractChange | null; shippedIn?: ReadingShippedIn | null; withdrawalMethod?: WithdrawalMethod | null;
+  cites?: Cite[]; foundBy?: FoundBy | null }
 export interface Part43 { ref: string; name: string | null; state?: PartState | null; stateQuote?: unknown; stateWhen?: string | null; type?: PartType | null; typeQuote?: unknown;
-  steps?: Step43[]; claims: Claim43[]; conditions?: { quote: { record: string; from?: number; to?: number }; phase?: ConditionPhase | null }[];
+  parent?: string | null; role?: string | null; basis?: { record: string; quote: string; from?: number; to?: number }[]; config?: string[];
+  steps?: Step43[]; claims: Claim43[]; conditions?: { when?: string; then?: string; else?: string | null; quote: { record: string; quote?: string; from?: number; to?: number }; phase?: ConditionPhase | null }[];
   fileRoles?: { quote: { record: string; from?: number; to?: number }; runtime?: boolean }[];
   loop?: { unit: string | null; stop: string | null; resume: string | null; quote: unknown; program?: true } | null;
   recordRef?: string | null; implementation?: PartImplementation | null; implementationQuote?: Record43Quote | null; members?: ReadingMembers | null; groupAxis?: GroupAxis | null;
-  groupAxisQuote?: Record43Quote | null; statusClaims?: ReadingStatusClaim[]; loops?: ReadingRecordLoop[]; variants?: ReadingVariant[]; entries?: ReadingEntryPoint[]; contracts?: ReadingContract[] }
+  groupAxisQuote?: Record43Quote | null; statusClaims?: ReadingStatusClaim[]; loops?: ReadingRecordLoop[]; variants?: ReadingVariant[]; entries?: ReadingEntryPoint[]; contracts?: ReadingContract[];
+  /** Recipe .45 (map-reading.19): set by the program only (record45). */
+  family?: RecordFamily | null; familyRole?: string | null; familyReason?: FamilyReason | null; familyQuote?: Record43Quote | null; familyUnclear?: boolean; added?: boolean;
+  states?: ReadingPartState[]; cites?: Cite[] }
 export interface Line43 { from: string; to: string; kind: string; note: string; record: string; quote: string; span?: { from: number; to: number }; payload?: string | null; cadence?: string | null;
   mode?: 'design' | 'observed' | null; channel?: 'data' | 'control' | 'uses' | null; payloadFields?: string[];
-  when?: string | null; optional?: boolean; variantRef?: string | null; crosses?: CrossKind | null; cadenceKind?: CadenceKind | null; payloadRef?: string | null; via?: string | null; member?: string | null }
+  when?: string | null; optional?: boolean; variantRef?: string | null; crosses?: CrossKind | null; cadenceKind?: CadenceKind | null; payloadRef?: string | null; via?: string | null; member?: string | null;
+  claimNature?: ClaimNature | null; cites?: Cite[] }
 /** The reading's own fields .43 adds. */
 export interface Reading43 { basisScope: { text: string; quote: Record43Quote } | null; focus: ReadingFocus | null; projectStatus: ReadingProjectStatus[];
   gatesNone: { reason: string; quote: Record43Quote } | null; coverage: ReadingCoverage[]; artifacts: ReadingArtifact[]; profileTables: ReadingProfileTable[];
   recordExtras: ReadingRecordExtra[]; recordDiagnostics: ReadingRecordDiagnostic[] }
+/** Recipe .45 (map-reading.19): the reading's own fields record45 adds (a reading of no v5 record: level null, every list empty). */
+export interface Reading45 { level: 0 | 1 | 2 | null; pages: ReadingPage[]; obligations: ReadingObligation[]; pageEnds: (Omit<ReadingPageEnd, 'quote'> & { quote: Record43Quote })[];
+  checks: (Omit<ReadingCheck, 'quote'> & { quote: Record43Quote })[]; defaults: (Omit<ReadingDefault, 'quote'> & { quote: Record43Quote })[]; firstLines: string[] }
 /** map-reading.18 bounds (4.7 PART_LIST_MAX and the reading's lists). */
 export const RECORD43_MAX = Object.freeze({ statusClaims: 8, loops: 8, variants: 12, entries: 12, contracts: 8, body: 16, branch: 4, actors: 6, projectStatus: 16, coverage: 128,
-  artifacts: 48, profileTables: 24, profileRows: 12, profileCells: 12, recordExtras: 8, recordDiagnostics: 64, members: 24 });
+  artifacts: 48, profileTables: 24, profileRows: 12, profileCells: 12, recordExtras: 8, recordDiagnostics: 64, members: 24,
+  // Recipe .45: the part lists the supplementary rows land on (map-reading.17 bounds), and the map-reading.19 lists.
+  steps: 24, conditions: 24, config: 12, cites: 6, states: 5, pages: 16, obligations: 64, pageEnds: 128, checks: 6, defaults: 9, firstLines: 3, sharedBy: 8 });
 
 const plain = (s: string): string => s.normalize('NFC').replace(/[*`]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
 const DASH = /^[—–-]+$/;
@@ -58,12 +71,19 @@ export function record43(ctx: { texts: Texts; parts: Part43[]; relations: Line43
   };
   const rowQuote = (r: TableRow): Record43Quote | null => quoteOf(r.record, r.from, r.to);
   const nameOfPart = (b: Part43): string => b.name ?? ctx.nameOf(b.ref);
-  const byName = (name: string): Part43 | undefined => { const n = plain(bare(name)); return n ? parts.find(b => plain(nameOfPart(b)) === n) : undefined; };
+  // Recipe .45: a v5 row's part name (its B ID's C-PART 이름) also names the part joined to that ID by its row (record45Parts), whatever the
+  // model called it.
+  let aliases: Map<string, string> | undefined;
+  const aliasOf = (n: string) => (aliases ??= new Map(rowsOf(texts, ['C-PART']).filter(r => r.dialect === 'v5').map(r => [plain(bare(r.byColumn['이름'] ?? '')), (r.byColumn['행 ID'] ?? '').trim()] as [string, string]))).get(n);
+  const byName = (name: string): Part43 | undefined => { const n = plain(bare(name)); if (!n) return undefined; const id = aliasOf(n);
+    // Review N4 (8.3): a v5 row's part by its ID first (the part record45Parts joined to the row), its name only as a fallback.
+    return (id ? parts.find(b => b.recordRef === id) : undefined) ?? parts.find(b => plain(nameOfPart(b)) === n); };
   const diag = (category: ReadingRecordDiagnostic['category'], table: string | null, record: string, from: number, to: number, column: string | null = null) => {
     if (out.recordDiagnostics.length < RECORD43_MAX.recordDiagnostics && from < to) out.recordDiagnostics.push({ category, table, column, record, from, to });
   };
   for (const [record, t] of read) for (const d of t.diagnostics) diag(d.category, d.table, record, d.from, d.to, d.column);
-  const v4 = (ids: string[]) => rowsOf(texts, ids).filter(r => r.dialect === 'v4');
+  // Recipe .45: a v5 row is read as a v4 row (its v4 view, record-table.ts v5View); a v3 row never.
+  const v4 = (ids: string[]) => rowsOf(texts, ids).filter(r => r.dialect !== 'v3');
   const refs = recordRefs(texts);
   const partOfRef = (record: string, b: string): string | null => refs.get(record)?.parts.get(b) ?? null;
 
@@ -88,19 +108,21 @@ export function record43(ctx: { texts: Texts; parts: Part43[]; relations: Line43
         c.actors = actorsOf(row.byColumn['관련 주체·역할'] ?? '');
         const dates = (row.byColumn['날짜'] ?? '').split(/\s+\/\s+/); c.mergedWhen = dates.length > 1 && said(dates[1]) ? cut(dates[1]!, 40) : null;
         c.contractChange = contractChangeOf(row.byColumn['계약 변화'] ?? ''); c.shippedIn = shippedOf(row.byColumn['실린 판본'] ?? '');
+        // Recipe .45: a v5 change row's 찾은 길 (5.1).
+        c.foundBy = row.dialect === 'v5' ? fixedWord(row.byColumn['찾은 길'] ?? '', FOUND_WORDS)?.value ?? null : null;
       }
     }
     if (c.topic === 'withdrawn') {
       const row = withdrawals.find(r => overlaps(c, r));
-      if (row) { c.withdrawalMethod = fixedWord(row.byColumn['방식'] ?? '', WITHDRAW_WORDS)?.value ?? null; c.contractChange = contractChangeOf(row.byColumn['계약 변화'] ?? ''); }
+      if (row) { c.withdrawalMethod = (fixedWord(row.byColumn['방식'] ?? '', row.dialect === 'v5' ? WITHDRAW_WORDS_V5 : WITHDRAW_WORDS)?.value ?? null) as WithdrawalMethod | null; c.contractChange = contractChangeOf(row.byColumn['계약 변화'] ?? ''); }
     }
   }
-  if (![...read.values()].some(t => t.version === 'v4' || t.tables.some(x => x.dialect === 'v4'))) return out;
+  if (![...read.values()].some(t => t.version === 'v4' || t.version === 'v5' || t.tables.some(x => x.dialect === 'v4' || x.dialect === 'v5'))) return out;
 
   /* Parts: C-PART (type, 구현 상태, row ID, list items), C-GROUP, C-STATUS, then the state (4.6). */
   const groups = v4(['C-GROUP']);
   for (const r of v4(['C-PART'])) {
-    const b = byName(r.byColumn['이름'] ?? ''), q = rowQuote(r); if (!b || !q || b.recordRef) continue;
+    const b = byName(r.byColumn['이름'] ?? ''), q = rowQuote(r); if (!b || !q || (b.recordRef && !(r.dialect === 'v5' && b.recordRef === (r.byColumn['행 ID'] ?? '').trim()))) continue;
     const id = (r.byColumn['행 ID'] ?? '').trim(); b.recordRef = /^B\d{1,3}$/.test(id) ? id : null;
     // .44: the row's 유형 decides a v4 part's type, on that row: a fixed word gives its value; 모름, a word outside the list or no word
     // gives none (the model's word for a part the record types otherwise, or not at all, is not kept).
@@ -108,6 +130,11 @@ export function record43(ctx: { texts: Texts; parts: Part43[]; relations: Line43
     // .44 (review N1): a model type left out for a 유형 word outside the list (not 모름, not empty) is said, on that row and column.
     if (b.type && !word && said(bare(r.byColumn['유형'] ?? ''))) diag('type-word', 'C-PART', r.record, r.from, r.to, '유형');
     b.type = typed as PartType | null; b.typeQuote = typed ? q : null;
+    // Recipe .45 (map-reading.19): the row's family. A v5 row's 표현군·역할 as written; a v4 row's 유형 word through the unambiguous words
+    // only (12.3: 루프·엔진, 봇, 외부 시스템 and 집행·외부 호출 keep their word, marked 대응 불명확).
+    if (r.dialect === 'v5') familyOn(b, r.byColumn['표현군·역할'] ?? '', q, r.fold?.mark === 'add');
+    else if (word && word.word in V4_TYPE_FAMILY) { const m = V4_TYPE_FAMILY[word.word]; b.family = m?.family ?? null; b.familyRole = m?.role ?? word.word; b.familyUnclear = !m; b.familyReason = null; b.familyQuote = q; }
+    if (r.dialect === 'v5') b.cites = r.fold?.cites ?? [];
     const impl = fixedWord(r.byColumn['구현 상태'] ?? '', IMPLEMENTATION_WORDS);
     b.implementation = impl?.value ?? null; b.implementationQuote = impl?.value ? q : null;
     const m = /항목\s*(\d+|여럿)\s*·\s*순서\s*(있음|없음)/.exec(r.byColumn['하는 일 한 줄'] ?? '');
@@ -125,8 +152,12 @@ export function record43(ctx: { texts: Texts; parts: Part43[]; relations: Line43
     const dim = fixedWord(r.byColumn['상태 차원'] ?? '', STATUS_DIMENSIONS)?.value, q = rowQuote(r); if (!dim || !q) continue;
     const val = fixedWord(r.byColumn['값'] ?? '', STATUS_VALUES[dim]); if (!val) continue;
     const successor = /\(\s*후속\s*[:：]\s*([^)]+)\)/.exec(val.rest)?.[1]?.trim() ?? null;
+    // Recipe .45 (13.2): a v5 row's range of a part partly off (기능 일부 · 기본 꺼짐); an 비활성 or 조건부 row with no range is 범위 미기재,
+    // never the whole part. Every v4 row: null.
+    const scopeKind: StatusScopeKind | null = r.dialect !== 'v5' ? null : fixedWord(r.byColumn['적용 범위·조건'] ?? '', SCOPE_WORDS)?.value
+      ?? (dim === 'activation' && (val.value === 'inactive' || val.value === 'conditional') && !said(r.byColumn['적용 범위·조건']) ? 'unstated' : null);
     const claim: ReadingStatusClaim = { dimension: dim as StatusDimension, value: val.value, scope: said(r.byColumn['적용 범위·조건']) ? cut(r.byColumn['적용 범위·조건']!, 120) : null,
-      basis: said(r.byColumn['기준']) ? cut(r.byColumn['기준']!, 60) : null, successor: successor ? cut(successor, 60) : null, quote: q };
+      basis: said(r.byColumn['기준']) ? cut(r.byColumn['기준']!, 60) : null, successor: successor ? cut(successor, 60) : null, quote: q, scopeKind };
     const target = (r.byColumn['대상'] ?? '').trim(), b = /^전체$/.test(target) ? undefined : byName(target);
     if (b) { if ((b.statusClaims ??= []).length < RECORD43_MAX.statusClaims) b.statusClaims.push(claim); }
     else if (out.projectStatus.length < RECORD43_MAX.projectStatus && target) out.projectStatus.push({ target: cut(target, 80), ...claim });
@@ -158,9 +189,12 @@ export function record43(ctx: { texts: Texts; parts: Part43[]; relations: Line43
     const b = byName(r.byColumn['소유 부분'] ?? ''), q = rowQuote(r), id = (r.byColumn['행 ID'] ?? '').trim(); if (!b || !q || !/^B\d{1,3}:L\d{1,3}$/.test(id)) continue;
     const own = id.split(':')[0]!, parentRef = /^B\d{1,3}:L\d{1,3}$/.test((r.byColumn['부모 반복 ID'] ?? '').trim()) ? r.byColumn['부모 반복 ID']!.trim() : null;
     const parentPart = parentRef && parentRef.split(':')[0] !== own ? partOfRef(r.record, parentRef.split(':')[0]!) : null;
-    const loop: ReadingRecordLoop = { recordRef: id, parentRef, parentPart: parentPart ? cut(parentPart, 60) : null, body: bodyOf(r.byColumn['몸통 단계 ID'] ?? '', own),
+    const body = bodyOf(r.byColumn['몸통 단계 ID'] ?? '', own);
+    // Recipe .45 (3.5): a v5 loop's body is the C-STEP rows naming it (linked) or none yet (unexpanded: no step is made up).
+    const loop: ReadingRecordLoop = { recordRef: id, parentRef, parentPart: parentPart ? cut(parentPart, 60) : null, body,
       unit: said(r.byColumn['반복 단위']) ? cut(r.byColumn['반복 단위']!, 80) : null, count: said(r.byColumn['횟수·계속 조건']) ? cut(r.byColumn['횟수·계속 조건']!, 120) : null,
-      stop: said(r.byColumn['종료·탈출 조건']) ? cut(r.byColumn['종료·탈출 조건']!, 120) : null, quote: q };
+      stop: said(r.byColumn['종료·탈출 조건']) ? cut(r.byColumn['종료·탈출 조건']!, 120) : null, quote: q,
+      bodyState: r.dialect === 'v5' ? (body.length ? 'linked' : 'unexpanded') : null, bodyText: r.dialect === 'v5' ? opt(r.byColumn['몸통 설명'], 120) : null, cites: r.fold?.cites ?? [] };
     if ((b.loops ??= []).length >= RECORD43_MAX.loops || b.loops.some(x => x.recordRef === id)) continue;
     b.loops.push(loop);
     for (const step of loop.body) {
@@ -183,6 +217,12 @@ export function record43(ctx: { texts: Texts; parts: Part43[]; relations: Line43
     if (b.loop && !b.loop.program) { const q = outer.quote as Record43Quote; diag('loop-replaced', 'C-LOOP', q.record, q.from, q.to); }
     b.loop = { unit, stop, resume: null, quote: outer.quote, program: true };
   }
+  /* Recipe .45 (13.7c): the supplementary rows that say how a part works land on that part, each on its row, as the program's: a P1-02
+   * chain's stages as steps of the part that owns the chain (its entry's or contract's part, or the part a stage names 「부분: 단계」), a
+   * P2-02 extension point as a step of its owner, a P5-03 failure row as a condition (실패 조건 → 재시도, else the recovery place) of the
+   * part its job or step names, P6-01 settings and P6-02 precedence as settings of the part they apply to. Words that read like a key never
+   * land; nothing past the reading's bounds is added. */
+  supplementary({ parts, v4, byName, rowQuote, partOfRef: (record, b) => partOfRef(record, b) });
   /* Contracts (C-CONTRACT) on the providing part; variants (C-VARIANT) on the part owning the interface; entries (C-ENTRY) on the owning
    * part, with a control line from a consumer that is a part (none is made up). */
   const contracts = v4(['C-CONTRACT']), profile22 = v4(['P2-02']);
@@ -197,7 +237,7 @@ export function record43(ctx: { texts: Texts; parts: Part43[]; relations: Line43
     const ownerName = k ? contracts.find(c => (c.byColumn['행 ID'] ?? '').trim() === k)?.byColumn['제공 부분'] : spot ? partOfRef(r.record, spot) : p22 ? profile22.find(c => (c.byColumn['행 ID'] ?? '').trim() === p22)?.byColumn['소유 부분'] : undefined;
     const implementer = (r.byColumn['구현 부분'] ?? '').trim(), b = (ownerName ? byName(ownerName) : undefined) ?? byName(implementer);
     if (!b) { diag('variant-owner', 'C-VARIANT', r.record, r.from, r.to); continue; }
-    const together = fixedWord(r.byColumn['함께 사용 가능 여부'] ?? '', TOGETHER_WORDS), sel = r.byColumn['선택 주체·시점'] ?? '';
+    const together = fixedWord(r.byColumn['함께 사용 가능 여부'] ?? '', (r.dialect === 'v5' ? TOGETHER_WORDS_V5 : TOGETHER_WORDS) as Readonly<Record<string, VariantTogether>>), sel = r.byColumn['선택 주체·시점'] ?? '';
     if ((b.variants ??= []).length < RECORD43_MAX.variants) b.variants.push({ recordRef: id, interfaceRef: cut(iface, 80), implementer: /^사용자\s*지정/.test(implementer) ? 'user' : cut(implementer || '모름', 60),
       selector: { who: /사용자\s*설정|플랫폼·빌드|플랫폼|빌드(?!\s*시)|코드/.exec(sel)?.[0] ?? null, how: Object.entries(SELECT_WORDS).find(([w]) => sel.includes(w))?.[1] ?? null, when: /빌드\s*시|시작\s*시|호출마다/.exec(sel)?.[0] ?? null },
       condition: opt(r.byColumn['선택 조건'], 120), together: together?.value ?? 'unknown', togetherScope: /^\((.+)\)$/.exec(together?.rest ?? '')?.[1]?.trim().slice(0, 60) ?? null, quote: q });
@@ -232,11 +272,35 @@ export function record43(ctx: { texts: Texts; parts: Part43[]; relations: Line43
   };
   programLines({ parts, relations, links, dataRows, byName, nameOfPart, rowQuote, dataById, maxLines: ctx.maxLines });
   /* Lines (C-LINK): 조건·선택, 경계, 박자, the D row named first, 통로, the list item. */
+  // Review D2: whether a part's own C-STEP rows (their part by row ID) or C-COND rows (their 부분) write one of a condition's code words.
+  let ownRows: { part: Part43; text: string }[] | undefined;
+  const readerChecks = (b: Part43 | undefined, condition: string): boolean => {
+    if (!b) return false;
+    const words = codeWords(condition); if (!words.length) return false;
+    ownRows ??= [...v4(['C-STEP']).flatMap(r => { const p = byName(r.cells[0] ?? ''); return p ? [{ part: p, text: r.cells.slice(1).join(' | ') }] : []; }),
+      ...v4(['C-COND']).flatMap(r => partsInCell(r.byColumn['부분'] ?? '', byName).map(p => ({ part: p, text: [r.byColumn['조건'] ?? '', r.byColumn['참이면'] ?? '', r.byColumn['거짓이면'] ?? ''].join(' | ') })))];
+    return ownRows.some(x => x.part === b && words.some(w => x.text.includes(w)));
+  };
   for (const l of relations) {
     if (!l.span) continue;
     const r = links.find(x => overlaps({ record: l.record, from: l.span!.from, to: l.span!.to }, x)); if (!r) continue;
     const choice = said(r.byColumn['조건·선택']), variant = choice ? /^변형\s*(X\d{1,3})\b/.exec(choice) : null;
-    l.optional = choice !== null; l.variantRef = variant ? variant[1]! : null; l.when = choice && !variant ? cut(choice, 120) : null;
+    // Recipe .45 (13.7b): a line out of a store part standing on a row that store does not send (the reader's half of a writer's row,
+    // maker → store → reader) never takes the writer's condition: the 조건·선택 is the sender's.
+    // A row whose sender is its receiver too (a part writing a file it reads back) keeps its condition on the read.
+    const senders = partsInCell((r.byColumn['보내는 부분'] ?? '').replace(/\s*:\s*.+$/, ''), byName), receivers = partsInCell((r.byColumn['받는 부분'] ?? '').replace(/\s*:\s*.+$/, ''), byName);
+    const from = parts.find(b => b.ref === l.from), self = senders.some(s => receivers.includes(s));
+    const storeHalf = !!from && (from.type === 'store' || from.family === 'store') && !senders.includes(from) && !self;
+    // Review D2: the reader's own check stays on its half: a condition whose code words (os.path.exists, plan_path) the reader's own
+    // C-STEP or C-COND rows write is the reader's, not only the writer's (a planner's 「os.path.exists(plan_path)」 on its own step).
+    const readerOwn = storeHalf && choice !== null && !variant && readerChecks(parts.find(b => b.ref === l.to), choice);
+    const writerHalf = storeHalf && !readerOwn;
+    l.optional = choice !== null && !writerHalf; l.variantRef = variant && !writerHalf ? variant[1]! : null; l.when = choice && !variant && !writerHalf ? cut(choice, 120) : null;
+    // Recipe .45 (12.2): a v5 row's 주장 성격 and cites; its mode is observed only for 실행 관측 with a run-grade cite (the view's 설계/관찰).
+    if (r.dialect === 'v5') {
+      l.claimNature = fixedWord(r.fold?.row.byColumn['주장 성격'] ?? '', NATURE_WORDS)?.value ?? null; l.cites = r.fold?.cites ?? [];
+      l.mode = r.byColumn['설계/관찰'] === '관찰' ? 'observed' : r.byColumn['설계/관찰'] === '설계' ? 'design' : null;
+    }
     l.crosses = fixedWord(r.byColumn['경계'] ?? '', CROSS_WORDS)?.value ?? null; l.cadenceKind = fixedWord(r.byColumn['박자'] ?? '', CADENCE_WORDS)?.value ?? null;
     const what = r.byColumn['넘기는 것'] ?? ''; l.payloadRef = /^\s*(D\d{1,3})\b/.exec(what)?.[1] ?? null;
     const via = /통로\s*[:：]\s*(.+)$/.exec(what)?.[1]; l.via = via ? cut(via, 80) : null;
@@ -280,7 +344,7 @@ export function record43(ctx: { texts: Texts; parts: Part43[]; relations: Line43
         out.artifacts.push({ recordRef: /^D\d{1,3}$/.test(id) ? id : null, name: cut(name, 80), kind: fixedWord(kind, DATA_WORDS)?.value ?? null, contractRef: /\bK\d{1,3}\b/.exec(kind)?.[0] ?? null,
           shape: said(shape) && !/[·,]/.test(shape) ? cut(shape, 120) : null, fieldsMore: Number(/그\s*밖\s*(\d+)\s*개/.exec(shape)?.[1] ?? NaN) || null,
           where: said(mode ? where.slice(0, mode.index) : where) ? cut(mode ? where.slice(0, mode.index) : where, 120) : null,
-          writeMode: mode ? fixedWord(mode[1]!, WRITE_WORDS)?.value ?? null : null, atomicScope: mode?.[2] ? cut(mode[2], 120) : null, quote: q });
+          writeMode: mode ? fixedWord(mode[1]!, WRITE_WORDS)?.value ?? null : null, atomicScope: mode?.[2] ? cut(mode[2], 120) : null, quote: q, sharedBy: [] });
       }
       if (/^P\d-\d{2}$/.test(table.id) && table.known && out.profileTables.length < RECORD43_MAX.profileTables) {
         const none = table.none ? quoteOf(record, table.none.from, table.none.to) : null;
@@ -298,6 +362,189 @@ export function record43(ctx: { texts: Texts; parts: Part43[]; relations: Line43
   return out;
 }
 const opt = (s: string | undefined, n: number): string | null => { const t = said(s); return t ? cut(t, n) : null; };
+
+/* ==================== Recipe .45 (map-reading.19, RECORD_ASKS_V5_KO.md 8.3–8.4 as 12 and 13 amend them) ==================== */
+/** A v5 record's parts are the program's (8.3): every current C-PART row is a part, joined to the model's part by name (record43) or by
+ * the row its basis stands on (record45). A row no part of the reply takes is added before record43 runs, as the program's part: its
+ * name and 하는 일 as written, the row its only basis, nothing else said for it (record43 then reads its row's fields like any part's).
+ * Never past MAP6_NEW_PARTS new parts. Returns the parts added. */
+export function record45Parts(ctx: { texts: Texts; parts: Part43[]; onMaterial: (q: Record43Quote) => boolean; maxNew: number }): Part43[] {
+  // Review N5: the parts of the latest v5 record only (a record of an earlier basis no longer stands: a part its newer pages dropped stays out).
+  const f = latestFold45(ctx.texts, foldPages([...ctx.texts].map(([record, { text }]) => ({ record, text })))); if (!f) return [];
+  const added: Part43[] = [], plainOf = (b: Part43) => plain(bare(b.name ?? ''));
+  let fresh = ctx.parts.filter(b => /^new:/.test(b.ref)).length;
+  const rows = (f.rows.get('C-PART') ?? []).flatMap(r => {
+    const name = cut(bare(r.row.byColumn['이름'] ?? ''), 60); if (!name || secretLike(name)) return [];
+    const text = ctx.texts.get(r.record)?.text; if (text === undefined) return [];
+    const q: Record43Quote = { record: r.record, quote: text.slice(r.row.from, Math.min(r.row.to, r.row.from + 600)), from: r.row.from, to: Math.min(r.row.to, r.row.from + 600) };
+    return ctx.onMaterial(q) ? [] : [{ r, name, q }];
+  });
+  // Any row the ID stood on (a row 교체 later replaced) is the ID's too.
+  const stood = (r: FoldRow) => f.history.get(r.id) ?? [r];
+  const within = (r: FoldRow) => (x: { record: string; from?: number; to?: number }) => x.from !== undefined && x.to !== undefined && stood(r).some(h => x.record === h.record && h.row.from <= x.from! && x.to! <= h.row.to + 1);
+  const onRow = (r: FoldRow) => (x: { record: string; from?: number; to?: number }) => stood(r).some(h => overlaps(x, { record: h.record, from: h.row.from, to: h.row.to }));
+  const taken = (id: string) => ctx.parts.some(b => b.recordRef === id);
+  const open = (b: Part43) => b.name !== null && !b.recordRef;
+  // 8.3 (review N4): a v5 part is joined to its C-PART row by ID first: the model's part whose basis stands within the row (the one of the
+  // row's name first); then by name; then a part whose basis meets the row. A row no part takes becomes the program's part.
+  for (const { r, name } of rows) {
+    if (taken(r.id)) continue;
+    const on = ctx.parts.filter(b => open(b) && (b.basis ?? []).some(within(r))), b = on.find(x => plainOf(x) === plain(name)) ?? on[0];
+    if (b) b.recordRef = r.id;
+  }
+  for (const { r, name, q } of rows) {
+    if (taken(r.id)) continue;
+    const b = ctx.parts.find(x => open(x) && plainOf(x) === plain(name)) ?? ctx.parts.find(x => open(x) && (x.basis ?? []).some(onRow(r)));
+    if (b) { b.recordRef = r.id; continue; }
+    // A part of the row's name the ID join gave another row stays unjoined (record45 says it); the row is not added again under its name.
+    if (ctx.parts.some(x => x.name !== null && plainOf(x) === plain(name))) continue;
+    if (fresh >= ctx.maxNew) continue;
+    const role = opt(r.row.byColumn['하는 일 한 줄'], 300);
+    const ref = `new:rec-${r.id.toLowerCase()}`; if (ctx.parts.some(x => x.ref === ref)) continue;
+    const p = { ref, name, parent: null, role: role && !secretLike(role) ? role : null, roleAbout: null, roleReplaces: null, basis: [q], claims: [], state: null, stateQuote: null, stateWhen: null,
+      files: [], type: null, typeQuote: null, inputs: [], outputs: [], fields: [], config: [], steps: [], loop: null, stateVars: [], conditions: [], fileRoles: [], recordRef: r.id } as Part43;
+    ctx.parts.push(p); added.push(p); fresh++;
+  }
+  return added;
+}
+/** The fold the newest of the texts belongs to: the v5 record that stands now. The ask lists its records newest first (N01 the newest,
+ * buildMapAsk), so the fold with a page in the earliest-listed record. (Review N5: the .45 pass took the last-listed one, the oldest.) */
+function latestFold45(texts: Texts, folds: FoldedRecord[]): FoldedRecord | null {
+  const order = [...texts.keys()]; let best: FoldedRecord | null = null, at = Infinity;
+  for (const f of folds) for (const p of f.pages) { const i = order.indexOf(p.record); if (i >= 0 && i < at) { at = i; best = f; } }
+  return best;
+}
+/** The family a v3 or v4 part's type word gives (the generic tail of record45: a part no v5 or v4 row gave a family). */
+const TYPE_FAMILY: Readonly<Record<PartType, { family: RecordFamily; role: string } | null>> = { person: { family: 'participant', role: '사람' }, session: { family: 'participant', role: '세션' },
+  compute: { family: 'process', role: '계산' }, collector: { family: 'process', role: '수집' }, ai: { family: 'process', role: 'AI 판단' }, screen: { family: 'process', role: '화면' },
+  store: { family: 'store', role: '행 파일' }, timer: { family: 'trigger', role: '타이머' }, automation: { family: 'trigger', role: '빌드·배포 자동화' }, loop: null, external: null, actor: null };
+const TYPE_WORD: Readonly<Record<PartType, string>> = { loop: '루프·엔진', external: '외부 시스템', actor: '집행·외부 호출', person: '사람', session: '세션', compute: '계산', collector: '수집기', ai: 'AI 판단',
+  screen: '화면', store: '행 파일·저장소', timer: '타이머·일정', automation: '빌드·배포 자동화' };
+/** Recipe .45: the program's v5 pass over a checked reply after record43: the parts' joins by row, families, roles, C-STATE rows, list
+ * items and cites; the steps', claims' and loops' cites; the v5 record's artifacts, gates-none line, supplementary tables and unknown tables
+ * (into read43); and the reading's own .19 fields (level, pages, obligations, page ends, checks, defaults, first lines). A part of no v5
+ * row takes its family from its type word (v4 and v3 records: only the unambiguous words; 루프·엔진, 외부 시스템, 집행·외부 호출 are kept
+ * as written and marked unclear). */
+export function record45(ctx: { texts: Texts; parts: Part43[]; relations: Line43[]; read43: Reading43 | null; onMaterial: (q: Record43Quote) => boolean }): Reading45 {
+  const { texts, parts } = ctx;
+  const out: Reading45 = { level: null, pages: [], obligations: [], pageEnds: [], checks: [], defaults: [], firstLines: [] };
+  const quoteOf = (record: string, from: number, to: number): Record43Quote | null => {
+    const text = texts.get(record)?.text; if (text === undefined || from >= to) return null;
+    let end = Math.min(to, from + 600); if (end < to && /[\ud800-\udbff]/.test(text[end - 1] ?? '')) end--;
+    const q = { record, quote: text.slice(from, end), from, to: end };
+    return ctx.onMaterial(q) ? null : q;
+  };
+  const rowQ = (r: FoldRow) => quoteOf(r.record, r.row.from, r.row.to);
+  const folds = foldPages([...texts].map(([record, { text }]) => ({ record, text })));
+  const latest = latestFold45(texts, folds);
+  const cites6 = (c: readonly Cite[]) => c.filter(x => ![x.source, x.place, x.quote].some(w => w && secretLike(w))).slice(0, RECORD43_MAX.cites).map(x => ({ ...x, ref: cut(x.ref, 12), source: x.source ? cut(x.source, 120) : null, place: x.place ? cut(x.place, 80) : null, quote: x.quote ? cut(x.quote, 200) : null }));
+  for (const f of folds) {
+    const nameOf = (id: string) => (f.byId.get(id)?.row.byColumn['이름'] ?? '').trim() || id;
+    const byRef = (id: string) => parts.find(b => b.recordRef === id && f.byId.get(id)?.table === 'C-PART');
+    // Parts: a row record43 did not join by name joins the model's part whose basis stands on it.
+    for (const r of f.rows.get('C-PART') ?? []) {
+      let b = byRef(r.id); const q = rowQ(r); if (!q) continue;
+      if (!b) {
+        b = parts.find(x => !x.recordRef && x.name !== null && (x.basis ?? []).some(y => (f.history.get(r.id) ?? [r]).some(h => overlaps(y, { record: h.record, from: h.row.from, to: h.row.to }))));
+        if (!b) continue;
+        b.recordRef = r.id; const t = roleType(r.row.byColumn['표현군·역할'] ?? ''); b.type = t as PartType | null; b.typeQuote = t ? q : null;
+        const impl = fixedWord(r.row.byColumn['구현 상태'] ?? '', IMPLEMENTATION_WORDS); b.implementation = impl?.value ?? null; b.implementationQuote = impl?.value ? q : null;
+      }
+      familyOn(b, r.row.byColumn['표현군·역할'] ?? '', q, r.mark === 'add'); b.cites = cites6(r.cites);
+    }
+    // C-STATE rows (13.6) on the part that owns them.
+    for (const r of f.rows.get('C-STATE') ?? []) {
+      const owner = partRefs(r.row.byColumn['소유 부분'])[0], b = owner ? byRef(owner) : undefined, q = rowQ(r), name = opt(r.row.byColumn['상태'], 60);
+      if (!b || !q || !name || (b.states ??= []).length >= RECORD43_MAX.states || [name, r.row.byColumn['전이 사건'] ?? '', r.row.byColumn['다음 상태'] ?? ''].some(w => secretLike(w))) continue;
+      b.states.push({ name, event: opt(r.row.byColumn['전이 사건'], 80), next: opt(r.row.byColumn['다음 상태'], 60), quote: q });
+    }
+    // 13.7d: a C-GROUP 목록 row is its parent's list of items, never parts (record43 reads C-PART's 「항목 N」 rows; a v5 row needs none).
+    for (const r of f.rows.get('C-GROUP') ?? []) {
+      if (fixedWord(r.row.byColumn['묶음 뜻'] ?? '', GROUP_WORDS)?.value !== 'members') continue;
+      const owner = partRefs(r.row.byColumn['부모'])[0], b = owner ? byRef(owner) : undefined, q = rowQ(r); if (!b || !q || b.members) continue;
+      const items = (r.row.byColumn['자식들'] ?? '').split(/\s*·\s*(?=B\d{1,3}\s*:)|\s+·\s+|\s*,\s*/).map(x => cut(x.replace(/^B\d{1,3}\s*:\s*/, '').trim(), 60)).filter(x => x && !secretLike(x));
+      if (items.length) b.members = { count: items.length, ordered: null, items: [...new Set(items)].slice(0, RECORD43_MAX.members), quote: q };
+    }
+    // Cites of the steps, claims and lines on v5 rows (record43 gave lines theirs).
+    const rowAt = (q: { record: string; from?: number; to?: number }) => [...f.byId.values()].find(r => overlaps(q, { record: r.record, from: r.row.from, to: r.row.to }));
+    for (const b of parts) {
+      for (const s of b.steps ?? []) { const r = s.recordRef ? f.byId.get(s.recordRef) : undefined; if (r) s.cites = cites6(r.cites); }
+      for (const c of b.claims) { const r = rowAt(c); if (r) c.cites = cites6(r.cites); }
+    }
+    // The v5 record's own artifacts (C-DATA, 13.3 shared data), gates checked as none, supplementary tables and unknown tables.
+    const r43 = ctx.read43;
+    if (r43) {
+      for (const r of f.rows.get('C-DATA') ?? []) {
+        const q = rowQ(r), c = r.row.byColumn, name = (c['이름'] ?? '').trim(); if (!q || !name || r43.artifacts.length >= RECORD43_MAX.artifacts) continue;
+        const where = c['있는 곳·쓰기 방식'] ?? '', mode = /[(（]\s*(덧붙임|통째\s*교체|원자\s*교체)\s*(?:[:：,·]\s*([^)）]+))?[)）]\s*$/.exec(where), shape = c['필드·모양'] ?? '';
+        const shared = /^\s*공유\s*[:：]\s*(.+)$/.exec(c['만드는 부분'] ?? '') ?? /^\s*공유\s*[:：]\s*(.+)$/.exec(c['읽는 부분'] ?? '');
+        r43.artifacts.push({ recordRef: r.id, name: cut(name, 80), kind: fixedWord(c['종류'] ?? '', DATA_WORDS)?.value ?? null, contractRef: /\bK\d{1,3}\b/.exec(c['종류'] ?? '')?.[0] ?? null,
+          shape: said(shape) && !/[·,]/.test(shape) ? cut(shape, 120) : null, fieldsMore: Number(/그\s*밖\s*(\d+)\s*개/.exec(shape)?.[1] ?? NaN) || null,
+          where: said(mode ? where.slice(0, mode.index) : where) ? cut(mode ? where.slice(0, mode.index) : where, 120) : null,
+          writeMode: mode ? fixedWord(mode[1]!, WRITE_WORDS)?.value ?? null : null, atomicScope: mode?.[2] ? cut(mode[2], 120) : null, quote: q,
+          sharedBy: shared ? partRefs(shared[1]).map(id => cut(nameOf(id), 60)).slice(0, RECORD43_MAX.sharedBy) : [] });
+      }
+      for (const p of f.pages) {
+        const t = readRecordTables(texts.get(p.record)?.text ?? '');
+        for (const table of t.tables) {
+          if (table.dialect !== 'v5' || table.from < p.from || table.from >= p.to) continue;
+          if (table.id === 'C-GATE' && table.none && !r43.gatesNone) { const q = quoteOf(p.record, table.none.from, table.none.to); if (q) r43.gatesNone = { reason: cut(table.none.text || '없음', 200), quote: q }; }
+          if (!table.known && r43.recordExtras.length < RECORD43_MAX.recordExtras) {
+            const rows = table.rows.slice(0, RECORD43_MAX.profileRows).flatMap(r => { const q = quoteOf(p.record, r.from, r.to); return q ? [{ cells: r.cells.slice(0, RECORD43_MAX.profileCells).map(c => cut(c.text, 200)), quote: q }] : []; });
+            r43.recordExtras.push({ table: table.id.slice(0, 12), header: table.header.slice(0, RECORD43_MAX.profileCells).map(h => cut(h || '—', 40)), rows });
+          }
+        }
+      }
+      for (const [table, rows] of f.rows) {
+        if (!/^P\d-\d{2}$/.test(table) || r43.profileTables.length >= RECORD43_MAX.profileTables || r43.profileTables.some(x => x.table === table)) continue;
+        const header = rows[0]!.source.header.slice(0, RECORD43_MAX.profileCells).map(h => cut(h || '—', 40));
+        r43.profileTables.push({ table, header, none: null, rows: rows.slice(0, RECORD43_MAX.profileRows).flatMap(r => { const q = rowQ(r); return q ? [{ cells: r.row.cells.slice(0, RECORD43_MAX.profileCells).map(c => cut(c.text, 200)), recordRef: /^P\d-\d{2}\.\d{1,3}$/.test(r.id) ? r.id : null, quote: q }] : []; }) });
+      }
+      if (f === latest) {
+        // C-HEAD: what the record says it read and could not read (basisScope), its defaults (never claims) and its first lines.
+        const head = (item: string) => f.head.get(item), read = head('읽은 범위'), unread = head('못 읽은 범위');
+        const rq = read ? rowQ(read) : null, scope = read ? said(read.row.byColumn['값']) : null, gap = unread ? said(unread.row.byColumn['값']) : null;
+        if (rq && scope && !r43.basisScope) r43.basisScope = { text: cut(`${scope}${gap ? ` · 못 읽음: ${gap}` : ''}`, 200), quote: rq };
+      }
+      for (const d of f.diagnostics) if (r43.recordDiagnostics.length < RECORD43_MAX.recordDiagnostics && d.from < d.to && texts.has(d.record))
+        r43.recordDiagnostics.push({ category: d.category, table: d.table, column: null, record: d.record, from: d.from, to: d.to });
+    }
+    if (f !== latest) continue;
+    out.level = f.level;
+    out.pages = f.pages.slice(0, RECORD43_MAX.pages).map(p => ({ recordId: f.recordId, n: p.n, prev: p.prev, hash: p.hash, conflict: p.conflict }));
+    out.obligations = f.obligations.slice(0, RECORD43_MAX.obligations).map(o => ({ kind: o.kind, table: o.table, ref: o.ref ? cut(o.ref, 40) : null, text: cut(o.text, 120), candidate: o.candidate }));
+    for (const e of f.ends) { const q = quoteOf(e.record, e.from, e.to); if (q && out.pageEnds.length < RECORD43_MAX.pageEnds && /^(?:C-[A-Z]{2,12}|P\d(?:-\d{2})?)$/.test(e.table))
+      out.pageEnds.push({ recordId: f.recordId, page: e.page, table: e.table, state: e.state, written: e.written.slice(0, 64).map(x => cut(x, 16)), reserved: e.reserved.map(x => cut(x.id, 16)).slice(0, 16), remaining: e.remaining ? cut(e.remaining, 120) : null, quote: q }); }
+    for (const r of f.rows.get('C-CHECK') ?? []) {
+      const q = rowQ(r); if (!q || out.checks.length >= RECORD43_MAX.checks) continue;
+      const found = [...new Set((r.row.byColumn['찾은 것'] ?? '').match(/(?<![A-Za-z0-9])(?:B\d{1,3}(?::[SL]\d{1,3}[a-z]?)?|[A-Z]{1,2}\d{1,3})(?![\dA-Za-z])/g) ?? [])].slice(0, 16);
+      const method = opt(r.row.byColumn['찾은 방법'], 120);
+      out.checks.push({ id: r.id, result: fixedWord(r.row.byColumn['결과'] ?? '', CHECK_WORDS)?.value ?? null, found, method: method && !secretLike(method) ? method : null, quote: q });
+    }
+    for (const [item, r] of f.head) {
+      const q = rowQ(r), value = opt(r.row.byColumn['값'], 120); if (!q || !value || secretLike(value)) continue;
+      if (item === '첫 구조 줄') out.firstLines = value.split(/\s+·\s+|\s*\/\s*|\s*;\s*/).map(x => cut(x.trim(), 80)).filter(Boolean).slice(0, RECORD43_MAX.firstLines);
+      else if (out.defaults.length < RECORD43_MAX.defaults) out.defaults.push({ item: cut(item, 20), value, quote: q });
+    }
+  }
+  // Review N4 (8.3): in a v5 record the parts are the C-PART rows': a model part standing on no row (no row ID joined, by ID or name) is said
+  // (part-no-row, where its first basis stands); a group's parent (a C-GROUP 부모, a part with children of its own) is no such part.
+  if (latest && ctx.read43) {
+    const parents = new Set([...(latest.rows.get('C-GROUP') ?? []).map(g => plain(bare(g.row.byColumn['부모'] ?? ''))), ...parts.flatMap(b => b.parent ? [b.parent] : [])]);
+    for (const b of parts) {
+      if (b.recordRef || b.name === null || /^new:rec-/.test(b.ref) || parents.has(b.ref) || parents.has(plain(bare(b.name)))) continue;
+      const q = (b.basis ?? []).find(x => x.from !== undefined && x.to !== undefined && texts.has(x.record));
+      if (q && ctx.read43.recordDiagnostics.length < RECORD43_MAX.recordDiagnostics && q.from! < q.to!)
+        ctx.read43.recordDiagnostics.push({ category: 'part-no-row', table: 'C-PART', column: null, record: q.record, from: q.from!, to: q.to! });
+    }
+  }
+  // Every part with no family yet: from its type word, the unambiguous ones only (a v4 or v3 record; 12.3).
+  for (const b of parts) {
+    if (b.family !== undefined || b.familyRole !== undefined || !b.type || !b.typeQuote) continue;
+    const m = TYPE_FAMILY[b.type]; b.family = m?.family ?? null; b.familyRole = m?.role ?? TYPE_WORD[b.type]; b.familyUnclear = !m; b.familyReason = null; b.familyQuote = b.typeQuote as Record43Quote;
+  }
+  return out;
+}
 /** .44: the fields a C-DATA 필드·모양 cell lists (24 of 60 at most): its items split on 「,」 or 「·」 outside brackets, a leading 「type:」 left off,
  * each without a space outside its brackets and within 60; [] for a cell that names a shape, a contract (K02) or one thing.
  * Review N3: [] too for a list the record cut (「…, 그 밖 11개」: a line has no place for the count, and a part of a list read whole
@@ -332,30 +579,102 @@ export function glossVariants(text: string, gloss: ReadonlyMap<string, string>):
   if (!gloss.size) return text;
   return text.replace(/\bX\d{1,3}\b(?!\s*[(（])/g, id => gloss.has(id) ? `${id}(${gloss.get(id)})` : id);
 }
+/** Recipe .45: a part's family from a v5 C-PART 표현군·역할 cell, on its row (nothing for a cell outside the fixed words: the next page
+ * asks for it). */
+function familyOn(b: Part43, cell: string, q: Record43Quote, added: boolean): void {
+  const f = readFamily(cell); b.added = added;
+  if (!f.ok) { b.family = null; b.familyRole = null; b.familyReason = null; b.familyUnclear = false; b.familyQuote = null; return; }
+  b.family = f.family; b.familyRole = f.role ? cut(f.role, 40) : null; b.familyReason = f.reason; b.familyUnclear = false; b.familyQuote = q;
+}
+/** Recipe .45 (13.7c, see record43): the supplementary rows that land on parts. */
+function supplementary(ctx: { parts: Part43[]; v4: (ids: string[]) => TableRow[]; byName: (name: string) => Part43 | undefined; rowQuote: (r: TableRow) => Record43Quote | null;
+  partOfRef: (record: string, b: string) => string | null }): void {
+  const { v4, byName, rowQuote } = ctx;
+  const p12 = v4(['P1-02']), p22 = v4(['P2-02']), p53 = v4(['P5-03']), p51 = v4(['P5-01']), p61 = v4(['P6-01']), p62 = v4(['P6-02']), entries = v4(['C-ENTRY']), contracts = v4(['C-CONTRACT']);
+  const rid = (r: TableRow) => (r.byColumn['행 ID'] ?? '').trim();
+  const clean = (s: string | undefined) => bare(s ?? '');
+  // 「부분: 나머지」 naming a part, the part a cell names whole, or a step ID's part (B03:S02, a v4 record's own C-PART row ID).
+  const partOf = (cell: string | undefined, record: string): { part: Part43 | undefined; rest: string | null } => {
+    const t = clean(cell); if (!t) return { part: undefined, rest: null };
+    const m = /^(.+?)\s*:\s*(.+)$/.exec(t), step = /^(B\d{1,3}):S\d/.exec(t);
+    if (m && byName(m[1]!)) return { part: byName(m[1]!), rest: m[2]!.trim() };
+    if (step) { const n = ctx.partOfRef(record, step[1]!); return { part: n ? byName(n) : undefined, rest: null }; }
+    return { part: byName(t), rest: null };
+  };
+  const addStep = (b: Part43, name: string, does: string | null, r: TableRow) => {
+    const q = rowQuote(r), steps = b.steps ??= [], n = cut(name, 60), d = does ? cut(does, 120) : null;
+    if (!q || !n || steps.length >= RECORD43_MAX.steps || steps.some(s => s.name === n) || secretLike(n) || (d && secretLike(d))) return;
+    steps.push({ name: n, does: d, uses: [], quote: q, program: true });
+  };
+  const addCondition = (b: Part43, when: string, then: string, otherwise: string | null, r: TableRow) => {
+    const q = rowQuote(r), list = b.conditions ??= [];
+    if (!q || !when || !then || list.length >= RECORD43_MAX.conditions || list.some(c => overlaps(c.quote, q)) || [when, then, otherwise ?? ''].some(w => secretLike(w))) return;
+    list.push({ when: cut(when, 80), then: cut(then, 60), else: otherwise ? cut(otherwise, 60) : null, quote: q, phase: null });
+  };
+  const addConfig = (b: Part43, item: string) => { const c = b.config ??= [], x = cut(item, 80); if (x && c.length < RECORD43_MAX.config && !c.includes(x) && !secretLike(x)) c.push(x); };
+  // P1-02: the chain's owner (the entry, contract or first stage it names), each stage a step in its order.
+  const owner = (chain: string, record: string, seen = 0): Part43 | undefined => {
+    const id = clean(chain);
+    const e = /^N\d{1,3}$/.test(id) ? entries.find(x => rid(x) === id) : undefined; if (e) return byName(e.byColumn['소유 부분'] ?? '');
+    const k = /^K\d{1,3}$/.test(id) ? contracts.find(x => rid(x) === id) : undefined; if (k) return byName(k.byColumn['제공 부분'] ?? '');
+    const first = /^P1-02\.\d+$/.test(id) && seen < 2 ? p12.find(x => rid(x) === id) : undefined;
+    if (first) { const s = partOf(first.byColumn['단계·부분'], record); return s.rest ? s.part : first.byColumn['사슬 ID'] && clean(first.byColumn['사슬 ID']) !== id ? owner(first.byColumn['사슬 ID']!, record, seen + 1) : undefined; }
+    return byName(id);
+  };
+  const order = (r: TableRow) => Number(/\d+/.exec(r.byColumn['순서'] ?? '')?.[0] ?? NaN);
+  for (const r of [...p12].sort((a, b) => (order(a) || 0) - (order(b) || 0))) {
+    const stage = partOf(r.byColumn['단계·부분'], r.record), b = stage.rest ? stage.part : owner(r.byColumn['사슬 ID'] ?? '', r.record);
+    const name = stage.rest ?? clean(r.byColumn['단계·부분']); if (!b || !name || stage.part === b && !stage.rest) continue;
+    const pass = said(clean(r.byColumn['다음으로 넘김·중단 조건'])), got = said(clean(r.byColumn['받는 것']));
+    addStep(b, name, [got, pass].filter(Boolean).join(' → ') || null, r);
+  }
+  for (const r of p22) {
+    const b = byName(r.byColumn['소유 부분'] ?? ''), what = said(clean(r.byColumn['구현해야 할 계약'])); if (!b || !what) continue;
+    addStep(b, `확장 접점: ${what}`, [said(clean(r.byColumn['등록·연결 방식'])), said(clean(r.byColumn['호출·해제 시점']))].filter(Boolean).join(' · ') || null, r);
+  }
+  for (const r of p53) {
+    const job = clean(r.byColumn['작업·단계 ID']), viaJob = /^P5-01\.\d+$/.test(job) ? p51.find(x => rid(x) === job) : undefined;
+    const b = viaJob ? byName(viaJob.byColumn['수행 부분'] ?? '') : partOf(job, r.record).part;
+    const when = said(clean(r.byColumn['실패 조건'])), retry = said(clean(r.byColumn['재시도 조건·한도'])); if (!b || !when || !retry) continue;
+    addCondition(b, when, `재시도: ${retry}`, said(clean(r.byColumn['복구 위치'])), r);
+  }
+  for (const r of p61) {
+    const b = byName(r.byColumn['적용 대상'] ?? ''), key = said(clean(r.byColumn['설정 ID·키'])); if (!b || !key) continue;
+    const value = said(clean(r.byColumn['기본값·식'])); addConfig(b, value ? `${key}=${value}` : key);
+  }
+  for (const r of p62) {
+    const id = said(clean(r.byColumn['설정 ID'])); if (!id) continue;
+    const def = p61.find(x => rid(x) === id || clean(x.byColumn['설정 ID·키']) === id), b = def ? byName(def.byColumn['적용 대상'] ?? '') : byName(r.byColumn['적용 범위·프리셋'] ?? '');
+    if (!b) continue;
+    const key = def ? said(clean(def.byColumn['설정 ID·키'])) ?? id : id, from = said(clean(r.byColumn['설정 출처'])), value = said(clean(r.byColumn['지정값'])), rank = said(clean(r.byColumn['우선 관계']));
+    addConfig(b, `${key}${from ? ` ← ${from}` : ''}${value ? ` ${value}` : ''}${rank ? ` (${rank})` : ''}`);
+  }
+}
+/** The parts a cell names: the whole cell, else its 「·」 pieces (the longest run naming a part first), a trailing 「(…)」 left off. */
+function partsInCell(cell: string, byName: (name: string) => Part43 | undefined): Part43[] {
+  const whole = said(bare(cell)); if (!whole) return [];
+  const one = (s: string) => byName(s) ?? byName(s.replace(/\s*[(（][^)）]*[)）]\s*$/, ''));
+  const all = one(whole); if (all) return [all];
+  const pieces = whole.split(/\s*·\s*/), out: Part43[] = [];
+  for (let i = 0; i < pieces.length;) {
+    let hit: Part43 | undefined, j = pieces.length;
+    for (; j > i && !hit; j--) hit = one(pieces.slice(i, j).join('·'));
+    if (hit) { if (!out.includes(hit)) out.push(hit); i = j + 1; } else i++;
+  }
+  return out;
+}
 /** .44: the file names in a text (「log.csv」, 「a.json·b.json」), lower-cased. */
 const fileNames = (t: string): string[] => (t.toLowerCase().match(/[a-z0-9_][a-z0-9_\-]*\.[a-z][a-z0-9]{0,5}\b/g) ?? []);
 /** .44 (see record43): the record's own lines from its C-LINK and C-DATA rows that the reply left undrawn, pushed onto relations. */
 function programLines(ctx: { parts: Part43[]; relations: Line43[]; links: TableRow[]; dataRows: TableRow[]; byName: (name: string) => Part43 | undefined;
   nameOfPart: (b: Part43) => string; rowQuote: (r: TableRow) => Record43Quote | null; dataById: (id: string, record: string) => TableRow | undefined; maxLines: number }): void {
   const { parts, relations, byName } = ctx;
-  // The parts a cell names: the whole cell, else its 「·」 pieces (the longest run naming a part first), a trailing 「(…)」 left off.
-  const partsIn = (cell: string): Part43[] => {
-    const whole = said(bare(cell)); if (!whole) return [];
-    const one = (s: string) => byName(s) ?? byName(s.replace(/\s*[(（][^)）]*[)）]\s*$/, ''));
-    const all = one(whole); if (all) return [all];
-    const pieces = whole.split(/\s*·\s*/), out: Part43[] = [];
-    for (let i = 0; i < pieces.length;) {
-      let hit: Part43 | undefined, j = pieces.length;
-      for (; j > i && !hit; j--) hit = one(pieces.slice(i, j).join('·'));
-      if (hit) { if (!out.includes(hit)) out.push(hit); i = j + 1; } else i++;
-    }
-    return out;
-  };
+  const partsIn = (cell: string): Part43[] => partsInCell(cell, byName);
   const has = (a: string, b: string) => relations.some(l => l.from === a && l.to === b);
   const through = (a: string, b: string) => relations.some(l => l.from === a && l.to !== b && has(l.to, b));
   const storeOf = (name: string): Part43 | undefined => {
     const n = plain(bare(name)), files = fileNames(name);
-    return parts.find(b => b.type === 'store' && (plain(ctx.nameOfPart(b)) === n || (files.length > 0 && fileNames(ctx.nameOfPart(b)).some(f => files.includes(f)))));
+    return parts.find(b => (b.type === 'store' || b.family === 'store') && (plain(ctx.nameOfPart(b)) === n || (files.length > 0 && fileNames(ctx.nameOfPart(b)).some(f => files.includes(f)))));
   };
   // A line's 설계/관찰 is its row's: a C-LINK row's own cell (review B2); a C-DATA row has none, so its line says none (null).
   const modeOf = (r: TableRow): 'design' | 'observed' | null => r.id === 'C-LINK' ? fixedWord(r.byColumn['설계/관찰'] ?? '', { 설계: 'design', 관찰: 'observed' } as const)?.value ?? null : null;
@@ -392,6 +711,18 @@ function programLines(ctx: { parts: Part43[]; relations: Line43[]; links: TableR
   }
   for (const r of ctx.dataRows) {
     const name = (r.byColumn['이름'] ?? '').trim(), id = (r.byColumn['행 ID'] ?? '').trim(); if (!name) continue;
+    // Recipe .45 (13.7a): a D row a C-LINK row carries draws no maker → reader line of its own: the C-LINK rows decide who hands it to
+    // whom (the row gives the fields), so no maker × reader shortcut is made from it. A store part holding it keeps its write and read
+    // halves (a store's own lines are never a shortcut).
+    if (/^D\d{1,3}$/.test(id) && !storeOf(name) && ctx.links.some(l => /^\s*(D\d{1,3})\b/.exec(l.byColumn['넘기는 것'] ?? '')?.[1] === id && ctx.dataById(id, l.record) === r)) continue;
+    // Recipe .45 (13.3): data shared with no direction (「공유: B05·B07」) draws no directed line; only the two-way lines between each
+    // sharer and the store part that holds it, when one does.
+    const sharers = partsIn(r.byColumn['공유 부분'] ?? '');
+    if (sharers.length) {
+      const s = storeOf(name);
+      if (s) for (const x of sharers) if (x !== s) { add(x, s, r, name, /^D\d{1,3}$/.test(id) ? id : null, fieldsOf(r.byColumn['필드·모양'] ?? '')); add(s, x, r, name, /^D\d{1,3}$/.test(id) ? id : null, fieldsOf(r.byColumn['필드·모양'] ?? '')); }
+      continue;
+    }
     const makers = partsIn(r.byColumn['만드는 부분'] ?? ''), readers = partsIn(r.byColumn['읽는 부분'] ?? '');
     if (!makers.length && !readers.length) continue;
     hand(makers, readers, r, name, name, /^D\d{1,3}$/.test(id) ? id : null, fieldsOf(r.byColumn['필드·모양'] ?? ''), fixedWord(r.byColumn['종류'] ?? '', DATA_WORDS)?.value === 'store');
@@ -447,4 +778,14 @@ function branchesOf(cell: string, own: string): ReadingStepBranch[] {
     const outcome = after.replace(/(?:(B\d{1,3})\s*:\s*)?S\d{1,3}[a-z]?/g, ' ').replace(/최대\s*\d+\s*(?:번|회)/, ' ').replace(/^[\s,·]+|[\s,·]+$/g, '').replace(/\s+/g, ' ');
     return { when: when ? cut(when, 120) : null, to: [...new Set(to)].slice(0, 4), max, outcome: outcome ? cut(outcome, 80) : null };
   });
+}
+/** Review D2: the code words of a condition as written: identifiers with 「_」 or 「.」 in them, camelCase ones, and calls (「exists(」), four
+ * characters or more (os.path.exists, plan_path, GITHUB_REF, best_score); plain words are none. */
+export function codeWords(condition: string): string[] {
+  const out: string[] = [];
+  for (const m of condition.matchAll(/[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*/g)) {
+    const w = m[0], call = condition[m.index! + w.length] === '(';
+    if (w.length >= 4 && (/[_.]/.test(w) || /[a-z][A-Z]/.test(w) || call) && !out.includes(w)) out.push(w);
+  }
+  return out;
 }

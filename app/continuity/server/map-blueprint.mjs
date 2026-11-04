@@ -70,7 +70,11 @@ const SAFE_CONTRACT_CATEGORIES = new Set(['shape', 'keys', 'text', 'count', 'new
   // map-reading.14 (.39): a part's file-map role row; .39: a claim quoting a range another part's claim quotes.
   'file-role', 'dup-claim',
   // .44: a change claim naming another change row's actor.
-  'actor']);
+  'actor',
+  // .45: a part splitting one part-table row or a list item written as a part.
+  'list-split',
+  // .45 (review N9): a v5 claim whose grade its row's cites do not reach.
+  'cite-grade']);
 /** Fixed path/rule (and, for rule 'contract', its fixed guard category) of a refusal; null for anything else. */
 export function safeValidation(error) {
   try {
@@ -113,7 +117,9 @@ parts는 기록이 그린 흐름의 단계를 잃지 않을 만큼 보통5~36개
 기록이 스스로 구성 목록(돌아가는 것의 표, 유닛 목록)·층 번호·「A → B」 흐름을 제시하면 그 단위로 부분을 나누고, 화살표의 양 끝이 서로 다른 부분이 되게 한다. 「A·B와 C」처럼 서로 다른 유닛을 한 이름에 묶어야 하면 나눈다. 기록이 묶음 이름과 구성원을 함께 밝히면(예: 「정보 층(달력·카드·질감)」, 1a·1b·1c 같은 번호) 그 묶음을 부모 부분으로 두고 구성원을 자식으로 둔다. 미구현·폐기된 구성원은 부분으로 세울 자리가 없을 때만 같은 묶음 부분의 focus에 적는다. 원문이 「X의 입력」이라 부른 것은 X의 자식으로 두지 말고 X 옆 부분으로 두어 X로 가는 관계로 잇는다. parent는 원문이 「A(B·C)」처럼 B를 A 안에 직접 열거할 때만 쓴다. 목적·설계 사상만 말하고 다른 부분과 주고받는 것이 없는 내용은 부분으로 만들지 않고 가장 가까운 부분의 focus로 보낸다. 기존 ref는 INPUT.parts에 있는 ID만, name은 사용자의 기존 이름과 글자 그대로 같아야 하고 parent도 원래 parentId와 같아야 한다. 새 ref는 ^new:[a-z0-9_-]{1,24}$이며 중복하지 않는다. parent는 실제 기존 부분 또는 이 계획의 부분 ref나 null이며 자기 자신·순환·없는 부모를 쓰지 않는다. 포함 근거가 없으면 null이다. name60자 이하. focus는 320자 안에 쓴다(480자를 넘으면 설계 전체가 거절된다). 긴 목록은 이름만 남기고 설명을 줄인다.
 global은64개 이하(그중 relation 항목 48개까지), text240자 이하. 뒤의 조건·정정·철회·미구현·모름, 내포 예제 범위, 관계 방향, 요청·prior 귀속을 누락하지 않는다. kind=relation 항목은 원문의 화살표·「A가 B를 읽는다」·보고와 지시의 전달마다 「from ref → to ref: 넘기는 것(원문 이름)」 형식으로 하나씩 쓰고 at에 그 줄을 둔다(흐름 뼈대이며 증거가 아니다). 원문이 「읽기만」「보고 읽기」「한 줄 지시」「잔고로 노출 조절」처럼 적은 읽기와 제어도 그 문장이 있을 때만 화살표로 잇는다(예: 성적표 → 사람, 엔진 → 감시, 사람 → 엔진). 흐름도의 끝까지 따라가 한 부분에서 나가는 화살표(예: 엔진 → journal·outcomes → 경주 행 → 성적표)도 relation 항목으로 세운다. 부분은 원문의 표·목록이 이름 붙인 단위(유닛·생산자·사람)로만 세우고, 흐름 그림의 중간 산출(journal·outcomes 같은 기록)은 부분이 아니라 그것을 내는 단위의 focus에 남기며 그 화살표는 단위 사이의 relation으로 쓴다. 원문이 서로 다른 생산자로 적은 둘(예: 라이브 엔진의 경주 행과 종이 재생의 경주 행)을 한 부분에 합치지 않는다. 사람(소유자)과 그 지시를 받는 세션·감독자가 원문에 따로 적혀 있으면 따로 둔다. 앞으로 하겠다는 지시·계획은 관계가 아니라 그 부분의 want로만 두고 relation 항목으로 쓰지 않는다. [모름]의 각 줄은 그것이 가리키는 부분에 하나씩 uncertain 항목으로 두고 「→ ref」로 맡긴다. 정정·철회·모름 항목과 condition·request 항목의 text 끝에는 그것을 맡을 부분 ref를 「→ new:x」로 하나만 적는다. 기록의 철회·변경, 실제 변화, 오류, 지켜야 할 것, 모르는 것, 가장 자신 없는 것 표의 행은 그 행의 「부분 이름」 칸(없으면 첫 칸)이 이름 붙인 부분에 맡긴다(「엔진 | 매일 FLAT 재시작 | 채택 안 함」은 → 엔진이며, 그것을 대신한 감시를 맡은 부분이 아니다). 「전체」 행만 원문이 그 규칙이 제약한다고 적은 부분에 둔다. 「전체」 행(부분 이름 칸이 「전체」)은 한 부분에만 맡긴다: 원문이 그 규칙이 제약한다고 적은 부분 하나(없으면 기록이 전체를 대표해 이름 대는 첫 부분)이며, 같은 「전체」 행을 둘 이상 부분의 at이나 항목에 나누어 넣지 않는다(나누어 맡기면 한 규칙이 두 번 선다). 한 항목은 원문 표 행 하나다: 철회·정정·규칙·모름·가장 자신 없는 것·다음 관문 표의 행마다 항목 하나를 쓰고 at에 그 행 하나를 둔다(그 행이 가리키는 다른 기록의 한 줄은 함께 둘 수 있다). 여러 행을 한 항목에 묶지 않는다(묶은 항목은 앞의 행만 주장이 되고 나머지 행이 사라진다). global 자리가 모자라면 그 행을 맡을 부분의 at에 그 행을 두어 맡긴다. 한 부분에 맡기는 항목 수는 줄이지 않는다(첫 지도의 부분은 주장을 20개까지 쓴다). 맡긴 항목의 표 행마다 그 부분의 주장 하나가 되며, 어느 주장도 인용하지 않은 행은 진단에 남는다. relation 항목은 48개까지만 쓴다. 기록의 연결 표(보내는 부분 | 받는 부분)의 모든 행은 relation 항목 하나(저장소를 거치면 둘)로 빠짐없이 쓴다. 소유자가 정한 요구사항은 규칙을 전달받는 세션이 아니라 그 규칙이 제약하는 부분(돈 경로 → 엔진, 지출 → 카드 러너, 노출 → 사람)에 둔다. 운영 함정·환경 사실(예: coreutils 차이, 거래소 지연 몰림)은 원문이 그 영향을 받는다고 이름 붙인 부분의 focus에 두고, 그것을 감시·보고하는 부분에 두지 않으며, 받는 부분이 원문에 없으면 아무 부분에나 붙이지 않는다. 원문 표의 단위와 저장소가 부분 36개를 넘으면 관계가 없는 자식부터 부모 부분의 focus에 원문 이름과 상태 그대로(예: 「변경 구상(plan-view): 돌고 있음 [추정]」) 넣고, 관계가 있는 단위와 사람은 부분으로 남긴다. 요구·구상·보고·검사 보고·제공 자료를 구별하고 작성자의 보고를 앱이 확인한 사실로 올리지 않는다. 같은 이름만으로 다른 대상·판본을 합치지 않는다. 사용자 이름·부모·직접 바로잡은 역할을 보존한다. 원문이 명시한 범위만 정정하고 도착 순서로 앞 주장을 철회하지 않는다. 「한 줄 요약」 문장은 material이 아니며, 꼬리표 밖에서 이름이 하나만 나오는 부분에 맡기고(꼬리표 안의 보고자가 아니다) 부분 이름이 둘 이상·없음이거나 프로젝트를 정의하는 문장은 어느 부분에도 맡기지 않는다.
 모든 at는 원래 INPUT.records에 실제 있는 구간 별칭1~8개다. 범위 문자열·인용 복사·새 별칭·현재 지도나 요청의 ID를 at로 쓰지 않는다. 서로 떨어진 별칭은 단서 위치 목록이며 이어 붙인 인용이 아니다. basis/note의 사용자 기재 정보를 원문 조건으로 만들지 않는다. 실제 부분이 없으면 parts=[]로 두며 빈 틀을 만들지 않는다. 설계 자체는 원문 증거도 구현 사실도 아니다.
-기록 v4(첫 줄 「기록 v4」 또는 덩이 머리 줄 「〔기록 … · 덩이 n · 기준 …〕」)는 표마다 「표 ID 제목」 줄이 있고, 한 답이 덩이 1(지금 상태)과 덩이 2(설계)로 나뉘어 두 기록으로 들어온다. 부분은 C-PART 행(행 ID B01…)이고 C-STEP 행 ID B03:S02의 B03은 C-PART 행 ID다. 표 이름은 ID로 대응한다: C-PART(v3: 부분·부분 유형), C-LINK(연결), C-CHANGE(최근 소유자 요청과 실제 변화), C-WITHDRAW(철회·변경), C-RULE(지켜야 할 것), C-ISSUE(오류·미해결), C-GATE(다음 관문), C-UNKNOWN(모르는 것), C-DOUBT(가장 자신 없는 것), C-DATA(산출물), C-DESIGN(부분별 설계), C-STEP(안의 단계), C-COND(조건·거부·분기), C-FILES(파일 지도), C-SUMMARY(한 줄 요약). v3 이름으로 말하는 규칙은 같은 ID의 표에도 적용한다. C-ENTRY의 진입점·C-VARIANT의 변형·C-CONTRACT의 외부 계약·자료형·오류 객체는 부분이 아니다(따로 맡은 일이 있는 C-PART 행만 부분이다). C-DATA 행은 종류가 「저장」일 때만 저장소 부분이 된다. C-PART의 「사용자 코드」 행은 부분이다. 보충 표(P1-01…P6-04), C-STATUS, C-DONE, 「이번 기록의 초점:」 줄은 계획 항목이나 부분의 at가 되지 않는다.`;
+기록 v4(첫 줄 「기록 v4」 또는 덩이 머리 줄 「〔기록 … · 덩이 n · 기준 …〕」)는 표마다 「표 ID 제목」 줄이 있고, 한 답이 덩이 1(지금 상태)과 덩이 2(설계)로 나뉘어 두 기록으로 들어온다. 부분은 C-PART 행(행 ID B01…)이고 C-STEP 행 ID B03:S02의 B03은 C-PART 행 ID다. 표 이름은 ID로 대응한다: C-PART(v3: 부분·부분 유형), C-LINK(연결), C-CHANGE(최근 소유자 요청과 실제 변화), C-WITHDRAW(철회·변경), C-RULE(지켜야 할 것), C-ISSUE(오류·미해결), C-GATE(다음 관문), C-UNKNOWN(모르는 것), C-DOUBT(가장 자신 없는 것), C-DATA(산출물), C-DESIGN(부분별 설계), C-STEP(안의 단계), C-COND(조건·거부·분기), C-FILES(파일 지도), C-SUMMARY(한 줄 요약). v3 이름으로 말하는 규칙은 같은 ID의 표에도 적용한다. C-ENTRY의 진입점·C-VARIANT의 변형·C-CONTRACT의 외부 계약·자료형·오류 객체는 부분이 아니다(따로 맡은 일이 있는 C-PART 행만 부분이다). C-DATA 행은 종류가 「저장」일 때만 저장소 부분이 된다. C-PART의 「사용자 코드」 행은 부분이다. 보충 표(P1-01…P6-04), C-STATUS, C-DONE, 「이번 기록의 초점:」 줄은 계획 항목이나 부분의 at가 되지 않는다.
+기록 v5(첫 줄이 「〔기록 … · 쪽 n · 기준 … · 앞 쪽 …〕」인 기록)는 쪽마다 한 기록으로 들어온다. 표 ID는 기록 v4와 같고, 다음 표가 다르다: C-HEAD(기록 머리, v4의 C-BASIS), C-SRC(파일 장부 F01…, v4의 C-FILES), C-EVID(근거 장부 E01…), C-STATE(첫 구조의 상태), C-CHECK(점검), C-DROP(삭제), C-END(쪽 끝). 행마다 첫 열이 행 ID이고, 「부분」으로 끝나는 칸과 부모·자식들·대상·소유 부분 칸에는 C-PART의 B ID(B05)가 적힌다. B·F·E ID는 INPUT 옆의 keys(기록마다 그 기록이 인용하는 B의 이름과 하는 일, F의 경로, E의 등급과 출처)로 푼다. 부분의 name은 B ID가 아니라 그 C-PART 행의 이름 칸 그대로다. 「교체 B07」 행은 같은 ID의 앞 행을 대신하고, C-DROP에 적힌 ID의 행은 없는 것으로 읽는다. C-PART의 표현군·역할은 프로그램이 읽으므로 type을 네가 정하지 않는다. C-LINK의 주장 성격이 「실행 관측」인 행만 관찰이고 그 밖은 설계다(mode를 관찰로 올리지 않는다). C-HEAD·C-SRC·C-EVID·C-CHECK·C-END 행과 「완료 단계:」·「다음:」 줄은 부분의 at나 주장의 출처가 되지 않는다(프로그램이 읽는다). C-DATA 행의 만드는·읽는 부분이 「공유: B03·B05」이면 방향 없는 공유 자료이므로 그 둘 사이에 선을 쓰지 않는다.
+부분 표의 한 행(목록 한 줄, 기여자 목록 한 줄)은 부분 하나다. 그 행이 적은 항목·사람을 각각 부분으로 세우지 않고 그 부분의 focus에 항목으로 적는다. C-GROUP 묶음 뜻이 「목록」인 행의 자식들도 부분이 아니라 부모 부분의 항목이다(자기 C-PART 행이 있는 항목만 부분이다).`;
 export const BLUEPRINT_PROMPT = MAP_BLUEPRINT_PROMPT;
 // Keep the first-map prompt and its cache identity unchanged. Only later map.7 planning registers current-claim obligations.
 export const LATER_BLUEPRINT_PROMPT = MAP_BLUEPRINT_PROMPT + `
@@ -1250,7 +1256,10 @@ export function combineRenderedReading(fragments, global, ask, blueprint, strict
   // other reason is read on what remains and then named by the combined wire's part index again (the wire the model wrote).
   // .36: a store part standing on a place another store part holds (storeDupParts) is left out whole too, with every line from or to
   // it and every port-map row naming such a line (store-dup); nothing is pointed at the kept store instead (never re-pointed).
-  const payload = payloadParts(combined, ask), folds = storeDupParts(combined, ask, payload), dup = folds.map(f => f.index);
+  // .45 (RECORD_ASKS_V5_KO.md 13.7d): a part table's one row (a list row, a contributors row) written as several parts, or a C-GROUP 목록
+  // row's item written as a part (listSplitParts), is left out the same way (list-split): the row is one part, its items a list.
+  const payload = payloadParts(combined, ask), folds = storeDupParts(combined, ask, payload), splits = listSplitParts(combined, ask, [...payload, ...folds.map(f => f.index)]);
+  const dup = [...folds.map(f => f.index), ...splits], splitRefs = new Set(splits.map(i => combined.parts[i].ref));
   const dupRefs = new Set(dup.map(i => combined.parts[i].ref)), kept = combined.parts.flatMap((_, i) => payload.includes(i) || dup.includes(i) ? [] : [i]);
   const lines = Array.isArray(combined.relations) ? combined.relations : [], cut = lines.flatMap((r, i) => r && typeof r === 'object' && (dupRefs.has(r.from) || dupRefs.has(r.to)) ? [i] : []);
   // .42 (fix 4): the artifact table's product lines merged into a kept line between the same two parts, or drawn already through another
@@ -1275,8 +1284,8 @@ export function combineRenderedReading(fragments, global, ask, blueprint, strict
   if (inner.length + payload.length + dup.length + cut.length + mergedAway.length + shortcutAway.length + cutRows.length > DIVIDED_EXCLUSIONS_MAX) invalid({ validation: { path: 'reply', rule: 'contract' } });
   const wire = withoutSetAside(reduced, inner);
   const exclusions = [...payload.map(i => payloadExclusion(combined.parts[i], i, ask)),
-    ...dup.map(i => aliasExclusion(`parts[${i}]`, 'store-dup', Array.isArray(combined.parts[i]?.basis) ? combined.parts[i].basis.find(b => typeof b === 'string') : null, ask)),
-    ...cut.map(i => aliasExclusion(`relations[${i}]`, 'store-dup', lines[i]?.at, ask)),
+    ...dup.map(i => aliasExclusion(`parts[${i}]`, splits.includes(i) ? 'list-split' : 'store-dup', Array.isArray(combined.parts[i]?.basis) ? combined.parts[i].basis.find(b => typeof b === 'string') : null, ask)),
+    ...cut.map(i => aliasExclusion(`relations[${i}]`, splitRefs.has(lines[i]?.from) || splitRefs.has(lines[i]?.to) ? 'list-split' : 'store-dup', lines[i]?.at, ask)),
     ...mergedAway.map(i => aliasExclusion(`relations[${i}]`, 'product-merge', lines[i]?.at, ask)), ...shortcutAway.map(i => aliasExclusion(`relations[${i}]`, 'product-shortcut', lines[i]?.at, ask)),
     ...cutRows.map(k => aliasExclusion(`portMap[${k}]`, cut.includes(rows[k]?.relation) ? 'store-dup' : 'product-shortcut', rows[k]?.at, ask)),
     ...inner.map(x => ({ ...x, path: x.path.replace(/^parts\[(\d+)\]/, (_, k) => `parts[${kept[Number(k)]}]`)
@@ -1299,13 +1308,43 @@ export function combineRenderedReading(fragments, global, ask, blueprint, strict
   // .42: the product lines left out, 「from → to: payload (합침 → the line it joined | 지름길 · via)」, and merged names past 80 (product-lines).
   const said = i => `${lines[i].from} → ${lines[i].to}${typeof lines[i].payload === 'string' ? `: ${lines[i].payload}` : ''}`;
   const productNames = [...products.merges.map(m => `${said(m.index)} (합침 → ${lines[m.into].from} → ${lines[m.into].to})`),
-    ...products.shortcuts.map(s => `${said(s.index)} (지름길 · ${s.via} 거침)`), ...unfitted.map(n => `${n} (합침 · 넘기는 것 80자 밖)`)];
-  return { wire, exclusions, folds: folds.map(f => `${f.name} → ${f.into}`), asideLines, products: productNames };
+    ...products.shortcuts.map(s => `${said(s.index)} (지름길 · ${s.via} 거침)`),
+    // .45 (review D1): a maker → reader line the C-LINK rows carrying its D never reach, kept and named as a missing C-LINK row's candidate.
+    ...(products.candidates ?? []).map(c => `${said(c.index)} (C-LINK 누락 후보)`), ...unfitted.map(n => `${n} (합침 · 넘기는 것 80자 밖)`)];
+  return { wire, exclusions, folds: folds.map(f => `${f.name} → ${f.into}`), asideLines, products: productNames, linkCandidates: (products.candidates ?? []).map(c => said(c.index)) };
 }
 
+/** .45 (13.7d): the combined wire's new parts (none a parent) that split one part-table row: several parts every basis of which stands on
+ * the same v4 or v5 C-PART row (the one named as the row is kept, else the first), and a part standing only on a C-GROUP 목록 row that is one
+ * of its items and no C-PART row's name; by combined index. */
+export function listSplitParts(wire, ask, skip = []) {
+  try {
+    const parts = Array.isArray(wire?.parts) ? wire.parts : [], texts = askRecords(ask), parents = new Set(parts.map(part => part?.parent).filter(ref => typeof ref === 'string'));
+    const where = alias => {
+      if (typeof alias !== 'string' || !alias.includes('.')) return null;
+      const record = alias.slice(0, alias.indexOf('.')), source = texts.get(record), range = source?.spans ? resolveRange(alias, record, source.text, source.spans) : null;
+      return range ? { record, from: range.from, to: range.to } : null;
+    };
+    const partRows = rowsOf(texts, ['C-PART']).filter(r => r.dialect !== 'v3'), groupRows = rowsOf(texts, ['C-GROUP']).filter(r => r.dialect !== 'v3' && /목록/.test(r.byColumn['묶음 뜻'] ?? ''));
+    const inRow = (part, rows) => {
+      const at = (Array.isArray(part.basis) ? part.basis : []).map(where); if (!at.length || at.some(x => !x)) return null;
+      return rows.find(r => at.every(x => x.record === r.record && r.from <= x.from && x.to <= r.to + 1)) ?? null;
+    };
+    const open = i => { const p = parts[i]; return !skip.includes(i) && !!p && typeof p === 'object' && typeof p.ref === 'string' && NEW.test(p.ref) && !parents.has(p.ref) && typeof p.name === 'string'; };
+    const byRow = new Map(), out = [];
+    parts.forEach((p, i) => { if (!open(i)) return; const r = inRow(p, partRows); if (r) byRow.set(r, [...byRow.get(r) ?? [], i]); });
+    for (const [r, list] of byRow) if (list.length > 1) { const own = list.find(i => plainName(parts[i].name) === plainName(r.byColumn['이름'] ?? '')) ?? list[0]; out.push(...list.filter(i => i !== own)); }
+    const named = new Set(partRows.map(r => plainName(r.byColumn['이름'] ?? '')));
+    parts.forEach((p, i) => {
+      if (!open(i) || out.includes(i) || named.has(plainName(p.name))) return;
+      const g = inRow(p, groupRows); if (g && String(g.byColumn['자식 이름들'] ?? '').split(/\s*·\s*/).map(plainName).includes(plainName(p.name))) out.push(i);
+    });
+    return out.sort((a, b) => a - b);
+  } catch { return []; }
+}
 /** .37: the set-aside categories that leave a line out because the records rule it out: no correction draws it again.
  * .42: and a product line merged into another or drawn already through another part (productLines). */
-const ASIDE_LINES = new Set(['unrecorded', 'store-dup', 'product-merge', 'product-shortcut']);
+const ASIDE_LINES = new Set(['unrecorded', 'store-dup', 'product-merge', 'product-shortcut', 'list-split']);
 /* .42 (fix 4, from the blind judging of the .41 CLI map: about twelve of its forty lines came from the artifact table's 만드는 부분 ×
  * 읽는 부분 cells, timer → Benchmark, Commands → Executor and Benchmark → ExportManager skipping the part the connection table passes
  * them through, ExportManager → 결과 파일 four times and 결과 파일 → 사용자 three times): a product line is a relation whose at is an
@@ -1350,7 +1389,49 @@ export function productLines(wire, ask, skip = []) {
       return at >= 0 && splitOutside(String(row.cells[at] ?? '').replace(/\([^)]*\)/g, ' ')).includes(plainName(name)); };
     const valid = i => { const r = lines[i]; return !!r && typeof r === 'object' && typeof r.from === 'string' && typeof r.to === 'string' && !skip.includes(i); };
     const product = lines.map((_, i) => valid(i) ? rowOf(i) : null);
-    const kept = lines.flatMap((_, i) => valid(i) && !product[i] ? [i] : []), merges = [], shortcuts = [];
+    // .45 (RECORD_ASKS_V5_KO.md 13.7a): an artifact row (a v4 or v5 C-DATA row) whose D ID the record's C-LINK rows carry: those rows say
+    // who hands it to whom, so a product line between two parts no such C-LINK row joins is a maker × reader shortcut (product-shortcut,
+    // via 「C-LINK」). A store's own write and read lines stay (below).
+    const dataRows = rowsOf(texts, ['C-DATA']).filter(r => r.dialect !== 'v3'), linkRows = rowsOf(texts, ['C-LINK']).filter(r => r.dialect !== 'v3');
+    const dOf = row => { const d = dataRows.find(x => x.record === row.record && x.from <= row.from && row.to <= x.to + 1); const id = (d?.byColumn['행 ID'] ?? '').trim(); return /^D\d{1,3}$/.test(id) ? id : null; };
+    const pieces = cell => String(cell ?? '').replace(/\s*:\s*.+$/, '').split(/\s*·\s*/).map(plainName).filter(Boolean);
+    // .45 (review D1): the composition and list groups (C-GROUP 구성 · 목록): a part a C-LINK row reaches reaches what it is made of.
+    const inside = new Map();
+    for (const g of rowsOf(texts, ['C-GROUP']).filter(r => r.dialect !== 'v3' && /구성|목록/.test(r.byColumn['묶음 뜻'] ?? ''))) {
+      const parent = plainName(String(g.byColumn['부모 이름'] ?? '').replace(/\s*:\s*.+$/, '')); if (!parent) continue;
+      inside.set(parent, [...inside.get(parent) ?? [], ...pieces(g.byColumn['자식 이름들'])]);
+    }
+    const linkEnds = linkRows.map(l => ({ from: pieces(l.byColumn['보내는 부분']), to: pieces(l.byColumn['받는 부분']) }));
+    const inLinks = n => linkEnds.some(l => l.from.includes(n) || l.to.includes(n));
+    /** Whether the record's C-LINK rows reach b from a (a → X → … → b, any row, a part reached reaching its composition and list items). */
+    const reaches = (a, b) => {
+      const seen = new Set([a]), queue = [a];
+      while (queue.length) {
+        const n = queue.shift();
+        const next = [...linkEnds.filter(l => l.from.includes(n)).flatMap(l => l.to), ...(n === a ? [] : inside.get(n) ?? [])];
+        for (const m of next) { if (m === b) return true; if (!seen.has(m)) { seen.add(m); queue.push(m); } }
+      }
+      return false;
+    };
+    // .45 (review D1): 'shortcut' only where the C-LINK rows carrying the D show the maker handing it to another part and reach the reader
+    // through it (or draw the reader on no line at all: the rows say where the D goes, and it goes through the part they hand it to);
+    // a reader the rows draw on lines of its own but never reach from the maker is a missing C-LINK row's candidate ('candidate'): the
+    // line stays. A D row of one maker and one reader is no product of makers × readers: its line stays (null).
+    const linkedBy = (row, from, to) => {
+      const id = dOf(row); if (!id) return null;
+      const d = dataRows.find(x => x.record === row.record && x.from <= row.from && row.to <= x.to + 1);
+      if (d && pieces(d.byColumn['만드는 부분']).length <= 1 && pieces(d.byColumn['읽는 부분']).length <= 1) return null;
+      const carrying = linkRows.filter(l => /^\s*(D\d{1,3})\b/.exec(l.byColumn['넘기는 것'] ?? '')?.[1] === id);
+      if (!carrying.length) return null;
+      const a = plainName(nameOf(from)), b = plainName(nameOf(to)), whole = cell => plainName(String(cell ?? '').replace(/\s*:\s*.+$/, ''));
+      const names = (cell, n) => whole(cell) === n || pieces(cell).includes(n), sends = l => names(l.byColumn['보내는 부분'], a), gets = l => names(l.byColumn['받는 부분'], b);
+      if (carrying.some(l => sends(l) && gets(l))) return true;
+      // Only where the rows say where the maker hands it (A sends it to another part) is the pair a shortcut; a maker the rows never show
+      // sending it (a reply going back, a second maker the rows leave out) keeps its line.
+      if (!carrying.some(sends)) return null;
+      return reaches(a, b) || !inLinks(b) ? 'shortcut' : 'candidate';
+    };
+    const kept = lines.flatMap((_, i) => valid(i) && !product[i] ? [i] : []), merges = [], shortcuts = [], candidates = [];
     for (const [i, row] of product.entries()) {
       if (!row) continue;
       const r = lines[i], channel = x => lines[x].channel ?? null;
@@ -1358,13 +1439,15 @@ export function productLines(wire, ask, skip = []) {
       if (into !== undefined) { merges.push({ index: i, into }); continue; }
       // A store's own write and read lines are its readers' and writers' (never a shortcut of a path through another part).
       const isStore = ref => parts.find(p => p?.ref === ref)?.type === 'store';
+      const linked = isStore(r.from) || isStore(r.to) ? null : linkedBy(row, r.from, r.to);
+      if (linked === 'shortcut') { shortcuts.push({ index: i, via: 'C-LINK' }); continue; }
       const via = isStore(r.from) || isStore(r.to) ? undefined : kept.filter(k => lines[k].from === r.from && lines[k].to !== r.to && carries(k, row)).map(k => lines[k].to)
         .find(m => kept.some(k => lines[k].from === m && lines[k].to === r.to && (carries(k, row) || (conns.some(c => meets(placed[k], c)) && receives(r.to, row.name)))));
       if (via !== undefined) { shortcuts.push({ index: i, via }); continue; }
-      kept.push(i);
+      kept.push(i); if (linked === 'candidate') candidates.push({ index: i });
     }
-    return { merges, shortcuts };
-  } catch { return { merges: [], shortcuts: [] }; }
+    return { merges, shortcuts, candidates };
+  } catch { return { merges: [], shortcuts: [], candidates: [] }; }
 }
 /** .42: a kept line with the payloads (a 「 · 」 list while it fits 80, each name once, loosely compared) and format fields (24) of the
  * product lines merged into it; the names that did not fit, for the diagnostic. */

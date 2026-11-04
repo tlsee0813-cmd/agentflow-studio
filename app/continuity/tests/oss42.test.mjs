@@ -80,7 +80,7 @@ test('.42 (1) who decided is not what keeps: a person device naming only the 누
     [[['code', 'run_batch(first_result)', false, 'sweeper|3']], ['parts[3].claims[0].enforcedBy[0]:enforced-by']]);
   // Stored as map-reading.17 (a program unknown has no passage); a map-reading.16 entry holds no program unknown.
   const applied = M.applyReading(f.project, f.input, read, meta('R_oss42_devices', 'a'));
-  assert.equal(applied.project.readings.at(-1).version, 'map-reading.18');
+  assert.equal(applied.project.readings.at(-1).version, 'map-reading.19');
   assert.deepEqual(validateProject(applied.project), applied.project);
   const old = JSON.parse(S.serializeProject(applied.project)); old.readings.at(-1).version = 'map-reading.16';
   assert.throws(() => validateProject(old));
@@ -137,7 +137,7 @@ test('.42 (4) product lines: an artifact row\'s maker × reader line between two
     line(f, 'new:reporter', 'new:user', '| 요약 JSON |', { payload: '요약 JSON' }),
     line(f, 'new:reporter', 'new:user', '| 요약 CSV |', { payload: '요약 CSV' })];
   const parts = names.map(([ref, name, head]) => part(f, ref, name, head));
-  assert.deepEqual(productLines(wire(parts, relations), f.ask), { merges: [{ index: 7, into: 3 }, { index: 9, into: 6 }, { index: 10, into: 6 }], shortcuts: [{ index: 8, via: 'new:worker' }] });
+  assert.deepEqual(productLines(wire(parts, relations), f.ask), { merges: [{ index: 7, into: 3 }, { index: 9, into: 6 }, { index: 10, into: 6 }], shortcuts: [{ index: 8, via: 'new:worker' }], candidates: [] });
   // Through the combine step: the kept wire, the reasons, and the final diagnostic.
   const blueprint = { parts: names.map(([ref, name, head]) => ({ ref, name, parent: null, focus: `${name}의 책임`, at: [f.at(head)] })), global: [] };
   const fragments = splitBlueprintParts(blueprint).map((group, index) => ({ ...wire([]), parts: group.parts.map((p, i) => ({ ...part(f, p.ref, p.name, names.find(n => n[0] === p.ref)[2]),
@@ -156,9 +156,9 @@ test('.42 (4) product lines: an artifact row\'s maker × reader line between two
   assert.ok(FINAL_DIAGNOSTICS.includes('product-lines'));
   assert.ok(!finalDiagnostics(fragments, global, f.ask, blueprint).some(x => x.rule === 'plan-relations' || x.rule === 'connections'));
   // A product line with no line between its ends and no recorded path stays; a control line between the same ends takes no data list.
-  assert.deepEqual(productLines(wire(parts, [relations[8]]), f.ask), { merges: [], shortcuts: [] });
+  assert.deepEqual(productLines(wire(parts, [relations[8]]), f.ask), { merges: [], shortcuts: [], candidates: [] });
   const control = [{ ...relations[6], channel: 'control' }, relations[9]];
-  assert.deepEqual(productLines(wire(parts, control), f.ask), { merges: [], shortcuts: [] });
+  assert.deepEqual(productLines(wire(parts, control), f.ask), { merges: [], shortcuts: [], candidates: [] });
   const P = await import('../server/map-pipeline.mjs');
   assert.ok(P.GLOBAL_RULES.includes('product-shortcut') && P.GLOBAL_RULES.includes('product-merge'));
   assert.ok(MAP_BLUEPRINT_PROMPT.includes('지름길'));
@@ -302,7 +302,7 @@ test('.42 (H, I, K, L, M) code names take no Hangul noun, a removal piece is no 
 
 test('.42 prompts: recipe .42, the decider rule, named loops, the summary\'s structural first sentence, product lines, field groups and the new bounds', async () => {
   const P = await import('../server/map-pipeline.mjs');
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.44', 'later-map-divided.44']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.45', 'later-map-divided.45']);
   for (const rule of ['「누가 정했나」 칸의 사람은 그 규칙을 정한 사람이지 지키는 장치가 아니다', 'decider', '[파일: X] 꼬리표가 가리키는', '{"kind":"person","text":"그 누가 정했나 칸 그대로(80자 이내)","at":"그 규칙 행"}',
     '단계 이름이나 하는 일이 스스로 반복을 말하면', '빠져나가는 조건', '단계 이름(60자 이내)', '조각 그대로(60자 이내)'])
     assert.ok(P.RENDER_RULES.includes(rule), rule);

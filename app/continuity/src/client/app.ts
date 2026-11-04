@@ -33,7 +33,7 @@ import { RUNTIME, runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, setInspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
 import { routeEdges, samplePath, mixPath, type Routed } from './map-route.js';
 import { zoomLevel, zoomTier, tierText, tierFit, entryParts, type EntryCounts, type ZoomTier } from './card-budget.js';
-import { cardTemplate, cardHeights, groupTip, groupKind, lifecycleOf, maintenanceOf, kindLabel, structuralOf, nameBreaks, FAMILY_WORD, NAME_ROOM, TOGGLE_W, UNLINKED_TIP, type CardFacts, type CardTemplate } from './card-family.js';
+import { cardTemplate, cardHeights, groupTip, groupKind, lifecycleOf, maintenanceOf, kindLabel, structuralOf, paneFamily, nameBreaks, FAMILY_WORD, NAME_ROOM, TOGGLE_W, UNLINKED_TIP, type CardFacts, type CardTemplate } from './card-family.js';
 import { glyphSvg } from './card-glyphs.js';
 import { placeExpansion, actionSections, opensInto, pushPlace, readOpenState, writeOpenState, groupBody, loopLine, stateVarLine, UNSAID, OPEN_MAP, SHORT_W, type OpenState, type ReadPlace, type ActionStep } from './expansion.js';
 import { detailChain, detailSigns, stepConsumers, unmappedMark, decisionStep, conditionPlacement, conditionLines, conditionOfQuote, stepFace, linkFace, stepPorts, stepCounts, EXIT_BLANK, CONDITION_BLANK, CONDITION_UNPLACED, PROGRAM_STEP_HINT, PROGRAM_PORT_LABEL, PROGRAM_PORT_HINT, type ChainLink, type OutLine, type DecisionStep, type DecisionExit, type PlacedCondition } from './steps-view.js';
@@ -47,7 +47,7 @@ import { PROGRAM_LABEL, PROGRAM_HINT, isProgram, ruleHasProgram, ruleHasProgramE
 import { opsLines, opsHead, opsCard } from './ops-line.js';
 import { projectRuleList, projectRuleEntry, RULE_ROW_LABEL, partSigns, hasSigns, signTabs, ruleSaid, ruleView, unplacedCount, gateKind, gateSplit, gateSplitLine, changeRow, failureBlanks, sinceMatch, sinceSummary, timeSpan, readSince, writeSince, SIGN_LABEL, RULE_BLANKS, RULE_BLANK_HINT, RULE_DESIGN_PROGRAM_HINT, GATE_BLANK, GATE_BLANK_HINT, GATE_LABEL, GATE_HINT, ANCHOR_HINT, ENFORCER_HINT, PLACE_LABEL, NATURE_HINT, FAILURE_BLANK, RECOVERY_BLANK, SINCE_OFF, type PartSigns, type PartPlaces, type SignKind, type SinceState } from './signs-view.js';
 import { CHAT_REPORT_ASK, RECORD_ASK_EXPLAIN, deltaReportAsk, reflectAsk, scenarioAskWithLedger, plannedNote } from '../shared/report-ask.js';
-import { recordAskNodes, continuationNode } from './record-asks.js';
+import { recordAskNodes, continuationNode, pageNode } from './record-asks.js';
 import { splitRecordChunks } from '../shared/record-table.js';
 import { modelLabel } from '../shared/model-label.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
@@ -1155,8 +1155,10 @@ function cardFactsOf(o: Opened, p: PartView, r: PartUnderstanding, said: Map<str
   const fb = failureBlanks(type, [...r.claims.flatMap(c => [c.text, c.before]), ...steps.flatMap(s => [s.name, s.does]), r.loop?.stop, r.loop?.resume]);
   // A group (S8): its parts by name in the record's order, and what kind of group it is (the record's 묶음 뜻 first).
   const gw = p.childIds.length ? groupWordOf(o.view, p.id, recordedAxis(o.project, p.id)) : null;
+  // Recipe .45 (map-reading.19): the record family, role word and 미정 reason the newest reading gives the part.
+  const fr = r.familyRead ?? null, family = fr ? { family: fr.family, role: fr.role, reason: fr.reason, unclear: fr.unclear } : null;
   return { members: p.childIds.map(name), groupAxis: gw?.axis ?? null, groupWord: gw?.word ?? null, groupRecorded: !!gw?.recorded,
-    type, config: r.config, inputs: r.inputs, outputs: r.outputs, fields: r.fields, loop: r.loop ?? null, loopProgram: programLoopItems(r.loop, r.config, conds),
+    type, family, config: r.config, inputs: r.inputs, outputs: r.outputs, fields: r.fields, loop: r.loop ?? null, loopProgram: programLoopItems(r.loop, r.config, conds),
     steps, conditions: conds, stateVars: r.stateVars?.length ?? 0, fileRoles: r.fileRoles?.length ?? 0,
     personRules: sg.rules.filter(x => (x.enforcedBy ?? []).some(e => e.kind === 'person')).length, children: p.childIds.length,
     controlIn: uniq(controlIn), controlOut: uniq(controlOut), dataIn: uniq(dataIn), dataInCadence: uniq(cadence), writers: writers.size, readers: readers.size,
@@ -1285,6 +1287,8 @@ function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, f
         // S9: the policy word stays whole on a narrow card; only its successor (' → update') gives way (styles.css .c-life-to).
         maint ? h('span', { class: 'c-life c-maint', title: `유지 방침 · 기록의 상태 표 (${maintQuote ? `“${maintQuote}”` : '원문 줄 없음'})` }, maint.split(' → ')[0]!) : null,
         maint?.includes(' → ') ? h('span', { class: 'c-life-to', title: `후속 · ${maint.split(' → ').slice(1).join(' → ')}` }, `→ ${maint.split(' → ').slice(1).join(' → ')}`) : null,
+        // Recipe .45: a part the record could not give a family (「미정: 이유」); a v4 word's unclear family reads in the pane head only (review N8).
+        t.undecided ? h('span', { class: 'c-life c-undecided', title: `표현군 · ${r.familyRead?.quote ? `“${r.familyRead.quote.quote}”` : '원문 줄 없음'} · 모양은 기록된 안쪽(단계·반복·묶음)으로만 정함` }, t.undecided) : null,
         extra.filed ? h('span', { class: 'c-filed', title: `원문 분류 · 기록이 이 부분을 「${extra.filed}」 묶음 아래에만 두었다 (실행 위치의 근거가 아님)` }, `원문 분류: ${extra.filed}`) : null),
       // The short status (5.4) on a line of its own, read only at 개요 (the bottom line says it at 중간 and 가까이).
       life ? null : h('span', { class: 'c-short', title: ops.tip }, ops.short),
@@ -3273,7 +3277,13 @@ function setRail(on: boolean) {
 function kindLine(c: PaneCtx): HTMLElement {
   const u = c.u, t = u?.typeRead ?? null, s = u?.stateRead ?? null;
   const filed = filedUnder(c.o.view, c.part.id), gw = c.part.childIds.length ? groupWordOf(c.o.view, c.part.id, recordedAxis(c.o.project, c.part.id)) : null;
-  const kind0 = t ? h('span', { class: 'lens-kind', ...(t.quote ? { title: `종류 · 기록의 말 “${t.quote.quote}”` } : {}) }, TYPE_LABEL[t.type])
+  // Recipe .45 (merged with S9): the record's family and role word beside the kind word (「표현군 처리 · 실행 조정」), or 「미정: 이유」, or
+  // 「대응 불명확: 루프·엔진」 for a v4 type word whose family is unclear (review N8: this one reads here, never on the card). With a family
+  // known and no type word, the family line stands in for 「유형 미상」.
+  const fr = u?.familyRead ?? null, fam = paneFamily(fr ? { family: fr.family, role: fr.role, reason: fr.reason, unclear: fr.unclear } : null, t ? TYPE_LABEL[t.type] : null);
+  const famEl = fam ? h('span', { class: `lens-family${fam.kind === 'family' ? '' : ' lens-undecided'}`,
+    title: `${fam.kind === 'unclear' ? '표현군 · 기록의 유형 낱말이 표현군 하나에 대응하지 않아 낱말 그대로 둠' : fam.kind === 'undecided' ? '표현군 · 기록이 주된 계약을 정하지 못함 · 카드 모양은 기록된 안쪽(단계·반복·묶음)으로만 정함' : '표현군 · 역할 · 기록의 C-PART 행'}${fr?.quote ? ` (“${fr.quote.quote}”)` : ''}` }, fam.text) : null;
+  const kind0 = famEl && !t && !gw && !c.part.childIds.length ? null : t ? h('span', { class: 'lens-kind', ...(t.quote ? { title: `종류 · 기록의 말 “${t.quote.quote}”` } : {}) }, TYPE_LABEL[t.type])
     // S8: an untyped group says what kind of group it is (its 묶음 뜻) and how many parts it holds, never 「유형 미상」.
     : gw ? h('span', { class: 'lens-kind', title: gw.recorded ? `묶음 뜻 「${gw.word}」 · 기록의 글자 · 종류 단어는 기록에 없음` : `묶음 뜻 「${gw.word}」 · 안의 부분들로 읽음 · 종류 단어는 기록에 없음` }, groupKind(null, gw.word, c.part.childIds.length))
     : u && c.part.childIds.length ? h('span', { class: 'lens-kind', title: '묶음 · 묶음 뜻과 종류 단어는 기록에 없음' }, groupKind(null, null, c.part.childIds.length))
@@ -3282,8 +3292,10 @@ function kindLine(c: PaneCtx): HTMLElement {
   // S9 (pipeline .44): the card's 「사용 중단 권고 → update」 reads in the pane's head too, in words ('사용 중단 권고 · 후속 update').
   const maint = u ? maintenanceOf(u.statusClaims) : null, mq = maint ? u!.statusClaims?.find(x => x.dimension === 'maintenance')?.quote.quote ?? null : null;
   const maintEl = maint ? h('span', { class: 'lens-maint', title: `유지 방침 · 기록의 상태 표${mq ? ` (“${mq}”)` : ''}` }, maint.replace(' → ', ' · 후속 ')) : null;
-  const kind1 = kind0 && filed ? h('span', { class: 'lens-kind-wrap' }, kind0, h('span', { class: 'lens-filed', title: `${SHELF_TIP}` }, ` · 원문 분류: ${filed}`)) : kind0;
-  const kind = kind1 && maintEl ? h('span', { class: 'lens-kind-wrap' }, kind1, ' ', maintEl) : kind1 ?? maintEl;
+  const filedEl = () => h('span', { class: 'lens-filed', title: `${SHELF_TIP}` }, ` · 원문 분류: ${filed}`);
+  const kind1 = kind0 && filed ? h('span', { class: 'lens-kind-wrap' }, kind0, filedEl()) : kind0;
+  const bits = [kind1, famEl, !kind0 && filed ? filedEl() : null, maintEl].filter((x): x is HTMLElement => !!x);
+  const kind = bits.length > 1 ? h('span', { class: 'lens-kind-wrap' }, ...bits.flatMap((x, i) => i ? [' ', x] : [x])) : bits[0] ?? null;
   const sep = () => h('span', { class: 'lk-sep', 'aria-hidden': 'true' }, '·');
   // map design v3 8.2-3 / 8.4: the kind word's and the operations line's footnotes in place of the evidence chip (the tag reads in the mark).
   const typeMark = t ? fnMarks(c, ['type'], '종류', false) : null;
@@ -5028,7 +5040,7 @@ function mapBlock(): HTMLElement | null {
     // The design record and the scenario record (with this map's ID ledger): pasted back like any other record; the scenario
     // record is read as a path by the app alone (scenario-record.ts) when it is pasted.
     // .43: a pasted 기록 v4 whose completion table leaves tables offers its continuation (record-asks.ts).
-    ...[continuationNode(o.project.pasted.map(r => r.text), (label, text, title) => askCopy(label, text, 'link-button', title))].filter((x): x is HTMLElement => !!x),
+    ...[pageNode(o.project.pasted.map(r => r.text), (label, text, title) => askCopy(label, text, 'link-button', title)), continuationNode(o.project.pasted.map(r => r.text), (label, text, title) => askCopy(label, text, 'link-button', title))].filter((x): x is HTMLElement => !!x),
     h('p', { class: 'fine rm-ask rm-records' }, ...recordAskNodes((label, text, title) => askCopy(label, text, 'link-button', title)), ' · ',
       askCopy('시나리오 기록 요청(대장 포함)', scenarioAskWithLedger(o.view, o.project.readings), 'link-button', RECORD_ASK_EXPLAIN.scenario),
       ' — 기록 요청은 지금 상태와 카드의 안쪽(산출물·단계·조건)을, 시나리오 기록은 동작 경로 하나를 써 받아요. 둘 다 다른 기록처럼 붙여 넣어요. 시나리오 기록은 붙이면 앱이 AI 없이 지금 지도의 ID 대장과 맞춰 길로 읽어, 제목 아래 ‘시나리오’ 줄에서 지도 위에 보여요.'));

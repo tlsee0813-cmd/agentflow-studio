@@ -1124,7 +1124,7 @@ test('.33: a wrong scope, place, device or gate is set aside alone on the combin
   M.attachExclusions(plain, exclusions, f.ask);
   const applied = M.applyReading(f.project, f.input, plain, meta30('R_koru33'));
   const engineId = applied.reading.parts[3].areaId, u = M.partUnderstanding(applied.project, engineId);
-  assert.deepEqual([applied.reading.version, applied.reading.exclusions.map(x => x.path)], ['map-reading.18', exclusions.map(x => x.path)]);
+  assert.deepEqual([applied.reading.version, applied.reading.exclusions.map(x => x.path)], ['map-reading.19', exclusions.map(x => x.path)]);
   assert.deepEqual([u.rules.map(c => [c.scope, c.anchors.length, c.enforcedBy.map(e => e.kind)]), u.withdrawals.map(c => c.withdrawalKind), u.gates.map(c => c.gate)],
     [[['part', 0, ['gate']], [null, 1, ['code']]], ['design'], ['run']]);
   assert.deepEqual(validateProject(applied.project), applied.project);
@@ -1679,7 +1679,7 @@ test('.36 conditions: a part\'s own 「조건·거부·분기」 rows stand outs
   assert.equal(M.setAside(plain).length, 0);
   M.attachExclusions(plain, exclusions, f.ask);
   const applied = M.applyReading(f.project, f.input, plain, { id: 'R_web36c', at: '2026-11-04T03:00:00.000Z', model: 'stub', prompt: 'm6-000000000036', hash: '7'.repeat(64) });
-  assert.equal(applied.reading.version, 'map-reading.18');
+  assert.equal(applied.reading.version, 'map-reading.19');
   assert.deepEqual(applied.reading.parts.map(p => p.conditions.length), [2, 1]);
   assert.equal(WEB36_DESIGN.slice(applied.reading.parts[1].conditions[0].quote.from, applied.reading.parts[1].conditions[0].quote.to), applied.reading.parts[1].conditions[0].quote.quote);
   assert.deepEqual(validateProject(applied.project), applied.project);
@@ -1831,7 +1831,7 @@ test('.37 program loop: a part with no loop whose cadence setting stands in its 
   M.attachExclusions(read, exclusions, k.ask);
   const applied = M.applyReading(k.project, k.input, read, meta37('R_loop37', '1'));
   const stored = ref => applied.reading.parts.find(p => p.areaId === applied.created[kPlan.parts.findIndex(x => x.ref === ref)]).loop;
-  assert.equal(applied.reading.version, 'map-reading.18');
+  assert.equal(applied.reading.version, 'map-reading.19');
   assert.deepEqual([stored('new:engine').unit, stored('new:engine').program, stored('new:card').program], ['j1_cadence 60 s', true, false]);
   assert.deepEqual(validateProject(applied.project), applied.project);
   // The web app (webapp-design-v1 §3, §5): the collector's own unit stays and takes its QUOTA_REACHED row as its stop; the worker's
@@ -2098,7 +2098,7 @@ test('.38 io exclusions carry their value: stored exactly in map-reading.13 (onl
   const read = M.validateMapReply(wire, f.ask);
   M.attachExclusions(read, exclusions, f.ask);
   const applied = M.applyReading(f.project, f.input, read, meta37('R_value38', '8'));
-  assert.equal(applied.reading.version, 'map-reading.18');
+  assert.equal(applied.reading.version, 'map-reading.19');
   const stored = applied.reading.exclusions.find(x => x.path === 'parts[3].inputs[0]');
   assert.deepEqual([stored.value, stored.record !== null, Object.keys(stored).length], ['감독자 보고', true, 8]);
   assert.deepEqual(validateProject(applied.project), applied.project);
@@ -2278,7 +2278,7 @@ test('.39 program steps (R4): a part with no 4절 row and no step whose 3절 안
   assert.deepEqual(M.validateMapReply(own, k.f.ask).parts.find(p => p.ref === 'new:sheet').steps.map(s => [s.name, s.program]), [['race_rows', undefined]]);
   // Stored: every step says program; the reading reads back exactly.
   const applied = M.applyReading(k.f.project, k.f.input, read, meta39('R_steps39', '1'));
-  assert.equal(applied.reading.version, 'map-reading.18');
+  assert.equal(applied.reading.version, 'map-reading.19');
   assert.deepEqual([createdOf(applied, k.parts, 'new:sheet').steps.map(s => s.program), createdOf(applied, k.parts, 'new:engine').steps.map(s => s.program)], [[true, true, true, true], [false, false]]);
   assert.deepEqual(validateProject(applied.project), applied.project);
 });
@@ -2463,7 +2463,7 @@ test('.40 program code device (web R1): a rule with no code device whose place s
   // Stored: every device says program; the reading reads back exactly; a device without program, a program person or a program code
   // without its row is refused; a .14 entry keeps its shape.
   const applied = M.applyReading(k.f.project, k.f.input, read, meta40('R_code40', '1'));
-  assert.equal(applied.reading.version, 'map-reading.18');
+  assert.equal(applied.reading.version, 'map-reading.19');
   const stored = applied.reading.parts.find(p => p.areaId === applied.created[0]).claims[0];
   assert.deepEqual(stored.enforcedBy.map(e => [e.kind, e.text, e.program, e.quote?.quote.startsWith('| 주문 API | action')]), [['code', '403 ROLE_REQUIRED', true, true]]);
   assert.deepEqual(validateProject(applied.project), applied.project);
