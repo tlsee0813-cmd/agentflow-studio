@@ -853,6 +853,39 @@ button:disabled { opacity: .5; cursor: default; }
 .lens-seg button:hover:not(:disabled) { background: var(--chip); color: var(--text); }
 .lens-seg button.on { background: var(--accent-soft); color: var(--accent-strong); }
 .lens-seg button:disabled { color: var(--text-4); opacity: .6; }
+/* The first view (S10): one guide line beside the lens switch, its two popovers; on the map a firmer neutral border on the emphasised
+   parts and a firmer stroke and label on their lines. No colour reads as importance; nothing is hidden, moved or resized. */
+/* The toolbar keeps to the map's own area (never under the reading pane): the guide line's sentence gives way first. */
+.controls { max-width: calc(100% - var(--plan-w, 0px) - 2 * var(--s-4)); }
+.controls .fv { position: relative; flex: 0 1 auto; display: inline-flex; align-items: center; gap: 0; min-width: 0; }
+.controls .fv > :not(.fv-why):not(.fv-pop) { flex: none; }
+/* Its own hairline (as .tool-sep), drawn only while it shows. */
+.controls .fv::before { content: ''; flex: none; width: 1px; height: 20px; background: var(--line); margin: 0 var(--s-1); }
+.controls .fv[hidden] { display: none; }
+.controls .fv .fv-b { height: 28px; min-width: 0; padding: 0 6px; font-size: 12px; font-weight: 500; color: var(--text-3); }
+.controls .fv .fv-why { display: block; flex: 0 1 auto; min-width: 72px; max-width: 440px; overflow: hidden; text-overflow: ellipsis; color: var(--text-2); line-height: 28px; }
+.controls .fv .fv-b[aria-expanded="true"] { background: var(--chip); color: var(--text); }
+.controls .fv .fv-dot { color: var(--text-4); font-size: 12px; padding: 0 1px; }
+.fv-pop { position: absolute; left: 0; bottom: calc(100% + 12px); z-index: 4; width: 340px; padding: 12px 14px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--shadow-lg); font-size: 12.5px; line-height: 18px; color: var(--text-2); white-space: normal; }
+.controls .fv-pop .fv-x { position: absolute; top: 6px; right: 6px; min-width: 24px; height: 24px; font-size: 15px; color: var(--text-3); }
+.fv-pop .fv-k { margin: 0 24px 6px 0; font-size: 11.5px; font-weight: var(--fw-name); color: var(--text-3); }
+.fv-pop .fv-q { display: block; margin: 0 0 8px; padding-left: 8px; border-left: 2px solid var(--line-strong); color: var(--text); quotes: '“' '”'; }
+.fv-pop .fv-t { margin: 0 0 6px; } .fv-pop .fv-fine { color: var(--text-4); font-size: 11.5px; }
+.fv-pop ul { margin: 0 0 8px; padding: 0; list-style: none; } .fv-pop .fv-used li { padding: 2px 0; } .fv-pop small { color: var(--text-3); font-size: 11.5px; }
+.controls .fv-pop .fv-alt { width: 100%; height: auto; min-height: 28px; justify-content: flex-start; padding: 4px 8px; font-size: 12.5px; font-weight: 400; color: var(--text-2); text-align: left; white-space: normal; }
+.fv-pop .fv-acts { display: flex; gap: 8px; } .fv-pop .fv-acts:empty { display: none; }
+.controls .fv-pop .fv-acts .fv-b { height: 28px; padding: 0 10px; border: 1px solid var(--line); font-size: 12px; color: var(--text-2); }
+.controls .fv-pop .fv-src { height: 24px; padding: 0; font-size: 12px; color: var(--accent-strong); }
+/* An emphasised card keeps its family edge (its border and a lens's lift are untouched): a neutral halo apart from the edge, 1.5px at
+   3px out on screen at every zoom, a form of its own, never a lift or a colour. A mark of its own (.lit, .plan-impact, the selection)
+   stays over it. */
+.space .node.fv-emph:not(.selected):not(.lit):not(.plan-impact):not(:focus-visible), .space .frame.fv-emph:not(.selected):not(.plan-impact):not(:focus-visible) {
+  outline: calc(1.5px * var(--u, 1)) solid var(--text-3); outline-offset: calc(3px * var(--u, 1)); }
+/* A firmer stroke only where it is firmer: never on a selected, summary, picked or path line (each is wider already); a dotted or
+   sparse line keeps its dots (its stroke darkens instead). */
+.space .world .edge.fv-emph:not(.on):not(.agg):not(.sum):not(.lit):not(.sc-path):not(.lg-pick):not(.s-dotted):not(.s-sparse) .edge-line { --lw: 2.25; }
+.space .world .edge.fv-emph:not(.on):not(.agg):not(.sum):not(.lit):not(.sc-path):not(.lg-pick):is(.s-dotted, .s-sparse) .edge-line { stroke: var(--text-2); }
+.space .world .edge-label.fv-emph { color: var(--text); border-color: var(--text-3); }
 /* What a lens does to the map (view-lens lensLook): each channel's lines at its opacity, lifted families with a firmer edge.
    Selection, hover, a scenario path and the legend's own marks stay over it. */
 .space .edge.c-data:not(.on):not(.near):not(.lg-pick):not(.sc-path) .edge-line { opacity: var(--lo-data, 1); }
