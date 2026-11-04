@@ -48,9 +48,10 @@ test('ASK-14 the page request: the app\'s own remaining obligations, the rows wr
   assert.deepEqual(plan.tables, T.Q2_TABLES);
   assert.ok(plan.text.startsWith('[AgentFlow 기록 쪽 요청 v5 · 기록 AF5-3b7e0c19 · 쪽 2]'));
   assert.ok(plan.text.includes('「〔기록 AF5-3b7e0c19 · 쪽 2 · 기준 9f2c1ab · 앞 쪽 1〕 물주기 기록 v5 (쓴 세션, 날짜·시각)」'));
-  assert.ok(plan.text.includes('- 예약 풀기 D01: 등록 요청') && plan.text.includes('- 단계 미전개 반복 C-LOOP B06:L01'));
+  // Recipe .46: grouped by table with a count per group (the record's own reservations under 「기록」); each next ID with its table.
+  assert.ok(plan.text.includes('예약 풀기 D01: 등록 요청') && plan.text.includes('- C-LOOP (2): 단계 미전개 반복 B06:L01, B05:L01'));
   assert.ok(plan.text.includes('C-LINK LN01–LN09') && plan.text.includes('C-PART B01–B10'));
-  assert.ok(/다음 ID: F08 · E05 · D01 · X01 · N01 · K01 · B11/.test(plan.text));
+  assert.ok(plan.text.includes('다음 ID: C-SRC F08 · C-EVID E05 · C-PART B11 · C-GROUP GR03 · C-LINK LN10 · C-STATE SM03 · C-WITHDRAW WD03 · C-STATUS ST04 · C-DATA D01'), plan.text);
   assert.ok(!plan.text.includes(R.FAMILY_RULES), 'C-PART is written: its criteria are not repeated');
   assert.ok(plan.text.includes(R.HISTORY_SEARCH), 'C-CHANGE is still to write');
   for (const s of R.NO_INVENTION_V5) assert.ok(plan.text.includes(s));
@@ -59,7 +60,7 @@ test('ASK-14 the page request: the app\'s own remaining obligations, the rows wr
   const open = R.pageAsk([page(1).replace('|C-LINK|끝남|LN01–LN09|', '|C-LINK|이어짐|LN01–LN09|')]);
   assert.equal(open.tables[0], 'C-LINK');
   const bad = R.pageAsk([page(1).replace('|B05|일정 계산기|처리 · 계산|', '|B05|일정 계산기|엔진|')]);
-  assert.ok(bad.text.includes('- 고칠 것 C-PART B05: 표현군·역할이 고정 낱말 밖') && bad.text.includes(R.FAMILY_RULES));
+  assert.ok(/\n- C-PART \(\d+\): 고칠 것 B05: 표현군·역할이 고정 낱말 밖/.test(bad.text) && bad.text.includes(R.FAMILY_RULES), bad.text.slice(0, 1500));
   // A missing page asks for that page; level 2 asks no page.
   const gap = R.pageAsk([page(1), page(2).replace('쪽 2 · 기준 9f2c1ab · 앞 쪽 1', '쪽 3 · 기준 9f2c1ab · 앞 쪽 2')]);
   assert.equal(gap.page, 2); assert.ok(gap.text.includes('쪽 2이 앱에 없다'));

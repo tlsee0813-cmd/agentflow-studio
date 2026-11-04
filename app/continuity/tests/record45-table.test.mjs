@@ -71,16 +71,17 @@ test('V5-T3 cites resolve against the F and E ledgers, each keeping its own grad
   assert.ok(kinds(eq).includes('fix:C-LINK:LN04·='));
 });
 
-test('V5-T4 the fold is idempotent: the same page again changes nothing, page order of pasting does not matter, another text for a page is a conflict (the first stays)', () => {
+test('V5-T4 the fold is idempotent: the same page again changes nothing, page order of pasting does not matter; recipe .46: another text for a page replaces it (latest wins)', () => {
   const a = fold(page(1), page(2)), b = fold(page(2), page(1), page(1)), c = fold(page(1), page(2), page(2));
   const shape = f => JSON.stringify([...f.byId.keys(), f.level, kinds(f), f.diagnostics.map(d => d.category)]);
   assert.equal(shape(b), shape(a)); assert.equal(shape(c), shape(a));
   assert.equal(c.pages[1].repeated, 1);
   const other = page(1).replace('|B05|일정 계산기|처리 · 계산|', '|B05|일정 계산기|처리 · 일정 계산|');
   const x = fold(page(1), other);
-  assert.deepEqual([x.pages.length, x.pages[0].conflict, x.conflicts.length, diag(x, 'page-conflict')], [1, true, 1, ['쪽 1']]);
-  assert.equal(T.readFamily(x.byId.get('B05').row.byColumn['표현군·역할']).role, '계산', 'the first page received stands until the person says which');
-  assert.ok(kinds(x).includes('page-conflict::쪽 1'));
+  // Changed on purpose (.46): the later text is the page now; the earlier is kept as replaced, said once, never asked about.
+  assert.deepEqual([x.pages.length, x.pages[0].conflict, x.conflicts.length, x.replaced.length, diag(x, 'page-replaced')], [1, false, 0, 1, ['쪽 1']]);
+  assert.equal(T.readFamily(x.byId.get('B05').row.byColumn['표현군·역할']).role, '일정 계산', 'the later text stands');
+  assert.ok(!kinds(x).some(k => k.startsWith('page-conflict')));
   // A changed basis sha is another record, never folded into this one.
   const moved = page(2).replace('기준 9f2c1ab', '기준 0aa11bb');
   assert.equal(T.foldTexts([page(1), moved]).length, 2);

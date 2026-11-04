@@ -6,7 +6,7 @@
  * copy makes one copy button (app.ts askCopy). */
 import { h } from './plan-dom.js';
 import { recordAskV4, newRecordId, continuationAsk, RECORD_V4_EXPLAIN, CONTINUATION_EXPLAIN, PROJECT_REPORT_ASK, DESIGN_RECORD_ASK, RECORD_ASK_EXPLAIN,
-  recordAskV5, newRecordIdV5, pageAsk, supplementaryAsk, RECORD_V5_EXPLAIN, PAGE_ASK_EXPLAIN, SUPPLEMENT_ASK_EXPLAIN } from '../shared/report-ask.js';
+  recordAskV5, newRecordIdV5, pageAsk, pageCapReached, supplementaryAsk, RECORD_V5_EXPLAIN, PAGE_ASK_EXPLAIN, SUPPLEMENT_ASK_EXPLAIN } from '../shared/report-ask.js';
 import { latestFold, Q2_TABLES } from '../shared/record-table.js';
 
 export type AskCopy = (label: string, text: string, title: string) => HTMLElement;
@@ -33,6 +33,9 @@ export function pageNode(texts: readonly string[], copy: AskCopy): HTMLElement |
   const more = supplementaryAsk(texts);
   if (more) return h('p', { class: 'fine rm-ask rm-continue' }, copy('보충 쪽 요청 복사', more.text, SUPPLEMENT_ASK_EXPLAIN),
     ` — ${status} · 기록의 공백이 부르는 보충 묶음 ${more.groups.join('·')}만 쪽 ${more.page}로 청해요.`);
+  // Recipe .46: stopped by the page cap, never shown as done.
+  const cap = pageCapReached(texts);
+  if (cap) return h('p', { class: 'fine rm-ask rm-continue' }, `${status} · 쪽 상한 ${cap.cap}쪽에 닿아 쪽 요청을 더 만들지 않아요(남은 의무 ${cap.obligations}개는 끝나지 않았어요).`);
   return h('p', { class: 'fine rm-ask rm-continue' }, status);
 }
 /** 「이어쓰기 요청 복사」 for the latest pasted v4 record whose C-DONE leaves tables (null when none does). */
