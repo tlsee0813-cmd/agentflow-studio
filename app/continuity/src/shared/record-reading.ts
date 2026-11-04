@@ -104,7 +104,9 @@ export function record43(ctx: { texts: Texts; parts: Part43[]; relations: Line43
     const id = (r.byColumn['행 ID'] ?? '').trim(); b.recordRef = /^B\d{1,3}$/.test(id) ? id : null;
     // .44: the row's 유형 decides a v4 part's type, on that row: a fixed word gives its value; 모름, a word outside the list or no word
     // gives none (the model's word for a part the record types otherwise, or not at all, is not kept).
-    const typed = fixedWord(r.byColumn['유형'] ?? '', TYPE_WORDS)?.value ?? null;
+    const word = fixedWord(r.byColumn['유형'] ?? '', TYPE_WORDS), typed = word?.value ?? null;
+    // .44 (review N1): a model type left out for a 유형 word outside the list (not 모름, not empty) is said, on that row and column.
+    if (b.type && !word && said(bare(r.byColumn['유형'] ?? ''))) diag('type-word', 'C-PART', r.record, r.from, r.to, '유형');
     b.type = typed as PartType | null; b.typeQuote = typed ? q : null;
     const impl = fixedWord(r.byColumn['구현 상태'] ?? '', IMPLEMENTATION_WORDS);
     b.implementation = impl?.value ?? null; b.implementationQuote = impl?.value ? q : null;
@@ -168,14 +170,18 @@ export function record43(ctx: { texts: Texts; parts: Part43[]; relations: Line43
   }
   // .44: a part's C-LOOP rows decide its one loop (the outermost row of its own): a loop the model or an earlier program pass gave it
   // that stands on none of the part's own loop rows (a step of one branch that names a loop, another loop's text) gives way to that
-  // row's unit and stop, on that row; one standing on such a row keeps its words and takes the row's stop where it has none.
+  // row's unit and stop, on that row; one standing on such a row keeps its words and takes that row's unit or stop where it has none
+  // (review B3: the row it stands on, never the outer one: a loop on an inner row is not given the outer row's words).
   for (const b of parts) {
     const own = b.loops ?? [], outer = own.find(l => !l.parentRef || l.parentPart !== null) ?? own[0];
     if (!outer || b.state === 'retired' || b.state === 'unbuilt') continue;
-    const unit = outer.unit ? cut(outer.unit, 60) : null, stop = outer.stop ? cut(outer.stop, 60) : null;
-    const onOwnRow = !!b.loop && own.some(l => overlaps(b.loop!.quote as { record: string; from?: number; to?: number }, l.quote as Record43Quote));
-    if (b.loop && onOwnRow) { if (b.loop.unit === null || b.loop.stop === null) b.loop = { ...b.loop, unit: b.loop.unit ?? unit, stop: b.loop.stop ?? stop, program: true }; }
-    else if (unit || stop) b.loop = { unit, stop, resume: null, quote: outer.quote, program: true };
+    const words = (l: ReadingRecordLoop) => ({ unit: l.unit ? cut(l.unit, 60) : null, stop: l.stop ? cut(l.stop, 60) : null });
+    const on = b.loop ? own.find(l => overlaps(b.loop!.quote as { record: string; from?: number; to?: number }, l.quote as Record43Quote)) : undefined;
+    if (b.loop && on) { if (b.loop.unit === null || b.loop.stop === null) { const w = words(on); b.loop = { ...b.loop, unit: b.loop.unit ?? w.unit, stop: b.loop.stop ?? w.stop, program: true }; } continue; }
+    const { unit, stop } = words(outer); if (!unit && !stop) continue;
+    // review N1: the model's own loop given way to the row is said (an earlier program loop is the program's to replace).
+    if (b.loop && !b.loop.program) { const q = outer.quote as Record43Quote; diag('loop-replaced', 'C-LOOP', q.record, q.from, q.to); }
+    b.loop = { unit, stop, resume: null, quote: outer.quote, program: true };
   }
   /* Contracts (C-CONTRACT) on the providing part; variants (C-VARIANT) on the part owning the interface; entries (C-ENTRY) on the owning
    * part, with a control line from a consumer that is a part (none is made up). */
@@ -213,7 +219,18 @@ export function record43(ctx: { texts: Texts; parts: Part43[]; relations: Line43
    * already joins through a third part is not drawn again (product-shortcut); a store part is never the maker or reader of a memory
    * line. The 넘기는 것 or the row's name is the payload, the row's 필드·모양 the fields. */
   const links = v4(['C-LINK']), dataRows = v4(['C-DATA']);
-  programLines({ parts, relations, links, dataRows, byName, nameOfPart, rowQuote, maxLines: ctx.maxLines });
+  // review N5: a D ID names the C-DATA row of its own record (the same text first, then the other chunks of the same record ID), never
+  // the same ID of another record (a later record's IDs start again at D01). The record ID is the chunk head's, or (a head the reader
+  // does not take, 「〔기록 R-x · 덩이 2 · fb88a1b〕」 without 기준) the ID its first line opens with.
+  const group = (record: string): string => {
+    const id = read.get(record)?.chunk?.recordId ?? /^\s*〔\s*기록\s+([^\s·〕]+)/.exec(texts.get(record)?.text ?? '')?.[1];
+    return id ? `id:${id}` : `record:${record}`;
+  };
+  const dataById = (id: string, record: string): TableRow | undefined => {
+    const hit = (r: TableRow) => (r.byColumn['행 ID'] ?? '').trim() === id;
+    return dataRows.find(r => r.record === record && hit(r)) ?? dataRows.find(r => group(r.record) === group(record) && hit(r));
+  };
+  programLines({ parts, relations, links, dataRows, byName, nameOfPart, rowQuote, dataById, maxLines: ctx.maxLines });
   /* Lines (C-LINK): 조건·선택, 경계, 박자, the D row named first, 통로, the list item. */
   for (const l of relations) {
     if (!l.span) continue;
@@ -231,10 +248,11 @@ export function record43(ctx: { texts: Texts; parts: Part43[]; relations: Line43
   // .44: a data line with no fields of its own takes those of the C-DATA row it carries (its D ref) or stands on, as the row lists them.
   for (const l of relations) {
     if ((l.payloadFields ?? []).length || l.channel === 'control' || l.channel === 'uses') continue;
-    const row = (l.payloadRef ? dataRows.find(r => r.record === l.record && (r.byColumn['행 ID'] ?? '').trim() === l.payloadRef) ?? dataRows.find(r => (r.byColumn['행 ID'] ?? '').trim() === l.payloadRef) : undefined)
+    const row = (l.payloadRef ? dataById(l.payloadRef, l.record) : undefined)
       ?? (l.span ? dataRows.find(r => overlaps({ record: l.record, from: l.span!.from, to: l.span!.to }, r)) : undefined);
     const fields = row ? fieldsOf(row.byColumn['필드·모양'] ?? '') : [];
-    if (fields.length) l.payloadFields = fields;
+    // review N4: a cell that reads like a key or token is never put on a line (the line's words are checked as the reply's).
+    if (fields.length && !fields.some(f => secretLike(f))) l.payloadFields = fields;
   }
   /* Conditions (C-COND 갈리는 때) and file-map rows (「(실행 시)」). */
   const conds = v4(['C-COND']), files = rowsOf(texts, ['C-FILES']);
@@ -281,11 +299,14 @@ export function record43(ctx: { texts: Texts; parts: Part43[]; relations: Line43
 }
 const opt = (s: string | undefined, n: number): string | null => { const t = said(s); return t ? cut(t, n) : null; };
 /** .44: the fields a C-DATA 필드·모양 cell lists (24 of 60 at most): its items split on 「,」 or 「·」 outside brackets, a leading 「type:」 left off,
- * each without a space outside its brackets and within 60; [] for a cell that names a shape, a contract (K02) or one thing. */
+ * each without a space outside its brackets and within 60; [] for a cell that names a shape, a contract (K02) or one thing.
+ * Review N3: [] too for a list the record cut (「…, 그 밖 11개」: a line has no place for the count, and a part of a list read whole
+ * would say the line carries those fields only) and for a list of file formats (「.md·.pdf·.docx」 are kinds of file, not fields). */
 export function fieldsOf(cell: string): string[] {
   // An evidence tag (「[파일: …]」, 「[추정]」) is left off; a code bracket (「rows[]」, 「map[str]」) stays.
-  let t = cell.replace(/\[[^\]]*[가-힣:：][^\]]*\]/g, ' ').replace(/\s+/g, ' ').trim(); if (!said(t) || /^K\d{1,3}$/.test(t)) return [];
-  t = t.replace(/\s*,?\s*그\s*밖\s*\d+\s*개\s*$/, '');
+  const t0 = cell.replace(/\[[^\]]*[가-힣:：][^\]]*\]/g, ' ').replace(/\s+/g, ' ').trim(); if (!said(t0) || /^K\d{1,3}$/.test(t0)) return [];
+  if (/그\s*밖\s*\d+\s*개/.test(t0)) return [];
+  let t = t0;
   const head = /^[^:：,·(){}\s]{1,40}[:：]\s*(?=\S)/.exec(t); if (head) t = t.slice(head[0].length);
   const items: string[] = []; let depth = 0, cur = '';
   for (const ch of t) {
@@ -294,7 +315,7 @@ export function fieldsOf(cell: string): string[] {
   }
   items.push(cur.trim());
   const outside = (s: string) => s.replace(/\([^)]*\)|\[[^\]]*\]|\{[^}]*\}/g, '');
-  const list = [...new Set(items.filter(Boolean))];
+  const list = [...new Set(items.filter(x => x && !/^\*?\.[a-z0-9]{1,6}$/i.test(x)))];
   if (list.length < 2 || list.some(x => x.length > 60 || /\s/.test(outside(x)) || /[{}]/.test(outside(x)))) return [];
   return list.slice(0, 24);
 }
@@ -315,7 +336,7 @@ export function glossVariants(text: string, gloss: ReadonlyMap<string, string>):
 const fileNames = (t: string): string[] => (t.toLowerCase().match(/[a-z0-9_][a-z0-9_\-]*\.[a-z][a-z0-9]{0,5}\b/g) ?? []);
 /** .44 (see record43): the record's own lines from its C-LINK and C-DATA rows that the reply left undrawn, pushed onto relations. */
 function programLines(ctx: { parts: Part43[]; relations: Line43[]; links: TableRow[]; dataRows: TableRow[]; byName: (name: string) => Part43 | undefined;
-  nameOfPart: (b: Part43) => string; rowQuote: (r: TableRow) => Record43Quote | null; maxLines: number }): void {
+  nameOfPart: (b: Part43) => string; rowQuote: (r: TableRow) => Record43Quote | null; dataById: (id: string, record: string) => TableRow | undefined; maxLines: number }): void {
   const { parts, relations, byName } = ctx;
   // The parts a cell names: the whole cell, else its 「·」 pieces (the longest run naming a part first), a trailing 「(…)」 left off.
   const partsIn = (cell: string): Part43[] => {
@@ -336,13 +357,14 @@ function programLines(ctx: { parts: Part43[]; relations: Line43[]; links: TableR
     const n = plain(bare(name)), files = fileNames(name);
     return parts.find(b => b.type === 'store' && (plain(ctx.nameOfPart(b)) === n || (files.length > 0 && fileNames(ctx.nameOfPart(b)).some(f => files.includes(f)))));
   };
+  // A line's 설계/관찰 is its row's: a C-LINK row's own cell (review B2); a C-DATA row has none, so its line says none (null).
+  const modeOf = (r: TableRow): 'design' | 'observed' | null => r.id === 'C-LINK' ? fixedWord(r.byColumn['설계/관찰'] ?? '', { 설계: 'design', 관찰: 'observed' } as const)?.value ?? null : null;
   const add = (from: Part43, to: Part43, r: TableRow, payload: string, ref: string | null, fields: string[]) => {
     const q = ctx.rowQuote(r);
     if (!q || from === to || relations.length >= ctx.maxLines || has(from.ref, to.ref) || secretLike(payload) || fields.some(f => secretLike(f))) return;
     relations.push({ from: from.ref, to: to.ref, kind: 'flow', note: '', record: q.record, quote: q.quote, span: { from: q.from, to: q.to }, payload: payload ? cut(payload, 80) : null, cadence: null,
-      mode: 'design', channel: 'data', payloadFields: fields, when: null, optional: false, variantRef: null, crosses: null, cadenceKind: null, payloadRef: ref, via: null, member: null });
+      mode: modeOf(r), channel: 'data', payloadFields: fields, when: null, optional: false, variantRef: null, crosses: null, cadenceKind: null, payloadRef: ref, via: null, member: null });
   };
-  const dataById = (id: string, record: string) => ctx.dataRows.find(r => r.record === record && (r.byColumn['행 ID'] ?? '').trim() === id) ?? ctx.dataRows.find(r => (r.byColumn['행 ID'] ?? '').trim() === id);
   // An artifact handed from makers to readers on row r: through its store part when one holds it, else directly.
   const hand = (makers: Part43[], readers: Part43[], r: TableRow, name: string, payload: string, ref: string | null, fields: string[], stored: boolean) => {
     const s = storeOf(name);
@@ -359,14 +381,14 @@ function programLines(ctx: { parts: Part43[]; relations: Line43[]; links: TableR
   };
   for (const r of ctx.links) {
     const from = partsIn(r.byColumn['보내는 부분']?.replace(/\s*:\s*.+$/, '') ?? ''), to = partsIn(r.byColumn['받는 부분']?.replace(/\s*:\s*.+$/, '') ?? '');
-    const what = said(r.byColumn['넘기는 것']) ?? '', ref = /^\s*(D\d{1,3})\b/.exec(what)?.[1] ?? null, row = ref ? dataById(ref, r.record) : undefined;
+    const what = said(r.byColumn['넘기는 것']) ?? '', ref = /^\s*(D\d{1,3})\b/.exec(what)?.[1] ?? null, row = ref ? ctx.dataById(ref, r.record) : undefined;
     if (from.length !== 1 || to.length !== 1) continue;
     if (row) { hand(from, to, r, row.byColumn['이름'] ?? '', what, ref, fieldsOf(row.byColumn['필드·모양'] ?? ''), fixedWord(row.byColumn['종류'] ?? '', DATA_WORDS)?.value === 'store'); continue; }
     // A line with no artifact row: the row's own line, its channel unsaid (the record's 넘기는 것 words alone do not say data or control).
     const a = from[0]!, b = to[0]!, q = ctx.rowQuote(r);
     if (a === b || !q || relations.length >= ctx.maxLines || has(a.ref, b.ref) || through(a.ref, b.ref) || secretLike(what)) continue;
     relations.push({ from: a.ref, to: b.ref, kind: 'flow', note: '', record: q.record, quote: q.quote, span: { from: q.from, to: q.to }, payload: what ? cut(what, 80) : null, cadence: null,
-      mode: fixedWord(r.byColumn['설계/관찰'] ?? '', { 설계: 'design', 관찰: 'observed' } as const)?.value ?? null, channel: null, payloadFields: [], when: null, optional: false, variantRef: null, crosses: null, cadenceKind: null, payloadRef: null, via: null, member: null });
+      mode: modeOf(r), channel: null, payloadFields: [], when: null, optional: false, variantRef: null, crosses: null, cadenceKind: null, payloadRef: null, via: null, member: null });
   }
   for (const r of ctx.dataRows) {
     const name = (r.byColumn['이름'] ?? '').trim(), id = (r.byColumn['행 ID'] ?? '').trim(); if (!name) continue;

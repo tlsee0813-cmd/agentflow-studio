@@ -312,7 +312,9 @@ export interface ReadingRecordExtra { table: string; header: string[]; rows: { c
 /** What the program noticed reading a record's tables (a row past its header's width, an unknown table or column, a left-out column, a
  * v4 record with no chunk head, an entry whose consumer is no part, a loop body its steps do not belong to, a variant with no owner):
  * fixed categories and places only, never the record's words. */
-export const RECORD_DIAGNOSTIC_CATEGORIES = ['row-cells', 'unknown-table', 'unknown-column', 'missing-column', 'chunk-head', 'entry-consumer', 'loop-body', 'variant-owner'] as const;
+export const RECORD_DIAGNOSTIC_CATEGORIES = ['row-cells', 'unknown-table', 'unknown-column', 'missing-column', 'chunk-head', 'entry-consumer', 'loop-body', 'variant-owner',
+  // .44 (review N1): a model type left out for a C-PART 유형 word outside the list; a model loop given way to the part's C-LOOP row.
+  'type-word', 'loop-replaced'] as const;
 export interface ReadingRecordDiagnostic { category: typeof RECORD_DIAGNOSTIC_CATEGORIES[number]; table: string | null; column: string | null; record: string; from: number; to: number }
 /** The record's focus line (K4): which question groups the record answered more of first; never a fact of the project. */
 export interface ReadingFocus { profiles: string[]; reason: string | null; tables: string[]; quote: ReadingQuote }

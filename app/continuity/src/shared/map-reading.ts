@@ -1081,6 +1081,30 @@ const HAND_KEPT = /문서에만|손으로|수동|사람이\s*(?:직접\s*)?(?:�
  * change row, the named actors of its 관련 주체·역할 cell (null when one of them goes unnamed: who it is then is not the program's to say). */
 const PART_COLUMN44: Readonly<Record<string, string>> = { 'C-CHANGE': '바뀐 부분', 'C-STATUS': '대상' };
 const bare44 = (s: string) => s.replace(/\[[^\]]*\]/g, ' ').replace(/\s+/g, ' ').trim();
+/** Pipeline .44 (review B1): the names of the given set a part cell names, each whole: the whole cell, else, from its first piece on,
+ * the longest run of its 「·」, 「,」, 「/」 pieces that is a name (「분석·관리 API」 is one name, not 「분석」 and 「관리 API」), a tail
+ * 「등」, 「외 (N개)」 or 「(…)」 left off before comparing (「retrievers·DeepResearchSkill 등」 names both). */
+const nameKey44 = (s: string): string => plainName(s).replace(/\s*([·,/])\s*/g, '$1');
+const untail44 = (s: string): string => {
+  let t = s.trim(), was: string;
+  do { was = t; t = t.replace(/\s+(?:등|외(?:\s*\d+\s*[개명곳건])?)$/, '').replace(/\s*[(（][^)）]*[)）]$/, '').trim(); } while (t !== was && t);
+  return t;
+};
+const nameKeys44 = new WeakMap<ReadonlySet<string>, Map<string, string>>();
+export function partNamesIn44(cell: string, names: ReadonlySet<string>): string[] {
+  let keys = nameKeys44.get(names); if (!keys) { keys = new Map([...names].map(n => [nameKey44(n), n] as const)); nameKeys44.set(names, keys); }
+  const one = (s: string): string | undefined => keys!.get(nameKey44(s)) ?? keys!.get(nameKey44(untail44(s)));
+  const whole = bare44(cell); if (!whole) return [];
+  const all = one(whole); if (all) return [all];
+  const bits = whole.split(/\s*([·,/])\s*/), pieces = bits.filter((_, i) => i % 2 === 0), seps = bits.filter((_, i) => i % 2 === 1), out: string[] = [];
+  const run = (i: number, j: number) => pieces.slice(i, j).map((p, k) => k ? `${seps[i + k - 1]}${p}` : p).join('');
+  for (let i = 0; i < pieces.length;) {
+    let hit: string | undefined, j = pieces.length;
+    for (; j > i && !hit; j--) hit = one(run(i, j));
+    if (hit) { if (!out.includes(hit)) out.push(hit); i = j + 1; } else i++;
+  }
+  return out;
+}
 function v4ClaimRow(texts: Map<string, { text: string; spans: Span[] | null }>, q: { record: string; from?: number; to?: number }): { id: string; part: string | undefined; actors: string[] } | null {
   if (q.from === undefined || q.to === undefined) return null;
   const r = rowsOf(texts, Object.keys(PART_COLUMN44)).find(x => x.dialect === 'v4' && x.record === q.record && x.from < q.to! && q.from! < x.to); if (!r) return null;
@@ -1804,14 +1828,15 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       // row naming this part, and no quoted row of its own) is set aside: the row is that part's.
       if (divided && typeof p.name === 'string') {
         const own = plainName(p.name), rows = tableRows(q.quote).filter(c => c.length > 1);
-        const other = rows.some(c => plainName(c[0]!) !== own && partNames.has(plainName(c[0]!)) && !c.slice(1).some(cell => cellNames(cell).includes(own)));
+        const other = rows.some(c => plainName(c[0]!) !== own && partNames.has(plainName(c[0]!)) && !c.slice(1).some(cell => cellNames(cell).includes(own) || partNamesIn44(cell, partNames).includes(own)));
         need(!other || rows.some(c => plainName(c[0]!) === own), `parts[${pi}].claims[${j}]`, 'wrong-part');
         // pipeline .44: a v4 change or status row names its part in its own column (바뀐 부분, 대상), not its first cell: one naming another
-        // part of this reading (「전체」 when the reading has that part) and not this one is that part's row.
+        // part of this reading (「전체」 when the reading has that part) and not this one is that part's row. Names are matched whole
+        // (review B1: a name with 「·」 in it, a cell ending in 「등」): a cell naming this part keeps the claim whatever else it names.
         const row44 = v4ClaimRow(texts, q);
         if (row44?.part !== undefined) {
-          const named = cellNames(row44.part), whole = plainName(bare44(row44.part));
-          need(!(named.some(n => n !== own && partNames.has(n)) || (whole !== own && partNames.has(whole))) || named.includes(own) || whole === own, `parts[${pi}].claims[${j}]`, 'wrong-part');
+          const named = partNamesIn44(row44.part, partNames);
+          need(named.includes(own) || !named.some(n => n !== own), `parts[${pi}].claims[${j}]`, 'wrong-part');
         }
         // pipeline .44: a claim on a v4 change row names no person another change row gives as its actor and its own row does not
         // (the .43 game map credited one contributor's commit to another); the row's own actors are kept on the claim (record43).
